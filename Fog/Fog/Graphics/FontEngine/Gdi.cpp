@@ -279,7 +279,7 @@ err_t WinFontFace::getGlyphSet(const Char* str, sysuint_t length, GlyphSet& glyp
 
   AutoLock locked(lock);
 
-  Glyph::Data* glyphd;
+  GlyphData* glyphd;
   HDC hdc = NULL;
 
   for (sysuint_t i = 0; i != length; i++)
@@ -379,12 +379,12 @@ err_t WinFontFace::getTextExtents(const Char* str, sysuint_t length, TextExtents
   }
 }
 
-Glyph::Data* WinFontFace::renderGlyph(HDC hdc, uint32_t uc)
+GlyphData* WinFontFace::renderGlyph(HDC hdc, uint32_t uc)
 {
   // renderBegin() must be called before
   FOG_ASSERT(hdc);
 
-  Glyph::Data* glyphd = NULL;
+  GlyphData* glyphd = NULL;
   Image::Data* bitmapd = NULL;
 
   GLYPHMETRICS gm;
@@ -401,7 +401,7 @@ Glyph::Data* WinFontFace::renderGlyph(HDC hdc, uint32_t uc)
     dataSize = 0;
   }
 
-  glyphd = new(std::nothrow) Glyph::Data();
+  glyphd = new(std::nothrow) GlyphData();
   if (glyphd == NULL) return NULL;
 
   // Whitespace?

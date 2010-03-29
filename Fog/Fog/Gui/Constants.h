@@ -170,24 +170,37 @@ enum LAYOUT_POLICY
 //! @brief GuiWindow create flags (used also by @c Widget).
 enum WINDOW_FLAGS
 {
-  //! @brief Create GuiWindow (this flag is used in Fog::Widget).
-  WINDOW_NATIVE = (1 << 0),
+	//! @brief Create GuiWindow (this flag is used in Fog::Widget).
+	WINDOW_NATIVE = (1 << 0),
 
-  //! @brief Create popup like window instead of normal one.
-  //!
-  //! Created popup window hasn't native borders and decoration, use
-  //! border style to set these borders.
-  WINDOW_POPUP = (1 << 16),
+	//! @brief Create dialog window instead of normal one.
+	//!
+	//! A dialog is a window with thin frame, which cannot be resized.
+	//! Normally a dialog also has no minimize and maximize functionality
+	WINDOW_DIALOG = (1 << 1),
 
-  //! @brief Create X11 window that listens only for XPropertyChange events.
-  //!
-  //! X11GuiEngine dependent and non-portable flag.
-  WINDOW_X11_PROPERTY_ONLY = (1 << 20),
+	//! @brief Create tool window instead of normal one.
+	//!
+	//! A tool window is often a small window with a smaller than usual 
+	//! title bar and decoration
+	//! A toolwindow has now min/max functionality
+	WINDOW_TOOL = (1 << 2),
 
-  //! @brief Override redirection from window managers under X11.
-  //!
-  //! X11GuiEngine dependent and non-portable flag.
-  WINDOW_X11_OVERRIDE_REDIRECT = (1 << 21)
+	//! @brief Create popup like window instead of normal one.
+	//!
+	//! Created popup window hasn't native borders and decoration, use
+	//! border style to set these borders.
+	WINDOW_POPUP = (1 << 3),
+
+	//! @brief Create X11 window that listens only for XPropertyChange events.
+	//!
+	//! X11GuiEngine dependent and non-portable flag.
+	WINDOW_X11_PROPERTY_ONLY = (1 << 20),
+
+	//! @brief Override redirection from window managers under X11.
+	//!
+	//! X11GuiEngine dependent and non-portable flag.
+	WINDOW_X11_OVERRIDE_REDIRECT = (1 << 21)
 };
 
 // ============================================================================

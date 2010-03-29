@@ -49,7 +49,7 @@ struct FOG_API WinFontFace : public FontFace
 private:
   //! @brief Renders glyph and returns it.
   //! @note You must use renderBegin() and renderEnd().
-  Glyph::Data* renderGlyph(HDC hdc, uint32_t uc);
+  GlyphData* renderGlyph(HDC hdc, uint32_t uc);
 
   friend struct WinFontEngine;
 

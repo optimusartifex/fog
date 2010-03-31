@@ -237,10 +237,6 @@ struct FOG_API BaseGuiWindow : public GuiWindow
   // --------------------------------------------------------------------------
 
 protected:
-  //! @brief Window bound rectangle.
-  IntRect _windowRect;
-  //! @brief Window client rectangle.
-  IntRect _clientRect;
   //! @brief Window title.
   String _title;
   //! @brief Window resize granularity.

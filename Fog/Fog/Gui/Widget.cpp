@@ -584,16 +584,17 @@ void Widget::setVisible(uint32_t val)
   //TODO: Check if an optimization makes sense here (hidden_by_parent)
   if(val == _visibility) return;
 
-  if(val == WIDGET_VISIBLE_FULLSCREEN) {
-    GuiEngine::DisplayInfo info;
-    Application::getInstance()->getGuiEngine()->getDisplayInfo(&info);
-    setGeometry(IntRect(0,0,info.width, info.height));
+  if(val == WIDGET_VISIBLE_FULLSCREEN && _guiWindow) {
     _restorewindowFlags = _windowFlags;
-    setWindowFlags(WINDOW_TYPE_FULLSCRREN);
-  }
+    _restoregeometry = _guiWindow->_windowRect;
 
-  if(_visibility != val && _visibility == WIDGET_VISIBLE_FULLSCREEN) {
+    GuiEngine::DisplayInfo info;
+    Application::getInstance()->getGuiEngine()->getDisplayInfo(&info);        
+    setWindowFlags(WINDOW_TYPE_FULLSCRREN);
+    setGeometry(IntRect(0,0,info.width, info.height));
+  } else if(_visibility != val && _visibility == WIDGET_VISIBLE_FULLSCREEN) {
     setWindowFlags(_restorewindowFlags);
+    setGeometry(_restoregeometry);
   }
 
   if (_guiWindow)

@@ -50,7 +50,9 @@ GuiWindow::GuiWindow(Widget* widget) :
   _visible(true),
   _hasFocus(false),
   _needBlit(true),
-  _isDirty(false)
+  _isDirty(false),
+  _windowRect(0, 0, 1, 1),
+  _clientRect(0, 0, 1, 1)
 {
 }
 

@@ -1019,8 +1019,6 @@ void BaseGuiEngine::_onButtonRepeatTimeOut(TimerEvent* e)
 
 BaseGuiWindow::BaseGuiWindow(Widget* widget) :
   GuiWindow(widget),
-  _windowRect(0, 0, 1, 1),
-  _clientRect(0, 0, 1, 1),
   _sizeGranularity(1, 1)
 {
 }

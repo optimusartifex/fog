@@ -380,6 +380,11 @@ struct FOG_API GuiWindow : public Object
   //! @brief Window is dirty and needs update.
   bool _isDirty;
 
+  //! @brief Window bound rectangle.
+  IntRect _windowRect;
+  //! @brief Window client rectangle.
+  IntRect _clientRect;
+
   friend struct GuiEngine;
   friend struct Widget;
 };

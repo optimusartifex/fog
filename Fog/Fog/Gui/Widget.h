@@ -358,8 +358,7 @@ struct FOG_API Widget : public LayoutItem
   FOG_INLINE bool isFullScreen()
   {
     if(!_guiWindow) return false;
-    //TODO
-    return false;
+    return (_visibility == WIDGET_VISIBLE_FULLSCREEN);
   }
 
   // --------------------------------------------------------------------------
@@ -603,7 +602,7 @@ protected:
   //! @brief Main geometry (geometry relative to widget parent or screen).
   IntRect _geometry;
   //! @brief Main geometry for restoration from fullscreen mode
-  IntRect _geometryrestore;
+  IntRect _restoregeometry;
   //! @brief Client area geometry (geometry within the widget).
   IntRect _clientGeometry;
   //! @brief Client origin.

@@ -115,7 +115,7 @@ struct FOG_API BaseGuiEngine : public GuiEngine
   // --------------------------------------------------------------------------
 
   virtual void dispatchEnabled(Widget* w, bool enabled);
-  virtual void dispatchVisibility(Widget* w, bool visible);
+  virtual void dispatchVisibility(Widget* w, uint32_t visible);
 
   virtual void dispatchConfigure(Widget* w, const IntRect& rect, bool changedOrientation);
 
@@ -206,7 +206,7 @@ struct FOG_API BaseGuiWindow : public GuiWindow
   // --------------------------------------------------------------------------
 
   virtual void onEnabled(bool enabled);
-  virtual void onVisibility(bool visible);
+  virtual void onVisibility(uint32_t visible);
 
   virtual void onConfigure(const IntRect& windowRect, const IntRect& clientRect);
 
@@ -245,6 +245,8 @@ protected:
   String _title;
   //! @brief Window resize granularity.
   IntPoint _sizeGranularity;
+
+  uint32_t _visibility;
 };
 
 } // Fog namespace

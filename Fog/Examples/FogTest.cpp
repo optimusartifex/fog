@@ -20,6 +20,28 @@ struct MyWindow : public Window
   // [Event Handlers]
   virtual void onKeyPress(KeyEvent* e);
   virtual void onPaint(PaintEvent* e);
+  virtual void onConfigure(ConfigureEvent* e) {
+    uint32_t vis = getVisibility();
+
+    if(vis == WIDGET_VISIBLE) {
+      setWindowTitle(Ascii8("STATE: VISIBLE"));
+    } else if(vis == WIDGET_VISIBLE_MAXIMIZED){
+      setWindowTitle(Ascii8("STATE: MAXIMIZED"));
+    } else if(vis == WIDGET_VISIBLE_MINIMIZED){
+      setWindowTitle(Ascii8("STATE: MINIMIZED"));
+    } else if(vis == WIDGET_HIDDEN){
+      setWindowTitle(Ascii8("STATE: HIDDEN"));
+    }    
+  }
+
+  void onButtonClick(MouseEvent* e) {
+//     if(getWindowFlags() & WINDOW_NATIVE) {
+//       setWindowFlags(WINDOW_TYPE_TOOL);
+//     } else {
+//       setWindowFlags(WINDOW_TYPE_DEFAULT);
+//     }
+    show(WIDGET_VISIBLE_MAXIMIZED);
+  }
 
   void paintImage(Painter* painter, const IntPoint& pos, const Image& im, const String& name);
 
@@ -75,6 +97,7 @@ MyWindow::MyWindow(uint32_t createFlags) :
   button->setText(Ascii8("Push me"));
   button->show();
 
+  button->addListener(EVENT_CLICK, this, &MyWindow::onButtonClick);
 }
 
 MyWindow::~MyWindow()

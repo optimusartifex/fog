@@ -413,23 +413,29 @@ void BaseGuiEngine::dispatchEnabled(Widget* w, bool enabled)
   }
 }
 
-void BaseGuiEngine::dispatchVisibility(Widget* w, bool visible)
+void BaseGuiEngine::dispatchVisibility(Widget* w, uint32_t visible)
 {
   uint32_t visibility = w->getVisibility();
+  if(visibility == visible) return;
 
   // Dispatch 'Show'.
-  if (visible)
+  if (visible >= WIDGET_VISIBLE)
   {
-    if (visibility == WIDGET_VISIBLE) return;
     if (visibility == WIDGET_HIDDEN_BY_PARENT && !w->isGuiWindow()) return;
 
-    w->_visibility = WIDGET_VISIBLE;
+    w->_visibility = visible;
 
-    VisibilityEvent e(EVENT_SHOW);
+    uint32_t code = EVENT_SHOW;
+    if(visible == WIDGET_VISIBLE_FULLSCREEN) code = EVENT_SHOW_FULLSCREEN;
+    else if(visible == WIDGET_VISIBLE_MAXIMIZED) code = EVENT_SHOW_MAXIMIZE;
+
+    VisibilityEvent e(code);
     w->sendEvent(&e);
 
-    FOG_WIDGET_TREE_ITERATOR(i1, w, true,
-      // before traverse
+    if(visibility == WIDGET_HIDDEN) {
+      //only needed if widget was hidden before this event
+      FOG_WIDGET_TREE_ITERATOR(i1, w, true,
+        // before traverse
       {
         // show only child that's hidden by parent
         if (child->getVisibility() != WIDGET_HIDDEN_BY_PARENT) FOG_WIDGET_TREE_ITERATOR_NEXT(i1);
@@ -437,22 +443,26 @@ void BaseGuiEngine::dispatchVisibility(Widget* w, bool visible)
         child->_visibility = WIDGET_VISIBLE;
         w->sendEvent(&e);
       },
-      // after traverse
+        // after traverse
       {}
-    );
+      );
+    }
 
     w->update(WIDGET_UPDATE_ALL);
   }
   // Dispatch 'Hidden'.
   else
   {
-    if (visibility == WIDGET_HIDDEN) return;
-    w->_visibility = WIDGET_HIDDEN;
+    w->_visibility = visible;
+    uint32_t code = EVENT_HIDE;
+    if(visible == WIDGET_VISIBLE_MINIMIZED) {
+      code = EVENT_SHOW_MINIMIZE;
+    }
 
-    VisibilityEvent e(EVENT_HIDE);
+    VisibilityEvent e(code);
     w->sendEvent(&e);
 
-    if (visibility == WIDGET_VISIBLE)
+    if (visible == WIDGET_HIDDEN && visibility >= WIDGET_VISIBLE)
     {
       e._code = EVENT_HIDE_BY_PARENT;
 
@@ -507,6 +517,7 @@ void BaseGuiEngine::dispatchConfigure(Widget* w, const IntRect& rect, bool chang
   Widget* p = w->getParent();
   if (p)
   {
+    //maximize and fullscreen should not be resized -> only visibile state
     if (w->getVisibility() == WIDGET_VISIBLE) p->update(WIDGET_UPDATE_ALL);
   }
   else if (changed & ConfigureEvent::CHANGED_SIZE)
@@ -770,7 +781,7 @@ __pushed:
     child = (Widget*)*ocur;
     for (;;)
     {
-      if (child->getVisibility() != WIDGET_VISIBLE)
+      if (child->getVisibility() < WIDGET_VISIBLE)
       {
         goto __next;
       }
@@ -1040,7 +1051,7 @@ void BaseGuiWindow::onEnabled(bool enabled)
   GUI_ENGINE()->dispatchEnabled(_widget, enabled);
 }
 
-void BaseGuiWindow::onVisibility(bool visible)
+void BaseGuiWindow::onVisibility(uint32_t visible)
 {
   _visible = visible;
 
@@ -1131,7 +1142,7 @@ __repeat:
     for (it.toEnd(); it.isValid(); it.toPrevious())
     {
       Widget* current = it.value();
-      if (current->getVisibility() == WIDGET_VISIBLE && current->_geometry.contains(p))
+      if (current->getVisibility() >= WIDGET_VISIBLE && current->_geometry.contains(p))
       {
         w = current;
         p -= w->getPosition();

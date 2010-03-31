@@ -215,7 +215,7 @@ struct FOG_API GuiEngine : public Object
   // --------------------------------------------------------------------------
 
   virtual void dispatchEnabled(Widget* w, bool enabled) = 0;
-  virtual void dispatchVisibility(Widget* w, bool visible) = 0;
+  virtual void dispatchVisibility(Widget* w, uint32_t visible) = 0;
   virtual void dispatchConfigure(Widget* w, const IntRect& rect, bool changedOrientation) = 0;
 
   //! @brief Called by widget destructor to erase all links to the widget from UIEngine.
@@ -290,7 +290,7 @@ struct FOG_API GuiWindow : public Object
   virtual err_t enable() = 0;
   virtual err_t disable() = 0;
 
-  virtual err_t show() = 0;
+  virtual err_t show(uint32_t state) = 0;
   virtual err_t hide() = 0;
   virtual err_t move(const IntPoint& pt) = 0;
   virtual err_t resize(const IntSize& size) = 0;
@@ -315,7 +315,7 @@ struct FOG_API GuiWindow : public Object
   // --------------------------------------------------------------------------
 
   virtual void onEnabled(bool enabled) = 0;
-  virtual void onVisibility(bool visible) = 0;
+  virtual void onVisibility(uint32_t visible) = 0;
 
   virtual void onConfigure(const IntRect& windowRect, const IntRect& clientRect) = 0;
 

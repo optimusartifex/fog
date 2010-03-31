@@ -325,32 +325,56 @@ struct FOG_API Widget : public LayoutItem
   FOG_INLINE uint32_t getVisibility() const { return _visibility; }
 
   //! @brief Get whether widget is visible.
-  FOG_INLINE bool isVisible() const { return _visibility == WIDGET_VISIBLE; }
+  FOG_INLINE bool isVisible() const { return _visibility >= WIDGET_VISIBLE; }
   //! @brief Get whether widget is visible to parent.
-  FOG_INLINE bool isVisibleToParent() const { return _state != WIDGET_HIDDEN; }
+  FOG_INLINE bool isVisibleToParent() const { return _state != WIDGET_HIDDEN && _state != WIDGET_VISIBLE_MINIMIZED; }
 
   //! @brief Set widget visibility to @a val.
-  void setVisible(bool val = true);
+  void setVisible(uint32_t val=WIDGET_VISIBLE);
   
   //! @brief Show widget (set it's visibility to true).
-  FOG_INLINE void show() { setVisible(true); }
+  FOG_INLINE void show(uint32_t type=WIDGET_VISIBLE) { setVisible(type); }
   //! @brief Hide widget (set it's visibility to false).
-  FOG_INLINE void hide() { setVisible(false); }
+  FOG_INLINE void hide() { setVisible(WIDGET_HIDDEN); }
 
+  //! @brief returns true if the toplevel window is currently maximized
+  FOG_INLINE bool isMaximized()
+  {
+    if(!_guiWindow) return false;
+    //TODO
+    return false;
+  }
+
+  //! @brief returns true if the toplevel window is currently minimized
+  FOG_INLINE bool isMinimized()
+  {
+    if(!_guiWindow) return false;
+    //TODO
+    return false;
+  }
+
+  //! @brief returns true if the toplevel window is currently in 
+  //! full screen mode
+  FOG_INLINE bool isFullScreen()
+  {
+    if(!_guiWindow) return false;
+    //TODO
+    return false;
+  }
 
   // --------------------------------------------------------------------------
   // [Widget Window Style]
   // --------------------------------------------------------------------------
   FOG_INLINE uint32_t getWindowFlags() { return _windowFlags; }
   void setWindowFlags(uint32_t flags);
-  FOG_INLINE uint32_t getWindowHints() { return _windowFlags & WINDOW_HINTS_FLAG; }
+  FOG_INLINE uint32_t getWindowHints() { return _windowFlags & WINDOW_HINTS_MASK; }
   void setWindowHints(uint32_t flags);  
 
   FOG_INLINE bool isDragAble() { return (_windowFlags & WINDOW_DRAGABLE); }
   void setDragAble(bool drag, bool update=true);
 
-  FOG_INLINE bool isResizeAble() { return (_windowFlags & WINDOW_FIXED_SIZE) != 0; }  
-  void setResizeAble(bool resize, bool update=true);
+  FOG_INLINE bool isResizeAble() { return (_windowFlags & WINDOW_FIXED_SIZE) == 0; }  
+  void setResizeAble(bool resize, bool update=true);    
 
   // --------------------------------------------------------------------------
   // [Widget Orientation]
@@ -534,6 +558,9 @@ struct FOG_API Widget : public LayoutItem
     FOG_EVENT_DEF(EVENT_DISABLE             , onDisable         , StateEvent     , OVERRIDE)
     FOG_EVENT_DEF(EVENT_DISABLE_BY_PARENT   , onDisable         , StateEvent     , OVERRIDE)
     FOG_EVENT_DEF(EVENT_SHOW                , onShow            , VisibilityEvent, OVERRIDE)
+    FOG_EVENT_DEF(EVENT_SHOW_FULLSCREEN     , onShow            , VisibilityEvent, OVERRIDE)
+    FOG_EVENT_DEF(EVENT_SHOW_MAXIMIZE       , onShow            , VisibilityEvent, OVERRIDE)
+    FOG_EVENT_DEF(EVENT_SHOW_MINIMIZE       , onShow            , VisibilityEvent, OVERRIDE)
     FOG_EVENT_DEF(EVENT_HIDE                , onHide            , VisibilityEvent, OVERRIDE)
     FOG_EVENT_DEF(EVENT_HIDE_BY_PARENT      , onHide            , VisibilityEvent, OVERRIDE)
     FOG_EVENT_DEF(EVENT_CONFIGURE           , onConfigure       , ConfigureEvent , OVERRIDE)
@@ -575,6 +602,8 @@ protected:
 
   //! @brief Main geometry (geometry relative to widget parent or screen).
   IntRect _geometry;
+  //! @brief Main geometry for restoration from fullscreen mode
+  IntRect _geometryrestore;
   //! @brief Client area geometry (geometry within the widget).
   IntRect _clientGeometry;
   //! @brief Client origin.
@@ -609,10 +638,13 @@ protected:
 
   //! @brief Window Style
   uint32_t _windowFlags;
+  //! @brief Window Style for restoration of fullscreen
+  uint32_t _restorewindowFlags;
+
   //! @brief Widget state.
   uint32_t _state : 2;
   //! @brief Widget visibility.
-  uint32_t _visibility : 2;
+  uint32_t _visibility : 3;
   //! @brief Widget focus policy
   uint32_t _focusPolicy : 4;
   //! @brief Focus.
@@ -620,7 +652,7 @@ protected:
   //! @brief Widget orientation
   uint32_t _orientation : 1;
   //! @brief Reserved for future use.
-  uint32_t _reserved : 22;
+  uint32_t _reserved : 21;
 
 private:
   friend struct Application;

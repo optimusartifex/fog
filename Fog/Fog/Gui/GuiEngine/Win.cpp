@@ -860,9 +860,8 @@ err_t WinGuiWindow::create(uint32_t flags)
     //during change of tool window/other window-type
     //a SWP_FRAMECHANGED with SetWindowPos does not do the job :-(
     //TODO: Sometimes the window don't show again after hide. Seems to be a EventLoop-Problem -> Need more research!
-    hide();
-    //update(WIDGET_UPDATE_ALL);
-    UpdateWindow((HWND)_handle);
+//     hide();
+//     UpdateWindow((HWND)_handle);
 
     //just update window with new styles
     DWORD style = GetWindowLong((HWND)_handle,GWL_STYLE);
@@ -876,11 +875,10 @@ err_t WinGuiWindow::create(uint32_t flags)
     doSystemMenu(flags);
 
     //not needed, if we hide/show
-    //SetWindowPos((HWND)_handle, 0,0,0,0,0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+    SetWindowPos((HWND)_handle, 0,0,0,0,0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
 
-    show();
-    //update(WIDGET_UPDATE_ALL);
-    UpdateWindow((HWND)_handle);
+//     show();
+//     UpdateWindow((HWND)_handle);
     return ERR_OK;
   }
 
@@ -982,11 +980,39 @@ err_t WinGuiWindow::disable()
   return ERR_OK;
 }
 
-err_t WinGuiWindow::show()
+err_t WinGuiWindow::show(uint32_t state)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
-
-  if (!_visible) ShowWindow((HWND)_handle, SW_SHOW);
+  if(state == WIDGET_VISIBLE) 
+  {
+    if(!IsZoomed((HWND)_handle) && !IsIconic((HWND)_handle) && !IsWindowVisible((HWND)_handle)) 
+      ShowWindow((HWND)_handle, SW_SHOW);
+  }
+  else if(state == WIDGET_VISIBLE_MAXIMIZED)
+  {            
+      if(!IsZoomed((HWND)_handle)) 
+      {
+        //Hack: To make sure a window can be shown maximized at first show
+        //else we would not receive a paint-event on startup
+        ShowWindow((HWND)_handle, SW_SHOW);
+        ShowWindow((HWND)_handle, SW_SHOWMAXIMIZED);
+      }
+  }
+  else if(state == WIDGET_VISIBLE_MINIMIZED)
+  {
+    if(!IsIconic((HWND)_handle)) 
+    {
+      //Hack: To make sure a window can be shown minimized at first show
+      //else we would not receive a paint-event on startup      
+      ShowWindow((HWND)_handle, SW_SHOW);
+      ShowWindow((HWND)_handle, SW_SHOWMINIMIZED);
+    }
+  }
+  else if(state == WIDGET_VISIBLE_FULLSCREEN) 
+  {
+    ShowWindow((HWND)_handle, SW_SHOW);
+  }
+  
   return ERR_OK;
 }
 
@@ -1155,10 +1181,6 @@ LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
 
   switch (message)
   {
-    case WM_SHOWWINDOW:
-      onVisibility(wParam ? true : false);
-      return 0;
-
     case WM_SYSCOMMAND:
       {
         if(!getWidget()->isDragAble()) {
@@ -1172,31 +1194,42 @@ LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
 
         goto defWindowProc;
       }
+    case WM_WINDOWPOSCHANGING:
+      //interessting for min/max layout! (we can reset size)
+      goto defWindowProc;
     case WM_WINDOWPOSCHANGED:
     {
-      IntRect wr;
-      IntRect cr;
-      getWindowRect(&wr, &cr);
+      //Handles everything within here -> no need for WM_MOVE, WM_SIZE, WM_SHOWWINDOW
+      //also we have better control when to send onConfiguration-Events!
 
       WINDOWPOS *pos = (WINDOWPOS*)lParam;
-      wr.setX(pos->x);
-      wr.setY(pos->y);
 
-      onConfigure(wr, cr);
-      return 0;
-    }
+      if (pos->flags & SWP_SHOWWINDOW) {
+        //window_was_shown();
+        onVisibility(WIDGET_VISIBLE);
+        return 0;
+      } else if (pos->flags & SWP_HIDEWINDOW) {
+        onVisibility(WIDGET_HIDDEN);
+        return 0;
+      }
 
-    // case WM_GETMINMAXINFO:
-    // {
-    //   return 0;
-    // }
+      if(IsIconic(hwnd) && (pos->flags & SWP_FRAMECHANGED)) {        
+        //window_minimized
+        //TODO: make sure that M$ damaged position on minimize isn't a problem!
+        //We may not send the onConfiguration then...
+        onVisibility(WIDGET_VISIBLE_MINIMIZED);
+      } else if(IsZoomed(hwnd) && (pos->flags & SWP_FRAMECHANGED)) {
+        //window_maximized
+        onVisibility(WIDGET_VISIBLE_MAXIMIZED);
+      } else {
+        if (!(pos->flags & SWP_NOMOVE) && pos->flags & SWP_FRAMECHANGED && !(pos->flags & SWP_NOSIZE)) {
+          onVisibility(WIDGET_VISIBLE);
+        }
+      }
 
-    case WM_SIZE:
-    {
       IntRect wr;
       IntRect cr;
       getWindowRect(&wr, &cr);
-
       onConfigure(wr, cr);
       return 0;
     }

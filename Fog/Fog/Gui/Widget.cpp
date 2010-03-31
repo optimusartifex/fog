@@ -55,7 +55,7 @@ Widget::Widget(uint32_t createFlags) :
   // TODO ?
   _focusLink = NULL;
 
-  if ((createFlags & WINDOW_TYPE_FLAG) != 0)
+  if ((createFlags & WINDOW_TYPE_MASK) != 0)
   {
     createWindow(createFlags);
   }
@@ -230,6 +230,7 @@ void Widget::setPosition(const IntPoint& pt)
   if (_guiWindow)
   {
     _guiWindow->move(pt);
+    _geometry.setX(pt.getX()).setY(pt.getY());
   }
   else
   {
@@ -248,6 +249,7 @@ void Widget::setSize(const IntSize& sz)
   if (_guiWindow)
   {
     _guiWindow->resize(sz);
+    //_geometry.setHeight(sz.getHeight()).setWidth(sz.getWidth());
   }
   else
   {
@@ -577,15 +579,29 @@ void Widget::setEnabled(bool val)
 // [Fog::Widget - Visibility]
 // ============================================================================
 
-void Widget::setVisible(bool val)
+void Widget::setVisible(uint32_t val)
 {
-  if ( val && _visibility != WIDGET_HIDDEN) return;
-  if (!val && _visibility == WIDGET_HIDDEN) return;
+  //TODO: Check if an optimization makes sense here (hidden_by_parent)
+  if(val == _visibility) return;
+
+  if(val == WIDGET_VISIBLE_FULLSCREEN) {
+    GuiEngine::DisplayInfo info;
+    Application::getInstance()->getGuiEngine()->getDisplayInfo(&info);
+    setGeometry(IntRect(0,0,info.width, info.height));
+    _restorewindowFlags = _windowFlags;
+    setWindowFlags(WINDOW_TYPE_FULLSCRREN);
+  }
+
+  if(_visibility != val && _visibility == WIDGET_VISIBLE_FULLSCREEN) {
+    setWindowFlags(_restorewindowFlags);
+  }
 
   if (_guiWindow)
   {
-    if (val)
-      _guiWindow->show();
+    if (val >= WIDGET_VISIBLE_MINIMIZED)
+    {
+      _guiWindow->show(val);
+    }
     else
       _guiWindow->hide();
   }
@@ -596,6 +612,8 @@ void Widget::setVisible(bool val)
 
     ge->dispatchVisibility(this, val);
   }
+
+  _visibility = val;
 }
 
 // ============================================================================
@@ -619,7 +637,7 @@ void Widget::setWindowHints(uint32_t flags)
   if(flags == getWindowHints()) return;
 
   //make sure to keep window type and to only update the hints
-  flags = (_windowFlags & WINDOW_TYPE_FLAG) | (flags & WINDOW_HINTS_FLAG);
+  flags = (_windowFlags & WINDOW_TYPE_MASK) | (flags & WINDOW_HINTS_MASK);
 
   if(_guiWindow) 
   {
@@ -647,15 +665,15 @@ void Widget::changeFlag(uint32_t flag, bool set, bool update) {
 
 void Widget::setDragAble(bool drag, bool update) 
 {
-  if(drag == isDragAble()) 
-    return;
+  if(drag == isDragAble()) return;
+
   changeFlag(WINDOW_DRAGABLE,drag,update);
 }
 
 void Widget::setResizeAble(bool resize, bool update) 
 {
-  if(resize == isResizeAble()) 
-    return;
+  if(resize == isResizeAble()) return;
+
   changeFlag(WINDOW_FIXED_SIZE,!resize,update);
 }
 

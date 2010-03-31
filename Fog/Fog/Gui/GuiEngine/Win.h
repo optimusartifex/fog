@@ -106,7 +106,7 @@ struct FOG_API WinGuiWindow : public BaseGuiWindow
   virtual err_t enable();
   virtual err_t disable();
 
-  virtual err_t show();
+  virtual err_t show(uint32_t state);
   virtual err_t hide();
 
   virtual err_t move(const IntPoint& pt);

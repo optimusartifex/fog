@@ -47,14 +47,15 @@ Widget::Widget(uint32_t createFlags) :
   _hasFocus(false),
   _orientation(ORIENTATION_HORIZONTAL),
   _reserved(0),
-  _tabOrder(0)
+  _tabOrder(0),
+  _windowFlags(createFlags)
 {
   _flags |= OBJ_IS_WIDGET;
 
   // TODO ?
   _focusLink = NULL;
 
-  if (createFlags & WINDOW_NATIVE)
+  if ((createFlags & WINDOW_TYPE_FLAG) != 0)
   {
     createWindow(createFlags);
   }
@@ -598,6 +599,67 @@ void Widget::setVisible(bool val)
 }
 
 // ============================================================================
+// [Fog::Widget - Window Style]
+// ============================================================================
+
+void Widget::setWindowFlags(uint32_t flags) 
+{
+    if(flags == _windowFlags) return;
+
+    if(_guiWindow) 
+    {
+        _guiWindow->create(flags);
+    }
+
+    _windowFlags = flags;
+}
+
+void Widget::setWindowHints(uint32_t flags) 
+{
+  if(flags == getWindowHints()) return;
+
+  //make sure to keep window type and to only update the hints
+  flags = (_windowFlags & WINDOW_TYPE_FLAG) | (flags & WINDOW_HINTS_FLAG);
+
+  if(_guiWindow) 
+  {
+    _guiWindow->create(flags);
+  }
+
+  _windowFlags = flags;
+}
+
+void Widget::changeFlag(uint32_t flag, bool set, bool update) {
+  if(set) 
+  {
+    _windowFlags |= flag;
+  }
+  else 
+  {
+    _windowFlags &= ~flag;
+  }
+
+  if(_guiWindow && update) 
+  {
+    _guiWindow->create(_windowFlags);
+  }
+}
+
+void Widget::setDragAble(bool drag, bool update) 
+{
+  if(drag == isDragAble()) 
+    return;
+  changeFlag(WINDOW_DRAGABLE,drag,update);
+}
+
+void Widget::setResizeAble(bool resize, bool update) 
+{
+  if(resize == isResizeAble()) 
+    return;
+  changeFlag(WINDOW_FIXED_SIZE,!resize,update);
+}
+
+// ============================================================================
 // [Fog::Widget - Orientation]
 // ============================================================================
 
@@ -702,7 +764,7 @@ void Widget::setFont(const Font& font)
 void Widget::update(uint32_t updateFlags)
 {
   uint32_t u = _uflags;
-  if ((u & updateFlags) == updateFlags || (u & WIDGET_UPDATE_ALL)) return;
+  //if ((u & updateFlags) == updateFlags || (u & WIDGET_UPDATE_ALL)) return;
 
   _uflags |= updateFlags | WIDGET_UPDATE_SOMETHING;
 

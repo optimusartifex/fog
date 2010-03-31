@@ -139,6 +139,10 @@ struct FOG_API WinGuiWindow : public BaseGuiWindow
   void getWindowRect(IntRect* windowRect, IntRect* clientRect);
 
   friend struct WinGuiEngine;
+
+private:
+  void calculateStyleFlags(uint32_t flags, DWORD& style, DWORD& exstyle);
+  void doSystemMenu(uint32_t flags);
 };
 
 // ============================================================================

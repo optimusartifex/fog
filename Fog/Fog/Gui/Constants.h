@@ -1,6 +1,6 @@
 // [Fog-Gui Library - Public API]
 //
-// [License]
+// [Licence]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -170,24 +170,100 @@ enum LAYOUT_POLICY
 //! @brief GuiWindow create flags (used also by @c Widget).
 enum WINDOW_FLAGS
 {
+  //! @brief Flag to indicate the maximum of window types 
+  //! (needed for fast identification of TopLevel-Windows)
+  WINDOW_TYPE_FLAG = 0x000000FF,
+  //! @brief Flag to indicate the maximum of window hints
+  WINDOW_HINTS_FLAG = 0xFFFFFF00,
+
   //! @brief Create GuiWindow (this flag is used in Fog::Widget).
   WINDOW_NATIVE = (1 << 0),
+
+  //! @brief Create dialog window instead of normal one.
+  //!
+  //! A dialog is a window with thin frame, which cannot be resized.
+  //! Normally a dialog also has no minimize and maximize functionality
+  WINDOW_DIALOG = (1 << 1),
+
+  //! @brief Create tool window instead of normal one.
+  //!
+  //! A tool window is often a small window with a smaller than usual
+  //! title bar and decoration   
+  WINDOW_TOOL = (1 << 2),
 
   //! @brief Create popup like window instead of normal one.
   //!
   //! Created popup window hasn't native borders and decoration, use
   //! border style to set these borders.
-  WINDOW_POPUP = (1 << 16),
+  WINDOW_POPUP = (1 << 3),
+
+  //! @brief Create a window without frame and decoration
+  //!
+  //! The window will not have a decoration at all.
+  //! this will complete overwrite the window frame flag
+  WINDOW_FRAMELESS = (1 << 10),
+
+  //Window flags
+
+  //! @brief Marks the window as not resizeable
+  //!
+  //! The window could not be resized at all. This will overwrite
+  //! resize feature of window frame flag (e.g. WINDOW_NATIVE)
+  WINDOW_FIXED_SIZE = (1 << 8),
+
+  //! @brief Marks the window as not moveable
+  //!
+  //! The window could not be dragged using the window decoration
+  WINDOW_DRAGABLE = (1 << 9),
+
+  //! @brief Marks the window to stay TopMost of the other windows
+  //!
+  //! The window will be on top of the whole system   
+  WINDOW_ALWAYS_ON_TOP = (1 << 11),
+
+  //! @brief Marks if the Window should have no system menu
+  //!
+  //! If this flag is set the system menu is completely disabled for the
+  //! window
+  WINDOW_SYSTEM_MENU = (1 << 12),
+
+  //! @brief Marks if the Window should have a max button
+  WINDOW_MAXIMIZE = (1 << 13),
+
+  //! @brief Marks if the Window should have a min button
+  WINDOW_MINIMIZE = (1 << 14),
+
+  //! @brief Marks if the Window should not have a close button
+  //!
+  //! The close button is only visible, if the window has also a system menu!
+  //! This will only disable the functionality from Gui. (Close-Button & SystemMenu-Entry)
+  //! But Alt+F4 will close the window!
+  WINDOW_CLOSE_BUTTON = (1 << 15),
+
+  //! @brief Marks if the Window should have a context help button
+  //!
+  //! The help button is only visible, if the window has also a system menu!
+  //! A tool window and a popup could not have a help button
+  WINDOW_CONTEXT_HELP_BUTTON = (1 << 16),
 
   //! @brief Create X11 window that listens only for XPropertyChange events.
   //!
   //! X11GuiEngine dependent and non-portable flag.
-  WINDOW_X11_PROPERTY_ONLY = (1 << 20),
+  WINDOW_X11_PROPERTY_ONLY = (1 << 30),
 
   //! @brief Override redirection from window managers under X11.
   //!
   //! X11GuiEngine dependent and non-portable flag.
-  WINDOW_X11_OVERRIDE_REDIRECT = (1 << 21)
+  WINDOW_X11_OVERRIDE_REDIRECT = (1 << 31)
+};
+
+enum WINDOW_TYPES
+{
+  WINDOW_TYPE_DIALOG = WINDOW_DIALOG | WINDOW_SYSTEM_MENU | WINDOW_DRAGABLE | WINDOW_FIXED_SIZE | WINDOW_ALWAYS_ON_TOP | WINDOW_CLOSE_BUTTON,
+  WINDOW_TYPE_DEFAULT = WINDOW_NATIVE | WINDOW_SYSTEM_MENU | WINDOW_DRAGABLE | WINDOW_MINIMIZE | WINDOW_MAXIMIZE | WINDOW_CLOSE_BUTTON,
+  WINDOW_TYPE_TOOL  = WINDOW_TOOL | WINDOW_CLOSE_BUTTON | WINDOW_SYSTEM_MENU | WINDOW_DRAGABLE,
+  WINDOW_TYPE_POPUP = WINDOW_POPUP | WINDOW_ALWAYS_ON_TOP | WINDOW_DRAGABLE,
+  WINDOW_TYPE_FRAMELESS = WINDOW_FRAMELESS | WINDOW_DRAGABLE
 };
 
 // ============================================================================

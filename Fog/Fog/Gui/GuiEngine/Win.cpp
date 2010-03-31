@@ -293,6 +293,16 @@ WinGuiEngine::WinGuiEngine()
   wc.lpszClassName = L"Fog_Popup";
   if (!RegisterClassExW(&wc)) return;
 
+  // "Fog_Dialog" window class.
+  wc.style         = CS_OWNDC;
+  wc.lpszClassName = L"Fog_Dialog";
+  if (!RegisterClassExW(&wc)) return;
+
+  // "Fog_Tool" window class.
+  wc.style         = CS_OWNDC;
+  wc.lpszClassName = L"Fog_Tool";
+  if (!RegisterClassExW(&wc)) return;
+
   updateDisplayInfo();
   _initialized = true;
 }
@@ -303,6 +313,8 @@ WinGuiEngine::~WinGuiEngine()
   // HINSTANCE hInstance = (HINSTANCE)GetModuleHandleW(NULL);
   // UnregisterClassW(L"Fog_Window", hInstance);
   // UnregisterClassW(L"Fog_Popup", hInstance);
+  // UnregisterClassW(L"Fog_Dialog", hInstance);
+  // UnregisterClassW(L"Fog_Tool", hInstance);
 }
 
 // ============================================================================
@@ -724,29 +736,178 @@ WinGuiWindow::~WinGuiWindow()
   delete _backingStore;
 }
 
+void WinGuiWindow::calculateStyleFlags(uint32_t flags, DWORD& style, DWORD& exstyle) 
+{
+  if(flags & WINDOW_FRAMELESS) 
+  {
+    style = WS_POPUP;
+    exstyle = 0;
+  }
+  else if(flags & WINDOW_POPUP) 
+  {
+    style = WS_POPUP;
+    exstyle = WS_EX_TOPMOST;
+    //A popup has no min/max/close/systemmenu
+    return;
+  }
+  else if(flags & WINDOW_NATIVE) 
+  {
+    style = WS_OVERLAPPED | WS_CAPTION;
+    exstyle = WS_EX_WINDOWEDGE;
+  }
+  else if(flags & WINDOW_TOOL) 
+  {
+    style = WS_OVERLAPPED | WS_CAPTION;
+    exstyle = WS_EX_TOOLWINDOW;
+  }
+  else if(flags & WINDOW_DIALOG) 
+  {
+    style = WS_OVERLAPPED | WS_CAPTION | WS_DLGFRAME;
+    //Dialog is always on top
+    exstyle =  WS_EX_TOPMOST;  //probably we should also set WS_EX_DLGMODALFRAME
+  }
+
+  if(flags & WINDOW_SYSTEM_MENU) {
+    style |= WS_SYSMENU;
+
+    //The Close Button is only available if the system menu is set
+    if(!(flags & WINDOW_CLOSE_BUTTON)) {
+      //We will disable the entry within SystemMenu on our own later
+      style |= CS_NOCLOSE;
+    }
+  }
+
+  if(!(flags & WINDOW_FRAMELESS)) {
+    //A frameless window does not have any decoration
+    //if(helper::isResizeAble(flags)) {
+    if(flags & WINDOW_FIXED_SIZE) {
+      style |= WS_BORDER;
+    } else {
+      style |=WS_THICKFRAME;      
+    }
+
+    //A Context-helpbutton is only visible if no min/max button are defined
+    //to offer to create a window with a context help button we implicitly
+    //have to set min/max button to false
+
+    if(flags & WINDOW_CONTEXT_HELP_BUTTON) {
+      exstyle |= WS_EX_CONTEXTHELP;
+    } else {
+      if(flags & WINDOW_MINIMIZE) {
+        //We will disable the entry within SystemMenu on our own later
+        style |= WS_MINIMIZEBOX;
+      }
+
+      if(flags & WINDOW_MAXIMIZE) {
+        //We will disable the entry within SystemMenu on our own later
+        style |= WS_MAXIMIZEBOX;
+      }
+    }
+  }
+
+  if(flags & WINDOW_ALWAYS_ON_TOP) {
+    exstyle |= WS_EX_TOPMOST;
+  }
+}
+
+void WinGuiWindow::doSystemMenu(uint32_t flags) {
+  //Do it here, so we don't need to do it in INIT_MENU everytime
+
+  HMENU hMenu = GetSystemMenu((HWND)_handle, false);
+  if(hMenu == INVALID_HANDLE_VALUE)
+    return;
+
+  if(!(flags & WINDOW_CLOSE_BUTTON)) {
+    EnableMenuItem(hMenu, SC_CLOSE, MF_GRAYED);
+  } else {
+    //make sure it is enabled
+    EnableMenuItem(hMenu, SC_CLOSE, MF_ENABLED);
+  }
+
+  if(!(flags & WINDOW_MINIMIZE)) {
+    EnableMenuItem(hMenu, SC_MINIMIZE, MF_GRAYED);
+  } else {
+    //make sure it is enabled
+    EnableMenuItem(hMenu, SC_MINIMIZE, MF_ENABLED);
+  }
+
+  if(!(flags & WINDOW_MAXIMIZE)) {
+    EnableMenuItem(hMenu, SC_MAXIMIZE, MF_GRAYED);
+  } else {
+    //make sure it is enabled
+    EnableMenuItem(hMenu, SC_MAXIMIZE, MF_ENABLED);
+  }
+
+  if(flags & WINDOW_FIXED_SIZE) {
+    EnableMenuItem(hMenu, SC_SIZE, MF_GRAYED);
+  } else {
+    //make sure it is enabled
+    EnableMenuItem(hMenu, SC_SIZE, MF_ENABLED);
+  }
+}
+
 err_t WinGuiWindow::create(uint32_t flags)
 {
-  if (_handle) return ERR_GUI_WINDOW_ALREADY_EXISTS;
-
   // Create the Window (HWND is returned)
   DWORD dwStyle;
   DWORD dwStyleEx;
+
+  calculateStyleFlags(flags, dwStyle,dwStyleEx);
+
+  if (_handle)
+  {    
+    //need to hide window to support to insert/remove window from taskbar
+    //during change of tool window/other window-type
+    //a SWP_FRAMECHANGED with SetWindowPos does not do the job :-(
+    //TODO: Sometimes the window don't show again after hide. Seems to be a EventLoop-Problem -> Need more research!
+    hide();
+    //update(WIDGET_UPDATE_ALL);
+    UpdateWindow((HWND)_handle);
+
+    //just update window with new styles
+    DWORD style = GetWindowLong((HWND)_handle,GWL_STYLE);
+
+    //it's much easier to first remove all possible flags
+    //and then create a complete new flag and or it with the clean old one
+    style &=~ (WS_OVERLAPPED | WS_CAPTION | WS_POPUP | WS_SYSMENU | WS_DLGFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | CS_NOCLOSE | WS_THICKFRAME | WS_BORDER);
+    
+    SetWindowLong((HWND)_handle,GWL_STYLE,style|dwStyle);
+    SetWindowLong((HWND)_handle,GWL_EXSTYLE,dwStyleEx);
+    doSystemMenu(flags);
+
+    //not needed, if we hide/show
+    //SetWindowPos((HWND)_handle, 0,0,0,0,0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+
+    show();
+    //update(WIDGET_UPDATE_ALL);
+    UpdateWindow((HWND)_handle);
+    return ERR_OK;
+  }
+
   int x;
   int y;
   WCHAR* wndClass;
 
   if (flags & WINDOW_POPUP)
   {
-    dwStyle = WS_POPUP;
-    dwStyleEx = 0;
     x = -1;
     y = -1;
     wndClass = L"Fog_Popup";
   }
+  else if(flags & WINDOW_TOOL)
+  {
+    x = CW_USEDEFAULT;
+    y = CW_USEDEFAULT;
+    wndClass = L"Fog_Tool";
+  }
+  else if(flags & WINDOW_DIALOG)
+  {
+    x = CW_USEDEFAULT;
+    y = CW_USEDEFAULT;
+    wndClass = L"Fog_Dialog";
+  }
   else
   {
-    dwStyle = WS_OVERLAPPEDWINDOW;
-    dwStyleEx = WS_EX_CLIENTEDGE;
     x = CW_USEDEFAULT;
     y = CW_USEDEFAULT;
     wndClass = L"Fog_Window";
@@ -763,6 +924,8 @@ err_t WinGuiWindow::create(uint32_t flags)
     fog_stderr_msg("Fog::WinGuiWindow", "create", "CreateWindowExW() failed.");
     goto fail;
   }
+
+  doSystemMenu(flags);
 
   // Create HWND <-> GuiWindow* connection.
   GUI_ENGINE()->mapHandle(_handle, this);
@@ -996,6 +1159,19 @@ LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
       onVisibility(wParam ? true : false);
       return 0;
 
+    case WM_SYSCOMMAND:
+      {
+        if(!getWidget()->isDragAble()) {
+          int command = wParam & 0xfff0;
+          if (command == SC_MOVE) 
+          {
+            //do not allow to move
+            return 0;
+          }
+        }
+
+        goto defWindowProc;
+      }
     case WM_WINDOWPOSCHANGED:
     {
       IntRect wr;

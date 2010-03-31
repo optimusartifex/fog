@@ -81,6 +81,7 @@ struct Window;
 //! Coordinates that's retrieved represents widget position that's relative to it's
 //! parent. If widget parent is @c NULL then this position is relative to the screen
 //! coordinates (desktop window).
+
 struct FOG_API Widget : public LayoutItem
 {
   FOG_DECLARE_OBJECT(Widget, LayoutItem)
@@ -333,8 +334,23 @@ struct FOG_API Widget : public LayoutItem
   
   //! @brief Show widget (set it's visibility to true).
   FOG_INLINE void show() { setVisible(true); }
-  //! @brief Show widget (set it's visibility to false).
+  //! @brief Hide widget (set it's visibility to false).
   FOG_INLINE void hide() { setVisible(false); }
+
+
+  // --------------------------------------------------------------------------
+  // [Widget Window Style]
+  // --------------------------------------------------------------------------
+  FOG_INLINE uint32_t getWindowFlags() { return _windowFlags; }
+  void setWindowFlags(uint32_t flags);
+  FOG_INLINE uint32_t getWindowHints() { return _windowFlags & WINDOW_HINTS_FLAG; }
+  void setWindowHints(uint32_t flags);  
+
+  FOG_INLINE bool isDragAble() { return (_windowFlags & WINDOW_DRAGABLE); }
+  void setDragAble(bool drag, bool update=true);
+
+  FOG_INLINE bool isResizeAble() { return (_windowFlags & WINDOW_FIXED_SIZE) != 0; }  
+  void setResizeAble(bool resize, bool update=true);
 
   // --------------------------------------------------------------------------
   // [Widget Orientation]
@@ -547,6 +563,9 @@ struct FOG_API Widget : public LayoutItem
   // --------------------------------------------------------------------------
 
 protected:
+  //! @brief Will set/unset a window flag and update the window if specified
+  void changeFlag(uint32_t flag, bool set, bool update);
+
   Widget* _parent;
 
   List<Widget*> _children;
@@ -588,6 +607,8 @@ protected:
   //! @brief Update flags.
   uint32_t _uflags;
 
+  //! @brief Window Style
+  uint32_t _windowFlags;
   //! @brief Widget state.
   uint32_t _state : 2;
   //! @brief Widget visibility.

@@ -1,6 +1,6 @@
 // [Fog-Svg Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 #if defined(_MSVC)

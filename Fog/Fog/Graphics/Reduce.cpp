@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Precompiled Headers]
@@ -97,7 +97,7 @@ bool Reduce::analyze(const Image& image, bool discardAlpha)
   }
   else
   {
-    Hash<uint32_t, uint64_t> hash;
+    UnorderedHash<uint32_t, uint64_t> hash;
     bool fillalpha = (image.getFormat() == PIXEL_FORMAT_XRGB32) || discardAlpha;
 
     for (y = 0; y < h; y++)
@@ -122,7 +122,7 @@ bool Reduce::analyze(const Image& image, bool discardAlpha)
     // If we are here, color reduction is possible, setup tables ...
     i = 0;
 
-    Hash<uint32_t, uint64_t>::ConstIterator it(hash);
+    UnorderedHash<uint32_t, uint64_t>::ConstIterator it(hash);
     for (it.toStart(); it.isValid(); it.toNext(), i++)
     {
       e[i].key   = it.key();

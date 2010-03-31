@@ -1,6 +1,6 @@
 // [Fog-Core Library - Private API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]

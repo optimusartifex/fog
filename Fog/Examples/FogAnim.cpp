@@ -27,7 +27,7 @@ struct MyPoint
     if (rand() % 1000 > 500) stepy = -stepy;
   }
 
-  void move(const RectD& bounds)
+  void move(const DoubleRect& bounds)
   {
     posx += stepx;
     posy += stepy;
@@ -109,7 +109,7 @@ void MyWindow::onPaint(PaintEvent* e)
 {
   Painter* p = e->getPainter();
 
-  Path path;
+  DoublePath path;
   for (sysuint_t i = 0; i < NumPoints; i += 2)
   {
     if (i == 0)
@@ -123,7 +123,7 @@ void MyWindow::onPaint(PaintEvent* e)
 
   p->setOperator(OPERATOR_SUBTRACT);
   p->setSource(0x01FFFFFF);
-  p->fillRect(Rect(0, 0, getWidth(), getHeight()));
+  p->fillRect(IntRect(0, 0, getWidth(), getHeight()));
 
   p->setSource((clr.toArgb() & 0x00FFFFFF) | 0x0F000000);
   p->setOperator(OPERATOR_SCREEN);
@@ -135,7 +135,7 @@ void MyWindow::onPaint(PaintEvent* e)
 void MyWindow::onTimer(TimerEvent* e)
 {
   double w = getWidth(), h = getHeight();
-  RectD bounds(0, 0, w, h);
+  DoubleRect bounds(0.0, 0.0, w, h);
 
   for (sysuint_t i = 0; i < NumPoints; i++) mp[i].move(bounds);
   clr.move();
@@ -152,7 +152,7 @@ FOG_GUI_MAIN()
   Application app(Ascii8("Gui"));
 
   MyWindow window;
-  window.setSize(Size(515, 455));
+  window.setSize(IntSize(515, 455));
   window.show();
   window.addListener(EVENT_CLOSE, &app, &Application::quit);
 

@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -15,7 +15,6 @@
 #include <Fog/Core/Lock.h>
 #include <Fog/Core/String.h>
 #include <Fog/Graphics/Font.h>
-#include <Fog/Graphics/FontEngine.h>
 
 #include <windows.h>
 
@@ -23,6 +22,10 @@
 //! @{
 
 namespace Fog {
+
+// ============================================================================
+// [Forward Declarations]
+// ============================================================================
 
 struct WinFontEngine;
 
@@ -32,19 +35,31 @@ struct WinFontEngine;
 
 struct FOG_API WinFontFace : public FontFace
 {
-  // Lock
-  mutable Lock lock;
-  // Glyph cache:
-  GlyphCache glyphCache;
-  // Windows font handle
-  HFONT hFont;
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   WinFontFace();
   virtual ~WinFontFace();
 
+  // --------------------------------------------------------------------------
+  // [Virtuals]
+  // --------------------------------------------------------------------------
+
   virtual err_t getGlyphSet(const Char* str, sysuint_t length, GlyphSet& glyphSet);
-  virtual err_t getOutline(const Char* str, sysuint_t length, Path& dst);
+  virtual err_t getOutline(const Char* str, sysuint_t length, DoublePath& dst);
   virtual err_t getTextExtents(const Char* str, sysuint_t length, TextExtents& extents);
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  //! @brief Lock.
+  mutable Lock lock;
+  //! @brief Glyph cache.
+  GlyphCache glyphCache;
+  //! @brief Windows font handle.
+  HFONT hFont;
 
 private:
   //! @brief Renders glyph and returns it.
@@ -62,16 +77,26 @@ private:
 
 struct FOG_API WinFontEngine : public FontEngine
 {
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
   WinFontEngine();
   virtual ~WinFontEngine();
+
+  // --------------------------------------------------------------------------
+  // [Virtuals]
+  // --------------------------------------------------------------------------
 
   virtual List<String> getFontList();
 
   virtual FontFace* createDefaultFace();
 
   virtual FontFace* createFace(
-    const String& family, uint32_t size, 
-    const FontCaps& caps);
+    const String& family,
+    float size, 
+    const FontOptions& options,
+    const FloatMatrix& matrix);
 
 private:
   FOG_DISABLE_COPY(WinFontEngine)

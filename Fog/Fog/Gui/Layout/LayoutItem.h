@@ -1,6 +1,6 @@
 // [Fog-Gui Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -53,13 +53,13 @@ struct FOG_API LayoutItem : public Object
   virtual const LayoutHint& getComputedLayoutHint() const = 0;
   virtual void computeLayoutHint() = 0;
 
-  Size getSizeHint() const;
-  Size getMinimumSize() const;
-  Size getMaximumSize() const;
+  IntSize getSizeHint() const;
+  IntSize getMinimumSize() const;
+  IntSize getMaximumSize() const;
 
-  void setSizeHint(const Size& sizeHint);
-  void setMinimumSize(const Size& minimumSize);
-  void setMaximumSize(const Size& maximumSize);
+  void setSizeHint(const IntSize& sizeHint);
+  void setMinimumSize(const IntSize& minimumSize);
+  void setMaximumSize(const IntSize& maximumSize);
 
   // --------------------------------------------------------------------------
   // [Layout Policy]

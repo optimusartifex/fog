@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -23,36 +23,19 @@ namespace Fog {
 // [Fog::Argb]
 // ============================================================================
 
-#include <Fog/Core/Pack.h>
+#include <Fog/Core/Compiler/PackByte.h>
 //! @brief Stores 32 bit RGBA color entity (8 bits for each channel).
-struct FOG_HIDDEN FOG_PACKED Argb
+struct FOG_HIDDEN Argb
 {
+  // --------------------------------------------------------------------------
   // [Enums]
+  // --------------------------------------------------------------------------
 
   enum { SIZE = 4 };
 
-  // [Members]
-
-  union
-  {
-    struct
-    {
-#if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-      uint8_t b;
-      uint8_t g;
-      uint8_t r;
-      uint8_t a;
-#else
-      uint8_t a;
-      uint8_t r;
-      uint8_t g;
-      uint8_t b;
-#endif // FOG_BYTE_ORDER
-    };
-    uint32_t value;
-  };
-
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE Argb() {}
   FOG_INLINE Argb(uint32_t _value) : value(_value) {}
@@ -69,7 +52,9 @@ struct FOG_HIDDEN FOG_PACKED Argb
     value(rgba.value)
   {}
 
+  // --------------------------------------------------------------------------
   // [Set]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE Argb& set(const Argb& rgba) { value = rgba.value; return* this; }
   FOG_INLINE Argb& set(uint32_t rgba) { value = rgba; return* this; }
@@ -82,7 +67,9 @@ struct FOG_HIDDEN FOG_PACKED Argb
     return* this;
   }
 
+  // --------------------------------------------------------------------------
   // [Channels]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE uint32_t getAlpha() const { return a; }
   FOG_INLINE uint32_t getRed  () const { return r; }
@@ -92,12 +79,16 @@ struct FOG_HIDDEN FOG_PACKED Argb
   FOG_INLINE uint32_t getGrey () const { return getGrey(value); }
   FOG_INLINE uint32_t getValue() const { return value; }
 
+  // --------------------------------------------------------------------------
   // [Swap]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE void swapRgb() { uint8_t t = r; r = g; g = t; }
   FOG_INLINE void bswap() { value = Memory::bswap32(value); }
 
-  // [Overloaded Operators]
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE operator uint32_t() const { return value; }
 
@@ -108,7 +99,9 @@ struct FOG_HIDDEN FOG_PACKED Argb
   FOG_INLINE Argb& operator&=(uint32_t _value) { value &= _value; return *this; }
   FOG_INLINE Argb& operator^=(uint32_t _value) { value ^= _value; return *this; }
 
-  // [Static]
+  // --------------------------------------------------------------------------
+  // [Statics]
+  // --------------------------------------------------------------------------
 
   static FOG_INLINE uint32_t getAlpha(uint32_t rgba) { return (rgba & ARGB32_AMASK) >> ARGB32_ASHIFT; }
   static FOG_INLINE uint32_t getRed  (uint32_t rgba) { return (rgba & ARGB32_RMASK) >> ARGB32_RSHIFT; }
@@ -166,8 +159,31 @@ struct FOG_HIDDEN FOG_PACKED Argb
            ((uint32_t)(b) << ARGB32_BSHIFT) |
            ((uint32_t)(a) << ARGB32_ASHIFT) ;
   }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  union
+  {
+    struct
+    {
+#if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
+      uint8_t b;
+      uint8_t g;
+      uint8_t r;
+      uint8_t a;
+#else
+      uint8_t a;
+      uint8_t r;
+      uint8_t g;
+      uint8_t b;
+#endif // FOG_BYTE_ORDER
+    };
+    uint32_t value;
+  };
 };
-#include <Fog/Core/Unpack.h>
+#include <Fog/Core/Compiler/PackRestore.h>
 
 // ============================================================================
 // [Fog::ArgbStop]
@@ -175,32 +191,44 @@ struct FOG_HIDDEN FOG_PACKED Argb
 
 struct FOG_HIDDEN ArgbStop
 {
-  double offset;
-  Argb argb;
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE ArgbStop() {}
-  FOG_INLINE ArgbStop(double offset, Argb argb) :
+  FOG_INLINE ArgbStop(float offset, Argb argb) :
     offset(offset), argb(argb) {}
-  FOG_INLINE ArgbStop(double offset, uint8_t a, uint8_t r, uint8_t g, uint8_t b) :
+  FOG_INLINE ArgbStop(float offset, uint8_t a, uint8_t r, uint8_t g, uint8_t b) :
     offset(offset), argb(Argb(a, r, g, b)) {}
   FOG_INLINE ArgbStop(const ArgbStop& other) :
     offset(other.offset), argb(other.argb) {}
 
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void normalize()
+  { offset = Math::bound<float>(offset, 0.0f, 1.0f); }
+
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
+
   FOG_INLINE ArgbStop& operator=(const ArgbStop& other)
   { offset = other.offset; argb = other.argb; return *this; }
 
-  FOG_INLINE void normalize()
-  { offset = Math::bound<double>(offset, 0.0, 1.0); }
-};
+  FOG_INLINE bool operator==(const Fog::ArgbStop& other) const { return (offset == other.offset) && (argb == other.argb); }
+  FOG_INLINE bool operator!=(const Fog::ArgbStop& other) const { return (offset != other.offset) || (argb != other.argb); }
+  FOG_INLINE bool operator< (const Fog::ArgbStop& other) const { return (offset <  other.offset) || (offset == other.offset && argb <  other.argb); }
+  FOG_INLINE bool operator<=(const Fog::ArgbStop& other) const { return (offset <  other.offset) || (offset == other.offset && argb <= other.argb); }
+  FOG_INLINE bool operator> (const Fog::ArgbStop& other) const { return (offset >  other.offset) || (offset == other.offset && argb >  other.argb); }
+  FOG_INLINE bool operator>=(const Fog::ArgbStop& other) const { return (offset >  other.offset) || (offset == other.offset && argb >= other.argb); }
 
-// ============================================================================
-// [Fog::ArgbVertex]
-// ============================================================================
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
 
-struct FOG_HIDDEN ArgbVertex
-{
-  double x;
-  double y;
+  float offset;
   Argb argb;
 };
 
@@ -210,14 +238,6 @@ struct FOG_HIDDEN ArgbVertex
 
 FOG_DECLARE_TYPEINFO(Fog::Argb, Fog::TYPEINFO_PRIMITIVE)
 FOG_DECLARE_TYPEINFO(Fog::ArgbStop, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::ArgbVertex, Fog::TYPEINFO_PRIMITIVE)
-
-static FOG_INLINE bool operator==(const Fog::ArgbStop& a, const Fog::ArgbStop& b) { return a.offset == b.offset && a.argb == b.argb; }
-static FOG_INLINE bool operator!=(const Fog::ArgbStop& a, const Fog::ArgbStop& b) { return a.offset != b.offset || a.argb != b.argb; }
-static FOG_INLINE bool operator< (const Fog::ArgbStop& a, const Fog::ArgbStop& b) { return a.offset <  b.offset || (a.offset == b.offset && a.argb <  b.argb); }
-static FOG_INLINE bool operator<=(const Fog::ArgbStop& a, const Fog::ArgbStop& b) { return a.offset <  b.offset || (a.offset == b.offset && a.argb <= b.argb); }
-static FOG_INLINE bool operator> (const Fog::ArgbStop& a, const Fog::ArgbStop& b) { return a.offset >  b.offset || (a.offset == b.offset && a.argb >  b.argb); }
-static FOG_INLINE bool operator>=(const Fog::ArgbStop& a, const Fog::ArgbStop& b) { return a.offset >  b.offset || (a.offset == b.offset && a.argb >= b.argb); }
 
 // [Guard]
 #endif // _FOG_GRAPHICS_ARGB_H

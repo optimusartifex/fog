@@ -1,6 +1,6 @@
 // [Fog-Svg Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Dependencies]
@@ -17,13 +17,13 @@ namespace SvgUtil {
 // [Fog::SvgUtil - Color & Opacity]
 // ============================================================================
 
-#include <Fog/Core/Pack.h>
-struct FOG_PACKED SvgNamedColor
+#include <Fog/Core/Compiler/PackByte.h>
+struct SvgNamedColor
 {
   char name[22];
   uint32_t value;
 };
-#include <Fog/Core/Unpack.h>
+#include <Fog/Core/Compiler/PackRestore.h>
 
 #define __SVG_COLOR(R, G, B) \
   ( 0xFF000000U | (((uint32_t)R) << 16) | (((uint32_t)G) << 8) | ((uint32_t)B) )
@@ -407,7 +407,7 @@ err_t parseOpacity(const String& str, double* dst)
 // [Fog::SvgUtil - Matrix]
 // ============================================================================
 
-err_t parseMatrix(const String& str, Matrix* dst)
+err_t parseMatrix(const String& str, DoubleMatrix* dst)
 {
   err_t status = ERR_OK;
 
@@ -419,7 +419,7 @@ err_t parseMatrix(const String& str, Matrix* dst)
   double d[6];
   sysuint_t d_count;
 
-  Matrix w;
+  DoubleMatrix w;
 
 start:
   // Skip spaces.
@@ -489,7 +489,7 @@ done:
   if (functionLen == 6 && StringUtil::eq(functionName, "matrix", 6))
   {
     if (d_count != 6) goto end;
-    w.multiply(*reinterpret_cast<Matrix *>(d), MATRIX_PREPEND);
+    w.multiply(*reinterpret_cast<DoubleMatrix *>(d), MATRIX_PREPEND);
   }
   // translate() function.
   else if (functionLen == 9 && StringUtil::eq(functionName, "translate", 9))
@@ -614,9 +614,9 @@ err_t serializeCoord(String& dst, const SvgCoord& coord)
 // [Fog::SvgUtil - Paths]
 // ============================================================================
 
-Path parsePoints(const String& str)
+DoublePath parsePoints(const String& str)
 {
-  Path path;
+  DoublePath path;
 
   const Char* strCur = str.getData();
   const Char* strEnd = strCur + str.getLength();
@@ -626,9 +626,9 @@ Path parsePoints(const String& str)
   return path;
 }
 
-Path parsePath(const String& str)
+DoublePath parsePath(const String& str)
 {
-  Path path;
+  DoublePath path;
 
   const Char* strCur = str.getData();
   const Char* strEnd = strCur + str.getLength();

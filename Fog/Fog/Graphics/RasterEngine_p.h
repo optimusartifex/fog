@@ -1,6 +1,6 @@
 // [Fog-Graphics library - Private API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -31,7 +31,7 @@ struct BlurParams;
 struct ColorLut;
 struct ColorMatrix;
 struct ConvolveParams;
-struct Matrix;
+struct DoubleMatrix;
 struct Pattern;
 struct SymmetricConvolveParamsF;
 struct SymmetricConvolveParamsI;
@@ -47,10 +47,10 @@ struct Solid;
 // ============================================================================
 
 typedef void (FOG_FASTCALL *Dither8Fn)(
-  uint8_t* dst, const uint8_t* src, sysint_t w, const Point& origin, const uint8_t* palConv);
+  uint8_t* dst, const uint8_t* src, sysint_t w, const IntPoint& origin, const uint8_t* palConv);
 
 typedef void (FOG_FASTCALL *Dither16Fn)(
-  uint8_t* dst, const uint8_t* src, sysint_t w, const Point& origin);
+  uint8_t* dst, const uint8_t* src, sysint_t w, const IntPoint& origin);
 
 // ============================================================================
 // [Fog::RasterEngine - Prototypes - Interpolate]
@@ -66,7 +66,7 @@ typedef void (FOG_FASTCALL *InterpolateArgbFn)(
 
 // Generic.
 typedef err_t (FOG_FASTCALL *PatternInitFn)(
-  PatternContext* ctx, const Pattern& pattern, const Matrix& matrix);
+  PatternContext* ctx, const Pattern& pattern, const DoubleMatrix& matrix);
 
 typedef void (FOG_FASTCALL *PatternDestroyFn)(
   PatternContext* ctx);
@@ -80,17 +80,17 @@ typedef err_t (FOG_FASTCALL *SolidInitFn)(
 
 // Texture.
 typedef err_t (FOG_FASTCALL *TextureInitFn)(
-  PatternContext* ctx, const Pattern& pattern, const Matrix& matrix, int interpolationType);
+  PatternContext* ctx, const Pattern& pattern, const DoubleMatrix& matrix, int interpolationType);
 
 typedef err_t (FOG_FASTCALL *TextureInitBlitFn)(
-  PatternContext* ctx, const Image& image, const Matrix& matrix, int spread, int interpolationType);
+  PatternContext* ctx, const Image& image, const DoubleMatrix& matrix, int spread, int interpolationType);
 
 typedef err_t (FOG_FASTCALL *TextureInitScaleFn)(
   PatternContext* ctx, const Image& image, int dw, int dh, int interpolationType);
 
 // Gradient.
 typedef err_t (FOG_FASTCALL *GradientInitFn)(
-  PatternContext* ctx, const Pattern& pattern, const Matrix& matrix, int interpolationType);
+  PatternContext* ctx, const Pattern& pattern, const DoubleMatrix& matrix, int interpolationType);
 
 // ============================================================================
 // [Fog::RasterEngine - Prototypes - Filter]

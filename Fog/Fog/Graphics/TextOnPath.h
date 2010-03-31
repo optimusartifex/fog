@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -27,7 +27,7 @@ struct FOG_API PathTransform
   PathTransform();
   virtual ~PathTransform();
 
-  virtual err_t transform(Path& dst, const Path& src) const = 0;
+  virtual err_t transform(DoublePath& dst, const DoublePath& src) const = 0;
 
 private:
   FOG_DISABLE_COPY(PathTransform)
@@ -42,17 +42,17 @@ struct FOG_API TextOnPath : public PathTransform
   TextOnPath();
   virtual ~TextOnPath();
 
-  virtual err_t transform(Path& dst, const Path& src) const;
+  virtual err_t transform(DoublePath& dst, const DoublePath& src) const;
 
-  FOG_INLINE const Path& getPath() const { return _path; }
+  FOG_INLINE const DoublePath& getPath() const { return _path; }
   FOG_INLINE double getCalcLength() const { return _calcLength; }
   FOG_INLINE double getBaseLength() const { return _baseLength; }
 
-  err_t setPath(const Path& path, const Matrix* matrix = NULL);
+  err_t setPath(const DoublePath& path, const DoubleMatrix* matrix = NULL);
   err_t setBaseLength(double baseLength);
 
 private:
-  Path _path;
+  DoublePath _path;
   List<double> _dist;
 
   double _calcLength;

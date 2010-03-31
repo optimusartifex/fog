@@ -21,7 +21,7 @@ struct MyWindow : public Window
   virtual void onKeyPress(KeyEvent* e);
   virtual void onPaint(PaintEvent* e);
 
-  void paintImage(Painter* painter, const Point& pos, const Image& im, const String& name);
+  void paintImage(Painter* painter, const IntPoint& pos, const Image& im, const String& name);
 
   Image i[2];
   double _subx;
@@ -71,7 +71,7 @@ MyWindow::MyWindow(uint32_t createFlags) :
 
   Button* button = new Button();
   add(button);
-  button->setGeometry(Rect(40, 40, 100, 20));
+  button->setGeometry(IntRect(40, 40, 100, 20));
   button->setText(Ascii8("Push me"));
   button->show();
 
@@ -155,7 +155,7 @@ void MyWindow::onPaint(PaintEvent* e)
   p->clear();
   
   p->setSource(Argb(0xFF000000));
-  p->drawRect(Rect(15, 15, getWidth() - 25, getHeight() - 25));
+  p->drawRect(IntRect(15, 15, getWidth() - 25, getHeight() - 25));
 
 /*
   Region reg;
@@ -185,7 +185,7 @@ void MyWindow::onPaint(PaintEvent* e)
   p->translate(_subx, _suby);
 
   // Create path that will contain rounded rectangle.
-  Path path;
+  DoublePath path;
   path.moveTo(100, 100);
   path.cubicTo(150, 120, 180, 100, 200, 200);
   path.lineTo(50, 230);
@@ -194,7 +194,7 @@ void MyWindow::onPaint(PaintEvent* e)
   // Create linear gradient pattern.
   Pattern pattern;
   pattern.setType(PATTERN_LINEAR_GRADIENT);
-  pattern.setPoints(PointD(x, y), PointD(x + w, y + h));
+  pattern.setPoints(DoublePoint(x, y), DoublePoint(x + w, y + h));
   pattern.addStop(ArgbStop(0.0, Argb(0xFF000000)));
   pattern.addStop(ArgbStop(1.0, Argb(0xFFFF0000)));
 
@@ -219,8 +219,8 @@ void MyWindow::onPaint(PaintEvent* e)
     ColorMatrix cm;
     cm.rotateHue((float)_rotate * 3.0f);
     im.filter(cm);
-    p->blitImage(PointD(50.0, 50.0), im);
-    p->blitImage(PointD(250.0, 50.0), i[0]);
+    p->blitImage(DoublePoint(50.0, 50.0), im);
+    p->blitImage(DoublePoint(250.0, 50.0), i[0]);
   }
 #endif
 
@@ -231,22 +231,22 @@ void MyWindow::onPaint(PaintEvent* e)
 
   p->setOperator(OPERATOR_SRC_OVER);
   p->setSource(0xFF000000);
-  p->fillRect(Rect(0, 0, getWidth(), getFont().getHeight()));
+  p->fillRect(IntRect(0, 0, getWidth(), getFont().getHeight()));
   p->setSource(0xFFFF0000);
 
   String s;
   s.format("Size: %d %d, time %g, [PARAMS: %g %g]", getWidth(), getHeight(), delta.inMillisecondsF(), _subx, _suby);
-  p->drawText(Point(0, 0), s, getFont());
+  p->drawText(IntPoint(0, 0), s, getFont());
 }
 
-void MyWindow::paintImage(Painter* p, const Point& pos, const Image& im, const String& name)
+void MyWindow::paintImage(Painter* p, const IntPoint& pos, const Image& im, const String& name)
 {
   int x = 10 + pos.x * 152;
   int y = 10 + pos.y * 152;
 
-  p->drawText(Rect(x, y, 130, 20), name, getFont(), TEXT_ALIGN_CENTER);
-  p->drawRect(Rect(x, y + 20, 130, 130));
-  p->blitImage(Point(x + 1, y + 21), im);
+  p->drawText(IntRect(x, y, 130, 20), name, getFont(), TEXT_ALIGN_CENTER);
+  p->drawRect(IntRect(x, y + 20, 130, 130));
+  p->blitImage(IntPoint(x + 1, y + 21), im);
 }
 
 // ============================================================================
@@ -258,7 +258,7 @@ FOG_GUI_MAIN()
   Application app(Ascii8("Gui"));
 
   MyWindow window;
-  window.setSize(Size(500, 400));
+  window.setSize(IntSize(500, 400));
 
   window.addListener(EVENT_CLOSE, &app, &Application::quit);
   window.show();

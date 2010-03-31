@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Precompiled Headers]
@@ -18,7 +18,7 @@ namespace Fog {
 // [Fog::Pattern]
 // ============================================================================
 
-Static<Pattern::Data> Pattern::sharedNull;
+Static<PatternData> Pattern::sharedNull;
 
 Pattern::Pattern() : 
   _d(sharedNull->ref())
@@ -39,7 +39,7 @@ err_t Pattern::_detach()
 {
   if (_d->refCount.get() == 1) return ERR_OK;
 
-  Data* newd = new(std::nothrow) Data(*_d);
+  PatternData* newd = new(std::nothrow) PatternData(*_d);
   if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
   atomicPtrXchg(&_d, newd)->deref();
@@ -51,7 +51,7 @@ void Pattern::free()
   atomicPtrXchg(&_d, sharedNull->ref())->deref();
 }
 
-err_t Pattern::setType(int type)
+err_t Pattern::setType(uint32_t type)
 {
   if (_d->type == type) return ERR_OK;
 
@@ -80,7 +80,7 @@ err_t Pattern::setType(int type)
   }
   else
   {
-    Data* newd = new(std::nothrow) Data();
+    PatternData* newd = new(std::nothrow) PatternData();
     if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
     newd->type = type;
@@ -121,7 +121,7 @@ void Pattern::reset()
   }
 }
 
-err_t Pattern::setSpread(int spread)
+err_t Pattern::setSpread(uint32_t spread)
 {
   if (_d->spread == spread) return ERR_OK;
   if ((uint)spread >= SPREAD_COUNT) return ERR_RT_INVALID_ARGUMENT;
@@ -132,7 +132,15 @@ err_t Pattern::setSpread(int spread)
   return ERR_OK;
 }
 
-err_t Pattern::setMatrix(const Matrix& matrix)
+err_t Pattern::setMatrix(const FloatMatrix& matrix)
+{
+  FOG_RETURN_ON_ERROR(detach());
+
+  _d->matrix = matrix;
+  return ERR_OK;
+}
+
+err_t Pattern::setMatrix(const DoubleMatrix& matrix)
 {
   FOG_RETURN_ON_ERROR(detach());
 
@@ -148,7 +156,12 @@ err_t Pattern::resetMatrix()
   return ERR_OK;
 }
 
-err_t Pattern::translate(double x, double y, int order)
+err_t Pattern::translate(float x, float y, uint32_t order)
+{
+  return translate((double)x, (double)y, order);
+}
+
+err_t Pattern::translate(double x, double y, uint32_t order)
 {
   FOG_RETURN_ON_ERROR(detach());
 
@@ -156,7 +169,12 @@ err_t Pattern::translate(double x, double y, int order)
   return ERR_OK;
 }
 
-err_t Pattern::rotate(double a, int order)
+err_t Pattern::rotate(float a, uint32_t order)
+{
+  return rotate((double)a, order);
+}
+
+err_t Pattern::rotate(double a, uint32_t order)
 {
   FOG_RETURN_ON_ERROR(detach());
 
@@ -164,7 +182,12 @@ err_t Pattern::rotate(double a, int order)
   return ERR_OK;
 }
 
-err_t Pattern::scale(double x, double y, int order)
+err_t Pattern::scale(float x, float y, uint32_t order)
+{
+  return scale((double)x, (double)y, order);
+
+}
+err_t Pattern::scale(double x, double y, uint32_t order)
 {
   FOG_RETURN_ON_ERROR(detach());
 
@@ -172,7 +195,12 @@ err_t Pattern::scale(double x, double y, int order)
   return ERR_OK;
 }
 
-err_t Pattern::skew(double x, double y, int order)
+err_t Pattern::skew(float x, float y, uint32_t order)
+{
+  return skew((double)x, (double)y, order);
+}
+
+err_t Pattern::skew(double x, double y, uint32_t order)
 {
   FOG_RETURN_ON_ERROR(detach());
 
@@ -180,7 +208,12 @@ err_t Pattern::skew(double x, double y, int order)
   return ERR_OK;
 }
 
-err_t Pattern::transform(const Matrix& m, int order)
+err_t Pattern::transform(const FloatMatrix& m, uint32_t order)
+{
+  return transform(m.toDoubleMatrix(), order);
+}
+
+err_t Pattern::transform(const DoubleMatrix& m, uint32_t order)
 {
   FOG_RETURN_ON_ERROR(detach());
 
@@ -188,13 +221,17 @@ err_t Pattern::transform(const Matrix& m, int order)
   return ERR_OK;
 }
 
-err_t Pattern::setStartPoint(const Point& pt)
+err_t Pattern::setStartPoint(const IntPoint& pt)
 {
-  return setStartPoint(
-    PointD((double)pt.getX() + 0.5, (double)pt.getY() + 0.5));
+  return setStartPoint(pt.toDoublePoint());
 }
 
-err_t Pattern::setStartPoint(const PointD& pt)
+err_t Pattern::setStartPoint(const FloatPoint& pt)
+{
+  return setStartPoint(pt.toDoublePoint());
+
+}
+err_t Pattern::setStartPoint(const DoublePoint& pt)
 {
   if (_d->points[0] == pt) return ERR_OK;
 
@@ -204,13 +241,17 @@ err_t Pattern::setStartPoint(const PointD& pt)
   return ERR_OK;
 }
 
-err_t Pattern::setEndPoint(const Point& pt)
+err_t Pattern::setEndPoint(const IntPoint& pt)
 {
-  return setEndPoint(
-    PointD((double)pt.getX() + 0.5, (double)pt.getY() + 0.5));
+  return setEndPoint(pt.toDoublePoint());
 }
 
-err_t Pattern::setEndPoint(const PointD& pt)
+err_t Pattern::setEndPoint(const FloatPoint& pt)
+{
+  return setEndPoint(pt.toDoublePoint());
+}
+
+err_t Pattern::setEndPoint(const DoublePoint& pt)
 {
   if (_d->points[1] == pt) return ERR_OK;
 
@@ -220,14 +261,17 @@ err_t Pattern::setEndPoint(const PointD& pt)
   return ERR_OK;
 }
 
-err_t Pattern::setPoints(const Point& startPt, const Point& endPt)
+err_t Pattern::setPoints(const IntPoint& startPt, const IntPoint& endPt)
 {
-  return setPoints(
-    PointD((double)startPt.x, (double)startPt.y),
-    PointD((double)endPt.x  , (double)endPt.y  ));
+  return setPoints(startPt.toDoublePoint(), endPt.toDoublePoint());
 }
 
-err_t Pattern::setPoints(const PointD& startPt, const PointD& endPt)
+err_t Pattern::setPoints(const FloatPoint& startPt, const FloatPoint& endPt)
+{
+  return setPoints(startPt.toDoublePoint(), endPt.toDoublePoint());
+
+}
+err_t Pattern::setPoints(const DoublePoint& startPt, const DoublePoint& endPt)
 {
   if (_d->points[0] == startPt && _d->points[1] == endPt) return ERR_OK;
 
@@ -262,7 +306,7 @@ err_t Pattern::setColor(const Argb& argb)
   }
   else
   {
-    Data* newd = new(std::nothrow) Data();
+    PatternData* newd = new(std::nothrow) PatternData();
     if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
     newd->type = PATTERN_SOLID;
@@ -302,7 +346,7 @@ err_t Pattern::setTexture(const Image& texture)
   }
   else
   {
-    Data* newd = new(std::nothrow) Data();
+    PatternData* newd = new(std::nothrow) PatternData();
     if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
     newd->type = PATTERN_TEXTURE;
@@ -325,7 +369,7 @@ err_t Pattern::setTexture(const Image& texture)
 
 Gradient Pattern::getGradient() const
 {
-  Data* d = _d;
+  PatternData* d = _d;
 
   if (d->type & PATTERN_GRADIENT_MASK)
   {
@@ -354,7 +398,7 @@ err_t Pattern::setGradient(const Gradient& gradient)
   }
   else
   {
-    Data* newd = new(std::nothrow) Data();
+    PatternData* newd = new(std::nothrow) PatternData();
     if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
     newd->type = gradient._type;
@@ -367,6 +411,11 @@ err_t Pattern::setGradient(const Gradient& gradient)
     atomicPtrXchg(&_d, newd)->deref();
     return ERR_OK;
   }
+}
+
+err_t Pattern::setRadius(float r)
+{
+  return setRadius((double)r);
 }
 
 err_t Pattern::setRadius(double r)
@@ -447,10 +496,10 @@ Pattern& Pattern::operator=(const Argb& rgba)
 }
 
 // ============================================================================
-// [Fog::Gradient::Data]
+// [Fog::PatternData]
 // ============================================================================
 
-Pattern::Data::Data()
+PatternData::PatternData()
 {
   refCount.init(1);
   type = PATTERN_NULL;
@@ -462,7 +511,7 @@ Pattern::Data::Data()
   obj.argb->set(0x00000000);
 }
 
-Pattern::Data::Data(const Data& other) :
+PatternData::PatternData(const PatternData& other) :
   type(other.type),
   spread(other.spread),
   radius(other.radius),
@@ -491,17 +540,17 @@ Pattern::Data::Data(const Data& other) :
   }
 }
 
-Pattern::Data::~Data()
+PatternData::~PatternData()
 {
   deleteResources();
 }
 
-Pattern::Data* Pattern::Data::copy()
+PatternData* PatternData::copy()
 {
-  return new(std::nothrow) Data(*this);
+  return new(std::nothrow) PatternData(*this);
 }
 
-void Pattern::Data::deleteResources()
+void PatternData::deleteResources()
 {
   if (type == PATTERN_TEXTURE)
   {

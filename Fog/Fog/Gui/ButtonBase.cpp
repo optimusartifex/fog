@@ -1,6 +1,6 @@
 // [Fog-Gui Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Precompiled Headers]

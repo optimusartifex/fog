@@ -1,6 +1,6 @@
 // [Fog-Core Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Precompiled Headers]
@@ -866,7 +866,7 @@ err_t String::appendUtf8(const char* str, sysuint_t length)
 
     if (i < utf8Size)
     {
-      err = ERR_TEXT_INPUT_TRUNCATED;
+      err = ERR_STRING_TRUNCATED;
       goto end;
     }
 
@@ -874,7 +874,7 @@ err_t String::appendUtf8(const char* str, sysuint_t length)
     {
       // Invalid UTF-8 Sequence.
       case 0:
-        err = ERR_TEXT_INVALID_UTF8_SEQ;
+        err = ERR_STRING_INVALID_UTF8;
         goto end;
       case 1:
         break;
@@ -897,7 +897,7 @@ err_t String::appendUtf8(const char* str, sysuint_t length)
            |  (uint32_t((uint8_t)str[3]) - 128U);
         break;
       default:
-        err = ERR_TEXT_INVALID_UTF8_SEQ;
+        err = ERR_STRING_INVALID_UTF8;
         goto end;
     }
 
@@ -908,7 +908,7 @@ err_t String::appendUtf8(const char* str, sysuint_t length)
     }
     else if (Char::isSurrogatePair(uc) && uc >= 0xFFFE)
     {
-      err = ERR_TEXT_INVALID_CHAR;
+      err = ERR_STRING_INVALID_CHAR;
       break;
     }
     else
@@ -953,7 +953,7 @@ reallocBuffer:
     }
     else if (Char::isSurrogatePair(uc) && uc >= 0xFFFE)
     {
-      err = ERR_TEXT_INVALID_CHAR;
+      err = ERR_STRING_INVALID_CHAR;
       break;
     }
     else

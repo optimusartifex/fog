@@ -1,6 +1,6 @@
 // [Fog-Core Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -14,6 +14,7 @@
 #include <Fog/Core/Char.h>
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/List.h>
+#include <Fog/Core/Math.h>
 #include <Fog/Core/Memory.h>
 #include <Fog/Core/SequenceInfo.h>
 #include <Fog/Core/Static.h>
@@ -67,13 +68,52 @@ FOG_API uint32_t hashString(const char* key, sysuint_t length);
 FOG_API uint32_t hashString(const Char* key, sysuint_t length);
 
 //! @brief Combine two hash values into one.
-static FOG_INLINE uint32_t combineHash(uint32_t hash1, uint32_t hash2) { return hash1 + hash2; }
+static FOG_INLINE uint32_t combineHash(uint32_t hash0, uint32_t hash1)
+{
+ return hash0 + hash1;
+}
+
+//! @brief Combine three hash values into one.
+static FOG_INLINE uint32_t combineHash(uint32_t h0, uint32_t h1, uint32_t h2)
+{
+ return h0 + h1 + h2;
+}
+
+//! @brief Combine four hash values into one.
+static FOG_INLINE uint32_t combineHash(uint32_t h0, uint32_t h1, uint32_t h2, uint32_t h3)
+{
+ return h0 + h1 + h2 + h3;
+}
+
+//! @brief Combine five hash values into one.
+static FOG_INLINE uint32_t combineHash(uint32_t h0, uint32_t h1, uint32_t h2, uint32_t h3, uint32_t h4)
+{
+ return h0 + h1 + h2 + h3 + h4;
+}
+
+//! @brief Combine six hash values into one.
+static FOG_INLINE uint32_t combineHash(uint32_t h0, uint32_t h1, uint32_t h2, uint32_t h3, uint32_t h4, uint32_t h5)
+{
+ return h0 + h1 + h2 + h3 + h4 + h5;
+}
+
+//! @brief Combine seven hash values into one.
+static FOG_INLINE uint32_t combineHash(uint32_t h0, uint32_t h1, uint32_t h2, uint32_t h3, uint32_t h4, uint32_t h5, uint32_t h6)
+{
+ return h0 + h1 + h2 + h3 + h4 + h5 + h6;
+}
+
+//! @brief Combine eight hash values into one.
+static FOG_INLINE uint32_t combineHash(uint32_t h0, uint32_t h1, uint32_t h2, uint32_t h3, uint32_t h4, uint32_t h5, uint32_t h6, uint32_t h7)
+{
+ return h0 + h1 + h2 + h3 + h4 + h5 + h6 + h7;
+}
 
 // ============================================================================
 // [Fog::getHashCode]
 // ============================================================================
 
-// Default action is to call getHashCode() method
+// Default action is to call getHashCode() method.
 template<typename T>
 FOG_INLINE uint32_t getHashCode(const T& key) { return key.getHashCode(); }
 
@@ -96,11 +136,10 @@ FOG_DECLARE_HASHABLE(int32_t, { return (uint32_t)key; })
 FOG_DECLARE_HASHABLE(uint32_t, { return (uint32_t)key; })
 FOG_DECLARE_HASHABLE(int64_t, { return ((uint32_t)((uint64_t)(key) >> 31)) ^ (uint32_t)(key); })
 FOG_DECLARE_HASHABLE(uint64_t, { return ((uint32_t)((uint64_t)(key) >> 31)) ^ (uint32_t)(key); })
-/*
-FOG_DECLARE_HASHABLE_PTR(char*, { return hashString(key, DetectLength); })
-FOG_DECLARE_HASHABLE_PTR(uint8_t*, { return hashString(reinterpret_cast<const char*>(key), DetectLength); })
-FOG_DECLARE_HASHABLE_PTR(Char*, { return hashString(key, DetectLength); })
-*/
+
+FOG_DECLARE_HASHABLE(float, { Math::FloatAndInt32 data; data.f = key; return getHashCode(data.i32); })
+FOG_DECLARE_HASHABLE(double, { Math::DoubleAndInt64 data; data.d = key; return getHashCode(data.i64); })
+
 #if FOG_ARCH_BITS == 32
 template<typename T>
 FOG_INLINE uint32_t getHashCode(T* key) { return (uint32_t)key; }

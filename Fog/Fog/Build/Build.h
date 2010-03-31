@@ -1,6 +1,6 @@
 // [Fog Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -182,6 +182,11 @@
 #elif defined(__powerpc__) || defined(__ppc__)
 
 # define FOG_ARCH_PPC
+# define FOG_ARCH_BITS 32
+
+#elif defined(FOG_IDE)
+
+# define FOG_ARCH_X86
 # define FOG_ARCH_BITS 32
 
 #else

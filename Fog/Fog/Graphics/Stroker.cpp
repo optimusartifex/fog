@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 //----------------------------------------------------------------------------
@@ -43,7 +43,7 @@ namespace Fog {
 
 struct FOG_HIDDEN StrokerPrivate
 {
-  FOG_INLINE StrokerPrivate(const Stroker& stroker, Path& dst) :
+  FOG_INLINE StrokerPrivate(const Stroker& stroker, DoublePath& dst) :
     stroker(stroker),
     dst(dst),
     distances(NULL),
@@ -61,15 +61,15 @@ struct FOG_HIDDEN StrokerPrivate
   }
 
   void calcCap(
-    const PointD& v0,
-    const PointD& v1,
+    const DoublePoint& v0,
+    const DoublePoint& v1,
     double len,
     int cap);
 
   void calcJoin(
-    const PointD& v0,
-    const PointD& v1,
-    const PointD& v2,
+    const DoublePoint& v0,
+    const DoublePoint& v1,
+    const DoublePoint& v2,
     double len1,
     double len2);
 
@@ -79,19 +79,19 @@ struct FOG_HIDDEN StrokerPrivate
     double dx2, double dy2);
 
   void calcMiter(
-    const PointD& v0,
-    const PointD& v1,
-    const PointD& v2,
+    const DoublePoint& v0,
+    const DoublePoint& v1,
+    const DoublePoint& v2,
     double dx1, double dy1,
     double dx2, double dy2,
     int lineJoin,
     double mlimit,
     double dbevel);
 
-  err_t stroke(const PointD* src, sysuint_t count, bool outline);
+  err_t stroke(const DoublePoint* src, sysuint_t count, bool outline);
 
   const Stroker& stroker;
-  Path& dst;
+  DoublePath& dst;
 
   //! @brief Memory buffer used to store distances.
   LocalBuffer<1024> buffer;
@@ -151,12 +151,12 @@ void Stroker::_update()
   _da = acos(_wAbs / (_wAbs + 0.125 / _approximationScale)) * 2.0;
 }
 
-err_t Stroker::stroke(Path& dst) const
+err_t Stroker::stroke(DoublePath& dst) const
 {
   return stroke(dst, dst);
 }
 
-err_t Stroker::stroke(Path& dst, const Path& src) const
+err_t Stroker::stroke(DoublePath& dst, const DoublePath& src) const
 {
   err_t err;
 
@@ -165,7 +165,7 @@ err_t Stroker::stroke(Path& dst, const Path& src) const
   // - source path must be flat.
   if (&dst == &src || !src.isFlat())
   {
-    Path tmp;
+    DoublePath tmp;
     if ((err = src.flattenTo(tmp, NULL, _approximationScale))) return err;
     return stroke(dst, tmp);
   }
@@ -174,7 +174,7 @@ err_t Stroker::stroke(Path& dst, const Path& src) const
   StrokerPrivate p(*this, dst);
 
   const uint8_t* commands = src.getCommands();
-  const PointD* vertices = src.getVertices();
+  const DoublePoint* vertices = src.getVertices();
 
   // Traverse path, find moveTo / lineTo segments and stroke them.
   const uint8_t* subCommand = NULL;
@@ -289,9 +289,9 @@ void StrokerPrivate::calcArc(
 }
 
 void StrokerPrivate::calcMiter(
-  const PointD& v0,
-  const PointD& v1,
-  const PointD& v2,
+  const DoublePoint& v0,
+  const DoublePoint& v1,
+  const DoublePoint& v2,
   double dx1, double dy1,
   double dx2, double dy2,
   int lineJoin,
@@ -379,8 +379,8 @@ void StrokerPrivate::calcMiter(
 }
 
 void StrokerPrivate::calcCap(
-  const PointD& v0,
-  const PointD& v1,
+  const DoublePoint& v0,
+  const DoublePoint& v1,
   double len,
   int cap)
 {
@@ -507,9 +507,9 @@ void StrokerPrivate::calcCap(
 }
 
 void StrokerPrivate::calcJoin(
-  const PointD& v0,
-  const PointD& v1,
-  const PointD& v2,
+  const DoublePoint& v0,
+  const DoublePoint& v1,
+  const DoublePoint& v2,
   double len1,
   double len2)
 {
@@ -578,7 +578,7 @@ void StrokerPrivate::calcJoin(
     // line segment.
     double dx = (dx1 + dx2) / 2;
     double dy = (dy1 + dy2) / 2;
-    double dbevel = sqrt(dx * dx + dy * dy);
+    double dbevel = Math::sqrt(dx * dx + dy * dy);
 
     if (stroker._params._lineJoin == LINE_JOIN_ROUND ||
         stroker._params._lineJoin == LINE_JOIN_BEVEL)
@@ -643,9 +643,9 @@ void StrokerPrivate::calcJoin(
   }
 }
 
-err_t StrokerPrivate::stroke(const PointD* src, sysuint_t count, bool outline)
+err_t StrokerPrivate::stroke(const DoublePoint* src, sysuint_t count, bool outline)
 {
-  const PointD* cur;
+  const DoublePoint* cur;
   sysuint_t i;
   sysuint_t moveToPosition0 = dst.getLength();
   sysuint_t moveToPosition1 = INVALID_INDEX;
@@ -784,16 +784,16 @@ err_t StrokerPrivate::stroke(const PointD* src, sysuint_t count, bool outline)
 // [Fog::Path - Dash]
 // ============================================================================
 
-err_t Path::dash(const List<double>& dashes, double startOffset, double approximationScale)
+err_t DoublePath::dash(const List<double>& dashes, double startOffset, double approximationScale)
 {
   return dashTo(*this, dashes, startOffset, approximationScale);
 }
 
-err_t Path::dashTo(Path& dst, const List<double>& dashes, double startOffset, double approximationScale)
+err_t DoublePath::dashTo(DoublePath& dst, const List<double>& dashes, double startOffset, double approximationScale)
 {
   if (getType() != LineType)
   {
-    Path tmp;
+    DoublePath tmp;
     flattenTo(tmp, NULL, approximationScale);
     return tmp.dashTo(dst, dashes, startOffset, approximationScale);
   }
@@ -816,7 +816,7 @@ err_t Path::dashTo(Path& dst, const List<double>& dashes, double startOffset, do
 
     if (this == &dst)
     {
-      Path tmp;
+      DoublePath tmp;
       err_t err = concatToPath(tmp, dasher);
       if (err) return err;
       return dst.set(tmp);
@@ -833,17 +833,17 @@ err_t Path::dashTo(Path& dst, const List<double>& dashes, double startOffset, do
 // [Fog::Path - Stroke]
 // ============================================================================
 
-err_t Path::stroke(const StrokerParams& strokeParams, double approximationScale)
+err_t DoublePath::stroke(const StrokerParams& strokeParams, double approximationScale)
 {
   return strokeTo(*this, strokeParams);
 }
 
 #if 1
-err_t Path::strokeTo(Path& dst, const StrokerParams& strokeParams, double approximationScale) const
+err_t DoublePath::strokeTo(DoublePath& dst, const StrokerParams& strokeParams, double approximationScale) const
 {
   if (getType() != LineType)
   {
-    Path tmp;
+    DoublePath tmp;
     flattenTo(tmp, NULL, approximationScale);
     return tmp.strokeTo(dst, strokeParams, approximationScale);
   }
@@ -860,7 +860,7 @@ err_t Path::strokeTo(Path& dst, const StrokerParams& strokeParams, double approx
 
     if (this == &dst)
     {
-      Path tmp;
+      DoublePath tmp;
       err_t err = concatToPath(tmp, stroker);
       if (err) return err;
       return dst.set(tmp);
@@ -880,7 +880,7 @@ err_t Path::strokeTo(Path& dst, const StrokerParams& strokeParams, double approx
   err_t dash(const List<double>& dashes, double startOffset, double approximationScale = 1.0);
 
   //! @brief Similar method to @c dash(), but with specified destination path.
-  err_t dashTo(Path& dst, const List<double>& dashes, double startOffset, double approximationScale = 1.0);
+  err_t dashTo(DoublePath& dst, const List<double>& dashes, double startOffset, double approximationScale = 1.0);
 
   // [Stroke]
 
@@ -890,7 +890,7 @@ err_t Path::strokeTo(Path& dst, const StrokerParams& strokeParams, double approx
   err_t stroke(const StrokerParams& strokeParams, double approximationScale = 1.0);
 
   //! @brief Similar method to @c stroke(), but with specified destination path.
-  err_t strokeTo(Path& dst, const StrokerParams& strokeParams, double approximationScale = 1.0) const;
+  err_t strokeTo(DoublePath& dst, const StrokerParams& strokeParams, double approximationScale = 1.0) const;
 
 #endif
 

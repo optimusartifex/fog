@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Private API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -26,26 +26,26 @@ namespace ImageIO {
 // [Fog::ImageIO::IcoHeader]
 // ============================================================================
 
-#include <Fog/Core/Pack.h>
+#include <Fog/Core/Compiler/PackByte.h>
 
 //! @brief Size of IcoHeader == 6
-struct FOG_PACKED IcoHeader
+struct IcoHeader
 {
   uint16_t reserved;
   uint16_t type;
   uint16_t count;
 };
 
-#include <Fog/Core/Unpack.h>
+#include <Fog/Core/Compiler/PackRestore.h>
 
 // ============================================================================
 // [Fog::ImageIO::IcoEntry]
 // ============================================================================
 
-#include <Fog/Core/Pack.h>
+#include <Fog/Core/Compiler/PackByte.h>
 
 //! @brief Size of IcoEntry == 16.
-struct FOG_PACKED IcoEntry
+struct IcoEntry
 {
   uint8_t width;
   uint8_t height;
@@ -57,7 +57,7 @@ struct FOG_PACKED IcoEntry
   uint32_t offset;
 };
 
-#include <Fog/Core/Unpack.h>
+#include <Fog/Core/Compiler/PackRestore.h>
 
 // ============================================================================
 // [Fog::ImageIO::IcoProvider]

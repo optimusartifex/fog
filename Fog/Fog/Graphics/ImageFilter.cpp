@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Precompiled Headers]
@@ -189,7 +189,7 @@ static void makeGaussianBlurKernel(List<float>& dst_, double radius)
 
   // Reciprocals.
   double re = 1.0 / (2.0 * sigma2);
-  double rs = 1.0 / (float)sqrt(2.0 * M_PI * sigma);
+  double rs = 1.0 / Math::sqrt(2.0 * M_PI * sigma);
 
   double total = 0;
 

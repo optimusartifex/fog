@@ -1,9 +1,9 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
-#include <Fog/Graphics/Font.h>
+#include <Fog/Build/Build.h>
 
 #if defined(FOG_FONT_WINDOWS)
 
@@ -13,8 +13,6 @@
 #include <Fog/Core/Lock.h>
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/Font.h>
-#include <Fog/Graphics/FontEngine.h>
-#include <Fog/Graphics/FontManager.h>
 #include <Fog/Graphics/Matrix.h>
 #include <Fog/Graphics/Geometry.h>
 #include <Fog/Graphics/Path.h>
@@ -106,14 +104,14 @@ FontFace* WinFontEngine::createDefaultFace()
   memcpy(&gDefaultFont, &(ncm.lfMessageFont), sizeof(LOGFONT));
   */
 
-  FontCaps caps;
-  ZeroMemory(&caps, sizeof(FontCaps));
-  return FontManager::getFace(String(Ascii8("arial")), 12, caps);
+  return createFace(Ascii8("arial"), 12, FontOptions(), FloatMatrix());
 }
 
 FontFace* WinFontEngine::createFace(
-  const String& family, uint32_t size,
-  const FontCaps& caps)
+  const String& family,
+  float size, 
+  const FontOptions& options,
+  const FloatMatrix& matrix)
 {
   WinFontFace* face = NULL;
 
@@ -130,8 +128,8 @@ FontFace* WinFontEngine::createFace(
 
   CopyMemory(logFont.lfFaceName, reinterpret_cast<const wchar_t*>(family.getData()), (family.getLength() + 1) * sizeof(WCHAR));
   logFont.lfHeight = -(int)size;
-  logFont.lfWeight = (caps.bold  ) ? FW_BOLD : FW_NORMAL;
-  logFont.lfItalic = (caps.italic) != 0;
+  logFont.lfWeight = options.getWeight() * 100;
+  logFont.lfItalic = options.getStyle() >= FONT_STYLE_ITALIC;
 
   // Create HFONT.
   if ((hFont = CreateFontIndirectW(&logFont)) == NULL) goto fail;
@@ -141,6 +139,7 @@ FontFace* WinFontEngine::createFace(
   if ((hOldFont = (HFONT)SelectObject(hdc, (HGDIOBJ)hFont)) == (HFONT)GDI_ERROR) goto failFreeHFONTandHDC;
 
   GetTextMetricsW(hdc, &textMetrics);
+
   SelectObject(hdc, (HGDIOBJ)hOldFont);
   DeleteDC(hdc);
 
@@ -150,16 +149,16 @@ FontFace* WinFontEngine::createFace(
 
   face->family = family;
   face->family.squeeze();
-  face->metrics.size = size;
-  face->metrics.ascent = textMetrics.tmAscent;
-  face->metrics.descent = textMetrics.tmDescent;
-  face->metrics.averageWidth = textMetrics.tmAveCharWidth;
-  face->metrics.maximumWidth = textMetrics.tmMaxCharWidth;
-  face->metrics.height = textMetrics.tmHeight;
-  face->caps = caps;
+  face->metrics._size = size;
+  face->metrics._ascent = (float)textMetrics.tmAscent;
+  face->metrics._descent = (float)textMetrics.tmDescent;
+  face->metrics._averageWidth = (float)textMetrics.tmAveCharWidth;
+  face->metrics._maximumWidth = (float)textMetrics.tmMaxCharWidth;
+  face->metrics._height = (float)textMetrics.tmHeight;
+  face->options = options;
+  face->matrix = matrix;
   face->hFont = hFont;
 
-  // Fog_FontFaceCache_put(face);
   return face;
 
 failFreeHFONTandHDC:
@@ -176,14 +175,18 @@ fail:
 
 // Identity matrix. It seems that this matrix must be always passed to 
 // GetGlyphOutlineW function.
-static const MAT2 mat2identity = {{0, 1}, {0, 0}, {0, 0}, {0, 1}};
+static const MAT2 mat2identity =
+{
+  {0, 1}, {0, 0},
+  {0, 0}, {0, 1}
+};
 
 static FOG_INLINE double fxToDouble(const FIXED& p)
 {
   return (double)p.value + (double)p.fract * (1.0 / 65536.0);
 }
 
-static err_t decompose_win32_glyph_outline(const uint8_t* gbuf, unsigned size, bool flipY, const Matrix* mtx, Path& path)
+static err_t decompose_win32_glyph_outline(const uint8_t* gbuf, uint size, bool flipY, const DoubleMatrix* mtx, DoublePath& path)
 {
   const uint8_t* cur_glyph = gbuf;
   const uint8_t* end_glyph = gbuf + size;
@@ -205,7 +208,7 @@ static err_t decompose_win32_glyph_outline(const uint8_t* gbuf, unsigned size, b
     if (flipY) y = -y;
 
     path.closePolygon();
-    path.moveTo(PointD(x, y));
+    path.moveTo(DoublePoint(x, y));
 
     while (cur_poly < end_poly)
     {
@@ -219,7 +222,7 @@ static err_t decompose_win32_glyph_outline(const uint8_t* gbuf, unsigned size, b
           x = fxToDouble(pc->apfx[i].x);
           y = fxToDouble(pc->apfx[i].y);
           if (flipY) y = -y;
-          path.lineTo(PointD(x, y));
+          path.lineTo(DoublePoint(x, y));
         }
       }
       
@@ -228,12 +231,14 @@ static err_t decompose_win32_glyph_outline(const uint8_t* gbuf, unsigned size, b
         // Walk through points in spline.
         for (int u = 0; u < pc->cpfx - 1; u++)
         {
-          POINTFX pnt_b = pc->apfx[u]; // B is always the current point.
+          // B is always the current point.
+          POINTFX pnt_b = pc->apfx[u];
           POINTFX pnt_c = pc->apfx[u+1];
-          
-          if (u < pc->cpfx - 2) // If not on last spline, compute C.
+
+          // If not on last spline, compute C.
+          if (u < pc->cpfx - 2)
           {
-            // Midpoint (x,y).
+            // Midpoint (x, y).
             *(int*)&pnt_c.x = (*(int*)&pnt_b.x + *(int*)&pnt_c.x) / 2;
             *(int*)&pnt_c.y = (*(int*)&pnt_b.y + *(int*)&pnt_c.y) / 2;
           }
@@ -244,7 +249,7 @@ static err_t decompose_win32_glyph_outline(const uint8_t* gbuf, unsigned size, b
           x2 = fxToDouble(pnt_c.x);
           y2 = fxToDouble(pnt_c.y);
           if (flipY) { y = -y; y2 = -y2; }
-          path.curveTo(PointD(x, y), PointD(x2, y2));
+          path.curveTo(DoublePoint(x, y), DoublePoint(x2, y2));
         }
       }
       cur_poly += sizeof(WORD) * 2 + sizeof(POINTFX) * pc->cpfx;
@@ -310,12 +315,12 @@ err_t WinFontFace::getGlyphSet(const Char* str, sysuint_t length, GlyphSet& glyp
   return ERR_OK;
 }
 
-err_t WinFontFace::getOutline(const Char* str, sysuint_t length, Path& dst)
+err_t WinFontFace::getOutline(const Char* str, sysuint_t length, DoublePath& dst)
 {
   AutoLock locked(lock);
 
   err_t err = ERR_OK;
-  Matrix matrix;
+  DoubleMatrix matrix;
 
   GLYPHMETRICS gm;
   ZeroMemory(&gm, sizeof(gm));
@@ -407,7 +412,7 @@ GlyphData* WinFontFace::renderGlyph(HDC hdc, uint32_t uc)
   // Whitespace?
   if (dataSize == 0) gm.gmBlackBoxX = gm.gmBlackBoxY = 0;
 
-  glyphd->offset.set(gm.gmptGlyphOrigin.x, metrics.ascent - gm.gmptGlyphOrigin.y);
+  glyphd->offset.set(gm.gmptGlyphOrigin.x, (int)metrics.getAscent() - gm.gmptGlyphOrigin.y);
   glyphd->beginWidth = 0;
   glyphd->endWidth = 0;
 

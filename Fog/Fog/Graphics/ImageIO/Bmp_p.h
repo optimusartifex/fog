@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Private API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -25,12 +25,12 @@ namespace ImageIO {
 // [Fog::ImageIO::BmpFileHeader]
 // ============================================================================
 
-#include <Fog/Core/Pack.h>
+#include <Fog/Core/Compiler/PackByte.h>
 
 //! @brief Bitmap file header (always 14 bytes in little endian format).
 //!
 //! @note Size of BmpFileHeader must be 14 bytes.
-struct FOG_PACKED BmpFileHeader
+struct BmpFileHeader
 {
   uint8_t magic_B;          //!< @brief Bitmap mime type ('B').
   uint8_t magic_M;          //!< @brief Bitmap mime type ('M').
@@ -40,18 +40,18 @@ struct FOG_PACKED BmpFileHeader
   uint32_t imageOffset;     //!< @brief Offset to image data (54, 124, ...).
 };
 
-#include <Fog/Core/Unpack.h>
+#include <Fog/Core/Compiler/PackRestore.h>
 
 // ============================================================================
 // [Fog::ImageIO::BmpOS2V1Header]
 // ============================================================================
 
-#include <Fog/Core/Pack.h>
+#include <Fog/Core/Compiler/PackByte.h>
 
 //! @brief Bitmap OS/2 header.
 //!
 //! @note This header is 12 bytes length.
-struct FOG_PACKED BmpOS2V1Header
+struct BmpOS2V1Header
 {
   uint32_t headerSize;      //!< @brief Header size (40, 52).
   uint16_t width;           //!< @brief Bitmap width (16-bit value).
@@ -60,18 +60,18 @@ struct FOG_PACKED BmpOS2V1Header
   uint16_t bitsPerPixel;    //!< @brief Bits per pixel (1, 4, 8 or 24).
 };
 
-#include <Fog/Core/Unpack.h>
+#include <Fog/Core/Compiler/PackRestore.h>
 
 // ============================================================================
 // [Fog::ImageIO::BmpWinV3Header]
 // ============================================================================
 
-#include <Fog/Core/Pack.h>
+#include <Fog/Core/Compiler/PackByte.h>
 
 //! @brief Bitmap V3 header.
 //!
 //! @note This header is 40 bytes length.
-struct FOG_PACKED BmpWinV3Header
+struct BmpWinV3Header
 {
   uint32_t headerSize;      //!< @brief Header size (40, 52).
   uint32_t width;           //!< @brief Bitmap width.
@@ -86,18 +86,18 @@ struct FOG_PACKED BmpWinV3Header
   uint32_t colorsImportant; //!< @brief Minimum number of important colors.
 };
 
-#include <Fog/Core/Unpack.h>
+#include <Fog/Core/Compiler/PackRestore.h>
 
 // ============================================================================
 // [Fog::ImageIO::BmpWinV4Header]
 // ============================================================================
 
-#include <Fog/Core/Pack.h>
+#include <Fog/Core/Compiler/PackByte.h>
 
 //! @brief Bitmap V4 header.
 //!
 //! @note This header is 108 bytes length.
-struct FOG_PACKED BmpWinV4Header
+struct BmpWinV4Header
 {
   uint32_t headerSize;      //!< @brief Header size (108).
   uint32_t width;           //!< @brief Bitmap width.
@@ -130,18 +130,18 @@ struct FOG_PACKED BmpWinV4Header
   uint32_t bGamma;          //!< @brief Gamma blue coordinate scale value.
 };
 
-#include <Fog/Core/Unpack.h>
+#include <Fog/Core/Compiler/PackRestore.h>
 
 // ============================================================================
 // [Fog::ImageIO::BmpWinV5Header]
 // ============================================================================
 
-#include <Fog/Core/Pack.h>
+#include <Fog/Core/Compiler/PackByte.h>
 
 //! @brief Bitmap V5 header.
 //!
 //! @note This header is 124 bytes length.
-struct FOG_PACKED BmpWinV5Header
+struct BmpWinV5Header
 {
   uint32_t headerSize;      //!< @brief Header size (108).
   uint32_t width;           //!< @brief Bitmap width.
@@ -180,7 +180,7 @@ struct FOG_PACKED BmpWinV5Header
   uint32_t reserved;        //!< @brief Reserved, should be zero.
 };
 
-#include <Fog/Core/Unpack.h>
+#include <Fog/Core/Compiler/PackRestore.h>
 
 // ============================================================================
 // [Fog::ImageIO::BmpDataHeader]

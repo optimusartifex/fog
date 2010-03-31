@@ -1,6 +1,6 @@
 // [Fog-Core Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // Copyright (c) 2006-2008 The Chromium Authors. All rights reserved.

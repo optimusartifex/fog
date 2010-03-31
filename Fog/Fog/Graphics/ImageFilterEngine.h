@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -79,7 +79,7 @@ struct FOG_API ImageFilterEngine
   //! like blurs where resulting image can be larger than source.
   //!
   //! @note For color filters this is always NOP (no extends).
-  virtual err_t getExtendedRect(Rect& rect) const;
+  virtual err_t getExtendedRect(IntRect& rect) const;
 
   // --------------------------------------------------------------------------
   // [Interface - Context]

@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Precompiled Headers]
@@ -68,7 +68,7 @@ namespace Fog {
 // [Fog::Region - Round]
 // ============================================================================
 
-err_t Region::round(const Rect& r, uint xradius, uint yradius, bool fill)
+err_t Region::round(const IntRect& r, uint xradius, uint yradius, bool fill)
 {
   Data* selfd;
 
@@ -103,7 +103,7 @@ err_t Region::round(const Rect& r, uint xradius, uint yradius, bool fill)
   // Check if we can do a normal rectangle instead.
   if (ewidth < 2 || eheight < 2)
   {
-    return set(Box(r));
+    return set(IntBox(r));
   }
 
   ewidth  &= ~1;
@@ -120,8 +120,8 @@ err_t Region::round(const Rect& r, uint xradius, uint yradius, bool fill)
   if ((err = prepare(space))) { clear(); return err; }
   selfd = _d;
 
-  Box* rectCur = selfd->rects;
-  Box* reverse; // will be used later
+  IntBox* rectCur = selfd->rects;
+  IntBox* reverse; // will be used later
 
   // Ellipse algorithm, based on an article by K. Porter
   // in DDJ Graphics Programming Column, 8/89
@@ -235,7 +235,7 @@ err_t Region::round(const Rect& r, uint xradius, uint yradius, bool fill)
     // -------------------------------
     // Non-filled round
     // -------------------------------
-    Box* rectEnd = rectCur + space - 1;
+    IntBox* rectEnd = rectCur + space - 1;
     int len = 0;
 
     // Loop to draw first half of quadrant.
@@ -330,12 +330,12 @@ err_t Region::round(const Rect& r, uint xradius, uint yradius, bool fill)
       (*rectCur++).set(lx1, y1, lx1+1, y2);
       (*rectCur++).set(lx2-1, y1, lx2, y2);
       y1 = y2;
-      memmove(rectCur, rectEnd + 1, sizeof(Box) * count);
+      memmove(rectCur, rectEnd + 1, sizeof(IntBox) * count);
       selfd->length = (count << 1) + 2;
     }
     else
     {
-      memmove(rectCur, rectEnd + 1, sizeof(Box) * count);
+      memmove(rectCur, rectEnd + 1, sizeof(IntBox) * count);
       selfd->length = (count << 1);
     }
   }

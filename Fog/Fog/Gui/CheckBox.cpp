@@ -1,6 +1,6 @@
 // [Fog-Gui Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Precompiled Headers]
@@ -43,10 +43,10 @@ void CheckBox::onClick(MouseEvent* e)
 void CheckBox::onPaint(PaintEvent* e)
 {
   Painter* p = e->getPainter();
-  Size s = getClientSize();
+  IntSize s = getClientSize();
 
-  Rect bounds(0, 0, s.w, s.h);
-  Rect chrect(1, (s.h - 13) / 2, 13, 13);
+  IntRect bounds(0, 0, s.w, s.h);
+  IntRect chrect(1, (s.h - 13) / 2, 13, 13);
 
   p->setSource(0xFF000000);
   p->drawRect(chrect);
@@ -60,7 +60,7 @@ void CheckBox::onPaint(PaintEvent* e)
   {
     double c = (double)(s.h / 2);
 
-    Path path;
+    DoublePath path;
     path.moveTo(3.5, c - 1.5);
     path.lineTo(6.5, c + 3.5);
     path.lineTo(11.5, c - 4.5);
@@ -71,7 +71,7 @@ void CheckBox::onPaint(PaintEvent* e)
 
   if (isDown())
   {
-    Rect d = chrect;
+    IntRect d = chrect;
     p->setSource(0x7F8FAFFF);
     p->drawRect(d);
     d.shrink(1);

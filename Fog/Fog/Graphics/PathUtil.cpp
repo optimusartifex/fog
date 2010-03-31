@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 //----------------------------------------------------------------------------
@@ -43,7 +43,7 @@ FunctionMap functionMap;
 // [Fog::PathUtil::Transformations]
 // ============================================================================
 
-static void FOG_FASTCALL translatePointsD(PointD* dst, const PointD* src, sysuint_t length, const PointD* pt)
+static void FOG_FASTCALL translatePointsD(DoublePoint* dst, const DoublePoint* src, sysuint_t length, const DoublePoint* pt)
 {
   double tx = pt->x;
   double ty = pt->y;
@@ -58,7 +58,7 @@ static void FOG_FASTCALL translatePointsD(PointD* dst, const PointD* src, sysuin
   }
 }
 
-static void FOG_FASTCALL transformPointsD(PointD* dst, const PointD* src, sysuint_t length, const Matrix* matrix)
+static void FOG_FASTCALL transformPointsD(DoublePoint* dst, const DoublePoint* src, sysuint_t length, const DoubleMatrix* matrix)
 {
   for (sysuint_t i = length; i; i--, dst++, src++)
   {
@@ -81,7 +81,7 @@ enum { APPROXIMATE_CURVE3_RECURSION_LIMIT = 32 };
 enum { APPROXIMATE_CURVE4_RECURSION_LIMIT = 32 };
 
 static err_t FOG_FASTCALL approximateCurve3(
-  Path& dst,
+  DoublePath& dst,
   double x1, double y1,
   double x2, double y2,
   double x3, double y3,
@@ -95,8 +95,8 @@ static err_t FOG_FASTCALL approximateCurve3(
   sysuint_t initialLength = dst._d->length;
   sysuint_t level = 0;
 
-  PointD* curVertex;
-  PointD* endVertex;
+  DoublePoint* curVertex;
+  DoublePoint* endVertex;
 
   ApproximateCurve3Data stack[APPROXIMATE_CURVE3_RECURSION_LIMIT];
 
@@ -274,7 +274,7 @@ invalidNumber:
 }
 
 static err_t FOG_FASTCALL approximateCurve4(
-  Path& dst,
+  DoublePath& dst,
   double x1, double y1,
   double x2, double y2,
   double x3, double y3,
@@ -290,8 +290,8 @@ static err_t FOG_FASTCALL approximateCurve4(
   sysuint_t initialLength = dst._d->length;
   sysuint_t level = 0;
 
-  PointD* curVertex;
-  PointD* endVertex;
+  DoublePoint* curVertex;
+  DoublePoint* endVertex;
 
   ApproximateCurve4Data stack[APPROXIMATE_CURVE4_RECURSION_LIMIT];
 

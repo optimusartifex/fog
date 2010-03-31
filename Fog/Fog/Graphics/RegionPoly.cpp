@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Precompiled Headers]
@@ -303,10 +303,10 @@ struct ScanLineListBlock
 #define NUMPTSTOBUFFER 16384
 
 // Used to allocate buffers for points and link the buffers together.
-struct PointBlock
+struct IntPointBlock
 {
-  Point pts[NUMPTSTOBUFFER];
-  PointBlock* next;
+  IntPoint pts[NUMPTSTOBUFFER];
+  IntPointBlock* next;
 };
 
 #define LARGE_COORDINATE INT32_MAX
@@ -394,15 +394,15 @@ static bool insertEdgeInET(
 static bool createETandAET(
   const sysuint_t *Count,
   sysuint_t Polygons,
-  const Point* pts,
+  const IntPoint* pts,
   EdgeTable *ET,
   EdgeTableEntry* AET,
   EdgeTableEntry* pETEs,
   ScanLineListBlock* pSLLBlock
 )
 {
-  const Point* top, *bottom;
-  const Point* PrevPt, *CurrPt, *EndPt;
+  const IntPoint* top, *bottom;
+  const IntPoint* PrevPt, *CurrPt, *EndPt;
   sysuint_t poly, count;
   sysuint_t iSLLBlock = 0;
   int dy;
@@ -588,13 +588,13 @@ static void freeStorage(ScanLineListBlock* pSLLBlock)
 // Create an array of rectangles from a list of points.
 static err_t ptsToRegion(Region* self,
   sysuint_t numFullPtBlocks, sysuint_t icurPtBlock,
-  PointBlock* firstPtBlock)
+  IntPointBlock* firstPtBlock)
 {
   err_t err = self->prepare(((numFullPtBlocks * NUMPTSTOBUFFER) + icurPtBlock) >> 1);
   if (err) return err;
 
-  PointBlock* curPtBlock = firstPtBlock;
-  Box* rects = self->_d->rects - 1;
+  IntPointBlock* curPtBlock = firstPtBlock;
+  IntBox* rects = self->_d->rects - 1;
   sysuint_t length = 0;
 
   int extentsX1 = LARGE_COORDINATE;
@@ -603,7 +603,7 @@ static err_t ptsToRegion(Region* self,
   for (; numFullPtBlocks != sysuint_t(-1); numFullPtBlocks--)
   {
     // the loop uses 2 points per iteration
-    Point* pts;
+    IntPoint* pts;
     int i = NUMPTSTOBUFFER >> 1;
 
     if (!numFullPtBlocks) i = icurPtBlock >> 1;
@@ -641,26 +641,26 @@ static err_t ptsToRegion(Region* self,
   return ERR_OK;
 }
 
-err_t Region::polygon(const Point* pts, sysuint_t count, uint fillRule)
+err_t Region::polygon(const IntPoint* pts, sysuint_t count, uint fillRule)
 {
   return polyPolygon(pts, &count, 1, fillRule);
 }
 
-err_t Region::polyPolygon(const Point* src, const sysuint_t *count, sysuint_t polygons, uint fillRule)
+err_t Region::polyPolygon(const IntPoint* src, const sysuint_t *count, sysuint_t polygons, uint fillRule)
 {
   EdgeTableEntry *pAET;            // Active Edge Table
   int y;                           // current scanline
   int iPts = 0;                    // number of pts in buffer
   EdgeTableEntry *pWETE;           // Winding Edge Table Entry
   ScanLineList *pSLL;              // current scanLineList
-  Point *pts;                      // output buffer   
+  IntPoint *pts;                   // output buffer
   EdgeTableEntry *pPrevAET;        // ptr to previous AET
   EdgeTable ET;                    // header node for ET
   EdgeTableEntry AET;              // header node for AET
   EdgeTableEntry *pETEs;           // EdgeTableEntries pool
   ScanLineListBlock SLLBlock;      // header for scanlinelist
-  PointBlock firstPtBlock, *curPtBlock; // PtBlock buffers
-  PointBlock *tmpPtBlock;
+  IntPointBlock firstPtBlock, *curPtBlock; // PtBlock buffers
+  IntPointBlock *tmpPtBlock;
   sysuint_t numFullPtBlocks = 0;
   sysuint_t poly, total;
   bool fixWAET = false;
@@ -692,7 +692,7 @@ err_t Region::polyPolygon(const Point* src, const sysuint_t *count, sysuint_t po
          src[2].getX() == src[3].getX() &&
          src[3].getY() == src[0].getY()) ))
   {
-    return set(Box(
+    return set(IntBox(
       Math::min(src[0].getX(), src[2].getX()),
       Math::min(src[0].getY(), src[2].getY()),
       Math::max(src[0].getX(), src[2].getX()) + 1,
@@ -734,7 +734,7 @@ err_t Region::polyPolygon(const Point* src, const sysuint_t *count, sysuint_t po
         // send out the buffer.
         if (iPts == NUMPTSTOBUFFER)
         {
-          tmpPtBlock = (PointBlock *)Memory::alloc(sizeof(PointBlock));
+          tmpPtBlock = (IntPointBlock *)Memory::alloc(sizeof(IntPointBlock));
           if (!tmpPtBlock) goto outOfMemory;
           curPtBlock->next = tmpPtBlock;
           curPtBlock = tmpPtBlock;
@@ -779,7 +779,7 @@ err_t Region::polyPolygon(const Point* src, const sysuint_t *count, sysuint_t po
           // Send out the buffer.
           if (iPts == NUMPTSTOBUFFER)
           {
-            tmpPtBlock = (PointBlock *)Memory::alloc(sizeof(PointBlock));
+            tmpPtBlock = (IntPointBlock *)Memory::alloc(sizeof(IntPointBlock));
             if (!tmpPtBlock) goto outOfMemory;
             curPtBlock->next = tmpPtBlock;
             curPtBlock = tmpPtBlock;

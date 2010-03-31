@@ -1,6 +1,6 @@
 // [Fog-Gui Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -51,7 +51,7 @@ struct FOG_API BaseGuiEngine : public GuiEngine
   // --------------------------------------------------------------------------
 
   //! Widget mapper (ID <-> GuiWindow)
-  typedef Hash<void*, GuiWindow*> WidgetMapper;
+  typedef UnorderedHash<void*, GuiWindow*> WidgetMapper;
 
   virtual bool mapHandle(void* handle, GuiWindow* w);
   virtual bool unmapHandle(void* handle);
@@ -86,7 +86,7 @@ struct FOG_API BaseGuiEngine : public GuiEngine
 
   virtual void invalidateMouseStatus();
   virtual void updateMouseStatus();
-  virtual void changeMouseStatus(Widget* w, const Point& pos);
+  virtual void changeMouseStatus(Widget* w, const IntPoint& pos);
 
   virtual void clearSystemMouseStatus();
 
@@ -117,7 +117,7 @@ struct FOG_API BaseGuiEngine : public GuiEngine
   virtual void dispatchEnabled(Widget* w, bool enabled);
   virtual void dispatchVisibility(Widget* w, bool visible);
 
-  virtual void dispatchConfigure(Widget* w, const Rect& rect, bool changedOrientation);
+  virtual void dispatchConfigure(Widget* w, const IntRect& rect, bool changedOrientation);
 
   virtual void widgetDestroyed(Widget* w);
 
@@ -208,7 +208,7 @@ struct FOG_API BaseGuiWindow : public GuiWindow
   virtual void onEnabled(bool enabled);
   virtual void onVisibility(bool visible);
 
-  virtual void onConfigure(const Rect& windowRect, const Rect& clientRect);
+  virtual void onConfigure(const IntRect& windowRect, const IntRect& clientRect);
 
   virtual void onMouseHover(int x, int y);
   virtual void onMouseMove(int x, int y);
@@ -238,13 +238,13 @@ struct FOG_API BaseGuiWindow : public GuiWindow
 
 protected:
   //! @brief Window bound rectangle.
-  Rect _windowRect;
+  IntRect _windowRect;
   //! @brief Window client rectangle.
-  Rect _clientRect;
+  IntRect _clientRect;
   //! @brief Window title.
   String _title;
   //! @brief Window resize granularity.
-  Point _sizeGranularity;
+  IntPoint _sizeGranularity;
 };
 
 } // Fog namespace

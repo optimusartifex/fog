@@ -1,6 +1,6 @@
 // [Fog-Core Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -571,7 +571,7 @@ struct FOG_API String
   err_t slashesToWin();
 
   // --------------------------------------------------------------------------
-  // [Hash]
+  // [HashCode]
   // --------------------------------------------------------------------------
 
   uint32_t getHashCode() const;

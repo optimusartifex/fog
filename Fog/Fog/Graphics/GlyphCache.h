@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -22,18 +22,16 @@ namespace Fog {
 //! @brief Glyph cache.
 //!
 //! Glyphs are stored in sparse Nx256 array. First pointer points to second
-//! array where are stored real glyphs. This cache is per face per attribute
-//! and access is very very fast.
+//! array where are stored real glyphs. This cache is per face and glyph
+//! attribute. The most optimized method is @c get() for retrieving the glyph.
 //!
-//! Address for glyph 'ch' is row[ch >> 8][ch & 255]
+//! Address for glyph 'uc' is row[uc >> 8][uc & 255].
 struct FOG_API GlyphCache
 {
   typedef GlyphData* Entity;
 
   GlyphCache();
   ~GlyphCache();
-
-  bool set(uint32_t uc, Entity data);
 
   FOG_INLINE Entity get(uint32_t uc) const
   {
@@ -42,12 +40,14 @@ struct FOG_API GlyphCache
     return ucRow < _count && (row = _rows[ucRow]) ? row[uc & 0xFF] : 0;
   }
 
+  bool set(uint32_t uc, Entity data);
+
   void reset();
 
 protected:
-  //! @brief Pointers to glyphs
+  //! @brief Array of pointers to glyphs.
   Entity** _rows;
-  //! @brief Count of first rows pointer. Initial value is 0
+  //! @brief Count of first rows pointer. Initial value is 0.
   sysuint_t _count;
 
 private:

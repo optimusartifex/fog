@@ -1,6 +1,6 @@
 // [Fog-Gui Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Precompiled Headers]
@@ -188,14 +188,14 @@ err_t Widget::setWindowIcon(const Image& icon)
   return _guiWindow->setIcon(icon);
 }
 
-Point Widget::getWindowGranularity() const
+IntPoint Widget::getWindowGranularity() const
 {
-  Point sz(0, 0);
+  IntPoint sz(0, 0);
   if (_guiWindow) _guiWindow->getSizeGranularity(sz);
   return sz;
 }
 
-err_t Widget::setWindowGranularity(const Point& pt)
+err_t Widget::setWindowGranularity(const IntPoint& pt)
 {
   if (!_guiWindow) return ERR_RT_INVALID_HANDLE;
   return _guiWindow->setSizeGranularity(pt);
@@ -205,7 +205,7 @@ err_t Widget::setWindowGranularity(const Point& pt)
 // [Fog::Widget - Geometry]
 // ============================================================================
 
-void Widget::setGeometry(const Rect& geometry)
+void Widget::setGeometry(const IntRect& geometry)
 {
   if (_geometry == geometry) return;
 
@@ -222,7 +222,7 @@ void Widget::setGeometry(const Rect& geometry)
   }
 }
 
-void Widget::setPosition(const Point& pt)
+void Widget::setPosition(const IntPoint& pt)
 {
   if (_geometry.getPosition() == pt) return;
 
@@ -235,12 +235,12 @@ void Widget::setPosition(const Point& pt)
     GuiEngine* ge = Application::getInstance()->getGuiEngine();
     if (!ge) return;
 
-    Size size = getSize();
-    ge->dispatchConfigure(this, Rect(pt.x, pt.y, size.w, size.h), false);
+    IntSize size = getSize();
+    ge->dispatchConfigure(this, IntRect(pt.x, pt.y, size.w, size.h), false);
   }
 }
 
-void Widget::setSize(const Size& sz)
+void Widget::setSize(const IntSize& sz)
 {
   if (_geometry.getSize() == sz) return;
 
@@ -253,11 +253,11 @@ void Widget::setSize(const Size& sz)
     GuiEngine* ge = Application::getInstance()->getGuiEngine();
     if (!ge) return;
 
-    ge->dispatchConfigure(this, Rect(_geometry.x, _geometry.y, sz.w, sz.h), false);
+    ge->dispatchConfigure(this, IntRect(_geometry.x, _geometry.y, sz.w, sz.h), false);
   }
 }
 
-void Widget::setOrigin(const Point& pt)
+void Widget::setOrigin(const IntPoint& pt)
 {
   if (_origin == pt) return;
 
@@ -270,7 +270,7 @@ void Widget::setOrigin(const Point& pt)
   update(WIDGET_UPDATE_ALL);
 }
 
-bool Widget::worldToClient(Point* coords) const
+bool Widget::worldToClient(IntPoint* coords) const
 {
   Widget* w = const_cast<Widget*>(this);
 
@@ -286,7 +286,7 @@ bool Widget::worldToClient(Point* coords) const
   return false;
 }
 
-bool Widget::clientToWorld(Point* coords) const
+bool Widget::clientToWorld(IntPoint* coords) const
 {
   Widget* w = const_cast<Widget*>(this);
 
@@ -300,7 +300,7 @@ bool Widget::clientToWorld(Point* coords) const
   return false;
 }
 
-bool Widget::translateCoordinates(Widget* to, Widget* from, Point* coords)
+bool Widget::translateCoordinates(Widget* to, Widget* from, IntPoint* coords)
 {
   Widget* w;
   int x, y;
@@ -357,7 +357,7 @@ bool Widget::translateCoordinates(Widget* to, Widget* from, Point* coords)
 // [Fog::Widget - Hit Testing]
 // ============================================================================
 
-Widget* Widget::hitTest(const Point& pt) const
+Widget* Widget::hitTest(const IntPoint& pt) const
 {
   int x = pt.getX();
   int y = pt.getY();
@@ -373,7 +373,7 @@ Widget* Widget::hitTest(const Point& pt) const
   return const_cast<Widget*>(this);
 }
 
-Widget* Widget::getChildAt(const Point& pt, bool recursive) const
+Widget* Widget::getChildAt(const IntPoint& pt, bool recursive) const
 {
   int x = pt.getX();
   int y = pt.getY();
@@ -745,7 +745,7 @@ uint32_t Widget::getPaintHint() const
 
 err_t Widget::getPropagatedRegion(Region* dst) const
 {
-  return dst->set(Box(0, 0, getWidth(), getHeight()));
+  return dst->set(IntBox(0, 0, getWidth(), getHeight()));
 }
 
 // ============================================================================

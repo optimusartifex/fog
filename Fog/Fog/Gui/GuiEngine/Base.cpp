@@ -1,6 +1,6 @@
 // [Fog-Gui Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Dependencies]
@@ -161,7 +161,7 @@ void BaseGuiEngine::updateMouseStatus()
 {
 }
 
-void BaseGuiEngine::changeMouseStatus(Widget* w, const Point& pos)
+void BaseGuiEngine::changeMouseStatus(Widget* w, const IntPoint& pos)
 {
   if (_mouseStatus.widget != w)
   {
@@ -481,7 +481,7 @@ void BaseGuiEngine::dispatchVisibility(Widget* w, bool visible)
   }
 }
 
-void BaseGuiEngine::dispatchConfigure(Widget* w, const Rect& rect, bool changedOrientation)
+void BaseGuiEngine::dispatchConfigure(Widget* w, const IntRect& rect, bool changedOrientation)
 {
   uint32_t changed = 0;
 
@@ -539,8 +539,8 @@ void BaseGuiEngine::widgetDestroyed(Widget* w)
 // traversing in widget-tree.
 struct UpdateRec
 {
-  Box bounds;
-  Box paintBounds;
+  IntBox bounds;
+  IntBox paintBounds;
   uint32_t uflags;
   uint32_t implicitFlags;
   uint32_t visible;
@@ -639,8 +639,8 @@ void BaseGuiEngine::doUpdateWindow(GuiWindow* window)
   TemporaryRegion<64> blitRegion;
 
   // Some temporary data.
-  Size topSize(top->getSize());
-  Box  topBox(0, 0, (int)topSize.getWidth(), (int)topSize.getHeight());
+  IntSize topSize(top->getSize());
+  IntBox  topBox(0, 0, (int)topSize.getWidth(), (int)topSize.getHeight());
 
   uint32_t uflags = top->_uflags;
   uint32_t implicitFlags = 0;
@@ -719,8 +719,8 @@ void BaseGuiEngine::doUpdateWindow(GuiWindow* window)
     e._receiver = top;
 
     painter.setMetaVariables(
-      Point(0, 0),
-      TemporaryRegion<1>(Rect(0, 0, top->getWidth(), top->getHeight())),
+      IntPoint(0, 0),
+      TemporaryRegion<1>(IntRect(0, 0, top->getWidth(), top->getHeight())),
       true,
       true);
     top->sendEvent(&e);
@@ -806,7 +806,7 @@ __pushed:
 
       childRec.bounds += parent->getOrigin();
 
-      childRec.visible = Box::intersect(childRec.paintBounds, parentRec.paintBounds, childRec.bounds);
+      childRec.visible = IntBox::intersect(childRec.paintBounds, parentRec.paintBounds, childRec.bounds);
       childRec.painted = false;
 
       if (childRec.visible)
@@ -840,7 +840,7 @@ __pushed:
                 }
                 else
                 {
-                  rtmp4.unite(Box(
+                  rtmp4.unite(IntBox(
                     cw->rect().x1() + ox,
                     cw->rect().y1() + oy,
                     cw->rect().x2() + ox,
@@ -859,7 +859,7 @@ __pushed:
           }
 #endif
           painter.setMetaVariables(
-            Point(childRec.bounds.getX1(), childRec.bounds.getY1()),
+            IntPoint(childRec.bounds.getX1(), childRec.bounds.getY1()),
             rtmp1,
             true,
             true);
@@ -944,7 +944,7 @@ end:
   // blit root widget content to screen
   // =======================================================
 
-  const Box* rptr;
+  const IntBox* rptr;
   sysuint_t rlen = 0;
 
   if (blitFull || window->_needBlit)
@@ -1047,12 +1047,12 @@ void BaseGuiWindow::onVisibility(bool visible)
   GUI_ENGINE()->dispatchVisibility(_widget, visible);
 }
 
-void BaseGuiWindow::onConfigure(const Rect& windowRect, const Rect& clientRect)
+void BaseGuiWindow::onConfigure(const IntRect& windowRect, const IntRect& clientRect)
 {
   _windowRect = windowRect;
   _clientRect = clientRect;
 
-  GUI_ENGINE()->dispatchConfigure(_widget, Rect(
+  GUI_ENGINE()->dispatchConfigure(_widget, IntRect(
     windowRect.getX(),
     windowRect.getY(),
     clientRect.getWidth(),
@@ -1087,7 +1087,7 @@ void BaseGuiWindow::onMouseMove(int x, int y)
   }
   uiSystem->_systemMouseStatus.position.set(x, y);
 
-  Point p(x, y);
+  IntPoint p(x, y);
 
   // ----------------------------------
   // Grabbing mode

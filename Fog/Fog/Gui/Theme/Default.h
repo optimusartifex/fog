@@ -1,6 +1,6 @@
 // [Fog-Gui Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -33,4 +33,4 @@ struct FOG_API DefaultTheme : public Theme
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_UI_THEME_DEFAULT_H
+#endif // _FOG_GUI_THEME_DEFAULT_H

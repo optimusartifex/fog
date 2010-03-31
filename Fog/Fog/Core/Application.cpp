@@ -1,6 +1,6 @@
 // [Fog-Core Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // Copyright (c) 2006-2008 The Chromium Authors. All rights reserved.
@@ -163,8 +163,8 @@ end:
 
 struct FOG_HIDDEN Application_Local
 {
-  typedef Hash<String, Application::GuiEngineConstructor> GuiEngineHash;
-  typedef Hash<String, Application::EventLoopConstructor> EventLoopHash;
+  typedef UnorderedHash<String, Application::GuiEngineConstructor> GuiEngineHash;
+  typedef UnorderedHash<String, Application::EventLoopConstructor> EventLoopHash;
 
   Lock lock;
 

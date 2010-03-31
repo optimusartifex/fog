@@ -96,19 +96,19 @@ static FOG_INLINE uint32_t randColor()
   return (rand() & 0xFFFF) | (rand() << 16);
 }
 
-static FOG_INLINE Rect randRect(int w, int h, int rw, int rh)
+static FOG_INLINE IntRect randRect(int w, int h, int rw, int rh)
 {
-  return Rect(rand() % (w - rw), rand() % (h - rh), rw, rh);
+  return IntRect(rand() % (w - rw), rand() % (h - rh), rw, rh);
 }
 
-static FOG_INLINE Point randPoint(int w, int h)
+static FOG_INLINE IntPoint randPoint(int w, int h)
 {
-  return Point(rand() % w, rand() % h);
+  return IntPoint(rand() % w, rand() % h);
 }
 
-static FOG_INLINE PointD randPointD(int w, int h)
+static FOG_INLINE DoublePoint randPointD(int w, int h)
 {
-  return PointD(randDouble() * (double)w, randDouble() * (double)h);
+  return DoublePoint(randDouble() * (double)w, randDouble() * (double)h);
 }
 
 // ============================================================================
@@ -189,7 +189,7 @@ struct Randomizer_Rect
   void init(int quantity, int w, int h, int sw, int sh);
   void free();
 
-  Rect* data;
+  IntRect* data;
 };
 
 Randomizer_Rect::Randomizer_Rect() : data(NULL) {}
@@ -198,7 +198,7 @@ Randomizer_Rect::~Randomizer_Rect() { free(); }
 void Randomizer_Rect::init(int quantity, int w, int h, int sw, int sh)
 {
   free();
-  data = (Rect*)Memory::alloc(sizeof(Rect) * quantity);
+  data = (IntRect*)Memory::alloc(sizeof(IntRect) * quantity);
   for (int a = 0; a < quantity; a++) data[a] = randRect(w, h, sw, sh);
 }
 
@@ -220,7 +220,7 @@ struct Randomizer_Polygon
   void init(int quantity, int w, int h, int sw, int sh);
   void free();
 
-  PointD* data;
+  DoublePoint* data;
 };
 
 Randomizer_Polygon::Randomizer_Polygon() : data(NULL) {}
@@ -229,7 +229,7 @@ Randomizer_Polygon::~Randomizer_Polygon() { free(); }
 void Randomizer_Polygon::init(int quantity, int w, int h, int sw, int sh)
 {
   free();
-  data = (PointD*)Memory::alloc(sizeof(PointD) * quantity * 10);
+  data = (DoublePoint*)Memory::alloc(sizeof(DoublePoint) * quantity * 10);
 
   double x = 0.0;
   double y = 0.0;
@@ -469,7 +469,7 @@ void FogModule_FillRectAffine::bench(int quantity)
 
   for (int a = 0; a < quantity; a++, rot += 0.01)
   {
-    Matrix m;
+    DoubleMatrix m;
     m.translate(cx, cy);
     m.rotate(rot);
     m.translate(-cx, -cy);
@@ -511,7 +511,7 @@ void FogModule_FillRound::bench(int quantity)
   for (int a = 0; a < quantity; a++)
   {
     p.setSource(r_argb.data[a]);
-    p.fillRound(r_rect.data[a], Point(8, 8));
+    p.fillRound(r_rect.data[a], IntPoint(8, 8));
   }
 }
 
@@ -560,16 +560,16 @@ void FogModule_FillPolygon::bench(int quantity)
   configurePainter(p);
 
   p.setFillMode(FILL_EVEN_ODD);
-  Path path;
+  DoublePath path;
 
   for (int a = 0; a < quantity; a++)
   {
-    const PointD* polyData = &r_poly.data[a * 10];
+    const DoublePoint* polyData = &r_poly.data[a * 10];
 
     path.clear();
     for (int i = 0; i < 10; i++)
     {
-      PointD c0 = polyData[i];
+      DoublePoint c0 = polyData[i];
       if (i == 0)
         path.moveTo(c0);
       else
@@ -633,11 +633,11 @@ void FogModule_FillPattern::setupPattern(int type)
 
   if (type == PATTERN_LINEAR_GRADIENT)
   {
-    pattern.setPoints(PointD(w/2.0, h/2.0), PointD(30.0, 30.0));
+    pattern.setPoints(DoublePoint(w/2.0, h/2.0), DoublePoint(30.0, 30.0));
   }
   else
   {
-    pattern.setPoints(PointD(w/2.0, h/2.0), PointD(w/3.0, h/3.0));
+    pattern.setPoints(DoublePoint(w/2.0, h/2.0), DoublePoint(w/3.0, h/3.0));
     pattern.setRadius(w/4.0);
   }
 
@@ -704,7 +704,7 @@ void FogModule_Image::prepare(int quantity, int sw, int sh)
   r_rect.init(quantity, w, h, sw, sh);
   r_numb.init(quantity, 0, NUM_SPRITES - 1);
 
-  for (int a = 0; a < 4; a++) images[a] = sprite[a].scale(Size(sw, sh));
+  for (int a = 0; a < 4; a++) images[a] = sprite[a].scale(IntSize(sw, sh));
 }
 
 void FogModule_Image::finish()
@@ -756,7 +756,7 @@ void FogModule_ImageAffine::bench(int quantity)
 
   for (int a = 0; a < quantity; a++, rot += 0.01)
   {
-    Matrix m;
+    DoubleMatrix m;
     m.translate(cx, cy);
     m.rotate(rot);
     m.translate(-cx, -cy);
@@ -943,7 +943,7 @@ void GdiPlusModule_FillRect::bench(int quantity)
 
   for (int a = 0; a < quantity; a++)
   {
-    Rect r = r_rect.data[a];
+    IntRect r = r_rect.data[a];
 
     Gdiplus::Color c(r_argb.data[a]);
     Gdiplus::SolidBrush br(c);
@@ -983,7 +983,7 @@ void GdiPlusModule_FillRectAffine::bench(int quantity)
 
   for (int a = 0; a < quantity; a++, rot += 0.01f)
   {
-    Rect r = r_rect.data[a];
+    IntRect r = r_rect.data[a];
 
     gr.ResetTransform();
     gr.TranslateTransform((Gdiplus::REAL)cx, (Gdiplus::REAL)cy);
@@ -1027,7 +1027,7 @@ void GdiPlusModule_FillRound::bench(int quantity)
 
   for (int a = 0; a < quantity; a++)
   {
-    Rect r = r_rect.data[a];
+    IntRect r = r_rect.data[a];
 
     Gdiplus::Color c(r_argb.data[a]);
     Gdiplus::SolidBrush br(c);
@@ -1094,7 +1094,7 @@ void GdiPlusModule_FillPolygon::bench(int quantity)
 
   for (int a = 0; a < quantity; a++)
   {
-    const PointD* polyData = &r_poly.data[a*10];
+    const DoublePoint* polyData = &r_poly.data[a*10];
 
     Gdiplus::GraphicsPath path;
     Gdiplus::PointF lines[10];
@@ -1200,7 +1200,7 @@ void GdiPlusModule_FillPattern::bench(int quantity)
 
   for (int a = 0; a < quantity; a++)
   {
-    Rect r = r_rect.data[a];
+    IntRect r = r_rect.data[a];
     gr.FillRectangle(brush, r.x, r.y, r.w, r.h);
   }
 }
@@ -1253,7 +1253,7 @@ void GdiPlusModule_Image::prepare(int quantity, int sw, int sh)
 
   for (int a = 0; a < 4; a++)
   {
-    images[a] = sprite[a].scale(Size(sw, sh));
+    images[a] = sprite[a].scale(IntSize(sw, sh));
     images_gdip[a] = new Gdiplus::Bitmap(
       images[a].getWidth(),
       images[a].getHeight(), 
@@ -1443,7 +1443,7 @@ void CairoModule_FillRect::bench(int quantity)
 
   for (int a = 0; a < quantity; a++)
   {
-    Rect r(r_rect.data[a]);
+    IntRect r(r_rect.data[a]);
     Argb c(r_argb.data[a]);
 
     cairo_set_source_rgba(cr,
@@ -1489,7 +1489,7 @@ void CairoModule_FillRectAffine::bench(int quantity)
 
   for (int a = 0; a < quantity; a++, rot += 0.01)
   {
-    Rect r(r_rect.data[a]);
+    IntRect r(r_rect.data[a]);
     Argb c(r_argb.data[a]);
 
     cairo_identity_matrix(cr);
@@ -1526,7 +1526,7 @@ struct CairoModule_FillRound : public CairoModule_FillRect
   virtual void bench(int quantity);
   ByteArray getType();
 
-  void addRound(cairo_t* cr, Rect rect, double radius);
+  void addRound(cairo_t* cr, IntRect rect, double radius);
 };
 
 CairoModule_FillRound::CairoModule_FillRound(int w, int h) : CairoModule_FillRect(w, h) {}
@@ -1538,7 +1538,7 @@ void CairoModule_FillRound::bench(int quantity)
 
   for (int a = 0; a < quantity; a++)
   {
-    Rect r(r_rect.data[a]);
+    IntRect r(r_rect.data[a]);
     Argb c(r_argb.data[a]);
 
     cairo_set_source_rgba(cr,
@@ -1558,7 +1558,7 @@ ByteArray CairoModule_FillRound::getType()
   return ByteArray("FillRound");
 }
 
-void CairoModule_FillRound::addRound(cairo_t* cr, Rect rect, double radius)
+void CairoModule_FillRound::addRound(cairo_t* cr, IntRect rect, double radius)
 {
   double x0 = rect.x;
   double y0 = rect.y;
@@ -1667,7 +1667,7 @@ void CairoModule_FillPolygon::bench(int quantity)
       (double)c.b / 255.0,
       (double)c.a / 255.0);
 
-    const PointD* polyData = &r_poly.data[a*10];
+    const DoublePoint* polyData = &r_poly.data[a*10];
     for (int i = 0; i < 10; i++)
     {
       if (i == 0)
@@ -1747,7 +1747,7 @@ void CairoModule_FillPattern::bench(int quantity)
 
   for (int a = 0; a < quantity; a++)
   {
-    Rect r = r_rect.data[a];
+    IntRect r = r_rect.data[a];
     cairo_rectangle(cr, r.x, r.y, r.w, r.h);
     cairo_fill(cr);
   }
@@ -1798,7 +1798,7 @@ void CairoModule_Image::prepare(int quantity, int sw, int sh)
 
   for (int a = 0; a < NUM_SPRITES; a++)
   {
-    images[a] = sprite[a].scale(Size(sw, sh));
+    images[a] = sprite[a].scale(IntSize(sw, sh));
     images_cairo[a] = cairo_image_surface_create_for_data(
       (unsigned char*)images[a].getFirst(),
       CAIRO_FORMAT_ARGB32,
@@ -1933,17 +1933,17 @@ static void benchAll()
   int w = 640, h = 480;
   int quantity = 100000;
 
-  Size sizes[] =
+  IntSize sizes[] =
   {
     //Size(2, 2),
     //Size(4, 4),
     //Size(8, 8),
     
-    Size(10, 10),
-    Size(16, 16),
-    Size(32, 32),
-    Size(64, 64),
-    Size(128, 128)
+    IntSize(10, 10),
+    IntSize(16, 16),
+    IntSize(32, 32),
+    IntSize(64, 64),
+    IntSize(128, 128)
   };
 
   TimeDelta totalFog[3];

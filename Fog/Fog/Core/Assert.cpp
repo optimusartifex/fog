@@ -1,6 +1,6 @@
 // [Fog-Core Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 #if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)

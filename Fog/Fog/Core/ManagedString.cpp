@@ -1,6 +1,6 @@
 // [Fog-Core Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Precompiled Headers]
@@ -44,7 +44,7 @@ struct FOG_HIDDEN ManagedStringLocal
   FOG_INLINE ~ManagedStringLocal()
   {
     {
-      Hash<String, Cache*>::ConstIterator it(_hash);
+      UnorderedHash<String, Cache*>::ConstIterator it(_hash);
       for (it.toStart(); it.isValid(); it.toNext())
       {
         Cache* c = it.value();
@@ -271,10 +271,10 @@ struct FOG_HIDDEN ManagedStringLocal
 
     _capacity = capacity;
 
-    _expandCapacity = Hash_Abstract::_calcExpandCapacity(capacity);
+    _expandCapacity = UnorderedAbstract::_calcExpandCapacity(capacity);
     _expandLength = (sysuint_t)((sysint_t)_capacity * 0.92);
 
-    _shrinkCapacity = Hash_Abstract::_calcShrinkCapacity(capacity);
+    _shrinkCapacity = UnorderedAbstract::_calcShrinkCapacity(capacity);
     _shrinkLength = (sysuint_t)((sysint_t)_shrinkCapacity * 0.70);
 
     atomicPtrXchg(&_buckets, newBuckets);
@@ -309,7 +309,7 @@ struct FOG_HIDDEN ManagedStringLocal
 
   // [Managed String Cache]
 
-  Hash<String, Cache*> _hash;
+  UnorderedHash<String, Cache*> _hash;
 };
 
 static Static<ManagedStringLocal> managed_local;

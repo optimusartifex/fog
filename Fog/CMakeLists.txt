@@ -351,7 +351,6 @@ Set(FOG_CORE_LIB_HEADERS
   Fog/Core/Misc.h
   Fog/Core/Object.h
   Fog/Core/OS.h
-  Fog/Core/Pack.h
   Fog/Core/ScopedHandle.h
   Fog/Core/SequenceInfo.h
   Fog/Core/Static.h
@@ -372,7 +371,6 @@ Set(FOG_CORE_LIB_HEADERS
   Fog/Core/Time.h
   Fog/Core/Timer.h
   Fog/Core/TypeInfo.h
-  Fog/Core/Unpack.h
   Fog/Core/UserInfo.h
   Fog/Core/Value.h
   Fog/Core/WinIStream_p.h
@@ -381,6 +379,12 @@ Set(FOG_CORE_LIB_HEADERS
   Fog/Core/Arch/Atomic_gcc_x86x64.h
   Fog/Core/Arch/Atomic_msc_intrin.h
   Fog/Core/Arch/Atomic_msc_x86.h
+
+  Fog/Core/Compiler/PackByte.h
+  Fog/Core/Compiler/PackWord.h
+  Fog/Core/Compiler/PackDWord.h
+  Fog/Core/Compiler/PackQWord.h
+  Fog/Core/Compiler/PackRestore.h
 )
 
 # Source groups
@@ -401,8 +405,6 @@ Set(FOG_GRAPHICS_LIB_SOURCES
   Fog/Graphics/DitherMatrix.cpp
   Fog/Graphics/Dpi.cpp
   Fog/Graphics/Font.cpp
-  Fog/Graphics/FontEngine.cpp
-  Fog/Graphics/FontManager.cpp
   Fog/Graphics/Geometry.cpp
   Fog/Graphics/Glyph.cpp
   Fog/Graphics/GlyphCache.cpp
@@ -431,6 +433,7 @@ Set(FOG_GRAPHICS_LIB_SOURCES
   Fog/Graphics/RegionRound.cpp
   Fog/Graphics/Scanline.cpp
   Fog/Graphics/Stroker.cpp
+  Fog/Graphics/TextIterator.cpp
   Fog/Graphics/TextLayout.cpp
   Fog/Graphics/TextOnPath.cpp
 )
@@ -449,8 +452,6 @@ Set(FOG_GRAPHICS_LIB_HEADERS
   Fog/Graphics/DitherMatrix_p.h
   Fog/Graphics/Dpi.h
   Fog/Graphics/Font.h
-  Fog/Graphics/FontEngine.h
-  Fog/Graphics/FontManager.h
   Fog/Graphics/Geometry.h
   Fog/Graphics/Glyph.h
   Fog/Graphics/GlyphCache.h
@@ -476,6 +477,7 @@ Set(FOG_GRAPHICS_LIB_HEADERS
   Fog/Graphics/Region.h
   Fog/Graphics/Scanline_p.h
   Fog/Graphics/Stroker.h
+  Fog/Graphics/TextIterator.h
   Fog/Graphics/TextLayout.h
   Fog/Graphics/TextOnPath.h
 )

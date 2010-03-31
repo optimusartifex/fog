@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -30,7 +30,9 @@ namespace Fog {
 //! 256 up to 511.
 struct FOG_API Palette
 {
+  // --------------------------------------------------------------------------
   // [Indexes]
+  // --------------------------------------------------------------------------
 
   enum INDEX_OFFSET
   {
@@ -38,7 +40,9 @@ struct FOG_API Palette
     INDEX_PRGB32 = 256
   };
 
+  // --------------------------------------------------------------------------
   // [Data]
+  // --------------------------------------------------------------------------
 
   struct FOG_API Data
   {
@@ -70,14 +74,18 @@ struct FOG_API Palette
   static Static<Data> sharedGrey;
   static Static<Data> sharedA8;
 
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   Palette();
   Palette(const Palette& other);
   FOG_INLINE explicit Palette(Data* d) : _d(d) {}
   ~Palette();
 
+  // --------------------------------------------------------------------------
   // [Implicit Sharing]
+  // --------------------------------------------------------------------------
 
   //! @copydoc Doxygen::Implicit::refCount().
   FOG_INLINE sysuint_t refCount() const { return _d->refCount.get(); }
@@ -90,7 +98,9 @@ struct FOG_API Palette
   //! @copydoc Doxygen::Implicit::free().
   void free();
 
+  // --------------------------------------------------------------------------
   // [Data]
+  // --------------------------------------------------------------------------
 
   //! @brief Returns const pointer to palette data.
   FOG_INLINE const Argb* getData() const
@@ -123,7 +133,9 @@ struct FOG_API Palette
 
   FOG_INLINE uint32_t isAlphaUsed() const { return _d->isAlphaUsed; }
 
+  // --------------------------------------------------------------------------
   // [Operations]
+  // --------------------------------------------------------------------------
 
   void clear();
 
@@ -138,17 +150,23 @@ struct FOG_API Palette
 
   uint8_t findColor(uint8_t r, uint8_t g, uint8_t b) const;
 
+  // --------------------------------------------------------------------------
   // [Changed]
+  // --------------------------------------------------------------------------
 
   void update();
 
+  // --------------------------------------------------------------------------
   // [Static Constructors]
+  // --------------------------------------------------------------------------
 
   static Palette greyscale();
   static Palette a8();
   static Palette colorCube(int r, int g, int b);
 
-  // [Overloaded Operators]
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE const Palette& operator=(const Palette& other)
   {
@@ -156,12 +174,16 @@ struct FOG_API Palette
     return *this;
   }
 
+  // --------------------------------------------------------------------------
   // [Statics]
+  // --------------------------------------------------------------------------
 
   static bool isGreyOnly(const Argb* data, sysuint_t count);
   static bool isAlphaUsed(const Argb* data, sysuint_t count);
 
+  // --------------------------------------------------------------------------
   // [Members]
+  // --------------------------------------------------------------------------
 
   FOG_DECLARE_D(Data);
 };

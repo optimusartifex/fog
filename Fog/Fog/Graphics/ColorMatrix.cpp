@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // AggOO - Version 0.1
@@ -130,7 +130,7 @@ ColorMatrix& ColorMatrix::subtract(const ColorMatrix& other)
   return *this;
 }
 
-ColorMatrix& ColorMatrix::multiply(const ColorMatrix& other, int order)
+ColorMatrix& ColorMatrix::multiply(const ColorMatrix& other, uint32_t order)
 {
   ColorMatrix save(*this);
 
@@ -246,7 +246,7 @@ void ColorMatrix::transformAlpha(uint8_t* a) const
   *a = (uint8_t)ta;
 }
 
-ColorMatrix& ColorMatrix::scale(float sa, float sr, float sg, float sb, int order)
+ColorMatrix& ColorMatrix::scale(float sa, float sr, float sg, float sb, uint32_t order)
 {
   ColorMatrix mod(ColorMatrix::IDENTITY);
   mod[0][0] = sr;
@@ -256,7 +256,7 @@ ColorMatrix& ColorMatrix::scale(float sa, float sr, float sg, float sb, int orde
   return multiply(mod, order);
 }
 
-ColorMatrix& ColorMatrix::translate(float ta, float tr, float tg, float tb, int order)
+ColorMatrix& ColorMatrix::translate(float ta, float tr, float tg, float tb, uint32_t order)
 {
   ColorMatrix mod(ColorMatrix::IDENTITY);
   mod[4][0] = tr;
@@ -266,7 +266,7 @@ ColorMatrix& ColorMatrix::translate(float ta, float tr, float tg, float tb, int 
   return multiply(mod, order);
 }
 
-ColorMatrix& ColorMatrix::setSaturation(float sat, int order)
+ColorMatrix& ColorMatrix::setSaturation(float sat, uint32_t order)
 {
   // If the saturation is 1.0, then this matrix remains unchanged.
   // If the saturation is 0.0, each color is scaled by its luminance
@@ -306,7 +306,7 @@ bool ColorMatrix::eq(const ColorMatrix& other, float epsilon) const
   return true;
 }
 
-ColorMatrix& ColorMatrix::_rotateColor(float phi, int x, int y, int order)
+ColorMatrix& ColorMatrix::_rotateColor(float phi, int x, int y, uint32_t order)
 {
   float phiSin;
   float phiCos;
@@ -320,7 +320,7 @@ ColorMatrix& ColorMatrix::_rotateColor(float phi, int x, int y, int order)
   return multiply(mod, order);
 }
 
-ColorMatrix& ColorMatrix::_shearColor(int x, int y1, float col1, int y2, float col2, int order)
+ColorMatrix& ColorMatrix::_shearColor(int x, int y1, float col1, int y2, float col2, uint32_t order)
 {
   ColorMatrix mod(ColorMatrix::IDENTITY);
   mod.m[y1][x] = col1;

@@ -1,6 +1,6 @@
 // [Fog/Cpu Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]

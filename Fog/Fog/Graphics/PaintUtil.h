@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -22,7 +22,7 @@ namespace PaintUtil {
 // ============================================================================
 
 //! @brief Paint stroked 3d-looking rectangle using two colors.
-FOG_API void draw3dRect(Painter* p, const Rect& r, Argb color1, Argb color2, bool checked = false);
+FOG_API void draw3dRect(Painter* p, const IntRect& r, Argb color1, Argb color2, bool checked = false);
 
 } // PaintUtil namespace
 } // Fog namespace

@@ -75,7 +75,7 @@ FOG_GUI_MAIN()
   if (w < 200) w = 200;
   if (h < 60) h = 60;
 
-  window.setSize(Size(w, h));
+  window.setSize(IntSize(w, h));
   window.show();
   window.addListener(EVENT_CLOSE, &app, &Application::quit);
 

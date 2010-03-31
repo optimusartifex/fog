@@ -1,6 +1,6 @@
 // [Fog-Svg Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -65,7 +65,7 @@ struct FOG_API SvgElement :
   virtual err_t onRender(SvgContext* context) const;
   virtual err_t onRenderShape(SvgContext* context) const;
   virtual err_t onApplyPattern(SvgContext* context, SvgElement* obj, int paintType) const;
-  virtual err_t onCalcBoundingBox(RectD* box) const;
+  virtual err_t onCalcBoundingBox(DoubleRect* box) const;
 
   static err_t _walkAndRender(const XmlElement* root, SvgContext* context);
 
@@ -78,7 +78,7 @@ struct FOG_API SvgElement :
 
   FOG_INLINE uint32_t isBoundingRectDirty() const { return _boundingRectDirty; }
 
-  const RectD& getBoundingRect() const;
+  const DoubleRect& getBoundingRect() const;
 
 protected:
   uint8_t _svgType;
@@ -87,7 +87,7 @@ public:
   uint16_t _unused;
 
 protected:
-  mutable RectD _boundingRect;
+  mutable DoubleRect _boundingRect;
 
 private:
   FOG_DISABLE_COPY(SvgElement)

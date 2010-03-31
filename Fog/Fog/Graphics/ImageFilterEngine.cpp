@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Precompiled Headers]
@@ -37,7 +37,7 @@ bool ImageFilterEngine::isNop() const
   return false;
 }
 
-err_t ImageFilterEngine::getExtendedRect(Rect& rect) const
+err_t ImageFilterEngine::getExtendedRect(IntRect& rect) const
 {
   // Default is no extents.
   FOG_UNUSED(rect);

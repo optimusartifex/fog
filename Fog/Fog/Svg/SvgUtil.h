@@ -1,6 +1,6 @@
 // [Fog-Svg Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -49,7 +49,7 @@ FOG_API err_t parseOpacity(const String& str, double* dst);
 // ============================================================================
 
 //! @brief Parse SVG matrix and save it to @a dst.
-FOG_API err_t parseMatrix(const String& str, Matrix* dst);
+FOG_API err_t parseMatrix(const String& str, DoubleMatrix* dst);
 
 // ============================================================================
 // [Fog::SvgUtil - Coordinates]
@@ -65,9 +65,9 @@ FOG_API err_t serializeCoord(String& dst, const SvgCoord& coord);
 // [Fog::SvgUtil - Paths]
 // ============================================================================
 
-FOG_API Path parsePoints(const String& str);
+FOG_API DoublePath parsePoints(const String& str);
 
-FOG_API Path parsePath(const String& str);
+FOG_API DoublePath parsePath(const String& str);
 
 } // SvgUtil namespace
 

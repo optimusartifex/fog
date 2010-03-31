@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Precompiled Headers]
@@ -9,36 +9,313 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
+#include <Fog/Core/AutoLock.h>
+#include <Fog/Core/Constants.h>
+#include <Fog/Core/FileSystem.h>
+#include <Fog/Core/FileUtil.h>
+#include <Fog/Core/Hash.h>
+#include <Fog/Core/Lock.h>
+#include <Fog/Core/Memory.h>
+#include <Fog/Core/OS.h>
 #include <Fog/Core/Static.h>
 #include <Fog/Core/String.h>
+#include <Fog/Core/UserInfo.h>
+#include <Fog/Graphics/Argb.h>
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/Font.h>
-#include <Fog/Graphics/FontEngine.h>
-#include <Fog/Graphics/FontManager.h>
+#include <Fog/Graphics/Glyph.h>
+#include <Fog/Graphics/GlyphCache.h>
+
+#if defined(FOG_FONT_WINDOWS)
+#include <Fog/Graphics/FontEngine/Gdi.h>
+#endif // FOG_FONT_WINDOWS
+
+#if defined(FOG_FONT_FREETYPE)
+#include <Fog/Graphics/FontEngine/FreeType.h>
+#endif // FOG_FONT_FREETYPE
+
+#include <Fog/Graphics/FontEngine/Null_p.h>
 
 namespace Fog {
 
 // ============================================================================
-// [Fog::Font]
+// [Fog::FontFaceEntry]
 // ============================================================================
 
-Font::Data* Font::sharedNull;
+// TODO: FontFaceEntry contains duplicated members thats also in FontFace. We
+// need better hash structure that will allow to use custom Accessor instance.
 
-static err_t _setFace(Font* self, FontFace* face)
+struct FOG_HIDDEN FontFaceEntry
 {
-  if (!face) return ERR_FONT_INVALID_FACE;
-  if (self->_d->face == face) return ERR_OK;
+  // [Construction / Destruction]
 
-  FOG_RETURN_ON_ERROR(self->detach());
+  FOG_INLINE FontFaceEntry() : size(0.0f)
+  {
+  }
 
-  if (self->_d->face) self->_d->face->deref();
-  self->_d->face = face;
+  FOG_INLINE FontFaceEntry(const FontFaceEntry& other) :
+    family(other.family),
+    size(other.size),
+    options(other.options),
+    matrix(other.matrix)
+  {
+  }
 
-  return ERR_OK;
+  FOG_INLINE FontFaceEntry(
+    const String& family,
+    float size,
+    const FontOptions& options,
+    const FloatMatrix& matrix) :
+      family(family),
+      size(size),
+      options(options),
+      matrix(matrix)
+  {
+  }
+
+  FOG_INLINE ~FontFaceEntry() {}
+
+  // [HashCode]
+
+  FOG_INLINE uint32_t getHashCode() const
+  {
+    return HashUtil::combineHash(
+      family.getHashCode(),
+      HashUtil::getHashCode(size),
+      options.getHashCode(),
+      matrix.getHashCode());
+  }
+
+  // [Operator Overload]
+
+  FOG_INLINE FontFaceEntry& operator=(const FontFaceEntry& other)
+  {
+    family = other.family;
+    size = other.size;
+    options = other.options;
+    matrix = other.matrix;
+  }
+
+  FOG_INLINE bool operator==(const FontFaceEntry& other) const
+  {
+    return (family == other.family) && (size == other.size) && (options == other.options) && (matrix == other.matrix);
+  }
+
+  FOG_INLINE bool operator!=(const FontFaceEntry& other) const
+  {
+    return (family != other.family) || (size != other.size) || (options != other.options) || (matrix != other.matrix);
+  }
+
+  // [Members]
+
+  //! @brief Font family name.
+  String family;
+  //! @brief Font size.
+  float size;
+  //! @brief Font caps.
+  FontOptions options;
+  //! @brief Transformation matrix.
+  FloatMatrix matrix;
+};
+
+// ============================================================================
+// [Fog::Font_Local]
+// ============================================================================
+
+struct FOG_HIDDEN Font_Local
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  Font_Local();
+  ~Font_Local();
+
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
+
+  FontFace* getFaceFromCache(
+    const String& family,
+    float size,
+    const FontOptions& options,
+    const FloatMatrix& matrix);
+
+  err_t putFaceToCache(FontFace* face);
+
+  void resetFaceCache();
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  Lock lock;
+
+  List<String> paths;
+  List<String> list;
+  bool listInitialized;
+
+  UnorderedHash<FontFaceEntry, FontFace*> faceCache;
+};
+
+static Static<Font_Local> font_local;
+
+Font_Local::Font_Local()
+{
 }
 
+Font_Local::~Font_Local()
+{
+  resetFaceCache();
+}
+
+FontFace* Font_Local::getFaceFromCache(
+  const String& family,
+  float size,
+  const FontOptions& options,
+  const FloatMatrix& matrix)
+{
+  AutoLock locked(lock);
+  FontFace* face = faceCache.value(FontFaceEntry(family, size, options, matrix), NULL);
+
+  if (face) face = face->ref();
+  return face;
+}
+
+err_t Font_Local::putFaceToCache(FontFace* face)
+{
+  AutoLock locked(lock);
+  err_t err = faceCache.put(
+    FontFaceEntry(
+      face->family, 
+      face->metrics.getSize(),
+      face->options,
+      face->matrix),
+    face, false);
+
+  if (err == ERR_OK) face->ref();
+  return err;
+}
+
+void Font_Local::resetFaceCache()
+{
+  AutoLock locked(lock);
+  UnorderedHash<FontFaceEntry, FontFace*>::MutableIterator it(faceCache);
+
+  for (it.toStart(); it.isValid(); it.remove()) it.value()->deref();
+}
+
+// ============================================================================
+// [Fog::FontFace]
+// ============================================================================
+
+FontFace::FontFace()
+{
+  refCount.init(1);
+  type = FONT_FACE_NONE;
+  flags = 0;
+  metrics.reset();
+}
+
+FontFace::~FontFace()
+{
+}
+
+FontFace* FontFace::ref() const
+{
+  refCount.inc();
+  return const_cast<FontFace*>(this);
+}
+
+void FontFace::deref()
+{
+  if (refCount.deref()) delete this;
+}
+
+uint32_t FontFace::getHashCode() const
+{
+  return HashUtil::combineHash(
+    family.getHashCode(),
+    HashUtil::getHashCode(metrics.getSize()),
+    options.getHashCode(),
+    matrix.getHashCode());
+}
+
+// ============================================================================
+// [Fog::FontEngine]
+// ============================================================================
+
+FontEngine::FontEngine(const String& name) :
+  _name(name)
+{
+}
+
+FontEngine::~FontEngine()
+{
+}
+
+// TODO: Move this out.
+List<String> FontEngine::getDefaultFontDirectories()
+{
+  List<String> paths;
+
+#if defined(FOG_OS_WINDOWS)
+  // Add WIN font directory.
+  String winFonts = OS::getWindowsDirectory();
+  FileUtil::joinPath(winFonts, winFonts, Ascii8("fonts"));
+  paths.append(winFonts);
+#elif defined(FOG_OS_MAC)
+  // Add MAC font directories.
+  String home;
+
+  if (UserInfo::getDirectory(home, UserInfo::DIRECTORY_HOME) == ERR_OK)
+  {
+    paths.append(home + Ascii8("/Library/Fonts"));
+  }
+
+  paths.append(Ascii8("/System/Library/Fonts"));
+  paths.append(Ascii8("/Library/Fonts"));
+#elif defined(FOG_OS_POSIX)
+  // add $HOME and $HOME/fonts directories.
+  {
+    String home;
+
+    if (UserInfo::getDirectory(home, UserInfo::DIRECTORY_HOME) == ERR_OK)
+    {
+      paths.append(home);
+      paths.append(home + Ascii8("/fonts"));
+    }
+  }
+
+  // Add font directories found in linux/unix systems...
+
+  // Gentoo default font paths:
+  paths.append(Ascii8("/usr/share/fonts"));
+  paths.append(Ascii8("/usr/share/fonts/TTF"));
+  paths.append(Ascii8("/usr/share/fonts/corefonts"));
+  paths.append(Ascii8("/usr/share/fonts/local"));
+  paths.append(Ascii8("/usr/share/fonts/ttf-bitstream-vera"));
+  paths.append(Ascii8("/usr/local/share/fonts"));
+  paths.append(Ascii8("/usr/local/share/fonts/TTF"));
+  paths.append(Ascii8("/usr/local/share/fonts/corefonts"));
+  paths.append(Ascii8("/usr/local/share/fonts/local"));
+  paths.append(Ascii8("/usr/local/share/fonts/ttf-bitstream-vera"));
+
+  // Ubuntu default truetype font paths:
+  paths.append(Ascii8("/usr/share/fonts/truetype/msttcorefonts"));
+#else
+# warning "Fog::FontEngine::Unknown operating system target"
+#endif // FOG_OS_POSIX
+
+  return paths;
+}
+
+// ============================================================================
+// [Fog::Font - Construction / Destruction]
+// ============================================================================
+
 Font::Font() :
-  _d(sharedNull->ref())
+  _d(sharedDefault->ref())
 {
 }
 
@@ -52,151 +329,282 @@ Font::~Font()
   _d->deref();
 }
 
-err_t Font::_detach()
-{
-  if (_d->refCount.get() > 1)
-  {
-    Data* newd = Data::copy(_d);
-    if (!newd) return ERR_RT_OUT_OF_MEMORY;
-    atomicPtrXchg(&_d, newd)->deref();
-  }
-  return ERR_OK;
-}
+// ============================================================================
+// [Fog::Font - Implicit Sharing]
+// ============================================================================
 
 void Font::free()
 {
-  atomicPtrXchg(&_d, sharedNull->ref())->deref();
+  atomicPtrXchg(&_d, sharedDefault->ref())->deref();
 }
+
+// ============================================================================
+// [Fog::Font - Face Family / Options / Metrics / Matrix]
+// ============================================================================
 
 err_t Font::setFamily(const String& family)
 {
-  return _setFace(this, FontManager::getFace(family, getSize(), getCaps()));
+  return setFont(family, getSize(), getOptions(), getMatrix());
 }
 
-err_t Font::setFamily(const String& family, uint32_t size)
+err_t Font::setOptions(const FontOptions& options)
 {
-  return _setFace(this, FontManager::getFace(family, size, getCaps()));
+  return setFont(getFamily(), getSize(), options, getMatrix());
 }
 
-err_t Font::setSize(uint32_t size)
+err_t Font::setWeight(uint32_t weight)
 {
-  return _setFace(this, FontManager::getFace(getFamily(), size, getCaps()));
+  if (getWeight() == weight) return ERR_OK;
+
+  FontOptions options = getOptions();
+  options.setWeight(weight);
+  return setFont(getFamily(), getSize(), options, getMatrix());
 }
 
-err_t Font::setCaps(const FontCaps& a)
+err_t Font::setStyle(uint32_t style)
 {
-  return _setFace(this, FontManager::getFace(getFamily(), getSize(), a));
+  if (getStyle() == style) return ERR_OK;
+
+  FontOptions options = getOptions();
+  options.setStyle(style);
+  return setFont(getFamily(), getSize(), options, getMatrix());
 }
 
-err_t Font::setBold(bool val)
+err_t Font::setDecoration(uint32_t decoration)
 {
-  if (isBold() == val) return ERR_OK;
+  if (getDecoration() == decoration) return ERR_OK;
 
-  FontCaps a = getCaps();
-  a.bold = val;
-
-  return _setFace(this, FontManager::getFace(getFamily(), getSize(), a));
+  FontOptions options = getOptions();
+  options.setDecoration(decoration);
+  return setFont(getFamily(), getSize(), options, getMatrix());
 }
 
-err_t Font::setItalic(bool val)
+err_t Font::setKerning(uint32_t kerning)
 {
-  if (isItalic() == val) return ERR_OK;
+  if (getKerning() == kerning) return ERR_OK;
 
-  FontCaps a = getCaps();
-  a.italic = val;
-
-  return _setFace(this, FontManager::getFace(getFamily(), getSize(), a));
+  FontOptions options = getOptions();
+  options.setKerning(kerning);
+  return setFont(getFamily(), getSize(), options, getMatrix());
 }
 
-err_t Font::setStrike(bool val)
+err_t Font::setHinting(uint32_t hinting)
 {
-  if (isStrike() == val) return ERR_OK;
+  if (getHinting() == hinting) return ERR_OK;
 
-  FontCaps a = getCaps();
-  a.strike = val;
-
-  return _setFace(this, FontManager::getFace(getFamily(), getSize(), a));
+  FontOptions options = getOptions();
+  options.setHinting(hinting);
+  return setFont(getFamily(), getSize(), options, getMatrix());
 }
 
-err_t Font::setUnderline(bool val)
+err_t Font::setSize(float size)
 {
-  if (isUnderline() == val) return ERR_OK;
+  if (getSize() == size) return ERR_OK;
 
-  FontCaps a = getCaps();
-  a.underline = val;
-
-  return _setFace(this, FontManager::getFace(getFamily(), getSize(), a));
+  return setFont(getFamily(), size, getOptions(), getMatrix());
 }
 
-err_t Font::set(const Font& other)
+err_t Font::setMatrix(const FloatMatrix& matrix)
+{
+  return setFont(getFamily(), getSize(), getOptions(), matrix);
+}
+
+err_t Font::setFont(const Font& other)
 {
   atomicPtrXchg(&_d, other._d->ref())->deref();
   return ERR_OK;
 }
 
+err_t Font::setFont(const String& family, float size)
+{
+  return setFont(family, size, getOptions(), getMatrix());
+}
+
+err_t Font::setFont(const String& family, float size, const FontOptions& options)
+{
+  return setFont(family, size, options, getMatrix());
+}
+
+err_t Font::setFont(const String& family, float size, const FontOptions& options, const FloatMatrix& matrix)
+{
+  FontFace* face;
+
+  // Try to get the font face from cache.
+  face = font_local->getFaceFromCache(family, size, options, matrix);
+  if (face)
+  {
+    atomicPtrXchg(&_d, face->ref())->deref();
+    return ERR_OK;
+  }
+
+  // If we failed, try to create the font face through font engine.
+  face = _engine->createFace(family, size, options, matrix);
+  if (!face) return ERR_FONT_NOT_MATCHED;
+
+  // And put it to the cache.
+  err_t err = font_local->putFaceToCache(face);
+  if (err == ERR_OK)
+  {
+    // Everything is OK. We increased reference count before adding face to cache
+    // and we can't do it again!
+    atomicPtrXchg(&_d, face)->deref();
+    return ERR_OK;
+  }
+
+  // This can happen if there is concurrency. We created font face that was
+  // created by another thread and put into the cache. Everything we need is
+  // to delete our one and use font face that is in cache already.
+  //
+  // Second case is that engine created face that is close to demanded one but
+  // not the same.
+  if (err == ERR_RT_OBJECT_ALREADY_EXISTS)
+  {
+    FontFace* other = font_local->getFaceFromCache(
+      face->family, face->metrics.getSize(), face->options, face->matrix);
+    // It can also happen that cached face was deleted, in this case we use the
+    // out one again :)
+    if (other) { face->deref(); face = other; }
+  }
+
+  atomicPtrXchg(&_d, face)->deref();
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::Font - Face Methods]
+// ============================================================================
+
 err_t Font::getGlyphSet(const String& str, GlyphSet& glyphSet) const
 {
-  return _d->face->getGlyphSet(str.getData(), str.getLength(), glyphSet);
+  return _d->getGlyphSet(str.getData(), str.getLength(), glyphSet);
 }
 
 err_t Font::getGlyphSet(const Char* str, sysuint_t length, GlyphSet& glyphSet) const
 {
-  return _d->face->getGlyphSet(str, length, glyphSet);
+  return _d->getGlyphSet(str, length, glyphSet);
 }
 
-err_t Font::getOutline(const String& str, Path& dst) const
+err_t Font::getOutline(const String& str, DoublePath& dst) const
 {
-  return _d->face->getOutline(str.getData(), str.getLength(), dst);
+  return _d->getOutline(str.getData(), str.getLength(), dst);
 }
 
-err_t Font::getOutline(const Char* str, sysuint_t length, Path& dst) const
+err_t Font::getOutline(const Char* str, sysuint_t length, DoublePath& dst) const
 {
-  return _d->face->getOutline(str, length, dst);
+  return _d->getOutline(str, length, dst);
 }
 
 err_t Font::getTextExtents(const String& str, TextExtents& extents) const
 {
-  return _d->face->getTextExtents(str.getData(), str.getLength(), extents);
+  return _d->getTextExtents(str.getData(), str.getLength(), extents);
 }
 
 err_t Font::getTextExtents(const Char* str, sysuint_t length, TextExtents& extents) const
 {
-  return _d->face->getTextExtents(str, length, extents);
+  return _d->getTextExtents(str, length, extents);
 }
 
 // ============================================================================
-// [Font::Data]
+// [Fog::Font - Operator Overload]
 // ============================================================================
 
-Font::Data::Data()
+const Font& Font::operator=(const Font& other)
 {
-  refCount.init(1);
-  face = NULL;
+  setFont(other);
+  return *this;
 }
 
-Font::Data::~Data()
+// ============================================================================
+// [Fog::Font - Engine]
+// ============================================================================
+
+FontEngine* Font::_engine;
+
+// ============================================================================
+// [Fog::Font - Faces]
+// ============================================================================
+
+FontFace* Font::sharedNone;
+FontFace* Font::sharedDefault;
+
+// ============================================================================
+// [Fog::Font - Font Path Management]
+// ============================================================================
+
+bool Font::addFontPath(const String& path)
 {
-  if (face) face->deref();
+  AutoLock locked(font_local->lock);
+
+  if (!font_local->paths.contains(path) && FileSystem::isDirectory(path))
+  {
+    font_local->paths.append(path);
+    return true;
+  }
+  else
+    return false;
 }
 
-Font::Data* Font::Data::ref() const
+void Font::addFontPaths(const List<String>& paths)
 {
-  refCount.inc();
-  return const_cast<Data*>(this);
+  AutoLock locked(font_local->lock);
+
+  List<String>::ConstIterator it(paths);
+  for (; it.isValid(); it.toNext())
+  {
+    String path = it.value();
+    if (!font_local->paths.contains(path) && FileSystem::isDirectory(path))
+    {
+      font_local->paths.append(path);
+    }
+  }
 }
 
-void Font::Data::deref()
+bool Font::removeFontPath(const String& path)
 {
-  if (refCount.deref()) delete this;
+  AutoLock locked(font_local->lock);
+  return font_local->paths.remove(path) != 0;
 }
 
-Font::Data* Font::Data::copy(const Data* d)
+bool Font::hasFontPath(const String& path)
 {
-  Data* newd = new(std::nothrow) Data();
-  if (!newd) return NULL;
+  AutoLock locked(font_local->lock);
+  return font_local->paths.contains(path);
+}
 
-  newd->face = d->face ? d->face->ref() : NULL;
-  return newd;
+bool Font::findFontFile(const String& fileName, String& dest)
+{
+  AutoLock locked(font_local->lock);
+  return FileSystem::findFile(font_local->paths, fileName, dest);
+}
+
+List<String> Font::getPathList()
+{
+  AutoLock locked(font_local->lock);
+  return font_local->paths;
+}
+
+// ============================================================================
+// [Fog::Font - Font List Management]
+// ============================================================================
+
+List<String> Font::getFontList()
+{
+  AutoLock locked(font_local->lock);
+  if (!font_local->listInitialized)
+  {
+    font_local->list.append(_engine->getFontList());
+    font_local->listInitialized = true;
+  }
+  return font_local->list;
+}
+
+// ============================================================================
+// [Fog::Font - Font Face Management]
+// ============================================================================
+
+err_t Font::putFace(FontFace* face)
+{
+  return font_local->putFaceToCache(face);
 }
 
 } // Fog namespace
@@ -211,18 +619,82 @@ FOG_INIT_DECLARE err_t fog_font_init(void)
 {
   using namespace Fog;
 
-  // Font is initialized before font manager, so it will set correct default
-  // face to this null (default) font.
-  Font::sharedNull = new(std::nothrow) Font::Data();
-  if (!Font::sharedNull) return ERR_RT_OUT_OF_MEMORY;
+  err_t err = ERR_OK;
+
+  font_local.init();
+  font_local->listInitialized = false;
+
+  // Font Faces.
+  Font::sharedNone = new(std::nothrow) NullFontFace();
+  if (!Font::sharedNone) return ERR_RT_OUT_OF_MEMORY;
+  Font::sharedDefault = Font::sharedNone->ref();
+
+  // Font Engine.
+#if defined(FOG_FONT_WINDOWS)
+  if (!Font::_engine)
+  {
+    Font::_engine = new(std::nothrow) WinFontEngine();
+    if (Font::_engine == NULL) { err = ERR_RT_OUT_OF_MEMORY; goto fail; }
+  }
+#endif // FOG_FONT_WINDOWS
+
+#if defined(FOG_FONT_FREETYPE)
+  if (!Font::_engine)
+  {
+    Font::_engine = new(std::nothrow) FTFontEngine();
+    if (Font::_engine == NULL) { err = ERR_RT_OUT_OF_MEMORY; goto fail; }
+  }
+#endif // FOG_FONT_FREETYPE
+
+  // Add engine specific font directories.
+  Font::addFontPaths(Font::_engine->getDefaultFontDirectories());
+
+  // Set engine specific default font face to default one.
+  {
+    FontFace* face = Font::_engine->createDefaultFace();
+    if (face != NULL)
+    {
+      Font::sharedDefault->deref();
+      Font::sharedDefault = face;
+    }
+    else
+    {
+      fog_debug("Fog::Font::init() - Can't load default font face, setting to Fog::NullFontFace.");
+    }
+  }
 
   return ERR_OK;
+
+fail:
+  fog_font_shutdown();
+  return err;
 }
 
 FOG_INIT_DECLARE void fog_font_shutdown(void)
 {
   using namespace Fog;
 
-  delete Font::sharedNull;
-  Font::sharedNull = NULL;
+  if (Font::sharedNone)
+  {
+    Font::sharedNone->deref();
+    Font::sharedNone = NULL;
+  }
+
+  if (Font::sharedDefault)
+  {
+    Font::sharedDefault->deref();
+    Font::sharedDefault = NULL;
+  }
+
+  font_local->resetFaceCache();
+
+  // Destroy font engine.
+  if (Font::_engine)
+  {
+    delete Font::_engine;
+    Font::_engine = NULL;
+  }
+
+  // Destroy font manager.
+  font_local.destroy();
 }

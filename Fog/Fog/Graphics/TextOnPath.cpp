@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Precompiled Headers]
@@ -40,12 +40,12 @@ TextOnPath::~TextOnPath()
 {
 }
 
-err_t TextOnPath::transform(Path& dst, const Path& src) const
+err_t TextOnPath::transform(DoublePath& dst, const DoublePath& src) const
 {
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t TextOnPath::setPath(const Path& path, const Matrix* matrix)
+err_t TextOnPath::setPath(const DoublePath& path, const DoubleMatrix* matrix)
 {
   // Use larger scaling factor to increase path on path precision.
   double scalingFactor = 3.0;

@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 #include <Fog/Build/Build.h>
@@ -25,8 +25,6 @@
 #include <Fog/Graphics/Argb.h>
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/Font.h>
-#include <Fog/Graphics/FontEngine.h>
-#include <Fog/Graphics/FontManager.h>
 #include <Fog/Graphics/Image.h>
 #include <Fog/Graphics/TextLayout.h>
 
@@ -821,7 +819,7 @@ void FTFontEngine::close()
   // Bail if FreeType library is not loaded.
   if (!_freeTypeLib->ok) return;
 
-  Hash<String, FTFontFile*>::MutableIterator it(_ftCache);
+  UnorderedHash<String, FTFontFile*>::MutableIterator it(_ftCache);
 
   for (it.toStart(); it.isValid(); it.remove())
   {
@@ -1053,7 +1051,7 @@ err_t FTFontFace::getGlyphSet(const Char* str, sysuint_t length, GlyphSet& glyph
   if (length == 0) return ERR_OK;
 
   // This really shouldn't happen!
-  if (str[0].isTrailSurrogate()) return ERR_TEXT_INVALID_UTF16_SEQ;
+  if (str[0].isTrailSurrogate()) return ERR_STRING_INVALID_UTF16;
 
   err_t err;
   if ((err = glyphSet.begin(length))) return err;
@@ -1070,7 +1068,7 @@ err_t FTFontFace::getGlyphSet(const Char* str, sysuint_t length, GlyphSet& glyph
 
     if (Char::isSurrogatePair((uint16_t)uc))
     {
-      if (!remain) return ERR_TEXT_INPUT_TRUNCATED;
+      if (!remain) return ERR_STRING_TRUNCATED;
       uc = Char::fromSurrogate((uint16_t)uc, str[0].ch());
 
       str++;
@@ -1100,7 +1098,7 @@ err_t FTFontFace::getOutline(const Char* str, sysuint_t length, Path& dst)
   if (length == 0) return ERR_OK;
 
   // This really shouldn't happen!
-  if (str[0].isTrailSurrogate()) return ERR_TEXT_INVALID_UTF16_SEQ;
+  if (str[0].isTrailSurrogate()) return ERR_STRING_INVALID_UTF16;
 
   err_t err = ERR_OK;
   AutoLock locked(lock);
@@ -1114,7 +1112,7 @@ err_t FTFontFace::getOutline(const Char* str, sysuint_t length, Path& dst)
 
     if (Char::isSurrogatePair((uint16_t)uc))
     {
-      if (!remain) return ERR_TEXT_INPUT_TRUNCATED;
+      if (!remain) return ERR_STRING_TRUNCATED;
       uc = Char::fromSurrogate((uint16_t)uc, str[0].ch());
 
       str++;
@@ -1550,7 +1548,7 @@ static void Fog_Font_ftAppendFontsToList(List<String>* list)
     // this is not preferred case and this is only small workaround.
 
     // Make common fonts list, but check if they are available
-    Hash<String, String>::ConstIterator iterator(Fog_Ft->ftTranslator);
+    UnorderedHash<String, String>::ConstIterator iterator(Fog_Ft->ftTranslator);
     String path;
 
     for (iterator.begin(); iterator.exist(); iterator.next())

@@ -1,6 +1,6 @@
 // [Fog-Core Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -213,6 +213,18 @@ template<typename T>
 static FOG_INLINE T abs(const T& a)
 { return (a >= 0) ? a : -a; }
 
+template<>
+static FOG_INLINE float abs(const float& a)
+{
+  return ::fabsf(a);
+}
+
+template<>
+static FOG_INLINE double abs(const double& a)
+{
+  return ::fabs(a);
+}
+
 // ============================================================================
 // [Fog::Math - Nan/Finite/Infinite]
 // ============================================================================
@@ -239,12 +251,17 @@ static FOG_INLINE bool isNaN(double x)
 // [Fog::Math - Floating point ops with epsilon]
 // ============================================================================
 
-//! @brief Default epsilon used in math.
-static const double DEFAULT_EPSILON = 1e-14;
+//! @brief Default epsilon used in math for 32-bit floats.
+static const float DEFAULT_FLOAT_EPSILON = 1e-8f;
+
+//! @brief Default epsilon used in math for 64-bit floats.
+static const double DEFAULT_DOUBLE_EPSILON = 1e-14;
 
 template<typename T>
-static FOG_INLINE bool feq(T a, T b, T epsilon = 0.000001)
-{ return fabs(a - b) <= epsilon; }
+static FOG_INLINE bool feq(T a, T b, T epsilon = (T)0.000001)
+{
+  return fabs(a - b) <= epsilon;
+}
 
 // ============================================================================
 // [Fog::Math - Float <-> Integer]
@@ -316,7 +333,7 @@ static FOG_INLINE uint uceil(double v) { return uround(::ceil(v)); }
 // ============================================================================
 
 //! @brief Helper union used to convert double to fixed point integer.
-union DoubleAndInt
+union DoubleAndInt64
 {
   //! @brief Double data.
   double d;
@@ -335,6 +352,14 @@ union DoubleAndInt
   int64_t i64;
 };
 
+union FloatAndInt32
+{
+  //! @brief Float data.
+  float f;
+  //! @brief Int32 data.
+  int32_t i32;
+};
+
 static FOG_INLINE int doubleToInt(double d)
 {
   return (int)d;
@@ -344,7 +369,7 @@ static FOG_INLINE int16x16_t doubleToFixed16x16(double d)
 {
   // The euqivalent code should be:
   // return (int32_t)(d * 65536.0);
-  DoubleAndInt data;
+  DoubleAndInt64 data;
   data.d = d + 103079215104.0;
   return data.i32_0;
 }
@@ -397,6 +422,13 @@ static FOG_INLINE void sincos(double rad, double* sinResult, double* cosResult)
   *cosResult = ::cos(rad);
 }
 #endif
+
+// ============================================================================
+// [Fog::Math - Sqrt]
+// ============================================================================
+
+static FOG_INLINE float sqrt(float x) { return ::sqrtf(x); }
+static FOG_INLINE double sqrt(double x) { return ::sqrt(x); }
 
 } // Math namespace
 } // Fog namespace

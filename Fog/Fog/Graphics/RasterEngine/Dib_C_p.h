@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Private API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // For some IDEs to enable code-assist.
@@ -1556,7 +1556,7 @@ struct FOG_HIDDEN DibC
   // --------------------------------------------------------------------------
 
   static void FOG_FASTCALL i8rgb232_from_xrgb32_dither(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Point& origin, const uint8_t* palConv)
+    uint8_t* dst, const uint8_t* src, sysint_t w, const IntPoint& origin, const uint8_t* palConv)
   {
     sysint_t i;
 
@@ -1587,7 +1587,7 @@ struct FOG_HIDDEN DibC
   }
 
   static void FOG_FASTCALL i8rgb222_from_xrgb32_dither(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Point& origin, const uint8_t* palConv)
+    uint8_t* dst, const uint8_t* src, sysint_t w, const IntPoint& origin, const uint8_t* palConv)
   {
     sysint_t i;
 
@@ -1620,7 +1620,7 @@ struct FOG_HIDDEN DibC
   }
 
   static void FOG_FASTCALL i8rgb111_from_xrgb32_dither(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Point& origin, const uint8_t* palConv)
+    uint8_t* dst, const uint8_t* src, sysint_t w, const IntPoint& origin, const uint8_t* palConv)
   {
     sysint_t i;
 
@@ -1651,7 +1651,7 @@ struct FOG_HIDDEN DibC
   }
 
   static void FOG_FASTCALL rgb16_555_native_from_xrgb32_dither(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Point& origin)
+    uint8_t* dst, const uint8_t* src, sysint_t w, const IntPoint& origin)
   {
     sysint_t i;
 
@@ -1678,7 +1678,7 @@ struct FOG_HIDDEN DibC
   }
 
   static void FOG_FASTCALL rgb16_565_native_from_xrgb32_dither(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Point& origin)
+    uint8_t* dst, const uint8_t* src, sysint_t w, const IntPoint& origin)
   {
     sysint_t i;
 
@@ -1707,7 +1707,7 @@ struct FOG_HIDDEN DibC
   }
 
   static void FOG_FASTCALL rgb16_555_swapped_from_xrgb32_dither(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Point& origin)
+    uint8_t* dst, const uint8_t* src, sysint_t w, const IntPoint& origin)
   {
     sysint_t i;
 
@@ -1734,7 +1734,7 @@ struct FOG_HIDDEN DibC
   }
 
   static void FOG_FASTCALL rgb16_565_swapped_from_xrgb32_dither(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Point& origin)
+    uint8_t* dst, const uint8_t* src, sysint_t w, const IntPoint& origin)
   {
     sysint_t i;
 

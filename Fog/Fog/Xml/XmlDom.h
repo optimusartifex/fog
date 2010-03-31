@@ -1,6 +1,6 @@
 // [Fog-Xml Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -562,7 +562,7 @@ protected:
   XmlElement* _documentRoot;
 
   //! @brief Hash table that contains all managed strings and reference counts.
-  Hash<String, sysuint_t> _managedStrings;
+  UnorderedHash<String, sysuint_t> _managedStrings;
 
   //! @brief Hash table that contains all managed IDs.
   XmlIdManager _elementIdsHash;

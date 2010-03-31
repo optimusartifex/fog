@@ -1,6 +1,6 @@
 // [Fog-Xml Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Precompiled Headers]
@@ -1001,10 +1001,10 @@ void XmlIdManager::_rehash(sysuint_t capacity)
 
   _capacity = capacity;
 
-  _expandCapacity = Hash_Abstract::_calcExpandCapacity(capacity);
+  _expandCapacity = UnorderedAbstract::_calcExpandCapacity(capacity);
   _expandLength = (sysuint_t)((sysint_t)_capacity * 0.92);
 
-  _shrinkCapacity = Hash_Abstract::_calcShrinkCapacity(capacity);
+  _shrinkCapacity = UnorderedAbstract::_calcShrinkCapacity(capacity);
   _shrinkLength = (sysuint_t)((sysint_t)_shrinkCapacity * 0.70);
 
   atomicPtrXchg(&_buckets, newBuckets);

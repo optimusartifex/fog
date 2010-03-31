@@ -1,6 +1,6 @@
 // [Fog-Core Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -19,7 +19,7 @@ namespace Fog {
 // [Fog::AtomicOperationHelper]
 // ============================================================================
 
-template<sysuint_t Size>
+template<sysuint_t IntSize>
 struct AtomicOperationHelper {};
 
 } // Fog namespace

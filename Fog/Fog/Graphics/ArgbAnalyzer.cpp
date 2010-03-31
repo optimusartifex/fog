@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Precompiled Headers]
@@ -14,7 +14,9 @@
 
 namespace Fog {
 
+// ============================================================================
 // [Fog::ArgbAnalyzer]
+// ============================================================================
 
 int ArgbAnalyzer::analyzeAlpha(const uint8_t* data, sysuint_t count, sysuint_t alphapos, sysuint_t _inc)
 {
@@ -22,7 +24,7 @@ int ArgbAnalyzer::analyzeAlpha(const uint8_t* data, sysuint_t count, sysuint_t a
   sysuint_t inc = _inc;
   uint8_t mask;
 
-  if (!i) return Fog::ALPHA_TRANSPARENT;
+  if (!i) return ALPHA_TRANSPARENT;
 
   data += alphapos;
   mask = data[0];
@@ -30,7 +32,7 @@ int ArgbAnalyzer::analyzeAlpha(const uint8_t* data, sysuint_t count, sysuint_t a
   while (--i)
   {
     data += inc;
-    if (data[0] != mask) return Fog::ALPHA_VARIANT;
+    if (data[0] != mask) return ALPHA_VARIANT;
   }
 
   return (int)mask;

@@ -1,6 +1,6 @@
 // [Fog-Core Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -27,13 +27,15 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::Hash_Abstract]
+// [Fog::UnorderedAbstract]
 // ============================================================================
 
 //! @brief Abstract hash container.
-struct FOG_API Hash_Abstract
+struct FOG_API UnorderedAbstract
 {
+  // --------------------------------------------------------------------------
   // [Node]
+  // --------------------------------------------------------------------------
 
   struct FOG_HIDDEN Node
   {
@@ -41,7 +43,9 @@ struct FOG_API Hash_Abstract
     uint32_t hashCode;
   };
 
+  // --------------------------------------------------------------------------
   // [Data]
+  // --------------------------------------------------------------------------
 
   struct FOG_HIDDEN Data
   {
@@ -75,24 +79,34 @@ struct FOG_API Hash_Abstract
 
   static Static<Data> sharedNull;
 
-  FOG_INLINE sysuint_t getCapacity() const { return _d->capacity; }
-  FOG_INLINE sysuint_t getLength() const { return _d->length; }
-  FOG_INLINE bool isEmpty() const { return _d->length == 0; }
+  // --------------------------------------------------------------------------
+  // [Implicit Sharing]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE bool isDetached() const { return _d->refCount.get() == 1; }
   FOG_INLINE sysuint_t refCount() const { return _d->refCount.get(); }
 
+  // --------------------------------------------------------------------------
+  // [Container]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE sysuint_t getCapacity() const { return _d->capacity; }
+  FOG_INLINE sysuint_t getLength() const { return _d->length; }
+  FOG_INLINE bool isEmpty() const { return _d->length == 0; }
+
+  // --------------------------------------------------------------------------
   // [Abstract Iterator]
+  // --------------------------------------------------------------------------
 
   struct FOG_API _Iterator
   {
-    FOG_INLINE _Iterator(Hash_Abstract& hash) :
+    FOG_INLINE _Iterator(UnorderedAbstract& hash) :
       _hash(&hash),
       _node(NULL),
       _index(INVALID_INDEX)
     {}
 
-    FOG_INLINE _Iterator(Hash_Abstract* hash) :
+    FOG_INLINE _Iterator(UnorderedAbstract* hash) :
       _hash(hash),
       _node(NULL),
       _index(INVALID_INDEX)
@@ -106,12 +120,14 @@ struct FOG_API Hash_Abstract
     Node* _removeCurrent();
 
   protected:
-    Hash_Abstract* _hash;
+    UnorderedAbstract* _hash;
     Node* _node;
     sysuint_t _index;
   };
 
+  // --------------------------------------------------------------------------
   // [Helpers]
+  // --------------------------------------------------------------------------
 
   bool _rehash(sysuint_t bc);
 
@@ -121,42 +137,58 @@ struct FOG_API Hash_Abstract
   static sysuint_t _calcExpandCapacity(sysuint_t capacity);
   static sysuint_t _calcShrinkCapacity(sysuint_t capacity);
 
+  // --------------------------------------------------------------------------
   // [Members]
+  // --------------------------------------------------------------------------
 
   FOG_DECLARE_D(Data)
 };
 
 // ============================================================================
-// [Fog::Hash]
+// [Fog::UnorderedHash]
 // ============================================================================
 
-template<typename KeyT, typename ValueT>
-struct Hash : public Hash_Abstract
+template<typename KeyType, typename ValueType>
+struct UnorderedHash : public UnorderedAbstract
 {
+  // --------------------------------------------------------------------------
+  // [Node]
+  // --------------------------------------------------------------------------
+
   struct Node
   {
-    FOG_INLINE Node(uint32_t hashCode, const KeyT& key) :
-      next(NULL), hashCode(hashCode), key(key) {}
+    FOG_INLINE Node(uint32_t hashCode, const KeyType& key) :
+      next(NULL), hashCode(hashCode), key(key)
+    {
+    }
 
-    FOG_INLINE Node(uint32_t hashCode, const KeyT& key, const ValueT& value) :
-      next(NULL), hashCode(hashCode), key(key), value(value) {}
+    FOG_INLINE Node(uint32_t hashCode, const KeyType& key, const ValueType& value) :
+      next(NULL), hashCode(hashCode), key(key), value(value)
+    {
+    }
 
-    FOG_INLINE ~Node() {};
+    FOG_INLINE ~Node()
+    {
+    }
 
     Node* next;
     uint32_t hashCode;
-    KeyT key;
-    ValueT value;
+    KeyType key;
+    ValueType value;
   };
 
-  struct Data : public Hash_Abstract::Data
+  // --------------------------------------------------------------------------
+  // [Data]
+  // --------------------------------------------------------------------------
+
+  struct Data : public UnorderedAbstract::Data
   {
     void deref()
     {
       if (refCount.deref())
       {
         clear();
-        Hash_Abstract::_freeData(this);
+        UnorderedAbstract::_freeData(this);
       }
     }
 
@@ -180,52 +212,61 @@ struct Hash : public Hash_Abstract
     }
   };
 
-  Hash()
-  { _d = sharedNull->ref(); }
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
-  Hash(const Hash<KeyT, ValueT>& other)
-  { _d = other._d->ref(); }
+  UnorderedHash() { _d = sharedNull->ref(); }
+  UnorderedHash(const UnorderedHash<KeyType, ValueType>& other) { _d = other._d->ref(); }
+  ~UnorderedHash() { ((Data*)_d)->deref(); }
 
-  ~Hash()
-  { ((Data*)_d)->deref(); }
+  // --------------------------------------------------------------------------
+  // [Implicit Sharing]
+  // --------------------------------------------------------------------------
 
-  FOG_INLINE bool detach()
-  { return (!isDetached()) ? _detach() : true; }
+  FOG_INLINE err_t detach() { return (!isDetached()) ? _detach() : ERR_OK; }
+  err_t _detach(Node* exclude = NULL);
 
-  bool _detach(Node* exclude = NULL);
+  // --------------------------------------------------------------------------
+  // [Manipulation]
+  // --------------------------------------------------------------------------
 
   void clear();
 
-  bool contains(const KeyT& key) const;
+  bool contains(const KeyType& key) const;
 
-  err_t put(const KeyT& key, const ValueT& value, bool replace = true);
-  bool remove(const KeyT& key);
+  err_t put(const KeyType& key, const ValueType& value, bool replace = true);
+  err_t remove(const KeyType& key);
 
-  ValueT* get(const KeyT& key) const;
-  ValueT* mod(const KeyT& key);
+  ValueType* get(const KeyType& key) const;
+  ValueType* mod(const KeyType& key);
 
-  Node* _getNode(const KeyT& key) const;
+  Node* _getNode(const KeyType& key) const;
 
-  ValueT value(const KeyT& key) const;
-  ValueT value(const KeyT& key, const ValueT& defaultValue) const;
+  ValueType value(const KeyType& key) const;
+  ValueType value(const KeyType& key, const ValueType& defaultValue) const;
 
-  List<KeyT> keys() const;
-  List<KeyT> keys(const ValueT& value) const;
+  List<KeyType> keys() const;
+  List<KeyType> keys(const ValueType& value) const;
 
-  Hash<KeyT, ValueT>& operator=(const Hash<KeyT, ValueT>& other)
+  UnorderedHash<KeyType, ValueType>& operator=(const UnorderedHash<KeyType, ValueType>& other)
   { ((Data*)atomicPtrXchg(&_d, other._d->ref()))->deref(); return *this; }
 
-  FOG_INLINE ValueT* operator[](const KeyT& key)
+  FOG_INLINE ValueType* operator[](const KeyType& key)
   { return mod(key); }
 
-  struct ConstIterator : public Hash_Abstract::_Iterator
+  // --------------------------------------------------------------------------
+  // [Const Iterator]
+  // --------------------------------------------------------------------------
+
+  struct ConstIterator : public UnorderedAbstract::_Iterator
   {
-    FOG_INLINE ConstIterator(const Hash<KeyT, ValueT>& hash) :
-      _Iterator((Hash_Abstract *)&hash)
+    FOG_INLINE ConstIterator(const UnorderedHash<KeyType, ValueType>& hash) :
+      _Iterator((UnorderedAbstract *)&hash)
     {}
 
-    FOG_INLINE ConstIterator(const Hash<KeyT, ValueT>* hash) :
-      _Iterator((Hash_Abstract *)hash)
+    FOG_INLINE ConstIterator(const UnorderedHash<KeyType, ValueType>* hash) :
+      _Iterator((UnorderedAbstract *)hash)
     {}
 
     FOG_INLINE ConstIterator& toStart()
@@ -234,22 +275,26 @@ struct Hash : public Hash_Abstract
     FOG_INLINE ConstIterator& toNext()
     { _toNext(); return *this; }
 
-    FOG_INLINE const KeyT& key() const
+    FOG_INLINE const KeyType& key() const
     { return ((Node*)_node)->key; }
 
-    FOG_INLINE const ValueT& value() const
+    FOG_INLINE const ValueType& value() const
     { return ((Node*)_node)->value; }
   };
 
-  struct MutableIterator : public Hash_Abstract::_Iterator
-  {
-    FOG_INLINE MutableIterator(Hash<KeyT, ValueT>& hash) :
-      _Iterator((Hash_Abstract *)&hash)
-    { ((Hash*)_hash)->detach(); }
+  // --------------------------------------------------------------------------
+  // [Mutable Iterator]
+  // --------------------------------------------------------------------------
 
-    FOG_INLINE MutableIterator(Hash<KeyT, ValueT>* hash) :
-      _Iterator((Hash_Abstract *)hash)
-    { ((Hash*)_hash)->detach(); }
+  struct MutableIterator : public UnorderedAbstract::_Iterator
+  {
+    FOG_INLINE MutableIterator(UnorderedHash<KeyType, ValueType>& hash) :
+      _Iterator((UnorderedAbstract *)&hash)
+    { ((UnorderedHash*)_hash)->detach(); }
+
+    FOG_INLINE MutableIterator(UnorderedHash<KeyType, ValueType>* hash) :
+      _Iterator((UnorderedAbstract *)hash)
+    { ((UnorderedHash*)_hash)->detach(); }
 
     FOG_INLINE MutableIterator& toStart()
     { _toBegin(); return *this; }
@@ -257,13 +302,13 @@ struct Hash : public Hash_Abstract
     FOG_INLINE MutableIterator& toNext()
     { _toNext(); return *this; }
 
-    FOG_INLINE const KeyT& key() const
+    FOG_INLINE const KeyType& key() const
     { return ((Node*)_node)->key; }
 
-    FOG_INLINE const ValueT& value() const
+    FOG_INLINE const ValueType& value() const
     { return ((Node*)_node)->value; }
 
-    FOG_INLINE ValueT& value()
+    FOG_INLINE ValueType& value()
     { return ((Node*)_node)->value; }
 
     FOG_INLINE void remove()
@@ -273,11 +318,11 @@ struct Hash : public Hash_Abstract
   };
 };
 
-template<typename KeyT, typename ValueT>
-bool Hash<KeyT, ValueT>::_detach(Node* exclude)
+template<typename KeyType, typename ValueType>
+err_t UnorderedHash<KeyType, ValueType>::_detach(Node* exclude)
 {
   Data* newd = (Data*)_allocData(_d->capacity);
-  if (!newd) return false;
+  if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
   sysuint_t i, len = _d->capacity;
   sysuint_t bc = newd->capacity;
@@ -303,23 +348,23 @@ bool Hash<KeyT, ValueT>::_detach(Node* exclude)
   newd->length = _d->length;
   if (exclude) newd->length--;
 
-  ((Data*)atomicPtrXchg(&_d, (Hash_Abstract::Data*)newd))->deref();
-  return true;
+  ((Data*)atomicPtrXchg(&_d, (UnorderedAbstract::Data*)newd))->deref();
+  return ERR_OK;
 
 alloc_fail:
   newd->clear();
   _freeData(newd);
-  return false;
+  return ERR_RT_OUT_OF_MEMORY;
 }
 
-template<typename KeyT, typename ValueT>
-void Hash<KeyT, ValueT>::clear()
+template<typename KeyType, typename ValueType>
+void UnorderedHash<KeyType, ValueType>::clear()
 {
   ((Data*)atomicPtrXchg(&_d, sharedNull->ref()))->deref();
 }
 
-template<typename KeyT, typename ValueT>
-bool Hash<KeyT, ValueT>::contains(const KeyT& key) const
+template<typename KeyType, typename ValueType>
+bool UnorderedHash<KeyType, ValueType>::contains(const KeyType& key) const
 {
   if (!_d->length) return false;
 
@@ -336,8 +381,8 @@ bool Hash<KeyT, ValueT>::contains(const KeyT& key) const
   return false;
 }
 
-template<typename KeyT, typename ValueT>
-err_t Hash<KeyT, ValueT>::put(const KeyT& key, const ValueT& value, bool replace)
+template<typename KeyType, typename ValueType>
+err_t UnorderedHash<KeyType, ValueType>::put(const KeyType& key, const ValueType& value, bool replace)
 {
   if (!_d->length && !_rehash(32)) return ERR_RT_OUT_OF_MEMORY;
 
@@ -375,10 +420,10 @@ err_t Hash<KeyT, ValueT>::put(const KeyT& key, const ValueT& value, bool replace
   return ERR_OK;
 }
 
-template<typename KeyT, typename ValueT>
-bool Hash<KeyT, ValueT>::remove(const KeyT& key)
+template<typename KeyType, typename ValueType>
+err_t UnorderedHash<KeyType, ValueType>::remove(const KeyType& key)
 {
-  if (!_d->length) return false;
+  if (!_d->length) return ERR_RT_OBJECT_NOT_FOUND;
 
   uint32_t hashCode = HashUtil::getHashCode(key);
   uint32_t hashMod = hashCode % getCapacity();
@@ -399,17 +444,17 @@ bool Hash<KeyT, ValueT>::remove(const KeyT& key)
 
       delete node;
       if (--_d->length <= _d->shrinkLength) _rehash(_d->shrinkCapacity);
-      return true;
+      return ERR_OK;
     }
     prev = node;
     node = node->next;
   }
 
-  return false;
+  return ERR_RT_OBJECT_NOT_FOUND;
 }
 
-template<typename KeyT, typename ValueT>
-ValueT* Hash<KeyT, ValueT>::get(const KeyT& key) const
+template<typename KeyType, typename ValueType>
+ValueType* UnorderedHash<KeyType, ValueType>::get(const KeyType& key) const
 {
   if (!_d->length) return NULL;
 
@@ -429,8 +474,8 @@ ValueT* Hash<KeyT, ValueT>::get(const KeyT& key) const
   return NULL;
 }
 
-template<typename KeyT, typename ValueT>
-ValueT* Hash<KeyT, ValueT>::mod(const KeyT& key)
+template<typename KeyType, typename ValueType>
+ValueType* UnorderedHash<KeyType, ValueType>::mod(const KeyType& key)
 {
   if (!_d->length && !_rehash(32)) return NULL;
 
@@ -464,8 +509,8 @@ ValueT* Hash<KeyT, ValueT>::mod(const KeyT& key)
   return &node->value;
 }
 
-template<typename KeyT, typename ValueT>
-typename Hash<KeyT, ValueT>::Node* Hash<KeyT, ValueT>::_getNode(const KeyT& key) const
+template<typename KeyType, typename ValueType>
+typename UnorderedHash<KeyType, ValueType>::Node* UnorderedHash<KeyType, ValueType>::_getNode(const KeyType& key) const
 {
   if (!_d->length) return NULL;
 
@@ -482,24 +527,24 @@ typename Hash<KeyT, ValueT>::Node* Hash<KeyT, ValueT>::_getNode(const KeyT& key)
   return NULL;
 }
 
-template<typename KeyT, typename ValueT>
-ValueT Hash<KeyT, ValueT>::value(const KeyT& key) const
+template<typename KeyType, typename ValueType>
+ValueType UnorderedHash<KeyType, ValueType>::value(const KeyType& key) const
 {
-  const ValueT* vptr = get(key);
-  return vptr ? ValueT(*vptr) : ValueT();
+  const ValueType* vptr = get(key);
+  return vptr ? ValueType(*vptr) : ValueType();
 }
 
-template<typename KeyT, typename ValueT>
-ValueT Hash<KeyT, ValueT>::value(const KeyT& key, const ValueT& defaultValue) const
+template<typename KeyType, typename ValueType>
+ValueType UnorderedHash<KeyType, ValueType>::value(const KeyType& key, const ValueType& defaultValue) const
 {
-  const ValueT* vptr = get(key);
-  return ValueT(vptr ? *vptr : defaultValue);
+  const ValueType* vptr = get(key);
+  return ValueType(vptr ? *vptr : defaultValue);
 }
 
-template<typename KeyT, typename ValueT>
-List<KeyT> Hash<KeyT, ValueT>::keys() const
+template<typename KeyType, typename ValueType>
+List<KeyType> UnorderedHash<KeyType, ValueType>::keys() const
 {
-  List<KeyT> result;
+  List<KeyType> result;
   sysuint_t i, len = _d->capacity;
 
   result.reserve(len);
@@ -517,10 +562,10 @@ List<KeyT> Hash<KeyT, ValueT>::keys() const
   return result;
 }
 
-template<typename KeyT, typename ValueT>
-List<KeyT> Hash<KeyT, ValueT>::keys(const ValueT& value) const
+template<typename KeyType, typename ValueType>
+List<KeyType> UnorderedHash<KeyType, ValueType>::keys(const ValueType& value) const
 {
-  List<KeyT> result;
+  List<KeyType> result;
   sysuint_t i, len = _d->capacity;
   for (i = 0; i < len; i++)
   {
@@ -536,6 +581,329 @@ List<KeyT> Hash<KeyT, ValueT>::keys(const ValueT& value) const
   return result;
 }
 
+// ============================================================================
+// [Fog::UnorderedSet<KeyType>]
+// ============================================================================
+
+template<typename KeyType>
+struct UnorderedSet : public UnorderedAbstract
+{
+  // --------------------------------------------------------------------------
+  // [Node]
+  // --------------------------------------------------------------------------
+
+  struct Node
+  {
+    FOG_INLINE Node(uint32_t hashCode, const KeyType& key) :
+      next(NULL), hashCode(hashCode), key(key)
+    {
+    }
+
+    FOG_INLINE ~Node()
+    {
+    }
+
+    Node* next;
+    uint32_t hashCode;
+    KeyType key;
+  };
+
+  // --------------------------------------------------------------------------
+  // [Data]
+  // --------------------------------------------------------------------------
+
+  struct Data : public UnorderedAbstract::Data
+  {
+    void deref()
+    {
+      if (refCount.deref())
+      {
+        clear();
+        UnorderedAbstract::_freeData(this);
+      }
+    }
+
+    void clear()
+    {
+      sysuint_t i, len = capacity;
+
+      for (i = 0; i < len; i++)
+      {
+        Node* node = (Node*)(buckets[i]);
+        if (node)
+        {
+          do {
+            Node* next = node->next;
+            delete node;
+            node = next;
+          } while (node);
+          buckets[i] = NULL;
+        }
+      }
+    }
+  };
+
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  UnorderedSet() { _d = sharedNull->ref(); }
+  UnorderedSet(const UnorderedSet<KeyType>& other) { _d = other._d->ref(); }
+  ~UnorderedSet() { ((Data*)_d)->deref(); }
+
+  // --------------------------------------------------------------------------
+  // [Implicit Sharing]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t detach() { return (!isDetached()) ? _detach() : ERR_OK; }
+  err_t _detach(Node* exclude = NULL);
+
+  // --------------------------------------------------------------------------
+  // [Manipulation]
+  // --------------------------------------------------------------------------
+
+  void clear();
+
+  bool contains(const KeyType& key) const;
+
+  err_t put(const KeyType& key);
+  err_t remove(const KeyType& key);
+
+  Node* _getNode(const KeyType& key) const;
+
+  List<KeyType> keys() const;
+
+  UnorderedSet<KeyType>& operator=(const UnorderedSet<KeyType>& other)
+  { ((Data*)atomicPtrXchg(&_d, other._d->ref()))->deref(); return *this; }
+
+  // --------------------------------------------------------------------------
+  // [Const Iterator]
+  // --------------------------------------------------------------------------
+
+  struct ConstIterator : public UnorderedAbstract::_Iterator
+  {
+    FOG_INLINE ConstIterator(const UnorderedSet<KeyType>& hash) :
+      _Iterator((UnorderedAbstract *)&hash)
+    {}
+
+    FOG_INLINE ConstIterator(const UnorderedSet<KeyType>* hash) :
+      _Iterator((UnorderedAbstract *)hash)
+    {}
+
+    FOG_INLINE ConstIterator& toStart()
+    { _toBegin(); return *this; }
+
+    FOG_INLINE ConstIterator& toNext()
+    { _toNext(); return *this; }
+
+    FOG_INLINE const KeyType& key() const
+    { return ((Node*)_node)->key; }
+  };
+
+  // --------------------------------------------------------------------------
+  // [Mutable Iterator]
+  // --------------------------------------------------------------------------
+
+  struct MutableIterator : public UnorderedAbstract::_Iterator
+  {
+    FOG_INLINE MutableIterator(UnorderedSet<KeyType>& hash) :
+      _Iterator((UnorderedAbstract *)&hash)
+    { ((UnorderedSet*)_hash)->detach(); }
+
+    FOG_INLINE MutableIterator(UnorderedSet<KeyType>* hash) :
+      _Iterator((UnorderedAbstract *)hash)
+    { ((UnorderedSet*)_hash)->detach(); }
+
+    FOG_INLINE MutableIterator& toStart()
+    { _toBegin(); return *this; }
+
+    FOG_INLINE MutableIterator& toNext()
+    { _toNext(); return *this; }
+
+    FOG_INLINE const KeyType& key() const
+    { return ((Node*)_node)->key; }
+
+    FOG_INLINE void remove()
+    {
+      delete (Node*)_removeCurrent();
+    }
+  };
+};
+
+template<typename KeyType>
+err_t UnorderedSet<KeyType>::_detach(Node* exclude)
+{
+  Data* newd = (Data*)_allocData(_d->capacity);
+  if (!newd) return ERR_RT_OUT_OF_MEMORY;
+
+  sysuint_t i, len = _d->capacity;
+  sysuint_t bc = newd->capacity;
+
+  for (i = 0; i < len; i++)
+  {
+    Node* node = (Node*)(_d->buckets[i]);
+    while (node)
+    {
+      if (FOG_LIKELY(node != exclude))
+      {
+        uint32_t hashMod = node->hashCode % bc;
+        Node* n = new(std::nothrow) Node(node->hashCode, node->key, node->value);
+        if (FOG_UNLIKELY(!n)) goto alloc_fail;
+
+        n->next = (Node*)newd->buckets[hashMod];
+        newd->buckets[hashMod] = n;
+      }
+      node = node->next;
+    }
+  }
+
+  newd->length = _d->length;
+  if (exclude) newd->length--;
+
+  ((Data*)atomicPtrXchg(&_d, (UnorderedAbstract::Data*)newd))->deref();
+  return ERR_OK;
+
+alloc_fail:
+  newd->clear();
+  _freeData(newd);
+  return ERR_RT_OUT_OF_MEMORY;
+}
+
+template<typename KeyType>
+void UnorderedSet<KeyType>::clear()
+{
+  ((Data*)atomicPtrXchg(&_d, sharedNull->ref()))->deref();
+}
+
+template<typename KeyType>
+bool UnorderedSet<KeyType>::contains(const KeyType& key) const
+{
+  if (!_d->length) return false;
+
+  uint32_t hashCode = HashUtil::getHashCode(key);
+  uint32_t hashMod = hashCode % getCapacity();
+
+  Node* node = (Node*)(_d->buckets[hashMod]);
+
+  while (node)
+  {
+    if (node->hashCode == hashCode && node->key == key) return true;
+    node = node->next;
+  }
+  return false;
+}
+
+template<typename KeyType>
+err_t UnorderedSet<KeyType>::put(const KeyType& key)
+{
+  if (!_d->length && !_rehash(32)) return ERR_RT_OUT_OF_MEMORY;
+
+  detach();
+
+  uint32_t hashCode = HashUtil::getHashCode(key);
+  uint32_t hashMod = hashCode % getCapacity();
+
+  Node* node = (Node*)(_d->buckets[hashMod]);
+  Node* prev = NULL;
+
+  while (node)
+  {
+    if (node->hashCode == hashCode && node->key == key) break;
+    prev = node;
+    node = node->next;
+  }
+
+  if (node)
+  {
+    if (!replace) return ERR_RT_OBJECT_ALREADY_EXISTS;
+    node->value = value;
+  }
+  else
+  {
+    node = new(std::nothrow) Node(hashCode, key, value);
+    if (!node) return ERR_RT_OUT_OF_MEMORY;
+
+    if (prev)
+      prev->next = node;
+    else
+      _d->buckets[hashMod] = node;
+    if (++_d->length >= _d->expandLength) _rehash(_d->expandCapacity);
+  }
+  return ERR_OK;
+}
+
+template<typename KeyType>
+err_t UnorderedSet<KeyType>::remove(const KeyType& key)
+{
+  if (!_d->length) return ERR_RT_OBJECT_NOT_FOUND;
+
+  uint32_t hashCode = HashUtil::getHashCode(key);
+  uint32_t hashMod = hashCode % getCapacity();
+
+  Node* node = (Node*)(_d->buckets[hashMod]);
+  Node* prev = NULL;
+
+  while (node)
+  {
+    if (node->hashCode == hashCode && node->key == key)
+    {
+      if (FOG_UNLIKELY(!isDetached())) return _detach(node);
+
+      if (prev)
+        prev->next = node->next;
+      else
+        _d->buckets[hashMod] = node->next;
+
+      delete node;
+      if (--_d->length <= _d->shrinkLength) _rehash(_d->shrinkCapacity);
+      return true;
+    }
+    prev = node;
+    node = node->next;
+  }
+
+  return ERR_RT_OBJECT_NOT_FOUND;
+}
+
+template<typename KeyType>
+typename UnorderedSet<KeyType>::Node* UnorderedSet<KeyType>::_getNode(const KeyType& key) const
+{
+  if (!_d->length) return NULL;
+
+  uint32_t hashCode = HashUtil::getHashCode(key);
+  uint32_t hashMod = hashCode % getCapacity();
+
+  Node* node = (Node*)(_d->buckets[hashMod]);
+
+  while (node)
+  {
+    if (node->hashCode == hashCode && node->key == key) return node;
+    node = node->next;
+  }
+  return NULL;
+}
+
+template<typename KeyType>
+List<KeyType> UnorderedSet<KeyType>::keys() const
+{
+  List<KeyType> result;
+  sysuint_t i, len = _d->capacity;
+
+  result.reserve(len);
+
+  for (i = 0; i < len; i++)
+  {
+    Node* node = (Node*)(_d->buckets[i]);
+    while (node)
+    {
+      result.append(node->key);
+      node = node->next;
+    }
+  }
+
+  return result;
+}
+
 //! @}
 
 } // Fog namespace
@@ -544,9 +912,13 @@ List<KeyT> Hash<KeyT, ValueT>::keys(const ValueT& value) const
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO_TEMPLATE2(Fog::Hash,
-  typename, KeyT,
-  typename, ValueT,
+FOG_DECLARE_TYPEINFO_TEMPLATE2(Fog::UnorderedHash,
+  typename, KeyType,
+  typename, ValueType,
+  Fog::TYPEINFO_MOVABLE)
+
+FOG_DECLARE_TYPEINFO_TEMPLATE1(Fog::UnorderedSet,
+  typename, KeyType,
   Fog::TYPEINFO_MOVABLE)
 
 // [Guard]

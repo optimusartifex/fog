@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Private API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -296,15 +296,15 @@ struct FOG_HIDDEN RasterPaintClipState
 
   mutable Atomic<sysuint_t> refCount;
 
-  Point metaOrigin;
-  Point userOrigin;
-  Point workOrigin;
+  IntPoint metaOrigin;
+  IntPoint userOrigin;
+  IntPoint workOrigin;
 
   Region metaRegion;
   Region userRegion;
   Region workRegion;
 
-  Box clipBox;
+  IntBox clipBox;
 
   uint8_t metaRegionUsed;
   uint8_t userRegionUsed;
@@ -399,16 +399,16 @@ struct FOG_HIDDEN RasterPaintCapsState
   StrokeParams strokeParams;
 
   //! @brief Transformation matrix.
-  Matrix transform;
+  DoubleMatrix transform;
   //! @brief Transformation approximation scale used by path flattening.
   double approximationScale;
 
   //! @brief Saved transform matrix translation (tx and ty values).
-  PointD transformTranslateSaved;
+  DoublePoint transformTranslateSaved;
 
   //! @brief Transformation translate point in pixels (can be used if
   //! transform type is @c TRANSFORM_TRANSLATE_EXACT).
-  Point transformTranslateInt;
+  IntPoint transformTranslateInt;
 };
 
 // ============================================================================
@@ -505,7 +505,7 @@ struct RasterRenderImageAffineBound
 
   // [Init]
 
-  bool init(const Image& image, const Matrix& matrix, const Box& clipBox, int interpolationType);
+  bool init(const Image& image, const DoubleMatrix& matrix, const IntBox& clipBox, int interpolationType);
   FOG_INLINE bool isInitialized() const { return (bool)ictx.initialized; }
 
   // [Render]
@@ -515,7 +515,7 @@ struct RasterRenderImageAffineBound
   // [Members]
 
   RasterEngine::PatternContext ictx;
-  PointD pts[4];
+  DoublePoint pts[4];
   int pty[4];
 
   int leftStart;
@@ -663,7 +663,7 @@ struct FOG_HIDDEN RasterPaintCmdBoxes : public RasterPaintCmd
   // [Members]
 
   sysuint_t count;
-  Box boxes[1];
+  IntBox boxes[1];
 };
 
 // ============================================================================
@@ -686,8 +686,8 @@ struct FOG_HIDDEN RasterPaintCmdImage : public RasterPaintCmd
 
   Static<Image> image;
 
-  Rect dst;
-  Rect src;
+  IntRect dst;
+  IntRect src;
 };
 
 // ============================================================================
@@ -731,8 +731,8 @@ struct FOG_HIDDEN RasterPaintCmdGlyphSet : public RasterPaintCmd
 
   Static<GlyphSet> glyphSet;
 
-  Point pt;
-  Box boundingBox;
+  IntPoint pt;
+  IntBox boundingBox;
 };
 
 // ============================================================================
@@ -803,7 +803,7 @@ struct FOG_HIDDEN RasterPaintCalcPath : public RasterPaintCalc
   RasterPaintEngine* engine;
 
   //! @brief Path to process.
-  Static<Path> path;
+  Static<DoublePath> path;
   bool stroke;
 };
 
@@ -936,25 +936,25 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   // --------------------------------------------------------------------------
 
   virtual void setMetaVariables(
-    const Point& metaOrigin,
+    const IntPoint& metaOrigin,
     const Region& metaRegion,
     bool useMetaRegion,
     bool reset);
 
-  virtual void setMetaOrigin(const Point& pt);
-  virtual void setUserOrigin(const Point& pt);
+  virtual void setMetaOrigin(const IntPoint& pt);
+  virtual void setUserOrigin(const IntPoint& pt);
 
-  virtual void translateMetaOrigin(const Point& pt);
-  virtual void translateUserOrigin(const Point& pt);
+  virtual void translateMetaOrigin(const IntPoint& pt);
+  virtual void translateUserOrigin(const IntPoint& pt);
 
-  virtual void setUserRegion(const Rect& r);
+  virtual void setUserRegion(const IntRect& r);
   virtual void setUserRegion(const Region& r);
 
   virtual void resetMetaVars();
   virtual void resetUserVars();
 
-  virtual Point getMetaOrigin() const;
-  virtual Point getUserOrigin() const;
+  virtual IntPoint getMetaOrigin() const;
+  virtual IntPoint getUserOrigin() const;
 
   virtual Region getMetaRegion() const;
   virtual Region getUserRegion() const;
@@ -1024,20 +1024,20 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   // [Transformations]
   // --------------------------------------------------------------------------
 
-  virtual Matrix getMatrix() const;
-  virtual void setMatrix(const Matrix& m);
+  virtual DoubleMatrix getMatrix() const;
+  virtual void setMatrix(const DoubleMatrix& m);
   virtual void resetMatrix();
 
-  virtual void rotate(double angle, int order);
-  virtual void scale(double sx, double sy, int order);
-  virtual void skew(double sx, double sy, int order);
-  virtual void translate(double x, double y, int order);
-  virtual void transform(const Matrix& m, int order);
+  virtual void rotate(double angle, uint32_t order);
+  virtual void scale(double sx, double sy, uint32_t order);
+  virtual void skew(double sx, double sy, uint32_t order);
+  virtual void translate(double x, double y, uint32_t order);
+  virtual void transform(const DoubleMatrix& m, uint32_t order);
 
-  virtual void worldToScreen(PointD* pt) const;
-  virtual void screenToWorld(PointD* pt) const;
+  virtual void worldToScreen(DoublePoint* pt) const;
+  virtual void screenToWorld(DoublePoint* pt) const;
 
-  virtual void alignPoint(PointD* pt) const;
+  virtual void alignPoint(DoublePoint* pt) const;
 
   // --------------------------------------------------------------------------
   // [State]
@@ -1051,54 +1051,54 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   // --------------------------------------------------------------------------
 
   virtual void clear();
-  virtual void drawPoint(const Point& p);
-  virtual void drawLine(const Point& start, const Point& end);
-  virtual void drawRect(const Rect& r);
-  virtual void drawRound(const Rect& r, const Point& radius);
-  virtual void fillRect(const Rect& r);
-  virtual void fillRects(const Rect* r, sysuint_t count);
-  virtual void fillRound(const Rect& r, const Point& radius);
+  virtual void drawPoint(const IntPoint& p);
+  virtual void drawLine(const IntPoint& start, const IntPoint& end);
+  virtual void drawRect(const IntRect& r);
+  virtual void drawRound(const IntRect& r, const IntPoint& radius);
+  virtual void fillRect(const IntRect& r);
+  virtual void fillRects(const IntRect* r, sysuint_t count);
+  virtual void fillRound(const IntRect& r, const IntPoint& radius);
   virtual void fillRegion(const Region& region);
 
   // --------------------------------------------------------------------------
   // [Vector Drawing]
   // --------------------------------------------------------------------------
 
-  virtual void drawPoint(const PointD& p);
-  virtual void drawLine(const PointD& start, const PointD& end);
-  virtual void drawLine(const PointD* pts, sysuint_t count);
-  virtual void drawPolygon(const PointD* pts, sysuint_t count);
-  virtual void drawRect(const RectD& r);
-  virtual void drawRects(const RectD* r, sysuint_t count);
-  virtual void drawRound(const RectD& r, const PointD& radius);
-  virtual void drawEllipse(const PointD& cp, const PointD& r);
-  virtual void drawArc(const PointD& cp, const PointD& r, double start, double sweep);
-  virtual void drawPath(const Path& path);
+  virtual void drawPoint(const DoublePoint& p);
+  virtual void drawLine(const DoublePoint& start, const DoublePoint& end);
+  virtual void drawLine(const DoublePoint* pts, sysuint_t count);
+  virtual void drawPolygon(const DoublePoint* pts, sysuint_t count);
+  virtual void drawRect(const DoubleRect& r);
+  virtual void drawRects(const DoubleRect* r, sysuint_t count);
+  virtual void drawRound(const DoubleRect& r, const DoublePoint& radius);
+  virtual void drawEllipse(const DoublePoint& cp, const DoublePoint& r);
+  virtual void drawArc(const DoublePoint& cp, const DoublePoint& r, double start, double sweep);
+  virtual void drawPath(const DoublePath& path);
 
-  virtual void fillPolygon(const PointD* pts, sysuint_t count);
-  virtual void fillRect(const RectD& r);
-  virtual void fillRects(const RectD* r, sysuint_t count);
-  virtual void fillRound(const RectD& r, const PointD& radius);
-  virtual void fillEllipse(const PointD& cp, const PointD& r);
-  virtual void fillArc(const PointD& cp, const PointD& r, double start, double sweep);
-  virtual void fillPath(const Path& path);
+  virtual void fillPolygon(const DoublePoint* pts, sysuint_t count);
+  virtual void fillRect(const DoubleRect& r);
+  virtual void fillRects(const DoubleRect* r, sysuint_t count);
+  virtual void fillRound(const DoubleRect& r, const DoublePoint& radius);
+  virtual void fillEllipse(const DoublePoint& cp, const DoublePoint& r);
+  virtual void fillArc(const DoublePoint& cp, const DoublePoint& r, double start, double sweep);
+  virtual void fillPath(const DoublePath& path);
 
   // --------------------------------------------------------------------------
   // [Glyph / Text Drawing]
   // --------------------------------------------------------------------------
 
-  virtual void drawGlyph(const Point& pt, const Glyph& glyph, const Rect* clip);
-  virtual void drawGlyphSet(const Point& pt, const GlyphSet& glyphSet, const Rect* clip);
+  virtual void drawGlyph(const IntPoint& pt, const Glyph& glyph, const IntRect* clip);
+  virtual void drawGlyphSet(const IntPoint& pt, const GlyphSet& glyphSet, const IntRect* clip);
 
-  virtual void drawText(const Point& p, const String& text, const Font& font, const Rect* clip);
-  virtual void drawText(const Rect& r, const String& text, const Font& font, uint32_t align, const Rect* clip);
+  virtual void drawText(const IntPoint& p, const String& text, const Font& font, const IntRect* clip);
+  virtual void drawText(const IntRect& r, const String& text, const Font& font, uint32_t align, const IntRect* clip);
 
   // --------------------------------------------------------------------------
   // [Image drawing]
   // --------------------------------------------------------------------------
 
-  virtual void blitImage(const Point& p, const Image& image, const Rect* irect);
-  virtual void blitImage(const PointD& p, const Image& image, const Rect* irect);
+  virtual void blitImage(const IntPoint& p, const Image& image, const IntRect* irect);
+  virtual void blitImage(const DoublePoint& p, const Image& image, const IntRect* irect);
 
   // --------------------------------------------------------------------------
   // [Helpers]
@@ -1142,11 +1142,11 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   // --------------------------------------------------------------------------
 
   // Serializers are always called from painter thread.
-  void _serializeBoxes(const Box* box, sysuint_t count);
-  void _serializeImage(const Rect& dst, const Image& image, const Rect& src);
-  void _serializeImageAffine(const PointD& pt, const Image& image, const Rect* irect);
-  void _serializeGlyphSet(const Point& pt, const GlyphSet& glyphSet, const Rect* clip);
-  void _serializePath(const Path& path, bool stroke);
+  void _serializeBoxes(const IntBox* box, sysuint_t count);
+  void _serializeImage(const IntRect& dst, const Image& image, const IntRect& src);
+  void _serializeImageAffine(const DoublePoint& pt, const Image& image, const IntRect* irect);
+  void _serializeGlyphSet(const IntPoint& pt, const GlyphSet& glyphSet, const IntRect* clip);
+  void _serializePath(const DoublePath& path, bool stroke);
 
   template<typename T> FOG_INLINE T* _createCommand(sysuint_t size = sizeof(T));
   template<typename T> FOG_INLINE T* _createCommand(sysuint_t size, RasterEngine::PatternContext* pctx);
@@ -1158,16 +1158,16 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   // [Rasterization]
   // --------------------------------------------------------------------------
 
-  static bool _rasterizePath(RasterPaintContext* ctx, Rasterizer* ras, const Path& path, bool stroke);
+  static bool _rasterizePath(RasterPaintContext* ctx, Rasterizer* ras, const DoublePath& path, bool stroke);
 
   // --------------------------------------------------------------------------
   // [Renderering]
   // --------------------------------------------------------------------------
 
-  static void _renderBoxes(RasterPaintContext* ctx, const Box* box, sysuint_t count);
-  static void _renderImage(RasterPaintContext* ctx, const Rect& dst, const Image& image, const Rect& src);
-  static void _renderImageAffineBound(RasterPaintContext* ctx, const PointD& pt, const Image& image);
-  static void _renderGlyphSet(RasterPaintContext* ctx, const Point& pt, const GlyphSet& glyphSet, const Box& boundingBox);
+  static void _renderBoxes(RasterPaintContext* ctx, const IntBox* box, sysuint_t count);
+  static void _renderImage(RasterPaintContext* ctx, const IntRect& dst, const Image& image, const IntRect& src);
+  static void _renderImageAffineBound(RasterPaintContext* ctx, const DoublePoint& pt, const Image& image);
+  static void _renderGlyphSet(RasterPaintContext* ctx, const IntPoint& pt, const GlyphSet& glyphSet, const IntBox& boundingBox);
   static void _renderPath(RasterPaintContext* ctx, Rasterizer* ras, bool textureBlit);
 
   // --------------------------------------------------------------------------
@@ -1179,7 +1179,7 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   MemoryAllocator allocator;
 
   // Temporary path.
-  Path tmpPath;
+  DoublePath tmpPath;
 
   // Temporary glyph set.
   GlyphSet tmpGlyphSet;

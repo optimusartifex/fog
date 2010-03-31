@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -24,7 +24,7 @@ namespace Fog {
 // [Forward Declarations]
 // ============================================================================
 
-struct Rect;
+struct IntRect;
 
 // ============================================================================
 // [Fog::ConvolutionMatrixI]
@@ -32,11 +32,15 @@ struct Rect;
 
 struct FOG_API ConvolutionMatrixI
 {
+  // --------------------------------------------------------------------------
   // [Value Type]
+  // --------------------------------------------------------------------------
 
   typedef int ValueType;
 
+  // --------------------------------------------------------------------------
   // [Data]
+  // --------------------------------------------------------------------------
 
   struct FOG_API Data
   {
@@ -68,7 +72,9 @@ struct FOG_API ConvolutionMatrixI
 
   static Static<Data> sharedNull;
 
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   ConvolutionMatrixI();
   ConvolutionMatrixI(const ConvolutionMatrixI& other);
@@ -79,7 +85,9 @@ struct FOG_API ConvolutionMatrixI
 
   static ConvolutionMatrixI fromData(int w, int h, const ValueType* data);
 
+  // --------------------------------------------------------------------------
   // [Implicit Sharing]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE sysuint_t refCount() const { return _d->refCount.get(); }
   FOG_INLINE bool isDetached() const { return _d->refCount.get() == 1; }
@@ -87,17 +95,23 @@ struct FOG_API ConvolutionMatrixI
 
   err_t _detach();
 
+  // --------------------------------------------------------------------------
   // [Flags]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE bool isEmpty() const { return _d->width == 0; }
   FOG_INLINE bool isNull() const { return _d == sharedNull.instancep(); }
 
+  // --------------------------------------------------------------------------
   // [Width / Height]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE int getWidth() const { return _d->width; }
   FOG_INLINE int getHeight() const { return _d->height; }
 
+  // --------------------------------------------------------------------------
   // [Manipulation]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE const ValueType* getData() const { return _d->m; }
   FOG_INLINE ValueType* getMData() { return detach() ? NULL : _d->m; }
@@ -116,15 +130,19 @@ struct FOG_API ConvolutionMatrixI
   int getCell(int x, int y) const;
   err_t setCell(int x, int y, int val);
 
-  err_t fill(const Rect& rect, ValueType value);
+  err_t fill(const IntRect& rect, ValueType value);
 
+  // --------------------------------------------------------------------------
   // [Operator Overload]
+  // --------------------------------------------------------------------------
 
   ConvolutionMatrixI& operator=(const ConvolutionMatrixI& other);
 
   ValueType* operator[](int y);
 
+  // --------------------------------------------------------------------------
   // [Members]
+  // --------------------------------------------------------------------------
 
   FOG_DECLARE_D(Data)
 };

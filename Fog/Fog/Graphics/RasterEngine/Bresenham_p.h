@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Private API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -223,12 +223,12 @@ struct FOG_HIDDEN BresenhamLineIterator
     return true;
   }
 
-  FOG_INLINE bool initAndClip(int x1, int y1, int x2, int y2, const Box& clip)
+  FOG_INLINE bool initAndClip(int x1, int y1, int x2, int y2, const IntBox& clip)
   {
     return initAndClip(x1, y1, x2, y2, clip.getX1(), clip.getY1(), clip.getX2()-1, clip.getY2()-1);
   }
 
-  FOG_INLINE bool initAndClip(int x1, int y1, int x2, int y2, const Rect& clip)
+  FOG_INLINE bool initAndClip(int x1, int y1, int x2, int y2, const IntRect& clip)
   {
     return initAndClip(x1, y1, x2, y2, clip.getX1(), clip.getY1(), clip.getX2()-1, clip.getY2()-1);
   }

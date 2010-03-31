@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Precompiled Headers]
@@ -385,7 +385,7 @@ err_t Image::to8Bit()
 
     for (y = 0; y < h; y++, dstBase += dstStride, srcBase += srcStride)
     {
-      converter(dstBase, srcBase, w, Point(0, y), palConv);
+      converter(dstBase, srcBase, w, IntPoint(0, y), palConv);
     }
   }
 
@@ -1255,7 +1255,7 @@ Image Image::extractChannel(uint32_t channel) const
 // [Fog::Image - Color Filter]
 // ============================================================================
 
-static err_t applyColorFilter(Image& im, const Box& box, ColorFilterFn fn, const void* context)
+static err_t applyColorFilter(Image& im, const IntBox& box, ColorFilterFn fn, const void* context)
 {
   // Clip.
   int imgw = im.getWidth();
@@ -1285,9 +1285,9 @@ static err_t applyColorFilter(Image& im, const Box& box, ColorFilterFn fn, const
   return ERR_OK;
 }
 
-err_t Image::filter(const ColorFilter& f, const Rect* area)
+err_t Image::filter(const ColorFilter& f, const IntRect* area)
 {
-  Box abox(0, 0, getWidth(), getHeight());
+  IntBox abox(0, 0, getWidth(), getHeight());
   if (area) abox.set(area->getX1(), area->getY1(), area->getX2(), area->getY2());
 
   ColorFilterFn fn = f.getEngine()->getColorFilterFn(getFormat());
@@ -1300,9 +1300,9 @@ err_t Image::filter(const ColorFilter& f, const Rect* area)
   return err;
 }
 
-err_t Image::filter(const ColorLut& lut, const Rect* area)
+err_t Image::filter(const ColorLut& lut, const IntRect* area)
 {
-  Box abox(0, 0, getWidth(), getHeight());
+  IntBox abox(0, 0, getWidth(), getHeight());
   if (area) abox.set(area->getX1(), area->getY1(), area->getX2(), area->getY2());
 
   ColorFilterFn fn = (ColorFilterFn)RasterEngine::functionMap->filter.color_lut[getFormat()];
@@ -1311,9 +1311,9 @@ err_t Image::filter(const ColorLut& lut, const Rect* area)
   return applyColorFilter(*this, abox, fn, lut.getData());
 }
 
-err_t Image::filter(const ColorMatrix& cm, const Rect* area)
+err_t Image::filter(const ColorMatrix& cm, const IntRect* area)
 {
-  Box abox(0, 0, getWidth(), getHeight());
+  IntBox abox(0, 0, getWidth(), getHeight());
   if (area) abox.set(area->getX1(), area->getY1(), area->getX2(), area->getY2());
 
   ColorFilterFn fn = (ColorFilterFn)RasterEngine::functionMap->filter.color_matrix[getFormat()];
@@ -1326,7 +1326,7 @@ err_t Image::filter(const ColorMatrix& cm, const Rect* area)
 // [Fog::Image - Image Filter]
 // ============================================================================
 
-static err_t applyImageFilter(Image& im, const Box& box, const ImageFilter& filter)
+static err_t applyImageFilter(Image& im, const IntBox& box, const ImageFilter& filter)
 {
   // Never call applyImageFilter() with color filter, see applyColorFilter().
   FOG_ASSERT((filter.getCharacteristics() & IMAGE_FILTER_CHAR_COLOR_TRANSFORM) == 0);
@@ -1429,7 +1429,7 @@ end:
   return err;
 }
 
-err_t Image::filter(const ImageFilter& f, const Rect* area)
+err_t Image::filter(const ImageFilter& f, const IntRect* area)
 {
   // Use optimized way for ColorFilter if image doest color transform.
   if (f.getCharacteristics() & IMAGE_FILTER_CHAR_COLOR_TRANSFORM)
@@ -1437,7 +1437,7 @@ err_t Image::filter(const ImageFilter& f, const Rect* area)
     return filter(reinterpret_cast<const ColorFilter&>(f), area);
   }
 
-  Box abox(0, 0, getWidth(), getHeight());
+  IntBox abox(0, 0, getWidth(), getHeight());
   if (area) abox.set(area->getX1(), area->getY1(), area->getX2(), area->getY2());
 
   return applyImageFilter(*this, abox, f);
@@ -1447,7 +1447,7 @@ err_t Image::filter(const ImageFilter& f, const Rect* area)
 // [Fog::Image - Scaling]
 // ============================================================================
 
-Image Image::scale(const Size& to, int interpolationType)
+Image Image::scale(const IntSize& to, int interpolationType)
 {
   Image dst;
 
@@ -1483,10 +1483,10 @@ Image Image::scale(const Size& to, int interpolationType)
 
 err_t Image::clear(Argb c0)
 {
-  return fillRect(Rect(0, 0, getWidth(), getHeight()), c0, OPERATOR_SRC);
+  return fillRect(IntRect(0, 0, getWidth(), getHeight()), c0, OPERATOR_SRC);
 }
 
-err_t Image::drawPixel(const Point& pt, Argb c0)
+err_t Image::drawPixel(const IntPoint& pt, Argb c0)
 {
   if ((uint)pt.x >= (uint)getWidth() || (uint)pt.y >= (uint)getHeight())
     return ERR_OK;
@@ -1545,7 +1545,7 @@ static void Draw_BresenhamLine(uint8_t* dst, sysint_t dstStride, uint32_t c0, Ra
   if (last) Op::store(dst, c0);
 }
 
-err_t Image::drawLine(const Point& pt0, const Point& pt1, Argb c0, bool lastPoint)
+err_t Image::drawLine(const IntPoint& pt0, const IntPoint& pt1, Argb c0, bool lastPoint)
 {
   if (isEmpty())
     return ERR_OK;
@@ -1578,7 +1578,7 @@ err_t Image::drawLine(const Point& pt0, const Point& pt1, Argb c0, bool lastPoin
   return ERR_OK;
 }
 
-err_t Image::fillRect(const Rect& r, Argb c0, int op)
+err_t Image::fillRect(const IntRect& r, Argb c0, int op)
 {
   if ((uint)op >= OPERATOR_COUNT) return ERR_RT_INVALID_ARGUMENT;
 
@@ -1630,7 +1630,7 @@ err_t Image::fillRect(const Rect& r, Argb c0, int op)
 // [Fog::Image - Painting - Gradients]
 // ============================================================================
 
-err_t Image::fillQGradient(const Rect& r, Argb c0, Argb c1, Argb c2, Argb c3, int op)
+err_t Image::fillQGradient(const IntRect& r, Argb c0, Argb c1, Argb c2, Argb c3, int op)
 {
   if (getFormat() == PIXEL_FORMAT_I8) return ERR_IMAGE_UNSUPPORTED_FORMAT;
 
@@ -1728,7 +1728,7 @@ err_t Image::fillQGradient(const Rect& r, Argb c0, Argb c1, Argb c2, Argb c3, in
   return ERR_OK;
 }
 
-err_t Image::fillHGradient(const Rect& r, Argb c0, Argb c1, int op)
+err_t Image::fillHGradient(const IntRect& r, Argb c0, Argb c1, int op)
 {
   if (getFormat() == PIXEL_FORMAT_I8) return ERR_IMAGE_UNSUPPORTED_FORMAT;
   if (c0 == c1) return fillRect(r, c0, op);
@@ -1787,7 +1787,7 @@ err_t Image::fillHGradient(const Rect& r, Argb c0, Argb c1, int op)
   return ERR_OK;
 }
 
-err_t Image::fillVGradient(const Rect& r, Argb c0, Argb c1, int op)
+err_t Image::fillVGradient(const IntRect& r, Argb c0, Argb c1, int op)
 {
   if (getFormat() == PIXEL_FORMAT_I8) return ERR_IMAGE_UNSUPPORTED_FORMAT;
   if (c0 == c1) return fillRect(r, c0, op);
@@ -1946,7 +1946,7 @@ static err_t _blitImage(
 }
 
 // TODO: Operator should be 'int'.
-err_t Image::blitImage(const Point& pt, const Image& src, uint32_t op, uint32_t opacity)
+err_t Image::blitImage(const IntPoint& pt, const Image& src, uint32_t op, uint32_t opacity)
 {
   if ((uint)op >= OPERATOR_COUNT) return ERR_RT_INVALID_ARGUMENT;
   if (opacity == 0) return ERR_OK;
@@ -1975,7 +1975,7 @@ err_t Image::blitImage(const Point& pt, const Image& src, uint32_t op, uint32_t 
 }
 
 // TODO: Operator should be 'int'.
-err_t Image::blitImage(const Point& pt, const Image& src, const Rect& srcRect, uint32_t op, uint32_t opacity)
+err_t Image::blitImage(const IntPoint& pt, const Image& src, const IntRect& srcRect, uint32_t op, uint32_t opacity)
 {
   if ((uint)op >= OPERATOR_COUNT) return ERR_RT_INVALID_ARGUMENT;
   if (!srcRect.isValid()) return ERR_OK;
@@ -2019,10 +2019,10 @@ err_t Image::blitImage(const Point& pt, const Image& src, const Rect& srcRect, u
 
 err_t Image::scroll(int scrollX, int scrollY)
 {
-  return scroll(scrollX, scrollY, Rect(0, 0, getWidth(), getHeight()));
+  return scroll(scrollX, scrollY, IntRect(0, 0, getWidth(), getHeight()));
 }
 
-err_t Image::scroll(int scrollX, int scrollY, const Rect& r)
+err_t Image::scroll(int scrollX, int scrollY, const IntRect& r)
 {
   if (scrollX == 0 && scrollY == 0) return ERR_OK;
 
@@ -2086,7 +2086,7 @@ err_t Image::scroll(int scrollX, int scrollY, const Rect& r)
 // [Fog::Image - Misc]
 // ============================================================================
 
-err_t Image::glyphFromPath(Image& glyph, Point& offset, const Path& path)
+err_t Image::glyphFromPath(Image& glyph, IntPoint& offset, const DoublePath& path)
 {
   if (path.isEmpty())
   {
@@ -2106,7 +2106,7 @@ err_t Image::glyphFromPath(Image& glyph, Point& offset, const Path& path)
   }
   else
   {
-    Path temp;
+    DoublePath temp;
 
     err = temp.flattenTo(temp, NULL, 1.0);
     if (err != ERR_OK) goto end;
@@ -2118,7 +2118,7 @@ err_t Image::glyphFromPath(Image& glyph, Point& offset, const Path& path)
 
   if (rasterizer->hasCells())
   {
-    Box bounds(rasterizer->getCellsBounds());
+    IntBox bounds(rasterizer->getCellsBounds());
 
     Scanline32 scanline;
 

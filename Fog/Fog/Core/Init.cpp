@@ -1,6 +1,6 @@
 // [Fog Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Precompiled Headers]
@@ -62,7 +62,6 @@ FOG_INIT_FUNC(fog_glyph);
 FOG_INIT_FUNC(fog_glyphset);
 FOG_INIT_FUNC(fog_pattern);
 FOG_INIT_FUNC(fog_font);
-FOG_INIT_FUNC(fog_fontmanager);
 FOG_INIT_FUNC(fog_painter);
 
 // Fog-Gui
@@ -134,7 +133,6 @@ static const FogInitEntry fog_init_entries[] =
   INIT_ENTRY(fog_glyphset),
   INIT_ENTRY(fog_pattern),
   INIT_ENTRY(fog_font),
-  INIT_ENTRY(fog_fontmanager),
   INIT_ENTRY(fog_painter),
 
   // Fog-Gui

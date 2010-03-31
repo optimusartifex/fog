@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 //----------------------------------------------------------------------------
@@ -395,13 +395,13 @@ struct FOG_HIDDEN AnalyticRasterizer : public Rasterizer
   virtual void pooled();
   virtual void reset();
 
-  virtual void setClipBox(const Box& clipBox);
+  virtual void setClipBox(const IntBox& clipBox);
   virtual void resetClipBox();
 
   virtual void setError(err_t error);
   virtual void resetError();
 
-  virtual void addPath(const Path& path);
+  virtual void addPath(const DoublePath& path);
   void closePolygon();
 
   void clipLine(int24x8_t x1, int24x8_t y1, int24x8_t x2, int24x8_t y2, uint f1, uint f2);
@@ -425,12 +425,12 @@ struct FOG_HIDDEN AnalyticRasterizer : public Rasterizer
   FOG_INLINE uint calculateAlphaEvenOdd(int area) const;
 
   virtual uint sweepScanline(Scanline32* scanline, int y);
-  virtual uint sweepScanline(Scanline32* scanline, int y, const Box* clip, sysuint_t count);
+  virtual uint sweepScanline(Scanline32* scanline, int y, const IntBox* clip, sysuint_t count);
 
   //! @brief Whether rasterizer clipping is enabled.
   int _clipping;
   //! @brief Rasterizer clip box in 24x8 format.
-  Box _clip24x8;
+  IntBox _clip24x8;
 
   //! @brief Current x position.
   int24x8_t _x1;
@@ -684,7 +684,7 @@ void AnalyticRasterizer::reset()
 // [Fog::AnalyticRasterizer - Clipping]
 // ============================================================================
 
-void AnalyticRasterizer::setClipBox(const Box& clipBox)
+void AnalyticRasterizer::setClipBox(const IntBox& clipBox)
 {
   _clipping = true;
   _clipBox = clipBox;
@@ -718,7 +718,7 @@ void AnalyticRasterizer::resetError()
 // [Fog::AnalyticRasterizer - Commands]
 // ============================================================================
 
-void AnalyticRasterizer::addPath(const Path& path)
+void AnalyticRasterizer::addPath(const DoublePath& path)
 {
   FOG_ASSERT(_finalized == false);
 
@@ -726,7 +726,7 @@ void AnalyticRasterizer::addPath(const Path& path)
   if (!i) return;
 
   const uint8_t* commands = path.getCommands();
-  const PointD* vertices = path.getVertices();
+  const DoublePoint* vertices = path.getVertices();
 
   if (_clipping)
   {
@@ -1665,7 +1665,7 @@ uint AnalyticRasterizer::sweepScanline(Scanline32* scanline, int y)
 #undef SWEEP
 }
 
-uint AnalyticRasterizer::sweepScanline(Scanline32* scanline, int y, const Box* clip, sysuint_t count)
+uint AnalyticRasterizer::sweepScanline(Scanline32* scanline, int y, const IntBox* clip, sysuint_t count)
 {
   FOG_ASSERT(_finalized);
   if (y >= _cellsBounds.y2) return 0;
@@ -1685,7 +1685,7 @@ uint AnalyticRasterizer::sweepScanline(Scanline32* scanline, int y, const Box* c
   uint alpha;
 
   // Clipping support.
-  const Box* clipEnd = clip + count;
+  const IntBox* clipEnd = clip + count;
   if (clip == clipEnd) return 0;
   // Clip end point (not part of clip span).
   int clipEndX = clip->x2;

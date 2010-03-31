@@ -1,6 +1,6 @@
 // [Fog-Core Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -234,7 +234,7 @@ enum EVENT_CORE_ENUM
 };
 
 // ============================================================================
-// [Fog::ERR_CORE]
+// [Fog::ERR_OK_ENUM]
 // ============================================================================
 
 //! @brief Single enumeration to define @c ERR_OK value.
@@ -244,14 +244,23 @@ enum ERR_OK_ENUM
   ERR_OK = 0
 };
 
+// ============================================================================
+// [Fog::ERR_CORE_ENUM]
+// ============================================================================
+
 //! @brief Error codes used in Fog-Core.
 enum ERR_CORE_ENUM
 {
-  // Errors Range.
+  // --------------------------------------------------------------------------
+  // [Core]
+  // --------------------------------------------------------------------------
+
   ERR_CORE_START = 0x00010000,
   ERR_CORE_LAST  = 0x00010FFF,
 
-  // Runtime errors.
+  // --------------------------------------------------------------------------
+  // [Runtime]
+  // --------------------------------------------------------------------------
 
   ERR_RT_OUT_OF_MEMORY = ERR_CORE_START,
   ERR_RT_NOT_IMPLEMENTED,
@@ -265,22 +274,25 @@ enum ERR_CORE_ENUM
 
   ERR_RT_OVERFLOW,
 
-  // Property errors.
+  // --------------------------------------------------------------------------
+  // [Property]
+  // --------------------------------------------------------------------------
 
   ERR_PROPERTY_INVALID_NAME,
   ERR_PROPERTY_INVALID_VALUE,
   ERR_PROPERTY_IS_READ_ONLY,
 
-  // IO Errors.
+  // --------------------------------------------------------------------------
+  // [IO]
+  // --------------------------------------------------------------------------
 
-  //IOEmpty,
-  //IOReadOnly,
-  //IONotFound,
+  // TODO: What is difference between ERR_IO_TOO_BIG and ERR_IO_FILE_TOO_BIG.
 
   ERR_IO_TOO_BIG,
   ERR_IO_NOT_A_FILE,
   ERR_IO_NOT_A_DIRECTORY,
   ERR_IO_FILE_IS_EMPTY,
+
   ERR_IO_FILE_TOO_BIG,
 
   ERR_IO_CANT_READ,
@@ -292,39 +304,57 @@ enum ERR_CORE_ENUM
   ERR_IO_FILE_NOT_EXISTS,
   ERR_IO_DIR_ALREADY_EXISTS,
 
-  // Library Errors.
+  // --------------------------------------------------------------------------
+  // [Library]
+  // --------------------------------------------------------------------------
 
   ERR_LIB_LOAD_FAILED,
   ERR_LIB_SYMBOL_NOT_FOUND,
 
-  // Text Errors (StringUtil, TextCodec).
+  // --------------------------------------------------------------------------
+  // [String / TextCodec]
+  // --------------------------------------------------------------------------
 
   //! @brief Invalid text input (converting strings to numbers).
-  ERR_TEXT_INVALID_INPUT,
+  ERR_STRING_INVALID_INPUT,
 
-  //! @brief Invalid text codec (Null) used to encode / decode string
-  ERR_TEXT_INVALID_CODEC,
+  //! @brief Invalid text codec (Null) used to encode / decode string.
+  ERR_STRING_INVALID_CODEC,
+
   //! @brief Invalid UTF-8 sequence.
-  ERR_TEXT_INVALID_UTF8_SEQ,
+  ERR_STRING_INVALID_UTF8,
+
   //! @brief Invalid UTF-16 sequence (surrogate pair error).
-  ERR_TEXT_INVALID_UTF16_SEQ,
+  ERR_STRING_INVALID_UTF16,
+
   //! @brief Invalid UCS-2 sequence (surrogate pair in UCS-2).
-  ERR_TEXT_INVALID_UCS2_SEQ,
+  ERR_STRING_INVALID_UCS2,
+
   //! @brief Invalid Unicode character.
-  ERR_TEXT_INVALID_CHAR,
-  //! @brief Incomplete input buffer.
-  ERR_TEXT_INPUT_TRUNCATED,
-  //! @brief Some characters loss during conversion (replaced by '?' or a given replacer).
+  ERR_STRING_INVALID_CHAR,
+
+  //! @brief Truncated (incomplete) input buffer.
+  //!
+  //! This error can be returned if you passed UTF-16 string to some function
+  //! and the string ends with UTF-16 lead surrogate character.
+  ERR_STRING_TRUNCATED,
+
+  //! @brief Some characters lost during conversion (replaced by '?' or a given replacer).
   //!
   //! This can only happen when converting unicode to non-unicode encoding.
-  ERR_TEXT_CHARACTERS_LOSS,
+  ERR_STRING_LOST,
 
-  // Environment Errors.
+  // --------------------------------------------------------------------------
+  // [Environment]
+  // --------------------------------------------------------------------------
 
   ERR_ENV_GET_FAILED,
   ERR_ENV_SET_FAILED,
 
-  // User Errors.
+  // --------------------------------------------------------------------------
+  // [User]
+  // --------------------------------------------------------------------------
+
   ERR_USER_NO_HOME_DIRECTORY,
   ERR_USER_NO_XDG_DIRECTORY
 };

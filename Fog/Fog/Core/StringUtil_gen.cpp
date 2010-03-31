@@ -1,6 +1,6 @@
 // [Fog-Core Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Generator]
@@ -20,7 +20,7 @@ err_t atob(const CHAR_TYPE* str, sysuint_t length, bool* dst, sysuint_t* parserE
   const CHAR_TYPE* beg = str;
   const CHAR_TYPE* end = str + length;
 
-  err_t err = ERR_TEXT_INVALID_INPUT;
+  err_t err = ERR_STRING_INVALID_INPUT;
   uint32_t flags = 0;
   sysuint_t i;
   sysuint_t remain = (sysuint_t)(end - str);
@@ -460,7 +460,7 @@ truncated:
   *dst = 0;
   if (parserEnd) *parserEnd = length;
   if (parserFlags) *parserFlags = flags;
-  return ERR_TEXT_INVALID_INPUT;
+  return ERR_STRING_INVALID_INPUT;
 }
 
 err_t atoi64(const CHAR_TYPE* str, sysuint_t length, int64_t* dst, int base, sysuint_t* end, uint32_t* parserFlags)

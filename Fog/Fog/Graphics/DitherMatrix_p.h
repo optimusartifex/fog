@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Private API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -34,7 +34,9 @@ namespace Fog {
 //! library. Evas is BSD licensed, main developer is rasterman <www.rasterman.com>
 struct FOG_HIDDEN DitherMatrix
 {
+  // --------------------------------------------------------------------------
   // [Constants]
+  // --------------------------------------------------------------------------
 
   enum {
 #ifdef FOG_SMALL_DITHER
@@ -52,16 +54,20 @@ struct FOG_HIDDEN DitherMatrix
 #endif // FOG_SMALL_DITHER
   };
 
+  // --------------------------------------------------------------------------
   // [Table]
+  // --------------------------------------------------------------------------
 
   // To find correct position in dithering table, use this formula:
   // table[X & Mask][Y & Mask]
   static const uint8_t matrix[SIZE][SIZE];
 
+  // --------------------------------------------------------------------------
   // [Helpers]
   //
   // Helpers that helps us to use this dithering table for
   // more image types and bit depths
+  // --------------------------------------------------------------------------
 
   //! @brief Shifting argument helper.
   template<typename T>

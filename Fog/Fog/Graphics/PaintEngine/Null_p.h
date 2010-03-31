@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Private API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -57,18 +57,18 @@ struct FOG_HIDDEN NullPaintEngine : public PaintEngine
   // [Meta]
   // --------------------------------------------------------------------------
 
-  virtual void setMetaVariables(const Point& metaOrigin, const Region& metaRegion, bool useMetaRegion, bool reset) {}
+  virtual void setMetaVariables(const IntPoint& metaOrigin, const Region& metaRegion, bool useMetaRegion, bool reset) {}
 
-  virtual void setMetaOrigin(const Point& pt) {}
-  virtual void setUserOrigin(const Point& pt) {}
+  virtual void setMetaOrigin(const IntPoint& pt) {}
+  virtual void setUserOrigin(const IntPoint& pt) {}
 
-  virtual Point getMetaOrigin() const { return Point(0, 0); }
-  virtual Point getUserOrigin() const { return Point(0, 0); }
+  virtual IntPoint getMetaOrigin() const { return IntPoint(0, 0); }
+  virtual IntPoint getUserOrigin() const { return IntPoint(0, 0); }
 
-  virtual void translateMetaOrigin(const Point& pt) {}
-  virtual void translateUserOrigin(const Point& pt) {}
+  virtual void translateMetaOrigin(const IntPoint& pt) {}
+  virtual void translateUserOrigin(const IntPoint& pt) {}
 
-  virtual void setUserRegion(const Rect& r) {}
+  virtual void setUserRegion(const IntRect& r) {}
   virtual void setUserRegion(const Region& r) {}
 
   virtual Region getMetaRegion() const { return Region(); }
@@ -141,20 +141,20 @@ struct FOG_HIDDEN NullPaintEngine : public PaintEngine
   // [Transformations]
   // --------------------------------------------------------------------------
 
-  virtual Matrix getMatrix() const { return Matrix(); }
-  virtual void setMatrix(const Matrix& m) {}
+  virtual DoubleMatrix getMatrix() const { return DoubleMatrix(); }
+  virtual void setMatrix(const DoubleMatrix& m) {}
   virtual void resetMatrix() {}
 
-  virtual void rotate(double angle, int order) {}
-  virtual void scale(double sx, double sy, int order) {}
-  virtual void skew(double sx, double sy, int order) {}
-  virtual void translate(double x, double y, int order) {}
-  virtual void transform(const Matrix& m, int order) {}
+  virtual void rotate(double angle, uint32_t order) {}
+  virtual void scale(double sx, double sy, uint32_t order) {}
+  virtual void skew(double sx, double sy, uint32_t order) {}
+  virtual void translate(double x, double y, uint32_t order) {}
+  virtual void transform(const DoubleMatrix& m, uint32_t order) {}
 
-  virtual void worldToScreen(PointD* pt) const {}
-  virtual void screenToWorld(PointD* pt) const {}
+  virtual void worldToScreen(DoublePoint* pt) const {}
+  virtual void screenToWorld(DoublePoint* pt) const {}
 
-  virtual void alignPoint(PointD* pt) const {}
+  virtual void alignPoint(DoublePoint* pt) const {}
 
   // --------------------------------------------------------------------------
   // [State]
@@ -173,54 +173,54 @@ struct FOG_HIDDEN NullPaintEngine : public PaintEngine
   // [Raster Drawing]
   // --------------------------------------------------------------------------
 
-  virtual void drawPoint(const Point& p) {}
-  virtual void drawLine(const Point& start, const Point& end) {}
-  virtual void drawRect(const Rect& r) {}
-  virtual void drawRound(const Rect& r, const Point& radius) {}
-  virtual void fillRect(const Rect& r) {}
-  virtual void fillRects(const Rect* r, sysuint_t count) {}
-  virtual void fillRound(const Rect& r, const Point& radius) {}
+  virtual void drawPoint(const IntPoint& p) {}
+  virtual void drawLine(const IntPoint& start, const IntPoint& end) {}
+  virtual void drawRect(const IntRect& r) {}
+  virtual void drawRound(const IntRect& r, const IntPoint& radius) {}
+  virtual void fillRect(const IntRect& r) {}
+  virtual void fillRects(const IntRect* r, sysuint_t count) {}
+  virtual void fillRound(const IntRect& r, const IntPoint& radius) {}
   virtual void fillRegion(const Region& region) {}
 
   // --------------------------------------------------------------------------
   // [Vector Drawing]
   // --------------------------------------------------------------------------
 
-  virtual void drawPoint(const PointD& p) {}
-  virtual void drawLine(const PointD& start, const PointD& end) {}
-  virtual void drawLine(const PointD* pts, sysuint_t count) {}
-  virtual void drawPolygon(const PointD* pts, sysuint_t count) {}
-  virtual void drawRect(const RectD& r) {}
-  virtual void drawRects(const RectD* r, sysuint_t count) {}
-  virtual void drawRound(const RectD& r, const PointD& radius) {}
-  virtual void drawEllipse(const PointD& cp, const PointD& r) {}
-  virtual void drawArc(const PointD& cp, const PointD& r, double start, double sweep) {}
-  virtual void drawPath(const Path& path) {}
+  virtual void drawPoint(const DoublePoint& p) {}
+  virtual void drawLine(const DoublePoint& start, const DoublePoint& end) {}
+  virtual void drawLine(const DoublePoint* pts, sysuint_t count) {}
+  virtual void drawPolygon(const DoublePoint* pts, sysuint_t count) {}
+  virtual void drawRect(const DoubleRect& r) {}
+  virtual void drawRects(const DoubleRect* r, sysuint_t count) {}
+  virtual void drawRound(const DoubleRect& r, const DoublePoint& radius) {}
+  virtual void drawEllipse(const DoublePoint& cp, const DoublePoint& r) {}
+  virtual void drawArc(const DoublePoint& cp, const DoublePoint& r, double start, double sweep) {}
+  virtual void drawPath(const DoublePath& path) {}
 
-  virtual void fillPolygon(const PointD* pts, sysuint_t count) {}
-  virtual void fillRect(const RectD& r) {}
-  virtual void fillRects(const RectD* r, sysuint_t count) {}
-  virtual void fillRound(const RectD& r, const PointD& radius) {}
-  virtual void fillEllipse(const PointD& cp, const PointD& r) {}
-  virtual void fillArc(const PointD& cp, const PointD& r, double start, double sweep) {}
-  virtual void fillPath(const Path& path) {}
+  virtual void fillPolygon(const DoublePoint* pts, sysuint_t count) {}
+  virtual void fillRect(const DoubleRect& r) {}
+  virtual void fillRects(const DoubleRect* r, sysuint_t count) {}
+  virtual void fillRound(const DoubleRect& r, const DoublePoint& radius) {}
+  virtual void fillEllipse(const DoublePoint& cp, const DoublePoint& r) {}
+  virtual void fillArc(const DoublePoint& cp, const DoublePoint& r, double start, double sweep) {}
+  virtual void fillPath(const DoublePath& path) {}
 
   // --------------------------------------------------------------------------
   // [Glyph / Text Drawing]
   // --------------------------------------------------------------------------
 
-  virtual void drawGlyph(const Point& pt, const Glyph& glyph, const Rect* clip) {}
-  virtual void drawGlyphSet(const Point& pt, const GlyphSet& glyphSet, const Rect* clip) {}
+  virtual void drawGlyph(const IntPoint& pt, const Glyph& glyph, const IntRect* clip) {}
+  virtual void drawGlyphSet(const IntPoint& pt, const GlyphSet& glyphSet, const IntRect* clip) {}
 
-  virtual void drawText(const Point& p, const String& text, const Font& font, const Rect* clip) {}
-  virtual void drawText(const Rect& r, const String& text, const Font& font, uint32_t align, const Rect* clip) {}
+  virtual void drawText(const IntPoint& p, const String& text, const Font& font, const IntRect* clip) {}
+  virtual void drawText(const IntRect& r, const String& text, const Font& font, uint32_t align, const IntRect* clip) {}
 
   // --------------------------------------------------------------------------
   // [Image drawing]
   // --------------------------------------------------------------------------
 
-  virtual void blitImage(const Point& p, const Image& image, const Rect* irect) {}
-  virtual void blitImage(const PointD& p, const Image& image, const Rect* irect) {}
+  virtual void blitImage(const IntPoint& p, const Image& image, const IntRect* irect) {}
+  virtual void blitImage(const DoublePoint& p, const Image& image, const IntRect* irect) {}
 };
 
 } // Fog namespace

@@ -1,6 +1,6 @@
 // [Fog-Gui Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Precompiled Headers]
@@ -23,9 +23,9 @@ namespace Fog {
 Layout::Layout() : 
   _parentItem(NULL),
   _layoutHint(
-    Size(WIDGET_MIN_SIZE, WIDGET_MIN_SIZE),
-    Size(WIDGET_MIN_SIZE, WIDGET_MIN_SIZE),
-    Size(WIDGET_MAX_SIZE, WIDGET_MAX_SIZE)),
+    IntSize(WIDGET_MIN_SIZE, WIDGET_MIN_SIZE),
+    IntSize(WIDGET_MIN_SIZE, WIDGET_MIN_SIZE),
+    IntSize(WIDGET_MAX_SIZE, WIDGET_MAX_SIZE)),
   _isLayoutDirty(true)
 {
   _flags |= OBJ_IS_LAYOUT;

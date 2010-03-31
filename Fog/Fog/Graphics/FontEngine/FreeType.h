@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -11,7 +11,6 @@
 #include <Fog/Core/Lock.h>
 #include <Fog/Core/String.h>
 #include <Fog/Graphics/Font.h>
-#include <Fog/Graphics/FontEngine.h>
 
 #if defined(FOG_FONT_FREETYPE)
 
@@ -82,7 +81,7 @@ struct FOG_API FTFontEngine : public FontEngine
 protected:
   void close();
 
-  Hash<String, FTFontFile*> _ftCache;
+  UnorderedHash<String, FTFontFile*> _ftCache;
 
 private:
   FOG_DISABLE_COPY(FTFontEngine)

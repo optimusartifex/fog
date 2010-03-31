@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -63,6 +63,90 @@ enum DPI_VALUE_TYPE
 
   //! @brief Count of DPI value units.
   DPI_VALUE_COUNT
+};
+
+// ============================================================================
+// [Fog::FONT_FACE_TYPE]
+// ============================================================================
+
+enum FONT_FACE_TYPE
+{
+  FONT_FACE_NONE = 0,
+  FONT_FACE_WINDOWS = 1,
+  FONT_FACE_FREETYPE = 2,
+  FONT_FACE_MAC = 3
+};
+
+// ============================================================================
+// [Fog::FONT_STYLE_TYPE]
+// ============================================================================
+
+enum FONT_STYLE_TYPE
+{
+  FONT_STYLE_NORMAL = 0,
+  FONT_STYLE_ITALIC = 1,
+  FONT_STYLE_OBLIQUE = 2
+};
+
+// ============================================================================
+// [Fog::FONT_WEIGHT_TYPE]
+// ============================================================================
+
+enum FONT_WEIGHT_TYPE
+{
+  FONT_WEIGHT_100 = 1,
+  FONT_WEIGHT_200 = 2,
+  FONT_WEIGHT_300 = 3,
+  FONT_WEIGHT_400 = 4,
+  FONT_WEIGHT_500 = 5,
+  FONT_WEIGHT_600 = 6,
+  FONT_WEIGHT_700 = 7,
+  FONT_WEIGHT_800 = 8,
+  FONT_WEIGHT_900 = 9,
+
+  FONT_WEIGHT_THIN = FONT_WEIGHT_100,
+  FONT_WEIGHT_EXTRALIGHT = FONT_WEIGHT_200,
+  FONT_WEIGHT_LIGHT = FONT_WEIGHT_300,
+  FONT_WEIGHT_NORMAL = FONT_WEIGHT_400,
+  FONT_WEIGHT_MEDIUM = FONT_WEIGHT_500,
+  FONT_WEIGHT_SEMIBOLD = FONT_WEIGHT_600,
+  FONT_WEIGHT_BOLD = FONT_WEIGHT_700,
+  FONT_WEIGHT_EXTRABOLD = FONT_WEIGHT_800,
+  FONT_WEIGHT_BLACK = FONT_WEIGHT_900
+};
+
+// ============================================================================
+// [Fog::FONT_DECORATION_FLAGS]
+// ============================================================================
+
+enum FONT_DECORATION_FLAGS
+{
+  FONT_DECORATION_NONE = 0x00,
+  FONT_DECORATION_UNDERLINE = 0x01,
+  FONT_DECORATION_STRIKE_THROUGH = 0x02
+};
+
+// ============================================================================
+// [Fog::FONT_KERNING_TYPE]
+// ============================================================================
+
+enum FONT_KERNING_TYPE
+{
+  FONT_KERNING_NONE = 0x00,
+  FONT_KERNING_ENABLED = 0x01,
+  FONT_KERNING_DEFAULT = 0xFF
+};
+
+// ============================================================================
+// [Fog::FONT_HINTING_TYPE]
+// ============================================================================
+
+enum FONT_HINTING_TYPE
+{
+  FONT_HINTING_NONE = 0x00,
+  FONT_HINTING_ENABLED = 0x01,
+  FONT_HINTING_METRICS = 0x02,
+  FONT_HINTING_DEFAULT = 0xFF
 };
 
 // ============================================================================
@@ -2035,6 +2119,7 @@ enum ERR_GRAPHICS_ENUM
 
   // Font Errors.
 
+  ERR_FONT_NOT_MATCHED,
   ERR_FONT_INVALID_FACE,
   ERR_FONT_INVALID_DATA,
   ERR_FONT_CANT_LOAD_DEFAULT_FACE,

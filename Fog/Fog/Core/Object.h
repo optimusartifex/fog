@@ -1,6 +1,6 @@
 // [Fog-Core Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -536,7 +536,7 @@ protected:
   //!
   //! @note Access to this structure must be always locked by
   //! @c fog_object_lock.
-  Hash<uint32_t, ObjectConnection*> _connection;
+  UnorderedHash<uint32_t, ObjectConnection*> _connection;
 
   //! @brief Back reference to connections.
   //!

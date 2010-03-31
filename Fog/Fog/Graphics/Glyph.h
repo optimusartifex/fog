@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -58,7 +58,7 @@ struct FOG_API GlyphData
   //! @brief Glyph bitmap data, supported formats are only A8 for now.
   Image bitmap;
   //! @brief Bitmap offset.
-  Point offset;
+  IntPoint offset;
 
   //! @brief Begin width.
   int beginWidth;
@@ -115,14 +115,14 @@ struct FOG_API Glyph
   FOG_INLINE const GlyphData* getData() const { return _d; }
 
   FOG_INLINE const Image& getBitmap() const { return _d->bitmap; }
-  FOG_INLINE const Point& getOffset() const { return _d->offset; }
+  FOG_INLINE const IntPoint& getOffset() const { return _d->offset; }
 
   FOG_INLINE int getBeginWidth() const { return _d->beginWidth; }
   FOG_INLINE int getEndWidth() const { return _d->endWidth; }
   FOG_INLINE int getAdvance() const { return _d->advance; }
 
   err_t setBitmap(const Image& bitmap);
-  err_t setOffset(const Point& offset);
+  err_t setOffset(const IntPoint& offset);
 
   // --------------------------------------------------------------------------
   // [Operator Overload]

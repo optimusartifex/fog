@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 #if defined(_MSVC)
@@ -63,8 +63,6 @@
 #include <Fog/Graphics/ColorMatrix.h>
 #include <Fog/Graphics/ConvolutionMatrix.h>
 #include <Fog/Graphics/Font.h>
-#include <Fog/Graphics/FontEngine.h>
-#include <Fog/Graphics/FontManager.h>
 #include <Fog/Graphics/Glyph.h>
 #include <Fog/Graphics/GlyphCache.h>
 #include <Fog/Graphics/GlyphSet.h>

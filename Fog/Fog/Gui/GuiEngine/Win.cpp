@@ -1,6 +1,6 @@
 // [Fog-Gui Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 #include <Fog/Build/Build.h>
@@ -77,7 +77,7 @@ namespace Fog {
 #define GUI_ENGINE() \
   reinterpret_cast<WinGuiEngine*>(Application::getInstance()->getGuiEngine())
 
-static void hwndGetRect(HWND handle, Rect* out)
+static void hwndGetRect(HWND handle, IntRect* out)
 {
   RECT wr;
   RECT cr;
@@ -392,7 +392,7 @@ void WinGuiEngine::updateDisplayInfo()
 // [Fog::WinGuiEngine - Update]
 // ============================================================================
 
-void WinGuiEngine::doBlitWindow(GuiWindow* window, const Box* rects, sysuint_t count)
+void WinGuiEngine::doBlitWindow(GuiWindow* window, const IntBox* rects, sysuint_t count)
 {
   HDC hdc = GetDC((HWND)window->getHandle());
   reinterpret_cast<WinGuiBackBuffer*>(window->_backingStore)->blitRects(hdc, rects, count);
@@ -835,7 +835,7 @@ err_t WinGuiWindow::hide()
   return ERR_OK;
 }
 
-err_t WinGuiWindow::move(const Point& pt)
+err_t WinGuiWindow::move(const IntPoint& pt)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
@@ -852,7 +852,7 @@ err_t WinGuiWindow::move(const Point& pt)
   return ERR_OK;
 }
 
-err_t WinGuiWindow::resize(const Size& size)
+err_t WinGuiWindow::resize(const IntSize& size)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
   if ((size.getWidth() <= 0) | (size.getHeight() <= 0)) return ERR_RT_INVALID_ARGUMENT;
@@ -870,7 +870,7 @@ err_t WinGuiWindow::resize(const Size& size)
   return ERR_OK;
 }
 
-err_t WinGuiWindow::reconfigure(const Rect& rect)
+err_t WinGuiWindow::reconfigure(const IntRect& rect)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
   if (!rect.isValid()) return ERR_RT_INVALID_ARGUMENT;
@@ -926,7 +926,7 @@ err_t WinGuiWindow::getIcon(Image& icon)
 
 }
 
-err_t WinGuiWindow::setSizeGranularity(const Point& pt)
+err_t WinGuiWindow::setSizeGranularity(const IntPoint& pt)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
@@ -934,7 +934,7 @@ err_t WinGuiWindow::setSizeGranularity(const Point& pt)
   return ERR_OK;
 }
 
-err_t WinGuiWindow::getSizeGranularity(Point& pt)
+err_t WinGuiWindow::getSizeGranularity(IntPoint& pt)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
@@ -942,7 +942,7 @@ err_t WinGuiWindow::getSizeGranularity(Point& pt)
   return ERR_OK;
 }
 
-err_t WinGuiWindow::worldToClient(Point* coords)
+err_t WinGuiWindow::worldToClient(IntPoint* coords)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
@@ -951,7 +951,7 @@ err_t WinGuiWindow::worldToClient(Point* coords)
     : (err_t)ERR_GUI_CANT_TRANSLETE_COORDINATES;
 }
 
-err_t WinGuiWindow::clientToWorld(Point* coords)
+err_t WinGuiWindow::clientToWorld(IntPoint* coords)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
@@ -998,8 +998,8 @@ LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
 
     case WM_WINDOWPOSCHANGED:
     {
-      Rect wr;
-      Rect cr;
+      IntRect wr;
+      IntRect cr;
       getWindowRect(&wr, &cr);
 
       WINDOWPOS *pos = (WINDOWPOS*)lParam;
@@ -1017,8 +1017,8 @@ LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
 
     case WM_SIZE:
     {
-      Rect wr;
-      Rect cr;
+      IntRect wr;
+      IntRect cr;
       getWindowRect(&wr, &cr);
 
       onConfigure(wr, cr);
@@ -1184,7 +1184,7 @@ defWindowProc:
   }
 }
 
-void WinGuiWindow::getWindowRect(Rect* windowRect, Rect* clientRect)
+void WinGuiWindow::getWindowRect(IntRect* windowRect, IntRect* clientRect)
 {
   RECT wr;
   RECT cr;
@@ -1336,12 +1336,12 @@ void WinGuiBackBuffer::destroy()
   resize(0, 0, false);
 }
 
-void WinGuiBackBuffer::updateRects(const Box* rects, sysuint_t count)
+void WinGuiBackBuffer::updateRects(const IntBox* rects, sysuint_t count)
 {
   // There is nothing to do (this is mainly for X11).
 }
 
-void WinGuiBackBuffer::blitRects(HDC target, const Box* rects, sysuint_t count)
+void WinGuiBackBuffer::blitRects(HDC target, const IntBox* rects, sysuint_t count)
 {
   sysuint_t i;
 

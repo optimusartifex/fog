@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -147,32 +147,32 @@ struct FOG_API Painter
   //! This function were designed as an optimization for windowing systems to
   //! set all important origin and clipping information per one function call.
   FOG_INLINE void setMetaVariables(
-    const Point& metaOrigin,
+    const IntPoint& metaOrigin,
     const Region& metaRegion, 
     bool useMetaRegion,
     bool reset)
   { _engine->setMetaVariables(metaOrigin, metaRegion, useMetaRegion, reset); }
 
   //! @brief Change meta origin to @a p.
-  FOG_INLINE void setMetaOrigin(const Point& p) { _engine->setMetaOrigin(p); }
+  FOG_INLINE void setMetaOrigin(const IntPoint& p) { _engine->setMetaOrigin(p); }
   //! @brief Change user origin to @a p.
-  FOG_INLINE void setUserOrigin(const Point& p) { _engine->setUserOrigin(p); }
+  FOG_INLINE void setUserOrigin(const IntPoint& p) { _engine->setUserOrigin(p); }
 
   //! @brief Get meta origin.
-  FOG_INLINE Point getMetaOrigin() const { return _engine->getMetaOrigin(); }
+  FOG_INLINE IntPoint getMetaOrigin() const { return _engine->getMetaOrigin(); }
   //! @brief Get user origin.
-  FOG_INLINE Point getUserOrigin() const { return _engine->getUserOrigin(); }
+  FOG_INLINE IntPoint getUserOrigin() const { return _engine->getUserOrigin(); }
 
   //! @brief Translate meta origin by @a p.
-  FOG_INLINE void translateMetaOrigin(const Point& p) { _engine->translateMetaOrigin(p); }
+  FOG_INLINE void translateMetaOrigin(const IntPoint& p) { _engine->translateMetaOrigin(p); }
   //! @brief Translate user origin by @a p.
-  FOG_INLINE void translateUserOrigin(const Point& p) { _engine->translateUserOrigin(p); }
+  FOG_INLINE void translateUserOrigin(const IntPoint& p) { _engine->translateUserOrigin(p); }
 
   //! @brief Set user region to @a r.
   FOG_INLINE void setUserRegion(const Region& r) { _engine->setUserRegion(r); }
   //! @brief Set user region to @a r.
   //! @overload
-  FOG_INLINE void setUserRegion(const Rect& r) { _engine->setUserRegion(r); }
+  FOG_INLINE void setUserRegion(const IntRect& r) { _engine->setUserRegion(r); }
 
   //! @brief Reset meta variables (meta origin and meta region).
   //!
@@ -306,34 +306,34 @@ struct FOG_API Painter
   // --------------------------------------------------------------------------
 
   //! @brief Get current working matrix.
-  FOG_INLINE Matrix getMatrix() const { return _engine->getMatrix(); }
+  FOG_INLINE DoubleMatrix getMatrix() const { return _engine->getMatrix(); }
   //! @brief Set current working matrix to @a m.
-  FOG_INLINE void setMatrix(const Matrix& m) { _engine->setMatrix(m); }
+  FOG_INLINE void setMatrix(const DoubleMatrix& m) { _engine->setMatrix(m); }
   //! @brief Reset current working matrix (to identity).
   FOG_INLINE void resetMatrix() { _engine->resetMatrix(); }
 
   //! @brief Rotate current working matrix .
-  FOG_INLINE void rotate(double angle, int order = MATRIX_PREPEND) { _engine->rotate(angle, order); }
+  FOG_INLINE void rotate(double angle, uint32_t order = MATRIX_PREPEND) { _engine->rotate(angle, order); }
   //! @brief Scale current working matrix.
-  FOG_INLINE void scale(double sx, double sy, int order = MATRIX_PREPEND) { _engine->scale(sx, sy, order); }
+  FOG_INLINE void scale(double sx, double sy, uint32_t order = MATRIX_PREPEND) { _engine->scale(sx, sy, order); }
   //! @brief Skew current working matrix.
-  FOG_INLINE void skew(double sx, double sy, int order = MATRIX_PREPEND) { _engine->skew(sx, sy, order); }
+  FOG_INLINE void skew(double sx, double sy, uint32_t order = MATRIX_PREPEND) { _engine->skew(sx, sy, order); }
   //! @brief Translate current working matrix.
-  FOG_INLINE void translate(double x, double y, int order = MATRIX_PREPEND) { _engine->translate(x, y, order); }
+  FOG_INLINE void translate(double x, double y, uint32_t order = MATRIX_PREPEND) { _engine->translate(x, y, order); }
   //! @brief Transform current working matrix.
-  FOG_INLINE void transform(const Matrix& m, int order = MATRIX_PREPEND) { _engine->transform(m, order); }
+  FOG_INLINE void transform(const DoubleMatrix& m, uint32_t order = MATRIX_PREPEND) { _engine->transform(m, order); }
 
   //! @brief Convert world coordinate into screen one (using transformation matrix).
-  FOG_INLINE void worldToScreen(PointD* pt) const { _engine->worldToScreen(pt); }
+  FOG_INLINE void worldToScreen(DoublePoint* pt) const { _engine->worldToScreen(pt); }
   //! @brief Convert screen coordinate into world one (using transformation matrix).
-  FOG_INLINE void screenToWorld(PointD* pt) const { _engine->screenToWorld(pt); }
+  FOG_INLINE void screenToWorld(DoublePoint* pt) const { _engine->screenToWorld(pt); }
 
   //! @brief Align point to center of the raster (X.5, Y.5), after after all
   //! transformations were applied.
   //!
   //! This method is useful when you need to paint really sharp lines or other
   //! primitives.
-  FOG_INLINE void alignPoint(PointD* pt) const { _engine->alignPoint(pt); }
+  FOG_INLINE void alignPoint(DoublePoint* pt) const { _engine->alignPoint(pt); }
 
   // --------------------------------------------------------------------------
   // [State]
@@ -354,66 +354,66 @@ struct FOG_API Painter
   // [Raster Drawing]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void drawPoint(const Point& p) { _engine->drawPoint(p); }
-  FOG_INLINE void drawLine(const Point& start, const Point& end) { _engine->drawLine(start, end); }
-  FOG_INLINE void drawRect(const Rect& r) { _engine->drawRect(r); }
-  FOG_INLINE void drawRound(const Rect& r, const Point& radius) { _engine->drawRound(r, radius); }
-  FOG_INLINE void fillRect(const Rect& r) { _engine->fillRect(r); }
-  FOG_INLINE void fillRects(const Rect* r, sysuint_t count) { _engine->fillRects(r, count); }
-  FOG_INLINE void fillRound(const Rect& r, const Point& radius) { _engine->fillRound(r, radius); }
+  FOG_INLINE void drawPoint(const IntPoint& p) { _engine->drawPoint(p); }
+  FOG_INLINE void drawLine(const IntPoint& start, const IntPoint& end) { _engine->drawLine(start, end); }
+  FOG_INLINE void drawRect(const IntRect& r) { _engine->drawRect(r); }
+  FOG_INLINE void drawRound(const IntRect& r, const IntPoint& radius) { _engine->drawRound(r, radius); }
+  FOG_INLINE void fillRect(const IntRect& r) { _engine->fillRect(r); }
+  FOG_INLINE void fillRects(const IntRect* r, sysuint_t count) { _engine->fillRects(r, count); }
+  FOG_INLINE void fillRound(const IntRect& r, const IntPoint& radius) { _engine->fillRound(r, radius); }
   FOG_INLINE void fillRegion(const Region& region) { _engine->fillRegion(region); }
 
   // --------------------------------------------------------------------------
   // [Vector Drawing]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void drawPoint(const PointD& p) { _engine->drawPoint(p); }
-  FOG_INLINE void drawLine(const PointD& start, const PointD& end) { _engine->drawLine(start, end); }
-  FOG_INLINE void drawLine(const PointD* pts, sysuint_t count) { _engine->drawLine(pts, count); }
-  FOG_INLINE void drawPolygon(const PointD* pts, sysuint_t count) { _engine->drawPolygon(pts, count); }
-  FOG_INLINE void drawRect(const RectD& r) { _engine->drawRect(r); }
-  FOG_INLINE void drawRects(const RectD* r, sysuint_t count) { _engine->drawRects(r, count); }
-  FOG_INLINE void drawRound(const RectD& r, const PointD& radius) { _engine->drawRound(r, radius); }
-  FOG_INLINE void drawEllipse(const PointD& cp, const PointD& r) { _engine->drawEllipse(cp, r); }
-  FOG_INLINE void drawArc(const PointD& cp, const PointD& r, double start, double sweep) { _engine->drawArc(cp, r, start, sweep); }
-  FOG_INLINE void drawPath(const Path& path) { _engine->drawPath(path); }
+  FOG_INLINE void drawPoint(const DoublePoint& p) { _engine->drawPoint(p); }
+  FOG_INLINE void drawLine(const DoublePoint& start, const DoublePoint& end) { _engine->drawLine(start, end); }
+  FOG_INLINE void drawLine(const DoublePoint* pts, sysuint_t count) { _engine->drawLine(pts, count); }
+  FOG_INLINE void drawPolygon(const DoublePoint* pts, sysuint_t count) { _engine->drawPolygon(pts, count); }
+  FOG_INLINE void drawRect(const DoubleRect& r) { _engine->drawRect(r); }
+  FOG_INLINE void drawRects(const DoubleRect* r, sysuint_t count) { _engine->drawRects(r, count); }
+  FOG_INLINE void drawRound(const DoubleRect& r, const DoublePoint& radius) { _engine->drawRound(r, radius); }
+  FOG_INLINE void drawEllipse(const DoublePoint& cp, const DoublePoint& r) { _engine->drawEllipse(cp, r); }
+  FOG_INLINE void drawArc(const DoublePoint& cp, const DoublePoint& r, double start, double sweep) { _engine->drawArc(cp, r, start, sweep); }
+  FOG_INLINE void drawPath(const DoublePath& path) { _engine->drawPath(path); }
 
-  FOG_INLINE void fillPolygon(const PointD* pts, sysuint_t count) { _engine->fillPolygon(pts, count); }
-  FOG_INLINE void fillRect(const RectD& r) { _engine->fillRect(r); }
-  FOG_INLINE void fillRects(const RectD* r, sysuint_t count) { _engine->fillRects(r, count); }
-  FOG_INLINE void fillRound(const RectD& r, const PointD& radius) { _engine->fillRound(r, radius); }
-  FOG_INLINE void fillEllipse(const PointD& cp, const PointD& r) { _engine->fillEllipse(cp, r); }
-  FOG_INLINE void fillArc(const PointD& cp, const PointD& r, double start, double sweep) { _engine->fillArc(cp, r, start, sweep); }
-  FOG_INLINE void fillPath(const Path& path) { _engine->fillPath(path); }
+  FOG_INLINE void fillPolygon(const DoublePoint* pts, sysuint_t count) { _engine->fillPolygon(pts, count); }
+  FOG_INLINE void fillRect(const DoubleRect& r) { _engine->fillRect(r); }
+  FOG_INLINE void fillRects(const DoubleRect* r, sysuint_t count) { _engine->fillRects(r, count); }
+  FOG_INLINE void fillRound(const DoubleRect& r, const DoublePoint& radius) { _engine->fillRound(r, radius); }
+  FOG_INLINE void fillEllipse(const DoublePoint& cp, const DoublePoint& r) { _engine->fillEllipse(cp, r); }
+  FOG_INLINE void fillArc(const DoublePoint& cp, const DoublePoint& r, double start, double sweep) { _engine->fillArc(cp, r, start, sweep); }
+  FOG_INLINE void fillPath(const DoublePath& path) { _engine->fillPath(path); }
 
   // --------------------------------------------------------------------------
   // [Glyph / Text Drawing]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void drawGlyph(const Point& pt, const Glyph& glyph, const Rect* clip = 0)
+  FOG_INLINE void drawGlyph(const IntPoint& pt, const Glyph& glyph, const IntRect* clip = 0)
   { _engine->drawGlyph(pt, glyph, clip); }
 
-  FOG_INLINE void drawGlyphSet(const Point& pt, const GlyphSet& glyphSet, const Rect* clip = 0)
+  FOG_INLINE void drawGlyphSet(const IntPoint& pt, const GlyphSet& glyphSet, const IntRect* clip = 0)
   { _engine->drawGlyphSet(pt, glyphSet, clip); }
 
   // --------------------------------------------------------------------------
   // [Text drawing]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void drawText(const Point& p, const String& text, const Font& font, const Rect* clip = NULL)
+  FOG_INLINE void drawText(const IntPoint& p, const String& text, const Font& font, const IntRect* clip = NULL)
   { _engine->drawText(p, text, font, clip); }
 
-  FOG_INLINE void drawText(const Rect& r, const String& text, const Font& font, uint32_t align, const Rect* clip = NULL)
+  FOG_INLINE void drawText(const IntRect& r, const String& text, const Font& font, uint32_t align, const IntRect* clip = NULL)
   { _engine->drawText(r, text, font, align, clip); }
 
   // --------------------------------------------------------------------------
   // [Image Drawing]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void blitImage(const Point& p, const Image& image, const Rect* irect = 0)
+  FOG_INLINE void blitImage(const IntPoint& p, const Image& image, const IntRect* irect = 0)
   { _engine->blitImage(p, image, irect); }
 
-  FOG_INLINE void blitImage(const PointD& p, const Image& image, const Rect* irect = 0)
+  FOG_INLINE void blitImage(const DoublePoint& p, const Image& image, const IntRect* irect = 0)
   { _engine->blitImage(p, image, irect); }
 
   // --------------------------------------------------------------------------

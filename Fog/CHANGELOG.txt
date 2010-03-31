@@ -1,3 +1,8 @@
+2010-03-31
+- Bunch or refactorization (IntRect, IntPoint, FloatRect, FloatPoint, ...)
+- Fonts reworked again, adding more to the font face, removing FontData and
+  keeping only FontFace, need a lot of more work to be usable.
+
 2010-03-27
 - Implemented path to image - Fog::Image::makeFromPath().
 

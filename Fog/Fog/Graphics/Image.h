@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -31,7 +31,7 @@ struct ColorFilter;
 struct ColorLut;
 struct ColorMatrix;
 struct ImageFilter;
-struct Path;
+struct DoublePath;
 
 // ============================================================================
 // [Fog::ImageBuffer]
@@ -61,7 +61,9 @@ struct ImageBuffer
 //! @brief Raster image container.
 struct FOG_API Image
 {
+  // --------------------------------------------------------------------------
   // [Data]
+  // --------------------------------------------------------------------------
 
   struct FOG_API Data
   {
@@ -121,7 +123,9 @@ struct FOG_API Image
 
   static Static<Data> sharedNull;
 
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   Image();
   FOG_INLINE explicit Image(Data* d) : _d(d) {}
@@ -129,7 +133,9 @@ struct FOG_API Image
   Image(int w, int h, int format);
   ~Image();
 
+  // --------------------------------------------------------------------------
   // [Implicit Sharing]
+  // --------------------------------------------------------------------------
 
   //! @copydoc Doxygen::Implicit::refCount().
   FOG_INLINE sysuint_t refCount() const { return _d->refCount.get(); }
@@ -142,7 +148,9 @@ struct FOG_API Image
   //! @copydoc Doxygen::Implicit::free().
   void free();
 
+  // --------------------------------------------------------------------------
   // [Flags]
+  // --------------------------------------------------------------------------
 
   //! @copydoc Doxygen::Implicit::getFlags().
   FOG_INLINE uint32_t getFlags() const { return _d->flags; }
@@ -157,7 +165,9 @@ struct FOG_API Image
   //! @brief Returns true if image is read only.
   FOG_INLINE bool isReadOnly() const { return _d->flags & Data::IsReadOnly; }
 
+  // --------------------------------------------------------------------------
   // [Data]
+  // --------------------------------------------------------------------------
 
   //! @brief Get constant pointer to image data (first byte in image buffer).
   //!
@@ -240,7 +250,9 @@ struct FOG_API Image
     return _d->first + (sysint_t)i * _d->stride;
   }
 
+  // --------------------------------------------------------------------------
   // [Dimensions]
+  // --------------------------------------------------------------------------
 
   //! @brief Get image width (in pixels).
   FOG_INLINE int getWidth() const { return _d->width; }
@@ -253,7 +265,9 @@ struct FOG_API Image
   //! @note Stride can be 'width * bytesPerPixel', but can be also larger.
   FOG_INLINE sysint_t getStride() const { return _d->stride; }
 
+  // --------------------------------------------------------------------------
   // [Format]
+  // --------------------------------------------------------------------------
 
   //! @brief Get image format, see @c PIXEL_FORMAT enumeration.
   FOG_INLINE int getFormat() const { return _d->format; }
@@ -268,7 +282,9 @@ struct FOG_API Image
   //! @brief Get whether image is premultiplied (@c PIXEL_FORMAT_PRGB32).
   FOG_INLINE bool isPremultiplied() const { return _d->format == PIXEL_FORMAT_PRGB32; }
 
+  // --------------------------------------------------------------------------
   // [Create / Adopt]
+  // --------------------------------------------------------------------------
 
   //! @brief Create new image at @a w x @a h size in a given @a format.
   //!
@@ -280,14 +296,18 @@ struct FOG_API Image
   //! @brief Adopt memory buffer to the image.
   err_t adopt(const ImageBuffer& buffers, uint32_t adoptFlags = IMAGE_ADOPT_DEFAULT);
 
+  // --------------------------------------------------------------------------
   // [Set]
+  // --------------------------------------------------------------------------
 
   //! @brief Set other image to this image creating reference to it if possible.
   err_t set(const Image& other);
   //! @brief Set other image to this image making deep copy of it.
   err_t setDeep(const Image& other);
 
+  // --------------------------------------------------------------------------
   // [Convert]
+  // --------------------------------------------------------------------------
 
   //! @brief Convert image to @a format.
   err_t convert(int format);
@@ -305,7 +325,9 @@ struct FOG_API Image
   //! or demultiplication on 32 bit images.
   err_t forceFormat(int format);
 
+  // --------------------------------------------------------------------------
   // [Palette]
+  // --------------------------------------------------------------------------
 
   //! @brief Get image palette.
   FOG_INLINE const Palette& getPalette() const { return _d->palette; }
@@ -314,71 +336,93 @@ struct FOG_API Image
   //! @brief Set image palette entries.
   err_t setPalette(sysuint_t index, const Argb* rgba, sysuint_t count);
 
+  // --------------------------------------------------------------------------
   // [GetDib / SetDib]
+  // --------------------------------------------------------------------------
 
   err_t getDib(int x, int y, uint w, int dibFormat, void* dst) const;
   err_t setDib(int x, int y, uint w, int dibFormat, const void* src);
 
+  // --------------------------------------------------------------------------
   // [Swap RGB and RGBA]
+  // --------------------------------------------------------------------------
 
   err_t swapRgb();
   err_t swapArgb();
 
+  // --------------------------------------------------------------------------
   // [Premultiply / Demultiply]
+  // --------------------------------------------------------------------------
 
   err_t premultiply();
   err_t demultiply();
 
+  // --------------------------------------------------------------------------
   // [Invert]
+  // --------------------------------------------------------------------------
 
   static err_t invert(Image& dest, const Image& src, uint32_t channels);
   FOG_INLINE err_t invert(uint32_t channels) { return invert(*this, *this, channels); }
 
+  // --------------------------------------------------------------------------
   // [Mirror]
+  // --------------------------------------------------------------------------
 
   static err_t mirror(Image& dest, const Image& src, uint32_t mirrorMode);
   FOG_INLINE err_t mirror(uint32_t mirrorMode) { return mirror(*this, *this, mirrorMode); }
 
+  // --------------------------------------------------------------------------
   // [Rotate]
+  // --------------------------------------------------------------------------
 
   //! @brief Rotate image by 0, 90, 180 or 270 degrees, see @c IMAGE_ROTATE_MODE.
   static err_t rotate(Image& dest, const Image& src, uint32_t rotateMode);
   //! @brief Rotate image by 0, 90, 180 or 270 degrees, see @c IMAGE_ROTATE_MODE.
   FOG_INLINE err_t rotate(uint32_t rotateMode) { return rotate(*this, *this, rotateMode); }
 
+  // --------------------------------------------------------------------------
   // [Channel related]
+  // --------------------------------------------------------------------------
 
   Image extractChannel(uint32_t channel) const;
 
+  // --------------------------------------------------------------------------
   // [Color Filter]
+  // --------------------------------------------------------------------------
 
-  err_t filter(const ColorFilter& f, const Rect* area = NULL);
-  err_t filter(const ColorLut& lut, const Rect* area = NULL);
-  err_t filter(const ColorMatrix& cm, const Rect* area = NULL);
+  err_t filter(const ColorFilter& f, const IntRect* area = NULL);
+  err_t filter(const ColorLut& lut, const IntRect* area = NULL);
+  err_t filter(const ColorMatrix& cm, const IntRect* area = NULL);
 
+  // --------------------------------------------------------------------------
   // [Image Filter]
+  // --------------------------------------------------------------------------
 
-  err_t filter(const ImageFilter& f, const Rect* area = NULL);
+  err_t filter(const ImageFilter& f, const IntRect* area = NULL);
 
+  // --------------------------------------------------------------------------
   // [Scaling]
+  // --------------------------------------------------------------------------
 
-  Image scale(const Size& to, int interpolationType = INTERPOLATION_SMOOTH);
+  Image scale(const IntSize& to, int interpolationType = INTERPOLATION_SMOOTH);
 
+  // --------------------------------------------------------------------------
   // [Painting]
+  // --------------------------------------------------------------------------
 
   err_t clear(Argb c0);
 
-  err_t drawPixel(const Point& pt, Argb c0);
-  err_t drawLine(const Point& pt0, const Point& pt1, Argb c0, bool lastPoint = true);
+  err_t drawPixel(const IntPoint& pt, Argb c0);
+  err_t drawLine(const IntPoint& pt0, const IntPoint& pt1, Argb c0, bool lastPoint = true);
 
-  err_t fillRect(const Rect& r, Argb c0, int op = OPERATOR_SRC_OVER);
+  err_t fillRect(const IntRect& r, Argb c0, int op = OPERATOR_SRC_OVER);
 
-  err_t fillQGradient(const Rect& r, Argb c0, Argb c1, Argb c2, Argb c3, int op = OPERATOR_SRC_OVER);
-  err_t fillHGradient(const Rect& r, Argb c0, Argb c1, int op = OPERATOR_SRC_OVER);
-  err_t fillVGradient(const Rect& r, Argb c0, Argb c1, int op = OPERATOR_SRC_OVER);
+  err_t fillQGradient(const IntRect& r, Argb c0, Argb c1, Argb c2, Argb c3, int op = OPERATOR_SRC_OVER);
+  err_t fillHGradient(const IntRect& r, Argb c0, Argb c1, int op = OPERATOR_SRC_OVER);
+  err_t fillVGradient(const IntRect& r, Argb c0, Argb c1, int op = OPERATOR_SRC_OVER);
 
-  err_t blitImage(const Point& pt, const Image& src, uint32_t op = OPERATOR_SRC_OVER, uint32_t opacity = 255);
-  err_t blitImage(const Point& pt, const Image& src, const Rect& srcRect, uint32_t op = OPERATOR_SRC_OVER, uint32_t opacity = 255);
+  err_t blitImage(const IntPoint& pt, const Image& src, uint32_t op = OPERATOR_SRC_OVER, uint32_t opacity = 255);
+  err_t blitImage(const IntPoint& pt, const Image& src, const IntRect& srcRect, uint32_t op = OPERATOR_SRC_OVER, uint32_t opacity = 255);
 
   //! @brief Scroll data in image.
   //!
@@ -387,9 +431,11 @@ struct FOG_API Image
   //! @brief Scroll data in image in rectangle @a r.
   //!
   //! @note Data that was scrolled out are unchanged.
-  err_t scroll(int x, int y, const Rect& r);
+  err_t scroll(int x, int y, const IntRect& r);
 
+  // --------------------------------------------------------------------------
   // [Misc]
+  // --------------------------------------------------------------------------
 
   //! @brief Check if point at a given coordinates @a x and @a y is in image.
   FOG_INLINE bool hasPoint(int x, int y) 
@@ -398,14 +444,17 @@ struct FOG_API Image
   }
   
   //! @brief Check if point at a given coordinates @a at is in image.
-  FOG_INLINE bool hasPoint(const Point& pt) 
+  FOG_INLINE bool hasPoint(const IntPoint& pt)
   { 
     return (uint)pt.x < (uint)getWidth() && (uint)pt.y < (uint)getHeight(); 
   }
 
-  static err_t glyphFromPath(Image& glyph, Point& offset, const Path& path);
+  static err_t glyphFromPath(Image& glyph, IntPoint& offset, const DoublePath& path);
 
+  // --------------------------------------------------------------------------
   // [WinAPI functions]
+  // --------------------------------------------------------------------------
+
 #if defined(FOG_OS_WINDOWS)
 
   // TODO: Introduce ENUM to set alpha format of HBITMAP.
@@ -420,7 +469,9 @@ struct FOG_API Image
   err_t fromHBITMAP(HBITMAP hBitmap);
 #endif // FOG_OS_WINDOWS
 
+  // --------------------------------------------------------------------------
   // [Read]
+  // --------------------------------------------------------------------------
 
   err_t readFile(const String& fileName);
   err_t readStream(Stream& stream);
@@ -430,17 +481,23 @@ struct FOG_API Image
   err_t readBuffer(const void* buffer, sysuint_t size);
   err_t readBuffer(const void* buffer, sysuint_t size, const String& extension);
 
+  // --------------------------------------------------------------------------
   // [Write]
+  // --------------------------------------------------------------------------
 
   err_t writeFile(const String& fileName) const;
   err_t writeStream(Stream& stream, const String& extension) const;
   err_t writeBuffer(ByteArray& buffer, const String& extension) const;
 
-  // [Overloaded Operators]
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE Image& operator=(const Image& other) { set(other); return *this; }
 
+  // --------------------------------------------------------------------------
   // [Statics]
+  // --------------------------------------------------------------------------
 
   //! @brief Calculate stride for a given image @a width and @a depth.
   //!
@@ -455,7 +512,9 @@ struct FOG_API Image
   //! @brief Converts a given format @a format into bytes per pixel.
   static int formatToBytesPerPixel(int format);
 
+  // --------------------------------------------------------------------------
   // [Members]
+  // --------------------------------------------------------------------------
 
   FOG_DECLARE_D(Data)
 };

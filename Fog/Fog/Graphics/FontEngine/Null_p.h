@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Private API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -8,7 +8,7 @@
 #define _FOG_GRAPHICS_FONTENGINE_NULL_P_H
 
 // [Dependencies]
-#include <Fog/Graphics/FontEngine.h>
+#include <Fog/Graphics/Font.h>
 
 //! @addtogroup Fog_Graphics
 //! @{
@@ -21,7 +21,7 @@ struct FOG_HIDDEN NullFontFace : public FontFace
   virtual ~NullFontFace();
 
   virtual err_t getGlyphSet(const Char* str, sysuint_t length, GlyphSet& glyphSet);
-  virtual err_t getOutline(const Char* str, sysuint_t length, Path& dst);
+  virtual err_t getOutline(const Char* str, sysuint_t length, DoublePath& dst);
   virtual err_t getTextExtents(const Char* str, sysuint_t length, TextExtents& extents);
 
 private:

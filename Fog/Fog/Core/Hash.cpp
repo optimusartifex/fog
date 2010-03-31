@@ -1,6 +1,6 @@
 // [Fog-Core Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Precompiled Headers]
@@ -20,12 +20,12 @@
 namespace Fog {
 
 // ============================================================================
-// [Fog::Hash_Abstract]
+// [Fog::UnorderedAbstract]
 // ============================================================================
 
-Static<Hash_Abstract::Data> Hash_Abstract::sharedNull;
+Static<UnorderedAbstract::Data> UnorderedAbstract::sharedNull;
 
-Hash_Abstract::Data* Hash_Abstract::_allocData(sysuint_t capacity)
+UnorderedAbstract::Data* UnorderedAbstract::_allocData(sysuint_t capacity)
 {
   sysuint_t dsize = 
     sizeof(Data) - sizeof(void*) + capacity * sizeof(void**);
@@ -45,12 +45,12 @@ Hash_Abstract::Data* Hash_Abstract::_allocData(sysuint_t capacity)
   return d;
 }
 
-void Hash_Abstract::_freeData(Data* d)
+void UnorderedAbstract::_freeData(Data* d)
 {
   Memory::free(d);
 }
 
-sysuint_t Hash_Abstract::_calcExpandCapacity(sysuint_t capacity)
+sysuint_t UnorderedAbstract::_calcExpandCapacity(sysuint_t capacity)
 {
   static const sysuint_t threshold = 1024*1024*4;
 
@@ -60,7 +60,7 @@ sysuint_t Hash_Abstract::_calcExpandCapacity(sysuint_t capacity)
     return capacity + threshold;
 }
 
-sysuint_t Hash_Abstract::_calcShrinkCapacity(sysuint_t capacity)
+sysuint_t UnorderedAbstract::_calcShrinkCapacity(sysuint_t capacity)
 {
   static const sysuint_t threshold = 1024*1024*4;
 
@@ -70,7 +70,7 @@ sysuint_t Hash_Abstract::_calcShrinkCapacity(sysuint_t capacity)
     return capacity - threshold;
 }
 
-bool Hash_Abstract::_rehash(sysuint_t bc)
+bool UnorderedAbstract::_rehash(sysuint_t bc)
 {
   Data* newd = _allocData(bc);
   if (!newd) return false;
@@ -100,7 +100,7 @@ bool Hash_Abstract::_rehash(sysuint_t bc)
   return true;
 }
 
-void Hash_Abstract::_Iterator::_toBegin()
+void UnorderedAbstract::_Iterator::_toBegin()
 {
   if (FOG_UNLIKELY(_hash->isEmpty()))
   {
@@ -110,11 +110,11 @@ void Hash_Abstract::_Iterator::_toBegin()
   }
 
   sysuint_t i, len = _hash->_d->capacity;
-  Hash_Abstract::Node* node;
+  UnorderedAbstract::Node* node;
 
   for (i = 0; i < len; i++)
   {
-    node = (Hash_Abstract::Node*)(_hash->_d->buckets[i]);
+    node = (UnorderedAbstract::Node*)(_hash->_d->buckets[i]);
     if (node) break;
   }
 
@@ -125,10 +125,10 @@ void Hash_Abstract::_Iterator::_toBegin()
   _index = i;
 }
 
-void Hash_Abstract::_Iterator::_toNext()
+void UnorderedAbstract::_Iterator::_toNext()
 {
   sysuint_t i, len = _hash->_d->capacity;
-  Hash_Abstract::Node* node = _node;
+  UnorderedAbstract::Node* node = _node;
 
   // Bail out if there is problem
   if (FOG_UNLIKELY(node == NULL)) return;
@@ -145,7 +145,7 @@ void Hash_Abstract::_Iterator::_toNext()
 
   for (i = _index + 1; i < len; i++)
   {
-    node = (Hash_Abstract::Node*)(_hash->_d->buckets[i]);
+    node = (UnorderedAbstract::Node*)(_hash->_d->buckets[i]);
     if (node) { _node = node; _index = i; return; }
   }
 
@@ -153,7 +153,7 @@ void Hash_Abstract::_Iterator::_toNext()
   _index = INVALID_INDEX;
 }
 
-Hash_Abstract::Node* Hash_Abstract::_Iterator::_removeCurrent()
+UnorderedAbstract::Node* UnorderedAbstract::_Iterator::_removeCurrent()
 {
   Node* node = _node;
   sysuint_t i = _index;
@@ -193,7 +193,7 @@ FOG_INIT_DECLARE err_t fog_hash_init(void)
 {
   using namespace Fog;
 
-  Hash_Abstract::Data* d = Hash_Abstract::sharedNull.instancep();
+  UnorderedAbstract::Data* d = UnorderedAbstract::sharedNull.instancep();
   d->refCount.init(1);
   d->capacity = 1;
   d->length = 0;
@@ -210,6 +210,6 @@ FOG_INIT_DECLARE void fog_hash_shutdown(void)
 {
   using namespace Fog;
 
-  Hash_Abstract::Data* d = Hash_Abstract::sharedNull.instancep();
+  UnorderedAbstract::Data* d = UnorderedAbstract::sharedNull.instancep();
   d->refCount.dec();
 }

@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Dependencies]
@@ -16,7 +16,7 @@ namespace PathUtil {
 // [Fog::PathUtil::Transformations]
 // ============================================================================
 
-static void FOG_FASTCALL translatePointsD_sse2(PointD* dst, const PointD* src, sysuint_t length, const PointD* pt)
+static void FOG_FASTCALL translatePointsD_sse2(DoublePoint* dst, const DoublePoint* src, sysuint_t length, const DoublePoint* pt)
 {
   sysuint_t i;
 
@@ -78,7 +78,7 @@ static void FOG_FASTCALL translatePointsD_sse2(PointD* dst, const PointD* src, s
   }
 }
 
-static void FOG_FASTCALL transformPointsD_sse2(PointD* dst, const PointD* src, sysuint_t length, const Matrix* matrix)
+static void FOG_FASTCALL transformPointsD_sse2(DoublePoint* dst, const DoublePoint* src, sysuint_t length, const DoubleMatrix* matrix)
 {
   sysuint_t i;
 

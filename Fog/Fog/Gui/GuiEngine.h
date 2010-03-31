@@ -1,6 +1,6 @@
 // [Fog-Gui Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -86,7 +86,7 @@ struct FOG_API GuiEngine : public Object
   struct CaretStatus
   {
     Widget* widget;
-    Rect rect;
+    IntRect rect;
     Argb color;
     uint32_t type;
     uint32_t animation;
@@ -105,7 +105,7 @@ struct FOG_API GuiEngine : public Object
     //! @brief Widget where mouse is.
     Widget* widget;
     //! @brief Mouse position relative to @c widget.
-    Point position;
+    IntPoint position;
     //! @brief Hover state.
     uint32_t hover;
     //! @brief Pressed buttons.
@@ -119,7 +119,7 @@ struct FOG_API GuiEngine : public Object
     //! @brief System window where mouse is (or NULL).
     GuiWindow* uiWindow;
     //! @brief Mouse position relative to @c uiWindow (in client area).
-    Point position;
+    IntPoint position;
     //! @brief Hover state.
     uint32_t hover;
     //! @brief Pressed buttons.
@@ -186,7 +186,7 @@ struct FOG_API GuiEngine : public Object
 
   virtual void invalidateMouseStatus() = 0;
   virtual void updateMouseStatus() = 0;
-  virtual void changeMouseStatus(Widget* w, const Point& pos) = 0;
+  virtual void changeMouseStatus(Widget* w, const IntPoint& pos) = 0;
 
   virtual void clearSystemMouseStatus() = 0;
 
@@ -216,7 +216,7 @@ struct FOG_API GuiEngine : public Object
 
   virtual void dispatchEnabled(Widget* w, bool enabled) = 0;
   virtual void dispatchVisibility(Widget* w, bool visible) = 0;
-  virtual void dispatchConfigure(Widget* w, const Rect& rect, bool changedOrientation) = 0;
+  virtual void dispatchConfigure(Widget* w, const IntRect& rect, bool changedOrientation) = 0;
 
   //! @brief Called by widget destructor to erase all links to the widget from UIEngine.
   virtual void widgetDestroyed(Widget* w) = 0;
@@ -238,7 +238,7 @@ struct FOG_API GuiEngine : public Object
   virtual void doUpdateWindow(GuiWindow* window) = 0;
 
   //! @brief Blits window content into screen. Called usually from @c doUpdateWindow().
-  virtual void doBlitWindow(GuiWindow* window, const Box* rects, sysuint_t count) = 0;
+  virtual void doBlitWindow(GuiWindow* window, const IntBox* rects, sysuint_t count) = 0;
 
   // --------------------------------------------------------------------------
   // [GuiWindow Create / Destroy]
@@ -292,9 +292,9 @@ struct FOG_API GuiWindow : public Object
 
   virtual err_t show() = 0;
   virtual err_t hide() = 0;
-  virtual err_t move(const Point& pt) = 0;
-  virtual err_t resize(const Size& size) = 0;
-  virtual err_t reconfigure(const Rect& rect) = 0;
+  virtual err_t move(const IntPoint& pt) = 0;
+  virtual err_t resize(const IntSize& size) = 0;
+  virtual err_t reconfigure(const IntRect& rect) = 0;
 
   virtual err_t takeFocus() = 0;
 
@@ -304,11 +304,11 @@ struct FOG_API GuiWindow : public Object
   virtual err_t setIcon(const Image& icon) = 0;
   virtual err_t getIcon(Image& icon) = 0;
 
-  virtual err_t setSizeGranularity(const Point& pt) = 0;
-  virtual err_t getSizeGranularity(Point& pt) = 0;
+  virtual err_t setSizeGranularity(const IntPoint& pt) = 0;
+  virtual err_t getSizeGranularity(IntPoint& pt) = 0;
 
-  virtual err_t worldToClient(Point* coords) = 0;
-  virtual err_t clientToWorld(Point* coords) = 0;
+  virtual err_t worldToClient(IntPoint* coords) = 0;
+  virtual err_t clientToWorld(IntPoint* coords) = 0;
 
   // --------------------------------------------------------------------------
   // [Windowing System]
@@ -317,7 +317,7 @@ struct FOG_API GuiWindow : public Object
   virtual void onEnabled(bool enabled) = 0;
   virtual void onVisibility(bool visible) = 0;
 
-  virtual void onConfigure(const Rect& windowRect, const Rect& clientRect) = 0;
+  virtual void onConfigure(const IntRect& windowRect, const IntRect& clientRect) = 0;
 
   virtual void onMouseHover(int x, int y) = 0;
   virtual void onMouseMove(int x, int y) = 0;
@@ -404,7 +404,7 @@ struct FOG_API GuiBackBuffer
 
   virtual bool resize(int width, int height, bool cache) = 0;
   virtual void destroy() = 0;
-  virtual void updateRects(const Box* rects, sysuint_t count) = 0;
+  virtual void updateRects(const IntBox* rects, sysuint_t count) = 0;
 
   // --------------------------------------------------------------------------
   // [Generic Methods]

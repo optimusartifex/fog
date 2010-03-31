@@ -1,6 +1,6 @@
 // [Fog-Gui Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -118,7 +118,7 @@ struct FOG_API ConfigureEvent : public Event
     CHANGED_ORIENTATION = (1 << 4)
   };
 
-  FOG_INLINE const Rect& getGeometry() const { return _geometry; }
+  FOG_INLINE const IntRect& getGeometry() const { return _geometry; }
   FOG_INLINE uint32_t getChangedFlags() const { return _changed; }
 
   FOG_INLINE bool isChangedPosition() const { return (_changed & CHANGED_POSITION) != 0; }
@@ -132,7 +132,7 @@ struct FOG_API ConfigureEvent : public Event
   // --------------------------------------------------------------------------
 
   // TODO: Is this needed?
-  Rect _geometry;
+  IntRect _geometry;
   uint32_t _changed;
 };
 
@@ -153,13 +153,13 @@ struct FOG_API OriginEvent : public Event
   // [Methods]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const Point& getOrigin() const { return _origin; }
+  FOG_INLINE const IntPoint& getOrigin() const { return _origin; }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  Point _origin;
+  IntPoint _origin;
 };
 
 // ============================================================================
@@ -261,7 +261,7 @@ struct FOG_API MouseEvent : public Event
 
   //! @brief Returns mouse position relative to client or non-client 
   //! area (depends to event type).
-  FOG_INLINE const Point& getPosition() const { return _position; }
+  FOG_INLINE const IntPoint& getPosition() const { return _position; }
 
   //! @brief Get if event was generated outside of widget.
   FOG_INLINE bool isOutside() const { return _isOutside; }
@@ -282,7 +282,7 @@ struct FOG_API MouseEvent : public Event
   uint32_t _modifiers;
 
   //! @brief Relative mouse position.
-  Point _position;
+  IntPoint _position;
 
   //! @brief True if event is outside of widget (grabbing).
   bool _isOutside;

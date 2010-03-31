@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Precompiled Headers]
@@ -14,7 +14,7 @@
 namespace Fog {
 namespace PaintUtil {
 
-void draw3dRect(Painter* p, const Rect& r, Argb color1, Argb color2, bool checked)
+void draw3dRect(Painter* p, const IntRect& r, Argb color1, Argb color2, bool checked)
 {
   if (!r.isValid()) return;
 
@@ -29,12 +29,12 @@ void draw3dRect(Painter* p, const Rect& r, Argb color1, Argb color2, bool checke
   p->setLineCaps(LINE_CAP_SQUARE);
 
   p->setSource(checked ? color2 : color1);
-  p->drawLine(PointD(x1   , y1    ), PointD(x2   , y1    ));
-  p->drawLine(PointD(x1   , y1+1.0), PointD(x1   , y2-1.0));
+  p->drawLine(DoublePoint(x1   , y1    ), DoublePoint(x2   , y1    ));
+  p->drawLine(DoublePoint(x1   , y1+1.0), DoublePoint(x1   , y2-1.0));
 
   p->setSource(checked ? color1 : color2);
-  p->drawLine(PointD(x2   , y1+1.0), PointD(x2   , y2-1.0));
-  p->drawLine(PointD(x1   , y2    ), PointD(x2   , y2    ));
+  p->drawLine(DoublePoint(x2   , y1+1.0), DoublePoint(x2   , y2-1.0));
+  p->drawLine(DoublePoint(x1   , y2    ), DoublePoint(x2   , y2    ));
 
   p->restore();
 }

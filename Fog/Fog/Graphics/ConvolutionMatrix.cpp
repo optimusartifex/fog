@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Precompiled Headers]
@@ -144,7 +144,7 @@ err_t ConvolutionMatrixI::setCell(int x, int y, int val)
   return ERR_OK;
 }
 
-err_t ConvolutionMatrixI::fill(const Rect& rect, ValueType value)
+err_t ConvolutionMatrixI::fill(const IntRect& rect, ValueType value)
 {
   int x1 = Math::max<int>(rect.getX1(), 0);
   int y1 = Math::max<int>(rect.getY1(), 0);

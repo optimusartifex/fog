@@ -1,6 +1,6 @@
 // [Fog-Core Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Precompiled Headers]
@@ -91,12 +91,12 @@ struct FOG_HIDDEN NullCodec : public TextCodec::Engine
 
 err_t NullCodec::appendFromUnicode(ByteArray& dst, const Char* src, sysuint_t length, Replacer replacer, State* state) const
 {
-  return ERR_TEXT_INVALID_CODEC;
+  return ERR_STRING_INVALID_CODEC;
 }
 
 err_t NullCodec::appendToUnicode(String& dst, const void* src, sysuint_t size, State* state) const
 {
-  return ERR_TEXT_INVALID_CODEC;
+  return ERR_STRING_INVALID_CODEC;
 }
 
 static TextCodec::Engine* NullCodec_create(uint32_t code, uint32_t flags, const char* mime, void*)
@@ -903,7 +903,7 @@ loop:
       // Incomplete surrogate pair.
       if (srcCur == srcEnd)
       {
-        if (!state) { err = ERR_TEXT_INPUT_TRUNCATED; goto end; }
+        if (!state) { err = ERR_STRING_TRUNCATED; goto end; }
         reinterpret_cast<uint16_t*>(state->buffer)[0] = uc0;
         state->count = 2;
         goto end;
@@ -911,7 +911,7 @@ loop:
 
 surrogateTrail:
       uc1 = *srcCur++;
-      if (!uc1.isTrailSurrogate()) { err = ERR_TEXT_INVALID_UTF16_SEQ; goto end; }
+      if (!uc1.isTrailSurrogate()) { err = ERR_STRING_INVALID_UTF16; goto end; }
 
       err = replacer(replaceBuffer, Char::fromSurrogate(uc0, uc1));
       goto replace;
@@ -1087,7 +1087,7 @@ loop:
       // Incomplete surrogate pair.
       if (srcCur == srcEnd)
       {
-        if (!state) { err = ERR_TEXT_INPUT_TRUNCATED; goto end; }
+        if (!state) { err = ERR_STRING_TRUNCATED; goto end; }
         reinterpret_cast<uint16_t*>(state->buffer)[0] = uc0;
         state->count = 2;
         goto end;
@@ -1095,7 +1095,7 @@ loop:
 
 surrogateTrail:
       uc1 = *srcCur++;
-      if (!uc1.isTrailSurrogate()) { err = ERR_TEXT_INVALID_UTF16_SEQ; goto end; }
+      if (!uc1.isTrailSurrogate()) { err = ERR_STRING_INVALID_UTF16; goto end; }
 
       uc = Char::fromSurrogate(uc0, uc1);
     }
@@ -1158,7 +1158,7 @@ err_t UTF8Codec::appendToUnicode(String& dst, const void* src, sysuint_t size, S
   { \
     /* Invalid UTF-8 Sequence */ \
     case 0: \
-      err = ERR_TEXT_INVALID_UTF8_SEQ; \
+      err = ERR_STRING_INVALID_UTF8; \
       goto end; \
     case 1: \
       break; \
@@ -1181,7 +1181,7 @@ err_t UTF8Codec::appendToUnicode(String& dst, const void* src, sysuint_t size, S
          |  (uint32_t((__buffer__)[3]) - 128U); \
       break; \
     default: \
-      err = ERR_TEXT_INVALID_UTF8_SEQ; \
+      err = ERR_STRING_INVALID_UTF8; \
       goto end; \
   }
 
@@ -1247,7 +1247,7 @@ code:
     }
     else if (Char::isSurrogatePair(uc) && uc >= 0xFFFE)
     {
-      err = ERR_TEXT_INVALID_CHAR;
+      err = ERR_STRING_INVALID_CHAR;
       goto end;
     }
     else
@@ -1271,7 +1271,7 @@ inputTruncated:
   }
   else
   {
-    err = ERR_TEXT_INPUT_TRUNCATED;
+    err = ERR_STRING_TRUNCATED;
   }
 
 end:
@@ -1345,7 +1345,7 @@ loop:
       // Incomplete surrogate pair.
       if (srcCur == srcEnd)
       {
-        if (!state) { err = ERR_TEXT_INPUT_TRUNCATED; goto end; }
+        if (!state) { err = ERR_STRING_TRUNCATED; goto end; }
         reinterpret_cast<uint16_t*>(state->buffer)[0] = uc0;
         state->count = 2;
         goto end;
@@ -1353,7 +1353,7 @@ loop:
 
 surrogateTrail:
       uc1 = *srcCur++;
-      if (!uc1.isTrailSurrogate()) { err = ERR_TEXT_INVALID_UTF16_SEQ; goto end; }
+      if (!uc1.isTrailSurrogate()) { err = ERR_STRING_INVALID_UTF16; goto end; }
 
       // Byte swapping.
       if (isByteSwapped) { uc0 = Memory::bswap16(uc0); uc1 = Memory::bswap16(uc1); }
@@ -1452,7 +1452,7 @@ loop:
       if (isByteSwapped) uc1.bswap();
 
 surrogatePair:
-      if (!uc1.isTrailSurrogate()) { err = ERR_TEXT_INVALID_UTF16_SEQ; goto end; }
+      if (!uc1.isTrailSurrogate()) { err = ERR_STRING_INVALID_UTF16; goto end; }
 
       dstCur[0] = uc0;
       dstCur[1] = uc1;
@@ -1469,7 +1469,7 @@ notSurrogatePair:
       }
       else if (uc0.isTrailSurrogate())
       {
-        err = ERR_TEXT_INVALID_UTF16_SEQ;
+        err = ERR_STRING_INVALID_UTF16;
         goto end;
       }
       else
@@ -1494,7 +1494,7 @@ notSurrogatePair:
     }
     else
     {
-      err = ERR_TEXT_INPUT_TRUNCATED;
+      err = ERR_STRING_TRUNCATED;
     }
   }
 
@@ -1575,7 +1575,7 @@ loop:
       // Incomplete surrogate pair.
       if (srcCur == srcEnd)
       {
-        if (!state) { err = ERR_TEXT_INPUT_TRUNCATED; goto end; }
+        if (!state) { err = ERR_STRING_TRUNCATED; goto end; }
         reinterpret_cast<uint16_t*>(state->buffer)[0] = uc0;
         state->count = 2;
         goto end;
@@ -1583,7 +1583,7 @@ loop:
 
 surrogateTrail:
       uc1 = *srcCur++;
-      if (!uc1.isTrailSurrogate()) { err = ERR_TEXT_INVALID_UTF16_SEQ; goto end; }
+      if (!uc1.isTrailSurrogate()) { err = ERR_STRING_INVALID_UTF16; goto end; }
 
       {
         uint32_t uc = Char::fromSurrogate(uc0, uc1);
@@ -1677,7 +1677,7 @@ loop:
 processChar:
     if (uc0.isSurrogatePair())
     {
-      err = ERR_TEXT_INVALID_UCS2_SEQ;
+      err = ERR_STRING_INVALID_UCS2;
       goto end;
     }
 
@@ -1707,7 +1707,7 @@ processChar:
     }
     else
     {
-      err = ERR_TEXT_INPUT_TRUNCATED;
+      err = ERR_STRING_TRUNCATED;
     }
   }
 
@@ -1783,7 +1783,7 @@ loop:
       // Incomplete surrogate pair.
       if (srcCur == srcEnd)
       {
-        if (!state) { err = ERR_TEXT_INPUT_TRUNCATED; goto end; }
+        if (!state) { err = ERR_STRING_TRUNCATED; goto end; }
         reinterpret_cast<uint16_t*>(state->buffer)[0] = uc0;
         state->count = 2;
         goto end;
@@ -1791,7 +1791,7 @@ loop:
 
 surrogateTrail:
       uc1 = *srcCur++;
-      if (!uc1.isTrailSurrogate()) { err = ERR_TEXT_INVALID_UTF16_SEQ; goto end; }
+      if (!uc1.isTrailSurrogate()) { err = ERR_STRING_INVALID_UTF16; goto end; }
 
       uc = Char::fromSurrogate(uc0, uc1);
     }
@@ -1864,7 +1864,7 @@ loop:
 processChar:
     if (uc > UNICODE_LAST || (uc <= 0xFFFF && Char::isSurrogatePair((uint16_t)uc)))
     {
-      err = ERR_TEXT_INVALID_CHAR;
+      err = ERR_STRING_INVALID_CHAR;
       goto end;
     }
 
@@ -1899,7 +1899,7 @@ processChar:
     }
     else
     {
-      err = ERR_TEXT_INPUT_TRUNCATED;
+      err = ERR_STRING_TRUNCATED;
     }
   }
 
@@ -2237,7 +2237,7 @@ TextCodec& TextCodec::operator=(const TextCodec& other)
 err_t TextCodec::setCode(uint32_t code)
 {
   err_t err = ERR_OK;
-  if (code >= Invalid) { code = 0; err = ERR_TEXT_INVALID_CODEC; }
+  if (code >= Invalid) { code = 0; err = ERR_STRING_INVALID_CODEC; }
 
   atomicPtrXchg(&_d, getEngine(code))->deref();
   return err;
@@ -2246,13 +2246,13 @@ err_t TextCodec::setCode(uint32_t code)
 err_t TextCodec::setMime(const char* mime)
 {
   *this = TextCodec::fromMime(mime);
-  return _d->code == None ? (err_t)ERR_TEXT_INVALID_CODEC : (err_t)ERR_OK;
+  return _d->code == None ? (err_t)ERR_STRING_INVALID_CODEC : (err_t)ERR_OK;
 }
 
 err_t TextCodec::setMime(const String& mime)
 {
   *this = TextCodec::fromMime(mime);
-  return _d->code == None ? (err_t)ERR_TEXT_INVALID_CODEC : (err_t)ERR_OK;
+  return _d->code == None ? (err_t)ERR_STRING_INVALID_CODEC : (err_t)ERR_OK;
 }
 
 // FromUtf16/32

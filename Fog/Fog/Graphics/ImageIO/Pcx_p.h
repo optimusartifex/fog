@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Private API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -25,9 +25,9 @@ namespace ImageIO {
 // [Fog::ImageIO::PcxHeader]
 // ============================================================================
 
-#include <Fog/Core/Pack.h>
+#include <Fog/Core/Compiler/PackByte.h>
 
-struct FOG_PACKED PcxHeader
+struct PcxHeader
 {
   uint8_t manufacturer;
   uint8_t version;
@@ -49,7 +49,7 @@ struct FOG_PACKED PcxHeader
   uint8_t unused[54];
 };
 
-#include <Fog/Core/Unpack.h>
+#include <Fog/Core/Compiler/PackRestore.h>
 
 // ============================================================================
 // [Fog::ImageIO::PcxProvider]

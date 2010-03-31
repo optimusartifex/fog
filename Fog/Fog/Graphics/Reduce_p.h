@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Private API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 #ifndef _FOG_GRAPHICS_REDUCE_P_H
@@ -51,7 +51,7 @@ struct FOG_HIDDEN Reduce
   // [Methods]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const Hash<uint32_t, uint8_t>& getIndexes() const { return _indexes; }
+  FOG_INLINE const UnorderedHash<uint32_t, uint8_t>& getIndexes() const { return _indexes; }
   FOG_INLINE const Entity* getEntities() const { return _entities; }
   FOG_INLINE uint32_t getCount() const { return _count; }
 
@@ -68,7 +68,7 @@ struct FOG_HIDDEN Reduce
 
 private:
   //! @brief Color to index hash.
-  Hash<uint32_t, uint8_t> _indexes;
+  UnorderedHash<uint32_t, uint8_t> _indexes;
 
   //! @brief Entities.
   Entity _entities[256];

@@ -1,6 +1,6 @@
 // [Fog-Gui Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Precompiled Headers]
@@ -27,22 +27,22 @@ LayoutItem::~LayoutItem()
 {
 }
 
-Size LayoutItem::getSizeHint() const
+IntSize LayoutItem::getSizeHint() const
 {
   return getLayoutHint().getSizeHint();
 }
 
-Size LayoutItem::getMinimumSize() const
+IntSize LayoutItem::getMinimumSize() const
 {
   return getLayoutHint().getMinimumSize();
 }
 
-Size LayoutItem::getMaximumSize() const
+IntSize LayoutItem::getMaximumSize() const
 {
   return getLayoutHint().getMaximumSize();
 }
 
-void LayoutItem::setSizeHint(const Size& sizeHint)
+void LayoutItem::setSizeHint(const IntSize& sizeHint)
 {
   LayoutHint hint = getLayoutHint();
   hint.setSizeHint(sizeHint);
@@ -50,7 +50,7 @@ void LayoutItem::setSizeHint(const Size& sizeHint)
   setLayoutHint(hint);
 }
 
-void LayoutItem::setMinimumSize(const Size& minimumSize)
+void LayoutItem::setMinimumSize(const IntSize& minimumSize)
 {
   LayoutHint hint = getLayoutHint();
   hint.setMinimumSize(minimumSize);
@@ -58,7 +58,7 @@ void LayoutItem::setMinimumSize(const Size& minimumSize)
   setLayoutHint(hint);
 }
 
-void LayoutItem::setMaximumSize(const Size& maximumSize)
+void LayoutItem::setMaximumSize(const IntSize& maximumSize)
 {
   LayoutHint hint = getLayoutHint();
   hint.setMaximumSize(maximumSize);

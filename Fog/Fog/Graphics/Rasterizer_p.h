@@ -1,6 +1,6 @@
 // [Fog-Graphics library - Private API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -62,7 +62,7 @@ struct FOG_HIDDEN Rasterizer
   // [Cell]
   // --------------------------------------------------------------------------
 
-#include <Fog/Core/Pack.h>
+#include <Fog/Core/Compiler/PackDWord.h>
   struct CellXY
   {
     int x;
@@ -80,10 +80,10 @@ struct FOG_HIDDEN Rasterizer
     FOG_INLINE void addCovers(int _cover, int _area) { cover += _cover; area += _area; }
     FOG_INLINE bool hasCovers() const { return (cover | area) != 0; }
   };
-#include <Fog/Core/Unpack.h>
+#include <Fog/Core/Compiler/PackRestore.h>
 
-#include <Fog/Core/Pack.h>
-  struct FOG_PACKED CellX
+#include <Fog/Core/Compiler/PackDWord.h>
+  struct CellX
   {
     int x;
     int cover;
@@ -110,7 +110,7 @@ struct FOG_HIDDEN Rasterizer
       area = other.area;
     }
   };
-#include <Fog/Core/Unpack.h>
+#include <Fog/Core/Compiler/PackRestore.h>
 
   // --------------------------------------------------------------------------
   // [CellXYBuffer]
@@ -155,9 +155,9 @@ struct FOG_HIDDEN Rasterizer
   // [Clipping]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const Box& getClipBox() const { return _clipBox; }
+  FOG_INLINE const IntBox& getClipBox() const { return _clipBox; }
 
-  virtual void setClipBox(const Box& clipBox) = 0;
+  virtual void setClipBox(const IntBox& clipBox) = 0;
   virtual void resetClipBox() = 0;
 
   // --------------------------------------------------------------------------
@@ -206,7 +206,7 @@ struct FOG_HIDDEN Rasterizer
   //! @brief Get bounds of rasterized cells.
   //!
   //! @note This method is only valid after finalize() call.
-  FOG_INLINE const Box& getCellsBounds() const { return _cellsBounds; }
+  FOG_INLINE const IntBox& getCellsBounds() const { return _cellsBounds; }
 
   //! @brief Get whether there are cells in rasterizer.
   //!
@@ -227,7 +227,7 @@ struct FOG_HIDDEN Rasterizer
   // [Commands]
   // --------------------------------------------------------------------------
 
-  virtual void addPath(const Path& path) = 0;
+  virtual void addPath(const DoublePath& path) = 0;
   virtual void finalize() = 0;
 
   // --------------------------------------------------------------------------
@@ -241,7 +241,7 @@ struct FOG_HIDDEN Rasterizer
   //!
   //! This method is called by raster painter engine if clipping region is
   //! complex (more than one rectangle).
-  virtual uint sweepScanline(Scanline32* scanline, int y, const Box* clip, sysuint_t count) = 0;
+  virtual uint sweepScanline(Scanline32* scanline, int y, const IntBox* clip, sysuint_t count) = 0;
 
   // --------------------------------------------------------------------------
   // [Pooling]
@@ -266,10 +266,10 @@ struct FOG_HIDDEN Rasterizer
 
 protected:
   //! @brief Clip bounding box (always must be valid, initialy set to zero).
-  Box _clipBox;
+  IntBox _clipBox;
 
   //! @brief Cells bounding box (min / max).
-  Box _cellsBounds;
+  IntBox _cellsBounds;
 
   //! @brief Rasterizer error code.
   err_t _error;

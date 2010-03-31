@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Private API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 //----------------------------------------------------------------------------
@@ -35,7 +35,7 @@ namespace Fog {
 // [Forward Declarations]
 // ============================================================================
 
-struct Matrix;
+struct DoubleMatrix;
 
 // ============================================================================
 // [Fog::PathUtil]
@@ -90,11 +90,11 @@ static const double CURVE_ANGLE_TOLERANCE_EPSILON = 0.01;
 
 struct FunctionMap
 {
-  typedef void (FOG_FASTCALL *TranslatePointsDFn)(PointD* dst, const PointD* src, sysuint_t count, const PointD* pt);
-  typedef void (FOG_FASTCALL *TransformPointsDFn)(PointD* dst, const PointD* src, sysuint_t count, const Matrix* matrix);
+  typedef void (FOG_FASTCALL *TranslatePointsDFn)(DoublePoint* dst, const DoublePoint* src, sysuint_t count, const DoublePoint* pt);
+  typedef void (FOG_FASTCALL *TransformPointsDFn)(DoublePoint* dst, const DoublePoint* src, sysuint_t count, const DoubleMatrix* matrix);
 
   typedef err_t (FOG_FASTCALL *ApproximateCurve3Fn)(
-    Path& dst,
+    DoublePath& dst,
     double x1, double y1,
     double x2, double y2,
     double x3, double y3,
@@ -103,7 +103,7 @@ struct FunctionMap
     double angleTolerance);
 
   typedef err_t (FOG_FASTCALL *ApproximateCurve4Fn)(
-    Path& dst,
+    DoublePath& dst,
     double x1, double y1,
     double x2, double y2,
     double x3, double y3,
@@ -126,16 +126,16 @@ extern FOG_API FunctionMap functionMap;
 // [Fog::PathUtil::FunctionMap wrappers]
 // ============================================================================
 
-static FOG_INLINE void translatePoints(PointD* data, sysuint_t count, const PointD* pt)
+static FOG_INLINE void translatePoints(DoublePoint* data, sysuint_t count, const DoublePoint* pt)
 { functionMap.translatePointsD(data, data, count, pt); }
 
-static FOG_INLINE void translatePoints(PointD* dst, const PointD* src, sysuint_t count, const PointD* pt)
+static FOG_INLINE void translatePoints(DoublePoint* dst, const DoublePoint* src, sysuint_t count, const DoublePoint* pt)
 { functionMap.translatePointsD(dst, src, count, pt); }
 
-static FOG_INLINE void transformPoints(PointD* data, sysuint_t count, const Matrix* matrix)
+static FOG_INLINE void transformPoints(DoublePoint* data, sysuint_t count, const DoubleMatrix* matrix)
 { functionMap.transformPointsD(data, data, count, matrix); }
 
-static FOG_INLINE void transformPoints(PointD* dst, const PointD* src, sysuint_t count, const Matrix* matrix)
+static FOG_INLINE void transformPoints(DoublePoint* dst, const DoublePoint* src, sysuint_t count, const DoubleMatrix* matrix)
 { functionMap.transformPointsD(dst, src, count, matrix); }
 
 // ============================================================================
@@ -148,7 +148,7 @@ static FOG_INLINE double calcDistance(
 {
   double dx = x2 - x1;
   double dy = y2 - y1;
-  return sqrt(dx * dx + dy * dy);
+  return Math::sqrt(dx * dx + dy * dy);
 }
 
 static FOG_INLINE double calcSqDistance(

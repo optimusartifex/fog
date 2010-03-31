@@ -1,6 +1,6 @@
 // [Fog-Core Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -51,6 +51,10 @@ namespace Fog {
 //! @sa @c Fog::String, @c Fog::StringMatcher
 struct FOG_API StringMatcher : public StringFilter
 {
+  // --------------------------------------------------------------------------
+  // [SkipTable]
+  // --------------------------------------------------------------------------
+
   //! @brief @c Fog::StringMatcher skip table.
   //!
   //! @note The table is generated on the fly by first search call.
@@ -67,31 +71,41 @@ struct FOG_API StringMatcher : public StringFilter
     Atomic<uint> status;
   };
 
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   StringMatcher();
   StringMatcher(const String& pattern);
   StringMatcher(const StringMatcher& matcher);
   virtual ~StringMatcher();
 
-  // [Pattern get / set]
+  // --------------------------------------------------------------------------
+  // [Accesors]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE const String& getPattern() const { return _pattern; }
 
   err_t setPattern(const String& pattern);
   err_t setPattern(const StringMatcher& matcher);
 
+  // --------------------------------------------------------------------------
   // [Filter Implementation]
+  // --------------------------------------------------------------------------
 
   virtual sysuint_t getLength() const;
   virtual Range match(const Char* str, sysuint_t length, uint cs, const Range& range) const;
 
-  // [Overloaded Operators]
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE StringMatcher& operator=(const String& pattern) { setPattern(pattern); return *this; }
   FOG_INLINE StringMatcher& operator=(const StringMatcher& matcher) { setPattern(matcher); return *this; }
 
+  // --------------------------------------------------------------------------
   // [Members]
+  // --------------------------------------------------------------------------
 
 private:
   String _pattern;

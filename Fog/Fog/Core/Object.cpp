@@ -1,6 +1,6 @@
 // [Fog-Core Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Precompiled Headers]
@@ -222,7 +222,7 @@ uint Object::removeListener(Object* listener)
   ObjectConnection* conn;
   ObjectConnection* next;
 
-  Hash<uint32_t, ObjectConnection*>::MutableIterator it(_connection);
+  UnorderedHash<uint32_t, ObjectConnection*>::MutableIterator it(_connection);
 
   for (it.toStart(); it.isValid(); )
   {
@@ -274,7 +274,7 @@ uint Object::removeAllListeners()
   ObjectConnection* conn;
   ObjectConnection* next;
 
-  Hash<uint32_t, ObjectConnection*>::MutableIterator it(_connection);
+  UnorderedHash<uint32_t, ObjectConnection*>::MutableIterator it(_connection);
 
   for (it.toStart(); it.isValid(); it.toNext())
   {

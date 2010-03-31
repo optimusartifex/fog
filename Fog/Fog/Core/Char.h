@@ -1,6 +1,6 @@
 // [Fog-Core Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -19,14 +19,13 @@
 
 namespace Fog {
 
-#include <Fog/Core/Pack.h>
-
 // ============================================================================
 // [Fog::Char]
 // ============================================================================
 
+#include <Fog/Core/Compiler/PackByte.h>
 //! @brief 16-bit unicode character.
-struct FOG_HIDDEN FOG_PACKED Char
+struct FOG_HIDDEN Char
 {
   // [Construction / Destruction]
 
@@ -187,7 +186,7 @@ struct FOG_HIDDEN FOG_PACKED Char
   //! @brief 16-bit unicode character value.
   uint16_t _ch;
 };
-#include <Fog/Core/Unpack.h>
+#include <Fog/Core/Compiler/PackRestore.h>
 
 } // Fog namespace
 

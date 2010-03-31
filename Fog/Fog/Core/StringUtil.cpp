@@ -1,6 +1,6 @@
 // [Fog-Core Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 #include <Fog/Core/Byte.h>
@@ -45,8 +45,8 @@ err_t validateUtf8(const char* str, sysuint_t len, sysuint_t* invalidPos)
     uint8_t c0 = strCur[0];
 
     sysuint_t clen = utf8LengthTable[c0];
-    if (!clen) { err = ERR_TEXT_INVALID_UTF8_SEQ; break; }
-    if (remain < clen) { err = ERR_TEXT_INPUT_TRUNCATED; break; }
+    if (!clen) { err = ERR_STRING_INVALID_UTF8; break; }
+    if (remain < clen) { err = ERR_STRING_TRUNCATED; break; }
 
     strCur += clen;
     remain -= clen;
@@ -71,13 +71,13 @@ err_t validateUtf16(const Char* str, sysuint_t len, sysuint_t* invalidPos)
 
     if (Char::isLeadSurrogate(uc))
     {
-      if (srcCur == srcEnd) { err = ERR_TEXT_INPUT_TRUNCATED; break; }
+      if (srcCur == srcEnd) { err = ERR_STRING_TRUNCATED; break; }
       uc = *srcCur++;
-      if (!Char::isTrailSurrogate(uc)) { err = ERR_TEXT_INVALID_UTF16_SEQ; break; }
+      if (!Char::isTrailSurrogate(uc)) { err = ERR_STRING_INVALID_UTF16; break; }
     }
     else
     {
-      if (uc >= 0xFFFE) { err = ERR_TEXT_INVALID_CHAR; break; }
+      if (uc >= 0xFFFE) { err = ERR_STRING_INVALID_CHAR; break; }
     }
   }
 
@@ -98,8 +98,8 @@ FOG_API err_t getNumUtf8Chars(const char* str, sysuint_t len, sysuint_t* charsCo
     uint8_t c0 = strCur[0];
 
     sysuint_t clen = utf8LengthTable[c0];
-    if (!clen) { err = ERR_TEXT_INVALID_UTF8_SEQ; break; }
-    if (remain < clen) { err = ERR_TEXT_INPUT_TRUNCATED; break; }
+    if (!clen) { err = ERR_STRING_INVALID_UTF8; break; }
+    if (remain < clen) { err = ERR_STRING_TRUNCATED; break; }
 
     strCur += clen;
     remain -= clen;
@@ -126,13 +126,13 @@ FOG_API err_t getNumUtf16Chars(const Char* str, sysuint_t len, sysuint_t* charsC
 
     if (Char::isLeadSurrogate(uc))
     {
-      if (srcCur == srcEnd) { err = ERR_TEXT_INPUT_TRUNCATED; break; }
+      if (srcCur == srcEnd) { err = ERR_STRING_TRUNCATED; break; }
       uc = *srcCur++;
-      if (!Char::isTrailSurrogate(uc)) { err = ERR_TEXT_INVALID_UTF16_SEQ; break; }
+      if (!Char::isTrailSurrogate(uc)) { err = ERR_STRING_INVALID_UTF16; break; }
     }
     else
     {
-      if (uc >= 0xFFFE) { err = ERR_TEXT_INVALID_CHAR; break; }
+      if (uc >= 0xFFFE) { err = ERR_STRING_INVALID_CHAR; break; }
     }
     num++;
   }
@@ -720,7 +720,7 @@ sysuint_t lastIndexOfAny(const Char* str, sysuint_t length, const Char* ch, sysu
 
 // Boolean translating table from 'char*' or 'Fog::Char*' into 'bool'
 // Should be 12 bytes
-#include <Fog/Core/Pack.h>
+#include <Fog/Core/Compiler/PackByte.h>
 struct BoolMap
 {
   char str[10];
@@ -748,7 +748,7 @@ static const BoolMap boolMap[] =
   { { '1', 0  , 0  , 0  , 0  , 0  , 0  , 0  ,  0 ,  0 }, 1, true  },
   { { '0', 0  , 0  , 0  , 0  , 0  , 0  , 0  ,  0 ,  0 }, 1, false }
 };
-#include <Fog/Core/Unpack.h>
+#include <Fog/Core/Compiler/PackRestore.h>
 
 // ============================================================================
 // [Fog::StringUtil::asciiMap]

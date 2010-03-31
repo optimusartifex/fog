@@ -1,6 +1,6 @@
 // [Fog-Svg Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Dependencies]
@@ -98,8 +98,8 @@ static int styleToId(const ManagedString& name)
   return i;
 }
 
-#include <Fog/Core/Pack.h>
-struct FOG_HIDDEN FOG_PACKED SvgStyleAttribute : public XmlAttribute
+#include <Fog/Core/Compiler/PackByte.h>
+struct FOG_HIDDEN SvgStyleAttribute : public XmlAttribute
 {
   // [Construction / Destruction]
 
@@ -155,7 +155,7 @@ struct FOG_HIDDEN FOG_PACKED SvgStyleAttribute : public XmlAttribute
   SvgCoord _fontSize;
   SvgCoord _letterSpacing;
 
-  Path _clipPath;
+  DoublePath _clipPath;
   List<double> _dashArray;
 
   String _fillUri;
@@ -165,7 +165,7 @@ struct FOG_HIDDEN FOG_PACKED SvgStyleAttribute : public XmlAttribute
 private:
   FOG_DISABLE_COPY(SvgStyleAttribute)
 };
-#include <Fog/Core/Unpack.h>
+#include <Fog/Core/Compiler/PackRestore.h>
 
 SvgStyleAttribute::SvgStyleAttribute(XmlElement* element, const ManagedString& name, int offset) :
   XmlAttribute(element, name, offset),
@@ -613,12 +613,12 @@ struct FOG_HIDDEN SvgTransformAttribute : public XmlAttribute
 
   // [Data]
 
-  FOG_INLINE const Matrix& getMatrix() const { return _matrix; }
+  FOG_INLINE const DoubleMatrix& getMatrix() const { return _matrix; }
   FOG_INLINE bool isValid() const { return _isValid; }
 
   // [Members]
 protected:
-  Matrix _matrix;
+  DoubleMatrix _matrix;
   bool _isValid;
 
 private:
@@ -775,11 +775,11 @@ struct FOG_HIDDEN SvgPathAttribute : public XmlAttribute
 
   // [Coords]
 
-  FOG_INLINE const Path& getPath() const { return _path; }
+  FOG_INLINE const DoublePath& getPath() const { return _path; }
 
   // [Members]
 protected:
-  Path _path;
+  DoublePath _path;
 
 private:
   FOG_DISABLE_COPY(SvgPathAttribute)
@@ -823,11 +823,11 @@ struct FOG_HIDDEN SvgPointsAttribute : public XmlAttribute
 
   // [Coords]
 
-  FOG_INLINE const Path& getPath() const { return _path; }
+  FOG_INLINE const DoublePath& getPath() const { return _path; }
 
   // [Members]
 protected:
-  Path _path;
+  DoublePath _path;
   bool _closePath;
 
 private:
@@ -1151,7 +1151,7 @@ err_t SvgElement::onApplyPattern(SvgContext* context, SvgElement* obj, int paint
   return ERR_RT_INVALID_CONTEXT;
 }
 
-err_t SvgElement::onCalcBoundingBox(RectD* box) const
+err_t SvgElement::onCalcBoundingBox(DoubleRect* box) const
 {
   return ERR_RT_INVALID_CONTEXT;
 }
@@ -1187,7 +1187,7 @@ err_t SvgElement::setStyle(const String& name, const String& value)
   return ERR_RT_INVALID_CONTEXT;
 }
 
-const RectD& SvgElement::getBoundingRect() const
+const DoubleRect& SvgElement::getBoundingRect() const
 {
   if (_boundingRectDirty)
   {
@@ -1464,7 +1464,7 @@ struct FOG_HIDDEN SvgCircleElement : public SvgStyledElement
   // [SVG Rendering]
 
   virtual err_t onRenderShape(SvgContext* context) const;
-  virtual err_t onCalcBoundingBox(RectD* box) const;
+  virtual err_t onCalcBoundingBox(DoubleRect* box) const;
 
   // [Embedded Attributes]
 
@@ -1508,7 +1508,7 @@ err_t SvgCircleElement::onRenderShape(SvgContext* context) const
 
     if (r <= 0.0) return ERR_OK;
 
-    context->drawEllipse(PointD(cx, cy), PointD(r, r));
+    context->drawEllipse(DoublePoint(cx, cy), DoublePoint(r, r));
     return ERR_OK;
   }
   else
@@ -1517,7 +1517,7 @@ err_t SvgCircleElement::onRenderShape(SvgContext* context) const
   }
 }
 
-err_t SvgCircleElement::onCalcBoundingBox(RectD* box) const
+err_t SvgCircleElement::onCalcBoundingBox(DoubleRect* box) const
 {
   if (a_r.isAssigned())
   {
@@ -1594,7 +1594,7 @@ struct FOG_HIDDEN SvgEllipseElement : public SvgStyledElement
   // [SVG Rendering]
 
   virtual err_t onRenderShape(SvgContext* context) const;
-  virtual err_t onCalcBoundingBox(RectD* box) const;
+  virtual err_t onCalcBoundingBox(DoubleRect* box) const;
 
   // [Embedded Attributes]
 
@@ -1642,7 +1642,7 @@ err_t SvgEllipseElement::onRenderShape(SvgContext* context) const
 
     if (rx <= 0.0 || ry <= 0.0) return ERR_OK;
 
-    context->drawEllipse(PointD(cx, cy), PointD(rx, ry));
+    context->drawEllipse(DoublePoint(cx, cy), DoublePoint(rx, ry));
     return ERR_OK;
   }
   else
@@ -1651,7 +1651,7 @@ err_t SvgEllipseElement::onRenderShape(SvgContext* context) const
   }
 }
 
-err_t SvgEllipseElement::onCalcBoundingBox(RectD* box) const
+err_t SvgEllipseElement::onCalcBoundingBox(DoubleRect* box) const
 {
   if (a_rx.isAssigned() && a_ry.isAssigned())
   {
@@ -1731,7 +1731,7 @@ struct FOG_HIDDEN SvgLineElement : public SvgStyledElement
   // [SVG Rendering]
 
   virtual err_t onRenderShape(SvgContext* context) const;
-  virtual err_t onCalcBoundingBox(RectD* box) const;
+  virtual err_t onCalcBoundingBox(DoubleRect* box) const;
 
   // [Embedded Attributes]
 
@@ -1775,11 +1775,11 @@ err_t SvgLineElement::onRenderShape(SvgContext* context) const
   double x2 = a_x2.isAssigned() ? a_x2.getCoord().value : 0.0;
   double y2 = a_y2.isAssigned() ? a_y2.getCoord().value : 0.0;
 
-  context->drawLine(PointD(x1, y1), PointD(x2, y2));
+  context->drawLine(DoublePoint(x1, y1), DoublePoint(x2, y2));
   return ERR_OK;
 }
 
-err_t SvgLineElement::onCalcBoundingBox(RectD* box) const
+err_t SvgLineElement::onCalcBoundingBox(DoubleRect* box) const
 {
   double x1 = a_x1.isAssigned() ? a_x1.getCoord().value : 0.0;
   double y1 = a_y1.isAssigned() ? a_y1.getCoord().value : 0.0;
@@ -1815,7 +1815,7 @@ struct FOG_HIDDEN SvgPathElement : public SvgStyledElement
   // [SVG Rendering]
 
   virtual err_t onRenderShape(SvgContext* context) const;
-  virtual err_t onCalcBoundingBox(RectD* box) const;
+  virtual err_t onCalcBoundingBox(DoubleRect* box) const;
 
   // [Embedded Attributes]
 
@@ -1847,7 +1847,7 @@ err_t SvgPathElement::onRenderShape(SvgContext* context) const
 {
   if (a_d.isAssigned())
   {
-    const Path& path = a_d.getPath();
+    const DoublePath& path = a_d.getPath();
     context->drawPath(path);
     return ERR_OK;
   }
@@ -1857,11 +1857,11 @@ err_t SvgPathElement::onRenderShape(SvgContext* context) const
   }
 }
 
-err_t SvgPathElement::onCalcBoundingBox(RectD* box) const
+err_t SvgPathElement::onCalcBoundingBox(DoubleRect* box) const
 {
   if (a_d.isAssigned())
   {
-    const Path& path = a_d.getPath();
+    const DoublePath& path = a_d.getPath();
     box->set(path.getBoundingRect());
     return ERR_OK;
   }
@@ -1892,7 +1892,7 @@ struct FOG_HIDDEN SvgPolygonElement : public SvgStyledElement
   // [SVG Rendering]
 
   virtual err_t onRenderShape(SvgContext* context) const;
-  virtual err_t onCalcBoundingBox(RectD* box) const;
+  virtual err_t onCalcBoundingBox(DoubleRect* box) const;
 
   // [Embedded Attributes]
 
@@ -1924,7 +1924,7 @@ err_t SvgPolygonElement::onRenderShape(SvgContext* context) const
 {
   if (a_points.isAssigned())
   {
-    const Path& path = a_points.getPath();
+    const DoublePath& path = a_points.getPath();
     context->drawPath(path);
     return ERR_OK;
   }
@@ -1934,11 +1934,11 @@ err_t SvgPolygonElement::onRenderShape(SvgContext* context) const
   }
 }
 
-err_t SvgPolygonElement::onCalcBoundingBox(RectD* box) const
+err_t SvgPolygonElement::onCalcBoundingBox(DoubleRect* box) const
 {
   if (a_points.isAssigned())
   {
-    const Path& path = a_points.getPath();
+    const DoublePath& path = a_points.getPath();
     box->set(path.getBoundingRect());
     return ERR_OK;
   }
@@ -1969,7 +1969,7 @@ struct FOG_HIDDEN SvgPolyLineElement : public SvgStyledElement
   // [SVG Rendering]
 
   virtual err_t onRenderShape(SvgContext* context) const;
-  virtual err_t onCalcBoundingBox(RectD* box) const;
+  virtual err_t onCalcBoundingBox(DoubleRect* box) const;
 
   // [Embedded Attributes]
 
@@ -2001,7 +2001,7 @@ err_t SvgPolyLineElement::onRenderShape(SvgContext* context) const
 {
   if (a_points.isAssigned())
   {
-    const Path& path = a_points.getPath();
+    const DoublePath& path = a_points.getPath();
     context->drawPath(path);
     return ERR_OK;
   }
@@ -2011,11 +2011,11 @@ err_t SvgPolyLineElement::onRenderShape(SvgContext* context) const
   }
 }
 
-err_t SvgPolyLineElement::onCalcBoundingBox(RectD* box) const
+err_t SvgPolyLineElement::onCalcBoundingBox(DoubleRect* box) const
 {
   if (a_points.isAssigned())
   {
-    const Path& path = a_points.getPath();
+    const DoublePath& path = a_points.getPath();
     box->set(path.getBoundingRect());
     return ERR_OK;
   }
@@ -2046,7 +2046,7 @@ struct FOG_HIDDEN SvgRectElement : public SvgStyledElement
   // [SVG Rendering]
 
   virtual err_t onRenderShape(SvgContext* context) const;
-  virtual err_t onCalcBoundingBox(RectD* box) const;
+  virtual err_t onCalcBoundingBox(DoubleRect* box) const;
 
   // [Embedded Attributes]
 
@@ -2107,16 +2107,16 @@ err_t SvgRectElement::onRenderShape(SvgContext* context) const
     if (!a_ry.isAssigned() && a_rx.isAssigned()) ry = rx;
 
     if (rx <= 0.0 || ry <= 0.0)
-      context->drawRect(RectD(x, y, w, h));
+      context->drawRect(DoubleRect(x, y, w, h));
     else
-      context->drawRound(RectD(x, y, w, h), PointD(rx, ry));
+      context->drawRound(DoubleRect(x, y, w, h), DoublePoint(rx, ry));
   }
 
 fail:
   return ERR_OK;
 }
 
-err_t SvgRectElement::onCalcBoundingBox(RectD* box) const
+err_t SvgRectElement::onCalcBoundingBox(DoubleRect* box) const
 {
   if (a_width.isAssigned() && a_height.isAssigned())
   {
@@ -2152,7 +2152,7 @@ struct FOG_HIDDEN SvgUseElement : public SvgStyledElement
   // [SVG Rendering]
 
   virtual err_t onRenderShape(SvgContext* context) const;
-  virtual err_t onCalcBoundingBox(RectD* box) const;
+  virtual err_t onCalcBoundingBox(DoubleRect* box) const;
 
   // [Embedded Attributes]
 
@@ -2184,7 +2184,7 @@ err_t SvgUseElement::onRenderShape(SvgContext* context) const
   return ERR_OK;
 }
 
-err_t SvgUseElement::onCalcBoundingBox(RectD* box) const
+err_t SvgUseElement::onCalcBoundingBox(DoubleRect* box) const
 {
   box->clear();
   return ERR_OK;
@@ -2353,7 +2353,7 @@ start:
 
       if (_stop->a_offset.isAssigned() && _stop->a_style.hasStyle(SVG_STYLE_STOP_COLOR))
       {
-        double offset = _stop->a_offset.getOffset();
+        float offset = _stop->a_offset.getOffset();
         Argb color = _stop->a_style._stopColor;
 
         if (_stop->a_style.hasStyle(SVG_STYLE_STOP_OPACITY))
@@ -2463,7 +2463,7 @@ err_t SvgLinearGradientElement::onApplyPattern(SvgContext* context, SvgElement* 
   if (!a_gradientUnits.isAssigned() || a_gradientUnits.getEnum() == SVG_OBJECT_BOUNDING_BOX)
   {
     // BoundingBox coordinates.
-    RectD bbox = obj->getBoundingRect();
+    DoubleRect bbox = obj->getBoundingRect();
 
     double x1 = a_x1.isAssigned() ? context->translateCoord(a_x1.getDouble(), a_x1.getUnit()) : 0.0;
     double y1 = a_y1.isAssigned() ? context->translateCoord(a_y1.getDouble(), a_y1.getUnit()) : 0.0;
@@ -2475,7 +2475,7 @@ err_t SvgLinearGradientElement::onApplyPattern(SvgContext* context, SvgElement* 
     x2 = bbox.x + bbox.w * x2;
     y2 = bbox.y + bbox.h * y2;
 
-    pattern.setPoints(PointD(x1, y1), PointD(x2, y2));
+    pattern.setPoints(DoublePoint(x1, y1), DoublePoint(x2, y2));
   }
   else if (a_x1.isAssigned() && a_y1.isAssigned() && a_x2.isAssigned() && a_y2.isAssigned())
   {
@@ -2485,7 +2485,7 @@ err_t SvgLinearGradientElement::onApplyPattern(SvgContext* context, SvgElement* 
     double x2 = context->translateCoord(a_x2.getDouble(), a_x2.getUnit());
     double y2 = context->translateCoord(a_y2.getDouble(), a_y2.getUnit());
 
-    pattern.setPoints(PointD(x1, y1), PointD(x2, y2));
+    pattern.setPoints(DoublePoint(x1, y1), DoublePoint(x2, y2));
   }
   else
   {
@@ -2587,7 +2587,7 @@ err_t SvgRadialGradientElement::onApplyPattern(SvgContext* context, SvgElement* 
   // Setup start and end points.
   if (!a_gradientUnits.isAssigned() || a_gradientUnits.getEnum() == SVG_OBJECT_BOUNDING_BOX)
   {
-    RectD bbox = obj->getBoundingRect();
+    DoubleRect bbox = obj->getBoundingRect();
 
     double cx = a_cx.isAssigned() ? context->translateCoord(a_cx.getDouble(), a_cx.getUnit()) : 0.5;
     double cy = a_cy.isAssigned() ? context->translateCoord(a_cy.getDouble(), a_cy.getUnit()) : 0.5;
@@ -2601,7 +2601,7 @@ err_t SvgRadialGradientElement::onApplyPattern(SvgContext* context, SvgElement* 
     fy = bbox.y + bbox.h * fy;
     r = Math::min(bbox.w, bbox.h) * r;
 
-    pattern.setPoints(PointD(cx, cy), PointD(fx, fy));
+    pattern.setPoints(DoublePoint(cx, cy), DoublePoint(fx, fy));
     pattern.setRadius(r);
   }
   else if (a_cx.isAssigned() && a_cy.isAssigned() && a_cx.isAssigned() && a_r.isAssigned())
@@ -2612,7 +2612,7 @@ err_t SvgRadialGradientElement::onApplyPattern(SvgContext* context, SvgElement* 
     double fy = a_fy.isAssigned() ? context->translateCoord(a_fy.getDouble(), a_fy.getUnit()) : cy;
     double r = context->translateCoord(a_r.getDouble(), a_r.getUnit());
 
-    pattern.setPoints(PointD(cx, cy), PointD(fx, fy));
+    pattern.setPoints(DoublePoint(cx, cy), DoublePoint(fx, fy));
     pattern.setRadius(r);
   }
   else
@@ -2696,7 +2696,7 @@ err_t SvgImageElement::onRender(SvgContext* context) const
 {
   err_t err = ERR_OK;
 
-  Matrix backupMatrix(DONT_INITIALIZE);
+  DoubleMatrix backupMatrix(DONT_INITIALIZE);
   bool transformed = a_transform.isAssigned() & a_transform.isValid();
 
   // There is only transformation that can be applied to the image.
@@ -2727,7 +2727,7 @@ err_t SvgImageElement::onRenderShape(SvgContext* context) const
     double x = a_x.isAssigned() ? a_x.getCoord().value : 0.0;
     double y = a_y.isAssigned() ? a_y.getCoord().value : 0.0;
 
-    context->blitImage(PointD(x, y), a_href._image);
+    context->blitImage(DoublePoint(x, y), a_href._image);
     return ERR_OK;
   }
   else

@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Private API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -29,6 +29,8 @@
 // ============================================================================
 // [GdiPlus - Flat API]
 // ============================================================================
+
+#include <Fog/Core/Compiler/PackQWord.h>
 
 typedef uint32_t GpARGB;
 typedef int GpPixelFormat;
@@ -227,6 +229,8 @@ struct GpRect
   int Width;
   int Height;
 };
+
+#include <Fog/Core/Compiler/PackRestore.h>
 
 namespace Fog {
 namespace ImageIO {

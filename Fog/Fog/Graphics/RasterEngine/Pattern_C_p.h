@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Private API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // For some IDEs to enable code-assist.
@@ -371,9 +371,9 @@ struct FOG_HIDDEN PatternC
   // --------------------------------------------------------------------------
 
   static err_t FOG_FASTCALL texture_init(
-    PatternContext* ctx, const Pattern& pattern, const Matrix& matrix, int interpolationType)
+    PatternContext* ctx, const Pattern& pattern, const DoubleMatrix& matrix, int interpolationType)
   {
-    Pattern::Data* d = pattern._d;
+    PatternData* d = pattern._d;
 
     // Only PATTERN_TEXTURE type pattern can be passed to texture_init().
     FOG_ASSERT(d->type == PATTERN_TEXTURE);
@@ -382,14 +382,14 @@ struct FOG_HIDDEN PatternC
     if (d->obj.texture->isEmpty()) return functionMap->pattern.solid_init(ctx, 0x00000000);
 
     // Multiply pattern matrix with a given matrix (painter transformations).
-    Matrix m(pattern._d->matrix.multiplied(matrix));
+    DoubleMatrix m(pattern._d->matrix.multiplied(matrix));
 
     // Call texture_init_blit() which will initialize the context.
     return texture_init_blit(ctx, d->obj.texture.instance(), m, d->spread, interpolationType);
   }
 
   static err_t FOG_FASTCALL texture_init_blit(
-    PatternContext* ctx, const Image& image, const Matrix& matrix, int spread, int interpolationType)
+    PatternContext* ctx, const Image& image, const DoubleMatrix& matrix, int spread, int interpolationType)
   {
     // Only valid images can be passed to texture_init_blit.
     FOG_ASSERT(!image.isEmpty());
@@ -513,7 +513,7 @@ struct FOG_HIDDEN PatternC
     if (!ctx->fetch)
     {
       // Transform.
-      matrix.inverted().storeTo(ctx->m);
+      matrix.inverted().saveTo(ctx->m);
 
       // Inner loop increments and bounds (16.16 fixed point).
       {
@@ -3179,9 +3179,9 @@ doFill_4:
   // --------------------------------------------------------------------------
 
   static err_t FOG_FASTCALL linear_gradient_init(
-    PatternContext* ctx, const Pattern& pattern, const Matrix& matrix, int interpolationType)
+    PatternContext* ctx, const Pattern& pattern, const DoubleMatrix& matrix, int interpolationType)
   {
-    Pattern::Data* d = pattern._d;
+    PatternData* d = pattern._d;
     if (d->type != PATTERN_LINEAR_GRADIENT) return ERR_RT_INVALID_ARGUMENT;
 
     if (d->obj.stops->getLength() == 0)
@@ -3203,8 +3203,8 @@ doFill_4:
 
     // FIXME: TODO: Not correct code
 #if 0
-    Matrix m(pattern._d->matrix.multiplied(matrix));
-    PointD points[2];
+    DoubleMatrix m(pattern._d->matrix.multiplied(matrix));
+    DoublePoint points[2];
 
     double f = (m.sx * m.sy) - (m.shy * m.shx);
     if (fabs(f) < 1e-20)
@@ -3223,7 +3223,7 @@ doFill_4:
     double dx = points[1].x - points[0].x;
     double dy = points[1].y - points[0].y;
     double dx2dy2 = dx * dx + dy * dy;
-    double sqrtxxyy = sqrt(dx2dy2);
+    double sqrtxxyy = Math::sqrt(dx2dy2);
 
     if (Math::abs(dx) < 0.000001 && Math::abs(dy) < 0.000001)
     {
@@ -3250,8 +3250,8 @@ doFill_4:
 
 
 #if 1
-    Matrix m(pattern._d->matrix.multiplied(matrix));
-    PointD pts[2];
+    DoubleMatrix m(pattern._d->matrix.multiplied(matrix));
+    DoublePoint pts[2];
 
     double px = d->points[0].x;
     double py = d->points[0].y;
@@ -3269,7 +3269,7 @@ doFill_4:
 
     //double dx2dy2 = dx * dx + dy * dy;
     double dx2dy2 = dx * dx + dy * dy;
-    double sqrtxxyy = sqrt(dx2dy2);
+    double sqrtxxyy = Math::sqrt(dx2dy2);
 
     if (Math::abs(dx) < 0.000001 && Math::abs(dy) < 0.000001)
     {
@@ -3297,7 +3297,7 @@ doFill_4:
 
 
 #if 0
-    Matrix m(pattern._d->matrix.multiplied(matrix));
+    DoubleMatrix m(pattern._d->matrix.multiplied(matrix));
 
     double px = d->points[0].x;
     double py = d->points[0].y;
@@ -3316,7 +3316,7 @@ doFill_4:
     double sh = m.shx + m.shy;
 
     double wx2wy2 = wx * wx + wy * wy;
-    double sqrtwx2wy2 = sqrt(wx2wy2);
+    double sqrtwx2wy2 = Math::sqrt(wx2wy2);
 
     if (Math::abs(wx) < 0.000001 && Math::abs(wy) < 0.000001)
     {
@@ -3694,9 +3694,9 @@ doFill_4:
   // --------------------------------------------------------------------------
 
   static err_t FOG_FASTCALL radial_gradient_init(
-    PatternContext* ctx, const Pattern& pattern, const Matrix& matrix, int interpolationType)
+    PatternContext* ctx, const Pattern& pattern, const DoubleMatrix& matrix, int interpolationType)
   {
-    Pattern::Data* d = pattern._d;
+    PatternData* d = pattern._d;
     if (d->type != PATTERN_RADIAL_GRADIENT) return ERR_RT_INVALID_ARGUMENT;
 
     if (d->obj.stops->getLength() == 0)
@@ -3708,9 +3708,9 @@ doFill_4:
       return functionMap->pattern.solid_init(ctx, ArgbUtil::premultiply(d->obj.stops->at(0).argb));
     }
 
-    Matrix m(pattern._d->matrix.multiplied(matrix));
+    DoubleMatrix m(pattern._d->matrix.multiplied(matrix));
 
-    PointD points[2];
+    DoublePoint points[2];
     m.transformPoints(points, d->points, 2);
 
     sysint_t gLength = 256 * d->obj.stops->getLength();
@@ -3815,7 +3815,7 @@ doFill_4:
       double d2 = dx * fy - dyfx;
       double d3 = r2 * (dx * dx + dydy) - d2 * d2;
 
-      index = (int) ((dx * fx + dyfy + sqrt(fabs(d3))) * scale);
+      index = (int) ((dx * fx + dyfy + Math::sqrt(fabs(d3))) * scale);
 
       if (index < 0)
         ((uint32_t*)dstCur)[0] = color0;
@@ -3876,7 +3876,7 @@ doFill_4:
     double di = fx;
 
     do {
-      index = (int)((dd + sqrt(fabs(cc))) * scale);
+      index = (int)((dd + Math::sqrt(fabs(cc))) * scale);
 
       if (index < 0)
         ((uint32_t*)dstCur)[0] = color0;
@@ -3941,7 +3941,7 @@ doFill_4:
     double di = fx;
 
     do {
-      index = (int)((dd + sqrt(fabs(cc))) * scale) % colorsLength;
+      index = (int)((dd + Math::sqrt(fabs(cc))) * scale) % colorsLength;
       if (index < 0) index += colorsLength;
 
       ((uint32_t*)dstCur)[0] = colors[index];
@@ -3964,9 +3964,9 @@ doFill_4:
   // --------------------------------------------------------------------------
 
   static err_t FOG_FASTCALL conical_gradient_init(
-    PatternContext* ctx, const Pattern& pattern, const Matrix& matrix, int interpolationType)
+    PatternContext* ctx, const Pattern& pattern, const DoubleMatrix& matrix, int interpolationType)
   {
-    Pattern::Data* d = pattern._d;
+    PatternData* d = pattern._d;
     if (d->type != PATTERN_CONICAL_GRADIENT) return ERR_RT_INVALID_ARGUMENT;
 
     if (d->obj.stops->getLength() == 0)
@@ -3978,9 +3978,9 @@ doFill_4:
       return functionMap->pattern.solid_init(ctx, ArgbUtil::premultiply(d->obj.stops->at(0).argb));
     }
 
-    Matrix m(pattern._d->matrix.multiplied(matrix));
+    DoubleMatrix m(pattern._d->matrix.multiplied(matrix));
 
-    PointD points[2];
+    DoublePoint points[2];
     m.transformPoints(points, d->points, 2);
 
     sysint_t gLength = 256 * d->obj.stops->getLength();

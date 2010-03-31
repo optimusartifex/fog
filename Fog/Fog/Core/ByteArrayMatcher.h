@@ -1,6 +1,6 @@
 // [Fog-Core Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -51,6 +51,10 @@ namespace Fog {
 //! @sa @c Fog::ByteArray, @c Fog::ByteArrayFilter.
 struct FOG_API ByteArrayMatcher : public ByteArrayFilter
 {
+  // --------------------------------------------------------------------------
+  // [SkipTable]
+  // --------------------------------------------------------------------------
+
   //! @brief @c Fog::ByteArrayMatcher skip table.
   //!
   //! @note The table is generated on the fly by first search call.
@@ -67,32 +71,42 @@ struct FOG_API ByteArrayMatcher : public ByteArrayFilter
     Atomic<uint> status;
   };
 
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   ByteArrayMatcher();
   ByteArrayMatcher(const ByteArray& pattern);
   ByteArrayMatcher(const ByteArrayMatcher& matcher);
   virtual ~ByteArrayMatcher();
 
-  // [Pattern get / set]
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE const ByteArray& getPattern() const { return _pattern; }
 
   err_t setPattern(const ByteArray& pattern);
   err_t setPattern(const ByteArrayMatcher& matcher);
 
+  // --------------------------------------------------------------------------
   // [Filter Implementation]
+  // --------------------------------------------------------------------------
 
   virtual sysuint_t getLength() const;
 
   virtual Range match(const char* str, sysuint_t length, uint cs, const Range& range) const;
 
-  // [Overloaded Operators]
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE ByteArrayMatcher& operator=(const ByteArray& pattern) { setPattern(pattern); return *this; }
   FOG_INLINE ByteArrayMatcher& operator=(const ByteArrayMatcher& matcher) { setPattern(matcher); return *this; }
 
+  // --------------------------------------------------------------------------
   // [Members]
+  // --------------------------------------------------------------------------
 
 private:
   ByteArray _pattern;

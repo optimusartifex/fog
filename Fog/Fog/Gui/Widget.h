@@ -1,6 +1,6 @@
 // [Fog-Gui Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -163,20 +163,20 @@ struct FOG_API Widget : public LayoutItem
   err_t setWindowIcon(const Image& icon);
 
   //! @brief Get native gui window resize granularity.
-  Point getWindowGranularity() const;
+  IntPoint getWindowGranularity() const;
   //! @brief Set native gui window resize granularity.
-  err_t setWindowGranularity(const Point& pt);
+  err_t setWindowGranularity(const IntPoint& pt);
 
   // --------------------------------------------------------------------------
   // [Geometry]
   // --------------------------------------------------------------------------
 
   //! @brief Get widget geometry.
-  FOG_INLINE const Rect& getGeometry() const { return _geometry; }
+  FOG_INLINE const IntRect& getGeometry() const { return _geometry; }
   //! @brief Get widget position relative to parent.
-  FOG_INLINE const Point& getPosition() const { return _geometry.getPosition(); }
+  FOG_INLINE const IntPoint& getPosition() const { return _geometry.getPosition(); }
   //! @brief Get widget size.
-  FOG_INLINE const Size& getSize() const { return _geometry.getSize(); }
+  FOG_INLINE const IntSize& getSize() const { return _geometry.getSize(); }
 
   //! @brief Get widget left position, this method is equal to @c left().
   FOG_INLINE int getX() const { return _geometry.x; }
@@ -188,11 +188,11 @@ struct FOG_API Widget : public LayoutItem
   FOG_INLINE int getHeight() const { return _geometry.h; }
 
   //! @brief Get widget client geometry.
-  FOG_INLINE const Rect& getClientGeometry() const { return _clientGeometry; }
+  FOG_INLINE const IntRect& getClientGeometry() const { return _clientGeometry; }
   //! @brief Get widget position relative to parent.
-  FOG_INLINE const Point& getClientPosition() const { return _clientGeometry.getPosition(); }
+  FOG_INLINE const IntPoint& getClientPosition() const { return _clientGeometry.getPosition(); }
   //! @brief Get widget size.
-  FOG_INLINE const Size& getClientSize() const { return _clientGeometry.getSize(); }
+  FOG_INLINE const IntSize& getClientSize() const { return _clientGeometry.getSize(); }
 
   //! @brief Get widget left position, this method is equal to @c left().
   FOG_INLINE int getClientX() const { return _clientGeometry.x; }
@@ -204,51 +204,51 @@ struct FOG_API Widget : public LayoutItem
   FOG_INLINE int getClientHeight() const { return _clientGeometry.h; }
 
   //! @brief Get widget origin.
-  FOG_INLINE const Point& getOrigin() const { return _origin; }
+  FOG_INLINE const IntPoint& getOrigin() const { return _origin; }
 
   //! @brief Set widget position and size to @a geometry.
-  void setGeometry(const Rect& geometry);
+  void setGeometry(const IntRect& geometry);
 
   //! @brief Set widget position to @a pt.
   //!
   //! @note To set widget position and size together use @c setGeometry().
-  void setPosition(const Point& pt);
+  void setPosition(const IntPoint& pt);
 
   //! @brief Set the widget size to @a sz.
   //!
   //! @note To set widget position and size together use @c setGeometry().
-  void setSize(const Size& size);
+  void setSize(const IntSize& size);
 
   //! @brief Set widget origin to @a pt.
-  void setOrigin(const Point& pt);
+  void setOrigin(const IntPoint& pt);
 
   //! @brief Set widget position to @a pt.
   //!
   //! This method is similar to @c setPosition().
-  FOG_INLINE void move(const Point& pt) { setPosition(pt); }
+  FOG_INLINE void move(const IntPoint& pt) { setPosition(pt); }
 
   //! @brief Set widget size to @a size.
   //!
   //! This method is similar to @c setSize().
-  FOG_INLINE void resize(const Size& size) { setSize(size); }
+  FOG_INLINE void resize(const IntSize& size) { setSize(size); }
 
   //! @brief Translate world coordinate @a coord into client (relative to the
   //! widget).
-  bool worldToClient(Point* coord) const;
+  bool worldToClient(IntPoint* coord) const;
 
   //! @brief Translate client coordinate @a coord into world (relative to the
   //! screen).
-  bool clientToWorld(Point* coord) const;
+  bool clientToWorld(IntPoint* coord) const;
 
   //! @brief Translate coordinates between two widgets.
-  static bool translateCoordinates(Widget* to, Widget* from, Point* coords);
+  static bool translateCoordinates(Widget* to, Widget* from, IntPoint* coords);
 
   // --------------------------------------------------------------------------
   // [Hit Testing]
   // --------------------------------------------------------------------------
 
-  Widget* hitTest(const Point& pt) const;
-  Widget* getChildAt(const Point& pt, bool recursive = false) const;
+  Widget* hitTest(const IntPoint& pt) const;
+  Widget* getChildAt(const IntPoint& pt, bool recursive = false) const;
 
   // --------------------------------------------------------------------------
   // [Layout Of Widget]
@@ -555,11 +555,11 @@ protected:
   GuiWindow* _guiWindow;
 
   //! @brief Main geometry (geometry relative to widget parent or screen).
-  Rect _geometry;
+  IntRect _geometry;
   //! @brief Client area geometry (geometry within the widget).
-  Rect _clientGeometry;
+  IntRect _clientGeometry;
   //! @brief Client origin.
-  Point _origin;
+  IntPoint _origin;
 
   //! @brief Font (used to draw text in widget).
   Font _font;

@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 #if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
@@ -193,14 +193,14 @@ typedef uint8_t *GifRowType;
 typedef uint16_t GifPrefixType;
 typedef int GifWord;
 
-#include <Fog/Core/Pack.h>
+#include <Fog/Core/Compiler/PackByte.h>
 struct GifColorType
 {
   uint8_t Red;
   uint8_t Green;
   uint8_t Blue;
 };
-#include <Fog/Core/Unpack.h>
+#include <Fog/Core/Compiler/PackRestore.h>
 
 struct ColorMapObject
 {

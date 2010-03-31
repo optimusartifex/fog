@@ -1,6 +1,6 @@
 // [Fog-Svg Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Dependencies]
@@ -45,7 +45,7 @@ void SvgContext::setDpi(double dpi)
   _translateCoordData[SVG_UNIT_PX] = 1.0;
 }
 
-void SvgContext::drawEllipse(const PointD& cp, const PointD& r)
+void SvgContext::drawEllipse(const DoublePoint& cp, const DoublePoint& r)
 {
   if (_fillStyle.type != SVG_SOURCE_NONE)
   {
@@ -60,7 +60,7 @@ void SvgContext::drawEllipse(const PointD& cp, const PointD& r)
   }
 }
 
-void SvgContext::drawLine(const PointD& p1, const PointD& p2)
+void SvgContext::drawLine(const DoublePoint& p1, const DoublePoint& p2)
 {
   if (_lineStyle.type != SVG_SOURCE_NONE)
   {
@@ -69,7 +69,7 @@ void SvgContext::drawLine(const PointD& p1, const PointD& p2)
   }
 }
 
-void SvgContext::drawRect(const RectD& rect)
+void SvgContext::drawRect(const DoubleRect& rect)
 {
   if (_fillStyle.type != SVG_SOURCE_NONE)
   {
@@ -84,7 +84,7 @@ void SvgContext::drawRect(const RectD& rect)
   }
 }
 
-void SvgContext::drawRound(const RectD& rect, const PointD& r)
+void SvgContext::drawRound(const DoubleRect& rect, const DoublePoint& r)
 {
   if (_fillStyle.type != SVG_SOURCE_NONE)
   {
@@ -99,7 +99,7 @@ void SvgContext::drawRound(const RectD& rect, const PointD& r)
   }
 }
 
-void SvgContext::drawPath(const Path& path)
+void SvgContext::drawPath(const DoublePath& path)
 {
   if (_fillStyle.type != SVG_SOURCE_NONE)
   {
@@ -114,7 +114,7 @@ void SvgContext::drawPath(const Path& path)
   }
 }
 
-void SvgContext::blitImage(const PointD& pt, const Image& im)
+void SvgContext::blitImage(const DoublePoint& pt, const Image& im)
 {
   _painter->blitImage(pt, im);
 }

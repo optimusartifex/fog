@@ -1,6 +1,6 @@
 // [Fog-Gui Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Precompiled Headers]
@@ -33,9 +33,9 @@ Button::~Button()
 void Button::onPaint(PaintEvent* e)
 {
   Painter* p = e->getPainter();
-  Size s = getClientSize();
+  IntSize s = getClientSize();
 
-  Rect bounds(0, 0, s.w, s.h);
+  IntRect bounds(0, 0, s.w, s.h);
   PaintUtil::draw3dRect(p, bounds, 0xFFFFFFFF, 0xFF000000, isDown());
 
   bounds.shrink(1);
@@ -46,19 +46,19 @@ void Button::onPaint(PaintEvent* e)
 
   if (!isDown())
   {
-    pat.setStartPoint(Point(0, 0));
-    pat.setEndPoint(Point(0, s.h));
+    pat.setStartPoint(IntPoint(0, 0));
+    pat.setEndPoint(IntPoint(0, s.h));
   }
   else
   {
-    pat.setStartPoint(Point(0, s.h));
-    pat.setEndPoint(Point(0, 0));
+    pat.setStartPoint(IntPoint(0, s.h));
+    pat.setEndPoint(IntPoint(0, 0));
   }
 
-  pat.addStop(ArgbStop(0.00, 0xFFFFFFFF));
-  pat.addStop(ArgbStop(0.48, 0xFF8CAAFF));
-  pat.addStop(ArgbStop(0.52, 0xFF6E8CFF));
-  pat.addStop(ArgbStop(1.00, 0xFF4664FF));
+  pat.addStop(ArgbStop(0.00f, 0xFFFFFFFF));
+  pat.addStop(ArgbStop(0.48f, 0xFF8CAAFF));
+  pat.addStop(ArgbStop(0.52f, 0xFF6E8CFF));
+  pat.addStop(ArgbStop(1.00f, 0xFF4664FF));
   p->setSource(pat);
   p->fillRect(bounds);
 

@@ -1,6 +1,6 @@
 // [Fog-Svg Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -94,7 +94,7 @@ struct FOG_API SvgContext
 
   // [Matrix]
 
-  FOG_INLINE Matrix getMatrix() const
+  FOG_INLINE DoubleMatrix getMatrix() const
   {
     return _painter->getMatrix();
   }
@@ -224,13 +224,13 @@ struct FOG_API SvgContext
     _painter->setStrokeParams(_strokeParams);
   }
 
-  void drawEllipse(const PointD& cp, const PointD& r);
-  void drawLine(const PointD& p1, const PointD& p2);
-  void drawRect(const RectD& rect);
-  void drawRound(const RectD& rect, const PointD& r);
-  void drawPath(const Path& path);
+  void drawEllipse(const DoublePoint& cp, const DoublePoint& r);
+  void drawLine(const DoublePoint& p1, const DoublePoint& p2);
+  void drawRect(const DoubleRect& rect);
+  void drawRound(const DoubleRect& rect, const DoublePoint& r);
+  void drawPath(const DoublePath& path);
 
-  void blitImage(const PointD& pt, const Image& im);
+  void blitImage(const DoublePoint& pt, const Image& im);
 
   // [Members]
 
@@ -303,7 +303,7 @@ struct FOG_HIDDEN SvgContextBackup
   }
 
   SvgContext* _context;
-  Matrix _matrix;
+  DoubleMatrix _matrix;
 
   Static<SvgContext::Style> _fillStyle;
   uint32_t _fillMode;

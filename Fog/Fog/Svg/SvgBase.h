@@ -1,6 +1,6 @@
 // [Fog-Svg Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -24,8 +24,8 @@ namespace Fog {
 // [Fog::SvgCoord]
 // ============================================================================
 
-#include <Fog/Core/Pack.h>
-struct FOG_HIDDEN FOG_PACKED SvgCoord
+#include <Fog/Core/Compiler/PackByte.h>
+struct FOG_HIDDEN SvgCoord
 {
   FOG_INLINE SvgCoord() {}
   FOG_INLINE SvgCoord(double value, uint32_t unit) : value(value), unit(unit) {}
@@ -33,7 +33,7 @@ struct FOG_HIDDEN FOG_PACKED SvgCoord
   double value;
   uint32_t unit;
 };
-#include <Fog/Core/Unpack.h>
+#include <Fog/Core/Compiler/PackRestore.h>
 
 //! @}
 

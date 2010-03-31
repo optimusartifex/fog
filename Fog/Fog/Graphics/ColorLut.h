@@ -1,6 +1,6 @@
 // [Fog-Graphics Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -68,17 +68,27 @@ private:
 //! transformations that can be applied to an image data.
 struct FOG_API ColorLut
 {
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   ColorLut();
   ColorLut(const ColorLut& other);
   FOG_INLINE ColorLut(_DONT_INITIALIZE _linkerInitialized) { FOG_UNUSED(_linkerInitialized); }
   ~ColorLut();
 
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
   FOG_INLINE ColorLutData* getData() { return &_data; }
   FOG_INLINE const ColorLutData* getData() const { return &_data; }
 
   err_t setData(const ColorLutData* data);
+
+  // --------------------------------------------------------------------------
+  // [Filters]
+  // --------------------------------------------------------------------------
 
   err_t reset(int channel);
   err_t saturate(int channel, int minThreshold, int maxThreshold);
@@ -87,12 +97,17 @@ struct FOG_API ColorLut
   err_t invert(int channel);
   err_t filter(int channel, const ColorLutFilter& filter);
 
+  // --------------------------------------------------------------------------
   // [Operator Overload]
+  // --------------------------------------------------------------------------
 
   //! @brief Assignment operator.
   ColorLut& operator=(const ColorLut& other);
 
+  // --------------------------------------------------------------------------
   // [Members]
+  // --------------------------------------------------------------------------
+
 protected:
   ColorLutData _data;
 };

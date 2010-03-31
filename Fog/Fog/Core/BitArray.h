@@ -1,6 +1,6 @@
 // [Fog-Core Library - Public API]
 //
-// [Licence]
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -55,14 +55,18 @@ struct FOG_API BitArray
 
   static Static<Data> sharedNull;
 
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   BitArray();
   BitArray(const BitArray& other);
   FOG_INLINE explicit BitArray(Data* d) : _d(d) {}
   ~BitArray();
 
+  // --------------------------------------------------------------------------
   // [Implicit Sharing]
+  // --------------------------------------------------------------------------
 
   //! @copydoc Doxygen::Implicit::refCount().
   FOG_INLINE sysuint_t refCount() const { return _d->refCount.get(); }
@@ -75,12 +79,16 @@ struct FOG_API BitArray
   //! @copydoc Doxygen::Implicit::free().
   void free();
 
+  // --------------------------------------------------------------------------
   // [Flags]
+  // --------------------------------------------------------------------------
 
   //! @copydoc Doxygen::Implicit::isNull().
   FOG_INLINE bool isNull() const { return _d == sharedNull.instancep(); }
 
+  // --------------------------------------------------------------------------
   // [Data]
+  // --------------------------------------------------------------------------
 
   //! @brief Returns const pointer to bit array data (bits).
   FOG_INLINE const uint8_t* getData() const
@@ -124,49 +132,65 @@ struct FOG_API BitArray
   void squeeze();
   void clear();
 
-  // [Single bit manipulation]
+  // --------------------------------------------------------------------------
+  // [Single Bit Manipulation]
+  // --------------------------------------------------------------------------
 
   err_t setBit(sysuint_t index);
   err_t setBit(sysuint_t index, uint32_t bit);
   err_t resetBit(sysuint_t index);
   err_t invertBit(sysuint_t index);
 
-  // [Multiple bits manipulation]
+  // --------------------------------------------------------------------------
+  // [Multiple Bits Manipulation]
+  // --------------------------------------------------------------------------
 
   err_t fill(uint32_t bit);
   err_t fillAt(sysuint_t index, sysuint_t count, uint32_t bit);
   err_t invert();
   err_t invertAt(sysuint_t index, sysuint_t count);
 
+  // --------------------------------------------------------------------------
   // [Set]
+  // --------------------------------------------------------------------------
 
   err_t set(const BitArray& other);
   err_t setDeep(const BitArray& other);
 
+  // --------------------------------------------------------------------------
   // [Append]
+  // --------------------------------------------------------------------------
 
   err_t append(uint32_t bit);
   err_t append(uint32_t bit, sysuint_t count);
   err_t append(const BitArray& other);
 
+  // --------------------------------------------------------------------------
   // [Prepend]
+  // --------------------------------------------------------------------------
 
   err_t prepend(uint32_t bit);
   err_t prepend(uint32_t bit, sysuint_t count);
   err_t prepend(const BitArray& other);
 
+  // --------------------------------------------------------------------------
   // [Insert]
+  // --------------------------------------------------------------------------
 
   err_t insert(sysuint_t index, uint32_t bit);
   err_t insert(sysuint_t index, uint32_t bit, sysuint_t count);
   err_t insert(sysuint_t index, const BitArray& other);
 
-  // [Overloaded Operators]
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE BitArray& operator=(const BitArray& other) { set(other); return *this; }
   FOG_INLINE BitArray& operator+=(const BitArray& other) { append(other); return *this; }
 
+  // --------------------------------------------------------------------------
   // [Comparing]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE bool eq(const BitArray& other) const { return eq(this, &other); }
   FOG_INLINE int compare(const BitArray& other) const { return compare(this, &other); }
@@ -174,7 +198,9 @@ struct FOG_API BitArray
   static bool eq(const BitArray* a, const BitArray* b);
   static int compare(const BitArray* a, const BitArray* b);
 
+  // --------------------------------------------------------------------------
   // [Members]
+  // --------------------------------------------------------------------------
 
   FOG_DECLARE_D(Data)
 };

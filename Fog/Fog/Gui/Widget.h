@@ -152,6 +152,8 @@ struct FOG_API Widget : public LayoutItem
   err_t createWindow(uint32_t createFlags = 0);
   //! @brief Destroy native gui window.
   err_t destroyWindow();
+  
+  err_t rebaseToParent(Widget* w = 0, uint32_t windowflags=0);
 
   //! @brief Get native gui window title.
   String getWindowTitle() const;
@@ -332,48 +334,53 @@ struct FOG_API Widget : public LayoutItem
   //! @brief Set widget visibility to @a val.
   void setVisible(uint32_t val=WIDGET_VISIBLE);
   
-  //! @brief Show widget (set it's visibility to true).
+  //! @brief Show widget (set it's visibility to WIDGET_VISIBLE).
   FOG_INLINE void show(uint32_t type=WIDGET_VISIBLE) { setVisible(type); }
-  //! @brief Hide widget (set it's visibility to false).
+  //! @brief Hide widget (set it's visibility to WIDGET_HIDDEN).
   FOG_INLINE void hide() { setVisible(WIDGET_HIDDEN); }
 
-  //! @brief returns true if the toplevel window is currently maximized
-  FOG_INLINE bool isMaximized()
-  {
-    if(!_guiWindow) return false;
-    //TODO
-    return false;
-  }
+  //! @brief Show widget as FullScreen (set it's visibility to WIDGET_VISIBLE_FULLSCREEN).
+  FOG_INLINE void showFullScreen() { setVisible(WIDGET_VISIBLE_FULLSCREEN); }
+  //! @brief Show widget maximized (set it's visibility to WIDGET_VISIBLE_MAXIMIZED).
+  FOG_INLINE void showMaximized() { setVisible(WIDGET_VISIBLE_MAXIMIZED); }
+  //! @brief Show widget minimized (set it's visibility to WIDGET_VISIBLE_MINIMIZED).
+  FOG_INLINE void showMinimized() { setVisible(WIDGET_VISIBLE_MINIMIZED); }
+  //! @brief Show widget (set it's visibility to WIDGET_VISIBLE).
+  FOG_INLINE void showNormal() { setVisible(WIDGET_VISIBLE); }
 
-  //! @brief returns true if the toplevel window is currently minimized
-  FOG_INLINE bool isMinimized()
-  {
-    if(!_guiWindow) return false;
-    //TODO
-    return false;
-  }
-
-  //! @brief returns true if the toplevel window is currently in 
-  //! full screen mode
-  FOG_INLINE bool isFullScreen()
-  {
-    if(!_guiWindow) return false;
-    return (_visibility == WIDGET_VISIBLE_FULLSCREEN);
-  }
+  //! @brief returns true if the widget is currently maximized
+  FOG_INLINE bool isMaximized() { return (_visibility == WIDGET_VISIBLE_MAXIMIZED); }
+  //! @brief returns true if the widget is currently minimized
+  FOG_INLINE bool isMinimized() {return ( _visibility == WIDGET_VISIBLE_FULLSCREEN); }
+  //! @brief returns true if the widget is currently shown as full screen  
+  FOG_INLINE bool isFullScreen() { return (_visibility == WIDGET_VISIBLE_FULLSCREEN); }
 
   // --------------------------------------------------------------------------
   // [Widget Window Style]
   // --------------------------------------------------------------------------
+  //! @brief returns the current window flags of the widget
   FOG_INLINE uint32_t getWindowFlags() { return _windowFlags; }
+  //! @brief set the current window flags of the widget (overwrites existing)
   void setWindowFlags(uint32_t flags);
+  //! @brief returns the current window hints of the widget
   FOG_INLINE uint32_t getWindowHints() { return _windowFlags & WINDOW_HINTS_MASK; }
+  //! @brief set the current window hints of the widget (but keep window_type!)
   void setWindowHints(uint32_t flags);  
 
+  //! @brief returns true if the widget is currently allowed to drag
   FOG_INLINE bool isDragAble() { return (_windowFlags & WINDOW_DRAGABLE); }
+  //! @brief sets the permission to drag the window
   void setDragAble(bool drag, bool update=true);
 
-  FOG_INLINE bool isResizeAble() { return (_windowFlags & WINDOW_FIXED_SIZE) == 0; }  
-  void setResizeAble(bool resize, bool update=true);    
+  //! @brief returns true if the widget is currently allowed to resize
+  FOG_INLINE bool isResizeAble() { return (_windowFlags & WINDOW_FIXED_SIZE) == 0; }
+  //! @brief sets the permission to resize the window
+  void setResizeAble(bool resize, bool update=true);  
+
+  //! @brief returns true if the widget lays on top of the other windows
+  FOG_INLINE bool isAlwaysOnTop() { return (_windowFlags & WINDOW_ALWAYS_ON_TOP) != 0; }
+  //! @brief sets the ON_TOP flag of the window
+  void setAlwaysOnTop(bool ontop);
 
   // --------------------------------------------------------------------------
   // [Widget Orientation]

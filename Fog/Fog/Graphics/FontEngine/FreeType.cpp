@@ -377,7 +377,7 @@ String FontConfigLibrary::resolveFontPath(const String& family, uint32_t size, c
   pFcPatternAddDouble(p1, FC_SIZE, (double)size);
 
   if (options.getStyle() == FONT_STYLE_ITALIC) pFcPatternAddInteger(p1, FC_SLANT, FC_SLANT_ITALIC);
-  if (options.getStyle() == FONT_STYLE_OBLIQUE) pFcPatternAddInteger(p1, FC_WEIGHT, FC_WEIGHT_BOLD);
+  if (options.getWeight() == FONT_WEIGHT_BOLD) pFcPatternAddInteger(p1, FC_WEIGHT, FC_WEIGHT_BOLD);
 
   pFcConfigSubstitute(NULL, p1, FcMatchPattern);
   pFcDefaultSubstitute(p1);
@@ -411,7 +411,7 @@ struct FOG_HIDDEN FontTranslatorRecord
     family(family),
     fileName(fileName)
   {
-    if(bold) attr.setStyle(FONT_STYLE_OBLIQUE);
+    if(bold) attr.setWeight(FONT_WEIGHT_BOLD);
     if(italic) attr.setStyle(FONT_STYLE_ITALIC);
   }
 
@@ -574,7 +574,7 @@ String FontTranslator::resolveFontPath(const String& family, uint32_t size, cons
   {
     const FontTranslatorRecord& rec = it.value();
 
-    if (rec.family == familyLower && rec.attr.getStyle() == attr.getStyle())
+    if (rec.family == familyLower && rec.attr.getStyle() == attr.getStyle() && rec.attr.getWeight() == attr.getWeight())
     {
       if (FileSystem::findFile(fontPaths, rec.fileName, result)) return result;
     }

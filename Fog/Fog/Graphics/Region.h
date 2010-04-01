@@ -277,8 +277,17 @@ struct FOG_API Region
   //!
   //! @note Calling this method is faster than doing these operations individually.
   static err_t intersectAndClip(Region& dst, const Region& src1Region, const Region& src2Region, const IntBox& clip);
-
+  //! @overload
   static err_t translateAndClip(Region& dst, const Region& src1Region, const IntPoint& pt, const IntBox& clip);
+
+  // --------------------------------------------------------------------------
+  // [Windows Specific]
+  // --------------------------------------------------------------------------
+
+#if defined(FOG_OS_WINDOWS)
+  HRGN toHRGN() const;
+  err_t fromHRGN(HRGN hrgn);
+#endif // FOG_OS_WINDOWS
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
@@ -307,15 +316,6 @@ struct FOG_API Region
   FOG_INLINE Region& operator-=(const Region& r) { subtract(r); return *this; }
   FOG_INLINE Region& operator-=(const IntRect& r) { subtract(r); return *this; }
   FOG_INLINE Region& operator-=(const IntBox& r) { subtract(r); return *this; }
-
-  // --------------------------------------------------------------------------
-  // [Windows Specific]
-  // --------------------------------------------------------------------------
-
-#if defined(FOG_OS_WINDOWS)
-  HRGN toHRGN() const;
-  err_t fromHRGN(HRGN hrgn);
-#endif // FOG_OS_WINDOWS
 
   // --------------------------------------------------------------------------
   // [Members]

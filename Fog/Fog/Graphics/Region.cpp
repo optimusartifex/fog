@@ -16,7 +16,11 @@
 #include <Fog/Core/Misc.h>
 #include <Fog/Core/Std.h>
 #include <Fog/Graphics/Constants.h>
+#include <Fog/Graphics/Matrix.h>
+#include <Fog/Graphics/Path.h>
+#include <Fog/Graphics/Rasterizer_p.h>
 #include <Fog/Graphics/Region.h>
+#include <Fog/Graphics/Scanline_p.h>
 
 /************************************************************************
 
@@ -231,8 +235,8 @@ static err_t _intersectPrivate(Region* dest, const IntBox* src1, sysuint_t count
 static err_t _subtractPrivate(Region* dest, const IntBox* src1, sysuint_t count1, const IntBox* src2, sysuint_t count2, bool memOverlap);
 static err_t _appendPrivate(Region* dest, const IntBox* src, sysuint_t length, const IntBox* new_extents);
 
-// Fog::Region::Data statics
-static Region::Data* _reallocRegion(Region::Data* d, sysuint_t capacity);
+// Fog::RegionData statics
+static RegionData* _reallocRegion(RegionData* d, sysuint_t capacity);
 
 // ============================================================================
 // [Fog::Region - Union, Subtraction, Intersection and Append Implementation]
@@ -265,7 +269,7 @@ static err_t _unitePrivate(Region* dest, const IntBox* src1, sysuint_t count1, c
   if (src2 == src2End) return dest->set(*src1);
 
   // New region data in case that it needs it.
-  Region::Data* newd = NULL;
+  RegionData* newd = NULL;
   sysuint_t length;
 
   // Local buffer that can be used instead of malloc in most calls
@@ -281,7 +285,7 @@ static err_t _unitePrivate(Region* dest, const IntBox* src1, sysuint_t count1, c
     }
     else
     {
-      newd = Region::Data::create(minRectsNeeded);
+      newd = RegionData::create(minRectsNeeded);
       if (!newd) return ERR_RT_OUT_OF_MEMORY;
       destCur = newd->rects;
     }
@@ -528,7 +532,7 @@ static err_t _intersectPrivate(Region* dest, const IntBox* src1, sysuint_t count
   }
 
   // New region data in case that it needs it.
-  Region::Data* newd = NULL;
+  RegionData* newd = NULL;
   sysuint_t length;
 
   // Local buffer that can be used instead of malloc in most calls
@@ -544,7 +548,7 @@ static err_t _intersectPrivate(Region* dest, const IntBox* src1, sysuint_t count
     }
     else
     {
-      newd = Region::Data::create(minRectsNeeded);
+      newd = RegionData::create(minRectsNeeded);
       if (!newd) { dest->clear(); return ERR_RT_OUT_OF_MEMORY; }
       destCur = newd->rects;
     }
@@ -700,12 +704,12 @@ static err_t _subtractPrivate(Region* dest, const IntBox* src1, sysuint_t count1
 
   sysuint_t minRectsNeeded = (count1 + count2) * 2;
 
-  Region::Data* newd;
+  RegionData* newd;
   sysuint_t length;
 
   if (memOverlap)
   {
-    newd = Region::Data::create(minRectsNeeded);
+    newd = RegionData::create(minRectsNeeded);
     if (!newd) { dest->clear(); return ERR_RT_OUT_OF_MEMORY; }
   }
   else
@@ -754,7 +758,7 @@ static err_t _subtractPrivate(Region* dest, const IntBox* src1, sysuint_t count1
       sysuint_t prevBandIndex = (sysuint_t)(prevBand - destBegin);\
       sysuint_t curBandIndex = (sysuint_t)(curBand - destBegin);  \
                                                                   \
-      Region::Data* _d = _reallocRegion(newd, length * 2);        \
+      RegionData* _d = _reallocRegion(newd, length * 2);          \
       if (!_d) goto outOfMemory;                                  \
                                                                   \
       newd = _d;                                                  \
@@ -1050,7 +1054,7 @@ __end:
 // [Fog::Region]
 // ============================================================================
 
-Static<Region::Data> Region::sharedNull;
+Static<RegionData> Region::sharedNull;
 
 Region::Region() :
   _d(sharedNull.instancep()->refAlways())
@@ -1058,14 +1062,14 @@ Region::Region() :
 }
 
 Region::Region(const IntBox& rect) :
-  _d(Data::create(1, &rect, &rect, 1))
+  _d(RegionData::create(1, &rect, &rect, 1))
 {
 }
 
 Region::Region(const IntRect& rect)
 {
   IntBox t(rect);
-  _d = Data::create(1, &t, &t, 1);
+  _d = RegionData::create(1, &t, &t, 1);
 }
 
 Region::Region(const Region& other) :
@@ -1080,18 +1084,18 @@ Region::~Region()
 
 err_t Region::_detach()
 {
-  Data* d = _d;
+  RegionData* d = _d;
 
   if (d->refCount.get() > 1)
   {
     if (d->length > 0)
     {
-      d = Data::create(d->length, &d->extents, d->rects, d->length);
+      d = RegionData::create(d->length, &d->extents, d->rects, d->length);
       if (!d) return ERR_RT_OUT_OF_MEMORY;
     }
     else
     {
-      d = Data::create(d->length);
+      d = RegionData::create(d->length);
       if (!d) return ERR_RT_OUT_OF_MEMORY;
       d->extents.clear();
     }
@@ -1113,41 +1117,41 @@ err_t Region::setSharable(bool val)
   FOG_RETURN_ON_ERROR(detach());
 
   if (val)
-    _d->flags |= Data::IsSharable;
+    _d->flags |= RegionData::IsSharable;
   else
-    _d->flags &= ~Data::IsSharable;
+    _d->flags &= ~RegionData::IsSharable;
   return ERR_OK;
 }
 
 err_t Region::setStrong(bool val)
 {
-  if (isSharable() == val) return ERR_OK;
+  if (isStrong() == val) return ERR_OK;
 
   FOG_RETURN_ON_ERROR(detach());
 
   if (val)
-    _d->flags |= Data::IsStrong;
+    _d->flags |= RegionData::IsStrong;
   else
-    _d->flags &= ~Data::IsStrong;
+    _d->flags &= ~RegionData::IsStrong;
   return ERR_OK;
 }
 
 err_t Region::reserve(sysuint_t to)
 {
-  Data* d = _d;
+  RegionData* d = _d;
 
   if (d->refCount.get() > 1)
   {
 __create:
-    Data* newd = Data::create(to, &d->extents, d->rects, d->length);
+    RegionData* newd = RegionData::create(to, &d->extents, d->rects, d->length);
     if (!newd) return ERR_RT_OUT_OF_MEMORY;
     atomicPtrXchg(&_d, newd)->derefInline();
   }
   else if (d->capacity < to)
   {
-    if (!(d->flags & Data::IsDynamic)) goto __create;
+    if (!(d->flags & RegionData::IsDynamic)) goto __create;
 
-    Data* newd = (Data *)Memory::realloc(d, Data::sizeFor(to));
+    RegionData* newd = (RegionData *)Memory::realloc(d, RegionData::sizeFor(to));
     if (!newd) return ERR_RT_OUT_OF_MEMORY;
     newd->capacity = to;
     _d = newd;
@@ -1158,21 +1162,21 @@ __create:
 
 err_t Region::prepare(sysuint_t to)
 {
-  Data* d = _d;
+  RegionData* d = _d;
 
   if (d->refCount.get() > 1)
   {
 __create:
-    Data* newd = Data::create(to);
+    RegionData* newd = RegionData::create(to);
     if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
     atomicPtrXchg(&_d, newd)->derefInline();
   }
   else if (d->capacity < to)
   {
-    if (!(d->flags & Data::IsDynamic)) goto __create;
+    if (!(d->flags & RegionData::IsDynamic)) goto __create;
 
-    Data* newd = (Data *)Memory::realloc(d, Data::sizeFor(to));
+    RegionData* newd = (RegionData *)Memory::realloc(d, RegionData::sizeFor(to));
     if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
     newd->capacity = to;
@@ -1189,16 +1193,16 @@ __create:
 
 void Region::squeeze()
 {
-  Data* d = _d;
+  RegionData* d = _d;
   
-  if (d->flags & Data::IsDynamic)
+  if (d->flags & RegionData::IsDynamic)
   {
     sysuint_t length = d->length;
     if (d->capacity == length) return;
 
     if (d->refCount.get() > 1)
     {
-      d = Data::create(length);
+      d = RegionData::create(length);
       if (!d) return;
 
       d->length = length;
@@ -1208,7 +1212,7 @@ void Region::squeeze()
     }
     else
     {
-      d = (Data *)Memory::realloc(d, Data::sizeFor(length));
+      d = (RegionData *)Memory::realloc(d, RegionData::sizeFor(length));
       if (!d) return;
 
       _d = d;
@@ -1225,7 +1229,7 @@ uint32_t Region::getType() const
 
 int Region::hitTest(const IntPoint& pt) const
 {
-  Data* d = _d;
+  RegionData* d = _d;
 
   sysuint_t i;
   sysuint_t length = d->length;
@@ -1284,7 +1288,7 @@ int Region::hitTest(const IntRect& r) const
 
 int Region::hitTest(const IntBox& r) const
 {
-  Data* d = _d;
+  RegionData* d = _d;
   sysuint_t length = d->length;
 
   // This is (just) a useful optimization.
@@ -1357,7 +1361,7 @@ int Region::hitTest(const IntBox& r) const
 
 void Region::clear()
 {
-  Data* d = _d;
+  RegionData* d = _d;
   if (d->length == 0) return;
 
   if (d->refCount.get() > 0)
@@ -1373,11 +1377,11 @@ void Region::clear()
 
 err_t Region::set(const Region& r)
 {
-  Data* td = _d;
-  Data* rd = r._d;
+  RegionData* td = _d;
+  RegionData* rd = r._d;
   if (td == rd) return ERR_OK;
 
-  if ((td->flags & Data::IsStrong) || !(rd->flags & Data::IsSharable))
+  if ((td->flags & RegionData::IsStrong) || !(rd->flags & RegionData::IsSharable))
   {
     err_t err = prepare(rd->length);
     if (err) return err;
@@ -1403,7 +1407,7 @@ err_t Region::set(const IntRect& r)
   if (err) return err;
 
   IntBox b(r);
-  Data* newd = _d;
+  RegionData* newd = _d;
 
   newd->length = 1;
   newd->extents = b;
@@ -1417,7 +1421,7 @@ err_t Region::set(const IntBox& r)
   if (!r.isValid()) { clear(); return ERR_OK; }
 
   prepare(1);
-  Data* d = _d;
+  RegionData* d = _d;
   d->length = 1;
   d->extents = r;
   d->rects[0] = r;
@@ -1427,8 +1431,8 @@ err_t Region::set(const IntBox& r)
 
 err_t Region::setDeep(const Region& r)
 {
-  Data* td = _d;
-  Data* rd = r._d;
+  RegionData* td = _d;
+  RegionData* rd = r._d;
   if (td == rd) return ERR_OK;
 
   err_t err = prepare(rd->length);
@@ -1460,8 +1464,8 @@ err_t Region::set(const IntBox* rects, sysuint_t length)
 
 err_t Region::unite(const Region& r)
 {
-  Data* td = _d;
-  Data* rd = r._d;
+  RegionData* td = _d;
+  RegionData* rd = r._d;
 
   // Union region is same or r is empty... -> nop
   if (td == rd || rd->length == 0) return ERR_OK;
@@ -1504,7 +1508,7 @@ err_t Region::unite(const IntRect& r)
 
 err_t Region::unite(const IntBox& r)
 {
-  Data* td = _d;
+  RegionData* td = _d;
 
   if (!r.isValid()) return ERR_OK;
 
@@ -1540,8 +1544,8 @@ err_t Region::unite(const IntBox& r)
 
 err_t Region::intersect(const Region& r)
 {
-  Data* td = _d;
-  Data* rd = r._d;
+  RegionData* td = _d;
+  RegionData* rd = r._d;
   err_t err = ERR_OK;
 
   if (td == rd)
@@ -1561,7 +1565,7 @@ err_t Region::intersect(const IntRect& r)
 
 err_t Region::intersect(const IntBox& r)
 {
-  Data* td = _d;
+  RegionData* td = _d;
   err_t err = ERR_OK;
 
   if (td->length == 0 || !r.isValid() || !td->extents.overlaps(r)) 
@@ -1591,8 +1595,8 @@ err_t Region::eor(const IntBox& r)
 
 err_t Region::subtract(const Region& r)
 {
-  Data* td = _d;
-  Data* rd = r._d;
+  RegionData* td = _d;
+  RegionData* rd = r._d;
   err_t err = ERR_OK;
 
   if (td == rd) 
@@ -1612,7 +1616,7 @@ err_t Region::subtract(const IntRect& r)
 
 err_t Region::subtract(const IntBox& r)
 {
-  Data* td = _d;
+  RegionData* td = _d;
 
   if (td->length == 0 || !r.isValid() || !td->extents.overlaps(r)) return ERR_OK;
   return _subtractPrivate(this, td->rects, td->length, &r, 1, true);
@@ -1670,10 +1674,106 @@ err_t Region::frame(const IntPoint& pt)
   return frame(*this, *this, pt);
 }
 
+static err_t Region_doPath(Region* self, Rasterizer* rasterizer, uint8_t threshold)
+{
+  if (!rasterizer->hasCells()) return ERR_OK;
+  IntBox bounds(rasterizer->getCellsBounds());
+
+  Scanline32 scanline;
+  FOG_RETURN_ON_ERROR(scanline.init(bounds.x1, bounds.x2));
+
+  int w = bounds.getWidth();
+  int h = bounds.getHeight();
+
+  for (int y = 0; y < h; y++)
+  {
+    rasterizer->sweepScanline(&scanline, y + bounds.y1);
+
+    const Scanline32::Span* span = scanline.getSpansData();
+    for (sysuint_t i = scanline.getSpansCount(); i; i--, span++)
+    {
+      int len = span->len;
+
+      if (len > 0)
+      {
+        const uint8_t* covers = span->covers;
+        int x = 0;
+        do {
+          // Find start of usable covers[] data.
+          while (covers[0] < threshold)
+          {
+            covers++;
+            if (++x == len) goto next;
+          }
+
+          covers++;
+          int startx = x++;
+
+          // Find end of usable covers[] data.
+          while (x != len && covers[0] >= threshold) { covers++; x++; }
+
+          // Append.
+          self->unite(IntBox(span->x + startx, y, span->x + x, y + 1));
+        } while (x != len);
+next:
+        ;
+      }
+      else
+      {
+        len = -len;
+        if (span->covers[0] >= threshold)
+        {
+          // Append.
+          self->unite(IntBox(span->x, y, span->x + len, y + 1));
+        }
+      }
+    }
+  }
+
+  return ERR_OK;
+}
+
+err_t Region::fromPath(const DoublePath& path, const DoubleMatrix* matrix, uint32_t threshold)
+{
+  clear();
+
+  if (threshold == 0) return ERR_RT_INVALID_ARGUMENT;
+  if (threshold > 255) threshold = 255;
+
+  if (path.isEmpty()) return ERR_OK;
+
+  Rasterizer* rasterizer = Rasterizer::getRasterizer();
+  if (rasterizer == NULL) return ERR_RT_OUT_OF_MEMORY;
+
+  err_t err = ERR_OK;
+  if (path.isFlat() && matrix == NULL)
+  {
+    rasterizer->addPath(path);
+  }
+  else
+  {
+    DoublePath temp;
+
+    err = path.flattenTo(temp, matrix, 1.0);
+    if (err != ERR_OK) goto end;
+
+    rasterizer->addPath(temp);
+  }
+
+  rasterizer->finalize();
+  err = Region_doPath(this, rasterizer, (uint8_t)threshold);
+
+end:
+  Rasterizer::releaseRasterizer(rasterizer);
+
+  if (err != ERR_OK) clear();
+  return err;
+}
+
 bool Region::eq(const Region& other) const
 {
-  Data* d1 = _d;
-  Data* d2 = other._d;
+  RegionData* d1 = _d;
+  RegionData* d2 = other._d;
 
   if (d1 == d2) return true;
   if (d1->length != d2->length) return false;
@@ -1696,9 +1796,9 @@ err_t Region::set(Region& dest, const Region& src)
 
 err_t Region::unite(Region& dest, const Region& src1, const Region& src2)
 {
-  Data* destd = dest._d;
-  Data* src1d = src1._d;
-  Data* src2d = src2._d;
+  RegionData* destd = dest._d;
+  RegionData* src1d = src1._d;
+  RegionData* src2d = src2._d;
 
   // Trivial operations
   if (src1d->length == 0) { return dest.set(src2); }
@@ -1736,9 +1836,9 @@ err_t Region::unite(Region& dest, const Region& src1, const Region& src2)
 
 err_t Region::intersect(Region& dest, const Region& src1, const Region& src2)
 {
-  Data* destd = dest._d;
-  Data* src1d = src1._d;
-  Data* src2d = src2._d;
+  RegionData* destd = dest._d;
+  RegionData* src1d = src1._d;
+  RegionData* src2d = src2._d;
   err_t err = ERR_OK;
 
   // Trivial rejects.
@@ -1767,9 +1867,9 @@ err_t Region::eor(Region& dest, const Region& src1, const Region& src2)
 
 err_t Region::subtract(Region& dest, const Region& src1, const Region& src2)
 {
-  Data* destd = dest._d;
-  Data* src1d = src1._d;
-  Data* src2d = src2._d;
+  RegionData* destd = dest._d;
+  RegionData* src1d = src1._d;
+  RegionData* src2d = src2._d;
   err_t err = ERR_OK;
 
   // Trivial rejects.
@@ -1805,8 +1905,8 @@ err_t Region::translate(Region& dest, const Region& src, const IntPoint& pt)
 
   if (x == 0 && y == 0) { return dest.set(src); }
 
-  Data* dest_d = dest._d;
-  Data* src_d = src._d;
+  RegionData* dest_d = dest._d;
+  RegionData* src_d = src._d;
 
   sysuint_t i;
   IntBox* dest_r;
@@ -1941,7 +2041,7 @@ err_t Region::intersectAndClip(Region& dst, const Region& src1Region, const Regi
   }
 
   // New region data in case that it needs it.
-  Region::Data* newd = NULL;
+  RegionData* newd = NULL;
   sysuint_t length;
 
   // Local buffer that can be used instead of malloc in most calls
@@ -1957,7 +2057,7 @@ err_t Region::intersectAndClip(Region& dst, const Region& src1Region, const Regi
     }
     else
     {
-      newd = Region::Data::create(minRectsNeeded);
+      newd = RegionData::create(minRectsNeeded);
       if (!newd) { dst.clear(); return ERR_RT_OUT_OF_MEMORY; }
       destCur = newd->rects;
     }
@@ -2118,7 +2218,7 @@ err_t Region::translateAndClip(Region& dst, const Region& src1Region, const IntP
   IntBox* prevBand;
   IntBox* curBand;
 
-  Data* newd = NULL;
+  RegionData* newd = NULL;
 
   if (&dst == &src1Region) 
   {
@@ -2128,7 +2228,7 @@ err_t Region::translateAndClip(Region& dst, const Region& src1Region, const IntP
     }
     else
     {
-      newd = Data::create(dst.getLength());
+      newd = RegionData::create(dst.getLength());
       if (!newd) return ERR_RT_OUT_OF_MEMORY;
       destCur = newd->rects;
     }
@@ -2237,7 +2337,7 @@ static FOG_INLINE void RECTToBox(IntBox* dest, const RECT* src)
 
 HRGN Region::toHRGN() const
 {
-  Data* d = _d;
+  RegionData* d = _d;
   sysuint_t i;
   sysuint_t length = d->length;
 
@@ -2291,32 +2391,32 @@ err_t Region::fromHRGN(HRGN hrgn)
 #endif // FOG_OS_WINDOWS
 
 // ============================================================================
-// [Fog::Region::Data]
+// [Fog::RegionData]
 // ============================================================================
 
-Region::Data* Region::Data::ref() const
+RegionData* RegionData::ref() const
 {
   if (flags & IsSharable)
   {
     refCount.inc();
-    return const_cast<Data*>(this);
+    return const_cast<RegionData*>(this);
   }
   else
   {
-    return Data::copy(this);
+    return RegionData::copy(this);
   }
 }
 
-void Region::Data::deref()
+void RegionData::deref()
 {
   if (refCount.deref() && (flags & IsDynamic) != 0) Memory::free(this);
 }
 
-static Region::Data* _reallocRegion(Region::Data* d, sysuint_t capacity)
+static RegionData* _reallocRegion(RegionData* d, sysuint_t capacity)
 {
-  if ((d->flags & Region::Data::IsDynamic) != 0)
+  if ((d->flags & RegionData::IsDynamic) != 0)
   {
-    d = (Region::Data*)Memory::realloc(d, Region::Data::sizeFor(capacity));
+    d = (RegionData*)Memory::realloc(d, RegionData::sizeFor(capacity));
     if (!d) return NULL;
 
     d->capacity = capacity;
@@ -2324,13 +2424,13 @@ static Region::Data* _reallocRegion(Region::Data* d, sysuint_t capacity)
   }
   else
   {
-    return Region::Data::create(capacity, &d->extents, d->rects, d->length);
+    return RegionData::create(capacity, &d->extents, d->rects, d->length);
   }
 }
 
-Region::Data* Region::Data::adopt(void* address, sysuint_t capacity)
+RegionData* RegionData::adopt(void* address, sysuint_t capacity)
 {
-  Data* d = (Data*)address;
+  RegionData* d = (RegionData*)address;
   
   d->refCount.init(1);
   d->flags = IsStrong;
@@ -2341,11 +2441,11 @@ Region::Data* Region::Data::adopt(void* address, sysuint_t capacity)
   return d;
 }
 
-Region::Data* Region::Data::adopt(void* address, sysuint_t capacity, const IntBox& r)
+RegionData* RegionData::adopt(void* address, sysuint_t capacity, const IntBox& r)
 {
   if (!r.isValid() || capacity == 0) return adopt(address, capacity);
 
-  Data* d = (Data*)address;
+  RegionData* d = (RegionData*)address;
   
   d->refCount.init(1);
   d->flags = IsStrong;
@@ -2366,11 +2466,11 @@ Region::Data* Region::Data::adopt(void* address, sysuint_t capacity, const IntBo
   return d;
 }
 
-Region::Data* Region::Data::adopt(void* address, sysuint_t capacity, const IntBox* extents, const IntBox* rects, sysuint_t length)
+RegionData* RegionData::adopt(void* address, sysuint_t capacity, const IntBox* extents, const IntBox* rects, sysuint_t length)
 {
   if (capacity < length) create(length, extents, rects, length);
 
-  Data* d = (Data*)address;
+  RegionData* d = (RegionData*)address;
   
   d->refCount.init(1);
   d->flags = IsStrong;
@@ -2390,12 +2490,12 @@ Region::Data* Region::Data::adopt(void* address, sysuint_t capacity, const IntBo
   return d;
 }
 
-Region::Data* Region::Data::create(sysuint_t capacity)
+RegionData* RegionData::create(sysuint_t capacity)
 {
   if (FOG_UNLIKELY(capacity == 0)) return Region::sharedNull.instancep()->refAlways();
 
   sysuint_t dsize = sizeFor(capacity);
-  Data* d = (Data*)Memory::alloc(dsize);
+  RegionData* d = (RegionData*)Memory::alloc(dsize);
   if (!d) return NULL;
 
   d->refCount.init(1);
@@ -2406,11 +2506,11 @@ Region::Data* Region::Data::create(sysuint_t capacity)
   return d;
 }
 
-Region::Data* Region::Data::create(sysuint_t capacity, const IntBox* extents, const IntBox* rects, sysuint_t length)
+RegionData* RegionData::create(sysuint_t capacity, const IntBox* extents, const IntBox* rects, sysuint_t length)
 {
   if (FOG_UNLIKELY(capacity < length)) capacity = length;
 
-  Data* d = create(capacity);
+  RegionData* d = create(capacity);
   if (!d) return NULL;
 
   if (FOG_LIKELY(length))
@@ -2430,11 +2530,11 @@ Region::Data* Region::Data::create(sysuint_t capacity, const IntBox* extents, co
   return d;
 }
 
-Region::Data* Region::Data::copy(const Data* other)
+RegionData* RegionData::copy(const RegionData* other)
 {
   if (!other->length) return Region::sharedNull.instancep()->refAlways();
 
-  Data* d = create(other->length);
+  RegionData* d = create(other->length);
   if (!d) return NULL;
 
   d->length = other->length;
@@ -2455,10 +2555,10 @@ FOG_INIT_DECLARE err_t fog_region_init(void)
   using namespace Fog;
 
   Region::sharedNull.init();
-  Region::Data* d = Region::sharedNull.instancep();
+  RegionData* d = Region::sharedNull.instancep();
 
   d->refCount.init(1);
-  d->flags = Region::Data::IsSharable;
+  d->flags = RegionData::IsSharable;
   d->extents.clear();
   d->rects[0].clear();
 

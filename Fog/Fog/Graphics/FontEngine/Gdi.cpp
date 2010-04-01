@@ -26,7 +26,129 @@
 
 namespace Fog {
 
-// tools
+// ============================================================================
+// [Helpers]
+// ============================================================================
+
+static FOG_INLINE double FIXEDToDouble(const FIXED& f)
+{
+  return (double)f.value + (double)f.fract * (1.0 / 65536.0);
+}
+
+static FOG_INLINE FIXED DoubleToFIXED(const double& d)
+{
+  FIXED f;
+  uint32_t v = Math::doubleToFixed16x16(d);
+
+  f.value = v >> 16;
+  f.fract = v & 0xFFFF;
+
+  return f;
+}
+
+static FOG_INLINE double FIXEDToFloat(const FIXED& f)
+{
+  return (float)f.value + (float)f.fract * (1.0f / 65536.0f);
+}
+
+static FOG_INLINE FIXED FloatToFIXED(const float& d)
+{
+  FIXED f;
+  uint32_t v = Math::doubleToFixed16x16(d);
+
+  f.value = v >> 16;
+  f.fract = v & 0xFFFF;
+
+  return f;
+}
+
+// Identity matrix.
+// 
+// It seems that this matrix must be always passed to GetGlyphOutlineW function.
+static const MAT2 mat2identity =
+{
+  {0, 1}, {0, 0},
+  {0, 0}, {0, 1}
+};
+
+static err_t decompose_win32_glyph_outline(const uint8_t* gbuf, uint size, bool flipY, const DoubleMatrix* mtx, DoublePath& path)
+{
+  const uint8_t* cur_glyph = gbuf;
+  const uint8_t* end_glyph = gbuf + size;
+  double x, y;
+
+  if (cur_glyph == end_glyph) return ERR_OK;
+
+  err_t err = ERR_OK;
+  sysuint_t subPathIndex = path.getLength();
+
+  do {
+    const TTPOLYGONHEADER* th = (TTPOLYGONHEADER*)cur_glyph;
+    
+    const uint8_t* end_poly = cur_glyph + th->cb;
+    const uint8_t* cur_poly = cur_glyph + sizeof(TTPOLYGONHEADER);
+
+    x = FIXEDToDouble(th->pfxStart.x);
+    y = FIXEDToDouble(th->pfxStart.y);
+    if (flipY) y = -y;
+
+    path.closePolygon();
+    path.moveTo(DoublePoint(x, y));
+
+    while (cur_poly < end_poly)
+    {
+      const TTPOLYCURVE* pc = (const TTPOLYCURVE*)cur_poly;
+      
+      if (pc->wType == TT_PRIM_LINE)
+      {
+        int i;
+        for (i = 0; i < pc->cpfx; i++)
+        {
+          x = FIXEDToDouble(pc->apfx[i].x);
+          y = FIXEDToDouble(pc->apfx[i].y);
+          if (flipY) y = -y;
+          path.lineTo(DoublePoint(x, y));
+        }
+      }
+      
+      if (pc->wType == TT_PRIM_QSPLINE)
+      {
+        // Walk through points in spline.
+        for (int u = 0; u < pc->cpfx - 1; u++)
+        {
+          // B is always the current point.
+          POINTFX pnt_b = pc->apfx[u];
+          POINTFX pnt_c = pc->apfx[u+1];
+
+          // If not on last spline, compute C.
+          if (u < pc->cpfx - 2)
+          {
+            // Midpoint (x, y).
+            *(int*)&pnt_c.x = (*(int*)&pnt_b.x + *(int*)&pnt_c.x) / 2;
+            *(int*)&pnt_c.y = (*(int*)&pnt_b.y + *(int*)&pnt_c.y) / 2;
+          }
+          
+          double x2, y2;
+          x  = FIXEDToDouble(pnt_b.x);
+          y  = FIXEDToDouble(pnt_b.y);
+          x2 = FIXEDToDouble(pnt_c.x);
+          y2 = FIXEDToDouble(pnt_c.y);
+          if (flipY) { y = -y; y2 = -y2; }
+          path.curveTo(DoublePoint(x, y), DoublePoint(x2, y2));
+        }
+      }
+      cur_poly += sizeof(WORD) * 2 + sizeof(POINTFX) * pc->cpfx;
+    }
+    cur_glyph += th->cb;
+  } while (cur_glyph < end_glyph);
+
+  path.closePolygon();
+
+  if (mtx) path.applyMatrix(*mtx, Range(subPathIndex, DETECT_LENGTH));
+  return err;
+}
+
+// Tools.
 
 struct WinEnumFontStruct
 {
@@ -35,12 +157,18 @@ struct WinEnumFontStruct
   WCHAR buffer[256];
 };
 
+static FOG_INLINE HDC winCreateDC()
+{
+  HDC hdc = CreateCompatibleDC(NULL);
+  if (hdc != NULL) SetGraphicsMode(hdc, GM_ADVANCED);
+  return hdc;
+}
+
 // ============================================================================
 // [Fog::WinFontEngine]
 // ============================================================================
 
-WinFontEngine::WinFontEngine() :
-  FontEngine(Ascii8("Windows"))
+WinFontEngine::WinFontEngine() : FontEngine(FONT_FACE_WINDOWS)
 {
 }
 
@@ -126,7 +254,8 @@ FontFace* WinFontEngine::createFace(
 
   if (family.getLength() >= FOG_ARRAY_SIZE(logFont.lfFaceName)) goto fail;
 
-  CopyMemory(logFont.lfFaceName, reinterpret_cast<const wchar_t*>(family.getData()), (family.getLength() + 1) * sizeof(WCHAR));
+  CopyMemory(logFont.lfFaceName, reinterpret_cast<const wchar_t*>(
+    family.getData()), (family.getLength() + 1) * sizeof(WCHAR));
   logFont.lfHeight = -(int)size;
   logFont.lfWeight = options.getWeight() * 100;
   logFont.lfItalic = options.getStyle() >= FONT_STYLE_ITALIC;
@@ -135,7 +264,7 @@ FontFace* WinFontEngine::createFace(
   if ((hFont = CreateFontIndirectW(&logFont)) == NULL) goto fail;
 
   // Get text metrics (need to create temporary HDC).
-  if ((hdc = CreateCompatibleDC(NULL)) == NULL) goto failFreeHFONT;
+  if ((hdc = winCreateDC()) == NULL) goto failFreeHFONT;
   if ((hOldFont = (HFONT)SelectObject(hdc, (HGDIOBJ)hFont)) == (HFONT)GDI_ERROR) goto failFreeHFONTandHDC;
 
   GetTextMetricsW(hdc, &textMetrics);
@@ -145,7 +274,7 @@ FontFace* WinFontEngine::createFace(
 
   // Everything should be OK, create new font face.
   face = new(std::nothrow) WinFontFace();
-  if (!face) return NULL;
+  if (!face) goto failFreeHFONT;
 
   face->family = family;
   face->family.squeeze();
@@ -170,97 +299,23 @@ fail:
 }
 
 // ============================================================================
-// [Fog::WinFontFace - Helpers]
+// [Fog::WinFontMaster]
 // ============================================================================
 
-// Identity matrix. It seems that this matrix must be always passed to 
-// GetGlyphOutlineW function.
-static const MAT2 mat2identity =
+WinFontMaster::WinFontMaster() :
+  family(family)
 {
-  {0, 1}, {0, 0},
-  {0, 0}, {0, 1}
-};
+  refCount.init(1);
 
-static FOG_INLINE double fxToDouble(const FIXED& p)
-{
-  return (double)p.value + (double)p.fract * (1.0 / 65536.0);
+  ZeroMemory(&logFont, sizeof(LOGFONTW));
+  hFont = NULL;
+
+  kerningPairs = NULL;
+  kerningCount = 0;
 }
 
-static err_t decompose_win32_glyph_outline(const uint8_t* gbuf, uint size, bool flipY, const DoubleMatrix* mtx, DoublePath& path)
+WinFontMaster::~WinFontMaster()
 {
-  const uint8_t* cur_glyph = gbuf;
-  const uint8_t* end_glyph = gbuf + size;
-  double x, y;
-
-  if (cur_glyph == end_glyph) return ERR_OK;
-
-  err_t err = ERR_OK;
-  sysuint_t subPathIndex = path.getLength();
-
-  do {
-    const TTPOLYGONHEADER* th = (TTPOLYGONHEADER*)cur_glyph;
-    
-    const uint8_t* end_poly = cur_glyph + th->cb;
-    const uint8_t* cur_poly = cur_glyph + sizeof(TTPOLYGONHEADER);
-
-    x = fxToDouble(th->pfxStart.x);
-    y = fxToDouble(th->pfxStart.y);
-    if (flipY) y = -y;
-
-    path.closePolygon();
-    path.moveTo(DoublePoint(x, y));
-
-    while (cur_poly < end_poly)
-    {
-      const TTPOLYCURVE* pc = (const TTPOLYCURVE*)cur_poly;
-      
-      if (pc->wType == TT_PRIM_LINE)
-      {
-        int i;
-        for (i = 0; i < pc->cpfx; i++)
-        {
-          x = fxToDouble(pc->apfx[i].x);
-          y = fxToDouble(pc->apfx[i].y);
-          if (flipY) y = -y;
-          path.lineTo(DoublePoint(x, y));
-        }
-      }
-      
-      if (pc->wType == TT_PRIM_QSPLINE)
-      {
-        // Walk through points in spline.
-        for (int u = 0; u < pc->cpfx - 1; u++)
-        {
-          // B is always the current point.
-          POINTFX pnt_b = pc->apfx[u];
-          POINTFX pnt_c = pc->apfx[u+1];
-
-          // If not on last spline, compute C.
-          if (u < pc->cpfx - 2)
-          {
-            // Midpoint (x, y).
-            *(int*)&pnt_c.x = (*(int*)&pnt_b.x + *(int*)&pnt_c.x) / 2;
-            *(int*)&pnt_c.y = (*(int*)&pnt_b.y + *(int*)&pnt_c.y) / 2;
-          }
-          
-          double x2, y2;
-          x  = fxToDouble(pnt_b.x);
-          y  = fxToDouble(pnt_b.y);
-          x2 = fxToDouble(pnt_c.x);
-          y2 = fxToDouble(pnt_c.y);
-          if (flipY) { y = -y; y2 = -y2; }
-          path.curveTo(DoublePoint(x, y), DoublePoint(x2, y2));
-        }
-      }
-      cur_poly += sizeof(WORD) * 2 + sizeof(POINTFX) * pc->cpfx;
-    }
-    cur_glyph += th->cb;
-  } while (cur_glyph < end_glyph);
-
-  path.closePolygon();
-
-  if (mtx) path.applyMatrix(*mtx, Range(subPathIndex, DETECT_LENGTH));
-  return err;
 }
 
 // ============================================================================
@@ -270,6 +325,8 @@ static err_t decompose_win32_glyph_outline(const uint8_t* gbuf, uint size, bool 
 WinFontFace::WinFontFace() :
   hFont(NULL)
 {
+  type = FONT_FACE_WINDOWS;
+  master = NULL;
 }
 
 WinFontFace::~WinFontFace()
@@ -279,27 +336,40 @@ WinFontFace::~WinFontFace()
 
 err_t WinFontFace::getGlyphSet(const Char* str, sysuint_t length, GlyphSet& glyphSet)
 {
-  err_t err;
-  if ( (err = glyphSet.begin(length)) ) return err;
+  FOG_RETURN_ON_ERROR(glyphSet.begin(length));
 
   AutoLock locked(lock);
 
   GlyphData* glyphd;
   HDC hdc = NULL;
 
-  for (sysuint_t i = 0; i != length; i++)
-  {
-    uint32_t uc = str[i].ch();
+  err_t err = ERR_OK;
+  sysuint_t remain = length;
+
+  do {
+    // Get unicode character, it's also needed to handle surrogate pairs.
+    uint32_t uc = str[0].ch();
+    str++;
+    remain--;
+
+    if (FOG_UNLIKELY(Char::isSurrogatePair((uint16_t)uc)))
+    {
+      if (!remain) { err = ERR_STRING_TRUNCATED; goto end; }
+      uc = Char::fromSurrogate((uint16_t)uc, str[0].ch());
+
+      str++;
+      remain--;
+    }
 
     // First try cache.
-    glyphd = glyphCache.get(uc);
-    if (FOG_UNLIKELY(!glyphd))
+    if (FOG_UNLIKELY((glyphd = glyphCache.get(uc)) == NULL))
     {
-      // Glyph is not in cache, initialize HDC (if not initialized) and try
-      // to get glyph from HFONT.
+      // Glyph is not in cache.
+      //
+      // Initialize HDC (if not initialized) and try to get glyph from HFONT.
       if (hdc == NULL)
       {
-        if ((hdc = CreateCompatibleDC(NULL)) == NULL) continue;
+        if ((hdc = winCreateDC()) == NULL) continue;
         SelectObject(hdc, (HGDIOBJ)hFont);
       }
 
@@ -307,12 +377,13 @@ err_t WinFontFace::getGlyphSet(const Char* str, sysuint_t length, GlyphSet& glyp
     }
 
     if (FOG_LIKELY(glyphd)) glyphSet._add(glyphd->ref());
-  }
+  } while (remain);
 
+end:
   if (hdc) DeleteDC(hdc);
+  if (err == ERR_OK) FOG_RETURN_ON_ERROR(glyphSet.end());
 
-  if ( (err = glyphSet.end()) ) return err;
-  return ERR_OK;
+  return err;
 }
 
 err_t WinFontFace::getOutline(const Char* str, sysuint_t length, DoublePath& dst)
@@ -325,7 +396,7 @@ err_t WinFontFace::getOutline(const Char* str, sysuint_t length, DoublePath& dst
   GLYPHMETRICS gm;
   ZeroMemory(&gm, sizeof(gm));
 
-  HDC hdc = CreateCompatibleDC(NULL);
+  HDC hdc = winCreateDC();
   if (hdc == NULL) return GetLastError();
   SelectObject(hdc, (HGDIOBJ)hFont);
 
@@ -395,13 +466,26 @@ GlyphData* WinFontFace::renderGlyph(HDC hdc, uint32_t uc)
   GLYPHMETRICS gm;
   ZeroMemory(&gm, sizeof(gm));
 
-  uint32_t dataSize = GetGlyphOutlineW(hdc, uc, GGO_GRAY8_BITMAP, &gm, 0, NULL, &mat2identity);
+  MAT2 mat2;
 
-  // GetGlyphOutline() fails when being called
-  // for GGO_GRAY8_BITMAP and white space.
+  if (matrix.isIdentity())
+  {
+    mat2 = mat2identity;
+  }
+  else
+  {
+    mat2.eM11 = FloatToFIXED(matrix.sx);
+    mat2.eM12 = FloatToFIXED(matrix.shy);
+    mat2.eM21 = FloatToFIXED(matrix.shx);
+    mat2.eM22 = FloatToFIXED(matrix.sy);
+  }
+
+  uint32_t dataSize = GetGlyphOutlineW(hdc, uc, GGO_GRAY8_BITMAP, &gm, 0, NULL, &mat2);
+
+  // GetGlyphOutline() fails when being called for GGO_GRAY8_BITMAP and white space.
   if (dataSize == GDI_ERROR)
   {
-    dataSize = GetGlyphOutlineW(hdc, uc, GGO_METRICS, &gm, 0, NULL, &mat2identity);
+    dataSize = GetGlyphOutlineW(hdc, uc, GGO_METRICS, &gm, 0, NULL, &mat2);
     if (dataSize == GDI_ERROR) return NULL;
     dataSize = 0;
   }
@@ -435,7 +519,7 @@ GlyphData* WinFontFace::renderGlyph(HDC hdc, uint32_t uc)
   // This should be also equal.
   FOG_ASSERT(dataSize == bitmapd->stride * bitmapd->height);
 
-  dataSize = GetGlyphOutlineW(hdc, uc, GGO_GRAY8_BITMAP, &gm, dataSize, bitmapd->data, &mat2identity);
+  dataSize = GetGlyphOutlineW(hdc, uc, GGO_GRAY8_BITMAP, &gm, dataSize, bitmapd->data, &mat2);
   // If previous call to GetGlyphOutlineW was ok, this should be also ok, but nobody knows.
   if (dataSize == GDI_ERROR)
   {
@@ -451,7 +535,8 @@ GlyphData* WinFontFace::renderGlyph(HDC hdc, uint32_t uc)
     uint8_t* p = bitmapd->first + y * bitmapd->stride;
     for (x = 0; x < gm.gmBlackBoxX; x++)
     {
-      *p++ = (*p > 63) ? 0xFF : *p << 2;
+      uint8_t p0 = p[0];
+      *p++ = (p0 > 63) ? (0xFF) : (p0 << 2) | (p0 & 0x03);
     }
   }
 

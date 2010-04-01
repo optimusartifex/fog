@@ -83,7 +83,7 @@ typedef err_t (FOG_FASTCALL *TextureInitFn)(
   PatternContext* ctx, const Pattern& pattern, const DoubleMatrix& matrix, int interpolationType);
 
 typedef err_t (FOG_FASTCALL *TextureInitBlitFn)(
-  PatternContext* ctx, const Image& image, const DoubleMatrix& matrix, int spread, int interpolationType);
+  PatternContext* ctx, const Image& image, const IntRect& irect, const DoubleMatrix& matrix, int spread, int interpolationType);
 
 typedef err_t (FOG_FASTCALL *TextureInitScaleFn)(
   PatternContext* ctx, const Image& image, int dw, int dh, int interpolationType);
@@ -362,7 +362,9 @@ struct PatternContext
 //! is not needed to check for these features in higher level API.
 struct FunctionMap
 {
+  // --------------------------------------------------------------------------
   // [Dib]
+  // --------------------------------------------------------------------------
 
   struct DibFuncs
   {
@@ -408,7 +410,9 @@ struct FunctionMap
 
   DibFuncs dib;
 
+  // --------------------------------------------------------------------------
   // [Interpolation]
+  // --------------------------------------------------------------------------
 
   struct InterpolateFuncs
   {
@@ -419,7 +423,9 @@ struct FunctionMap
 
   InterpolateFuncs interpolate;
 
+  // --------------------------------------------------------------------------
   // [Pattern]
+  // --------------------------------------------------------------------------
 
   struct PatternFuncs
   {
@@ -484,7 +490,9 @@ struct FunctionMap
 
   PatternFuncs pattern;
 
+  // --------------------------------------------------------------------------
   // [Filter]
+  // --------------------------------------------------------------------------
 
   struct FilterFuncs
   {
@@ -520,7 +528,9 @@ struct FunctionMap
 
   FilterFuncs filter;
 
+  // --------------------------------------------------------------------------
   // [Composite]
+  // --------------------------------------------------------------------------
 
   struct CompositeFuncs
   {

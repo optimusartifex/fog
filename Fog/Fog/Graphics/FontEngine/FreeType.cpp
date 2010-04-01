@@ -702,11 +702,10 @@ private:
 // [Fog::FTFontEngine]
 // ============================================================================
 
-FTFontEngine::FTFontEngine() :
-  FontEngine(Ascii8("FreeType"))
+FTFontEngine::FTFontEngine() : FontEngine(FONT_FACE_FREETYPE)
 {
   err_t err = initFTFontEngine();
-  if (err)
+  if (err != ERR_OK)
   {
     fog_debug("Fog::FTFontEngine::FTFontEngine() - Can't load or initialize FreeType, error %u.", err);
   }
@@ -1038,6 +1037,7 @@ end:
 FTFontFace::FTFontFace() :
   file(NULL)
 {
+  type = FONT_FACE_FREETYPE;
 }
 
 FTFontFace::~FTFontFace()
@@ -1066,7 +1066,7 @@ err_t FTFontFace::getGlyphSet(const Char* str, sysuint_t length, GlyphSet& glyph
     str++;
     remain--;
 
-    if (Char::isSurrogatePair((uint16_t)uc))
+    if (FOG_UNLIKELY(Char::isSurrogatePair((uint16_t)uc)))
     {
       if (!remain) return ERR_STRING_TRUNCATED;
       uc = Char::fromSurrogate((uint16_t)uc, str[0].ch());
@@ -1076,8 +1076,7 @@ err_t FTFontFace::getGlyphSet(const Char* str, sysuint_t length, GlyphSet& glyph
     }
 
     // First try cache.
-    glyphd = glyphCache.get(uc);
-    if (FOG_UNLIKELY(!glyphd))
+    if (FOG_UNLIKELY((glyphd = glyphCache.get(uc)) == NULL))
     {
       glyphd = renderGlyph(uc);
       if (glyphd != NULL) glyphCache.set(uc, glyphd);

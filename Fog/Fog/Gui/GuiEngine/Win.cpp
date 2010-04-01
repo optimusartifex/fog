@@ -323,7 +323,7 @@ WinGuiEngine::~WinGuiEngine()
 
 void WinGuiEngine::updateDisplayInfo()
 {
-  int dibSize;
+  uint dibSize;
   LPBITMAPINFOHEADER dibHdr;
   HDC hdc;
   HBITMAP hbm;

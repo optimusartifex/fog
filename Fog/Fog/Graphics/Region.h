@@ -20,81 +20,92 @@
 namespace Fog {
 
 // ============================================================================
+// [Forward Declarations]
+// ============================================================================
+
+struct DoublePath;
+struct DoubleMatrix;
+
+// ============================================================================
+// [Fog::RegionData]
+// ============================================================================
+
+struct FOG_HIDDEN RegionData
+{
+  // [Ref / Deref]
+
+  FOG_INLINE RegionData* refAlways() const { refCount.inc(); return const_cast<RegionData*>(this); }
+  FOG_INLINE void derefInline() { if (refCount.deref() && (flags & IsDynamic) != 0) Memory::free(this); }
+
+  RegionData* ref() const;
+  void deref();
+
+  static RegionData* adopt(void* address, sysuint_t capacity);
+  static RegionData* adopt(void* address, sysuint_t capacity, const IntBox& r);
+  static RegionData* adopt(void* address, sysuint_t capacity, const IntBox* extents, const IntBox* rects, sysuint_t count);
+  
+  static RegionData* create(sysuint_t capacity);
+  static RegionData* create(sysuint_t capacity, const IntBox* extents, const IntBox* rects, sysuint_t count);
+
+  static RegionData* copy(const RegionData* other);
+
+  static FOG_INLINE sysuint_t sizeFor(sysuint_t capacity)
+  { return sizeof(RegionData) - sizeof(IntBox) + sizeof(IntBox) * capacity; }
+
+  // [Flags]
+
+  //! @brief String data flags.
+  enum Flags
+  {
+    //! @brief String data are created on the heap. 
+    //!
+    //! Object is created by function like @c Fog::Memory::alloc() or by
+    //! @c new operator. It this flag is not set, you can't delete object from
+    //! the heap and object is probabbly only temporary (short life object).
+    IsDynamic = (1U << 0),
+
+    //! @brief String data are shareable.
+    //!
+    //! Object can be directly referenced by internal method @c ref(). 
+    //! Sharable data are usually created on the heap and together 
+    //! with this flag is set also @c IsDynamic, but it isn't prerequisite.
+    IsSharable = (1U << 1),
+
+    //! @brief String data are strong to weak assignments.
+    //!
+    //! This flag means:
+    //!   "Don't assign other data to me, instead, copy them to me!".
+    IsStrong = (1U << 2)
+  };
+
+  // [Members]
+
+  //! @brief Reference count.
+  mutable Atomic<sysuint_t> refCount;
+  //! @brief Region flags.
+  uint32_t flags;
+
+  //! @brief Count of preallocated rectangles.
+  sysuint_t capacity;
+  //! @brief Count of used rectangles.
+  sysuint_t length;
+  //! @brief Region extents.
+  IntBox extents;
+  //! @brief Region rectangles, always YX sorted.
+  IntBox rects[1];
+};
+
+// ============================================================================
 // [Fog::Region]
 // ============================================================================
 
 struct FOG_API Region
 {
   // --------------------------------------------------------------------------
-  // [Data]
+  // [RegionData]
   // --------------------------------------------------------------------------
 
-  struct FOG_API Data
-  {
-    // [Ref / Deref]
-
-    FOG_INLINE Data* refAlways() const { refCount.inc(); return const_cast<Data*>(this); }
-    FOG_INLINE void derefInline() { if (refCount.deref() && (flags & IsDynamic) != 0) Memory::free(this); }
-
-    Data* ref() const;
-    void deref();
-
-    static Data* adopt(void* address, sysuint_t capacity);
-    static Data* adopt(void* address, sysuint_t capacity, const IntBox& r);
-    static Data* adopt(void* address, sysuint_t capacity, const IntBox* extents, const IntBox* rects, sysuint_t count);
-    
-    static Data* create(sysuint_t capacity);
-    static Data* create(sysuint_t capacity, const IntBox* extents, const IntBox* rects, sysuint_t count);
-
-    static Data* copy(const Data* other);
-
-    static FOG_INLINE sysuint_t sizeFor(sysuint_t capacity)
-    { return sizeof(Data) - sizeof(IntBox) + sizeof(IntBox) * capacity; }
-
-    // [Flags]
-
-    //! @brief String data flags.
-    enum Flags
-    {
-      //! @brief String data are created on the heap. 
-      //!
-      //! Object is created by function like @c Fog::Memory::alloc() or by
-      //! @c new operator. It this flag is not set, you can't delete object from
-      //! the heap and object is probabbly only temporary (short life object).
-      IsDynamic = (1U << 0),
-
-      //! @brief String data are shareable.
-      //!
-      //! Object can be directly referenced by internal method @c ref(). 
-      //! Sharable data are usually created on the heap and together 
-      //! with this flag is set also @c IsDynamic, but it isn't prerequisite.
-      IsSharable = (1U << 1),
-
-      //! @brief String data are strong to weak assignments.
-      //!
-      //! This flag means:
-      //!   "Don't assign other data to me, instead, copy them to me!".
-      IsStrong = (1U << 2)
-    };
-
-    // [Members]
-
-    //! @brief Reference count.
-    mutable Atomic<sysuint_t> refCount;
-    //! @brief Region flags.
-    uint32_t flags;
-
-    //! @brief Count of preallocated rectangles.
-    sysuint_t capacity;
-    //! @brief Count of used rectangles.
-    sysuint_t length;
-    //! @brief Region extents.
-    IntBox extents;
-    //! @brief Region rectangles, always YX sorted.
-    IntBox rects[1];
-  };
-
-  static Fog::Static<Data> sharedNull;
+  static Static<RegionData> sharedNull;
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -104,7 +115,7 @@ struct FOG_API Region
   Region(const Region& other);
   explicit Region(const IntBox& rect);
   explicit Region(const IntRect& rect);
-  FOG_INLINE explicit Region(Data* d) : _d(d) {}
+  FOG_INLINE explicit Region(RegionData* d) : _d(d) {}
   ~Region();
 
   // --------------------------------------------------------------------------
@@ -131,26 +142,26 @@ struct FOG_API Region
   //! @copydoc Doxygen::Implicit::isNull().
   FOG_INLINE bool isNull() const { return _d == sharedNull.instancep(); }
   //! @copydoc Doxygen::Implicit::isDynamic().
-  FOG_INLINE bool isDynamic() const { return (_d->flags & Data::IsDynamic) != 0; }
+  FOG_INLINE bool isDynamic() const { return (_d->flags & RegionData::IsDynamic) != 0; }
   //! @copydoc Doxygen::Implicit::isSharable().
-  FOG_INLINE bool isSharable() const { return (_d->flags & Data::IsSharable) != 0; }
+  FOG_INLINE bool isSharable() const { return (_d->flags & RegionData::IsSharable) != 0; }
   //! @copydoc Doxygen::Implicit::isStrong().
-  FOG_INLINE bool isStrong() const { return (_d->flags & Data::IsStrong) != 0; }
+  FOG_INLINE bool isStrong() const { return (_d->flags & RegionData::IsStrong) != 0; }
 
   err_t setSharable(bool val);
   err_t setStrong(bool val);
 
   // --------------------------------------------------------------------------
-  // [Data]
+  // [RegionData]
   // --------------------------------------------------------------------------
 
-  //! @brief Get const pointer to region data.
+  //! @brief Get const pointer to the region data.
   FOG_INLINE const IntBox* getData() const  { return _d->rects; }
 
-  //! @brief Get read / write pointer to region data.
+  //! @brief Get mutable pointer to the region data.
   FOG_INLINE IntBox* getMData() { return detach() == ERR_OK ? _d->rects : (IntBox*)NULL; }
 
-  //! @brief Get read / write pointer to region data.
+  //! @brief Get mutable pointer to the region data.
   FOG_INLINE IntBox* getXData()
   {
     FOG_ASSERT_X(isDetached(), "Fog::Region::getXData() - Not detached");
@@ -186,10 +197,10 @@ struct FOG_API Region
 
   //! @brief Tests if a given point is in region, see @c REGION_HITTEST enum.
   int hitTest(const IntPoint& pt) const;
-  FOG_INLINE int hitTest(int x, int y) const { return hitTest(IntPoint(x, y)); }
-
   int hitTest(const IntRect& r) const;
   int hitTest(const IntBox& r) const;
+
+  FOG_INLINE int hitTest(int x, int y) const { return hitTest(IntPoint(x, y)); }
 
   // --------------------------------------------------------------------------
   // [Clear]
@@ -241,21 +252,14 @@ struct FOG_API Region
   err_t op(const IntBox& r, int _op);
 
   err_t translate(const IntPoint& pt);
-
-  FOG_INLINE err_t translate(int x, int y) { return translate(IntPoint(x, y)); }
-
   err_t shrink(const IntPoint& pt);
-
-  FOG_INLINE err_t shrink(int x, int y) { return shrink(IntPoint(x, y)); }
-
   err_t frame(const IntPoint& pt);
 
+  FOG_INLINE err_t translate(int x, int y) { return translate(IntPoint(x, y)); }
+  FOG_INLINE err_t shrink(int x, int y) { return shrink(IntPoint(x, y)); }
   FOG_INLINE err_t frame(int x, int y) { return frame(IntPoint(x, y)); }
 
-  err_t round(const IntRect& r, uint xradius, uint yradius, bool fill = true);
-
-  err_t polygon(const IntPoint* pts, sysuint_t count, uint fillRule);
-  err_t polyPolygon(const IntPoint* src, const sysuint_t* count, sysuint_t polygons, uint fillRule);
+  err_t fromPath(const DoublePath& path, const DoubleMatrix* matrix = NULL, uint32_t threshold = 0x7F);
 
   bool eq(const Region& other) const;
 
@@ -317,7 +321,7 @@ struct FOG_API Region
   // [Members]
   // --------------------------------------------------------------------------
 
-  FOG_DECLARE_D(Data)
+  FOG_DECLARE_D(RegionData)
 };
 
 // ============================================================================
@@ -329,34 +333,34 @@ struct TemporaryRegion : public Region
 {
   struct Storage
   {
-    Data d;
+    RegionData d;
     // There will be 1 rect more, because some compilers gives me warnings
     // about this construct when <N == 1>
     IntBox rects[N];
   } _storage;
 
   FOG_INLINE TemporaryRegion() :
-    Region(Data::adopt((void*)&_storage, N))
+    Region(RegionData::adopt((void*)&_storage, N))
   {
   }
 
   FOG_INLINE TemporaryRegion(const TemporaryRegion<N>& other) :
-    Region(Data::adopt((void*)&_storage, N, &other._d->extents, other._d->rects, other._d->length))
+    Region(RegionData::adopt((void*)&_storage, N, &other._d->extents, other._d->rects, other._d->length))
   {
   }
   
   FOG_INLINE TemporaryRegion(const Region& other) :
-    Region(Data::adopt((void*)&_storage, N, &other._d->extents, other._d->rects, other._d->length))
+    Region(RegionData::adopt((void*)&_storage, N, &other._d->extents, other._d->rects, other._d->length))
   {
   }
 
   FOG_INLINE explicit TemporaryRegion(const IntBox& r) :
-    Region(Data::adopt((void*)&_storage, N, r))
+    Region(RegionData::adopt((void*)&_storage, N, r))
   {
   }
 
   FOG_INLINE explicit TemporaryRegion(const IntRect& r) :
-    Region(Data::adopt((void*)&_storage, N, IntBox(r)))
+    Region(RegionData::adopt((void*)&_storage, N, IntBox(r)))
   {
   }
 
@@ -365,7 +369,7 @@ struct TemporaryRegion : public Region
     if ((void*)_d != (void*)&_storage)
     {
       _d->deref();
-      _d = Data::adopt((void*)&_storage, N);
+      _d = RegionData::adopt((void*)&_storage, N);
     }
   }
 

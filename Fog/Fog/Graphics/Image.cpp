@@ -2108,7 +2108,7 @@ err_t Image::glyphFromPath(Image& glyph, IntPoint& offset, const DoublePath& pat
   {
     DoublePath temp;
 
-    err = temp.flattenTo(temp, NULL, 1.0);
+    err = path.flattenTo(temp, NULL, 1.0);
     if (err != ERR_OK) goto end;
 
     rasterizer->addPath(temp);

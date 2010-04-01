@@ -245,8 +245,8 @@ uint32_t FontFace::getHashCode() const
 // [Fog::FontEngine]
 // ============================================================================
 
-FontEngine::FontEngine(const String& name) :
-  _name(name)
+FontEngine::FontEngine(uint32_t type) :
+  _type(type)
 {
 }
 

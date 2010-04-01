@@ -142,7 +142,7 @@ err_t String::_detach()
 // [Fog::String::Flags]
 // ============================================================================
 
-void String::setIsSharable(bool val)
+void String::setSharable(bool val)
 {
   if (isSharable() == val) return;
 
@@ -155,7 +155,7 @@ void String::setIsSharable(bool val)
     _d->flags &= ~Data::IsSharable;
 }
 
-void String::setIsStrong(bool val)
+void String::setStrong(bool val)
 {
   if (isStrong() == val) return;
 

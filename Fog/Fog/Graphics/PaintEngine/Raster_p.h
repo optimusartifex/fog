@@ -372,7 +372,7 @@ struct FOG_HIDDEN RasterPaintCapsState
       uint32_t gradientInterpolation : 4;
 
       //! @brief Whether to force vector text.
-      uint32_t forceVectorText : 4;
+      uint32_t forceOutlineText : 4;
 
       //! @brief Whether line is simple (one pixel width and default caps).
       uint32_t lineIsSimple : 1;
@@ -489,7 +489,9 @@ private:
 //! and image alpha is permited).
 struct RasterRenderImageAffineBound
 {
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE RasterRenderImageAffineBound()
   {
@@ -503,16 +505,26 @@ struct RasterRenderImageAffineBound
     if (ictx.initialized) ictx.destroy(&ictx);
   }
 
+  // --------------------------------------------------------------------------
   // [Init]
+  // --------------------------------------------------------------------------
 
-  bool init(const Image& image, const DoubleMatrix& matrix, const IntBox& clipBox, int interpolationType);
+  bool init(
+    const Image& image, const IntRect& irect,
+    const DoubleMatrix& matrix,
+    const IntBox& clipBox, int interpolationType);
+
   FOG_INLINE bool isInitialized() const { return (bool)ictx.initialized; }
 
+  // --------------------------------------------------------------------------
   // [Render]
+  // --------------------------------------------------------------------------
 
   void render(RasterPaintContext* ctx);
 
+  // --------------------------------------------------------------------------
   // [Members]
+  // --------------------------------------------------------------------------
 
   RasterEngine::PatternContext ictx;
   DoublePoint pts[4];

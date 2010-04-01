@@ -429,8 +429,6 @@ Set(FOG_GRAPHICS_LIB_SOURCES
   Fog/Graphics/Rasterizer.cpp
   Fog/Graphics/Reduce.cpp
   Fog/Graphics/Region.cpp
-  Fog/Graphics/RegionPoly.cpp
-  Fog/Graphics/RegionRound.cpp
   Fog/Graphics/Scanline.cpp
   Fog/Graphics/Stroker.cpp
   Fog/Graphics/TextIterator.cpp

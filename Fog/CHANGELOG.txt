@@ -1,3 +1,8 @@
+2010-04-01
+- Removed RegionPoly.cpp / RegionRound.cpp, now it's only used Region::path().
+- Fixed few bugs related to Image::glyphFromRegion.
+- Some work on fonts (still incomplete).
+
 2010-03-31
 - Bunch or refactorization (IntRect, IntPoint, FloatRect, FloatPoint, ...)
 - Fonts reworked again, adding more to the font face, removing FontData and

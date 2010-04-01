@@ -374,7 +374,10 @@ uint8_t* RasterPaintContext::getBuffer(sysint_t size)
 // [Fog::RasterRenderImageAffineBound]
 // ============================================================================
 
-bool RasterRenderImageAffineBound::init(const Image& image, const DoubleMatrix& matrix, const IntBox& clipBox, int interpolationType)
+bool RasterRenderImageAffineBound::init(
+  const Image& image, const IntRect& irect,
+  const DoubleMatrix& matrix,
+  const IntBox& clipBox, int interpolationType)
 {
   // Don't call init() after it was initialized.
   FOG_ASSERT(ictx.initialized == false);
@@ -383,8 +386,8 @@ bool RasterRenderImageAffineBound::init(const Image& image, const DoubleMatrix& 
 
   // Transform points and convert to integers.
   {
-    double w = (double)image.getWidth();
-    double h = (double)image.getHeight();
+    double w = (double)irect.w;
+    double h = (double)irect.h;
 
     pts[0].set(0.0, 0.0);
     pts[1].set(w+1, 0.0);
@@ -481,13 +484,8 @@ bool RasterRenderImageAffineBound::init(const Image& image, const DoubleMatrix& 
   xmax = bbox.x2;
   ymax = bbox.y2;
 
-  if (RasterEngine::functionMap->pattern.texture_init_blit(
-    &ictx, image, matrix, SPREAD_NONE, interpolationType) != ERR_OK)
-  {
-    return false;
-  }
-
-  return true;
+  return RasterEngine::functionMap->pattern.texture_init_blit(&ictx, 
+    image, irect, matrix, SPREAD_NONE, interpolationType) == ERR_OK;
 }
 
 void RasterRenderImageAffineBound::render(RasterPaintContext* ctx)
@@ -1520,8 +1518,8 @@ int RasterPaintEngine::getHint(uint32_t hint) const
     case PAINTER_HINT_GRADIENT_INTERPOLATION:
       return (int)capsState->gradientInterpolation;
 
-    case PAINTER_HINT_VECTOR_TEXT:
-      return (int)capsState->forceVectorText;
+    case PAINTER_HINT_OUTLINE_TEXT:
+      return (int)capsState->forceOutlineText;
 
     default:
       return -1;
@@ -1555,11 +1553,11 @@ void RasterPaintEngine::setHint(uint32_t hint, int value)
       capsState->gradientInterpolation = (uint8_t)value;
       break;
 
-    case PAINTER_HINT_VECTOR_TEXT:
-      if ((capsState->forceVectorText == value) | ((uint)value >= 2)) return;
+    case PAINTER_HINT_OUTLINE_TEXT:
+      if ((capsState->forceOutlineText == value) | ((uint)value >= 2)) return;
       if (!(capsState = _detachCapsState())) return;
 
-      capsState->forceVectorText = (uint8_t)value;
+      capsState->forceOutlineText = (uint8_t)value;
       break;
 
     default:
@@ -2329,7 +2327,7 @@ void RasterPaintEngine::drawRect(const IntRect& r)
     TemporaryRegion<16> boxISect;
 
     {
-      Region::Data* box_d = box._d;
+      RegionData* box_d = box._d;
 
       int tx = capsState->transformTranslateInt.x;
       int ty = capsState->transformTranslateInt.y;
@@ -3147,7 +3145,7 @@ void RasterPaintEngine::_setCapsDefaults()
   capsState->aaQuality = ANTI_ALIASING_SMOOTH;
   capsState->imageInterpolation = INTERPOLATION_SMOOTH;
   capsState->gradientInterpolation = INTERPOLATION_SMOOTH;
-  capsState->forceVectorText = false;
+  capsState->forceOutlineText = false;
   capsState->lineIsSimple = true;
 
   capsState->solid.argb = 0xFF000000;
@@ -3420,6 +3418,9 @@ void RasterPaintEngine::_serializeImageAffine(const DoublePoint& pt, const Image
   tr.transformPoint(&pt_.x, &pt_.y);
   DoubleMatrix matrix(tr.sx, tr.shy, tr.shx, tr.sy, pt_.x, pt_.y);
 
+  IntRect ir(0, 0, image.getWidth(), image.getHeight());
+  if (irect) ir = *irect;
+
   if (!(OperatorCharacteristics[ctx.capsState->op] & OPERATOR_CHAR_UNBOUND))
   {
     // Compositing operator is BOUND so we can take advantage of it. We create
@@ -3431,7 +3432,7 @@ void RasterPaintEngine::_serializeImageAffine(const DoublePoint& pt, const Image
     if (isSingleThreaded())
     {
       RasterRenderImageAffineBound renderer;
-      if (!renderer.init(image, matrix, ctx.clipState->clipBox, ctx.capsState->imageInterpolation)) return;
+      if (!renderer.init(image, ir, matrix, ctx.clipState->clipBox, ctx.capsState->imageInterpolation)) return;
 
       renderer.render(&ctx);
     }
@@ -3441,7 +3442,7 @@ void RasterPaintEngine::_serializeImageAffine(const DoublePoint& pt, const Image
       RasterPaintCmdImageAffineBound* cmd = _createCommand<RasterPaintCmdImageAffineBound>(sizeof(RasterPaintCmdImageAffineBound), NULL);
       if (!cmd) return;
 
-      if (!cmd->renderer.instance().init(image, matrix, ctx.clipState->clipBox, ctx.capsState->imageInterpolation))
+      if (!cmd->renderer.instance().init(image, ir, matrix, ctx.clipState->clipBox, ctx.capsState->imageInterpolation))
       {
         cmd->release();
         return;
@@ -3458,7 +3459,7 @@ void RasterPaintEngine::_serializeImageAffine(const DoublePoint& pt, const Image
 
     // Make the path.
     tmpPath.clear();
-    tmpPath.addRect(DoubleRect(pt.x, pt.y, (double)image.getWidth(), (double)image.getHeight()));
+    tmpPath.addRect(DoubleRect(pt.x, pt.y, (double)ir.w, (double)ir.h));
 
     // Singlethreaded.
     if (isSingleThreaded())
@@ -3472,8 +3473,8 @@ void RasterPaintEngine::_serializeImageAffine(const DoublePoint& pt, const Image
         // Create new pattern context (based on the image).
         RasterEngine::PatternContext imagectx;
         imagectx.initialized = false;
-        RasterEngine::functionMap->pattern.texture_init_blit(
-          &imagectx, image, matrix, SPREAD_PAD, ctx.capsState->imageInterpolation);
+        RasterEngine::functionMap->pattern.texture_init_blit(&imagectx, 
+          image, ir, matrix, SPREAD_PAD, ctx.capsState->imageInterpolation);
         ctx.pctx = &imagectx;
 
         // Render path using specific pattern context.
@@ -3502,7 +3503,7 @@ void RasterPaintEngine::_serializeImageAffine(const DoublePoint& pt, const Image
 
       imagectx->initialized = false;
       RasterEngine::functionMap->pattern.texture_init_blit(
-        imagectx, image, matrix, SPREAD_PAD, ctx.capsState->imageInterpolation);
+        imagectx, image, ir, matrix, SPREAD_PAD, ctx.capsState->imageInterpolation);
       imagectx->refCount.init(1);
 
       RasterPaintCmdPath* cmd = _createCommand<RasterPaintCmdPath>(sizeof(RasterPaintCmdPath), imagectx);
@@ -3667,7 +3668,7 @@ void RasterPaintEngine::_postCommand(RasterPaintCmd* cmd, RasterPaintCalc* clc)
 #if defined(FOG_DEBUG_RASTER_COMMANDS)
     fog_debug("Fog::Painter::_postCommand() - command buffer is full");
 #endif // FOG_DEBUG_RASTER_COMMANDS
-    flush(PAINTER_FLUSH_SYNC | PAINTER_FLUSH_NO_DEMULTIPLY);
+    flush(PAINTER_FLUSH_SYNC);
   }
 
   if (clc)

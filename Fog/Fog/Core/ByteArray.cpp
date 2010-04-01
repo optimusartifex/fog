@@ -134,7 +134,7 @@ err_t ByteArray::_detach()
 // [Fog::ByteArray::Flags]
 // ============================================================================
 
-void ByteArray::setIsSharable(bool val)
+void ByteArray::setSharable(bool val)
 {
   if (isSharable() == val) return;
 
@@ -147,7 +147,7 @@ void ByteArray::setIsSharable(bool val)
     _d->flags &= ~Data::IsSharable;
 }
 
-void ByteArray::setIsStrong(bool val)
+void ByteArray::setStrong(bool val)
 {
   if (isStrong() == val) return;
 

@@ -229,14 +229,15 @@ void MyWindow::onPaint(PaintEvent* e)
 
   TimeDelta delta = TimeTicks::highResNow() - ticks;
 
-  p->setOperator(OPERATOR_SRC_OVER);
-  p->setSource(0xFF000000);
-  p->fillRect(IntRect(0, 0, getWidth(), getFont().getHeight()));
-  p->setSource(0xFFFF0000);
-
   String s;
   s.format("Size: %d %d, time %g, [PARAMS: %g %g]", getWidth(), getHeight(), delta.inMillisecondsF(), _subx, _suby);
-  p->drawText(IntPoint(0, 0), s, getFont());
+  Font font = getFont();
+
+  p->setOperator(OPERATOR_SRC_OVER);
+  p->setSource(0xFF000000);
+  p->fillRect(IntRect(0, 0, getWidth(), font.getHeight()));
+  p->setSource(0xFFFF0000);
+  p->drawText(IntPoint(0, 0), s, font);
 }
 
 void MyWindow::paintImage(Painter* p, const IntPoint& pos, const Image& im, const String& name)

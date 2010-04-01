@@ -182,10 +182,10 @@ struct FOG_API String
   //! @copydoc Doxygen::Implicit::isStrong().
   FOG_INLINE bool isStrong() const { return (_d->flags & Data::IsStrong) != 0; }
 
-  //! @copydoc Doxygen::Implicit::setIsSharable().
-  void setIsSharable(bool val);
-  //! @copydoc Doxygen::Implicit::setIsStrong().
-  void setIsStrong(bool val);
+  //! @copydoc Doxygen::Implicit::setSharable().
+  void setSharable(bool val);
+  //! @copydoc Doxygen::Implicit::setStrong().
+  void setStrong(bool val);
 
   // --------------------------------------------------------------------------
   // [Data]

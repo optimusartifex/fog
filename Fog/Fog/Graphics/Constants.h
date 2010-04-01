@@ -69,12 +69,46 @@ enum DPI_VALUE_TYPE
 // [Fog::FONT_FACE_TYPE]
 // ============================================================================
 
+//! @brief Type of font face (which engine created the font face instance).
 enum FONT_FACE_TYPE
 {
+  //! @brief None face (this is dummy face that does nothing, created in case
+  //! that something failed).
   FONT_FACE_NONE = 0,
+  //! @brief Windows font face - HFONT.
   FONT_FACE_WINDOWS = 1,
+  //! @brief FreeType font face - FtFace.
   FONT_FACE_FREETYPE = 2,
+  //! @brief Mac font face.
   FONT_FACE_MAC = 3
+};
+
+// ============================================================================
+// [Fog::FONT_FACE_FLAGS]
+// ============================================================================
+
+//! @brief Font face flags.
+enum FONT_FACE_FLAGS
+{
+  //! @brief Font face is cached. This means that font glyphs and outlines
+  //! can be stored in cache for later reuse.
+  FONT_FACE_CACHED = 0x00000001,
+
+  //! @brief Font face contains glyphs (raster images) that should be use to 
+  //! render the font on raster devices if not using transformations / scaling.
+  //!
+  //! @note Each font face supports glyphs.
+  FONT_FACE_GLYPHS = 0x00000002,
+
+  //! @brief Font face contains outlines (vectors). Text can be converted to
+  //! path and then rendered.
+  FONT_FACE_OUTLINES = 0x00000004,
+
+  //! @brief Font contains kerning.
+  FONT_FACE_KERNING = 0x00000008,
+
+  //! @brief Whether the font matrics were quantized.
+  FONT_FACE_QUANTIZED_METRICS = 0x00000010
 };
 
 // ============================================================================
@@ -1889,11 +1923,11 @@ enum PAINTER_HINT
   //! @brief Gradient interpolation type (quality), see @c INTERPOLATION_TYPE.
   PAINTER_HINT_GRADIENT_INTERPOLATION = 3,
 
-  //! @brief Whether to render text only using paths (vectors).
+  //! @brief Whether to render text only using path outlines (vectors).
   //!
   //! If font do not support vector data then bitmaps are used. This flag makes
-  //! sense mainly if you are using true-type fonts and text transformaions.
-  PAINTER_HINT_VECTOR_TEXT = 4
+  //! sense mainly if you are using true-type fonts and text transformations.
+  PAINTER_HINT_OUTLINE_TEXT = 4
 };
 
 // ============================================================================
@@ -1906,13 +1940,7 @@ enum PAINTER_FLUSH_FLAGS
   //! @brief Flush all painter commands and wait for completition. Use this
   //! command if you want to access painter data after the flush() function
   //! call.
-  PAINTER_FLUSH_SYNC = 0x0001,
-
-  //! @brief Do not demultiply data in the buffer if the target surface is
-  //! not premultiplied.
-  //!
-  //! @internal
-  PAINTER_FLUSH_NO_DEMULTIPLY = 0x0002
+  PAINTER_FLUSH_SYNC = 0x0001
 };
 
 // ============================================================================

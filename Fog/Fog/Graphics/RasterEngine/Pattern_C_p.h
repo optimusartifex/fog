@@ -371,7 +371,10 @@ struct FOG_HIDDEN PatternC
   // --------------------------------------------------------------------------
 
   static err_t FOG_FASTCALL texture_init(
-    PatternContext* ctx, const Pattern& pattern, const DoubleMatrix& matrix, int interpolationType)
+    PatternContext* ctx,
+    const Pattern& pattern,
+    const DoubleMatrix& matrix,
+    int interpolationType)
   {
     PatternData* d = pattern._d;
 
@@ -385,11 +388,14 @@ struct FOG_HIDDEN PatternC
     DoubleMatrix m(pattern._d->matrix.multiplied(matrix));
 
     // Call texture_init_blit() which will initialize the context.
-    return texture_init_blit(ctx, d->obj.texture.instance(), m, d->spread, interpolationType);
+    return texture_init_blit(ctx, d->obj.texture.instance(), d->data.texture->area, m, d->spread, interpolationType);
   }
 
   static err_t FOG_FASTCALL texture_init_blit(
-    PatternContext* ctx, const Image& image, const DoubleMatrix& matrix, int spread, int interpolationType)
+    PatternContext* ctx,
+    const Image& image, const IntRect& irect, 
+    const DoubleMatrix& matrix,
+    int spread, int interpolationType)
   {
     // Only valid images can be passed to texture_init_blit.
     FOG_ASSERT(!image.isEmpty());
@@ -402,11 +408,21 @@ struct FOG_HIDDEN PatternC
     ctx->texture.texture.init(image);
     ctx->texture.pal = NULL;
 
+    // Copy texture variables into pattern context.
+    ctx->texture.bits = ctx->texture.texture->getScanline(irect.y);
+    ctx->texture.stride = ctx->texture.texture->getStride();
+    ctx->texture.w = irect.w;
+    ctx->texture.h = irect.h;
+
+    FOG_ASSERT(irect.w <= ctx->texture.texture->getWidth());
+    FOG_ASSERT(irect.h <= ctx->texture.texture->getHeight());
+
     switch (format)
     {
       case PIXEL_FORMAT_PRGB32:
       case PIXEL_FORMAT_ARGB32:
       {
+        ctx->texture.bits += irect.x * 4;
         ctx->format = PIXEL_FORMAT_PRGB32;
         ctx->depth = 32;
         break;
@@ -414,6 +430,7 @@ struct FOG_HIDDEN PatternC
 
       case PIXEL_FORMAT_XRGB32:
       {
+        ctx->texture.bits += irect.x * 4;
         ctx->format = (spread == SPREAD_NONE)
           ? PIXEL_FORMAT_PRGB32
           : PIXEL_FORMAT_XRGB32;
@@ -423,6 +440,7 @@ struct FOG_HIDDEN PatternC
 
       case PIXEL_FORMAT_A8:
       {
+        ctx->texture.bits += irect.x;
         ctx->format = PIXEL_FORMAT_A8;
         ctx->depth = 8;
         break;
@@ -432,21 +450,18 @@ struct FOG_HIDDEN PatternC
       {
         const Palette& pal = ctx->texture.texture->getPalette();
         ctx->texture.pal = pal.getData() + Palette::INDEX_PRGB32;
+
+        ctx->texture.bits += irect.x;
         ctx->format = (pal.isAlphaUsed() && spread != SPREAD_NONE)
           ? PIXEL_FORMAT_PRGB32
           : PIXEL_FORMAT_XRGB32;
         ctx->depth = 32;
         break;
       }
+
       default:
         FOG_ASSERT_NOT_REACHED();
     }
-
-    // Copy texture variables into pattern context.
-    ctx->texture.bits = ctx->texture.texture->getData();
-    ctx->texture.stride = ctx->texture.texture->getStride();
-    ctx->texture.w = ctx->texture.texture->getWidth();
-    ctx->texture.h = ctx->texture.texture->getHeight();
 
     ctx->fetch = NULL;
 
@@ -3195,8 +3210,8 @@ doFill_4:
 
     // If points are equal, we will fill everything by last color. This is
     // defined in SVG.
-    if (Math::feq(d->points[0].x, d->points[1].x) &&
-        Math::feq(d->points[0].y, d->points[1].y))
+    if (Math::feq(d->data.gradient->points[0].x, d->data.gradient->points[1].x) &&
+        Math::feq(d->data.gradient->points[0].y, d->data.gradient->points[1].y))
     {
       return functionMap->pattern.solid_init(ctx, ArgbUtil::premultiply(d->obj.stops->at(d->obj.stops->getLength() -1).argb));
     }
@@ -3253,13 +3268,13 @@ doFill_4:
     DoubleMatrix m(pattern._d->matrix.multiplied(matrix));
     DoublePoint pts[2];
 
-    double px = d->points[0].x;
-    double py = d->points[0].y;
+    double px = d->data.gradient->points[0].x;
+    double py = d->data.gradient->points[0].y;
 
-    m.transformPoints(pts, d->points, 2);
+    m.transformPoints(pts, d->data.gradient->points, 2);
 
-    double vx = d->points[1].x - d->points[0].x;
-    double vy = d->points[1].y - d->points[0].y;
+    double vx = d->data.gradient->points[1].x - d->data.gradient->points[0].x;
+    double vy = d->data.gradient->points[1].y - d->data.gradient->points[0].y;
 
     double wx = pts[1].x - pts[0].x;
     double wy = pts[1].y - pts[0].y;
@@ -3711,7 +3726,7 @@ doFill_4:
     DoubleMatrix m(pattern._d->matrix.multiplied(matrix));
 
     DoublePoint points[2];
-    m.transformPoints(points, d->points, 2);
+    m.transformPoints(points, d->data.gradient->points, 2);
 
     sysint_t gLength = 256 * d->obj.stops->getLength();
     if (gLength > 4096) gLength = 4096;
@@ -3735,7 +3750,7 @@ doFill_4:
     dy = points[1].y;
     fx = points[1].x - points[0].x;
     fy = points[1].y - points[0].y;
-    r = d->radius;
+    r = d->data.gradient->radius;
 
     r2 = r  * r;
     fx2 = fx * fx;
@@ -3981,7 +3996,7 @@ doFill_4:
     DoubleMatrix m(pattern._d->matrix.multiplied(matrix));
 
     DoublePoint points[2];
-    m.transformPoints(points, d->points, 2);
+    m.transformPoints(points, d->data.gradient->points, 2);
 
     sysint_t gLength = 256 * d->obj.stops->getLength();
     if (gLength > 4096) gLength = 4096;

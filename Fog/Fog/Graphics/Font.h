@@ -88,17 +88,17 @@ struct FOG_HIDDEN FontOptions
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE uint8_t getWeight() const { return _weight; } 
-  FOG_INLINE uint8_t getStyle() const { return _style; } 
-  FOG_INLINE uint8_t getDecoration() const { return _decoration; } 
-  FOG_INLINE uint8_t getKerning() const { return _kerning; } 
-  FOG_INLINE uint8_t getHinting() const { return _hinting; } 
+  FOG_INLINE uint32_t getWeight() const { return _weight; } 
+  FOG_INLINE uint32_t getStyle() const { return _style; } 
+  FOG_INLINE uint32_t getDecoration() const { return _decoration; } 
+  FOG_INLINE uint32_t getKerning() const { return _kerning; } 
+  FOG_INLINE uint32_t getHinting() const { return _hinting; } 
 
-  FOG_INLINE void setWeight(uint8_t weight) { _weight = weight; }
-  FOG_INLINE void setStyle(uint8_t style) { _style = style; }
-  FOG_INLINE void setDecoration(uint8_t decoration) { _decoration = decoration; }
-  FOG_INLINE void setKerning(uint8_t kerning) { _kerning = kerning; }
-  FOG_INLINE void setHinting(uint8_t hinting) { _hinting = hinting; }
+  FOG_INLINE void setWeight(uint32_t weight) { _weight = (uint8_t)weight; }
+  FOG_INLINE void setStyle(uint32_t style) { _style = (uint8_t)style; }
+  FOG_INLINE void setDecoration(uint32_t decoration) { _decoration = (uint8_t)decoration; }
+  FOG_INLINE void setKerning(uint32_t kerning) { _kerning = (uint8_t)kerning; }
+  FOG_INLINE void setHinting(uint32_t hinting) { _hinting = (uint8_t)hinting; }
 
   FOG_INLINE void reset()
   {
@@ -252,6 +252,33 @@ private:
 };
 
 // ============================================================================
+// [Fog::IntKerningPair / FloatKerningPair]
+// ============================================================================
+
+#include <Fog/Core/Compiler/PackByte.h>
+
+//! @brief Kerning pair used if font uses quantized metrics.
+struct IntKerningPair
+{
+  uint16_t first;
+  uint16_t second;
+  int amount;
+};
+
+//! @brief Kerning pair used if font uses non-quantized floating point metrics.
+//!
+//! Floating kerning pairs are shared for all font sizes. To get demanded 
+//! value use Font::getKerningScale() value.
+struct FloatKerningPair
+{
+  uint16_t first;
+  uint16_t second;
+  float amount;
+};
+
+#include <Fog/Core/Compiler/PackRestore.h>
+
+// ============================================================================
 // [Fog::FontFace]
 // ============================================================================
 
@@ -315,7 +342,7 @@ struct FOG_API FontEngine
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FontEngine(const String& name);
+  FontEngine(uint32_t type);
   virtual ~FontEngine();
 
   // --------------------------------------------------------------------------
@@ -338,14 +365,14 @@ struct FOG_API FontEngine
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const String& getName() const { return _name; }
+  FOG_INLINE uint32_t getType() const { return _type; }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
 protected:
-  String _name;
+  uint32_t _type;
 
 private:
   FOG_DISABLE_COPY(FontEngine)
@@ -382,6 +409,13 @@ struct FOG_API Font
 
   FOG_INLINE uint32_t getType() const { return _d->type; }
   FOG_INLINE uint32_t getFlags() const { return _d->flags; }
+
+  FOG_INLINE bool isCached() const { return (_d->flags & FONT_FACE_CACHED) != 0; }
+  FOG_INLINE bool hasGlyphs() const { return (_d->flags & FONT_FACE_GLYPHS) != 0; }
+  FOG_INLINE bool hasOutlines() const { return (_d->flags & FONT_FACE_OUTLINES) != 0; }
+  FOG_INLINE bool hasKerning() const { return (_d->flags & FONT_FACE_KERNING) != 0; }
+
+  FOG_INLINE bool hasQuantizedMetrics() const { return (_d->flags & FONT_FACE_QUANTIZED_METRICS) != 0; }
 
   // --------------------------------------------------------------------------
   // [Face Family / Options / Metrics / Matrix]
@@ -503,6 +537,8 @@ private:
 // [Fog::TypeInfo<>]
 // ============================================================================
 
+FOG_DECLARE_TYPEINFO(Fog::IntKerningPair, Fog::TYPEINFO_PRIMITIVE)
+FOG_DECLARE_TYPEINFO(Fog::FloatKerningPair, Fog::TYPEINFO_PRIMITIVE)
 FOG_DECLARE_TYPEINFO(Fog::Font, Fog::TYPEINFO_MOVABLE)
 
 // [Guard]

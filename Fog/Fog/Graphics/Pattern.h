@@ -54,7 +54,6 @@ struct FOG_API PatternData
   // [Methods]
   // --------------------------------------------------------------------------
 
-  PatternData* copy();
   void deleteResources();
 
   // --------------------------------------------------------------------------
@@ -72,25 +71,37 @@ struct FOG_API PatternData
   //! @brief Pattern transformation matrix.
   DoubleMatrix matrix;
 
-  //! @brief Start and end points. These values have different meaning for
-  //! each pattern type:
-  //! - Null and Solid - Not used, should be zeros.
-  //! - Texture - points[0] is texture offset (starting point).
-  //! - Linear gradient - points[0 to 1] is start and end point.
-  //! - Radial gradient - points[0] is circle center point, points[1] is focal point.
-  //! - Conical gradient - points[0] is center point, points[1] is end point (for angle).
-  DoublePoint points[3];
-  //! @brief Used only for PATTERN_RADIAL_GRADIENT - circle radius.
-  double radius;
+  struct GradientData
+  {
+    //! @brief Start and end points. These values have different meaning for
+    //! each pattern type:
+    //! - Linear gradient - points[0] is start point and points[1] is end point.
+    //! - Radial gradient - points[0] is center point, points[1] is focal point.
+    //! - Conical gradient - points[0] is center point, points[1] is end point (for angle).
+    DoublePoint points[2];
+    //! @brief Used only for PATTERN_RADIAL_GRADIENT - circle radius.
+    double radius;
+  };
+
+  struct TextureData
+  {
+    IntRect area;
+  };
 
   //! @brief Embedded objects in pattern, this can be solid color, raster
   //! texture data and gradient stops.
-  union Objects
+  union ObjectInst
   {
     Static< Argb > argb;
     Static< Image > texture;
     Static< List<ArgbStop> > stops;
   } obj;
+
+  union ObjectData
+  {
+    Static< TextureData > texture;
+    Static< GradientData > gradient;
+  } data;
 };
 
 // ============================================================================
@@ -180,25 +191,6 @@ struct FOG_API Pattern
   err_t transform(const DoubleMatrix& m, uint32_t order = MATRIX_PREPEND);
 
   // --------------------------------------------------------------------------
-  // [Start Point / End Point]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE DoublePoint getStartPoint() const { return _d->points[0]; }
-  FOG_INLINE DoublePoint getEndPoint() const { return _d->points[1]; }
-
-  err_t setStartPoint(const IntPoint& pt);
-  err_t setStartPoint(const FloatPoint& pt);
-  err_t setStartPoint(const DoublePoint& pt);
-
-  err_t setEndPoint(const IntPoint& pt);
-  err_t setEndPoint(const FloatPoint& pt);
-  err_t setEndPoint(const DoublePoint& pt);
-
-  err_t setPoints(const IntPoint& startPt, const IntPoint& endPt);
-  err_t setPoints(const FloatPoint& startPt, const FloatPoint& endPt);
-  err_t setPoints(const DoublePoint& startPt, const DoublePoint& endPt);
-
-  // --------------------------------------------------------------------------
   // [Solid]
   // --------------------------------------------------------------------------
 
@@ -218,6 +210,9 @@ struct FOG_API Pattern
   //! @brief Get pattern texture (for @c PATTERN_TEXTURE type).
   Image getTexture() const;
 
+  //! @brief Get texture area (for @c PATTERN_TEXTURE type).
+  IntRect getTextureArea() const;
+
   //! @brief Set pattern type to @c PATTERN_TEXTURE and the texture to @a texture.
   //!
   //! @return
@@ -225,6 +220,8 @@ struct FOG_API Pattern
   //! - @c ERR_RT_INVALID_CONTEXT - If pattern is not @c PATTERN_RADIAL_GRADIENT.
   //! - @c ERR_RT_OUT_OF_MEMORY - If memory allocation failed.
   err_t setTexture(const Image& texture);
+  //! @overload
+  err_t setTexture(const Image& texture, const IntRect& textureArea);
 
   // --------------------------------------------------------------------------
   // [Gradient]
@@ -233,8 +230,23 @@ struct FOG_API Pattern
   Gradient getGradient() const;
   err_t setGradient(const Gradient& gradient);
 
+  DoublePoint getStartPoint() const;
+  DoublePoint getEndPoint() const;
+
+  err_t setStartPoint(const IntPoint& pt);
+  err_t setStartPoint(const FloatPoint& pt);
+  err_t setStartPoint(const DoublePoint& pt);
+
+  err_t setEndPoint(const IntPoint& pt);
+  err_t setEndPoint(const FloatPoint& pt);
+  err_t setEndPoint(const DoublePoint& pt);
+
+  err_t setPoints(const IntPoint& startPt, const IntPoint& endPt);
+  err_t setPoints(const FloatPoint& startPt, const FloatPoint& endPt);
+  err_t setPoints(const DoublePoint& startPt, const DoublePoint& endPt);
+
   //! @brief Get radial gradient radius (for @c PATTERN_RADIAL_GRADIENT type)
-  FOG_INLINE double getRadius() const { return _d->radius; }
+  double getRadius() const;
 
   //! @brief Set radial gradient radius to @a r.
   //!

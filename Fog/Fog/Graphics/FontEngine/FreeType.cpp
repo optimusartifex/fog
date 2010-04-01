@@ -183,7 +183,7 @@ struct FOG_HIDDEN FontConfigLibrary
   List<String> getFontDirectories() const;
   List<String> getFontList() const;
 
-  String resolveFontPath(const String& family, uint32_t size, const FontCaps& caps) const;
+  String resolveFontPath(const String& family, uint32_t size, const FontOptions& options) const;
 
   enum { NUM_SYMBOLS = 25 };
   union
@@ -360,7 +360,7 @@ List<String> FontConfigLibrary::getFontList() const
   return result;
 }
 
-String FontConfigLibrary::resolveFontPath(const String& family, uint32_t size, const FontCaps& caps) const
+String FontConfigLibrary::resolveFontPath(const String& family, uint32_t size, const FontOptions& options) const
 {
   FOG_ASSERT(ok);
 
@@ -376,8 +376,8 @@ String FontConfigLibrary::resolveFontPath(const String& family, uint32_t size, c
   p1 = pFcNameParse((FcChar8 *)family8.getData());
   pFcPatternAddDouble(p1, FC_SIZE, (double)size);
 
-  if (caps.italic) pFcPatternAddInteger(p1, FC_SLANT, FC_SLANT_ITALIC);
-  if (caps.bold) pFcPatternAddInteger(p1, FC_WEIGHT, FC_WEIGHT_BOLD);
+  if (options.getStyle() == FONT_STYLE_ITALIC) pFcPatternAddInteger(p1, FC_SLANT, FC_SLANT_ITALIC);
+  if (options.getStyle() == FONT_STYLE_OBLIQUE) pFcPatternAddInteger(p1, FC_WEIGHT, FC_WEIGHT_BOLD);
 
   pFcConfigSubstitute(NULL, p1, FcMatchPattern);
   pFcDefaultSubstitute(p1);
@@ -411,10 +411,8 @@ struct FOG_HIDDEN FontTranslatorRecord
     family(family),
     fileName(fileName)
   {
-    attr.bold = bold;
-    attr.italic = italic;
-    attr.strike = false;
-    attr.underline = false;
+    if(bold) attr.setStyle(FONT_STYLE_OBLIQUE);
+    if(italic) attr.setStyle(FONT_STYLE_ITALIC);
   }
 
   FOG_INLINE ~FontTranslatorRecord() {}
@@ -423,8 +421,8 @@ struct FOG_HIDDEN FontTranslatorRecord
   String family;
   // File name (case sensitive).
   String fileName;
-  // Only bold and italic caps are used.
-  FontCaps attr;
+  // Only bold and italic options are used.
+  FontOptions attr;
 };
 
 // This is ugly...
@@ -441,7 +439,7 @@ struct FOG_HIDDEN FontTranslator
   err_t addCustomDefinitions(const char* defs);
   void freeCustomDefinitions();
 
-  String resolveFontPath(const String& family, uint32_t size, const FontCaps& attr) const;
+  String resolveFontPath(const String& family, uint32_t size, const FontOptions& attr) const;
 
   List<FontTranslatorRecord> _records;
 
@@ -561,14 +559,14 @@ void FontTranslator::freeCustomDefinitions()
   _records.free();
 }
 
-String FontTranslator::resolveFontPath(const String& family, uint32_t size, const FontCaps& attr) const
+String FontTranslator::resolveFontPath(const String& family, uint32_t size, const FontOptions& attr) const
 {
   String result;
 
   // Custom definitions bypasses FontConfig.
   String familyLower = family.lowered();
 
-  List<String> fontPaths = FontManager::getPathList();
+  List<String> fontPaths = Font::getPathList();
   List<FontTranslatorRecord> records(_records);
   List<FontTranslatorRecord>::ConstIterator it(records);
 
@@ -576,7 +574,7 @@ String FontTranslator::resolveFontPath(const String& family, uint32_t size, cons
   {
     const FontTranslatorRecord& rec = it.value();
 
-    if (rec.family == familyLower && rec.attr.bold == attr.bold && rec.attr.italic == attr.italic)
+    if (rec.family == familyLower && rec.attr.getStyle() == attr.getStyle())
     {
       if (FileSystem::findFile(fontPaths, rec.fileName, result)) return result;
     }
@@ -667,7 +665,7 @@ struct FOG_HIDDEN FTFontFile
   // [Setup]
 
   bool setupSize(uint32_t size);
-  FontFace* createFace(uint32_t size, const FontCaps& caps);
+  FontFace* createFace(uint32_t size, const FontOptions& options);
 
   // [Members]
 
@@ -729,15 +727,15 @@ FontFace* FTFontEngine::createDefaultFace()
   // Bail if FreeType library is not loaded.
   if (!_freeTypeLib->ok) return NULL;
 
-  FontCaps caps;
+  FontOptions options;
   int size = 12;
 
-  memset(&caps, 0, sizeof(FontCaps));
+  memset(&options, 0, sizeof(FontOptions));
   
   FontFace* face = NULL;
 
 #if defined(FOG_HAVE_FONTCONFIG)
-  face = FontManager::getFace(Ascii8("default"), size, caps);
+  face = createFace(Ascii8("default"), size, options, FloatMatrix());
 #endif
 
   // If face wasn't loaded, try some generic font names.
@@ -755,7 +753,7 @@ FontFace* FTFontEngine::createDefaultFace()
 
     while (*p) {
       sysuint_t plen = strlen(p);
-      face = FontManager::getFace(Ascii8(p, plen), size, caps);
+      face = createFace(Ascii8(p, plen), size, options, FloatMatrix());
       if (face) break;
 
       p += plen + 1;
@@ -766,13 +764,14 @@ FontFace* FTFontEngine::createDefaultFace()
 }
 
 FontFace* FTFontEngine::createFace(
-  const String& family, uint32_t size,
-  const FontCaps& caps)
+  const String& family, float size,
+  const FontOptions& options, 
+  const FloatMatrix& matrix)
 {
   // Bail if FreeType library is not loaded.
   if (!_freeTypeLib->ok) return NULL;
 
-  String fileName = _fontTranslator->resolveFontPath(family, size, caps);
+  String fileName = _fontTranslator->resolveFontPath(family, size, options);
 
   if (!fileName.isEmpty())
   {
@@ -798,7 +797,7 @@ FontFace* FTFontEngine::createFace(
     }
 
     // If face was created, reference count is increased too.
-    return file->createFace(size, caps);
+    return file->createFace(size, options);
   }
 
   return NULL;
@@ -838,7 +837,7 @@ void FTFontEngine::close()
 
 static FOG_INLINE double fx26p6ToDouble(int p) { return double(p) / 64.0; }
 
-static err_t decompose_ft_glyph_outline(const FT_Outline& outline, bool flipY, const Matrix* mtx, Path& path)
+static err_t decompose_ft_glyph_outline(const FT_Outline& outline, bool flipY, const DoubleMatrix* mtx, DoublePath& path)
 {
   int n;         // Index of contour in outline.
   int first = 0; // Index of first point in contour.
@@ -1089,9 +1088,9 @@ err_t FTFontFace::getGlyphSet(const Char* str, sysuint_t length, GlyphSet& glyph
   return err;
 }
 
-err_t FTFontFace::getOutline(const Char* str, sysuint_t length, Path& dst)
+err_t FTFontFace::getOutline(const Char* str, sysuint_t length, DoublePath& dst)
 {
-  if (scalable == 0) return ERR_FONT_CANT_GET_OUTLINE;
+  // if (scalable == 0) return ERR_FONT_CANT_GET_OUTLINE;
 
   if (length == DETECT_LENGTH) length = StringUtil::len(str);
   if (length == 0) return ERR_OK;
@@ -1157,7 +1156,7 @@ GlyphData* FTFontFace::renderGlyph(uint32_t uc)
 
   face = file->currentFace;
   // Setup font size (mainly for scalable fonts).
-  file->setupSize(metrics.size);
+  file->setupSize(metrics._size);
 
   // Get glyph index.
   if ((index = _freeTypeLib->pFT_Get_Char_Index(face, uc)) == 0) goto end;
@@ -1179,7 +1178,7 @@ GlyphData* FTFontFace::renderGlyph(uint32_t uc)
     // space is never larger, so we must use these values and
     // we are using them in our rendering process too.
     offsetX = FT_FLOOR(slot->metrics.horiBearingX);
-    offsetY = metrics.ascent - FT_FLOOR(slot->metrics.horiBearingY) - 1;
+    offsetY = metrics._ascent - FT_FLOOR(slot->metrics.horiBearingY) - 1;
     advance = FT_CEIL(slot->metrics.horiAdvance);
 
     /* Adjust for bold and italic text */
@@ -1188,7 +1187,7 @@ GlyphData* FTFontFace::renderGlyph(uint32_t uc)
     // we can italize normal font if italic variant is not present.
     /*
     if ((face->style_flags & FT_STYLE_FLAG_ITALIC) == 0 &&
-      (caps & Font::Attribute_Italic) != 0)
+      (options & Font::Attribute_Italic) != 0)
     {
       FT_Matrix shear;
 
@@ -1464,7 +1463,7 @@ done:
   return error == 0;
 }
 
-FontFace* FTFontFile::createFace(uint32_t size, const FontCaps& caps)
+FontFace* FTFontFile::createFace(uint32_t size, const FontOptions& options)
 {
   FTFontFace* face = NULL;
 
@@ -1478,17 +1477,17 @@ FontFace* FTFontFile::createFace(uint32_t size, const FontCaps& caps)
 
     face->file = this->ref();
     face->family = family;
-    face->metrics.size = size;
-    face->caps = caps;
+    face->metrics._size = size;
+    face->options = options;
 
     if (FT_IS_SCALABLE(currentFace))
     {
       // Get the scalable font metrics for this font
       FT_Fixed scale = currentFace->size->metrics.y_scale;
 
-      face->metrics.height = FT_CEIL(_freeTypeLib->pFT_MulFix(currentFace->bbox.yMax - currentFace->bbox.yMin, scale)) - 1;
-      face->metrics.ascent = (FT_CEIL(_freeTypeLib->pFT_MulFix(currentFace->bbox.yMax, scale)));
-      face->metrics.descent = face->metrics.height - face->metrics.ascent;
+      face->metrics._height = FT_CEIL(_freeTypeLib->pFT_MulFix(currentFace->bbox.yMax - currentFace->bbox.yMin, scale)) - 1;
+      face->metrics._ascent = (FT_CEIL(_freeTypeLib->pFT_MulFix(currentFace->bbox.yMax, scale)));
+      face->metrics._descent = face->metrics._height - face->metrics._ascent;
 
       /*
       face->metrics.lineSkip = FT_CEIL(_freetypeLib->pFT_MulFix(face->height, scale));
@@ -1506,11 +1505,11 @@ FontFace* FTFontFile::createFace(uint32_t size, const FontCaps& caps)
       // handles differently different font files, but this workaround
       // should be smart.
 
-      face->metrics.height = currentFace->available_sizes[fixedWidthIndex].height;
-      face->metrics.ascent = FT_FLOOR(currentFace->available_sizes[fixedWidthIndex].y_ppem);
-      if (face->metrics.ascent == face->metrics.height)
-        face->metrics.ascent = FT_FLOOR(currentFace->size->metrics.ascender);
-      face->metrics.descent = face->metrics.height - face->metrics.ascent;
+      face->metrics._height = currentFace->available_sizes[fixedWidthIndex].height;
+      face->metrics._ascent = FT_FLOOR(currentFace->available_sizes[fixedWidthIndex].y_ppem);
+      if (face->metrics._ascent == face->metrics._height)
+        face->metrics._ascent = FT_FLOOR(currentFace->size->metrics.ascender);
+      face->metrics._descent = face->metrics._height - face->metrics._ascent;
 
       /*
       face->metrics.lineSkip = FT_CEIL(face->metrics.ascent);

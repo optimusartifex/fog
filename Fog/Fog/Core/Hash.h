@@ -815,12 +815,11 @@ err_t UnorderedSet<KeyType>::put(const KeyType& key)
 
   if (node)
   {
-    if (!replace) return ERR_RT_OBJECT_ALREADY_EXISTS;
-    node->value = value;
+    node->key = key;
   }
   else
   {
-    node = new(std::nothrow) Node(hashCode, key, value);
+    node = new(std::nothrow) Node(hashCode, key);
     if (!node) return ERR_RT_OUT_OF_MEMORY;
 
     if (prev)

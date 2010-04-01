@@ -38,7 +38,7 @@ struct FOG_API FTFontFace : public FontFace
   virtual ~FTFontFace();
 
   virtual err_t getGlyphSet(const Char* str, sysuint_t length, GlyphSet& glyphSet);
-  virtual err_t getOutline(const Char* str, sysuint_t length, Path& dst);
+  virtual err_t getOutline(const Char* str, sysuint_t length, DoublePath& dst);
   virtual err_t getTextExtents(const Char* str, sysuint_t length, TextExtents& extents);
 
   //! @brief Glyph cache lock.
@@ -73,8 +73,9 @@ struct FOG_API FTFontEngine : public FontEngine
   virtual FontFace* createDefaultFace();
 
   virtual FontFace* createFace(
-    const String& family, uint32_t size, 
-    const FontCaps& caps);
+    const String& family, float size, 
+    const FontOptions& options, 
+    const FloatMatrix& matrix);
 
   virtual List<String> getDefaultFontDirectories();
 

@@ -188,7 +188,7 @@ struct FOG_API Image
   //! @copydoc Doxygen::Implicit::getFlags().
   FOG_INLINE uint32_t getFlags() const { return _d->flags; }
   //! @copydoc Doxygen::Implicit::isNull().
-  FOG_INLINE bool isNull() const { return _d == sharedNull.instancep(); }
+  FOG_INLINE bool isNull() const { return _d == _dnull.instancep(); }
   //! @copydoc Doxygen::Implicit::isDynamic().
   FOG_INLINE bool isDynamic() const { return _d->flags & ImageData::IsDynamic; }
   //! @copydoc Doxygen::Implicit::isSharable().
@@ -538,7 +538,7 @@ struct FOG_API Image
   // --------------------------------------------------------------------------
 
   //! @brief Shared null image.
-  static Static<ImageData> sharedNull;
+  static Static<ImageData> _dnull;
 
   //! @brief Calculate stride for a given image @a width and @a depth.
   //!

@@ -17,7 +17,7 @@ namespace Fog {
 // [Fog::Glyph]
 // ============================================================================
 
-Static<GlyphData> Glyph::sharedNull;
+Static<GlyphData> Glyph::_dnull;
 
 // ============================================================================
 // [Fog::GlyphData]
@@ -92,7 +92,7 @@ FOG_INIT_DECLARE err_t fog_glyph_init(void)
 {
   using namespace Fog;
 
-  Glyph::sharedNull.init();
+  Glyph::_dnull.init();
   return ERR_OK;
 }
 
@@ -100,6 +100,6 @@ FOG_INIT_DECLARE void fog_glyph_shutdown(void)
 {
   using namespace Fog;
 
-  Glyph::sharedNull.instancep()->refCount.dec();
-  Glyph::sharedNull.destroy();
+  Glyph::_dnull.instancep()->refCount.dec();
+  Glyph::_dnull.destroy();
 }

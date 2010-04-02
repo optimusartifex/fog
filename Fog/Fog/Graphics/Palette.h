@@ -175,7 +175,7 @@ struct FOG_API Palette
   // [Statics]
   // --------------------------------------------------------------------------
 
-  static Static<PaletteData> sharedNull;
+  static Static<PaletteData> _dnull;
   static Static<PaletteData> sharedGrey;
   static Static<PaletteData> sharedA8;
 

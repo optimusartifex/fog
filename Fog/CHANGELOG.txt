@@ -1,3 +1,14 @@
+2010-04-03
+- Renamed Class::sharedNull to Class::_dnull. Now all 'd' statics will start at '_d'.
+- Removed Region::operation(), added Region::combine() for all ops.
+- Region now supports infinite regions, use Region::infinite() to get it.
+- All operations with INFINITE regions are supported in Region API.
+- Cleaned up mess with META and USER variables (region + origin) in PaintEngine and Painter,
+  now there are strict rules (META variables are for whole painting and user variables can
+  be temporary and setting / resetting them will not destroy or damage current clipping area).
+- Instead of USER variables just use clip().
+- Painter::clear() renamed to Painter::fillAll().
+
 2010-04-02
 - Added more ROI (rectange of interest) methods in Image and Painter.
 - Added Painter::switchTo() so now it's efficient to switch singlethreaded or 

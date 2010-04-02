@@ -146,6 +146,85 @@ static FOG_INLINE int alignToDelta(int y, int offset, int delta)
 }
 
 // ============================================================================
+// [Fog::RasterPaintClipBuffer]
+// ============================================================================
+
+RasterPaintClipBuffer::RasterPaintClipBuffer()
+{
+  refCount.init(1);
+  rows = NULL;
+
+  box.clear();
+  clip.clear();
+}
+
+RasterPaintClipBuffer::~RasterPaintClipBuffer()
+{
+  if (rows) Memory::free(rows);
+}
+
+err_t RasterPaintClipBuffer::create(int w, int h, uint32_t format)
+{
+  err_t err;
+  if ((err = reallocRows(h)) != ERR_OK) goto fail;
+
+  box.set(0, 0, w, h);
+  clip.clear();
+
+  if ((err = image.create(w, h, format)) != ERR_OK) goto fail;
+  return ERR_OK;
+
+fail:
+  free();
+  return err;
+}
+
+err_t RasterPaintClipBuffer::adopt(Image& other)
+{
+  int w = other.getWidth();
+  int h = other.getHeight();
+
+  if (w <= 0 || h <= 0)
+  {
+    free();
+    return ERR_RT_INVALID_ARGUMENT;
+  }
+
+  err_t err;
+  if ((err = reallocRows(h)) != ERR_OK) goto fail;
+  if ((err = image.set(other)) != ERR_OK) goto fail;
+
+  return ERR_OK;
+
+fail:
+  free();
+  return err;
+}
+
+err_t RasterPaintClipBuffer::reallocRows(int h)
+{
+  if (box.getHeight() == h)
+  {
+    Memory::zero(rows + box.y1, box.getHeight() * sizeof(Row));
+  }
+  else
+  {
+    if (rows != NULL) Memory::free(rows);
+    if ((rows = (Row*)Memory::calloc((uint)h * sizeof(Row))) == NULL) return ERR_RT_OUT_OF_MEMORY;
+  }
+  return ERR_OK;
+}
+
+void RasterPaintClipBuffer::free()
+{
+  image.free();
+  if (rows) { Memory::free(rows); rows = NULL; }
+
+  box.clear();
+  clip.clear();
+}
+
+// ============================================================================
 // [Fog::RasterPaintClipState]
 // ============================================================================
 
@@ -237,9 +316,6 @@ RasterPaintCapsState::RasterPaintCapsState(const RasterPaintCapsState& other) :
     case PAINTER_SOURCE_PATTERN:
       pattern.initCustom1(other.pattern.instance());
       break;
-    case PAINTER_SOURCE_COLOR_FILTER:
-      colorFilter.initCustom1(other.colorFilter.instance());
-      break;
     default:
       FOG_ASSERT_NOT_REACHED();
   }
@@ -253,9 +329,6 @@ RasterPaintCapsState::~RasterPaintCapsState()
       break;
     case PAINTER_SOURCE_PATTERN:
       pattern.destroy();
-      break;
-    case PAINTER_SOURCE_COLOR_FILTER:
-      colorFilter.destroy();
       break;
     default:
       FOG_ASSERT_NOT_REACHED();
@@ -276,9 +349,6 @@ RasterPaintCapsState& RasterPaintCapsState::operator=(const RasterPaintCapsState
       break;
     case PAINTER_SOURCE_PATTERN:
       pattern.destroy();
-      break;
-    case PAINTER_SOURCE_COLOR_FILTER:
-      colorFilter.destroy();
       break;
     default:
       FOG_ASSERT_NOT_REACHED();
@@ -301,9 +371,6 @@ RasterPaintCapsState& RasterPaintCapsState::operator=(const RasterPaintCapsState
       break;
     case PAINTER_SOURCE_PATTERN:
       pattern.initCustom1(other.pattern.instance());
-      break;
-    case PAINTER_SOURCE_COLOR_FILTER:
-      colorFilter.initCustom1(other.colorFilter.instance());
       break;
     default:
       FOG_ASSERT_NOT_REACHED();
@@ -1572,162 +1639,87 @@ void RasterPaintEngine::setHint(uint32_t hint, int value)
 // [Fog::RasterPaintEngine - Meta]
 // ============================================================================
 
-void RasterPaintEngine::setMetaVariables(
-  const IntPoint& metaOrigin,
-  const Region& metaRegion,
-  bool useMetaRegion,
-  bool reset)
+void RasterPaintEngine::setMetaVars(const Region& region, const IntPoint& origin)
 {
   RasterPaintClipState* clipState;
   if (!(clipState = _detachClipState())) return;
 
-  clipState->metaOrigin = metaOrigin;
-  clipState->metaRegion = metaRegion;
-  clipState->metaRegionUsed = useMetaRegion;
+  clipState->metaOrigin = origin;
+  clipState->metaRegion = region;
+  clipState->metaRegionUsed = !region.isInfinite();
 
-  if (reset)
-  {
-    _deleteStates();
+  _deleteStates();
 
-    clipState->userOrigin.set(0, 0);
-    clipState->userRegion.clear();
-    clipState->userRegionUsed = false;
+  clipState->userOrigin.set(0, 0);
+  clipState->userRegion = Region::infinite();
+  clipState->userRegionUsed = false;
 
-    // We must set workOrigin here, because _setCapsDefaults() will set default
-    // transformation matrix to identity + workOrigin.
-    clipState->workOrigin.set(metaOrigin);
-    if (_detachCapsState()) _setCapsDefaults();
-  }
+  // We must set workOrigin here, because _setCapsDefaults() will set default
+  // transformation matrix to identity + workOrigin.
+  clipState->workOrigin.set(origin);
 
-  _updateWorkRegion();
-}
-
-void RasterPaintEngine::setMetaOrigin(const IntPoint& pt)
-{
-  RasterPaintClipState* clipState = ctx.clipState;
-
-  if (clipState->metaOrigin == pt) return;
-  if (!(clipState = _detachClipState())) return;
-
-  clipState->metaOrigin = pt;
-  _updateWorkRegion();
-}
-
-void RasterPaintEngine::setUserOrigin(const IntPoint& pt)
-{
-  RasterPaintClipState* clipState = ctx.clipState;
-
-  if (clipState->userOrigin == pt) return;
-  if (!(clipState = _detachClipState())) return;
-
-  clipState->userOrigin = pt;
-  _updateWorkRegion();
-}
-
-void RasterPaintEngine::translateMetaOrigin(const IntPoint& pt)
-{
-  if (pt.x == 0 && pt.y == 0) return;
-
-  RasterPaintClipState* clipState;
-  if (!(clipState = _detachClipState())) return;
-
-  clipState->metaOrigin += pt;
-  _updateWorkRegion();
-}
-
-void RasterPaintEngine::translateUserOrigin(const IntPoint& pt)
-{
-  if (pt.x == 0 && pt.y == 0) return;
-
-  RasterPaintClipState* clipState;
-  if (!(clipState = _detachClipState())) return;
-
-  clipState->userOrigin += pt;
-  _updateWorkRegion();
-}
-
-void RasterPaintEngine::setUserRegion(const IntRect& r)
-{
-  RasterPaintClipState* clipState;
-  if (!(clipState = _detachClipState())) return;
-
-  clipState->userRegion = r;
-  clipState->userRegionUsed = true;
-  _updateWorkRegion();
-}
-
-void RasterPaintEngine::setUserRegion(const Region& r)
-{
-  RasterPaintClipState* clipState;
-  if (!(clipState = _detachClipState())) return;
-
-  clipState->userRegion = r;
-  clipState->userRegionUsed = true;
+  if (_detachCapsState()) _setCapsDefaults();
   _updateWorkRegion();
 }
 
 void RasterPaintEngine::resetMetaVars()
 {
+  setMetaVars(Region::infinite(), IntPoint(0, 0));
+}
+
+void RasterPaintEngine::setUserVars(const Region& region, const IntPoint& origin)
+{
   RasterPaintClipState* clipState;
   if (!(clipState = _detachClipState())) return;
 
-  clipState->metaOrigin.set(0, 0);
-  clipState->metaRegion.clear();
-  clipState->metaRegionUsed = false;
+  clipState->userRegion = region;
+  clipState->userRegionUsed = !region.isInfinite();
+  clipState->userOrigin = origin;
+
+  _updateWorkRegion();
+}
+
+void RasterPaintEngine::setUserOrigin(const IntPoint& origin, uint32_t originOp)
+{
+  RasterPaintClipState* clipState = ctx.clipState;
+  if (!(clipState = _detachClipState())) return;
+
+  switch (originOp)
+  {
+    case PAINTER_ORIGIN_SET:
+      clipState->userOrigin.set(origin);
+      break;
+    case PAINTER_ORIGIN_TRANSLATE:
+      clipState->userOrigin.translate(origin);
+      break;
+  }
+
   _updateWorkRegion();
 }
 
 void RasterPaintEngine::resetUserVars()
 {
-  RasterPaintClipState* clipState;
-  if (!(clipState = _detachClipState())) return;
-
-  clipState->userOrigin.set(0, 0);
-  clipState->userRegion.clear();
-  clipState->userRegionUsed = false;
-  _updateWorkRegion();
-}
-
-IntPoint RasterPaintEngine::getMetaOrigin() const
-{
-  RasterPaintClipState* clipState = ctx.clipState;
-
-  return clipState->metaOrigin;
-}
-
-IntPoint RasterPaintEngine::getUserOrigin() const
-{
-  RasterPaintClipState* clipState = ctx.clipState;
-
-  return clipState->userOrigin;
+  setUserVars(Region::infinite(), IntPoint(0, 0));
 }
 
 Region RasterPaintEngine::getMetaRegion() const
 {
-  RasterPaintClipState* clipState = ctx.clipState;
-
-  return clipState->metaRegion;
+  return ctx.clipState->metaRegion;
 }
 
 Region RasterPaintEngine::getUserRegion() const
 {
-  RasterPaintClipState* clipState = ctx.clipState;
-
-  return clipState->userRegion;
+  return ctx.clipState->userRegion;
 }
 
-bool RasterPaintEngine::isMetaRegionUsed() const
+IntPoint RasterPaintEngine::getMetaOrigin() const
 {
-  RasterPaintClipState* clipState = ctx.clipState;
-
-  return clipState->metaRegionUsed;
+  return ctx.clipState->metaOrigin;
 }
 
-bool RasterPaintEngine::isUserRegionUsed() const
+IntPoint RasterPaintEngine::getUserOrigin() const
 {
-  RasterPaintClipState* clipState = ctx.clipState;
-
-  return clipState->userRegionUsed;
+  return ctx.clipState->userOrigin;
 }
 
 // ============================================================================
@@ -1762,39 +1754,42 @@ uint32_t RasterPaintEngine::getSourceType() const
   return capsState->sourceType;
 }
 
-err_t RasterPaintEngine::getSourceArgb(Argb& argb) const
+Argb RasterPaintEngine::getSourceArgb() const
 {
   RasterPaintCapsState* capsState = ctx.capsState;
+  Argb argb;
 
   switch (capsState->sourceType)
   {
     case PAINTER_SOURCE_ARGB:
-      argb.set(capsState->solid.argb);
-      return ERR_OK;
+      return capsState->solid.argb;
 
     default:
-      argb.set(0x00000000);
-      return ERR_RT_INVALID_CONTEXT;
+      return Argb(0x00000000);
   }
 }
 
-err_t RasterPaintEngine::getSourcePattern(Pattern& pattern) const
+Pattern RasterPaintEngine::getSourcePattern() const
 {
   RasterPaintCapsState* capsState = ctx.capsState;
+  Pattern pattern;
 
   switch (capsState->sourceType)
   {
     case PAINTER_SOURCE_ARGB:
-      return pattern.setColor(capsState->solid.argb);
+      pattern.setColor(capsState->solid.argb);
+      break;
 
     case PAINTER_SOURCE_PATTERN:
       pattern = capsState->pattern.instance();
-      return ERR_OK;
+      break;
 
     default:
       pattern.reset();
-      return ERR_RT_INVALID_CONTEXT;
+      break;
   }
+
+  return pattern;
 }
 
 void RasterPaintEngine::setSource(Argb argb)
@@ -1810,9 +1805,6 @@ void RasterPaintEngine::setSource(Argb argb)
     case PAINTER_SOURCE_PATTERN:
       capsState->pattern.destroy();
       _resetPatternRasterPaintContext();
-      break;
-    case PAINTER_SOURCE_COLOR_FILTER:
-      capsState->colorFilter.destroy();
       break;
     default:
       FOG_ASSERT_NOT_REACHED();
@@ -1847,9 +1839,6 @@ void RasterPaintEngine::setSource(const Pattern& pattern)
     case PAINTER_SOURCE_PATTERN:
       capsState->pattern.instance() = pattern;
       goto done;
-    case PAINTER_SOURCE_COLOR_FILTER:
-      capsState->colorFilter.destroy();
-      break;
     default:
       FOG_ASSERT_NOT_REACHED();
   }
@@ -1859,33 +1848,6 @@ void RasterPaintEngine::setSource(const Pattern& pattern)
 
 done:
   _resetPatternRasterPaintContext();
-}
-
-void RasterPaintEngine::setSource(const ColorFilter& colorFilter)
-{
-  RasterPaintCapsState* capsState;
-  if (!(capsState = _detachCapsState())) return;
-
-  // Destroy old source object if needed.
-  switch (capsState->sourceType)
-  {
-    case PAINTER_SOURCE_ARGB:
-      break;
-    case PAINTER_SOURCE_PATTERN:
-      capsState->pattern.destroy();
-      _resetPatternRasterPaintContext();
-      break;
-    case PAINTER_SOURCE_COLOR_FILTER:
-      capsState->colorFilter.instance() = colorFilter;
-      goto done;
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
-
-  capsState->sourceType = PAINTER_SOURCE_COLOR_FILTER;
-  capsState->colorFilter.initCustom1(colorFilter);
-done:
-  ;
 }
 
 // ============================================================================
@@ -2283,21 +2245,6 @@ void RasterPaintEngine::restore()
 // [Fog::RasterPaintEngine - Raster drawing]
 // ============================================================================
 
-void RasterPaintEngine::clear()
-{
-  RasterPaintClipState* clipState = ctx.clipState;
-
-  if (clipState->clipSimple)
-  {
-    _serializeBoxes(&clipState->clipBox, 1);
-  }
-  else
-  {
-    const Region& r = clipState->workRegion;
-    _serializeBoxes(r.getData(), r.getLength());
-  }
-}
-
 void RasterPaintEngine::drawPoint(const IntPoint& p)
 {
   RasterPaintEngine::drawPoint(
@@ -2358,7 +2305,7 @@ void RasterPaintEngine::drawRect(const IntRect& r)
     }
     else
     {
-      Region::intersect(boxISect, box, clipState->workRegion);
+      Region::combine(boxISect, box, clipState->workRegion, REGION_OP_INTERSECT);
     }
 
     sysuint_t len = boxISect.getLength();
@@ -2411,7 +2358,7 @@ void RasterPaintEngine::fillRect(const IntRect& r)
       TemporaryRegion<1> box_(box);
       TemporaryRegion<16> boxISect(box);
 
-      Region::intersect(boxISect, box_, clipState->workRegion);
+      Region::combine(boxISect, box_, clipState->workRegion, REGION_OP_INTERSECT);
       if (boxISect.isEmpty()) return;
 
       _serializeBoxes(boxISect.getData(), boxISect.getLength());
@@ -2445,7 +2392,7 @@ void RasterPaintEngine::fillRects(const IntRect* r, sysuint_t count)
 
     if (!ctx.clipState->clipSimple)
     {
-      Region::intersect(region, region, ctx.clipState->workRegion);
+      Region::combine(region, region, ctx.clipState->workRegion, REGION_OP_INTERSECT);
       if (region.isEmpty()) return;
     }
 
@@ -2462,6 +2409,7 @@ void RasterPaintEngine::fillRound(const IntRect& r, const IntPoint& radius)
 
 void RasterPaintEngine::fillRegion(const Region& region)
 {
+  if (region.isInfinite()) { fillAll(); return; }
   if (region.isEmpty()) return;
 
   RasterPaintCapsState* capsState = ctx.capsState;
@@ -2488,11 +2436,26 @@ void RasterPaintEngine::fillRegion(const Region& region)
 
     if (!ctx.clipState->clipSimple)
     {
-      Region::intersect(regionISect, regionISect, ctx.clipState->workRegion);
+      Region::combine(regionISect, regionISect, ctx.clipState->workRegion, REGION_OP_INTERSECT);
       if (region.isEmpty()) return;
     }
 
     _serializeBoxes(region.getData(), region.getLength());
+  }
+}
+
+void RasterPaintEngine::fillAll()
+{
+  RasterPaintClipState* clipState = ctx.clipState;
+
+  if (clipState->clipSimple)
+  {
+    _serializeBoxes(&clipState->clipBox, 1);
+  }
+  else
+  {
+    const Region& r = clipState->workRegion;
+    _serializeBoxes(r.getData(), r.getLength());
   }
 }
 
@@ -2641,7 +2604,7 @@ void RasterPaintEngine::fillRect(const DoubleRect& r)
       TemporaryRegion<1> box_(box);
       TemporaryRegion<16> boxISect(box);
 
-      Region::intersect(boxISect, box_, clipState->workRegion);
+      Region::combine(boxISect, box_, clipState->workRegion, REGION_OP_INTERSECT);
       if (boxISect.isEmpty()) return;
 
       _serializeBoxes(boxISect.getData(), boxISect.getLength());
@@ -3159,9 +3122,6 @@ void RasterPaintEngine::_setCapsDefaults()
       break;
     case PAINTER_SOURCE_PATTERN:
       capsState->pattern.destroy();
-      break;
-    case PAINTER_SOURCE_COLOR_FILTER:
-      capsState->colorFilter.destroy();
       break;
     default:
       FOG_ASSERT_NOT_REACHED();
@@ -3981,24 +3941,6 @@ void RasterPaintEngine::_renderBoxes(RasterPaintContext* ctx, const IntBox* box,
       }
       break;
     }
-
-#if 0
-    // Color filter.
-    case PAINTER_SOURCE_COLOR_FILTER:
-    {
-      const ImageFilterEngine* cfEngine = capsState->colorFilter->getEngine();
-      const void* cfRasterPaintContext = cfEngine->getContext();
-      ColorFilterFn cspan = cfEngine->getColorFilterFn(layer->format);
-
-      RENDER_LOOP(bltColorFilter, 4,
-      {
-        cspan(cfRasterPaintContext, pCur, pCur, (sysuint_t)w);
-      });
-
-      cfEngine->releaseContext(cfRasterPaintContext);
-      break;
-    }
-#endif
   }
 #undef RENDER_LOOP
 }
@@ -4471,15 +4413,6 @@ void RasterPaintEngine::_renderGlyphSet(RasterPaintContext* ctx, const IntPoint&
 
       break;
     }
-
-#if 0
-    // Color filter.
-    case PAINTER_SOURCE_COLOR_FILTER:
-    {
-      // TODO:
-      break;
-    }
-#endif
   }
 #undef RENDER_LOOP
 }
@@ -4773,67 +4706,6 @@ NAME##_end: \
       }
       break;
     }
-
-#if 0
-    // Color filter source type.
-    case PAINTER_SOURCE_COLOR_FILTER:
-    {
-      uint8_t* pBuf = ctx->getBuffer((uint)(clipState->clipBox.getWidth()) * 4);
-      if (!pBuf) return;
-
-      uint32_t format = layer->format;
-
-      const ImageFilterEngine* cfEngine = capsState->colorFilter->getEngine();
-      const void* cfRasterPaintContext = cfEngine->getContext();
-      ColorFilterFn cspan = cfEngine->getColorFilterFn(format);
-
-      RasterEngine::VSpanMskFn vspan_a8 =
-        RasterEngine::functionMap->composite[OPERATOR_SRC][format].vspan_a8[format];
-      RasterEngine::VSpanMskConstFn vspan_a8_const =
-        RasterEngine::functionMap->composite[OPERATOR_SRC][format].vspan_a8_const[format];
-
-      RENDER_LOOP(bltColorFilter,
-      {
-        const Scanline32::Span* span = scanline->getSpansData();
-
-        for (;;)
-        {
-          int x = span->x;
-          int len = span->len;
-
-          pCur = pBase + x * bpp;
-
-          if (len > 0)
-          {
-            cspan(cfRasterPaintContext, pBuf, pCur, len);
-            vspan_a8(pCur, pBuf, span->covers, len, &closure);
-          }
-          else
-          {
-            len = -len;
-            FOG_ASSERT(len > 0);
-
-            uint32_t cover = (uint32_t)*(span->covers);
-            if (cover == 0xFF)
-            {
-              cspan(cfRasterPaintContext, pCur, pCur, len);
-            }
-            else
-            {
-              cspan(cfRasterPaintContext, pBuf, pCur, len);
-              vspan_a8_const(pCur, pBuf, cover, len, &closure);
-            }
-          }
-
-          if (--numSpans == 0) break;
-          ++span;
-        }
-      });
-
-      cfEngine->releaseContext(cfRasterPaintContext);
-      break;
-    }
-#endif
   }
 #undef RENDER_LOOP
 }

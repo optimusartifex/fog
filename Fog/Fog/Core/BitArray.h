@@ -53,7 +53,7 @@ struct FOG_API BitArray
     uint8_t data[4];
   };
 
-  static Static<Data> sharedNull;
+  static Static<Data> _dnull;
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -84,7 +84,7 @@ struct FOG_API BitArray
   // --------------------------------------------------------------------------
 
   //! @copydoc Doxygen::Implicit::isNull().
-  FOG_INLINE bool isNull() const { return _d == sharedNull.instancep(); }
+  FOG_INLINE bool isNull() const { return _d == _dnull.instancep(); }
 
   // --------------------------------------------------------------------------
   // [Data]

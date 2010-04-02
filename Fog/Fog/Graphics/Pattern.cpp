@@ -50,10 +50,10 @@ static FOG_INLINE void Pattern_freeData(PatternData* d)
   }
 }
 
-Static<PatternData> Pattern::sharedNull;
+Static<PatternData> Pattern::_dnull;
 
 Pattern::Pattern() : 
-  _d(sharedNull->ref())
+  _d(_dnull->ref())
 {
 }
 
@@ -80,7 +80,7 @@ err_t Pattern::_detach()
 
 void Pattern::free()
 {
-  atomicPtrXchg(&_d, sharedNull->ref())->deref();
+  atomicPtrXchg(&_d, _dnull->ref())->deref();
 }
 
 err_t Pattern::setType(uint32_t type)
@@ -128,7 +128,7 @@ void Pattern::reset()
 {
   if (_d->refCount.get() > 1)
   {
-    atomicPtrXchg(&_d, sharedNull->ref())->deref();
+    atomicPtrXchg(&_d, _dnull->ref())->deref();
   }
   else
   {
@@ -641,7 +641,7 @@ FOG_INIT_DECLARE err_t fog_pattern_init(void)
 {
   using namespace Fog;
 
-  Pattern::sharedNull.init();
+  Pattern::_dnull.init();
   return ERR_OK;
 }
 
@@ -649,5 +649,5 @@ FOG_INIT_DECLARE void fog_pattern_shutdown(void)
 {
   using namespace Fog;
 
-  Pattern::sharedNull.destroy();
+  Pattern::_dnull.destroy();
 }

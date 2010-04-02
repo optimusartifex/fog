@@ -34,15 +34,15 @@ namespace Fog {
 // [Fog::Locale]
 // ============================================================================
 
-Static<Locale::Data> Locale::sharedNull;
+Static<Locale::Data> Locale::_dnull;
 Static<Locale::Data> Locale::sharedPosix;
 Static<Locale::Data> Locale::sharedUser;
 
-Locale* Locale::sharedNullLocale;
+Locale* Locale::_dnullLocale;
 Locale* Locale::sharedPosixLocale;
 Locale* Locale::sharedUserLocale;
 
-static Static<Locale> sharedNullL;
+static Static<Locale> _dnullL;
 static Static<Locale> sharedPosixL;
 static Static<Locale> sharedUserL;
 
@@ -76,7 +76,7 @@ static void _setLConv(Locale::Data* d, const struct lconv* conv)
 }
 
 Locale::Locale() :
-  _d(sharedNull->ref())
+  _d(_dnull->ref())
 {
 }
 
@@ -91,7 +91,7 @@ Locale::Locale(Data* d) :
 }
 
 Locale::Locale(const String& name) :
-  _d(sharedNull->ref())
+  _d(_dnull->ref())
 {
   set(name);
 }
@@ -114,7 +114,7 @@ err_t Locale::_detach()
 
 void Locale::free()
 {
-  atomicPtrXchg(&_d, sharedNull->ref())->deref();
+  atomicPtrXchg(&_d, _dnull->ref())->deref();
 }
 
 // [Set]
@@ -194,9 +194,9 @@ FOG_INIT_DECLARE err_t fog_locale_init(void)
 {
   using namespace Fog;
 
-  Locale::sharedNull.init();
-  Locale::sharedNull->name = Ascii8("NULL");
-  _setDefaults(Locale::sharedNull.instancep());
+  Locale::_dnull.init();
+  Locale::_dnull->name = Ascii8("NULL");
+  _setDefaults(Locale::_dnull.instancep());
 
   Locale::sharedPosix.init();
   Locale::sharedPosix->name= Ascii8("POSIX");
@@ -205,11 +205,11 @@ FOG_INIT_DECLARE err_t fog_locale_init(void)
   Locale::sharedUser.init();
   _setLConv(Locale::sharedUser.instancep(), localeconv());
 
-  sharedNullL.initCustom1(Locale::sharedNull.instancep());
+  _dnullL.initCustom1(Locale::_dnull.instancep());
   sharedPosixL.initCustom1(Locale::sharedPosix.instancep());
   sharedUserL.initCustom1(Locale::sharedUser.instancep());
 
-  Locale::sharedNullLocale = sharedNullL.instancep();
+  Locale::_dnullLocale = _dnullL.instancep();
   Locale::sharedPosixLocale = sharedPosixL.instancep();
   Locale::sharedUserLocale = sharedUserL.instancep();
 
@@ -220,7 +220,7 @@ FOG_INIT_DECLARE void fog_locale_shutdown(void)
 {
   using namespace Fog;
 
-  Locale::sharedNull.destroy();
+  Locale::_dnull.destroy();
   Locale::sharedPosix.destroy();
   Locale::sharedUser.destroy();
 }

@@ -38,7 +38,7 @@ struct FOG_HIDDEN ManagedStringLocal
     _buckets((Node**)Memory::calloc(INITIAL_CAPACITY * sizeof(Node*))),
     _null(String())
   {
-    ManagedString::sharedNull = &_null;
+    ManagedString::_dnull = &_null;
   }
 
   FOG_INLINE ~ManagedStringLocal()
@@ -55,7 +55,7 @@ struct FOG_HIDDEN ManagedStringLocal
 
     // Free allocated memory for buckets and set everything to NULL.
     Memory::free(_buckets);
-    ManagedString::sharedNull = NULL;
+    ManagedString::_dnull = NULL;
   }
 
   FOG_INLINE Node* addString(const String& s)
@@ -318,10 +318,10 @@ static Static<ManagedStringLocal> managed_local;
 // [Fog::ManagedString]
 // ============================================================================
 
-ManagedString::Node* ManagedString::sharedNull;
+ManagedString::Node* ManagedString::_dnull;
 
 ManagedString::ManagedString() :
-  _node(sharedNull->ref())
+  _node(_dnull->ref())
 {
 }
 
@@ -333,13 +333,13 @@ ManagedString::ManagedString(const ManagedString& other) :
 ManagedString::ManagedString(const String& s) :
   _node(managed_local->addString(s))
 {
-  if (_node == NULL) _node = sharedNull->ref();
+  if (_node == NULL) _node = _dnull->ref();
 }
 
 ManagedString::ManagedString(const Utf16& s) :
   _node(managed_local->addUtf16(s))
 {
-  if (_node == NULL) _node = sharedNull->ref();
+  if (_node == NULL) _node = _dnull->ref();
 }
 
 ManagedString::~ManagedString()
@@ -349,7 +349,7 @@ ManagedString::~ManagedString()
 
 void ManagedString::clear()
 {
-  Node* old = atomicPtrXchg(&_node, sharedNull->ref());
+  Node* old = atomicPtrXchg(&_node, _dnull->ref());
   if (old->refCount.deref()) managed_local->remove(old);
 }
 

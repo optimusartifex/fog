@@ -386,7 +386,7 @@ static Static<RasterizerLocal> rasterizer_local;
 //! Note, gamma table is BYTE type not int as in original rasterizer.
 //!
 //! Contribution by Petr Kobalicek <kobalicek.petr@gmail.com>,
-//! This contribution follows antigrain licence (Public Domain).
+//! This contribution follows antigrain license (Public Domain).
 struct FOG_HIDDEN AnalyticRasterizer : public Rasterizer
 {
   AnalyticRasterizer();

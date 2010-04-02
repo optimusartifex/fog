@@ -151,7 +151,7 @@ ImageData* ImageData::copy(const ImageData* other)
   }
   else
   {
-    d = Image::sharedNull->refAlways();
+    d = Image::_dnull->refAlways();
   }
 
   return d;
@@ -161,10 +161,10 @@ ImageData* ImageData::copy(const ImageData* other)
 // [Fog::Image]
 // ============================================================================
 
-Static<ImageData> Image::sharedNull;
+Static<ImageData> Image::_dnull;
 
 Image::Image() : 
-  _d(sharedNull->refAlways())
+  _d(_dnull->refAlways())
 {
 }
 
@@ -174,7 +174,7 @@ Image::Image(const Image& other) :
 }
 
 Image::Image(int w, int h, uint32_t format) :
-  _d(sharedNull->refAlways())
+  _d(_dnull->refAlways())
 {
   create(w, h, format);
 }
@@ -187,11 +187,11 @@ Image::~Image()
 err_t Image::_detach()
 {
   ImageData* d = _d;
-  if (d == sharedNull.instancep()) return ERR_OK;
+  if (d == _dnull.instancep()) return ERR_OK;
 
   if (d->stride == 0)
   {
-    atomicPtrXchg(&_d, sharedNull->refAlways())->deref();
+    atomicPtrXchg(&_d, _dnull->refAlways())->deref();
     return ERR_OK;
   }
 
@@ -208,7 +208,7 @@ err_t Image::_detach()
 
 void Image::free()
 {
-  atomicPtrXchg(&_d, sharedNull.instancep()->refAlways())->deref();
+  atomicPtrXchg(&_d, _dnull.instancep()->refAlways())->deref();
 }
 
 err_t Image::create(int w, int h, uint32_t format)
@@ -304,7 +304,7 @@ err_t Image::set(const Image& other)
 
   if (other.isEmpty())
   {
-    atomicPtrXchg(&_d, sharedNull->refAlways())->deref();
+    atomicPtrXchg(&_d, _dnull->refAlways())->deref();
     return ERR_OK;
   }
 
@@ -392,7 +392,7 @@ err_t Image::setDeep(const Image& other)
 
   if (other.isEmpty())
   {
-    atomicPtrXchg(&_d, sharedNull->refAlways())->deref();
+    atomicPtrXchg(&_d, _dnull->refAlways())->deref();
     return ERR_OK;
   }
 
@@ -2688,8 +2688,8 @@ FOG_INIT_DECLARE err_t fog_image_init(void)
 {
   using namespace Fog;
 
-  Image::sharedNull.init();
-  ImageData* d = Image::sharedNull.instancep();
+  Image::_dnull.init();
+  ImageData* d = Image::_dnull.instancep();
   d->refCount.init(1);
   d->flags = ImageData::IsSharable;
 
@@ -2700,6 +2700,6 @@ FOG_INIT_DECLARE void fog_image_shutdown(void)
 {
   using namespace Fog;
 
-  Image::sharedNull.instancep()->refCount.dec();
-  Image::sharedNull.destroy();
+  Image::_dnull.instancep()->refCount.dec();
+  Image::_dnull.destroy();
 }

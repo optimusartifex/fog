@@ -23,7 +23,7 @@ namespace Fog {
 // ============================================================================
 
 static Static<NullPaintEngine> _nullPaintEngine;
-PaintEngine* Painter::sharedNull;
+PaintEngine* Painter::_dnull;
 
 static FOG_INLINE bool Painter_isFormatSupported(uint32_t format)
 {
@@ -51,24 +51,24 @@ static FOG_INLINE bool Painter_isRectValid(const Image& image, const IntRect& re
 
 Painter::Painter()
 {
-  _engine = sharedNull;
+  _engine = _dnull;
 }
 
 Painter::Painter(Image& image, uint32_t initFlags)
 {
-  _engine = sharedNull;
+  _engine = _dnull;
   begin(image, initFlags);
 }
 
 Painter::Painter(Image& image, const IntRect& rect, uint32_t initFlags)
 {
-  _engine = sharedNull;
+  _engine = _dnull;
   begin(image, rect, initFlags);
 }
 
 Painter::~Painter()
 {
-  if (_engine != sharedNull) delete _engine;
+  if (_engine != _dnull) delete _engine;
 }
 
 err_t Painter::begin(Image& image, uint32_t initFlags)
@@ -141,10 +141,10 @@ err_t Painter::begin(const ImageBuffer& buffer, uint32_t initFlags)
 
 void Painter::end()
 {
-  if (_engine == sharedNull) return;
+  if (_engine == _dnull) return;
 
   delete _engine;
-  _engine = sharedNull;
+  _engine = _dnull;
 }
 
 err_t Painter::switchTo(Image& image)
@@ -213,7 +213,7 @@ FOG_INIT_DECLARE err_t fog_painter_init(void)
   using namespace Fog;
 
   _nullPaintEngine.init();
-  Painter::sharedNull = _nullPaintEngine.instancep();
+  Painter::_dnull = _nullPaintEngine.instancep();
 
   return ERR_OK;
 }
@@ -223,5 +223,5 @@ FOG_INIT_DECLARE void fog_painter_shutdown(void)
   using namespace Fog;
 
   _nullPaintEngine.destroy();
-  Painter::sharedNull = NULL;
+  Painter::_dnull = NULL;
 }

@@ -152,7 +152,7 @@ void MyWindow::onPaint(PaintEvent* e)
 
   // Clear everything to white.
   p->setSource(Argb(0xFFFFFFFF));
-  p->clear();
+  p->fillAll();
   
   p->setSource(Argb(0xFF000000));
   p->drawRect(IntRect(15, 15, getWidth() - 25, getHeight() - 25));
@@ -164,7 +164,7 @@ void MyWindow::onPaint(PaintEvent* e)
     {
       for (int x = (y % 20) == 10 ? 10 : 0; x < getWidth(); x += 20)
       {
-        reg.unite(Rect(x, y, 10, 10));
+        reg.combine(Rect(x, y, 10, 10), REGION_OP_UNION);
       }
     }
   }

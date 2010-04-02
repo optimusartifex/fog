@@ -39,7 +39,7 @@ void MyWindow::onPaint(PaintEvent* e)
   Painter* p = e->getPainter();
 
   p->setSource(0xFFAFAFAF);
-  p->clear();
+  p->fillAll();
 
   SvgContext context(p);
   svg.onRender(&context);

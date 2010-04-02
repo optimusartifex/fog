@@ -65,7 +65,7 @@ void MyWindow::onPaint(PaintEvent* e)
 
   p->setOperator(OPERATOR_SRC);
   p->setSource(0xFF000000);
-  p->clear();
+  p->fillAll();
 
   p->setOperator(OPERATOR_SRC_OVER);
   p->setSource(0xFFFFFFFF);

@@ -37,7 +37,7 @@ struct FOG_HIDDEN LibraryData
 
 struct FOG_API Library
 {
-  static Static<LibraryData> sharedNull;
+  static Static<LibraryData> _dnull;
 
   // [Construction / Destruction]
 

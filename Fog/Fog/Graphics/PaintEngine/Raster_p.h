@@ -264,6 +264,50 @@ struct FOG_HIDDEN RasterPaintLayer
 };
 
 // ============================================================================
+// [Fog::RasterPaintClipBuffer]
+// ============================================================================
+
+struct FOG_HIDDEN RasterPaintClipBuffer
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  RasterPaintClipBuffer();
+  ~RasterPaintClipBuffer();
+
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
+
+  err_t create(int w, int h, uint32_t format);
+  err_t adopt(Image& other);
+
+  err_t reallocRows(int h);
+
+  void free();
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  struct Row 
+  {
+    int x1, x2;
+  };
+
+  Atomic<sysuint_t> refCount;
+  Image image;
+  Row* rows;
+
+  IntBox box;
+  IntBox clip;
+
+private:
+  FOG_DISABLE_COPY(RasterPaintClipBuffer)
+};
+
+// ============================================================================
 // [Fog::RasterPaintClipState]
 // ============================================================================
 
@@ -384,12 +428,10 @@ struct FOG_HIDDEN RasterPaintCapsState
 
   union
   {
-    //! @brief Solid source data (if @c sourceType is @c PAINTER_SOURCE_SOLID).
+    //! @brief Solid source data (if @c sourceType is @c PAINTER_SOURCE_ARGB).
     RasterEngine::Solid solid;
     //! @brief Pattern source data (if @c sourceType is @c PAINTER_SOURCE_PATTERN).
     Static<Pattern> pattern;
-    //! @brief Color filter data (if @c sourceType is @c PAINTER_SOURCE_COLOR_FILTER).
-    Static<ColorFilter> colorFilter;
   };
 
   //! @brief Pointer to compositing functions, see @c op.
@@ -1027,32 +1069,18 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   // [Meta]
   // --------------------------------------------------------------------------
 
-  virtual void setMetaVariables(
-    const IntPoint& metaOrigin,
-    const Region& metaRegion,
-    bool useMetaRegion,
-    bool reset);
-
-  virtual void setMetaOrigin(const IntPoint& pt);
-  virtual void setUserOrigin(const IntPoint& pt);
-
-  virtual void translateMetaOrigin(const IntPoint& pt);
-  virtual void translateUserOrigin(const IntPoint& pt);
-
-  virtual void setUserRegion(const IntRect& r);
-  virtual void setUserRegion(const Region& r);
-
+  virtual void setMetaVars(const Region& region, const IntPoint& origin);
   virtual void resetMetaVars();
-  virtual void resetUserVars();
 
-  virtual IntPoint getMetaOrigin() const;
-  virtual IntPoint getUserOrigin() const;
+  virtual void setUserVars(const Region& region, const IntPoint& origin);
+  virtual void setUserOrigin(const IntPoint& origin, uint32_t originOp);
+  virtual void resetUserVars();
 
   virtual Region getMetaRegion() const;
   virtual Region getUserRegion() const;
 
-  virtual bool isMetaRegionUsed() const;
-  virtual bool isUserRegionUsed() const;
+  virtual IntPoint getMetaOrigin() const;
+  virtual IntPoint getUserOrigin() const;
 
   // --------------------------------------------------------------------------
   // [Operator]
@@ -1067,12 +1095,11 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
 
   virtual uint32_t getSourceType() const;
 
-  virtual err_t getSourceArgb(Argb& argb) const;
-  virtual err_t getSourcePattern(Pattern& pattern) const;
+  virtual Argb getSourceArgb() const;
+  virtual Pattern getSourcePattern() const;
 
   virtual void setSource(Argb argb);
   virtual void setSource(const Pattern& pattern);
-  virtual void setSource(const ColorFilter& colorFilter);
 
   // --------------------------------------------------------------------------
   // [Fill Parameters]
@@ -1142,7 +1169,6 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   // [Raster Drawing]
   // --------------------------------------------------------------------------
 
-  virtual void clear();
   virtual void drawPoint(const IntPoint& p);
   virtual void drawLine(const IntPoint& start, const IntPoint& end);
   virtual void drawRect(const IntRect& r);
@@ -1151,6 +1177,8 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   virtual void fillRects(const IntRect* r, sysuint_t count);
   virtual void fillRound(const IntRect& r, const IntPoint& radius);
   virtual void fillRegion(const Region& region);
+
+  virtual void fillAll();
 
   // --------------------------------------------------------------------------
   // [Vector Drawing]

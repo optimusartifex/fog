@@ -718,11 +718,9 @@ void BaseGuiEngine::doUpdateWindow(GuiWindow* window)
     e._code = EVENT_PAINT;
     e._receiver = top;
 
-    painter.setMetaVariables(
-      IntPoint(0, 0),
+    painter.setMetaVars(
       TemporaryRegion<1>(IntRect(0, 0, top->getWidth(), top->getHeight())),
-      true,
-      true);
+      IntPoint(0, 0));
     top->sendEvent(&e);
 
     uflags |=
@@ -840,15 +838,15 @@ __pushed:
                 }
                 else
                 {
-                  rtmp4.unite(IntBox(
+                  rtmp4.combine(IntBox(
                     cw->rect().x1() + ox,
                     cw->rect().y1() + oy,
                     cw->rect().x2() + ox,
-                    cw->rect().y2() + oy));
+                    cw->rect().y2() + oy), REGION_OP_UNION);
                 }
               }
             }
-            Region::subtract(rtmp1, rtmp2, rtmp4);
+            Region::combine(rtmp1, rtmp2, rtmp4, REGION_OP_SUBTRACT);
           }
           else
           {
@@ -858,18 +856,16 @@ __pushed:
 #if 0
           }
 #endif
-          painter.setMetaVariables(
-            IntPoint(childRec.bounds.getX1(), childRec.bounds.getY1()),
+          painter.setMetaVars(
             rtmp1,
-            true,
-            true);
+            IntPoint(childRec.bounds.getX1(), childRec.bounds.getY1()));
 
           // FIXME: Repaint caret repaints the whole widget.
           if ((childRec.uflags & (WIDGET_REPAINT_AREA | WIDGET_REPAINT_CARET)) != 0)
           {
             child->sendEvent(&e);
             //blitFull = true;
-            if (!parentRec.painted) blitRegion.unite(rtmp1);
+            if (!parentRec.painted) blitRegion.combine(rtmp1, REGION_OP_UNION);
           }
 
           /*
@@ -878,7 +874,7 @@ __pushed:
           {
             theme->paintCaret(&painter, Application::caretStatus());
             //blitFull = true;
-            if (!parentRec.painted) blitRegion.unite(rtmp1);
+            if (!parentRec.painted) blitRegion.combine(rtmp1, REGION_OP_UNION);
           }
           */
 

@@ -70,7 +70,7 @@ struct FOG_API ConvolutionMatrixI
     ValueType m[1];
   };
 
-  static Static<Data> sharedNull;
+  static Static<Data> _dnull;
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -100,7 +100,7 @@ struct FOG_API ConvolutionMatrixI
   // --------------------------------------------------------------------------
 
   FOG_INLINE bool isEmpty() const { return _d->width == 0; }
-  FOG_INLINE bool isNull() const { return _d == sharedNull.instancep(); }
+  FOG_INLINE bool isNull() const { return _d == _dnull.instancep(); }
 
   // --------------------------------------------------------------------------
   // [Width / Height]

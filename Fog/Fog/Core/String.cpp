@@ -54,13 +54,13 @@ static FOG_INLINE bool fitToRange(
 
 String::String()
 {
-  _d = sharedNull->refAlways();
+  _d = _dnull->refAlways();
 }
 
 String::String(Char ch, sysuint_t length)
 {
   _d = Data::alloc(length);
-  if (!_d) { _d = sharedNull->refAlways(); return; }
+  if (!_d) { _d = _dnull->refAlways(); return; }
   if (!length) return;
 
   StringUtil::fill(_d->data, ch, length);
@@ -91,7 +91,7 @@ String::String(const Char* str)
   sysuint_t length = StringUtil::len(str);
 
   _d = Data::alloc(0, str, length);
-  if (!_d) _d = sharedNull->refAlways();
+  if (!_d) _d = _dnull->refAlways();
 }
 
 String::String(const Char* str, sysuint_t length)
@@ -99,7 +99,7 @@ String::String(const Char* str, sysuint_t length)
   if (length == DETECT_LENGTH) length = StringUtil::len(str);
 
   _d = Data::alloc(0, str, length);
-  if (!_d) _d = sharedNull->refAlways();
+  if (!_d) _d = _dnull->refAlways();
 }
 
 String::String(const Ascii8& str)
@@ -109,12 +109,12 @@ String::String(const Ascii8& str)
     ? StringUtil::len(s) : str.getLength();
 
   _d = Data::alloc(0, s, length);
-  if (!_d) _d = sharedNull->refAlways();
+  if (!_d) _d = _dnull->refAlways();
 }
 
 String::String(const Utf16& str)
 {
-  _d = sharedNull->refAlways();
+  _d = _dnull->refAlways();
   set(str);
 }
 
@@ -352,7 +352,7 @@ void String::clear()
 {
   if (_d->refCount.get() > 1)
   {
-    atomicPtrXchg(&_d, sharedNull->refAlways())->deref();
+    atomicPtrXchg(&_d, _dnull->refAlways())->deref();
     return;
   }
 
@@ -363,7 +363,7 @@ void String::clear()
 
 void String::free()
 {
-  atomicPtrXchg(&_d, sharedNull->refAlways())->deref();
+  atomicPtrXchg(&_d, _dnull->refAlways())->deref();
 }
 
 Char* String::getMData()
@@ -3427,7 +3427,7 @@ void String::Data::deref()
 
 String::Data* String::Data::adopt(void* address, sysuint_t capacity)
 {
-  if (capacity == 0) return String::sharedNull->refAlways();
+  if (capacity == 0) return String::_dnull->refAlways();
 
   Data* d = (Data*)address;
   d->refCount.init(1);
@@ -3478,7 +3478,7 @@ String::Data* String::Data::adopt(void* address, sysuint_t capacity, const Char*
 
 String::Data* String::Data::alloc(sysuint_t capacity)
 {
-  if (capacity == 0) return String::sharedNull->refAlways();
+  if (capacity == 0) return String::_dnull->refAlways();
 
   // Pad to 16 bytes (8 chars).
   capacity = (capacity + 7) & ~7;
@@ -3501,7 +3501,7 @@ String::Data* String::Data::alloc(sysuint_t capacity, const char* str, sysuint_t
   if (length == DETECT_LENGTH) length = StringUtil::len(str);
   if (length > capacity) capacity = length;
 
-  if (capacity == 0) return String::sharedNull->refAlways();
+  if (capacity == 0) return String::_dnull->refAlways();
 
   Data* d = alloc(capacity);
   if (!d) return NULL;
@@ -3518,7 +3518,7 @@ String::Data* String::Data::alloc(sysuint_t capacity, const Char* str, sysuint_t
   if (length == DETECT_LENGTH) length = StringUtil::len(str);
   if (length > capacity) capacity = length;
 
-  if (capacity == 0) return String::sharedNull->refAlways();
+  if (capacity == 0) return String::_dnull->refAlways();
 
   Data* d = alloc(capacity);
   if (!d) return NULL;
@@ -3565,7 +3565,7 @@ void String::Data::free(Data* d)
   Memory::free((void*)d);
 }
 
-Static<String::Data> String::sharedNull;
+Static<String::Data> String::_dnull;
 
 } // Fog namespace
 
@@ -3573,7 +3573,7 @@ FOG_INIT_DECLARE err_t fog_string_init(void)
 {
   using namespace Fog;
 
-  String::Data* d = String::sharedNull.instancep();
+  String::Data* d = String::_dnull.instancep();
   d->refCount.init(1);
   d->flags |= String::Data::IsSharable;
   d->hashCode = 0;

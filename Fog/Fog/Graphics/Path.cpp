@@ -42,7 +42,7 @@ namespace Fog {
 
 DoublePath::DoublePath()
 {
-  _d = sharedNull->ref();
+  _d = _dnull->ref();
 }
 
 DoublePath::DoublePath(const DoublePath& other)
@@ -59,7 +59,7 @@ DoublePath::~DoublePath()
 // [Fog::Path - Implicit Sharing]
 // ============================================================================
 
-Static<DoublePathData> DoublePath::sharedNull;
+Static<DoublePathData> DoublePath::_dnull;
 
 static FOG_INLINE sysuint_t _getPathDataSize(sysuint_t capacity)
 {
@@ -120,7 +120,7 @@ DoublePathData* DoublePath::_reallocData(DoublePathData* d, sysuint_t capacity)
 DoublePathData* DoublePath::_copyData(const DoublePathData* d)
 {
   sysuint_t length = d->length;
-  if (!length) return sharedNull->ref();
+  if (!length) return _dnull->ref();
 
   DoublePathData* newd = _allocData(length);
   if (!newd) return NULL;
@@ -307,7 +307,7 @@ void DoublePath::clear()
 {
   if (_d->refCount.get() > 1)
   {
-    atomicPtrXchg(&_d, sharedNull->ref())->deref();
+    atomicPtrXchg(&_d, _dnull->ref())->deref();
   }
   else
   {
@@ -318,7 +318,7 @@ void DoublePath::clear()
 
 void DoublePath::free()
 {
-  atomicPtrXchg(&_d, sharedNull->ref())->deref();
+  atomicPtrXchg(&_d, _dnull->ref())->deref();
 }
 
 // ============================================================================
@@ -1796,7 +1796,7 @@ FOG_INIT_DECLARE err_t fog_path_init(void)
 {
   using namespace Fog;
 
-  DoublePathData* d = DoublePath::sharedNull.instancep();
+  DoublePathData* d = DoublePath::_dnull.instancep();
 
   d->refCount.init(1);
   d->flat = true;
@@ -1810,5 +1810,5 @@ FOG_INIT_DECLARE void fog_path_shutdown(void)
 {
   using namespace Fog;
 
-  DoublePath::sharedNull->refCount.dec();
+  DoublePath::_dnull->refCount.dec();
 }

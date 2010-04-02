@@ -81,7 +81,7 @@ struct FOG_API Glyph
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE Glyph() : _d(sharedNull->ref()) {}
+  FOG_INLINE Glyph() : _d(_dnull->ref()) {}
   FOG_INLINE Glyph(const Glyph& other) : _d(other._d->ref()) {}
 
   FOG_INLINE explicit Glyph(GlyphData* d) : _d(d) {}
@@ -106,7 +106,7 @@ struct FOG_API Glyph
   // [Flags]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool isNull() const { return _d == sharedNull.instancep(); }
+  FOG_INLINE bool isNull() const { return _d == _dnull.instancep(); }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -134,7 +134,7 @@ struct FOG_API Glyph
   // [Statics]
   // --------------------------------------------------------------------------
 
-  static Static<GlyphData> sharedNull;
+  static Static<GlyphData> _dnull;
 
   // --------------------------------------------------------------------------
   // [Members]

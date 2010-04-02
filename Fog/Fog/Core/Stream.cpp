@@ -938,17 +938,17 @@ void MMapStreamDevice::close()
 // [Fog::Stream]
 // ============================================================================
 
-StreamDevice* Stream::sharedNull;
+StreamDevice* Stream::_dnull;
 
 Stream::Stream() :
-  _d(sharedNull->ref())
+  _d(_dnull->ref())
 {
 }
 
 Stream::Stream(const Stream& other) :
   _d(other._d->ref())
 {
-  if (!_d) _d = sharedNull->ref();
+  if (!_d) _d = _dnull->ref();
 }
 
 Stream::Stream(StreamDevice* d) :
@@ -963,7 +963,7 @@ Stream::~Stream()
 
 void Stream::setSeekable(bool seekable)
 {
-  if (_d == sharedNull) return;
+  if (_d == _dnull) return;
 
   if (seekable)
     _d->flags |= STREAM_IS_SEEKABLE;
@@ -1222,7 +1222,7 @@ err_t Stream::truncate(int64_t offset)
 
 void Stream::close()
 {
-  atomicPtrXchg(&_d, sharedNull->ref())->deref();
+  atomicPtrXchg(&_d, _dnull->ref())->deref();
 }
 
 ByteArray Stream::getBuffer() const
@@ -1247,7 +1247,7 @@ FOG_INIT_DECLARE err_t fog_stream_init(void)
   using namespace Fog;
 
   streamdevice_null.init();
-  Stream::sharedNull = streamdevice_null.instancep();
+  Stream::_dnull = streamdevice_null.instancep();
 
   return ERR_OK;
 }

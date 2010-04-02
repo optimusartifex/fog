@@ -67,11 +67,11 @@ struct FOG_API Locale
   };
 
 
-  static Static<Data> sharedNull;
+  static Static<Data> _dnull;
   static Static<Data> sharedPosix;
   static Static<Data> sharedUser;
 
-  static Locale* sharedNullLocale;
+  static Locale* _dnullLocale;
   static Locale* sharedPosixLocale;
   static Locale* sharedUserLocale;
 
@@ -98,7 +98,7 @@ struct FOG_API Locale
   
   // [Flags]
 
-  FOG_INLINE bool isNull() const { return _d == sharedNull.instancep(); }
+  FOG_INLINE bool isNull() const { return _d == _dnull.instancep(); }
 
   // [Set]
 
@@ -127,7 +127,7 @@ struct FOG_API Locale
 
   // [Statics]
 
-  static FOG_INLINE const Locale& null() { return *sharedNullLocale; }
+  static FOG_INLINE const Locale& null() { return *_dnullLocale; }
   static FOG_INLINE const Locale& posix() { return *sharedPosixLocale; }
   static FOG_INLINE const Locale& user() { return *sharedUserLocale; }
 

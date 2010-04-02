@@ -147,7 +147,7 @@ struct FOG_API ListPrivate_
   static ListData* d_alloc(sysuint_t typeSize, sysuint_t capacity);
   static sysuint_t d_getSize(sysuint_t typeSize, sysuint_t capacity);
 
-  static Static<ListData> sharedNull;
+  static Static<ListData> _dnull;
 };
 
 // 0 = PrimitiveType
@@ -284,7 +284,7 @@ struct List
 
   // [Construction / Destruction]
 
-  FOG_INLINE List() : _d(ListPrivate_::sharedNull->ref()) {}
+  FOG_INLINE List() : _d(ListPrivate_::_dnull->ref()) {}
   FOG_INLINE List(const List& other) : _d(other._d->ref()) {}
 
   explicit FOG_INLINE List(ListData* d) : _d(d) {}
@@ -304,7 +304,7 @@ struct List
   // [Flags]
 
   //! @copydoc Doxygen::Implicit::isNull().
-  FOG_INLINE bool isNull() const { return _d == ListPrivate_::sharedNull.instancep(); }
+  FOG_INLINE bool isNull() const { return _d == ListPrivate_::_dnull.instancep(); }
 
   // [Container]
 

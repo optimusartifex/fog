@@ -20,10 +20,10 @@ namespace Fog {
 // [Fog::ConvolutionMatrixI]
 // ============================================================================
 
-Static<ConvolutionMatrixI::Data> ConvolutionMatrixI::sharedNull;
+Static<ConvolutionMatrixI::Data> ConvolutionMatrixI::_dnull;
 
 ConvolutionMatrixI::ConvolutionMatrixI() :
-  _d(sharedNull->ref())
+  _d(_dnull->ref())
 {
 }
 
@@ -44,7 +44,7 @@ ConvolutionMatrixI ConvolutionMatrixI::fromData(int w, int h, const ValueType* d
   if (w > 0 && h > 0 && (d = Data::alloc(w, h)))
     Memory::copy(d->m, data, (sysuint_t)w * (sysuint_t)h * (sysuint_t)sizeof(ValueType));
   else
-    d = sharedNull->ref();
+    d = _dnull->ref();
 
   return ConvolutionMatrixI(d);
 }
@@ -197,7 +197,7 @@ ConvolutionMatrixI::ValueType* ConvolutionMatrixI::operator[](int y)
 
 ConvolutionMatrixI::Data* ConvolutionMatrixI::Data::alloc(int w, int h)
 {
-  if (w == 0 || h == 0) return sharedNull->ref();
+  if (w == 0 || h == 0) return _dnull->ref();
 
   Data* d = (Data*)Memory::alloc(sizeof(Data) + (w * h) * sizeof(ValueType));
   if (!d) return NULL;
@@ -232,7 +232,7 @@ FOG_INIT_DECLARE err_t fog_convolutionmatrix_init(void)
 {
   using namespace Fog;
 
-  ConvolutionMatrixI::sharedNull.init();
+  ConvolutionMatrixI::_dnull.init();
   return ERR_OK;
 }
 
@@ -240,5 +240,5 @@ FOG_INIT_DECLARE void fog_convolutionmatrix_shutdown(void)
 {
   using namespace Fog;
 
-  ConvolutionMatrixI::sharedNull.destroy();
+  ConvolutionMatrixI::_dnull.destroy();
 }

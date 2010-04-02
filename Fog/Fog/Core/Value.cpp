@@ -348,12 +348,12 @@ err_t StringValueData::setValue(void* val)
 // [Fog::Value]
 // ============================================================================
 
-static Static<NullValueData> sharedNullData;
-ValueData* Value::sharedNull;
+static Static<NullValueData> _dnullData;
+ValueData* Value::_dnull;
 
 Value::Value()
 {
-  _d = sharedNull;
+  _d = _dnull;
   _d->refCount.inc();
 }
 
@@ -443,8 +443,8 @@ err_t Value::detach()
 
 err_t Value::reset()
 {
-  sharedNull->refCount.inc();
-  atomicPtrXchg(&_d, sharedNull)->deref();
+  _dnull->refCount.inc();
+  atomicPtrXchg(&_d, _dnull)->deref();
   return ERR_OK;
 }
 
@@ -538,8 +538,8 @@ FOG_INIT_DECLARE err_t fog_value_init(void)
 {
   using namespace Fog;
 
-  sharedNullData.init();
-  Value::sharedNull = sharedNullData.instancep();
+  _dnullData.init();
+  Value::_dnull = _dnullData.instancep();
 
   return ERR_OK;
 }
@@ -548,5 +548,5 @@ FOG_INIT_DECLARE void fog_value_shutdown(void)
 {
   using namespace Fog;
 
-  sharedNullData.destroy();
+  _dnullData.destroy();
 }

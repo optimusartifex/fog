@@ -358,7 +358,7 @@ static void _xorBits(uint8_t* dst, sysuint_t dstBitOffset, sysuint_t _count)
 //                       (0->32, 1->32, 32->32, 33->64, etc...)
 
 BitArray::BitArray()
-  : _d(sharedNull->ref())
+  : _d(_dnull->ref())
 {
 }
 
@@ -389,7 +389,7 @@ err_t BitArray::_detach()
 
 void BitArray::free()
 {
-  atomicPtrXchg(&_d, sharedNull->ref())->deref();
+  atomicPtrXchg(&_d, _dnull->ref())->deref();
 }
 
 err_t BitArray::reserve(sysuint_t to)
@@ -491,7 +491,7 @@ void BitArray::clear()
   Data* d = _d;
 
   if (d->refCount.get() > 1)
-    atomicPtrXchg(&_d, sharedNull->ref())->deref();
+    atomicPtrXchg(&_d, _dnull->ref())->deref();
   else
     d->length = 0;
 }
@@ -936,7 +936,7 @@ BitArray::Data* BitArray::Data::copy(const Data* other)
   return d;
 }
 
-Static<BitArray::Data> BitArray::sharedNull;
+Static<BitArray::Data> BitArray::_dnull;
 
 } // Fog namespace
 
@@ -948,9 +948,9 @@ FOG_INIT_DECLARE err_t fog_bitarray_init(void)
 {
   using namespace Fog;
 
-  BitArray::sharedNull.init();
+  BitArray::_dnull.init();
 
-  BitArray::Data* d = BitArray::sharedNull.instancep();
+  BitArray::Data* d = BitArray::_dnull.instancep();
   d->refCount.init(1);
   d->capacity = 0;
   d->length = 0;
@@ -963,6 +963,6 @@ FOG_INIT_DECLARE void fog_bitarray_shutdown(void)
 {
   using namespace Fog;
 
-  BitArray::sharedNull.instancep()->refCount.dec();
-  BitArray::sharedNull.destroy();
+  BitArray::_dnull.instancep()->refCount.dec();
+  BitArray::_dnull.destroy();
 }

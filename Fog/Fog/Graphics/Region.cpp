@@ -79,7 +79,7 @@ namespace Fog {
 #define REGION_STACK_SIZE 64
 
 // ============================================================================
-// [Fog::Region - Statics]
+// [Fog::Region - Helpers]
 // ============================================================================
 
 static FOG_INLINE void _copyRects(IntBox* dest, const IntBox* src, sysuint_t length)
@@ -104,7 +104,164 @@ static void _copyRectsExtents(IntBox* dest, const IntBox* src, sysuint_t length,
   extents->set(extentsX1, extentsY1, extentsX2, extentsY2);
 }
 
-// -----------------------------------------------------------------------
+// ============================================================================
+// [Fog::RegionData]
+// ============================================================================
+
+RegionData* RegionData::ref() const
+{
+  if (flags & IsSharable)
+  {
+    refCount.inc();
+    return const_cast<RegionData*>(this);
+  }
+  else
+  {
+    return RegionData::copy(this);
+  }
+}
+
+void RegionData::deref()
+{
+  if (refCount.deref() && (flags & IsDynamic) != 0) Memory::free(this);
+}
+
+static RegionData* _reallocRegion(RegionData* d, sysuint_t capacity)
+{
+  if ((d->flags & RegionData::IsDynamic) != 0)
+  {
+    d = (RegionData*)Memory::realloc(d, RegionData::sizeFor(capacity));
+    if (!d) return NULL;
+
+    d->capacity = capacity;
+    return d;
+  }
+  else
+  {
+    return RegionData::create(capacity, &d->extents, d->rects, d->length);
+  }
+}
+
+RegionData* RegionData::adopt(void* address, sysuint_t capacity)
+{
+  RegionData* d = (RegionData*)address;
+  
+  d->refCount.init(1);
+  d->flags = IsStrong;
+  d->capacity = capacity;
+  d->length = 0;
+  d->extents.clear();
+
+  return d;
+}
+
+RegionData* RegionData::adopt(void* address, sysuint_t capacity, const IntBox& r)
+{
+  if (!r.isValid() || capacity == 0) return adopt(address, capacity);
+
+  RegionData* d = (RegionData*)address;
+  
+  d->refCount.init(1);
+  d->flags = IsStrong;
+  d->capacity = capacity;
+  if (r.isValid())
+  {
+    d->length = 1;
+    d->extents = r;
+    d->rects[0] = r;
+  }
+  else
+  {
+    d->length = 0;
+    d->extents.clear();
+    d->rects[0].clear();
+  }
+
+  return d;
+}
+
+RegionData* RegionData::adopt(void* address, sysuint_t capacity, const IntBox* extents, const IntBox* rects, sysuint_t length)
+{
+  if (capacity < length) create(length, extents, rects, length);
+
+  RegionData* d = (RegionData*)address;
+  
+  d->refCount.init(1);
+  d->flags = IsStrong;
+  d->capacity = capacity;
+  d->length = length;
+  
+  if (extents)
+  {
+    d->extents = *extents;
+    _copyRects(d->rects, rects, length);
+  }
+  else
+  {
+    _copyRectsExtents(d->rects, rects, length, &d->extents);
+  }
+
+  return d;
+}
+
+RegionData* RegionData::create(sysuint_t capacity)
+{
+  if (FOG_UNLIKELY(capacity == 0)) return Region::_dnull.instancep()->refAlways();
+
+  sysuint_t dsize = sizeFor(capacity);
+  RegionData* d = (RegionData*)Memory::alloc(dsize);
+  if (!d) return NULL;
+
+  d->refCount.init(1);
+  d->flags = IsDynamic | IsSharable;
+  d->capacity = capacity;
+  d->length = 0;
+
+  return d;
+}
+
+RegionData* RegionData::create(sysuint_t capacity, const IntBox* extents, const IntBox* rects, sysuint_t length)
+{
+  if (FOG_UNLIKELY(capacity < length)) capacity = length;
+
+  RegionData* d = create(capacity);
+  if (!d) return NULL;
+
+  if (FOG_LIKELY(length))
+  {
+    d->length = length;
+    if (extents)
+    {
+      d->extents = *extents;
+      _copyRects(d->rects, rects, length);
+    }
+    else
+    {
+      _copyRectsExtents(d->rects, rects, length, &d->extents);
+    }
+  }
+
+  return d;
+}
+
+RegionData* RegionData::copy(const RegionData* other)
+{
+  if (!other->length) return Region::_dnull.instancep()->refAlways();
+
+  RegionData* d = create(other->length);
+  if (!d) return NULL;
+
+  d->length = other->length;
+  d->extents = other->extents;
+  _copyRects(d->rects, other->rects, other->length);
+
+  return d;
+}
+
+// ============================================================================
+// [Fog::Region - Statics]
+// ============================================================================
+
 // Utility procedure _compress:
 //
 // Replace r by the region r', where
@@ -123,46 +280,26 @@ static void _copyRectsExtents(IntBox* dest, const IntBox* src, sysuint_t length,
 // value of dx.  dx = dxo & ~(shift-1).  As parameters, s and t are
 // scratch regions, so that we don't have to allocate them on every
 // call.
-// -----------------------------------------------------------------------
 static err_t _compress(Region& r, Region& s, Region& t, uint dx, bool xdir, bool grow)
 {
-  err_t err;
   uint shift = 1;
 
-  if ((err = s.setDeep(r))) return err;
+  FOG_RETURN_ON_ERROR(s.setDeep(r));
 
   while (dx)
   {
     if (dx & shift)
     {
-      if (xdir)
-        err = Region::translate(r, r, IntPoint(-(int)shift, 0));
-      else
-        err = Region::translate(r, r, IntPoint(0, -(int)shift));
-      if (err) return err;
-
-      if (grow)
-        err = r.unite(s);
-      else
-        err = r.intersect(s);
-      if (err) return err;
+      FOG_RETURN_ON_ERROR(r.translate(xdir ? IntPoint(-(int)shift, 0) : IntPoint(0, -(int)shift)));
+      FOG_RETURN_ON_ERROR(r.combine(s, grow ? REGION_OP_UNION : REGION_OP_INTERSECT));
 
       dx -= shift;
       if (!dx) break;
     }
 
-    if ((err = t.setDeep(s))) return err;
-    if (xdir)
-      err = Region::translate(s, s, IntPoint(-(int)shift, 0));
-    else 
-      err = Region::translate(s, s, IntPoint(0, -(int)shift));
-    if (err) return err;
-
-    if (grow)
-      err = s.unite(t); 
-    else
-      err = s.intersect(t);
-    if (err) return err;
+    FOG_RETURN_ON_ERROR(t.setDeep(s));
+    FOG_RETURN_ON_ERROR(s.translate(xdir ? IntPoint(-(int)shift, 0) : IntPoint(0, -(int)shift)));
+    FOG_RETURN_ON_ERROR(s.combine(t, grow ? REGION_OP_UNION : REGION_OP_INTERSECT));
 
     shift <<= 1;
   }
@@ -170,8 +307,7 @@ static err_t _compress(Region& r, Region& s, Region& t, uint dx, bool xdir, bool
   return ERR_OK;
 }
 
-// -----------------------------------------------------------------------
-// coalesce
+// Coalesce:
 //   Attempt to merge the boxes in the current band with those in the
 //   previous one. Used only by miRegionOp.
 //
@@ -183,8 +319,6 @@ static err_t _compress(Region& r, Region& s, Region& t, uint dx, bool xdir, bool
 //   - rectangles in the previous band will have their y2 fields
 //     altered.
 //   - Count may be decreased.
-// -----------------------------------------------------------------------
-
 static IntBox* _coalesceHelper(IntBox* dest_ptr, IntBox** prev_start_, IntBox** cur_start_)
 {
   IntBox* prev_start = *prev_start_;
@@ -1051,13 +1185,17 @@ __end:
 }
 
 // ============================================================================
-// [Fog::Region]
+// [Fog::Region - Construction / Destruction]
 // ============================================================================
 
-Static<RegionData> Region::sharedNull;
+Static<RegionData> Region::_dnull;
+Static<RegionData> Region::_dinfinite;
+
+Region Region::_empty(DONT_INITIALIZE);
+Region Region::_infinite(DONT_INITIALIZE);
 
 Region::Region() :
-  _d(sharedNull.instancep()->refAlways())
+  _d(_dnull.instancep()->refAlways())
 {
 }
 
@@ -1082,6 +1220,10 @@ Region::~Region()
   _d->derefInline();
 }
 
+// ============================================================================
+// [Fog::Region - Implicit Sharing]
+// ============================================================================
+
 err_t Region::_detach()
 {
   RegionData* d = _d;
@@ -1095,7 +1237,9 @@ err_t Region::_detach()
     }
     else
     {
-      d = RegionData::create(d->length);
+      if (d == _dinfinite.instancep()) return ERR_REGION_INFINITE;
+
+      d = RegionData::create(d->capacity);
       if (!d) return ERR_RT_OUT_OF_MEMORY;
       d->extents.clear();
     }
@@ -1107,13 +1251,29 @@ err_t Region::_detach()
 
 void Region::free()
 {
-  atomicPtrXchg(&_d, sharedNull.instancep()->refAlways())->derefInline();
+  atomicPtrXchg(&_d, _dnull.instancep()->refAlways())->derefInline();
+}
+
+// ============================================================================
+// [Fog::Region - Flags]
+// ============================================================================
+
+uint32_t Region::getType() const
+{
+  uint32_t len = _d->length;
+
+  // If t < 2 then it can be 0 or 1, which means REGION_TYPE_EMPTY or 
+  // REGION_TYPE_SIMPLE, respectively.
+  return isInfinite()
+    ? REGION_TYPE_INFINITE
+    : len < 2 ? len : REGION_TYPE_COMPLEX;
 }
 
 err_t Region::setSharable(bool val)
 {
-  if (isSharable() == val) return ERR_OK;
+  if (isInfinite()) return ERR_RT_INVALID_CONTEXT;
 
+  if (isSharable() == val) return ERR_OK;
   FOG_RETURN_ON_ERROR(detach());
 
   if (val)
@@ -1125,8 +1285,9 @@ err_t Region::setSharable(bool val)
 
 err_t Region::setStrong(bool val)
 {
-  if (isStrong() == val) return ERR_OK;
+  if (isInfinite()) return ERR_RT_INVALID_CONTEXT;
 
+  if (isStrong() == val) return ERR_OK;
   FOG_RETURN_ON_ERROR(detach());
 
   if (val)
@@ -1136,50 +1297,56 @@ err_t Region::setStrong(bool val)
   return ERR_OK;
 }
 
-err_t Region::reserve(sysuint_t to)
+// ============================================================================
+// [Fog::Region - Container]
+// ============================================================================
+
+err_t Region::reserve(sysuint_t n)
 {
+  if (isInfinite()) return ERR_RT_INVALID_CONTEXT;
+
   RegionData* d = _d;
 
   if (d->refCount.get() > 1)
   {
 __create:
-    RegionData* newd = RegionData::create(to, &d->extents, d->rects, d->length);
+    RegionData* newd = RegionData::create(n, &d->extents, d->rects, d->length);
     if (!newd) return ERR_RT_OUT_OF_MEMORY;
     atomicPtrXchg(&_d, newd)->derefInline();
   }
-  else if (d->capacity < to)
+  else if (d->capacity < n)
   {
     if (!(d->flags & RegionData::IsDynamic)) goto __create;
 
-    RegionData* newd = (RegionData *)Memory::realloc(d, RegionData::sizeFor(to));
+    RegionData* newd = (RegionData *)Memory::realloc(d, RegionData::sizeFor(n));
     if (!newd) return ERR_RT_OUT_OF_MEMORY;
-    newd->capacity = to;
+    newd->capacity = n;
     _d = newd;
   }
 
   return ERR_OK;
 }
 
-err_t Region::prepare(sysuint_t to)
+err_t Region::prepare(sysuint_t n)
 {
   RegionData* d = _d;
 
   if (d->refCount.get() > 1)
   {
 __create:
-    RegionData* newd = RegionData::create(to);
+    RegionData* newd = RegionData::create(n);
     if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
     atomicPtrXchg(&_d, newd)->derefInline();
   }
-  else if (d->capacity < to)
+  else if (d->capacity < n)
   {
     if (!(d->flags & RegionData::IsDynamic)) goto __create;
 
-    RegionData* newd = (RegionData *)Memory::realloc(d, RegionData::sizeFor(to));
+    RegionData* newd = (RegionData *)Memory::realloc(d, RegionData::sizeFor(n));
     if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
-    newd->capacity = to;
+    newd->capacity = n;
     newd->length = 0;
     _d = newd;
   }
@@ -1221,26 +1388,25 @@ void Region::squeeze()
   }
 }
 
-uint32_t Region::getType() const
-{
-  uint32_t t = _d->length;
-  return t < 2 ? t : 2;
-}
+// ============================================================================
+// [Fog::Region - HitTest]
+// ============================================================================
 
-int Region::hitTest(const IntPoint& pt) const
+uint32_t Region::hitTest(const IntPoint& pt) const
 {
+  if (isInfinite()) return REGION_HITTEST_IN;
+
   RegionData* d = _d;
 
   sysuint_t i;
   sysuint_t length = d->length;
-
   if (!length) return REGION_HITTEST_OUT;
 
-  // Check if point position is in extents, if not -> Out
+  // Check if point position is in extents, if not -> Out.
   if (!(d->extents.contains(pt))) return REGION_HITTEST_OUT;
   if (length == 1) return REGION_HITTEST_IN;
 
-  // Binary search for matching position
+  // Binary search for matching position.
   const IntBox* base = d->rects;
   const IntBox* r;
 
@@ -1258,36 +1424,38 @@ int Region::hitTest(const IntPoint& pt) const
       {
         if (x < r->x2)
         {
-          // Match
+          // Match.
           return REGION_HITTEST_IN;
         }
         else
         {
-          // Move right
+          // Move right.
           base = r + 1;
           i--;
         }
       }
-      // else: Move left
+      // else: Move left.
     }
     else if (r->y2 <= y)
     {
-      // Move right
+      // Move right.
       base = r + 1;
       i--;
     }
-    // else: Move left
+    // else: Move left.
   }
   return REGION_HITTEST_OUT;
 }
 
-int Region::hitTest(const IntRect& r) const
+uint32_t Region::hitTest(const IntRect& r) const
 {
   return hitTest(IntBox(r));
 }
 
-int Region::hitTest(const IntBox& r) const
+uint32_t Region::hitTest(const IntBox& r) const
 {
+  if (isInfinite()) return REGION_HITTEST_IN;
+
   RegionData* d = _d;
   sysuint_t length = d->length;
 
@@ -1359,14 +1527,24 @@ int Region::hitTest(const IntBox& r) const
     : REGION_HITTEST_OUT;
 }
 
+// ============================================================================
+// [Fog::Region - Clear]
+// ============================================================================
+
 void Region::clear()
 {
+  if (isInfinite())
+  {
+    atomicPtrXchg(&_d, _dnull->refAlways())->derefInline();
+    return;
+  }
+
   RegionData* d = _d;
   if (d->length == 0) return;
 
   if (d->refCount.get() > 0)
   {
-    atomicPtrXchg(&_d, sharedNull.instancep()->refAlways())->derefInline();
+    atomicPtrXchg(&_d, _dnull.instancep()->refAlways())->derefInline();
   }
   else
   {
@@ -1375,16 +1553,19 @@ void Region::clear()
   }
 }
 
+// ============================================================================
+// [Fog::Region - Operations]
+// ============================================================================
+
 err_t Region::set(const Region& r)
 {
   RegionData* td = _d;
   RegionData* rd = r._d;
   if (td == rd) return ERR_OK;
 
-  if ((td->flags & RegionData::IsStrong) || !(rd->flags & RegionData::IsSharable))
+  if (!r.isInfinite() && ((td->flags & RegionData::IsStrong) || !(rd->flags & RegionData::IsSharable)))
   {
-    err_t err = prepare(rd->length);
-    if (err) return err;
+    FOG_RETURN_ON_ERROR(prepare(rd->length));
 
     td = _d;
     td->length = rd->length;
@@ -1403,15 +1584,12 @@ err_t Region::set(const IntRect& r)
 {
   if (!r.isValid()) { clear(); return ERR_OK; }
 
-  err_t err = prepare(1);
-  if (err) return err;
+  FOG_RETURN_ON_ERROR(prepare(1));
 
-  IntBox b(r);
-  RegionData* newd = _d;
-
-  newd->length = 1;
-  newd->extents = b;
-  newd->rects[0] = b;
+  RegionData* d = _d;
+  d->length = 1;
+  d->extents = IntBox(r);
+  d->rects[0] = d->extents;
 
   return ERR_OK;
 }
@@ -1420,7 +1598,8 @@ err_t Region::set(const IntBox& r)
 {
   if (!r.isValid()) { clear(); return ERR_OK; }
 
-  prepare(1);
+  FOG_RETURN_ON_ERROR(prepare(1));
+
   RegionData* d = _d;
   d->length = 1;
   d->extents = r;
@@ -1431,12 +1610,17 @@ err_t Region::set(const IntBox& r)
 
 err_t Region::setDeep(const Region& r)
 {
+  if (r.isInfinite())
+  {
+    atomicPtrXchg(&_d, r._d->refAlways())->derefInline();
+    return ERR_OK;
+  }
+
   RegionData* td = _d;
   RegionData* rd = r._d;
   if (td == rd) return ERR_OK;
 
-  err_t err = prepare(rd->length);
-  if (err) return err;
+  FOG_RETURN_ON_ERROR(prepare(rd->length));
 
   td = _d;
   td->length = rd->length;
@@ -1449,212 +1633,208 @@ err_t Region::setDeep(const Region& r)
 err_t Region::set(const IntRect* rects, sysuint_t length)
 {
   // TODO: Not optimal.
-  clear();
-  for (sysuint_t i = 0; i < length; i++) unite(rects[i]);
+  FOG_RETURN_ON_ERROR(prepare(length));
+
+  for (sysuint_t i = 0; i < length; i++) combine(rects[i], REGION_OP_UNION);
   return ERR_OK;
 }
 
 err_t Region::set(const IntBox* rects, sysuint_t length)
 {
   // TODO: Not optimal.
-  clear();
-  for (sysuint_t i = 0; i < length; i++) unite(rects[i]);
+  FOG_RETURN_ON_ERROR(prepare(length));
+
+  for (sysuint_t i = 0; i < length; i++) combine(rects[i], REGION_OP_UNION);
   return ERR_OK;
 }
 
-err_t Region::unite(const Region& r)
+err_t Region::combine(const Region& r, uint32_t combineOp)
 {
-  RegionData* td = _d;
-  RegionData* rd = r._d;
-
-  // Union region is same or r is empty... -> nop
-  if (td == rd || rd->length == 0) return ERR_OK;
-
-  // We are empty or r completely subsumes us -> set r
-  if (td->length == 0 || (rd->length == 1 && rd->extents.subsumes(td->extents))) return set(r);
-
-  // We completely subsumes r
-  if (td->length == 1 && rd->length == 1 && td->extents.subsumes(rd->extents)) return ERR_OK;
-
-  // Last optimization can be append
-  const IntBox* sdlast = td->rects + td->length - 1;
-  const IntBox* rdfirst = rd->rects;
-
-  IntBox ext(Math::min(td->extents.x1, rd->extents.x1),
-          Math::min(td->extents.y1, rd->extents.y1),
-          Math::max(td->extents.x2, rd->extents.x2),
-          Math::max(td->extents.y2, rd->extents.y2));
-
-  err_t err;
-  if (sdlast->y2 <= rdfirst->y1 ||
-     (sdlast->y1 == rdfirst->y1 &&
-      sdlast->y2 == rdfirst->y2 &&
-      sdlast->x2 <= rdfirst->x1 ))
-  {
-    err = _appendPrivate(this, rd->rects, rd->length, &ext);
-  }
-  else
-  {
-    err = _unitePrivate(this, td->rects, td->length, rd->rects, rd->length, true, &ext);
-  }
-
-  return err;
-}
-
-err_t Region::unite(const IntRect& r)
-{
-  return unite(IntBox(r));
-}
-
-err_t Region::unite(const IntBox& r)
-{
-  RegionData* td = _d;
-
-  if (!r.isValid()) return ERR_OK;
-
-  // We are empty or 'r' completely subsumes us.
-  if (td->length == 0 || r.subsumes(td->extents)) return set(r);
-
-  // We completely subsumes src.
-  if (td->length == 1 && td->extents.subsumes(r)) return ERR_OK;
-
-  IntBox ext(Math::min(td->extents.x1, r.x1),
-          Math::min(td->extents.y1, r.y1),
-          Math::max(td->extents.x2, r.x2),
-          Math::max(td->extents.y2, r.y2));
-
-  // Last optimization can be append.
-  IntBox* sdlast = td->rects + td->length-1;
   err_t err;
 
-  if ( sdlast->y2 <= r.y1 ||
-      (sdlast->y1 == r.y1 &&
-       sdlast->y2 == r.y2 &&
-       sdlast->x2 <= r.x1 ))
-  {
-    err = _appendPrivate(this, &r, 1, &ext);
-  }
-  else
-  {
-    err = _unitePrivate(this, td->rects, td->length, &r, 1, true, &ext);
-  }
-
-  return err;
-}
-
-err_t Region::intersect(const Region& r)
-{
   RegionData* td = _d;
   RegionData* rd = r._d;
-  err_t err = ERR_OK;
 
-  if (td == rd)
-    ;
-  else if (td->length == 0 || rd->length == 0 || !td->extents.overlaps(rd->extents)) 
-    clear();
-  else
-    err = _intersectPrivate(this, td->rects, td->length, rd->rects, rd->length, true);
-
-  return err;
-}
-
-err_t Region::intersect(const IntRect& r)
-{
-  return intersect(IntBox(r));
-}
-
-err_t Region::intersect(const IntBox& r)
-{
-  RegionData* td = _d;
-  err_t err = ERR_OK;
-
-  if (td->length == 0 || !r.isValid() || !td->extents.overlaps(r)) 
-    clear();
-  else
-    err = _intersectPrivate(this, td->rects, td->length, &r, 1, true);
-
-  return err;
-}
-
-err_t Region::eor(const Region& r)
-{
-  return eor(*this, *this, r);
-}
-
-err_t Region::eor(const IntRect& r)
-{
-  TemporaryRegion<1> reg(r);
-  return eor(reg);
-}
-
-err_t Region::eor(const IntBox& r)
-{
-  TemporaryRegion<1> reg(r);
-  return eor(reg);
-}
-
-err_t Region::subtract(const Region& r)
-{
-  RegionData* td = _d;
-  RegionData* rd = r._d;
-  err_t err = ERR_OK;
-
-  if (td == rd) 
-    clear();
-  else if (td->length == 0 || rd->length == 0 || !td->extents.overlaps(rd->extents)) 
-    ;
-  else
-    err = _subtractPrivate(this, td->rects, td->length, rd->rects, rd->length, true);
-
-  return err;
-}
-
-err_t Region::subtract(const IntRect& r)
-{
-  return subtract(IntBox(r));
-}
-
-err_t Region::subtract(const IntBox& r)
-{
-  RegionData* td = _d;
-
-  if (td->length == 0 || !r.isValid() || !td->extents.overlaps(r)) return ERR_OK;
-  return _subtractPrivate(this, td->rects, td->length, &r, 1, true);
-}
-
-err_t Region::op(const Region& r, int _op)
-{
-  switch (_op)
+  switch (combineOp)
   {
-    case REGION_OP_COPY     : return set(r);
-    case REGION_OP_UNITE    : return unite(r);
-    case REGION_OP_INTERSECT: return intersect(r);
-    case REGION_OP_XOR      : return eor(r);
-    case REGION_OP_SUBTRACT : return subtract(r);
+    case REGION_OP_COPY:
+      return set(r);
+
+    case REGION_OP_UNION:
+    {
+      // If destination or source region is infinite then result is infinite.
+      if (td == _dinfinite.instancep())
+        return ERR_OK;
+      else if (rd == _dinfinite.instancep())
+        return set(infinite());
+
+      // Union region is same or r is empty... -> nop.
+      if (td == rd || rd->length == 0) return ERR_OK;
+
+      // We are empty or r completely subsumes us -> set r.
+      if (td->length == 0 || (rd->length == 1 && rd->extents.subsumes(td->extents))) return set(r);
+
+      // We completely subsumes r.
+      if (td->length == 1 && rd->length == 1 && td->extents.subsumes(rd->extents)) return ERR_OK;
+
+      // Last optimization can be append.
+      const IntBox* tdLast = td->rects + td->length - 1;
+      const IntBox* rdFirst = rd->rects;
+
+      IntBox ext(Math::min(td->extents.x1, rd->extents.x1),
+                 Math::min(td->extents.y1, rd->extents.y1),
+                 Math::max(td->extents.x2, rd->extents.x2),
+                 Math::max(td->extents.y2, rd->extents.y2));
+
+      if (tdLast->y2 <= rdFirst->y1 ||
+         (tdLast->y1 == rdFirst->y1 &&
+          tdLast->y2 == rdFirst->y2 &&
+          tdLast->x2 <= rdFirst->x1 ))
+      {
+        err = _appendPrivate(this, rd->rects, rd->length, &ext);
+      }
+      else
+      {
+        err = _unitePrivate(this, td->rects, td->length, rd->rects, rd->length, true, &ext);
+      }
+
+      return err;
+    }
+
+    case REGION_OP_INTERSECT:
+    {
+      // If destination is infinite then source is result.
+      // If source is infinite then destination is result.
+      if (td == _dinfinite.instancep())
+        return set(r);
+      else if (rd == _dinfinite.instancep())
+        return ERR_OK;
+
+      if (td == rd)
+        ;
+      else if (td->length == 0 || rd->length == 0 || !td->extents.overlaps(rd->extents))
+        clear();
+      else
+        return _intersectPrivate(this, td->rects, td->length, rd->rects, rd->length, true);
+
+      return ERR_OK;
+    }
+
+    case REGION_OP_XOR:
+    {
+      return combine(*this, *this, r, combineOp);
+    }
+
+    case REGION_OP_SUBTRACT:
+    {
+      // Infinite regions are forbidden for SUBTRACT.
+      if (td == _dinfinite.instancep() || rd == _dinfinite.instancep())
+      {
+        clear();
+        return ERR_REGION_INFINITE;
+      }
+
+      if (td == rd) 
+        clear();
+      else if (td->length == 0 || rd->length == 0 || !td->extents.overlaps(rd->extents)) 
+        ;
+      else
+        return _subtractPrivate(this, td->rects, td->length, rd->rects, rd->length, true);
+
+      return ERR_OK;
+    }
 
     default:
-      FOG_ASSERT_NOT_REACHED();
       return ERR_RT_INVALID_ARGUMENT;
   }
 }
 
-err_t Region::op(const IntRect& r, int _op)
+err_t Region::combine(const IntRect& r, uint32_t combineOp)
 {
-  return op(IntBox(r), _op);
+  return combine(IntBox(r), combineOp);
 }
 
-err_t Region::op(const IntBox& r, int _op)
+err_t Region::combine(const IntBox& r, uint32_t combineOp)
 {
-  switch (_op)
+  RegionData* td = _d;
+  err_t err;
+
+  switch (combineOp)
   {
-    case REGION_OP_COPY     : return set(r);
-    case REGION_OP_UNITE    : return unite(r);
-    case REGION_OP_INTERSECT: return intersect(r);
-    case REGION_OP_XOR      : return eor(r);
-    case REGION_OP_SUBTRACT : return subtract(r);
+    case REGION_OP_COPY:
+    {
+      return set(r);
+    }
+
+    case REGION_OP_UNION:
+    {
+      if (td == _dinfinite.instancep()) return ERR_OK;
+      if (!r.isValid()) return ERR_OK;
+
+      // We are empty or 'r' completely subsumes us.
+      if (td->length == 0 || r.subsumes(td->extents)) return set(r);
+
+      // We completely subsumes src.
+      if (td->length == 1 && td->extents.subsumes(r)) return ERR_OK;
+
+      IntBox ext(Math::min(td->extents.x1, r.x1),
+                 Math::min(td->extents.y1, r.y1),
+                 Math::max(td->extents.x2, r.x2),
+                 Math::max(td->extents.y2, r.y2));
+
+      // Last optimization can be append.
+      IntBox* tdLast = td->rects + td->length-1;
+
+      if (tdLast->y2 <= r.y1 ||
+         (tdLast->y1 == r.y1 &&
+          tdLast->y2 == r.y2 &&
+          tdLast->x2 <= r.x1 ))
+      {
+        err = _appendPrivate(this, &r, 1, &ext);
+      }
+      else
+      {
+        err = _unitePrivate(this, td->rects, td->length, &r, 1, true, &ext);
+      }
+
+      return err;
+    }
+
+    case REGION_OP_INTERSECT:
+    {
+      if (td == _dinfinite.instancep()) return set(r);
+
+      if (td->length == 0 || !r.isValid() || !td->extents.overlaps(r)) 
+      {
+        clear();
+        return ERR_OK;
+      }
+
+      return _intersectPrivate(this, td->rects, td->length, &r, 1, true);
+    }
+
+    case REGION_OP_XOR:
+    {
+      TemporaryRegion<1> rr(r);
+      return combine(*this, *this, rr, combineOp);
+    }
+
+    case REGION_OP_SUBTRACT:
+      // Infinite regions are forbidden for SUBTRACT.
+      if (td == _dinfinite.instancep())
+      {
+        clear();
+        return ERR_REGION_INFINITE;
+      }
+
+      if (td->length == 0 || !r.isValid() || !td->extents.overlaps(r))
+      {
+        return ERR_OK;
+      }
+
+      return _subtractPrivate(this, td->rects, td->length, &r, 1, true);
 
     default:
-      FOG_ASSERT_NOT_REACHED();
       return ERR_RT_INVALID_ARGUMENT;
   }
 }
@@ -1713,7 +1893,7 @@ static err_t Region_doPath(Region* self, Rasterizer* rasterizer, uint8_t thresho
           while (x != len && covers[0] >= threshold) { covers++; x++; }
 
           // Append.
-          self->unite(IntBox(span->x + startx, y, span->x + x, y + 1));
+          self->combine(IntBox(span->x + startx, y, span->x + x, y + 1), REGION_OP_UNION);
         } while (x != len);
 next:
         ;
@@ -1724,7 +1904,7 @@ next:
         if (span->covers[0] >= threshold)
         {
           // Append.
-          self->unite(IntBox(span->x, y, span->x + len, y + 1));
+          self->combine(IntBox(span->x, y, span->x + len, y + 1), REGION_OP_UNION);
         }
       }
     }
@@ -1776,6 +1956,7 @@ bool Region::eq(const Region& other) const
   RegionData* d2 = other._d;
 
   if (d1 == d2) return true;
+  if (d1 == _dinfinite.instancep() || d2 == _dinfinite.instancep()) return false;
   if (d1->length != d2->length) return false;
 
   sysuint_t i;
@@ -1789,117 +1970,205 @@ bool Region::eq(const Region& other) const
   return true;
 }
 
-err_t Region::set(Region& dest, const Region& src)
+// ============================================================================
+// [Fog::Region - Windows Specific]
+// ============================================================================
+
+#if defined(FOG_OS_WINDOWS)
+
+static FOG_INLINE void BoxToRECT(RECT* dest, const IntBox* src)
 {
-  return dest.set(src);
+  dest->left   = src->x1;
+  dest->top    = src->y1;
+  dest->right  = src->x2;
+  dest->bottom = src->y2;
 }
 
-err_t Region::unite(Region& dest, const Region& src1, const Region& src2)
+static FOG_INLINE void RECTToBox(IntBox* dest, const RECT* src)
 {
-  RegionData* destd = dest._d;
-  RegionData* src1d = src1._d;
-  RegionData* src2d = src2._d;
-
-  // Trivial operations
-  if (src1d->length == 0) { return dest.set(src2); }
-  if (src2d->length == 0) { return dest.set(src1); }
-  if (src1d == src2d    ) { return dest.set(src1); }
-
-  const IntBox* src1first = src1d->rects;
-  const IntBox* src2first = src2d->rects;
-  const IntBox* src1last = src1first + src1d->length - 1;
-  const IntBox* src2last = src2first + src2d->length - 1;
-
-  IntBox ext(Math::min(src1d->extents.x1, src2d->extents.x1),
-          Math::min(src1d->extents.y1, src2d->extents.y1),
-          Math::max(src1d->extents.x2, src2d->extents.x2),
-          Math::max(src1d->extents.y2, src2d->extents.y2));
-
-  err_t err;
-  if (src1last->y2 <= src2first->y1)
-  {
-    err = dest.setDeep(src1);
-    if (!err) err = _appendPrivate(&dest, src2first, src2d->length, &ext);
-  }
-  else if (src2last->y2 <= src1first->y1)
-  {
-    err = dest.setDeep(src2);
-    if (!err) err = _appendPrivate(&dest, src1first, src1d->length, &ext);
-  }
-  else
-  {
-    err = _unitePrivate(&dest, src1first, src1d->length, src2first, src2d->length, destd == src1d || destd == src2d, &ext);
-  }
-
-  return err;
+  dest->x1 = src->left;
+  dest->y1 = src->top;
+  dest->x2 = src->right;
+  dest->y2 = src->bottom;
 }
 
-err_t Region::intersect(Region& dest, const Region& src1, const Region& src2)
+HRGN Region::toHRGN() const
+{
+  RegionData* d = _d;
+  sysuint_t i;
+  sysuint_t length = d->length;
+
+  LocalBuffer<4096> mem;
+  RGNDATAHEADER *hdr = (RGNDATAHEADER *)mem.alloc(sizeof(RGNDATAHEADER) + length * sizeof(RECT));
+  if (!hdr) return (HRGN)NULLREGION;
+
+  hdr->dwSize = sizeof(RGNDATAHEADER);
+  hdr->iType = RDH_RECTANGLES;
+  hdr->nCount = length;
+  hdr->nRgnSize = length * sizeof(RECT);
+  BoxToRECT(&hdr->rcBound, &d->extents);
+
+  RECT* r = (RECT *)((uint8_t *)hdr + sizeof(RGNDATAHEADER));
+  for (i = 0; i < length; i++, r++)
+  {
+    BoxToRECT(r, &d->rects[i]);
+  }
+  return ExtCreateRegion(NULL, sizeof(RGNDATAHEADER) + (sizeof(RECT)*length), (RGNDATA *)hdr);
+}
+
+err_t Region::fromHRGN(HRGN hrgn)
+{
+  clear();
+
+  if (hrgn == NULL) return ERR_RT_INVALID_ARGUMENT;
+  if (hrgn == (HRGN)NULLREGION) return ERR_OK;
+
+  DWORD size = GetRegionData(hrgn, 0, NULL);
+  if (size == 0) return false;
+
+  LocalBuffer<1024> mem;
+  RGNDATAHEADER *hdr = (RGNDATAHEADER *)mem.alloc(size);
+  if (hdr) return ERR_RT_OUT_OF_MEMORY;
+
+  if (!GetRegionData(hrgn, size, (RGNDATA*)hdr)) return GetLastError();
+
+  sysuint_t i;
+  sysuint_t length = hdr->nCount;
+  RECT* r = (RECT*)((uint8_t*)hdr + sizeof(RGNDATAHEADER));
+
+  // TODO: Rects should be already YX sorted, but I'm not sure.
+  for (i = 0; i != length; i++, r++)
+  {
+    combine(IntBox(r->left, r->top, r->right, r->bottom), REGION_OP_UNION);
+  }
+
+  return ERR_OK;
+}
+
+#endif // FOG_OS_WINDOWS
+
+// ============================================================================
+// [Fog::Region - Statics]
+// ============================================================================
+
+err_t Region::combine(Region& dest, const Region& src1, const Region& src2, uint32_t combineOp)
 {
   RegionData* destd = dest._d;
   RegionData* src1d = src1._d;
   RegionData* src2d = src2._d;
   err_t err = ERR_OK;
 
-  // Trivial rejects.
-  if (FOG_UNLIKELY(src1d == src2d))
-    err = dest.set(src1);
-  else if (FOG_UNLIKELY(src1d->length == 0 || src2d->length == 0 || !src1d->extents.overlaps(src2d->extents))) 
-    dest.clear();
-  else
-    err = _intersectPrivate(&dest, src1d->rects, src1d->length, src2d->rects, src2d->length, destd == src1d || destd == src2d);
-
-  return err;
-}
-
-err_t Region::eor(Region& dest, const Region& src1, const Region& src2)
-{
-  TemporaryRegion<REGION_STACK_SIZE> r1;
-  TemporaryRegion<REGION_STACK_SIZE> r2;
-  err_t err;
-
-  if ((err = subtract(r1, src1, src2))) return err;
-  if ((err = subtract(r2, src2, src1))) return err;
-  if ((err = unite(dest, r1, r2))) return err;
-
-  return ERR_OK;
-}
-
-err_t Region::subtract(Region& dest, const Region& src1, const Region& src2)
-{
-  RegionData* destd = dest._d;
-  RegionData* src1d = src1._d;
-  RegionData* src2d = src2._d;
-  err_t err = ERR_OK;
-
-  // Trivial rejects.
-  if (src1d == src2d || src1d->length == 0) 
-    dest.clear();
-  else if (src2d->length == 0 || !src1d->extents.overlaps(src2d->extents)) 
-    err = dest.set(src1);
-  else
-    err = _subtractPrivate(&dest, src1d->rects, src1d->length, src2d->rects, src2d->length, destd == src1d || destd == src2d);
-
-  return ERR_OK;
-}
-
-err_t Region::op(Region& dest, const Region& src1, const Region& src2, int _op)
-{
-  switch (_op)
+  switch (combineOp)
   {
-    case REGION_OP_COPY     : return set(dest, src1);
-    case REGION_OP_UNITE    : return unite(dest, src1, src2);
-    case REGION_OP_INTERSECT: return intersect(dest, src1, src2);
-    case REGION_OP_XOR      : return eor(dest, src1, src2);
-    case REGION_OP_SUBTRACT : return subtract(dest, src1, src2);
+    case REGION_OP_COPY:
+    {
+      return dest.set(src2);
+    }
+
+    case REGION_OP_UNION:
+    {
+      // Trivial operations.
+      if (src1.isInfinite()) { return dest.set(src1); }
+      if (src2.isInfinite()) { return dest.set(src2); }
+
+      if (src1d->length == 0) { return dest.set(src2); }
+      if (src2d->length == 0) { return dest.set(src1); }
+      if (src1d == src2d    ) { return dest.set(src1); }
+
+      const IntBox* src1first = src1d->rects;
+      const IntBox* src2first = src2d->rects;
+      const IntBox* src1last = src1first + src1d->length - 1;
+      const IntBox* src2last = src2first + src2d->length - 1;
+
+      IntBox ext(Math::min(src1d->extents.x1, src2d->extents.x1),
+              Math::min(src1d->extents.y1, src2d->extents.y1),
+              Math::max(src1d->extents.x2, src2d->extents.x2),
+              Math::max(src1d->extents.y2, src2d->extents.y2));
+
+      err_t err;
+      if (src1last->y2 <= src2first->y1)
+      {
+        err = dest.setDeep(src1);
+        if (!err) err = _appendPrivate(&dest, src2first, src2d->length, &ext);
+      }
+      else if (src2last->y2 <= src1first->y1)
+      {
+        err = dest.setDeep(src2);
+        if (!err) err = _appendPrivate(&dest, src1first, src1d->length, &ext);
+      }
+      else
+      {
+        err = _unitePrivate(&dest, src1first, src1d->length, src2first, src2d->length, destd == src1d || destd == src2d, &ext);
+      }
+
+      return err;
+    }
+
+    case REGION_OP_INTERSECT:
+    {
+      // Trivial operations.
+      if (src1.isInfinite()) { return dest.set(src2); }
+      if (src2.isInfinite()) { return dest.set(src1); }
+
+      // Trivial rejects.
+      if (FOG_UNLIKELY(src1d == src2d))
+        err = dest.set(src1);
+      else if (FOG_UNLIKELY(src1d->length == 0 || src2d->length == 0 || !src1d->extents.overlaps(src2d->extents))) 
+        dest.clear();
+      else
+        err = _intersectPrivate(&dest, src1d->rects, src1d->length, src2d->rects, src2d->length, destd == src1d || destd == src2d);
+
+      return err;
+    }
+
+    case REGION_OP_XOR:
+    {
+      // Infinite region is forbidden for XOR operation.
+      if (src1d == _dinfinite.instancep() || src2d == _dinfinite.instancep())
+      {
+        dest.clear();
+        return ERR_REGION_INFINITE;
+      }
+
+      TemporaryRegion<REGION_STACK_SIZE> r1;
+      TemporaryRegion<REGION_STACK_SIZE> r2;
+
+      FOG_RETURN_ON_ERROR(combine(r1, src1, src2, REGION_OP_SUBTRACT));
+      FOG_RETURN_ON_ERROR(combine(r2, src2, src1, REGION_OP_SUBTRACT));
+      FOG_RETURN_ON_ERROR(combine(dest, r1, r2, REGION_OP_UNION));
+
+      return ERR_OK;
+    }
+
+    case REGION_OP_SUBTRACT:
+    {
+      // Infinite region is forbidden for XOR operation.
+      if (src1d == _dinfinite.instancep() || src2d == _dinfinite.instancep())
+      {
+        dest.clear();
+        return ERR_REGION_INFINITE;
+      }
+
+      // Trivial rejects.
+      if (src1d == src2d || src1d->length == 0) 
+        dest.clear();
+      else if (src2d->length == 0 || !src1d->extents.overlaps(src2d->extents)) 
+        err = dest.set(src1);
+      else
+        err = _subtractPrivate(&dest, src1d->rects, src1d->length, src2d->rects, src2d->length, destd == src1d || destd == src2d);
+
+      return err;
+    }
+
     default:
-      FOG_ASSERT_NOT_REACHED();
       return ERR_RT_INVALID_ARGUMENT;
   }
 }
 
 err_t Region::translate(Region& dest, const Region& src, const IntPoint& pt)
 {
+  if (src.isInfinite()) return dest.set(src);
+
   int x = pt.getX();
   int y = pt.getY();
 
@@ -1935,11 +2204,10 @@ err_t Region::translate(Region& dest, const Region& src, const IntPoint& pt)
 
     dest_r = dest_d->rects;
     src_r = src_d->rects;
+
     for (i = dest_d->length; i; i--, dest_r++) 
     {
-      dest_r->set(
-        src_r->x1 + x, src_r->y1 + y,
-        src_r->x2 + x, src_r->y2 + y);
+      dest_r->set(src_r->x1 + x, src_r->y1 + y, src_r->x2 + x, src_r->y2 + y);
     }
   }
   return ERR_OK;
@@ -1947,6 +2215,8 @@ err_t Region::translate(Region& dest, const Region& src, const IntPoint& pt)
 
 err_t Region::shrink(Region& dest, const Region& src, const IntPoint& pt)
 {
+  if (src.isInfinite()) return dest.set(src);
+
   int x = pt.getX();
   int y = pt.getY();
   if (x == 0 && y == 0) return dest.set(src);
@@ -1966,19 +2236,20 @@ err_t Region::shrink(Region& dest, const Region& src, const IntPoint& pt)
 
 err_t Region::frame(Region& dest, const Region& src, const IntPoint& pt)
 {
+  if (src.isInfinite()) return dest.set(src);
+
   // In cases that dest == src, we need to backup src.
   TemporaryRegion<REGION_STACK_SIZE> r1;
   TemporaryRegion<REGION_STACK_SIZE> r2;
-  err_t err;
 
-  if ((err = translate(r2, src, IntPoint(-pt.getX(), 0))) ||
-      (err = translate(r1, src, IntPoint( pt.getX(), 0))) ||
-      (err = r2.intersect(r1)) ||
-      (err = translate(r1, src, IntPoint(0, -pt.getY()))) ||
-      (err = r2.intersect(r1)) ||
-      (err = translate(r1, src, IntPoint(0,  pt.getY()))) ||
-      (err = r2.intersect(r1)) ||
-      (err = subtract(dest, src, r2))) return err;
+  FOG_RETURN_ON_ERROR(translate(r2, src, IntPoint(-pt.getX(), 0)));
+  FOG_RETURN_ON_ERROR(translate(r1, src, IntPoint( pt.getX(), 0)));
+  FOG_RETURN_ON_ERROR(r2.combine(r1, REGION_OP_INTERSECT));
+  FOG_RETURN_ON_ERROR(translate(r1, src, IntPoint(0, -pt.getY())));
+  FOG_RETURN_ON_ERROR(r2.combine(r1, REGION_OP_INTERSECT));
+  FOG_RETURN_ON_ERROR(translate(r1, src, IntPoint(0,  pt.getY())));
+  FOG_RETURN_ON_ERROR(r2.combine(r1, REGION_OP_INTERSECT));
+  FOG_RETURN_ON_ERROR(combine(dest, src, r2, REGION_OP_SUBTRACT));
 
   return ERR_OK;
 }
@@ -1991,6 +2262,9 @@ err_t Region::intersectAndClip(Region& dst, const Region& src1Region, const Regi
 
   sysuint_t count1 = src1Region.getLength();
   sysuint_t count2 = src2Region.getLength();
+
+  if (src1Region.isInfinite()) { src1 = &clip, count1 = 1; }
+  if (src2Region.isInfinite()) { src2 = &clip, count2 = 1; }
 
   int clipX1 = clip.x1;
   int clipY1 = clip.y1;
@@ -2009,13 +2283,13 @@ err_t Region::intersectAndClip(Region& dst, const Region& src1Region, const Regi
   const IntBox* src1BandEnd;              // End of current band in src1.
   const IntBox* src2BandEnd;              // End of current band in src2.
 
-  int ytop;                            // Top of intersection.
-  int ybot;                            // Bottom of intersection.
-  int ytopAdjusted;                    // Top of intersection, intersected with clip.
-  int ybotAdjusted;                    // Bottom of intersection, intersected with clip.
+  int ytop;                               // Top of intersection.
+  int ybot;                               // Bottom of intersection.
+  int ytopAdjusted;                       // Top of intersection, intersected with clip.
+  int ybotAdjusted;                       // Bottom of intersection, intersected with clip.
 
-  int extentsX1 = INT_MAX;             // Extents x1 coord (computed in loop).
-  int extentsX2 = INT_MIN;             // Extents x2 coord (computed in loop).
+  int extentsX1 = INT_MAX;                // Extents x1 coord (computed in loop).
+  int extentsX2 = INT_MIN;                // Extents x2 coord (computed in loop).
 
   IntBox* prevBand;                       // Pointer to start of previous band.
   IntBox* curBand;                        // Pointer to start of current band.
@@ -2198,6 +2472,8 @@ err_t Region::intersectAndClip(Region& dst, const Region& src1Region, const Regi
 // TODO: Check if it's correct.
 err_t Region::translateAndClip(Region& dst, const Region& src1Region, const IntPoint& pt, const IntBox& clip)
 {
+  if (src1Region.isInfinite()) return dst.set(src1Region);
+
   int x = pt.x;
   int y = pt.y;
 
@@ -2313,237 +2589,6 @@ end:
   return ERR_OK;
 }
 
-// ============================================================================
-// [Fog::Region - Windows Specific]
-// ============================================================================
-
-#if defined(FOG_OS_WINDOWS)
-
-static FOG_INLINE void BoxToRECT(RECT* dest, const IntBox* src)
-{
-  dest->left   = src->x1;
-  dest->top    = src->y1;
-  dest->right  = src->x2;
-  dest->bottom = src->y2;
-}
-
-static FOG_INLINE void RECTToBox(IntBox* dest, const RECT* src)
-{
-  dest->x1 = src->left;
-  dest->y1 = src->top;
-  dest->x2 = src->right;
-  dest->y2 = src->bottom;
-}
-
-HRGN Region::toHRGN() const
-{
-  RegionData* d = _d;
-  sysuint_t i;
-  sysuint_t length = d->length;
-
-  LocalBuffer<4096> mem;
-  RGNDATAHEADER *hdr = (RGNDATAHEADER *)mem.alloc(sizeof(RGNDATAHEADER) + length * sizeof(RECT));
-  if (!hdr) return (HRGN)NULLREGION;
-
-  hdr->dwSize = sizeof(RGNDATAHEADER);
-  hdr->iType = RDH_RECTANGLES;
-  hdr->nCount = length;
-  hdr->nRgnSize = length * sizeof(RECT);
-  BoxToRECT(&hdr->rcBound, &d->extents);
-
-  RECT* r = (RECT *)((uint8_t *)hdr + sizeof(RGNDATAHEADER));
-  for (i = 0; i < length; i++, r++)
-  {
-    BoxToRECT(r, &d->rects[i]);
-  }
-  return ExtCreateRegion(NULL, sizeof(RGNDATAHEADER) + (sizeof(RECT)*length), (RGNDATA *)hdr);
-}
-
-err_t Region::fromHRGN(HRGN hrgn)
-{
-  clear();
-
-  if (hrgn == NULL) return ERR_RT_INVALID_ARGUMENT;
-  if (hrgn == (HRGN)NULLREGION) return ERR_OK;
-
-  DWORD size = GetRegionData(hrgn, 0, NULL);
-  if (size == 0) return false;
-
-  LocalBuffer<1024> mem;
-  RGNDATAHEADER *hdr = (RGNDATAHEADER *)mem.alloc(size);
-  if (hdr) return ERR_RT_OUT_OF_MEMORY;
-
-  if (!GetRegionData(hrgn, size, (RGNDATA*)hdr)) return GetLastError();
-
-  sysuint_t i;
-  sysuint_t length = hdr->nCount;
-  RECT* r = (RECT*)((uint8_t*)hdr + sizeof(RGNDATAHEADER));
-
-  // TODO: Rects should be already YX sorted, but I'm not sure
-  for (i = 0; i != length; i++, r++)
-  {
-    unite(IntBox(r->left, r->top, r->right, r->bottom));
-  }
-
-  return ERR_OK;
-}
-
-#endif // FOG_OS_WINDOWS
-
-// ============================================================================
-// [Fog::RegionData]
-// ============================================================================
-
-RegionData* RegionData::ref() const
-{
-  if (flags & IsSharable)
-  {
-    refCount.inc();
-    return const_cast<RegionData*>(this);
-  }
-  else
-  {
-    return RegionData::copy(this);
-  }
-}
-
-void RegionData::deref()
-{
-  if (refCount.deref() && (flags & IsDynamic) != 0) Memory::free(this);
-}
-
-static RegionData* _reallocRegion(RegionData* d, sysuint_t capacity)
-{
-  if ((d->flags & RegionData::IsDynamic) != 0)
-  {
-    d = (RegionData*)Memory::realloc(d, RegionData::sizeFor(capacity));
-    if (!d) return NULL;
-
-    d->capacity = capacity;
-    return d;
-  }
-  else
-  {
-    return RegionData::create(capacity, &d->extents, d->rects, d->length);
-  }
-}
-
-RegionData* RegionData::adopt(void* address, sysuint_t capacity)
-{
-  RegionData* d = (RegionData*)address;
-  
-  d->refCount.init(1);
-  d->flags = IsStrong;
-  d->capacity = capacity;
-  d->length = 0;
-  d->extents.clear();
-
-  return d;
-}
-
-RegionData* RegionData::adopt(void* address, sysuint_t capacity, const IntBox& r)
-{
-  if (!r.isValid() || capacity == 0) return adopt(address, capacity);
-
-  RegionData* d = (RegionData*)address;
-  
-  d->refCount.init(1);
-  d->flags = IsStrong;
-  d->capacity = capacity;
-  if (r.isValid())
-  {
-    d->length = 1;
-    d->extents = r;
-    d->rects[0] = r;
-  }
-  else
-  {
-    d->length = 0;
-    d->extents.clear();
-    d->rects[0].clear();
-  }
-
-  return d;
-}
-
-RegionData* RegionData::adopt(void* address, sysuint_t capacity, const IntBox* extents, const IntBox* rects, sysuint_t length)
-{
-  if (capacity < length) create(length, extents, rects, length);
-
-  RegionData* d = (RegionData*)address;
-  
-  d->refCount.init(1);
-  d->flags = IsStrong;
-  d->capacity = capacity;
-  d->length = length;
-  
-  if (extents)
-  {
-    d->extents = *extents;
-    _copyRects(d->rects, rects, length);
-  }
-  else
-  {
-    _copyRectsExtents(d->rects, rects, length, &d->extents);
-  }
-
-  return d;
-}
-
-RegionData* RegionData::create(sysuint_t capacity)
-{
-  if (FOG_UNLIKELY(capacity == 0)) return Region::sharedNull.instancep()->refAlways();
-
-  sysuint_t dsize = sizeFor(capacity);
-  RegionData* d = (RegionData*)Memory::alloc(dsize);
-  if (!d) return NULL;
-
-  d->refCount.init(1);
-  d->flags = IsDynamic | IsSharable;
-  d->capacity = capacity;
-  d->length = 0;
-
-  return d;
-}
-
-RegionData* RegionData::create(sysuint_t capacity, const IntBox* extents, const IntBox* rects, sysuint_t length)
-{
-  if (FOG_UNLIKELY(capacity < length)) capacity = length;
-
-  RegionData* d = create(capacity);
-  if (!d) return NULL;
-
-  if (FOG_LIKELY(length))
-  {
-    d->length = length;
-    if (extents)
-    {
-      d->extents = *extents;
-      _copyRects(d->rects, rects, length);
-    }
-    else
-    {
-      _copyRectsExtents(d->rects, rects, length, &d->extents);
-    }
-  }
-
-  return d;
-}
-
-RegionData* RegionData::copy(const RegionData* other)
-{
-  if (!other->length) return Region::sharedNull.instancep()->refAlways();
-
-  RegionData* d = create(other->length);
-  if (!d) return NULL;
-
-  d->length = other->length;
-  d->extents = other->extents;
-  _copyRects(d->rects, other->rects, other->length);
-
-  return d;
-}
-
 } // Fog namespace
 
 // ============================================================================
@@ -2554,13 +2599,22 @@ FOG_INIT_DECLARE err_t fog_region_init(void)
 {
   using namespace Fog;
 
-  Region::sharedNull.init();
-  RegionData* d = Region::sharedNull.instancep();
+  RegionData* d;
 
+  d = Region::_dnull.instancep();
   d->refCount.init(1);
   d->flags = RegionData::IsSharable;
   d->extents.clear();
   d->rects[0].clear();
+
+  d = Region::_dinfinite.instancep();
+  d->refCount.init(1);
+  d->flags = RegionData::IsSharable;
+  d->extents.set(INT_MIN, INT_MIN, INT_MAX, INT_MAX);
+  d->rects[0].set(INT_MIN, INT_MIN, INT_MAX, INT_MAX);
+
+  Region::_empty._d = d->refAlways();
+  Region::_infinite._d = d->refAlways();
 
   return ERR_OK;
 }
@@ -2569,6 +2623,6 @@ FOG_INIT_DECLARE void fog_region_shutdown(void)
 {
   using namespace Fog;
 
-  Region::sharedNull.instancep()->refCount.dec();
-  Region::sharedNull.destroy();
+  Region::_dinfinite.instancep()->refCount.dec();
+  Region::_dnull.instancep()->refCount.dec();
 }

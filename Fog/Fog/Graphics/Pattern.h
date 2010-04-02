@@ -119,7 +119,7 @@ struct FOG_API PatternData
 //! - Conical gradient - Conical gradient - atan() function is used.
 struct FOG_API Pattern
 {
-  static Static<PatternData> sharedNull;
+  static Static<PatternData> _dnull;
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]

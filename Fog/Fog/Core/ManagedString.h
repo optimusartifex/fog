@@ -130,7 +130,7 @@ struct FOG_API ManagedString
 
   // [Getters]
 
-  FOG_INLINE bool isEmpty() const { return _node == sharedNull; }
+  FOG_INLINE bool isEmpty() const { return _node == _dnull; }
   FOG_INLINE sysuint_t refCount() const { return _node->refCount.get(); }
   FOG_INLINE const String& getString() const { return _node->getString(); }
   FOG_INLINE uint32_t getHashCode() const { return _node->getHashCode(); }
@@ -207,7 +207,7 @@ struct FOG_API ManagedString
 
   // [Statics]
 
-  static Node* sharedNull;
+  static Node* _dnull;
 
   // [Members]
 

@@ -57,28 +57,18 @@ struct FOG_HIDDEN NullPaintEngine : public PaintEngine
   // [Meta]
   // --------------------------------------------------------------------------
 
-  virtual void setMetaVariables(const IntPoint& metaOrigin, const Region& metaRegion, bool useMetaRegion, bool reset) {}
+  virtual void setMetaVars(const Region& region, const IntPoint& origin) {}
+  virtual void resetMetaVars() {}
 
-  virtual void setMetaOrigin(const IntPoint& pt) {}
-  virtual void setUserOrigin(const IntPoint& pt) {}
+  virtual void setUserVars(const Region& region, const IntPoint& origin) {}
+  virtual void setUserOrigin(const IntPoint& origin, uint32_t originOp) {}
+  virtual void resetUserVars() {}
+
+  virtual Region getMetaRegion() const { return Region::infinite(); }
+  virtual Region getUserRegion() const { return Region::infinite(); }
 
   virtual IntPoint getMetaOrigin() const { return IntPoint(0, 0); }
   virtual IntPoint getUserOrigin() const { return IntPoint(0, 0); }
-
-  virtual void translateMetaOrigin(const IntPoint& pt) {}
-  virtual void translateUserOrigin(const IntPoint& pt) {}
-
-  virtual void setUserRegion(const IntRect& r) {}
-  virtual void setUserRegion(const Region& r) {}
-
-  virtual Region getMetaRegion() const { return Region(); }
-  virtual Region getUserRegion() const { return Region(); }
-
-  virtual bool isMetaRegionUsed() const { return false; }
-  virtual bool isUserRegionUsed() const { return false; }
-
-  virtual void resetMetaVars() {}
-  virtual void resetUserVars() {}
 
   // --------------------------------------------------------------------------
   // [Operator]
@@ -92,12 +82,12 @@ struct FOG_HIDDEN NullPaintEngine : public PaintEngine
   // --------------------------------------------------------------------------
 
   virtual uint32_t getSourceType() const { return PAINTER_SOURCE_ARGB; }
-  virtual err_t getSourceArgb(Argb& argb) const { argb.set(0x00000000); return ERR_RT_INVALID_CONTEXT; }
-  virtual err_t getSourcePattern(Pattern& pattern) const { pattern.reset(); return ERR_RT_INVALID_CONTEXT; }
+
+  virtual Argb getSourceArgb() const { return Argb(0x00000000); }
+  virtual Pattern getSourcePattern() const { return Pattern(); }
 
   virtual void setSource(Argb argb) {}
   virtual void setSource(const Pattern& pattern) {}
-  virtual void setSource(const ColorFilter& colorFilter) {}
 
   // --------------------------------------------------------------------------
   // [Fill Parameters]
@@ -164,12 +154,6 @@ struct FOG_HIDDEN NullPaintEngine : public PaintEngine
   virtual void restore() {}
 
   // --------------------------------------------------------------------------
-  // [Clear]
-  // --------------------------------------------------------------------------
-
-  virtual void clear() {}
-
-  // --------------------------------------------------------------------------
   // [Raster Drawing]
   // --------------------------------------------------------------------------
 
@@ -181,6 +165,8 @@ struct FOG_HIDDEN NullPaintEngine : public PaintEngine
   virtual void fillRects(const IntRect* r, sysuint_t count) {}
   virtual void fillRound(const IntRect& r, const IntPoint& radius) {}
   virtual void fillRegion(const Region& region) {}
+
+  virtual void fillAll() {}
 
   // --------------------------------------------------------------------------
   // [Vector Drawing]

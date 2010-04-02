@@ -36,11 +36,11 @@ static void freeGlyphs(Glyph* data, sysuint_t count)
 // [Fog::GlyphSet]
 // ============================================================================
 
-Static<GlyphSet::Data> GlyphSet::sharedNull;
+Static<GlyphSet::Data> GlyphSet::_dnull;
 
 GlyphSet::GlyphSet()
 {
-  _d = sharedNull->refAlways();
+  _d = _dnull->refAlways();
 }
 
 GlyphSet::GlyphSet(const GlyphSet& other)
@@ -59,7 +59,7 @@ void GlyphSet::clear()
 
   if (_d->refCount.get() > 1)
   {
-    atomicPtrXchg(&_d, sharedNull->refAlways())->deref();
+    atomicPtrXchg(&_d, _dnull->refAlways())->deref();
   }
   else
   {
@@ -72,7 +72,7 @@ void GlyphSet::clear()
 
 void GlyphSet::free()
 {
-  atomicPtrXchg(&_d, sharedNull->refAlways())->deref();
+  atomicPtrXchg(&_d, _dnull->refAlways())->deref();
 }
 
 err_t GlyphSet::reserve(sysuint_t capacity)
@@ -251,7 +251,7 @@ GlyphSet::Data* GlyphSet::Data::realloc(Data* d, sysuint_t capacity)
 
 GlyphSet::Data* GlyphSet::Data::copy(const Data* d)
 {
-  if (d->length == 0) return sharedNull->refAlways();
+  if (d->length == 0) return _dnull->refAlways();
 
   Data* newd = alloc(d->capacity);
   if (!newd) return NULL;
@@ -279,7 +279,7 @@ FOG_INIT_DECLARE err_t fog_glyphset_init(void)
 {
   using namespace Fog;
 
-  GlyphSet::Data* d = GlyphSet::sharedNull.instancep();
+  GlyphSet::Data* d = GlyphSet::_dnull.instancep();
   d->refCount.init(1);
   d->flags = GlyphSet::Data::IsSharable;
   d->capacity = 0;
@@ -294,6 +294,6 @@ FOG_INIT_DECLARE void fog_glyphset_shutdown(void)
 {
   using namespace Fog;
 
-  GlyphSet::Data* d = Fog::GlyphSet::sharedNull.instancep();
+  GlyphSet::Data* d = Fog::GlyphSet::_dnull.instancep();
   d->refCount.dec();
 }

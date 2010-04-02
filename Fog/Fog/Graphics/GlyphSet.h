@@ -117,7 +117,7 @@ struct FOG_API GlyphSet
     char data[sizeof(Glyph)];
   };
 
-  static Static<Data> sharedNull;
+  static Static<Data> _dnull;
 
   // [Construction / Destruction]
 

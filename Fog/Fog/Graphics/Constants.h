@@ -29,6 +29,47 @@ enum ANTI_ALIASING_TYPE
 };
 
 // ============================================================================
+// [Fog::CLIP_OP]
+// ============================================================================
+
+//! @brief Clip operation used by @c Painter::clip() and PaintEngine::clip() 
+//! methods.
+enum CLIP_OP
+{
+  //! @brief Replace the current clipping area by the given one (copy).
+  CLIP_OP_COPY = 0x00000000,
+  //! @brief Union the current clipping area with the given one (union).
+  CLIP_OP_UNITE = 0x00000001,
+  //! @brief Intersect the current clipping area with the given one (intersection).
+  CLIP_OP_INTERSECT = 0x00000002,
+  //! @brief Xor the current clipping area with the given one (eXclusive OR).
+  CLIP_OP_XOR = 0x00000003,
+  //! @brief Subtract the given clipping area from the current one (difference).
+  CLIP_OP_SUBTRACT = 0x00000004
+};
+
+// ============================================================================
+// [Fog::CLIP_FLAGS]
+// ============================================================================
+
+enum CLIP_FLAGS
+{
+  //! @brief Invert the given clipping area and apply it instead of original.
+  CLIP_FLAG_INVERT = 0x00010000,
+
+  //! @brief Use current opacity with the given clipping area. Using this 
+  //! flag will result in semi-transparent clipping mask.
+  //!
+  //! @note When used together with CLIP_FLAG_INVERT the invert operation is
+  //! done first and then the opacity is adjusted using current opacity value.
+  CLIP_FLAG_USE_OPACITY = 0x00020000,
+
+  //! @brief Stroke clip path (or primitive) instead of fill using current
+  //! stroke settings.
+  CLIP_FLAG_STROKE = 0x00040000
+};
+
+// ============================================================================
 // [Fog::COLOR_CHANNEL_TYPE]
 // ============================================================================
 
@@ -1858,21 +1899,6 @@ enum INNER_JOIN
 };
 
 // ============================================================================
-// [Fog::PAINTER_SOURCE_TYPE]
-// ============================================================================
-
-//! @brief Type of source assigned in @c Painter or @c PaintEngine.
-enum PAINTER_SOURCE_TYPE
-{
-  //! @brief Painter source is ARGB color, see @c Painter::setSource(Argb argb).
-  PAINTER_SOURCE_ARGB = 0,
-  //! @brief Painter source is pattern color, see @c Painter::setPattern(const Pattern& pattern).
-  PAINTER_SOURCE_PATTERN = 1,
-  //! @brief Painter source is color filter, see @c Painter::setSource(const ColorFilter& colorFilter).
-  PAINTER_SOURCE_COLOR_FILTER = 2
-};
-
-// ============================================================================
 // [Fog::PAINTER_ENGINE]
 // ============================================================================
 
@@ -1890,18 +1916,16 @@ enum PAINTER_ENGINE
 };
 
 // ============================================================================
-// [Fog::PAINTER_INIT]
+// [Fog::PAINTER_FLUSH_FLAGS]
 // ============================================================================
 
-//! @brief Painter initialization flags.
-enum PAINTER_INIT_FLAGS
+//! @brief Painter flush flags.
+enum PAINTER_FLUSH_FLAGS
 {
-  //! @brief Initialize multithreading if it makes sense.
-  //! 
-  //! If this option is true, painter first check if image size is not too 
-  //! small (painting to small images are singlethreaded by default). Then
-  //! CPU detection is used to check if machine contains more CPU units.
-  PAINTER_INIT_MT = 0x0001
+  //! @brief Flush all painter commands and wait for completition. Use this
+  //! command if you want to access painter data after the flush() function
+  //! call.
+  PAINTER_FLUSH_SYNC = 0x0001
 };
 
 // ============================================================================
@@ -1931,16 +1955,44 @@ enum PAINTER_HINT
 };
 
 // ============================================================================
-// [Fog::PAINTER_FLUSH_FLAGS]
+// [Fog::PAINTER_INIT]
 // ============================================================================
 
-//! @brief Painter flush flags.
-enum PAINTER_FLUSH_FLAGS
+//! @brief Painter initialization flags.
+enum PAINTER_INIT_FLAGS
 {
-  //! @brief Flush all painter commands and wait for completition. Use this
-  //! command if you want to access painter data after the flush() function
-  //! call.
-  PAINTER_FLUSH_SYNC = 0x0001
+  //! @brief Initialize multithreading if it makes sense.
+  //! 
+  //! If this option is true, painter first check if image size is not too 
+  //! small (painting to small images are singlethreaded by default). Then
+  //! CPU detection is used to check if machine contains more CPU units.
+  PAINTER_INIT_MT = 0x0001
+};
+
+// ============================================================================
+// [Fog::PAINTER_ORIGIN]
+// ============================================================================
+
+//! @brief Painter set origin operation.
+enum PAINTER_ORIGIN_OP
+{
+  //! @brief Set origin to a given point.
+  PAINTER_ORIGIN_SET = 0,
+  //! @brief Translate origin by a given point.
+  PAINTER_ORIGIN_TRANSLATE = 1
+};
+
+// ============================================================================
+// [Fog::PAINTER_SOURCE_TYPE]
+// ============================================================================
+
+//! @brief Type of source assigned in @c Painter or @c PaintEngine.
+enum PAINTER_SOURCE_TYPE
+{
+  //! @brief Painter source is ARGB color, see @c Painter::setSource(Argb argb).
+  PAINTER_SOURCE_ARGB = 0,
+  //! @brief Painter source is pattern color, see @c Painter::setPattern(const Pattern& pattern).
+  PAINTER_SOURCE_PATTERN = 1
 };
 
 // ============================================================================
@@ -2013,12 +2065,17 @@ enum PATTERN_TYPE
 //! @brief Type of @c Region.
 enum REGION_TYPE
 {
+  // NOTE: Never change value of REGION_TYPE_EMPTY and REGION_TYPE_SIMPLE
+  // constants, see Region::getType() method in Region.cpp file.
+
   //! @brief Region is empty.
   REGION_TYPE_EMPTY = 0,
   //! @brief Region has only one rectangle (rectangular).
   REGION_TYPE_SIMPLE = 1,
   //! @brief Region has more YX sorted rectangles.
-  REGION_TYPE_COMPLEX = 2
+  REGION_TYPE_COMPLEX = 2,
+  //! @brief Region is infinite (special region type).
+  REGION_TYPE_INFINITE = 3
 };
 
 // ============================================================================
@@ -2031,11 +2088,9 @@ enum REGION_OP
   //! @brief Copy.*/
   REGION_OP_COPY = 0,
   //! @brief Union (OR)
-  REGION_OP_UNITE = 1,
+  REGION_OP_UNION = 1,
   //! @brief Intersection (AND).
   REGION_OP_INTERSECT = 2,
-  //! @brief eXclusive or (XOR).
-  REGION_OP_EOR = 3,
   //! @brief eXclusive or (XOR).
   REGION_OP_XOR = 3,
   //! @brief Subtraction (Difference).
@@ -2107,17 +2162,18 @@ enum TEXT_ALIGN
 //! @brief Error codes used in Fog-Graphics.
 enum ERR_GRAPHICS_ENUM
 {
+  // --------------------------------------------------------------------------
   // [Errors Range]
+  // --------------------------------------------------------------------------
+
   ERR_GRAPHICS_START = 0x00011100,
   ERR_GRAPHICS_LAST  = 0x000111FF,
 
-  // Path Errors.
+  // --------------------------------------------------------------------------
+  // [Image, ImageFilter, ImageIO and Painter]
+  // --------------------------------------------------------------------------
 
-  ERR_PATH_INVALID = ERR_GRAPHICS_START,
-
-  // Image, ImageFilter, ImageIO and Painter Errors.
-
-  ERR_IMAGE_INVALID_SIZE,
+  ERR_IMAGE_INVALID_SIZE = ERR_GRAPHICS_START,
   ERR_IMAGE_INVALID_FORMAT,
 
   ERR_IMAGE_UNSUPPORTED_FORMAT,
@@ -2145,7 +2201,9 @@ enum ERR_GRAPHICS_ENUM
   ERR_IMAGEIO_GDIPLUS_NOT_LOADED,
   ERR_IMAGEIO_GDIPLUS_ERROR,
 
-  // Font Errors.
+  // --------------------------------------------------------------------------
+  // [Font]
+  // --------------------------------------------------------------------------
 
   ERR_FONT_NOT_MATCHED,
   ERR_FONT_INVALID_FACE,
@@ -2157,7 +2215,19 @@ enum ERR_GRAPHICS_ENUM
   ERR_FONT_FONTCONFIG_INIT_FAILED,
 
   ERR_FONT_FREETYPE_NOT_LOADED,
-  ERR_FONT_FREETYPE_INIT_FAILED
+  ERR_FONT_FREETYPE_INIT_FAILED,
+
+  // --------------------------------------------------------------------------
+  // [Path]
+  // --------------------------------------------------------------------------
+
+  ERR_PATH_INVALID,
+
+  // --------------------------------------------------------------------------
+  // [Region]
+  // --------------------------------------------------------------------------
+
+  ERR_REGION_INFINITE
 };
 
 extern FOG_API uint32_t OperatorCharacteristics[OPERATOR_COUNT];

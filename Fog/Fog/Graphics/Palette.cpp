@@ -21,11 +21,11 @@ namespace Fog {
 // [Fog::Palette]
 // ============================================================================
 
-Static<PaletteData> Palette::sharedNull;
+Static<PaletteData> Palette::_dnull;
 Static<PaletteData> Palette::sharedGrey;
 Static<PaletteData> Palette::sharedA8;
 
-Palette::Palette() : _d(sharedNull->ref()) {}
+Palette::Palette() : _d(_dnull->ref()) {}
 Palette::Palette(const Palette& other) : _d(other._d->ref()) {}
 
 Palette::~Palette()
@@ -51,7 +51,7 @@ err_t Palette::_detach()
 
 void Palette::free()
 {
-  atomicPtrXchg(&_d, sharedNull->ref())->deref();
+  atomicPtrXchg(&_d, _dnull->ref())->deref();
 }
 
 void Palette::clear()
@@ -59,7 +59,7 @@ void Palette::clear()
   if (isDetached())
     Memory::zero(_d->data, 512 * sizeof(Argb));
   else
-    atomicPtrXchg(&_d, sharedNull->ref())->deref();
+    atomicPtrXchg(&_d, _dnull->ref())->deref();
 }
 
 err_t Palette::set(const Palette& other)
@@ -266,11 +266,11 @@ FOG_INIT_DECLARE err_t fog_palette_init(void)
   PaletteData* d;
   uint32_t i, c0;
 
-  Palette::sharedNull;
+  Palette::_dnull;
   Palette::sharedGrey;
 
   // Setup null palette;
-  d = Palette::sharedNull.instancep();
+  d = Palette::_dnull.instancep();
   d->refCount.init(1);
   d->isAlphaUsed = false;
   Memory::zero(d->data, 512 * sizeof(Argb));
@@ -310,7 +310,7 @@ FOG_INIT_DECLARE void fog_palette_shutdown(void)
 {
   using namespace Fog;
 
-  Palette::sharedNull.instancep()->refCount.dec();
+  Palette::_dnull.instancep()->refCount.dec();
   Palette::sharedGrey.instancep()->refCount.dec();
   Palette::sharedA8.instancep()->refCount.dec();
 }

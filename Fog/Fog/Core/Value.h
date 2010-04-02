@@ -141,7 +141,7 @@ struct FOG_API Value
 
   // [Static Data]
 
-  static ValueData* sharedNull;
+  static ValueData* _dnull;
 
   // [Members]
 

@@ -6,8 +6,8 @@
 // AggOO - Version 0.1
 // Copyright (c) 2006 Dratek Software
 //
-// Author of AggOO (Chad M. Draper) agreed relicencing code to the MIT licence
-// that is used for Fog (original code was 3 clause BSD licence). Thanks.
+// Author of AggOO (Chad M. Draper) agreed relicencing code to the MIT license
+// that is used for Fog (original code was 3 clause BSD license). Thanks.
 
 // [Precompiled Headers]
 #if defined(FOG_PRECOMP)

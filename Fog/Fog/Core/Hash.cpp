@@ -23,7 +23,7 @@ namespace Fog {
 // [Fog::UnorderedAbstract]
 // ============================================================================
 
-Static<UnorderedAbstract::Data> UnorderedAbstract::sharedNull;
+Static<UnorderedAbstract::Data> UnorderedAbstract::_dnull;
 
 UnorderedAbstract::Data* UnorderedAbstract::_allocData(sysuint_t capacity)
 {
@@ -95,7 +95,7 @@ bool UnorderedAbstract::_rehash(sysuint_t bc)
   Data* old = atomicPtrXchg(&_d, newd);
 
   old->refCount.dec();
-  if (old != sharedNull.instancep()) _freeData(old);
+  if (old != _dnull.instancep()) _freeData(old);
   
   return true;
 }
@@ -193,7 +193,7 @@ FOG_INIT_DECLARE err_t fog_hash_init(void)
 {
   using namespace Fog;
 
-  UnorderedAbstract::Data* d = UnorderedAbstract::sharedNull.instancep();
+  UnorderedAbstract::Data* d = UnorderedAbstract::_dnull.instancep();
   d->refCount.init(1);
   d->capacity = 1;
   d->length = 0;
@@ -210,6 +210,6 @@ FOG_INIT_DECLARE void fog_hash_shutdown(void)
 {
   using namespace Fog;
 
-  UnorderedAbstract::Data* d = UnorderedAbstract::sharedNull.instancep();
+  UnorderedAbstract::Data* d = UnorderedAbstract::_dnull.instancep();
   d->refCount.dec();
 }

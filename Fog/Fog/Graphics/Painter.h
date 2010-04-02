@@ -23,8 +23,8 @@ namespace Fog {
 //!
 //! Painter is high level class that can be used to draw into the images or raw
 //! memory buffers. Fog painter is state based and each rendering call depends
-//! to current painter state that can be changed by methods like @c setLineWidth(),
-//! @c setLineCaps(), @c setOperator(), etc...
+//! to current painter state that can be changed by methods like @c setFillRule(),
+//! @c setLineWidth(), @c setLineCaps(), @c setOperator(), etc...
 //!
 //! @section Beginning and finalizing rendering.
 //!
@@ -35,21 +35,24 @@ namespace Fog {
 //! instance delete it (by @c delete operator or static destructor) or call
 //! @c end() method.
 //!
-//! It's very important to delete painter or call @c end() method, because 
-//! rendering can be asynchronous.
+//! It's very important to destroy painter instance or call @c end() method,
+//! because rendering can be asynchronous and destroying or enging will ensure
+//! that all painting operations are visible to the target image.
 //!
-//! Hint: to turn off multithreaded rendering use @c HintNoMultithreading in
-//! @c begin() method.
-//!
-//! @section Meta and user region.
+//! @section Meta and user regions, clipping.
 //!
 //! Painter supports two indenpendent region and origin information that can
 //! be used to affect painter origin and clipping. First region and origin 
-//! informations are stored as meta region and meta origin. These variables
+//! information are stored as meta region and meta origin. These variables
 //! shouldn't be changed during rendering and are used usually by windowing
 //! system to set correct origin and window clipping. If you are using Fog-Gui
 //! library, never change these variables in @c Widget::onPaint() event.
 //!
+//! Also the meta region and origin is generally immutable. When you set it
+//! you are forced to use it in all your painting code. Reseting these regions
+//! will also reset all clipping and painter states. To set meta region and
+//! origin use ... .
+//! 
 //! Second region and origin information are stored as user region and user
 //! origin. These variables are designed to be changeable by user during 
 //! rendering, so use them if it's useable for you.
@@ -156,36 +159,30 @@ struct FOG_API Painter
   // --------------------------------------------------------------------------
 
   //! @brief Get painter width in pixels (width returned is width passed to @c begin() method).
-  FOG_INLINE int getWidth() const
-  { return _engine->getWidth(); }
+  FOG_INLINE int getWidth() const { return _engine->getWidth(); }
 
   //! @brief Get painter height in pixels (height returned is height passed to @c begin() method).
-  FOG_INLINE int getHeight() const
-  { return _engine->getHeight(); }
+  FOG_INLINE int getHeight() const { return _engine->getHeight(); }
 
   //! @brief Get painter format  (format returned is format passed to @c begin() method).
-  FOG_INLINE int getFormat() const
-  { return _engine->getFormat(); }
+  FOG_INLINE int getFormat() const { return _engine->getFormat(); }
 
   // --------------------------------------------------------------------------
   // [Engine / Flush]
   // --------------------------------------------------------------------------
 
   //! @brief Get painter engine ID, see @c PAINTER_ENGINE.
-  FOG_INLINE uint32_t getEngine() const
-  { return _engine->getEngine(); }
+  FOG_INLINE uint32_t getEngine() const { return _engine->getEngine(); }
 
   //! @brief Set Painter engine ID, see @c PAINTER_ENGINE.
   //!
   //! @param engine The engine ID to use.
   //! @param cores If the demanded engine is multithreaded then @a core 
   //! specifies number of threads to use.
-  FOG_INLINE void setEngine(uint32_t engine, uint32_t cores = 0)
-  { _engine->setEngine(engine, cores); }
+  FOG_INLINE void setEngine(uint32_t engine, uint32_t cores = 0) { _engine->setEngine(engine, cores); }
 
   //! @brief Flush painter, see @c PAINTER_FLUSH_FLAGS.
-  FOG_INLINE void flush(uint32_t flags)
-  { _engine->flush(flags); }
+  FOG_INLINE void flush(uint32_t flags) { _engine->flush(flags); }
 
   // --------------------------------------------------------------------------
   // [Hints]
@@ -194,69 +191,48 @@ struct FOG_API Painter
   //! @brief Get painter hint, see @c PAINTER_HINT.
   //!
   //! Painter hints can be used to control quality and behavior of painting.
-  FOG_INLINE int getHint(uint32_t hint) const
-  { return _engine->getHint(hint); }
+  FOG_INLINE int getHint(uint32_t hint) const { return _engine->getHint(hint); }
 
   //! @brief Set painter hint, see @c PAINTER_HINT.
   //!
   //! Painter hints can be used to control quality and behavior of painting.
-  FOG_INLINE void setHint(uint32_t hint, int value)
-  { _engine->setHint(hint, value); }
+  FOG_INLINE void setHint(uint32_t hint, int value) { _engine->setHint(hint, value); }
 
   // --------------------------------------------------------------------------
   // [Meta]
   // --------------------------------------------------------------------------
 
-  //! @brief Set painter meta variables (meta origin, meta region, user origin and user region).
+  //! @brief Set painter meta variables (meta origin, meta region) and reset
+  //! all user variables (user origin, user region), clipping and states.
   //!
-  //! This function were designed as an optimization for windowing systems to
+  //! This function was designed as an optimization for windowing systems to
   //! set all important origin and clipping information per one function call.
-  FOG_INLINE void setMetaVariables(
-    const IntPoint& metaOrigin,
-    const Region& metaRegion, 
-    bool useMetaRegion,
-    bool reset)
-  { _engine->setMetaVariables(metaOrigin, metaRegion, useMetaRegion, reset); }
+  FOG_INLINE void setMetaVars(const Region& region, const IntPoint& origin) { _engine->setMetaVars(region, origin); }
 
-  //! @brief Change meta origin to @a p.
-  FOG_INLINE void setMetaOrigin(const IntPoint& p) { _engine->setMetaOrigin(p); }
-  //! @brief Change user origin to @a p.
-  FOG_INLINE void setUserOrigin(const IntPoint& p) { _engine->setUserOrigin(p); }
+  //! @brief Reset meta variables (setting meta region to infinite and meta
+  //! origin to zero).
+  //!
+  //! This function also resets all clipping and states like @c setMetaVars()
+  //! do.
+  FOG_INLINE void resetMetaVars() { _engine->resetMetaVars(); }
+
+  //! @brief Set user variables (user origin, user region).
+  FOG_INLINE void setUserVars(const Region& region, const IntPoint& origin) { _engine->setUserVars(region, origin); }
+  //! @brief Set user origin.
+  FOG_INLINE void setUserOrigin(const IntPoint& origin, uint32_t originOp) { _engine->setUserOrigin(origin, originOp); }
+  //! @brief Reset user variables (setting user region to infinite and user
+  //! origin to zero).
+  FOG_INLINE void resetUserVars() { _engine->resetUserVars(); }
+
+  //! @brief Get meta region.
+  FOG_INLINE Region getMetaRegion() const { return _engine->getMetaRegion(); }
+  //! @brief Get user region.
+  FOG_INLINE Region getUserRegion() const { return _engine->getUserRegion(); }
 
   //! @brief Get meta origin.
   FOG_INLINE IntPoint getMetaOrigin() const { return _engine->getMetaOrigin(); }
   //! @brief Get user origin.
   FOG_INLINE IntPoint getUserOrigin() const { return _engine->getUserOrigin(); }
-
-  //! @brief Translate meta origin by @a p.
-  FOG_INLINE void translateMetaOrigin(const IntPoint& p) { _engine->translateMetaOrigin(p); }
-  //! @brief Translate user origin by @a p.
-  FOG_INLINE void translateUserOrigin(const IntPoint& p) { _engine->translateUserOrigin(p); }
-
-  //! @brief Set user region to @a r.
-  FOG_INLINE void setUserRegion(const Region& r) { _engine->setUserRegion(r); }
-  //! @brief Set user region to @a r.
-  //! @overload
-  FOG_INLINE void setUserRegion(const IntRect& r) { _engine->setUserRegion(r); }
-
-  //! @brief Reset meta variables (meta origin and meta region).
-  //!
-  //! Resetting means set meta origin to [0, 0] and clear meta region.
-  FOG_INLINE void resetMetaVars() { _engine->resetMetaVars(); }
-  //! @brief Reset user variables (user origin and user region).
-  //!
-  //! Resetting means set user origin to [0, 0] and clear user region.
-  FOG_INLINE void resetUserVars() { _engine->resetUserVars(); }
-
-  //! @brief Get meta region.
-  FOG_INLINE Region getMetaRegion() const { return _engine->getMetaRegion(); }
-  //! @brief Get user origin.
-  FOG_INLINE Region getUserRegion() const { return _engine->getUserRegion(); }
-
-  //! @brief Tells if current meta region is used (calling @c resetMetaVars() will unuse it).
-  FOG_INLINE bool isMetaRegionUsed() const { return _engine->isMetaRegionUsed(); }
-  //! @brief Tells if current user region is used (calling @c resetUserVars() will unuse it).
-  FOG_INLINE bool isUserRegionUsed() const { return _engine->isUserRegionUsed(); }
 
   // --------------------------------------------------------------------------
   // [Operator]
@@ -277,34 +253,25 @@ struct FOG_API Painter
   // --------------------------------------------------------------------------
 
   //! @brief Get source type, see @c PAINTER_SOURCE_TYPE.
-  FOG_INLINE uint32_t getSourceType() const
-  { return _engine->getSourceType(); }
+  FOG_INLINE uint32_t getSourceType() const { return _engine->getSourceType(); }
 
   //! @brief Get source color as @c Argb instance.
   //!
   //! If current source isn't solid color, the @c Argb(0x00000000) color is
   //! returned.
-  FOG_INLINE err_t getSourceArgb(Argb& argb) const
-  { return _engine->getSourceArgb(argb); }
+  FOG_INLINE Argb getSourceArgb() const { return _engine->getSourceArgb(); }
 
   //! @brief Get source pattern.
   //!
   //! If source color was set through @c setSource(Argb argb) method,
   //! pattern is created automatically.
-  FOG_INLINE err_t getSourcePattern(Pattern& pattern) const
-  { return _engine->getSourcePattern(pattern); }
+  FOG_INLINE Pattern getSourcePattern() const { return _engine->getSourcePattern(); }
 
   //! @brief Set source as solid @a rgba color.
-  FOG_INLINE void setSource(Argb argb)
-  { _engine->setSource(argb); }
+  FOG_INLINE void setSource(Argb argb) { _engine->setSource(argb); }
 
   //! @brief Set source as pattern @a pattern.
-  FOG_INLINE void setSource(const Pattern& pattern)
-  { _engine->setSource(pattern); }
-
-  //! @brief Set source as color filter @a colorFilter.
-  FOG_INLINE void setSource(const ColorFilter& colorFilter)
-  { _engine->setSource(colorFilter); }
+  FOG_INLINE void setSource(const Pattern& pattern) { _engine->setSource(pattern); }
 
   // --------------------------------------------------------------------------
   // [Fill Parameters]
@@ -410,12 +377,6 @@ struct FOG_API Painter
   FOG_INLINE void restore() { _engine->restore(); }
 
   // --------------------------------------------------------------------------
-  // [Clear]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE void clear() { _engine->clear(); }
-
-  // --------------------------------------------------------------------------
   // [Raster Drawing]
   // --------------------------------------------------------------------------
 
@@ -427,6 +388,8 @@ struct FOG_API Painter
   FOG_INLINE void fillRects(const IntRect* r, sysuint_t count) { _engine->fillRects(r, count); }
   FOG_INLINE void fillRound(const IntRect& r, const IntPoint& radius) { _engine->fillRound(r, radius); }
   FOG_INLINE void fillRegion(const Region& region) { _engine->fillRegion(region); }
+
+  FOG_INLINE void fillAll() { _engine->fillAll(); }
 
   // --------------------------------------------------------------------------
   // [Vector Drawing]
@@ -492,7 +455,7 @@ struct FOG_API Painter
   // --------------------------------------------------------------------------
 
   //! @brief Null paint engine used for non-initialized painters.
-  static PaintEngine* sharedNull;
+  static PaintEngine* _dnull;
 
   // --------------------------------------------------------------------------
   // [Members]

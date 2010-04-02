@@ -118,7 +118,7 @@ struct FOG_API Stream
   // [Data]
   // --------------------------------------------------------------------------
 
-  static StreamDevice* sharedNull;
+  static StreamDevice* _dnull;
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -141,7 +141,7 @@ struct FOG_API Stream
 
   FOG_INLINE uint32_t getFlags() const { return _d->flags; }
 
-  FOG_INLINE bool isNull()     const { return _d == sharedNull; }
+  FOG_INLINE bool isNull()     const { return _d == _dnull; }
 
   FOG_INLINE bool isOpen()     const { return (_d->flags & STREAM_IS_OPEN    ) != 0; }
   FOG_INLINE bool isSeekable() const { return (_d->flags & STREAM_IS_SEEKABLE) != 0; }

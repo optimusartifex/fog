@@ -144,10 +144,10 @@ static void derefLibraryData(LibraryData* d)
 // [Fog::Library]
 // ============================================================================
 
-Static<LibraryData> Library::sharedNull;
+Static<LibraryData> Library::_dnull;
 
 Library::Library() :
-  _d(refLibraryData(sharedNull.instancep()))
+  _d(refLibraryData(_dnull.instancep()))
 {
 }
 
@@ -157,7 +157,7 @@ Library::Library(const Library& other) :
 }
 
 Library::Library(const String& fileName, uint32_t openFlags) :
-  _d(refLibraryData(sharedNull.instancep()))
+  _d(refLibraryData(_dnull.instancep()))
 {
   open(fileName, openFlags);
 }
@@ -258,7 +258,7 @@ fail:
 void Library::close()
 {
   derefLibraryData(
-    atomicPtrXchg(&_d, refLibraryData(sharedNull.instancep()))
+    atomicPtrXchg(&_d, refLibraryData(_dnull.instancep()))
   );
 }
 
@@ -379,8 +379,8 @@ FOG_INIT_DECLARE err_t fog_library_init(void)
 {
   using namespace Fog;
 
-  Library::sharedNull.init();
-  LibraryData* d = Library::sharedNull.instancep();
+  Library::_dnull.init();
+  LibraryData* d = Library::_dnull.instancep();
   d->refCount.init(1);
   d->handle = NULL;
 
@@ -430,5 +430,5 @@ FOG_INIT_DECLARE void fog_library_shutdown(void)
   using namespace Fog;
 
   library_local.destroy();
-  Library::sharedNull->refCount.dec();
+  Library::_dnull->refCount.dec();
 }

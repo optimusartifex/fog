@@ -52,13 +52,13 @@ static FOG_INLINE bool fitToRange(
 
 ByteArray::ByteArray()
 {
-  _d = sharedNull->refAlways();
+  _d = _dnull->refAlways();
 }
 
 ByteArray::ByteArray(char ch, sysuint_t length)
 {
   _d = Data::alloc(length);
-  if (!_d) { _d = sharedNull->refAlways(); return; }
+  if (!_d) { _d = _dnull->refAlways(); return; }
   if (!length) return;
 
   StringUtil::fill(_d->data, ch, length);
@@ -89,7 +89,7 @@ ByteArray::ByteArray(const char* str)
   sysuint_t length = StringUtil::len(str);
 
   _d = Data::alloc(0, str, length);
-  if (!_d) _d = sharedNull->refAlways();
+  if (!_d) _d = _dnull->refAlways();
 }
 
 ByteArray::ByteArray(const char* str, sysuint_t length)
@@ -97,7 +97,7 @@ ByteArray::ByteArray(const char* str, sysuint_t length)
   if (length == DETECT_LENGTH) length = StringUtil::len(str);
 
   _d = Data::alloc(0, str, length);
-  if (!_d) _d = sharedNull->refAlways();
+  if (!_d) _d = _dnull->refAlways();
 }
 
 ByteArray::ByteArray(const Str8& str)
@@ -107,7 +107,7 @@ ByteArray::ByteArray(const Str8& str)
     ? StringUtil::len(s) : str.getLength();
 
   _d = Data::alloc(0, s, length);
-  if (!_d) _d = sharedNull->refAlways();
+  if (!_d) _d = _dnull->refAlways();
 }
 
 ByteArray::~ByteArray()
@@ -344,7 +344,7 @@ void ByteArray::clear()
 {
   if (_d->refCount.get() > 1)
   {
-    atomicPtrXchg(&_d, sharedNull->refAlways())->deref();
+    atomicPtrXchg(&_d, _dnull->refAlways())->deref();
     return;
   }
 
@@ -355,7 +355,7 @@ void ByteArray::clear()
 
 void ByteArray::free()
 {
-  atomicPtrXchg(&_d, sharedNull->refAlways())->deref();
+  atomicPtrXchg(&_d, _dnull->refAlways())->deref();
 }
 
 char* ByteArray::getMData()
@@ -3104,7 +3104,7 @@ void ByteArray::Data::deref()
 
 ByteArray::Data* ByteArray::Data::adopt(void* address, sysuint_t capacity)
 {
-  if (capacity == 0) return ByteArray::sharedNull->refAlways();
+  if (capacity == 0) return ByteArray::_dnull->refAlways();
 
   Data* d = (Data*)address;
   d->refCount.init(1);
@@ -3137,7 +3137,7 @@ ByteArray::Data* ByteArray::Data::adopt(void* address, sysuint_t capacity, const
 
 ByteArray::Data* ByteArray::Data::alloc(sysuint_t capacity)
 {
-  if (capacity == 0) return ByteArray::sharedNull->refAlways();
+  if (capacity == 0) return ByteArray::_dnull->refAlways();
 
   // Pad to 8 bytes
   capacity = (capacity + 7) & ~7;
@@ -3160,7 +3160,7 @@ ByteArray::Data* ByteArray::Data::alloc(sysuint_t capacity, const char* str, sys
   if (length == DETECT_LENGTH) length = StringUtil::len(str);
   if (length > capacity) capacity = length;
 
-  if (capacity == 0) return ByteArray::sharedNull->refAlways();
+  if (capacity == 0) return ByteArray::_dnull->refAlways();
 
   Data* d = alloc(capacity);
   if (!d) return NULL;
@@ -3207,7 +3207,7 @@ void ByteArray::Data::free(Data* d)
   Memory::free((void*)d);
 }
 
-Static<ByteArray::Data> ByteArray::sharedNull;
+Static<ByteArray::Data> ByteArray::_dnull;
 
 } // Fog namespace
 
@@ -3215,7 +3215,7 @@ FOG_INIT_DECLARE err_t fog_bytearray_init(void)
 {
   using namespace Fog;
 
-  ByteArray::Data* d = ByteArray::sharedNull.instancep();
+  ByteArray::Data* d = ByteArray::_dnull.instancep();
   d->refCount.init(1);
   d->flags |= ByteArray::Data::IsSharable;
   d->hashCode = 0;

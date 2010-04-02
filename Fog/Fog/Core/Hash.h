@@ -77,7 +77,7 @@ struct FOG_API UnorderedAbstract
     }
   };
 
-  static Static<Data> sharedNull;
+  static Static<Data> _dnull;
 
   // --------------------------------------------------------------------------
   // [Implicit Sharing]
@@ -216,7 +216,7 @@ struct UnorderedHash : public UnorderedAbstract
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  UnorderedHash() { _d = sharedNull->ref(); }
+  UnorderedHash() { _d = _dnull->ref(); }
   UnorderedHash(const UnorderedHash<KeyType, ValueType>& other) { _d = other._d->ref(); }
   ~UnorderedHash() { ((Data*)_d)->deref(); }
 
@@ -360,7 +360,7 @@ alloc_fail:
 template<typename KeyType, typename ValueType>
 void UnorderedHash<KeyType, ValueType>::clear()
 {
-  ((Data*)atomicPtrXchg(&_d, sharedNull->ref()))->deref();
+  ((Data*)atomicPtrXchg(&_d, _dnull->ref()))->deref();
 }
 
 template<typename KeyType, typename ValueType>
@@ -647,7 +647,7 @@ struct UnorderedSet : public UnorderedAbstract
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  UnorderedSet() { _d = sharedNull->ref(); }
+  UnorderedSet() { _d = _dnull->ref(); }
   UnorderedSet(const UnorderedSet<KeyType>& other) { _d = other._d->ref(); }
   ~UnorderedSet() { ((Data*)_d)->deref(); }
 
@@ -772,7 +772,7 @@ alloc_fail:
 template<typename KeyType>
 void UnorderedSet<KeyType>::clear()
 {
-  ((Data*)atomicPtrXchg(&_d, sharedNull->ref()))->deref();
+  ((Data*)atomicPtrXchg(&_d, _dnull->ref()))->deref();
 }
 
 template<typename KeyType>

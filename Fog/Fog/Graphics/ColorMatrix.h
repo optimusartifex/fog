@@ -6,8 +6,8 @@
 // AggOO - Version 0.1
 // Copyright (c) 2006 Dratek Software
 //
-// Author of AggOO (Chad M. Draper) agreed relicencing code to the MIT licence
-// that is used for Fog (original code was 3 clause BSD licence). Thanks.
+// Author of AggOO (Chad M. Draper) agreed relicencing code to the MIT license
+// that is used for Fog (original code was 3 clause BSD license). Thanks.
 
 // [Guard]
 #ifndef _FOG_GRAPHICS_COLORMATRIX_H
@@ -65,10 +65,7 @@ struct FOG_API ColorMatrix
     _copyData(getData(), other.getData());
   }
 
-  FOG_INLINE ColorMatrix(_DONT_INITIALIZE _dontInitialize) 
-  {
-    FOG_UNUSED(_dontInitialize);
-  }
+  FOG_INLINE ColorMatrix(_DONT_INITIALIZE) {}
 
   FOG_INLINE ColorMatrix(
     float m00, float m01, float m02, float m03, float m04,

@@ -36,7 +36,7 @@ namespace Fog {
 // [Fog::ListPrivate_ - Shared Null]
 // ===========================================================================
 
-Static<ListData> ListPrivate_::sharedNull;
+Static<ListData> ListPrivate_::_dnull;
 
 // ===========================================================================
 // [Fog::ListPrivate_ - Primitive Types]
@@ -267,7 +267,7 @@ void ListPrivate_::p_squeeze(ListUntyped* self, sysuint_t typeSize)
 
 void ListPrivate_::p_free(ListUntyped* self)
 {
-  p_deref(atomicPtrXchg(&self->_d, sharedNull->ref()));
+  p_deref(atomicPtrXchg(&self->_d, _dnull->ref()));
 }
 
 void ListPrivate_::p_clear(ListUntyped* self)
@@ -278,7 +278,7 @@ void ListPrivate_::p_clear(ListUntyped* self)
   {
     if (d->refCount.get() > 1)
     {
-      p_deref(atomicPtrXchg(&self->_d, sharedNull->ref()));
+      p_deref(atomicPtrXchg(&self->_d, _dnull->ref()));
     }
     else
     {
@@ -677,7 +677,7 @@ void ListPrivate_::c_squeeze(ListUntyped* self, const SequenceInfoVTable* vtable
 
 void ListPrivate_::c_free(ListUntyped* self, const SequenceInfoVTable* vtable)
 {
-  c_deref(atomicPtrXchg(&self->_d, sharedNull->ref()), vtable);
+  c_deref(atomicPtrXchg(&self->_d, _dnull->ref()), vtable);
 }
 
 void ListPrivate_::c_clear(ListUntyped* self, const SequenceInfoVTable* vtable)
@@ -1041,7 +1041,7 @@ FOG_INIT_DECLARE err_t fog_list_init(void)
 {
   using namespace Fog;
 
-  ListData* d = ListPrivate_::sharedNull.instancep();
+  ListData* d = ListPrivate_::_dnull.instancep();
   d->refCount.init(1);
   d->length = 0;
   d->capacity = 0;
@@ -1056,6 +1056,6 @@ FOG_INIT_DECLARE void fog_list_shutdown(void)
 {
   using namespace Fog;
 
-  ListData* d = ListPrivate_::sharedNull.instancep();
+  ListData* d = ListPrivate_::_dnull.instancep();
   d->refCount.dec();
 }

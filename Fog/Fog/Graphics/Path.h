@@ -130,7 +130,7 @@ struct FOG_API DoublePath
   // [Implicit Sharing]
   // --------------------------------------------------------------------------
 
-  static Static<DoublePathData> sharedNull;
+  static Static<DoublePathData> _dnull;
 
   static DoublePathData* _allocData(sysuint_t capacity);
   static DoublePathData* _reallocData(DoublePathData* d, sysuint_t capacity);
@@ -153,7 +153,7 @@ struct FOG_API DoublePath
   //! @brief Get whether path is empty.
   FOG_INLINE bool isEmpty() const { return _d->length == 0; }
   //! @brief Get whether path is null.
-  FOG_INLINE bool isNull() const { return _d == sharedNull.instancep(); }
+  FOG_INLINE bool isNull() const { return _d == _dnull.instancep(); }
 
   //! @brief Get path commands array.
   FOG_INLINE const uint8_t* getCommands() const { return _d->commands; }

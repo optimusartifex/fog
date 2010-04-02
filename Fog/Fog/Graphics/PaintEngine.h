@@ -76,32 +76,18 @@ struct FOG_API PaintEngine
   // [Meta]
   // --------------------------------------------------------------------------
 
-  virtual void setMetaVariables(
-    const IntPoint& metaOrigin,
-    const Region& metaRegion,
-    bool useMetaRegion,
-    bool reset) = 0;
+  virtual void setMetaVars(const Region& region, const IntPoint& origin) = 0;
+  virtual void resetMetaVars() = 0;
 
-  virtual void setMetaOrigin(const IntPoint& pt) = 0;
-  virtual void setUserOrigin(const IntPoint& pt) = 0;
-
-  virtual IntPoint getMetaOrigin() const = 0;
-  virtual IntPoint getUserOrigin() const = 0;
-
-  virtual void translateMetaOrigin(const IntPoint& pt) = 0;
-  virtual void translateUserOrigin(const IntPoint& pt) = 0;
-
-  virtual void setUserRegion(const IntRect& r) = 0;
-  virtual void setUserRegion(const Region& r) = 0;
+  virtual void setUserVars(const Region& region, const IntPoint& origin) = 0;
+  virtual void setUserOrigin(const IntPoint& origin, uint32_t originOp) = 0;
+  virtual void resetUserVars() = 0;
 
   virtual Region getMetaRegion() const = 0;
   virtual Region getUserRegion() const = 0;
 
-  virtual bool isMetaRegionUsed() const = 0;
-  virtual bool isUserRegionUsed() const = 0;
-
-  virtual void resetMetaVars() = 0;
-  virtual void resetUserVars() = 0;
+  virtual IntPoint getMetaOrigin() const = 0;
+  virtual IntPoint getUserOrigin() const = 0;
 
   // --------------------------------------------------------------------------
   // [Operator]
@@ -116,12 +102,40 @@ struct FOG_API PaintEngine
 
   virtual uint32_t getSourceType() const = 0;
 
-  virtual err_t getSourceArgb(Argb& argb) const = 0;
-  virtual err_t getSourcePattern(Pattern& pattern) const = 0;
+  virtual Argb getSourceArgb() const = 0;
+  virtual Pattern getSourcePattern() const = 0;
 
   virtual void setSource(Argb argb) = 0;
   virtual void setSource(const Pattern& pattern) = 0;
-  virtual void setSource(const ColorFilter& colorFilter) = 0;
+
+#if 0
+  // API proposal
+
+  // --------------------------------------------------------------------------
+  // [Global Opacity]
+  // --------------------------------------------------------------------------
+
+  virtual float getOpacity() const = 0;
+  virtual void setOpacity(float opacity) = 0;
+
+  // --------------------------------------------------------------------------
+  // [Clipping]
+  // --------------------------------------------------------------------------
+
+  virtual void clipRect(const IntRect& rect, uint32_t clipOp) = 0;
+  virtual void clipMask(const IntPoint& pt, const Image& mask, uint32_t clipOp) = 0;
+  virtual void clipRegion(const Region& region, uint32_t clipOp) = 0;
+
+  virtual void clipRect(const DoubleRect& rect, uint32_t clipOp) = 0;
+  virtual void clipMask(const DoublePoint& pt, const Image& mask, uint32_t clipOp) = 0;
+  virtual void clipRects(const DoubleRect* r, sysuint_t count, uint32_t clipOp) = 0;
+  virtual void clipRound(const DoubleRect& r, const DoublePoint& radius, uint32_t clipOp) = 0;
+  virtual void clipEllipse(const DoublePoint& cp, const DoublePoint& r, uint32_t clipOp) = 0;
+  virtual void clipArc(const DoublePoint& cp, const DoublePoint& r, double start, double sweep, uint32_t clipOp) = 0;
+  virtual void clipPath(const DoublePath& path, uint32_t clipOp) = 0;
+
+  virtual void resetClip() = 0;
+#endif
 
   // --------------------------------------------------------------------------
   // [Fill Parameters]
@@ -188,12 +202,6 @@ struct FOG_API PaintEngine
   virtual void restore() = 0;
 
   // --------------------------------------------------------------------------
-  // [Clear]
-  // --------------------------------------------------------------------------
-
-  virtual void clear() = 0;
-
-  // --------------------------------------------------------------------------
   // [Raster Drawing]
   // --------------------------------------------------------------------------
 
@@ -205,6 +213,8 @@ struct FOG_API PaintEngine
   virtual void fillRects(const IntRect* r, sysuint_t count) = 0;
   virtual void fillRound(const IntRect& r, const IntPoint& radius) = 0;
   virtual void fillRegion(const Region& region) = 0;
+
+  virtual void fillAll() = 0;
 
   // --------------------------------------------------------------------------
   // [Vector Drawing]

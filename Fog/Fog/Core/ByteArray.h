@@ -116,7 +116,7 @@ struct FOG_API ByteArray
     char data[4];
   };
 
-  static Static<Data> sharedNull;
+  static Static<Data> _dnull;
 
   // --------------------------------------------------------------------------
   // [Typedefs]
@@ -164,7 +164,7 @@ struct FOG_API ByteArray
   //! @copydoc Doxygen::Implicit::getFlags().
   FOG_INLINE uint32_t getFlags() const { return _d->flags; }
   //! @copydoc Doxygen::Implicit::isNull().
-  FOG_INLINE bool isNull() const { return _d == sharedNull.instancep(); }
+  FOG_INLINE bool isNull() const { return _d == _dnull.instancep(); }
   //! @copydoc Doxygen::Implicit::isDynamic().
   FOG_INLINE bool isDynamic() const { return (_d->flags & Data::IsDynamic) != 0; }
   //! @copydoc Doxygen::Implicit::isSharable().

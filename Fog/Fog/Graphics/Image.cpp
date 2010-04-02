@@ -33,10 +33,135 @@
 namespace Fog {
 
 // ============================================================================
+// [Fog::ImageData]
+// ============================================================================
+
+ImageData::ImageData() {}
+ImageData::~ImageData() {}
+
+ImageData* ImageData::ref() const
+{
+  if (flags & IsSharable)
+    return refAlways();
+  else
+    return copy(this);
+}
+
+void ImageData::deref()
+{
+  if (refCount.deref())
+  {
+    bool dynamic = (flags & IsDynamic) != 0;
+    this->~ImageData();
+    if (dynamic) Memory::free(this);
+  }
+}
+
+ImageData* ImageData::alloc(sysuint_t size)
+{
+  sysuint_t dsize = sizeof(ImageData) - sizeof(uint32_t) + size;
+  ImageData* d = (ImageData*)Memory::alloc(dsize);
+  if (!d) return NULL;
+
+  new (d) ImageData();
+  d->refCount.init(1);
+  d->flags = ImageData::IsDynamic | ImageData::IsSharable;
+  d->inUse = 0;
+  d->width = 0;
+  d->height = 0;
+  d->format = 0;
+  d->depth = 0;
+  d->bytesPerPixel = 0;
+  d->stride = 0;
+  d->data = (size != 0) ? d->buffer : NULL;
+  d->first = d->data;
+  d->size = size;
+
+  return d;
+}
+
+ImageData* ImageData::alloc(int w, int h, uint32_t format)
+{
+  ImageData* d;
+  sysint_t stride;
+  uint64_t size;
+
+  FOG_ASSERT(w >= 0 && h >= 0);
+
+  // Zero or negative coordinates are invalid
+  if (w == 0 || h == 0) return NULL;
+
+  // Prevent multiply overflow (64 bit int type)
+  if (w >= IMAGE_MAX_WIDTH || h >= IMAGE_MAX_HEIGHT)
+    return NULL;
+
+  size = (int64_t)w * h;
+  if (size > INT_MAX) return NULL;
+
+  uint32_t depth = Image::formatToDepth(format);
+
+  // Calculate stride
+  if ((stride = Image::calcStride(w, depth)) == 0) return 0;
+
+  // Try to alloc data
+  d = alloc((sysuint_t)(h * stride));
+  if (!d) return NULL;
+
+  d->width = w;
+  d->height = h;
+  d->format = format;
+  d->depth = (uint16_t)depth;
+  d->bytesPerPixel = (uint16_t)(depth >> 3);
+  d->stride = stride;
+
+  return d;
+}
+
+ImageData* ImageData::copy(const ImageData* other)
+{
+  ImageData* d;
+
+  if (other->width && other->height)
+  {
+    d = alloc(other->width, other->height, other->format);
+    if (!d) return NULL;
+
+    uint8_t *destPixels = d->first;
+    const uint8_t *srcPixels = other->first;
+
+    sysint_t w = d->width;
+    RasterEngine::VSpanFn copy;
+
+    switch (d->depth)
+    {
+      case 32: copy = RasterEngine::functionMap->dib.memcpy32; break;
+      case  8: copy = RasterEngine::functionMap->dib.memcpy8; break;
+      default:
+        FOG_ASSERT_NOT_REACHED();
+    }
+
+    for (sysuint_t y = d->height; y; y--,
+      destPixels += d->stride,
+      srcPixels += other->stride)
+    {
+      copy(destPixels, srcPixels, w, NULL);
+    }
+
+    d->palette = other->palette;
+  }
+  else
+  {
+    d = Image::sharedNull->refAlways();
+  }
+
+  return d;
+}
+
+// ============================================================================
 // [Fog::Image]
 // ============================================================================
 
-Static<Image::Data> Image::sharedNull;
+Static<ImageData> Image::sharedNull;
 
 Image::Image() : 
   _d(sharedNull->refAlways())
@@ -61,7 +186,7 @@ Image::~Image()
 
 err_t Image::_detach()
 {
-  Data* d = _d;
+  ImageData* d = _d;
   if (d == sharedNull.instancep()) return ERR_OK;
 
   if (d->stride == 0)
@@ -70,9 +195,9 @@ err_t Image::_detach()
     return ERR_OK;
   }
 
-  if (d->refCount.get() > 1 || (d->flags & Data::IsReadOnly))
+  if (d->refCount.get() > 1 || (d->flags & ImageData::IsReadOnly))
   {
-    Data* newd = Data::copy(d);
+    ImageData* newd = ImageData::copy(d);
     if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
     atomicPtrXchg(&_d, newd)->deref();
@@ -88,7 +213,7 @@ void Image::free()
 
 err_t Image::create(int w, int h, uint32_t format)
 {
-  Data* d = _d;
+  ImageData* d = _d;
 
   // Zero dimensions are like Image::free()
   if ((uint)format >= PIXEL_FORMAT_COUNT)
@@ -104,13 +229,13 @@ err_t Image::create(int w, int h, uint32_t format)
   }
 
   // Always return a new detached and writable image.
-  if (d->width == w && d->height == h && d->format == format && d->refCount.get() == 1 && !(d->flags & Data::IsReadOnly))
+  if (d->width == w && d->height == h && d->format == format && d->refCount.get() == 1 && !(d->flags & ImageData::IsReadOnly))
   {
     return ERR_OK;
   }
 
   // Create new data
-  Data* newd = Data::alloc(w, h, format);
+  ImageData* newd = ImageData::alloc(w, h, format);
   if (!newd)
   {
     free();
@@ -123,19 +248,17 @@ err_t Image::create(int w, int h, uint32_t format)
 
 err_t Image::adopt(const ImageBuffer& buffer, uint32_t adoptFlags)
 {
-  Data* d = _d;
+  ImageData* d = _d;
 
-  if ((buffer.width <= 0 || buffer.height <= 0) || 
-      (uint)buffer.format >= PIXEL_FORMAT_COUNT ||
-      buffer.data == NULL)
+  if (!buffer.isValid())
   {
     free();
     return ERR_RT_INVALID_ARGUMENT;
   }
 
-  if (d->refCount.get() > 1 || ((d->flags & Data::IsDynamic) && d->size != 0))
+  if (d->refCount.get() > 1 || ((d->flags & ImageData::IsDynamic) && d->size != 0))
   {
-    Data* newd = Data::alloc(0);
+    ImageData* newd = ImageData::alloc(0);
     if (!newd)
     {
       free();
@@ -168,9 +291,9 @@ err_t Image::adopt(const ImageBuffer& buffer, uint32_t adoptFlags)
 
   // Read only memory ?
   if ((adoptFlags & IMAGE_ATOPT_READ_ONLY) != 0)
-    d->flags |= Data::IsReadOnly;
+    d->flags |= ImageData::IsReadOnly;
   else
-    d->flags &= ~Data::IsReadOnly;
+    d->flags &= ~ImageData::IsReadOnly;
 
   return ERR_OK;
 }
@@ -221,7 +344,7 @@ err_t Image::set(const Image& other, const IntRect& area)
 
   if (_d == other._d)
   {
-    Data* newd = Data::alloc(w, h, other.getFormat());
+    ImageData* newd = ImageData::alloc(w, h, other.getFormat());
     if (newd == NULL) return ERR_RT_OUT_OF_MEMORY;
 
     uint8_t* dstCur = newd->first;
@@ -294,7 +417,7 @@ err_t Image::setDeep(const Image& other)
     return ERR_OK;
   }
 
-  Data* newd = Data::copy(other._d);
+  ImageData* newd = ImageData::copy(other._d);
   if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
   atomicPtrXchg(&_d, newd)->deref();
@@ -303,7 +426,7 @@ err_t Image::setDeep(const Image& other)
 
 err_t Image::convert(uint32_t format)
 {
-  Data* d = _d;
+  ImageData* d = _d;
 
   uint32_t sourceFormat = _d->format;
   uint32_t targetFormat = format;
@@ -351,7 +474,7 @@ err_t Image::convert(uint32_t format)
   }
   else
   {
-    Data* newd = Data::alloc(w, h, targetFormat);
+    ImageData* newd = ImageData::alloc(w, h, targetFormat);
     if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
     uint8_t* dstCur = newd->first;
@@ -581,7 +704,7 @@ err_t Image::setPalette(sysuint_t index, const Argb* rgba, sysuint_t count)
 
 err_t Image::getDib(int x, int y, uint w, uint32_t dibFormat, void* dst) const
 {
-  Data* d = _d;
+  ImageData* d = _d;
 
   if ((uint)dibFormat >= DIB_FORMAT_COUNT)
     return ERR_IMAGE_INVALID_FORMAT;
@@ -607,7 +730,7 @@ err_t Image::getDib(int x, int y, uint w, uint32_t dibFormat, void* dst) const
 err_t Image::setDib(int x, int y, uint w, uint32_t dibFormat, const void* src)
 {
   FOG_RETURN_ON_ERROR(detach());
-  Data* d = _d;
+  ImageData* d = _d;
 
   if ((uint)dibFormat >= DIB_FORMAT_COUNT)
     return ERR_IMAGE_INVALID_FORMAT;
@@ -641,7 +764,7 @@ err_t Image::swapRgb()
 
   FOG_RETURN_ON_ERROR(detach());
 
-  Data* d = _d;
+  ImageData* d = _d;
 
   int x, y;
   int w = d->width;
@@ -699,7 +822,7 @@ err_t Image::swapArgb()
 
   FOG_RETURN_ON_ERROR(detach());
 
-  Data* d = _d;
+  ImageData* d = _d;
 
   int x, y;
   int w = d->width;
@@ -786,8 +909,8 @@ err_t Image::invert(Image& dst, const Image& src, uint32_t channels)
     : dst.detach());
 
   // Prepare data.
-  Data* dst_d = dst._d;
-  Data* src_d = src._d;
+  ImageData* dst_d = dst._d;
+  ImageData* src_d = src._d;
 
   sysint_t dstStride = dst_d->stride;
   sysint_t srcStride = src_d->stride;
@@ -1057,8 +1180,8 @@ err_t Image::mirror(Image& dst, const Image& src, uint32_t mirrorMode)
     ? dst.create(src.getWidth(), src.getHeight(), format)
     : dst.detach());
 
-  Data* dst_d = dst._d;
-  Data* src_d = src._d;
+  ImageData* dst_d = dst._d;
+  ImageData* src_d = src._d;
 
   sysint_t dstStride = dst_d->stride;
   sysint_t srcStride = src_d->stride;
@@ -1148,8 +1271,8 @@ err_t Image::rotate(Image& dst, const Image& src, uint32_t rotateMode)
   err_t err = dst.create(src.getHeight(), src.getWidth(), src.getFormat());
   if (err) return err;
 
-  Data* dst_d = dst._d;
-  Data* src_d = src._d;
+  ImageData* dst_d = dst._d;
+  ImageData* src_d = src._d;
 
   sysint_t dstStride = dst_d->stride;
   sysint_t srcStride = src_d->stride;
@@ -1919,8 +2042,8 @@ err_t Image::fillVGradient(const IntRect& r, Argb c0, Argb c1, int op)
 // ============================================================================
 
 static err_t _blitImage(
-  Image::Data* dstD, int dstX, int dstY,
-  Image::Data* srcD, int srcX, int srcY,
+  ImageData* dstD, int dstX, int dstY,
+  ImageData* srcD, int srcX, int srcY,
   int w, int h,
   uint32_t op, uint32_t opacity)
 {
@@ -2018,8 +2141,8 @@ err_t Image::blitImage(const IntPoint& pt, const Image& src, uint32_t op, uint32
   if ((uint)op >= OPERATOR_COUNT) return ERR_RT_INVALID_ARGUMENT;
   if (opacity == 0) return ERR_OK;
 
-  Data* dst_d = _d;
-  Data* src_d = src._d;
+  ImageData* dst_d = _d;
+  ImageData* src_d = src._d;
 
   int w = dst_d->width;
   int h = dst_d->height;
@@ -2048,8 +2171,8 @@ err_t Image::blitImage(const IntPoint& pt, const Image& src, const IntRect& srcR
   if (!srcRect.isValid()) return ERR_OK;
   if (opacity == 0) return ERR_OK;
 
-  Data* dst_d = _d;
-  Data* src_d = src._d;
+  ImageData* dst_d = _d;
+  ImageData* src_d = src._d;
 
   int srcX1 = srcRect.getX1();
   int srcY1 = srcRect.getY1();
@@ -2093,7 +2216,7 @@ err_t Image::scroll(int scrollX, int scrollY, const IntRect& r)
 {
   if (scrollX == 0 && scrollY == 0) return ERR_OK;
 
-  Data* d = _d;
+  ImageData* d = _d;
 
   int x1 = r.getX1();
   int y1 = r.getY1();
@@ -2266,7 +2389,7 @@ empty:
 
 HBITMAP Image::toHBITMAP()
 {
-  Data* d = _d;
+  ImageData* d = _d;
   uint8_t* raw;
 
   if (d->width == 0 || d->height == 0) return NULL;
@@ -2298,7 +2421,7 @@ HBITMAP Image::toHBITMAP()
   sysint_t destStride = info.dsBm.bmWidthBytes;
   sysint_t srcStride = d->stride;
 
-  sysuint_t byteWidth = (d->width * d->depth + 7) >> 3;
+  sysuint_t byteWidth = (d->width * (uint32_t)d->depth + 7) >> 3;
 
   for (y = d->height; y; y--, dest += destStride, src += srcStride)
   {
@@ -2555,130 +2678,6 @@ uint32_t Image::formatToBytesPerPixel(uint32_t format)
   }
 }
 
-// ============================================================================
-// [Fog::Image::Data]
-// ============================================================================
-
-Image::Data::Data() {}
-Image::Data::~Data() {}
-
-Image::Data* Image::Data::ref() const
-{
-  if (flags & IsSharable)
-    return refAlways();
-  else
-    return copy(this);
-}
-
-void Image::Data::deref()
-{
-  if (refCount.deref())
-  {
-    bool dynamic = (flags & IsDynamic) != 0;
-    this->~Data();
-    if (dynamic) Memory::free(this);
-  }
-}
-
-Image::Data* Image::Data::alloc(sysuint_t size)
-{
-  sysuint_t dsize = sizeof(Data) - sizeof(uint32_t) + size;
-  Data* d = (Data*)Memory::alloc(dsize);
-  if (!d) return NULL;
-
-  new (d) Data();
-  d->refCount.init(1);
-  d->flags = Data::IsDynamic | Data::IsSharable;
-  d->width = 0;
-  d->height = 0;
-  d->format = 0;
-  d->depth = 0;
-  d->bytesPerPixel = 0;
-  d->stride = 0;
-  d->data = (size != 0) ? d->buffer : NULL;
-  d->first = d->data;
-  d->size = size;
-
-  return d;
-}
-
-Image::Data* Image::Data::alloc(int w, int h, uint32_t format)
-{
-  Data* d;
-  sysint_t stride;
-  uint64_t size;
-
-  FOG_ASSERT(w >= 0 && h >= 0);
-
-  // Zero or negative coordinates are invalid
-  if (w == 0 || h == 0) return NULL;
-
-  // Prevent multiply overflow (64 bit int type)
-  if (w >= IMAGE_MAX_WIDTH || h >= IMAGE_MAX_HEIGHT)
-    return NULL;
-
-  size = (int64_t)w * h;
-  if (size > INT_MAX) return NULL;
-
-  int depth = formatToDepth(format);
-
-  // Calculate stride
-  if ((stride = calcStride(w, depth)) == 0) return 0;
-
-  // Try to alloc data
-  d = alloc((sysuint_t)(h * stride));
-  if (!d) return NULL;
-
-  d->width = w;
-  d->height = h;
-  d->format = format;
-  d->depth = depth;
-  d->bytesPerPixel = depth >> 3;
-  d->stride = stride;
-
-  return d;
-}
-
-Image::Data* Image::Data::copy(const Data* other)
-{
-  Data* d;
-
-  if (other->width && other->height)
-  {
-    d = alloc(other->width, other->height, other->format);
-    if (!d) return NULL;
-
-    uint8_t *destPixels = d->first;
-    const uint8_t *srcPixels = other->first;
-
-    sysint_t w = d->width;
-    RasterEngine::VSpanFn copy;
-
-    switch (d->depth)
-    {
-      case 32: copy = RasterEngine::functionMap->dib.memcpy32; break;
-      case  8: copy = RasterEngine::functionMap->dib.memcpy8; break;
-      default:
-        FOG_ASSERT_NOT_REACHED();
-    }
-
-    for (sysuint_t y = d->height; y; y--,
-      destPixels += d->stride,
-      srcPixels += other->stride)
-    {
-      copy(destPixels, srcPixels, w, NULL);
-    }
-
-    d->palette = other->palette;
-  }
-  else
-  {
-    d = Image::sharedNull->refAlways();
-  }
-
-  return d;
-}
-
 } // Fog namespace
 
 // ============================================================================
@@ -2690,9 +2689,9 @@ FOG_INIT_DECLARE err_t fog_image_init(void)
   using namespace Fog;
 
   Image::sharedNull.init();
-  Image::Data* d = Image::sharedNull.instancep();
+  ImageData* d = Image::sharedNull.instancep();
   d->refCount.init(1);
-  d->flags = Image::Data::IsSharable;
+  d->flags = ImageData::IsSharable;
 
   return ERR_OK;
 }

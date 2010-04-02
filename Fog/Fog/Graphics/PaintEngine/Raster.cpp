@@ -1222,11 +1222,21 @@ bool RasterPaintWorkerManager::isCompleted()
 // [Fog::RasterPaintEngine - Construction / Destruction]
 // ============================================================================
 
-RasterPaintEngine::RasterPaintEngine(const ImageBuffer& buffer, uint32_t initFlags) :
+RasterPaintEngine::RasterPaintEngine(const ImageBuffer& buffer, ImageData* imaged, uint32_t initFlags) :
   workerManager(NULL)
 {
-  // Setup primary context.
+  // BASIC SETUP (setup variables that will never change):
+  // - Setup primary context.
+  // - Setup primary layer (main).
+  // - ClipState / CapsState.
+  // - Rasterizer.
   ctx.engine = this;
+  ctx.layer = &main;
+
+  ctx.clipState = new( allocator.alloc(sizeof(RasterPaintClipState)) ) RasterPaintClipState();
+  ctx.capsState = new( allocator.alloc(sizeof(RasterPaintCapsState)) ) RasterPaintCapsState();
+
+  ras = Rasterizer::getRasterizer();
 
   // Setup primary layer.
   main.pixels = buffer.data;
@@ -1234,17 +1244,9 @@ RasterPaintEngine::RasterPaintEngine(const ImageBuffer& buffer, uint32_t initFla
   main.height = buffer.height;
   main.format = buffer.format;
   main.stride = buffer.stride;
-
-  ctx.layer = &main;
   _setupLayer(&main);
 
-  // Setup primary rasterizer.
-  ras = Rasterizer::getRasterizer();
-
-  // Setup clip / caps state.
-  ctx.clipState = new( allocator.alloc(sizeof(RasterPaintClipState)) ) RasterPaintClipState();
-  ctx.capsState = new( allocator.alloc(sizeof(RasterPaintCapsState)) ) RasterPaintCapsState();
-
+  // Setup clip / caps state to defaults.
   _setClipDefaults();
   _setCapsDefaults();
 
@@ -1272,7 +1274,8 @@ RasterPaintEngine::~RasterPaintEngine()
 
   _deleteStates();
 
-  // This is our context, it's imposible that other thread is using it!
+  // This is our context, it's imposible that other thread is using it at this 
+  // time!
   if (ctx.pctx)
   {
     if (ctx.pctx->initialized) ctx.pctx->destroy(ctx.pctx);
@@ -2982,6 +2985,32 @@ void RasterPaintEngine::blitImage(const DoublePoint& p, const Image& image, cons
 // [Fog::RasterPaintEngine - Helpers]
 // ============================================================================
 
+err_t RasterPaintEngine::switchTo(const ImageBuffer& buffer, ImageData* d)
+{
+  // Sync, making all changes visible to current image / layer.
+  flush(PAINTER_FLUSH_SYNC);
+
+  // Delete all saved states.
+  _deleteStates();
+
+  // Destroy pattern context.
+  if (ctx.pctx && ctx.pctx->initialized) ctx.pctx->destroy(ctx.pctx);
+
+  // Setup primary layer.
+  main.pixels = buffer.data;
+  main.width = buffer.width;
+  main.height = buffer.height;
+  main.format = buffer.format;
+  main.stride = buffer.stride;
+  _setupLayer(&main);
+
+  // Setup clip / caps state to defaults.
+  _setClipDefaults();
+  _setCapsDefaults();
+
+  return ERR_OK;
+}
+
 void RasterPaintEngine::_updateWorkRegion()
 {
   RasterPaintLayer* layer = ctx.layer;
@@ -4238,7 +4267,7 @@ NAME##_end: \
   RasterPaintClipState* clipState = ctx->clipState;
   RasterPaintCapsState* capsState = ctx->capsState;
 
-  Image::Data* image_d = image._d;
+  ImageData* image_d = image._d;
   RasterEngine::VSpanFn vspan = capsState->rops->vspan[image_d->format];
 
   sysint_t dstStride = layer->stride;
@@ -4293,7 +4322,7 @@ void RasterPaintEngine::_renderGlyphSet(RasterPaintContext* ctx, const IntPoint&
   for (sysuint_t i = 0; i < count; i++) \
   { \
     GlyphData* glyphd = glyphs[i]._d; \
-    Image::Data* bitmapd = glyphd->bitmap._d; \
+    ImageData* bitmapd = glyphd->bitmap._d; \
     \
     int px1 = px + glyphd->offset.x; \
     int py1 = py + glyphd->offset.y; \

@@ -25,6 +25,30 @@ namespace Fog {
 static Static<NullPaintEngine> _nullPaintEngine;
 PaintEngine* Painter::sharedNull;
 
+static FOG_INLINE bool Painter_isFormatSupported(uint32_t format)
+{
+  // This function is called after null image check, so the pixel format
+  // can't be null (PIXEL_FORMAT_NULL) at this time.
+  FOG_ASSERT(format != PIXEL_FORMAT_NULL);
+
+  if (format == PIXEL_FORMAT_I8) return false;
+
+  return true;
+}
+
+static FOG_INLINE bool Painter_isRectValid(const Image& image, const IntRect& rect)
+{
+  int x1 = rect.x;
+  int y1 = rect.y;
+  int x2 = x1 + rect.w;
+  int y2 = y1 + rect.h;
+
+  if (x1 < 0 || y1 < 0 || x2 > image.getWidth() || y2 > image.getHeight() || x1 >= x2 || y1 >= y2) 
+    return false;
+  else
+    return true;
+}
+
 Painter::Painter()
 {
   _engine = sharedNull;
@@ -36,6 +60,12 @@ Painter::Painter(Image& image, uint32_t initFlags)
   begin(image, initFlags);
 }
 
+Painter::Painter(Image& image, const IntRect& rect, uint32_t initFlags)
+{
+  _engine = sharedNull;
+  begin(image, rect, initFlags);
+}
+
 Painter::~Painter()
 {
   if (_engine != sharedNull) delete _engine;
@@ -43,26 +73,49 @@ Painter::~Painter()
 
 err_t Painter::begin(Image& image, uint32_t initFlags)
 {
+  // End painting.
   end();
 
-  if (image.isEmpty()) return ERR_IMAGE_INVALID_SIZE;
-
-  // If image is not empty, the format can't be Null.
+  // Do basic checks.
   uint32_t format = image.getFormat();
-  if (format == PIXEL_FORMAT_I8) return ERR_IMAGE_UNSUPPORTED_FORMAT;
 
+  if (image.isEmpty()) return ERR_IMAGE_INVALID_SIZE;
+  if (!Painter_isFormatSupported(format)) return ERR_IMAGE_UNSUPPORTED_FORMAT;
+
+  // Create image buffer.
   FOG_RETURN_ON_ERROR(image.detach());
 
-  Image::Data* image_d = image._d;
   ImageBuffer buffer;
+  buffer.import(image._d);
 
-  buffer.width = image_d->width;
-  buffer.height = image_d->height;
-  buffer.format = image_d->format;
-  buffer.stride = image_d->stride;
-  buffer.data = image_d->first;
+  // Create paint engine.
+  PaintEngine* d = new(std::nothrow) RasterPaintEngine(buffer, image._d, initFlags);
+  if (!d) return ERR_RT_OUT_OF_MEMORY;
 
-  PaintEngine* d = new(std::nothrow) RasterPaintEngine(buffer, initFlags);
+  _engine = d;
+  return ERR_OK;
+}
+
+err_t Painter::begin(Image& image, const IntRect& rect, uint32_t initFlags)
+{
+  // End painting.
+  end();
+
+  // Do basic checks.
+  uint32_t format = image.getFormat();
+
+  if (image.isEmpty()) return ERR_RT_INVALID_ARGUMENT;
+  if (!Painter_isRectValid(image, rect)) return ERR_RT_INVALID_ARGUMENT;
+  if (!Painter_isFormatSupported(format)) return ERR_IMAGE_UNSUPPORTED_FORMAT;
+
+  // Create image buffer.
+  FOG_RETURN_ON_ERROR(image.detach());
+
+  ImageBuffer buffer;
+  buffer.import(image._d, rect);
+
+  // Create paint engine.
+  PaintEngine* d = new(std::nothrow) RasterPaintEngine(buffer, image._d, initFlags);
   if (!d) return ERR_RT_OUT_OF_MEMORY;
 
   _engine = d;
@@ -71,19 +124,15 @@ err_t Painter::begin(Image& image, uint32_t initFlags)
 
 err_t Painter::begin(const ImageBuffer& buffer, uint32_t initFlags)
 {
+  // End painting.
   end();
 
-  // Check for invalid arguments.
-  if (buffer.data == NULL) return ERR_RT_INVALID_ARGUMENT;
+  // Do basic checks.
+  if (!buffer.isValid()) return ERR_RT_INVALID_ARGUMENT;
+  if (!Painter_isFormatSupported(buffer.format)) return ERR_IMAGE_UNSUPPORTED_FORMAT;
 
-  // Never initialize painter for zero image.
-  if (buffer.width <= 0 || buffer.height <= 0) return ERR_IMAGE_INVALID_SIZE;
-
-  // Check for valid image format.
-  if ((uint)buffer.format >= PIXEL_FORMAT_COUNT) return ERR_RT_INVALID_ARGUMENT;
-  if ((uint)buffer.format == PIXEL_FORMAT_I8) return ERR_IMAGE_UNSUPPORTED_FORMAT;
-
-  PaintEngine* d = new(std::nothrow) RasterPaintEngine(buffer, initFlags);
+  // Create paint engine.
+  PaintEngine* d = new(std::nothrow) RasterPaintEngine(buffer, NULL, initFlags);
   if (!d) return ERR_RT_OUT_OF_MEMORY;
 
   _engine = d;
@@ -92,8 +141,65 @@ err_t Painter::begin(const ImageBuffer& buffer, uint32_t initFlags)
 
 void Painter::end()
 {
-  if (_engine != sharedNull) delete _engine;
+  if (_engine == sharedNull) return;
+
+  delete _engine;
   _engine = sharedNull;
+}
+
+err_t Painter::switchTo(Image& image)
+{
+  uint32_t engineType = _engine->getEngine();
+
+  // We must ensure that engine is PAINTER_ENGINE_RASTER_XXX.
+  if (engineType != PAINTER_ENGINE_RASTER_ST && engineType != PAINTER_ENGINE_RASTER_MT)
+    return begin(image);
+
+  // Do basic checks.
+  if (image.isEmpty()) return ERR_RT_INVALID_ARGUMENT;
+  if (!Painter_isFormatSupported(image.getFormat())) return ERR_IMAGE_UNSUPPORTED_FORMAT;
+
+  // Create image buffer and switch to it.
+  ImageBuffer buffer;
+  buffer.import(image._d);
+
+  return reinterpret_cast<RasterPaintEngine*>(_engine)->switchTo(buffer, image._d);
+}
+
+err_t Painter::switchTo(Image& image, const IntRect& rect)
+{
+  uint32_t engineType = _engine->getEngine();
+
+  // We must ensure that engine is PAINTER_ENGINE_RASTER_XXX.
+  if (engineType != PAINTER_ENGINE_RASTER_ST && engineType != PAINTER_ENGINE_RASTER_MT)
+    return begin(image, rect);
+
+  // Do basic checks.
+  if (image.isEmpty()) return ERR_RT_INVALID_ARGUMENT;
+  if (!Painter_isRectValid(image, rect)) return ERR_RT_INVALID_ARGUMENT;
+  if (!Painter_isFormatSupported(image.getFormat())) return ERR_IMAGE_UNSUPPORTED_FORMAT;
+
+  // Create image buffer and switch to it.
+  ImageBuffer buffer;
+  buffer.import(image._d, rect);
+
+  return reinterpret_cast<RasterPaintEngine*>(_engine)->switchTo(buffer, image._d);
+}
+
+err_t Painter::switchTo(const ImageBuffer& buffer)
+{
+  uint32_t engineType = _engine->getEngine();
+
+  // We must ensure that engine is PAINTER_ENGINE_RASTER_XXX.
+  if (engineType != PAINTER_ENGINE_RASTER_ST && engineType != PAINTER_ENGINE_RASTER_MT)
+    return begin(buffer);
+
+  // Do basic checks.
+  if (!buffer.isValid()) return ERR_RT_INVALID_ARGUMENT;
+  if (!Painter_isFormatSupported(buffer.format)) return ERR_IMAGE_UNSUPPORTED_FORMAT;
+
+  // Switch to a given buffer.
+  return reinterpret_cast<RasterPaintEngine*>(_engine)->switchTo(buffer, NULL);
 }
 
 } // Fog namespace

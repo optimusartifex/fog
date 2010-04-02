@@ -70,28 +70,80 @@ struct FOG_API Painter
   Painter();
 
   //! @brief Create painter instance for a given image @a image.
+  //!
+  //! @sa Painter::begin().
   Painter(Image& image, uint32_t initFlags = NO_FLAGS);
+
+  //! @brief Create painter instance for a given image @a image, using only
+  //! the @a rect area.
+  //!
+  //! @sa Painter::begin().
+  Painter(Image& image, const IntRect& rect, uint32_t initFlags = NO_FLAGS);
 
   //! @brief Destroy painter instance.
   //!
   //! If painter is multithreaded, destructor would wait to finish the rendering
   //! (it will call @c end() method).
+  //!
+  //! @sa Painter::end().
   ~Painter();
 
   // --------------------------------------------------------------------------
   // [Begin / End]
   // --------------------------------------------------------------------------
 
+  //! @brief Begin painting into the @a image.
+  //!
+  //! Always call @c Painter::end() or destroy painter before you try to 
+  //! destroy or work with image. If you want to use the image you provided,
+  //! but you want to continue paniting on it then call @c Painter::flush() 
+  //! with @c PAINTER_FLUSH_SYNC flag to make content in the image ready.
   err_t begin(Image& image, uint32_t initFlags = NO_FLAGS);
+
+  //! @brief Begin painting to a given rectange @a rect into the @a image.
+  //!
+  //! Always call @c Painter::end() or destroy painter before you try to 
+  //! destroy or work with image. If you want to use the image you provided,
+  //! but you want to continue paniting on it then call @c Painter::flush() 
+  //! with @c PAINTER_FLUSH_SYNC flag to make content in the image ready.
+  err_t begin(Image& image, const IntRect& rect, uint32_t initFlags = NO_FLAGS);
+
+  //! @brief Begin painting to the custom image buffer @a buffer.
+  //!
+  //! This method can be used to paint to non-fog image buffer (WinGDI, Cairo,
+  //! Qt4, SDL_Surface, etc...).
   err_t begin(const ImageBuffer& buffer, uint32_t initFlags = NO_FLAGS);
+
+  //! @brief Destroy paint engine assigning null painter engine to the 
+  //! @c Painter instance.
+  //!
+  //! Destroying also means that content in a provided image or buffer (through
+  //! @c Painter::begin() call) will be ready to use.
   void end();
+
+  //! @brief Finish painting and switch target to @a image, leaving
+  //! the engine configuration.
+  //!
+  //! @note Calling Painter::switchTo() will destroy all layers and saved states,
+  //! it's like calling @c Painter::end(), but reusing the paint engine.
+  err_t switchTo(Image& image);
+
+  //! @brief Finish painting and switch target to @a image, leaving
+  //! the engine configuration.
+  //!
+  //! @note Calling Painter::switchTo() will destroy all layers and saved states,
+  //! it's like calling @c Painter::end(), but reusing the paint engine.
+  err_t switchTo(Image& image, const IntRect& rect);
+
+  //! @brief Finish painting and switch target to @a buffer, leaving 
+  //! the engine configuration.
+  //!
+  //! @note Calling Painter::switchTo() will destroy all layers and saved states,
+  //! it's like calling @c Painter::end(), but reusing the paint engine.
+  err_t switchTo(const ImageBuffer& buffer);
 
 #if 0
   // TODO: API proposal.
-
-  //! @brief End with painting and switch target buffer to @a dest.
-  FOG_INLINE err_t switchToTarget(Image& dest);
-  FOG_INLINE err_t switchToTarget(const ImageBuffer& dest);
 
   FOG_INLINE err_t beginLayer();
   FOG_INLINE err_t beginLayerToImage(Image& dest);
@@ -107,7 +159,7 @@ struct FOG_API Painter
   FOG_INLINE int getWidth() const
   { return _engine->getWidth(); }
 
-  //! @brief Get painter heigh in pixels (height returned is height passed to @c begin() method).
+  //! @brief Get painter height in pixels (height returned is height passed to @c begin() method).
   FOG_INLINE int getHeight() const
   { return _engine->getHeight(); }
 

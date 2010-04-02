@@ -911,7 +911,7 @@ err_t BmpEncoderDevice::writeImage(const Image& image)
   static const uint8_t tailBytes[4] = { 0, 0, 0, 0 };
   err_t err = ERR_OK;
 
-  Image::Data* d = image._d;
+  ImageData* d = image._d;
   int width = d->width;
   int height = d->height;
   uint32_t format = d->format;

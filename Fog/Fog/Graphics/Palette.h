@@ -19,6 +19,37 @@
 namespace Fog {
 
 // ============================================================================
+// [Fog::PaletteData]
+// ============================================================================
+
+struct FOG_API PaletteData
+{
+  // --------------------------------------------------------------------------
+  // [Ref / Deref]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE PaletteData* ref() const
+  {
+    refCount.inc();
+    return const_cast<PaletteData*>(this);
+  }
+
+  FOG_INLINE void deref()
+  {
+    if (refCount.deref()) Memory::free(this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  mutable Atomic<sysuint_t> refCount;
+  uint32_t isAlphaUsed;
+
+  Argb data[512];
+};
+
+// ============================================================================
 // [Fog::Palette]
 // ============================================================================
 
@@ -41,46 +72,12 @@ struct FOG_API Palette
   };
 
   // --------------------------------------------------------------------------
-  // [Data]
-  // --------------------------------------------------------------------------
-
-  struct FOG_API Data
-  {
-    // [Ref / Deref]
-
-    Data* ref() const;
-    void deref();
-
-    FOG_INLINE Data* refAlways() const
-    {
-      refCount.inc();
-      return const_cast<Data*>(this);
-    }
-
-    // [Create]
-
-    static Data* create();
-    static Data* copy(const Data* other);
-
-    // [Members]
-
-    mutable Atomic<sysuint_t> refCount;
-    uint32_t isAlphaUsed;
-
-    Argb data[512];
-  };
-
-  static Static<Data> sharedNull;
-  static Static<Data> sharedGrey;
-  static Static<Data> sharedA8;
-
-  // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
   Palette();
   Palette(const Palette& other);
-  FOG_INLINE explicit Palette(Data* d) : _d(d) {}
+  FOG_INLINE explicit Palette(PaletteData* d) : _d(d) {}
   ~Palette();
 
   // --------------------------------------------------------------------------
@@ -178,6 +175,10 @@ struct FOG_API Palette
   // [Statics]
   // --------------------------------------------------------------------------
 
+  static Static<PaletteData> sharedNull;
+  static Static<PaletteData> sharedGrey;
+  static Static<PaletteData> sharedA8;
+
   static bool isGreyOnly(const Argb* data, sysuint_t count);
   static bool isAlphaUsed(const Argb* data, sysuint_t count);
 
@@ -185,7 +186,7 @@ struct FOG_API Palette
   // [Members]
   // --------------------------------------------------------------------------
 
-  FOG_DECLARE_D(Data);
+  FOG_DECLARE_D(PaletteData);
 };
 
 } // Fog namespace

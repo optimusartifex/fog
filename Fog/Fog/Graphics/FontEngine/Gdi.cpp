@@ -461,7 +461,7 @@ GlyphData* WinFontFace::renderGlyph(HDC hdc, uint32_t uc)
   FOG_ASSERT(hdc);
 
   GlyphData* glyphd = NULL;
-  Image::Data* bitmapd = NULL;
+  ImageData* bitmapd = NULL;
 
   GLYPHMETRICS gm;
   ZeroMemory(&gm, sizeof(gm));

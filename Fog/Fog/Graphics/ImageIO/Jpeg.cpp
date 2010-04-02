@@ -452,7 +452,7 @@ err_t JpegDecoderDevice::readImage(Image& image)
 
   if (format == PIXEL_FORMAT_I8)
   {
-    Image::Data* image_d = image._d;
+    ImageData* image_d = image._d;
 
     // Directly load into the image buffer.
     while (cinfo.output_scanline < cinfo.output_height)
@@ -576,7 +576,7 @@ err_t JpegEncoderDevice::writeImage(const Image& image)
 
   err_t err = ERR_OK;
 
-  Image::Data* d = image._d;
+  ImageData* d = image._d;
   int width = d->width;
   int height = d->height;
   int format = d->format;

@@ -985,7 +985,15 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  RasterPaintEngine(const ImageBuffer& buffer, uint32_t initFlags);
+  //! @brief Create new instance of @c RasterPaintEngine.
+  //!
+  //! @param buffer Buffer where to painting will be performed.
+  //! @param imaged Image data (can be @c NULL), only for increasing and 
+  //! decreasing ImageData::inUse member.
+  //! @param initFlags Initialization flags, see @c PAINTER_INIT_FLAGS.
+  RasterPaintEngine(const ImageBuffer& buffer, ImageData* imaged, uint32_t initFlags);
+
+  //! @brief Destroy paint engine, decreasing @c ImageData::inUse flag (if set).
   virtual ~RasterPaintEngine();
 
   // --------------------------------------------------------------------------
@@ -1187,6 +1195,8 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   // --------------------------------------------------------------------------
   // [Helpers]
   // --------------------------------------------------------------------------
+
+  err_t switchTo(const ImageBuffer& buffer, ImageData* d);
 
   void _updateWorkRegion();
   void _updateTransform(bool translationOnly);

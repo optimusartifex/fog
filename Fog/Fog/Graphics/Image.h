@@ -30,8 +30,9 @@ namespace Fog {
 struct ColorFilter;
 struct ColorLut;
 struct ColorMatrix;
-struct ImageFilter;
 struct DoublePath;
+struct ImageData;
+struct ImageFilter;
 
 // ============================================================================
 // [Fog::ImageBuffer]
@@ -42,6 +43,19 @@ struct DoublePath;
 //! Use it together with @c Image::adopt() or @c Painter::begin() methods.
 struct ImageBuffer
 {
+  FOG_INLINE bool isValid() const
+  {
+    return (uint)width > 0 && 
+           (uint)height > 0 && 
+           format != PIXEL_FORMAT_NULL &&
+           format < PIXEL_FORMAT_COUNT &&
+           data != NULL;
+  }
+
+  // Defined Later.
+  FOG_INLINE void import(ImageData* d);
+  FOG_INLINE void import(ImageData* d, const IntRect& rect);
+
   //! @brief Image buffer width.
   int width;
   //! @brief Image buffer height.
@@ -50,8 +64,89 @@ struct ImageBuffer
   uint32_t format;
   //! @brief Image buffer stride (bytes per line).
   sysint_t stride;
-  //! @brief Pointer to first image scanline.
+  //! @brief Pointer to the first image scanline.
   uint8_t* data;
+};
+
+// ============================================================================
+// [Fog::ImageData]
+// ============================================================================
+
+struct FOG_API ImageData
+{
+  enum
+  {
+    IsDynamic = (1U << 0),
+    IsSharable = (1U << 1),
+    IsStrong = (1U << 2),
+    IsReadOnly = (1U << 3)
+  };
+
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  ImageData();
+  ~ImageData();
+
+  // --------------------------------------------------------------------------
+  // [Ref / Deref]
+  // --------------------------------------------------------------------------
+
+  ImageData* ref() const;
+  void deref();
+
+  FOG_INLINE ImageData* refAlways() const { refCount.inc(); return const_cast<ImageData*>(this); }
+
+  // --------------------------------------------------------------------------
+  // [Alloc / Free]
+  // --------------------------------------------------------------------------
+
+  static ImageData* alloc(sysuint_t size);
+  static ImageData* alloc(int w, int h, uint32_t format);
+  static void free(ImageData* d);
+
+  static ImageData* copy(const ImageData* other);
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  //! @brief Reference count.
+  mutable Atomic<sysuint_t> refCount;
+  //! @brief Image flags.
+  uint32_t flags;
+  //! @brief Paint and image filtering engine can increase / decrease this 
+  //! reference count. If image is being destroyed and inUse is larger than
+  //! zero then application is terminated (assert + error reporting).
+  uint32_t inUse;
+  //! @brief Image width.
+  int width;
+  //! @brief Image height.
+  int height;
+  //! @brief Image pixel format.
+  uint32_t format;
+  //! @brief Image depth.
+  uint16_t depth;
+  //! @brief Image bytes per pixel
+  uint16_t bytesPerPixel;
+  //! @brief Image stride.
+  sysint_t stride;
+  //! @brief Data pointer that points to raw memory received from image device.
+  uint8_t* data;
+  //! @brief Base pointer to scanline, in most cases it's equal to @c _data.
+  uint8_t* first;
+  //! @brief Size of @c buffer.
+  sysuint_t size;
+  //! @brief Image palette (only for 8 bit indexed images).
+  Palette palette;
+
+  //! @brief Buffer for static data allocation (allocated together with this
+  //! structure).
+  uint8_t buffer[4];
+
+private:
+  FOG_DISABLE_COPY(ImageData)
 };
 
 // ============================================================================
@@ -62,77 +157,13 @@ struct ImageBuffer
 struct FOG_API Image
 {
   // --------------------------------------------------------------------------
-  // [Data]
-  // --------------------------------------------------------------------------
-
-  struct FOG_API Data
-  {
-    enum
-    {
-      IsDynamic = (1U << 0),
-      IsSharable = (1U << 1),
-      IsStrong = (1U << 2),
-      IsReadOnly = (1U << 3)
-    };
-
-    Data();
-    ~Data();
-
-    // [Ref / Deref]
-
-    Data* ref() const;
-    void deref();
-
-    FOG_INLINE Data* refAlways() const { refCount.inc(); return const_cast<Data*>(this); }
-
-    static Data* alloc(sysuint_t size);
-    static Data* alloc(int w, int h, uint32_t format);
-    static void free(Data* d);
-
-    static Data* copy(const Data* other);
-
-    // [Members]
-
-    //! @brief Reference count.
-    mutable Atomic<sysuint_t> refCount;
-    //! @brief Image flags.
-    uint32_t flags;
-    //! @brief Image width.
-    int width;
-    //! @brief Image height.
-    int height;
-    //! @brief Image pixel format.
-    uint32_t format;
-    //! @brief Image depth.
-    uint32_t depth;
-    //! @brief Image bytes per pixel
-    uint32_t bytesPerPixel;
-    //! @brief Image stride.
-    sysint_t stride;
-    //! @brief Image palette (only for 8 bit indexed images).
-    Palette palette;
-    //! @brief Data pointer that points to raw memory received from image device.
-    uint8_t* data;
-    //! @brief Base pointer to scanline, in most cases it's equal to @c _data.
-    uint8_t* first;
-    //! @brief Size of @c buffer.
-    sysuint_t size;
-
-    //! @brief Buffer for static data allocation (allocated together with this
-    //! structure).
-    uint8_t buffer[4];
-  };
-
-  static Static<Data> sharedNull;
-
-  // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
   Image();
-  FOG_INLINE explicit Image(Data* d) : _d(d) {}
   Image(const Image& other);
   Image(int w, int h, uint32_t format);
+  FOG_INLINE explicit Image(ImageData* d) : _d(d) {}
   ~Image();
 
   // --------------------------------------------------------------------------
@@ -159,13 +190,13 @@ struct FOG_API Image
   //! @copydoc Doxygen::Implicit::isNull().
   FOG_INLINE bool isNull() const { return _d == sharedNull.instancep(); }
   //! @copydoc Doxygen::Implicit::isDynamic().
-  FOG_INLINE bool isDynamic() const { return _d->flags & Data::IsDynamic; }
+  FOG_INLINE bool isDynamic() const { return _d->flags & ImageData::IsDynamic; }
   //! @copydoc Doxygen::Implicit::isSharable().
-  FOG_INLINE bool isSharable() const { return _d->flags & Data::IsSharable; }
+  FOG_INLINE bool isSharable() const { return _d->flags & ImageData::IsSharable; }
   //! @copydoc Doxygen::Implicit::isStrong().
-  FOG_INLINE bool isStrong() const { return _d->flags & Data::IsStrong; }
+  FOG_INLINE bool isStrong() const { return _d->flags & ImageData::IsStrong; }
   //! @brief Returns true if image is read only.
-  FOG_INLINE bool isReadOnly() const { return _d->flags & Data::IsReadOnly; }
+  FOG_INLINE bool isReadOnly() const { return _d->flags & ImageData::IsReadOnly; }
 
   // --------------------------------------------------------------------------
   // [Data]
@@ -272,11 +303,11 @@ struct FOG_API Image
   // --------------------------------------------------------------------------
 
   //! @brief Get image format, see @c PIXEL_FORMAT enumeration.
-  FOG_INLINE int getFormat() const { return _d->format; }
+  FOG_INLINE uint32_t getFormat() const { return _d->format; }
   //! @brief Get image depth (8, 24 or 32).
-  FOG_INLINE int getDepth() const { return _d->depth; }
+  FOG_INLINE uint32_t getDepth() const { return _d->depth; }
   //! @brief Get image bytes per pixel.
-  FOG_INLINE int getBytesPerPixel() const { return _d->bytesPerPixel; }
+  FOG_INLINE uint32_t getBytesPerPixel() const { return _d->bytesPerPixel; }
 
   //! @brief Get whether image is indexed (8-bit image with palette).
   FOG_INLINE bool isIndexed() const { return _d->format == PIXEL_FORMAT_I8; }
@@ -506,6 +537,9 @@ struct FOG_API Image
   // [Statics]
   // --------------------------------------------------------------------------
 
+  //! @brief Shared null image.
+  static Static<ImageData> sharedNull;
+
   //! @brief Calculate stride for a given image @a width and @a depth.
   //!
   //! Stride is calculated using @a width and @a depth using 32-bit alignment
@@ -523,12 +557,44 @@ struct FOG_API Image
   // [Members]
   // --------------------------------------------------------------------------
 
-  FOG_DECLARE_D(Data)
+  FOG_DECLARE_D(ImageData)
 };
+
+// ============================================================================
+// [Defined Later]
+// ============================================================================
+
+FOG_INLINE void ImageBuffer::import(ImageData* d)
+{
+  width = d->width;
+  height = d->height;
+  format = d->format;
+  stride = d->stride;
+  data = d->first;
+}
+
+FOG_INLINE void ImageBuffer::import(ImageData* d, const IntRect& rect)
+{
+  // Rect must be normalized.
+  FOG_ASSERT(rect.x >= 0 && rect.y >= 0 &&rect.x + rect.w <= d->width && rect.y + rect.h <= d->height);
+  FOG_ASSERT(rect.w > 0 && rect.h > 0);
+
+  width = rect.w;
+  height = rect.h;
+  format = d->format;
+  stride = d->stride;
+  data = d->first + (uint)rect.y * d->stride + (uint)rect.x * (uint)d->bytesPerPixel;
+}
 
 } // Fog namespace
 
 //! @}
+
+// ============================================================================
+// [Fog::TypeInfo<T>]
+// ============================================================================
+
+FOG_DECLARE_TYPEINFO(Fog::Image , Fog::TYPEINFO_MOVABLE)
 
 // [Guard]
 #endif // _FOG_GRAPHICS_IMAGE_H

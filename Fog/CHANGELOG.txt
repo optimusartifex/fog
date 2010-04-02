@@ -1,3 +1,8 @@
+2010-04-02
+- Added more ROI (rectange of interest) methods in Image and Painter.
+- Added Painter::switchTo() so now it's efficient to switch singlethreaded or 
+  multithreaded painting to different image or buffer.
+
 2010-04-01
 - Removed RegionPoly.cpp / RegionRound.cpp, now it's only used Region::path().
 - Fixed few bugs related to Image::glyphFromRegion.

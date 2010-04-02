@@ -21,12 +21,12 @@ namespace Fog {
 // [Fog::Palette]
 // ============================================================================
 
-Static<Palette::Data> Palette::sharedNull;
-Static<Palette::Data> Palette::sharedGrey;
-Static<Palette::Data> Palette::sharedA8;
+Static<PaletteData> Palette::sharedNull;
+Static<PaletteData> Palette::sharedGrey;
+Static<PaletteData> Palette::sharedA8;
 
-Palette::Palette() : _d(sharedNull->refAlways()) {}
-Palette::Palette(const Palette& other) : _d(other._d->refAlways()) {}
+Palette::Palette() : _d(sharedNull->ref()) {}
+Palette::Palette(const Palette& other) : _d(other._d->ref()) {}
 
 Palette::~Palette()
 {
@@ -37,8 +37,13 @@ err_t Palette::_detach()
 {
   if (isDetached()) return ERR_OK;
 
-  Data* newd = Data::copy(_d);
+  PaletteData* newd = reinterpret_cast<PaletteData*>(
+    Memory::alloc(sizeof(PaletteData)));
   if (!newd) return ERR_RT_OUT_OF_MEMORY;
+
+  newd->refCount.init(1);
+  newd->isAlphaUsed = _d->isAlphaUsed;
+  Memory::copy(newd->data, _d->data, sizeof(Argb) * 512);
 
   atomicPtrXchg(&_d, newd)->deref();
   return ERR_OK;
@@ -46,7 +51,7 @@ err_t Palette::_detach()
 
 void Palette::free()
 {
-  atomicPtrXchg(&_d, sharedNull->refAlways())->deref();
+  atomicPtrXchg(&_d, sharedNull->ref())->deref();
 }
 
 void Palette::clear()
@@ -54,7 +59,7 @@ void Palette::clear()
   if (isDetached())
     Memory::zero(_d->data, 512 * sizeof(Argb));
   else
-    atomicPtrXchg(&_d, sharedNull->refAlways())->deref();
+    atomicPtrXchg(&_d, sharedNull->ref())->deref();
 }
 
 err_t Palette::set(const Palette& other)
@@ -180,12 +185,12 @@ void Palette::update()
 
 Palette Palette::greyscale()
 {
-  return Palette(sharedGrey->refAlways());
+  return Palette(sharedGrey->ref());
 }
 
 Palette Palette::a8()
 {
-  return Palette(sharedA8->refAlways());
+  return Palette(sharedA8->ref());
 }
 
 Palette Palette::colorCube(int nr, int ng, int nb)
@@ -248,44 +253,6 @@ bool Palette::isAlphaUsed(const Argb* data, sysuint_t count)
   return false;
 }
 
-// ============================================================================
-// [Fog::Palette::Data]
-// ============================================================================
-
-Palette::Data* Palette::Data::ref() const
-{
-  return refAlways();
-}
-
-void Palette::Data::deref()
-{
-  if (refCount.deref()) Memory::free(this);
-}
-
-Palette::Data* Palette::Data::create()
-{
-  Data* d = (Data*)Memory::alloc(sizeof(Data));
-
-  if (d)
-  {
-    d->refCount.init(1);
-  }
-
-  return d;
-}
-
-Palette::Data* Palette::Data::copy(const Data* other)
-{
-  Data* d = create();
-
-  if (d)
-  {
-    Memory::copy(d->data, other->data, sizeof(Argb) * 512);
-  }
-
-  return d;
-}
-
 } // Fog namespace
 
 // ============================================================================
@@ -296,7 +263,7 @@ FOG_INIT_DECLARE err_t fog_palette_init(void)
 {
   using namespace Fog;
 
-  Palette::Data* d;
+  PaletteData* d;
   uint32_t i, c0;
 
   Palette::sharedNull;

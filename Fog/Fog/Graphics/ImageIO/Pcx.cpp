@@ -726,12 +726,13 @@ err_t PcxEncoderDevice::writeImage(const Image& image)
   err_t err = ERR_OK;
   int width = image.getWidth();
   int height = image.getHeight();
-  int format = image.getFormat();
-  int version;
-  int bitsPerPixel;
-  int nPlanes;
-  int bpl;
-  int alignment;
+  uint32_t format = image.getFormat();
+  uint32_t version;
+  uint32_t bitsPerPixel;
+  uint32_t nPlanes;
+  uint32_t bpl;
+  uint32_t alignment;
+
   int y;
 
   LocalBuffer<1024> rleenc;

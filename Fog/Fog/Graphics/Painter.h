@@ -86,6 +86,19 @@ struct FOG_API Painter
   err_t begin(const ImageBuffer& buffer, uint32_t initFlags = NO_FLAGS);
   void end();
 
+#if 0
+  // TODO: API proposal.
+
+  //! @brief End with painting and switch target buffer to @a dest.
+  FOG_INLINE err_t switchToTarget(Image& dest);
+  FOG_INLINE err_t switchToTarget(const ImageBuffer& dest);
+
+  FOG_INLINE err_t beginLayer();
+  FOG_INLINE err_t beginLayerToImage(Image& dest);
+  FOG_INLINE err_t beginLayerToImage(const ImageBuffer& dest);
+  FOG_INLINE err_t endLayer();
+#endif
+
   // --------------------------------------------------------------------------
   // [Width / Height / Format]
   // --------------------------------------------------------------------------
@@ -410,11 +423,24 @@ struct FOG_API Painter
   // [Image Drawing]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void blitImage(const IntPoint& p, const Image& image, const IntRect* irect = 0)
-  { _engine->blitImage(p, image, irect); }
+  FOG_INLINE void blitImage(const IntPoint& p, const Image& image)
+  { _engine->blitImage(p, image, NULL); }
 
-  FOG_INLINE void blitImage(const DoublePoint& p, const Image& image, const IntRect* irect = 0)
-  { _engine->blitImage(p, image, irect); }
+  FOG_INLINE void blitImage(const IntPoint& p, const Image& image, const IntRect& irect)
+  { _engine->blitImage(p, image, &irect); }
+
+  FOG_INLINE void blitImage(const DoublePoint& p, const Image& image)
+  { _engine->blitImage(p, image, NULL); }
+
+  FOG_INLINE void blitImage(const DoublePoint& p, const Image& image, const IntRect& irect)
+  { _engine->blitImage(p, image, &irect); }
+
+  // --------------------------------------------------------------------------
+  // [Statics]
+  // --------------------------------------------------------------------------
+
+  //! @brief Null paint engine used for non-initialized painters.
+  static PaintEngine* sharedNull;
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -422,9 +448,6 @@ struct FOG_API Painter
 
   //! @brief Paint engine instance.
   PaintEngine* _engine;
-
-  //! @brief Null paint engine used for non-initialized painters.
-  static PaintEngine* sharedNull;
 
 private:
   FOG_DISABLE_COPY(Painter);

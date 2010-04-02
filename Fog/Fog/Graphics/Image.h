@@ -47,7 +47,7 @@ struct ImageBuffer
   //! @brief Image buffer height.
   int height;
   //! @brief Image buffer format.
-  int format;
+  uint32_t format;
   //! @brief Image buffer stride (bytes per line).
   sysint_t stride;
   //! @brief Pointer to first image scanline.
@@ -86,7 +86,7 @@ struct FOG_API Image
     FOG_INLINE Data* refAlways() const { refCount.inc(); return const_cast<Data*>(this); }
 
     static Data* alloc(sysuint_t size);
-    static Data* alloc(int w, int h, int format);
+    static Data* alloc(int w, int h, uint32_t format);
     static void free(Data* d);
 
     static Data* copy(const Data* other);
@@ -102,11 +102,11 @@ struct FOG_API Image
     //! @brief Image height.
     int height;
     //! @brief Image pixel format.
-    int format;
+    uint32_t format;
     //! @brief Image depth.
-    int depth;
+    uint32_t depth;
     //! @brief Image bytes per pixel
-    int bytesPerPixel;
+    uint32_t bytesPerPixel;
     //! @brief Image stride.
     sysint_t stride;
     //! @brief Image palette (only for 8 bit indexed images).
@@ -117,7 +117,9 @@ struct FOG_API Image
     uint8_t* first;
     //! @brief Size of @c buffer.
     sysuint_t size;
-    //! @brief Buffer for static allocations.
+
+    //! @brief Buffer for static data allocation (allocated together with this
+    //! structure).
     uint8_t buffer[4];
   };
 
@@ -130,7 +132,7 @@ struct FOG_API Image
   Image();
   FOG_INLINE explicit Image(Data* d) : _d(d) {}
   Image(const Image& other);
-  Image(int w, int h, int format);
+  Image(int w, int h, uint32_t format);
   ~Image();
 
   // --------------------------------------------------------------------------
@@ -236,7 +238,7 @@ struct FOG_API Image
   //! @brief Get mutable pointer to @c i scanline.
   FOG_INLINE uint8_t* getMScanline(uint32_t i)
   {
-    FOG_ASSERT_X((sysuint_t)i < (sysuint_t)_d->height, "Fog::Image::getScanline() - Index out of range");
+    FOG_ASSERT_X((sysuint_t)i < (sysuint_t)_d->height, "Fog::Image::getMScanline() - Index out of range");
     return (detach() == ERR_OK) ? _d->first + (sysint_t)i * _d->stride : NULL;
   }
 
@@ -245,7 +247,7 @@ struct FOG_API Image
   //! @note Image must be detached to call this function.
   FOG_INLINE uint8_t* getXScanline(uint32_t i)
   {
-    FOG_ASSERT_X((sysuint_t)i < (sysuint_t)_d->height, "Fog::Image::getScanline() - Index out of range");
+    FOG_ASSERT_X((sysuint_t)i < (sysuint_t)_d->height, "Fog::Image::getXScanline() - Index out of range");
     FOG_ASSERT_X(isDetached(), "Fog::Image::getXScanline() - Not detached data.");
     return _d->first + (sysint_t)i * _d->stride;
   }
@@ -291,10 +293,10 @@ struct FOG_API Image
   //! Please always check error value, because allocation memory for image data
   //! can fail. Also if there are invalid arguments (dimensions or format) the
   //! InvalidArgument will be returned.
-  err_t create(int w, int h, int format);
+  err_t create(int w, int h, uint32_t format);
 
   //! @brief Adopt memory buffer to the image.
-  err_t adopt(const ImageBuffer& buffers, uint32_t adoptFlags = IMAGE_ADOPT_DEFAULT);
+  err_t adopt(const ImageBuffer& buffer, uint32_t adoptFlags = IMAGE_ADOPT_DEFAULT);
 
   // --------------------------------------------------------------------------
   // [Set]
@@ -302,6 +304,10 @@ struct FOG_API Image
 
   //! @brief Set other image to this image creating reference to it if possible.
   err_t set(const Image& other);
+
+  //! @brief Copy part of other image to the image.
+  err_t set(const Image& other, const IntRect& area);
+
   //! @brief Set other image to this image making deep copy of it.
   err_t setDeep(const Image& other);
 
@@ -310,7 +316,7 @@ struct FOG_API Image
   // --------------------------------------------------------------------------
 
   //! @brief Convert image to @a format.
-  err_t convert(int format);
+  err_t convert(uint32_t format);
 
   //! @brief Convert image to 8 bit using optimized palette or dithering.
   err_t to8Bit();
@@ -323,7 +329,7 @@ struct FOG_API Image
   //!
   //! @note You can use this method for example to bypass premultiplication
   //! or demultiplication on 32 bit images.
-  err_t forceFormat(int format);
+  err_t forceFormat(uint32_t format);
 
   // --------------------------------------------------------------------------
   // [Palette]
@@ -340,8 +346,8 @@ struct FOG_API Image
   // [GetDib / SetDib]
   // --------------------------------------------------------------------------
 
-  err_t getDib(int x, int y, uint w, int dibFormat, void* dst) const;
-  err_t setDib(int x, int y, uint w, int dibFormat, const void* src);
+  err_t getDib(int x, int y, uint w, uint32_t dibFormat, void* dst) const;
+  err_t setDib(int x, int y, uint w, uint32_t dibFormat, const void* src);
 
   // --------------------------------------------------------------------------
   // [Swap RGB and RGBA]
@@ -404,7 +410,7 @@ struct FOG_API Image
   // [Scaling]
   // --------------------------------------------------------------------------
 
-  Image scale(const IntSize& to, int interpolationType = INTERPOLATION_SMOOTH);
+  Image scale(const IntSize& to, uint32_t interpolationType = INTERPOLATION_SMOOTH);
 
   // --------------------------------------------------------------------------
   // [Painting]
@@ -428,7 +434,8 @@ struct FOG_API Image
   //!
   //! @note Data that was scrolled out are unchanged.
   err_t scroll(int x, int y);
-  //! @brief Scroll data in image in rectangle @a r.
+
+  //! @brief Scroll data in image only in rectangle @a r.
   //!
   //! @note Data that was scrolled out are unchanged.
   err_t scroll(int x, int y, const IntRect& r);
@@ -507,10 +514,10 @@ struct FOG_API Image
   static sysint_t calcStride(int width, int depth);
 
   //! @brief Converts a given format @a format into depth.
-  static int formatToDepth(int format);
+  static uint32_t formatToDepth(uint32_t format);
 
   //! @brief Converts a given format @a format into bytes per pixel.
-  static int formatToBytesPerPixel(int format);
+  static uint32_t formatToBytesPerPixel(uint32_t format);
 
   // --------------------------------------------------------------------------
   // [Members]

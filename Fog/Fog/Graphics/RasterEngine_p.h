@@ -80,17 +80,17 @@ typedef err_t (FOG_FASTCALL *SolidInitFn)(
 
 // Texture.
 typedef err_t (FOG_FASTCALL *TextureInitFn)(
-  PatternContext* ctx, const Pattern& pattern, const DoubleMatrix& matrix, int interpolationType);
+  PatternContext* ctx, const Pattern& pattern, const DoubleMatrix& matrix, uint32_t interpolationType);
 
 typedef err_t (FOG_FASTCALL *TextureInitBlitFn)(
-  PatternContext* ctx, const Image& image, const IntRect& irect, const DoubleMatrix& matrix, int spread, int interpolationType);
+  PatternContext* ctx, const Image& image, const IntRect& irect, const DoubleMatrix& matrix, uint32_t spread, uint32_t interpolationType);
 
 typedef err_t (FOG_FASTCALL *TextureInitScaleFn)(
-  PatternContext* ctx, const Image& image, int dw, int dh, int interpolationType);
+  PatternContext* ctx, const Image& image, int dw, int dh, uint32_t interpolationType);
 
 // Gradient.
 typedef err_t (FOG_FASTCALL *GradientInitFn)(
-  PatternContext* ctx, const Pattern& pattern, const DoubleMatrix& matrix, int interpolationType);
+  PatternContext* ctx, const Pattern& pattern, const DoubleMatrix& matrix, uint32_t interpolationType);
 
 // ============================================================================
 // [Fog::RasterEngine - Prototypes - Filter]
@@ -197,15 +197,15 @@ struct PatternContext
   int initialized;
   //! @brief Pixel format of this context (pixel format that will be fetched
   //! using @c fetch() function.
-  int format;
+  uint32_t format;
   //! @brief Depth of this context (this is related to pixel format of course).
-  int depth;
+  uint32_t depth;
 
   //! @brief True if context is transformed.
   //!
   //! @note This is never set for translation only matrices. Scale or shear is
   //! condition to set this variable to true.
-  int isTransformed;
+  uint32_t isTransformed;
 
   //! @brief Embedded matrix data (no @c Matrix instance here).
   double m[6];

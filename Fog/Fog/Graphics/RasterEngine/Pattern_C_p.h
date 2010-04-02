@@ -374,7 +374,7 @@ struct FOG_HIDDEN PatternC
     PatternContext* ctx,
     const Pattern& pattern,
     const DoubleMatrix& matrix,
-    int interpolationType)
+    uint32_t interpolationType)
   {
     PatternData* d = pattern._d;
 
@@ -395,13 +395,13 @@ struct FOG_HIDDEN PatternC
     PatternContext* ctx,
     const Image& image, const IntRect& irect, 
     const DoubleMatrix& matrix,
-    int spread, int interpolationType)
+    uint32_t spread, uint32_t interpolationType)
   {
     // Only valid images can be passed to texture_init_blit.
     FOG_ASSERT(!image.isEmpty());
     FOG_ASSERT((uint)spread < SPREAD_COUNT);
 
-    int format = image.getFormat();
+    uint32_t format = image.getFormat();
     bool isTransformed = (!Math::feq(matrix.sx, 1.0) || !Math::feq(matrix.shy, 0.0) ||
                           !Math::feq(matrix.sy, 1.0) || !Math::feq(matrix.shx, 0.0) );
 
@@ -3030,7 +3030,7 @@ doFill_4:
   // (it's scaled, you just can't use this value).
 
   static err_t FOG_FASTCALL generic_gradient_init(
-    PatternContext* ctx, const List<ArgbStop>& stops, sysint_t gLength, int spread)
+    PatternContext* ctx, const List<ArgbStop>& stops, sysint_t gLength, uint32_t spread)
   {
     // Never initialize this if there are no stops or only single one (solid color).
     FOG_ASSERT(stops.getLength() >= 2);
@@ -3194,7 +3194,7 @@ doFill_4:
   // --------------------------------------------------------------------------
 
   static err_t FOG_FASTCALL linear_gradient_init(
-    PatternContext* ctx, const Pattern& pattern, const DoubleMatrix& matrix, int interpolationType)
+    PatternContext* ctx, const Pattern& pattern, const DoubleMatrix& matrix, uint32_t interpolationType)
   {
     PatternData* d = pattern._d;
     if (d->type != PATTERN_LINEAR_GRADIENT) return ERR_RT_INVALID_ARGUMENT;
@@ -3709,7 +3709,7 @@ doFill_4:
   // --------------------------------------------------------------------------
 
   static err_t FOG_FASTCALL radial_gradient_init(
-    PatternContext* ctx, const Pattern& pattern, const DoubleMatrix& matrix, int interpolationType)
+    PatternContext* ctx, const Pattern& pattern, const DoubleMatrix& matrix, uint32_t interpolationType)
   {
     PatternData* d = pattern._d;
     if (d->type != PATTERN_RADIAL_GRADIENT) return ERR_RT_INVALID_ARGUMENT;
@@ -3979,7 +3979,7 @@ doFill_4:
   // --------------------------------------------------------------------------
 
   static err_t FOG_FASTCALL conical_gradient_init(
-    PatternContext* ctx, const Pattern& pattern, const DoubleMatrix& matrix, int interpolationType)
+    PatternContext* ctx, const Pattern& pattern, const DoubleMatrix& matrix, uint32_t interpolationType)
   {
     PatternData* d = pattern._d;
     if (d->type != PATTERN_CONICAL_GRADIENT) return ERR_RT_INVALID_ARGUMENT;

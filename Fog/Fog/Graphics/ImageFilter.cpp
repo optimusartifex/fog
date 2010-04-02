@@ -64,7 +64,7 @@ struct FOG_HIDDEN ColorLutFilterEngine : public ImageFilterEngine
 {
   ColorLutFilterEngine(const ColorLutData& lut);
 
-  virtual ColorFilterFn getColorFilterFn(int format) const;
+  virtual ColorFilterFn getColorFilterFn(uint32_t format) const;
   virtual const void* getContext() const;
 
   virtual ImageFilterEngine* clone() const;
@@ -88,7 +88,7 @@ ColorLutFilterEngine::ColorLutFilterEngine(const ColorLutData& lutData) :
     IMAGE_FILTER_CHAR_SUPPORTS_A8     ;
 }
 
-ColorFilterFn ColorLutFilterEngine::getColorFilterFn(int format) const
+ColorFilterFn ColorLutFilterEngine::getColorFilterFn(uint32_t format) const
 {
   if ((uint)format >= PIXEL_FORMAT_COUNT) return NULL;
   return (ColorFilterFn)RasterEngine::functionMap->filter.color_lut[format];
@@ -118,7 +118,7 @@ struct FOG_HIDDEN ColorMatrixFilterEngine : public ImageFilterEngine
   ColorMatrixFilterEngine(const ColorMatrixFilterEngine& other);
   ColorMatrixFilterEngine(const ColorMatrix& cm);
 
-  virtual ColorFilterFn getColorFilterFn(int format) const;
+  virtual ColorFilterFn getColorFilterFn(uint32_t format) const;
   virtual const void* getContext() const;
 
   virtual ImageFilterEngine* clone() const;
@@ -150,7 +150,7 @@ ColorMatrixFilterEngine::ColorMatrixFilterEngine(const ColorMatrix& cm) :
     IMAGE_FILTER_CHAR_SUPPORTS_A8     ;
 }
 
-ColorFilterFn ColorMatrixFilterEngine::getColorFilterFn(int format) const
+ColorFilterFn ColorMatrixFilterEngine::getColorFilterFn(uint32_t format) const
 {
   if ((uint)format >= PIXEL_FORMAT_COUNT) return NULL;
   return (ColorFilterFn)RasterEngine::functionMap->filter.color_matrix[format];
@@ -217,7 +217,7 @@ struct FOG_HIDDEN BlurFilterEngine : public ImageFilterEngine
 {
   BlurFilterEngine(const BlurParams& params);
 
-  virtual ImageFilterFn getImageFilterFn(int format, int processing) const;
+  virtual ImageFilterFn getImageFilterFn(uint32_t format, uint32_t processing) const;
   virtual const void* getContext() const;
 
   virtual ImageFilterEngine* clone() const;
@@ -238,7 +238,7 @@ BlurFilterEngine::BlurFilterEngine(const BlurParams& params) :
   update();
 }
 
-ImageFilterFn BlurFilterEngine::getImageFilterFn(int format, int processing) const
+ImageFilterFn BlurFilterEngine::getImageFilterFn(uint32_t format, uint32_t processing) const
 {
   if ((uint)format >= PIXEL_FORMAT_COUNT) return NULL;
 

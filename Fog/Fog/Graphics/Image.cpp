@@ -48,7 +48,7 @@ Image::Image(const Image& other) :
 {
 }
 
-Image::Image(int w, int h, int format) :
+Image::Image(int w, int h, uint32_t format) :
   _d(sharedNull->refAlways())
 {
   create(w, h, format);
@@ -86,7 +86,7 @@ void Image::free()
   atomicPtrXchg(&_d, sharedNull.instancep()->refAlways())->deref();
 }
 
-err_t Image::create(int w, int h, int format)
+err_t Image::create(int w, int h, uint32_t format)
 {
   Data* d = _d;
 
@@ -196,6 +196,73 @@ err_t Image::set(const Image& other)
   }
 }
 
+err_t Image::set(const Image& other, const IntRect& area)
+{
+  if (other.isEmpty())
+  {
+    free();
+    return ERR_OK;
+  }
+
+  int x1 = area.x;
+  int y1 = area.y;
+  int x2 = x1 + area.w;
+  int y2 = y1 + area.h;
+
+  if (x1 < 0) x1 = 0;
+  if (y1 < 0) y1 = 0;
+  if (x2 > other.getWidth()) x2 = other.getWidth();
+  if (y2 > other.getHeight()) y2 = other.getHeight();
+
+  if (x1 >= x2 || y1 >= y2) return ERR_RT_INVALID_ARGUMENT;
+
+  int w = x2 - x1;
+  int h = y2 - y1;
+
+  if (_d == other._d)
+  {
+    Data* newd = Data::alloc(w, h, other.getFormat());
+    if (newd == NULL) return ERR_RT_OUT_OF_MEMORY;
+
+    uint8_t* dstCur = newd->first;
+    uint8_t* srcCur = other._d->first;
+
+    sysint_t dstStride = newd->stride;
+    sysint_t srcStride = other._d->stride;
+
+    srcCur += (uint)y1 * srcStride + (uint)x1 * other.getBytesPerPixel();
+    sysuint_t bpl = w * other.getBytesPerPixel();
+
+    for (sysint_t i = 0; i < h; i++, dstCur += dstStride, srcCur += srcStride)
+    {
+      Memory::copy(dstCur, srcCur, bpl);
+    }
+
+    atomicPtrXchg(&_d, newd)->deref();
+    return ERR_OK;
+  }
+  else
+  {
+    FOG_RETURN_ON_ERROR(create(w, h, other.getFormat()));
+
+    uint8_t* dstCur = _d->first;
+    uint8_t* srcCur = other._d->first;
+
+    sysint_t dstStride = _d->stride;
+    sysint_t srcStride = other._d->stride;
+
+    srcCur += (uint)y1 * srcStride + (uint)x1 * other.getBytesPerPixel();
+    sysuint_t bpl = w * other.getBytesPerPixel();
+
+    for (sysint_t i = 0; i < h; i++, dstCur += dstStride, srcCur += srcStride)
+    {
+      Memory::copy(dstCur, srcCur, bpl);
+    }
+
+    return ERR_OK;
+  }
+}
+
 err_t Image::setDeep(const Image& other)
 {
   if (_d == other._d) return ERR_OK;
@@ -234,12 +301,12 @@ err_t Image::setDeep(const Image& other)
   return ERR_OK;
 }
 
-err_t Image::convert(int format)
+err_t Image::convert(uint32_t format)
 {
   Data* d = _d;
 
-  int sourceFormat = _d->format;
-  int targetFormat = format;
+  uint32_t sourceFormat = _d->format;
+  uint32_t targetFormat = format;
 
   if ((uint)targetFormat >= PIXEL_FORMAT_COUNT)
     return ERR_RT_INVALID_ARGUMENT;
@@ -474,7 +541,7 @@ err_t Image::to8Bit(const Palette& pal)
   return set(i);
 }
 
-err_t Image::forceFormat(int format)
+err_t Image::forceFormat(uint32_t format)
 {
   if (format == PIXEL_FORMAT_NULL || (uint)format >= (uint)PIXEL_FORMAT_COUNT)
     return ERR_RT_INVALID_ARGUMENT;
@@ -512,7 +579,7 @@ err_t Image::setPalette(sysuint_t index, const Argb* rgba, sysuint_t count)
 // [Fog::Image - GetDib / SetDib]
 // ============================================================================
 
-err_t Image::getDib(int x, int y, uint w, int dibFormat, void* dst) const
+err_t Image::getDib(int x, int y, uint w, uint32_t dibFormat, void* dst) const
 {
   Data* d = _d;
 
@@ -537,7 +604,7 @@ err_t Image::getDib(int x, int y, uint w, int dibFormat, void* dst) const
   return ERR_OK;
 }
 
-err_t Image::setDib(int x, int y, uint w, int dibFormat, const void* src)
+err_t Image::setDib(int x, int y, uint w, uint32_t dibFormat, const void* src)
 {
   FOG_RETURN_ON_ERROR(detach());
   Data* d = _d;
@@ -703,7 +770,7 @@ err_t Image::invert(Image& dst, const Image& src, uint32_t channels)
 {
   if (channels >= 16) return ERR_RT_INVALID_ARGUMENT;
 
-  int format = src.getFormat();
+  uint32_t format = src.getFormat();
 
   // First check for some invertion flags in source image format.
   if (src.isEmpty() || channels == 0 ||
@@ -984,7 +1051,7 @@ err_t Image::mirror(Image& dst, const Image& src, uint32_t mirrorMode)
   if (src.isEmpty() || mirrorMode == 0) return dst.set(src);
   if (mirrorMode >= 4) return ERR_RT_INVALID_ARGUMENT;
 
-  int format = src.getFormat();
+  uint32_t format = src.getFormat();
 
   FOG_RETURN_ON_ERROR(dst._d != src._d
     ? dst.create(src.getWidth(), src.getHeight(), format)
@@ -1346,8 +1413,8 @@ static err_t applyImageFilter(Image& im, const IntBox& box, const ImageFilter& f
   int w = x2 - x1;
   int h = y2 - y1;
 
-  int filterFormat = imgf;
-  int filterCharacteristics = filter.getCharacteristics();
+  uint32_t filterFormat = imgf;
+  uint32_t filterCharacteristics = filter.getCharacteristics();
 
   if ((filterCharacteristics & (IMAGE_FILTER_CHAR_HV_PROCESSING | IMAGE_FILTER_CHAR_ENTIRE_PROCESSING)) == 0)
   {
@@ -1447,7 +1514,7 @@ err_t Image::filter(const ImageFilter& f, const IntRect* area)
 // [Fog::Image - Scaling]
 // ============================================================================
 
-Image Image::scale(const IntSize& to, int interpolationType)
+Image Image::scale(const IntSize& to, uint32_t interpolationType)
 {
   Image dst;
 
@@ -1653,7 +1720,7 @@ err_t Image::fillQGradient(const IntRect& r, Argb c0, Argb c1, Argb c2, Argb c3,
                (c1 & 0xFF000000) == 0xFF000000 &&
                (c2 & 0xFF000000) == 0xFF000000 &&
                (c3 & 0xFF000000) == 0xFF000000 ;
-  int sourceFormat = solid ? PIXEL_FORMAT_XRGB32 : PIXEL_FORMAT_ARGB32;
+  uint32_t sourceFormat = solid ? PIXEL_FORMAT_XRGB32 : PIXEL_FORMAT_ARGB32;
   if (op == OPERATOR_SRC_OVER && solid) op = OPERATOR_SRC;
 
   if (x1 < 0) x1 = 0;
@@ -2249,7 +2316,7 @@ err_t Image::fromHBITMAP(HBITMAP hBitmap)
   BITMAPINFO dibi; // Target (for GetDIBits() function).
   GetObject(hBitmap, sizeof(BITMAP), &bm);
 
-  int format;
+  uint32_t format;
 
   switch (bm.bmBitsPixel)
   {
@@ -2454,7 +2521,7 @@ sysint_t Image::calcStride(int width, int depth)
   return result;
 }
 
-int Image::formatToDepth(int format)
+uint32_t Image::formatToDepth(uint32_t format)
 {
   switch (format)
   {
@@ -2471,7 +2538,7 @@ int Image::formatToDepth(int format)
   }
 }
 
-int Image::formatToBytesPerPixel(int format)
+uint32_t Image::formatToBytesPerPixel(uint32_t format)
 {
   switch (format)
   {
@@ -2535,7 +2602,7 @@ Image::Data* Image::Data::alloc(sysuint_t size)
   return d;
 }
 
-Image::Data* Image::Data::alloc(int w, int h, int format)
+Image::Data* Image::Data::alloc(int w, int h, uint32_t format)
 {
   Data* d;
   sysint_t stride;

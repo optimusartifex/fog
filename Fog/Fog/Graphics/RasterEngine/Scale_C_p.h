@@ -178,7 +178,7 @@ struct FOG_HIDDEN ScaleC
     return p;
   }
 
-  static err_t FOG_FASTCALL texture_init_scale(PatternContext* ctx, const Image& image, int dw, int dh, int interpolationType)
+  static err_t FOG_FASTCALL texture_init_scale(PatternContext* ctx, const Image& image, int dw, int dh, uint32_t interpolationType)
   {
     Memory::zero(&ctx->scale, sizeof(ctx->scale));
 

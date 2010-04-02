@@ -512,7 +512,7 @@ struct RasterRenderImageAffineBound
   bool init(
     const Image& image, const IntRect& irect,
     const DoubleMatrix& matrix,
-    const IntBox& clipBox, int interpolationType);
+    const IntBox& clipBox, uint32_t interpolationType);
 
   FOG_INLINE bool isInitialized() const { return (bool)ictx.initialized; }
 
@@ -552,6 +552,10 @@ struct RasterRenderImageAffineBound
 //! @c RasterPaintCalc classes. It shares common stuff and dispatching.
 struct FOG_HIDDEN RasterPaintAction
 {
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
   //! @brief Action constructor.
   FOG_INLINE RasterPaintAction() {}
 
@@ -561,7 +565,9 @@ struct FOG_HIDDEN RasterPaintAction
   //! with the action.
   FOG_INLINE ~RasterPaintAction() {}
 
-  // [Abstract]
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
 
   //! @brief Run action (command or calculation).
   virtual void run(RasterPaintContext* ctx) = 0;
@@ -575,7 +581,9 @@ struct FOG_HIDDEN RasterPaintAction
   //! implementation. It's inlined for efficiency.
   FOG_INLINE void _free();
 
+  // --------------------------------------------------------------------------
   // [Members]
+  // --------------------------------------------------------------------------
 
   //! @brief Owner of this action.
   RasterPaintEngine* engine;
@@ -662,17 +670,23 @@ struct FOG_HIDDEN RasterPaintCmd : public RasterPaintAction
 
 struct FOG_HIDDEN RasterPaintCmdBoxes : public RasterPaintCmd
 {
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE RasterPaintCmdBoxes() {};
   FOG_INLINE ~RasterPaintCmdBoxes() {};
 
-  // [Implementation]
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
 
   virtual void run(RasterPaintContext* ctx);
   virtual void release();
 
+  // --------------------------------------------------------------------------
   // [Members]
+  // --------------------------------------------------------------------------
 
   sysuint_t count;
   IntBox boxes[1];
@@ -684,17 +698,23 @@ struct FOG_HIDDEN RasterPaintCmdBoxes : public RasterPaintCmd
 
 struct FOG_HIDDEN RasterPaintCmdImage : public RasterPaintCmd
 {
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE RasterPaintCmdImage() {};
   FOG_INLINE ~RasterPaintCmdImage() {};
 
-  // [Implementation]
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
 
   virtual void run(RasterPaintContext* ctx);
   virtual void release();
 
+  // --------------------------------------------------------------------------
   // [Members]
+  // --------------------------------------------------------------------------
 
   Static<Image> image;
 
@@ -708,17 +728,23 @@ struct FOG_HIDDEN RasterPaintCmdImage : public RasterPaintCmd
 
 struct FOG_HIDDEN RasterPaintCmdImageAffineBound : public RasterPaintCmd
 {
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE RasterPaintCmdImageAffineBound() { renderer.init(); };
   FOG_INLINE ~RasterPaintCmdImageAffineBound() {};
 
-  // [Implementation]
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
 
   virtual void run(RasterPaintContext* ctx);
   virtual void release();
 
+  // --------------------------------------------------------------------------
   // [Members]
+  // --------------------------------------------------------------------------
 
   Static<RasterRenderImageAffineBound> renderer;
 };
@@ -729,17 +755,23 @@ struct FOG_HIDDEN RasterPaintCmdImageAffineBound : public RasterPaintCmd
 
 struct FOG_HIDDEN RasterPaintCmdGlyphSet : public RasterPaintCmd
 {
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE RasterPaintCmdGlyphSet() {};
   FOG_INLINE ~RasterPaintCmdGlyphSet() {};
 
-  // [Implementation]
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
 
   virtual void run(RasterPaintContext* ctx);
   virtual void release();
 
+  // --------------------------------------------------------------------------
   // [Members]
+  // --------------------------------------------------------------------------
 
   Static<GlyphSet> glyphSet;
 
@@ -753,17 +785,23 @@ struct FOG_HIDDEN RasterPaintCmdGlyphSet : public RasterPaintCmd
 
 struct FOG_HIDDEN RasterPaintCmdPath : public RasterPaintCmd
 {
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE RasterPaintCmdPath() {};
   FOG_INLINE ~RasterPaintCmdPath() {};
 
-  // [Implementation]
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
 
   virtual void run(RasterPaintContext* ctx);
   virtual void release();
 
+  // --------------------------------------------------------------------------
   // [Members]
+  // --------------------------------------------------------------------------
 
   //! @brief Rasterizer (where path is rasterized by @c RasterPaintCalc)
   Rasterizer* ras;
@@ -774,7 +812,7 @@ struct FOG_HIDDEN RasterPaintCmdPath : public RasterPaintCmd
   //! Texture blit commands are serialized through @c _serializeImageAffine(),
   //! difference is that it's always used PAINTER_SOURCE_PATTERN type to do
   //! pattern based blit.
-  int textureBlit;
+  uint32_t textureBlit;
 };
 
 // ============================================================================
@@ -788,8 +826,16 @@ struct FOG_HIDDEN RasterPaintCmdPath : public RasterPaintCmd
 //! can distribute them to different threads.
 struct FOG_HIDDEN RasterPaintCalc : public RasterPaintAction
 {
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
   FOG_INLINE RasterPaintCalc() {};
   FOG_INLINE ~RasterPaintCalc() {};
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
 
   //! @brief Related command to this calculation.
   RasterPaintCmd* relatedTo;
@@ -801,15 +847,23 @@ struct FOG_HIDDEN RasterPaintCalc : public RasterPaintAction
 
 struct FOG_HIDDEN RasterPaintCalcPath : public RasterPaintCalc
 {
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
   FOG_INLINE RasterPaintCalcPath() {};
   FOG_INLINE ~RasterPaintCalcPath() {};
 
-  // [Implementation]
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
 
   virtual void run(RasterPaintContext* ctx);
   virtual void release();
 
+  // --------------------------------------------------------------------------
   // [Members]
+  // --------------------------------------------------------------------------
 
   //! @brief Owner raster paint engine.
   RasterPaintEngine* engine;
@@ -828,11 +882,23 @@ struct FOG_HIDDEN RasterPaintCalcPath : public RasterPaintCalc
 // is shared across all painter threads so one signal will wake them all.
 struct FOG_HIDDEN RasterPaintTask : public Task
 {
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
   RasterPaintTask(Lock* condLock);
   virtual ~RasterPaintTask();
 
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
+
   virtual void run();
   virtual void destroy();
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
 
   // State
   enum STATE
@@ -865,19 +931,25 @@ struct FOG_HIDDEN RasterPaintTask : public Task
 // Structure shared across all workers (threads).
 struct FOG_HIDDEN RasterPaintWorkerManager
 {
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   RasterPaintWorkerManager();
   ~RasterPaintWorkerManager();
 
+  // --------------------------------------------------------------------------
   // [Methods]
+  // --------------------------------------------------------------------------
 
   // To call the lock must be locked!
   RasterPaintTask* wakeUpScheduled(RasterPaintTask* calledFrom);
   RasterPaintTask* wakeUpSleeping(RasterPaintTask* calledFrom);
   bool isCompleted();
 
+  // --------------------------------------------------------------------------
   // [Members]
+  // --------------------------------------------------------------------------
 
   sysuint_t numWorkers;               // Count of workers used in engine.
 

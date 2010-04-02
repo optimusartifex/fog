@@ -48,7 +48,7 @@ err_t Painter::begin(Image& image, uint32_t initFlags)
   if (image.isEmpty()) return ERR_IMAGE_INVALID_SIZE;
 
   // If image is not empty, the format can't be Null.
-  int format = image.getFormat();
+  uint32_t format = image.getFormat();
   if (format == PIXEL_FORMAT_I8) return ERR_IMAGE_UNSUPPORTED_FORMAT;
 
   FOG_RETURN_ON_ERROR(image.detach());

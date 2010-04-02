@@ -73,10 +73,10 @@ struct FOG_API ImageFilterBase
   FOG_INLINE sysuint_t refCount() const { return _d->refCount.get(); }
 
   //! @brief Get type of filter, see @c IMAGE_FILTER_TYPE.
-  FOG_INLINE int getType() const { return _d->type; }
+  FOG_INLINE uint32_t getType() const { return _d->type; }
 
   //! @brief Get characteristics of filter, see @c IMAGE_FILTER_CHAR.
-  FOG_INLINE int getCharacteristics() const { return _d->characteristics; }
+  FOG_INLINE uint32_t getCharacteristics() const { return _d->characteristics; }
 
   // --------------------------------------------------------------------------
   // [ColorFilter / ImageFilter Compatible]

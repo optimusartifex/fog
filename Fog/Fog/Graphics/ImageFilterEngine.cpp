@@ -17,7 +17,7 @@ namespace Fog {
 // [Fog::ImageFilterEngine - Construction / Destruction]
 // ============================================================================
 
-ImageFilterEngine::ImageFilterEngine(int type) :
+ImageFilterEngine::ImageFilterEngine(uint32_t type) :
   type(type),
   characteristics(0)
 {
@@ -62,13 +62,13 @@ void ImageFilterEngine::releaseContext(const void* context) const
 // [Fog::ImageFilterEngine - Interface - Filtering]
 // ============================================================================
 
-ColorFilterFn ImageFilterEngine::getColorFilterFn(int format) const
+ColorFilterFn ImageFilterEngine::getColorFilterFn(uint32_t format) const
 {
   FOG_UNUSED(format);
   return NULL;
 }
 
-ImageFilterFn ImageFilterEngine::getImageFilterFn(int format, int processing) const
+ImageFilterFn ImageFilterEngine::getImageFilterFn(uint32_t format, uint32_t processing) const
 {
   FOG_UNUSED(format);
   FOG_UNUSED(processing);

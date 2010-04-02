@@ -377,7 +377,7 @@ uint8_t* RasterPaintContext::getBuffer(sysint_t size)
 bool RasterRenderImageAffineBound::init(
   const Image& image, const IntRect& irect,
   const DoubleMatrix& matrix,
-  const IntBox& clipBox, int interpolationType)
+  const IntBox& clipBox, uint32_t interpolationType)
 {
   // Don't call init() after it was initialized.
   FOG_ASSERT(ictx.initialized == false);
@@ -4752,7 +4752,7 @@ NAME##_end: \
       uint8_t* pBuf = ctx->getBuffer((uint)(clipState->clipBox.getWidth()) * 4);
       if (!pBuf) return;
 
-      int format = layer->format;
+      uint32_t format = layer->format;
 
       const ImageFilterEngine* cfEngine = capsState->colorFilter->getEngine();
       const void* cfRasterPaintContext = cfEngine->getContext();

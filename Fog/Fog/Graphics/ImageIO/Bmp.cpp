@@ -914,9 +914,9 @@ err_t BmpEncoderDevice::writeImage(const Image& image)
   Image::Data* d = image._d;
   int width = d->width;
   int height = d->height;
-  int format = d->format;
-  int bpl;
-  int skip;
+  uint32_t format = d->format;
+  uint32_t bpl;
+  uint32_t skip;
 
   BmpFileHeader bmpFileHeader;
   BmpDataHeader bmpDataHeader;

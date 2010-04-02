@@ -64,7 +64,7 @@ struct FOG_API ImageFilterEngine
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  ImageFilterEngine(int type);
+  ImageFilterEngine(uint32_t type);
   virtual ~ImageFilterEngine();
 
   // --------------------------------------------------------------------------
@@ -75,7 +75,7 @@ struct FOG_API ImageFilterEngine
   virtual bool isNop() const;
 
   //! @brief Extend a given rectangle by number of pixels needed to successfully
-  //! apply this filter to image. This is mainly for convolution type filters
+  //! apply this filter to an image. This is mainly for convolution type filters
   //! like blurs where resulting image can be larger than source.
   //!
   //! @note For color filters this is always NOP (no extends).
@@ -88,6 +88,7 @@ struct FOG_API ImageFilterEngine
   //! @brief Get or create context that will be used as an argument for filter
   //! functions. You must release it using @c releaseContext() method.
   virtual const void* getContext() const;
+
   //! @brief Release context returned by @c getContext() method.
   virtual void releaseContext(const void* context) const;
 
@@ -100,7 +101,7 @@ struct FOG_API ImageFilterEngine
   //! @param format Pixel format of data that will be processed.
   //!
   //! @note This is valid only for color filters, otherwise NULL is returned.
-  virtual ColorFilterFn getColorFilterFn(int format) const;
+  virtual ColorFilterFn getColorFilterFn(uint32_t format) const;
 
   //! @brief Get image filter function for a given @a format.
   //!
@@ -113,7 +114,7 @@ struct FOG_API ImageFilterEngine
   //! - @c IMAGE_FILTER_HORZ_PROCESSING - Horizontal processing.
   //!
   //! @note This is valid only for image filters, otherwise NULL is returned.
-  virtual ImageFilterFn getImageFilterFn(int format, int processing) const;
+  virtual ImageFilterFn getImageFilterFn(uint32_t format, uint32_t processing) const;
 
   // --------------------------------------------------------------------------
   // [Reference Counting]
@@ -143,9 +144,9 @@ struct FOG_API ImageFilterEngine
   //! @brief Reference count.
   mutable Atomic<sysuint_t> refCount;
   //! @brief filter type, see @c IMAGE_FILTER_TYPE.
-  int type;
+  uint32_t type;
   //! @brief Filter characteristics, see @c IMAGE_FILTER_CHAR.
-  int characteristics;
+  uint32_t characteristics;
 
 private:
   FOG_DISABLE_COPY(ImageFilterEngine)

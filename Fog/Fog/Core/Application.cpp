@@ -31,7 +31,7 @@
 #include <Fog/Core/WinUtil_p.h>
 #include <Fog/Gui/GuiEngine.h>
 
-#if defined(FOG_OS_WINDOWS)
+#if defined(FOG_GUI_WINDOWS)
 # include <Fog/Gui/GuiEngine/Win.h>
 // windows.h is already included by Fog/Build/Build.h
 # include <io.h>
@@ -418,11 +418,11 @@ err_t Application::setWorkingDirectory(const String& dir)
 
 String Application::detectGuiEngine()
 {
-#if defined(FOG_OS_WINDOWS)
+#if defined(FOG_GUI_WINDOWS)
   return Ascii8("Gui.Windows");
-#elif defined(FOG_OS_POSIX)
+#elif defined(FOG_GUI_POSIX)
   return Ascii8("Gui.X11");
-#endif // FOG_OS_POSIX
+#endif // FOG_GUI_POSIX
 }
 
 GuiEngine* Application::createGuiEngine(const String& _name)
@@ -513,13 +513,13 @@ FOG_INIT_DECLARE err_t fog_application_init(void)
   application_local.init();
   Application::registerEventLoopType<DefaultEventLoop>(Ascii8("Default"));
 
-#if defined(FOG_OS_WINDOWS)
+#if defined(FOG_GUI_WINDOWS)
   {
     String winGuiEngineName(Ascii8("Gui.Windows"));
     Application::registerGuiEngineType<WinGuiEngine>(winGuiEngineName);
     Application::registerEventLoopType<WinGuiEventLoop>(winGuiEngineName);
   }
-#endif // FOG_OS_WINDOWS
+#endif // FOG_GUI_WINDOWS
 
   return ERR_OK;
 }

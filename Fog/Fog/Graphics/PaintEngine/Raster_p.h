@@ -168,7 +168,7 @@ struct FOG_HIDDEN BlockAllocator
   //! @brief Size of one block (decreased by some value to always fit in 
   //! one/two pages). 96 bytes reserved for @c ::malloc() data and our
   //! @c Block data.
-  enum { BLOCK_SIZE = 8096 };
+  enum { BLOCK_SIZE = 8000 };
 
   // --------------------------------------------------------------------------
   // [Block]
@@ -309,27 +309,34 @@ struct FOG_HIDDEN ZoneAllocator
   //!   obj->~Object();
   //!
   //!   // ZoneAllocator destructor will free all memory allocated through it,
-  //!   // alternative is to call @c zone.free() or @c zone.reset().
+  //!   // alternative is to call @c zone.free().
   //! }
   //! @endcode
-  void* alloc(sysuint_t size);
+  FOG_INLINE void* alloc(sysuint_t size)
+  {
+    // Chunks must be valid pointer if we are here.
+    FOG_ASSERT(_chunks != NULL);
+
+    if (FOG_LIKELY(_chunks->getRemainingBytes() >= size))
+    {
+      uint8_t* p = _chunks->data + _chunks->pos;
+      _chunks->pos += size;
+      return (void*)p;
+    }
+    else
+    {
+      return _alloc(size);
+    }
+  }
+
+  //! @brief Internal alloc function.
+  void* _alloc(sysuint_t size);
 
   //! @brief Free all allocated memory except first block that remains for reuse.
   //!
   //! Note that this method will invalidate all instances using this memory
   //! allocated by this zone instance.
   void reset();
-
-  //! @brief Free all allocated memory at once.
-  //!
-  //! Note that this method will invalidate all instances using this memory
-  //! allocated by this zone instance.
-  void free();
-
-  //! @brief Get total size of allocated objects - by @c alloc().
-  FOG_INLINE sysuint_t getTotal() const { return _total; }
-  //! @brief Get (default) chunk size.
-  FOG_INLINE sysuint_t getChunkSize() const { return _chunkSize; }
 
   // --------------------------------------------------------------------------
   // [Chunk]
@@ -359,8 +366,6 @@ struct FOG_HIDDEN ZoneAllocator
 private:
   //! @brief Last allocated chunk of memory.
   Chunk* _chunks;
-  //! @brief Total size of allocated objects - by @c alloc() method.
-  sysuint_t _total;
   //! @brief One chunk size.
   sysuint_t _chunkSize;
 
@@ -748,22 +753,6 @@ struct RasterRenderImageAffineBound
   int ymax;
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // ============================================================================
 // [Fog::RasterPaintAction]
 // ============================================================================
@@ -793,20 +782,14 @@ struct FOG_HIDDEN RasterPaintAction
   virtual void run(RasterPaintContext* ctx) = 0;
   //! @brief Release action (it means free / dereference all associated
   //! resources with this action).
-  virtual void release() = 0;
-
-  //! @brief Free all common resources (called only by @c release() method).
-  //!
-  //! This is convenience method that is often used by @c release() method
-  //! implementation. It's inlined for efficiency.
-  FOG_INLINE void _free();
+  virtual void release(RasterPaintContext* ctx) = 0;
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
   //! @brief Owner of this action.
-  RasterPaintEngine* engine;
+  // RasterPaintEngine* engine;
 
 private:
   FOG_DISABLE_COPY(RasterPaintAction)
@@ -885,7 +868,7 @@ struct FOG_HIDDEN RasterPaintCmdLayerChange : public RasterPaintCmd
   // --------------------------------------------------------------------------
 
   virtual void run(RasterPaintContext* ctx);
-  virtual void release();
+  virtual void release(RasterPaintContext* ctx);
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -919,7 +902,7 @@ struct FOG_HIDDEN RasterPaintCmdRegionChange : public RasterPaintCmd
   // --------------------------------------------------------------------------
 
   virtual void run(RasterPaintContext* ctx);
-  virtual void release();
+  virtual void release(RasterPaintContext* ctx);
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -967,10 +950,7 @@ struct FOG_HIDDEN RasterPaintCmdDraw : public RasterPaintCmd
   FOG_INLINE void _afterPaint(RasterPaintContext* ctx);
 
   //! @brief This method destroys only general @c RasterPaintCmdDraw data.
-  //!
-  //! Within this method the @c RasterPaintAction::_free() is not called, so
-  //! make sure you call @c _free() after @c _releasePattern().
-  FOG_INLINE void _releasePattern();
+  FOG_INLINE void _releasePattern(RasterPaintContext* ctx);
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -1005,7 +985,7 @@ struct FOG_HIDDEN RasterPaintCmdBoxes : public RasterPaintCmdDraw
   // --------------------------------------------------------------------------
 
   virtual void run(RasterPaintContext* ctx);
-  virtual void release();
+  virtual void release(RasterPaintContext* ctx);
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -1033,7 +1013,7 @@ struct FOG_HIDDEN RasterPaintCmdImage : public RasterPaintCmdDraw
   // --------------------------------------------------------------------------
 
   virtual void run(RasterPaintContext* ctx);
-  virtual void release();
+  virtual void release(RasterPaintContext* ctx);
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -1063,7 +1043,7 @@ struct FOG_HIDDEN RasterPaintCmdImageAffineBound : public RasterPaintCmdDraw
   // --------------------------------------------------------------------------
 
   virtual void run(RasterPaintContext* ctx);
-  virtual void release();
+  virtual void release(RasterPaintContext* ctx);
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -1090,7 +1070,7 @@ struct FOG_HIDDEN RasterPaintCmdGlyphSet : public RasterPaintCmdDraw
   // --------------------------------------------------------------------------
 
   virtual void run(RasterPaintContext* ctx);
-  virtual void release();
+  virtual void release(RasterPaintContext* ctx);
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -1120,7 +1100,7 @@ struct FOG_HIDDEN RasterPaintCmdPath : public RasterPaintCmdDraw
   // --------------------------------------------------------------------------
 
   virtual void run(RasterPaintContext* ctx);
-  virtual void release();
+  virtual void release(RasterPaintContext* ctx);
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -1176,7 +1156,7 @@ struct FOG_HIDDEN RasterPaintCalcFillPath : public RasterPaintCalc
   // --------------------------------------------------------------------------
 
   virtual void run(RasterPaintContext* ctx);
-  virtual void release();
+  virtual void release(RasterPaintContext* ctx);
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -1222,7 +1202,7 @@ struct FOG_HIDDEN RasterPaintCalcStrokePath : public RasterPaintCalc
   // --------------------------------------------------------------------------
 
   virtual void run(RasterPaintContext* ctx);
-  virtual void release();
+  virtual void release(RasterPaintContext* ctx);
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -1679,11 +1659,6 @@ FOG_INLINE uint8_t* RasterPaintContext::getBuffer(sysuint_t size)
   return (size < bufferSize) ? buffer : reallocBuffer(size);
 }
 
-FOG_INLINE void RasterPaintAction::_free()
-{
-  // Not used when switched to ZoneAllocator. Freed when reset.
-}
-
 FOG_INLINE void RasterPaintCmdDraw::_initPaint(RasterPaintContext* ctx)
 {
   ops = ctx->ops;
@@ -1731,12 +1706,12 @@ FOG_INLINE void RasterPaintCmdDraw::_initBlit(RasterPaintContext* ctx)
   ops.sourceType = PAINTER_SOURCE_ARGB;
 }
 
-FOG_INLINE void RasterPaintCmdDraw::_releasePattern()
+FOG_INLINE void RasterPaintCmdDraw::_releasePattern(RasterPaintContext* ctx)
 {
   if (ops.sourceType == PAINTER_SOURCE_PATTERN && pctx->refCount.deref())
   {
     pctx->destroy(pctx);
-    engine->blockAllocator.free(pctx);
+    ctx->engine->blockAllocator.free(pctx);
   }
 }
 
@@ -1751,7 +1726,6 @@ FOG_INLINE T* RasterPaintEngine::_createCommand(sysuint_t size)
   command->refCount.init((uint)workerManager->numWorkers);
   command->status.init(RASTER_COMMAND_READY);
 
-  command->engine = this;
   command->calculation = NULL;
 
   return command;

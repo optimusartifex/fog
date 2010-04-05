@@ -131,30 +131,35 @@ void BlockAllocator::reset()
 // ============================================================================
 
 ZoneAllocator::ZoneAllocator(sysuint_t chunkSize)
+  : _chunkSize(chunkSize)
 {
-  _chunks = NULL;
-  _total = 0;
-  _chunkSize = chunkSize;
+  // We need almost one chunk.
+  _chunks = reinterpret_cast<Chunk*>(Memory::alloc(sizeof(Chunk) - sizeof(void*) + _chunkSize));
+  _chunks->prev = NULL;
+  _chunks->pos = 0;
+  _chunks->size = _chunkSize;
+
+  // TODO: We need almost one chunk, but memory allocation can fail, what to do?
+  FOG_ASSERT(_chunks != NULL);
 }
 
 ZoneAllocator::~ZoneAllocator()
 {
-  free();
+  reset();
+  if (_chunks) Memory::free(_chunks);
 }
 
-void* ZoneAllocator::alloc(sysuint_t size)
+void* ZoneAllocator::_alloc(sysuint_t size)
 {
-  // Align to 4 or 8 bytes
-  size = (size + sizeof(sysint_t)-1) & ~(sizeof(sysint_t)-1);
-
   Chunk* cur = _chunks;
 
-  if (!cur || cur->getRemainingBytes() < size)
+  if (cur->getRemainingBytes() < size)
   {
-    sysuint_t chSize = _chunkSize;
-    if (chSize < size) chSize = size;
+    // This allocator wasn't designed to alloc huge amount of memory (larger
+    // than the chunk size), so never do it!
+    FOG_ASSERT(_chunkSize < size);
 
-    cur = reinterpret_cast<Chunk*>(Memory::alloc(sizeof(Chunk) - sizeof(void*) + chSize));
+    cur = reinterpret_cast<Chunk*>(Memory::alloc(sizeof(Chunk) - sizeof(void*) + _chunkSize));
     if (!cur) return NULL;
 
     cur->prev = _chunks;
@@ -165,7 +170,6 @@ void* ZoneAllocator::alloc(sysuint_t size)
 
   uint8_t* p = cur->data + cur->pos;
   cur->pos += size;
-  _total += size;
   return (void*)p;
 }
 
@@ -176,24 +180,8 @@ void ZoneAllocator::reset()
 
   _chunks->pos = 0;
   _chunks->prev = NULL;
-  _total = 0;
 
   cur = cur->prev;
-  while (cur)
-  {
-    Chunk* prev = cur->prev;
-    Memory::free(cur);
-    cur = prev;
-  }
-}
-
-void ZoneAllocator::free()
-{
-  Chunk* cur = _chunks;
-
-  _chunks = NULL;
-  _total = 0;
-
   while (cur)
   {
     Chunk* prev = cur->prev;
@@ -843,9 +831,8 @@ void RasterPaintCmdLayerChange::run(RasterPaintContext* ctx)
   ctx->layer = layer;
 }
 
-void RasterPaintCmdLayerChange::release()
+void RasterPaintCmdLayerChange::release(RasterPaintContext* ctx)
 {
-  _free();
 }
 
 // ============================================================================
@@ -861,9 +848,8 @@ void RasterPaintCmdRegionChange::run(RasterPaintContext* ctx)
   ctx->workRegion = workRegion;
 }
 
-void RasterPaintCmdRegionChange::release()
+void RasterPaintCmdRegionChange::release(RasterPaintContext* ctx)
 {
-  _free();
 }
 
 // ============================================================================
@@ -877,10 +863,9 @@ void RasterPaintCmdBoxes::run(RasterPaintContext* ctx)
   _afterPaint(ctx);
 }
 
-void RasterPaintCmdBoxes::release()
+void RasterPaintCmdBoxes::release(RasterPaintContext* ctx)
 {
-  _releasePattern();
-  _free();
+  _releasePattern(ctx);
 }
 
 // ============================================================================
@@ -894,12 +879,10 @@ void RasterPaintCmdImage::run(RasterPaintContext* ctx)
   _afterPaint(ctx);
 }
 
-void RasterPaintCmdImage::release()
+void RasterPaintCmdImage::release(RasterPaintContext* ctx)
 {
   image.destroy();
-
-  _releasePattern();
-  _free();
+  _releasePattern(ctx);
 }
 
 // ============================================================================
@@ -912,10 +895,9 @@ void RasterPaintCmdImageAffineBound::run(RasterPaintContext* ctx)
   renderer.instance().render(ctx);
 }
 
-void RasterPaintCmdImageAffineBound::release()
+void RasterPaintCmdImageAffineBound::release(RasterPaintContext* ctx)
 {
   renderer.destroy();
-  _free();
 }
 
 // ============================================================================
@@ -929,12 +911,10 @@ void RasterPaintCmdGlyphSet::run(RasterPaintContext* ctx)
   _afterPaint(ctx);
 }
 
-void RasterPaintCmdGlyphSet::release()
+void RasterPaintCmdGlyphSet::release(RasterPaintContext* ctx)
 {
   glyphSet.destroy();
-
-  _releasePattern();
-  _free();
+  _releasePattern(ctx);
 }
 
 // ============================================================================
@@ -948,12 +928,10 @@ void RasterPaintCmdPath::run(RasterPaintContext* ctx)
   _afterPaint(ctx);
 }
 
-void RasterPaintCmdPath::release()
+void RasterPaintCmdPath::release(RasterPaintContext* ctx)
 {
   Rasterizer::releaseRasterizer(ras);
-
-  _releasePattern();
-  _free();
+  _releasePattern(ctx);
 }
 
 // ============================================================================
@@ -985,10 +963,9 @@ void RasterPaintCalcFillPath::run(RasterPaintContext* ctx)
   cmd->status.set(ras->hasCells() ? RASTER_COMMAND_READY : RASTER_COMMAND_SKIP);
 }
 
-void RasterPaintCalcFillPath::release()
+void RasterPaintCalcFillPath::release(RasterPaintContext* ctx)
 {
   path.destroy();
-  _free();
 }
 
 // ============================================================================
@@ -1028,11 +1005,10 @@ void RasterPaintCalcStrokePath::run(RasterPaintContext* ctx)
   cmd->status.set(ras->hasCells() ? RASTER_COMMAND_READY : RASTER_COMMAND_SKIP);
 }
 
-void RasterPaintCalcStrokePath::release()
+void RasterPaintCalcStrokePath::release(RasterPaintContext* ctx)
 {
   path.destroy();
   stroker.destroy();
-  _free();
 }
 
 // ============================================================================
@@ -1094,7 +1070,7 @@ void RasterPaintTask::run()
           RasterPaintCmd* cmd = clc->relatedTo;
 
           clc->run(&ctx);
-          clc->release();
+          clc->release(&ctx);
 
           AutoLock locked(mgr->lock);
           mgr->wakeUpScheduled(this);
@@ -1119,7 +1095,7 @@ void RasterPaintTask::run()
           case RASTER_COMMAND_READY:
           {
             cmd->run(&ctx);
-            if (cmd->refCount.deref()) cmd->release();
+            if (cmd->refCount.deref()) cmd->release(&ctx);
 
             cmdCurrent++;
             cont = 0;
@@ -1129,7 +1105,7 @@ void RasterPaintTask::run()
           case RASTER_COMMAND_SKIP:
           {
             cmdCurrent++;
-            if (cmd->refCount.deref()) cmd->release();
+            if (cmd->refCount.deref()) cmd->release(&ctx);
             cont = 0;
             break;
           }
@@ -1235,7 +1211,7 @@ void RasterPaintTask::destroy()
 RasterWorkerManager::RasterWorkerManager() :
   allFinishedCondition(&lock),
   releaseEvent(NULL),
-  zoneAllocator(8096)
+  zoneAllocator(16000)
 {
 }
 
@@ -3192,7 +3168,7 @@ void RasterPaintEngine::_serializeImageAffine(const DoublePoint& pt, const Image
 
       if (!cmd->renderer.instance().init(image, ir, matrix, ctx.clipBox, ctx.hints.imageInterpolation))
       {
-        cmd->release();
+        cmd->release(&ctx);
         return;
       }
 
@@ -3270,7 +3246,7 @@ void RasterPaintEngine::_serializeImageAffine(const DoublePoint& pt, const Image
       }
 
       RasterPaintCalcFillPath* clc = _createCalc<RasterPaintCalcFillPath>();
-      if (!clc) { cmd->release(); return; }
+      if (!clc) { cmd->release(&ctx); return; }
 
       clc->relatedTo = cmd;
       clc->path.init(tmpPath);
@@ -3349,7 +3325,7 @@ void RasterPaintEngine::_serializePath(const DoublePath& path, bool stroke)
     if (stroke)
     {
       RasterPaintCalcStrokePath* clc = _createCalc<RasterPaintCalcStrokePath>();
-      if (!clc) { cmd->release(); return; }
+      if (!clc) { cmd->release(&ctx); return; }
 
       clc->relatedTo = cmd;
       clc->path.init(path);
@@ -3365,7 +3341,7 @@ void RasterPaintEngine::_serializePath(const DoublePath& path, bool stroke)
     else
     {
       RasterPaintCalcFillPath* clc = _createCalc<RasterPaintCalcFillPath>();
-      if (!clc) { cmd->release(); return; }
+      if (!clc) { cmd->release(&ctx); return; }
 
       clc->relatedTo = cmd;
       clc->path.init(path);

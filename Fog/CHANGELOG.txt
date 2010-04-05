@@ -4,6 +4,7 @@
 - Painter now supports meta matrix (addition to meta region) that is base matrix for
   all transformations and can't be reset by resetMatrix() or setMatrix() methods.
 - Some work on clipping, but not finished yet.
+- Additional performance optimizations (raster paint engine).
 
 2010-04-03
 - Renamed Class::sharedNull to Class::_dnull. Now all 'd' statics will start at '_d'.

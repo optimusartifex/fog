@@ -2642,7 +2642,7 @@ err_t GifDecoderDevice::readImage(Image& image)
   int intjump[] = { 8, 8, 4, 2 };
   int transp = -1;
   err_t error = ERR_OK;
-  int format = PIXEL_FORMAT_XRGB32;
+  uint32_t format = PIXEL_FORMAT_XRGB32;
 
   do {
     if (DGifGetRecordType(_context, &rec) == GIF_ERROR)

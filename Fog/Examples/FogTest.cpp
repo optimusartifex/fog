@@ -219,8 +219,8 @@ void MyWindow::onPaint(PaintEvent* e)
     ColorMatrix cm;
     cm.rotateHue((float)_rotate * 3.0f);
     im.filter(cm);
-    p->blitImage(DoublePoint(50.0, 50.0), im);
-    p->blitImage(DoublePoint(250.0, 50.0), i[0]);
+    p->blitImage(IntPoint(50, 50), im);
+    p->blitImage(IntPoint(250, 50), i[0]);
   }
 #endif
 

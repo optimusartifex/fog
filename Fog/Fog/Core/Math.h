@@ -210,17 +210,17 @@ static FOG_INLINE const T& bound(const T& val, const T& min, const T& max)
 
 //! @brief Returns absolute value of @a a
 template<typename T>
-static FOG_INLINE T abs(const T& a)
+FOG_INLINE T abs(const T& a)
 { return (a >= 0) ? a : -a; }
 
 template<>
-static FOG_INLINE float abs(const float& a)
+FOG_INLINE float abs(const float& a)
 {
   return ::fabsf(a);
 }
 
 template<>
-static FOG_INLINE double abs(const double& a)
+FOG_INLINE double abs(const double& a)
 {
   return ::fabs(a);
 }

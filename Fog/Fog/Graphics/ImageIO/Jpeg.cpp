@@ -373,7 +373,7 @@ err_t JpegDecoderDevice::readImage(Image& image)
   MyJpegErrorMgr jerr;
   JSAMPROW rowptr[1];
 
-  int format = PIXEL_FORMAT_XRGB32;
+  uint32_t format = PIXEL_FORMAT_XRGB32;
   int bpp = 3;
 
   LocalBuffer<1024> bufferStorage;
@@ -579,7 +579,7 @@ err_t JpegEncoderDevice::writeImage(const Image& image)
   ImageData* d = image._d;
   int width = d->width;
   int height = d->height;
-  int format = d->format;
+  uint32_t format = d->format;
 
   // This struct contains the JPEG compression parameters and pointers to
   // working space (which is allocated as needed by the JPEG library).

@@ -127,6 +127,7 @@ struct FOG_API Pattern
 
   Pattern();
   Pattern(const Pattern& other);
+  explicit Pattern(const Argb& argb);
   FOG_INLINE explicit Pattern(PatternData* d) : _d(d) {}
   ~Pattern();
 

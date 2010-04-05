@@ -35,7 +35,7 @@ struct FOG_HIDDEN NullPaintEngine : public PaintEngine
 
   virtual int getWidth() const { return 0; }
   virtual int getHeight() const { return 0; }
-  virtual int getFormat() const { return PIXEL_FORMAT_NULL; }
+  virtual uint32_t getFormat() const { return PIXEL_FORMAT_NULL; }
 
   // --------------------------------------------------------------------------
   // [Engine / Flush]
@@ -51,7 +51,7 @@ struct FOG_HIDDEN NullPaintEngine : public PaintEngine
   // --------------------------------------------------------------------------
 
   virtual int getHint(uint32_t hint) const { return -1; }
-  virtual void setHint(uint32_t hint, int value) {}
+  virtual err_t setHint(uint32_t hint, int value) { return ERR_RT_INVALID_CONTEXT; }
 
   // --------------------------------------------------------------------------
   // [Meta]
@@ -75,7 +75,7 @@ struct FOG_HIDDEN NullPaintEngine : public PaintEngine
   // --------------------------------------------------------------------------
 
   virtual uint32_t getOperator() const { return OPERATOR_SRC_OVER; }
-  virtual void setOperator(uint32_t op) {}
+  virtual err_t setOperator(uint32_t op) { return ERR_RT_INVALID_CONTEXT; }
 
   // --------------------------------------------------------------------------
   // [Source]
@@ -86,46 +86,46 @@ struct FOG_HIDDEN NullPaintEngine : public PaintEngine
   virtual Argb getSourceArgb() const { return Argb(0x00000000); }
   virtual Pattern getSourcePattern() const { return Pattern(); }
 
-  virtual void setSource(Argb argb) {}
-  virtual void setSource(const Pattern& pattern) {}
+  virtual err_t setSource(Argb argb) { return ERR_OK; }
+  virtual err_t setSource(const Pattern& pattern) { return ERR_RT_INVALID_CONTEXT; }
 
   // --------------------------------------------------------------------------
   // [Fill Parameters]
   // --------------------------------------------------------------------------
 
   virtual uint32_t getFillMode() const { return FILL_DEFAULT; }
-  virtual void setFillMode(uint32_t mode) {}
+  virtual err_t setFillMode(uint32_t mode) { return ERR_RT_INVALID_CONTEXT; }
 
   // --------------------------------------------------------------------------
   // [Stroke Parameters]
   // --------------------------------------------------------------------------
 
-  virtual void getStrokeParams(StrokeParams& strokeParams) const { strokeParams.reset(); }
-  virtual void setStrokeParams(const StrokeParams& strokeParams) {}
+  virtual StrokeParams getStrokeParams() const { return StrokeParams(); }
+  virtual err_t setStrokeParams(const StrokeParams& strokeParams) { return ERR_RT_INVALID_CONTEXT; }
 
   virtual double getLineWidth() const { return 0.0; }
-  virtual void setLineWidth(double lineWidth) {}
+  virtual err_t setLineWidth(double lineWidth) { return ERR_RT_INVALID_CONTEXT; }
 
   virtual uint32_t getStartCap() const { return 0; }
-  virtual void setStartCap(uint32_t startCap) {}
+  virtual err_t setStartCap(uint32_t startCap) { return ERR_RT_INVALID_CONTEXT; }
 
   virtual uint32_t getEndCap() const { return 0; }
-  virtual void setEndCap(uint32_t endCap) {}
+  virtual err_t setEndCap(uint32_t endCap) { return ERR_RT_INVALID_CONTEXT; }
 
-  virtual void setLineCaps(uint32_t lineCaps) {}
+  virtual err_t setLineCaps(uint32_t lineCaps) { return ERR_RT_INVALID_CONTEXT; }
 
   virtual uint32_t getLineJoin() const { return 0; }
-  virtual void setLineJoin(uint32_t lineJoin) {}
+  virtual err_t setLineJoin(uint32_t lineJoin) { return ERR_RT_INVALID_CONTEXT; }
 
   virtual double getMiterLimit() const { return 0.0; }
-  virtual void setMiterLimit(double miterLimit) {}
+  virtual err_t setMiterLimit(double miterLimit) { return ERR_RT_INVALID_CONTEXT; }
 
   virtual List<double> getDashes() const { return List<double>(); }
-  virtual void setDashes(const double* dashes, sysuint_t count) {}
-  virtual void setDashes(const List<double>& dashes) {}
+  virtual err_t setDashes(const double* dashes, sysuint_t count) { return ERR_RT_INVALID_CONTEXT; }
+  virtual err_t setDashes(const List<double>& dashes) { return ERR_RT_INVALID_CONTEXT; }
 
   virtual double getDashOffset() const { return 0.0; }
-  virtual void setDashOffset(double offset) {}
+  virtual err_t setDashOffset(double offset) { return ERR_RT_INVALID_CONTEXT; }
 
   // --------------------------------------------------------------------------
   // [Transformations]

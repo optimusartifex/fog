@@ -53,7 +53,10 @@ public:
   FOG_INLINE void init(const Type& t) { new (reinterpret_cast<void*>(_storage)) Type(t); }
 
   template<typename C1>
-  FOG_INLINE void initCustom1(C1 t) { new (reinterpret_cast<void*>(_storage)) Type(t); }
+  FOG_INLINE void initCustom1(C1 t1) { new (reinterpret_cast<void*>(_storage)) Type(t1); }
+
+  template<typename C1, typename C2>
+  FOG_INLINE void initCustom2(C1 t1, C2 t2) { new (reinterpret_cast<void*>(_storage)) Type(t1, t2); }
 
   //! @brief Deinitializer (calls placement @c delete operator).
   FOG_INLINE void destroy() { getStorage()->~Type(); }

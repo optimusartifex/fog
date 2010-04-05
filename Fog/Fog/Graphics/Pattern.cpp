@@ -62,6 +62,15 @@ Pattern::Pattern(const Pattern& other) :
 {
 }
 
+Pattern::Pattern(const Argb& argb)
+{
+  _d = new(std::nothrow) PatternData();
+  if (!_d) { _d = _dnull->ref(); return; }
+
+  _d->type = PATTERN_SOLID;
+  _d->obj.argb->set(argb);
+}
+
 Pattern::~Pattern()
 {
   _d->deref();

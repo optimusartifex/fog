@@ -425,7 +425,7 @@ struct FOG_API GuiBackBuffer
   FOG_INLINE uint8_t* getPixels() const { return _buffer.data; }
   FOG_INLINE int getWidth() const { return _buffer.width; }
   FOG_INLINE int getHeight() const { return _buffer.height; }
-  FOG_INLINE int getFormat() const { return _buffer.format; }
+  FOG_INLINE uint32_t getFormat() const { return _buffer.format; }
   FOG_INLINE sysint_t getStride() const { return _buffer.stride; }
 
   FOG_INLINE int getCachedWidth() const { return _cachedWidth; }

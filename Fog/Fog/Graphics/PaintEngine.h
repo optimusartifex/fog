@@ -18,6 +18,7 @@
 #include <Fog/Graphics/Path.h>
 #include <Fog/Graphics/Pattern.h>
 #include <Fog/Graphics/Region.h>
+#include <Fog/Graphics/Stroker.h>
 
 //! @addtogroup Fog_Graphics
 //! @{
@@ -29,7 +30,6 @@ namespace Fog {
 // ============================================================================
 
 struct ColorFilter;
-struct StrokeParams;
 struct ImageFilter;
 
 // ============================================================================
@@ -54,7 +54,7 @@ struct FOG_API PaintEngine
 
   virtual int getWidth() const = 0;
   virtual int getHeight() const = 0;
-  virtual int getFormat() const = 0;
+  virtual uint32_t getFormat() const = 0;
 
   // --------------------------------------------------------------------------
   // [Engine / Flush]
@@ -70,7 +70,7 @@ struct FOG_API PaintEngine
   // --------------------------------------------------------------------------
 
   virtual int getHint(uint32_t hint) const = 0;
-  virtual void setHint(uint32_t hint, int value) = 0;
+  virtual err_t setHint(uint32_t hint, int value) = 0;
 
   // --------------------------------------------------------------------------
   // [Meta]
@@ -94,7 +94,7 @@ struct FOG_API PaintEngine
   // --------------------------------------------------------------------------
 
   virtual uint32_t getOperator() const = 0;
-  virtual void setOperator(uint32_t op) = 0;
+  virtual err_t setOperator(uint32_t op) = 0;
 
   // --------------------------------------------------------------------------
   // [Source]
@@ -105,8 +105,8 @@ struct FOG_API PaintEngine
   virtual Argb getSourceArgb() const = 0;
   virtual Pattern getSourcePattern() const = 0;
 
-  virtual void setSource(Argb argb) = 0;
-  virtual void setSource(const Pattern& pattern) = 0;
+  virtual err_t setSource(Argb argb) = 0;
+  virtual err_t setSource(const Pattern& pattern) = 0;
 
 #if 0
   // API proposal
@@ -142,38 +142,38 @@ struct FOG_API PaintEngine
   // --------------------------------------------------------------------------
 
   virtual uint32_t getFillMode() const = 0;
-  virtual void setFillMode(uint32_t mode) = 0;
+  virtual err_t setFillMode(uint32_t mode) = 0;
 
   // --------------------------------------------------------------------------
   // [Stroke Parameters]
   // --------------------------------------------------------------------------
 
-  virtual void getStrokeParams(StrokeParams& strokeParams) const = 0;
-  virtual void setStrokeParams(const StrokeParams& strokeParams) = 0;
+  virtual StrokeParams getStrokeParams() const = 0;
+  virtual err_t setStrokeParams(const StrokeParams& strokeParams) = 0;
 
   virtual double getLineWidth() const = 0;
-  virtual void setLineWidth(double lineWidth) = 0;
+  virtual err_t setLineWidth(double lineWidth) = 0;
 
   virtual uint32_t getStartCap() const = 0;
-  virtual void setStartCap(uint32_t startCap) = 0;
+  virtual err_t setStartCap(uint32_t startCap) = 0;
 
   virtual uint32_t getEndCap() const = 0;
-  virtual void setEndCap(uint32_t endCap) = 0;
+  virtual err_t setEndCap(uint32_t endCap) = 0;
 
-  virtual void setLineCaps(uint32_t lineCap) = 0;
+  virtual err_t setLineCaps(uint32_t lineCap) = 0;
 
   virtual uint32_t getLineJoin() const = 0;
-  virtual void setLineJoin(uint32_t lineJoin) = 0;
+  virtual err_t setLineJoin(uint32_t lineJoin) = 0;
 
   virtual double getMiterLimit() const = 0;
-  virtual void setMiterLimit(double miterLimit) = 0;
+  virtual err_t setMiterLimit(double miterLimit) = 0;
 
   virtual List<double> getDashes() const = 0;
-  virtual void setDashes(const double* dashes, sysuint_t count) = 0;
-  virtual void setDashes(const List<double>& dashes) = 0;
+  virtual err_t setDashes(const double* dashes, sysuint_t count) = 0;
+  virtual err_t setDashes(const List<double>& dashes) = 0;
 
   virtual double getDashOffset() const = 0;
-  virtual void setDashOffset(double offset) = 0;
+  virtual err_t setDashOffset(double offset) = 0;
 
   // --------------------------------------------------------------------------
   // [Transformations]

@@ -216,7 +216,7 @@ struct FOG_API BaseDevice : public Object
   FOG_INLINE uint32_t getActualFrame() const { return _actualFrame; }
   FOG_INLINE uint32_t getFramesCount() const { return _framesCount; }
 
-  FOG_INLINE int getFormat() const { return _format; }
+  FOG_INLINE uint32_t getFormat() const { return _format; }
   FOG_INLINE const Palette& getPalette() const { return _palette; }
   FOG_INLINE const ByteArray& getComment() const { return _comment; }
 

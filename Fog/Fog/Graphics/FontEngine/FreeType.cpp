@@ -411,8 +411,8 @@ struct FOG_HIDDEN FontTranslatorRecord
     family(family),
     fileName(fileName)
   {
-    if(bold) attr.setWeight(FONT_WEIGHT_BOLD);
-    if(italic) attr.setStyle(FONT_STYLE_ITALIC);
+    if (bold) attr.setWeight(FONT_WEIGHT_BOLD);
+    if (italic) attr.setStyle(FONT_STYLE_ITALIC);
   }
 
   FOG_INLINE ~FontTranslatorRecord() {}

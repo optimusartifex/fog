@@ -50,25 +50,26 @@ enum { RASTER_MAX_CALCULATIONS = 1024 };
 // [Forward Declarations]
 // ============================================================================
 
+struct RasterPaintAction;
 struct RasterPaintCalc;
-struct RasterPaintCapsState;
-struct RasterPaintClipState;
 struct RasterPaintCmd;
 struct RasterPaintContext;
-struct RasterPaintLayer;
-struct RasterPaintStoredState;
-struct RasterPaintWorkerManager;
-struct RasterPaintTask;
-
 struct RasterPaintEngine;
+struct RasterPaintLayer;
+struct RasterPaintState;
+struct RasterPaintTask;
+struct RasterWorkerManager;
 
 // ============================================================================
 // [Constants]
 // ============================================================================
 
 //! @brief Type of current painter layer
-enum LAYER_TYPE
+enum RASTER_LAYER_TYPE
 {
+  //! @brief Non-initialized.
+  RASTER_LAYER_TYPE_NONE = 0,
+
   //! @brief Direct 32-bit painting and compositing (PRGB32, XRGB32).
   //!
   //! This layer is te most efficient layer in Fog-Framework.
@@ -76,21 +77,21 @@ enum LAYER_TYPE
   //! Pixel format summary:
   //! - @c PIXEL_FORMAT_PRGB32
   //! - @c PIXEL_FORMAT_XRGB32
-  LAYER_TYPE_DIRECT32 = 0,
+  RASTER_LAYER_TYPE_DIRECT32 = 1,
 
   //! @brief Indirect 32-bit painting and compositing (ARGB32).
   //!
-  //! This layer is less efficient than @c LAYER_TYPE_DIRECT32, because each
+  //! This layer is less efficient than @c RASTER_LAYER_TYPE_DIRECT32, because each
   //! pixel needs to be premultiplied before compositing and demultiplied back
   //! after it has been processed.
   //!
   //! Pixel format summary:
   //! - @c PIXEL_FORMAT_ARGB32
-  LAYER_TYPE_INDIRECT32 = 1
+  RASTER_LAYER_TYPE_INDIRECT32 = 2
 };
 
 //! @brief Type of current transform in raster paint engine.
-enum TRANSFORM_TYPE
+enum RASTER_TRANSFORM_TYPE
 {
   //! @brief Transformation matrix is identity or translation only.
   //!
@@ -98,53 +99,67 @@ enum TRANSFORM_TYPE
   //! grid (this means that integral numbers can be used for this part). This
   //! is most efficient transform type in simple cases (fill rect, blit image,
   //! etc...).
-  TRANSFORM_TRANSLATE_EXACT = 0,
+  RASTER_TRANSFORM_EXACT = 0,
 
   //! @brief Transformation matrix is identity except translation part which
   //! can be represented only by real numbers. Painter has complex fast paths
   //! for this type, but it's used mainly by image blitting and texture
   //! fetching.
-  TRANSFORM_TRANSLATE_SUBPX = 1,
+  RASTER_TRANSFORM_SUBPX = 1,
 
   //! @brief Transformation matrix is affine (not identity or simple translation).
-  TRANSFORM_AFFINE = 2
+  RASTER_TRANSFORM_AFFINE = 2
+};
+
+//! @brief Changed flags (used in multithreaded mode to send change commands).
+enum RASTER_CHANGED_FLAGS
+{
+  RASTER_CHANGED_REGION = 0x00000001
+};
+
+//! @brief Clip type (masks).
+enum RASTER_CLIP_TYPE
+{
+  RASTER_CLIP_SIMPLE = 0x01,
+  RASTER_CLIP_COMPLEX = 0x02,
+  RASTER_CLIP_MASK = 0x04
 };
 
 //! @brief Status of the raster paint engine command.
 //!
 //! Status of command is only used if it has associated calculation.
-enum COMMAND_STATUS
+enum RASTER_COMMAND_STATUS
 {
   //! @brief Wait until calculation is done.
-  COMMAND_STATUS_WAIT = 0,
+  RASTER_COMMAND_WAIT = 0,
   //! @brief Ready to process the command.
-  COMMAND_STATUS_READY = 1,
+  RASTER_COMMAND_READY = 1,
   //! @brief Skip this command - don't call @c RasterPaintAction::run().
-  COMMAND_STATUS_SKIP = 2
+  RASTER_COMMAND_SKIP = 2
 };
 
 // ============================================================================
-// [Fog::MemoryAllocator]
+// [Fog::BlockAllocator]
 // ============================================================================
 
-//! @brief Memory allocator used by raster paint engine.
+//! @brief Custom memory allocator used by raster paint engine.
 //!
 //! This allocator allocates larger blocks (see @c BLOCK_SIZE) dividing them
-//! into small pieces demanded throught @c MemoryAllocator::alloc() method.
+//! into small pieces demanded throught @c BlockAllocator::alloc() method.
 //! Each allocation contains information about memory block used by allocator
-//! and when the memory is not needed (and @c MemoryAllocator::free() is called)
+//! and when the memory is not needed (and @c BlockAllocator::free() is called)
 //! it's atomically removed from memory block.
 //!
 //! In short: Each memory block has information about used memory, increased by
-//! @c MemoryAllocator::alloc() and decreased by @c MemoryAllocator::free().
+//! @c BlockAllocator::alloc() and decreased by @c BlockAllocator::free().
 //! When the number is decreased to zero then the block is free and will be 
 //! reused. The goal of this algorithm is to provide fast memory alloc/free,
 //! but do not eat too much memory (reuse it).
 //!
-//! @note The @c MemoryAllocator::alloc() is reentrant and can be called only
-//! by main thread, but @c MemoryAllocator::free() is thread-safe and it can
+//! @note The @c BlockAllocator::alloc() is reentrant and can be called only
+//! by main thread, but @c BlockAllocator::free() is thread-safe and it can
 //! be called (and it is) from worker threads.
-struct FOG_HIDDEN MemoryAllocator
+struct FOG_HIDDEN BlockAllocator
 {
   // --------------------------------------------------------------------------
   // [Constants]
@@ -167,7 +182,7 @@ struct FOG_HIDDEN MemoryAllocator
 
     //! @brief Size of the block.
     sysuint_t size;
-    //! @brief Allocator position, incremented by each @c MemoryAllocator::alloc().
+    //! @brief Allocator position, incremented by each @c BlockAllocator::alloc().
     sysuint_t pos;
     //! @brief Count of bytes used by the block (atomic).
     Atomic<sysuint_t> used;
@@ -194,9 +209,9 @@ struct FOG_HIDDEN MemoryAllocator
   // --------------------------------------------------------------------------
 
   //! @brief Memory allocator constructor.
-  MemoryAllocator();
+  BlockAllocator();
   //! @brief Memory allocator destructor, will check if all blocks are freed.
-  ~MemoryAllocator();
+  ~BlockAllocator();
 
   // --------------------------------------------------------------------------
   // [Alloc / Free]
@@ -221,14 +236,136 @@ struct FOG_HIDDEN MemoryAllocator
   Block* blocks;
 
 private:
-  FOG_DISABLE_COPY(MemoryAllocator)
+  FOG_DISABLE_COPY(BlockAllocator)
 };
 
-FOG_INLINE void MemoryAllocator::free(void* ptr)
+FOG_INLINE void BlockAllocator::free(void* ptr)
 {
   Header* header = reinterpret_cast<Header*>(reinterpret_cast<uint8_t*>(ptr) - sizeof(Header));
   header->block->used.sub(header->size);
 }
+
+// ============================================================================
+// [Fog::ZoneAllocator]
+// ============================================================================
+
+//! @brief Memory allocator designed to fast alloc memory that will be freed
+//! in one step (used by raster paint engine for commands and calculations).
+//!
+//! @note This is hackery for performance. Concept is that objects created
+//! by @c ZoneAllocator are freed all at once. This means that lifetime of
+//! these objects are same as zone object itselt (or managed by zone allocator
+//! owner).
+//!
+//! This class were stripped from AsmJit.
+//!   http://code.google.com/p/asmjit/
+struct FOG_HIDDEN ZoneAllocator
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  //! @brief Create new instance of zone allocator.
+  //! @param chunkSize Default size for one zone chunk.
+  ZoneAllocator(sysuint_t chunkSize);
+
+  //! @brief Destroy zone allocatorinstance.
+  ~ZoneAllocator();
+
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
+
+  //! @brief Allocate @c size bytes of memory and return pointer to it.
+  //!
+  //! Pointer allocated by this way will be valid until @c ZoneAllocator object
+  //! is destroyed. To create class by this way use placement @c new and
+  //! @c delete operators:
+  //!
+  //! @code
+  //! // Example of allocating simple class
+  //!
+  //! // Your class
+  //! class Object
+  //! {
+  //!   // members...
+  //! };
+  //!
+  //! // Your function
+  //! void f()
+  //! {
+  //!   // We are using AsmJit namespace
+  //!   using namespace AsmJit
+  //!
+  //!   // Create zone object with chunk size of 65536 bytes.
+  //!   ZoneAllocator zone(8096);
+  //!
+  //!   // Create your objects using zone object allocating, for example:
+  //!   Object* obj = new(zone.alloc(sizeof(YourClass))) Object();
+  //!
+  //!   // ... lifetime of your objects ...
+  //!
+  //!   // Destroy your objects:
+  //!   obj->~Object();
+  //!
+  //!   // ZoneAllocator destructor will free all memory allocated through it,
+  //!   // alternative is to call @c zone.free() or @c zone.reset().
+  //! }
+  //! @endcode
+  void* alloc(sysuint_t size);
+
+  //! @brief Free all allocated memory except first block that remains for reuse.
+  //!
+  //! Note that this method will invalidate all instances using this memory
+  //! allocated by this zone instance.
+  void reset();
+
+  //! @brief Free all allocated memory at once.
+  //!
+  //! Note that this method will invalidate all instances using this memory
+  //! allocated by this zone instance.
+  void free();
+
+  //! @brief Get total size of allocated objects - by @c alloc().
+  FOG_INLINE sysuint_t getTotal() const { return _total; }
+  //! @brief Get (default) chunk size.
+  FOG_INLINE sysuint_t getChunkSize() const { return _chunkSize; }
+
+  // --------------------------------------------------------------------------
+  // [Chunk]
+  // --------------------------------------------------------------------------
+
+  //! @brief One allocated chunk of memory.
+  struct Chunk
+  {
+    //! @brief Link to previous chunk.
+    Chunk* prev;
+    //! @brief Position in this chunk.
+    sysuint_t pos;
+    //! @brief Size of this chunk (in bytes).
+    sysuint_t size;
+
+    //! @brief Data.
+    uint8_t data[sizeof(void*)];
+
+    //! @brief Get count of remaining (unused) bytes in chunk.
+    FOG_INLINE sysuint_t getRemainingBytes() const { return size - pos; }
+  };
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+private:
+  //! @brief Last allocated chunk of memory.
+  Chunk* _chunks;
+  //! @brief Total size of allocated objects - by @c alloc() method.
+  sysuint_t _total;
+  //! @brief One chunk size.
+  sysuint_t _chunkSize;
+
+  FOG_DISABLE_COPY(ZoneAllocator)
+};
 
 // ============================================================================
 // [Fog::RasterPaintLayer]
@@ -264,17 +401,17 @@ struct FOG_HIDDEN RasterPaintLayer
 };
 
 // ============================================================================
-// [Fog::RasterPaintClipBuffer]
+// [Fog::RasterClipBuffer]
 // ============================================================================
 
-struct FOG_HIDDEN RasterPaintClipBuffer
+struct FOG_HIDDEN RasterClipBuffer
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  RasterPaintClipBuffer();
-  ~RasterPaintClipBuffer();
+  RasterClipBuffer();
+  ~RasterClipBuffer();
 
   // --------------------------------------------------------------------------
   // [Methods]
@@ -304,223 +441,248 @@ struct FOG_HIDDEN RasterPaintClipBuffer
   IntBox clip;
 
 private:
-  FOG_DISABLE_COPY(RasterPaintClipBuffer)
+  FOG_DISABLE_COPY(RasterClipBuffer)
 };
 
 // ============================================================================
-// [Fog::RasterPaintClipState]
+// [Fog::RasterPaintOps]
 // ============================================================================
 
-//! @brief Raster paint engine clipping state.
-struct FOG_HIDDEN RasterPaintClipState
+//! @brief Context ops (used in main state and per context instance).
+union RasterPaintOps
 {
-  // ------------------------------------------------------------------------
-  // [Construction / Destruction]
-  // ------------------------------------------------------------------------
-
-  RasterPaintClipState();
-  RasterPaintClipState(const RasterPaintClipState& other);
-  ~RasterPaintClipState();
-
-  // ------------------------------------------------------------------------
-  // [Ref]
-  // ------------------------------------------------------------------------
-
-  FOG_INLINE RasterPaintClipState* ref() const;
-
-  // ------------------------------------------------------------------------
-  // [Operator Overload]
-  // ------------------------------------------------------------------------
-
-  RasterPaintClipState& operator=(const RasterPaintClipState& other);
-
-  // ------------------------------------------------------------------------
-  // [Members]
-  // ------------------------------------------------------------------------
-
-  mutable Atomic<sysuint_t> refCount;
-
-  IntPoint metaOrigin;
-  IntPoint userOrigin;
-  IntPoint workOrigin;
-
-  Region metaRegion;
-  Region userRegion;
-  Region workRegion;
-
-  IntBox clipBox;
-
-  uint8_t metaRegionUsed;
-  uint8_t userRegionUsed;
-  uint8_t workRegionUsed;
-  uint8_t clipSimple;
-};
-
-// ============================================================================
-// [Fog::RasterPaintCapsState]
-// ============================================================================
-
-//! @brief Raster paint engine capabilities.
-struct FOG_HIDDEN RasterPaintCapsState
-{
-  // ------------------------------------------------------------------------
-  // [Construction / Destruction]
-  // ------------------------------------------------------------------------
-
-  RasterPaintCapsState();
-  RasterPaintCapsState(const RasterPaintCapsState& other);
-  ~RasterPaintCapsState();
-
-  // ------------------------------------------------------------------------
-  // [Ref]
-  // ------------------------------------------------------------------------
-
-  FOG_INLINE RasterPaintCapsState* ref() const;
-
-  // ------------------------------------------------------------------------
-  // [Operator Overload]
-  // ------------------------------------------------------------------------
-
-  RasterPaintCapsState& operator=(const RasterPaintCapsState& other);
-
-  // ------------------------------------------------------------------------
-  // [Members]
-  // ------------------------------------------------------------------------
-
-  //! @brief Reference count.
-  mutable Atomic<sysuint_t> refCount;
-
-  union
+  struct
   {
-    struct
-    {
-      //! @brief Compositing operator, see @c OPERATOR_TYPE.
-      uint32_t op : 8;
+    //! @brief Compositing operator, see @c OPERATOR_TYPE.
+    uint32_t op : 8;
 
-      //! @brief Type of source, see @c PAINTER_SOURCE_TYPE.
-      uint32_t sourceType : 8;
+    //! @brief Type of source, see @c PAINTER_SOURCE_TYPE.
+    uint32_t sourceType : 8;
 
-      //! @brief Type of transform, see @c TRANSFORM_TYPE.
-      uint32_t transformType : 8;
+    //! @brief Type of clip area, see @c RASTER_CLIP_TYPE.
+    uint32_t clipType : 8;
 
-      //! @brief Fill mode, see @c FILL_MODE.
-      uint32_t fillMode : 8;
-
-      //! @brief Anti-aliasing type / quality, see @c ANTI_ALIASING_TYPE.
-      uint32_t aaQuality : 4;
-
-      //! @brief Image interpolation type / quality, see @c INTERPOLATION_TYPE.
-      uint32_t imageInterpolation : 4;
-
-      //! @brief Gradient interpolation type / quality, see @c INTERPOLATION_TYPE.
-      uint32_t gradientInterpolation : 4;
-
-      //! @brief Whether to force vector text.
-      uint32_t forceOutlineText : 4;
-
-      //! @brief Whether line is simple (one pixel width and default caps).
-      uint32_t lineIsSimple : 1;
-    };
-
-    //! @brief All packed data in one array (for fast copy).
-    uint8_t data[8];
+    //! @brief Reserved for future use.
+    uint32_t reserved : 8;
   };
 
-  union
-  {
-    //! @brief Solid source data (if @c sourceType is @c PAINTER_SOURCE_ARGB).
-    RasterEngine::Solid solid;
-    //! @brief Pattern source data (if @c sourceType is @c PAINTER_SOURCE_PATTERN).
-    Static<Pattern> pattern;
-  };
-
-  //! @brief Pointer to compositing functions, see @c op.
-  RasterEngine::FunctionMap::CompositeFuncs* rops;
-
-  //! @brief Stroke parameters.
-  StrokeParams strokeParams;
-
-  //! @brief Transformation matrix.
-  DoubleMatrix transform;
-  //! @brief Transformation approximation scale used by path flattening.
-  double approximationScale;
-
-  //! @brief Saved transform matrix translation (tx and ty values).
-  DoublePoint transformTranslateSaved;
-
-  //! @brief Transformation translate point in pixels (can be used if
-  //! transform type is @c TRANSFORM_TRANSLATE_EXACT).
-  IntPoint transformTranslateInt;
+  //! @brief All data packed in one integer.
+  uint32_t data;
 };
 
 // ============================================================================
-// [Fog::RasterPaintStoredState]
+// [Fog::RasterPaintHints]
 // ============================================================================
 
-//! @brief State structure used by save() and restore() methods.
-struct FOG_HIDDEN RasterPaintStoredState
+//! @brief Context hints (used in main state).
+union RasterPaintHints
 {
-  RasterPaintClipState* clipState;
-  RasterPaintCapsState* capsState;
-  RasterEngine::PatternContext* pctx;
+  struct
+  {
+    //! @brief Type of transform, see @c RASTER_TRANSFORM_TYPE.
+    uint32_t transformType : 8;
+
+    //! @brief Fill mode, see @c FILL_MODE.
+    uint32_t fillMode : 4;
+
+    //! @brief Anti-aliasing type / quality, see @c ANTI_ALIASING_TYPE.
+    uint32_t aaQuality : 4;
+
+    //! @brief Image interpolation type / quality, see @c INTERPOLATION_TYPE.
+    uint32_t imageInterpolation : 4;
+
+    //! @brief Gradient interpolation type / quality, see @c INTERPOLATION_TYPE.
+    uint32_t gradientInterpolation : 4;
+
+    //! @brief Whether to force vector text.
+    uint32_t forceOutlineText : 1;
+
+    //! @brief Whether line is simple (one pixel width and default caps).
+    uint32_t lineIsSimple : 1;
+
+    uint32_t metaMatrixUsed : 1;
+    uint32_t metaRegionUsed : 1;
+    uint32_t userRegionUsed : 1;
+    uint32_t workRegionUsed : 1;
+  };
+
+  //! @brief All data packed in one integer.
+  uint32_t data;
 };
 
 // ============================================================================
 // [Fog::RasterPaintContext]
 // ============================================================================
 
-// RasterPaintContext is accessed always from only one thread.
 struct FOG_HIDDEN RasterPaintContext
 {
-  // ------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
-  // ------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
 
   RasterPaintContext();
   ~RasterPaintContext();
 
-  // ------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void copyFromMaster(const RasterPaintContext& master);
+
+  // --------------------------------------------------------------------------
   // [Buffer Manager]
-  // ------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
 
-  uint8_t* getBuffer(sysint_t size);
+  FOG_INLINE uint8_t* getBuffer(sysuint_t size);
 
-  // ------------------------------------------------------------------------
+  uint8_t* reallocBuffer(sysuint_t size);
+
+  // --------------------------------------------------------------------------
   // [Members]
-  // ------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
 
-  // Owner of this context.
+  //! @brief Owner of this context.
   RasterPaintEngine* engine;
 
-  // Layer.
-  RasterPaintLayer* layer;
-  // Clip state.
-  RasterPaintClipState* clipState;
-  // Capabilities state.
-  RasterPaintCapsState* capsState;
+  //! @brief Context id (multithreading).
+  //!
+  //! @note If multithreading is disabled, id is -1.
+  int id;
 
-  // Raster closure.
-  RasterEngine::Closure closure;
+  //! @brief Context offset (multithreading).
+  //!
+  //! @note If multithreading is disabled, offset is 0.
+  int offset;
 
-  // Pattern context.
+  //! @brief Context delta (multithreading).
+  //!
+  //! @note If multithreading is disabled, delta is 1.
+  int delta;
+
+  //! @brief Current context ops.
+  RasterPaintOps ops;
+
+  //! @brief Current context layer.
+  RasterPaintLayer layer;
+
+  //! @brief Solid source color (applicable if source type is PAINTER_SOURCE_ARGB.
+  RasterEngine::Solid solid;
+
+  //! @brief Pattern source context.
   RasterEngine::PatternContext* pctx;
 
-  // Scanline rasterizer container.
+  //! @brief Pointer to compositing functions, see @c ops.op.
+  RasterEngine::FunctionMap::CompositeFuncs* funcs;
+
+  //! @brief Raster engine closure (used together with blitter from @c funcs).
+  RasterEngine::Closure closure;
+
+  //! @brief The meta origin.
+  IntPoint metaOrigin;
+  //! @brief The meta region.
+  Region metaRegion;
+
+  //! @brief Meta origin translated by used origin.
+  IntPoint workOrigin;
+  //! @brief Meta region intersected with user region translated by meta origin.
+  Region workRegion;
+
+  //! @brief Clip box (work region extents).
+  IntBox clipBox;
+
+  //! @brief Scanline instance owned by context, for current work.
   Scanline32 scanline;
 
-  // Multithreading id, offset and delta.
-  int id;     // If multithreading is disabled, id is -1.
-  int offset; // If multithreading is disabled, offset is 0.
-  int delta;  // If multithreading is disabled, delta is 1.
-
-  // Static embedded buffer for fast alloc/free, see getBuffer().
+  //! @brief Reusable buffer.
   uint8_t* buffer;
-  sysint_t bufferSize;
-  uint8_t bufferStatic[1024*8];
+  //! @brief Reusable buffer size.
+  sysuint_t bufferSize;
 
 private:
   FOG_DISABLE_COPY(RasterPaintContext)
 };
+
+// ============================================================================
+// [Fog::RasterPaintMainContext]
+// ============================================================================
+
+//! @brief Main state structure where is stored the current state.
+struct FOG_HIDDEN RasterPaintMainContext : public RasterPaintContext
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  RasterPaintMainContext();
+  ~RasterPaintMainContext();
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  //! @brief Context hints.
+  RasterPaintHints hints;
+
+  //! @brief Changed flags, see @c RASTER_CHANGED_FLAGS.
+  uint32_t changed;
+
+  //! @brief Pattern source data (applicable if source type is @c PAINTER_SOURCE_PATTERN).
+  Static<Pattern> pattern;
+
+  //! @brief Stroke parameters.
+  StrokeParams strokeParams;
+
+  //! @brief User origin.
+  IntPoint userOrigin;
+  //! @brief User region.
+  Region userRegion;
+
+  //! @brief Meta matrix.
+  DoubleMatrix metaMatrix;
+
+  //! @brief User transformation matrix.
+  DoubleMatrix userMatrix;
+  //! @brief Work transformation matrix (the matrix used to transform 
+  //! coordinates from user space to raster).
+  DoubleMatrix workMatrix;
+
+  //! @brief Transformation translate point in pixels (can be used if 
+  //! transform type is @c RASTER_TRANSFORM_EXACT).
+  IntPoint workTranslate;
+
+  //! @brief Transformation approximation scale used by path flattening 
+  //! and stroking.
+  double approximationScale;
+
+private:
+  FOG_DISABLE_COPY(RasterPaintMainContext)
+};
+
+
+
+struct FOG_HIDDEN RasterPaintState
+{
+  RasterEngine::PatternContext* pctx;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // ============================================================================
 // [Fog::RasterRenderImageAffineBound]
@@ -586,6 +748,22 @@ struct RasterRenderImageAffineBound
   int ymax;
 };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ============================================================================
 // [Fog::RasterPaintAction]
 // ============================================================================
@@ -649,18 +827,18 @@ private:
 //! commands in parallel, but one-by-one.
 //!
 //! Command can depend to @c calculation. If calculation is not @c NULL and
-//! command status is @c COMMAND_STATUS_WAIT then thread can't process
-//! current command until command status is set to @c COMMAND_STATUS_READY
-//! or COMMAND_STATUS_SKIP (that means skip this command). Instead of waiting
+//! command status is @c RASTER_COMMAND_WAIT then thread can't process
+//! current command until command status is set to @c RASTER_COMMAND_READY
+//! or @c RASTER_COMMAND_SKIP (that means skip this command). Instead of waiting
 //! the worker can work on different calculation, see @c RasterPaintTask::run()
 //! implementation. Notice that command status is set by @c RasterPaintCalc if
 //! used.
 //!
 //! After command is processed the @c RasterPaintAction::release() is called.
 //! To create own command the method must be implemented and you must ensure
-//! to call @c RasterPaintCmd::_releaseObjects() there. When writing command
-//! concentrate only to @c RasterPaintAction::release() method, because all
-//! other stuff should be done by worker task.
+//! to call @c RasterPaintCmd::_releasePattern() for painting commands. When 
+//! writing command concentrate only to @c RasterPaintAction::release() method,
+//! because all other stuff should be done by worker task.
 struct FOG_HIDDEN RasterPaintCmd : public RasterPaintAction
 {
   // --------------------------------------------------------------------------
@@ -670,12 +848,6 @@ struct FOG_HIDDEN RasterPaintCmd : public RasterPaintAction
   FOG_INLINE RasterPaintCmd() {};
   FOG_INLINE ~RasterPaintCmd() {};
 
-  //! @brief This method destroys only general @c RasterPaintCmd data.
-  //!
-  //! Within this method the @c RasterPaintAction::_free() is not called, so
-  //! make sure you call _free() after _releaseObjects().
-  FOG_INLINE void _releaseObjects();
-
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
@@ -684,33 +856,142 @@ struct FOG_HIDDEN RasterPaintCmd : public RasterPaintAction
   //!
   //! Initial value is count of workers and each worker decreases it when
   //! finished. If value is decreased to zero worker must release the command
-  //! using @c RasterPaintAction::release() method. This is done by worker task.
+  //! using @c RasterPaintAction::release() method. This is done by the worker 
+  //! task.
   Atomic<int> refCount;
 
   //! @brief Status of this command.
   Atomic<int> status;
-
-  //! @brief Layer - contains info about raster.
-  RasterPaintLayer* layer;
-  //! @brief Clip state of the command.
-  RasterPaintClipState* clipState;
-  //! @brief Capabilities of the command.
-  RasterPaintCapsState* capsState;
-
-  //! @brief Pattern context (must be @c NULL if single color is used).
-  //!
-  //! TODOC
-  RasterEngine::PatternContext* pctx;
 
   //! @brief Calculation.
   RasterPaintCalc* calculation;
 };
 
 // ============================================================================
+// [Fog::RasterPaintCmdLayerChange]
+// ============================================================================
+
+struct FOG_HIDDEN RasterPaintCmdLayerChange : public RasterPaintCmd
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE RasterPaintCmdLayerChange() {};
+  FOG_INLINE ~RasterPaintCmdLayerChange() {};
+
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
+
+  virtual void run(RasterPaintContext* ctx);
+  virtual void release();
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  //! @brief The layer data.
+  RasterPaintLayer layer;
+
+  IntPoint metaOrigin;
+  Region metaRegion;
+
+  IntPoint workOrigin;
+  Region workRegion;
+};
+
+// ============================================================================
+// [Fog::RasterPaintCmdRegionChange]
+// ============================================================================
+
+struct FOG_HIDDEN RasterPaintCmdRegionChange : public RasterPaintCmd
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE RasterPaintCmdRegionChange() {};
+  FOG_INLINE ~RasterPaintCmdRegionChange() {};
+
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
+
+  virtual void run(RasterPaintContext* ctx);
+  virtual void release();
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  IntPoint metaOrigin;
+  Region metaRegion;
+
+  IntPoint workOrigin;
+  Region workRegion;
+};
+
+// ============================================================================
+// [Fog::RasterPaintCmdDraw]
+// ============================================================================
+
+struct FOG_HIDDEN RasterPaintCmdDraw : public RasterPaintCmd
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE RasterPaintCmdDraw() {};
+  FOG_INLINE ~RasterPaintCmdDraw() {};
+
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
+
+  //! @brief Initialize paint command to classic painting (used by all paint
+  //! commands except image
+  //! blitting).
+  FOG_INLINE void _initPaint(RasterPaintContext* ctx);
+
+  //! @brief Initialize paint command for image blitting (used by all image
+  //! blit commands, but not image affine blit commands).
+  FOG_INLINE void _initBlit(RasterPaintContext* ctx);
+
+  FOG_INLINE void _beforeBlit(RasterPaintContext* ctx);
+
+  //! @brief Called before paint in worker thread, by @c run() method.
+  FOG_INLINE void _beforePaint(RasterPaintContext* ctx);
+
+  //! @brief Called after paint in worker thread, by @c run() method.
+  FOG_INLINE void _afterPaint(RasterPaintContext* ctx);
+
+  //! @brief This method destroys only general @c RasterPaintCmdDraw data.
+  //!
+  //! Within this method the @c RasterPaintAction::_free() is not called, so
+  //! make sure you call @c _free() after @c _releasePattern().
+  FOG_INLINE void _releasePattern();
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  RasterPaintOps ops;
+
+  union
+  {
+    //! @brief Solid color (if source type is @c PAINTER_SOURCE_ARGB).
+    RasterEngine::Solid solid;
+    //! @brief Pattern context (if source type is @c PAINTER_SOURCE_PATTERN).
+    RasterEngine::PatternContext* pctx;
+  };
+};
+
+// ============================================================================
 // [Fog::RasterPaintCmdBoxes]
 // ============================================================================
 
-struct FOG_HIDDEN RasterPaintCmdBoxes : public RasterPaintCmd
+struct FOG_HIDDEN RasterPaintCmdBoxes : public RasterPaintCmdDraw
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -738,7 +1019,7 @@ struct FOG_HIDDEN RasterPaintCmdBoxes : public RasterPaintCmd
 // [Fog::RasterPaintCmdImage]
 // ============================================================================
 
-struct FOG_HIDDEN RasterPaintCmdImage : public RasterPaintCmd
+struct FOG_HIDDEN RasterPaintCmdImage : public RasterPaintCmdDraw
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -768,7 +1049,7 @@ struct FOG_HIDDEN RasterPaintCmdImage : public RasterPaintCmd
 // [Fog::RasterPaintCmdImageAffineBound]
 // ============================================================================
 
-struct FOG_HIDDEN RasterPaintCmdImageAffineBound : public RasterPaintCmd
+struct FOG_HIDDEN RasterPaintCmdImageAffineBound : public RasterPaintCmdDraw
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -795,7 +1076,7 @@ struct FOG_HIDDEN RasterPaintCmdImageAffineBound : public RasterPaintCmd
 // [Fog::RasterPaintCmdGlyphSet]
 // ============================================================================
 
-struct FOG_HIDDEN RasterPaintCmdGlyphSet : public RasterPaintCmd
+struct FOG_HIDDEN RasterPaintCmdGlyphSet : public RasterPaintCmdDraw
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -825,7 +1106,7 @@ struct FOG_HIDDEN RasterPaintCmdGlyphSet : public RasterPaintCmd
 // [Fog::RasterPaintCmdPath]
 // ============================================================================
 
-struct FOG_HIDDEN RasterPaintCmdPath : public RasterPaintCmd
+struct FOG_HIDDEN RasterPaintCmdPath : public RasterPaintCmdDraw
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -845,16 +1126,10 @@ struct FOG_HIDDEN RasterPaintCmdPath : public RasterPaintCmd
   // [Members]
   // --------------------------------------------------------------------------
 
-  //! @brief Rasterizer (where path is rasterized by @c RasterPaintCalc)
-  Rasterizer* ras;
-
-  //! @brief Whether it's texture blit command instead of draw/fill path
-  //! command.
+  //! @brief Rasterizer (where path is rasterized by @c RasterPaintCalc).
   //!
-  //! Texture blit commands are serialized through @c _serializeImageAffine(),
-  //! difference is that it's always used PAINTER_SOURCE_PATTERN type to do
-  //! pattern based blit.
-  uint32_t textureBlit;
+  //! Rasterizer is set-up by calculation.
+  Rasterizer* ras;
 };
 
 // ============================================================================
@@ -887,14 +1162,14 @@ struct FOG_HIDDEN RasterPaintCalc : public RasterPaintAction
 // [Fog::RasterPaintCalcPath]
 // ============================================================================
 
-struct FOG_HIDDEN RasterPaintCalcPath : public RasterPaintCalc
+struct FOG_HIDDEN RasterPaintCalcFillPath : public RasterPaintCalc
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE RasterPaintCalcPath() {};
-  FOG_INLINE ~RasterPaintCalcPath() {};
+  FOG_INLINE RasterPaintCalcFillPath() {};
+  FOG_INLINE ~RasterPaintCalcFillPath() {};
 
   // --------------------------------------------------------------------------
   // [Methods]
@@ -912,7 +1187,64 @@ struct FOG_HIDDEN RasterPaintCalcPath : public RasterPaintCalc
 
   //! @brief Path to process.
   Static<DoublePath> path;
-  bool stroke;
+
+  //! @brief Transformation matrix.
+  Static<DoubleMatrix> matrix;
+
+  //! @brief Clip box.
+  IntBox clipBox;
+
+  //! @brief Transformation type (see @c RASTER_TRANSFORM_TYPE).
+  uint32_t transformType;
+
+  //! @brief Fill mode.
+  uint32_t fillMode;
+
+  //! @brief Approximation scale.
+  double approximationScale;
+};
+
+// ============================================================================
+// [Fog::RasterPaintCalcStrokePath]
+// ============================================================================
+
+struct FOG_HIDDEN RasterPaintCalcStrokePath : public RasterPaintCalc
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE RasterPaintCalcStrokePath() {};
+  FOG_INLINE ~RasterPaintCalcStrokePath() {};
+
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
+
+  virtual void run(RasterPaintContext* ctx);
+  virtual void release();
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  //! @brief Owner raster paint engine.
+  RasterPaintEngine* engine;
+
+  //! @brief Path to process.
+  Static<DoublePath> path;
+
+  //! @brief Transformation matrix.
+  Static<DoubleMatrix> matrix;
+
+  //! @brief Clip box.
+  IntBox clipBox;
+
+  //! @brief Transformation type (see @c RASTER_TRANSFORM_TYPE).
+  uint32_t transformType;
+
+  //! @brief Stroker.
+  Static<Stroker> stroker;
 };
 
 // ============================================================================
@@ -967,18 +1299,18 @@ struct FOG_HIDDEN RasterPaintTask : public Task
 };
 
 // ============================================================================
-// [Fog::RasterPaintWorkerManager]
+// [Fog::RasterWorkerManager]
 // ============================================================================
 
 // Structure shared across all workers (threads).
-struct FOG_HIDDEN RasterPaintWorkerManager
+struct FOG_HIDDEN RasterWorkerManager
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  RasterPaintWorkerManager();
-  ~RasterPaintWorkerManager();
+  RasterWorkerManager();
+  ~RasterWorkerManager();
 
   // --------------------------------------------------------------------------
   // [Methods]
@@ -1006,7 +1338,7 @@ struct FOG_HIDDEN RasterPaintWorkerManager
   Static<RasterPaintTask> tasks[RASTER_MAX_WORKERS];
 
   // Commands and calculations allocator.
-  MemoryAllocator allocator;
+  ZoneAllocator zoneAllocator;
 
   // Commands manager.
   volatile sysint_t cmdPosition;
@@ -1044,7 +1376,7 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
 
   virtual int getWidth() const;
   virtual int getHeight() const;
-  virtual int getFormat() const;
+  virtual uint32_t getFormat() const;
 
   // --------------------------------------------------------------------------
   // [Engine / Flush]
@@ -1063,7 +1395,7 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   // --------------------------------------------------------------------------
 
   virtual int getHint(uint32_t hint) const;
-  virtual void setHint(uint32_t hint, int value);
+  virtual err_t setHint(uint32_t hint, int value);
 
   // --------------------------------------------------------------------------
   // [Meta]
@@ -1087,7 +1419,7 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   // --------------------------------------------------------------------------
 
   virtual uint32_t getOperator() const;
-  virtual void setOperator(uint32_t op);
+  virtual err_t setOperator(uint32_t op);
 
   // --------------------------------------------------------------------------
   // [Source]
@@ -1098,46 +1430,46 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   virtual Argb getSourceArgb() const;
   virtual Pattern getSourcePattern() const;
 
-  virtual void setSource(Argb argb);
-  virtual void setSource(const Pattern& pattern);
+  virtual err_t setSource(Argb argb);
+  virtual err_t setSource(const Pattern& pattern);
 
   // --------------------------------------------------------------------------
   // [Fill Parameters]
   // --------------------------------------------------------------------------
 
   virtual uint32_t getFillMode() const;
-  virtual void setFillMode(uint32_t mode);
+  virtual err_t setFillMode(uint32_t mode);
 
   // --------------------------------------------------------------------------
   // [Stroke Parameters]
   // --------------------------------------------------------------------------
 
-  virtual void getStrokeParams(StrokeParams& strokeParams) const;
-  virtual void setStrokeParams(const StrokeParams& strokeParams);
+  virtual StrokeParams getStrokeParams() const;
+  virtual err_t setStrokeParams(const StrokeParams& strokeParams);
 
   virtual double getLineWidth() const;
-  virtual void setLineWidth(double lineWidth);
+  virtual err_t setLineWidth(double lineWidth);
 
   virtual uint32_t getStartCap() const;
-  virtual void setStartCap(uint32_t startCap);
+  virtual err_t setStartCap(uint32_t startCap);
 
   virtual uint32_t getEndCap() const;
-  virtual void setEndCap(uint32_t endCap);
+  virtual err_t setEndCap(uint32_t endCap);
 
-  virtual void setLineCaps(uint32_t lineCaps);
+  virtual err_t setLineCaps(uint32_t lineCaps);
 
   virtual uint32_t getLineJoin() const;
-  virtual void setLineJoin(uint32_t lineJoin);
+  virtual err_t setLineJoin(uint32_t lineJoin);
 
   virtual double getMiterLimit() const;
-  virtual void setMiterLimit(double miterLimit);
+  virtual err_t setMiterLimit(double miterLimit);
 
   virtual List<double> getDashes() const;
-  virtual void setDashes(const double* dashes, sysuint_t count);
-  virtual void setDashes(const List<double>& dashes);
+  virtual err_t setDashes(const double* dashes, sysuint_t count);
+  virtual err_t setDashes(const List<double>& dashes);
 
   virtual double getDashOffset() const;
-  virtual void setDashOffset(double offset);
+  virtual err_t setDashOffset(double offset);
 
   // --------------------------------------------------------------------------
   // [Transformations]
@@ -1232,21 +1564,15 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   void _setClipDefaults();
   void _setCapsDefaults();
 
-  RasterEngine::PatternContext* _getPatternRasterPaintContext();
-  void _resetPatternRasterPaintContext();
+  RasterEngine::PatternContext* _getPatternContext();
+  void _resetPatternContext();
 
   FOG_INLINE void _updateLineWidth()
   {
-    ctx.capsState->lineIsSimple = (
-      ctx.capsState->strokeParams.getLineWidth() == 1.0 &&
-      ctx.capsState->strokeParams.getDashes().getLength() == 0);
+    ctx.hints.lineIsSimple = (
+      ctx.strokeParams.getLineWidth() == 1.0 &&
+      ctx.strokeParams.getDashes().getLength() == 0);
   }
-
-  RasterPaintCapsState* _detachCapsState();
-  RasterPaintClipState* _detachClipState();
-
-  FOG_INLINE void _derefClipState(RasterPaintClipState* clipState);
-  FOG_INLINE void _derefCapsState(RasterPaintCapsState* capsState);
 
   void _deleteStates();
 
@@ -1271,16 +1597,17 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   void _serializePath(const DoublePath& path, bool stroke);
 
   template<typename T> FOG_INLINE T* _createCommand(sysuint_t size = sizeof(T));
-  template<typename T> FOG_INLINE T* _createCommand(sysuint_t size, RasterEngine::PatternContext* pctx);
   template<typename T> FOG_INLINE T* _createCalc(sysuint_t size = sizeof(T));
 
+  FOG_INLINE void _beforeNewAction();
   void _postCommand(RasterPaintCmd* cmd, RasterPaintCalc* clc = NULL);
 
   // --------------------------------------------------------------------------
   // [Rasterization]
   // --------------------------------------------------------------------------
 
-  static bool _rasterizePath(RasterPaintContext* ctx, Rasterizer* ras, const DoublePath& path, bool stroke);
+  //! @brief Rasterizer used only by singlethreaded mode by default rasterizer.
+  bool _rasterizePath(const DoublePath& path, bool stroke);
 
   // --------------------------------------------------------------------------
   // [Renderering]
@@ -1290,15 +1617,28 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   static void _renderImage(RasterPaintContext* ctx, const IntRect& dst, const Image& image, const IntRect& src);
   static void _renderImageAffineBound(RasterPaintContext* ctx, const DoublePoint& pt, const Image& image);
   static void _renderGlyphSet(RasterPaintContext* ctx, const IntPoint& pt, const GlyphSet& glyphSet, const IntBox& boundingBox);
-  static void _renderPath(RasterPaintContext* ctx, Rasterizer* ras, bool textureBlit);
+  static void _renderPath(RasterPaintContext* ctx, Rasterizer* ras);
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  RasterPaintLayer main;
+  //! @brief Custom memory allocator instance used by the raster paint engine
+  //! for the most memory allocations.
+  BlockAllocator blockAllocator;
 
-  MemoryAllocator allocator;
+  //! @brief Main raster context.
+  RasterPaintMainContext ctx;
+
+  //! @brief States stack (for @c save() and @c restore() methods).
+  List<RasterPaintState*> states;
+
+  // If we are running in single-core environment it's better to use one
+  // rasterizer for everythging.
+  Rasterizer* ras;
+
+  // Multithreading
+  RasterWorkerManager* workerManager;
 
   // Temporary path.
   DoublePath tmpPath;
@@ -1306,19 +1646,141 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   // Temporary glyph set.
   GlyphSet tmpGlyphSet;
 
-  // RasterPaintContext that is used by single-threaded painter.
-  RasterPaintContext ctx;
-
-  // RasterPaintContext states LIFO buffer (for save() and restore() methods)
-  List<RasterPaintStoredState> states;
-
-  // If we are running in single-core environment it's better to use one
-  // rasterizer for everythging.
-  Rasterizer* ras;
-
-  // Multithreading
-  RasterPaintWorkerManager* workerManager;
+  // Temporary region.
+  Region tmpRegion;
 };
+
+// ============================================================================
+// [Inline]
+// ============================================================================
+
+FOG_INLINE void RasterPaintContext::copyFromMaster(const RasterPaintContext& master)
+{
+  ops = master.ops;
+  layer = master.layer;
+
+  solid = master.solid;
+  pctx = NULL;
+
+  funcs = master.funcs;
+  closure = master.closure;
+
+  metaOrigin = master.metaOrigin;
+  metaRegion = master.metaRegion;
+
+  workOrigin = master.workOrigin;
+  workRegion = master.workRegion;
+
+  clipBox = master.clipBox;
+}
+
+FOG_INLINE uint8_t* RasterPaintContext::getBuffer(sysuint_t size)
+{
+  return (size < bufferSize) ? buffer : reallocBuffer(size);
+}
+
+FOG_INLINE void RasterPaintAction::_free()
+{
+  // Not used when switched to ZoneAllocator. Freed when reset.
+}
+
+FOG_INLINE void RasterPaintCmdDraw::_initPaint(RasterPaintContext* ctx)
+{
+  ops = ctx->ops;
+
+  if (FOG_LIKELY(ops.sourceType == PAINTER_SOURCE_ARGB))
+  {
+    solid = ctx->solid;
+  }
+  else // if (ctx.ops.sourceType == PAINTER_SOURCE_PATTERN)
+  {
+    // Pattern context must be initialized if we are here.
+    FOG_ASSERT(ctx->pctx && ctx->pctx->initialized);
+    pctx = ctx->pctx;
+    pctx->refCount.inc();
+  }
+}
+
+FOG_INLINE void RasterPaintCmdDraw::_beforeBlit(RasterPaintContext* ctx)
+{
+  FOG_ASSERT(ops.sourceType == PAINTER_SOURCE_ARGB);
+
+  ctx->ops = ops;
+  ctx->funcs = RasterEngine::getCompositeFuncs(ctx->layer.format, ops.op);
+}
+
+FOG_INLINE void RasterPaintCmdDraw::_beforePaint(RasterPaintContext* ctx)
+{
+  ctx->ops = ops;
+  ctx->funcs = RasterEngine::getCompositeFuncs(ctx->layer.format, ops.op);
+
+  if (FOG_LIKELY(ops.sourceType == PAINTER_SOURCE_ARGB))
+    ctx->solid = solid;
+  else
+    ctx->pctx = pctx;
+}
+
+FOG_INLINE void RasterPaintCmdDraw::_afterPaint(RasterPaintContext* ctx)
+{
+  ctx->pctx = NULL;
+}
+
+FOG_INLINE void RasterPaintCmdDraw::_initBlit(RasterPaintContext* ctx)
+{
+  ops = ctx->ops;
+  ops.sourceType = PAINTER_SOURCE_ARGB;
+}
+
+FOG_INLINE void RasterPaintCmdDraw::_releasePattern()
+{
+  if (ops.sourceType == PAINTER_SOURCE_PATTERN && pctx->refCount.deref())
+  {
+    pctx->destroy(pctx);
+    engine->blockAllocator.free(pctx);
+  }
+}
+
+template <typename T>
+FOG_INLINE T* RasterPaintEngine::_createCommand(sysuint_t size)
+{
+  T* command = reinterpret_cast<T*>(workerManager->zoneAllocator.alloc(size));
+  if (!command) return NULL;
+
+  new(command) T;
+
+  command->refCount.init((uint)workerManager->numWorkers);
+  command->status.init(RASTER_COMMAND_READY);
+
+  command->engine = this;
+  command->calculation = NULL;
+
+  return command;
+}
+
+template<typename T>
+T* RasterPaintEngine::_createCalc(sysuint_t size)
+{
+  T* calculation = reinterpret_cast<T*>(workerManager->zoneAllocator.alloc(size));
+  if (!calculation) return NULL;
+
+  new(calculation) T;
+  calculation->engine = this;
+  return calculation;
+}
+
+FOG_INLINE void RasterPaintEngine::_beforeNewAction()
+{
+  // Flush everything if commands get maximum. We need to ensure that there are
+  // at least two commands left, because _postCommand() can create one change
+  // clip / region / something else command.
+  if (workerManager->cmdPosition >= RASTER_MAX_COMMANDS - 1)
+  {
+#if defined(FOG_DEBUG_RASTER_COMMANDS)
+    fog_debug("Fog::Painter::_postCommand() - command buffer is full");
+#endif // FOG_DEBUG_RASTER_COMMANDS
+    flush(PAINTER_FLUSH_SYNC);
+  }
+}
 
 } // Fog namespace
 

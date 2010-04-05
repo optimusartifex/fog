@@ -165,7 +165,7 @@ struct FOG_API Painter
   FOG_INLINE int getHeight() const { return _engine->getHeight(); }
 
   //! @brief Get painter format  (format returned is format passed to @c begin() method).
-  FOG_INLINE int getFormat() const { return _engine->getFormat(); }
+  FOG_INLINE uint32_t getFormat() const { return _engine->getFormat(); }
 
   // --------------------------------------------------------------------------
   // [Engine / Flush]
@@ -196,7 +196,7 @@ struct FOG_API Painter
   //! @brief Set painter hint, see @c PAINTER_HINT.
   //!
   //! Painter hints can be used to control quality and behavior of painting.
-  FOG_INLINE void setHint(uint32_t hint, int value) { _engine->setHint(hint, value); }
+  FOG_INLINE err_t setHint(uint32_t hint, int value) { return _engine->setHint(hint, value); }
 
   // --------------------------------------------------------------------------
   // [Meta]
@@ -246,7 +246,7 @@ struct FOG_API Painter
   //! @brief Set compositing operator.
   //!
   //! See @c OPERATOR_TYPE enumeration for operators and their descriptions.
-  FOG_INLINE void setOperator(uint32_t op) { _engine->setOperator(op); }
+  FOG_INLINE err_t setOperator(uint32_t op) { return _engine->setOperator(op); }
 
   // --------------------------------------------------------------------------
   // [Source]
@@ -268,10 +268,10 @@ struct FOG_API Painter
   FOG_INLINE Pattern getSourcePattern() const { return _engine->getSourcePattern(); }
 
   //! @brief Set source as solid @a rgba color.
-  FOG_INLINE void setSource(Argb argb) { _engine->setSource(argb); }
+  FOG_INLINE err_t setSource(Argb argb) { return _engine->setSource(argb); }
 
   //! @brief Set source as pattern @a pattern.
-  FOG_INLINE void setSource(const Pattern& pattern) { _engine->setSource(pattern); }
+  FOG_INLINE err_t setSource(const Pattern& pattern) { return _engine->setSource(pattern); }
 
   // --------------------------------------------------------------------------
   // [Fill Parameters]
@@ -280,58 +280,58 @@ struct FOG_API Painter
   //! @brief Get fill mode, see @c FillMode enumeration.
   FOG_INLINE uint32_t getFillMode() const { return _engine->getFillMode(); }
   //! @brief Set fill mode, see @c FillMode enumeration.
-  FOG_INLINE void setFillMode(uint32_t mode) { _engine->setFillMode(mode); }
+  FOG_INLINE err_t setFillMode(uint32_t mode) { return _engine->setFillMode(mode); }
 
   // --------------------------------------------------------------------------
   // [Stroke Parameters]
   // --------------------------------------------------------------------------
 
   //! @brief Get line parameters.
-  FOG_INLINE void getStrokeParams(StrokeParams& strokeParams) const { return _engine->getStrokeParams(strokeParams); }
+  FOG_INLINE StrokeParams getStrokeParams() const { return _engine->getStrokeParams(); }
   //! @brief Set line parameters.
-  FOG_INLINE void setStrokeParams(const StrokeParams& strokeParams) { _engine->setStrokeParams(strokeParams); }
+  FOG_INLINE err_t setStrokeParams(const StrokeParams& strokeParams) { return _engine->setStrokeParams(strokeParams); }
 
   //! @brief Get line width.
   FOG_INLINE double getLineWidth() const { return _engine->getLineWidth(); }
   //! @brief Set line width.
   //!
   //! @note Line width is scaled by affine transformations.
-  FOG_INLINE void setLineWidth(double lineWidth) { _engine->setLineWidth(lineWidth); }
+  FOG_INLINE err_t setLineWidth(double lineWidth) { return _engine->setLineWidth(lineWidth); }
 
   //! @brief Get line start cap.
   FOG_INLINE uint32_t getStartCap() const { return _engine->getStartCap(); }
   //! @brief Set line start cap.
-  FOG_INLINE void setStartCap(uint32_t startCap) { _engine->setStartCap(startCap);}
+  FOG_INLINE err_t setStartCap(uint32_t startCap) { return _engine->setStartCap(startCap);}
 
   //! @brief Get line end cap.
   FOG_INLINE uint32_t getEndCap() const { return _engine->getEndCap(); }
   //! @brief Set line end cap.
-  FOG_INLINE void setEndCap(uint32_t endCap) { _engine->setEndCap(endCap);}
+  FOG_INLINE err_t setEndCap(uint32_t endCap) { return _engine->setEndCap(endCap);}
 
   //! @brief Set line start and end caps.
-  FOG_INLINE void setLineCaps(uint32_t lineCaps) { _engine->setLineCaps(lineCaps);}
+  FOG_INLINE err_t setLineCaps(uint32_t lineCaps) { return _engine->setLineCaps(lineCaps);}
 
   //! @brief Get line join.
   FOG_INLINE uint32_t getLineJoin() const { return _engine->getLineJoin(); }
   //! @brief Set line join.
-  FOG_INLINE void setLineJoin(uint32_t lineJoin) { _engine->setLineJoin(lineJoin); }
+  FOG_INLINE err_t setLineJoin(uint32_t lineJoin) { return _engine->setLineJoin(lineJoin); }
 
   //! @brief Get line miter limit.
   FOG_INLINE double getMiterLimit() const { return _engine->getMiterLimit(); }
   //! @brief Set line miter limit.
-  FOG_INLINE void setMiterLimit(double miterLimit) { _engine->setMiterLimit(miterLimit); }
+  FOG_INLINE err_t setMiterLimit(double miterLimit) { return _engine->setMiterLimit(miterLimit); }
 
   //! @brief Set line dash.
   FOG_INLINE List<double> getDashes() const { return _engine->getDashes(); }
   //! @brief Set line dash.
-  FOG_INLINE void setDashes(const List<double>& dashes) { _engine->setDashes(dashes); }
+  FOG_INLINE err_t setDashes(const List<double>& dashes) { return _engine->setDashes(dashes); }
   //! @overload.
-  FOG_INLINE void setDashes(const double* dashes, sysuint_t count) { _engine->setDashes(dashes, count); }
+  FOG_INLINE err_t setDashes(const double* dashes, sysuint_t count) { return _engine->setDashes(dashes, count); }
 
   //! @brief Get line dash offset.
   FOG_INLINE double getDashOffset() const { return _engine->getDashOffset(); }
   //! @brief Set line dash offset.
-  FOG_INLINE void setDashOffset(double offset) { _engine->setDashOffset(offset); }
+  FOG_INLINE err_t setDashOffset(double offset) { return _engine->setDashOffset(offset); }
 
   // --------------------------------------------------------------------------
   // [Transformations]

@@ -38,6 +38,8 @@
 #include <Fog/Graphics/Scanline_p.h>
 #include <Fog/Graphics/Stroker.h>
 
+#include "Fog/Gui/Constants.h"
+
 namespace Fog {
 
 // ============================================================================
@@ -157,7 +159,7 @@ void* ZoneAllocator::_alloc(sysuint_t size)
   {
     // This allocator wasn't designed to alloc huge amount of memory (larger
     // than the chunk size), so never do it!
-    FOG_ASSERT(_chunkSize < size);
+    FOG_ASSERT(_chunkSize >= size);
 
     cur = reinterpret_cast<Chunk*>(Memory::alloc(sizeof(Chunk) - sizeof(void*) + _chunkSize));
     if (!cur) return NULL;
@@ -178,9 +180,6 @@ void ZoneAllocator::reset()
   Chunk* cur = _chunks;
   if (!cur) return;
 
-  _chunks->pos = 0;
-  _chunks->prev = NULL;
-
   cur = cur->prev;
   while (cur)
   {
@@ -188,6 +187,9 @@ void ZoneAllocator::reset()
     Memory::free(cur);
     cur = prev;
   }
+
+  _chunks->prev = NULL;
+  _chunks->pos = 0;
 }
 
 // ============================================================================
@@ -355,6 +357,7 @@ RasterPaintMainContext::RasterPaintMainContext()
 {
   hints.data = 0;
   changed = 0;
+  noPaint = 0;
   userOrigin.clear();
   metaOrigin.clear();
   workOrigin.clear();
@@ -850,6 +853,23 @@ void RasterPaintCmdRegionChange::run(RasterPaintContext* ctx)
 
 void RasterPaintCmdRegionChange::release(RasterPaintContext* ctx)
 {
+}
+
+// ============================================================================
+// [Fog::RasterPaintCmdRegion]
+// ============================================================================
+
+void RasterPaintCmdRegion::run(RasterPaintContext* ctx)
+{
+  _beforePaint(ctx);
+  ctx->engine->_renderBoxes(ctx, region->getData(), region->getLength());
+  _afterPaint(ctx);
+}
+
+void RasterPaintCmdRegion::release(RasterPaintContext* ctx)
+{
+  region.destroy();
+  _releasePattern(ctx);
 }
 
 // ============================================================================
@@ -1364,13 +1384,13 @@ uint32_t RasterPaintEngine::getEngine() const
     : PAINTER_ENGINE_RASTER_MT;
 }
 
-void RasterPaintEngine::setEngine(uint32_t engine, uint32_t cores)
+err_t RasterPaintEngine::setEngine(uint32_t engine, uint32_t cores)
 {
   int i;
   bool mt = (engine == PAINTER_ENGINE_RASTER_MT);
 
   // If we already initialized demanded engine we can bail safely.
-  if ((workerManager != NULL) == mt) return;
+  if ((workerManager != NULL) == mt) return ERR_OK;
 
   // We are using global thread pool.
   ThreadPool* threadPool = ThreadPool::getInstance();
@@ -1385,7 +1405,7 @@ void RasterPaintEngine::setEngine(uint32_t engine, uint32_t cores)
 #endif // FOG_DEBUG_RASTER_SYNCHRONIZATION
 
     workerManager = new(std::nothrow) RasterWorkerManager;
-    if (workerManager == NULL) return;
+    if (workerManager == NULL) return ERR_RT_OUT_OF_MEMORY;
 
     // This is for testing multithreaded rendering on single cores.
     if (max < 2)
@@ -1417,8 +1437,8 @@ void RasterPaintEngine::setEngine(uint32_t engine, uint32_t cores)
       delete workerManager;
       workerManager = NULL;
 
-      // Bailout
-      return;
+      // Bailout.
+      return ERR_RT_OUT_OF_THREADS;
     }
 
     int count = i;
@@ -1504,12 +1524,14 @@ void RasterPaintEngine::setEngine(uint32_t engine, uint32_t cores)
     fog_debug("Fog::Painter::setEngine() - done");
 #endif // FOG_DEBUG_RASTER_SYNCHRONIZATION
   }
+
+  return ERR_OK;
 }
 
-void RasterPaintEngine::flush(uint32_t flags)
+err_t RasterPaintEngine::flush(uint32_t flags)
 {
-  if (isSingleThreaded()) return;
-  if (workerManager->cmdPosition == 0) return;
+  if (isSingleThreaded()) return ERR_OK;
+  if (workerManager->cmdPosition == 0) return ERR_OK;
 
   // TODO: flags ignored, it will always wait.
   {
@@ -1535,6 +1557,8 @@ void RasterPaintEngine::flush(uint32_t flags)
     workerManager->tasks[i]->cmdCurrent = 0;
     workerManager->tasks[i]->calcCurrent = 0;
   }
+
+  return ERR_OK;
 }
 
 void RasterPaintEngine::flushWithQuit()
@@ -1615,17 +1639,39 @@ err_t RasterPaintEngine::setHint(uint32_t hint, int value)
 // [Fog::RasterPaintEngine - Meta]
 // ============================================================================
 
-void RasterPaintEngine::setMetaVars(const Region& region, const IntPoint& origin)
+err_t RasterPaintEngine::setMetaVars(const Region& region, const IntPoint& origin)
 {
   _deleteStates();
 
   ctx.metaOrigin = origin;
-  ctx.metaRegion = region;
-
   ctx.userOrigin.set(0, 0);
-  ctx.userRegion = Region::infinite();
 
-  ctx.hints.metaRegionUsed = !region.isInfinite();
+  if (region.isInfinite())
+  {
+    ctx.metaRegion.clear();
+    ctx.metaClipBox.set(0, 0, (int)ctx.layer.width, (int)ctx.layer.height);
+    ctx.metaClipBox -= origin;
+    ctx.hints.metaRegionUsed = false;
+  }
+  else
+  {
+    ctx.metaRegion = region;
+    ctx.hints.metaRegionUsed = true;
+
+    IntBox bounds(0, 0, (int)ctx.layer.width, (int)ctx.layer.height);
+    if (!bounds.subsumes(ctx.metaRegion.extents()))
+    {
+      // Need to clip the meta region (we never use meta region that is out of
+      // bounds).
+      Region::translateAndClip(ctx.metaRegion, ctx.metaRegion, IntPoint(0, 0), bounds);
+    }
+
+    ctx.metaClipBox.set(ctx.metaRegion.extents());
+    ctx.metaClipBox -= origin;
+    if (region.isEmpty()) ctx.metaClipBox.clear();
+  }
+
+  ctx.userRegion.clear();
   ctx.hints.userRegionUsed = false;
 
   // We must set workOrigin here, because _setCapsDefaults() will set default
@@ -1634,23 +1680,109 @@ void RasterPaintEngine::setMetaVars(const Region& region, const IntPoint& origin
 
   _setCapsDefaults();
   _updateWorkRegion();
+
+  return ERR_OK;
 }
 
-void RasterPaintEngine::resetMetaVars()
+err_t RasterPaintEngine::resetMetaVars()
 {
-  setMetaVars(Region::infinite(), IntPoint(0, 0));
+  return setMetaVars(Region::infinite(), IntPoint(0, 0));
 }
 
-void RasterPaintEngine::setUserVars(const Region& region, const IntPoint& origin)
+err_t RasterPaintEngine::setUserVars(const Region& region, const IntPoint& origin)
 {
   ctx.userOrigin = origin;
-  ctx.userRegion = region;
-  ctx.hints.userRegionUsed = !region.isInfinite();
+
+  if (region.isInfinite())
+  {
+    ctx.userRegion.clear();
+    ctx.hints.userRegionUsed = false;
+  }
+  else
+  {
+    ctx.userRegion = region;
+    ctx.hints.userRegionUsed = true;
+  }
 
   _updateWorkRegion();
+  return ERR_OK;
 }
 
-void RasterPaintEngine::setUserOrigin(const IntPoint& origin, uint32_t originOp)
+err_t RasterPaintEngine::setUserRegion(const Region& region, uint32_t regionOp)
+{
+  if (regionOp >= REGION_OP_COUNT) return ERR_RT_INVALID_ARGUMENT;
+
+  // Special infinite region handling (we allow infinite regions, because we
+  // will make finite from them (clipped to meta region bounds).
+  if (region.isInfinite())
+  {
+    switch (regionOp)
+    {
+      case REGION_OP_COPY:
+      case REGION_OP_UNION:
+      {
+        ctx.userRegion.clear();
+        ctx.hints.userRegionUsed = false;
+        break;
+      }
+      case REGION_OP_INTERSECT:
+      {
+        // NOP.
+        return ERR_OK;
+      }
+      case REGION_OP_XOR:
+      case REGION_OP_SUBTRACT:
+      {
+        if (ctx.hints.userRegionUsed)
+        {
+          if (ctx.userRegion.isEmpty())
+          {
+            ctx.userRegion.clear();
+            ctx.hints.userRegionUsed = regionOp == REGION_OP_SUBTRACT;
+          }
+          else
+          {
+            FOG_RETURN_ON_ERROR(Region::combine(tmpRegion, ctx.userRegion, TemporaryRegion<1>(ctx.metaClipBox), regionOp));
+            ctx.hints.userRegionUsed = true;
+            Memory::xchgPtr(&ctx.userRegion._d, &tmpRegion._d);
+          }
+        }
+        else
+        {
+          ctx.userRegion.clear();
+          ctx.hints.userRegionUsed = true;
+        }
+        break;
+      }
+    }
+  }
+  else
+  {
+    switch (regionOp)
+    {
+      case REGION_OP_COPY:
+      {
+        FOG_RETURN_ON_ERROR(ctx.userRegion.set(region));
+        ctx.hints.userRegionUsed = true;
+        break;
+      }
+      default:
+      {
+        if (ctx.hints.userRegionUsed)
+          FOG_RETURN_ON_ERROR(Region::combine(tmpRegion, ctx.userRegion, region, regionOp));
+        else
+          FOG_RETURN_ON_ERROR(Region::combine(tmpRegion, TemporaryRegion<1>(ctx.metaClipBox), region, regionOp));
+        ctx.hints.userRegionUsed = true;
+        break;
+      }
+    }
+  }
+
+  _updateWorkRegion();
+  return ERR_OK;
+}
+
+err_t RasterPaintEngine::setUserOrigin(const IntPoint& origin, uint32_t originOp)
 {
   switch (originOp)
   {
@@ -1660,14 +1792,17 @@ void RasterPaintEngine::setUserOrigin(const IntPoint& origin, uint32_t originOp)
     case PAINTER_ORIGIN_TRANSLATE:
       ctx.userOrigin.translate(origin);
       break;
+    default:
+      return ERR_RT_INVALID_ARGUMENT;
   }
 
   _updateWorkRegion();
+  return ERR_OK;
 }
 
-void RasterPaintEngine::resetUserVars()
+err_t RasterPaintEngine::resetUserVars()
 {
-  setUserVars(Region::infinite(), IntPoint(0, 0));
+  return setUserVars(Region::infinite(), IntPoint(0, 0));
 }
 
 Region RasterPaintEngine::getMetaRegion() const
@@ -1704,8 +1839,10 @@ err_t RasterPaintEngine::setOperator(uint32_t op)
   if (op >= OPERATOR_COUNT) return ERR_RT_INVALID_ARGUMENT;
 
   ctx.ops.op = op;
+  ctx.noPaint &= ~(RASTER_NO_PAINT_OPERATOR);
   ctx.funcs = RasterEngine::getCompositeFuncs(ctx.layer.format, op);
 
+  if (FOG_UNLIKELY(op == OPERATOR_DST)) ctx.noPaint |= RASTER_NO_PAINT_OPERATOR;
   return ERR_OK;
 }
 
@@ -1722,7 +1859,7 @@ Argb RasterPaintEngine::getSourceArgb() const
 {
   if (ctx.ops.sourceType == PAINTER_SOURCE_ARGB)
     return Argb(ctx.solid.argb);
-  else // ctx.ops.sourceType == PAINTER_SOURCE_PATTERN
+  else // if (ctx.ops.sourceType == PAINTER_SOURCE_PATTERN)
     return Argb(0x00000000);
 }
 
@@ -1730,7 +1867,7 @@ Pattern RasterPaintEngine::getSourcePattern() const
 {
   if (ctx.ops.sourceType == PAINTER_SOURCE_ARGB)
     return Pattern(ctx.solid.argb);
-  else // ctx.ops.sourceType == PAINTER_SOURCE_PATTERN
+  else // if (ctx.ops.sourceType == PAINTER_SOURCE_PATTERN)
     return Pattern(ctx.pattern.instance());
 }
 
@@ -1760,7 +1897,7 @@ err_t RasterPaintEngine::setSource(const Pattern& pattern)
     ctx.ops.sourceType = PAINTER_SOURCE_PATTERN;
     ctx.pattern.init(pattern);
   }
-  else // ctx.ops.sourceType == PAINTER_SOURCE_PATTERN
+  else // if (ctx.ops.sourceType == PAINTER_SOURCE_PATTERN)
   {
     ctx.pattern.instance() = pattern;
   }
@@ -2060,7 +2197,7 @@ void RasterPaintEngine::drawLine(const IntPoint& start, const IntPoint& end)
 
 void RasterPaintEngine::drawRect(const IntRect& r)
 {
-  if (!r.isValid()) return;
+  if (FOG_UNLIKELY(ctx.noPaint) || FOG_UNLIKELY(!r.isValid())) return;
 
   if (ctx.hints.transformType != RASTER_TRANSFORM_EXACT || !ctx.hints.lineIsSimple)
   {
@@ -2102,8 +2239,7 @@ void RasterPaintEngine::drawRect(const IntRect& r)
     else
     {
       Region::combine(tmpRegion, box, ctx.workRegion, REGION_OP_INTERSECT);
-      sysuint_t len = tmpRegion.getLength();
-      if (len) _serializeBoxes(tmpRegion.getData(), len);
+      _serializeRegion(tmpRegion);
     }
   }
 }
@@ -2123,7 +2259,7 @@ void RasterPaintEngine::drawRound(const IntRect& r, const IntPoint& radius)
 
 void RasterPaintEngine::fillRect(const IntRect& r)
 {
-  if (!r.isValid()) return;
+  if (FOG_UNLIKELY(ctx.noPaint) || FOG_UNLIKELY(!r.isValid())) return;
 
   if (ctx.hints.transformType != RASTER_TRANSFORM_EXACT)
   {
@@ -2149,16 +2285,14 @@ void RasterPaintEngine::fillRect(const IntRect& r)
     else
     {
       Region::combine(tmpRegion, ctx.workRegion, TemporaryRegion<1>(box), REGION_OP_INTERSECT);
-
-      sysuint_t len = tmpRegion.getLength();
-      if (len) _serializeBoxes(tmpRegion.getData(), len);
+      _serializeRegion(tmpRegion);
     }
   }
 }
 
 void RasterPaintEngine::fillRects(const IntRect* r, sysuint_t count)
 {
-  if (!count) return;
+  if (FOG_UNLIKELY(ctx.noPaint) || FOG_UNLIKELY(!count)) return;
 
   if (ctx.hints.transformType == RASTER_TRANSFORM_EXACT)
   {
@@ -2170,8 +2304,7 @@ void RasterPaintEngine::fillRects(const IntRect* r, sysuint_t count)
       Region::combine(tmpRegion, tmpRegion, ctx.workRegion, REGION_OP_INTERSECT);
     }
 
-    sysuint_t len = tmpRegion.getLength();
-    if (len) _serializeBoxes(tmpRegion.getData(), len);
+    _serializeRegion(tmpRegion);
   }
   else
   {
@@ -2188,6 +2321,8 @@ void RasterPaintEngine::fillRects(const IntRect* r, sysuint_t count)
 
 void RasterPaintEngine::fillRound(const IntRect& r, const IntPoint& radius)
 {
+  if (FOG_UNLIKELY(ctx.noPaint)) return;
+
   RasterPaintEngine::fillRound(
     DoubleRect((double)r.x, (double)r.y, (double)r.w, (double)r.h),
     DoublePoint((double)radius.x, (double)radius.y));
@@ -2195,8 +2330,10 @@ void RasterPaintEngine::fillRound(const IntRect& r, const IntPoint& radius)
 
 void RasterPaintEngine::fillRegion(const Region& region)
 {
-  if (region.isInfinite()) { fillAll(); return; }
-  if (region.isEmpty()) return;
+  if (FOG_UNLIKELY(ctx.noPaint)) return;
+
+  if (FOG_UNLIKELY(region.isInfinite())) { fillAll(); return; }
+  if (FOG_UNLIKELY(region.isEmpty())) return;
 
   if (ctx.hints.transformType == RASTER_TRANSFORM_EXACT)
   {
@@ -2207,8 +2344,7 @@ void RasterPaintEngine::fillRegion(const Region& region)
       Region::combine(tmpRegion, tmpRegion, ctx.workRegion, REGION_OP_INTERSECT);
     }
 
-    sysuint_t len = tmpRegion.getLength();
-    if (len) _serializeBoxes(region.getData(), len);
+    _serializeRegion(tmpRegion);
   }
   else
   {
@@ -2228,15 +2364,12 @@ void RasterPaintEngine::fillRegion(const Region& region)
 
 void RasterPaintEngine::fillAll()
 {
+  if (FOG_UNLIKELY(ctx.noPaint)) return;
+
   if (ctx.ops.clipType & RASTER_CLIP_SIMPLE)
-  {
     _serializeBoxes(&ctx.clipBox, 1);
-  }
   else
-  {
-    const Region& r = ctx.workRegion;
-    _serializeBoxes(r.getData(), r.getLength());
-  }
+    _serializeRegion(ctx.workRegion);
 }
 
 // ============================================================================
@@ -2245,6 +2378,8 @@ void RasterPaintEngine::fillAll()
 
 void RasterPaintEngine::drawPoint(const DoublePoint& p)
 {
+  if (FOG_UNLIKELY(ctx.noPaint)) return;
+
   tmpPath.clear();
   tmpPath.moveTo(p);
   tmpPath.lineTo(p.x, p.y + 0.0001);
@@ -2253,6 +2388,8 @@ void RasterPaintEngine::drawPoint(const DoublePoint& p)
 
 void RasterPaintEngine::drawLine(const DoublePoint& start, const DoublePoint& end)
 {
+  if (FOG_UNLIKELY(ctx.noPaint)) return;
+
   tmpPath.clear();
   tmpPath.moveTo(start);
   tmpPath.lineTo(end);
@@ -2261,7 +2398,7 @@ void RasterPaintEngine::drawLine(const DoublePoint& start, const DoublePoint& en
 
 void RasterPaintEngine::drawLine(const DoublePoint* pts, sysuint_t count)
 {
-  if (!count) return;
+  if (FOG_UNLIKELY(ctx.noPaint) || FOG_UNLIKELY(!count)) return;
 
   tmpPath.clear();
   tmpPath.moveTo(pts[0]);
@@ -2274,7 +2411,7 @@ void RasterPaintEngine::drawLine(const DoublePoint* pts, sysuint_t count)
 
 void RasterPaintEngine::drawPolygon(const DoublePoint* pts, sysuint_t count)
 {
-  if (!count) return;
+  if (FOG_UNLIKELY(ctx.noPaint) || FOG_UNLIKELY(!count)) return;
 
   tmpPath.clear();
   tmpPath.moveTo(pts[0]);
@@ -2288,7 +2425,7 @@ void RasterPaintEngine::drawPolygon(const DoublePoint* pts, sysuint_t count)
 
 void RasterPaintEngine::drawRect(const DoubleRect& r)
 {
-  if (!r.isValid()) return;
+  if (FOG_UNLIKELY(ctx.noPaint) || FOG_UNLIKELY(!r.isValid())) return;
 
   tmpPath.clear();
   tmpPath.addRect(r);
@@ -2297,7 +2434,7 @@ void RasterPaintEngine::drawRect(const DoubleRect& r)
 
 void RasterPaintEngine::drawRects(const DoubleRect* r, sysuint_t count)
 {
-  if (!count) return;
+  if (FOG_UNLIKELY(ctx.noPaint) || FOG_UNLIKELY(!count)) return;
 
   tmpPath.clear();
   tmpPath.addRects(r, count);
@@ -2306,6 +2443,8 @@ void RasterPaintEngine::drawRects(const DoubleRect* r, sysuint_t count)
 
 void RasterPaintEngine::drawRound(const DoubleRect& r, const DoublePoint& radius)
 {
+  if (FOG_UNLIKELY(ctx.noPaint)) return;
+
   tmpPath.clear();
   tmpPath.addRound(r, radius);
   _serializePath(tmpPath, true);
@@ -2313,6 +2452,8 @@ void RasterPaintEngine::drawRound(const DoubleRect& r, const DoublePoint& radius
 
 void RasterPaintEngine::drawEllipse(const DoublePoint& cp, const DoublePoint& r)
 {
+  if (FOG_UNLIKELY(ctx.noPaint)) return;
+
   tmpPath.clear();
   tmpPath.addEllipse(cp, r);
   _serializePath(tmpPath, true);
@@ -2320,6 +2461,8 @@ void RasterPaintEngine::drawEllipse(const DoublePoint& cp, const DoublePoint& r)
 
 void RasterPaintEngine::drawArc(const DoublePoint& cp, const DoublePoint& r, double start, double sweep)
 {
+  if (FOG_UNLIKELY(ctx.noPaint)) return;
+
   tmpPath.clear();
   tmpPath.addArc(cp, r, start, sweep);
   _serializePath(tmpPath, true);
@@ -2327,12 +2470,14 @@ void RasterPaintEngine::drawArc(const DoublePoint& cp, const DoublePoint& r, dou
 
 void RasterPaintEngine::drawPath(const DoublePath& path)
 {
+  if (FOG_UNLIKELY(ctx.noPaint)) return;
+
   _serializePath(path, true);
 }
 
 void RasterPaintEngine::fillPolygon(const DoublePoint* pts, sysuint_t count)
 {
-  if (!count) return;
+  if (FOG_UNLIKELY(ctx.noPaint) || FOG_UNLIKELY(!count)) return;
 
   tmpPath.clear();
   tmpPath.moveTo(pts[0]);
@@ -2346,7 +2491,7 @@ void RasterPaintEngine::fillPolygon(const DoublePoint* pts, sysuint_t count)
 
 void RasterPaintEngine::fillRect(const DoubleRect& r)
 {
-  if (!r.isValid()) return;
+  if (FOG_UNLIKELY(ctx.noPaint) || FOG_UNLIKELY(!r.isValid())) return;
 
   if (ctx.hints.transformType < RASTER_TRANSFORM_AFFINE)
   {
@@ -2376,9 +2521,7 @@ void RasterPaintEngine::fillRect(const DoubleRect& r)
     else
     {
       Region::combine(tmpRegion, ctx.workRegion, TemporaryRegion<1>(box), REGION_OP_INTERSECT);
-
-      sysuint_t len = tmpRegion.getLength();
-      if (len) _serializeBoxes(tmpRegion.getData(), len);
+      _serializeRegion(tmpRegion);
     }
     return;
   }
@@ -2391,7 +2534,7 @@ usePath:
 
 void RasterPaintEngine::fillRects(const DoubleRect* r, sysuint_t count)
 {
-  if (!count) return;
+  if (FOG_UNLIKELY(ctx.noPaint) || FOG_UNLIKELY(!count)) return;
 
   // Single rect fills can be more optimized.
   if (count == 1) fillRect(r[0]);
@@ -2403,6 +2546,8 @@ void RasterPaintEngine::fillRects(const DoubleRect* r, sysuint_t count)
 
 void RasterPaintEngine::fillRound(const DoubleRect& r, const DoublePoint& radius)
 {
+  if (FOG_UNLIKELY(ctx.noPaint)) return;
+
   tmpPath.clear();
   tmpPath.addRound(r, radius);
   _serializePath(tmpPath, false);
@@ -2410,6 +2555,8 @@ void RasterPaintEngine::fillRound(const DoubleRect& r, const DoublePoint& radius
 
 void RasterPaintEngine::fillEllipse(const DoublePoint& cp, const DoublePoint& r)
 {
+  if (FOG_UNLIKELY(ctx.noPaint)) return;
+
   tmpPath.clear();
   tmpPath.addEllipse(cp, r);
   _serializePath(tmpPath, false);
@@ -2417,6 +2564,8 @@ void RasterPaintEngine::fillEllipse(const DoublePoint& cp, const DoublePoint& r)
 
 void RasterPaintEngine::fillArc(const DoublePoint& cp, const DoublePoint& r, double start, double sweep)
 {
+  if (FOG_UNLIKELY(ctx.noPaint)) return;
+
   tmpPath.clear();
   tmpPath.addArc(cp, r, start, sweep);
   _serializePath(tmpPath, false);
@@ -2424,6 +2573,8 @@ void RasterPaintEngine::fillArc(const DoublePoint& cp, const DoublePoint& r, dou
 
 void RasterPaintEngine::fillPath(const DoublePath& path)
 {
+  if (FOG_UNLIKELY(ctx.noPaint)) return;
+
   _serializePath(path, false);
 }
 
@@ -2433,6 +2584,8 @@ void RasterPaintEngine::fillPath(const DoublePath& path)
 
 void RasterPaintEngine::drawGlyph(const IntPoint& pt_, const Glyph& glyph, const IntRect* clip_)
 {
+  if (FOG_UNLIKELY(ctx.noPaint)) return;
+
   tmpGlyphSet.clear();
 
   int tx = ctx.workTranslate.x;
@@ -2457,6 +2610,8 @@ void RasterPaintEngine::drawGlyph(const IntPoint& pt_, const Glyph& glyph, const
 
 void RasterPaintEngine::drawGlyphSet(const IntPoint& pt_, const GlyphSet& glyphSet, const IntRect* clip_)
 {
+  if (FOG_UNLIKELY(ctx.noPaint)) return;
+
   int tx = ctx.workTranslate.x;
   int ty = ctx.workTranslate.y;
 
@@ -2474,6 +2629,8 @@ void RasterPaintEngine::drawGlyphSet(const IntPoint& pt_, const GlyphSet& glyphS
 
 void RasterPaintEngine::drawText(const IntPoint& pt_, const String& text, const Font& font, const IntRect* clip_)
 {
+  if (FOG_UNLIKELY(ctx.noPaint)) return;
+
   int tx = ctx.workTranslate.x;
   int ty = ctx.workTranslate.y;
 
@@ -2494,6 +2651,8 @@ void RasterPaintEngine::drawText(const IntPoint& pt_, const String& text, const 
 
 void RasterPaintEngine::drawText(const IntRect& r, const String& text, const Font& font, uint32_t align, const IntRect* clip_)
 {
+  if (FOG_UNLIKELY(ctx.noPaint)) return;
+
   int tx = ctx.workTranslate.x;
   int ty = ctx.workTranslate.y;
 
@@ -2549,7 +2708,7 @@ void RasterPaintEngine::drawText(const IntRect& r, const String& text, const Fon
 
 void RasterPaintEngine::blitImage(const IntPoint& p, const Image& image, const IntRect* irect)
 {
-  if (image.isEmpty()) return;
+  if (FOG_UNLIKELY(ctx.noPaint) || FOG_UNLIKELY(image.isEmpty())) return;
 
   if (ctx.hints.transformType == RASTER_TRANSFORM_EXACT)
   {
@@ -2626,7 +2785,7 @@ void RasterPaintEngine::blitImage(const IntPoint& p, const Image& image, const I
 
 void RasterPaintEngine::blitImage(const DoublePoint& p, const Image& image, const IntRect* irect)
 {
-  if (image.isEmpty()) return;
+  if (FOG_UNLIKELY(ctx.noPaint) || FOG_UNLIKELY(image.isEmpty())) return;
 
   if (ctx.hints.transformType <= RASTER_TRANSFORM_SUBPX)
   {
@@ -2750,11 +2909,12 @@ void RasterPaintEngine::_updateWorkRegion()
   ctx.ops.clipType &= ~(RASTER_CLIP_COMPLEX | RASTER_CLIP_SIMPLE);
   ctx.clipBox.set(0, 0, ctx.layer.width, ctx.layer.height);
   ctx.workOrigin = workOrigin;
+  ctx.noPaint &= ~(RASTER_NO_PAINT_REGION);
 
   // Calculate final clip region.
-  uint clipBits = ((uint)ctx.hints.metaRegionUsed << 1) | ((uint)(ctx.hints.userRegionUsed) << 0);
+  uint userBits = ((uint)ctx.hints.metaRegionUsed << 1) | ((uint)(ctx.hints.userRegionUsed) << 0);
 
-  switch (clipBits)
+  switch (userBits)
   {
     // User region only.
     case 0x00000001:
@@ -2768,27 +2928,31 @@ void RasterPaintEngine::_updateWorkRegion()
 
     // Meta region & user region.
     case 0x00000003:
-    {
       Region::translate(tmpRegion, ctx.userRegion, ctx.metaOrigin);
       Region::intersectAndClip(ctx.workRegion, ctx.metaRegion, tmpRegion, ctx.clipBox);
       break;
-    }
   }
 
-  if (clipBits)
+  if (userBits)
   {
+    sysuint_t len = ctx.workRegion.getLength();
+
     ctx.clipBox = ctx.workRegion.extents();
-    ctx.ops.clipType |= (ctx.workRegion.getLength() <= 1) 
-      ? RASTER_CLIP_SIMPLE
-      : RASTER_CLIP_COMPLEX;
+    ctx.noPaint &= ~(RASTER_NO_PAINT_REGION);
+    ctx.ops.clipType &= ~(RASTER_CLIP_SIMPLE | RASTER_CLIP_COMPLEX);
+
+    if (len == 0)
+      ctx.noPaint |= RASTER_NO_PAINT_REGION;
+    else
+      ctx.ops.clipType |= (len == 1) ? RASTER_CLIP_SIMPLE : RASTER_CLIP_COMPLEX;
   }
   else
   {
     ctx.ops.clipType |= RASTER_CLIP_SIMPLE;
   }
 
-  ctx.hints.workRegionUsed = (clipBits != 0) && !(ctx.ops.clipType & RASTER_CLIP_SIMPLE);
-  ctx.changed != RASTER_CHANGED_REGION;
+  ctx.hints.workRegionUsed = (userBits != 0) && !(ctx.ops.clipType & RASTER_CLIP_SIMPLE);
+  ctx.changed |= RASTER_CHANGED_REGION;
 
   if (workOriginChanged) _updateTransform(true);
 }
@@ -3074,6 +3238,31 @@ void RasterPaintEngine::_setupLayer(RasterPaintLayer* layer)
     if (ctx.ops.sourceType == PAINTER_SOURCE_PATTERN && !_getPatternContext()) return; \
   FOG_END_MACRO
 
+void RasterPaintEngine::_serializeRegion(const Region& region)
+{
+  if (region.getLength() == 0) return;
+
+  RASTER_SERIALIZE_ENSURE_PATTERN();
+
+  // Singlethreaded.
+  if (isSingleThreaded())
+  {
+    _renderBoxes(&ctx, region.getData(), region.getLength());
+  }
+  // Multithreaded.
+  else
+  {
+    _beforeNewAction();
+
+    RasterPaintCmdRegion* cmd = _createCommand<RasterPaintCmdRegion>();
+    if (!cmd) return;
+
+    cmd->region.init(region);
+    cmd->_initPaint(&ctx);
+    _postCommand(cmd);
+  }
+}
+
 void RasterPaintEngine::_serializeBoxes(const IntBox* box, sysuint_t count)
 {
   RASTER_SERIALIZE_ENSURE_PATTERN();
@@ -3090,7 +3279,7 @@ void RasterPaintEngine::_serializeBoxes(const IntBox* box, sysuint_t count)
     {
       _beforeNewAction();
 
-      sysuint_t n = Math::min<sysuint_t>(count, 128);
+      sysuint_t n = Math::min<sysuint_t>(count, 32);
       RasterPaintCmdBoxes* cmd = _createCommand<RasterPaintCmdBoxes>(sizeof(RasterPaintCmdBoxes) - sizeof(IntBox) + n * sizeof(IntBox));
       if (!cmd) return;
 
@@ -3260,7 +3449,7 @@ void RasterPaintEngine::_serializeImageAffine(const DoublePoint& pt, const Image
       cmd->ras = NULL; // Will be initialized by calculation.
 
       // Init paint specialized for affine blit.
-      cmd->ops = ctx.ops;
+      cmd->ops.data = ctx.ops.data;
       cmd->ops.sourceType = PAINTER_SOURCE_PATTERN;
       cmd->pctx = imagectx;
 

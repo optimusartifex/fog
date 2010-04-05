@@ -1348,7 +1348,7 @@ struct IntRect
               ((getX1()-r.getX2()) ^ (getX2()-r.getX1())) ) < 0);
   }
 
-  //! @brief Returns @c true if rectangle completely subsumes @a r.
+  //! @brief Get whether rectangle completely subsumes @a r.
   FOG_INLINE bool subsumes(const IntRect& r) const
   {
     return ((r.getX1() >= getX1()) & (r.getX2() <= getX2()) &

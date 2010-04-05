@@ -42,9 +42,9 @@ struct FOG_HIDDEN NullPaintEngine : public PaintEngine
   // --------------------------------------------------------------------------
 
   virtual uint32_t getEngine() const { return PAINTER_ENGINE_NULL; }
-  virtual void setEngine(uint32_t engine, uint32_t cores = 0) {}
+  virtual err_t setEngine(uint32_t engine, uint32_t cores = 0) { return ERR_RT_INVALID_CONTEXT; }
 
-  virtual void flush(uint32_t flags) {}
+  virtual err_t flush(uint32_t flags) { return ERR_RT_INVALID_CONTEXT; }
 
   // --------------------------------------------------------------------------
   // [Hints]
@@ -57,12 +57,13 @@ struct FOG_HIDDEN NullPaintEngine : public PaintEngine
   // [Meta]
   // --------------------------------------------------------------------------
 
-  virtual void setMetaVars(const Region& region, const IntPoint& origin) {}
-  virtual void resetMetaVars() {}
+  virtual err_t setMetaVars(const Region& region, const IntPoint& origin) { return ERR_RT_INVALID_CONTEXT; }
+  virtual err_t resetMetaVars() { return ERR_RT_INVALID_CONTEXT; }
 
-  virtual void setUserVars(const Region& region, const IntPoint& origin) {}
-  virtual void setUserOrigin(const IntPoint& origin, uint32_t originOp) {}
-  virtual void resetUserVars() {}
+  virtual err_t setUserVars(const Region& region, const IntPoint& origin) { return ERR_RT_INVALID_CONTEXT; }
+  virtual err_t setUserRegion(const Region& region, uint32_t regionOp) { return ERR_RT_INVALID_CONTEXT; }
+  virtual err_t setUserOrigin(const IntPoint& origin, uint32_t originOp) { return ERR_RT_INVALID_CONTEXT; }
+  virtual err_t resetUserVars() { return ERR_RT_INVALID_CONTEXT; }
 
   virtual Region getMetaRegion() const { return Region::infinite(); }
   virtual Region getUserRegion() const { return Region::infinite(); }

@@ -440,8 +440,8 @@ err_t Image::convert(uint32_t format)
   int h = d->height;
   int y;
 
-  RasterEngine::FunctionMap::CompositeFuncs* ops = RasterEngine::getCompositeFuncs(targetFormat, OPERATOR_SRC);
-  RasterEngine::VSpanFn blitter = ops->vspan[sourceFormat];
+  RasterEngine::FunctionMap::CompositeFuncs* funcs = RasterEngine::getCompositeFuncs(targetFormat, OPERATOR_SRC);
+  RasterEngine::VSpanFn blitter = funcs->vspan[sourceFormat];
 
   RasterEngine::Closure closure;
   closure.srcPalette = _d->palette.getData();
@@ -1789,8 +1789,8 @@ err_t Image::fillRect(const IntRect& r, Argb c0, int op)
   if (x2 > w) x2 = w;
   if (y2 > h) y2 = h;
 
-  RasterEngine::FunctionMap::CompositeFuncs* ops = RasterEngine::getCompositeFuncs(fmt, op);
-  if (ops == NULL) return ERR_RT_NOT_IMPLEMENTED;
+  RasterEngine::FunctionMap::CompositeFuncs* funcs = RasterEngine::getCompositeFuncs(fmt, op);
+  if (funcs == NULL) return ERR_RT_NOT_IMPLEMENTED;
 
   if ((w = x2 - x1) <= 0) return ERR_OK;
   if ((h = y2 - y1) <= 0) return ERR_OK;
@@ -1804,7 +1804,7 @@ err_t Image::fillRect(const IntRect& r, Argb c0, int op)
   source.argb = c0;
   source.prgb = ArgbUtil::premultiply(c0);
 
-  RasterEngine::CSpanFn blitter = ops->cspan;
+  RasterEngine::CSpanFn blitter = funcs->cspan;
 
   RasterEngine::Closure closure;
   closure.dstPalette = _d->palette.getData();
@@ -1851,8 +1851,8 @@ err_t Image::fillQGradient(const IntRect& r, Argb c0, Argb c1, Argb c2, Argb c3,
   if (x2 > w) x2 = w;
   if (y2 > h) y2 = h;
 
-  RasterEngine::FunctionMap::CompositeFuncs* ops = RasterEngine::getCompositeFuncs(fmt, op);
-  if (ops == NULL) return ERR_RT_NOT_IMPLEMENTED;
+  RasterEngine::FunctionMap::CompositeFuncs* funcs = RasterEngine::getCompositeFuncs(fmt, op);
+  if (funcs == NULL) return ERR_RT_NOT_IMPLEMENTED;
 
   if ((w = x2 - x1) <= 0) return ERR_OK;
   if ((h = y2 - y1) <= 0) return ERR_OK;
@@ -1901,7 +1901,7 @@ err_t Image::fillQGradient(const IntRect& r, Argb c0, Argb c1, Argb c2, Argb c3,
       // ... fall throught ...
     default:
     {
-      RasterEngine::VSpanFn blitter = ops->vspan[sourceFormat];
+      RasterEngine::VSpanFn blitter = funcs->vspan[sourceFormat];
 
       RasterEngine::Closure closure;
       closure.dstPalette = _d->palette.getData();
@@ -1942,8 +1942,8 @@ err_t Image::fillHGradient(const IntRect& r, Argb c0, Argb c1, int op)
   if (x2 > w) x2 = w;
   if (y2 > h) y2 = h;
 
-  RasterEngine::FunctionMap::CompositeFuncs* ops = RasterEngine::getCompositeFuncs(fmt, op);
-  if (ops == NULL) return ERR_RT_NOT_IMPLEMENTED;
+  RasterEngine::FunctionMap::CompositeFuncs* funcs = RasterEngine::getCompositeFuncs(fmt, op);
+  if (funcs == NULL) return ERR_RT_NOT_IMPLEMENTED;
 
   if ((w = x2 - x1) <= 0) return ERR_OK;
   if ((h = y2 - y1) <= 0) return ERR_OK;
@@ -1964,7 +1964,7 @@ err_t Image::fillHGradient(const IntRect& r, Argb c0, Argb c1, int op)
 
   gradientSpan(shade0, c0, c1, w, 0, w);
 
-  RasterEngine::VSpanFn blitter = ops->vspan[fmt == PIXEL_FORMAT_PRGB32 ? PIXEL_FORMAT_PRGB32 : PIXEL_FORMAT_ARGB32];
+  RasterEngine::VSpanFn blitter = funcs->vspan[fmt == PIXEL_FORMAT_PRGB32 ? PIXEL_FORMAT_PRGB32 : PIXEL_FORMAT_ARGB32];
 
   RasterEngine::Closure closure;
   closure.dstPalette = _d->palette.getData();
@@ -2001,8 +2001,8 @@ err_t Image::fillVGradient(const IntRect& r, Argb c0, Argb c1, int op)
   if (x2 > w) x2 = w;
   if (y2 > h) y2 = h;
 
-  RasterEngine::FunctionMap::CompositeFuncs* ops = RasterEngine::getCompositeFuncs(fmt, op);
-  if (ops == NULL) return ERR_RT_NOT_IMPLEMENTED;
+  RasterEngine::FunctionMap::CompositeFuncs* funcs = RasterEngine::getCompositeFuncs(fmt, op);
+  if (funcs == NULL) return ERR_RT_NOT_IMPLEMENTED;
 
   if ((w = x2 - x1) <= 0) return ERR_OK;
   if ((h = y2 - y1) <= 0) return ERR_OK;
@@ -2021,7 +2021,7 @@ err_t Image::fillVGradient(const IntRect& r, Argb c0, Argb c1, int op)
   RasterEngine::InterpolateArgbFn gradientSpan = RasterEngine::functionMap->interpolate.gradient[PIXEL_FORMAT_ARGB32];
   gradientSpan(shade0, c0, c1, h, 0, h);
 
-  RasterEngine::CSpanFn blitter = ops->cspan;
+  RasterEngine::CSpanFn blitter = funcs->cspan;
 
   RasterEngine::Closure closure;
   closure.dstPalette = _d->palette.getData();
@@ -2071,7 +2071,7 @@ static err_t _blitImage(
   dstPixels += dstX * dstD->bytesPerPixel;
   srcPixels += srcX * srcD->bytesPerPixel;
 
-  RasterEngine::FunctionMap::CompositeFuncs* ops = RasterEngine::getCompositeFuncs(dstD->format, op);
+  RasterEngine::FunctionMap::CompositeFuncs* funcs = RasterEngine::getCompositeFuncs(dstD->format, op);
 
   RasterEngine::Closure closure;
   closure.dstPalette = dstD->palette.getData();
@@ -2091,7 +2091,7 @@ static err_t _blitImage(
 
     if (opacity >= 255)
     {
-      RasterEngine::VSpanFn blitter = ops->vspan[srcD->format];
+      RasterEngine::VSpanFn blitter = funcs->vspan[srcD->format];
 
       for (y = h; y; y--, dstPixels += dstStride, srcPixels += srcStride)
       {
@@ -2101,7 +2101,7 @@ static err_t _blitImage(
     }
     else
     {
-      RasterEngine::VSpanMskConstFn blitter = ops->vspan_a8_const[srcD->format];
+      RasterEngine::VSpanMskConstFn blitter = funcs->vspan_a8_const[srcD->format];
 
       for (y = h; y; y--, dstPixels += dstStride, srcPixels += srcStride)
       {
@@ -2115,7 +2115,7 @@ static err_t _blitImage(
   {
     if (opacity >= 255)
     {
-      RasterEngine::VSpanFn blit = ops->vspan[srcD->format];
+      RasterEngine::VSpanFn blit = funcs->vspan[srcD->format];
 
       for (y = h; y; y--, dstPixels += dstStride, srcPixels += srcStride)
       {
@@ -2124,7 +2124,7 @@ static err_t _blitImage(
     }
     else
     {
-      RasterEngine::VSpanMskConstFn blit = ops->vspan_a8_const[srcD->format];
+      RasterEngine::VSpanMskConstFn blit = funcs->vspan_a8_const[srcD->format];
 
       for (y = h; y; y--, dstPixels += dstStride, srcPixels += srcStride)
       {

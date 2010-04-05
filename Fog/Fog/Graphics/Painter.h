@@ -179,10 +179,10 @@ struct FOG_API Painter
   //! @param engine The engine ID to use.
   //! @param cores If the demanded engine is multithreaded then @a core 
   //! specifies number of threads to use.
-  FOG_INLINE void setEngine(uint32_t engine, uint32_t cores = 0) { _engine->setEngine(engine, cores); }
+  FOG_INLINE err_t setEngine(uint32_t engine, uint32_t cores = 0) { return _engine->setEngine(engine, cores); }
 
   //! @brief Flush painter, see @c PAINTER_FLUSH_FLAGS.
-  FOG_INLINE void flush(uint32_t flags) { _engine->flush(flags); }
+  FOG_INLINE err_t flush(uint32_t flags) { return _engine->flush(flags); }
 
   // --------------------------------------------------------------------------
   // [Hints]
@@ -207,22 +207,24 @@ struct FOG_API Painter
   //!
   //! This function was designed as an optimization for windowing systems to
   //! set all important origin and clipping information per one function call.
-  FOG_INLINE void setMetaVars(const Region& region, const IntPoint& origin) { _engine->setMetaVars(region, origin); }
+  FOG_INLINE err_t setMetaVars(const Region& region, const IntPoint& origin) { return _engine->setMetaVars(region, origin); }
 
   //! @brief Reset meta variables (setting meta region to infinite and meta
   //! origin to zero).
   //!
   //! This function also resets all clipping and states like @c setMetaVars()
   //! do.
-  FOG_INLINE void resetMetaVars() { _engine->resetMetaVars(); }
+  FOG_INLINE err_t resetMetaVars() { return _engine->resetMetaVars(); }
 
   //! @brief Set user variables (user origin, user region).
-  FOG_INLINE void setUserVars(const Region& region, const IntPoint& origin) { _engine->setUserVars(region, origin); }
+  FOG_INLINE err_t setUserVars(const Region& region, const IntPoint& origin) { return _engine->setUserVars(region, origin); }
+  //! @brief Set use region.
+  FOG_INLINE err_t setUserRegion(const Region& region, uint32_t regionOp) { return _engine->setUserRegion(region, regionOp); }
   //! @brief Set user origin.
-  FOG_INLINE void setUserOrigin(const IntPoint& origin, uint32_t originOp) { _engine->setUserOrigin(origin, originOp); }
+  FOG_INLINE err_t setUserOrigin(const IntPoint& origin, uint32_t originOp) { return _engine->setUserOrigin(origin, originOp); }
   //! @brief Reset user variables (setting user region to infinite and user
   //! origin to zero).
-  FOG_INLINE void resetUserVars() { _engine->resetUserVars(); }
+  FOG_INLINE err_t resetUserVars() { return _engine->resetUserVars(); }
 
   //! @brief Get meta region.
   FOG_INLINE Region getMetaRegion() const { return _engine->getMetaRegion(); }

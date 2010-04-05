@@ -263,6 +263,7 @@ enum ERR_CORE_ENUM
   // --------------------------------------------------------------------------
 
   ERR_RT_OUT_OF_MEMORY = ERR_CORE_START,
+  ERR_RT_OUT_OF_THREADS,
   ERR_RT_NOT_IMPLEMENTED,
 
   ERR_RT_INVALID_ARGUMENT,

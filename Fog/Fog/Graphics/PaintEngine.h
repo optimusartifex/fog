@@ -61,9 +61,9 @@ struct FOG_API PaintEngine
   // --------------------------------------------------------------------------
 
   virtual uint32_t getEngine() const = 0;
-  virtual void setEngine(uint32_t engine, uint32_t cores = 0) = 0;
+  virtual err_t setEngine(uint32_t engine, uint32_t cores = 0) = 0;
 
-  virtual void flush(uint32_t flags) = 0;
+  virtual err_t flush(uint32_t flags) = 0;
 
   // --------------------------------------------------------------------------
   // [Hints]
@@ -76,12 +76,13 @@ struct FOG_API PaintEngine
   // [Meta]
   // --------------------------------------------------------------------------
 
-  virtual void setMetaVars(const Region& region, const IntPoint& origin) = 0;
-  virtual void resetMetaVars() = 0;
+  virtual err_t setMetaVars(const Region& region, const IntPoint& origin) = 0;
+  virtual err_t resetMetaVars() = 0;
 
-  virtual void setUserVars(const Region& region, const IntPoint& origin) = 0;
-  virtual void setUserOrigin(const IntPoint& origin, uint32_t originOp) = 0;
-  virtual void resetUserVars() = 0;
+  virtual err_t setUserVars(const Region& region, const IntPoint& origin) = 0;
+  virtual err_t setUserRegion(const Region& region, uint32_t regionOp) = 0;
+  virtual err_t setUserOrigin(const IntPoint& origin, uint32_t originOp) = 0;
+  virtual err_t resetUserVars() = 0;
 
   virtual Region getMetaRegion() const = 0;
   virtual Region getUserRegion() const = 0;

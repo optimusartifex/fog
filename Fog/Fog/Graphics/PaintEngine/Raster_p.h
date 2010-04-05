@@ -114,15 +114,42 @@ enum RASTER_TRANSFORM_TYPE
 //! @brief Changed flags (used in multithreaded mode to send change commands).
 enum RASTER_CHANGED_FLAGS
 {
+  //! @brief The region was changed.
   RASTER_CHANGED_REGION = 0x00000001
 };
 
 //! @brief Clip type (masks).
 enum RASTER_CLIP_TYPE
 {
+  //! @brief Clip region is simple (one clip rectangle).
   RASTER_CLIP_SIMPLE = 0x01,
+
+  //! @brief Clip region is complex (more than one clip rectangles - region).
   RASTER_CLIP_COMPLEX = 0x02,
+
+  //! @brief Clip region contains mask.
   RASTER_CLIP_MASK = 0x04
+};
+
+//! @brief No paint flags.
+//!
+//! Flags that will be set if some internal state disables painting, see flags
+//! and their meanings for details.
+enum RASTER_NO_PAINT
+{
+  //! @brief Painting is disabled due to operator (for example @c OPERATOR_DST
+  //! is not).
+  RASTER_NO_PAINT_OPERATOR = 0x00000001,
+
+  //! @brief Painting is disabled due to source (for example empty texture).
+  RASTER_NO_PAINT_SOURCE = 0x00000002,
+
+  //! @brief Painting is disabled due to meta or user clipping region.
+  RASTER_NO_PAINT_REGION = 0x00000004,
+
+  //! @brief Painting is disabled, because transformation matrix is invalid or
+  //! degenerated (for example matrix where one of scale value is 0.0).
+  RASTER_NO_PAINT_MATRIX = 0x00000008
 };
 
 //! @brief Status of the raster paint engine command.
@@ -132,8 +159,10 @@ enum RASTER_COMMAND_STATUS
 {
   //! @brief Wait until calculation is done.
   RASTER_COMMAND_WAIT = 0,
+
   //! @brief Ready to process the command.
   RASTER_COMMAND_READY = 1,
+
   //! @brief Skip this command - don't call @c RasterPaintAction::run().
   RASTER_COMMAND_SKIP = 2
 };
@@ -631,11 +660,17 @@ struct FOG_HIDDEN RasterPaintMainContext : public RasterPaintContext
   //! @brief Changed flags, see @c RASTER_CHANGED_FLAGS.
   uint32_t changed;
 
+  //! @brief No paint flags.
+  uint32_t noPaint;
+
   //! @brief Pattern source data (applicable if source type is @c PAINTER_SOURCE_PATTERN).
   Static<Pattern> pattern;
 
   //! @brief Stroke parameters.
   StrokeParams strokeParams;
+
+  //! @brief Meta clip box.
+  IntBox metaClipBox;
 
   //! @brief User origin.
   IntPoint userOrigin;
@@ -663,31 +698,15 @@ private:
   FOG_DISABLE_COPY(RasterPaintMainContext)
 };
 
-
+// ============================================================================
+// [Fog::RasterPaintState]
+// ============================================================================
 
 struct FOG_HIDDEN RasterPaintState
 {
+
   RasterEngine::PatternContext* pctx;
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // ============================================================================
 // [Fog::RasterRenderImageAffineBound]
@@ -706,6 +725,7 @@ struct RasterRenderImageAffineBound
   {
     // Mark as non-initialized.
     ictx.initialized = false;
+    ictx.refCount.init(0);
   }
 
   FOG_INLINE ~RasterRenderImageAffineBound()
@@ -968,6 +988,33 @@ struct FOG_HIDDEN RasterPaintCmdDraw : public RasterPaintCmd
 };
 
 // ============================================================================
+// [Fog::RasterPaintCmdRegion]
+// ============================================================================
+
+struct FOG_HIDDEN RasterPaintCmdRegion : public RasterPaintCmdDraw
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE RasterPaintCmdRegion() {};
+  FOG_INLINE ~RasterPaintCmdRegion() {};
+
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
+
+  virtual void run(RasterPaintContext* ctx);
+  virtual void release(RasterPaintContext* ctx);
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  Static<Region> region;
+};
+
+// ============================================================================
 // [Fog::RasterPaintCmdBoxes]
 // ============================================================================
 
@@ -1161,9 +1208,6 @@ struct FOG_HIDDEN RasterPaintCalcFillPath : public RasterPaintCalc
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
-
-  //! @brief Owner raster paint engine.
-  RasterPaintEngine* engine;
 
   //! @brief Path to process.
   Static<DoublePath> path;
@@ -1363,9 +1407,9 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   // --------------------------------------------------------------------------
 
   virtual uint32_t getEngine() const;
-  virtual void setEngine(uint32_t engine, uint32_t cores = 0);
+  virtual err_t setEngine(uint32_t engine, uint32_t cores = 0);
 
-  virtual void flush(uint32_t flags);
+  virtual err_t flush(uint32_t flags);
   void flushWithQuit();
 
   FOG_INLINE bool isSingleThreaded() const { return workerManager == NULL; }
@@ -1381,12 +1425,13 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   // [Meta]
   // --------------------------------------------------------------------------
 
-  virtual void setMetaVars(const Region& region, const IntPoint& origin);
-  virtual void resetMetaVars();
+  virtual err_t setMetaVars(const Region& region, const IntPoint& origin);
+  virtual err_t resetMetaVars();
 
-  virtual void setUserVars(const Region& region, const IntPoint& origin);
-  virtual void setUserOrigin(const IntPoint& origin, uint32_t originOp);
-  virtual void resetUserVars();
+  virtual err_t setUserVars(const Region& region, const IntPoint& origin);
+  virtual err_t setUserRegion(const Region& region, uint32_t regionOp);
+  virtual err_t setUserOrigin(const IntPoint& origin, uint32_t originOp);
+  virtual err_t resetUserVars();
 
   virtual Region getMetaRegion() const;
   virtual Region getUserRegion() const;
@@ -1570,14 +1615,30 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   // --------------------------------------------------------------------------
 
   // Serializers are always called from painter thread.
+  void _serializeRegion(const Region& region);
   void _serializeBoxes(const IntBox* box, sysuint_t count);
   void _serializeImage(const IntRect& dst, const Image& image, const IntRect& src);
   void _serializeImageAffine(const DoublePoint& pt, const Image& image, const IntRect* irect);
   void _serializeGlyphSet(const IntPoint& pt, const GlyphSet& glyphSet, const IntRect* clip);
   void _serializePath(const DoublePath& path, bool stroke);
 
-  template<typename T> FOG_INLINE T* _createCommand(sysuint_t size = sizeof(T));
-  template<typename T> FOG_INLINE T* _createCalc(sysuint_t size = sizeof(T));
+  // BIG NOTE:
+  //
+  // There is something wrong in Visual Studio 2005. In older code there was
+  // only one function:
+  //
+  //    template<typename T> FOG_INLINE T* _createCommand(sysuint_t size = sizeof(T));
+  //
+  // But the size returned by sizeof(T) was 32 under 32-bit mode. The failure 
+  // was found when allocating memory for RasterPaintCmdImageAffineBound class.
+  //
+  // So, if the memory corruption happen again, check whether the size in alloc()
+  // corresponds to size of the structure. This was really hard to find bug!
+  //
+  // - Petr
+  template<typename T> FOG_INLINE T* _createCommand();
+  template<typename T> FOG_INLINE T* _createCommand(sysuint_t size);
+  template<typename T> FOG_INLINE T* _createCalc();
 
   FOG_INLINE void _beforeNewAction();
   void _postCommand(RasterPaintCmd* cmd, RasterPaintCalc* clc = NULL);
@@ -1636,7 +1697,7 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
 
 FOG_INLINE void RasterPaintContext::copyFromMaster(const RasterPaintContext& master)
 {
-  ops = master.ops;
+  ops.data = master.ops.data;
   layer = master.layer;
 
   solid = master.solid;
@@ -1661,7 +1722,7 @@ FOG_INLINE uint8_t* RasterPaintContext::getBuffer(sysuint_t size)
 
 FOG_INLINE void RasterPaintCmdDraw::_initPaint(RasterPaintContext* ctx)
 {
-  ops = ctx->ops;
+  ops.data = ctx->ops.data;
 
   if (FOG_LIKELY(ops.sourceType == PAINTER_SOURCE_ARGB))
   {
@@ -1680,13 +1741,13 @@ FOG_INLINE void RasterPaintCmdDraw::_beforeBlit(RasterPaintContext* ctx)
 {
   FOG_ASSERT(ops.sourceType == PAINTER_SOURCE_ARGB);
 
-  ctx->ops = ops;
+  ctx->ops.data = ops.data;
   ctx->funcs = RasterEngine::getCompositeFuncs(ctx->layer.format, ops.op);
 }
 
 FOG_INLINE void RasterPaintCmdDraw::_beforePaint(RasterPaintContext* ctx)
 {
-  ctx->ops = ops;
+  ctx->ops.data = ops.data;
   ctx->funcs = RasterEngine::getCompositeFuncs(ctx->layer.format, ops.op);
 
   if (FOG_LIKELY(ops.sourceType == PAINTER_SOURCE_ARGB))
@@ -1702,7 +1763,7 @@ FOG_INLINE void RasterPaintCmdDraw::_afterPaint(RasterPaintContext* ctx)
 
 FOG_INLINE void RasterPaintCmdDraw::_initBlit(RasterPaintContext* ctx)
 {
-  ops = ctx->ops;
+  ops.data = ctx->ops.data;
   ops.sourceType = PAINTER_SOURCE_ARGB;
 }
 
@@ -1716,30 +1777,42 @@ FOG_INLINE void RasterPaintCmdDraw::_releasePattern(RasterPaintContext* ctx)
 }
 
 template <typename T>
-FOG_INLINE T* RasterPaintEngine::_createCommand(sysuint_t size)
+FOG_INLINE T* RasterPaintEngine::_createCommand()
 {
-  T* command = reinterpret_cast<T*>(workerManager->zoneAllocator.alloc(size));
-  if (!command) return NULL;
+  T* command = reinterpret_cast<T*>(workerManager->zoneAllocator.alloc(sizeof(T)));
+  if (FOG_UNLIKELY(command == NULL)) return NULL;
 
   new(command) T;
 
   command->refCount.init((uint)workerManager->numWorkers);
   command->status.init(RASTER_COMMAND_READY);
+  command->calculation = NULL;
 
+  return command;
+}
+
+template <typename T>
+FOG_INLINE T* RasterPaintEngine::_createCommand(sysuint_t size)
+{
+  T* command = reinterpret_cast<T*>(workerManager->zoneAllocator.alloc(size));
+  if (FOG_UNLIKELY(command == NULL)) return NULL;
+
+  new(command) T;
+
+  command->refCount.init((uint)workerManager->numWorkers);
+  command->status.init(RASTER_COMMAND_READY);
   command->calculation = NULL;
 
   return command;
 }
 
 template<typename T>
-T* RasterPaintEngine::_createCalc(sysuint_t size)
+T* RasterPaintEngine::_createCalc()
 {
-  T* calculation = reinterpret_cast<T*>(workerManager->zoneAllocator.alloc(size));
-  if (!calculation) return NULL;
+  T* calculation = reinterpret_cast<T*>(workerManager->zoneAllocator.alloc(sizeof(T)));
+  if (FOG_UNLIKELY(calculation == NULL)) return NULL;
 
-  new(calculation) T;
-  calculation->engine = this;
-  return calculation;
+  return new(calculation) T;
 }
 
 FOG_INLINE void RasterPaintEngine::_beforeNewAction()

@@ -1648,14 +1648,14 @@ err_t Region::set(const IntBox* rects, sysuint_t length)
   return ERR_OK;
 }
 
-err_t Region::combine(const Region& r, uint32_t combineOp)
+err_t Region::combine(const Region& r, uint32_t regionOp)
 {
   err_t err;
 
   RegionData* td = _d;
   RegionData* rd = r._d;
 
-  switch (combineOp)
+  switch (regionOp)
   {
     case REGION_OP_COPY:
       return set(r);
@@ -1722,7 +1722,7 @@ err_t Region::combine(const Region& r, uint32_t combineOp)
 
     case REGION_OP_XOR:
     {
-      return combine(*this, *this, r, combineOp);
+      return combine(*this, *this, r, regionOp);
     }
 
     case REGION_OP_SUBTRACT:
@@ -1749,17 +1749,17 @@ err_t Region::combine(const Region& r, uint32_t combineOp)
   }
 }
 
-err_t Region::combine(const IntRect& r, uint32_t combineOp)
+err_t Region::combine(const IntRect& r, uint32_t regionOp)
 {
-  return combine(IntBox(r), combineOp);
+  return combine(IntBox(r), regionOp);
 }
 
-err_t Region::combine(const IntBox& r, uint32_t combineOp)
+err_t Region::combine(const IntBox& r, uint32_t regionOp)
 {
   RegionData* td = _d;
   err_t err;
 
-  switch (combineOp)
+  switch (regionOp)
   {
     case REGION_OP_COPY:
     {
@@ -1816,7 +1816,7 @@ err_t Region::combine(const IntBox& r, uint32_t combineOp)
     case REGION_OP_XOR:
     {
       TemporaryRegion<1> rr(r);
-      return combine(*this, *this, rr, combineOp);
+      return combine(*this, *this, rr, regionOp);
     }
 
     case REGION_OP_SUBTRACT:
@@ -2051,14 +2051,14 @@ err_t Region::fromHRGN(HRGN hrgn)
 // [Fog::Region - Statics]
 // ============================================================================
 
-err_t Region::combine(Region& dest, const Region& src1, const Region& src2, uint32_t combineOp)
+err_t Region::combine(Region& dest, const Region& src1, const Region& src2, uint32_t regionOp)
 {
   RegionData* destd = dest._d;
   RegionData* src1d = src1._d;
   RegionData* src2d = src2._d;
   err_t err = ERR_OK;
 
-  switch (combineOp)
+  switch (regionOp)
   {
     case REGION_OP_COPY:
     {

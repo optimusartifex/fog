@@ -5,6 +5,10 @@
   all transformations and can't be reset by resetMatrix() or setMatrix() methods.
 - Some work on clipping, but not finished yet.
 - Additional performance optimizations (raster paint engine).
+- Added RasterPaintEngine::_serializeRegion() method to improve performance of serializing
+  large regions.
+- Added noPaint mask to raster paint engine efficiently returning early if painting can't
+  be performed (invalid clip region, OPERATOR_DST, degenerated transformation matrix, etc...).
 
 2010-04-03
 - Renamed Class::sharedNull to Class::_dnull. Now all 'd' statics will start at '_d'.

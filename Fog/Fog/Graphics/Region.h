@@ -239,9 +239,9 @@ struct FOG_API Region
   err_t set(const IntRect* rects, sysuint_t count);
   err_t set(const IntBox* rects, sysuint_t count);
 
-  err_t combine(const Region& r, uint32_t combineOp);
-  err_t combine(const IntRect& r, uint32_t combineOp);
-  err_t combine(const IntBox& r, uint32_t combineOp);
+  err_t combine(const Region& r, uint32_t regionOp);
+  err_t combine(const IntRect& r, uint32_t regionOp);
+  err_t combine(const IntBox& r, uint32_t regionOp);
 
   err_t translate(const IntPoint& pt);
   err_t shrink(const IntPoint& pt);
@@ -310,7 +310,7 @@ struct FOG_API Region
   //! @brief Infinite region instance.
   static const Region& infinite() { return _infinite; }
 
-  static err_t combine(Region& dst, const Region& src1, const Region& src2, uint32_t combineOp);
+  static err_t combine(Region& dst, const Region& src1, const Region& src2, uint32_t regionOp);
   static err_t translate(Region& dst, const Region& src, const IntPoint& pt);
   static err_t shrink(Region& dst, const Region& src, const IntPoint& pt);
   static err_t frame(Region& dst, const Region& src, const IntPoint& pt);

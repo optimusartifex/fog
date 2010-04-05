@@ -540,6 +540,16 @@ struct FOG_HIDDEN Memory
     fog_memory_xchg((uint8_t*)a, (uint8_t*)b, count);
   }
 
+  template<typename T>
+  static FOG_INLINE void xchgPtr(T** a, T** b)
+  {
+#if FOG_ARCH_BITS == 64
+    xchg8B(static_cast<void*>(a), static_cast<void*>(b));
+#else
+    xchg4B(static_cast<void*>(a), static_cast<void*>(b));
+#endif
+  }
+
   // [bswap]
 
   static FOG_INLINE uint16_t bswap16(uint16_t x)

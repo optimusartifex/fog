@@ -98,7 +98,24 @@ static LRESULT CALLBACK hwndWndProc(HWND hwnd, UINT message, WPARAM wParam, LPAR
       GUI_ENGINE()->handleToNative((void*)hwnd));
 
   if (window)
-    return window->onWinMsg(hwnd, message, wParam, lParam);
+  {
+    GuiWindow* curmodal = GUI_ENGINE()->getModalWindow();
+    if(curmodal) {
+      if(window == curmodal) {
+        return window->onWinMsg(hwnd, message, wParam, lParam);
+      } else {
+        //set Focus to curmodal!
+        HWND h = (HWND)curmodal->getHandle();
+        if(GetFocus() != h) {
+          SetFocus(h);
+        }
+        //eat message
+        return 0;
+      }
+    } else {
+      return window->onWinMsg(hwnd, message, wParam, lParam);
+    }
+  }
   else
     return DefWindowProc(hwnd, message, wParam, lParam);
 }
@@ -736,24 +753,68 @@ WinGuiWindow::~WinGuiWindow()
   delete _backingStore;
 }
 
+void WinGuiWindow::moveToTop(GuiWindow* w) {  
+  if(w) {
+    SetWindowPos((HWND)getHandle(),(HWND)w->getHandle(),0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE);
+  } else {
+    SetWindowPos((HWND)getHandle(),HWND_TOP,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE);
+  }
+
+  if(_widget) {
+    //If you call this the always on top flag is automatically removed!
+    if(_widget->isAlwaysOnTop()) {
+      _widget->overrideWindowFlags(_widget->getWindowFlags() & ~WINDOW_ALWAYS_ON_TOP);
+    }
+  }
+}
+
+void WinGuiWindow::moveToBottom(GuiWindow* w) {
+  //TODO: The Flag of HWND_TOPMOST will be cleared!! (update internal Flag)
+  if(w) {
+    SetWindowPos((HWND)getHandle(),(HWND)w->getHandle(),0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE);
+  } else {
+    SetWindowPos((HWND)getHandle(),HWND_BOTTOM,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE);
+  }
+
+  if(_widget) {
+    //If you call this the always on top flag is automatically removed!
+    if(_widget->isAlwaysOnTop()) {
+      _widget->overrideWindowFlags(_widget->getWindowFlags() & ~WINDOW_ALWAYS_ON_TOP);
+    }
+  }
+}
+
+void WinGuiWindow::setOwner(GuiWindow* w) {
+  if(w) {
+    SetParent((HWND)getHandle(), (HWND)w->getHandle());
+  } else {
+    SetParent((HWND)getHandle(), 0);
+  }
+}
+
+void WinGuiWindow::setTransparency(float val) {
+  //LWA_COLORKEY
+  SetLayeredWindowAttributes((HWND)getHandle(),0,(int)(255 * val),LWA_ALPHA);
+}
+
 void WinGuiWindow::calculateStyleFlags(uint32_t flags, DWORD& style, DWORD& exstyle) 
 {
   if(flags & WINDOW_FRAMELESS) 
   {
     style = WS_POPUP;
-    exstyle = 0;
+    exstyle = WS_EX_LAYERED;
   }
   else if(flags & WINDOW_POPUP) 
   {
     style = WS_POPUP;
-    exstyle = WS_EX_TOPMOST;
+    exstyle = WS_EX_LAYERED | WS_EX_TOPMOST;
     //A popup has no min/max/close/systemmenu
     return;
   }
   else if(flags & WINDOW_NATIVE) 
   {
     style = WS_OVERLAPPED | WS_CAPTION;
-    exstyle = WS_EX_WINDOWEDGE;
+    exstyle = WS_EX_LAYERED | WS_EX_WINDOWEDGE;
   }
   else if(flags & WINDOW_TOOL) 
   {
@@ -807,6 +868,12 @@ void WinGuiWindow::calculateStyleFlags(uint32_t flags, DWORD& style, DWORD& exst
 
   if(flags & WINDOW_ALWAYS_ON_TOP) {
     exstyle |= WS_EX_TOPMOST;
+  }
+
+  if(flags & WINDOW_TRANSPARENT) {
+    //todo: check if WS_EX_TRANSPARENT is needed!
+    //WS_EX_TRANSPARENT: will make a transparent window, where no events are received!
+    exstyle |= WS_EX_LAYERED;
   }
 }
 
@@ -923,6 +990,13 @@ err_t WinGuiWindow::create(uint32_t flags)
     goto fail;
   }
 
+  if(dwStyleEx & WS_EX_LAYERED) {
+    if(!SetLayeredWindowAttributes((HWND)_handle, 0, 255, LWA_ALPHA))  {
+      fog_stderr_msg("Fog::WinGuiWindow", "create", "SetLayeredWindowAttributes() failed.");
+      goto fail;
+    }
+  }
+
   doSystemMenu(flags);
 
   // Create HWND <-> GuiWindow* connection.
@@ -1020,7 +1094,10 @@ err_t WinGuiWindow::hide()
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
-  if (_visible) ShowWindow((HWND)_handle, SW_HIDE);
+  if (!IsWindowVisible((HWND)_handle)) 
+  {
+    ShowWindow((HWND)_handle, SW_HIDE);
+  }
   return ERR_OK;
 }
 
@@ -1181,6 +1258,12 @@ LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
 
   switch (message)
   {
+    case WM_NCHITTEST:
+      //Very easy way to allow dragging/resizing of a window 
+      //usefull for our own window manager. So we don't need to write our own
+      //dragging/resizeing methods!
+      //http://msdn.microsoft.com/en-us/library/ms645618%28VS.85%29.aspx      
+      goto defWindowProc;
     case WM_SYSCOMMAND:
       {
         if(!getWidget()->isDragAble()) {

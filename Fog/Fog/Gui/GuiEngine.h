@@ -247,6 +247,14 @@ struct FOG_API GuiEngine : public Object
   virtual GuiWindow* createGuiWindow(Widget* widget) = 0;
   virtual void destroyGuiWindow(GuiWindow* native) = 0;
 
+
+  // --------------------------------------------------------------------------
+  // [Modal Window Handling]
+  // --------------------------------------------------------------------------
+  virtual void startModalWindow(GuiWindow* w) = 0;
+  virtual void endModal(GuiWindow *w) = 0;
+  virtual GuiWindow* getModalWindow() = 0;
+
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
@@ -352,6 +360,29 @@ struct FOG_API GuiWindow : public Object
   FOG_INLINE bool isDirty() const { return _isDirty; }
   FOG_INLINE bool hasFocus() const { return _hasFocus; }
 
+  FOG_INLINE bool isModal() const { return _modal; }
+  FOG_INLINE void setModal(bool b) { _modal = b; }
+
+
+  // --------------------------------------------------------------------------
+  // [Owner Handling]
+  // --------------------------------------------------------------------------
+
+  //SetOwner not only set the member variable
+  //It should also do the z-order work of window manager!
+  virtual void setOwner(GuiWindow* w) = 0;
+  FOG_INLINE GuiWindow* getOwner() const { return _owner; }
+  virtual void setTransparency(float val) = 0;
+
+  // --------------------------------------------------------------------------
+  // [Z-Order]
+  // --------------------------------------------------------------------------
+
+  //Move Window on Top of other Window! (If w == 0 Move on top of all Windows)
+  virtual void moveToTop(GuiWindow* w) = 0;
+  //Move Window behind other Window! (If w == 0 Move behind all Windows of screen)
+  virtual void moveToBottom(GuiWindow* w) = 0;
+
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
@@ -359,17 +390,21 @@ struct FOG_API GuiWindow : public Object
   //! @brief Widget.
   Widget* _widget;
 
+  GuiWindow* _owner;
+
   //! @brief Window handle.
   void* _handle;
 
   //! @brief Backing store.
   GuiBackBuffer* _backingStore;
 
+  //TODO: use bitset here 
+
   //! @brief Whether window is enabled.
   bool _enabled;
 
   //! @brief Whether window is visible.
-  bool _visible;
+  bool _visible; //do we need this? (already in widget)
 
   //! @brief Whether window has native windowing system focus.
   bool _hasFocus;
@@ -379,6 +414,8 @@ struct FOG_API GuiWindow : public Object
 
   //! @brief Window is dirty and needs update.
   bool _isDirty;
+
+  bool _modal;
 
   //! @brief Window bound rectangle.
   IntRect _windowRect;

@@ -48,7 +48,9 @@ Widget::Widget(uint32_t createFlags) :
   _orientation(ORIENTATION_HORIZONTAL),
   _reserved(0),
   _tabOrder(0),
-  _windowFlags(createFlags)
+  _fullscreendata(NULL),
+  _windowFlags(createFlags),
+  _transparency(1.0)
 {
   _flags |= OBJ_IS_WIDGET;
 
@@ -90,9 +92,32 @@ bool Widget::add(Widget* w)
     // Remove element can fail, so we return false in that case
     if (!p->remove(w)) return false;
   }
+  
 
-  // Now element can be added, call virtual method
-  return _add(_children.getLength(), w);
+  //Inline PopUps should be always at the end of the ChildrenList!
+  bool ispopup = ((w->getWindowFlags() & WINDOW_INLINE_POPUP) != 0);
+
+  //A Inline PopUp can only be added to a GuiWindow!
+  if(ispopup && (getWindowFlags() & WINDOW_TYPE_MASK) == 0) {
+    return false;
+  }
+
+  if(!ispopup && _children.getLength() > 0) {
+    List<Widget*>::ConstIterator it(_children);
+    for (it.toEnd(); it.isValid(); it.toPrevious())
+    {
+      Widget* widget = it.value();
+      if (widget && ((widget->getWindowFlags() & WINDOW_INLINE_POPUP) != 0)) {
+        // Now element can be added, call virtual method
+        return _add(it.index(), w);
+      }
+    }
+
+    // No PopUp found
+    return _add(_children.getLength(), w);
+  } else {
+    return _add(_children.getLength(), w);
+  }
 }
 
 bool Widget::remove(Widget* w)
@@ -584,17 +609,26 @@ void Widget::setVisible(uint32_t val)
   //TODO: Check if an optimization makes sense here (hidden_by_parent)
   if(val == _visibility) return;
 
-  if(val == WIDGET_VISIBLE_FULLSCREEN && _guiWindow) {
-    _restorewindowFlags = _windowFlags;
-    _restoregeometry = _guiWindow->_windowRect;
+  if(val == WIDGET_VISIBLE_FULLSCREEN) {
+    if(!_guiWindow) {
+      return;
+    }
+
+    _fullscreendata = new(std::nothrow) FullScreenData;
+    _fullscreendata->_restorewindowFlags = _windowFlags;
+    _fullscreendata->_restoregeometry = _guiWindow->_windowRect;
 
     GuiEngine::DisplayInfo info;
-    Application::getInstance()->getGuiEngine()->getDisplayInfo(&info);        
+    Application::getInstance()->getGuiEngine()->getDisplayInfo(&info);
     setWindowFlags(WINDOW_TYPE_FULLSCRREN);
     setGeometry(IntRect(0,0,info.width, info.height));
-  } else if(_visibility != val && _visibility == WIDGET_VISIBLE_FULLSCREEN) {
-    setWindowFlags(_restorewindowFlags);
-    setGeometry(_restoregeometry);
+  } else if(_visibility == WIDGET_VISIBLE_FULLSCREEN) {
+    FOG_ASSERT(_fullscreendata);
+    setWindowFlags(_fullscreendata->_restorewindowFlags);
+    setGeometry(_fullscreendata->_restoregeometry);
+
+    delete _fullscreendata;
+    _fullscreendata = 0;
   }
 
   if (_guiWindow)
@@ -615,6 +649,36 @@ void Widget::setVisible(uint32_t val)
   }
 
   _visibility = val;
+}
+
+void Widget::setTransparency(float val) {
+  if(val < 0.0) {
+    val = 0.0;
+  } else if(val > 1.0) {
+    val = 1.0;
+  }
+  
+  if(_guiWindow) {    
+    //some window manager need a flag to be set (w.g. windows)
+    //so make sure the flag is already set
+    if((_windowFlags & WINDOW_TRANSPARENT) == 0) {
+      setWindowHints(getWindowHints() | WINDOW_TRANSPARENT);
+    }
+    _transparency = val;
+    _guiWindow->setTransparency(val);
+  } else {
+    //TODO
+  }
+}
+
+void Widget::showModal(GuiWindow* owner) {
+  if(_guiWindow) {
+    //Only TopLevel Windows may be modal!    
+    _guiWindow->setModal(true);
+    //This will implicitly set this window above owner window!
+    _guiWindow->setOwner(owner);
+    setVisible(WIDGET_VISIBLE);
+  }
 }
 
 // ============================================================================

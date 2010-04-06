@@ -210,7 +210,7 @@ enum WINDOW_FLAGS
   //! screen
   //!
   //! This flag overwrites all other window-types
-  WINDOW_FULLSCREEN = (1 << 5),
+  WINDOW_FULLSCREEN = (1 << 5),  
 
   //Window flags
 
@@ -254,6 +254,15 @@ enum WINDOW_FLAGS
   //! The help button is only visible, if the window has also a system menu!
   //! A tool window and a popup could not have a help button
   WINDOW_CONTEXT_HELP_BUTTON = (1 << 16),
+
+  //! @brief Marks the window to allow transparency
+  WINDOW_TRANSPARENT = (1 << 17),
+
+  //! @brief Marks that the PopUp window should be inline within the top level window
+  //!
+  //! A pop normally creates a system top level window. But if this
+  //! flag is set, the pop acts as a child widget on top of all others in the guiWindow!
+  WINDOW_INLINE_POPUP = (1 << 18),
 
   //! @brief Create X11 window that listens only for XPropertyChange events.
   //!

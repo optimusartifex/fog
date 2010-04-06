@@ -128,6 +128,18 @@ struct FOG_API WinGuiWindow : public BaseGuiWindow
   virtual err_t clientToWorld(IntPoint* coords);
 
   // --------------------------------------------------------------------------
+  // [Z-Order]
+  // --------------------------------------------------------------------------
+
+  //Move Window on Top of other Window! (If w == 0 Move on top of all Windows)
+  virtual void moveToTop(GuiWindow* w=0);
+  //Move Window behind other Window! (If w == 0 Move behind all Windows of screen)
+  virtual void moveToBottom(GuiWindow* w=0);
+
+  virtual void setOwner(GuiWindow* w=0);
+  virtual void setTransparency(float val);
+
+  // --------------------------------------------------------------------------
   // [Windowing System]
   // --------------------------------------------------------------------------
 

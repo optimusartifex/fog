@@ -433,6 +433,11 @@ void BaseGuiEngine::dispatchVisibility(Widget* w, uint32_t visible)
     w->sendEvent(&e);
 
     if(visibility == WIDGET_HIDDEN) {
+      if((w->getWindowHints() & WINDOW_INLINE_POPUP) != 0 && w->getParent() && w->getParent()->getGuiWindow()) {
+        BaseGuiWindow* ww = (BaseGuiWindow*)w->getParent()->getGuiWindow();
+        ww->showPopUp(w);
+      }
+
       //only needed if widget was hidden before this event
       FOG_WIDGET_TREE_ITERATOR(i1, w, true,
         // before traverse
@@ -446,6 +451,10 @@ void BaseGuiEngine::dispatchVisibility(Widget* w, uint32_t visible)
         // after traverse
       {}
       );
+    }
+
+    if(w->getGuiWindow() && w->getGuiWindow()->isModal()) {      
+      startModalWindow(w->getGuiWindow());
     }
 
     w->update(WIDGET_UPDATE_ALL);
@@ -485,6 +494,10 @@ void BaseGuiEngine::dispatchVisibility(Widget* w, uint32_t visible)
         }
       );
 
+      if(w->getGuiWindow() && w->getGuiWindow()->isModal()) {
+        endModal(w->getGuiWindow());
+      }
+
       Widget* p = w->getParent();
       if (p) p->update(WIDGET_UPDATE_ALL);
     }
@@ -493,6 +506,10 @@ void BaseGuiEngine::dispatchVisibility(Widget* w, uint32_t visible)
 
 void BaseGuiEngine::dispatchConfigure(Widget* w, const IntRect& rect, bool changedOrientation)
 {
+  if(w->isGuiWindow() && ((BaseGuiWindow*)w->getGuiWindow())->hasPopUp()) {
+      ((BaseGuiWindow*)w->getGuiWindow())->closePopUps();
+  }
+
   uint32_t changed = 0;
 
   if (w->getPosition() != rect.getPosition())
@@ -1185,7 +1202,16 @@ void BaseGuiWindow::onMousePress(uint32_t button, bool repeated)
   if (uiSystem->_systemMouseStatus.uiWindow != this) return;
 
   Widget* w = uiSystem->_mouseStatus.widget;
-  if (!w) return;
+  if (!w) {
+    closePopUps();
+    return;
+  }
+
+  if(hasPopUp()) {
+    if(!w->isPopUpWindow()) {
+      closePopUps();
+    }
+  }
 
   uiSystem->_systemMouseStatus.buttons |= button;
   uiSystem->_mouseStatus.buttons |= button;
@@ -1295,6 +1321,7 @@ void BaseGuiWindow::onFocus(bool focus)
   else
   {
     uiSystem->_keyboardStatus.modifiers = 0;
+    closePopUps();
   }
 }
 
@@ -1382,6 +1409,25 @@ void BaseGuiWindow::setFocus(Widget* w, uint32_t reason)
   FocusEvent e(EVENT_FOCUS_IN, reason);
   w->_hasFocus = true;
   w->sendEvent(&e);
+}
+
+// --------------------------------------------------------------------------
+// [Fog::BaseGuiWindow - PopUp - Handling]
+// --------------------------------------------------------------------------
+
+void BaseGuiWindow::showPopUp(Widget* w) {
+  _popup.append(w);
+}
+
+void BaseGuiWindow::closePopUps() {
+  List<Widget*>::ConstIterator it(_popup);
+  for (it.toStart(); it.isValid(); it.toNext())
+  {
+    Widget* widget = it.value();
+    if (widget) widget->hide();
+  } 
+
+  _popup.free();
 }
 
 // ============================================================================

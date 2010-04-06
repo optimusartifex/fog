@@ -8,6 +8,25 @@
 
 using namespace Fog;
 
+struct MyPopUp : public Widget {
+  MyPopUp() : Widget(WINDOW_INLINE_POPUP) {
+
+  }
+
+  virtual void onPaint(PaintEvent* e)
+  {
+    Painter* p = e->getPainter();
+    p->setOperator(OPERATOR_SRC_OVER);
+
+    // Clear everything to white.
+    p->setSource(Argb(0xAAFFFFFFF));
+    p->clear();
+
+    p->setSource(Argb(0xFF000000));
+    p->drawText(IntPoint(0,0),Ascii8("TEXT TEXT"),getFont());
+  }
+};
+
 struct MyWindow : public Window
 {
   // [Fog Object System]
@@ -34,13 +53,35 @@ struct MyWindow : public Window
     }    
   }
 
-  void onButtonClick(MouseEvent* e) {
-//     if(getWindowFlags() & WINDOW_NATIVE) {
-//       setWindowFlags(WINDOW_TYPE_TOOL);
-//     } else {
-//       setWindowFlags(WINDOW_TYPE_DEFAULT);
-//     }
-    show(WIDGET_VISIBLE_MAXIMIZED);
+  void onPopUpClick(MouseEvent* e) {
+    if(_popup->getVisibility() < WIDGET_VISIBLE) {
+      _popup->show();
+    }
+  }
+
+  void onFrameTestClick(MouseEvent* e) {
+    if(getWindowFlags() & WINDOW_NATIVE) {
+      setWindowFlags(WINDOW_TYPE_TOOL);
+    } else {
+      setWindowFlags(WINDOW_TYPE_DEFAULT);
+    }
+  }
+
+  void onFullScreenClick(MouseEvent* e) {
+    if(isFullScreen()) {
+      show();
+    } else {
+      show(WIDGET_VISIBLE_FULLSCREEN);
+    }
+  }
+
+  void onTransparencyClick(MouseEvent* e) {
+    float v = getTransparency();
+    if(v == 1.0) {
+      v = 0.1;
+    }
+    
+    setTransparency(v + 0.05);
   }
 
   void paintImage(Painter* painter, const IntPoint& pos, const Image& im, const String& name);
@@ -53,6 +94,8 @@ struct MyWindow : public Window
   double _shearY;
   double _scale;
   int _spread;
+
+  Widget* _popup;
 };
 
 FOG_IMPLEMENT_OBJECT(MyWindow)
@@ -94,14 +137,41 @@ MyWindow::MyWindow(uint32_t createFlags) :
   Button* button = new Button();
   add(button);
   button->setGeometry(IntRect(40, 40, 100, 20));
-  button->setText(Ascii8("Push me"));
-  button->show();
+  button->setText(Ascii8("Test Transparency"));
+  button->show();  
+  button->addListener(EVENT_CLICK, this, &MyWindow::onTransparencyClick);
 
-  button->addListener(EVENT_CLICK, this, &MyWindow::onButtonClick);
+  Button* button2 = new Button();
+  add(button2);
+  button2->setGeometry(IntRect(40, 80, 100, 20));
+  button2->setText(Ascii8("Test FullScreen"));
+  button2->show();
+  button2->addListener(EVENT_CLICK, this, &MyWindow::onFullScreenClick);
+
+  Button* button3 = new Button();
+  add(button3);
+  button3->setGeometry(IntRect(40, 120, 100, 20));
+  button3->setText(Ascii8("Test PopUp"));
+  button3->show();  
+  button3->addListener(EVENT_CLICK, this, &MyWindow::onPopUpClick);
+
+  Button* button4 = new Button();
+  add(button4);
+  button4->setGeometry(IntRect(40, 160, 100, 20));
+  button4->setText(Ascii8("Test FrameChange"));
+  button4->show();  
+  button4->addListener(EVENT_CLICK, this, &MyWindow::onFrameTestClick);
+
+  _popup = new MyPopUp();
+  add(_popup);
+  _popup->setGeometry(IntRect(40, 120, 50, 20));
+  //should be automatically hidden because of lost of focus!
+  _popup->show();
 }
 
 MyWindow::~MyWindow()
 {
+  //Yeah I know no child widget destructurs... 
 }
 
 void MyWindow::onKeyPress(KeyEvent* e)

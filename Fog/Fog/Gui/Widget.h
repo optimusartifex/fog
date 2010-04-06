@@ -152,8 +152,6 @@ struct FOG_API Widget : public LayoutItem
   err_t createWindow(uint32_t createFlags = 0);
   //! @brief Destroy native gui window.
   err_t destroyWindow();
-  
-  err_t rebaseToParent(Widget* w = 0, uint32_t windowflags=0);
 
   //! @brief Get native gui window title.
   String getWindowTitle() const;
@@ -336,6 +334,9 @@ struct FOG_API Widget : public LayoutItem
   
   //! @brief Show widget (set it's visibility to WIDGET_VISIBLE).
   FOG_INLINE void show(uint32_t type=WIDGET_VISIBLE) { setVisible(type); }
+  //! @brief Show widget (set it's visibility to WIDGET_VISIBLE).
+  void showModal(GuiWindow* owner);
+
   //! @brief Hide widget (set it's visibility to WIDGET_HIDDEN).
   FOG_INLINE void hide() { setVisible(WIDGET_HIDDEN); }
 
@@ -349,31 +350,35 @@ struct FOG_API Widget : public LayoutItem
   FOG_INLINE void showNormal() { setVisible(WIDGET_VISIBLE); }
 
   //! @brief returns true if the widget is currently maximized
-  FOG_INLINE bool isMaximized() { return (_visibility == WIDGET_VISIBLE_MAXIMIZED); }
+  FOG_INLINE bool isMaximized() const { return (_visibility == WIDGET_VISIBLE_MAXIMIZED); }
   //! @brief returns true if the widget is currently minimized
-  FOG_INLINE bool isMinimized() {return ( _visibility == WIDGET_VISIBLE_FULLSCREEN); }
+  FOG_INLINE bool isMinimized() const {return ( _visibility == WIDGET_VISIBLE_FULLSCREEN); }
   //! @brief returns true if the widget is currently shown as full screen  
-  FOG_INLINE bool isFullScreen() { return (_visibility == WIDGET_VISIBLE_FULLSCREEN); }
+  FOG_INLINE bool isFullScreen() const { return (_visibility == WIDGET_VISIBLE_FULLSCREEN); }  
 
   // --------------------------------------------------------------------------
   // [Widget Window Style]
   // --------------------------------------------------------------------------
   //! @brief returns the current window flags of the widget
-  FOG_INLINE uint32_t getWindowFlags() { return _windowFlags; }
+  FOG_INLINE uint32_t getWindowFlags() const { return _windowFlags; }
   //! @brief set the current window flags of the widget (overwrites existing)
   void setWindowFlags(uint32_t flags);
+  //! @brief set WindowFlags without notifying the window manager!
+  //! Make sure you know what you are doing!
+  FOG_INLINE void overrideWindowFlags(uint32_t flags) { _windowFlags = flags; }
+
   //! @brief returns the current window hints of the widget
-  FOG_INLINE uint32_t getWindowHints() { return _windowFlags & WINDOW_HINTS_MASK; }
+  FOG_INLINE uint32_t getWindowHints() const { return _windowFlags & WINDOW_HINTS_MASK; }
   //! @brief set the current window hints of the widget (but keep window_type!)
   void setWindowHints(uint32_t flags);  
 
   //! @brief returns true if the widget is currently allowed to drag
-  FOG_INLINE bool isDragAble() { return (_windowFlags & WINDOW_DRAGABLE); }
+  FOG_INLINE bool isDragAble() const { return (_windowFlags & WINDOW_DRAGABLE); }
   //! @brief sets the permission to drag the window
   void setDragAble(bool drag, bool update=true);
 
   //! @brief returns true if the widget is currently allowed to resize
-  FOG_INLINE bool isResizeAble() { return (_windowFlags & WINDOW_FIXED_SIZE) == 0; }
+  FOG_INLINE bool isResizeAble() const { return (_windowFlags & WINDOW_FIXED_SIZE) == 0; }
   //! @brief sets the permission to resize the window
   void setResizeAble(bool resize, bool update=true);  
 
@@ -381,6 +386,11 @@ struct FOG_API Widget : public LayoutItem
   FOG_INLINE bool isAlwaysOnTop() { return (_windowFlags & WINDOW_ALWAYS_ON_TOP) != 0; }
   //! @brief sets the ON_TOP flag of the window
   void setAlwaysOnTop(bool ontop);
+
+  FOG_INLINE bool isPopUpWindow() const { return (((_windowFlags & WINDOW_POPUP) != 0) || ((_windowFlags & WINDOW_INLINE_POPUP) != 0)); }
+
+  void setTransparency(float val);
+  FOG_INLINE float getTransparency() const { return _transparency; }
 
   // --------------------------------------------------------------------------
   // [Widget Orientation]
@@ -596,10 +606,19 @@ struct FOG_API Widget : public LayoutItem
   // --------------------------------------------------------------------------
 
 protected:
+  struct FullScreenData {
+    //! @brief Main geometry for restoration from fullscreen mode
+    IntRect _restoregeometry;
+    //! @brief Window Style for restoration of fullscreen
+    uint32_t _restorewindowFlags;
+  };
+
   //! @brief Will set/unset a window flag and update the window if specified
   void changeFlag(uint32_t flag, bool set, bool update);
 
   Widget* _parent;
+  GuiWindow* _owner;
+  FullScreenData* _fullscreendata;
 
   List<Widget*> _children;
 
@@ -608,8 +627,6 @@ protected:
 
   //! @brief Main geometry (geometry relative to widget parent or screen).
   IntRect _geometry;
-  //! @brief Main geometry for restoration from fullscreen mode
-  IntRect _restoregeometry;
   //! @brief Client area geometry (geometry within the widget).
   IntRect _clientGeometry;
   //! @brief Client origin.
@@ -635,6 +652,9 @@ protected:
   //! @brief Tab order.
   int _tabOrder;
 
+  //! @brief global transparency of window (0.0..1.0)
+  float _transparency;
+
   //! @brief Link to child that was last focus.
   Widget* _lastFocus;
   Widget* _focusLink;
@@ -644,8 +664,6 @@ protected:
 
   //! @brief Window Style
   uint32_t _windowFlags;
-  //! @brief Window Style for restoration of fullscreen
-  uint32_t _restorewindowFlags;
 
   //! @brief Widget state.
   uint32_t _state : 2;

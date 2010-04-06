@@ -52,7 +52,9 @@ GuiWindow::GuiWindow(Widget* widget) :
   _needBlit(true),
   _isDirty(false),
   _windowRect(0, 0, 1, 1),
-  _clientRect(0, 0, 1, 1)
+  _clientRect(0, 0, 1, 1),
+  _owner(NULL),
+  _modal(false)
 {
 }
 

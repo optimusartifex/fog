@@ -802,19 +802,19 @@ void WinGuiWindow::calculateStyleFlags(uint32_t flags, DWORD& style, DWORD& exst
   if(flags & WINDOW_FRAMELESS) 
   {
     style = WS_POPUP;
-    exstyle = WS_EX_LAYERED;
+    exstyle = 0;
   }
   else if(flags & WINDOW_POPUP) 
   {
     style = WS_POPUP;
-    exstyle = WS_EX_LAYERED | WS_EX_TOPMOST;
+    exstyle = WS_EX_TOPMOST;
     //A popup has no min/max/close/systemmenu
     return;
   }
   else if(flags & WINDOW_NATIVE) 
   {
     style = WS_OVERLAPPED | WS_CAPTION;
-    exstyle = WS_EX_LAYERED | WS_EX_WINDOWEDGE;
+    exstyle = WS_EX_WINDOWEDGE;
   }
   else if(flags & WINDOW_TOOL) 
   {

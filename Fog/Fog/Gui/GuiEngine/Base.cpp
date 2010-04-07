@@ -76,13 +76,6 @@ BaseGuiEngine::~BaseGuiEngine()
   if (_updateStatus.task) _updateStatus.task->cancel();
 }
 
-
-void BaseGuiEngine::showAllModalWindows(uint32_t visible) {
-  for(int i=0;i<_modal.getLength();++i) {
-    _modal.at(i)->getWidget()->show(visible);
-  }
-}
-
 // ============================================================================
 // [Fog::BaseGuiEngine - ID <-> GuiWindow]
 // ============================================================================
@@ -424,9 +417,6 @@ void BaseGuiEngine::dispatchVisibility(Widget* w, uint32_t visible)
 {
   uint32_t visibility = w->getVisibility();
   if(visibility == visible) return;
-
-  GuiEngine* uiSystem = Application::getInstance()->getGuiEngine();
-  GuiWindow* modalWindow = uiSystem->getModalWindow();
 
   // Dispatch 'Show'.
   if (visible >= WIDGET_VISIBLE)
@@ -1044,6 +1034,7 @@ void BaseGuiEngine::_onButtonRepeatTimeOut(TimerEvent* e)
 
 BaseGuiWindow::BaseGuiWindow(Widget* widget) :
   GuiWindow(widget),
+  _modal(NULL),
   _sizeGranularity(1, 1)
 {
 }
@@ -1062,6 +1053,18 @@ BaseGuiWindow::~BaseGuiWindow()
   // Remove GuiWindow's from dirty list.
   sysuint_t i = uiSystem->_dirtyList.indexOf(this);
   if (i != INVALID_INDEX) uiSystem->_dirtyList.set(i, NULL);
+}
+
+
+void BaseGuiWindow::showAllModalWindows(uint32_t visible) {
+  GuiWindow* parent = getOwner();
+  while(parent->getOwner()) {
+    parent->getWidget()->show(visible);
+    parent = parent->getOwner();
+  }
+
+  //To get the focus to me
+  getWidget()->show(visible);
 }
 
 // ============================================================================

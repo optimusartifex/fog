@@ -142,50 +142,6 @@ struct FOG_API BaseGuiEngine : public GuiEngine
 
   void _onButtonRepeatTimeOut(TimerEvent* e);
 
-  //SORRY for implementing it in header
-  //but it's currently faster, 'cause it's some type of
-  //prototyping ;-)
-  virtual void startModalWindow(GuiWindow* w) {
-    //TODO: check if it already exists
-    //maybe with a flag within BaseGuiWindow
-    _modal.append(w);
-
-    //EnableWindow((HWND)w->getOwner()->getHandle(),FALSE);
-    w->getOwner()->disable();
-  }
-
-  virtual void endModal(GuiWindow *w) {
-    FOG_ASSERT(w == _modal.at(_modal.getLength()-1));
-    w->setModal(false);
-    _modal.removeAt(_modal.getLength()-1);
-
-    //EnableWindow((HWND)w->getOwner()->getHandle(),TRUE);
-    w->getOwner()->enable();
-    w->releaseOwner();
-  }
-
-  virtual GuiWindow* getModalWindow() {
-    if(_modal.getLength() == 0) {
-      return 0;
-    }
-
-    //always the last modal window is the current modal
-    //window!
-    return _modal.at(_modal.getLength()-1);
-  }
-
-  virtual GuiWindow* getModalBaseWindow() {
-    if(_modal.getLength() == 0) {
-      return 0;
-    }
-
-    //always the last modal window is the current modal
-    //window!
-    return _modal.at(0)->getOwner();
-  }
-
-  virtual void showAllModalWindows(uint32_t visible);
-
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
@@ -195,8 +151,7 @@ struct FOG_API BaseGuiEngine : public GuiEngine
 
   //! @brief Circular list of dirty windows.
   List<BaseGuiWindow*> _dirtyList;
-
-  List<GuiWindow*> _modal;
+  
   //! @brief Display information.
   DisplayInfo _displayInfo;
   //! @brief Palette information.
@@ -282,6 +237,48 @@ struct FOG_API BaseGuiWindow : public GuiWindow
   void closePopUps();
 
   // --------------------------------------------------------------------------
+  // [Modal - Handling]
+  // --------------------------------------------------------------------------
+
+  //SORRY for implementing it in header
+  //but it's currently faster, 'cause it's some type of
+  //prototyping ;-)
+  virtual void startModalWindow(GuiWindow* w) {    
+//     setModal(true);
+//     w->setOwner(this);
+    _modal = w;
+    disable();
+  }
+
+  virtual void endModal(GuiWindow* w) {
+    FOG_ASSERT(w == _modal);
+    w->setModal(false);    
+    enable();
+    w->releaseOwner();
+
+    _modal = 0;
+  }
+
+  virtual GuiWindow* getModalWindow() {
+    if(getOwner()) {
+      return static_cast<BaseGuiWindow*>(getOwner())->_modal;
+    }    
+
+    return 0;
+  }
+
+  virtual GuiWindow* getModalBaseWindow() {
+    GuiWindow* parent = this;
+    while(parent->getOwner()) {
+      parent = parent->getOwner();
+    }
+
+    return parent;
+  }
+
+  virtual void showAllModalWindows(uint32_t visible);
+
+  // --------------------------------------------------------------------------
   // [Dirty]
   // --------------------------------------------------------------------------
 
@@ -300,6 +297,7 @@ protected:
   uint32_t _visibility;
 
   List<Widget*> _popup;
+  GuiWindow* _modal;
 };
 
 } // Fog namespace

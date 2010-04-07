@@ -97,26 +97,9 @@ static LRESULT CALLBACK hwndWndProc(HWND hwnd, UINT message, WPARAM wParam, LPAR
     reinterpret_cast<WinGuiWindow*>(
       GUI_ENGINE()->handleToNative((void*)hwnd));
 
-  if (window)
+  if (window) 
   {
-    GuiWindow* curmodal = GUI_ENGINE()->getModalWindow();
-     if(curmodal) {
-       curmodal = curmodal;
-     }
-//       if(window == curmodal) {
         return window->onWinMsg(hwnd, message, wParam, lParam);
-//       } else {
-//         //set Focus to curmodal!
-//         HWND h = (HWND)curmodal->getHandle();
-//         if(GetFocus() != h) {
-//           SetFocus(h);
-//         }
-//         //eat message
-//         return 0;
-//       }
-//     } else {
-//       return window->onWinMsg(hwnd, message, wParam, lParam);
-//     }
   }
   else
     return DefWindowProc(hwnd, message, wParam, lParam);
@@ -1258,9 +1241,6 @@ err_t WinGuiWindow::clientToWorld(IntPoint* coords)
 void WinGuiWindow::onMousePress(uint32_t button, bool repeated)
 {
   WinGuiEngine* uiSystem = GUI_ENGINE();
-  if(uiSystem->getModalWindow() && uiSystem->getModalWindow() != this) {
-    return;
-  }
 
   if (uiSystem->_systemMouseStatus.uiWindow != this) return;
 
@@ -1275,9 +1255,6 @@ void WinGuiWindow::onMousePress(uint32_t button, bool repeated)
 void WinGuiWindow::onMouseRelease(uint32_t button)
 {
   WinGuiEngine* uiSystem = GUI_ENGINE();
-  if(uiSystem->getModalWindow() && uiSystem->getModalWindow() != this) {
-    return;
-  }
 
   if (uiSystem->_systemMouseStatus.uiWindow != this) return;
 
@@ -1292,8 +1269,12 @@ void WinGuiWindow::onMouseRelease(uint32_t button)
 LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
   WinGuiEngine* uiSystem = GUI_ENGINE();
-  GuiWindow* curmodal = uiSystem->getModalWindow();
-  bool allowinput = !curmodal || ((HWND)curmodal->getHandle() == hwnd);
+  GuiWindow* curmodal = getModalWindow();
+  if(!curmodal) {
+    curmodal = getLastModalWindow();
+  }
+
+  //bool allowinput = !curmodal || ((HWND)curmodal->getHandle() == hwnd);
 
   switch (message)
   { 
@@ -1311,11 +1292,13 @@ LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
         int command = wParam & 0xfff0;
         if(curmodal) {
           if(command == SC_MINIMIZE) {
-            if(curmodal->getOwner()->getWidget()->getWindowFlags() & WINDOW_MINIMIZE) {
-              GuiWindow* parent = uiSystem->getModalBaseWindow();
-              uiSystem->showAllModalWindows(WIDGET_HIDDEN_BY_PARENT);
+            GuiWindow* parent = getModalBaseWindow();
+
+            if(parent->getWidget()->getWindowFlags() & WINDOW_MINIMIZE) {              
+              curmodal->showAllModalWindows(WIDGET_HIDDEN_BY_PARENT);
               parent->enable();
               parent->getWidget()->show(WIDGET_VISIBLE_MINIMIZED);
+              parent->setLastModalWindow(curmodal);
             }
             return 0;
           }
@@ -1368,15 +1351,10 @@ LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
         onVisibility(WIDGET_VISIBLE_MAXIMIZED);
       } else {
         if (!(pos->flags & SWP_NOMOVE) && pos->flags & SWP_FRAMECHANGED && !(pos->flags & SWP_NOSIZE)) {          
-          if(curmodal && !allowinput) {
-            //EnableWindow((HWND)curmodal->getOwner()->getHandle(), FALSE);
-            //make sure a WM_WINDOWPOSCHANGED message is also sent to ModalWidget (for redraw)!
-            uiSystem->showAllModalWindows(WIDGET_VISIBLE_RESTORE);
-
-            //hwnd is always the most toplevel window!
-            //EnableWindow(hwnd, FALSE);          
+          if(curmodal) {            
+            curmodal->showAllModalWindows(WIDGET_VISIBLE_RESTORE);
+            setLastModalWindow(0);
             disable();
-            //SetWindowPos((HWND)curmodal->getHandle(),0,0,0,0,0,SWP_FRAMECHANGED|SWP_NOSIZE|SWP_NOMOVE|SWP_SHOWWINDOW);
           }
 
           onVisibility(WIDGET_VISIBLE_RESTORE);

@@ -55,21 +55,14 @@ GuiWindow::GuiWindow(Widget* widget) :
   _windowRect(0, 0, 1, 1),
   _clientRect(0, 0, 1, 1),
   _owner(NULL),
-  _modal(false)
+  _modal(false),
+  _lastmodal(NULL)
 {
 }
 
 GuiWindow::~GuiWindow()
 {
 
-}
-
-void GuiWindow::minimize() {
-  Application::getInstance()->getGuiEngine()->minimize(this);
-}
-
-void GuiWindow::maximize() {
-  Application::getInstance()->getGuiEngine()->maximize(this);
 }
 
 

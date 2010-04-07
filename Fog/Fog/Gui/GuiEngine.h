@@ -249,16 +249,6 @@ struct FOG_API GuiEngine : public Object
 
 
   // --------------------------------------------------------------------------
-  // [Modal Window Handling]
-  // --------------------------------------------------------------------------
-  virtual void startModalWindow(GuiWindow* w) = 0;
-  virtual void endModal(GuiWindow *w) = 0;
-  virtual GuiWindow* getModalWindow() = 0;
-
-  virtual void minimize(GuiWindow*) = 0;
-  virtual void maximize(GuiWindow*) = 0;
-
-  // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
@@ -365,9 +355,14 @@ struct FOG_API GuiWindow : public Object
 
   FOG_INLINE bool isModal() const { return _modal; }
   FOG_INLINE void setModal(bool b) { _modal = b; }
-  
-  void minimize();
-  void maximize();
+
+  FOG_INLINE void setLastModalWindow(GuiWindow* w) {
+    _lastmodal = w;
+  }
+
+  FOG_INLINE GuiWindow* getLastModalWindow() const {
+    return _lastmodal;
+  }
 
   // --------------------------------------------------------------------------
   // [Owner Handling]
@@ -391,6 +386,14 @@ struct FOG_API GuiWindow : public Object
   virtual void setTransparency(float val) = 0;
 
   // --------------------------------------------------------------------------
+  // [Modal Window Handling]
+  // --------------------------------------------------------------------------
+  virtual void startModalWindow(GuiWindow* w) = 0;
+  virtual void endModal(GuiWindow* w) = 0;
+  virtual GuiWindow* getModalWindow() = 0;
+  virtual void showAllModalWindows(uint32_t visible) = 0;
+
+  // --------------------------------------------------------------------------
   // [Z-Order]
   // --------------------------------------------------------------------------
 
@@ -407,6 +410,7 @@ struct FOG_API GuiWindow : public Object
   Widget* _widget;
 
   GuiWindow* _owner;
+  GuiWindow* _lastmodal;
 
   //! @brief Window handle.
   void* _handle;

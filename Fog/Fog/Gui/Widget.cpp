@@ -183,6 +183,10 @@ err_t Widget::destroyWindow()
 {
   if (!_guiWindow) return ERR_RT_INVALID_HANDLE;
 
+  if(_guiWindow->isModal()) {
+    Application::getInstance()->getGuiEngine()->endModal(_guiWindow);
+  }
+
   delete _guiWindow;
   _guiWindow = NULL;
   return true;
@@ -617,14 +621,21 @@ void Widget::setVisible(uint32_t val)
     _fullscreendata = new(std::nothrow) FullScreenData;
     _fullscreendata->_restorewindowFlags = _windowFlags;
     _fullscreendata->_restoregeometry = _guiWindow->_windowRect;
+    _fullscreendata->_restoretransparency = _transparency;
 
     GuiEngine::DisplayInfo info;
     Application::getInstance()->getGuiEngine()->getDisplayInfo(&info);
-    setWindowFlags(WINDOW_TYPE_FULLSCRREN);
+
+    setWindowFlags(WINDOW_TYPE_FULLSCREEN | getWindowHints());
     setGeometry(IntRect(0,0,info.width, info.height));
   } else if(_visibility == WIDGET_VISIBLE_FULLSCREEN) {
     FOG_ASSERT(_fullscreendata);
     setWindowFlags(_fullscreendata->_restorewindowFlags);
+
+    if(_fullscreendata->_restorewindowFlags & WINDOW_TRANSPARENT) {
+      setTransparency(getTransparency());
+    }
+
     setGeometry(_fullscreendata->_restoregeometry);
 
     delete _fullscreendata;
@@ -635,10 +646,19 @@ void Widget::setVisible(uint32_t val)
   {
     if (val >= WIDGET_VISIBLE_MINIMIZED)
     {
+      if(_guiWindow->isModal() && val != WIDGET_VISIBLE_RESTORE) {
+        Application::getInstance()->getGuiEngine()->startModalWindow(_guiWindow);
+      }
       _guiWindow->show(val);
     }
     else
+    {
+      if(_guiWindow->isModal() && val == WIDGET_HIDDEN) {
+        //only hidden will remove the Modal widget! (WIDGET_HIDDEN_BY_PARENT not!)
+        Application::getInstance()->getGuiEngine()->endModal(_guiWindow);
+      }
       _guiWindow->hide();
+    }
   }
   else
   {
@@ -646,6 +666,10 @@ void Widget::setVisible(uint32_t val)
     if (!ge) return;
 
     ge->dispatchVisibility(this, val);
+  }
+
+  if(val == WIDGET_VISIBLE_RESTORE) {
+    val = WIDGET_VISIBLE;
   }
 
   _visibility = val;

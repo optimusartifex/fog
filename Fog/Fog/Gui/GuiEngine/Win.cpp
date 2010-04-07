@@ -100,21 +100,23 @@ static LRESULT CALLBACK hwndWndProc(HWND hwnd, UINT message, WPARAM wParam, LPAR
   if (window)
   {
     GuiWindow* curmodal = GUI_ENGINE()->getModalWindow();
-    if(curmodal) {
-      if(window == curmodal) {
+     if(curmodal) {
+       curmodal = curmodal;
+     }
+//       if(window == curmodal) {
         return window->onWinMsg(hwnd, message, wParam, lParam);
-      } else {
-        //set Focus to curmodal!
-        HWND h = (HWND)curmodal->getHandle();
-        if(GetFocus() != h) {
-          SetFocus(h);
-        }
-        //eat message
-        return 0;
-      }
-    } else {
-      return window->onWinMsg(hwnd, message, wParam, lParam);
-    }
+//       } else {
+//         //set Focus to curmodal!
+//         HWND h = (HWND)curmodal->getHandle();
+//         if(GetFocus() != h) {
+//           SetFocus(h);
+//         }
+//         //eat message
+//         return 0;
+//       }
+//     } else {
+//       return window->onWinMsg(hwnd, message, wParam, lParam);
+//     }
   }
   else
     return DefWindowProc(hwnd, message, wParam, lParam);
@@ -332,6 +334,15 @@ WinGuiEngine::~WinGuiEngine()
   // UnregisterClassW(L"Fog_Popup", hInstance);
   // UnregisterClassW(L"Fog_Dialog", hInstance);
   // UnregisterClassW(L"Fog_Tool", hInstance);
+}
+
+void WinGuiEngine::minimize(GuiWindow* w) {
+  //ShowWindow((HWND)w->getHandle(),SW_MINIMIZE);
+  w->getWidget()->show(WIDGET_VISIBLE_MINIMIZED);
+}
+
+void WinGuiEngine::maximize(GuiWindow* w) {
+  w->getWidget()->show(WIDGET_VISIBLE_MAXIMIZED);  
 }
 
 // ============================================================================
@@ -755,9 +766,9 @@ WinGuiWindow::~WinGuiWindow()
 
 void WinGuiWindow::moveToTop(GuiWindow* w) {  
   if(w) {
-    SetWindowPos((HWND)getHandle(),(HWND)w->getHandle(),0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE);
+    SetWindowPos((HWND)getHandle(),(HWND)w->getHandle(),0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE|SWP_NOCOPYBITS|SWP_NOREDRAW);
   } else {
-    SetWindowPos((HWND)getHandle(),HWND_TOP,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE);
+    SetWindowPos((HWND)getHandle(),HWND_TOP,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE|SWP_NOCOPYBITS|SWP_NOREDRAW);
   }
 
   if(_widget) {
@@ -784,14 +795,6 @@ void WinGuiWindow::moveToBottom(GuiWindow* w) {
   }
 }
 
-void WinGuiWindow::setOwner(GuiWindow* w) {
-  if(w) {
-    SetParent((HWND)getHandle(), (HWND)w->getHandle());
-  } else {
-    SetParent((HWND)getHandle(), 0);
-  }
-}
-
 void WinGuiWindow::setTransparency(float val) {
   //LWA_COLORKEY
   SetLayeredWindowAttributes((HWND)getHandle(),0,(int)(255 * val),LWA_ALPHA);
@@ -808,7 +811,10 @@ void WinGuiWindow::calculateStyleFlags(uint32_t flags, DWORD& style, DWORD& exst
   {
     style = WS_POPUP;
     exstyle = WS_EX_TOPMOST;
-    //A popup has no min/max/close/systemmenu
+
+    if(flags & WINDOW_TRANSPARENT) {
+      exstyle |= WS_EX_LAYERED;
+    }
     return;
   }
   else if(flags & WINDOW_NATIVE) 
@@ -932,6 +938,7 @@ err_t WinGuiWindow::create(uint32_t flags)
 
     //just update window with new styles
     DWORD style = GetWindowLong((HWND)_handle,GWL_STYLE);
+    DWORD exstyle = GetWindowLong((HWND)_handle,GWL_EXSTYLE);
 
     //it's much easier to first remove all possible flags
     //and then create a complete new flag and or it with the clean old one
@@ -941,8 +948,16 @@ err_t WinGuiWindow::create(uint32_t flags)
     SetWindowLong((HWND)_handle,GWL_EXSTYLE,dwStyleEx);
     doSystemMenu(flags);
 
+    if((exstyle & WS_EX_LAYERED) != 0) {
+      if(flags & WINDOW_TRANSPARENT) {
+        setTransparency(_widget->getTransparency());
+      }
+    }
+
     //not needed, if we hide/show
     SetWindowPos((HWND)_handle, 0,0,0,0,0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+    // Ask the window and its children to repaint
+    //RedrawWindow((HWND)_handle, NULL, NULL, RDW_ERASE | RDW_INVALIDATE | RDW_FRAME);
 
 //     show();
 //     UpdateWindow((HWND)_handle);
@@ -1042,7 +1057,11 @@ err_t WinGuiWindow::enable()
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
-  if (!_enabled) EnableWindow((HWND)_handle, TRUE);
+  if (!_enabled)
+  {
+    _enabled = true;
+    EnableWindow((HWND)_handle, TRUE);
+  }
   return ERR_OK;
 }
 
@@ -1050,7 +1069,11 @@ err_t WinGuiWindow::disable()
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
-  if (_enabled) EnableWindow((HWND)_handle, FALSE);
+  if (_enabled) 
+  {
+    EnableWindow((HWND)_handle, FALSE);
+    _enabled = false;
+  }
   return ERR_OK;
 }
 
@@ -1059,8 +1082,14 @@ err_t WinGuiWindow::show(uint32_t state)
   if (!_handle) return ERR_RT_INVALID_HANDLE;
   if(state == WIDGET_VISIBLE) 
   {
-    if(!IsZoomed((HWND)_handle) && !IsIconic((HWND)_handle) && !IsWindowVisible((HWND)_handle)) 
+    //!IsZoomed((HWND)_handle) && !IsIconic((HWND)_handle) && 
+    //if(!IsWindowVisible((HWND)_handle)) {
       ShowWindow((HWND)_handle, SW_SHOW);
+    //}
+  } 
+  else if(state == WIDGET_VISIBLE_RESTORE) 
+  {
+    ShowWindow((HWND)_handle, SW_RESTORE);   
   }
   else if(state == WIDGET_VISIBLE_MAXIMIZED)
   {            
@@ -1094,7 +1123,7 @@ err_t WinGuiWindow::hide()
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
-  if (!IsWindowVisible((HWND)_handle)) 
+  if (IsWindowVisible((HWND)_handle)) 
   {
     ShowWindow((HWND)_handle, SW_HIDE);
   }
@@ -1229,6 +1258,10 @@ err_t WinGuiWindow::clientToWorld(IntPoint* coords)
 void WinGuiWindow::onMousePress(uint32_t button, bool repeated)
 {
   WinGuiEngine* uiSystem = GUI_ENGINE();
+  if(uiSystem->getModalWindow() && uiSystem->getModalWindow() != this) {
+    return;
+  }
+
   if (uiSystem->_systemMouseStatus.uiWindow != this) return;
 
   if (uiSystem->_systemMouseStatus.buttons == 0 && !repeated)
@@ -1242,6 +1275,10 @@ void WinGuiWindow::onMousePress(uint32_t button, bool repeated)
 void WinGuiWindow::onMouseRelease(uint32_t button)
 {
   WinGuiEngine* uiSystem = GUI_ENGINE();
+  if(uiSystem->getModalWindow() && uiSystem->getModalWindow() != this) {
+    return;
+  }
+
   if (uiSystem->_systemMouseStatus.uiWindow != this) return;
 
   if ((uiSystem->_systemMouseStatus.buttons & ~button) == 0)
@@ -1255,19 +1292,36 @@ void WinGuiWindow::onMouseRelease(uint32_t button)
 LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
   WinGuiEngine* uiSystem = GUI_ENGINE();
+  GuiWindow* curmodal = uiSystem->getModalWindow();
+  bool allowinput = !curmodal || ((HWND)curmodal->getHandle() == hwnd);
 
   switch (message)
-  {
+  { 
     case WM_NCHITTEST:
       //Very easy way to allow dragging/resizing of a window 
       //usefull for our own window manager. So we don't need to write our own
       //dragging/resizeing methods!
-      //http://msdn.microsoft.com/en-us/library/ms645618%28VS.85%29.aspx      
+      //http://msdn.microsoft.com/en-us/library/ms645618%28VS.85%29.aspx   
+//       if(!allowinput) {
+//         return HTNOWHERE;
+//       }
       goto defWindowProc;
     case WM_SYSCOMMAND:
       {
-        if(!getWidget()->isDragAble()) {
-          int command = wParam & 0xfff0;
+        int command = wParam & 0xfff0;
+        if(curmodal) {
+          if(command == SC_MINIMIZE) {
+            if(curmodal->getOwner()->getWidget()->getWindowFlags() & WINDOW_MINIMIZE) {
+              GuiWindow* parent = uiSystem->getModalBaseWindow();
+              uiSystem->showAllModalWindows(WIDGET_HIDDEN_BY_PARENT);
+              parent->enable();
+              parent->getWidget()->show(WIDGET_VISIBLE_MINIMIZED);
+            }
+            return 0;
+          }
+        }
+        
+        if(!getWidget()->isDragAble()) {          
           if (command == SC_MOVE) 
           {
             //do not allow to move
@@ -1278,8 +1332,12 @@ LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
         goto defWindowProc;
       }
     case WM_WINDOWPOSCHANGING:
-      //interessting for min/max layout! (we can reset size)
-      goto defWindowProc;
+      {
+        //interessting for min/max size layout! (we can reset size)
+        WINDOWPOS *pos = (WINDOWPOS*)lParam;
+        goto defWindowProc;
+      }      
+
     case WM_WINDOWPOSCHANGED:
     {
       //Handles everything within here -> no need for WM_MOVE, WM_SIZE, WM_SHOWWINDOW
@@ -1292,7 +1350,11 @@ LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
         onVisibility(WIDGET_VISIBLE);
         return 0;
       } else if (pos->flags & SWP_HIDEWINDOW) {
-        onVisibility(WIDGET_HIDDEN);
+        //We need to enable Owner-Window to be able to restore it again
+        if(!curmodal) {
+          onVisibility(WIDGET_HIDDEN);
+        }
+        
         return 0;
       }
 
@@ -1305,8 +1367,22 @@ LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
         //window_maximized
         onVisibility(WIDGET_VISIBLE_MAXIMIZED);
       } else {
-        if (!(pos->flags & SWP_NOMOVE) && pos->flags & SWP_FRAMECHANGED && !(pos->flags & SWP_NOSIZE)) {
-          onVisibility(WIDGET_VISIBLE);
+        if (!(pos->flags & SWP_NOMOVE) && pos->flags & SWP_FRAMECHANGED && !(pos->flags & SWP_NOSIZE)) {          
+          if(curmodal && !allowinput) {
+            //EnableWindow((HWND)curmodal->getOwner()->getHandle(), FALSE);
+            //make sure a WM_WINDOWPOSCHANGED message is also sent to ModalWidget (for redraw)!
+            uiSystem->showAllModalWindows(WIDGET_VISIBLE_RESTORE);
+
+            //hwnd is always the most toplevel window!
+            //EnableWindow(hwnd, FALSE);          
+            disable();
+            //SetWindowPos((HWND)curmodal->getHandle(),0,0,0,0,0,SWP_FRAMECHANGED|SWP_NOSIZE|SWP_NOMOVE|SWP_SHOWWINDOW);
+          }
+
+          onVisibility(WIDGET_VISIBLE_RESTORE);
+          
+          //No Configure needed!
+          //return 0;
         }
       }
 

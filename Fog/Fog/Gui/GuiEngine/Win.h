@@ -53,6 +53,9 @@ struct FOG_API WinGuiEngine : public BaseGuiEngine
   virtual GuiWindow* createGuiWindow(Widget* widget);
   virtual void destroyGuiWindow(GuiWindow* native);
 
+  virtual void minimize(GuiWindow*);
+  virtual void maximize(GuiWindow*);
+
   // --------------------------------------------------------------------------
   // [Windows Specific]
   // --------------------------------------------------------------------------
@@ -136,7 +139,6 @@ struct FOG_API WinGuiWindow : public BaseGuiWindow
   //Move Window behind other Window! (If w == 0 Move behind all Windows of screen)
   virtual void moveToBottom(GuiWindow* w=0);
 
-  virtual void setOwner(GuiWindow* w=0);
   virtual void setTransparency(float val);
 
   // --------------------------------------------------------------------------

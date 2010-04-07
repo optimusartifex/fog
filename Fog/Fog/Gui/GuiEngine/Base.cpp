@@ -76,6 +76,13 @@ BaseGuiEngine::~BaseGuiEngine()
   if (_updateStatus.task) _updateStatus.task->cancel();
 }
 
+
+void BaseGuiEngine::showAllModalWindows(uint32_t visible) {
+  for(int i=0;i<_modal.getLength();++i) {
+    _modal.at(i)->getWidget()->show(visible);
+  }
+}
+
 // ============================================================================
 // [Fog::BaseGuiEngine - ID <-> GuiWindow]
 // ============================================================================
@@ -418,6 +425,9 @@ void BaseGuiEngine::dispatchVisibility(Widget* w, uint32_t visible)
   uint32_t visibility = w->getVisibility();
   if(visibility == visible) return;
 
+  GuiEngine* uiSystem = Application::getInstance()->getGuiEngine();
+  GuiWindow* modalWindow = uiSystem->getModalWindow();
+
   // Dispatch 'Show'.
   if (visible >= WIDGET_VISIBLE)
   {
@@ -451,10 +461,6 @@ void BaseGuiEngine::dispatchVisibility(Widget* w, uint32_t visible)
         // after traverse
       {}
       );
-    }
-
-    if(w->getGuiWindow() && w->getGuiWindow()->isModal()) {      
-      startModalWindow(w->getGuiWindow());
     }
 
     w->update(WIDGET_UPDATE_ALL);
@@ -494,14 +500,16 @@ void BaseGuiEngine::dispatchVisibility(Widget* w, uint32_t visible)
         }
       );
 
-      if(w->getGuiWindow() && w->getGuiWindow()->isModal()) {
-        endModal(w->getGuiWindow());
-      }
-
       Widget* p = w->getParent();
       if (p) p->update(WIDGET_UPDATE_ALL);
     }
   }
+
+  if(visible == WIDGET_VISIBLE_RESTORE) {
+    visible = WIDGET_VISIBLE;
+  }
+
+  w->_visibility = visible;
 }
 
 void BaseGuiEngine::dispatchConfigure(Widget* w, const IntRect& rect, bool changedOrientation)
@@ -1068,7 +1076,7 @@ void BaseGuiWindow::onEnabled(bool enabled)
 
 void BaseGuiWindow::onVisibility(uint32_t visible)
 {
-  _visible = visible;
+  _visible = visible >= WIDGET_VISIBLE;
 
   GUI_ENGINE()->dispatchVisibility(_widget, visible);
 }

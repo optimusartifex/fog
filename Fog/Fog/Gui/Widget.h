@@ -611,6 +611,7 @@ protected:
     IntRect _restoregeometry;
     //! @brief Window Style for restoration of fullscreen
     uint32_t _restorewindowFlags;
+    float _restoretransparency;
   };
 
   //! @brief Will set/unset a window flag and update the window if specified

@@ -27,6 +27,48 @@ struct MyPopUp : public Widget {
   }
 };
 
+
+struct MyModalWindow : public Window {
+  MyModalWindow(int x) : Window(WINDOW_TYPE_DEFAULT), _x(x) {
+    Button* button5 = new Button();
+    add(button5);
+    button5->setGeometry(IntRect(40, 200, 100, 20));
+    button5->setText(Ascii8("Test ModalWindow"));
+    button5->show();  
+    button5->addListener(EVENT_CLICK, this, &MyModalWindow::onModalTestClick);
+  }
+
+  void onModalTestClick(MouseEvent* e) {
+    _modalwindow = new MyModalWindow(_x+1);
+    _modalwindow->setSize(IntSize(200,300));
+    _modalwindow->addListener(EVENT_CLOSE, this, &MyModalWindow::onModalClose);
+    _modalwindow->showModal(getGuiWindow());
+  }
+
+  void onModalClose() {
+    _modalwindow->hide();
+    //_modalwindow->destroy();
+    _modalwindow = 0;
+  }
+
+  virtual void onPaint(PaintEvent* e)
+  {
+    Painter* p = e->getPainter();
+    p->setOperator(OPERATOR_SRC);
+    // Clear everything to white.
+    p->setSource(Argb(0xFF000000));
+    p->clear();
+
+    p->setSource(Argb(0xFFFFFFFF));
+    String s;
+    s.format("MODAL DIALOG NO: %i", _x);
+    p->drawText(IntPoint(0,0),s,getFont());
+  }
+
+  int _x;
+  MyModalWindow* _modalwindow;
+};
+
 struct MyWindow : public Window
 {
   // [Fog Object System]
@@ -50,7 +92,22 @@ struct MyWindow : public Window
       setWindowTitle(Ascii8("STATE: MINIMIZED"));
     } else if(vis == WIDGET_HIDDEN){
       setWindowTitle(Ascii8("STATE: HIDDEN"));
-    }    
+    } else if(vis == WIDGET_VISIBLE_RESTORE){
+      setWindowTitle(Ascii8("STATE: RESTORED"));
+    }   
+  }
+
+  void onModalClose() {
+    _modalwindow->hide();
+    _modalwindow->destroy();
+    _modalwindow = 0;
+  }
+
+  void onModalTestClick(MouseEvent* e) {
+    _modalwindow = new MyModalWindow(_mcount);
+    _modalwindow->setSize(IntSize(200,300));
+    _modalwindow->addListener(EVENT_CLOSE, this, &MyWindow::onModalClose);
+    _modalwindow->showModal(getGuiWindow());
   }
 
   void onPopUpClick(MouseEvent* e) {
@@ -70,7 +127,7 @@ struct MyWindow : public Window
   void onFullScreenClick(MouseEvent* e) {
     if(isFullScreen()) {
       show();
-    } else {
+    } else {      
       show(WIDGET_VISIBLE_FULLSCREEN);
     }
   }
@@ -96,6 +153,8 @@ struct MyWindow : public Window
   int _spread;
 
   Widget* _popup;
+  int _mcount;
+  MyModalWindow* _modalwindow;
 };
 
 FOG_IMPLEMENT_OBJECT(MyWindow)
@@ -110,6 +169,8 @@ MyWindow::MyWindow(uint32_t createFlags) :
 
   i[0].convert(PIXEL_FORMAT_ARGB32);
   i[1].convert(PIXEL_FORMAT_ARGB32);
+
+  _mcount = 0;
 
 /*
   {
@@ -161,6 +222,13 @@ MyWindow::MyWindow(uint32_t createFlags) :
   button4->setText(Ascii8("Test FrameChange"));
   button4->show();  
   button4->addListener(EVENT_CLICK, this, &MyWindow::onFrameTestClick);
+
+  Button* button5 = new Button();
+  add(button5);
+  button5->setGeometry(IntRect(40, 200, 100, 20));
+  button5->setText(Ascii8("Test ModalWindow"));
+  button5->show();  
+  button5->addListener(EVENT_CLICK, this, &MyWindow::onModalTestClick);
 
   _popup = new MyPopUp();
   add(_popup);
@@ -237,6 +305,20 @@ void MyWindow::onKeyPress(KeyEvent* e)
 
 void MyWindow::onPaint(PaintEvent* e)
 {
+  uint32_t vis = getVisibility();
+
+  if(vis == WIDGET_VISIBLE) {
+    setWindowTitle(Ascii8("STATE: VISIBLE"));
+  } else if(vis == WIDGET_VISIBLE_MAXIMIZED){
+    setWindowTitle(Ascii8("STATE: MAXIMIZED"));
+  } else if(vis == WIDGET_VISIBLE_MINIMIZED){
+    setWindowTitle(Ascii8("STATE: MINIMIZED"));
+  } else if(vis == WIDGET_HIDDEN){
+    setWindowTitle(Ascii8("STATE: HIDDEN"));
+  } else if(vis == WIDGET_VISIBLE_RESTORE){
+    setWindowTitle(Ascii8("STATE: RESTORED"));
+  }
+
   TimeTicks ticks = TimeTicks::highResNow();
   Painter* p = e->getPainter();
 

@@ -255,6 +255,9 @@ struct FOG_API GuiEngine : public Object
   virtual void endModal(GuiWindow *w) = 0;
   virtual GuiWindow* getModalWindow() = 0;
 
+  virtual void minimize(GuiWindow*) = 0;
+  virtual void maximize(GuiWindow*) = 0;
+
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
@@ -362,7 +365,9 @@ struct FOG_API GuiWindow : public Object
 
   FOG_INLINE bool isModal() const { return _modal; }
   FOG_INLINE void setModal(bool b) { _modal = b; }
-
+  
+  void minimize();
+  void maximize();
 
   // --------------------------------------------------------------------------
   // [Owner Handling]
@@ -370,7 +375,18 @@ struct FOG_API GuiWindow : public Object
 
   //SetOwner not only set the member variable
   //It should also do the z-order work of window manager!
-  virtual void setOwner(GuiWindow* w) = 0;
+  virtual void setOwner(GuiWindow* w) {
+    _owner = w;
+    //always set owner to toplevel window!
+    GuiWindow* parent = _owner;
+    SetWindowLong((HWND)getHandle(),GWLP_HWNDPARENT, (LONG)parent->getHandle());
+  }
+
+  virtual void releaseOwner() {
+    SetWindowLong((HWND)getHandle(),GWLP_HWNDPARENT, (LONG)0);
+    _owner = 0;
+  }
+
   FOG_INLINE GuiWindow* getOwner() const { return _owner; }
   virtual void setTransparency(float val) = 0;
 

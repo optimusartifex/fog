@@ -5,6 +5,7 @@
 
 // [Dependencies]
 #include <Fog/Gui/GuiEngine.h>
+#include <Fog/Core/Application.h>
 
 FOG_IMPLEMENT_OBJECT(Fog::GuiEngine)
 FOG_IMPLEMENT_OBJECT(Fog::GuiWindow)
@@ -60,7 +61,17 @@ GuiWindow::GuiWindow(Widget* widget) :
 
 GuiWindow::~GuiWindow()
 {
+
 }
+
+void GuiWindow::minimize() {
+  Application::getInstance()->getGuiEngine()->minimize(this);
+}
+
+void GuiWindow::maximize() {
+  Application::getInstance()->getGuiEngine()->maximize(this);
+}
+
 
 // ============================================================================
 // [Fog::GuiBackBuffer]

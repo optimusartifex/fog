@@ -240,33 +240,23 @@ struct FOG_API BaseGuiWindow : public GuiWindow
   // [Modal - Handling]
   // --------------------------------------------------------------------------
 
-  //SORRY for implementing it in header
-  //but it's currently faster, 'cause it's some type of
-  //prototyping ;-)
   virtual void startModalWindow(GuiWindow* w) {    
-//     setModal(true);
-//     w->setOwner(this);
     _modal = w;
     disable();
   }
 
   virtual void endModal(GuiWindow* w) {
     FOG_ASSERT(w == _modal);
-    w->setModal(false);    
+    w->setModal(MODAL_NONE);
     enable();
     w->releaseOwner();
 
     _modal = 0;
   }
 
-  virtual GuiWindow* getModalWindow() {
-    if(getOwner()) {
-      return static_cast<BaseGuiWindow*>(getOwner())->_modal;
-    }    
-
-    return 0;
-  }
-
+  //returns the first window, which is not modal!
+  //On windows this is needed to minimize this window
+  //instead of only minimize the modal window
   virtual GuiWindow* getModalBaseWindow() {
     GuiWindow* parent = this;
     while(parent->getOwner()) {
@@ -276,6 +266,7 @@ struct FOG_API BaseGuiWindow : public GuiWindow
     return parent;
   }
 
+  //show/hide/maximize/minimize all Modal-Windows
   virtual void showAllModalWindows(uint32_t visible);
 
   // --------------------------------------------------------------------------
@@ -297,7 +288,6 @@ protected:
   uint32_t _visibility;
 
   List<Widget*> _popup;
-  GuiWindow* _modal;
 };
 
 } // Fog namespace

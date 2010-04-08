@@ -130,6 +130,18 @@ struct FOG_API WinGuiWindow : public BaseGuiWindow
   virtual err_t worldToClient(IntPoint* coords);
   virtual err_t clientToWorld(IntPoint* coords);
 
+
+  virtual void setOwner_sys() {
+    //always set owner to toplevel window!
+    SetWindowLong((HWND)getHandle(),GWLP_HWNDPARENT, (LONG)_owner->getHandle());
+  }
+
+  virtual void releaseOwner_sys() {
+    SetWindowLong((HWND)getHandle(),GWLP_HWNDPARENT, (LONG)0);
+    SetActiveWindow((HWND)_owner->getHandle());
+    SetForegroundWindow((HWND)_owner->getHandle());
+  }
+
   // --------------------------------------------------------------------------
   // [Z-Order]
   // --------------------------------------------------------------------------

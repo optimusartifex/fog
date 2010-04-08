@@ -157,6 +157,14 @@ enum FOCUS_POLICY
   FOCUS_WHEEL = FOCUS_STRONG | FOCUS_MASK_WHEEL
 };
 
+//! @brief Focus policy
+enum MODAL_POLICY
+{
+  MODAL_NONE = 0,
+  MODAL_WINDOW = 1,
+  MODAL_APPLICATION = 2
+};
+
 // ============================================================================
 // [Fog::LAYOUT_POLICY]
 // ============================================================================

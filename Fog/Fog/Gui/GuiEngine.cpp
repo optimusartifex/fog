@@ -55,7 +55,8 @@ GuiWindow::GuiWindow(Widget* widget) :
   _windowRect(0, 0, 1, 1),
   _clientRect(0, 0, 1, 1),
   _owner(NULL),
-  _modal(false),
+  _modalpolicy(MODAL_NONE),
+  _modal(0),
   _lastmodal(NULL)
 {
 }

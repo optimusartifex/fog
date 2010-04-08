@@ -1042,7 +1042,7 @@ err_t WinGuiWindow::enable()
 
   if (!_enabled)
   {
-    _enabled = true;
+    //_enabled = true;
     EnableWindow((HWND)_handle, TRUE);
   }
   return ERR_OK;
@@ -1055,7 +1055,7 @@ err_t WinGuiWindow::disable()
   if (_enabled) 
   {
     EnableWindow((HWND)_handle, FALSE);
-    _enabled = false;
+    //_enabled = false;
   }
   return ERR_OK;
 }
@@ -1269,10 +1269,8 @@ void WinGuiWindow::onMouseRelease(uint32_t button)
 LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
   WinGuiEngine* uiSystem = GUI_ENGINE();
-  GuiWindow* curmodal = getModalWindow();
-  if(!curmodal) {
-    curmodal = getLastModalWindow();
-  }
+  //TODO:check GuiEngine for modal widget!
+  GuiWindow* curmodal = isModal() ? this : 0;
 
   //bool allowinput = !curmodal || ((HWND)curmodal->getHandle() == hwnd);
 
@@ -1292,13 +1290,26 @@ LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
         int command = wParam & 0xfff0;
         if(curmodal) {
           if(command == SC_MINIMIZE) {
+            //get parent of all modal windows (first parent without modal flag)
             GuiWindow* parent = getModalBaseWindow();
 
-            if(parent->getWidget()->getWindowFlags() & WINDOW_MINIMIZE) {              
+            if(parent->getWidget()->getWindowFlags() & WINDOW_MINIMIZE) {
+              //hide all modal windows
+              //this is because else the system will not move the owned
+              //child to taskbar. It only minimize it to the owner-window
               curmodal->showAllModalWindows(WIDGET_HIDDEN_BY_PARENT);
+              //we need to enable the parent, else it can not be activated
+              //using click in taskbar
               parent->enable();
+              //hide our parent widget
               parent->getWidget()->show(WIDGET_VISIBLE_MINIMIZED);
+              //set temporary variable to this, so we can use it later
+              //to show all widgets again!
               parent->setLastModalWindow(curmodal);
+            } else {
+              //if the parent could not be minimized, the modal window also
+              //could not be minimized
+              MessageBeep(0xFFFFFFFF);
             }
             return 0;
           }
@@ -1313,6 +1324,11 @@ LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
         }
 
         goto defWindowProc;
+      }
+    case WM_ENABLE:
+      {
+        onEnabled(wParam==TRUE);
+        return 0;
       }
     case WM_WINDOWPOSCHANGING:
       {
@@ -1343,24 +1359,34 @@ LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
 
       if(IsIconic(hwnd) && (pos->flags & SWP_FRAMECHANGED)) {        
         //window_minimized
-        //TODO: make sure that M$ damaged position on minimize isn't a problem!
-        //We may not send the onConfiguration then...
         onVisibility(WIDGET_VISIBLE_MINIMIZED);
+        //no configuration change needed! 
+        return 0;
       } else if(IsZoomed(hwnd) && (pos->flags & SWP_FRAMECHANGED)) {
         //window_maximized
-        onVisibility(WIDGET_VISIBLE_MAXIMIZED);
+        onVisibility(WIDGET_VISIBLE_MAXIMIZED);        
       } else {
-        if (!(pos->flags & SWP_NOMOVE) && pos->flags & SWP_FRAMECHANGED && !(pos->flags & SWP_NOSIZE)) {          
-          if(curmodal) {            
+        if (!(pos->flags & SWP_NOMOVE) && pos->flags & SWP_FRAMECHANGED && !(pos->flags & SWP_NOSIZE)) {
+          //should always be NULL but who knows?
+          if(!curmodal) {
+            //only for the case of minimized modal widgets we need
+            //a pointer to last modal window on stack to be able 
+            //to show all modal widgets on 'restore' again (single linked list)
+            curmodal = getLastModalWindow();
+          }
+          
+          bool mini= getWidget()->getVisibility() == WIDGET_VISIBLE_MINIMIZED;
+
+          if(curmodal && mini) {
             curmodal->showAllModalWindows(WIDGET_VISIBLE_RESTORE);
             setLastModalWindow(0);
             disable();
           }
 
+          //TODO: Is it important to know, if it is a change from minimize to normal
+          //or from maximize to normal?
+          //Current answer: not of interested
           onVisibility(WIDGET_VISIBLE_RESTORE);
-          
-          //No Configure needed!
-          //return 0;
         }
       }
 

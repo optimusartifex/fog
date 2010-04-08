@@ -184,7 +184,6 @@ err_t Widget::destroyWindow()
   if (!_guiWindow) return ERR_RT_INVALID_HANDLE;
 
   if(_guiWindow->isModal()) {
-    //Application::getInstance()->getGuiEngine()->endModal();
     _guiWindow->getOwner()->endModal(_guiWindow);
   }
 
@@ -657,7 +656,6 @@ void Widget::setVisible(uint32_t val)
     {
       if(_guiWindow->isModal() && val == WIDGET_HIDDEN) {
         //only hidden will remove the Modal widget! (WIDGET_HIDDEN_BY_PARENT not!)
-        //Application::getInstance()->getGuiEngine()->endModal(_guiWindow);
         _guiWindow->getOwner()->endModal(_guiWindow);
       }
       _guiWindow->hide();
@@ -701,9 +699,9 @@ void Widget::setTransparency(float val) {
 void Widget::showModal(GuiWindow* owner) {
   if(_guiWindow) {
     //Only TopLevel Windows may be modal!    
-    _guiWindow->setModal(true);
-    _guiWindow->setOwner(owner);    
+    _guiWindow->setModal(MODAL_WINDOW);
     //This will implicitly set this window above owner window!
+    _guiWindow->setOwner(owner);    
     setVisible(WIDGET_VISIBLE);
   }
 }

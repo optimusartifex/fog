@@ -1034,7 +1034,6 @@ void BaseGuiEngine::_onButtonRepeatTimeOut(TimerEvent* e)
 
 BaseGuiWindow::BaseGuiWindow(Widget* widget) :
   GuiWindow(widget),
-  _modal(NULL),
   _sizeGranularity(1, 1)
 {
 }
@@ -1063,7 +1062,7 @@ void BaseGuiWindow::showAllModalWindows(uint32_t visible) {
     parent = parent->getOwner();
   }
 
-  //To get the focus to me
+  //If show, to focus will be at this window!
   getWidget()->show(visible);
 }
 
@@ -1074,13 +1073,17 @@ void BaseGuiWindow::showAllModalWindows(uint32_t visible) {
 void BaseGuiWindow::onEnabled(bool enabled)
 {
   _enabled = enabled;
-  GUI_ENGINE()->dispatchEnabled(_widget, enabled);
+  //Question: dispatch disable-events during modality?
+  //current answer: No, because it is an indirect disable
+  //and should not be changed/react by application!
+  if(_modal == 0) {
+    GUI_ENGINE()->dispatchEnabled(_widget, enabled);
+  }
 }
 
 void BaseGuiWindow::onVisibility(uint32_t visible)
 {
   _visible = visible >= WIDGET_VISIBLE;
-
   GUI_ENGINE()->dispatchVisibility(_widget, visible);
 }
 
@@ -1189,7 +1192,7 @@ void BaseGuiWindow::onMouseLeave(int x, int y)
     Widget* w = uiSystem->_mouseStatus.widget;
 
     uiSystem->_mouseStatus.widget = NULL;
-    uiSystem->_mouseStatus.position.set(-1, -1);;
+    uiSystem->_mouseStatus.position.set(-1, -1);
     uiSystem->_mouseStatus.valid = 1;
     uiSystem->_mouseStatus.buttons = 0;
     uiSystem->_mouseStatus.hover = 0;

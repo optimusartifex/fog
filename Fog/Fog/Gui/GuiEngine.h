@@ -215,7 +215,7 @@ struct FOG_API GuiEngine : public Object
   // --------------------------------------------------------------------------
 
   virtual void dispatchEnabled(Widget* w, bool enabled) = 0;
-  virtual void dispatchVisibility(Widget* w, bool visible) = 0;
+  virtual void dispatchVisibility(Widget* w, uint32_t visible) = 0;
   virtual void dispatchConfigure(Widget* w, const IntRect& rect, bool changedOrientation) = 0;
 
   //! @brief Called by widget destructor to erase all links to the widget from UIEngine.
@@ -247,6 +247,34 @@ struct FOG_API GuiEngine : public Object
   virtual GuiWindow* createGuiWindow(Widget* widget) = 0;
   virtual void destroyGuiWindow(GuiWindow* native) = 0;
 
+
+  // --------------------------------------------------------------------------
+  // [Modality]
+  // --------------------------------------------------------------------------
+
+/*
+  //!@brief makes the GuiWindow to be shown as Modal window in front of this window
+  virtual void startModalWindow(GuiWindow* w) = 0;
+  //!@brief The modal GuiWindow is being closed, so the modality should be removed
+  virtual void endModal(GuiWindow* w) = 0;
+  //!@brief call show(visible) on all modal windows on the stack (last to first)
+  virtual void showAllModalWindows(uint32_t visible) = 0;
+
+  //!@brief tmp variable to set the last modal window int the stack
+  //! so we can iterate the modal stack from behind again (without double linked list)
+  FOG_INLINE void setLastModalWindow(GuiWindow* w) {
+    _lastmodal = w;
+  }
+  FOG_INLINE GuiWindow* getLastModalWindow() const {
+    return _lastmodal;
+  }
+  //!@brief returns the current modalWindow
+  GuiWindow* getModalWindow() const {
+    return _modal;
+  }*/
+
+
+
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
@@ -260,6 +288,10 @@ protected:
 
   //! @brief Whether UIEngine is correctly initialized.
   bool _initialized;
+
+  GuiWindow* _modal;
+  GuiWindow* _lastmodal;
+
 
 private:
   friend struct Application;
@@ -290,7 +322,7 @@ struct FOG_API GuiWindow : public Object
   virtual err_t enable() = 0;
   virtual err_t disable() = 0;
 
-  virtual err_t show() = 0;
+  virtual err_t show(uint32_t state) = 0;
   virtual err_t hide() = 0;
   virtual err_t move(const IntPoint& pt) = 0;
   virtual err_t resize(const IntSize& size) = 0;
@@ -315,7 +347,7 @@ struct FOG_API GuiWindow : public Object
   // --------------------------------------------------------------------------
 
   virtual void onEnabled(bool enabled) = 0;
-  virtual void onVisibility(bool visible) = 0;
+  virtual void onVisibility(uint32_t visible) = 0;
 
   virtual void onConfigure(const IntRect& windowRect, const IntRect& clientRect) = 0;
 
@@ -352,6 +384,77 @@ struct FOG_API GuiWindow : public Object
   FOG_INLINE bool isDirty() const { return _isDirty; }
   FOG_INLINE bool hasFocus() const { return _hasFocus; }
 
+  FOG_INLINE bool isModal() const { return _modalpolicy != MODAL_NONE; }
+  FOG_INLINE void setModal(MODAL_POLICY b) { _modalpolicy = b; }
+  FOG_INLINE MODAL_POLICY getModality() const { return _modalpolicy; }
+
+  // --------------------------------------------------------------------------
+  // [Owner Handling]
+  // --------------------------------------------------------------------------
+
+  //SetOwner not only set the member variable
+  //It should also do the z-order work of window manager! (make sure owner is
+  //always behind the child)
+  void setOwner(GuiWindow* w) {    
+    _owner = w;
+    setOwner_sys();
+  }
+
+  //releases the owner from the child window
+  //and makes sure the owner will get the focus
+  void releaseOwner() {
+    releaseOwner_sys();
+    _owner = 0;
+  }
+
+  virtual void setOwner_sys() = 0;
+  virtual void releaseOwner_sys() = 0;
+
+  FOG_INLINE GuiWindow* getOwner() const { return _owner; }
+  
+  virtual void setTransparency(float val) = 0;
+
+  // --------------------------------------------------------------------------
+  // [Modal Window Handling]
+  // --------------------------------------------------------------------------
+  
+  //!@brief makes the GuiWindow to be shown as Modal window in front of this window
+  virtual void startModalWindow(GuiWindow* w) = 0;
+  //!@brief The modal GuiWindow is being closed, so the modality should be removed
+  virtual void endModal(GuiWindow* w) = 0;
+
+  //!@brief call show(visible) on all modal windows on the stack (last to first)
+  virtual void showAllModalWindows(uint32_t visible) = 0;
+  
+  //!@brief tmp variable to set the last modal window int the stack
+  //! so we can iterate the modal stack from behind again (without double linked list)
+  FOG_INLINE void setLastModalWindow(GuiWindow* w) {
+    _lastmodal = w;
+  }
+  FOG_INLINE GuiWindow* getLastModalWindow() const {
+    return _lastmodal;
+  }
+
+  //!@brief returns the current modalWindow
+  virtual GuiWindow* getModalWindow() {
+    if(getOwner()) {
+      //normally this would be this. But maybe
+      //we need the owner-variable for other tasks, too!
+      return getOwner()->_modal;
+    }
+
+    return 0;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Z-Order]
+  // --------------------------------------------------------------------------
+
+  //Move Window on Top of other Window! (If w == 0 Move on top of all Windows)
+  virtual void moveToTop(GuiWindow* w) = 0;
+  //Move Window behind other Window! (If w == 0 Move behind all Windows of screen)
+  virtual void moveToBottom(GuiWindow* w) = 0;
+
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
@@ -359,17 +462,24 @@ struct FOG_API GuiWindow : public Object
   //! @brief Widget.
   Widget* _widget;
 
+  //our owner.
+  GuiWindow* _owner;
+  GuiWindow* _modal;
+  GuiWindow* _lastmodal;
+
   //! @brief Window handle.
   void* _handle;
 
   //! @brief Backing store.
   GuiBackBuffer* _backingStore;
 
+  //TODO: use bitset here 
+
   //! @brief Whether window is enabled.
   bool _enabled;
 
   //! @brief Whether window is visible.
-  bool _visible;
+  bool _visible; //do we need this? (already in widget)
 
   //! @brief Whether window has native windowing system focus.
   bool _hasFocus;
@@ -379,6 +489,13 @@ struct FOG_API GuiWindow : public Object
 
   //! @brief Window is dirty and needs update.
   bool _isDirty;
+
+  MODAL_POLICY _modalpolicy;
+
+  //! @brief Window bound rectangle.
+  IntRect _windowRect;
+  //! @brief Window client rectangle.
+  IntRect _clientRect;
 
   friend struct GuiEngine;
   friend struct Widget;

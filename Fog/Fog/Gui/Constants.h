@@ -100,7 +100,7 @@ enum WIDGET_STATE
   //! @brief Widget is enabled, but parent is disabled and this makes control disabled.
   WIDGET_DISABLED_BY_PARENT = 1,
   //! @brief Widget is enabled and it parent too.
-  WIDGET_ENABLED = 2
+  WIDGET_ENABLED = 2,
 };
 // ============================================================================
 // [Fog::WIDGET_VISIBILITY]
@@ -112,9 +112,13 @@ enum WIDGET_VISIBILITY
   //! @brief Widget is hidden.
   WIDGET_HIDDEN = 0,
   //! @brief Widget is hidden by parent that's not visible.
-  WIDGET_HIDDEN_BY_PARENT = 1,
+  WIDGET_HIDDEN_BY_PARENT = 1, 
+  WIDGET_VISIBLE_MINIMIZED = 2,
   //! @brief Widget is visible.
-  WIDGET_VISIBLE = 2,
+  WIDGET_VISIBLE = 3,
+  WIDGET_VISIBLE_RESTORE = 4,
+  WIDGET_VISIBLE_MAXIMIZED = 5,
+  WIDGET_VISIBLE_FULLSCREEN = 6
 };
 
 // ============================================================================
@@ -153,6 +157,14 @@ enum FOCUS_POLICY
   FOCUS_WHEEL = FOCUS_STRONG | FOCUS_MASK_WHEEL
 };
 
+//! @brief Focus policy
+enum MODAL_POLICY
+{
+  MODAL_NONE = 0,
+  MODAL_WINDOW = 1,
+  MODAL_APPLICATION = 2
+};
+
 // ============================================================================
 // [Fog::LAYOUT_POLICY]
 // ============================================================================
@@ -172,9 +184,9 @@ enum WINDOW_FLAGS
 {
   //! @brief Flag to indicate the maximum of window types 
   //! (needed for fast identification of TopLevel-Windows)
-  WINDOW_TYPE_FLAG = 0x000000FF,
+  WINDOW_TYPE_MASK = 0x000000FF,
   //! @brief Flag to indicate the maximum of window hints
-  WINDOW_HINTS_FLAG = 0xFFFFFF00,
+  WINDOW_HINTS_MASK = 0xFFFFFF00,
 
   //! @brief Create GuiWindow (this flag is used in Fog::Widget).
   WINDOW_NATIVE = (1 << 0),
@@ -201,7 +213,13 @@ enum WINDOW_FLAGS
   //!
   //! The window will not have a decoration at all.
   //! this will complete overwrite the window frame flag
-  WINDOW_FRAMELESS = (1 << 10),
+  WINDOW_FRAMELESS = (1 << 4),
+
+  //! @brief Create a window without frame and decoration which fills the whole
+  //! screen
+  //!
+  //! This flag overwrites all other window-types
+  WINDOW_FULLSCREEN = (1 << 5),  
 
   //Window flags
 
@@ -246,6 +264,15 @@ enum WINDOW_FLAGS
   //! A tool window and a popup could not have a help button
   WINDOW_CONTEXT_HELP_BUTTON = (1 << 16),
 
+  //! @brief Marks the window to allow transparency
+  WINDOW_TRANSPARENT = (1 << 17),
+
+  //! @brief Marks that the PopUp window should be inline within the top level window
+  //!
+  //! A pop normally creates a system top level window. But if this
+  //! flag is set, the pop acts as a child widget on top of all others in the guiWindow!
+  WINDOW_INLINE_POPUP = (1 << 18),
+
   //! @brief Create X11 window that listens only for XPropertyChange events.
   //!
   //! X11GuiEngine dependent and non-portable flag.
@@ -263,7 +290,8 @@ enum WINDOW_TYPES
   WINDOW_TYPE_DEFAULT = WINDOW_NATIVE | WINDOW_SYSTEM_MENU | WINDOW_DRAGABLE | WINDOW_MINIMIZE | WINDOW_MAXIMIZE | WINDOW_CLOSE_BUTTON,
   WINDOW_TYPE_TOOL  = WINDOW_TOOL | WINDOW_CLOSE_BUTTON | WINDOW_SYSTEM_MENU | WINDOW_DRAGABLE,
   WINDOW_TYPE_POPUP = WINDOW_POPUP | WINDOW_ALWAYS_ON_TOP | WINDOW_DRAGABLE,
-  WINDOW_TYPE_FRAMELESS = WINDOW_FRAMELESS | WINDOW_DRAGABLE
+  WINDOW_TYPE_FRAMELESS = WINDOW_FRAMELESS | WINDOW_DRAGABLE,
+  WINDOW_TYPE_FULLSCREEN = WINDOW_FRAMELESS | WINDOW_SYSTEM_MENU | WINDOW_ALWAYS_ON_TOP
 };
 
 // ============================================================================
@@ -584,6 +612,9 @@ enum EVENT_GUI_ENUM
   // --------------------------------------------------------------------------
 
   EVENT_SHOW,
+  EVENT_SHOW_MAXIMIZE,
+  EVENT_SHOW_MINIMIZE,
+  EVENT_SHOW_FULLSCREEN,
   EVENT_HIDE,
   EVENT_HIDE_BY_PARENT,
 

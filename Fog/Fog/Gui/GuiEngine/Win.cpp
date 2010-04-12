@@ -334,7 +334,7 @@ void WinGuiEngine::maximize(GuiWindow* w) {
 
 void WinGuiEngine::updateDisplayInfo()
 {
-  int dibSize;
+  uint dibSize;
   LPBITMAPINFOHEADER dibHdr;
   HDC hdc;
   HBITMAP hbm;
@@ -417,9 +417,33 @@ void WinGuiEngine::updateDisplayInfo()
 
 void WinGuiEngine::doBlitWindow(GuiWindow* window, const IntBox* rects, sysuint_t count)
 {
-  HDC hdc = GetDC((HWND)window->getHandle());
-  reinterpret_cast<WinGuiBackBuffer*>(window->_backingStore)->blitRects(hdc, rects, count);
-  ReleaseDC((HWND)window->getHandle(), hdc);
+  Widget* w = window->getWidget();
+
+  if((w->getWindowFlags() & WINDOW_FRAMELESS) != 0 && (w->getWindowHints() & WINDOW_TRANSPARENT) != 0) {
+    WinGuiBackBuffer* back = reinterpret_cast<WinGuiBackBuffer*>(window->_backingStore);  
+
+    SIZE size;
+    size.cx = back->getWidth();
+    size.cy = back->getHeight();
+    HDC screenDc = GetDC((HWND)window->getHandle());  
+    POINT pointSource;
+    pointSource.x = 0;
+    pointSource.y = 0;
+    BLENDFUNCTION blend;
+    blend.BlendOp             = AC_SRC_OVER;
+    blend.BlendFlags          = 0;
+    blend.SourceConstantAlpha = (int)(255 * window->getWidget()->getTransparency());
+    blend.AlphaFormat         = AC_SRC_ALPHA;
+
+    BOOL ret = UpdateLayeredWindow((HWND)window->getHandle(), screenDc, 0, &size, back->_hdc, &pointSource, 0, &blend, ULW_ALPHA);
+
+    ReleaseDC((HWND)window->getHandle(), screenDc);
+  } else {
+    HDC hdc = GetDC((HWND)window->getHandle());
+    reinterpret_cast<WinGuiBackBuffer*>(window->_backingStore)->blitRects(hdc, rects, count);
+    ReleaseDC((HWND)window->getHandle(), hdc);
+    return;
+  }
 }
 
 // ============================================================================
@@ -738,7 +762,11 @@ const char* WinGuiEngine::msgToStr(uint message)
 WinGuiWindow::WinGuiWindow(Widget* widget) : 
   BaseGuiWindow(widget)
 {
-  _backingStore = new(std::nothrow) WinGuiBackBuffer();
+  bool b = (widget->getWindowFlags() & WINDOW_FRAMELESS) != 0 || (widget->getWindowFlags() & WINDOW_POPUP) != 0 || (widget->getWindowFlags() & WINDOW_FULLSCREEN) != 0;
+  if(b) {
+    b = (widget->getWindowFlags() & WINDOW_TRANSPARENT) != 0;
+  }
+  _backingStore = new(std::nothrow) WinGuiBackBuffer(b);
 }
 
 WinGuiWindow::~WinGuiWindow()
@@ -780,7 +808,41 @@ void WinGuiWindow::moveToBottom(GuiWindow* w) {
 
 void WinGuiWindow::setTransparency(float val) {
   //LWA_COLORKEY
-  SetLayeredWindowAttributes((HWND)getHandle(),0,(int)(255 * val),LWA_ALPHA);
+   //full opaque windows do not have the layered flag  
+   if(!static_cast<WinGuiBackBuffer*>(_backingStore)->_prgb) {
+     if(val == 1.0) {
+       //if no transparency is set we don't need the transparency flag
+       //this is an optimization for windows, because windows always
+       //double buffer transparent windows also for full opaque windows...
+       LONG flag = GetWindowLong((HWND)getHandle(),GWL_EXSTYLE);
+       if((flag & WS_EX_LAYERED) != 0) {
+          flag &=~WS_EX_LAYERED;
+          SetWindowLong((HWND)getHandle(),GWL_EXSTYLE,flag);
+       }
+     } else {
+       //make sure window flag is set!
+       LONG flag = GetWindowLong((HWND)getHandle(),GWL_EXSTYLE);
+       if((flag & WS_EX_LAYERED) == 0) {
+         SetWindowLong((HWND)getHandle(),GWL_EXSTYLE,flag|WS_EX_LAYERED);
+       }
+
+       SetLayeredWindowAttributes((HWND)getHandle(),0,(int)(255 * val),LWA_ALPHA);
+     }
+      
+   } else {
+     BLENDFUNCTION blend;
+     blend.BlendOp = AC_SRC_OVER;
+     blend.BlendFlags = 0;
+     blend.AlphaFormat = 0;
+     blend.SourceConstantAlpha = (int)(255 * val);
+
+     LONG flag = GetWindowLong((HWND)getHandle(),GWL_EXSTYLE);
+     if((flag & WS_EX_LAYERED) == 0) {
+       SetWindowLong((HWND)getHandle(),GWL_EXSTYLE,flag|WS_EX_LAYERED);
+     }
+
+     UpdateLayeredWindow((HWND)getHandle(), NULL, NULL, NULL, NULL, NULL,NULL, &blend, ULW_ALPHA);
+   }
 }
 
 void WinGuiWindow::calculateStyleFlags(uint32_t flags, DWORD& style, DWORD& exstyle) 
@@ -788,12 +850,12 @@ void WinGuiWindow::calculateStyleFlags(uint32_t flags, DWORD& style, DWORD& exst
   if(flags & WINDOW_FRAMELESS) 
   {
     style = WS_POPUP;
-    exstyle = 0;
+    exstyle = WS_EX_APPWINDOW;
   }
   else if(flags & WINDOW_POPUP) 
   {
     style = WS_POPUP;
-    exstyle = WS_EX_TOPMOST;
+    exstyle = WS_EX_TOPMOST|WS_EX_APPWINDOW;
 
     if(flags & WINDOW_TRANSPARENT) {
       exstyle |= WS_EX_LAYERED;
@@ -858,12 +920,6 @@ void WinGuiWindow::calculateStyleFlags(uint32_t flags, DWORD& style, DWORD& exst
   if(flags & WINDOW_ALWAYS_ON_TOP) {
     exstyle |= WS_EX_TOPMOST;
   }
-
-  if(flags & WINDOW_TRANSPARENT) {
-    //todo: check if WS_EX_TRANSPARENT is needed!
-    //WS_EX_TRANSPARENT: will make a transparent window, where no events are received!
-    exstyle |= WS_EX_LAYERED;
-  }
 }
 
 void WinGuiWindow::doSystemMenu(uint32_t flags) {
@@ -911,39 +967,48 @@ err_t WinGuiWindow::create(uint32_t flags)
   calculateStyleFlags(flags, dwStyle,dwStyleEx);
 
   if (_handle)
-  {    
-    //need to hide window to support to insert/remove window from taskbar
-    //during change of tool window/other window-type
-    //a SWP_FRAMECHANGED with SetWindowPos does not do the job :-(
-    //TODO: Sometimes the window don't show again after hide. Seems to be a EventLoop-Problem -> Need more research!
-//     hide();
-//     UpdateWindow((HWND)_handle);
-
+  {
     //just update window with new styles
     DWORD style = GetWindowLong((HWND)_handle,GWL_STYLE);
     DWORD exstyle = GetWindowLong((HWND)_handle,GWL_EXSTYLE);
+
+
+    bool b = (flags & WINDOW_FRAMELESS) != 0 || (flags & WINDOW_POPUP) != 0 || (flags & WINDOW_FULLSCREEN) != 0;
+    if(b) {
+      b = (flags & WINDOW_TRANSPARENT) != 0;
+    }
+
+    //prevent flickering!
+    SendMessage((HWND)_handle, WM_SETREDRAW, (WPARAM) FALSE, (LPARAM) 0);
+
+    if(reinterpret_cast<WinGuiBackBuffer*>(_backingStore)->_prgb != b) {
+      reinterpret_cast<WinGuiBackBuffer*>(_backingStore)->_prgb = b;
+      reinterpret_cast<WinGuiBackBuffer*>(_backingStore)->_clear();
+
+      if(b) {    
+        SetWindowLong((HWND)_handle,GWL_EXSTYLE, exstyle &~WS_EX_LAYERED);
+        dwStyleEx |= WS_EX_LAYERED;
+      }
+    }
 
     //it's much easier to first remove all possible flags
     //and then create a complete new flag and or it with the clean old one
     style &=~ (WS_OVERLAPPED | WS_CAPTION | WS_POPUP | WS_SYSMENU | WS_DLGFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | CS_NOCLOSE | WS_THICKFRAME | WS_BORDER);
     
     SetWindowLong((HWND)_handle,GWL_STYLE,style|dwStyle);
-    SetWindowLong((HWND)_handle,GWL_EXSTYLE,dwStyleEx);
+    SetWindowLong((HWND)_handle,GWL_EXSTYLE, dwStyleEx);
+    
     doSystemMenu(flags);
 
-    if((exstyle & WS_EX_LAYERED) != 0) {
-      if(flags & WINDOW_TRANSPARENT) {
-        setTransparency(_widget->getTransparency());
-      }
-    }
+    getWidget()->setTransparency(getWidget()->getTransparency());
 
-    //not needed, if we hide/show
-    SetWindowPos((HWND)_handle, 0,0,0,0,0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
-    // Ask the window and its children to repaint
-    //RedrawWindow((HWND)_handle, NULL, NULL, RDW_ERASE | RDW_INVALIDATE | RDW_FRAME);
+    //allow repaint again!
+    SendMessage((HWND)_handle, WM_SETREDRAW, (WPARAM) TRUE, (LPARAM) 0);
+    UpdateWindow((HWND)_handle);
+    
+    SetWindowPos((HWND)_handle, 0,0,0,0,0, SWP_FRAMECHANGED | SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER);
+    RedrawWindow((HWND)_handle,0,0, RDW_ERASE | RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_UPDATENOW);
 
-//     show();
-//     UpdateWindow((HWND)_handle);
     return ERR_OK;
   }
 
@@ -976,6 +1041,17 @@ err_t WinGuiWindow::create(uint32_t flags)
     wndClass = L"Fog_Window";
   }
 
+  bool b = (flags & WINDOW_FRAMELESS) != 0 || (flags & WINDOW_POPUP) != 0 || (flags & WINDOW_FULLSCREEN) != 0;
+  if(b) {
+    b = (flags & WINDOW_TRANSPARENT) != 0;
+  }
+
+  if(b) {
+    dwStyleEx |= WS_EX_LAYERED; 
+  }
+
+  reinterpret_cast<WinGuiBackBuffer*>(_backingStore)->_prgb = b;
+
   _handle = (void*)CreateWindowExW(
     dwStyleEx, wndClass, L"",
     dwStyle, x, y,
@@ -986,13 +1062,6 @@ err_t WinGuiWindow::create(uint32_t flags)
   {
     fog_stderr_msg("Fog::WinGuiWindow", "create", "CreateWindowExW() failed.");
     goto fail;
-  }
-
-  if(dwStyleEx & WS_EX_LAYERED) {
-    if(!SetLayeredWindowAttributes((HWND)_handle, 0, 255, LWA_ALPHA))  {
-      fog_stderr_msg("Fog::WinGuiWindow", "create", "SetLayeredWindowAttributes() failed.");
-      goto fail;
-    }
   }
 
   doSystemMenu(flags);
@@ -1011,6 +1080,7 @@ err_t WinGuiWindow::create(uint32_t flags)
 
   // Get correct window and client rectangle.
   getWindowRect(&_windowRect, &_clientRect);
+
 
   return ERR_OK;
 
@@ -1064,33 +1134,33 @@ err_t WinGuiWindow::show(uint32_t state)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
   if(state == WIDGET_VISIBLE) 
-  {
-    //!IsZoomed((HWND)_handle) && !IsIconic((HWND)_handle) && 
-    //if(!IsWindowVisible((HWND)_handle)) {
+  {    
+    if(!IsWindowVisible((HWND)_handle)) {
       ShowWindow((HWND)_handle, SW_SHOW);
-    //}
+    }
   } 
   else if(state == WIDGET_VISIBLE_RESTORE) 
   {
-    ShowWindow((HWND)_handle, SW_RESTORE);   
+    ShowWindow((HWND)_handle, SW_RESTORE);
   }
   else if(state == WIDGET_VISIBLE_MAXIMIZED)
   {            
-      if(!IsZoomed((HWND)_handle)) 
-      {
-        //Hack: To make sure a window can be shown maximized at first show
-        //else we would not receive a paint-event on startup
-        ShowWindow((HWND)_handle, SW_SHOW);
-        ShowWindow((HWND)_handle, SW_SHOWMAXIMIZED);
+    if(!IsZoomed((HWND)_handle)) 
+    {
+      bool pos =  !IsWindowVisible((HWND)_handle);
+
+      ShowWindow((HWND)_handle, SW_SHOWMAXIMIZED);
+
+      if(pos) {
+        SendMessage((HWND)_handle,WM_USER,0,0);
+        //SetWindowPos((HWND)_handle,0,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOZORDER);
       }
+    }
   }
   else if(state == WIDGET_VISIBLE_MINIMIZED)
   {
     if(!IsIconic((HWND)_handle)) 
     {
-      //Hack: To make sure a window can be shown minimized at first show
-      //else we would not receive a paint-event on startup      
-      ShowWindow((HWND)_handle, SW_SHOW);
       ShowWindow((HWND)_handle, SW_SHOWMINIMIZED);
     }
   }
@@ -1098,6 +1168,10 @@ err_t WinGuiWindow::show(uint32_t state)
   {
     ShowWindow((HWND)_handle, SW_SHOW);
   }
+
+//   if((GetWindowLong((HWND)_handle,GWL_EXSTYLE) & WS_EX_LAYERED) != 0) {
+//     ::RedrawWindow((HWND)_handle, NULL, NULL, RDW_UPDATENOW); 
+//   }
   
   return ERR_OK;
 }
@@ -1266,24 +1340,137 @@ void WinGuiWindow::onMouseRelease(uint32_t button)
   base::onMouseRelease(button);
 }
 
+FOG_INLINE LRESULT WinGuiWindow::KeyboardMessageHelper(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
+  WinGuiEngine* uiSystem = GUI_ENGINE();
+  //Keyboard messages
+  switch (message)
+  { 
+  case WM_SYSKEYDOWN:
+  case WM_KEYDOWN:
+    {
+      uint32_t modifier = uiSystem->winKeyToModifier(&wParam, lParam);
+      bool used = onKeyPress(
+        uiSystem->winKeyToFogKey(wParam, HIWORD(lParam)),
+        modifier,
+        (uint32_t)wParam,
+        Char(uiSystem->winKeyToUnicode(wParam, HIWORD(lParam)))
+        );
+
+      if (used) return 0;
+    }
+  case WM_SYSKEYUP:
+  case WM_KEYUP:
+    {
+      uint32_t modifier = uiSystem->winKeyToModifier(&wParam, lParam);
+      bool used = onKeyRelease(
+        uiSystem->winKeyToFogKey(wParam, HIWORD(lParam)),
+        modifier,
+        (uint32_t)wParam,
+        Char(uiSystem->winKeyToUnicode(wParam, HIWORD(lParam)))
+        );
+
+      if (used) return 0;
+    }
+  }
+  return DefWindowProc(hwnd, message, wParam, lParam);
+}
+
+
+FOG_INLINE LRESULT WinGuiWindow::MouseMessageHelper(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
+  WinGuiEngine* uiSystem = GUI_ENGINE();
+
+  //Mouse Messages
+  switch (message)
+  { 
+  case WM_MOUSEHOVER:
+  case WM_MOUSEMOVE:
+    {
+      // Mouse tracking for WM_MOUSELEAVE message.
+      TRACKMOUSEEVENT tme;
+      tme.cbSize    = sizeof(TRACKMOUSEEVENT);
+      tme.dwFlags   = TME_LEAVE;
+      tme.hwndTrack = hwnd;
+      TrackMouseEvent(&tme);
+
+      int x = (int)(short)LOWORD(lParam);
+      int y = (int)(short)HIWORD(lParam);
+
+      // WM_MOUSEHOVER is not sent sometimes.
+      if (uiSystem->_systemMouseStatus.uiWindow != this || 
+        !uiSystem->_systemMouseStatus.hover)
+      {
+        onMouseHover(x, y);
+      }
+      else
+      {
+        onMouseMove(x, y);
+      }
+
+      return 0;
+    }
+
+  case WM_MOUSELEAVE:
+    {
+      if (uiSystem->_systemMouseStatus.uiWindow == this && 
+        !uiSystem->_systemMouseStatus.buttons)
+      {
+        onMouseLeave(-1, -1);
+      }
+      return 0;
+    }
+
+  case WM_LBUTTONDOWN: onMousePress(BUTTON_LEFT  , false); return 0;
+  case WM_RBUTTONDOWN: onMousePress(BUTTON_RIGHT , false); return 0;
+  case WM_MBUTTONDOWN: onMousePress(BUTTON_MIDDLE, false); return 0;
+
+  case WM_LBUTTONUP: onMouseRelease(BUTTON_LEFT  ); return 0;
+  case WM_RBUTTONUP: onMouseRelease(BUTTON_RIGHT ); return 0;
+  case WM_MBUTTONUP: onMouseRelease(BUTTON_MIDDLE); return 0;
+
+  case WM_MOUSEWHEEL:
+    // Typical for synaptics.
+    if (uiSystem->_systemMouseStatus.uiWindow != this || 
+      !uiSystem->_systemMouseStatus.hover)
+    {
+      POINT pt;
+      DWORD cursorPos = GetMessagePos();
+      pt.x = (int)(short)LOWORD(cursorPos);
+      pt.y = (int)(short)HIWORD(cursorPos);
+      ScreenToClient(hwnd, &pt);
+      onMouseHover(pt.x, pt.y);
+    }
+
+    if ((int16_t)HIWORD(wParam) < 0)
+    {
+      onMouseWheel(WHEEL_DOWN);
+    }
+    else
+    {
+      onMouseWheel(WHEEL_UP);
+    }
+    return 0;  
+  }
+  return DefWindowProc(hwnd, message, wParam, lParam);
+}
+
 LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+  //IDEA: optimize message handling (make lesser comparisions)
   WinGuiEngine* uiSystem = GUI_ENGINE();
   //TODO:check GuiEngine for modal widget!
   GuiWindow* curmodal = isModal() ? this : 0;
+  //bool allowinput = !curmodal || ((HWND)curmodal->getHandle() == hwnd);  
 
-  //bool allowinput = !curmodal || ((HWND)curmodal->getHandle() == hwnd);
+  if(message >= WM_NCCREATE && message <= WM_NCXBUTTONDBLCLK) {
 
-  switch (message)
-  { 
-    case WM_NCHITTEST:
-      //Very easy way to allow dragging/resizing of a window 
-      //usefull for our own window manager. So we don't need to write our own
-      //dragging/resizeing methods!
-      //http://msdn.microsoft.com/en-us/library/ms645618%28VS.85%29.aspx   
-//       if(!allowinput) {
-//         return HTNOWHERE;
-//       }
+  } else if(message >= WM_KEYFIRST && message <= WM_KEYLAST) {
+    return KeyboardMessageHelper(hwnd,message,wParam,lParam);
+  } else if(message >= WM_MOUSEFIRST && message <= WM_MOUSELAST || message== WM_MOUSEMOVE || message== WM_MOUSELEAVE) {
+    return MouseMessageHelper(hwnd,message,wParam,lParam);
+  } else {
+    switch (message)
+    {
+    case WM_SHOWWINDOW:
       goto defWindowProc;
     case WM_SYSCOMMAND:
       {
@@ -1314,7 +1501,7 @@ LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
             return 0;
           }
         }
-        
+
         if(!getWidget()->isDragAble()) {          
           if (command == SC_MOVE) 
           {
@@ -1325,220 +1512,118 @@ LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
 
         goto defWindowProc;
       }
-    case WM_ENABLE:
+    case WM_USER:
       {
-        onEnabled(wParam==TRUE);
+        //message is sent to create a onConfigure on maximized application start
+        IntRect wr;
+        IntRect cr;
+        getWindowRect(&wr, &cr);
+        onConfigure(wr, cr);
         return 0;
       }
-    case WM_WINDOWPOSCHANGING:
-      {
-        //interessting for min/max size layout! (we can reset size)
-        WINDOWPOS *pos = (WINDOWPOS*)lParam;
-        goto defWindowProc;
-      }      
-
     case WM_WINDOWPOSCHANGED:
-    {
-      //Handles everything within here -> no need for WM_MOVE, WM_SIZE, WM_SHOWWINDOW
-      //also we have better control when to send onConfiguration-Events!
+      {
+        //Handles everything within here -> no need for WM_MOVE, WM_SIZE, WM_SHOWWINDOW
+        //also we have better control when to send onConfiguration-Events!
 
-      WINDOWPOS *pos = (WINDOWPOS*)lParam;
+        WINDOWPOS *pos = (WINDOWPOS*)lParam;
 
-      if (pos->flags & SWP_SHOWWINDOW) {
-        //window_was_shown();
-        onVisibility(WIDGET_VISIBLE);
-        return 0;
-      } else if (pos->flags & SWP_HIDEWINDOW) {
-        //We need to enable Owner-Window to be able to restore it again
-        if(!curmodal) {
-          onVisibility(WIDGET_HIDDEN);
-        }
-        
-        return 0;
-      }
-
-      if(IsIconic(hwnd) && (pos->flags & SWP_FRAMECHANGED)) {        
-        //window_minimized
-        onVisibility(WIDGET_VISIBLE_MINIMIZED);
-        //no configuration change needed! 
-        return 0;
-      } else if(IsZoomed(hwnd) && (pos->flags & SWP_FRAMECHANGED)) {
-        //window_maximized
-        onVisibility(WIDGET_VISIBLE_MAXIMIZED);        
-      } else {
-        if (!(pos->flags & SWP_NOMOVE) && pos->flags & SWP_FRAMECHANGED && !(pos->flags & SWP_NOSIZE)) {
-          //should always be NULL but who knows?
+        if (pos->flags & SWP_SHOWWINDOW) {
+          //window_was_shown();
+          onVisibility(WIDGET_VISIBLE);
+          return 0;
+        } else if (pos->flags & SWP_HIDEWINDOW) {
+          //We need to enable Owner-Window to be able to restore it again
           if(!curmodal) {
-            //only for the case of minimized modal widgets we need
-            //a pointer to last modal window on stack to be able 
-            //to show all modal widgets on 'restore' again (single linked list)
-            curmodal = getLastModalWindow();
-          }
-          
-          bool mini= getWidget()->getVisibility() == WIDGET_VISIBLE_MINIMIZED;
-
-          if(curmodal && mini) {
-            curmodal->showAllModalWindows(WIDGET_VISIBLE_RESTORE);
-            setLastModalWindow(0);
-            disable();
+            onVisibility(WIDGET_HIDDEN);
           }
 
-          //TODO: Is it important to know, if it is a change from minimize to normal
-          //or from maximize to normal?
-          //Current answer: not of interested
-          onVisibility(WIDGET_VISIBLE_RESTORE);
+          return 0;
         }
+
+        if(IsIconic(hwnd) && (pos->flags & SWP_FRAMECHANGED)) {        
+          //window_minimized
+          onVisibility(WIDGET_VISIBLE_MINIMIZED);
+          //no configuration change needed! 
+          return 0;
+        } else if(IsZoomed(hwnd) && (pos->flags & SWP_FRAMECHANGED)) {
+          //window_maximized
+          onVisibility(WIDGET_VISIBLE_MAXIMIZED);        
+        } else {
+          if (!(pos->flags & SWP_NOMOVE) && pos->flags & SWP_FRAMECHANGED && !(pos->flags & SWP_NOSIZE)) {
+            //should always be NULL but who knows?
+            if(!curmodal) {
+              //only for the case of minimized modal widgets we need
+              //a pointer to last modal window on stack to be able 
+              //to show all modal widgets on 'restore' again (single linked list)
+              curmodal = getLastModalWindow();
+            }
+
+            bool mini= getWidget()->getVisibility() == WIDGET_VISIBLE_MINIMIZED;
+
+            if(curmodal && mini) {
+              curmodal->showAllModalWindows(WIDGET_VISIBLE_RESTORE);
+              setLastModalWindow(0);
+              disable();
+            }
+
+            //TODO: Is it important to know, if it is a change from minimize to normal
+            //or from maximize to normal?
+            //Current answer: not of interested
+            onVisibility(WIDGET_VISIBLE_RESTORE);
+          }
+        }
+
+        IntRect wr;
+        IntRect cr;
+        getWindowRect(&wr, &cr);
+        onConfigure(wr, cr);
+        return 0;
       }
 
-      IntRect wr;
-      IntRect cr;
-      getWindowRect(&wr, &cr);
-      onConfigure(wr, cr);
+    case WM_ENABLE:
+      onEnabled(wParam==TRUE);
       return 0;
-    }
-
     case WM_SETFOCUS:
       onFocus(true);
       return 0;
-
     case WM_KILLFOCUS:
       onFocus(false);
       return 0;
-
-    case WM_MOUSEHOVER:
-    case WM_MOUSEMOVE:
-    {
-      // Mouse tracking for WM_MOUSELEAVE message.
-      TRACKMOUSEEVENT tme;
-      tme.cbSize    = sizeof(TRACKMOUSEEVENT);
-      tme.dwFlags   = TME_LEAVE;
-      tme.hwndTrack = hwnd;
-      TrackMouseEvent(&tme);
-
-      int x = (int)(short)LOWORD(lParam);
-      int y = (int)(short)HIWORD(lParam);
-
-      // WM_MOUSEHOVER is not sent sometimes.
-      if (uiSystem->_systemMouseStatus.uiWindow != this || 
-         !uiSystem->_systemMouseStatus.hover)
-      {
-        onMouseHover(x, y);
-      }
-      else
-      {
-        onMouseMove(x, y);
-      }
-
-      return 0;
-    }
-
-    case WM_MOUSELEAVE:
-    {
-      if (uiSystem->_systemMouseStatus.uiWindow == this && 
-         !uiSystem->_systemMouseStatus.buttons)
-      {
-        onMouseLeave(-1, -1);
-      }
-      return 0;
-    }
-
-    case WM_LBUTTONDOWN: onMousePress(BUTTON_LEFT  , false); return 0;
-    case WM_RBUTTONDOWN: onMousePress(BUTTON_RIGHT , false); return 0;
-    case WM_MBUTTONDOWN: onMousePress(BUTTON_MIDDLE, false); return 0;
-
-    case WM_LBUTTONUP: onMouseRelease(BUTTON_LEFT  ); return 0;
-    case WM_RBUTTONUP: onMouseRelease(BUTTON_RIGHT ); return 0;
-    case WM_MBUTTONUP: onMouseRelease(BUTTON_MIDDLE); return 0;
-
-    case WM_MOUSEWHEEL:
-      // Typical for synaptics.
-      if (uiSystem->_systemMouseStatus.uiWindow != this || 
-         !uiSystem->_systemMouseStatus.hover)
-      {
-        POINT pt;
-        DWORD cursorPos = GetMessagePos();
-        pt.x = (int)(short)LOWORD(cursorPos);
-        pt.y = (int)(short)HIWORD(cursorPos);
-        ScreenToClient(hwnd, &pt);
-        onMouseHover(pt.x, pt.y);
-      }
-
-      if ((int16_t)HIWORD(wParam) < 0)
-      {
-wheelDown:
-        onMouseWheel(WHEEL_DOWN);
-      }
-      else
-      {
-wheelUp:
-        onMouseWheel(WHEEL_UP);
-      }
-      return 0;
-
-    case WM_SYSKEYDOWN:
-    case WM_KEYDOWN:
-    {
-      uint32_t modifier = uiSystem->winKeyToModifier(&wParam, lParam);
-      bool used = onKeyPress(
-        uiSystem->winKeyToFogKey(wParam, HIWORD(lParam)),
-        modifier,
-        (uint32_t)wParam,
-        Char(uiSystem->winKeyToUnicode(wParam, HIWORD(lParam)))
-      );
-
-      if (used) return 0;
-      goto defWindowProc;
-    }
-    case WM_SYSKEYUP:
-    case WM_KEYUP:
-    {
-      uint32_t modifier = uiSystem->winKeyToModifier(&wParam, lParam);
-      bool used = onKeyRelease(
-        uiSystem->winKeyToFogKey(wParam, HIWORD(lParam)),
-        modifier,
-        (uint32_t)wParam,
-        Char(uiSystem->winKeyToUnicode(wParam, HIWORD(lParam)))
-      );
-
-      if (used) return 0;
-      goto defWindowProc;
-    }
-
-    case WM_ERASEBKGND:
-      return 1;
+   case WM_ERASEBKGND:
+     return 1;
 
     case WM_PAINT:
-    {
-      RECT rect;
-      PAINTSTRUCT ps;
-      HDC hdc;
-
-      GetClientRect(hwnd, &rect);
-      hdc = BeginPaint(hwnd, &ps);
-
-      if (!_isDirty)
       {
-        BitBlt(
-          hdc, 0, 0, rect.right-rect.left, rect.bottom-rect.top, 
-          reinterpret_cast<WinGuiBackBuffer*>(_backingStore)->getHdc(), 0, 0, 
-          SRCCOPY);
-      }
-      else
-      {
-        _needBlit = true;
-      }
+        RECT rect;
+        PAINTSTRUCT ps;
+        HDC hdc;
 
-      EndPaint(hwnd, &ps);
-      return 0;
-    }
+        GetClientRect(hwnd, &rect);
+        hdc = BeginPaint(hwnd, &ps);
+
+        if (!_isDirty)
+        {
+          BitBlt(
+            hdc, 0, 0, rect.right-rect.left, rect.bottom-rect.top, 
+            reinterpret_cast<WinGuiBackBuffer*>(_backingStore)->getHdc(), 0, 0, 
+            SRCCOPY);
+        }
+        else
+        {
+          _needBlit = true;
+        }
+
+        EndPaint(hwnd, &ps);
+        return 0;
+      }
 
     case WM_CLOSE:
-    {
-      CloseEvent e;
-      _widget->sendEvent(&e);
-      return 0;
-    }
-
+      {
+        CloseEvent e;
+        _widget->sendEvent(&e);
+        return 0;
+      }
     case WM_DESTROY:
       return 0;
 
@@ -1546,14 +1631,21 @@ wheelUp:
       if (message == GUI_ENGINE()->uMSH_MOUSEWHEEL)
       {
         if ((int)wParam < 0) 
-          goto wheelDown;
+        {
+          onMouseWheel(WHEEL_DOWN);
+          return 0;
+        }
         else 
-          goto wheelUp;
+        {
+          onMouseWheel(WHEEL_UP);
+          return 0;
+        }
       }
+    }
+  }
 
 defWindowProc:
-      return DefWindowProc(hwnd, message, wParam, lParam);
-  }
+  return DefWindowProc(hwnd, message, wParam, lParam);
 }
 
 void WinGuiWindow::getWindowRect(IntRect* windowRect, IntRect* clientRect)
@@ -1572,7 +1664,7 @@ void WinGuiWindow::getWindowRect(IntRect* windowRect, IntRect* clientRect)
 // [Fog::WinGuiBackBuffer]
 // ============================================================================
 
-WinGuiBackBuffer::WinGuiBackBuffer()
+WinGuiBackBuffer::WinGuiBackBuffer(bool b) : _prgb(b)
 {
 }
 
@@ -1679,7 +1771,7 @@ bool WinGuiBackBuffer::resize(int width, int height, bool cache)
     _buffer.data = _primaryPixels;
     _buffer.width = width;
     _buffer.height = height;
-    _buffer.format = PIXEL_FORMAT_XRGB32;
+    _buffer.format = _prgb ? PIXEL_FORMAT_PRGB32 : PIXEL_FORMAT_XRGB32;
     _buffer.stride = _primaryStride;
 
     _cachedWidth = targetWidth;
@@ -1690,7 +1782,12 @@ bool WinGuiBackBuffer::resize(int width, int height, bool cache)
     _secondaryStride = 0;
 
     _createdTime = TimeTicks::now();
-    _expireTime = _createdTime + TimeDelta::fromSeconds(15);
+    if(_prgb) {
+      _expireTime = _createdTime + TimeDelta::fromDays(1);      
+    } else {
+      _expireTime = _createdTime + TimeDelta::fromSeconds(15);
+    }
+    
 
     _convertFunc = NULL;
     _convertDepth = 0;

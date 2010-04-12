@@ -160,6 +160,9 @@ struct FOG_API WinGuiWindow : public BaseGuiWindow
   virtual void onMousePress(uint32_t button, bool repeated);
   virtual void onMouseRelease(uint32_t button);
 
+  FOG_INLINE LRESULT MouseMessageHelper(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+  FOG_INLINE LRESULT KeyboardMessageHelper(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+  FOG_INLINE LRESULT WindowManagerMessageHelper(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
   virtual LRESULT onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
   void getWindowRect(IntRect* windowRect, IntRect* clientRect);
@@ -182,7 +185,7 @@ struct FOG_API WinGuiBackBuffer : public GuiBackBuffer
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  WinGuiBackBuffer();
+  WinGuiBackBuffer(bool prgb=false);
   virtual ~WinGuiBackBuffer();
 
   // --------------------------------------------------------------------------
@@ -212,6 +215,8 @@ struct FOG_API WinGuiBackBuffer : public GuiBackBuffer
 
   HBITMAP _hBitmap;
   HDC _hdc;
+
+  bool _prgb;
 };
 
 } // Fog namespace

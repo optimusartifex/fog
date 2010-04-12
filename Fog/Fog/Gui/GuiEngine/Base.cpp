@@ -677,7 +677,7 @@ void BaseGuiEngine::doUpdateWindow(GuiWindow* window)
   uint topBytesPerPixel;
 
   if (window->_backingStore->getWidth()  != topSize.getWidth() ||
-      window->_backingStore->getHeight() != topSize.getHeight())
+    window->_backingStore->getHeight() != topSize.getHeight())
   {
     window->_backingStore->resize(topSize.getWidth(), topSize.getHeight(), true);
 
@@ -702,12 +702,12 @@ void BaseGuiEngine::doUpdateWindow(GuiWindow* window)
   // if there is nothing to do, continue. It's checked here,
   // because next steps needs to create drawing context, etc...
   if ((uflags & (
-      WIDGET_UPDATE_SOMETHING |
-      WIDGET_UPDATE_CHILD     |
-      WIDGET_UPDATE_ALL       |
-      WIDGET_UPDATE_GEOMETRY  |
-      WIDGET_REPAINT_AREA     |
-      WIDGET_REPAINT_CARET   )) == 0)
+    WIDGET_UPDATE_SOMETHING |
+    WIDGET_UPDATE_CHILD     |
+    WIDGET_UPDATE_ALL       |
+    WIDGET_UPDATE_GEOMETRY  |
+    WIDGET_REPAINT_AREA     |
+    WIDGET_REPAINT_CARET   )) == 0)
   {
     return;
   }
@@ -744,9 +744,11 @@ void BaseGuiEngine::doUpdateWindow(GuiWindow* window)
     e._code = EVENT_PAINT;
     e._receiver = top;
 
-    painter.setMetaVars(
+    painter.setMetaVariables(
+      IntPoint(0, 0),
       TemporaryRegion<1>(IntRect(0, 0, top->getWidth(), top->getHeight())),
-      IntPoint(0, 0));
+      true,
+      true);
     top->sendEvent(&e);
 
     uflags |=
@@ -864,15 +866,15 @@ __pushed:
                 }
                 else
                 {
-                  rtmp4.combine(IntBox(
+                  rtmp4.unite(IntBox(
                     cw->rect().x1() + ox,
                     cw->rect().y1() + oy,
                     cw->rect().x2() + ox,
-                    cw->rect().y2() + oy), REGION_OP_UNION);
+                    cw->rect().y2() + oy));
                 }
               }
             }
-            Region::combine(rtmp1, rtmp2, rtmp4, REGION_OP_SUBTRACT);
+            Region::subtract(rtmp1, rtmp2, rtmp4);
           }
           else
           {
@@ -882,35 +884,37 @@ __pushed:
 #if 0
           }
 #endif
-          painter.setMetaVars(
+          painter.setMetaVariables(
+            IntPoint(childRec.bounds.getX1(), childRec.bounds.getY1()),
             rtmp1,
-            IntPoint(childRec.bounds.getX1(), childRec.bounds.getY1()));
+            true,
+            true);
 
           // FIXME: Repaint caret repaints the whole widget.
           if ((childRec.uflags & (WIDGET_REPAINT_AREA | WIDGET_REPAINT_CARET)) != 0)
           {
             child->sendEvent(&e);
             //blitFull = true;
-            if (!parentRec.painted) blitRegion.combine(rtmp1, REGION_OP_UNION);
+            if (!parentRec.painted) blitRegion.unite(rtmp1);
           }
 
           /*
           if (Application::caretStatus().widget == child &&
-            (childRec.uflags & (Widget::UFlagRepaintWidget | Widget::UFlagRepaintCaret)) != 0)
+          (childRec.uflags & (Widget::UFlagRepaintWidget | Widget::UFlagRepaintCaret)) != 0)
           {
-            theme->paintCaret(&painter, Application::caretStatus());
-            //blitFull = true;
-            if (!parentRec.painted) blitRegion.combine(rtmp1, REGION_OP_UNION);
+          theme->paintCaret(&painter, Application::caretStatus());
+          //blitFull = true;
+          if (!parentRec.painted) blitRegion.unite(rtmp1);
           }
           */
 
           parentRec.implicitFlags |= WIDGET_UPDATE_SOMETHING |
-                                     WIDGET_UPDATE_CHILD     |
-                                     WIDGET_REPAINT_AREA     ;
+            WIDGET_UPDATE_CHILD     |
+            WIDGET_REPAINT_AREA     ;
           childRec.uflags         |= WIDGET_UPDATE_CHILD     ;
           childRec.implicitFlags  |= WIDGET_UPDATE_SOMETHING |
-                                     WIDGET_UPDATE_CHILD     |
-                                     WIDGET_REPAINT_AREA     ;
+            WIDGET_UPDATE_CHILD     |
+            WIDGET_REPAINT_AREA     ;
         }
       }
 

@@ -249,6 +249,33 @@ struct FOG_API GuiEngine : public Object
 
 
   // --------------------------------------------------------------------------
+  // [Modality]
+  // --------------------------------------------------------------------------
+
+/*
+  //!@brief makes the GuiWindow to be shown as Modal window in front of this window
+  virtual void startModalWindow(GuiWindow* w) = 0;
+  //!@brief The modal GuiWindow is being closed, so the modality should be removed
+  virtual void endModal(GuiWindow* w) = 0;
+  //!@brief call show(visible) on all modal windows on the stack (last to first)
+  virtual void showAllModalWindows(uint32_t visible) = 0;
+
+  //!@brief tmp variable to set the last modal window int the stack
+  //! so we can iterate the modal stack from behind again (without double linked list)
+  FOG_INLINE void setLastModalWindow(GuiWindow* w) {
+    _lastmodal = w;
+  }
+  FOG_INLINE GuiWindow* getLastModalWindow() const {
+    return _lastmodal;
+  }
+  //!@brief returns the current modalWindow
+  GuiWindow* getModalWindow() const {
+    return _modal;
+  }*/
+
+
+
+  // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
@@ -261,6 +288,10 @@ protected:
 
   //! @brief Whether UIEngine is correctly initialized.
   bool _initialized;
+
+  GuiWindow* _modal;
+  GuiWindow* _lastmodal;
+
 
 private:
   friend struct Application;
@@ -353,8 +384,9 @@ struct FOG_API GuiWindow : public Object
   FOG_INLINE bool isDirty() const { return _isDirty; }
   FOG_INLINE bool hasFocus() const { return _hasFocus; }
 
-  FOG_INLINE bool isModal() const { return _modalpolicy; }
+  FOG_INLINE bool isModal() const { return _modalpolicy != MODAL_NONE; }
   FOG_INLINE void setModal(MODAL_POLICY b) { _modalpolicy = b; }
+  FOG_INLINE MODAL_POLICY getModality() const { return _modalpolicy; }
 
   // --------------------------------------------------------------------------
   // [Owner Handling]
@@ -458,7 +490,7 @@ struct FOG_API GuiWindow : public Object
   //! @brief Window is dirty and needs update.
   bool _isDirty;
 
-  bool _modalpolicy;
+  MODAL_POLICY _modalpolicy;
 
   //! @brief Window bound rectangle.
   IntRect _windowRect;
@@ -510,7 +542,7 @@ struct FOG_API GuiBackBuffer
   FOG_INLINE uint8_t* getPixels() const { return _buffer.data; }
   FOG_INLINE int getWidth() const { return _buffer.width; }
   FOG_INLINE int getHeight() const { return _buffer.height; }
-  FOG_INLINE int getFormat() const { return _buffer.format; }
+  FOG_INLINE uint32_t getFormat() const { return _buffer.format; }
   FOG_INLINE sysint_t getStride() const { return _buffer.stride; }
 
   FOG_INLINE int getCachedWidth() const { return _cachedWidth; }

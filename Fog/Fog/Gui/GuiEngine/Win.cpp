@@ -419,13 +419,13 @@ void WinGuiEngine::doBlitWindow(GuiWindow* window, const IntBox* rects, sysuint_
 {
   Widget* w = window->getWidget();
 
-  if((w->getWindowFlags() & WINDOW_FRAMELESS) != 0 && (w->getWindowHints() & WINDOW_TRANSPARENT) != 0) {
-    WinGuiBackBuffer* back = reinterpret_cast<WinGuiBackBuffer*>(window->_backingStore);  
+  HDC hdc = GetDC((HWND)window->getHandle());
+  WinGuiBackBuffer* back = reinterpret_cast<WinGuiBackBuffer*>(window->_backingStore);
 
+  if(back->_prgb) {      
     SIZE size;
     size.cx = back->getWidth();
     size.cy = back->getHeight();
-    HDC screenDc = GetDC((HWND)window->getHandle());  
     POINT pointSource;
     pointSource.x = 0;
     pointSource.y = 0;
@@ -435,15 +435,17 @@ void WinGuiEngine::doBlitWindow(GuiWindow* window, const IntBox* rects, sysuint_
     blend.SourceConstantAlpha = (int)(255 * window->getWidget()->getTransparency());
     blend.AlphaFormat         = AC_SRC_ALPHA;
 
-    BOOL ret = UpdateLayeredWindow((HWND)window->getHandle(), screenDc, 0, &size, back->_hdc, &pointSource, 0, &blend, ULW_ALPHA);
+    BOOL ret = UpdateLayeredWindow((HWND)window->getHandle(), hdc, 0, &size, back->_hdc, &pointSource, 0, &blend, ULW_ALPHA);
 
-    ReleaseDC((HWND)window->getHandle(), screenDc);
-  } else {
-    HDC hdc = GetDC((HWND)window->getHandle());
-    reinterpret_cast<WinGuiBackBuffer*>(window->_backingStore)->blitRects(hdc, rects, count);
-    ReleaseDC((HWND)window->getHandle(), hdc);
-    return;
+    if(!ret) {
+      int e = GetLastError();
+    }
+
+  } else {    
+    back->blitRects(hdc, rects, count);
   }
+
+  ReleaseDC((HWND)window->getHandle(), hdc);
 }
 
 // ============================================================================
@@ -828,7 +830,6 @@ void WinGuiWindow::setTransparency(float val) {
 
        SetLayeredWindowAttributes((HWND)getHandle(),0,(int)(255 * val),LWA_ALPHA);
      }
-      
    } else {
      BLENDFUNCTION blend;
      blend.BlendOp = AC_SRC_OVER;
@@ -1152,8 +1153,7 @@ err_t WinGuiWindow::show(uint32_t state)
       ShowWindow((HWND)_handle, SW_SHOWMAXIMIZED);
 
       if(pos) {
-        SendMessage((HWND)_handle,WM_USER,0,0);
-        //SetWindowPos((HWND)_handle,0,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOZORDER);
+        SendMessage((HWND)_handle,WM_USER,0,0);        
       }
     }
   }
@@ -1169,10 +1169,6 @@ err_t WinGuiWindow::show(uint32_t state)
     ShowWindow((HWND)_handle, SW_SHOW);
   }
 
-//   if((GetWindowLong((HWND)_handle,GWL_EXSTYLE) & WS_EX_LAYERED) != 0) {
-//     ::RedrawWindow((HWND)_handle, NULL, NULL, RDW_UPDATENOW); 
-//   }
-  
   return ERR_OK;
 }
 

@@ -60,6 +60,9 @@ Widget::Widget(uint32_t createFlags) :
   if ((createFlags & WINDOW_TYPE_MASK) != 0)
   {
     createWindow(createFlags);
+
+    //not needed under windows, maybe on linux?
+    //setTransparency(1.0);
   }
 }
 
@@ -618,6 +621,8 @@ void Widget::setVisible(uint32_t val)
       return;
     }
 
+    int rrr = _windowFlags & WINDOW_TRANSPARENT;
+
     _fullscreendata = new(std::nothrow) FullScreenData;
     _fullscreendata->_restorewindowFlags = _windowFlags;
     _fullscreendata->_restoregeometry = _guiWindow->_windowRect;
@@ -628,14 +633,10 @@ void Widget::setVisible(uint32_t val)
 
     setWindowFlags(WINDOW_TYPE_FULLSCREEN | getWindowHints());
     setGeometry(IntRect(0,0,info.width, info.height));
-  } else if(_visibility == WIDGET_VISIBLE_FULLSCREEN) {
+  } else if(_visibility == WIDGET_VISIBLE_FULLSCREEN && val == WIDGET_VISIBLE) {
     FOG_ASSERT(_fullscreendata);
+    _visibility = WIDGET_VISIBLE;
     setWindowFlags(_fullscreendata->_restorewindowFlags);
-
-    if(_fullscreendata->_restorewindowFlags & WINDOW_TRANSPARENT) {
-      setTransparency(getTransparency());
-    }
-
     setGeometry(_fullscreendata->_restoregeometry);
 
     delete _fullscreendata;
@@ -647,16 +648,24 @@ void Widget::setVisible(uint32_t val)
     if (val >= WIDGET_VISIBLE_MINIMIZED)
     {
       if(_guiWindow->isModal() && val != WIDGET_VISIBLE_RESTORE) {
-        //Application::getInstance()->getGuiEngine()->startModalWindow(_guiWindow);
-        _guiWindow->getOwner()->startModalWindow(_guiWindow);
+        //TODO: Application wide modality do not have a owner
+        if(_guiWindow->getModality() == MODAL_WINDOW) {
+          //start this window as modal window above our owner
+          _guiWindow->getOwner()->startModalWindow(_guiWindow);
+        } else {
+
+        }
       }
       _guiWindow->show(val);
     }
     else
     {
       if(_guiWindow->isModal() && val == WIDGET_HIDDEN) {
-        //only hidden will remove the Modal widget! (WIDGET_HIDDEN_BY_PARENT not!)
-        _guiWindow->getOwner()->endModal(_guiWindow);
+        if(_guiWindow->getModality() == MODAL_WINDOW) {
+          _guiWindow->getOwner()->endModal(_guiWindow);
+        } else {
+
+        }
       }
       _guiWindow->hide();
     }
@@ -683,12 +692,9 @@ void Widget::setTransparency(float val) {
     val = 1.0;
   }
   
-  if(_guiWindow) {    
-    //some window manager need a flag to be set (w.g. windows)
+  if(_guiWindow) {
+    //some window manager need a flag to be set (e.g. windows)
     //so make sure the flag is already set
-    if((_windowFlags & WINDOW_TRANSPARENT) == 0) {
-      setWindowHints(getWindowHints() | WINDOW_TRANSPARENT);
-    }
     _transparency = val;
     _guiWindow->setTransparency(val);
   } else {
@@ -697,11 +703,16 @@ void Widget::setTransparency(float val) {
 }
 
 void Widget::showModal(GuiWindow* owner) {
-  if(_guiWindow) {
-    //Only TopLevel Windows may be modal!    
-    _guiWindow->setModal(MODAL_WINDOW);
-    //This will implicitly set this window above owner window!
-    _guiWindow->setOwner(owner);    
+  if(_guiWindow && !_guiWindow->getOwner()) {
+    //Only TopLevel Windows may be modal!
+    if(owner != 0) {
+      _guiWindow->setModal(MODAL_WINDOW);
+      //This will implicitly set this window above owner window!
+      _guiWindow->setOwner(owner);
+    } else {
+      _guiWindow->setModal(MODAL_APPLICATION);
+    }
+  
     setVisible(WIDGET_VISIBLE);
   }
 }
@@ -716,10 +727,18 @@ void Widget::setWindowFlags(uint32_t flags)
 
     if(_guiWindow) 
     {
+      if(_visibility == WIDGET_VISIBLE_FULLSCREEN) {
+        //if it is currently fullscreen, just set the restore flags to flags!
+        _fullscreendata->_restorewindowFlags = flags;
+        return;
+      } else {
         _guiWindow->create(flags);
+      }
     }
 
     _windowFlags = flags;
+
+    //setTransparency(_transparency);
 }
 
 void Widget::setWindowHints(uint32_t flags) 
@@ -729,28 +748,21 @@ void Widget::setWindowHints(uint32_t flags)
   //make sure to keep window type and to only update the hints
   flags = (_windowFlags & WINDOW_TYPE_MASK) | (flags & WINDOW_HINTS_MASK);
 
-  if(_guiWindow) 
-  {
-    _guiWindow->create(flags);
-  }
-
-  _windowFlags = flags;
+  setWindowFlags(flags);
 }
 
 void Widget::changeFlag(uint32_t flag, bool set, bool update) {
+  uint32_t flags = _windowFlags;
   if(set) 
   {
-    _windowFlags |= flag;
+    flags |= flag;
   }
   else 
   {
-    _windowFlags &= ~flag;
+    flags &= ~flag;
   }
 
-  if(_guiWindow && update) 
-  {
-    _guiWindow->create(_windowFlags);
-  }
+  setWindowFlags(flags);
 }
 
 void Widget::setDragAble(bool drag, bool update) 

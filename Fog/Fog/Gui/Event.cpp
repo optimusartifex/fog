@@ -59,7 +59,7 @@ StateEvent::~StateEvent()
 // ============================================================================
 
 VisibilityEvent::VisibilityEvent(uint32_t code) :
-  Event(code)
+  Event(code) 
 {
 }
 

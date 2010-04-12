@@ -8,67 +8,6 @@
 
 using namespace Fog;
 
-struct MyPopUp : public Widget {
-  MyPopUp() : Widget(WINDOW_INLINE_POPUP) {
-
-  }
-
-  virtual void onPaint(PaintEvent* e)
-  {
-    Painter* p = e->getPainter();
-    p->setOperator(OPERATOR_SRC_OVER);
-
-    // Clear everything to white.
-    p->setSource(Argb(0xAAFFFFFFF));
-    p->fillAll();
-
-    p->setSource(Argb(0xFF000000));
-    p->drawText(IntPoint(0,0),Ascii8("TEXT TEXT"),getFont());
-  }
-};
-
-
-struct MyModalWindow : public Window {
-  MyModalWindow(int x) : Window(WINDOW_TYPE_DEFAULT), _x(x) {
-    Button* button5 = new Button();
-    add(button5);
-    button5->setGeometry(IntRect(40, 200, 100, 20));
-    button5->setText(Ascii8("Test ModalWindow"));
-    button5->show();  
-    button5->addListener(EVENT_CLICK, this, &MyModalWindow::onModalTestClick);
-  }
-
-  void onModalTestClick(MouseEvent* e) {
-    _modalwindow = new MyModalWindow(_x+1);
-    _modalwindow->setSize(IntSize(200,300));
-    _modalwindow->addListener(EVENT_CLOSE, this, &MyModalWindow::onModalClose);
-    _modalwindow->showModal(getGuiWindow());
-  }
-
-  void onModalClose() {
-    _modalwindow->hide();
-    //_modalwindow->destroy();
-    _modalwindow = 0;
-  }
-
-  virtual void onPaint(PaintEvent* e)
-  {
-    Painter* p = e->getPainter();
-    p->setOperator(OPERATOR_SRC);
-    // Clear everything to white.
-    p->setSource(Argb(0xFF000000));
-    p->fillAll();
-
-    p->setSource(Argb(0xFFFFFFFF));
-    String s;
-    s.format("MODAL DIALOG NO: %i", _x);
-    p->drawText(IntPoint(0,0),s,getFont());
-  }
-
-  int _x;
-  MyModalWindow* _modalwindow;
-};
-
 struct MyWindow : public Window
 {
   // [Fog Object System]
@@ -81,65 +20,6 @@ struct MyWindow : public Window
   // [Event Handlers]
   virtual void onKeyPress(KeyEvent* e);
   virtual void onPaint(PaintEvent* e);
-  virtual void onConfigure(ConfigureEvent* e) {
-    uint32_t vis = getVisibility();
-
-    if(vis == WIDGET_VISIBLE) {
-      setWindowTitle(Ascii8("STATE: VISIBLE"));
-    } else if(vis == WIDGET_VISIBLE_MAXIMIZED){
-      setWindowTitle(Ascii8("STATE: MAXIMIZED"));
-    } else if(vis == WIDGET_VISIBLE_MINIMIZED){
-      setWindowTitle(Ascii8("STATE: MINIMIZED"));
-    } else if(vis == WIDGET_HIDDEN){
-      setWindowTitle(Ascii8("STATE: HIDDEN"));
-    } else if(vis == WIDGET_VISIBLE_RESTORE){
-      setWindowTitle(Ascii8("STATE: RESTORED"));
-    }   
-  }
-
-  void onModalClose() {
-    _modalwindow->hide();
-    _modalwindow->destroy();
-    _modalwindow = 0;
-  }
-
-  void onModalTestClick(MouseEvent* e) {
-    _modalwindow = new MyModalWindow(_mcount);
-    _modalwindow->setSize(IntSize(200,300));
-    _modalwindow->addListener(EVENT_CLOSE, this, &MyWindow::onModalClose);
-    _modalwindow->showModal(getGuiWindow());
-  }
-
-  void onPopUpClick(MouseEvent* e) {
-    if(_popup->getVisibility() < WIDGET_VISIBLE) {
-      _popup->show();
-    }
-  }
-
-  void onFrameTestClick(MouseEvent* e) {
-    if((getWindowFlags() & WINDOW_NATIVE) == 0) {
-      setWindowFlags(WINDOW_TYPE_DEFAULT|WINDOW_TRANSPARENT);      
-    } else {
-      setWindowFlags(WINDOW_TYPE_FRAMELESS);      
-    }
-  }
-
-  void onFullScreenClick(MouseEvent* e) {
-    if(isFullScreen()) {
-      show();
-    } else {      
-      show(WIDGET_VISIBLE_FULLSCREEN);
-    }
-  }
-
-  void onTransparencyClick(MouseEvent* e) {
-    float v = getTransparency();
-    if(v == 1.0) {
-      v = 0.1;
-    }
-    
-    setTransparency(v + 0.05);
-  }
 
   void paintImage(Painter* painter, const IntPoint& pos, const Image& im, const String& name);
 
@@ -151,10 +31,6 @@ struct MyWindow : public Window
   double _shearY;
   double _scale;
   int _spread;
-
-  Widget* _popup;
-  int _mcount;
-  MyModalWindow* _modalwindow;
 };
 
 FOG_IMPLEMENT_OBJECT(MyWindow)
@@ -169,8 +45,6 @@ MyWindow::MyWindow(uint32_t createFlags) :
 
   i[0].convert(PIXEL_FORMAT_ARGB32);
   i[1].convert(PIXEL_FORMAT_ARGB32);
-
-  _mcount = 0;
 
 /*
   {
@@ -198,48 +72,13 @@ MyWindow::MyWindow(uint32_t createFlags) :
   Button* button = new Button();
   add(button);
   button->setGeometry(IntRect(40, 40, 100, 20));
-  button->setText(Ascii8("Test Transparency"));
-  button->show();  
-  button->addListener(EVENT_CLICK, this, &MyWindow::onTransparencyClick);
+  button->setText(Ascii8("Push me"));
+  button->show();
 
-  Button* button2 = new Button();
-  add(button2);
-  button2->setGeometry(IntRect(40, 80, 100, 20));
-  button2->setText(Ascii8("Test FullScreen"));
-  button2->show();
-  button2->addListener(EVENT_CLICK, this, &MyWindow::onFullScreenClick);
-
-  Button* button3 = new Button();
-  add(button3);
-  button3->setGeometry(IntRect(40, 120, 100, 20));
-  button3->setText(Ascii8("Test PopUp"));
-  button3->show();  
-  button3->addListener(EVENT_CLICK, this, &MyWindow::onPopUpClick);
-
-  Button* button4 = new Button();
-  add(button4);
-  button4->setGeometry(IntRect(40, 160, 100, 20));
-  button4->setText(Ascii8("Test FrameChange"));
-  button4->show();  
-  button4->addListener(EVENT_CLICK, this, &MyWindow::onFrameTestClick);
-
-  Button* button5 = new Button();
-  add(button5);
-  button5->setGeometry(IntRect(40, 200, 100, 20));
-  button5->setText(Ascii8("Test ModalWindow"));
-  button5->show();  
-  button5->addListener(EVENT_CLICK, this, &MyWindow::onModalTestClick);
-
-  _popup = new MyPopUp();
-  add(_popup);
-  _popup->setGeometry(IntRect(40, 120, 50, 20));
-  //should be automatically hidden because of lost of focus!
-  _popup->show();
 }
 
 MyWindow::~MyWindow()
 {
-  //Yeah I know no child widget destructurs... 
 }
 
 void MyWindow::onKeyPress(KeyEvent* e)
@@ -305,20 +144,6 @@ void MyWindow::onKeyPress(KeyEvent* e)
 
 void MyWindow::onPaint(PaintEvent* e)
 {
-  uint32_t vis = getVisibility();
-
-  if(vis == WIDGET_VISIBLE) {
-    setWindowTitle(Ascii8("STATE: VISIBLE"));
-  } else if(vis == WIDGET_VISIBLE_MAXIMIZED){
-    setWindowTitle(Ascii8("STATE: MAXIMIZED"));
-  } else if(vis == WIDGET_VISIBLE_MINIMIZED){
-    setWindowTitle(Ascii8("STATE: MINIMIZED"));
-  } else if(vis == WIDGET_HIDDEN){
-    setWindowTitle(Ascii8("STATE: HIDDEN"));
-  } else if(vis == WIDGET_VISIBLE_RESTORE){
-    setWindowTitle(Ascii8("STATE: RESTORED"));
-  }
-
   TimeTicks ticks = TimeTicks::highResNow();
   Painter* p = e->getPainter();
 
@@ -326,7 +151,7 @@ void MyWindow::onPaint(PaintEvent* e)
   p->setOperator(OPERATOR_SRC);
 
   // Clear everything to white.
-  p->setSource(Argb(0x66FFFFFF));
+  p->setSource(Argb(0xFFFFFFFF));
   p->fillAll();
   
   p->setSource(Argb(0xFF000000));
@@ -433,11 +258,10 @@ FOG_GUI_MAIN()
 {
   Application app(Ascii8("Gui"));
 
-  MyWindow window(WINDOW_TYPE_DEFAULT|WINDOW_TRANSPARENT);
+  MyWindow window;
   window.setSize(IntSize(500, 400));
 
   window.addListener(EVENT_CLOSE, &app, &Application::quit);
-  window.setTransparency(0.1);
   window.show();
 
   return app.run();

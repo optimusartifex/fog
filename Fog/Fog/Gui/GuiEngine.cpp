@@ -5,7 +5,6 @@
 
 // [Dependencies]
 #include <Fog/Gui/GuiEngine.h>
-#include <Fog/Core/Application.h>
 
 FOG_IMPLEMENT_OBJECT(Fog::GuiEngine)
 FOG_IMPLEMENT_OBJECT(Fog::GuiWindow)
@@ -51,21 +50,13 @@ GuiWindow::GuiWindow(Widget* widget) :
   _visible(true),
   _hasFocus(false),
   _needBlit(true),
-  _isDirty(false),
-  _windowRect(0, 0, 1, 1),
-  _clientRect(0, 0, 1, 1),
-  _owner(NULL),
-  _modalpolicy(MODAL_NONE),
-  _modal(0),
-  _lastmodal(NULL)
+  _isDirty(false)
 {
 }
 
 GuiWindow::~GuiWindow()
 {
-
 }
-
 
 // ============================================================================
 // [Fog::GuiBackBuffer]

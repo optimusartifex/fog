@@ -90,8 +90,6 @@ struct FOG_API VisibilityEvent : public Event
 
   VisibilityEvent(uint32_t code = 0);
   virtual ~VisibilityEvent();
-
-  uint32_t _visibilitystate;
 };
 
 // ============================================================================

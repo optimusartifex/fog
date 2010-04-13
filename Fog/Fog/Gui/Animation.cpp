@@ -17,6 +17,10 @@ FOG_IMPLEMENT_OBJECT(Fog::Animation)
 FOG_IMPLEMENT_OBJECT(Fog::AnimationDispatcher)
 FOG_IMPLEMENT_OBJECT(Fog::WidgetAnimation)
 FOG_IMPLEMENT_OBJECT(Fog::WidgetOpacityAnimation)
+FOG_IMPLEMENT_OBJECT(Fog::WidgetPositionAnimation)
+FOG_IMPLEMENT_OBJECT(Fog::WidgetGeometryAnimation)
+FOG_IMPLEMENT_OBJECT(Fog::WidgetSizeAnimation)
+
 
 namespace Fog {
 

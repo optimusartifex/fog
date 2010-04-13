@@ -128,6 +128,11 @@ protected:
   Widget* _widget;
 };
 
+#ifdef FOG_OS_WINDOWS
+#pragma warning(disable: 4244) // float to int reduction
+#endif
+
+//Now rudimentary Animation-Implementation follows
 
 struct FOG_API WidgetOpacityAnimation : public WidgetAnimation
 {
@@ -157,6 +162,112 @@ struct FOG_API WidgetOpacityAnimation : public WidgetAnimation
 protected:
   float _startOpacity;
   float _endOpacity;
+};
+
+struct FOG_API WidgetPositionAnimation : public WidgetAnimation
+{
+  FOG_DECLARE_OBJECT(WidgetPositionAnimation, WidgetAnimation)
+
+  WidgetPositionAnimation(Widget* widget) : WidgetAnimation(widget) {
+
+  }
+
+  virtual ~WidgetPositionAnimation() {
+
+  }
+
+  virtual void onStep(AnimationEvent* e) {    
+    if (_widget) {
+      IntPoint p;
+
+      p.setX((int)_startPosition.getX() + (_endPosition.getX() - _startPosition.getX()) * _position);
+      p.setY((int)_startPosition.getY() + (_endPosition.getY() - _startPosition.getY()) * _position);
+
+      _widget->setPosition(p);
+    }
+  }
+
+  FOG_INLINE IntPoint getStartPosition() const { return _startPosition; }
+  FOG_INLINE IntPoint getEndPosition() const { return _endPosition; }
+
+  void setStartPosition(const IntPoint& start) { _startPosition = start; }
+  void setEndPosition(const IntPoint& end) { _endPosition = end; }
+
+protected:
+  IntPoint _startPosition;
+  IntPoint _endPosition;
+};
+
+struct FOG_API WidgetSizeAnimation : public WidgetAnimation
+{
+  FOG_DECLARE_OBJECT(WidgetSizeAnimation, WidgetAnimation)
+
+    WidgetSizeAnimation(Widget* widget) : WidgetAnimation(widget) {
+
+  }
+
+  virtual ~WidgetSizeAnimation() {
+
+  }
+
+  virtual void onStep(AnimationEvent* e) {    
+    if (_widget) {
+      IntSize p;
+
+      p.setWidth((int)_start.getWidth() + (_end.getWidth() - _start.getWidth()) * _position);
+      p.setHeight((int)_start.getHeight() + (_end.getHeight() - _start.getHeight()) * _position);
+
+      _widget->setSize(p);
+    }
+  }
+
+  FOG_INLINE IntSize getStartPosition() const { return _start; }
+  FOG_INLINE IntSize getEndPosition() const { return _end; }
+
+  void setStartPosition(const IntSize& start) { _start = start; }
+  void setEndPosition(const IntSize& end) { _end = end; }
+
+protected:
+  IntSize _start;
+  IntSize _end;
+};
+
+
+struct FOG_API WidgetGeometryAnimation : public WidgetAnimation
+{
+  FOG_DECLARE_OBJECT(WidgetGeometryAnimation, WidgetAnimation)
+
+    WidgetGeometryAnimation(Widget* widget) : WidgetAnimation(widget) {
+
+  }
+
+  virtual ~WidgetGeometryAnimation() {
+
+  }
+
+  virtual void onStep(AnimationEvent* e) {    
+    if (_widget) {
+      IntRect p;
+
+      p.setX((int)_start.getX() + (_end.getX() - _start.getX()) * _position);
+      p.setY((int)_start.getY() + (_end.getY() - _start.getY()) * _position);
+
+      p.setWidth((int)_start.getWidth() + (_end.getWidth() - _start.getWidth()) * _position);
+      p.setHeight((int)_start.getHeight() + (_end.getHeight() - _start.getHeight()) * _position);
+
+      _widget->setGeometry(p);
+    }
+  }
+
+  FOG_INLINE IntRect getStartPosition() const { return _start; }
+  FOG_INLINE IntRect getEndPosition() const { return _end; }
+
+  void setStartPosition(const IntRect& start) { _start = start; }
+  void setEndPosition(const IntRect& end) { _end = end; }
+
+protected:
+  IntRect _start;
+  IntRect _end;
 };
 
 }

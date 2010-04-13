@@ -679,10 +679,10 @@ void Widget::setVisible(uint32_t val)
   }
 
   if(val == WIDGET_VISIBLE_RESTORE) {
-    val = WIDGET_VISIBLE;
+    _visibility = WIDGET_VISIBLE;
+  } else {
+    _visibility = val;
   }
-
-  _visibility = val;
 }
 
 void Widget::setTransparency(float val) {

@@ -290,20 +290,22 @@ WinGuiEngine::WinGuiEngine()
   wc.lpszClassName = L"Fog_Window";
   if (!RegisterClassExW(&wc)) return;
 
-  // "Fog_Popup" window class.
-  wc.style         = CS_OWNDC;
-  wc.lpszClassName = L"Fog_Popup";
-  if (!RegisterClassExW(&wc)) return;
-
-  // "Fog_Dialog" window class.
-  wc.style         = CS_OWNDC;
-  wc.lpszClassName = L"Fog_Dialog";
-  if (!RegisterClassExW(&wc)) return;
-
-  // "Fog_Tool" window class.
-  wc.style         = CS_OWNDC;
-  wc.lpszClassName = L"Fog_Tool";
-  if (!RegisterClassExW(&wc)) return;
+// All classes share the same configuration
+// so, why have different classes?
+//   // "Fog_Popup" window class.
+//   wc.style         = CS_OWNDC;
+//   wc.lpszClassName = L"Fog_Popup";
+//   if (!RegisterClassExW(&wc)) return;
+// 
+//   // "Fog_Dialog" window class.
+//   wc.style         = CS_OWNDC;
+//   wc.lpszClassName = L"Fog_Dialog";
+//   if (!RegisterClassExW(&wc)) return;
+// 
+//   // "Fog_Tool" window class.
+//   wc.style         = CS_OWNDC;
+//   wc.lpszClassName = L"Fog_Tool";
+//   if (!RegisterClassExW(&wc)) return;
 
   updateDisplayInfo();
   _initialized = true;
@@ -984,8 +986,12 @@ err_t WinGuiWindow::create(uint32_t flags)
       b = (flags & WINDOW_TRANSPARENT) != 0;
     }
 
-    //prevent flickering!
-    SendMessage((HWND)_handle, WM_SETREDRAW, (WPARAM) FALSE, (LPARAM) 0);
+    bool visible = getWidget()->isVisible();
+
+    if(visible) {
+      //prevent flickering!
+      SendMessage((HWND)_handle, WM_SETREDRAW, (WPARAM) FALSE, (LPARAM) 0);
+    }
 
     if(reinterpret_cast<WinGuiBackBuffer*>(_backingStore)->_prgb != b) {
       reinterpret_cast<WinGuiBackBuffer*>(_backingStore)->_prgb = b;
@@ -1008,12 +1014,14 @@ err_t WinGuiWindow::create(uint32_t flags)
 
     getWidget()->setTransparency(getWidget()->getTransparency());
 
-    //allow repaint again!
-    SendMessage((HWND)_handle, WM_SETREDRAW, (WPARAM) TRUE, (LPARAM) 0);
-    UpdateWindow((HWND)_handle);
+    if(visible) {
+      //allow repaint again!
+      SendMessage((HWND)_handle, WM_SETREDRAW, (WPARAM) TRUE, (LPARAM) 0);
+      UpdateWindow((HWND)_handle);
     
-    SetWindowPos((HWND)_handle, 0,0,0,0,0, SWP_FRAMECHANGED | SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER);
-    RedrawWindow((HWND)_handle,0,0, RDW_ERASE | RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_UPDATENOW);
+      SetWindowPos((HWND)_handle, 0,0,0,0,0, SWP_FRAMECHANGED | SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER);
+      RedrawWindow((HWND)_handle,0,0, RDW_ERASE | RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_UPDATENOW);
+    }
 
     return ERR_OK;
   }
@@ -1022,30 +1030,31 @@ err_t WinGuiWindow::create(uint32_t flags)
   int y;
   WCHAR* wndClass;
 
-  if (flags & WINDOW_POPUP)
-  {
-    x = -1;
-    y = -1;
-    wndClass = L"Fog_Popup";
-  }
-  else if(flags & WINDOW_TOOL)
-  {
-    x = CW_USEDEFAULT;
-    y = CW_USEDEFAULT;
-    wndClass = L"Fog_Tool";
-  }
-  else if(flags & WINDOW_DIALOG)
-  {
-    x = CW_USEDEFAULT;
-    y = CW_USEDEFAULT;
-    wndClass = L"Fog_Dialog";
-  }
-  else
-  {
+// I don't think that we need differen window classes!
+//   if (flags & WINDOW_POPUP)
+//   {
+//     x = -1;
+//     y = -1;
+//     wndClass = L"Fog_Popup";
+//   }
+//   else if(flags & WINDOW_TOOL)
+//   {
+//     x = CW_USEDEFAULT;
+//     y = CW_USEDEFAULT;
+//     wndClass = L"Fog_Tool";
+//   }
+//   else if(flags & WINDOW_DIALOG)
+//   {
+//     x = CW_USEDEFAULT;
+//     y = CW_USEDEFAULT;
+//     wndClass = L"Fog_Dialog";
+//   }
+//   else
+//   {
     x = CW_USEDEFAULT;
     y = CW_USEDEFAULT;
     wndClass = L"Fog_Window";
-  }
+//  }
 
   bool b = (flags & WINDOW_FRAMELESS) != 0 || (flags & WINDOW_POPUP) != 0 || (flags & WINDOW_FULLSCREEN) != 0;
   if(b) {
@@ -1171,7 +1180,9 @@ err_t WinGuiWindow::show(uint32_t state)
   }
   else if(state == WIDGET_VISIBLE_FULLSCREEN) 
   {
-    ShowWindow((HWND)_handle, SW_SHOW);
+    if(!IsWindowVisible((HWND)_handle)) {
+      ShowWindow((HWND)_handle, SW_SHOW);
+    }
   }
 
   return ERR_OK;

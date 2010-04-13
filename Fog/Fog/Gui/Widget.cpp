@@ -686,10 +686,10 @@ void Widget::setVisible(uint32_t val)
 }
 
 void Widget::setTransparency(float val) {
-  if(val < 0.0) {
-    val = 0.0;
-  } else if(val > 1.0) {
-    val = 1.0;
+  if(val < 0.0f) {
+    val = 0.0f;
+  } else if(val > 1.0f) {
+    val = 1.0f;
   }
   
   if(_guiWindow) {

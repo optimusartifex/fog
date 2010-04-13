@@ -644,6 +644,7 @@ SOURCE_GROUP(Svg FILES ${FOG_SVG_LIB_SOURCES} ${FOG_SVG_LIB_HEADERS})
 # =============================================================================
 
 Set(FOG_GUI_LIB_SOURCES
+  Fog/Gui/Animation.cpp
   Fog/Gui/Button.cpp
   Fog/Gui/ButtonBase.cpp
   Fog/Gui/CheckBox.cpp
@@ -660,6 +661,7 @@ Set(FOG_GUI_LIB_SOURCES
 )
 
 Set(FOG_GUI_LIB_HEADERS
+  Fog/Gui/Animation.h
   Fog/Gui.h
   Fog/Gui/Button.h
   Fog/Gui/ButtonBase.h

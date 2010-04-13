@@ -94,13 +94,17 @@ struct MyWindow : public Window
       setWindowTitle(Ascii8("STATE: HIDDEN"));
     } else if(vis == WIDGET_VISIBLE_RESTORE){
       setWindowTitle(Ascii8("STATE: RESTORED"));
-    }   
+    }
   }
 
   void onModalClose() {
     _modalwindow->hide();
     _modalwindow->destroy();
     _modalwindow = 0;
+  }
+
+  virtual void onClose(CloseEvent* e) {
+    this->destroyWindow();
   }
 
   void onModalTestClick(MouseEvent* e) {
@@ -118,9 +122,9 @@ struct MyWindow : public Window
 
   void onFrameTestClick(MouseEvent* e) {
     if(getWindowFlags() & WINDOW_NATIVE) {
-      setWindowFlags(WINDOW_TYPE_TOOL);
+      setWindowFlags(WINDOW_TYPE_TOOL|WINDOW_TRANSPARENT);
     } else {
-      setWindowFlags(WINDOW_TYPE_DEFAULT);
+      setWindowFlags(WINDOW_TYPE_DEFAULT|WINDOW_TRANSPARENT);
     }
   }
 
@@ -133,12 +137,18 @@ struct MyWindow : public Window
   }
 
   void onTransparencyClick(MouseEvent* e) {
-    float v = getTransparency();
-    if(v == 1.0) {
-      v = 0.1;
-    }
+    WidgetOpacityAnimation* anim = new WidgetOpacityAnimation(this);
+    anim->setDuration(TimeDelta::fromMilliseconds(1000));
+
+    anim->setStartOpacity(0.0f);
+    anim->setEndOpacity(1.0f);
     
-    setTransparency(v + 0.05);
+    if(getTransparency() == 1.0) {
+      anim->setDirection(ANIMATION_BACKWARD);
+      anim->setStartOpacity(0.1f);
+    }
+
+    Application::getInstance()->getAnimationDispatcher()->addAnimation(anim);
   }
 
   void paintImage(Painter* painter, const IntPoint& pos, const Image& im, const String& name);
@@ -326,7 +336,7 @@ void MyWindow::onPaint(PaintEvent* e)
   p->setOperator(OPERATOR_SRC);
 
   // Clear everything to white.
-  p->setSource(Argb(0xFFFFFFFF));
+  p->setSource(Argb(0x19000000));
   p->clear();
   
   p->setSource(Argb(0xFF000000));
@@ -349,7 +359,7 @@ void MyWindow::onPaint(PaintEvent* e)
   p->clear();
 */
 
-#if 1
+#if 0
 
   // These coordinates describe boundary of object we want to paint.
   double x = 40.5;
@@ -432,11 +442,13 @@ FOG_GUI_MAIN()
 {
   Application app(Ascii8("Gui"));
 
-  MyWindow window;
+  MyWindow window(WINDOW_TYPE_FRAMELESS|WINDOW_TRANSPARENT);
   window.setSize(IntSize(500, 400));
+  window.show(WIDGET_VISIBLE);  
 
-  window.addListener(EVENT_CLOSE, &app, &Application::quit);
-  window.show();
+  app.addListener(EVENT_LAST_WINDOW_CLOSED, &app, &Application::quit);
+
+    
 
   return app.run();
 }

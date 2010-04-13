@@ -212,4 +212,14 @@ ThemeEvent::~ThemeEvent()
 {
 }
 
+AnimationEvent::AnimationEvent(uint32_t code) : 
+  Event(code)
+{
+}
+
+AnimationEvent::~AnimationEvent()
+{
+}
+
+
 } // Fog namespace

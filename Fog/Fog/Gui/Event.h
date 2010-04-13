@@ -383,6 +383,23 @@ struct FOG_API ThemeEvent : public Event
   virtual ~ThemeEvent();
 };
 
+
+// ============================================================================
+// [Fog::AnimationEvent]
+// ============================================================================
+
+struct FOG_API AnimationEvent : public Event
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  AnimationEvent(uint32_t code=EVENT_ANIMATION);
+  virtual ~AnimationEvent();
+
+  uint32_t _type;
+};
+
 } // Fog namespace
 
 //! @}

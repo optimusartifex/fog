@@ -87,7 +87,13 @@ bool BaseGuiEngine::mapHandle(void* handle, GuiWindow* native)
 
 bool BaseGuiEngine::unmapHandle(void* handle)
 {
-  return _widgetMapper.remove(handle);
+  bool b= _widgetMapper.remove(handle);
+  if(_widgetMapper.getLength() == 0) {
+    Event e(EVENT_LAST_WINDOW_CLOSED);
+    Application::getInstance()->sendEvent(&e);
+  }
+
+  return b;
 }
 
 GuiWindow* BaseGuiEngine::handleToNative(void* handle) const

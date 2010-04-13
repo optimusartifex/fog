@@ -422,7 +422,7 @@ void WinGuiEngine::doBlitWindow(GuiWindow* window, const IntBox* rects, sysuint_
   HDC hdc = GetDC((HWND)window->getHandle());
   WinGuiBackBuffer* back = reinterpret_cast<WinGuiBackBuffer*>(window->_backingStore);
 
-  if(back->_prgb) {      
+  if(back->_prgb) {
     SIZE size;
     size.cx = back->getWidth();
     size.cy = back->getHeight();
@@ -835,14 +835,19 @@ void WinGuiWindow::setTransparency(float val) {
      blend.BlendOp = AC_SRC_OVER;
      blend.BlendFlags = 0;
      blend.AlphaFormat = 0;
-     blend.SourceConstantAlpha = (int)(255 * val);
+     //on update a value of 255 will create a opaque window!
+     blend.SourceConstantAlpha = (int)(254 * val);
 
      LONG flag = GetWindowLong((HWND)getHandle(),GWL_EXSTYLE);
      if((flag & WS_EX_LAYERED) == 0) {
        SetWindowLong((HWND)getHandle(),GWL_EXSTYLE,flag|WS_EX_LAYERED);
      }
 
-     UpdateLayeredWindow((HWND)getHandle(), NULL, NULL, NULL, NULL, NULL,NULL, &blend, ULW_ALPHA);
+     bool ret = UpdateLayeredWindow((HWND)getHandle(), NULL, NULL, NULL, NULL, NULL, NULL, &blend, ULW_ALPHA);
+     if(!ret) {
+       int e = GetLastError();
+       ret = ret;
+     }
    }
 }
 
@@ -1458,7 +1463,12 @@ LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
   //bool allowinput = !curmodal || ((HWND)curmodal->getHandle() == hwnd);  
 
   if(message >= WM_NCCREATE && message <= WM_NCXBUTTONDBLCLK) {
-
+    if(message > WM_NCMOUSEMOVE) {
+      if(hasPopUp()) {
+        closePopUps();
+      }
+    }
+    goto defWindowProc;
   } else if(message >= WM_KEYFIRST && message <= WM_KEYLAST) {
     return KeyboardMessageHelper(hwnd,message,wParam,lParam);
   } else if(message >= WM_MOUSEFIRST && message <= WM_MOUSELAST || message== WM_MOUSEMOVE || message== WM_MOUSELEAVE) {

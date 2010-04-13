@@ -50,6 +50,7 @@
 #include <Fog/Gui/Theme.h>
 #include <Fog/Gui/Widget.h>
 #include <Fog/Gui/Window.h>
+#include <Fog/Gui/Animation.h>
 
 // [Guard]
 #endif // _FOG_GUI_H

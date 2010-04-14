@@ -35,6 +35,10 @@ struct FOG_API Layout : public LayoutItem
   Layout();
   virtual ~Layout();
 
+  virtual uint32_t expandingDirections() const {
+    return ORIENTATION_HORIZONTAL | ORIENTATION_VERTICAL;
+  }
+
   FOG_DISABLE_COPY(Layout)
 
   LayoutItem* _parentItem;

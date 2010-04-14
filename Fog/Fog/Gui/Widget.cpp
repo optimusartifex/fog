@@ -35,7 +35,7 @@ Widget::Widget(uint32_t createFlags) :
   _clientGeometry(0, 0, 0, 0),
   _origin(0, 0),
   _layout(NULL),
-  _layoutPolicy(0),
+  _layoutPolicy(LAYOUT_POLICY_WIDTH_PREFERRED|LAYOUT_POLICY_HEIGHT_PREFERRED),
   _hasHeightForWidth(false),
   _isLayoutDirty(true),
   _lastFocus(NULL),
@@ -239,16 +239,15 @@ err_t Widget::setWindowGranularity(const IntPoint& pt)
 // ============================================================================
 
 void Widget::setGeometry(const IntRect& geometry)
-{
-  if(_layout) return;
+{  
   if (_geometry == geometry) return;
-
   if (_guiWindow)
   {
     _guiWindow->reconfigure(geometry);
   }
   else
   {
+    if(_layout) return;
     GuiEngine* ge = Application::getInstance()->getGuiEngine();
     if (!ge) return;
 
@@ -258,8 +257,7 @@ void Widget::setGeometry(const IntRect& geometry)
 
 void Widget::setPosition(const IntPoint& pt)
 {
-  if (_geometry.getPosition() == pt) return;
-
+  if (_geometry.getPosition() == pt) return;  
   if (_guiWindow)
   {
     _guiWindow->move(pt);
@@ -267,6 +265,7 @@ void Widget::setPosition(const IntPoint& pt)
   }
   else
   {
+    if(_layout) return;
     GuiEngine* ge = Application::getInstance()->getGuiEngine();
     if (!ge) return;
 
@@ -277,15 +276,14 @@ void Widget::setPosition(const IntPoint& pt)
 
 void Widget::setSize(const IntSize& sz)
 {
-  if (_geometry.getSize() == sz) return;
-
+  if (_geometry.getSize() == sz) return;  
   if (_guiWindow)
   {
     _guiWindow->resize(sz);
-    //_geometry.setHeight(sz.getHeight()).setWidth(sz.getWidth());
   }
   else
   {
+    if(_layout) return;
     GuiEngine* ge = Application::getInstance()->getGuiEngine();
     if (!ge) return;
 
@@ -528,18 +526,39 @@ Layout* Widget::takeLayout()
 // [Layout Policy]
 // ============================================================================
 
-// uint32_t Widget::getLayoutPolicy() const
-// {
-//   return _layoutPolicy;
-// }
-// 
-// void Widget::setLayoutPolicy(uint32_t policy)
-// {
-//   if (_layoutPolicy == policy) return;
-// 
-//   _layoutPolicy = policy;
-//   invalidateLayout();
-// }
+uint32_t Widget::getExpandingDirections() const {    
+  if (isEmpty())
+    return 0;
+
+  uint32_t e = _orientation;
+
+  if (_layout) {
+    if (_layoutPolicy.getPolicy() & LAYOUT_GROWING_WIDTH  && (_layout->expandingDirections() & ORIENTATION_HORIZONTAL))
+      e |= ORIENTATION_HORIZONTAL;
+    if (_layoutPolicy.getPolicy() & LAYOUT_GROWING_HEIGHT  && (_layout->expandingDirections() & ORIENTATION_VERTICAL))
+      e |= ORIENTATION_VERTICAL;
+  }
+
+  if (_alignment & ALIGNMENT_HORIZONTAL_MASK)
+    e &= ~ORIENTATION_HORIZONTAL;
+  if (_alignment & ALIGNMENT_VERTICAL_MASK)
+    e &= ~ORIENTATION_VERTICAL;
+
+  return e;
+}
+
+LayoutPolicy Widget::getLayoutPolicy() const
+{
+  return _layoutPolicy;
+}
+
+void Widget::setLayoutPolicy(const LayoutPolicy& policy)
+{
+  if (_layoutPolicy == policy) return;
+
+  _layoutPolicy = policy;
+  invalidateLayout();
+}
 
 // ============================================================================
 // [Layout Height For Width]

@@ -19,8 +19,9 @@ namespace Fog {
 // [Fog::LayoutItem]
 // ============================================================================
 
-LayoutItem::LayoutItem()
+LayoutItem::LayoutItem(uint32_t alignment) : _alignment(alignment)
 {
+
 }
 
 LayoutItem::~LayoutItem() 

@@ -22,6 +22,7 @@
 #include <Fog/Gui/Constants.h>
 #include <Fog/Gui/Event.h>
 #include <Fog/Gui/Layout/LayoutItem.h>
+#include <Fog/Gui/Layout/LayoutHint.h>
 
 //! @addtogroup Fog_Gui
 //! @{
@@ -255,6 +256,18 @@ struct FOG_API Widget : public LayoutItem
   // [Layout Of Widget]
   // --------------------------------------------------------------------------
 
+  virtual IntSize getSizeHint() const {
+    return _layoutHint.getSizeHint();
+  }
+
+  virtual IntSize getMinimumSize() const {
+    return _layoutHint.getMinimumSize();
+  }
+
+  virtual IntSize getMaximumSize() const {
+    return _layoutHint.getMaximumSize();
+  }
+
   //! @brief Get widget layout manager.
   FOG_INLINE Layout* getLayout() const { return _layout; }
 
@@ -266,6 +279,23 @@ struct FOG_API Widget : public LayoutItem
 
   //! @brief Take widget layout manager (will not disconnect children).
   Layout* takeLayout();
+
+  virtual bool isEmpty() const {
+    return !isVisible() || _guiWindow;
+  }
+
+  virtual uint32_t getExpandingDirections() const;
+
+
+  //methods for doing real geometry changes
+  virtual void setLayoutGeometry(const IntRect&) {
+    //don't dispatch geometry events because updates will be done AFTER finishing all
+    //geometry changes
+  }
+
+  virtual IntRect getLayoutGeometry() const {
+    return IntRect();
+  }
 
   // --------------------------------------------------------------------------
   // [Layout Hints]
@@ -281,8 +311,8 @@ struct FOG_API Widget : public LayoutItem
   // [Layout Policy]
   // --------------------------------------------------------------------------
 
-  //virtual uint32_t getLayoutPolicy() const;
-  //virtual void setLayoutPolicy(uint32_t policy);
+  virtual LayoutPolicy getLayoutPolicy() const;
+  virtual void setLayoutPolicy(const LayoutPolicy& policy);
 
   // --------------------------------------------------------------------------
   // [Layout Height For Width]
@@ -640,10 +670,10 @@ protected:
   Layout* _layout;
 
   //! @brief Layout hints.
-  //LayoutHint _layoutHint;
+  LayoutHint _layoutHint;
 
   //! @brief Layout policy.
-  uint8_t _layoutPolicy;
+  LayoutPolicy _layoutPolicy;
   //! @brief Whether the widget can trade height for width.
   bool _hasHeightForWidth;
   //! @brief Whether the layout is dirty (must be recalculated for this widget

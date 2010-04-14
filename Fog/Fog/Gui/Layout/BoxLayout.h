@@ -7,6 +7,7 @@
 #ifndef _FOG_GUI_LAYOUT_BOXLAYOUT_H
 #define _FOG_GUI_LAYOUT_BOXLAYOUT_H
 
+#if 0
 // [Dependencies]
 #include <Fog/Gui/Layout/Layout.h>
 
@@ -59,6 +60,6 @@ protected:
 } // Fog namespace
 
 //! @}
-
+#endif
 // [Guard]
 #endif // _FOG_GUI_LAYOUT_BOXLAYOUT_H

@@ -271,18 +271,18 @@ struct FOG_API Widget : public LayoutItem
   // [Layout Hints]
   // --------------------------------------------------------------------------
 
-  virtual const LayoutHint& getLayoutHint() const;
-  virtual void setLayoutHint(const LayoutHint& layoutHint);
+  //virtual const LayoutHint& getLayoutHint() const;
+  //virtual void setLayoutHint(const LayoutHint& layoutHint);
 
-  virtual const LayoutHint& getComputedLayoutHint() const;
-  virtual void computeLayoutHint();
+  //virtual const LayoutHint& getComputedLayoutHint() const;
+  //virtual void computeLayoutHint();
 
   // --------------------------------------------------------------------------
   // [Layout Policy]
   // --------------------------------------------------------------------------
 
-  virtual uint32_t getLayoutPolicy() const;
-  virtual void setLayoutPolicy(uint32_t policy);
+  //virtual uint32_t getLayoutPolicy() const;
+  //virtual void setLayoutPolicy(uint32_t policy);
 
   // --------------------------------------------------------------------------
   // [Layout Height For Width]
@@ -640,7 +640,7 @@ protected:
   Layout* _layout;
 
   //! @brief Layout hints.
-  LayoutHint _layoutHint;
+  //LayoutHint _layoutHint;
 
   //! @brief Layout policy.
   uint8_t _layoutPolicy;

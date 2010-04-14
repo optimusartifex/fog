@@ -240,6 +240,7 @@ err_t Widget::setWindowGranularity(const IntPoint& pt)
 
 void Widget::setGeometry(const IntRect& geometry)
 {
+  if(_layout) return;
   if (_geometry == geometry) return;
 
   if (_guiWindow)
@@ -493,52 +494,52 @@ Layout* Widget::takeLayout()
 // [Layout Hints]
 // ============================================================================
 
-const LayoutHint& Widget::getLayoutHint() const
-{
-  return (_layout) ? _layout->getLayoutHint() : _layoutHint;
-}
-
-void Widget::setLayoutHint(const LayoutHint& layoutHint)
-{
-  // GUI TODO:
-  if (_layout)
-  {
-    _layout->setLayoutHint(layoutHint);
-  }
-  else
-  {
-    if (_layoutHint == layoutHint) return;
-    _layoutHint = layoutHint;
-    invalidateLayout();
-  }
-}
-
-const LayoutHint& Widget::getComputedLayoutHint() const
-{
-  return _layout ? _layout->getComputedLayoutHint() : _layoutHint;
-}
-
-void Widget::computeLayoutHint()
-{
-  if (_layout) _layout->computeLayoutHint();
-}
+// const LayoutHint& Widget::getLayoutHint() const
+// {
+//   return (_layout) ? _layout->getLayoutHint() : _layoutHint;
+// }
+// 
+// void Widget::setLayoutHint(const LayoutHint& layoutHint)
+// {
+//   // GUI TODO:
+//   if (_layout)
+//   {
+//     _layout->setLayoutHint(layoutHint);
+//   }
+//   else
+//   {
+//     if (_layoutHint == layoutHint) return;
+//     _layoutHint = layoutHint;
+//     invalidateLayout();
+//   }
+// }
+// 
+// const LayoutHint& Widget::getComputedLayoutHint() const
+// {
+//   return _layout ? _layout->getComputedLayoutHint() : _layoutHint;
+// }
+// 
+// void Widget::computeLayoutHint()
+// {
+//   if (_layout) _layout->computeLayoutHint();
+// }
 
 // ============================================================================
 // [Layout Policy]
 // ============================================================================
 
-uint32_t Widget::getLayoutPolicy() const
-{
-  return _layoutPolicy;
-}
-
-void Widget::setLayoutPolicy(uint32_t policy)
-{
-  if (_layoutPolicy == policy) return;
-
-  _layoutPolicy = policy;
-  invalidateLayout();
-}
+// uint32_t Widget::getLayoutPolicy() const
+// {
+//   return _layoutPolicy;
+// }
+// 
+// void Widget::setLayoutPolicy(uint32_t policy)
+// {
+//   if (_layoutPolicy == policy) return;
+// 
+//   _layoutPolicy = policy;
+//   invalidateLayout();
+// }
 
 // ============================================================================
 // [Layout Height For Width]
@@ -565,21 +566,21 @@ bool Widget::isLayoutDirty() const
 
 void Widget::invalidateLayout() const
 {
-  // Don't invalidate more times, it can be time consuming.
-  if (_isLayoutDirty) return;
-
-  // Invalidate widget that has layout.
-  Widget* w = const_cast<Widget*>(this);
-  while (w->_layout == NULL)
-  {
-    w = w->_parent;
-    if (w == NULL) return;
-  }
-
-  w->_isLayoutDirty = true;
-  w->_layout->invalidateLayout();
-
-  if (w->_parent && w->_parent->_isLayoutDirty == false) w->_parent->invalidateLayout();
+//   // Don't invalidate more times, it can be time consuming.
+//   if (_isLayoutDirty) return;
+// 
+//   // Invalidate widget that has layout.
+//   Widget* w = const_cast<Widget*>(this);
+//   while (w->_layout == NULL)
+//   {
+//     w = w->_parent;
+//     if (w == NULL) return;
+//   }
+// 
+//   w->_isLayoutDirty = true;
+//   w->_layout->invalidateLayout();
+// 
+//   if (w->_parent && w->_parent->_isLayoutDirty == false) w->_parent->invalidateLayout();
 }
 
 // ============================================================================

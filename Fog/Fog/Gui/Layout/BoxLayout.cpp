@@ -8,6 +8,7 @@
 #include FOG_PRECOMP
 #endif // FOG_PRECOMP
 
+#if 0
 // [Dependencies]
 #include <Fog/Gui/Layout/BoxLayout.h>
 #include <Fog/Gui/Widget.h>
@@ -112,3 +113,5 @@ void BoxLayout::setSpacing(int spacing)
 }
 
 } // Fog namespace
+
+#endif

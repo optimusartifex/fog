@@ -7,6 +7,8 @@
 #ifndef _FOG_GUI_LAYOUT_LAYOUTHINT_H
 #define _FOG_GUI_LAYOUT_LAYOUTHINT_H
 
+
+#if 0
 // [Dependencies]
 #include <Fog/Graphics/Geometry.h>
 
@@ -100,6 +102,7 @@ struct FOG_HIDDEN LayoutHint
 } // Fog namespace
 
 //! @}
+#endif
 
 // [Guard]
 #endif // _FOG_GUI_LAYOUT_LAYOUTHINT_H

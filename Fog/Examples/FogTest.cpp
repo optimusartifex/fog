@@ -442,9 +442,9 @@ FOG_GUI_MAIN()
 {
   Application app(Ascii8("Gui"));
 
-  MyWindow window(WINDOW_TYPE_FRAMELESS|WINDOW_TRANSPARENT);
+  MyWindow window(WINDOW_TYPE_DEFAULT|WINDOW_TRANSPARENT);
   window.setSize(IntSize(500, 400));
-  window.show(WIDGET_VISIBLE);  
+  window.show(WIDGET_VISIBLE_FULLSCREEN);
 
   app.addListener(EVENT_LAST_WINDOW_CLOSED, &app, &Application::quit);
 

@@ -24,7 +24,7 @@ FOG_IMPLEMENT_OBJECT(Fog::WidgetSizeAnimation)
 
 namespace Fog {
 
-Animation::Animation(uint32_t t) : _type(t), _step(10), _duration(TimeDelta::fromMilliseconds(200)), _position(0.0f) {
+Animation::Animation(uint32_t t) : _type(t), _step(10), _duration(TimeDelta::fromMilliseconds(200)), _position(0.0f),_direction(ANIMATION_FORWARD) {
   
 }
 

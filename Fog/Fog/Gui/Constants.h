@@ -593,6 +593,27 @@ enum ANIMATION_TYPE {
 };
 
 // ============================================================================
+// [Fog::AnimationFlags]
+// ============================================================================
+enum ANIMATION_FLAGS {
+  ANIMATION_WIDGET_NO_FLAGS = 0,
+  //! @brief show Widget when animation begins
+  ANIMATION_WIDGET_SHOW_ON_START = (1 << 1),
+  //! @brief hide Widget when animation ends
+  ANIMATION_WIDGET_HIDE_ON_END = (1 << 2),
+  //! @brief destroy Widget when animation ends 
+  ANIMATION_WIDGET_DESTROY_ON_END = (1 << 3),
+  //! @brief marks that the positions are relative to parent
+  ANIMATION_WIDGET_RELATIV_TO_PARENT = (1 << 4),
+  
+  //! @brief identifies where the widget is relativ to parent
+  ANIMATION_WIDGET_ORIENTATION_TOP = (1<<5),
+  ANIMATION_WIDGET_ORIENTATION_BOTTOM = (1<<6),
+  ANIMATION_WIDGET_ORIENTATION_LEFT = (1<<7),
+  ANIMATION_WIDGET_ORIENTATION_RIGHT = (1<<8)
+};
+
+// ============================================================================
 // [Fog::AnimationEventTypes]
 // ============================================================================
 enum ANIMATION_EVENT_TYPE {

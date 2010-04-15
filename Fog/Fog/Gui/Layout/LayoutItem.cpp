@@ -20,7 +20,7 @@ namespace Fog {
 // [Fog::LayoutItem]
 // ============================================================================
 
-LayoutItem::LayoutItem(uint32_t alignment) : _alignment(alignment)
+LayoutItem::LayoutItem(uint32_t alignment) : _alignment(alignment), _withinLayout(0)
 {
 
 }
@@ -29,10 +29,11 @@ LayoutItem::~LayoutItem()
 {
 }
 
-IntSize LayoutItem::calculateMaximumSize(const IntSize& sizeHint, const IntSize& minSize, const IntSize& maxSize, const LayoutPolicy& sizePolicy, uint32_t align)
+FOG_INLINE IntSize calculateMaximumSize(const IntSize& sizeHint, const IntSize& minSize, const IntSize& maxSize, const LayoutPolicy& sizePolicy, uint32_t align)
 {
   if (align & ALIGNMENT_HORIZONTAL_MASK && align & ALIGNMENT_VERTICAL_MASK)
-    return IntSize(WIDGET_MAX_SIZE, WIDGET_MAX_SIZE); //Max Layout-Size??
+    return IntSize(WIDGET_MAX_SIZE, WIDGET_MAX_SIZE);
+
   IntSize s = maxSize;
   IntSize hint = sizeHint.expandedTo(minSize);
   if (s.getWidth() == WIDGET_MAX_SIZE && !(align & ALIGNMENT_HORIZONTAL_MASK))
@@ -52,11 +53,11 @@ IntSize LayoutItem::calculateMaximumSize(const IntSize& sizeHint, const IntSize&
 
 IntSize LayoutItem::calculateMaximumSize(const Widget *w) 
 {
-  return calculateMaximumSize(w->getSizeHint().expandedTo(w->getMinimumSizeHint()), w->getMinimumSize(), w->getMaximumSize(), w->getLayoutPolicy(), w->getLayoutAlignment());
+  return Fog::calculateMaximumSize(w->getSizeHint().expandedTo(w->getMinimumSizeHint()), w->getMinimumSize(), w->getMaximumSize(), w->getLayoutPolicy(), w->getLayoutAlignment());
 }
 
 
-IntSize LayoutItem::calculateMinimumSize(const IntSize& sizeHint, const IntSize& minSizeHint, const IntSize& minSize, const IntSize& maxSize, const LayoutPolicy& sizePolicy) {
+FOG_INLINE IntSize calculateMinimumSize(const IntSize& sizeHint, const IntSize& minSizeHint, const IntSize& minSize, const IntSize& maxSize, const LayoutPolicy& sizePolicy) {
   IntSize s(0, 0);
 
   if (sizePolicy.getHorizontalPolicy() != LAYOUT_IGNORE_WIDTH) {
@@ -84,7 +85,7 @@ IntSize LayoutItem::calculateMinimumSize(const IntSize& sizeHint, const IntSize&
 }
 
 IntSize LayoutItem::calculateMinimumSize(const Widget* w) {
-  return calculateMinimumSize(w->getSizeHint(), w->getMinimumSizeHint(),w->getMinimumSize(), w->getMaximumSize(),w->getLayoutPolicy());
+  return Fog::calculateMinimumSize(w->getSizeHint(), w->getMinimumSizeHint(),w->getMinimumSize(), w->getMaximumSize(),w->getLayoutPolicy());
 }
 
 } // Fog namespace

@@ -85,6 +85,7 @@ struct Window;
 
 struct FOG_API Widget : public LayoutItem
 {
+  friend struct Layout;
   FOG_DECLARE_OBJECT(Widget, LayoutItem)
 
   // --------------------------------------------------------------------------
@@ -366,6 +367,10 @@ struct FOG_API Widget : public LayoutItem
   virtual IntSize getMinimumSizeHint() const;
   virtual IntSize getMaximumSizeHint() const;
   virtual IntSize getSizeHint() const;
+
+  FOG_INLINE void setMinimumSize(const IntSize& minSize) {
+    //TODO!
+  }
 
   FOG_INLINE IntSize getMinimumSize() const
   {
@@ -711,6 +716,8 @@ protected:
     int _maxheight;
     int _minwidth;
     int _minheight;
+    int _explicitMinSize;
+    int _explicitMaxSize;
   }* _extra;
 
   //! @brief Will set/unset a window flag and update the window if specified

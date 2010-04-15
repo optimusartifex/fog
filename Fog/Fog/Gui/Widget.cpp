@@ -531,6 +531,7 @@ Layout* Widget::takeLayout()
 bool Widget::hasLayoutHeightForWidth() const { 
   if (isEmpty())
     return false;
+
   if (_layout)
     return _layout->hasLayoutHeightForWidth();
 
@@ -545,7 +546,7 @@ int Widget::getLayoutHeightForWidth(int width) const {
 //     ? fromLayoutItemSize(wid->d_func(), QSize(w, 0)).width()
 //     : w;
 
-  int hfw =0;
+  int hfw = 0;
   int maxh = getMaximumHeight();
   int minh = getMinimumHeight();
 

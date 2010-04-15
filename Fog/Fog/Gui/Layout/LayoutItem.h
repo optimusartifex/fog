@@ -45,7 +45,6 @@ struct FOG_API LayoutItem : public Object
 
   virtual bool isEmpty() const = 0;
 
-
   virtual IntSize getLayoutSizeHint() const = 0;
   virtual IntSize getLayoutMinimumSize() const = 0;
   virtual IntSize getLayoutMaximumSize() const = 0;
@@ -65,13 +64,11 @@ struct FOG_API LayoutItem : public Object
   uint32_t getLayoutAlignment() const { return _alignment; }
   void setLayoutAlignment(uint32_t a) { _alignment = a; }
 
-  static IntSize calculateMinimumSize(const IntSize& sizeHint, const IntSize& minSizeHint, const IntSize& minSize, const IntSize& maxSize, const LayoutPolicy& sizePolicy);
   static IntSize calculateMinimumSize(const Widget* w);
-
-  static IntSize calculateMaximumSize(const IntSize& sizeHint, const IntSize& minSize, const IntSize& maxSize, const LayoutPolicy& sizePolicy, uint32_t align);
   static IntSize calculateMaximumSize(const Widget* w);
   
   uint32_t _alignment;
+  Layout* _withinLayout;  //for fast identification of Layout, where this Item is inserted!
 };
 
 } // Fog namespace

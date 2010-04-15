@@ -21,12 +21,12 @@ namespace Fog {
 // [Fog::Layout]
 // ============================================================================
 
-Layout::Layout() : _parentItem(0)
+Layout::Layout() : _parentItem(0), _margininvalid(1), _toplevel(0), _spacing(0), _enabled(1), _activated(0)
 {
-  _flags |= OBJ_IS_LAYOUT;
+  _flags |= OBJ_IS_LAYOUT;  
 }
 
-Layout::Layout(Widget *parent, Layout* parentLayout) {
+Layout::Layout(Widget *parent, Layout* parentLayout) : _margininvalid(1), _toplevel(0), _spacing(0), _enabled(1), _activated(0) {
   _flags |= OBJ_IS_LAYOUT;
 
   if (parentLayout) {
@@ -34,12 +34,12 @@ Layout::Layout(Widget *parent, Layout* parentLayout) {
      parentLayout->add(this);
   } else if (parent) {
     if (parent->getLayout()) {
-      //WARNING!
+      //TODO: WARNING! 
     } else {
-      _toplevel = true;
-
       _parentItem = parent;
        parent->setLayout(this);
+       parent->_withinLayout = this;
+       _toplevel = 1;
     }
   } else {
     _parentItem = 0;
@@ -48,6 +48,22 @@ Layout::Layout(Widget *parent, Layout* parentLayout) {
 
 Layout::~Layout() 
 {
+}
+
+int Layout::calcMargin(int margin) const {
+  if (margin >= 0) {
+    return margin;
+  } else if (!_toplevel) {
+    return 0;
+  } else if (const Widget *pw = getParentWidget()) {
+    if(pw->isGuiWindow()) {
+      return DEFAULT_WINDOW_MARGIN;
+    } else {
+      return DEFAULT_WIDGET_MARGIN;
+    }
+  }
+
+  return 0;
 }
 
 //Macro for easy iteration over all items
@@ -134,7 +150,7 @@ void Layout::add(Widget* w) {
 
   if(pw && pw->getLayout()) {
     if(removeWidgetRecursively(pw->getLayout(), w)) {
-      //WARNING: removed from excisting layout
+      //WARNING: removed from existing layout
     }
   }
 
@@ -211,13 +227,131 @@ IntSize Layout::getTotalSizeHint() const
   return s + IntSize(side, top);
 }
 
+void Layout::callSetGeometry(const IntSize& size) {
+  IntRect rect = getParentWidget()->getGeometry();
+  //IntRect rect = mw->testAttribute(Qt::WA_LayoutOnEntireRect) ? mw->getGeometry() : mw->getContentGeometry()
+  setLayoutGeometry(rect);
+}
+
+void Layout::addChildLayout(Layout *l)
+{
+  if (l->_parentItem) {
+    //WARNING already has a parent!
+    return;
+  }
+
+  l->_parentItem = this;
+  l->_withinLayout = this;
+  l->_toplevel = 0;
+  l->_margininvalid = 1;
+
+  if (Widget *mw = getParentWidget()) {
+    l->reparentChildWidgets(mw);
+  }
+}
 
 void Layout::update() {
+  Layout *layout = this;
+  while (layout && layout->_activated) {
+    layout->_activated = false;
+    if (layout->_toplevel) {
+      FOG_ASSERT(layout->_parentItem->isWidget());
+      Widget *mw = static_cast<Widget*>(layout->_parentItem);
+      LayoutEvent e;
+      sendEvent(&e);
+      break;
+    }
+    FOG_ASSERT(!layout->_parentItem || (layout->_parentItem && layout->_parentItem->isLayout()));
+    layout = static_cast<Layout*>(layout->_parentItem);
 
+  }
+}
+
+void Layout::activateRecursiveHelper(LayoutItem *item)
+{
+  item->invalidateLayout();
+  if (item->isLayout()) {
+    FOR_EACH_ITEM(child, 
+    {
+      activateRecursiveHelper(child);
+    }, this)
+
+    ((Layout*)item)->_activated = true;
+  }
 }
 
 bool Layout::activate() {
+  if (!isEnabled() || !_parentItem)
+    return false;  
+
+  if (!_toplevel) {
+    FOG_ASSERT(!layout->_parentItem || (layout->_parentItem && layout->_parentItem->isLayout()));
+    return static_cast<Layout*>(_parentItem)->activate();
+  }
+  if (_activated)
+    return false;
+
+  Widget *mw = static_cast<Widget*>(_parentItem);
+  if (mw == 0) {
+    return false;
+  }
+  FOG_ASSERT(!layout->_parentItem || (layout->_parentItem && layout->_parentItem->isWidget()));
+
+  activateRecursiveHelper(this);
+
+  Widget *md = mw;
+  uint explMin = md->_extra ? md->_extra->_explicitMinSize : 0;
+  uint explMax = md->_extra ? md->_extra->_explicitMaxSize : 0;
+
+
+  bool widthSet = explMin & ORIENTATION_HORIZONTAL;
+  bool heightSet = explMin & ORIENTATION_VERTICAL;
+  
+  if (mw->isGuiWindow()) {
+    IntSize ms = getTotalMinimumSize();
+    if (widthSet)
+      ms.setWidth(mw->getMinimumSize().getWidth());
+    if (heightSet)
+      ms.setHeight(mw->getMinimumSize().getHeight());
+    if ((!heightSet || !widthSet) && hasLayoutHeightForWidth()) {
+      int h = getLayoutMinimumHeightForWidth(ms.getWidth());
+      if (h > ms.getHeight()) {
+        if (!heightSet)
+          ms.setHeight(0);
+        if (!widthSet)
+          ms.setWidth(0);
+      }
+    }
+    mw->setMinimumSize(ms);
+  } else if (!widthSet || !heightSet) {
+    IntSize ms = mw->getMinimumSize();
+    if (!widthSet)
+      ms.setWidth(0);
+    if (!heightSet)
+      ms.setHeight(0);
+    mw->setMinimumSize(ms);
+  }
+
+  callSetGeometry(mw->getSize());
+
+  if (md->_extra) {
+    md->_extra->_explicitMinSize = explMin;
+    md->_extra->_explicitMaxSize = explMax;
+  }
+  // ideally only if sizeHint() or sizePolicy() has changed
+  //mw->updateGeometry();
+
   return false;
+}
+
+
+void Layout::onLayout(LayoutEvent* e) {
+  if (!isEnabled())
+    return;
+
+  if(e->_code == EVENT_LAYOUT_REQUEST) {
+
+  }
 }
 
 

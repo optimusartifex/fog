@@ -710,6 +710,7 @@ enum EVENT_GUI_ENUM
 
   EVENT_LAYOUT_ITEM_ADD,
   EVENT_LAYOUT_ITEM_REMOVE,
+  EVENT_LAYOUT_REQUEST,
 
   // --------------------------------------------------------------------------
   // [StateEvent]

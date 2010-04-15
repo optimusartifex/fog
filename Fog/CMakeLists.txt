@@ -674,6 +674,7 @@ Set(FOG_GUI_LIB_HEADERS
   Fog/Gui/Layout/Layout.h
   Fog/Gui/Layout/LayoutHint.h
   Fog/Gui/Layout/LayoutItem.h
+  Fog/Gui/Layout/LayoutPolicy.h
   Fog/Gui/Theme.h
   Fog/Gui/Widget.h
   Fog/Gui/Widget_p.h

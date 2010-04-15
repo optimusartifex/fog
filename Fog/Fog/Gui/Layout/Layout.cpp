@@ -350,7 +350,9 @@ void Layout::onLayout(LayoutEvent* e) {
     return;
 
   if(e->_code == EVENT_LAYOUT_REQUEST) {
-
+    FOG_ASSERT(!layout->_parentItem || (layout->_parentItem && layout->_parentItem->isWidget()));
+    if (static_cast<Widget *>(_parentItem)->isVisible())
+      activate();
   }
 }
 

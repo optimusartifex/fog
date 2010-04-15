@@ -51,7 +51,8 @@ Widget::Widget(uint32_t createFlags) :
   _fullscreendata(NULL),
   _windowFlags(createFlags),
   _transparency(1.0),
-  _widgetflags(0)
+  _widgetflags(0),
+  _extra(0)
 {
   _flags |= OBJ_IS_WIDGET;
 
@@ -527,6 +528,46 @@ Layout* Widget::takeLayout()
 // [Layout Policy]
 // ============================================================================
 
+bool Widget::hasLayoutHeightForWidth() const { 
+  if (isEmpty())
+    return false;
+  if (_layout)
+    return _layout->hasLayoutHeightForWidth();
+
+  return _layoutPolicy.hasHeightForWidth();
+}
+
+int Widget::getLayoutHeightForWidth(int width) const {
+  if (isEmpty())
+    return -1;
+
+//   w = !wid->testAttribute(Qt::WA_LayoutUsesWidgetRect)
+//     ? fromLayoutItemSize(wid->d_func(), QSize(w, 0)).width()
+//     : w;
+
+  int hfw =0;
+  int maxh = getMaximumHeight();
+  int minh = getMinimumHeight();
+
+  if (_layout)
+    hfw = _layout->getTotalHeightForWidth(width);
+  else
+    hfw = getHeightForWidth(width);
+
+  if (hfw > maxh)
+    hfw = maxh;
+  if (hfw < minh)
+    hfw = minh;
+
+//   hfw = !wid->testAttribute(Qt::WA_LayoutUsesWidgetRect)
+//     ? toLayoutItemSize(wid->d_func(), QSize(0, hfw)).height()
+//     : hfw;
+
+  if (hfw < 0)
+    hfw = 0;
+  return hfw;
+}
+
 uint32_t Widget::getLayoutExpandingDirections() const {    
   if (isEmpty())
     return 0;
@@ -548,6 +589,7 @@ uint32_t Widget::getLayoutExpandingDirections() const {
   return e;
 }
 
+//SetLayoutGeometry using rect as layoutRect (without margins)
 void Widget::setLayoutGeometry(const IntRect& rect) {
   //if widget isn't visible -> nothing to do
   if (isEmpty())
@@ -555,10 +597,10 @@ void Widget::setLayoutGeometry(const IntRect& rect) {
 
   IntRect r = rect;
 
-  //check if we don't need to use the widget margins
-  if(!testAttribute(WIDGET_FLAG_LAYOUT_USES_WINDOW_RECT)) {
-    //TODO: do margin calculations!
-  }
+//   //check if we don't need to use the widget margins
+//   if(!testAttribute(WIDGET_FLAG_LAYOUT_USES_WINDOW_RECT)) {
+//     //TODO: do margin calculations!
+//   }
 
   //make sure the widget will never be bigger than maxiumum size
   IntSize s = r.getSize().boundedTo(getLayoutMaximumSize());
@@ -567,11 +609,11 @@ void Widget::setLayoutGeometry(const IntRect& rect) {
   if (alignment & (ALIGNMENT_HORIZONTAL_MASK | ALIGNMENT_VERTICAL_MASK)) {
     IntSize prefered(getLayoutSizeHint());
     LayoutPolicy sp = _layoutPolicy;
-    if (sp.getHorizontalPolicy() == LAYOUT_POLICY_WIDTH_IGNORED) {
+    if (sp.isHorizontalPolicyIgnored()) {
       //The getLayoutSizeHint() is ignored. The widget will get prefered Size
       prefered.setWidth(getSizeHint().expandedTo(getMinimumSize()).getWidth());
     }
-    if (sp.getVerticalPolicy() == LAYOUT_POLICY_HEIGHT_IGNORED) {
+    if (sp.isVerticalPolicyIgnored()) {
       //The getLayoutSizeHint() is ignored. The widget will get prefered Size
       prefered.setHeight(getSizeHint().expandedTo(getMinimumSize()).getHeight());
     }

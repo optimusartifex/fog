@@ -269,16 +269,47 @@ struct FOG_API Widget : public LayoutItem
 
   //TODO: these are wrong!
   virtual IntSize getLayoutSizeHint() const {
-    return IntSize(0,0);
+    if(isEmpty()) 
+      return IntSize(0, 0);
+
+    IntSize s(0, 0);
+    s = getSizeHint().expandedTo(getMinimumSizeHint());
+    s = s.boundedTo(getMaximumSize()).expandedTo(getMinimumSize());
+//     s = !wid->testAttribute(Qt::WA_LayoutUsesWidgetRect)
+//       ? toLayoutItemSize(wid->d_func(), s)
+//       : s;
+
+    if (_layoutPolicy.isHorizontalPolicyIgnored())
+      s.setWidth(0);
+    if (_layoutPolicy.isVerticalPolicyIgnored())
+      s.setHeight(0);
+    return s;
   }
 
   virtual IntSize getLayoutMinimumSize() const {
-    return IntSize(0,0);
+    if (isEmpty())
+      return IntSize(0, 0);
+
+//     return !wid->testAttribute(Qt::WA_LayoutUsesWidgetRect)
+//       ? toLayoutItemSize(wid->d_func(), qSmartMinSize(this))
+//       : qSmartMinSize(this);
+    return LayoutItem::calculateMinimumSize(this);
   }
 
+
   virtual IntSize getLayoutMaximumSize() const {
-    return IntSize(0,0);
+    if (isEmpty())
+      return IntSize(0, 0);
+
+//       return !wid->testAttribute(Qt::WA_LayoutUsesWidgetRect)
+//         ? toLayoutItemSize(wid->d_func(), qSmartMaxSize(this, align))
+//         : qSmartMaxSize(this, align);
+
+    return LayoutItem::calculateMaximumSize(this);
   }
+
+  virtual bool hasLayoutHeightForWidth() const;
+  virtual int getLayoutHeightForWidth(int width) const;  
 
   //! @brief Get widget layout manager.
   FOG_INLINE Layout* getLayout() const { return _layout; }
@@ -336,15 +367,21 @@ struct FOG_API Widget : public LayoutItem
   virtual IntSize getMaximumSizeHint() const;
   virtual IntSize getSizeHint() const;
 
-  IntSize getMinimumSize() const
+  FOG_INLINE IntSize getMinimumSize() const
   {
-    return _extra ? IntSize(_extra->_minwidth, _extra->_minheight) : IntSize(0, 0);
+    return _extra ? IntSize(_extra->_minwidth, _extra->_minheight) : IntSize(WIDGET_MIN_SIZE, WIDGET_MIN_SIZE);
   }
 
-  IntSize getMaximumSize() const
+  FOG_INLINE IntSize getMaximumSize() const
   {
-    return _extra ? IntSize(_extra->_maxwidth, _extra->_maxheight) : IntSize(0, 0);
+    return _extra ? IntSize(_extra->_maxwidth, _extra->_maxheight) : IntSize(WIDGET_MAX_SIZE, WIDGET_MAX_SIZE);
   }
+
+  FOG_INLINE int getMinimumHeight() const { return getMinimumSize().getHeight(); }
+  FOG_INLINE int getMaximumHeight() const { return getMaximumSize().getHeight(); }
+
+  FOG_INLINE int getMinimumWidth() const { return getMinimumSize().getWidth(); }
+  FOG_INLINE int getMaximumWidth() const { return getMaximumSize().getWidth(); }
 
   // --------------------------------------------------------------------------
   // [Layout State]

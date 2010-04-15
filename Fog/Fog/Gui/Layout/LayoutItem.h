@@ -12,6 +12,7 @@
 #include <Fog/Core/Object.h>
 #include <Fog/Graphics/Geometry.h>
 #include <Fog/Gui/Constants.h>
+#include <Fog/Gui/Layout/LayoutPolicy.h>
 
 //! @addtogroup Fog_Gui
 //! @{
@@ -25,69 +26,6 @@ namespace Fog {
 struct Layout;
 struct Widget;
 struct SpacerItem;
-
-//Currently I'm to lazy to insert this into own file ;-)
-//TODO: split horizontal & vertical policies into 2 variables?
-struct LayoutPolicy {
-  LayoutPolicy(uint32_t policy)  {
-    _data._all = 0;
-    _data._policy = policy;
-  }
-
-  FOG_INLINE uint32_t getHorizontalStretch() const { return _data._horizontalStretch; }
-  FOG_INLINE uint32_t getVerticalStretch() const { return _data._verticalStretch; }
-  FOG_INLINE void setHorizontalStretch(uchar stretchFactor) { _data._horizontalStretch = stretchFactor; }
-  FOG_INLINE void setVerticalStretch(uchar stretchFactor) { _data._verticalStretch = stretchFactor; }
-
-  FOG_INLINE uint32_t getPolicy() const { return _data._policy; }
-  FOG_INLINE uint32_t getHorizontalPolicy() const { return _data._policy & 0xF; }
-  FOG_INLINE uint32_t getVerticalPolicy() const { return _data._policy & 0xF0; }
-  FOG_INLINE void setPolicy(uint32_t policy) { _data._policy = policy; }
-
-
-  uint32_t expandingDirections() const {
-    uint32_t result;
-    if (_data._policy & LAYOUT_EXPANDING_WIDTH)
-      result |= ORIENTATION_HORIZONTAL;
-    if (_data._policy & LAYOUT_EXPANDING_HEIGHT)
-      result |= ORIENTATION_VERTICAL;
-
-    return result;
-  }
-
-  //is this method really usefull?
-  void transpose() {    
-    uint32_t result = (_data._policy << LAYOUT_HEIGHT_SHIFT); //move vertial to horizontal position
-    result |= (_data._policy >> LAYOUT_HEIGHT_SHIFT);
-    _data._policy = (result & 0xFF);
-    
-    uint32_t hStretch = uint32_t(getHorizontalStretch());
-    uint32_t vStretch = uint32_t(getVerticalStretch());
-    setHorizontalStretch(vStretch);
-    setVerticalStretch(hStretch);
-  }
-
-
-  FOG_INLINE void setHeightForWidth(bool b) { _data._heightForWidth = b; }
-  FOG_INLINE bool hasHeightForWidth() const { return _data._heightForWidth; }
-
-  bool operator==(const LayoutPolicy& s) const { return _data._all == s._data._all; }
-  bool operator!=(const LayoutPolicy& s) const { return _data._all != s._data._all; }
-
-  union u {
-    struct {
-      uint32_t _policy : 8;  
-      uint32_t _horizontalStretch : 8;
-      uint32_t _verticalStretch : 8;
-
-      uint32_t _heightForWidth : 1;
-      uint32_t _unused : 7;
-    };
-
-    uint32_t _all;
-  } _data;
-
-};
 
 // ============================================================================
 // [Fog::LayoutItem]
@@ -126,6 +64,12 @@ struct FOG_API LayoutItem : public Object
 
   uint32_t getLayoutAlignment() const { return _alignment; }
   void setLayoutAlignment(uint32_t a) { _alignment = a; }
+
+  static IntSize calculateMinimumSize(const IntSize& sizeHint, const IntSize& minSizeHint, const IntSize& minSize, const IntSize& maxSize, const LayoutPolicy& sizePolicy);
+  static IntSize calculateMinimumSize(const Widget* w);
+
+  static IntSize calculateMaximumSize(const IntSize& sizeHint, const IntSize& minSize, const IntSize& maxSize, const LayoutPolicy& sizePolicy, uint32_t align);
+  static IntSize calculateMaximumSize(const Widget* w);
   
   uint32_t _alignment;
 };

@@ -50,7 +50,8 @@ Widget::Widget(uint32_t createFlags) :
   _tabOrder(0),
   _fullscreendata(NULL),
   _windowFlags(createFlags),
-  _transparency(1.0)
+  _transparency(1.0),
+  _widgetflags(0)
 {
   _flags |= OBJ_IS_WIDGET;
 
@@ -526,16 +527,16 @@ Layout* Widget::takeLayout()
 // [Layout Policy]
 // ============================================================================
 
-uint32_t Widget::getExpandingDirections() const {    
+uint32_t Widget::getLayoutExpandingDirections() const {    
   if (isEmpty())
     return 0;
 
   uint32_t e = _orientation;
 
   if (_layout) {
-    if (_layoutPolicy.getPolicy() & LAYOUT_GROWING_WIDTH  && (_layout->expandingDirections() & ORIENTATION_HORIZONTAL))
+    if (_layoutPolicy.getPolicy() & LAYOUT_GROWING_WIDTH  && (_layout->getLayoutExpandingDirections() & ORIENTATION_HORIZONTAL))
       e |= ORIENTATION_HORIZONTAL;
-    if (_layoutPolicy.getPolicy() & LAYOUT_GROWING_HEIGHT  && (_layout->expandingDirections() & ORIENTATION_VERTICAL))
+    if (_layoutPolicy.getPolicy() & LAYOUT_GROWING_HEIGHT  && (_layout->getLayoutExpandingDirections() & ORIENTATION_VERTICAL))
       e |= ORIENTATION_VERTICAL;
   }
 
@@ -545,6 +546,75 @@ uint32_t Widget::getExpandingDirections() const {
     e &= ~ORIENTATION_VERTICAL;
 
   return e;
+}
+
+void Widget::setLayoutGeometry(const IntRect& rect) {
+  //if widget isn't visible -> nothing to do
+  if (isEmpty())
+    return;
+
+  IntRect r = rect;
+
+  //check if we don't need to use the widget margins
+  if(!testAttribute(WIDGET_FLAG_LAYOUT_USES_WINDOW_RECT)) {
+    //TODO: do margin calculations!
+  }
+
+  //make sure the widget will never be bigger than maxiumum size
+  IntSize s = r.getSize().boundedTo(getLayoutMaximumSize());
+  uint32_t alignment = _alignment;
+
+  if (alignment & (ALIGNMENT_HORIZONTAL_MASK | ALIGNMENT_VERTICAL_MASK)) {
+    IntSize prefered(getLayoutSizeHint());
+    LayoutPolicy sp = _layoutPolicy;
+    if (sp.getHorizontalPolicy() == LAYOUT_POLICY_WIDTH_IGNORED) {
+      //The getLayoutSizeHint() is ignored. The widget will get prefered Size
+      prefered.setWidth(getSizeHint().expandedTo(getMinimumSize()).getWidth());
+    }
+    if (sp.getVerticalPolicy() == LAYOUT_POLICY_HEIGHT_IGNORED) {
+      //The getLayoutSizeHint() is ignored. The widget will get prefered Size
+      prefered.setHeight(getSizeHint().expandedTo(getMinimumSize()).getHeight());
+    }
+
+    //pref += widgetRectSurplus; //TODO: margins!
+    
+    if (alignment & ALIGNMENT_HORIZONTAL_MASK) {
+      //if preferred size is possible use it, else use complete available size
+      s.setWidth(Math::min(s.getWidth(), prefered.getWidth()));
+    }
+
+    if (alignment & ALIGNMENT_VERTICAL_MASK) {
+      if (hasLayoutHeightForWidth())
+        s.setHeight(Math::min(s.getHeight(), getLayoutHeightForWidth(s.getWidth())));
+      else
+        s.setHeight(Math::min(s.getHeight(), prefered.getHeight()));
+    }
+  }
+
+  //TODO: support for right2left layouts!
+
+  //If no alignment is set, set it to the std. alignment -> left
+  //could be moved to setAlignment parameter in LayoutItem!
+  if (!(alignment & ALIGNMENT_HORIZONTAL_MASK)) {
+    alignment |= ALIGNMENT_LEFT;
+  }
+
+  int x = r.getX();
+  int y = r.getY();
+
+  if (alignment & ALIGNMENT_RIGHT) {
+    x += (r.getWidth() - s.getWidth());
+  } else if (alignment & ALIGNMENT_HCENTER) {
+    x += (r.getWidth() - s.getWidth()) / 2;
+  }
+
+  if (alignment & ALIGNMENT_BOTTOM) {
+    y += (r.getHeight() - s.getHeight());
+  }  else if (alignment & ALIGNMENT_VCENTER) {
+    y += (r.getHeight() - s.getHeight()) / 2;
+  }
+
+  //wid->setGeometry(x, y, s.width(), s.height();
 }
 
 LayoutPolicy Widget::getLayoutPolicy() const
@@ -572,6 +642,27 @@ bool Widget::hasHeightForWidth() const
 int Widget::getHeightForWidth(int width) const
 {
   return -1;
+}
+
+IntSize Widget::getMinimumSizeHint() const
+{
+  if (_layout)
+    return _layout->getTotalMinimumSize();
+  return IntSize(-1, -1);
+}
+
+IntSize Widget::getMaximumSizeHint() const
+{
+  if (_layout)
+    return _layout->getTotalMaximumSize();
+  return IntSize(-1, -1);
+}
+
+IntSize Widget::getSizeHint() const
+{
+  if (_layout)
+    return _layout->getTotalSizeHint();
+  return IntSize(-1, -1);
 }
 
 // ============================================================================

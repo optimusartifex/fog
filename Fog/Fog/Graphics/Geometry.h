@@ -856,6 +856,16 @@ struct IntSize
     return (w != other.w) | (h != other.h);
   }
 
+  FOG_INLINE IntSize expandedTo(const IntSize& otherSize) const
+  {
+    return IntSize(Math::max(w,otherSize.w), Math::max(h,otherSize.h));
+  }
+
+  FOG_INLINE IntSize boundedTo(const IntSize& otherSize) const
+  {
+    return IntSize(Math::min(w,otherSize.w), Math::min(h,otherSize.h));
+  }
+
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------

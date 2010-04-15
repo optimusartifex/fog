@@ -40,6 +40,8 @@ struct LayoutPolicy {
   FOG_INLINE void setVerticalStretch(uchar stretchFactor) { _data._verticalStretch = stretchFactor; }
 
   FOG_INLINE uint32_t getPolicy() const { return _data._policy; }
+  FOG_INLINE uint32_t getHorizontalPolicy() const { return _data._policy & 0xF; }
+  FOG_INLINE uint32_t getVerticalPolicy() const { return _data._policy & 0xF0; }
   FOG_INLINE void setPolicy(uint32_t policy) { _data._policy = policy; }
 
 
@@ -103,16 +105,18 @@ struct FOG_API LayoutItem : public Object
   LayoutItem(uint32_t alignment = 0);
   virtual ~LayoutItem();
 
-  virtual IntSize getSizeHint() const = 0;
-  virtual IntSize getMinimumSize() const = 0;
-  virtual IntSize getMaximumSize() const = 0;
-  virtual uint32_t getExpandingDirections() const = 0;
   virtual bool isEmpty() const = 0;
+
+
+  virtual IntSize getLayoutSizeHint() const = 0;
+  virtual IntSize getLayoutMinimumSize() const = 0;
+  virtual IntSize getLayoutMaximumSize() const = 0;
+  virtual uint32_t getLayoutExpandingDirections() const = 0;  
   
   //reimpl if needed
-  virtual bool hasHeightForWidth() const { return false; }
-  virtual int getHeightForWidth(int width) const { return -1; }
-  virtual int getMinimumHeightForWidth(int width) const { return getHeightForWidth(width); }
+  virtual bool hasLayoutHeightForWidth() const { return false; }
+  virtual int getLayoutHeightForWidth(int width) const { return -1; }
+  virtual int getLayoutMinimumHeightForWidth(int width) const { return getLayoutHeightForWidth(width); }
 
   virtual void invalidateLayout() { }
 
@@ -120,14 +124,8 @@ struct FOG_API LayoutItem : public Object
   virtual void setLayoutGeometry(const IntRect&) = 0;
   virtual IntRect getLayoutGeometry() const = 0;
 
-  uint32_t getAlignment() const { return _alignment; }
-  void setAlignment(uint32_t a) { _alignment = a; }
-
-  //don't know if we really need this methods
-
-  virtual Widget* widget() { return 0; }
-  virtual Layout* layout() { return 0; }
-  virtual SpacerItem* spacerItem() { return 0; }
+  uint32_t getLayoutAlignment() const { return _alignment; }
+  void setLayoutAlignment(uint32_t a) { _alignment = a; }
   
   uint32_t _alignment;
 };

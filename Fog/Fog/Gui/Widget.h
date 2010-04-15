@@ -252,20 +252,32 @@ struct FOG_API Widget : public LayoutItem
   Widget* hitTest(const IntPoint& pt) const;
   Widget* getChildAt(const IntPoint& pt, bool recursive = false) const;
 
+  FOG_INLINE bool testAttribute(uint32_t flag) {
+    return (_widgetflags & flag) != 0;
+  }
+
+  void setAttribute(uint32_t flag, bool set) {
+    if(set)
+      _widgetflags |= flag;
+    else
+      _widgetflags &= ~ flag;    
+  }
+
   // --------------------------------------------------------------------------
   // [Layout Of Widget]
   // --------------------------------------------------------------------------
 
-  virtual IntSize getSizeHint() const {
-    return _layoutHint.getSizeHint();
+  //TODO: these are wrong!
+  virtual IntSize getLayoutSizeHint() const {
+    return IntSize(0,0);
   }
 
-  virtual IntSize getMinimumSize() const {
-    return _layoutHint.getMinimumSize();
+  virtual IntSize getLayoutMinimumSize() const {
+    return IntSize(0,0);
   }
 
-  virtual IntSize getMaximumSize() const {
-    return _layoutHint.getMaximumSize();
+  virtual IntSize getLayoutMaximumSize() const {
+    return IntSize(0,0);
   }
 
   //! @brief Get widget layout manager.
@@ -284,14 +296,13 @@ struct FOG_API Widget : public LayoutItem
     return !isVisible() || _guiWindow;
   }
 
-  virtual uint32_t getExpandingDirections() const;
+  virtual uint32_t getLayoutExpandingDirections() const;
 
 
   //methods for doing real geometry changes
-  virtual void setLayoutGeometry(const IntRect&) {
-    //don't dispatch geometry events because updates will be done AFTER finishing all
-    //geometry changes
-  }
+  //don't dispatch geometry events because updates will be done AFTER finishing all
+  //geometry changes
+  virtual void setLayoutGeometry(const IntRect&);
 
   virtual IntRect getLayoutGeometry() const {
     return IntRect();
@@ -320,6 +331,20 @@ struct FOG_API Widget : public LayoutItem
 
   virtual bool hasHeightForWidth() const;
   virtual int getHeightForWidth(int width) const;
+
+  virtual IntSize getMinimumSizeHint() const;
+  virtual IntSize getMaximumSizeHint() const;
+  virtual IntSize getSizeHint() const;
+
+  IntSize getMinimumSize() const
+  {
+    return _extra ? IntSize(_extra->_minwidth, _extra->_minheight) : IntSize(0, 0);
+  }
+
+  IntSize getMaximumSize() const
+  {
+    return _extra ? IntSize(_extra->_maxwidth, _extra->_maxheight) : IntSize(0, 0);
+  }
 
   // --------------------------------------------------------------------------
   // [Layout State]
@@ -644,6 +669,13 @@ protected:
     float _restoretransparency;
   };
 
+  struct ExtendedData {
+    int _maxwidth;
+    int _maxheight;
+    int _minwidth;
+    int _minheight;
+  }* _extra;
+
   //! @brief Will set/unset a window flag and update the window if specified
   void changeFlag(uint32_t flag, bool set, bool update);
 
@@ -708,6 +740,8 @@ protected:
   uint32_t _orientation : 1;
   //! @brief Reserved for future use.
   uint32_t _reserved : 21;
+
+  uint32_t _widgetflags;
 
 private:
   friend struct Application;

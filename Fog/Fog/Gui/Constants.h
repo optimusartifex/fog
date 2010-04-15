@@ -166,7 +166,7 @@ enum MODAL_POLICY
 };
 
 // ============================================================================
-// [Fog::LAYOUT_POLICY]
+// [Fog::LAYOUT_POLICY_FLAGS]
 // ============================================================================
 enum LAYOUT_POLICY_FLAGS {
   LAYOUT_WIDTH_MASK = 0xF,
@@ -186,6 +186,9 @@ enum LAYOUT_POLICY_FLAGS {
   LAYOUT_IGNORE_HEIGHT  = (1<<7)
 };
 
+// ============================================================================
+// [Fog::LAYOUT_POLICY]
+// ============================================================================
 enum LAYOUT_POLICY
 {
   LAYOUT_POLICY_HEIGHT_FIXED = 0,
@@ -204,6 +207,14 @@ enum LAYOUT_POLICY
   LAYOUT_POLICY_WIDTH_MINIMUM_EXPANDING = LAYOUT_GROWING_WIDTH|LAYOUT_EXPANDING_WIDTH,
   LAYOUT_POLICY_WIDTH_EXPANDING = LAYOUT_GROWING_WIDTH|LAYOUT_EXPANDING_WIDTH|LAYOUT_SHRINKING_WIDTH,
   LAYOUT_POLICY_WIDTH_IGNORED = LAYOUT_GROWING_WIDTH|LAYOUT_IGNORE_WIDTH|LAYOUT_SHRINKING_WIDTH
+};
+
+// ============================================================================
+// [Fog::WINDOW_FLAGS]
+// ============================================================================
+
+enum WIDGET_FLAGS {
+  WIDGET_FLAG_LAYOUT_USES_WINDOW_RECT = (1<<0)
 };
 
 // ============================================================================

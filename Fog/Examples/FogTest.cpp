@@ -442,6 +442,12 @@ FOG_GUI_MAIN()
 {
   Application app(Ascii8("Gui"));
 
+  uint32_t _alignment = ALIGNMENT_LEFT;
+
+  if (_alignment & (ALIGNMENT_HORIZONTAL_MASK | ALIGNMENT_VERTICAL_MASK)) {
+    _alignment = _alignment;
+  }
+
   MyWindow window(WINDOW_TYPE_DEFAULT|WINDOW_TRANSPARENT);
   window.setSize(IntSize(500, 400));
   window.show(WIDGET_VISIBLE_FULLSCREEN);

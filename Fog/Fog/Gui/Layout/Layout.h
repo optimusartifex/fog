@@ -35,8 +35,18 @@ struct FOG_API Layout : public LayoutItem
   Layout();
   virtual ~Layout();
 
-  virtual uint32_t expandingDirections() const {
+  virtual uint32_t getLayoutExpandingDirections() const {
     return ORIENTATION_HORIZONTAL | ORIENTATION_VERTICAL;
+  }
+
+  IntSize getTotalSizeHint() const {
+    return IntSize();
+  }
+  IntSize getTotalMaximumSize() const {
+    return IntSize();
+  }
+  IntSize getTotalMinimumSize() const {
+    return IntSize();
   }
 
   FOG_DISABLE_COPY(Layout)

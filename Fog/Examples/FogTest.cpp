@@ -95,6 +95,10 @@ struct MyWindow : public Window
     } else if(vis == WIDGET_VISIBLE_RESTORE){
       setWindowTitle(Ascii8("STATE: RESTORED"));
     }
+
+    _layout->invalidateLayout();
+    _layout->_activated = 0;
+    _layout->activate();
   }
 
   void onModalClose() {
@@ -165,6 +169,8 @@ struct MyWindow : public Window
   Widget* _popup;
   int _mcount;
   MyModalWindow* _modalwindow;
+
+  //FlowLayout* _layout;
 };
 
 FOG_IMPLEMENT_OBJECT(MyWindow)
@@ -196,6 +202,8 @@ MyWindow::MyWindow(uint32_t createFlags) :
   //i[0].readFile(Ascii8("/my/upload/bmpsuite/icons_fullset.png"));
 
   //i[0] = i[0].scale(Size(32, 32), INTERPOLATION_SMOOTH);
+  FlowLayout* flow = new FlowLayout(this);
+  setLayout(flow);
 
   _subx = 0.0;
   _suby = 0.0;
@@ -207,35 +215,35 @@ MyWindow::MyWindow(uint32_t createFlags) :
 
   Button* button = new Button();
   add(button);
-  button->setGeometry(IntRect(40, 40, 100, 20));
+  //button->setGeometry(IntRect(40, 40, 100, 20));
   button->setText(Ascii8("Test Transparency"));
   button->show();  
   button->addListener(EVENT_CLICK, this, &MyWindow::onTransparencyClick);
 
   Button* button2 = new Button();
   add(button2);
-  button2->setGeometry(IntRect(40, 80, 100, 20));
+  //button2->setGeometry(IntRect(40, 80, 100, 20));
   button2->setText(Ascii8("Test FullScreen"));
   button2->show();
   button2->addListener(EVENT_CLICK, this, &MyWindow::onFullScreenClick);
 
   Button* button3 = new Button();
   add(button3);
-  button3->setGeometry(IntRect(40, 120, 100, 20));
+  //button3->setGeometry(IntRect(40, 120, 100, 20));
   button3->setText(Ascii8("Test PopUp"));
   button3->show();  
   button3->addListener(EVENT_CLICK, this, &MyWindow::onPopUpClick);
 
   Button* button4 = new Button();
   add(button4);
-  button4->setGeometry(IntRect(40, 160, 100, 20));
+  //button4->setGeometry(IntRect(40, 160, 100, 20));
   button4->setText(Ascii8("Test FrameChange"));
   button4->show();  
   button4->addListener(EVENT_CLICK, this, &MyWindow::onFrameTestClick);
 
   Button* button5 = new Button();
   add(button5);
-  button5->setGeometry(IntRect(40, 200, 100, 20));
+  //button5->setGeometry(IntRect(40, 200, 100, 20));
   button5->setText(Ascii8("Test ModalWindow"));
   button5->show();  
   button5->addListener(EVENT_CLICK, this, &MyWindow::onModalTestClick);
@@ -245,6 +253,15 @@ MyWindow::MyWindow(uint32_t createFlags) :
   _popup->setGeometry(IntRect(40, 120, 50, 20));
   //should be automatically hidden because of lost of focus!
   _popup->show();
+
+
+  _layout->add(button);
+  _layout->add(button2);
+  _layout->add(button3);
+  _layout->add(button4);
+  _layout->add(button5);
+
+  _layout->activate();
 }
 
 MyWindow::~MyWindow()
@@ -442,15 +459,9 @@ FOG_GUI_MAIN()
 {
   Application app(Ascii8("Gui"));
 
-  uint32_t _alignment = ALIGNMENT_LEFT;
-
-  if (_alignment & (ALIGNMENT_HORIZONTAL_MASK | ALIGNMENT_VERTICAL_MASK)) {
-    _alignment = _alignment;
-  }
-
   MyWindow window(WINDOW_TYPE_DEFAULT|WINDOW_TRANSPARENT);
   window.setSize(IntSize(500, 400));
-  window.show(WIDGET_VISIBLE_FULLSCREEN);
+  window.show();
 
   app.addListener(EVENT_LAST_WINDOW_CLOSED, &app, &Application::quit);
 

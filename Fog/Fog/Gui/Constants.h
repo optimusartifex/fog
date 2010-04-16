@@ -209,6 +209,19 @@ enum LAYOUT_POLICY
   LAYOUT_POLICY_WIDTH_IGNORED = LAYOUT_GROWING_WIDTH|LAYOUT_IGNORE_WIDTH|LAYOUT_SHRINKING_WIDTH
 };
 
+
+// ============================================================================
+// [Fog::LAYOUT_POLICY]
+// ============================================================================
+enum MINMAXSIZE
+{
+  MIN_WIDTH_IS_SET   = 1,
+  MIN_HEIGHT_IS_SET = 2,
+
+  MAX_WIDTH_IS_SET   = 1,
+  MAX_HEIGHT_IS_SET = 2,
+};
+
 // ============================================================================
 // [Fog::WINDOW_FLAGS]
 // ============================================================================

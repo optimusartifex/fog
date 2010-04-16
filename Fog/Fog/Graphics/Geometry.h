@@ -1506,7 +1506,7 @@ struct IntRect
 
   FOG_INLINE IntRect adjusted(int px1, int py1, int px2, int py2) const
   {
-    return IntRect(x + px1, y + py1, w - px1 - px2, h - py1 - py2);
+    return IntRect(x + px1, y + py1, w - px1 + px2, h - py1 + py2);
   }
 
   // --------------------------------------------------------------------------

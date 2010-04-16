@@ -37,11 +37,11 @@ FOG_INLINE IntSize calculateMaximumSize(const IntSize& sizeHint, const IntSize& 
   IntSize s = maxSize;
   IntSize hint = sizeHint.expandedTo(minSize);
   if (s.getWidth() == WIDGET_MAX_SIZE && !(align & ALIGNMENT_HORIZONTAL_MASK))
-    if (!(sizePolicy.getHorizontalPolicy() & LAYOUT_GROWING_WIDTH))
+    if (!(sizePolicy.getPolicy() & LAYOUT_GROWING_WIDTH))
       s.setWidth(hint.getWidth());
 
   if (s.getHeight() == WIDGET_MAX_SIZE && !(align & ALIGNMENT_VERTICAL_MASK))
-    if (!(sizePolicy.getVerticalPolicy() & LAYOUT_GROWING_WIDTH))
+    if (!(sizePolicy.getPolicy() & LAYOUT_GROWING_WIDTH))
       s.setHeight(hint.getHeight());
 
   if (align & ALIGNMENT_HORIZONTAL_MASK)

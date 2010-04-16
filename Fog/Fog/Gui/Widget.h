@@ -268,13 +268,12 @@ struct FOG_API Widget : public LayoutItem
   // [Layout Of Widget]
   // --------------------------------------------------------------------------
 
-  //TODO: these are wrong!
   virtual IntSize getLayoutSizeHint() const {
     if(isEmpty()) 
       return IntSize(0, 0);
 
-    IntSize s(0, 0);
-    s = getSizeHint().expandedTo(getMinimumSizeHint());
+    return IntSize(40, 40);
+    IntSize s = getSizeHint().expandedTo(getMinimumSizeHint());
     s = s.boundedTo(getMaximumSize()).expandedTo(getMinimumSize());
 //     s = !wid->testAttribute(Qt::WA_LayoutUsesWidgetRect)
 //       ? toLayoutItemSize(wid->d_func(), s)
@@ -364,29 +363,57 @@ struct FOG_API Widget : public LayoutItem
   virtual bool hasHeightForWidth() const;
   virtual int getHeightForWidth(int width) const;
 
+  // --------------------------------------------------------------------------
+  // [Layout SizeHint]
+  // --------------------------------------------------------------------------
+
   virtual IntSize getMinimumSizeHint() const;
   virtual IntSize getMaximumSizeHint() const;
   virtual IntSize getSizeHint() const;
 
-  FOG_INLINE void setMinimumSize(const IntSize& minSize) {
-    //TODO!
+  // --------------------------------------------------------------------------
+  // [Layout Fixed Size]
+  // --------------------------------------------------------------------------
+
+  // --------------------------------------------------------------------------
+  // [Layout Minimum And Maximum Size]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void checkMinMaxBlock() { if(!_extra) _extra = new(std::nothrow) ExtendedData(); }
+  
+  bool checkMinimumSize(int width, int height);
+  bool checkMaximumSize(int width, int height);
+  void setMinimumSize(const IntSize& minSize);
+  void setMaximumSize(const IntSize& minSize);
+  
+  FOG_INLINE void setMinimumHeight(int height) {
+    int width = hasMinimumHeight()? _extra->_minwidth : -1;
+    setMinimumSize(IntSize(width,height));
+  }
+  FOG_INLINE void setMinimumWidth(int width) {
+    int height = hasMinimumHeight()? _extra->_maxheight : -1;
+    setMinimumSize(IntSize(width,height));
+  }
+  FOG_INLINE void setMaximumHeight(int height) {
+    int width = hasMaximumHeight()? _extra->_minwidth : -1;
+    setMaximumSize(IntSize(width,height));
+  }
+  void setMaximumWidth(int width) {
+    int height = hasMaximumHeight()? _extra->_maxheight : -1;
+    setMaximumSize(IntSize(width,height));
   }
 
-  FOG_INLINE IntSize getMinimumSize() const
-  {
-    return _extra ? IntSize(_extra->_minwidth, _extra->_minheight) : IntSize(WIDGET_MIN_SIZE, WIDGET_MIN_SIZE);
-  }
-
-  FOG_INLINE IntSize getMaximumSize() const
-  {
-    return _extra ? IntSize(_extra->_maxwidth, _extra->_maxheight) : IntSize(WIDGET_MAX_SIZE, WIDGET_MAX_SIZE);
-  }
-
+  FOG_INLINE bool hasMinimumHeight() const { return _minset & MIN_HEIGHT_IS_SET; }
+  FOG_INLINE bool hasMaximumHeight() const { return _maxset & MAX_HEIGHT_IS_SET; }
+  FOG_INLINE bool hasMinimumWidth() const { return _minset & MIN_WIDTH_IS_SET; }
+  FOG_INLINE bool hasMaximumWidth() const { return _maxset & MAX_WIDTH_IS_SET; }
   FOG_INLINE int getMinimumHeight() const { return getMinimumSize().getHeight(); }
   FOG_INLINE int getMaximumHeight() const { return getMaximumSize().getHeight(); }
-
   FOG_INLINE int getMinimumWidth() const { return getMinimumSize().getWidth(); }
   FOG_INLINE int getMaximumWidth() const { return getMaximumSize().getWidth(); }
+
+  FOG_INLINE IntSize getMinimumSize() const { return _extra ? IntSize(_extra->_minwidth, _extra->_minheight) : IntSize(WIDGET_MIN_SIZE, WIDGET_MIN_SIZE); }
+  FOG_INLINE IntSize getMaximumSize() const { return _extra ? IntSize(_extra->_maxwidth, _extra->_maxheight) : IntSize(WIDGET_MAX_SIZE, WIDGET_MAX_SIZE); }
 
   // --------------------------------------------------------------------------
   // [Layout State]
@@ -704,20 +731,20 @@ struct FOG_API Widget : public LayoutItem
 
 protected:
   struct FullScreenData {
+
     //! @brief Main geometry for restoration from fullscreen mode
     IntRect _restoregeometry;
     //! @brief Window Style for restoration of fullscreen
     uint32_t _restorewindowFlags;
     float _restoretransparency;
-  };
+  }* _fullscreendata;
 
   struct ExtendedData {
+    ExtendedData() : _maxheight(WIDGET_MAX_SIZE), _maxwidth(WIDGET_MAX_SIZE), _minheight(WIDGET_MIN_SIZE), _minwidth(WIDGET_MIN_SIZE) {}
     int _maxwidth;
     int _maxheight;
     int _minwidth;
     int _minheight;
-    int _explicitMinSize;
-    int _explicitMaxSize;
   }* _extra;
 
   //! @brief Will set/unset a window flag and update the window if specified
@@ -725,7 +752,6 @@ protected:
 
   Widget* _parent;
   GuiWindow* _owner;
-  FullScreenData* _fullscreendata;
 
   List<Widget*> _children;
 
@@ -768,22 +794,29 @@ protected:
 
   //! @brief Update flags.
   uint32_t _uflags;
-
   //! @brief Window Style
   uint32_t _windowFlags;
 
+  //! @brief marks if minwidth/minheight is set
+  uint32_t _minset : 2;
+  //! @brief marks if maxwidth/maxheight is set
+  uint32_t _maxset : 2;
+  //! @brief Focus.
+  uint32_t _hasFocus : 1;
+  //! @brief Widget orientation
+  uint32_t _orientation : 1;  
   //! @brief Widget state.
   uint32_t _state : 2;
+
   //! @brief Widget visibility.
   uint32_t _visibility : 3;
   //! @brief Widget focus policy
   uint32_t _focusPolicy : 4;
-  //! @brief Focus.
-  uint32_t _hasFocus : 1;
-  //! @brief Widget orientation
-  uint32_t _orientation : 1;
   //! @brief Reserved for future use.
-  uint32_t _reserved : 21;
+  uint32_t _unused : 1;
+
+  //! @brief Reserved for future use.
+  uint32_t _reserved : 16;
 
   uint32_t _widgetflags;
 

@@ -50,7 +50,7 @@ struct FOG_API Layout : public LayoutItem
 
   Widget* getParentWidget() const
   {
-    if (_toplevel) {
+    if (!_toplevel) {
       if (_parentItem) {
         FOG_ASSERT(_parentItem->isLayout());
         return static_cast<Layout*>(_parentItem)->getParentWidget();
@@ -89,7 +89,6 @@ struct FOG_API Layout : public LayoutItem
     if(_contentmargins.eq(m))
       return;
 
-    _margininvalid = false;
     invalidateLayout();
   }
 
@@ -97,9 +96,7 @@ struct FOG_API Layout : public LayoutItem
     setContentsMargins(m.left,m.right,m.top,m.bottom);
   }
   
-  FOG_INLINE IntMargins getContentsMargins() { 
-    if(_margininvalid) 
-      setContentsMargins(_contentmargins); 
+  FOG_INLINE IntMargins getContentsMargins() const { 
     return _contentmargins; 
   }
 
@@ -143,17 +140,14 @@ struct FOG_API Layout : public LayoutItem
   }
 
   virtual void invalidateLayout() {
-    _rect = IntRect();
-    update();
+    _rect = IntRect();    
+    update();    
   }  
 
   //need to be implemented by SubClass!
   virtual IntSize getLayoutSizeHint() const = 0;
 
-  virtual void add(LayoutItem* item) {
-    item->_withinLayout = this;
-  }
-  void add(Widget* widget);
+  virtual void add(LayoutItem* item);  
 
   virtual LayoutItem* getAt(int index) const = 0;
   virtual LayoutItem* takeAt(int index) = 0;
@@ -191,11 +185,11 @@ struct FOG_API Layout : public LayoutItem
     FOG_EVENT_DEF(EVENT_LAYOUT_REQUEST     , onLayout          , LayoutEvent    , OVERRIDE)    
   FOG_EVENT_END()
 
-protected:
-  bool activate();
   void update();
+
+  bool activate();  
   void callSetGeometry(const IntSize& size);
-  void activateRecursiveHelper(LayoutItem *item);
+  void activateAll(LayoutItem *item, bool activate=true);
 
   IntMargins _contentmargins;
 

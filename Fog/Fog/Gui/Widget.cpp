@@ -52,7 +52,9 @@ Widget::Widget(uint32_t createFlags) :
   _windowFlags(createFlags),
   _transparency(1.0),
   _widgetflags(0),
-  _extra(0)
+  _extra(0),
+  _minset(0),
+  _maxset(0)
 {
   _flags |= OBJ_IS_WIDGET;
 
@@ -542,31 +544,19 @@ int Widget::getLayoutHeightForWidth(int width) const {
   if (isEmpty())
     return -1;
 
-//   w = !wid->testAttribute(Qt::WA_LayoutUsesWidgetRect)
-//     ? fromLayoutItemSize(wid->d_func(), QSize(w, 0)).width()
-//     : w;
+  //TODO: widget margin
 
-  int hfw = 0;
-  int maxh = getMaximumHeight();
-  int minh = getMinimumHeight();
-
-  if (_layout)
-    hfw = _layout->getTotalHeightForWidth(width);
+  int ret = 0;
+  if (!_layout)
+    ret = getHeightForWidth(width);
   else
-    hfw = getHeightForWidth(width);
+    ret = _layout->getTotalHeightForWidth(width);    
 
-  if (hfw > maxh)
-    hfw = maxh;
-  if (hfw < minh)
-    hfw = minh;
+  Math::min(ret,getMaximumHeight());
+  Math::max(ret,getMinimumHeight());
 
-//   hfw = !wid->testAttribute(Qt::WA_LayoutUsesWidgetRect)
-//     ? toLayoutItemSize(wid->d_func(), QSize(0, hfw)).height()
-//     : hfw;
-
-  if (hfw < 0)
-    hfw = 0;
-  return hfw;
+  Math::max(ret,0);
+  return ret;
 }
 
 uint32_t Widget::getLayoutExpandingDirections() const {    
@@ -596,14 +586,10 @@ void Widget::setLayoutGeometry(const IntRect& rect) {
   if (isEmpty())
     return;
 
-  IntRect r = rect;
+  //TODO: widget margin
+  IntRect r = rect;  
 
-//   //check if we don't need to use the widget margins
-//   if(!testAttribute(WIDGET_FLAG_LAYOUT_USES_WINDOW_RECT)) {
-//     //TODO: do margin calculations!
-//   }
-
-  //make sure the widget will never be bigger than maxiumum size
+  //make sure the widget will never be bigger than maximum size
   IntSize s = r.getSize().boundedTo(getLayoutMaximumSize());
   uint32_t alignment = _alignment;
 
@@ -636,8 +622,7 @@ void Widget::setLayoutGeometry(const IntRect& rect) {
 
   //TODO: support for right2left layouts!
 
-  //If no alignment is set, set it to the std. alignment -> left
-  //could be moved to setAlignment parameter in LayoutItem!
+  //If no alignment is set, set it to the std. alignment -> left  
   if (!(alignment & ALIGNMENT_HORIZONTAL_MASK)) {
     alignment |= ALIGNMENT_LEFT;
   }
@@ -657,7 +642,7 @@ void Widget::setLayoutGeometry(const IntRect& rect) {
     y += (r.getHeight() - s.getHeight()) / 2;
   }
 
-  //wid->setGeometry(x, y, s.width(), s.height();
+  setGeometry(IntRect(x, y, s.getWidth(), s.getHeight()));
 }
 
 LayoutPolicy Widget::getLayoutPolicy() const
@@ -706,6 +691,75 @@ IntSize Widget::getSizeHint() const
   if (_layout)
     return _layout->getTotalSizeHint();
   return IntSize(-1, -1);
+}
+
+// ============================================================================
+// [Layout Minimum And Maximum Size]
+// ============================================================================
+
+bool Widget::checkMinimumSize(int w, int h) {
+  int set = 0;
+  if(w >= 0) set |=MAX_WIDTH_IS_SET;
+  if(h >= 0) set |=MAX_HEIGHT_IS_SET; 
+
+  w = Math::min<int>(w,WIDGET_MAX_SIZE);
+  w = Math::max<int>(w,0);
+  h = Math::min<int>(h,WIDGET_MAX_SIZE);
+  h = Math::max<int>(h,0);
+
+  checkMinMaxBlock();
+  if (_extra->_minwidth == w && _extra->_minheight == h)
+    return false;
+
+  _extra->_minwidth = w;
+  _extra->_minheight = h;
+  _minset = set;
+  return true;
+}
+
+bool Widget::checkMaximumSize(int w, int h) {
+  int set = 0;
+  if(w >= 0) set |=MAX_WIDTH_IS_SET;
+  if(h >= 0) set |=MAX_HEIGHT_IS_SET; 
+
+  w = Math::min<int>(w,WIDGET_MAX_SIZE);
+  w = Math::max<int>(w,0);
+  h = Math::min<int>(h,WIDGET_MAX_SIZE);
+  h = Math::max<int>(h,0);
+
+  checkMinMaxBlock();
+  if (_extra->_maxwidth == w && _extra->_maxheight == h)
+    return false;
+
+  _extra->_maxwidth = w;
+  _extra->_maxheight = h;
+  _maxset = set;
+  return true;
+}
+
+void Widget::setMinimumSize(const IntSize& minSize) {
+   if(!checkMinimumSize(minSize.getWidth(),minSize.getHeight())) //nothing changed
+     return;
+
+   IntSize size(getMinimumWidth(),getMinimumHeight());
+   if(_geometry.getWidth() < size.getWidth() || _geometry.getHeight() < size.getHeight()) {
+     resize(size);
+   }
+
+   //TODO: Write EventListener for allow/disallow min/max
+}
+
+void Widget::setMaximumSize(const IntSize& maxSize) {
+  if(!checkMaximumSize(maxSize.getWidth(),maxSize.getHeight())) //nothing changed
+    return;
+
+  IntSize size(getMaximumWidth(),getMaximumHeight());
+
+  if(_geometry.getWidth() > size.getWidth() || _geometry.getHeight() > size.getHeight()) {
+    resize(size);
+  }
+
+  //TODO: Write EventListener for allow/disallow min/max
 }
 
 // ============================================================================

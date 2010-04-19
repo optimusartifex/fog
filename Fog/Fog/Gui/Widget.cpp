@@ -60,6 +60,7 @@ Widget::Widget(uint32_t createFlags) :
 
   // TODO ?
   _focusLink = NULL;
+  _contentmargin.clear();
 
   if ((createFlags & WINDOW_TYPE_MASK) != 0)
   {

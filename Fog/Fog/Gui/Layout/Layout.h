@@ -32,7 +32,7 @@ struct FOG_API Layout : public LayoutItem
 {
   FOG_DECLARE_OBJECT(Layout, LayoutItem)
 
-    enum SizeConstraint {
+    enum SizeConstraint { //not implemented yet
       CONSTRAINT_DEFAULT,
       CONSTRAINT_NO,
       CONSTRAINT_MINIMUM_SIZE,
@@ -48,7 +48,7 @@ struct FOG_API Layout : public LayoutItem
   Layout();
   Layout(Widget *parent, Layout *parentLayout=0);
 
-  Widget* getParentWidget() const
+  FOG_INLINE Widget* getParentWidget() const
   {
     if (!_toplevel) {
       if (_parentItem) {
@@ -80,7 +80,7 @@ struct FOG_API Layout : public LayoutItem
 
   FOG_INLINE int calcMargin(int margin) const;
 
-  FOG_INLINE void setContentsMargins(int left, int right, int top, int bottom) { 
+  FOG_INLINE void setContentMargins(int left, int right, int top, int bottom) { 
     IntMargins m = _contentmargins;
     _contentmargins.left = calcMargin(left);
     _contentmargins.right = calcMargin(right);
@@ -92,17 +92,17 @@ struct FOG_API Layout : public LayoutItem
     invalidateLayout();
   }
 
-  FOG_INLINE void setContentsMargins(const IntMargins& m) { 
-    setContentsMargins(m.left,m.right,m.top,m.bottom);
+  FOG_INLINE void setContentMargins(const IntMargins& m) { 
+    setContentMargins(m.left,m.right,m.top,m.bottom);
   }
   
-  FOG_INLINE IntMargins getContentsMargins() const { 
+  FOG_INLINE IntMargins getContentMargins() const { 
     return _contentmargins; 
   }
 
   FOG_INLINE IntRect getContentsRect() {
     if(_margininvalid) 
-      setContentsMargins(_contentmargins);
+      setContentMargins(_contentmargins);
     return _rect.adjusted(+_contentmargins.left, +_contentmargins.top, -_contentmargins.right, -_contentmargins.bottom);
   }
 
@@ -176,7 +176,7 @@ struct FOG_API Layout : public LayoutItem
 
   void addChildLayout(Layout *l);
 
-  static bool removeWidgetRecursively(LayoutItem *li, Widget *w);
+  static bool removeAllWidgets(LayoutItem *li, Widget *w);
   void reparentChildWidgets(Widget *mw);
 
   virtual void onLayout(LayoutEvent* e);
@@ -189,7 +189,8 @@ struct FOG_API Layout : public LayoutItem
 
   bool activate();  
   void callSetGeometry(const IntSize& size);
-  void activateAll(LayoutItem *item, bool activate=true);
+
+  void invalidActivateAll(LayoutItem *item, bool activate=true);
 
   IntMargins _contentmargins;
 
@@ -204,6 +205,7 @@ struct FOG_API Layout : public LayoutItem
   IntRect _rect;
 
 private:
+  void calcContentMargins(int&side, int&top) const;
   FOG_DISABLE_COPY(Layout)
 };
 

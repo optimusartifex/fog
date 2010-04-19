@@ -65,19 +65,6 @@ int Layout::calcMargin(int margin) const {
   return 0;
 }
 
-//Macro for easy iteration over all items
-//Item will be accessible over VARNAME
-//at code you can add the code to execute for every item
-//The index will always be accessible with in variable i
-#define FOR_EACH_ITEM(VARNAME, CODE, THIS) \
-int i = 0;\
-LayoutItem *VARNAME = THIS->getAt(i);\
-while (VARNAME) {\
-  CODE\
-  ++i;\
-  VARNAME = THIS->getAt(i);\
-}
-
 #define FOR_EACH(ITEM, CONTAINER) \
 LayoutItem *ITEM;\
 int i=0;\
@@ -94,6 +81,9 @@ bool Layout::isEmpty() const {
 
 int Layout::indexOf(LayoutItem* item) const
 {
+  if(item->_withinLayout != this)
+    return -1;
+
   FOR_EACH(iitem, this) {
     if (iitem == item)
       return i;
@@ -103,6 +93,9 @@ int Layout::indexOf(LayoutItem* item) const
 }
 
 void Layout::remove(LayoutItem* item) {
+  if(item->_withinLayout != this)
+    return;
+
   FOR_EACH(iitem, this) {
     if (iitem == item) {
       takeAt(i);
@@ -111,22 +104,23 @@ void Layout::remove(LayoutItem* item) {
   }
 }
 
-bool Layout::removeWidgetRecursively(LayoutItem *li, Widget *w)
+bool Layout::removeAllWidgets(LayoutItem *layout, Widget *w)
 {  
-  if (!li->isLayout())
+  if(!layout->_withinLayout)
     return false;
 
-  if(!li->_withinLayout)
+  if (!layout->isLayout())
     return false;
 
-  Layout *lay = static_cast<Layout*>(li);
+  Layout *lay = static_cast<Layout*>(layout);
 
   FOR_EACH(iitem, lay) {
     if (iitem == w) {
-      delete lay->takeAt(i);
+      lay->takeAt(i);
+      w->_withinLayout = 0;
       lay->invalidateLayout();
       return true;
-    } else if (removeWidgetRecursively(iitem, w)) {
+    } else if (removeAllWidgets(iitem, w)) {
       return true;
     } 
   }
@@ -134,50 +128,47 @@ bool Layout::removeWidgetRecursively(LayoutItem *li, Widget *w)
   return false;
 }
 
-void Layout::reparentChildWidgets(Widget* mw)
+//reparent 
+void Layout::reparentChildWidgets(Widget* widget)
 {
   FOR_EACH(iitem, this) {
     if(iitem->isWidget()) {
       Widget* w = static_cast<Widget*>(iitem);
-      if (w->getParent() != mw)
-        w->setParent(mw);
+      if (w->getParent() != widget)
+        w->setParent(widget);
     } else if (iitem->isLayout()) {
-      static_cast<Layout*>(iitem)->reparentChildWidgets(mw);
+      static_cast<Layout*>(iitem)->reparentChildWidgets(widget);
     }
   }
 }
 
-void Layout::add(LayoutItem* item) {
-  item->_withinLayout = this;
-
+void Layout::add(LayoutItem* item) 
+{
   if(item->isWidget()) {
     Widget* w = static_cast<Widget*>(item);
-    Widget *mw = getParentWidget();
-    Widget *pw = w->getParent();
+    Widget *layoutparent = getParentWidget();
+    Widget *widgetparent = w->getParent();
 
-    if(pw && pw->getLayout()) {
-      if(removeWidgetRecursively(pw->getLayout(), w)) {
+    if(widgetparent && widgetparent->getLayout() && item->_withinLayout) {
+      if(removeAllWidgets(widgetparent->getLayout(), w)) {
         //WARNING: removed from existing layout
       }
     }
 
-    if (pw && mw && pw != mw) {
-      w->setParent(mw);
-    } else if(!pw && mw) {
-      w->setParent(mw);
+    if (widgetparent && layoutparent && widgetparent != layoutparent) {
+      w->setParent(layoutparent);
+    } else if(!widgetparent && layoutparent) {
+      w->setParent(layoutparent);
     }
   }
+
+  item->_withinLayout = this;
 }
 
 IntSize Layout::getTotalMinimumSize() const
 {
   int side=0, top=0;
-  if (_toplevel) {
-    //    Widget *pw = parentWidget();
-    //     QWidgetPrivate *wd = pw->d_func();
-    //     side += wd->leftmargin + wd->rightmargin;
-    //     top += wd->topmargin + wd->bottommargin;
-  }
+  calcContentMargins(side,top);
 
   IntSize s = getLayoutMinimumSize();
   return s + IntSize(side, top);
@@ -185,17 +176,12 @@ IntSize Layout::getTotalMinimumSize() const
 
 IntSize Layout::getTotalMaximumSize() const { 
   int side=0, top=0;
-  if (_toplevel) {
-    //    Widget *pw = parentWidget();
-    //     QWidgetPrivate *wd = pw->d_func();
-    //     side += wd->leftmargin + wd->rightmargin;
-    //     top += wd->topmargin + wd->bottommargin;
-  }
+  calcContentMargins(side,top);
 
   IntSize s = getLayoutMaximumSize();
-
-  if (_toplevel)
+  if (_toplevel) {
     s = IntSize(Math::min<int>(s.getWidth() + side, WIDGET_MAX_SIZE), Math::min<int>(s.getHeight() + top, WIDGET_MAX_SIZE));
+  }
 
   return s;
 }
@@ -203,28 +189,24 @@ IntSize Layout::getTotalMaximumSize() const {
 int Layout::getTotalHeightForWidth(int w) const
 {
   int side=0, top=0;
-  if (_toplevel) {
-//     QWidget *parent = parentWidget();
-//     parent->ensurePolished();
-//     QWidgetPrivate *wd = parent->d_func();
-//     side += wd->leftmargin + wd->rightmargin;
-//     top += wd->topmargin + wd->bottommargin;
-  }
+  calcContentMargins(side,top);
   int h = getLayoutHeightForWidth(w - side) + top;
   return h;
 }
 
+void Layout::calcContentMargins(int&side, int&top) const {
+  if (_toplevel) {
+    Widget* parent = getParentWidget();
+    FOG_ASSERT(parent);
+    side = parent->getContentLeftMargin() + parent->getContentRightMargin();
+    top = parent->getContentTopMargin() + parent->getContentBottomMargin();
+  }
+}
 
 IntSize Layout::getTotalSizeHint() const
 {
   int side=0, top=0;
-  if (_toplevel) {
-    //     QWidget *parent = parentWidget();
-    //     parent->ensurePolished();
-    //     QWidgetPrivate *wd = parent->d_func();
-    //     side += wd->leftmargin + wd->rightmargin;
-    //     top += wd->topmargin + wd->bottommargin;
-  }
+  calcContentMargins(side,top);
 
   IntSize s = getLayoutSizeHint();
   if (hasLayoutHeightForWidth())
@@ -234,7 +216,7 @@ IntSize Layout::getTotalSizeHint() const
 }
 
 void Layout::callSetGeometry(const IntSize& size) {
-  IntRect rect = getParentWidget()->getClientGeometry();
+  IntRect rect = getParentWidget()->getClientContentGeometry();
   //IntRect rect = mw->testAttribute(Qt::WA_LayoutOnEntireRect) ? mw->getGeometry() : mw->getContentGeometry()
   setLayoutGeometry(rect);
 }
@@ -271,17 +253,23 @@ void Layout::update() {
   }
 }
 
-void Layout::activateAll(LayoutItem *item, bool activate)
+//Method invalidates all children
+//Also it will mark all Layouts in the hierarchy to the value of activate
+void Layout::invalidActivateAll(LayoutItem *item, bool activate)
 {
-  item->invalidateLayout();
-  if (item->isLayout()) {
-    FOR_EACH_ITEM(child, 
-    {
-      activateAll(child, activate);
-    }, this)
+  FOG_ASSERT(item->isLayout());
 
-    ((Layout*)item)->_activated = true;
+  item->invalidateLayout();
+  FOR_EACH(child, this)
+  {
+    if (child->isLayout()) {
+      invalidActivateAll(child, activate);
+    } else {
+      child->invalidateLayout();
+    }
   }
+
+  ((Layout*)item)->_activated = true;
 }
 
 bool Layout::activate() {
@@ -303,7 +291,7 @@ bool Layout::activate() {
 
   //invalid all childs and mark them directly as activated
   //mark all childs as activated (recursive!)
-  activateAll(this, true);
+  invalidActivateAll(this, true);
 
   Widget *md = mw;
   bool hasH = md->hasMinimumHeight();
@@ -312,12 +300,13 @@ bool Layout::activate() {
   
   if (mw->isGuiWindow()) {
     IntSize ms = getTotalMinimumSize();
-    bool calc = hasLayoutHeightForWidth();  
-    if (hasW) {
-      ms.setWidth(mw->getMinimumSize().getWidth());      
-    }
-    if (hasH) {
-      ms.setHeight(mw->getMinimumSize().getHeight());
+    if(calc) {
+      if (hasW) {
+        ms.setWidth(mw->getMinimumSize().getWidth());      
+      }
+      if (hasH) {
+        ms.setHeight(mw->getMinimumSize().getHeight());
+      }
     }
 
     if (calc && hasLayoutHeightForWidth()) {
@@ -353,8 +342,9 @@ void Layout::onLayout(LayoutEvent* e) {
   if(e->_code == EVENT_LAYOUT_REQUEST) {
     FOG_ASSERT(!_parentItem || (_parentItem && _parentItem->isWidget()));
     if (static_cast<Widget *>(_parentItem)->isVisible())
+    {
       activate();
-
+    }
   }
 }
 

@@ -202,7 +202,7 @@ MyWindow::MyWindow(uint32_t createFlags) :
   //i[0].readFile(Ascii8("/my/upload/bmpsuite/icons_fullset.png"));
 
   //i[0] = i[0].scale(Size(32, 32), INTERPOLATION_SMOOTH);
-  FlowLayout* flow = new FlowLayout(this);
+  FlowLayout* flow = new FlowLayout(this,20);
   setLayout(flow);
 
   _subx = 0.0;
@@ -261,7 +261,9 @@ MyWindow::MyWindow(uint32_t createFlags) :
   _layout->add(button4);
   _layout->add(button5);
 
-  _layout->activate();
+  _layout->activate();  
+
+  setContentRightMargin(50);
 }
 
 MyWindow::~MyWindow()

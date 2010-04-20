@@ -80,30 +80,24 @@ struct FOG_API Layout : public LayoutItem
 
   FOG_INLINE int calcMargin(int margin) const;
 
-  FOG_INLINE void setContentMargins(int left, int right, int top, int bottom) { 
-    IntMargins m = _contentmargins;
-    _contentmargins.left = calcMargin(left);
-    _contentmargins.right = calcMargin(right);
-    _contentmargins.top = calcMargin(top);
-    _contentmargins.bottom = calcMargin(bottom);
-    if(_contentmargins.eq(m))
-      return;
-
-    invalidateLayout();
+  void setContentMargins(int left, int right, int top, int bottom) {
+    IntMargins m;
+    m.left = calcMargin(left);
+    m.right = calcMargin(right);
+    m.top = calcMargin(top);
+    m.bottom = calcMargin(bottom);
+    if(!m.eq(_contentmargin)) {
+      LayoutItem::setContentMargins(m);
+      invalidateLayout();
+    }
   }
 
   FOG_INLINE void setContentMargins(const IntMargins& m) { 
     setContentMargins(m.left,m.right,m.top,m.bottom);
   }
-  
-  FOG_INLINE IntMargins getContentMargins() const { 
-    return _contentmargins; 
-  }
 
-  FOG_INLINE IntRect getContentsRect() {
-    if(_margininvalid) 
-      setContentMargins(_contentmargins);
-    return _rect.adjusted(+_contentmargins.left, +_contentmargins.top, -_contentmargins.right, -_contentmargins.bottom);
+  FOG_INLINE IntRect getContentsRect() const {
+    return _rect.adjusted(+_contentmargin.left, +_contentmargin.top, -_contentmargin.right, -_contentmargin.bottom);
   }
 
   virtual int getSpacing() const { 
@@ -192,7 +186,7 @@ struct FOG_API Layout : public LayoutItem
 
   void invalidActivateAll(LayoutItem *item, bool activate=true);
 
-  IntMargins _contentmargins;
+  //IntMargins _contentmargins;
 
   int _spacing : 24;    //max Widget-Size
   uint _toplevel : 1;
@@ -204,9 +198,16 @@ struct FOG_API Layout : public LayoutItem
   SizeConstraint _constraint;
   IntRect _rect;
 
+  //For easy handling of Flex-Layouts
+  void addFlexItem(){ ++_flexcount; }
+  void removeFlexItem() { --_flexcount; }
+  bool hasFlexItems() const { return _flexcount > 0; }  
+
 private:
   void calcContentMargins(int&side, int&top) const;
   FOG_DISABLE_COPY(Layout)
+
+  int _flexcount;
 };
 
 } // Fog namespace

@@ -174,18 +174,6 @@ struct FOG_API Widget : public LayoutItem
   // [Geometry]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE IntMargins getContentMargins() const { return _contentmargin; }
-  FOG_INLINE int getContentLeftMargin() const { return _contentmargin.left; }
-  FOG_INLINE int getContentRightMargin() const { return _contentmargin.right; }
-  FOG_INLINE int getContentTopMargin() const { return _contentmargin.top; }
-  FOG_INLINE int getContentBottomMargin() const { return _contentmargin.bottom; }
-  FOG_INLINE void setContentMargins(const IntMargins& m)  { _contentmargin = m; }
-  FOG_INLINE void setContentLeftMargin(int m)  { _contentmargin.left = m; }
-  FOG_INLINE void setContentRightMargin(int m)  { _contentmargin.right = m; }
-  FOG_INLINE void setContentTopMargin(int m)  { _contentmargin.top = m; }
-  FOG_INLINE void setContentBottomMargin(int m)  { _contentmargin.bottom = m; }
-  FOG_INLINE void setContentMargins(int left, int right, int top, int bottom)  { _contentmargin.set(left,right,top,bottom); }
-
   //! @brief Get widget geometry.
   FOG_INLINE const IntRect& getGeometry() const { return _geometry; }
   //! @brief Get widget position relative to parent.
@@ -793,9 +781,7 @@ protected:
   Layout* _layout;
 
   //! @brief Layout hints.
-  //LayoutHint _layoutHint;
-
-  IntMargins _contentmargin; 
+  //LayoutHint _layoutHint;  
 
   //! @brief Layout policy.
   LayoutPolicy _layoutPolicy;

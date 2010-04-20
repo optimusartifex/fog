@@ -202,7 +202,9 @@ MyWindow::MyWindow(uint32_t createFlags) :
   //i[0].readFile(Ascii8("/my/upload/bmpsuite/icons_fullset.png"));
 
   //i[0] = i[0].scale(Size(32, 32), INTERPOLATION_SMOOTH);
-  FlowLayout* flow = new FlowLayout(this,20);
+  BoxLayout* flow = new BoxLayout(this,5,5);
+  flow->setContentTopMargin(50);
+  flow->setContentBottomMargin(50);
   setLayout(flow);
 
   _subx = 0.0;
@@ -226,6 +228,7 @@ MyWindow::MyWindow(uint32_t createFlags) :
   button2->setText(Ascii8("Test FullScreen"));
   button2->show();
   button2->addListener(EVENT_CLICK, this, &MyWindow::onFullScreenClick);
+  button2->setFlex(1.0);
 
   Button* button3 = new Button();
   add(button3);
@@ -233,6 +236,7 @@ MyWindow::MyWindow(uint32_t createFlags) :
   button3->setText(Ascii8("Test PopUp"));
   button3->show();  
   button3->addListener(EVENT_CLICK, this, &MyWindow::onPopUpClick);
+  button3->setFlex(1.0);
 
   Button* button4 = new Button();
   add(button4);
@@ -263,7 +267,7 @@ MyWindow::MyWindow(uint32_t createFlags) :
 
   _layout->activate();  
 
-  setContentRightMargin(50);
+  setContentRightMargin(0);
 }
 
 MyWindow::~MyWindow()

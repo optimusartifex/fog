@@ -7,7 +7,7 @@
 #ifndef _FOG_GUI_LAYOUT_BOXLAYOUT_H
 #define _FOG_GUI_LAYOUT_BOXLAYOUT_H
 
-#if 0
+
 // [Dependencies]
 #include <Fog/Gui/Layout/Layout.h>
 
@@ -20,46 +20,39 @@ namespace Fog {
 // [Fog::BoxLayout]
 // ============================================================================
 
-//! @brief Base class for all layouts.
-struct FOG_API BoxLayout : public Layout
-{
-  FOG_DECLARE_OBJECT(BoxLayout, Layout)
+  //! @brief Base class for all layouts.
+  struct FOG_API BoxLayout : public Layout
+  {
+    FOG_DECLARE_OBJECT(BoxLayout, Layout)
+    BoxLayout(Widget *parent, int margin=-1, int spacing=-1);
+    BoxLayout(int margin=-1, int spacing=-1);
+    ~BoxLayout();
 
-  // [Construction / Destruction]
+    virtual void add(LayoutItem *item);    
+    virtual uint32_t getLayoutExpandingDirections() const;
+    virtual IntSize getLayoutSizeHint() const { return _hint; }
+    virtual IntSize getLayoutMinimumSize() const  { return _min; }
 
-  BoxLayout();
-  virtual ~BoxLayout();
+    virtual int getLength() const; 
+    virtual LayoutItem *getAt(int index) const;
+    virtual LayoutItem *takeAt(int index);
 
-  virtual void reparentChildren();
+    virtual void setLayoutGeometry(const IntRect &rect);
 
-  sysint_t indexOf(LayoutItem* item);
+    virtual void invalidateLayout() {
+      buildCache();
+      Layout::invalidateLayout();
+    }
 
-  bool addItem(LayoutItem* item);
-  bool addItemAt(sysint_t index, LayoutItem* item);
-
-  LayoutItem* takeAt(sysint_t index);
-
-  bool deleteItem(LayoutItem* item);
-  bool deleteItemAt(sysint_t index);
-
-  List<LayoutItem*> items() const;
-
-  FOG_INLINE int margin() const { return _margin; }
-  FOG_INLINE int spacing() const { return _spacing; }
-
-  void setMargin(int margin);
-  void setSpacing(int spacing);
-
-protected:
-  List<LayoutItem*> _items;
-
-  int _margin;
-  int _spacing;
-};
+  private:
+    IntSize _min;
+    IntSize _hint;
+    int doLayout(const IntRect &rect);
+    void buildCache();
+    List<LayoutItem*> _itemList;
+  };
 
 } // Fog namespace
 
-//! @}
-#endif
 // [Guard]
 #endif // _FOG_GUI_LAYOUT_BOXLAYOUT_H

@@ -10,6 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Gui/Layout/LayoutItem.h>
+#include <Fog/Gui/Layout/Layout.h>
 #include <Fog/Gui/Widget.h>
 
 FOG_IMPLEMENT_OBJECT(Fog::LayoutItem)
@@ -20,7 +21,7 @@ namespace Fog {
 // [Fog::LayoutItem]
 // ============================================================================
 
-LayoutItem::LayoutItem(uint32_t alignment) : _alignment(alignment), _withinLayout(0)
+LayoutItem::LayoutItem(uint32_t alignment) : _alignment(alignment), _withinLayout(0), _flexibles(0), _flex(-1)
 {
 
 }
@@ -86,6 +87,15 @@ FOG_INLINE IntSize calculateMinimumSize(const IntSize& sizeHint, const IntSize& 
 
 IntSize LayoutItem::calculateMinimumSize(const Widget* w) {
   return Fog::calculateMinimumSize(w->getSizeHint(), w->getMinimumSizeHint(),w->getMinimumSize(), w->getMaximumSize(),w->getLayoutPolicy());
+}
+
+
+void LayoutItem::setFlex(int flex) {
+  if(flex < 0) flex = -1;
+  _flex = flex;
+  if(_withinLayout && flex != -1) {
+    _withinLayout->addFlexItem();
+  }
 }
 
 } // Fog namespace

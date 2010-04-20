@@ -656,6 +656,7 @@ Set(FOG_GUI_LIB_SOURCES
   Fog/Gui/Layout/Layout.cpp
   Fog/Gui/Layout/LayoutHint.cpp
   Fog/Gui/Layout/LayoutItem.cpp
+  Fog/Gui/Layout/LayoutUtils.cpp
   Fog/Gui/Theme.cpp
   Fog/Gui/Widget.cpp
   Fog/Gui/Window.cpp
@@ -677,6 +678,7 @@ Set(FOG_GUI_LIB_HEADERS
   Fog/Gui/Layout/LayoutHint.h
   Fog/Gui/Layout/LayoutItem.h
   Fog/Gui/Layout/LayoutPolicy.h
+  Fog/Gui/Layout/LayoutUtils.h
   Fog/Gui/Theme.h
   Fog/Gui/Widget.h
   Fog/Gui/Widget_p.h

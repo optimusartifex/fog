@@ -21,12 +21,12 @@ namespace Fog {
 // [Fog::Layout]
 // ============================================================================
 
-Layout::Layout() : _parentItem(0), _margininvalid(1), _toplevel(0), _spacing(0), _enabled(1), _activated(1)
+Layout::Layout() : _parentItem(0), _margininvalid(1), _toplevel(0), _spacing(0), _enabled(1), _activated(1), _flexcount(0)
 {
   _flags |= OBJ_IS_LAYOUT;  
 }
 
-Layout::Layout(Widget *parent, Layout* parentLayout) : _margininvalid(1), _toplevel(0), _spacing(0), _enabled(1), _activated(1), _parentItem(0) {
+Layout::Layout(Widget *parent, Layout* parentLayout) : _flexcount(0), _margininvalid(1), _toplevel(0), _spacing(0), _enabled(1), _activated(1), _parentItem(0) {
   _flags |= OBJ_IS_LAYOUT;
 
   if (parentLayout) {
@@ -98,6 +98,9 @@ void Layout::remove(LayoutItem* item) {
 
   FOR_EACH(iitem, this) {
     if (iitem == item) {
+      if(item->hasFlex())
+        removeFlexItem();
+      item->_withinLayout = 0;
       takeAt(i);
       invalidateLayout();
     }
@@ -117,6 +120,8 @@ bool Layout::removeAllWidgets(LayoutItem *layout, Widget *w)
   FOR_EACH(iitem, lay) {
     if (iitem == w) {
       lay->takeAt(i);
+      if(iitem->hasFlex())
+        lay->removeFlexItem();
       w->_withinLayout = 0;
       lay->invalidateLayout();
       return true;
@@ -163,6 +168,9 @@ void Layout::add(LayoutItem* item)
   }
 
   item->_withinLayout = this;
+  if(item->hasFlex()) {
+    addFlexItem();
+  }
 }
 
 IntSize Layout::getTotalMinimumSize() const

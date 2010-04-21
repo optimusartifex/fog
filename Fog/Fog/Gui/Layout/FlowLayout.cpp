@@ -40,8 +40,7 @@ namespace Fog {
 
   void FlowLayout::add(LayoutItem *item)
   {
-    Layout::add(item);
-    _itemList.append(item);    
+    Layout::addChild(item);
   }
 
   int FlowLayout::horizontalSpacing() const
@@ -62,27 +61,6 @@ namespace Fog {
       return DEFAULT_LAYOUT_SPACING;
       //return smartSpacing(QStyle::PM_LayoutVerticalSpacing);
     }
-  }
-
-  int FlowLayout::getLength() const
-  {
-    return _itemList.getLength();
-  }
-
-  LayoutItem *FlowLayout::getAt(int index) const
-  {
-    if(index < _itemList.getLength())
-      return _itemList.at(index);
-
-    return 0;
-  }
-
-  LayoutItem *FlowLayout::takeAt(int index)
-  {
-    if (index >= 0 && index < _itemList.getLength())
-      return _itemList.take(index);
-    else
-      return 0;
   }
 
   uint32_t FlowLayout::getLayoutExpandingDirections() const
@@ -115,9 +93,9 @@ namespace Fog {
   IntSize FlowLayout::getLayoutMinimumSize() const
   {
     IntSize size;
-    int len = _itemList.getLength();
+    int len = getLength();
     for(int i=0;i<len;++i) {
-      size = size.expandedTo(_itemList.at(i)->getLayoutMinimumSize());
+      size = size.expandedTo(getAt(i)->getLayoutMinimumSize());
     }
 
     int l = 2* getContentMargins().left;
@@ -134,9 +112,9 @@ namespace Fog {
     int y = effectiveRect.y;
     int lineHeight = 0;
 
-    int len = _itemList.getLength();
+    int len = getLength();
     for(int i=0;i<len;++i) {
-      LayoutItem *item = _itemList.at(i);
+      LayoutItem *item = getAt(i);
       int spaceX = horizontalSpacing();
       if (spaceX == -1)
         spaceX = 0;

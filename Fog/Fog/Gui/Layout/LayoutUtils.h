@@ -26,6 +26,7 @@ namespace Fog {
 
   void calculateFlexOffsets(const List<LayoutItem*>& arr, int avail, int& used);
   int calculateHorizontalGaps(const List<LayoutItem*>& children, int spacing=0, bool collapse=true);
+  int calculateVerticalGaps(const List<LayoutItem*>& children, int spacing, bool collapse);
 
   int collapseMargins(int margin1, int margin2);
   int collapseMargins(int margin1, int margin2, int margin3);

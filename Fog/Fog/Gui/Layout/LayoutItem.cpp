@@ -21,7 +21,7 @@ namespace Fog {
 // [Fog::LayoutItem]
 // ============================================================================
 
-LayoutItem::LayoutItem(uint32_t alignment) : _alignment(alignment), _withinLayout(0), _flexibles(0), _flex(-1)
+LayoutItem::LayoutItem(uint32_t alignment) : _alignment(alignment), _withinLayout(0), _layoutdata(0), _flex(-1), _dirty(1)
 {
 
 }
@@ -102,10 +102,10 @@ void LayoutItem::setFlex(int flex) {
   }
 }
 
-void LayoutItem::removeFlexibles() {
-  if(_flexibles) {
-    delete _flexibles;
-    _flexibles = 0;  
+void LayoutItem::removeLayoutStruct() {
+  if(_layoutdata) {
+    delete _layoutdata;
+    _layoutdata = 0;  
   }
 }
 

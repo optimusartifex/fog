@@ -31,8 +31,8 @@ Layout::Layout(Widget *parent, Layout* parentLayout) : _flexcount(0), _toplevel(
 
   if (parentLayout) {
     _parentItem = parent;
-     parentLayout->add(this);
-  } else if (parent) { 
+     parentLayout->addChild(this);
+  } else if (parent) {
      parent->setLayout(this);
      if(_parentItem == parent) {
        parent->_withinLayout = this;
@@ -139,10 +139,12 @@ void Layout::remove(LayoutItem* item) {
     return;
 
   FOR_EACH(iitem, this) {
-    if (iitem == item) {
+    if (iitem == item) {      
       if(item->hasFlex())
         removeFlexItem();
+
       item->_withinLayout = 0;
+      item->removeLayoutStruct();
       takeAt(i);
       invalidateLayout();
     }
@@ -189,8 +191,8 @@ void Layout::reparentChildWidgets(Widget* widget)
   }
 }
 
-void Layout::add(LayoutItem* item) 
-{
+void Layout::addChild(LayoutItem* item) 
+{  
   if(item->isWidget()) {
     Widget* w = static_cast<Widget*>(item);
     Widget *layoutparent = getParentWidget();
@@ -207,12 +209,36 @@ void Layout::add(LayoutItem* item)
     } else if(!widgetparent && layoutparent) {
       w->setParent(layoutparent);
     }
+  } else if(item->isLayout()) {
+    //support for Flex-Layout?
+    return addChildLayout(static_cast<Layout*>(item));
   }
 
   item->_withinLayout = this;
   if(item->hasFlex()) {
     addFlexItem();
   }
+
+  prepareItem(item, getLength());
+  _children.append(item);
+}
+
+void Layout::addChildLayout(Layout *l)
+{
+  if (l->_parentItem) {
+    //WARNING already has a parent!
+    return;
+  }
+
+  l->_parentItem = this;  
+  l->_toplevel = 0;
+
+  if (Widget *mw = getParentWidget()) {
+    l->reparentChildWidgets(mw);
+  }
+
+  prepareItem(l, getLength());
+  _children.append(l);
 }
 
 IntSize Layout::getTotalMinimumSize() const
@@ -266,24 +292,11 @@ IntSize Layout::getTotalSizeHint() const
 }
 
 void Layout::callSetGeometry(const IntSize& size) {
-  IntRect rect = getParentWidget()->getClientContentGeometry();
-  //TODO: EntireRect
-  setLayoutGeometry(rect);
-}
-
-void Layout::addChildLayout(Layout *l)
-{
-  if (l->_parentItem) {
-    //WARNING already has a parent!
-    return;
-  }
-
-  l->_parentItem = this;
-  l->_withinLayout = this;
-  l->_toplevel = 0;
-
-  if (Widget *mw = getParentWidget()) {
-    l->reparentChildWidgets(mw);
+  if(size.isValid()) {
+    //support for parentWidget-Margin (so layouts do not need to do this within calculation)
+    IntRect rect = getParentWidget()->getClientContentGeometry();
+    //TODO: EntireRect
+    setLayoutGeometry(rect);
   }
 }
 

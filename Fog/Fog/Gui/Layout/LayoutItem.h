@@ -13,6 +13,7 @@
 #include <Fog/Graphics/Geometry.h>
 #include <Fog/Gui/Constants.h>
 #include <Fog/Gui/Layout/LayoutPolicy.h>
+#include <Fog/Gui/Layout/LayoutHint.h>
 
 //! @addtogroup Fog_Gui
 //! @{
@@ -76,15 +77,38 @@ struct FOG_API LayoutItem : public Object
 
   virtual bool hasLayoutHeightForWidth() const { return false; }
   virtual int getLayoutHeightForWidth(int width) const { return -1; }
-  virtual int getLayoutMinimumHeightForWidth(int width) const { return getLayoutHeightForWidth(width); }
+  FOG_INLINE virtual int getLayoutMinimumHeightForWidth(int width) const { return getLayoutHeightForWidth(width); }
 
   // --------------------------------------------------------------------------
   // [LayoutHint]
   // --------------------------------------------------------------------------
 
-  virtual IntSize getLayoutSizeHint() const = 0;
-  virtual IntSize getLayoutMinimumSize() const = 0;
-  virtual IntSize getLayoutMaximumSize() const = 0;
+  virtual void calculateLayoutHint(LayoutHint& hint) = 0;
+
+  //TODO: maybe we can insert clearDirty() in special function, so that it is only
+  //checked there, to have a real const getter!
+
+  FOG_INLINE void clearDirty() {
+    FOG_ASSERT(_dirty);
+    if(!isEmpty()) {
+      calculateLayoutHint(_cache); 
+    } else {
+      _cache._maximumSize = _cache._minimumSize = _cache._sizeHint = IntSize(0,0);
+    }
+   
+    _dirty = 0; 
+  }
+
+  FOG_INLINE const LayoutHint& getLayoutHint() const {
+    if(_dirty) {
+      const_cast<LayoutItem*>(this)->clearDirty();
+    }
+    return _cache;
+  }
+
+  FOG_INLINE IntSize getLayoutSizeHint() const { return getLayoutHint()._sizeHint; }
+  FOG_INLINE IntSize getLayoutMinimumSize() const { return getLayoutHint()._minimumSize; }
+  FOG_INLINE IntSize getLayoutMaximumSize() const { return getLayoutHint()._maximumSize; }
 
   // --------------------------------------------------------------------------
   // [Calculate SizeHint]
@@ -109,14 +133,14 @@ struct FOG_API LayoutItem : public Object
   // [Cache Handling]
   // --------------------------------------------------------------------------
 
-  virtual void invalidateLayout() { }
+  virtual void invalidateLayout() { _dirty = 1; }
 
   // --------------------------------------------------------------------------
   // [Geometry]
   // --------------------------------------------------------------------------
 
   virtual void setLayoutGeometry(const IntRect&) = 0;
-  virtual IntRect getLayoutGeometry() const { return IntRect(); }   //who needs this?
+  virtual IntRect getLayoutGeometry() const { return IntRect(); }
 
   // --------------------------------------------------------------------------
   // [Alignment]
@@ -130,7 +154,7 @@ struct FOG_API LayoutItem : public Object
   // --------------------------------------------------------------------------
 
   void setFlex(int flex);
-  void removeFlexibles();
+  void removeLayoutStruct();
   FOG_INLINE int getFlex() const { return _flex; }
   FOG_INLINE bool hasFlex() const { return _flex != -1; }
 
@@ -139,26 +163,30 @@ struct FOG_API LayoutItem : public Object
   // --------------------------------------------------------------------------
 
   //Struct for Calculation of Flex-Values in LayoutManager
-  struct Flexibles {
-    Flexibles() : _min(0), _max(0), _hint(0), _flex(-1), _potential(0), _offset(0) {}
-    int _min;
-    int _max;
-    int _hint;
+  struct LayoutStruct {
+    LayoutStruct() : _min(0), _max(0), _hint(0), _flex(-1), _potential(0), _offset(0), _next(0) {}
+    int _min;     //height or width
+    int _max;     //height or width
+    int _hint;    //height or width
 
     //Request/Response
-    float _flex;
-    int _potential;
+    float _flex;  //the flex value for this Item
 
-    int _offset;
-  }* _flexibles;
+    int _potential; //for internal use
+    int _offset;  //for internal use
 
-  IntMargins _contentmargin; 
+    LayoutStruct* _next;   //for faster Flexible handling
+  }* _layoutdata;
+
+  IntMargins _contentmargin;
+  LayoutHint _cache;
   Layout* _withinLayout;  //for fast identification of Layout, where this Item is inserted!
                           //maybe also used for layout pointer in widget
 
   int _flex : 24;
   uint32_t _alignment : 2;
-  uint32_t _unused : 6;
+  uint32_t _dirty : 1;
+  uint32_t _unused : 5;
 };
 
 } // Fog namespace

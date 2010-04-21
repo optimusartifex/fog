@@ -772,8 +772,9 @@ bool Widget::isLayoutDirty() const
   return _isLayoutDirty;
 }
 
-void Widget::invalidateLayout() const
+void Widget::invalidateLayout()
 {
+  LayoutItem::invalidateLayout();
 //   // Don't invalidate more times, it can be time consuming.
 //   if (_isLayoutDirty) return;
 // 

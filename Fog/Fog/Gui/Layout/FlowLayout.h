@@ -39,15 +39,10 @@ namespace Fog {
     virtual int getLayoutHeightForWidth(int) const;
     virtual IntSize getLayoutMinimumSize() const;
 
-    virtual int getLength() const; 
-    virtual LayoutItem *getAt(int index) const;
-    virtual LayoutItem *takeAt(int index);
-
     virtual void setLayoutGeometry(const IntRect &rect);
 
   private:
     int doLayout(const IntRect &rect, bool testOnly) const;
-    List<LayoutItem*> _itemList;
     int _hSpace;
     int _vSpace;
   };

@@ -202,11 +202,11 @@ MyWindow::MyWindow(uint32_t createFlags) :
   //i[0].readFile(Ascii8("/my/upload/bmpsuite/icons_fullset.png"));
 
   //i[0] = i[0].scale(Size(32, 32), INTERPOLATION_SMOOTH);
-  BoxLayout* flow = new BoxLayout(this,0,0);
+  HBoxLayout* flow = new HBoxLayout(this,0,0);
   flow->setContentLeftMargin(0);
   flow->setContentTopMargin(0);
   flow->setContentBottomMargin(0);
-  flow->setDirection(RIGHTTOLEFT);
+  //flow->setDirection(RIGHTTOLEFT);
   setLayout(flow);
 
   _subx = 0.0;
@@ -230,7 +230,7 @@ MyWindow::MyWindow(uint32_t createFlags) :
   button2->setText(Ascii8("Test FullScreen"));
   button2->show();
   button2->addListener(EVENT_CLICK, this, &MyWindow::onFullScreenClick);
-  button2->setFlex(1.0);
+  //button2->setContentLeftMargin(-20);
 
   Button* button3 = new Button();
   add(button3);
@@ -239,6 +239,8 @@ MyWindow::MyWindow(uint32_t createFlags) :
   button3->show();  
   button3->addListener(EVENT_CLICK, this, &MyWindow::onPopUpClick);
   button3->setFlex(1.0);
+  //button3->setContentLeftMargin(10);
+  //button3->setContentRightMargin(10);
 
   Button* button4 = new Button();
   add(button4);
@@ -252,7 +254,7 @@ MyWindow::MyWindow(uint32_t createFlags) :
   //button5->setGeometry(IntRect(40, 200, 100, 20));
   button5->setText(Ascii8("Test ModalWindow"));
   button5->show();  
-  button5->addListener(EVENT_CLICK, this, &MyWindow::onModalTestClick);
+  button5->addListener(EVENT_CLICK, this, &MyWindow::onModalTestClick);  
 
   _popup = new MyPopUp();
   add(_popup);
@@ -261,13 +263,13 @@ MyWindow::MyWindow(uint32_t createFlags) :
   _popup->show();
 
 
-  _layout->add(button);
-  _layout->add(button2);
-  _layout->add(button3);
-  _layout->add(button4);
-  _layout->add(button5);
+  flow->addItem(button);
+  flow->addItem(button2);
+  flow->addItem(button3);
+  flow->addItem(button4);
+  flow->addItem(button5);
 
-  _layout->activate();  
+  _layout->activate();
 
   setContentRightMargin(0);
 }
@@ -467,7 +469,7 @@ FOG_GUI_MAIN()
 {
   Application app(Ascii8("Gui"));
 
-  MyWindow window(WINDOW_TYPE_FRAMELESS|WINDOW_TRANSPARENT);
+  MyWindow window(WINDOW_TYPE_DEFAULT|WINDOW_TRANSPARENT);
   window.setSize(IntSize(500, 400));
   window.show();
 

@@ -22,42 +22,50 @@ namespace Fog {
 
   enum Direction { LEFTTORIGHT=0, RIGHTTOLEFT=1, TOPTOBOTTOM=0, BOTTOMTOTOP=1, DOWN = TOPTOBOTTOM, UP = BOTTOMTOTOP };
 
-  //! @brief Base class for all layouts.
+  //! @brief BoxLayout base class
   struct FOG_API BoxLayout : public Layout
   {    
     FOG_DECLARE_OBJECT(BoxLayout, Layout)
     BoxLayout(Widget *parent, int margin=-1, int spacing=-1);
     BoxLayout(int margin=-1, int spacing=-1);
-    ~BoxLayout();
+    virtual ~BoxLayout();
 
-    virtual void add(LayoutItem *item);    
+    FOG_INLINE virtual void prepareItem(LayoutItem* item, sysuint_t index) { item->_layoutdata = new(std::nothrow) LayoutItem::LayoutStruct(); }
+    FOG_INLINE void addItem(LayoutItem *item) { Layout::addChild(item); }
+
     virtual uint32_t getLayoutExpandingDirections() const;
-    virtual IntSize getLayoutSizeHint() const { return _hint; }
-    virtual IntSize getLayoutMinimumSize() const  { return _min; }
 
-    virtual int getLength() const; 
-    virtual LayoutItem *getAt(int index) const;
-    virtual LayoutItem *takeAt(int index);
+    FOG_INLINE Direction getDirection() const { return static_cast<Direction>(_direction); }   
+    FOG_INLINE void setDirection(Direction d) { _direction = d; }    
 
-    FOG_INLINE Direction getDirection() const { return _direction; }   
-    FOG_INLINE void setDirection(Direction d) { _direction = d; }
+  protected:
+    FOG_INLINE bool isForward() const { return _direction == 0; }
 
-    virtual void setLayoutGeometry(const IntRect &rect);
-
-    virtual void invalidateLayout() {
-      buildCache();
-      Layout::invalidateLayout();
-    }
+    virtual void setLayoutGeometry(const IntRect &rect);    
+    virtual int doLayout(const IntRect &rect) = 0;
 
   private:
-    IntSize _min;
-    IntSize _hint;
-    int doLayout(const IntRect &rect);
-    FOG_INLINE bool isForward() const { return getDirection() == 0; }
-    void buildCache();
-    List<LayoutItem*> _itemList;
+    uint32_t _direction : 1;
+    uint32_t _unused : 31;
+  };
 
-    Direction _direction;
+  struct FOG_API HBoxLayout : public BoxLayout
+  {
+    HBoxLayout(Widget *parent, int margin=-1, int spacing=-1) : BoxLayout(parent,margin,spacing) {}
+    HBoxLayout(int margin=-1, int spacing=-1) : BoxLayout(margin,spacing) {}
+
+    virtual int doLayout(const IntRect &rect);
+
+    virtual void calculateLayoutHint(LayoutHint& hint);
+  };
+
+  struct FOG_API VBoxLayout : public BoxLayout
+  {
+    VBoxLayout(Widget *parent, int margin=-1, int spacing=-1) : BoxLayout(parent,margin,spacing) {}
+    VBoxLayout(int margin=-1, int spacing=-1) : BoxLayout(margin,spacing) {}
+
+    virtual int doLayout(const IntRect &rect);
+    virtual void calculateLayoutHint(LayoutHint& hint);
   };
 
 } // Fog namespace

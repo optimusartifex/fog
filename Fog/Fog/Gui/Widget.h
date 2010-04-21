@@ -195,10 +195,14 @@ struct FOG_API Widget : public LayoutItem
 
   FOG_INLINE IntRect getClientContentGeometry() const { 
     IntRect ret = _clientGeometry; 
+    if(ret.getWidth() == 0 && ret.getHeight() == 0)
+      return IntRect(0,0,0,0);
+
     ret.setLeft(getContentLeftMargin());
     ret.setTop(getContentTopMargin());
-    ret.setWidth(_clientGeometry.getWidth() - 1 - getContentRightMargin());
-    ret.setHeight(_clientGeometry.getHeight() - 1 - getContentBottomMargin());
+    ret.setWidth(_clientGeometry.getWidth() - getContentRightMargin());
+    ret.setHeight(_clientGeometry.getHeight() - getContentBottomMargin());
+
     return ret;
   }
   //! @brief Get widget position relative to parent.
@@ -266,36 +270,25 @@ struct FOG_API Widget : public LayoutItem
   // [Layout Of Widget]
   // --------------------------------------------------------------------------
 
-  virtual IntSize getLayoutSizeHint() const {
-    if(isEmpty()) 
-      return IntSize(0, 0);
+  virtual void calculateLayoutHint(LayoutHint& hint) {
+    //calculate MinimumSize
+    hint._minimumSize = LayoutItem::calculateMinimumSize();
 
-    return IntSize(40, 40);
-    IntSize s = getSizeHint().expandedTo(getMinimumSizeHint());
-    s = s.boundedTo(getMaximumSize()).expandedTo(getMinimumSize());
+    //calculate MaxiumumSize
+    hint._maximumSize = LayoutItem::calculateMaximumSize();
+
+    //calculate SizeHint
+    hint._sizeHint = getSizeHint().expandedTo(getMinimumSizeHint());
+    hint._sizeHint = hint._sizeHint.boundedTo(getMaximumSize()).expandedTo(getMinimumSize());
     //TODO: WA_LayoutUsesWidgetRect
 
     if (_layoutPolicy.isHorizontalPolicyIgnored())
-      s.setWidth(0);
+      hint._sizeHint.setWidth(0);
     if (_layoutPolicy.isVerticalPolicyIgnored())
-      s.setHeight(0);
-    return s;
-  }
+      hint._sizeHint.setHeight(0);
 
-  virtual IntSize getLayoutMinimumSize() const {
-    if (isEmpty())
-      return IntSize(0, 0);
-    //TODO: WA_LayoutUsesWidgetRect
-    return LayoutItem::calculateMinimumSize();
-  }
-
-
-  virtual IntSize getLayoutMaximumSize() const {
-    if (isEmpty())
-      return IntSize(0, 0);
-
-    //TODO: WA_LayoutUsesWidgetRect
-    return calculateMaximumSize();
+    //!!! TODO: REMOVE THIS AFTER EASY TESTING!!!
+    hint._sizeHint = IntSize(40, 40);
   }
 
   virtual bool hasLayoutHeightForWidth() const;
@@ -313,9 +306,7 @@ struct FOG_API Widget : public LayoutItem
   //! @brief Take widget layout manager (will not disconnect children).
   Layout* takeLayout();
 
-  virtual bool isEmpty() const {
-    return !isVisible() || _guiWindow;
-  }
+  FOG_INLINE virtual bool isEmpty() const { return !isVisible() || _guiWindow; }
 
   virtual uint32_t getLayoutExpandingDirections() const;
 
@@ -406,7 +397,7 @@ struct FOG_API Widget : public LayoutItem
   // --------------------------------------------------------------------------
 
   virtual bool isLayoutDirty() const;
-  virtual void invalidateLayout() const;
+  virtual void invalidateLayout();
 
   // --------------------------------------------------------------------------
   // [Widget State]

@@ -35,7 +35,7 @@ namespace Fog {
       flexSum = 0;
       for(sysuint_t i=0;i<arr.getLength();++i) {
         if(arr.at(i)->hasFlex()) {
-          LayoutItem::Flexibles* child = arr.at(i)->_flexibles;
+          LayoutItem::LayoutStruct* child = arr.at(i)->_layoutdata;
 
           if(!set) {
             child->_potential = grow ? child->_max - child->_hint : child->_hint - child->_min;
@@ -65,7 +65,7 @@ namespace Fog {
       for(sysuint_t z=0;z<arr.getLength();++z) {
         if(arr.at(z)->hasFlex())
         {
-          LayoutItem::Flexibles* child = arr.at(z)->_flexibles;
+          LayoutItem::LayoutStruct* child = arr.at(z)->_layoutdata;
 
           if (child->_potential > 0)
           {
@@ -99,9 +99,9 @@ namespace Fog {
   }
 
 #define CALC(VALUE)\
-  if(margin1 < 0) {\
+  if(VALUE < 0) {\
   min = Math::min(min, VALUE);\
-  } else if(margin1 > 0) {\
+  } else if(VALUE > 0) {\
   max = Math::max(max, VALUE);\
   }\
 
@@ -154,6 +154,43 @@ namespace Fog {
       // Simple adding of all margins
       for (int i=1; i<children.getLength(); ++i) {
         gaps += children.at(i)->getContentLeftMargin() + children.at(i)->getContentRightMargin();
+      }
+
+      // Add spacing
+      gaps += (spacing * (children.getLength()-1));
+    }
+
+    return gaps;
+  }
+
+
+  int calculateVerticalGaps(const List<LayoutItem*>& children, int spacing, bool collapse) {
+    if(children.getLength() == 0)
+      return 0;
+
+    if(spacing == -1) {
+      spacing = 0;
+    }
+
+    int gaps = 0;
+
+    if (collapse)
+    {
+      // Add first child
+      gaps += children.at(0)->getContentLeftMargin();
+
+      for (int i=1; i<children.getLength(); ++i) {
+        gaps += collapseMargins(spacing, children.at(i-1)->getContentBottomMargin(), children.at(i)->getContentTopMargin());
+      }
+
+      // Add last child
+      gaps += children.at(children.getLength()-1)->getContentBottomMargin();
+    }
+    else
+    {
+      // Simple adding of all margins
+      for (int i=1; i<children.getLength(); ++i) {
+        gaps += children.at(i)->getContentTopMargin() + children.at(i)->getContentBottomMargin();
       }
 
       // Add spacing

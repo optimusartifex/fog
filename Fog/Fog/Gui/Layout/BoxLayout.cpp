@@ -41,37 +41,6 @@ namespace Fog {
       delete item;
   }
 
-  void BoxLayout::add(LayoutItem *item)
-  {
-    Layout::add(item);
-    item->_flexibles = new(std::nothrow) LayoutItem::Flexibles();
-    _itemList.append(item);
-  }
-
-  int BoxLayout::getLength() const
-  {
-    return _itemList.getLength();
-  }
-
-  LayoutItem *BoxLayout::getAt(int index) const
-  {
-    if(index < (int)_itemList.getLength())
-      return _itemList.at(index);
-
-    return 0;
-  }
-
-  LayoutItem *BoxLayout::takeAt(int index)
-  {
-    if (index >= 0 && index < (int)_itemList.getLength()) {
-      LayoutItem * item  = _itemList.take(index);
-      if(item) item->removeFlexibles();
-      return item;
-    }
-    
-    return 0;
-  }
-
   uint32_t BoxLayout::getLayoutExpandingDirections() const
   {
     return ORIENTATION_HORIZONTAL;
@@ -83,15 +52,21 @@ namespace Fog {
     doLayout(rect);
   }
 
-  void BoxLayout::buildCache() {
+
+
+  // ============================================================================
+  // [Fog::HBoxLayout]
+  // ============================================================================
+
+  void HBoxLayout::calculateLayoutHint(LayoutHint& hint) {
     // Initialize
     int minWidth=0, width=0;
     int minHeight=0, height=0;
 
     // Iterate over children
-    for (sysuint_t i=0; i<_itemList.getLength(); ++i)
+    for (sysuint_t i=0; i<getLength(); ++i)
     {
-      LayoutItem* child = _itemList.at(i);
+      LayoutItem* child = getAt(i);
       IntSize hint = child->getLayoutSizeHint();
       IntSize min = child->getLayoutMinimumSize();
 
@@ -120,41 +95,43 @@ namespace Fog {
     }
 
     // Respect gaps
-    int gaps = (getContentLeftMargin() + calculateHorizontalGaps(_itemList, getSpacing(), true) + getContentRightMargin());
+    int gaps = (getContentLeftMargin() + calculateHorizontalGaps(_children, getSpacing(), true) + getContentRightMargin());
 
-    _min.set(minWidth + gaps,minHeight+getContentTopMargin()+getContentBottomMargin());
-    _hint.set(width + gaps,height+getContentTopMargin()+getContentBottomMargin());
+    hint._minimumSize.set(minWidth + gaps,minHeight+getContentTopMargin()+getContentBottomMargin());
+    hint._sizeHint.set(width + gaps,height+getContentTopMargin()+getContentBottomMargin());
+    hint._maximumSize.set(INT_MAX,INT_MAX);
   }
 
-  int BoxLayout::doLayout(const IntRect &rect)
+  int HBoxLayout::doLayout(const IntRect &rect)
   {
-    buildCache();
-
+    if(!rect.isValid())
+      return 0;
     int availWidth = rect.getWidth();
     int availHeight = rect.getHeight();
 
-    int gaps = getContentLeftMargin() + calculateHorizontalGaps(_itemList, getSpacing(), true) + getContentRightMargin();    
+    //support for Margin of Layout
+    int gaps = getContentLeftMargin() + calculateHorizontalGaps(_children, getSpacing(), true) + getContentRightMargin();    
     int allocatedWidth = gaps;
 
     if(hasFlexItems()) {            
       //Prepare Values!
-      for (sysuint_t i=0; i<_itemList.getLength(); ++i)
+      for (sysuint_t i=0; i<getLength(); ++i)
       {
-        LayoutItem* item = _itemList.at(i);
+        LayoutItem* item = getAt(i);
         int hint = item->getLayoutSizeHint().getWidth();
         if(item->hasFlex()) {
-          item->_flexibles->_min = item->getLayoutMinimumSize().getWidth();
-          item->_flexibles->_max = item->getLayoutMaximumSize().getWidth();
-          item->_flexibles->_hint = hint;
-          item->_flexibles->_flex = (float)item->getFlex();
-          item->_flexibles->_offset = 0;
+          item->_layoutdata->_min = item->getLayoutMinimumSize().getWidth();
+          item->_layoutdata->_max = item->getLayoutMaximumSize().getWidth();
+          item->_layoutdata->_hint = hint;
+          item->_layoutdata->_flex = (float)item->getFlex();
+          item->_layoutdata->_offset = 0;
         }
 
         allocatedWidth += hint;
       }
 
       if(allocatedWidth != availWidth) {
-        calculateFlexOffsets(_itemList, availWidth, allocatedWidth);
+        calculateFlexOffsets(_children, availWidth, allocatedWidth);
       }
     }
 
@@ -165,8 +142,8 @@ namespace Fog {
     // Render children and separators
     bool forward = isForward();
 
-    int i=-1;    
-    int len = _itemList.getLength()-1;
+    register int i=-1;    
+    int len = getLength()-1;
     int start = 0;
 
     if(!forward) {
@@ -175,17 +152,17 @@ namespace Fog {
       start = len;
     }
 
-    int left = collapseMargins(getContentLeftMargin(), _itemList.at(start)->getContentLeftMargin());
+    int left = collapseMargins(getContentLeftMargin(), getAt(start)->getContentLeftMargin());
 
     while(i != len)  {
       forward ? ++i : --i;
-      LayoutItem* child = _itemList.at(i);
+      LayoutItem* child = getAt(i);
       IntSize hint = child->getLayoutSizeHint();
 
       int width = hint.getWidth();
-      width += child->_flexibles->_offset;
+      width += child->_layoutdata->_offset;
 
-      if(child->_flexibles->_offset < 0) {
+      if(child->_layoutdata->_offset < 0) {
         width = width;
       }
 
@@ -216,5 +193,143 @@ namespace Fog {
 
     return 0;
   }
+
+
+
+  // ============================================================================
+  // [Fog::VBoxLayout]
+  // ============================================================================
+
+  void VBoxLayout::calculateLayoutHint(LayoutHint& hint) {
+    // Initialize
+    int minWidth=0, width=0;
+    int minHeight=0, height=0;
+
+    // Iterate over children
+    for (sysuint_t i=0; i<getLength(); ++i)
+    {
+      LayoutItem* child = getAt(i);
+      IntSize hint = child->getLayoutSizeHint();
+      IntSize min = child->getLayoutMinimumSize();
+
+      // Sum up widths
+      height += hint.getHeight();
+
+      // Detect if child is shrinkable or has percent width and update minWidth
+      if (child->hasFlex()) {
+        minHeight += min.getHeight();
+      } else {
+        minHeight += hint.getHeight();
+      }
+
+      // Build vertical margin sum
+      int margin = child->getContentTopMargin() + child->getContentBottomMargin();
+
+      // Find biggest height
+      if ((hint.getWidth()+margin) > width) {
+        width = hint.getWidth() + width;
+      }
+
+      // Find biggest minHeight
+      if ((min.getWidth()+margin) > minWidth) {
+        minWidth = min.getWidth() + margin;
+      }
+    }
+
+    // Respect gaps
+    int gaps = (getContentLeftMargin() + calculateVerticalGaps(_children, getSpacing(), true) + getContentRightMargin());
+
+    hint._minimumSize.set(minWidth+getContentLeftMargin()+getContentRightMargin(),minHeight+gaps);
+    hint._sizeHint.set(width+getContentLeftMargin()+getContentRightMargin(),height+gaps);
+    hint._maximumSize.set(INT_MAX,INT_MAX);
+  }
+
+
+  int VBoxLayout::doLayout(const IntRect &rect)
+  {
+    int availWidth = rect.getWidth();
+    int availHeight = rect.getHeight();
+
+    //support for Margin of Layout
+    int gaps = getContentTopMargin() + calculateVerticalGaps(_children, getSpacing(), true) + getContentBottomMargin();
+    int allocatedHeight = gaps;
+
+    if(hasFlexItems()) {
+      //Prepare Values!
+      for (sysuint_t i=0; i<getLength(); ++i)
+      {
+        LayoutItem* item = getAt(i);
+        int hint = item->getLayoutSizeHint().getHeight();
+        if(item->hasFlex()) {
+          item->_layoutdata->_min = item->getLayoutMinimumSize().getHeight();
+          item->_layoutdata->_max = item->getLayoutMaximumSize().getHeight();
+          item->_layoutdata->_hint = hint;
+          item->_layoutdata->_flex = (float)item->getFlex();
+          item->_layoutdata->_offset = 0;
+        }
+
+        allocatedHeight += hint;
+      }
+
+      if(allocatedHeight != availHeight) {
+        calculateFlexOffsets(_children, availHeight, allocatedHeight);
+      }
+    }
+
+    int left, height, marginLeft, marginRight;
+    int marginBottom = -INT_MAX;    
+    int spacing = getSpacing();
+
+    // Render children and separators
+    bool forward = isForward();
+
+    register int i=-1;    
+    int len = getLength()-1;
+    int start = 0;
+
+    if(!forward) {
+      i = len+1;
+      len = 0;
+      start = len;
+    }
+
+    int top = collapseMargins(getContentTopMargin(), getAt(start)->getContentTopMargin());
+
+    while(i != len)  {
+      forward ? ++i : --i;
+      LayoutItem* child = getAt(i);
+      IntSize hint = child->getLayoutSizeHint();
+
+      height = hint.getHeight();
+      height += child->_layoutdata->_offset;
+
+      marginLeft = getContentLeftMargin() + child->getContentLeftMargin();
+      marginRight = getContentRightMargin() + child->getContentRightMargin();
+
+      // Find usable height
+      int width = Math::max<int>(child->getLayoutMinimumSize().getWidth(), Math::min(availWidth-marginLeft-marginRight, child->getLayoutMaximumSize().getWidth()));
+
+      // Respect vertical alignment
+      left = marginLeft;
+
+      // Add collapsed margin
+      if (marginRight != -INT_MAX) {
+        // Support margin collapsing
+        top += collapseMargins(spacing, marginBottom, child->getContentTopMargin());
+      }
+
+      // Layout child
+      child->setLayoutGeometry(IntRect(left, top, width, height));
+
+      // Add width
+      top += height;
+
+      // Remember right margin (for collapsing)
+      marginRight = child->getContentRightMargin();
+    }
+
+    return 0;
+  }
+
 } // Fog namespaces
 

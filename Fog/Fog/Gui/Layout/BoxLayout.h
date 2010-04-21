@@ -20,9 +20,11 @@ namespace Fog {
 // [Fog::BoxLayout]
 // ============================================================================
 
+  enum Direction { LEFTTORIGHT=0, RIGHTTOLEFT=1, TOPTOBOTTOM=0, BOTTOMTOTOP=1, DOWN = TOPTOBOTTOM, UP = BOTTOMTOTOP };
+
   //! @brief Base class for all layouts.
   struct FOG_API BoxLayout : public Layout
-  {
+  {    
     FOG_DECLARE_OBJECT(BoxLayout, Layout)
     BoxLayout(Widget *parent, int margin=-1, int spacing=-1);
     BoxLayout(int margin=-1, int spacing=-1);
@@ -37,6 +39,9 @@ namespace Fog {
     virtual LayoutItem *getAt(int index) const;
     virtual LayoutItem *takeAt(int index);
 
+    FOG_INLINE Direction getDirection() const { return _direction; }   
+    FOG_INLINE void setDirection(Direction d) { _direction = d; }
+
     virtual void setLayoutGeometry(const IntRect &rect);
 
     virtual void invalidateLayout() {
@@ -48,8 +53,11 @@ namespace Fog {
     IntSize _min;
     IntSize _hint;
     int doLayout(const IntRect &rect);
+    FOG_INLINE bool isForward() const { return getDirection() == 0; }
     void buildCache();
     List<LayoutItem*> _itemList;
+
+    Direction _direction;
   };
 
 } // Fog namespace

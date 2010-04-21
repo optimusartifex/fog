@@ -47,167 +47,152 @@ struct FOG_API Layout : public LayoutItem
 
   Layout();
   Layout(Widget *parent, Layout *parentLayout=0);
-
-  FOG_INLINE Widget* getParentWidget() const
-  {
-    if (!_toplevel) {
-      if (_parentItem) {
-        FOG_ASSERT(_parentItem->isLayout());
-        return static_cast<Layout*>(_parentItem)->getParentWidget();
-      } else {
-        return 0;
-      }
-    }
-
-    FOG_ASSERT(_parentItem && _parentItem->isWidget());
-    return (Widget *)(_parentItem);
-  }
-
-
   virtual ~Layout();
 
-  int getTotalHeightForWidth(int width) const;
+  // --------------------------------------------------------------------------
+  // [Layout Hierarchy]
+  // --------------------------------------------------------------------------
 
+  FOG_INLINE Widget* getParentWidget() const; 
+
+  // --------------------------------------------------------------------------
+  // [LayoutItem Handling]
+  // --------------------------------------------------------------------------
+  
+  virtual LayoutItem* getAt(int index) const = 0;
+  virtual LayoutItem* takeAt(int index) = 0;
+  virtual int getLength() const = 0;
+  virtual void add(LayoutItem* item);
+
+  int indexOf(LayoutItem*) const;
+  void remove(LayoutItem* item);
+  
+  void reparentChildWidgets(Widget *mw);
+  static bool removeAllWidgets(LayoutItem *li, Widget *w);
+
+  // --------------------------------------------------------------------------
+  // [Total Layout Size Hints]
+  // --------------------------------------------------------------------------
   IntSize getTotalSizeHint() const;
   IntSize getTotalMaximumSize() const;
   IntSize getTotalMinimumSize() const;
+  int getTotalHeightForWidth(int width) const;
+
+  // --------------------------------------------------------------------------
+  // [Size Constraints]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE void setSizeConstraint(SizeConstraint constraint) { _constraint = constraint; }
   FOG_INLINE SizeConstraint getSizeConstraint() const { return _constraint; }
 
+  // --------------------------------------------------------------------------
+  // [Enable]
+  // --------------------------------------------------------------------------
   FOG_INLINE void setEnabled(bool enable) { _enabled = enable; }
   FOG_INLINE bool isEnabled() const { return _enabled; }
 
-  FOG_INLINE int calcMargin(int margin) const;
+  // --------------------------------------------------------------------------
+  // [Margin]
+  // --------------------------------------------------------------------------
 
-  void setContentMargins(int left, int right, int top, int bottom) {
-    IntMargins m;
-    m.left = calcMargin(left);
-    m.right = calcMargin(right);
-    m.top = calcMargin(top);
-    m.bottom = calcMargin(bottom);
-    if(!m.eq(_contentmargin)) {
-      LayoutItem::setContentMargins(m);
-      invalidateLayout();
-    }
-  }
+  FOG_INLINE virtual int calcMargin(int margin, MarginPosition pos) const;  
+  FOG_INLINE IntRect getContentsRect() const { return _rect.adjusted(+_contentmargin.left, +_contentmargin.top, -_contentmargin.right, -_contentmargin.bottom); }
 
-  FOG_INLINE void setContentMargins(const IntMargins& m) { 
-    setContentMargins(m.left,m.right,m.top,m.bottom);
-  }
-
-  FOG_INLINE IntRect getContentsRect() const {
-    return _rect.adjusted(+_contentmargin.left, +_contentmargin.top, -_contentmargin.right, -_contentmargin.bottom);
-  }
-
-  virtual int getSpacing() const { 
-    if (_spacing >=0) {
-      return _spacing;
-    } else {
-      // arbitrarily prefer horizontal spacing to vertical spacing
-      //return qSmartSpacing(this, QStyle::PM_LayoutHorizontalSpacing);
-      if (!_parentItem) {
-        return -1;
-      } else if (_parentItem->isWidget()) {
-        return DEFAULT_LAYOUT_SPACING;
-      } else {
-        FOG_ASSERT(_parentItem->isLayout());
-        return static_cast<Layout *>(_parentItem)->getSpacing();
-      }
-
-      return 0;
-    }  
-  }
+  //helper method
+  void calcContentMargins(int&side, int&top) const;
+  
+  // --------------------------------------------------------------------------
+  // [Spacing]
+  // --------------------------------------------------------------------------
+  virtual int getSpacing() const;
   virtual void setSpacing(int spacing) { _spacing = spacing; }
   
-
-  //From LayoutItem  
+  // --------------------------------------------------------------------------
+  // [Expanding Directions]
+  // --------------------------------------------------------------------------
   virtual uint32_t getLayoutExpandingDirections() const { return ORIENTATION_HORIZONTAL | ORIENTATION_VERTICAL; }
+
+  // --------------------------------------------------------------------------
+  // [Height For Width]
+  // --------------------------------------------------------------------------
   virtual bool hasLayoutHeightForWidth() const { return false; } 
   virtual IntSize getLayoutMinimumSize() const { return IntSize(WIDGET_MIN_SIZE, WIDGET_MIN_SIZE); };
   virtual IntSize getLayoutMaximumSize() const { return IntSize(WIDGET_MAX_SIZE, WIDGET_MAX_SIZE); };
-  virtual void setLayoutGeometry(const IntRect& r) {
-    _rect = r;
-  }
-  virtual IntRect getLayoutGeometry() const {
-    return _rect;
-  }
-
-  virtual void invalidateLayout() {
-    _rect = IntRect();    
-    update();    
-  }  
 
   //need to be implemented by SubClass!
   virtual IntSize getLayoutSizeHint() const = 0;
 
-  virtual void add(LayoutItem* item);  
+  // --------------------------------------------------------------------------
+  // [Geometry]
+  // --------------------------------------------------------------------------
 
-  virtual LayoutItem* getAt(int index) const = 0;
-  virtual LayoutItem* takeAt(int index) = 0;
-  virtual int getLength() const = 0;
+  virtual void setLayoutGeometry(const IntRect& r) { _rect = r; }
+  virtual IntRect getLayoutGeometry() const { return _rect; }
+  void callSetGeometry(const IntSize& size);
+
+  // --------------------------------------------------------------------------
+  // [Invalidation]
+  // --------------------------------------------------------------------------
+
+  virtual void invalidateLayout() { _rect = IntRect(); update(); }  
+
+  // --------------------------------------------------------------------------
+  // [Visibility]
+  // --------------------------------------------------------------------------
 
   virtual bool isEmpty() const;
-  virtual void remove(LayoutItem* index);
-  virtual int indexOf(LayoutItem*) const;
 
-  void setAlignment(uint32_t alignment) {
-    _alignment = alignment;
-  }
+  // --------------------------------------------------------------------------
+  // [Alignment]
+  // --------------------------------------------------------------------------
 
-  bool setAlignment(LayoutItem *item, uint32_t alignment)
-  {
-    if(item->_withinLayout == this) {
-      item->_alignment = alignment;
-      invalidateLayout();
-      return true;
-    }
-    
-    return false;
-  }
-
-  LayoutItem* _parentItem;
-
+  bool setLayoutAlignment(LayoutItem *item, uint32_t alignment);  
   void addChildLayout(Layout *l);
 
-  static bool removeAllWidgets(LayoutItem *li, Widget *w);
-  void reparentChildWidgets(Widget *mw);
+  // --------------------------------------------------------------------------
+  // [Update And Activation Of Layout]
+  // --------------------------------------------------------------------------  
 
+  bool activate();  
+  void update();    
+  void invalidActivateAll(LayoutItem *item, bool activate=true);
+
+  // --------------------------------------------------------------------------
+  // [Flex support]
+  // -------------------------------------------------------------------------- 
+
+  void addFlexItem(){ ++_flexcount; }
+  void removeFlexItem() { --_flexcount; }
+  bool hasFlexItems() const { return _flexcount > 0; } 
+
+  // --------------------------------------------------------------------------
+  // [Event Handler]
+  // --------------------------------------------------------------------------  
+  
   virtual void onLayout(LayoutEvent* e);
 
   FOG_EVENT_BEGIN()
     FOG_EVENT_DEF(EVENT_LAYOUT_REQUEST     , onLayout          , LayoutEvent    , OVERRIDE)    
   FOG_EVENT_END()
 
-  void update();
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------  
 
-  bool activate();  
-  void callSetGeometry(const IntSize& size);
+  LayoutItem* _parentItem;      //parentItem (Widget or Layout) of this Layout
+  SizeConstraint _constraint;   
+  IntRect _rect;                //current rect of this Layout
 
-  void invalidActivateAll(LayoutItem *item, bool activate=true);
-
-  //IntMargins _contentmargins;
+  int _flexcount;       //to easy know, if we have flex item within layout
 
   int _spacing : 24;    //max Widget-Size
-  uint _toplevel : 1;
-  uint _enabled : 1;
+  uint _toplevel : 1;  
   uint _activated : 1;
-  uint _margininvalid : 1;
-  uint _unused : 4;
-  
-  SizeConstraint _constraint;
-  IntRect _rect;
+  uint _enabled : 1;
+  uint _unused : 5; 
 
-  //For easy handling of Flex-Layouts
-  void addFlexItem(){ ++_flexcount; }
-  void removeFlexItem() { --_flexcount; }
-  bool hasFlexItems() const { return _flexcount > 0; }  
-
-private:
-  void calcContentMargins(int&side, int&top) const;
+private:  
   FOG_DISABLE_COPY(Layout)
-
-  int _flexcount;
 };
 
 } // Fog namespace

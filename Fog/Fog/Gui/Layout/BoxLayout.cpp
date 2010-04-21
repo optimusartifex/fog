@@ -22,13 +22,13 @@ namespace Fog {
 // ============================================================================
 
   BoxLayout::BoxLayout(Widget *parent, int margin, int spacing)
-    : Layout(parent)
+    : Layout(parent), _direction(LEFTTORIGHT)
   {
     setSpacing(spacing);
     setContentMargins(margin, margin, margin, margin);
   }
 
-  BoxLayout::BoxLayout(int margin, int spacing)
+  BoxLayout::BoxLayout(int margin, int spacing) : _direction(LEFTTORIGHT)
   {
     setSpacing(spacing);
     setContentMargins(margin, margin, margin, margin);
@@ -44,7 +44,7 @@ namespace Fog {
   void BoxLayout::add(LayoutItem *item)
   {
     Layout::add(item);
-    item->_flexibles = new LayoutItem::Flexibles();    
+    item->_flexibles = new(std::nothrow) LayoutItem::Flexibles();
     _itemList.append(item);
   }
 
@@ -158,13 +158,27 @@ namespace Fog {
       }
     }
 
-    int top, height, marginRight, marginTop, marginBottom;
-    int left = collapseMargins(getContentLeftMargin(), _itemList.at(0)->getContentLeftMargin());
+    int top, height, marginTop, marginBottom;
+    int marginRight = -INT_MAX;    
     int spacing = getSpacing();
 
     // Render children and separators
-    for (sysuint_t i=0; i<_itemList.getLength(); ++i)
-    {
+    bool forward = isForward();
+
+    int i=-1;    
+    int len = _itemList.getLength()-1;
+    int start = 0;
+
+    if(!forward) {
+      i = len+1;
+      len = 0;
+      start = len;
+    }
+
+    int left = collapseMargins(getContentLeftMargin(), _itemList.at(start)->getContentLeftMargin());
+
+    while(i != len)  {
+      forward ? ++i : --i;
       LayoutItem* child = _itemList.at(i);
       IntSize hint = child->getLayoutSizeHint();
 
@@ -185,7 +199,7 @@ namespace Fog {
       top = marginTop;
 
       // Add collapsed margin
-      if (i > 0) {
+      if (marginRight != -INT_MAX) {
         // Support margin collapsing
         left += collapseMargins(spacing, marginRight, child->getContentLeftMargin());
       }
@@ -202,5 +216,5 @@ namespace Fog {
 
     return 0;
   }
-} // Fog namespace
+} // Fog namespaces
 

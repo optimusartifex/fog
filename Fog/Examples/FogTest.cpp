@@ -202,9 +202,11 @@ MyWindow::MyWindow(uint32_t createFlags) :
   //i[0].readFile(Ascii8("/my/upload/bmpsuite/icons_fullset.png"));
 
   //i[0] = i[0].scale(Size(32, 32), INTERPOLATION_SMOOTH);
-  BoxLayout* flow = new BoxLayout(this,5,5);
-  flow->setContentTopMargin(50);
-  flow->setContentBottomMargin(50);
+  BoxLayout* flow = new BoxLayout(this,0,0);
+  flow->setContentLeftMargin(0);
+  flow->setContentTopMargin(0);
+  flow->setContentBottomMargin(0);
+  flow->setDirection(RIGHTTOLEFT);
   setLayout(flow);
 
   _subx = 0.0;
@@ -465,7 +467,7 @@ FOG_GUI_MAIN()
 {
   Application app(Ascii8("Gui"));
 
-  MyWindow window(WINDOW_TYPE_DEFAULT|WINDOW_TRANSPARENT);
+  MyWindow window(WINDOW_TYPE_FRAMELESS|WINDOW_TRANSPARENT);
   window.setSize(IntSize(500, 400));
   window.show();
 

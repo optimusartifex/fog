@@ -262,17 +262,6 @@ struct FOG_API Widget : public LayoutItem
   Widget* hitTest(const IntPoint& pt) const;
   Widget* getChildAt(const IntPoint& pt, bool recursive = false) const;
 
-  FOG_INLINE bool testAttribute(uint32_t flag) {
-    return (_widgetflags & flag) != 0;
-  }
-
-  void setAttribute(uint32_t flag, bool set) {
-    if(set)
-      _widgetflags |= flag;
-    else
-      _widgetflags &= ~ flag;    
-  }
-
   // --------------------------------------------------------------------------
   // [Layout Of Widget]
   // --------------------------------------------------------------------------
@@ -284,9 +273,7 @@ struct FOG_API Widget : public LayoutItem
     return IntSize(40, 40);
     IntSize s = getSizeHint().expandedTo(getMinimumSizeHint());
     s = s.boundedTo(getMaximumSize()).expandedTo(getMinimumSize());
-//     s = !wid->testAttribute(Qt::WA_LayoutUsesWidgetRect)
-//       ? toLayoutItemSize(wid->d_func(), s)
-//       : s;
+    //TODO: WA_LayoutUsesWidgetRect
 
     if (_layoutPolicy.isHorizontalPolicyIgnored())
       s.setWidth(0);
@@ -298,11 +285,8 @@ struct FOG_API Widget : public LayoutItem
   virtual IntSize getLayoutMinimumSize() const {
     if (isEmpty())
       return IntSize(0, 0);
-
-//     return !wid->testAttribute(Qt::WA_LayoutUsesWidgetRect)
-//       ? toLayoutItemSize(wid->d_func(), qSmartMinSize(this))
-//       : qSmartMinSize(this);
-    return LayoutItem::calculateMinimumSize(this);
+    //TODO: WA_LayoutUsesWidgetRect
+    return LayoutItem::calculateMinimumSize();
   }
 
 
@@ -310,11 +294,8 @@ struct FOG_API Widget : public LayoutItem
     if (isEmpty())
       return IntSize(0, 0);
 
-//       return !wid->testAttribute(Qt::WA_LayoutUsesWidgetRect)
-//         ? toLayoutItemSize(wid->d_func(), qSmartMaxSize(this, align))
-//         : qSmartMaxSize(this, align);
-
-    return LayoutItem::calculateMaximumSize(this);
+    //TODO: WA_LayoutUsesWidgetRect
+    return calculateMaximumSize();
   }
 
   virtual bool hasLayoutHeightForWidth() const;
@@ -343,10 +324,6 @@ struct FOG_API Widget : public LayoutItem
   //don't dispatch geometry events because updates will be done AFTER finishing all
   //geometry changes
   virtual void setLayoutGeometry(const IntRect&);
-
-  virtual IntRect getLayoutGeometry() const {
-    return IntRect();
-  }
 
   // --------------------------------------------------------------------------
   // [Layout Hints]

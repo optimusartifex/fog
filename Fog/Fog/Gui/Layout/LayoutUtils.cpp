@@ -14,7 +14,9 @@
 
 namespace Fog {
 
-  void calculateFlexOffsets(List<LayoutItem*> arr, int avail, int& used) {
+  void calculateFlexOffsets(const List<LayoutItem*>& arr, int avail, int& used) {
+    if(arr.getLength() == 0) return;
+
     bool grow = avail > used;
     int remaining = Math::abs(avail - used);
     int roundingOffset, currentOffset;

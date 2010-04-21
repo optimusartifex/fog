@@ -21,12 +21,12 @@ namespace Fog {
 // [Fog::Layout]
 // ============================================================================
 
-Layout::Layout() : _parentItem(0), _margininvalid(1), _toplevel(0), _spacing(0), _enabled(1), _activated(1), _flexcount(0)
+Layout::Layout() : _parentItem(0), _toplevel(0), _spacing(0), _enabled(1), _activated(1), _flexcount(0)
 {
   _flags |= OBJ_IS_LAYOUT;  
 }
 
-Layout::Layout(Widget *parent, Layout* parentLayout) : _flexcount(0), _margininvalid(1), _toplevel(0), _spacing(0), _enabled(1), _activated(1), _parentItem(0) {
+Layout::Layout(Widget *parent, Layout* parentLayout) : _flexcount(0), _toplevel(0), _spacing(0), _enabled(1), _activated(1), _parentItem(0) {
   _flags |= OBJ_IS_LAYOUT;
 
   if (parentLayout) {
@@ -49,7 +49,22 @@ Layout::~Layout()
 {
 }
 
-int Layout::calcMargin(int margin) const {
+Widget* Layout::getParentWidget() const
+{
+  if (!_toplevel) {
+    if (_parentItem) {
+      FOG_ASSERT(_parentItem->isLayout());
+      return static_cast<Layout*>(_parentItem)->getParentWidget();
+    } else {
+      return 0;
+    }
+  }
+
+  FOG_ASSERT(_parentItem && _parentItem->isWidget());
+  return (Widget *)(_parentItem);
+}
+
+int Layout::calcMargin(int margin, MarginPosition pos) const {
   if (margin >= 0) {
     return margin;
   } else if (!_toplevel) {
@@ -63,6 +78,33 @@ int Layout::calcMargin(int margin) const {
   }
 
   return 0;
+}
+
+int Layout::getSpacing() const { 
+  if (_spacing >=0) {
+    return _spacing;
+  } else {
+    if (!_parentItem) {
+      return -1;
+    } else if (_parentItem->isWidget()) {
+      return DEFAULT_LAYOUT_SPACING;
+    } else {
+      FOG_ASSERT(_parentItem->isLayout());
+      return static_cast<Layout *>(_parentItem)->getSpacing();
+    }
+
+    return 0;
+  }  
+}
+
+bool Layout::setLayoutAlignment(LayoutItem *item, uint32_t alignment)
+{
+  if(item->_withinLayout == this) {
+    item->setLayoutAlignment(alignment);
+    return true;
+  }
+
+  return false;
 }
 
 #define FOR_EACH(ITEM, CONTAINER) \
@@ -225,7 +267,7 @@ IntSize Layout::getTotalSizeHint() const
 
 void Layout::callSetGeometry(const IntSize& size) {
   IntRect rect = getParentWidget()->getClientContentGeometry();
-  //IntRect rect = mw->testAttribute(Qt::WA_LayoutOnEntireRect) ? mw->getGeometry() : mw->getContentGeometry()
+  //TODO: EntireRect
   setLayoutGeometry(rect);
 }
 
@@ -239,7 +281,6 @@ void Layout::addChildLayout(Layout *l)
   l->_parentItem = this;
   l->_withinLayout = this;
   l->_toplevel = 0;
-  l->_margininvalid = 1;
 
   if (Widget *mw = getParentWidget()) {
     l->reparentChildWidgets(mw);

@@ -32,23 +32,26 @@ namespace Fog {
     LayoutItem* getCellItem(int row, int column) const;
 
     FOG_INLINE sysuint_t getColumnCount() const { return _cols.getLength(); } 
-    FOG_INLINE float getColumnFlex(int column) const { return column < _cols.getLength() ? _rows.at(column)->_flex : -1; }
+    FOG_INLINE float getColumnFlex(int column) const { return column < _cols.getLength() ? _cols.at(column)->_flex : 0; }
     FOG_INLINE int getColumnMinimumWidth(int column) const { return column < _cols.getLength() ? _cols.at(column)->_minWidth : -1; }
     FOG_INLINE int getColumnMaximumWidth(int column) const { return column < _cols.getLength() ? _cols.at(column)->_maxWidth : -1; }
     FOG_INLINE int getColumnHintWidth(int column) const { return column < _cols.getLength() ? _cols.at(column)->_hintWidth : -1; }
 
     FOG_INLINE sysuint_t getRowCount() const { return _rows.getLength(); }
-    FOG_INLINE float getRowFlex(int row) const { return row < _rows.getLength() ? _rows.at(row)->_flex : -1; }    
+    FOG_INLINE float getRowFlex(int row) const { return row < _rows.getLength() ? _rows.at(row)->_flex : 0; }    
     FOG_INLINE int getRowMinimumHeight(int row) const { return row < _rows.getLength() ? _rows.at(row)->_minHeight : -1; } 
     FOG_INLINE int getRowMaximumHeight(int row) const { return row < _rows.getLength() ? _rows.at(row)->_maxHeight : -1; } 
     FOG_INLINE int getRowHintHeight(int row) const { return row < _rows.getLength() ? _rows.at(row)->_hintHeight : -1; } 
 
     //TODO: invalidateLayout()!
+    FOG_INLINE void setColumnFlex(int column, float flex) const { if(column < _cols.getLength()) _cols.at(column)->_flex = flex; }
     FOG_INLINE void setColumnMinimumWidth(int column, int minsize) { if(column < _cols.getLength()) _cols.at(column)->_minWidth=minsize; }
-    FOG_INLINE void setRowMinimumHeight(int row, int minsize) { if(row < _rows.getLength()) _rows.at(row)->_minHeight = minsize; }        
     FOG_INLINE void setColumnMaximumWidth(int column, int maxsize) { if(column < _cols.getLength()) _cols.at(column)->_maxWidth=maxsize; }
-    FOG_INLINE void setRowMaximumHeight(int row, int maxsize) { if(row < _rows.getLength()) _rows.at(row)->_maxHeight = maxsize; }     
     FOG_INLINE void setColumnHintWidth(int column, int hintsize) { if(column < _cols.getLength()) _cols.at(column)->_hintWidth=hintsize; }
+    
+    FOG_INLINE void setRowFlex(int row, float flex) const { if(row < _rows.getLength()) _rows.at(row)->_flex = flex; }
+    FOG_INLINE void setRowMinimumHeight(int row, int minsize) { if(row < _rows.getLength()) _rows.at(row)->_minHeight = minsize; }        
+    FOG_INLINE void setRowMaximumHeight(int row, int maxsize) { if(row < _rows.getLength()) _rows.at(row)->_maxHeight = maxsize; }         
     FOG_INLINE void setRowHintHeight(int row, int hintsize) { if(row < _rows.getLength()) _rows.at(row)->_hintHeight = hintsize; } 
 
     FOG_INLINE void setHorizontalSpacing(int spacing) {_hspacing = spacing; }
@@ -62,40 +65,58 @@ namespace Fog {
     virtual void setLayoutGeometry(const IntRect&);
     FOG_INLINE virtual void invalidateLayout() { _rowheight = 0; _colwidth = 0; Layout::invalidateLayout(); }
 
+
+    struct Column {
+      Column() : _minWidth(0), _maxWidth(INT_MAX), _hintWidth(0), _flex(0.0) { _layoutdata = &_static; }
+      int _minWidth;
+      int _maxWidth;
+      int _hintWidth;
+
+      float _flex;
+
+      //TODO: CacheHandling for Column?
+
+      LayoutItem::LayoutStruct* _layoutdata;
+      LayoutItem::LayoutStruct _static;
+    };
+
+    struct Row {
+      Row() : _minHeight(0), _maxHeight(INT_MAX), _hintHeight(-1), _flex(0.0) {_layoutdata = &_static;}
+      int _minHeight;
+      int _maxHeight;
+      int _hintHeight;
+
+      float _flex;
+      List<LayoutItem*> _cols;
+
+      //TODO: CacheHandling for Row?
+
+      LayoutItem::LayoutStruct* _layoutdata;
+      LayoutItem::LayoutStruct _static;
+    };
+
   private:
 
     void calculateColumnWidths();
     void calculateRowHeights();
+    void fixWidthColumnSpan();
+    void fixHeightRowSpan();
 
-    struct LayoutProperties : public Layout::LayoutStruct {
+    void calculateColumnFlexOffsets(int width);
+    void calculateRowFlexOffsets(int height);
+
+    struct LayoutProperties : public LayoutItem::LayoutStruct {
+      LayoutProperties() : _colspannext(0), _rowspannext(0) {
+
+      }
       int _colspan;
       int _rowspan;
 
       int _row;
       int _column;
-    };
 
-    struct Column {
-      Column() : _minWidth(-1), _maxWidth(-1), _hintWidth(-1), _flex(1.0), _cacheWidth(-1) {}
-      int _minWidth;
-      int _maxWidth;
-      int _hintWidth;
-
-      int _cacheWidth;    //if _cacheWidth < 0 -> cache dirty!
-
-      float _flex;
-    };
-
-    struct Row {
-      Row(LayoutItem* i) : _minHeight(-1), _maxHeight(-1), _hintHeight(-1), _flex(1.0), _cacheHeight(-1) {}
-      int _minHeight;
-      int _maxHeight;
-      int _hintHeight;
-
-      int _cacheHeight;    //if _cacheHeight < 0 -> cache dirty!
-
-      float _flex;
-      List<LayoutItem*> _cols;
+      LayoutItem* _colspannext;
+      LayoutItem* _rowspannext;
     };
 
     //per Row a Description and the List of LayoutItems
@@ -103,6 +124,9 @@ namespace Fog {
 
     //with description of Columns
     List<Column*> _cols;
+
+    LayoutItem* _colspan;
+    LayoutItem* _rowspan;
 
     int _hspacing;
     int _vspacing;

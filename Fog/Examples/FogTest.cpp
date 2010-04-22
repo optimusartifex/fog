@@ -203,6 +203,7 @@ MyWindow::MyWindow(uint32_t createFlags) :
 
   //i[0] = i[0].scale(Size(32, 32), INTERPOLATION_SMOOTH);
   GridLayout* flow = new GridLayout(this);
+  //HBoxLayout* flow = new HBoxLayout(this,0,0);
   //flow->setDirection(RIGHTTOLEFT);
   setLayout(flow);
 
@@ -261,12 +262,21 @@ MyWindow::MyWindow(uint32_t createFlags) :
 
 
   flow->addItem(button,0,0);
-  flow->addItem(button2,0,1,1,2);
-  flow->addItem(button3,2,3);
-  flow->addItem(button4,3,1);
-  flow->addItem(button5,3,2);
+  flow->addItem(button2,0,1);
+  flow->addItem(button3,1,0,1,2);
+  flow->addItem(button4,3,0);
+   flow->addItem(button5,3,1);
 
-  _layout->activate();
+  flow->setColumnFlex(1,1.0);
+  flow->setRowFlex(1,1.0);
+
+//   flow->addItem(button);
+//   flow->addItem(button2);
+//   flow->addItem(button3);
+//   flow->addItem(button4);
+//   flow->addItem(button5);
+
+  //_layout->activate();
 
   setContentRightMargin(0);
 }

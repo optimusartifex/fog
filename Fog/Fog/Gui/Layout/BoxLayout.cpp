@@ -115,6 +115,7 @@ namespace Fog {
 
     if(hasFlexItems()) {            
       //Prepare Values!
+      LayoutItem* flexibles = 0;
       for (sysuint_t i=0; i<getLength(); ++i)
       {
         LayoutItem* item = getAt(i);
@@ -125,13 +126,16 @@ namespace Fog {
           item->_layoutdata->_hint = hint;
           item->_layoutdata->_flex = (float)item->getFlex();
           item->_layoutdata->_offset = 0;
+
+          item->_layoutdata->_next = flexibles;
+          flexibles = item;
         }
 
         allocatedWidth += hint;
       }
 
-      if(allocatedWidth != availWidth) {
-        calculateFlexOffsets(_children, availWidth, allocatedWidth);
+      if(allocatedWidth != availWidth && flexibles) {
+        calculateFlexOffsets(flexibles, availWidth, allocatedWidth);
       }
     }
 
@@ -161,10 +165,6 @@ namespace Fog {
 
       int width = hint.getWidth();
       width += child->_layoutdata->_offset;
-
-      if(child->_layoutdata->_offset < 0) {
-        width = width;
-      }
 
       marginTop = getContentTopMargin() + child->getContentTopMargin();
       marginBottom = getContentBottomMargin() + child->getContentBottomMargin();
@@ -256,6 +256,8 @@ namespace Fog {
 
     if(hasFlexItems()) {
       //Prepare Values!
+      LayoutItem* flexibles = 0;
+
       for (sysuint_t i=0; i<getLength(); ++i)
       {
         LayoutItem* item = getAt(i);
@@ -266,13 +268,16 @@ namespace Fog {
           item->_layoutdata->_hint = hint;
           item->_layoutdata->_flex = (float)item->getFlex();
           item->_layoutdata->_offset = 0;
+          
+          item->_layoutdata->_next = flexibles;
+          flexibles = item;
         }
 
         allocatedHeight += hint;
       }
 
-      if(allocatedHeight != availHeight) {
-        calculateFlexOffsets(_children, availHeight, allocatedHeight);
+      if(allocatedHeight != availHeight && flexibles) {
+        calculateFlexOffsets(flexibles, availHeight, allocatedHeight);
       }
     }
 

@@ -175,7 +175,7 @@ struct FOG_API LayoutItem : public Object
     int _potential; //for internal use
     int _offset;  //for internal use
 
-    LayoutStruct* _next;   //for faster Flexible handling
+    void* _next;   //for faster Flexible handling (could be different type)
   }* _layoutdata;
 
   IntMargins _contentmargin;

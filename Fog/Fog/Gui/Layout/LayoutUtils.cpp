@@ -11,11 +11,13 @@
 // [Dependencies]
 #include <Fog/Gui/Layout/LayoutUtils.h>
 #include <Fog/Core.h>
+#include <Fog/Gui/Layout/GridLayout.h>
 
 namespace Fog {
 
-  void calculateFlexOffsets(const List<LayoutItem*>& arr, int avail, int& used) {
-    if(arr.getLength() == 0) return;
+  template<class T> 
+  void calculateFlexOffsetsT(T* head, int avail, int& used) {
+    if(head == 0) return;
 
     bool grow = avail > used;
     int remaining = Math::abs(avail - used);
@@ -23,7 +25,7 @@ namespace Fog {
 
     float flexStep, flexSum;
 
-    FOG_ASSERT(remaining != 0);
+    FOG_ASSERT(remaining != 0);   //check: is this too hard??
 
     bool set = false;
 
@@ -33,21 +35,22 @@ namespace Fog {
       // Find minimum potential for next correction
       flexStep = WIDGET_MAX_SIZE;
       flexSum = 0;
-      for(sysuint_t i=0;i<arr.getLength();++i) {
-        if(arr.at(i)->hasFlex()) {
-          LayoutItem::LayoutStruct* child = arr.at(i)->_layoutdata;
+      T* item = head;
+      while(item) {        
+        LayoutItem::LayoutStruct* child = item->_layoutdata;
 
-          if(!set) {
-            child->_potential = grow ? child->_max - child->_hint : child->_hint - child->_min;
-            child->_flex = grow ? child->_flex : 1 / child->_flex;
-            child->_offset = 0;            
-          }
-
-          if (child->_potential > 0) {
-            flexSum += child->_flex;
-            flexStep = Math::min<float>(flexStep, child->_potential / child->_flex);
-          }
+        if(!set) {
+          child->_potential = grow ? child->_max - child->_hint : child->_hint - child->_min;
+          child->_flex = grow ? child->_flex : 1 / child->_flex;
+          child->_offset = 0;
         }
+
+        if (child->_potential > 0) {
+          flexSum += child->_flex;
+          flexStep = Math::min<float>(flexStep, child->_potential / child->_flex);
+        }
+
+        item = (T*)child->_next;
       }
       
       set = true;
@@ -62,40 +65,50 @@ namespace Fog {
 
       // Start with correction
       roundingOffset = 0;
-      for(sysuint_t z=0;z<arr.getLength();++z) {
-        if(arr.at(z)->hasFlex())
+      item = head;
+      while(item) {        
+        LayoutItem::LayoutStruct* child = item->_layoutdata;
+
+        if (child->_potential > 0)
         {
-          LayoutItem::LayoutStruct* child = arr.at(z)->_layoutdata;
+          // Compute offset for this step
+          currentOffset = Math::min<int>(remaining, child->_potential, ::ceil(flexStep * child->_flex));
 
-          if (child->_potential > 0)
+          // Fix rounding issues
+          roundingOffset += currentOffset - (flexStep * child->_flex);
+          if (roundingOffset >= 1)
           {
-            // Compute offset for this step
-            currentOffset = Math::min<int>(remaining, child->_potential, ::ceil(flexStep * child->_flex));
-
-            // Fix rounding issues
-            roundingOffset += currentOffset - (flexStep * child->_flex);
-            if (roundingOffset >= 1)
-            {
-              roundingOffset -= 1;
-              currentOffset -= 1;
-            }
-
-            // Update child status
-            child->_potential -= currentOffset;
-
-            if (grow) {
-              child->_offset += currentOffset;            
-            } else {
-              child->_offset -= currentOffset;
-            }
-            used+=child->_offset;
-
-            // Update parent status
-            remaining -= currentOffset;
+            roundingOffset -= 1;
+            currentOffset -= 1;
           }
+
+          // Update child status
+          child->_potential -= currentOffset;
+
+          if (grow) {
+            child->_offset += currentOffset;            
+          } else {
+            child->_offset -= currentOffset;
+          }
+          used+=child->_offset;
+
+          // Update parent status
+          remaining -= currentOffset;
         }
+
+        item = (T*)child->_next;
       }
     }
+  }
+
+  void calculateFlexOffsets(LayoutItem* head, int avail, int& used) {
+    return calculateFlexOffsetsT<LayoutItem>(head,avail,used);
+  }
+  void calculateFlexOffsets(GridLayout::Column* head, int avail, int& used) {
+    return calculateFlexOffsetsT<GridLayout::Column>(head,avail,used);
+  }
+  void calculateFlexOffsets(GridLayout::Row* head, int avail, int& used) {
+    return calculateFlexOffsetsT<GridLayout::Row>(head,avail,used);
   }
 
 #define CALC(VALUE)\

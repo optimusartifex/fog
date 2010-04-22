@@ -24,10 +24,9 @@ namespace Fog {
   struct FOG_API GridLayout : public Layout
   {
     FOG_DECLARE_OBJECT(GridLayout, Layout)
+    GridLayout(Widget* parent=0);
 
-    virtual void prepareItem(LayoutItem* item, sysuint_t index) {
-      item->_layoutdata = new(std::nothrow) LayoutProperties();
-    }
+    FOG_INLINE virtual void prepareItem(LayoutItem* item, sysuint_t index) { item->_layoutdata = new(std::nothrow) LayoutProperties(); }
 
     void addItem(LayoutItem* item, int row, int column, int rowSpan=1, int columnSpan = 1, uint32_t alignment = 0);
     LayoutItem* getCellItem(int row, int column) const;
@@ -55,7 +54,19 @@ namespace Fog {
     FOG_INLINE void setHorizontalSpacing(int spacing) {_hspacing = spacing; }
     FOG_INLINE void setVerticalSpacing(int spacing) {_vspacing = spacing; }
 
+
+    // ============================================================================
+    // [Grid Layout Implementation]
+    // ============================================================================
+    virtual void calculateLayoutHint(LayoutHint& hint);
+    virtual void setLayoutGeometry(const IntRect&);
+    FOG_INLINE virtual void invalidateLayout() { _rowheight = 0; _colwidth = 0; Layout::invalidateLayout(); }
+
   private:
+
+    void calculateColumnWidths();
+    void calculateRowHeights();
+
     struct LayoutProperties : public Layout::LayoutStruct {
       int _colspan;
       int _rowspan;

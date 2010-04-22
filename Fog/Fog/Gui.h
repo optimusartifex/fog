@@ -45,6 +45,7 @@
 #include <Fog/Gui/GuiEngine.h>
 #include <Fog/Gui/Layout/BoxLayout.h>
 #include <Fog/Gui/Layout/FlowLayout.h>
+#include <Fog/Gui/Layout/GridLayout.h>
 #include <Fog/Gui/Layout/Layout.h>
 #include <Fog/Gui/Layout/LayoutHint.h>
 #include <Fog/Gui/Layout/LayoutItem.h>

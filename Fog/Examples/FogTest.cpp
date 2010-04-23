@@ -218,14 +218,14 @@ MyWindow::MyWindow(uint32_t createFlags) :
   Button* button = new Button();
   add(button);
   //button->setGeometry(IntRect(40, 40, 100, 20));
-  button->setText(Ascii8("Test Transparency"));
+  button->setText(Ascii8("Button"));
   button->show();  
   button->addListener(EVENT_CLICK, this, &MyWindow::onTransparencyClick);
 
   Button* button2 = new Button();
   add(button2);
   //button2->setGeometry(IntRect(40, 80, 100, 20));
-  button2->setText(Ascii8("Test FullScreen"));
+  button2->setText(Ascii8("Button2"));
   button2->show();
   button2->addListener(EVENT_CLICK, this, &MyWindow::onFullScreenClick);
   //button2->setContentLeftMargin(-20);
@@ -233,10 +233,9 @@ MyWindow::MyWindow(uint32_t createFlags) :
   Button* button3 = new Button();
   add(button3);
   //button3->setGeometry(IntRect(40, 120, 100, 20));
-  button3->setText(Ascii8("Test PopUp"));
+  button3->setText(Ascii8("Button3"));
   button3->show();  
   button3->addListener(EVENT_CLICK, this, &MyWindow::onPopUpClick);
-  button3->setFlex(1.0);
   //button3->setContentLeftMargin(10);
   //button3->setContentRightMargin(10);
 
@@ -261,20 +260,33 @@ MyWindow::MyWindow(uint32_t createFlags) :
   _popup->show();
 
 
+  button->setMinimumSize(IntSize(40,40));
+  button2->setMinimumSize(IntSize(40,40));
+  button3->setMinimumSize(IntSize(40,40));
+  button4->setMinimumSize(IntSize(40,40));
+  button5->setMinimumSize(IntSize(40,40));
+
   flow->addItem(button,0,0);
   flow->addItem(button2,0,1);
-  flow->addItem(button3,1,0,1,2);
-  flow->addItem(button4,3,0);
-   flow->addItem(button5,3,1);
+  flow->addItem(button3,1,0,2);
+  flow->setRowMinimumHeight(1,60);
+  flow->addItem(button4,1,1);
+  flow->addItem(button5,2,1);
 
   flow->setColumnFlex(1,1.0);
   flow->setRowFlex(1,1.0);
 
+//   button->setFlex(3);
+//   button2->setFlex(7);
+//   button3->setFlex(5);
 //   flow->addItem(button);
 //   flow->addItem(button2);
 //   flow->addItem(button3);
 //   flow->addItem(button4);
 //   flow->addItem(button5);
+
+  flow->setHorizontalSpacing(5);
+  flow->setVerticalSpacing(5);
 
   //_layout->activate();
 

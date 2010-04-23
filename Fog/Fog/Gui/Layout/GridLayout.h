@@ -24,7 +24,7 @@ namespace Fog {
   struct FOG_API GridLayout : public Layout
   {
     FOG_DECLARE_OBJECT(GridLayout, Layout)
-    GridLayout(Widget* parent=0);
+    GridLayout(Widget* parent=0, int row=-1, int colums=-1);
 
     FOG_INLINE virtual void prepareItem(LayoutItem* item, sysuint_t index) { item->_layoutdata = new(std::nothrow) LayoutProperties(); }
 
@@ -44,12 +44,12 @@ namespace Fog {
     FOG_INLINE int getRowHintHeight(int row) const { return row < _rows.getLength() ? _rows.at(row)->_hintHeight : -1; } 
 
     //TODO: invalidateLayout()!
-    FOG_INLINE void setColumnFlex(int column, float flex) const { if(column < _cols.getLength()) _cols.at(column)->_flex = flex; }
+    FOG_INLINE void setColumnFlex(int column, float flex) const { if(column < _cols.getLength()) _cols.at(column)->_flex = flex < 1 ? 0 : flex; }
     FOG_INLINE void setColumnMinimumWidth(int column, int minsize) { if(column < _cols.getLength()) _cols.at(column)->_minWidth=minsize; }
     FOG_INLINE void setColumnMaximumWidth(int column, int maxsize) { if(column < _cols.getLength()) _cols.at(column)->_maxWidth=maxsize; }
     FOG_INLINE void setColumnHintWidth(int column, int hintsize) { if(column < _cols.getLength()) _cols.at(column)->_hintWidth=hintsize; }
     
-    FOG_INLINE void setRowFlex(int row, float flex) const { if(row < _rows.getLength()) _rows.at(row)->_flex = flex; }
+    FOG_INLINE void setRowFlex(int row, float flex) const { if(row < _rows.getLength()) _rows.at(row)->_flex = flex < 1 ? 0 : flex; }
     FOG_INLINE void setRowMinimumHeight(int row, int minsize) { if(row < _rows.getLength()) _rows.at(row)->_minHeight = minsize; }        
     FOG_INLINE void setRowMaximumHeight(int row, int maxsize) { if(row < _rows.getLength()) _rows.at(row)->_maxHeight = maxsize; }         
     FOG_INLINE void setRowHintHeight(int row, int hintsize) { if(row < _rows.getLength()) _rows.at(row)->_hintHeight = hintsize; } 
@@ -67,7 +67,7 @@ namespace Fog {
 
 
     struct Column {
-      Column() : _minWidth(0), _maxWidth(INT_MAX), _hintWidth(0), _flex(0.0) { _layoutdata = &_static; }
+      Column() : _minWidth(0), _maxWidth(INT_MAX), _hintWidth(-1), _flex(0.0) { _layoutdata = &_static; }
       int _minWidth;
       int _maxWidth;
       int _hintWidth;

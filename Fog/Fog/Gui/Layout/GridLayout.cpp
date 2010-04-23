@@ -16,12 +16,15 @@
 FOG_IMPLEMENT_OBJECT(Fog::GridLayout)
 
 namespace Fog {
-  GridLayout::GridLayout(Widget* parent) : Layout(parent), _colwidth(0), _rowheight(0), _vspacing(0), _hspacing(0), _colspan(0), _rowspan(0) {
-    
+  GridLayout::GridLayout(Widget* parent, int rows, int colums) : Layout(parent), _colwidth(0), _rowheight(0), _vspacing(0), _hspacing(0), _colspan(0), _rowspan(0) {
+    if(rows >= 0 && colums >=0) {
+      addItem(0,0,0,rows,colums);
+    }
   }
 
   void GridLayout::addItem(LayoutItem* item, int row, int column, int rowSpan, int columnSpan, uint32_t alignment) {
-    Layout::addChild(item);
+    if(item)
+      Layout::addChild(item);
 
     if(row == -1)
       row = _rows.getLength();
@@ -30,16 +33,20 @@ namespace Fog {
       column = _cols.getLength();
 
     //check that it's not already there... (needs some improvement!)
-    for(uint32_t i=0;i<rowSpan;++i) {
-      for(uint32_t j=0;j<columnSpan;++j) {
-        if(getCellItem(row+i,column+j))
-        {
-          //Warning already exists!
-          remove(item);
-          return;
+    if(item)
+    {
+      for(uint32_t i=0;i<rowSpan;++i) {
+        for(uint32_t j=0;j<columnSpan;++j) {
+          if(getCellItem(row+i,column+j))
+          {
+            //Warning already exists!
+            remove(item);
+            return;
+          }
         }
       }
     }
+
 
     //Add Columns and Rows needed for insertion
     //TODO: use reserve to prevent unneeded memory allocations!
@@ -86,22 +93,26 @@ namespace Fog {
       }
     }
 
-    LayoutProperties* prop = static_cast<LayoutProperties*>(item->_layoutdata);
-    prop->_row = row;
-    prop->_rowspan = rowSpan;
-    prop->_column = column;
-    prop->_colspan = columnSpan;
+    if(item) {
+      LayoutProperties* prop = static_cast<LayoutProperties*>(item->_layoutdata);
+      prop->_row = row;
+      prop->_rowspan = rowSpan;
+      prop->_column = column;
+      prop->_colspan = columnSpan;
 
-    //create simple single linked lists for fast span iterations
-    if(columnSpan > 1) {
-      prop->_colspannext = _colspan;
-      _colspan = item;
-    }
+      item->setLayoutAlignment(alignment);
 
-    if(rowSpan > 1) {
-      prop->_rowspannext = _rowspan;
-      _rowspan = item;
-    }    
+      //create simple single linked lists for fast span iterations
+      if(columnSpan > 1) {
+        prop->_colspannext = _colspan;
+        _colspan = item;
+      }
+
+      if(rowSpan > 1) {
+        prop->_rowspannext = _rowspan;
+        _rowspan = item;
+      } 
+    }  
   }
 
   LayoutItem* GridLayout::getCellItem(int row, int column) const {

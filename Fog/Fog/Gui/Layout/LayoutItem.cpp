@@ -23,7 +23,7 @@ namespace Fog {
 
 LayoutItem::LayoutItem(uint32_t alignment) : _alignment(alignment), _withinLayout(0), _layoutdata(0), _flex(-1), _dirty(1)
 {
-
+  _contentmargin.set(0,0,0,0);
 }
 
 LayoutItem::~LayoutItem() 

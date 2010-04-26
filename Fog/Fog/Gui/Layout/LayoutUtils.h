@@ -27,15 +27,11 @@ namespace Fog {
 //   template<class T>
 //   void calculateFlexOffsets(T* head, int avail, int& used);
 
-   void calculateFlexOffsets(LayoutItem* head, int avail, int& used);
-   void calculateFlexOffsets(GridLayout::Column* head, int avail, int& used);
-   void calculateFlexOffsets(GridLayout::Row* head, int avail, int& used);
-
-  int calculateHorizontalGaps(const List<LayoutItem*>& children, int spacing=0, bool collapse=true);
-  int calculateVerticalGaps(const List<LayoutItem*>& children, int spacing, bool collapse);
+  void calculateFlexOffsets(LayoutItem* head, int avail, int& used);
+  void calculateFlexOffsets(GridLayout::Column* head, int avail, int& used);
+  void calculateFlexOffsets(GridLayout::Row* head, int avail, int& used);
 
   int collapseMargins(int margin1, int margin2);
   int collapseMargins(int margin1, int margin2, int margin3);
-
 }
 #endif

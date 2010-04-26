@@ -47,7 +47,6 @@ namespace Fog {
       }
     }
 
-
     //Add Columns and Rows needed for insertion
     //TODO: use reserve to prevent unneeded memory allocations!
     int ccolumn = column+columnSpan;
@@ -63,7 +62,6 @@ namespace Fog {
     if(_rows.getCapacity() < crow) {
       _cols.reserve(crow);
     }
-
 
     //check if enough columns are there
     if(ccolumn > _cols.getLength()) {
@@ -305,8 +303,8 @@ namespace Fog {
     int spacingY = _vspacing * (_rows.getLength() - 1);
 
     //calculate margin
-    int marginX = getContentLeftMargin() + getContentRightMargin();
-    int marginY = getContentTopMargin() + getContentBottomMargin();
+    spacingX += getContentLeftMargin() + getContentRightMargin();
+    spacingY += getContentTopMargin() + getContentBottomMargin();
 
     hint._minimumSize.set(minWidth + spacingX,minHeight + spacingY);
     hint._sizeHint.set(width + spacingX,height + spacingY);
@@ -354,11 +352,12 @@ namespace Fog {
     calculateRowFlexOffsets(availHeight);
 
     // do the layout
-    int curleft = getContentLeftMargin();
+    int curleft = rect.x + getContentLeftMargin();
+    int top = rect.y + getContentTopMargin();
 
     for (int col=0; col<maxColIndex; ++col) {
       Column* column = _cols.at(col);
-      int curtop = getContentTopMargin();
+      int curtop = top;
 
       for (int crow=0; crow<maxRowIndex; ++crow) {
         Row* row = _rows.at(crow);

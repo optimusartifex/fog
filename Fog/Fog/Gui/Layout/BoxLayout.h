@@ -44,6 +44,9 @@ namespace Fog {
     virtual void setLayoutGeometry(const IntRect &rect);    
     virtual int doLayout(const IntRect &rect) = 0;
 
+    int calculateHorizontalGaps(bool collapse=true);
+    int calculateVerticalGaps(bool collapse=true);
+
   private:
     uint32_t _direction : 1;
     uint32_t _unused : 31;

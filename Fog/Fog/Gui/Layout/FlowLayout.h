@@ -29,7 +29,7 @@ namespace Fog {
     ~FlowLayout();
     
     int horizontalSpacing() const;
-    int verticalSpacing() const;    
+    int verticalSpacing() const;
 
     virtual void add(LayoutItem *item);
 

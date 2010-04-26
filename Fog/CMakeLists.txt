@@ -651,8 +651,9 @@ Set(FOG_GUI_LIB_SOURCES
   Fog/Gui/Composite.cpp
   Fog/Gui/Event.cpp
   Fog/Gui/GuiEngine.cpp
-  Fog/Gui/Layout/FlowLayout.cpp
+  Fog/Gui/Layout/BorderLayout.cpp
   Fog/Gui/Layout/BoxLayout.cpp
+  Fog/Gui/Layout/FlowLayout.cpp  
   Fog/Gui/Layout/GridLayout.cpp
   Fog/Gui/Layout/Layout.cpp
   Fog/Gui/Layout/LayoutHint.cpp
@@ -673,9 +674,10 @@ Set(FOG_GUI_LIB_HEADERS
   Fog/Gui/Constants.h
   Fog/Gui/Event.h
   Fog/Gui/GuiEngine.h
+  Fog/Gui/Layout/BorderLayout.h
   Fog/Gui/Layout/BoxLayout.h
-  Fog/Gui/Layout/GridLayout.h
   Fog/Gui/Layout/FlowLayout.h
+  Fog/Gui/Layout/GridLayout.h  
   Fog/Gui/Layout/Layout.h
   Fog/Gui/Layout/LayoutHint.h
   Fog/Gui/Layout/LayoutItem.h

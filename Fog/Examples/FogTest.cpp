@@ -303,7 +303,8 @@ MyWindow::MyWindow(uint32_t createFlags) :
   flow->setColumnFlex(1,1.0);
   flow->setRowFlex(1,1.0);
 
-  HBoxLayout* hbox = new HBoxLayout();
+  HBoxLayout* hbox = new HBoxLayout(5,5);
+  hbox->setContentLeftMargin(20);
   flow->addItem(hbox,1,1); 
 
   hbox->addItem(buttonx1);

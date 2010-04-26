@@ -52,6 +52,68 @@ namespace Fog {
     doLayout(rect);
   }
 
+  int BoxLayout::calculateHorizontalGaps(bool collapse) {
+    if(_children.getLength() == 0)
+      return 0;
+
+    int spacing = getSpacing();
+    if(spacing < 0) spacing = 0;
+
+    int gaps = 0;
+
+    if (collapse)
+    {
+      for (int i=1; i<_children.getLength(); ++i) {
+        gaps += collapseMargins(spacing, _children.at(i-1)->getContentRightMargin(), _children.at(i)->getContentLeftMargin());
+      }
+
+      // Add last child
+      gaps += _children.at(0)->getContentLeftMargin() + _children.at(_children.getLength()-1)->getContentRightMargin();
+    }
+    else
+    {
+      // Simple adding of all margins
+      for (int i=1; i<_children.getLength(); ++i) {
+        gaps += _children.at(i)->getContentLeftMargin() + _children.at(i)->getContentRightMargin();
+      }
+
+      // Add spacing
+      gaps += (spacing * (_children.getLength()-1));
+    }
+
+    return gaps;
+  }
+
+
+  int BoxLayout::calculateVerticalGaps(bool collapse) {
+    if(_children.getLength() == 0)
+      return 0;
+
+    int spacing = getSpacing();
+    if(spacing < 0) spacing = 0;
+    int gaps = 0;
+
+    if (collapse)
+    {
+      for (int i=1; i<_children.getLength(); ++i) 
+      {
+        gaps += collapseMargins(spacing, _children.at(i-1)->getContentBottomMargin(), _children.at(i)->getContentTopMargin());
+      }
+      gaps += _children.at(0)->getContentLeftMargin() + _children.at(_children.getLength()-1)->getContentBottomMargin();
+    }
+    else
+    {
+      for (int i=1; i<_children.getLength(); ++i) 
+      {
+        LayoutItem* item = _children.at(i);
+        gaps += item->getContentTopMargin() + item->getContentBottomMargin();
+      }
+      gaps += (spacing * (_children.getLength()-1));
+    }
+
+    return gaps;
+  }
+
 
 
   // ============================================================================
@@ -74,11 +136,7 @@ namespace Fog {
       width += hint.getWidth();
 
       // Detect if child is shrinkable or has percent width and update minWidth
-      if (child->hasFlex()) {
-        minWidth += min.getWidth();
-      } else {
-        minWidth += hint.getWidth();
-      }
+      minWidth += child->hasFlex() ? min.getWidth() : hint.getWidth();
 
       // Build vertical margin sum
       int margin = child->getContentTopMargin() + child->getContentBottomMargin();
@@ -95,7 +153,7 @@ namespace Fog {
     }
 
     // Respect gaps
-    int gaps = (getContentLeftMargin() + calculateHorizontalGaps(_children, getSpacing(), true) + getContentRightMargin());
+    int gaps = (getContentLeftMargin() + calculateHorizontalGaps(true) + getContentRightMargin());
 
     hint._minimumSize.set(minWidth + gaps,minHeight+getContentTopMargin()+getContentBottomMargin());
     hint._sizeHint.set(width + gaps,height+getContentTopMargin()+getContentBottomMargin());
@@ -110,7 +168,7 @@ namespace Fog {
     int availHeight = rect.getHeight();
 
     //support for Margin of Layout
-    int gaps = getContentLeftMargin() + calculateHorizontalGaps(_children, getSpacing(), true) + getContentRightMargin();    
+    int gaps = getContentLeftMargin() + calculateHorizontalGaps(true) + getContentRightMargin();    
     int allocatedWidth = gaps;
 
     if(hasFlexItems()) {            
@@ -237,7 +295,7 @@ namespace Fog {
     }
 
     // Respect gaps
-    int gaps = (getContentLeftMargin() + calculateVerticalGaps(_children, getSpacing(), true) + getContentRightMargin());
+    int gaps = (getContentLeftMargin() + calculateVerticalGaps(true) + getContentRightMargin());
 
     hint._minimumSize.set(minWidth+getContentLeftMargin()+getContentRightMargin(),minHeight+gaps);
     hint._sizeHint.set(width+getContentLeftMargin()+getContentRightMargin(),height+gaps);
@@ -251,7 +309,7 @@ namespace Fog {
     int availHeight = rect.getHeight();
 
     //support for Margin of Layout
-    int gaps = getContentTopMargin() + calculateVerticalGaps(_children, getSpacing(), true) + getContentBottomMargin();
+    int gaps = getContentTopMargin() + calculateVerticalGaps(true) + getContentBottomMargin();
     int allocatedHeight = gaps;
 
     if(hasFlexItems()) {
@@ -298,7 +356,7 @@ namespace Fog {
       start = len;
     }
 
-    int top = collapseMargins(getContentTopMargin(), getAt(start)->getContentTopMargin());
+    int top = rect.y + collapseMargins(getContentTopMargin(), getAt(start)->getContentTopMargin());
 
     while(i != len)  {
       forward ? ++i : --i;
@@ -315,7 +373,7 @@ namespace Fog {
       int width = Math::max<int>(child->getLayoutMinimumSize().getWidth(), Math::min(availWidth-marginLeft-marginRight, child->getLayoutMaximumSize().getWidth()));
 
       // Respect vertical alignment
-      left = marginLeft;
+      left = rect.x + marginLeft;
 
       // Add collapsed margin
       if (marginRight != -INT_MAX) {

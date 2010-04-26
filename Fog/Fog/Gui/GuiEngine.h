@@ -35,6 +35,8 @@ struct GuiBackBuffer;
 struct GuiEngine;
 struct GuiWindow;
 
+struct Layout;
+
 // ============================================================================
 // [Fog::GuiEngine]
 // ============================================================================
@@ -461,6 +463,7 @@ struct FOG_API GuiWindow : public Object
 
   //! @brief Widget.
   Widget* _widget;
+  Layout* _activatelist;
 
   //our owner.
   GuiWindow* _owner;

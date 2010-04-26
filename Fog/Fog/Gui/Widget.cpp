@@ -36,8 +36,6 @@ Widget::Widget(uint32_t createFlags) :
   _origin(0, 0),
   _layout(NULL),
   _layoutPolicy(LAYOUT_POLICY_WIDTH_PREFERRED|LAYOUT_POLICY_HEIGHT_PREFERRED),
-  _hasHeightForWidth(false),
-  _isLayoutDirty(true),
   _lastFocus(NULL),
   _focusLink(NULL),
   _uflags(0),
@@ -252,7 +250,6 @@ void Widget::setGeometry(const IntRect& geometry)
   }
   else
   {
-    if(_layout) return;
     GuiEngine* ge = Application::getInstance()->getGuiEngine();
     if (!ge) return;
 
@@ -463,8 +460,6 @@ void Widget::setLayout(Layout* lay)
     LayoutEvent e(EVENT_LAYOUT_SET);
     this->sendEvent(&e);
     lay->sendEvent(&e);
-
-    invalidateLayout();
   }
 }
 
@@ -483,6 +478,7 @@ Layout* Widget::takeLayout()
     lay->_parentItem = NULL;
     _layout = NULL;
 
+    //clear layout cache
     invalidateLayout();
 
     LayoutEvent e(EVENT_LAYOUT_REMOVE);
@@ -492,40 +488,6 @@ Layout* Widget::takeLayout()
 
   return lay;
 }
-
-// ============================================================================
-// [Layout Hints]
-// ============================================================================
-
-// const LayoutHint& Widget::getLayoutHint() const
-// {
-//   return (_layout) ? _layout->getLayoutHint() : _layoutHint;
-// }
-// 
-// void Widget::setLayoutHint(const LayoutHint& layoutHint)
-// {
-//   // GUI TODO:
-//   if (_layout)
-//   {
-//     _layout->setLayoutHint(layoutHint);
-//   }
-//   else
-//   {
-//     if (_layoutHint == layoutHint) return;
-//     _layoutHint = layoutHint;
-//     invalidateLayout();
-//   }
-// }
-// 
-// const LayoutHint& Widget::getComputedLayoutHint() const
-// {
-//   return _layout ? _layout->getComputedLayoutHint() : _layoutHint;
-// }
-// 
-// void Widget::computeLayoutHint()
-// {
-//   if (_layout) _layout->computeLayoutHint();
-// }
 
 // ============================================================================
 // [Layout Policy]
@@ -643,7 +605,32 @@ void Widget::setLayoutGeometry(const IntRect& rect) {
     y += (r.getHeight() - s.getHeight()) / 2;
   }
 
-  setGeometry(IntRect(x, y, s.getWidth(), s.getHeight()));
+  //we don't need to use setGeometry, because the Layout
+  //is only activated during repainting.
+  IntRect geometry(x, y, s.getWidth(), s.getHeight());
+  
+  if(_guiWindow) {
+    //Do we really provide LayoutManager for Native Windows?
+    setGeometry(geometry);
+  } else {
+    //TODO: create method for this! (currently copied from Base::dispatchConfigure)
+    uint32_t changed = 0;
+    if (getPosition() != geometry.getPosition())
+      changed |= ConfigureEvent::CHANGED_POSITION;
+
+    if (getSize() != geometry.getSize())
+      changed |= ConfigureEvent::CHANGED_SIZE;
+
+    if(changed) {
+      ConfigureEvent e;
+      e._geometry = geometry;
+      e._changed = changed;
+
+      _geometry = geometry;
+      _clientGeometry.set(0, 0, geometry.w, geometry.h);
+      sendEvent(&e);
+    }
+  }
 }
 
 LayoutPolicy Widget::getLayoutPolicy() const
@@ -656,22 +643,14 @@ void Widget::setLayoutPolicy(const LayoutPolicy& policy)
   if (_layoutPolicy == policy) return;
 
   _layoutPolicy = policy;
-  invalidateLayout();
+  if(_layout) {
+    _layout->invalidateLayout();
+  }
 }
 
 // ============================================================================
 // [Layout Height For Width]
 // ============================================================================
-
-bool Widget::hasHeightForWidth() const
-{
-  return _hasHeightForWidth;
-}
-
-int Widget::getHeightForWidth(int width) const
-{
-  return -1;
-}
 
 IntSize Widget::getMinimumSizeHint() const
 {
@@ -767,29 +746,9 @@ void Widget::setMaximumSize(const IntSize& maxSize) {
 // [Layout State]
 // ============================================================================
 
-bool Widget::isLayoutDirty() const
-{
-  return _isLayoutDirty;
-}
-
 void Widget::invalidateLayout()
 {
-  LayoutItem::invalidateLayout();
-//   // Don't invalidate more times, it can be time consuming.
-//   if (_isLayoutDirty) return;
-// 
-//   // Invalidate widget that has layout.
-//   Widget* w = const_cast<Widget*>(this);
-//   while (w->_layout == NULL)
-//   {
-//     w = w->_parent;
-//     if (w == NULL) return;
-//   }
-// 
-//   w->_isLayoutDirty = true;
-//   w->_layout->invalidateLayout();
-// 
-//   if (w->_parent && w->_parent->_isLayoutDirty == false) w->_parent->invalidateLayout();
+  //TODO: Widget Layout Cache (clear it here)
 }
 
 // ============================================================================

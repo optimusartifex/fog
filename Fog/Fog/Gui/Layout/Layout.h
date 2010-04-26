@@ -120,7 +120,13 @@ struct FOG_API Layout : public LayoutItem
   // [Invalidation]
   // --------------------------------------------------------------------------
 
-  virtual void invalidateLayout() { LayoutItem::invalidateLayout(); _rect = IntRect(); update(); }
+  virtual void invalidateLayout() {
+    LayoutItem::invalidateLayout(); 
+    _rect = IntRect(); 
+    update();
+  }
+
+  void markAsDirty();
 
   // --------------------------------------------------------------------------
   // [Visibility]
@@ -141,7 +147,7 @@ struct FOG_API Layout : public LayoutItem
 
   void update();    
   bool activate();
-  void invalidActivateAll(LayoutItem *item, bool activate=true);
+  void invalidActivateAll(bool activate=true);
 
   // --------------------------------------------------------------------------
   // [Flex support]
@@ -149,7 +155,7 @@ struct FOG_API Layout : public LayoutItem
 
   void addFlexItem(){ ++_flexcount; }
   void removeFlexItem() { --_flexcount; }
-  bool hasFlexItems() const { return _flexcount > 0; } 
+  bool hasFlexItems() const { return _flexcount > 0; }   
 
   // --------------------------------------------------------------------------
   // [Event Handler]
@@ -175,7 +181,10 @@ struct FOG_API Layout : public LayoutItem
   uint _toplevel : 1;  
   uint _activated : 1;
   uint _enabled : 1;
-  uint _unused : 5; 
+  uint _invalidated : 1;
+  uint _unused : 4; 
+
+  Layout* _nextactivate;
 
 protected:
   // --------------------------------------------------------------------------

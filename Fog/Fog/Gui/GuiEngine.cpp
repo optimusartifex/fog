@@ -57,7 +57,8 @@ GuiWindow::GuiWindow(Widget* widget) :
   _owner(NULL),
   _modalpolicy(MODAL_NONE),
   _modal(0),
-  _lastmodal(NULL)
+  _lastmodal(NULL),
+  _activatelist(NULL)
 {
 }
 

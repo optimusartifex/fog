@@ -95,10 +95,6 @@ struct MyWindow : public Window
     } else if(vis == WIDGET_VISIBLE_RESTORE){
       setWindowTitle(Ascii8("STATE: RESTORED"));
     }
-
-    _layout->invalidateLayout();
-    _layout->_activated = 0;
-    _layout->activate();
   }
 
   void onModalClose() {
@@ -260,21 +256,61 @@ MyWindow::MyWindow(uint32_t createFlags) :
   _popup->show();
 
 
+
+  Button* buttonx1 = new Button();
+  add(buttonx1);
+  //button4->setGeometry(IntRect(40, 160, 100, 20));
+  buttonx1->setText(Ascii8("ButtonX1"));
+  buttonx1->show(); 
+
+  Button* buttonx2 = new Button();
+  add(buttonx2);
+  //button4->setGeometry(IntRect(40, 160, 100, 20));
+  buttonx2->setText(Ascii8("ButtonX2"));
+  buttonx2->show(); 
+
+  Button* buttonx3 = new Button();
+  add(buttonx3);
+  //button4->setGeometry(IntRect(40, 160, 100, 20));
+  buttonx3->setText(Ascii8("ButtonX3"));
+  buttonx3->show(); 
+
+  Button* buttonx4 = new Button();
+  add(buttonx4);
+  //button4->setGeometry(IntRect(40, 160, 100, 20));
+  buttonx4->setText(Ascii8("ButtonX4"));
+  buttonx4->show(); 
+
+
   button->setMinimumSize(IntSize(40,40));
   button2->setMinimumSize(IntSize(40,40));
   button3->setMinimumSize(IntSize(40,40));
   button4->setMinimumSize(IntSize(40,40));
   button5->setMinimumSize(IntSize(40,40));
+  buttonx1->setMinimumSize(IntSize(40,40));
+  buttonx2->setMinimumSize(IntSize(40,40));
+  buttonx3->setMinimumSize(IntSize(40,40));
+  buttonx4->setMinimumSize(IntSize(40,40));
+
+  buttonx2->setMaximumSize(IntSize(80,80));
 
   flow->addItem(button,0,0);
   flow->addItem(button2,0,1);
-  flow->addItem(button3,1,0,2);
-  flow->setRowMinimumHeight(1,60);
-  flow->addItem(button4,1,1);
+  flow->addItem(button3,1,0);  
+  flow->addItem(button4,2,0);
   flow->addItem(button5,2,1);
 
   flow->setColumnFlex(1,1.0);
   flow->setRowFlex(1,1.0);
+
+  HBoxLayout* hbox = new HBoxLayout();
+  flow->addItem(hbox,1,1); 
+
+  hbox->addItem(buttonx1);
+  hbox->addItem(buttonx2);
+  hbox->addItem(buttonx3);
+  buttonx3->setFlex(1);
+  hbox->addItem(buttonx4);
 
 //   button->setFlex(3);
 //   button2->setFlex(7);
@@ -488,7 +524,7 @@ FOG_GUI_MAIN()
 {
   Application app(Ascii8("Gui"));
 
-  MyWindow window(WINDOW_TYPE_DEFAULT|WINDOW_TRANSPARENT);
+  MyWindow window(WINDOW_TYPE_DEFAULT);
   window.setSize(IntSize(500, 400));
   window.show();
 

@@ -317,16 +317,6 @@ struct FOG_API Widget : public LayoutItem
   virtual void setLayoutGeometry(const IntRect&);
 
   // --------------------------------------------------------------------------
-  // [Layout Hints]
-  // --------------------------------------------------------------------------
-
-  //virtual const LayoutHint& getLayoutHint() const;
-  //virtual void setLayoutHint(const LayoutHint& layoutHint);
-
-  //virtual const LayoutHint& getComputedLayoutHint() const;
-  //virtual void computeLayoutHint();
-
-  // --------------------------------------------------------------------------
   // [Layout Policy]
   // --------------------------------------------------------------------------
 
@@ -337,8 +327,8 @@ struct FOG_API Widget : public LayoutItem
   // [Layout Height For Width]
   // --------------------------------------------------------------------------
 
-  virtual bool hasHeightForWidth() const;
-  virtual int getHeightForWidth(int width) const;
+  virtual bool hasHeightForWidth() const { return false; }
+  virtual int getHeightForWidth(int width) const { return -1; }
 
   // --------------------------------------------------------------------------
   // [Layout SizeHint]
@@ -396,7 +386,6 @@ struct FOG_API Widget : public LayoutItem
   // [Layout State]
   // --------------------------------------------------------------------------
 
-  virtual bool isLayoutDirty() const;
   virtual void invalidateLayout();
 
   // --------------------------------------------------------------------------
@@ -748,16 +737,8 @@ protected:
   //! @brief Layout.
   Layout* _layout;
 
-  //! @brief Layout hints.
-  //LayoutHint _layoutHint;  
-
   //! @brief Layout policy.
-  LayoutPolicy _layoutPolicy;
-  //! @brief Whether the widget can trade height for width.
-  bool _hasHeightForWidth;
-  //! @brief Whether the layout is dirty (must be recalculated for this widget
-  //! and all descendents).
-  mutable bool _isLayoutDirty;
+  LayoutPolicy _layoutPolicy; // move into LayoutItem??
 
   //! @brief Tab order.
   int _tabOrder;

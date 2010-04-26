@@ -12,6 +12,7 @@
 #include <Fog/Gui/Layout/Layout.h>
 #include <Fog/Gui/Layout/LayoutItem.h>
 #include <Fog/Gui/Widget.h>
+#include <Fog/Gui/GuiEngine.h>
 
 FOG_IMPLEMENT_OBJECT(Fog::Layout)
 
@@ -21,12 +22,12 @@ namespace Fog {
 // [Fog::Layout]
 // ============================================================================
 
-Layout::Layout() : _parentItem(0), _toplevel(0), _spacing(0), _enabled(1), _activated(1), _flexcount(0)
+Layout::Layout() : _parentItem(0), _toplevel(0), _spacing(0), _enabled(1), _activated(1), _flexcount(0), _nextactivate(0),_invalidated(0)
 {
   _flags |= OBJ_IS_LAYOUT;  
 }
 
-Layout::Layout(Widget *parent, Layout* parentLayout) : _flexcount(0), _toplevel(0), _spacing(0), _enabled(1), _activated(1), _parentItem(0) {
+Layout::Layout(Widget *parent, Layout* parentLayout) : _flexcount(0), _toplevel(0), _spacing(0), _enabled(1), _activated(1), _parentItem(0), _nextactivate(0),_invalidated(0) {
   _flags |= OBJ_IS_LAYOUT;
 
   if (parentLayout) {
@@ -47,6 +48,24 @@ Layout::Layout(Widget *parent, Layout* parentLayout) : _flexcount(0), _toplevel(
 
 Layout::~Layout() 
 {
+  FOG_ASSERT(_nextactivate == NULL);
+}
+
+void Layout::markAsDirty() {
+  if(_toplevel == 1) {
+    Widget* w = getParentWidget();
+    if(w) {
+      GuiWindow * window = w->getClosestGuiWindow();
+      if(window) {
+        _activated = 0;
+        _invalidated = 0;
+        _nextactivate = window->_activatelist;
+        window->_activatelist = this;
+      }
+    }
+  } else {
+    _toplevel = _toplevel;
+  }
 }
 
 Widget* Layout::getParentWidget() const
@@ -230,12 +249,12 @@ void Layout::addChildLayout(Layout *l)
     return;
   }
 
-  l->_parentItem = this;  
-  l->_toplevel = 0;
-
   if (Widget *mw = getParentWidget()) {
     l->reparentChildWidgets(mw);
   }
+
+  l->_parentItem = this;  
+  l->_toplevel = 0;
 
   prepareItem(l, getLength());
   _children.append(l);
@@ -305,9 +324,8 @@ void Layout::update() {
   while (layout && layout->_activated) {
     layout->_activated = false;
     if (layout->_toplevel) {
-      FOG_ASSERT(layout->_parentItem->isWidget());      
-      LayoutEvent e(EVENT_LAYOUT_REQUEST);
-      sendEvent(&e);
+      FOG_ASSERT(layout->_parentItem->isWidget());
+      layout->markAsDirty();
       break;
     }
     FOG_ASSERT(!layout->_parentItem || (layout->_parentItem && layout->_parentItem->isLayout()));
@@ -317,21 +335,33 @@ void Layout::update() {
 
 //Method invalidates all children
 //Also it will mark all Layouts in the hierarchy to the value of activate
-void Layout::invalidActivateAll(LayoutItem *item, bool activate)
+void Layout::invalidActivateAll(bool activate)
 {
-  FOG_ASSERT(item->isLayout());
+//   item->invalidateLayout();
+//   if(item->isLayout()) {
+//     FOR_EACH(child, this)
+//     {
+//       invalidActivateAll(child, activate);
+//    }    
+// 
+//     ((Layout*)item)->_activated = activate;
+//   }
 
-  item->invalidateLayout();
+  FOG_ASSERT(isLayout());
+
+  invalidateLayout();
+
   FOR_EACH(child, this)
   {
-    if (child->isLayout()) {
-      invalidActivateAll(child, activate);
+    if(child->isLayout()) {
+      Layout* layout = (Layout*)child;
+      layout->invalidActivateAll(activate);
     } else {
       child->invalidateLayout();
     }
-  }
+  } 
 
-  ((Layout*)item)->_activated = true;
+  _activated = activate;
 }
 
 bool Layout::activate() {
@@ -353,7 +383,7 @@ bool Layout::activate() {
 
   //invalid all childs and mark them directly as activated
   //mark all childs as activated (recursive!)
-  invalidActivateAll(this, true);
+  invalidActivateAll(true);
 
   Widget *md = mw;
   bool hasH = md->hasMinimumHeight();

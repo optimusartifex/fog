@@ -156,7 +156,7 @@ namespace Fog {
       start = len;
     }
 
-    int left = collapseMargins(getContentLeftMargin(), getAt(start)->getContentLeftMargin());
+    int left = rect.x + collapseMargins(getContentLeftMargin(), getAt(start)->getContentLeftMargin());
 
     while(i != len)  {
       forward ? ++i : --i;
@@ -173,7 +173,7 @@ namespace Fog {
       height = Math::max<int>(child->getLayoutMinimumSize().getHeight(), Math::min(availHeight-marginTop-marginBottom, child->getLayoutMaximumSize().getHeight()));
 
       // Respect vertical alignment
-      top = marginTop;
+      top = rect.y + marginTop;
 
       // Add collapsed margin
       if (marginRight != -INT_MAX) {

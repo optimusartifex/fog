@@ -16,6 +16,7 @@
 #include <Fog/Gui/Event.h>
 #include <Fog/Gui/GuiEngine/Base.h>
 #include <Fog/Gui/Widget_p.h>
+#include <Fog/Gui/Layout/Layout.h>
 
 FOG_IMPLEMENT_OBJECT(Fog::BaseGuiEngine)
 FOG_IMPLEMENT_OBJECT(Fog::BaseGuiWindow)
@@ -535,6 +536,17 @@ void BaseGuiEngine::dispatchConfigure(Widget* w, const IntRect& rect, bool chang
   w->_clientGeometry.set(0, 0, rect.w, rect.h);
   w->sendEvent(&e);
 
+  Layout* layout = w->getLayout();
+
+  //TODO: intelligent enum order so we can omit one check here!
+  if(layout && layout->_activated &&  changed & ConfigureEvent::CHANGED_SIZE || changed & ConfigureEvent::CHANGED_ORIENTATION) {    
+    GuiWindow* window = w->getClosestGuiWindow();
+    FOG_ASSERT(window);
+    layout->_activated = 0;
+    layout->_nextactivate = window->_activatelist;
+    window->_activatelist = layout;
+  }
+
   Widget* p = w->getParent();
   if (p)
   {
@@ -647,6 +659,13 @@ void BaseGuiEngine::doUpdateWindow(GuiWindow* window)
   {
     top->_uflags = 0;
     return;
+  }
+  
+  while(window->_activatelist) {
+    FOG_ASSERT(window->_activatelist->_activated == 0);
+    window->_activatelist->activate();
+    FOG_ASSERT(window->_activatelist->_activated == 1);
+    window->_activatelist = window->_activatelist->_nextactivate;
   }
 
   // =======================================================

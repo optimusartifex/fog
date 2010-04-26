@@ -6,6 +6,10 @@
 
 // This is for MY testing:)
 
+//#include <Windows.h>
+#include <uxtheme.h>
+#include <Tmschema.h>
+
 using namespace Fog;
 
 struct MyPopUp : public Widget {
@@ -25,6 +29,231 @@ struct MyPopUp : public Widget {
     p->setSource(Argb(0xFF000000));
     p->drawText(IntPoint(0,0),Ascii8("TEXT TEXT"),getFont());
   }
+};
+
+struct UxTheme {
+  UxTheme() : _theme(0) {
+    if(!_dll) {
+      _dll = LoadLibrary(L"UxTheme.dll");
+    }
+
+    _pOpenThemeData = (PFNOPENTHEMEDATA)getProc("OpenThemeData");
+    _pCloseThemeData = (PFNCLOSETHEMEDATA)getProc("CloseThemeData");
+    _pDrawThemeBackground = (PFNDRAWTHEMEBACKGROUND)getProc("DrawThemeBackground");
+    _pDrawThemeText = (PFNDRAWTHEMETEXT)getProc("DrawThemeText");
+    _pGetThemeRegion = (PFNGETTHEMEBACKGROUNDREGION) getProc("GetThemeBackgroundRegion");
+    _pIsThemeBackgroundPartiallyTransparent = (PFNISTHEMEBACKGROUNDPARTIALLYTRANSPARENT) getProc("IsThemeBackgroundPartiallyTransparent");
+  }
+
+  ~UxTheme() {
+    close();
+  }
+
+  void openTheme(LPCWSTR cls) {
+    _theme = _pOpenThemeData(0,cls);
+  }
+
+  void close() {
+    _pCloseThemeData(_theme);
+    _theme = 0;
+  }
+
+  BOOL drawThemeBackground(HDC hdc, int iPartId, int iStateId, const RECT *pRect,  const RECT *pClipRect) {
+    return _pDrawThemeBackground(_theme,hdc,iPartId,iStateId,pRect,pClipRect) == S_OK;
+  }
+
+  BOOL drawThemeText(HDC hdc, int iPartId, int iStateId, LPCWSTR pszText, int iCharCount, DWORD dwTextFlags, DWORD dwTextFlags2, const RECT *pRect) {
+      return (*_pDrawThemeText)(_theme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect) == S_OK;
+  }
+
+  BOOL getThemeBackgroundRegion(HDC hdc, int iPartId, int iStateId, const RECT *pRect,  HRGN *pRegion) {
+    return (*_pGetThemeRegion)(_theme, hdc, iPartId, iStateId, pRect, pRegion) == S_OK;
+  }
+
+  BOOL IsThemeBackgroundPartiallyTransparent(int iPartId, int iStateId) {
+    return (*_pIsThemeBackgroundPartiallyTransparent)(_theme, iPartId, iStateId);
+  }
+
+  static bool EnableTheming(bool b) {
+    if(!_dll) {
+      _dll = LoadLibrary(L"UxTheme.dll");
+    }
+    typedef HRESULT (__stdcall *PFNENABLETHEMING)(BOOL fEnable);
+    PFNENABLETHEMING pfn = (PFNENABLETHEMING)getProc("EnableTheming");
+    return (*pfn)(b) == S_OK;
+  }
+
+  static bool isAppThemed() {
+    if(!_dll) {
+      _dll = LoadLibrary(L"UxTheme.dll");
+    }
+    typedef HRESULT (__stdcall *PFNENABLETHEMING)();
+    PFNENABLETHEMING pfn = (PFNENABLETHEMING)getProc("IsAppThemed");
+    return (*pfn)();
+  }
+
+  
+
+
+private:
+
+  static void* getProc(LPCSTR szProc) {
+    if (_dll != NULL)
+      return GetProcAddress(_dll, szProc);
+
+    return 0;
+  }
+
+  typedef HTHEME(__stdcall *PFNOPENTHEMEDATA)(HWND hwnd, LPCWSTR pszClassList);
+  typedef HRESULT(__stdcall *PFNCLOSETHEMEDATA)(HTHEME hTheme);
+  typedef HRESULT(__stdcall *PFNDRAWTHEMEBACKGROUND)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, const RECT *pRect,  const RECT *pClipRect);
+  typedef HRESULT (__stdcall *PFNDRAWTHEMETEXT)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, LPCWSTR pszText, int iCharCount, DWORD dwTextFlags, DWORD dwTextFlags2, const RECT *pRect);
+  typedef HRESULT (__stdcall *PFNGETTHEMEBACKGROUNDREGION)(HTHEME hTheme,  HDC hdc, int iPartId, int iStateId, const RECT *pRect,  HRGN *pRegion);
+  typedef BOOL (__stdcall *PFNISTHEMEBACKGROUNDPARTIALLYTRANSPARENT)(HTHEME hTheme, int iPartId, int iStateId);
+
+
+  PFNOPENTHEMEDATA _pOpenThemeData;
+  PFNCLOSETHEMEDATA _pCloseThemeData;
+  PFNDRAWTHEMEBACKGROUND _pDrawThemeBackground;
+  PFNDRAWTHEMETEXT _pDrawThemeText;
+  PFNGETTHEMEBACKGROUNDREGION _pGetThemeRegion;
+  PFNISTHEMEBACKGROUNDPARTIALLYTRANSPARENT _pIsThemeBackgroundPartiallyTransparent;
+
+  static HMODULE _dll;
+  HTHEME _theme;
+};
+
+HMODULE UxTheme::_dll = 0;
+
+//TABP_TABITEM
+//BP_PUSHBUTTON
+
+struct XPButton : public ButtonBase {
+  XPButton() : _hBitmap(0), _hdc(0), _default(false), TYPE(TABP_TABITEM), _rgn(0), isbutton(true) {
+    _theme.openTheme(L"Button");
+  }
+
+  void setDefault(bool def) {
+    _default = def;
+  }
+
+  virtual void onConfigure(ConfigureEvent* e) {
+    int width = e->_geometry.getWidth();
+    int height = e->_geometry.getHeight();
+
+    int targetBPP = 32;
+    // Define bitmap attributes.
+    BITMAPINFO bmi;
+
+    if(_hdc)
+      DeleteDC(_hdc);
+
+    if(_hBitmap)
+      DeleteObject(_hBitmap);    
+
+    _hdc = CreateCompatibleDC(NULL);
+    if (_hdc == NULL)
+    {    
+      return;
+    }
+
+    //Fog::Memory::zero();
+    Fog::Memory::zero(&bmi, sizeof(bmi));
+    bmi.bmiHeader.biSize        = sizeof(bmi.bmiHeader);
+    bmi.bmiHeader.biWidth       = width;
+    bmi.bmiHeader.biHeight      = -height;
+    bmi.bmiHeader.biPlanes      = 1;
+    bmi.bmiHeader.biBitCount    = targetBPP;
+    bmi.bmiHeader.biCompression = BI_RGB;
+
+    unsigned char* pixels = NULL;
+    
+    _hBitmap = CreateDIBSection(NULL, &bmi, DIB_RGB_COLORS, (void**)&pixels, NULL, 0);
+    if (_hBitmap == NULL) 
+    {
+      DeleteDC(_hdc);
+      return;
+    }
+
+    // Select bitmap to DC.
+    SelectObject(_hdc, _hBitmap);
+
+    DIBSECTION info;
+    GetObjectW(_hBitmap, sizeof(DIBSECTION), &info);
+
+    _buffer.data = pixels;
+    _buffer.width = width;
+    _buffer.height = height;
+    _buffer.stride = info.dsBm.bmWidthBytes;
+
+    if(_theme.IsThemeBackgroundPartiallyTransparent(TYPE,calcState())) {
+      _buffer.format = PIXEL_FORMAT_PRGB32;
+    } else {
+      _buffer.format = PIXEL_FORMAT_XRGB32;
+    }
+
+    _image.adopt(_buffer);
+  }
+
+  FOG_INLINE int calcState() const {
+    int state = 0;
+
+    if(isbutton) {
+      state = isMouseOver() ? PBS_HOT : (_default ? PBS_DEFAULTED : PBS_NORMAL);
+      state = isMouseDown() ? PBS_PRESSED : state;
+      state = !isEnabled() ? PBS_DISABLED : state;
+    } else {
+      state = isMouseOver() ? TIS_HOT : TIS_NORMAL;
+      state = isMouseDown() ? TIS_SELECTED : state;
+      state = !isEnabled() ? TIS_DISABLED : state;
+    }
+
+    return state;
+  }
+
+  virtual void onPaint(PaintEvent* e) {
+    IntRect r = getClientContentGeometry(); //for easy margin support
+    RECT rect;
+    rect.left = 0;
+    rect.right = _clientGeometry.getWidth();
+    rect.top = 0;
+    rect.bottom = _clientGeometry.getHeight();
+
+    int state = calcState();
+
+    if(_theme.IsThemeBackgroundPartiallyTransparent(TYPE,state)) {
+      //button
+      _image.clear(Argb(0x00000000));
+    } else {
+      //tab
+      _image.clear(Argb(0xFF000000));
+    }
+
+    //Clip on Region to support Transparency! ... needed?
+
+    BOOL result = _theme.drawThemeBackground(_hdc, TYPE,	state, &rect, NULL);
+
+    //draws with a really ugly font... why?? (also if I set the button within window -> maybe because I open them with null hwnd)
+    //BOOL ret = _theme.drawThemeText(_hdc,BP_PUSHBUTTON,state,(wchar_t*)_text.getData(),_text.getLength(),DT_CENTER|DT_VCENTER|DT_SINGLELINE,0,&rect);     
+    e->getPainter()->blitImage(IntPoint(0,0),_image);
+    e->getPainter()->drawText(r, _text, _font, TEXT_ALIGN_CENTER);
+  }
+
+
+private:
+  UxTheme _theme;
+  HBITMAP _hBitmap;
+  HRGN _rgn;
+  HDC _hdc;
+
+  ImageBuffer _buffer;
+
+  Image _image;
+  bool _default;
+
+  const int TYPE;
+
+  const int isbutton;
 };
 
 
@@ -257,29 +486,31 @@ MyWindow::MyWindow(uint32_t createFlags) :
 
 
 
-  Button* buttonx1 = new Button();
+  XPButton* buttonx1 = new XPButton();
   add(buttonx1);
   //button4->setGeometry(IntRect(40, 160, 100, 20));
   buttonx1->setText(Ascii8("ButtonX1"));
   buttonx1->show(); 
 
-  Button* buttonx2 = new Button();
+  XPButton* buttonx2 = new XPButton();
   add(buttonx2);
   //button4->setGeometry(IntRect(40, 160, 100, 20));
   buttonx2->setText(Ascii8("ButtonX2"));
   buttonx2->show(); 
 
-  Button* buttonx3 = new Button();
+  XPButton* buttonx3 = new XPButton();
   add(buttonx3);
-  //button4->setGeometry(IntRect(40, 160, 100, 20));
   buttonx3->setText(Ascii8("ButtonX3"));
   buttonx3->show(); 
+  buttonx3->setContentMargins(10,10,10,10);
+  buttonx3->setDefault(true);
 
-  Button* buttonx4 = new Button();
+  XPButton* buttonx4 = new XPButton();
   add(buttonx4);
   //button4->setGeometry(IntRect(40, 160, 100, 20));
   buttonx4->setText(Ascii8("ButtonX4"));
-  buttonx4->show(); 
+  buttonx4->show();   
+  buttonx4->setEnabled(false);
 
 
   button->setMinimumSize(IntSize(40,40));
@@ -311,7 +542,7 @@ MyWindow::MyWindow(uint32_t createFlags) :
   hbox->addItem(buttonx2);
   hbox->addItem(buttonx3);
   buttonx3->setFlex(1);
-  hbox->addItem(buttonx4);
+  hbox->addItem(buttonx4); 
 
 //   button->setFlex(3);
 //   button2->setFlex(7);
@@ -419,8 +650,10 @@ void MyWindow::onPaint(PaintEvent* e)
   p->setOperator(OPERATOR_SRC);
 
   // Clear everything to white.
-  p->setSource(Argb(0x19000000));
+  p->setSource(Argb(0xFFFFFFFF));
   p->clear();
+
+  return;
   
   p->setSource(Argb(0xFF000000));
   p->drawRect(IntRect(15, 15, getWidth() - 25, getHeight() - 25));
@@ -524,6 +757,9 @@ void MyWindow::paintImage(Painter* p, const IntPoint& pos, const Image& im, cons
 FOG_GUI_MAIN()
 {
   Application app(Ascii8("Gui"));
+
+  //BOOL b = UxTheme::EnableTheming(TRUE);
+  BOOL ret = UxTheme::isAppThemed();
 
   MyWindow window(WINDOW_TYPE_DEFAULT);
   window.setSize(IntSize(500, 400));

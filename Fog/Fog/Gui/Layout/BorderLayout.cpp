@@ -120,7 +120,8 @@ namespace Fog {
     int nextTop=0, nextLeft=0;
     int spacingX= getSpacing(), spacingY=getSpacing();
 
-    int len = list.getLength()+_center? 1 : 0;
+    int len = list.getLength();
+    len += (_center != 0) ? 1 : 0;
 
     for(int i=0;i<len;++i) {
       LayoutItem* item = _center;

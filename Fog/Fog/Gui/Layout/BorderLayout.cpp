@@ -116,12 +116,21 @@ namespace Fog {
       centerwidthoffset = availWidth - _allocatedWidth;
     }
 
-    int left, top, used;
+    int used;
     int nextTop=0, nextLeft=0;
     int spacingX= getSpacing(), spacingY=getSpacing();
 
-    for(int i=0;i<list.getLength();++i) {
-      LayoutItem* item = list.at(i);
+    int len = list.getLength()+_center? 1 : 0;
+
+    for(int i=0;i<len;++i) {
+      LayoutItem* item = _center;
+      if(i < list.getLength()) {
+        item = list.at(i);
+        if(item == _center) {
+          continue;
+        }
+      }
+      
       const LayoutHint& hint = item->getLayoutHint();
       LayoutProperty* prop = static_cast<LayoutProperty*>(item->_layoutdata);
 
@@ -137,6 +146,9 @@ namespace Fog {
 
       int zheight = availHeight - marginY;
       int zwidth = availWidth - marginX;
+
+      int left = nextLeft + item->getContentLeftMargin();
+      int top = nextTop + item->getContentTopMargin();
 
       // Limit width to min/max
       if (zwidth < minwidth) {
@@ -154,35 +166,37 @@ namespace Fog {
 
       if(prop->_edge & Y_MASK) {
         width = zwidth;
+
         // Update available height
         used = height + marginY + spacingY;
-        availHeight -= used;
 
         // Update coordinates, for next child
         if (prop->_edge == NORTH) {
           nextTop += used;
+        } else {
+          top = nextTop + (availHeight - height - item->getContentBottomMargin());
         }
+
+        availHeight -= used;
       } else if(prop->_edge & X_MASK) {
         height = zheight;
 
         // Update available height
-        used = width + marginX + spacingX;
-        availWidth -= used;
+        used = width + marginX + spacingX;        
 
         // Update coordinates, for next child
         if (prop->_edge == WEST) {
           nextLeft += used;
+        } else {
+          left = nextLeft + (availWidth - width - item->getContentRightMargin());
         }
+        availWidth -= used;
       } else {
         // Calculated width/height
         FOG_ASSERT(item == _center);
-        width = zwidth + centerwidthoffset;
-        height = zheight + centerheightoffset;
+        width += centerwidthoffset;
+        height += centerheightoffset;
       }
-
-
-      int left = nextLeft + item->getContentLeftMargin();
-      int top = nextTop + item->getContentTopMargin();
 
       item->setLayoutGeometry(IntRect(left,top,width,height));
     }

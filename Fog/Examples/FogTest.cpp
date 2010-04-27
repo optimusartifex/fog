@@ -477,7 +477,7 @@ MyWindow::MyWindow(uint32_t createFlags) :
   //button5->setGeometry(IntRect(40, 200, 100, 20));
   button5->setText(Ascii8("Test ModalWindow"));
   button5->show();  
-  button5->addListener(EVENT_CLICK, this, &MyWindow::onModalTestClick);  
+  //button5->addListener(EVENT_CLICK, this, &MyWindow::onModalTestClick);  
 
   _popup = new MyPopUp();
   add(_popup);
@@ -503,15 +503,13 @@ MyWindow::MyWindow(uint32_t createFlags) :
   add(buttonx3);
   buttonx3->setText(Ascii8("ButtonX3"));
   buttonx3->show(); 
-  buttonx3->setContentMargins(10,10,10,10);
   buttonx3->setDefault(true);
 
   XPButton* buttonx4 = new XPButton();
   add(buttonx4);
   //button4->setGeometry(IntRect(40, 160, 100, 20));
   buttonx4->setText(Ascii8("ButtonX4"));
-  buttonx4->show();   
-  buttonx4->setEnabled(false);
+  buttonx4->show(); 
 
 
   /*button->setMinimumSize(IntSize(40,40));
@@ -524,7 +522,7 @@ MyWindow::MyWindow(uint32_t createFlags) :
   buttonx3->setMinimumSize(IntSize(40,40));
   buttonx4->setMinimumSize(IntSize(40,40));
 
-  buttonx2->setMaximumSize(IntSize(80,80));
+  //buttonx2->setMaximumSize(IntSize(80,80));
 
   BorderLayout* border = new BorderLayout(this);
   setLayout(border);

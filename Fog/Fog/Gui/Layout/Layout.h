@@ -120,11 +120,17 @@ struct FOG_API Layout : public LayoutItem
   // [Invalidation]
   // --------------------------------------------------------------------------
 
-  virtual void invalidateLayout() {
-    LayoutItem::invalidateLayout(); 
-    _rect = IntRect(); 
-    update();
+  virtual void updateLayout() {
+    if(_toplevel) {
+      markAsDirty();
+    } else {
+      if(_withinLayout) {
+        _withinLayout->markAsDirty();
+      }
+    }
   }
+
+  virtual void invalidateLayout() { _dirty = 1; }
 
   void markAsDirty();
 
@@ -155,7 +161,7 @@ struct FOG_API Layout : public LayoutItem
 
   void addFlexItem(){ ++_flexcount; }
   void removeFlexItem() { --_flexcount; }
-  bool hasFlexItems() const { return _flexcount > 0; }   
+  bool hasFlexItems() const { return _flexcount > 0; }
 
   // --------------------------------------------------------------------------
   // [Event Handler]

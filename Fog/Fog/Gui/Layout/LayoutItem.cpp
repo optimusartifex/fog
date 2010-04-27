@@ -30,6 +30,10 @@ LayoutItem::~LayoutItem()
 {
 }
 
+FOG_INLINE void LayoutItem::updateLayout() {
+  if(_withinLayout) _withinLayout->updateLayout();
+}
+
 FOG_INLINE IntSize calculateMaximumSize(const IntSize& sizeHint, const IntSize& minSize, const IntSize& maxSize, const LayoutPolicy& sizePolicy, uint32_t align)
 {
   if (align & ALIGNMENT_HORIZONTAL_MASK && align & ALIGNMENT_VERTICAL_MASK)

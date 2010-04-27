@@ -64,12 +64,13 @@ struct FOG_API LayoutItem : public Object
   FOG_INLINE virtual int calcMargin(int margin, MarginPosition pos) const { return margin; }
 
   //TODO: only invalidate if margin really changes after calcMargin
+  FOG_INLINE void checkMarginChanged(int a, int b) { if(a != b) { _dirty = 1; updateLayout();} }
   FOG_INLINE void setContentMargins(const IntMargins& m)  { setContentMargins(m.left,m.right,m.top,m.bottom); }
-  FOG_INLINE void setContentMargins(int left, int right, int top, int bottom)  { _contentmargin.set(calcMargin(left,MARGIN_LEFT),calcMargin(right,MARGIN_RIGHT),calcMargin(top,MARGIN_TOP),calcMargin(bottom,MARGIN_BOTTOM)); invalidateLayout();}  
-  FOG_INLINE void setContentLeftMargin(int m)  { _contentmargin.left = calcMargin(m,MARGIN_LEFT); invalidateLayout();}
-  FOG_INLINE void setContentRightMargin(int m)  { _contentmargin.right = calcMargin(m,MARGIN_RIGHT); invalidateLayout();}
-  FOG_INLINE void setContentTopMargin(int m)  { _contentmargin.top = calcMargin(m,MARGIN_TOP); invalidateLayout();}
-  FOG_INLINE void setContentBottomMargin(int m)  { _contentmargin.bottom = calcMargin(m,MARGIN_BOTTOM); invalidateLayout();}
+  FOG_INLINE void setContentMargins(int left, int right, int top, int bottom)  { _contentmargin.set(calcMargin(left,MARGIN_LEFT),calcMargin(right,MARGIN_RIGHT),calcMargin(top,MARGIN_TOP),calcMargin(bottom,MARGIN_BOTTOM)); checkMarginChanged(1,2); }  //TODO: optimize update!
+  FOG_INLINE void setContentLeftMargin(int m)  { int z=_contentmargin.left; _contentmargin.left = calcMargin(m,MARGIN_LEFT); checkMarginChanged(z,_contentmargin.left); }
+  FOG_INLINE void setContentRightMargin(int m)  { int z=_contentmargin.right; _contentmargin.right = calcMargin(m,MARGIN_RIGHT); checkMarginChanged(z,_contentmargin.right);}
+  FOG_INLINE void setContentTopMargin(int m)  { int z=_contentmargin.top; _contentmargin.top = calcMargin(m,MARGIN_TOP); checkMarginChanged(z,_contentmargin.top); }
+  FOG_INLINE void setContentBottomMargin(int m)  { int z=_contentmargin.bottom; _contentmargin.bottom = calcMargin(m,MARGIN_BOTTOM); checkMarginChanged(z,_contentmargin.bottom); }
 
   // --------------------------------------------------------------------------
   // [Height For Width]
@@ -83,6 +84,9 @@ struct FOG_API LayoutItem : public Object
   // [LayoutHint]
   // --------------------------------------------------------------------------
 
+  //mark this layout for a need to repaint
+  FOG_INLINE virtual void updateLayout();
+
   virtual void calculateLayoutHint(LayoutHint& hint) = 0;
 
   //TODO: maybe we can insert clearDirty() in special function, so that it is only
@@ -91,18 +95,23 @@ struct FOG_API LayoutItem : public Object
   FOG_INLINE void clearDirty() {
     FOG_ASSERT(_dirty);
     if(!isEmpty()) {
-      calculateLayoutHint(_cache); 
+      calculateLayoutHint(_cache);
     } else {
       _cache._maximumSize = _cache._minimumSize = _cache._sizeHint = IntSize(0,0);
     }
    
-    _dirty = 0; 
+    _dirty = 0;
   }
 
   FOG_INLINE const LayoutHint& getLayoutHint() const {
     if(_dirty) {
       const_cast<LayoutItem*>(this)->clearDirty();
     }
+
+    if(isLayout()) {
+      int i = 100;
+    }
+
     return _cache;
   }
 
@@ -133,7 +142,7 @@ struct FOG_API LayoutItem : public Object
   // [Cache Handling]
   // --------------------------------------------------------------------------
 
-  virtual void invalidateLayout() { _dirty = 1; }
+  //virtual void invalidateLayout() { _dirty = 1; }
 
   // --------------------------------------------------------------------------
   // [Geometry]

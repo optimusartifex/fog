@@ -270,6 +270,8 @@ struct FOG_API Widget : public LayoutItem
   // [Layout Of Widget]
   // --------------------------------------------------------------------------
 
+  FOG_INLINE void invalidateLayout();
+
   virtual void calculateLayoutHint(LayoutHint& hint) {
     //calculate MinimumSize
     hint._minimumSize = LayoutItem::calculateMinimumSize();
@@ -385,8 +387,6 @@ struct FOG_API Widget : public LayoutItem
   // --------------------------------------------------------------------------
   // [Layout State]
   // --------------------------------------------------------------------------
-
-  virtual void invalidateLayout();
 
   // --------------------------------------------------------------------------
   // [Widget State]

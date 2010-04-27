@@ -440,6 +440,11 @@ repeat:
 // ============================================================================
 // [Fog::Widget - Layout]
 // ============================================================================
+void Widget::invalidateLayout() {
+ _dirty = 1; 
+ if(_layout)
+   _layout->updateLayout();
+}
 
 void Widget::setLayout(Layout* lay)
 {
@@ -478,7 +483,6 @@ Layout* Widget::takeLayout()
     lay->_parentItem = NULL;
     _layout = NULL;
 
-    //clear layout cache
     invalidateLayout();
 
     LayoutEvent e(EVENT_LAYOUT_REMOVE);
@@ -718,38 +722,49 @@ bool Widget::checkMaximumSize(int w, int h) {
 }
 
 void Widget::setMinimumSize(const IntSize& minSize) {
-   if(!checkMinimumSize(minSize.getWidth(),minSize.getHeight())) //nothing changed
-     return;
+  IntSize lastmin(-1,-1);
+  if(_extra) {
+    lastmin.set(_extra->_minwidth, _extra->_minheight);
+  }
 
-   IntSize size(getMinimumWidth(),getMinimumHeight());
-   if(_geometry.getWidth() < size.getWidth() || _geometry.getHeight() < size.getHeight()) {
-     resize(size);
-   }
+  if(!checkMinimumSize(minSize.getWidth(),minSize.getHeight())) //nothing changed
+    return;
 
-   //TODO: Write EventListener for allow/disallow min/max
+  IntSize size(getMinimumWidth(),getMinimumHeight());
+
+  invalidateLayout();
+  
+  if(_geometry.getWidth() < size.getWidth() || _geometry.getHeight() < size.getHeight()) {
+    resize(size);
+  }
+
+ //TODO: Write EventListener for GuiWindow to allow/disallow min/max
 }
 
 void Widget::setMaximumSize(const IntSize& maxSize) {
+  IntSize lastmin(-1,-1);
+  if(_extra) {
+    lastmin.set(_extra->_minwidth, _extra->_minheight);
+  }
+
   if(!checkMaximumSize(maxSize.getWidth(),maxSize.getHeight())) //nothing changed
     return;
 
   IntSize size(getMaximumWidth(),getMaximumHeight());
 
+  invalidateLayout();
+
   if(_geometry.getWidth() > size.getWidth() || _geometry.getHeight() > size.getHeight()) {
     resize(size);
   }
 
-  //TODO: Write EventListener for allow/disallow min/max
+  //TODO: Write EventListener for GuiWindow to allow/disallow min/max
 }
 
 // ============================================================================
 // [Layout State]
 // ============================================================================
 
-void Widget::invalidateLayout()
-{
-  //TODO: Widget Layout Cache (clear it here)
-}
 
 // ============================================================================
 // [Fog::Widget - State]

@@ -25,116 +25,96 @@ namespace Fog {
   {
     FOG_DECLARE_OBJECT(BorderLayout, Layout)
 
-    enum BorderType {
-      NORTH = 1,
-      SOUTH = 2,
-      WEST = 3,
-      EAST = 4,
-      CENTER = 5
+    enum Edge {
+      X_MASK = 1,
+      Y_MASK = 2,
+      X_FLEX = 4,
+      Y_FLEX = 8,      
+      
+      NORTH = 128|Y_MASK|Y_FLEX,
+      SOUTH = 256|Y_MASK|Y_FLEX,
+      WEST = 512|X_MASK|X_FLEX,
+      EAST = 1024|X_MASK|X_FLEX,
+      CENTER = 2048|X_FLEX|Y_FLEX
     };
 
-    BorderLayout(Widget* parent=0) : _center(0), Layout(parent) {
+    BorderLayout(Widget* parent=0) : _center(0), Layout(parent), _sort(0) {
     
     }
 
+    struct LayoutProperty : public Layout::LayoutStruct {
+      uint32_t _edge;
+    };
+
     FOG_INLINE virtual void prepareItem(LayoutItem* item, sysuint_t index) {
-      item->_layoutdata = new(std::nothrow) ItemProperties();
+      item->_layoutdata = new(std::nothrow) LayoutProperty();
     }
 
-    FOG_INLINE void addItem(LayoutItem *item, BorderType type) { 
-      Layout::addChild(item); 
-      if(item->_withinLayout == this) {
-        if(type == CENTER) {
-          FOG_ASSERT(!_center);
-          _center = item;
-        } else if(type == NORTH) {
-          _north.add(item);
-        } else if(type == SOUTH) {
-          _south.add(item);
-        } else if(type == EAST) {
-          _east.add(item);
-        } else if(type == WEST) {
-          _west.add(item);
+    FOG_INLINE void addItem(LayoutItem *item, Edge type) {
+      Layout::addChild(item);      
+      if(type == NORTH || type == SOUTH) {
+        _y.append(item);
+      } else if(type == EAST || type == WEST) {
+        _x.append(item);
+      } else {
+        FOG_ASSERT(!_center);
+        _center = item;
+      }
+
+      LayoutProperty* prop = static_cast<LayoutProperty*>(item->_layoutdata);
+      prop->_edge = type;
+
+      if(_sort != SORTNONE)
+        _sortdirty = 1;
+    }
+
+    virtual void calculateLayoutHint(LayoutHint& hint);
+    virtual void setLayoutGeometry(const IntRect&);
+
+    enum SortType {SORTNONE=0, SORTX=1, SORTY=2};
+
+    void setSort(SortType s) {
+      if(_sort != s) {
+        _sort = s;
+        _sortdirty = 1;
+      }
+
+      invalidateLayout();
+    }
+
+    const List<LayoutItem*>& getList() {
+      if(_sort == 0) {
+        return _children;
+      } else {
+        if(_sortdirty) {
+          _sorted.clear();
+          _sorted.reserve(_x.getLength() + _y.getLength());
+          if(_sort == SORTX) {
+            _sorted.append(_x);
+            _sorted.append(_y);
+          } else if(_sort == SORTY) {
+            _sorted.append(_y);
+            _sorted.append(_x);
+          }
         }
+
+        return _sorted;
       }
     }
 
-    virtual uint32_t getLayoutExpandingDirections() const {
-      return 0;
-    }
+    FOG_INLINE bool isDirty() { return _dirty || _sortdirty; }
 
-    struct Part {
-      Part() : _dirty(1) {
-
-      }
-
-      FOG_INLINE void add(LayoutItem* i) {        
-        ItemProperties* prop = static_cast<ItemProperties*>(i->_layoutdata);
-        prop->_id = _items.getLength(); 
-        prop->_part = this;
-        _items.append(i);
-        _dirty = 1;
-      }
-
-      FOG_INLINE void remove(LayoutItem* i) {
-        ItemProperties* prop = static_cast<ItemProperties*>(i->_layoutdata);
-        _items.take(prop->_id);
-        _dirty = 1;
-      }
-
-      FOG_INLINE void invalidate() {
-        _dirty = 1;
-      }
-
-      int _dimension:31; //dimension of all items in part
-      int _dirty: 1;
-      List<LayoutItem*> _items;
-    };
-
-    struct Horizontal : public Part {
-      void update() {
-        int width = 0;
-        for(sysuint_t i=0;i<_items.getLength();++i) {
-          width += _items.at(i)->getLayoutSizeHint().getWidth();
-        }
-
-        _dimension = width;
-        _dirty = 0;
-      }
-
-      FOG_INLINE int getDimension() {
-        if(_dirty)
-          update();
-        return _dimension;
-      }
-    } _east, _west;
-
-    struct Vertical : public Part {
-      void update() {
-        int height = 0;
-        for(sysuint_t i=0;i<_items.getLength();++i) {
-          LayoutItem* item = _items.at(i);
-          height += item->getLayoutSizeHint().getHeight() + item->getContentTopMargin() + item->getContentBottomMargin();
-        }
-
-        _dimension = height;
-        _dirty = 0;
-      }
-
-    FOG_INLINE int getDimension() {
-        if(_dirty)
-          update();
-        return _dimension;
-      }
-    }_south, _north;
-
-
-    struct ItemProperties : public LayoutItem::LayoutStruct {
-      int _id;
-      Part* _part;
-    };
-
+    List<LayoutItem*> _x;
+    List<LayoutItem*> _y;
+    List<LayoutItem*> _sorted;
     LayoutItem* _center;
+
+    int _sortdirty: 1;
+    int _sort:2;    
+    int _unused: 1;
+
+    int _allocatedWidth;
+    int _allocatedHeight;
   };
 }
 #endif

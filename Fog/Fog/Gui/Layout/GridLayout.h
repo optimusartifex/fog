@@ -63,7 +63,12 @@ namespace Fog {
     // ============================================================================
     virtual void calculateLayoutHint(LayoutHint& hint);
     virtual void setLayoutGeometry(const IntRect&);
-    FOG_INLINE virtual void invalidateLayout() { _rowheight = 0; _colwidth = 0; Layout::invalidateLayout(); }
+
+     FOG_INLINE virtual void invalidateLayout() {
+       Layout::invalidateLayout();
+       _rowheight = 0;
+       _colwidth = 0;
+     }
 
     struct Row;
 

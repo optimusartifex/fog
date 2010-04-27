@@ -113,7 +113,9 @@ namespace Fog {
         prop->_rowspannext = _rowspan;
         _rowspan = item;
       }
-    }  
+    }
+
+    invalidateLayout();
   }
 
   LayoutItem* GridLayout::getCellItem(int row, int column) const {

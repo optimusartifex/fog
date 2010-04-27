@@ -43,6 +43,7 @@
 #include <Fog/Gui/Constants.h>
 #include <Fog/Gui/Event.h>
 #include <Fog/Gui/GuiEngine.h>
+#include <Fog/Gui/Layout/BorderLayout.h>
 #include <Fog/Gui/Layout/BoxLayout.h>
 #include <Fog/Gui/Layout/FlowLayout.h>
 #include <Fog/Gui/Layout/GridLayout.h>

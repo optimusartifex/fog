@@ -42,7 +42,6 @@ void ButtonBase::setText(const String& text)
 {
   _text = text;
 
-  invalidateLayout();
   repaint(WIDGET_REPAINT_AREA);
 }
 

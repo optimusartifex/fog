@@ -48,6 +48,7 @@ namespace Fog {
 
   void BoxLayout::setLayoutGeometry(const IntRect &rect)
   {
+    //TODO: check oldrect and newrect if we really need to reposition
     Layout::setLayoutGeometry(rect);
     doLayout(rect);
   }
@@ -161,7 +162,7 @@ namespace Fog {
   }
 
   int HBoxLayout::doLayout(const IntRect &rect)
-  {
+  {    
     if(!rect.isValid())
       return 0;
     int availWidth = rect.getWidth();

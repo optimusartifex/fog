@@ -138,9 +138,27 @@ struct XPButton : public ButtonBase {
   }
 
   virtual void onConfigure(ConfigureEvent* e) {
-    int width = e->_geometry.getWidth();
-    int height = e->_geometry.getHeight();
+    int width = _geometry.getWidth();
+    int height = _geometry.getHeight();
+  }
 
+  FOG_INLINE int calcState() const {
+    int state = 0;
+
+    if(isbutton) {
+      state = isMouseOver() ? PBS_HOT : (_default ? PBS_DEFAULTED : PBS_NORMAL);
+      state = isMouseDown() ? PBS_PRESSED : state;
+      state = !isEnabled() ? PBS_DISABLED : state;
+    } else {
+      state = isMouseOver() ? TIS_HOT : TIS_NORMAL;
+      state = isMouseDown() ? TIS_SELECTED : state;
+      state = !isEnabled() ? TIS_DISABLED : state;
+    }
+
+    return state;
+  }
+
+  void createBitmap(int width, int height) {
     int targetBPP = 32;
     // Define bitmap attributes.
     BITMAPINFO bmi;
@@ -149,11 +167,10 @@ struct XPButton : public ButtonBase {
       DeleteDC(_hdc);
 
     if(_hBitmap)
-      DeleteObject(_hBitmap);    
+      DeleteObject(_hBitmap);
 
     _hdc = CreateCompatibleDC(NULL);
-    if (_hdc == NULL)
-    {    
+    if (_hdc == NULL) {
       return;
     }
 
@@ -167,7 +184,7 @@ struct XPButton : public ButtonBase {
     bmi.bmiHeader.biCompression = BI_RGB;
 
     unsigned char* pixels = NULL;
-    
+
     _hBitmap = CreateDIBSection(NULL, &bmi, DIB_RGB_COLORS, (void**)&pixels, NULL, 0);
     if (_hBitmap == NULL) 
     {
@@ -195,45 +212,33 @@ struct XPButton : public ButtonBase {
     _image.adopt(_buffer);
   }
 
-  FOG_INLINE int calcState() const {
-    int state = 0;
-
-    if(isbutton) {
-      state = isMouseOver() ? PBS_HOT : (_default ? PBS_DEFAULTED : PBS_NORMAL);
-      state = isMouseDown() ? PBS_PRESSED : state;
-      state = !isEnabled() ? PBS_DISABLED : state;
-    } else {
-      state = isMouseOver() ? TIS_HOT : TIS_NORMAL;
-      state = isMouseDown() ? TIS_SELECTED : state;
-      state = !isEnabled() ? TIS_DISABLED : state;
-    }
-
-    return state;
-  }
-
-  virtual void onPaint(PaintEvent* e) {
+  virtual void onPaint(PaintEvent* e) {    
     IntRect r = getClientContentGeometry(); //for easy margin support
     RECT rect;
-    rect.left = 0;
-    rect.right = _clientGeometry.getWidth();
-    rect.top = 0;
-    rect.bottom = _clientGeometry.getHeight();
+    rect.left = r.x;
+    rect.right = r.getWidth();
+    rect.top = r.y;
+    rect.bottom = r.getHeight();
+
+    createBitmap(r.getWidth(), r.getHeight());
 
     int state = calcState();
 
     if(_theme.IsThemeBackgroundPartiallyTransparent(TYPE,state)) {
       //button
-      _image.clear(Argb(0x00000000));
+      //_image.clear(Argb(0x00000000));
+      //_theme.getThemeBackgroundRegion(_hdc,TYPE,state,&rect,&_rgn);
+      //SelectClipRgn(_hdc, _rgn);
     } else {
       //tab
-      _image.clear(Argb(0xFF000000));
-    }
+      _image.clear(Argb(0xFFFFFFFF));
+    }    
 
     //Clip on Region to support Transparency! ... needed?
 
     BOOL result = _theme.drawThemeBackground(_hdc, TYPE,	state, &rect, NULL);
 
-    //draws with a really ugly font... why?? (also if I set the button within window -> maybe because I open them with null hwnd)
+    //draws with a really ugly font... why?? (also if I set the font within window -> maybe because I open them with null hwnd)
     //BOOL ret = _theme.drawThemeText(_hdc,BP_PUSHBUTTON,state,(wchar_t*)_text.getData(),_text.getLength(),DT_CENTER|DT_VCENTER|DT_SINGLELINE,0,&rect);     
     e->getPainter()->blitImage(IntPoint(0,0),_image);
     e->getPainter()->drawText(r, _text, _font, TEXT_ALIGN_CENTER);
@@ -427,10 +432,6 @@ MyWindow::MyWindow(uint32_t createFlags) :
   //i[0].readFile(Ascii8("/my/upload/bmpsuite/icons_fullset.png"));
 
   //i[0] = i[0].scale(Size(32, 32), INTERPOLATION_SMOOTH);
-  GridLayout* flow = new GridLayout(this);
-  //HBoxLayout* flow = new HBoxLayout(this,0,0);
-  //flow->setDirection(RIGHTTOLEFT);
-  setLayout(flow);
 
   _subx = 0.0;
   _suby = 0.0;
@@ -440,7 +441,7 @@ MyWindow::MyWindow(uint32_t createFlags) :
   _scale = 1.0;
   _spread = SPREAD_REPEAT;
 
-  Button* button = new Button();
+  /*Button* button = new Button();
   add(button);
   //button->setGeometry(IntRect(40, 40, 100, 20));
   button->setText(Ascii8("Button"));
@@ -469,7 +470,7 @@ MyWindow::MyWindow(uint32_t createFlags) :
   //button4->setGeometry(IntRect(40, 160, 100, 20));
   button4->setText(Ascii8("Test FrameChange"));
   button4->show();  
-  button4->addListener(EVENT_CLICK, this, &MyWindow::onFrameTestClick);
+  button4->addListener(EVENT_CLICK, this, &MyWindow::onFrameTestClick);*/
 
   Button* button5 = new Button();
   add(button5);
@@ -513,10 +514,10 @@ MyWindow::MyWindow(uint32_t createFlags) :
   buttonx4->setEnabled(false);
 
 
-  button->setMinimumSize(IntSize(40,40));
+  /*button->setMinimumSize(IntSize(40,40));
   button2->setMinimumSize(IntSize(40,40));
   button3->setMinimumSize(IntSize(40,40));
-  button4->setMinimumSize(IntSize(40,40));
+  button4->setMinimumSize(IntSize(40,40));*/
   button5->setMinimumSize(IntSize(40,40));
   buttonx1->setMinimumSize(IntSize(40,40));
   buttonx2->setMinimumSize(IntSize(40,40));
@@ -524,6 +525,20 @@ MyWindow::MyWindow(uint32_t createFlags) :
   buttonx4->setMinimumSize(IntSize(40,40));
 
   buttonx2->setMaximumSize(IntSize(80,80));
+
+  BorderLayout* border = new BorderLayout(this);
+  setLayout(border);
+
+  border->addItem(buttonx1,BorderLayout::NORTH);
+  border->addItem(buttonx2,BorderLayout::CENTER);
+  border->addItem(buttonx3,BorderLayout::WEST);
+  border->addItem(buttonx4,BorderLayout::SOUTH);
+  border->addItem(button5,BorderLayout::EAST);
+
+/*  GridLayout* flow = new GridLayout(this);
+  //HBoxLayout* flow = new HBoxLayout(this,0,0);
+  //flow->setDirection(RIGHTTOLEFT);
+  setLayout(flow);
 
   flow->addItem(button,0,0);
   flow->addItem(button2,0,1);
@@ -554,7 +569,7 @@ MyWindow::MyWindow(uint32_t createFlags) :
 //   flow->addItem(button5);
 
   flow->setHorizontalSpacing(5);
-  flow->setVerticalSpacing(5);
+  flow->setVerticalSpacing(5);*/
 
   //_layout->activate();
 

@@ -39,7 +39,7 @@ Layout::Layout(Widget *parent, Layout* parentLayout) : _flexcount(0), _toplevel(
        parent->_withinLayout = this;
        _toplevel = 1;
 
-       invalidateLayout();
+       updateLayout();
      }
   } else {
     _parentItem = 0;
@@ -53,18 +53,23 @@ Layout::~Layout()
 
 void Layout::markAsDirty() {
   if(_toplevel == 1) {
-    Widget* w = getParentWidget();
-    if(w) {
-      GuiWindow * window = w->getClosestGuiWindow();
-      if(window) {
-        _activated = 0;
-        _invalidated = 0;
-        _nextactivate = window->_activatelist;
-        window->_activatelist = this;
+    if(_activated == 1) {
+      Widget* w = getParentWidget();
+      if(w) {
+        GuiWindow * window = w->getClosestGuiWindow();
+        if(window) {
+          _activated = 0;
+          _invalidated = 0;
+          FOG_ASSERT(window->_activatelist == 0);
+          _nextactivate = window->_activatelist;
+          window->_activatelist = this;
+        }
       }
     }
   } else {
-    _toplevel = _toplevel;
+    //FOG_ASSERT(_withinLayout);
+    if(_withinLayout)
+      return _withinLayout->markAsDirty();
   }
 }
 
@@ -166,6 +171,7 @@ void Layout::remove(LayoutItem* item) {
       item->removeLayoutStruct();
       takeAt(i);
       invalidateLayout();
+      updateLayout();
     }
   }
 }
@@ -191,7 +197,7 @@ bool Layout::removeAllWidgets(LayoutItem *layout, Widget *w)
     } else if (removeAllWidgets(iitem, w)) {
       return true;
     } 
-  }
+  }  
 
   return false;
 }
@@ -240,6 +246,8 @@ void Layout::addChild(LayoutItem* item)
 
   prepareItem(item, getLength());
   _children.append(item);
+
+  invalidateLayout();
 }
 
 void Layout::addChildLayout(Layout *l)
@@ -255,6 +263,7 @@ void Layout::addChildLayout(Layout *l)
 
   l->_parentItem = this;  
   l->_toplevel = 0;
+  l->_withinLayout = this;
 
   prepareItem(l, getLength());
   _children.append(l);
@@ -312,92 +321,44 @@ IntSize Layout::getTotalSizeHint() const
 
 void Layout::callSetGeometry(const IntSize& size) {
   if(size.isValid()) {
-    //support for parentWidget-Margin (so layouts do not need to do this within calculation)
     IntRect rect = getParentWidget()->getClientContentGeometry();
     //TODO: EntireRect
     setLayoutGeometry(rect);
   }
 }
 
-void Layout::update() {
-  Layout *layout = this;
-  while (layout && layout->_activated) {
-    layout->_activated = false;
-    if (layout->_toplevel) {
-      FOG_ASSERT(layout->_parentItem->isWidget());
-      layout->markAsDirty();
-      break;
-    }
-    FOG_ASSERT(!layout->_parentItem || (layout->_parentItem && layout->_parentItem->isLayout()));
-    layout = static_cast<Layout*>(layout->_parentItem);
-  }
-}
+//Only TopLevel-Layouts are being activated.
+//Child Layouts are handled like normal widgets.
+bool Layout::activate() {
+  //There is no need to check this in release...
+  FOG_ASSERT(_toplevel);
+  FOG_ASSERT(!_activated);
+  FOG_ASSERT(_parentItem && _parentItem->isWidget());
 
-//Method invalidates all children
-//Also it will mark all Layouts in the hierarchy to the value of activate
-void Layout::invalidActivateAll(bool activate)
-{
-//   item->invalidateLayout();
-//   if(item->isLayout()) {
-//     FOR_EACH(child, this)
-//     {
-//       invalidActivateAll(child, activate);
-//    }    
-// 
-//     ((Layout*)item)->_activated = activate;
-//   }
+  if (!isEnabled())
+    return false;
 
-  FOG_ASSERT(isLayout());
+  Widget *parentwidget = static_cast<Widget*>(_parentItem);
 
   invalidateLayout();
-
-  FOR_EACH(child, this)
-  {
+  FOR_EACH(child, this) {
     if(child->isLayout()) {
-      Layout* layout = (Layout*)child;
-      layout->invalidActivateAll(activate);
-    } else {
-      child->invalidateLayout();
+      ((Layout*)child)->invalidateLayout();      
     }
-  } 
-
-  _activated = activate;
-}
-
-bool Layout::activate() {
-  if (!isEnabled() || !_parentItem)
-    return false;  
-
-  if (!_toplevel) {
-    FOG_ASSERT(!_parentItem || (_parentItem && _parentItem->isLayout()));
-    return static_cast<Layout*>(_parentItem)->activate();
   }
-  if (_activated)
-    return false;
 
-  Widget *mw = static_cast<Widget*>(_parentItem);
-  if (mw == 0) {
-    return false;
-  }
-  FOG_ASSERT(!_parentItem || (_parentItem && _parentItem->isWidget()));
-
-  //invalid all childs and mark them directly as activated
-  //mark all childs as activated (recursive!)
-  invalidActivateAll(true);
-
-  Widget *md = mw;
-  bool hasH = md->hasMinimumHeight();
-  bool hasW = md->hasMinimumWidth();
+  bool hasH = parentwidget->hasMinimumHeight();
+  bool hasW = parentwidget->hasMinimumWidth();
   bool calc = (!hasH || !hasW);
   
-  if (mw->isGuiWindow()) {
+  if (parentwidget->isGuiWindow()) {
     IntSize ms = getTotalMinimumSize();
     if(calc) {
       if (hasW) {
-        ms.setWidth(mw->getMinimumSize().getWidth());      
+        ms.setWidth(parentwidget->getMinimumSize().getWidth());      
       }
       if (hasH) {
-        ms.setHeight(mw->getMinimumSize().getHeight());
+        ms.setHeight(parentwidget->getMinimumSize().getHeight());
       }
     }
 
@@ -410,20 +371,21 @@ bool Layout::activate() {
           ms.setWidth(0);
       }
     }
-    mw->setMinimumSize(ms);
+    parentwidget->setMinimumSize(ms);
   } else if (calc) {
-    IntSize ms = mw->getMinimumSize();
+    IntSize ms = parentwidget->getMinimumSize();
     if (!hasH) {
       ms.setHeight(0);
     }
     if (!hasW) {
       ms.setWidth(0);
     }
-    mw->setMinimumSize(ms);
+    parentwidget->setMinimumSize(ms);
   }
-
-  callSetGeometry(mw->getSize());
-  return false;
+  
+  callSetGeometry(parentwidget->getSize());
+  _activated = 1;
+  return true;
 }
 
 

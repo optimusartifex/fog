@@ -36,7 +36,11 @@ namespace Fog {
     virtual uint32_t getLayoutExpandingDirections() const;
 
     FOG_INLINE Direction getDirection() const { return static_cast<Direction>(_direction); }   
-    FOG_INLINE void setDirection(Direction d) { _direction = d; }    
+    FOG_INLINE void setDirection(Direction d) { _direction = d; } 
+
+    FOG_INLINE virtual void invalidateLayout() {
+      Layout::invalidateLayout();    
+    }
 
   protected:
     FOG_INLINE bool isForward() const { return _direction == 0; }

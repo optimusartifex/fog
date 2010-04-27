@@ -539,12 +539,9 @@ void BaseGuiEngine::dispatchConfigure(Widget* w, const IntRect& rect, bool chang
   Layout* layout = w->getLayout();
 
   //TODO: intelligent enum order so we can omit one check here!
-  if(layout && layout->_activated &&  changed & ConfigureEvent::CHANGED_SIZE || changed & ConfigureEvent::CHANGED_ORIENTATION) {    
-    GuiWindow* window = w->getClosestGuiWindow();
-    FOG_ASSERT(window);
-    layout->_activated = 0;
-    layout->_nextactivate = window->_activatelist;
-    window->_activatelist = layout;
+  if(layout && layout->_activated &&  changed & ConfigureEvent::CHANGED_SIZE || changed & ConfigureEvent::CHANGED_ORIENTATION) {
+    FOG_ASSERT(layout->_toplevel);
+    layout->markAsDirty();
   }
 
   Widget* p = w->getParent();
@@ -665,7 +662,7 @@ void BaseGuiEngine::doUpdateWindow(GuiWindow* window)
     FOG_ASSERT(window->_activatelist->_activated == 0);
     window->_activatelist->activate();
     FOG_ASSERT(window->_activatelist->_activated == 1);
-    window->_activatelist = window->_activatelist->_nextactivate;
+    window->_activatelist = window->_activatelist->_nextactivate;    
   }
 
   // =======================================================

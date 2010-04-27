@@ -758,7 +758,7 @@ FOG_GUI_MAIN()
 {
   Application app(Ascii8("Gui"));
 
-  //BOOL b = UxTheme::EnableTheming(TRUE);
+  BOOL b = UxTheme::EnableTheming(TRUE);
   BOOL ret = UxTheme::isAppThemed();
 
   MyWindow window(WINDOW_TYPE_DEFAULT);

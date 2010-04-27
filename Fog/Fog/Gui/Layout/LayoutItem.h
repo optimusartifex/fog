@@ -106,9 +106,9 @@ struct FOG_API LayoutItem : public Object
     return _cache;
   }
 
-  FOG_INLINE IntSize getLayoutSizeHint() const { return getLayoutHint()._sizeHint; }
-  FOG_INLINE IntSize getLayoutMinimumSize() const { return getLayoutHint()._minimumSize; }
-  FOG_INLINE IntSize getLayoutMaximumSize() const { return getLayoutHint()._maximumSize; }
+  FOG_INLINE const IntSize& getLayoutSizeHint() const { return getLayoutHint()._sizeHint; }
+  FOG_INLINE const IntSize& getLayoutMinimumSize() const { return getLayoutHint()._minimumSize; }
+  FOG_INLINE const IntSize& getLayoutMaximumSize() const { return getLayoutHint()._maximumSize; }
 
   // --------------------------------------------------------------------------
   // [Calculate SizeHint]

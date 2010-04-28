@@ -371,7 +371,8 @@ struct MyWindow : public Window
     layout->addItem(_buttons.at(6),3,2);
 
     layout->setRowFlex(2, 1);
-    layout->setColumnFlex(2, 1);
+    layout->setColumnFlex(1, 1);    
+    
   }
 
   void testVBoxLayout(Layout* parent = 0) {

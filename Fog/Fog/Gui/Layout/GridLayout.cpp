@@ -349,18 +349,19 @@ namespace Fog {
       Column* column = _cols.at(col);
       int curtop = top;
 
-      //int x = updateColumnFlexWidth(column);      
+      //int x = updateColumnFlexWidth(column); 
+      int width = updateColumnFlexWidth(column);
 
       for (int crow=0; crow<maxRowIndex; ++crow) {
         Row* row = _rows.at(crow);
         LayoutItem* item = getCellItem(crow,col);
 
         //int y = updateRowFlexHeight(row);
+        int height = updateRowFlexHeight(row);
         
         if (!item)
         {
-          // ignore empty cells
-          int height = updateRowFlexHeight(row);
+          // ignore empty cells          
           curtop += height + _vspacing;
           continue;
         }
@@ -369,7 +370,6 @@ namespace Fog {
         if(!isItemOrigin(item, row, column))
         {
           // ignore cells, which have cell spanning but are not the origin of the item
-          int height = updateRowFlexHeight(row);
           curtop += height + _vspacing;
           continue;
         }
@@ -391,10 +391,10 @@ namespace Fog {
 
         item->setLayoutGeometry(IntRect(cellLeft,cellTop,cellWidth,cellHeight));
 
-        curtop += row->_hintHeight + _vspacing;
+        curtop += height + _vspacing;
       }
 
-      curleft += column->_hintWidth + _hspacing;
+      curleft += width + _hspacing;
     }
   }
 

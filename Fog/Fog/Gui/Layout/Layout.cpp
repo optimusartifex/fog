@@ -137,6 +137,9 @@ int i=0;\
 while ((ITEM = CONTAINER->getAt(i++)))
 
 bool Layout::isEmpty() const {
+  if(_children.getLength() == 0)
+    return true;
+
   FOR_EACH(iitem, this) {
     if (!iitem->isEmpty())
       return false;
@@ -216,7 +219,7 @@ void Layout::reparentChildWidgets(Widget* widget)
   }
 }
 
-void Layout::addChild(LayoutItem* item) 
+int Layout::addChild(LayoutItem* item) 
 {  
   if(item->isWidget()) {
     Widget* w = static_cast<Widget*>(item);
@@ -244,17 +247,17 @@ void Layout::addChild(LayoutItem* item)
     addFlexItem();
   }
 
-  prepareItem(item, getLength());
   _children.append(item);
-
   invalidateLayout();
+
+  return getLength() -1;
 }
 
-void Layout::addChildLayout(Layout *l)
+int Layout::addChildLayout(Layout *l)
 {
   if (l->_parentItem) {
     //WARNING already has a parent!
-    return;
+    return -1;
   }
 
   if (Widget *mw = getParentWidget()) {
@@ -265,8 +268,8 @@ void Layout::addChildLayout(Layout *l)
   l->_toplevel = 0;
   l->_withinLayout = this;
 
-  prepareItem(l, getLength());
   _children.append(l);
+  return getLength() -1;
 }
 
 IntSize Layout::getTotalMinimumSize() const
@@ -335,17 +338,10 @@ bool Layout::activate() {
   FOG_ASSERT(!_activated);
   FOG_ASSERT(_parentItem && _parentItem->isWidget());
 
-  if (!isEnabled())
+  if (!isEnabled() || isEmpty())
     return false;
 
   Widget *parentwidget = static_cast<Widget*>(_parentItem);
-
-  invalidateLayout();
-  FOR_EACH(child, this) {
-    if(child->isLayout()) {
-      ((Layout*)child)->invalidateLayout();      
-    }
-  }
 
   bool hasH = parentwidget->hasMinimumHeight();
   bool hasW = parentwidget->hasMinimumWidth();

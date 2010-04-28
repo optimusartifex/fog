@@ -29,6 +29,9 @@ namespace Fog {
 
     _allocatedHeight = _allocatedWidth = 0;
 
+    _horizontalflex = 0;
+    _verticalflex = 0;
+
     for(int i=0;i<list.getLength();++i) {
       LayoutItem* item = list.at(i);
       const LayoutHint& hint = item->getLayoutHint();
@@ -50,6 +53,17 @@ namespace Fog {
 
         //Allocated height
         _allocatedHeight += hint.getSizeHint().getHeight() + marginY + spacingY;
+
+        if(item->hasFlex()) {
+          FlexLayoutProperties* prop = static_cast<FlexLayoutProperties*>(item->_layoutdata);
+          prop->_flex = item->_flex;
+          prop->_hint = hint.getSizeHint().getWidth();
+          prop->_min = hint.getMinimumSize().getWidth();
+          prop->_max = hint.getMaximumSize().getWidth();
+
+          prop->_next = _horizontalflex;
+          _horizontalflex = item;
+        }
       } else if(prop->_edge & Y_MASK) {
         heightX = Math::max(heightX, hint.getSizeHint().getHeight() + heightY + marginY);
         minHeightX = Math::max(minHeightX, hint.getMinimumSize().getHeight() + minHeightY + marginY);
@@ -63,6 +77,17 @@ namespace Fog {
 
         //Allocated width
         _allocatedWidth += hint.getSizeHint().getWidth() + marginX + spacingX;
+
+        if(item->hasFlex()) {
+          FlexLayoutProperties* prop = static_cast<FlexLayoutProperties*>(item->_layoutdata);
+          prop->_flex = item->_flex;
+          prop->_hint = hint.getSizeHint().getHeight();
+          prop->_min = hint.getMinimumSize().getHeight();
+          prop->_max = hint.getMaximumSize().getHeight();          
+
+          prop->_next = _verticalflex;
+          _verticalflex = item;
+        }
       } else {
         FOG_ASSERT(item == _center);
         // A centered widget must be added to both sums as
@@ -77,129 +102,173 @@ namespace Fog {
         spacingSumX += spacingX;
         spacingSumY += spacingY;
 
-        //Allocated height /Allocated width
+        //Allocated height / Allocated width
         _allocatedHeight += hint.getSizeHint().getHeight() + marginY + spacingY;
         _allocatedWidth += hint.getSizeHint().getWidth() + marginX + spacingX;
+
+        FlexLayoutProperties* prop = static_cast<FlexLayoutProperties*>(item->_layoutdata);
+        prop->_flex = item->_flex < 1 ? 1:item->_flex; //center has min flex value of 1!
       }
     }
 
-    int minWidth = Math::max(minWidthX, minWidthY) + spacingSumX;
-    int width = Math::max(widthX, widthY) + spacingSumX;
-    int minHeight = Math::max(minHeightX, minHeightY) + spacingSumY;
-    int height = Math::max(heightX, heightY) + spacingSumY;
+    //set margins to LayoutMargins
+    int marginX = getContentLeftMargin() + getContentRightMargin();
+    int marginY = getContentTopMargin() + getContentBottomMargin();
+
+    int minWidth = Math::max(minWidthX, minWidthY) + spacingSumX + marginX;
+    int width = Math::max(widthX, widthY) + spacingSumX + marginX;
+    int minHeight = Math::max(minHeightX, minHeightY) + spacingSumY + marginY;
+    int height = Math::max(heightX, heightY) + spacingSumY + marginY;
 
     hint._minimumSize.set(minWidth, minHeight);
     hint._sizeHint.set(width, height);
   }
 
+  void BorderLayout::calculateVerticalFlexOffsets(int availHeight, int& allocatedHeight) {
+    if (_verticalflex && allocatedHeight != availHeight) {
+      if(_center) {
+        FlexLayoutProperties* prop = static_cast<FlexLayoutProperties*>(_center->_layoutdata);
+        prop->_next = _verticalflex;
+        _verticalflex = _center;
+
+        prop->_hint = _center->getLayoutSizeHint().getHeight();
+        prop->_min = _center->getLayoutMinimumSize().getHeight();
+        prop->_max = _center->getLayoutMaximumSize().getHeight();
+      }
+
+      calculateFlexOffsets(_verticalflex, availHeight, allocatedHeight);
+
+      //clean it for next run!
+      if(_center) {
+        FlexLayoutProperties* prop = static_cast<FlexLayoutProperties*>(_center->_layoutdata);
+        _verticalflex = (LayoutItem*)prop->_next;
+      }
+    }
+  }
+
+  void BorderLayout::calculateHorizonzalFlexOffsets(int availWidth, int& allocatedWidth) {
+    if(_horizontalflex && allocatedWidth != availWidth) {
+      if(_center) {
+        FlexLayoutProperties* prop = static_cast<FlexLayoutProperties*>(_center->_layoutdata);
+        prop->_next = _horizontalflex;
+        _horizontalflex = _center;
+
+        prop->_hint = _center->getLayoutSizeHint().getWidth();
+        prop->_min = _center->getLayoutMinimumSize().getWidth();
+        prop->_max = _center->getLayoutMaximumSize().getWidth();
+      }
+
+      calculateFlexOffsets(_horizontalflex, availWidth, allocatedWidth);
+
+      //clean it for next run!
+      if(_center) {
+        FlexLayoutProperties* prop = static_cast<FlexLayoutProperties*>(_center->_layoutdata);
+        _horizontalflex = (LayoutItem*)prop->_next;
+      }
+    }
+  }
+
+#define CLEAN(VAR, MIN, MAX) VAR = VAR < MIN ? MIN : ( VAR > MAX ? MAX : VAR)
+
   void BorderLayout::setLayoutGeometry(const IntRect& rect) {
     int availWidth = rect.getWidth();
     int availHeight = rect.getHeight();
+    
+    //Do not allow to overlap 
+    if(availHeight < getLayoutSizeHint().getHeight()) {
+      availHeight = getLayoutSizeHint().getHeight();
+    }
+    //Do not allow to overlap 
+    if(availWidth < getLayoutSizeHint().getWidth()) {
+      availWidth = getLayoutSizeHint().getWidth();
+    }
+
+    int allocatedHeight = _allocatedHeight;
+    int allocatedWidth = _allocatedWidth;
 
     const List<LayoutItem*>& list = getList();
 
-    int centerheightoffset = 0;
-    int centerwidthoffset = 0;
+    calculateHorizonzalFlexOffsets(availWidth, allocatedWidth);
+    calculateVerticalFlexOffsets(availHeight, allocatedHeight);
 
-    //calculate horizontal flex
-    if (hasFlex()) {
-      if(_allocatedWidth != availWidth) {
-        
-      }
+    int curTop=rect.y + getContentTopMargin();
+    int curLeft=rect.x + getContentLeftMargin();
 
-      if (_allocatedHeight != availHeight) {
+    //TODO: add Support XY-Spacings!
+    int spacingX= getSpacing();
+    int spacingY= getSpacing();
 
-      }
-    } else {
-      //all flex come to center!
-      centerheightoffset = availHeight - _allocatedHeight;
-      centerwidthoffset = availWidth - _allocatedWidth;
-    }
-
-    int used;
-    int nextTop=0, nextLeft=0;
-    int spacingX= getSpacing(), spacingY=getSpacing();
-
-    int len = list.getLength();
-    len += (_center != 0) ? 1 : 0;
-
-    for(int i=0;i<len;++i) {
-      LayoutItem* item = _center;
-      if(i < list.getLength()) {
-        item = list.at(i);
-        if(item == _center) {
-          continue;
-        }
+    for(int i=0;i<list.getLength();++i) {
+      LayoutItem* item = list.at(i);
+      if(item == _center) {
+        //Center is also within _children of Layout, but we handle
+        //it differently
+        continue;
       }
       
       const LayoutHint& hint = item->getLayoutHint();
       LayoutProperty* prop = static_cast<LayoutProperty*>(item->_layoutdata);
 
-      int height = hint.getSizeHint().getHeight();
-      int width = hint.getSizeHint().getWidth();
+      int height = item->getLayoutSizeHint().getHeight();
+      int width = item->getLayoutSizeHint().getWidth();
+      int left = curLeft + item->getContentLeftMargin();
+      int top = curTop + item->getContentTopMargin();
 
-      int minwidth = hint.getMinimumSize().getWidth();
-      int maxwidth = hint.getMaximumSize().getWidth();
-      int minheight = hint.getMinimumSize().getHeight();
-      int maxheight = hint.getMaximumSize().getHeight();
-      int marginX = item->getContentLeftMargin() + item->getContentRightMargin();
-      int marginY = item->getContentTopMargin() + item->getContentBottomMargin();
-
-      int zheight = availHeight - marginY;
-      int zwidth = availWidth - marginX;
-
-      int left = nextLeft + item->getContentLeftMargin();
-      int top = nextTop + item->getContentTopMargin();
-
-      // Limit width to min/max
-      if (zwidth < minwidth) {
-        zwidth = minwidth;
-      } else if (zwidth > maxwidth) {
-        zwidth = maxwidth;
-      }
-
-      // Limit height to min/max
-      if (zheight < minheight) {
-        zheight = minheight;
-      } else if (zheight > maxheight) {
-        zheight = maxheight;
-      }
+      int marginY = item->getContentYMargins();
+      int marginX = item->getContentXMargins();
 
       if(prop->_edge & Y_MASK) {
-        width = zwidth;
+        //NORTH or SOUTH
+        width = availWidth - marginX;
+        CLEAN(width, hint.getMinimumSize().getWidth(), hint.getMaximumSize().getWidth());        
+
+        if(prop->_offset != 0) {
+          height += prop->_offset;
+          prop->_offset = 0;
+        }
 
         // Update available height
-        used = height + marginY + spacingY;
+        int used = height + marginY + spacingY;
 
         // Update coordinates, for next child
         if (prop->_edge == NORTH) {
-          nextTop += used;
+          curTop += used;
         } else {
-          top = nextTop + (availHeight - height - item->getContentBottomMargin());
+          top = curTop + (availHeight - height - item->getContentBottomMargin());
         }
 
         availHeight -= used;
       } else if(prop->_edge & X_MASK) {
-        height = zheight;
+        height = availHeight - marginY;
+        CLEAN(height, hint.getMinimumSize().getHeight(), hint.getMaximumSize().getHeight()); 
 
-        // Update available height
-        used = width + marginX + spacingX;        
+        if(prop->_offset != 0) {
+          width += prop->_offset;
+          prop->_offset = 0;
+        }
+
+        // Update available width
+        int used = width + marginX + spacingX;        
 
         // Update coordinates, for next child
         if (prop->_edge == WEST) {
-          nextLeft += used;
+          curLeft += used;
         } else {
-          left = nextLeft + (availWidth - width - item->getContentRightMargin());
+          left = curLeft + (availWidth - width - item->getContentRightMargin());
         }
         availWidth -= used;
-      } else {
-        // Calculated width/height
-        FOG_ASSERT(item == _center);
-        width += centerwidthoffset;
-        height += centerheightoffset;
       }
 
       item->setLayoutGeometry(IntRect(left,top,width,height));
+    }
+
+    if(_center) {
+      int width = availWidth - _center->getContentXMargins();
+      int height = availHeight - _center->getContentYMargins();
+      CLEAN(width, _center->getLayoutMinimumSize().getWidth(), _center->getLayoutMaximumSize().getWidth());
+      CLEAN(height, _center->getLayoutMinimumSize().getHeight(), _center->getLayoutMaximumSize().getHeight());
+
+      _center->setLayoutGeometry(IntRect(curLeft + _center->getContentLeftMargin(),curTop + _center->getContentTopMargin(),width,height));
     }
   }
 }

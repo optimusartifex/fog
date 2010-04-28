@@ -24,9 +24,7 @@ namespace Fog {
   struct FOG_API GridLayout : public Layout
   {
     FOG_DECLARE_OBJECT(GridLayout, Layout)
-    GridLayout(Widget* parent=0, int row=-1, int colums=-1);
-
-    FOG_INLINE virtual void prepareItem(LayoutItem* item, sysuint_t index) { item->_layoutdata = new(std::nothrow) LayoutProperties(); }
+    GridLayout(Widget* parent=0, int row=-1, int colums=-1);    
 
     void addItem(LayoutItem* item, int row, int column, int rowSpan=1, int columnSpan = 1, uint32_t alignment = 0);
     LayoutItem* getCellItem(int row, int column) const;
@@ -77,6 +75,7 @@ namespace Fog {
       int _minWidth;
       int _maxWidth;
       int _hintWidth;
+      int _offset;
 
       int _colid;
 
@@ -84,8 +83,8 @@ namespace Fog {
       GridLayout* _layout;
 
       //to be able to us Column directly within FlexEngine
-      LayoutItem::LayoutStruct* _layoutdata;
-      LayoutItem::LayoutStruct _static;
+      LayoutItem::FlexLayoutProperties* _layoutdata;
+      LayoutItem::FlexLayoutProperties _static;
 
       void calculateWidth();
       void initFlex(Column* flexibles) {
@@ -110,6 +109,7 @@ namespace Fog {
       int _minHeight;
       int _maxHeight;
       int _hintHeight;
+      int _offset;
 
       int _rowid;
 
@@ -117,8 +117,8 @@ namespace Fog {
       List<LayoutItem*> _cols;
 
       //to be able to us Row directly within FlexEngine
-      LayoutItem::LayoutStruct* _layoutdata;
-      LayoutItem::LayoutStruct _static;
+      LayoutItem::FlexLayoutProperties* _layoutdata;
+      LayoutItem::FlexLayoutProperties _static;
 
       void initFlex(Row* flexibles) {
         LayoutProperties* widgetProps = static_cast<LayoutProperties*>(_layoutdata);
@@ -146,18 +146,24 @@ namespace Fog {
     int calculateSpanWidth(int col, LayoutItem*) const;
     int calculateSpanHeight(int row, LayoutItem*) const;
 
-    FOG_INLINE void updateColumnFlexWidth(Column* column) const {    
+    FOG_INLINE int updateColumnFlexWidth(Column* column) const { 
+      int ret = column->_hintWidth;
       if(column->_static._offset != 0) {
-        column->_hintWidth += column->_static._offset;
-        column->_static._offset = 0;
+        ret += column->_static._offset;
+        //column->_static._offset = 0;
       }
+
+      return ret;
     }
 
-    FOG_INLINE void updateRowFlexHeight(Row* row) const {
+    FOG_INLINE int updateRowFlexHeight(Row* row) const {
+      int ret = row->_hintHeight;
       if(row->_static._offset != 0) {
-        row->_hintHeight += row->_static._offset;
-        row->_static._offset = 0;
+        ret += row->_static._offset;
+        //row->_static._offset = 0;
       }
+
+      return ret;
     }
 
     FOG_INLINE bool isItemOrigin(LayoutItem* item, Row* row, Column* column) const {
@@ -165,7 +171,7 @@ namespace Fog {
       return widgetProps->_column == column && widgetProps->_row == row;
     }
 
-    struct LayoutProperties : public LayoutItem::LayoutStruct {
+    struct LayoutProperties : public LayoutItem::FlexLayoutProperties {
       LayoutProperties() : _colspannext(0), _rowspannext(0), _colspan(-1), _rowspan(-1) {
 
       }
@@ -186,8 +192,12 @@ namespace Fog {
     //per Row a Description and the List of LayoutItems
     List<Row*> _rows;
 
+    Row* _rowflexibles;
+
     //with description of Columns
     List<Column*> _cols;
+
+    Column* _colflexibles;
 
     LayoutItem* _colspan;
     LayoutItem* _rowspan;

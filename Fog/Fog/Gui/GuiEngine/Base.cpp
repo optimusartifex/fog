@@ -662,7 +662,7 @@ void BaseGuiEngine::doUpdateWindow(GuiWindow* window)
     FOG_ASSERT(window->_activatelist->_activated == 0);
     window->_activatelist->activate();
     FOG_ASSERT(window->_activatelist->_activated == 1);
-    window->_activatelist = window->_activatelist->_nextactivate;    
+    window->_activatelist = window->_activatelist->_nextactivate;
   }
 
   // =======================================================

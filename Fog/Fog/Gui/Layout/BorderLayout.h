@@ -27,31 +27,30 @@ namespace Fog {
 
     enum Edge {
       X_MASK = 1,
-      Y_MASK = 2,
-      X_FLEX = 4,
-      Y_FLEX = 8,      
+      Y_MASK = 2,     
       
-      NORTH = 128|Y_MASK|Y_FLEX,
-      SOUTH = 256|Y_MASK|Y_FLEX,
-      WEST = 512|X_MASK|X_FLEX,
-      EAST = 1024|X_MASK|X_FLEX,
-      CENTER = 2048|X_FLEX|Y_FLEX
+      NORTH = 128|Y_MASK,
+      SOUTH = 256|Y_MASK,
+      WEST = 512|X_MASK,
+      EAST = 1024|X_MASK,
+      CENTER = 2048
     };
 
-    BorderLayout(Widget* parent=0) : _center(0), Layout(parent), _sort(0) {
+    BorderLayout(Widget* parent=0) : _center(0), Layout(parent), _sort(0), _horizontalflex(0), _verticalflex(0), _sortdirty(0) {
     
     }
 
-    struct LayoutProperty : public Layout::LayoutStruct {
+    struct LayoutProperty : public LayoutItem::FlexLayoutProperties {
       uint32_t _edge;
     };
 
-    FOG_INLINE virtual void prepareItem(LayoutItem* item, sysuint_t index) {
-      item->_layoutdata = new(std::nothrow) LayoutProperty();
-    }
-
     FOG_INLINE void addItem(LayoutItem *item, Edge type) {
-      Layout::addChild(item);      
+      if(Layout::addChild(item) == -1) {
+        return;
+      }
+
+      item->_layoutdata = new(std::nothrow) LayoutProperty();
+
       if(type == NORTH || type == SOUTH) {
         _y.append(item);
       } else if(type == EAST || type == WEST) {
@@ -104,10 +103,17 @@ namespace Fog {
 
     FOG_INLINE bool isDirty() { return _dirty || _sortdirty; }
 
+
+    void calculateVerticalFlexOffsets(int availHeight, int& allocatedHeight);
+    void calculateHorizonzalFlexOffsets(int availWidth, int& allocatedWidth);
+
     List<LayoutItem*> _x;
     List<LayoutItem*> _y;
     List<LayoutItem*> _sorted;
     LayoutItem* _center;
+
+    LayoutItem* _horizontalflex;
+    LayoutItem* _verticalflex;
 
     int _sortdirty: 1;
     int _sort:2;    

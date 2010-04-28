@@ -30,18 +30,18 @@ namespace Fog {
     // Continue as long as we need to do anything
     while (remaining != 0)
     {
+      bool breakfrom = true;
       // Find minimum potential for next correction
       float flexStep = FLOAT_MAX;
-      T* item = head;
-
-      bool breakfrom = true;
+      T* item = head;      
 
       //calculate sum of all flexes and initialize variables!
       //TODO: can be done on setter so we can save this loop!
       while(item) {
-        LayoutItem::LayoutStruct* child = item->_layoutdata;
+        LayoutItem::FlexLayoutProperties* child = static_cast<LayoutItem::FlexLayoutProperties*>(item->_layoutdata);
 
         if(!set) {
+          child->_offset = 0;
           child->_potential = grow ? child->_max - child->_hint : child->_hint - child->_min;
           child->_flex = grow ? child->_flex : (1 / child->_flex);
           flexSum += child->_flex;
@@ -67,7 +67,7 @@ namespace Fog {
       int roundingOffset = 0;      
 
       while(item) {
-        LayoutItem::LayoutStruct* child = item->_layoutdata;
+        LayoutItem::FlexLayoutProperties* child = static_cast<LayoutItem::FlexLayoutProperties*>(item->_layoutdata);
 
         if (child->_potential > 0)
         {
@@ -87,9 +87,8 @@ namespace Fog {
         item = (T*)child->_next;
       }
 
-      if(breakfrom) {
+      if(breakfrom)
         break;
-      }
     }
   }
 

@@ -16,15 +16,20 @@
 FOG_IMPLEMENT_OBJECT(Fog::GridLayout)
 
 namespace Fog {
-  GridLayout::GridLayout(Widget* parent, int rows, int colums) : Layout(parent), _colwidth(0), _rowheight(0), _vspacing(0), _hspacing(0), _colspan(0), _rowspan(0) {
+  GridLayout::GridLayout(Widget* parent, int rows, int colums) : Layout(parent), _colwidth(0), _rowheight(0), _vspacing(0), _hspacing(0), _colspan(0), _rowspan(0), _rowflexibles(0), _colflexibles(0) {
     if(rows >= 0 && colums >=0) {
       addItem(0,0,0,rows,colums);
     }
   }
 
   void GridLayout::addItem(LayoutItem* item, int row, int column, int rowSpan, int columnSpan, uint32_t alignment) {
-    if(item)
-      Layout::addChild(item);
+    if(item) {
+      if(Layout::addChild(item) == -1) {
+        return;
+      }
+
+      item->_layoutdata = new(std::nothrow) LayoutProperties();
+    }
 
     if(row == -1)
       row = _rows.getLength();
@@ -202,6 +207,8 @@ namespace Fog {
     _cacheMinWidth = 0;
     _cacheHintWidth = 0;
 
+    _colflexibles = 0;
+
     for (int col=0; col<_cols.getLength(); col++)
     {
       Column* column = _cols.at(col);
@@ -209,6 +216,11 @@ namespace Fog {
 
       _cacheMinWidth += column->_flex > 0 ? column->_minWidth : column->_hintWidth;
       _cacheHintWidth += column->_hintWidth;
+
+      if ((column->_flex > 0)) {
+        column->initFlex(_colflexibles);
+        _colflexibles = column;
+      }
     }
 
     minWidth = _cacheMinWidth;
@@ -225,6 +237,8 @@ namespace Fog {
 
     _cacheMinHeight = 0;
     _cacheHintHeight = 0;
+
+    _rowflexibles = 0;
     
     for (int crow=0; crow<_rows.getLength(); ++crow) {
        Row* row = _rows.at(crow);
@@ -232,6 +246,11 @@ namespace Fog {
 
        _cacheMinHeight += row->_flex > 0 ? row->_minHeight : row->_hintHeight;
        _cacheHintHeight += row->_hintHeight;
+
+       if ((row->_flex > 0)) {
+         row->initFlex(_rowflexibles);
+         _rowflexibles = row;
+       }
     }
 
     minHeight = _cacheMinHeight;
@@ -245,24 +264,9 @@ namespace Fog {
 
     if (diff == 0)
       return;
-
-    // collect all flexible children
-    Column* flexibles = 0;
-    for (int i=0; i<_cols.getLength(); ++i)
-    {
-      Column* col = _cols.at(i);      
-
-      //optimize usage of flex
-      if ((col->_flex <= 0) || (col->_hintWidth == col->_maxWidth && diff > 0) || (col->_hintWidth == col->_minWidth && diff < 0)) {
-        continue;
-      }
-
-      col->initFlex(flexibles);
-      flexibles = col;
-    }
     
-    if(flexibles)
-      calculateFlexOffsets(flexibles, availWidth, hintwidth);
+    if(_colflexibles)
+      calculateFlexOffsets(_colflexibles, availWidth, hintwidth);
   }
 
   void GridLayout::calculateRowFlexOffsets(int availHeight) {
@@ -272,22 +276,8 @@ namespace Fog {
     if (diff == 0)
       return;
 
-    // collect all flexible children
-    Row* flexibles = 0;
-    for (int i=0; i<_rows.getLength(); ++i)
-    {
-      Row* row = _rows.at(i);    
-
-      //optimize usage of flex
-      if ((row->_flex <= 0) || (row->_hintHeight == row->_maxHeight && diff > 0) || (row->_hintHeight == row->_minHeight && diff < 0))
-        continue;
-
-      row->initFlex(flexibles);      
-      flexibles = row;
-    }
-
-    if(flexibles)
-      calculateFlexOffsets(flexibles, availHeight, hintHeight);
+    if(_rowflexibles)
+      calculateFlexOffsets(_rowflexibles, availHeight, hintHeight);
   }
 
 
@@ -320,8 +310,7 @@ namespace Fog {
     for (int i=0; i<widgetProps->_colspan; ++i) {
       Column* column = _cols.at(col+i);
       //update if flex was calculated for this column
-      updateColumnFlexWidth(column);
-      width += column->_hintWidth;
+      width += updateColumnFlexWidth(column);
     }
 
     return width;
@@ -334,8 +323,7 @@ namespace Fog {
     for (int i=0; i<widgetProps->_rowspan; i++) {
       Row* row = _rows.at(crow+i);
       //update if flex was calculated for this row
-      updateRowFlexHeight(row);
-      height += row->_hintHeight;
+      height += updateRowFlexHeight(row);      
     }
 
     return height;
@@ -361,16 +349,19 @@ namespace Fog {
       Column* column = _cols.at(col);
       int curtop = top;
 
+      //int x = updateColumnFlexWidth(column);      
+
       for (int crow=0; crow<maxRowIndex; ++crow) {
         Row* row = _rows.at(crow);
-        LayoutItem* item = getCellItem(crow,col);        
+        LayoutItem* item = getCellItem(crow,col);
+
+        //int y = updateRowFlexHeight(row);
         
         if (!item)
         {
           // ignore empty cells
-          updateColumnFlexWidth(column);
-          updateRowFlexHeight(row);
-          curtop += row->_hintHeight + _vspacing;
+          int height = updateRowFlexHeight(row);
+          curtop += height + _vspacing;
           continue;
         }
 
@@ -378,7 +369,8 @@ namespace Fog {
         if(!isItemOrigin(item, row, column))
         {
           // ignore cells, which have cell spanning but are not the origin of the item
-          curtop += row->_hintHeight + _vspacing;
+          int height = updateRowFlexHeight(row);
+          curtop += height + _vspacing;
           continue;
         }
 

@@ -313,22 +313,106 @@ struct MyWindow : public Window
   virtual ~MyWindow();
 
   // [Event Handlers]
-  virtual void onKeyPress(KeyEvent* e);
   virtual void onPaint(PaintEvent* e);
-  virtual void onConfigure(ConfigureEvent* e) {
-    uint32_t vis = getVisibility();
 
-    if(vis == WIDGET_VISIBLE) {
-      setWindowTitle(Ascii8("STATE: VISIBLE"));
-    } else if(vis == WIDGET_VISIBLE_MAXIMIZED){
-      setWindowTitle(Ascii8("STATE: MAXIMIZED"));
-    } else if(vis == WIDGET_VISIBLE_MINIMIZED){
-      setWindowTitle(Ascii8("STATE: MINIMIZED"));
-    } else if(vis == WIDGET_HIDDEN){
-      setWindowTitle(Ascii8("STATE: HIDDEN"));
-    } else if(vis == WIDGET_VISIBLE_RESTORE){
-      setWindowTitle(Ascii8("STATE: RESTORED"));
+  void createButtons(int count) {
+    _buttons.clear();
+    _buttons.reserve(count);
+
+    for(int i=0;i<count;++i) {
+      XPButton* buttonx1 = new XPButton();
+      add(buttonx1);
+      //button4->setGeometry(IntRect(40, 160, 100, 20));
+      String str;
+      str.format("XButton%i", i);
+      buttonx1->setText(str);
+      buttonx1->show(); 
+
+      buttonx1->setMinimumSize(IntSize(40,40));
+      _buttons.append(buttonx1);
     }
+
+  }
+
+  void testBorderLayout(Layout* parent=0) {
+    createButtons(6);
+    BorderLayout* layout;
+    if(parent) {
+      layout = new BorderLayout();      
+    } else {
+      layout = new BorderLayout(this);
+    }
+    
+    layout->addItem(_buttons.at(0), BorderLayout::SOUTH);
+    layout->addItem(_buttons.at(1), BorderLayout::WEST);
+    layout->addItem(_buttons.at(2), BorderLayout::CENTER);
+    layout->addItem(_buttons.at(3), BorderLayout::EAST);
+    layout->addItem(_buttons.at(4), BorderLayout::NORTH);
+    layout->addItem(_buttons.at(5), BorderLayout::NORTH);
+  }
+
+  void testGridLayout(Layout* parent=0) {
+    createButtons(8);
+
+    GridLayout* layout;
+    if(parent) {
+      layout = new GridLayout();      
+    } else {
+      layout = new GridLayout(this);
+    }
+
+    layout->addItem(_buttons.at(0),0,0);
+    layout->addItem(_buttons.at(1),0,1);
+    layout->addItem(_buttons.at(2),0,2);
+    layout->addItem(_buttons.at(3),1,0,1,3);
+    layout->addItem(_buttons.at(4),2,0,2);
+    layout->addItem(_buttons.at(5),2,1);
+    layout->addItem(_buttons.at(6),3,1);
+    layout->addItem(_buttons.at(6),3,2);
+
+    layout->setRowFlex(2, 1);
+    layout->setColumnFlex(2, 1);
+  }
+
+  void testVBoxLayout(Layout* parent = 0) {
+    const int COUNT = 8;
+    createButtons(COUNT);
+
+    VBoxLayout* layout;
+    if(parent) {
+      layout = new VBoxLayout(0,0);      
+    } else {
+      layout = new VBoxLayout(this,0,0);
+    }
+
+    for(int i=0;i<COUNT;++i) {
+      layout->addItem(_buttons.at(i));
+    }
+
+    _buttons.at(3)->setFlex(1);
+    _buttons.at(2)->setFlex(2);
+  }
+
+  void testHBoxLayout(Layout* parent = 0) {
+    const int COUNT = 8;
+    createButtons(COUNT);
+    HBoxLayout* layout;
+    if(parent) {
+      layout = new HBoxLayout(0,0);      
+    } else {
+      layout = new HBoxLayout(this,0,0);
+    }
+
+    for(int i=0;i<COUNT;++i) {
+      layout->addItem(_buttons.at(i));
+    }
+
+    _buttons.at(3)->setFlex(1);
+    _buttons.at(2)->setFlex(2);
+  }
+
+  void testNestedLayout() {
+
   }
 
   void onModalClose() {
@@ -400,6 +484,9 @@ struct MyWindow : public Window
   int _mcount;
   MyModalWindow* _modalwindow;
 
+
+  List<Widget*> _buttons;
+
   //FlowLayout* _layout;
 };
 
@@ -418,21 +505,6 @@ MyWindow::MyWindow(uint32_t createFlags) :
 
   _mcount = 0;
 
-/*
-  {
-    Painter p(i[0]);
-
-    p.setSource(0xFFFFFFFF);
-    p.setOperator(OPERATOR_DST_OVER);
-    p.clear();
-  }
-*/
-  // i[0].readFile(Ascii8("texture0.bmp"));
-  //i[0].readFile(Ascii8("/my/upload/bmpsuite/g04.bmp"));
-  //i[0].readFile(Ascii8("/my/upload/bmpsuite/icons_fullset.png"));
-
-  //i[0] = i[0].scale(Size(32, 32), INTERPOLATION_SMOOTH);
-
   _subx = 0.0;
   _suby = 0.0;
   _rotate = 0.0;
@@ -441,135 +513,7 @@ MyWindow::MyWindow(uint32_t createFlags) :
   _scale = 1.0;
   _spread = SPREAD_REPEAT;
 
-  /*Button* button = new Button();
-  add(button);
-  //button->setGeometry(IntRect(40, 40, 100, 20));
-  button->setText(Ascii8("Button"));
-  button->show();  
-  button->addListener(EVENT_CLICK, this, &MyWindow::onTransparencyClick);
-
-  Button* button2 = new Button();
-  add(button2);
-  //button2->setGeometry(IntRect(40, 80, 100, 20));
-  button2->setText(Ascii8("Button2"));
-  button2->show();
-  button2->addListener(EVENT_CLICK, this, &MyWindow::onFullScreenClick);
-  //button2->setContentLeftMargin(-20);
-
-  Button* button3 = new Button();
-  add(button3);
-  //button3->setGeometry(IntRect(40, 120, 100, 20));
-  button3->setText(Ascii8("Button3"));
-  button3->show();  
-  button3->addListener(EVENT_CLICK, this, &MyWindow::onPopUpClick);
-  //button3->setContentLeftMargin(10);
-  //button3->setContentRightMargin(10);
-
-  Button* button4 = new Button();
-  add(button4);
-  //button4->setGeometry(IntRect(40, 160, 100, 20));
-  button4->setText(Ascii8("Test FrameChange"));
-  button4->show();  
-  button4->addListener(EVENT_CLICK, this, &MyWindow::onFrameTestClick);*/
-
-  Button* button5 = new Button();
-  add(button5);
-  //button5->setGeometry(IntRect(40, 200, 100, 20));
-  button5->setText(Ascii8("Test ModalWindow"));
-  button5->show();  
-  //button5->addListener(EVENT_CLICK, this, &MyWindow::onModalTestClick);  
-
-  _popup = new MyPopUp();
-  add(_popup);
-  _popup->setGeometry(IntRect(40, 120, 50, 20));
-  //should be automatically hidden because of lost of focus!
-  _popup->show();
-
-
-
-  XPButton* buttonx1 = new XPButton();
-  add(buttonx1);
-  //button4->setGeometry(IntRect(40, 160, 100, 20));
-  buttonx1->setText(Ascii8("ButtonX1"));
-  buttonx1->show(); 
-
-  XPButton* buttonx2 = new XPButton();
-  add(buttonx2);
-  //button4->setGeometry(IntRect(40, 160, 100, 20));
-  buttonx2->setText(Ascii8("ButtonX2"));
-  buttonx2->show(); 
-
-  XPButton* buttonx3 = new XPButton();
-  add(buttonx3);
-  buttonx3->setText(Ascii8("ButtonX3"));
-  buttonx3->show(); 
-  buttonx3->setDefault(true);
-
-  XPButton* buttonx4 = new XPButton();
-  add(buttonx4);
-  //button4->setGeometry(IntRect(40, 160, 100, 20));
-  buttonx4->setText(Ascii8("ButtonX4"));
-  buttonx4->show(); 
-
-
-  /*button->setMinimumSize(IntSize(40,40));
-  button2->setMinimumSize(IntSize(40,40));
-  button3->setMinimumSize(IntSize(40,40));
-  button4->setMinimumSize(IntSize(40,40));*/
-  button5->setMinimumSize(IntSize(40,40));
-  buttonx1->setMinimumSize(IntSize(40,40));
-  buttonx2->setMinimumSize(IntSize(40,40));
-  buttonx3->setMinimumSize(IntSize(40,40));
-  buttonx4->setMinimumSize(IntSize(40,40));
-
-  //buttonx2->setMaximumSize(IntSize(80,80));
-
-  BorderLayout* border = new BorderLayout(this);
-  setLayout(border);
-
-  border->addItem(buttonx1,BorderLayout::NORTH);
-  border->addItem(buttonx2,BorderLayout::CENTER);
-  border->addItem(buttonx3,BorderLayout::WEST);
-  border->addItem(buttonx4,BorderLayout::SOUTH);
-  border->addItem(button5,BorderLayout::EAST);
-
-/*  GridLayout* flow = new GridLayout(this);
-  //HBoxLayout* flow = new HBoxLayout(this,0,0);
-  //flow->setDirection(RIGHTTOLEFT);
-  setLayout(flow);
-
-  flow->addItem(button,0,0);
-  flow->addItem(button2,0,1);
-  flow->addItem(button3,1,0);  
-  flow->addItem(button4,2,0);
-  flow->addItem(button5,2,1);
-
-  flow->setColumnFlex(1,1.0);
-  flow->setRowFlex(1,1.0);
-
-  HBoxLayout* hbox = new HBoxLayout(5,5);
-  hbox->setContentLeftMargin(20);
-  flow->addItem(hbox,1,1); 
-
-  hbox->addItem(buttonx1);
-  hbox->addItem(buttonx2);
-  hbox->addItem(buttonx3);
-  buttonx3->setFlex(1);
-  hbox->addItem(buttonx4); 
-
-//   button->setFlex(3);
-//   button2->setFlex(7);
-//   button3->setFlex(5);
-//   flow->addItem(button);
-//   flow->addItem(button2);
-//   flow->addItem(button3);
-//   flow->addItem(button4);
-//   flow->addItem(button5);
-
-  flow->setHorizontalSpacing(5);
-  flow->setVerticalSpacing(5);*/
-
-  //_layout->activate();
+  testGridLayout();
 
   setContentRightMargin(0);
 }
@@ -577,67 +521,6 @@ MyWindow::MyWindow(uint32_t createFlags) :
 MyWindow::~MyWindow()
 {
   //Yeah I know no child widget destructurs... 
-}
-
-void MyWindow::onKeyPress(KeyEvent* e)
-{
-  switch (e->getKey())
-  {
-    case KEY_LEFT:
-      _subx -= 0.05;
-      break;
-    case KEY_RIGHT:
-      _subx += 0.05;
-      break;
-    case KEY_UP:
-      _suby -= 0.05;
-      break;
-    case KEY_DOWN:
-      _suby += 0.05;
-      break;
-    case KEY_LEFT | KEY_CTRL:
-      _subx -= 5;
-      break;
-    case KEY_RIGHT | KEY_CTRL:
-      _subx += 5;
-      break;
-    case KEY_UP | KEY_CTRL:
-      _suby -= 5;
-      break;
-    case KEY_DOWN | KEY_CTRL:
-      _suby += 5;
-      break;
-    case KEY_Q:
-      _rotate -= 0.005;
-      break;
-    case KEY_W:
-      _rotate += 0.005;
-      break;
-    case KEY_E:
-      _shearX -= 0.01;
-      break;
-    case KEY_R:
-      _shearX += 0.01;
-      break;
-    case KEY_T:
-      _shearY -= 0.01;
-      break;
-    case KEY_Y:
-      _shearY += 0.01;
-      break;
-    case KEY_A:
-      _scale -= 0.01;
-      break;
-    case KEY_S:
-      _scale += 0.01;
-      break;
-    case KEY_SPACE:
-      if (++_spread >= SPREAD_COUNT) _spread = 0;
-      break;
-  }
-
-  repaint(WIDGET_REPAINT_AREA);
-  base::onKeyPress(e);
 }
 
 void MyWindow::onPaint(PaintEvent* e)
@@ -665,102 +548,6 @@ void MyWindow::onPaint(PaintEvent* e)
   // Clear everything to white.
   p->setSource(Argb(0xFFFFFFFF));
   p->clear();
-
-  return;
-  
-  p->setSource(Argb(0xFF000000));
-  p->drawRect(IntRect(15, 15, getWidth() - 25, getHeight() - 25));
-
-/*
-  Region reg;
-  {
-    for (int y = 0; y < getHeight(); y += 10)
-    {
-      for (int x = (y % 20) == 10 ? 10 : 0; x < getWidth(); x += 20)
-      {
-        reg.unite(Rect(x, y, 10, 10));
-      }
-    }
-  }
-  p->setUserRegion(reg);
-
-  p->setSource(Argb(0xFF00007F));
-  p->clear();
-*/
-
-#if 0
-
-  // These coordinates describe boundary of object we want to paint.
-  double x = 40.5;
-  double y = 40.5;
-  double w = 300.0;
-  double h = 300.0;
-
-  p->translate(_subx, _suby);
-
-  // Create path that will contain rounded rectangle.
-  DoublePath path;
-  path.moveTo(100, 100);
-  path.cubicTo(150, 120, 180, 100, 200, 200);
-  path.lineTo(50, 230);
-  path.lineTo(140, 280);
-
-  // Create linear gradient pattern.
-  Pattern pattern;
-  pattern.setType(PATTERN_LINEAR_GRADIENT);
-  pattern.setPoints(DoublePoint(x, y), DoublePoint(x + w, y + h));
-  pattern.addStop(ArgbStop(0.0, Argb(0xFF000000)));
-  pattern.addStop(ArgbStop(1.0, Argb(0xFFFF0000)));
-
-  p->translate((double)getWidth()/2, (double)getHeight()/2);
-  p->rotate(_rotate);
-  p->translate(-(double)getWidth()/2, -(double)getHeight()/2);
-
-  // Fill path with linear gradient we created.
-  p->setSource(pattern);
-  p->fillPath(path);
-
-  // Stroke path using solid black color.
-  p->setSource(Argb(0xFF000000));
-  p->setLineWidth(2);
-  p->drawPath(path);
-
-  p->setOperator(OPERATOR_SRC_OVER);
-  //p->translate(100, 100);
-  //p->translate(-100, -100);
-  {
-    Image im(i[0]);
-    ColorMatrix cm;
-    cm.rotateHue((float)_rotate * 3.0f);
-    im.filter(cm);
-    p->blitImage(DoublePoint(50.0, 50.0), im);
-    p->blitImage(DoublePoint(250.0, 50.0), i[0]);
-  }
-#endif
-
-  p->restore();
-  p->flush(PAINTER_FLUSH_SYNC);
-
-  TimeDelta delta = TimeTicks::highResNow() - ticks;
-
-  p->setOperator(OPERATOR_SRC_OVER);
-  p->setSource(0xFF000000);
-  p->fillRect(IntRect(0, 0, getWidth(), getFont().getHeight()));
-  p->setSource(0xFFFF0000);
-
-  String s;
-  s.format("Size: %d %d, time %g, [PARAMS: %g %g]", getWidth(), getHeight(), delta.inMillisecondsF(), _subx, _suby);
-  p->drawText(IntPoint(0, 0), s, getFont());
-}
-
-void MyWindow::paintImage(Painter* p, const IntPoint& pos, const Image& im, const String& name)
-{
-  int x = 10 + pos.x * 152;
-  int y = 10 + pos.y * 152;
-
-  p->drawText(IntRect(x, y, 130, 20), name, getFont(), TEXT_ALIGN_CENTER);
-  p->drawRect(IntRect(x, y + 20, 130, 130));
-  p->blitImage(IntPoint(x + 1, y + 21), im);
 }
 
 // ============================================================================

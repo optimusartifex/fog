@@ -57,9 +57,7 @@ struct FOG_API Layout : public LayoutItem
   // [Layout Hierarchy]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE Widget* getParentWidget() const; 
-
-  virtual void prepareItem(LayoutItem* item, sysuint_t index) {}
+  FOG_INLINE Widget* getParentWidget() const;
 
   // --------------------------------------------------------------------------
   // [Total Layout Size Hints]
@@ -130,7 +128,9 @@ struct FOG_API Layout : public LayoutItem
     }
   }
 
-  virtual void invalidateLayout() { _dirty = 1; }
+  virtual void invalidateLayout() {
+    _dirty = 1;
+  }
 
   void markAsDirty();
 
@@ -144,8 +144,7 @@ struct FOG_API Layout : public LayoutItem
   // [Alignment]
   // --------------------------------------------------------------------------
 
-  bool setLayoutAlignment(LayoutItem *item, uint32_t alignment);  
-  void addChildLayout(Layout *l);
+  bool setLayoutAlignment(LayoutItem *item, uint32_t alignment);    
 
   // --------------------------------------------------------------------------
   // [Update And Activation Of Layout]
@@ -200,7 +199,8 @@ protected:
   FOG_INLINE LayoutItem* getAt(sysuint_t index) const { return index < _children.getLength() ? _children.at(index) : 0; }
   FOG_INLINE LayoutItem* takeAt(int index) { return index < _children.getLength() ? _children.take(index) : 0; }
   FOG_INLINE int getLength() const { return _children.getLength(); }
-  virtual void addChild(LayoutItem* item);
+  
+  int addChild(LayoutItem* item);  
 
   int indexOf(LayoutItem*) const;
   void remove(LayoutItem* item);
@@ -211,6 +211,8 @@ protected:
   static bool removeAllWidgets(LayoutItem *li, Widget *w);
 
 private:  
+  int addChildLayout(Layout *l);
+
   FOG_DISABLE_COPY(Layout)
   
 };

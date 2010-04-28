@@ -30,17 +30,17 @@ namespace Fog {
     BoxLayout(int margin=-1, int spacing=-1);
     virtual ~BoxLayout();
 
-    FOG_INLINE virtual void prepareItem(LayoutItem* item, sysuint_t index) { item->_layoutdata = new(std::nothrow) LayoutItem::LayoutStruct(); }
-    FOG_INLINE void addItem(LayoutItem *item) { Layout::addChild(item); }
+    FOG_INLINE void addItem(LayoutItem *item) { 
+      if(Layout::addChild(item) == -1) {
+        return;
+      }
+      item->_layoutdata = new(std::nothrow) LayoutItem::FlexLayoutProperties();
+    }
 
     virtual uint32_t getLayoutExpandingDirections() const;
 
     FOG_INLINE Direction getDirection() const { return static_cast<Direction>(_direction); }   
-    FOG_INLINE void setDirection(Direction d) { _direction = d; } 
-
-    FOG_INLINE virtual void invalidateLayout() {
-      Layout::invalidateLayout();    
-    }
+    FOG_INLINE void setDirection(Direction d) { _direction = d; }
 
   protected:
     FOG_INLINE bool isForward() const { return _direction == 0; }
@@ -50,10 +50,12 @@ namespace Fog {
 
     int calculateHorizontalGaps(bool collapse=true);
     int calculateVerticalGaps(bool collapse=true);
+    
+    uint32_t _allocated : 31;
+    LayoutItem* _flexibles;
 
   private:
     uint32_t _direction : 1;
-    uint32_t _unused : 31;
   };
 
   struct FOG_API HBoxLayout : public BoxLayout

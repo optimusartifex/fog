@@ -54,6 +54,9 @@ struct FOG_API LayoutItem : public Object
   FOG_INLINE int getContentTopMargin() const { return _contentmargin.top; }
   FOG_INLINE int getContentBottomMargin() const { return _contentmargin.bottom; }
 
+  FOG_INLINE int getContentXMargins() const { return _contentmargin.left + _contentmargin.right; }
+  FOG_INLINE int getContentYMargins() const { return _contentmargin.top + _contentmargin.bottom; }
+
   // --------------------------------------------------------------------------
   // [ContentMargins setter]
   // --------------------------------------------------------------------------
@@ -172,8 +175,12 @@ struct FOG_API LayoutItem : public Object
   // --------------------------------------------------------------------------
 
   //Struct for Calculation of Flex-Values in LayoutManager
-  struct LayoutStruct {
-    LayoutStruct() : _min(0), _max(0), _hint(0), _flex(-1), _potential(0), _offset(0), _next(0) {}
+  struct LayoutProperties {
+
+  };
+
+  struct FlexLayoutProperties : public LayoutProperties{
+    FlexLayoutProperties() : _min(0), _max(0), _hint(0), _flex(-1), _potential(0), _offset(0), _next(0) {}
     int _min;     //height or width
     int _max;     //height or width
     int _hint;    //height or width
@@ -185,7 +192,9 @@ struct FOG_API LayoutItem : public Object
     int _offset;  //for internal use
 
     void* _next;   //for faster Flexible handling (could be different type)
-  }* _layoutdata;
+  };
+
+  LayoutProperties* _layoutdata;
 
   IntMargins _contentmargin;
   LayoutHint _cache;

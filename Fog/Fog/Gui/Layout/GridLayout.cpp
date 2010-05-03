@@ -22,13 +22,64 @@ namespace Fog {
     }
   }
 
+  void GridLayout::onRemove(LayoutItem* item) {
+    LayoutProperties* prop = item->getLayoutData<LayoutProperties>();
+    if(!prop) //item was removed before itemproperties are created
+      return;
+
+    //clean up data within row/col structure
+    for(uint32_t i=prop->_row->_rowid;i<prop->_rowspan;++i) {
+      for(uint32_t j=prop->_column->_colid;j<prop->_colspan;++j) {
+        takeCellItem(prop->_row->_rowid+i,prop->_column->_colid+j);
+      }
+    }
+
+    //clean up colspan chain
+    if(prop->_colspan > 1) {
+      LayoutItem* iter = _colspan;
+      LayoutItem* prev = 0;
+      if(item == iter) {
+        _colspan = item->getLayoutData<LayoutProperties>()->_colspannext;
+      } else {
+        while(iter) {
+          LayoutProperties* prop = iter->getLayoutData<LayoutProperties>();
+          if(iter == item) {
+            prev->getLayoutData<LayoutProperties>()->_colspannext = prop->_colspannext;
+            prop->_colspannext = 0;
+            break;
+          }
+          prev = iter;
+          iter = prop->_colspannext;
+        }
+      }
+    }
+
+    //clean up rowspan chain
+    if(prop->_rowspan > 1) {
+      LayoutItem* iter = _rowspan;
+      LayoutItem* prev = 0;
+      if(item == iter) {
+        _colspan = item->getLayoutData<LayoutProperties>()->_rowspannext;
+      } else {
+        while(iter) {
+          LayoutProperties* prop = iter->getLayoutData<LayoutProperties>();
+          if(iter == item) {
+            prev->getLayoutData<LayoutProperties>()->_rowspannext = prop->_rowspannext;
+            prop->_rowspannext = 0;
+            break;
+          }
+          prev = iter;
+          iter = prop->_rowspannext;
+        }
+      }
+    }    
+  }
+
   void GridLayout::addItem(LayoutItem* item, int row, int column, int rowSpan, int columnSpan, uint32_t alignment) {
     if(item) {
       if(Layout::addChild(item) == -1) {
         return;
-      }
-
-      item->_layoutdata = new(std::nothrow) LayoutProperties();
+      }      
     }
 
     if(row == -1)
@@ -50,6 +101,8 @@ namespace Fog {
           }
         }
       }
+
+      item->_layoutdata = new(std::nothrow) LayoutProperties();
     }
 
     //Add Columns and Rows needed for insertion
@@ -119,8 +172,19 @@ namespace Fog {
         _rowspan = item;
       }
     }
+  }
 
-    invalidateLayout();
+  LayoutItem* GridLayout::takeCellItem(int row, int column) {
+    FOG_ASSERT(row >= 0 && column >=0);
+    if(column >= _cols.getLength() || row >= _rows.getLength())
+      return 0;
+
+    Row* r = _rows.at(row);
+
+    if(column >= r->_cols.getLength()) 
+      return 0;
+
+    return r->_cols.take(column);
   }
 
   LayoutItem* GridLayout::getCellItem(int row, int column) const {
@@ -133,8 +197,7 @@ namespace Fog {
     if(column >= r->_cols.getLength()) 
       return 0;
 
-    LayoutItem* col = r->_cols.at(column);
-    return col;
+    return r->_cols.at(column);
   }
 
   void GridLayout::Column::calculateWidth() {

@@ -99,11 +99,12 @@ struct FOG_API LayoutItem : public Object
     FOG_ASSERT(_dirty);
     if(!isEmpty()) {
       calculateLayoutHint(_cache);
+      _propertydirty = 0;
     } else {
       _cache._maximumSize = _cache._minimumSize = _cache._sizeHint = IntSize(0,0);
     }
    
-    _dirty = 0;
+    _dirty = 0;    
   }
 
   FOG_INLINE const LayoutHint& getLayoutHint() const {
@@ -164,23 +165,31 @@ struct FOG_API LayoutItem : public Object
   // --------------------------------------------------------------------------
   // [Flex variable support]
   // --------------------------------------------------------------------------
-
-  void setFlex(int flex);
+  
   void removeLayoutStruct();
-  FOG_INLINE int getFlex() const { return _flex; }
-  FOG_INLINE bool hasFlex() const { return _flex != -1; }
 
   // --------------------------------------------------------------------------
   // [Members]
-  // --------------------------------------------------------------------------
+  // -------------------------------------------------------------------------- 
+
+  template<class T> typename T::PropertyType* getLayoutProperties() {
+    if(!_layoutdata) return 0;
+    typename T::LayoutData* prop = ((typename T::LayoutData*)_layoutdata);
+    return (T::PropertyType*) &((typename T::LayoutData*)_layoutdata)->_user;
+  }
+
+  template<class T>
+  T* getLayoutData() {
+    return static_cast<T*>(_layoutdata);
+  }
 
   //Struct for Calculation of Flex-Values in LayoutManager
-  struct LayoutProperties {
-
+  struct LayoutData {
+    
   };
 
-  struct FlexLayoutProperties : public LayoutProperties{
-    FlexLayoutProperties() : _min(0), _max(0), _hint(0), _flex(-1), _potential(0), _offset(0), _next(0) {}
+  struct FlexLayoutData : public LayoutData {
+    FlexLayoutData() : _min(0), _max(0), _hint(0), _flex(-1), _potential(0), _offset(0), _next(0) {}
     int _min;     //height or width
     int _max;     //height or width
     int _hint;    //height or width
@@ -192,20 +201,70 @@ struct FOG_API LayoutItem : public Object
     int _offset;  //for internal use
 
     void* _next;   //for faster Flexible handling (could be different type)
-  };
 
-  LayoutProperties* _layoutdata;
+    FOG_INLINE void init(bool grow) {
+      _offset = 0;
+      _potential = grow ?_max - _hint : _hint - _min;
+      _flex = grow ? _flex : (1 / _flex);
+    }
+
+    FOG_INLINE void prepare() { _potential = -INT_MAX; }
+  };  
+
+  LayoutData* _layoutdata;
 
   IntMargins _contentmargin;
   LayoutHint _cache;
   Layout* _withinLayout;  //for fast identification of Layout, where this Item is inserted!
                           //maybe also used for layout pointer in widget
-
-  int _flex : 24;
+  
   uint32_t _alignment : 2;
-  uint32_t _dirty : 1;
-  uint32_t _unused : 5;
+  uint32_t _dirty : 1;    //layout hint is dirty -> call calculateLayoutHint() next time
+  uint32_t _propertydirty : 1; //property values changes -> calculate
+  uint32_t _unused : 28;
 };
+
+//ToDo: invalidateLayout
+#define ONPROPERTYCHANGE _layout->_propertydirty = 1;
+
+#define FLEXPROPERTY()\
+public:\
+  FOG_INLINE bool hasFlex() const { return _flex > 0; }\
+  FOG_INLINE int getFlex() const { return _flex; }\
+  FOG_INLINE void setFlex(int value) {if(value == _flex)return; _flex = value; ONPROPERTYCHANGE}\
+  FOG_INLINE void clear() { _flex = -1; }\
+private: \
+  int _flex;
+
+#define FLEXPROPERTYINIT() _flex = -1;
+
+#define PERCENTHEIGHTPROPERTY()\
+public:\
+         FOG_INLINE bool hasHeight() const { return _height != -1.f; }\
+         FOG_INLINE void setHeight(float value) {if(value == _height)return; _height = value > 1.f ? 1.f : value < 0.f ? 0.f : value; ONPROPERTYCHANGE}\
+         FOG_INLINE float getHeight() const {return _height;}\
+         FOG_INLINE void clearHeight() {if(_height==-1.f) return; _height = -1.f; ONPROPERTYCHANGE}\
+private:\
+        float _height;
+
+#define PERCENTHEIGHTPROPERTYINIT() _height = 1.f;
+
+#define PERCENTWIDTHPROPERTY()\
+public:\
+  FOG_INLINE bool hasWidth() const { return _width != -1.f; }\
+  FOG_INLINE void setWidth(float value) {if(value == _width)return; _width = value > 1.f ? 1.f : value < 0.f ? 0.f : value; ONPROPERTYCHANGE}\
+  FOG_INLINE float getWidth() const {return _width;}\
+  FOG_INLINE void clearWidth() {if(_width==-1.f) return; _width = -1.f; ONPROPERTYCHANGE}\
+private:\
+  float _width;\
+
+#define PERCENTWIDTHPROPERTYINIT() _width=1.f;
+       
+
+#define PERCENTPROPERTY() PERCENTHEIGHTPROPERTY() PERCENTWIDTHPROPERTY()
+
+#define PERCENTPROPERTYINIT() PERCENTHEIGHTPROPERTYINIT() PERCENTWIDTHPROPERTYINIT()
+
 
 } // Fog namespace
 

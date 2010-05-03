@@ -22,12 +22,12 @@ namespace Fog {
 // [Fog::Layout]
 // ============================================================================
 
-Layout::Layout() : _parentItem(0), _toplevel(0), _spacing(0), _enabled(1), _activated(1), _flexcount(0), _nextactivate(0),_invalidated(0)
+Layout::Layout() : _parentItem(0), _toplevel(0), _spacing(0), _enabled(1), _activated(1), _flexcount(0), _nextactivate(0)
 {
   _flags |= OBJ_IS_LAYOUT;  
 }
 
-Layout::Layout(Widget *parent, Layout* parentLayout) : _flexcount(0), _toplevel(0), _spacing(0), _enabled(1), _activated(1), _parentItem(0), _nextactivate(0),_invalidated(0) {
+Layout::Layout(Widget *parent, Layout* parentLayout) : _flexcount(0), _toplevel(0), _spacing(0), _enabled(1), _activated(1), _parentItem(0), _nextactivate(0) {
   _flags |= OBJ_IS_LAYOUT;
 
   if (parentLayout) {
@@ -49,6 +49,9 @@ Layout::Layout(Widget *parent, Layout* parentLayout) : _flexcount(0), _toplevel(
 Layout::~Layout() 
 {
   FOG_ASSERT(_nextactivate == NULL);
+  while(_children.getLength()) {    
+    remove(_children.at(0));
+  }
 }
 
 void Layout::markAsDirty() {
@@ -59,10 +62,10 @@ void Layout::markAsDirty() {
         GuiWindow * window = w->getClosestGuiWindow();
         if(window) {
           _activated = 0;
-          _invalidated = 0;
           FOG_ASSERT(window->_activatelist == 0);
           _nextactivate = window->_activatelist;
           window->_activatelist = this;
+          w->update(WIDGET_REPAINT_ALL);
         }
       }
     }
@@ -166,15 +169,14 @@ void Layout::remove(LayoutItem* item) {
     return;
 
   FOR_EACH(iitem, this) {
-    if (iitem == item) {      
-      if(item->hasFlex())
-        removeFlexItem();
-
+    if (iitem == item) {
       item->_withinLayout = 0;
       item->removeLayoutStruct();
       takeAt(i);
+      onRemove(item);     //call virtual method for LM implementation
       invalidateLayout();
       updateLayout();
+      break;
     }
   }
 }
@@ -192,8 +194,7 @@ bool Layout::removeAllWidgets(LayoutItem *layout, Widget *w)
   FOR_EACH(iitem, lay) {
     if (iitem == w) {
       lay->takeAt(i);
-      if(iitem->hasFlex())
-        lay->removeFlexItem();
+      lay->onRemove(iitem);
       w->_withinLayout = 0;
       lay->invalidateLayout();
       return true;
@@ -243,10 +244,6 @@ int Layout::addChild(LayoutItem* item)
   }
 
   item->_withinLayout = this;
-  if(item->hasFlex()) {
-    addFlexItem();
-  }
-
   _children.append(item);
   invalidateLayout();
 

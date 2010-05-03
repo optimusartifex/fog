@@ -53,6 +53,8 @@ struct FOG_API Layout : public LayoutItem
   Layout(Widget *parent, Layout *parentLayout=0);
   virtual ~Layout();
 
+  FOG_INLINE virtual void onRemove(LayoutItem* item) {}
+
   // --------------------------------------------------------------------------
   // [Layout Hierarchy]
   // --------------------------------------------------------------------------
@@ -186,8 +188,8 @@ struct FOG_API Layout : public LayoutItem
   uint _toplevel : 1;  
   uint _activated : 1;
   uint _enabled : 1;
-  uint _invalidated : 1;
-  uint _unused : 4; 
+  //uint _invalidated : 1;
+  uint _unused : 5; 
 
   Layout* _nextactivate;
 

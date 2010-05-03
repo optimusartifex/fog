@@ -21,7 +21,7 @@ namespace Fog {
 // [Fog::LayoutItem]
 // ============================================================================
 
-LayoutItem::LayoutItem(uint32_t alignment) : _alignment(alignment), _withinLayout(0), _layoutdata(0), _flex(-1), _dirty(1)
+LayoutItem::LayoutItem(uint32_t alignment) : _alignment(alignment), _withinLayout(0), _layoutdata(0), _dirty(1), _propertydirty(1)
 {
   _contentmargin.set(0,0,0,0);
 }
@@ -95,15 +95,6 @@ IntSize LayoutItem::calculateMinimumSize() const {
   FOG_ASSERT(this->isWidget());
   const Widget *w = (Widget *)this;
   return Fog::calculateMinimumSize(w->getSizeHint(), w->getMinimumSizeHint(),w->getMinimumSize(), w->getMaximumSize(),w->getLayoutPolicy());
-}
-
-
-void LayoutItem::setFlex(int flex) {
-  if(flex < 0) flex = -1;
-  _flex = flex;
-  if(_withinLayout && flex != -1) {
-    _withinLayout->addFlexItem();
-  }
 }
 
 void LayoutItem::removeLayoutStruct() {

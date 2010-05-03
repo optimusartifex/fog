@@ -35,7 +35,7 @@ namespace Fog {
     for(int i=0;i<list.getLength();++i) {
       LayoutItem* item = list.at(i);
       const LayoutHint& hint = item->getLayoutHint();
-      LayoutProperty* prop = static_cast<LayoutProperty*>(item->_layoutdata);
+      LayoutData* prop = item->getLayoutData<LayoutData>();
 
       int marginX = item->getContentLeftMargin() + item->getContentRightMargin();
       int marginY = item->getContentTopMargin() + item->getContentBottomMargin();
@@ -54,9 +54,9 @@ namespace Fog {
         //Allocated height
         _allocatedHeight += hint.getSizeHint().getHeight() + marginY + spacingY;
 
-        if(item->hasFlex()) {
-          FlexLayoutProperties* prop = static_cast<FlexLayoutProperties*>(item->_layoutdata);
-          prop->_flex = item->_flex;
+        if(prop->hasFlex()) {
+          LayoutData* prop = item->getLayoutData<LayoutData>();
+          prop->_flex = prop->getFlex();
           prop->_hint = hint.getSizeHint().getWidth();
           prop->_min = hint.getMinimumSize().getWidth();
           prop->_max = hint.getMaximumSize().getWidth();
@@ -78,9 +78,9 @@ namespace Fog {
         //Allocated width
         _allocatedWidth += hint.getSizeHint().getWidth() + marginX + spacingX;
 
-        if(item->hasFlex()) {
-          FlexLayoutProperties* prop = static_cast<FlexLayoutProperties*>(item->_layoutdata);
-          prop->_flex = item->_flex;
+        if(prop->hasFlex()) {
+          LayoutData* prop = item->getLayoutData<LayoutData>();
+          prop->_flex = prop->getFlex();
           prop->_hint = hint.getSizeHint().getHeight();
           prop->_min = hint.getMinimumSize().getHeight();
           prop->_max = hint.getMaximumSize().getHeight();          
@@ -106,8 +106,8 @@ namespace Fog {
         _allocatedHeight += hint.getSizeHint().getHeight() + marginY + spacingY;
         _allocatedWidth += hint.getSizeHint().getWidth() + marginX + spacingX;
 
-        FlexLayoutProperties* prop = static_cast<FlexLayoutProperties*>(item->_layoutdata);
-        prop->_flex = item->_flex < 1 ? 1:item->_flex; //center has min flex value of 1!
+        LayoutData* prop = item->getLayoutData<LayoutData>();
+        prop->setFlex(prop->getFlex() < 1 ? 1:prop->getFlex()); //center has min flex value of 1!
       }
     }
 
@@ -121,26 +121,31 @@ namespace Fog {
     int height = Math::max(heightX, heightY) + spacingSumY + marginY;
 
     hint._minimumSize.set(minWidth, minHeight);
-    hint._sizeHint.set(width, height);
+    hint._sizeHint.set(width, height);    
   }
 
   void BorderLayout::calculateVerticalFlexOffsets(int availHeight, int& allocatedHeight) {
     if (_verticalflex && allocatedHeight != availHeight) {
       if(_center) {
-        FlexLayoutProperties* prop = static_cast<FlexLayoutProperties*>(_center->_layoutdata);
+        LayoutData* prop = _center->getLayoutData<LayoutData>();
         prop->_next = _verticalflex;
         _verticalflex = _center;
+
+        if(prop->getFlex() == -1) {
+          prop->setFlex(1);
+        }
 
         prop->_hint = _center->getLayoutSizeHint().getHeight();
         prop->_min = _center->getLayoutMinimumSize().getHeight();
         prop->_max = _center->getLayoutMaximumSize().getHeight();
+        prop->_flex = prop->getFlex();
       }
 
       calculateFlexOffsets(_verticalflex, availHeight, allocatedHeight);
 
       //clean it for next run!
       if(_center) {
-        FlexLayoutProperties* prop = static_cast<FlexLayoutProperties*>(_center->_layoutdata);
+        LayoutData* prop = _center->getLayoutData<LayoutData>();
         _verticalflex = (LayoutItem*)prop->_next;
       }
     }
@@ -149,20 +154,25 @@ namespace Fog {
   void BorderLayout::calculateHorizonzalFlexOffsets(int availWidth, int& allocatedWidth) {
     if(_horizontalflex && allocatedWidth != availWidth) {
       if(_center) {
-        FlexLayoutProperties* prop = static_cast<FlexLayoutProperties*>(_center->_layoutdata);
+        LayoutData* prop = _center->getLayoutData<LayoutData>();
         prop->_next = _horizontalflex;
         _horizontalflex = _center;
+
+        if(prop->getFlex() == -1) {
+          prop->setFlex(1);
+        }
 
         prop->_hint = _center->getLayoutSizeHint().getWidth();
         prop->_min = _center->getLayoutMinimumSize().getWidth();
         prop->_max = _center->getLayoutMaximumSize().getWidth();
+        prop->_flex = prop->getFlex();
       }
 
       calculateFlexOffsets(_horizontalflex, availWidth, allocatedWidth);
 
       //clean it for next run!
       if(_center) {
-        FlexLayoutProperties* prop = static_cast<FlexLayoutProperties*>(_center->_layoutdata);
+        FlexLayoutData* prop = _center->getLayoutData<LayoutData>();
         _horizontalflex = (LayoutItem*)prop->_next;
       }
     }
@@ -207,7 +217,7 @@ namespace Fog {
       }
       
       const LayoutHint& hint = item->getLayoutHint();
-      LayoutProperty* prop = static_cast<LayoutProperty*>(item->_layoutdata);
+      LayoutData* prop = item->getLayoutData<LayoutData>();
 
       int height = item->getLayoutSizeHint().getHeight();
       int width = item->getLayoutSizeHint().getWidth();

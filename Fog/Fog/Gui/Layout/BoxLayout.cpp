@@ -34,13 +34,6 @@ namespace Fog {
     setContentMargins(margin, margin, margin, margin);
   }
 
-  BoxLayout::~BoxLayout()
-  {
-    LayoutItem *item;
-    while ((item = takeAt(0)))
-      delete item;
-  }
-
   uint32_t BoxLayout::getLayoutExpandingDirections() const
   {
     return ORIENTATION_HORIZONTAL;
@@ -129,12 +122,13 @@ namespace Fog {
       LayoutItem* item = getAt(i);
       IntSize hint = item->getLayoutSizeHint();
       IntSize min = item->getLayoutMinimumSize();
+      LayoutData * data = static_cast<LayoutData*> (item->_layoutdata);
 
       // Sum up widths
       width += hint.getWidth();
 
       // Detect if child is shrinkable or has percent width and update minWidth
-      minWidth += item->hasFlex() ? min.getWidth() : hint.getWidth();
+      minWidth += data->hasFlex() ? min.getWidth() : hint.getWidth();
 
       // Build vertical margin sum
       int margin = item->getContentTopMargin() + item->getContentBottomMargin();
@@ -150,15 +144,14 @@ namespace Fog {
       }
 
       int whint = hint.getWidth();
-      if(item->hasFlex()) {
-        LayoutItem::FlexLayoutProperties * prop = static_cast<LayoutItem::FlexLayoutProperties*> (item->_layoutdata);
-        prop->_min = item->getLayoutMinimumSize().getWidth();
-        prop->_max = item->getLayoutMaximumSize().getWidth();
-        prop->_hint = whint;
-        prop->_flex = (float)item->getFlex();
-        prop->_offset = 0;
+      if(data->hasFlex()) {        
+        data->_min = item->getLayoutMinimumSize().getWidth();
+        data->_max = item->getLayoutMaximumSize().getWidth();
+        data->_hint = whint;
+        data->_flex = (float)data->getFlex();
+        data->_offset = 0;
 
-        prop->_next = _flexibles;
+        data->_next = _flexibles;
         _flexibles = item;
       }
 
@@ -213,7 +206,7 @@ namespace Fog {
       IntSize hint = child->getLayoutSizeHint();
 
       int width = hint.getWidth();
-      width += ((LayoutItem::FlexLayoutProperties*)child->_layoutdata)->_offset;
+      width += ((LayoutItem::FlexLayoutData*)child->_layoutdata)->_offset;
 
       marginTop = getContentTopMargin() + child->getContentTopMargin();
       marginBottom = getContentBottomMargin() + child->getContentBottomMargin();
@@ -264,11 +257,13 @@ namespace Fog {
       IntSize hint = item->getLayoutSizeHint();
       IntSize min = item->getLayoutMinimumSize();
 
+      LayoutData * prop = static_cast<LayoutData*> (item->_layoutdata);
+
       // Sum up widths
       height += hint.getHeight();
 
       // Detect if child is shrinkable or has percent width and update minWidth
-      if (item->hasFlex()) {
+      if (prop->hasFlex()) {
         minHeight += min.getHeight();
       } else {
         minHeight += hint.getHeight();
@@ -288,12 +283,11 @@ namespace Fog {
       }
       
       int hinth = hint.getHeight();
-      if(item->hasFlex()) {
-        LayoutItem::FlexLayoutProperties * prop = static_cast<LayoutItem::FlexLayoutProperties*> (item->_layoutdata);
+      if(prop->hasFlex()) {        
         prop->_min = item->getLayoutMinimumSize().getHeight();
         prop->_max = item->getLayoutMaximumSize().getHeight();
         prop->_hint = hinth;
-        prop->_flex = (float)item->getFlex();
+        prop->_flex = (float)prop->getFlex();
         prop->_offset = 0;
 
         prop->_next = _flexibles;
@@ -350,7 +344,7 @@ namespace Fog {
       IntSize hint = child->getLayoutSizeHint();
 
       height = hint.getHeight();
-      height += ((LayoutItem::FlexLayoutProperties*)child->_layoutdata)->_offset;
+      height += ((LayoutItem::FlexLayoutData*)child->_layoutdata)->_offset;
 
       marginLeft = getContentLeftMargin() + child->getContentLeftMargin();
       marginRight = getContentRightMargin() + child->getContentRightMargin();

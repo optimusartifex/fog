@@ -349,6 +349,11 @@ struct MyWindow : public Window
     layout->addItem(_buttons.at(3), BorderLayout::EAST);
     layout->addItem(_buttons.at(4), BorderLayout::NORTH);
     layout->addItem(_buttons.at(5), BorderLayout::NORTH);
+
+    LayoutItem* item = _buttons.at(3);
+    BorderLayout::LayoutData* d = (BorderLayout::LayoutData*)item->_layoutdata;
+    item->getLayoutProperties<BorderLayout>()->setFlex(1);
+    d = d;
   }
 
   void testGridLayout(Layout* parent=0) {
@@ -375,6 +380,12 @@ struct MyWindow : public Window
     
   }
 
+  void onButtonClick(MouseEvent* ev) {
+    _buttons.at(0)->getLayoutProperties<VBoxLayout>()->setFlex(1);
+    _layout->_dirty = 1;
+    invalidateLayout();
+  }
+
   void testVBoxLayout(Layout* parent = 0) {
     const int COUNT = 8;
     createButtons(COUNT);
@@ -390,8 +401,11 @@ struct MyWindow : public Window
       layout->addItem(_buttons.at(i));
     }
 
-    _buttons.at(3)->setFlex(1);
-    _buttons.at(2)->setFlex(2);
+    _buttons.at(3)->getLayoutProperties<VBoxLayout>()->setFlex(1);
+    _buttons.at(2)->getLayoutProperties<VBoxLayout>()->setFlex(2);
+
+
+    _buttons.at(0)->addListener(EVENT_CLICK,this,&MyWindow::onButtonClick);
   }
 
   void testHBoxLayout(Layout* parent = 0) {
@@ -408,8 +422,8 @@ struct MyWindow : public Window
       layout->addItem(_buttons.at(i));
     }
 
-    _buttons.at(3)->setFlex(1);
-    _buttons.at(2)->setFlex(2);
+    _buttons.at(3)->getLayoutProperties<HBoxLayout>()->setFlex(1);
+    _buttons.at(2)->getLayoutProperties<HBoxLayout>()->setFlex(2);
   }
 
   void testNestedLayout() {
@@ -514,7 +528,7 @@ MyWindow::MyWindow(uint32_t createFlags) :
   _scale = 1.0;
   _spread = SPREAD_REPEAT;
 
-  testGridLayout();
+  testVBoxLayout();
 
   setContentRightMargin(0);
 }

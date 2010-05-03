@@ -28,13 +28,37 @@ namespace Fog {
     FOG_DECLARE_OBJECT(BoxLayout, Layout)
     BoxLayout(Widget *parent, int margin=-1, int spacing=-1);
     BoxLayout(int margin=-1, int spacing=-1);
-    virtual ~BoxLayout();
 
-    FOG_INLINE void addItem(LayoutItem *item) { 
+    struct LayoutProperty {
+      LayoutProperty(Layout* layout) : _nextpercent(0), _layout(layout) {
+        FLEXPROPERTYINIT();
+        PERCENTPROPERTYINIT();
+      }
+
+      LayoutItem* _nextpercent;
+      Layout* _layout;
+
+      FLEXPROPERTY()
+      PERCENTPROPERTY()
+    };
+
+    struct LayoutData : LayoutItem::FlexLayoutData {
+      LayoutData(Layout* layout) : _user(layout) {}
+      FOG_INLINE bool hasFlex() const { return _user.hasFlex(); }
+      FOG_INLINE int getFlex() const { return _user.getFlex(); }
+      FOG_INLINE void setFlex(int flex) { return _user.setFlex(flex); }
+      LayoutProperty _user;
+    };
+    typedef LayoutProperty PropertyType;
+
+    FOG_INLINE void addItem(LayoutItem *item, int flex=-1) { 
       if(Layout::addChild(item) == -1) {
         return;
       }
-      item->_layoutdata = new(std::nothrow) LayoutItem::FlexLayoutProperties();
+      LayoutData* data = new(std::nothrow) LayoutData(this);
+      data->_user.setFlex(flex);
+
+      item->_layoutdata = data;
     }
 
     virtual uint32_t getLayoutExpandingDirections() const;
@@ -51,9 +75,8 @@ namespace Fog {
     int calculateHorizontalGaps(bool collapse=true);
     int calculateVerticalGaps(bool collapse=true);
     
-    uint32_t _allocated : 31;
     LayoutItem* _flexibles;
-
+    uint32_t _allocated : 31;    
   private:
     uint32_t _direction : 1;
   };

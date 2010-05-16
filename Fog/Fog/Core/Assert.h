@@ -8,13 +8,13 @@
 #define _FOG_CORE_ASSERT_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 
 // ============================================================================
 // [FOG_ASSERT]
 // ============================================================================
 
-//! @addtogroup Fog_Core
+//! @addtogroup Fog_Core_Debugging
 //! @{
 
 FOG_CAPI_EXTERN void FOG_NO_RETURN fog_assert_failure(const char* file, int line, const char* msg);

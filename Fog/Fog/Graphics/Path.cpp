@@ -3,21 +3,6 @@
 // [License]
 // MIT, See COPYING file in package
 
-//----------------------------------------------------------------------------
-// Anti-Grain Geometry - Version 2.4
-// Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
-//
-// Permission to copy, use, modify, sell and distribute this software
-// is granted provided this copyright notice appears in all copies.
-// This software is provided "as is" without express or implied
-// warranty, and with no claim as to its suitability for any purpose.
-//
-//----------------------------------------------------------------------------
-// Contact: mcseem@antigrain.com
-//          mcseemagg@yahoo.com
-//          http://www.antigrain.com
-//----------------------------------------------------------------------------
-
 // [Precompiled Headers]
 #if defined(FOG_PRECOMP)
 #include FOG_PRECOMP
@@ -29,10 +14,12 @@
 #include <Fog/Core/Math.h>
 #include <Fog/Core/Memory.h>
 #include <Fog/Core/Std.h>
+#include <Fog/Core/Swap.h>
 #include <Fog/Graphics/Matrix.h>
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/Path.h>
 #include <Fog/Graphics/PathUtil.h>
+#include <Fog/Graphics/Region.h>
 
 namespace Fog {
 
@@ -93,7 +80,6 @@ DoublePathData* DoublePath::_allocData(sysuint_t capacity)
   return d;
 }
 
-// tady
 DoublePathData* DoublePath::_reallocData(DoublePathData* d, sysuint_t capacity)
 {
   FOG_ASSERT(d->length <= capacity);
@@ -105,7 +91,12 @@ DoublePathData* DoublePath::_reallocData(DoublePathData* d, sysuint_t capacity)
   sysuint_t length = d->length;
 
   newd->refCount.init(1);
+
   newd->flat = d->flat;
+  newd->boundingBoxDirty = d->boundingBoxDirty;
+  newd->boundingBoxMin = d->boundingBoxMin;
+  newd->boundingBoxMax = d->boundingBoxMax;
+
   newd->capacity = capacity;
   newd->length = length;
   _updatePathDataPointers(newd, capacity);
@@ -126,7 +117,11 @@ DoublePathData* DoublePath::_copyData(const DoublePathData* d)
   if (!newd) return NULL;
 
   newd->length = length;
+
   newd->flat = d->flat;
+  newd->boundingBoxDirty = d->boundingBoxDirty;
+  newd->boundingBoxMin = d->boundingBoxMin;
+  newd->boundingBoxMax = d->boundingBoxMax;
 
   Memory::copy(newd->commands, d->commands, length * sizeof(uint8_t));
   Memory::copy(newd->vertices, d->vertices, length * sizeof(DoublePoint));
@@ -181,6 +176,7 @@ static FOG_INLINE void _relativeToAbsolute(DoublePathData* d, double* x0, double
   if (!PathCmd::isVertex(cmd)) return;
 
   const DoublePoint& pt = d->vertices[last];
+
   *x0 += pt.x;
   *y0 += pt.y;
   *x1 += pt.x;
@@ -204,6 +200,11 @@ err_t DoublePath::reserve(sysuint_t capacity)
   if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
   newd->length = length;
+
+  newd->flat = _d->flat;
+  newd->boundingBoxDirty = _d->boundingBoxDirty;
+  newd->boundingBoxMin = _d->boundingBoxMin;
+  newd->boundingBoxMax = _d->boundingBoxMax;
 
   Memory::copy(newd->commands, _d->commands, length * sizeof(uint8_t));
   Memory::copy(newd->vertices, _d->vertices, length * sizeof(DoublePoint));
@@ -251,7 +252,11 @@ sysuint_t DoublePath::_add(sysuint_t count)
     if (!newd) return INVALID_INDEX;
 
     newd->length = length + count;
+
     newd->flat = _d->flat;
+    newd->boundingBoxDirty = _d->boundingBoxDirty;
+    newd->boundingBoxMin = _d->boundingBoxMin;
+    newd->boundingBoxMax = _d->boundingBoxMax;
 
     Memory::copy(newd->commands, _d->commands, length * sizeof(uint8_t));
     Memory::copy(newd->vertices, _d->vertices, length * sizeof(DoublePoint));
@@ -297,6 +302,10 @@ err_t DoublePath::setDeep(const DoublePath& other)
   self_d->length = length;
   self_d->flat = other_d->flat;
 
+  self_d->boundingBoxDirty = other_d->boundingBoxDirty;
+  self_d->boundingBoxMin = other_d->boundingBoxMin;
+  self_d->boundingBoxMax = other_d->boundingBoxMax;
+
   Memory::copy(self_d->commands, other_d->commands, length * sizeof(uint8_t));
   Memory::copy(self_d->vertices, other_d->vertices, length * sizeof(DoublePoint));
 
@@ -312,7 +321,11 @@ void DoublePath::clear()
   else
   {
     _d->length = 0;
+
     _d->flat = 1;
+    _d->boundingBoxDirty = true;
+    _d->boundingBoxMin.clear();
+    _d->boundingBoxMax.clear();
   }
 }
 
@@ -322,56 +335,294 @@ void DoublePath::free()
 }
 
 // ============================================================================
-// [Fog::Path - Bounding Rect]
+// [Fog::Path - BoundingRect / FitTo]
 // ============================================================================
 
-DoubleRect DoublePath::getBoundingRect() const
+// Based on the Graphics-Gems.
+
+// Calculate the quadratic bezier curve coefficients at (t).
+//
+// a = (1-t)^2
+// b = 2 * (1-t) * t
+// c = t^2
+#define DOUBLE_QUAD_COEFF_AT_T(t, a, b, c) \
+  { \
+    double inv_t = 1.0 - t; \
+    \
+    a = inv_t * inv_t; \
+    b = 2.0 * inv_t * t; \
+    c = t * t; \
+  }
+
+#define DOUBLE_QUAD_MERGE_AT_T(t) \
+  { \
+    if (t > 0.0 && t < 1.0) \
+    { \
+      DOUBLE_QUAD_COEFF_AT_T(t, a, b, c) \
+      \
+      DoublePoint __p(a * startPoint.x + b * pts[0].x + c * pts[1].x, \
+                      a * startPoint.y + b * pts[0].y + c * pts[1].y); \
+      \
+      if (__p.x < pMin.x) pMin.x = __p.x; else if (__p.x > pMax.x) pMax.x = __p.x; \
+      if (__p.y < pMin.y) pMin.y = __p.y; else if (__p.y > pMax.y) pMax.y = __p.y; \
+    } \
+  }
+
+static void DoublePath_calcQuadExtrema(
+  const DoublePoint& startPoint, const DoublePoint* pts, DoublePoint& pMin, DoublePoint& pMax)
 {
-  sysuint_t i = _d->length;
+  // Merge end point.
+  if (pts[1].x < pMin.x) pMin.x = pts[1].x;
+  if (pts[1].y < pMin.y) pMin.y = pts[1].y;
 
-  const uint8_t* commands = _d->commands;
-  const DoublePoint* vertices = _d->vertices;
+  if (pts[1].x > pMax.x) pMax.x = pts[1].x;
+  if (pts[1].y > pMax.y) pMax.y = pts[1].y;
 
-  double x1 = 0.0, y1 = 0.0;
-  double x2 = 0.0, y2 = 0.0;
+  double a, b, c;
 
-  while (i)
+  // X/Y extrema.
+  double t0 = (startPoint.x - pts[0].x) / (startPoint.x - 2.0 * pts[0].x + pts[1].x);
+  double t1 = (startPoint.y - pts[0].y) / (startPoint.y - 2.0 * pts[0].y + pts[1].y);
+
+  DOUBLE_QUAD_MERGE_AT_T(t0)
+  DOUBLE_QUAD_MERGE_AT_T(t1)
+}
+
+// Calculate the cubic bezier curve coefficients at (t).
+//
+// a = (1-t)^3
+// b = 3 * (1-t)^2 * t
+// c = 3 * (1-t) * t^2
+// d = (t)^3
+#define DOUBLE_CUBIC_COEFF_AT_T(t, a, b, c, d) \
+  { \
+    double inv_t = 1.0 - t; \
+    double t_2 = t * t; \
+    double inv_t_2 = inv_t * inv_t; \
+    \
+    a = inv_t * inv_t_2; \
+    b = 3.0 * inv_t_2 * t; \
+    c = 3.0 * inv_t * t_2; \
+    d = t * t_2; \
+  }
+
+#define DOUBLE_CUBIC_MERGE_AT_T(t) \
+  { \
+    if (t > 0.0 && t < 1.0) \
+    { \
+      DOUBLE_CUBIC_COEFF_AT_T(t, a, b, c, d) \
+      \
+      DoublePoint __p(a * startPoint.x + b * pts[0].x + c * pts[1].x + d * pts[2].x, \
+                      a * startPoint.y + b * pts[0].y + c * pts[1].y + d * pts[2].y); \
+      \
+      if (__p.x < pMin.x) pMin.x = __p.x; else if (__p.x > pMax.x) pMax.x = __p.x; \
+      if (__p.y < pMin.y) pMin.y = __p.y; else if (__p.y > pMax.y) pMax.y = __p.y; \
+    } \
+  }
+
+static void DoublePath_calcCubicExtrema(
+  const DoublePoint& startPoint, const DoublePoint* pts, DoublePoint& pMin, DoublePoint& pMax)
+{
+  // Merge end point.
+  if (pts[2].x < pMin.x) pMin.x = pts[2].x;
+  if (pts[2].y < pMin.y) pMin.y = pts[2].y;
+
+  if (pts[2].x > pMax.x) pMax.x = pts[2].x;
+  if (pts[2].y > pMax.y) pMax.y = pts[2].y;
+
+  double a;
+  double b;
+  double c;
+
+  // X extrema.
+  a = 3.0 * (-startPoint.x + 3.0 * pts[0].x - 3.0 * pts[1].x + pts[2].x);
+  b = 6.0 * ( startPoint.x - 2.0 * pts[0].x +       pts[1].x           );
+  c = 3.0 * (-startPoint.x +       pts[0].x                            );
+
+  for (int i = 0;;)
   {
-    i--;
-    if (PathCmd::isVertex(commands[0]))
+    if (Math::feq(a, 0.0))
     {
-      x1 = vertices[0].x;
-      y1 = vertices[0].y;
-      x2 = vertices[0].x;
-      y2 = vertices[0].y;
+      if (!Math::feq(b, 0.0))
+      {
+        // Simple case (t = -c / b).
+        double t0 = -c / b;
+        double d;
 
-      commands++;
-      vertices++;
-      break;
+        DOUBLE_CUBIC_MERGE_AT_T(t0)
+      }
     }
     else
     {
-      commands++;
-      vertices++;
-    }
-  }
+      // Calculate roots (t = b^2 - 4ac).
+      double t = b * b - 4.0 * a * c;
+      if (t > 0.0)
+      {
+        double tsqrt = Math::sqrt(t);
+        double recip = 1.0 / (2.0 * a);
 
-  while (i)
+        double t0 = (-b + tsqrt) * recip;
+        double t1 = (-b - tsqrt) * recip;
+        double d;
+
+        DOUBLE_CUBIC_MERGE_AT_T(t0)
+        DOUBLE_CUBIC_MERGE_AT_T(t1)
+      }
+    }
+
+    if (++i == 2) break;
+
+    // Y extrema.
+    a = 3.0 * (-startPoint.y + 3.0 * pts[0].y - 3.0 * pts[1].y + pts[2].y);
+    b = 6.0 * ( startPoint.y - 2.0 * pts[0].y +       pts[1].y           );
+    c = 3.0 * (-startPoint.y +       pts[0].y                            );
+  }
+}
+
+DoubleRect DoublePath::getBoundingRect() const
+{
+  if (_d->boundingBoxDirty)
   {
-    if (PathCmd::isVertex(commands[0]))
+    sysuint_t i = _d->length;
+
+    const uint8_t* cmd = _d->commands;
+    const DoublePoint* pts = _d->vertices;
+
+    bool first = false;
+
+    DoublePoint pMin(0.0, 0.0);
+    DoublePoint pMax(0.0, 0.0);
+    DoublePoint pLast(0.0, 0.0);
+
+    if (i > 0)
     {
-      if (x1 > vertices[0].x) x1 = vertices[0].x;
-      if (y1 > vertices[0].y) y1 = vertices[0].y;
-      if (x2 < vertices[0].x) x2 = vertices[0].x;
-      if (y2 < vertices[0].y) y2 = vertices[0].y;
+      // Find first CMD_MOVE_TO. If there is no moveTo then we assume first point
+      // as [0, 0].
+      do {
+        uint c = cmd[0] & PATH_CMD_TYPE_MASK;
+
+        if (c == PATH_CMD_MOVE_TO)
+        {
+          pMin = pts[0];
+          pMax = pts[0];
+          pLast = pts[0];
+
+          i--;
+          cmd++;
+          pts++;
+          break;
+        }
+        else if (c == PATH_CMD_STOP)
+        {
+          i--;
+          cmd++;
+          pts++;
+          continue;
+        }
+        else
+        {
+          break;
+        }
+      } while (i);
+
+      // Iterate over the path / sub-paths.
+      while (i)
+      {
+        switch (cmd[0] & PATH_CMD_TYPE_MASK)
+        {
+          case PATH_CMD_MOVE_TO:
+          case PATH_CMD_LINE_TO:
+            if (pts[0].x < pMin.x) pMin.x = pts[0].x; else if (pts[0].x > pMax.x) pMax.x = pts[0].x;
+            if (pts[0].y < pMin.y) pMin.y = pts[0].y; else if (pts[0].y > pMax.y) pMax.y = pts[0].y;
+
+            pLast = pts[0];
+
+            i--;
+            cmd++;
+            pts++;
+            break;
+
+          case PATH_CMD_CURVE_3:
+            FOG_ASSERT(i >= 2);
+            if (FOG_UNLIKELY(i < 2)) break;
+
+            DoublePath_calcQuadExtrema(pLast, pts, pMin, pMax);
+            pLast = pts[1];
+
+            i -= 2;
+            cmd += 2;
+            pts += 2;
+            break;
+
+          case PATH_CMD_CURVE_4:
+            FOG_ASSERT(i >= 3);
+            if (FOG_UNLIKELY(i < 3)) break;
+
+            DoublePath_calcCubicExtrema(pLast, pts, pMin, pMax);
+            pLast = pts[2];
+
+            i -= 3;
+            cmd += 3;
+            pts += 3;
+            break;
+
+          case PATH_CMD_STOP:
+          case PATH_CMD_END:
+            pLast.clear();
+
+            i--;
+            cmd++;
+            pts++;
+            break;
+        }
+      }
     }
 
-    i--;
-    commands++;
-    vertices++;
+    _d->boundingBoxDirty = false;
+    _d->boundingBoxMin = pMin;
+    _d->boundingBoxMax = pMax;
+  }
+  
+  return DoubleRect(
+    _d->boundingBoxMin.x,
+    _d->boundingBoxMin.y,
+    _d->boundingBoxMax.x - _d->boundingBoxMin.x,
+    _d->boundingBoxMax.y - _d->boundingBoxMin.y);
+}
+
+err_t DoublePath::fitTo(const DoubleRect& toRect)
+{
+  if (!toRect.isValid()) return ERR_RT_INVALID_ARGUMENT;
+
+  DoubleRect currentRect = getBoundingRect();
+  if (!currentRect.isValid()) return ERR_OK;
+
+  double cx = currentRect.x;
+  double cy = currentRect.y;
+
+  double tx = toRect.x;
+  double ty = toRect.y;
+
+  double sx = toRect.w / currentRect.w;
+  double sy = toRect.h / currentRect.h;
+
+  FOG_RETURN_ON_ERROR(detach());
+
+  sysuint_t i, length = _d->length;
+  DoublePoint* pts = _d->vertices;
+
+  for (i = 0; i < length; i++, pts++)
+  {
+    pts[0].set((pts[0].x - cx) * sx + tx,
+               (pts[0].y - cy) * sy + ty);
   }
 
-  return DoubleRect(x1, y1, x2 - x1, y2 - y1);
+  _d->boundingBoxMin.set((_d->boundingBoxMin.x - cx) * sx + tx,
+                         (_d->boundingBoxMin.y - cy) * sy + ty);
+  _d->boundingBoxMax.set((_d->boundingBoxMax.x - cx) * sx + tx,
+                         (_d->boundingBoxMax.y - cy) * sy + ty);
+
+  return ERR_OK;
 }
 
 // ============================================================================
@@ -457,6 +708,9 @@ err_t DoublePath::moveTo(double x, double y)
   commands[0] = PATH_CMD_MOVE_TO;
   vertices[0].set(x, y);
 
+  // Bounding box is no longer valid.
+  _d->boundingBoxDirty = true;
+
   return ERR_OK;
 }
 
@@ -481,6 +735,9 @@ err_t DoublePath::lineTo(double x, double y)
   commands[0] = PATH_CMD_LINE_TO;
   vertices[0].set(x, y);
 
+  // Bounding box is no longer valid.
+  _d->boundingBoxDirty = true;
+
   return ERR_OK;
 }
 
@@ -504,6 +761,9 @@ err_t DoublePath::lineTo(const double* x, const double* y, sysuint_t count)
     vertices[i].set(x[i], y[i]);
   }
 
+  // Bounding box is no longer valid.
+  _d->boundingBoxDirty = true;
+
   return ERR_OK;
 }
 
@@ -520,6 +780,9 @@ err_t DoublePath::lineTo(const DoublePoint* pts, sysuint_t count)
     commands[i] = PATH_CMD_LINE_TO;
     vertices[i].set(pts[i]);
   }
+
+  // Bounding box is no longer valid.
+  _d->boundingBoxDirty = true;
 
   return ERR_OK;
 }
@@ -575,7 +838,7 @@ static void _arcToBezier(
 
   double x0;
   double y0;
-  Math::sincos(sweep, &x0, &y0);
+  Math::sincos(sweep, &y0, &x0);
 
   double tx = (1.0 - x0) * (4.0 / 3.0);
   double ty = y0 - tx * x0 / y0;
@@ -647,8 +910,8 @@ err_t DoublePath::_arcTo(double cx, double cy, double rx, double ry, double star
     commands++;
     vertices++;
 
-    // 4 arcs are the maximum;
-    sysuint_t remain = 4;
+    // 4 arcs is the maximum.
+    int remain = 4;
 
     do {
       if (sweep < 0.0)
@@ -692,6 +955,9 @@ err_t DoublePath::_arcTo(double cx, double cy, double rx, double ry, double star
     _d->flat = 0;
   }
 
+  // Bounding box is no longer valid.
+  _d->boundingBoxDirty = true;
+
   if (closePath) closePolygon();
   return ERR_OK;
 }
@@ -711,11 +977,25 @@ err_t DoublePath::_svgArcTo(
   double x0 = 0.0, y0 = 0.0;
 
   // Get initial (x0, y0).
-  if (mark && PathCmd::isVertex(_d->commands[mark - 1]))
+  if (mark)
   {
-    const DoublePoint* vertex = _d->vertices + mark - 1;
-    x0 = vertex[0].x;
-    y0 = vertex[0].y;
+    uint8_t cmd = _d->commands[mark - 1];
+    if (PathCmd::isVertex(cmd))
+    {
+      const DoublePoint* vertex = _d->vertices + mark - 1;
+      x0 = vertex[0].x;
+      y0 = vertex[0].y;
+
+      // Skip last vertex, because initial command duplicates it. This is
+      // sometimes called as a degenerate case.
+      if (initialCommand != PATH_CMD_MOVE_TO)
+      {
+        FOG_RETURN_ON_ERROR(detach());
+        initialCommand = cmd;
+        _d->length--;
+        mark--;
+      }
+    }
   }
 
   // Normalize radius.
@@ -806,19 +1086,21 @@ err_t DoublePath::_svgArcTo(
   {
     DoubleMatrix matrix = DoubleMatrix::fromRotation(angle);
     matrix.translate(cx, cy, MATRIX_APPEND);
-    PathUtil::transformPoints(_d->vertices + mark + 1, _d->length - mark - 1, &matrix);
+    PathUtil::transformPoints(_d->vertices + mark, _d->length - mark, &matrix);
   }
 
   // We must make sure that the starting and ending points exactly coincide
   // with the initial (x0, y0) and (x2, y2).
-  //
-  // This comment was originally from AntiGrain, we actually need only to fix
-  // the end point.
   {
-    DoublePoint* vertex = _d->vertices + _d->length - 1;
-    vertex->x = x2;
-    vertex->y = y2;
+    DoublePoint* vertex = _d->vertices;
+    vertex[mark].x = x0;
+    vertex[mark].y = y0;
+    vertex[_d->length - 1].x = x2;
+    vertex[_d->length - 1].y = y2;
   }
+
+  // Bounding box is no longer valid.
+  _d->boundingBoxDirty = true;
 
   if (closePath) err = closePolygon();
   return err;
@@ -876,6 +1158,8 @@ err_t DoublePath::curveTo(double cx, double cy, double tx, double ty)
 
   // Path is no longer flat.
   _d->flat = 0;
+  // The bounding box is no longer valid.
+  _d->boundingBoxDirty = true;
 
   return ERR_OK;
 }
@@ -935,6 +1219,8 @@ err_t DoublePath::cubicTo(double cx1, double cy1, double cx2, double cy2, double
 
   // Path is no longer flat.
   _d->flat = 0;
+  // The bounding box is no longer valid.
+  _d->boundingBoxDirty = true;
 
   return ERR_OK;
 }
@@ -991,6 +1277,16 @@ err_t DoublePath::flipX(double x1, double x2)
     vertices++;
   } while (--i);
 
+  if (!_d->boundingBoxDirty)
+  {
+    double xMin = x - _d->boundingBoxMin.x;
+    double xMax = x - _d->boundingBoxMax.x;
+    if (xMax < xMin) swap(xMin, xMax);
+
+    _d->boundingBoxMin.x = xMin;
+    _d->boundingBoxMax.x = xMax;
+  }
+
   return ERR_OK;
 }
 
@@ -1008,6 +1304,16 @@ err_t DoublePath::flipY(double y1, double y2)
     vertices[0].y = y - vertices[0].y;
     vertices++;
   } while (--i);
+
+  if (!_d->boundingBoxDirty)
+  {
+    double yMin = y - _d->boundingBoxMin.y;
+    double yMax = y - _d->boundingBoxMax.y;
+    if (yMax < yMin) swap(yMin, yMax);
+
+    _d->boundingBoxMin.y = yMin;
+    _d->boundingBoxMax.y = yMax;
+  }
 
   return ERR_OK;
 }
@@ -1029,6 +1335,12 @@ err_t DoublePath::translate(double dx, double dy)
     vertices[0].translate(dx, dy);
     vertices++;
   } while (--i);
+
+  if (!_d->boundingBoxDirty)
+  {
+    _d->boundingBoxMin.translate(dx, dy);
+    _d->boundingBoxMax.translate(dx, dy);
+  }
 
   return ERR_OK;
 }
@@ -1052,6 +1364,9 @@ err_t DoublePath::translateSubPath(sysuint_t subPathId, double dx, double dy)
     commands++;
     vertices++;
   } while (--i);
+
+  // Bounding box is no longer valid.
+  _d->boundingBoxDirty = true;
 
   return ERR_OK;
 }
@@ -1094,6 +1409,25 @@ err_t DoublePath::scale(double sx, double sy, bool keepStartPos)
       vertices[0].y += dy;
       vertices++;
     } while (--i);
+
+    if (!_d->boundingBoxDirty)
+    {
+      DoublePoint& bMin = _d->boundingBoxMin;
+      DoublePoint& bMax = _d->boundingBoxMin;
+
+      bMin.x *= sx;
+      bMin.y *= sy;
+      bMin.x += dx;
+      bMin.y += dy;
+
+      bMax.x *= sx;
+      bMax.y *= sy;
+      bMax.x += dx;
+      bMax.y += dy;
+
+      if (bMin.x > bMax.x) swap(bMin.x, bMax.x);
+      if (bMin.y > bMax.y) swap(bMin.y, bMax.y);
+    }
   }
   else
   {
@@ -1102,6 +1436,21 @@ err_t DoublePath::scale(double sx, double sy, bool keepStartPos)
       vertices[0].y *= sy;
       vertices++;
     } while (--i);
+
+    if (!_d->boundingBoxDirty)
+    {
+      DoublePoint& bMin = _d->boundingBoxMin;
+      DoublePoint& bMax = _d->boundingBoxMin;
+
+      bMin.x *= sx;
+      bMin.y *= sy;
+
+      bMax.x *= sx;
+      bMax.y *= sy;
+
+      if (bMin.x > bMax.x) swap(bMin.x, bMax.x);
+      if (bMin.y > bMax.y) swap(bMin.y, bMax.y);
+    }
   }
 
   return ERR_OK;
@@ -1118,6 +1467,10 @@ err_t DoublePath::applyMatrix(const DoubleMatrix& matrix)
   FOG_RETURN_ON_ERROR(detach());
 
   PathUtil::transformPoints(_d->vertices, _d->length, &matrix);
+
+  // Bounding box is no longer valid.
+  _d->boundingBoxDirty = true;
+
   return ERR_OK;
 }
 
@@ -1129,6 +1482,10 @@ err_t DoublePath::applyMatrix(const DoubleMatrix& matrix, const Range& range)
   FOG_RETURN_ON_ERROR(detach());
 
   PathUtil::transformPoints(_d->vertices + range.index, Math::min(range.length, length - range.index), &matrix);
+
+  // Bounding box is no longer valid.
+  _d->boundingBoxDirty = true;
+
   return ERR_OK;
 }
 
@@ -1136,7 +1493,12 @@ err_t DoublePath::applyMatrix(const DoubleMatrix& matrix, const Range& range)
 // [Fog::Path - Add]
 // ============================================================================
 
-err_t DoublePath::addRect(const DoubleRect& r, int direction)
+err_t DoublePath::addRect(const IntRect& r, uint32_t direction)
+{
+  return addRect(DoubleRect(r.x, r.y, r.w, r.h), direction);
+}
+
+err_t DoublePath::addRect(const DoubleRect& r, uint32_t direction)
 {
   if (!r.isValid()) return ERR_OK;
 
@@ -1146,6 +1508,11 @@ err_t DoublePath::addRect(const DoubleRect& r, int direction)
   uint8_t* commands = _d->commands + pos;
   DoublePoint* vertices = _d->vertices + pos;
 
+  double x0 = r.x;
+  double y0 = r.y;
+  double x1 = r.x + r.w;
+  double y1 = r.y + r.h;
+
   if (direction == PATH_DIRECTION_CW)
   {
     commands[0] = PATH_CMD_MOVE_TO;
@@ -1154,14 +1521,14 @@ err_t DoublePath::addRect(const DoubleRect& r, int direction)
     commands[3] = PATH_CMD_LINE_TO;
     commands[4] = PATH_CMD_END | PATH_CMD_FLAG_CLOSE;
 
-    vertices[0].x = r.x;
-    vertices[0].y = r.y;
-    vertices[1].x = r.x + r.w;
-    vertices[1].y = r.y;
-    vertices[2].x = r.x + r.w;
-    vertices[2].y = r.y + r.h;
-    vertices[3].x = r.x;
-    vertices[3].y = r.y + r.h;
+    vertices[0].x = x0;
+    vertices[0].y = y0;
+    vertices[1].x = x1;
+    vertices[1].y = y0;
+    vertices[2].x = x1;
+    vertices[2].y = y1;
+    vertices[3].x = x0;
+    vertices[3].y = y1;
     vertices[4].x = NAN;
     vertices[4].y = NAN;
   }
@@ -1173,22 +1540,255 @@ err_t DoublePath::addRect(const DoubleRect& r, int direction)
     commands[3] = PATH_CMD_LINE_TO;
     commands[4] = PATH_CMD_END | PATH_CMD_FLAG_CLOSE;
 
-    vertices[0].x = r.x;
-    vertices[0].y = r.y;
-    vertices[1].x = r.x;
-    vertices[1].y = r.y + r.h;
-    vertices[2].x = r.x + r.w;
-    vertices[2].y = r.y + r.h;
-    vertices[3].x = r.x + r.w;
-    vertices[3].y = r.y;
+    vertices[0].x = x0;
+    vertices[0].y = y0;
+    vertices[1].x = x0;
+    vertices[1].y = y1;
+    vertices[2].x = x1;
+    vertices[2].y = y1;
+    vertices[3].x = x1;
+    vertices[3].y = y0;
     vertices[4].x = NAN;
     vertices[4].y = NAN;
+  }
+
+  if (!_d->boundingBoxDirty)
+  {
+    if (x0 < _d->boundingBoxMin.x) _d->boundingBoxMin.x = x0;
+    if (x1 > _d->boundingBoxMax.x) _d->boundingBoxMax.x = x1;
+
+    if (y0 < _d->boundingBoxMin.y) _d->boundingBoxMin.y = y0;
+    if (y1 > _d->boundingBoxMax.y) _d->boundingBoxMax.y = y1;
   }
 
   return ERR_OK;
 }
 
-err_t DoublePath::addRects(const DoubleRect* r, sysuint_t count, int direction)
+static err_t DoublePath_addPoly(DoublePath* path, const IntPoint* pts, sysuint_t count, bool closePath)
+{
+  sysuint_t pos = path->_add(count + closePath);
+  if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
+
+  uint8_t* commands = path->_d->commands + pos;
+  DoublePoint* vertices = path->_d->vertices + pos;
+
+  commands[0] = PATH_CMD_MOVE_TO;
+  memset(&commands[1], PATH_CMD_LINE_TO, count - 1);
+
+  for (sysuint_t i = 0; i < count; i++)
+  {
+    vertices[i] = pts[i];
+  }
+
+  if (closePath)
+  {
+    commands[count] = PATH_CMD_END | PATH_CMD_FLAG_CLOSE;
+    vertices[count].set(NAN, NAN);
+  }
+
+  return ERR_OK;
+}
+
+static err_t DoublePath_addPoly(DoublePath* path, const DoublePoint* pts, sysuint_t count, bool closePath)
+{
+  sysuint_t pos = path->_add(count + closePath);
+  if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
+
+  uint8_t* commands = path->_d->commands + pos;
+  DoublePoint* vertices = path->_d->vertices + pos;
+
+  commands[0] = PATH_CMD_MOVE_TO;
+  memset(&commands[1], PATH_CMD_LINE_TO, count - 1);
+
+  for (sysuint_t i = 0; i < count; i++)
+  {
+    vertices[i] = pts[i];
+  }
+
+  if (closePath)
+  {
+    commands[count] = PATH_CMD_END | PATH_CMD_FLAG_CLOSE;
+    vertices[count].set(NAN, NAN);
+  }
+
+  // Bounding box is no longer valid.
+  path->_d->boundingBoxDirty = true;
+
+  return ERR_OK;
+}
+
+err_t DoublePath::addPolygon(const IntPoint* pts, sysuint_t count)
+{
+  if (count < 3 || pts == NULL) return ERR_RT_INVALID_ARGUMENT;
+  return DoublePath_addPoly(this, pts, count, true);
+}
+
+err_t DoublePath::addPolygon(const DoublePoint* pts, sysuint_t count)
+{
+  if (count < 3 || pts == NULL) return ERR_RT_INVALID_ARGUMENT;
+  return DoublePath_addPoly(this, pts, count, true);
+}
+
+err_t DoublePath::addPolyLine(const IntPoint* pts, sysuint_t count)
+{
+  if (count < 2) return ERR_RT_INVALID_ARGUMENT;
+  return DoublePath_addPoly(this, pts, count, false);
+}
+
+err_t DoublePath::addPolyLine(const DoublePoint* pts, sysuint_t count)
+{
+  if (count < 2) return ERR_RT_INVALID_ARGUMENT;
+  return DoublePath_addPoly(this, pts, count, false);
+}
+
+err_t DoublePath::addRegion(const Region& r, uint32_t direction)
+{
+  return addRects(r.getData(), r.getLength(), direction);
+}
+
+err_t DoublePath::addRects(const IntRect* r, sysuint_t count, uint32_t direction)
+{
+  if (!count) return ERR_OK;
+  FOG_ASSERT(r);
+
+  sysuint_t pos = _add(count * 5);
+  if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
+
+  uint8_t* commands = _d->commands + pos;
+  DoublePoint* vertices = _d->vertices + pos;
+
+  if (direction == PATH_DIRECTION_CW)
+  {
+    for (sysuint_t i = 0; i < count; i++, r++)
+    {
+      if (!r->isValid()) continue;
+
+      commands[0] = PATH_CMD_MOVE_TO;
+      commands[1] = PATH_CMD_LINE_TO;
+      commands[2] = PATH_CMD_LINE_TO;
+      commands[3] = PATH_CMD_LINE_TO;
+      commands[4] = PATH_CMD_END | PATH_CMD_FLAG_CLOSE;
+
+      vertices[0].x = (double)(r->x);
+      vertices[0].y = (double)(r->y);
+      vertices[1].x = (double)(r->x + r->w);
+      vertices[1].y = (double)(r->y);
+      vertices[2].x = (double)(r->x + r->w);
+      vertices[2].y = (double)(r->y + r->h);
+      vertices[3].x = (double)(r->x);
+      vertices[3].y = (double)(r->y + r->h);
+      vertices[4].x = NAN;
+      vertices[4].y = NAN;
+
+      commands += 5;
+      vertices += 5;
+    }
+  }
+  else
+  {
+    for (sysuint_t i = 0; i < count; i++, r++)
+    {
+      if (!r->isValid()) continue;
+
+      commands[0] = PATH_CMD_MOVE_TO;
+      commands[1] = PATH_CMD_LINE_TO;
+      commands[2] = PATH_CMD_LINE_TO;
+      commands[3] = PATH_CMD_LINE_TO;
+      commands[4] = PATH_CMD_END | PATH_CMD_FLAG_CLOSE;
+
+      vertices[0].x = (double)(r->x);
+      vertices[0].y = (double)(r->y);
+      vertices[1].x = (double)(r->x);
+      vertices[1].y = (double)(r->y + r->h);
+      vertices[2].x = (double)(r->x + r->w);
+      vertices[2].y = (double)(r->y + r->h);
+      vertices[3].x = (double)(r->x + r->w);
+      vertices[3].y = (double)(r->y);
+      vertices[4].x = NAN;
+      vertices[4].y = NAN;
+    }
+  }
+
+  // Bounding box is no longer valid.
+  _d->boundingBoxDirty = true;
+
+  // Return and update path length.
+  _d->length = (sysuint_t)(commands - _d->commands);
+  return ERR_OK;
+}
+
+err_t DoublePath::addRects(const IntBox* r, sysuint_t count, uint32_t direction)
+{
+  if (!count) return ERR_OK;
+  FOG_ASSERT(r);
+
+  sysuint_t pos = _add(count * 5);
+  if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
+
+  uint8_t* commands = _d->commands + pos;
+  DoublePoint* vertices = _d->vertices + pos;
+
+  if (direction == PATH_DIRECTION_CW)
+  {
+    for (sysuint_t i = 0; i < count; i++, r++)
+    {
+      if (!r->isValid()) continue;
+
+      commands[0] = PATH_CMD_MOVE_TO;
+      commands[1] = PATH_CMD_LINE_TO;
+      commands[2] = PATH_CMD_LINE_TO;
+      commands[3] = PATH_CMD_LINE_TO;
+      commands[4] = PATH_CMD_END | PATH_CMD_FLAG_CLOSE;
+
+      vertices[0].x = (double)(r->x1);
+      vertices[0].y = (double)(r->y1);
+      vertices[1].x = (double)(r->x2);
+      vertices[1].y = (double)(r->y1);
+      vertices[2].x = (double)(r->x2);
+      vertices[2].y = (double)(r->y2);
+      vertices[3].x = (double)(r->x1);
+      vertices[3].y = (double)(r->y2);
+      vertices[4].x = NAN;
+      vertices[4].y = NAN;
+
+      commands += 5;
+      vertices += 5;
+    }
+  }
+  else
+  {
+    for (sysuint_t i = 0; i < count; i++, r++)
+    {
+      if (!r->isValid()) continue;
+
+      commands[0] = PATH_CMD_MOVE_TO;
+      commands[1] = PATH_CMD_LINE_TO;
+      commands[2] = PATH_CMD_LINE_TO;
+      commands[3] = PATH_CMD_LINE_TO;
+      commands[4] = PATH_CMD_END | PATH_CMD_FLAG_CLOSE;
+
+      vertices[0].x = (double)(r->x1);
+      vertices[0].y = (double)(r->y1);
+      vertices[1].x = (double)(r->x1);
+      vertices[1].y = (double)(r->y2);
+      vertices[2].x = (double)(r->x2);
+      vertices[2].y = (double)(r->y2);
+      vertices[3].x = (double)(r->x2);
+      vertices[3].y = (double)(r->y1);
+      vertices[4].x = NAN;
+      vertices[4].y = NAN;
+    }
+  }
+
+  // Bounding box is no longer valid.
+  _d->boundingBoxDirty = true;
+
+  // Return and update path length.
+  _d->length = (sysuint_t)(commands - _d->commands);
+  return ERR_OK;
+}
+
+err_t DoublePath::addRects(const DoubleRect* r, sysuint_t count, uint32_t direction)
 {
   if (!count) return ERR_OK;
   FOG_ASSERT(r);
@@ -1251,12 +1851,15 @@ err_t DoublePath::addRects(const DoubleRect* r, sysuint_t count, int direction)
     }
   }
 
+  // Bounding box is no longer valid.
+  _d->boundingBoxDirty = true;
+
   // Return and update path length.
   _d->length = (sysuint_t)(commands - _d->commands);
   return ERR_OK;
 }
 
-err_t DoublePath::addRound(const DoubleRect& r, const DoublePoint& radius, int direction)
+err_t DoublePath::addRound(const DoubleRect& r, const DoublePoint& radius, uint32_t direction)
 {
   if (!r.isValid()) return ERR_OK;
 
@@ -1271,51 +1874,61 @@ err_t DoublePath::addRound(const DoubleRect& r, const DoublePoint& radius, int d
 
   if (rx == 0 || ry == 0) return addRect(r, direction);
 
-  double x1 = r.x;
-  double y1 = r.y;
-  double x2 = r.x + r.w;
-  double y2 = r.y + r.h;
+  double x0 = r.x;
+  double y0 = r.y;
+  double x1 = r.x + r.w;
+  double y1 = r.y + r.h;
 
   err_t err = ERR_OK;
 
   if (direction == PATH_DIRECTION_CW)
   {
-    err |= moveTo(x1 + rx, y1);
+    err |= moveTo(x0 + rx, y0);
 
-    err |= lineTo(x2 - rx, y1);
-    err |= arcTo(x2 - rx, y1 + ry, rx, ry, M_PI * 1.5, M_PI * 0.5);
+    err |= lineTo(x1 - rx, y0);
+    err |= arcTo(x1 - rx, y0 + ry, rx, ry, M_PI * 1.5, M_PI * 0.5);
 
-    err |= lineTo(x2, y2 - ry);
-    err |= arcTo(x2 - rx, y2 - ry, rx, ry, M_PI * 0.0, M_PI * 0.5);
+    err |= lineTo(x1, y1 - ry);
+    err |= arcTo(x1 - rx, y1 - ry, rx, ry, M_PI * 0.0, M_PI * 0.5);
 
-    err |= lineTo(x1 + rx, y2);
-    err |= arcTo(x1 + rx, y2 - ry, rx, ry, M_PI * 0.5, M_PI * 0.5);
+    err |= lineTo(x0 + rx, y1);
+    err |= arcTo(x0 + rx, y1 - ry, rx, ry, M_PI * 0.5, M_PI * 0.5);
 
-    err |= lineTo(x1, y1 + ry);
-    err |= arcTo(x1 + rx, y1 + ry, rx, ry, M_PI * 1.0, M_PI * 0.5);
+    err |= lineTo(x0, y0 + ry);
+    err |= arcTo(x0 + rx, y0 + ry, rx, ry, M_PI * 1.0, M_PI * 0.5);
   }
   else
   {
-    err |= moveTo(x1 + rx, y1);
+    err |= moveTo(x0 + rx, y0);
 
-    err |= arcTo(x1, y1 + ry, rx, ry, M_PI * 1.0, M_PI * -0.5);
-    err |= lineTo(x1, y2 - ry);
+    err |= arcTo(x0 + rx, y0 + ry, rx, ry, M_PI * 1.5, M_PI * -0.5);
+    err |= lineTo(x0, y1 - ry);
 
-    err |= arcTo(x1 + rx, y2, rx, ry, M_PI * 0.5, M_PI * -0.5);
-    err |= lineTo(x2 - rx, y2);
+    err |= arcTo(x0 + rx, y1 - ry, rx, ry, M_PI * 1.0, M_PI * -0.5);
+    err |= lineTo(x1 - rx, y1);
 
-    err |= arcTo(x2, y2 - ry, rx, ry, M_PI * 0.0, M_PI * -0.5);
-    err |= lineTo(x2, y1 + ry);
+    err |= arcTo(x1 - rx, y1 - ry, rx, ry, M_PI * 0.5, M_PI * -0.5);
+    err |= lineTo(x1, y0 + ry);
 
-    err |= arcTo(x2 - rx, y1, rx, ry, M_PI * 1.5, M_PI * -0.5);
+    err |= arcTo(x1 - rx, y0 + ry, rx, ry, M_PI * 0.0, M_PI * -0.5);
   }
 
   err |= closePolygon();
 
+
+  if (err == ERR_OK && !_d->boundingBoxDirty)
+  {
+    if (x0 < _d->boundingBoxMin.x) _d->boundingBoxMin.x = x0;
+    if (x1 > _d->boundingBoxMax.x) _d->boundingBoxMax.x = y0;
+
+    if (y0 < _d->boundingBoxMin.y) _d->boundingBoxMin.y = x1;
+    if (y1 > _d->boundingBoxMax.y) _d->boundingBoxMax.y = y1;
+  }
+
   return err;
 }
 
-err_t DoublePath::addEllipse(const DoubleRect& r, int direction)
+err_t DoublePath::addEllipse(const DoubleRect& r, uint32_t direction)
 {
   if (!r.isValid()) return ERR_OK;
 
@@ -1334,11 +1947,11 @@ err_t DoublePath::addEllipse(const DoubleRect& r, int direction)
   }
 }
 
-err_t DoublePath::addEllipse(const DoublePoint& cp, const DoublePoint& r, int direction)
+err_t DoublePath::addEllipse(const DoublePoint& cp, const DoublePoint& r, uint32_t direction)
 {
   if (direction == PATH_DIRECTION_CW)
   {
-    return _arcTo(cp.x, cp.y, r.x, r.y, 0.0, M_PI * -2.0, PATH_CMD_MOVE_TO, true);
+    return _arcTo(cp.x, cp.y, r.x, r.y, 0.0, M_PI * 2.0, PATH_CMD_MOVE_TO, true);
   }
   else
   {
@@ -1346,7 +1959,7 @@ err_t DoublePath::addEllipse(const DoublePoint& cp, const DoublePoint& r, int di
   }
 }
 
-err_t DoublePath::addArc(const DoubleRect& r, double start, double sweep, int direction)
+err_t DoublePath::addArc(const DoubleRect& r, double start, double sweep, uint32_t direction)
 {
   if (!r.isValid()) return ERR_OK;
 
@@ -1359,13 +1972,13 @@ err_t DoublePath::addArc(const DoubleRect& r, double start, double sweep, int di
   return _arcTo(cx, cy, rx, ry, start, sweep, PATH_CMD_MOVE_TO, false);
 }
 
-err_t DoublePath::addArc(const DoublePoint& cp, const DoublePoint& r, double start, double sweep, int direction)
+err_t DoublePath::addArc(const DoublePoint& cp, const DoublePoint& r, double start, double sweep, uint32_t direction)
 {
   if (direction == PATH_DIRECTION_CCW) { start += sweep; sweep = -sweep; }
   return _arcTo(cp.x, cp.y, r.x, r.y, start, sweep, PATH_CMD_MOVE_TO, false);
 }
 
-err_t DoublePath::addChord(const DoubleRect& r, double start, double sweep, int direction)
+err_t DoublePath::addChord(const DoubleRect& r, double start, double sweep, uint32_t direction)
 {
   if (!r.isValid()) return ERR_OK;
 
@@ -1378,13 +1991,13 @@ err_t DoublePath::addChord(const DoubleRect& r, double start, double sweep, int 
   return _arcTo(cx, cy, rx, ry, start, sweep, PATH_CMD_MOVE_TO, true);
 }
 
-err_t DoublePath::addChord(const DoublePoint& cp, const DoublePoint& r, double start, double sweep, int direction)
+err_t DoublePath::addChord(const DoublePoint& cp, const DoublePoint& r, double start, double sweep, uint32_t direction)
 {
   if (direction == PATH_DIRECTION_CCW) { start += sweep; sweep = -sweep; }
   return _arcTo(cp.x, cp.y, r.x, r.y, start, sweep, PATH_CMD_MOVE_TO, true);
 }
 
-err_t DoublePath::addPie(const DoubleRect& r, double start, double sweep, int direction)
+err_t DoublePath::addPie(const DoubleRect& r, double start, double sweep, uint32_t direction)
 {
   if (!r.isValid()) return ERR_OK;
 
@@ -1396,7 +2009,7 @@ err_t DoublePath::addPie(const DoubleRect& r, double start, double sweep, int di
   return addPie(DoublePoint(cx, cy), DoublePoint(rx, ry), start, sweep);
 }
 
-err_t DoublePath::addPie(const DoublePoint& cp, const DoublePoint& r, double start, double sweep, int direction)
+err_t DoublePath::addPie(const DoublePoint& cp, const DoublePoint& r, double start, double sweep, uint32_t direction)
 {
   if (sweep >= M_PI*2.0) return addEllipse(cp, r, direction);
 
@@ -1428,6 +2041,20 @@ err_t DoublePath::addPath(const DoublePath& path)
 
   _d->flat = flat;
 
+  if (!_d->boundingBoxDirty && !path._d->boundingBoxDirty)
+  {
+    double x0 = path._d->boundingBoxMin.x;
+    double y0 = path._d->boundingBoxMin.y;
+    double x1 = path._d->boundingBoxMax.x;
+    double y1 = path._d->boundingBoxMax.y;
+
+    if (x0 < _d->boundingBoxMin.x) _d->boundingBoxMin.x = x0;
+    if (x1 > _d->boundingBoxMax.x) _d->boundingBoxMax.x = x0;
+
+    if (y0 < _d->boundingBoxMin.y) _d->boundingBoxMin.y = y0;
+    if (y1 > _d->boundingBoxMax.y) _d->boundingBoxMax.y = y1;
+  }
+
   return ERR_OK;
 }
 
@@ -1445,6 +2072,20 @@ err_t DoublePath::addPath(const DoublePath& path, const DoublePoint& pt)
   PathUtil::translatePoints(_d->vertices + pos, path._d->vertices, count, &pt);
 
   _d->flat = flat;
+
+  if (!_d->boundingBoxDirty && !path._d->boundingBoxDirty)
+  {
+    double x0 = path._d->boundingBoxMin.x + pt.x;
+    double y0 = path._d->boundingBoxMin.y + pt.y;
+    double x1 = path._d->boundingBoxMax.x + pt.x;
+    double y1 = path._d->boundingBoxMax.y + pt.y;
+
+    if (x0 < _d->boundingBoxMin.x) _d->boundingBoxMin.x = x0;
+    if (x1 > _d->boundingBoxMax.x) _d->boundingBoxMax.x = x0;
+
+    if (y0 < _d->boundingBoxMin.y) _d->boundingBoxMin.y = y0;
+    if (y1 > _d->boundingBoxMax.y) _d->boundingBoxMax.y = y1;
+  }
 
   return ERR_OK;
 }
@@ -1473,15 +2114,15 @@ err_t DoublePath::addPath(const DoublePath& path, const DoubleMatrix& matrix)
 
 bool DoublePath::isFlat() const
 {
-  int flat = _d->flat;
-  if (flat != -1) return (bool)flat;
+  uint flat = _d->flat;
+  if (flat != 0xFF) return (bool)flat;
+
+  flat = 1;
 
   const uint8_t* commands = _d->commands;
-  sysuint_t i = _d->length;
-
-  for (flat = true; i; i--, commands++)
+  for (sysuint_t i = _d->length; i; i--, commands++)
   {
-    if (PathCmd::isCurve(commands[0])) { flat = false; break; }
+    if (PathCmd::isCurve(commands[0])) { flat = 0; break; }
   }
 
   _d->flat = flat;
@@ -1498,7 +2139,7 @@ err_t DoublePath::flatten(const DoubleMatrix* matrix, double approximationScale)
   return flattenTo(*this, NULL, 1.0);
 }
 
-static err_t _flattenData(
+static err_t DoublePath_flattenData(
   DoublePath& dst,
   const uint8_t* srcCommands, const DoublePoint* srcVertices, sysuint_t srcCount,
   const DoubleMatrix* matrix, double approximationScale)
@@ -1507,7 +2148,6 @@ static err_t _flattenData(
   if (srcCount == 0) return ERR_OK;
 
   err_t err = ERR_OK;
-  sysuint_t initialLength = dst.getLength();
   sysuint_t grow = srcCount * 4;
 
   if (grow < srcCount) return ERR_RT_OUT_OF_MEMORY;
@@ -1672,11 +2312,10 @@ end:
   return err;
 
 invalid:
-  dst._d->length = 0;
-  return ERR_PATH_INVALID;
+  err = ERR_PATH_INVALID;
 
 error:
-  dst._d->length = initialLength;
+  dst._d->length = 0;
   return err;
 }
 
@@ -1713,14 +2352,14 @@ err_t DoublePath::flattenTo(DoublePath& dst, const DoubleMatrix* matrix, double 
   {
     DoublePath tmp(*this);
 
-    return _flattenData(dst,
+    return DoublePath_flattenData(dst,
       tmp.getCommands(),
       tmp.getVertices(),
       tmp.getLength(), matrix, approximationScale);
   }
   else
   {
-    return _flattenData(dst,
+    return DoublePath_flattenData(dst,
       getCommands(),
       getVertices(),
       getLength(), matrix, approximationScale);
@@ -1772,14 +2411,14 @@ err_t DoublePath::flattenSubPathTo(DoublePath& dst, sysuint_t subPathId, const D
   {
     DoublePath tmp(*this);
 
-    return _flattenData(dst,
+    return DoublePath_flattenData(dst,
       tmp.getCommands() + subPathId,
       tmp.getVertices() + subPathId,
       len, matrix, approximationScale);
   }
   else
   {
-    return _flattenData(dst,
+    return DoublePath_flattenData(dst,
       getCommands() + subPathId,
       getVertices() + subPathId,
       len, matrix, approximationScale);
@@ -1799,7 +2438,12 @@ FOG_INIT_DECLARE err_t fog_path_init(void)
   DoublePathData* d = DoublePath::_dnull.instancep();
 
   d->refCount.init(1);
+
   d->flat = true;
+  d->boundingBoxDirty = true;
+  d->boundingBoxMin.clear();
+  d->boundingBoxMax.clear();
+
   d->capacity = 0;
   d->length = 0;
 

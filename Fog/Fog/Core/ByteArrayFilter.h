@@ -8,20 +8,21 @@
 #define _FOG_CORE_BYTEARRAYFILTER_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Basics.h>
 #include <Fog/Core/ByteArray.h>
 
-//! @addtogroup Fog_Core
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Core_Essentials
+//! @{
 
 // ============================================================================
 // [Fog::ByteArrayFilter]
 // ============================================================================
 
+//! @brief Byte array filter.
 struct FOG_API ByteArrayFilter
 {
   // [Construction / Destruction]
@@ -43,9 +44,9 @@ private:
   FOG_DISABLE_COPY(ByteArrayFilter)
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_CORE_BYTEARRAYFILTER_H

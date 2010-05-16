@@ -9,15 +9,17 @@
 #include <Fog/Core/Hash.h>
 #include <Fog/Graphics/Image.h>
 
+namespace Fog {
+
 //! @addtogroup Fog_Graphics_Private
 //! @{
-
-namespace Fog {
 
 // ============================================================================
 // [Fog::Reduce]
 // ============================================================================
 
+//! @internal
+//!
 //! @brief Class used to get information about colors in an image.
 //!
 //! It's designed for tasks where it's needed or optional to reduce color
@@ -40,6 +42,8 @@ struct FOG_HIDDEN Reduce
   // [Entity]
   // --------------------------------------------------------------------------
 
+  //! @internal
+  //!
   //! @brief Argb entity with usage information.
   struct Entity
   {
@@ -79,8 +83,8 @@ private:
   FOG_DISABLE_COPY(Reduce)
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 #endif // _FOG_GRAPHICS_REDUCE_P_H

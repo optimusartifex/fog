@@ -13,10 +13,10 @@
 #include <Fog/Graphics/Matrix.h>
 #include <Fog/Graphics/Path.h>
 
-//! @addtogroup Fog_Graphics
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Graphics_Effects
+//! @{
 
 // ============================================================================
 // [Fog::PathTransform]
@@ -61,9 +61,9 @@ private:
   FOG_DISABLE_COPY(TextOnPath)
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GRAPHICS_TEXTONPATH_H

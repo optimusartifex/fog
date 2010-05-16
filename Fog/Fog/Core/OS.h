@@ -8,11 +8,8 @@
 #define _FOG_CORE_OS_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/String.h>
-
-//! @addtogroup Fog_Core
-//! @{
 
 namespace Fog {
 
@@ -22,6 +19,9 @@ namespace Fog {
 
 //! @brief Contains useful functions for getting system information.
 namespace OS {
+
+//! @addtogroup Fog_Core_Environment
+//! @{
 
 //! @brief Get the name of the host operating system.
 FOG_API String getName();
@@ -63,10 +63,10 @@ FOG_API String getWindowsDirectory();
 FOG_API err_t getEnv(const String& name, String& value);
 FOG_API err_t setEnv(const String& name, const String& value);
 
+//! @}
+
 } // OS namespace
 } // Fog namespace
-
-//! @}
 
 // [Guard]
 #endif // _FOG_CORE_OS_H

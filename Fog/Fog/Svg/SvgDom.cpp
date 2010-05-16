@@ -42,9 +42,9 @@ static const SvgEnumList svgEnumList_gradientUnits[] =
 
 static const SvgEnumList svgEnumList_spreadMethod[] =
 {
-  { "pad", SPREAD_PAD },
-  { "reflect", SPREAD_REFLECT },
-  { "repeat", SPREAD_REPEAT },
+  { "pad", PATTERN_SPREAD_PAD },
+  { "reflect", PATTERN_SPREAD_REFLECT },
+  { "repeat", PATTERN_SPREAD_REPEAT },
   { "", -1 }
 };
 
@@ -144,10 +144,10 @@ struct FOG_HIDDEN SvgStyleAttribute : public XmlAttribute
   Argb _strokeColor;
   Argb _stopColor;
 
-  double _opacity;
-  double _fillOpacity;
-  double _strokeOpacity;
-  double _stopOpacity;
+  float _opacity;
+  float _fillOpacity;
+  float _strokeOpacity;
+  float _stopOpacity;
 
   SvgCoord _strokeDashOffset;
   SvgCoord _strokeMiterLimit;
@@ -315,7 +315,7 @@ String SvgStyleAttribute::getStyle(int styleId) const
       break;
 
     case SVG_STYLE_CLIP_RULE:
-      FOG_ASSERT(_clipRule < FILL_MODE_COUNT);
+      FOG_ASSERT(_clipRule < FILL_RULE_COUNT);
       result.set(Ascii8(svgEnumList_fillRule[_clipRule].name));
       break;
 
@@ -343,7 +343,7 @@ String SvgStyleAttribute::getStyle(int styleId) const
       break;
 
     case SVG_STYLE_FILL_RULE:
-      FOG_ASSERT(_fillRule < FILL_MODE_COUNT);
+      FOG_ASSERT(_fillRule < FILL_RULE_COUNT);
       result.set(Ascii8(svgEnumList_fillRule[_fillRule].name));
       break;
 
@@ -403,12 +403,12 @@ String SvgStyleAttribute::getStyle(int styleId) const
       break;
 
     case SVG_STYLE_STROKE_LINE_CAP:
-      FOG_ASSERT(_strokeLineCap < FILL_MODE_COUNT);
+      FOG_ASSERT(_strokeLineCap < LINE_CAP_COUNT);
       result.set(Ascii8(svgEnumList_strokeLineCap[_strokeLineCap].name));
       break;
 
     case SVG_STYLE_STROKE_LINE_JOIN:
-      FOG_ASSERT(_strokeLineJoin < FILL_MODE_COUNT);
+      FOG_ASSERT(_strokeLineJoin < LINE_JOIN_COUNT);
       result.set(Ascii8(svgEnumList_strokeLineJoin[_strokeLineJoin].name));
       break;
 
@@ -715,11 +715,11 @@ struct FOG_HIDDEN SvgOffsetAttribute : public XmlAttribute
 
   // [Coords]
 
-  FOG_INLINE double getOffset() const { return _offset; }
+  FOG_INLINE float getOffset() const { return _offset; }
 
   // [Members]
 protected:
-  double _offset;
+  float _offset;
 
 private:
   FOG_DISABLE_COPY(SvgOffsetAttribute)
@@ -741,16 +741,14 @@ err_t SvgOffsetAttribute::setValue(const String& value)
   if (err) return err;
 
   sysuint_t end;
-  if (value.atod(&_offset, NULL, &end) == ERR_OK)
+  if (value.atof(&_offset, NULL, &end) == ERR_OK)
   {
-    if (end < value.getLength() && value.at(end) == Char('%')) _offset *= 0.01;
-
-    if (_offset < 0.0) _offset = 0.0;
-    if (_offset > 1.0) _offset = 1.0;
+    if (end < value.getLength() && value.at(end) == Char('%')) _offset *= 0.01f;
+    _offset = Math::bound<float>(_offset, 0.0f, 1.0f);
   }
   else
   {
-    _offset = 0.0;
+    _offset = 0.0f;
   }
 
   return ERR_OK;
@@ -849,7 +847,7 @@ err_t SvgPointsAttribute::setValue(const String& value)
   err_t err = _value.set(value);
   if (err) return err;
 
-  _path = SvgUtil::parsePoints(value);
+  _path = SvgUtil::parsePoints(value, _closePath);
   if (!_path.isEmpty() && _closePath) _path.closePolygon();
 
   if (_element) reinterpret_cast<SvgElement*>(_element)->_boundingRectDirty = true;
@@ -962,7 +960,7 @@ String SvgImageLinkAttribute::getValue() const
     err |= dst.append(Ascii8("data:image/png;base64,"));
     err |= memio.openBuffer();
 
-    _image.writeStream(memio, Ascii8("png"));
+    _image.writeToStream(memio, Ascii8("png"));
     err |= StringUtil::toBase64(dst, memio.getBuffer(), OUTPUT_MODE_APPEND);
 
     if (err) dst.free();
@@ -1018,7 +1016,7 @@ err_t SvgImageLinkAttribute::setValue(const String& value)
       }
 
       err |= stream.openBuffer(memio);
-      err |= _image.readStream(stream, extension);
+      err |= _image.readFromStream(stream, extension);
 
       if (err)
       {
@@ -1148,12 +1146,12 @@ err_t SvgElement::onRenderShape(SvgContext* context) const
 
 err_t SvgElement::onApplyPattern(SvgContext* context, SvgElement* obj, int paintType) const
 {
-  return ERR_RT_INVALID_CONTEXT;
+  return ERR_RT_INVALID_OBJECT;
 }
 
 err_t SvgElement::onCalcBoundingBox(DoubleRect* box) const
 {
-  return ERR_RT_INVALID_CONTEXT;
+  return ERR_RT_INVALID_OBJECT;
 }
 
 err_t SvgElement::_walkAndRender(const XmlElement* root, SvgContext* context)
@@ -1184,7 +1182,7 @@ String SvgElement::getStyle(const String& name) const
 
 err_t SvgElement::setStyle(const String& name, const String& value)
 {
-  return ERR_RT_INVALID_CONTEXT;
+  return ERR_RT_INVALID_OBJECT;
 }
 
 const DoubleRect& SvgElement::getBoundingRect() const
@@ -1292,7 +1290,7 @@ err_t SvgStyledElement::onRender(SvgContext* context) const
   uint32_t styleMask = a_style.getMask();
   bool transformed = a_transform.isAssigned() & a_transform.isValid();
 
-  // Before render: Apply transformations and setup styles defined in this element.
+  // Before render: Apply transformations and setup styles defined by this element.
   if (styleMask != 0 || transformed)
   {
     backup.init(context);
@@ -1308,8 +1306,8 @@ err_t SvgStyledElement::onRender(SvgContext* context) const
 
     // Setup fill parameters.
     if (styleMask & (1 << SVG_STYLE_FILL               ) |
-                    (1 << SVG_STYLE_FILL_RULE          ) |
-                    (1 << SVG_STYLE_FILL_OPACITY       ) )
+                    (1 << SVG_STYLE_FILL_OPACITY       ) |
+                    (1 << SVG_STYLE_FILL_RULE          ) )
     {
       if (styleMask & (1 << SVG_STYLE_FILL))
       {
@@ -1337,9 +1335,14 @@ err_t SvgStyledElement::onRender(SvgContext* context) const
         }
       }
 
+      if (styleMask & (1 << SVG_STYLE_FILL_OPACITY))
+      {
+        context->setFillOpacity(a_style._fillOpacity);
+      }
+
       if (styleMask & (1 << SVG_STYLE_FILL_RULE))
       {
-        context->setFillMode(a_style._fillRule);
+        context->setFillRule(a_style._fillRule);
       }
     }
 
@@ -1394,6 +1397,11 @@ err_t SvgStyledElement::onRender(SvgContext* context) const
         double miterLimit = context->translateCoord(
           a_style._strokeMiterLimit.value, a_style._strokeMiterLimit.unit);
         context->setMiterLimit(miterLimit);
+      }
+
+      if (styleMask & (1 << SVG_STYLE_STROKE_OPACITY))
+      {
+        context->setStrokeOpacity(a_style._strokeOpacity);
       }
 
       if (styleMask & (1 << SVG_STYLE_STROKE_WIDTH))
@@ -2358,7 +2366,7 @@ start:
 
         if (_stop->a_style.hasStyle(SVG_STYLE_STOP_OPACITY))
         {
-          color.a = (uint8_t)(int)(_stop->a_style._stopOpacity * 255);
+          color.setAlpha((int)(_stop->a_style._stopOpacity * 255));
         }
 
         pattern.addStop(ArgbStop(offset, color));
@@ -2451,7 +2459,7 @@ err_t SvgLinearGradientElement::onApplyPattern(SvgContext* context, SvgElement* 
   Pattern pattern;
 
   // Set gradient type to linear gradient.
-  pattern.setType(PATTERN_LINEAR_GRADIENT);
+  pattern.setType(PATTERN_TYPE_LINEAR_GRADIENT);
 
   // Set gradient transform matrix.
   if (a_gradientTransform.isAssigned()) pattern.setMatrix(a_gradientTransform.getMatrix());
@@ -2576,7 +2584,7 @@ err_t SvgRadialGradientElement::onApplyPattern(SvgContext* context, SvgElement* 
   Pattern pattern;
 
   // Set gradient type to radial gradient.
-  pattern.setType(PATTERN_RADIAL_GRADIENT);
+  pattern.setType(PATTERN_TYPE_RADIAL_GRADIENT);
 
   // Set gradient transform matrix.
   if (a_gradientTransform.isAssigned()) pattern.setMatrix(a_gradientTransform.getMatrix());
@@ -2727,7 +2735,7 @@ err_t SvgImageElement::onRenderShape(SvgContext* context) const
     double x = a_x.isAssigned() ? a_x.getCoord().value : 0.0;
     double y = a_y.isAssigned() ? a_y.getCoord().value : 0.0;
 
-    context->blitImage(DoublePoint(x, y), a_href._image);
+    context->drawImage(DoublePoint(x, y), a_href._image);
     return ERR_OK;
   }
   else

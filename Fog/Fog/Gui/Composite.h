@@ -10,15 +10,16 @@
 // [Dependencies]
 #include <Fog/Gui/Widget.h>
 
-//! @addtogroup Fog_Gui
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Gui_Widget
+//! @{
 
 // ============================================================================
 // [Fog::Composite]
 // ============================================================================
 
+//! @brief Composite widget.
 struct FOG_API Composite : public Widget
 {
   FOG_DECLARE_OBJECT(Composite, Widget)
@@ -29,9 +30,9 @@ struct FOG_API Composite : public Widget
   virtual ~Composite();
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GUI_COMPOSITE_H

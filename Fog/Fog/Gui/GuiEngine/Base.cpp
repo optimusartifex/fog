@@ -7,7 +7,7 @@
 #include <Fog/Core/Application.h>
 #include <Fog/Core/List.h>
 #include <Fog/Core/Math.h>
-#include <Fog/Graphics/Argb.h>
+#include <Fog/Graphics/Color.h>
 #include <Fog/Graphics/Geometry.h>
 #include <Fog/Graphics/Font.h>
 #include <Fog/Graphics/Image.h>
@@ -699,7 +699,7 @@ void BaseGuiEngine::doUpdateWindow(GuiWindow* window)
     buffer.format = window->_backingStore->getFormat();
     buffer.stride = window->_backingStore->getStride();
 
-    painter.begin(buffer, NO_FLAGS /* | PAINTER_INIT_MT */);
+    painter.begin(buffer, NO_FLAGS /*| PAINTER_INIT_MT */);
   }
 
   if ((uflags & WIDGET_UPDATE_ALL) != 0)

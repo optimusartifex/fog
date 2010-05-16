@@ -12,12 +12,12 @@
 #define _FOG_CORE_CPUINFO_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
-
-//! @addtogroup Fog_Core
-//! @{
+#include <Fog/Core/Build.h>
 
 namespace Fog {
+
+//! @addtogroup Fog_Core_Environment
+//! @{
 
 // ============================================================================
 // [Fog::CpuId]
@@ -161,15 +161,16 @@ struct FOG_HIDDEN CpuInfo
 FOG_CVAR_EXTERN CpuInfo* cpuInfo;
 
 #if defined(FOG_ARCH_X86) || defined(FOG_ARCH_X86_64)
-//! @brief Calls cpuid instruction.
+//! @brief Retrieve CPUID values.
 FOG_API void cpuid(uint32_t in, CpuId* out);
 #endif // FOG_ARCH_X86) || FOG_ARCH_X86_64
 
+//! @brief Detect CPU info to @a i.
 FOG_API void detectCpuInfo(CpuInfo* i);
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_CORE_CPUINFO_H

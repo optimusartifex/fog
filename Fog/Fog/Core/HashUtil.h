@@ -8,7 +8,7 @@
 #define _FOG_CORE_HASHUTIL_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Atomic.h>
 #include <Fog/Core/Char.h>
@@ -24,7 +24,7 @@
 namespace Fog {
 namespace HashUtil {
 
-//! @addtogroup Fog_Core
+//! @addtogroup Fog_Core_Essentials
 //! @{
 
 // ============================================================================

@@ -12,10 +12,10 @@
 #include <Fog/Core/Timer.h>
 #include <Fog/Gui/GuiEngine.h>
 
-//! @addtogroup Fog_Gui
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Gui_Engine
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -247,9 +247,9 @@ protected:
   IntPoint _sizeGranularity;
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GUI_GUIENGINE_BASE_H

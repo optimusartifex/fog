@@ -8,7 +8,7 @@
 #define _FOG_CORE_MEMORY_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 
 #if defined(FOG_CC_MSVC) && FOG_CC_MSVC >= 1400
 #pragma intrinsic (_byteswap_ushort, _byteswap_ulong, _byteswap_uint64)
@@ -43,10 +43,10 @@ FOG_CAPI_EXTERN void fog_memory_xchg(uint8_t* addr1, uint8_t* addr2, sysuint_t c
 
 //! @}
 
-//! @addtogroup Fog_Core
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Core_Memory
+//! @{
 
 // ============================================================================
 // [Fog::Uint64Union]
@@ -76,7 +76,9 @@ union UInt64Union
 //! @c Memory::xmalloc() and @c Memory::free().
 struct FOG_HIDDEN Memory
 {
+  // --------------------------------------------------------------------------
   // [Alloc / Free]
+  // --------------------------------------------------------------------------
 
   static FOG_INLINE void* alloc(sysuint_t size)
   {
@@ -103,7 +105,9 @@ struct FOG_HIDDEN Memory
     fog_memory_free(addr);
   }
 
-  // [Memory operations]
+  // --------------------------------------------------------------------------
+  // [Memory Operations]
+  // --------------------------------------------------------------------------
 
   static FOG_INLINE void* dup(void* addr, sysuint_t size)
   {
@@ -130,7 +134,9 @@ struct FOG_HIDDEN Memory
     fog_memory_zero(dst, size);
   }
 
-  // [Memory operations - nt]
+  // --------------------------------------------------------------------------
+  // [Memory Operations - NT]
+  // --------------------------------------------------------------------------
 
   static FOG_INLINE void copy_nt(void* dst, const void* src, sysuint_t size)
   {
@@ -152,7 +158,9 @@ struct FOG_HIDDEN Memory
     fog_memory_zero_nt(dst, size);
   }
 
-  // [copy::]
+  // --------------------------------------------------------------------------
+  // [Copy]
+  // --------------------------------------------------------------------------
 
   static FOG_INLINE void copy1B(void* dst, const void* src)
   {
@@ -177,11 +185,11 @@ struct FOG_HIDDEN Memory
 
   static FOG_INLINE void copy8B(void* dst, const void* src)
   {
-#if FOG_ARCH_BITS == 32
+#if FOG_ARCH_BITS == 64
+    ((uint64_t *)dst)[0] = ((const uint64_t *)src)[0];
+#else
     ((uint32_t *)dst)[0] = ((const uint32_t *)src)[0];
     ((uint32_t *)dst)[1] = ((const uint32_t *)src)[1];
-#else
-    ((uint64_t *)dst)[0] = ((const uint64_t *)src)[0];
 #endif
   }
 
@@ -196,13 +204,13 @@ struct FOG_HIDDEN Memory
 #if defined(FOG_HARDCODE_SSE2)
     _mm_storeu_si128((__m128i *)(dst), _mm_loadu_si128((__m128i *)(src)));
 #elif FOG_ARCH_BITS == 64
+    ((uint64_t *)dst)[0] = ((const uint64_t *)src)[0];
+    ((uint64_t *)dst)[1] = ((const uint64_t *)src)[1];
+#else
     ((uint32_t *)dst)[0] = ((const uint32_t *)src)[0];
     ((uint32_t *)dst)[1] = ((const uint32_t *)src)[1];
     ((uint32_t *)dst)[2] = ((const uint32_t *)src)[2];
     ((uint32_t *)dst)[3] = ((const uint32_t *)src)[3];
-#else
-    ((uint64_t *)dst)[0] = ((const uint64_t *)src)[0];
-    ((uint64_t *)dst)[1] = ((const uint64_t *)src)[1];
 #endif
   }
 
@@ -264,7 +272,9 @@ struct FOG_HIDDEN Memory
 #endif
   }
 
-  // [eq::]
+  // --------------------------------------------------------------------------
+  // [Eq]
+  // --------------------------------------------------------------------------
 
   static FOG_INLINE bool eq1B(const void* a, const void* b)
   {
@@ -329,7 +339,9 @@ struct FOG_HIDDEN Memory
 #endif 
   }
 
-  // [zero::]
+  // --------------------------------------------------------------------------
+  // [Zero]
+  // --------------------------------------------------------------------------
 
   static FOG_INLINE void zero1B(void* a)
   {
@@ -400,7 +412,9 @@ struct FOG_HIDDEN Memory
 #endif
   }
 
-  // [xchg::]
+  // --------------------------------------------------------------------------
+  // [XChg]
+  // --------------------------------------------------------------------------
 
   static FOG_INLINE void xchg1B(void* a, void* b)
   {
@@ -550,7 +564,9 @@ struct FOG_HIDDEN Memory
 #endif
   }
 
-  // [bswap]
+  // --------------------------------------------------------------------------
+  // [BSwap]
+  // --------------------------------------------------------------------------
 
   static FOG_INLINE uint16_t bswap16(uint16_t x)
   {
@@ -667,9 +683,9 @@ struct FOG_HIDDEN Memory
 
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_CORE_MEMORY_H

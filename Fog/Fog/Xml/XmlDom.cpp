@@ -1095,7 +1095,7 @@ XmlElement* XmlDocument::getElementById(const Utf16& id) const
   return _elementIdsHash.get(idStr, idLen);
 }
 
-err_t XmlDocument::readFile(const String& fileName)
+err_t XmlDocument::readFromFile(const String& fileName)
 {
   clear();
 
@@ -1107,7 +1107,7 @@ err_t XmlDocument::readFile(const String& fileName)
   return err;
 }
 
-err_t XmlDocument::readStream(Stream& stream)
+err_t XmlDocument::readFromStream(Stream& stream)
 {
   clear();
 
@@ -1119,7 +1119,7 @@ err_t XmlDocument::readStream(Stream& stream)
   return err;
 }
 
-err_t XmlDocument::readMemory(const void* mem, sysuint_t size)
+err_t XmlDocument::readFromMemory(const void* mem, sysuint_t size)
 {
   clear();
 
@@ -1131,7 +1131,7 @@ err_t XmlDocument::readMemory(const void* mem, sysuint_t size)
   return err;
 }
 
-err_t XmlDocument::readString(const String& str)
+err_t XmlDocument::readFromString(const String& str)
 {
   clear();
 

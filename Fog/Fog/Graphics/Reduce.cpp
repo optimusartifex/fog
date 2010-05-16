@@ -98,7 +98,7 @@ bool Reduce::analyze(const Image& image, bool discardAlpha)
   else
   {
     UnorderedHash<uint32_t, uint64_t> hash;
-    bool fillalpha = (image.getFormat() == PIXEL_FORMAT_XRGB32) || discardAlpha;
+    bool fillalpha = (image.getFormat() == IMAGE_FORMAT_XRGB32) || discardAlpha;
 
     for (y = 0; y < h; y++)
     {

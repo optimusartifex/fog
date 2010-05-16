@@ -8,7 +8,7 @@
 #define _FOG_CORE_SEQUENCEINFO_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/TypeInfo.h>
 
 namespace Fog {

@@ -26,6 +26,15 @@
 #include <Fog/Core/ThreadEvent.h>
 #include <Fog/Core/Time.h>
 
+#if defined(FOG_OS_WINDOWS)
+# if !defined(USER_TIMER_MINIMUM)
+#  define USER_TIMER_MINIMUM 0x0000000A
+# endif // USER_TIMER_MINIMUM
+# if !defined(USER_TIMER_MAXIMUM)
+#  define USER_TIMER_MAXIMUM 0x7FFFFFFF
+# endif // USER_TIMER_MAXIMUM
+#endif // FOG_OS_WINDOWS
+
 namespace Fog {
 
 // ============================================================================
@@ -622,7 +631,7 @@ void WinEventLoop::_initMessageWnd()
   HINSTANCE hInst = GetModuleHandle(NULL);
 
   WNDCLASSEXW wc;
-  ZeroMemory(&wc, sizeof(WNDCLASSEX));
+  ZeroMemory(&wc, sizeof(WNDCLASSEXW));
   wc.cbSize = sizeof(wc);
   wc.lpfnWndProc = WndProcThunk;
   wc.hInstance = hInst;

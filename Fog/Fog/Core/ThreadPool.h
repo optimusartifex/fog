@@ -12,10 +12,10 @@
 #include <Fog/Core/Lock.h>
 #include <Fog/Core/Thread.h>
 
-//! @addtogroup Fog_Core
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Core_Threading
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -126,9 +126,9 @@ private:
   FOG_DISABLE_COPY(ThreadPool)
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_CORE_THREADPOOL_H

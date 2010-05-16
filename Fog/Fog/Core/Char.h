@@ -8,16 +8,16 @@
 #define _FOG_CORE_CHAR_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/CharUtil.h>
 #include <Fog/Core/Memory.h>
 #include <Fog/Core/TypeInfo.h>
 
-//! @defgroup Core
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Core_Essentials
+//! @{
 
 // ============================================================================
 // [Fog::Char]
@@ -188,6 +188,8 @@ struct FOG_HIDDEN Char
 };
 #include <Fog/Core/Compiler/PackRestore.h>
 
+//! @}
+
 } // Fog namespace
 
 // [Overloads]
@@ -226,8 +228,6 @@ __FOG_CHAR_MAKE_ARITH_OVERLOAD(const Fog::Char& a, a._ch, int16_t b, (uint16_t)b
 __FOG_CHAR_MAKE_ARITH_OVERLOAD(int16_t a, (uint16_t)a, const Fog::Char& b, b._ch)
 
 #undef __FOG_CHAR_MAKE_ARITH_OVERLOAD
-
-//! @}
 
 // ============================================================================
 // [Fog::TypeInfo<>]

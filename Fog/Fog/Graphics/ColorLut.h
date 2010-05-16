@@ -8,15 +8,15 @@
 #define _FOG_GRAPHICS_COLORLUT_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Constants.h>
 #include <Fog/Graphics/Constants.h>
 
-//! @addtogroup Fog_Graphics
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Graphics_Effects
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -112,9 +112,9 @@ protected:
   ColorLutData _data;
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GRAPHICS_COLORLUT_H

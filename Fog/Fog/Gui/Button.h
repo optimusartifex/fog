@@ -10,15 +10,16 @@
 // [Dependencies]
 #include <Fog/Gui/ButtonBase.h>
 
-//! @addtogroup Fog_Gui
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Gui_Widget
+//! @{
 
 // ============================================================================
 // [Fog::Button]
 // ============================================================================
 
+//! @brief Button.
 struct FOG_API Button : public ButtonBase
 {
   FOG_DECLARE_OBJECT(Button, ButtonBase)
@@ -34,9 +35,9 @@ struct FOG_API Button : public ButtonBase
   virtual void onPaint(PaintEvent* e);
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GUI_BUTTON_H

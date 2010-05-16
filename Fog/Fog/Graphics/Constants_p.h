@@ -8,40 +8,34 @@
 #define _FOG_GRAPHICS_CONSTANTS_P_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Graphics/Constants.h>
+
+namespace Fog {
 
 //! @addtogroup Fog_Graphics_Private
 //! @{
 
-namespace Fog {
-
 // ============================================================================
-// [Fog::ALPHA_TYPE]
+// [Fog::FIXED]
 // ============================================================================
 
-//! @brief Results from some color analyzer functions.
-//!
-//! Usualy used to improve performance of image processing. Algorithm designed
-//! for full opaque pixels is always faster than generic algorithm for image
-//! with or without alpha channel.
-enum ALPHA_TYPE
+enum FIXED_16x16_ENUM
 {
-  //! @brief Alpha values are variant.
-  ALPHA_VARIANT = -1,
-  //! @brief All alpha values are transparent (all 0).
-  ALPHA_TRANSPARENT = 0,
-  //! @brief All alpha values are opaque (all 255).
-  ALPHA_OPAQUE = 255
+  FIXED_16x16_ONE  = 0x00010000,
+  FIXED_16x16_HALF = 0x00008000
 };
 
 // ============================================================================
 // [Fog::OPERATOR_CHAR]
 // ============================================================================
 
-//! @brief Operator characteristics (used internally by @c PaintEngine).
+//! @internal
 //!
-//! Characteristics are always stored in bitfield.
+//! @brief Operator characteristics.
+//! 
+//! Operator characteristics are used internally by @c RasterPaintEngine and 
+//! compositing templates in @c Fog::RasterEngine.
 enum OPERATOR_CHAR
 {
   //! @brief Operator uses destination color value.
@@ -72,20 +66,28 @@ enum OPERATOR_CHAR
   OPERATOR_CHAR_NOP_ALWAYS = (1 << 6),
   //! @brief Operator is nop if destination alpha is zero.
   OPERATOR_CHAR_NOP_IF_DST_A_ZERO = (1 << 7),
-  //! @brief Operator is nop if destination alpha is zero.
+  //! @brief Operator is nop if destination alpha is fully opaque.
   OPERATOR_CHAR_NOP_IF_DST_A_FULL = (1 << 8),
   //! @brief Operator is nop if source alpha value is zero.
   OPERATOR_CHAR_NOP_IF_SRC_A_ZERO = (1 << 9),
-  //! @brief Operator is nop if source alpha value is zero.
+  //! @brief Operator is nop if source alpha value is fully opaque.
   OPERATOR_CHAR_NOP_IF_SRC_A_FULL = (1 << 10),
 
-  //! @brief Operator can done on packed data (this is hint for mmx/sse2 templates).
-  OPERATOR_CHAR_PACKED = (1 << 1)
+  //! @brief Operator can be done on packed data (this is hint for mmx/sse2
+  //! templates).
+  OPERATOR_CHAR_PACKED = (1 << 11),
+
+  //! @brief Prefer color in 0xFFRRGGBB format instead of 0xXXRRGGBB. Used as
+  //! an optimization hint for MMX/SSE2 code.
+  OPERATOR_CHAR_PREFER_FRGB = (1 << 12)
 };
 
 // ============================================================================
 // [OPERATOR_CHAR_STATIC]
 // ============================================================================
+
+// Skip documenting this section.
+#if !defined(FOG_DOXYGEN)
 
 // Shorter names are better for our table.
 #define DST_C          OPERATOR_CHAR_DST_C_USED
@@ -100,7 +102,12 @@ enum OPERATOR_CHAR
 #define NOP_SRC_A_Z    OPERATOR_CHAR_NOP_IF_SRC_A_ZERO
 #define NOP_SRC_A_F    OPERATOR_CHAR_NOP_IF_SRC_A_FULL
 #define HINT_PACKED    OPERATOR_CHAR_PACKED
+#define HINT_FRGB      OPERATOR_CHAR_PREFER_FRGB
 
+#endif // FOG_DOXYGEN
+
+//! @internal
+//!
 //! @brief Operator characteristics for each operator (used by blitter templates).
 enum OPERATOR_CHAR_STATIC
 {
@@ -112,12 +119,12 @@ enum OPERATOR_CHAR_STATIC
   OPERATOR_CHAR_DST_IN     = DST_C | DST_A | 0     | SRC_A | UNBOUND_MSK_IN | NOP_SRC_A_F | 0,
   OPERATOR_CHAR_SRC_OUT    = 0     | DST_A | SRC_C | SRC_A | UNBOUND_MSK_IN | 0           | 0,
   OPERATOR_CHAR_DST_OUT    = DST_C | DST_A | 0     | SRC_A | 0              | NOP_SRC_A_Z | 0,
-  OPERATOR_CHAR_SRC_ATOP   = DST_C | DST_A | SRC_C | SRC_A | 0              | NOP_SRC_A_Z | 0,
+  OPERATOR_CHAR_SRC_ATOP   = DST_C | DST_A | SRC_C | SRC_A | 0              | NOP_SRC_A_Z | HINT_FRGB,
   OPERATOR_CHAR_DST_ATOP   = DST_C | DST_A | SRC_C | SRC_A | UNBOUND_MSK_IN | 0           | 0,
   OPERATOR_CHAR_XOR        = DST_C | DST_A | SRC_C | SRC_A | 0              | NOP_SRC_A_Z | 0,
   OPERATOR_CHAR_CLEAR      = 0     | 0     | 0     | 0     | UNBOUND        | 0           | 0,
   OPERATOR_CHAR_ADD        = DST_C | DST_A | SRC_C | SRC_A | 0              | NOP_SRC_A_Z | HINT_PACKED,
-  OPERATOR_CHAR_SUBTRACT   = DST_C | DST_A | SRC_C | SRC_A | 0              | NOP_SRC_A_Z | 0,
+  OPERATOR_CHAR_SUBTRACT   = DST_C | DST_A | SRC_C | SRC_A | 0              | NOP_SRC_A_Z | HINT_PACKED,
   OPERATOR_CHAR_MULTIPLY   = DST_C | DST_A | SRC_C | SRC_A | UNBOUND        | NOP_SRC_A_Z | 0,
   OPERATOR_CHAR_SCREEN     = DST_C | DST_A | SRC_C | SRC_A | 0              | NOP_SRC_A_Z | 0,
   OPERATOR_CHAR_DARKEN     = DST_C | DST_A | SRC_C | SRC_A | 0              | NOP_SRC_A_Z | 0,
@@ -142,11 +149,48 @@ enum OPERATOR_CHAR_STATIC
 #undef NOP_SRC_A_F
 #undef OP_PACKED
 
+//! @internal
+//!
+//! @brief Operator characteristics that can be used by raster paint engine
+//! dynamically (based on operator).
 extern FOG_HIDDEN uint32_t OperatorCharacteristics[OPERATOR_COUNT];
 
-} // Fog namespace
+// ============================================================================
+// [PATTERN_FETCH_MODE]
+// ============================================================================
+
+//! @internal
+//!
+//! @brief Pattern fetch mode (see @c RasterEngine).
+enum PATTERN_FETCH_MODE
+{
+  //! @brief Pattern fetcher can use data that owns source pattern (this is
+  //! in most cases the image pixels owned by @c Image).
+  //!
+  //! This flag is the default and in some cases it is performance improvement,
+  //! because the data don't need to be copied to the provided temporary buffer.
+  //!
+  //! If sharers are used then this mode is never used by pattern fetcher,
+  //! because shaders need to overwrite the fetched pixels.
+  PATTERN_FETCH_CAN_USE_SRC = 0,
+
+  //! @brief Pattern fetcher can use only provided buffer to fetch the data to.
+  //!
+  //! This mode is opposite to @c PATTERN_FETCH_CAN_USE_SRC. It tells to 
+  //! fetcher to always use the provided buffer for all fetches. If shaders are
+  //! used then these data will be overwritten so it's important to tell this
+  //! fact to fetcher.
+  //!
+  //! This mode can be also used when using @c OPERATOR_SRC and fetcher is not 
+  //! called using temporary buffer, but the target image buffer. This means 
+  //! that pattern fetcher will fetch data into the target buffer and no 
+  //! another copy is needed (optimization).
+  PATTERN_FETCH_BUFFER_ONLY = 1
+};
 
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GRAPHICS_CONSTANTS_P_H

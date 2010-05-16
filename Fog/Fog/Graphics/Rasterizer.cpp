@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics Library - Private API]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -39,16 +39,28 @@
 
 // [Dependencies]
 #include <Fog/Core/AutoLock.h>
+#include <Fog/Core/ByteArray.h>
 #include <Fog/Core/Lock.h>
 #include <Fog/Core/Math.h>
 #include <Fog/Core/Memory.h>
+#include <Fog/Graphics/ByteUtil_p.h>
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/Image.h>
+#include <Fog/Graphics/RasterEngine_p.h>
 #include <Fog/Graphics/Rasterizer_p.h>
-
-#include "Image.h"
+#include <Fog/Graphics/Span_p.h>
 
 namespace Fog {
+
+// ============================================================================
+// [Fog::Rasterizer - Debugging]
+// ============================================================================
+
+// #define FOG_DEBUG_RASTERIZER)
+
+// ============================================================================
+// [Fog::Rasterizer - Constants]
+// ============================================================================
 
 enum POLY_SUBPIXEL_ENUM
 {
@@ -73,7 +85,7 @@ enum
 
 struct FOG_HIDDEN RasterizerUtil
 {
-  static FOG_INLINE int mulDiv(double a, double b, double c) { return Math::iround(a * b / c); }
+  static FOG_INLINE int muldiv(double a, double b, double c) { return Math::iround(a * b / c); }
   static FOG_INLINE int upscale(double v) { return Math::iround(v * POLY_SUBPIXEL_SCALE); }
 };
 
@@ -355,7 +367,7 @@ struct FOG_HIDDEN RasterizerLocal
   Lock lock;
 
   Rasterizer* rasterizers;
-  Rasterizer::CellXYBuffer *cellBuffers;
+  Rasterizer::CellXYBuffer* cellBuffers;
 
   sysuint_t cellsBufferCapacity;
 };
@@ -374,8 +386,8 @@ static Static<RasterizerLocal> rasterizer_local;
 //! This is custom rasterizer that can be used in multithreaded environment
 //! from multiple threads. Method sweepScanline() from antigrain
 //! agg::rasterizer_scanline_aa<> template was replaced to method that accepts
-//! y coordinate and it's tagged as const. After you serialize your content use
-//! new sweepScanline() method with you own Y coordinate.
+//! y coordinate. After you serialize your content use sweepScanline() method 
+//! with you own Y coordinate.
 //!
 //! To use this rasterizer you must first set gamma table that will be used. In
 //! multithreaded environment recomputing gamma table in each thread command
@@ -401,6 +413,11 @@ struct FOG_HIDDEN AnalyticRasterizer : public Rasterizer
   virtual void setError(err_t error);
   virtual void resetError();
 
+  virtual void setFillRule(uint32_t fillRule);
+  virtual void setAlpha(uint32_t alpha);
+
+  void updateFunctions();
+
   virtual void addPath(const DoublePath& path);
   void closePolygon();
 
@@ -421,11 +438,22 @@ struct FOG_HIDDEN AnalyticRasterizer : public Rasterizer
 
   virtual void finalize();
 
-  FOG_INLINE uint calculateAlphaNonZero(int area) const;
-  FOG_INLINE uint calculateAlphaEvenOdd(int area) const;
+  template<int _RULE, int _USE_ALPHA>
+  FOG_INLINE uint _calculateAlpha(int area) const;
 
-  virtual uint sweepScanline(Scanline32* scanline, int y);
-  virtual uint sweepScanline(Scanline32* scanline, int y, const IntBox* clip, sysuint_t count);
+  template<int _RULE, int _USE_ALPHA>
+  static Span8* _sweepScanlineSimpleImpl(
+    Rasterizer* _rasterizer, Scanline8& scanline, int y);
+
+  template<int _RULE, int _USE_ALPHA>
+  static Span8* _sweepScanlineRegionImpl(
+    Rasterizer* _rasterizer, Scanline8& scanline, int y,
+    const IntBox* clipBoxes, sysuint_t count);
+
+  template<int _RULE, int _USE_ALPHA>
+  static Span8* _sweepScanlineSpansImpl(
+    Rasterizer* _rasterizer, Scanline8& scanline, int y,
+    const Span8* clipSpans);
 
   //! @brief Whether rasterizer clipping is enabled.
   int _clipping;
@@ -473,11 +501,22 @@ private:
 
 Rasterizer::Rasterizer()
 {
+  // Must be set by the real rasterizer.
+  _sweepScanlineSimpleFn = NULL;
+  _sweepScanlineRegionFn = NULL;
+  _sweepScanlineSpansFn = NULL;
+
   _clipBox.clear();
+  _cellsBounds.clear();
+
   _error = ERR_OK;
 
-  // Defaults.
-  _fillRule = FILL_EVEN_ODD;
+  // Set fill rule to invalid, real rasterizer will set it to default in 
+  // construction time (and also set the _sweep... methods).
+  _fillRule = FILL_RULE_COUNT;
+  // Default alpha is full-opaque.
+  _alpha = 0xFF;
+
   _finalized = false;
   _autoClose = true;
 
@@ -619,6 +658,8 @@ AnalyticRasterizer::AnalyticRasterizer()
   _bufferFirst = Rasterizer::getCellXYBuffer();
   _bufferLast = _bufferFirst;
 
+  setFillRule(FILL_DEFAULT);
+
   reset();
 }
 
@@ -638,7 +679,7 @@ void AnalyticRasterizer::pooled()
   freeXYCellBuffers(false);
 
   // If this rasterizer was used for something really big, we will free the
-  // memory
+  // memory.
   if (_cellsCapacity > 1024)
   {
     Memory::free(_cellsSorted);
@@ -712,6 +753,75 @@ void AnalyticRasterizer::setError(err_t error)
 void AnalyticRasterizer::resetError()
 {
   _error = ERR_OK;
+}
+
+// ============================================================================
+// [Fog::AnalyticRasterizer - Fill Rule]
+// ============================================================================
+
+void AnalyticRasterizer::setFillRule(uint32_t fillRule)
+{
+  if (_fillRule == fillRule) return;
+  FOG_ASSERT(fillRule < FILL_RULE_COUNT);
+
+  _fillRule = fillRule;
+  updateFunctions();
+}
+
+// ============================================================================
+// [Fog::AnalyticRasterizer - Alpha]
+// ============================================================================
+
+void AnalyticRasterizer::setAlpha(uint32_t alpha)
+{
+  if (_alpha == alpha) return;
+  FOG_ASSERT(alpha <= 0xFF);
+
+  _alpha = alpha;
+  updateFunctions();
+}
+
+// ============================================================================
+// [Fog::AnalyticRasterizer - Update Functions]
+// ============================================================================
+
+void AnalyticRasterizer::updateFunctions()
+{
+  switch (_fillRule)
+  {
+    case FILL_NON_ZERO:
+      if (_alpha == 0xFF)
+      {
+        _sweepScanlineSimpleFn = _sweepScanlineSimpleImpl<FILL_NON_ZERO, 0>;
+        _sweepScanlineRegionFn = _sweepScanlineRegionImpl<FILL_NON_ZERO, 0>;
+        _sweepScanlineSpansFn  = _sweepScanlineSpansImpl<FILL_NON_ZERO, 0>;
+      }
+      else
+      {
+        _sweepScanlineSimpleFn = _sweepScanlineSimpleImpl<FILL_NON_ZERO, 1>;
+        _sweepScanlineRegionFn = _sweepScanlineRegionImpl<FILL_NON_ZERO, 1>;
+        _sweepScanlineSpansFn  = _sweepScanlineSpansImpl<FILL_NON_ZERO, 1>;
+      }
+      break;
+
+    case FILL_EVEN_ODD:
+      if (_alpha == 0xFF)
+      {
+        _sweepScanlineSimpleFn = _sweepScanlineSimpleImpl<FILL_EVEN_ODD, 0>;
+        _sweepScanlineRegionFn = _sweepScanlineRegionImpl<FILL_EVEN_ODD, 0>;
+        _sweepScanlineSpansFn  = _sweepScanlineSpansImpl<FILL_EVEN_ODD, 0>;
+      }
+      else
+      {
+        _sweepScanlineSimpleFn = _sweepScanlineSimpleImpl<FILL_EVEN_ODD, 1>;
+        _sweepScanlineRegionFn = _sweepScanlineRegionImpl<FILL_EVEN_ODD, 1>;
+        _sweepScanlineSpansFn  = _sweepScanlineSpansImpl<FILL_EVEN_ODD, 1>;
+      }
+      break;
+
+    default:
+      FOG_ASSERT_NOT_REACHED();
+  }
 }
 
 // ============================================================================
@@ -867,7 +977,7 @@ void AnalyticRasterizer::clipLine(int24x8_t x1, int24x8_t y1, int24x8_t x2, int2
 
     // x2 > clip.x2
     case 1:
-      y3 = y1 + RasterizerUtil::mulDiv(_clip24x8.x2 - x1, y2 - y1, x2 - x1);
+      y3 = y1 + RasterizerUtil::muldiv(_clip24x8.x2 - x1, y2 - y1, x2 - x1);
       f3 = LiangBarsky::getClippingFlagsY(y3, _clip24x8);
       clipLineY(x1, y1, _clip24x8.x2, y3, f1, f3);
       clipLineY(_clip24x8.x2, y3, _clip24x8.x2, y2, f3, f2);
@@ -875,7 +985,7 @@ void AnalyticRasterizer::clipLine(int24x8_t x1, int24x8_t y1, int24x8_t x2, int2
 
     // x1 > clip.x2
     case 2:
-      y3 = y1 + RasterizerUtil::mulDiv(_clip24x8.x2 - x1, y2 - y1, x2 - x1);
+      y3 = y1 + RasterizerUtil::muldiv(_clip24x8.x2 - x1, y2 - y1, x2 - x1);
       f3 = LiangBarsky::getClippingFlagsY(y3, _clip24x8);
       clipLineY(_clip24x8.x2, y1, _clip24x8.x2, y3, f1, f3);
       clipLineY(_clip24x8.x2, y3, x2, y2, f3, f2);
@@ -888,7 +998,7 @@ void AnalyticRasterizer::clipLine(int24x8_t x1, int24x8_t y1, int24x8_t x2, int2
 
     // x2 < clipX1
     case 4:
-      y3 = y1 + RasterizerUtil::mulDiv(_clip24x8.x1 - x1, y2 - y1, x2 - x1);
+      y3 = y1 + RasterizerUtil::muldiv(_clip24x8.x1 - x1, y2 - y1, x2 - x1);
       f3 = LiangBarsky::getClippingFlagsY(y3, _clip24x8);
       clipLineY(x1, y1, _clip24x8.x1, y3, f1, f3);
       clipLineY(_clip24x8.x1, y3, _clip24x8.x1, y2, f3, f2);
@@ -896,8 +1006,8 @@ void AnalyticRasterizer::clipLine(int24x8_t x1, int24x8_t y1, int24x8_t x2, int2
 
     // x1 > clip.x2 && x2 < clip.x1
     case 6:
-      y3 = y1 + RasterizerUtil::mulDiv(_clip24x8.x2 - x1, y2 - y1, x2 - x1);
-      y4 = y1 + RasterizerUtil::mulDiv(_clip24x8.x1 - x1, y2 - y1, x2 - x1);
+      y3 = y1 + RasterizerUtil::muldiv(_clip24x8.x2 - x1, y2 - y1, x2 - x1);
+      y4 = y1 + RasterizerUtil::muldiv(_clip24x8.x1 - x1, y2 - y1, x2 - x1);
       f3 = LiangBarsky::getClippingFlagsY(y3, _clip24x8);
       f4 = LiangBarsky::getClippingFlagsY(y4, _clip24x8);
       clipLineY(_clip24x8.x2, y1, _clip24x8.x2, y3, f1, f3);
@@ -907,7 +1017,7 @@ void AnalyticRasterizer::clipLine(int24x8_t x1, int24x8_t y1, int24x8_t x2, int2
 
     // x1 < clip.x1
     case 8:
-      y3 = y1 + RasterizerUtil::mulDiv(_clip24x8.x1 - x1, y2 - y1, x2 - x1);
+      y3 = y1 + RasterizerUtil::muldiv(_clip24x8.x1 - x1, y2 - y1, x2 - x1);
       f3 = LiangBarsky::getClippingFlagsY(y3, _clip24x8);
       clipLineY(_clip24x8.x1, y1, _clip24x8.x1, y3, f1, f3);
       clipLineY(_clip24x8.x1, y3, x2, y2, f3, f2);
@@ -915,8 +1025,8 @@ void AnalyticRasterizer::clipLine(int24x8_t x1, int24x8_t y1, int24x8_t x2, int2
 
     // x1 < clip.x1 && x2 > clip.x2
     case 9:
-      y3 = y1 + RasterizerUtil::mulDiv(_clip24x8.x1 - x1, y2 - y1, x2 - x1);
-      y4 = y1 + RasterizerUtil::mulDiv(_clip24x8.x2 - x1, y2 - y1, x2 - x1);
+      y3 = y1 + RasterizerUtil::muldiv(_clip24x8.x1 - x1, y2 - y1, x2 - x1);
+      y4 = y1 + RasterizerUtil::muldiv(_clip24x8.x2 - x1, y2 - y1, x2 - x1);
       f3 = LiangBarsky::getClippingFlagsY(y3, _clip24x8);
       f4 = LiangBarsky::getClippingFlagsY(y4, _clip24x8);
       clipLineY(_clip24x8.x1, y1, _clip24x8.x1, y3, f1, f3);
@@ -953,25 +1063,25 @@ FOG_INLINE void AnalyticRasterizer::clipLineY(int24x8_t x1, int24x8_t y1, int24x
 
     if (f1 & 8) // y1 < clip.y1
     {
-      tx1 = x1 + RasterizerUtil::mulDiv(_clip24x8.y1 - y1, x2 - x1, y2 - y1);
+      tx1 = x1 + RasterizerUtil::muldiv(_clip24x8.y1 - y1, x2 - x1, y2 - y1);
       ty1 = _clip24x8.y1;
     }
 
     if (f1 & 2) // y1 > clip.y2
     {
-      tx1 = x1 + RasterizerUtil::mulDiv(_clip24x8.y2 - y1, x2 - x1, y2 - y1);
+      tx1 = x1 + RasterizerUtil::muldiv(_clip24x8.y2 - y1, x2 - x1, y2 - y1);
       ty1 = _clip24x8.y2;
     }
 
     if (f2 & 8) // y2 < clip.y1
     {
-      tx2 = x1 + RasterizerUtil::mulDiv(_clip24x8.y1 - y1, x2 - x1, y2 - y1);
+      tx2 = x1 + RasterizerUtil::muldiv(_clip24x8.y1 - y1, x2 - x1, y2 - y1);
       ty2 = _clip24x8.y1;
     }
 
     if (f2 & 2) // y2 > clip.y2
     {
-      tx2 = x1 + RasterizerUtil::mulDiv(_clip24x8.y2 - y1, x2 - x1, y2 - y1);
+      tx2 = x1 + RasterizerUtil::muldiv(_clip24x8.y2 - y1, x2 - x1, y2 - y1);
       ty2 = _clip24x8.y2;
     }
 
@@ -1569,216 +1679,725 @@ void AnalyticRasterizer::finalize()
 // [Fog::AnalyticRasterizer - Sweep]
 // ============================================================================
 
-FOG_INLINE uint AnalyticRasterizer::calculateAlphaNonZero(int area) const
+#if defined(FOG_DEBUG_RASTERIZER)
+static void dumpSpans(int y, const Span8* span)
+{
+  ByteArray b;
+  b.appendFormat("Y=%d - ", y);
+
+  while (span)
+  {
+    if (span->isCMask())
+    {
+      b.appendFormat("C[%d %d]%0.2X", span->x1, span->x2, span->getCMask());
+    }
+    else
+    {
+      b.appendFormat("M[%d %d]", span->x1, span->x2);
+      for (int x = 0; x < span->getLength(); x++)
+        b.appendFormat("%0.2X", span->getVMask()[x]);
+    }
+    b.append(' ');
+    span = span->getNext();
+  }
+
+  printf("%s\n", b.getData());
+}
+#endif // FOG_DEBUG_RASTERIZER
+
+template<int _RULE, int _USE_ALPHA>
+FOG_INLINE uint AnalyticRasterizer::_calculateAlpha(int area) const
 {
   int cover = area >> (POLY_SUBPIXEL_SHIFT*2 + 1 - AA_SHIFT);
-
   if (cover < 0) cover = -cover;
-  if (cover > AA_MASK) cover = AA_MASK;
+
+  if (_RULE == FILL_NON_ZERO)
+  {
+    if (cover > AA_MASK) cover = AA_MASK;
+  }
+  else
+  {
+    cover &= AA_MASK_2;
+    if (cover > AA_SCALE) cover = AA_SCALE_2 - cover;
+    if (cover > AA_MASK) cover = AA_MASK;
+  }
+
+  if (_USE_ALPHA) cover = ByteUtil::scalar_muldiv255(cover, _alpha);
   //return _gamma[cover];
   return cover;
 }
 
-FOG_INLINE uint AnalyticRasterizer::calculateAlphaEvenOdd(int area) const
+template<int _RULE, int _USE_ALPHA>
+Span8* AnalyticRasterizer::_sweepScanlineSimpleImpl(
+  Rasterizer* _rasterizer, Scanline8& scanline, int y)
 {
-  int cover = area >> (POLY_SUBPIXEL_SHIFT*2 + 1 - AA_SHIFT);
+  AnalyticRasterizer* rasterizer =
+    reinterpret_cast<AnalyticRasterizer*>(_rasterizer);
 
-  if (cover < 0) cover = -cover;
-  cover &= AA_MASK_2;
-  if (cover > AA_SCALE) cover = AA_SCALE_2 - cover;
-  if (cover > AA_MASK) cover = AA_MASK;
-  //return _gamma[cover];
-  return cover;
-}
+  FOG_ASSERT(rasterizer->_finalized);
+  if (y >= rasterizer->_cellsBounds.y2) return NULL;
 
-uint AnalyticRasterizer::sweepScanline(Scanline32* scanline, int y)
-{
-  FOG_ASSERT(_finalized);
-  if (y >= _cellsBounds.y2) return 0;
-
-  const RowInfo& ri = _rowsInfo[y - _cellsBounds.y1];
+  const RowInfo& ri = rasterizer->_rowsInfo[y - rasterizer->_cellsBounds.y1];
 
   uint numCells = ri.count;
-  if (!numCells) return 0;
+  if (!numCells) return NULL;
 
-  const CellX* cell = &_cellsSorted[ri.index];
+  const CellX* cellCur = &rasterizer->_cellsSorted[ri.index];
+
+  int x;
+  int nextX = cellCur->x;
+  int area;
   int cover = 0;
 
-  if (scanline->init(_cellsBounds.x1, _cellsBounds.x2) != ERR_OK) return 0;
+  if (scanline.newScanline(rasterizer->_cellsBounds.x1, rasterizer->_cellsBounds.x2) != ERR_OK)
+    return NULL;
 
-  int x, cellX = cell->x;
-  int area;
-  uint alpha;
-
-#define SWEEP(CALCULATE, SUFFIX) \
-  for (;;) \
-  { \
-    x = cellX; \
-    area = cell->area; \
-    cover += cell->cover; \
-    \
-    /* Accumulate all cells with the same X. */ \
-    while (--numCells) \
-    { \
-      cell++; \
-      if ((cellX = cell->x) != x) break; \
-      area  += cell->area; \
-      cover += cell->cover; \
-    } \
-    \
-    int coversh = cover << (POLY_SUBPIXEL_SHIFT + 1); \
-    if (area) \
-    { \
-      if ((alpha = CALCULATE(coversh - area))) scanline->addCell##SUFFIX(x, alpha); \
-      x++; \
-    } \
-    if (!numCells) break; \
-    \
-    int slen = cellX - x; \
-    if (slen > 0 && (alpha = CALCULATE(coversh))) scanline->addSpan##SUFFIX(x, (uint)slen, alpha); \
-  }
-
-  if (numCells * 2 < scanline->getSpansCapacity())
+  for (;;)
   {
-    if (_fillRule == FILL_NON_ZERO)
+    x      = nextX;
+    area   = cellCur->area;
+    cover += cellCur->cover;
+
+    while (--numCells)
     {
-      SWEEP(calculateAlphaNonZero, _NoCheck);
+      cellCur++;
+      if ((nextX = cellCur->x) != x) break;
+      area  += cellCur->area;
+      cover += cellCur->cover;
     }
+
+    int coversh = cover << (POLY_SUBPIXEL_SHIFT + 1);
+
+    // There are two possibilities:
+    //
+    // 1. Next cellCur is in position x + 1. This means that we are rendering 
+    //    shape and the line direction in current scanline is horizontal.
+    //    Horizontal direction means that the generated span-mask is larger
+    //    than one pixel.
+    if (x + 1 == nextX)
+    {
+      uint alpha;
+      // Skip this cellCur if resulting mask is zero.
+      if ((alpha = rasterizer->_calculateAlpha<_RULE, _USE_ALPHA>(coversh - area)) == 0) continue;
+
+      // Okay, it seems that we will now generate some masks, embedded to one
+      // span instance.
+      scanline.newVSpanAlpha(x);
+      scanline.addValueAlpha((uint8_t)alpha);
+
+      for (;;)
+      {
+        x      = nextX;
+        area   = cellCur->area;
+        cover += cellCur->cover;
+
+        while (--numCells)
+        {
+          cellCur++;
+          if ((nextX = cellCur->x) != x) break;
+          area  += cellCur->area;
+          cover += cellCur->cover;
+        }
+
+        coversh = cover << (POLY_SUBPIXEL_SHIFT + 1);
+        alpha = rasterizer->_calculateAlpha<_RULE, _USE_ALPHA>(coversh - area);
+
+        if (++x == nextX)
+        {
+          scanline.addValueAlpha(alpha);
+          continue;
+        }
+        else
+        {
+          break;
+        }
+      }
+
+      if (area != 0)
+      {
+        if (alpha != 0)
+        {
+          scanline.addValueAlpha(alpha);
+          scanline.endVSpanAlpha(x);
+        }
+        else
+        {
+          scanline.endVSpanAlpha(x - 1);
+        }
+      }
+      else
+      {
+        scanline.endVSpanAlpha(--x);
+      }
+      if (numCells == 0) break;
+    }
+
+    // 2. Next cellCur is not near or it's the last one. We need to add mask if
+    //    alpha is larger than zero.
     else
     {
-      SWEEP(calculateAlphaEvenOdd, _NoCheck);
+      uint alpha;
+      if (area != 0)
+      {
+        if ((alpha = rasterizer->_calculateAlpha<_RULE, _USE_ALPHA>(coversh - area)) != 0)
+        {
+          scanline.newVSpanAlpha(x);
+          scanline.addValueAlpha(alpha);
+          scanline.endVSpanAlpha(x + 1);
+        }
+        x++;
+      }
+      if (numCells == 0) break;
     }
-  }
-  else
-  {
-    if (_fillRule == FILL_NON_ZERO)
+
     {
-      SWEEP(calculateAlphaNonZero, _Check);
-    }
-    else
-    {
-      SWEEP(calculateAlphaEvenOdd, _Check);
+      uint alpha = rasterizer->_calculateAlpha<_RULE, _USE_ALPHA>(coversh);
+      if (alpha) scanline.addCSpanOrMergeVSpan(x, nextX, alpha);
     }
   }
 
-  return scanline->finalize(y);
-#undef SWEEP
+  if (scanline.endScanline() != ERR_OK) return NULL;
+#if defined(FOG_DEBUG_RASTERIZER)
+  dumpSpans(y, scanline.getSpans());
+#endif // FOG_DEBUG_RASTERIZER
+  return scanline.getSpans();
 }
 
-uint AnalyticRasterizer::sweepScanline(Scanline32* scanline, int y, const IntBox* clip, sysuint_t count)
+template<int _RULE, int _USE_ALPHA>
+Span8* AnalyticRasterizer::_sweepScanlineRegionImpl(
+  Rasterizer* _rasterizer, Scanline8& scanline, int y,
+  const IntBox* clipBoxes, sysuint_t count)
 {
-  FOG_ASSERT(_finalized);
-  if (y >= _cellsBounds.y2) return 0;
+  AnalyticRasterizer* rasterizer =
+    reinterpret_cast<AnalyticRasterizer*>(_rasterizer);
 
-  const RowInfo& ri = _rowsInfo[y - _cellsBounds.y1];
+  FOG_ASSERT(rasterizer->_finalized);
+  if (y >= rasterizer->_cellsBounds.y2) return NULL;
+
+  const RowInfo& ri = rasterizer->_rowsInfo[y - rasterizer->_cellsBounds.y1];
 
   uint numCells = ri.count;
-  if (!numCells) return 0;
+  if (!numCells) return NULL;
 
-  const CellX* cell = &_cellsSorted[ri.index];
-  int cover = 0;
+  const CellX* cellCur = &rasterizer->_cellsSorted[ri.index];
 
-  if (scanline->init(_cellsBounds.x1, _cellsBounds.x2) != ERR_OK) return 0;
+  // Clipping.
+  const IntBox* clipCur = clipBoxes;
+  const IntBox* clipEnd = clipBoxes + count;
+  if (FOG_UNLIKELY(clipCur == clipEnd)) return NULL;
 
-  int x, cellX = cell->x;
+  if (scanline.newScanline(rasterizer->_cellsBounds.x1, rasterizer->_cellsBounds.x2) != ERR_OK)
+    return NULL;
+
+  int x;
+  int nextX = cellCur->x;
   int area;
-  uint alpha;
+  int cover = 0;
+  int coversh;
 
-  // Clipping support.
-  const IntBox* clipEnd = clip + count;
-  if (clip == clipEnd) return 0;
-  // Clip end point (not part of clip span).
-  int clipEndX = clip->x2;
-  int clipStartX;
+  // Current clip box start / end point (not part of clip span).
+  int clipX1;
+  int clipX2 = clipCur->x2;
 
-  // Advance clip.
-  while (clipEndX <= cellX)
+  // Advance clip (discard clip-boxes that can't intersect).
+  while (clipX2 <= nextX)
   {
-    if (++clip == clipEnd) return 0;
-    clipEndX = clip->x2;
-  }
-  clipStartX = clip->x1;
-  FOG_ASSERT(cellX < clipEndX);
-
-#define SWEEP(CALCULATE, SUFFIX, BAIL) \
-  for (;;) \
-  { \
-    x = cellX; \
-    area = cell->area; \
-    cover += cell->cover; \
-    \
-    /* Accumulate all cells with the same X. */ \
-    while (--numCells) \
-    { \
-      cell++; \
-      if ((cellX = cell->x) != x) break; \
-      area  += cell->area; \
-      cover += cell->cover; \
-    } \
-    \
-    int coversh = cover << (POLY_SUBPIXEL_SHIFT + 1); \
-    if (area) \
-    { \
-      /* Here we are always in clip pointer. */ \
-      if (clipStartX <= x && (alpha = CALCULATE(coversh - area))) \
-      { \
-        scanline->addCell##SUFFIX(x, alpha); \
-      } \
-      if (++x == clipEndX) \
-      { \
-        if (++clip == clipEnd) goto BAIL; \
-        clipEndX = clip->x2; \
-        clipStartX = clip->x1; \
-        x = clip->x1; \
-      } \
-    } \
-    if (!numCells) break; \
-    \
-    if (x < clipStartX) x = clipStartX; \
-    if (cellX > x && (alpha = CALCULATE(coversh))) \
-    { \
-      for (;;) \
-      { \
-        int slen = Math::min(cellX, clipEndX) - x; \
-        scanline->addSpan##SUFFIX(x, (uint)slen, alpha); \
-        x += slen; \
-        if (x == clipEndX) \
-        { \
-          if (++clip == clipEnd) goto BAIL; \
-          clipEndX = clip->x2; \
-          clipStartX = clip->x1; \
-          if (clipStartX < cellX) \
-          { \
-            x = clipStartX; \
-            continue; \
-          } \
-        } \
-        break; \
-      } \
-    } \
-    \
-    /* Advance clip pointer. */ \
-    while (cellX >= clipEndX) \
-    { \
-      if (++clip == clipEnd) goto BAIL; \
-      clipEndX = clip->x2; \
-      clipStartX = clip->x1; \
-    } \
+advanceClip:
+    if (++clipCur == clipEnd) goto end;
+    clipX2 = clipCur->x2;
   }
 
-  if (_fillRule == FILL_NON_ZERO)
+  clipX1 = clipCur->x1;
+  FOG_ASSERT(nextX < clipX2);
+
+  for (;;)
   {
-    SWEEP(calculateAlphaNonZero, _Check, end)
-  }
-  else
-  {
-    SWEEP(calculateAlphaEvenOdd, _Check, end)
-  }
+    x      = nextX;
+    area   = cellCur->area;
+    cover += cellCur->cover;
+    FOG_ASSERT(x < clipX2);
 
-#undef SWEEP
+    while (--numCells)
+    {
+      cellCur++;
+      if ((nextX = cellCur->x) != x) break;
+      area  += cellCur->area;
+      cover += cellCur->cover;
+    }
+
+    coversh = cover << (POLY_SUBPIXEL_SHIFT + 1);
+
+    // There are two possibilities:
+    //
+    // 1. Next cellCur is in position x + 1. This means that we are rendering 
+    //    shape and the line direction in current scanline is horizontal.
+    //    Horizontal direction means that the generated span-mask is larger
+    //    than one pixel.
+    if (x + 1 == nextX)
+    {
+      if (x < clipX1) continue;
+
+      uint alpha;
+      // Skip this cellCur if resulting mask is zero.
+      if ((alpha = rasterizer->_calculateAlpha<_RULE, _USE_ALPHA>(coversh - area)) == 0) continue;
+
+      // Okay, it seems that we will now generate some masks, embedded to one
+      // span instance.
+      scanline.newVSpanAlpha(x);
+      scanline.addValueAlpha(alpha);
+
+      if (clipX2 <= nextX)
+      {
+        scanline.endVSpanAlpha(nextX);
+        goto advanceClip;
+      }
+
+      for (;;)
+      {
+        x      = nextX;
+        area   = cellCur->area;
+        cover += cellCur->cover;
+
+        while (--numCells)
+        {
+          cellCur++;
+          if ((nextX = cellCur->x) != x) break;
+          area  += cellCur->area;
+          cover += cellCur->cover;
+        }
+
+        coversh = cover << (POLY_SUBPIXEL_SHIFT + 1);
+        alpha = rasterizer->_calculateAlpha<_RULE, _USE_ALPHA>(coversh - area);
+
+        if (++x == nextX)
+        {
+          scanline.addValueAlpha(alpha);
+          if (clipX2 <= nextX)
+          {
+            scanline.endVSpanAlpha(x);
+            goto advanceClip;
+          }
+          continue;
+        }
+        else
+        {
+          break;
+        }
+      }
+
+      if (area != 0)
+      {
+        if (alpha != 0)
+        {
+          scanline.addValueAlpha(alpha);
+          scanline.endVSpanAlpha(x);
+        }
+        else
+        {
+          scanline.endVSpanAlpha(x - 1);
+        }
+      }
+      else
+      {
+        scanline.endVSpanAlpha(--x);
+      }
+      if (numCells == 0) break;
+    }
+
+    // 2. Next cellCur is not near or it's the last one. We need to add mask if
+    //    alpha is larger than zero.
+    else
+    {
+      uint alpha;
+      if (area != 0)
+      {
+        if (x >= clipX1 && (alpha = rasterizer->_calculateAlpha<_RULE, _USE_ALPHA>(coversh - area)) != 0)
+        {
+          scanline.newVSpanAlpha(x);
+          scanline.addValueAlpha(alpha);
+          scanline.endVSpanAlpha(x + 1);
+        }
+        x++;
+      }
+      if (numCells == 0) break;
+    }
+
+    {
+      if (x >= clipX2)
+      {
+        if (++clipCur == clipEnd) goto end;
+        clipX1 = clipCur->x1;
+        clipX2 = clipCur->x2;
+        FOG_ASSERT(x < clipX2);
+      }
+
+      uint alpha = rasterizer->_calculateAlpha<_RULE, _USE_ALPHA>(coversh);
+      if (alpha && nextX > clipX1)
+      {
+        if (x < clipX1) x = clipX1;
+
+        if (x < clipX2)
+        {
+          FOG_ASSERT(x < clipX2);
+          int toX = Math::min<int>(nextX, clipX2);
+          scanline.addCSpanOrMergeVSpan(x, toX, alpha);
+          x = toX;
+        }
+
+        if (nextX > clipX2)
+        {
+          for (;;)
+          {
+            if (++clipCur == clipEnd) goto end;
+            clipX1 = clipCur->x1;
+            clipX2 = clipCur->x2;
+            if (nextX > clipX1)
+            {
+              scanline.addCSpan(clipX1, Math::min<int>(nextX, clipX2), alpha);
+              if (nextX >= clipX2) continue;
+            }
+            break;
+          }
+        }
+      }
+
+      if (nextX >= clipX2) goto advanceClip;
+    }
+  }
 
 end:
-  return scanline->finalize(y);
+  if (scanline.endScanline() != ERR_OK) return NULL;
+#if defined(FOG_DEBUG_RASTERIZER)
+  dumpSpans(y, scanline.getSpans());
+#endif // FOG_DEBUG_RASTERIZER
+  return scanline.getSpans();
+}
+
+template<int _RULE, int _USE_ALPHA>
+Span8* AnalyticRasterizer::_sweepScanlineSpansImpl(
+  Rasterizer* _rasterizer, Scanline8& scanline, int y,
+  const Span8* clipSpans)
+{
+  AnalyticRasterizer* rasterizer =
+    reinterpret_cast<AnalyticRasterizer*>(_rasterizer);
+
+  FOG_ASSERT(rasterizer->_finalized);
+  if (y >= rasterizer->_cellsBounds.y2) return NULL;
+
+  const RowInfo& ri = rasterizer->_rowsInfo[y - rasterizer->_cellsBounds.y1];
+
+  uint numCells = ri.count;
+  if (!numCells) return NULL;
+
+  const CellX* cellCur = &rasterizer->_cellsSorted[ri.index];
+
+  // Clipping.
+  const Span8* clipCur = clipSpans;
+  if (FOG_UNLIKELY(clipCur == NULL)) return NULL;
+
+  if (scanline.newScanline(rasterizer->_cellsBounds.x1, rasterizer->_cellsBounds.x2) != ERR_OK)
+    return NULL;
+
+  int x;
+  int nextX = cellCur->x;
+  int area;
+  int cover = 0;
+  int coversh;
+
+  // Current clip box start / end point (not part of clip span).
+  int clipX1;
+  int clipX2 = clipCur->getX2();
+  const uint8_t* clipMask;
+
+  // Advance clip (discard clip-boxes that can't intersect).
+  while (clipX2 <= nextX)
+  {
+advanceClip:
+    if ((clipCur = clipCur->getNext()) == NULL) goto end;
+    clipX2 = clipCur->getX2();
+  }
+
+#define CLIP_SPAN_CHANGED() \
+  { \
+    clipX1 = clipCur->getX1(); \
+    FOG_ASSERT(clipX1 < clipX2); \
+    \
+    clipMask = clipCur->getMaskPtr(); \
+    if (Span8::isPtrVMask(clipMask)) clipMask -= clipX1; \
+  }
+
+  CLIP_SPAN_CHANGED()
+  FOG_ASSERT(nextX < clipX2);
+
+  for (;;)
+  {
+    x      = nextX;
+    area   = cellCur->area;
+    cover += cellCur->cover;
+    FOG_ASSERT(x < clipX2);
+
+    while (--numCells)
+    {
+      cellCur++;
+      if ((nextX = cellCur->x) != x) break;
+      area  += cellCur->area;
+      cover += cellCur->cover;
+    }
+
+    coversh = cover << (POLY_SUBPIXEL_SHIFT + 1);
+
+    // There are two possibilities:
+    //
+    // 1. Next cellCur is in position x + 1. This means that we are rendering 
+    //    shape and the line direction in current scanline is horizontal.
+    //    Horizontal direction means that the generated span-mask is larger
+    //    than one pixel.
+    if (x + 1 == nextX)
+    {
+      if (x < clipX1) continue;
+
+      uint alpha;
+      // Skip this cellCur if resulting mask is zero.
+      if ((alpha = rasterizer->_calculateAlpha<_RULE, _USE_ALPHA>(coversh - area)) == 0)
+      {
+        if (clipX2 <= nextX) goto advanceClip;
+        continue;
+      }
+
+      // Okay, it seems that we will now generate some masks, embedded to one
+      // span instance.
+      if (Span8::isPtrCMask(clipMask))
+      {
+        uint32_t m = Span8::ptrToCMask(clipMask);
+        if ((alpha = ByteUtil::scalar_muldiv255(alpha, m)) == 0)
+        {
+          if (clipX2 <= nextX) goto advanceClip;
+          continue;
+        }
+
+        scanline.newVSpanAlpha(x);
+        scanline.addValueAlpha(alpha);
+
+        if (clipX2 <= nextX)
+        {
+          scanline.endVSpanAlpha(nextX);
+          goto advanceClip;
+        }
+
+        for (;;)
+        {
+          x      = nextX;
+          area   = cellCur->area;
+          cover += cellCur->cover;
+
+          while (--numCells)
+          {
+            cellCur++;
+            if ((nextX = cellCur->x) != x) break;
+            area  += cellCur->area;
+            cover += cellCur->cover;
+          }
+
+          coversh = cover << (POLY_SUBPIXEL_SHIFT + 1);
+          alpha = ByteUtil::scalar_muldiv255(
+            rasterizer->_calculateAlpha<_RULE, _USE_ALPHA>(coversh - area), m);
+
+          FOG_ASSERT(x >= clipX1 && x < clipX2);
+          if (++x == nextX)
+          {
+            scanline.addValueAlpha(alpha);
+            if (clipX2 <= nextX)
+            {
+              scanline.endVSpanAlpha(x);
+              goto advanceClip;
+            }
+            continue;
+          }
+          else
+          {
+            break;
+          }
+        }
+      }
+      else
+      {
+        if ((alpha = ByteUtil::scalar_muldiv255(alpha, clipMask[x])) == 0)
+        {
+          if (clipX2 <= nextX) goto advanceClip;
+          continue;
+        }
+
+        scanline.newVSpanAlpha(x);
+        scanline.addValueAlpha(alpha);
+
+        if (clipX2 <= nextX)
+        {
+          scanline.endVSpanAlpha(nextX);
+          goto advanceClip;
+        }
+
+        for (;;)
+        {
+          x      = nextX;
+          area   = cellCur->area;
+          cover += cellCur->cover;
+
+          while (--numCells)
+          {
+            cellCur++;
+            if ((nextX = cellCur->x) != x) break;
+            area  += cellCur->area;
+            cover += cellCur->cover;
+          }
+
+          FOG_ASSERT(x >= clipX1 && x < clipX2);
+          
+          coversh = cover << (POLY_SUBPIXEL_SHIFT + 1);
+          alpha = ByteUtil::scalar_muldiv255(
+            rasterizer->_calculateAlpha<_RULE, _USE_ALPHA>(coversh - area), clipMask[x]);
+
+          if (++x == nextX)
+          {
+            scanline.addValueAlpha(alpha);
+            if (clipX2 <= nextX)
+            {
+              scanline.endVSpanAlpha(x);
+              goto advanceClip;
+            }
+            continue;
+          }
+          else
+          {
+            break;
+          }
+        }
+      }
+
+      if (area != 0)
+      {
+        if (alpha != 0)
+        {
+          scanline.addValueAlpha(alpha);
+          scanline.endVSpanAlpha(x);
+        }
+        else
+        {
+          scanline.endVSpanAlpha(x - 1);
+        }
+      }
+      else
+      {
+        scanline.endVSpanAlpha(--x);
+      }
+      if (numCells == 0) break;
+    }
+
+    // 2. Next cellCur is not near or it's the last one. We need to add mask if
+    //    alpha is larger than zero.
+    else
+    {
+      uint alpha;
+      if (area != 0)
+      {
+        if (x >= clipX1 && (alpha = rasterizer->_calculateAlpha<_RULE, _USE_ALPHA>(coversh - area)) != 0)
+        {
+          FOG_ASSERT(x >= clipX1 && x < clipX2);
+          uint m = (Span8::isPtrCMask(clipMask)) ? Span8::ptrToCMask(clipMask) : clipMask[x];
+          alpha = ByteUtil::scalar_muldiv255(alpha, m);
+          if (alpha)
+          {
+            scanline.newVSpanAlpha(x);
+            scanline.addValueAlpha(alpha);
+            scanline.endVSpanAlpha(x + 1);
+          }
+        }
+        x++;
+      }
+      if (numCells == 0) break;
+    }
+
+    if (nextX > clipX1)
+    {
+      if (clipX2 <= x)
+      {
+        if ((clipCur = clipCur->getNext()) == NULL) goto end;
+        clipX2 = clipCur->getX2();
+        CLIP_SPAN_CHANGED()
+        FOG_ASSERT(x < clipX2);
+      }
+
+      uint alpha = rasterizer->_calculateAlpha<_RULE, _USE_ALPHA>(coversh);
+      if (alpha)
+      {
+        if (x < clipX1) x = clipX1;
+
+        if (x < clipX2)
+        {
+          int toX = Math::min<int>(nextX, clipX2);
+          FOG_ASSERT(x < clipX2);
+          FOG_ASSERT(x < toX);
+
+          if (Span8::isPtrCMask(clipMask))
+          {
+            uint alphaAdj = ByteUtil::scalar_muldiv255(alpha, Span8::ptrToCMask(clipMask));
+            if (alphaAdj) scanline.addCSpanOrMergeVSpan(x, toX, alphaAdj);
+          }
+          else
+          {
+            rasterFuncs.mask[CLIP_OP_INTERSECT][IMAGE_FORMAT_A8].v_op_c(
+              scanline.addVSpanAlphaOrMergeVSpan(x, toX), // Destination.
+              clipMask + x,                               // Source A.
+              alpha,                                      // Source B.
+              toX - x);                                   // Length.
+          }
+
+          x = toX;
+        }
+
+        if (nextX > clipX2)
+        {
+          for (;;)
+          {
+            if ((clipCur = clipCur->getNext()) == NULL) goto end;
+            clipX2 = clipCur->getX2();
+            CLIP_SPAN_CHANGED()
+            if (nextX > clipX1)
+            {
+              int toX = Math::min<int>(nextX, clipX2);
+              FOG_ASSERT(clipX1 < toX);
+              if (Span8::isPtrCMask(clipMask))
+              {
+                uint alphaAdj = ByteUtil::scalar_muldiv255(alpha, Span8::ptrToCMask(clipMask));
+                if (alphaAdj) scanline.addCSpanOrMergeVSpan(clipX1, toX, alphaAdj);
+              }
+              else
+              {
+                rasterFuncs.mask[CLIP_OP_INTERSECT][IMAGE_FORMAT_A8].v_op_c(
+                  scanline.addVSpanAlphaOrMergeVSpan(clipX1, toX), // Destination.
+                  clipMask + clipX1,                               // Source A.
+                  alpha,                                           // Source B.
+                  toX - clipX1);                                   // Length.
+              }
+              if (clipX2 <= nextX) continue;
+            }
+            break;
+          }
+        }
+
+      }
+
+      if (clipX2 <= nextX) goto advanceClip;
+    }
+  }
+
+end:
+  if (scanline.endScanline() != ERR_OK) return NULL;
+#if defined(FOG_DEBUG_RASTERIZER)
+  dumpSpans(y, scanline.getSpans());
+#endif // FOG_DEBUG_RASTERIZER
+  return scanline.getSpans();
+
+#undef CLIP_SPAN_CHANGED
 }
 
 } // Fog namespace

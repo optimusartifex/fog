@@ -1,4 +1,4 @@
-// [Fog-Graphics library - Private API]
+// [Fog-Graphics Library - Private API]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -8,19 +8,19 @@
 #define _FOG_GRAPHICS_BYTEUTIL_P_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Graphics/Constants.h>
-
-//! @addtogroup Fog_Graphics_Private
-//! @{
 
 namespace Fog {
 
+//! @internal
+//! 
 //! @brief Helper typedefs and methods to work with bytes packed in 32-bit or
 //! 64-bit integers.
-//!
-//! @internal.
 namespace ByteUtil {
+
+//! @addtogroup Fog_Graphics_Private
+//! @{
 
 // ============================================================================
 // [Fog::ByteUtil - Div255/256]
@@ -99,6 +99,23 @@ static FOG_INLINE uint32_t scalar_addus(uint32_t x, uint32_t y)
   x |= 0x0100U - ((x >> 8) & 0x00FFU);
   x &= 0x00FFU;
   return x;
+}
+
+// Result = max(x - y, 0)
+static FOG_INLINE uint32_t scalar_subus_invertedy(uint32_t x, uint32_t y)
+{
+  x ^= 0xFF;
+  x += y;
+  x |= 0x0100U - ((x >> 8) & 0x00FFU);
+  x &= 0x00FFU;
+  return x ^ 0xFF;
+}
+
+// Result = max(x - y, 0)
+static FOG_INLINE uint32_t scalar_subus(uint32_t x, uint32_t y)
+{
+  y ^= 0xFF;
+  return scalar_subus_invertedy(x, y);
 }
 
 // Result = x | (x << 8) | (x << 16) | (x << 24)
@@ -1112,19 +1129,17 @@ static FOG_INLINE uint32_t packed_muldiv255(uint32_t x, uint32_t a)
 #endif
 }
 
-// x_c' = x_c * a
+// x_c' = (x_c * a) / 255
 // x_a' = 0xFF
 static FOG_INLINE uint32_t packed_muldiv255_Fxxx(uint32_t x, uint32_t a)
 {
 #if FOG_ARCH_BITS == 64
-  // TODO: I'm not sure about this.
   uint64_t x0 = ((uint64_t)x | ((uint64_t)x << 24)) & FOG_UINT64_C(0x000000FF00FF00FF);
   x0 *= a;
   x0 = (x0 + ((x0 >> 8) & FOG_UINT64_C(0x000000FF00FF00FF)) + FOG_UINT64_C(0xFF00008000800080)) >> 8;
   x0 &= FOG_UINT64_C(0x00FF00FF00FF00FF);
   return (uint32_t)(x0 | (x0 >> 24));
 #else
-  // TODO: I'm not sure about this.
   uint32_t t0 = ((x & 0x00FF00FF)     ) * a;
   uint32_t t1 = ((x & 0x0000FF00) >> 8) * a;
 
@@ -1135,12 +1150,11 @@ static FOG_INLINE uint32_t packed_muldiv255_Fxxx(uint32_t x, uint32_t a)
 #endif
 }
 
-// x_c' = x_c * a
+// x_c' = (x_c * a) / 255
 // x_a' = 0x00
 static FOG_INLINE uint32_t packed_muldiv255_0xxx(uint32_t x, uint32_t a)
 {
 #if FOG_ARCH_BITS == 64
-  // TODO: I'm not sure about this.
   uint64_t x0 = ((uint64_t)x | ((uint64_t)x << 24)) & FOG_UINT64_C(0x000000FF00FF00FF);
   x0 *= a;
   x0 = (x0 + ((x0 >> 8) & FOG_UINT64_C(0x000000FF00FF00FF)) + FOG_UINT64_C(0x0000008000800080)) >> 8;
@@ -1253,92 +1267,10 @@ static FOG_INLINE uint32_t packed_muldiv256_2x_join(
   return x0;
 }
 
-#if 0
-// Currently not used.
-// x_c = (x_c * a_c) / 255
-static FOG_INLINE uint32_t bytemulC(uint32_t x, uint32_t a)
-{
-  uint32_t t;
-  uint32_t r = (x & 0xFF) * (a & 0xFF);
-  r |= (x & 0x00FF0000) * ((a >> 16) & 0xFF);
-  r += 0x80;
-  r = (r + ((r >> 8) & 0x00FF00FF)) >> 8;
-  r &= 0x00FF00FF;
-
-  x >>= 8;
-  t = (x & 0xFF) * ((a >> 8) & 0xFF);
-  t |= (x & 0x00FF0000) * (a >> 24);
-  t += 0x80;
-  t = t + ((t >> 8) & 0x00FF00FF);
-
-  return r | (t & 0xFF00FF00);
-}
-
-// x_c = (x_c * a) / 255 + y
-static FOG_INLINE uint32_t bytemuladdC(uint32_t x, uint32_t a, uint32_t y)
-{
-  uint32_t t;
-  uint32_t r = (x & 0xFF) * (a & 0xFF);
-
-  r |= (x & 0x00FF0000) * ((a >> 16) & 0xFF);
-  r += 0x80;
-  r = (r + ((r >> 8) & 0x00FF00FF)) >> 8;
-  r &= 0x00FF00FF;
-  r += y & 0x00FF00FF;
-  r |= 0x01000100 - ((r >> 8) & 0x00FF00FF);
-  r &= 0x00FF00FF;
-
-  x >>= 8;
-  t = (x & 0xFF) * ((a >> 8) & 0xFF);
-  t |= (x & 0x00FF0000) * (a >> 24);
-  t += 0x80;
-  t = (t + ((t >> 8) & 0x00FF00FF)) >> 8;
-  t &= 0x00FF00FF;
-  t += (y >> 8) & 0x00FF00FF;
-  t |= 0x01000100 - ((t >> 8) & 0x00FF00FF);
-  t &= 0x00FF00FF;
-
-  return r | (t << 8);
-}
-
-// x_c = (x_c * a_c + y_c * b) / 255
-static FOG_INLINE uint32_t byteaddmulC(uint32_t x, uint32_t a, uint32_t y, uint32_t b)
-{
-  uint32_t t;
-  uint32_t r = (x >> 24) * (a >> 24) +
-               (y >> 24) * b;
-  r += (r >> 8) + 0x80;
-  r >>= 8;
-
-  t = (x & 0x0000FF00) * ((a >> 8) & 0xFF) + (y & 0x0000FF00) * b;
-  t += (t >> 8) + (0x80 << 8);
-  t >>= 16;
-
-  t |= r << 16;
-  t |= 0x01000100 - ((t >> 8) & 0x00FF00FF);
-  t &= 0x00FF00FF;
-  t <<= 8;
-
-  r = ((x >> 16) & 0xFF) * ((a >> 16) & 0xFF) +
-      ((y >> 16) & 0xFF) * b + 0x80;
-  r += (r >> 8);
-  r >>= 8;
-
-  x = (x & 0xFF) * (a & 0xFF) + (y & 0xFF) * b + 0x80;
-  x += (x >> 8);
-  x >>= 8;
-  x |= r << 16;
-  x |= 0x01000100 - ((x >> 8) & 0x00FF00FF);
-  x &= 0x00FF00FF;
-
-  return x | t;
-}
-#endif
+//! @}
 
 } // ByteUtil namespace
 } // Fog namespace
-
-//! @}
 
 // [Guard]
 #endif // _FOG_GRAPHICS_BYTEUTIL_P_H

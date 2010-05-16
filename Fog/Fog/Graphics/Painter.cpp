@@ -13,8 +13,8 @@
 #include <Fog/Graphics/Painter.h>
 #include <Fog/Graphics/PaintEngine.h>
 
-#include <Fog/Graphics/PaintEngine/Null_p.h>
-#include <Fog/Graphics/PaintEngine/Raster_p.h>
+#include <Fog/Graphics/PaintEngine/PaintEngine_Null_p.h>
+#include <Fog/Graphics/PaintEngine/PaintEngine_Raster_Engine_p.h>
 
 namespace Fog {
 
@@ -28,10 +28,10 @@ PaintEngine* Painter::_dnull;
 static FOG_INLINE bool Painter_isFormatSupported(uint32_t format)
 {
   // This function is called after null image check, so the pixel format
-  // can't be null (PIXEL_FORMAT_NULL) at this time.
-  FOG_ASSERT(format != PIXEL_FORMAT_NULL);
+  // can't be null (IMAGE_FORMAT_NULL) at this time.
+  FOG_ASSERT(format < IMAGE_FORMAT_COUNT);
 
-  if (format == PIXEL_FORMAT_I8) return false;
+  if (format == IMAGE_FORMAT_I8) return false;
 
   return true;
 }
@@ -80,7 +80,7 @@ err_t Painter::begin(Image& image, uint32_t initFlags)
   uint32_t format = image.getFormat();
 
   if (image.isEmpty()) return ERR_IMAGE_INVALID_SIZE;
-  if (!Painter_isFormatSupported(format)) return ERR_IMAGE_UNSUPPORTED_FORMAT;
+  if (!Painter_isFormatSupported(format)) return ERR_PAINTER_UNSUPPORTED_FORMAT;
 
   // Create image buffer.
   FOG_RETURN_ON_ERROR(image.detach());
@@ -106,7 +106,7 @@ err_t Painter::begin(Image& image, const IntRect& rect, uint32_t initFlags)
 
   if (image.isEmpty()) return ERR_RT_INVALID_ARGUMENT;
   if (!Painter_isRectValid(image, rect)) return ERR_RT_INVALID_ARGUMENT;
-  if (!Painter_isFormatSupported(format)) return ERR_IMAGE_UNSUPPORTED_FORMAT;
+  if (!Painter_isFormatSupported(format)) return ERR_PAINTER_UNSUPPORTED_FORMAT;
 
   // Create image buffer.
   FOG_RETURN_ON_ERROR(image.detach());
@@ -129,7 +129,7 @@ err_t Painter::begin(const ImageBuffer& buffer, uint32_t initFlags)
 
   // Do basic checks.
   if (!buffer.isValid()) return ERR_RT_INVALID_ARGUMENT;
-  if (!Painter_isFormatSupported(buffer.format)) return ERR_IMAGE_UNSUPPORTED_FORMAT;
+  if (!Painter_isFormatSupported(buffer.format)) return ERR_PAINTER_UNSUPPORTED_FORMAT;
 
   // Create paint engine.
   PaintEngine* d = new(std::nothrow) RasterPaintEngine(buffer, NULL, initFlags);
@@ -151,13 +151,13 @@ err_t Painter::switchTo(Image& image)
 {
   uint32_t engineType = _engine->getEngine();
 
-  // We must ensure that engine is PAINTER_ENGINE_RASTER_XXX.
-  if (engineType != PAINTER_ENGINE_RASTER_ST && engineType != PAINTER_ENGINE_RASTER_MT)
+  // We must ensure that engine is PAINT_ENGINE_RASTER_XXX.
+  if (engineType != PAINT_ENGINE_RASTER_ST && engineType != PAINT_ENGINE_RASTER_MT)
     return begin(image);
 
   // Do basic checks.
   if (image.isEmpty()) return ERR_RT_INVALID_ARGUMENT;
-  if (!Painter_isFormatSupported(image.getFormat())) return ERR_IMAGE_UNSUPPORTED_FORMAT;
+  if (!Painter_isFormatSupported(image.getFormat())) return ERR_PAINTER_UNSUPPORTED_FORMAT;
 
   // Create image buffer and switch to it.
   ImageBuffer buffer;
@@ -170,14 +170,14 @@ err_t Painter::switchTo(Image& image, const IntRect& rect)
 {
   uint32_t engineType = _engine->getEngine();
 
-  // We must ensure that engine is PAINTER_ENGINE_RASTER_XXX.
-  if (engineType != PAINTER_ENGINE_RASTER_ST && engineType != PAINTER_ENGINE_RASTER_MT)
+  // We must ensure that engine is PAINT_ENGINE_RASTER_XXX.
+  if (engineType != PAINT_ENGINE_RASTER_ST && engineType != PAINT_ENGINE_RASTER_MT)
     return begin(image, rect);
 
   // Do basic checks.
   if (image.isEmpty()) return ERR_RT_INVALID_ARGUMENT;
   if (!Painter_isRectValid(image, rect)) return ERR_RT_INVALID_ARGUMENT;
-  if (!Painter_isFormatSupported(image.getFormat())) return ERR_IMAGE_UNSUPPORTED_FORMAT;
+  if (!Painter_isFormatSupported(image.getFormat())) return ERR_PAINTER_UNSUPPORTED_FORMAT;
 
   // Create image buffer and switch to it.
   ImageBuffer buffer;
@@ -190,13 +190,13 @@ err_t Painter::switchTo(const ImageBuffer& buffer)
 {
   uint32_t engineType = _engine->getEngine();
 
-  // We must ensure that engine is PAINTER_ENGINE_RASTER_XXX.
-  if (engineType != PAINTER_ENGINE_RASTER_ST && engineType != PAINTER_ENGINE_RASTER_MT)
+  // We must ensure that engine is PAINT_ENGINE_RASTER_XXX.
+  if (engineType != PAINT_ENGINE_RASTER_ST && engineType != PAINT_ENGINE_RASTER_MT)
     return begin(buffer);
 
   // Do basic checks.
   if (!buffer.isValid()) return ERR_RT_INVALID_ARGUMENT;
-  if (!Painter_isFormatSupported(buffer.format)) return ERR_IMAGE_UNSUPPORTED_FORMAT;
+  if (!Painter_isFormatSupported(buffer.format)) return ERR_PAINTER_UNSUPPORTED_FORMAT;
 
   // Switch to a given buffer.
   return reinterpret_cast<RasterPaintEngine*>(_engine)->switchTo(buffer, NULL);

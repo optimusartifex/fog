@@ -9,14 +9,14 @@
 
 // [Dependencies]
 #include <Fog/Core/Static.h>
-#include <Fog/Graphics/Argb.h>
+#include <Fog/Graphics/Color.h>
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/Geometry.h>
 
-//! @addtogroup Fog_Graphics
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Graphics_Painting
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -28,6 +28,7 @@ struct Pattern;
 // [Fog::Gradient]
 // ============================================================================
 
+//! @brief Gradient pattern helper class.
 struct FOG_HIDDEN Gradient
 {
   // --------------------------------------------------------------------------
@@ -35,8 +36,8 @@ struct FOG_HIDDEN Gradient
   // --------------------------------------------------------------------------
 
   FOG_INLINE Gradient() :
-    _type(PATTERN_LINEAR_GRADIENT),
-    _spread(SPREAD_PAD),
+    _type(PATTERN_TYPE_LINEAR_GRADIENT),
+    _spread(PATTERN_SPREAD_PAD),
     _start(0.0, 0.0),
     _end(0.0, 0.0),
     _radius(0.0)
@@ -54,8 +55,8 @@ struct FOG_HIDDEN Gradient
   }
 
   FOG_INLINE Gradient(uint32_t type, uint32_t spread, const DoublePoint& start, const DoublePoint& end, const List<ArgbStop>& stops) :
-    _type((type < PATTERN_LINEAR_GRADIENT) | (type > PATTERN_CONICAL_GRADIENT) ? PATTERN_LINEAR_GRADIENT : type),
-    _spread((uint)spread >= SPREAD_COUNT ? SPREAD_PAD : spread),
+    _type((type < PATTERN_TYPE_LINEAR_GRADIENT) | (type > PATTERN_TYPE_CONICAL_GRADIENT) ? PATTERN_TYPE_LINEAR_GRADIENT : type),
+    _spread(spread >= PATTERN_SPREAD_COUNT ? PATTERN_SPREAD_PAD : spread),
     _start(start),
     _end(end),
     _radius(0.0),
@@ -64,8 +65,8 @@ struct FOG_HIDDEN Gradient
   }
 
   FOG_INLINE Gradient(uint32_t type, uint32_t spread, const DoublePoint& start, const DoublePoint& end, double radius, const List<ArgbStop>& stops) :
-    _type((type < PATTERN_LINEAR_GRADIENT) | (type > PATTERN_CONICAL_GRADIENT) ? PATTERN_LINEAR_GRADIENT : type),
-    _spread((uint)spread >= SPREAD_COUNT ? SPREAD_PAD : spread),
+    _type((type < PATTERN_TYPE_LINEAR_GRADIENT) | (type > PATTERN_TYPE_CONICAL_GRADIENT) ? PATTERN_TYPE_LINEAR_GRADIENT : type),
+    _spread(spread >= PATTERN_SPREAD_COUNT ? PATTERN_SPREAD_PAD : spread),
     _start(start),
     _end(end),
     _radius(radius),
@@ -88,7 +89,7 @@ struct FOG_HIDDEN Gradient
 
   FOG_INLINE void setType(uint32_t type)
   {
-    if ((type < PATTERN_LINEAR_GRADIENT) | (type > PATTERN_CONICAL_GRADIENT)) return;
+    if ((type < PATTERN_TYPE_LINEAR_GRADIENT) | (type > PATTERN_TYPE_CONICAL_GRADIENT)) return;
     _type = type;
   }
 
@@ -103,7 +104,7 @@ struct FOG_HIDDEN Gradient
 
   FOG_INLINE void setSpread(uint32_t spread)
   {
-    if ((uint32_t)spread >= SPREAD_COUNT) return;
+    if ((uint32_t)spread >= PATTERN_SPREAD_COUNT) return;
     _spread = spread;
   }
 
@@ -167,9 +168,9 @@ private:
   friend struct Pattern;
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GRAPHICS_GRADIENT_H

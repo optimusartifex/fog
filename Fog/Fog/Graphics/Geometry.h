@@ -12,10 +12,10 @@
 #include <Fog/Core/Memory.h>
 #include <Fog/Core/TypeInfo.h>
 
-//! @addtogroup Fog_Graphics
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Graphics_Geometry
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -60,7 +60,7 @@ struct DoubleSize;
 // [Fog::IntPoint]
 // ============================================================================
 
-//! @brief Point (32-bit integer based).
+//! @brief Point (32-bit integer version).
 struct FOG_HIDDEN IntPoint
 {
   // --------------------------------------------------------------------------
@@ -243,7 +243,7 @@ struct FOG_HIDDEN IntPoint
 // [Fog::FloatPoint]
 // ============================================================================
 
-//! @brief Point (32-bit float based).
+//! @brief Point (32-bit float version).
 struct FloatPoint
 {
   // --------------------------------------------------------------------------
@@ -475,7 +475,7 @@ struct FloatPoint
 // [Fog::DoublePoint]
 // ============================================================================
 
-//! @brief Point (64-bit float based).
+//! @brief Point (64-bit float version).
 struct DoublePoint
 {
   // --------------------------------------------------------------------------
@@ -737,7 +737,7 @@ struct DoublePoint
 // [Fog::IntSize]
 // ============================================================================
 
-//! @brief Size (32-bit integer based).
+//! @brief Size (32-bit integer version).
 struct IntSize
 {
   // --------------------------------------------------------------------------
@@ -1216,7 +1216,7 @@ struct DoubleSize
 // [Fog::IntRect]
 // ============================================================================
 
-//! @brief Rectangle (32-bit integer based).
+//! @brief Rectangle (32-bit integer version).
 struct IntRect
 {
   // --------------------------------------------------------------------------
@@ -1544,7 +1544,7 @@ struct IntRect
 // [Fog::FloatRect]
 // ============================================================================
 
-//! @brief Rectangle (32-bit float based).
+//! @brief Rectangle (32-bit float version).
 struct FloatRect
 {
   // --------------------------------------------------------------------------
@@ -1925,7 +1925,7 @@ struct FloatRect
 // [Fog::DoubleRect]
 // ============================================================================
 
-//! @brief Rectangle (64-bit integer based).
+//! @brief Rectangle (64-bit integer version).
 struct DoubleRect
 {
   // --------------------------------------------------------------------------
@@ -2401,7 +2401,7 @@ struct DoubleRect
 // [Fog::IntBox]
 // ============================================================================
 
-//! @brief Box (32-bit integer based).
+//! @brief Box (32-bit integer version).
 struct IntBox
 {
   // --------------------------------------------------------------------------
@@ -2701,6 +2701,8 @@ FOG_INLINE DoubleRect FloatRect::toDoubleRect() const { return DoubleRect((doubl
 FOG_INLINE IntRect::IntRect(const IntBox& box) : x(box.x1), y(box.y1), w(box.x2 - box.x1), h(box.y2 - box.y1) {}
 FOG_INLINE IntBox::IntBox(const IntRect& rect) : x1(rect.x), y1(rect.y), x2(rect.x + rect.w), y2(rect.y + rect.h) {}
 
+//! @}
+
 } // Fog namespace
 
 // ============================================================================
@@ -2736,8 +2738,6 @@ FOG_INLINE Fog::DoubleRect operator-(const Fog::DoubleRect& a, const Fog::Double
 
 FOG_INLINE Fog::IntBox operator+(const Fog::IntBox& a, const Fog::IntPoint& b) { return Fog::IntBox(a.x1 + b.x, a.y1 + b.y, a.x2 + b.x, a.y2 + b.y); }
 FOG_INLINE Fog::IntBox operator-(const Fog::IntBox& a, const Fog::IntPoint& b) { return Fog::IntBox(a.x1 - b.x, a.y1 - b.y, a.x2 - b.x, a.y2 - b.y); }
-
-//! @}
 
 // ============================================================================
 // [Fog::TypeInfo<>]

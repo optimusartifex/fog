@@ -9,22 +9,23 @@
 
 // [Dependencies]
 #include <Fog/Core/Static.h>
-#include <Fog/Graphics/Argb.h>
+#include <Fog/Graphics/Color.h>
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/Geometry.h>
 #include <Fog/Graphics/Gradient.h>
 #include <Fog/Graphics/Image.h>
 #include <Fog/Graphics/Matrix.h>
 
-//! @addtogroup Fog_Graphics
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Graphics_Painting
+//! @{
 
 // ============================================================================
 // [Fog::PatternData]
 // ============================================================================
 
+//! Pattern data.
 struct FOG_API PatternData
 {
   // --------------------------------------------------------------------------
@@ -65,12 +66,13 @@ struct FOG_API PatternData
 
   //! @brief pattern type, see @c PATTERN_TYPE enum.
   uint32_t type;
-  //! @brief Pattern spread, see @c SPREAD_TYPE enum.
+  //! @brief Pattern spread, see @c PATTERN_SPREAD enum.
   uint32_t spread;
 
   //! @brief Pattern transformation matrix.
   DoubleMatrix matrix;
 
+  //! @internal
   struct GradientData
   {
     //! @brief Start and end points. These values have different meaning for
@@ -79,15 +81,18 @@ struct FOG_API PatternData
     //! - Radial gradient - points[0] is center point, points[1] is focal point.
     //! - Conical gradient - points[0] is center point, points[1] is end point (for angle).
     DoublePoint points[2];
-    //! @brief Used only for PATTERN_RADIAL_GRADIENT - circle radius.
+    //! @brief Used only for PATTERN_TYPE_RADIAL_GRADIENT - circle radius.
     double radius;
   };
 
+  //! @internal
   struct TextureData
   {
     IntRect area;
   };
 
+  //! @internal
+  //!
   //! @brief Embedded objects in pattern, this can be solid color, raster
   //! texture data and gradient stops.
   union ObjectInst
@@ -97,11 +102,15 @@ struct FOG_API PatternData
     Static< List<ArgbStop> > stops;
   } obj;
 
+  //! @internal
   union ObjectData
   {
     Static< TextureData > texture;
     Static< GradientData > gradient;
-  } data;
+  };
+
+  //! @brief Data for all pattern types.
+  ObjectData data;
 };
 
 // ============================================================================
@@ -150,13 +159,13 @@ struct FOG_API Pattern
   FOG_INLINE uint32_t getType() const { return _d->type; }
   err_t setType(uint32_t type);
 
-  FOG_INLINE bool isNull() const { return _d->type == PATTERN_NULL; }
-  FOG_INLINE bool isSolid() const { return _d->type == PATTERN_SOLID; }
-  FOG_INLINE bool isTexture() const { return _d->type == PATTERN_TEXTURE; }
-  FOG_INLINE bool isGradient() const { return (_d->type & PATTERN_GRADIENT_MASK) == PATTERN_GRADIENT_MASK; }
-  FOG_INLINE bool isLinearGradient() const { return _d->type == PATTERN_LINEAR_GRADIENT; }
-  FOG_INLINE bool isRadialGradient() const { return _d->type == PATTERN_RADIAL_GRADIENT; }
-  FOG_INLINE bool isConicalGradient() const { return _d->type == PATTERN_CONICAL_GRADIENT; }
+  FOG_INLINE bool isNull() const { return _d->type == PATTERN_TYPE_NONE; }
+  FOG_INLINE bool isSolid() const { return _d->type == PATTERN_TYPE_SOLID; }
+  FOG_INLINE bool isTexture() const { return _d->type == PATTERN_TYPE_TEXTURE; }
+  FOG_INLINE bool isGradient() const { return (_d->type & PATTERN_TYPE_IS_GRADIENT) == PATTERN_TYPE_IS_GRADIENT; }
+  FOG_INLINE bool isLinearGradient() const { return _d->type == PATTERN_TYPE_LINEAR_GRADIENT; }
+  FOG_INLINE bool isRadialGradient() const { return _d->type == PATTERN_TYPE_RADIAL_GRADIENT; }
+  FOG_INLINE bool isConicalGradient() const { return _d->type == PATTERN_TYPE_CONICAL_GRADIENT; }
 
   // --------------------------------------------------------------------------
   // [Null]
@@ -195,30 +204,30 @@ struct FOG_API Pattern
   // [Solid]
   // --------------------------------------------------------------------------
 
-  //! @brief Get pattern color (for @c PATTERN_SOLID type).
+  //! @brief Get pattern color (for @c PATTERN_TYPE_SOLID type).
   //!
-  //! If the pattern is not @c PATTERN_SOLID type, the Argb(0, 0, 0, 0) color is
+  //! If the pattern is not @c PATTERN_TYPE_SOLID type, the Argb(0, 0, 0, 0) color is
   //! returned.
   Argb getColor() const;
 
-  //! @brief Set pattern type to @c PATTERN_SOLID and its color to @a argb.
+  //! @brief Set pattern type to @c PATTERN_TYPE_SOLID and its color to @a argb.
   err_t setColor(const Argb& argb);
 
   // --------------------------------------------------------------------------
   // [Texture]
   // --------------------------------------------------------------------------
 
-  //! @brief Get pattern texture (for @c PATTERN_TEXTURE type).
+  //! @brief Get pattern texture (for @c PATTERN_TYPE_TEXTURE type).
   Image getTexture() const;
 
-  //! @brief Get texture area (for @c PATTERN_TEXTURE type).
+  //! @brief Get texture area (for @c PATTERN_TYPE_TEXTURE type).
   IntRect getTextureArea() const;
 
-  //! @brief Set pattern type to @c PATTERN_TEXTURE and the texture to @a texture.
+  //! @brief Set pattern type to @c PATTERN_TYPE_TEXTURE and the texture to @a texture.
   //!
   //! @return
   //! - @c ERR_OK - If function succeed.
-  //! - @c ERR_RT_INVALID_CONTEXT - If pattern is not @c PATTERN_RADIAL_GRADIENT.
+  //! - @c ERR_RT_INVALID_OBJECT - If pattern is not @c PATTERN_TYPE_RADIAL_GRADIENT.
   //! - @c ERR_RT_OUT_OF_MEMORY - If memory allocation failed.
   err_t setTexture(const Image& texture);
   //! @overload
@@ -246,29 +255,29 @@ struct FOG_API Pattern
   err_t setPoints(const FloatPoint& startPt, const FloatPoint& endPt);
   err_t setPoints(const DoublePoint& startPt, const DoublePoint& endPt);
 
-  //! @brief Get radial gradient radius (for @c PATTERN_RADIAL_GRADIENT type)
+  //! @brief Get radial gradient radius (for @c PATTERN_TYPE_RADIAL_GRADIENT type)
   double getRadius() const;
 
   //! @brief Set radial gradient radius to @a r.
   //!
   //! @return
   //! - @c ERR_OK - If function succeed.
-  //! - @c ERR_RT_INVALID_CONTEXT - If pattern is not @c PATTERN_RADIAL_GRADIENT.
+  //! - @c ERR_RT_INVALID_OBJECT - If pattern is not @c PATTERN_TYPE_RADIAL_GRADIENT.
   //! - @c ERR_RT_OUT_OF_MEMORY - If memory allocation failed.
   err_t setRadius(float r);
   //! @overload
   err_t setRadius(double r);
 
-  //! @brief Get generic gradient argb stops (for @c PATTERN_LINEAR_GRADIENT,
-  //! @c PATTERN_RADIAL_GRADIENT and @c PATTERN_CONICAL_GRADIENT types).
+  //! @brief Get generic gradient argb stops (for @c PATTERN_TYPE_LINEAR_GRADIENT,
+  //! @c PATTERN_TYPE_RADIAL_GRADIENT and @c PATTERN_TYPE_CONICAL_GRADIENT types).
   List<ArgbStop> getStops() const;
 
   //! @brief Set generic gradient argb stops to @a stops.
   //!
   //! @return
   //! - @c ERR_OK - If function succeed.
-  //! - @c ERR_RT_INVALID_CONTEXT - If pattern is not @c PATTERN_LINEAR_GRADIENT,
-  //!   @c PATTERN_RADIAL_GRADIENT or @c PATTERN_CONICAL_GRADIENT.
+  //! - @c ERR_RT_INVALID_OJBECT - If pattern is not @c PATTERN_TYPE_LINEAR_GRADIENT,
+  //!   @c PATTERN_TYPE_RADIAL_GRADIENT or @c PATTERN_TYPE_CONICAL_GRADIENT.
   //! - @c ERR_RT_OUT_OF_MEMORY - If memory allocation failed.
   err_t setStops(const List<ArgbStop>& stops);
 
@@ -276,8 +285,8 @@ struct FOG_API Pattern
   //!
   //! @return
   //! - @c ERR_OK - If function succeed.
-  //! - @c ERR_RT_INVALID_CONTEXT - If pattern is not @c PATTERN_LINEAR_GRADIENT,
-  //!   @c PATTERN_RADIAL_GRADIENT or @c PATTERN_CONICAL_GRADIENT.
+  //! - @c ERR_RT_INVALID_OBJECT - If pattern is not @c PATTERN_TYPE_LINEAR_GRADIENT,
+  //!   @c PATTERN_TYPE_RADIAL_GRADIENT or @c PATTERN_TYPE_CONICAL_GRADIENT.
   //! - @c ERR_RT_OUT_OF_MEMORY - If memory allocation failed.
   err_t resetStops();
 
@@ -285,8 +294,8 @@ struct FOG_API Pattern
   //!
   //! @return
   //! - @c ERR_OK - If function succeed.
-  //! - @c ERR_RT_INVALID_CONTEXT - If pattern is not @c PATTERN_LINEAR_GRADIENT,
-  //!   @c PATTERN_RADIAL_GRADIENT or @c PATTERN_CONICAL_GRADIENT.
+  //! - @c ERR_RT_INVALID_OBJECT - If pattern is not @c PATTERN_TYPE_LINEAR_GRADIENT,
+  //!   @c PATTERN_TYPE_RADIAL_GRADIENT or @c PATTERN_TYPE_CONICAL_GRADIENT.
   //! - @c ERR_RT_OUT_OF_MEMORY - If memory allocation failed.
   err_t addStop(const ArgbStop& stop);
 
@@ -304,9 +313,9 @@ struct FOG_API Pattern
   FOG_DECLARE_D(PatternData)
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GRAPHICS_PATTERN_H

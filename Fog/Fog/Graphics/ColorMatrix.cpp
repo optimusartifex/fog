@@ -17,7 +17,7 @@
 // [Dependencies]
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/Math.h>
-#include <Fog/Graphics/Argb.h>
+#include <Fog/Graphics/Color.h>
 #include <Fog/Graphics/ColorMatrix.h>
 
 namespace Fog {
@@ -200,50 +200,40 @@ void ColorMatrix::transformVector(float* FOG_RESTRICT v) const
 
 void ColorMatrix::transformRgb(Argb* clr) const
 {
-  float r = (float)clr->r;
-  float g = (float)clr->g;
-  float b = (float)clr->b;
+  float r = (float)clr->getRed();
+  float g = (float)clr->getGreen();
+  float b = (float)clr->getBlue();
 
   int tr = Math::iround(r * m[0][0] + g * m[1][0] + b * m[2][0] + 255.0f * m[3][0] + m[4][0] * 255.0f);
   int tg = Math::iround(r * m[0][1] + g * m[1][1] + b * m[2][1] + 255.0f * m[3][1] + m[4][1] * 255.0f);
   int tb = Math::iround(r * m[0][2] + g * m[1][2] + b * m[2][2] + 255.0f * m[3][2] + m[4][2] * 255.0f);
 
-  tr = Math::bound<int>(tr, 0, 255);
-  tg = Math::bound<int>(tg, 0, 255);
-  tb = Math::bound<int>(tb, 0, 255);
-
-  clr->r = (uint8_t)tr;
-  clr->g = (uint8_t)tg;
-  clr->b = (uint8_t)tb;
+  clr->setRed  (Math::boundToByte(tr));
+  clr->setGreen(Math::boundToByte(tg));
+  clr->setBlue (Math::boundToByte(tb));
 }
 
 void ColorMatrix::transformArgb(Argb* clr) const
 {
-  float r = (float)clr->r;
-  float g = (float)clr->g;
-  float b = (float)clr->b;
-  float a = (float)clr->a;
+  float r = (float)clr->getRed  ();
+  float g = (float)clr->getGreen();
+  float b = (float)clr->getBlue ();
+  float a = (float)clr->getAlpha();
 
   int tr = Math::iround(r * m[0][0] + g * m[1][0] + b * m[2][0] + a * m[3][0] + m[4][0] * 255.0f);
   int tg = Math::iround(r * m[0][1] + g * m[1][1] + b * m[2][1] + a * m[3][1] + m[4][1] * 255.0f);
   int tb = Math::iround(r * m[0][2] + g * m[1][2] + b * m[2][2] + a * m[3][2] + m[4][2] * 255.0f);
   int ta = Math::iround(r * m[0][3] + g * m[1][3] + b * m[2][3] + a * m[3][3] + m[4][3] * 255.0f);
 
-  tr = Math::bound<int>(tr, 0, 255);
-  tg = Math::bound<int>(tg, 0, 255);
-  tb = Math::bound<int>(tb, 0, 255);
-  ta = Math::bound<int>(ta, 0, 255);
-
-  clr->set(tr, tg, tb, ta);
+  clr->setRed  (Math::boundToByte(tr));
+  clr->setGreen(Math::boundToByte(tg));
+  clr->setBlue (Math::boundToByte(tb));
+  clr->setAlpha(Math::boundToByte(ta));
 }
 
 void ColorMatrix::transformAlpha(uint8_t* a) const
 {
-  int ta = Math::iround((float)*a * m[3][3] + m[4][3] * 255.0f);
-
-  ta = Math::bound<int>(ta, 0, 255);
-
-  *a = (uint8_t)ta;
+  *a = Math::boundToByte(Math::iround((float)*a * m[3][3] + m[4][3] * 255.0f));
 }
 
 ColorMatrix& ColorMatrix::scale(float sa, float sr, float sg, float sb, uint32_t order)
@@ -337,42 +327,42 @@ void ColorMatrix::_copyData(float* _dst, const float* _src)
 // [Fog::ColorMatrix - Statics]
 // ============================================================================
 
-ColorMatrix ColorMatrix::GREYSCALE(
+const ColorMatrix ColorMatrix::GREYSCALE(
   LUM_R, LUM_R, LUM_R, 0.0f, 0.0f,
   LUM_G, LUM_G, LUM_G, 0.0f, 0.0f,
   LUM_B, LUM_B, LUM_B, 0.0f, 0.0f,
   0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
   0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
 
-ColorMatrix ColorMatrix::IDENTITY(
+const ColorMatrix ColorMatrix::IDENTITY(
   1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
   0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
   0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
   0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
   0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
 
-ColorMatrix ColorMatrix::WHITE(
+const ColorMatrix ColorMatrix::WHITE(
   1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
   1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
   1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
   0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
   0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
 
-ColorMatrix ColorMatrix::ZERO(
+const ColorMatrix ColorMatrix::ZERO(
   0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
   0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
   0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
   0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
   0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
-ColorMatrix ColorMatrix::PRE_HUE(
+const ColorMatrix ColorMatrix::PRE_HUE(
   0.8164966106f, 0.0f, 0.5345109105f, 0.0f, 0.0f,
   -0.4082482755f, 0.7071067691f, 1.055511713f, 0.0f, 0.0f,
   -0.4082482755f, -0.7071067691f, 0.1420281678f, 0.0f, 0.0f,
   0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
   0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
 
-ColorMatrix ColorMatrix::POST_HUE(
+const ColorMatrix ColorMatrix::POST_HUE(
   0.8467885852f, -0.3779562712f, -0.3779562712f, 0.0f, 0.0f,
   -0.3729280829f, 0.3341786563f, -1.080034852f, 0.0f, 0.0f,
   0.5773502588f, 0.5773502588f, 0.5773502588f, 0.0f, 0.0f,

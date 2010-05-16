@@ -8,15 +8,15 @@
 #define _FOG_CORE_CHARUTIL_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Memory.h>
 #include <Fog/Core/TypeInfo.h>
 
-//! @defgroup Core
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Core_Essentials
+//! @{
 
 // ============================================================================
 // [Ascii and Unicode Data]
@@ -76,7 +76,7 @@ extern FOG_API const uint8_t utf8LengthTable[256];
 // [Unicode Constants]
 // ============================================================================
 
-enum UNOCODE_CHARS
+enum UNICODE_CHARS
 {
   // UTF-16
 
@@ -207,8 +207,8 @@ struct FOG_HIDDEN CharUtil
 #undef __FOG_CTYPE_UNICODE_OVERLOAD
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 #endif // _FOG_CORE_CHARUTIL_H

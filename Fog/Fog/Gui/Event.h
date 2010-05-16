@@ -12,9 +12,6 @@
 #include <Fog/Graphics/Geometry.h>
 #include <Fog/Gui/Constants.h>
 
-//! @addtogroup Fog_Gui
-//! @{
-
 namespace Fog {
 
 // ============================================================================
@@ -23,6 +20,9 @@ namespace Fog {
 
 struct Widget;
 struct Painter;
+
+//! @addtogroup Fog_Gui_Widget
+//! @{
 
 // ============================================================================
 // [Fog::ChildEvent]
@@ -48,20 +48,6 @@ struct FOG_API ChildEvent : public Event
   // --------------------------------------------------------------------------
 
   Widget* _child;
-};
-
-// ============================================================================
-// [Fog::LayoutEvent]
-// ============================================================================
-
-struct FOG_API LayoutEvent : public Event
-{
-  // --------------------------------------------------------------------------
-  // [Construction / Destruction]
-  // --------------------------------------------------------------------------
-
-  LayoutEvent(uint32_t code = 0);
-  virtual ~LayoutEvent();
 };
 
 // ============================================================================
@@ -381,9 +367,28 @@ struct FOG_API ThemeEvent : public Event
   virtual ~ThemeEvent();
 };
 
-} // Fog namespace
+//! @}
+
+//! @addtogroup Fog_Gui_Layout
+//! @{
+
+// ============================================================================
+// [Fog::LayoutEvent]
+// ============================================================================
+
+struct FOG_API LayoutEvent : public Event
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  LayoutEvent(uint32_t code = 0);
+  virtual ~LayoutEvent();
+};
 
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GUI_EVENT_H

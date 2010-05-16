@@ -4,7 +4,7 @@
 // MIT, See COPYING file in package
 
 // For some IDEs to enable code-assist.
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 
 #if defined(FOG_IDE)
 #include <Fog/Graphics/RasterEngine/Defs_C_p.h>
@@ -47,6 +47,7 @@ enum RGB24_SWAPPED_BYTEPOS
 // [Fog::RasterEngine::C - Dib - IO]
 // ============================================================================
 
+//! @internal
 struct FOG_HIDDEN RGB24_NATIVE_IO
 {
   static FOG_INLINE uint32_t fetch(const uint8_t* p)
@@ -73,6 +74,7 @@ struct FOG_HIDDEN RGB24_NATIVE_IO
   }
 };
 
+//! @internal
 struct FOG_HIDDEN RGB24_SWAPPED_IO
 {
   static FOG_INLINE uint32_t fetch(const uint8_t* p)
@@ -90,6 +92,7 @@ struct FOG_HIDDEN RGB24_SWAPPED_IO
   }
 };
 
+//! @internal
 struct FOG_HIDDEN RGB16_565_NATIVE_IO
 {
   // TODO: Not correct
@@ -111,6 +114,7 @@ struct FOG_HIDDEN RGB16_565_NATIVE_IO
   }
 };
 
+//! @internal
 struct FOG_HIDDEN RGB16_565_SWAPPED_IO
 {
   // TODO: Not correct
@@ -133,6 +137,7 @@ struct FOG_HIDDEN RGB16_565_SWAPPED_IO
   }
 };
 
+//! @internal
 struct FOG_HIDDEN RGB16_555_NATIVE_IO
 {
   // TODO: Not correct
@@ -154,6 +159,7 @@ struct FOG_HIDDEN RGB16_555_NATIVE_IO
   }
 };
 
+//! @internal
 struct FOG_HIDDEN RGB16_555_SWAPPED_IO
 {
   // TODO: Not correct
@@ -180,6 +186,7 @@ struct FOG_HIDDEN RGB16_555_SWAPPED_IO
 // [Fog::RasterEngine::C - Dib]
 // ============================================================================
 
+//! @internal
 struct FOG_HIDDEN DibC
 {
   // --------------------------------------------------------------------------
@@ -187,22 +194,20 @@ struct FOG_HIDDEN DibC
   // --------------------------------------------------------------------------
 
   static void FOG_FASTCALL bswap16(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       ((uint16_t*)dst)[0] = Memory::bswap16(((const uint16_t*)src)[0]);
 
       dst += 2;
       src += 2;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL bswap24(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       uint8_t s0 = src[0];
       uint8_t s1 = src[1];
       uint8_t s2 = src[2];
@@ -213,19 +218,18 @@ struct FOG_HIDDEN DibC
 
       dst += 3;
       src += 3;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL bswap32(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       ((uint32_t*)dst)[0] = Memory::bswap32(((const uint32_t*)src)[0]);
 
       dst += 4;
       src += 4;
-    }
+    } while (--w);
   }
 
   // --------------------------------------------------------------------------
@@ -233,11 +237,11 @@ struct FOG_HIDDEN DibC
   // --------------------------------------------------------------------------
 
   static void FOG_FASTCALL memcpy8(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     while ((sysuint_t(dst) & 3))
     {
-      copy1(dst, src);
+      Memory::copy1B(dst, src);
       dst++;
       src++;
       if (--w == 0) return;
@@ -245,7 +249,7 @@ struct FOG_HIDDEN DibC
 
     while (w >= 32)
     {
-      copy32(dst, src);
+      Memory::copy32B(dst, src);
       dst += 32;
       src += 32;
       w -= 32;
@@ -253,13 +257,13 @@ struct FOG_HIDDEN DibC
 
     while (w >= 4)
     {
-      copy4(dst, src);
+      Memory::copy4B(dst, src);
       dst += 4;
       src += 4;
       w -= 4;
     }
 
-    switch (w & 3)
+    switch (w)
     {
       case 3: *dst++ = *src++;
       case 2: *dst++ = *src++;
@@ -268,38 +272,246 @@ struct FOG_HIDDEN DibC
   }
 
   static void FOG_FASTCALL memcpy16(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    memcpy8(dst, src, (sysuint_t)w * 2, closure);
+    memcpy8(dst, src, w * 2, closure);
   }
 
   static void FOG_FASTCALL memcpy24(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    memcpy8(dst, src, (sysuint_t)w * 3, closure);
+    memcpy8(dst, src, w * 3, closure);
   }
 
   static void FOG_FASTCALL memcpy32(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     while (w >= 8)
     {
-      copy32(dst, src);
+      Memory::copy32B(dst, src);
       dst += 32;
       src += 32;
       w -= 8;
     }
 
-    switch (w & 7)
+    switch (w)
     {
-      case 7: copy4(dst, src); dst += 4; src += 4;
-      case 6: copy4(dst, src); dst += 4; src += 4;
-      case 5: copy4(dst, src); dst += 4; src += 4;
-      case 4: copy4(dst, src); dst += 4; src += 4;
-      case 3: copy4(dst, src); dst += 4; src += 4;
-      case 2: copy4(dst, src); dst += 4; src += 4;
-      case 1: copy4(dst, src); dst += 4; src += 4;
+      case 7: Memory::copy4B(dst, src); dst += 4; src += 4;
+      case 6: Memory::copy4B(dst, src); dst += 4; src += 4;
+      case 5: Memory::copy4B(dst, src); dst += 4; src += 4;
+      case 4: Memory::copy4B(dst, src); dst += 4; src += 4;
+      case 3: Memory::copy4B(dst, src); dst += 4; src += 4;
+      case 2: Memory::copy4B(dst, src); dst += 4; src += 4;
+      case 1: Memory::copy4B(dst, src); dst += 4; src += 4;
     }
+  }
+
+  // --------------------------------------------------------------------------
+  // [DibC - Rect]
+  // --------------------------------------------------------------------------
+
+  static void FOG_FASTCALL cblit_rect_32_helper(
+    uint8_t* dst, sysint_t dstStride,
+    uint32_t src0,
+    int w, int h)
+  {
+    FOG_ASSERT(w > 0 && h > 0);
+    dstStride -= w * 4;
+
+#if FOG_ARCH_BITS == 64
+    uint64_t src0_64 = (uint64_t)src0 | ((uint64_t)src0 << 32);
+
+    do {
+      int i = w;
+
+      while ((i -= 8) >= 0)
+      {
+        ((uint64_t*)dst)[0] = src0_64;
+        ((uint64_t*)dst)[1] = src0_64;
+        ((uint64_t*)dst)[2] = src0_64;
+        ((uint64_t*)dst)[3] = src0_64;
+
+        dst += 32;
+      }
+      i += 8;
+
+      switch (i)
+      {
+        case 7: ((uint32_t*)dst)[0] = src0; dst += 4;
+        case 6: ((uint32_t*)dst)[0] = src0; dst += 4;
+        case 5: ((uint32_t*)dst)[0] = src0; dst += 4;
+        case 4: ((uint32_t*)dst)[0] = src0; dst += 4;
+        case 3: ((uint32_t*)dst)[0] = src0; dst += 4;
+        case 2: ((uint32_t*)dst)[0] = src0; dst += 4;
+        case 1: ((uint32_t*)dst)[0] = src0; dst += 4;
+      }
+
+      dst += dstStride;
+    } while (--h);
+#else
+    do {
+      int i = w;
+
+      while ((i -= 8) >= 0)
+      {
+        ((uint32_t*)dst)[0] = src0;
+        ((uint32_t*)dst)[1] = src0;
+        ((uint32_t*)dst)[2] = src0;
+        ((uint32_t*)dst)[3] = src0;
+        ((uint32_t*)dst)[4] = src0;
+        ((uint32_t*)dst)[5] = src0;
+        ((uint32_t*)dst)[6] = src0;
+        ((uint32_t*)dst)[7] = src0;
+
+        dst += 32;
+      }
+      i += 8;
+
+      switch (i)
+      {
+        case 7: ((uint32_t*)dst)[0] = src0; dst += 4;
+        case 6: ((uint32_t*)dst)[0] = src0; dst += 4;
+        case 5: ((uint32_t*)dst)[0] = src0; dst += 4;
+        case 4: ((uint32_t*)dst)[0] = src0; dst += 4;
+        case 3: ((uint32_t*)dst)[0] = src0; dst += 4;
+        case 2: ((uint32_t*)dst)[0] = src0; dst += 4;
+        case 1: ((uint32_t*)dst)[0] = src0; dst += 4;
+      }
+
+      dst += dstStride;
+    } while (--h);
+#endif
+  }
+
+  static void FOG_FASTCALL cblit_rect_32_prgb(
+    uint8_t* dst, sysint_t dstStride,
+    const RasterSolid* src,
+    int w, int h, const RasterClosure* closure)
+  {
+    cblit_rect_32_helper(dst, dstStride, src->prgb, w, h);
+  }
+
+  static void FOG_FASTCALL cblit_rect_32_argb(
+    uint8_t* dst, sysint_t dstStride,
+    const RasterSolid* src,
+    int w, int h, const RasterClosure* closure)
+  {
+    cblit_rect_32_helper(dst, dstStride, src->argb, w, h);
+  }
+
+  static void FOG_FASTCALL cblit_rect_8(
+    uint8_t* dst, sysint_t dstStride,
+    const RasterSolid* src,
+    int w, int h, const RasterClosure* closure)
+  {
+    FOG_ASSERT(w > 0 && h > 0);
+    dstStride -= w;
+
+#if FOG_ARCH_BITS == 64
+    uint64_t src0 = (uint64_t)((src->prgb) >> 24) * FOG_UINT64_C(0x0101010101010101);
+#else
+    uint32_t src0 = (uint32_t)((src->prgb) >> 24) * 0x01010101;
+#endif
+
+    do {
+      int i = w;
+
+      while (((sysuint_t)dst & 0x3) && i)
+      {
+        dst[0] = (uint8_t)src0;
+        dst++;
+        i--;
+      }
+
+      while ((i -= 32) >= 0)
+      {
+#if FOG_ARCH_BITS == 64
+        ((uint64_t*)dst)[0] = src0;
+        ((uint64_t*)dst)[1] = src0;
+        ((uint64_t*)dst)[2] = src0;
+        ((uint64_t*)dst)[3] = src0;
+#else
+        ((uint32_t*)dst)[0] = src0;
+        ((uint32_t*)dst)[1] = src0;
+        ((uint32_t*)dst)[2] = src0;
+        ((uint32_t*)dst)[3] = src0;
+        ((uint32_t*)dst)[4] = src0;
+        ((uint32_t*)dst)[5] = src0;
+        ((uint32_t*)dst)[6] = src0;
+        ((uint32_t*)dst)[7] = src0;
+#endif
+        dst += 32;
+      }
+      i += 32;
+
+      while ((i -= 4) >= 0)
+      {
+        ((uint32_t*)dst)[0] = (uint32_t)src0;
+        dst += 4;
+      }
+      i += 4;
+
+      switch (i)
+      {
+        case 3: ((uint8_t*)dst)[0] = (uint8_t)src0; dst += 1;
+        case 2: ((uint8_t*)dst)[0] = (uint8_t)src0; dst += 1;
+        case 1: ((uint8_t*)dst)[0] = (uint8_t)src0; dst += 1;
+      }
+
+      dst += dstStride;
+    } while (--h);
+  }
+
+  static void FOG_FASTCALL vblit_rect_32(
+    uint8_t* dst, sysint_t dstStride,
+    const uint8_t* src, sysint_t srcStride,
+    int w, int h, const RasterClosure* closure)
+  {
+    FOG_ASSERT(w > 0 && h > 0);
+
+    dstStride -= w * 4;
+    srcStride -= w * 4;
+
+    do {
+      int i = w;
+
+      while ((i -= 8) >= 0)
+      {
+        Memory::copy64B(dst, src);
+
+        dst += 32;
+        src += 32;
+      }
+      i += 8;
+
+      switch (i)
+      {
+        case 7: Memory::copy4B(dst, src); dst += 4; src += 4;
+        case 6: Memory::copy4B(dst, src); dst += 4; src += 4;
+        case 5: Memory::copy4B(dst, src); dst += 4; src += 4;
+        case 4: Memory::copy4B(dst, src); dst += 4; src += 4;
+        case 3: Memory::copy4B(dst, src); dst += 4; src += 4;
+        case 2: Memory::copy4B(dst, src); dst += 4; src += 4;
+        case 1: Memory::copy4B(dst, src); dst += 4; src += 4;
+      }
+
+      dst += dstStride;
+      src += srcStride;
+    } while (--h);
+  }
+
+  static void FOG_FASTCALL vblit_rect_8(
+    uint8_t* dst, sysint_t dstStride,
+    const uint8_t* src, sysint_t srcStride,
+    int w, int h, const RasterClosure* closure)
+  {
+    FOG_ASSERT(w > 0 && h > 0);
+
+    do {
+      memcpy(dst, src, w);
+      dst += dstStride;
+      src += srcStride;
+    } while (--h);
   }
 
   // --------------------------------------------------------------------------
@@ -307,86 +519,78 @@ struct FOG_HIDDEN DibC
   // --------------------------------------------------------------------------
 
   static void FOG_FASTCALL prgb32_from_argb32(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       ((uint32_t*)dst)[0] = ArgbUtil::premultiply(((const uint32_t*)src)[0]);
 
       dst += 4;
       src += 4;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL frgb32_from_xrgb32(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       ((uint32_t*)dst)[0] = ((const uint32_t*)src)[0] | 0xFF000000U;
 
       dst += 4;
       src += 4;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL azzz32_from_a8(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       ((uint32_t*)dst)[0] = (uint32_t)src[0] << 24;
 
       dst += 4;
       src += 1;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL prgb32_from_i8(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    const Argb* srcPal = closure->srcPalette + Palette::INDEX_PRGB32;
+    const uint32_t* srcPal = closure->srcPalette + Palette::INDEX_PRGB32;
 
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       ((uint32_t*)dst)[0] = srcPal[src[0]];
 
       dst += 4;
       src += 1;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL prgb32_from_argb32_swapped(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       ((uint32_t*)dst)[0] = ArgbUtil::premultiply(Memory::bswap32(((const uint32_t*)src)[0]));
 
       dst += 4;
       src += 4;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL frgb32_from_xrgb32_swapped(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       ((uint32_t*)dst)[0] = Memory::bswap32(((const uint32_t*)src)[0]) | 0xFF000000U;
 
       dst += 4;
       src += 4;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL frgb32_from_rgb24_native(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    sysint_t i = w;
-
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-    while (i >= 4)
+    while (w >= 4)
     {
       // Following table illustrates how this works on Little Endian:
       //
@@ -404,100 +608,94 @@ struct FOG_HIDDEN DibC
 
       dst += 16;
       src += 12;
-      i -= 4;
+      w -= 4;
     }
 #endif // FOG_BYTE_ORDER
 
-    while (i)
+    while (w)
     {
       ((uint32_t*)dst)[0] = RGB24_NATIVE_IO::fetch(src) | 0xFF000000U;
       dst += 4;
       src += 3;
-      i--;
+      w--;
     }
   }
 
   static void FOG_FASTCALL frgb32_from_rgb24_swapped(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       ((uint32_t*)dst)[0] = RGB24_SWAPPED_IO::fetch(src) | 0xFF000000U;
 
       dst += 4;
       src += 3;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL frgb32_from_rgb16_565_native(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       ((uint32_t*)dst)[0] = RGB16_565_NATIVE_IO::fetch(src) | 0xFF000000U;
 
       dst += 4;
       src += 2;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL frgb32_from_rgb16_565_swapped(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       ((uint32_t*)dst)[0] = RGB16_565_SWAPPED_IO::fetch(src) | 0xFF000000U;
 
       dst += 4;
       src += 2;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL frgb32_from_rgb16_555_native(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       ((uint32_t*)dst)[0] = RGB16_555_NATIVE_IO::fetch(src) | 0xFF000000U;
 
       dst += 4;
       src += 2;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL frgb32_from_rgb16_555_swapped(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       ((uint32_t*)dst)[0] = RGB16_555_SWAPPED_IO::fetch(src) | 0xFF000000U;
 
       dst += 4;
       src += 2;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL frgb32_from_grey8(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       uint32_t grey = src[0];
 
       ((uint32_t*)dst)[0] = grey | (grey << 8) | (grey << 16) | 0xFF000000U;
 
       dst += 4;
       src += 1;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL argb32_from_prgb32(
-    uint8_t* _dst, const uint8_t* _src, sysint_t w, const Closure* closure)
+    uint8_t* _dst, const uint8_t* _src, int w, const RasterClosure* closure)
   {
     uint32_t* dst = reinterpret_cast<uint32_t*>(_dst);
     const uint32_t* src = reinterpret_cast<const uint32_t*>(_src);
 
-    sysint_t i = 0;
+    int i = 0;
 
     while (i < w)
     {
@@ -524,7 +722,7 @@ struct FOG_HIDDEN DibC
         r = (rgba >> 16) & 0xFFU;
         g = (rgba >> 8 ) & 0xFFU;
         b = (rgba      ) & 0xFFU;
-        recip = ArgbUtil::demultiply_reciprocal_table_d[a];
+        recip = raster_demultiply_reciprocal_table_d[a];
 
         r = ((r * recip)      ) & 0x00FF0000;
         g = ((g * recip) >>  8) & 0x0000FF00;
@@ -543,7 +741,7 @@ struct FOG_HIDDEN DibC
         r = (rgba >> 16) & 0xFFU;
         g = (rgba >>  8) & 0xFFU;
         b = (rgba      ) & 0xFFU;
-        recip = ArgbUtil::demultiply_reciprocal_table_d[a];
+        recip = raster_demultiply_reciprocal_table_d[a];
 
         diff = rgba ^ const_in;
 
@@ -582,26 +780,25 @@ struct FOG_HIDDEN DibC
   }
 
   static void FOG_FASTCALL argb32_from_i8(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    const Argb* srcPal = closure->srcPalette + Palette::INDEX_ARGB32;
+    const uint32_t* srcPal = closure->srcPalette + Palette::INDEX_ARGB32;
 
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       ((uint32_t*)dst)[0] = srcPal[src[0]];
 
       dst += 4;
       src += 1;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL argb32_from_prgb32_swapped(
-    uint8_t* _dst, const uint8_t* _src, sysint_t w, const Closure* closure)
+    uint8_t* _dst, const uint8_t* _src, int w, const RasterClosure* closure)
   {
     uint32_t* dst = reinterpret_cast<uint32_t*>(_dst);
     const uint32_t* src = reinterpret_cast<const uint32_t*>(_src);
 
-    sysint_t i = 0;
+    int i = 0;
 
     while (i < w)
     {
@@ -628,7 +825,7 @@ struct FOG_HIDDEN DibC
         r = (rgba >>  8) & 0xFFU;
         g = (rgba >> 16) & 0xFFU;
         b = (rgba >> 24);
-        recip = ArgbUtil::demultiply_reciprocal_table_d[a];
+        recip = raster_demultiply_reciprocal_table_d[a];
 
         r = ((r * recip)      ) & 0x00FF0000;
         g = ((g * recip) >>  8) & 0x0000FF00;
@@ -647,7 +844,7 @@ struct FOG_HIDDEN DibC
         r = (rgba >>  8) & 0xFFU;
         g = (rgba >> 16) & 0xFFU;
         b = (rgba >> 24);
-        recip = ArgbUtil::demultiply_reciprocal_table_d[a];
+        recip = raster_demultiply_reciprocal_table_d[a];
 
         diff = rgba ^ const_in;
 
@@ -686,163 +883,151 @@ struct FOG_HIDDEN DibC
   }
 
   static void FOG_FASTCALL frgb32_from_argb32(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       ((uint32_t*)dst)[0] = ArgbUtil::premultiply(((const uint32_t*)src)[0]);
 
       dst += 4;
       src += 4;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL fzzz32_from_null(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       ((uint32_t*)dst)[0] = 0xFF000000U;
 
       dst += 4;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL frgb32_from_i8(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    const Argb* srcPal = closure->srcPalette + Palette::INDEX_PRGB32;
+    const uint32_t* srcPal = closure->srcPalette + Palette::INDEX_PRGB32;
 
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       ((uint32_t*)dst)[0] = srcPal[src[0]] | 0xFF000000U;
 
       dst += 4;
       src += 1;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL frgb32_from_argb32_swapped(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       ((uint32_t*)dst)[0] = Memory::bswap32(ArgbUtil::premultiply(((const uint32_t*)src)[0])) | 0xFF000000U;
 
       dst += 4;
       src += 4;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL a8_from_axxx32(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     src += ARGB32_ABYTE;
 
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       dst[0] = src[0];
 
       dst += 1;
       src += 4;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL f8_from_null(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       *dst++ = 0xFFU;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL a8_from_i8(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     const uint8_t* srcPal = (uint8_t*)(closure->srcPalette + Palette::INDEX_ARGB32);
     srcPal += ARGB32_ABYTE;
 
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       dst[0] = srcPal[src[0]];
 
       dst += 1;
       src += 1;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL a8_from_axxx32_swapped(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     src += 3 - ARGB32_ABYTE;
 
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       dst[0] = src[0];
 
       dst += 1;
       src += 4;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL prgb32_swapped_from_argb32(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       ((uint32_t*)dst)[0] = Memory::bswap32(ArgbUtil::premultiply(((const uint32_t*)src)[0]));
 
       dst += 4;
       src += 4;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL frgb32_swapped_from_xrgb32(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       ((uint32_t*)dst)[0] = Memory::bswap32(((const uint32_t*)src)[0] | 0xFF000000U);
 
       dst += 4;
       src += 4;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL azzz32_swapped_from_a8(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       ((uint32_t*)dst)[0] = (uint32_t)src[0];
 
       dst += 4;
       src += 1;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL prgb32_swapped_from_i8(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    const Argb* srcPal = closure->srcPalette + Palette::INDEX_PRGB32;
+    const uint32_t* srcPal = closure->srcPalette + Palette::INDEX_PRGB32;
 
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       ((uint32_t*)dst)[0] = Memory::bswap32(srcPal[src[0]]);
 
       dst += 4;
       src += 1;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL argb32_swapped_from_prgb32(
-    uint8_t* _dst, const uint8_t* _src, sysint_t w, const Closure* closure)
+    uint8_t* _dst, const uint8_t* _src, int w, const RasterClosure* closure)
   {
     uint32_t* dst = reinterpret_cast<uint32_t*>(_dst);
     const uint32_t* src = reinterpret_cast<const uint32_t*>(_src);
 
-    sysint_t i = 0;
+    int i = 0;
 
     while (i < w)
     {
@@ -869,7 +1054,7 @@ struct FOG_HIDDEN DibC
         r = (rgba >> 16) & 0xFFU;
         g = (rgba >> 8 ) & 0xFFU;
         b = (rgba      ) & 0xFFU;
-        recip = ArgbUtil::demultiply_reciprocal_table_d[a];
+        recip = raster_demultiply_reciprocal_table_d[a];
 
         r = ((r * recip) >>  8) & 0x0000FF00U;
         g = ((g * recip)      ) & 0x00FF0000U;
@@ -889,7 +1074,7 @@ struct FOG_HIDDEN DibC
         r = (rgba >> 16) & 0xFFU;
         g = (rgba >> 8 ) & 0xFFU;
         b = (rgba      ) & 0xFFU;
-        recip = ArgbUtil::demultiply_reciprocal_table_d[a];
+        recip = raster_demultiply_reciprocal_table_d[a];
 
         diff = rgba ^ const_in;
 
@@ -928,64 +1113,58 @@ struct FOG_HIDDEN DibC
   }
 
   static void FOG_FASTCALL argb32_swapped_from_i8(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    const Argb* srcPal = closure->srcPalette + Palette::INDEX_ARGB32;
+    const uint32_t* srcPal = closure->srcPalette + Palette::INDEX_ARGB32;
 
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       ((uint32_t*)dst)[0] = Memory::bswap32(srcPal[src[0]]);
 
       dst += 4;
       src += 1;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL frgb32_swapped_from_argb32(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       ((uint32_t*)dst)[0] = Memory::bswap32(ArgbUtil::premultiply(((const uint32_t*)src)[0]) | 0xFF000000U);
 
       dst += 4;
       src += 4;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL fzzz32_swapped_from_null(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       ((uint32_t*)dst)[0] = 0x000000FFU;
 
       dst += 4;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL frgb32_swapped_from_i8(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    const Argb* srcPal = closure->srcPalette + Palette::INDEX_PRGB32;
+    const uint32_t* srcPal = closure->srcPalette + Palette::INDEX_PRGB32;
 
-    for (sysint_t i = w; i; i--)
-    {
+    do {
       ((uint32_t*)dst)[0] = Memory::bswap32(srcPal[src[0]] | 0xFF000000U);
 
       dst += 4;
       src += 1;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL rgb24_native_from_xrgb32(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    sysint_t i = w;
-
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
     // Align.
-    while (i && (sysuint_t)dst & 0x3)
+    while (w && (sysuint_t)dst & 0x3)
     {
       uint32_t s0 = ((const uint32_t*)src)[0];
 
@@ -995,11 +1174,11 @@ struct FOG_HIDDEN DibC
 
       dst += 3;
       src += 4;
-      i--;
+      w--;
     }
 
     // 4 Pixels per time.
-    while (i >= 4)
+    while (w >= 4)
     {
       // Following table illustrates how this works on Little Endian:
       //
@@ -1016,11 +1195,11 @@ struct FOG_HIDDEN DibC
 
       dst += 12;
       src += 16;
-      i -= 4;
+      w -= 4;
     }
 #endif // FOG_BYTE_ORDER
 
-    while (i)
+    while (w)
     {
       uint32_t s0 = ((const uint32_t*)src)[0];
 
@@ -1030,18 +1209,16 @@ struct FOG_HIDDEN DibC
 
       dst += 3;
       src += 4;
-      i--;
+      w--;
     }
   }
 
   static void FOG_FASTCALL rgb24_native_from_argb32(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    sysint_t i = w;
-
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
     // Align.
-    while (i && (sysuint_t)dst & 0x3)
+    while (w && (sysuint_t)dst & 0x3)
     {
       uint32_t s0 = ArgbUtil::premultiply(((const uint32_t*)src)[0]);
 
@@ -1051,11 +1228,11 @@ struct FOG_HIDDEN DibC
 
       dst += 3;
       src += 4;
-      i--;
+      w--;
     }
 
     // 4 Pixels per time.
-    while (i >= 4)
+    while (w >= 4)
     {
       // Following table illustrates how this works on Little Endian:
       //
@@ -1072,11 +1249,11 @@ struct FOG_HIDDEN DibC
 
       dst += 12;
       src += 16;
-      i -= 4;
+      w -= 4;
     }
 #endif // FOG_BYTE_ORDER
 
-    while (i)
+    while (w)
     {
       uint32_t s0 = ArgbUtil::premultiply(((const uint32_t*)src)[0]);
 
@@ -1086,57 +1263,54 @@ struct FOG_HIDDEN DibC
 
       dst += 3;
       src += 4;
-      i--;
+      w--;
     }
   }
 
   static void FOG_FASTCALL zzz24_from_null(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    sysint_t i = w;
-
     // Align.
-    while (i && (sysuint_t)dst & 0x3)
+    while (w && (sysuint_t)dst & 0x3)
     {
       dst[0] = 0x00U;
       dst[1] = 0x00U;
       dst[2] = 0x00U;
 
       dst += 3;
-      i--;
+      w--;
     }
 
     // 4 Pixels per time.
-    while (i >= 4)
+    while (w >= 4)
     {
       ((uint32_t*)dst)[0] = 0x00000000U;
       ((uint32_t*)dst)[1] = 0x00000000U;
       ((uint32_t*)dst)[2] = 0x00000000U;
 
       dst += 12;
-      i -= 4;
+      w -= 4;
     }
 
-    while (i)
+    while (w)
     {
       dst[0] = 0x00U;
       dst[1] = 0x00U;
       dst[2] = 0x00U;
 
       dst += 3;
-      i--;
+      w--;
     }
   }
 
   static void FOG_FASTCALL rgb24_native_from_i8(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    const Argb* srcPal = closure->srcPalette + Palette::INDEX_PRGB32;
-    sysint_t i = w;
+    const uint32_t* srcPal = closure->srcPalette + Palette::INDEX_PRGB32;
 
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
     // Align.
-    while (i && (sysuint_t)dst & 0x3)
+    while (w && (sysuint_t)dst & 0x3)
     {
       uint32_t s0 = srcPal[src[0]];
 
@@ -1146,11 +1320,11 @@ struct FOG_HIDDEN DibC
 
       dst += 3;
       src += 1;
-      i--;
+      w--;
     }
 
     // 4 Pixels per time.
-    while (i >= 4)
+    while (w >= 4)
     {
       // Following table illustrates how this works on Little Endian:
       //
@@ -1167,11 +1341,11 @@ struct FOG_HIDDEN DibC
 
       dst += 12;
       src += 4;
-      i -= 4;
+      w -= 4;
     }
 #endif // FOG_BYTE_ORDER
 
-    while (i)
+    while (w)
     {
       uint32_t s0 = srcPal[src[0]];
 
@@ -1181,17 +1355,14 @@ struct FOG_HIDDEN DibC
 
       dst += 3;
       src += 1;
-      i--;
+      w--;
     }
   }
 
   static void FOG_FASTCALL rgb24_swapped_from_xrgb32(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    sysint_t i = w;
-
-    while (i)
-    {
+    do {
       uint32_t s0 = ((const uint32_t*)src)[0];
 
       dst[RGB24_SWAPPED_RBYTE] = (uint8_t)(s0 >> 16);
@@ -1200,17 +1371,13 @@ struct FOG_HIDDEN DibC
 
       dst += 3;
       src += 4;
-      i--;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL rgb24_swapped_from_argb32(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    sysint_t i = w;
-
-    while (i)
-    {
+    do {
       uint32_t s0 = ArgbUtil::premultiply(((const uint32_t*)src)[0]);
 
       dst[RGB24_SWAPPED_RBYTE] = (uint8_t)(s0 >> 16);
@@ -1219,18 +1386,15 @@ struct FOG_HIDDEN DibC
 
       dst += 3;
       src += 4;
-      i--;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL rgb24_swapped_from_i8(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    const Argb* srcPal = closure->srcPalette + Palette::INDEX_PRGB32;
-    sysint_t i = w;
+    const uint32_t* srcPal = closure->srcPalette + Palette::INDEX_PRGB32;
 
-    while (i)
-    {
+    do {
       uint32_t s0 = srcPal[src[0]];
 
       dst[RGB24_SWAPPED_RBYTE] = (uint8_t)(s0 >> 16);
@@ -1239,237 +1403,190 @@ struct FOG_HIDDEN DibC
 
       dst += 3;
       src += 1;
-      i--;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL rgb16_565_native_from_xrgb32(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    sysint_t i = w;
-
-    while (i)
-    {
+    do {
       uint32_t s0 = ((const uint32_t*)src)[0];
       RGB16_565_NATIVE_IO::store(dst, s0);
 
       dst += 2;
       src += 4;
-      i--;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL rgb16_565_native_from_argb32(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    sysint_t i = w;
-
-    while (i)
-    {
+    do {
       uint32_t s0 = ArgbUtil::premultiply(((const uint32_t*)src)[0]);
       RGB16_565_NATIVE_IO::store(dst, s0);
 
       dst += 2;
       src += 4;
-      i--;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL zzz16_from_null(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    sysint_t i = w;
-
     // Align.
-    while (i && (sysuint_t)dst & 0x3)
+    while (w && (sysuint_t)dst & 0x3)
     {
       ((uint16_t*)dst)[0] = 0x0000U;
 
       dst += 2;
-      i--;
+      w--;
     }
 
     // 4 Pixels per time.
-    while (i >= 4)
+    while (w >= 4)
     {
       ((uint32_t*)dst)[0] = 0x00000000U;
       ((uint32_t*)dst)[1] = 0x00000000U;
 
       dst += 8;
-      i -= 4;
+      w -= 4;
     }
 
-    while (i)
+    while (w)
     {
       ((uint16_t*)dst)[0] = 0x0000U;
 
       dst += 2;
-      i--;
+      w--;
     }
   }
 
   static void FOG_FASTCALL rgb16_565_native_from_i8(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    const Argb* srcPal = closure->srcPalette + Palette::INDEX_PRGB32;
-    sysint_t i = w;
+    const uint32_t* srcPal = closure->srcPalette + Palette::INDEX_PRGB32;
 
-    while (i)
-    {
+    do {
       uint32_t s0 = srcPal[src[0]];
       RGB16_565_NATIVE_IO::store(dst, s0);
 
       dst += 2;
       src += 1;
-      i--;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL rgb16_565_swapped_from_xrgb32(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    sysint_t i = w;
-
-    while (i)
-    {
+    do {
       uint32_t s0 = ((const uint32_t*)src)[0];
       RGB16_565_SWAPPED_IO::store(dst, s0);
 
       dst += 2;
       src += 4;
-      i--;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL rgb16_565_swapped_from_argb32(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    sysint_t i = w;
-
-    while (i)
-    {
+    do {
       uint32_t s0 = ArgbUtil::premultiply(((const uint32_t*)src)[0]);
       RGB16_565_SWAPPED_IO::store(dst, s0);
 
       dst += 2;
       src += 4;
-      i--;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL rgb16_565_swapped_from_i8(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    const Argb* srcPal = closure->srcPalette + Palette::INDEX_PRGB32;
-    sysint_t i = w;
+    const uint32_t* srcPal = closure->srcPalette + Palette::INDEX_PRGB32;
 
-    while (i)
-    {
+    do {
       uint32_t s0 = srcPal[src[0]];
       RGB16_565_SWAPPED_IO::store(dst, s0);
 
       dst += 2;
       src += 1;
-      i--;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL rgb16_555_native_from_xrgb32(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    sysint_t i = w;
-
-    while (i)
-    {
+    do {
       uint32_t s0 = ((const uint32_t*)src)[0];
       RGB16_555_NATIVE_IO::store(dst, s0);
 
       dst += 2;
       src += 4;
-      i--;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL rgb16_555_native_from_argb32(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    sysint_t i = w;
-
-    while (i)
-    {
+    do {
       uint32_t s0 = ArgbUtil::premultiply(((const uint32_t*)src)[0]);
       RGB16_555_NATIVE_IO::store(dst, s0);
 
       dst += 2;
       src += 4;
-      i--;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL rgb16_555_native_from_i8(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    const Argb* srcPal = closure->srcPalette + Palette::INDEX_PRGB32;
-    sysint_t i = w;
+    const uint32_t* srcPal = closure->srcPalette + Palette::INDEX_PRGB32;
 
-    while (i)
-    {
+    do {
       uint32_t s0 = srcPal[src[0]];
       RGB16_555_NATIVE_IO::store(dst, s0);
 
       dst += 2;
       src += 1;
-      i--;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL rgb16_555_swapped_from_xrgb32(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    sysint_t i = w;
-
-    while (i)
-    {
+    do {
       uint32_t s0 = ((const uint32_t*)src)[0];
       RGB16_555_SWAPPED_IO::store(dst, s0);
 
       dst += 2;
       src += 4;
-      i--;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL rgb16_555_swapped_from_argb32(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    sysint_t i = w;
-
-    while (i)
-    {
+    do {
       uint32_t s0 = ArgbUtil::premultiply(((const uint32_t*)src)[0]);
       RGB16_555_SWAPPED_IO::store(dst, s0);
 
       dst += 2;
       src += 4;
-      i--;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL rgb16_555_swapped_from_i8(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    const Argb* srcPal = closure->srcPalette + Palette::INDEX_PRGB32;
-    sysint_t i = w;
+    const uint32_t* srcPal = closure->srcPalette + Palette::INDEX_PRGB32;
 
-    while (i)
-    {
+    do {
       uint32_t s0 = srcPal[src[0]];
       RGB16_555_SWAPPED_IO::store(dst, s0);
 
       dst += 2;
       src += 1;
-      i--;
-    }
+    } while (--w);
   }
 
   // Greyscale from RGB conversion.
@@ -1480,12 +1597,9 @@ struct FOG_HIDDEN DibC
   //  (13938 * R + 46868 * G + 4730 * B) / 65536
 
   static void FOG_FASTCALL grey8_from_xrgb32(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    sysint_t i = w;
-
-    while (i)
-    {
+    do {
       uint32_t s0 = ((const uint32_t*)src)[0];
       uint32_t grey = ((s0 >> 16) & 0xFFU) * 13938 +
                       ((s0 >>  8) & 0xFFU) * 46868 +
@@ -1494,17 +1608,13 @@ struct FOG_HIDDEN DibC
 
       dst += 1;
       src += 4;
-      i--;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL grey8_from_argb32(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    sysint_t i = w;
-
-    while (i)
-    {
+    do {
       uint32_t s0 = ArgbUtil::premultiply(((const uint32_t*)src)[0]);
       uint32_t grey = ((s0 >> 16) & 0xFFU) * 13938 +
                       ((s0 >>  8) & 0xFFU) * 46868 +
@@ -1513,32 +1623,25 @@ struct FOG_HIDDEN DibC
 
       dst += 1;
       src += 4;
-      i--;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL z8_from_null(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    sysint_t i = w;
-
-    while (i)
-    {
+    do {
       dst[0] = 0x00U;
 
       dst += 1;
-      i--;
-    }
+    } while (--w);
   }
 
   static void FOG_FASTCALL grey8_from_i8(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    const Argb* srcPal = closure->srcPalette + Palette::INDEX_PRGB32;
-    sysint_t i = w;
+    const uint32_t* srcPal = closure->srcPalette + Palette::INDEX_PRGB32;
 
-    while (i)
-    {
+    do {
       uint32_t s0 = srcPal[src[0]];
       uint32_t grey = ((s0 >> 16) & 0xFFU) * 13938 +
                       ((s0 >>  8) & 0xFFU) * 46868 +
@@ -1547,8 +1650,7 @@ struct FOG_HIDDEN DibC
 
       dst += 1;
       src += 1;
-      i--;
-    }
+    } while (--w);
   }
 
   // --------------------------------------------------------------------------
@@ -1556,15 +1658,12 @@ struct FOG_HIDDEN DibC
   // --------------------------------------------------------------------------
 
   static void FOG_FASTCALL i8rgb232_from_xrgb32_dither(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const IntPoint& origin, const uint8_t* palConv)
+    uint8_t* dst, const uint8_t* src, int w, const IntPoint& origin, const uint8_t* palConv)
   {
-    sysint_t i;
-
     const uint8_t* dt = DitherMatrix::matrix[origin.getY() & DitherMatrix::MASK];
     int dx = origin.getX();
 
-    for (i = w; i; i--, dx++, dst += 1, src += 4)
-    {
+    do {
       uint32_t c0;
       uint32_t r0, g0, b0, d, dith2, dith3;
 
@@ -1583,19 +1682,20 @@ struct FOG_HIDDEN DibC
       if (((b0 & 0x3F) >= dith2) && (b0 < 0xC0)) b0 += 64;
 
       ((uint8_t *)dst)[0] = palConv[((r0 & 0xC0) >> 1) | ((g0 & 0xE0) >> 3) | ((b0 & 0xC0) >> 6)];
-    }
+
+      dx++;
+      dst += 1;
+      src += 4;
+    } while (--w);
   }
 
   static void FOG_FASTCALL i8rgb222_from_xrgb32_dither(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const IntPoint& origin, const uint8_t* palConv)
+    uint8_t* dst, const uint8_t* src, int w, const IntPoint& origin, const uint8_t* palConv)
   {
-    sysint_t i;
-
     const uint8_t* dt = DitherMatrix::matrix[origin.getY() & DitherMatrix::MASK];
     int dx = origin.getX();
 
-    for (i = w; i; i--, dx++, dst += 1, src += 4)
-    {
+    do {
       uint32_t c0;
       uint32_t r0, g0, b0, dith2;
       uint32_t r0t, g0t, b0t;
@@ -1616,19 +1716,20 @@ struct FOG_HIDDEN DibC
       if ((g0 - (g0t * 85)) > dith2) g0t++;
       if ((b0 - (b0t * 85)) > dith2) b0t++;
       ((uint8_t *)dst)[0] = palConv[(r0t<<4)|(g0t<<2)|(b0t)];
-    }
+
+      dx++;
+      dst += 1;
+      src += 4;
+    } while (--w);
   }
 
   static void FOG_FASTCALL i8rgb111_from_xrgb32_dither(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const IntPoint& origin, const uint8_t* palConv)
+    uint8_t* dst, const uint8_t* src, int w, const IntPoint& origin, const uint8_t* palConv)
   {
-    sysint_t i;
-
     const uint8_t* dt = DitherMatrix::matrix[origin.getY() & DitherMatrix::MASK];
     int dx = origin.getX();
 
-    for (i = w; i; i--, dx++, dst += 1, src += 4)
-    {
+    do {
       uint32_t c0;
       uint32_t r0, g0, b0, dith1;
 
@@ -1647,19 +1748,20 @@ struct FOG_HIDDEN DibC
         (((r0 + 1) >> 8) << 2) |
         (((g0 + 1) >> 8) << 1) |
         (((b0 + 1) >> 8)     ) ];
-    }
+
+      dx++;
+      dst += 1;
+      src += 4;
+    } while (--w);
   }
 
   static void FOG_FASTCALL rgb16_555_native_from_xrgb32_dither(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const IntPoint& origin)
+    uint8_t* dst, const uint8_t* src, int w, const IntPoint& origin)
   {
-    sysint_t i;
-
     const uint8_t* dt = DitherMatrix::matrix[origin.getY() & DitherMatrix::MASK];
     int dx = origin.getX();
 
-    for (i = w; i; i--, dx++, dst += 2, src += 4)
-    {
+    do {
       uint32_t c0;
       uint32_t r0, g0, b0, dith;
 
@@ -1674,19 +1776,20 @@ struct FOG_HIDDEN DibC
       if (((b0 & 7) >= dith) && (b0 < 0xF8)) b0 += 8;
 
       ((uint16_t *)dst)[0] = ((r0 & 0xF8) << 7) | ((g0 & 0xF8) << 2) | ((b0 & 0xF8) >> 3);
-    }
+
+      dx++;
+      dst += 2;
+      src += 4;
+    } while (--w);
   }
 
   static void FOG_FASTCALL rgb16_565_native_from_xrgb32_dither(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const IntPoint& origin)
+    uint8_t* dst, const uint8_t* src, int w, const IntPoint& origin)
   {
-    sysint_t i;
-
     const uint8_t* dt = DitherMatrix::matrix[origin.getY() & DitherMatrix::MASK];
     int dx = origin.getX();
 
-    for (i = w; i; i--, dx++, dst += 2, src += 4)
-    {
+    do {
       uint32_t c0;
       uint32_t r0, g0, b0, d, dith5, dith6;
 
@@ -1703,19 +1806,20 @@ struct FOG_HIDDEN DibC
       if (((b0 & 7) >= dith5) && (b0 < 0xF8)) b0 += 8;
 
       ((uint16_t *)dst)[0] = ((r0 & 0xF8) << 8) | ((g0 & 0xFC) << 3) | ((b0 & 0xF8) >> 3);
-    }
+
+      dx++;
+      dst += 2;
+      src += 4;
+    } while (--w);
   }
 
   static void FOG_FASTCALL rgb16_555_swapped_from_xrgb32_dither(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const IntPoint& origin)
+    uint8_t* dst, const uint8_t* src, int w, const IntPoint& origin)
   {
-    sysint_t i;
-
     const uint8_t* dt = DitherMatrix::matrix[origin.getY() & DitherMatrix::MASK];
     int dx = origin.getX();
 
-    for (i = w; i; i--, dx++, dst += 2, src += 4)
-    {
+    do {
       uint32_t c0;
       uint32_t r0, g0, b0, dith;
 
@@ -1730,19 +1834,20 @@ struct FOG_HIDDEN DibC
       if (((b0 & 7) >= dith) && (b0 < 0xF8)) b0 += 8;
 
       ((uint16_t *)dst)[0] = Memory::bswap16(((r0 & 0xF8) << 7) | ((g0 & 0xF8) << 2) | ((b0 & 0xF8) >> 3));
-    }
+
+      dx++;
+      dst += 2;
+      src += 4;
+    } while (--w);
   }
 
   static void FOG_FASTCALL rgb16_565_swapped_from_xrgb32_dither(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const IntPoint& origin)
+    uint8_t* dst, const uint8_t* src, int w, const IntPoint& origin)
   {
-    sysint_t i;
-
     const uint8_t* dt = DitherMatrix::matrix[origin.getY() & DitherMatrix::MASK];
     int dx = origin.getX();
 
-    for (i = w; i; i--, dx++, dst += 2, src += 4)
-    {
+    do {
       uint32_t c0;
       uint32_t r0, g0, b0, d, dith5, dith6;
 
@@ -1759,7 +1864,125 @@ struct FOG_HIDDEN DibC
       if (((b0 & 7) >= dith5) && (b0 < 0xF8)) b0 += 8;
 
       ((uint16_t *)dst)[0] = Memory::bswap16(((r0 & 0xF8) << 8) | ((g0 & 0xFC) << 3) | ((b0 & 0xF8) >> 3));
-    }
+
+      dx++;
+      dst += 2;
+      src += 4;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL prgb32_from_argb32_span(
+    uint8_t* _dst, const Span* span, const RasterClosure* closure)
+  {
+    uint32_t* pixels = reinterpret_cast<uint32_t*>(_dst);
+
+    do {
+      uint x1 = (uint)span->getX1();
+      uint x2 = (uint)span->getX2();
+
+      while (x1 < x2)
+      {
+        uint32_t pix0 = pixels[x1];
+
+        if (!RasterUtil::isAlpha0xFF_ARGB32(pix0))
+          pixels[x1] = ArgbUtil::premultiply(pix0);
+        x1++;
+      }
+    } while ((span = span->getNext()) != NULL);
+  }
+
+  static void FOG_FASTCALL argb32_from_prgb32_span(
+    uint8_t* _dst, const Span* span, const RasterClosure* closure)
+  {
+    uint32_t* pixels = reinterpret_cast<uint32_t*>(_dst);
+
+    do {
+      uint x1 = (uint)span->getX1();
+      uint x2 = (uint)span->getX2();
+
+      while (x1 < x2)
+      {
+        // We want to identify long runs of constant input pixels and
+        // cache the unpremultiplied.
+        uint32_t const_in, const_out;
+
+        // Diff is the or of all bitwise differences from const_in
+        // during the probe period.  If it is zero after the probe
+        // period then every input pixel was identical in the
+        // probe.
+        unsigned diff = 0;
+
+        // Accumulator for all alphas of the probe period pixels,
+        // biased to make the sum zero if the
+        unsigned accu = -2*255;
+
+        {
+          uint32_t rgba, a, r, g, b, recip;
+
+          rgba = const_in = pixels[x1];
+          a = (rgba >> 24);
+          accu += a;
+          r = (rgba >> 16) & 0xFFU;
+          g = (rgba >> 8 ) & 0xFFU;
+          b = (rgba      ) & 0xFFU;
+          recip = raster_demultiply_reciprocal_table_d[a];
+
+          r = ((r * recip)      ) & 0x00FF0000;
+          g = ((g * recip) >>  8) & 0x0000FF00;
+          b = ((b * recip) >> 16) & 0x000000FFU;
+
+          pixels[x1] = const_out = r | g | b | (a << 24);
+        }
+
+        if (++x1 == x2) break;
+
+        {
+          uint32_t rgba, a, r, g, b, recip;
+          rgba = pixels[x1];
+          a = (rgba >> 24);
+          accu += a;
+          r = (rgba >> 16) & 0xFFU;
+          g = (rgba >>  8) & 0xFFU;
+          b = (rgba      ) & 0xFFU;
+          recip = raster_demultiply_reciprocal_table_d[a];
+
+          diff = rgba ^ const_in;
+
+          r = ((r * recip)      ) & 0x00FF0000;
+          g = ((g * recip) >>  8) & 0x0000FF00;
+          b = ((b * recip) >> 16) & 0x000000FFU;
+
+          pixels[x1] = r | g | b | (a << 24);
+        }
+
+        if (++x1 == x2) break;
+
+        // Fall into special cases if we have special circumstances.
+        if (0 != (accu & diff)) continue;
+
+        if (0 == accu)
+        {
+          // a run of solid pixels.
+          uint32_t in;
+          while (0xFF000000U == ((in = pixels[x1]) & 0xFF000000U))
+          {
+            pixels[x1] = in;
+            if (++x1 == x2) goto nextSpan;
+          }
+        }
+        else if (0 == diff)
+        {
+          // a run of constant pixels.
+          while (pixels[x1] == const_in)
+          {
+            pixels[x1] = const_out;
+            if (++x1 == x2) goto nextSpan;
+          }
+        }
+      }
+nextSpan:
+      ;
+    } while ((span = span->getNext()) != NULL);
   }
 };
 

@@ -8,16 +8,16 @@
 #define _FOG_CORE_LIBRARY_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/Static.h>
 #include <Fog/Core/String.h>
 #include <Fog/Core/TypeInfo.h>
 
-//! @addtogroup Fog_Core
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Core_Library
+//! @{
 
 // ============================================================================
 // [Fog::LibraryData]
@@ -35,6 +35,7 @@ struct FOG_HIDDEN LibraryData
 // [Fog::Library]
 // ============================================================================
 
+//! @brief Dynamic library.
 struct FOG_API Library
 {
   static Static<LibraryData> _dnull;
@@ -167,9 +168,9 @@ static library##Interface library##_interface;
 #define FOG_LIBRARY_LEAVE(library) static void library##Leave(void)
 #endif
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // ============================================================================
 // [Fog::TypeInfo<>]

@@ -154,7 +154,7 @@ err_t Object::getProperty(const String& name, Value& value) const
   ManagedString m_name;
 
   if (m_name.setIfManaged(name) == ERR_RT_OBJECT_NOT_FOUND)
-    return ERR_PROPERTY_INVALID_NAME;
+    return ERR_OBJECT_INVALID_PROPERTY;
 
   return getProperty(m_name, value);
 }
@@ -164,7 +164,7 @@ err_t Object::setProperty(const String& name, const Value& value)
   ManagedString m_name;
 
   if (m_name.setIfManaged(name) == ERR_RT_OBJECT_NOT_FOUND)
-    return ERR_PROPERTY_INVALID_NAME;
+    return ERR_OBJECT_INVALID_PROPERTY;
 
   return setProperty(m_name, value);
 }
@@ -174,7 +174,7 @@ err_t Object::getProperty(const ManagedString& name, Value& value) const
   FOG_UNUSED(name);
   FOG_UNUSED(value);
 
-  return ERR_PROPERTY_INVALID_NAME;
+  return ERR_OBJECT_INVALID_PROPERTY;
 }
 
 err_t Object::setProperty(const ManagedString& name, const Value& value)
@@ -182,7 +182,7 @@ err_t Object::setProperty(const ManagedString& name, const Value& value)
   FOG_UNUSED(name);
   FOG_UNUSED(value);
 
-  return ERR_PROPERTY_INVALID_NAME;
+  return ERR_OBJECT_INVALID_PROPERTY;
 }
 
 // ============================================================================

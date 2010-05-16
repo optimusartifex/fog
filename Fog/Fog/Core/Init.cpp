@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/Std.h>
 
@@ -31,7 +31,6 @@ FOG_INIT_FUNC(fog_lock);
 FOG_INIT_FUNC(fog_memory);
 FOG_INIT_FUNC(fog_math);
 FOG_INIT_FUNC(fog_list);
-FOG_INIT_FUNC(fog_bitarray);
 FOG_INIT_FUNC(fog_bytearray);
 FOG_INIT_FUNC(fog_string);
 FOG_INIT_FUNC(fog_managedstring);
@@ -102,7 +101,6 @@ static const FogInitEntry fog_init_entries[] =
   INIT_ENTRY(fog_memory),           // Depends to Cpu and Lock
   INIT_ENTRY(fog_math),             // Depends to Cpu
   INIT_ENTRY(fog_list),             // No dependency
-  INIT_ENTRY(fog_bitarray),         // No dependency
   INIT_ENTRY(fog_bytearray),        // No dependency
   INIT_ENTRY(fog_string),           // No dependency
   INIT_ENTRY(fog_textcodec),        // No dependency
@@ -216,15 +214,19 @@ struct FOG_HIDDEN FogAutoInit
   {
     if ( (err = fog_init()) )
     {
-      fog_stderr_msg(NULL, "FogAutoInit", 
-        "Failed to initialize Fog library, error=%d", err);
+      fog_stderr_msg(NULL, "FogAutoInit", "Failed to initialize Fog library, error=%d", err);
       exit(Fog::ERR_OK);
     }
   }
 
   ~FogAutoInit()
   {
-    if (err == Fog::ERR_OK) fog_shutdown();
+    // We shutdown only if there is no error and fog_failed is zero. This is
+    // because for example a ThreadPool wants to release all threads, but an
+    // assertion can be raised by the thread owned by ThreadPool.
+    //
+    // So if we failed, never call fog_shutdown() and exit quickly.
+    if (err == Fog::ERR_OK && fog_failed == 0) fog_shutdown();
   }
 };
 

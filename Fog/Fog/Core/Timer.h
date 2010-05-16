@@ -16,10 +16,14 @@
 #include <Fog/Core/Task.h>
 #include <Fog/Core/Time.h>
 
-//! @addtogroup Fog_Core
+namespace Fog {
+
+//! @addtogroup Fog_Core_Threading
 //! @{
 
-namespace Fog {
+// ============================================================================
+// [Forward Declarations]
+// ============================================================================
 
 struct EventLoop;
 
@@ -27,6 +31,7 @@ struct EventLoop;
 // [Fog::Timer]
 // ============================================================================
 
+//! @brief Timer.
 struct FOG_API Timer : public Object
 {
   FOG_DECLARE_OBJECT(Timer, Object)
@@ -56,8 +61,8 @@ private:
   friend struct TimerTask;
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 #endif  // _FOG_CORE_TIMER_H

@@ -12,10 +12,10 @@
 #include <Fog/Core/String.h>
 #include <Fog/Core/TypeInfo.h>
 
-//! @addtogroup Fog_Core
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Core_Essentials
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -214,9 +214,9 @@ struct FOG_API ManagedString
   Node* _node;
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 FOG_DECLARE_TYPEINFO(Fog::ManagedString, Fog::TYPEINFO_MOVABLE)
 

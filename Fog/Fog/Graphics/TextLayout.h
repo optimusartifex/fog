@@ -15,10 +15,10 @@
 #include <Fog/Core/String.h>
 #include <Fog/Graphics/Constants.h>
 
-//! @addtogroup Fog_Graphics
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Graphics_Text
+//! @{
 
 // ============================================================================
 // [Fog::TextCaps]
@@ -68,9 +68,9 @@ private:
   bool _multiLine;
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GRAPHICS_TEXTLAYOUT_H

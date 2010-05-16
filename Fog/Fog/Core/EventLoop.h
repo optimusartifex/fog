@@ -20,9 +20,6 @@
 #include <Fog/Core/ThreadEvent.h>
 #include <Fog/Core/Time.h>
 
-//! @addtogroup Fog_Core
-//! @{
-
 namespace Fog {
 
 // ============================================================================
@@ -37,6 +34,9 @@ struct EventLoopPendingTask;
 FOG_DECLARE_TYPEINFO(Fog::EventLoopPendingTask, Fog::TYPEINFO_PRIMITIVE)
 
 namespace Fog {
+
+//! @addtogroup Fog_Core_Object
+//! @{
 
 // ============================================================================
 // [Fog::DelayedPendingTask]
@@ -459,8 +459,8 @@ struct FOG_API WinGuiEventLoop : public WinEventLoop
 
 #endif // FOG_OS_WINDOWS
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 #endif // _FOG_CORE_EVENTLOOP_H

@@ -8,7 +8,7 @@
 #define _FOG_CORE_OBJECT_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Atomic.h>
 #include <Fog/Core/Char.h>
 #include <Fog/Core/Delegate.h>
@@ -36,12 +36,17 @@ struct Value;
 // [Fog::Object CAPI]
 // ============================================================================
 
+//! @addtogroup Fog_Core_Private
+//! @{
+
 FOG_CVAR_EXTERN Fog::Lock* fog_object_lock;
 
 FOG_CAPI_EXTERN void* fog_object_cast_helper(Fog::Object* self, const Fog::MetaClass* targetMetaClass);
 FOG_CAPI_EXTERN void* fog_object_cast_string(Fog::Object* self, const char* className);
 
-//! @addtogroup Fog_Core
+//! @}
+
+//! @addtogroup Fog_Core_Object
 //! @{
 
 // ============================================================================

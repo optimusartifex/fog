@@ -14,10 +14,10 @@
 #include <Fog/Core/String.h>
 #include <Fog/Core/Value.h>
 
-//! @addtogroup Fog_Core
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Core_Streaming
+//! @{
 
 // ============================================================================
 // [Fog::MapFile]
@@ -109,8 +109,8 @@ private:
   FOG_DISABLE_COPY(MapFile)
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 #endif // _FOG_CORE_MAPFILE_H

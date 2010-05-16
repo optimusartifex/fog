@@ -11,15 +11,15 @@
 #include <Fog/Core/Hash.h>
 #include <Fog/Core/Library.h>
 #include <Fog/Core/Object.h>
-#include <Fog/Graphics/Argb.h>
+#include <Fog/Graphics/Color.h>
 #include <Fog/Graphics/Geometry.h>
 #include <Fog/Graphics/Image.h>
 #include <Fog/Gui/Constants.h>
 
-//! @addtogroup Fog_Gui
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Gui_Engine
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -498,10 +498,9 @@ struct FOG_API GuiBackBuffer
   TimeTicks _expireTime;
 };
 
-} // Fog namespace
-
-//! @addtogroup Fog_Gui
 //! @}
+
+} // Fog namespace
 
 // ============================================================================
 // [Fog::TypeInfo<>]

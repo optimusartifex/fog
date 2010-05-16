@@ -33,7 +33,7 @@
 
 #if defined(FOG_OS_WINDOWS)
 # include <Fog/Gui/GuiEngine/Win.h>
-// windows.h is already included by Fog/Build/Build.h
+// windows.h is already included by Fog/Core/Build.h
 # include <io.h>
 #else
 # include <errno.h>

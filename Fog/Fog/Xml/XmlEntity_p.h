@@ -8,24 +8,28 @@
 #define _FOG_XML_XMLENTITY_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/ByteArray.h>
 #include <Fog/Core/Char.h>
 #include <Fog/Core/String.h>
 
-//! @addtogroup Fog_Xml
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Xml_Private
+//! @{
 
 // ============================================================================
 // [Fog::XmlEntity]
 // ============================================================================
 
+//! @internal.
+//!
 //! @brief Static class that allows to encode and decode built-in xml named
 //! entities.
 struct FOG_HIDDEN XmlEntity
 {
+  //! @internal.
+  //!
   //! @brief Xml entity structure, Entity <=> Character
   struct Pair
   {
@@ -35,6 +39,8 @@ struct FOG_HIDDEN XmlEntity
     uint16_t ch;
   };
 
+  //! @internal.
+  //!
   //! @brief Reversed pair structure.
   struct PairRev
   {
@@ -68,9 +74,9 @@ struct FOG_HIDDEN XmlEntity
   static sysuint_t _pairsCount;
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_XML_XMLENTITY_H

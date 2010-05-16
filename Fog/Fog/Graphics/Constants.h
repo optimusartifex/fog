@@ -8,9 +8,33 @@
 #define _FOG_GRAPHICS_CONSTANTS_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
+#include <Fog/Core/Constants.h>
 
 namespace Fog {
+
+//! @addtogroup Fog_Graphics_Constants
+//! @{
+
+// ============================================================================
+// [Fog::ALPHA_TYPE]
+// ============================================================================
+
+//! @brief Results from some color analyzer functions.
+//!
+//! Usualy used to improve performance of image processing. Algorithm designed
+//! for full opaque pixels is always faster than generic algorithm for image
+//! with or without alpha channel.
+enum ALPHA_TYPE
+{
+  //! @brief All alpha values are transparent (all 0).
+  ALPHA_TRANSPARENT = 0x00,
+  //! @brief All alpha values are opaque (all 255).
+  ALPHA_OPAQUE = 0xFF,
+
+  //! @brief Alpha values are variant.
+  ALPHA_VARIANT = 0xFFFFFFFF
+};
 
 // ============================================================================
 // [Fog::ANTI_ALIASING_TYPE]
@@ -21,11 +45,52 @@ enum ANTI_ALIASING_TYPE
 {
   //! @brief No anti-aliasing.
   ANTI_ALIASING_NONE = 0,
+
   //! @brief Smooth anti-aliasing (default).
   ANTI_ALIASING_SMOOTH = 1,
 
   //! @brief Count of anti-aliasing types (for error checking).
   ANTI_ALIASING_COUNT = 2
+};
+
+// ============================================================================
+// [Fog::ARGB32_MASK]
+// ============================================================================
+
+static const uint32_t ARGB32_RMASK = 0x00FF0000U;
+static const uint32_t ARGB32_GMASK = 0x0000FF00U;
+static const uint32_t ARGB32_BMASK = 0x000000FFU;
+static const uint32_t ARGB32_AMASK = 0xFF000000U;
+
+// ============================================================================
+// [Fog::ARGB32_SHIFT]
+// ============================================================================
+
+enum ARGB32_SHIFT
+{
+  ARGB32_RSHIFT = 16U,
+  ARGB32_GSHIFT =  8U,
+  ARGB32_BSHIFT =  0U,
+  ARGB32_ASHIFT = 24U
+};
+
+// ============================================================================
+// [Fog::ARGB32_BYTEPOS]
+// ============================================================================
+
+enum ARGB32_BYTEPOS
+{
+#if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
+  ARGB32_RBYTE = 2,
+  ARGB32_GBYTE = 1,
+  ARGB32_BBYTE = 0,
+  ARGB32_ABYTE = 3
+#else // FOG_BYTE_ORDER == FOG_BIG_ENDIAN
+  ARGB32_RBYTE = 1,
+  ARGB32_GBYTE = 2,
+  ARGB32_BBYTE = 3,
+  ARGB32_ABYTE = 0
+#endif // FOG_BYTE_ORDER
 };
 
 // ============================================================================
@@ -37,36 +102,30 @@ enum ANTI_ALIASING_TYPE
 enum CLIP_OP
 {
   //! @brief Replace the current clipping area by the given one (copy).
-  CLIP_OP_COPY = 0x00000000,
-  //! @brief Union the current clipping area with the given one (union).
-  CLIP_OP_UNITE = 0x00000001,
-  //! @brief Intersect the current clipping area with the given one (intersection).
-  CLIP_OP_INTERSECT = 0x00000002,
-  //! @brief Xor the current clipping area with the given one (eXclusive OR).
-  CLIP_OP_XOR = 0x00000003,
-  //! @brief Subtract the given clipping area from the current one (difference).
-  CLIP_OP_SUBTRACT = 0x00000004
+  CLIP_OP_REPLACE = 0,
+  //! @brief Intersect the current clipping area with the given one (and).
+  CLIP_OP_INTERSECT = 1,
+
+  //! @brief Count of clip operators.
+  CLIP_OP_COUNT = 2
 };
 
 // ============================================================================
-// [Fog::CLIP_FLAGS]
+// [Fog::CLIP_RULE]
 // ============================================================================
 
-enum CLIP_FLAGS
+//! @brief Clip rule.
+enum CLIP_RULE
 {
-  //! @brief Invert the given clipping area and apply it instead of original.
-  CLIP_FLAG_INVERT = 0x00010000,
+  //! @brief Clip using non-zero rule.
+  CLIP_NON_ZERO = 0,
+  //! @brief Clip using even-odd rule.
+  CLIP_EVEN_ODD = 1,
+  //! @brief Initial (default) clip rule for painter and rasterizer.
+  CLIP_DEFAULT = CLIP_EVEN_ODD,
 
-  //! @brief Use current opacity with the given clipping area. Using this 
-  //! flag will result in semi-transparent clipping mask.
-  //!
-  //! @note When used together with CLIP_FLAG_INVERT the invert operation is
-  //! done first and then the opacity is adjusted using current opacity value.
-  CLIP_FLAG_USE_OPACITY = 0x00020000,
-
-  //! @brief Stroke clip path (or primitive) instead of fill using current
-  //! stroke settings.
-  CLIP_FLAG_STROKE = 0x00040000
+  //! @brief Used to catch invalid arguments.
+  CLIP_RULE_COUNT = 2
 };
 
 // ============================================================================
@@ -483,8 +542,8 @@ enum OPERATOR_TYPE
   //!
   //!   Msk:
   //!
-  //!   Dca' = Dca.Sa.m + Dca.(1 - m)
-  //!   Da'  = Da.Sa.m + Da.(1 - m)
+  //!   Dca' = Dca.Sa.m + Dca.(1 - m) = Dca.(Sa.m + (1 - m))
+  //!   Da'  = Da .Sa.m + Da .(1 - m) = Da .(Sa.m + (1 - m))
   //!
   //! Formulas for PRGB(dst), XRGB(src) colorspaces (NOP):
   //!   Dca' = Dca
@@ -1305,55 +1364,6 @@ enum OPERATOR_TYPE
 };
 
 // ============================================================================
-// [Fog::PIXEL_FORMAT]
-// ============================================================================
-
-//! @brief Pixel format.
-//!
-//! @note All pixel formats are CPU endian dependent. So @c ARGB32 pixels
-//! will be stored differenly in memory on machines with different endianness.
-//!
-//! @c PIXEL_FORMAT_ARGB32, @c PIXEL_FORMAT_PRGB32:
-//! - Little endian: BBGGRRAA
-//! - Big endian   : AARRGGBB
-//! @c PIXEL_FORMAT_XRGB32:
-//! - Little endian: BBGGRRXX
-//! - Big endian   : XXRRGGBB
-//! @c PIXEL_FORMAT_A8:
-//! - no difference: AA (8 bit alpha value)
-//! @c PIXEL_FORMAT_I8:
-//! - no difference: II (8 bit index value to palette)
-//!
-//! @sa @c PIXEL_FORMAT_EXTENDED.
-enum PIXEL_FORMAT
-{
-  //! @brief 32-bit RGBA, premultiplied.
-  PIXEL_FORMAT_PRGB32 = 0,
-
-  //! @brief 32-bit RGBA, non-premultiplied.
-  //!
-  //! Eequivalent to @c Argb.
-  PIXEL_FORMAT_ARGB32 = 1,
-
-  //! @brief 32-bit XRGB, no alpha.
-  //!
-  //! equivalent to @c Argb, where alpha is set to 255).
-  PIXEL_FORMAT_XRGB32 = 2,
-
-  //! @brief 8-bit alpha channel only.
-  PIXEL_FORMAT_A8 = 3,
-
-  //! @brief 8-bit indexed pixel format.
-  PIXEL_FORMAT_I8 = 4,
-
-  //! @brief Count of pixel formats.
-  PIXEL_FORMAT_COUNT = 5,
-
-  //! @brief Null pixel format (used only by empty images).
-  PIXEL_FORMAT_NULL = 0xFF
-};
-
-// ============================================================================
 // [Fog::DIB_FORMAT]
 // ============================================================================
 
@@ -1361,29 +1371,29 @@ enum PIXEL_FORMAT
 //! and Image::setDib() methods. These formats can't be used by @c Image itself.
 enum DIB_FORMAT
 {
-  //! @brief 32-bit RGBA, premultiplied (compatible to @c PIXEL_FORMAT_PRGB32)
+  //! @brief 32-bit ARGB, premultiplied (compatible to @c IMAGE_FORMAT_PRGB32)
   DIB_FORMAT_PRGB32_NATIVE = 0,
 
-  //! @brief 32-bit RGBA, non-premultiplied (compatible to @c PIXEL_FORMAT_ARGB32).
+  //! @brief 32-bit ARGB, non-premultiplied (compatible to @c IMAGE_FORMAT_ARGB32).
   //!
   //! Eequivalent to @c Argb.
   DIB_FORMAT_ARGB32_NATIVE = 1,
 
-  //! @brief 32-bit XRGB, no alpha (compatible to @c PIXEL_FORMAT_XRGB32).
+  //! @brief 32-bit XRGB, no alpha (compatible to @c IMAGE_FORMAT_XRGB32).
   //!
   //! equivalent to @c Argb, where alpha is set to 255).
   DIB_FORMAT_XRGB32_NATIVE = 2,
 
-  //! @brief 8-bit alpha channel (compatible to @c PIXEL_FORMAT_A8).
+  //! @brief 8-bit alpha channel (compatible to @c IMAGE_FORMAT_A8).
   DIB_FORMAT_A8 = 3,
 
-  //! @brief 8-bit indexed pixel format (compatible to @c PIXEL_FORMAT_I8).
+  //! @brief 8-bit indexed pixel format (compatible to @c IMAGE_FORMAT_I8).
   DIB_FORMAT_I8 = 4,
 
-  //! @brief 32-bit RGBA, premultiplied, byteswapped.
+  //! @brief 32-bit ARGB, premultiplied, byteswapped.
   DIB_FORMAT_PRGB32_SWAPPED = 5,
 
-  //! @brief 32-bit RGBA, non-premultiplied, byteswapped.
+  //! @brief 32-bit ARGB, non-premultiplied, byteswapped.
   DIB_FORMAT_ARGB32_SWAPPED = 6,
 
   //! @brief 32-bit XRGB, no alpha, byteswapped.
@@ -1451,56 +1461,111 @@ enum DIB_FORMAT
 };
 
 // ============================================================================
-// [Fog::ARGB32_MASK]
+// [Fog::IMAGE_TYPE]
 // ============================================================================
 
-static const uint32_t ARGB32_RMASK = 0x00FF0000U;
-static const uint32_t ARGB32_GMASK = 0x0000FF00U;
-static const uint32_t ARGB32_BMASK = 0x000000FFU;
-static const uint32_t ARGB32_AMASK = 0xFF000000U;
-
-// ============================================================================
-// [Fog::ARGB32_SHIFT]
-// ============================================================================
-
-enum ARGB32_SHIFT
+//! @brief Image type.
+enum IMAGE_TYPE
 {
-  ARGB32_RSHIFT = 16U,
-  ARGB32_GSHIFT =  8U,
-  ARGB32_BSHIFT =  0U,
-  ARGB32_ASHIFT = 24U
+  //! @brief Image is in memory buffer, no platform dependent functions are
+  //! used to construct and work with the image.
+  //!
+  //! @note This is the default image type.
+  IMAGE_TYPE_MEMORY = 0,
+
+  //! @brief Image is Windows DIBSECTION.
+  //!
+  //! @note This is Windows-only image type.
+  IMAGE_TYPE_WIN_DIB = 1,
+
+  IMAGE_TYPE_COUNT = 2,
+
+  //! @brief Ignore image type (used by some functions inside @c Image).
+  IMAGE_TYPE_IGNORE = 0xFF
 };
 
 // ============================================================================
-// [Fog::ARGB32_BYTEPOS]
+// [Fog::IMAGE_FORMAT]
 // ============================================================================
 
-enum ARGB32_BYTEPOS
+//! @brief Pixel format.
+//!
+//! @note All pixel formats are CPU endian dependent. So @c ARGB32 pixels
+//! will be stored differenly in memory on machines with different endianness.
+//!
+//! @c IMAGE_FORMAT_ARGB32, @c IMAGE_FORMAT_PRGB32:
+//! - Little endian: BBGGRRAA
+//! - Big endian   : AARRGGBB
+//!
+//! @c IMAGE_FORMAT_XRGB32:
+//! - Little endian: BBGGRRXX
+//! - Big endian   : XXRRGGBB
+//!
+//! @c IMAGE_FORMAT_A8:
+//! - no difference: AA (8 bit alpha value, indexes to palette are also valid).
+//!
+//! @c IMAGE_FORMAT_I8:
+//! - no difference: II (8 bit index value to palette)
+//!
+//! @sa @c IMAGE_FORMAT_EXTENDED.
+enum IMAGE_FORMAT
 {
-#if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-  ARGB32_RBYTE = 2,
-  ARGB32_GBYTE = 1,
-  ARGB32_BBYTE = 0,
-  ARGB32_ABYTE = 3
-#else // FOG_BYTE_ORDER == FOG_BIG_ENDIAN
-  ARGB32_RBYTE = 1,
-  ARGB32_GBYTE = 2,
-  ARGB32_BBYTE = 3,
-  ARGB32_ABYTE = 0
-#endif // FOG_BYTE_ORDER
+  //! @brief 32-bit ARGB, premultiplied.
+  IMAGE_FORMAT_PRGB32 = 0,
+
+  //! @brief 32-bit ARGB, non-premultiplied.
+  //!
+  //! Eequivalent to @c Argb.
+  IMAGE_FORMAT_ARGB32 = 1,
+
+  //! @brief 32-bit XRGB, no alpha.
+  //!
+  //! equivalent to @c Argb, where alpha is set to 255).
+  IMAGE_FORMAT_XRGB32 = 2,
+
+  //! @brief 8-bit alpha channel only.
+  IMAGE_FORMAT_A8 = 3,
+
+  //! @brief 8-bit indexed pixel format.
+  IMAGE_FORMAT_I8 = 4,
+
+  //! @brief Count of pixel formats.
+  IMAGE_FORMAT_COUNT = 5,
+
+  //! @brief Null image format (used only by empty images).
+  IMAGE_FORMAT_NULL = 0xFF,
+
+  //! @brief Ignore image format (used by some functions inside @c Image).
+  IMAGE_FORMAT_IGNORE = 0xFF
 };
 
 // ============================================================================
-// [Fog::IMAGE_LIMITS]
+// [Fog::IMAGE_CONTENT]
 // ============================================================================
 
-//! @brief Image limits.
-enum IMAGE_LIMITS
+//! @brief Image content description.
+enum IMAGE_CONTENT
 {
-  //! @brief Maximum image width (in pixels).
-  IMAGE_MAX_WIDTH = 16777215,
-  //! @brief Maximum image height (in pixels).
-  IMAGE_MAX_HEIGHT = 16777215
+  IMAGE_CONTENT_NONE  = 0x00000000,
+  //! @brief Image contains only RGB entities, there is no alpha.
+  //!
+  //! Related pixel formats:
+  //!   - @c IMAGE_FORMAT_XRGB32.
+  IMAGE_CONTENT_RGB   = 0x00010000,
+
+  //! @brief Image contains only alpha entities, there is RGB.
+  //!
+  //! Related pixel formats:
+  //!   - @c IMAGE_FORMAT_A8.
+  IMAGE_CONTENT_ALPHA = 0x00020000,
+
+  //! @brief Image contains RGB and alpha entities.
+  //!
+  //! Related pixel formats:
+  //!   - @c IMAGE_FORMAT_PRGB32.
+  //!   - @c IMAGE_FORMAT_ARGB32.
+  //!   - @c IMAGE_FORMAT_I8.
+  IMAGE_CONTENT_ARGB  = 0x00030000
 };
 
 // ============================================================================
@@ -1511,11 +1576,52 @@ enum IMAGE_LIMITS
 enum IMAGE_ADOPT
 {
   //! @brief Standard adopt behavior
-  IMAGE_ADOPT_DEFAULT = 0x0,
+  IMAGE_ADOPT_DEFAULT = 0x00,
   //! @brief Adopted image will be read-only.
-  IMAGE_ATOPT_READ_ONLY = 0x1,
-  //! @brief Adopted image data are from bottom-to-top (Windows DIBs).
-  IMAGE_ADOPT_REVERSED = 0x2
+  IMAGE_ATOPT_READ_ONLY = 0x01,
+  //! @brief Adopted image data are from bottom-to-top.
+  //!
+  //! This is useful flag when you need to adopt Windows-DIB.
+  IMAGE_ADOPT_REVERSED = 0x02
+};
+
+// ============================================================================
+// [Fog::IMAGE_LOCK_MODE]
+// ============================================================================
+
+//! @brief Image pixels flags.
+enum IMAGE_LOCK_MODE
+{
+  //! @brief Image pixels are locked for over-write.
+  //!
+  //! If image pixels are stored on some device then the content is not moved
+  //! back to @c Image buffer, but this step is omitted. This prevents moving
+  //! data back that will be over-written (not needed).
+  //!
+  //! If image pixels are stored in local memory then this flag behaves 
+  //! exactly like @c IMAGE_LOCK_READWRITE (because there is not copy or
+  //! other operation). But if image needs to be detached then the locked area
+  //! is not copied from the master image.
+  IMAGE_LOCK_OVERWRITE = 0,
+
+  //! @brief Image pixels are locked for read-write.
+  //!
+  //! If image is stored on some device then it's first moved back and stored
+  //! to @c Image data.
+  IMAGE_LOCK_READWRITE = 1
+};
+
+// ============================================================================
+// [Fog::IMAGE_LIMITS]
+// ============================================================================
+
+//! @brief Image limits.
+enum IMAGE_LIMITS
+{
+  //! @brief Maximum image width (in pixels).
+  IMAGE_MAX_WIDTH = 0x10000,
+  //! @brief Maximum image height (in pixels).
+  IMAGE_MAX_HEIGHT = 0x10000
 };
 
 // ============================================================================
@@ -1525,10 +1631,10 @@ enum IMAGE_ADOPT
 //! @brief Mirror modes used together with @c Image::mirror().
 enum IMAGE_MIRROR_MODE
 {
-  IMAGE_MIRROR_NONE       = 0x0,
-  IMAGE_MIRROR_HORIZONTAL = 0x1,
-  IMAGE_MIRROR_VERTICAL   = 0x2,
-  IMAGE_MIRROR_BOTH       = 0x3
+  IMAGE_MIRROR_NONE       = 0x00,
+  IMAGE_MIRROR_HORIZONTAL = 0x01,
+  IMAGE_MIRROR_VERTICAL   = 0x02,
+  IMAGE_MIRROR_BOTH       = 0x03
 };
 
 // ============================================================================
@@ -1538,10 +1644,54 @@ enum IMAGE_MIRROR_MODE
 //! @brief Rotate modes used together with @c Image::rotate() methods.
 enum IMAGE_ROTATE_MODE
 {
-  IMAGE_ROTATE_0   = 0x0,
-  IMAGE_ROTATE_90  = 0x1,
-  IMAGE_ROTATE_180 = 0x2,
-  IMAGE_ROTATE_270 = 0x3
+  IMAGE_ROTATE_0   = 0x00,
+  IMAGE_ROTATE_90  = 0x01,
+  IMAGE_ROTATE_180 = 0x02,
+  IMAGE_ROTATE_270 = 0x03
+};
+
+// ============================================================================
+// [Fog::IMAGE_DATA_FLAGS]
+// ============================================================================
+
+//! @brief @c Image / @c ImageData flags.
+enum IMAGE_DATA_FLAGS
+{
+  // --------------------------------------------------------------------------
+  // [Core Flags]
+  // --------------------------------------------------------------------------
+
+  //! @brief Image data instance allocated using dynamic memory. This flag is
+  //! the default and currently only the null image data has this flag unset.
+  //!
+  //! @note This flag is compatible to standard Fog-Core data flags.
+  IMAGE_DATA_FLAG_DYNAMIC = OBJECT_DATA_FLAG_DYNAMIC,
+
+  //! @brief Image instance is shareable (creating weak copy when 
+  //! assigned to other image instance).
+  //!
+  //! @note This flag is compatible to standard Fog-Core data flags.
+  IMAGE_DATA_FLAG_SHARABLE = OBJECT_DATA_FLAG_SHARABLE,
+
+  //! @brief Keep alive this instance when assigning other image into it, 
+  //! creating deep copy instead of weak-reference.
+  //!
+  //! @note This flag is compatible to standard Fog-Core data flags.
+  IMAGE_DATA_FLAG_KEEP_ALIVE = OBJECT_DATA_FLAG_KEEP_ALIVE,
+
+  // --------------------------------------------------------------------------
+  // [Extended Flags]
+  // --------------------------------------------------------------------------
+
+  //! @brief Image is read-only. Fog must create a copy when write operation
+  //! is performed (creating @c Painter instance, locking pixels, etc...)
+  IMAGE_DATA_FLAG_READ_ONLY = 0x10,
+
+  //! @brief Image is reversed (from bottom-to-top).
+  //!
+  //! @note This flag should be set only when adopting other image or 
+  //! DIBSECTION (Windows only). Fog itselt shouldn't create reversed images.
+  IMAGE_DATA_FLAG_REVERSED = 0x20
 };
 
 // ============================================================================
@@ -1554,14 +1704,18 @@ enum IMAGE_FILTER_TYPE
   //! @brief Image filter is null (NOP).
   IMAGE_FILTER_TYPE_NONE = 0,
 
-  // [ColorFilter filters]
+  // --------------------------------------------------------------------------
+  // [ColorFilter]
+  // --------------------------------------------------------------------------
 
   //! @brief @c ColorLut image filter.
-  IMAGE_FILTER_TYPE_COLORLUT = 1,
+  IMAGE_FILTER_TYPE_COLOR_LUT = 1,
   //! @brief @c ColorMatrix image filter.
-  IMAGE_FILTER_TYPE_COLORMATRIX = 2,
+  IMAGE_FILTER_TYPE_COLOR_MATRIX = 2,
 
-  // [ImageFilter filters]
+  // --------------------------------------------------------------------------
+  // [ImageFilter]
+  // --------------------------------------------------------------------------
 
   //! @brief Image filter is box blur.
   IMAGE_FILTER_TYPE_BLUR = 3,
@@ -1627,24 +1781,24 @@ enum IMAGE_FILTER_CHAR
     IMAGE_FILTER_CHAR_VERT_PROCESSING |
     IMAGE_FILTER_CHAR_HORZ_PROCESSING ,
 
-  //! @brief Image filter supports @c PIXEL_FORMAT_PRGB32.
+  //! @brief Image filter supports @c IMAGE_FORMAT_PRGB32.
   //!
   //! If filters not supports this format the image data must be first converted
-  //! to @c PIXEL_FORMAT_ARGB32, processed and then converted back.
+  //! to @c IMAGE_FORMAT_ARGB32, processed and then converted back.
   IMAGE_FILTER_CHAR_SUPPORTS_PRGB32 = 0x0100,
 
-  //! @brief Image filter supports @c PIXEL_FORMAT_ARGB32.
+  //! @brief Image filter supports @c IMAGE_FORMAT_ARGB32.
   //!
   //! @note This flag should be always set (or at least 
   //! @c IMAGE_FILTER_FORMAT_PRGB32)!
   IMAGE_FILTER_CHAR_SUPPORTS_ARGB32 = 0x0200,
 
-  //! @brief Image filter supports @c PIXEL_FORMAT_XRGB32.
+  //! @brief Image filter supports @c IMAGE_FORMAT_XRGB32.
   //!
   //! @note This flag should be always set!
   IMAGE_FILTER_CHAR_SUPPORTS_XRGB32 = 0x0400,
 
-  //! @brief Image filter supports @c PIXEL_FORMAT_A8.
+  //! @brief Image filter supports @c IMAGE_FORMAT_A8.
   //!
   //! @note This flag should be always set!
   IMAGE_FILTER_CHAR_SUPPORTS_A8 = 0x0800,
@@ -1771,17 +1925,29 @@ enum IMAGE_IO_FILE_TYPE
 };
 
 // ============================================================================
-// [Fog::INTERPOLATION_TYPE]
+// [Fog::IMAGE_INTERPOLATION_TYPE]
 // ============================================================================
 
-//! @brief Scale filter that can be using with @c Image::scale() or set in
-//! painter.
-enum INTERPOLATION_TYPE
+//! @brief Image interpolation type, used by @c Painter or @c Image::scale().
+enum IMAGE_INTERPOLATION_TYPE
 {
-  INTERPOLATION_NEAREST = 0,
-  INTERPOLATION_SMOOTH = 1,
+  IMAGE_INTERPOLATION_NEAREST = 0,
+  IMAGE_INTERPOLATION_SMOOTH = 1,
 
-  INTERPOLATION_INVALID = 2
+  IMAGE_INTERPOLATION_COUNT = 2
+};
+
+// ============================================================================
+// [Fog::COLOR_INTERPOLATION_TYPE]
+// ============================================================================
+
+//! @brief Color interpolation type, used by @c Painter.
+enum COLOR_INTERPOLATION_TYPE
+{
+  COLOR_INTERPOLATION_NEAREST = 0,
+  COLOR_INTERPOLATION_SMOOTH = 1,
+
+  COLOR_INTERPOLATION_COUNT = 2
 };
 
 // ============================================================================
@@ -1812,7 +1978,12 @@ enum MATRIX_DATA
 //! @brief Matrix multiply ordering.
 enum MATRIX_ORDER
 {
+  //! @brief The second matrix which is multiplied with the primary matrix is
+  //! on the left (default for all graphics / color matrix operations).
   MATRIX_PREPEND = 0,
+
+  //! @brief The second matrix which is multiplied with the primary matrix is
+  //! on the right.
   MATRIX_APPEND = 1
 };
 
@@ -1830,11 +2001,11 @@ enum MATRIX_TYPE
 };
 
 // ============================================================================
-// [Fog::Fill Constants]
+// [Fog::FILL_RULE]
 // ============================================================================
 
-//! @brief Fill mode.
-enum FILL_MODE
+//! @brief Fill rule.
+enum FILL_RULE
 {
   //! @brief Fill using non-zero rule.
   FILL_NON_ZERO = 0,
@@ -1844,17 +2015,21 @@ enum FILL_MODE
   FILL_DEFAULT = FILL_EVEN_ODD,
 
   //! @brief Used to catch invalid arguments.
-  FILL_MODE_COUNT = 2
+  FILL_RULE_COUNT = 2
 };
 
 // ============================================================================
-// [Fog::Stroke Constants]
+// [Fog::STROKE]
 // ============================================================================
 
 static const double LINE_WIDTH_DEFAULT = 1.0;
 static const double MITER_LIMIT_DEFAULT = 4.0;
 static const double INNER_LIMIT_DEFAULT = 1.01;
 static const double DASH_OFFSET_DEFAULT = 0.0;
+
+// ============================================================================
+// [Fog::LINE_CAP]
+// ============================================================================
 
 //! @brief Line cap.
 enum LINE_CAP
@@ -1871,6 +2046,10 @@ enum LINE_CAP
   LINE_CAP_COUNT = 6
 };
 
+// ============================================================================
+// [Fog::LINE_JOIN]
+// ============================================================================
+
 //! @brief Line join.
 enum LINE_JOIN
 {
@@ -1884,6 +2063,12 @@ enum LINE_JOIN
   //! @brief Used to catch invalid arguments.
   LINE_JOIN_COUNT = 5
 };
+
+// ============================================================================
+// [Fog::INNER_JOIN]
+// ============================================================================
+
+// TODO: Remove INNER-JOIN.
 
 //! @brief Inner join.
 enum INNER_JOIN
@@ -1899,20 +2084,20 @@ enum INNER_JOIN
 };
 
 // ============================================================================
-// [Fog::PAINTER_ENGINE]
+// [Fog::PAINT_ENGINE]
 // ============================================================================
 
 //! @brief Type of painter engine.
-enum PAINTER_ENGINE
+enum PAINT_ENGINE
 {
   //! @brief Null painter engine (painter is not initialized or invalid).
-  PAINTER_ENGINE_NULL = 0,
+  PAINT_ENGINE_NULL = 0,
 
-  //! @brief Singlethreaded raster painter engine.
-  PAINTER_ENGINE_RASTER_ST = 1,
+  //! @brief Singlethreaded raster paint engine.
+  PAINT_ENGINE_RASTER_ST = 1,
 
-  //! @brief Multithreaded raster painter engine.
-  PAINTER_ENGINE_RASTER_MT = 2
+  //! @brief Multithreaded raster paint engine.
+  PAINT_ENGINE_RASTER_MT = 2
 };
 
 // ============================================================================
@@ -1941,11 +2126,11 @@ enum PAINTER_HINT
   //! @brief Anti-aliasing type (quality), see @c ANTI_ALIASING_TYPE.
   PAINTER_HINT_ANTIALIASING_QUALITY = 1,
 
-  //! @brief Image interpolation type (quality), see @c INTERPOLATION_TYPE.
+  //! @brief Image interpolation type (quality), see @c IMAGE_INTERPOLATION_TYPE.
   PAINTER_HINT_IMAGE_INTERPOLATION = 2,
 
-  //! @brief Gradient interpolation type (quality), see @c INTERPOLATION_TYPE.
-  PAINTER_HINT_GRADIENT_INTERPOLATION = 3,
+  //! @brief Gradient interpolation type (quality), see @c COLOR_INTERPOLATION_TYPE.
+  PAINTER_HINT_COLOR_INTERPOLATION = 3,
 
   //! @brief Whether to render text only using path outlines (vectors).
   //!
@@ -1961,25 +2146,54 @@ enum PAINTER_HINT
 //! @brief Painter initialization flags.
 enum PAINTER_INIT_FLAGS
 {
+  //! @brief Crear the content of the painter to transparent color if target
+  //! buffer contains alpha channel or to black (if target buffer not contains
+  //! alpha channel).
+  //!
+  //! Using this flag can lead to very optimized painting and it's generally
+  //! faster than setting painter to @c OPERATOR_SRC and clearing the content
+  //! by using @c Painter::fillAll() or @c Painter::fillRect() methods. This
+  //! method is efficient, because painter will mark image region as transparent
+  //! and then use that information to perform copy operator to the
+  //! span that hasn't been initialized yet.
+  PAINTER_INIT_CLEAR = 0x00000001,
+
   //! @brief Initialize multithreading if it makes sense.
   //! 
   //! If this option is true, painter first check if image size is not too 
   //! small (painting to small images are singlethreaded by default). Then
-  //! CPU detection is used to check if machine contains more CPU units.
-  PAINTER_INIT_MT = 0x0001
+  //! CPU detection is used to check if machine contains more CPUs or cores.
+  PAINTER_INIT_MT = 0x00000002
 };
 
 // ============================================================================
-// [Fog::PAINTER_ORIGIN]
+// [Fog::PAINTER_STATE_FLAGS]
 // ============================================================================
 
-//! @brief Painter set origin operation.
-enum PAINTER_ORIGIN_OP
+//! @brief Save flags used by @c Painter::save() or @c PaintEngine::save().
+enum PAINTER_STATE_FLAGS
 {
-  //! @brief Set origin to a given point.
-  PAINTER_ORIGIN_SET = 0,
-  //! @brief Translate origin by a given point.
-  PAINTER_ORIGIN_TRANSLATE = 1
+  //! @brief Paint parameters (paint source, paint alpha and operator).
+  PAINTER_STATE_PAINT_PARAMS  = 0x00000001,
+  //! @brief Clip parameters (clip rule and clip alpha).
+  PAINTER_STATE_CLIP_PARAMS   = 0x00000002,
+  //! @brief Fill parameters (fill rule).
+  PAINTER_STATE_FILL_PARAMS   = 0x00000004,
+  //! @brief Stroker parameters (line width, join, etc...).
+  PAINTER_STATE_STROKE_PARAMS = 0x00000008,
+
+  //! @brief Paint hints (anti-aliasing mode, interpolation quality, etc...).
+  PAINTER_STATE_HINTS         = 0x00000010,
+  //! @brief Current transformation matrix).
+  PAINTER_STATE_MATRIX        = 0x00000020,
+  //! @brief Clip area (clip region or mask).
+  PAINTER_STATE_CLIP_AREA     = 0x00000040,
+
+  //! @brief All states.
+  PAINTER_STATE_ALL           = 0xFFFFFFFF,
+
+  //! @brief All states, used internally.
+  PAINTER_STATE_ALL_PRIVATE   = 0x0000007F
 };
 
 // ============================================================================
@@ -2041,21 +2255,63 @@ enum PATH_DIRECTION
 enum PATTERN_TYPE
 {
   //! @brief Null pattern (nothing will be paint using this pattern).
-  PATTERN_NULL = 0x0,
+  PATTERN_TYPE_NONE = 0x0,
   //! @brief Solid color pattern.
-  PATTERN_SOLID = 0x1,
+  PATTERN_TYPE_SOLID = 0x1,
   //! @brief Texture pattern (@c Image).
-  PATTERN_TEXTURE = 0x2,
+  PATTERN_TYPE_TEXTURE = 0x2,
 
   //! @brief Mask for all gradient patterns.
-  PATTERN_GRADIENT_MASK = 0x10,
+  PATTERN_TYPE_IS_GRADIENT = 0x10,
 
   //! @brief Linear gradient pattern.
-  PATTERN_LINEAR_GRADIENT = PATTERN_GRADIENT_MASK | 0x0,
+  PATTERN_TYPE_LINEAR_GRADIENT = PATTERN_TYPE_IS_GRADIENT | 0x0,
   //! @brief Radial gradient pattern.
-  PATTERN_RADIAL_GRADIENT = PATTERN_GRADIENT_MASK | 0x1,
+  PATTERN_TYPE_RADIAL_GRADIENT = PATTERN_TYPE_IS_GRADIENT | 0x1,
   //! @brief Conical gradient pattern.
-  PATTERN_CONICAL_GRADIENT = PATTERN_GRADIENT_MASK | 0x2
+  PATTERN_TYPE_CONICAL_GRADIENT = PATTERN_TYPE_IS_GRADIENT | 0x2
+};
+
+// ============================================================================
+// [Fog::PATTERN_SPREAD]
+// ============================================================================
+
+//! @brief Spread of @c Pattern.
+enum PATTERN_SPREAD
+{
+  //! @brief No spread (area outside the pattern definition is transparent).
+  PATTERN_SPREAD_NONE = 0,
+  //! @brief Pad spread (area outside the pattern continues by border color).
+  PATTERN_SPREAD_PAD = 1,
+  //! @brief Releat spread (pattern is repeated).
+  PATTERN_SPREAD_REPEAT = 2,
+  //! @brief Reflect spread (pattern is reflected and then repeated).
+  PATTERN_SPREAD_REFLECT = 3,
+
+  //! @brief Count of pattern spreads.
+  PATTERN_SPREAD_COUNT = 4
+};
+
+// ============================================================================
+// [Fog::REGION_OP]
+// ============================================================================
+
+//! @brief Region or clip combining operators.
+enum REGION_OP
+{
+  //! @brief Copy.*/
+  REGION_OP_REPLACE = 0,
+  //! @brief Intersection (AND).
+  REGION_OP_INTERSECT = 1,
+  //! @brief Union (OR)
+  REGION_OP_UNION = 2,
+  //! @brief eXclusive or (XOR).
+  REGION_OP_XOR = 3,
+  //! @brief Subtraction (Difference).
+  REGION_OP_SUBTRACT = 4,
+
+  //! @brief Count of region operators.
+  REGION_OP_COUNT
 };
 
 // ============================================================================
@@ -2079,60 +2335,70 @@ enum REGION_TYPE
 };
 
 // ============================================================================
-// [Fog::REGION_OP]
-// ============================================================================
-
-//! @brief Region operators.
-enum REGION_OP
-{
-  //! @brief Copy.*/
-  REGION_OP_COPY = 0,
-  //! @brief Union (OR)
-  REGION_OP_UNION = 1,
-  //! @brief Intersection (AND).
-  REGION_OP_INTERSECT = 2,
-  //! @brief eXclusive or (XOR).
-  REGION_OP_XOR = 3,
-  //! @brief Subtraction (Difference).
-  REGION_OP_SUBTRACT = 4,
-
-  //! @brief Count of region operators.
-  REGION_OP_COUNT
-};
-
-// ============================================================================
-// [Fog::REGION_HITTEST]
+// [Fog::REGION_HIT_TEST]
 // ============================================================================
 
 //! @brief Region hit-test result.
-enum REGION_HITTEST
+enum REGION_HIT_TEST
 {
   //! @brief Object isn't in region (point, rectangle or another region).
-  REGION_HITTEST_OUT = 0,
+  REGION_HIT_OUT = 0,
   //! @brief Object is in region (point, rectangle or another region).
-  REGION_HITTEST_IN = 1,
+  REGION_HIT_IN = 1,
   //! @brief Object is partially in region (point, rectangle or another region).
-  REGION_HITTEST_PART = 2
+  REGION_HIT_PART = 2
 };
 
 // ============================================================================
-// [Fog::SPREAD_TYPE]
+// [SPAN_TYPE]
 // ============================================================================
 
-//! @brief Spread of @c Pattern.
-enum SPREAD_TYPE
+//! @brief Type of @c Span.
+enum SPAN_TYPE
 {
-  //! @brief No spread (area outside the pattern definition is transparent).
-  SPREAD_NONE = 0,
-  //! @brief Pad spread (area outside the pattern continues by border color).
-  SPREAD_PAD = 1,
-  //! @brief Releat spread (pattern is repeated).
-  SPREAD_REPEAT = 2,
-  //! @brief Reflect spread (pattern is reflected and then repeated).
-  SPREAD_REFLECT = 3,
+  //! @brief Span is const mask or fully opaque. Value must be read using
+  //! @c Span8::getCMask(), Span16::getCMask() or FloatSpan::getCMask().
+  SPAN_TYPE_CMASK = 0,
 
-  //! @brief Count of pattern spreads.
-  SPREAD_COUNT = 4
+  //! @brief Start of VMask span types (used by asserts).
+  //!
+  //! @note This constant is only shadow to valid mask type, don't use this
+  //! value in switch() {}.
+  SPAN_TYPE_VMASK_START = 2,
+
+  //! @brief Span is variable-alpha mask. Mask pointer must be read using
+  //! @c Span8::getVMask(), Span16::getVMask() or FloatSpan::getVMask().
+  //!
+  //! @note This type of alpha-mask means you that you shouldn't check for
+  //! fully-opaque or fully-transparent values. The mask probably contains
+  //! these values only in very limited count (the output from rasterizer).
+  //! If you want to check for fully-opaque or fully-transparent pixels then
+  //! use @c SPAN_TYPE_VMASK_A_SPARSE instead.
+  //!
+  //! @sa @c SPAN_TYPE_VMASK_A_SPARSE.
+  SPAN_TYPE_VMASK_A_DENSE = 2,
+
+  //! @brief Span is variable-alpha mask. Mask pointer must be read using
+  //! @c Span8::getVMask(), Span16::getVMask() or FloatSpan::getVMask().
+  //!
+  //! This is sparse version, implementation should check for fully-opaque
+  //! and fully-transparent chunks and then skip or perform full blit on
+  //! these areas. This mask type is usually used when rendering glyphs or
+  //! using mask from other image in @c IMAGE_FORMAT_A8.
+  //!
+  //! @sa @c SPAN_TYPE_VMASK_A_DENSE.
+  SPAN_TYPE_VMASK_A_SPARSE = 3,
+
+  //! @brief Span is variable-argb mask. Mask pointer must be read using
+  //! @c Span8::getVMask(), Span16::getVMask() or FloatSpan::getVMask().
+  SPAN_TYPE_VMASK_ARGB_DENSE = 4,
+
+  //! @brief Span is variable-argb mask. Mask pointer must be read using
+  //! @c Span8::getVMask(), Span16::getVMask() or FloatSpan::getVMask().
+  SPAN_TYPE_VMASK_ARGB_SPARSE = 5,
+
+  //! @brief Count of span types.
+  SPAN_TYPE_COUNT = 6
 };
 
 // ============================================================================
@@ -2166,18 +2432,30 @@ enum ERR_GRAPHICS_ENUM
   // [Errors Range]
   // --------------------------------------------------------------------------
 
-  ERR_GRAPHICS_START = 0x00011100,
+  // TODO: Increase this range.
+
+  //! @brief First error code that can be used by Fog-Graphics library.
+  ERR_GRAPHICS_FIRST = 0x00011100,
+  //! @brief Last error code that can be used by Fog-Graphics library.
   ERR_GRAPHICS_LAST  = 0x000111FF,
 
   // --------------------------------------------------------------------------
-  // [Image, ImageFilter, ImageIO and Painter]
+  // [Image, ImageFilter, ImageIO]
   // --------------------------------------------------------------------------
 
-  ERR_IMAGE_INVALID_SIZE = ERR_GRAPHICS_START,
-  ERR_IMAGE_INVALID_FORMAT,
+  //! @brief Image size is invalid or zero.
+  //!
+  //! This error can happen when creating image or when using @c Fog::ImageIO.
+  //! Fog example it's invalid to open image file where dimensions says [0x0].
+  ERR_IMAGE_INVALID_SIZE = ERR_GRAPHICS_FIRST,
 
+  //! @brief Image format is invalid.
+  ERR_IMAGE_INVALID_FORMAT,
+  
+  // TODO: Remove
   ERR_IMAGE_UNSUPPORTED_FORMAT,
 
+  //! @brief I
   ERR_IMAGEIO_INTERNAL_ERROR,
 
   ERR_IMAGEIO_NO_DECODER,
@@ -2198,7 +2476,11 @@ enum ERR_GRAPHICS_ENUM
   ERR_IMAGEIO_LIBPNG_NOT_LOADED,
   ERR_IMAGEIO_LIBPNG_ERROR,
 
+  //! @brief Failed to load Gdi+ library under Windows.
   ERR_IMAGEIO_GDIPLUS_NOT_LOADED,
+
+  //! @brief Call to Gdi+ library failed and resulting error can't be
+  //! translated to the Fog one. This is generic error.
   ERR_IMAGEIO_GDIPLUS_ERROR,
 
   // --------------------------------------------------------------------------
@@ -2218,19 +2500,60 @@ enum ERR_GRAPHICS_ENUM
   ERR_FONT_FREETYPE_INIT_FAILED,
 
   // --------------------------------------------------------------------------
+  // [Painter]
+  // --------------------------------------------------------------------------
+
+  //! @brief Image format is not supported by the paint engine.
+  //!
+  //! The error can be misleading, but it can be returned by @c Painter::begin()
+  //! where the image argument points to image that is using @c IMAGE_FORMAT_I8.
+  //!
+  //! Painter can be used only to paint into supported pixel formats (all RGB,
+  //! ARGB and ALPHA-only pixel formats are supported).
+  ERR_PAINTER_UNSUPPORTED_FORMAT,
+
+  //! @brief Error that can be returned by painter if it's illegal to change
+  //! paint engine at this time.
+  //!
+  //! This can happen if multithreaded or hardware accelerated painter is used
+  //! and you want to switch to a different paint engine.
+  //!
+  //! @sa @c Painter::setEngine().
+  ERR_PAINTER_NOT_ALLOWED,
+
+  //! @brief Error that can be returned by the paint engine to tell called that
+  //! there is no state to restore.
+  //!
+  //! @sa @c Painter::restore() and @c PaintEngine::restore().
+  ERR_PAINTER_NO_STATE,
+
+  // --------------------------------------------------------------------------
   // [Path]
   // --------------------------------------------------------------------------
 
+  //! @brief Path is invalid (contains invalid data sequence).
   ERR_PATH_INVALID,
+
+  //! @brief Can't stroke path that contains only one vertex (probably 
+  //! @c PATH_CMD_MOVE_TO).
+  ERR_PATH_CANT_STROKE,
 
   // --------------------------------------------------------------------------
   // [Region]
   // --------------------------------------------------------------------------
 
+  //! @brief Can't do binary algebra using infinite region as a source or
+  //! destination.
+  //!
+  //! The algebra is possible, but resulting region could be very large and
+  //! all other operations can be insecure. This can happen if you want to
+  //! XOR simple or complex region by infinite one.
   ERR_REGION_INFINITE
 };
 
 extern FOG_API uint32_t OperatorCharacteristics[OPERATOR_COUNT];
+
+//! @}
 
 } // Fog namespace
 

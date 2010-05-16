@@ -10,15 +10,16 @@
 // [Dependencies]
 #include <Fog/Gui/Widget.h>
 
-//! @addtogroup Fog_Gui
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Gui_Widget
+//! @{
 
 // ============================================================================
 // [Fog::ButtonBase]
 // ============================================================================
 
+//! @brief Base class for button-like widgets.
 struct FOG_API ButtonBase : public Widget
 {
   FOG_DECLARE_OBJECT(ButtonBase, Widget)
@@ -84,9 +85,9 @@ protected:
   bool _isSpaceDown;
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GUI_BUTTONBASE_H

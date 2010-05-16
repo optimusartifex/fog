@@ -131,7 +131,7 @@ static err_t getXdgDirectory(String& dst, int id)
   String home;
   String configFile;
 
-  if ((err = UserInfo::getDirectory(home, UserInfo::DIRECTORY_HOME))) return err;
+  if ((err = UserInfo::getDirectory(home, USER_DIRECTORY_HOME))) return err;
 
   if ((err = OS::getEnv(Ascii8("XDG_CONFIG_HOME"), configFile)) || configFile.isEmpty())
   {
@@ -216,7 +216,7 @@ nextLine:
 
 fail:
   // Just fallback to known defaults.
-  if (id == UserInfo::DIRECTORY_DESKTOP)
+  if (id == USER_DIRECTORY_DESKTOP)
   {
     dst.set(home);
     dst.append(Ascii8("/Desktop"));
@@ -292,11 +292,11 @@ err_t UserInfo::getDirectory(String& dst, int id)
   err_t err;
 
   dst.clear();
-  if ((uint)id >= (uint)DIRECTORY_INVALID) return ERR_RT_INVALID_ARGUMENT;
+  if ((uint)id >= (uint)USER_DIRECTORY_COUNT) return ERR_RT_INVALID_ARGUMENT;
 
   switch (id)
   {
-    case UserInfo::DIRECTORY_HOME:
+    case USER_DIRECTORY_HOME:
       err = getHomeDirectory(dst);
       break;
 

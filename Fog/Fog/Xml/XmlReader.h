@@ -8,16 +8,16 @@
 #define _FOG_XML_XMLREADER_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/String.h>
 #include <Fog/Core/Stream.h>
 #include <Fog/Core/TextCodec.h>
 #include <Fog/Xml/Constants.h>
 
-//! @addtogroup Fog_Xml
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Xml_IO
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -33,12 +33,16 @@ struct XmlElement;
 //! @brief Xml reader.
 struct FOG_API XmlReader
 {
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   XmlReader();
   virtual ~XmlReader();
 
+  // --------------------------------------------------------------------------
   // [Parser]
+  // --------------------------------------------------------------------------
 
   err_t parseFile(const String& fileName);
   err_t parseStream(Stream& stream);
@@ -48,7 +52,9 @@ struct FOG_API XmlReader
   FOG_INLINE err_t parseString(const String& str)
   { return parseString(str.getData(), str.getLength()); }
 
+  // --------------------------------------------------------------------------
   // [State]
+  // --------------------------------------------------------------------------
 
   //! @brief Parser state.
   enum ParserState
@@ -100,11 +106,15 @@ struct FOG_API XmlReader
     ElementSelfClosingTag,
     //! @brief Element is XML declaration.
     ElementXML,
+    //! @brief Element is CDATA declaration.
+    ElementCDATA,
     //! @brief Element is DOCTYPE declaration.
     ElementDOCTYPE
   };
 
+  // --------------------------------------------------------------------------
   // [Event Handlers]
+  // --------------------------------------------------------------------------
 
   virtual err_t onAddElement(const Utf16& tagName) = 0;
   virtual err_t onCloseElement(const Utf16& tagName) = 0;
@@ -127,12 +137,16 @@ protected:
 //! @brief Xml dom reader.
 struct FOG_API XmlDomReader : public XmlReader
 {
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   XmlDomReader(XmlDocument* document);
   virtual ~XmlDomReader();
 
+  // --------------------------------------------------------------------------
   // [Event Handlers]
+  // --------------------------------------------------------------------------
 
   virtual err_t onAddElement(const Utf16& tagName);
   virtual err_t onCloseElement(const Utf16& tagName);
@@ -151,9 +165,9 @@ protected:
   XmlElement* _current;
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_XML_XMLREADER_H

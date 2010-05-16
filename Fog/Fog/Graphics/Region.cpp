@@ -649,7 +649,7 @@ static err_t _intersectPrivate(Region* dest, const IntBox* src1, sysuint_t count
   if (count1 == 1 && count2 == 1)
   {
     return dest->set(IntBox(Math::max(src1->x1, src2->x1), Math::max(src1->y1, src2->y1),
-                         Math::min(src1->x2, src2->x2), Math::min(src1->y2, src2->y2)));
+                            Math::min(src1->x2, src2->x2), Math::min(src1->y2, src2->y2)));
   }
 
   sysuint_t minRectsNeeded = (count1 + count2) * 2;
@@ -669,8 +669,8 @@ static err_t _intersectPrivate(Region* dest, const IntBox* src1, sysuint_t count
   RegionData* newd = NULL;
   sysuint_t length;
 
-  // Local buffer that can be used instead of malloc in most calls
-  // can be increased to higher values, but I think that 32 is ok.
+  // Local buffer that can be used instead of malloc in most calls,
+  // can be increased to higher value, but I think that 32 is ok.
   IntBox staticBuffer[32];
 
   if (memOverlap)
@@ -1271,7 +1271,7 @@ uint32_t Region::getType() const
 
 err_t Region::setSharable(bool val)
 {
-  if (isInfinite()) return ERR_RT_INVALID_CONTEXT;
+  if (isInfinite()) return ERR_RT_INVALID_OBJECT;
 
   if (isSharable() == val) return ERR_OK;
   FOG_RETURN_ON_ERROR(detach());
@@ -1285,7 +1285,7 @@ err_t Region::setSharable(bool val)
 
 err_t Region::setStrong(bool val)
 {
-  if (isInfinite()) return ERR_RT_INVALID_CONTEXT;
+  if (isInfinite()) return ERR_RT_INVALID_OBJECT;
 
   if (isStrong() == val) return ERR_OK;
   FOG_RETURN_ON_ERROR(detach());
@@ -1303,7 +1303,7 @@ err_t Region::setStrong(bool val)
 
 err_t Region::reserve(sysuint_t n)
 {
-  if (isInfinite()) return ERR_RT_INVALID_CONTEXT;
+  if (isInfinite()) return ERR_RT_INVALID_OBJECT;
 
   RegionData* d = _d;
 
@@ -1394,17 +1394,17 @@ void Region::squeeze()
 
 uint32_t Region::hitTest(const IntPoint& pt) const
 {
-  if (isInfinite()) return REGION_HITTEST_IN;
+  if (isInfinite()) return REGION_HIT_IN;
 
   RegionData* d = _d;
 
   sysuint_t i;
   sysuint_t length = d->length;
-  if (!length) return REGION_HITTEST_OUT;
+  if (!length) return REGION_HIT_OUT;
 
   // Check if point position is in extents, if not -> Out.
-  if (!(d->extents.contains(pt))) return REGION_HITTEST_OUT;
-  if (length == 1) return REGION_HITTEST_IN;
+  if (!(d->extents.contains(pt))) return REGION_HIT_OUT;
+  if (length == 1) return REGION_HIT_IN;
 
   // Binary search for matching position.
   const IntBox* base = d->rects;
@@ -1417,7 +1417,7 @@ uint32_t Region::hitTest(const IntPoint& pt) const
   {
     r = base + (i >> 1);
 
-    // Try match
+    // Try match.
     if (y >= r->y1 && y < r->y2)
     {
       if (x >= r->x1)
@@ -1425,7 +1425,7 @@ uint32_t Region::hitTest(const IntPoint& pt) const
         if (x < r->x2)
         {
           // Match.
-          return REGION_HITTEST_IN;
+          return REGION_HIT_IN;
         }
         else
         {
@@ -1444,7 +1444,7 @@ uint32_t Region::hitTest(const IntPoint& pt) const
     }
     // else: Move left.
   }
-  return REGION_HITTEST_OUT;
+  return REGION_HIT_OUT;
 }
 
 uint32_t Region::hitTest(const IntRect& r) const
@@ -1454,13 +1454,13 @@ uint32_t Region::hitTest(const IntRect& r) const
 
 uint32_t Region::hitTest(const IntBox& r) const
 {
-  if (isInfinite()) return REGION_HITTEST_IN;
+  if (isInfinite()) return REGION_HIT_IN;
 
   RegionData* d = _d;
   sysuint_t length = d->length;
 
   // This is (just) a useful optimization.
-  if (!length || !d->extents.overlaps(r)) return REGION_HITTEST_OUT;
+  if (!length || !d->extents.overlaps(r)) return REGION_HIT_OUT;
 
   const IntBox* cur = d->rects;
   const IntBox* end = cur + length;
@@ -1523,8 +1523,8 @@ uint32_t Region::hitTest(const IntBox& r) const
   }
 
   return (partIn)
-    ? ((y < r.y2) ? REGION_HITTEST_PART : REGION_HITTEST_IN)
-    : REGION_HITTEST_OUT;
+    ? ((y < r.y2) ? REGION_HIT_PART : REGION_HIT_IN)
+    : REGION_HIT_OUT;
 }
 
 // ============================================================================
@@ -1648,17 +1648,36 @@ err_t Region::set(const IntBox* rects, sysuint_t length)
   return ERR_OK;
 }
 
-err_t Region::combine(const Region& r, uint32_t regionOp)
+err_t Region::combine(const Region& r, uint32_t combineOp)
 {
   err_t err;
 
   RegionData* td = _d;
   RegionData* rd = r._d;
 
-  switch (regionOp)
+  switch (combineOp)
   {
-    case REGION_OP_COPY:
+    case REGION_OP_REPLACE:
       return set(r);
+
+    case REGION_OP_INTERSECT:
+    {
+      // If destination is infinite then source is result.
+      // If source is infinite then destination is result.
+      if (td == _dinfinite.instancep())
+        return set(r);
+      else if (rd == _dinfinite.instancep())
+        return ERR_OK;
+
+      if (td == rd)
+        ;
+      else if (td->length == 0 || rd->length == 0 || !td->extents.overlaps(rd->extents))
+        clear();
+      else
+        return _intersectPrivate(this, td->rects, td->length, rd->rects, rd->length, true);
+
+      return ERR_OK;
+    }
 
     case REGION_OP_UNION:
     {
@@ -1701,28 +1720,9 @@ err_t Region::combine(const Region& r, uint32_t regionOp)
       return err;
     }
 
-    case REGION_OP_INTERSECT:
-    {
-      // If destination is infinite then source is result.
-      // If source is infinite then destination is result.
-      if (td == _dinfinite.instancep())
-        return set(r);
-      else if (rd == _dinfinite.instancep())
-        return ERR_OK;
-
-      if (td == rd)
-        ;
-      else if (td->length == 0 || rd->length == 0 || !td->extents.overlaps(rd->extents))
-        clear();
-      else
-        return _intersectPrivate(this, td->rects, td->length, rd->rects, rd->length, true);
-
-      return ERR_OK;
-    }
-
     case REGION_OP_XOR:
     {
-      return combine(*this, *this, r, regionOp);
+      return combine(*this, *this, r, combineOp);
     }
 
     case REGION_OP_SUBTRACT:
@@ -1749,21 +1749,34 @@ err_t Region::combine(const Region& r, uint32_t regionOp)
   }
 }
 
-err_t Region::combine(const IntRect& r, uint32_t regionOp)
+err_t Region::combine(const IntRect& r, uint32_t combineOp)
 {
-  return combine(IntBox(r), regionOp);
+  return combine(IntBox(r), combineOp);
 }
 
-err_t Region::combine(const IntBox& r, uint32_t regionOp)
+err_t Region::combine(const IntBox& r, uint32_t combineOp)
 {
   RegionData* td = _d;
   err_t err;
 
-  switch (regionOp)
+  switch (combineOp)
   {
-    case REGION_OP_COPY:
+    case REGION_OP_REPLACE:
     {
       return set(r);
+    }
+
+    case REGION_OP_INTERSECT:
+    {
+      if (td == _dinfinite.instancep()) return set(r);
+
+      if (td->length == 0 || !r.isValid() || !td->extents.overlaps(r)) 
+      {
+        clear();
+        return ERR_OK;
+      }
+
+      return _intersectPrivate(this, td->rects, td->length, &r, 1, true);
     }
 
     case REGION_OP_UNION:
@@ -1800,23 +1813,9 @@ err_t Region::combine(const IntBox& r, uint32_t regionOp)
       return err;
     }
 
-    case REGION_OP_INTERSECT:
-    {
-      if (td == _dinfinite.instancep()) return set(r);
-
-      if (td->length == 0 || !r.isValid() || !td->extents.overlaps(r)) 
-      {
-        clear();
-        return ERR_OK;
-      }
-
-      return _intersectPrivate(this, td->rects, td->length, &r, 1, true);
-    }
-
     case REGION_OP_XOR:
     {
-      TemporaryRegion<1> rr(r);
-      return combine(*this, *this, rr, regionOp);
+      return combine(*this, *this, r, combineOp);
     }
 
     case REGION_OP_SUBTRACT:
@@ -1859,54 +1858,45 @@ static err_t Region_doPath(Region* self, Rasterizer* rasterizer, uint8_t thresho
   if (!rasterizer->hasCells()) return ERR_OK;
   IntBox bounds(rasterizer->getCellsBounds());
 
-  Scanline32 scanline;
-  FOG_RETURN_ON_ERROR(scanline.init(bounds.x1, bounds.x2));
+  Scanline8 scanline;
 
   int w = bounds.getWidth();
   int h = bounds.getHeight();
 
   for (int y = 0; y < h; y++)
   {
-    rasterizer->sweepScanline(&scanline, y + bounds.y1);
-
-    const Scanline32::Span* span = scanline.getSpansData();
-    for (sysuint_t i = scanline.getSpansCount(); i; i--, span++)
+    Span8* span = rasterizer->sweepScanline(scanline, y + bounds.y1);
+    while (span)
     {
-      int len = span->len;
-
-      if (len > 0)
+      if (span->isCMask())
       {
-        const uint8_t* covers = span->covers;
-        int x = 0;
-        do {
-          // Find start of usable covers[] data.
-          while (covers[0] < threshold)
-          {
-            covers++;
-            if (++x == len) goto next;
-          }
-
-          covers++;
-          int startx = x++;
-
-          // Find end of usable covers[] data.
-          while (x != len && covers[0] >= threshold) { covers++; x++; }
-
-          // Append.
-          self->combine(IntBox(span->x + startx, y, span->x + x, y + 1), REGION_OP_UNION);
-        } while (x != len);
-next:
-        ;
-      }
-      else
-      {
-        len = -len;
-        if (span->covers[0] >= threshold)
+        if (span->getCMask() >= threshold)
         {
-          // Append.
-          self->combine(IntBox(span->x, y, span->x + len, y + 1), REGION_OP_UNION);
+          self->combine(IntBox(span->getX1(), y, span->getX2(), y + 1), REGION_OP_UNION);
         }
       }
+      else 
+      {
+        const uint8_t* mask = span->getVMask();
+        int x1 = span->getX1();
+        int x2 = span->getX2();
+
+        do {
+          // Find start of continuous data in mask[].
+          while (x1 != x2 && mask[0] < threshold) { x1++; mask++; }
+          if (x1 == x2) break;
+
+          mask++;
+          int mark = x1++;
+
+          // Find end of continuous data in mask[].
+          while (x1 != x2 && mask[0] >= threshold) { x1++; mask++; }
+
+          // Append.
+          self->combine(IntBox(mark, y, x1, y + 1), REGION_OP_UNION);
+        } while (x1 != x2);
+      }
+      span = span->getNext();
     }
   }
 
@@ -2051,18 +2041,35 @@ err_t Region::fromHRGN(HRGN hrgn)
 // [Fog::Region - Statics]
 // ============================================================================
 
-err_t Region::combine(Region& dest, const Region& src1, const Region& src2, uint32_t regionOp)
+err_t Region::combine(Region& dest, const Region& src1, const Region& src2, uint32_t combineOp)
 {
   RegionData* destd = dest._d;
   RegionData* src1d = src1._d;
   RegionData* src2d = src2._d;
   err_t err = ERR_OK;
 
-  switch (regionOp)
+  switch (combineOp)
   {
-    case REGION_OP_COPY:
+    case REGION_OP_REPLACE:
     {
       return dest.set(src2);
+    }
+
+    case REGION_OP_INTERSECT:
+    {
+      // Trivial operations.
+      if (src1.isInfinite()) { return dest.set(src2); }
+      if (src2.isInfinite()) { return dest.set(src1); }
+
+      // Trivial rejects.
+      if (FOG_UNLIKELY(src1d == src2d))
+        err = dest.set(src1);
+      else if (FOG_UNLIKELY(src1d->length == 0 || src2d->length == 0 || !src1d->extents.overlaps(src2d->extents))) 
+        dest.clear();
+      else
+        err = _intersectPrivate(&dest, src1d->rects, src1d->length, src2d->rects, src2d->length, destd == src1d || destd == src2d);
+
+      return err;
     }
 
     case REGION_OP_UNION:
@@ -2100,23 +2107,6 @@ err_t Region::combine(Region& dest, const Region& src1, const Region& src2, uint
       {
         err = _unitePrivate(&dest, src1first, src1d->length, src2first, src2d->length, destd == src1d || destd == src2d, &ext);
       }
-
-      return err;
-    }
-
-    case REGION_OP_INTERSECT:
-    {
-      // Trivial operations.
-      if (src1.isInfinite()) { return dest.set(src2); }
-      if (src2.isInfinite()) { return dest.set(src1); }
-
-      // Trivial rejects.
-      if (FOG_UNLIKELY(src1d == src2d))
-        err = dest.set(src1);
-      else if (FOG_UNLIKELY(src1d->length == 0 || src2d->length == 0 || !src1d->extents.overlaps(src2d->extents))) 
-        dest.clear();
-      else
-        err = _intersectPrivate(&dest, src1d->rects, src1d->length, src2d->rects, src2d->length, destd == src1d || destd == src2d);
 
       return err;
     }
@@ -2163,6 +2153,21 @@ err_t Region::combine(Region& dest, const Region& src1, const Region& src2, uint
     default:
       return ERR_RT_INVALID_ARGUMENT;
   }
+}
+
+err_t Region::combine(Region& dst, const Region& src1, const IntBox& src2, uint32_t combineOp)
+{
+  return combine(dst, src1, TemporaryRegion<1>(src2), combineOp);
+}
+
+err_t Region::combine(Region& dst, const IntBox& src1, const Region& src2, uint32_t combineOp)
+{
+  return combine(dst, TemporaryRegion<1>(src1), src2, combineOp);
+}
+
+err_t Region::combine(Region& dst, const IntBox& src1, const IntBox& src2, uint32_t combineOp)
+{
+  return combine(dst, TemporaryRegion<1>(src1), TemporaryRegion<1>(src2), combineOp);
 }
 
 err_t Region::translate(Region& dest, const Region& src, const IntPoint& pt)
@@ -2298,7 +2303,7 @@ err_t Region::intersectAndClip(Region& dst, const Region& src1Region, const Regi
   if (count1 == 1 && count2 == 1)
   {
     return dst.set(IntBox(Math::max(src1->x1, src2->x1), Math::max(src1->y1, src2->y1),
-                       Math::min(src1->x2, src2->x2), Math::min(src1->y2, src2->y2)));
+                          Math::min(src1->x2, src2->x2), Math::min(src1->y2, src2->y2)));
   }
 
   sysuint_t minRectsNeeded = (count1 + count2) * 2;
@@ -2504,14 +2509,14 @@ err_t Region::translateAndClip(Region& dst, const Region& src1Region, const IntP
     }
     else
     {
-      newd = RegionData::create(dst.getLength());
+      newd = RegionData::create(src1Region.getLength());
       if (!newd) return ERR_RT_OUT_OF_MEMORY;
       destCur = newd->rects;
     }
   }
   else
   {
-    err_t err = dst.prepare(dst.getLength());
+    err_t err = dst.prepare(src1Region.getLength());
     if (err) return err;
     destCur = dst.getXData();
   }
@@ -2577,7 +2582,7 @@ end:
   {
     if (newd) atomicPtrXchg(&dst._d, newd)->deref();
 
-    dst._d->length = (sysuint_t)(dst._d->rects - destCur);
+    dst._d->length = (sysuint_t)(destCur - dst._d->rects);
     dst._d->extents.set(extentsX1, dst._d->rects[0].y1, extentsX2, destCur[-1].y2);
   }
   else

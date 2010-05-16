@@ -13,10 +13,10 @@
 #include <Fog/Graphics/Geometry.h>
 #include <Fog/Graphics/Glyph.h>
 
-//! @addtogroup Fog_Graphics
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Graphics_Text
+//! @{
 
 // ============================================================================
 // [Fog::GlyphSet]
@@ -208,9 +208,9 @@ private:
     GlyphSet(other._d->ref()) {}
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // ============================================================================
 // [Fog::TypeInfo<>]

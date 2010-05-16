@@ -3,41 +3,22 @@
 // [License]
 // MIT, See COPYING file in package
 
-//----------------------------------------------------------------------------
-// Anti-Grain Geometry - Version 2.4
-// Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
-//
-// Permission to copy, use, modify, sell and distribute this software 
-// is granted provided this copyright notice appears in all copies. 
-// This software is provided "as is" without express or implied
-// warranty, and with no claim as to its suitability for any purpose.
-//
-//----------------------------------------------------------------------------
-// Contact: mcseem@antigrain.com
-//          mcseemagg@yahoo.com
-//          http://www.antigrain.com
-//----------------------------------------------------------------------------
-//
-// Affine transformations
-//
-//----------------------------------------------------------------------------
-
 // [Guard]
 #ifndef _FOG_GRAPHICS_MATRIX_H
 #define _FOG_GRAPHICS_MATRIX_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/HashUtil.h>
 #include <Fog/Core/Math.h>
 #include <Fog/Core/TypeInfo.h>
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/Geometry.h>
 
-//! @addtogroup Fog_Graphics
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Graphics_Geometry
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -52,7 +33,7 @@ struct DoublePoint;
 // [Fog::FloatMatrix]
 // ============================================================================
 
-//! @brief Matrix (32-bit float based).
+//! @brief Matrix (32-bit float version).
 //!
 //! Affine transformation are linear transformations in Cartesian coordinates
 //! (strictly speaking not only in Cartesian, but for the beginning we will
@@ -265,7 +246,7 @@ struct FOG_API FloatMatrix
   //! @brief Get type of matrix.
   //!
   //! You can use type of matrix to optimize matrix operations.
-  int getType() const;
+  uint32_t getType() const;
 
   // --------------------------------------------------------------------------
   // [Load / Save]
@@ -321,10 +302,20 @@ struct FOG_API FloatMatrix
   bool isEqual(const FloatMatrix& m, float epsilon = Math::DEFAULT_FLOAT_EPSILON) const;
 
   //! @brief Calculate the determinant of matrix.
-  FOG_INLINE float getDeterminant() const { return sx * sy - shy * shx; }
+  FOG_INLINE float getDeterminant() const
+  { return sx * sy - shy * shx; }
 
   //! @brief Calculate the reciprocal of the determinant.
-  FOG_INLINE float getDeterminantReciprocal() const { return 1.0f / (sx * sy - shy * shx); }
+  FOG_INLINE float getDeterminantReciprocal() const
+  { return 1.0f / (sx * sy - shy * shx); }
+
+  //! @brief Calculate the determinant of matrix.
+  FOG_INLINE double getDeterminantDouble() const
+  { return (double)sx * (double)sy - (double)shy * (double)shx; }
+
+  //! @brief Calculate the reciprocal of the determinant (using double precision).
+  FOG_INLINE double getDeterminantReciprocalDouble() const
+  { return 1.0 / ((double)sx * (double)sy - (double)shy * (double)shx); }
 
   //! @brief Get translation part of matrix.
   FloatPoint getTranslation() const;
@@ -394,6 +385,12 @@ struct FOG_API FloatMatrix
   FOG_INLINE bool operator!=(const FloatMatrix& m) const { return !isEqual(m, Math::DEFAULT_FLOAT_EPSILON); }
 
   // --------------------------------------------------------------------------
+  // [Statics]
+  // --------------------------------------------------------------------------
+
+  static void multiply(FloatMatrix& dst, const FloatMatrix& a, const FloatMatrix& b);
+
+  // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
@@ -413,7 +410,7 @@ struct FOG_API FloatMatrix
 // [Fog::DoubleMatrix]
 // ============================================================================
 
-//! @brief Matrix (64-bit float based).
+//! @brief Matrix (64-bit float version).
 //!
 //! Affine transformation are linear transformations in Cartesian coordinates
 //! (strictly speaking not only in Cartesian, but for the beginning we will
@@ -672,7 +669,7 @@ struct FOG_API DoubleMatrix
   //! @brief Get type of matrix.
   //!
   //! You can use type of matrix to optimize matrix operations.
-  int getType() const;
+  uint32_t getType() const;
 
   // --------------------------------------------------------------------------
   // [Load / Save]
@@ -804,6 +801,12 @@ struct FOG_API DoubleMatrix
   FOG_INLINE bool operator!=(const DoubleMatrix& m) const { return !isEqual(m, Math::DEFAULT_DOUBLE_EPSILON); }
 
   // --------------------------------------------------------------------------
+  // [Statics]
+  // --------------------------------------------------------------------------
+
+  static void multiply(DoubleMatrix& dst, const DoubleMatrix& a, const DoubleMatrix& b);
+
+  // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
@@ -828,6 +831,8 @@ DoubleMatrix FloatMatrix::toDoubleMatrix() const
   return DoubleMatrix((double)sx, (double)shy, (double)shx, (double)sy, (double)tx, (double)ty);
 }
 
+//! @}
+
 } // Fog namespace
 
 // ============================================================================
@@ -836,8 +841,6 @@ DoubleMatrix FloatMatrix::toDoubleMatrix() const
 
 FOG_DECLARE_TYPEINFO(Fog::FloatMatrix , Fog::TYPEINFO_PRIMITIVE)
 FOG_DECLARE_TYPEINFO(Fog::DoubleMatrix, Fog::TYPEINFO_PRIMITIVE)
-
-//! @}
 
 // [Guard]
 #endif // _FOG_GRAPHICS_MATRIX_H

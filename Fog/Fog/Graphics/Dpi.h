@@ -11,15 +11,16 @@
 #include <Fog/Core/Atomic.h>
 #include <Fog/Graphics/Constants.h>
 
-//! @addtogroup Fog_Graphics
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Graphics_Other
+//! @{
 
 // ============================================================================
 // [Fog::Dpi]
 // ============================================================================
 
+//! @brief DPI conversion.
 struct FOG_API Dpi
 {
   // --------------------------------------------------------------------------
@@ -34,22 +35,22 @@ struct FOG_API Dpi
   // [Methods]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE double getDpi() const
+  FOG_INLINE float getDpi() const
   {
     return _data[DPI_VALUE_IN];
   }
 
-  FOG_INLINE double getValue(uint32_t valueType)
+  FOG_INLINE float getValue(uint32_t valueType)
   {
     FOG_ASSERT(valueType < DPI_VALUE_COUNT);
     return _data[valueType];
   }
 
-  err_t setDpi(double dpi, double em, double ex);
+  err_t setDpi(float dpi, float em, float ex);
   void reset();
 
-  double toDeviceSpace(double value, uint32_t valueType) const;
-  double fromDeviceSpace(double value, uint32_t valueType) const;
+  float toDeviceSpace(float value, uint32_t valueType) const;
+  float fromDeviceSpace(float value, uint32_t valueType) const;
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
@@ -62,12 +63,12 @@ struct FOG_API Dpi
   // --------------------------------------------------------------------------
 
   //! @brief DPI translator data.
-  double _data[DPI_VALUE_COUNT];
+  float _data[DPI_VALUE_COUNT];
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GRAPHICS_DPI_H

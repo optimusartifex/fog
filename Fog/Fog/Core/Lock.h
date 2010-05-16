@@ -8,7 +8,7 @@
 #define _FOG_CORE_LOCK_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Atomic.h>
@@ -24,14 +24,14 @@
 #include <pthread.h>
 #endif // FOG_OS_POSIX
 
-//! @addtogroup Fog_Core
-//! @{
-
 #if defined(FOG_OS_POSIX)
 FOG_CVAR_EXTERN pthread_mutexattr_t fog_lock_recursive_attrs;
 #endif // FOG_OS_POSIX
 
 namespace Fog {
+
+//! @addtogroup Fog_Core_Threading
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -43,6 +43,7 @@ struct ThreadCondition;
 // [Fog::Lock]
 // ============================================================================
 
+//! @brief Lock.
 struct FOG_HIDDEN Lock
 {
 #if defined(FOG_OS_WINDOWS)
@@ -124,15 +125,17 @@ private:
   FOG_DISABLE_COPY(Lock)
 };
 
+//! @}
+
 } // Fog namespace
 
 //! @brief Lock used when you need to initialize something only once.
+//!
+//! @sa @c FOG_ONCE_LOCK, @c FOG_ONCE_UNLOCK.
 extern FOG_API Fog::Static<Fog::Lock> fog_once_lock;
 
 #define FOG_ONCE_LOCK() fog_once_lock->lock()
 #define FOG_ONCE_UNLOCK() fog_once_lock->unlock()
-
-//! @}
 
 // [Guard]
 #endif // _FOG_CORE_LOCK_H

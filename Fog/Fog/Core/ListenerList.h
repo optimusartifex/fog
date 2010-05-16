@@ -10,7 +10,7 @@
 #ifndef _FOG_CORE_LISTENERLIST_H
 #define _FOG_CORE_LISTENERLIST_H
 
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/List.h>
 
 namespace Fog {

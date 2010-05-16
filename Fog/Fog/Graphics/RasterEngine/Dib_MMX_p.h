@@ -4,7 +4,7 @@
 // MIT, See COPYING file in package
 
 // For some IDEs to enable code-assist.
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 
 #if defined(FOG_IDE)
 #include <Fog/Graphics/RasterEngine/Defs_MMX_p.h>
@@ -18,6 +18,7 @@ namespace RasterEngine {
 // [Fog::RasterEngine::MMX - Dib]
 // ============================================================================
 
+//! @internal
 struct FOG_HIDDEN MMX_SYM(Dib)
 {
   // --------------------------------------------------------------------------
@@ -25,17 +26,14 @@ struct FOG_HIDDEN MMX_SYM(Dib)
   // --------------------------------------------------------------------------
 
   static void FOG_FASTCALL memcpy32(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    sysint_t i = w;
-    FOG_ASSERT(w);
-
-    if ((i -= 8) >= 0)
+    if ((w -= 8) >= 0)
     {
       if ((sysuint_t)dst & 0x7)
       {
-        copy4(dst, src); dst += 4; src += 4;
-        if (--i < 0) goto skip;
+        Memory::copy4B(dst, src); dst += 4; src += 4;
+        if (--w < 0) goto skip;
       }
 
       do {
@@ -53,22 +51,22 @@ struct FOG_HIDDEN MMX_SYM(Dib)
 
         dst += 32;
         src += 32;
-      } while ((i -= 8) >= 0);
+      } while ((w -= 8) >= 0);
 
       mmx_end();
     }
 skip:
-    i += 8;
+    w += 8;
 
-    switch (i)
+    switch (w)
     {
-      case 7: copy4(dst, src); dst += 4; src += 4;
-      case 6: copy4(dst, src); dst += 4; src += 4;
-      case 5: copy4(dst, src); dst += 4; src += 4;
-      case 4: copy4(dst, src); dst += 4; src += 4;
-      case 3: copy4(dst, src); dst += 4; src += 4;
-      case 2: copy4(dst, src); dst += 4; src += 4;
-      case 1: copy4(dst, src); dst += 4; src += 4;
+      case 7: Memory::copy4B(dst, src); dst += 4; src += 4;
+      case 6: Memory::copy4B(dst, src); dst += 4; src += 4;
+      case 5: Memory::copy4B(dst, src); dst += 4; src += 4;
+      case 4: Memory::copy4B(dst, src); dst += 4; src += 4;
+      case 3: Memory::copy4B(dst, src); dst += 4; src += 4;
+      case 2: Memory::copy4B(dst, src); dst += 4; src += 4;
+      case 1: Memory::copy4B(dst, src); dst += 4; src += 4;
     }
   }
 
@@ -79,10 +77,9 @@ skip:
   // XXXXXXXX RRRRRRRR GGGGGGGG BBBBBBBB ->
   //                   RRRRRGGG GGGBBBBB
   static void FOG_FASTCALL rgb16_565_native_from_xrgb32(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    sysint_t i;
-    FOG_ASSERT(w);
+    int i;
 
     // Align destination to 8 bytes.
     while ((sysuint_t)dst & 7)
@@ -116,14 +113,14 @@ skip:
       pix0mmB = _mm_srli_pi32(pix0mmB, 3);
       pix1mmB = _mm_srli_pi32(pix1mmB, 3);
 
-      pix0mmR = _mm_and_si64(pix0mmR, MMX_GET_CONST(00007C0000007C00));
-      pix1mmR = _mm_and_si64(pix1mmR, MMX_GET_CONST(00007C0000007C00));
+      pix0mmR = _mm_and_si64(pix0mmR, FOG_MMX_GET_CONST(00007C0000007C00));
+      pix1mmR = _mm_and_si64(pix1mmR, FOG_MMX_GET_CONST(00007C0000007C00));
 
-      pix0mmG = _mm_and_si64(pix0mmG, MMX_GET_CONST(000007E0000007E0));
-      pix1mmG = _mm_and_si64(pix1mmG, MMX_GET_CONST(000007E0000007E0));
+      pix0mmG = _mm_and_si64(pix0mmG, FOG_MMX_GET_CONST(000007E0000007E0));
+      pix1mmG = _mm_and_si64(pix1mmG, FOG_MMX_GET_CONST(000007E0000007E0));
 
-      pix0mmB = _mm_and_si64(pix0mmB, MMX_GET_CONST(0000001F0000001F));
-      pix1mmB = _mm_and_si64(pix1mmB, MMX_GET_CONST(0000001F0000001F));
+      pix0mmB = _mm_and_si64(pix0mmB, FOG_MMX_GET_CONST(0000001F0000001F));
+      pix1mmB = _mm_and_si64(pix1mmB, FOG_MMX_GET_CONST(0000001F0000001F));
 
       pix0mmB = _mm_or_si64(pix0mmB, pix0mmG);
       pix1mmB = _mm_or_si64(pix1mmB, pix1mmG);
@@ -148,14 +145,14 @@ skip:
       pix0mmB = _mm_srli_pi32(pix0mmB, 3);
       pix1mmB = _mm_srli_pi32(pix1mmB, 3);
 
-      pix0mmR = _mm_and_si64(pix0mmR, MMX_GET_CONST(00007C0000007C00));
-      pix1mmR = _mm_and_si64(pix1mmR, MMX_GET_CONST(00007C0000007C00));
+      pix0mmR = _mm_and_si64(pix0mmR, FOG_MMX_GET_CONST(00007C0000007C00));
+      pix1mmR = _mm_and_si64(pix1mmR, FOG_MMX_GET_CONST(00007C0000007C00));
 
-      pix0mmG = _mm_and_si64(pix0mmG, MMX_GET_CONST(000007E0000007E0));
-      pix1mmG = _mm_and_si64(pix1mmG, MMX_GET_CONST(000007E0000007E0));
+      pix0mmG = _mm_and_si64(pix0mmG, FOG_MMX_GET_CONST(000007E0000007E0));
+      pix1mmG = _mm_and_si64(pix1mmG, FOG_MMX_GET_CONST(000007E0000007E0));
 
-      pix0mmB = _mm_and_si64(pix0mmB, MMX_GET_CONST(0000001F0000001F));
-      pix1mmB = _mm_and_si64(pix1mmB, MMX_GET_CONST(0000001F0000001F));
+      pix0mmB = _mm_and_si64(pix0mmB, FOG_MMX_GET_CONST(0000001F0000001F));
+      pix1mmB = _mm_and_si64(pix1mmB, FOG_MMX_GET_CONST(0000001F0000001F));
 
       pix0mmB = _mm_or_si64(pix0mmB, pix0mmG);
       pix1mmB = _mm_or_si64(pix1mmB, pix1mmG);
@@ -184,10 +181,9 @@ skip:
   // XXXXXXXX RRRRRRRR GGGGGGGG BBBBBBBB ->
   //                   XRRRRRGG GGGBBBBB
   static void FOG_FASTCALL rgb16_555_native_from_xrgb32(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    sysint_t i;
-    FOG_ASSERT(w);
+    int i;
 
     // Align destination to 8 bytes.
     while ((sysuint_t)dst & 7)
@@ -221,14 +217,14 @@ skip:
       pix0mmB = _mm_srli_pi32(pix0mmB, 3);
       pix1mmB = _mm_srli_pi32(pix1mmB, 3);
 
-      pix0mmR = _mm_and_si64(pix0mmR, MMX_GET_CONST(00007C0000007C00));
-      pix1mmR = _mm_and_si64(pix1mmR, MMX_GET_CONST(00007C0000007C00));
+      pix0mmR = _mm_and_si64(pix0mmR, FOG_MMX_GET_CONST(00007C0000007C00));
+      pix1mmR = _mm_and_si64(pix1mmR, FOG_MMX_GET_CONST(00007C0000007C00));
 
-      pix0mmG = _mm_and_si64(pix0mmG, MMX_GET_CONST(000003E0000003E0));
-      pix1mmG = _mm_and_si64(pix1mmG, MMX_GET_CONST(000003E0000003E0));
+      pix0mmG = _mm_and_si64(pix0mmG, FOG_MMX_GET_CONST(000003E0000003E0));
+      pix1mmG = _mm_and_si64(pix1mmG, FOG_MMX_GET_CONST(000003E0000003E0));
 
-      pix0mmB = _mm_and_si64(pix0mmB, MMX_GET_CONST(0000001F0000001F));
-      pix1mmB = _mm_and_si64(pix1mmB, MMX_GET_CONST(0000001F0000001F));
+      pix0mmB = _mm_and_si64(pix0mmB, FOG_MMX_GET_CONST(0000001F0000001F));
+      pix1mmB = _mm_and_si64(pix1mmB, FOG_MMX_GET_CONST(0000001F0000001F));
 
       pix0mmB = _mm_or_si64(pix0mmB, pix0mmR);
       pix1mmB = _mm_or_si64(pix1mmB, pix1mmR);
@@ -251,14 +247,14 @@ skip:
       pix0mmR = _mm_srli_pi32(pix0mmR, 9);
       pix1mmR = _mm_srli_pi32(pix1mmR, 9);
 
-      pix0mmR = _mm_and_si64(pix0mmR, MMX_GET_CONST(00007C0000007C00));
-      pix1mmR = _mm_and_si64(pix1mmR, MMX_GET_CONST(00007C0000007C00));
+      pix0mmR = _mm_and_si64(pix0mmR, FOG_MMX_GET_CONST(00007C0000007C00));
+      pix1mmR = _mm_and_si64(pix1mmR, FOG_MMX_GET_CONST(00007C0000007C00));
 
-      pix0mmG = _mm_and_si64(pix0mmG, MMX_GET_CONST(000003E0000003E0));
-      pix1mmG = _mm_and_si64(pix1mmG, MMX_GET_CONST(000003E0000003E0));
+      pix0mmG = _mm_and_si64(pix0mmG, FOG_MMX_GET_CONST(000003E0000003E0));
+      pix1mmG = _mm_and_si64(pix1mmG, FOG_MMX_GET_CONST(000003E0000003E0));
 
-      pix0mmB = _mm_and_si64(pix0mmB, MMX_GET_CONST(0000001F0000001F));
-      pix1mmB = _mm_and_si64(pix1mmB, MMX_GET_CONST(0000001F0000001F));
+      pix0mmB = _mm_and_si64(pix0mmB, FOG_MMX_GET_CONST(0000001F0000001F));
+      pix1mmB = _mm_and_si64(pix1mmB, FOG_MMX_GET_CONST(0000001F0000001F));
 
       pix0mmB = _mm_or_si64(pix0mmB, pix0mmR);
       pix1mmB = _mm_or_si64(pix1mmB, pix1mmR);

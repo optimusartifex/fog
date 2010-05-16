@@ -8,9 +8,9 @@
 #define _FOG_GRAPHICS_RASTERENGINE_C_DEPRECATED_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
-#include <Fog/Graphics/Argb.h>
-#include <Fog/Graphics/ArgbUtil.h>
+#include <Fog/Core/Build.h>
+#include <Fog/Graphics/Color.h>
+#include <Fog/Graphics/ColorUtil.h>
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/Geometry.h>
 #include <Fog/Graphics/Image.h>
@@ -19,108 +19,16 @@
 //! @addtogroup Fog_Graphics_Raster
 //! @{
 
-// This file is included from all Fog-Graphics/RasterEngine/RasterEngine_.h includes and
-// .cpp files, so in future it may contain generic code for these modules.
+// This file is included from all Fog/Graphics/RasterEngine/RasterEngine_.h 
+// include files and .cpp files, so in future it may contain generic code for
+// these modules.
 
 namespace Fog {
 namespace RasterEngine {
 
+#if 1
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ============================================================================
-// [Fog::Raster - Copy]
-// ============================================================================
-
-// TODO: Ideally move to Fog::Memory...
-
-static FOG_INLINE void copy1(uint8_t* dest, const uint8_t* src)
-{
-  *dest = *src;
-}
-
-static FOG_INLINE void copy2(uint8_t* dest, const uint8_t* src)
-{
-  ((uint16_t *)dest)[0] = ((uint16_t *)src)[0];
-}
-
-static FOG_INLINE void copy3(uint8_t* dest, const uint8_t* src)
-{
-  ((uint16_t *)dest)[0] = ((uint16_t *)src)[0];
-  ((uint8_t  *)dest)[2] = ((uint8_t  *)src)[2];
-}
-
-static FOG_INLINE void copy4(uint8_t* dest, const uint8_t* src)
-{
-  ((uint32_t *)dest)[0] = ((uint32_t *)src)[0];
-}
-
-static FOG_INLINE void copy8(uint8_t* dest, const uint8_t* src)
-{
-#if FOG_ARCH_BITS == 64
-  ((uint64_t *)dest)[0] = ((uint64_t *)src)[0];
-#else
-  ((uint32_t *)dest)[0] = ((uint32_t *)src)[0];
-  ((uint32_t *)dest)[1] = ((uint32_t *)src)[1];
-#endif
-}
-
-static FOG_INLINE void copy12(uint8_t* dest, const uint8_t* src)
-{
-#if FOG_ARCH_BITS == 64
-  ((uint64_t *)dest)[0] = ((uint64_t *)src)[0];
-  ((uint32_t *)dest)[2] = ((uint32_t *)src)[2];
-#else
-  ((uint32_t *)dest)[0] = ((uint32_t *)src)[0];
-  ((uint32_t *)dest)[1] = ((uint32_t *)src)[1];
-  ((uint32_t *)dest)[2] = ((uint32_t *)src)[2];
-#endif
-}
-
-static FOG_INLINE void copy16(uint8_t* dest, const uint8_t* src)
-{
-#if defined(FOG_HARDCODE_SSE2)
-  _mm_storeu_si128(&((__m128i *)dest)[0], _mm_loadu_si128(&((__m128i *)src)[0]));
-#elif FOG_ARCH_BITS == 64
-  ((uint64_t *)dest)[0] = ((uint64_t *)src)[0];
-  ((uint64_t *)dest)[1] = ((uint64_t *)src)[1];
-#else
-  ((uint32_t *)dest)[0] = ((uint32_t *)src)[0];
-  ((uint32_t *)dest)[1] = ((uint32_t *)src)[1];
-  ((uint32_t *)dest)[2] = ((uint32_t *)src)[2];
-  ((uint32_t *)dest)[3] = ((uint32_t *)src)[3];
-#endif
-}
-
-static FOG_INLINE void copy24(uint8_t* dest, const uint8_t* src)
-{
-  copy16(dest, src);
-  copy8(dest + 16, src + 16);
-}
-
-static FOG_INLINE void copy32(uint8_t* dest, const uint8_t* src)
-{
-  copy16(dest, src);
-  copy16(dest + 16, src + 16);
-}
+// TODO: Remove this header!
 
 // ============================================================================
 // [Fog::Raster - Set]
@@ -133,104 +41,7 @@ static FOG_INLINE void set4(uint8_t* dest, uint32_t pattern)
   ((uint32_t *)dest)[0] = pattern;
 }
 
-static FOG_INLINE void set8(uint8_t* dest, uint32_t pattern)
-{
-  ((uint32_t *)dest)[0] = pattern;
-  ((uint32_t *)dest)[1] = pattern;
-}
-
-static FOG_INLINE void set12(uint8_t* dest, uint32_t pattern)
-{
-  ((uint32_t *)dest)[0] = pattern;
-  ((uint32_t *)dest)[1] = pattern;
-  ((uint32_t *)dest)[2] = pattern;
-}
-
-static FOG_INLINE void set16(uint8_t* dest, uint32_t pattern)
-{
-  ((uint32_t *)dest)[0] = pattern;
-  ((uint32_t *)dest)[1] = pattern;
-  ((uint32_t *)dest)[2] = pattern;
-  ((uint32_t *)dest)[3] = pattern;
-}
-
-static FOG_INLINE void set24(uint8_t* dest, uint32_t pattern)
-{
-  ((uint32_t *)dest)[0] = pattern;
-  ((uint32_t *)dest)[1] = pattern;
-  ((uint32_t *)dest)[2] = pattern;
-  ((uint32_t *)dest)[3] = pattern;
-  ((uint32_t *)dest)[4] = pattern;
-  ((uint32_t *)dest)[5] = pattern;
-}
-
-static FOG_INLINE void set32(uint8_t* dest, uint32_t pattern)
-{
-  ((uint32_t *)dest)[0] = pattern;
-  ((uint32_t *)dest)[1] = pattern;
-  ((uint32_t *)dest)[2] = pattern;
-  ((uint32_t *)dest)[3] = pattern;
-  ((uint32_t *)dest)[4] = pattern;
-  ((uint32_t *)dest)[5] = pattern;
-  ((uint32_t *)dest)[6] = pattern;
-  ((uint32_t *)dest)[7] = pattern;
-}
-
-static FOG_INLINE void set8(uint8_t* dest, uint64_t pattern)
-{
-  ((uint64_t *)dest)[0] = pattern;
-}
-
-static FOG_INLINE void set12(uint8_t* dest, uint64_t pattern)
-{
-  ((uint64_t *)dest)[0] = pattern;
-  ((uint32_t *)dest)[2] = (uint32_t)pattern;
-}
-
-static FOG_INLINE void set16(uint8_t* dest, uint64_t pattern)
-{
-  ((uint64_t *)dest)[0] = pattern;
-  ((uint64_t *)dest)[1] = pattern;
-}
-
-static FOG_INLINE void set24(uint8_t* dest, uint64_t pattern)
-{
-  ((uint64_t *)dest)[0] = pattern;
-  ((uint64_t *)dest)[1] = pattern;
-  ((uint64_t *)dest)[2] = pattern;
-}
-
-static FOG_INLINE void set32(uint8_t* dest, uint64_t pattern)
-{
-  ((uint64_t *)dest)[0] = pattern;
-  ((uint64_t *)dest)[1] = pattern;
-  ((uint64_t *)dest)[2] = pattern;
-  ((uint64_t *)dest)[3] = pattern;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#endif
 
 // ============================================================================
 // [Fog::Raster - PixFmt_ARGB32]

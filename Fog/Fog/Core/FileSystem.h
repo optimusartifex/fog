@@ -15,11 +15,11 @@
 #include <sys/stat.h>
 #endif // FOG_OS_POSIX
 
-//! @addtogroup Fog_Core
-//! @{
-
 namespace Fog {
 namespace FileSystem {
+
+//! @addtogroup Fog_Core_Streaming
+//! @{
 
 // ============================================================================
 // [Fog::FileSystem]
@@ -102,10 +102,10 @@ static FOG_INLINE bool isDirectory(const String& fileName)
 FOG_API err_t createDirectory(const String& dir, bool recursive = true);
 FOG_API err_t deleteDirectory(const String& dir);
 
+//! @}
+
 } // FileSystem namespace
 } // Fog namespace
-
-//! @}
 
 // [Guard]
 #endif // _FOG_CORE_FILESYSTEM_H

@@ -4,7 +4,7 @@
 // MIT, See COPYING file in package
 
 // For some IDEs to enable code-assist.
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 
 #if defined(FOG_IDE)
 #include <Fog/Graphics/RasterEngine/Defs_C_p.h>
@@ -12,6 +12,71 @@
 
 namespace Fog {
 namespace RasterEngine {
+
+// ============================================================================
+// [Fog::RasterEngine::SSE2 - Defines]
+// ============================================================================
+
+// W masks.
+FOG_DECLARE_SSE_CONST_PI16_VAR(0080008000800080_0080008000800080, 0x0080, 0x0080, 0x0080, 0x0080, 0x0080, 0x0080, 0x0080, 0x0080);
+FOG_DECLARE_SSE_CONST_PI16_VAR(000000FF00FF00FF_000000FF00FF00FF, 0x0000, 0x00FF, 0x00FF, 0x00FF, 0x0000, 0x00FF, 0x00FF, 0x00FF);
+FOG_DECLARE_SSE_CONST_PI16_VAR(000000FF00FF00FF_00FF00FF00FF00FF, 0x0000, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF);
+FOG_DECLARE_SSE_CONST_PI16_VAR(00FF00FF00FF00FF_000000FF00FF00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x0000, 0x00FF, 0x00FF, 0x00FF);
+FOG_DECLARE_SSE_CONST_PI16_VAR(00FF00FF00FF00FF_00FF00FF00FF00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF);
+FOG_DECLARE_SSE_CONST_PI16_VAR(FF000000000000FF_FF000000000000FF, 0xFF00, 0x0000, 0x0000, 0x00FF, 0xFF00, 0x0000, 0x0000, 0x00FF);
+FOG_DECLARE_SSE_CONST_PI16_VAR(0101010101010101_0101010101010101, 0x0101, 0x0101, 0x0101, 0x0101, 0x0101, 0x0101, 0x0101, 0x0101);
+FOG_DECLARE_SSE_CONST_PI16_VAR(FFFFFFFFFFFFFFFF_FFFFFFFFFFFFFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF);
+FOG_DECLARE_SSE_CONST_PI16_VAR(FFFFFFFFFFFFFFFF_0000000000000000, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0x0000, 0x0000, 0x0000, 0x0000);
+FOG_DECLARE_SSE_CONST_PI16_VAR(00FF000000000000_00FF000000000000, 0x00FF, 0x0000, 0x0000, 0x0000, 0x00FF, 0x0000, 0x0000, 0x0000);
+FOG_DECLARE_SSE_CONST_PI16_VAR(0000000000000000_00FF000000000000, 0x0000, 0x0000, 0x0000, 0x0000, 0x00FF, 0x0000, 0x0000, 0x0000);
+FOG_DECLARE_SSE_CONST_PI16_VAR(00FF000000000000_0000000000000000, 0x00FF, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000);
+FOG_DECLARE_SSE_CONST_PI16_VAR(FF000000FF000000_FF000000FF000000, 0xFF00, 0x0000, 0xFF00, 0x0000, 0xFF00, 0x0000, 0xFF00, 0x0000);
+FOG_DECLARE_SSE_CONST_PI16_VAR(000000FF000000FF_000000FF000000FF, 0x0000, 0x00FF, 0x0000, 0x00FF, 0x0000, 0x00FF, 0x0000, 0x00FF);
+FOG_DECLARE_SSE_CONST_PI16_VAR(00000000000000FF_00000000000000FF, 0x0000, 0x0000, 0x0000, 0x00FF, 0x0000, 0x0000, 0x0000, 0x00FF);
+FOG_DECLARE_SSE_CONST_PI16_VAR(00FFFFFF00FFFFFF_00FFFFFF00FFFFFF, 0x00FF, 0xFFFF, 0x00FF, 0xFFFF, 0x00FF, 0xFFFF, 0x00FF, 0xFFFF);
+FOG_DECLARE_SSE_CONST_PI16_VAR(0000000100000001_0000000100000001, 0x0000, 0x0001, 0x0000, 0x0001, 0x0000, 0x0001, 0x0000, 0x0001);
+
+FOG_DECLARE_SSE_CONST_PI16_VAR(0000000000000000_00000000FF000000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0xFF00, 0x0000);
+FOG_DECLARE_SSE_CONST_PI16_VAR(0000000000000000_00000000FFFFFFFF, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0xFFFF, 0xFFFF);
+
+FOG_DECLARE_SSE_CONST_PI16_VAR(00FF00FF00FF00FF_0000000000000000, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x0000, 0x0000, 0x0000, 0x0000);
+FOG_DECLARE_SSE_CONST_PI16_VAR(0000000000000000_00FF00FF00FF00FF, 0x0000, 0x0000, 0x0000, 0x0000, 0x00FF, 0x00FF, 0x00FF, 0x00FF);
+FOG_DECLARE_SSE_CONST_PI16_VAR(0001000200020002_0001000200020002, 0x0001, 0x0002, 0x0002, 0x0002, 0x0001, 0x0002, 0x0002, 0x0002);
+
+FOG_DECLARE_SSE_CONST_PI16_VAR(0000000000000000_FFFFFFFFFFFFFFFF, 0x0000, 0x0000, 0x0000, 0x0000, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF);
+FOG_DECLARE_SSE_CONST_PI16_VAR(0000000000000000_0101010101010101, 0x0000, 0x0000, 0x0000, 0x0000, 0x0101, 0x0101, 0x0101, 0x0101);
+
+// RGB16 masks.
+FOG_DECLARE_SSE_CONST_PI16_VAR(0000F8000000F800_0000F8000000F800, 0x0000, 0xF800, 0x0000, 0xF800, 0x0000, 0xF800, 0x0000, 0xF800);
+FOG_DECLARE_SSE_CONST_PI16_VAR(0000E0000000E000_0000E0000000E000, 0x0000, 0xE000, 0x0000, 0xE000, 0x0000, 0xE000, 0x0000, 0xE000);
+FOG_DECLARE_SSE_CONST_PI16_VAR(00007C0000007C00_00007C0000007C00, 0x0000, 0x7C00, 0x0000, 0x7C00, 0x0000, 0x7C00, 0x0000, 0x7C00);
+FOG_DECLARE_SSE_CONST_PI16_VAR(0000700000007000_0000700000007000, 0x0000, 0x7000, 0x0000, 0x7000, 0x0000, 0x7000, 0x0000, 0x7000);
+FOG_DECLARE_SSE_CONST_PI16_VAR(0000380000003800_0000380000003800, 0x0000, 0x3800, 0x0000, 0x3800, 0x0000, 0x3800, 0x0000, 0x3800);
+FOG_DECLARE_SSE_CONST_PI16_VAR(00001F0000001F00_00001F0000001F00, 0x0000, 0x1F00, 0x0000, 0x1F00, 0x0000, 0x1F00, 0x0000, 0x1F00);
+FOG_DECLARE_SSE_CONST_PI16_VAR(00001C0000001C00_00001C0000001C00, 0x0000, 0x1C00, 0x0000, 0x1C00, 0x0000, 0x1C00, 0x0000, 0x1C00);
+FOG_DECLARE_SSE_CONST_PI16_VAR(000007E0000007E0_000007E0000007E0, 0x0000, 0x07E0, 0x0000, 0x07E0, 0x0000, 0x07E0, 0x0000, 0x07E0);
+FOG_DECLARE_SSE_CONST_PI16_VAR(000003E0000003E0_000003E0000003E0, 0x0000, 0x03E0, 0x0000, 0x03E0, 0x0000, 0x03E0, 0x0000, 0x03E0);
+FOG_DECLARE_SSE_CONST_PI16_VAR(000000F8000000F8_000000F8000000F8, 0x0000, 0x00F8, 0x0000, 0x00F8, 0x0000, 0x00F8, 0x0000, 0x00F8);
+FOG_DECLARE_SSE_CONST_PI16_VAR(0000007C0000007C_0000007C0000007C, 0x0000, 0x007C, 0x0000, 0x007C, 0x0000, 0x007C, 0x0000, 0x007C);
+FOG_DECLARE_SSE_CONST_PI16_VAR(0000001F0000001F_0000001F0000001F, 0x0000, 0x001F, 0x0000, 0x001F, 0x0000, 0x001F, 0x0000, 0x001F);
+FOG_DECLARE_SSE_CONST_PI16_VAR(0000000700000007_0000000700000007, 0x0000, 0x0007, 0x0000, 0x0007, 0x0000, 0x0007, 0x0000, 0x0007);
+FOG_DECLARE_SSE_CONST_PI16_VAR(0000000300000003_0000000300000003, 0x0000, 0x0003, 0x0000, 0x0003, 0x0000, 0x0003, 0x0000, 0x0003);
+
+// D masks
+FOG_DECLARE_SSE_CONST_PI32_VAR(0001000000000000_0000000000000000, 0x00010000, 0x00000000, 0x00000000, 0x00000000);
+FOG_DECLARE_SSE_CONST_PI32_VAR(0001000000010000_0000000000000000, 0x00010000, 0x00010000, 0x00000000, 0x00000000);
+
+// Float masks
+FOG_DECLARE_SSE_CONST_PI32_VAR(7FFFFFFF7FFFFFFF_7FFFFFFF7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF);
+// 1.0, 0x0, 0x0, 0x0, for float demultiply.
+FOG_DECLARE_SSE_CONST_PI32_VAR(3F80000000000000_0000000000000000, 0x3F800000, 0x00000000, 0x00000000, 0x00000000);
+
+// Double masks
+FOG_DECLARE_SSE_CONST_PI32_VAR(7FFFFFFFFFFFFFFF_7FFFFFFFFFFFFFFF, 0x7FFFFFFF, 0xFFFFFFFF, 0x7FFFFFFF, 0xFFFFFFFF);
+FOG_DECLARE_SSE_CONST_PD_VAR(0_5_0_5, 0.5, 0.5);
+FOG_DECLARE_SSE_CONST_PD_VAR(1_0_1_0, 1.0, 1.0);
+FOG_DECLARE_SSE_CONST_PD_VAR(65536_0_65536_0, 65536.0, 65536.0);
+FOG_DECLARE_SSE_CONST_PD_VAR(32768_0_32768_0, 32768.0, 32768.0);
 
 // ============================================================================
 // [Fog::RasterEngine::SSE2 - Defines]
@@ -40,190 +105,225 @@ namespace RasterEngine {
 // 32-bit entities:
 //   - 1 pixel at time:
 //     - SSE2_BLIT_32x4_SMALL_BEGIN(dst) - Small loop begin.
-//     - SSE2_BLIT_32x4_SMALL_END(dst) - Small loop end.
+//     - SSE2_BLIT_32x4_SMALL_END(dst)   - Small loop end.
 //
 //   - 4 pixels at time:
-//     - SSE2_BLIT_32x4_LARGE_BEGIN(dst) - Main loop begin.
-//     - SSE2_BLIT_32x4_LARGE_END(dst) - Main loop end.
+//     - SSE2_BLIT_32x4_MAIN_BEGIN(dst)  - Main loop begin.
+//     - SSE2_BLIT_32x4_MAIN_END(dst)    - Main loop end.
 //
 // 8-bit entities:
 //   - 1 pixel at time:
 //     - SSE2_BLIT_8x16_SMALL_BEGIN(dst) - Small loop begin.
-//     - SSE2_BLIT_8x16_SMALL_END(dst) - Small loop end.
+//     - SSE2_BLIT_8x16_SMALL_END(dst)   - Small loop end.
 //
 //   - 16 pixels at time:
-//     - SSE2_BLIT_8x16_LARGE_BEGIN(dst) - Main loop begin.
-//     - SSE2_BLIT_8x16_LARGE_END(dst) - Main loop end.
+//     - SSE2_BLIT_8x16_MAIN_BEGIN(dst)  - Main loop begin.
+//     - SSE2_BLIT_8x16_MAIN_END(dst)    - Main loop end.
 //
 // Because compilers can be quite missed from our machinery, it's needed
 // to follow some rules to help them to optimize this code:
 // - declare temporary variables (mainly sse2 registers) in local loop scope.
-// - do not add anything between SSE2_BLIT_32x4_SMALL_END and SSE2_BLIT_32x4_LARGE_BEGIN.
+// - do not add anything between SSE2_BLIT_32x4_SMALL_END and SSE2_BLIT_32x4_MAIN_BEGIN.
 
-static const sysint_t __m32x4AlignBy[16] =
-{
-  0         , // 0x00
-  SYSINT_MAX, // 0x01
-  SYSINT_MAX, // 0x02
-  SYSINT_MAX, // 0x03
-  3         , // 0x04
-  SYSINT_MAX, // 0x05
-  SYSINT_MAX, // 0x06
-  SYSINT_MAX, // 0x07
-  2         , // 0x08
-  SYSINT_MAX, // 0x09
-  SYSINT_MAX, // 0x0A
-  SYSINT_MAX, // 0x0B
-  1         , // 0x0C
-  SYSINT_MAX, // 0x0D
-  SYSINT_MAX, // 0x0E
-  SYSINT_MAX  // 0x0F
-};
+// ============================================================================
+// [SSE2 BLIT - 32xX - Generic]
+// ============================================================================
 
-// 32-bit entities:
+#define SSE2_BLIT_32xX_INIT() \
+  FOG_ASSERT(w > 0);
 
-#define SSE2_BLIT_32x4_INIT(_dst, _w) \
-  sysuint_t _i = (sysuint_t)__m32x4AlignBy[(sysuint_t)_dst & 15]; \
-  sysuint_t _j; \
+// ============================================================================
+// [SSE2 BLIT - 32x4 - 32-bits per pixel, 4 pixels in a main loop]
+// ============================================================================
+
+#define SSE2_BLIT_32x4_SMALL_BEGIN(__group__) \
+  if (((sysuint_t)dst & 15) == 0) goto __group__##_small_skip; \
   \
-  if (_i > (sysuint_t)_w) _i = (sysuint_t)_w; \
-  _w -= _i; \
-  _j = _w & 3; \
-  if ((_w >>= 2) == 0) _i += _j;
-
-#define SSE2_BLIT_32x4_SMALL_BEGIN(group) \
-  if (_i) \
-  { \
-group: \
-    do {
-
-#define SSE2_BLIT_32x4_SMALL_END(group) \
-    } while (--_i); \
-    if (!w) goto group##_end; \
-  }
-
-#define SSE2_BLIT_32x4_LARGE_BEGIN(group) \
+__group__##_small_begin: \
   do {
 
-#define SSE2_BLIT_32x4_LARGE_END(group) \
-  } while (--w); \
+#define SSE2_BLIT_32x4_SMALL_BEGIN_ALT(__group__, __prepare_code__) \
+  if (((sysuint_t)dst & 15) == 0) goto __group__##_small_skip; \
   \
-  if ((_i = _j)) goto group; \
-group##_end: \
-  ;
-
-// Alternatives to 'SSE2_BLIT_32x4_SMALL_BEGIN'
-#define SSE2_BLIT_32x4_SMALL_PREPARE(group) \
-  if (_i) \
-  { \
-group:
-
-#define SSE2_BLIT_32x4_SMALL_DO(group) \
-    do {
-
-// 8-bit entities:
-
-#define SSE2_BLIT_8x4_INIT(_dst, _w) \
-  sysuint_t _i = (sysuint_t)_w; \
-  sysuint_t _j = 0; \
-  \
-  if (_i >= 4) \
-  { \
-    sysint_t align = ((sysint_t)4 - ((sysint_t)(_dst) & 3)) & 3; \
-    \
-    if (_w - align < 4) \
-    { \
-      _w = 0; \
-    } \
-    else \
-    { \
-      _i = align; \
-      _w -= (sysint_t)_i; \
-      _j = _w & 3; \
-      _w >>= 2; \
-    } \
-  } \
-  else \
-  { \
-    _w = 0; \
-  }
-
-#define SSE2_BLIT_8x4_SMALL_BEGIN(group) \
-  if (_i) \
-  { \
-group: \
-    do {
-
-#define SSE2_BLIT_8x4_SMALL_END(group) \
-    } while (--_i); \
-    if (!w) goto group##_end; \
-  } \
-
-#define SSE2_BLIT_8x4_LARGE_BEGIN(group) \
+__group__##_small_begin: \
+  __prepare_code__ \
   do {
 
-#define SSE2_BLIT_8x4_LARGE_END(group) \
-  } while (--w); \
+#define SSE2_BLIT_32x4_SMALL_CONTINUE(__group__) \
+    if (--w == 0) goto __group__##_end; \
+    if (((sysuint_t)dst & 15) != 0) continue; \
+    break;
+
+#define SSE2_BLIT_32x4_SMALL_END(__group__) \
+    if (--w == 0) goto __group__##_end; \
+  } while (((sysuint_t)dst & 15) != 0); \
   \
-  if ((_i = _j)) goto group; \
-group##_end: \
-  ;
+__group__##_small_skip: \
 
-#define SSE2_BLIT_8x16_INIT(_dst, _w) \
-  sysuint_t _i = (sysuint_t)_w; \
-  sysuint_t _j = 0; \
+#define SSE2_BLIT_32x4_MAIN_BEGIN(__group__) \
+  w -= 4; \
+  if (w < 0) goto __group__##_main_skip; \
   \
-  if (_i >= 16) \
-  { \
-    sysint_t align = ((sysint_t)16 - ((sysint_t)(_dst) & 15)) & 15; \
-    \
-    if (_w - align < 16) \
-    { \
-      _w = 0; \
-    } \
-    else \
-    { \
-      _i = align; \
-      _w -= (sysint_t)_i; \
-      _j = _w & 15; \
-      _w >>= 4; \
-    } \
-  } \
-  else \
-  { \
-    _w = 0; \
-  }
-
-#define SSE2_BLIT_8x16_SMALL_BEGIN(group) \
-  if (_i) \
-  { \
-group: \
-    do {
-
-#define SSE2_BLIT_8x16_SMALL_END(group) \
-    } while (--_i); \
-    if (!w) goto group##_end; \
-  } \
-
-#define SSE2_BLIT_8x16_LARGE_BEGIN(group) \
   do {
 
-#define SSE2_BLIT_8x16_LARGE_END(group) \
-  } while (--w); \
+#define SSE2_BLIT_32x4_MAIN_CONTINUE(__group__) \
+    if ((w -= 4) >= 0) continue; \
+    break;
+
+#define SSE2_BLIT_32x4_MAIN_END(__group__) \
+  } while ((w -= 4) >= 0); \
   \
-  if ((_i = _j)) goto group; \
-group##_end: \
+__group__##_main_skip: \
+  w += 4; \
+  if (w != 0) goto __group__##_small_begin; \
+  \
+__group__##_end: \
   ;
 
-#define SSE2_BLIT_GENERIC_END(group) \
-group##_end: \
+// ============================================================================
+// [SSE2 BLIT - 32x16 - 32-bits per pixel, 16 pixels in a main loop]
+// ============================================================================
+
+#define SSE2_BLIT_32x16_ALIGN_BEGIN(__group__) \
+  if (((sysuint_t)dst & 15) == 0) goto __group__##_small_skip; \
+  \
+  do {
+
+#define SSE2_BLIT_32x16_ALIGN_END(__group__) \
+    if (--w == 0) goto __group__##_end; \
+  } while (((sysuint_t)dst & 15) != 0); \
+  \
+__group__##_small_skip: \
   ;
+
+#define SSE2_BLIT_32x16_MAIN_BEGIN(__group__) \
+  w -= 16; \
+  if (w < 0) goto __group__##_main_skip; \
+  \
+  do {
+
+#define SSE2_BLIT_32x16_MAIN_END(__group__) \
+  } while ((w -= 16) >= 0); \
+  \
+__group__##_main_skip: \
+  w += 16;
+
+#define SSE2_BLIT_32x16_TAIL_4(__group__, __code__) \
+  switch (w >> 2) \
+  { \
+    case 3: __code__ \
+    case 2: __code__ \
+    case 1: __code__ \
+  }
+
+#define SSE2_BLIT_32x16_TAIL_1(__group__, __code__) \
+  switch (w & 3) \
+  { \
+    case 3: __code__ \
+    case 2: __code__ \
+    case 1: __code__ \
+  } \
+__group__##_end: \
+  ;
+
+// ============================================================================
+// [SSE2 BLIT - 8x4 - 8-bits per pixel, 4 pixels in a main loop]
+// ============================================================================
+
+#define SSE2_BLIT_8x4_INIT()
+
+#define SSE2_BLIT_8x4_SMALL_BEGIN(__group__) \
+  if (((sysuint_t)dst & 3) == 0) goto __group__##_small_skip; \
+  \
+__group__##_small_begin: \
+  do {
+
+#define SSE2_BLIT_8x4_SMALL_CONTINUE(__group__) \
+    if (--w == 0) goto __group__##_end; \
+    if (((sysuint_t)dst & 3) != 0) continue; \
+    break;
+
+#define SSE2_BLIT_8x4_SMALL_END(__group__) \
+    if (--w == 0) goto __group__##_end; \
+  } while (((sysuint_t)dst & 3) != 0); \
+  \
+__group__##_small_skip: \
+  ;
+
+#define SSE2_BLIT_8x4_MAIN_BEGIN(__group__) \
+  w -= 4; \
+  if (w < 0) goto __group__##_main_skip; \
+  \
+  do {
+
+#define SSE2_BLIT_8x4_MAIN_CONTINUE(__group__) \
+    if ((w -= 4) >= 0) continue; \
+    break;
+
+#define SSE2_BLIT_8x4_MAIN_END(__group__) \
+  } while ((w -= 4) >= 0); \
+  \
+__group__##_main_skip: \
+  w += 4; \
+  if (w != 0) goto __group__##_small_begin; \
+  \
+__group__##_end: \
+  ;
+
+// ============================================================================
+// [SSE2 BLIT - 8x16 - 8-bits per pixel, 16 pixels in a main loop]
+// ============================================================================
+
+#define SSE2_BLIT_8x16_INIT()
+
+#define SSE2_BLIT_8x16_SMALL_BEGIN(__group__) \
+  if (((sysuint_t)dst & 15) == 0) goto __group__##_small_skip; \
+  \
+__group__##_small_begin: \
+  do {
+
+#define SSE2_BLIT_8x16_SMALL_CONTINUE(__group__) \
+    if (--w == 0) goto __group__##_end; \
+    if (((sysuint_t)dst & 15) != 0) continue; \
+    break;
+
+#define SSE2_BLIT_8x16_SMALL_END(__group__) \
+    if (--w == 0) goto __group__##_end; \
+  } while (((sysuint_t)dst & 15) != 0); \
+  \
+__group__##_small_skip: \
+  ;
+
+#define SSE2_BLIT_8x16_MAIN_BEGIN(__group__) \
+  w -= 16; \
+  if (w < 0) goto __group__##_main_skip; \
+  \
+  do {
+
+#define SSE2_BLIT_8x16_MAIN_CONTINUE(__group__) \
+    if ((w -= 16) >= 0) continue; \
+    break;
+
+#define SSE2_BLIT_8x16_MAIN_END(__group__) \
+  } while ((w -= 16) >= 0); \
+  \
+__group__##_main_skip: \
+  w += 16; \
+  if (w != 0) goto __group__##_small_begin; \
+  \
+__group__##_end: \
+  ;
+
+// ============================================================================
+// [SSE2 BLIT TEST ]
+// ============================================================================
 
 // This is heavily optimized inner loop test for all opaque pixels or all
 // transparent ones. This is invention that comes from BlitJit project and
 // this code was translated originally from BlitJit code generator. If C++
 // compiler is smart then this code is limit what you can do while using
 // 4-pixels per time.
+
 #define SSE2_BLIT_TEST_4_PRGB_PIXELS(__src0xmm, __tmp0xmm, __tmp1xmm, __L_fill, __L_away) \
   _mm_ext_fill_si128(__tmp0xmm); \
   __tmp1xmm = _mm_setzero_si128(); \
@@ -239,6 +339,42 @@ group##_end: \
     \
     if (__srcMsk1 == 0xFFFF) goto __L_away; \
     if (__srcMsk0 == 0x8888) goto __L_fill; \
+  }
+
+#define SSE2_BLIT_TEST_4_PRGB_PIXELS_MASK(__src0xmm, __tmp0xmm, __tmp1xmm, __msk0__, __L_fill, __L_away) \
+  _mm_ext_fill_si128(__tmp0xmm); \
+  __tmp1xmm = _mm_setzero_si128(); \
+  \
+  __tmp0xmm = _mm_cmpeq_epi8(__tmp0xmm, __src0xmm); \
+  __tmp1xmm = _mm_cmpeq_epi8(__tmp1xmm, __src0xmm); \
+  \
+  { \
+    register uint __srcMsk0 = (uint)_mm_movemask_epi8(__tmp0xmm); \
+    register uint __srcMsk1 = (uint)_mm_movemask_epi8(__tmp1xmm); \
+    \
+    __srcMsk0 &= 0x8888; \
+    \
+    if ((__srcMsk1 == 0xFFFF)) goto __L_away; \
+    if ((__srcMsk0 == 0x8888) & (__msk0__ == 0xFFFFFFFF)) goto __L_fill; \
+  }
+
+#define SSE2_BLIT_TEST_4_PRGB_PIXELS_FULL(__src0xmm, __tmp0xmm, __condition__, __L_fill) \
+  _mm_ext_fill_si128(__tmp0xmm); \
+  __tmp0xmm = _mm_cmpeq_epi8(__tmp0xmm, __src0xmm); \
+  { \
+    register uint __srcMsk0 = (uint)_mm_movemask_epi8(__tmp0xmm); \
+    \
+    __srcMsk0 &= 0x8888; \
+    if ((__srcMsk0 == 0x8888) & (__condition__)) goto __L_fill; \
+  }
+
+#define SSE2_BLIT_TEST_4_PRGB_PIXELS_ZERO(__src0xmm, __tmp0xmm, __L_away) \
+  __tmp0xmm = _mm_setzero_si128(); \
+  __tmp0xmm = _mm_cmpeq_epi8(__tmp0xmm, __src0xmm); \
+  \
+  { \
+    register uint __srcMsk0 = (uint)_mm_movemask_epi8(__tmp0xmm); \
+    if (__srcMsk0 == 0xFFFF) goto __L_away; \
   }
 
 #define SSE2_BLIT_TEST_4_ARGB_PIXELS(__src0xmm, __tmp0xmm, __tmp1xmm, __L_fill, __L_away) \
@@ -259,203 +395,42 @@ group##_end: \
     if (__srcMsk0 == 0x8888) goto __L_fill; \
   }
 
-// ============================================================================
-// [Fog::RasterEngine::SSE2 - Constants]
-// ============================================================================
-
-#define SSE2_DECLARE_CONST_PI8_VAR(name, val0, val1, val2, val3, val4, val5, val6, val7, val8, val9, val10, val11, val12, val13, val14, val15) \
-  FOG_ALIGNED_VAR(static const uint8_t, _sse2_const_##name[16], 16) = \
+#define SSE2_BLIT_TEST_4_ARGB_PIXELS_MASK(__src0xmm, __tmp0xmm, __tmp1xmm, __msk0__, __L_fill, __L_away) \
+  __tmp1xmm = _mm_setzero_si128(); \
+  _mm_ext_fill_si128(__tmp0xmm); \
+  \
+  __tmp1xmm = _mm_cmpeq_epi8(__tmp1xmm, __src0xmm); \
+  __tmp0xmm = _mm_cmpeq_epi8(__tmp0xmm, __src0xmm); \
+  \
   { \
-    (uint8_t)(val15), \
-    (uint8_t)(val14), \
-    (uint8_t)(val13), \
-    (uint8_t)(val12), \
-    (uint8_t)(val11), \
-    (uint8_t)(val10), \
-    (uint8_t)(val9), \
-    (uint8_t)(val8), \
-    (uint8_t)(val7), \
-    (uint8_t)(val6), \
-    (uint8_t)(val5), \
-    (uint8_t)(val4), \
-    (uint8_t)(val3), \
-    (uint8_t)(val2), \
-    (uint8_t)(val1), \
-    (uint8_t)(val0)  \
+    register uint __srcMsk1 = (uint)_mm_movemask_epi8(__tmp1xmm); \
+    register uint __srcMsk0 = (uint)_mm_movemask_epi8(__tmp0xmm); \
+    \
+    __srcMsk1 &= 0x8888; \
+    __srcMsk0 &= 0x8888; \
+    \
+    if ((__srcMsk1 == 0x8888)) goto __L_away; \
+    if ((__srcMsk0 == 0x8888) & (__msk0__ == 0xFFFFFFFF)) goto __L_fill; \
   }
 
-#define SSE2_DECLARE_CONST_PI8_SET(name, val0) \
-  FOG_ALIGNED_VAR(static const uint8_t, _sse2_const_##name[16], 16) = \
+#define SSE2_BLIT_TEST_4_ARGB_PIXELS_ZERO(__src0xmm, __tmp0xmm, __L_away) \
+  __tmp0xmm = _mm_setzero_si128(); \
+  __tmp0xmm = _mm_cmpeq_epi8(__tmp0xmm, __src0xmm); \
+  \
   { \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0)  \
+    register uint __srcMsk0 = (uint)_mm_movemask_epi8(__tmp0xmm); \
+    __srcMsk0 &= 0x8888; \
+    if (__srcMsk0 == 0x8888) goto __L_away; \
   }
 
-#define SSE2_DECLARE_CONST_PI16_VAR(name, val0, val1, val2, val3, val4, val5, val6, val7) \
-  FOG_ALIGNED_VAR(static const uint16_t, _sse2_const_##name[8], 16) = \
+#define SSE2_BLIT_TEST_4_ARGB_PIXELS_FULL(__src0xmm, __tmp0xmm, __condition__, __L_fill) \
+  _mm_ext_fill_si128(__tmp0xmm); \
+  __tmp0xmm = _mm_cmpeq_epi8(__tmp0xmm, __src0xmm); \
   { \
-    (uint16_t)(val7), \
-    (uint16_t)(val6), \
-    (uint16_t)(val5), \
-    (uint16_t)(val4), \
-    (uint16_t)(val3), \
-    (uint16_t)(val2), \
-    (uint16_t)(val1), \
-    (uint16_t)(val0)  \
+    register uint __srcMsk0 = (uint)_mm_movemask_epi8(__tmp0xmm); \
+    __srcMsk0 &= 0x8888; \
+    if ((__srcMsk0 == 0x8888) & (__condition__)) goto __L_fill; \
   }
-
-#define SSE2_DECLARE_CONST_PI16_SET(name, val0) \
-  FOG_ALIGNED_VAR(static const uint16_t, _sse2_const_##name[8], 16) = \
-  { \
-    (uint16_t)(val0), \
-    (uint16_t)(val0), \
-    (uint16_t)(val0), \
-    (uint16_t)(val0), \
-    (uint16_t)(val0), \
-    (uint16_t)(val0), \
-    (uint16_t)(val0), \
-    (uint16_t)(val0)  \
-  }
-
-#define SSE2_DECLARE_CONST_PI32_VAR(name, val0, val1, val2, val3) \
-  FOG_ALIGNED_VAR(static const uint32_t, _sse2_const_##name[4], 16) = \
-  { \
-    (uint32_t)(val3), \
-    (uint32_t)(val2), \
-    (uint32_t)(val1), \
-    (uint32_t)(val0)  \
-  }
-
-#define SSE2_DECLARE_CONST_PI32_SET(name, val0) \
-  FOG_ALIGNED_VAR(static const uint32_t, _sse2_const_##name[4], 16) = \
-  { \
-    (uint32_t)(val0), \
-    (uint32_t)(val0), \
-    (uint32_t)(val0), \
-    (uint32_t)(val0)  \
-  }
-
-#define SSE2_DECLARE_CONST_PI64_VAR(name, val0, val1) \
-  FOG_ALIGNED_VAR(static const uint64_t, _sse2_const_##name[2], 16) = \
-  { \
-    (uint64_t)(val1), \
-    (uint64_t)(val0)  \
-  }
-
-#define SSE2_DECLARE_CONST_PI64_SET(name, val0) \
-  FOG_ALIGNED_VAR(static const uint64_t, _sse2_const_##name[2], 16) = \
-  { \
-    (uint64_t)(val0), \
-    (uint64_t)(val0)  \
-  }
-
-#define SSE2_DECLARE_CONST_PS_VAR(name, val0, val1, val2, val3) \
-  FOG_ALIGNED_VAR(static const float, _sse2_const_##name[4], 16) = \
-  { \
-    (float)(val3), \
-    (float)(val2), \
-    (float)(val1), \
-    (float)(val0)  \
-  }
-
-#define SSE2_DECLARE_CONST_PS_SET(name, val0) \
-  FOG_ALIGNED_VAR(static const float, _sse2_const_##name[4], 16) = \
-  { \
-    (float)(val0), \
-    (float)(val0), \
-    (float)(val0), \
-    (float)(val0)  \
-  }
-
-#define SSE2_DECLARE_CONST_PD_VAR(name, val0, val1) \
-  FOG_ALIGNED_VAR(static const double, _sse2_const_##name[2], 16) = \
-  { \
-    val1, \
-    val0  \
-  }
-
-#define SSE2_DECLARE_CONST_PD_SET(name, val0) \
-  FOG_ALIGNED_VAR(static const double, _sse2_const_##name[2], 16) = \
-  { \
-    val0, \
-    val0  \
-  }
-
-#define SSE2_GET_CONST_PD(name) (*(const __m128d*)_sse2_const_##name)
-#define SSE2_GET_CONST_PS(name) (*(const __m128 *)_sse2_const_##name)
-#define SSE2_GET_CONST_PI(name) (*(const __m128i*)_sse2_const_##name)
-
-// W masks.
-SSE2_DECLARE_CONST_PI16_VAR(0080008000800080_0080008000800080, 0x0080, 0x0080, 0x0080, 0x0080, 0x0080, 0x0080, 0x0080, 0x0080);
-SSE2_DECLARE_CONST_PI16_VAR(000000FF00FF00FF_000000FF00FF00FF, 0x0000, 0x00FF, 0x00FF, 0x00FF, 0x0000, 0x00FF, 0x00FF, 0x00FF);
-SSE2_DECLARE_CONST_PI16_VAR(000000FF00FF00FF_00FF00FF00FF00FF, 0x0000, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF);
-SSE2_DECLARE_CONST_PI16_VAR(00FF00FF00FF00FF_000000FF00FF00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x0000, 0x00FF, 0x00FF, 0x00FF);
-SSE2_DECLARE_CONST_PI16_VAR(00FF00FF00FF00FF_00FF00FF00FF00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF);
-SSE2_DECLARE_CONST_PI16_VAR(FF000000000000FF_FF000000000000FF, 0xFF00, 0x0000, 0x0000, 0x00FF, 0xFF00, 0x0000, 0x0000, 0x00FF);
-SSE2_DECLARE_CONST_PI16_VAR(0101010101010101_0101010101010101, 0x0101, 0x0101, 0x0101, 0x0101, 0x0101, 0x0101, 0x0101, 0x0101);
-SSE2_DECLARE_CONST_PI16_VAR(FFFFFFFFFFFFFFFF_FFFFFFFFFFFFFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF);
-SSE2_DECLARE_CONST_PI16_VAR(FFFFFFFFFFFFFFFF_0000000000000000, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0x0000, 0x0000, 0x0000, 0x0000);
-SSE2_DECLARE_CONST_PI16_VAR(00FF000000000000_00FF000000000000, 0x00FF, 0x0000, 0x0000, 0x0000, 0x00FF, 0x0000, 0x0000, 0x0000);
-SSE2_DECLARE_CONST_PI16_VAR(0000000000000000_00FF000000000000, 0x0000, 0x0000, 0x0000, 0x0000, 0x00FF, 0x0000, 0x0000, 0x0000);
-SSE2_DECLARE_CONST_PI16_VAR(00FF000000000000_0000000000000000, 0x00FF, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000);
-SSE2_DECLARE_CONST_PI16_VAR(FF000000FF000000_FF000000FF000000, 0xFF00, 0x0000, 0xFF00, 0x0000, 0xFF00, 0x0000, 0xFF00, 0x0000);
-SSE2_DECLARE_CONST_PI16_VAR(000000FF000000FF_000000FF000000FF, 0x0000, 0x00FF, 0x0000, 0x00FF, 0x0000, 0x00FF, 0x0000, 0x00FF);
-SSE2_DECLARE_CONST_PI16_VAR(00000000000000FF_00000000000000FF, 0x0000, 0x0000, 0x0000, 0x00FF, 0x0000, 0x0000, 0x0000, 0x00FF);
-SSE2_DECLARE_CONST_PI16_VAR(00FFFFFF00FFFFFF_00FFFFFF00FFFFFF, 0x00FF, 0xFFFF, 0x00FF, 0xFFFF, 0x00FF, 0xFFFF, 0x00FF, 0xFFFF);
-SSE2_DECLARE_CONST_PI16_VAR(0000000100000001_0000000100000001, 0x0000, 0x0001, 0x0000, 0x0001, 0x0000, 0x0001, 0x0000, 0x0001);
-
-SSE2_DECLARE_CONST_PI16_VAR(00FF00FF00FF00FF_0000000000000000, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x0000, 0x0000, 0x0000, 0x0000);
-SSE2_DECLARE_CONST_PI16_VAR(0000000000000000_00FF00FF00FF00FF, 0x0000, 0x0000, 0x0000, 0x0000, 0x00FF, 0x00FF, 0x00FF, 0x00FF);
-SSE2_DECLARE_CONST_PI16_VAR(0001000200020002_0001000200020002, 0x0001, 0x0002, 0x0002, 0x0002, 0x0001, 0x0002, 0x0002, 0x0002);
-
-SSE2_DECLARE_CONST_PI16_VAR(0000000000000000_FFFFFFFFFFFFFFFF, 0x0000, 0x0000, 0x0000, 0x0000, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF);
-SSE2_DECLARE_CONST_PI16_VAR(0000000000000000_0101010101010101, 0x0000, 0x0000, 0x0000, 0x0000, 0x0101, 0x0101, 0x0101, 0x0101);
-
-// RGB16 masks.
-SSE2_DECLARE_CONST_PI16_VAR(0000F8000000F800_0000F8000000F800, 0x0000, 0xF800, 0x0000, 0xF800, 0x0000, 0xF800, 0x0000, 0xF800);
-SSE2_DECLARE_CONST_PI16_VAR(0000E0000000E000_0000E0000000E000, 0x0000, 0xE000, 0x0000, 0xE000, 0x0000, 0xE000, 0x0000, 0xE000);
-SSE2_DECLARE_CONST_PI16_VAR(00007C0000007C00_00007C0000007C00, 0x0000, 0x7C00, 0x0000, 0x7C00, 0x0000, 0x7C00, 0x0000, 0x7C00);
-SSE2_DECLARE_CONST_PI16_VAR(0000700000007000_0000700000007000, 0x0000, 0x7000, 0x0000, 0x7000, 0x0000, 0x7000, 0x0000, 0x7000);
-SSE2_DECLARE_CONST_PI16_VAR(0000380000003800_0000380000003800, 0x0000, 0x3800, 0x0000, 0x3800, 0x0000, 0x3800, 0x0000, 0x3800);
-SSE2_DECLARE_CONST_PI16_VAR(00001F0000001F00_00001F0000001F00, 0x0000, 0x1F00, 0x0000, 0x1F00, 0x0000, 0x1F00, 0x0000, 0x1F00);
-SSE2_DECLARE_CONST_PI16_VAR(00001C0000001C00_00001C0000001C00, 0x0000, 0x1C00, 0x0000, 0x1C00, 0x0000, 0x1C00, 0x0000, 0x1C00);
-SSE2_DECLARE_CONST_PI16_VAR(000007E0000007E0_000007E0000007E0, 0x0000, 0x07E0, 0x0000, 0x07E0, 0x0000, 0x07E0, 0x0000, 0x07E0);
-SSE2_DECLARE_CONST_PI16_VAR(000003E0000003E0_000003E0000003E0, 0x0000, 0x03E0, 0x0000, 0x03E0, 0x0000, 0x03E0, 0x0000, 0x03E0);
-SSE2_DECLARE_CONST_PI16_VAR(000000F8000000F8_000000F8000000F8, 0x0000, 0x00F8, 0x0000, 0x00F8, 0x0000, 0x00F8, 0x0000, 0x00F8);
-SSE2_DECLARE_CONST_PI16_VAR(0000007C0000007C_0000007C0000007C, 0x0000, 0x007C, 0x0000, 0x007C, 0x0000, 0x007C, 0x0000, 0x007C);
-SSE2_DECLARE_CONST_PI16_VAR(0000001F0000001F_0000001F0000001F, 0x0000, 0x001F, 0x0000, 0x001F, 0x0000, 0x001F, 0x0000, 0x001F);
-SSE2_DECLARE_CONST_PI16_VAR(0000000700000007_0000000700000007, 0x0000, 0x0007, 0x0000, 0x0007, 0x0000, 0x0007, 0x0000, 0x0007);
-SSE2_DECLARE_CONST_PI16_VAR(0000000300000003_0000000300000003, 0x0000, 0x0003, 0x0000, 0x0003, 0x0000, 0x0003, 0x0000, 0x0003);
-
-// D masks
-SSE2_DECLARE_CONST_PI32_VAR(0001000000000000_0000000000000000, 0x00010000, 0x00000000, 0x00000000, 0x00000000);
-SSE2_DECLARE_CONST_PI32_VAR(0001000000010000_0000000000000000, 0x00010000, 0x00010000, 0x00000000, 0x00000000);
-
-// Float masks
-SSE2_DECLARE_CONST_PI32_VAR(7FFFFFFF7FFFFFFF_7FFFFFFF7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF);
-// 1.0, 0x0, 0x0, 0x0, for float demultiply.
-SSE2_DECLARE_CONST_PI32_VAR(3F80000000000000_0000000000000000, 0x3F800000, 0x00000000, 0x00000000, 0x00000000);
-
-// Double masks
-SSE2_DECLARE_CONST_PI32_VAR(7FFFFFFFFFFFFFFF_7FFFFFFFFFFFFFFF, 0x7FFFFFFF, 0xFFFFFFFF, 0x7FFFFFFF, 0xFFFFFFFF);
-SSE2_DECLARE_CONST_PD_VAR(0_5_0_5, 0.5, 0.5);
-SSE2_DECLARE_CONST_PD_VAR(1_0_1_0, 1.0, 1.0);
-SSE2_DECLARE_CONST_PD_VAR(65536_0_65536_0, 65536.0, 65536.0);
-SSE2_DECLARE_CONST_PD_VAR(32768_0_32768_0, 32768.0, 32768.0);
 
 // ============================================================================
 // [Fog::RasterEngine::SSE2 - Helpers]
@@ -474,21 +449,33 @@ static FOG_INLINE void sse2_mul_const_4D(__m128i& dst, const __m128i& a, const _
 // Load.
 
 template<typename SrcT>
+static FOG_INLINE void sse2_load1(__m128i& dst0, const SrcT* srcp)
+{
+  dst0 = _mm_cvtsi32_si128(((const uint8_t *)srcp)[0]);
+}
+
+template<typename SrcT>
+static FOG_INLINE void sse2_load2(__m128i& dst0, const SrcT* srcp)
+{
+  dst0 = _mm_cvtsi32_si128(((const uint16_t *)srcp)[0]);
+}
+
+template<typename SrcT>
 static FOG_INLINE void sse2_load4(__m128i& dst0, const SrcT* srcp)
 {
-  dst0 = _mm_cvtsi32_si128(((int *)srcp)[0]);
+  dst0 = _mm_cvtsi32_si128(((const int *)srcp)[0]);
 }
 
 template<typename SrcT>
 static FOG_INLINE void sse2_load8(__m128i& dst0, const SrcT* srcp)
 {
-  dst0 = _mm_loadl_epi64((__m128i*)(srcp));
+  dst0 = _mm_loadl_epi64((const __m128i*)(srcp));
 }
 
 template<typename SrcT>
 static FOG_INLINE void sse2_load16a(__m128i& dst0, const SrcT* srcp)
 {
-  dst0 = _mm_load_si128((__m128i *)(srcp));
+  dst0 = _mm_load_si128((const __m128i *)(srcp));
 }
 
 template<typename SrcT>
@@ -498,7 +485,7 @@ static FOG_INLINE void sse2_load16u(__m128i& dst0, const SrcT* srcp)
   // dst0 = _mm_loadl_epi64((__m128i*)(srcp));
   // dst0 = reinterpret_cast<__m128i>(_mm_loadh_pi(reinterpret_cast<__m128>(dst0), ((__m64*)srcp) + 1));
 
-  dst0 = _mm_loadu_si128((__m128i *)(srcp));
+  dst0 = _mm_loadu_si128((const __m128i *)(srcp));
 }
 
 // Store.
@@ -652,36 +639,58 @@ static FOG_INLINE void sse2_split_1x1W_1x1W(__m128i& hi, const __m128i& lo)
 
 // Negate.
 
+static FOG_INLINE void sse2_negate_1x1B(
+  __m128i& dst0, const __m128i& src0)
+{
+  dst0 = _mm_xor_si128(src0, FOG_GET_SSE_CONST_PI(0000000000000000_00000000FFFFFFFF));
+}
+
+static FOG_INLINE void sse2_negate_1x4B(
+  __m128i& dst0, const __m128i& src0)
+{
+  dst0 = _mm_xor_si128(src0, FOG_GET_SSE_CONST_PI(FFFFFFFFFFFFFFFF_FFFFFFFFFFFFFFFF));
+}
+
 static FOG_INLINE void sse2_negate_1x1W(
   __m128i& dst0, const __m128i& src0)
 {
-  dst0 = _mm_xor_si128(src0, SSE2_GET_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
+  dst0 = _mm_xor_si128(src0, FOG_GET_SSE_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
 }
 
 static FOG_INLINE void sse2_negate_1x2W(
   __m128i& dst0, const __m128i& src0)
 {
-  dst0 = _mm_xor_si128(src0, SSE2_GET_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
+  dst0 = _mm_xor_si128(src0, FOG_GET_SSE_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
 }
 
 static FOG_INLINE void sse2_negate_1x2W_lo(
   __m128i& dst0, const __m128i& src0)
 {
-  dst0 = _mm_xor_si128(src0, SSE2_GET_CONST_PI(0000000000000000_00FF00FF00FF00FF));
+  dst0 = _mm_xor_si128(src0, FOG_GET_SSE_CONST_PI(0000000000000000_00FF00FF00FF00FF));
 }
 
 static FOG_INLINE void sse2_negate_1x2W_hi(
   __m128i& dst0, const __m128i& src0)
 {
-  dst0 = _mm_xor_si128(src0, SSE2_GET_CONST_PI(00FF00FF00FF00FF_0000000000000000));
+  dst0 = _mm_xor_si128(src0, FOG_GET_SSE_CONST_PI(00FF00FF00FF00FF_0000000000000000));
 }
 
 static FOG_INLINE void sse2_negate_2x2W(
   __m128i& dst0, const __m128i& src0,
   __m128i& dst1, const __m128i& src1)
 {
-  dst0 = _mm_xor_si128(src0, SSE2_GET_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
-  dst1 = _mm_xor_si128(src1, SSE2_GET_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
+  dst0 = _mm_xor_si128(src0, FOG_GET_SSE_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
+  dst1 = _mm_xor_si128(src1, FOG_GET_SSE_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
+}
+
+static FOG_INLINE void sse2_negate_alpha_1x1B(__m128i& dst0xmm, const __m128i& src0xmm)
+{
+  dst0xmm = _mm_xor_si128(src0xmm, FOG_GET_SSE_CONST_PI(0000000000000000_00000000FF000000));
+}
+
+static FOG_INLINE void sse2_negate_alpha_1x4B(__m128i& dst0xmm, const __m128i& src0xmm)
+{
+  dst0xmm = _mm_xor_si128(src0xmm, FOG_GET_SSE_CONST_PI(FF000000FF000000_FF000000FF000000));
 }
 
 // Swap.
@@ -896,15 +905,20 @@ static FOG_INLINE void sse2_expand_mask_1x4B_to_1x4WW(
 }
 
 static FOG_INLINE void sse2_expand_mask_1x1W(
+  __m128i& dst0, const __m128i& src)
+{
+  sse2_expand_alpha_rev_1x1W(dst0, src);
+}
+
+static FOG_INLINE void sse2_expand_mask_1x1W(
   __m128i& dst0, uint32_t msk)
 {
   sse2_expand_alpha_rev_1x1W(dst0, _mm_cvtsi32_si128(msk));
 }
 
-static FOG_INLINE void sse2_expand_mask_2x2W(
+static FOG_INLINE void sse2_expand_mask_2x2W_from_1x1W(
   __m128i& dst0, __m128i& dst1, const __m128i& msk0)
 {
-  sse2_unpack_1x1W(dst0, msk0);
   dst0 = _mm_shuffle_epi32(dst0, _MM_SHUFFLE(1, 0, 1, 0));
 
   dst1 = _mm_shufflelo_epi16(dst0, _MM_SHUFFLE(2, 2, 2, 2));
@@ -914,10 +928,18 @@ static FOG_INLINE void sse2_expand_mask_2x2W(
 }
 
 static FOG_INLINE void sse2_expand_mask_2x2W(
+  __m128i& dst0, __m128i& dst1, const __m128i& msk0)
+{
+  sse2_unpack_1x1W(dst0, msk0);
+  sse2_expand_mask_2x2W_from_1x1W(dst0, dst1, dst0);
+}
+
+static FOG_INLINE void sse2_expand_mask_2x2W(
   __m128i& dst0, __m128i& dst1, uint32_t msk)
 {
   dst0 = _mm_cvtsi32_si128(msk);
-  sse2_expand_mask_2x2W(dst0, dst1, dst0);
+  sse2_unpack_1x1W(dst0, dst0);
+  sse2_expand_mask_2x2W_from_1x1W(dst0, dst1, dst0);
 }
 
 static FOG_INLINE void sse2_expand_mask_1x1D(
@@ -939,8 +961,8 @@ static FOG_INLINE void sse2_muldiv255_1x1W(
   __m128i& dst0, const __m128i& data0, const __m128i& alpha0)
 {
   dst0 = _mm_mullo_epi16(data0, alpha0);
-  dst0 = _mm_adds_epu16(dst0, SSE2_GET_CONST_PI(0080008000800080_0080008000800080));
-  dst0 = _mm_mulhi_epu16(dst0, SSE2_GET_CONST_PI(0101010101010101_0101010101010101));
+  dst0 = _mm_adds_epu16(dst0, FOG_GET_SSE_CONST_PI(0080008000800080_0080008000800080));
+  dst0 = _mm_mulhi_epu16(dst0, FOG_GET_SSE_CONST_PI(0101010101010101_0101010101010101));
 }
 
 static FOG_INLINE void sse2_muldiv255_1x2W(
@@ -955,10 +977,10 @@ static FOG_INLINE void sse2_muldiv255_2x2W(
 {
   dst0 = _mm_mullo_epi16(data0, alpha0);
   dst1 = _mm_mullo_epi16(data1, alpha1);
-  dst0 = _mm_adds_epu16(dst0, SSE2_GET_CONST_PI(0080008000800080_0080008000800080));
-  dst1 = _mm_adds_epu16(dst1, SSE2_GET_CONST_PI(0080008000800080_0080008000800080));
-  dst0 = _mm_mulhi_epu16(dst0, SSE2_GET_CONST_PI(0101010101010101_0101010101010101));
-  dst1 = _mm_mulhi_epu16(dst1, SSE2_GET_CONST_PI(0101010101010101_0101010101010101));
+  dst0 = _mm_adds_epu16(dst0, FOG_GET_SSE_CONST_PI(0080008000800080_0080008000800080));
+  dst1 = _mm_adds_epu16(dst1, FOG_GET_SSE_CONST_PI(0080008000800080_0080008000800080));
+  dst0 = _mm_mulhi_epu16(dst0, FOG_GET_SSE_CONST_PI(0101010101010101_0101010101010101));
+  dst1 = _mm_mulhi_epu16(dst1, FOG_GET_SSE_CONST_PI(0101010101010101_0101010101010101));
 }
 
 // Fill Alpha.
@@ -966,45 +988,45 @@ static FOG_INLINE void sse2_muldiv255_2x2W(
 static FOG_INLINE void sse2_fill_alpha_1x1B(
   __m128i& dst0)
 {
-  dst0 = _mm_or_si128(dst0, SSE2_GET_CONST_PI(FF000000FF000000_FF000000FF000000));
+  dst0 = _mm_or_si128(dst0, FOG_GET_SSE_CONST_PI(FF000000FF000000_FF000000FF000000));
 }
 
 static FOG_INLINE void sse2_fill_alpha_1x4B(
   __m128i& dst0)
 {
-  dst0 = _mm_or_si128(dst0, SSE2_GET_CONST_PI(FF000000FF000000_FF000000FF000000));
+  dst0 = _mm_or_si128(dst0, FOG_GET_SSE_CONST_PI(FF000000FF000000_FF000000FF000000));
 }
 
 static FOG_INLINE void sse2_fill_alpha_1x1W(
   __m128i& dst0)
 {
-  dst0 = _mm_or_si128(dst0, SSE2_GET_CONST_PI(00FF000000000000_00FF000000000000));
+  dst0 = _mm_or_si128(dst0, FOG_GET_SSE_CONST_PI(00FF000000000000_00FF000000000000));
 }
 
 static FOG_INLINE void sse2_fill_alpha_1x2W(
   __m128i& dst0)
 {
-  dst0 = _mm_or_si128(dst0, SSE2_GET_CONST_PI(00FF000000000000_00FF000000000000));
+  dst0 = _mm_or_si128(dst0, FOG_GET_SSE_CONST_PI(00FF000000000000_00FF000000000000));
 }
 
 static FOG_INLINE void sse2_fill_alpha_1x2W_lo(
   __m128i& dst0)
 {
-  dst0 = _mm_or_si128(dst0, SSE2_GET_CONST_PI(0000000000000000_00FF000000000000));
+  dst0 = _mm_or_si128(dst0, FOG_GET_SSE_CONST_PI(0000000000000000_00FF000000000000));
 }
 
 static FOG_INLINE void sse2_fill_alpha_1x2W_hi(
   __m128i& dst0)
 {
-  dst0 = _mm_or_si128(dst0, SSE2_GET_CONST_PI(00FF000000000000_0000000000000000));
+  dst0 = _mm_or_si128(dst0, FOG_GET_SSE_CONST_PI(00FF000000000000_0000000000000000));
 }
 
 static FOG_INLINE void sse2_fill_alpha_2x2W(
   __m128i& dst0,
   __m128i& dst1)
 {
-  dst0 = _mm_or_si128(dst0, SSE2_GET_CONST_PI(00FF000000000000_00FF000000000000));
-  dst1 = _mm_or_si128(dst1, SSE2_GET_CONST_PI(00FF000000000000_00FF000000000000));
+  dst0 = _mm_or_si128(dst0, FOG_GET_SSE_CONST_PI(00FF000000000000_00FF000000000000));
+  dst1 = _mm_or_si128(dst1, FOG_GET_SSE_CONST_PI(00FF000000000000_00FF000000000000));
 }
 
 // Zero Alpha.
@@ -1012,57 +1034,57 @@ static FOG_INLINE void sse2_fill_alpha_2x2W(
 static FOG_INLINE void sse2_zero_alpha_1x1B(
   __m128i& dst0)
 {
-  dst0 = _mm_and_si128(dst0, SSE2_GET_CONST_PI(00FFFFFF00FFFFFF_00FFFFFF00FFFFFF));
+  dst0 = _mm_and_si128(dst0, FOG_GET_SSE_CONST_PI(00FFFFFF00FFFFFF_00FFFFFF00FFFFFF));
 }
 
 static FOG_INLINE void sse2_zero_alpha_1x4B(
   __m128i& dst0)
 {
-  dst0 = _mm_and_si128(dst0, SSE2_GET_CONST_PI(00FFFFFF00FFFFFF_00FFFFFF00FFFFFF));
+  dst0 = _mm_and_si128(dst0, FOG_GET_SSE_CONST_PI(00FFFFFF00FFFFFF_00FFFFFF00FFFFFF));
 }
 
 static FOG_INLINE void sse2_zero_alpha_1x1W(
   __m128i& dst0)
 {
-  dst0 = _mm_and_si128(dst0, SSE2_GET_CONST_PI(000000FF00FF00FF_000000FF00FF00FF));
+  dst0 = _mm_and_si128(dst0, FOG_GET_SSE_CONST_PI(000000FF00FF00FF_000000FF00FF00FF));
 }
 
 static FOG_INLINE void sse2_zero_alpha_1x2W(
   __m128i& dst0)
 {
-  dst0 = _mm_and_si128(dst0, SSE2_GET_CONST_PI(000000FF00FF00FF_000000FF00FF00FF));
+  dst0 = _mm_and_si128(dst0, FOG_GET_SSE_CONST_PI(000000FF00FF00FF_000000FF00FF00FF));
 }
 
 static FOG_INLINE void sse2_zero_alpha_1x2W_lo(
   __m128i& dst0)
 {
-  dst0 = _mm_and_si128(dst0, SSE2_GET_CONST_PI(00FF00FF00FF00FF_000000FF00FF00FF));
+  dst0 = _mm_and_si128(dst0, FOG_GET_SSE_CONST_PI(00FF00FF00FF00FF_000000FF00FF00FF));
 }
 
 static FOG_INLINE void sse2_zero_alpha_1x2W_hi(
   __m128i& dst0)
 {
-  dst0 = _mm_and_si128(dst0, SSE2_GET_CONST_PI(000000FF00FF00FF_00FF00FF00FF00FF));
+  dst0 = _mm_and_si128(dst0, FOG_GET_SSE_CONST_PI(000000FF00FF00FF_00FF00FF00FF00FF));
 }
 
 static FOG_INLINE void sse2_zero_alpha_2x2W(
   __m128i& dst0,
   __m128i& dst1)
 {
-  dst0 = _mm_and_si128(dst0, SSE2_GET_CONST_PI(000000FF00FF00FF_000000FF00FF00FF));
-  dst1 = _mm_and_si128(dst1, SSE2_GET_CONST_PI(000000FF00FF00FF_000000FF00FF00FF));
+  dst0 = _mm_and_si128(dst0, FOG_GET_SSE_CONST_PI(000000FF00FF00FF_000000FF00FF00FF));
+  dst1 = _mm_and_si128(dst1, FOG_GET_SSE_CONST_PI(000000FF00FF00FF_000000FF00FF00FF));
 }
 
 static FOG_INLINE void sse2_zero_pixel_lo_1x1W(
   __m128i& dst0, const __m128i& src0)
 {
-  dst0 = _mm_and_si128(src0, SSE2_GET_CONST_PI(FFFFFFFFFFFFFFFF_0000000000000000));
+  dst0 = _mm_and_si128(src0, FOG_GET_SSE_CONST_PI(FFFFFFFFFFFFFFFF_0000000000000000));
 }
 
 static FOG_INLINE void sse2_zero_pixel_hi_1x1W(
   __m128i& dst0, const __m128i& src0)
 {
-  dst0 = _mm_and_si128(src0, SSE2_GET_CONST_PI(0000000000000000_FFFFFFFFFFFFFFFF));
+  dst0 = _mm_and_si128(src0, FOG_GET_SSE_CONST_PI(0000000000000000_FFFFFFFFFFFFFFFF));
 }
 
 // Premultiply.
@@ -1117,7 +1139,7 @@ static FOG_INLINE void sse2_demultiply_1x1W(__m128i& dst0, const __m128i& src0)
 
   index = buffer[6];
 
-  sse2_load8(recip, (int8_t*)ArgbUtil::demultiply_reciprocal_table_w + index * 8);
+  sse2_load8(recip, (int8_t*)raster_demultiply_reciprocal_table_w + index * 8);
   dst0 = _mm_slli_epi16(dst0, 8);
   dst0 = _mm_mulhi_epu16(dst0, recip);
 }
@@ -1134,8 +1156,8 @@ static FOG_INLINE void sse2_demultiply_2x2W(__m128i& dst0, const __m128i& src0, 
   index0 = buffer[6];
   index1 = buffer[14];
 
-  sse2_load8(recip0, (int8_t*)ArgbUtil::demultiply_reciprocal_table_w + index0 * 8);
-  sse2_load8(recip1, (int8_t*)ArgbUtil::demultiply_reciprocal_table_w + index1 * 8);
+  sse2_load8(recip0, (int8_t*)raster_demultiply_reciprocal_table_w + index0 * 8);
+  sse2_load8(recip1, (int8_t*)raster_demultiply_reciprocal_table_w + index1 * 8);
 
   sse2_store16u(buffer, src1);
 
@@ -1150,8 +1172,8 @@ static FOG_INLINE void sse2_demultiply_2x2W(__m128i& dst0, const __m128i& src0, 
   index0 = buffer[6];
   index1 = buffer[14];
 
-  sse2_load8(recip0, (int8_t*)ArgbUtil::demultiply_reciprocal_table_w + index0 * 8);
-  sse2_load8(recip1, (int8_t*)ArgbUtil::demultiply_reciprocal_table_w + index1 * 8);
+  sse2_load8(recip0, (int8_t*)raster_demultiply_reciprocal_table_w + index0 * 8);
+  sse2_load8(recip1, (int8_t*)raster_demultiply_reciprocal_table_w + index1 * 8);
 
   recip1 = _mm_shuffle_epi32(recip1, _MM_SHUFFLE(1, 0, 3, 2));
   recip0 = _mm_or_si128(recip0, recip1);
@@ -1166,7 +1188,7 @@ static FOG_INLINE void sse2_demultiply_1x1W_srcbuf(__m128i& dst0, const __m128i&
 
   index = srcBuf[ARGB32_ABYTE];
 
-  sse2_load8(recip, (int8_t*)ArgbUtil::demultiply_reciprocal_table_w + index * 8);
+  sse2_load8(recip, (int8_t*)raster_demultiply_reciprocal_table_w + index * 8);
   dst0 = _mm_slli_epi16(dst0, 8);
   dst0 = _mm_mulhi_epu16(dst0, recip);
 }
@@ -1180,8 +1202,8 @@ static FOG_INLINE void sse2_demultiply_2x2W_srcbuf(__m128i& dst0, const __m128i&
   index0 = srcBuf[ARGB32_ABYTE];
   index1 = srcBuf[ARGB32_ABYTE + 4];
 
-  sse2_load8(recip0, (int8_t*)ArgbUtil::demultiply_reciprocal_table_w + index0 * 8);
-  sse2_load8(recip1, (int8_t*)ArgbUtil::demultiply_reciprocal_table_w + index1 * 8);
+  sse2_load8(recip0, (int8_t*)raster_demultiply_reciprocal_table_w + index0 * 8);
+  sse2_load8(recip1, (int8_t*)raster_demultiply_reciprocal_table_w + index1 * 8);
 
   dst0 = _mm_slli_epi16(src0, 8);
   dst1 = _mm_slli_epi16(src1, 8);
@@ -1194,128 +1216,13 @@ static FOG_INLINE void sse2_demultiply_2x2W_srcbuf(__m128i& dst0, const __m128i&
   index0 = srcBuf[ARGB32_ABYTE + 8];
   index1 = srcBuf[ARGB32_ABYTE + 12];
 
-  sse2_load8(recip0, (int8_t*)ArgbUtil::demultiply_reciprocal_table_w + index0 * 8);
-  sse2_load8(recip1, (int8_t*)ArgbUtil::demultiply_reciprocal_table_w + index1 * 8);
+  sse2_load8(recip0, (int8_t*)raster_demultiply_reciprocal_table_w + index0 * 8);
+  sse2_load8(recip1, (int8_t*)raster_demultiply_reciprocal_table_w + index1 * 8);
 
   recip1 = _mm_shuffle_epi32(recip1, _MM_SHUFFLE(1, 0, 3, 2));
   recip0 = _mm_or_si128(recip0, recip1);
 
   dst1 = _mm_mulhi_epu16(dst1, recip0);
-}
-
-// Lerp (Interpolation).
-
-static FOG_INLINE void sse2_lerp_1x1W(
-  __m128i& dst0, const __m128i& src0, const __m128i& alpha0)
-{
-  __m128i ialpha0;
-  __m128i tmp0;
-
-  sse2_muldiv255_1x1W(tmp0, src0, alpha0);
-  sse2_negate_1x1W(ialpha0, alpha0);
-  sse2_muldiv255_1x1W(dst0, dst0, ialpha0);
-  sse2_adds_1x1W(dst0, dst0, tmp0);
-}
-
-static FOG_INLINE void sse2_lerp_2x2W(
-  __m128i& dst0, const __m128i& src0, const __m128i& alpha0,
-  __m128i& dst1, const __m128i& src1, const __m128i& alpha1)
-{
-  __m128i ialpha0, ialpha1;
-  __m128i tmp0, tmp1;
-
-  sse2_muldiv255_2x2W(tmp0, src0, alpha0, tmp1, src1, alpha1);
-  sse2_negate_2x2W(ialpha0, alpha0, ialpha1, alpha1);
-  sse2_muldiv255_2x2W(dst0, dst0, ialpha0, dst1, dst1, ialpha1);
-  sse2_adds_2x2W(dst0, dst0, tmp0, dst1, dst1, tmp1);
-}
-
-static FOG_INLINE void sse2_lerp_ialpha_1x1W(
-  __m128i& dst0, const __m128i& src0, const __m128i& alpha0, const __m128i& ialpha0)
-{
-  __m128i tmp0;
-
-  sse2_muldiv255_1x1W(tmp0, src0, alpha0);
-  sse2_muldiv255_1x1W(dst0, dst0, ialpha0);
-  sse2_adds_1x1W(dst0, dst0, tmp0);
-}
-
-static FOG_INLINE void sse2_lerp_ialpha_2x2W(
-  __m128i& dst0, const __m128i& src0, const __m128i& alpha0, const __m128i& ialpha0,
-  __m128i& dst1, const __m128i& src1, const __m128i& alpha1, const __m128i& ialpha1)
-{
-  __m128i tmp0, tmp1;
-
-  sse2_muldiv255_2x2W(tmp0, src0, alpha0, tmp1, src1, alpha1);
-  sse2_muldiv255_2x2W(dst0, dst0, ialpha0, dst1, dst1, ialpha1);
-  sse2_adds_2x2W(dst0, dst0, tmp0, dst1, dst1, tmp1);
-}
-
-// Over.
-
-static FOG_INLINE void sse2_over_ialpha_1x1W(
-  __m128i& dst0, const __m128i& src0, const __m128i& ialpha0)
-{
-  sse2_muldiv255_1x1W(dst0, dst0, ialpha0);
-  sse2_adds_1x1W(dst0, dst0, src0);
-}
-
-static FOG_INLINE void sse2_over_1x1W(
-  __m128i& dst0, const __m128i& src0, const __m128i& alpha0)
-{
-  __m128i ialpha0;
-
-  sse2_negate_1x1W(ialpha0, alpha0);
-  sse2_muldiv255_1x1W(dst0, dst0, ialpha0);
-  sse2_adds_1x1W(dst0, dst0, src0);
-}
-
-static FOG_INLINE void sse2_over_ialpha_2x2W(
-  __m128i& dst0, const __m128i& src0, const __m128i& ialpha0,
-  __m128i& dst1, const __m128i& src1, const __m128i& ialpha1)
-{
-  sse2_muldiv255_2x2W(
-    dst0, dst0, ialpha0,
-    dst1, dst1, ialpha1);
-  sse2_adds_2x2W(dst0, dst0, src0, dst1, dst1, src1);
-}
-
-static FOG_INLINE void sse2_over_2x2W(
-  __m128i& dst0, const __m128i& src0, const __m128i& alpha0,
-  __m128i& dst1, const __m128i& src1, const __m128i& alpha1)
-{
-  __m128i ialpha0;
-  __m128i ialpha1;
-
-  sse2_negate_2x2W(
-    ialpha0, alpha0,
-    ialpha1, alpha1);
-  sse2_muldiv255_2x2W(
-    dst0, dst0, ialpha0,
-    dst1, dst1, ialpha1);
-  sse2_adds_2x2W(dst0, dst0, src0, dst1, dst1, src1);
-}
-
-static FOG_INLINE void sse2_over_1x1W(
-  __m128i& dst0, __m128i& src0)
-{
-  __m128i src0ia;
-
-  sse2_expand_alpha_1x1W(src0ia, src0);
-  sse2_negate_1x1W(src0ia, src0ia);
-  sse2_over_ialpha_1x1W(dst0, src0, src0ia);
-}
-
-static FOG_INLINE void sse2_over_2x2W(
-  __m128i& dst0, __m128i& src0,
-  __m128i& dst1, __m128i& src1)
-{
-  __m128i src0ia;
-  __m128i src1ia;
-
-  sse2_expand_alpha_2x2W(src0ia, src0, src1ia, src1);
-  sse2_negate_2x2W(src0ia, src0ia, src1ia, src1ia);
-  sse2_over_ialpha_2x2W(dst0, src0, src0ia, dst1, src1, src1ia);
 }
 
 // Fetch RGB24/BGR24.
@@ -1336,8 +1243,8 @@ static FOG_INLINE void sse2_fetch_rgb24_2x2W(__m128i& dst0, __m128i& dst1, const
   dst0 = _mm_slli_epi64(dst0, 8);                            // dst0 = [B2 R1 G1 B1 R0 G0 B0   ]
   dst1 = _mm_srli_epi64(dst1, 8);                            // dst1 = [   R3 G3 B3 R2 G2 B2 R1]
 
-  dst0 = _mm_or_si128(dst0, SSE2_GET_CONST_PI(FF000000000000FF_FF000000000000FF));           // dst0 = [FF R1 G1 B1 R0 G0 B0 FF]
-  dst1 = _mm_or_si128(dst1, SSE2_GET_CONST_PI(FF000000000000FF_FF000000000000FF));           // dst1 = [FF R3 G3 B3 R2 G2 B2 FF]
+  dst0 = _mm_or_si128(dst0, FOG_GET_SSE_CONST_PI(FF000000000000FF_FF000000000000FF));           // dst0 = [FF R1 G1 B1 R0 G0 B0 FF]
+  dst1 = _mm_or_si128(dst1, FOG_GET_SSE_CONST_PI(FF000000000000FF_FF000000000000FF));           // dst1 = [FF R3 G3 B3 R2 G2 B2 FF]
 
   dst0 = _mm_unpacklo_epi8(dst0, xmmz);
   dst1 = _mm_unpacklo_epi8(dst1, xmmz);
@@ -1356,8 +1263,8 @@ static FOG_INLINE void sse2_fetch_bgr24_2x2W(__m128i& dst0, __m128i& dst1, const
   dst0 = _mm_slli_epi64(dst0, 8);                            // dst0 = [R2 B1 G1 R1 B0 G0 R0   ]
   dst1 = _mm_srli_epi64(dst1, 8);                            // dst1 = [   B3 G3 R3 B2 G2 R2 B1]
 
-  dst0 = _mm_or_si128(dst0, SSE2_GET_CONST_PI(FF000000000000FF_FF000000000000FF));           // dst0 = [FF B1 G1 R1 B0 G0 R0 FF]
-  dst1 = _mm_or_si128(dst1, SSE2_GET_CONST_PI(FF000000000000FF_FF000000000000FF));           // dst1 = [FF B3 G3 R3 B2 G2 R2 FF]
+  dst0 = _mm_or_si128(dst0, FOG_GET_SSE_CONST_PI(FF000000000000FF_FF000000000000FF));           // dst0 = [FF B1 G1 R1 B0 G0 R0 FF]
+  dst1 = _mm_or_si128(dst1, FOG_GET_SSE_CONST_PI(FF000000000000FF_FF000000000000FF));           // dst1 = [FF B3 G3 R3 B2 G2 R2 FF]
 
   dst0 = _mm_unpacklo_epi8(dst0, xmmz);
   dst1 = _mm_unpacklo_epi8(dst1, xmmz);
@@ -1419,13 +1326,13 @@ static FOG_INLINE void sse2_load_4xA8(__m128i& dst0, const uint8_t* p)
   dst0 = _mm_slli_epi32(dst0, 24);
 }
 
-static FOG_INLINE void sse2_load_1xI8(__m128i& dst0, const uint8_t* p, const Argb* pal)
+static FOG_INLINE void sse2_load_1xI8(__m128i& dst0, const uint8_t* p, const uint32_t* pal)
 {
   const uint8_t* p0 = (uint8_t*)(&pal[p[0]]);
   sse2_load4(dst0, p0);
 }
 
-static FOG_INLINE void sse2_load_4xI8(__m128i& dst0, const uint8_t* p, const Argb* pal)
+static FOG_INLINE void sse2_load_4xI8(__m128i& dst0, const uint8_t* p, const uint32_t* pal)
 {
   __m128i dst1;
   __m128i dst2;
@@ -1471,6 +1378,47 @@ static FOG_INLINE void sse2_load_and_unpack_axxx32_64B(__m128i& dst0, __m128i& d
   dst1 = _mm_srli_epi32(dst1, 24);
   dst2 = _mm_srli_epi32(dst1, 24);
   dst1 = _mm_packs_epi32(dst1, dst2);
+}
+
+// ============================================================================
+// [Fog::RasterEngine::SSE2 - Helpers]
+// ============================================================================
+
+static FOG_INLINE void sse2_vector_affine(__m128d& m_x_y, const double* m)
+{
+  __m128d m_y_x     = _mm_shuffle_pd(m_x_y, m_x_y, _MM_SHUFFLE2(0, 1));
+
+  __m128d m_sx_sy   = _mm_set_pd(m[MATRIX_SY], m[MATRIX_SX]);
+  __m128d m_shx_shy = _mm_set_pd(m[MATRIX_SHY], m[MATRIX_SHX]);
+  __m128d m_tx_ty   = _mm_loadu_pd(&m[MATRIX_TX]);
+
+  m_x_y = _mm_mul_pd(m_x_y, m_sx_sy);
+  m_y_x = _mm_mul_pd(m_y_x, m_shx_shy);
+  m_x_y = _mm_add_pd(m_x_y, m_tx_ty);
+  m_x_y = _mm_add_pd(m_x_y, m_y_x);
+}
+
+static FOG_INLINE void sse2_vector_fetch_centered(__m128d& xy, int x, int y)
+{
+  xy = _mm_add_pd(_mm_cvtepi32_pd(_mm_set_epi32(0, 0, y, x)), FOG_GET_SSE_CONST_PD(0_5_0_5));
+}
+
+static FOG_INLINE void sse2_vector_fetch_transformed(__m128d& fxfy, int x, int y, const double* m)
+{
+  sse2_vector_fetch_centered(fxfy, x, y);
+  sse2_vector_affine(fxfy, m);
+  fxfy = _mm_mul_pd(fxfy, FOG_GET_SSE_CONST_PD(65536_0_65536_0));
+  fxfy = _mm_sub_pd(fxfy, FOG_GET_SSE_CONST_PD(32768_0_32768_0));
+}
+
+static FOG_INLINE void sse2_vector_fetch_transformed(int& fx, int& fy, int x, int y, const double* m)
+{
+  __m128d fxfy_d;
+  sse2_vector_fetch_transformed(fxfy_d, x, y, m);
+
+  __m128i fxfy = _mm_cvtpd_epi32(fxfy_d);
+  fx = _mm_cvtsi128_si32(fxfy); fxfy = _mm_shuffle_epi32(fxfy, _MM_SHUFFLE(0, 1, 0, 1));
+  fy = _mm_cvtsi128_si32(fxfy);
 }
 
 } // RasterEngine namespace

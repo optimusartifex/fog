@@ -60,7 +60,7 @@ FOG_GUI_MAIN()
   fileName = arguments.at(1);
 
   MyWindow window;
-  window.error = window.svg.readFile(fileName);
+  window.error = window.svg.readFromFile(fileName);
 
   int w = 0, h = 0;
   XmlElement* root = window.svg.documentRoot();

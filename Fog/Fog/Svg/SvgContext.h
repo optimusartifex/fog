@@ -11,13 +11,14 @@
 #include <Fog/Core/Static.h>
 #include <Fog/Graphics/Painter.h>
 #include <Fog/Graphics/PaintEngine.h>
-#include <Fog/Graphics/Stroker.h>
+#include <Fog/Graphics/Path.h>
+#include <Fog/Graphics/PathStroker.h>
 #include <Fog/Svg/Constants.h>
 #include <Fog/Svg/SvgDom.h>
 
 namespace Fog {
 
-//! @addtogroup Fog_Svg
+//! @addtogroup Fog_Svg_Dom
 //! @{
 
 // ============================================================================
@@ -36,12 +37,16 @@ struct SvgElement;
 //! @brief SVG Rendering context.
 struct FOG_API SvgContext
 {
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   SvgContext(Painter* painter);
   ~SvgContext();
 
+  // --------------------------------------------------------------------------
   // [Style]
+  // --------------------------------------------------------------------------
 
   struct FOG_HIDDEN Style
   {
@@ -85,21 +90,27 @@ struct FOG_API SvgContext
     Pattern pattern;
   };
 
+  // --------------------------------------------------------------------------
   // [Painter]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE Painter* getPainter() const
   {
     return _painter;
   }
 
+  // --------------------------------------------------------------------------
   // [Matrix]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE DoubleMatrix getMatrix() const
   {
     return _painter->getMatrix();
   }
 
+  // --------------------------------------------------------------------------
   // [Fill Parameters]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE const Style& getFillStyle() const
   {
@@ -109,6 +120,11 @@ struct FOG_API SvgContext
   FOG_INLINE void setFillStyle(const Style& style)
   {
     _fillStyle = style;
+  }
+
+  FOG_INLINE void setFillOpacity(float opacity)
+  {
+    _fillStyle.opacity = opacity;
   }
 
   FOG_INLINE void setFillNone()
@@ -128,12 +144,14 @@ struct FOG_API SvgContext
     _fillStyle.pattern = pattern;
   }
 
-  FOG_INLINE void setFillMode(int mode)
+  FOG_INLINE void setFillRule(uint32_t fillRule)
   {
-    _fillMode = mode;
+    _fillRule = fillRule;
   }
 
+  // --------------------------------------------------------------------------
   // [Line Parameters]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE const Style& getStrokeStyle()
   {
@@ -143,6 +161,11 @@ struct FOG_API SvgContext
   FOG_INLINE void setStrokeStyle(const Style& style)
   {
     _lineStyle = style;
+  }
+
+  FOG_INLINE void setStrokeOpacity(float opacity)
+  {
+    _lineStyle.opacity = opacity;
   }
 
   FOG_INLINE void setStrokeNone()
@@ -162,7 +185,7 @@ struct FOG_API SvgContext
     _lineStyle.pattern = pattern;
   }
 
-  FOG_INLINE void setStrokeParams(const StrokeParams& strokeParams)
+  FOG_INLINE void setStrokeParams(const PathStrokeParams& strokeParams)
   {
     _strokeParams = strokeParams;
   }
@@ -187,35 +210,43 @@ struct FOG_API SvgContext
     _strokeParams.setMiterLimit(miterLimit);
   }
 
+  // --------------------------------------------------------------------------
   // [DPI]
+  // --------------------------------------------------------------------------
 
-  FOG_INLINE double getDpi() const
+  FOG_INLINE float getDpi() const
   {
     return _dpi; 
   }
 
-  void setDpi(double dpi);
+  void setDpi(float dpi);
 
-  FOG_INLINE double translateCoord(double val, uint32_t unit) const
+  FOG_INLINE float translateCoord(float val, uint32_t unit) const
   {
     FOG_ASSERT(unit < SVG_UNIT_INVALID);
     return val * _translateCoordData[unit];
   }
 
+  // --------------------------------------------------------------------------
   // [Draw]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE void setupFillStyle()
   {
+    _painter->setAlpha(_fillStyle.opacity);
+
     if (_fillStyle.type == SVG_SOURCE_COLOR)
       _painter->setSource(_fillStyle.color);
     else
       _painter->setSource(_fillStyle.pattern);
 
-    _painter->setFillMode(_fillMode);
+    _painter->setFillRule(_fillRule);
   }
 
   FOG_INLINE void setupStrokeStyle()
   {
+    _painter->setAlpha(_lineStyle.opacity);
+
     if (_lineStyle.type == SVG_SOURCE_COLOR)
       _painter->setSource(_lineStyle.color);
     else
@@ -230,19 +261,21 @@ struct FOG_API SvgContext
   void drawRound(const DoubleRect& rect, const DoublePoint& r);
   void drawPath(const DoublePath& path);
 
-  void blitImage(const DoublePoint& pt, const Image& im);
+  void drawImage(const DoublePoint& pt, const Image& im);
 
+  // --------------------------------------------------------------------------
   // [Members]
+  // --------------------------------------------------------------------------
 
   Painter* _painter;
 
   Style _fillStyle;
   Style _lineStyle;
-  StrokeParams _strokeParams;
-  int _fillMode;
+  PathStrokeParams _strokeParams;
+  uint32_t _fillRule;
 
-  double _dpi;
-  double _translateCoordData[SVG_UNIT_INVALID];
+  float _dpi;
+  float _translateCoordData[SVG_UNIT_INVALID];
 
 private:
   friend struct SvgContextBackup;
@@ -256,6 +289,10 @@ private:
 
 struct FOG_HIDDEN SvgContextBackup
 {
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
   FOG_INLINE SvgContextBackup() :
     _context(NULL),
     _matrix(DONT_INITIALIZE),
@@ -274,12 +311,16 @@ struct FOG_HIDDEN SvgContextBackup
     if (_context) destroy();
   }
 
+  // --------------------------------------------------------------------------
+  // [Init / Destroy]
+  // --------------------------------------------------------------------------
+
   FOG_INLINE void init(SvgContext* context)
   {
     _context = context;
 
     _fillStyle.init(_context->_fillStyle);
-    _fillMode = _context->_fillMode;
+    _fillRule = _context->_fillRule;
 
     _lineStyle.init(_context->_lineStyle);
     _strokeParams.init(_context->_strokeParams);
@@ -290,7 +331,7 @@ struct FOG_HIDDEN SvgContextBackup
   FOG_INLINE void destroy()
   {
     _context->_fillStyle = _fillStyle.instance();
-    _context->_fillMode = _fillMode;
+    _context->_fillRule = _fillRule;
 
     _context->_lineStyle = _lineStyle.instance();
     _context->_strokeParams = _strokeParams.instance();
@@ -302,14 +343,18 @@ struct FOG_HIDDEN SvgContextBackup
     _strokeParams.destroy();
   }
 
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
   SvgContext* _context;
   DoubleMatrix _matrix;
 
   Static<SvgContext::Style> _fillStyle;
-  uint32_t _fillMode;
+  uint32_t _fillRule;
 
   Static<SvgContext::Style> _lineStyle;
-  Static<StrokeParams> _strokeParams;
+  Static<PathStrokeParams> _strokeParams;
 
   bool _matrixBackup;
 

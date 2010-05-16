@@ -81,7 +81,7 @@ struct MyWindow : public Window
   // [Members]
   Timer timer;
 
-  enum { NumPoints = 8 };
+  enum { NumPoints = 4 };
   MyPoint mp[NumPoints];
   MyColor clr;
 };
@@ -110,6 +110,7 @@ void MyWindow::onPaint(PaintEvent* e)
   Painter* p = e->getPainter();
 
   DoublePath path;
+
   for (sysuint_t i = 0; i < NumPoints; i += 2)
   {
     if (i == 0)
@@ -118,7 +119,7 @@ void MyWindow::onPaint(PaintEvent* e)
       path.curveTo(mp[i].posx, mp[i].posy, mp[i+1].posx, mp[i+1].posy);
   }
 
-  path.curveTo(mp[0].posx, mp[0].posy);
+  path.curveTo(mp[NumPoints-1].posx, mp[NumPoints-1].posy, mp[0].posx, mp[0].posy);
   path.closePolygon();
 
   p->setOperator(OPERATOR_SUBTRACT);
@@ -127,7 +128,7 @@ void MyWindow::onPaint(PaintEvent* e)
 
   p->setSource((clr.toArgb() & 0x00FFFFFF) | 0x0F000000);
   p->setOperator(OPERATOR_SCREEN);
-  p->setFillMode(FILL_EVEN_ODD);
+  p->setFillRule(FILL_EVEN_ODD);
   p->setLineWidth(3.0);
   p->drawPath(path);
 }

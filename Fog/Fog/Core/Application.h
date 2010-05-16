@@ -12,12 +12,9 @@
 #define _FOG_CORE_APPLICATION_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Object.h>
 #include <Fog/Core/String.h>
-
-//! @addtogroup Fog_Core
-//! @{
 
 //! @brief Function that should be called if application arguments are not
 //! initialized and Application object not exists or it's not kwown that
@@ -28,6 +25,9 @@
 FOG_API void fog_arguments_init(int argc, char* argv[]);
 
 namespace Fog {
+
+//! @addtogroup Fog_Core_Application
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -43,6 +43,7 @@ struct GuiEngine;
 // [Fog::Application]
 // ============================================================================
 
+//! @brief Main application object.
 struct FOG_API Application : public Object
 {
   // --------------------------------------------------------------------------
@@ -162,9 +163,9 @@ private:
   FOG_DISABLE_COPY(Application)
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_CORE_APPLICATION_H

@@ -8,21 +8,22 @@
 #define _FOG_CORE_VALUE_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Atomic.h>
 #include <Fog/Core/Memory.h>
 #include <Fog/Core/String.h>
 #include <Fog/Core/TypeInfo.h>
 
-//! @addtogroup Fog_Core
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Core_Essentials
+//! @{
 
 // ============================================================================
 // [Fog::ValueData]
 // ============================================================================
 
+//! @brief Value data.
 struct FOG_API ValueData
 {
   // [Construction / Destruction]
@@ -79,16 +80,9 @@ private:
 // [Fog::Value]
 // ============================================================================
 
+//! @brief Value can hold any value (dynamic type).
 struct FOG_API Value
 {
-  enum TYPE
-  {
-    TYPE_NULL = 0,
-    TYPE_INTEGER = 1,
-    TYPE_DOUBLE = 2,
-    TYPE_STRING = 3
-  };
-
   // [Construction / Destruction]
 
   Value();
@@ -123,10 +117,10 @@ struct FOG_API Value
 
   uint32_t getType() const { return _d->type; }
 
-  FOG_INLINE bool isNull() const { return _d->type == TYPE_NULL; }
-  FOG_INLINE bool isInteger() const { return _d->type == TYPE_INTEGER; }
-  FOG_INLINE bool isDouble() const { return _d->type == TYPE_DOUBLE; }
-  FOG_INLINE bool isString() const { return _d->type == TYPE_STRING; }
+  FOG_INLINE bool isNull() const { return _d->type == VALUE_TYPE_NULL; }
+  FOG_INLINE bool isInteger() const { return _d->type == VALUE_TYPE_INTEGER; }
+  FOG_INLINE bool isDouble() const { return _d->type == VALUE_TYPE_DOUBLE; }
+  FOG_INLINE bool isString() const { return _d->type == VALUE_TYPE_STRING; }
 
   FOG_INLINE err_t getInt32(int32_t* dst) const { return _d->getInt32(dst); }
   FOG_INLINE err_t getInt64(int64_t* dst) const { return _d->getInt64(dst); }
@@ -148,9 +142,9 @@ struct FOG_API Value
   FOG_DECLARE_D(ValueData)
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // ============================================================================
 // [Fog::TypeInfo<>]

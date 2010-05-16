@@ -146,7 +146,7 @@ cont:
         break;
 
       case StateTagBegin:
-        // Match start tag name (this is probably the most common)
+        // Match start tag name (this is probably the most common).
         if (ch.isAlpha() || ch == Char('_') || ch == Char(':'))
         {
           state = StateTagName;
@@ -367,12 +367,19 @@ tagEnd:
           strCur += 3;
           goto begin;
         }
-        else if ((sysuint_t)(strEnd - strCur) > 7 && StringUtil::eq(strCur, "DOCTYPE", 7, CASE_INSENSITIVE) && strCur[7].isSpace())
+        else if ((sysuint_t)(strEnd - strCur) > 7 && StringUtil::eq(strCur, "DOCTYPE", 7, CASE_SENSITIVE) && strCur[7].isSpace())
         {
           element = ElementDOCTYPE;
           state = StateDOCTYPE;
           strCur += 8;
           doctype.clear();
+          goto begin;
+        }
+        else if ((sysuint_t)(strEnd - strCur) > 6 && StringUtil::eq(strCur, "[CDATA[", 7, CASE_SENSITIVE))
+        {
+          element = ElementCDATA;
+          state = StateCDATA;
+          strCur += 7;
           goto begin;
         }
         else

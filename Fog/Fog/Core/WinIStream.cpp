@@ -9,12 +9,13 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 
 #if defined(FOG_OS_WINDOWS)
 
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Constants.h>
+#include <Fog/Core/WinCom_p.h>
 #include <Fog/Core/WinIStream_p.h>
 
 namespace Fog {

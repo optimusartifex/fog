@@ -13,15 +13,15 @@
 #include <Fog/Core/Static.h>
 #include <Fog/Core/String.h>
 #include <Fog/Core/Value.h>
-#include <Fog/Graphics/Argb.h>
+#include <Fog/Graphics/Color.h>
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/ConvolutionMatrix.h>
 #include <Fog/Graphics/Image.h>
 
-//! @addtogroup Fog_Graphics
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Graphics_Effects
+//! @{
 
 // ============================================================================
 // [Typedefs]
@@ -152,9 +152,9 @@ private:
   FOG_DISABLE_COPY(ImageFilterEngine)
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GRAPHICS_IMAGEFILTERENGINE_H

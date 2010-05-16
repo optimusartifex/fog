@@ -13,15 +13,15 @@
 #include <Fog/Core/Delegate.h>
 #include <Fog/Core/Static.h>
 #include <Fog/Core/Stream.h>
-#include <Fog/Graphics/Argb.h>
+#include <Fog/Graphics/Color.h>
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/Geometry.h>
 #include <Fog/Graphics/Palette.h>
 
-//! @addtogroup Fog_Graphics
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Graphics_Imaging
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -33,6 +33,7 @@ struct ColorMatrix;
 struct DoublePath;
 struct ImageData;
 struct ImageFilter;
+struct ImagePixels;
 
 // ============================================================================
 // [Fog::ImageBuffer]
@@ -43,17 +44,21 @@ struct ImageFilter;
 //! Use it together with @c Image::adopt() or @c Painter::begin() methods.
 struct ImageBuffer
 {
+  //! @brief Get whether the image buffer structure contains valid data.
+  //!
+  //! Valid data are data that can be used to represent image at least 1x1
+  //! dimensions using Fog supported pixel format.
   FOG_INLINE bool isValid() const
   {
-    return (uint)width > 0 && 
-           (uint)height > 0 && 
-           format != PIXEL_FORMAT_NULL &&
-           format < PIXEL_FORMAT_COUNT &&
-           data != NULL;
+    return width > 0 && height > 0 && format < IMAGE_FORMAT_COUNT && data != NULL;
   }
 
   // Defined Later.
+
+  //! @brief Import @c ImageData instance into @c ImageBuffer.
   FOG_INLINE void import(ImageData* d);
+  //! @brief Import @c ImageData instance into @c ImageBuffer, using only
+  //! specified rectangle @a rect.
   FOG_INLINE void import(ImageData* d, const IntRect& rect);
 
   //! @brief Image buffer width.
@@ -72,41 +77,32 @@ struct ImageBuffer
 // [Fog::ImageData]
 // ============================================================================
 
+//! @brief Image data.
 struct FOG_API ImageData
 {
-  enum
-  {
-    IsDynamic = (1U << 0),
-    IsSharable = (1U << 1),
-    IsStrong = (1U << 2),
-    IsReadOnly = (1U << 3)
-  };
-
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
   ImageData();
-  ~ImageData();
+  virtual ~ImageData();
 
   // --------------------------------------------------------------------------
-  // [Ref / Deref]
+  // [Members]
   // --------------------------------------------------------------------------
 
-  ImageData* ref() const;
-  void deref();
+  FOG_INLINE ImageData* refAlways() const
+  { refCount.inc(); return const_cast<ImageData*>(this); }
 
-  FOG_INLINE ImageData* refAlways() const { refCount.inc(); return const_cast<ImageData*>(this); }
+  virtual ImageData* ref() const;
+  virtual void deref();
 
-  // --------------------------------------------------------------------------
-  // [Alloc / Free]
-  // --------------------------------------------------------------------------
+  virtual ImageData* clone() const;
 
-  static ImageData* alloc(sysuint_t size);
-  static ImageData* alloc(int w, int h, uint32_t format);
-  static void free(ImageData* d);
+  virtual err_t create(int w, int h, uint32_t format);
+  virtual err_t destroy();
 
-  static ImageData* copy(const ImageData* other);
+  virtual void* getHandle();
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -114,36 +110,51 @@ struct FOG_API ImageData
 
   //! @brief Reference count.
   mutable Atomic<sysuint_t> refCount;
-  //! @brief Image flags.
-  uint32_t flags;
-  //! @brief Paint and image filtering engine can increase / decrease this 
-  //! reference count. If image is being destroyed and inUse is larger than
-  //! zero then application is terminated (assert + error reporting).
-  uint32_t inUse;
+
   //! @brief Image width.
   int width;
   //! @brief Image height.
   int height;
-  //! @brief Image pixel format.
-  uint32_t format;
-  //! @brief Image depth.
-  uint16_t depth;
-  //! @brief Image bytes per pixel
-  uint16_t bytesPerPixel;
+
+  //! @brief Paint and image filtering engine can increase / decrease this 
+  //! counter. If image is being destroyed and @c lockCounter is larger
+  //! than zero then application is terminated (assert + error reporting).
+  uint32_t locked;
+
+  //! @brief Image type, see @c IMAGE_TYPE.
+  uint32_t type : 8;
+  //! @brief Image flags, see @c IMAGE_FLAGS.
+  uint32_t flags : 8;
+  //! @brief Image format, see @c IMAGE_FORMAT.
+  uint32_t format : 8;
+  //! @brief Bytes per pixel.
+  uint32_t bytesPerPixel : 8;
+
+  //! @brief Data pointer that points to raw memory received from the image 
+  //! device.
+  uint8_t* data;
+  //! @brief Base pointer to scanline, in most cases it's equal to @c data.
+  //!
+  //! @note This pointer can be different to @c data member only if the image
+  //! pixels are mirrored (buttom-to-top). In this case @b first points to
+  //! last scanline and @c stride is negative.
+  uint8_t* first;
   //! @brief Image stride.
   sysint_t stride;
-  //! @brief Data pointer that points to raw memory received from image device.
-  uint8_t* data;
-  //! @brief Base pointer to scanline, in most cases it's equal to @c _data.
-  uint8_t* first;
-  //! @brief Size of @c buffer.
-  sysuint_t size;
+
   //! @brief Image palette (only for 8 bit indexed images).
   Palette palette;
 
   //! @brief Buffer for static data allocation (allocated together with this
   //! structure).
-  uint8_t buffer[4];
+  uint8_t buffer[8];
+
+  // --------------------------------------------------------------------------
+  // [Statics]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE sysuint_t getSizeFor(sysuint_t size)
+  { return sizeof(ImageData) - (sizeof(uint8_t) * 8) + size; }
 
 private:
   FOG_DISABLE_COPY(ImageData)
@@ -162,7 +173,7 @@ struct FOG_API Image
 
   Image();
   Image(const Image& other);
-  Image(int w, int h, uint32_t format);
+  Image(int w, int h, uint32_t format, uint32_t type = IMAGE_TYPE_MEMORY);
   FOG_INLINE explicit Image(ImageData* d) : _d(d) {}
   ~Image();
 
@@ -173,7 +184,7 @@ struct FOG_API Image
   //! @copydoc Doxygen::Implicit::refCount().
   FOG_INLINE sysuint_t refCount() const { return _d->refCount.get(); }
   //! @copydoc Doxygen::Implicit::isDetached().
-  FOG_INLINE bool isDetached() const { return refCount() == 1 || isReadOnly(); }
+  FOG_INLINE bool isDetached() const { return refCount() == 1 && !isReadOnly(); }
   //! @copydoc Doxygen::Implicit::detach().
   FOG_INLINE err_t detach() { return !isDetached() ? _detach() : (err_t)ERR_OK; }
   //! @copydoc Doxygen::Implicit::_detach().
@@ -187,27 +198,36 @@ struct FOG_API Image
 
   //! @copydoc Doxygen::Implicit::getFlags().
   FOG_INLINE uint32_t getFlags() const { return _d->flags; }
+
   //! @copydoc Doxygen::Implicit::isNull().
   FOG_INLINE bool isNull() const { return _d == _dnull.instancep(); }
   //! @copydoc Doxygen::Implicit::isDynamic().
-  FOG_INLINE bool isDynamic() const { return _d->flags & ImageData::IsDynamic; }
+  FOG_INLINE bool isDynamic() const { return _d->flags & IMAGE_DATA_FLAG_DYNAMIC; }
   //! @copydoc Doxygen::Implicit::isSharable().
-  FOG_INLINE bool isSharable() const { return _d->flags & ImageData::IsSharable; }
-  //! @copydoc Doxygen::Implicit::isStrong().
-  FOG_INLINE bool isStrong() const { return _d->flags & ImageData::IsStrong; }
+  FOG_INLINE bool isSharable() const { return _d->flags & IMAGE_DATA_FLAG_SHARABLE; }
+  //! @copydoc Doxygen::Implicit::isKeepAlive().
+  FOG_INLINE bool isKeepAlive() const { return _d->flags & IMAGE_DATA_FLAG_KEEP_ALIVE; }
+
   //! @brief Returns true if image is read only.
-  FOG_INLINE bool isReadOnly() const { return _d->flags & ImageData::IsReadOnly; }
+  FOG_INLINE bool isReadOnly() const { return _d->flags & IMAGE_DATA_FLAG_READ_ONLY; }
 
   // --------------------------------------------------------------------------
   // [Data]
   // --------------------------------------------------------------------------
+
+  //! @brief Get image handle.
+  //!
+  //! This method can be used to retrieve handle of the original image that 
+  //! manages the image buffer. This image can be for example Windows DIB
+  //! Section (see @c IMAGE_TYPE enumeration).
+  FOG_INLINE void* getHandle() { return _d->getHandle(); }
 
   //! @brief Get constant pointer to image data (first byte in image buffer).
   //!
   //! Note that image data should be usually equal to image first scanline. But
   //! it's possible that this pointer will be last image scanline in cases that
   //! raster data are filled from bottom to top (Windows DIBs). So if you want
-  //! to write portable code, use always @c cFirst() or @c cScanline() methods.
+  //! to write portable code, use always @c getFirst() or @c getScanline() methods.
   FOG_INLINE const uint8_t* getData() const
   {
     return _d->data;
@@ -255,21 +275,24 @@ struct FOG_API Image
   //! @note Image must be detached to call this function.
   FOG_INLINE uint8_t* getXFirst()
   {
-    FOG_ASSERT_X(isDetached(), "Fog::Image::getXFirst() - Not detached data.");
+    FOG_ASSERT_X(isDetached(),
+      "Fog::Image::getXFirst() - Not detached data.");
     return _d->first;
   }
 
   //! @brief Get constant pointer to @c i scanline.
   FOG_INLINE const uint8_t* getScanline(uint32_t i) const
   {
-    FOG_ASSERT_X((sysuint_t)i < (sysuint_t)_d->height, "Fog::Image::getScanline() - Index out of range");
+    FOG_ASSERT_X((sysuint_t)i < (sysuint_t)_d->height,
+      "Fog::Image::getScanline() - Index out of range");
     return _d->first + (sysint_t)i * _d->stride;
   }
 
   //! @brief Get mutable pointer to @c i scanline.
   FOG_INLINE uint8_t* getMScanline(uint32_t i)
   {
-    FOG_ASSERT_X((sysuint_t)i < (sysuint_t)_d->height, "Fog::Image::getMScanline() - Index out of range");
+    FOG_ASSERT_X((sysuint_t)i < (sysuint_t)_d->height,
+      "Fog::Image::getMScanline() - Index out of range");
     return (detach() == ERR_OK) ? _d->first + (sysint_t)i * _d->stride : NULL;
   }
 
@@ -278,42 +301,50 @@ struct FOG_API Image
   //! @note Image must be detached to call this function.
   FOG_INLINE uint8_t* getXScanline(uint32_t i)
   {
-    FOG_ASSERT_X((sysuint_t)i < (sysuint_t)_d->height, "Fog::Image::getXScanline() - Index out of range");
-    FOG_ASSERT_X(isDetached(), "Fog::Image::getXScanline() - Not detached data.");
+    FOG_ASSERT_X((sysuint_t)i < (sysuint_t)_d->height,
+      "Fog::Image::getXScanline() - Index out of range");
+    FOG_ASSERT_X(isDetached(),
+      "Fog::Image::getXScanline() - Not detached data.");
     return _d->first + (sysint_t)i * _d->stride;
   }
 
   // --------------------------------------------------------------------------
-  // [Dimensions]
+  // [Accessors]
   // --------------------------------------------------------------------------
 
   //! @brief Get image width (in pixels).
   FOG_INLINE int getWidth() const { return _d->width; }
   //! @brief Get image height (in pixels).
   FOG_INLINE int getHeight() const { return _d->height; }
+
   //! @brief Get whether image is empty (width and height equals to zero).
   FOG_INLINE bool isEmpty() const { return _d->stride == 0; }
+
   //! @brief Get image stride (bytes per line).
   //!
   //! @note Stride can be 'width * bytesPerPixel', but can be also larger.
   FOG_INLINE sysint_t getStride() const { return _d->stride; }
 
   // --------------------------------------------------------------------------
-  // [Format]
+  // [Type / Format]
   // --------------------------------------------------------------------------
 
-  //! @brief Get image format, see @c PIXEL_FORMAT enumeration.
+  //! @brief Get image type, see @c IMAGE_TYPE enumeration.
+  FOG_INLINE uint32_t getType() const { return _d->type; }
+
+  //! @brief Get image format, see @c IMAGE_FORMAT enumeration.
   FOG_INLINE uint32_t getFormat() const { return _d->format; }
-  //! @brief Get image depth (8, 24 or 32).
-  FOG_INLINE uint32_t getDepth() const { return _d->depth; }
-  //! @brief Get image bytes per pixel.
+  //! @brief Get image bytes per pixel (1 or 4).
   FOG_INLINE uint32_t getBytesPerPixel() const { return _d->bytesPerPixel; }
 
-  //! @brief Get whether image is indexed (8-bit image with palette).
-  FOG_INLINE bool isIndexed() const { return _d->format == PIXEL_FORMAT_I8; }
+  //! @brief Get image depth (8 or 32).
+  FOG_INLINE uint32_t getDepth() const { return _d->bytesPerPixel == 0 ? 1 : _d->bytesPerPixel << 3; }
 
-  //! @brief Get whether image is premultiplied (@c PIXEL_FORMAT_PRGB32).
-  FOG_INLINE bool isPremultiplied() const { return _d->format == PIXEL_FORMAT_PRGB32; }
+  //! @brief Get whether image is indexed (8-bit image with palette).
+  FOG_INLINE bool isIndexed() const { return _d->format == IMAGE_FORMAT_I8; }
+
+  //! @brief Get whether image uses premultiplied pixels (@c IMAGE_FORMAT_PRGB32).
+  FOG_INLINE bool isPremultiplied() const { return _d->format == IMAGE_FORMAT_PRGB32; }
 
   // --------------------------------------------------------------------------
   // [Create / Adopt]
@@ -324,7 +355,7 @@ struct FOG_API Image
   //! Please always check error value, because allocation memory for image data
   //! can fail. Also if there are invalid arguments (dimensions or format) the
   //! InvalidArgument will be returned.
-  err_t create(int w, int h, uint32_t format);
+  err_t create(int w, int h, uint32_t format, uint32_t type = IMAGE_TYPE_MEMORY);
 
   //! @brief Adopt memory buffer to the image.
   err_t adopt(const ImageBuffer& buffer, uint32_t adoptFlags = IMAGE_ADOPT_DEFAULT);
@@ -346,7 +377,7 @@ struct FOG_API Image
   // [Convert]
   // --------------------------------------------------------------------------
 
-  //! @brief Convert image to @a format.
+  //! @brief Convert image to @a format and @a type.
   err_t convert(uint32_t format);
 
   //! @brief Convert image to 8 bit using optimized palette or dithering.
@@ -374,6 +405,14 @@ struct FOG_API Image
   err_t setPalette(sysuint_t index, const Argb* rgba, sysuint_t count);
 
   // --------------------------------------------------------------------------
+  // [Lock / Unlock Pixels]
+  // --------------------------------------------------------------------------
+
+  err_t lockPixels(ImagePixels& pixels, uint32_t lockMode = IMAGE_LOCK_READWRITE);
+  err_t lockPixels(ImagePixels& pixels, const IntRect& rect, uint32_t lockMode = IMAGE_LOCK_READWRITE);
+  err_t unlockPixels(ImagePixels& pixels);
+
+  // --------------------------------------------------------------------------
   // [GetDib / SetDib]
   // --------------------------------------------------------------------------
 
@@ -381,7 +420,7 @@ struct FOG_API Image
   err_t setDib(int x, int y, uint w, uint32_t dibFormat, const void* src);
 
   // --------------------------------------------------------------------------
-  // [Swap RGB and RGBA]
+  // [Swap RGB and ARGB]
   // --------------------------------------------------------------------------
 
   err_t swapRgb();
@@ -441,7 +480,7 @@ struct FOG_API Image
   // [Scaling]
   // --------------------------------------------------------------------------
 
-  Image scale(const IntSize& to, uint32_t interpolationType = INTERPOLATION_SMOOTH);
+  Image scale(const IntSize& to, uint32_t interpolationType = IMAGE_INTERPOLATION_SMOOTH);
 
   // --------------------------------------------------------------------------
   // [Painting]
@@ -458,8 +497,8 @@ struct FOG_API Image
   err_t fillHGradient(const IntRect& r, Argb c0, Argb c1, int op = OPERATOR_SRC_OVER);
   err_t fillVGradient(const IntRect& r, Argb c0, Argb c1, int op = OPERATOR_SRC_OVER);
 
-  err_t blitImage(const IntPoint& pt, const Image& src, uint32_t op = OPERATOR_SRC_OVER, uint32_t opacity = 255);
-  err_t blitImage(const IntPoint& pt, const Image& src, const IntRect& srcRect, uint32_t op = OPERATOR_SRC_OVER, uint32_t opacity = 255);
+  err_t drawImage(const IntPoint& pt, const Image& src, uint32_t op = OPERATOR_SRC_OVER, uint32_t opacity = 255);
+  err_t drawImage(const IntPoint& pt, const Image& src, const IntRect& srcRect, uint32_t op = OPERATOR_SRC_OVER, uint32_t opacity = 255);
 
   //! @brief Scroll data in image.
   //!
@@ -490,42 +529,59 @@ struct FOG_API Image
   static err_t glyphFromPath(Image& glyph, IntPoint& offset, const DoublePath& path);
 
   // --------------------------------------------------------------------------
-  // [WinAPI functions]
+  // [Windows Support]
   // --------------------------------------------------------------------------
 
 #if defined(FOG_OS_WINDOWS)
-
-  // TODO: Introduce ENUM to set alpha format of HBITMAP.
-
   //! @brief Convert image to Windows @c HBITMAP (DIBSECTION).
   //!
-  //! @note This function is Windows-only.
+  //! @note This function is for Windows-only.
   HBITMAP toHBITMAP();
+
   //! @brief Convert image from Windows @c HBITMAP (Ideally DIBSECTION).
   //!
-  //! @note This function is Windows-only.
+  //! @note This function is for Windows-only.
   err_t fromHBITMAP(HBITMAP hBitmap);
+
+  //! @brief Get HDC mapped to the image.
+  //!
+  //! After the HDC is not needed anymore use @c releaseDC() method to release
+  //! the device context.
+  //!
+  //! @note This function is for Windows-only and it returns HDC only when
+  //! the image was created using @c IMAGE_TYPE_WIN_DIB type. Otherwise @c NULL
+  //! is returned.
+  //!
+  //! @sa @c releaseDC().
+  HDC getDC();
+
+  //! @brief Release HDC mapped to the image, retrieved by @c getDC() method.
+  //!
+  //! @note This function is for Windows-only.
+  //!
+  //! @sa @c getDC().
+  void releaseDC(HDC hDC);
 #endif // FOG_OS_WINDOWS
 
   // --------------------------------------------------------------------------
   // [Read]
   // --------------------------------------------------------------------------
 
-  err_t readFile(const String& fileName);
-  err_t readStream(Stream& stream);
-  err_t readStream(Stream& stream, const String& extension);
-  err_t readBuffer(const ByteArray& buffer);
-  err_t readBuffer(const ByteArray& buffer, const String& extension);
-  err_t readBuffer(const void* buffer, sysuint_t size);
-  err_t readBuffer(const void* buffer, sysuint_t size, const String& extension);
+  err_t readFromFile(const String& fileName);
+  err_t readFromStream(Stream& stream);
+  err_t readFromStream(Stream& stream, const String& extension);
+  err_t readFromBuffer(const ByteArray& buffer);
+  err_t readFromBuffer(const ByteArray& buffer, const String& extension);
+  err_t readFromBuffer(const void* buffer, sysuint_t size);
+  err_t readFromBuffer(const void* buffer, sysuint_t size, const String& extension);
 
   // --------------------------------------------------------------------------
   // [Write]
   // --------------------------------------------------------------------------
 
-  err_t writeFile(const String& fileName) const;
-  err_t writeStream(Stream& stream, const String& extension) const;
-  err_t writeBuffer(ByteArray& buffer, const String& extension) const;
+  err_t writeToFile(const String& fileName) const;
+  err_t writeToStream(Stream& stream, const String& extension) const;
+  err_t writeToBuffer(ByteArray& buffer, const String& extension) const;
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
@@ -545,13 +601,21 @@ struct FOG_API Image
   //! Stride is calculated using @a width and @a depth using 32-bit alignment
   //! that is compatible to Windows DIBs and probably to other OS specific
   //! image formats.
-  static sysint_t calcStride(int width, int depth);
+  static sysint_t getStrideFromWidth(int width, uint32_t depth);
 
   //! @brief Converts a given format @a format into depth.
-  static uint32_t formatToDepth(uint32_t format);
+  static uint32_t getDepthFromFormat(uint32_t format);
 
   //! @brief Converts a given format @a format into bytes per pixel.
-  static uint32_t formatToBytesPerPixel(uint32_t format);
+  static uint32_t getBytesPerPixelFromFormat(uint32_t format);
+
+  // --------------------------------------------------------------------------
+  // [Ref / Deref]
+  // --------------------------------------------------------------------------
+
+  static ImageData* _allocData(sysuint_t size);
+  static ImageData* _allocData(int w, int h, uint32_t format);
+  static void _freeData(ImageData* d);
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -586,9 +650,9 @@ FOG_INLINE void ImageBuffer::import(ImageData* d, const IntRect& rect)
   data = d->first + (uint)rect.y * d->stride + (uint)rect.x * (uint)d->bytesPerPixel;
 }
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // ============================================================================
 // [Fog::TypeInfo<T>]

@@ -8,15 +8,15 @@
 #define _FOG_CORE_STRINGUTIL_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Char.h>
 
 #include <string.h>
 
-//! @addtogroup Fog_Core
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Core_Essentials
+//! @{
 
 // ============================================================================
 // [Fog::StringUtil::Forward Declarations]
@@ -193,10 +193,10 @@ FOG_API err_t toBase64(String& dst, const ByteArray& src, int outputMode = OUTPU
 FOG_API err_t toBase64(ByteArray& dst, const char* src, sysuint_t srcLength, int outputMode = OUTPUT_MODE_SET);
 FOG_API err_t toBase64(String& dst, const char* src, sysuint_t srcLength, int outputMode = OUTPUT_MODE_SET);
 
+//! @}
+
 } // StringUtil namespace
 } // Fog namespace
-
-//! @}
 
 // [Guard]
 #endif // _FOG_CORE_STRINGUTIL_H

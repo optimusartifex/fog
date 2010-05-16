@@ -24,9 +24,6 @@ namespace HashUtil {
 // [Fog::HashUtil::hashData]
 // ===========================================================================
 
-// TODO: For our purposes too complex, we need faster function for ManagedStrings
-// and String hash tables. 
-
 // From OSSP val - Value Access <http://www.ossp.org/pkg/lib/val/>
 //
 // BJDDJ Hash Function (Bob Jenkins, Dr. Dobbs Journal):

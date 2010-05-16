@@ -8,7 +8,7 @@
 #define _FOG_CORE_BYTEARRAY_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Atomic.h>
 #include <Fog/Core/Basics.h>
@@ -16,10 +16,10 @@
 #include <Fog/Core/Static.h>
 #include <Fog/Core/TypeInfo.h>
 
-//! @addtogroup Fog_Core
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Core_Essentials
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -35,6 +35,7 @@ template<typename T> struct List;
 // [Fog::ByteArray]
 // ============================================================================
 
+//! @brief Byte array.
 struct FOG_API ByteArray
 {
   // --------------------------------------------------------------------------
@@ -622,11 +623,16 @@ struct TemporaryByteArray : public ByteArray
   FOG_INLINE TemporaryByteArray<N>& operator=(const TemporaryByteArray<N>& other) { set(other); return *this; }
 };
 
+//! @}
+
 } // Fog namespace
 
 // ============================================================================
 // [Global Operator Overload]
 // ============================================================================
+
+//! @addtogroup Fog_Core_Essentials
+//! @{
 
 static FOG_INLINE const Fog::ByteArray operator+(const Fog::ByteArray& a, const Fog::ByteArray& b) { return Fog::ByteArray(a, b); }
 

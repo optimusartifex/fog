@@ -8,13 +8,13 @@
 #define _FOG_GUI_GUIENGINE_X11HEADERS_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 
 // [Guard]
 #if defined(FOG_GUI_X11)
 
 #ifdef _XLIB_H
-#error "You must include Fog-Gui/UIEngine/X11Headers.h before xlib.h"
+#error "Fog::X11 - You must include Fog/Gui/UIEngine/X11Headers.h before xlib.h"
 #endif
 
 // redefine some critical things
@@ -318,7 +318,7 @@ const int XVisibilityNotify = VisibilityNotify;
 #endif // index
 
 #else
-#warning "Fog::X11 - Including Fog-Gui/UIEngine/X11Headers on non-x11 plaform"
+#warning "Fog::X11 - Including Fog/Gui/UIEngine/X11Headers on non-x11 plaform"
 #endif // FOG_GUI_X11
 
 // [Guard]

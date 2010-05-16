@@ -84,7 +84,7 @@ struct FOG_HIDDEN NullValueData : public ValueData
 };
 
 NullValueData::NullValueData() : 
-  ValueData(Value::TYPE_NULL)
+  ValueData(VALUE_TYPE_NULL)
 {
 }
 
@@ -120,7 +120,7 @@ err_t NullValueData::getString(String* dst) const
 
 err_t NullValueData::setValue(void* val)
 {
-  return ERR_RT_INVALID_CONTEXT;
+  return ERR_RT_INVALID_OBJECT;
 }
 
 // ============================================================================
@@ -141,7 +141,7 @@ struct FOG_HIDDEN IntegerValueData : public ValueData
 };
 
 IntegerValueData::IntegerValueData(int64_t content) : 
-  ValueData(Value::TYPE_INTEGER)
+  ValueData(VALUE_TYPE_INTEGER)
 {
   i64 = content;
 }
@@ -213,7 +213,7 @@ struct FOG_HIDDEN DoubleValueData : public ValueData
 };
 
 DoubleValueData::DoubleValueData(double content) : 
-  ValueData(Value::TYPE_DOUBLE)
+  ValueData(VALUE_TYPE_DOUBLE)
 {
   d = content;
 }
@@ -301,7 +301,7 @@ struct FOG_HIDDEN StringValueData : public ValueData
 };
 
 StringValueData::StringValueData(const String& content) : 
-  ValueData(Value::TYPE_STRING)
+  ValueData(VALUE_TYPE_STRING)
 {
   new (str()) String(content);
 }

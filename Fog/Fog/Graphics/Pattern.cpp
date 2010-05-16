@@ -22,12 +22,12 @@ static FOG_INLINE void Pattern_initData(PatternData* d)
 {
   uint32_t type = d->type;
 
-  if (type == PATTERN_TEXTURE)
+  if (type == PATTERN_TYPE_TEXTURE)
   {
     d->obj.texture.init();
     d->data.texture->area.clear();
   }
-  else if (type & PATTERN_GRADIENT_MASK)
+  else if (type & PATTERN_TYPE_IS_GRADIENT)
   {
     d->obj.stops.init();
     d->data.gradient->points[0].clear();
@@ -40,11 +40,11 @@ static FOG_INLINE void Pattern_freeData(PatternData* d)
 {
   uint32_t type = d->type;
 
-  if (type == PATTERN_TEXTURE)
+  if (type == PATTERN_TYPE_TEXTURE)
   {
     d->obj.texture.destroy();
   }
-  else if (type & PATTERN_GRADIENT_MASK)
+  else if (type & PATTERN_TYPE_IS_GRADIENT)
   {
     d->obj.stops.destroy();
   }
@@ -67,8 +67,8 @@ Pattern::Pattern(const Argb& argb)
   _d = new(std::nothrow) PatternData();
   if (!_d) { _d = _dnull->ref(); return; }
 
-  _d->type = PATTERN_SOLID;
-  _d->obj.argb->set(argb);
+  _d->type = PATTERN_TYPE_SOLID;
+  _d->obj.argb->setArgb(argb);
 }
 
 Pattern::~Pattern()
@@ -96,11 +96,11 @@ err_t Pattern::setType(uint32_t type)
 {
   if (_d->type == type) return ERR_OK;
 
-  if (!((uint)type <= 0x2U || (type >= PATTERN_LINEAR_GRADIENT && type <= PATTERN_CONICAL_GRADIENT)))
+  if (!((uint)type <= 0x2U || (type >= PATTERN_TYPE_LINEAR_GRADIENT && type <= PATTERN_TYPE_CONICAL_GRADIENT)))
     return ERR_RT_INVALID_ARGUMENT;
 
   // Optimize [Gradient -> Gradient] type switching.
-  if ((_d->type & PATTERN_GRADIENT_MASK) != 0 && (type & PATTERN_GRADIENT_MASK) != 0)
+  if ((_d->type & PATTERN_TYPE_IS_GRADIENT) != 0 && (type & PATTERN_TYPE_IS_GRADIENT) != 0)
   {
     FOG_RETURN_ON_ERROR(detach());
     _d->type = type;
@@ -142,8 +142,8 @@ void Pattern::reset()
   else
   {
     _d->deleteResources();
-    _d->type = PATTERN_NULL;
-    _d->spread = SPREAD_PAD;
+    _d->type = PATTERN_TYPE_NONE;
+    _d->spread = PATTERN_SPREAD_PAD;
     _d->matrix.reset();
   }
 }
@@ -151,7 +151,7 @@ void Pattern::reset()
 err_t Pattern::setSpread(uint32_t spread)
 {
   if (_d->spread == spread) return ERR_OK;
-  if ((uint)spread >= SPREAD_COUNT) return ERR_RT_INVALID_ARGUMENT;
+  if (spread >= PATTERN_SPREAD_COUNT) return ERR_RT_INVALID_ARGUMENT;
 
   FOG_RETURN_ON_ERROR(detach());
 
@@ -267,7 +267,7 @@ err_t Pattern::setColor(const Argb& argb)
     if (_d->obj.argb.instance() == argb) return ERR_OK;
     FOG_RETURN_ON_ERROR(detach());
 
-    _d->obj.argb->set(argb);
+    _d->obj.argb->setArgb(argb);
     return ERR_OK;
   }
   else
@@ -275,11 +275,11 @@ err_t Pattern::setColor(const Argb& argb)
     PatternData* newd = new(std::nothrow) PatternData();
     if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
-    newd->type = PATTERN_SOLID;
+    newd->type = PATTERN_TYPE_SOLID;
     newd->spread = _d->spread;
     newd->matrix = _d->matrix;
 
-    newd->obj.argb->set(argb);
+    newd->obj.argb->setArgb(argb);
 
     atomicPtrXchg(&_d, newd)->deref();
     return ERR_OK;
@@ -311,7 +311,7 @@ static err_t Pattern_setTexturePrivate(Pattern* self, const Image& texture, cons
   if (self->_d->refCount.get() == 1)
   {
     self->_d->deleteResources();
-    self->_d->type = PATTERN_TEXTURE;
+    self->_d->type = PATTERN_TYPE_TEXTURE;
 
     self->_d->obj.texture.init(texture);
     self->_d->data.texture->area = textureArea;
@@ -323,7 +323,7 @@ static err_t Pattern_setTexturePrivate(Pattern* self, const Image& texture, cons
     PatternData* newd = new(std::nothrow) PatternData();
     if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
-    newd->type = PATTERN_TEXTURE;
+    newd->type = PATTERN_TYPE_TEXTURE;
     newd->spread = self->_d->spread;
     newd->matrix = self->_d->matrix;
 
@@ -366,7 +366,7 @@ Gradient Pattern::getGradient() const
 {
   PatternData* d = _d;
 
-  if (d->type & PATTERN_GRADIENT_MASK)
+  if (d->type & PATTERN_TYPE_IS_GRADIENT)
   {
     return Gradient(
       d->type,
@@ -444,7 +444,7 @@ err_t Pattern::setStartPoint(const FloatPoint& pt)
 }
 err_t Pattern::setStartPoint(const DoublePoint& pt)
 {
-  if (!isGradient()) return ERR_RT_INVALID_CONTEXT;
+  if (!isGradient()) return ERR_RT_INVALID_OBJECT;
   if (_d->data.gradient->points[0] == pt) return ERR_OK;
 
   FOG_RETURN_ON_ERROR(detach());
@@ -465,7 +465,7 @@ err_t Pattern::setEndPoint(const FloatPoint& pt)
 
 err_t Pattern::setEndPoint(const DoublePoint& pt)
 {
-  if (!isGradient()) return ERR_RT_INVALID_CONTEXT;
+  if (!isGradient()) return ERR_RT_INVALID_OBJECT;
   if (_d->data.gradient->points[1] == pt) return ERR_OK;
 
   FOG_RETURN_ON_ERROR(detach());
@@ -486,7 +486,7 @@ err_t Pattern::setPoints(const FloatPoint& startPt, const FloatPoint& endPt)
 
 err_t Pattern::setPoints(const DoublePoint& startPt, const DoublePoint& endPt)
 {
-  if (!isGradient()) return ERR_RT_INVALID_CONTEXT;
+  if (!isGradient()) return ERR_RT_INVALID_OBJECT;
 
   if (_d->data.gradient->points[0] == startPt && 
       _d->data.gradient->points[1] == endPt) return ERR_OK;
@@ -513,7 +513,7 @@ err_t Pattern::setRadius(float r)
 
 err_t Pattern::setRadius(double r)
 {
-  if (!isGradient()) return ERR_RT_INVALID_CONTEXT;
+  if (!isGradient()) return ERR_RT_INVALID_OBJECT;
   if (_d->data.gradient->radius == r) return ERR_OK;
 
   FOG_RETURN_ON_ERROR(detach());
@@ -531,7 +531,7 @@ List<ArgbStop> Pattern::getStops() const
 
 err_t Pattern::setStops(const List<ArgbStop>& stops)
 {
-  if (!isGradient()) return ERR_RT_INVALID_CONTEXT;
+  if (!isGradient()) return ERR_RT_INVALID_OBJECT;
   if (_d->obj.stops->_d == stops._d) return ERR_OK;
 
   FOG_RETURN_ON_ERROR(detach());
@@ -542,7 +542,7 @@ err_t Pattern::setStops(const List<ArgbStop>& stops)
 
 err_t Pattern::resetStops()
 {
-  if (!isGradient()) return ERR_RT_INVALID_CONTEXT;
+  if (!isGradient()) return ERR_RT_INVALID_OBJECT;
 
   _d->obj.stops->free();
   return ERR_OK;
@@ -550,7 +550,7 @@ err_t Pattern::resetStops()
 
 err_t Pattern::addStop(const ArgbStop& stop)
 {
-  if (!isGradient()) return ERR_RT_INVALID_CONTEXT;
+  if (!isGradient()) return ERR_RT_INVALID_OBJECT;
 
   FOG_RETURN_ON_ERROR(detach());
 
@@ -560,12 +560,12 @@ err_t Pattern::addStop(const ArgbStop& stop)
   List<ArgbStop>::MutableIterator it(_d->obj.stops.instance());
   for (it.toStart(); it.isValid(); it.toNext())
   {
-    if (it.value().offset == s.offset)
+    if (it.value().getOffset() == s.getOffset())
     {
-      it.value().argb = s.argb;
+      it.value().setArgb(s.getArgb());
       return ERR_OK;
     }
-    else if (it.value().offset > s.offset)
+    else if (it.value().getOffset() > s.getOffset())
     {
       break;
     }
@@ -597,8 +597,8 @@ Pattern& Pattern::operator=(const Argb& rgba)
 PatternData::PatternData()
 {
   refCount.init(1);
-  type = PATTERN_NULL;
-  spread = SPREAD_PAD;
+  type = PATTERN_TYPE_NONE;
+  spread = PATTERN_SPREAD_PAD;
 }
 
 PatternData::PatternData(const PatternData& other) :
@@ -610,16 +610,16 @@ PatternData::PatternData(const PatternData& other) :
 
   switch (type)
   {
-    case PATTERN_SOLID:
+    case PATTERN_TYPE_SOLID:
       obj.argb.init(other.obj.argb.instance());
       break;
-    case PATTERN_TEXTURE:
+    case PATTERN_TYPE_TEXTURE:
       obj.texture.init(other.obj.texture.instance());
       data.texture->area = other.data.texture->area;
       break;
-    case PATTERN_LINEAR_GRADIENT:
-    case PATTERN_RADIAL_GRADIENT:
-    case PATTERN_CONICAL_GRADIENT:
+    case PATTERN_TYPE_LINEAR_GRADIENT:
+    case PATTERN_TYPE_RADIAL_GRADIENT:
+    case PATTERN_TYPE_CONICAL_GRADIENT:
       obj.stops.init(other.obj.stops.instance());
       data.gradient->points[0] = other.data.gradient->points[0];
       data.gradient->points[1] = other.data.gradient->points[1];

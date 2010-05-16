@@ -8,7 +8,7 @@
 #define _FOG_CORE_STRING_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Atomic.h>
 #include <Fog/Core/Basics.h>
@@ -19,13 +19,10 @@
 
 #include <wchar.h>
 
-//! @addtogroup Fog_Core
+//! @addtogroup Fog_Core_Essentials
 //! @{
 
 namespace Fog {
-
-//! @addtogroup Fog_Core
-//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -42,6 +39,7 @@ template<typename T> struct List;
 // [Fog::String]
 // ============================================================================
 
+//! @brief String.
 struct FOG_API String
 {
   // --------------------------------------------------------------------------

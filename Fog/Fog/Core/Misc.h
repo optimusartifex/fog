@@ -8,12 +8,15 @@
 #define _FOG_CORE_MISC_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/Memory.h>
 
 namespace Fog {
+
+//! @addtogroup Fog_Core_Other
+//! @{
 
 //! @brief This template is for fast routines that needs to alloc memory on
 //! the stack. Maximum size of memory allocated on the stack is @a N.
@@ -182,6 +185,8 @@ struct LocalStack
 private:
   FOG_DISABLE_COPY(LocalStack)
 };
+
+//! @}
 
 } // Fog namespace
 

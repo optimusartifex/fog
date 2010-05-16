@@ -4,7 +4,7 @@
 // MIT, See COPYING file in package
 
 // For some IDEs to enable code-assist.
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 
 #if defined(FOG_IDE)
 #include <Fog/Graphics/RasterEngine/Defs_C_p.h>
@@ -48,23 +48,9 @@ namespace RasterEngine {
 // [Fog::RasterEngine::C - Filter]
 // ============================================================================
 
+//! @internal
 struct FOG_HIDDEN FilterC
 {
-
-  // --------------------------------------------------------------------------
-  // [Helpers]
-  // --------------------------------------------------------------------------
-
-  static FOG_INLINE int clamp255(int val)
-  {
-    // Value in range [0, 255] including is common, so the first check is for 
-    // that range.
-    if (FOG_LIKELY((uint)val < 256))
-      return val;
-    else
-      return (val > 255) ? 255 : 0;
-  }
-
   // Get reciprocal for 16-bit value @a val.
   static FOG_INLINE int getReciprocal(int val)
   {
@@ -77,54 +63,64 @@ struct FOG_HIDDEN FilterC
 
   static void FOG_FASTCALL color_lut_prgb32(
     const ColorLutData* lut,
-    uint8_t* dst, const uint8_t* src, sysuint_t width)
+    uint8_t* dst, const uint8_t* src, int w)
   {
-    functionMap->dib.convert[PIXEL_FORMAT_ARGB32][PIXEL_FORMAT_PRGB32](dst, src, width, NULL);
-    functionMap->filter.color_lut[PIXEL_FORMAT_ARGB32](lut, dst, dst, width);
-    functionMap->dib.convert[PIXEL_FORMAT_PRGB32][PIXEL_FORMAT_ARGB32](dst, dst, width, NULL);
+    rasterFuncs.dib.convert[IMAGE_FORMAT_ARGB32][IMAGE_FORMAT_PRGB32](dst, src, w, NULL);
+    rasterFuncs.filter.color_lut[IMAGE_FORMAT_ARGB32](lut, dst, dst, w);
+    rasterFuncs.dib.convert[IMAGE_FORMAT_PRGB32][IMAGE_FORMAT_ARGB32](dst, dst, w, NULL);
   }
 
   static void FOG_FASTCALL color_lut_argb32(
     const ColorLutData* lut,
-    uint8_t* dst, const uint8_t* src, sysuint_t width)
+    uint8_t* dst, const uint8_t* src, int w)
   {
     const uint8_t* rLut = lut->r;
     const uint8_t* gLut = lut->g;
     const uint8_t* bLut = lut->b;
     const uint8_t* aLut = lut->a;
 
-    for (sysuint_t i = width; i; i--, dst += 4, src += 4)
-    {
+    do {
       dst[ARGB32_RBYTE] = rLut[src[ARGB32_RBYTE]];
       dst[ARGB32_GBYTE] = gLut[src[ARGB32_GBYTE]];
       dst[ARGB32_BBYTE] = bLut[src[ARGB32_BBYTE]];
       dst[ARGB32_ABYTE] = aLut[src[ARGB32_ABYTE]];
-    }
+
+      dst += 4;
+      src += 4;
+    } while (--w);
   }
 
   static void FOG_FASTCALL color_lut_xrgb32(
     const ColorLutData* lut,
-    uint8_t* dst, const uint8_t* src, sysuint_t width)
+    uint8_t* dst, const uint8_t* src, int w)
   {
     const uint8_t* rLut = lut->r;
     const uint8_t* gLut = lut->g;
     const uint8_t* bLut = lut->b;
 
-    for (sysuint_t i = width; i; i--, dst += 4, src += 4)
-    {
+    do {
       dst[ARGB32_RBYTE] = rLut[src[ARGB32_RBYTE]];
       dst[ARGB32_GBYTE] = gLut[src[ARGB32_GBYTE]];
       dst[ARGB32_BBYTE] = bLut[src[ARGB32_BBYTE]];
       dst[ARGB32_ABYTE] = 0xFF;
-    }
+
+      dst += 4;
+      src += 4;
+    } while (--w);
   }
 
   static void FOG_FASTCALL color_lut_a8(
     const ColorLutData* lut,
-    uint8_t* dst, const uint8_t* src, sysuint_t width)
+    uint8_t* dst, const uint8_t* src, int w)
   {
     const uint8_t* aLut = lut->a;
-    for (sysuint_t i = width; i; i--, dst += 1, src += 1) dst[0] = aLut[src[0]];
+
+    do {
+      dst[0] = aLut[src[0]];
+
+      dst += 1;
+      src += 1;
+    } while (--w);
   }
 
   // --------------------------------------------------------------------------
@@ -133,17 +129,16 @@ struct FOG_HIDDEN FilterC
 
   static void FOG_FASTCALL color_matrix_prgb32(
     const ColorMatrix* cm,
-    uint8_t* dst, const uint8_t* src, sysuint_t width)
+    uint8_t* dst, const uint8_t* src, int w)
   {
     float dr = cm->m[4][0] * 255.0f + 0.5f;
     float dg = cm->m[4][1] * 255.0f + 0.5f;
     float db = cm->m[4][2] * 255.0f + 0.5f;
     float da = cm->m[4][3] * 255.0f + 0.5f;
 
-    for (sysuint_t i = width; i; i--, dst += 4, src += 4)
-    {
+    do {
       int pa = src[ARGB32_ABYTE];
-      float demul = ArgbUtil::demultiply_reciprocal_table_f[pa];
+      float demul = raster_demultiply_reciprocal_table_f[pa];
 
       float fr = (float)src[ARGB32_RBYTE] * demul;
       float fg = (float)src[ARGB32_GBYTE] * demul;
@@ -161,20 +156,22 @@ struct FOG_HIDDEN FilterC
       ta = Math::bound<int>(ta, 0, 255);
 
       ((uint32_t*)dst)[0] = ArgbUtil::premultiply(ta, tr, tg, tb);
-    }
+      
+      dst += 4;
+      src += 4;
+    } while (--w);
   }
 
   static void FOG_FASTCALL color_matrix_argb32(
     const ColorMatrix* cm,
-    uint8_t* dst, const uint8_t* src, sysuint_t width)
+    uint8_t* dst, const uint8_t* src, int w)
   {
     float dr = cm->m[4][0] * 255.0f + 0.5f;
     float dg = cm->m[4][1] * 255.0f + 0.5f;
     float db = cm->m[4][2] * 255.0f + 0.5f;
     float da = cm->m[4][3] * 255.0f + 0.5f;
 
-    for (sysuint_t i = width; i; i--, dst += 4, src += 4)
-    {
+    do {
       float fr = (float)src[ARGB32_RBYTE];
       float fg = (float)src[ARGB32_GBYTE];
       float fb = (float)src[ARGB32_BBYTE];
@@ -191,19 +188,21 @@ struct FOG_HIDDEN FilterC
       ta = Math::bound<int>(ta, 0, 255);
 
       ((uint32_t*)dst)[0] = Argb::make(ta, tr, tg, tb);
-    }
+
+      dst += 4;
+      src += 4;
+    } while (--w);
   }
 
   static void FOG_FASTCALL color_matrix_xrgb32(
     const ColorMatrix* cm,
-    uint8_t* dst, const uint8_t* src, sysuint_t width)
+    uint8_t* dst, const uint8_t* src, int w)
   {
     float dr = (cm->m[3][0] + cm->m[4][0]) * 255.0f + 0.5f;
     float dg = (cm->m[3][1] + cm->m[4][1]) * 255.0f + 0.5f;
     float db = (cm->m[3][2] + cm->m[4][2]) * 255.0f + 0.5f;
 
-    for (sysuint_t i = width; i; i--, dst += 4, src += 4)
-    {
+    do {
       float fr = (float)src[ARGB32_RBYTE];
       float fg = (float)src[ARGB32_GBYTE];
       float fb = (float)src[ARGB32_BBYTE];
@@ -217,22 +216,27 @@ struct FOG_HIDDEN FilterC
       tb = Math::bound<int>(tb, 0, 255);
 
       ((uint32_t*)dst)[0] = Argb::make(0xFF, tr, tg, tb);
-    }
+
+      dst += 4;
+      src += 4;
+    } while (--w);
   }
 
   static void FOG_FASTCALL color_matrix_a8(
     const ColorMatrix* cm,
-    uint8_t* dst, const uint8_t* src, sysuint_t width)
+    uint8_t* dst, const uint8_t* src, int w)
   {
     float da = cm->m[4][3] * 255.0f + 0.5f;
     float xa = cm->m[3][3];
 
-    for (sysuint_t i = width; i; i--, dst++, src++)
-    {
+    do {
       int ta = (int)((float)src[0] * xa + da);
       ta = Math::bound<int>(ta, 0, 255);
       dst[0] = ta;
-    }
+
+      dst += 1;
+      src += 1;
+    } while (--w);
   }
 
   // --------------------------------------------------------------------------
@@ -243,12 +247,12 @@ struct FOG_HIDDEN FilterC
     const void* context,
     uint8_t* dst, sysint_t dstStride,
     const uint8_t* src, sysint_t srcStride,
-    sysuint_t width, sysuint_t height, sysint_t offset)
+    int width, int height, int offset)
   {
     if (dst == src) return;
 
-    sysuint_t y = height;
-    sysuint_t size = width * 4;
+    int y = height;
+    int size = width * 4;
 
     if (offset == -1)
     {
@@ -272,12 +276,12 @@ struct FOG_HIDDEN FilterC
     const void* context,
     uint8_t* dst, sysint_t dstStride,
     const uint8_t* src, sysint_t srcStride,
-    sysuint_t width, sysuint_t height, sysint_t offset)
+    int width, int height, int offset)
   {
     if (dst == src) return;
 
-    sysuint_t y = height;
-    sysuint_t size = width * 3;
+    int y = height;
+    int size = width * 3;
 
     if (offset == -1)
     {
@@ -301,12 +305,12 @@ struct FOG_HIDDEN FilterC
     const void* context,
     uint8_t* dst, sysint_t dstStride,
     const uint8_t* src, sysint_t srcStride,
-    sysuint_t width, sysuint_t height, sysint_t offset)
+    int width, int height, int offset)
   {
     if (dst == src) return;
 
-    sysuint_t y = height;
-    sysuint_t size = width;
+    int y = height;
+    int size = width;
 
     if (offset == -1)
     {
@@ -334,27 +338,27 @@ struct FOG_HIDDEN FilterC
     const BlurParams* params,
     uint8_t* dst, sysint_t dstStride,
     const uint8_t* src, sysint_t srcStride,
-    sysuint_t width, sysuint_t height, sysint_t offset)
+    int width, int height, int offset)
   {
     int radius = Math::min<int>((int)params->hRadius, 254);
 
     if (radius == 0 || width < 2)
     {
-      functionMap->filter.copy_area[PIXEL_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
+      rasterFuncs.filter.copy_area[IMAGE_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
       return;
     }
 
-    sysint_t dym1 = (sysint_t)width;
-    sysint_t dym2 = (sysint_t)height;
-    sysint_t max = dym1 - 1;
+    int dym1 = width;
+    int dym2 = height;
+    int max = dym1 - 1;
     sysint_t end = max * 4;
 
     uint8_t* dstCur;
     const uint8_t* srcCur;
 
-    sysint_t pos1;
-    sysint_t pos2;
-    sysint_t xp, i;
+    int pos1;
+    int pos2;
+    int xp, i;
 
     uint size = radius * 2 + 1;
 
@@ -449,7 +453,7 @@ struct FOG_HIDDEN FilterC
         sumA += pixA;
       }
 
-      xp = Math::min((sysint_t)radius, max);
+      xp = Math::min<int>(radius, max);
 
       srcCur = src + xp * 4;
       dstCur = dst;
@@ -513,27 +517,27 @@ struct FOG_HIDDEN FilterC
     const BlurParams* params,
     uint8_t* dst, sysint_t dstStride,
     const uint8_t* src, sysint_t srcStride,
-    sysuint_t width, sysuint_t height, sysint_t offset)
+    int width, int height, int offset)
   {
     int radius = Math::min<int>((int)params->vRadius, 254);
 
     if (radius == 0 || height < 2)
     {
-      functionMap->filter.copy_area[PIXEL_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
+      rasterFuncs.filter.copy_area[IMAGE_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
       return;
     }
 
-    sysint_t dym1 = height;
-    sysint_t dym2 = width;
-    sysint_t max = dym1 - 1;
+    int dym1 = height;
+    int dym2 = width;
+    int max = dym1 - 1;
     sysint_t end = max * srcStride;
 
     uint8_t* dstCur;
     const uint8_t* srcCur;
 
-    sysint_t pos1;
-    sysint_t pos2;
-    sysint_t xp, i;
+    int pos1;
+    int pos2;
+    int xp, i;
 
     uint size = radius * 2 + 1;
 
@@ -628,7 +632,7 @@ struct FOG_HIDDEN FilterC
         sumA += pixA;
       }
 
-      xp = Math::min((sysint_t)radius, max);
+      xp = Math::min<int>(radius, max);
 
       srcCur = src + xp * srcStride;
       dstCur = dst;
@@ -692,27 +696,27 @@ struct FOG_HIDDEN FilterC
     const BlurParams* params,
     uint8_t* dst, sysint_t dstStride,
     const uint8_t* src, sysint_t srcStride,
-    sysuint_t width, sysuint_t height, sysint_t offset)
+    int width, int height, int offset)
   {
     int radius = Math::min<int>((int)params->hRadius, 254);
 
     if (radius == 0 || width < 2)
     {
-      functionMap->filter.copy_area[PIXEL_FORMAT_XRGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
+      rasterFuncs.filter.copy_area[IMAGE_FORMAT_XRGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
       return;
     }
 
-    sysint_t dym1 = (sysint_t)width;
-    sysint_t dym2 = (sysint_t)height;
-    sysint_t max = dym1 - 1;
+    int dym1 = width;
+    int dym2 = height;
+    int max = dym1 - 1;
     sysint_t end = max * 4;
 
     uint8_t* dstCur;
     const uint8_t* srcCur;
 
-    sysint_t pos1;
-    sysint_t pos2;
-    sysint_t xp, i;
+    int pos1;
+    int pos2;
+    int xp, i;
 
     uint size = radius * 2 + 1;
 
@@ -799,7 +803,7 @@ struct FOG_HIDDEN FilterC
         sumB += pixB;
       }
 
-      xp = Math::min((sysint_t)radius, max);
+      xp = Math::min<int>(radius, max);
 
       srcCur = src + xp * 4;
       dstCur = dst;
@@ -859,27 +863,27 @@ struct FOG_HIDDEN FilterC
     const BlurParams* params,
     uint8_t* dst, sysint_t dstStride,
     const uint8_t* src, sysint_t srcStride,
-    sysuint_t width, sysuint_t height, sysint_t offset)
+    int width, int height, int offset)
   {
     int radius = Math::min<int>((int)params->vRadius, 254);
 
     if (radius == 0 || height < 2)
     {
-      functionMap->filter.copy_area[PIXEL_FORMAT_XRGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
+      rasterFuncs.filter.copy_area[IMAGE_FORMAT_XRGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
       return;
     }
 
-    sysint_t dym1 = height;
-    sysint_t dym2 = width;
-    sysint_t max = dym1 - 1;
+    int dym1 = height;
+    int dym2 = width;
+    int max = dym1 - 1;
     sysint_t end = max * srcStride;
 
     uint8_t* dstCur;
     const uint8_t* srcCur;
 
-    sysint_t pos1;
-    sysint_t pos2;
-    sysint_t xp, i;
+    int pos1;
+    int pos2;
+    int xp, i;
 
     uint size = radius * 2 + 1;
 
@@ -966,7 +970,7 @@ struct FOG_HIDDEN FilterC
         sumB += pixB;
       }
 
-      xp = Math::min((sysint_t)radius, max);
+      xp = Math::min<int>(radius, max);
 
       srcCur = src + xp * srcStride;
       dstCur = dst;
@@ -1026,27 +1030,27 @@ struct FOG_HIDDEN FilterC
     const BlurParams* params,
     uint8_t* dst, sysint_t dstStride,
     const uint8_t* src, sysint_t srcStride,
-    sysuint_t width, sysuint_t height, sysint_t offset)
+    int width, int height, int offset)
   {
     int radius = Math::min<int>((int)params->hRadius, 254);
 
     if (radius == 0 || width < 2)
     {
-      functionMap->filter.copy_area[PIXEL_FORMAT_A8](NULL, dst, dstStride, src, srcStride, width, height, offset);
+      rasterFuncs.filter.copy_area[IMAGE_FORMAT_A8](NULL, dst, dstStride, src, srcStride, width, height, offset);
       return;
     }
 
-    sysint_t dym1 = width;
-    sysint_t dym2 = height;
-    sysint_t max = dym1 - 1;
+    int dym1 = width;
+    int dym2 = height;
+    int max = dym1 - 1;
     sysint_t end = max;
 
     uint8_t* dstCur;
     const uint8_t* srcCur;
 
-    sysint_t pos1;
-    sysint_t pos2;
-    sysint_t xp, i;
+    int pos1;
+    int pos2;
+    int xp, i;
 
     uint size = radius * 2 + 1;
 
@@ -1110,7 +1114,7 @@ struct FOG_HIDDEN FilterC
         sum += pix;
       }
 
-      xp = Math::min((sysint_t)radius, max);
+      xp = Math::min<int>(radius, max);
 
       srcCur = src + xp;
       dstCur = dst;
@@ -1152,27 +1156,27 @@ struct FOG_HIDDEN FilterC
     const BlurParams* params,
     uint8_t* dst, sysint_t dstStride,
     const uint8_t* src, sysint_t srcStride,
-    sysuint_t width, sysuint_t height, sysint_t offset)
+    int width, int height, int offset)
   {
     int radius = Math::min<int>((int)params->vRadius, 254);
 
     if (radius == 0 || height < 2)
     {
-      functionMap->filter.copy_area[PIXEL_FORMAT_A8](NULL, dst, dstStride, src, srcStride, width, height, offset);
+      rasterFuncs.filter.copy_area[IMAGE_FORMAT_A8](NULL, dst, dstStride, src, srcStride, width, height, offset);
       return;
     }
 
-    sysint_t dym1 = height;
-    sysint_t dym2 = width;
-    sysint_t max = dym1 - 1;
+    int dym1 = height;
+    int dym2 = width;
+    int max = dym1 - 1;
     sysint_t end = max * srcStride;
 
     uint8_t* dstCur;
     const uint8_t* srcCur;
 
-    sysint_t pos1;
-    sysint_t pos2;
-    sysint_t xp, i;
+    int pos1;
+    int pos2;
+    int xp, i;
 
     uint size = radius * 2 + 1;
 
@@ -1235,7 +1239,7 @@ struct FOG_HIDDEN FilterC
         sum += pix;
       }
 
-      xp = Math::min((sysint_t)radius, max);
+      xp = Math::min<int>(radius, max);
 
       srcCur = src + xp * srcStride;
       dstCur = dst;
@@ -1281,30 +1285,30 @@ struct FOG_HIDDEN FilterC
     const BlurParams* params,
     uint8_t* dst, sysint_t dstStride,
     const uint8_t* src, sysint_t srcStride,
-    sysuint_t width, sysuint_t height, sysint_t offset)
+    int width, int height, int offset)
   {
     int radius = Math::min<int>((int)params->hRadius, 254);
 
     if (radius == 0 || width < 2)
     {
-      functionMap->filter.copy_area[PIXEL_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
+      rasterFuncs.filter.copy_area[IMAGE_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
       return;
     }
 
-    sysint_t dym1 = width;
-    sysint_t dym2 = height;
-    sysint_t max = dym1 - 1;
+    int dym1 = width;
+    int dym2 = height;
+    int max = dym1 - 1;
     sysint_t end = max * 4;
 
     uint8_t* dstCur;
     const uint8_t* srcCur;
 
-    sysint_t pos1;
-    sysint_t pos2;
-    sysint_t xp, i;
+    int pos1;
+    int pos2;
+    int xp, i;
 
-    uint sumMul = linear_blur8_mul[radius];
-    uint sumShr = linear_blur8_shr[radius];
+    uint sumMul = raster_linear_blur8_mul[radius];
+    uint sumShr = raster_linear_blur8_shr[radius];
 
     uint32_t stack[512];
     uint32_t* stackEnd = stack + (radius * 2 + 1);
@@ -1420,7 +1424,7 @@ struct FOG_HIDDEN FilterC
         sumInA          += pixA;
       }
 
-      xp = Math::min((sysint_t)radius, max);
+      xp = Math::min<int>(radius, max);
 
       srcCur = src + xp * 4;
       dstCur = dst;
@@ -1509,30 +1513,30 @@ struct FOG_HIDDEN FilterC
     const BlurParams* params,
     uint8_t* dst, sysint_t dstStride,
     const uint8_t* src, sysint_t srcStride,
-    sysuint_t width, sysuint_t height, sysint_t offset)
+    int width, int height, int offset)
   {
     int radius = Math::min<int>((int)params->vRadius, 254);
 
     if (radius == 0 || height < 2)
     {
-      functionMap->filter.copy_area[PIXEL_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
+      rasterFuncs.filter.copy_area[IMAGE_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
       return;
     }
 
-    sysint_t dym1 = height;
-    sysint_t dym2 = width;
-    sysint_t max = dym1 - 1;
+    int dym1 = height;
+    int dym2 = width;
+    int max = dym1 - 1;
     sysint_t end = max * srcStride;
 
     uint8_t* dstCur;
     const uint8_t* srcCur;
 
-    sysint_t pos1;
-    sysint_t pos2;
-    sysint_t xp, i;
+    int pos1;
+    int pos2;
+    int xp, i;
 
-    uint sumMul = linear_blur8_mul[radius];
-    uint sumShr = linear_blur8_shr[radius];
+    uint sumMul = raster_linear_blur8_mul[radius];
+    uint sumShr = raster_linear_blur8_shr[radius];
 
     uint32_t stack[512];
     uint32_t* stackEnd = stack + (radius * 2 + 1);
@@ -1648,7 +1652,7 @@ struct FOG_HIDDEN FilterC
         sumInA          += pixA;
       }
 
-      xp = Math::min((sysint_t)radius, max);
+      xp = Math::min<int>(radius, max);
 
       srcCur = src + xp * srcStride;
       dstCur = dst;
@@ -1737,30 +1741,30 @@ struct FOG_HIDDEN FilterC
     const BlurParams* params,
     uint8_t* dst, sysint_t dstStride,
     const uint8_t* src, sysint_t srcStride,
-    sysuint_t width, sysuint_t height, sysint_t offset)
+    int width, int height, int offset)
   {
     int radius = Math::min<int>((int)params->hRadius, 254);
 
     if (radius == 0 || width < 2)
     {
-      functionMap->filter.copy_area[PIXEL_FORMAT_A8](NULL, dst, dstStride, src, srcStride, width, height, offset);
+      rasterFuncs.filter.copy_area[IMAGE_FORMAT_A8](NULL, dst, dstStride, src, srcStride, width, height, offset);
       return;
     }
 
-    sysint_t dym1 = width;
-    sysint_t dym2 = height;
-    sysint_t max = dym1 - 1;
+    int dym1 = width;
+    int dym2 = height;
+    int max = dym1 - 1;
     sysint_t end = max;
 
     uint8_t* dstCur;
     const uint8_t* srcCur;
 
-    sysint_t pos1;
-    sysint_t pos2;
-    sysint_t xp, i;
+    int pos1;
+    int pos2;
+    int xp, i;
 
-    uint sumMul = linear_blur8_mul[radius];
-    uint sumShr = linear_blur8_shr[radius];
+    uint sumMul = raster_linear_blur8_mul[radius];
+    uint sumShr = raster_linear_blur8_shr[radius];
 
     uint8_t stack[512];
     uint8_t* stackEnd = stack + (radius * 2 + 1);
@@ -1826,7 +1830,7 @@ struct FOG_HIDDEN FilterC
         sumIn          += pix;
       }
 
-      xp = Math::min((sysint_t)radius, max);
+      xp = Math::min<int>(radius, max);
 
       srcCur = src + xp;
       dstCur = dst;
@@ -1880,30 +1884,30 @@ struct FOG_HIDDEN FilterC
     const BlurParams* params,
     uint8_t* dst, sysint_t dstStride,
     const uint8_t* src, sysint_t srcStride,
-    sysuint_t width, sysuint_t height, sysint_t offset)
+    int width, int height, int offset)
   {
     int radius = Math::min<int>((int)params->vRadius, 254);
 
     if (radius == 0 || height < 2)
     {
-      functionMap->filter.copy_area[PIXEL_FORMAT_A8](NULL, dst, dstStride, src, srcStride, width, height, offset);
+      rasterFuncs.filter.copy_area[IMAGE_FORMAT_A8](NULL, dst, dstStride, src, srcStride, width, height, offset);
       return;
     }
 
-    sysint_t dym1 = height;
-    sysint_t dym2 = width;
-    sysint_t max = dym1 - 1;
+    int dym1 = height;
+    int dym2 = width;
+    int max = dym1 - 1;
     sysint_t end = max * srcStride;
 
     uint8_t* dstCur;
     const uint8_t* srcCur;
 
-    sysint_t pos1;
-    sysint_t pos2;
-    sysint_t xp, i;
+    int pos1;
+    int pos2;
+    int xp, i;
 
-    uint sumMul = linear_blur8_mul[radius];
-    uint sumShr = linear_blur8_shr[radius];
+    uint sumMul = raster_linear_blur8_mul[radius];
+    uint sumShr = raster_linear_blur8_shr[radius];
 
     uint8_t stack[512];
     uint8_t* stackEnd = stack + (radius * 2 + 1);
@@ -1975,7 +1979,7 @@ struct FOG_HIDDEN FilterC
         sumIn          += pix;
       }
 
-      xp = Math::min((sysint_t)radius, max);
+      xp = Math::min<int>(radius, max);
 
       srcCur = src + xp * srcStride;
       dstCur = dst;
@@ -2029,33 +2033,33 @@ struct FOG_HIDDEN FilterC
   // --------------------------------------------------------------------------
 
   static void FOG_FASTCALL symmetric_convolve_float_h_argb32(
-    const SymmetricConvolveParamsF* params,
+    const FloatSymmetricConvolveParams* params,
     uint8_t* dst, sysint_t dstStride,
     const uint8_t* src, sysint_t srcStride,
-    sysuint_t width, sysuint_t height, sysint_t offset)
+    int width, int height, int offset)
   {
     const float* kernel = params->hMatrix.getData();
-    sysint_t size = params->hMatrix.getLength();
+    int size = (int)params->hMatrix.getLength();
 
     if (size == 0 || width < 2)
     {
-      functionMap->filter.copy_area[PIXEL_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
+      rasterFuncs.filter.copy_area[IMAGE_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
       return;
     }
 
-    sysint_t dym1 = width;
-    sysint_t dym2 = height;
-    sysint_t max = dym1 - 1;
+    int dym1 = width;
+    int dym2 = height;
+    int max = dym1 - 1;
     sysint_t end = max * 4;
 
     uint8_t* dstCur;
     const uint8_t* srcCur;
 
-    sysint_t pos1;
-    sysint_t pos2;
-    sysint_t xp, i;
+    int pos1;
+    int pos2;
+    int xp, i;
 
-    sysint_t sizeHalf = size >> 1;
+    int sizeHalf = size >> 1;
 
     LocalBuffer<256*sizeof(uint32_t)> stackBuffer;
     uint32_t* stack = (uint32_t*)stackBuffer.alloc(size * sizeof(uint32_t));
@@ -2132,10 +2136,10 @@ struct FOG_HIDDEN FilterC
         }
 
         ((uint32_t*)dstCur)[0] =
-          ((uint32_t)clamp255((int)cr) << 16) |
-          ((uint32_t)clamp255((int)cg) <<  8) |
-          ((uint32_t)clamp255((int)cb)      ) |
-          ((uint32_t)clamp255((int)ca) << 24) ;
+          ((uint32_t)Math::boundToByte((int)cr) << 16) |
+          ((uint32_t)Math::boundToByte((int)cg) <<  8) |
+          ((uint32_t)Math::boundToByte((int)cb)      ) |
+          ((uint32_t)Math::boundToByte((int)ca) << 24) ;
         dstCur += 4;
 
         if (xp < dym1)
@@ -2160,33 +2164,33 @@ struct FOG_HIDDEN FilterC
   }
 
   static void FOG_FASTCALL symmetric_convolve_float_v_argb32(
-    const SymmetricConvolveParamsF* params,
+    const FloatSymmetricConvolveParams* params,
     uint8_t* dst, sysint_t dstStride,
     const uint8_t* src, sysint_t srcStride,
-    sysuint_t width, sysuint_t height, sysint_t offset)
+    int width, int height, int offset)
   {
     const float* kernel = params->vMatrix.getData();
-    sysint_t size = params->vMatrix.getLength();
+    int size = (int)params->vMatrix.getLength();
 
     if (size == 0 || height < 2)
     {
-      functionMap->filter.copy_area[PIXEL_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
+      rasterFuncs.filter.copy_area[IMAGE_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
       return;
     }
 
-    sysint_t dym1 = height;
-    sysint_t dym2 = width;
-    sysint_t max = dym1 - 1;
+    int dym1 = height;
+    int dym2 = width;
+    int max = dym1 - 1;
     sysint_t end = max * srcStride;
 
     uint8_t* dstCur;
     const uint8_t* srcCur;
 
-    sysint_t pos1;
-    sysint_t pos2;
-    sysint_t xp, i;
+    int pos1;
+    int pos2;
+    int xp, i;
 
-    sysint_t sizeHalf = size >> 1;
+    int sizeHalf = size >> 1;
 
     LocalBuffer<256*sizeof(uint32_t)> stackBuffer;
     uint32_t* stack = (uint32_t*)stackBuffer.alloc(size * sizeof(uint32_t));
@@ -2263,10 +2267,10 @@ struct FOG_HIDDEN FilterC
         }
 
         ((uint32_t*)dstCur)[0] =
-          ((uint32_t)clamp255((int)cr) << 16) |
-          ((uint32_t)clamp255((int)cg) <<  8) |
-          ((uint32_t)clamp255((int)cb)      ) |
-          ((uint32_t)clamp255((int)ca) << 24) ;
+          ((uint32_t)Math::boundToByte((int)cr) << 16) |
+          ((uint32_t)Math::boundToByte((int)cg) <<  8) |
+          ((uint32_t)Math::boundToByte((int)cb)      ) |
+          ((uint32_t)Math::boundToByte((int)ca) << 24) ;
         dstCur += dstStride;
 
         if (xp < dym1)
@@ -2291,33 +2295,33 @@ struct FOG_HIDDEN FilterC
   }
 
   static void FOG_FASTCALL symmetric_convolve_float_h_a8(
-    const SymmetricConvolveParamsF* params,
+    const FloatSymmetricConvolveParams* params,
     uint8_t* dst, sysint_t dstStride,
     const uint8_t* src, sysint_t srcStride,
-    sysuint_t width, sysuint_t height, sysint_t offset)
+    int width, int height, int offset)
   {
     const float* kernel = params->hMatrix.getData();
-    sysint_t size = params->hMatrix.getLength();
+    int size = (int)params->hMatrix.getLength();
 
     if (size == 0 || width < 2)
     {
-      functionMap->filter.copy_area[PIXEL_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
+      rasterFuncs.filter.copy_area[IMAGE_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
       return;
     }
 
-    sysint_t dym1 = width;
-    sysint_t dym2 = height;
-    sysint_t max = dym1 - 1;
+    int dym1 = width;
+    int dym2 = height;
+    int max = dym1 - 1;
     sysint_t end = max;
 
     uint8_t* dstCur;
     const uint8_t* srcCur;
 
-    sysint_t pos1;
-    sysint_t pos2;
-    sysint_t xp, i;
+    int pos1;
+    int pos2;
+    int xp, i;
 
-    sysint_t sizeHalf = size >> 1;
+    int sizeHalf = size >> 1;
 
     LocalBuffer<256*sizeof(uint32_t)> stackBuffer;
     uint8_t* stack = (uint8_t*)stackBuffer.alloc(size * sizeof(uint8_t));
@@ -2387,7 +2391,7 @@ struct FOG_HIDDEN FilterC
           if (stackCur == stackEnd) stackCur = stack;
         }
 
-        dstCur[0] = (uint8_t)clamp255((int)ca);
+        dstCur[0] = (uint8_t)Math::boundToByte((int)ca);
         dstCur += 1;
 
         if (xp < dym1)
@@ -2411,33 +2415,33 @@ struct FOG_HIDDEN FilterC
   }
 
   static void FOG_FASTCALL symmetric_convolve_float_v_a8(
-    const SymmetricConvolveParamsF* params,
+    const FloatSymmetricConvolveParams* params,
     uint8_t* dst, sysint_t dstStride,
     const uint8_t* src, sysint_t srcStride,
-    sysuint_t width, sysuint_t height, sysint_t offset)
+    int width, int height, int offset)
   {
     const float* kernel = params->vMatrix.getData();
-    sysint_t size = params->vMatrix.getLength();
+    int size = (int)params->vMatrix.getLength();
 
     if (size == 0 || height < 2)
     {
-      functionMap->filter.copy_area[PIXEL_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
+      rasterFuncs.filter.copy_area[IMAGE_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
       return;
     }
 
-    sysint_t dym1 = height;
-    sysint_t dym2 = width;
-    sysint_t max = dym1 - 1;
+    int dym1 = height;
+    int dym2 = width;
+    int max = dym1 - 1;
     sysint_t end = max * srcStride;
 
     uint8_t* dstCur;
     const uint8_t* srcCur;
 
-    sysint_t pos1;
-    sysint_t pos2;
-    sysint_t xp, i;
+    int pos1;
+    int pos2;
+    int xp, i;
 
-    sysint_t sizeHalf = size >> 1;
+    int sizeHalf = size >> 1;
 
     LocalBuffer<256*sizeof(uint32_t)> stackBuffer;
     uint8_t* stack = (uint8_t*)stackBuffer.alloc(size * sizeof(uint8_t));
@@ -2507,7 +2511,7 @@ struct FOG_HIDDEN FilterC
           if (stackCur == stackEnd) stackCur = stack;
         }
 
-        dstCur[0] = (uint8_t)clamp255((int)ca);
+        dstCur[0] = (uint8_t)Math::boundToByte((int)ca);
         dstCur += dstStride;
 
         if (xp < dym1)

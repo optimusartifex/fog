@@ -12,10 +12,10 @@
 #include <Fog/Core/FileSystem.h>
 #include <Fog/Core/String.h>
 
-//! @addtogroup Fog_Core
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Core_Streaming
+//! @{
 
 // ============================================================================
 // [Fog::Constants]
@@ -233,9 +233,9 @@ struct FOG_API Stream
   FOG_DECLARE_D(StreamDevice)
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // ============================================================================
 // [Fog::TypeInfo<>]

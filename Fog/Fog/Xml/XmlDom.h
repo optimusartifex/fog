@@ -8,17 +8,17 @@
 #define _FOG_XML_XMLDOM_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Hash.h>
 #include <Fog/Core/List.h>
 #include <Fog/Core/ManagedString.h>
 #include <Fog/Core/String.h>
 #include <Fog/Xml/Constants.h>
 
-//! @addtogroup Fog_Xml
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Xml_Dom
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -41,8 +41,9 @@ struct XmlWriter;
 // [Fog::XmlIdManager]
 // ============================================================================
 
-//! @brief Hash table to store element IDs used by @c XmlDocument. Do not use directly.
 //! @internal
+//!
+//! @brief Hash table to store element IDs used by @c XmlDocument. Do not use directly.
 struct FOG_API XmlIdManager
 {
   // [Construction / Destruction]
@@ -88,6 +89,7 @@ private:
 // [Fog::XmlAttribute]
 // ============================================================================
 
+//! @brief Xml attribute.
 struct FOG_API XmlAttribute
 {
   // [Construction / Destruction]
@@ -133,6 +135,7 @@ private:
 // [Fog::XmlElement]
 // ============================================================================
 
+//! @brief Xml element.
 struct FOG_API XmlElement
 {
   // [Construction / Destruction]
@@ -353,6 +356,7 @@ private:
 // [Fog::XmlText]
 // ============================================================================
 
+//! @brief Xml text element.
 struct FOG_API XmlText : public XmlElement
 {
   // [Construction / Destruction]
@@ -392,6 +396,7 @@ private:
 // [Fog::XmlNoTextElement]
 // ============================================================================
 
+//! @brief Xml no text element (convenience, base class for others).
 struct FOG_API XmlNoTextElement : public XmlElement
 {
   // [Construction / Destruction]
@@ -411,6 +416,7 @@ private:
 // [Fog::XmlComment]
 // ============================================================================
 
+//! @brief Xml comment element.
 struct FOG_API XmlComment : public XmlNoTextElement
 {
   // [Construction / Destruction]
@@ -443,6 +449,7 @@ private:
 // [Fog::XmlCDATA]
 // ============================================================================
 
+//! @brief Xml CDATA section.
 struct FOG_API XmlCDATA : public XmlNoTextElement
 {
   // [Construction / Destruction]
@@ -475,6 +482,7 @@ private:
 // [Fog::XmlPI]
 // ============================================================================
 
+//! @brief Xml processing instructions.
 struct FOG_API XmlPI : public XmlNoTextElement
 {
   // [Construction / Destruction]
@@ -507,6 +515,7 @@ private:
 // [Fog::XmlDocument]
 // ============================================================================
 
+//! @brief Xml document element.
 struct FOG_API XmlDocument : public XmlElement
 {
   // [Construction / Destruction]
@@ -545,10 +554,10 @@ struct FOG_API XmlDocument : public XmlElement
 
   // [Read]
 
-  virtual err_t readFile(const String& fileName);
-  virtual err_t readStream(Stream& stream);
-  virtual err_t readMemory(const void* mem, sysuint_t size);
-  virtual err_t readString(const String& str);
+  virtual err_t readFromFile(const String& fileName);
+  virtual err_t readFromStream(Stream& stream);
+  virtual err_t readFromMemory(const void* mem, sysuint_t size);
+  virtual err_t readFromString(const String& str);
 
   // [DOCTYPE]
 
@@ -578,9 +587,9 @@ private:
   FOG_DISABLE_COPY(XmlDocument)
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_XML_XMLDOM_H

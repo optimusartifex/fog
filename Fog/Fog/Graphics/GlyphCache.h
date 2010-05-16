@@ -10,10 +10,10 @@
 // [Dependencies]
 #include <Fog/Graphics/Glyph.h>
 
-//! @addtogroup Fog_Graphics
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Graphics_Text
+//! @{
 
 // ============================================================================
 // [Fog::GlyphCache]
@@ -54,9 +54,9 @@ private:
   FOG_DISABLE_COPY(GlyphCache)
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GRAPHICS_GLYPHCACHE_H

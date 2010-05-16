@@ -39,12 +39,15 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/TypeInfo.h>
 
 #include <memory.h> // to allow <,> comparisons
 
-//            Delegate.h 
+#if !defined(FOG_DOXYGEN)
+
+// Delegate.h 
+//
 //  Efficient delegates in C++ that generate only two lines of asm code!
 //  Documentation is found at http://www.codeproject.com/cpp/Delegate.asp
 //
@@ -2151,6 +2154,8 @@ FOG_DECLARE_TYPEINFO_TEMPLATE6(Fog::Delegate5, class, T0, class, T1, class, T2, 
 FOG_DECLARE_TYPEINFO_TEMPLATE7(Fog::Delegate6, class, T0, class, T1, class, T2, class, T3, class, T4, class, T5, class, RET, Fog::TYPEINFO_PRIMITIVE)
 FOG_DECLARE_TYPEINFO_TEMPLATE8(Fog::Delegate7, class, T0, class, T1, class, T2, class, T3, class, T4, class, T5, class, T6, class, RET, Fog::TYPEINFO_PRIMITIVE)
 FOG_DECLARE_TYPEINFO_TEMPLATE9(Fog::Delegate8, class, T0, class, T1, class, T2, class, T3, class, T4, class, T5, class, T6, class, T7, class, RET, Fog::TYPEINFO_PRIMITIVE)
+
+#endif // FOG_DOXYGEN
 
 // [Guard]
 #endif // _FOG_CORE_DELEGATE_H

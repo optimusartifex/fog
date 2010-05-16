@@ -12,7 +12,7 @@
 #define _FOG_CORE_THREAD_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Atomic.h>
 #include <Fog/Core/EventLoop.h>
 #include <Fog/Core/String.h>
@@ -24,7 +24,7 @@
 
 namespace Fog {
 
-//! @addtogroup Fog_Core
+//! @addtogroup Fog_Core_Threading
 //! @{
 
 // ============================================================================
@@ -295,9 +295,9 @@ private:
   FOG_DISABLE_COPY(Thread)
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_CORE_THREAD_H

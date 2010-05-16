@@ -8,13 +8,13 @@
 #define _FOG_CORE_STRINGS_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/ManagedString.h>
 
-//! @addtogroup Fog_Core
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Core_Essentials
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -197,9 +197,9 @@ enum STR_ID
 
 extern FOG_API ManagedString::Cache* fog_strings;
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_CORE_STRINGS_H

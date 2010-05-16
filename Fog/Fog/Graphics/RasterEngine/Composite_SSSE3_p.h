@@ -4,13 +4,11 @@
 // MIT, See COPYING file in package
 
 // For some IDEs to enable code-assist.
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 
 #if defined(FOG_IDE)
 #include <Fog/Graphics/RasterEngine/Defs_SSSE3_p.h>
 #include <Fog/Graphics/RasterEngine/Dib_SSSE3_p.h>
-
-#include "RasterEngine_Defs_SSE2_p.h"
 #endif // FOG_IDE
 
 namespace Fog {
@@ -20,43 +18,43 @@ namespace RasterEngine {
 // [Fog::RasterEngine::SSSE3 - Composite - SrcOver]
 // ============================================================================
 
-SSE2_DECLARE_CONST_PI8_VAR(SSSE3_unpack_argb_1x1W_from_1x1B,
+FOG_DECLARE_SSE_CONST_PI8_VAR(SSSE3_unpack_argb_1x1W_from_1x1B,
   0x80, 0x80, 0x80, 0x80,
   0x80, 0x80, 0x80, 0x80,
   0x80, 0x03, 0x80, 0x02,
   0x80, 0x01, 0x80, 0x00);
 
-SSE2_DECLARE_CONST_PI8_VAR(SSSE3_unpack_argb_2x1W_from_4x1B_lo,
+FOG_DECLARE_SSE_CONST_PI8_VAR(SSSE3_unpack_argb_2x1W_from_4x1B_lo,
   0x80, 0x07, 0x80, 0x06,
   0x80, 0x05, 0x80, 0x04,
   0x80, 0x03, 0x80, 0x02,
   0x80, 0x01, 0x80, 0x00);
 
-SSE2_DECLARE_CONST_PI8_VAR(SSSE3_unpack_argb_2x1W_from_4x1B_hi,
+FOG_DECLARE_SSE_CONST_PI8_VAR(SSSE3_unpack_argb_2x1W_from_4x1B_hi,
   0x80, 0x0F, 0x80, 0x0E,
   0x80, 0x0D, 0x80, 0x0C,
   0x80, 0x0B, 0x80, 0x0A,
   0x80, 0x09, 0x80, 0x08);
 
-SSE2_DECLARE_CONST_PI8_VAR(SSSE3_unpack_0rgb_1x1W_from_1x1B,
+FOG_DECLARE_SSE_CONST_PI8_VAR(SSSE3_unpack_0rgb_1x1W_from_1x1B,
   0x80, 0x80, 0x80, 0x80,
   0x80, 0x80, 0x80, 0x80,
   0x80, 0x80, 0x80, 0x02,
   0x80, 0x01, 0x80, 0x00);
 
-SSE2_DECLARE_CONST_PI8_VAR(SSSE3_unpack_aaaa_1x1W_from_1x1B,
+FOG_DECLARE_SSE_CONST_PI8_VAR(SSSE3_unpack_aaaa_1x1W_from_1x1B,
   0x80, 0x80, 0x80, 0x80,
   0x80, 0x80, 0x80, 0x80,
   0x80, 0x03, 0x80, 0x03,
   0x80, 0x03, 0x80, 0x03);
 
-SSE2_DECLARE_CONST_PI8_VAR(SSSE3_unpack_aaaa_2x1W_from_4x1B_lo,
+FOG_DECLARE_SSE_CONST_PI8_VAR(SSSE3_unpack_aaaa_2x1W_from_4x1B_lo,
   0x80, 0x07, 0x80, 0x07,
   0x80, 0x07, 0x80, 0x07,
   0x80, 0x03, 0x80, 0x03,
   0x80, 0x03, 0x80, 0x03);
 
-SSE2_DECLARE_CONST_PI8_VAR(SSSE3_unpack_aaaa_2x1W_from_4x1B_hi,
+FOG_DECLARE_SSE_CONST_PI8_VAR(SSSE3_unpack_aaaa_2x1W_from_4x1B_hi,
   0x80, 0x0F, 0x80, 0x0F,
   0x80, 0x0F, 0x80, 0x0F,
   0x80, 0x0B, 0x80, 0x0B,
@@ -74,52 +72,47 @@ template<uint8_t T00, uint8_t T01, uint8_t T02, uint8_t T03,
          uint8_t T12, uint8_t T13, uint8_t T14, uint8_t T15>
 static FOG_INLINE void ssse3_pshufb(__m128i& dst, __m128i src)
 {
-  SSE2_DECLARE_CONST_PI8_VAR(c,
+  FOG_DECLARE_SSE_CONST_PI8_VAR(c,
     T00, T01, T02, T03,
     T04, T05, T06, T07,
     T08, T09, T10, T11,
     T12, T13, T14, T15);
-  dst = _mm_shuffle_epi8(src, SSE2_GET_CONST_PI(c));
+  dst = _mm_shuffle_epi8(src, FOG_GET_SSE_CONST_PI(c));
 }
 
 static FOG_INLINE void ssse3_unpack_argb_1x1W_from_1x1B(__m128i& dst, const __m128i& src)
 {
-  dst = _mm_shuffle_epi8(src, SSE2_GET_CONST_PI(SSSE3_unpack_argb_1x1W_from_1x1B));
+  dst = _mm_shuffle_epi8(src, FOG_GET_SSE_CONST_PI(SSSE3_unpack_argb_1x1W_from_1x1B));
 }
 
 static FOG_INLINE void ssse3_unpack_argb_2x1W_from_4x1B_lo(__m128i& dst, const __m128i& src)
 {
-  dst = _mm_shuffle_epi8(src, SSE2_GET_CONST_PI(SSSE3_unpack_argb_2x1W_from_4x1B_lo));
+  dst = _mm_shuffle_epi8(src, FOG_GET_SSE_CONST_PI(SSSE3_unpack_argb_2x1W_from_4x1B_lo));
 }
 
 static FOG_INLINE void ssse3_unpack_argb_2x1W_from_4x1B_hi(__m128i& dst, const __m128i& src)
 {
-  dst = _mm_shuffle_epi8(src, SSE2_GET_CONST_PI(SSSE3_unpack_argb_2x1W_from_4x1B_hi));
+  dst = _mm_shuffle_epi8(src, FOG_GET_SSE_CONST_PI(SSSE3_unpack_argb_2x1W_from_4x1B_hi));
 }
 
 static FOG_INLINE void ssse3_unpack_0rgb_1x1W_from_1x1B(__m128i& dst, const __m128i& src)
 {
-  dst = _mm_shuffle_epi8(src, SSE2_GET_CONST_PI(SSSE3_unpack_0rgb_1x1W_from_1x1B));
+  dst = _mm_shuffle_epi8(src, FOG_GET_SSE_CONST_PI(SSSE3_unpack_0rgb_1x1W_from_1x1B));
 }
 
 static FOG_INLINE void ssse3_unpack_aaaa_1x1W_from_1x1B(__m128i& dst, const __m128i& src)
 {
-  dst = _mm_shuffle_epi8(src, SSE2_GET_CONST_PI(SSSE3_unpack_aaaa_1x1W_from_1x1B));
+  dst = _mm_shuffle_epi8(src, FOG_GET_SSE_CONST_PI(SSSE3_unpack_aaaa_1x1W_from_1x1B));
 }
 
 static FOG_INLINE void ssse3_unpack_aaaa_2x1W_from_4x1B_lo(__m128i& dst, const __m128i& src)
 {
-  dst = _mm_shuffle_epi8(src, SSE2_GET_CONST_PI(SSSE3_unpack_aaaa_2x1W_from_4x1B_lo));
+  dst = _mm_shuffle_epi8(src, FOG_GET_SSE_CONST_PI(SSSE3_unpack_aaaa_2x1W_from_4x1B_lo));
 }
 
 static FOG_INLINE void ssse3_unpack_aaaa_2x1W_from_4x1B_hi(__m128i& dst, const __m128i& src)
 {
-  dst = _mm_shuffle_epi8(src, SSE2_GET_CONST_PI(SSSE3_unpack_aaaa_2x1W_from_4x1B_hi));
-}
-
-static FOG_INLINE void sse2_negate_1x4B(__m128i& dst0xmm, const __m128i& src0xmm)
-{
-  dst0xmm = _mm_xor_si128(src0xmm, SSE2_GET_CONST_PI(FF000000FF000000_FF000000FF000000));
+  dst = _mm_shuffle_epi8(src, FOG_GET_SSE_CONST_PI(SSSE3_unpack_aaaa_2x1W_from_4x1B_hi));
 }
 
 static FOG_INLINE void sse2_unpack_4x2W(
@@ -148,28 +141,29 @@ static FOG_INLINE void sse2_muldiv255_4x2W(
   dst2 = _mm_mullo_epi16(data2, alpha2);
   dst3 = _mm_mullo_epi16(data3, alpha3);
 
-  dst0 = _mm_adds_epu16(dst0, SSE2_GET_CONST_PI(0080008000800080_0080008000800080));
-  dst1 = _mm_adds_epu16(dst1, SSE2_GET_CONST_PI(0080008000800080_0080008000800080));
-  dst2 = _mm_adds_epu16(dst2, SSE2_GET_CONST_PI(0080008000800080_0080008000800080));
-  dst3 = _mm_adds_epu16(dst3, SSE2_GET_CONST_PI(0080008000800080_0080008000800080));
+  dst0 = _mm_adds_epu16(dst0, FOG_GET_SSE_CONST_PI(0080008000800080_0080008000800080));
+  dst1 = _mm_adds_epu16(dst1, FOG_GET_SSE_CONST_PI(0080008000800080_0080008000800080));
+  dst2 = _mm_adds_epu16(dst2, FOG_GET_SSE_CONST_PI(0080008000800080_0080008000800080));
+  dst3 = _mm_adds_epu16(dst3, FOG_GET_SSE_CONST_PI(0080008000800080_0080008000800080));
 
-  dst0 = _mm_mulhi_epu16(dst0, SSE2_GET_CONST_PI(0101010101010101_0101010101010101));
-  dst1 = _mm_mulhi_epu16(dst1, SSE2_GET_CONST_PI(0101010101010101_0101010101010101));
-  dst2 = _mm_mulhi_epu16(dst2, SSE2_GET_CONST_PI(0101010101010101_0101010101010101));
-  dst3 = _mm_mulhi_epu16(dst3, SSE2_GET_CONST_PI(0101010101010101_0101010101010101));
+  dst0 = _mm_mulhi_epu16(dst0, FOG_GET_SSE_CONST_PI(0101010101010101_0101010101010101));
+  dst1 = _mm_mulhi_epu16(dst1, FOG_GET_SSE_CONST_PI(0101010101010101_0101010101010101));
+  dst2 = _mm_mulhi_epu16(dst2, FOG_GET_SSE_CONST_PI(0101010101010101_0101010101010101));
+  dst3 = _mm_mulhi_epu16(dst3, FOG_GET_SSE_CONST_PI(0101010101010101_0101010101010101));
 }
 
+//! @internal
 struct FOG_HIDDEN CompositeSrcOverSSSE3
 {
   // -------------------------------------------------------------------------
-  // [CompositeSrcOverSSE2 - PRGB32]
+  // [CompositeSrcOverSSSE3 - PRGB32 - VBlit - PRGB32]
   // -------------------------------------------------------------------------
 
   // OPERATOR_SRC_OVER implementation for newest architectures with SSSE3
   // support. Idea is very simple. These architectures are really powerful,
   // so I all jumps were eliminated and inner loop was unrolled a lot.
-  static void FOG_FASTCALL prgb32_vspan_prgb32(
-    uint8_t* dst, const uint8_t* src, sysint_t w, const Closure* closure)
+  static void FOG_FASTCALL prgb32_vblit_prgb32_full(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     FOG_ASSERT(w);
 
@@ -243,8 +237,8 @@ start:
 
       sse2_load16a(dst0xmm, dst     );
       sse2_load16a(dst2xmm, dst + 16);
-      sse2_negate_1x4B(inv0xmm, src0xmm);
-      sse2_negate_1x4B(inv2xmm, src2xmm);
+      sse2_negate_alpha_1x4B(inv0xmm, src0xmm);
+      sse2_negate_alpha_1x4B(inv2xmm, src2xmm);
 
       sse2_load16a(dst4xmm, dst + 32);
       sse2_load16a(dst6xmm, dst + 48);
@@ -262,8 +256,8 @@ start:
         dst0xmm, dst0xmm, inv0xmm, dst1xmm, dst1xmm, inv1xmm,
         dst2xmm, dst2xmm, inv2xmm, dst3xmm, dst3xmm, inv3xmm);
 
-      sse2_negate_1x4B(inv0xmm, src4xmm);
-      sse2_negate_1x4B(inv2xmm, src6xmm);
+      sse2_negate_alpha_1x4B(inv0xmm, src4xmm);
+      sse2_negate_alpha_1x4B(inv2xmm, src6xmm);
 
       sse2_pack_2x2W(dst0xmm, dst0xmm, dst1xmm);
       sse2_pack_2x2W(dst2xmm, dst2xmm, dst3xmm);
@@ -310,7 +304,7 @@ start:
       ssse3_load16u(src0xmm, src);
       sse2_load16a(dst0xmm, dst);
 
-      sse2_negate_1x4B(inv0xmm, src0xmm);
+      sse2_negate_alpha_1x4B(inv0xmm, src0xmm);
       sse2_unpack_2x2W(dst0xmm, dst1xmm, dst0xmm);
 
       ssse3_unpack_aaaa_2x1W_from_4x1B_hi(inv1xmm, inv0xmm);

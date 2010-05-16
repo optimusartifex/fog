@@ -20,21 +20,21 @@
 #include <Fog/Core/Static.h>
 #include <Fog/Core/String.h>
 #include <Fog/Core/UserInfo.h>
-#include <Fog/Graphics/Argb.h>
+#include <Fog/Graphics/Color.h>
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/Font.h>
 #include <Fog/Graphics/Glyph.h>
 #include <Fog/Graphics/GlyphCache.h>
 
 #if defined(FOG_FONT_WINDOWS)
-#include <Fog/Graphics/FontEngine/Gdi.h>
+#include <Fog/Graphics/FontEngine/FontEngine_Windows.h>
 #endif // FOG_FONT_WINDOWS
 
 #if defined(FOG_FONT_FREETYPE)
-#include <Fog/Graphics/FontEngine/FreeType.h>
+#include <Fog/Graphics/FontEngine/FontEngine_FreeType.h>
 #endif // FOG_FONT_FREETYPE
 
-#include <Fog/Graphics/FontEngine/Null_p.h>
+#include <Fog/Graphics/FontEngine/FontEngine_Null_p.h>
 
 namespace Fog {
 
@@ -268,7 +268,7 @@ List<String> FontEngine::getDefaultFontDirectories()
   // Add MAC font directories.
   String home;
 
-  if (UserInfo::getDirectory(home, UserInfo::DIRECTORY_HOME) == ERR_OK)
+  if (UserInfo::getDirectory(home, USER_DIRECTORY_HOME) == ERR_OK)
   {
     paths.append(home + Ascii8("/Library/Fonts"));
   }
@@ -280,7 +280,7 @@ List<String> FontEngine::getDefaultFontDirectories()
   {
     String home;
 
-    if (UserInfo::getDirectory(home, UserInfo::DIRECTORY_HOME) == ERR_OK)
+    if (UserInfo::getDirectory(home, USER_DIRECTORY_HOME) == ERR_OK)
     {
       paths.append(home);
       paths.append(home + Ascii8("/fonts"));

@@ -1,3 +1,39 @@
+2010-05-12
+- Removed Fog::BitArray, currently not used and unfinished.
+- Removed Fog::ScopedHANDLE, never used too.
+- Renamed INTERPOLATION_TYPE to IMAGE_INTERPOLATION_TYPE and COLOR_INTERPOLATION_TYPE.
+- Fixed Stroker, now degenerate cases are stroked correctly.
+- Fixed Path::addRound().
+- Fixed Path::arcTo().
+- Fixed DoublePath::getBoundingRect(), now the bounding rect is correct.
+- Added DoublePath::fitTo(), uses getBoundingRect() internally.
+- Fixed compiling under 32-bit Linux / MinGW (GCC issue), added some inline assembly.
+- Rewritten blitters and spans. Now it's able to use single span structure for nearly 
+  all blit operations, see SPAN_TYPE, Span, Span8, SpanExt8.
+- Optimized pattern fetchers, they can now fetch more patterns in single function call
+  (blitting is also single function call so now the function call overhead is minimized).
+- Added basic support for text rotation, incomplete, not works when using FreeType.
+- C/MMX/SSE2 code was split into many files, now it's more readable.
+- RasterPaintEngine code was split too, isolating core engine, commands, calculations,
+  renderers and workers (used for multithreading)
+- Renamed other files in Fog/Graphics package (ImageIO/Bmp.cpp to ImageIO/ImageIO_Bmp.cpp,
+  etc. This scheme was used in past, abandoned and refreshed).
+- FogBench tool split into several files, many imporvements to test also SRC operator.
+- FogBench tool contains Qt4 benchmark, implicitly disabled.
+- Improved SVG support (fill and stroke opacity, added support for polygon and polyline).
+- Improved XML support (added missing support for CDATA section).
+- Added clip regions that can be defined by paths into the painter.
+- Added opacity to the painter. Opacity is like constant alpha mask.
+- Added PAINTER_INIT_CLEAR flag so painter will know that it should clear the surface.
+
+2010-04-07
+- FogBench now contains benchmark summary.
+
+2010-04-06
+- Possibility to use main task (main thread) in multithreaded paint engine, but currently
+  it's much slower than previous way and disabled.
+- Changed some internals in multithreading.
+
 2010-04-05
 - New raster painter architecture that performs better in both modes - singlethreaded
   and multithreaded. See diff, there was really a lot of work.
@@ -181,4 +217,3 @@
 2010-01-01
 - Welcome to 2010.
 - Changelog started.
-

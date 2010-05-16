@@ -14,16 +14,16 @@
 #define _FOG_GRAPHICS_COLORMATRIX_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/Math.h>
 #include <Fog/Graphics/Constants.h>
 
-//! @addtogroup Fog_Graphics
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Graphics_Effects
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -37,8 +37,9 @@ struct Argb;
 
 //! @brief Color matrix.
 //!
-//! The color matrix is a 5x5 matrix that can be used to do color transformations
-//! The idea is like affine transformations for vector painter coordinates.
+//! The color matrix is a 5x5 matrix that can be used to do a color based
+//! transformations. But unlike the affine transformations used by vector
+//! graphics input and output to color matrix is an ARGB color entity.
 struct FOG_API ColorMatrix
 {
   // --------------------------------------------------------------------------
@@ -110,17 +111,17 @@ struct FOG_API ColorMatrix
     //!   [n n n n n]
     TYPE_SHEAR_ALPHA = 0x02,
 
-    //! @brief Matrix contains RGBA shear part.
+    //! @brief Matrix contains ARGB shear part.
     //!
-    //! RGBA shear part is illustrated here:
+    //! ARGB shear part is illustrated here:
     //!   [n X X X n]
     //!   [X n X X n]
     //!   [X X n X n]
     //!   [X X X n n]
     //!   [n n n n n]
     //!
-    //! @note RGBA shear is combination of RGB and Alpha shear parts.
-    TYPE_SHEAR_RGBA = 0x03,
+    //! @note ARGB shear is combination of RGB and Alpha shear parts.
+    TYPE_SHEAR_ARGB = 0x03,
 
     //! @brief Matrix contains RGB lut part.
     //!
@@ -142,17 +143,17 @@ struct FOG_API ColorMatrix
     //!   [n n n n n]
     TYPE_LUT_ALPHA = 0x08,
 
-    //! @brief Matrix contains RGBA lut part.
+    //! @brief Matrix contains ARGB lut part.
     //!
-    //! RGBA lut part is illustrated here:
+    //! ARGB lut part is illustrated here:
     //!   [X n n n n]
     //!   [n X n n n]
     //!   [n n X n n]
     //!   [n n n X n]
     //!   [n n n n n]
     //!
-    //! @note RGBA lut is combination of RGB and Alpha lut parts.
-    TYPE_LUT_RGBA = 0x0C,
+    //! @note ARGB lut is combination of RGB and Alpha lut parts.
+    TYPE_LUT_ARGB = 0x0C,
 
     //! @brief Matrix contains const RGB lut part (all cells are set to 1.0).
     //!
@@ -174,17 +175,17 @@ struct FOG_API ColorMatrix
     //!   [n n n n n]
     TYPE_CONST_ALPHA = 0x20,
 
-    //! @brief Matrix contains const RGBA lut part (all cells are set to 1.0).
+    //! @brief Matrix contains const ARGB lut part (all cells are set to 1.0).
     //!
-    //! Const RGBA lut part is illustrated here:
+    //! Const ARGB lut part is illustrated here:
     //!   [1 n n n n]
     //!   [n 1 n n n]
     //!   [n n 1 n n]
     //!   [n n n 1 n]
     //!   [n n n n n]
     //!
-    //! @note RGBA const lut is combination of RGB a Alpha const lut.
-    TYPE_CONST_ARGA = 0x30,
+    //! @note ARGB const lut is combination of RGB a Alpha const lut.
+    TYPE_CONST_ARGB = 0x30,
 
     //! @brief Matrix contains RGB translation part
     //!
@@ -206,17 +207,17 @@ struct FOG_API ColorMatrix
     //!   [n n n X n]
     TYPE_TRANSLATE_ALPHA = 0x80,
 
-    //! @brief Matrix contains RGBA translation part
+    //! @brief Matrix contains ARGB translation part
     //!
-    //! RGBA translation part is illustrated here:
+    //! ARGB translation part is illustrated here:
     //!   [n n n n n]
     //!   [n n n n n]
     //!   [n n n n n]
     //!   [n n n n n]
     //!   [X X X X n]
     //!
-    //! @note RGBA translation is combination of RGB and Alpha translation parts.
-    TYPE_TRANSLATE_RGBA = 0xC0
+    //! @note ARGB translation is combination of RGB and Alpha translation parts.
+    TYPE_TRANSLATE_ARGB = 0xC0
   };
 
   //! @brief Determines type of color matrix.
@@ -367,17 +368,17 @@ struct FOG_API ColorMatrix
 
   //! @brief Overload the [] operator for access to a row. This will enable
   //! access to the elements by using [r][c].
-  FOG_INLINE float* operator[](sysuint_t row)
+  FOG_INLINE float* operator[](sysuint_t index)
   {
-    FOG_ASSERT_X(row < 5U, "Row out of bounds");
-    return m[row];
+    FOG_ASSERT_X(index < 5U, "Fog::ColorMatrix::operator[] - Index out of bounds.");
+    return m[index];
   }
 
   //! @overload.
-  FOG_INLINE const float* const operator[](sysuint_t row) const
+  FOG_INLINE const float* const operator[](sysuint_t index) const
   {
-    FOG_ASSERT_X(row < 5U, "Row out of bounds");
-    return m[row];
+    FOG_ASSERT_X(index < 5U, "Fog::ColorMatrix::operator[] - Index out of bounds.");
+    return m[index];
   }
 
   // --------------------------------------------------------------------------
@@ -393,15 +394,15 @@ struct FOG_API ColorMatrix
   //! @brief Grayscale color matrix is modified from the GDI+ FAQ (submitted
   //! by Gilles Khouzam) to use the NTSC color values. The version in the FAQ
   //! used 0.3, 0.59, and 0.11, so it was close.
-  static ColorMatrix GREYSCALE;
+  static const ColorMatrix GREYSCALE;
 
   //! @brief Identity matrix.
-  static ColorMatrix IDENTITY;
-  static ColorMatrix WHITE;
-  static ColorMatrix ZERO;
+  static const ColorMatrix IDENTITY;
+  static const ColorMatrix WHITE;
+  static const ColorMatrix ZERO;
 
-  static ColorMatrix PRE_HUE;
-  static ColorMatrix POST_HUE;
+  static const ColorMatrix PRE_HUE;
+  static const ColorMatrix POST_HUE;
 
   // --------------------------------------------------------------------------
   // [Private]
@@ -420,9 +421,9 @@ private:
   static void _copyData(float* dst, const float* src);
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GRAPHICS_COLORMATRIX_H

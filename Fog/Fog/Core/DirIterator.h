@@ -19,10 +19,10 @@
 #include <sys/stat.h>
 #endif // FOG_OS_POSIX
 
-//! @addtogroup Fog_Core
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Core_Streaming
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -150,12 +150,13 @@ private:
 
   bool _skipDots;
 
+private:
   FOG_DISABLE_COPY(DirIterator)
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // ============================================================================
 // [Fog::TypeInfo<T>]

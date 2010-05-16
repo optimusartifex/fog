@@ -7,20 +7,19 @@
 #ifndef _FOG_CORE_WINISTREAM_P_H
 #define _FOG_CORE_WINISTREAM_P_H
 
-// [Dependencies]
-#include <Fog/Build/Build.h>
-
+#include <Fog/Core/Build.h>
 #if defined(FOG_OS_WINDOWS)
 
+// [Dependencies]
 #include <Fog/Core/Stream.h>
-#include <Objidl.h>
+#include <objidl.h>
+
+namespace Fog {
 
 //! @addtogroup Fog_Core_Private
 //! @{
 
-namespace Fog {
-
-FOG_HIDDEN class WinIStream : public IStream
+class FOG_HIDDEN WinIStream : public IStream
 {
 public:
   WinIStream(Stream& stream);
@@ -33,11 +32,11 @@ public:
   virtual ULONG   STDMETHODCALLTYPE AddRef(void);
   virtual ULONG   STDMETHODCALLTYPE Release(void);
 
-  // ISequentialStream Interface
+  // ISequentialStream Interface.
   virtual HRESULT STDMETHODCALLTYPE Read(void* pv, ULONG cb, ULONG* pcbRead);
   virtual HRESULT STDMETHODCALLTYPE Write(void const* pv, ULONG cb, ULONG* pcbWritten);
 
-  // IStream Interface
+  // IStream Interface.
   virtual HRESULT STDMETHODCALLTYPE SetSize(ULARGE_INTEGER libNewSize);
   virtual HRESULT STDMETHODCALLTYPE CopyTo(IStream* pstm, ULARGE_INTEGER cb, ULARGE_INTEGER* pcbRead, ULARGE_INTEGER* pcbWritten);
   virtual HRESULT STDMETHODCALLTYPE Commit(DWORD grfCommitFlags);
@@ -53,11 +52,10 @@ private:
   LONG _refCount;
 };
 
-} // Fog namespace
-
 //! @}
 
-#endif // FOG_OS_WINDOWS
+} // Fog namespace
 
 // [Guard]
+#endif // FOG_OS_WINDOWS
 #endif // _FOG_CORE_WINISTREAM_P_H

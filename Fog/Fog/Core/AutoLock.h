@@ -8,16 +8,16 @@
 #define _FOG_CORE_AUTOLOCK_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Atomic.h>
 #include <Fog/Core/Lock.h>
 
-//! @addtogroup Fog_Core
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Core_Threading
+//! @{
 
 // ============================================================================
 // [Fog::AutoLock]
@@ -79,9 +79,9 @@ private:
   FOG_DISABLE_COPY(AutoLock)
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_CORE_AUTOLOCK_H

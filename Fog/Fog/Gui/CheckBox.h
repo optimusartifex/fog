@@ -10,15 +10,16 @@
 // [Dependencies]
 #include <Fog/Gui/ButtonBase.h>
 
-//! @addtogroup Fog_Gui
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Gui_Widget
+//! @{
 
 // ============================================================================
 // [Fog::CheckBox]
 // ============================================================================
 
+//! @brief Check box.
 struct FOG_API CheckBox : public ButtonBase
 {
   FOG_DECLARE_OBJECT(CheckBox, ButtonBase)
@@ -35,9 +36,9 @@ struct FOG_API CheckBox : public ButtonBase
   virtual void onPaint(PaintEvent* e);
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GUI_CHECKBOX_H

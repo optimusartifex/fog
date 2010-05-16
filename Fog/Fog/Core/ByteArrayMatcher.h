@@ -8,16 +8,16 @@
 #define _FOG_CORE_BYTEARRAYMATCHER_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Basics.h>
 #include <Fog/Core/ByteArray.h>
 #include <Fog/Core/ByteArrayFilter.h>
 
-//! @addtogroup Fog_Core
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Core_Essentials
+//! @{
 
 // ============================================================================
 // [Fog::ByteArrayMatcher]
@@ -55,6 +55,8 @@ struct FOG_API ByteArrayMatcher : public ByteArrayFilter
   // [SkipTable]
   // --------------------------------------------------------------------------
 
+  //! @internal
+  //!
   //! @brief @c Fog::ByteArrayMatcher skip table.
   //!
   //! @note The table is generated on the fly by first search call.
@@ -113,9 +115,9 @@ private:
   mutable SkipTable _skipTable[2];
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // ============================================================================
 // [Fog::TypeInfo<>]

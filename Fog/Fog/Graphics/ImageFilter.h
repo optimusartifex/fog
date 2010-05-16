@@ -13,16 +13,16 @@
 #include <Fog/Core/Static.h>
 #include <Fog/Core/String.h>
 #include <Fog/Core/Value.h>
-#include <Fog/Graphics/Argb.h>
+#include <Fog/Graphics/Color.h>
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/ConvolutionMatrix.h>
 #include <Fog/Graphics/Image.h>
 #include <Fog/Graphics/ImageFilterEngine.h>
 
-//! @addtogroup Fog_Graphics
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Graphics_Effects
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -194,9 +194,9 @@ struct FOG_HIDDEN ColorFilter : public ImageFilterBase
   FOG_INLINE ColorFilter& operator=(const ColorLut& colorLut) { setColorLut(colorLut); return *this; }
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // ============================================================================
 // [Fog::TypeInfo<>]

@@ -8,16 +8,16 @@
 #define _FOG_XML_XMLWRITER_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/String.h>
 #include <Fog/Core/Stream.h>
 #include <Fog/Core/TextCodec.h>
 #include <Fog/Xml/Constants.h>
 
-//! @addtogroup Fog_Xml
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Xml_IO
+//! @{
 
 // ============================================================================
 // [Fog::XmlWriter]
@@ -29,9 +29,9 @@ struct FOG_API XmlWriter
   virtual ~XmlWriter();
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_XML_XMLWRITER_H

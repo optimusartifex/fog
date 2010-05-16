@@ -3,21 +3,6 @@
 // [License]
 // MIT, See COPYING file in package
 
-//----------------------------------------------------------------------------
-// Anti-Grain Geometry - Version 2.4
-// Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
-//
-// Permission to copy, use, modify, sell and distribute this software
-// is granted provided this copyright notice appears in all copies.
-// This software is provided "as is" without express or implied
-// warranty, and with no claim as to its suitability for any purpose.
-//
-//----------------------------------------------------------------------------
-// Contact: mcseem@antigrain.com
-//          mcseemagg@yahoo.com
-//          http://www.antigrain.com
-//----------------------------------------------------------------------------
-
 // [Guard]
 #ifndef _FOG_GRAPHICS_PATH_H
 #define _FOG_GRAPHICS_PATH_H
@@ -31,10 +16,10 @@
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/Geometry.h>
 
-//! @addtogroup Fog_Graphics
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Graphics_Geometry
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -42,6 +27,7 @@ namespace Fog {
 
 struct FloatMatrix;
 struct DoubleMatrix;
+struct Region;
 
 // ============================================================================
 // [Fog::PathCmd]
@@ -74,6 +60,7 @@ struct FOG_HIDDEN PathCmd
 // [Fog::DoublePathData]
 // ============================================================================
 
+//! @brief Path data (64-bit float version)
 struct FOG_HIDDEN DoublePathData
 {
   // --------------------------------------------------------------------------
@@ -98,11 +85,21 @@ struct FOG_HIDDEN DoublePathData
   //! @brief Reference count.
   mutable Fog::Atomic<sysuint_t> refCount;
   //! @brief Whether the path is flattened (no curves).
-  int flat;
+  uint8_t flat;
+  //! @brief Whether the path bounding box is dirty (must be calculated before
+  //! you can access it.
+  uint8_t boundingBoxDirty;
+  //! @brief Reserved for future use.
+  uint8_t reserved[2];
   //! @brief Path capacity (allocated space for vertices).
   sysuint_t capacity;
   //! @brief Path length (count of vertices used).
   sysuint_t length;
+
+  //! @brief Path bounding box minimum.
+  DoublePoint boundingBoxMin;
+  //! @brief Path bounding box maximum.
+  DoublePoint boundingBoxMax;
 
   //! @brief Vertices data (aligned to 16 bytes).
   DoublePoint* vertices;
@@ -114,7 +111,9 @@ struct FOG_HIDDEN DoublePathData
 // [Fog::DoublePath]
 // ============================================================================
 
-//! @brief Path defines graphics path that can be filled or stroked by painter.
+//! @brief Path (64-bit float version)
+//!
+//! Path defines graphics shape that can be filled or stroked by a painter.
 struct FOG_API DoublePath
 {
   // --------------------------------------------------------------------------
@@ -195,10 +194,11 @@ struct FOG_API DoublePath
   void free();
 
   // --------------------------------------------------------------------------
-  // [Bounding Rect]
+  // [BoundingRect / FitTo]
   // --------------------------------------------------------------------------
 
   DoubleRect getBoundingRect() const;
+  err_t fitTo(const DoubleRect& toRect);
 
   // --------------------------------------------------------------------------
   // [SubPath]
@@ -376,40 +376,61 @@ struct FOG_API DoublePath
   // [Complex]
   // --------------------------------------------------------------------------
 
-  //! @brief Add closed rectangle into path.
-  err_t addRect(const DoubleRect& r, int direction = PATH_DIRECTION_CW);
+  //! @brief Add closed rectangle into the path.
+  err_t addRect(const IntRect& r, uint32_t direction = PATH_DIRECTION_CW);
+  //! @brief Add closed rectangle into the path.
+  err_t addRect(const DoubleRect& r, uint32_t direction = PATH_DIRECTION_CW);
 
-  //! @brief Add rectangles.
-  err_t addRects(const DoubleRect* r, sysuint_t count, int direction = PATH_DIRECTION_CW);
+  //! @brief Add closed polygon into the path.
+  err_t addPolygon(const IntPoint* pts, sysuint_t count);
+  //! @brief Add closed polygon into the path.
+  err_t addPolygon(const DoublePoint* pts, sysuint_t count);
 
-  //! @brief Add round.
-  err_t addRound(const DoubleRect& r, const DoublePoint& radius, int direction = PATH_DIRECTION_CW);
+  //! @brief Add closed polygon into the path.
+  err_t addPolyLine(const IntPoint* pts, sysuint_t count);
+  //! @brief Add closed polygon into the path.
+  err_t addPolyLine(const DoublePoint* pts, sysuint_t count);
 
-  //! @brief Add Closed ellipse into path.
-  err_t addEllipse(const DoubleRect& r, int direction = PATH_DIRECTION_CW);
+  //! @brief Add region (converted to set of rectangles).
+  err_t addRegion(const Region& r, uint32_t direction = PATH_DIRECTION_CW);
+
+  //! @brief Add rectangles into the path.
+  err_t addRects(const IntRect* r, sysuint_t count, uint32_t direction = PATH_DIRECTION_CW);
+
+  //! @brief Add rectangles into the path.
+  err_t addRects(const IntBox* r, sysuint_t count, uint32_t direction = PATH_DIRECTION_CW);
+
+  //! @brief Add rectangles into the path.
+  err_t addRects(const DoubleRect* r, sysuint_t count, uint32_t direction = PATH_DIRECTION_CW);
+
+  //! @brief Add round into the path.
+  err_t addRound(const DoubleRect& r, const DoublePoint& radius, uint32_t direction = PATH_DIRECTION_CW);
+
+  //! @brief Add a closed ellipse into the path.
+  err_t addEllipse(const DoubleRect& r, uint32_t direction = PATH_DIRECTION_CW);
   //! @overload
-  err_t addEllipse(const DoublePoint& cp, const DoublePoint& r, int direction = PATH_DIRECTION_CW);
+  err_t addEllipse(const DoublePoint& cp, const DoublePoint& r, uint32_t direction = PATH_DIRECTION_CW);
 
-  //! @brief Add arc into path.
-  err_t addArc(const DoubleRect& r, double start, double sweep, int direction = PATH_DIRECTION_CW);
+  //! @brief Add an arc into the path.
+  err_t addArc(const DoubleRect& r, double start, double sweep, uint32_t direction = PATH_DIRECTION_CW);
   //! @overload
-  err_t addArc(const DoublePoint& cp, const DoublePoint& r, double start, double sweep, int direction = PATH_DIRECTION_CW);
+  err_t addArc(const DoublePoint& cp, const DoublePoint& r, double start, double sweep, uint32_t direction = PATH_DIRECTION_CW);
 
-  //! @brief Add chord into path.
-  err_t addChord(const DoubleRect& r, double start, double sweep, int direction = PATH_DIRECTION_CW);
+  //! @brief Add a chord into the path.
+  err_t addChord(const DoubleRect& r, double start, double sweep, uint32_t direction = PATH_DIRECTION_CW);
   //! @overload
-  err_t addChord(const DoublePoint& cp, const DoublePoint& r, double start, double sweep, int direction = PATH_DIRECTION_CW);
+  err_t addChord(const DoublePoint& cp, const DoublePoint& r, double start, double sweep, uint32_t direction = PATH_DIRECTION_CW);
 
-  //! @brief Add pie into path.
-  err_t addPie(const DoubleRect& r, double start, double sweep, int direction = PATH_DIRECTION_CW);
+  //! @brief Add a pie into the path.
+  err_t addPie(const DoubleRect& r, double start, double sweep, uint32_t direction = PATH_DIRECTION_CW);
   //! @overload
-  err_t addPie(const DoublePoint& cp, const DoublePoint& r, double start, double sweep, int direction = PATH_DIRECTION_CW);
+  err_t addPie(const DoublePoint& cp, const DoublePoint& r, double start, double sweep, uint32_t direction = PATH_DIRECTION_CW);
 
-  //! @brief Add path.
+  //! @brief Add another path into the path.
   err_t addPath(const DoublePath& path);
-  //! @brief Add translated path.
+  //! @brief Add a translated path into the path.
   err_t addPath(const DoublePath& path, const DoublePoint& pt);
-  //! @brief Add transformed path.
+  //! @brief Add a transformed path into the path.
   err_t addPath(const DoublePath& path, const DoubleMatrix& matrix);
 
   // --------------------------------------------------------------------------
@@ -422,17 +443,24 @@ struct FOG_API DoublePath
   //! use @c flatten() or @c flattenTo() methods.
   bool isFlat() const;
 
-  //! @brief Invalidate type of path.
-  //!
-  //! This method must be called after path was manually changed by getMData() or
-  //! similar methods to invalidate type of path.
-  FOG_INLINE void resetFlat() const { _d->flat = -1; }
-
   err_t flatten();
   err_t flatten(const DoubleMatrix* matrix, double approximationScale = 1.0);
 
   err_t flattenTo(DoublePath& dst, const DoubleMatrix* matrix, double approximationScale = 1.0) const;
   err_t flattenSubPathTo(DoublePath& dst, sysuint_t subPathId, const DoubleMatrix* matrix, double approximationScale = 1.0) const;
+
+  // --------------------------------------------------------------------------
+  // [Invalidate]
+  // --------------------------------------------------------------------------
+
+  //! @brief Invalidate type of path.
+  //!
+  //! This method must be called after path was manually changed by getMData() or
+  //! similar methods to invalidate type of path.
+  FOG_INLINE void invalidateFlatPath() const { _d->flat = 0xFF; }
+
+  //! @brief Invalidate path bounding box.
+  FOG_INLINE void invalidateBoundingBox() const { _d->boundingBoxDirty = true; }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
@@ -451,9 +479,9 @@ struct FOG_API DoublePath
   FOG_DECLARE_D(DoublePathData)
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GRAPHICS_PATH_H

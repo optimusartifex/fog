@@ -8,16 +8,16 @@
 #define _FOG_CORE_TEXTCODEC_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Atomic.h>
 #include <Fog/Core/Char.h>
 #include <Fog/Core/TypeInfo.h>
 #include <Fog/Core/String.h>
 
-//! @addtogroup Fog_Core
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Core_Other
+//! @{
 
 // ============================================================================
 // [Fog::TextCodec]
@@ -470,9 +470,9 @@ struct FOG_API TextCodec
   FOG_DECLARE_D(Engine)
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // ============================================================================
 // [Fog::TypeInfo<>]

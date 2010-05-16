@@ -15,10 +15,10 @@
 #include <Fog/Core/Static.h>
 #include <Fog/Graphics/Constants.h>
 
-//! @addtogroup Fog_Graphics
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Graphics_Effects
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -27,10 +27,11 @@ namespace Fog {
 struct IntRect;
 
 // ============================================================================
-// [Fog::ConvolutionMatrixI]
+// [Fog::IntConvolutionMatrix]
 // ============================================================================
 
-struct FOG_API ConvolutionMatrixI
+//! @brief Convolution matrix.
+struct FOG_API IntConvolutionMatrix
 {
   // --------------------------------------------------------------------------
   // [Value Type]
@@ -76,14 +77,14 @@ struct FOG_API ConvolutionMatrixI
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  ConvolutionMatrixI();
-  ConvolutionMatrixI(const ConvolutionMatrixI& other);
+  IntConvolutionMatrix();
+  IntConvolutionMatrix(const IntConvolutionMatrix& other);
 
-  FOG_INLINE explicit ConvolutionMatrixI(Data* d) : _d(d) {}
+  FOG_INLINE explicit IntConvolutionMatrix(Data* d) : _d(d) {}
 
-  ~ConvolutionMatrixI();
+  ~IntConvolutionMatrix();
 
-  static ConvolutionMatrixI fromData(int w, int h, const ValueType* data);
+  static IntConvolutionMatrix fromData(int w, int h, const ValueType* data);
 
   // --------------------------------------------------------------------------
   // [Implicit Sharing]
@@ -136,7 +137,7 @@ struct FOG_API ConvolutionMatrixI
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  ConvolutionMatrixI& operator=(const ConvolutionMatrixI& other);
+  IntConvolutionMatrix& operator=(const IntConvolutionMatrix& other);
 
   ValueType* operator[](int y);
 
@@ -147,40 +148,9 @@ struct FOG_API ConvolutionMatrixI
   FOG_DECLARE_D(Data)
 };
 
-// ============================================================================
-// [Fog::ConvolutionMatrix<>]
-// ============================================================================
-
-template<typename T>
-struct ConvolutionMatrix {};
-
-template<>
-struct ConvolutionMatrix<int> : public ConvolutionMatrixI
-{
-  FOG_INLINE ConvolutionMatrix() :
-    ConvolutionMatrixI()
-  {
-  }
-
-  FOG_INLINE ConvolutionMatrix(const ConvolutionMatrixI& other) :
-    ConvolutionMatrixI(other)
-  {
-  }
-
-  FOG_INLINE ~ConvolutionMatrix()
-  {
-  }
-
-  FOG_INLINE ConvolutionMatrix& operator=(const ConvolutionMatrix& other)
-  {
-    // Cast back to ConvolutionMatrix<int>.
-    return reinterpret_cast<ConvolutionMatrix&>(ConvolutionMatrixI::operator=(other));
-  }
-};
+//! @}
 
 } // Fog namespace
-
-//! @}
 
 // [Guard]
 #endif // _FOG_GRAPHICS_CONVOLUTIONMATRIX_H

@@ -12,7 +12,7 @@
 #define _FOG_CORE_THREADLOCALSTORAGE_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Atomic.h>
@@ -27,10 +27,10 @@
 #include <pthread.h>
 #endif // FOG_OS_POSIX
 
-//! @addtogroup Fog_Core
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Core_Threading
+//! @{
 
 // ============================================================================
 // [Fog::ThreadLocalStorage]
@@ -217,9 +217,9 @@ private:
   FOG_DISABLE_COPY(ThreadLocalBoolean)
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_CORE_THREADLOCALSTORAGE_H

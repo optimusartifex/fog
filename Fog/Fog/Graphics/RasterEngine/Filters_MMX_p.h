@@ -4,11 +4,10 @@
 // MIT, See COPYING file in package
 
 // For some IDEs to enable code-assist.
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 
 #if defined(FOG_IDE)
 #include <Fog/Graphics/RasterEngine/Defs_MMX_p.h>
-#include <Fog/Graphics/RasterEngine/Composite_MMX_p.h>
 #include <Fog/Graphics/RasterEngine/Dib_MMX_p.h>
 #endif // FOG_IDE
 
@@ -19,21 +18,22 @@ namespace RasterEngine {
 // [Fog::RasterEngine::MMX - Filter]
 // ============================================================================
 
-MMX_DECLARE_CONST_PF_SET(cf0  , 0.0f  );
-MMX_DECLARE_CONST_PF_SET(cf0_5, 0.5f  );
-MMX_DECLARE_CONST_PF_SET(cf255, 255.0f);
+FOG_MMX_DECLARE_CONST_PF_SET(cf0  , 0.0f  );
+FOG_MMX_DECLARE_CONST_PF_SET(cf0_5, 0.5f  );
+FOG_MMX_DECLARE_CONST_PF_SET(cf255, 255.0f);
 
-MMX_DECLARE_CONST_PF_VAR(cf255_0, 255.0f, 0.0f);
-MMX_DECLARE_CONST_PF_VAR(cf0_255, 0.0f, 255.0f);
+FOG_MMX_DECLARE_CONST_PF_VAR(cf255_0, 255.0f, 0.0f);
+FOG_MMX_DECLARE_CONST_PF_VAR(cf0_255, 0.0f, 255.0f);
 
-MMX_DECLARE_CONST_PF_VAR(cf1_0_div255, 1.0f, 1.0f/255.0f);
+FOG_MMX_DECLARE_CONST_PF_VAR(cf1_0_div255, 1.0f, 1.0f/255.0f);
 
-MMX_DECLARE_CONST_PI32_VAR(cf1_0_0x0, 0x3F800000, 0x00000000);
-MMX_DECLARE_CONST_PI32_VAR(cf0x0_1_0, 0x00000000, 0x3F800000);
+FOG_MMX_DECLARE_CONST_PI32_VAR(cf1_0_0x0, 0x3F800000, 0x00000000);
+FOG_MMX_DECLARE_CONST_PI32_VAR(cf0x0_1_0, 0x00000000, 0x3F800000);
 
-MMX_DECLARE_CONST_PI16_VAR(cfm, 0x00FF, 0x0000, 0x0000, 0x00FF);
-MMX_DECLARE_CONST_PI16_VAR(cfa, 0x00FF, 0x0000, 0x0000, 0x0000);
+FOG_MMX_DECLARE_CONST_PI16_VAR(cfm, 0x00FF, 0x0000, 0x0000, 0x00FF);
+FOG_MMX_DECLARE_CONST_PI16_VAR(cfa, 0x00FF, 0x0000, 0x0000, 0x0000);
 
+//! @internal
 struct FOG_HIDDEN MMX_SYM(Filter)
 {
 #if defined(FOG_RASTER_MMX3DNOW)
@@ -42,15 +42,15 @@ struct FOG_HIDDEN MMX_SYM(Filter)
 
   static void FOG_FASTCALL color_matrix_prgb32(
     const ColorMatrix* cm,
-    uint8_t* dst, const uint8_t* src, sysuint_t width)
+    uint8_t* dst, const uint8_t* src, int width)
   {
     FOG_ASSERT(width != 0);
 
-    __m64 pt_rg = _m_pfmul(color_matrix_load_rg(cm->m[4]), MMX_GET_CONST(cf255));
-    __m64 pt_ba = _m_pfmul(color_matrix_load_ba(cm->m[4]), MMX_GET_CONST(cf255));
+    __m64 pt_rg = _m_pfmul(color_matrix_load_rg(cm->m[4]), FOG_MMX_GET_CONST(cf255));
+    __m64 pt_ba = _m_pfmul(color_matrix_load_ba(cm->m[4]), FOG_MMX_GET_CONST(cf255));
 
-    pt_rg = _m_pfadd(pt_rg, MMX_GET_CONST(cf0_5));
-    pt_ba = _m_pfadd(pt_ba, MMX_GET_CONST(cf0_5));
+    pt_rg = _m_pfadd(pt_rg, FOG_MMX_GET_CONST(cf0_5));
+    pt_ba = _m_pfadd(pt_ba, FOG_MMX_GET_CONST(cf0_5));
 
     for (sysuint_t i = width; i; i--, dst += 4, src += 4)
     {
@@ -66,7 +66,7 @@ struct FOG_HIDDEN MMX_SYM(Filter)
       __m64 zero = _mm_setzero_si64();
 
       mmx_load4(pix_i0, src);
-      mmx_load4(pix_f0, &ArgbUtil::demultiply_reciprocal_table_f[src[ARGB32_ABYTE]]);
+      mmx_load4(pix_f0, &raster_demultiply_reciprocal_table_f[src[ARGB32_ABYTE]]);
 
       pix_i0 = _mm_unpacklo_pi8(pix_i0, zero);
       pix_i1 = _mm_unpackhi_pi16(pix_i0, zero);
@@ -80,7 +80,7 @@ struct FOG_HIDDEN MMX_SYM(Filter)
       pix_i0 = _m_pfmul(pix_i0, pix_f0);
 
       pix_f0 = _mm_srli_si64(pix_f0, 32);
-      pix_f0 = _mm_or_si64(pix_f0, MMX_GET_CONST(cf1_0_0x0));
+      pix_f0 = _mm_or_si64(pix_f0, FOG_MMX_GET_CONST(cf1_0_0x0));
       pix_i1 = _m_pfmul(pix_i1, pix_f0);
 
       // Blue.
@@ -124,16 +124,16 @@ struct FOG_HIDDEN MMX_SYM(Filter)
       result_t1 = _m_pfadd(result_t1, pix_f1);
 
       // Bound.
-      result_t0 = _m_pfmin(result_t0, MMX_GET_CONST(cf255));
-      result_t1 = _m_pfmin(result_t1, MMX_GET_CONST(cf255));
+      result_t0 = _m_pfmin(result_t0, FOG_MMX_GET_CONST(cf255));
+      result_t1 = _m_pfmin(result_t1, FOG_MMX_GET_CONST(cf255));
 
-      result_t0 = _m_pfmax(result_t0, MMX_GET_CONST(cf0));
-      result_t1 = _m_pfmax(result_t1, MMX_GET_CONST(cf0));
+      result_t0 = _m_pfmax(result_t0, FOG_MMX_GET_CONST(cf0));
+      result_t1 = _m_pfmax(result_t1, FOG_MMX_GET_CONST(cf0));
 
       // Premultiply
       pix_f0 = _mm_srli_si64(result_t1, 32);
-      pix_f0 = _mm_or_si64(pix_f0, MMX_GET_CONST(cf1_0_0x0));
-      pix_f0 = _m_pfmul(pix_f0, MMX_GET_CONST(cf1_0_div255));
+      pix_f0 = _mm_or_si64(pix_f0, FOG_MMX_GET_CONST(cf1_0_0x0));
+      pix_f0 = _m_pfmul(pix_f0, FOG_MMX_GET_CONST(cf1_0_div255));
 
       result_t1 = _m_pfmul(result_t1, pix_f0);
       pix_f0 = _mm_unpacklo_pi32(pix_f0, pix_f0);
@@ -149,11 +149,11 @@ struct FOG_HIDDEN MMX_SYM(Filter)
       pix_i1 = result_t1;
 
       result_t0 = _mm_slli_si64(result_t0, 32);
-      result_t1 = _mm_and_si64(result_t1, MMX_GET_CONST(cfm));
+      result_t1 = _mm_and_si64(result_t1, FOG_MMX_GET_CONST(cfm));
 
       pix_i0 = _mm_srli_si64(pix_i0, 16);
       pix_i1 = _mm_slli_si64(pix_i1, 16);
-      pix_i1 = _mm_and_si64(pix_i1, MMX_GET_CONST(cfm));
+      pix_i1 = _mm_and_si64(pix_i1, FOG_MMX_GET_CONST(cfm));
 
       result_t0 = _mm_or_si64(result_t0, pix_i0);
       result_t1 = _mm_or_si64(result_t1, pix_i1);
@@ -169,15 +169,15 @@ struct FOG_HIDDEN MMX_SYM(Filter)
 
   static void FOG_FASTCALL color_matrix_argb32(
     const ColorMatrix* cm,
-    uint8_t* dst, const uint8_t* src, sysuint_t width)
+    uint8_t* dst, const uint8_t* src, int width)
   {
     FOG_ASSERT(width != 0);
 
-    __m64 pt_rg = _m_pfmul(color_matrix_load_rg(cm->m[4]), MMX_GET_CONST(cf255));
-    __m64 pt_ba = _m_pfmul(color_matrix_load_ba(cm->m[4]), MMX_GET_CONST(cf255));
+    __m64 pt_rg = _m_pfmul(color_matrix_load_rg(cm->m[4]), FOG_MMX_GET_CONST(cf255));
+    __m64 pt_ba = _m_pfmul(color_matrix_load_ba(cm->m[4]), FOG_MMX_GET_CONST(cf255));
 
-    pt_rg = _m_pfadd(pt_rg, MMX_GET_CONST(cf0_5));
-    pt_ba = _m_pfadd(pt_ba, MMX_GET_CONST(cf0_5));
+    pt_rg = _m_pfadd(pt_rg, FOG_MMX_GET_CONST(cf0_5));
+    pt_ba = _m_pfadd(pt_ba, FOG_MMX_GET_CONST(cf0_5));
 
     for (sysuint_t i = width; i; i--, dst += 4, src += 4)
     {
@@ -242,11 +242,11 @@ struct FOG_HIDDEN MMX_SYM(Filter)
       result_t1 = _m_pfadd(result_t1, pix_f1);
 
       // Bound.
-      result_t0 = _m_pfmin(result_t0, MMX_GET_CONST(cf255));
-      result_t1 = _m_pfmin(result_t1, MMX_GET_CONST(cf255));
+      result_t0 = _m_pfmin(result_t0, FOG_MMX_GET_CONST(cf255));
+      result_t1 = _m_pfmin(result_t1, FOG_MMX_GET_CONST(cf255));
 
-      result_t0 = _m_pfmax(result_t0, MMX_GET_CONST(cf0));
-      result_t1 = _m_pfmax(result_t1, MMX_GET_CONST(cf0));
+      result_t0 = _m_pfmax(result_t0, FOG_MMX_GET_CONST(cf0));
+      result_t1 = _m_pfmax(result_t1, FOG_MMX_GET_CONST(cf0));
 
       // Store.
       // t0 == [000G000R] -> [000R0G00] |
@@ -258,11 +258,11 @@ struct FOG_HIDDEN MMX_SYM(Filter)
       pix_i1 = result_t1;
 
       result_t0 = _mm_slli_si64(result_t0, 32);
-      result_t1 = _mm_and_si64(result_t1, MMX_GET_CONST(cfm));
+      result_t1 = _mm_and_si64(result_t1, FOG_MMX_GET_CONST(cfm));
 
       pix_i0 = _mm_srli_si64(pix_i0, 16);
       pix_i1 = _mm_slli_si64(pix_i1, 16);
-      pix_i1 = _mm_and_si64(pix_i1, MMX_GET_CONST(cfm));
+      pix_i1 = _mm_and_si64(pix_i1, FOG_MMX_GET_CONST(cfm));
 
       result_t0 = _mm_or_si64(result_t0, pix_i0);
       result_t1 = _mm_or_si64(result_t1, pix_i1);
@@ -278,18 +278,18 @@ struct FOG_HIDDEN MMX_SYM(Filter)
 
   static void FOG_FASTCALL color_matrix_xrgb32(
     const ColorMatrix* cm,
-    uint8_t* dst, const uint8_t* src, sysuint_t width)
+    uint8_t* dst, const uint8_t* src, int width)
   {
     FOG_ASSERT(width != 0);
 
-    __m64 pt_rg = _m_pfmul(color_matrix_load_rg(cm->m[4]), MMX_GET_CONST(cf255));
-    __m64 pt_ba = _m_pfmul(color_matrix_load_ba(cm->m[4]), MMX_GET_CONST(cf255));
+    __m64 pt_rg = _m_pfmul(color_matrix_load_rg(cm->m[4]), FOG_MMX_GET_CONST(cf255));
+    __m64 pt_ba = _m_pfmul(color_matrix_load_ba(cm->m[4]), FOG_MMX_GET_CONST(cf255));
 
-    pt_rg = _m_pfadd(pt_rg, _m_pfmul(color_matrix_load_rg(cm->m[3]), MMX_GET_CONST(cf255)));
-    pt_ba = _m_pfadd(pt_ba, _m_pfmul(color_matrix_load_rg(cm->m[3]), MMX_GET_CONST(cf255)));
+    pt_rg = _m_pfadd(pt_rg, _m_pfmul(color_matrix_load_rg(cm->m[3]), FOG_MMX_GET_CONST(cf255)));
+    pt_ba = _m_pfadd(pt_ba, _m_pfmul(color_matrix_load_rg(cm->m[3]), FOG_MMX_GET_CONST(cf255)));
 
-    pt_rg = _m_pfadd(pt_rg, MMX_GET_CONST(cf0_5));
-    pt_ba = _m_pfadd(pt_ba, MMX_GET_CONST(cf0_5));
+    pt_rg = _m_pfadd(pt_rg, FOG_MMX_GET_CONST(cf0_5));
+    pt_ba = _m_pfadd(pt_ba, FOG_MMX_GET_CONST(cf0_5));
 
     for (sysuint_t i = width; i; i--, dst += 4, src += 4)
     {
@@ -344,11 +344,11 @@ struct FOG_HIDDEN MMX_SYM(Filter)
       result_t1 = _m_pfadd(result_t1, pix_f1);
 
       // Bound.
-      result_t0 = _m_pfmin(result_t0, MMX_GET_CONST(cf255));
-      result_t1 = _m_pfmin(result_t1, MMX_GET_CONST(cf0_255));
+      result_t0 = _m_pfmin(result_t0, FOG_MMX_GET_CONST(cf255));
+      result_t1 = _m_pfmin(result_t1, FOG_MMX_GET_CONST(cf0_255));
 
-      result_t0 = _m_pfmax(result_t0, MMX_GET_CONST(cf0));
-      result_t1 = _m_pfmax(result_t1, MMX_GET_CONST(cf0));
+      result_t0 = _m_pfmax(result_t0, FOG_MMX_GET_CONST(cf0));
+      result_t1 = _m_pfmax(result_t1, FOG_MMX_GET_CONST(cf0));
 
       // Store.
       // t0 == [000G000R] -> [000R0G00] |
@@ -359,7 +359,7 @@ struct FOG_HIDDEN MMX_SYM(Filter)
       pix_i0 = result_t0;
       result_t0 = _mm_slli_si64(result_t0, 32);
       pix_i0 = _mm_srli_si64(pix_i0, 16);
-      result_t1 = _mm_or_si64(result_t1, MMX_GET_CONST(cfa));
+      result_t1 = _mm_or_si64(result_t1, FOG_MMX_GET_CONST(cfa));
 
       result_t0 = _mm_or_si64(result_t0, pix_i0);
       result_t0 = _mm_or_si64(result_t0, result_t1);

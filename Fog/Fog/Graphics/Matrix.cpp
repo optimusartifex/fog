@@ -27,6 +27,8 @@
 #include <Fog/Graphics/Geometry.h>
 #include <Fog/Graphics/Matrix.h>
 
+#define DBL(x) ((double)(x))
+
 namespace Fog {
 
 // ============================================================================
@@ -175,19 +177,21 @@ FloatMatrix& FloatMatrix::translate(float x, float y, uint32_t order)
 
 FloatMatrix& FloatMatrix::rotate(float a, uint32_t order)
 {
-  float aSin;
-  float aCos;
-  Math::sincos(a, &aSin, &aCos);
+  double aSin;
+  double aCos;
+  Math::sincos((double)a, &aSin, &aCos);
 
   if (order == MATRIX_APPEND)
   {
-    float t0 = sx  * aCos + shy * -aSin;
-    float t2 = shx * aCos + sy  * -aSin;
-    float t4 = tx  * aCos + ty  * -aSin;
+    float t0, t2, t4;
 
-    shy = sx  * aSin + shy * aCos;
-    sy  = shx * aSin + sy  * aCos;
-    ty  = tx  * aSin + ty  * aCos;
+    t0  = (float)( DBL(sx ) * aCos + DBL(shy) * -aSin );
+    t2  = (float)( DBL(shx) * aCos + DBL(sy ) * -aSin );
+    t4  = (float)( DBL(tx ) * aCos + DBL(ty ) * -aSin );
+
+    shy = (float)( DBL(sx ) * aSin + DBL(shy) *  aCos );
+    sy  = (float)( DBL(shx) * aSin + DBL(sy ) *  aCos );
+    ty  = (float)( DBL(tx ) * aSin + DBL(ty ) *  aCos );
 
     sx  = t0;
     shx = t2;
@@ -195,11 +199,13 @@ FloatMatrix& FloatMatrix::rotate(float a, uint32_t order)
   }
   else
   {
-    float t0 = sx  * aCos  + shx * aSin;
-    float t1 = shy * aCos  + sy  * aSin;
+    float t0, t1;
 
-    shx = sx  * -aSin + shx * aCos;
-    sy  = shy * -aSin + sy  * aCos;
+    t0  = (float)( DBL(sx ) *  aCos + DBL(shx) * aSin );
+    t1  = (float)( DBL(shy) *  aCos + DBL(sy ) * aSin );
+
+    shx = (float)( DBL(sx ) * -aSin + DBL(shx) * aCos );
+    sy  = (float)( DBL(shy) * -aSin + DBL(sy ) * aCos );
 
     sx  = t0;
     shy = t1;
@@ -227,18 +233,20 @@ FloatMatrix& FloatMatrix::scale(float x, float y, uint32_t order)
 
 FloatMatrix& FloatMatrix::skew(float x, float y, uint32_t order)
 {
-  float xTan = tan(x);
-  float yTan = tan(y);
+  double xTan = tan((double)x);
+  double yTan = tan((double)y);
 
   if (order == MATRIX_APPEND)
   {
-    float t0 = sx  + shy * xTan;
-    float t2 = shx + sy  * xTan;
-    float t4 = tx  + ty  * xTan;
+    float t0, t2, t4;
 
-    shy = sx  * yTan + shy;
-    sy  = shx * yTan + sy ;
-    ty  = tx  * yTan + ty ;
+    t0  = (float)( DBL(sx ) + DBL(shy) * xTan );
+    t2  = (float)( DBL(shx) + DBL(sy ) * xTan );
+    t4  = (float)( DBL(tx ) + DBL(ty ) * xTan );
+
+    shy = (float)( DBL(sx ) * yTan + DBL(shy) );
+    sy  = (float)( DBL(shx) * yTan + DBL(sy ) );
+    ty  = (float)( DBL(tx ) * yTan + DBL(ty ) );
 
     sx  = t0;
     shx = t2;
@@ -246,11 +254,13 @@ FloatMatrix& FloatMatrix::skew(float x, float y, uint32_t order)
   }
   else
   {
-    float t0 = sx  + shx * yTan;
-    float t1 = shy + sy  * yTan;
+    float t0, t1;
 
-    shx = sx  * xTan + shx;
-    sy  = shy * xTan + sy ;
+    t0  = (float)( DBL(sx ) + DBL(shx) * yTan );
+    t1  = (float)( DBL(shy) + DBL(sy ) * yTan );
+
+    shx = (float)( DBL(sx ) * xTan + DBL(shx) );
+    sy  = (float)( DBL(shy) * xTan + DBL(sy ) );
 
     sx  = t0;
     shy = t1;
@@ -261,15 +271,18 @@ FloatMatrix& FloatMatrix::skew(float x, float y, uint32_t order)
 
 FloatMatrix& FloatMatrix::multiply(const FloatMatrix& m, uint32_t order)
 {
+  // To avoid inaccurate multiplication we are using doubles internally.
   if (order == MATRIX_APPEND)
   {
-    float t0 = sx  * m.sx + shy * m.shx;
-    float t2 = shx * m.sx + sy  * m.shx;
-    float t4 = tx  * m.sx + ty  * m.shx + m.tx;
+    float t0, t2, t4;
 
-    shy = sx  * m.shy + shy * m.sy;
-    sy  = shx * m.shy + sy  * m.sy;
-    ty  = tx  * m.shy + ty  * m.sy + m.ty;
+    t0  = (float)( DBL(sx ) * DBL(m.sx) + DBL(shy) * DBL(m.shx) );
+    t2  = (float)( DBL(shx) * DBL(m.sx) + DBL(sy ) * DBL(m.shx) );
+    t4  = (float)( DBL(tx ) * DBL(m.sx) + DBL(ty ) * DBL(m.shx) + DBL(m.tx) );
+
+    shy = (float)( DBL(sx ) * DBL(m.shy) + DBL(shy) * DBL(m.sy) );
+    sy  = (float)( DBL(shx) * DBL(m.shy) + DBL(sy ) * DBL(m.sy) );
+    ty  = (float)( DBL(tx ) * DBL(m.shy) + DBL(ty ) * DBL(m.sy) + DBL(m.ty) );
 
     sx  = t0;
     shx = t2;
@@ -277,14 +290,16 @@ FloatMatrix& FloatMatrix::multiply(const FloatMatrix& m, uint32_t order)
   }
   else
   {
-    tx = sx  * m.tx  + shx * m.ty + tx;
-    ty = shy * m.tx  + sy  * m.ty + ty;
+    float t0, t1;
 
-    float t0 = sx  * m.sx  + shx * m.shy;
-    float t1 = shy * m.sx  + sy  * m.shy;
+    tx  = (float)( DBL(sx ) * DBL(m.tx)  + DBL(shx) * DBL(m.ty) + DBL(tx) );
+    ty  = (float)( DBL(shy) * DBL(m.tx)  + DBL(sy ) * DBL(m.ty) + DBL(ty) );
 
-    shx = sx  * m.shx + shx * m.sy;
-    sy  = shy * m.shx + sy  * m.sy;
+    t0  = (float)( DBL(sx ) * DBL(m.sx) + DBL(shx) * DBL(m.shy) );
+    t1  = (float)( DBL(shy) * DBL(m.sx) + DBL(sy ) * DBL(m.shy) );
+
+    shx = (float)( DBL(sx ) * DBL(m.shx) + DBL(shx) * DBL(m.sy) );
+    sy  = (float)( DBL(shy) * DBL(m.shx) + DBL(sy ) * DBL(m.sy) );
 
     sx  = t0;
     shy = t1;
@@ -295,6 +310,7 @@ FloatMatrix& FloatMatrix::multiply(const FloatMatrix& m, uint32_t order)
 
 FloatMatrix FloatMatrix::multiplied(const FloatMatrix& m, uint32_t order) const
 {
+  // To avoid inaccurate multiplication we are using doubles internally.
   FloatMatrix result(DONT_INITIALIZE);
 
   const FloatMatrix* m0 = this;
@@ -306,59 +322,93 @@ FloatMatrix FloatMatrix::multiplied(const FloatMatrix& m, uint32_t order) const
     m1 = this;
   }
 
-  result.sx  = m0->sx  * m1->sx  + m0->shy * m1->shx;
-  result.shy = m0->sx  * m1->shy + m0->shy * m1->sy;
+  result.sx  = (float)( DBL(m0->sx ) * DBL(m1->sx ) + DBL(m0->shy) * DBL(m1->shx) );
+  result.shy = (float)( DBL(m0->sx ) * DBL(m1->shy) + DBL(m0->shy) * DBL(m1->sy ) );
 
-  result.shx = m0->shx * m1->sx  + m0->sy  * m1->shx;
-  result.sy  = m0->shx * m1->shy + m0->sy  * m1->sy;
+  result.shx = (float)( DBL(m0->shx) * DBL(m1->sx ) + DBL(m0->sy ) * DBL(m1->shx) );
+  result.sy  = (float)( DBL(m0->shx) * DBL(m1->shy) + DBL(m0->sy ) * DBL(m1->sy ) );
 
-  result.tx  = m0->tx  * m1->sx  + m0->ty  * m1->shx + m1->tx;
-  result.ty  = m0->tx  * m1->shy + m0->ty  * m1->sy  + m1->ty;
+  result.tx  = (float)( DBL(m0->tx ) * DBL(m1->sx ) + DBL(m0->ty ) * DBL(m1->shx) + DBL(m1->tx) );
+  result.ty  = (float)( DBL(m0->tx ) * DBL(m1->shy) + DBL(m0->ty ) * DBL(m1->sy ) + DBL(m1->ty) );
 
   return result;
 }
 
 FloatMatrix& FloatMatrix::multiplyInv(const FloatMatrix& m, uint32_t order)
 {
-  return multiply(m.inverted(), order);
+  // To avoid inaccurate multiplication we are using doubles internally.
+  double d = getDeterminantReciprocalDouble();
+  double t0, t1, t2, t3, t4, t5;
+
+  t0  = DBL( sy ) * d;
+  t1  = DBL(-shy) * d;
+  t2  = DBL( sx ) * d;
+  t3  = DBL(-shx) * d;
+  t4  = DBL(-tx ) * DBL(t0) - DBL(ty) * DBL(t3);
+  t5  = DBL(-tx ) * DBL(t1) - DBL(ty) * DBL(t2);
+
+  if (order == MATRIX_APPEND)
+  {
+    sx  = (float)( DBL(t0) * DBL(m.sx ) + DBL(t1) * DBL(m.shx) );
+    shy = (float)( DBL(t0) * DBL(m.shy) + DBL(t1) * DBL(m.sy ) );
+    sy  = (float)( DBL(t3) * DBL(m.shy) + DBL(t2) * DBL(m.sy ) );
+    shx = (float)( DBL(t3) * DBL(m.sx ) + DBL(t2) * DBL(m.shx) );
+    tx  = (float)( DBL(t4) * DBL(m.sx ) + DBL(t5) * DBL(m.shx) + DBL(m.tx) );
+    ty  = (float)( DBL(t4) * DBL(m.shy) + DBL(t5) * DBL(m.sy ) + DBL(m.ty) );
+  }
+  else
+  {
+    sx  = (float)( DBL(t0) * DBL(m.sx ) + DBL(t3) * DBL(m.shy) );
+    shy = (float)( DBL(t1) * DBL(m.sx ) + DBL(t2) * DBL(m.shy) );
+    sy  = (float)( DBL(t1) * DBL(m.shx) + DBL(t2) * DBL(m.sy ) );
+    shx = (float)( DBL(t0) * DBL(m.shx) + DBL(t3) * DBL(m.sy ) );
+    tx  = (float)( DBL(t0) * DBL(m.tx ) + DBL(t3) * DBL(m.ty ) + DBL(t4) );
+    ty  = (float)( DBL(t1) * DBL(m.tx ) + DBL(t2) * DBL(m.ty ) + DBL(t5) );
+  }
+
+  return *this;
 }
 
 FloatMatrix& FloatMatrix::invert()
 {
-  float d, t0, t4;
+  // To avoid inaccurate multiplication we are using doubles internally.
+  double d = getDeterminantReciprocalDouble();
+  double t0, t1, t2, t3, t4, t5;
 
-  d  = getDeterminantReciprocal();
+  t0  = DBL( sy ) * d;
+  t1  = DBL(-shy) * d;
+  t2  = DBL( sx ) * d;
+  t3  = DBL(-shx) * d;
+  t4  = DBL(-tx ) * DBL(t0) - DBL(ty) * DBL(t3);
+  t5  = DBL(-tx ) * DBL(t1) - DBL(ty) * DBL(t2);
 
-  t0  =  sy  * d;
-  sy  =  sx  * d;
-  shy = -shy * d;
-  shx = -shx * d;
-
-  t4 = -tx * t0  - ty * shx;
-  ty = -tx * shy - ty * sy;
-
-  sx = t0;
-  tx = t4;
+  sx  = (float)t0;
+  shy = (float)t1;
+  sy  = (float)t2;
+  shx = (float)t3;
+  tx  = (float)t4;
+  ty  = (float)t5;
 
   return *this;
 }
 
 FloatMatrix FloatMatrix::inverted() const
 {
-  FloatMatrix result(DONT_INITIALIZE);
-  float d;
+  // To avoid inaccurate multiplication we are using doubles internally.
+  double d = getDeterminantReciprocalDouble();
+  double t0, t1, t2, t3, t4, t5;
 
-  d  = getDeterminantReciprocal();
+  t0  = DBL( sy ) * d;
+  t1  = DBL(-shy) * d;
+  t2  = DBL( sx ) * d;
+  t3  = DBL(-shx) * d;
+  t4  = DBL(-tx ) * DBL(t0) - DBL(ty) * DBL(t3);
+  t5  = DBL(-tx ) * DBL(t1) - DBL(ty) * DBL(t2);
 
-  result.sx  =  sy  * d;
-  result.sy  =  sx  * d;
-  result.shy = -shy * d;
-  result.shx = -shx * d;
-
-  result.tx = -tx * result.sx  - ty * result.shx;
-  result.ty = -tx * result.shy - ty * result.sy;
-
-  return result;
+  return FloatMatrix(
+    (float)t0, (float)t1,
+    (float)t2, (float)t3,
+    (float)t4, (float)t5);
 }
 
 FloatMatrix& FloatMatrix::flipX()
@@ -379,9 +429,9 @@ FloatMatrix& FloatMatrix::flipY()
   return *this;
 }
 
-int FloatMatrix::getType() const
+uint32_t FloatMatrix::getType() const
 {
-  int type = 0;
+  uint32_t type = 0;
 
   if (Math::feq(tx, 0.0f, Math::DEFAULT_FLOAT_EPSILON)) type |= MATRIX_TYPE_TRANSLATE;
   if (Math::feq(ty, 0.0f, Math::DEFAULT_FLOAT_EPSILON)) type |= MATRIX_TYPE_TRANSLATE;
@@ -487,6 +537,16 @@ FloatPoint FloatMatrix::getAbsoluteScaling() const
   float y = Math::sqrt(shy * shy + sy  * sy);
 
   return FloatPoint(x, y);
+}
+
+void FloatMatrix::multiply(FloatMatrix& dst, const FloatMatrix& a, const FloatMatrix& b)
+{
+  dst.sx  = (float)( DBL(a.sx ) * DBL(b.sx ) + DBL(a.shy) * DBL(b.shx) );
+  dst.shx = (float)( DBL(a.shx) * DBL(b.sx ) + DBL(a.sy ) * DBL(b.shx) );
+  dst.shy = (float)( DBL(a.sx ) * DBL(b.shy) + DBL(a.shy) * DBL(b.sy ) );
+  dst.sy  = (float)( DBL(a.shx) * DBL(b.shy) + DBL(a.sy ) * DBL(b.sy ) );
+  dst.tx  = (float)( DBL(a.tx ) * DBL(b.sx ) + DBL(a.ty ) * DBL(b.shx) + DBL(b.tx) );
+  dst.ty  = (float)( DBL(a.tx ) * DBL(b.shy) + DBL(a.ty ) * DBL(b.sy ) + DBL(b.ty) );
 }
 
 // ============================================================================
@@ -839,9 +899,9 @@ DoubleMatrix& DoubleMatrix::flipY()
   return *this;
 }
 
-int DoubleMatrix::getType() const
+uint32_t DoubleMatrix::getType() const
 {
-  int type = 0;
+  uint32_t type = 0;
 
   if (Math::feq(tx, 0.0, Math::DEFAULT_DOUBLE_EPSILON)) type |= MATRIX_TYPE_TRANSLATE;
   if (Math::feq(ty, 0.0, Math::DEFAULT_DOUBLE_EPSILON)) type |= MATRIX_TYPE_TRANSLATE;
@@ -947,6 +1007,16 @@ DoublePoint DoubleMatrix::getAbsoluteScaling() const
   double y = Math::sqrt(shy * shy + sy  * sy);
 
   return DoublePoint(x, y);
+}
+
+void DoubleMatrix::multiply(DoubleMatrix& dst, const DoubleMatrix& a, const DoubleMatrix& b)
+{
+  dst.sx  = a.sx  * b.sx  + a.shy * b.shx;
+  dst.shx = a.shx * b.sx  + a.sy  * b.shx;
+  dst.shy = a.sx  * b.shy + a.shy * b.sy;
+  dst.sy  = a.shx * b.shy + a.sy  * b.sy;
+  dst.tx  = a.tx  * b.sx  + a.ty  * b.shx + b.tx;
+  dst.ty  = a.tx  * b.shy + a.ty  * b.sy  + b.ty;
 }
 
 } // Fog namespace

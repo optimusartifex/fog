@@ -20,15 +20,15 @@ namespace Fog {
 // [Fog::Glyph]
 // ============================================================================
 
-static inline void _setupDpi(double* data, double dpi, double em, double ex)
+static inline void _setupDpi(float* data, float dpi, float em, float ex)
 {
-  data[DPI_VALUE_CM] = dpi * 0.3937007777777778;
+  data[DPI_VALUE_CM] = dpi * 0.393700777778f;
   data[DPI_VALUE_EM] = em;
   data[DPI_VALUE_EX] = ex;
-  data[DPI_VALUE_MM] = dpi * 0.0393700777777778;
-  data[DPI_VALUE_PC] = dpi * 0.1666666666666667;
-  data[DPI_VALUE_PT] = dpi * 0.0138888888888889;
-  data[DPI_VALUE_PX] = 1.0;
+  data[DPI_VALUE_MM] = dpi * 0.039370077778f;
+  data[DPI_VALUE_PC] = dpi * 0.166666666667f;
+  data[DPI_VALUE_PT] = dpi * 0.013888888889f;
+  data[DPI_VALUE_PX] = 1.0f;
 }
 
 Dpi::Dpi()
@@ -45,9 +45,9 @@ Dpi::~Dpi()
 {
 }
 
-err_t Dpi::setDpi(double dpi, double em, double ex)
+err_t Dpi::setDpi(float dpi, float em, float ex)
 {
-  if (dpi <= 0.0 || em <= 0.0 || ex <= 0.0) return ERR_RT_INVALID_ARGUMENT;
+  if (dpi <= 0.0f || em <= 0.0f || ex <= 0.0f) return ERR_RT_INVALID_ARGUMENT;
   _setupDpi(_data, dpi, em, ex);
 
   return ERR_OK;
@@ -55,19 +55,19 @@ err_t Dpi::setDpi(double dpi, double em, double ex)
 
 void Dpi::reset()
 {
-  _setupDpi(_data, 72.0, 12.0, 6.0);
+  _setupDpi(_data, 72.0f, 12.0f, 6.0f);
 }
 
-double Dpi::toDeviceSpace(double value, uint32_t valueType) const
+float Dpi::toDeviceSpace(float value, uint32_t valueType) const
 {
-  if ((uint32_t)valueType >= DPI_VALUE_COUNT) return 0.0;
+  if ((uint32_t)valueType >= DPI_VALUE_COUNT) return 0.0f;
 
   return value * _data[valueType];
 }
 
-double Dpi::fromDeviceSpace(double value, uint32_t valueType) const
+float Dpi::fromDeviceSpace(float value, uint32_t valueType) const
 {
-  if ((uint32_t)valueType >= DPI_VALUE_COUNT) return 0.0;
+  if ((uint32_t)valueType >= DPI_VALUE_COUNT) return 0.0f;
 
   return value / _data[valueType];
 }

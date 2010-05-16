@@ -8,7 +8,7 @@
 #define _FOG_CORE_THREADEVENT_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Atomic.h>
@@ -25,10 +25,10 @@
 #include <pthread.h>
 #endif // FOG_OS_POSIX
 
-//! @addtogroup Fog_Core
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Core_Threading
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -56,10 +56,10 @@ struct TimeDelta;
 struct FOG_API ThreadEvent
 {
 public:
-  //! If manual_reset is true, then to set the event state to non-signaled, a
-  //! consumer must call the Reset method.  If this parameter is false, then the
-  //! system automatically resets the event state to non-signaled after a single
-  //! waiting thread has been released.
+  //! If manual_reset is true, then to set the event state to non-signaled,
+  //! a consumer must call the @c reset() method.  If this parameter is false,
+  //! then the system automatically resets the event state to non-signaled after
+  //! a single waiting thread has been released.
   ThreadEvent(bool manualReset = false, bool initiallySignaled = false);
 
   //! WARNING: Destroying a ThreadEvent while threads are waiting on it is not
@@ -102,9 +102,9 @@ private:
   FOG_DISABLE_COPY(ThreadEvent)
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_CORE_THREADEVENT_H

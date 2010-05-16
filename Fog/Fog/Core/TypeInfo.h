@@ -8,48 +8,19 @@
 #define _FOG_CORE_TYPEINFO_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Constants.h>
 
 namespace Fog {
+
+//! @addtogroup Fog_Core_Essentials
+//! @{
 
 // ===========================================================================
 // [Fog::TypeInfo - Types]
 //
 // Class types for Fog::TypeInfo<T> template.
 // ===========================================================================
-
-//! @brief Types for @c Fog::TypeInfo, use together with
-//! @c FOG_DECLARE_TYPEINFO macro.
-enum TYPEINFO_TYPE
-{
-  //! @brief Simple data type like @c int, @c long, ...
-  //!
-  //! Simple data can be copyed from one memory location into another.
-  TYPEINFO_PRIMITIVE = 0,
-
-  //! @brief Moveable data type line @c Fog::String, ...
-  //!
-  //! Moveable data type can't be copyed to another location, but
-  //! can be moved in memory.
-  TYPEINFO_MOVABLE = 1,
-
-  //! @brief Class data type. 
-  //!
-  //! Means that class cannot be moved to another location.
-  TYPEINFO_CLASS = 2
-};
-
-//! @brief Additional flags for FOG_DECLARE_TYPEINFO. All flags are cleared in
-//! in @c Fog::TypeInfo<T> template.
-enum TYPEINFO_FLAGS
-{
-  TYPEINFO_IS_POD_TYPE   = 0x00000100,
-  TYPEINFO_IS_FLOAT_TYPE = 0x00000200,
-  TYPEINFO_HAS_COMPARE   = 0x00000400,
-  TYPEINFO_HAS_EQ        = 0x00000800,
-  TYPEINFO_MASK          = 0xFFFFFF00
-};
 
 // [Fog::AbstractCompareFn and Fog::AbstractEqFn]
 
@@ -381,6 +352,8 @@ namespace Fog { \
 template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5, T6 A6, T7 A7, T8 A8, T9 A9, T10 A10> \
 struct TypeCmp < __symbol__<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10> > : public TypeCmp_Wrapper< __symbol__<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10> > {}; \
 }
+
+//! @}
 
 } // Fog namespace
 

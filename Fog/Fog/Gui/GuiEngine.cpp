@@ -79,7 +79,7 @@ void GuiBackBuffer::_clear()
   _buffer.data = NULL;
   _buffer.width = 0;
   _buffer.height = 0;
-  _buffer.format = PIXEL_FORMAT_NULL;
+  _buffer.format = IMAGE_FORMAT_NULL;
   _buffer.stride = 0;
 
   _cachedWidth = 0;

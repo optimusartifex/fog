@@ -10,10 +10,10 @@
 // [Dependencies]
 #include <Fog/Gui/Layout/Layout.h>
 
-//! @addtogroup Fog_Gui
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Gui_Layout
+//! @{
 
 // ============================================================================
 // [Fog::BoxLayout]
@@ -56,9 +56,9 @@ protected:
   int _spacing;
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GUI_LAYOUT_BOXLAYOUT_H

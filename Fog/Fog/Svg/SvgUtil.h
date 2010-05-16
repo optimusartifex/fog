@@ -11,14 +11,14 @@
 #include <Fog/Core/Char.h>
 #include <Fog/Core/List.h>
 #include <Fog/Core/String.h>
-#include <Fog/Graphics/Argb.h>
+#include <Fog/Graphics/Color.h>
 #include <Fog/Graphics/Matrix.h>
 #include <Fog/Graphics/Path.h>
 #include <Fog/Svg/SvgBase.h>
 
 namespace Fog {
 
-//! @addtogroup Fog_Svg
+//! @addtogroup Fog_Svg_Util
 //! @{
 
 // ============================================================================
@@ -42,7 +42,7 @@ FOG_API err_t serializeColor(String& dst, Argb color);
 
 //! @brief Parse SVG opacity value: 0.0 to 1.0 or 0% to 100% and clamp it if.
 //! needed.
-FOG_API err_t parseOpacity(const String& str, double* dst);
+FOG_API err_t parseOpacity(const String& str, float* dst);
 
 // ============================================================================
 // [Fog::SvgUtil - Matrix]
@@ -65,7 +65,7 @@ FOG_API err_t serializeCoord(String& dst, const SvgCoord& coord);
 // [Fog::SvgUtil - Paths]
 // ============================================================================
 
-FOG_API DoublePath parsePoints(const String& str);
+FOG_API DoublePath parsePoints(const String& str, bool close);
 
 FOG_API DoublePath parsePath(const String& str);
 

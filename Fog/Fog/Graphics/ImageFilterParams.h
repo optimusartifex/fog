@@ -12,10 +12,10 @@
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/ConvolutionMatrix.h>
 
-//! @addtogroup Fog_Graphics
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Graphics_Effects
+//! @{
 
 // ============================================================================
 // [Fog::ImageBlurParams]
@@ -74,22 +74,22 @@ struct FOG_HIDDEN BlurParams
 };
 
 // ============================================================================
-// [Fog::SymmetricConvolveParamsF]
+// [Fog::FloatSymmetricConvolveParams]
 // ============================================================================
 
-struct FOG_HIDDEN SymmetricConvolveParamsF
+struct FOG_HIDDEN FloatSymmetricConvolveParams
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE SymmetricConvolveParamsF() :
+  FOG_INLINE FloatSymmetricConvolveParams() :
     borderExtend(IMAGE_FILTER_EXTEND_PAD),
     borderColor(0x00000000)
   {
   }
 
-  FOG_INLINE SymmetricConvolveParamsF(const SymmetricConvolveParamsF& other) :
+  FOG_INLINE FloatSymmetricConvolveParams(const FloatSymmetricConvolveParams& other) :
     hMatrix(other.hMatrix),
     vMatrix(other.vMatrix),
     borderExtend(other.borderExtend),
@@ -97,7 +97,7 @@ struct FOG_HIDDEN SymmetricConvolveParamsF
   {
   }
 
-  FOG_INLINE SymmetricConvolveParamsF(
+  FOG_INLINE FloatSymmetricConvolveParams(
     const List<float>& hMatrix,
     const List<float>& vMatrix,
     uint32_t borderExtend = IMAGE_FILTER_EXTEND_PAD,
@@ -110,11 +110,11 @@ struct FOG_HIDDEN SymmetricConvolveParamsF
   {
   }
 
-  FOG_INLINE ~SymmetricConvolveParamsF()
+  FOG_INLINE ~FloatSymmetricConvolveParams()
   {
   }
 
-  FOG_NO_INLINE SymmetricConvolveParamsF& operator=(const SymmetricConvolveParamsF& other)
+  FOG_NO_INLINE FloatSymmetricConvolveParams& operator=(const FloatSymmetricConvolveParams& other)
   {
     hMatrix = other.hMatrix;
     vMatrix = other.vMatrix;
@@ -135,16 +135,16 @@ struct FOG_HIDDEN SymmetricConvolveParamsF
   uint32_t borderColor;
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // ============================================================================
 // [Fog::TypeInfo<>]
 // ============================================================================
 
 FOG_DECLARE_TYPEINFO(Fog::BlurParams, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::SymmetricConvolveParamsF, Fog::TYPEINFO_MOVABLE)
+FOG_DECLARE_TYPEINFO(Fog::FloatSymmetricConvolveParams, Fog::TYPEINFO_MOVABLE)
 
 // [Guard]
 #endif // _FOG_GRAPHICS_IMAGEFILTERPARAMS_H

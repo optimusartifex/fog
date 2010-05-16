@@ -30,8 +30,8 @@ MyWindow::MyWindow(uint32_t createFlags) :
 {
   setWindowTitle(Ascii8("Fog - Composite"));
 
-  i[0].readFile(Ascii8("babelfish.png"));
-  i[1].readFile(Ascii8("kweather.png"));
+  i[0].readFromFile(Ascii8("babelfish.png"));
+  i[1].readFromFile(Ascii8("kweather.png"));
 
   i[0].premultiply();
   i[1].premultiply();
@@ -99,7 +99,7 @@ void MyWindow::onPaint(PaintEvent* e)
   for (int a = 0; a < OPERATOR_COUNT; a++)
   {
     Image im(i[1]);
-    im.blitImage(IntPoint(0, 0), i[0], a, _opacity);
+    im.drawImage(IntPoint(0, 0), i[0], a, _opacity);
     paintImage(p, IntPoint(x, y), im, Ascii8(opname[a]));
 
     if (++x == 6) { x = 0; y++; }
@@ -113,7 +113,7 @@ void MyWindow::paintImage(Painter* p, const IntPoint& pos, const Image& im, cons
 
   p->drawText(IntRect(x, y, 130, 20), name, getFont(), TEXT_ALIGN_CENTER);
   p->drawRect(IntRect(x, y + 20, 130, 130));
-  p->blitImage(IntPoint(x + 1, y + 21), im);
+  p->drawImage(IntPoint(x + 1, y + 21), im);
 }
 
 // ============================================================================

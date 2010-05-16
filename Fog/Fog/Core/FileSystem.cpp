@@ -19,7 +19,7 @@
 #include <Fog/Core/UserInfo.h>
 
 #if defined(FOG_OS_WINDOWS)
-// windows.h is already included in Fog/Build/Build.h
+// windows.h is already included in Fog/Core/Build.h
 #include <io.h>
 #ifndef IO_REPARSE_TAG_SYMLINK
 #define IO_REPARSE_TAG_SYMLINK 0xA000000C

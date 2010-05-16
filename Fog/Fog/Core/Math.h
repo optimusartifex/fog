@@ -8,7 +8,7 @@
 #define _FOG_CORE_MATH_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 
 #include <math.h>
 
@@ -154,7 +154,7 @@ static FOG_HIDDEN const uint32_t fog_inf[2] = { 0x00000000, 0x7FF00000 };
 namespace Fog {
 namespace Math {
 
-//! @addtogroup Fog_Core
+//! @addtogroup Fog_Core_Math
 //! @{
 
 // ============================================================================
@@ -199,6 +199,14 @@ static FOG_INLINE const T& max(const T& a, const T& b, const T& c)
 template<typename T>
 static FOG_INLINE const T& bound(const T& val, const T& min, const T& max)
 { return val < max ? (val > min ? val : min) : max; }
+
+static FOG_INLINE uint8_t boundToByte(int val)
+{
+  if (FOG_LIKELY((uint)val <= 0xFF))
+    return (uint8_t)(uint)val;
+  else
+    return (val < 0) ? 0 : 0xFF;
+}
 
 // ============================================================================
 // [Fog::Math - Abs]
@@ -332,7 +340,9 @@ static FOG_INLINE uint uceil(double v) { return uround(::ceil(v)); }
 // [Fog::Math - Double <-> Fixed point]
 // ============================================================================
 
-//! @brief Helper union used to convert double to fixed point integer.
+//! @internal
+//!
+//! @brief Helper union that contains 64-bit float and 64-bit integer.
 union DoubleAndInt64
 {
   //! @brief Double data.
@@ -352,6 +362,9 @@ union DoubleAndInt64
   int64_t i64;
 };
 
+//! @internal
+//!
+//! @brief Helper union that contains 32-bit float and 32-bit integer.
 union FloatAndInt32
 {
   //! @brief Float data.
@@ -399,7 +412,7 @@ static FOG_INLINE float cos(float rad) { return ::cosf(rad); }
 static FOG_INLINE double sin(double rad) { return ::sin(rad); }
 static FOG_INLINE double cos(double rad) { return ::cos(rad); }
 
-#if defined(FOG_CC_GNU) && !defined(FOG_OS_MAC)
+#if defined(FOG_CC_GNU) && !defined(FOG_OS_MAC) && !defined(FOG_OS_WINDOWS)
 static FOG_INLINE void sincos(float rad, float* sinResult, float* cosResult)
 {
   ::sincosf(rad, sinResult, cosResult);
@@ -430,10 +443,10 @@ static FOG_INLINE void sincos(double rad, double* sinResult, double* cosResult)
 static FOG_INLINE float sqrt(float x) { return ::sqrtf(x); }
 static FOG_INLINE double sqrt(double x) { return ::sqrt(x); }
 
+//! @}
+
 } // Math namespace
 } // Fog namespace
-
-//! @}
 
 // [Guard]
 #endif // _FOG_CORE_MATH_H

@@ -8,17 +8,19 @@
 #define _FOG_GRAPHICS_DITHERMATRIX_P_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
+
+namespace Fog {
 
 //! @addtogroup Fog_Graphics_Private
 //! @{
-
-namespace Fog {
 
 // ============================================================================
 // [Fog::DitherMatrix]
 // ============================================================================
 
+//! @internal
+//!
 //! @brief Functions and tables that can be used to dithering
 //! implementation
 //!
@@ -87,9 +89,9 @@ struct FOG_HIDDEN DitherMatrix
   }
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GRAPHICS_DITHERMATRIX_P_H

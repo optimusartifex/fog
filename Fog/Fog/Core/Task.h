@@ -8,17 +8,18 @@
 #define _FOG_CORE_TASK_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
-
-//! @addtogroup Fog_Core
-//! @{
+#include <Fog/Core/Build.h>
 
 namespace Fog {
+
+//! @addtogroup Fog_Core_Threading
+//! @{
 
 // ============================================================================
 // [Fog::Task]
 // ============================================================================
 
+//! @brief Task that can be send to thread event loop.
 struct FOG_API Task
 {
   Task();
@@ -75,9 +76,9 @@ public:
   virtual void run();
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_CORE_TASK_H

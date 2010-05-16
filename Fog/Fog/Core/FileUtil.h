@@ -10,11 +10,11 @@
 // [Dependencies]
 #include <Fog/Core/String.h>
 
-//! @addtogroup Fog_Core
-//! @{
-
 namespace Fog {
 namespace FileUtil {
+
+//! @addtogroup Fog_Core_Streaming
+//! @{
 
 // ============================================================================
 // [Fog::FileUtil]
@@ -51,10 +51,10 @@ static const char pathSeparatorA = ':';
 static const Char pathSeparatorU = Char(':');
 #endif // FOG_OS_POSIX
 
+//! @}
+
 } // FileUtil namespace
 } // Fog namespace
-
-//! @}
 
 // [Guard]
 #endif // _FOG_CORE_FILEUTIL_H

@@ -4,13 +4,12 @@
 // MIT, See COPYING file in package
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Application.h>
 #include <Fog/Core/Byte.h>
 #include <Fog/Core/Math.h>
 #include <Fog/Core/TextCodec.h>
 #include <Fog/Graphics/RasterEngine_p.h>
-#include <Fog/Graphics/RasterEngine/C_p.h>
 #include <Fog/Gui/Constants.h>
 #include <Fog/Gui/GuiEngine/X11.h>
 #include <Fog/Gui/Widget.h>
@@ -291,13 +290,13 @@ static const char *X11_atomNames[X11GuiEngine::Atom_Count] =
 // [Fog::X11GuiEngine - Helpers]
 // ============================================================================
 
-static void X11GuiEngine_sendClientMessage(X11GuiEngine* uiSystem, XWindow win, long mask, long l0, long l1, long l2, long l3, long l4)
+static void X11GuiEngine_sendClientMessage(X11GuiEngine* engine, XWindow win, long mask, long l0, long l1, long l2, long l3, long l4)
 {
   XClientMessageEvent xe;
 
   xe.type = XClientMessage;
   xe.window = win;
-  xe.message_type = uiSystem->getAtom(X11GuiEngine::Atom_WM_PROTOCOLS);
+  xe.message_type = engine->getAtom(X11GuiEngine::Atom_WM_PROTOCOLS);
   xe.format = 32;
   xe.data.l[0] = l0;
   xe.data.l[1] = l1;
@@ -305,7 +304,7 @@ static void X11GuiEngine_sendClientMessage(X11GuiEngine* uiSystem, XWindow win, 
   xe.data.l[3] = l3;
   xe.data.l[4] = l4;
 
-  uiSystem->pXSendEvent(uiSystem->getDisplay(), win, false, mask, (XEvent *)&xe);
+  engine->pXSendEvent(engine->getDisplay(), win, false, mask, (XEvent *)&xe);
 }
 
 // ============================================================================
@@ -960,10 +959,10 @@ err_t X11GuiWindow::create(uint32_t createFlags)
 {
   if (_handle) return ERR_GUI_WINDOW_ALREADY_EXISTS;
 
-  X11GuiEngine* uiSystem = GUI_ENGINE();
+  X11GuiEngine* engine = GUI_ENGINE();
 
-  XDisplay* display = uiSystem->getDisplay();
-  XAtom* atoms = uiSystem->getAtoms();
+  XDisplay* display = engine->getDisplay();
+  XAtom* atoms = engine->getAtoms();
 
   int x = _widget->getX();
   int y = _widget->getY();
@@ -981,7 +980,7 @@ err_t X11GuiWindow::create(uint32_t createFlags)
 
     attr.backing_store = NotUseful;
     attr.override_redirect = (createFlags & WINDOW_X11_OVERRIDE_REDIRECT) != 0;
-    attr.colormap = uiSystem->getColormap();
+    attr.colormap = engine->getColormap();
     attr.border_pixel = 0;
     attr.background_pixel = XNone;
     attr.save_under = (createFlags & WINDOW_POPUP) != 0;
@@ -1001,31 +1000,31 @@ err_t X11GuiWindow::create(uint32_t createFlags)
       CWBorderPixel            |
       CWEventMask;
 
-    _handle = (void*)uiSystem->pXCreateWindow(display,
-      uiSystem->getRoot(),
+    _handle = (void*)engine->pXCreateWindow(display,
+      engine->getRoot(),
       x, y, w, h,
-      0, uiSystem->_displayInfo.depth,
+      0, engine->_displayInfo.depth,
       InputOutput,
-      uiSystem->getVisual(),
+      engine->getVisual(),
       attr_mask,
       &attr);
     _inputOnly = false;
   }
   else
   {
-    _handle = (void*)uiSystem->pXCreateWindow(display,
-      uiSystem->getRoot(),
+    _handle = (void*)engine->pXCreateWindow(display,
+      engine->getRoot(),
       x, y, w, h,
       0, CopyFromParent, InputOnly, CopyFromParent, 0, &attr);
 
-    uiSystem->pXSelectInput(display,
+    engine->pXSelectInput(display,
       (XID)_handle,
       PropertyChangeMask);
     _inputOnly = true;
   }
 
   // Create XID <-> GuiWindow* connection.
-  uiSystem->mapHandle(_handle, this);
+  engine->mapHandle(_handle, this);
 
   // Window protocols.
   {
@@ -1037,7 +1036,7 @@ err_t X11GuiWindow::create(uint32_t createFlags)
     // NET_WM_PING support.
     protocols[1] = atoms[X11GuiEngine::Atom_NET_WM_PING];
 
-    uiSystem->pXSetWMProtocols(display, (XID)getHandle(), protocols, 2);
+    engine->pXSetWMProtocols(display, (XID)getHandle(), protocols, 2);
   }
 
   //
@@ -1058,29 +1057,29 @@ err_t X11GuiWindow::create(uint32_t createFlags)
     wmHints.window_group = 0;
     */
 
-    uiSystem->pXSetWMProperties(display, (XID)getHandle(), NULL, NULL, NULL, 0, NULL, NULL, NULL);
+    engine->pXSetWMProperties(display, (XID)getHandle(), NULL, NULL, NULL, 0, NULL, NULL, NULL);
   }
 
   // Set _NET_WM_PID
   long pid = getpid();
-  uiSystem->pXChangeProperty(display, (XID)getHandle(), atoms[X11GuiEngine::Atom_NET_WM_PID], XA_CARDINAL, 32, PropModeReplace, (unsigned char*)&pid, 1);
+  engine->pXChangeProperty(display, (XID)getHandle(), atoms[X11GuiEngine::Atom_NET_WM_PID], XA_CARDINAL, 32, PropModeReplace, (unsigned char*)&pid, 1);
 
   // Set WM_CLIENT_LEADER
-  long clientLeader = uiSystem->getWmClientLeader();
-  uiSystem->pXChangeProperty(display, (XID)getHandle(), atoms[X11GuiEngine::Atom_WM_CLIENT_LEADER], XA_WINDOW, 32, PropModeReplace, (unsigned char*)&clientLeader, 1);
+  long clientLeader = engine->getWmClientLeader();
+  engine->pXChangeProperty(display, (XID)getHandle(), atoms[X11GuiEngine::Atom_WM_CLIENT_LEADER], XA_WINDOW, 32, PropModeReplace, (unsigned char*)&clientLeader, 1);
 
   // Get correct window position.
   {
     XWindowAttributes wa;
-    uiSystem->pXGetWindowAttributes(display, (XID)getHandle(), &wa);
+    engine->pXGetWindowAttributes(display, (XID)getHandle(), &wa);
 
     _windowRect.set(wa.x, wa.y, (int)wa.width, (int)wa.height);
   }
 
   // Create X input context.
-  if (uiSystem->_xim)
+  if (engine->_xim)
   {
-    _xic = uiSystem->pXCreateIC(uiSystem->getXim(),
+    _xic = engine->pXCreateIC(engine->getXim(),
       XNInputStyle, (XIMPreeditNothing | XIMStatusNothing),
       XNClientWindow, (XID)getHandle(),
       XNFocusWindow, (XID)getHandle(),
@@ -1107,13 +1106,13 @@ err_t X11GuiWindow::destroy()
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
-  X11GuiEngine* uiSystem = GUI_ENGINE();
+  X11GuiEngine* engine = GUI_ENGINE();
 
-  uiSystem->pXDestroyIC(_xic);
-  uiSystem->pXDestroyWindow(uiSystem->getDisplay(), (XID)getHandle());
+  engine->pXDestroyIC(_xic);
+  engine->pXDestroyWindow(engine->getDisplay(), (XID)getHandle());
 
   // Destroy XID <-> GuiWindow* connection.
-  uiSystem->unmapHandle(_handle);
+  engine->unmapHandle(_handle);
 
   // Clear all variables.
   _handle = NULL;
@@ -1147,8 +1146,8 @@ err_t X11GuiWindow::show()
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
-  X11GuiEngine* uiSystem = GUI_ENGINE();
-  uiSystem->pXMapWindow(uiSystem->getDisplay(), (XID)getHandle());
+  X11GuiEngine* engine = GUI_ENGINE();
+  engine->pXMapWindow(engine->getDisplay(), (XID)getHandle());
 
   return ERR_OK;
 }
@@ -1157,8 +1156,8 @@ err_t X11GuiWindow::hide()
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
-  X11GuiEngine* uiSystem = GUI_ENGINE();
-  uiSystem->pXUnmapWindow(uiSystem->getDisplay(), (XID)getHandle());
+  X11GuiEngine* engine = GUI_ENGINE();
+  engine->pXUnmapWindow(engine->getDisplay(), (XID)getHandle());
 
   return ERR_OK;
 }
@@ -1169,13 +1168,13 @@ err_t X11GuiWindow::move(const IntPoint& pt)
 
   if (_windowRect.getX() != pt.getX() || _windowRect.getY() != pt.getY())
   {
-    X11GuiEngine* uiSystem = GUI_ENGINE();
+    X11GuiEngine* engine = GUI_ENGINE();
 
     // some window managers can change widget move request
     if ((_xflags & XFlag_Configured) == 0)
       setMoveableHints();
 
-    uiSystem->pXMoveWindow(uiSystem->getDisplay(), (XID)getHandle(), pt.getX(), pt.getY());
+    engine->pXMoveWindow(engine->getDisplay(), (XID)getHandle(), pt.getX(), pt.getY());
   }
 
   return ERR_OK;
@@ -1188,8 +1187,8 @@ err_t X11GuiWindow::resize(const IntSize& size)
 
   if (_windowRect.getSize() != size)
   {
-    X11GuiEngine* uiSystem = GUI_ENGINE();
-    uiSystem->pXResizeWindow(uiSystem->getDisplay(), (XID)getHandle(),
+    X11GuiEngine* engine = GUI_ENGINE();
+    engine->pXResizeWindow(engine->getDisplay(), (XID)getHandle(),
       (uint)size.getWidth(), (uint)size.getHeight());
   }
 
@@ -1207,8 +1206,8 @@ err_t X11GuiWindow::reconfigure(const IntRect& rect)
     if ((_xflags & XFlag_Configured) == 0)
       setMoveableHints();
 
-    X11GuiEngine* uiSystem = GUI_ENGINE();
-    uiSystem->pXMoveResizeWindow(uiSystem->getDisplay(), (XID)getHandle(),
+    X11GuiEngine* engine = GUI_ENGINE();
+    engine->pXMoveResizeWindow(engine->getDisplay(), (XID)getHandle(),
       rect.getX(),
       rect.getY(),
       rect.getWidth(),
@@ -1222,8 +1221,8 @@ err_t X11GuiWindow::takeFocus()
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
-  X11GuiEngine* uiSystem = GUI_ENGINE();
-  uiSystem->pXSetInputFocus(uiSystem->getDisplay(), (XID)getHandle(), XNone, 0);
+  X11GuiEngine* engine = GUI_ENGINE();
+  engine->pXSetInputFocus(engine->getDisplay(), (XID)getHandle(), XNone, 0);
 
   return ERR_OK;
 }
@@ -1244,15 +1243,15 @@ err_t X11GuiWindow::setTitle(const String& title)
   const wchar_t *titleWChar = reinterpret_cast<const wchar_t *>(titleW.nullTerminated());
 #endif
 
-  X11GuiEngine* uiSystem = GUI_ENGINE();
-  int result = uiSystem->pXwcTextListToTextProperty(uiSystem->getDisplay(),
+  X11GuiEngine* engine = GUI_ENGINE();
+  int result = engine->pXwcTextListToTextProperty(engine->getDisplay(),
     (wchar_t **)&titleWChar, 1, XTextStyle, &windowProperty);
 
   if (result == XSuccess)
   {
-    uiSystem->pXSetWMName(uiSystem->getDisplay(), (XID)getHandle(), &windowProperty);
-    uiSystem->pXFree(windowProperty.value);
-    uiSystem->pXSync(uiSystem->getDisplay(), False);
+    engine->pXSetWMName(engine->getDisplay(), (XID)getHandle(), &windowProperty);
+    engine->pXFree(windowProperty.value);
+    engine->pXSync(engine->getDisplay(), False);
 
     _title = title;
   }
@@ -1304,8 +1303,8 @@ err_t X11GuiWindow::setSizeGranularity(const IntPoint& pt)
 
   _sizeGranularity = pt;
 
-  X11GuiEngine* uiSystem = GUI_ENGINE();
-  uiSystem->pXSetNormalHints(uiSystem->getDisplay(), (XID)getHandle(), &hints);
+  X11GuiEngine* engine = GUI_ENGINE();
+  engine->pXSetNormalHints(engine->getDisplay(), (XID)getHandle(), &hints);
 
   return ERR_OK;
 }
@@ -1323,9 +1322,9 @@ err_t X11GuiWindow::worldToClient(IntPoint* coords)
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
   XWindow childRet;
-  X11GuiEngine* uiSystem = GUI_ENGINE();
-  bool ok = uiSystem->pXTranslateCoordinates(uiSystem->getDisplay(),
-    uiSystem->getRoot(), (XID)getHandle(),
+  X11GuiEngine* engine = GUI_ENGINE();
+  bool ok = engine->pXTranslateCoordinates(engine->getDisplay(),
+    engine->getRoot(), (XID)getHandle(),
     coords->x, coords->y,
     &coords->x, &coords->y,
     &childRet);
@@ -1338,9 +1337,9 @@ err_t X11GuiWindow::clientToWorld(IntPoint* coords)
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
   XWindow childRet;
-  X11GuiEngine* uiSystem = GUI_ENGINE();
-  bool ok = uiSystem->pXTranslateCoordinates(uiSystem->getDisplay(),
-    (XID)getHandle(), uiSystem->getRoot(),
+  X11GuiEngine* engine = GUI_ENGINE();
+  bool ok = engine->pXTranslateCoordinates(engine->getDisplay(),
+    (XID)getHandle(), engine->getRoot(),
     coords->x, coords->y,
     &coords->x, &coords->y,
     &childRet);
@@ -1350,7 +1349,7 @@ err_t X11GuiWindow::clientToWorld(IntPoint* coords)
 
 void X11GuiWindow::onX11Event(XEvent* xe)
 {
-  X11GuiEngine* uiSystem = GUI_ENGINE();
+  X11GuiEngine* engine = GUI_ENGINE();
 
   switch (xe->xany.type)
   {
@@ -1385,7 +1384,7 @@ void X11GuiWindow::onX11Event(XEvent* xe)
       _xflags |= XFlag_Configured;
 
       // Don't process old configure events.
-      while (uiSystem->pXCheckTypedWindowEvent(uiSystem->getDisplay(), xe->xany.window, XConfigureNotify, xe)) ;
+      while (engine->pXCheckTypedWindowEvent(engine->getDisplay(), xe->xany.window, XConfigureNotify, xe)) ;
 
       IntRect windowRect(
         xe->xconfigure.x,
@@ -1422,7 +1421,7 @@ void X11GuiWindow::onX11Event(XEvent* xe)
         // Use XIC (X input context) to translate key
         wchar_t buf[32];
         XStatus status;
-        int len = uiSystem->pXwcLookupString(_xic,
+        int len = engine->pXwcLookupString(_xic,
           (XKeyPressedEvent *)xe,
           buf,
           FOG_ARRAY_SIZE(buf) - 1,
@@ -1451,28 +1450,28 @@ void X11GuiWindow::onX11Event(XEvent* xe)
 __keyPressNoXIC:
         // XIC not supported...?
         char buf[15*6 + 1];
-        int len = uiSystem->pXLookupString(&xe->xkey, buf, FOG_ARRAY_SIZE(buf) - 1, &xsym, 0);
+        int len = engine->pXLookupString(&xe->xkey, buf, FOG_ARRAY_SIZE(buf) - 1, &xsym, 0);
         TextCodec::local8().toUnicode(unicode, buf, len);
       }
 
-      key = uiSystem->translateXSym(xsym);
-      onKeyPress(key, uiSystem->keyToModifier(key), xe->xkey.keycode,
+      key = engine->translateXSym(xsym);
+      onKeyPress(key, engine->keyToModifier(key), xe->xkey.keycode,
         Char(unicode.getLength() == 1 ? unicode.at(0).ch() : 0));
       break;
     }
 
     case XKeyRelease:
     {
-      KeySym xsym = uiSystem->pXKeycodeToKeysym(uiSystem->getDisplay(), xe->xkey.keycode, 0);
-      uint32_t key = uiSystem->translateXSym(xsym);
+      KeySym xsym = engine->pXKeycodeToKeysym(engine->getDisplay(), xe->xkey.keycode, 0);
+      uint32_t key = engine->translateXSym(xsym);
 
-      onKeyRelease(key, uiSystem->keyToModifier(key), xe->xkey.keycode, Char(0));
+      onKeyRelease(key, engine->keyToModifier(key), xe->xkey.keycode, Char(0));
       break;
     }
 
     case XEnterNotify:
-      if (uiSystem->_systemMouseStatus.uiWindow == this &&
-          uiSystem->_systemMouseStatus.buttons)
+      if (engine->_systemMouseStatus.uiWindow == this &&
+          engine->_systemMouseStatus.buttons)
       {
         onMouseMove(xe->xmotion.x, xe->xmotion.y);
       }
@@ -1482,8 +1481,8 @@ __keyPressNoXIC:
       }
       break;
     case XLeaveNotify:
-      if (uiSystem->_systemMouseStatus.uiWindow == this &&
-          uiSystem->_systemMouseStatus.buttons)
+      if (engine->_systemMouseStatus.uiWindow == this &&
+          engine->_systemMouseStatus.buttons)
       {
         onMouseMove(xe->xmotion.x, xe->xmotion.y);
       }
@@ -1498,7 +1497,7 @@ __keyPressNoXIC:
 
     case XButtonPress:
     {
-      uint button = uiSystem->translateButton(xe->xbutton.button);
+      uint button = engine->translateButton(xe->xbutton.button);
       switch (button)
       {
         case BUTTON_LEFT:
@@ -1516,7 +1515,7 @@ __keyPressNoXIC:
 
     case XButtonRelease:
     {
-      uint button = uiSystem->translateButton(xe->xbutton.button);
+      uint button = engine->translateButton(xe->xbutton.button);
       switch (button)
       {
         case BUTTON_LEFT:
@@ -1540,14 +1539,14 @@ __keyPressNoXIC:
             xe->xexpose.y + xe->xexpose.height);
           reinterpret_cast<X11GuiBackBuffer*>(_backingStore)->blitRects(
             (XID)getHandle(), &box, 1);
-        } while (xe->xexpose.count > 0 && uiSystem->pXCheckTypedWindowEvent(uiSystem->getDisplay(), xe->xany.window, XExpose, xe));
+        } while (xe->xexpose.count > 0 && engine->pXCheckTypedWindowEvent(engine->getDisplay(), xe->xany.window, XExpose, xe));
 
-        uiSystem->pXFlush(uiSystem->getDisplay());
+        engine->pXFlush(engine->getDisplay());
       }
       else
       {
         // Eat all events, because we will repaint later (in update process).
-        while (uiSystem->pXCheckTypedWindowEvent(uiSystem->getDisplay(), xe->xany.window, XExpose, xe)) ;
+        while (engine->pXCheckTypedWindowEvent(engine->getDisplay(), xe->xany.window, XExpose, xe)) ;
         _needBlit = true;
       }
       break;
@@ -1559,21 +1558,21 @@ __keyPressNoXIC:
       if (xe->xclient.format == 32)
       {
         // WM_PROTOCOLS messages
-        if (xe->xclient.message_type == uiSystem->getAtom(X11GuiEngine::Atom_WM_PROTOCOLS))
+        if (xe->xclient.message_type == engine->getAtom(X11GuiEngine::Atom_WM_PROTOCOLS))
         {
           XAtom msg = (XAtom)xe->xclient.data.l[0];
 
-          if (msg == uiSystem->getAtom(X11GuiEngine::Atom_WM_DELETE_WINDOW))
+          if (msg == engine->getAtom(X11GuiEngine::Atom_WM_DELETE_WINDOW))
           {
             CloseEvent e;
             _widget->sendEvent(&e);
           }
-          else if (msg == uiSystem->getAtom(X11GuiEngine::Atom_NET_WM_PING))
+          else if (msg == engine->getAtom(X11GuiEngine::Atom_NET_WM_PING))
           {
-            if (xe->xclient.window != uiSystem->_root)
+            if (xe->xclient.window != engine->_root)
             {
               X11GuiEngine_sendClientMessage(
-                uiSystem, uiSystem->_root,
+                engine, engine->_root,
                 SubstructureNotifyMask | SubstructureRedirectMask,
                 xe->xclient.data.l[0],
                 xe->xclient.data.l[1],
@@ -1600,8 +1599,8 @@ void X11GuiWindow::setMoveableHints()
   Memory::zero(&hints, sizeof(XSizeHints));
   hints.flags = PPosition;
 
-  X11GuiEngine* uiSystem = GUI_ENGINE();
-  uiSystem->pXSetNormalHints(uiSystem->getDisplay(), (XID)getHandle(), &hints);
+  X11GuiEngine* engine = GUI_ENGINE();
+  engine->pXSetNormalHints(engine->getDisplay(), (XID)getHandle(), &hints);
 }
 // ============================================================================
 // [Fog::X11GuiBackBuffer]
@@ -1621,7 +1620,7 @@ X11GuiBackBuffer::~X11GuiBackBuffer()
 
 bool X11GuiBackBuffer::resize(int width, int height, bool cache)
 {
-  X11GuiEngine* uiSystem = GUI_ENGINE();
+  X11GuiEngine* engine = GUI_ENGINE();
 
   int targetWidth = width;
   int targetHeight = height;
@@ -1669,13 +1668,13 @@ bool X11GuiBackBuffer::resize(int width, int height, bool cache)
         break;
 
       case TYPE_X11_XSHM_PIXMAP:
-        uiSystem->pXShmDetach(uiSystem->getDisplay(), &_shmi);
-        uiSystem->pXSync(uiSystem->getDisplay(), False);
+        engine->pXShmDetach(engine->getDisplay(), &_shmi);
+        engine->pXSync(engine->getDisplay(), False);
 
         shmdt(_shmi.shmaddr);
         shmctl(_shmi.shmid, IPC_RMID, NULL);
 
-        uiSystem->pXFreePixmap(uiSystem->getDisplay(), _pixmap);
+        engine->pXFreePixmap(engine->getDisplay(), _pixmap);
 
         if (_secondaryPixels) Memory::free(_secondaryPixels);
         break;
@@ -1686,11 +1685,11 @@ bool X11GuiBackBuffer::resize(int width, int height, bool cache)
         Memory::free(_primaryPixels);
         _ximage->data = NULL;
 
-        uiSystem->pXDestroyImage(_ximage);
+        engine->pXDestroyImage(_ximage);
 #if defined(FOG_X11BACKBUFFER_FORCE_PIXMAP)
         if (_type == TYPE_X11_XIMAGE_WITH_PIXMAP)
         {
-          uiSystem->pXFreePixmap(uiSystem->getDisplay(), _pixmap);
+          engine->pXFreePixmap(engine->getDisplay(), _pixmap);
         }
 #endif
         if (_secondaryPixels) Memory::free(_secondaryPixels);
@@ -1702,16 +1701,16 @@ bool X11GuiBackBuffer::resize(int width, int height, bool cache)
   if (createImage)
   {
     // correct target BPP, some X server settings can be amazing:-)
-    uint targetDepth = uiSystem->_displayInfo.depth;
+    uint targetDepth = engine->_displayInfo.depth;
     if (targetDepth > 4 && targetDepth < 8) targetDepth = 8;
     else if (targetDepth == 15) targetDepth = 16;
     else if (targetDepth == 24) targetDepth = 32;
 
-    targetStride = Image::calcStride(targetWidth, targetDepth);
+    targetStride = Image::getStrideFromWidth(targetWidth, targetDepth);
     targetSize = targetStride * targetHeight;
 
     // TypeXShmPixmap
-    if (uiSystem->hasXShm())
+    if (engine->hasXShm())
     {
       if ((_shmi.shmid = shmget(IPC_PRIVATE, targetSize, IPC_CREAT | IPC_EXCL | 0666)) < 0)
       {
@@ -1729,16 +1728,16 @@ bool X11GuiBackBuffer::resize(int width, int height, bool cache)
       _shmi.readOnly = False;
 
       // Get the X server to attach this segment to a pixmap
-      uiSystem->pXShmAttach(uiSystem->getDisplay(), &_shmi);
-      uiSystem->pXSync(uiSystem->getDisplay(), False);
+      engine->pXShmAttach(engine->getDisplay(), &_shmi);
+      engine->pXSync(engine->getDisplay(), False);
 
-      _pixmap = uiSystem->pXShmCreatePixmap(
-        uiSystem->getDisplay(),
-        uiSystem->getRoot(),
+      _pixmap = engine->pXShmCreatePixmap(
+        engine->getDisplay(),
+        engine->getRoot(),
         _shmi.shmaddr,
         &_shmi,
         targetWidth, targetHeight,
-        uiSystem->_displayInfo.depth);
+        engine->_displayInfo.depth);
 
       _type = TYPE_X11_XSHM_PIXMAP;
       _primaryPixels = (uint8_t*)_shmi.shmaddr;
@@ -1757,10 +1756,10 @@ __tryImage:
       }
 
       // try to create XImage
-      _ximage = uiSystem->pXCreateImage(
-        uiSystem->getDisplay(),
-        uiSystem->getVisual(),
-        uiSystem->_displayInfo.depth,
+      _ximage = engine->pXCreateImage(
+        engine->getDisplay(),
+        engine->getVisual(),
+        engine->_displayInfo.depth,
         ZPixmap, 0, (char *)_primaryPixels,
         targetWidth, targetHeight,
         32, targetStride);
@@ -1774,11 +1773,11 @@ __tryImage:
 #if defined(FOG_X11BACKBUFFER_FORCE_PIXMAP)
       // this step should be optional, but can increase performance
       // on remote machines (local machines should use XSHM extension)
-      _pixmap = uiSystem->pXCreatePixmap(
-        uiSystem->getDisplay(),
-        uiSystem->getRoot(),
+      _pixmap = engine->pXCreatePixmap(
+        engine->getDisplay(),
+        engine->getRoot(),
         targetWidth, targetHeight,
-        uiSystem->_displayInfo.depth);
+        engine->_displayInfo.depth);
 
       if (_pixmap)
         _type = TYPE_X11_XIMAGE_WITH_PIXMAP;
@@ -1792,7 +1791,7 @@ __tryImage:
       _createdTime = TimeTicks::now();
       _expireTime = _createdTime + TimeDelta::fromSeconds(15);
 
-      _buffer.format = PIXEL_FORMAT_XRGB32;
+      _buffer.format = IMAGE_FORMAT_XRGB32;
 
       _primaryStride = targetStride;
       _cachedWidth = targetWidth;
@@ -1817,64 +1816,64 @@ __tryImage:
         _convertFunc = NULL;
         _convertDepth = targetDepth;
 
-        uint32_t rMask = uiSystem->_displayInfo.rMask;
-        uint32_t gMask = uiSystem->_displayInfo.gMask;
-        uint32_t bMask = uiSystem->_displayInfo.bMask;
+        uint32_t rMask = engine->_displayInfo.rMask;
+        uint32_t gMask = engine->_displayInfo.gMask;
+        uint32_t bMask = engine->_displayInfo.bMask;
 
         switch (targetDepth)
         {
           // 8-bit target.
           case 8:
             if (rMask == 0x60 && gMask == 0x1C && bMask == 0x03)
-              _convertFunc = (void*)RasterEngine::functionMap->dib.i8rgb232_from_xrgb32_dither;
+              _convertFunc = (void*)rasterFuncs.dib.i8rgb232_from_xrgb32_dither;
             else if (rMask == 0x30 && gMask == 0x0C && bMask == 0x03)
-              _convertFunc = (void*)RasterEngine::functionMap->dib.i8rgb222_from_xrgb32_dither;
+              _convertFunc = (void*)rasterFuncs.dib.i8rgb222_from_xrgb32_dither;
             else if (rMask == 0x04 && gMask == 0x02 && bMask == 0x01)
-              _convertFunc = (void*)RasterEngine::functionMap->dib.i8rgb111_from_xrgb32_dither;
+              _convertFunc = (void*)rasterFuncs.dib.i8rgb111_from_xrgb32_dither;
             break;
 
           // 16-bit target.
           case 16:
             if (rMask == 0xF800 && gMask == 0x07E0 && bMask == 0x001F)
             {
-              if (uiSystem->_displayInfo.is16BitSwapped)
-                _convertFunc = (void*)RasterEngine::functionMap->dib.convert[DIB_FORMAT_RGB16_565_NATIVE][PIXEL_FORMAT_XRGB32];
+              if (engine->_displayInfo.is16BitSwapped)
+                _convertFunc = (void*)rasterFuncs.dib.convert[DIB_FORMAT_RGB16_565_NATIVE][IMAGE_FORMAT_XRGB32];
               else
-                _convertFunc = (void*)RasterEngine::functionMap->dib.convert[DIB_FORMAT_RGB16_565_NATIVE][PIXEL_FORMAT_XRGB32];
+                _convertFunc = (void*)rasterFuncs.dib.convert[DIB_FORMAT_RGB16_565_NATIVE][IMAGE_FORMAT_XRGB32];
             }
             else if (rMask == 0x7C00 && gMask == 0x03E0 && bMask == 0x001F)
             {
-              if (uiSystem->_displayInfo.is16BitSwapped)
-                _convertFunc = (void*)RasterEngine::functionMap->dib.convert[DIB_FORMAT_RGB16_555_NATIVE][PIXEL_FORMAT_XRGB32];
+              if (engine->_displayInfo.is16BitSwapped)
+                _convertFunc = (void*)rasterFuncs.dib.convert[DIB_FORMAT_RGB16_555_NATIVE][IMAGE_FORMAT_XRGB32];
               else
-                _convertFunc = (void*)RasterEngine::functionMap->dib.convert[DIB_FORMAT_RGB16_555_NATIVE][PIXEL_FORMAT_XRGB32];
+                _convertFunc = (void*)rasterFuncs.dib.convert[DIB_FORMAT_RGB16_555_NATIVE][IMAGE_FORMAT_XRGB32];
             }
 #if 0
             if (rMask == 0x7C00 && gMask == 0x03E0 && bMask == 0x001F)
             {
-              if (uiSystem->_displayInfo.is16BitSwapped)
-                _convertFunc = (void*)RasterEngine::functionMap->dib.rgb16_555_swapped_from_xrgb32_dither;
+              if (engine->_displayInfo.is16BitSwapped)
+                _convertFunc = (void*)rasterFuncs.dib.rgb16_555_swapped_from_xrgb32_dither;
               else
-                _convertFunc = (void*)RasterEngine::functionMap->dib.rgb16_555_native_from_xrgb32_dither;
+                _convertFunc = (void*)rasterFuncs.dib.rgb16_555_native_from_xrgb32_dither;
             }
             else if (rMask == 0xF800 && gMask == 0x07E0 && bMask == 0x001F)
             {
-              if (uiSystem->_displayInfo.is16BitSwapped)
-                _convertFunc = (void*)RasterEngine::functionMap->dib.rgb16_565_swapped_from_xrgb32_dither;
+              if (engine->_displayInfo.is16BitSwapped)
+                _convertFunc = (void*)rasterFuncs.dib.rgb16_565_swapped_from_xrgb32_dither;
               else
-                _convertFunc = (void*)RasterEngine::functionMap->dib.rgb16_565_native_from_xrgb32_dither;
+                _convertFunc = (void*)rasterFuncs.dib.rgb16_565_native_from_xrgb32_dither;
             }
 #endif
             break;
 
           // 24-bit target.
           case 24:
-            _convertFunc = (void*)RasterEngine::functionMap->dib.convert[DIB_FORMAT_RGB24_NATIVE][PIXEL_FORMAT_XRGB32];
+            _convertFunc = (void*)rasterFuncs.dib.convert[DIB_FORMAT_RGB24_NATIVE][IMAGE_FORMAT_XRGB32];
             break;
 
           // 32-bit target.
           case 32:
-            _convertFunc = (void*)RasterEngine::functionMap->dib.memcpy32;
+            _convertFunc = (void*)rasterFuncs.dib.memcpy32;
             break;
         }
 
@@ -1922,7 +1921,7 @@ void X11GuiBackBuffer::destroy()
 
 void X11GuiBackBuffer::updateRects(const IntBox* rects, sysuint_t count)
 {
-  X11GuiEngine* uiSystem = GUI_ENGINE();
+  X11GuiEngine* engine = GUI_ENGINE();
 
   // If there is secondary buffer, we need to convert it to primary
   // one that has same depth and pixel format as X display.
@@ -1939,7 +1938,7 @@ void X11GuiBackBuffer::updateRects(const IntBox* rects, sysuint_t count)
     uint8_t* dstBase = _primaryPixels;
     uint8_t* srcBase = _secondaryPixels;
 
-    const uint8_t* palConv = uiSystem->_paletteInfo.palConv;
+    const uint8_t* palConv = engine->_paletteInfo.palConv;
 
     sysint_t dstxmul = _convertDepth >> 3;
     sysint_t srcxmul = 4;
@@ -1970,7 +1969,7 @@ void X11GuiBackBuffer::updateRects(const IntBox* rects, sysuint_t count)
         case 8:
           while (y1 < y2)
           {
-            ((RasterEngine::Dither8Fn)_convertFunc)(dstCur, srcCur, w, IntPoint(x1, y1), palConv);
+            ((RasterDither8Fn)_convertFunc)(dstCur, srcCur, w, IntPoint(x1, y1), palConv);
 
             dstCur += dstStride;
             srcCur += srcStride;
@@ -1981,7 +1980,7 @@ void X11GuiBackBuffer::updateRects(const IntBox* rects, sysuint_t count)
 #if 0
           while (y1 < y2)
           {
-            ((RasterEngine::Dither16Fn)_convertFunc)(dstCur, srcCur, w, IntPoint(x1, y1));
+            ((RasterDither16Fn)_convertFunc)(dstCur, srcCur, w, IntPoint(x1, y1));
 
             dstCur += dstStride;
             srcCur += srcStride;
@@ -1990,7 +1989,7 @@ void X11GuiBackBuffer::updateRects(const IntBox* rects, sysuint_t count)
 #endif
           while (y1 < y2)
           {
-            ((RasterEngine::VSpanFn)_convertFunc)(dstCur, srcCur, w, NULL);
+            ((RasterVBlitFullFn)_convertFunc)(dstCur, srcCur, w, NULL);
 
             dstCur += dstStride;
             srcCur += srcStride;
@@ -2001,7 +2000,7 @@ void X11GuiBackBuffer::updateRects(const IntBox* rects, sysuint_t count)
         case 32:
           while (y1 < y2)
           {
-            ((RasterEngine::VSpanFn)_convertFunc)(dstCur, srcCur, w, NULL);
+            ((RasterVBlitFullFn)_convertFunc)(dstCur, srcCur, w, NULL);
 
             dstCur += dstStride;
             srcCur += srcStride;
@@ -2024,10 +2023,10 @@ void X11GuiBackBuffer::updateRects(const IntBox* rects, sysuint_t count)
       uint w = uint(rects[i].getWidth());
       uint h = uint(rects[i].getHeight());
 
-      uiSystem->pXPutImage(
-        uiSystem->getDisplay(),
+      engine->pXPutImage(
+        engine->getDisplay(),
         _pixmap,
-        uiSystem->getGc(),
+        engine->getGc(),
         _ximage,
         x, y,
         x, y,
@@ -2038,7 +2037,7 @@ void X11GuiBackBuffer::updateRects(const IntBox* rects, sysuint_t count)
 
 void X11GuiBackBuffer::blitRects(XID target, const IntBox* rects, sysuint_t count)
 {
-  X11GuiEngine* uiSystem = GUI_ENGINE();
+  X11GuiEngine* engine = GUI_ENGINE();
   sysuint_t i;
 
   switch (getType())
@@ -2056,11 +2055,11 @@ void X11GuiBackBuffer::blitRects(XID target, const IntBox* rects, sysuint_t coun
         int w = rects[i].getWidth();
         int h = rects[i].getHeight();
 
-        uiSystem->pXCopyArea(
-          uiSystem->getDisplay(),
+        engine->pXCopyArea(
+          engine->getDisplay(),
           _pixmap,
           target,
-          uiSystem->getGc(),
+          engine->getGc(),
           x, y,
           w, h,
           x, y);
@@ -2075,10 +2074,10 @@ void X11GuiBackBuffer::blitRects(XID target, const IntBox* rects, sysuint_t coun
         int w = rects[i].getWidth();
         int h = rects[i].getHeight();
 
-        uiSystem->pXPutImage(
-          uiSystem->getDisplay(),
+        engine->pXPutImage(
+          engine->getDisplay(),
           target,
-          uiSystem->getGc(),
+          engine->getGc(),
           _ximage,
           x, y,
           x, y,
@@ -2114,7 +2113,7 @@ void X11GuiEventLoop::_runInternal()
     bool didWork = false;
     bool more;
 
-    // Process XEvents. These has biggest priority.
+    // Process XEvents. This is the biggest priority task.
     do {
       more = _processNextXEvent();
       didWork |= more;
@@ -2172,10 +2171,10 @@ void X11GuiEventLoop::_scheduleDelayedWork(const Time& delayedWorkTime)
 
 void X11GuiEventLoop::_waitForWork()
 {
-  X11GuiEngine* uiSystem = GUI_ENGINE();
+  X11GuiEngine* engine = GUI_ENGINE();
 
-  int fd = uiSystem->_fd;
-  int fdSize = Math::max(fd, uiSystem->_wakeUpPipe[0]) + 1;
+  int fd = engine->_fd;
+  int fdSize = Math::max(fd, engine->_wakeUpPipe[0]) + 1;
   fd_set fdSet;
 
   struct timeval tval;
@@ -2183,7 +2182,7 @@ void X11GuiEventLoop::_waitForWork()
 
   FD_ZERO(&fdSet);
   FD_SET(fd, &fdSet);
-  FD_SET(uiSystem->_wakeUpPipe[0], &fdSet);
+  FD_SET(engine->_wakeUpPipe[0], &fdSet);
 
   if (_delayedWorkTime.isNull())
   {
@@ -2222,12 +2221,12 @@ void X11GuiEventLoop::_waitForWork()
 
   if (ret > 0)
   {
-    if (FD_ISSET(uiSystem->_wakeUpPipe[0], &fdSet))
+    if (FD_ISSET(engine->_wakeUpPipe[0], &fdSet))
     {
       // Dummy c, the actual value is out of our interest.
       uint8_t c;
 
-      if (read(uiSystem->_wakeUpPipe[0], &c, 1) != 1)
+      if (read(engine->_wakeUpPipe[0], &c, 1) != 1)
       {
         fog_debug("Fog::X11GuiEventLoop::waitForWork() - Can't read from weak-up pipe.");
       }
@@ -2239,20 +2238,20 @@ void X11GuiEventLoop::_waitForWork()
 
 bool X11GuiEventLoop::_xsync()
 {
-  X11GuiEngine* uiSystem = GUI_ENGINE();
-  uiSystem->pXSync(uiSystem->getDisplay(), false);
-  return uiSystem->pXPending(uiSystem->getDisplay());
+  X11GuiEngine* engine = GUI_ENGINE();
+  engine->pXSync(engine->getDisplay(), false);
+  return engine->pXPending(engine->getDisplay());
 }
 
 bool X11GuiEventLoop::_processNextXEvent()
 {
-  X11GuiEngine* uiSystem = GUI_ENGINE();
-  if (!uiSystem->pXPending(uiSystem->getDisplay())) return false;
+  X11GuiEngine* engine = GUI_ENGINE();
+  if (!engine->pXPending(engine->getDisplay())) return false;
 
   XEvent xe;
-  uiSystem->pXNextEvent(uiSystem->getDisplay(), &xe);
+  engine->pXNextEvent(engine->getDisplay(), &xe);
 
-  X11GuiWindow* uiWindow = reinterpret_cast<X11GuiWindow*>(uiSystem->handleToNative((void*)xe.xany.window));
+  X11GuiWindow* uiWindow = reinterpret_cast<X11GuiWindow*>(engine->handleToNative((void*)xe.xany.window));
 
   FOG_LISTENER_FOR_EACH(NativeEventListener, _nativeEventListenerList, onBeforeDispatch(&xe));
   if (uiWindow) uiWindow->onX11Event(&xe);
@@ -2266,9 +2265,9 @@ void X11GuiEventLoop::_sendWakeUp()
   if (_wakeUpSent.cmpXchg(0, 1))
   {
     static const uint8_t c[1] = { 'W' };
-    X11GuiEngine* uiSystem = GUI_ENGINE();
+    X11GuiEngine* engine = GUI_ENGINE();
 
-    if (write(uiSystem->_wakeUpPipe[1], c, 1) != 1)
+    if (write(engine->_wakeUpPipe[1], c, 1) != 1)
     {
       {
         fog_debug("Fog::X11GuiEventLoop::sendWakeUp() - Can't write to weak-up pipe");

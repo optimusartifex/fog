@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/ByteArray.h>
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/OS.h>

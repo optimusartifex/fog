@@ -4,11 +4,11 @@
 // MIT, See COPYING file in package
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 
 // [Guard]
 #if !defined(FOG_IDE) && !defined(_FOG_CORE_ATOMIC_H)
-#error "Fog::Atomic::MSC_INTRIN - Only Fog-Core/Atomic.h can include this file."
+#error "Fog::Atomic::MSC_INTRIN - Only Fog/Core/Atomic.h can include this file."
 #else
 
 // Always use compiler intrinsics if available.
@@ -37,6 +37,7 @@ namespace Fog {
 // [Fog::AtomicInt32]
 // ============================================================================
 
+//! @internal
 struct AtomicInt32
 {
   typedef int32_t Type;
@@ -107,6 +108,7 @@ struct AtomicOperationHelper<4> : public AtomicInt32 {};
 
 #if FOG_ARCH_BITS == 64
 
+//! @internal
 struct AtomicInt64
 {
   typedef int64_t Type;

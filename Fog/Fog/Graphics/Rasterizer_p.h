@@ -1,4 +1,4 @@
-// [Fog-Graphics library - Private API]
+// [Fog-Graphics Library - Private API]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -8,21 +8,29 @@
 #define _FOG_GRAPHICS_RASTERIZER_P_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/Geometry.h>
 #include <Fog/Graphics/Path.h>
 #include <Fog/Graphics/Scanline_p.h>
 
+namespace Fog {
+
 //! @addtogroup Fog_Graphics_Private
 //! @{
 
-namespace Fog {
+// ============================================================================
+// [Forward Declarations]
+// ============================================================================
+
+struct Span8;
 
 // ============================================================================
 // [Fog::Rasterizer]
 // ============================================================================
 
+//! @internal
+//!
 //! Scanline polygon rasterizer.
 //!
 //! Polygon rasterizer that is used to render filled polygons with 
@@ -63,7 +71,8 @@ struct FOG_HIDDEN Rasterizer
   // --------------------------------------------------------------------------
 
 #include <Fog/Core/Compiler/PackDWord.h>
-  struct CellXY
+  //! @internal
+  struct FOG_HIDDEN CellXY
   {
     int x;
     int y;
@@ -83,7 +92,8 @@ struct FOG_HIDDEN Rasterizer
 #include <Fog/Core/Compiler/PackRestore.h>
 
 #include <Fog/Core/Compiler/PackDWord.h>
-  struct CellX
+  //! @internal
+  struct FOG_HIDDEN CellX
   {
     int x;
     int cover;
@@ -116,8 +126,10 @@ struct FOG_HIDDEN Rasterizer
   // [CellXYBuffer]
   // --------------------------------------------------------------------------
 
+  //! @internal
+  //!
   //! @brief Cell buffer.
-  struct CellXYBuffer
+  struct FOG_HIDDEN CellXYBuffer
   {
     CellXYBuffer* prev;
     CellXYBuffer* next;
@@ -130,13 +142,23 @@ struct FOG_HIDDEN Rasterizer
   // [RowInfo]
   // --------------------------------------------------------------------------
 
+  //! @internal
+  //!
   //! @brief Lookup table that contains index and count of cells in sorted cells
   //! buffer. Each index to this table represents one row.
-  struct RowInfo
+  struct FOG_HIDDEN RowInfo
   {
     sysuint_t index;
     sysuint_t count;
   };
+
+  // --------------------------------------------------------------------------
+  // [Typedefs]
+  // --------------------------------------------------------------------------
+
+  typedef Span8* (*SweepScanlineSimpleFn)(Rasterizer* rasterizer, Scanline8& scanline, int y);
+  typedef Span8* (*SweepScanlineRegionFn)(Rasterizer* rasterizer, Scanline8& scanline, int y, const IntBox* clipBoxes, sysuint_t count);
+  typedef Span8* (*SweepScanlineSpansFn)(Rasterizer* rasterizer, Scanline8& scanline, int y, const Span8* clipSpans);
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -164,17 +186,24 @@ struct FOG_HIDDEN Rasterizer
   // [Error]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t getError() { return _error; }
+  FOG_INLINE err_t getError() const { return _error; }
 
   virtual void setError(err_t error) = 0;
   virtual void resetError() = 0;
 
   // --------------------------------------------------------------------------
-  // [Fill rule]
+  // [Fill Rule]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE int getFillRule() const { return _fillRule; }
-  FOG_INLINE void setFillRule(int fillRule) { _fillRule = fillRule; }
+  FOG_INLINE uint32_t getFillRule() const { return _fillRule; }
+  virtual void setFillRule(uint32_t fillRule) = 0;
+
+  // --------------------------------------------------------------------------
+  // [Alpha]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE uint32_t getAlpha() const { return _alpha; }
+  virtual void setAlpha(uint32_t alpha) = 0;
 
   // --------------------------------------------------------------------------
   // [Finalized]
@@ -235,13 +264,20 @@ struct FOG_HIDDEN Rasterizer
   // --------------------------------------------------------------------------
 
   //! @brief Sweep scanline @a y.
-  virtual uint sweepScanline(Scanline32* scanline, int y) = 0;
+  FOG_INLINE Span8* sweepScanline(Scanline8& scanline, int y)
+  { return _sweepScanlineSimpleFn(this, scanline, y); }
 
-  //! @brief Enhanced version of @c sweepScanline() that contains clip boundary.
+  //! @brief Enhanced version of @c sweepScanline() that accepts clip boundary.
   //!
-  //! This method is called by raster painter engine if clipping region is
-  //! complex (more than one rectangle).
-  virtual uint sweepScanline(Scanline32* scanline, int y, const IntBox* clip, sysuint_t count) = 0;
+  //! This method is called by raster paint engine if clipping region is complex.
+  FOG_INLINE Span8* sweepScanline(Scanline8& scanline, int y, const IntBox* clipBoxes, sysuint_t count)
+  { return _sweepScanlineRegionFn(this, scanline, y, clipBoxes, count); }
+
+  //! @brief Enhanced version of @c sweepScanline() that accepts clip spans.
+  //!
+  //! This method is called by raster paint engine if clipping region is mask.
+  FOG_INLINE Span8* sweepScanline(Scanline8& scanline, int y, const Span8* clipSpans)
+  { return _sweepScanlineSpansFn(this, scanline, y, clipSpans); }
 
   // --------------------------------------------------------------------------
   // [Pooling]
@@ -264,7 +300,10 @@ struct FOG_HIDDEN Rasterizer
   // [Members]
   // --------------------------------------------------------------------------
 
-protected:
+  SweepScanlineSimpleFn _sweepScanlineSimpleFn;
+  SweepScanlineRegionFn _sweepScanlineRegionFn;
+  SweepScanlineSpansFn _sweepScanlineSpansFn;
+
   //! @brief Clip bounding box (always must be valid, initialy set to zero).
   IntBox _clipBox;
 
@@ -275,7 +314,10 @@ protected:
   err_t _error;
 
   //! @brief Fill rule;
-  int _fillRule;
+  uint32_t _fillRule;
+
+  //! @brief Alpha.
+  uint32_t _alpha;
 
   //! @brief Whether rasterizer is finalized.
   bool _finalized;
@@ -315,16 +357,14 @@ protected:
 private:
   //! @brief Link to next pooled @c Rasterizer instance. Always NULL when you 
   //! get rasterizer by @c Rasterizer::getRasterizer() method.
-  //!
-  //! @internal
   Rasterizer* _poolNext;
 
   FOG_DISABLE_COPY(Rasterizer)
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GRAPHICS_RASTERIZER_P_H

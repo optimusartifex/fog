@@ -14,15 +14,16 @@
 #include <Fog/Graphics/Image.h>
 #include <Fog/Graphics/Path.h>
 
-//! @addtogroup Fog_Graphics
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Graphics_Text
+//! @{
 
 // ============================================================================
 // [Fog::GlyphData]
 // ============================================================================
 
+//! @brief Glyph data.
 struct FOG_API GlyphData
 {
   // --------------------------------------------------------------------------
@@ -75,6 +76,7 @@ private:
 // [Fog::Glyph]
 // ============================================================================
 
+//! @brief Glyph.
 struct FOG_API Glyph
 {
   // --------------------------------------------------------------------------
@@ -143,9 +145,9 @@ struct FOG_API Glyph
   FOG_DECLARE_D(GlyphData)
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // ============================================================================
 // [Fog::TypeInfo<>]

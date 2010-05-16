@@ -26,9 +26,6 @@
 #include <Fog/Core/Math.h>
 #include <Fog/Graphics/Path.h>
 
-//! @addtogroup Fog_Graphics
-//! @{
-
 namespace Fog {
 
 // ============================================================================
@@ -42,6 +39,9 @@ struct DoubleMatrix;
 // ============================================================================
 
 namespace PathUtil {
+
+//! @addtogroup Fog_Graphics_Geometry
+//! @{
 
 // ============================================================================
 // [Fog::PathUtil::Structures]
@@ -182,10 +182,10 @@ static FOG_INLINE double crossProduct(
   return (x - x2) * (y2 - y1) - (y - y2) * (x2 - x1);
 }
 
+//! @}
+
 } // PathUtil namespace
 } // Fog namespace
-
-//! @}
 
 // [Guard]
 #endif // _FOG_GRAPHICS_PATHUTIL_H

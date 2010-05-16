@@ -8,6 +8,7 @@
 #define _FOG_GRAPHICS_REGION_H
 
 // [Dependencies]
+#include <Fog/Core/Assert.h>
 #include <Fog/Core/Atomic.h>
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/Memory.h>
@@ -15,10 +16,10 @@
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/Geometry.h>
 
-//! @addtogroup Fog_Graphics
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Graphics_Geometry
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -31,7 +32,8 @@ struct DoubleMatrix;
 // [Fog::RegionData]
 // ============================================================================
 
-struct FOG_HIDDEN RegionData
+//! @brief Region data.
+struct FOG_API RegionData
 {
   // [Ref / Deref]
 
@@ -100,6 +102,7 @@ struct FOG_HIDDEN RegionData
 // [Fog::Region]
 // ============================================================================
 
+//! @brief Region defined by rectangles.
 struct FOG_API Region
 {
   // --------------------------------------------------------------------------
@@ -189,7 +192,7 @@ struct FOG_API Region
   FOG_INLINE bool isEmpty() const  { return _d->length == 0; }
 
   //! @brief Returns region extents.
-  FOG_INLINE const IntBox& extents() const  { return _d->extents; }
+  FOG_INLINE const IntBox& getExtents() const  { return _d->extents; }
 
   //! @brief Reserve @a n rectangles in region and detach it. If retion is
   //! infinite then ERR_RT_INVALID_CONTEXT is returned.
@@ -203,7 +206,7 @@ struct FOG_API Region
   // [HitTest]
   // --------------------------------------------------------------------------
 
-  //! @brief Tests if a given point is in region, see @c REGION_HITTEST enum.
+  //! @brief Tests if a given point is in region, see @c REGION_HIT_TEST enum.
   uint32_t hitTest(const IntPoint& pt) const;
   uint32_t hitTest(const IntRect& r) const;
   uint32_t hitTest(const IntBox& r) const;
@@ -239,9 +242,9 @@ struct FOG_API Region
   err_t set(const IntRect* rects, sysuint_t count);
   err_t set(const IntBox* rects, sysuint_t count);
 
-  err_t combine(const Region& r, uint32_t regionOp);
-  err_t combine(const IntRect& r, uint32_t regionOp);
-  err_t combine(const IntBox& r, uint32_t regionOp);
+  err_t combine(const Region& r, uint32_t combineOp);
+  err_t combine(const IntRect& r, uint32_t combineOp);
+  err_t combine(const IntBox& r, uint32_t combineOp);
 
   err_t translate(const IntPoint& pt);
   err_t shrink(const IntPoint& pt);
@@ -310,7 +313,11 @@ struct FOG_API Region
   //! @brief Infinite region instance.
   static const Region& infinite() { return _infinite; }
 
-  static err_t combine(Region& dst, const Region& src1, const Region& src2, uint32_t regionOp);
+  static err_t combine(Region& dst, const Region& src1, const Region& src2, uint32_t combineOp);
+  static err_t combine(Region& dst, const Region& src1, const IntBox& src2, uint32_t combineOp);
+  static err_t combine(Region& dst, const IntBox& src1, const Region& src2, uint32_t combineOp);
+  static err_t combine(Region& dst, const IntBox& src1, const IntBox& src2, uint32_t combineOp);
+
   static err_t translate(Region& dst, const Region& src, const IntPoint& pt);
   static err_t shrink(Region& dst, const Region& src, const IntPoint& pt);
   static err_t frame(Region& dst, const Region& src, const IntPoint& pt);
@@ -396,6 +403,8 @@ struct TemporaryRegion : public Region
   }
 };
 
+//! @}
+
 } // Fog namespace
 
 FOG_INLINE const Fog::Region operator+(const Fog::Region& src1, const Fog::Region& src2) { Fog::Region r; Fog::Region::combine(r, src1, src2, Fog::REGION_OP_UNION    ); return r; }
@@ -415,8 +424,6 @@ FOG_INLINE const Fog::Region operator|(const Fog::Region& src1, const Fog::IntBo
 FOG_INLINE const Fog::Region operator&(const Fog::Region& src1, const Fog::IntBox& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_INTERSECT); return r; }
 FOG_INLINE const Fog::Region operator^(const Fog::Region& src1, const Fog::IntBox& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_XOR      ); return r; }
 FOG_INLINE const Fog::Region operator-(const Fog::Region& src1, const Fog::IntBox& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_SUBTRACT ); return r; }
-
-//! @}
 
 // ============================================================================
 // [Fog::TypeInfo<>]

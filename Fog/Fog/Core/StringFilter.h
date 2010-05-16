@@ -8,15 +8,15 @@
 #define _FOG_CORE_STRINGFILTER_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Basics.h>
 #include <Fog/Core/String.h>
 
-//! @addtogroup Fog_Core
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Core_Essentials
+//! @{
 
 // ============================================================================
 // [Fog::StringFilter]
@@ -43,9 +43,9 @@ private:
   FOG_DISABLE_COPY(StringFilter)
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_CORE_STRINGFILTER_H

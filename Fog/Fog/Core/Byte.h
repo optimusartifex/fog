@@ -8,15 +8,15 @@
 #define _FOG_CORE_BYTE_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/CharUtil.h>
 #include <Fog/Core/TypeInfo.h>
 
-//! @defgroup Core
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Core_Essentials
+//! @{
 
 // ============================================================================
 // [Fog::Byte]
@@ -123,6 +123,8 @@ struct FOG_HIDDEN Byte
 };
 #include <Fog/Core/Compiler/PackRestore.h>
 
+//! @}
+
 } // Fog namespace
 
 // [Overloads]
@@ -155,8 +157,6 @@ __FOG_BYTE_MAKE_ARITH_OVERLOAD(uint8_t a, a, const Fog::Byte& b, b._ch)
 __FOG_BYTE_MAKE_ARITH_OVERLOAD(const Fog::Byte& a, a._ch, uint8_t b, b)
 
 #undef __FOG_BYTE_MAKE_ARITH_OVERLOAD
-
-//! @}
 
 // ============================================================================
 // [Fog::TypeInfo<>]

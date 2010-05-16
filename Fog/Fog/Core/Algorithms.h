@@ -8,14 +8,14 @@
 #define _FOG_CORE_ALGORITHMS_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Math.h>
 #include <Fog/Core/TypeInfo.h>
 
-//! @addtogroup Fog_Core
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Core_Other
+//! @{
 
 // ============================================================================
 // [Fog::QSort<T>]
@@ -156,9 +156,9 @@ loop:
   }
 }
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_CORE_ALGORITHMS_H

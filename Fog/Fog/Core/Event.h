@@ -11,10 +11,10 @@
 #include <Fog/Core/String.h>
 #include <Fog/Core/Task.h>
 
-//! @addtogroup Fog_Core
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Core_Object
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -27,7 +27,7 @@ struct Timer;
 // [Fog::Event]
 // ============================================================================
 
-//! @brief Structure that contains information about event.
+//! @brief Structure that contains information about an event.
 //!
 //! Used together with Fog::Object event model.
 struct FOG_API Event : Task
@@ -207,9 +207,9 @@ private:
   String _name;
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_CORE_EVENT_H

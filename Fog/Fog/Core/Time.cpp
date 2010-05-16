@@ -21,17 +21,20 @@
 #endif // FOG_OS_WINDOWS
 
 #if defined(FOG_OS_POSIX)
-#ifdef FOG_OS_MAC
-#include <mach/mach_time.h>
-#endif
 #include <sys/time.h>
 #include <time.h>
 #include <unistd.h>
 #endif // FOG_OS_POSIX
 
+#if defined(FOG_OS_MAC)
+#include <mach/mach_time.h>
+#endif // FOG_OS_MAC
+
 namespace Fog {
 
+// ============================================================================
 // [Fog::TimeDelta]
+// ============================================================================
 
 // static
 TimeDelta TimeDelta::fromDays(int64_t days)
@@ -214,7 +217,7 @@ static void microsecondsToFileTime(int64_t us, FILETIME* ft)
   // handle alignment problems. This only works on little-endian machines.
   *ft64 = us * 10;
 #else
-#error "Error"
+# error "Fog::Time - PORT ME!"
 #endif
 }
 
@@ -590,7 +593,7 @@ Time Time::now()
   struct timezone tz = { 0, 0 };  // UTC
   if (gettimeofday(&tv, &tz) != 0)
   {
-     // "Could not determine time of day"
+    // "Could not determine time of day"
     FOG_ASSERT(0);
   }
   // Combine seconds and microseconds in a 64-bit field containing microseconds
@@ -683,8 +686,7 @@ TimeTicks TimeTicks::now()
   // With numer and denom = 1 (the expected case), the 64-bit absolute time
   // reported in nanoseconds is enough to last nearly 585 years.
 
-#elif defined(FOG_OS_POSIX) && \
-      defined(_POSIX_MONOTONIC_CLOCK) && _POSIX_MONOTONIC_CLOCK >= 0
+#elif defined(FOG_OS_POSIX) && defined(_POSIX_MONOTONIC_CLOCK) && _POSIX_MONOTONIC_CLOCK >= 0
 
   struct timespec ts;
   if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0)

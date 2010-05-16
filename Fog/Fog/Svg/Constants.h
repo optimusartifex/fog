@@ -8,12 +8,12 @@
 #define _FOG_SVG_CONSTANTS_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
-
-//! @addtogroup Fog_Svg
-//! @{
+#include <Fog/Core/Build.h>
 
 namespace Fog {
+
+//! @addtogroup Fog_Svg_Constants
+//! @{
 
 // ============================================================================
 // [Fog::SVG_ELEMENT_TYPE]
@@ -82,8 +82,8 @@ enum SVG_PAINT_TYPE
 
 enum SVG_STYLE_ID
 {
-  // When adding value here, it's important to add value to Fog-Core/Strings.h
-  // and Fog-Core/Strings.cpp. There are static strings for style names.
+  // When adding value here, it's important to add value to Fog/Core/Strings.h
+  // and Fog/Core/Strings.cpp. There are static strings for style names.
   SVG_STYLE_CLIP_PATH = 0,
   SVG_STYLE_CLIP_RULE,
   SVG_STYLE_ENABLE_BACKGROUND,
@@ -154,9 +154,9 @@ enum ERR_SVG_ENUM
   ERR_SVG_INVALID_DATA_ENCODING = ERR_SVG_START
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_SVG_CONSTANTS_H

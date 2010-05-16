@@ -12,12 +12,12 @@
 #include <Fog/Core/List.h>
 #include <Fog/Core/ManagedString.h>
 #include <Fog/Core/String.h>
-#include <Fog/Graphics/Argb.h>
+#include <Fog/Graphics/Color.h>
 #include <Fog/Graphics/Path.h>
 
 namespace Fog {
 
-//! @addtogroup Fog_Svg
+//! @addtogroup Fog_Svg_Dom
 //! @{
 
 // ============================================================================
@@ -28,9 +28,9 @@ namespace Fog {
 struct FOG_HIDDEN SvgCoord
 {
   FOG_INLINE SvgCoord() {}
-  FOG_INLINE SvgCoord(double value, uint32_t unit) : value(value), unit(unit) {}
+  FOG_INLINE SvgCoord(float value, uint32_t unit) : value(value), unit(unit) {}
 
-  double value;
+  float value;
   uint32_t unit;
 };
 #include <Fog/Core/Compiler/PackRestore.h>

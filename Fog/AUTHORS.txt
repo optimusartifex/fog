@@ -12,37 +12,18 @@ Other libraries and source code used in Fog (always BSD/MIT/Public Domain)
 (See COPYING file)
 ==========================================================================
 
-Fog/Core
+Fog-Core
 ========
 
 Delegates - FastDelegate <http://www.codeproject.com/cpp/FastDelegate.asp>.
 Threading and Event loops - Chromium <http://code.google.com/p/chromium/>.
 Unicode support - Ultimate++ <http://www.ultimatepp.com>.
 
-Fog/Graphics
+Fog-Graphics
 ============
 
-Affine matrix - AGG version 2.4 <http://www.antigrain.com>.
 Color matrix - AggOO <http://www.dratek.com/>.
 Dither matrix - Evas <http://www.enlightenment.org>.
 Gif - GifLib <http://sourceforge.net/projects/libungif>.
 Linear blur - Mario Klingemann <http://incubator.quasimondo.com/processing/fast_blur_deluxe.php>.
 Region - XOrg <http://www.x.org>.
-Rasterizer - AGG version 2.4 <http://www.antigrain.com>.
-Path - AGG version 2.4 <http://www.antigrain.com>.
-
-Fog/Gui
-=======
-
-None.
-
-Fog/Svg
-=======
-
-None.
-
-Fog/Xml
-=======
-
-None.
-

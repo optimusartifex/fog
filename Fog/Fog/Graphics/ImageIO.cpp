@@ -420,7 +420,7 @@ err_t BaseDevice::setProperty(const ManagedString& name, const Value& value)
       name == fog_strings->getString(STR_GRAPHICS_framesCount) ||
       name == fog_strings->getString(STR_GRAPHICS_progress))
   {
-    return ERR_PROPERTY_IS_READ_ONLY;
+    return ERR_OBJECT_READ_ONLY_PROPERTY;
   }
 
   return base::setProperty(name, value);
@@ -488,7 +488,7 @@ void BaseDevice::reset()
   _framesCount = 0;
   _progress = 0.0f;
 
-  _format = PIXEL_FORMAT_NULL;
+  _format = IMAGE_FORMAT_NULL;
 
   _palette.free();
   _comment.free();

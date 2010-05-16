@@ -8,7 +8,7 @@
 #define _FOG_GUI_GUIENGINE_X11_H
 
 // [Visibility]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 
 #if defined(Fog_Gui_X11_EXPORTS)
 # define FOG_GUIENGINE_X11_API FOG_DLL_EXPORT
@@ -25,10 +25,10 @@
 #include <Fog/Gui/GuiEngine/Base.h>
 #include <Fog/Gui/GuiEngine/X11Headers.h>
 
-//! @addtogroup Fog_Gui
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Gui_Engine
+//! @{
 
 // ============================================================================
 // [Fog::X11GuiEngine]
@@ -578,9 +578,9 @@ protected:
   Time _delayedWorkTime;
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GUI_GUIENGINE_X11_H

@@ -8,16 +8,16 @@
 #define _FOG_CORE_BASICS_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/Char.h>
 #include <Fog/Core/TypeInfo.h>
 
-//! @addtogroup Fog_Core
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Core_Essentials
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -31,6 +31,7 @@ struct String;
 // [Fog::Str8]
 // ============================================================================
 
+//! @brief 8-bit generic string (stub).
 struct FOG_HIDDEN Str8
 {
   // [Construction / Destruction]
@@ -62,6 +63,7 @@ private:
 // [Fog::Ascii8]
 // ============================================================================
 
+//! @brief 8-bit ASCII string (stub).
 struct FOG_HIDDEN Ascii8 : public Str8
 {
   // [Construction / Destruction]
@@ -74,6 +76,7 @@ struct FOG_HIDDEN Ascii8 : public Str8
 // [Fog::Local8]
 // ============================================================================
 
+//! @brief 8-bit string encoded in local encoding (stub).
 struct FOG_HIDDEN Local8 : public Str8
 {
   // [Construction / Destruction]
@@ -86,6 +89,7 @@ struct FOG_HIDDEN Local8 : public Str8
 // [Fog::Utf8]
 // ============================================================================
 
+//! @brief UTF-8 string (stub).
 struct FOG_HIDDEN Utf8 : public Str8
 {
   // [Construction / Destruction]
@@ -98,6 +102,7 @@ struct FOG_HIDDEN Utf8 : public Str8
 // [Fog::Utf16]
 // ============================================================================
 
+//! @brief UTF-16 string (stub).
 struct FOG_HIDDEN Utf16
 {
   // [Construction / Destruction]
@@ -133,6 +138,7 @@ private:
 // [Fog::FormatFlags]
 // ============================================================================
 
+//! @brief String format flags.
 struct FOG_HIDDEN FormatFlags
 {
   // [Construction / Destruction]
@@ -153,6 +159,7 @@ struct FOG_HIDDEN FormatFlags
 // [Fog::Range]
 // ============================================================================
 
+//! @brief Range.
 struct FOG_HIDDEN Range
 {
   // [Construction / Destruction]
@@ -165,9 +172,9 @@ struct FOG_HIDDEN Range
   sysuint_t length;
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // ============================================================================
 // [Fog::TypeInfo<T>]

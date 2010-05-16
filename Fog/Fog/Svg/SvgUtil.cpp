@@ -236,17 +236,17 @@ FOG_API int parseColor(const String& str, Argb* dst)
     sysuint_t len = (sysuint_t)(end - begin);
     if (len == 3)
     {
-      color.r = singleHexToColorValue(begin[0]);
-      color.g = singleHexToColorValue(begin[1]);
-      color.b = singleHexToColorValue(begin[2]);
+      color.setRed  (singleHexToColorValue(begin[0]));
+      color.setGreen(singleHexToColorValue(begin[1]));
+      color.setBlue (singleHexToColorValue(begin[2]));
 
       status = SVG_SOURCE_COLOR;
     }
     else if (len == 6)
     {
-      color.r = doubleHexToColorValue(begin[0], begin[1]);
-      color.g = doubleHexToColorValue(begin[2], begin[3]);
-      color.b = doubleHexToColorValue(begin[4], begin[5]);
+      color.setRed  (doubleHexToColorValue(begin[0], begin[1]));
+      color.setGreen(doubleHexToColorValue(begin[2], begin[3]));
+      color.setBlue (doubleHexToColorValue(begin[4], begin[5]));
 
       status = SVG_SOURCE_COLOR;
     }
@@ -318,9 +318,9 @@ FOG_API int parseColor(const String& str, Argb* dst)
       }
     }
 
-    color.r = c[0];
-    color.g = c[1];
-    color.b = c[2];
+    color.setRed  (c[0]);
+    color.setGreen(c[1]);
+    color.setBlue (c[2]);
 
     status = SVG_SOURCE_COLOR;
   }
@@ -356,16 +356,16 @@ err_t serializeColor(String& dst, Argb color)
   err_t err;
 
   if ((err = dst.append(Char('#'))) ||
-      (err = dst.appendInt(color.value, 16, FormatFlags(6, 6)))) return err;
+      (err = dst.appendInt(color.getValue(), 16, FormatFlags(6, 6)))) return err;
 
   return err;
 }
 
-err_t parseOpacity(const String& str, double* dst)
+err_t parseOpacity(const String& str, float* dst)
 {
   sysuint_t end;
-  double d = 0.0;
-  err_t err = str.atod(&d, NULL, &end);
+  float d = 0.0;
+  err_t err = str.atof(&d, NULL, &end);
 
   if (err == ERR_OK)
   {
@@ -383,7 +383,7 @@ err_t parseOpacity(const String& str, double* dst)
 
         if (c == Char('%'))
         {
-          d *= 0.01;
+          d *= 0.01f;
           return ERR_OK;
         }
         else
@@ -393,11 +393,8 @@ err_t parseOpacity(const String& str, double* dst)
       } while (++strCur != strEnd);
     }
 
-    // Clamp value to 0.0 -> 1.0 including.
-    if (d < 0.0) d = 0.0;
-    else if (d > 1.0) d = 1.0;
-
-    *dst = d;
+    // Clamp value to 0.0 -> 1.0 inclusive.
+    *dst = Math::bound<float>(d, 0.0f, 1.0f);
   }
 
   return err;
@@ -614,15 +611,62 @@ err_t serializeCoord(String& dst, const SvgCoord& coord)
 // [Fog::SvgUtil - Paths]
 // ============================================================================
 
-DoublePath parsePoints(const String& str)
+DoublePath parsePoints(const String& str, bool close)
 {
   DoublePath path;
 
   const Char* strCur = str.getData();
   const Char* strEnd = strCur + str.getLength();
 
-  // SVG TODO:
+  double coords[2];
+  uint32_t position;
 
+  bool first = true;
+
+  // Finished?
+  if (strCur == strEnd) goto bail;
+
+  // Parse coordinates.
+  position = 0;
+  for (;;)
+  {
+    // Skip spaces.
+    while (strCur->isSpace())
+    {
+      if (++strCur == strEnd) goto bail;
+    }
+
+    // Parse number.
+    sysuint_t numEnd;
+    err_t err = StringUtil::atod(strCur, (sysuint_t)(strEnd - strCur), &coords[position], Char('.'), &numEnd);
+    if (err) goto bail;
+
+    strCur += numEnd;
+    if (strCur == strEnd) break;
+
+    if (*strCur == Char(','))
+    {
+      if (++strCur == strEnd) break;
+    }
+
+    if (++position == 2)
+    {
+      if (first)
+      {
+        path.moveTo(coords[0], coords[1]);
+        first = false;
+      }
+      else
+      {
+        path.lineTo(coords[0], coords[1]);
+      }
+      position = 0;
+    }
+  }
+
+bail:
+  if (close && !path.isEmpty()) path.closePolygon();
+  path.squeeze();
   return path;
 }
 

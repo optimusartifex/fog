@@ -10,10 +10,10 @@
 // [Dependencies]
 #include <Fog/Gui/Composite.h>
 
-//! @addtogroup Fog_Gui
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Gui_Widget
+//! @{
 
 // ============================================================================
 // [Fog::Window]
@@ -30,9 +30,9 @@ struct FOG_API Window : public Composite
   virtual void onPaint(PaintEvent* e);
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GUI_WINDOW_H

@@ -21,10 +21,10 @@
 #include <Fog/Graphics/GlyphSet.h>
 #include <Fog/Graphics/Matrix.h>
 
-//! @addtogroup Fog_Graphics
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Graphics_Text
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -45,6 +45,7 @@ struct TextExtents;
 // [Fog::FontOptions]
 // ============================================================================
 
+//! @brief Font options.
 struct FOG_HIDDEN FontOptions
 {
   // --------------------------------------------------------------------------
@@ -185,6 +186,7 @@ protected:
 // [Fog::FontMetrics]
 // ============================================================================
 
+//! @brief Font metrics.
 struct FOG_HIDDEN FontMetrics
 {
   // --------------------------------------------------------------------------
@@ -282,7 +284,9 @@ struct FloatKerningPair
 // [Fog::FontFace]
 // ============================================================================
 
-//! @brief Font face (reference counted class used inside @c Font).
+//! @brief Font face.
+//!
+//! Font face is reference counted class used inside of @c Font.
 struct FOG_API FontFace
 {
   // --------------------------------------------------------------------------
@@ -529,9 +533,9 @@ private:
   friend struct FontManager;
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // ============================================================================
 // [Fog::TypeInfo<>]

@@ -20,24 +20,24 @@ namespace Fog {
 // [Fog::ConvolutionMatrixI]
 // ============================================================================
 
-Static<ConvolutionMatrixI::Data> ConvolutionMatrixI::_dnull;
+Static<IntConvolutionMatrix::Data> IntConvolutionMatrix::_dnull;
 
-ConvolutionMatrixI::ConvolutionMatrixI() :
+IntConvolutionMatrix::IntConvolutionMatrix() :
   _d(_dnull->ref())
 {
 }
 
-ConvolutionMatrixI::ConvolutionMatrixI(const ConvolutionMatrixI& other) :
+IntConvolutionMatrix::IntConvolutionMatrix(const IntConvolutionMatrix& other) :
   _d(other._d->ref())
 {
 }
 
-ConvolutionMatrixI::~ConvolutionMatrixI()
+IntConvolutionMatrix::~IntConvolutionMatrix()
 {
   _d->deref();
 }
 
-ConvolutionMatrixI ConvolutionMatrixI::fromData(int w, int h, const ValueType* data)
+IntConvolutionMatrix IntConvolutionMatrix::fromData(int w, int h, const ValueType* data)
 {
   Data* d = NULL;
 
@@ -46,10 +46,10 @@ ConvolutionMatrixI ConvolutionMatrixI::fromData(int w, int h, const ValueType* d
   else
     d = _dnull->ref();
 
-  return ConvolutionMatrixI(d);
+  return IntConvolutionMatrix(d);
 }
 
-err_t ConvolutionMatrixI::_detach()
+err_t IntConvolutionMatrix::_detach()
 {
   if (_d->refCount.get() == 1) return ERR_OK;
 
@@ -60,7 +60,7 @@ err_t ConvolutionMatrixI::_detach()
   return ERR_OK;
 }
 
-err_t ConvolutionMatrixI::setData(int width, int height, const ValueType* data)
+err_t IntConvolutionMatrix::setData(int width, int height, const ValueType* data)
 {
   if (_d->refCount.get() == 1 && (
       (_d->width == width && _d->height == height) ||
@@ -80,7 +80,7 @@ err_t ConvolutionMatrixI::setData(int width, int height, const ValueType* data)
   return ERR_OK;
 }
 
-err_t ConvolutionMatrixI::create(int width, int height)
+err_t IntConvolutionMatrix::create(int width, int height)
 {
   if (_d->width == width && _d->height == height) return ERR_OK;
 
@@ -91,7 +91,7 @@ err_t ConvolutionMatrixI::create(int width, int height)
   return ERR_OK;
 }
 
-err_t ConvolutionMatrixI::extend(int width, int height, ValueType value)
+err_t IntConvolutionMatrix::extend(int width, int height, ValueType value)
 {
   if (_d->width == width && _d->height == height) return ERR_OK;
 
@@ -124,7 +124,7 @@ err_t ConvolutionMatrixI::extend(int width, int height, ValueType value)
   return ERR_OK;
 }
 
-int ConvolutionMatrixI::getCell(int x, int y) const
+int IntConvolutionMatrix::getCell(int x, int y) const
 {
   Data* d = _d;
   if ((uint)x >= (uint)d->width || (uint)y >= (uint)_d->height) return 0;
@@ -132,7 +132,7 @@ int ConvolutionMatrixI::getCell(int x, int y) const
   return d->m[y * d->width + x];
 }
 
-err_t ConvolutionMatrixI::setCell(int x, int y, int val)
+err_t IntConvolutionMatrix::setCell(int x, int y, int val)
 {
   if ((uint)x >= (uint)getWidth() || (uint)y >= (uint)getHeight()) return ERR_OK;
 
@@ -144,7 +144,7 @@ err_t ConvolutionMatrixI::setCell(int x, int y, int val)
   return ERR_OK;
 }
 
-err_t ConvolutionMatrixI::fill(const IntRect& rect, ValueType value)
+err_t IntConvolutionMatrix::fill(const IntRect& rect, ValueType value)
 {
   int x1 = Math::max<int>(rect.getX1(), 0);
   int y1 = Math::max<int>(rect.getY1(), 0);
@@ -171,13 +171,13 @@ err_t ConvolutionMatrixI::fill(const IntRect& rect, ValueType value)
   return ERR_OK;
 }
 
-ConvolutionMatrixI& ConvolutionMatrixI::operator=(const ConvolutionMatrixI& other)
+IntConvolutionMatrix& IntConvolutionMatrix::operator=(const IntConvolutionMatrix& other)
 {
   atomicPtrXchg(&_d, other._d->ref())->deref();
   return *this;
 }
 
-ConvolutionMatrixI::ValueType* ConvolutionMatrixI::operator[](int y)
+IntConvolutionMatrix::ValueType* IntConvolutionMatrix::operator[](int y)
 {
   Data* d = _d;
   if ((uint)y >= (uint)_d->height) return NULL;
@@ -195,7 +195,7 @@ ConvolutionMatrixI::ValueType* ConvolutionMatrixI::operator[](int y)
 // [Fog::ConvolutionMatrixI::Data]
 // ============================================================================
 
-ConvolutionMatrixI::Data* ConvolutionMatrixI::Data::alloc(int w, int h)
+IntConvolutionMatrix::Data* IntConvolutionMatrix::Data::alloc(int w, int h)
 {
   if (w == 0 || h == 0) return _dnull->ref();
 
@@ -208,7 +208,7 @@ ConvolutionMatrixI::Data* ConvolutionMatrixI::Data::alloc(int w, int h)
   return d;
 }
 
-void ConvolutionMatrixI::Data::copy(Data* dst, int dstX, int dstY, Data* src, int srcX, int srcY, int w, int h)
+void IntConvolutionMatrix::Data::copy(Data* dst, int dstX, int dstY, Data* src, int srcX, int srcY, int w, int h)
 {
   ValueType* dstM = dst->m + dstY * dst->width + dstX;
   ValueType* srcM = src->m + srcY * src->width + srcX;
@@ -232,7 +232,7 @@ FOG_INIT_DECLARE err_t fog_convolutionmatrix_init(void)
 {
   using namespace Fog;
 
-  ConvolutionMatrixI::_dnull.init();
+  IntConvolutionMatrix::_dnull.init();
   return ERR_OK;
 }
 
@@ -240,5 +240,5 @@ FOG_INIT_DECLARE void fog_convolutionmatrix_shutdown(void)
 {
   using namespace Fog;
 
-  ConvolutionMatrixI::_dnull.destroy();
+  IntConvolutionMatrix::_dnull.destroy();
 }

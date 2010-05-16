@@ -10,15 +10,16 @@
 // [Dependencies]
 #include <Fog/Core/Object.h>
 
-//! @addtogroup Fog_Gui
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Gui_Theming
+//! @{
 
 // ============================================================================
 // [Fog::Theme]
 // ============================================================================
 
+//! @brief Theme.
 struct FOG_API Theme : public Object
 {
   FOG_DECLARE_OBJECT(Theme, Object)
@@ -39,9 +40,9 @@ struct FOG_API Theme : public Object
   static FOG_INLINE Theme* getInstance() { return _instance; }
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GUI_THEME_H

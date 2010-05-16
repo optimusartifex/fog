@@ -12,7 +12,7 @@
 #define _FOG_CORE_TIME_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/TypeInfo.h>
@@ -40,10 +40,10 @@
 
 #include <time.h>
 
-//! @addtogroup Fog_Core
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Core_DateTime
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -57,6 +57,7 @@ struct TimeTicks;
 // [Fog::TimeDelta]
 // ============================================================================
 
+//! @brief Time delta (the delta between two @a Time instances).
 struct FOG_API TimeDelta
 {
 public:
@@ -204,7 +205,7 @@ FOG_INLINE TimeDelta operator*(int64_t a, TimeDelta td)
 // [Fog::Time]
 // ============================================================================
 
-// Represents a wall clock time.
+//! @brief Time.
 struct FOG_API Time
 {
 public:
@@ -404,6 +405,7 @@ FOG_INLINE Time TimeDelta::operator+(Time t) const
 // [Fog::TimeTicks]
 // ============================================================================
 
+//! @brief Tick count.
 struct FOG_API TimeTicks
 {
 public:
@@ -516,9 +518,9 @@ FOG_INLINE TimeTicks TimeDelta::operator+(TimeTicks t) const
   return TimeTicks(t._ticks + _delta);
 }
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // ============================================================================
 // Fog::TypeInfo<>

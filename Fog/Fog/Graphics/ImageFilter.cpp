@@ -78,7 +78,7 @@ private:
 };
 
 ColorLutFilterEngine::ColorLutFilterEngine(const ColorLutData& lutData) :
-  ImageFilterEngine(IMAGE_FILTER_TYPE_COLORLUT)
+  ImageFilterEngine(IMAGE_FILTER_TYPE_COLOR_LUT)
 {
   setColorLut(lutData);
 
@@ -90,8 +90,8 @@ ColorLutFilterEngine::ColorLutFilterEngine(const ColorLutData& lutData) :
 
 ColorFilterFn ColorLutFilterEngine::getColorFilterFn(uint32_t format) const
 {
-  if ((uint)format >= PIXEL_FORMAT_COUNT) return NULL;
-  return (ColorFilterFn)RasterEngine::functionMap->filter.color_lut[format];
+  if (format >= IMAGE_FORMAT_COUNT) return NULL;
+  return (ColorFilterFn)rasterFuncs.filter.color_lut[format];
 }
 
 const void* ColorLutFilterEngine::getContext() const
@@ -129,7 +129,7 @@ struct FOG_HIDDEN ColorMatrixFilterEngine : public ImageFilterEngine
 };
 
 ColorMatrixFilterEngine::ColorMatrixFilterEngine(const ColorMatrixFilterEngine& other) :
-  ImageFilterEngine(IMAGE_FILTER_TYPE_COLORMATRIX),
+  ImageFilterEngine(IMAGE_FILTER_TYPE_COLOR_MATRIX),
   cm(other.cm)
 {
   characteristics |=
@@ -140,7 +140,7 @@ ColorMatrixFilterEngine::ColorMatrixFilterEngine(const ColorMatrixFilterEngine& 
 }
 
 ColorMatrixFilterEngine::ColorMatrixFilterEngine(const ColorMatrix& cm) :
-  ImageFilterEngine(IMAGE_FILTER_TYPE_COLORMATRIX),
+  ImageFilterEngine(IMAGE_FILTER_TYPE_COLOR_MATRIX),
   cm(cm)
 {
   characteristics |=
@@ -152,8 +152,8 @@ ColorMatrixFilterEngine::ColorMatrixFilterEngine(const ColorMatrix& cm) :
 
 ColorFilterFn ColorMatrixFilterEngine::getColorFilterFn(uint32_t format) const
 {
-  if ((uint)format >= PIXEL_FORMAT_COUNT) return NULL;
-  return (ColorFilterFn)RasterEngine::functionMap->filter.color_matrix[format];
+  if (format >= IMAGE_FORMAT_COUNT) return NULL;
+  return (ColorFilterFn)rasterFuncs.filter.color_matrix[format];
 }
 
 const void* ColorMatrixFilterEngine::getContext() const
@@ -226,38 +226,38 @@ struct FOG_HIDDEN BlurFilterEngine : public ImageFilterEngine
   void update();
 
   BlurParams params;
-  SymmetricConvolveParamsF convolve;
+  FloatSymmetricConvolveParams convolve;
 
 private:
   FOG_DISABLE_COPY(BlurFilterEngine)
 };
 
 BlurFilterEngine::BlurFilterEngine(const BlurParams& params) :
-  ImageFilterEngine(IMAGE_FILTER_TYPE_COLORLUT), params(params)
+  ImageFilterEngine(IMAGE_FILTER_TYPE_COLOR_LUT), params(params)
 {
   update();
 }
 
 ImageFilterFn BlurFilterEngine::getImageFilterFn(uint32_t format, uint32_t processing) const
 {
-  if ((uint)format >= PIXEL_FORMAT_COUNT) return NULL;
+  if (format >= IMAGE_FORMAT_COUNT) return NULL;
 
   switch (params.blur)
   {
     case IMAGE_FILTER_BLUR_BOX:
-      if (processing == IMAGE_FILTER_CHAR_HORZ_PROCESSING) return (ImageFilterFn)RasterEngine::functionMap->filter.box_blur_h[format];
-      if (processing == IMAGE_FILTER_CHAR_VERT_PROCESSING) return (ImageFilterFn)RasterEngine::functionMap->filter.box_blur_v[format];
+      if (processing == IMAGE_FILTER_CHAR_HORZ_PROCESSING) return (ImageFilterFn)rasterFuncs.filter.box_blur_h[format];
+      if (processing == IMAGE_FILTER_CHAR_VERT_PROCESSING) return (ImageFilterFn)rasterFuncs.filter.box_blur_v[format];
       break;
 
     case IMAGE_FILTER_BLUR_LINEAR:
-      if (processing == IMAGE_FILTER_CHAR_HORZ_PROCESSING) return (ImageFilterFn)RasterEngine::functionMap->filter.linear_blur_h[format];
-      if (processing == IMAGE_FILTER_CHAR_VERT_PROCESSING) return (ImageFilterFn)RasterEngine::functionMap->filter.linear_blur_v[format];
+      if (processing == IMAGE_FILTER_CHAR_HORZ_PROCESSING) return (ImageFilterFn)rasterFuncs.filter.linear_blur_h[format];
+      if (processing == IMAGE_FILTER_CHAR_VERT_PROCESSING) return (ImageFilterFn)rasterFuncs.filter.linear_blur_v[format];
       break;
 
     case IMAGE_FILTER_BLUR_GAUSSIAN:
     default:
-      if (processing == IMAGE_FILTER_CHAR_HORZ_PROCESSING) return (ImageFilterFn)RasterEngine::functionMap->filter.symmetric_convolve_float_h[format];
-      if (processing == IMAGE_FILTER_CHAR_VERT_PROCESSING) return (ImageFilterFn)RasterEngine::functionMap->filter.symmetric_convolve_float_v[format];
+      if (processing == IMAGE_FILTER_CHAR_HORZ_PROCESSING) return (ImageFilterFn)rasterFuncs.filter.symmetric_convolve_float_h[format];
+      if (processing == IMAGE_FILTER_CHAR_VERT_PROCESSING) return (ImageFilterFn)rasterFuncs.filter.symmetric_convolve_float_v[format];
       break;
   }
 
@@ -367,14 +367,14 @@ ImageFilterBase::~ImageFilterBase()
 
 err_t ImageFilterBase::getColorLut(ColorLut& colorLut) const
 {
-  if (_d->type != IMAGE_FILTER_TYPE_COLORLUT) return ERR_RT_INVALID_CONTEXT;
+  if (_d->type != IMAGE_FILTER_TYPE_COLOR_LUT) return ERR_RT_INVALID_OBJECT;
 
   return colorLut.setData(&reinterpret_cast<ColorLutFilterEngine*>(_d)->lut);
 }
 
 err_t ImageFilterBase::getColorMatrix(ColorMatrix& colorMatrix) const
 {
-  if (_d->type != IMAGE_FILTER_TYPE_COLORMATRIX) return ERR_RT_INVALID_CONTEXT;
+  if (_d->type != IMAGE_FILTER_TYPE_COLOR_MATRIX) return ERR_RT_INVALID_OBJECT;
 
   colorMatrix = reinterpret_cast<ColorMatrixFilterEngine*>(_d)->cm;
   return ERR_OK;
@@ -382,7 +382,7 @@ err_t ImageFilterBase::getColorMatrix(ColorMatrix& colorMatrix) const
 
 err_t ImageFilterBase::getBlur(BlurParams& params) const
 {
-  if (_d->type != IMAGE_FILTER_TYPE_BLUR) return ERR_RT_INVALID_CONTEXT;
+  if (_d->type != IMAGE_FILTER_TYPE_BLUR) return ERR_RT_INVALID_OBJECT;
 
   params = reinterpret_cast<BlurFilterEngine*>(_d)->params;
   return ERR_OK;
@@ -390,7 +390,7 @@ err_t ImageFilterBase::getBlur(BlurParams& params) const
 
 err_t ImageFilterBase::setColorLut(const ColorLut& colorLut)
 {
-  if (_d->type == IMAGE_FILTER_TYPE_COLORLUT && _d->refCount.get() == 1)
+  if (_d->type == IMAGE_FILTER_TYPE_COLOR_LUT && _d->refCount.get() == 1)
   {
     // Not needed to create new ColorLutFilterEngine instance.
     reinterpret_cast<ColorLutFilterEngine *>(_d)->setColorLut(*colorLut.getData());
@@ -408,7 +408,7 @@ err_t ImageFilterBase::setColorLut(const ColorLut& colorLut)
 
 err_t ImageFilterBase::setColorMatrix(const ColorMatrix& colorMatrix)
 {
-  if (_d->type == IMAGE_FILTER_TYPE_COLORLUT && _d->refCount.get() == 1)
+  if (_d->type == IMAGE_FILTER_TYPE_COLOR_LUT && _d->refCount.get() == 1)
   {
     // Not needed to create new ColorMatrixFilterEngine instance.
     reinterpret_cast<ColorMatrixFilterEngine *>(_d)->setColorMatrix(colorMatrix);

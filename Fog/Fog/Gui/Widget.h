@@ -23,10 +23,10 @@
 #include <Fog/Gui/Event.h>
 #include <Fog/Gui/Layout/LayoutItem.h>
 
-//! @addtogroup Fog_Gui
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Gui_Widget
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -55,10 +55,15 @@ struct Window;
 //!  - <code>virtual void onStateChange(StateEvent* e)</code>
 //!  - <code>virtual void onVisibilityChange(VisibilityEvent* e)</code>
 //!  - <code>virtual void onConfigure(ConfigureEvent* e)</code>
-//!  - <code>virtual void onFocus(FocusEvent* e)</code>
-//!  - <code>virtual void onKey(KeyEvent* e)</code>
-//!  - <code>virtual void onMouse(MouseEvent* e)</code>
-//!  - <code>virtual void onNcPaint(PaintEvent* e)</code>
+//!  - <code>virtual void onFocusIn(FocusEvent* e)</code>
+//!  - <code>virtual void onFocusOut(FocusEvent* e)</code>
+//!  - <code>virtual void onKeyPress(KeyEvent* e)</code>
+//!  - <code>virtual void onKeyRelease(KeyEvent* e)</code>
+//!  - <code>virtual void onMouseIn(MouseEvent* e)</code>
+//!  - <code>virtual void onMouseOut(MouseEvent* e)</code>
+//!  - <code>virtual void onMouseMove(MouseEvent* e)</code>
+//!  - <code>virtual void onMousePress(MouseEvent* e)</code>
+//!  - <code>virtual void onMouseRelease(MouseEvent* e)</code>
 //!  - <code>virtual void onPaint(PaintEvent* e)</code>
 //!  - <code>virtual void onClose(CloseEvent* e)</code>
 //!
@@ -81,7 +86,6 @@ struct Window;
 //! Coordinates that's retrieved represents widget position that's relative to it's
 //! parent. If widget parent is @c NULL then this position is relative to the screen
 //! coordinates (desktop window).
-
 struct FOG_API Widget : public LayoutItem
 {
   FOG_DECLARE_OBJECT(Widget, LayoutItem)
@@ -633,9 +637,9 @@ private:
   FOG_DISABLE_COPY(Widget)
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GUI_WIDGET_H

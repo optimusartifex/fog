@@ -8,7 +8,7 @@
 #define _FOG_CORE_LOCALE_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/Atomic.h>
 #include <Fog/Core/Char.h>
@@ -16,11 +16,10 @@
 #include <Fog/Core/String.h>
 #include <Fog/Core/TypeInfo.h>
 
-//! @addtogroup Fog_Core
-//! @{
-
-// [Fog::}
 namespace Fog {
+
+//! @addtogroup Fog_Core_Localization
+//! @{
 
 // ============================================================================
 // [Fog::Locale]
@@ -136,9 +135,9 @@ struct FOG_API Locale
   FOG_DECLARE_D(Data)
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // ============================================================================
 // [Fog::TypeInfo<>]

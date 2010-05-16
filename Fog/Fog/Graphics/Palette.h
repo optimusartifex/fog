@@ -11,12 +11,12 @@
 #include <Fog/Core/Atomic.h>
 #include <Fog/Core/Memory.h>
 #include <Fog/Core/Static.h>
-#include <Fog/Graphics/Argb.h>
-
-//! @addtogroup Fog_Graphics
-//! @{
+#include <Fog/Graphics/Color.h>
 
 namespace Fog {
+
+//! @addtogroup Fog_Graphics_Imaging
+//! @{
 
 // ============================================================================
 // [Fog::PaletteData]
@@ -189,9 +189,9 @@ struct FOG_API Palette
   FOG_DECLARE_D(PaletteData);
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GRAPHICS_PALETTE_H

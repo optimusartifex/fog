@@ -17,6 +17,8 @@ namespace RasterEngine {
 // [Fog::Raster - BresenhamLineIterator]
 // ============================================================================
 
+//! @internal
+//!
 //! @brief Class that's used by software painters to draw aliased line using
 //! bresenham algorithm.
 //!
@@ -34,8 +36,6 @@ namespace RasterEngine {
 //! Use @c hInc() and @c vInc to iterate through line, use @c hDone() and
 //! @c vDone() to check if iterator is at end point (the point given in
 //! @c init - x2 y2).
-//!
-//! @internal
 struct FOG_HIDDEN BresenhamLineIterator
 {
   int x, dx, incx, endx;

@@ -41,8 +41,8 @@ void Button::onPaint(PaintEvent* e)
   bounds.shrink(1);
 
   Pattern pat;
-  pat.setType(PATTERN_LINEAR_GRADIENT);
-  pat.setSpread(SPREAD_PAD);
+  pat.setType(PATTERN_TYPE_LINEAR_GRADIENT);
+  pat.setSpread(PATTERN_SPREAD_PAD);
 
   if (!isDown())
   {

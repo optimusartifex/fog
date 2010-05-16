@@ -14,10 +14,10 @@
 #include <Fog/Gui/GuiEngine.h>
 #include <Fog/Gui/GuiEngine/Base.h>
 
-//! @addtogroup Fog_Gui
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Gui_Engine
+//! @{
 
 // ============================================================================
 // [Fog::WinGuiEngine]
@@ -188,9 +188,9 @@ struct FOG_API WinGuiBackBuffer : public GuiBackBuffer
   HDC _hdc;
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GUI_GUIENGINE_WIN_H

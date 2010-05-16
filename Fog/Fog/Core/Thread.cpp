@@ -30,7 +30,7 @@
 #if defined(FOG_OS_WINDOWS)
 #include <windows.h>
 #include <process.h>
-#endif
+#endif // FOG_OS_WINDOWS
 
 #if defined(FOG_OS_POSIX)
 #include <pthread.h>
@@ -46,6 +46,12 @@
 #endif
 #endif
 
+#if defined(FOG_OS_WINDOWS)
+# if !defined(STACK_SIZE_PARAM_IS_A_RESERVATION)
+#  define STACK_SIZE_PARAM_IS_A_RESERVATION 0x00010000
+# endif // STACK_SIZE_PARAM_IS_A_RESERVATION
+#endif // FOG_OS_WINDOWS
+
 namespace Fog {
 
 // A lazily created thread local storage for quick access to a thread's message
@@ -60,7 +66,7 @@ static Static< ThreadLocalPointer<Thread> > thread_tls;
 
 // The information on how to set the thread name comes from
 // a MSDN article: http://msdn2.microsoft.com/en-us/library/xcb2z8hs.aspx
-static const DWORD kVCThreadNameException = 0x406D1388;
+static const DWORD MS_VC_EXCEPTION = 0x406D1388;
 
 typedef struct tagTHREADNAME_INFO {
   DWORD dwType;     // Must be 0x1000.
@@ -95,13 +101,15 @@ void Thread::_sleep(uint32_t ms)
 
 static void __setThreadName(THREADNAME_INFO* info)
 {
+#if defined(FOG_CC_MSVC)
   __try
   {
-    RaiseException(kVCThreadNameException, 0, sizeof(info)/sizeof(DWORD), reinterpret_cast<DWORD_PTR*>(info));
+    RaiseException(MS_VC_EXCEPTION, 0, sizeof(info)/sizeof(DWORD), reinterpret_cast<DWORD_PTR*>(info));
   }
-  __except(EXCEPTION_CONTINUE_EXECUTION)
-  {
-  }
+  __except(EXCEPTION_CONTINUE_EXECUTION) {}
+#else
+#warning "SEH handling not enabled for this compiler"
+#endif
 }
 
 void Thread::_setName(const String& name)
@@ -314,15 +322,10 @@ void Thread::stop()
   FOG_ASSERT(_id != _tid());
 
   // StopSoon may have already been called.
-  if (_eventLoop)
-    _eventLoop->postTask(new(std::nothrow) QuitTask());
+  if (_eventLoop) _eventLoop->postTask(new(std::nothrow) QuitTask());
 
-  // Wait for the thread to exit.  It should already have terminated but make
+  // Wait for the thread to exit. It should already have terminated but make
   // sure this assumption is valid.
-  //
-  // TODO(darin): Unfortunately, we need to keep _eventLoop around until
-  // the thread exits.  Some consumers are abusing the API.  Make them stop.
-  //
   Thread::_join(this);
 
   // The thread can't receive messages anymore.

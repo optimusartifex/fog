@@ -8,7 +8,7 @@
 #define _FOG_CORE_LIST_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Atomic.h>
 #include <Fog/Core/Basics.h>
@@ -22,7 +22,7 @@
 
 namespace Fog {
 
-//! @addtogroup Fog_Core
+//! @addtogroup Fog_Core_Essentials
 //! @{
 
 // ============================================================================

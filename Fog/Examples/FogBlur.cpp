@@ -32,8 +32,8 @@ MyWindow::MyWindow(uint32_t createFlags) :
 {
   setWindowTitle(Ascii8("Testing..."));
 
-  i[0].readFile(Ascii8("babelfish.png"));
-  i[1].readFile(Ascii8("kweather.png"));
+  i[0].readFromFile(Ascii8("babelfish.png"));
+  i[1].readFromFile(Ascii8("kweather.png"));
 
   _baseRadius = 1.0f;
 }
@@ -110,7 +110,7 @@ void MyWindow::paintImage(Painter* p, const IntPoint& pos, const Image& im, cons
 
   p->drawText(IntRect(x, y, 130, 20), name, getFont(), TEXT_ALIGN_CENTER);
   p->drawRect(IntRect(x, y + 20, 130, 130));
-  p->blitImage(IntPoint(x + 1, y + 21), im);
+  p->drawImage(IntPoint(x + 1, y + 21), im);
 }
 
 // ============================================================================

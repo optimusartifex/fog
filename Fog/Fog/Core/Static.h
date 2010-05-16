@@ -8,12 +8,16 @@
 #define _FOG_CORE_STATIC_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
-
-//! @addtogroup Fog_Core
-//! @{
+#include <Fog/Core/Build.h>
 
 namespace Fog {
+
+//! @addtogroup Fog_Core_Other
+//! @{
+
+// ============================================================================
+// [Fog::Static]
+// ============================================================================
 
 //! @brief Simple template that can create class using placement new and delete.
 //!
@@ -89,9 +93,9 @@ private:
   char _storage[sizeof(Type)];
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_CORE_STATIC_H

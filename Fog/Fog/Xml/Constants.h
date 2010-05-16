@@ -8,12 +8,12 @@
 #define _FOG_XML_CONSTANTS_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
-
-//! @addtogroup Fog_Xml
-//! @{
+#include <Fog/Core/Build.h>
 
 namespace Fog {
+
+//! @addtogroup Fog_Xml_Constants
+//! @{
 
 // ============================================================================
 // [Fog::XML_ELEMENT_TYPE]
@@ -93,9 +93,9 @@ enum ERR_XML_ENUM
   ERR_XML_INVALID_CLOSING_TAG,
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_XML_CONSTANTS_H

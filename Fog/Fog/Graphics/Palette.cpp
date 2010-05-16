@@ -94,13 +94,13 @@ err_t Palette::setArgb32(sysuint_t index, const Argb* pal, sysuint_t count)
   // Premultiply.
   if (newContainsAlpha)
   {
-    RasterEngine::functionMap->dib.convert[PIXEL_FORMAT_PRGB32][PIXEL_FORMAT_ARGB32](
+    rasterFuncs.dib.convert[IMAGE_FORMAT_PRGB32][IMAGE_FORMAT_ARGB32](
       reinterpret_cast<uint8_t*>(_d->data + INDEX_PRGB32 + index),
       reinterpret_cast<const uint8_t*>(pal), count, NULL);
   }
   else
   {
-    RasterEngine::functionMap->dib.memcpy32(
+    rasterFuncs.dib.memcpy32(
       reinterpret_cast<uint8_t*>(_d->data + INDEX_PRGB32 + index),
       reinterpret_cast<const uint8_t*>(pal), count, NULL);
   }
@@ -128,10 +128,10 @@ err_t Palette::setXrgb32(sysuint_t index, const Argb* pal, sysuint_t count)
   // Copy data to palette.
   uint32_t updateAlpha = _d->isAlphaUsed ? isAlphaUsed(_d->data + INDEX_ARGB32 + index, count) : 0;
 
-  RasterEngine::functionMap->dib.convert[PIXEL_FORMAT_ARGB32][PIXEL_FORMAT_XRGB32](
+  rasterFuncs.dib.convert[IMAGE_FORMAT_ARGB32][IMAGE_FORMAT_XRGB32](
     reinterpret_cast<uint8_t*>(_d->data + INDEX_ARGB32 + index),
     reinterpret_cast<const uint8_t*>(pal), count, NULL);
-  RasterEngine::functionMap->dib.convert[PIXEL_FORMAT_PRGB32][PIXEL_FORMAT_XRGB32](
+  rasterFuncs.dib.convert[IMAGE_FORMAT_PRGB32][IMAGE_FORMAT_XRGB32](
     reinterpret_cast<uint8_t*>(_d->data + INDEX_PRGB32 + index),
     reinterpret_cast<const uint8_t*>(pal), count, NULL);
 
@@ -147,9 +147,9 @@ uint8_t Palette::findColor(uint8_t r, uint8_t g, uint8_t b) const
 
   for (i = 0; i < 256; i++, data++)
   {
-    int rd = (int)data->r - (int)r;
-    int gd = (int)data->g - (int)g;
-    int bd = (int)data->b - (int)b;
+    int rd = (int)data->getRed  () - (int)r;
+    int gd = (int)data->getGreen() - (int)g;
+    int bd = (int)data->getBlue () - (int)b;
 
     int dist = (rd * rd) + (gd * gd) + (bd * bd);
     if (dist < smallest)
@@ -169,13 +169,13 @@ void Palette::update()
   // Premultiply all.
   if (alpha)
   {
-    RasterEngine::functionMap->dib.convert[PIXEL_FORMAT_PRGB32][PIXEL_FORMAT_ARGB32](
+    rasterFuncs.dib.convert[IMAGE_FORMAT_PRGB32][IMAGE_FORMAT_ARGB32](
       (uint8_t*)(_d->data + INDEX_PRGB32),
       (uint8_t*)(_d->data + INDEX_ARGB32), 256, NULL);
   }
   else
   {
-    RasterEngine::functionMap->dib.memcpy32(
+    rasterFuncs.dib.memcpy32(
       (uint8_t*)(_d->data + INDEX_PRGB32),
       (uint8_t*)(_d->data + INDEX_ARGB32), 256, NULL);
   }
@@ -237,7 +237,9 @@ bool Palette::isGreyOnly(const Argb* data, sysuint_t count)
 
   for (i = count; i; i--, data++)
   {
-    if (data->a != 0xFF || data->r != data->g || data->g != data->b) break;
+    if (data->getAlpha() != 0xFF             || 
+        data->getRed  () != data->getGreen() || 
+        data->getGreen() != data->getBlue () ) break;
   }
 
   return i == 0;
@@ -247,7 +249,7 @@ bool Palette::isAlphaUsed(const Argb* data, sysuint_t count)
 {
   for (int i = 0; i < 256; i++)
   {
-    if (data[i].a != 0xFF) return true;
+    if (!data[i].isAlpha0xFF()) return true;
   }
 
   return false;

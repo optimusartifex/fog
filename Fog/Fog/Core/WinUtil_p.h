@@ -7,15 +7,11 @@
 #ifndef _FOG_CORE_WINUTIL_H
 #define _FOG_CORE_WINUTIL_H
 
-// [Dependencies]
-#include <Fog/Build/Build.h>
-
+#include <Fog/Core/Build.h>
 #if defined(FOG_OS_WINDOWS)
 
+// [Dependencies]
 #include <Fog/Core/String.h>
-
-//! @addtogroup Fog_Core_Private
-//! @{
 
 namespace Fog {
 
@@ -23,14 +19,16 @@ namespace Fog {
 //! development.
 namespace WinUtil {
 
+//! @addtogroup Fog_Core_Private
+//! @{
+
 FOG_HIDDEN err_t getModuleFileName(HMODULE hModule, String& dst);
+
+//! @}
 
 } // WinUtil namespace
 } // Fog namespace
 
-//! @}
-
-#endif // FOG_OS_WINDOWS
-
 // [Guard]
+#endif // FOG_OS_WINDOWS
 #endif // _FOG_CORE_WINUTIL_H

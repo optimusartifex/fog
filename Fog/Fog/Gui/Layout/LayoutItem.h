@@ -15,10 +15,10 @@
 #include <Fog/Gui/Event.h>
 #include <Fog/Gui/Layout/LayoutHint.h>
 
-//! @addtogroup Fog_Gui
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Gui_Layout
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -98,9 +98,9 @@ struct FOG_API LayoutItem : public Object
   FOG_EVENT_END()
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GUI_LAYOUT_LAYOUTITEM_H

@@ -10,10 +10,10 @@
 // [Dependencies]
 #include <Fog/Graphics/Geometry.h>
 
-//! @addtogroup Fog_Gui
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Gui_Layout
+//! @{
 
 // ============================================================================
 // [Fog::LayoutHint]
@@ -97,9 +97,9 @@ struct FOG_HIDDEN LayoutHint
   IntSize _maximumSize;
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GUI_LAYOUT_LAYOUTHINT_H

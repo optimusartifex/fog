@@ -8,16 +8,16 @@
 #define _FOG_CORE_STRINGMATCHER_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Basics.h>
 #include <Fog/Core/String.h>
 #include <Fog/Core/StringFilter.h>
 
-//! @addtogroup Fog_Core
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Core_Essentials
+//! @{
 
 // ============================================================================
 // [Fog::StringMatcher]
@@ -55,6 +55,8 @@ struct FOG_API StringMatcher : public StringFilter
   // [SkipTable]
   // --------------------------------------------------------------------------
 
+  //! @internal
+  //!
   //! @brief @c Fog::StringMatcher skip table.
   //!
   //! @note The table is generated on the fly by first search call.
@@ -112,6 +114,8 @@ private:
   mutable SkipTable _skipTable[2];
 };
 
+//! @}
+
 } // Fog namespace
 
 // ============================================================================
@@ -119,8 +123,6 @@ private:
 // ============================================================================
 
 FOG_DECLARE_TYPEINFO(Fog::StringMatcher, Fog::TYPEINFO_MOVABLE)
-
-//! @}
 
 // [Guard]
 #endif // _FOG_CORE_STRINGMATCHER_H

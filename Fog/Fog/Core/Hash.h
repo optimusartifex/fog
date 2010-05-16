@@ -8,7 +8,7 @@
 #define _FOG_CORE_HASH_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Atomic.h>
 #include <Fog/Core/Char.h>
@@ -23,7 +23,7 @@
 
 namespace Fog {
 
-//! @addtogroup Fog_Core
+//! @addtogroup Fog_Core_Essentials
 //! @{
 
 // ============================================================================
@@ -183,7 +183,7 @@ struct UnorderedHash : public UnorderedAbstract
 
   struct Data : public UnorderedAbstract::Data
   {
-    void deref()
+    FOG_NO_INLINE void deref()
     {
       if (refCount.deref())
       {
@@ -192,7 +192,7 @@ struct UnorderedHash : public UnorderedAbstract
       }
     }
 
-    void clear()
+    FOG_NO_INLINE void clear()
     {
       sysuint_t i, len = capacity;
 
@@ -216,9 +216,9 @@ struct UnorderedHash : public UnorderedAbstract
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  UnorderedHash() { _d = _dnull->ref(); }
-  UnorderedHash(const UnorderedHash<KeyType, ValueType>& other) { _d = other._d->ref(); }
-  ~UnorderedHash() { ((Data*)_d)->deref(); }
+  UnorderedHash();
+  UnorderedHash(const UnorderedHash<KeyType, ValueType>& other);
+  ~UnorderedHash();
 
   // --------------------------------------------------------------------------
   // [Implicit Sharing]
@@ -317,6 +317,24 @@ struct UnorderedHash : public UnorderedAbstract
     }
   };
 };
+
+template<typename KeyType, typename ValueType>
+UnorderedHash<KeyType, ValueType>::UnorderedHash()
+{
+  _d = _dnull->ref();
+}
+
+template<typename KeyType, typename ValueType>
+UnorderedHash<KeyType, ValueType>::UnorderedHash(const UnorderedHash<KeyType, ValueType>& other)
+{
+  _d = other._d->ref();
+}
+
+template<typename KeyType, typename ValueType>
+UnorderedHash<KeyType, ValueType>::~UnorderedHash()
+{
+  ((Data*)_d)->deref();
+}
 
 template<typename KeyType, typename ValueType>
 err_t UnorderedHash<KeyType, ValueType>::_detach(Node* exclude)

@@ -16,25 +16,20 @@
 namespace Fog {
 
 // ============================================================================
-// [Fog::Lazy_Abstract]
+// [Fog::LazyBase]
 // ============================================================================
 
-Lazy_Abstract::Lazy_Abstract() : _ptr(NULL)
+LazyBase::LazyBase() : _ptr(NULL)
 {
 }
 
-Lazy_Abstract::Lazy_Abstract(_DONT_INITIALIZE x)
-{
-  FOG_UNUSED(x);
-}
-
-Lazy_Abstract::~Lazy_Abstract()
+LazyBase::~LazyBase()
 {
   // Pointer should be NULL here
   FOG_ASSERT(_ptr == NULL);
 }
 
-void* Lazy_Abstract::_get()
+void* LazyBase::_get()
 {
   void* v = AtomicOperation<void*>::get(&_ptr);
 

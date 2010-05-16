@@ -3,7 +3,7 @@
 // [License]
 // MIT, See COPYING file in package
 
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 
 #if defined(FOG_GUI_WINDOWS)
 
@@ -1483,7 +1483,7 @@ bool WinGuiBackBuffer::resize(int width, int height, bool cache)
     _buffer.data = _primaryPixels;
     _buffer.width = width;
     _buffer.height = height;
-    _buffer.format = PIXEL_FORMAT_XRGB32;
+    _buffer.format = IMAGE_FORMAT_XRGB32;
     _buffer.stride = _primaryStride;
 
     _cachedWidth = targetWidth;

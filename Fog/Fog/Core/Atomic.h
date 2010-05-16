@@ -8,12 +8,12 @@
 #define _FOG_CORE_ATOMIC_H
 
 // [Dependencies]
-#include <Fog/Build/Build.h>
-
-//! @addtogroup Fog_Core
-//! @{
+#include <Fog/Core/Build.h>
 
 namespace Fog {
+
+//! @addtogroup Fog_Core_Threading
+//! @{
 
 // ============================================================================
 // [Fog::AtomicOperationHelper]
@@ -140,9 +140,9 @@ static FOG_INLINE T* atomicPtrXchg(T** atomic, T* value)
 //! @brief Macro to help setting @c Fog::Atomic structure in static data.
 #define FOG_ATOMIC_SET(value) { value }
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [TypeInfo]
 #include <Fog/Core/TypeInfo.h>

@@ -24,7 +24,7 @@ namespace Fog {
 // [Fog::XmlEntity - Pairs]
 // ============================================================================
 
-// keep sorted order, this table is binary searched!
+// Keep sorted order, this table is binary searched!
 static const XmlEntity::Pair xmlentity_pairs[] =
 {
   { "AElig",     198   },
@@ -94,10 +94,10 @@ static const XmlEntity::Pair xmlentity_pairs[] =
   { "agrave",    224   },
   { "alefsym",   8501  },
   { "alpha",     945   },
-  { "amp",       '&'   },
+  { "amp",       '&'   }, // & == 38
   { "and",       8743  },
   { "ang",       8736  },
-  // { "apos",      '\''  }, TODO: Add
+  { "apos",      '\''  }, // ' == 39
   { "aring",     229   },
   { "asymp",     8776  },
   { "atilde",    227   },
@@ -148,7 +148,7 @@ static const XmlEntity::Pair xmlentity_pairs[] =
   { "frasl",     8260  },
   { "gamma",     947   },
   { "ge",        8805  },
-  { "gt",        '>'   },
+  { "gt",        '>'   }, // > == 62
   { "hArr",      8660  },
   { "harr",      8596  },
   { "hearts",    9829  },
@@ -180,7 +180,7 @@ static const XmlEntity::Pair xmlentity_pairs[] =
   { "lrm",       8206  },
   { "lsaquo",    8249  },
   { "lsquo",     8216  },
-  { "lt",        '<'   },
+  { "lt",        '<'   }, // < == 60
   { "macr",      175   },
   { "mdash",     8212  },
   { "micro",     181   },
@@ -225,7 +225,7 @@ static const XmlEntity::Pair xmlentity_pairs[] =
   { "prod",      8719  },
   { "prop",      8733  },
   { "psi",       968   },
-  { "quot",      '\"'  },
+  { "quot",      '\"'  }, // " == 34
   { "rArr",      8658  },
   { "radic",     8730  },
   { "rang",      9002  },
@@ -286,48 +286,49 @@ static const XmlEntity::Pair xmlentity_pairs[] =
   { "zwnj",      8204  }
 };
 
-// keep sorted order, this table is binary searched!
+// Keep sorted order, this table is binary searched!
 static const XmlEntity::PairRev xmlentity_pairs_rev[] =
 {
-  { 34, 197 },
+  { 34, 198 },
   { 38, 67 },
-  { 60, 152 },
-  { 62, 120 },
-  { 160, 160 },
-  { 161, 128 },
-  { 162, 82 },
-  { 163, 192 },
-  { 164, 90 },
-  { 165, 251 },
-  { 166, 76 },
+  { 39, 70 },
+  { 60, 153 },
+  { 62, 121 },
+  { 160, 161 },
+  { 161, 129 },
+  { 162, 83 },
+  { 163, 193 },
+  { 164, 91 },
+  { 165, 252 },
   { 166, 77 },
-  { 167, 215 },
-  { 168, 97 },
-  { 168, 244 },
-  { 169, 87 },
-  { 170, 178 },
-  { 171, 141 },
-  { 172, 164 },
-  { 173, 216 },
-  { 174, 206 },
-  { 175, 125 },
-  { 175, 153 },
-  { 176, 94 },
-  { 177, 191 },
-  { 178, 226 },
-  { 179, 227 },
+  { 166, 77 },
+  { 167, 216 },
+  { 168, 98 },
+  { 168, 98 },
+  { 169, 88 },
+  { 170, 179 },
+  { 171, 142 },
+  { 172, 165 },
+  { 173, 217 },
+  { 174, 207 },
+  { 175, 126 },
+  { 175, 126 },
+  { 176, 95 },
+  { 177, 192 },
+  { 178, 227 },
+  { 179, 228 },
   { 180, 62 },
-  { 181, 155 },
-  { 182, 184 },
-  { 183, 156 },
-  { 184, 81 },
-  { 185, 225 },
-  { 186, 179 },
-  { 187, 201 },
-  { 188, 115 },
-  { 189, 114 },
-  { 190, 116 },
-  { 191, 134 },
+  { 181, 156 },
+  { 182, 185 },
+  { 183, 157 },
+  { 184, 82 },
+  { 185, 226 },
+  { 186, 180 },
+  { 187, 202 },
+  { 188, 116 },
+  { 189, 115 },
+  { 190, 117 },
+  { 191, 135 },
   { 192, 3 },
   { 193, 1 },
   { 194, 2 },
@@ -345,14 +346,14 @@ static const XmlEntity::PairRev xmlentity_pairs_rev[] =
   { 206, 23 },
   { 207, 26 },
   { 208, 13 },
-  { 208, 14 },
+  { 208, 13 },
   { 209, 30 },
   { 210, 35 },
   { 211, 33 },
   { 212, 34 },
   { 213, 39 },
   { 214, 40 },
-  { 215, 237 },
+  { 215, 238 },
   { 216, 38 },
   { 217, 53 },
   { 218, 51 },
@@ -360,47 +361,47 @@ static const XmlEntity::PairRev xmlentity_pairs_rev[] =
   { 220, 55 },
   { 221, 57 },
   { 222, 48 },
-  { 223, 229 },
+  { 223, 230 },
   { 224, 64 },
   { 225, 60 },
   { 226, 61 },
-  { 227, 72 },
-  { 228, 73 },
-  { 229, 70 },
+  { 227, 73 },
+  { 228, 74 },
+  { 229, 71 },
   { 230, 63 },
-  { 231, 80 },
-  { 232, 101 },
-  { 233, 99 },
-  { 234, 100 },
-  { 235, 109 },
-  { 236, 129 },
-  { 237, 126 },
-  { 238, 127 },
-  { 239, 136 },
-  { 240, 108 },
-  { 241, 167 },
-  { 242, 172 },
-  { 243, 169 },
-  { 244, 170 },
-  { 245, 181 },
-  { 246, 183 },
-  { 247, 98 },
-  { 248, 180 },
-  { 249, 243 },
-  { 250, 240 },
-  { 251, 242 },
-  { 252, 247 },
-  { 253, 250 },
-  { 254, 235 },
-  { 255, 252 },
+  { 231, 81 },
+  { 232, 102 },
+  { 233, 100 },
+  { 234, 101 },
+  { 235, 110 },
+  { 236, 130 },
+  { 237, 127 },
+  { 238, 128 },
+  { 239, 137 },
+  { 240, 109 },
+  { 241, 168 },
+  { 242, 173 },
+  { 243, 170 },
+  { 244, 171 },
+  { 245, 182 },
+  { 246, 184 },
+  { 247, 99 },
+  { 248, 181 },
+  { 249, 244 },
+  { 250, 241 },
+  { 251, 243 },
+  { 252, 248 },
+  { 253, 251 },
+  { 254, 236 },
+  { 255, 253 },
   { 338, 32 },
-  { 339, 171 },
+  { 339, 172 },
   { 352, 46 },
-  { 353, 213 },
+  { 353, 214 },
   { 376, 58 },
-  { 402, 112 },
-  { 710, 84 },
-  { 732, 236 },
+  { 402, 113 },
+  { 710, 85 },
+  { 732, 237 },
   { 913, 4 },
   { 914, 8 },
   { 915, 21 },
@@ -426,126 +427,179 @@ static const XmlEntity::PairRev xmlentity_pairs_rev[] =
   { 936, 44 },
   { 937, 36 },
   { 945, 66 },
-  { 946, 75 },
-  { 947, 118 },
-  { 948, 95 },
-  { 949, 105 },
-  { 950, 253 },
-  { 951, 107 },
-  { 952, 232 },
-  { 953, 133 },
-  { 954, 137 },
-  { 955, 139 },
-  { 956, 158 },
-  { 957, 168 },
-  { 958, 249 },
-  { 959, 175 },
-  { 960, 189 },
-  { 961, 208 },
-  { 962, 218 },
-  { 963, 217 },
-  { 964, 230 },
-  { 965, 246 },
-  { 966, 188 },
-  { 967, 83 },
-  { 968, 196 },
-  { 969, 174 },
-  { 977, 233 },
-  { 978, 245 },
-  { 982, 190 },
-  { 8194, 104 },
-  { 8195, 103 },
-  { 8201, 234 },
-  { 8204, 255 },
-  { 8205, 254 },
-  { 8206, 149 },
-  { 8207, 209 },
-  { 8211, 161 },
-  { 8212, 154 },
-  { 8216, 151 },
-  { 8217, 211 },
-  { 8218, 212 },
-  { 8220, 144 },
-  { 8221, 204 },
-  { 8222, 74 },
-  { 8224, 92 },
+  { 946, 76 },
+  { 947, 119 },
+  { 948, 96 },
+  { 949, 106 },
+  { 950, 254 },
+  { 951, 108 },
+  { 952, 233 },
+  { 953, 134 },
+  { 954, 138 },
+  { 955, 140 },
+  { 956, 159 },
+  { 957, 169 },
+  { 958, 250 },
+  { 959, 176 },
+  { 960, 190 },
+  { 961, 209 },
+  { 962, 219 },
+  { 963, 218 },
+  { 964, 231 },
+  { 965, 247 },
+  { 966, 189 },
+  { 967, 84 },
+  { 968, 197 },
+  { 969, 175 },
+  { 977, 234 },
+  { 978, 246 },
+  { 982, 191 },
+  { 8194, 105 },
+  { 8195, 104 },
+  { 8201, 235 },
+  { 8204, 256 },
+  { 8205, 255 },
+  { 8206, 150 },
+  { 8207, 210 },
+  { 8211, 162 },
+  { 8212, 155 },
+  { 8216, 152 },
+  { 8217, 212 },
+  { 8218, 213 },
+  { 8220, 145 },
+  { 8221, 205 },
+  { 8222, 75 },
+  { 8224, 93 },
   { 8225, 11 },
-  { 8226, 78 },
-  { 8230, 124 },
-  { 8240, 186 },
-  { 8242, 193 },
+  { 8226, 79 },
+  { 8230, 125 },
+  { 8240, 187 },
+  { 8242, 194 },
   { 8243, 43 },
-  { 8249, 150 },
-  { 8250, 210 },
-  { 8254, 173 },
-  { 8260, 117 },
-  { 8364, 110 },
-  { 8465, 130 },
-  { 8472, 248 },
-  { 8476, 205 },
-  { 8482, 238 },
+  { 8249, 151 },
+  { 8250, 211 },
+  { 8254, 174 },
+  { 8260, 118 },
+  { 8364, 111 },
+  { 8465, 131 },
+  { 8472, 249 },
+  { 8476, 206 },
+  { 8482, 239 },
   { 8501, 65 },
-  { 8592, 142 },
-  { 8593, 241 },
-  { 8594, 202 },
-  { 8595, 93 },
-  { 8596, 122 },
-  { 8629, 88 },
-  { 8656, 138 },
-  { 8657, 239 },
-  { 8658, 198 },
-  { 8659, 91 },
-  { 8660, 121 },
-  { 8704, 113 },
-  { 8706, 185 },
-  { 8707, 111 },
-  { 8709, 102 },
-  { 8711, 159 },
-  { 8712, 135 },
-  { 8713, 165 },
-  { 8715, 163 },
-  { 8719, 194 },
-  { 8721, 223 },
-  { 8722, 157 },
-  { 8727, 147 },
-  { 8730, 199 },
-  { 8733, 195 },
-  { 8734, 131 },
+  { 8592, 143 },
+  { 8593, 242 },
+  { 8594, 203 },
+  { 8595, 94 },
+  { 8596, 123 },
+  { 8629, 89 },
+  { 8656, 139 },
+  { 8657, 240 },
+  { 8658, 199 },
+  { 8659, 92 },
+  { 8660, 122 },
+  { 8704, 114 },
+  { 8706, 186 },
+  { 8707, 112 },
+  { 8709, 103 },
+  { 8711, 160 },
+  { 8712, 136 },
+  { 8713, 166 },
+  { 8715, 164 },
+  { 8719, 195 },
+  { 8721, 224 },
+  { 8722, 158 },
+  { 8727, 148 },
+  { 8730, 200 },
+  { 8733, 196 },
+  { 8734, 132 },
   { 8736, 69 },
   { 8743, 68 },
-  { 8744, 177 },
-  { 8745, 79 },
-  { 8746, 89 },
-  { 8747, 132 },
-  { 8756, 231 },
-  { 8764, 219 },
-  { 8773, 86 },
-  { 8776, 71 },
-  { 8800, 162 },
-  { 8801, 106 },
-  { 8804, 145 },
-  { 8805, 119 },
-  { 8834, 221 },
-  { 8835, 224 },
-  { 8836, 166 },
-  { 8838, 222 },
-  { 8839, 228 },
-  { 8853, 176 },
-  { 8855, 182 },
-  { 8869, 187 },
-  { 8901, 214 },
-  { 8968, 143 },
-  { 8969, 203 },
-  { 8970, 146 },
-  { 8971, 207 },
-  { 9001, 140 },
-  { 9002, 200 },
-  { 9674, 148 },
-  { 9824, 220 },
-  { 9827, 85 },
-  { 9829, 123 },
-  { 9830, 96 }
+  { 8744, 178 },
+  { 8745, 80 },
+  { 8746, 90 },
+  { 8747, 133 },
+  { 8756, 232 },
+  { 8764, 220 },
+  { 8773, 87 },
+  { 8776, 72 },
+  { 8800, 163 },
+  { 8801, 107 },
+  { 8804, 146 },
+  { 8805, 120 },
+  { 8834, 222 },
+  { 8835, 225 },
+  { 8836, 167 },
+  { 8838, 223 },
+  { 8839, 229 },
+  { 8853, 177 },
+  { 8855, 183 },
+  { 8869, 188 },
+  { 8901, 215 },
+  { 8968, 144 },
+  { 8969, 204 },
+  { 8970, 147 },
+  { 8971, 208 },
+  { 9001, 141 },
+  { 9002, 201 },
+  { 9674, 149 },
+  { 9824, 221 },
+  { 9827, 86 },
+  { 9829, 124 },
+  { 9830, 97 }
 };
+
+/*
+// If regeneration of secondary table is needed then uncomment this piece of
+// code.
+struct RegenerateXmlEntityTable
+{
+  RegenerateXmlEntityTable()
+  {
+    const uint32_t count = FOG_ARRAY_SIZE(xmlentity_pairs);
+
+    XmlEntity::Pair* pairs = reinterpret_cast<XmlEntity::Pair*>(
+      malloc(sizeof(XmlEntity::Pair) * count));
+
+    memcpy(pairs, xmlentity_pairs, sizeof(XmlEntity::Pair) * count);
+    qsort(pairs, count, sizeof(XmlEntity::Pair), cmp);
+
+    printf("static const XmlEntity::PairRev xmlentity_pairs_rev[] =\n");
+    printf("{\n");
+
+    for (uint32_t i = 0; i < count; i++)
+    {
+      printf("  { %u, %u }", pairs[i].ch, findEntityPos(pairs[i].ch));
+      if (i != count - 1) printf(",\n");
+    }
+
+    printf("\n};\n");
+    free(pairs);
+  }
+
+  static int cmp(const void* _a, const void* _b)
+  {
+    const XmlEntity::Pair* a = reinterpret_cast<const XmlEntity::Pair*>(_a);
+    const XmlEntity::Pair* b = reinterpret_cast<const XmlEntity::Pair*>(_b);
+
+    return (int)a->ch - (int)b->ch;
+  }
+
+  static uint32_t findEntityPos(uint32_t ch)
+  {
+    const uint32_t count = FOG_ARRAY_SIZE(xmlentity_pairs);
+
+    for (uint32_t i = 0; i < count; i++)
+    {
+      if (xmlentity_pairs[i].ch == ch) return i;
+    }
+
+    FOG_ASSERT_NOT_REACHED();
+    return 0xFFFFFFFF;
+  }
+};
+
+static RegenerateXmlEntityTable regenerateXmlEntityTable;
+*/
 
 // ============================================================================
 // [Fog::XmlEntity]
@@ -560,7 +614,7 @@ static FOG_INLINE int _compareEntities(const T* entity, sysuint_t length, const 
   sysuint_t i = 0;
   while (true)
   {
-    // end...
+    // End...
     if (i == length)
     {
       // How this works...? If entityInTable[i] is not zero terminator,
@@ -569,14 +623,14 @@ static FOG_INLINE int _compareEntities(const T* entity, sysuint_t length, const 
       // this means MATCH.
       return entityInTable[i] != '\0';
     }
-    // or end of entity string in table...?
+    // Or end of entity string in table...?
     else if (entityInTable[i] == '\0')
     {
       // Result is negative and it means that entity is in larger than entity
       // in table
       return -1;
     }
-    // character comparision
+    // Character comparision.
     else if (entity[i] != (uint8_t)entityInTable[i])
     {
       return (int)entity[i] - (int)(uint8_t)entityInTable[i];
@@ -631,24 +685,23 @@ static FOG_INLINE Char _decode(const T* entityName, sysuint_t entityLength)
     for (index = count; index != 0; index >>= 1)
     {
       basep = base + (index >> 1);
-
-      // Compare.
       int result = _compareEntities<T>(entityName, entityLength, basep->name);
+
       // Match.
       if (result == 0)
       {
         return Char(basep->ch);
       }
-      // Larger... move right.
+      // Larger, move right.
       else if (result > 0)
       {
         base = basep + 1;
         index--;
       }
-      // else => move left
+      // Else, move left.
     }
 
-    // Not found
+    // Not found.
     return Char(0);
   }
 }
@@ -681,7 +734,7 @@ sysuint_t XmlEntity::encode(char* dst, Char _ch)
     {
       basep = base + (index >> 1);
 
-      // Match
+      // Match.
       if (ch == basep->ch)
       {
         char* dstBegin = dst;
@@ -694,13 +747,13 @@ sysuint_t XmlEntity::encode(char* dst, Char _ch)
 
         return (sysuint_t)(dst - dstBegin);
       }
-      // Larger... move right
+      // Larger, move right.
       else if (ch > basep->ch)
       {
         base = basep + 1;
         index--;
       }
-      // else => move left
+      // Else, move left.
     }
   }
 

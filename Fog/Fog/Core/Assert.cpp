@@ -3,10 +3,6 @@
 // [License]
 // MIT, See COPYING file in package
 
-#if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
-#define _CRT_SECURE_NO_WARNINGS
-#endif // _MSC_VER
-
 // [Precompiled Headers]
 #if defined(FOG_PRECOMP)
 #include FOG_PRECOMP

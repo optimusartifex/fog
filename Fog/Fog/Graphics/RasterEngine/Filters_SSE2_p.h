@@ -4,11 +4,10 @@
 // MIT, See COPYING file in package
 
 // For some IDEs to enable code-assist.
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 
 #if defined(FOG_IDE)
 #include <Fog/Graphics/RasterEngine/Defs_SSE2_p.h>
-#include <Fog/Graphics/RasterEngine/Composite_SSE2_p.h>
 #include <Fog/Graphics/RasterEngine/Dib_SSE2_p.h>
 #endif // FOG_IDE
 
@@ -48,6 +47,7 @@ namespace RasterEngine {
 // [Fog::RasterEngine::SSE2 - Filter]
 // ============================================================================
 
+//! @internal
 struct FOG_HIDDEN FilterSSE2
 {
   // --------------------------------------------------------------------------
@@ -73,7 +73,7 @@ struct FOG_HIDDEN FilterSSE2
 
   static void FOG_FASTCALL color_matrix_prgb32(
     const ColorMatrix* cm,
-    uint8_t* dst, const uint8_t* src, sysuint_t width)
+    uint8_t* dst, const uint8_t* src, int w)
   {
     __m128 cf0 = _mm_set1_ps(0.0f);
     __m128 cf255 = _mm_set1_ps(255.0f);
@@ -86,7 +86,7 @@ struct FOG_HIDDEN FilterSSE2
     __m128 pa = _loadColorMatrixRow(cm->m[3]);
     __m128 pt = _mm_mul_ps(_loadColorMatrixRow(cm->m[4]), cf255);
 
-    for (sysuint_t i = width >> 1; i; i--, dst += 8, src += 8)
+    while ((w -= 2) >= 0)
     {
       __m128i pix0, pix1;
       __m128 pixf0, pixf1;
@@ -108,12 +108,12 @@ struct FOG_HIDDEN FilterSSE2
       pixf1 = _mm_cvtepi32_ps(pix1);
 
       {
-        __m128 demul0 = _mm_load_ss(&ArgbUtil::demultiply_reciprocal_table_f[src[ARGB32_ABYTE]]);
-        __m128 demul1 = _mm_load_ss(&ArgbUtil::demultiply_reciprocal_table_f[src[ARGB32_ABYTE+4]]);
+        __m128 demul0 = _mm_load_ss(&raster_demultiply_reciprocal_table_f[src[ARGB32_ABYTE]]);
+        __m128 demul1 = _mm_load_ss(&raster_demultiply_reciprocal_table_f[src[ARGB32_ABYTE+4]]);
 
         // demul |= [1.0f, 0x0, 0x0, 0x0]
-        demul0 = _mm_castsi128_ps(_mm_or_si128(_mm_castps_si128(demul0), SSE2_GET_CONST_PI(3F80000000000000_0000000000000000)));
-        demul1 = _mm_castsi128_ps(_mm_or_si128(_mm_castps_si128(demul1), SSE2_GET_CONST_PI(3F80000000000000_0000000000000000)));
+        demul0 = _mm_castsi128_ps(_mm_or_si128(_mm_castps_si128(demul0), FOG_GET_SSE_CONST_PI(3F80000000000000_0000000000000000)));
+        demul1 = _mm_castsi128_ps(_mm_or_si128(_mm_castps_si128(demul1), FOG_GET_SSE_CONST_PI(3F80000000000000_0000000000000000)));
 
         demul0 = _mm_shuffle_ps(demul0, demul0, _MM_SHUFFLE(3, 0, 0, 0));
         demul1 = _mm_shuffle_ps(demul1, demul1, _MM_SHUFFLE(3, 0, 0, 0));
@@ -177,9 +177,12 @@ struct FOG_HIDDEN FilterSSE2
       pix0 = _mm_shuffle_epi32(pix0, _MM_SHUFFLE(2, 0, 2, 0));
 
       sse2_store8(dst, pix0);
+      dst += 8;
+      src += 8;
     }
+    w += 2;
 
-    if (width & 1)
+    if (w & 1)
     {
       __m128i pix;
       __m128 pixf;
@@ -190,9 +193,9 @@ struct FOG_HIDDEN FilterSSE2
       sse2_load4(pix, src);
       sse2_unpack_to_float(pixf, pix);
 
-      demul = _mm_load_ss(&ArgbUtil::demultiply_reciprocal_table_f[src[ARGB32_ABYTE]]);
+      demul = _mm_load_ss(&raster_demultiply_reciprocal_table_f[src[ARGB32_ABYTE]]);
       // demul |= [1.0f, 0x0, 0x0, 0x0]
-      demul = _mm_castsi128_ps(_mm_or_si128(_mm_castps_si128(demul), SSE2_GET_CONST_PI(3F80000000000000_0000000000000000)));
+      demul = _mm_castsi128_ps(_mm_or_si128(_mm_castps_si128(demul), FOG_GET_SSE_CONST_PI(3F80000000000000_0000000000000000)));
       demul = _mm_shuffle_ps(demul, demul, _MM_SHUFFLE(3, 0, 0, 0));
       pixf = _mm_mul_ps(pixf, demul);
 
@@ -230,7 +233,7 @@ struct FOG_HIDDEN FilterSSE2
 
   static void FOG_FASTCALL color_matrix_argb32(
     const ColorMatrix* cm,
-    uint8_t* dst, const uint8_t* src, sysuint_t width)
+    uint8_t* dst, const uint8_t* src, int w)
   {
     __m128 cf0 = _mm_set1_ps(0.0f);
     __m128 cf255 = _mm_set1_ps(255.0f);
@@ -241,7 +244,7 @@ struct FOG_HIDDEN FilterSSE2
     __m128 pa = _loadColorMatrixRow(cm->m[3]);
     __m128 pt = _mm_mul_ps(_loadColorMatrixRow(cm->m[4]), cf255);
 
-    for (sysuint_t i = width >> 1; i; i--, dst += 8, src += 8)
+    while ((w -= 2) >= 0)
     {
       __m128i pix0, pix1;
       __m128 pixf0, pixf1;
@@ -306,9 +309,13 @@ struct FOG_HIDDEN FilterSSE2
       pix0 = _mm_shuffle_epi32(pix0, _MM_SHUFFLE(2, 0, 2, 0));
 
       sse2_store8(dst, pix0);
-    }
 
-    if (width & 1)
+      dst += 8;
+      src += 8;
+    }
+    w += 2;
+
+    if (w & 1)
     {
       __m128i pix;
       __m128 pixf;
@@ -346,7 +353,7 @@ struct FOG_HIDDEN FilterSSE2
 
   static void FOG_FASTCALL color_matrix_xrgb32(
     const ColorMatrix* cm,
-    uint8_t* dst, const uint8_t* src, sysuint_t width)
+    uint8_t* dst, const uint8_t* src, int w)
   {
     __m128 cf0 = _mm_set1_ps(0.0f);
     __m128 cf255 = _mm_set1_ps(255.0f);
@@ -359,7 +366,7 @@ struct FOG_HIDDEN FilterSSE2
 
     pt = _mm_add_ps(pt, _mm_mul_ps(pa, cf255));
 
-    for (sysuint_t i = width >> 1; i; i--, dst += 8, src += 8)
+    while ((w -=2) >= 0)
     {
       __m128i pix0, pix1;
       __m128 pixf0, pixf1;
@@ -367,7 +374,7 @@ struct FOG_HIDDEN FilterSSE2
       __m128 result0, result1;
 
       sse2_load8(pix0, src);
-      pix0 = _mm_or_si128(pix0, SSE2_GET_CONST_PI(FF000000FF000000_FF000000FF000000));
+      pix0 = _mm_or_si128(pix0, FOG_GET_SSE_CONST_PI(FF000000FF000000_FF000000FF000000));
 
       {
         __m128i xmmz = _mm_setzero_si128();
@@ -418,9 +425,13 @@ struct FOG_HIDDEN FilterSSE2
       pix0 = _mm_shuffle_epi32(pix0, _MM_SHUFFLE(2, 0, 2, 0));
 
       sse2_store8(dst, pix0);
-    }
 
-    if (width & 1)
+      dst += 8;
+      src += 8;
+    }
+    w += 2;
+
+    if (w & 1)
     {
       __m128i pix;
       __m128 pixf;
@@ -428,7 +439,7 @@ struct FOG_HIDDEN FilterSSE2
       __m128 result;
 
       sse2_load4(pix, src);
-      pix = _mm_or_si128(pix, SSE2_GET_CONST_PI(FF000000FF000000_FF000000FF000000));
+      pix = _mm_or_si128(pix, FOG_GET_SSE_CONST_PI(FF000000FF000000_FF000000FF000000));
       sse2_unpack_to_float(pixf, pix);
 
       result = pt;
@@ -455,10 +466,8 @@ struct FOG_HIDDEN FilterSSE2
 
   static void FOG_FASTCALL color_matrix_a8(
     const ColorMatrix* cm,
-    uint8_t* dst, const uint8_t* src, sysuint_t width)
+    uint8_t* dst, const uint8_t* src, int w)
   {
-    sysuint_t i;
-
     __m128 cf0 = _mm_set_ps(0.0f, 0.0f, 0.0f, 0.0f);
     __m128 cf255 = _mm_set1_ps(255.0f);
 
@@ -467,7 +476,7 @@ struct FOG_HIDDEN FilterSSE2
 
     pt = _mm_mul_ps(pa, cf255);
 
-    for (i = width >> 2; i; i--, dst += 4, src += 4)
+    while ((w -= 4) >= 0)
     {
       __m128i pix;
       __m128 pixf;
@@ -483,9 +492,13 @@ struct FOG_HIDDEN FilterSSE2
 
       sse2_pack_from_float(pix, pixf);
       sse2_store4(dst, pix);
-    }
 
-    for (i = width & 3; i; i--, dst += 1, src += 1)
+      dst += 4;
+      src += 4;
+    }
+    w += 4;
+
+    while (w)
     {
       __m128i pix;
       __m128 pixf;
@@ -501,40 +514,44 @@ struct FOG_HIDDEN FilterSSE2
 
       sse2_pack_from_float(pix, pixf);
       dst[0] = (uint8_t)_mm_cvtsi128_si32(pix);
+
+      dst += 1;
+      src += 1;
+      w--;
     }
   }
 
   // --------------------------------------------------------------------------
-  // [Fog::Raster_SSE2 - BoxBlur]
+  // [Fog::RasterEngine::SSE2 - BoxBlur]
   // --------------------------------------------------------------------------
 
   static void FOG_FASTCALL box_blur_h_argb32(
     const BlurParams* params,
     uint8_t* dst, sysint_t dstStride,
     const uint8_t* src, sysint_t srcStride,
-    sysuint_t width, sysuint_t height, sysint_t offset)
+    int width, int height, int offset)
   {
     int radius = Math::min<int>((int)params->vRadius, 254);
 
     if (radius == 0 || width < 2)
     {
-      functionMap->filter.copy_area[PIXEL_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
+      rasterFuncs.filter.copy_area[IMAGE_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
       return;
     }
 
     if (radius > 254) radius = 254;
 
-    sysint_t dym1 = width;
-    sysint_t dym2 = height;
-    sysint_t max = dym1 - 1;
+    int dym1 = width;
+    int dym2 = height;
+    int max = dym1 - 1;
     sysint_t end = max * 4;
 
     uint8_t* dstCur;
     const uint8_t* srcCur;
 
-    sysint_t pos1;
-    sysint_t pos2;
-    sysint_t xp, i;
+    int pos1;
+    int pos2;
+    int xp, i;
 
     uint size = (uint)radius * 2 + 1;
 
@@ -606,7 +623,7 @@ struct FOG_HIDDEN FilterSSE2
         sum = _mm_add_epi32(sum, pix);
       }
 
-      xp = Math::min((sysint_t)radius, max);
+      xp = Math::min<int>(radius, max);
 
       srcCur = src + xp * 4;
       dstCur = dst;
@@ -656,29 +673,29 @@ struct FOG_HIDDEN FilterSSE2
     const BlurParams* params,
     uint8_t* dst, sysint_t dstStride,
     const uint8_t* src, sysint_t srcStride,
-    sysuint_t width, sysuint_t height, sysint_t offset)
+    int width, int height, int offset)
   {
     int radius = Math::min<int>((int)params->vRadius, 254);
 
     if (radius == 0 || width < 2)
     {
-      functionMap->filter.copy_area[PIXEL_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
+      rasterFuncs.filter.copy_area[IMAGE_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
       return;
     }
 
     if (radius > 254) radius = 254;
 
-    sysint_t dym1 = width;
-    sysint_t dym2 = height;
-    sysint_t max = dym1 - 1;
+    int dym1 = width;
+    int dym2 = height;
+    int max = dym1 - 1;
     sysint_t end = max * 4;
 
     uint8_t* dstCur;
     const uint8_t* srcCur;
 
-    sysint_t pos1;
-    sysint_t pos2;
-    sysint_t xp, i;
+    int pos1;
+    int pos2;
+    int xp, i;
 
     uint size = (uint)radius * 2 + 1;
 
@@ -750,7 +767,7 @@ struct FOG_HIDDEN FilterSSE2
         sum = _mm_add_epi32(sum, pix);
       }
 
-      xp = Math::min((sysint_t)radius, max);
+      xp = Math::min<int>(radius, max);
 
       srcCur = src + xp * 4;
       dstCur = dst;
@@ -762,7 +779,7 @@ struct FOG_HIDDEN FilterSSE2
         sse2_mul_const_4D(pix, sum, mmMul);
         pix = _mm_srl_epi32(pix, mmShr);
         sse2_pack_1x1D(pix, pix);
-        pix = _mm_or_si128(pix, SSE2_GET_CONST_PI(FF000000FF000000_FF000000FF000000));
+        pix = _mm_or_si128(pix, FOG_GET_SSE_CONST_PI(FF000000FF000000_FF000000FF000000));
         sse2_store4(dstCur, pix);
 
         dstCur += 4;
@@ -801,29 +818,29 @@ struct FOG_HIDDEN FilterSSE2
     const BlurParams* params,
     uint8_t* dst, sysint_t dstStride,
     const uint8_t* src, sysint_t srcStride,
-    sysuint_t width, sysuint_t height, sysint_t offset)
+    int width, int height, int offset)
   {
     int radius = Math::min<int>((int)params->vRadius, 254);
 
     if (radius == 0 || height < 2)
     {
-      functionMap->filter.copy_area[PIXEL_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
+      rasterFuncs.filter.copy_area[IMAGE_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
       return;
     }
 
     if (radius > 254) radius = 254;
 
-    sysint_t dym1 = height;
-    sysint_t dym2 = width;
-    sysint_t max = dym1 - 1;
+    int dym1 = height;
+    int dym2 = width;
+    int max = dym1 - 1;
     sysint_t end = max * srcStride;
 
     uint8_t* dstCur;
     const uint8_t* srcCur;
 
-    sysint_t pos1;
-    sysint_t pos2;
-    sysint_t xp, i;
+    int pos1;
+    int pos2;
+    int xp, i;
 
     uint size = (uint)radius * 2 + 1;
 
@@ -895,7 +912,7 @@ struct FOG_HIDDEN FilterSSE2
         sum = _mm_add_epi32(sum, pix);
       }
 
-      xp = Math::min((sysint_t)radius, max);
+      xp = Math::min<int>(radius, max);
 
       srcCur = src + xp * srcStride;
       dstCur = dst;
@@ -945,29 +962,29 @@ struct FOG_HIDDEN FilterSSE2
     const BlurParams* params,
     uint8_t* dst, sysint_t dstStride,
     const uint8_t* src, sysint_t srcStride,
-    sysuint_t width, sysuint_t height, sysint_t offset)
+    int width, int height, int offset)
   {
     int radius = Math::min<int>((int)params->vRadius, 254);
 
     if (radius == 0 || height < 2)
     {
-      functionMap->filter.copy_area[PIXEL_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
+      rasterFuncs.filter.copy_area[IMAGE_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
       return;
     }
 
     if (radius > 254) radius = 254;
 
-    sysint_t dym1 = height;
-    sysint_t dym2 = width;
-    sysint_t max = dym1 - 1;
+    int dym1 = height;
+    int dym2 = width;
+    int max = dym1 - 1;
     sysint_t end = max * srcStride;
 
     uint8_t* dstCur;
     const uint8_t* srcCur;
 
-    sysint_t pos1;
-    sysint_t pos2;
-    sysint_t xp, i;
+    int pos1;
+    int pos2;
+    int xp, i;
 
     uint size = (uint)radius * 2 + 1;
 
@@ -1039,7 +1056,7 @@ struct FOG_HIDDEN FilterSSE2
         sum = _mm_add_epi32(sum, pix);
       }
 
-      xp = Math::min((sysint_t)radius, max);
+      xp = Math::min<int>(radius, max);
 
       srcCur = src + xp * srcStride;
       dstCur = dst;
@@ -1051,7 +1068,7 @@ struct FOG_HIDDEN FilterSSE2
         sse2_mul_const_4D(pix, sum, mmMul);
         pix = _mm_srl_epi32(pix, mmShr);
         sse2_pack_1x1D(pix, pix);
-        pix = _mm_or_si128(pix, SSE2_GET_CONST_PI(FF000000FF000000_FF000000FF000000));
+        pix = _mm_or_si128(pix, FOG_GET_SSE_CONST_PI(FF000000FF000000_FF000000FF000000));
         sse2_store4(dstCur, pix);
 
         dstCur += dstStride;
@@ -1087,39 +1104,39 @@ struct FOG_HIDDEN FilterSSE2
   }
 
   // --------------------------------------------------------------------------
-  // [Fog::Raster_SSE2 - LinearBlur]
+  // [Fog::RasterEngine::SSE2 - LinearBlur]
   // --------------------------------------------------------------------------
 
   static void FOG_FASTCALL linear_blur_h_argb32(
     const BlurParams* params,
     uint8_t* dst, sysint_t dstStride,
     const uint8_t* src, sysint_t srcStride,
-    sysuint_t width, sysuint_t height, sysint_t offset)
+    int width, int height, int offset)
   {
     int radius = Math::min<int>((int)params->vRadius, 254);
 
     if (radius == 0 || width < 2)
     {
-      functionMap->filter.copy_area[PIXEL_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
+      rasterFuncs.filter.copy_area[IMAGE_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
       return;
     }
 
     if (radius > 254) radius = 254;
 
-    sysint_t dym1 = width;
-    sysint_t dym2 = height;
-    sysint_t max = dym1 - 1;
+    int dym1 = width;
+    int dym2 = height;
+    int max = dym1 - 1;
     sysint_t end = max * 4;
 
     uint8_t* dstCur;
     const uint8_t* srcCur;
 
-    sysint_t pos1;
-    sysint_t pos2;
-    sysint_t xp, i;
+    int pos1;
+    int pos2;
+    int xp, i;
 
-    __m128i mmMul = _mm_cvtsi32_si128(linear_blur8_mul[radius]);
-    __m128i mmShr = _mm_cvtsi32_si128(linear_blur8_shr[radius]);
+    __m128i mmMul = _mm_cvtsi32_si128(raster_linear_blur8_mul[radius]);
+    __m128i mmShr = _mm_cvtsi32_si128(raster_linear_blur8_shr[radius]);
     sse2_expand_pixel_lo_1x4B(mmMul, mmMul);
 
     uint32_t stack[512];
@@ -1205,7 +1222,7 @@ struct FOG_HIDDEN FilterSSE2
         sum = _mm_add_epi32(sum, pix);
       }
 
-      xp = Math::min((sysint_t)radius, max);
+      xp = Math::min<int>(radius, max);
 
       srcCur = src + xp * 4;
       dstCur = dst;
@@ -1265,32 +1282,32 @@ struct FOG_HIDDEN FilterSSE2
     const BlurParams* params,
     uint8_t* dst, sysint_t dstStride,
     const uint8_t* src, sysint_t srcStride,
-    sysuint_t width, sysuint_t height, sysint_t offset)
+    int width, int height, int offset)
   {
     int radius = Math::min<int>((int)params->vRadius, 254);
 
     if (radius == 0 || height < 2)
     {
-      functionMap->filter.copy_area[PIXEL_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
+      rasterFuncs.filter.copy_area[IMAGE_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
       return;
     }
 
     if (radius > 254) radius = 254;
 
-    sysint_t dym1 = height;
-    sysint_t dym2 = width;
-    sysint_t max = dym1 - 1;
+    int dym1 = height;
+    int dym2 = width;
+    int max = dym1 - 1;
     sysint_t end = max * srcStride;
 
     uint8_t* dstCur;
     const uint8_t* srcCur;
 
-    sysint_t pos1;
-    sysint_t pos2;
-    sysint_t xp, i;
+    int pos1;
+    int pos2;
+    int xp, i;
 
-    __m128i mmMul = _mm_cvtsi32_si128(linear_blur8_mul[radius]);
-    __m128i mmShr = _mm_cvtsi32_si128(linear_blur8_shr[radius]);
+    __m128i mmMul = _mm_cvtsi32_si128(raster_linear_blur8_mul[radius]);
+    __m128i mmShr = _mm_cvtsi32_si128(raster_linear_blur8_shr[radius]);
     sse2_expand_pixel_lo_1x4B(mmMul, mmMul);
 
     uint32_t stack[512];
@@ -1376,7 +1393,7 @@ struct FOG_HIDDEN FilterSSE2
         sum = _mm_add_epi32(sum, pix);
       }
 
-      xp = Math::min((sysint_t)radius, max);
+      xp = Math::min<int>(radius, max);
 
       srcCur = src + xp * srcStride;
       dstCur = dst;
@@ -1437,33 +1454,33 @@ struct FOG_HIDDEN FilterSSE2
   // --------------------------------------------------------------------------
 
   static void FOG_FASTCALL symmetric_convolve_float_h_argb32(
-    const SymmetricConvolveParamsF* params,
+    const FloatSymmetricConvolveParams* params,
     uint8_t* dst, sysint_t dstStride,
     const uint8_t* src, sysint_t srcStride,
-    sysuint_t width, sysuint_t height, sysint_t offset)
+    int width, int height, int offset)
   {
     const float* kernel = params->hMatrix.getData();
-    sysint_t size = params->hMatrix.getLength();
+    int size = (int)params->hMatrix.getLength();
 
     if (size == 0 || width < 2)
     {
-      if (dst != src) functionMap->filter.copy_area[PIXEL_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
+      if (dst != src) rasterFuncs.filter.copy_area[IMAGE_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
       return;
     }
 
-    sysint_t dym1 = width;
-    sysint_t dym2 = height;
-    sysint_t max = dym1 - 1;
+    int dym1 = width;
+    int dym2 = height;
+    int max = dym1 - 1;
     sysint_t end = max * 4;
 
     uint8_t* dstCur;
     const uint8_t* srcCur;
 
-    sysint_t pos1;
-    sysint_t pos2;
-    sysint_t xp, i;
+    int pos1;
+    int pos2;
+    int xp, i;
 
-    sysint_t sizeHalf = size >> 1;
+    int sizeHalf = size >> 1;
 
     LocalBuffer<256*sizeof(uint32_t)> stackBuffer;
     uint32_t* stack = (uint32_t*)stackBuffer.alloc(size * sizeof(uint32_t));
@@ -1571,33 +1588,33 @@ struct FOG_HIDDEN FilterSSE2
   }
 
   static void FOG_FASTCALL symmetric_convolve_float_v_argb32(
-    const SymmetricConvolveParamsF* params,
+    const FloatSymmetricConvolveParams* params,
     uint8_t* dst, sysint_t dstStride,
     const uint8_t* src, sysint_t srcStride,
-    sysuint_t width, sysuint_t height, sysint_t offset)
+    int width, int height, int offset)
   {
     const float* kernel = params->vMatrix.getData();
-    sysint_t size = params->vMatrix.getLength();
+    int size = (int)params->vMatrix.getLength();
 
     if (size == 0 || height < 2)
     {
-      if (dst != src) functionMap->filter.copy_area[PIXEL_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
+      if (dst != src) rasterFuncs.filter.copy_area[IMAGE_FORMAT_ARGB32](NULL, dst, dstStride, src, srcStride, width, height, offset);
       return;
     }
 
-    sysint_t dym1 = height;
-    sysint_t dym2 = width;
-    sysint_t max = dym1 - 1;
+    int dym1 = height;
+    int dym2 = width;
+    int max = dym1 - 1;
     sysint_t end = max * srcStride;
 
     uint8_t* dstCur;
     const uint8_t* srcCur;
 
-    sysint_t pos1;
-    sysint_t pos2;
-    sysint_t xp, i;
+    int pos1;
+    int pos2;
+    int xp, i;
 
-    sysint_t sizeHalf = size >> 1;
+    int sizeHalf = size >> 1;
 
     LocalBuffer<256*sizeof(uint32_t)> stackBuffer;
     uint32_t* stack = (uint32_t*)stackBuffer.alloc(size * sizeof(uint32_t));

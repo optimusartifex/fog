@@ -11,31 +11,62 @@
 #ifndef _FOG_GRAPHICS_H
 #define _FOG_GRAPHICS_H
 
-#if defined(_DOXYGEN)
+#if defined(FOG_DOXYGEN)
 
 // ============================================================================
-// [Fog-Graphics Groups]
+// [Fog - Graphics - Documentation]
 // ============================================================================
 
-//! @defgroup Fog_Graphics Fog-Graphics public API.
+//! @defgroup Fog_Graphics_Public Fog-Graphics
 //!
-//! Set of Fog-Graphics library classes and their members.
+//! Public classes and functions related to Fog-Graphics library.
 
-//! @defgroup Fog_Graphics_Private Fog-Graphics private API.
-//! @ingroup Fog_Graphics
+//! @internal
+//! @defgroup Fog_Graphics_Private Fog-Graphics (private)
 //!
-//! This module contains classes related to specific ImageIO plugins.
+//! Private classes and functions related to Fog-Graphics library.
 
-//! @defgroup Fog_Graphics_ImageIO Fog-Graphics ImageIO API.
-//! @ingroup Fog_Graphics
-//!
-//! This module contains classes related to specific ImageIO plugins.
+
+
+//! @defgroup Fog_Graphics_Constants Constants
+//! @ingroup Fog_Graphics_Public
+
+
+
+//! @defgroup Fog_Graphics_Effects Effects
+//! @ingroup Fog_Graphics_Public
+
+
+
+//! @defgroup Fog_Graphics_Geometry Geometry classes and primitives
+//! @ingroup Fog_Graphics_Public
+
+
+
+//! @defgroup Fog_Graphics_Imaging Imaging
+//! @ingroup Fog_Graphics_Public
+
+
+
+//! @defgroup Fog_Graphics_Painting Painting and related classes
+//! @ingroup Fog_Graphics_Public
+
+
+
+//! @defgroup Fog_Graphics_Text Text and font-management
+//! @ingroup Fog_Graphics_Public
+
+
+
+//! @defgroup Fog_Graphics_Other Non-categorized classes and functions
+//! @ingroup Fog_Graphics_Public
 
 // ============================================================================
-// [Fog-Graphics Namespaces]
+// [Fog - Graphics - Namespaces]
 // ============================================================================
 
 //! @namespace Fog::RasterEngine
+//! @internal
 //! @brief Low level raster based functions namespace.
 //!
 //! RasterEngine namespace contains lowest level pixel manipulation library that
@@ -48,19 +79,19 @@
 //! the result is premultiplied and alpha is set to 0xFF. This is like blitting
 //! the result into black destination using source over operator.
 
-#endif // _DOXYGEN
+#endif // FOG_DOXYGEN
 
 // ============================================================================
 // [Fog-Graphics Include Files]
 // ============================================================================
 
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 
-#include <Fog/Graphics/Argb.h>
-#include <Fog/Graphics/ArgbUtil.h>
-#include <Fog/Graphics/Constants.h>
+#include <Fog/Graphics/Color.h>
 #include <Fog/Graphics/ColorLut.h>
 #include <Fog/Graphics/ColorMatrix.h>
+#include <Fog/Graphics/ColorUtil.h>
+#include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/ConvolutionMatrix.h>
 #include <Fog/Graphics/Font.h>
 #include <Fog/Graphics/Glyph.h>
@@ -77,11 +108,11 @@
 #include <Fog/Graphics/PaintUtil.h>
 #include <Fog/Graphics/Palette.h>
 #include <Fog/Graphics/Path.h>
+#include <Fog/Graphics/PathStroker.h>
 #include <Fog/Graphics/PathTransform.h>
 #include <Fog/Graphics/PathUtil.h>
 #include <Fog/Graphics/Pattern.h>
 #include <Fog/Graphics/Region.h>
-#include <Fog/Graphics/Stroker.h>
 #include <Fog/Graphics/TextLayout.h>
 #include <Fog/Graphics/TextOnPath.h>
 

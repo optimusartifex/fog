@@ -15,17 +15,42 @@
 // [Fog-Svg Documentation]
 // ============================================================================
 
-#if defined(_DOXYGEN)
-//! @defgroup Fog_Svg Fog-Svg library API.
+#if defined(FOG_DOXYGEN)
+//! @defgroup Fog_Svg_Public Fog-Svg
 //!
-//! Set of Fog-Svg library classes and their members.
-#endif // _DOXYGEN
+//! Public classes and functions related to Fog-Svg library.
+
+//! @internal
+//! @defgroup Fog_Svg_Private Fog-Svg (private)
+//!
+//! Private classes and functions related to Fog-Svg library.
+
+
+
+//! @defgroup Fog_Svg_Constants Constants
+//! @ingroup Fog_Svg_Public
+
+
+
+//! @defgroup Fog_Svg_Dom Svg-DOM
+//! @ingroup Fog_Svg_Public
+
+
+
+//! @defgroup Fog_Svg_IO Svg-IO
+//! @ingroup Fog_Svg_Public
+
+
+
+//! @defgroup Fog_Svg_Util Svg utilities
+//! @ingroup Fog_Svg_Public
+#endif // FOG_DOXYGEN
 
 // ============================================================================
 // [Fog-Graphics Include Files]
 // ============================================================================
 
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 
 #include <Fog/Svg/Constants.h>
 #include <Fog/Svg/SvgBase.h>

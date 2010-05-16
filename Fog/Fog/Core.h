@@ -11,38 +11,208 @@
 #pragma once
 #endif // _MSVC
 
-#if defined(_DOXYGEN)
+#if defined(FOG_DOXYGEN)
 
 // ============================================================================
-// [Fog-Core Main]
+// [Fog - Core - Main]
 // ============================================================================
 
 //! @mainpage Fog Library Documentation
 //!
 //! @section Main_Page_Intro Introduction
 //!
-//! Fog library is high performance library written mainly in C++ 
-//! language that abstracts operating system dependencies and enables 
-//! multi platform development through single source compatibility. This 
-//! library was created as an abstraction layer between Windows and 
-//! Unix like operating systems.
+//! Fog library is high performance library written in C++  language that 
+//! abstracts operating system dependencies and enables multi platform 
+//! development through single source compatibility. This library was created 
+//! as an abstraction layer between Windows and Unix like operating systems.
 
 // ============================================================================
-// [Fog-Core Groups]
+// [Fog - Core - Documentation]
 // ============================================================================
 
-//! @defgroup Fog_Core Fog-Core public API.
+//! @defgroup Fog_Core_Public Fog-Core
 //!
-//! Set of Fog-Core library classes and their members.
+//! Public classes and functions related to Fog-Core library.
 
-//! @defgroup Fog_Core_Private Fog-Core private API.
-//! @ingroup Fog_Core
-
-//! @defgroup Fog_Core_Macros Fog-Core macros.
-//! @ingroup Fog_Core
+//! @internal
+//! @defgroup Fog_Core_Private Fog-Core (private)
 //!
-//! Very low level macros, but needed for compiling Core library and
-//! applications.
+//! Private classes and functions related to Fog-Core library.
+
+
+
+//! @defgroup Fog_Core_Application Application
+//! @ingroup Fog_Core_Public
+
+
+
+//! @defgroup Fog_Core_Compiler Compiler macros
+//! @ingroup Fog_Core_Public
+//!
+//! Section that contains compiler macros to control class / function
+//! visibility (export / import), structure packing and compiler intrinsics.
+//!
+//! @section Fog_Core_Compiler_OS Operating system
+//!
+//! Operating system checking at compile-time. If your application directly
+//! depends to specific features of operating system, you can easily check
+//! for it and include these features at compile-time.
+//!
+//! List of main macros:
+//!
+//! - @ref FOG_OS_MAC.
+//! - @ref FOG_OS_POSIX.
+//! - @ref FOG_OS_WINDOWS.
+//!
+//! List of all operating system macros:
+//!
+//! - @ref FOG_OS_BSD.
+//! - @ref FOG_OS_FREEBSD.
+//! - @ref FOG_OS_HPUX.
+//! - @ref FOG_OS_LINUX.
+//! - @ref FOG_OS_MAC.
+//! - @ref FOG_OS_NETBSD.
+//! - @ref FOG_OS_OPENBSD.
+//! - @ref FOG_OS_WINDOWS.
+//!
+//! @section Fog_Core_Compiler_Arch Architecture
+//!
+//! Fog-Framework contains macros that helps to get architecture for the
+//! library is being compiled.
+//!
+//! List of architecture macros:
+//!
+//! - @ref FOG_ARCH_X86.
+//! - @ref FOG_ARCH_X86_64.
+//! - @ref FOG_ARCH_PPC.
+//! - @ref FOG_ARCH_BITS.
+//!
+//! The last (@ref FOG_ARCH_BITS) macro is generic and it tells you the target
+//! architecture word size.
+//!
+//! @note Only 32-bit and 64-bit architectures are supported.
+//!
+//! @section Fog_Core_Compiler_Hardcoding Hardcoding
+//!
+//! Hardcoding macros can be used to hardcode some code using processor
+//! extensions. In Fog-Framework hardcoding is mainly used to compile some
+//! performance critical code using SSE2.
+//!
+//! List of hardcoding macros:
+//! 
+//! - @ref FOG_HARDCODE_MMX.
+//! - @ref FOG_HARDCODE_MMX2.
+//! - @ref FOG_HARDCODE_SSE.
+//! - @ref FOG_HARDCODE_SSE2.
+//! - @ref FOG_HARDCODE_SSE3.
+//!
+//! @section Fog_Core_Compiler_Decorators Decorators
+//!
+//! Decorators are used when compiling Fog library and when including Fog
+//! header files from other sources. Decorators can be used to control
+//! API visibility, function calling conventions, etc...
+//!
+//! List of standard decorators:
+//!
+//! - @ref FOG_ALIGNED_TYPE.
+//! - @ref FOG_ALIGNED_VAR.
+//! - @ref FOG_API.
+//! - @ref FOG_CDECL.
+//! - @ref FOG_DEPRECATED.
+//! - @ref FOG_DLL_IMPORT.
+//! - @ref FOG_DLL_EXPORT.
+//! - @ref FOG_FASTCALL.
+//! - @ref FOG_HIDDEN.
+//! - @ref FOG_INLINE.
+//! - @ref FOG_NO_RETURN.
+//! - @ref FOG_STDCALL.
+//! - @ref FOG_UNUSED.
+//!
+//! @section Fog_Core_Compiler_PCE Predicting conditional expressions
+//!
+//! Macros that can help to optimize the code using compiler specific 
+//! decorators to tell compiler expected result of the expression.
+//!
+//! List of macros:
+//!
+//! - @ref FOG_LIKELY.
+//! - @ref FOG_UNLIKELY.
+//!
+//! @note Currently only when compiling by gcc these macros are used, when 
+//! compiling for example by MSVC there is no such functionality (when using
+//! this compiler try to use profile based optimizations instead).
+
+
+
+//! @defgroup Fog_Core_Constants Constants
+//! @ingroup Fog_Core_Public
+
+
+
+//! @defgroup Fog_Core_DateTime Date and time
+//! @ingroup Fog_Core_Public
+
+
+
+//! @defgroup Fog_Core_Debugging Debugging and assertions
+//! @ingroup Fog_Core_Public
+
+
+
+//! @defgroup Fog_Core_Environment Environment and operating system related classes
+//! @ingroup Fog_Core_Public
+
+
+
+//! @defgroup Fog_Core_Essentials Essential classes and algorithms
+//! @ingroup Fog_Core_Public
+
+
+
+//! @defgroup Fog_Core_Library Dynamic libraries and plugins
+//! @ingroup Fog_Core_Public
+
+
+
+//! @defgroup Fog_Core_Localization Localization and internationalization
+//! @ingroup Fog_Core_Public
+
+
+
+//! @defgroup Fog_Core_Math Math functions
+//! @ingroup Fog_Core_Public
+
+
+
+//! @defgroup Fog_Core_Memory Memory management and debugging
+//! @ingroup Fog_Core_Public
+
+
+
+//! @defgroup Fog_Core_Object Object-system, properties and events
+//! @ingroup Fog_Core_Public
+
+
+
+//! @defgroup Fog_Core_Streaming Filesystem and streams
+//! @ingroup Fog_Core_Public
+
+
+
+//! @defgroup Fog_Core_Threading Threading, tasks, timers and event loop
+//! @ingroup Fog_Core_Public
+
+
+
+//! @defgroup Fog_Core_Other Non-categorized classes and functions
+//! @ingroup Fog_Core_Public
+
+
+
+//! @defgroup Fog_Core_Macros Macros
+//! @ingroup Fog_Core_Public
+//!
+//! Macros that helps with compiling Fog-Framework and all applications.
 
 // ============================================================================
 // [Fog-Core Shared]
@@ -131,20 +301,19 @@ struct Implicit
 
 } // Doxygen namespace
 
-#endif // _DOXYGEN
+#endif // FOG_DOXYGEN
 
 // ============================================================================
 // [Fog-Core Include Files]
 // ============================================================================
 
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 
 #include <Fog/Core/Algorithms.h>
 #include <Fog/Core/Application.h>
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Atomic.h>
 #include <Fog/Core/Basics.h>
-#include <Fog/Core/BitArray.h>
 #include <Fog/Core/Byte.h>
 #include <Fog/Core/ByteArray.h>
 #include <Fog/Core/ByteArrayFilter.h>
@@ -172,7 +341,6 @@ struct Implicit
 #include <Fog/Core/Misc.h>
 #include <Fog/Core/OS.h>
 #include <Fog/Core/Object.h>
-#include <Fog/Core/ScopedHandle.h>
 #include <Fog/Core/SequenceInfo.h>
 #include <Fog/Core/Static.h>
 #include <Fog/Core/Stream.h>

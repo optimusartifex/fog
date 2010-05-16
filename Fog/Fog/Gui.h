@@ -11,30 +11,70 @@
 #ifndef _FOG_GUI_H
 #define _FOG_GUI_H
 
-#if defined(_DOXYGEN)
+#if defined(FOG_DOXYGEN)
 
 // ============================================================================
 // [Fog-Gui Groups]
 // ============================================================================
 
-//! @defgroup Fog_Gui Fog-Gui library API.
+//! @defgroup Fog_Gui_Public Fog-Gui
 //!
-//! Set of Fog-Gui library classes and their members.
+//! Public classes and functions related to Fog-Gui library.
 
-//! @defgroup Fog_Gui_Win Fog-Gui Windows module API.
+//! @internal
+//!
+//! @defgroup Fog_Gui_Private Fog-Gui (private)
+//!
+//! Private classes and functions related to Fog-Gui library.
+
+
+
+//! @defgroup Fog_Gui_Constants Constants
+//! @ingroup Fog_Gui_Public
+
+
+
+//! @defgroup Fog_Gui_Engine Engine
+//! @ingroup Fog_Gui_Public
+
+
+
+//! @defgroup Fog_Gui_Layout Layout managers
+//! @ingroup Fog_Gui_Public
+
+
+
+//! @defgroup Fog_Gui_Theming Theming
+//! @ingroup Fog_Gui_Public
+
+
+
+//! @defgroup Fog_Gui_Widget Widgets
+//! @ingroup Fog_Gui_Public
+
+
+
+//! @defgroup Fog_Gui_Win Windows specific
+//! @ingroup Fog_Gui_Public
 //!
 //! This module contains specific part of UI system for Windows.
 
-//! @defgroup Fog_Gui_X11 Fog-Gui X11 module API.
+
+
+//! @defgroup Fog_Gui_X11 X11 specific
+//! @ingroup Fog_Gui_Public
 //!
 //! This module contains specific part of UI system for X Window System (xlib).
-#endif // _DOXYGEN
+
+
+
+#endif // FOG_DOXYGEN
 
 // ============================================================================
 // [Fog-Gui Include Files]
 // ============================================================================
 
-#include <Fog/Build/Build.h>
+#include <Fog/Core/Build.h>
 
 #include <Fog/Gui/Button.h>
 #include <Fog/Gui/ButtonBase.h>

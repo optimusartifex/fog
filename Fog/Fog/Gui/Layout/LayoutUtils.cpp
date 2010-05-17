@@ -14,113 +14,135 @@
 #include <Fog/Gui/Layout/GridLayout.h>
 
 namespace Fog {
+namespace LayoutUtil {
 
-  template<class T> 
-  void calculateFlexOffsetsT(T* head, int avail, int& used) {
-    if(head == 0) return;
+template<class T>
+static FOG_INLINE void calculateFlexOffsetsT(T* head, int avail, int& used)
+{
+  if(head == 0) return;
 
-    bool grow = avail > used;
-    int remaining = Math::abs(avail - used);        
+  bool grow = avail > used;
+  int remaining = Math::abs(avail - used);        
 
-    FOG_ASSERT(remaining != 0);
+  FOG_ASSERT(remaining != 0);
 
-    bool set = false;
+  bool set = false;
 
-    while (remaining != 0)
+  while (remaining != 0)
+  {
+    bool breakfrom = true;
+    float flexStep = FLOAT_MAX;
+    T* item = head;
+    float flexSum = 0;
+
+    // Calculate sum of all flexes and initialize variables.
+    // TODO LAYOUT: can be done on setter so we can save this loop!
+    while (item)
     {
-      bool breakfrom = true;
-      float flexStep = FLOAT_MAX;
-      T* item = head;
-      float flexSum = 0;
+      LayoutItem::FlexLayoutData* child = static_cast<LayoutItem::FlexLayoutData*>(item->_layoutdata);
 
-      //calculate sum of all flexes and initialize variables!
-      //TODO: can be done on setter so we can save this loop!
-      while(item) {
-        LayoutItem::FlexLayoutData* child = static_cast<LayoutItem::FlexLayoutData*>(item->_layoutdata);
-
-        if(!set) {
-          child->init(grow);
-        }
-
-        if (child->_potential > 0) {
-          flexSum += child->_flex;
-          flexStep = Math::min<float>(flexStep, child->_potential / child->_flex);
-        }
-
-        item = (T*)child->_next;
+      if(!set)
+      {
+        child->init(grow);
       }
 
-      if(flexSum==0)  //should not happen, but just to be sure :-)
-        break;
-      
-      set = true;
-      
-      //never take more space than the parent has!
-      flexStep = Math::min<float>(remaining, flexStep * flexSum) / flexSum;
-
-      //start with the calculation
-      item = head;
-
-      while(item) {
-        LayoutItem::FlexLayoutData* child = static_cast<LayoutItem::FlexLayoutData*>(item->_layoutdata);
-
-        if (child->_potential > 0)
-        {
-          breakfrom = false;
-          // Compute offset for this step
-          int currentOffset = Math::min<int>(remaining, child->_potential, ::ceil(flexStep * child->_flex));
-          // Update child status
-          child->_potential -= currentOffset;
-
-          child->_offset += grow? currentOffset : -currentOffset;
-          used+=child->_offset;
-
-          // Update parent status
-          remaining -= currentOffset;
-        }
-
-        item = (T*)child->_next;
+      if (child->_potential > 0)
+      {
+        flexSum += child->_flex;
+        flexStep = Math::min<float>(flexStep, child->_potential / child->_flex);
       }
 
-      if(breakfrom)
-        break;
+      item = (T*)child->_next;
     }
+
+    // Should not happen, but just to be sure :-)
+    if (flexSum == 0)
+      break;
+    
+    set = true;
+    
+    // Never take more space than the parent has!
+    flexStep = Math::min<float>(remaining, flexStep * flexSum) / flexSum;
+
+    // Start with the calculation.
+    item = head;
+
+    while (item)
+    {
+      LayoutItem::FlexLayoutData* child = static_cast<LayoutItem::FlexLayoutData*>(item->_layoutdata);
+
+      if (child->_potential > 0)
+      {
+        breakfrom = false;
+        // Compute offset for this step.
+        int currentOffset = Math::min<int>(remaining, child->_potential, ::ceil(flexStep * child->_flex));
+        // Update child status.
+        child->_potential -= currentOffset;
+
+        child->_offset += grow? currentOffset : -currentOffset;
+        used += child->_offset;
+
+        // Update parent status.
+        remaining -= currentOffset;
+      }
+
+      item = (T*)child->_next;
+    }
+
+    if (breakfrom)
+      break;
+  }
+}
+
+void calculateFlexOffsets(LayoutItem* head, int avail, int& used)
+{
+  return calculateFlexOffsetsT<LayoutItem>(head, avail, used);
+}
+
+void calculateFlexOffsets(GridLayout::Column* head, int avail, int& used)
+{
+  return calculateFlexOffsetsT<GridLayout::Column>(head, avail, used);
+}
+
+void calculateFlexOffsets(GridLayout::Row* head, int avail, int& used)
+{
+  return calculateFlexOffsetsT<GridLayout::Row>(head, avail, used);
+}
+
+#define CALC(VALUE) \
+  if (VALUE < 0) \
+  { \
+    min = Math::min(min, VALUE); \
+  } \
+  else if (VALUE > 0) \
+  { \
+    max = Math::max(max, VALUE); \
   }
 
-  void calculateFlexOffsets(LayoutItem* head, int avail, int& used) {
-    return calculateFlexOffsetsT<LayoutItem>(head,avail,used);
-  }
-  void calculateFlexOffsets(GridLayout::Column* head, int avail, int& used) {
-    return calculateFlexOffsetsT<GridLayout::Column>(head,avail,used);
-  }
-  void calculateFlexOffsets(GridLayout::Row* head, int avail, int& used) {
-    return calculateFlexOffsetsT<GridLayout::Row>(head,avail,used);
-  }
+int collapseMargins(int margin1, int margin2)
+{
+  int min = 0;
+  int max = 0;
 
-#define CALC(VALUE)\
-  if(VALUE < 0) {\
-  min = Math::min(min, VALUE);\
-  } else if(VALUE > 0) {\
-  max = Math::max(max, VALUE);\
-  }\
+  CALC(margin1);
+  CALC(margin2);
 
-  int collapseMargins(int margin1, int margin2, int margin3) {
-    int max=0, min=0;
-    CALC(margin1);
-    CALC(margin2);
-    CALC(margin3);
-    return max + min;
-  }
+  return min + max;
+}
 
-  int collapseMargins(int margin1, int margin2) {
-    int max=0, min=0;
-    CALC(margin1);
-    CALC(margin2);
-    return max + min;
-  }
+int collapseMargins(int margin1, int margin2, int margin3)
+{
+  int min = 0;
+  int max = 0;
+
+  CALC(margin1);
+  CALC(margin2);
+  CALC(margin3);
+
+  return min + max;
+}
 
 #undef CALC
 
-
-
-}
+} // LayoutUtil namespace
+} // Fog namespace

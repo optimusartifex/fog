@@ -144,8 +144,10 @@ void ThreadLocalStorage::threadExit()
   if (!tls_data)
     return;
 
-  for (int slot = 0; slot < _tlsMax; slot++) {
-    if (_tlsDestructors[slot] != NULL) {
+  for (int slot = 0; slot < _tlsMax; slot++)
+  {
+    if (_tlsDestructors[slot] != NULL)
+    {
       void* value = tls_data[slot];
       _tlsDestructors[slot](value);
     }

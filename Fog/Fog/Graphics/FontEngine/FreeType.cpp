@@ -754,7 +754,8 @@ FontFace* FTFontEngine::createDefaultFace()
 
     const char* p = defaultFaceNames;
 
-    while (*p) {
+    while (*p)
+    {
       sysuint_t plen = strlen(p);
       face = FontManager::getFace(Ascii8(p, plen), size, caps);
       if (face) break;
@@ -1305,8 +1306,10 @@ GlyphData* FTFontFace::renderGlyph(uint32_t uc)
       glyphd->_offsetX,
       glyphd->_offsetY);
 
-    for (y = 0; y != imaged->_height; y++) {
-      for (x = 0; x != imaged->_width; x++) {
+    for (y = 0; y != imaged->_height; y++)
+    {
+      for (x = 0; x != imaged->_width; x++)
+      {
         fprintf(stderr, "%.2X ", imaged->_base[y * imaged->_stride + x]);
       }
       fprintf(stderr, "\n");

@@ -1566,7 +1566,8 @@ ffUnsigned:
         {
           void* pointer = va_arg(ap, void*);
           sysuint_t n = getLength() - beginLength;
-          switch (sizeFlags) {
+          switch (sizeFlags)
+          {
             case ARG_SIZE_M:
             case ARG_SIZE_LL: *(uint64_t *)pointer = (uint64_t)(n); break;
             case ARG_SIZE_L:  *(ulong    *)pointer = (ulong   )(n); break;

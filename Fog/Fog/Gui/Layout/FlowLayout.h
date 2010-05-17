@@ -16,37 +16,50 @@
 
 namespace Fog {
 
-  // ============================================================================
-  // [Fog::FlowLayout]
-  // ============================================================================
+// ============================================================================
+// [Fog::FlowLayout]
+// ============================================================================
 
-  //! @brief Base class for all layouts.
-  struct FOG_API FlowLayout : public Layout
-  {
-    FOG_DECLARE_OBJECT(FlowLayout, Layout)
-    FlowLayout(Widget *parent, int margin=-1, int hSpacing=-1, int vSpacing=-1);
-    FlowLayout(int margin=-1, int hSpacing=-1, int vSpacing=-1);
-    ~FlowLayout();
-    
-    int horizontalSpacing() const;
-    int verticalSpacing() const;
+//! @brief Base class for all layouts.
+struct FOG_API FlowLayout : public Layout
+{
+  FOG_DECLARE_OBJECT(FlowLayout, Layout)
 
-    virtual void add(LayoutItem *item);
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
-    virtual IntSize getLayoutSizeHint() const;
-    virtual uint32_t getLayoutExpandingDirections() const;
-    virtual bool hasLayoutHeightForWidth() const;
-    virtual int getLayoutHeightForWidth(int) const;
-    virtual IntSize getLayoutMinimumSize() const;
+  FlowLayout(Widget *parent, int margin=-1, int hSpacing=-1, int vSpacing=-1);
+  FlowLayout(int margin=-1, int hSpacing=-1, int vSpacing=-1);
+  ~FlowLayout();
+  
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
 
-    virtual void setLayoutGeometry(const IntRect &rect);
+  int getHorizontalSpacing() const;
+  int getVerticalSpacing() const;
 
-  private:
-    int doLayout(const IntRect &rect, bool testOnly) const;
-    int _hSpace;
-    int _vSpace;
-  };
+  // --------------------------------------------------------------------------
+  // [Implementation]
+  // --------------------------------------------------------------------------
 
-}
+  virtual void add(LayoutItem *item);
 
-#endif
+  virtual IntSize getLayoutSizeHint() const;
+  virtual uint32_t getLayoutExpandingDirections() const;
+  virtual bool hasLayoutHeightForWidth() const;
+  virtual int getLayoutHeightForWidth(int) const;
+  virtual IntSize getLayoutMinimumSize() const;
+
+  virtual void setLayoutGeometry(const IntRect &rect);
+
+private:
+  int doLayout(const IntRect &rect, bool testOnly) const;
+  int _hSpace;
+  int _vSpace;
+};
+
+} // Fog namespace
+
+#endif // _FOG_GUI_LAYOUT_FLOWLAYOUT_H

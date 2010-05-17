@@ -7,17 +7,22 @@
 #ifndef _FOG_GUI_ANIMATION_H
 #define _FOG_GUI_ANIMATION_H
 
+// [Dependencies]
 #include <Fog/Build/Build.h>
-
+#include <Fog/Core/Time.h>
+#include <Fog/Core/Timer.h>
 #include <Fog/Gui/Constants.h>
 #include <Fog/Gui/Event.h>
 #include <Fog/Gui/GuiEngine.h>
 #include <Fog/Gui/Widget.h>
-#include <Fog/Core/Timer.h>
-#include <Fog/Core/Time.h>
 
 namespace Fog {
+
 struct Application;
+
+// ============================================================================
+// [Fog::Animation]
+// ============================================================================
 
 struct FOG_API Animation : public Object
 {
@@ -26,33 +31,11 @@ struct FOG_API Animation : public Object
   Animation(uint32_t t=ANIMATION_FIXED_STEP);
   virtual ~Animation();
 
-  virtual void onStart() {
-    //called from Dispatcher after animation was inserted into listener queue
-    _starttime = TimeTicks::highResNow();
-    if(_type == ANIMATION_FIXED_TIME) {
-      _endtime = _starttime + getDuration();
-      //store in _step the value for 1 ms for easy calculate of _position
-      //based on elapsed time since start
-      _step = (float) (1.0f / getDuration().inMilliseconds());
-    }
-  }
-
-  virtual void onAnimation(AnimationEvent* e) {
-    if(e->_type == EVENT_ANIMATION_STEP) {
-      onStep(e);
-    } else {
-      onFinished(e);
-    }
-  }
-
+  virtual void onStart();
+  virtual void onAnimation(AnimationEvent* e);
   virtual void onTimer(TimerEvent* e);
-
-  virtual void onStep(AnimationEvent* e) {
-
-  }
-  virtual void onFinished(AnimationEvent* e) {
-
-  }
+  virtual void onStep(AnimationEvent* e);
+  virtual void onFinished(AnimationEvent* e);
 
   FOG_INLINE float getStep() const { return _step; }
   FOG_INLINE float getFps() const { return _fps; }
@@ -82,32 +65,41 @@ protected:
   TimeTicks _endtime;
 };
 
+// ============================================================================
+// [Fog::AnimationDispatcher]
+// ============================================================================
 
-struct FOG_API AnimationDispatcher : public Object {
+struct FOG_API AnimationDispatcher : public Object
+{
   FOG_DECLARE_OBJECT(AnimationDispatcher, Object)
 
   AnimationDispatcher(TimeDelta ms=TimeDelta::fromMilliseconds(20));
-  ~AnimationDispatcher() {
+  virtual ~AnimationDispatcher();
 
-  }
-
-  //add an Animation to dispatcher
-  //the dispatcher will take the ownership of the animation-object!
+  //! @brief Add an Animation to dispatcher.
+  //!
+  //! The dispatcher will take the ownership of the animation-object.
   void addAnimation(Animation* a);
 
-  //remove an Animation from dispatcher
-  //the dispatcher will destroy the object itself
+  //! @brief Remove an Animation from dispatcher.
+  //!
+  //! The dispatcher will destroy the object itself
   void removeAnimation(Animation* a);
 
   virtual void onTimer(TimerEvent* e);
 
 private:
-  int _count;   //number of registered animations
-  Timer _timer; //Timer object for animations
+  //! @brief Number of registered animations.
+  int _count;
+  //! @brief Timer object for animations.
+  Timer _timer;
 
   List<Animation*> _finished;
 };
 
+// ============================================================================
+// [Fog::WidgetAnimation]
+// ============================================================================
 
 struct FOG_API WidgetAnimation : public Animation
 {
@@ -161,6 +153,10 @@ protected:
 #pragma warning(disable: 4244) // float to int reduction
 #endif
 
+// ============================================================================
+// [Fog::WidgetOpacityAnimation]
+// ============================================================================
+
 //Now rudimentary Animation-Implementation follows
 
 struct FOG_API WidgetOpacityAnimation : public WidgetAnimation
@@ -201,6 +197,14 @@ protected:
   float _startOpacity;
   float _endOpacity;
 };
+
+// TODO: Move implementation to .cpp,
+// TODO: Shouldn't we join all of these, I think that WidgetGeometryAnimation
+// will be enough.
+
+// ============================================================================
+// [Fog::WidgetPositionAnimation]
+// ============================================================================
 
 struct FOG_API WidgetPositionAnimation : public WidgetAnimation
 {
@@ -245,6 +249,10 @@ protected:
   IntPoint _end;
 };
 
+// ============================================================================
+// [Fog::WidgetSizeAnimation]
+// ============================================================================
+
 struct FOG_API WidgetSizeAnimation : public WidgetAnimation
 {
   FOG_DECLARE_OBJECT(WidgetSizeAnimation, WidgetAnimation)
@@ -288,6 +296,9 @@ protected:
   IntSize _end;
 };
 
+// ============================================================================
+// [Fog::WidgetGeometryAnimation]
+// ============================================================================
 
 struct FOG_API WidgetGeometryAnimation : public WidgetAnimation
 {
@@ -335,6 +346,7 @@ protected:
   IntRect _end;
 };
 
-}
+} // Fog namespace
 
-#endif
+// [Guard]
+#endif // _FOG_GUI_ANIMATION_H

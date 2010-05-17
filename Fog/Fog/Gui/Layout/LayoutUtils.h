@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_GUI_LAYOUT_LAYOUTUTILS_H
-#define _FOG_GUI_LAYOUT_LAYOUTUTILS_H
+#ifndef _FOG_GUI_LAYOUT_LAYOUTUTIL_H
+#define _FOG_GUI_LAYOUT_LAYOUTUTIL_H
 
 // [Dependencies]
 #include <Fog/Core/Constants.h>
@@ -14,24 +14,34 @@
 #include <Fog/Graphics/Geometry.h>
 #include <Fog/Gui/Constants.h>
 #include <Fog/Gui/Layout/GridLayout.h>
-//! @addtogroup Fog_Gui
+
+// TODO LAYOUT: Rename to LayoutUtil.cpp/.h
+
+//! @addtogroup Fog_Gui_Layout
 //! @{
 
 namespace Fog {
 
-  // ============================================================================
-  // [Forward Declarations]
-  // ============================================================================
+// ============================================================================
+// [Forward Declarations]
+// ============================================================================
 
-  struct LayoutItem;
-//   template<class T>
-//   void calculateFlexOffsets(T* head, int avail, int& used);
+struct LayoutItem;
 
-  void calculateFlexOffsets(LayoutItem* head, int avail, int& used);
-  void calculateFlexOffsets(GridLayout::Column* head, int avail, int& used);
-  void calculateFlexOffsets(GridLayout::Row* head, int avail, int& used);
+// ============================================================================
+// [Fog::LayoutUtil]
+// ============================================================================
 
-  int collapseMargins(int margin1, int margin2);
-  int collapseMargins(int margin1, int margin2, int margin3);
-}
-#endif
+namespace LayoutUtil {
+
+void calculateFlexOffsets(LayoutItem* head, int avail, int& used);
+void calculateFlexOffsets(GridLayout::Column* head, int avail, int& used);
+void calculateFlexOffsets(GridLayout::Row* head, int avail, int& used);
+
+int collapseMargins(int margin1, int margin2);
+int collapseMargins(int margin1, int margin2, int margin3);
+
+} // LayoutUtil namespace
+} // Fog namespace
+
+#endif // _FOG_GUI_LAYOUT_LAYOUTUTIL_H

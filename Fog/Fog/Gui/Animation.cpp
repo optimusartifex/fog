@@ -21,27 +21,62 @@ FOG_IMPLEMENT_OBJECT(Fog::WidgetPositionAnimation)
 FOG_IMPLEMENT_OBJECT(Fog::WidgetGeometryAnimation)
 FOG_IMPLEMENT_OBJECT(Fog::WidgetSizeAnimation)
 
-
 namespace Fog {
 
-Animation::Animation(uint32_t t) : _type(t), _step(10), _duration(TimeDelta::fromMilliseconds(200)), _position(0.0f),_direction(ANIMATION_FORWARD) {
-  
+// ============================================================================
+// [Fog::Animation]
+// ============================================================================
+
+Animation::Animation(uint32_t t) : 
+  _type(t),
+  _step(10),
+  _duration(TimeDelta::fromMilliseconds(200)),
+  _position(0.0f),
+  _direction(ANIMATION_FORWARD)
+{
 }
 
-Animation::~Animation() {
+Animation::~Animation()
+{
+}
 
+void Animation::onStart()
+{
+  //called from Dispatcher after animation was inserted into listener queue
+  _starttime = TimeTicks::highResNow();
+  if (_type == ANIMATION_FIXED_TIME)
+  {
+    _endtime = _starttime + getDuration();
+    //store in _step the value for 1 ms for easy calculate of _position
+    //based on elapsed time since start
+    _step = (float) (1.0f / getDuration().inMilliseconds());
+  }
+}
+
+void Animation::onAnimation(AnimationEvent* e)
+{
+  if (e->_type == EVENT_ANIMATION_STEP)
+  {
+    onStep(e);
+  }
+  else
+  {
+    onFinished(e);
+  }
 }
 
 void Animation::onTimer(TimerEvent* e)
 {
-  if(_position >= 1.0) {
+  if (_position >= 1.0)
+  {
     //Animation is finished! should not happen
     return;
   }
 
   bool finished = false;
 
-  if(_type == ANIMATION_FIXED_STEP) {
+  if (_type == ANIMATION_FIXED_STEP)
+  {
     if (_direction == ANIMATION_FORWARD)
     {
       _position += _step;
@@ -52,26 +87,36 @@ void Animation::onTimer(TimerEvent* e)
       _position -= _step;
       if (_position <= 0.0f) { _position = 0.0f; finished = true; }
     }
-  } else {
-    //dynamically calculate position based on time elapsed since start    
+  }
+  else
+  {
+    // Dynamically calculate position based on time elapsed since start.
     TimeTicks now = TimeTicks::highResNow();
-    if(now >= _endtime) {
-      if(_direction == ANIMATION_BACKWARD) {
+    if (now >= _endtime)
+    {
+      if (_direction == ANIMATION_BACKWARD)
+      {
         _position = 0.0f;
-      } else {
+      }
+      else
+      {
         _position = 1.0f;
       }
       finished = true;
-    } else {
+    }
+    else
+    {
       TimeDelta delta = now - _starttime;
       //in _step the value for one ms is stored
       _position = delta.inMilliseconds() * _step;
 
-      if(_position > 1.0f) {
+      if (_position > 1.0f)
+      {
         _position = 1.0f;
       }
 
-      if(_direction == ANIMATION_BACKWARD) {
+      if (_direction == ANIMATION_BACKWARD)
+      {
         _position = 1.0f - _position;
       }
     }
@@ -93,33 +138,37 @@ void Animation::onTimer(TimerEvent* e)
   }
 }
 
-void AnimationDispatcher::onTimer(TimerEvent* e) {
-  //notify all registered handler
-  sendEvent(e);
-  //or directly call doUpdate() ??  
-
-  while(_finished.getLength() > 0) {
-    Animation* e = _finished.takeFirst();
-    //who is responsible to destruct?
-    //current answer: call destroy on Animation
-    removeListener(e);
-    e->destroy();
-  }
-
- Application::getInstance()->getGuiEngine()->update();
+void Animation::onStep(AnimationEvent* e)
+{
 }
 
-AnimationDispatcher::AnimationDispatcher(TimeDelta ms) : _count(0) {
+void Animation::onFinished(AnimationEvent* e)
+{
+}
+
+// ============================================================================
+// [Fog::AnimationDispatcher]
+// ============================================================================
+
+AnimationDispatcher::AnimationDispatcher(TimeDelta ms) :
+  _count(0)
+{
   _timer.setInterval(ms);
   _timer.addListener(EVENT_TIMER,this,&AnimationDispatcher::onTimer);
   //No local onTimer-Event
   //The Time Events are dispatched directly to AnimationInstances
 }
 
-void AnimationDispatcher::addAnimation(Animation* a) {
+AnimationDispatcher::~AnimationDispatcher()
+{
+}
+
+void AnimationDispatcher::addAnimation(Animation* a)
+{
   addListener(EVENT_TIMER,a,&Animation::onTimer);
   ++_count;
-  if(_count == 1) {
+  if (_count == 1)
+  {
     //So the Timer is only running if a animation is in there
     _timer.start();
   }
@@ -129,12 +178,34 @@ void AnimationDispatcher::addAnimation(Animation* a) {
   a->onStart();
 }
 
-void AnimationDispatcher::removeAnimation(Animation* e) {
+void AnimationDispatcher::removeAnimation(Animation* e)
+{
   _finished.append(e);  
   --_count;
-  if(_count == 0) {
+
+  if (_count == 0)
+  {
     _timer.stop();
   }
 }
 
+void AnimationDispatcher::onTimer(TimerEvent* e)
+{
+  // Notify all registered handlers.
+  sendEvent(e);
+
+  // TODO: Or directly call doUpdate() ??  
+
+  while (_finished.getLength() > 0)
+  {
+    Animation* e = _finished.takeFirst();
+    //who is responsible to destruct?
+    //current answer: call destroy on Animation
+    removeListener(e);
+    e->destroy();
+  }
+
+  Application::getInstance()->getGuiEngine()->update();
 }
+
+} // Fog namespace

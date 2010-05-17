@@ -30,7 +30,8 @@ LayoutItem::~LayoutItem()
 {
 }
 
-FOG_INLINE void LayoutItem::updateLayout() {
+FOG_INLINE void LayoutItem::updateLayout()
+{
   if(_withinLayout) _withinLayout->updateLayout();
 }
 
@@ -63,23 +64,24 @@ IntSize LayoutItem::calculateMaximumSize() const
   return Fog::calculateMaximumSize(w->getSizeHint().expandedTo(w->getMinimumSizeHint()), w->getMinimumSize(), w->getMaximumSize(), w->getLayoutPolicy(), w->getLayoutAlignment());
 }
 
-
-FOG_INLINE IntSize calculateMinimumSize(const IntSize& sizeHint, const IntSize& minSizeHint, const IntSize& minSize, const IntSize& maxSize, const LayoutPolicy& sizePolicy) {
+FOG_INLINE IntSize calculateMinimumSize(const IntSize& sizeHint, const IntSize& minSizeHint, const IntSize& minSize, const IntSize& maxSize, const LayoutPolicy& sizePolicy)
+{
   IntSize s(0, 0);
 
-  if (sizePolicy.isHorizontalPolicyIgnored()) {
+  if (sizePolicy.isHorizontalPolicyIgnored())
+  {
     if (sizePolicy.getHorizontalPolicy() & LAYOUT_SHRINKING_WIDTH)
       s.setWidth(minSizeHint.getWidth());
     else
       s.setWidth(Math::max(sizeHint.getWidth(), minSizeHint.getWidth()));
   }
 
-  if (sizePolicy.isVerticalPolicyIgnored()) {
-    if (sizePolicy.getVerticalPolicy() & LAYOUT_SHRINKING_HEIGHT) {
+  if (sizePolicy.isVerticalPolicyIgnored())
+  {
+    if (sizePolicy.getVerticalPolicy() & LAYOUT_SHRINKING_HEIGHT)
       s.setHeight(minSizeHint.getHeight());
-    } else {
+    else
       s.setHeight(Math::max(sizeHint.getHeight(), minSizeHint.getHeight()));
-    }
   }
 
   s = s.boundedTo(maxSize);
@@ -91,14 +93,17 @@ FOG_INLINE IntSize calculateMinimumSize(const IntSize& sizeHint, const IntSize& 
   return s.expandedTo(IntSize(0,0));
 }
 
-IntSize LayoutItem::calculateMinimumSize() const {
+IntSize LayoutItem::calculateMinimumSize() const
+{
   FOG_ASSERT(this->isWidget());
   const Widget *w = (Widget *)this;
   return Fog::calculateMinimumSize(w->getSizeHint(), w->getMinimumSizeHint(),w->getMinimumSize(), w->getMaximumSize(),w->getLayoutPolicy());
 }
 
-void LayoutItem::removeLayoutStruct() {
-  if(_layoutdata) {
+void LayoutItem::removeLayoutStruct()
+{
+  if (_layoutdata)
+  {
     delete _layoutdata;
     _layoutdata = 0;  
   }

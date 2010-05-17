@@ -251,17 +251,20 @@ static uint32_t test_stat(struct stat *s, uint32_t flags)
     uid_t uid = UserInfo::uid();
     gid_t gid = UserInfo::gid();
 
-    if (s->st_uid == uid && (s->st_mode & S_IRWXU)) {
+    if (s->st_uid == uid && (s->st_mode & S_IRWXU))
+    {
       if (s->st_mode & S_IRUSR) result |= FileSystem::CAN_READ;
       if (s->st_mode & S_IWUSR) result |= FileSystem::CAN_WRITE;
       if (s->st_mode & S_IXUSR) result |= FileSystem::CAN_EXECUTE;
     }
-    else if (s->st_gid == gid && (s->st_mode & S_IRWXG)) {
+    else if (s->st_gid == gid && (s->st_mode & S_IRWXG))
+    {
       if (s->st_mode & S_IRGRP) result |= FileSystem::CAN_READ;
       if (s->st_mode & S_IWGRP) result |= FileSystem::CAN_WRITE;
       if (s->st_mode & S_IXGRP) result |= FileSystem::CAN_EXECUTE;
     }
-    else if (s->st_mode & S_IRWXO) {
+    else if (s->st_mode & S_IRWXO)
+    {
       if (s->st_mode & S_IROTH) result |= FileSystem::CAN_READ;
       if (s->st_mode & S_IWOTH) result |= FileSystem::CAN_WRITE;
       if (s->st_mode & S_IXOTH) result |= FileSystem::CAN_EXECUTE;

@@ -2217,17 +2217,17 @@ int main(int argc, char* argv[])
   fog_debug("Fog benchmark tool v0.2\n");
 
 #if defined(FOG_BENCH_GDIPLUS)
-	// Initialize GDI+
+  // Initialize GDI+
   ULONG_PTR gdiplusToken;
-	Gdiplus::GdiplusStartupInput gdiplusStartupInput;
-	Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+  Gdiplus::GdiplusStartupInput gdiplusStartupInput;
+  Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 #endif // FOG_BENCH_GDIPLUS
 
   loadSprites();
   benchAll();
 
 #if defined(FOG_BENCH_GDIPLUS)
-	// Shutdown GDI+
+  // Shutdown GDI+
   Gdiplus::GdiplusShutdown(gdiplusToken);
 
   system("pause");

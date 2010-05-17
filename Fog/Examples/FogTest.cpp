@@ -220,7 +220,7 @@ struct XPButton : public ButtonBase {
     rect.top = r.y;
     rect.bottom = r.getHeight();
 
-    createBitmap(r.getWidth(), r.getHeight());
+    //createBitmap(r.getWidth(), r.getHeight());
 
     int state = calcState();
 
@@ -236,11 +236,14 @@ struct XPButton : public ButtonBase {
 
     //Clip on Region to support Transparency! ... needed?
 
-    BOOL result = _theme.drawThemeBackground(_hdc, TYPE,	state, &rect, NULL);
+    BOOL result = _theme.drawThemeBackground(_hdc, TYPE,  state, &rect, NULL);
 
     //draws with a really ugly font... why?? (also if I set the font within window -> maybe because I open them with null hwnd)
     //BOOL ret = _theme.drawThemeText(_hdc,BP_PUSHBUTTON,state,(wchar_t*)_text.getData(),_text.getLength(),DT_CENTER|DT_VCENTER|DT_SINGLELINE,0,&rect);     
+    e->getPainter()->setSource(Argb(0xFFFFFFFF));
+    e->getPainter()->fillRect(IntRect(0, 0, getWidth(), getHeight()));
     e->getPainter()->blitImage(IntPoint(0,0),_image);
+    e->getPainter()->setSource(Argb(0xFF000000));
     e->getPainter()->drawText(r, _text, _font, TEXT_ALIGN_CENTER);
   }
 

@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics Library - Private API]
 //
 // [License]
 // MIT, See COPYING file in package

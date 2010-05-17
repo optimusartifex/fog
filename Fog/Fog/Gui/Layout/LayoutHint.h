@@ -10,7 +10,7 @@
 // [Dependencies]
 #include <Fog/Graphics/Geometry.h>
 
-//! @addtogroup Fog_Gui
+//! @addtogroup Fog_Gui_Layout
 //! @{
 
 namespace Fog {

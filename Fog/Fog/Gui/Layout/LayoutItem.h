@@ -15,10 +15,10 @@
 #include <Fog/Gui/Layout/LayoutPolicy.h>
 #include <Fog/Gui/Layout/LayoutHint.h>
 
-//! @addtogroup Fog_Gui
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Gui_Layout
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -67,7 +67,7 @@ struct FOG_API LayoutItem : public Object
   FOG_INLINE virtual int calcMargin(int margin, MarginPosition pos) const { return margin; }
 
   //TODO: only invalidate if margin really changes after calcMargin
-  FOG_INLINE void checkMarginChanged(int a, int b) { if(a != b) { _dirty = 1; updateLayout();} }
+  FOG_INLINE void checkMarginChanged(int a, int b) { if (a != b) { _dirty = 1; updateLayout();} }
   FOG_INLINE void setContentMargins(const IntMargins& m)  { setContentMargins(m.left,m.right,m.top,m.bottom); }
   FOG_INLINE void setContentMargins(int left, int right, int top, int bottom)  { _contentmargin.set(calcMargin(left,MARGIN_LEFT),calcMargin(right,MARGIN_RIGHT),calcMargin(top,MARGIN_TOP),calcMargin(bottom,MARGIN_BOTTOM)); checkMarginChanged(1,2); }  //TODO: optimize update!
   FOG_INLINE void setContentLeftMargin(int m)  { int z=_contentmargin.left; _contentmargin.left = calcMargin(m,MARGIN_LEFT); checkMarginChanged(z,_contentmargin.left); }
@@ -87,7 +87,7 @@ struct FOG_API LayoutItem : public Object
   // [LayoutHint]
   // --------------------------------------------------------------------------
 
-  //mark this layout for a need to repaint
+  //! @brief Mark this layout for a need to repaint
   FOG_INLINE virtual void updateLayout();
 
   virtual void calculateLayoutHint(LayoutHint& hint) = 0;
@@ -97,10 +97,12 @@ struct FOG_API LayoutItem : public Object
 
   FOG_INLINE void clearDirty() {
     FOG_ASSERT(_dirty);
-    if(!isEmpty()) {
+    if (!isEmpty()) {
       calculateLayoutHint(_cache);
       _propertydirty = 0;
-    } else {
+    }
+    else
+    {
       _cache._maximumSize = _cache._minimumSize = _cache._sizeHint = IntSize(0,0);
     }
    
@@ -108,11 +110,12 @@ struct FOG_API LayoutItem : public Object
   }
 
   FOG_INLINE const LayoutHint& getLayoutHint() const {
-    if(_dirty) {
+    if (_dirty) {
       const_cast<LayoutItem*>(this)->clearDirty();
     }
 
-    if(isLayout()) {
+    if (isLayout())
+    {
       int i = 100;
     }
 
@@ -173,7 +176,7 @@ struct FOG_API LayoutItem : public Object
   // -------------------------------------------------------------------------- 
 
   template<class T> typename T::PropertyType* getLayoutProperties() {
-    if(!_layoutdata) return 0;
+    if (!_layoutdata) return 0;
     typename T::LayoutData* prop = ((typename T::LayoutData*)_layoutdata);
     return (T::PropertyType*) &((typename T::LayoutData*)_layoutdata)->_user;
   }
@@ -184,8 +187,8 @@ struct FOG_API LayoutItem : public Object
   }
 
   //Struct for Calculation of Flex-Values in LayoutManager
-  struct LayoutData {
-    
+  struct LayoutData
+  {
   };
 
   struct FlexLayoutData : public LayoutData {
@@ -194,7 +197,7 @@ struct FOG_API LayoutItem : public Object
     int _max;     //height or width
     int _hint;    //height or width
 
-    //Request/Response
+    // Request/Response
     float _flex;  //the flex value for this Item
 
     int _potential; //for internal use
@@ -202,7 +205,8 @@ struct FOG_API LayoutItem : public Object
 
     void* _next;   //for faster Flexible handling (could be different type)
 
-    FOG_INLINE void init(bool grow) {
+    FOG_INLINE void init(bool grow)
+    {
       _offset = 0;
       _potential = grow ?_max - _hint : _hint - _min;
       _flex = grow ? _flex : (1 / _flex);
@@ -215,56 +219,65 @@ struct FOG_API LayoutItem : public Object
 
   IntMargins _contentmargin;
   LayoutHint _cache;
-  Layout* _withinLayout;  //for fast identification of Layout, where this Item is inserted!
-                          //maybe also used for layout pointer in widget
+  //! @brief For fast identification of Layout, where this Item is inserted!
+  //! maybe also used for layout pointer in widget
+  Layout* _withinLayout; 
   
   uint32_t _alignment : 2;
-  uint32_t _dirty : 1;    //layout hint is dirty -> call calculateLayoutHint() next time
-  uint32_t _propertydirty : 1; //property values changes -> calculate
+  //! @brief Layout hint is dirty -> call calculateLayoutHint() next time
+  uint32_t _dirty : 1;
+  //! @brief Property values changes -> calculate.
+  uint32_t _propertydirty : 1;
   uint32_t _unused : 28;
 };
 
-//ToDo: invalidateLayout
-#define ONPROPERTYCHANGE _layout->_propertydirty = 1;
+// TODO: invalidateLayout.
+#define FOG_LAYOUT_PROPERTY_CHANGED \
+  _layout->_propertydirty = 1;
 
-#define FLEXPROPERTY()\
+#define FOG_DECLARE_FLEX_PROPERTY() \
 public:\
-  FOG_INLINE bool hasFlex() const { return _flex > 0; }\
-  FOG_INLINE int getFlex() const { return _flex; }\
-  FOG_INLINE void setFlex(int value) {if(value == _flex)return; _flex = value; ONPROPERTYCHANGE}\
-  FOG_INLINE void clear() { _flex = -1; }\
+  FOG_INLINE bool hasFlex() const { return _flex > 0; } \
+  FOG_INLINE int getFlex() const { return _flex; } \
+  FOG_INLINE void setFlex(int value) { if (value == _flex) return; _flex = value; FOG_LAYOUT_PROPERTY_CHANGED} \
+  FOG_INLINE void clear() { _flex = -1; } \
 private: \
   int _flex;
 
-#define FLEXPROPERTYINIT() _flex = -1;
+#define FOG_INIT_FLEX_PROPERTY() \
+  _flex = -1;
 
-#define PERCENTHEIGHTPROPERTY()\
-public:\
-         FOG_INLINE bool hasHeight() const { return _height != -1.f; }\
-         FOG_INLINE void setHeight(float value) {if(value == _height)return; _height = value > 1.f ? 1.f : value < 0.f ? 0.f : value; ONPROPERTYCHANGE}\
-         FOG_INLINE float getHeight() const {return _height;}\
-         FOG_INLINE void clearHeight() {if(_height==-1.f) return; _height = -1.f; ONPROPERTYCHANGE}\
-private:\
-        float _height;
+#define FOG_DECLARE_PERCENT_HEIGHT_PROPERTY() \
+public: \
+  FOG_INLINE bool hasHeight() const { return _height != -1.f; } \
+  FOG_INLINE void setHeight(float value) { if (value == _height) return; _height = value > 1.f ? 1.f : value < 0.f ? 0.f : value; FOG_LAYOUT_PROPERTY_CHANGED } \
+  FOG_INLINE float getHeight() const { return _height; } \
+  FOG_INLINE void clearHeight() { if (_height == -1.f) return; _height = -1.f; FOG_LAYOUT_PROPERTY_CHANGED } \
+private: \
+  float _height;
 
-#define PERCENTHEIGHTPROPERTYINIT() _height = 1.f;
+#define FOG_INIT_PERCENT_HEIGHT_PROPERTY() \
+  _height = 1.f;
 
-#define PERCENTWIDTHPROPERTY()\
-public:\
-  FOG_INLINE bool hasWidth() const { return _width != -1.f; }\
-  FOG_INLINE void setWidth(float value) {if(value == _width)return; _width = value > 1.f ? 1.f : value < 0.f ? 0.f : value; ONPROPERTYCHANGE}\
-  FOG_INLINE float getWidth() const {return _width;}\
-  FOG_INLINE void clearWidth() {if(_width==-1.f) return; _width = -1.f; ONPROPERTYCHANGE}\
-private:\
-  float _width;\
+#define FOG_DECLARE_PERCENT_WIDTH_PROPERTY()\
+public: \
+  FOG_INLINE bool hasWidth() const { return _width != -1.f; } \
+  FOG_INLINE void setWidth(float value) {if (value == _width) return; _width = value > 1.f ? 1.f : value < 0.f ? 0.f : value; FOG_LAYOUT_PROPERTY_CHANGED } \
+  FOG_INLINE float getWidth() const { return _width; } \
+  FOG_INLINE void clearWidth() {if (_width == -1.f) return; _width = -1.f; FOG_LAYOUT_PROPERTY_CHANGED } \
+private: \
+  float _width;
 
-#define PERCENTWIDTHPROPERTYINIT() _width=1.f;
+#define FOG_INIT_PERCENT_WIDTH_PROPERTY() \
+  _width=1.f;
        
+#define FOG_DECLARE_PERCENT_SIZE_PROPERTY() \
+  FOG_DECLARE_PERCENT_HEIGHT_PROPERTY() \
+  FOG_DECLARE_PERCENT_WIDTH_PROPERTY()
 
-#define PERCENTPROPERTY() PERCENTHEIGHTPROPERTY() PERCENTWIDTHPROPERTY()
-
-#define PERCENTPROPERTYINIT() PERCENTHEIGHTPROPERTYINIT() PERCENTWIDTHPROPERTYINIT()
-
+#define FOG_INIT_PERCENT_SIZE_PROPERTY() \
+  FOG_INIT_PERCENT_HEIGHT_PROPERTY() \
+  FOG_INIT_PERCENT_WIDTH_PROPERTY()
 
 } // Fog namespace
 

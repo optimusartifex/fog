@@ -240,31 +240,13 @@ struct FOG_API BaseGuiWindow : public GuiWindow
   // [Modal - Handling]
   // --------------------------------------------------------------------------
 
-  virtual void startModalWindow(GuiWindow* w) {    
-    _modal = w;
-    disable();
-  }
-
-  virtual void endModal(GuiWindow* w) {
-    FOG_ASSERT(w == _modal);
-    w->setModal(MODAL_NONE);
-    enable();
-    w->releaseOwner();
-
-    _modal = 0;
-  }
+  virtual void startModalWindow(GuiWindow* w);
+  virtual void endModal(GuiWindow* w);
 
   //returns the first window, which is not modal!
   //On windows this is needed to minimize this window
   //instead of only minimize the modal window
-  virtual GuiWindow* getModalBaseWindow() {
-    GuiWindow* parent = this;
-    while(parent->getOwner()) {
-      parent = parent->getOwner();
-    }
-
-    return parent;
-  }
+  virtual GuiWindow* getModalBaseWindow();
 
   //show/hide/maximize/minimize all Modal-Windows
   virtual void showAllModalWindows(uint32_t visible);

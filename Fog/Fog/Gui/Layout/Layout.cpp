@@ -22,26 +22,47 @@ namespace Fog {
 // [Fog::Layout]
 // ============================================================================
 
-Layout::Layout() : _parentItem(0), _toplevel(0), _spacing(0), _enabled(1), _activated(1), _flexcount(0), _nextactivate(0)
+Layout::Layout() : 
+  _parentItem(0),
+  _toplevel(0),
+  _spacing(0),
+  _enabled(1),
+  _activated(1),
+  _flexcount(0),
+  _nextactivate(0)
 {
   _flags |= OBJ_IS_LAYOUT;  
 }
 
-Layout::Layout(Widget *parent, Layout* parentLayout) : _flexcount(0), _toplevel(0), _spacing(0), _enabled(1), _activated(1), _parentItem(0), _nextactivate(0) {
+Layout::Layout(Widget* parent, Layout* parentLayout) :
+  _flexcount(0),
+  _toplevel(0),
+  _spacing(0),
+  _enabled(1),
+  _activated(1),
+  _parentItem(0),
+  _nextactivate(0)
+{
   _flags |= OBJ_IS_LAYOUT;
 
-  if (parentLayout) {
+  if (parentLayout)
+  {
     _parentItem = parent;
      parentLayout->addChild(this);
-  } else if (parent) {
-     parent->setLayout(this);
-     if(_parentItem == parent) {
-       parent->_withinLayout = this;
-       _toplevel = 1;
+  }
+  else if (parent)
+  {
+    parent->setLayout(this);
+    if (_parentItem == parent)
+    {
+      parent->_withinLayout = this;
+      _toplevel = 1;
 
-       updateLayout();
-     }
-  } else {
+      updateLayout();
+    }
+  }
+  else
+  {
     _parentItem = 0;
   }
 }
@@ -49,18 +70,49 @@ Layout::Layout(Widget *parent, Layout* parentLayout) : _flexcount(0), _toplevel(
 Layout::~Layout() 
 {
   FOG_ASSERT(_nextactivate == NULL);
-  while(_children.getLength()) {    
+
+  while(_children.getLength())
+  {    
     remove(_children.at(0));
   }
 }
 
-void Layout::markAsDirty() {
-  if(_toplevel == 1) {
-    if(_activated == 1) {
+void Layout::onRemove(LayoutItem* item)
+{
+}
+
+void Layout::updateLayout()
+{
+  if (_toplevel)
+  {
+    markAsDirty();
+  }
+  else
+  {
+    if (_withinLayout)
+    {
+      _withinLayout->markAsDirty();
+    }
+  }
+}
+
+void Layout::invalidateLayout()
+{
+  _dirty = 1;
+}
+
+void Layout::markAsDirty()
+{
+  if (_toplevel == 1)
+  {
+    if (_activated == 1)
+    {
       Widget* w = getParentWidget();
-      if(w) {
-        GuiWindow * window = w->getClosestGuiWindow();
-        if(window) {
+      if (w)
+      {
+        GuiWindow* window = w->getClosestGuiWindow();
+        if (window)
+        {
           _activated = 0;
           FOG_ASSERT(window->_activatelist == 0);
           _nextactivate = window->_activatelist;
@@ -69,64 +121,87 @@ void Layout::markAsDirty() {
         }
       }
     }
-  } else {
+  }
+  else
+  {
+    // TODO: Remove this assert?
     //FOG_ASSERT(_withinLayout);
-    if(_withinLayout)
+    if (_withinLayout)
       return _withinLayout->markAsDirty();
   }
 }
 
 Widget* Layout::getParentWidget() const
 {
-  if (!_toplevel) {
-    if (_parentItem) {
+  if (!_toplevel)
+  {
+    if (_parentItem)
+    {
       FOG_ASSERT(_parentItem->isLayout());
       return static_cast<Layout*>(_parentItem)->getParentWidget();
-    } else {
+    }
+    else
+    {
       return 0;
     }
   }
 
   FOG_ASSERT(_parentItem && _parentItem->isWidget());
-  return (Widget *)(_parentItem);
+  return (Widget*)(_parentItem);
 }
 
-int Layout::calcMargin(int margin, MarginPosition pos) const {
-  if (margin >= 0) {
+int Layout::calcMargin(int margin, MarginPosition pos) const
+{
+  if (margin >= 0)
+  {
     return margin;
-  } else if (!_toplevel) {
+  }
+  else if (!_toplevel)
+  {
     return 0;
-  } else if (const Widget *pw = getParentWidget()) {
-    if(pw->isGuiWindow()) {
-      return DEFAULT_WINDOW_MARGIN;
-    } else {
-      return DEFAULT_WIDGET_MARGIN;
-    }
+  }
+  else if (const Widget* pw = getParentWidget())
+  {
+    // TODO: Move margins to theme?
+    if (pw->isGuiWindow())
+      return LAYOUT_DEFAULT_WINDOW_MARGIN;
+    else
+      return LAYOUT_DEFAULT_WIDGET_MARGIN;
   }
 
   return 0;
 }
 
-int Layout::getSpacing() const { 
-  if (_spacing >=0) {
+int Layout::getSpacing() const
+{
+  if (_spacing >= 0)
+  {
     return _spacing;
-  } else {
-    if (!_parentItem) {
+  }
+  else
+  {
+    if (!_parentItem)
+    {
       return -1;
-    } else if (_parentItem->isWidget()) {
-      return DEFAULT_LAYOUT_SPACING;
-    } else {
+    }
+    else if (_parentItem->isWidget())
+    {
+      return LAYOUT_DEFAULT_SPACING;
+    }
+    else
+    {
       FOG_ASSERT(_parentItem->isLayout());
-      return static_cast<Layout *>(_parentItem)->getSpacing();
+      return static_cast<Layout*>(_parentItem)->getSpacing();
     }
 
     return 0;
   }  
 }
 
-bool Layout::setLayoutAlignment(LayoutItem *item, uint32_t alignment)
+bool Layout::setLayoutAlignment(LayoutItem* item, uint32_t alignment)
 {
-  if(item->_withinLayout == this) {
+  if (item->_withinLayout == this)
+  {
     item->setLayoutAlignment(alignment);
     return true;
   }
@@ -135,15 +210,17 @@ bool Layout::setLayoutAlignment(LayoutItem *item, uint32_t alignment)
 }
 
 #define FOR_EACH(ITEM, CONTAINER) \
-LayoutItem *ITEM;\
-int i=0;\
-while ((ITEM = CONTAINER->getAt(i++)))
+  LayoutItem* ITEM; \
+  int i = 0; \
+  while ((ITEM = CONTAINER->getAt(i++)))
 
-bool Layout::isEmpty() const {
-  if(_children.getLength() == 0)
+bool Layout::isEmpty() const
+{
+  if (_children.getLength() == 0)
     return true;
 
-  FOR_EACH(iitem, this) {
+  FOR_EACH(iitem, this)
+  {
     if (!iitem->isEmpty())
       return false;
   }
@@ -153,10 +230,11 @@ bool Layout::isEmpty() const {
 
 int Layout::indexOf(LayoutItem* item) const
 {
-  if(item->_withinLayout != this)
+  if (item->_withinLayout != this)
     return -1;
 
-  FOR_EACH(iitem, this) {
+  FOR_EACH(iitem, this)
+  {
     if (iitem == item)
       return i;
   }
@@ -164,16 +242,20 @@ int Layout::indexOf(LayoutItem* item) const
   return -1;
 }
 
-void Layout::remove(LayoutItem* item) {
-  if(item->_withinLayout != this)
+void Layout::remove(LayoutItem* item)
+{
+  if (item->_withinLayout != this)
     return;
 
-  FOR_EACH(iitem, this) {
-    if (iitem == item) {
+  FOR_EACH(iitem, this)
+  {
+    if (iitem == item)
+    {
       item->_withinLayout = 0;
       item->removeLayoutStruct();
       takeAt(i);
-      onRemove(item);     //call virtual method for LM implementation
+      // Call virtual method for LM implementation.
+      onRemove(item);
       invalidateLayout();
       updateLayout();
       break;
@@ -181,24 +263,28 @@ void Layout::remove(LayoutItem* item) {
   }
 }
 
-bool Layout::removeAllWidgets(LayoutItem *layout, Widget *w)
+bool Layout::removeAllWidgets(LayoutItem* layout, Widget* w)
 {  
-  if(!layout->_withinLayout)
+  if (!layout->_withinLayout)
     return false;
 
   if (!layout->isLayout())
     return false;
 
-  Layout *lay = static_cast<Layout*>(layout);
+  Layout* lay = static_cast<Layout*>(layout);
 
-  FOR_EACH(iitem, lay) {
-    if (iitem == w) {
+  FOR_EACH(iitem, lay)
+  {
+    if (iitem == w)
+    {
       lay->takeAt(i);
       lay->onRemove(iitem);
       w->_withinLayout = 0;
       lay->invalidateLayout();
       return true;
-    } else if (removeAllWidgets(iitem, w)) {
+    }
+    else if (removeAllWidgets(iitem, w))
+    {
       return true;
     } 
   }  
@@ -206,15 +292,19 @@ bool Layout::removeAllWidgets(LayoutItem *layout, Widget *w)
   return false;
 }
 
-//reparent 
+// Reparent.
 void Layout::reparentChildWidgets(Widget* widget)
 {
-  FOR_EACH(iitem, this) {
-    if(iitem->isWidget()) {
+  FOR_EACH(iitem, this)
+  {
+    if (iitem->isWidget())
+    {
       Widget* w = static_cast<Widget*>(iitem);
       if (w->getParent() != widget)
         w->setParent(widget);
-    } else if (iitem->isLayout()) {
+    }
+    else if (iitem->isLayout())
+    {
       static_cast<Layout*>(iitem)->reparentChildWidgets(widget);
     }
   }
@@ -222,24 +312,32 @@ void Layout::reparentChildWidgets(Widget* widget)
 
 int Layout::addChild(LayoutItem* item) 
 {  
-  if(item->isWidget()) {
+  if (item->isWidget())
+  {
     Widget* w = static_cast<Widget*>(item);
-    Widget *layoutparent = getParentWidget();
-    Widget *widgetparent = w->getParent();
+    Widget* layoutparent = getParentWidget();
+    Widget* widgetparent = w->getParent();
 
-    if(widgetparent && widgetparent->getLayout() && item->_withinLayout) {
-      if(removeAllWidgets(widgetparent->getLayout(), w)) {
+    if (widgetparent && widgetparent->getLayout() && item->_withinLayout)
+    {
+      if (removeAllWidgets(widgetparent->getLayout(), w))
+      {
         //WARNING: removed from existing layout
       }
     }
 
-    if (widgetparent && layoutparent && widgetparent != layoutparent) {
-      w->setParent(layoutparent);
-    } else if(!widgetparent && layoutparent) {
+    if (widgetparent && layoutparent && widgetparent != layoutparent)
+    {
       w->setParent(layoutparent);
     }
-  } else if(item->isLayout()) {
-    //support for Flex-Layout?
+    else if (!widgetparent && layoutparent)
+    {
+      w->setParent(layoutparent);
+    }
+  }
+  else if (item->isLayout())
+  {
+    // Support for Flex-Layout?
     return addChildLayout(static_cast<Layout*>(item));
   }
 
@@ -250,14 +348,16 @@ int Layout::addChild(LayoutItem* item)
   return getLength() -1;
 }
 
-int Layout::addChildLayout(Layout *l)
+int Layout::addChildLayout(Layout* l)
 {
-  if (l->_parentItem) {
+  if (l->_parentItem)
+  {
     //WARNING already has a parent!
     return -1;
   }
 
-  if (Widget *mw = getParentWidget()) {
+  if (Widget* mw = getParentWidget())
+  {
     l->reparentChildWidgets(mw);
   }
 
@@ -271,19 +371,21 @@ int Layout::addChildLayout(Layout *l)
 
 IntSize Layout::getTotalMinimumSize() const
 {
-  int side=0, top=0;
-  calcContentMargins(side,top);
+  int side = 0, top = 0;
+  calcContentMargins(side, top);
 
   IntSize s = getLayoutMinimumSize();
   return s + IntSize(side, top);
 }
 
-IntSize Layout::getTotalMaximumSize() const { 
-  int side=0, top=0;
-  calcContentMargins(side,top);
+IntSize Layout::getTotalMaximumSize() const
+{
+  int side = 0, top = 0;
+  calcContentMargins(side, top);
 
   IntSize s = getLayoutMaximumSize();
-  if (_toplevel) {
+  if (_toplevel)
+  {
     s = IntSize(Math::min<int>(s.getWidth() + side, WIDGET_MAX_SIZE), Math::min<int>(s.getHeight() + top, WIDGET_MAX_SIZE));
   }
 
@@ -292,14 +394,16 @@ IntSize Layout::getTotalMaximumSize() const {
 
 int Layout::getTotalHeightForWidth(int w) const
 {
-  int side=0, top=0;
+  int side = 0, top = 0;
   calcContentMargins(side,top);
   int h = getLayoutHeightForWidth(w - side) + top;
   return h;
 }
 
-void Layout::calcContentMargins(int&side, int&top) const {
-  if (_toplevel) {
+void Layout::calcContentMargins(int&side, int&top) const
+{
+  if (_toplevel)
+  {
     Widget* parent = getParentWidget();
     FOG_ASSERT(parent);
     side = parent->getContentLeftMargin() + parent->getContentRightMargin();
@@ -319,18 +423,22 @@ IntSize Layout::getTotalSizeHint() const
   return s + IntSize(side, top);
 }
 
-void Layout::callSetGeometry(const IntSize& size) {
-  if(size.isValid()) {
+void Layout::callSetGeometry(const IntSize& size)
+{
+  if (size.isValid())
+  {
     IntRect rect = getParentWidget()->getClientContentGeometry();
     //TODO: EntireRect
     setLayoutGeometry(rect);
   }
 }
 
-//Only TopLevel-Layouts are being activated.
-//Child Layouts are handled like normal widgets.
-bool Layout::activate() {
-  //There is no need to check this in release...
+bool Layout::activate()
+{
+  // Only TopLevel-Layouts are being activated.
+  // Child Layouts are handled like normal widgets.
+
+  // There is no need to check this in release...
   FOG_ASSERT(_toplevel);
   FOG_ASSERT(!_activated);
   FOG_ASSERT(_parentItem && _parentItem->isWidget());
@@ -338,41 +446,37 @@ bool Layout::activate() {
   if (!isEnabled() || isEmpty())
     return false;
 
-  Widget *parentwidget = static_cast<Widget*>(_parentItem);
+  Widget* parentwidget = static_cast<Widget*>(_parentItem);
 
   bool hasH = parentwidget->hasMinimumHeight();
   bool hasW = parentwidget->hasMinimumWidth();
   bool calc = (!hasH || !hasW);
   
-  if (parentwidget->isGuiWindow()) {
+  if (parentwidget->isGuiWindow())
+  {
     IntSize ms = getTotalMinimumSize();
-    if(calc) {
-      if (hasW) {
-        ms.setWidth(parentwidget->getMinimumSize().getWidth());      
-      }
-      if (hasH) {
-        ms.setHeight(parentwidget->getMinimumSize().getHeight());
-      }
+    if (calc)
+    {
+      if (hasW) ms.setWidth(parentwidget->getMinimumSize().getWidth());      
+      if (hasH) ms.setHeight(parentwidget->getMinimumSize().getHeight());
     }
 
-    if (calc && hasLayoutHeightForWidth()) {
+    if (calc && hasLayoutHeightForWidth())
+    {
       int h = getLayoutMinimumHeightForWidth(ms.getWidth());
-      if (h > ms.getHeight()) {
-        if (!hasH)
-          ms.setHeight(0);
-        if (!hasW)
-          ms.setWidth(0);
+      if (h > ms.getHeight())
+      {
+        if (!hasH) ms.setHeight(0);
+        if (!hasW) ms.setWidth(0);
       }
     }
     parentwidget->setMinimumSize(ms);
-  } else if (calc) {
+  }
+  else if (calc)
+  {
     IntSize ms = parentwidget->getMinimumSize();
-    if (!hasH) {
-      ms.setHeight(0);
-    }
-    if (!hasW) {
-      ms.setWidth(0);
-    }
+    if (!hasH) ms.setHeight(0);
+    if (!hasW) ms.setWidth(0);
     parentwidget->setMinimumSize(ms);
   }
   
@@ -382,19 +486,19 @@ bool Layout::activate() {
 }
 
 
-void Layout::onLayout(LayoutEvent* e) {
+void Layout::onLayout(LayoutEvent* e)
+{
   if (!isEnabled())
     return;
 
-  if(e->_code == EVENT_LAYOUT_REQUEST) {
+  if (e->_code == EVENT_LAYOUT_REQUEST)
+  {
     FOG_ASSERT(!_parentItem || (_parentItem && _parentItem->isWidget()));
-    if (static_cast<Widget *>(_parentItem)->isVisible())
+    if (static_cast<Widget*>(_parentItem)->isVisible())
     {
       activate();
     }
   }
 }
-
-
 
 } // Fog namespace

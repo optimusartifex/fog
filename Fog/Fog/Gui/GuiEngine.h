@@ -264,10 +264,12 @@ struct FOG_API GuiEngine : public Object
 
   //!@brief tmp variable to set the last modal window int the stack
   //! so we can iterate the modal stack from behind again (without double linked list)
-  FOG_INLINE void setLastModalWindow(GuiWindow* w) {
+  FOG_INLINE void setLastModalWindow(GuiWindow* w)
+  {
     _lastmodal = w;
   }
-  FOG_INLINE GuiWindow* getLastModalWindow() const {
+  FOG_INLINE GuiWindow* getLastModalWindow() const
+  {
     return _lastmodal;
   }
   //!@brief returns the current modalWindow
@@ -394,20 +396,16 @@ struct FOG_API GuiWindow : public Object
   // [Owner Handling]
   // --------------------------------------------------------------------------
 
+  // TODO GUI: Join set/releaseOwner() / set/releaseOwner_sys() into one method.
+
   //SetOwner not only set the member variable
   //It should also do the z-order work of window manager! (make sure owner is
   //always behind the child)
-  void setOwner(GuiWindow* w) {    
-    _owner = w;
-    setOwner_sys();
-  }
+  void setOwner(GuiWindow* w);
 
   //releases the owner from the child window
   //and makes sure the owner will get the focus
-  void releaseOwner() {
-    releaseOwner_sys();
-    _owner = 0;
-  }
+  void releaseOwner();
 
   virtual void setOwner_sys() = 0;
   virtual void releaseOwner_sys() = 0;
@@ -420,33 +418,28 @@ struct FOG_API GuiWindow : public Object
   // [Modal Window Handling]
   // --------------------------------------------------------------------------
   
-  //!@brief makes the GuiWindow to be shown as Modal window in front of this window
+  //! @brief makes the GuiWindow to be shown as Modal window in front of this window
   virtual void startModalWindow(GuiWindow* w) = 0;
-  //!@brief The modal GuiWindow is being closed, so the modality should be removed
+  //! @brief The modal GuiWindow is being closed, so the modality should be removed
   virtual void endModal(GuiWindow* w) = 0;
 
-  //!@brief call show(visible) on all modal windows on the stack (last to first)
+  //! @brief call show(visible) on all modal windows on the stack (last to first)
   virtual void showAllModalWindows(uint32_t visible) = 0;
   
-  //!@brief tmp variable to set the last modal window int the stack
+  //! @brief tmp variable to set the last modal window int the stack
   //! so we can iterate the modal stack from behind again (without double linked list)
-  FOG_INLINE void setLastModalWindow(GuiWindow* w) {
+  FOG_INLINE void setLastModalWindow(GuiWindow* w)
+  {
     _lastmodal = w;
   }
-  FOG_INLINE GuiWindow* getLastModalWindow() const {
+
+  FOG_INLINE GuiWindow* getLastModalWindow() const
+  {
     return _lastmodal;
   }
 
   //!@brief returns the current modalWindow
-  virtual GuiWindow* getModalWindow() {
-    if(getOwner()) {
-      //normally this would be this. But maybe
-      //we need the owner-variable for other tasks, too!
-      return getOwner()->_modal;
-    }
-
-    return 0;
-  }
+  virtual GuiWindow* getModalWindow();
 
   // --------------------------------------------------------------------------
   // [Z-Order]

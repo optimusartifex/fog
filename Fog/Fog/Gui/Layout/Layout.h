@@ -8,52 +8,41 @@
 #define _FOG_GUI_LAYOUT_LAYOUT_H
 
 // [Dependencies]
-#include <Fog/Gui/Event.h>
 #include <Fog/Core/Object.h>
 #include <Fog/Graphics/Geometry.h>
 #include <Fog/Gui/Constants.h>
+#include <Fog/Gui/Event.h>
 #include <Fog/Gui/Layout/LayoutItem.h>
 
-//! @addtogroup Fog_Gui
-//! @{
-
 namespace Fog {
+
+//! @addtogroup Fog_Gui_Layout
+//! @{
 
 // ============================================================================
 // [Fog::Layout]
 // ============================================================================
 
-const int DEFAULT_LAYOUT_SPACING = 6;
-const int DEFAULT_WIDGET_MARGIN = 9;
-const int DEFAULT_WINDOW_MARGIN = 11;
-
-#ifdef FOG_OS_WINDOWS
-#pragma warning(disable:4018)    //conversion of signed/unsigned
-#endif
+// TODO: We shouldn't disable warnings by such way, add (uint) (int) conversion instead.
+// #ifdef FOG_OS_WINDOWS
+// #pragma warning(disable:4018)    //conversion of signed/unsigned
+// #endif
 
 //! @brief Base class for all layouts.
 struct FOG_API Layout : public LayoutItem
 {
   FOG_DECLARE_OBJECT(Layout, LayoutItem)
 
-  enum SizeConstraint { //not implemented yet
-      CONSTRAINT_DEFAULT,
-      CONSTRAINT_NO,
-      CONSTRAINT_MINIMUM_SIZE,
-      CONSTRAINT_FIXED_SIZE,
-      CONSTRAINT_MAXIMUM_SIZE,
-      CONSTRAINT_MINIMUM_MAXIMUM_SIZE
-  };
-
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
   Layout();
-  Layout(Widget *parent, Layout *parentLayout=0);
+  Layout(Widget* parent, Layout* parentLayout = NULL);
   virtual ~Layout();
 
-  FOG_INLINE virtual void onRemove(LayoutItem* item) {}
+  // TODO: Move...
+  virtual void onRemove(LayoutItem* item);
 
   // --------------------------------------------------------------------------
   // [Layout Hierarchy]
@@ -73,8 +62,8 @@ struct FOG_API Layout : public LayoutItem
   // [Size Constraints]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void setSizeConstraint(SizeConstraint constraint) { _constraint = constraint; }
-  FOG_INLINE SizeConstraint getSizeConstraint() const { return _constraint; }
+  FOG_INLINE void setSizeConstraint(uint32_t constraint) { _constraint = constraint; }
+  FOG_INLINE uint32_t getSizeConstraint() const { return _constraint; }
 
   // --------------------------------------------------------------------------
   // [Enable]
@@ -95,17 +84,20 @@ struct FOG_API Layout : public LayoutItem
   // --------------------------------------------------------------------------
   // [Spacing]
   // --------------------------------------------------------------------------
+
   virtual int getSpacing() const;
   virtual void setSpacing(int spacing) { _spacing = spacing; }
   
   // --------------------------------------------------------------------------
   // [Expanding Directions]
   // --------------------------------------------------------------------------
+
   virtual uint32_t getLayoutExpandingDirections() const { return ORIENTATION_HORIZONTAL | ORIENTATION_VERTICAL; }
 
   // --------------------------------------------------------------------------
   // [Height For Width]
   // --------------------------------------------------------------------------
+
   virtual bool hasLayoutHeightForWidth() const { return false; }  
 
   // --------------------------------------------------------------------------
@@ -120,19 +112,8 @@ struct FOG_API Layout : public LayoutItem
   // [Invalidation]
   // --------------------------------------------------------------------------
 
-  virtual void updateLayout() {
-    if(_toplevel) {
-      markAsDirty();
-    } else {
-      if(_withinLayout) {
-        _withinLayout->markAsDirty();
-      }
-    }
-  }
-
-  virtual void invalidateLayout() {
-    _dirty = 1;
-  }
+  virtual void updateLayout();
+  virtual void invalidateLayout();
 
   void markAsDirty();
 
@@ -146,7 +127,7 @@ struct FOG_API Layout : public LayoutItem
   // [Alignment]
   // --------------------------------------------------------------------------
 
-  bool setLayoutAlignment(LayoutItem *item, uint32_t alignment);    
+  bool setLayoutAlignment(LayoutItem* item, uint32_t alignment);    
 
   // --------------------------------------------------------------------------
   // [Update And Activation Of Layout]
@@ -160,9 +141,9 @@ struct FOG_API Layout : public LayoutItem
   // [Flex support]
   // -------------------------------------------------------------------------- 
 
-  void addFlexItem(){ ++_flexcount; }
-  void removeFlexItem() { --_flexcount; }
-  bool hasFlexItems() const { return _flexcount > 0; }
+  FOG_INLINE void addFlexItem() { ++_flexcount; }
+  FOG_INLINE void removeFlexItem() { --_flexcount; }
+  FOG_INLINE bool hasFlexItems() const { return _flexcount > 0; }
 
   // --------------------------------------------------------------------------
   // [Event Handler]
@@ -178,13 +159,18 @@ struct FOG_API Layout : public LayoutItem
   // [Members]
   // --------------------------------------------------------------------------  
 
-  LayoutItem* _parentItem;      //parentItem (Widget or Layout) of this Layout
-  SizeConstraint _constraint;   
-  IntRect _rect;                //current rect of this Layout
+  //! @brief Parent item (Widget or Layout) of this Layout.
+  LayoutItem* _parentItem;
+  //! @brief Current rect of this Layout.
+  IntRect _rect;
 
-  int _flexcount;               //to easy know, if we have flex item within layout
+  //! @brief Size constraint (TODO LAYOUT: Not implemented).
+  uint32_t _constraint;   
 
-  int _spacing : 24;            //max Widget-Size
+  //! @brief To easy know whether we have flex item within layout.
+  int _flexcount;
+  //! @brief Max widget size.
+  int _spacing : 24;
   uint _toplevel : 1;  
   uint _activated : 1;
   uint _enabled : 1;
@@ -194,12 +180,13 @@ struct FOG_API Layout : public LayoutItem
   Layout* _nextactivate;
 
 protected:
+
   // --------------------------------------------------------------------------
   // [LayoutItem Handling - only for internal use]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE LayoutItem* getAt(sysuint_t index) const { return index < _children.getLength() ? _children.at(index) : 0; }
-  FOG_INLINE LayoutItem* takeAt(int index) { return index < _children.getLength() ? _children.take(index) : 0; }
+  FOG_INLINE LayoutItem* getAt(int index) const { return (sysuint_t)index < _children.getLength() ? _children.at((uint)index) : 0; }
+  FOG_INLINE LayoutItem* takeAt(int index) { return (sysuint_t)index < _children.getLength() ? _children.take((uint)index) : 0; }
   FOG_INLINE int getLength() const { return _children.getLength(); }
   
   int addChild(LayoutItem* item);  
@@ -209,19 +196,18 @@ protected:
 
   List<LayoutItem*> _children;
 
-  void reparentChildWidgets(Widget *mw);
-  static bool removeAllWidgets(LayoutItem *li, Widget *w);
+  void reparentChildWidgets(Widget* mw);
+  static bool removeAllWidgets(LayoutItem* li, Widget* w);
 
 private:  
-  int addChildLayout(Layout *l);
+  int addChildLayout(Layout* l);
 
   FOG_DISABLE_COPY(Layout)
-  
 };
 
-} // Fog namespace
-
 //! @}
+
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_GUI_LAYOUT_LAYOUT_H

@@ -897,9 +897,10 @@ ret0:
 #endif
     )
   {
-    if (!e)
-      goto ret;
-    if (e > 0) {
+    if (!e) goto ret;
+
+    if (e > 0)
+    {
       if (e <= Ten_pmax)
       {
 #ifdef VAX

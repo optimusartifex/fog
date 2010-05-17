@@ -213,7 +213,8 @@ FOG_CAPI_DECLARE void fog_qsort(void *a, sysuint_t n, sysuint_t es, fog_qsort_ca
 loop:
   fog_qsort_swapinit(a, es);
   swap_cnt = 0;
-  if (n < 7) {
+  if (n < 7)
+  {
     for (pm = (char *) a + es; pm < (char *) a + n * es; pm += es)
       for (pl = pm; pl > (char *) a && compar(pl - es, pl) > 0; pl -= es)
         fog_qsort_swap(pl, pl - es);
@@ -267,7 +268,8 @@ loop:
   }
 
   // Switch to insertion sort.
-  if (swap_cnt == 0) {
+  if (swap_cnt == 0)
+  {
     for (pm = (char *) a + es; pm < (char *) a + n * es; pm += es)
       for (pl = pm; pl > (char *) a && compar(pl - es, pl) > 0; pl -= es)
         fog_qsort_swap(pl, pl - es);

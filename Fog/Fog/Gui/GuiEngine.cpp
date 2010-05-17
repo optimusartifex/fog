@@ -64,9 +64,31 @@ GuiWindow::GuiWindow(Widget* widget) :
 
 GuiWindow::~GuiWindow()
 {
-
 }
 
+GuiWindow* GuiWindow::getModalWindow()
+{
+  if (getOwner())
+  {
+    // Normally this would be this. But maybe we need the 
+    // owner-variable for other tasks, too!
+    return getOwner()->_modal;
+  }
+
+  return NULL;
+}
+
+void GuiWindow::setOwner(GuiWindow* w)
+{
+  _owner = w;
+  setOwner_sys();
+}
+
+void GuiWindow::releaseOwner()
+{
+  releaseOwner_sys();
+  _owner = 0;
+}
 
 // ============================================================================
 // [Fog::GuiBackBuffer]

@@ -89,7 +89,8 @@ bool BaseGuiEngine::mapHandle(void* handle, GuiWindow* native)
 bool BaseGuiEngine::unmapHandle(void* handle)
 {
   bool b= _widgetMapper.remove(handle);
-  if(_widgetMapper.getLength() == 0) {
+  if (_widgetMapper.getLength() == 0)
+  {
     Event e(EVENT_LAST_WINDOW_CLOSED);
     Application::getInstance()->sendEvent(&e);
   }
@@ -423,7 +424,7 @@ void BaseGuiEngine::dispatchEnabled(Widget* w, bool enabled)
 void BaseGuiEngine::dispatchVisibility(Widget* w, uint32_t visible)
 {
   uint32_t visibility = w->getVisibility();
-  if(visibility == visible) return;
+  if (visibility == visible) return;
 
   // Dispatch 'Show'.
   if (visible >= WIDGET_VISIBLE)
@@ -433,14 +434,16 @@ void BaseGuiEngine::dispatchVisibility(Widget* w, uint32_t visible)
     w->_visibility = visible;
 
     uint32_t code = EVENT_SHOW;
-    if(visible == WIDGET_VISIBLE_FULLSCREEN) code = EVENT_SHOW_FULLSCREEN;
-    else if(visible == WIDGET_VISIBLE_MAXIMIZED) code = EVENT_SHOW_MAXIMIZE;
+    if (visible == WIDGET_VISIBLE_FULLSCREEN) code = EVENT_SHOW_FULLSCREEN;
+    else if (visible == WIDGET_VISIBLE_MAXIMIZED) code = EVENT_SHOW_MAXIMIZE;
 
     VisibilityEvent e(code);
     w->sendEvent(&e);
 
-    if(visibility == WIDGET_HIDDEN) {
-      if((w->getWindowHints() & WINDOW_INLINE_POPUP) != 0 && w->getParent() && w->getParent()->getGuiWindow()) {
+    if (visibility == WIDGET_HIDDEN)
+    {
+      if ((w->getWindowHints() & WINDOW_INLINE_POPUP) != 0 && w->getParent() && w->getParent()->getGuiWindow())
+      {
         BaseGuiWindow* ww = (BaseGuiWindow*)w->getParent()->getGuiWindow();
         ww->showPopUp(w);
       }
@@ -448,15 +451,15 @@ void BaseGuiEngine::dispatchVisibility(Widget* w, uint32_t visible)
       //only needed if widget was hidden before this event
       FOG_WIDGET_TREE_ITERATOR(i1, w, true,
         // before traverse
-      {
+        {
         // show only child that's hidden by parent
         if (child->getVisibility() != WIDGET_HIDDEN_BY_PARENT) FOG_WIDGET_TREE_ITERATOR_NEXT(i1);
 
         child->_visibility = WIDGET_VISIBLE;
         w->sendEvent(&e);
-      },
+        },
         // after traverse
-      {}
+        {}
       );
     }
 
@@ -467,7 +470,8 @@ void BaseGuiEngine::dispatchVisibility(Widget* w, uint32_t visible)
   {
     w->_visibility = visible;
     uint32_t code = EVENT_HIDE;
-    if(visible == WIDGET_VISIBLE_MINIMIZED) {
+    if (visible == WIDGET_VISIBLE_MINIMIZED)
+    {
       code = EVENT_SHOW_MINIMIZE;
     }
 
@@ -502,7 +506,8 @@ void BaseGuiEngine::dispatchVisibility(Widget* w, uint32_t visible)
     }
   }
 
-  if(visible == WIDGET_VISIBLE_RESTORE) {
+  if (visible == WIDGET_VISIBLE_RESTORE)
+  {
     visible = WIDGET_VISIBLE;
   }
 
@@ -511,7 +516,7 @@ void BaseGuiEngine::dispatchVisibility(Widget* w, uint32_t visible)
 
 void BaseGuiEngine::dispatchConfigure(Widget* w, const IntRect& rect, bool changedOrientation)
 {
-  if(w->isGuiWindow() && ((BaseGuiWindow*)w->getGuiWindow())->hasPopUp()) {
+  if (w->isGuiWindow() && ((BaseGuiWindow*)w->getGuiWindow())->hasPopUp()) {
       ((BaseGuiWindow*)w->getGuiWindow())->closePopUps();
   }
 
@@ -539,7 +544,8 @@ void BaseGuiEngine::dispatchConfigure(Widget* w, const IntRect& rect, bool chang
   Layout* layout = w->getLayout();
 
   //TODO: intelligent enum order so we can omit one check here!
-  if(layout && layout->_activated &&  changed & ConfigureEvent::CHANGED_SIZE || changed & ConfigureEvent::CHANGED_ORIENTATION) {
+  if (layout && layout->_activated &&  changed & ConfigureEvent::CHANGED_SIZE || changed & ConfigureEvent::CHANGED_ORIENTATION)
+  {
     FOG_ASSERT(layout->_toplevel);
     layout->markAsDirty();
   }
@@ -658,7 +664,8 @@ void BaseGuiEngine::doUpdateWindow(GuiWindow* window)
     return;
   }
   
-  while(window->_activatelist) {
+  while (window->_activatelist)
+  {
     FOG_ASSERT(window->_activatelist->_activated == 0);
     window->_activatelist->activate();
     FOG_ASSERT(window->_activatelist->_activated == 1);
@@ -1076,10 +1083,38 @@ BaseGuiWindow::~BaseGuiWindow()
   if (i != INVALID_INDEX) uiSystem->_dirtyList.set(i, NULL);
 }
 
+void BaseGuiWindow::startModalWindow(GuiWindow* w)
+{
+  _modal = w;
+  disable();
+}
 
-void BaseGuiWindow::showAllModalWindows(uint32_t visible) {
+void BaseGuiWindow::endModal(GuiWindow* w)
+{
+  FOG_ASSERT(w == _modal);
+  w->setModal(MODAL_NONE);
+  enable();
+  w->releaseOwner();
+
+  _modal = 0;
+}
+
+GuiWindow* BaseGuiWindow::getModalBaseWindow()
+{
+  GuiWindow* parent = this;
+  while(parent->getOwner())
+  {
+    parent = parent->getOwner();
+  }
+
+  return parent;
+}
+
+void BaseGuiWindow::showAllModalWindows(uint32_t visible)
+{
   GuiWindow* parent = getOwner();
-  while(parent->getOwner()) {
+  while(parent->getOwner())
+  {
     parent->getWidget()->show(visible);
     parent = parent->getOwner();
   }
@@ -1098,7 +1133,8 @@ void BaseGuiWindow::onEnabled(bool enabled)
   //Question: dispatch disable-events during modality?
   //current answer: No, because it is an indirect disable
   //and should not be changed/react by application!
-  if(_modal == 0) {
+  if (_modal == 0)
+  {
     GUI_ENGINE()->dispatchEnabled(_widget, enabled);
   }
 }
@@ -1238,13 +1274,16 @@ void BaseGuiWindow::onMousePress(uint32_t button, bool repeated)
   if (uiSystem->_systemMouseStatus.uiWindow != this) return;
 
   Widget* w = uiSystem->_mouseStatus.widget;
-  if (!w) {
+  if (!w)
+  {
     closePopUps();
     return;
   }
 
-  if(hasPopUp()) {
-    if(!w->isPopUpWindow()) {
+  if (hasPopUp())
+  {
+    if (!w->isPopUpWindow())
+    {
       closePopUps();
     }
   }
@@ -1451,11 +1490,13 @@ void BaseGuiWindow::setFocus(Widget* w, uint32_t reason)
 // [Fog::BaseGuiWindow - PopUp - Handling]
 // --------------------------------------------------------------------------
 
-void BaseGuiWindow::showPopUp(Widget* w) {
+void BaseGuiWindow::showPopUp(Widget* w)
+{
   _popup.append(w);
 }
 
-void BaseGuiWindow::closePopUps() {
+void BaseGuiWindow::closePopUps()
+{
   List<Widget*>::ConstIterator it(_popup);
   for (it.toStart(); it.isValid(); it.toNext())
   {

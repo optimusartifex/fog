@@ -10,10 +10,33 @@
 // [Dependencies]
 #include <Fog/Build/Build.h>
 
-//! @addtogroup Fog_Gui
+//! @addtogroup Fog_Gui_Constants
 //! @{
 
 namespace Fog {
+
+// ============================================================================
+// [Fog::LAYOUT_DEFAULTS]
+// ============================================================================
+
+const int LAYOUT_DEFAULT_SPACING = 6;
+const int LAYOUT_DEFAULT_WIDGET_MARGIN = 9;
+const int LAYOUT_DEFAULT_WINDOW_MARGIN = 11;
+
+// ============================================================================
+// [Fog::LAYOUT_CONSTRAINT]
+// ============================================================================
+
+// TODO: Not implemented yet.
+enum LAYOUT_CONSTRAINT
+{
+  LAYOUT_CONSTRAINT_DEFAULT,
+  LAYOUT_CONSTRAINT_NO,
+  LAYOUT_CONSTRAINT_MINIMUM_SIZE,
+  LAYOUT_CONSTRAINT_FIXED_SIZE,
+  LAYOUT_CONSTRAINT_MAXIMUM_SIZE,
+  LAYOUT_CONSTRAINT_MINIMUM_MAXIMUM_SIZE
+};
 
 // ============================================================================
 // [Fog::WIDGET_LIMITS]
@@ -609,17 +632,17 @@ enum ALIGNMENT
   ALIGNMENT_JUSTIFY = 0x008,  //Justifies the text in the available space.
 
   ALIGNMENT_TOP = 0x0020,     //Aligns with the top.
-  ALIGNMENT_BOTTOM =	0x0040,	//Aligns with the bottom.
-  ALIGNMENT_VCENTER =	0x0080,	//Centers vertically in the available space.
+  ALIGNMENT_BOTTOM =  0x0040,  //Aligns with the bottom.
+  ALIGNMENT_VCENTER =  0x0080,  //Centers vertically in the available space.
 
-  ALIGNMENT_CENTER	= ALIGNMENT_VCENTER | ALIGNMENT_VCENTER, //	Centers in both dimensions.
+  ALIGNMENT_CENTER  = ALIGNMENT_VCENTER | ALIGNMENT_VCENTER, //  Centers in both dimensions.
 
-  //ALIGNMENT_ABSOLUTE = 0x0010, //	not supported yet
-  ALIGNMENT_LEADING	= ALIGNMENT_LEFT,	 //Synonym for ALIGNMENT_LEFT.
-  ALIGNMENT_TRAILING = ALIGNMENT_RIGHT, //	Synonym for ALIGNMENT_RIGHT.
+  //ALIGNMENT_ABSOLUTE = 0x0010, //  not supported yet
+  ALIGNMENT_LEADING  = ALIGNMENT_LEFT,   //Synonym for ALIGNMENT_LEFT.
+  ALIGNMENT_TRAILING = ALIGNMENT_RIGHT, //  Synonym for ALIGNMENT_RIGHT.
 
-  ALIGNMENT_HORIZONTAL_MASK	= ALIGNMENT_LEFT | ALIGNMENT_RIGHT | ALIGNMENT_HCENTER | ALIGNMENT_JUSTIFY, // | ALIGNMENT_ABSOLUTE, 
-  ALIGNMENT_VERTICAL_MASK	= ALIGNMENT_TOP | ALIGNMENT_BOTTOM | ALIGNMENT_VCENTER
+  ALIGNMENT_HORIZONTAL_MASK  = ALIGNMENT_LEFT | ALIGNMENT_RIGHT | ALIGNMENT_HCENTER | ALIGNMENT_JUSTIFY, // | ALIGNMENT_ABSOLUTE, 
+  ALIGNMENT_VERTICAL_MASK  = ALIGNMENT_TOP | ALIGNMENT_BOTTOM | ALIGNMENT_VCENTER
 };
 
 // ============================================================================

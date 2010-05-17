@@ -889,7 +889,8 @@ typedef int64_t int48x16_t;
 //! uint table[] = { 1, 2, 3, 4, 5 };
 //! uint i;
 //!
-//! for (i = 0; i != FOG_ARRAY_SIZE(table); i++) {
+//! for (i = 0; i != FOG_ARRAY_SIZE(table); i++)
+//! {
 //!   printf("table[%u]=%u\n", i, table[i]);
 //! }
 //! @endcode

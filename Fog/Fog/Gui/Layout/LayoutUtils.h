@@ -17,9 +17,6 @@
 
 // TODO LAYOUT: Rename to LayoutUtil.cpp/.h
 
-//! @addtogroup Fog_Gui_Layout
-//! @{
-
 namespace Fog {
 
 // ============================================================================
@@ -34,12 +31,17 @@ struct LayoutItem;
 
 namespace LayoutUtil {
 
+//! @addtogroup Fog_Gui_Layout
+//! @{
+
 void calculateFlexOffsets(LayoutItem* head, int avail, int& used);
 void calculateFlexOffsets(GridLayout::Column* head, int avail, int& used);
 void calculateFlexOffsets(GridLayout::Row* head, int avail, int& used);
 
 int collapseMargins(int margin1, int margin2);
 int collapseMargins(int margin1, int margin2, int margin3);
+
+//! @}
 
 } // LayoutUtil namespace
 } // Fog namespace

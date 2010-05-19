@@ -611,10 +611,9 @@ struct FOG_API GuiBackBuffer
   TimeTicks _expireTime;
 };
 
-} // Fog namespace
-
-//! @addtogroup Fog_Gui
 //! @}
+
+} // Fog namespace
 
 // ============================================================================
 // [Fog::TypeInfo<>]

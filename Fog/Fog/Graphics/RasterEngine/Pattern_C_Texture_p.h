@@ -266,9 +266,9 @@ struct FOG_HIDDEN PatternTextureC
 
       // Set fetch function.
       if (interpolationType == IMAGE_INTERPOLATION_NEAREST)
-        ctx->fetch = rasterFuncs.pattern.texture_fetch_transform_nearest[format][spread];
+        ctx->fetch = rasterFuncs.pattern.texture_fetch_trans_affine_nearest[format][spread];
       else
-        ctx->fetch = rasterFuncs.pattern.texture_fetch_transform_bilinear[format][spread];
+        ctx->fetch = rasterFuncs.pattern.texture_fetch_trans_affine_bilinear[format][spread];
     }
 
     // Set destroy function.
@@ -1995,7 +1995,7 @@ fetchSolidLoop:
   // --------------------------------------------------------------------------
 
   template<typename P_TEXTURE_FORMAT>
-  static void FOG_FASTCALL fetch_transform_nearest_none_32(
+  static void FOG_FASTCALL fetch_trans_affine_nearest_none_32(
     const RasterPattern* ctx, Span* span, uint8_t* buffer, int y, uint32_t mode)
   {
     P_FETCH_SPAN8_INIT()
@@ -2049,7 +2049,7 @@ fetchSolidLoop:
   }
 
   template<typename P_TEXTURE_FORMAT>
-  static void FOG_FASTCALL fetch_transform_nearest_pad_32(
+  static void FOG_FASTCALL fetch_trans_affine_nearest_pad_32(
     const RasterPattern* ctx, Span* span, uint8_t* buffer, int y, uint32_t mode)
   {
     P_FETCH_SPAN8_INIT()
@@ -2102,7 +2102,7 @@ fetchSolidLoop:
   }
 
   template<typename P_TEXTURE_FORMAT>
-  static void FOG_FASTCALL fetch_transform_nearest_repeat_32(
+  static void FOG_FASTCALL fetch_trans_affine_nearest_repeat_32(
     const RasterPattern* ctx, Span* span, uint8_t* buffer, int y, uint32_t mode)
   {
     P_FETCH_SPAN8_INIT()
@@ -2167,7 +2167,7 @@ fetchSolidLoop:
   }
 
   template<typename P_TEXTURE_FORMAT>
-  static void FOG_FASTCALL fetch_transform_nearest_reflect_32(
+  static void FOG_FASTCALL fetch_trans_affine_nearest_reflect_32(
     const RasterPattern* ctx, Span* span, uint8_t* buffer, int y, uint32_t mode)
   {
     P_FETCH_SPAN8_INIT()
@@ -2243,7 +2243,7 @@ fetchSolidLoop:
   // --------------------------------------------------------------------------
 
   template<typename P_TEXTURE_FORMAT>
-  static void FOG_FASTCALL fetch_transform_bilinear_none_32(
+  static void FOG_FASTCALL fetch_trans_affine_bilinear_none_32(
     const RasterPattern* ctx, Span* span, uint8_t* buffer, int y, uint32_t mode)
   {
     P_FETCH_SPAN8_INIT()
@@ -2347,7 +2347,7 @@ fetchSolidLoop:
   }
 
   template<typename P_TEXTURE_FORMAT>
-  static void FOG_FASTCALL fetch_transform_bilinear_pad_32(
+  static void FOG_FASTCALL fetch_trans_affine_bilinear_pad_32(
     const RasterPattern* ctx, Span* span, uint8_t* buffer, int y, uint32_t mode)
   {
     P_FETCH_SPAN8_INIT()
@@ -2436,7 +2436,7 @@ fetchSolidLoop:
   }
 
   template<typename P_TEXTURE_FORMAT>
-  static void FOG_FASTCALL fetch_transform_bilinear_repeat_32(
+  static void FOG_FASTCALL fetch_trans_affine_bilinear_repeat_32(
     const RasterPattern* ctx, Span* span, uint8_t* buffer, int y, uint32_t mode)
   {
     P_FETCH_SPAN8_INIT()
@@ -2530,7 +2530,7 @@ fetchSolidLoop:
   }
 
   template<typename P_TEXTURE_FORMAT>
-  static void FOG_FASTCALL fetch_transform_bilinear_reflect_32(
+  static void FOG_FASTCALL fetch_trans_affine_bilinear_reflect_32(
     const RasterPattern* ctx, Span* span, uint8_t* buffer, int y, uint32_t mode)
   {
     P_FETCH_SPAN8_INIT()

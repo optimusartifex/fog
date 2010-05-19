@@ -157,6 +157,51 @@ Fog::String GdiPlusModule_FillRect::getType()
 }
 
 // ============================================================================
+// [FogBench - GdiPlusModule_FillRectSubPX]
+// ============================================================================
+
+GdiPlusModule_FillRectSubPX::GdiPlusModule_FillRectSubPX(int w, int h) : GdiPlusModule_FillRect(w, h) {}
+GdiPlusModule_FillRectSubPX::~GdiPlusModule_FillRectSubPX() {}
+
+void GdiPlusModule_FillRectSubPX::bench(int quantity)
+{
+  Gdiplus::Graphics gr(screen_gdip);
+  configureGraphics(gr);
+
+  float sub = 0.1f;
+  float inc = 0.8f / (float)quantity;
+
+  if (source == BENCH_SOURCE_ARGB)
+  {
+    for (int a = 0; a < quantity; a++, sub += inc)
+    {
+      Fog::IntRect r = r_rect.data[a];
+
+      Gdiplus::Color c(r_argb.data[a]);
+      Gdiplus::SolidBrush br(c);
+
+      gr.FillRectangle((Gdiplus::Brush*)&br, (float)r.x + sub, (float)r.y + sub, (float)r.w, (float)r.h);
+    }
+  }
+  else
+  {
+    for (int a = 0; a < quantity; a++, sub += inc)
+    {
+      Fog::IntRect r = r_rect.data[a];
+
+      Gdiplus::Brush* brush = setupGdiPlusPatternForRect(r, r_argb.data[a]);
+      gr.FillRectangle(brush, (float)r.x + sub, (float)r.y + sub, (float)r.w, (float)r.h);
+      delete brush;
+    }
+  }
+}
+
+Fog::String GdiPlusModule_FillRectSubPX::getType()
+{
+  return Fog::Ascii8("FillRectSubPX");
+}
+
+// ============================================================================
 // [FogBench - GdiPlusModule_FillRectAffine]
 // ============================================================================
 
@@ -459,6 +504,11 @@ void GdiPlusBenchmarkContext::run()
     DO_BENCH(GdiPlusModule_FillRect      , BENCH_OPERATOR_SRC_OVER, BENCH_SOURCE_ARGB   , sizes[s].w, sizes[s].h)
     DO_BENCH(GdiPlusModule_FillRect      , BENCH_OPERATOR_SRC     , BENCH_SOURCE_PATTERN, sizes[s].w, sizes[s].h)
     DO_BENCH(GdiPlusModule_FillRect      , BENCH_OPERATOR_SRC_OVER, BENCH_SOURCE_PATTERN, sizes[s].w, sizes[s].h)
+
+    DO_BENCH(GdiPlusModule_FillRectSubPX , BENCH_OPERATOR_SRC     , BENCH_SOURCE_ARGB   , sizes[s].w, sizes[s].h)
+    DO_BENCH(GdiPlusModule_FillRectSubPX , BENCH_OPERATOR_SRC_OVER, BENCH_SOURCE_ARGB   , sizes[s].w, sizes[s].h)
+    DO_BENCH(GdiPlusModule_FillRectSubPX , BENCH_OPERATOR_SRC     , BENCH_SOURCE_PATTERN, sizes[s].w, sizes[s].h)
+    DO_BENCH(GdiPlusModule_FillRectSubPX , BENCH_OPERATOR_SRC_OVER, BENCH_SOURCE_PATTERN, sizes[s].w, sizes[s].h)
 
     DO_BENCH(GdiPlusModule_FillRectAffine, BENCH_OPERATOR_SRC     , BENCH_SOURCE_ARGB   , sizes[s].w, sizes[s].h)
     DO_BENCH(GdiPlusModule_FillRectAffine, BENCH_OPERATOR_SRC_OVER, BENCH_SOURCE_ARGB   , sizes[s].w, sizes[s].h)

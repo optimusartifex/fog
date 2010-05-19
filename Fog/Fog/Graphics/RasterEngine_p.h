@@ -627,9 +627,9 @@ struct RasterFuncs
     RasterPatternFetchFn texture_fetch_subxy[IMAGE_FORMAT_COUNT][PATTERN_SPREAD_COUNT];
 
     // Transform, nearest.
-    RasterPatternFetchFn texture_fetch_transform_nearest[IMAGE_FORMAT_COUNT][PATTERN_SPREAD_COUNT];
+    RasterPatternFetchFn texture_fetch_trans_affine_nearest[IMAGE_FORMAT_COUNT][PATTERN_SPREAD_COUNT];
     // Transform, bilinear.
-    RasterPatternFetchFn texture_fetch_transform_bilinear[IMAGE_FORMAT_COUNT][PATTERN_SPREAD_COUNT];
+    RasterPatternFetchFn texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_COUNT][PATTERN_SPREAD_COUNT];
 
     // Scale, nearest.
     RasterPatternFetchFn texture_fetch_scale_nearest[IMAGE_FORMAT_COUNT];

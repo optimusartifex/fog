@@ -67,6 +67,19 @@ struct GdiPlusModule_FillRect : public GdiPlusModule
 };
 
 // ============================================================================
+// [FogBench - GdiPlusModule_FillRectSubPX]
+// ============================================================================
+
+struct GdiPlusModule_FillRectSubPX : public GdiPlusModule_FillRect
+{
+  GdiPlusModule_FillRectSubPX(int w, int h);
+  virtual ~GdiPlusModule_FillRectSubPX();
+
+  virtual void bench(int quantity);
+  virtual Fog::String getType();
+};
+
+// ============================================================================
 // [FogBench - GdiPlusModule_FillRectAffine]
 // ============================================================================
 

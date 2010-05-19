@@ -223,10 +223,15 @@ namespace RasterEngine {
 struct FOG_HIDDEN PP_PRGB32_SSE2
 {
   enum { BPP = 4 };
+  enum { USE_PREPROCESS = 0 };
+  enum { USE_ALPHA = 1 };
 
   FOG_INLINE PP_PRGB32_SSE2(const RasterPattern* ctx) {}
 
   FOG_INLINE void preprocess_1x1B(__m128i& pix0) {}
+  FOG_INLINE void preprocess_1x2B(__m128i& pix0) {}
+  FOG_INLINE void preprocess_1x4B(__m128i& pix0) {}
+
   FOG_INLINE void preprocess_1x1W(__m128i& pix0) {}
   FOG_INLINE void preprocess_1x2W(__m128i& pix0) {}
   FOG_INLINE void preprocess_2x2W(__m128i& pix0, __m128i& pix1) {}
@@ -236,6 +241,8 @@ struct FOG_HIDDEN PP_PRGB32_SSE2
 struct FOG_HIDDEN PP_ARGB32_SSE2
 {
   enum { BPP = 4 };
+  enum { USE_PREPROCESS = 1 };
+  enum { USE_ALPHA = 1 };
 
   FOG_INLINE PP_ARGB32_SSE2(const RasterPattern* ctx) {}
 
@@ -244,6 +251,22 @@ struct FOG_HIDDEN PP_ARGB32_SSE2
     sse2_unpack_1x1W(pix0, pix0);
     sse2_premultiply_1x1W(pix0, pix0);
     sse2_pack_1x1W(pix0, pix0);
+  }
+
+  FOG_INLINE void preprocess_1x2B(__m128i& pix0)
+  {
+    sse2_unpack_1x2W(pix0, pix0);
+    sse2_premultiply_1x2W(pix0, pix0);
+    sse2_pack_1x1W(pix0, pix0);
+  }
+
+  FOG_INLINE void preprocess_1x4B(__m128i& pix0)
+  {
+    __m128i pix1;
+
+    sse2_unpack_2x2W(pix0, pix1, pix0);
+    sse2_premultiply_2x2W(pix0, pix0, pix1, pix1);
+    sse2_pack_2x2W(pix0, pix0, pix1);
   }
 
   FOG_INLINE void preprocess_1x1W(__m128i& pix0)
@@ -266,8 +289,25 @@ struct FOG_HIDDEN PP_ARGB32_SSE2
 struct FOG_HIDDEN PP_XRGB32_SSE2
 {
   enum { BPP = 4 };
+  enum { USE_PREPROCESS = 1 };
+  enum { USE_ALPHA = 0 };
 
   FOG_INLINE PP_XRGB32_SSE2(const RasterPattern* ctx) {}
+
+  FOG_INLINE void preprocess_1x1B(__m128i& pix0)
+  {
+    pix0 = _mm_or_si128(pix0, FOG_GET_SSE_CONST_PI(0000000000000000_00000000FF000000));
+  }
+
+  FOG_INLINE void preprocess_1x2B(__m128i& pix0)
+  {
+    pix0 = _mm_or_si128(pix0, FOG_GET_SSE_CONST_PI(0000000000000000_FF000000FF000000));
+  }
+
+  FOG_INLINE void preprocess_1x4B(__m128i& pix0)
+  {
+    pix0 = _mm_or_si128(pix0, FOG_GET_SSE_CONST_PI(FF000000FF000000_FF000000FF000000));
+  }
 
   FOG_INLINE void preprocess_1x1W(__m128i& pix0)
   {

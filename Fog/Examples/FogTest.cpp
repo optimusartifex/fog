@@ -18,10 +18,13 @@ struct MyWindow : public Window
   virtual ~MyWindow();
 
   // [Event Handlers]
+  virtual void onConfigure(ConfigureEvent* e);
   virtual void onKeyPress(KeyEvent* e);
   virtual void onPaint(PaintEvent* e);
 
   void paintImage(Painter* painter, const IntPoint& pos, const Image& im, const String& name);
+
+  Button* button;
 
   Image i[2];
   double _subx;
@@ -43,8 +46,8 @@ MyWindow::MyWindow(uint32_t createFlags) :
   i[0].readFromFile(Ascii8("babelfish.png"));
   i[1].readFromFile(Ascii8("kweather.png"));
 
-  i[0].convert(IMAGE_FORMAT_ARGB32);
-  i[1].convert(IMAGE_FORMAT_ARGB32);
+  i[0].convert(IMAGE_FORMAT_PRGB32);
+  i[1].convert(IMAGE_FORMAT_PRGB32);
 
   _subx = 0.0;
   _suby = 0.0;
@@ -54,7 +57,7 @@ MyWindow::MyWindow(uint32_t createFlags) :
   _scale = 1.0;
   _spread = PATTERN_SPREAD_REPEAT;
 
-  Button* button = new Button();
+  button = new Button();
   add(button);
   button->setGeometry(IntRect(40, 40, 100, 20));
   button->setText(Ascii8("Push me"));
@@ -63,6 +66,11 @@ MyWindow::MyWindow(uint32_t createFlags) :
 
 MyWindow::~MyWindow()
 {
+}
+
+void MyWindow::onConfigure(ConfigureEvent* e)
+{
+  button->setGeometry(IntRect(getWidth() - 120, getHeight() - 40, 100, 20));
 }
 
 void MyWindow::onKeyPress(KeyEvent* e)
@@ -138,15 +146,17 @@ void MyWindow::onPaint(PaintEvent* e)
   p->setSource(Argb(0xFFFFFFFF));
   p->fillAll();
 
+  p->setOperator(OPERATOR_SRC_OVER);
 
   {
     //Image aa = i[0].scale(IntSize(320, 320));
     //p->drawImage(IntPoint(100, 100), aa);
 
-    p->setHint(PAINTER_HINT_IMAGE_INTERPOLATION, IMAGE_INTERPOLATION_NEAREST);
-    p->drawImage(DoubleRect(100, 100, 320, 320), i[0]);
-
-    p->drawImage(DoublePoint(100, 100), i[0]);
+    //p->drawImage(DoubleRect(100, 100, 320, 320), i[0]);
+    //p->drawImage(DoubleRect(130, 130, 320, 320), i[0]);
+    //p->drawImage(DoubleRect(160, 160, 320, 320), i[0]);
+    //p->drawImage(DoubleRect(190, 190, 320, 320), i[0]);
+    //p->drawImage(DoublePoint(100, 100), i[0]);
   }
 
   p->restore();

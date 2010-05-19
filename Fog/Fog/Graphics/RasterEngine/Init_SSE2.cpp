@@ -919,29 +919,29 @@ FOG_INIT_DECLARE void fog_rasterengine_init_sse2(void)
 
   // TODO: None, Pad
 
-  f.pattern.texture_fetch_exact[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_REPEAT] = PatternTextureSSE2::texture_fetch_exact_repeat_32;
-  f.pattern.texture_fetch_exact[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_REPEAT] = PatternTextureSSE2::texture_fetch_exact_repeat_32;
-  f.pattern.texture_fetch_exact[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_REPEAT] = PatternTextureSSE2::texture_fetch_exact_repeat_32;
+  f.pattern.texture_fetch_exact[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_REPEAT] = PatternTextureSSE2::fetch_exact_repeat_32;
+  f.pattern.texture_fetch_exact[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_REPEAT] = PatternTextureSSE2::fetch_exact_repeat_32;
+  f.pattern.texture_fetch_exact[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_REPEAT] = PatternTextureSSE2::fetch_exact_repeat_32;
 
-  f.pattern.texture_fetch_exact[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_REFLECT] = PatternTextureSSE2::texture_fetch_exact_reflect_32;
-  f.pattern.texture_fetch_exact[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_REFLECT] = PatternTextureSSE2::texture_fetch_exact_reflect_32;
-  f.pattern.texture_fetch_exact[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_REFLECT] = PatternTextureSSE2::texture_fetch_exact_reflect_32;
+  f.pattern.texture_fetch_exact[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_REFLECT] = PatternTextureSSE2::fetch_exact_reflect_32;
+  f.pattern.texture_fetch_exact[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_REFLECT] = PatternTextureSSE2::fetch_exact_reflect_32;
+  f.pattern.texture_fetch_exact[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_REFLECT] = PatternTextureSSE2::fetch_exact_reflect_32;
 
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_NONE   ] = PatternTextureSSE2::texture_fetch_transform_bilinear_none_32<PP_PRGB32_SSE2>;
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_NONE   ] = PatternTextureSSE2::texture_fetch_transform_bilinear_none_32<PP_ARGB32_SSE2>;
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_NONE   ] = PatternTextureSSE2::texture_fetch_transform_bilinear_none_32<PP_PRGB32_SSE2>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_NONE   ] = PatternTextureSSE2::fetch_trans_affine_bilinear_none_32<PP_PRGB32_SSE2>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_NONE   ] = PatternTextureSSE2::fetch_trans_affine_bilinear_none_32<PP_ARGB32_SSE2>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_NONE   ] = PatternTextureSSE2::fetch_trans_affine_bilinear_none_32<PP_PRGB32_SSE2>;
 
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_PAD    ] = PatternTextureSSE2::texture_fetch_transform_bilinear_pad_32<PP_PRGB32_SSE2>;
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_PAD    ] = PatternTextureSSE2::texture_fetch_transform_bilinear_pad_32<PP_ARGB32_SSE2>;
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_PAD    ] = PatternTextureSSE2::texture_fetch_transform_bilinear_pad_32<PP_PRGB32_SSE2>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_PAD    ] = PatternTextureSSE2::fetch_trans_affine_bilinear_pad_32<PP_PRGB32_SSE2>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_PAD    ] = PatternTextureSSE2::fetch_trans_affine_bilinear_pad_32<PP_ARGB32_SSE2>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_PAD    ] = PatternTextureSSE2::fetch_trans_affine_bilinear_pad_32<PP_PRGB32_SSE2>;
 
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_REPEAT ] = PatternTextureSSE2::texture_fetch_transform_bilinear_repeat_32<PP_PRGB32_SSE2>;
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_REPEAT ] = PatternTextureSSE2::texture_fetch_transform_bilinear_repeat_32<PP_ARGB32_SSE2>;
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_REPEAT ] = PatternTextureSSE2::texture_fetch_transform_bilinear_repeat_32<PP_PRGB32_SSE2>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_REPEAT ] = PatternTextureSSE2::fetch_trans_affine_bilinear_repeat_32<PP_PRGB32_SSE2>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_REPEAT ] = PatternTextureSSE2::fetch_trans_affine_bilinear_repeat_32<PP_ARGB32_SSE2>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_REPEAT ] = PatternTextureSSE2::fetch_trans_affine_bilinear_repeat_32<PP_PRGB32_SSE2>;
 
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_REFLECT] = PatternTextureSSE2::texture_fetch_transform_bilinear_reflect_32<PP_PRGB32_SSE2>;
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_REFLECT] = PatternTextureSSE2::texture_fetch_transform_bilinear_reflect_32<PP_ARGB32_SSE2>;
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_REFLECT] = PatternTextureSSE2::texture_fetch_transform_bilinear_reflect_32<PP_PRGB32_SSE2>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_REFLECT] = PatternTextureSSE2::fetch_trans_affine_bilinear_reflect_32<PP_PRGB32_SSE2>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_REFLECT] = PatternTextureSSE2::fetch_trans_affine_bilinear_reflect_32<PP_ARGB32_SSE2>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_REFLECT] = PatternTextureSSE2::fetch_trans_affine_bilinear_reflect_32<PP_PRGB32_SSE2>;
 
   // --------------------------------------------------------------------------
   // [Pattern - Linear Gradient]

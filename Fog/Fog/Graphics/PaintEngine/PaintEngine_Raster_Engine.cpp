@@ -2017,9 +2017,8 @@ err_t RasterPaintEngine::stretchImageHelper(
   DoubleMatrix savedMatrix(ctx.userMatrix);
   DoubleMatrix newMatrix(ctx.userMatrix);
 
+  newMatrix.translate(pt.x, pt.y, MATRIX_PREPEND);
   newMatrix.scale(scaleX, scaleY, MATRIX_PREPEND);
-  newMatrix.tx += pt.x;
-  newMatrix.ty += pt.y;
 
   // I don't know what evil can happen there, but if it failed we should return.
   err_t err = setMatrix(newMatrix);

@@ -1160,54 +1160,54 @@ FOG_INIT_DECLARE void fog_rasterengine_init_c(void)
   f.pattern.texture_fetch_subxy[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_REFLECT] = PatternTextureC::fetch_subxy_reflect_32<PatternTextureC::FMT_PRGB32>;
   f.pattern.texture_fetch_subxy[IMAGE_FORMAT_I8    ][PATTERN_SPREAD_REFLECT] = PatternTextureC::fetch_subxy_reflect_32<PatternTextureC::FMT_I8>;
 
-  f.pattern.texture_fetch_transform_nearest[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_NONE   ] = PatternTextureC::fetch_transform_nearest_none_32<PatternTextureC::FMT_PRGB32>;
-  f.pattern.texture_fetch_transform_nearest[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_NONE   ] = PatternTextureC::fetch_transform_nearest_none_32<PatternTextureC::FMT_ARGB32>;
-  f.pattern.texture_fetch_transform_nearest[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_NONE   ] = PatternTextureC::fetch_transform_nearest_none_32<PatternTextureC::FMT_PRGB32>;
-  f.pattern.texture_fetch_transform_nearest[IMAGE_FORMAT_I8    ][PATTERN_SPREAD_NONE   ] = PatternTextureC::fetch_transform_nearest_none_32<PatternTextureC::FMT_I8>;
+  f.pattern.texture_fetch_trans_affine_nearest[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_NONE   ] = PatternTextureC::fetch_trans_affine_nearest_none_32<PatternTextureC::FMT_PRGB32>;
+  f.pattern.texture_fetch_trans_affine_nearest[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_NONE   ] = PatternTextureC::fetch_trans_affine_nearest_none_32<PatternTextureC::FMT_ARGB32>;
+  f.pattern.texture_fetch_trans_affine_nearest[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_NONE   ] = PatternTextureC::fetch_trans_affine_nearest_none_32<PatternTextureC::FMT_PRGB32>;
+  f.pattern.texture_fetch_trans_affine_nearest[IMAGE_FORMAT_I8    ][PATTERN_SPREAD_NONE   ] = PatternTextureC::fetch_trans_affine_nearest_none_32<PatternTextureC::FMT_I8>;
 
-  f.pattern.texture_fetch_transform_nearest[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_PAD    ] = PatternTextureC::fetch_transform_nearest_pad_32<PatternTextureC::FMT_PRGB32>;
-  f.pattern.texture_fetch_transform_nearest[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_PAD    ] = PatternTextureC::fetch_transform_nearest_pad_32<PatternTextureC::FMT_ARGB32>;
-  f.pattern.texture_fetch_transform_nearest[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_PAD    ] = PatternTextureC::fetch_transform_nearest_pad_32<PatternTextureC::FMT_PRGB32>;
-  f.pattern.texture_fetch_transform_nearest[IMAGE_FORMAT_I8    ][PATTERN_SPREAD_PAD    ] = PatternTextureC::fetch_transform_nearest_pad_32<PatternTextureC::FMT_I8>;
+  f.pattern.texture_fetch_trans_affine_nearest[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_PAD    ] = PatternTextureC::fetch_trans_affine_nearest_pad_32<PatternTextureC::FMT_PRGB32>;
+  f.pattern.texture_fetch_trans_affine_nearest[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_PAD    ] = PatternTextureC::fetch_trans_affine_nearest_pad_32<PatternTextureC::FMT_ARGB32>;
+  f.pattern.texture_fetch_trans_affine_nearest[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_PAD    ] = PatternTextureC::fetch_trans_affine_nearest_pad_32<PatternTextureC::FMT_PRGB32>;
+  f.pattern.texture_fetch_trans_affine_nearest[IMAGE_FORMAT_I8    ][PATTERN_SPREAD_PAD    ] = PatternTextureC::fetch_trans_affine_nearest_pad_32<PatternTextureC::FMT_I8>;
 
-  f.pattern.texture_fetch_transform_nearest[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_REPEAT ] = PatternTextureC::fetch_transform_nearest_repeat_32<PatternTextureC::FMT_PRGB32>;
-  f.pattern.texture_fetch_transform_nearest[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_REPEAT ] = PatternTextureC::fetch_transform_nearest_repeat_32<PatternTextureC::FMT_ARGB32>;
-  f.pattern.texture_fetch_transform_nearest[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_REPEAT ] = PatternTextureC::fetch_transform_nearest_repeat_32<PatternTextureC::FMT_PRGB32>;
-  f.pattern.texture_fetch_transform_nearest[IMAGE_FORMAT_I8    ][PATTERN_SPREAD_REPEAT ] = PatternTextureC::fetch_transform_nearest_repeat_32<PatternTextureC::FMT_I8>;
+  f.pattern.texture_fetch_trans_affine_nearest[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_REPEAT ] = PatternTextureC::fetch_trans_affine_nearest_repeat_32<PatternTextureC::FMT_PRGB32>;
+  f.pattern.texture_fetch_trans_affine_nearest[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_REPEAT ] = PatternTextureC::fetch_trans_affine_nearest_repeat_32<PatternTextureC::FMT_ARGB32>;
+  f.pattern.texture_fetch_trans_affine_nearest[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_REPEAT ] = PatternTextureC::fetch_trans_affine_nearest_repeat_32<PatternTextureC::FMT_PRGB32>;
+  f.pattern.texture_fetch_trans_affine_nearest[IMAGE_FORMAT_I8    ][PATTERN_SPREAD_REPEAT ] = PatternTextureC::fetch_trans_affine_nearest_repeat_32<PatternTextureC::FMT_I8>;
 
-  f.pattern.texture_fetch_transform_nearest[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_REFLECT] = PatternTextureC::fetch_transform_nearest_reflect_32<PatternTextureC::FMT_PRGB32>;
-  f.pattern.texture_fetch_transform_nearest[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_REFLECT] = PatternTextureC::fetch_transform_nearest_reflect_32<PatternTextureC::FMT_ARGB32>;
-  f.pattern.texture_fetch_transform_nearest[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_REFLECT] = PatternTextureC::fetch_transform_nearest_reflect_32<PatternTextureC::FMT_PRGB32>;
-  f.pattern.texture_fetch_transform_nearest[IMAGE_FORMAT_I8    ][PATTERN_SPREAD_REFLECT] = PatternTextureC::fetch_transform_nearest_reflect_32<PatternTextureC::FMT_I8>;
+  f.pattern.texture_fetch_trans_affine_nearest[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_REFLECT] = PatternTextureC::fetch_trans_affine_nearest_reflect_32<PatternTextureC::FMT_PRGB32>;
+  f.pattern.texture_fetch_trans_affine_nearest[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_REFLECT] = PatternTextureC::fetch_trans_affine_nearest_reflect_32<PatternTextureC::FMT_ARGB32>;
+  f.pattern.texture_fetch_trans_affine_nearest[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_REFLECT] = PatternTextureC::fetch_trans_affine_nearest_reflect_32<PatternTextureC::FMT_PRGB32>;
+  f.pattern.texture_fetch_trans_affine_nearest[IMAGE_FORMAT_I8    ][PATTERN_SPREAD_REFLECT] = PatternTextureC::fetch_trans_affine_nearest_reflect_32<PatternTextureC::FMT_I8>;
 
   // TODO: Implement all in SSE2
 #if defined(FOG_RASTERUTIL_INIT_C)
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_NONE   ] = PatternTextureC::fetch_transform_bilinear_none_32<PatternTextureC::FMT_PRGB32>;
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_NONE   ] = PatternTextureC::fetch_transform_bilinear_none_32<PatternTextureC::FMT_ARGB32>;
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_NONE   ] = PatternTextureC::fetch_transform_bilinear_none_32<PatternTextureC::FMT_XRGB32>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_NONE   ] = PatternTextureC::fetch_trans_affine_bilinear_none_32<PatternTextureC::FMT_PRGB32>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_NONE   ] = PatternTextureC::fetch_trans_affine_bilinear_none_32<PatternTextureC::FMT_ARGB32>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_NONE   ] = PatternTextureC::fetch_trans_affine_bilinear_none_32<PatternTextureC::FMT_XRGB32>;
 #endif // FOG_RASTERUTIL_INIT_C
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_I8    ][PATTERN_SPREAD_NONE   ] = PatternTextureC::fetch_transform_bilinear_none_32<PatternTextureC::FMT_I8>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_I8    ][PATTERN_SPREAD_NONE   ] = PatternTextureC::fetch_trans_affine_bilinear_none_32<PatternTextureC::FMT_I8>;
 
 #if defined(FOG_RASTERUTIL_INIT_C)
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_PAD    ] = PatternTextureC::fetch_transform_bilinear_pad_32<PatternTextureC::FMT_PRGB32>;
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_PAD    ] = PatternTextureC::fetch_transform_bilinear_pad_32<PatternTextureC::FMT_ARGB32>;
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_PAD    ] = PatternTextureC::fetch_transform_bilinear_pad_32<PatternTextureC::FMT_PRGB32>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_PAD    ] = PatternTextureC::fetch_trans_affine_bilinear_pad_32<PatternTextureC::FMT_PRGB32>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_PAD    ] = PatternTextureC::fetch_trans_affine_bilinear_pad_32<PatternTextureC::FMT_ARGB32>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_PAD    ] = PatternTextureC::fetch_trans_affine_bilinear_pad_32<PatternTextureC::FMT_PRGB32>;
 #endif // FOG_RASTERUTIL_INIT_C
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_I8    ][PATTERN_SPREAD_PAD    ] = PatternTextureC::fetch_transform_bilinear_pad_32<PatternTextureC::FMT_I8>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_I8    ][PATTERN_SPREAD_PAD    ] = PatternTextureC::fetch_trans_affine_bilinear_pad_32<PatternTextureC::FMT_I8>;
 
 #if defined(FOG_RASTERUTIL_INIT_C)
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_REPEAT ] = PatternTextureC::fetch_transform_bilinear_repeat_32<PatternTextureC::FMT_PRGB32>;
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_REPEAT ] = PatternTextureC::fetch_transform_bilinear_repeat_32<PatternTextureC::FMT_ARGB32>;
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_REPEAT ] = PatternTextureC::fetch_transform_bilinear_repeat_32<PatternTextureC::FMT_PRGB32>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_REPEAT ] = PatternTextureC::fetch_trans_affine_bilinear_repeat_32<PatternTextureC::FMT_PRGB32>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_REPEAT ] = PatternTextureC::fetch_trans_affine_bilinear_repeat_32<PatternTextureC::FMT_ARGB32>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_REPEAT ] = PatternTextureC::fetch_trans_affine_bilinear_repeat_32<PatternTextureC::FMT_PRGB32>;
 #endif // FOG_RASTERUTIL_INIT_C
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_I8    ][PATTERN_SPREAD_REPEAT ] = PatternTextureC::fetch_transform_bilinear_repeat_32<PatternTextureC::FMT_I8>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_I8    ][PATTERN_SPREAD_REPEAT ] = PatternTextureC::fetch_trans_affine_bilinear_repeat_32<PatternTextureC::FMT_I8>;
 
 #if defined(FOG_RASTERUTIL_INIT_C)
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_REFLECT] = PatternTextureC::fetch_transform_bilinear_reflect_32<PatternTextureC::FMT_PRGB32>;
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_REFLECT] = PatternTextureC::fetch_transform_bilinear_reflect_32<PatternTextureC::FMT_ARGB32>;
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_REFLECT] = PatternTextureC::fetch_transform_bilinear_reflect_32<PatternTextureC::FMT_PRGB32>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_PRGB32][PATTERN_SPREAD_REFLECT] = PatternTextureC::fetch_trans_affine_bilinear_reflect_32<PatternTextureC::FMT_PRGB32>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_ARGB32][PATTERN_SPREAD_REFLECT] = PatternTextureC::fetch_trans_affine_bilinear_reflect_32<PatternTextureC::FMT_ARGB32>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_XRGB32][PATTERN_SPREAD_REFLECT] = PatternTextureC::fetch_trans_affine_bilinear_reflect_32<PatternTextureC::FMT_PRGB32>;
 #endif // FOG_RASTERUTIL_INIT_C
-  f.pattern.texture_fetch_transform_bilinear[IMAGE_FORMAT_I8    ][PATTERN_SPREAD_REFLECT] = PatternTextureC::fetch_transform_bilinear_reflect_32<PatternTextureC::FMT_I8>;
+  f.pattern.texture_fetch_trans_affine_bilinear[IMAGE_FORMAT_I8    ][PATTERN_SPREAD_REFLECT] = PatternTextureC::fetch_trans_affine_bilinear_reflect_32<PatternTextureC::FMT_I8>;
 
   f.pattern.texture_fetch_scale_nearest[IMAGE_FORMAT_PRGB32] = PatternScaleC::fetch_argb32_nn;
   f.pattern.texture_fetch_scale_nearest[IMAGE_FORMAT_ARGB32] = PatternScaleC::fetch_argb32_nn;

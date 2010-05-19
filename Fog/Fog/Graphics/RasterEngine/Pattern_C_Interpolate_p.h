@@ -136,7 +136,7 @@ struct FOG_HIDDEN InterpolateC
     // Fill c0 before gradient start.
     if (x1 < 0)
     {
-      uint32_t c0p = ArgbUtil::premultiply(c0);
+      uint32_t c0p = ColorUtil::premultiply(c0);
       i = Math::min<int>(0, x2) - x1;
 
       xw -= i;
@@ -198,7 +198,7 @@ struct FOG_HIDDEN InterpolateC
 
     // Fill c1 after gradient end.
     {
-      uint32_t c1p = ArgbUtil::premultiply(c1);
+      uint32_t c1p = ColorUtil::premultiply(c1);
       i = x2 - x1;
       do { set4(dstCur, c1p); dstCur += 4; } while (--i);
     }

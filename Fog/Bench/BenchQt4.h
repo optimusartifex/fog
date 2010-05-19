@@ -58,6 +58,19 @@ struct Qt4Module_FillRect : public Qt4Module
 };
 
 // ============================================================================
+// [FogBench - Qt4Module_FillRectSubPX]
+// ============================================================================
+
+struct Qt4Module_FillRectSubPX : public Qt4Module_FillRect
+{
+  Qt4Module_FillRectSubPX(int w, int h);
+  virtual ~Qt4Module_FillRectSubPX();
+
+  virtual void bench(int quantity);
+  virtual Fog::String getType();
+};
+
+// ============================================================================
 // [FogBench - Qt4Module_FillRectAffine]
 // ============================================================================
 

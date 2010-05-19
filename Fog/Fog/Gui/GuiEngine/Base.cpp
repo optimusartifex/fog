@@ -630,7 +630,7 @@ void BaseGuiEngine::doUpdateWindow(GuiWindow* window)
   e._painter = &painter;
 
   // Temporary regions. We are using more regions, because region operations
-  // are most effective by Region::op(dest, src1, src2) way. So it's safe to 
+  // are most efficient by Region::op(dest, src1, src2) way. So it's safe to
   // use different destination regions. Memory will be copied, but no memory
   // will be allocated that is the goal.
   TemporaryRegion<32> rtmp1;

@@ -150,6 +150,60 @@ Fog::String CairoModule_FillRect::getType()
 }
 
 // ============================================================================
+// [FogBench - CairoModule_FillRectSubPX]
+// ============================================================================
+
+CairoModule_FillRectSubPX::CairoModule_FillRectSubPX(int w, int h) : CairoModule_FillRect(w, h) {}
+CairoModule_FillRectSubPX::~CairoModule_FillRectSubPX() {}
+
+void CairoModule_FillRectSubPX::bench(int quantity)
+{
+  cairo_t* cr = cairo_create(screen_cairo);
+  configureContext(cr);
+
+  double sub = 0.1;
+  double inc = 0.8 / (double)quantity;
+
+  if (source == BENCH_SOURCE_ARGB)
+  {
+    for (int a = 0; a < quantity; a++, sub += inc)
+    {
+      Fog::IntRect r(r_rect.data[a]);
+      Fog::Argb c(r_argb.data[a]);
+
+      cairo_set_source_rgba(cr,
+        (double)c.getRed() / 255.0,
+        (double)c.getGreen() / 255.0,
+        (double)c.getBlue() / 255.0,
+        (double)c.getAlpha() / 255.0);
+      cairo_rectangle(cr, sub + r.x, sub + r.y, r.w, r.h);
+      cairo_fill(cr);
+    }
+  }
+  else
+  {
+    for (int a = 0; a < quantity; a++, sub += inc)
+    {
+      Fog::IntRect r(r_rect.data[a]);
+      Fog::Argb c(r_argb.data[a]);
+
+      cairo_pattern_t* pattern = setupCairoPatternForRect(r, c);
+      cairo_set_source(cr, pattern);
+      cairo_rectangle(cr, sub + r.x, sub + r.y, r.w, r.h);
+      cairo_fill(cr);
+      cairo_pattern_destroy(pattern);
+    }
+  }
+
+  cairo_destroy(cr);
+}
+
+Fog::String CairoModule_FillRectSubPX::getType()
+{
+  return Fog::Ascii8("FillRectSubPX");
+}
+
+// ============================================================================
 // [FogBench - CairoModule_FillRectAffine]
 // ============================================================================
 
@@ -580,6 +634,11 @@ void CairoBenchmarkContext::run()
     DO_BENCH(CairoModule_FillRect      , BENCH_OPERATOR_SRC_OVER, BENCH_SOURCE_ARGB   , sizes[s].w, sizes[s].h)
     DO_BENCH(CairoModule_FillRect      , BENCH_OPERATOR_SRC     , BENCH_SOURCE_PATTERN, sizes[s].w, sizes[s].h)
     DO_BENCH(CairoModule_FillRect      , BENCH_OPERATOR_SRC_OVER, BENCH_SOURCE_PATTERN, sizes[s].w, sizes[s].h)
+
+    DO_BENCH(CairoModule_FillRectSubPX , BENCH_OPERATOR_SRC     , BENCH_SOURCE_ARGB   , sizes[s].w, sizes[s].h)
+    DO_BENCH(CairoModule_FillRectSubPX , BENCH_OPERATOR_SRC_OVER, BENCH_SOURCE_ARGB   , sizes[s].w, sizes[s].h)
+    DO_BENCH(CairoModule_FillRectSubPX , BENCH_OPERATOR_SRC     , BENCH_SOURCE_PATTERN, sizes[s].w, sizes[s].h)
+    DO_BENCH(CairoModule_FillRectSubPX , BENCH_OPERATOR_SRC_OVER, BENCH_SOURCE_PATTERN, sizes[s].w, sizes[s].h)
 
     DO_BENCH(CairoModule_FillRectAffine, BENCH_OPERATOR_SRC     , BENCH_SOURCE_ARGB   , sizes[s].w, sizes[s].h)
     DO_BENCH(CairoModule_FillRectAffine, BENCH_OPERATOR_SRC_OVER, BENCH_SOURCE_ARGB   , sizes[s].w, sizes[s].h)

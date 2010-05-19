@@ -38,7 +38,7 @@ struct FOG_HIDDEN PatternTextureC
     enum { BPP = 4, AS_IS = 0 };
 
     FOG_INLINE FMT_ARGB32(const RasterPattern* ctx) {}
-    FOG_INLINE uint32_t fetch(const uint8_t* p) { return ArgbUtil::premultiply(READ_32(p)); }
+    FOG_INLINE uint32_t fetch(const uint8_t* p) { return ColorUtil::premultiply(READ_32(p)); }
   };
 
   struct FOG_HIDDEN FMT_PRGB32

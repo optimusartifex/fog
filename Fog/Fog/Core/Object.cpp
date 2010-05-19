@@ -409,6 +409,7 @@ void Object::postEvent(Event* e)
 
   // Post event (event is posted as task).
   eventLoop->postTask(e);
+  return;
 
 fail:
   fog_stderr_msg("Fog::Object", "postEvent", "Can't post event to object which has no owner thread or event loop. Deleting event.");

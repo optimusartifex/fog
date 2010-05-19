@@ -21,6 +21,11 @@ namespace Fog {
 // ============================================================================
 
 //! @internal
+//!
+//! @brief Paint engine that does nothing.
+//!
+//! Calling the paint or other methods will result in returning
+//! @ref ERR_RT_INVALID_OBJECT error code.
 struct FOG_HIDDEN NullPaintEngine : public PaintEngine
 {
   // --------------------------------------------------------------------------
@@ -252,6 +257,9 @@ struct FOG_HIDDEN NullPaintEngine : public PaintEngine
 
   virtual err_t drawImage(const IntPoint& p, const Image& image, const IntRect* irect) { return ERR_RT_INVALID_OBJECT; }
   virtual err_t drawImage(const DoublePoint& p, const Image& image, const IntRect* irect) { return ERR_RT_INVALID_OBJECT; }
+
+  virtual err_t drawImage(const IntRect& rect, const Image& image, const IntRect* irect) { return ERR_RT_INVALID_OBJECT; }
+  virtual err_t drawImage(const DoubleRect& rect, const Image& image, const IntRect* irect) { return ERR_RT_INVALID_OBJECT; }
 };
 
 //! @}

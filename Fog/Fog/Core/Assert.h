@@ -34,7 +34,12 @@ FOG_CAPI_EXTERN void FOG_NO_RETURN fog_assert_failure(const char* file, int line
 
 #define FOG_ASSERT(expression) FOG_NOP
 #define FOG_ASSERT_X(expression, msg) FOG_NOP
+
+#if defined(FOG_CC_MSVC)
+#define FOG_ASSERT_NOT_REACHED() __assume(0)
+#else
 #define FOG_ASSERT_NOT_REACHED() FOG_NOP
+#endif 
 
 #endif // FOG_DEBUG
 

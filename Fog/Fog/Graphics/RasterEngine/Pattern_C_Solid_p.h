@@ -37,7 +37,7 @@ struct FOG_HIDDEN PatternSolidC
     ctx->bytesPerPixel = 4;
 
     ctx->solid.argb = argb;
-    ctx->solid.prgb = ArgbUtil::premultiply(argb);
+    ctx->solid.prgb = ColorUtil::premultiply(argb);
     ctx->fetch = fetch;
     ctx->destroy = destroy;
 

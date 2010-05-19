@@ -522,7 +522,7 @@ struct FOG_HIDDEN DibC
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     do {
-      ((uint32_t*)dst)[0] = ArgbUtil::premultiply(((const uint32_t*)src)[0]);
+      ((uint32_t*)dst)[0] = ColorUtil::premultiply(((const uint32_t*)src)[0]);
 
       dst += 4;
       src += 4;
@@ -568,7 +568,7 @@ struct FOG_HIDDEN DibC
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     do {
-      ((uint32_t*)dst)[0] = ArgbUtil::premultiply(Memory::bswap32(((const uint32_t*)src)[0]));
+      ((uint32_t*)dst)[0] = ColorUtil::premultiply(Memory::bswap32(((const uint32_t*)src)[0]));
 
       dst += 4;
       src += 4;
@@ -886,7 +886,7 @@ struct FOG_HIDDEN DibC
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     do {
-      ((uint32_t*)dst)[0] = ArgbUtil::premultiply(((const uint32_t*)src)[0]);
+      ((uint32_t*)dst)[0] = ColorUtil::premultiply(((const uint32_t*)src)[0]);
 
       dst += 4;
       src += 4;
@@ -920,7 +920,7 @@ struct FOG_HIDDEN DibC
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     do {
-      ((uint32_t*)dst)[0] = Memory::bswap32(ArgbUtil::premultiply(((const uint32_t*)src)[0])) | 0xFF000000U;
+      ((uint32_t*)dst)[0] = Memory::bswap32(ColorUtil::premultiply(((const uint32_t*)src)[0])) | 0xFF000000U;
 
       dst += 4;
       src += 4;
@@ -979,7 +979,7 @@ struct FOG_HIDDEN DibC
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     do {
-      ((uint32_t*)dst)[0] = Memory::bswap32(ArgbUtil::premultiply(((const uint32_t*)src)[0]));
+      ((uint32_t*)dst)[0] = Memory::bswap32(ColorUtil::premultiply(((const uint32_t*)src)[0]));
 
       dst += 4;
       src += 4;
@@ -1129,7 +1129,7 @@ struct FOG_HIDDEN DibC
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     do {
-      ((uint32_t*)dst)[0] = Memory::bswap32(ArgbUtil::premultiply(((const uint32_t*)src)[0]) | 0xFF000000U);
+      ((uint32_t*)dst)[0] = Memory::bswap32(ColorUtil::premultiply(((const uint32_t*)src)[0]) | 0xFF000000U);
 
       dst += 4;
       src += 4;
@@ -1220,7 +1220,7 @@ struct FOG_HIDDEN DibC
     // Align.
     while (w && (sysuint_t)dst & 0x3)
     {
-      uint32_t s0 = ArgbUtil::premultiply(((const uint32_t*)src)[0]);
+      uint32_t s0 = ColorUtil::premultiply(((const uint32_t*)src)[0]);
 
       dst[RGB24_NATIVE_RBYTE] = (uint8_t)(s0 >> 16);
       dst[RGB24_NATIVE_GBYTE] = (uint8_t)(s0 >> 8);
@@ -1238,10 +1238,10 @@ struct FOG_HIDDEN DibC
       //
       // [B G R X] [B G R X] [B G R X] [B G R X]
       // [B G R B] [G R B G] [R B G R]
-      uint32_t s0 = ArgbUtil::premultiply(((const uint32_t*)src)[0]);
-      uint32_t s1 = ArgbUtil::premultiply(((const uint32_t*)src)[1]);
-      uint32_t s2 = ArgbUtil::premultiply(((const uint32_t*)src)[2]);
-      uint32_t s3 = ArgbUtil::premultiply(((const uint32_t*)src)[3]);
+      uint32_t s0 = ColorUtil::premultiply(((const uint32_t*)src)[0]);
+      uint32_t s1 = ColorUtil::premultiply(((const uint32_t*)src)[1]);
+      uint32_t s2 = ColorUtil::premultiply(((const uint32_t*)src)[2]);
+      uint32_t s3 = ColorUtil::premultiply(((const uint32_t*)src)[3]);
 
       ((uint32_t*)dst)[0] = (s0 & 0x00FFFFFFU) | (s1 << 24); s1 >>= 8;
       ((uint32_t*)dst)[1] = (s1 & 0x0000FFFFU) | (s2 << 16); s2 >>= 16;
@@ -1255,7 +1255,7 @@ struct FOG_HIDDEN DibC
 
     while (w)
     {
-      uint32_t s0 = ArgbUtil::premultiply(((const uint32_t*)src)[0]);
+      uint32_t s0 = ColorUtil::premultiply(((const uint32_t*)src)[0]);
 
       dst[RGB24_NATIVE_RBYTE] = (uint8_t)(s0 >> 16);
       dst[RGB24_NATIVE_GBYTE] = (uint8_t)(s0 >> 8);
@@ -1378,7 +1378,7 @@ struct FOG_HIDDEN DibC
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     do {
-      uint32_t s0 = ArgbUtil::premultiply(((const uint32_t*)src)[0]);
+      uint32_t s0 = ColorUtil::premultiply(((const uint32_t*)src)[0]);
 
       dst[RGB24_SWAPPED_RBYTE] = (uint8_t)(s0 >> 16);
       dst[RGB24_SWAPPED_GBYTE] = (uint8_t)(s0 >> 8);
@@ -1422,7 +1422,7 @@ struct FOG_HIDDEN DibC
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     do {
-      uint32_t s0 = ArgbUtil::premultiply(((const uint32_t*)src)[0]);
+      uint32_t s0 = ColorUtil::premultiply(((const uint32_t*)src)[0]);
       RGB16_565_NATIVE_IO::store(dst, s0);
 
       dst += 2;
@@ -1491,7 +1491,7 @@ struct FOG_HIDDEN DibC
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     do {
-      uint32_t s0 = ArgbUtil::premultiply(((const uint32_t*)src)[0]);
+      uint32_t s0 = ColorUtil::premultiply(((const uint32_t*)src)[0]);
       RGB16_565_SWAPPED_IO::store(dst, s0);
 
       dst += 2;
@@ -1529,7 +1529,7 @@ struct FOG_HIDDEN DibC
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     do {
-      uint32_t s0 = ArgbUtil::premultiply(((const uint32_t*)src)[0]);
+      uint32_t s0 = ColorUtil::premultiply(((const uint32_t*)src)[0]);
       RGB16_555_NATIVE_IO::store(dst, s0);
 
       dst += 2;
@@ -1567,7 +1567,7 @@ struct FOG_HIDDEN DibC
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     do {
-      uint32_t s0 = ArgbUtil::premultiply(((const uint32_t*)src)[0]);
+      uint32_t s0 = ColorUtil::premultiply(((const uint32_t*)src)[0]);
       RGB16_555_SWAPPED_IO::store(dst, s0);
 
       dst += 2;
@@ -1615,7 +1615,7 @@ struct FOG_HIDDEN DibC
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     do {
-      uint32_t s0 = ArgbUtil::premultiply(((const uint32_t*)src)[0]);
+      uint32_t s0 = ColorUtil::premultiply(((const uint32_t*)src)[0]);
       uint32_t grey = ((s0 >> 16) & 0xFFU) * 13938 +
                       ((s0 >>  8) & 0xFFU) * 46868 +
                       ((s0      ) & 0xFFU) *  4730 ;
@@ -1885,7 +1885,7 @@ struct FOG_HIDDEN DibC
         uint32_t pix0 = pixels[x1];
 
         if (!RasterUtil::isAlpha0xFF_ARGB32(pix0))
-          pixels[x1] = ArgbUtil::premultiply(pix0);
+          pixels[x1] = ColorUtil::premultiply(pix0);
         x1++;
       }
     } while ((span = span->getNext()) != NULL);

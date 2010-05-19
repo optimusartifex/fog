@@ -227,6 +227,12 @@ struct FOG_API SvgContext
     return val * _translateCoordData[unit];
   }
 
+  FOG_INLINE double translateCoord(double val, uint32_t unit) const
+  {
+    FOG_ASSERT(unit < SVG_UNIT_INVALID);
+    return val * (double)_translateCoordData[unit];
+  }
+
   // --------------------------------------------------------------------------
   // [Draw]
   // --------------------------------------------------------------------------

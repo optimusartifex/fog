@@ -232,6 +232,7 @@ BenchmarkMaster::BenchmarkMaster()
   _sizes.append(Fog::IntSize(32 , 32 ));
   _sizes.append(Fog::IntSize(64 , 64 ));
   _sizes.append(Fog::IntSize(128, 128));
+  _sizes.append(Fog::IntSize(256, 256));
 }
 
 BenchmarkMaster::~BenchmarkMaster()

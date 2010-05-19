@@ -12,17 +12,16 @@
 #include <Fog/Graphics/Constants.h>
 
 namespace Fog {
-namespace ArgbUtil {
+namespace ColorUtil {
 
 //! @addtogroup Fog_Graphics_Other
 //! @{
 
 // ============================================================================
-// [Fog::ArgbUtil - Premultiply / Demultiply]
+// [Fog::ColorUtil - Premultiply / Demultiply]
 // ============================================================================
 
-//! @brief Return premultiplied color (@c IMAGE_FORMAT_PRGB32) in @a x given in
-//! the @c IMAGE_FORMAT_ARGB.
+//! @brief Convert ARGB32 pixel to PRGB32.
 static FOG_INLINE uint32_t premultiply(uint32_t x)
 {
 #if FOG_ARCH_BITS == 64
@@ -45,8 +44,7 @@ static FOG_INLINE uint32_t premultiply(uint32_t x)
 #endif
 }
 
-//! @brief Return premultiplied color (@c IMAGE_FORMAT_PRGB32) in @a x given in
-//! the @c IMAGE_FORMAT_ARGB.
+//! @brief Convert ARGB32 pixel to PRGB32.
 static FOG_INLINE uint32_t premultiply(uint32_t a, uint32_t r, uint32_t g, uint32_t b)
 {
 #if FOG_ARCH_BITS == 64
@@ -67,8 +65,7 @@ static FOG_INLINE uint32_t premultiply(uint32_t a, uint32_t r, uint32_t g, uint3
 #endif
 }
 
-//! @brief Return demultiplied color (@c IMAGE_FORMAT_ARGB32) in @a x given in
-//! the @c IMAGE_FORMAT_PRGB.
+//! @brief Convert PRGB32 pixel to ARGB32.
 static FOG_INLINE uint32_t demultiply(uint32_t x)
 {
   uint32_t a = (x >> 24);
@@ -86,14 +83,15 @@ static FOG_INLINE uint32_t demultiply(uint32_t x)
 }
 
 // ============================================================================
-// [Fog::ArgbUtil - ARGB <-> AHSV]
+// [Fog::ColorUtil - ARGB <-> AHSV]
 // ============================================================================
 
-FOG_API uint32_t argbFromAhsv(float a, float h, float s, float v);
+FOG_API Argb argbFromAhsv(const Ahsv& ahsv);
+FOG_API Ahsv ahsvFromArgb(Argb argb);
 
 //! @}
 
-} // ArgbUtil namespace
+} // ColorUtil namespace
 } // Fog namespace
 
 // [Guard]

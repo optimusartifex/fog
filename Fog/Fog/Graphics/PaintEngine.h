@@ -222,8 +222,10 @@ struct FOG_API PaintEngine
 
   virtual err_t drawPoint(const IntPoint& p) = 0;
   virtual err_t drawLine(const IntPoint& start, const IntPoint& end) = 0;
+
   virtual err_t drawRect(const IntRect& r) = 0;
   virtual err_t drawRound(const IntRect& r, const IntPoint& radius) = 0;
+
   virtual err_t fillRect(const IntRect& r) = 0;
   virtual err_t fillRects(const IntRect* r, sysuint_t count) = 0;
   virtual err_t fillRound(const IntRect& r, const IntPoint& radius) = 0;
@@ -238,6 +240,7 @@ struct FOG_API PaintEngine
   virtual err_t drawPoint(const DoublePoint& p) = 0;
   virtual err_t drawLine(const DoublePoint& start, const DoublePoint& end) = 0;
   virtual err_t drawLine(const DoublePoint* pts, sysuint_t count) = 0;
+
   virtual err_t drawPolygon(const DoublePoint* pts, sysuint_t count) = 0;
   virtual err_t drawRect(const DoubleRect& r) = 0;
   virtual err_t drawRects(const DoubleRect* r, sysuint_t count) = 0;
@@ -258,8 +261,8 @@ struct FOG_API PaintEngine
   // [Glyph Drawing]
   // --------------------------------------------------------------------------
 
-  virtual err_t drawGlyph(const IntPoint&p, const Image& glyph, const IntRect* grect) = 0;
-  virtual err_t drawGlyph(const DoublePoint&p, const Image& glyph, const IntRect* grect) = 0;
+  virtual err_t drawGlyph(const IntPoint& pt, const Image& glyph, const IntRect* grect) = 0;
+  virtual err_t drawGlyph(const DoublePoint& pt, const Image& glyph, const IntRect* grect) = 0;
 
   // TODO: Addition, painting API proposal.
   //
@@ -282,7 +285,7 @@ struct FOG_API PaintEngine
   virtual err_t drawText(const IntRect& rect, const String& text, const Font& font, uint32_t align, const IntRect* clip) = 0;
   virtual err_t drawText(const DoubleRect& rect, const String& text, const Font& font, uint32_t align, const IntRect* clip) = 0;
 
-  // TODO: Addition, filtering API proposal.
+  // TODO: API Addition, filtering API proposal.
   //
   // virtual err_t drawFilteredText(const IntPoint& p, const String& text, const Font& font, const ImageFilterBase& filter, const IntRect* clip) = 0;
   // virtual err_t drawFilteredText(const DoublePoint& p, const String& text, const Font& font, const ImageFilterBase& filter, const IntRect* clip) = 0;
@@ -291,15 +294,18 @@ struct FOG_API PaintEngine
   // [Image Drawing]
   // --------------------------------------------------------------------------
 
-  virtual err_t drawImage(const IntPoint& p, const Image& image, const IntRect* irect) = 0;
-  virtual err_t drawImage(const DoublePoint& p, const Image& image, const IntRect* irect) = 0;
+  virtual err_t drawImage(const IntPoint& pt, const Image& image, const IntRect* irect) = 0;
+  virtual err_t drawImage(const DoublePoint& pt, const Image& image, const IntRect* irect) = 0;
 
-  // TODO: Addition, painting API proposal.
+  virtual err_t drawImage(const IntRect& rect, const Image& image, const IntRect* irect) = 0;
+  virtual err_t drawImage(const DoubleRect& rect, const Image& image, const IntRect* irect) = 0;
+
+  // TODO: API Addition, painting API proposal.
   //
   // virtual err_t drawMaskedImage(const IntPoint& p, const Image& image, const Image& mask, const IntRect* irect, const IntRect* mrect) = 0;
   // virtual err_t drawMaskedImage(const DoublePoint& p, const Image& image, const Image& mask, const IntRect* irect, const IntRect* mrect) = 0;
   //
-  // TODO: Addition, filtering API proposal.
+  // TODO: API Addition, filtering API proposal.
   //
   // virtual err_t drawFilteredImage(const IntPoint& p, const Image& image, const ImageFilterBase& filter, const IntRect* irect) = 0;
   // virtual err_t drawFilteredImage(const DoublePoint& p, const Image& image, const ImageFilterBase& filter, const IntRect* irect) = 0;

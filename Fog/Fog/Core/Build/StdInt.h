@@ -116,11 +116,21 @@ typedef unsigned long ulong;
 typedef int32_t err_t;
 
 #if FOG_ARCH_BITS == 32
+
+#if defined(FOG_CC_MSVC)
+// Detect 64-bit portability issues
+typedef int __w64 sysint_t;
+typedef unsigned int __w64 sysuint_t;
+#else
 typedef int32_t sysint_t;
 typedef uint32_t sysuint_t;
+#endif
+
 #else
+
 typedef int64_t sysint_t;
 typedef uint64_t sysuint_t;
+
 #endif
 
 // fixed point integer types.

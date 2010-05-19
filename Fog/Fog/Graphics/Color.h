@@ -32,9 +32,9 @@ extern FOG_API const uint32_t raster_demultiply_reciprocal_table_d[256];
 // ============================================================================
 
 #include <Fog/Core/Compiler/PackByte.h>
-//! @brief ARGB color entity.
+//! @brief Color in ARGB32 format.
 //!
-//! Used to store and manipulate with 32-bit ARGB color entity (8-bits for each
+//! Use to store and manipulate 32-bit ARGB color entities (8-bits for each
 //! component).
 struct FOG_HIDDEN Argb
 {
@@ -349,6 +349,56 @@ struct FOG_HIDDEN ArgbStop
 
   float _offset;
   Argb _argb;
+};
+
+// ============================================================================
+// [Fog::Ahsv]
+// ============================================================================
+
+//! @brief Color in AHSV (alpha, hue, saturation, value) format.
+//!
+//! Used to manipulate with 32-bit floating point colors using AHSV format.
+struct FOG_HIDDEN Ahsv
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE Ahsv() :
+    _a(1.0), _h(0.0), _s(0.0), _v(0.0)
+  {
+  }
+
+  FOG_INLINE Ahsv(float a, float h, float s, float v) :
+    _a(a), _h(h), _s(s), _v(v)
+  {
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void setAhsv(float a, float h, float s, float v)
+  { _a = a; _h = h; _s = s; _v = v; }
+
+  FOG_INLINE void setAlpha(float a) { _a = a; }
+  FOG_INLINE void setHue(float h) { _h = h; }
+  FOG_INLINE void setSaturation(float s) { _s = s; }
+  FOG_INLINE void setValue(float v) { _v = v; }
+
+  FOG_INLINE float getAlpha() const { return _a; }
+  FOG_INLINE float getHue() const { return _h; }
+  FOG_INLINE float getSaturation() const { return _s; }
+  FOG_INLINE float getValue() const { return _v; }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  float _a;
+  float _h;
+  float _s;
+  float _v;
 };
 
 //! @}

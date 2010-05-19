@@ -1,3 +1,7 @@
+2010-05-15
+- Added ARGB<->AHSV color conversion.
+- Added Painter::drawImage() that can stretch image.
+
 2010-05-12
 - Removed Fog::BitArray, currently not used and unfinished.
 - Removed Fog::ScopedHANDLE, never used too.

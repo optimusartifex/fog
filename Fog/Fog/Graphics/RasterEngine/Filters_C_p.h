@@ -155,7 +155,7 @@ struct FOG_HIDDEN FilterC
       tb = Math::bound<int>(tb, 0, 255);
       ta = Math::bound<int>(ta, 0, 255);
 
-      ((uint32_t*)dst)[0] = ArgbUtil::premultiply(ta, tr, tg, tb);
+      ((uint32_t*)dst)[0] = ColorUtil::premultiply(ta, tr, tg, tb);
       
       dst += 4;
       src += 4;

@@ -56,6 +56,19 @@ struct CairoModule_FillRect : public CairoModule
 };
 
 // ============================================================================
+// [FogBench - CairoModule_FillRectSubPX]
+// ============================================================================
+
+struct CairoModule_FillRectSubPX : public CairoModule_FillRect
+{
+  CairoModule_FillRectSubPX(int w, int h);
+  virtual ~CairoModule_FillRectSubPX();
+
+  virtual void bench(int quantity);
+  virtual Fog::String getType();
+};
+
+// ============================================================================
 // [FogBench - CairoModule_FillRectAffine]
 // ============================================================================
 

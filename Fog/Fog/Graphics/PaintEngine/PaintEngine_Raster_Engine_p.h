@@ -298,6 +298,13 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   virtual err_t drawImage(const IntPoint& p, const Image& image, const IntRect* irect);
   virtual err_t drawImage(const DoublePoint& p, const Image& image, const IntRect* irect);
 
+  virtual err_t drawImage(const IntRect& rect, const Image& image, const IntRect* irect);
+  virtual err_t drawImage(const DoubleRect& rect, const Image& image, const IntRect* irect);
+
+  err_t stretchImageHelper(
+    const DoublePoint& pt, const Image& image, const IntRect& srcRect,
+    double scaleX, double scaleY);
+
   // --------------------------------------------------------------------------
   // [Helpers - Core]
   // --------------------------------------------------------------------------
@@ -436,7 +443,7 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   err_t _serializePaintRegion(const Region& region);
   err_t _serializePaintBoxes(const IntBox* box, sysuint_t count);
   err_t _serializePaintImage(const IntRect& dst, const Image& image, const IntRect& src);
-  err_t _serializePaintImageAffine(const DoublePoint& pt, const Image& image, const IntRect* irect);
+  err_t _serializePaintImageAffine(const DoublePoint& pt, const Image& image, const IntRect& irect);
   err_t _serializePaintGlyphSet(const IntPoint& pt, const GlyphSet& glyphSet, const IntRect* clip);
   err_t _serializePaintPath(const DoublePath& path, bool stroke);
 

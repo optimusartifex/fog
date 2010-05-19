@@ -20,6 +20,12 @@
 // CTX_DELTA - Context delta (ctx->delta) or 1.
 // CTX_STRIDE_WITH_DELTA - Stride multiplied by delta or non-modified stride.
 
+#if !defined(CTX_MT_MODE)
+// Included from IDE, make it happy.
+#include <Fog/Graphics/PaintEngine/PaintEngine_Raster_Engine_p.h>
+#define CTX_MT_MODE 0
+#endif
+
 #if CTX_MT_MODE == 0
 //   1. Single-threaded
 
@@ -333,7 +339,8 @@ void RasterPaintEngine::CTX_SYMBOL(_doPaintBoxes)(
 #if CTX_MT_MODE == 0
         // Special case, fill boxes using very optimized cblit_rect() if
         // possible. This is the fastest way with the minimum overhead.
-        if (ctx->ops.op == OPERATOR_SRC)
+        if ((ctx->ops.op == OPERATOR_SRC) ||
+            (ctx->ops.op == OPERATOR_SRC_OVER && RasterUtil::isAlpha0xFF_PRGB32(ctx->solid.prgb)))
         {
           RasterCBlitRectFn cblit_rect = rasterFuncs.dib.cblit_rect[ctx->paintLayer.format];
           switch (ctx->paintLayer.bytesPerPixel)
@@ -609,26 +616,24 @@ NAME##_Again: \
               { \
                 int x2 = Math::min<int>(curSpan->getX2(), x2_box); \
                 \
+                if (curSpan->isCMask()) \
                 { \
-                  if (curSpan->isCMask()) \
+                  uint32_t msk0 = curSpan->getCMask(); \
+                  if (USE_ALPHA) \
+                    msk0 = ByteUtil::scalar_muldiv255(msk0, ALPHA); \
+                  SCANLINE.addCSpan(x1, x2, msk0); \
+                } \
+                else \
+                { \
+                  const uint8_t* mskp = curSpan->getVMask() - curSpan->getX1() + x1; \
+                  \
+                  if (USE_ALPHA) \
                   { \
-                    uint32_t msk0 = curSpan->getCMask(); \
-                    if (USE_ALPHA) \
-                      msk0 = ByteUtil::scalar_muldiv255(msk0, ALPHA); \
-                    SCANLINE.addCSpan(x1, x2, msk0); \
+                    SCANLINE.addVSpanAlphaCopyAndMul(x1, x2, curSpan->getType(), mskp, ALPHA); \
                   } \
                   else \
                   { \
-                    const uint8_t* mskp = curSpan->getVMask() - curSpan->getX1() + x1; \
-                    \
-                    if (USE_ALPHA) \
-                    { \
-                      SCANLINE.addVSpanAlphaCopyAndMul(x1, x2, curSpan->getType(), mskp, ALPHA); \
-                    } \
-                    else \
-                    { \
-                      SCANLINE.addVSpanAlphaAdopt(x1, x2, curSpan->getType(), mskp); \
-                    } \
+                    SCANLINE.addVSpanAlphaAdopt(x1, x2, curSpan->getType(), mskp); \
                   } \
                 } \
                 \
@@ -636,7 +641,9 @@ NAME##_Again: \
                 { \
                   curSpan = curSpan->getNext(); \
                   if (curSpan == NULL) goto NAME##_DoSpans; \
+                  \
                   x1 = curSpan->getX1(); \
+                  if (x1 >= x2_box) goto NAME##_RepeatBox; \
                 } \
                 else \
                 { \
@@ -1521,6 +1528,7 @@ NAME##_end: \
         { \
           Span8* maskSpan = SCANLINE.getSpans(); \
           FOG_ASSERT(maskSpan != NULL); \
+          \
           CODE \
         } \
       } \
@@ -1588,7 +1596,7 @@ NAME##_End: \
 // ============================================================================
 
 // TODO: Hardcoded to A8 glyph format.
-// TODO: Clipping.
+// TODO: Region and mask clipping not implemented yet.
 void RasterPaintEngine::CTX_SYMBOL(_doPaintGlyphSet)(
   RasterPaintContext* ctx, const IntPoint& pt, const GlyphSet& glyphSet, const IntBox& boundingBox)
 {

@@ -132,6 +132,48 @@ Fog::String Qt4Module_FillRect::getType()
 }
 
 // ============================================================================
+// [FogBench - Qt4Module_FillRectSubPX]
+// ============================================================================
+
+Qt4Module_FillRectSubPX::Qt4Module_FillRectSubPX(int w, int h) : Qt4Module_FillRect(w, h) {}
+Qt4Module_FillRectSubPX::~Qt4Module_FillRectSubPX() {}
+
+void Qt4Module_FillRectSubPX::bench(int quantity)
+{
+  QPainter p(&screen_qt4);
+  configurePainter(p);
+
+  qreal sub = qreal(0.1);
+  qreal inc = qreal(0.8) / (qreal)quantity;
+
+  if (source == BENCH_SOURCE_ARGB)
+  {
+    for (int a = 0; a < quantity; a++, sub += inc)
+    {
+      Fog::IntRect r(r_rect.data[a]);
+      Fog::Argb c(r_argb.data[a]);
+
+      p.fillRect(QRectF(sub + r.x, sub + r.y, r.w, r.h), QColor(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha()));
+    }
+  }
+  else
+  {
+    for (int a = 0; a < quantity; a++, sub += inc)
+    {
+      Fog::IntRect r(r_rect.data[a]);
+      Fog::Argb c(r_argb.data[a]);
+
+      p.fillRect(QRectF(sub + r.x, r.y, sub + r.w, r.h), setupQt4PatternForRect(r, c));
+    }
+  }
+}
+
+Fog::String Qt4Module_FillRectSubPX::getType()
+{
+  return Fog::Ascii8("FillRectSubPX");
+}
+
+// ============================================================================
 // [FogBench - Qt4Module_FillRectAffine]
 // ============================================================================
 
@@ -408,6 +450,11 @@ void Qt4BenchmarkContext::run()
     DO_BENCH(Qt4Module_FillRect      , BENCH_OPERATOR_SRC_OVER, BENCH_SOURCE_ARGB   , sizes[s].w, sizes[s].h)
     DO_BENCH(Qt4Module_FillRect      , BENCH_OPERATOR_SRC     , BENCH_SOURCE_PATTERN, sizes[s].w, sizes[s].h)
     DO_BENCH(Qt4Module_FillRect      , BENCH_OPERATOR_SRC_OVER, BENCH_SOURCE_PATTERN, sizes[s].w, sizes[s].h)
+
+    DO_BENCH(Qt4Module_FillRectSubPX , BENCH_OPERATOR_SRC     , BENCH_SOURCE_ARGB   , sizes[s].w, sizes[s].h)
+    DO_BENCH(Qt4Module_FillRectSubPX , BENCH_OPERATOR_SRC_OVER, BENCH_SOURCE_ARGB   , sizes[s].w, sizes[s].h)
+    DO_BENCH(Qt4Module_FillRectSubPX , BENCH_OPERATOR_SRC     , BENCH_SOURCE_PATTERN, sizes[s].w, sizes[s].h)
+    DO_BENCH(Qt4Module_FillRectSubPX , BENCH_OPERATOR_SRC_OVER, BENCH_SOURCE_PATTERN, sizes[s].w, sizes[s].h)
 
     DO_BENCH(Qt4Module_FillRectAffine, BENCH_OPERATOR_SRC     , BENCH_SOURCE_ARGB   , sizes[s].w, sizes[s].h)
     DO_BENCH(Qt4Module_FillRectAffine, BENCH_OPERATOR_SRC_OVER, BENCH_SOURCE_ARGB   , sizes[s].w, sizes[s].h)

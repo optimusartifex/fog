@@ -623,7 +623,7 @@ err_t RasterPaintEngine::setSource(Argb argb)
   }
   else
   {
-    ctx.solid.prgb = ArgbUtil::premultiply(argb);
+    ctx.solid.prgb = ColorUtil::premultiply(argb);
     ctx.ops.sourceFormat = IMAGE_FORMAT_PRGB32;
   }
 
@@ -1249,16 +1249,22 @@ err_t RasterPaintEngine::fillRect(const IntRect& r)
   {
     IntBox box(r);
     box.translate(ctx.finalTranslate);
-    if (!IntBox::intersect(box, box, ctx.finalClipBox)) return ERR_OK;
 
     if (ctx.finalClipType == RASTER_CLIP_SIMPLE)
     {
+      if (!IntBox::intersect(box, box, ctx.finalClipBox)) return ERR_OK;
       return _serializePaintBoxes(&box, 1);
+    }
+    else if (ctx.finalClipType == RASTER_CLIP_REGION)
+    {
+      if (!IntBox::intersect(box, box, ctx.finalClipBox)) return ERR_OK;
+      FOG_RETURN_ON_ERROR(Region::combine(tmpRegion0, ctx.finalRegion, box, REGION_OP_INTERSECT));
+      return _serializePaintRegion(tmpRegion0);
     }
     else
     {
-      FOG_RETURN_ON_ERROR(Region::combine(tmpRegion0, ctx.finalRegion, box, REGION_OP_INTERSECT));
-      return _serializePaintRegion(tmpRegion0);
+      if (!IntBox::intersect(box, box, ctx.workClipBox)) return ERR_OK;
+      return _serializePaintBoxes(&box, 1);
     }
   }
   else
@@ -1473,13 +1479,18 @@ err_t RasterPaintEngine::fillRect(const DoubleRect& r)
     {
       if (ctx.finalClipType == RASTER_CLIP_SIMPLE)
       {
-        IntBox::intersect(finalBox, finalBox, ctx.finalClipBox);
-        return (finalBox.isValid()) ? _serializePaintBoxes(&finalBox, 1) : (err_t)ERR_OK;
+        if (!IntBox::intersect(finalBox, finalBox, ctx.finalClipBox)) return ERR_OK;
+        return _serializePaintBoxes(&finalBox, 1);
       }
-      else
+      else if (ctx.finalClipType == RASTER_CLIP_REGION)
       {
         FOG_RETURN_ON_ERROR(Region::combine(tmpRegion0, ctx.finalRegion, finalBox, REGION_OP_INTERSECT));
         return _serializePaintRegion(tmpRegion0);
+      }
+      else
+      {
+        if (!IntBox::intersect(finalBox, finalBox, ctx.workClipBox)) return ERR_OK;
+        return _serializePaintBoxes(&finalBox, 1);
       }
     }
   }
@@ -1723,6 +1734,7 @@ err_t RasterPaintEngine::drawImage(const IntPoint& p, const Image& image, const 
 {
   RASTER_ENTER_PAINT_IMAGE(image);
 
+  // Check whether we can use pixel-aligned blitter (speed optimization).
   if (FOG_LIKELY(ctx.hints.transformType == RASTER_TRANSFORM_EXACT))
   {
     int srcx = 0;
@@ -1742,9 +1754,9 @@ err_t RasterPaintEngine::drawImage(const IntPoint& p, const Image& image, const 
       if (!irect->isValid()) return ERR_OK;
 
       srcx = irect->x;
-      if (srcx < 0) return ERR_OK;
+      if (srcx < 0) return ERR_RT_INVALID_ARGUMENT;
       srcy = irect->y;
-      if (srcy < 0) return ERR_OK;
+      if (srcy < 0) return ERR_RT_INVALID_ARGUMENT;
 
       dstw = Math::min(image.getWidth(), irect->getWidth());
       if (dstw == 0) return ERR_OK;
@@ -1791,8 +1803,24 @@ err_t RasterPaintEngine::drawImage(const IntPoint& p, const Image& image, const 
   }
   else
   {
+    IntRect srcRect(0, 0, image.getWidth(), image.getHeight());
+
+    if (irect)
+    {
+      // Caller must ensure that irect is valid!
+      srcRect = *irect;
+      if (!srcRect.isValid() ||
+          srcRect.x < 0 ||
+          srcRect.y < 0 ||
+          srcRect.x + srcRect.w > image.getWidth() &&
+          srcRect.y + srcRect.h > image.getHeight())
+      {
+        return ERR_RT_INVALID_ARGUMENT;
+      }
+    }
+
     DoublePoint pd((double)p.x, (double)p.y);
-    return _serializePaintImageAffine(pd, image, irect);
+    return _serializePaintImageAffine(pd, image, srcRect);
   }
 }
 
@@ -1800,6 +1828,7 @@ err_t RasterPaintEngine::drawImage(const DoublePoint& p, const Image& image, con
 {
   RASTER_ENTER_PAINT_IMAGE(image);
 
+  // Check whether we can use pixel-aligned blitter (speed optimization).
   if (ctx.hints.transformType <= RASTER_TRANSFORM_SUBPX)
   {
     int64_t xbig = (int64_t)((p.x + ctx.finalMatrix.tx) * 256.0);
@@ -1808,6 +1837,7 @@ err_t RasterPaintEngine::drawImage(const DoublePoint& p, const Image& image, con
     int xf = (int)(xbig & 0xFF);
     int yf = (int)(ybig & 0xFF);
 
+    // If resulting x and y isn't aligned then we can't use pixel-aligned blitter.
     if (xf == 0x00 && yf == 0x00)
     {
       int srcx = 0;
@@ -1876,7 +1906,131 @@ err_t RasterPaintEngine::drawImage(const DoublePoint& p, const Image& image, con
     }
   }
 
-  return _serializePaintImageAffine(p, image, irect);
+  {
+    IntRect srcRect(0, 0, image.getWidth(), image.getHeight());
+
+    if (irect)
+    {
+      // Caller must ensure that irect is valid!
+      srcRect = *irect;
+      if (!srcRect.isValid() ||
+          srcRect.x < 0 ||
+          srcRect.y < 0 ||
+          srcRect.x + srcRect.w > image.getWidth() &&
+          srcRect.y + srcRect.h > image.getHeight())
+      {
+        return ERR_RT_INVALID_ARGUMENT;
+      }
+    }
+
+    return _serializePaintImageAffine(p, image, srcRect);
+  }
+}
+
+err_t RasterPaintEngine::drawImage(const IntRect& rect, const Image& image, const IntRect* irect)
+{
+  // It's better to call drawImage() without stretching if rect size is equal to
+  // irect size.
+  if (irect)
+  {
+    if (rect.w == irect->w && rect.h == irect->h)
+      return drawImage(IntPoint(rect.x, rect.y), image, irect);
+  }
+  else
+  {
+    if (rect.w == image.getWidth() && rect.h == image.getHeight())
+      return drawImage(IntPoint(rect.x, rect.y), image, irect);
+  }
+
+  IntRect srcRect(0, 0, image.getWidth(), image.getHeight());
+  if (irect)
+  {
+    if (!irect->isValid() ||
+        irect->x < 0 ||
+        irect->y < 0 ||
+        irect->x + irect->w > srcRect.w ||
+        irect->y + irect->h > srcRect.h)
+    {
+      return ERR_RT_INVALID_ARGUMENT;
+    }
+    srcRect = *irect;
+  }
+
+  if (FOG_LIKELY(ctx.hints.transformType == RASTER_TRANSFORM_EXACT))
+  {
+    // TODO PAINTER:
+  }
+
+  // If we can't use pixel aligned blitter then we create temporary affine
+  // matrix and call image-affine serializer.
+
+  // Calculate scaling factors.
+  double scaleX = (double)rect.w / (double)srcRect.w;
+  double scaleY = (double)rect.h / (double)srcRect.h;
+
+  return stretchImageHelper(DoublePoint(rect.x, rect.y), image, srcRect, scaleX, scaleY);
+}
+
+err_t RasterPaintEngine::drawImage(const DoubleRect& rect, const Image& image, const IntRect* irect)
+{
+  // Check whether we can use pixel-aligned blitter (speed optimization).
+  /*
+  // TODO PAINTER:
+  if (FOG_LIKELY(ctx.hints.transformType <= RASTER_TRANSFORM_SUBPX))
+  {
+    int w = (rect.w * 256.0);
+    int h = (rect.h * 256.0);
+
+    // If width is not aligned we can't use the pixel-aligned blitter.
+    if ((w & 0xFF) == 0x00 && (h & 0xFF) == 0x00)
+    {
+      int x = (rect.x * 256.0);
+      int y = (rect.y * 256.0);
+    }
+  }
+  */
+
+  IntRect srcRect(0, 0, image.getWidth(), image.getHeight());
+  if (irect)
+  {
+    if (!irect->isValid() ||
+        irect->x < 0 ||
+        irect->y < 0 ||
+        irect->x + irect->w > srcRect.w ||
+        irect->y + irect->h > srcRect.h)
+    {
+      return ERR_RT_INVALID_ARGUMENT;
+    }
+    srcRect = *irect;
+  }
+
+  double scaleX = rect.w / (double)srcRect.w;
+  double scaleY = rect.h / (double)srcRect.h;
+
+  return stretchImageHelper(DoublePoint(rect.x, rect.y), image, srcRect, scaleX, scaleY);
+}
+
+err_t RasterPaintEngine::stretchImageHelper(
+  const DoublePoint& pt, const Image& image, const IntRect& srcRect,
+  double scaleX, double scaleY)
+{
+  DoubleMatrix savedMatrix(ctx.userMatrix);
+  DoubleMatrix newMatrix(ctx.userMatrix);
+
+  newMatrix.scale(scaleX, scaleY, MATRIX_PREPEND);
+  newMatrix.tx += pt.x;
+  newMatrix.ty += pt.y;
+
+  // I don't know what evil can happen there, but if it failed we should return.
+  err_t err = setMatrix(newMatrix);
+  if (err) return err;
+
+  // This is the error value we want to return.
+  err = _serializePaintImageAffine(DoublePoint(0.0, 0.0), image, srcRect);
+
+  // Okay, restore the matrix and return.
+  setMatrix(savedMatrix);
+  return err;
 }
 
 // ============================================================================
@@ -2686,7 +2840,7 @@ err_t RasterPaintEngine::_serializePaintImage(const IntRect& dst, const Image& i
   return ERR_OK;
 }
 
-err_t RasterPaintEngine::_serializePaintImageAffine(const DoublePoint& pt, const Image& image, const IntRect* irect)
+err_t RasterPaintEngine::_serializePaintImageAffine(const DoublePoint& pt, const Image& image, const IntRect& irect)
 {
   FOG_ASSERT(!image.isEmpty());
 
@@ -2697,12 +2851,9 @@ err_t RasterPaintEngine::_serializePaintImageAffine(const DoublePoint& pt, const
   tr.transformPoint(&pt_.x, &pt_.y);
   DoubleMatrix matrix(tr.sx, tr.shy, tr.shx, tr.sy, pt_.x, pt_.y);
 
-  IntRect ir(0, 0, image.getWidth(), image.getHeight());
-  if (irect) ir = *irect;
-
   // Make the path.
   curPath.clear();
-  curPath.addRect(DoubleRect(pt.x, pt.y, (double)ir.w, (double)ir.h));
+  curPath.addRect(DoubleRect(pt.x, pt.y, (double)irect.w, (double)irect.h));
 
   // Singlethreaded.
   if (isSingleThreaded())
@@ -2718,7 +2869,7 @@ err_t RasterPaintEngine::_serializePaintImageAffine(const DoublePoint& pt, const
       RasterPattern imagectx;
       imagectx.initialized = false;
       rasterFuncs.pattern.texture_init_blit(&imagectx,
-        image, ir, matrix, PATTERN_SPREAD_PAD, ctx.hints.imageInterpolation);
+        image, irect, matrix, PATTERN_SPREAD_PAD, ctx.hints.imageInterpolation);
 
       ctx.ops.sourceType = PAINTER_SOURCE_PATTERN;
       ctx.pctx = &imagectx;
@@ -2752,7 +2903,7 @@ err_t RasterPaintEngine::_serializePaintImageAffine(const DoublePoint& pt, const
 
     imagectx->initialized = false;
     rasterFuncs.pattern.texture_init_blit(
-      imagectx, image, ir, matrix, PATTERN_SPREAD_PAD, ctx.hints.imageInterpolation);
+      imagectx, image, irect, matrix, PATTERN_SPREAD_PAD, ctx.hints.imageInterpolation);
     imagectx->refCount.init(1);
 
     RasterPaintCmdPath* cmd = _createCommand<RasterPaintCmdPath>();

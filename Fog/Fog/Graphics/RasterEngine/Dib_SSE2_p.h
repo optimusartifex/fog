@@ -220,17 +220,318 @@ struct FOG_HIDDEN DibSSE2
   }
 
   // --------------------------------------------------------------------------
-  // [DibSSE2 - Rect]
+  // [DibSSE2 - CBlit - Rect]
   // --------------------------------------------------------------------------
 
-  static void FOG_FASTCALL cblit_rect_32_helper(
+#if 1
+  static void cblit_rect_32_helper(
     uint8_t* dst, sysint_t dstStride,
-    __m128i src0xmm,
+    uint32_t src0,
+    int w, int h)
+  {
+    FOG_ASSERT(w > 0 && h > 0);
+
+    if (w < 8)
+    {
+      dst -= (w - 7) * 4;
+
+      do {
+        switch (w)
+        {
+          case 7: ((uint32_t*)dst)[0] = src0;
+          case 6: ((uint32_t*)dst)[1] = src0;
+          case 5: ((uint32_t*)dst)[2] = src0;
+          case 4: ((uint32_t*)dst)[3] = src0;
+          case 3: ((uint32_t*)dst)[4] = src0;
+          case 2: ((uint32_t*)dst)[5] = src0;
+          case 1: ((uint32_t*)dst)[6] = src0;
+            break;
+          default:
+            FOG_ASSERT_NOT_REACHED();
+            dst += dstStride;
+        }
+      } while (--h);
+    }
+    else
+    {
+      __m128i src0xmm = _mm_cvtsi32_si128(src0);
+      sse2_expand_pixel_lo_1x4B(src0xmm, src0xmm);
+
+      dstStride -= w * 4;
+
+      // For 4-byte store we are using general purpose register instead of sse2
+      // one, because the instruction is smaller and MSVC is unable to generate
+      // good code.
+      do {
+        int i = w;
+
+        sse2_prefetch_t0(dst + 64);
+
+        while (sysuint_t(dst) & 15)
+        {
+          ((uint32_t*)dst)[0] = src0;
+          dst += 4;
+          if (--i == 0) goto largeWidthSkip;
+        }
+
+        while (i >= 32)
+        {
+          sse2_prefetch_t0(dst + 128);
+
+          sse2_store16a(dst +   0, src0xmm);
+          sse2_store16a(dst +  16, src0xmm);
+          sse2_store16a(dst +  32, src0xmm);
+          sse2_store16a(dst +  48, src0xmm);
+          sse2_store16a(dst +  64, src0xmm);
+          sse2_store16a(dst +  80, src0xmm);
+          sse2_store16a(dst +  96, src0xmm);
+          sse2_store16a(dst + 112, src0xmm);
+
+          dst += 128;
+          i -= 32;
+        }
+
+        if (i >= 16)
+        {
+          sse2_prefetch_t0(dst + 64);
+
+          sse2_store16a(dst +   0, src0xmm);
+          sse2_store16a(dst +  16, src0xmm);
+          sse2_store16a(dst +  32, src0xmm);
+          sse2_store16a(dst +  48, src0xmm);
+
+          dst += 64;
+          i -= 16;
+        }
+
+        if (i >= 8)
+        {
+          sse2_store16a(dst +   0, src0xmm);
+          sse2_store16a(dst +  16, src0xmm);
+
+          dst += 32;
+          i -= 8;
+        }
+
+        switch (i)
+        {
+          case  7: ((uint32_t*)dst)[0] = src0; dst += 4;
+          case  6: ((uint32_t*)dst)[0] = src0; dst += 4;
+          case  5: ((uint32_t*)dst)[0] = src0; dst += 4;
+          case  4: ((uint32_t*)dst)[0] = src0; dst += 4;
+          case  3: ((uint32_t*)dst)[0] = src0; dst += 4;
+          case  2: ((uint32_t*)dst)[0] = src0; dst += 4;
+          case  1: ((uint32_t*)dst)[0] = src0; dst += 4;
+        }
+
+largeWidthSkip:
+        dst += dstStride;
+      } while (--h);
+    }
+  }
+#endif
+
+#if 0
+  // This is cblit_rect_32 version that can prefetch next scanline, instead of
+  // prefetching next bytes. The benchmarks say some speed improvement, but I'm
+  // not sure how the old hardware behaves, the improvement isn't so great to
+  // turn it on now.
+  //
+  // - Petr
+  static void cblit_rect_32_helper(
+    uint8_t* dst, sysint_t dstStride,
+    uint32_t src0,
+    int w, int h)
+  {
+    FOG_ASSERT(w > 0 && h > 0);
+
+    if (w < 8)
+    {
+      dst -= (7 - w) * 4;
+
+      do {
+        switch (w)
+        {
+          case 7: ((uint32_t*)dst)[0] = src0;
+          case 6: ((uint32_t*)dst)[1] = src0;
+          case 5: ((uint32_t*)dst)[2] = src0;
+          case 4: ((uint32_t*)dst)[3] = src0;
+          case 3: ((uint32_t*)dst)[4] = src0;
+          case 2: ((uint32_t*)dst)[5] = src0;
+          case 1: ((uint32_t*)dst)[6] = src0;
+            break;
+          default:
+            FOG_ASSERT_NOT_REACHED();
+            dst += dstStride;
+        }
+      } while (--h);
+    }
+    else
+    {
+      uint8_t* dstNext = dst + dstStride;
+
+      __m128i src0xmm = _mm_cvtsi32_si128(src0);
+      sse2_expand_pixel_lo_1x4B(src0xmm, src0xmm);
+
+      dstStride -= w * 4;
+
+      // For 4-byte store we are using general purpose register instead of sse2
+      // one, because the instruction is smaller and MSVC is unable to generate
+      // good code.
+
+      // Do all scanlines except the last one.
+      while (--h)
+      {
+        int i = w;
+
+        sse2_prefetch_t0(dstNext);
+
+        while (sysuint_t(dst) & 15)
+        {
+          ((uint32_t*)dst)[0] = src0;
+          dst += 4;
+          dstNext += 4;
+          if (--i == 0) goto largeWidthSkip;
+        }
+
+        while (i >= 32)
+        {
+          sse2_prefetch_t0(dstNext);
+
+          sse2_store16a(dst +   0, src0xmm);
+          sse2_store16a(dst +  16, src0xmm);
+          sse2_store16a(dst +  32, src0xmm);
+          sse2_store16a(dst +  48, src0xmm);
+          sse2_prefetch_t0(dstNext + 64);
+          sse2_store16a(dst +  64, src0xmm);
+          sse2_store16a(dst +  80, src0xmm);
+          sse2_store16a(dst +  96, src0xmm);
+          sse2_store16a(dst + 112, src0xmm);
+
+          dst += 128;
+          dstNext += 128;
+          i -= 32;
+        }
+
+        if (i >= 16)
+        {
+          sse2_prefetch_t0(dstNext);
+
+          sse2_store16a(dst +   0, src0xmm);
+          sse2_store16a(dst +  16, src0xmm);
+          sse2_store16a(dst +  32, src0xmm);
+          sse2_store16a(dst +  48, src0xmm);
+
+          dst += 64;
+          dstNext += 64;
+          i -= 16;
+        }
+
+        if (i >= 8)
+        {
+          sse2_store16a(dst +   0, src0xmm);
+          sse2_store16a(dst +  16, src0xmm);
+
+          dst += 32;
+          dstNext += 32;
+          i -= 8;
+        }
+
+        switch (i)
+        {
+          case  7: ((uint32_t*)dst)[0] = src0; dst += 4;
+          case  6: ((uint32_t*)dst)[0] = src0; dst += 4;
+          case  5: ((uint32_t*)dst)[0] = src0; dst += 4;
+          case  4: ((uint32_t*)dst)[0] = src0; dst += 4;
+          case  3: ((uint32_t*)dst)[0] = src0; dst += 4;
+          case  2: ((uint32_t*)dst)[0] = src0; dst += 4;
+          case  1: ((uint32_t*)dst)[0] = src0; dst += 4;
+        }
+        dstNext += i * 4;
+
+largeWidthSkip:
+        dst += dstStride;
+        dstNext += dstStride;
+      }
+
+      {
+        int i = w;
+
+        sse2_prefetch_t0(dst + 64);
+
+        while (sysuint_t(dst) & 15)
+        {
+          ((uint32_t*)dst)[0] = src0;
+          dst += 4;
+          if (--i == 0) goto tailWidthSkip;
+        }
+
+        while (i >= 32)
+        {
+          sse2_prefetch_t0(dst + 128);
+
+          sse2_store16a(dst +   0, src0xmm);
+          sse2_store16a(dst +  16, src0xmm);
+          sse2_store16a(dst +  32, src0xmm);
+          sse2_store16a(dst +  48, src0xmm);
+          sse2_store16a(dst +  64, src0xmm);
+          sse2_store16a(dst +  80, src0xmm);
+          sse2_store16a(dst +  96, src0xmm);
+          sse2_store16a(dst + 112, src0xmm);
+
+          dst += 128;
+          i -= 32;
+        }
+
+        if (i >= 16)
+        {
+          sse2_prefetch_t0(dst + 64);
+
+          sse2_store16a(dst +   0, src0xmm);
+          sse2_store16a(dst +  16, src0xmm);
+          sse2_store16a(dst +  32, src0xmm);
+          sse2_store16a(dst +  48, src0xmm);
+
+          dst += 64;
+          i -= 16;
+        }
+
+        if (i >= 8)
+        {
+          sse2_store16a(dst +   0, src0xmm);
+          sse2_store16a(dst +  16, src0xmm);
+
+          dst += 32;
+          i -= 8;
+        }
+
+        switch (i)
+        {
+          case  7: ((uint32_t*)dst)[0] = src0; dst += 4;
+          case  6: ((uint32_t*)dst)[0] = src0; dst += 4;
+          case  5: ((uint32_t*)dst)[0] = src0; dst += 4;
+          case  4: ((uint32_t*)dst)[0] = src0; dst += 4;
+          case  3: ((uint32_t*)dst)[0] = src0; dst += 4;
+          case  2: ((uint32_t*)dst)[0] = src0; dst += 4;
+          case  1: ((uint32_t*)dst)[0] = src0; dst += 4;
+        }
+
+tailWidthSkip:
+        dst += dstStride;
+      }
+    }
+  }
+#endif
+
+  static void FOG_INLINE cblit_rect_32_nt_helper(
+    uint8_t* dst, sysint_t dstStride,
+    uint32_t src0,
     int w, int h)
   {
     FOG_ASSERT(w > 0 && h > 0);
     dstStride -= w * 4;
 
+    __m128i src0xmm = _mm_cvtsi32_si128(src0);
     sse2_expand_pixel_lo_1x4B(src0xmm, src0xmm);
 
     do {
@@ -238,39 +539,55 @@ struct FOG_HIDDEN DibSSE2
 
       while (sysuint_t(dst) & 15)
       {
-        sse2_store4(dst, src0xmm);
+        sse2_store4_nt(dst, src0);
         dst += 4;
         if (--i == 0) goto skip;
       }
 
-      while (i >= 16)
+      while (i >= 32)
       {
-        sse2_store16a(dst + 0, src0xmm);
-        sse2_store16a(dst + 16, src0xmm);
-        sse2_store16a(dst + 32, src0xmm);
-        sse2_store16a(dst + 48, src0xmm);
+        sse2_store16a_nt(dst +   0, src0xmm);
+        sse2_store16a_nt(dst +  16, src0xmm);
+        sse2_store16a_nt(dst +  32, src0xmm);
+        sse2_store16a_nt(dst +  48, src0xmm);
+        sse2_store16a_nt(dst +  64, src0xmm);
+        sse2_store16a_nt(dst +  80, src0xmm);
+        sse2_store16a_nt(dst +  96, src0xmm);
+        sse2_store16a_nt(dst + 112, src0xmm);
+
+        dst += 128;
+        i -= 32;
+      }
+
+      if (i >= 16)
+      {
+        sse2_store16a_nt(dst +   0, src0xmm);
+        sse2_store16a_nt(dst +  16, src0xmm);
+        sse2_store16a_nt(dst +  32, src0xmm);
+        sse2_store16a_nt(dst +  48, src0xmm);
 
         dst += 64;
         i -= 16;
       }
 
-      switch (i & 15)
+      if (i >= 8)
       {
-        case 15: sse2_store4(dst, src0xmm); dst += 4;
-        case 14: sse2_store4(dst, src0xmm); dst += 4;
-        case 13: sse2_store4(dst, src0xmm); dst += 4;
-        case 12: sse2_store4(dst, src0xmm); dst += 4;
-        case 11: sse2_store4(dst, src0xmm); dst += 4;
-        case 10: sse2_store4(dst, src0xmm); dst += 4;
-        case  9: sse2_store4(dst, src0xmm); dst += 4;
-        case  8: sse2_store4(dst, src0xmm); dst += 4;
-        case  7: sse2_store4(dst, src0xmm); dst += 4;
-        case  6: sse2_store4(dst, src0xmm); dst += 4;
-        case  5: sse2_store4(dst, src0xmm); dst += 4;
-        case  4: sse2_store4(dst, src0xmm); dst += 4;
-        case  3: sse2_store4(dst, src0xmm); dst += 4;
-        case  2: sse2_store4(dst, src0xmm); dst += 4;
-        case  1: sse2_store4(dst, src0xmm); dst += 4;
+        sse2_store16a_nt(dst +   0, src0xmm);
+        sse2_store16a_nt(dst +  16, src0xmm);
+
+        dst += 32;
+        i -= 8;
+      }
+
+      switch (i)
+      {
+        case  7: sse2_store4_nt(dst, src0); dst += 4;
+        case  6: sse2_store4_nt(dst, src0); dst += 4;
+        case  5: sse2_store4_nt(dst, src0); dst += 4;
+        case  4: sse2_store4_nt(dst, src0); dst += 4;
+        case  3: sse2_store4_nt(dst, src0); dst += 4;
+        case  2: sse2_store4_nt(dst, src0); dst += 4;
+        case  1: sse2_store4_nt(dst, src0); dst += 4;
       }
 
 skip:
@@ -283,9 +600,7 @@ skip:
     const RasterSolid* src,
     int w, int h, const RasterClosure* closure)
   {
-    __m128i src0xmm;
-    sse2_load4(src0xmm, &src->prgb);
-    cblit_rect_32_helper(dst, dstStride, src0xmm, w, h);
+    cblit_rect_32_helper(dst, dstStride, src->prgb, w, h);
   }
 
   static void FOG_FASTCALL cblit_rect_32_argb(
@@ -293,10 +608,28 @@ skip:
     const RasterSolid* src,
     int w, int h, const RasterClosure* closure)
   {
-    __m128i src0xmm;
-    sse2_load4(src0xmm, &src->argb);
-    cblit_rect_32_helper(dst, dstStride, src0xmm, w, h);
+    cblit_rect_32_helper(dst, dstStride, src->argb, w, h);
   }
+
+  static void FOG_FASTCALL cblit_rect_32_nt_prgb(
+    uint8_t* dst, sysint_t dstStride,
+    const RasterSolid* src,
+    int w, int h, const RasterClosure* closure)
+  {
+    cblit_rect_32_nt_helper(dst, dstStride, src->prgb, w, h);
+  }
+
+  static void FOG_FASTCALL cblit_rect_32_nt_argb(
+    uint8_t* dst, sysint_t dstStride,
+    const RasterSolid* src,
+    int w, int h, const RasterClosure* closure)
+  {
+    cblit_rect_32_nt_helper(dst, dstStride, src->argb, w, h);
+  }
+
+  // --------------------------------------------------------------------------
+  // [DibSSE2 - VBlit - Rect]
+  // --------------------------------------------------------------------------
 
   static void FOG_FASTCALL vblit_rect_32(
     uint8_t* dst, sysint_t dstStride,
@@ -387,6 +720,102 @@ skip:
         case  3: Memory::copy4B(dst, src); dst += 4; src += 4;
         case  2: Memory::copy4B(dst, src); dst += 4; src += 4;
         case  1: Memory::copy4B(dst, src); dst += 4; src += 4;
+      }
+skip:
+      dst += dstStride;
+      src += srcStride;
+    } while (--h);
+  }
+
+  static void FOG_FASTCALL vblit_rect_32_nt(
+    uint8_t* dst, sysint_t dstStride,
+    const uint8_t* src, sysint_t srcStride,
+    int w, int h, const RasterClosure* closure)
+  {
+    FOG_ASSERT(w > 0 && h > 0);
+
+    dstStride -= w * 4;
+    srcStride -= w * 4;
+
+    do {
+      int i = w;
+
+      while ((sysuint_t)dst & 15)
+      {
+        sse2_store4_nt(dst, READ_32(src));
+        dst += 4;
+        src += 4;
+        if (--i == 0) goto skip;
+      }
+
+      if ((sysuint_t)src & 15)
+      {
+        while (i >= 16)
+        {
+          __m128i src0mm;
+          __m128i src1mm;
+          __m128i src2mm;
+          __m128i src3mm;
+
+          _mm_prefetch((const char*)(src + 64), _MM_HINT_T0);
+
+          sse2_load16u(src0mm, src + 0);
+          sse2_load16u(src1mm, src + 16);
+          sse2_load16u(src2mm, src + 32);
+          sse2_load16u(src3mm, src + 48);
+          sse2_store16a_nt(dst + 0, src0mm);
+          sse2_store16a_nt(dst + 16, src1mm);
+          sse2_store16a_nt(dst + 32, src2mm);
+          sse2_store16a_nt(dst + 48, src3mm);
+
+          dst += 64;
+          src += 64;
+          i -= 16;
+        }
+      }
+      else
+      {
+        while (i >= 16)
+        {
+          __m128i src0mm;
+          __m128i src1mm;
+          __m128i src2mm;
+          __m128i src3mm;
+
+          _mm_prefetch((const char*)(src + 64), _MM_HINT_T0);
+
+          sse2_load16a(src0mm, src + 0);
+          sse2_load16a(src1mm, src + 16);
+          sse2_load16a(src2mm, src + 32);
+          sse2_load16a(src3mm, src + 48);
+          sse2_store16a_nt(dst + 0, src0mm);
+          sse2_store16a_nt(dst + 16, src1mm);
+          sse2_store16a_nt(dst + 32, src2mm);
+          sse2_store16a_nt(dst + 48, src3mm);
+
+          dst += 64;
+          src += 64;
+          i -= 16;
+        }
+      }
+
+      switch (i)
+      {
+        case 15: sse2_store4_nt(dst, READ_32(src)); dst += 4; src += 4;
+        case 14: sse2_store4_nt(dst, READ_32(src)); dst += 4; src += 4;
+        case 13: sse2_store4_nt(dst, READ_32(src)); dst += 4; src += 4;
+        case 12: sse2_store4_nt(dst, READ_32(src)); dst += 4; src += 4;
+        case 11: sse2_store4_nt(dst, READ_32(src)); dst += 4; src += 4;
+        case 10: sse2_store4_nt(dst, READ_32(src)); dst += 4; src += 4;
+        case  9: sse2_store4_nt(dst, READ_32(src)); dst += 4; src += 4;
+        case  8: sse2_store4_nt(dst, READ_32(src)); dst += 4; src += 4;
+        case  7: sse2_store4_nt(dst, READ_32(src)); dst += 4; src += 4;
+        case  6: sse2_store4_nt(dst, READ_32(src)); dst += 4; src += 4;
+        case  5: sse2_store4_nt(dst, READ_32(src)); dst += 4; src += 4;
+        case  4: sse2_store4_nt(dst, READ_32(src)); dst += 4; src += 4;
+        case  3: sse2_store4_nt(dst, READ_32(src)); dst += 4; src += 4;
+        case  2: sse2_store4_nt(dst, READ_32(src)); dst += 4; src += 4;
+        case  1: sse2_store4_nt(dst, READ_32(src)); dst += 4; src += 4;
       }
 skip:
       dst += dstStride;

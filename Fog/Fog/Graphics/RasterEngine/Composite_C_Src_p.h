@@ -263,7 +263,7 @@ vMaskAlphaSparseSkip:
     {
       do {
         uint32_t src0 = READ_32(src);
-        if (!RasterUtil::isAlpha0xFF_ARGB32(src0)) src0 = ArgbUtil::premultiply(src0);
+        if (!RasterUtil::isAlpha0xFF_ARGB32(src0)) src0 = ColorUtil::premultiply(src0);
         ((uint32_t*)dst)[0] = src0;
 
         dst += 4;

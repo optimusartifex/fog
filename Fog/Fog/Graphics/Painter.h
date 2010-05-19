@@ -440,13 +440,23 @@ struct FOG_API Painter
   // [Raster Drawing]
   // --------------------------------------------------------------------------
 
+  //! @brief Draw point.
   FOG_INLINE err_t drawPoint(const IntPoint& p) { return _engine->drawPoint(p); }
+  //! @brief Draw line.
   FOG_INLINE err_t drawLine(const IntPoint& start, const IntPoint& end) { return _engine->drawLine(start, end); }
+
+  //! @brief Draw rectangle.
   FOG_INLINE err_t drawRect(const IntRect& r) { return _engine->drawRect(r); }
+  //! @brief Draw rounded rectangle.
   FOG_INLINE err_t drawRound(const IntRect& r, const IntPoint& radius) { return _engine->drawRound(r, radius); }
+
+  //! @brief Fill rectangle.
   FOG_INLINE err_t fillRect(const IntRect& r) { return _engine->fillRect(r); }
+  //! @brief Fill rectangles.
   FOG_INLINE err_t fillRects(const IntRect* r, sysuint_t count) { return _engine->fillRects(r, count); }
+  //! @brief Fill rounded rectangle.
   FOG_INLINE err_t fillRound(const IntRect& r, const IntPoint& radius) { return _engine->fillRound(r, radius); }
+  //! @brief Fill region.
   FOG_INLINE err_t fillRegion(const Region& region) { return _engine->fillRegion(region); }
 
   FOG_INLINE err_t fillAll() { return _engine->fillAll(); }
@@ -455,23 +465,41 @@ struct FOG_API Painter
   // [Vector Drawing]
   // --------------------------------------------------------------------------
 
+  //! @brief Draw point.
   FOG_INLINE err_t drawPoint(const DoublePoint& p) { return _engine->drawPoint(p); }
+  //! @brief Draw line.
   FOG_INLINE err_t drawLine(const DoublePoint& start, const DoublePoint& end) { return _engine->drawLine(start, end); }
+  //! @brief Draw poly-line.
   FOG_INLINE err_t drawLine(const DoublePoint* pts, sysuint_t count) { return _engine->drawLine(pts, count); }
+
+  //! @brief Draw polygon.
   FOG_INLINE err_t drawPolygon(const DoublePoint* pts, sysuint_t count) { return _engine->drawPolygon(pts, count); }
+  //! @brief Draw rectangle.
   FOG_INLINE err_t drawRect(const DoubleRect& r) { return _engine->drawRect(r); }
+  //! @brief Draw rectangles.
   FOG_INLINE err_t drawRects(const DoubleRect* r, sysuint_t count) { return _engine->drawRects(r, count); }
+  //! @brief Draw rounded rectangle.
   FOG_INLINE err_t drawRound(const DoubleRect& r, const DoublePoint& radius) { return _engine->drawRound(r, radius); }
+  //! @brief Draw ellipse.
   FOG_INLINE err_t drawEllipse(const DoublePoint& cp, const DoublePoint& r) { return _engine->drawEllipse(cp, r); }
+  //! @brief Draw arc.
   FOG_INLINE err_t drawArc(const DoublePoint& cp, const DoublePoint& r, double start, double sweep) { return _engine->drawArc(cp, r, start, sweep); }
+  //! @brief Draw path.
   FOG_INLINE err_t drawPath(const DoublePath& path) { return _engine->drawPath(path); }
 
+  //! @brief Fill polygon.
   FOG_INLINE err_t fillPolygon(const DoublePoint* pts, sysuint_t count) { return _engine->fillPolygon(pts, count); }
+  //! @brief Fill rectangle.
   FOG_INLINE err_t fillRect(const DoubleRect& r) { return _engine->fillRect(r); }
+  //! @brief Fill rectangles.
   FOG_INLINE err_t fillRects(const DoubleRect* r, sysuint_t count) { return _engine->fillRects(r, count); }
+  //! @brief Fill rounded rectangle.
   FOG_INLINE err_t fillRound(const DoubleRect& r, const DoublePoint& radius) { return _engine->fillRound(r, radius); }
+  //! @brief Fill ellipse.
   FOG_INLINE err_t fillEllipse(const DoublePoint& cp, const DoublePoint& r) { return _engine->fillEllipse(cp, r); }
+  //! @brief Fill arc.
   FOG_INLINE err_t fillArc(const DoublePoint& cp, const DoublePoint& r, double start, double sweep) { return _engine->fillArc(cp, r, start, sweep); }
+  //! @brief Fill path.
   FOG_INLINE err_t fillPath(const DoublePath& path) { return _engine->fillPath(path); }
 
   // --------------------------------------------------------------------------
@@ -516,17 +544,37 @@ struct FOG_API Painter
   // [Image Drawing]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t drawImage(const IntPoint& p, const Image& image)
-  { return _engine->drawImage(p, image, NULL); }
+  //! @brief Draw image at position @a pt.
+  FOG_INLINE err_t drawImage(const IntPoint& pt, const Image& image)
+  { return _engine->drawImage(pt, image, NULL); }
 
-  FOG_INLINE err_t drawImage(const IntPoint& p, const Image& image, const IntRect& irect)
-  { return _engine->drawImage(p, image, &irect); }
+  //! @brief Draw part of image given by @a irect at position @a pt.
+  FOG_INLINE err_t drawImage(const IntPoint& pt, const Image& image, const IntRect& irect)
+  { return _engine->drawImage(pt, image, &irect); }
 
-  FOG_INLINE err_t drawImage(const DoublePoint& p, const Image& image)
-  { return _engine->drawImage(p, image, NULL); }
+  //! @brief Draw image at position @a pt.
+  FOG_INLINE err_t drawImage(const DoublePoint& pt, const Image& image)
+  { return _engine->drawImage(pt, image, NULL); }
 
-  FOG_INLINE err_t drawImage(const DoublePoint& p, const Image& image, const IntRect& irect)
-  { return _engine->drawImage(p, image, &irect); }
+  //! @brief Draw part of image given by @a irect at position @a pt.
+  FOG_INLINE err_t drawImage(const DoublePoint& pt, const Image& image, const IntRect& irect)
+  { return _engine->drawImage(pt, image, &irect); }
+
+  //! @brief Stretch and draw image to @a rect.
+  FOG_INLINE err_t drawImage(const IntRect& rect, const Image& image)
+  { return _engine->drawImage(rect, image, NULL); }
+
+  //! @brief Stretch and draw part of image given by @a irect to @a rect.
+  FOG_INLINE err_t drawImage(const IntRect& rect, const Image& image, const IntRect& irect)
+  { return _engine->drawImage(rect, image, &irect); }
+
+  //! @brief Stretch and draw image to @a rect.
+  FOG_INLINE err_t drawImage(const DoubleRect& rect, const Image& image)
+  { return _engine->drawImage(rect, image, NULL); }
+
+  //! @brief Stretch and draw part of image given by @a irect to @a rect.
+  FOG_INLINE err_t drawImage(const DoubleRect& rect, const Image& image, const IntRect& irect)
+  { return _engine->drawImage(rect, image, &irect); }
 
   // --------------------------------------------------------------------------
   // [Statics]

@@ -42,7 +42,7 @@ namespace Fog {
 //! 3. Finalize scanline using @c endScanline().
 struct FOG_HIDDEN Scanline8
 {
-  enum { INVALID_SPAN = 0x7FFFFFF0 };
+  enum { INVALID_SPAN = 0x1FFFFFF0 };
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]

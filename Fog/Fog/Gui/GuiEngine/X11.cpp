@@ -480,7 +480,7 @@ void X11GuiEngine::updateDisplayInfo()
 void X11GuiEngine::doUpdate()
 {
   BaseGuiEngine::doUpdate();
-  pXFlush(_display);
+  pXSync(_display, false);
 }
 
 void X11GuiEngine::doBlitWindow(GuiWindow* window, const IntBox* rects, sysuint_t count)
@@ -1384,7 +1384,8 @@ void X11GuiWindow::onX11Event(XEvent* xe)
       _xflags |= XFlag_Configured;
 
       // Don't process old configure events.
-      while (engine->pXCheckTypedWindowEvent(engine->getDisplay(), xe->xany.window, XConfigureNotify, xe)) ;
+      while (engine->pXCheckTypedWindowEvent(engine->getDisplay(), xe->xany.window, XConfigureNotify, xe)) 
+        continue;
 
       IntRect windowRect(
         xe->xconfigure.x,
@@ -1546,7 +1547,8 @@ __keyPressNoXIC:
       else
       {
         // Eat all events, because we will repaint later (in update process).
-        while (engine->pXCheckTypedWindowEvent(engine->getDisplay(), xe->xany.window, XExpose, xe)) ;
+        while (engine->pXCheckTypedWindowEvent(engine->getDisplay(), xe->xany.window, XExpose, xe))
+          continue;
         _needBlit = true;
       }
       break;
@@ -2054,6 +2056,8 @@ void X11GuiBackBuffer::blitRects(XID target, const IntBox* rects, sysuint_t coun
         int y = rects[i].getY();
         int w = rects[i].getWidth();
         int h = rects[i].getHeight();
+
+        // printf("Blitting [%d %d %d %d]\n", x, y, w, h);
 
         engine->pXCopyArea(
           engine->getDisplay(),

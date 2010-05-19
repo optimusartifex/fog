@@ -53,6 +53,19 @@ struct FogModule_FillRect : public FogModule
 };
 
 // ============================================================================
+// [FogBench - FogModule_FillRectSubPX]
+// ============================================================================
+
+struct FogModule_FillRectSubPX : public FogModule_FillRect
+{
+  FogModule_FillRectSubPX(int w, int h);
+  virtual ~FogModule_FillRectSubPX();
+
+  virtual void bench(int quantity);
+  virtual Fog::String getType();
+};
+
+// ============================================================================
 // [FogBench - FogModule_FillRectAffine]
 // ============================================================================
 

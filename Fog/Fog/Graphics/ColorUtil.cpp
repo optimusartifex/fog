@@ -4,20 +4,26 @@
 // MIT, See COPYING file in package
 
 // [Dependencies]
+#include <Fog/Core/Math.h>
 #include <Fog/Graphics/Color.h>
 #include <Fog/Graphics/ColorUtil.h>
 
 namespace Fog {
-namespace ArgbUtil {
+namespace ColorUtil {
 
 // ============================================================================
-// [Fog::ArgbUtil - RGB <-> HSV]
+// [Fog::ColorUtil - ARGB <-> AHSV]
 // ============================================================================
 
-uint32_t argbFromAhsv(float a, float h, float s, float v)
+Argb argbFromAhsv(const Ahsv& ahsv)
 {
   int ai, hi, si, vi;
   float f;
+
+  float a = ahsv.getAlpha();
+  float h = ahsv.getHue();
+  float s = ahsv.getSaturation();
+  float v = ahsv.getValue();
 
   a *= 255.0f;
   v *= 255.0f;
@@ -25,18 +31,18 @@ uint32_t argbFromAhsv(float a, float h, float s, float v)
   ai = (int)a;
   vi = (int)v;
 
-  if (s == 0.0f)
+  if (Math::feq<float>(s, 0.0f))
   {
     return Argb(ai, vi, vi, vi);
   }
 
-  if (h >= 360.0f || h < 0.0f)
+  if (FOG_UNLIKELY(h >= 360.0f || h < 0.0f))
   {
     h = fmodf(h, 360.0f);
     if (h < 0.0f) h += 360.0f;
   }
 
-  h /= 60.0f;
+  h *= (1.0f / 60.0f);
   hi = (int)h;
   f = h - (float)hi;
 
@@ -58,5 +64,52 @@ uint32_t argbFromAhsv(float a, float h, float s, float v)
   }
 }
 
-} // ArgbUtil namespace
+Ahsv ahsvFromArgb(Argb argb)
+{
+  int r = (int)argb.getRed();
+  int g = (int)argb.getGreen();
+  int b = (int)argb.getBlue();
+
+  int minimum;
+  int maximum;
+  int delta;
+
+  minimum = (r + g - Math::abs(r - g)) >> 1;
+  minimum = (minimum + b - abs(minimum - b)) >> 1;
+
+  maximum = (r + g + Math::abs(r - g)) >> 1;
+  maximum = (maximum + b + abs(maximum - b)) >> 1;
+
+  delta = maximum - minimum;
+
+  float a = (1.0f / 255.0f) * (float)(int)argb.getAlpha();
+  float h = 0.0f;
+  float s = 0.0f;
+  float v = (100.0f / 255.0f) * maximum;
+
+  float recip = (delta) ? 100.0f / (6.0f * delta) : 0.0f;
+
+  if (maximum != 0)
+  {
+    s = (float)(100 * delta) / (float)maximum;
+  }
+
+  if (maximum == r)
+    h = (float)(g - b);
+  else if (maximum == g)
+    h = 2.0f * delta + (float)(b - r);
+  else
+    h = 4.0f * delta + (float)(r - g);
+
+  h *= recip;
+
+  if (h < 0.0f)
+    h += 100.0f;
+  else if (h > 100.0f)
+    h -= 100.0f;
+
+  return Ahsv(a, h, s, v);
+}
+
+} // ColorUtil namespace
 } // Fog namespace

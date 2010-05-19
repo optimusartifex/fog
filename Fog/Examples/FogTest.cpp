@@ -138,6 +138,17 @@ void MyWindow::onPaint(PaintEvent* e)
   p->setSource(Argb(0xFFFFFFFF));
   p->fillAll();
 
+
+  {
+    //Image aa = i[0].scale(IntSize(320, 320));
+    //p->drawImage(IntPoint(100, 100), aa);
+
+    p->setHint(PAINTER_HINT_IMAGE_INTERPOLATION, IMAGE_INTERPOLATION_NEAREST);
+    p->drawImage(DoubleRect(100, 100, 320, 320), i[0]);
+
+    p->drawImage(DoublePoint(100, 100), i[0]);
+  }
+
   p->restore();
   p->flush(PAINTER_FLUSH_SYNC);
 

@@ -120,8 +120,8 @@ struct FOG_HIDDEN PatternGradientC
       // Premultiply.
       if (hasAlpha)
       {
-        cFirst = ArgbUtil::premultiply(cFirst);
-        cLast = ArgbUtil::premultiply(cLast);
+        cFirst = ColorUtil::premultiply(cFirst);
+        cLast = ColorUtil::premultiply(cLast);
       }
     }
 

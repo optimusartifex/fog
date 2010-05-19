@@ -446,6 +446,26 @@ static FOG_INLINE void sse2_mul_const_4D(__m128i& dst, const __m128i& a, const _
   dst = _mm_or_si128(dst, tmp);
 }
 
+// Prefetch.
+
+template<typename DstT>
+static FOG_INLINE void sse2_prefetch_t0(const DstT* dstp)
+{
+  _mm_prefetch(reinterpret_cast<const char*>(dstp), _MM_HINT_T0);
+}
+
+template<typename DstT>
+static FOG_INLINE void sse2_prefetch_t1(const DstT* dstp)
+{
+  _mm_prefetch(reinterpret_cast<const char*>(dstp), _MM_HINT_T1);
+}
+
+template<typename DstT>
+static FOG_INLINE void sse2_prefetch_t2(const DstT* dstp)
+{
+  _mm_prefetch(reinterpret_cast<const char*>(dstp), _MM_HINT_T2);
+}
+
 // Load.
 
 template<typename SrcT>
@@ -512,6 +532,18 @@ template<typename DstT>
 static FOG_INLINE void sse2_store16u(DstT* dstp, const __m128i& src0)
 {
   _mm_storeu_si128((__m128i *)(dstp), src0);
+}
+
+template<typename DstT>
+static FOG_INLINE void sse2_store16a_nt(DstT* dstp, const __m128i& src0)
+{
+  _mm_stream_si128((__m128i *)(dstp), src0);
+}
+
+template<typename DstT>
+static FOG_INLINE void sse2_store4_nt(DstT* dstp, uint32_t src0)
+{
+  _mm_stream_si32((int*)(dstp), (int)src0);
 }
 
 // Unpack.

@@ -1972,7 +1972,7 @@ err_t Image::fillRect(const IntRect& r, Argb c0, int op)
 
   RasterSolid solid;
   solid.argb = c0;
-  solid.prgb = ArgbUtil::premultiply(c0);
+  solid.prgb = ColorUtil::premultiply(c0);
 
   RasterCBlitFullFn cblit_full = 
     funcs->cblit_full[isOpaque ? IMAGE_FORMAT_XRGB32 : IMAGE_FORMAT_PRGB32];
@@ -2206,7 +2206,7 @@ err_t Image::fillVGradient(const IntRect& r, Argb c0, Argb c1, int op)
   {
     RasterSolid solid;
     solid.argb = ((uint32_t*)shade0)[0];
-    solid.prgb = ArgbUtil::premultiply(solid.argb);
+    solid.prgb = ColorUtil::premultiply(solid.argb);
     cblit_full(dstCur, &solid, w, &closure);
   }
   return ERR_OK;

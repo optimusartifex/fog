@@ -146,9 +146,13 @@ struct FOG_HIDDEN PatternScaleC
 
       for (i = 0; i < d; i++)
       {
-        p[j++] = (val >> 8) - ((val >> 8) & 0xFFFFFF00);
-        if (((val >> 16)) >= (s - 1)) p[j - 1] = 0;
+        int pos = val >> 16;
+        if ((uint)pos >= (uint)(s - 1))
+          p[j] = 0;
+        else
+          p[j] = (val >> 8) - ((val >> 8) & 0xFFFFFF00);
         val += inc;
+        j++;
       }
     }
     else
@@ -319,7 +323,8 @@ fail:
           // Calculate the source line we'll scan from.
           sptr = ypoints[y];
 
-          if (YAP > 0)
+          // BUG: Out of bounds!
+          if (YAP > 0 && y < ctx->scale.dh-1)
           {
             for (; x < end; x++)
             {

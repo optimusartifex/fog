@@ -130,6 +130,54 @@ Fog::String FogModule_FillRect::getType()
 }
 
 // ============================================================================
+// [FogBench - FogModule_FillRectSubPX]
+// ============================================================================
+
+FogModule_FillRectSubPX::FogModule_FillRectSubPX(int w, int h) : FogModule_FillRect(w, h) {}
+FogModule_FillRectSubPX::~FogModule_FillRectSubPX() {}
+
+void FogModule_FillRectSubPX::bench(int quantity)
+{
+  Fog::Painter p(screen, Fog::NO_FLAGS);
+  configurePainter(p);
+
+  double sub = 0.1;
+  double inc = 0.8 / (double)quantity;
+
+  if (source == BENCH_SOURCE_ARGB)
+  {
+    for (int a = 0; a < quantity; a++, sub += inc)
+    {
+      Fog::IntRect r = r_rect.data[a];
+
+      p.setSource(r_argb.data[a]);
+      p.fillRect(Fog::DoubleRect(sub + r.x, sub + r.y, (double)r.w, (double)r.h));
+    }
+  }
+  else
+  {
+    Fog::Pattern pattern;
+    pattern.setType(Fog::PATTERN_TYPE_LINEAR_GRADIENT);
+    pattern.setSpread(Fog::PATTERN_SPREAD_PAD);
+
+    for (int a = 0; a < quantity; a++, sub += inc)
+    {
+      Fog::IntRect r = r_rect.data[a];
+
+      setupFogPatternForRect(pattern, r_rect.data[a], r_argb.data[a]);
+      p.setSource(pattern);
+      p.fillRect(Fog::DoubleRect(sub + r.x, sub + r.y, (double)r.w, (double)r.h));
+      p.resetSource();
+    }
+  }
+}
+
+Fog::String FogModule_FillRectSubPX::getType()
+{
+  return Fog::Ascii8("FillRectSubPX");
+}
+
+// ============================================================================
 // [FogBench - FogModule_FillRectAffine]
 // ============================================================================
 
@@ -443,6 +491,11 @@ void FogBenchmarkContext::run()
     DO_BENCH(FogModule_FillRect      , BENCH_OPERATOR_SRC_OVER, BENCH_SOURCE_ARGB   , sizes[s].w, sizes[s].h)
     DO_BENCH(FogModule_FillRect      , BENCH_OPERATOR_SRC     , BENCH_SOURCE_PATTERN, sizes[s].w, sizes[s].h)
     DO_BENCH(FogModule_FillRect      , BENCH_OPERATOR_SRC_OVER, BENCH_SOURCE_PATTERN, sizes[s].w, sizes[s].h)
+
+    DO_BENCH(FogModule_FillRectSubPX , BENCH_OPERATOR_SRC     , BENCH_SOURCE_ARGB   , sizes[s].w, sizes[s].h)
+    DO_BENCH(FogModule_FillRectSubPX , BENCH_OPERATOR_SRC_OVER, BENCH_SOURCE_ARGB   , sizes[s].w, sizes[s].h)
+    DO_BENCH(FogModule_FillRectSubPX , BENCH_OPERATOR_SRC     , BENCH_SOURCE_PATTERN, sizes[s].w, sizes[s].h)
+    DO_BENCH(FogModule_FillRectSubPX , BENCH_OPERATOR_SRC_OVER, BENCH_SOURCE_PATTERN, sizes[s].w, sizes[s].h)
 
     DO_BENCH(FogModule_FillRectAffine, BENCH_OPERATOR_SRC     , BENCH_SOURCE_ARGB   , sizes[s].w, sizes[s].h)
     DO_BENCH(FogModule_FillRectAffine, BENCH_OPERATOR_SRC_OVER, BENCH_SOURCE_ARGB   , sizes[s].w, sizes[s].h)

@@ -49,7 +49,7 @@ void CheckBox::onPaint(PaintEvent* e)
   IntRect chrect(1, (s.h - 13) / 2, 13, 13);
 
   p->setSource(0xFF000000);
-  p->drawRect(chrect);
+  p->drawRect(chrect.adjusted(0, 0, -1, -1));
 
   chrect.shrink(1);
 
@@ -71,7 +71,7 @@ void CheckBox::onPaint(PaintEvent* e)
 
   if (isDown())
   {
-    IntRect d = chrect;
+    IntRect d = chrect.adjusted(0, 0, -1, -1);
     p->setSource(0x7F8FAFFF);
     p->drawRect(d);
     d.shrink(1);

@@ -445,12 +445,7 @@ int VBoxLayout::doLayout(const IntRect &rect)
 
     // Add height.
     top += height;
-/*
-    if (marginBottom == -INT_MAX)
-    {
-      top += spacing;
-    }
-*/
+
     // Remember right margin (for collapsing).
     marginRight = child->getContentRightMargin();
   }

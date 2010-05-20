@@ -450,6 +450,23 @@ void Widget::invalidateLayout()
     _layout->updateLayout();
 }
 
+void Widget::calculateLayoutHint(LayoutHint& hint)
+{
+  hint._minimumSize = LayoutItem::calculateMinimumSize();
+  hint._maximumSize = LayoutItem::calculateMaximumSize();
+
+  hint._sizeHint = getSizeHint().expandedTo(getMinimumSizeHint());
+  hint._sizeHint = hint._sizeHint.boundedTo(getMaximumSize()).expandedTo(getMinimumSize());
+
+  if (_layoutPolicy.isHorizontalPolicyIgnored())
+    hint._sizeHint.setWidth(0);
+  if (_layoutPolicy.isVerticalPolicyIgnored())
+    hint._sizeHint.setHeight(0);
+
+  //!!! TODO: REMOVE THIS AFTER EASY TESTING!!!
+  hint._sizeHint = IntSize(40, 40);
+}
+
 void Widget::setLayout(Layout* lay)
 {
   if (lay->_parentItem == this) return;
@@ -1186,11 +1203,7 @@ err_t Widget::getPropagatedRegion(Region* dst) const
 // [Fog::Widget - Events]
 // ============================================================================
 
-void Widget::onChildAdd(ChildEvent* e)
-{
-}
-
-void Widget::onChildRemove(ChildEvent* e)
+void Widget::onChild(ChildEvent* e)
 {
 }
 
@@ -1214,39 +1227,15 @@ void Widget::onConfigure(ConfigureEvent* e)
 {
 }
 
-void Widget::onFocusIn(FocusEvent* e)
+void Widget::onFocus(FocusEvent* e)
 {
 }
 
-void Widget::onFocusOut(FocusEvent* e)
+void Widget::onKey(KeyEvent* e)
 {
 }
 
-void Widget::onKeyPress(KeyEvent* e)
-{
-}
-
-void Widget::onKeyRelease(KeyEvent* e)
-{
-}
-
-void Widget::onMouseIn(MouseEvent* e)
-{
-}
-
-void Widget::onMouseOut(MouseEvent* e)
-{
-}
-
-void Widget::onMouseMove(MouseEvent* e)
-{
-}
-
-void Widget::onMousePress(MouseEvent* e)
-{
-}
-
-void Widget::onMouseRelease(MouseEvent* e)
+void Widget::onMouse(MouseEvent* e)
 {
 }
 

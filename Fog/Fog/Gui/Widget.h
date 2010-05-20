@@ -56,15 +56,9 @@ struct Window;
 //!  - <code>virtual void onStateChange(StateEvent* e)</code>
 //!  - <code>virtual void onVisibilityChange(VisibilityEvent* e)</code>
 //!  - <code>virtual void onConfigure(ConfigureEvent* e)</code>
-//!  - <code>virtual void onFocusIn(FocusEvent* e)</code>
-//!  - <code>virtual void onFocusOut(FocusEvent* e)</code>
-//!  - <code>virtual void onKeyPress(KeyEvent* e)</code>
-//!  - <code>virtual void onKeyRelease(KeyEvent* e)</code>
-//!  - <code>virtual void onMouseIn(MouseEvent* e)</code>
-//!  - <code>virtual void onMouseOut(MouseEvent* e)</code>
-//!  - <code>virtual void onMouseMove(MouseEvent* e)</code>
-//!  - <code>virtual void onMousePress(MouseEvent* e)</code>
-//!  - <code>virtual void onMouseRelease(MouseEvent* e)</code>
+//!  - <code>virtual void onFocus(FocusEvent* e)</code>
+//!  - <code>virtual void onKey(KeyEvent* e)</code>
+//!  - <code>virtual void onMouse(MouseEvent* e)</code>
 //!  - <code>virtual void onPaint(PaintEvent* e)</code>
 //!  - <code>virtual void onClose(CloseEvent* e)</code>
 //!
@@ -197,7 +191,8 @@ struct FOG_API Widget : public LayoutItem
   //! @brief Get widget client geometry.
   FOG_INLINE const IntRect& getClientGeometry() const { return _clientGeometry; }
 
-  FOG_INLINE IntRect getClientContentGeometry() const { 
+  FOG_INLINE IntRect getClientContentGeometry() const
+  {
     IntRect ret = _clientGeometry; 
     if(ret.getWidth() == 0 && ret.getHeight() == 0)
       return IntRect(0,0,0,0);
@@ -209,6 +204,7 @@ struct FOG_API Widget : public LayoutItem
 
     return ret;
   }
+
   //! @brief Get widget position relative to parent.
   FOG_INLINE const IntPoint& getClientPosition() const { return _clientGeometry.getPosition(); }
   //! @brief Get widget size.
@@ -276,27 +272,7 @@ struct FOG_API Widget : public LayoutItem
 
   void invalidateLayout();
 
-  virtual void calculateLayoutHint(LayoutHint& hint) {
-    //calculate MinimumSize
-    hint._minimumSize = LayoutItem::calculateMinimumSize();
-
-    //calculate MaxiumumSize
-    hint._maximumSize = LayoutItem::calculateMaximumSize();
-
-    //calculate SizeHint
-    hint._sizeHint = getSizeHint().expandedTo(getMinimumSizeHint());
-    hint._sizeHint = hint._sizeHint.boundedTo(getMaximumSize()).expandedTo(getMinimumSize());
-    //TODO: WA_LayoutUsesWidgetRect
-
-    if (_layoutPolicy.isHorizontalPolicyIgnored())
-      hint._sizeHint.setWidth(0);
-    if (_layoutPolicy.isVerticalPolicyIgnored())
-      hint._sizeHint.setHeight(0);
-
-    //!!! TODO: REMOVE THIS AFTER EASY TESTING!!!
-    hint._sizeHint = IntSize(40, 40);
-  }
-
+  virtual void calculateLayoutHint(LayoutHint& hint);
   virtual bool hasLayoutHeightForWidth() const;
   virtual int getLayoutHeightForWidth(int width) const;  
 
@@ -604,10 +580,8 @@ struct FOG_API Widget : public LayoutItem
   // [Event Handlers]
   // --------------------------------------------------------------------------
 
-  //! @brief Child event handler.
-  virtual void onChildAdd(ChildEvent* e);
-  //! @brief Child event handler.
-  virtual void onChildRemove(ChildEvent* e);
+  //! @brief Child add / remove event handler.
+  virtual void onChild(ChildEvent* e);
   //! @brief State event handler.
   virtual void onEnable(StateEvent* e);
   //! @brief State event handler.
@@ -618,24 +592,12 @@ struct FOG_API Widget : public LayoutItem
   virtual void onHide(VisibilityEvent* e);
   //! @brief Configure event handler.
   virtual void onConfigure(ConfigureEvent* e);
-  //! @brief Focus in event handler.
-  virtual void onFocusIn(FocusEvent* e);
-  //! @brief Focus out event handler.
-  virtual void onFocusOut(FocusEvent* e);
-  //! @brief Keyboard event handler.
-  virtual void onKeyPress(KeyEvent* e);
-  //! @brief Keyboard event handler.
-  virtual void onKeyRelease(KeyEvent* e);
-  //! @brief Mouse in event handler.
-  virtual void onMouseIn(MouseEvent* e);
-  //! @brief Mouse out event handler.
-  virtual void onMouseOut(MouseEvent* e);
-  //! @brief Mouse moveevent handler.
-  virtual void onMouseMove(MouseEvent* e);
-  //! @brief Mouse press event handler.
-  virtual void onMousePress(MouseEvent* e);
-  //! @brief Mouse release event handler.
-  virtual void onMouseRelease(MouseEvent* e);
+  //! @brief Focus in / out event handler.
+  virtual void onFocus(FocusEvent* e);
+  //! @brief Keyboard press / release event handler.
+  virtual void onKey(KeyEvent* e);
+  //! @brief Mouse event handler.
+  virtual void onMouse(MouseEvent* e);
   //! @brief Click event handler.
   virtual void onClick(MouseEvent* e);
   //! @brief Double click event handler.
@@ -662,8 +624,8 @@ struct FOG_API Widget : public LayoutItem
   // --------------------------------------------------------------------------
 
   FOG_EVENT_BEGIN()
-    FOG_EVENT_DEF(EVENT_CHILD_ADD           , onChildAdd        , ChildEvent     , OVERRIDE)
-    FOG_EVENT_DEF(EVENT_CHILD_REMOVE        , onChildRemove     , ChildEvent     , OVERRIDE)
+    FOG_EVENT_DEF(EVENT_CHILD_ADD           , onChild           , ChildEvent     , OVERRIDE)
+    FOG_EVENT_DEF(EVENT_CHILD_REMOVE        , onChild           , ChildEvent     , OVERRIDE)
     FOG_EVENT_DEF(EVENT_ENABLE              , onEnable          , StateEvent     , OVERRIDE)
     FOG_EVENT_DEF(EVENT_DISABLE             , onDisable         , StateEvent     , OVERRIDE)
     FOG_EVENT_DEF(EVENT_DISABLE_BY_PARENT   , onDisable         , StateEvent     , OVERRIDE)
@@ -674,15 +636,15 @@ struct FOG_API Widget : public LayoutItem
     FOG_EVENT_DEF(EVENT_HIDE                , onHide            , VisibilityEvent, OVERRIDE)
     FOG_EVENT_DEF(EVENT_HIDE_BY_PARENT      , onHide            , VisibilityEvent, OVERRIDE)
     FOG_EVENT_DEF(EVENT_CONFIGURE           , onConfigure       , ConfigureEvent , OVERRIDE)
-    FOG_EVENT_DEF(EVENT_FOCUS_IN            , onFocusIn         , FocusEvent     , OVERRIDE)
-    FOG_EVENT_DEF(EVENT_FOCUS_OUT           , onFocusOut        , FocusEvent     , OVERRIDE)
-    FOG_EVENT_DEF(EVENT_KEY_PRESS           , onKeyPress        , KeyEvent       , OVERRIDE)
-    FOG_EVENT_DEF(EVENT_KEY_RELEASE         , onKeyRelease      , KeyEvent       , OVERRIDE)
-    FOG_EVENT_DEF(EVENT_MOUSE_IN            , onMouseIn         , MouseEvent     , OVERRIDE)
-    FOG_EVENT_DEF(EVENT_MOUSE_OUT           , onMouseOut        , MouseEvent     , OVERRIDE)
-    FOG_EVENT_DEF(EVENT_MOUSE_MOVE          , onMouseMove       , MouseEvent     , OVERRIDE)
-    FOG_EVENT_DEF(EVENT_MOUSE_PRESS         , onMousePress      , MouseEvent     , OVERRIDE)
-    FOG_EVENT_DEF(EVENT_MOUSE_RELEASE       , onMouseRelease    , MouseEvent     , OVERRIDE)
+    FOG_EVENT_DEF(EVENT_FOCUS_IN            , onFocus           , FocusEvent     , OVERRIDE)
+    FOG_EVENT_DEF(EVENT_FOCUS_OUT           , onFocus           , FocusEvent     , OVERRIDE)
+    FOG_EVENT_DEF(EVENT_KEY_PRESS           , onKey             , KeyEvent       , OVERRIDE)
+    FOG_EVENT_DEF(EVENT_KEY_RELEASE         , onKey             , KeyEvent       , OVERRIDE)
+    FOG_EVENT_DEF(EVENT_MOUSE_IN            , onMouse           , MouseEvent     , OVERRIDE)
+    FOG_EVENT_DEF(EVENT_MOUSE_OUT           , onMouse           , MouseEvent     , OVERRIDE)
+    FOG_EVENT_DEF(EVENT_MOUSE_MOVE          , onMouse           , MouseEvent     , OVERRIDE)
+    FOG_EVENT_DEF(EVENT_MOUSE_PRESS         , onMouse           , MouseEvent     , OVERRIDE)
+    FOG_EVENT_DEF(EVENT_MOUSE_RELEASE       , onMouse           , MouseEvent     , OVERRIDE)
     FOG_EVENT_DEF(EVENT_CLICK               , onClick           , MouseEvent     , OVERRIDE)
     FOG_EVENT_DEF(EVENT_DOUBLE_CLICK        , onDoubleClick     , MouseEvent     , OVERRIDE)
     FOG_EVENT_DEF(EVENT_WHEEL               , onWheel           , MouseEvent     , OVERRIDE)
@@ -700,8 +662,9 @@ struct FOG_API Widget : public LayoutItem
   // --------------------------------------------------------------------------
 
 protected:
-  struct FullScreenData {
-
+  // GUI TODO: Move to GuiWindow.
+  struct FullScreenData
+  {
     //! @brief Main geometry for restoration from fullscreen mode
     IntRect _restoregeometry;
     //! @brief Window Style for restoration of fullscreen
@@ -709,7 +672,8 @@ protected:
     float _restoretransparency;
   }* _fullscreendata;
 
-  struct ExtendedData {
+  struct ExtendedData
+  {
     ExtendedData() : _maxheight(WIDGET_MAX_SIZE), _maxwidth(WIDGET_MAX_SIZE), _minheight(WIDGET_MIN_SIZE), _minwidth(WIDGET_MIN_SIZE) {}
     int _maxwidth;
     int _maxheight;
@@ -742,7 +706,8 @@ protected:
   Layout* _layout;
 
   //! @brief Layout policy.
-  LayoutPolicy _layoutPolicy; // move into LayoutItem??
+  // LAYOUT TODO: move into LayoutItem??
+  LayoutPolicy _layoutPolicy;
 
   //! @brief Tab order.
   int _tabOrder;

@@ -56,14 +56,9 @@ struct FOG_API ButtonBase : public Widget
   // [Event Handlers]
 
   // Fog::Widget Events.
-  virtual void onFocusIn(FocusEvent* e);
-  virtual void onFocusOut(FocusEvent* e);
-  virtual void onKeyPress(KeyEvent* e);
-  virtual void onKeyRelease(KeyEvent* e);
-  virtual void onMouseIn(MouseEvent* e);
-  virtual void onMouseOut(MouseEvent* e);
-  virtual void onMousePress(MouseEvent* e);
-  virtual void onMouseRelease(MouseEvent* e);
+  virtual void onFocus(FocusEvent* e);
+  virtual void onKey(KeyEvent* e);
+  virtual void onMouse(MouseEvent* e);
 
   // Fog::ButtonBase Events.
   virtual void onCheck(CheckEvent* e);

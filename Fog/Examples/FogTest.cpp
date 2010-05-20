@@ -311,7 +311,7 @@ struct MyWindow : public Window
       layout->addItem(_buttons.at(i));
     }
 
-    // layout->setSpacing(2);
+    layout->setSpacing(2);
 
     _buttons.at(3)->getLayoutProperties<VBoxLayout>()->setFlex(1);
     _buttons.at(2)->getLayoutProperties<VBoxLayout>()->setFlex(2);

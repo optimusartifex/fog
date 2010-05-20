@@ -14,7 +14,7 @@ struct MyWindow : public Window
   virtual ~MyWindow();
 
   // [Event Handlers]
-  virtual void onKeyPress(KeyEvent* e);
+  virtual void onKey(KeyEvent* e);
   virtual void onPaint(PaintEvent* e);
 
   void paintImage(Painter* painter, const IntPoint& pos, const Image& im, const String& name);
@@ -43,20 +43,23 @@ MyWindow::~MyWindow()
 {
 }
 
-void MyWindow::onKeyPress(KeyEvent* e)
+void MyWindow::onKey(KeyEvent* e)
 {
-  switch (e->getKey())
+  if (e->getCode() == EVENT_KEY_PRESS)
   {
-    case KEY_Q:
-      _opacity = Math::max(_opacity - 1, 0);
-      break;
-    case KEY_W:
-      _opacity = Math::min(_opacity + 1, 255);
-      break;
+    switch (e->getKey())
+    {
+      case KEY_Q:
+        _opacity = Math::max(_opacity - 1, 0);
+        break;
+      case KEY_W:
+        _opacity = Math::min(_opacity + 1, 255);
+        break;
+    }
   }
 
   repaint(WIDGET_REPAINT_AREA);
-  base::onKeyPress(e);
+  base::onKey(e);
 }
 
 void MyWindow::onPaint(PaintEvent* e)

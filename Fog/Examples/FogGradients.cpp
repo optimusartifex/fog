@@ -14,7 +14,7 @@ struct MyWindow : public Window
   virtual ~MyWindow();
 
   // [Event Handlers]
-  virtual void onKeyPress(KeyEvent* e);
+  virtual void onKey(KeyEvent* e);
   virtual void onPaint(PaintEvent* e);
 
   // Helper to paint pattern in rect with title.
@@ -40,35 +40,38 @@ MyWindow::~MyWindow()
 {
 }
 
-void MyWindow::onKeyPress(KeyEvent* e)
+void MyWindow::onKey(KeyEvent* e)
 {
-  if (e->getKey() == KEY_SPACE)
+  if (e->getCode() == EVENT_KEY_PRESS)
   {
-    useRegion^=1;
-    repaint(WIDGET_REPAINT_AREA);
-  }
-  else if (e->getKey() == KEY_UP)
-  {
-    _rotate -= 0.002;
-    repaint(WIDGET_REPAINT_AREA);
-  }
-  else if (e->getKey() == KEY_DOWN)
-  {
-    _rotate += 0.002;
-    repaint(WIDGET_REPAINT_AREA);
-  }
-  else if (e->getKey() == KEY_LEFT)
-  {
-    _scale -= 0.1;
-    repaint(WIDGET_REPAINT_AREA);
-  }
-  else if (e->getKey() == KEY_RIGHT)
-  {
-    _scale += 0.1;
-    repaint(WIDGET_REPAINT_AREA);
+    if (e->getKey() == KEY_SPACE)
+    {
+      useRegion^=1;
+      repaint(WIDGET_REPAINT_AREA);
+    }
+    else if (e->getKey() == KEY_UP)
+    {
+      _rotate -= 0.002;
+      repaint(WIDGET_REPAINT_AREA);
+    }
+    else if (e->getKey() == KEY_DOWN)
+    {
+      _rotate += 0.002;
+      repaint(WIDGET_REPAINT_AREA);
+    }
+    else if (e->getKey() == KEY_LEFT)
+    {
+      _scale -= 0.1;
+      repaint(WIDGET_REPAINT_AREA);
+    }
+    else if (e->getKey() == KEY_RIGHT)
+    {
+      _scale += 0.1;
+      repaint(WIDGET_REPAINT_AREA);
+    }
   }
 
-  base::onKeyPress(e);
+  base::onKey(e);
 }
 
 void MyWindow::onPaint(PaintEvent* e)

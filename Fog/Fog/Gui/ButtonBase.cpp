@@ -81,84 +81,80 @@ bool ButtonBase::isDown() const
   return (_isMouseDown && _isMouseOver) || _isSpaceDown;
 }
 
-void ButtonBase::onFocusIn(FocusEvent* e)
+void ButtonBase::onFocus(FocusEvent* e)
 {
-  base::onFocusIn(e);
-}
-
-void ButtonBase::onFocusOut(FocusEvent* e)
-{
-  if (_isSpaceDown)
+  switch (e->getCode())
   {
-    _isSpaceDown = false;
-    repaint(WIDGET_REPAINT_AREA);
+    case EVENT_FOCUS_IN:
+      break;
+    case EVENT_FOCUS_OUT:
+      if (_isSpaceDown)
+      {
+        _isSpaceDown = false;
+        repaint(WIDGET_REPAINT_AREA);
+      }
+      break;
   }
 
-  base::onFocusOut(e);
+  base::onFocus(e);
 }
 
-void ButtonBase::onKeyPress(KeyEvent* e)
+void ButtonBase::onKey(KeyEvent* e)
 {
-  if ((e->getKey() & KEY_MASK) == KEY_SPACE)
+  switch (e->getCode())
   {
-    _isSpaceDown = true;
-    repaint(WIDGET_REPAINT_AREA);
-    e->accept();
-    return;
+    case EVENT_KEY_PRESS:
+      if ((e->getKey() & KEY_MASK) == KEY_SPACE)
+      {
+        _isSpaceDown = true;
+        repaint(WIDGET_REPAINT_AREA);
+        e->accept();
+        return;
+      }
+      break;
+    case EVENT_KEY_RELEASE:
+      if ((e->getKey() & KEY_MASK) == KEY_SPACE)
+      {
+        _isSpaceDown = false;
+        repaint(WIDGET_REPAINT_AREA);
+        e->accept();
+        return;
+      }
+      break;
   }
 
-  base::onKeyPress(e);
+  base::onKey(e);
 }
 
-void ButtonBase::onKeyRelease(KeyEvent* e)
+void ButtonBase::onMouse(MouseEvent* e)
 {
-  if ((e->getKey() & KEY_MASK) == KEY_SPACE)
+  switch (e->getCode())
   {
-    _isSpaceDown = false;
-    repaint(WIDGET_REPAINT_AREA);
-    e->accept();
-    return;
+    case EVENT_MOUSE_IN:
+      _isMouseOver = true;
+      repaint(WIDGET_REPAINT_AREA);
+      break;
+    case EVENT_MOUSE_OUT:
+      _isMouseOver = false;
+      repaint(WIDGET_REPAINT_AREA);
+      break;
+    case EVENT_MOUSE_PRESS:
+      if (e->getButton() == BUTTON_LEFT)
+      {
+        _isMouseDown = true;
+        repaint(WIDGET_REPAINT_AREA);
+      }
+      break;
+    case EVENT_MOUSE_RELEASE:
+      if (e->getButton() == BUTTON_LEFT)
+      {
+        _isMouseDown = false;
+        repaint(WIDGET_REPAINT_AREA);
+      }
+      break;
   }
 
-  base::onKeyRelease(e);
-}
-
-void ButtonBase::onMouseIn(MouseEvent* e)
-{
-  _isMouseOver = true;
-  repaint(WIDGET_REPAINT_AREA);
-
-  base::onMouseIn(e);
-}
-
-void ButtonBase::onMouseOut(MouseEvent* e)
-{
-  _isMouseOver = false;
-  repaint(WIDGET_REPAINT_AREA);
-
-  base::onMouseOut(e);
-}
-
-void ButtonBase::onMousePress(MouseEvent* e)
-{
-  if (e->getButton() == BUTTON_LEFT)
-  {
-    _isMouseDown = true;
-    repaint(WIDGET_REPAINT_AREA);
-  }
-
-  base::onMousePress(e);
-}
-
-void ButtonBase::onMouseRelease(MouseEvent* e)
-{
-  if (e->getButton() == BUTTON_LEFT)
-  {
-    _isMouseDown = false;
-    repaint(WIDGET_REPAINT_AREA);
-  }
-
-  base::onMouseRelease(e);
+  base::onMouse(e);
 }
 
 void ButtonBase::onCheck(CheckEvent* e)

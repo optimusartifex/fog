@@ -592,7 +592,7 @@ SvgCoord parseCoord(const String& str)
   }
 
   if (unit == SVG_UNIT_PERCENT) d *= 0.01;
-  return SvgCoord(d, unit);
+  return SvgCoord((float)d, unit);
 }
 
 err_t serializeCoord(String& dst, const SvgCoord& coord)

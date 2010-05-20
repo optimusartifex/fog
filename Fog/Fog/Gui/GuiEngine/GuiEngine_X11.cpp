@@ -11,7 +11,7 @@
 #include <Fog/Core/TextCodec.h>
 #include <Fog/Graphics/RasterEngine_p.h>
 #include <Fog/Gui/Constants.h>
-#include <Fog/Gui/GuiEngine/X11.h>
+#include <Fog/Gui/GuiEngine/GuiEngine_X11.h>
 #include <Fog/Gui/Widget.h>
 
 // [Shared memory and IPC]
@@ -479,7 +479,7 @@ void X11GuiEngine::updateDisplayInfo()
 
 void X11GuiEngine::doUpdate()
 {
-  BaseGuiEngine::doUpdate();
+  GuiEngine::doUpdate();
   pXSync(_display, false);
 }
 
@@ -940,7 +940,7 @@ XID X11GuiEngine::getWmClientLeader()
 // ============================================================================
 
 X11GuiWindow::X11GuiWindow(Widget* widget) :
-  BaseGuiWindow(widget),
+  GuiWindow(widget),
   _xic(0),
   _inputOnly(false),
   _mapRequest(false),
@@ -1142,8 +1142,9 @@ err_t X11GuiWindow::disable()
   return ERR_OK;
 }
 
-err_t X11GuiWindow::show()
+err_t X11GuiWindow::show(uint32_t state)
 {
+  // TODO GUI: X11, state ignored.
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
   X11GuiEngine* engine = GUI_ENGINE();
@@ -1347,6 +1348,33 @@ err_t X11GuiWindow::clientToWorld(IntPoint* coords)
   return (ok) ? (err_t)ERR_OK : (err_t)ERR_GUI_CANT_TRANSLETE_COORDINATES;
 }
 
+void X11GuiWindow::setOwner(GuiWindow* w)
+{
+  // TODO GUI: X11 owner.
+  _owner = w;
+}
+
+void X11GuiWindow::releaseOwner()
+{
+  // TODO GUI: X11 owner.
+  _owner = NULL;
+}
+
+void X11GuiWindow::setTransparency(float val)
+{
+  // TODO GUI: X11 transparency.
+}
+
+void X11GuiWindow::moveToTop(GuiWindow* w)
+{
+  // TODO: GUI: Port me.
+}
+
+void X11GuiWindow::moveToBottom(GuiWindow* w)
+{
+  // TODO: GUI: Port me.
+}
+
 void X11GuiWindow::onX11Event(XEvent* xe)
 {
   X11GuiEngine* engine = GUI_ENGINE();
@@ -1362,17 +1390,17 @@ void X11GuiWindow::onX11Event(XEvent* xe)
 
     case XMapNotify:
       _mapRequest = false;
-      onVisibility(true);
+      onVisibility(WIDGET_VISIBLE);
       break;
 
     case XMapRequest:
       _mapRequest = true;
-      onVisibility(false);
+      onVisibility(WIDGET_HIDDEN_BY_PARENT);
       break;
 
     case XUnmapNotify:
       _mapRequest = false;
-      onVisibility(false);
+      onVisibility(WIDGET_HIDDEN);
       break;
 
     case XConfigureRequest:

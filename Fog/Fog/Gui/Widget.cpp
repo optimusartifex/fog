@@ -35,9 +35,7 @@ Widget::Widget(uint32_t createFlags) :
   _clientGeometry(0, 0, 0, 0),
   _origin(0, 0),
   _layout(NULL),
-  _layoutPolicy(0),
-  _hasHeightForWidth(false),
-  _isLayoutDirty(true),
+  _layoutPolicy(LAYOUT_POLICY_WIDTH_PREFERRED|LAYOUT_POLICY_HEIGHT_PREFERRED),
   _lastFocus(NULL),
   _focusLink(NULL),
   _uflags(0),
@@ -48,16 +46,26 @@ Widget::Widget(uint32_t createFlags) :
   _orientation(ORIENTATION_HORIZONTAL),
   _reserved(0),
   _tabOrder(0),
-  _windowFlags(createFlags)
+  _fullscreendata(NULL),
+  _windowFlags(createFlags),
+  _transparency(1.0),
+  _widgetflags(0),
+  _extra(0),
+  _minset(0),
+  _maxset(0)
 {
   _flags |= OBJ_IS_WIDGET;
 
   // TODO ?
   _focusLink = NULL;
+  _contentmargin.clear();
 
-  if ((createFlags & WINDOW_TYPE_FLAG) != 0)
+  if ((createFlags & WINDOW_TYPE_MASK) != 0)
   {
     createWindow(createFlags);
+
+    //not needed under windows, maybe on linux?
+    //setTransparency(1.0);
   }
 }
 
@@ -90,8 +98,32 @@ bool Widget::add(Widget* w)
     // Remove element can fail, so we return false in that case
     if (!p->remove(w)) return false;
   }
+  
 
-  // Now element can be added, call virtual method
+  //Inline PopUps should be always at the end of the ChildrenList!
+  bool ispopup = ((w->getWindowFlags() & WINDOW_INLINE_POPUP) != 0);
+
+  //A Inline PopUp can only be added to a GuiWindow!
+  if (ispopup && (getWindowFlags() & WINDOW_TYPE_MASK) == 0)
+  {
+    return false;
+  }
+
+  if (!ispopup && _children.getLength() > 0)
+  {
+    List<Widget*>::ConstIterator it(_children);
+    for (it.toEnd(); it.isValid(); it.toPrevious())
+    {
+      Widget* widget = it.value();
+      if (widget && ((widget->getWindowFlags() & WINDOW_INLINE_POPUP) != 0))
+      {
+        // Now element can be added, call virtual method.
+        return _add(it.index(), w);
+      }
+    }
+
+    // No PopUp found...
+  }
   return _add(_children.getLength(), w);
 }
 
@@ -158,6 +190,10 @@ err_t Widget::destroyWindow()
 {
   if (!_guiWindow) return ERR_RT_INVALID_HANDLE;
 
+  if (_guiWindow->isModal()) {
+    _guiWindow->getOwner()->endModal(_guiWindow);
+  }
+
   delete _guiWindow;
   _guiWindow = NULL;
   return true;
@@ -207,9 +243,8 @@ err_t Widget::setWindowGranularity(const IntPoint& pt)
 // ============================================================================
 
 void Widget::setGeometry(const IntRect& geometry)
-{
+{  
   if (_geometry == geometry) return;
-
   if (_guiWindow)
   {
     _guiWindow->reconfigure(geometry);
@@ -225,14 +260,15 @@ void Widget::setGeometry(const IntRect& geometry)
 
 void Widget::setPosition(const IntPoint& pt)
 {
-  if (_geometry.getPosition() == pt) return;
-
+  if (_geometry.getPosition() == pt) return;  
   if (_guiWindow)
   {
     _guiWindow->move(pt);
+    _geometry.setX(pt.getX()).setY(pt.getY());
   }
   else
   {
+    if (_layout) return;
     GuiEngine* ge = Application::getInstance()->getGuiEngine();
     if (!ge) return;
 
@@ -243,14 +279,14 @@ void Widget::setPosition(const IntPoint& pt)
 
 void Widget::setSize(const IntSize& sz)
 {
-  if (_geometry.getSize() == sz) return;
-
+  if (_geometry.getSize() == sz) return;  
   if (_guiWindow)
   {
     _guiWindow->resize(sz);
   }
   else
   {
+    if (_layout) return;
     GuiEngine* ge = Application::getInstance()->getGuiEngine();
     if (!ge) return;
 
@@ -406,6 +442,14 @@ repeat:
 // [Fog::Widget - Layout]
 // ============================================================================
 
+void Widget::invalidateLayout()
+{
+  _dirty = 1;
+
+  if (_layout)
+    _layout->updateLayout();
+}
+
 void Widget::setLayout(Layout* lay)
 {
   if (lay->_parentItem == this) return;
@@ -425,8 +469,6 @@ void Widget::setLayout(Layout* lay)
     LayoutEvent e(EVENT_LAYOUT_SET);
     this->sendEvent(&e);
     lay->sendEvent(&e);
-
-    invalidateLayout();
   }
 }
 
@@ -456,97 +498,312 @@ Layout* Widget::takeLayout()
 }
 
 // ============================================================================
-// [Layout Hints]
-// ============================================================================
-
-const LayoutHint& Widget::getLayoutHint() const
-{
-  return (_layout) ? _layout->getLayoutHint() : _layoutHint;
-}
-
-void Widget::setLayoutHint(const LayoutHint& layoutHint)
-{
-  // GUI TODO:
-  if (_layout)
-  {
-    _layout->setLayoutHint(layoutHint);
-  }
-  else
-  {
-    if (_layoutHint == layoutHint) return;
-    _layoutHint = layoutHint;
-    invalidateLayout();
-  }
-}
-
-const LayoutHint& Widget::getComputedLayoutHint() const
-{
-  return _layout ? _layout->getComputedLayoutHint() : _layoutHint;
-}
-
-void Widget::computeLayoutHint()
-{
-  if (_layout) _layout->computeLayoutHint();
-}
-
-// ============================================================================
 // [Layout Policy]
 // ============================================================================
 
-uint32_t Widget::getLayoutPolicy() const
+bool Widget::hasLayoutHeightForWidth() const { 
+  if (isEmpty())
+    return false;
+
+  if (_layout)
+    return _layout->hasLayoutHeightForWidth();
+
+  return _layoutPolicy.hasHeightForWidth();
+}
+
+int Widget::getLayoutHeightForWidth(int width) const {
+  if (isEmpty())
+    return -1;
+
+  //TODO: widget margin
+
+  int ret = 0;
+  if (!_layout)
+    ret = getHeightForWidth(width);
+  else
+    ret = _layout->getTotalHeightForWidth(width);    
+
+  Math::min(ret,getMaximumHeight());
+  Math::max(ret,getMinimumHeight());
+
+  Math::max(ret,0);
+  return ret;
+}
+
+uint32_t Widget::getLayoutExpandingDirections() const {    
+  if (isEmpty())
+    return 0;
+
+  uint32_t e = _orientation;
+
+  if (_layout) {
+    if (_layoutPolicy.getPolicy() & LAYOUT_GROWING_WIDTH  && (_layout->getLayoutExpandingDirections() & ORIENTATION_HORIZONTAL))
+      e |= ORIENTATION_HORIZONTAL;
+    if (_layoutPolicy.getPolicy() & LAYOUT_GROWING_HEIGHT  && (_layout->getLayoutExpandingDirections() & ORIENTATION_VERTICAL))
+      e |= ORIENTATION_VERTICAL;
+  }
+
+  if (_alignment & ALIGNMENT_HORIZONTAL_MASK)
+    e &= ~ORIENTATION_HORIZONTAL;
+  if (_alignment & ALIGNMENT_VERTICAL_MASK)
+    e &= ~ORIENTATION_VERTICAL;
+
+  return e;
+}
+
+//SetLayoutGeometry using rect as layoutRect (without margins)
+void Widget::setLayoutGeometry(const IntRect& rect)
+{
+  // If widget isn't visible -> nothing to do.
+  if (isEmpty())
+    return;
+
+  // LAYOUT TODO: widget margin.
+  IntRect r = rect;  
+
+  // Make sure the widget will never be bigger than maximum size.
+  IntSize s = r.getSize().boundedTo(getLayoutMaximumSize());
+  uint32_t alignment = _alignment;
+
+  if (alignment & (ALIGNMENT_HORIZONTAL_MASK | ALIGNMENT_VERTICAL_MASK))
+  {
+    IntSize prefered(getLayoutSizeHint());
+    LayoutPolicy sp = _layoutPolicy;
+
+    if (sp.isHorizontalPolicyIgnored())
+    {
+      // The getLayoutSizeHint() is ignored. The widget will get prefered Size
+      prefered.setWidth(getSizeHint().expandedTo(getMinimumSize()).getWidth());
+    }
+    if (sp.isVerticalPolicyIgnored())
+    {
+      // The getLayoutSizeHint() is ignored. The widget will get prefered Size
+      prefered.setHeight(getSizeHint().expandedTo(getMinimumSize()).getHeight());
+    }
+
+    // LAYOUT TODO: margins!
+    //pref += widgetRectSurplus; 
+    
+    if (alignment & ALIGNMENT_HORIZONTAL_MASK)
+    {
+      // If preferred size is possible then use it, otherwise use
+      // a complete available size.
+      s.setWidth(Math::min(s.getWidth(), prefered.getWidth()));
+    }
+
+    if (alignment & ALIGNMENT_VERTICAL_MASK)
+    {
+      if (hasLayoutHeightForWidth())
+        s.setHeight(Math::min(s.getHeight(), getLayoutHeightForWidth(s.getWidth())));
+      else
+        s.setHeight(Math::min(s.getHeight(), prefered.getHeight()));
+    }
+  }
+
+  //TODO: support for right2left layouts!
+
+  //If no alignment is set, set it to the std. alignment -> left  
+  if (!(alignment & ALIGNMENT_HORIZONTAL_MASK))
+  {
+    alignment |= ALIGNMENT_LEFT;
+  }
+
+  int x = r.getX();
+  int y = r.getY();
+
+  if (alignment & ALIGNMENT_RIGHT)
+  {
+    x += (r.getWidth() - s.getWidth());
+  }
+  else if (alignment & ALIGNMENT_HCENTER)
+  {
+    x += (r.getWidth() - s.getWidth()) / 2;
+  }
+
+  if (alignment & ALIGNMENT_BOTTOM)
+  {
+    y += (r.getHeight() - s.getHeight());
+  }
+  else if (alignment & ALIGNMENT_VCENTER)
+  {
+    y += (r.getHeight() - s.getHeight()) / 2;
+  }
+
+  //we don't need to use setGeometry, because the Layout
+  //is only activated during repainting.
+  IntRect geometry(x, y, s.getWidth(), s.getHeight());
+  
+  if (_guiWindow)
+  {
+    //Do we really provide LayoutManager for Native Windows?
+    setGeometry(geometry);
+  }
+  else
+  {
+    // TODO WIDGET: create method for this! (currently copied from Base::dispatchConfigure)
+    uint32_t changed = 0;
+
+    if (getPosition() != geometry.getPosition())
+      changed |= ConfigureEvent::CHANGED_POSITION;
+
+    if (getSize() != geometry.getSize())
+      changed |= ConfigureEvent::CHANGED_SIZE;
+
+    if (changed)
+    {
+      ConfigureEvent e;
+      e._geometry = geometry;
+      e._changed = changed;
+
+      _geometry = geometry;
+      _clientGeometry.set(0, 0, geometry.w, geometry.h);
+      sendEvent(&e);
+    }
+  }
+}
+
+LayoutPolicy Widget::getLayoutPolicy() const
 {
   return _layoutPolicy;
 }
 
-void Widget::setLayoutPolicy(uint32_t policy)
+void Widget::setLayoutPolicy(const LayoutPolicy& policy)
 {
   if (_layoutPolicy == policy) return;
 
   _layoutPolicy = policy;
-  invalidateLayout();
+  if (_layout) _layout->invalidateLayout();
 }
 
 // ============================================================================
 // [Layout Height For Width]
 // ============================================================================
 
-bool Widget::hasHeightForWidth() const
+IntSize Widget::getMinimumSizeHint() const
 {
-  return _hasHeightForWidth;
+  if (_layout)
+    return _layout->getTotalMinimumSize();
+  else
+    return IntSize(-1, -1);
 }
 
-int Widget::getHeightForWidth(int width) const
+IntSize Widget::getMaximumSizeHint() const
 {
-  return -1;
+  if (_layout)
+    return _layout->getTotalMaximumSize();
+  else
+    return IntSize(-1, -1);
+}
+
+IntSize Widget::getSizeHint() const
+{
+  if (_layout)
+    return _layout->getTotalSizeHint();
+  else
+    return IntSize(-1, -1);
+}
+
+// ============================================================================
+// [Layout Minimum And Maximum Size]
+// ============================================================================
+
+bool Widget::checkMinimumSize(int w, int h)
+{
+  int set = 0;
+  if (w >= 0) set |=MAX_WIDTH_IS_SET;
+  if (h >= 0) set |=MAX_HEIGHT_IS_SET; 
+
+  w = Math::min<int>(w,WIDGET_MAX_SIZE);
+  w = Math::max<int>(w,0);
+  h = Math::min<int>(h,WIDGET_MAX_SIZE);
+  h = Math::max<int>(h,0);
+
+  checkMinMaxBlock();
+  if (_extra->_minwidth == w && _extra->_minheight == h)
+    return false;
+
+  _extra->_minwidth = w;
+  _extra->_minheight = h;
+  _minset = set;
+  return true;
+}
+
+bool Widget::checkMaximumSize(int w, int h)
+{
+  int set = 0;
+  if (w >= 0) set |=MAX_WIDTH_IS_SET;
+  if (h >= 0) set |=MAX_HEIGHT_IS_SET; 
+
+  w = Math::min<int>(w,WIDGET_MAX_SIZE);
+  w = Math::max<int>(w,0);
+  h = Math::min<int>(h,WIDGET_MAX_SIZE);
+  h = Math::max<int>(h,0);
+
+  checkMinMaxBlock();
+  if (_extra->_maxwidth == w && _extra->_maxheight == h)
+    return false;
+
+  _extra->_maxwidth = w;
+  _extra->_maxheight = h;
+  _maxset = set;
+  return true;
+}
+
+void Widget::setMinimumSize(const IntSize& minSize)
+{
+  IntSize lastmin(-1,-1);
+
+  if (_extra)
+  {
+    lastmin.set(_extra->_minwidth, _extra->_minheight);
+  }
+
+  if (!checkMinimumSize(minSize.getWidth(),minSize.getHeight())) //nothing changed
+  {
+    return;
+  }
+
+  IntSize size(getMinimumWidth(),getMinimumHeight());
+
+  invalidateLayout();
+  
+  if (_geometry.getWidth() < size.getWidth() || _geometry.getHeight() < size.getHeight())
+  {
+    resize(size);
+  }
+
+  //TODO: Write EventListener for GuiWindow to allow/disallow min/max
+}
+
+void Widget::setMaximumSize(const IntSize& maxSize)
+{
+  IntSize lastmin(-1, -1);
+
+  if (_extra)
+  {
+    lastmin.set(_extra->_minwidth, _extra->_minheight);
+  }
+
+  if (!checkMaximumSize(maxSize.getWidth(),maxSize.getHeight())) //nothing changed
+    return;
+
+  IntSize size(getMaximumWidth(),getMaximumHeight());
+
+  invalidateLayout();
+
+  if (_geometry.getWidth() > size.getWidth() || _geometry.getHeight() > size.getHeight())
+  {
+    resize(size);
+  }
+
+  // TODO: Write EventListener for GuiWindow to allow/disallow min/max
 }
 
 // ============================================================================
 // [Layout State]
 // ============================================================================
 
-bool Widget::isLayoutDirty() const
-{
-  return _isLayoutDirty;
-}
-
-void Widget::invalidateLayout() const
-{
-  // Don't invalidate more times, it can be time consuming.
-  if (_isLayoutDirty) return;
-
-  // Invalidate widget that has layout.
-  Widget* w = const_cast<Widget*>(this);
-  while (w->_layout == NULL)
-  {
-    w = w->_parent;
-    if (w == NULL) return;
-  }
-
-  w->_isLayoutDirty = true;
-  w->_layout->invalidateLayout();
-
-  if (w->_parent && w->_parent->_isLayoutDirty == false) w->_parent->invalidateLayout();
-}
+// LAYOUT TODO: ?
 
 // ============================================================================
 // [Fog::Widget - State]
@@ -577,17 +834,73 @@ void Widget::setEnabled(bool val)
 // [Fog::Widget - Visibility]
 // ============================================================================
 
-void Widget::setVisible(bool val)
+void Widget::setVisible(uint32_t val)
 {
-  if ( val && _visibility != WIDGET_HIDDEN) return;
-  if (!val && _visibility == WIDGET_HIDDEN) return;
+  //TODO: Check if an optimization makes sense here (hidden_by_parent)
+  if (val == _visibility) return;
+
+  if (val == WIDGET_VISIBLE_FULLSCREEN)
+  {
+    if (!_guiWindow) return;
+
+    int rrr = _windowFlags & WINDOW_TRANSPARENT;
+
+    _fullscreendata = new(std::nothrow) FullScreenData;
+    _fullscreendata->_restorewindowFlags = _windowFlags;
+    _fullscreendata->_restoregeometry = _guiWindow->_windowRect;
+    _fullscreendata->_restoretransparency = _transparency;
+
+    GuiEngine::DisplayInfo info;
+    Application::getInstance()->getGuiEngine()->getDisplayInfo(&info);
+
+    setWindowFlags(WINDOW_TYPE_FULLSCREEN | getWindowHints());
+    setGeometry(IntRect(0,0,info.width, info.height));
+  }
+  else if (_visibility == WIDGET_VISIBLE_FULLSCREEN && val == WIDGET_VISIBLE)
+  {
+    FOG_ASSERT(_fullscreendata);
+    _visibility = WIDGET_VISIBLE;
+    setWindowFlags(_fullscreendata->_restorewindowFlags);
+    setGeometry(_fullscreendata->_restoregeometry);
+
+    delete _fullscreendata;
+    _fullscreendata = 0;
+  }
 
   if (_guiWindow)
   {
-    if (val)
-      _guiWindow->show();
+    if (val >= WIDGET_VISIBLE_MINIMIZED)
+    {
+      if (_guiWindow->isModal() && val != WIDGET_VISIBLE_RESTORE)
+      {
+        // TODO: Application wide modality do not have a owner
+        if (_guiWindow->getModality() == MODAL_WINDOW)
+        {
+          // Start this window as modal window above our owner.
+          _guiWindow->getOwner()->startModalWindow(_guiWindow);
+        }
+        else
+        {
+          // TODO: What here?
+        }
+      }
+      _guiWindow->show(val);
+    }
     else
+    {
+      if (_guiWindow->isModal() && val == WIDGET_HIDDEN)
+      {
+        if (_guiWindow->getModality() == MODAL_WINDOW)
+        {
+          _guiWindow->getOwner()->endModal(_guiWindow);
+        }
+        else
+        {
+          // TODO: What here?
+        }
+      }
       _guiWindow->hide();
+    }
   }
   else
   {
@@ -595,6 +908,59 @@ void Widget::setVisible(bool val)
     if (!ge) return;
 
     ge->dispatchVisibility(this, val);
+  }
+
+  if (val == WIDGET_VISIBLE_RESTORE)
+  {
+    _visibility = WIDGET_VISIBLE;
+  }
+  else
+  {
+    _visibility = val;
+  }
+}
+
+void Widget::setTransparency(float val)
+{
+  if (val < 0.0f)
+  {
+    val = 0.0f;
+  }
+  else if (val > 1.0f)
+  {
+    val = 1.0f;
+  }
+  
+  if (_guiWindow)
+  {
+    //some window manager need a flag to be set (e.g. windows)
+    //so make sure the flag is already set
+    _transparency = val;
+    _guiWindow->setTransparency(val);
+  }
+  else
+  {
+    // TODO WIDGET: Transparency.
+  }
+}
+
+void Widget::showModal(GuiWindow* owner)
+{
+  if (_guiWindow && !_guiWindow->getOwner())
+  {
+    // Only TopLevel Windows may be modal!
+    if (owner != 0)
+    {
+      _guiWindow->setModal(MODAL_WINDOW);
+      // This will implicitly set this window above owner window!
+      _guiWindow->setOwner(owner);
+    }
+    else
+    {
+      _guiWindow->setModal(MODAL_APPLICATION);
+    }
+  
+    setVisible(WIDGET_VISIBLE);
   }
 }
 
@@ -604,58 +970,64 @@ void Widget::setVisible(bool val)
 
 void Widget::setWindowFlags(uint32_t flags) 
 {
-    if(flags == _windowFlags) return;
+  if (flags == _windowFlags) return;
 
-    if(_guiWindow) 
+  if (_guiWindow) 
+  {
+    if (_visibility == WIDGET_VISIBLE_FULLSCREEN)
     {
-        _guiWindow->create(flags);
+      // If it is currently fullscreen, just set the restore flags to flags!
+      _fullscreendata->_restorewindowFlags = flags;
+      return;
     }
+    else
+    {
+      _guiWindow->create(flags);
+    }
+  }
 
-    _windowFlags = flags;
+  _windowFlags = flags;
+
+  //setTransparency(_transparency);
 }
 
 void Widget::setWindowHints(uint32_t flags) 
 {
-  if(flags == getWindowHints()) return;
+  if (flags == getWindowHints()) return;
 
-  //make sure to keep window type and to only update the hints
-  flags = (_windowFlags & WINDOW_TYPE_FLAG) | (flags & WINDOW_HINTS_FLAG);
+  // Make sure to keep window type and to only update the hints.
+  flags = (_windowFlags & WINDOW_TYPE_MASK) | (flags & WINDOW_HINTS_MASK);
 
-  if(_guiWindow) 
-  {
-    _guiWindow->create(flags);
-  }
-
-  _windowFlags = flags;
+  setWindowFlags(flags);
 }
 
-void Widget::changeFlag(uint32_t flag, bool set, bool update) {
-  if(set) 
+void Widget::changeFlag(uint32_t flag, bool set, bool update)
+{
+  uint32_t flags = _windowFlags;
+
+  if (set) 
   {
-    _windowFlags |= flag;
+    flags |= flag;
   }
   else 
   {
-    _windowFlags &= ~flag;
+    flags &= ~flag;
   }
 
-  if(_guiWindow && update) 
-  {
-    _guiWindow->create(_windowFlags);
-  }
+  setWindowFlags(flags);
 }
 
 void Widget::setDragAble(bool drag, bool update) 
 {
-  if(drag == isDragAble()) 
-    return;
+  if (drag == isDragAble()) return;
+
   changeFlag(WINDOW_DRAGABLE,drag,update);
 }
 
 void Widget::setResizeAble(bool resize, bool update) 
 {
-  if(resize == isResizeAble()) 
-    return;
+  if (resize == isResizeAble()) return;
+
   changeFlag(WINDOW_FIXED_SIZE,!resize,update);
 }
 

@@ -10,7 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Graphics/Painter.h>
-#include <Fog/Gui/Theme/Default.h>
+#include <Fog/Gui/Theme/Theme_Default_p.h>
 
 FOG_IMPLEMENT_OBJECT(Fog::DefaultTheme)
 

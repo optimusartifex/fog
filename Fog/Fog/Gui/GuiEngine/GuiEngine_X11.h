@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_GUI_GUIENGINE_X11_H
-#define _FOG_GUI_GUIENGINE_X11_H
+#ifndef _FOG_GUI_GUIENGINE_X11_P_H
+#define _FOG_GUI_GUIENGINE_X11_P_H
 
 // [Visibility]
 #include <Fog/Core/Build.h>
@@ -22,8 +22,7 @@
 #include <Fog/Graphics/Geometry.h>
 #include <Fog/Gui/Constants.h>
 #include <Fog/Gui/GuiEngine.h>
-#include <Fog/Gui/GuiEngine/Base.h>
-#include <Fog/Gui/GuiEngine/X11Headers.h>
+#include <Fog/Gui/GuiEngine/GuiEngine_X11_Xlib.h>
 
 namespace Fog {
 
@@ -35,9 +34,9 @@ namespace Fog {
 // ============================================================================
 
 //! @brief X11 Gui engine.
-struct FOG_GUIENGINE_X11_API X11GuiEngine : public BaseGuiEngine
+struct FOG_GUIENGINE_X11_API X11GuiEngine : public GuiEngine
 {
-  FOG_DECLARE_OBJECT(X11GuiEngine, BaseGuiEngine)
+  FOG_DECLARE_OBJECT(X11GuiEngine, GuiEngine)
 
   // --------------------------------------------------------------------------
   // [Registration]
@@ -440,9 +439,9 @@ struct FOG_GUIENGINE_X11_API X11GuiEngine : public BaseGuiEngine
 // ============================================================================
 
 //! @brief X11 native window.
-struct FOG_GUIENGINE_X11_API X11GuiWindow : public BaseGuiWindow
+struct FOG_GUIENGINE_X11_API X11GuiWindow : public GuiWindow
 {
-  FOG_DECLARE_OBJECT(X11GuiWindow, BaseGuiWindow)
+  FOG_DECLARE_OBJECT(X11GuiWindow, GuiWindow)
 
   typedef XID Handle;
 
@@ -463,7 +462,7 @@ struct FOG_GUIENGINE_X11_API X11GuiWindow : public BaseGuiWindow
   virtual err_t enable();
   virtual err_t disable();
 
-  virtual err_t show();
+  virtual err_t show(uint32_t state);
   virtual err_t hide();
 
   virtual err_t move(const IntPoint& pt);
@@ -484,13 +483,21 @@ struct FOG_GUIENGINE_X11_API X11GuiWindow : public BaseGuiWindow
   virtual err_t worldToClient(IntPoint* coords);
   virtual err_t clientToWorld(IntPoint* coords);
 
+  virtual void setOwner(GuiWindow* owner);
+  virtual void releaseOwner();
+
+  virtual void setTransparency(float val);
+
+  virtual void moveToTop(GuiWindow* w);
+  virtual void moveToBottom(GuiWindow* w);
+
   // --------------------------------------------------------------------------
   // [Windowing System]
   // --------------------------------------------------------------------------
 
   virtual void onX11Event(XEvent* xe);
 
-  // tell window manager that we want's to move our window to our position
+  // Tell window manager that we want's to move our window to our position
   // (it will be not discarded if we will specify PPosition)
   void setMoveableHints();
 
@@ -583,4 +590,4 @@ protected:
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_GUI_GUIENGINE_X11_H
+#endif // _FOG_GUI_GUIENGINE_X11_P_H

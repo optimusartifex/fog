@@ -22,6 +22,7 @@
 #include <Fog/Gui/Constants.h>
 #include <Fog/Gui/Event.h>
 #include <Fog/Gui/Layout/LayoutItem.h>
+#include <Fog/Gui/Layout/LayoutHint.h>
 
 namespace Fog {
 
@@ -88,6 +89,7 @@ struct Window;
 //! coordinates (desktop window).
 struct FOG_API Widget : public LayoutItem
 {
+  friend struct Layout;
   FOG_DECLARE_OBJECT(Widget, LayoutItem)
 
   // --------------------------------------------------------------------------
@@ -194,6 +196,19 @@ struct FOG_API Widget : public LayoutItem
 
   //! @brief Get widget client geometry.
   FOG_INLINE const IntRect& getClientGeometry() const { return _clientGeometry; }
+
+  FOG_INLINE IntRect getClientContentGeometry() const { 
+    IntRect ret = _clientGeometry; 
+    if(ret.getWidth() == 0 && ret.getHeight() == 0)
+      return IntRect(0,0,0,0);
+
+    ret.setLeft(getContentLeftMargin());
+    ret.setTop(getContentTopMargin());
+    ret.setWidth(_clientGeometry.getWidth() - getContentRightMargin());
+    ret.setHeight(_clientGeometry.getHeight() - getContentBottomMargin());
+
+    return ret;
+  }
   //! @brief Get widget position relative to parent.
   FOG_INLINE const IntPoint& getClientPosition() const { return _clientGeometry.getPosition(); }
   //! @brief Get widget size.
@@ -259,6 +274,32 @@ struct FOG_API Widget : public LayoutItem
   // [Layout Of Widget]
   // --------------------------------------------------------------------------
 
+  void invalidateLayout();
+
+  virtual void calculateLayoutHint(LayoutHint& hint) {
+    //calculate MinimumSize
+    hint._minimumSize = LayoutItem::calculateMinimumSize();
+
+    //calculate MaxiumumSize
+    hint._maximumSize = LayoutItem::calculateMaximumSize();
+
+    //calculate SizeHint
+    hint._sizeHint = getSizeHint().expandedTo(getMinimumSizeHint());
+    hint._sizeHint = hint._sizeHint.boundedTo(getMaximumSize()).expandedTo(getMinimumSize());
+    //TODO: WA_LayoutUsesWidgetRect
+
+    if (_layoutPolicy.isHorizontalPolicyIgnored())
+      hint._sizeHint.setWidth(0);
+    if (_layoutPolicy.isVerticalPolicyIgnored())
+      hint._sizeHint.setHeight(0);
+
+    //!!! TODO: REMOVE THIS AFTER EASY TESTING!!!
+    hint._sizeHint = IntSize(40, 40);
+  }
+
+  virtual bool hasLayoutHeightForWidth() const;
+  virtual int getLayoutHeightForWidth(int width) const;  
+
   //! @brief Get widget layout manager.
   FOG_INLINE Layout* getLayout() const { return _layout; }
 
@@ -271,36 +312,85 @@ struct FOG_API Widget : public LayoutItem
   //! @brief Take widget layout manager (will not disconnect children).
   Layout* takeLayout();
 
-  // --------------------------------------------------------------------------
-  // [Layout Hints]
-  // --------------------------------------------------------------------------
+  // TODO GUI: Purpose?
+  FOG_INLINE virtual bool isEmpty() const { return !isVisible() || _guiWindow; }
 
-  virtual const LayoutHint& getLayoutHint() const;
-  virtual void setLayoutHint(const LayoutHint& layoutHint);
+  virtual uint32_t getLayoutExpandingDirections() const;
 
-  virtual const LayoutHint& getComputedLayoutHint() const;
-  virtual void computeLayoutHint();
+  //methods for doing real geometry changes
+  //don't dispatch geometry events because updates will be done AFTER finishing all
+  //geometry changes
+  virtual void setLayoutGeometry(const IntRect&);
 
   // --------------------------------------------------------------------------
   // [Layout Policy]
   // --------------------------------------------------------------------------
 
-  virtual uint32_t getLayoutPolicy() const;
-  virtual void setLayoutPolicy(uint32_t policy);
+  virtual LayoutPolicy getLayoutPolicy() const;
+  virtual void setLayoutPolicy(const LayoutPolicy& policy);
 
   // --------------------------------------------------------------------------
   // [Layout Height For Width]
   // --------------------------------------------------------------------------
 
-  virtual bool hasHeightForWidth() const;
-  virtual int getHeightForWidth(int width) const;
+  virtual bool hasHeightForWidth() const { return false; }
+  virtual int getHeightForWidth(int width) const { return -1; }
+
+  // --------------------------------------------------------------------------
+  // [Layout SizeHint]
+  // --------------------------------------------------------------------------
+
+  virtual IntSize getMinimumSizeHint() const;
+  virtual IntSize getMaximumSizeHint() const;
+  virtual IntSize getSizeHint() const;
+
+  // --------------------------------------------------------------------------
+  // [Layout Fixed Size]
+  // --------------------------------------------------------------------------
+
+  // --------------------------------------------------------------------------
+  // [Layout Minimum And Maximum Size]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void checkMinMaxBlock() { if(!_extra) _extra = new(std::nothrow) ExtendedData(); }
+  
+  bool checkMinimumSize(int width, int height);
+  bool checkMaximumSize(int width, int height);
+  void setMinimumSize(const IntSize& minSize);
+  void setMaximumSize(const IntSize& minSize);
+  
+  FOG_INLINE void setMinimumHeight(int height) {
+    int width = hasMinimumHeight()? _extra->_minwidth : -1;
+    setMinimumSize(IntSize(width,height));
+  }
+  FOG_INLINE void setMinimumWidth(int width) {
+    int height = hasMinimumHeight()? _extra->_maxheight : -1;
+    setMinimumSize(IntSize(width,height));
+  }
+  FOG_INLINE void setMaximumHeight(int height) {
+    int width = hasMaximumHeight()? _extra->_minwidth : -1;
+    setMaximumSize(IntSize(width,height));
+  }
+  void setMaximumWidth(int width) {
+    int height = hasMaximumHeight()? _extra->_maxheight : -1;
+    setMaximumSize(IntSize(width,height));
+  }
+
+  FOG_INLINE bool hasMinimumHeight() const { return _minset & MIN_HEIGHT_IS_SET; }
+  FOG_INLINE bool hasMaximumHeight() const { return _maxset & MAX_HEIGHT_IS_SET; }
+  FOG_INLINE bool hasMinimumWidth() const { return _minset & MIN_WIDTH_IS_SET; }
+  FOG_INLINE bool hasMaximumWidth() const { return _maxset & MAX_WIDTH_IS_SET; }
+  FOG_INLINE int getMinimumHeight() const { return getMinimumSize().getHeight(); }
+  FOG_INLINE int getMaximumHeight() const { return getMaximumSize().getHeight(); }
+  FOG_INLINE int getMinimumWidth() const { return getMinimumSize().getWidth(); }
+  FOG_INLINE int getMaximumWidth() const { return getMaximumSize().getWidth(); }
+
+  FOG_INLINE IntSize getMinimumSize() const { return _extra ? IntSize(_extra->_minwidth, _extra->_minheight) : IntSize(WIDGET_MIN_SIZE, WIDGET_MIN_SIZE); }
+  FOG_INLINE IntSize getMaximumSize() const { return _extra ? IntSize(_extra->_maxwidth, _extra->_maxheight) : IntSize(WIDGET_MAX_SIZE, WIDGET_MAX_SIZE); }
 
   // --------------------------------------------------------------------------
   // [Layout State]
   // --------------------------------------------------------------------------
-
-  virtual bool isLayoutDirty() const;
-  virtual void invalidateLayout() const;
 
   // --------------------------------------------------------------------------
   // [Widget State]
@@ -329,32 +419,72 @@ struct FOG_API Widget : public LayoutItem
   FOG_INLINE uint32_t getVisibility() const { return _visibility; }
 
   //! @brief Get whether widget is visible.
-  FOG_INLINE bool isVisible() const { return _visibility == WIDGET_VISIBLE; }
+  FOG_INLINE bool isVisible() const { return _visibility >= WIDGET_VISIBLE; }
   //! @brief Get whether widget is visible to parent.
-  FOG_INLINE bool isVisibleToParent() const { return _state != WIDGET_HIDDEN; }
+  FOG_INLINE bool isVisibleToParent() const { return _state != WIDGET_HIDDEN && _state != WIDGET_VISIBLE_MINIMIZED; }
 
   //! @brief Set widget visibility to @a val.
-  void setVisible(bool val = true);
+  void setVisible(uint32_t val=WIDGET_VISIBLE);
   
-  //! @brief Show widget (set it's visibility to true).
-  FOG_INLINE void show() { setVisible(true); }
-  //! @brief Hide widget (set it's visibility to false).
-  FOG_INLINE void hide() { setVisible(false); }
+  //! @brief Show widget (set it's visibility to WIDGET_VISIBLE).
+  FOG_INLINE void show(uint32_t type=WIDGET_VISIBLE) { setVisible(type); }
+  //! @brief Show widget (set it's visibility to WIDGET_VISIBLE).
+  void showModal(GuiWindow* owner);
 
+  //! @brief Hide widget (set it's visibility to WIDGET_HIDDEN).
+  FOG_INLINE void hide() { setVisible(WIDGET_HIDDEN); }
+
+  //! @brief Show widget as FullScreen (set it's visibility to WIDGET_VISIBLE_FULLSCREEN).
+  FOG_INLINE void showFullScreen() { setVisible(WIDGET_VISIBLE_FULLSCREEN); }
+  //! @brief Show widget maximized (set it's visibility to WIDGET_VISIBLE_MAXIMIZED).
+  FOG_INLINE void showMaximized() { setVisible(WIDGET_VISIBLE_MAXIMIZED); }
+  //! @brief Show widget minimized (set it's visibility to WIDGET_VISIBLE_MINIMIZED).
+  FOG_INLINE void showMinimized() { setVisible(WIDGET_VISIBLE_MINIMIZED); }
+  //! @brief Show widget (set it's visibility to WIDGET_VISIBLE).
+  FOG_INLINE void showNormal() { setVisible(WIDGET_VISIBLE); }
+
+  //! @brief returns true if the widget is currently maximized
+  FOG_INLINE bool isMaximized() const { return (_visibility == WIDGET_VISIBLE_MAXIMIZED); }
+  //! @brief returns true if the widget is currently minimized
+  FOG_INLINE bool isMinimized() const {return ( _visibility == WIDGET_VISIBLE_FULLSCREEN); }
+  //! @brief returns true if the widget is currently shown as full screen  
+  FOG_INLINE bool isFullScreen() const { return (_visibility == WIDGET_VISIBLE_FULLSCREEN); }  
 
   // --------------------------------------------------------------------------
   // [Widget Window Style]
   // --------------------------------------------------------------------------
-  FOG_INLINE uint32_t getWindowFlags() { return _windowFlags; }
+  //! @brief returns the current window flags of the widget
+  FOG_INLINE uint32_t getWindowFlags() const { return _windowFlags; }
+  //! @brief set the current window flags of the widget (overwrites existing)
   void setWindowFlags(uint32_t flags);
-  FOG_INLINE uint32_t getWindowHints() { return _windowFlags & WINDOW_HINTS_FLAG; }
+  //! @brief set WindowFlags without notifying the window manager!
+  //! Make sure you know what you are doing!
+  FOG_INLINE void overrideWindowFlags(uint32_t flags) { _windowFlags = flags; }
+
+  //! @brief returns the current window hints of the widget
+  FOG_INLINE uint32_t getWindowHints() const { return _windowFlags & WINDOW_HINTS_MASK; }
+  //! @brief set the current window hints of the widget (but keep window_type!)
   void setWindowHints(uint32_t flags);  
 
-  FOG_INLINE bool isDragAble() { return (_windowFlags & WINDOW_DRAGABLE); }
+  //! @brief returns true if the widget is currently allowed to drag
+  FOG_INLINE bool isDragAble() const { return (_windowFlags & WINDOW_DRAGABLE); }
+  //! @brief sets the permission to drag the window
   void setDragAble(bool drag, bool update=true);
 
-  FOG_INLINE bool isResizeAble() { return (_windowFlags & WINDOW_FIXED_SIZE) != 0; }  
-  void setResizeAble(bool resize, bool update=true);
+  //! @brief returns true if the widget is currently allowed to resize
+  FOG_INLINE bool isResizeAble() const { return (_windowFlags & WINDOW_FIXED_SIZE) == 0; }
+  //! @brief sets the permission to resize the window
+  void setResizeAble(bool resize, bool update=true);  
+
+  //! @brief returns true if the widget lays on top of the other windows
+  FOG_INLINE bool isAlwaysOnTop() { return (_windowFlags & WINDOW_ALWAYS_ON_TOP) != 0; }
+  //! @brief sets the ON_TOP flag of the window
+  void setAlwaysOnTop(bool ontop);
+
+  FOG_INLINE bool isPopUpWindow() const { return (((_windowFlags & WINDOW_POPUP) != 0) || ((_windowFlags & WINDOW_INLINE_POPUP) != 0)); }
+
+  void setTransparency(float val);
+  FOG_INLINE float getTransparency() const { return _transparency; }
 
   // --------------------------------------------------------------------------
   // [Widget Orientation]
@@ -538,6 +668,9 @@ struct FOG_API Widget : public LayoutItem
     FOG_EVENT_DEF(EVENT_DISABLE             , onDisable         , StateEvent     , OVERRIDE)
     FOG_EVENT_DEF(EVENT_DISABLE_BY_PARENT   , onDisable         , StateEvent     , OVERRIDE)
     FOG_EVENT_DEF(EVENT_SHOW                , onShow            , VisibilityEvent, OVERRIDE)
+    FOG_EVENT_DEF(EVENT_SHOW_FULLSCREEN     , onShow            , VisibilityEvent, OVERRIDE)
+    FOG_EVENT_DEF(EVENT_SHOW_MAXIMIZE       , onShow            , VisibilityEvent, OVERRIDE)
+    FOG_EVENT_DEF(EVENT_SHOW_MINIMIZE       , onShow            , VisibilityEvent, OVERRIDE)
     FOG_EVENT_DEF(EVENT_HIDE                , onHide            , VisibilityEvent, OVERRIDE)
     FOG_EVENT_DEF(EVENT_HIDE_BY_PARENT      , onHide            , VisibilityEvent, OVERRIDE)
     FOG_EVENT_DEF(EVENT_CONFIGURE           , onConfigure       , ConfigureEvent , OVERRIDE)
@@ -567,10 +700,28 @@ struct FOG_API Widget : public LayoutItem
   // --------------------------------------------------------------------------
 
 protected:
+  struct FullScreenData {
+
+    //! @brief Main geometry for restoration from fullscreen mode
+    IntRect _restoregeometry;
+    //! @brief Window Style for restoration of fullscreen
+    uint32_t _restorewindowFlags;
+    float _restoretransparency;
+  }* _fullscreendata;
+
+  struct ExtendedData {
+    ExtendedData() : _maxheight(WIDGET_MAX_SIZE), _maxwidth(WIDGET_MAX_SIZE), _minheight(WIDGET_MIN_SIZE), _minwidth(WIDGET_MIN_SIZE) {}
+    int _maxwidth;
+    int _maxheight;
+    int _minwidth;
+    int _minheight;
+  }* _extra;
+
   //! @brief Will set/unset a window flag and update the window if specified
   void changeFlag(uint32_t flag, bool set, bool update);
 
   Widget* _parent;
+  GuiWindow* _owner;
 
   List<Widget*> _children;
 
@@ -590,19 +741,14 @@ protected:
   //! @brief Layout.
   Layout* _layout;
 
-  //! @brief Layout hints.
-  LayoutHint _layoutHint;
-
   //! @brief Layout policy.
-  uint8_t _layoutPolicy;
-  //! @brief Whether the widget can trade height for width.
-  bool _hasHeightForWidth;
-  //! @brief Whether the layout is dirty (must be recalculated for this widget
-  //! and all descendents).
-  mutable bool _isLayoutDirty;
+  LayoutPolicy _layoutPolicy; // move into LayoutItem??
 
   //! @brief Tab order.
   int _tabOrder;
+
+  //! @brief global transparency of window (0.0..1.0)
+  float _transparency;
 
   //! @brief Link to child that was last focus.
   Widget* _lastFocus;
@@ -610,26 +756,34 @@ protected:
 
   //! @brief Update flags.
   uint32_t _uflags;
-
   //! @brief Window Style
   uint32_t _windowFlags;
-  //! @brief Widget state.
-  uint32_t _state : 2;
-  //! @brief Widget visibility.
-  uint32_t _visibility : 2;
-  //! @brief Widget focus policy
-  uint32_t _focusPolicy : 4;
+
+  //! @brief marks if minwidth/minheight is set
+  uint32_t _minset : 2;
+  //! @brief marks if maxwidth/maxheight is set
+  uint32_t _maxset : 2;
   //! @brief Focus.
   uint32_t _hasFocus : 1;
   //! @brief Widget orientation
-  uint32_t _orientation : 1;
+  uint32_t _orientation : 1;  
+  //! @brief Widget state.
+  uint32_t _state : 2;
+
+  //! @brief Widget visibility.
+  uint32_t _visibility : 3;
+  //! @brief Widget focus policy
+  uint32_t _focusPolicy : 4;
   //! @brief Reserved for future use.
-  uint32_t _reserved : 22;
+  uint32_t _unused : 1;
+
+  //! @brief Reserved for future use.
+  uint32_t _reserved : 16;
+
+  uint32_t _widgetflags;
 
 private:
   friend struct Application;
-  friend struct BaseGuiEngine;
-  friend struct BaseGuiWindow;
   friend struct GuiEngine;
   friend struct GuiWindow;
   friend struct Window;

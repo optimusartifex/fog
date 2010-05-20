@@ -84,7 +84,7 @@ void CheckBox::onPaint(PaintEvent* e)
   bounds.w -= 16;
 
   p->setSource(0xFF000000);
-  p->drawText(bounds, _text, _font, TEXT_ALIGN_LEFT);
+  p->drawText(bounds, _text, _font, TEXT_ALIGN_LEFT | TEXT_ALIGN_VCENTER);
 }
 
 } // Fog namespace

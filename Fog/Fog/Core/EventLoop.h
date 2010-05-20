@@ -128,7 +128,8 @@ struct FOG_API EventLoop
   //! The anatomy of a typical run loop:
   //!
   //! @verbatim
-  //! for (;;) {
+  //! for (;;)
+  //! {
   //!   didWork |= _doWork();
   //!   if (_quitting) break;
   //!

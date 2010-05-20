@@ -233,7 +233,7 @@ struct FOG_HIDDEN DibSSE2
 
     if (w < 8)
     {
-      dst -= (w - 7) * 4;
+      dst -= (7 - w) * 4;
 
       do {
         switch (w)
@@ -248,8 +248,8 @@ struct FOG_HIDDEN DibSSE2
             break;
           default:
             FOG_ASSERT_NOT_REACHED();
-            dst += dstStride;
         }
+        dst += dstStride;
       } while (--h);
     }
     else
@@ -362,8 +362,8 @@ largeWidthSkip:
             break;
           default:
             FOG_ASSERT_NOT_REACHED();
-            dst += dstStride;
         }
+        dst += dstStride;
       } while (--h);
     }
     else

@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_GUI_GUIENGINE_X11HEADERS_H
-#define _FOG_GUI_GUIENGINE_X11HEADERS_H
+#ifndef _FOG_GUI_GUIENGINE_X11_XLIB_H
+#define _FOG_GUI_GUIENGINE_X11_XLIB_H
 
 // [Dependencies]
 #include <Fog/Core/Build.h>
@@ -322,4 +322,4 @@ const int XVisibilityNotify = VisibilityNotify;
 #endif // FOG_GUI_X11
 
 // [Guard]
-#endif // _FOG_GUI_GUIENGINE_X11HEADERS_H
+#endif // _FOG_GUI_GUIENGINE_X11_XLIB_H

@@ -15,6 +15,7 @@
 #include <Fog/Core/Build.h>
 #include <Fog/Core/Object.h>
 #include <Fog/Core/String.h>
+#include <Fog/Gui/Animation.h>
 
 //! @brief Function that should be called if application arguments are not
 //! initialized and Application object not exists or it's not kwown that
@@ -120,6 +121,7 @@ public:
 
   //! @brief Get application event loop (can be NULL).
   FOG_INLINE EventLoop* getEventLoop() const { return _eventLoop; }
+  FOG_INLINE AnimationDispatcher* getAnimationDispatcher() { return &_animation; }
 
   //! @brief Create event loop.
   static EventLoop* createEventLoop(const String& name);
@@ -152,6 +154,7 @@ public:
 protected:
   EventLoop* _eventLoop;
   GuiEngine* _nativeEngine;
+  AnimationDispatcher _animation;
 
   // --------------------------------------------------------------------------
   // [Statics]

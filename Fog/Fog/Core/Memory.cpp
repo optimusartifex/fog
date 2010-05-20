@@ -258,7 +258,8 @@ static void fog_memdbg_dump(void* addr, sysuint_t size)
     }
     while (i++ < 24) fprintf(fog_stderr, "  ");
 
-    for (i = 0; i != width; i++) {
+    for (i = 0; i != width; i++)
+    {
       int c = addr_c[i];
       if (c >= ' ' && c < 128)
         fprintf(fog_stderr, "%c", c);

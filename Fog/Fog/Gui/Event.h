@@ -76,6 +76,8 @@ struct FOG_API VisibilityEvent : public Event
 
   VisibilityEvent(uint32_t code = 0);
   virtual ~VisibilityEvent();
+
+  uint32_t _visibilitystate;
 };
 
 // ============================================================================
@@ -367,7 +369,22 @@ struct FOG_API ThemeEvent : public Event
   virtual ~ThemeEvent();
 };
 
-//! @}
+
+// ============================================================================
+// [Fog::AnimationEvent]
+// ============================================================================
+
+struct FOG_API AnimationEvent : public Event
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  AnimationEvent(uint32_t code=EVENT_ANIMATION);
+  virtual ~AnimationEvent();
+
+  uint32_t _type;
+};
 
 //! @addtogroup Fog_Gui_Layout
 //! @{

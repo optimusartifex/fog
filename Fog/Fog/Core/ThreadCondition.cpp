@@ -332,7 +332,9 @@ ThreadCondition::CVEvent* ThreadCondition::getEventForWaiting()
     cv_event->initListElement();
     _allocationCounter++;
     FOG_ASSERT(cv_event->handle());
-  } else {
+  }
+  else
+  {
     cv_event = _recyclingList.popFront();
     _recyclingListSize--;
   }

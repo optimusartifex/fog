@@ -4,15 +4,14 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_GUI_GUIENGINE_WIN_H
-#define _FOG_GUI_GUIENGINE_WIN_H
+#ifndef _FOG_GUI_GUIENGINE_WINDOWS_H
+#define _FOG_GUI_GUIENGINE_WINDOWS_H
 
 // [Dependencies]
 #include <Fog/Core/Object.h>
 #include <Fog/Graphics/Geometry.h>
 #include <Fog/Gui/Constants.h>
 #include <Fog/Gui/GuiEngine.h>
-#include <Fog/Gui/GuiEngine/Base.h>
 
 namespace Fog {
 
@@ -23,9 +22,9 @@ namespace Fog {
 // [Fog::WinGuiEngine]
 // ============================================================================
 
-struct FOG_API WinGuiEngine : public BaseGuiEngine
+struct FOG_API WinGuiEngine : public GuiEngine
 {
-  FOG_DECLARE_OBJECT(WinGuiEngine, BaseGuiEngine)
+  FOG_DECLARE_OBJECT(WinGuiEngine, GuiEngine)
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -52,6 +51,9 @@ struct FOG_API WinGuiEngine : public BaseGuiEngine
 
   virtual GuiWindow* createGuiWindow(Widget* widget);
   virtual void destroyGuiWindow(GuiWindow* native);
+
+  virtual void minimize(GuiWindow*);
+  virtual void maximize(GuiWindow*);
 
   // --------------------------------------------------------------------------
   // [Windows Specific]
@@ -83,9 +85,9 @@ struct FOG_API WinGuiEngine : public BaseGuiEngine
 // [Fog::WinGuiWindow]
 // ============================================================================
 
-struct FOG_API WinGuiWindow : public BaseGuiWindow
+struct FOG_API WinGuiWindow : public GuiWindow
 {
-  FOG_DECLARE_OBJECT(WinGuiWindow, BaseGuiWindow)
+  FOG_DECLARE_OBJECT(WinGuiWindow, GuiWindow)
 
   typedef HWND Handle;
 
@@ -106,7 +108,7 @@ struct FOG_API WinGuiWindow : public BaseGuiWindow
   virtual err_t enable();
   virtual err_t disable();
 
-  virtual err_t show();
+  virtual err_t show(uint32_t state);
   virtual err_t hide();
 
   virtual err_t move(const IntPoint& pt);
@@ -127,12 +129,30 @@ struct FOG_API WinGuiWindow : public BaseGuiWindow
   virtual err_t worldToClient(IntPoint* coords);
   virtual err_t clientToWorld(IntPoint* coords);
 
+  virtual void setOwner(GuiWindow* owner);
+  virtual void releaseOwner();
+
+  // --------------------------------------------------------------------------
+  // [Z-Order]
+  // --------------------------------------------------------------------------
+
+  //Move Window on Top of other Window! (If w == 0 Move on top of all Windows)
+  virtual void moveToTop(GuiWindow* w=0);
+  //Move Window behind other Window! (If w == 0 Move behind all Windows of screen)
+  virtual void moveToBottom(GuiWindow* w=0);
+
+  virtual void setTransparency(float val);
+
   // --------------------------------------------------------------------------
   // [Windowing System]
   // --------------------------------------------------------------------------
 
   virtual void onMousePress(uint32_t button, bool repeated);
   virtual void onMouseRelease(uint32_t button);
+
+  LRESULT MouseMessageHelper(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+  LRESULT KeyboardMessageHelper(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+  LRESULT WindowManagerMessageHelper(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
   virtual LRESULT onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -156,7 +176,7 @@ struct FOG_API WinGuiBackBuffer : public GuiBackBuffer
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  WinGuiBackBuffer();
+  WinGuiBackBuffer(bool prgb=false);
   virtual ~WinGuiBackBuffer();
 
   // --------------------------------------------------------------------------
@@ -186,6 +206,8 @@ struct FOG_API WinGuiBackBuffer : public GuiBackBuffer
 
   HBITMAP _hBitmap;
   HDC _hdc;
+
+  bool _prgb;
 };
 
 //! @}
@@ -193,4 +215,4 @@ struct FOG_API WinGuiBackBuffer : public GuiBackBuffer
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_GUI_GUIENGINE_WIN_H
+#endif // _FOG_GUI_GUIENGINE_WINDOWS_H

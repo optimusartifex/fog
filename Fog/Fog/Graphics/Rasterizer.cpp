@@ -1523,7 +1523,8 @@ static FOG_INLINE void qsortCells(Cell* start, sysuint_t num)
         // int j1X = j[1].x;
         // uint64_t j1T = ((uint64_t*)&j[1].cover)[0];
         //
-        // for (;;) {
+        // for (;;)
+        // {
         //   int j0X = j[0].x;
         //   if (j0X < j1X) break;
         //

@@ -32,7 +32,7 @@
 #include <Fog/Gui/GuiEngine.h>
 
 #if defined(FOG_OS_WINDOWS)
-# include <Fog/Gui/GuiEngine/Win.h>
+# include <Fog/Gui/GuiEngine/GuiEngine_Windows.h>
 // windows.h is already included by Fog/Core/Build.h
 # include <io.h>
 #else
@@ -87,7 +87,8 @@ static void parseWinCmdLine(const String& cmdLine, List<String>& dst)
   for (;;)
   {
     // Skip spaces.
-    for (;;) {
+    for (;;)
+    {
       if (cur == end) goto end;
       if (cur->isSpace()) cur++;
       else break;

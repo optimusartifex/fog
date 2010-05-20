@@ -83,13 +83,17 @@
 #include <Fog/Gui/Constants.h>
 #include <Fog/Gui/Event.h>
 #include <Fog/Gui/GuiEngine.h>
+#include <Fog/Gui/Layout/BorderLayout.h>
 #include <Fog/Gui/Layout/BoxLayout.h>
+#include <Fog/Gui/Layout/FlowLayout.h>
+#include <Fog/Gui/Layout/GridLayout.h>
 #include <Fog/Gui/Layout/Layout.h>
 #include <Fog/Gui/Layout/LayoutHint.h>
 #include <Fog/Gui/Layout/LayoutItem.h>
 #include <Fog/Gui/Theme.h>
 #include <Fog/Gui/Widget.h>
 #include <Fog/Gui/Window.h>
+#include <Fog/Gui/Animation.h>
 
 // [Guard]
 #endif // _FOG_GUI_H

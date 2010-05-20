@@ -222,7 +222,7 @@ err_t GdiPlusLibrary::init()
     ;
 
   // Ensure that we are not called twice (once initialization is done
-  // we can't be called).
+  // we can't be called again).
   FOG_ASSERT(err == 0xFFFFFFFF);
 
   if (dll.open(Ascii8("gdiplus")) != ERR_OK)

@@ -10,64 +10,159 @@
 
 // [Dependencies]
 #include <Fog/Gui/Layout/LayoutItem.h>
+#include <Fog/Gui/Layout/Layout.h>
+#include <Fog/Gui/Widget.h>
 
 FOG_IMPLEMENT_OBJECT(Fog::LayoutItem)
 
 namespace Fog {
 
 // ============================================================================
+// [Helpers]
+// ============================================================================
+
+static IntSize calculateMaximumSizeHelper(const IntSize& sizeHint, const IntSize& minSize, const IntSize& maxSize, const LayoutPolicy& sizePolicy, uint32_t align)
+{
+  if (align & ALIGNMENT_HORIZONTAL_MASK && align & ALIGNMENT_VERTICAL_MASK)
+    return IntSize(WIDGET_MAX_SIZE, WIDGET_MAX_SIZE);
+
+  IntSize s = maxSize;
+  IntSize hint = sizeHint.expandedTo(minSize);
+  if (s.getWidth() == WIDGET_MAX_SIZE && !(align & ALIGNMENT_HORIZONTAL_MASK))
+    if (!(sizePolicy.getPolicy() & LAYOUT_GROWING_WIDTH))
+      s.setWidth(hint.getWidth());
+
+  if (s.getHeight() == WIDGET_MAX_SIZE && !(align & ALIGNMENT_VERTICAL_MASK))
+    if (!(sizePolicy.getPolicy() & LAYOUT_GROWING_WIDTH))
+      s.setHeight(hint.getHeight());
+
+  if (align & ALIGNMENT_HORIZONTAL_MASK)
+    s.setWidth(WIDGET_MAX_SIZE);
+  if (align & ALIGNMENT_VERTICAL_MASK)
+    s.setHeight(WIDGET_MAX_SIZE);
+  return s;
+}
+
+static IntSize calculateMinimumSizeHelper(const IntSize& sizeHint, const IntSize& minSizeHint, const IntSize& minSize, const IntSize& maxSize, const LayoutPolicy& sizePolicy)
+{
+  IntSize s(0, 0);
+
+  if (sizePolicy.isHorizontalPolicyIgnored())
+  {
+    if (sizePolicy.getHorizontalPolicy() & LAYOUT_SHRINKING_WIDTH)
+      s.setWidth(minSizeHint.getWidth());
+    else
+      s.setWidth(Math::max(sizeHint.getWidth(), minSizeHint.getWidth()));
+  }
+
+  if (sizePolicy.isVerticalPolicyIgnored())
+  {
+    if (sizePolicy.getVerticalPolicy() & LAYOUT_SHRINKING_HEIGHT)
+      s.setHeight(minSizeHint.getHeight());
+    else
+      s.setHeight(Math::max(sizeHint.getHeight(), minSizeHint.getHeight()));
+  }
+
+  s = s.boundedTo(maxSize);
+  if (minSize.getWidth() > 0)
+    s.setWidth(minSize.getWidth());
+  if (minSize.getHeight() > 0)
+    s.setHeight(minSize.getHeight());
+
+  return s.expandedTo(IntSize(0, 0));
+}
+
+// ============================================================================
 // [Fog::LayoutItem]
 // ============================================================================
 
-LayoutItem::LayoutItem()
+LayoutItem::LayoutItem(uint32_t alignment) : _alignment(alignment), _withinLayout(0), _layoutdata(0), _dirty(1), _propertydirty(1)
 {
+  _contentmargin.set(0,0,0,0);
 }
 
 LayoutItem::~LayoutItem() 
 {
 }
 
-IntSize LayoutItem::getSizeHint() const
+int LayoutItem::calcMargin(int margin, MarginPosition pos) const
 {
-  return getLayoutHint().getSizeHint();
+  return margin;
 }
 
-IntSize LayoutItem::getMinimumSize() const
+bool LayoutItem::hasLayoutHeightForWidth() const
 {
-  return getLayoutHint().getMinimumSize();
+  return false;
 }
 
-IntSize LayoutItem::getMaximumSize() const
+int LayoutItem::getLayoutHeightForWidth(int width) const
 {
-  return getLayoutHint().getMaximumSize();
+  return -1;
 }
 
-void LayoutItem::setSizeHint(const IntSize& sizeHint)
+int LayoutItem::getLayoutMinimumHeightForWidth(int width) const
 {
-  LayoutHint hint = getLayoutHint();
-  hint.setSizeHint(sizeHint);
-
-  setLayoutHint(hint);
+  return getLayoutHeightForWidth(width);
 }
 
-void LayoutItem::setMinimumSize(const IntSize& minimumSize)
+void LayoutItem::updateLayout()
 {
-  LayoutHint hint = getLayoutHint();
-  hint.setMinimumSize(minimumSize);
-
-  setLayoutHint(hint);
+  if(_withinLayout) _withinLayout->updateLayout();
 }
 
-void LayoutItem::setMaximumSize(const IntSize& maximumSize)
+void LayoutItem::clearDirty()
 {
-  LayoutHint hint = getLayoutHint();
-  hint.setMaximumSize(maximumSize);
+  FOG_ASSERT(_dirty);
 
-  setLayoutHint(hint);
+  if (!isEmpty())
+  {
+    calculateLayoutHint(_cache);
+    _propertydirty = 0;
+  }
+  else
+  {
+    _cache._maximumSize = _cache._minimumSize = _cache._sizeHint = IntSize(0,0);
+  }
+
+  _dirty = 0;
 }
 
-void LayoutItem::onLayout(LayoutEvent* e)
+const LayoutHint& LayoutItem::getLayoutHint() const
 {
+  if (_dirty)
+  {
+    const_cast<LayoutItem*>(this)->clearDirty();
+  }
+
+  if (isLayout())
+  {
+    int i = 100;
+  }
+
+  return _cache;
+}
+
+IntSize LayoutItem::calculateMaximumSize() const 
+{
+  FOG_ASSERT(this->isWidget());
+  const Widget *w = (Widget *)this;
+  return calculateMaximumSizeHelper(w->getSizeHint().expandedTo(w->getMinimumSizeHint()), w->getMinimumSize(), w->getMaximumSize(), w->getLayoutPolicy(), w->getLayoutAlignment());
+}
+
+IntSize LayoutItem::calculateMinimumSize() const
+{
+  FOG_ASSERT(this->isWidget());
+  const Widget *w = (Widget *)this;
+  return calculateMinimumSizeHelper(w->getSizeHint(), w->getMinimumSizeHint(),w->getMinimumSize(), w->getMaximumSize(),w->getLayoutPolicy());
+}
+
+void LayoutItem::removeLayoutStruct()
+{
+  if (_layoutdata)
+  {
+    delete _layoutdata;
+    _layoutdata = NULL;
+  }
 }
 
 } // Fog namespace

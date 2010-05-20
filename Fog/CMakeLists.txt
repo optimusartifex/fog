@@ -13,15 +13,6 @@ Project(Fog C CXX)
 # Set(FOG_BUILD_GUI_X11 TRUE)
 
 # =============================================================================
-# [Backward compatibility]
-# =============================================================================
-
-If(FOG_BUILD_UISYSTEM_X11)
-  Set(FOG_BUILD_GUI_X11 ${FOG_BUILD_UISYSTEM_X11})
-  Message("Warning: FOG_BUILD_UISYSTEM_X11 is deprecated, use FOG_BUILD_GUI_X11 instead!")
-EndIf(FOG_BUILD_UISYSTEM_X11)
-
-# =============================================================================
 # [Basics]
 # =============================================================================
 
@@ -762,23 +753,23 @@ Source_Group("Svg" FILES ${FOG_SVG_LIB_SOURCES} ${FOG_SVG_MAIN_HEADERS})
 # =============================================================================
 
 Set(FOG_GUI_LIB_SOURCES
+  Fog/Gui/Animation.cpp
   Fog/Gui/Button.cpp
   Fog/Gui/ButtonBase.cpp
   Fog/Gui/CheckBox.cpp
   Fog/Gui/Composite.cpp
   Fog/Gui/Event.cpp
   Fog/Gui/GuiEngine.cpp
-  Fog/Gui/Layout/BoxLayout.cpp
-  Fog/Gui/Layout/Layout.cpp
-  Fog/Gui/Layout/LayoutHint.cpp
-  Fog/Gui/Layout/LayoutItem.cpp
   Fog/Gui/Theme.cpp
+  Fog/Gui/ToolBar.cpp
+  Fog/Gui/ToolButton.cpp
   Fog/Gui/Widget.cpp
   Fog/Gui/Window.cpp
 )
 
 Set(FOG_GUI_MAIN_HEADERS
   Fog/Gui.h
+  Fog/Gui/Animation.h
   Fog/Gui/Button.h
   Fog/Gui/ButtonBase.h
   Fog/Gui/CheckBox.h
@@ -786,11 +777,9 @@ Set(FOG_GUI_MAIN_HEADERS
   Fog/Gui/Constants.h
   Fog/Gui/Event.h
   Fog/Gui/GuiEngine.h
-  Fog/Gui/Layout/BoxLayout.h
-  Fog/Gui/Layout/Layout.h
-  Fog/Gui/Layout/LayoutHint.h
-  Fog/Gui/Layout/LayoutItem.h
   Fog/Gui/Theme.h
+  Fog/Gui/ToolBar.h
+  Fog/Gui/ToolButton.h
   Fog/Gui/Widget.h
   Fog/Gui/Widget_p.h
   Fog/Gui/Window.h
@@ -805,28 +794,53 @@ Set(FOG_GUI_ENGINE_BASE_HEADERS
 )
 
 Set(FOG_GUI_ENGINE_WIN_SOURCES
-  Fog/Gui/GuiEngine/Win.cpp
+  Fog/Gui/GuiEngine/GuiEngine_Windows.cpp
 )
 
 Set(FOG_GUI_ENGINE_WIN_HEADERS
-  Fog/Gui/GuiEngine/Win.h
+  Fog/Gui/GuiEngine/GuiEngine_Windows.h
 )
 
 Set(FOG_GUI_ENGINE_X11_SOURCES
-  Fog/Gui/GuiEngine/X11.cpp
+  Fog/Gui/GuiEngine/GuiEngine_X11.cpp
 )
 
 Set(FOG_GUI_ENGINE_X11_HEADERS
-  Fog/Gui/GuiEngine/X11.h
-  Fog/Gui/GuiEngine/X11Headers.h
+  Fog/Gui/GuiEngine/GuiEngine_X11.h
+  Fog/Gui/GuiEngine/GuiEngine_X11_Xlib.h
+)
+
+Set(FOG_GUI_LAYOUT_SOURCES
+  Fog/Gui/Layout/BorderLayout.cpp
+  Fog/Gui/Layout/BoxLayout.cpp
+  Fog/Gui/Layout/FlowLayout.cpp  
+  Fog/Gui/Layout/GridLayout.cpp
+  Fog/Gui/Layout/Layout.cpp
+  Fog/Gui/Layout/LayoutHint.cpp
+  Fog/Gui/Layout/LayoutItem.cpp
+  Fog/Gui/Layout/LayoutUtil.cpp
+)
+
+Set(FOG_GUI_LAYOUT_HEADERS
+  Fog/Gui/Layout/BorderLayout.h
+  Fog/Gui/Layout/BoxLayout.h
+  Fog/Gui/Layout/FlowLayout.h
+  Fog/Gui/Layout/GridLayout.h  
+  Fog/Gui/Layout/Layout.h
+  Fog/Gui/Layout/LayoutHint.h
+  Fog/Gui/Layout/LayoutItem.h
+  Fog/Gui/Layout/LayoutPolicy.h
+  Fog/Gui/Layout/LayoutUtil.h
 )
 
 Set(FOG_GUI_THEME_SOURCES
-  Fog/Gui/Theme/Default.cpp
+  Fog/Gui/Theme/Theme_Default.cpp
+  Fog/Gui/Theme/Theme_UxTheme.cpp
 )
 
 Set(FOG_GUI_THEME_HEADERS
-  Fog/Gui/Theme/Default.h
+  Fog/Gui/Theme/Theme_Default_p.h
+  Fog/Gui/Theme/Theme_UxTheme_p.h
 )
 
 # Source groups.
@@ -838,6 +852,10 @@ Source_Group("Gui/GuiEngine" FILES
   ${FOG_GUI_ENGINE_BASE_SOURCES} ${FOG_GUI_ENGINE_BASE_HEADERS}
   ${FOG_GUI_ENGINE_X11_SOURCES} ${FOG_GUI_ENGINE_X11_HEADERS}
   ${FOG_GUI_ENGINE_WIN_SOURCES} ${FOG_GUI_ENGINE_WIN_HEADERS}
+)
+
+Source_Group("Gui/Layout" FILES
+  ${FOG_GUI_LAYOUT_SOURCES} ${FOG_GUI_LAYOUT_HEADERS}
 )
 
 Source_Group("Gui/Theme" FILES
@@ -856,38 +874,50 @@ EndIf(WIN32)
 # =============================================================================
 
 Set(FOG_ALL_SOURCES
+  # Fog-Core.
   ${FOG_CORE_LIB_SOURCES}
   ${FOG_CORE_ARCH_SOURCES}
   ${FOG_CORE_BUILD_SOURCES}
   ${FOG_CORE_COMPILER_SOURCES}
+  # Fog-Graphics.
   ${FOG_GRAPHICS_LIB_SOURCES}
   ${FOG_GRAPHICS_IMAGEIO_SOURCES}
   ${FOG_GRAPHICS_FONTENGINE_SOURCES}
   ${FOG_GRAPHICS_PAINTENGINE_SOURCES}
   ${FOG_GRAPHICS_RASTERENGINE_SOURCES}
+  # Fog-Gui.
   ${FOG_GUI_LIB_SOURCES}
   ${FOG_GUI_ENGINE_BASE_SOURCES}
+  ${FOG_GUI_LAYOUT_SOURCES}
   ${FOG_GUI_THEME_SOURCES}
+  # Fog-Svg.
   ${FOG_SVG_LIB_SOURCES}
+  # Fog-Xml.
   ${FOG_XML_LIB_SOURCES}
 )
 
 Set(FOG_ALL_HEADERS
+  # Fog-Core.
   ${FOG_CORE_MAIN_HEADERS}
   ${FOG_CORE_ARCH_HEADERS}
   ${FOG_CORE_BUILD_HEADERS}
   ${FOG_CORE_COMPILER_HEADERS}
+  # Fog-Graphics.
   ${FOG_GRAPHICS_MAIN_HEADERS}
   ${FOG_GRAPHICS_IMAGEIO_HEADERS}
   ${FOG_GRAPHICS_FONTENGINE_HEADERS}
   ${FOG_GRAPHICS_PAINTENGINE_HEADERS}
   ${FOG_GRAPHICS_RASTERENGINE_HEADERS}
+  # Fog-Gui.
   ${FOG_GUI_MAIN_HEADERS}
   ${FOG_GUI_ENGINE_BASE_HEADERS}
   ${FOG_GUI_ENGINE_WIN_HEADERS}
   ${FOG_GUI_ENGINE_X11_HEADERS}
+  ${FOG_GUI_LAYOUT_HEADERS}
   ${FOG_GUI_THEME_HEADERS}
+  # Fog-Svg.
   ${FOG_SVG_MAIN_HEADERS}
+  # Fog-Xml.
   ${FOG_XML_MAIN_HEADERS}
 )
 

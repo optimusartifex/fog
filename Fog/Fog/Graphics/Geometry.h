@@ -856,6 +856,16 @@ struct IntSize
     return (w != other.w) | (h != other.h);
   }
 
+  FOG_INLINE IntSize expandedTo(const IntSize& otherSize) const
+  {
+    return IntSize(Math::max(w,otherSize.w), Math::max(h,otherSize.h));
+  }
+
+  FOG_INLINE IntSize boundedTo(const IntSize& otherSize) const
+  {
+    return IntSize(Math::min(w,otherSize.w), Math::min(h,otherSize.h));
+  }
+
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
@@ -1496,7 +1506,7 @@ struct IntRect
 
   FOG_INLINE IntRect adjusted(int px1, int py1, int px2, int py2) const
   {
-    return IntRect(x + px1, y + py1, w - px1 - px2, h - py1 - py2);
+    return IntRect(x + px1, y + py1, w - px1 + px2, h - py1 + py2);
   }
 
   // --------------------------------------------------------------------------
@@ -2681,6 +2691,120 @@ struct IntBox
   int x2;
   int y2;
 };
+
+
+struct IntMargins
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE IntMargins()
+  {
+  }
+
+  FOG_INLINE IntMargins(const IntMargins& other) :
+  left(other.left), bottom(other.bottom), right(other.right), top(other.top)
+  {
+  }
+
+  FOG_INLINE IntMargins(int rleft, int rright, int rtop, int rbottom) :
+  left(rleft), bottom(rbottom), right(rright), top(rtop)
+  {
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool isEmpty() const { return left == 0 && top == 0 && right == 0 && bottom == 0; }
+
+  FOG_INLINE int getLeft() const { return left; }
+  FOG_INLINE int getTop() const { return top; }
+  FOG_INLINE int getRight() const { return right; }
+  FOG_INLINE int getBottom() const { return bottom; }
+
+  FOG_INLINE IntMargins& set(int rleft, int rright, int rtop, int rbottom)
+  { 
+    left = rleft; 
+    bottom = rbottom; 
+    right = rright; 
+    top = rtop; 
+
+    return *this;
+  }
+
+  FOG_INLINE IntMargins& set(const IntMargins &other)
+  {
+    if (sizeof(IntMargins) == 16)
+    {
+      Memory::copy16B(static_cast<void*>(this), static_cast<const void*>(&other));
+    }
+    else
+    {
+      left = other.left;
+      bottom = other.bottom;
+      right = other.right;
+      top = other.top;
+    }
+    return *this;
+  }
+
+  FOG_INLINE IntMargins& setLeft(int left) { left = left; return *this; }
+  FOG_INLINE IntMargins& setTop(int top) { top = top; return *this; }
+  FOG_INLINE IntMargins& setRight(int right) { right = right; return *this; }
+  FOG_INLINE IntMargins& setBottom(int bottom) { bottom = bottom; return *this; }
+
+  // --------------------------------------------------------------------------
+  // [Clear]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE IntMargins& clear()
+  {
+    if (sizeof(IntMargins) == 16)
+    {
+      Memory::zero16B(static_cast<void*>(this));
+    }
+    else
+    {
+      left = 0;
+      bottom = 0;
+      right = 0;
+      top = 0;
+    }
+    return *this;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Equality]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(int pleft, int pright, int ptop, int pbottom) const
+  {
+    return (left == ptop) & (bottom == pbottom) & (right == pright) & (top == ptop);
+  }
+
+  FOG_INLINE bool eq(const IntMargins& other) const
+  {
+    if (sizeof(IntMargins) == 16)
+      return Memory::eq16B(static_cast<const void*>(this), static_cast<const void*>(&other));
+    else
+      return (left == other.left) & (bottom == other.bottom) & (right == other.right) & (top == other.top);
+  }
+
+  FOG_INLINE bool operator==(const IntMargins& other) const { return (left == other.left) & (bottom == other.bottom) & (right == other.right) & (top == other.top); }
+  FOG_INLINE bool operator!=(const IntMargins& other) const { return (left != other.left) | (bottom != other.bottom) | (right != other.right) | (top != other.top); }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  int left;
+  int right;
+  int top;
+  int bottom;
+};
+
 
 // ============================================================================
 // [Defined Later]

@@ -19,41 +19,129 @@ namespace Fog {
 // [Fog::BoxLayout]
 // ============================================================================
 
-//! @brief Base class for all layouts.
+//! @brief Base class used by @ref HBoxLayout and @ref VBoxLayout.
 struct FOG_API BoxLayout : public Layout
 {
   FOG_DECLARE_OBJECT(BoxLayout, Layout)
 
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
-  BoxLayout();
+  BoxLayout(Widget *parent, int margin = -1, int spacing = -1);
+  BoxLayout(int margin = -1, int spacing = -1);
   virtual ~BoxLayout();
 
-  virtual void reparentChildren();
+  // --------------------------------------------------------------------------
+  // [Property / Data]
+  // --------------------------------------------------------------------------
 
-  sysint_t indexOf(LayoutItem* item);
+  struct LayoutProperty
+  {
+    LayoutProperty(Layout* layout) :
+      _layout(layout),
+      _nextpercent(0)
+    {
+      FOG_INIT_FLEX_PROPERTY();
+      FOG_INIT_PERCENT_SIZE_PROPERTY();
+    }
 
-  bool addItem(LayoutItem* item);
-  bool addItemAt(sysint_t index, LayoutItem* item);
+    Layout* _layout;
+    LayoutItem* _nextpercent;
 
-  LayoutItem* takeAt(sysint_t index);
+    FOG_DECLARE_FLEX_PROPERTY()
+    FOG_DECLARE_PERCENT_SIZE_PROPERTY()
+  };
 
-  bool deleteItem(LayoutItem* item);
-  bool deleteItemAt(sysint_t index);
+  struct LayoutData : LayoutItem::FlexLayoutData
+  {
+    LayoutData(Layout* layout) : _user(layout) {}
+    FOG_INLINE bool hasFlex() const { return _user.hasFlex(); }
+    FOG_INLINE int getFlex() const { return _user.getFlex(); }
+    FOG_INLINE void setFlex(int flex) { return _user.setFlex(flex); }
+    LayoutProperty _user;
+  };
+  typedef LayoutProperty PropertyType;
 
-  List<LayoutItem*> items() const;
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
 
-  FOG_INLINE int margin() const { return _margin; }
-  FOG_INLINE int spacing() const { return _spacing; }
+  void addItem(LayoutItem *item, int flex = -1);
+  virtual uint32_t getLayoutExpandingDirections() const;
 
-  void setMargin(int margin);
-  void setSpacing(int spacing);
+  FOG_INLINE uint32_t getDirection() const { return _direction; }   
+  FOG_INLINE void setDirection(uint32_t d) { _direction = d; }
+
+  // --------------------------------------------------------------------------
+  // [Implementation]
+  // --------------------------------------------------------------------------
 
 protected:
-  List<LayoutItem*> _items;
+  FOG_INLINE bool isForward() const { return _direction == 0; }
 
-  int _margin;
-  int _spacing;
+  virtual void setLayoutGeometry(const IntRect &rect);    
+  virtual int doLayout(const IntRect &rect) = 0;
+
+  int calculateHorizontalGaps(bool collapse = true);
+  int calculateVerticalGaps(bool collapse = true);
+  
+  LayoutItem* _flexibles;
+  uint32_t _allocated : 31;
+
+private:
+  uint32_t _direction : 1;
+};
+
+// ============================================================================
+// [Fog::HBoxLayout]
+// ============================================================================
+
+//! @brief Horizontal box layout.
+struct FOG_API HBoxLayout : public BoxLayout
+{
+  FOG_DECLARE_OBJECT(HBoxLayout, BoxLayout)
+
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  HBoxLayout(Widget *parent, int margin = -1, int spacing = -1);
+  HBoxLayout(int margin = -1, int spacing = -1);
+  virtual ~HBoxLayout();
+
+  // --------------------------------------------------------------------------
+  // [Implementation]
+  // --------------------------------------------------------------------------
+
+  virtual int doLayout(const IntRect &rect);
+  virtual void calculateLayoutHint(LayoutHint& hint);
+};
+
+// ============================================================================
+// [Fog::VBoxLayout]
+// ============================================================================
+
+//! @brief Vertical box layout.
+struct FOG_API VBoxLayout : public BoxLayout
+{
+  FOG_DECLARE_OBJECT(VBoxLayout, BoxLayout)
+
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  VBoxLayout(Widget *parent, int margin = -1, int spacing = -1);
+  VBoxLayout(int margin = -1, int spacing = -1);
+  virtual ~VBoxLayout();
+
+  // --------------------------------------------------------------------------
+  // [Implementation]
+  // --------------------------------------------------------------------------
+
+  // LAYOUT TODO: Was private!
+  virtual int doLayout(const IntRect &rect);
+  virtual void calculateLayoutHint(LayoutHint& hint);
 };
 
 //! @}

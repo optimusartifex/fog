@@ -11,6 +11,7 @@
 #include <Fog/Core/Hash.h>
 #include <Fog/Core/Library.h>
 #include <Fog/Core/Object.h>
+#include <Fog/Core/Timer.h>
 #include <Fog/Graphics/Color.h>
 #include <Fog/Graphics/Geometry.h>
 #include <Fog/Graphics/Image.h>
@@ -34,6 +35,8 @@ struct Widget;
 struct GuiBackBuffer;
 struct GuiEngine;
 struct GuiWindow;
+
+struct Layout;
 
 // ============================================================================
 // [Fog::GuiEngine]
@@ -77,8 +80,9 @@ struct FOG_API GuiEngine : public Object
   {
     //! @brief Count of entities in palConv[] 2 to 256.
     uint32_t palCount;
-    //! @brief Palette conversion (image quantization to 8 bits)
-    //! Also for X server that is running in low resolution (8 bit or less).
+    //! @brief Palette conversion (image quantization to 8 bits).
+    //!
+    //! Also used for X server that is running in low resolution (8 bit or less).
     uint8_t palConv[256];
   };
 
@@ -150,16 +154,19 @@ struct FOG_API GuiEngine : public Object
   // [ID <-> GuiWindow]
   // --------------------------------------------------------------------------
 
-  virtual bool mapHandle(void* handle, GuiWindow* w) = 0;
-  virtual bool unmapHandle(void* handle) = 0;
-  virtual GuiWindow* handleToNative(void* handle) const = 0;
+  //! Widget mapper (ID <-> GuiWindow)
+  typedef UnorderedHash<void*, GuiWindow*> WidgetMapper;
+
+  virtual bool mapHandle(void* handle, GuiWindow* w);
+  virtual bool unmapHandle(void* handle);
+  virtual GuiWindow* handleToNative(void* handle) const;
 
   // --------------------------------------------------------------------------
   // [Display]
   // --------------------------------------------------------------------------
 
-  virtual err_t getDisplayInfo(DisplayInfo* out) const = 0;
-  virtual err_t getPaletteInfo(PaletteInfo* out) const = 0;
+  virtual err_t getDisplayInfo(DisplayInfo* out) const;
+  virtual err_t getPaletteInfo(PaletteInfo* out) const;
 
   virtual void updateDisplayInfo() = 0;
 
@@ -167,59 +174,59 @@ struct FOG_API GuiEngine : public Object
   // [Caret]
   // --------------------------------------------------------------------------
 
-  virtual err_t getCaretStatus(CaretStatus* out) const = 0;
+  virtual err_t getCaretStatus(CaretStatus* out) const;
 
   // --------------------------------------------------------------------------
   // [Keyboard]
   // --------------------------------------------------------------------------
 
-  virtual err_t getKeyboardStatus(KeyboardStatus* out) const = 0;
-  virtual uint32_t getKeyboardModifiers() const = 0;
+  virtual err_t getKeyboardStatus(KeyboardStatus* out) const;
+  virtual uint32_t getKeyboardModifiers() const;
   virtual uint32_t keyToModifier(uint32_t key) const;
 
   // --------------------------------------------------------------------------
   // [Mouse]
   // --------------------------------------------------------------------------
 
-  virtual err_t getMouseStatus(MouseStatus* out) const = 0;
-  virtual err_t getSystemMouseStatus(SystemMouseStatus* out) const = 0;
+  virtual err_t getMouseStatus(MouseStatus* out) const;
+  virtual err_t getSystemMouseStatus(SystemMouseStatus* out) const;
 
-  virtual void invalidateMouseStatus() = 0;
-  virtual void updateMouseStatus() = 0;
-  virtual void changeMouseStatus(Widget* w, const IntPoint& pos) = 0;
+  virtual void invalidateMouseStatus();
+  virtual void updateMouseStatus();
+  virtual void changeMouseStatus(Widget* w, const IntPoint& pos);
 
-  virtual void clearSystemMouseStatus() = 0;
+  virtual void clearSystemMouseStatus();
 
   virtual bool startButtonRepeat(uint32_t button, 
-    bool reset, TimeDelta delay, TimeDelta interval) = 0;
-  virtual bool stopButtonRepeat(uint32_t button) = 0;
-  virtual void clearButtonRepeat() = 0;
+    bool reset, TimeDelta delay, TimeDelta interval);
+  virtual bool stopButtonRepeat(uint32_t button);
+  virtual void clearButtonRepeat();
 
   // --------------------------------------------------------------------------
   // [Wheel]
   // --------------------------------------------------------------------------
 
-  virtual int getWheelLines() const = 0;
-  virtual void setWheelLines(int count) = 0;
+  virtual int getWheelLines() const;
+  virtual void setWheelLines(int count);
 
   // --------------------------------------------------------------------------
   // [Timing]
   // --------------------------------------------------------------------------
 
-  virtual TimeDelta getRepeatingDelay() const = 0;
-  virtual TimeDelta getRepeatingInterval() const = 0;
-  virtual TimeDelta getDoubleClickInterval() const = 0;
+  virtual TimeDelta getRepeatingDelay() const;
+  virtual TimeDelta getRepeatingInterval() const;
+  virtual TimeDelta getDoubleClickInterval() const;
 
   // --------------------------------------------------------------------------
   // [Windowing System]
   // --------------------------------------------------------------------------
 
-  virtual void dispatchEnabled(Widget* w, bool enabled) = 0;
-  virtual void dispatchVisibility(Widget* w, bool visible) = 0;
-  virtual void dispatchConfigure(Widget* w, const IntRect& rect, bool changedOrientation) = 0;
+  virtual void dispatchEnabled(Widget* w, bool enabled);
+  virtual void dispatchVisibility(Widget* w, uint32_t visible);
+  virtual void dispatchConfigure(Widget* w, const IntRect& rect, bool changedOrientation);
 
   //! @brief Called by widget destructor to erase all links to the widget from UIEngine.
-  virtual void widgetDestroyed(Widget* w) = 0;
+  virtual void widgetDestroyed(Widget* w);
 
   // --------------------------------------------------------------------------
   // [Update]
@@ -228,14 +235,14 @@ struct FOG_API GuiEngine : public Object
   //! Tells application that some widget needs updating. This is key feature
   //! in the library that updating is in one place, so widgets can update()
   //! very often.
-  virtual void update() = 0;
+  virtual void update();
 
   //! @brief Runs updating. Do not use directly, use @c update() or you get into troubles.
-  virtual void doUpdate() = 0;
+  virtual void doUpdate();
 
   //! @brief Runs updating to specific window. This is internally done by 
   //! @c doUpdate() for all needed windows.
-  virtual void doUpdateWindow(GuiWindow* window) = 0;
+  virtual void doUpdateWindow(GuiWindow* window);
 
   //! @brief Blits window content into screen. Called usually from @c doUpdateWindow().
   virtual void doBlitWindow(GuiWindow* window, const IntBox* rects, sysuint_t count) = 0;
@@ -248,18 +255,94 @@ struct FOG_API GuiEngine : public Object
   virtual void destroyGuiWindow(GuiWindow* native) = 0;
 
   // --------------------------------------------------------------------------
+  // [Event Handlers]
+  // --------------------------------------------------------------------------
+
+  void _onButtonRepeatTimeOut(TimerEvent* e);
+
+  // --------------------------------------------------------------------------
+  // [Modality]
+  // --------------------------------------------------------------------------
+
+/*
+  //!@brief makes the GuiWindow to be shown as Modal window in front of this window
+  virtual void startModalWindow(GuiWindow* w) = 0;
+  //!@brief The modal GuiWindow is being closed, so the modality should be removed
+  virtual void endModal(GuiWindow* w) = 0;
+  //!@brief call show(visible) on all modal windows on the stack (last to first)
+  virtual void showAllModalWindows(uint32_t visible) = 0;
+
+  //!@brief tmp variable to set the last modal window int the stack
+  //! so we can iterate the modal stack from behind again (without double linked list)
+  FOG_INLINE void setLastModalWindow(GuiWindow* w)
+  {
+    _lastmodal = w;
+  }
+  FOG_INLINE GuiWindow* getLastModalWindow() const
+  {
+    return _lastmodal;
+  }
+  //!@brief returns the current modalWindow
+  GuiWindow* getModalWindow() const {
+    return _modal;
+  }*/
+
+
+
+  // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-protected:
   //! @brief Lock.
   Lock _lock;
 
   //! @brief Library, if this UIEngine was opened as plugin.
   Library _library;
 
-  //! @brief Whether UIEngine is correctly initialized.
+  //! @brief Whether The GuiEngine is correctly initialized.
   bool _initialized;
+
+  GuiWindow* _modal;
+  GuiWindow* _lastmodal;
+
+  //! @brief ID <-> GuiWindow mapper.
+  WidgetMapper _widgetMapper;
+
+  //! @brief Circular list of dirty windows.
+  List<GuiWindow*> _dirtyList;
+  
+  //! @brief Display information.
+  DisplayInfo _displayInfo;
+  //! @brief Palette information.
+  PaletteInfo _paletteInfo;
+
+  //! @brief Caret status.
+  CaretStatus _caretStatus;
+
+  //! @brief Keyboard status information.
+  KeyboardStatus _keyboardStatus;
+
+  //! @brief Count of mouse devices (1 is default).
+  int _mouseDevices;
+  //! @brief Mouse status information.
+  MouseStatus _mouseStatus;
+  //! @brief System mouse status information.
+  SystemMouseStatus _systemMouseStatus;
+
+  //! @brief Count of lines to scroll through mouse wheel.
+  int _wheelLines;
+
+  TimeDelta _repeatingDelay;
+  TimeDelta _repeatingInterval;
+  TimeDelta _doubleClickInterval;
+
+  Timer _buttonRepeat[3];
+  TimeDelta _buttonRepeatInterval[3];
+  TimeTicks _buttonTime[3];
+
+  UpdateStatus _updateStatus;
+
+  friend struct GuiWindow;
 
 private:
   friend struct Application;
@@ -290,7 +373,7 @@ struct FOG_API GuiWindow : public Object
   virtual err_t enable() = 0;
   virtual err_t disable() = 0;
 
-  virtual err_t show() = 0;
+  virtual err_t show(uint32_t state) = 0;
   virtual err_t hide() = 0;
   virtual err_t move(const IntPoint& pt) = 0;
   virtual err_t resize(const IntSize& size) = 0;
@@ -314,32 +397,66 @@ struct FOG_API GuiWindow : public Object
   // [Windowing System]
   // --------------------------------------------------------------------------
 
-  virtual void onEnabled(bool enabled) = 0;
-  virtual void onVisibility(bool visible) = 0;
+  virtual void onEnabled(bool enabled);
+  virtual void onVisibility(uint32_t visible);
 
-  virtual void onConfigure(const IntRect& windowRect, const IntRect& clientRect) = 0;
+  virtual void onConfigure(const IntRect& windowRect, const IntRect& clientRect);
 
-  virtual void onMouseHover(int x, int y) = 0;
-  virtual void onMouseMove(int x, int y) = 0;
-  virtual void onMouseLeave(int x, int y) = 0;
+  virtual void onMouseHover(int x, int y);
+  virtual void onMouseMove(int x, int y);
+  virtual void onMouseLeave(int x, int y);
 
-  virtual void onMousePress(uint32_t button, bool repeated) = 0;
-  virtual void onMouseRelease(uint32_t button) = 0;
-  virtual void onMouseWheel(uint32_t wheel) = 0;
+  virtual void onMousePress(uint32_t button, bool repeated);
+  virtual void onMouseRelease(uint32_t button);
+  virtual void onMouseWheel(uint32_t wheel);
 
-  virtual void onFocus(bool focus) = 0;
+  virtual void onFocus(bool focus);
 
-  virtual bool onKeyPress(uint32_t key, uint32_t modifier, uint32_t systemCode, Char unicode) = 0;
-  virtual bool onKeyRelease(uint32_t key, uint32_t modifier, uint32_t systemCode, Char unicode) = 0;
+  virtual bool onKeyPress(uint32_t key, uint32_t modifier, uint32_t systemCode, Char unicode);
+  virtual bool onKeyRelease(uint32_t key, uint32_t modifier, uint32_t systemCode, Char unicode);
 
-  virtual void clearFocus() = 0;
-  virtual void setFocus(Widget* w, uint32_t reason) = 0;
+  virtual void setFocus(Widget* w, uint32_t reason);
+  // TODO GUI: Rename to resetFocus().
+  virtual void clearFocus();
 
   // --------------------------------------------------------------------------
   // [Dirty]
   // --------------------------------------------------------------------------
 
-  virtual void setDirty() = 0;
+  virtual void setDirty();
+
+  // --------------------------------------------------------------------------
+  // [PopUp]
+  // --------------------------------------------------------------------------
+  FOG_INLINE bool hasPopUp() const { return _popup.getLength() > 0; }
+
+  void showPopUp(Widget*);
+  void closePopUps();
+
+  // --------------------------------------------------------------------------
+  // [Modal]
+  // --------------------------------------------------------------------------
+  
+  //! @brief makes the GuiWindow to be shown as Modal window in front of this window
+  virtual void startModalWindow(GuiWindow* w);
+  //! @brief The modal GuiWindow is being closed, so the modality should be removed
+  virtual void endModal(GuiWindow* w);
+
+  //! @brief Returns the first window, which is not modal! Under windows this is
+  //! needed to minimize this window instead of only minimize the modal window.
+  virtual GuiWindow* getModalBaseWindow();
+
+  //! @brief call show(visible) on all modal windows on the stack (last to first)
+  virtual void showAllModalWindows(uint32_t visible);
+
+  //! @brief tmp variable to set the last modal window int the stack
+  //! so we can iterate the modal stack from behind again (without double linked list)
+  FOG_INLINE void setLastModalWindow(GuiWindow* w) { _lastmodal = w; }
+
+  FOG_INLINE GuiWindow* getLastModalWindow() const { return _lastmodal; }
+
+  //!@brief returns the current modalWindow
+  virtual GuiWindow* getModalWindow();
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -352,12 +469,47 @@ struct FOG_API GuiWindow : public Object
   FOG_INLINE bool isDirty() const { return _isDirty; }
   FOG_INLINE bool hasFocus() const { return _hasFocus; }
 
+  FOG_INLINE bool isModal() const { return _modalpolicy != MODAL_NONE; }
+  FOG_INLINE void setModal(MODAL_POLICY b) { _modalpolicy = b; }
+  FOG_INLINE MODAL_POLICY getModality() const { return _modalpolicy; }
+
+  // --------------------------------------------------------------------------
+  // [Owner Handling]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE GuiWindow* getOwner() const { return _owner; }
+
+  // SetOwner not only set the member variable. It should also do the z-order
+  // work of window manager! (make sure owner is always behind the child).
+  virtual void setOwner(GuiWindow* w) = 0;
+
+  // Releases the owner from the child window and makes sure the owner will
+  // get the focus.
+  virtual void releaseOwner() = 0;
+  
+  virtual void setTransparency(float val) = 0;
+
+  // --------------------------------------------------------------------------
+  // [Z-Order]
+  // --------------------------------------------------------------------------
+
+  //Move Window on Top of other Window! (If w == 0 Move on top of all Windows)
+  virtual void moveToTop(GuiWindow* w) = 0;
+  //Move Window behind other Window! (If w == 0 Move behind all Windows of screen)
+  virtual void moveToBottom(GuiWindow* w) = 0;
+
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
   //! @brief Widget.
   Widget* _widget;
+  Layout* _activatelist;
+
+  //our owner.
+  GuiWindow* _owner;
+  GuiWindow* _modal;
+  GuiWindow* _lastmodal;
 
   //! @brief Window handle.
   void* _handle;
@@ -365,11 +517,13 @@ struct FOG_API GuiWindow : public Object
   //! @brief Backing store.
   GuiBackBuffer* _backingStore;
 
+  //TODO: use bitset here 
+
   //! @brief Whether window is enabled.
   bool _enabled;
 
   //! @brief Whether window is visible.
-  bool _visible;
+  bool _visible; //do we need this? (already in widget)
 
   //! @brief Whether window has native windowing system focus.
   bool _hasFocus;
@@ -379,6 +533,22 @@ struct FOG_API GuiWindow : public Object
 
   //! @brief Window is dirty and needs update.
   bool _isDirty;
+
+  MODAL_POLICY _modalpolicy;
+
+  //! @brief Window bound rectangle.
+  IntRect _windowRect;
+  //! @brief Window client rectangle.
+  IntRect _clientRect;
+
+  //! @brief Window title.
+  String _title;
+  //! @brief Window resize granularity.
+  IntPoint _sizeGranularity;
+
+  uint32_t _visibility;
+
+  List<Widget*> _popup;
 
   friend struct GuiEngine;
   friend struct Widget;

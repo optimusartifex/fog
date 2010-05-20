@@ -16,6 +16,53 @@ namespace Fog {
 //! @{
 
 // ============================================================================
+// [Fog::LAYOUT_DEFAULTS]
+// ============================================================================
+
+// TODO: Move to theme.
+
+const int LAYOUT_DEFAULT_SPACING = 6;
+const int LAYOUT_DEFAULT_WIDGET_MARGIN = 9;
+const int LAYOUT_DEFAULT_WINDOW_MARGIN = 11;
+
+// ============================================================================
+// [Fog::LAYOUT_CONSTRAINT]
+// ============================================================================
+
+// TODO: Not implemented yet.
+enum LAYOUT_CONSTRAINT
+{
+  LAYOUT_CONSTRAINT_DEFAULT,
+  LAYOUT_CONSTRAINT_NO,
+  LAYOUT_CONSTRAINT_MINIMUM_SIZE,
+  LAYOUT_CONSTRAINT_FIXED_SIZE,
+  LAYOUT_CONSTRAINT_MAXIMUM_SIZE,
+  LAYOUT_CONSTRAINT_MINIMUM_MAXIMUM_SIZE
+};
+
+
+// TODO: Move to constants.
+enum Direction
+{
+  LEFTTORIGHT = 0,
+  RIGHTTOLEFT = 1,
+  TOPTOBOTTOM = 0,
+  BOTTOMTOTOP = 1,
+  DOWN = TOPTOBOTTOM,
+  UP = BOTTOMTOTOP
+};
+
+
+
+
+
+
+
+
+
+
+
+// ============================================================================
 // [Fog::WIDGET_LIMITS]
 // ============================================================================
 
@@ -100,7 +147,7 @@ enum WIDGET_STATE
   //! @brief Widget is enabled, but parent is disabled and this makes control disabled.
   WIDGET_DISABLED_BY_PARENT = 1,
   //! @brief Widget is enabled and it parent too.
-  WIDGET_ENABLED = 2
+  WIDGET_ENABLED = 2,
 };
 // ============================================================================
 // [Fog::WIDGET_VISIBILITY]
@@ -112,9 +159,13 @@ enum WIDGET_VISIBILITY
   //! @brief Widget is hidden.
   WIDGET_HIDDEN = 0,
   //! @brief Widget is hidden by parent that's not visible.
-  WIDGET_HIDDEN_BY_PARENT = 1,
+  WIDGET_HIDDEN_BY_PARENT = 1, 
+  WIDGET_VISIBLE_MINIMIZED = 2,
   //! @brief Widget is visible.
-  WIDGET_VISIBLE = 2,
+  WIDGET_VISIBLE = 3,
+  WIDGET_VISIBLE_RESTORE = 4,
+  WIDGET_VISIBLE_MAXIMIZED = 5,
+  WIDGET_VISIBLE_FULLSCREEN = 6
 };
 
 // ============================================================================
@@ -143,7 +194,7 @@ enum FOCUS_MASK
 // [Fog::FOCUS_POLICY]
 // ============================================================================
 
-//! @brief Focus policy
+//! @brief Focus policy.
 enum FOCUS_POLICY
 {
   FOCUS_NONE = 0,
@@ -154,13 +205,114 @@ enum FOCUS_POLICY
 };
 
 // ============================================================================
+// [Fog::MODAL_POLICY]
+// ============================================================================
+
+//! @brief Modal policy.
+enum MODAL_POLICY
+{
+  MODAL_NONE = 0,
+  MODAL_WINDOW = 1,
+  MODAL_APPLICATION = 2
+};
+
+// ============================================================================
+// [Fog::LAYOUT_POLICY_FLAGS]
+// ============================================================================
+
+//! @brief Layout policy flags.
+enum LAYOUT_POLICY_FLAGS
+{
+  LAYOUT_WIDTH_MASK = 0x0F,
+  LAYOUT_WIDTH_SHIFT = 0,
+
+  LAYOUT_HEIGHT_MASK = 0xF0,
+  LAYOUT_HEIGHT_SHIFT = 4,  
+
+  LAYOUT_EXPANDING_WIDTH = 0x1 << LAYOUT_WIDTH_SHIFT,
+  LAYOUT_SHRINKING_WIDTH = 0x2 << LAYOUT_WIDTH_SHIFT,
+  LAYOUT_GROWING_WIDTH = 0x4 << LAYOUT_WIDTH_SHIFT,
+  LAYOUT_IGNORE_WIDTH  = 0x8 << LAYOUT_WIDTH_SHIFT,
+
+  LAYOUT_EXPANDING_HEIGHT = 0x1 << LAYOUT_HEIGHT_SHIFT,
+  LAYOUT_SHRINKING_HEIGHT = 0x2 << LAYOUT_HEIGHT_SHIFT,
+  LAYOUT_GROWING_HEIGHT = 0x4 << LAYOUT_HEIGHT_SHIFT,
+  LAYOUT_IGNORE_HEIGHT  = 0x8 << LAYOUT_HEIGHT_SHIFT
+};
+
+// ============================================================================
 // [Fog::LAYOUT_POLICY]
 // ============================================================================
 
+//! @brief Layout policy.
 enum LAYOUT_POLICY
 {
-  LAYOUT_EXPANDING_WIDTH = 0x01,
-  LAYOUT_EXPANDING_HEIGHT = 0x10
+  LAYOUT_POLICY_HEIGHT_FIXED = 0,
+  LAYOUT_POLICY_WIDTH_FIXED = 0,
+
+  LAYOUT_POLICY_WIDTH_MINIMUM = LAYOUT_EXPANDING_WIDTH,
+  LAYOUT_POLICY_WIDTH_MAXIMUM = LAYOUT_SHRINKING_WIDTH,
+
+  LAYOUT_POLICY_WIDTH_PREFERRED = 
+    LAYOUT_GROWING_WIDTH |
+    LAYOUT_SHRINKING_WIDTH,
+  
+  LAYOUT_POLICY_WIDTH_MINIMUM_EXPANDING = 
+    LAYOUT_GROWING_WIDTH |
+    LAYOUT_EXPANDING_WIDTH,
+  
+  LAYOUT_POLICY_WIDTH_EXPANDING = 
+    LAYOUT_GROWING_WIDTH |
+    LAYOUT_EXPANDING_WIDTH | 
+    LAYOUT_SHRINKING_WIDTH,
+
+  LAYOUT_POLICY_WIDTH_IGNORED = 
+    LAYOUT_GROWING_WIDTH | 
+    LAYOUT_IGNORE_WIDTH | 
+    LAYOUT_SHRINKING_WIDTH,
+
+  LAYOUT_POLICY_HEIGHT_MINIMUM = LAYOUT_EXPANDING_HEIGHT,
+  LAYOUT_POLICY_HEIGHT_MAXIMUM = LAYOUT_SHRINKING_HEIGHT,
+
+  LAYOUT_POLICY_HEIGHT_PREFERRED = 
+    LAYOUT_GROWING_HEIGHT | 
+    LAYOUT_SHRINKING_HEIGHT,
+  
+  LAYOUT_POLICY_HEIGHT_MINIMUM_EXPANDING = 
+    LAYOUT_GROWING_HEIGHT | 
+    LAYOUT_EXPANDING_HEIGHT,
+  
+  LAYOUT_POLICY_HEIGHT_EXPANDING = 
+    LAYOUT_GROWING_HEIGHT | 
+    LAYOUT_EXPANDING_HEIGHT | 
+    LAYOUT_SHRINKING_HEIGHT,
+  
+  LAYOUT_POLICY_HEIGHT_IGNORED = 
+    LAYOUT_GROWING_HEIGHT | 
+    LAYOUT_IGNORE_HEIGHT | 
+    LAYOUT_SHRINKING_HEIGHT
+};
+
+
+// ============================================================================
+// [Fog::LAYOUT_POLICY]
+// ============================================================================
+enum MINMAXSIZE
+{
+  MIN_WIDTH_IS_SET   = 1,
+  MIN_HEIGHT_IS_SET = 2,
+
+  MAX_WIDTH_IS_SET   = 1,
+  MAX_HEIGHT_IS_SET = 2,
+};
+
+// ============================================================================
+// [Fog::WINDOW_FLAGS]
+// ============================================================================
+
+enum WIDGET_FLAGS
+{
+  WIDGET_FLAG_LAYOUT_USES_WINDOW_RECT = (1 << 0)
 };
 
 // ============================================================================
@@ -170,11 +322,13 @@ enum LAYOUT_POLICY
 //! @brief GuiWindow create flags (used also by @c Widget).
 enum WINDOW_FLAGS
 {
+  // --------------------------------------------------------------------------
+  // [Window Type]
+  // --------------------------------------------------------------------------
+
   //! @brief Flag to indicate the maximum of window types 
   //! (needed for fast identification of TopLevel-Windows)
-  WINDOW_TYPE_FLAG = 0x000000FF,
-  //! @brief Flag to indicate the maximum of window hints
-  WINDOW_HINTS_FLAG = 0xFFFFFF00,
+  WINDOW_TYPE_MASK = 0x000000FF,
 
   //! @brief Create GuiWindow (this flag is used in Fog::Widget).
   WINDOW_NATIVE = (1 << 0),
@@ -199,11 +353,22 @@ enum WINDOW_FLAGS
 
   //! @brief Create a window without frame and decoration
   //!
-  //! The window will not have a decoration at all.
-  //! this will complete overwrite the window frame flag
-  WINDOW_FRAMELESS = (1 << 10),
+  //! The window will not have a decoration at all, this will complete 
+  //! overwrite the window frame flag.
+  WINDOW_FRAMELESS = (1 << 4),
 
-  //Window flags
+  //! @brief Create a window without frame and decoration which fills the whole
+  //! screen
+  //!
+  //! This flag overwrites all other window-types
+  WINDOW_FULLSCREEN = (1 << 5),  
+
+  // --------------------------------------------------------------------------
+  // [Window Hints]
+  // --------------------------------------------------------------------------
+
+  //! @brief Flag to indicate the maximum of window hints
+  WINDOW_HINTS_MASK = 0xFFFFFF00,
 
   //! @brief Marks the window as not resizeable
   //!
@@ -246,6 +411,19 @@ enum WINDOW_FLAGS
   //! A tool window and a popup could not have a help button
   WINDOW_CONTEXT_HELP_BUTTON = (1 << 16),
 
+  //! @brief Marks the window to allow transparency
+  WINDOW_TRANSPARENT = (1 << 17),
+
+  //! @brief Marks that the PopUp window should be inline within the top level window
+  //!
+  //! A pop normally creates a system top level window. But if this
+  //! flag is set, the pop acts as a child widget on top of all others in the guiWindow!
+  WINDOW_INLINE_POPUP = (1 << 18),
+
+  // --------------------------------------------------------------------------
+  // [Engine Specific]
+  // --------------------------------------------------------------------------
+
   //! @brief Create X11 window that listens only for XPropertyChange events.
   //!
   //! X11GuiEngine dependent and non-portable flag.
@@ -257,13 +435,19 @@ enum WINDOW_FLAGS
   WINDOW_X11_OVERRIDE_REDIRECT = (1 << 31)
 };
 
+// TODO GUI: This is not good.
+//
+// Window type can't be set of flags, it must be constant like 1, 2, 3. Flags
+// should be get from windowing system, because X11 can be totally different
+// to Windows and sometimes it just don't allow to set these flags.
 enum WINDOW_TYPES
 {
   WINDOW_TYPE_DIALOG = WINDOW_DIALOG | WINDOW_SYSTEM_MENU | WINDOW_DRAGABLE | WINDOW_FIXED_SIZE | WINDOW_ALWAYS_ON_TOP | WINDOW_CLOSE_BUTTON,
   WINDOW_TYPE_DEFAULT = WINDOW_NATIVE | WINDOW_SYSTEM_MENU | WINDOW_DRAGABLE | WINDOW_MINIMIZE | WINDOW_MAXIMIZE | WINDOW_CLOSE_BUTTON,
   WINDOW_TYPE_TOOL  = WINDOW_TOOL | WINDOW_CLOSE_BUTTON | WINDOW_SYSTEM_MENU | WINDOW_DRAGABLE,
   WINDOW_TYPE_POPUP = WINDOW_POPUP | WINDOW_ALWAYS_ON_TOP | WINDOW_DRAGABLE,
-  WINDOW_TYPE_FRAMELESS = WINDOW_FRAMELESS | WINDOW_DRAGABLE
+  WINDOW_TYPE_FRAMELESS = WINDOW_FRAMELESS | WINDOW_DRAGABLE,
+  WINDOW_TYPE_FULLSCREEN = WINDOW_FRAMELESS | WINDOW_SYSTEM_MENU | WINDOW_ALWAYS_ON_TOP
 };
 
 // ============================================================================
@@ -485,33 +669,92 @@ static FOG_INLINE bool isModeMod    (uint32_t mod) { return (mod & MODIFIER_MODE
 // [Fog::BUTTON_CODE]
 // ============================================================================
 
-//! @brief Mouse button codes.
+//! @brief Mouse button code.
+//!
+//! @sa @ref WHEEL_CODE.
 enum BUTTON_CODE
 {
-  BUTTON_LEFT              = 0x0001, //!< @brief Left button.
-  BUTTON_MIDDLE            = 0x0002, //!< @brief Middle button.
-  BUTTON_RIGHT             = 0x0004, //!< @brief Right button.
-  BUTTON_INVALID           = 0xFFFF  //!< @brief Invalid button (used internally).
+  //! @brief Left button.
+  BUTTON_LEFT = 0x0001,
+  //! @brief Middle button.
+  BUTTON_MIDDLE = 0x0002,
+  //! @brief Right button.
+  BUTTON_RIGHT = 0x0004,
+  //! @brief Invalid button (used internally).
+  BUTTON_INVALID = 0xFFFF
 };
 
 // ============================================================================
 // [Fog::WHEEL_CODE]
 // ============================================================================
 
+//! @brief Mouse wheel code.
+//!
+//! @sa @ref BUTTON_CODE.
 enum WHEEL_CODE
 {
-  WHEEL_UP                 = 0x0008, //!< @brief Wheel up button.
-  WHEEL_DOWN               = 0x0010  //!< @brief Wheel down button.
+  //! @brief Wheel up button.
+  WHEEL_UP = 0x0008,
+  //! @brief Wheel down button.
+  WHEEL_DOWN = 0x0010
 };
 
 // ============================================================================
 // [Fog::ORIENTATION]
 // ============================================================================
 
+//! @brief Orientation of widget or layout.
 enum ORIENTATION
 {
-  ORIENTATION_HORIZONTAL   = 0,      //!< @brief Wheel down button.
-  ORIENTATION_VERTICAL     = 1       //!< @brief Wheel up button.
+  //! @brief Horizontal orientation.
+  ORIENTATION_HORIZONTAL = 0,
+  //! @brief Vertical orientation.
+  ORIENTATION_VERTICAL = 1
+};
+
+// ============================================================================
+// [Fog::ALIGNMENT]
+// ============================================================================
+
+enum ALIGNMENT
+{
+  //! @brief Aligns with the left edge.
+  ALIGNMENT_LEFT = 0x001,
+  //! @brief Aligns with the right edge.
+  ALIGNMENT_RIGHT = 0x002,
+  //! @brief Centers horizontally in the available space. 
+  ALIGNMENT_HCENTER = 0x004,
+  //! @brief Justifies the text in the available space.
+  ALIGNMENT_JUSTIFY = 0x008,
+
+  //! @brief Aligns with the top.
+  ALIGNMENT_TOP = 0x0020,
+  //! @brief Aligns with the bottom.
+  ALIGNMENT_BOTTOM = 0x0040,
+  //! @brief Centers vertically in the available space.
+  ALIGNMENT_VCENTER = 0x0080,
+
+  //! @brief Centers in both dimensions.
+  ALIGNMENT_CENTER  = ALIGNMENT_VCENTER | ALIGNMENT_VCENTER,
+
+  // TODO: not supported yet.
+  //ALIGNMENT_ABSOLUTE = 0x0010,
+
+  //! @brief Synonym for ALIGNMENT_LEFT.
+  ALIGNMENT_LEADING  = ALIGNMENT_LEFT,
+  //! @brief Synonym for ALIGNMENT_RIGHT.
+  ALIGNMENT_TRAILING = ALIGNMENT_RIGHT,
+
+  ALIGNMENT_HORIZONTAL_MASK = 
+    ALIGNMENT_LEFT | 
+    ALIGNMENT_RIGHT | 
+    ALIGNMENT_HCENTER | 
+    ALIGNMENT_JUSTIFY, // | ALIGNMENT_ABSOLUTE
+
+  ALIGNMENT_VERTICAL_MASK = 
+    ALIGNMENT_TOP | 
+    ALIGNMENT_BOTTOM | 
+    ALIGNMENT_VCENTER
 };
 
 // ============================================================================
@@ -520,8 +763,10 @@ enum ORIENTATION
 
 enum CARET_TYPE
 {
-  CARET_NORMAL             = 0,      //!< @brief Normal type of caret
-  CARET_OVERWRITE          = 1,      //!< @brief Overwrite type of caret.
+  //! @brief Normal type of caret.
+  CARET_NORMAL = 0,
+  //! @brief Overwrite type of caret.
+  CARET_OVERWRITE = 1,
 };
 
 // ============================================================================
@@ -538,20 +783,81 @@ enum FOCUS_REASON
 };
 
 // ============================================================================
-// [Fog::CheckedState]
+// [Fog::CHECKED_STATE]
 // ============================================================================
 
+//! @brief The state value of check box.
 enum CHECKED_STATE
 {
+  //! @brief Non-checked.
   CHECKED_OFF = 0,
+  //! @brief Checked.
   CHECKED_ON = 1,
-  CHECKED_ALTERNATE = 2
+  //! @brief Mixed (used by hierarchies, some descendants are checked and
+  //! some don't).
+  CHECKED_MIXED = 2
 };
+
+// ============================================================================
+// [Fog::ANIMATION_DIRECTION]
+// ============================================================================
+enum ANIMATION_DIRECTION
+{
+  ANIMATION_FORWARD = 1,
+  ANIMATION_BACKWARD = 2
+};
+
+// ============================================================================
+// [Fog::ANIMATION_TYPE]
+// ============================================================================
+enum ANIMATION_TYPE
+{
+  ANIMATION_FIXED_STEP = 1,
+  ANIMATION_FIXED_TIME = 2
+};
+
+// ============================================================================
+// [Fog::ANIMATION_FLAGS]
+// ============================================================================
+enum ANIMATION_FLAGS
+{
+  ANIMATION_WIDGET_NO_FLAGS = 0,
+  //! @brief show Widget when animation begins.
+  ANIMATION_WIDGET_SHOW_ON_START = (1 << 1),
+  //! @brief hide Widget when animation ends.
+  ANIMATION_WIDGET_HIDE_ON_END = (1 << 2),
+  //! @brief destroy Widget when animation ends.
+  ANIMATION_WIDGET_DESTROY_ON_END = (1 << 3),
+  //! @brief marks that the positions are relative to parent.
+  ANIMATION_WIDGET_RELATIV_TO_PARENT = (1 << 4),
+  
+  //! @brief identifies where the widget is relative to parent.
+  ANIMATION_WIDGET_ORIENTATION_TOP = (1 << 5),
+  ANIMATION_WIDGET_ORIENTATION_BOTTOM = (1 << 6),
+  ANIMATION_WIDGET_ORIENTATION_LEFT = (1 << 7),
+  ANIMATION_WIDGET_ORIENTATION_RIGHT = (1 << 8)
+};
+
+// ============================================================================
+// [Fog::ANIMATION_EVENT_TYPE]
+// ============================================================================
+enum ANIMATION_EVENT_TYPE
+{
+  EVENT_ANIMATION_STEP = 1,
+  EVENT_ANIMATION_FINISHED = 2
+};
+
+// ============================================================================
+// [Fog::THEME]
+// ============================================================================
+
+
 
 // ============================================================================
 // [Fog::Event IDs]
 // ============================================================================
 
+//! @brief Event codes used in Fog-Gui.
 enum EVENT_GUI_ENUM
 {
   // --------------------------------------------------------------------------
@@ -570,6 +876,7 @@ enum EVENT_GUI_ENUM
 
   EVENT_LAYOUT_ITEM_ADD,
   EVENT_LAYOUT_ITEM_REMOVE,
+  EVENT_LAYOUT_REQUEST,
 
   // --------------------------------------------------------------------------
   // [StateEvent]
@@ -584,6 +891,9 @@ enum EVENT_GUI_ENUM
   // --------------------------------------------------------------------------
 
   EVENT_SHOW,
+  EVENT_SHOW_MAXIMIZE,
+  EVENT_SHOW_MINIMIZE,
+  EVENT_SHOW_FULLSCREEN,
   EVENT_HIDE,
   EVENT_HIDE_BY_PARENT,
 
@@ -622,6 +932,7 @@ enum EVENT_GUI_ENUM
   EVENT_MOUSE_MOVE,
   EVENT_MOUSE_PRESS,
   EVENT_MOUSE_RELEASE,
+
   EVENT_CLICK,
   EVENT_DOUBLE_CLICK,
   EVENT_WHEEL,
@@ -644,6 +955,7 @@ enum EVENT_GUI_ENUM
   // --------------------------------------------------------------------------
 
   EVENT_CLOSE,
+  EVENT_LAST_WINDOW_CLOSED,
 
   // --------------------------------------------------------------------------
   // [CheckEvent]
@@ -656,7 +968,13 @@ enum EVENT_GUI_ENUM
   // [ThemeEvent]
   // --------------------------------------------------------------------------
 
-  EVENT_THEME
+  EVENT_THEME,
+
+  // --------------------------------------------------------------------------
+  // [AnimationEvent]
+  // --------------------------------------------------------------------------
+
+  EVENT_ANIMATION
 };
 
 // ============================================================================
@@ -693,7 +1011,12 @@ enum ERR_GUI_ENUM
   ERR_GUI_CANT_CREATE_COLORMAP,
   ERR_GUI_CANT_TRANSLETE_COORDINATES,
 
-  ERR_GUI_WINDOW_ALREADY_EXISTS
+  ERR_GUI_WINDOW_ALREADY_EXISTS,
+
+  //! @brief Can't load native theme (UxTheme.dll).
+  ERR_THEME_NATIVE_NOT_AVAILABLE,
+  //! @brief Error happened during call to native theme (UxTheme.dll).
+  ERR_THEME_NATIVE_ERROR
 };
 
 //! @}

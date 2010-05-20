@@ -1397,12 +1397,12 @@ void WinGuiWindow::setOwner(GuiWindow* w)
   _owner = w;
 
   // Always set owner to toplevel window.
-  SetWindowLong((HWND)getHandle(), GWLP_HWNDPARENT, (LONG)_owner->getHandle());
+  SetWindowLongPtr((HWND)getHandle(), GWLP_HWNDPARENT, (LONG_PTR)_owner->getHandle());
 }
 
 void WinGuiWindow::releaseOwner()
 {
-  SetWindowLong((HWND)getHandle(), GWLP_HWNDPARENT, (LONG)0);
+  SetWindowLongPtr((HWND)getHandle(), GWLP_HWNDPARENT, (LONG_PTR)0);
   SetActiveWindow((HWND)_owner->getHandle());
   SetForegroundWindow((HWND)_owner->getHandle());
 

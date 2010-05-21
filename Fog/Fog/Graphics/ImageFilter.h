@@ -131,6 +131,7 @@ public:
 // [Fog::ImageFilter]
 // ============================================================================
 
+//! @brief Image filter.
 struct FOG_HIDDEN ImageFilter : public ImageFilterBase
 {
   // --------------------------------------------------------------------------
@@ -170,6 +171,7 @@ struct FOG_HIDDEN ImageFilter : public ImageFilterBase
 // [Fog::ColorFilter]
 // ============================================================================
 
+//! @brief Color filter.
 struct FOG_HIDDEN ColorFilter : public ImageFilterBase
 {
   // --------------------------------------------------------------------------

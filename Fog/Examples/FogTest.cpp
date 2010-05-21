@@ -447,7 +447,7 @@ MyWindow::MyWindow(uint32_t createFlags) :
   _spread = PATTERN_SPREAD_REPEAT;
 
   testVBoxLayout();
-  setContentRightMargin(0);
+  //setContentRightMargin(0);
 }
 
 MyWindow::~MyWindow()
@@ -492,7 +492,7 @@ FOG_GUI_MAIN()
   Application app(Ascii8("Gui"));
 
   MyWindow window(WINDOW_TYPE_DEFAULT);
-  window.setSize(IntSize(500, 400));
+  //window.setSize(IntSize(500, 400));
   window.show();
 
   app.addListener(EVENT_LAST_WINDOW_CLOSED, &app, &Application::quit);

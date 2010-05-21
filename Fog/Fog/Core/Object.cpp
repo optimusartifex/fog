@@ -397,9 +397,9 @@ void Object::postEvent(Event* e)
   if ((thread = getThread()) == NULL) goto fail;
   if ((eventLoop = thread->getEventLoop()) == NULL) goto fail;
 
-  // Add event to its object queue
+  // Link event with object event queue.
   {
-    Fog::AutoLock locked(*fog_object_lock);
+    AutoLock locked(*fog_object_lock);
 
     e->_prev = this->_events;
     this->_events = e;
@@ -424,13 +424,13 @@ void Object::postEvent(uint32_t code)
 
 void Object::sendEvent(Event* e)
 {
-  // First set receiver to self
+  // First set receiver to self.
   e->_receiver = this;
 
-  // Send event to object onEvent()
+  // Send event to object onEvent().
   onEvent(e);
 
-  // Send event to listeners
+  // Send event to listeners.
   _callListeners(e);
 }
 
@@ -450,10 +450,10 @@ void Object::onEvent(Event* e)
 {
   switch (e->getCode())
   {
-    case Fog::EVENT_CREATE:
+    case EVENT_CREATE:
       onCreate(reinterpret_cast<CreateEvent*>(e));
       break;
-    case Fog::EVENT_DESTROY:
+    case EVENT_DESTROY:
       onDestroy(reinterpret_cast<DestroyEvent*>(e));
       break;
   }

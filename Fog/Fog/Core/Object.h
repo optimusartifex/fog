@@ -209,18 +209,20 @@ virtual FOG_NO_INLINE void onEvent(Fog::Event* e) \
 // [fog_object_cast<>]
 // ============================================================================
 
-//! @brief Cast @a Core_Object* to @a T type.
+//! @brief Cast @ref Object* to @c T type.
 template <typename T>
 FOG_INLINE T fog_object_cast(Fog::Object* object)
 {
-  return static_cast<T>( (Fog::Object*) fog_object_cast_helper(object, ((T)NULL)->getStaticMetaClass()) );
+  return static_cast<T>((Fog::Object*)
+    fog_object_cast_helper(object, ((T)NULL)->getStaticMetaClass()) );
 }
 
-//! @brief Cast const @a Core_Object* to @a T type.
+//! @brief Cast const @ref Object* to @c T type.
 template <typename T>
 FOG_INLINE T fog_object_cast(const Fog::Object* object)
 {
-  return static_cast<T>( (const Fog::Object*) fog_object_cast_helper((Fog::Object*)object, ((T)NULL)->getStaticMetaClass()) );
+  return static_cast<T>((const Fog::Object*)
+    fog_object_cast_helper((Fog::Object*)object, ((T)NULL)->getStaticMetaClass()) );
 }
 
 namespace Fog {
@@ -229,13 +231,18 @@ namespace Fog {
 // [Fog::ObjectConnection]
 // ============================================================================
 
+//! @internal
+//!
+//! @brief Object connection is used to connect two objects (event dispatcher
+//! and receiver).
 struct ObjectConnection
 {
   ObjectConnection* next;
   Object* attachedObject;
   Object* listener;
 
-  union {
+  union
+  {
     Static< Delegate0<> > delegateVoid;
     Static< Delegate1<Event*> > delegateEvent;
   };
@@ -268,8 +275,8 @@ struct MetaClass
 // [Fog::Object]
 // ============================================================================
 
-// TODO: This needs cleanup, moving bad code out, creating proper object connection
-// system, threads management, etc...
+// TODO: This needs cleanup, moving bad code out, creating proper object 
+// connection system, threads management, etc...
 
 //! @brief Basic object type used for complex objects in Fog.
 //!
@@ -320,7 +327,7 @@ struct FOG_API Object
   //! @brief Get object flags.
   FOG_INLINE uint32_t getFlags() const { return _flags; }
 
-  //! @brief Get whether the object can be deleted using delete keyword.
+  //! @brief Get whether the object can be deleted using delete operator.
   FOG_INLINE bool canDelete() const { return (_flags & OBJ_CAN_DELETE) != 0; }
 
   //! @brief Get whether the object is @c Fog::Widget.
@@ -354,7 +361,10 @@ struct FOG_API Object
   // [Threading]
   // --------------------------------------------------------------------------
 
-  //! @brief Returns thread where object lives.
+  //! @brief Get object thread.
+  //!
+  //! Owner thread is thread where the instance was created. This thread not
+  //! owns the @ref Object instance, but is used by Fog-event subsystem.
   FOG_INLINE Thread* getThread() const { return _thread; }
 
   // --------------------------------------------------------------------------
@@ -366,16 +376,16 @@ struct FOG_API Object
   //! @brief Virtual method that's used for retrieving class info.
   virtual const MetaClass* getMetaClass() const;
 
-  //! @brief Returns class name of this object.
+  //! @brief Get object class name.
   FOG_INLINE const char* getClassName() const
   { return getMetaClass()->name; }
 
-  //! @brief Returns @c true if class can be casted to @a T.
+  //! @brief Get whether the object can be casted to @c T.
   template<typename T>
   FOG_INLINE bool isClassOf() const
   { return fog_object_cast<T>((Object*)this) != NULL; }
 
-  //! @brief Returns @c true if class can be casted to @a className.
+  //! @brief Get whether the object can be casted to @a className.
   FOG_INLINE bool isClassOf(const char* className) const
   { return fog_object_cast_string((Object*)this, className) != NULL; }
 
@@ -446,19 +456,21 @@ struct FOG_API Object
   uint removeListener(Object* receiver);
   uint removeAllListeners();
 
-  //! @brief Posts event @a e that will be processed by objects thread main loop. 
+  //! @brief Post event @a e that will be processed by object's thread event loop. 
   //!
   //! Posted event will be sent by main loop by @c sendEvent() method.
   void postEvent(Event* e);
-  //! @brief Posts simple event (only event id).
+  //! @brief Post simple event (only event id).
   void postEvent(uint32_t eventId);
 
-  //! @brief Sends event @a e immediately.
+  //! @brief Send event @a e immediately.
   void sendEvent(Event* e);
-  //! @brief Sends simple event (only event id) immediately.
+  //! @brief Send simple event (only event id) immediately.
   void sendEventById(uint32_t eventId);
 
   //! @brief Generic event handler.
+  //!
+  //! All events should be processed through this event handler.
   virtual void onEvent(Event* e);
 
   //! @brief Create object event.

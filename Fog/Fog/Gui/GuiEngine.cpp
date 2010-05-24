@@ -73,7 +73,7 @@ GuiEngine::~GuiEngine()
 }
 
 // ============================================================================
-// [Fog::GuiEngine - ID <-> GuiWindow]
+// [Fog::GuiEngine - Handle <-> GuiWindow]
 // ============================================================================
 
 bool GuiEngine::mapHandle(void* handle, GuiWindow* native)
@@ -93,7 +93,7 @@ bool GuiEngine::unmapHandle(void* handle)
   return b;
 }
 
-GuiWindow* GuiEngine::handleToNative(void* handle) const
+GuiWindow* GuiEngine::getWindowFromHandle(void* handle) const
 {
   return _widgetMapper.value(handle, NULL);
 }
@@ -221,7 +221,7 @@ void GuiEngine::changeMouseStatus(Widget* w, const IntPoint& pos)
     _buttonTime[1].clear();
     _buttonTime[2].clear();
 
-    uint32_t code = 0; // be quite
+    uint32_t code = 0; // Be quite.
     uint32_t hoverChange;;
 
     hoverChange = (!!_mouseStatus.hover) |
@@ -366,7 +366,7 @@ void GuiEngine::dispatchEnabled(Widget* w, bool enabled)
   if (enabled)
   {
     if (state == WIDGET_ENABLED) return;
-    if (state == WIDGET_DISABLED_BY_PARENT && !w->isGuiWindow()) return;
+    if (state == WIDGET_DISABLED_BY_PARENT && !w->hasGuiWindow()) return;
 
     w->_state = WIDGET_ENABLED;
 
@@ -410,7 +410,7 @@ void GuiEngine::dispatchEnabled(Widget* w, bool enabled)
     FOG_WIDGET_TREE_ITERATOR(i2, w, true,
       // before traverse
       {
-        // mark 'DisableByParent' all childs that's visible
+        // Mark by 'DisableByParent' all childs that's visible.
         if (child->getState() != WIDGET_ENABLED)
         {
           FOG_WIDGET_TREE_ITERATOR_NEXT(i2);
@@ -438,7 +438,7 @@ void GuiEngine::dispatchVisibility(Widget* w, uint32_t visible)
   // Dispatch 'Show'.
   if (visible >= WIDGET_VISIBLE)
   {
-    if (visibility == WIDGET_HIDDEN_BY_PARENT && !w->isGuiWindow()) return;
+    if (visibility == WIDGET_HIDDEN_BY_PARENT && !w->hasGuiWindow()) return;
 
     w->_visibility = visible;
 
@@ -451,17 +451,18 @@ void GuiEngine::dispatchVisibility(Widget* w, uint32_t visible)
 
     if (visibility == WIDGET_HIDDEN)
     {
-      if ((w->getWindowHints() & WINDOW_INLINE_POPUP) != 0 && w->getParent() && w->getParent()->getGuiWindow())
+      if ((w->getWindowHints() & WINDOW_INLINE_POPUP) != 0 && w->getParentWidget())
       {
-        GuiWindow* ww = (GuiWindow*)w->getParent()->getGuiWindow();
-        ww->showPopUp(w);
+        Widget* parent = w->getParentWidget();
+        GuiWindow* guiWindow = parent->getGuiWindow();
+        if (guiWindow != NULL) guiWindow->showPopUp(w);
       }
 
-      //only needed if widget was hidden before this event
+      // Only needed if widget was hidden before this event.
       FOG_WIDGET_TREE_ITERATOR(i1, w, true,
         // before traverse
         {
-        // show only child that's hidden by parent
+        // Show only child that's hidden by parent.
         if (child->getVisibility() != WIDGET_HIDDEN_BY_PARENT) FOG_WIDGET_TREE_ITERATOR_NEXT(i1);
 
         child->_visibility = WIDGET_VISIBLE;
@@ -510,7 +511,7 @@ void GuiEngine::dispatchVisibility(Widget* w, uint32_t visible)
         }
       );
 
-      Widget* p = w->getParent();
+      Widget* p = w->getParentWidget();
       if (p) p->update(WIDGET_UPDATE_ALL);
     }
   }
@@ -525,8 +526,9 @@ void GuiEngine::dispatchVisibility(Widget* w, uint32_t visible)
 
 void GuiEngine::dispatchConfigure(Widget* w, const IntRect& rect, bool changedOrientation)
 {
-  if (w->isGuiWindow() && ((GuiWindow*)w->getGuiWindow())->hasPopUp()) {
-      ((GuiWindow*)w->getGuiWindow())->closePopUps();
+  if (w->hasGuiWindow() && ((GuiWindow*)w->getGuiWindow())->hasPopUp())
+  {
+    ((GuiWindow*)w->getGuiWindow())->closePopUps();
   }
 
   uint32_t changed = 0;
@@ -552,17 +554,17 @@ void GuiEngine::dispatchConfigure(Widget* w, const IntRect& rect, bool changedOr
 
   Layout* layout = w->getLayout();
 
-  //TODO: intelligent enum order so we can omit one check here!
+  // TODO: intelligent enum order so we can omit one check here!
   if (layout && layout->_activated &&  changed & ConfigureEvent::CHANGED_SIZE || changed & ConfigureEvent::CHANGED_ORIENTATION)
   {
     FOG_ASSERT(layout->_toplevel);
     layout->markAsDirty();
   }
 
-  Widget* p = w->getParent();
+  Widget* p = w->getParentWidget();
   if (p)
   {
-    //maximize and fullscreen should not be resized -> only visibile state
+    // Maximize and fullscreen should not be resized -> only visibile state.
     if (w->getVisibility() == WIDGET_VISIBLE) p->update(WIDGET_UPDATE_ALL);
   }
   else if (changed & ConfigureEvent::CHANGED_SIZE)
@@ -807,8 +809,8 @@ void GuiEngine::doUpdateWindow(GuiWindow* window)
     err_t stackerr;
 
     // Manual object iterator.
-    Widget* const* ocur;
-    Widget* const* oend;
+    Object* const* ocur;
+    Object* const* oend;
 
     // Parent and child widgets.
     Widget* parent;
@@ -832,10 +834,12 @@ __pushed:
     child = (Widget*)*ocur;
     for (;;)
     {
-      if (child->getVisibility() < WIDGET_VISIBLE)
-      {
+      // TODO: Hackery
+      if (!reinterpret_cast<Object*>(child)->isWidget())
         goto __next;
-      }
+
+      if (child->getVisibility() < WIDGET_VISIBLE)
+        goto __next;
 
       childRec.uflags = child->_uflags;
       childRec.implicitFlags = parentRec.implicitFlags;
@@ -1150,31 +1154,31 @@ void GuiWindow::onConfigure(const IntRect& windowRect, const IntRect& clientRect
 
 void GuiWindow::onMouseHover(int x, int y)
 {
-  GuiEngine* uiSystem = GUI_ENGINE();
+  GuiEngine* guiEngine = GUI_ENGINE();
 
-  if (uiSystem->_systemMouseStatus.uiWindow != this)
+  if (guiEngine->_systemMouseStatus.uiWindow != this)
   {
-    uiSystem->_systemMouseStatus.uiWindow = this;
-    uiSystem->_systemMouseStatus.buttons = 0;
+    guiEngine->_systemMouseStatus.uiWindow = this;
+    guiEngine->_systemMouseStatus.buttons = 0;
   }
-  uiSystem->_systemMouseStatus.position.set(x, y);
-  uiSystem->_systemMouseStatus.hover = true;
+  guiEngine->_systemMouseStatus.position.set(x, y);
+  guiEngine->_systemMouseStatus.hover = true;
 
   onMouseMove(x, y);
 }
 
 void GuiWindow::onMouseMove(int x, int y)
 {
-  GuiEngine* uiSystem = GUI_ENGINE();
+  GuiEngine* guiEngine = GUI_ENGINE();
   Widget* w;
 
-  if (uiSystem->_systemMouseStatus.uiWindow != this)
+  if (guiEngine->_systemMouseStatus.uiWindow != this)
   {
-    uiSystem->_systemMouseStatus.uiWindow = this;
-    uiSystem->_systemMouseStatus.buttons = 0;
-    uiSystem->_systemMouseStatus.hover = false;
+    guiEngine->_systemMouseStatus.uiWindow = this;
+    guiEngine->_systemMouseStatus.buttons = 0;
+    guiEngine->_systemMouseStatus.hover = false;
   }
-  uiSystem->_systemMouseStatus.position.set(x, y);
+  guiEngine->_systemMouseStatus.position.set(x, y);
 
   IntPoint p(x, y);
 
@@ -1182,9 +1186,9 @@ void GuiWindow::onMouseMove(int x, int y)
   // Grabbing mode
   // ----------------------------------
 
-  if (uiSystem->_mouseStatus.buttons)
+  if (guiEngine->_mouseStatus.buttons)
   {
-    w = uiSystem->_mouseStatus.widget;
+    w = guiEngine->_mouseStatus.widget;
     p -= _widget->getOrigin();
 
     if (!Widget::translateCoordinates(w, _widget, &p))
@@ -1192,7 +1196,7 @@ void GuiWindow::onMouseMove(int x, int y)
       FOG_ASSERT_NOT_REACHED();
     }
 
-    uiSystem->changeMouseStatus(w, p);
+    guiEngine->changeMouseStatus(w, p);
     return;
   }
 
@@ -1200,7 +1204,7 @@ void GuiWindow::onMouseMove(int x, int y)
   // Motion mode
   // ----------------------------------
 
-  // in motion mode, mouse should be in widget bounds (so check for it)
+  // In motion mode, mouse should be in widget bounds (so check for it).
   if (x < 0 || y < 0 || x >= _widget->getWidth() || y >= _widget->getHeight())
   {
     return;
@@ -1213,14 +1217,16 @@ __repeat:
     // Add origin.
     p -= w->_origin;
 
-    // Iterate over children and try to find child widget where  mouse
+    // Iterate over children and try to find child widget where a mouse
     // position is. Iteration must be done through end, becuase we want
     // widget with highest Z-Order to match mouse position first.
-    List<Widget*>::ConstIterator it(w->_children);
+    List<Object*>::ConstIterator it(w->_children);
     for (it.toEnd(); it.isValid(); it.toPrevious())
     {
-      Widget* current = it.value();
-      if (current->getVisibility() >= WIDGET_VISIBLE && current->_geometry.contains(p))
+      Widget* current = fog_object_cast<Widget*>(it.value());
+      if (current && 
+          current->getVisibility() >= WIDGET_VISIBLE &&
+          current->_geometry.contains(p))
       {
         w = current;
         p -= w->getPosition();
@@ -1228,26 +1234,26 @@ __repeat:
       }
     }
 
-    uiSystem->changeMouseStatus(w, p);
+    guiEngine->changeMouseStatus(w, p);
   }
 }
 
 void GuiWindow::onMouseLeave(int x, int y)
 {
-  GuiEngine* uiSystem = GUI_ENGINE();
+  GuiEngine* guiEngine = GUI_ENGINE();
 
-  if (uiSystem->_systemMouseStatus.uiWindow == this)
+  if (guiEngine->_systemMouseStatus.uiWindow == this)
   {
-    Widget* w = uiSystem->_mouseStatus.widget;
+    Widget* w = guiEngine->_mouseStatus.widget;
 
-    uiSystem->_mouseStatus.widget = NULL;
-    uiSystem->_mouseStatus.position.set(-1, -1);
-    uiSystem->_mouseStatus.valid = 1;
-    uiSystem->_mouseStatus.buttons = 0;
-    uiSystem->_mouseStatus.hover = 0;
+    guiEngine->_mouseStatus.widget = NULL;
+    guiEngine->_mouseStatus.position.set(-1, -1);
+    guiEngine->_mouseStatus.valid = 1;
+    guiEngine->_mouseStatus.buttons = 0;
+    guiEngine->_mouseStatus.hover = 0;
 
-    uiSystem->clearSystemMouseStatus();
-    uiSystem->clearButtonRepeat();
+    guiEngine->clearSystemMouseStatus();
+    guiEngine->clearButtonRepeat();
 
     if (w)
     {
@@ -1261,10 +1267,10 @@ void GuiWindow::onMouseLeave(int x, int y)
 
 void GuiWindow::onMousePress(uint32_t button, bool repeated)
 {
-  GuiEngine* uiSystem = GUI_ENGINE();
-  if (uiSystem->_systemMouseStatus.uiWindow != this) return;
+  GuiEngine* guiEngine = GUI_ENGINE();
+  if (guiEngine->_systemMouseStatus.uiWindow != this) return;
 
-  Widget* w = uiSystem->_mouseStatus.widget;
+  Widget* w = guiEngine->_mouseStatus.widget;
   if (!w)
   {
     closePopUps();
@@ -1279,18 +1285,18 @@ void GuiWindow::onMousePress(uint32_t button, bool repeated)
     }
   }
 
-  uiSystem->_systemMouseStatus.buttons |= button;
-  uiSystem->_mouseStatus.buttons |= button;
+  guiEngine->_systemMouseStatus.buttons |= button;
+  guiEngine->_mouseStatus.buttons |= button;
 
   TimeTicks now = TimeTicks::now();
 
-  if (!repeated) uiSystem->startButtonRepeat(
-    button, true, uiSystem->_repeatingDelay, uiSystem->_repeatingInterval);
+  if (!repeated) guiEngine->startButtonRepeat(
+    button, true, guiEngine->_repeatingDelay, guiEngine->_repeatingInterval);
 
   MouseEvent e(EVENT_MOUSE_PRESS);
   e._button = button;
-  e._modifiers = uiSystem->getKeyboardModifiers();
-  e._position  = uiSystem->_mouseStatus.position;
+  e._modifiers = guiEngine->getKeyboardModifiers();
+  e._position  = guiEngine->_mouseStatus.position;
   e._isOutside = ((e._position.x >= 0) &
                   (e._position.y >= 0) &
                   (e._position.x < w->getWidth()) &
@@ -1301,37 +1307,37 @@ void GuiWindow::onMousePress(uint32_t button, bool repeated)
   uint32_t buttonId = fogButtonToId(button);
   if (repeated || buttonId == BUTTON_INVALID) return;
 
-  if (!repeated && (now - uiSystem->_buttonTime[buttonId]) <= uiSystem->_doubleClickInterval)
+  if (!repeated && (now - guiEngine->_buttonTime[buttonId]) <= guiEngine->_doubleClickInterval)
   {
-    uiSystem->_buttonTime[buttonId].clear();
+    guiEngine->_buttonTime[buttonId].clear();
     e._code = EVENT_DOUBLE_CLICK;
     w->sendEvent(&e);
   }
   else
   {
-    uiSystem->_buttonTime[buttonId] = now;
+    guiEngine->_buttonTime[buttonId] = now;
   }
 }
 
 void GuiWindow::onMouseRelease(uint32_t button)
 {
-  GuiEngine* uiSystem = GUI_ENGINE();
-  if (uiSystem->_systemMouseStatus.uiWindow != this) return;
+  GuiEngine* guiEngine = GUI_ENGINE();
+  if (guiEngine->_systemMouseStatus.uiWindow != this) return;
 
-  uiSystem->_systemMouseStatus.buttons &= ~button;
-  uiSystem->_mouseStatus.buttons &= ~button;
+  guiEngine->_systemMouseStatus.buttons &= ~button;
+  guiEngine->_mouseStatus.buttons &= ~button;
 
-  uiSystem->stopButtonRepeat(button);
+  guiEngine->stopButtonRepeat(button);
 
-  Widget* w = uiSystem->_mouseStatus.widget;
+  Widget* w = guiEngine->_mouseStatus.widget;
   if (!w) return;
 
-  bool lastButtonRelease = (uiSystem->_mouseStatus.buttons == 0);
+  bool lastButtonRelease = (guiEngine->_mouseStatus.buttons == 0);
 
   MouseEvent e(EVENT_MOUSE_RELEASE);
   e._button = button;
-  e._modifiers = uiSystem->getKeyboardModifiers();
-  e._position = uiSystem->_mouseStatus.position;
+  e._modifiers = guiEngine->getKeyboardModifiers();
+  e._position = guiEngine->_mouseStatus.position;
   e._isOutside = !(
     e._position.x >= 0 &&
     e._position.y >= 0 &&
@@ -1349,29 +1355,29 @@ void GuiWindow::onMouseRelease(uint32_t button)
 
   if (lastButtonRelease)
   {
-    onMouseMove(uiSystem->_systemMouseStatus.position.x,
-                uiSystem->_systemMouseStatus.position.y);
+    onMouseMove(guiEngine->_systemMouseStatus.position.x,
+                guiEngine->_systemMouseStatus.position.y);
   }
 }
 
 void GuiWindow::onMouseWheel(uint32_t wheel)
 {
-  GuiEngine* uiSystem = GUI_ENGINE();
-  if (uiSystem->_systemMouseStatus.uiWindow != this) return;
+  GuiEngine* guiEngine = GUI_ENGINE();
+  if (guiEngine->_systemMouseStatus.uiWindow != this) return;
 
-  Widget* w = uiSystem->_mouseStatus.widget;
+  Widget* w = guiEngine->_mouseStatus.widget;
   if (!w) return;
 
   MouseEvent e(EVENT_WHEEL);
   e._button = wheel;
-  e._modifiers = uiSystem->getKeyboardModifiers();
-  e._position = uiSystem->_mouseStatus.position;
+  e._modifiers = guiEngine->getKeyboardModifiers();
+  e._position = guiEngine->_mouseStatus.position;
   w->sendEvent(&e);
 }
 
 void GuiWindow::onFocus(bool focus)
 {
-  GuiEngine* uiSystem = GUI_ENGINE();
+  GuiEngine* guiEngine = GUI_ENGINE();
 
   _hasFocus = focus;
   if (focus)
@@ -1386,27 +1392,27 @@ void GuiWindow::onFocus(bool focus)
   }
   else
   {
-    uiSystem->_keyboardStatus.modifiers = 0;
+    guiEngine->_keyboardStatus.modifiers = 0;
     closePopUps();
   }
 }
 
 bool GuiWindow::onKeyPress(uint32_t key, uint32_t modifier, uint32_t systemCode, Char unicode)
 {
-  GuiEngine* uiSystem = GUI_ENGINE();
+  GuiEngine* guiEngine = GUI_ENGINE();
 
   KeyEvent e(EVENT_KEY_PRESS);
   e._key = key;
-  e._modifiers = uiSystem->getKeyboardModifiers();
+  e._modifiers = guiEngine->getKeyboardModifiers();
   e._systemCode = systemCode;
   e._unicode = unicode;
 
-  if (isShiftMod(uiSystem->_keyboardStatus.modifiers)) e._key |= KEY_SHIFT;
-  if (isCtrlMod (uiSystem->_keyboardStatus.modifiers)) e._key |= KEY_CTRL;
-  if (isAltMod  (uiSystem->_keyboardStatus.modifiers)) e._key |= KEY_ALT;
+  if (isShiftMod(guiEngine->_keyboardStatus.modifiers)) e._key |= KEY_SHIFT;
+  if (isCtrlMod (guiEngine->_keyboardStatus.modifiers)) e._key |= KEY_CTRL;
+  if (isAltMod  (guiEngine->_keyboardStatus.modifiers)) e._key |= KEY_ALT;
 
   // Set this status after modifiers check.
-  uiSystem->_keyboardStatus.modifiers |= modifier;
+  guiEngine->_keyboardStatus.modifiers |= modifier;
 
   if ((e.getUnicode().ch() >= 1 && e.getUnicode().ch() <= 31) ||
       e.getUnicode().ch() == 127 /* DEL key */)
@@ -1420,18 +1426,18 @@ bool GuiWindow::onKeyPress(uint32_t key, uint32_t modifier, uint32_t systemCode,
 
 bool GuiWindow::onKeyRelease(uint32_t key, uint32_t modifier, uint32_t systemCode, Char unicode)
 {
-  GuiEngine* uiSystem = GUI_ENGINE();
-  uiSystem->_keyboardStatus.modifiers &= ~modifier;
+  GuiEngine* guiEngine = GUI_ENGINE();
+  guiEngine->_keyboardStatus.modifiers &= ~modifier;
 
   KeyEvent e(EVENT_KEY_RELEASE);
   e._key = key;
-  e._modifiers = uiSystem->getKeyboardModifiers();
+  e._modifiers = guiEngine->getKeyboardModifiers();
   e._systemCode = systemCode;
   e._unicode._ch = 0;
 
-  if (isShiftMod(uiSystem->_keyboardStatus.modifiers)) e._key |= KEY_SHIFT;
-  if (isCtrlMod (uiSystem->_keyboardStatus.modifiers)) e._key |= KEY_CTRL;
-  if (isAltMod  (uiSystem->_keyboardStatus.modifiers)) e._key |= KEY_ALT;
+  if (isShiftMod(guiEngine->_keyboardStatus.modifiers)) e._key |= KEY_SHIFT;
+  if (isCtrlMod (guiEngine->_keyboardStatus.modifiers)) e._key |= KEY_CTRL;
+  if (isAltMod  (guiEngine->_keyboardStatus.modifiers)) e._key |= KEY_ALT;
 
   _widget->_findFocus()->sendEvent(&e);
   return e.isAccepted();
@@ -1441,7 +1447,7 @@ void GuiWindow::clearFocus()
 {
   Widget* w = _widget;
 
-  // Need to clear focus
+  // Need to clear focus.
   while (w->_focusLink)
   {
     Widget* t = w->_focusLink;
@@ -1461,13 +1467,12 @@ void GuiWindow::setFocus(Widget* w, uint32_t reason)
 {
   if (_widget->_focusLink) clearFocus();
 
-  Widget* t = w;
-  while (t != _widget)
+  Widget* cur = w;
+  while (cur != _widget)
   {
-    Widget* parent = t->getParent();
-    parent->_focusLink = t;
-    t = parent;
-    FOG_ASSERT(t != NULL);
+    Widget* parent = cur->getParentWidget();
+    parent->_focusLink = cur;
+    cur = parent;
   }
 
   if (!_hasFocus) takeFocus();
@@ -1488,9 +1493,9 @@ void GuiWindow::setDirty()
   if (_isDirty) return;
   _isDirty = true;
 
-  GuiEngine* uiSystem = GUI_ENGINE();
-  uiSystem->_dirtyList.append(this);
-  uiSystem->update();
+  GuiEngine* guiEngine = GUI_ENGINE();
+  guiEngine->_dirtyList.append(this);
+  guiEngine->update();
 }
 
 // ============================================================================
@@ -1554,7 +1559,7 @@ void GuiWindow::showAllModalWindows(uint32_t visible)
     parent = parent->getOwner();
   }
 
-  //If show, to focus will be at this window!
+  // If show, to focus will be at this window.
   getWidget()->show(visible);
 }
 

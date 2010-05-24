@@ -198,7 +198,7 @@ static int CALLBACK enumFontCb(CONST LOGFONTW* lplf, CONST TEXTMETRICW* lpntm, D
 
   // Many of the fonts are the same family, so temporary string
   // is here better
-  TemporaryString<TEMP_LENGTH> name;
+  TemporaryString<TEMPORARY_LENGTH> name;
   name.set(reinterpret_cast<const Char*>(lfFaceName));
 
   if (!efs->fonts->contains(name)) efs->fonts->append(name);

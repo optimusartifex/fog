@@ -117,16 +117,18 @@ static uint PCX_strnlen(const uint8_t* str, uint maxlen)
 
 #define PCX_Strict 1
 
-// decodes scanline compressed by PCX-RLE.
-// Returns 0 on success, otherwise error code.
-static uint PCX_decodeScanline(
+// Decodes scanline compressed by PCX-RLE.
+//
+// Returns 0 on success, otherwise an error code.
+static err_t PCX_decodeScanline(
   uint8_t* dest,
   const uint8_t** src, const uint8_t* end, 
-  sysuint_t length, sysuint_t ignore, sysuint_t increment)
+  uint32_t length, uint32_t ignore, uint32_t increment)
 {
+  err_t error = ERR_IMAGEIO_TRUNCATED;
+
   const uint8_t* cur = *src;
-  sysuint_t left = length;
-  sysuint_t error = ERR_IMAGEIO_TRUNCATED;
+  uint left = length;
 
   // Decode RLE scanline and write it to 'dest'
   while (left) 
@@ -158,7 +160,7 @@ static uint PCX_decodeScanline(
 
       if (extra)
       {
-        // This should happen only if 'ignore' is not zero
+        // This should happen only if 'ignore' is not zero.
         if (extra <= ignore)
         {
           ignore -= extra;
@@ -180,7 +182,7 @@ static uint PCX_decodeScanline(
     }
   }
 
-  // Decode RLE scanline and discard it
+  // Decode RLE scanline and discard it.
   while (ignore)
   {
     if (cur == end) goto fail;
@@ -319,16 +321,6 @@ static void PCX_fillEgaPalette(uint32_t* palette)
   palette[0xD] = 0xFFFF55FF;
   palette[0xE] = 0xFFFFFF55;
   palette[0xF] = 0xFFFFFFFF;
-}
-
-static void PCX_applyPalette(uint8_t* pixels, sysuint_t count, const uint32_t* palette)
-{
-  ulong i;
-
-  for (i = count; i; i--, pixels += 4)
-  {
-    ((uint32_t *)pixels)[0] = palette[pixels[0]];
-  }
 }
 
 static void PCX_convertPaletteToPcx(uint8_t* dest, const uint8_t* src, sysuint_t count, sysuint_t entrySize)
@@ -486,7 +478,7 @@ err_t PcxDecoderDevice::readImage(Image& image)
   uint8_t* mem;
 
   // Bytes per line
-  sysuint_t bytesPerLine = (sysuint_t)pcxFileHeader().bytesPerLine;
+  uint32_t bytesPerLine = pcxFileHeader().bytesPerLine;
 
   // Loop variables
   uint x, y;
@@ -514,7 +506,7 @@ err_t PcxDecoderDevice::readImage(Image& image)
   // Planes: 1, 2, 3, 4
   if (_depth == 1)
   {
-    sysuint_t plane;
+    uint32_t plane;
     uint8_t b;
 
     if (!temporary.alloc(bytesPerLine))
@@ -577,11 +569,11 @@ err_t PcxDecoderDevice::readImage(Image& image)
   // Planes: 1, 3, 4
   else
   {
-    sysuint_t pos[4];
-    sysuint_t ignore = bytesPerLine - _width;
-    sysuint_t increment;
-    sysuint_t plane;
-    sysuint_t planeMax = 1;
+    uint32_t pos[4];
+    uint32_t ignore = bytesPerLine - _width;
+    uint32_t increment;
+    uint32_t plane;
+    uint32_t planeMax = 1;
 
     switch (_depth)
     {

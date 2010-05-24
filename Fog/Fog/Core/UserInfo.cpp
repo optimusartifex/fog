@@ -98,7 +98,7 @@ _back:
       }
     }
   }
-  else if(tryShellFolders)
+  else if (tryShellFolders)
   {
     tryShellFolders = false;
     RegCloseKey(k);

@@ -257,7 +257,8 @@ FOG_API int parseColor(const String& str, Argb* dst)
     strCur += 3;
 
     // Skip spaces.
-    for (;;) {
+    for (;;)
+    {
       if (strCur == strEnd) goto bail;
       else if (strCur->isSpace()) strCur++;
       else break;
@@ -279,7 +280,8 @@ FOG_API int parseColor(const String& str, Argb* dst)
       // Skip spaces and parse ','.
       if (i < 2)
       {
-        for (;;) {
+        for (;;)
+        {
           if (strCur == strEnd) goto bail;
 
           if (strCur->isSpace())
@@ -300,7 +302,8 @@ FOG_API int parseColor(const String& str, Argb* dst)
     }
 
     // Skip spaces and parse ')'
-    for (;;) {
+    for (;;)
+    {
       if (strCur == strEnd) goto bail;
 
       if (strCur->isSpace())
@@ -420,7 +423,8 @@ err_t parseMatrix(const String& str, DoubleMatrix* dst)
 
 start:
   // Skip spaces.
-  for (;;) {
+  for (;;)
+  {
     if (strCur == strEnd) goto end;
     else if (strCur->isSpace()) strCur++;
     else break;
@@ -428,7 +432,8 @@ start:
 
   // Parse function name.
   functionName = strCur;
-  for (;;) {
+  for (;;)
+  {
     if (strCur == strEnd) goto end;
     else if (strCur->isAsciiAlpha()) strCur++;
     else break;
@@ -441,7 +446,8 @@ start:
 
   // Parse arguments.
   d_count = 0;
-  for (;;) {
+  for (;;)
+  {
     if (strCur == strEnd) goto end;
 
     // Parse number.
@@ -452,7 +458,8 @@ start:
 
     // Skip ',' and move to position of the next digit.
     bool commaParsed = false;
-    for (;;) {
+    for (;;)
+    {
       if (strCur == strEnd) goto end;
 
       if (strCur->isSpace())
@@ -535,7 +542,8 @@ done:
   }
 
   // Skip spaces.
-  for (;;) {
+  for (;;)
+  {
     if (strCur == strEnd) break;
     else if (strCur->isSpace()) strCur++;
     else goto start;
@@ -579,7 +587,7 @@ SvgCoord parseCoord(const String& str)
       else if (spec.getLength() == 2)
       {
         const char* units = svgUnitNames;
-        for (sysuint_t u = 1; u < SVG_UNIT_PERCENT; u++, units += 2)
+        for (uint32_t u = 1; u < SVG_UNIT_PERCENT; u++, units += 2)
         {
           if (spec.getData()[0] == units[0] && spec.getData()[1] == units[1])
           {

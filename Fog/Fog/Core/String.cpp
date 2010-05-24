@@ -1534,7 +1534,7 @@ ffUnsigned:
           else
           {
             // 8-bit string (char*).
-            TemporaryString<TEMP_LENGTH> str;
+            TemporaryString<TEMPORARY_LENGTH> str;
 
             const char* s = va_arg(ap, const char*);
             sysuint_t slen = (precision != NO_PRECISION)

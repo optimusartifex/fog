@@ -42,6 +42,8 @@
 # endif // FOG_HAVE_UNISTD_H
 #endif
 
+FOG_IMPLEMENT_OBJECT(Fog::Application)
+
 namespace Fog {
 
 // ============================================================================
@@ -384,7 +386,7 @@ err_t Application::setWorkingDirectory(const String& _dir)
 err_t Application::getWorkingDirectory(String& dst)
 {
   err_t err;
-  TemporaryByteArray<TEMP_LENGTH> dir8;
+  TemporaryByteArray<TEMPORARY_LENGTH> dir8;
 
   dst.clear();
   for (;;)
@@ -402,7 +404,7 @@ err_t Application::getWorkingDirectory(String& dst)
 err_t Application::setWorkingDirectory(const String& dir)
 {
   err_t err;
-  TemporaryByteArray<TEMP_LENGTH> dir8;
+  TemporaryByteArray<TEMPORARY_LENGTH> dir8;
 
   if ((err = TextCodec::local8().appendFromUnicode(dir8, dir))) return err;
 

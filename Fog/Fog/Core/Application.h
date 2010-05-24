@@ -47,6 +47,8 @@ struct GuiEngine;
 //! @brief Main application object.
 struct FOG_API Application : public Object
 {
+  FOG_DECLARE_OBJECT(Application, Object)
+
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------

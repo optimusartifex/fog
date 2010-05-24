@@ -17,24 +17,85 @@
 
 namespace Fog {
 
+// ============================================================================
+// [Forward Declarations]
+// ============================================================================
+
+struct Animation;
 struct Application;
+
+// ============================================================================
+// [Fog::AnimationDispatcher]
+// ============================================================================
+
+//! @brief Animation dispatcher.
+struct FOG_API AnimationDispatcher : public Object
+{
+  FOG_DECLARE_OBJECT(AnimationDispatcher, Object)
+
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  AnimationDispatcher(TimeDelta ms = TimeDelta::fromMilliseconds(20));
+  virtual ~AnimationDispatcher();
+
+  // --------------------------------------------------------------------------
+  // [Animation Management]
+  // --------------------------------------------------------------------------
+
+  //! @brief Add an Animation to dispatcher.
+  //!
+  //! The dispatcher will take the ownership of the animation-object.
+  void addAnimation(Animation* a);
+
+  //! @brief Remove an Animation from dispatcher.
+  //!
+  //! The dispatcher will destroy the object itself
+  void removeAnimation(Animation* a);
+
+  // --------------------------------------------------------------------------
+  // [Event Handlers]
+  // --------------------------------------------------------------------------
+
+  //! @brief Timer event.
+  virtual void onTimer(TimerEvent* e);
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+protected:
+  //! @brief Number of registered animations.
+  int _count;
+  //! @brief Timer object for animations.
+  Timer _timer;
+  //! @brief List of finished animations.
+  List<Animation*> _finished;
+
+private:
+  FOG_DISABLE_COPY(AnimationDispatcher)
+};
 
 // ============================================================================
 // [Fog::Animation]
 // ============================================================================
 
+//! @brief Animation base class.
 struct FOG_API Animation : public Object
 {
   FOG_DECLARE_OBJECT(Animation, Object)
 
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
   Animation(uint32_t t=ANIMATION_FIXED_STEP);
   virtual ~Animation();
 
-  virtual void onStart();
-  virtual void onAnimation(AnimationEvent* e);
-  virtual void onTimer(TimerEvent* e);
-  virtual void onStep(AnimationEvent* e);
-  virtual void onFinished(AnimationEvent* e);
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE float getStep() const { return _step; }
   FOG_INLINE float getFps() const { return _fps; }
@@ -46,9 +107,24 @@ struct FOG_API Animation : public Object
   void setDirection(uint direction) { _direction = direction; }
   void setDuration(TimeDelta duration) { _type = ANIMATION_FIXED_TIME;  _duration = duration; }
 
+  // --------------------------------------------------------------------------
+  // [Event Handlers]
+  // --------------------------------------------------------------------------
+
+  // ANIMATION TODO: Why onStart is not called through an event dispatcher?
+  virtual void onStart();
+  virtual void onAnimation(AnimationEvent* e);
+  virtual void onTimer(TimerEvent* e);
+  virtual void onStep(AnimationEvent* e);
+  virtual void onFinished(AnimationEvent* e);
+
   FOG_EVENT_BEGIN()
     FOG_EVENT_DEF(EVENT_ANIMATION           , onAnimation        , AnimationEvent     , OVERRIDE)
   FOG_EVENT_END()
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
 
 protected:
   float _position;
@@ -62,38 +138,9 @@ protected:
 
   TimeTicks _starttime;
   TimeTicks _endtime;
-};
-
-// ============================================================================
-// [Fog::AnimationDispatcher]
-// ============================================================================
-
-struct FOG_API AnimationDispatcher : public Object
-{
-  FOG_DECLARE_OBJECT(AnimationDispatcher, Object)
-
-  AnimationDispatcher(TimeDelta ms=TimeDelta::fromMilliseconds(20));
-  virtual ~AnimationDispatcher();
-
-  //! @brief Add an Animation to dispatcher.
-  //!
-  //! The dispatcher will take the ownership of the animation-object.
-  void addAnimation(Animation* a);
-
-  //! @brief Remove an Animation from dispatcher.
-  //!
-  //! The dispatcher will destroy the object itself
-  void removeAnimation(Animation* a);
-
-  virtual void onTimer(TimerEvent* e);
 
 private:
-  //! @brief Number of registered animations.
-  int _count;
-  //! @brief Timer object for animations.
-  Timer _timer;
-
-  List<Animation*> _finished;
+  FOG_DISABLE_COPY(Animation)
 };
 
 // ============================================================================
@@ -104,38 +151,20 @@ struct FOG_API WidgetAnimation : public Animation
 {
   FOG_DECLARE_OBJECT(WidgetAnimation, Animation)
 
-  WidgetAnimation(Widget* widget=0, uint32_t flags = ANIMATION_WIDGET_NO_FLAGS, uint32_t visibility=WIDGET_VISIBLE) : _widget(widget), _visibility(visibility) {
-    //call here because method may handle wrong flag settings
-    setFlags(flags);
-  }
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
-  virtual ~WidgetAnimation() {
+  // TODO: Move to .cpp
+  WidgetAnimation(Widget* widget = NULL, uint32_t flags = ANIMATION_WIDGET_NO_FLAGS, uint32_t visibility = WIDGET_VISIBLE);
+  virtual ~WidgetAnimation();
 
-  }
+  // --------------------------------------------------------------------------
+  // [Event Handlers]
+  // --------------------------------------------------------------------------
 
-  virtual void onStart() {
-    Animation::onStart();
-    if(_widget) {
-      if(_flags & ANIMATION_WIDGET_SHOW_ON_START) {
-        _widget->show(_visibility);
-      }
-    }
-  }
-
-  virtual void onFinished(AnimationEvent*e) {    
-    Animation::onFinished(e);
-    if(_widget) {
-      if(_flags & ANIMATION_WIDGET_HIDE_ON_END) {
-        _widget->hide();
-      }
-
-      if(_flags & ANIMATION_WIDGET_DESTROY_ON_END) {
-        _widget->destroy();
-      }
-    }
-
-    _widget = 0;
-  }
+  virtual void onStart();
+  virtual void onFinished(AnimationEvent* e);
 
   FOG_INLINE Widget* getWidget() const { return _widget; }
   void setWidget(Widget* widget) { _widget = widget; };
@@ -145,9 +174,12 @@ struct FOG_API WidgetAnimation : public Animation
 protected:
   Widget* _widget;
   uint32_t _flags;
-  uint32_t _visibility; //to make possible to show widget in fullscreen/minimized/maximized
+  //! @brief To make possible to show widget in fullscreen/minimized/maximized
+  //! mode.
+  uint32_t _visibility;
 };
 
+// GUI TODO: Remove this hack.
 #ifdef FOG_OS_WINDOWS
 #pragma warning(disable: 4244) // float to int reduction
 #endif
@@ -162,12 +194,14 @@ struct FOG_API WidgetOpacityAnimation : public WidgetAnimation
 {
   FOG_DECLARE_OBJECT(WidgetOpacityAnimation, WidgetAnimation)
 
-  WidgetOpacityAnimation(Widget* widget) : WidgetAnimation(widget) {
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
+  WidgetOpacityAnimation(Widget* widget) : WidgetAnimation(widget) {
   }
 
   virtual ~WidgetOpacityAnimation() {
-
   }
 
   virtual void onStart() {

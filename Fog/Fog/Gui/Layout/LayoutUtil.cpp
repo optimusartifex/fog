@@ -20,7 +20,7 @@ namespace LayoutUtil {
 template<class T>
 static FOG_INLINE void calculateFlexOffsetsT(T* head, int avail, int& used)
 {
-  if(head == 0) return;
+  if (head == NULL) return;
 
   bool grow = avail > used;
   int remaining = Math::abs(avail - used);        
@@ -42,7 +42,7 @@ static FOG_INLINE void calculateFlexOffsetsT(T* head, int avail, int& used)
     {
       LayoutItem::FlexLayoutData* child = static_cast<LayoutItem::FlexLayoutData*>(item->_layoutdata);
 
-      if(!set)
+      if (!set)
       {
         child->init(grow);
       }

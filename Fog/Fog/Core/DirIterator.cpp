@@ -109,8 +109,8 @@ err_t DirIterator::open(const String& path)
 {
   if (_handle) close();
 
-  TemporaryString<TEMP_LENGTH> pathAbs;
-  TemporaryString<TEMP_LENGTH> t;
+  TemporaryString<TEMPORARY_LENGTH> pathAbs;
+  TemporaryString<TEMPORARY_LENGTH> t;
 
   err_t err;
 
@@ -199,7 +199,7 @@ err_t DirIterator::rewind()
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
-  TemporaryString<TEMP_LENGTH> t;
+  TemporaryString<TEMPORARY_LENGTH> t;
 
   err_t err;
 
@@ -256,8 +256,8 @@ err_t DirIterator::open(const String& path)
 {
   close();
 
-  TemporaryString<TEMP_LENGTH> pathAbs;
-  TemporaryByteArray<TEMP_LENGTH> t;
+  TemporaryString<TEMPORARY_LENGTH> pathAbs;
+  TemporaryByteArray<TEMPORARY_LENGTH> t;
 
   err_t err;
 

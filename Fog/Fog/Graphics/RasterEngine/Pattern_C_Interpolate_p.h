@@ -34,7 +34,7 @@ struct FOG_HIDDEN InterpolateC
     // Sanity checks.
     FOG_ASSERT(w >= 0 && x1 <= x2);
 
-    sysint_t xw = (x2 - x1);
+    int xw = (x2 - x1);
     if (xw == 0) return;
 
     // Width is decreased by 1 to fit our gradient schema that first and last
@@ -42,7 +42,7 @@ struct FOG_HIDDEN InterpolateC
     if (w) w--;
 
     // Loop counter.
-    sysint_t i;
+    int i;
 
     // Fill c0 before gradient start.
     if (x1 < 0)
@@ -123,7 +123,7 @@ struct FOG_HIDDEN InterpolateC
     // Sanity checks.
     FOG_ASSERT(w >= 0 && x1 <= x2);
 
-    sysint_t xw = (x2 - x1);
+    int xw = (x2 - x1);
     if (xw == 0) return;
 
     // Width is decreased by 1 to fit our gradient schema that first and last
@@ -131,7 +131,7 @@ struct FOG_HIDDEN InterpolateC
     if (w) w--;
 
     // Loop counter.
-    sysint_t i;
+    int i;
 
     // Fill c0 before gradient start.
     if (x1 < 0)
@@ -213,7 +213,7 @@ struct FOG_HIDDEN InterpolateC
     // Sanity checks.
     FOG_ASSERT(w >= 0 && x1 <= x2);
 
-    sysint_t xw = (x2 - x1);
+    int xw = (x2 - x1);
     if (xw == 0) return;
 
     // Width is decreased by 1 to fit our gradient schema that first and last
@@ -224,7 +224,7 @@ struct FOG_HIDDEN InterpolateC
     c1 |= 0xFF000000;
 
     // Loop counter.
-    sysint_t i;
+    int i;
 
     // Fill c0 before gradient start.
     if (x1 < 0)
@@ -292,7 +292,7 @@ struct FOG_HIDDEN InterpolateC
     // Sanity checks.
     FOG_ASSERT(w >= 0 && x1 <= x2);
 
-    sysint_t xw = (x2 - x1);
+    int xw = (x2 - x1);
     if (xw == 0) return;
 
     // Width is decreased by 1 to fit our gradient schema that first and last
@@ -300,7 +300,7 @@ struct FOG_HIDDEN InterpolateC
     if (w) w--;
 
     // Loop counter.
-    sysint_t i;
+    int i;
 
     // Fill c0 before gradient start.
     if (x1 < 0)

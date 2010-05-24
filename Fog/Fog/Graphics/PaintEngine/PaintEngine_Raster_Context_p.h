@@ -453,7 +453,7 @@ FOG_INLINE void RasterPaintContext::copyFromMaster(const RasterPaintContext& mas
 
 FOG_INLINE uint8_t* RasterPaintContext::getBuffer(sysuint_t size)
 {
-  if (FOG_LIKELY(size < bufferSize))
+  if (FOG_LIKELY(size <= bufferSize))
     return buffer;
   else
     return reallocBuffer(size);

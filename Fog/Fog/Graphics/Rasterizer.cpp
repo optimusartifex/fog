@@ -369,7 +369,7 @@ struct FOG_HIDDEN RasterizerLocal
   Rasterizer* rasterizers;
   Rasterizer::CellXYBuffer* cellBuffers;
 
-  sysuint_t cellsBufferCapacity;
+  uint32_t cellsBufferCapacity;
 };
 
 static Static<RasterizerLocal> rasterizer_local;
@@ -1399,7 +1399,7 @@ bool AnalyticRasterizer::finalizeCellBuffer()
   // If there is no buffer we quietly do nothing.
   if (!_bufferCurrent) return false;
 
-  _bufferCurrent->count = (sysuint_t)(_curCell - _bufferCurrent->cells);
+  _bufferCurrent->count = (uint32_t)(_curCell - _bufferCurrent->cells);
   _cellsCount += _bufferCurrent->count;
 
   // Clear cell pointers (after finalize the access to cells is forbidden).
@@ -1639,10 +1639,10 @@ void AnalyticRasterizer::finalize()
 
   // Convert the Y-histogram into the array of starting indexes.
   {
-    sysuint_t start = 0;
+    uint32_t start = 0;
     for (i = 0; i < rows; i++)
     {
-      sysuint_t v = _rowsInfo[i].index;
+      uint32_t v = _rowsInfo[i].index;
       _rowsInfo[i].index = start;
       start += v;
     }

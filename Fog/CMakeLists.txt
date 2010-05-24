@@ -760,6 +760,7 @@ Set(FOG_GUI_LIB_SOURCES
   Fog/Gui/Composite.cpp
   Fog/Gui/Event.cpp
   Fog/Gui/GuiEngine.cpp
+  Fog/Gui/Margin.cpp
   Fog/Gui/Theme.cpp
   Fog/Gui/ToolBar.cpp
   Fog/Gui/ToolButton.cpp
@@ -777,20 +778,13 @@ Set(FOG_GUI_MAIN_HEADERS
   Fog/Gui/Constants.h
   Fog/Gui/Event.h
   Fog/Gui/GuiEngine.h
+  Fog/Gui/Margin.h
   Fog/Gui/Theme.h
   Fog/Gui/ToolBar.h
   Fog/Gui/ToolButton.h
   Fog/Gui/Widget.h
   Fog/Gui/Widget_p.h
   Fog/Gui/Window.h
-)
-
-Set(FOG_GUI_ENGINE_BASE_SOURCES
-  Fog/Gui/GuiEngine/Base.cpp
-)
-
-Set(FOG_GUI_ENGINE_BASE_HEADERS
-  Fog/Gui/GuiEngine/Base.h
 )
 
 Set(FOG_GUI_ENGINE_WIN_SOURCES
@@ -849,7 +843,6 @@ Source_Group("Gui" FILES
 )
 
 Source_Group("Gui/GuiEngine" FILES
-  ${FOG_GUI_ENGINE_BASE_SOURCES} ${FOG_GUI_ENGINE_BASE_HEADERS}
   ${FOG_GUI_ENGINE_X11_SOURCES} ${FOG_GUI_ENGINE_X11_HEADERS}
   ${FOG_GUI_ENGINE_WIN_SOURCES} ${FOG_GUI_ENGINE_WIN_HEADERS}
 )

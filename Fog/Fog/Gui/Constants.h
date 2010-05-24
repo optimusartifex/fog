@@ -16,6 +16,19 @@ namespace Fog {
 //! @{
 
 // ============================================================================
+// [Fog::MARGIN_LOCATION]
+// ============================================================================
+
+//! @brief Margin location.
+enum MARGIN_LOCATION
+{
+  MARGIN_TOP = 0,
+  MARGIN_RIGHT = 1,
+  MARGIN_BOTTOM = 2,
+  MARGIN_LEFT = 3
+};
+
+// ============================================================================
 // [Fog::LAYOUT_DEFAULTS]
 // ============================================================================
 
@@ -29,6 +42,7 @@ const int LAYOUT_DEFAULT_WINDOW_MARGIN = 11;
 // [Fog::LAYOUT_CONSTRAINT]
 // ============================================================================
 
+//! @brief Layout constraint.
 // TODO: Not implemented yet.
 enum LAYOUT_CONSTRAINT
 {
@@ -40,27 +54,17 @@ enum LAYOUT_CONSTRAINT
   LAYOUT_CONSTRAINT_MINIMUM_MAXIMUM_SIZE
 };
 
-
-// TODO: Move to constants.
-enum Direction
+//! @brief Layout direction.
+enum LAYOUT_DIRECTION
 {
-  LEFTTORIGHT = 0,
-  RIGHTTOLEFT = 1,
-  TOPTOBOTTOM = 0,
-  BOTTOMTOTOP = 1,
-  DOWN = TOPTOBOTTOM,
-  UP = BOTTOMTOTOP
+  LAYOUT_DIRECTION_LEFT_TO_RIGHT = 0,
+  LAYOUT_DIRECTION_RIGHT_TO_LEFT = 1,
+  LAYOUT_DIRECTION_TOP_TO_BOTTOM = 0,
+  LAYOUT_DIRECTION_BOTTOM_TO_TOP = 1,
+
+  LAYOUT_DIRECTION_DOWN = LAYOUT_DIRECTION_TOP_TO_BOTTOM,
+  LAYOUT_DIRECTION_UP = LAYOUT_DIRECTION_BOTTOM_TO_TOP
 };
-
-
-
-
-
-
-
-
-
-
 
 // ============================================================================
 // [Fog::WIDGET_LIMITS]

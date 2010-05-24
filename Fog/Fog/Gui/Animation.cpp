@@ -9,9 +9,9 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Gui/Animation.h>
 #include <Fog/Core/Application.h>
-#include <Fog/Core.h>
+#include <Fog/Core/Object.h>
+#include <Fog/Gui/Animation.h>
 
 FOG_IMPLEMENT_OBJECT(Fog::Animation)
 FOG_IMPLEMENT_OBJECT(Fog::AnimationDispatcher)
@@ -22,6 +22,68 @@ FOG_IMPLEMENT_OBJECT(Fog::WidgetGeometryAnimation)
 FOG_IMPLEMENT_OBJECT(Fog::WidgetSizeAnimation)
 
 namespace Fog {
+
+// ============================================================================
+// [Fog::AnimationDispatcher]
+// ============================================================================
+
+AnimationDispatcher::AnimationDispatcher(TimeDelta ms) :
+  _count(0)
+{
+  _timer.setInterval(ms);
+  _timer.addListener(EVENT_TIMER,this,&AnimationDispatcher::onTimer);
+  //No local onTimer-Event
+  //The Time Events are dispatched directly to AnimationInstances
+}
+
+AnimationDispatcher::~AnimationDispatcher()
+{
+}
+
+void AnimationDispatcher::addAnimation(Animation* a)
+{
+  addListener(EVENT_TIMER,a,&Animation::onTimer);
+  ++_count;
+  if (_count == 1)
+  {
+    //So the Timer is only running if a animation is in there
+    _timer.start();
+  }
+
+  //To set up start parameter, or should we call this on first time event 
+  //or maybe on construction?
+  a->onStart();
+}
+
+void AnimationDispatcher::removeAnimation(Animation* e)
+{
+  _finished.append(e);  
+  --_count;
+
+  if (_count == 0)
+  {
+    _timer.stop();
+  }
+}
+
+void AnimationDispatcher::onTimer(TimerEvent* e)
+{
+  // Notify all registered handlers.
+  sendEvent(e);
+
+  // TODO: Or directly call doUpdate() ??  
+
+  while (_finished.getLength() > 0)
+  {
+    Animation* e = _finished.takeFirst();
+    //who is responsible to destruct?
+    //current answer: call destroy on Animation
+    removeListener(e);
+    e->destroy();
+  }
+
+  Application::getInstance()->getGuiEngine()->update();
+}
 
 // ============================================================================
 // [Fog::Animation]
@@ -147,65 +209,52 @@ void Animation::onFinished(AnimationEvent* e)
 }
 
 // ============================================================================
-// [Fog::AnimationDispatcher]
+// [Fog::WidgetAnimation]
 // ============================================================================
 
-AnimationDispatcher::AnimationDispatcher(TimeDelta ms) :
-  _count(0)
+WidgetAnimation::WidgetAnimation(Widget* widget, uint32_t flags, uint32_t visibility) :
+  _widget(widget),
+  _visibility(visibility)
 {
-  _timer.setInterval(ms);
-  _timer.addListener(EVENT_TIMER,this,&AnimationDispatcher::onTimer);
-  //No local onTimer-Event
-  //The Time Events are dispatched directly to AnimationInstances
+  // Call here because method may handle wrong flag settings
+  setFlags(flags);
 }
 
-AnimationDispatcher::~AnimationDispatcher()
+WidgetAnimation::~WidgetAnimation()
 {
 }
 
-void AnimationDispatcher::addAnimation(Animation* a)
+void WidgetAnimation::onStart()
 {
-  addListener(EVENT_TIMER,a,&Animation::onTimer);
-  ++_count;
-  if (_count == 1)
+  Animation::onStart();
+
+  if (_widget)
   {
-    //So the Timer is only running if a animation is in there
-    _timer.start();
-  }
-
-  //To set up start parameter, or should we call this on first time event 
-  //or maybe on construction?
-  a->onStart();
-}
-
-void AnimationDispatcher::removeAnimation(Animation* e)
-{
-  _finished.append(e);  
-  --_count;
-
-  if (_count == 0)
-  {
-    _timer.stop();
+    if (_flags & ANIMATION_WIDGET_SHOW_ON_START)
+    {
+      _widget->show(_visibility);
+    }
   }
 }
 
-void AnimationDispatcher::onTimer(TimerEvent* e)
+void WidgetAnimation::onFinished(AnimationEvent* e)
 {
-  // Notify all registered handlers.
-  sendEvent(e);
+  Animation::onFinished(e);
 
-  // TODO: Or directly call doUpdate() ??  
-
-  while (_finished.getLength() > 0)
+  if (_widget)
   {
-    Animation* e = _finished.takeFirst();
-    //who is responsible to destruct?
-    //current answer: call destroy on Animation
-    removeListener(e);
-    e->destroy();
+    if (_flags & ANIMATION_WIDGET_HIDE_ON_END)
+    {
+      _widget->hide();
+    }
+
+    if (_flags & ANIMATION_WIDGET_DESTROY_ON_END)
+    {
+      _widget->destroy();
+    }
   }
 
-  Application::getInstance()->getGuiEngine()->update();
+  _widget = NULL;
 }
 
 } // Fog namespace

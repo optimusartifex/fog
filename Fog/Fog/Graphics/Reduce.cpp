@@ -130,7 +130,7 @@ bool Reduce::analyze(const Image& image, bool discardAlpha)
     }
 
     // Count items in hash table means count of colors used
-    _count = hash.getLength();
+    _count = (uint32_t)hash.getLength();
   }
 
   // sort, optimizes for PCX and all formats that are dependent to 

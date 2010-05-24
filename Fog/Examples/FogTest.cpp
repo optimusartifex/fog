@@ -173,7 +173,7 @@ struct MyModalWindow : public Window
   MyModalWindow(int x) : Window(WINDOW_TYPE_DEFAULT), _x(x)
   {
     Button* button5 = new Button();
-    add(button5);
+    addChild(button5);
     button5->setGeometry(IntRect(40, 200, 100, 20));
     button5->setText(Ascii8("Test ModalWindow"));
     button5->show();  
@@ -231,7 +231,7 @@ struct MyWindow : public Window
 
     for(int i=0;i<count;++i) {
       Button* buttonx1 = new Button();
-      add(buttonx1);
+      addChild(buttonx1);
       //button4->setGeometry(IntRect(40, 160, 100, 20));
       String str;
       str.format("XButton%i", i);
@@ -446,13 +446,12 @@ MyWindow::MyWindow(uint32_t createFlags) :
   _scale = 1.0;
   _spread = PATTERN_SPREAD_REPEAT;
 
-  testVBoxLayout();
+  //testBorderLayout();
   //setContentRightMargin(0);
 }
 
 MyWindow::~MyWindow()
 {
-  //Yeah I know no child widget destructurs... 
 }
 
 void MyWindow::onPaint(PaintEvent* e)
@@ -480,6 +479,7 @@ void MyWindow::onPaint(PaintEvent* e)
   // Clear everything to white.
   p->setSource(Argb(0xFFFFFFFF));
   p->fillAll();
+
   p->restore();
 }
 
@@ -492,7 +492,7 @@ FOG_GUI_MAIN()
   Application app(Ascii8("Gui"));
 
   MyWindow window(WINDOW_TYPE_DEFAULT);
-  //window.setSize(IntSize(500, 400));
+  window.setSize(IntSize(100, 100));
   window.show();
 
   app.addListener(EVENT_LAST_WINDOW_CLOSED, &app, &Application::quit);

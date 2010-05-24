@@ -29,7 +29,7 @@ namespace Fog {
 // ============================================================================
 
 Widget::Widget(uint32_t createFlags) :
-  _parent(NULL),
+  _parentWidget(NULL),
   _guiWindow(NULL),
   _geometry(0, 0, 0, 0),
   _clientGeometry(0, 0, 0, 0),
@@ -54,7 +54,7 @@ Widget::Widget(uint32_t createFlags) :
   _minset(0),
   _maxset(0)
 {
-  _flags |= OBJ_IS_WIDGET;
+  _objectFlags |= OBJECT_FLAG_IS_WIDGET;
 
   // TODO ?
   _focusLink = NULL;
@@ -76,84 +76,66 @@ Widget::~Widget()
 }
 
 // ============================================================================
-// [Fog::Widget - Hierarchy]
+// [Fog::Widget - Object Hierarchy]
 // ============================================================================
 
-bool Widget::setParent(Widget* p)
+err_t Widget::_addChild(sysuint_t index, Object* child)
 {
-  if (p) return p->add(this);
+  Widget* w = fog_object_cast<Widget*>(child);
 
-  if (_parent == NULL)
-    return true;
-  else
-    return _parent->remove(this);
-}
-
-bool Widget::add(Widget* w)
-{
-  // First remove the element from it's parent
-  Widget* p = w->_parent;
-  if (p != NULL && p != this) 
+  if (w)
   {
-    // Remove element can fail, so we return false in that case
-    if (!p->remove(w)) return false;
-  }
-  
+    // Default behavior is to set widget-parent to 'this', this means that
+    // the widget-parent is same as object-parent.
+    w->_parentWidget = this;
 
-  //Inline PopUps should be always at the end of the ChildrenList!
-  bool ispopup = ((w->getWindowFlags() & WINDOW_INLINE_POPUP) != 0);
+    // Handle an inline-popup widgets.
+    //
+    // The inline-popup should be always at the end of the children list and
+    // can be only added to a widget that has GuiWindow (the top-level one).
+    bool isInlinePopup = ((w->getWindowFlags() & WINDOW_INLINE_POPUP) != 0);
 
-  //A Inline PopUp can only be added to a GuiWindow!
-  if (ispopup && (getWindowFlags() & WINDOW_TYPE_MASK) == 0)
-  {
-    return false;
-  }
-
-  if (!ispopup && _children.getLength() > 0)
-  {
-    List<Widget*>::ConstIterator it(_children);
-    for (it.toEnd(); it.isValid(); it.toPrevious())
+    if (isInlinePopup && (getWindowFlags() & WINDOW_TYPE_MASK) == 0)
     {
-      Widget* widget = it.value();
-      if (widget && ((widget->getWindowFlags() & WINDOW_INLINE_POPUP) != 0))
-      {
-        // Now element can be added, call virtual method.
-        return _add(it.index(), w);
-      }
+      // WIDGET TODO: We need an error code for this!
+      return ERR_RT_INVALID_ARGUMENT;
     }
 
-    // No PopUp found...
+    // WIDGET TODO: Stefan, this is not optimal, we should create some stuff in
+    // GuiWindow for this, so inline popup can be handled by it. Hmm, what is
+    // purpose of this widget, shouldn't be sufficient to just create a regular
+    // widget and add it to the top-level hoerarchy?
+    if (!isInlinePopup && _children.getLength() > 0)
+    {
+      List<Object*>::ConstIterator it(_children);
+      for (it.toEnd(); it.isValid(); it.toPrevious())
+      {
+        Widget* widget = fog_object_cast<Widget*>(it.value());
+        if (widget && ((widget->getWindowFlags() & WINDOW_INLINE_POPUP) != 0))
+        {
+          // Now element can be added to that index.
+          return _addChild(it.index(), w);
+        }
+      }
+
+      // No inline popup found...
+    }
   }
-  return _add(_children.getLength(), w);
+
+  return Object::_addChild(index, child);
 }
 
-bool Widget::remove(Widget* w)
+err_t Widget::_removeChild(sysuint_t index, Object* child)
 {
-  Widget* p = w->_parent;
-  if (p != this) return false;
+  Widget* w = fog_object_cast<Widget*>(child);
 
-  return _remove(_children.indexOf(w), w);
-}
+  if (w)
+  {
+    // Clear widget parent.
+    w->_parentWidget = NULL;
+  }
 
-bool Widget::_add(sysuint_t index, Widget* w)
-{
-  FOG_ASSERT(index <= _children.getLength());
-
-  _children.insert(index, w);
-  w->_parent = this;
-
-  return true;
-}
-
-bool Widget::_remove(sysuint_t index, Widget* w)
-{
-  FOG_ASSERT(index < _children.getLength());
-  FOG_ASSERT(_children.at(index) == w);
-
-  _children.removeAt(index);
-  w->_parent = NULL;
-
-  return true;
+  return Object::_removeChild(index, child);
 }
 
 // ============================================================================
@@ -163,9 +145,10 @@ bool Widget::_remove(sysuint_t index, Widget* w)
 GuiWindow* Widget::getClosestGuiWindow() const
 {
   Widget* w = const_cast<Widget*>(this);
+
   do {
-    if (w->_guiWindow) return w->_guiWindow;
-    w = w->_parent;
+    if (w->hasGuiWindow()) return w->getGuiWindow();
+    w = w->getParentWidget();
   } while (w);
 
   return NULL;
@@ -190,7 +173,8 @@ err_t Widget::destroyWindow()
 {
   if (!_guiWindow) return ERR_RT_INVALID_HANDLE;
 
-  if (_guiWindow->isModal()) {
+  if (_guiWindow->isModal())
+  {
     _guiWindow->getOwner()->endModal(_guiWindow);
   }
 
@@ -315,9 +299,11 @@ bool Widget::worldToClient(IntPoint* coords) const
     // TODO, disable origin here?
     // coords->translate(w->getOrigin());
 
-    if (w->_guiWindow) return w->_guiWindow->worldToClient(coords);
+    if (w->hasGuiWindow())
+      return w->getGuiWindow()->worldToClient(coords);
+
     coords->translate(-(w->_geometry.x), -(w->_geometry.y));
-    w = w->_parent;
+    w = w->getParentWidget();
   } while (w);
 
   return false;
@@ -329,9 +315,12 @@ bool Widget::clientToWorld(IntPoint* coords) const
 
   do {
     coords->translate(w->getOrigin());
-    if (w->_guiWindow) return w->_guiWindow->clientToWorld(coords);
+
+    if (w->hasGuiWindow())
+      return w->getGuiWindow()->clientToWorld(coords);
+
     coords->translate(w->_geometry.x, w->_geometry.y);
-    w = w->_parent;
+    w = w->getParentWidget();
   } while (w);
 
   return false;
@@ -349,14 +338,14 @@ bool Widget::translateCoordinates(Widget* to, Widget* from, IntPoint* coords)
   x = coords->x;
   y = coords->y;
 
-  while (w->_parent)
+  while (w->hasParent() && w->getParent()->isWidget())
   {
     x += w->_origin.x;
     y += w->_origin.y;
     x += w->_geometry.x;
     y += w->_geometry.y;
 
-    w = w->_parent;
+    w = reinterpret_cast<Widget*>(w->getParent());
 
     if (w == to)
     {
@@ -370,14 +359,14 @@ bool Widget::translateCoordinates(Widget* to, Widget* from, IntPoint* coords)
   x = coords->x;
   y = coords->y;
 
-  while (w->_parent)
+  while (w->hasParent() && w->getParent()->isWidget())
   {
     x -= w->_origin.x;
     y -= w->_origin.y;
     x -= w->_geometry.x;
     y -= w->_geometry.y;
 
-    w = w->_parent;
+    w = reinterpret_cast<Widget*>(w->getParent());
 
     if (w == from)
     {
@@ -401,10 +390,12 @@ Widget* Widget::hitTest(const IntPoint& pt) const
 
   if (x < 0 || y < 0 || x > _geometry.w || y > _geometry.h) return NULL;
 
-  List<Widget*>::ConstIterator it(_children);
+  List<Object*>::ConstIterator it(_children);
   for (it.toEnd(); it.isValid(); it.toPrevious())
   {
-    if (it.value()->_geometry.contains(pt)) return it.value();
+    Widget* widget = fog_object_cast<Widget*>(it.value());
+    if (widget && widget->_geometry.contains(pt))
+      return widget;
   }
 
   return const_cast<Widget*>(this);
@@ -421,12 +412,13 @@ Widget* Widget::getChildAt(const IntPoint& pt, bool recursive) const
 
 repeat:
   {
-    List<Widget*>::ConstIterator it(current->_children);
+    List<Object*>::ConstIterator it(current->_children);
     for (it.toEnd(); it.isValid(); it.toPrevious())
     {
-      if (it.value()->_geometry.contains(pt))
+      Widget* widget = fog_object_cast<Widget*>(it.value());
+      if (widget && widget->_geometry.contains(pt))
       {
-        current = it.value();
+        current = widget;
         x -= current->getX();
         y -= current->getY();
         if (current->hasChildren()) goto repeat;
@@ -463,8 +455,9 @@ void Widget::calculateLayoutHint(LayoutHint& hint)
   if (_layoutPolicy.isVerticalPolicyIgnored())
     hint._sizeHint.setHeight(0);
 
-  //!!! TODO: REMOVE THIS AFTER EASY TESTING!!!
-  hint._sizeHint = IntSize(40, 40);
+  //TODO: REMOVE THIS AFTER EASY TESTING!!!
+  //TODO: REMOVED...
+  // hint._sizeHint = IntSize(40, 40);
 }
 
 void Widget::setLayout(Layout* lay)
@@ -553,7 +546,8 @@ uint32_t Widget::getLayoutExpandingDirections() const {
 
   uint32_t e = _orientation;
 
-  if (_layout) {
+  if (_layout)
+  {
     if (_layoutPolicy.getPolicy() & LAYOUT_GROWING_WIDTH  && (_layout->getLayoutExpandingDirections() & ORIENTATION_HORIZONTAL))
       e |= ORIENTATION_HORIZONTAL;
     if (_layoutPolicy.getPolicy() & LAYOUT_GROWING_HEIGHT  && (_layout->getLayoutExpandingDirections() & ORIENTATION_VERTICAL))
@@ -568,7 +562,7 @@ uint32_t Widget::getLayoutExpandingDirections() const {
   return e;
 }
 
-//SetLayoutGeometry using rect as layoutRect (without margins)
+// SetLayoutGeometry using rect as layoutRect (without margins).
 void Widget::setLayoutGeometry(const IntRect& rect)
 {
   // If widget isn't visible -> nothing to do.
@@ -695,6 +689,16 @@ void Widget::setLayoutPolicy(const LayoutPolicy& policy)
 // ============================================================================
 // [Layout Height For Width]
 // ============================================================================
+
+bool Widget::hasHeightForWidth() const
+{
+  return false;
+}
+
+int Widget::getHeightForWidth(int width) const
+{
+  return -1;
+}
 
 IntSize Widget::getMinimumSizeHint() const
 {
@@ -1167,7 +1171,7 @@ void Widget::update(uint32_t updateFlags)
 
   // No UFlagUpdate nor GuiWindow, traverse all parents up to GuiWindow and
   // set UFlagUpdateChild to all parents.
-  Widget* w = _parent;
+  Widget* w = getParentWidget();
   while (w && !(w->_uflags & (WIDGET_UPDATE_CHILD | WIDGET_UPDATE_ALL)))
   {
     w->_uflags |= WIDGET_UPDATE_CHILD;
@@ -1176,7 +1180,7 @@ void Widget::update(uint32_t updateFlags)
       if (!w->_guiWindow->isDirty()) w->_guiWindow->setDirty();
       return;
     }
-    w = w->_parent;
+    w = w->getParentWidget();
   }
 }
 

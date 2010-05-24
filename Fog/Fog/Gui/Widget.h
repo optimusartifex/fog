@@ -83,7 +83,6 @@ struct Window;
 //! coordinates (desktop window).
 struct FOG_API Widget : public LayoutItem
 {
-  friend struct Layout;
   FOG_DECLARE_OBJECT(Widget, LayoutItem)
 
   // --------------------------------------------------------------------------
@@ -94,57 +93,50 @@ struct FOG_API Widget : public LayoutItem
   virtual ~Widget();
 
   // --------------------------------------------------------------------------
-  // [Hierarchy]
+  // [Object Hierarchy]
   // --------------------------------------------------------------------------
 
-  //! @brief Get whether the widget is root.
-  FOG_INLINE bool isRoot() const { return _parent == NULL; }
+  virtual err_t _addChild(sysuint_t index, Object* child);
+  virtual err_t _removeChild(sysuint_t index, Object* child);
 
-  //! @brief Get whether the widget has parent.
-  FOG_INLINE bool hasParent() const { return _parent != NULL; }
+  // --------------------------------------------------------------------------
+  // [Widget Hierarchy]
+  // --------------------------------------------------------------------------
 
-  //! @brief Get whether the widget has children.
-  FOG_INLINE bool hasChildren() const { return !_children.isEmpty(); }
+  //! @brief Get whether the widget has widget parent.
+  //!
+  //! @sa getParentWidget().
+  FOG_INLINE bool hasParentWidget() { return _parentWidget != NULL; }
 
   //! @brief Get widget parent.
-  FOG_INLINE Widget* getParent() const { return _parent; }
-
-  //! @brief Get widget children.
-  FOG_INLINE List<Widget*> getChildren() const { return _children; }
-
-  //! @brief Set parent of this widget to @a p.
-  bool setParent(Widget* p);
-  //! @brief Add widget @a w into the widget.
-  bool add(Widget* w);
-  //! @brief Remove widget @a w from the widget.
-  bool remove(Widget* w);
-
-  //! @brief Add widget at specified index.
   //!
-  //! This method can be overriden to improve child widgets management. It can
-  //! be called throught @c setParent(), @a add() and @c remove() methods.
-  virtual bool _add(sysuint_t index, Widget* w);
-
-  //! @brief Remove widget at specified index.
+  //! Widget parent can be equal to object parent, but in some cases it is
+  //! different or @c NULL. If widget was added into object that not inherits
+  //! from @ref Widget then widget-parent will be set to @c NULL.
   //!
-  //! This method can be overriden to improve child widgets management. It can
-  //! be called throught @c setParent(), @a add() and @c remove() methods.
-  virtual bool _remove(sysuint_t index, Widget* w);
+  //! If widget is menu or menu item then widget parent can be @c NULL or
+  //! set to popup widget instance when displayed as popup.
+  //!
+  //! Unlike object hierarchy, widget parent is not related to memory 
+  //! management. Object is always owned by its object-parent, widget-parent
+  //! is just another layer used by Fog-Gui, because any instance that inherits
+  //! from @ref Object can be added to widget, for example @ref Timer.
+  FOG_INLINE Widget* getParentWidget() { return _parentWidget; }
 
   // --------------------------------------------------------------------------
   // [GuiWindow]
   // --------------------------------------------------------------------------
 
-  //! @brief Get whether widget has native gui window (@c GuiWindow).
-  FOG_INLINE bool isGuiWindow() const { return _guiWindow != NULL; }
+  //! @brief Get whether the widget has @ref GuiWindow.
+  FOG_INLINE bool hasGuiWindow() const { return _guiWindow != NULL; }
 
-  //! @brief Get native gui window (only for top-level widgets).
+  //! @brief Get the widget @ref GuiWindow (only for top-level widgets or menus).
   FOG_INLINE GuiWindow* getGuiWindow() const { return _guiWindow; }
 
-  //! @brief Get closest native gui window.
+  //! @brief Get closest @ref GuiWindow instance.
   //!
-  //! Returns gui window associated with this widget. If this widget hasn't
-  //! gui window then all parents are traversed until it's found, otherwise
+  //! Get @ref GuiWindow associated with this widget. If this widget hasn't
+  //! @ref GuiWindow then all parents are traversed until it's found, otherwise
   //! @c NULL is returned.
   GuiWindow* getClosestGuiWindow() const;
 
@@ -191,11 +183,12 @@ struct FOG_API Widget : public LayoutItem
   //! @brief Get widget client geometry.
   FOG_INLINE const IntRect& getClientGeometry() const { return _clientGeometry; }
 
+  // WIDGET TODO: Move to .cpp
   FOG_INLINE IntRect getClientContentGeometry() const
   {
     IntRect ret = _clientGeometry; 
-    if(ret.getWidth() == 0 && ret.getHeight() == 0)
-      return IntRect(0,0,0,0);
+    if (ret.getWidth() == 0 && ret.getHeight() == 0)
+      return IntRect(0, 0, 0, 0);
 
     ret.setLeft(getContentLeftMargin());
     ret.setTop(getContentTopMargin());
@@ -264,10 +257,11 @@ struct FOG_API Widget : public LayoutItem
   // --------------------------------------------------------------------------
 
   Widget* hitTest(const IntPoint& pt) const;
+  // WIDGET TODO: Rename to hitTest?
   Widget* getChildAt(const IntPoint& pt, bool recursive = false) const;
 
   // --------------------------------------------------------------------------
-  // [Layout Of Widget]
+  // [Widget Layout]
   // --------------------------------------------------------------------------
 
   void invalidateLayout();
@@ -288,7 +282,7 @@ struct FOG_API Widget : public LayoutItem
   //! @brief Take widget layout manager (will not disconnect children).
   Layout* takeLayout();
 
-  // TODO GUI: Purpose?
+  // TODO GUI: Purpose? Move to .cpp.
   FOG_INLINE virtual bool isEmpty() const { return !isVisible() || _guiWindow; }
 
   virtual uint32_t getLayoutExpandingDirections() const;
@@ -296,7 +290,7 @@ struct FOG_API Widget : public LayoutItem
   //methods for doing real geometry changes
   //don't dispatch geometry events because updates will be done AFTER finishing all
   //geometry changes
-  virtual void setLayoutGeometry(const IntRect&);
+  virtual void setLayoutGeometry(const IntRect& TODO_give_me_a_name);
 
   // --------------------------------------------------------------------------
   // [Layout Policy]
@@ -309,8 +303,8 @@ struct FOG_API Widget : public LayoutItem
   // [Layout Height For Width]
   // --------------------------------------------------------------------------
 
-  virtual bool hasHeightForWidth() const { return false; }
-  virtual int getHeightForWidth(int width) const { return -1; }
+  virtual bool hasHeightForWidth() const;
+  virtual int getHeightForWidth(int width) const;
 
   // --------------------------------------------------------------------------
   // [Layout SizeHint]
@@ -328,26 +322,33 @@ struct FOG_API Widget : public LayoutItem
   // [Layout Minimum And Maximum Size]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void checkMinMaxBlock() { if(!_extra) _extra = new(std::nothrow) ExtendedData(); }
+  // WIDGET TODO: Move to .cpp
+  FOG_INLINE void checkMinMaxBlock()
+  { if (!_extra) _extra = new(std::nothrow) ExtendedData(); }
   
   bool checkMinimumSize(int width, int height);
   bool checkMaximumSize(int width, int height);
   void setMinimumSize(const IntSize& minSize);
   void setMaximumSize(const IntSize& minSize);
   
-  FOG_INLINE void setMinimumHeight(int height) {
+  // WIDGET TODO: Move to .cpp
+  FOG_INLINE void setMinimumHeight(int height)
+  {
     int width = hasMinimumHeight()? _extra->_minwidth : -1;
     setMinimumSize(IntSize(width,height));
   }
-  FOG_INLINE void setMinimumWidth(int width) {
+  FOG_INLINE void setMinimumWidth(int width)
+  {
     int height = hasMinimumHeight()? _extra->_maxheight : -1;
     setMinimumSize(IntSize(width,height));
   }
-  FOG_INLINE void setMaximumHeight(int height) {
+  FOG_INLINE void setMaximumHeight(int height)
+  {
     int width = hasMaximumHeight()? _extra->_minwidth : -1;
     setMaximumSize(IntSize(width,height));
   }
-  void setMaximumWidth(int width) {
+  void setMaximumWidth(int width)
+  {
     int height = hasMaximumHeight()? _extra->_maxheight : -1;
     setMaximumSize(IntSize(width,height));
   }
@@ -399,11 +400,13 @@ struct FOG_API Widget : public LayoutItem
   //! @brief Get whether widget is visible to parent.
   FOG_INLINE bool isVisibleToParent() const { return _state != WIDGET_HIDDEN && _state != WIDGET_VISIBLE_MINIMIZED; }
 
+  // WIDGET TODO: Widget visibility is wrong.
+
   //! @brief Set widget visibility to @a val.
-  void setVisible(uint32_t val=WIDGET_VISIBLE);
+  void setVisible(uint32_t val = WIDGET_VISIBLE);
   
   //! @brief Show widget (set it's visibility to WIDGET_VISIBLE).
-  FOG_INLINE void show(uint32_t type=WIDGET_VISIBLE) { setVisible(type); }
+  FOG_INLINE void show(uint32_t type = WIDGET_VISIBLE) { setVisible(type); }
   //! @brief Show widget (set it's visibility to WIDGET_VISIBLE).
   void showModal(GuiWindow* owner);
 
@@ -429,6 +432,7 @@ struct FOG_API Widget : public LayoutItem
   // --------------------------------------------------------------------------
   // [Widget Window Style]
   // --------------------------------------------------------------------------
+
   //! @brief returns the current window flags of the widget
   FOG_INLINE uint32_t getWindowFlags() const { return _windowFlags; }
   //! @brief set the current window flags of the widget (overwrites existing)
@@ -445,12 +449,14 @@ struct FOG_API Widget : public LayoutItem
   //! @brief returns true if the widget is currently allowed to drag
   FOG_INLINE bool isDragAble() const { return (_windowFlags & WINDOW_DRAGABLE); }
   //! @brief sets the permission to drag the window
-  void setDragAble(bool drag, bool update=true);
+  // WIDGET TODO: Why there is update=true?
+  void setDragAble(bool drag, bool update = true);
 
   //! @brief returns true if the widget is currently allowed to resize
   FOG_INLINE bool isResizeAble() const { return (_windowFlags & WINDOW_FIXED_SIZE) == 0; }
   //! @brief sets the permission to resize the window
-  void setResizeAble(bool resize, bool update=true);  
+  // WIDGET TODO: Why there is update=true?
+  void setResizeAble(bool resize, bool update = true);  
 
   //! @brief returns true if the widget lays on top of the other windows
   FOG_INLINE bool isAlwaysOnTop() { return (_windowFlags & WINDOW_ALWAYS_ON_TOP) != 0; }
@@ -581,29 +587,42 @@ struct FOG_API Widget : public LayoutItem
   // --------------------------------------------------------------------------
 
   //! @brief Child add / remove event handler.
+  // TODO: Move to Object.
   virtual void onChild(ChildEvent* e);
+
   //! @brief State event handler.
   virtual void onEnable(StateEvent* e);
+
   //! @brief State event handler.
   virtual void onDisable(StateEvent* e);
+
   //! @brief Visibility event handler.
   virtual void onShow(VisibilityEvent* e);
+
   //! @brief Visibility event handler.
   virtual void onHide(VisibilityEvent* e);
+
   //! @brief Configure event handler.
   virtual void onConfigure(ConfigureEvent* e);
+
   //! @brief Focus in / out event handler.
   virtual void onFocus(FocusEvent* e);
+
   //! @brief Keyboard press / release event handler.
   virtual void onKey(KeyEvent* e);
+
   //! @brief Mouse event handler.
   virtual void onMouse(MouseEvent* e);
+
   //! @brief Click event handler.
   virtual void onClick(MouseEvent* e);
+
   //! @brief Double click event handler.
   virtual void onDoubleClick(MouseEvent* e);
+
   //! @brief Wheel event handler.
   virtual void onWheel(MouseEvent* e);
+
   //! @brief Selection event handler.
   virtual void onSelection(SelectionEvent* e);
 
@@ -662,6 +681,22 @@ struct FOG_API Widget : public LayoutItem
   // --------------------------------------------------------------------------
 
 protected:
+  //! @brief Widget parent link or @c NULL.
+  Widget* _parentWidget;
+
+  // TODO: Stefan, what is purpose of this member and why it's here, thanks;)
+  GuiWindow* _owner;
+
+  //! @brief GuiWindow (top-level) associated with this widget.
+  GuiWindow* _guiWindow;
+
+  //! @brief Main geometry (geometry relative to widget parent or screen).
+  IntRect _geometry;
+  //! @brief Client area geometry (geometry within the widget).
+  IntRect _clientGeometry;
+  //! @brief Client origin.
+  IntPoint _origin;
+
   // GUI TODO: Move to GuiWindow.
   struct FullScreenData
   {
@@ -672,6 +707,7 @@ protected:
     float _restoretransparency;
   }* _fullscreendata;
 
+  // GUI TODO: Move...
   struct ExtendedData
   {
     ExtendedData() : _maxheight(WIDGET_MAX_SIZE), _maxwidth(WIDGET_MAX_SIZE), _minheight(WIDGET_MIN_SIZE), _minwidth(WIDGET_MIN_SIZE) {}
@@ -683,21 +719,6 @@ protected:
 
   //! @brief Will set/unset a window flag and update the window if specified
   void changeFlag(uint32_t flag, bool set, bool update);
-
-  Widget* _parent;
-  GuiWindow* _owner;
-
-  List<Widget*> _children;
-
-  //! @brief Native window data.
-  GuiWindow* _guiWindow;
-
-  //! @brief Main geometry (geometry relative to widget parent or screen).
-  IntRect _geometry;
-  //! @brief Client area geometry (geometry within the widget).
-  IntRect _clientGeometry;
-  //! @brief Client origin.
-  IntPoint _origin;
 
   //! @brief Font (used to draw text in widget).
   Font _font;
@@ -712,7 +733,7 @@ protected:
   //! @brief Tab order.
   int _tabOrder;
 
-  //! @brief global transparency of window (0.0..1.0)
+  //! @brief Widget transparency (0.0 to 1.0).
   float _transparency;
 
   //! @brief Link to child that was last focus.
@@ -724,9 +745,9 @@ protected:
   //! @brief Window Style
   uint32_t _windowFlags;
 
-  //! @brief marks if minwidth/minheight is set
+  //! @brief Whether the minwidth / minheight is set.
   uint32_t _minset : 2;
-  //! @brief marks if maxwidth/maxheight is set
+  //! @brief Whether the maxwidth / maxheight is set.
   uint32_t _maxset : 2;
   //! @brief Focus.
   uint32_t _hasFocus : 1;
@@ -749,6 +770,7 @@ protected:
 
 private:
   friend struct Application;
+  friend struct Layout;
   friend struct GuiEngine;
   friend struct GuiWindow;
   friend struct Window;

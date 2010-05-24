@@ -1436,7 +1436,7 @@ static void BContext_bfree(BContext* context, BInt *v)
 
 #define Bcopy(x, y) memcpy((char *)&x->sign, (char *)&y->sign, y->wds*sizeof(int32_t) + 2*sizeof(int))
 
-/* multiply by m and add a */
+// Multiply by m and add a.
 static BInt* BContext_multadd(BContext* context, BInt *b, int m, int a)
 {
   int i, wds;
@@ -1473,7 +1473,7 @@ static BInt* BContext_multadd(BContext* context, BInt *b, int m, int a)
     *x++ = y & 0xffff;
 #endif
 #endif
-  } while(++i < wds);
+  } while (++i < wds);
 
   if (carry)
   {
@@ -1484,7 +1484,7 @@ static BInt* BContext_multadd(BContext* context, BInt *b, int m, int a)
       BContext_bfree(context, b);
       b = b1;
     }
-    b->x[wds++] = carry;
+    b->x[wds++] = (uint32_t)carry;
     b->wds = wds;
   }
   return b;
@@ -1614,7 +1614,7 @@ static BInt* BContext_mult(BContext* context, BInt* a, BInt* b)
   xbe = xb + wb;
   xc0 = c->x;
 #ifdef USE_UINT64
-  for(; xb < xbe; xc0++)
+  for (; xb < xbe; xc0++)
   {
     if ((y = *xb++))
     {
@@ -1625,13 +1625,13 @@ static BInt* BContext_mult(BContext* context, BInt* a, BInt* b)
         z = *x++ * (uint64_t)y + *xc + carry;
         carry = z >> 32;
         *xc++ = z & 0xFFFFFFFF;
-      } while(x < xae);
-      *xc = carry;
+      } while (x < xae);
+      *xc = (uint32_t)carry;
     }
   }
 #else
 #ifdef Pack_32
-  for(; xb < xbe; xb++, xc0++)
+  for (; xb < xbe; xb++, xc0++)
   {
     if ((y = *xb & 0xffff))
     {
@@ -1644,8 +1644,8 @@ static BInt* BContext_mult(BContext* context, BInt* a, BInt* b)
         z2 = (*x++ >> 16) * y + (*xc >> 16) + carry;
         carry = z2 >> 16;
         Storeinc(xc, z2, z);
-      } while(x < xae);
-      *xc = carry;
+      } while (x < xae);
+      *xc = (uint32_t)carry;
     }
     if ((y = *xb >> 16))
     {
@@ -1659,12 +1659,12 @@ static BInt* BContext_mult(BContext* context, BInt* a, BInt* b)
         Storeinc(xc, z, z2);
         z2 = (*x++ >> 16) * y + (*xc & 0xffff) + carry;
         carry = z2 >> 16;
-      } while(x < xae);
-      *xc = z2;
+      } while (x < xae);
+      *xc = (uint32_t)z2;
     }
   }
 #else
-  for(; xb < xbe; xc0++)
+  for (; xb < xbe; xc0++)
   {
     if (y = *xb++)
     {
@@ -1675,13 +1675,13 @@ static BInt* BContext_mult(BContext* context, BInt* a, BInt* b)
         z = *x++ * y + *xc + carry;
         carry = z >> 16;
         *xc++ = z & 0xffff;
-      } while(x < xae);
+      } while (x < xae);
       *xc = carry;
     }
   }
 #endif
 #endif
-  for(xc0 = c->x, xc = xc0 + wc; wc > 0 && !*--xc; --wc) ;
+  for (xc0 = c->x, xc = xc0 + wc; wc > 0 && !*--xc; --wc) ;
   c->wds = wc;
   return c;
 }
@@ -1700,7 +1700,7 @@ static BInt *BContext_pow5mult(BContext* context, BInt* b, int k)
     p5 = context->p5s = BContext_i2b(context, 625);
     p5->next = 0;
   }
-  for(;;)
+  for (;;)
   {
     if (k & 1)
     {
@@ -1746,7 +1746,7 @@ static BInt* BContext_lshift(BContext* context, BInt* b, int k)
     do {
       *x1++ = *x << k | z;
       z = *x++ >> k1;
-    } while(x < xe);
+    } while (x < xe);
     if ((*x1 = z)) ++n1;
   }
 #else
@@ -1757,7 +1757,7 @@ static BInt* BContext_lshift(BContext* context, BInt* b, int k)
     do {
       *x1++ = *x << k  & 0xffff | z;
       z = *x++ >> k1;
-    } while(x < xe);
+    } while (x < xe);
     if (*x1 = z) ++n1;
   }
 #endif
@@ -1765,7 +1765,7 @@ static BInt* BContext_lshift(BContext* context, BInt* b, int k)
   {
     do {
       *x1++ = *x++;
-    } while(x < xe);
+    } while (x < xe);
   }
   b1->wds = n1 - 1;
   BContext_bfree(context, b);
@@ -1790,7 +1790,7 @@ static int cmp(BInt *a, BInt *b)
   xa = xa0 + j;
   xb0 = b->x;
   xb = xb0 + j;
-  for(;;)
+  for (;;)
   {
     if (*--xa != *--xb)
       return *xa < *xb ? -1 : 1;
@@ -1848,9 +1848,9 @@ static BInt* BContext_diff(BContext* context, BInt* a, BInt* b)
     y = (uint64_t)*xa++ - *xb++ - borrow;
     borrow = y >> 32 & (uint32_t)1;
     *xc++ = y & 0xFFFFFFFF;
-  } while(xb < xbe);
+  } while (xb < xbe);
 
-  while(xa < xae)
+  while (xa < xae)
   {
     y = *xa++ - borrow;
     borrow = y >> 32 & (uint32_t)1;
@@ -1864,9 +1864,9 @@ static BInt* BContext_diff(BContext* context, BInt* a, BInt* b)
     z = (*xa++ >> 16) - (*xb++ >> 16) - borrow;
     borrow = (z & 0x10000) >> 16;
     Storeinc(xc, z, y);
-  } while(xb < xbe);
+  } while (xb < xbe);
 
-  while(xa < xae)
+  while (xa < xae)
   {
     y = (*xa & 0xffff) - borrow;
     borrow = (y & 0x10000) >> 16;
@@ -1879,9 +1879,9 @@ static BInt* BContext_diff(BContext* context, BInt* a, BInt* b)
     y = *xa++ - *xb++ - borrow;
     borrow = (y & 0x10000) >> 16;
     *xc++ = y & 0xffff;
-  } while(xb < xbe);
+  } while (xb < xbe);
 
-  while(xa < xae)
+  while (xa < xae)
   {
     y = *xa++ - borrow;
     borrow = (y & 0x10000) >> 16;
@@ -1889,7 +1889,7 @@ static BInt* BContext_diff(BContext* context, BInt* a, BInt* b)
   }
 #endif
 #endif
-  while(!*--xc) wa--;
+  while (!*--xc) wa--;
   c->wds = wa;
   return c;
 }
@@ -2309,11 +2309,11 @@ static int quorem(BInt *b, BInt *S)
       *bx++ = y & 0xffff;
 #endif
 #endif
-    } while(sx <= sxe);
+    } while (sx <= sxe);
     if (!*bxe)
     {
       bx = b->x;
-      while(--bxe > bx && !*bxe) --n;
+      while (--bxe > bx && !*bxe) --n;
       b->wds = n;
     }
   }
@@ -2350,14 +2350,14 @@ static int quorem(BInt *b, BInt *S)
       *bx++ = y & 0xffff;
 #endif
 #endif
-    } while(sx <= sxe);
+    } while (sx <= sxe);
 
     bx = b->x;
     bxe = bx + n;
 
     if (!*bxe)
     {
-      while(--bxe > bx && !*bxe)
+      while (--bxe > bx && !*bxe)
         --n;
       b->wds = n;
     }
@@ -2415,7 +2415,7 @@ void dtoa(double _d, int mode, int ndigits, NTOAOut* out)
     1 ==> like 0, but with Steele & White stopping rule;
       e.g. with IEEE P754 arithmetic , mode 0 gives
       1e23 whereas mode 1 gives 9.999999999999999e22.
-    2 ==> max(1,ndigits) significant digits.  This gives a
+    2 ==> max(1, ndigits) significant digits.  This gives a
       return value similar to that of ecvt, except
       that trailing zeros are suppressed.
     3 ==> through ndigits past the decimal point.  This
@@ -2655,7 +2655,7 @@ void dtoa(double _d, int mode, int ndigits, NTOAOut* out)
   }
 
   leftright = 1;
-  switch(mode)
+  switch (mode)
   {
     case 0:
     case 1:
@@ -2756,7 +2756,7 @@ void dtoa(double _d, int mode, int ndigits, NTOAOut* out)
        * generating digits needed.
        */
       eps.d = 0.5/tens[ilim-1] - eps.d;
-      for(i = 0;;)
+      for (i = 0;;)
       {
         L = (int32_t)d.d;
         d.d -= L;
@@ -2776,7 +2776,7 @@ void dtoa(double _d, int mode, int ndigits, NTOAOut* out)
 #endif
       /* Generate ilim digits, then fix them up. */
       eps.d *= tens[ilim-1];
-      for(i = 1;; i++, d.d *= 10.)
+      for (i = 1;; i++, d.d *= 10.)
       {
         L = (int32_t)(d.d);
         if (!(d.d -= L)) ilim = i;
@@ -2789,7 +2789,7 @@ void dtoa(double _d, int mode, int ndigits, NTOAOut* out)
           }
           else if (d.d < 0.5 - eps.d)
           {
-            while(*--s == '0');
+            while (*--s == '0');
             s++;
             goto ret1;
           }
@@ -2818,7 +2818,7 @@ fast_failed:
         goto no_digits;
       goto one_digit;
     }
-    for(i = 1;; i++, d.d *= 10.)
+    for (i = 1;; i++, d.d *= 10.)
     {
       L = (int32_t)(d.d / ds.d);
       d.d -= L * ds.d;
@@ -2852,7 +2852,7 @@ fast_failed:
         if (d.d > ds.d || d.d == ds.d && L & 1)
         {
 bump_up:
-          while(*--s == '9')
+          while (*--s == '9')
           {
             if (s == s0)
             {
@@ -2983,7 +2983,7 @@ bump_up:
   {
     if (ilim < 0 || cmp(b,S = BContext_multadd(&context, S, 5, 0)) <= 0)
     {
-      /* no digits, fcvt style */
+      // No digits, fcvt style.
 no_digits:
       k = -1 - ndigits;
       goto ret;
@@ -2998,9 +2998,8 @@ one_digit:
   {
     if (m2 > 0) mhi = BContext_lshift(&context, mhi, m2);
 
-    /* Compute mlo -- check for special case
-     * that d is a normalized power of 2.
-     */
+    // Compute mlo -- check for special case
+    // that d is a normalized power of 2.
 
     mlo = mhi;
     if (spec_case)
@@ -3010,12 +3009,11 @@ one_digit:
       mhi = BContext_lshift(&context, mhi, Log2P);
     }
 
-    for(i = 1;;i++)
+    for (i = 1;;i++)
     {
       dig = quorem(b,S) + '0';
-      /* Do we yet have the shortest decimal string
-       * that will round to d?
-       */
+      // Do we yet have the shortest decimal string
+      // that will round to d?
       j = cmp(b, mlo);
       delta = BContext_diff(&context, S, mhi);
       j1 = delta->sign ? 1 : cmp(b, delta);
@@ -3061,7 +3059,7 @@ one_digit:
             case 2: goto keep_dig;
           }
         }
-#endif /*Honor_FLT_ROUNDS*/
+#endif // Honor_FLT_ROUNDS
         if (j1 > 0)
         {
           b = BContext_lshift(&context, b, 1);
@@ -3078,7 +3076,9 @@ accept_dig:
 #ifdef Honor_FLT_ROUNDS
         if (!rounding) goto accept_dig;
 #endif
-        if (dig == '9') { /* possible if i == 1 */
+        // Possible if i == 1.
+        if (dig == '9')
+        {
 round_9_up:
           *s++ = '9';
           goto roundoff;
@@ -3103,7 +3103,7 @@ keep_dig:
   }
   else
   {
-    for(i = 1;; i++)
+    for (i = 1;; i++)
     {
       *s++ = dig = quorem(b,S) + '0';
       if (!b->x[0] && b->wds <= 1)
@@ -3118,7 +3118,7 @@ keep_dig:
     }
   }
 
-  /* Round off last digit */
+  // Round off last digit.
 
 #ifdef Honor_FLT_ROUNDS
   switch (rounding)
@@ -3132,7 +3132,7 @@ keep_dig:
   if (j > 0 || j == 0 && dig & 1)
   {
 roundoff:
-    while(*--s == '9')
+    while (*--s == '9')
       if (s == s0)
       {
         k++;

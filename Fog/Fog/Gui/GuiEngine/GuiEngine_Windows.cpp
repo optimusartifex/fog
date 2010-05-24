@@ -93,20 +93,22 @@ static void hwndGetRect(HWND handle, IntRect* out)
 
 static LRESULT CALLBACK hwndWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-  WinGuiWindow* window = 
+  WinGuiWindow* guiWindow = 
     reinterpret_cast<WinGuiWindow*>(
-      GUI_ENGINE()->handleToNative((void*)hwnd));
+      GUI_ENGINE()->getWindowFromHandle((void*)hwnd));
 
-  if (window) 
+  if (guiWindow) 
   {
-        return window->onWinMsg(hwnd, message, wParam, lParam);
+    return guiWindow->onWinMsg(hwnd, message, wParam, lParam);
   }
   else
-    return DefWindowProc(hwnd, message, wParam, lParam);
+  {
+    return DefWindowProcW(hwnd, message, wParam, lParam);
+  }
 }
 
-// Returns count of lines to scroll when using mouse wheel, inspired in
-// MSDN http://msdn2.microsoft.com/en-us/library/ms645602.aspx
+// Get count of lines to scroll when using mouse wheel, inspired in MSDN:
+//   http://msdn2.microsoft.com/en-us/library/ms645602.aspx
 static uint32_t getWheelLinesCount(void)
 {
   UINT ucNumLines = 3;
@@ -253,6 +255,8 @@ WinGuiEngine::WinGuiEngine()
   DWORD keyboardSpeed;
   DWORD dwTime;
 
+  // TODO: We should move this query to somewhere and update it if user
+  // updated it in system settings.
   if (SystemParametersInfo(SPI_GETKEYBOARDDELAY, 0, &keyboardDelay, 0))
   {
     _repeatingDelay = TimeDelta::fromMilliseconds((int64_t)((0.25 * (double)(keyboardDelay + 1)) * 1000));
@@ -290,40 +294,20 @@ WinGuiEngine::WinGuiEngine()
   wc.lpszClassName = L"Fog_Window";
   if (!RegisterClassExW(&wc)) return;
 
-// All classes share the same configuration
-// so, why have different classes?
-//   // "Fog_Popup" window class.
-//   wc.style         = CS_OWNDC;
-//   wc.lpszClassName = L"Fog_Popup";
-//   if (!RegisterClassExW(&wc)) return;
-// 
-//   // "Fog_Dialog" window class.
-//   wc.style         = CS_OWNDC;
-//   wc.lpszClassName = L"Fog_Dialog";
-//   if (!RegisterClassExW(&wc)) return;
-// 
-//   // "Fog_Tool" window class.
-//   wc.style         = CS_OWNDC;
-//   wc.lpszClassName = L"Fog_Tool";
-//   if (!RegisterClassExW(&wc)) return;
-
   updateDisplayInfo();
   _initialized = true;
 }
 
 WinGuiEngine::~WinGuiEngine()
 {
-  // Is safe to unregister window classes when we ends ?
+  // TODO: Is safe to unregister window classes when we ends?
   // HINSTANCE hInstance = (HINSTANCE)GetModuleHandleW(NULL);
   // UnregisterClassW(L"Fog_Window", hInstance);
-  // UnregisterClassW(L"Fog_Popup", hInstance);
-  // UnregisterClassW(L"Fog_Dialog", hInstance);
-  // UnregisterClassW(L"Fog_Tool", hInstance);
 }
 
 void WinGuiEngine::minimize(GuiWindow* w)
 {
-  //ShowWindow((HWND)w->getHandle(),SW_MINIMIZE);
+  //ShowWindow((HWND)w->getHandle(), SW_MINIMIZE);
   w->getWidget()->show(WIDGET_VISIBLE_MINIMIZED);
 }
 
@@ -343,13 +327,13 @@ void WinGuiEngine::updateDisplayInfo()
   HDC hdc;
   HBITMAP hbm;
 
-  // Screen size
+  // Get screen size.
   _displayInfo.width  = ::GetSystemMetrics(SM_CXSCREEN);
   _displayInfo.height = ::GetSystemMetrics(SM_CYSCREEN);
   _displayInfo.is16BitSwapped = false;
 
-  // Allocate enough space for a DIB header plus palette 
-  // (for 8-bit modes) or bitfields (for 16 and 32-bit modes)
+  // Allocate enough space for a DIB header plus palette.
+  // (for 8-bit modes) or bitfields (for 16 and 32-bit modes).
   dibSize = sizeof(BITMAPINFOHEADER) + 256 * sizeof (RGBQUAD);
 
   dibHdr = (LPBITMAPINFOHEADER)Memory::calloc(dibSize);
@@ -362,8 +346,8 @@ void WinGuiEngine::updateDisplayInfo()
   hbm = CreateCompatibleBitmap(hdc, 1, 1);
 
   // Convert the DDB to a DIB.  We need to call GetDIBits twice:
-  // the first call just fills in the BITMAPINFOHEADER; the 
-  // second fills in the bitfields or palette.
+  // - The first call just fills in the BITMAPINFOHEADER.
+  // - The second fills in the bitfields or palette.
   GetDIBits(hdc, hbm, 0, 1, NULL, (LPBITMAPINFO)dibHdr, DIB_RGB_COLORS);
   GetDIBits(hdc, hbm, 0, 1, NULL, (LPBITMAPINFO)dibHdr, DIB_RGB_COLORS);
   DeleteObject(hbm);
@@ -405,6 +389,7 @@ void WinGuiEngine::updateDisplayInfo()
       _displayInfo.bMask = 0x000000FF;
       break;
     default:
+      // Something failed, assume the worst.
       _displayInfo.depth = 0;
       _displayInfo.rMask = 0x00000000;
       _displayInfo.gMask = 0x00000000;
@@ -434,6 +419,7 @@ void WinGuiEngine::doBlitWindow(GuiWindow* window, const IntBox* rects, sysuint_
     POINT pointSource;
     pointSource.x = 0;
     pointSource.y = 0;
+
     BLENDFUNCTION blend;
     blend.BlendOp             = AC_SRC_OVER;
     blend.BlendFlags          = 0;
@@ -587,7 +573,8 @@ const char* WinGuiEngine::msgToStr(uint message)
     const char *str;
   };
 
-  static const MsgTable msgTable[] = {
+  static const MsgTable msgTable[] =
+  {
     {  WM_NULL, "WM_NULL"  },
     {  WM_CREATE, "WM_CREATE"  },
     {  WM_DESTROY, "WM_DESTROY"  },
@@ -787,19 +774,20 @@ WinGuiWindow::~WinGuiWindow()
 }
 
 void WinGuiWindow::moveToTop(GuiWindow* w)
-{  
-  if (w)
-  {
-    SetWindowPos((HWND)getHandle(),(HWND)w->getHandle(),0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE|SWP_NOCOPYBITS|SWP_NOREDRAW);
-  }
-  else
-  {
-    SetWindowPos((HWND)getHandle(),HWND_TOP,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE|SWP_NOCOPYBITS|SWP_NOREDRAW);
-  }
+{
+  HWND top = HWND_TOP;
+  if (w) top = (HWND)w->getHandle();
+
+  SetWindowPos((HWND)getHandle(), top, 0, 0, 0, 0, 
+    SWP_NOMOVE |
+    SWP_NOSIZE |
+    SWP_NOACTIVATE |
+    SWP_NOCOPYBITS |
+    SWP_NOREDRAW);
 
   if (_widget)
   {
-    //If you call this the always on top flag is automatically removed!
+    // If you call this the always on top flag is automatically removed!
     if (_widget->isAlwaysOnTop())
     {
       _widget->overrideWindowFlags(_widget->getWindowFlags() & ~WINDOW_ALWAYS_ON_TOP);
@@ -821,7 +809,7 @@ void WinGuiWindow::moveToBottom(GuiWindow* w)
 
   if (_widget)
   {
-    //If you call this the always on top flag is automatically removed!
+    // If you call this the always on top flag is automatically removed!
     if (_widget->isAlwaysOnTop())
     {
       _widget->overrideWindowFlags(_widget->getWindowFlags() & ~WINDOW_ALWAYS_ON_TOP);
@@ -1350,12 +1338,16 @@ err_t WinGuiWindow::setIcon(const Image& icon)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
+  // GUI TODO:
+  return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t WinGuiWindow::getIcon(Image& icon)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
+  // GUI TODO:
+  return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t WinGuiWindow::setSizeGranularity(const IntPoint& pt)
@@ -1397,12 +1389,12 @@ void WinGuiWindow::setOwner(GuiWindow* w)
   _owner = w;
 
   // Always set owner to toplevel window.
-  SetWindowLongPtr((HWND)getHandle(), GWLP_HWNDPARENT, (LONG_PTR)_owner->getHandle());
+  SetWindowLong((HWND)getHandle(), GWLP_HWNDPARENT, (LONG)_owner->getHandle());
 }
 
 void WinGuiWindow::releaseOwner()
 {
-  SetWindowLongPtr((HWND)getHandle(), GWLP_HWNDPARENT, (LONG_PTR)0);
+  SetWindowLong((HWND)getHandle(), GWLP_HWNDPARENT, (LONG)0);
   SetActiveWindow((HWND)_owner->getHandle());
   SetForegroundWindow((HWND)_owner->getHandle());
 
@@ -1411,11 +1403,11 @@ void WinGuiWindow::releaseOwner()
 
 void WinGuiWindow::onMousePress(uint32_t button, bool repeated)
 {
-  WinGuiEngine* uiSystem = GUI_ENGINE();
+  WinGuiEngine* guiEngine = GUI_ENGINE();
 
-  if (uiSystem->_systemMouseStatus.uiWindow != this) return;
+  if (guiEngine->_systemMouseStatus.uiWindow != this) return;
 
-  if (uiSystem->_systemMouseStatus.buttons == 0 && !repeated)
+  if (guiEngine->_systemMouseStatus.buttons == 0 && !repeated)
   {
     SetCapture((HWND)_handle);
   }
@@ -1425,11 +1417,11 @@ void WinGuiWindow::onMousePress(uint32_t button, bool repeated)
 
 void WinGuiWindow::onMouseRelease(uint32_t button)
 {
-  WinGuiEngine* uiSystem = GUI_ENGINE();
+  WinGuiEngine* guiEngine = GUI_ENGINE();
 
-  if (uiSystem->_systemMouseStatus.uiWindow != this) return;
+  if (guiEngine->_systemMouseStatus.uiWindow != this) return;
 
-  if ((uiSystem->_systemMouseStatus.buttons & ~button) == 0)
+  if ((guiEngine->_systemMouseStatus.buttons & ~button) == 0)
   {
     ReleaseCapture();
   }
@@ -1439,19 +1431,19 @@ void WinGuiWindow::onMouseRelease(uint32_t button)
 
 LRESULT WinGuiWindow::KeyboardMessageHelper(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-  WinGuiEngine* uiSystem = GUI_ENGINE();
+  WinGuiEngine* guiEngine = GUI_ENGINE();
   //Keyboard messages
   switch (message)
   { 
   case WM_SYSKEYDOWN:
   case WM_KEYDOWN:
     {
-      uint32_t modifier = uiSystem->winKeyToModifier(&wParam, lParam);
+      uint32_t modifier = guiEngine->winKeyToModifier(&wParam, lParam);
       bool used = onKeyPress(
-        uiSystem->winKeyToFogKey(wParam, HIWORD(lParam)),
+        guiEngine->winKeyToFogKey(wParam, HIWORD(lParam)),
         modifier,
         (uint32_t)wParam,
-        Char(uiSystem->winKeyToUnicode(wParam, HIWORD(lParam)))
+        Char(guiEngine->winKeyToUnicode(wParam, HIWORD(lParam)))
         );
 
       if (used) return 0;
@@ -1459,12 +1451,12 @@ LRESULT WinGuiWindow::KeyboardMessageHelper(HWND hwnd, UINT message, WPARAM wPar
   case WM_SYSKEYUP:
   case WM_KEYUP:
     {
-      uint32_t modifier = uiSystem->winKeyToModifier(&wParam, lParam);
+      uint32_t modifier = guiEngine->winKeyToModifier(&wParam, lParam);
       bool used = onKeyRelease(
-        uiSystem->winKeyToFogKey(wParam, HIWORD(lParam)),
+        guiEngine->winKeyToFogKey(wParam, HIWORD(lParam)),
         modifier,
         (uint32_t)wParam,
-        Char(uiSystem->winKeyToUnicode(wParam, HIWORD(lParam)))
+        Char(guiEngine->winKeyToUnicode(wParam, HIWORD(lParam)))
         );
 
       if (used) return 0;
@@ -1475,7 +1467,7 @@ LRESULT WinGuiWindow::KeyboardMessageHelper(HWND hwnd, UINT message, WPARAM wPar
 
 LRESULT WinGuiWindow::MouseMessageHelper(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-  WinGuiEngine* uiSystem = GUI_ENGINE();
+  WinGuiEngine* guiEngine = GUI_ENGINE();
 
   switch (message)
   { 
@@ -1493,8 +1485,8 @@ LRESULT WinGuiWindow::MouseMessageHelper(HWND hwnd, UINT message, WPARAM wParam,
       int y = (int)(short)HIWORD(lParam);
 
       // WM_MOUSEHOVER is not sent sometimes.
-      if (uiSystem->_systemMouseStatus.uiWindow != this || 
-        !uiSystem->_systemMouseStatus.hover)
+      if (guiEngine->_systemMouseStatus.uiWindow != this ||
+        !guiEngine->_systemMouseStatus.hover)
       {
         onMouseHover(x, y);
       }
@@ -1508,8 +1500,8 @@ LRESULT WinGuiWindow::MouseMessageHelper(HWND hwnd, UINT message, WPARAM wParam,
 
     case WM_MOUSELEAVE:
     {
-      if (uiSystem->_systemMouseStatus.uiWindow == this && 
-        !uiSystem->_systemMouseStatus.buttons)
+      if (guiEngine->_systemMouseStatus.uiWindow == this &&
+        !guiEngine->_systemMouseStatus.buttons)
       {
         onMouseLeave(-1, -1);
       }
@@ -1527,8 +1519,8 @@ LRESULT WinGuiWindow::MouseMessageHelper(HWND hwnd, UINT message, WPARAM wParam,
     case WM_MOUSEWHEEL:
     {
       // Typical for synaptics.
-      if (uiSystem->_systemMouseStatus.uiWindow != this || 
-        !uiSystem->_systemMouseStatus.hover)
+      if (guiEngine->_systemMouseStatus.uiWindow != this ||
+        !guiEngine->_systemMouseStatus.hover)
       {
         POINT pt;
         DWORD cursorPos = GetMessagePos();
@@ -1556,7 +1548,7 @@ LRESULT WinGuiWindow::MouseMessageHelper(HWND hwnd, UINT message, WPARAM wParam,
 LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
   //IDEA: optimize message handling (make lesser comparisions)
-  WinGuiEngine* uiSystem = GUI_ENGINE();
+  WinGuiEngine* guiEngine = GUI_ENGINE();
   //TODO:check GuiEngine for modal widget!
   GuiWindow* curmodal = isModal() ? this : 0;
   //bool allowinput = !curmodal || ((HWND)curmodal->getHandle() == hwnd);  

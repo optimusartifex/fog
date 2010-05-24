@@ -210,10 +210,10 @@ void GridLayout::addItem(LayoutItem* item, int row, int column, int rowSpan, int
   }
 
   if (row == -1)
-    row = _rows.getLength();
+    row = (int)_rows.getLength();
 
   if (column == -1)
-    column = _cols.getLength();
+    column = (int)_cols.getLength();
 
   // Check that it's not already there...
   // TODO: needs some improvement!
@@ -258,7 +258,7 @@ void GridLayout::addItem(LayoutItem* item, int row, int column, int rowSpan, int
   {
     while ((uint)ccolumn > _cols.getLength())
     {
-      Column* c = new(std::nothrow) Column(_cols.getLength(), this);
+      Column* c = new(std::nothrow) Column((int)_cols.getLength(), this);
       _cols.append(c);
     }
   }
@@ -268,7 +268,7 @@ void GridLayout::addItem(LayoutItem* item, int row, int column, int rowSpan, int
   {
     while ((uint)crow > _rows.getLength())
     {
-      Row* r = new(std::nothrow) Row(_rows.getLength());
+      Row* r = new(std::nothrow) Row((int)_rows.getLength());
       _rows.append(r);
     }
   }
@@ -512,8 +512,8 @@ void GridLayout::calculateLayoutHint(LayoutHint& hint)
   calculateRowHeights(minHeight, height);
 
   // Calculate spacing.
-  int spacingX = _hspacing * (_cols.getLength() - 1);
-  int spacingY = _vspacing * (_rows.getLength() - 1);
+  int spacingX = _hspacing * (int)(_cols.getLength() - 1);
+  int spacingY = _vspacing * (int)(_rows.getLength() - 1);
 
   // Calculate margin.
   spacingX += getContentLeftMargin() + getContentRightMargin();
@@ -556,8 +556,8 @@ int GridLayout::calculateSpanHeight(int crow, LayoutItem* item) const
 
 void GridLayout::setLayoutGeometry(const IntRect& rect)
 {
-  int maxRowIndex = _rows.getLength();
-  int maxColIndex = _cols.getLength();
+  int maxRowIndex = (int)_rows.getLength();
+  int maxColIndex = (int)_cols.getLength();
 
   if (maxRowIndex == 0 || maxColIndex == 0)
     return;

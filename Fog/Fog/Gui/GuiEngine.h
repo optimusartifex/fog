@@ -151,15 +151,18 @@ struct FOG_API GuiEngine : public Object
   FOG_INLINE Lock& lock() { return _lock; }
 
   // --------------------------------------------------------------------------
-  // [ID <-> GuiWindow]
+  // [Handle <-> GuiWindow]
   // --------------------------------------------------------------------------
 
-  //! Widget mapper (ID <-> GuiWindow)
+  //! Widget mapper (Handle <-> GuiWindow)
   typedef UnorderedHash<void*, GuiWindow*> WidgetMapper;
 
+  //! @brief Map windowing system handle to the @ref GuiWindow instance.
   virtual bool mapHandle(void* handle, GuiWindow* w);
+  //! @brief Unmap windowing system handle.
   virtual bool unmapHandle(void* handle);
-  virtual GuiWindow* handleToNative(void* handle) const;
+  //! @brief Translate windowing system handle to @ref GuiWindow instance.
+  virtual GuiWindow* getWindowFromHandle(void* handle) const;
 
   // --------------------------------------------------------------------------
   // [Display]

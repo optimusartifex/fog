@@ -101,7 +101,7 @@ struct FOG_API NativeEventListener
 //! signals sent to a registered set of HANDLEs may also be processed.
 //!
 //! Unless otherwise specified, a @c EventLoop's methods may only be called on
-//! the thread where the @c EventLoop's run method executes (this is owner thread).
+//! the thread where the @c EventLoop's run method executes (this is home thread).
 //!
 //! Please be SURE your task is reentrant (nestable) and all global variables
 //! are stable and accessible.
@@ -200,7 +200,7 @@ struct FOG_API EventLoop
   //! been run.
   //!
   //! @note These methods may be called on any thread.  The Task will be invoked
-  //! on the thread that executes @c run() (event loop owner thread).
+  //! on the thread that executes @c run() (event loop home thread).
   void postTask(Task* task, bool nestable = true, uint32_t delay = 0);
 
   //! @brief Get event loop type.

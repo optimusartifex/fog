@@ -25,21 +25,21 @@ namespace Fog {
 
 BoxLayout::BoxLayout(Widget *parent, int margin, int spacing) :
   Layout(parent),
-  _direction(LEFTTORIGHT),
+  _direction(LAYOUT_DIRECTION_LEFT_TO_RIGHT),
   _flexibles(0),
   _allocated(0)
 {
   setSpacing(spacing);
-  setContentMargins(margin, margin, margin, margin);
+  setContentMargin(margin, margin, margin, margin);
 }
 
 BoxLayout::BoxLayout(int margin, int spacing) :
-  _direction(LEFTTORIGHT),
+  _direction(LAYOUT_DIRECTION_LEFT_TO_RIGHT),
   _flexibles(0),
   _allocated(0)
 {
   setSpacing(spacing);
-  setContentMargins(margin, margin, margin, margin);
+  setContentMargin(margin, margin, margin, margin);
 }
 
 BoxLayout::~BoxLayout()
@@ -48,7 +48,8 @@ BoxLayout::~BoxLayout()
 
 void BoxLayout::addItem(LayoutItem *item, int flex)
 {
-  if (Layout::addChild(item) == -1) {
+  if (Layout::addChild(item) == -1)
+  {
     return;
   }
   LayoutData* data = new(std::nothrow) LayoutData(this);
@@ -95,7 +96,7 @@ int BoxLayout::calculateHorizontalGaps(bool collapse)
     }
 
     // Add spacing.
-    gaps += (spacing * (_children.getLength()-1));
+    gaps += (spacing * (int)(_children.getLength() - 1));
   }
 
   return gaps;
@@ -123,7 +124,7 @@ int BoxLayout::calculateVerticalGaps(bool collapse)
       LayoutItem* item = _children.at(i);
       gaps += item->getContentTopMargin() + item->getContentBottomMargin();
     }
-    gaps += (spacing * (_children.getLength()-1));
+    gaps += (spacing * (int)(_children.getLength() - 1));
   }
 
   return gaps;

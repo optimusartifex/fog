@@ -54,7 +54,7 @@ struct FOG_HIDDEN PatternGradientC
   // (it's scaled, you just can't use this value).
 
   static err_t FOG_FASTCALL init_generic(
-    RasterPattern* ctx, const List<ArgbStop>& stops, sysint_t gLength, uint32_t spread)
+    RasterPattern* ctx, const List<ArgbStop>& stops, int gLength, uint32_t spread)
   {
     // Never initialize this if there are no stops or only single one (solid color).
     FOG_ASSERT(stops.getLength() >= 2);
@@ -65,10 +65,10 @@ struct FOG_HIDDEN PatternGradientC
       : ColorAnalyzer::analyzeAlpha(stops) != 0xFF;
 
     // Alloc twice memory for reflect spread.
-    sysint_t gAlloc = gLength;
-    if (spread == PATTERN_SPREAD_REFLECT) gAlloc <<= 1;
+    int gAlloc = gLength;
+    if (spread == PATTERN_SPREAD_REFLECT) gAlloc *= 2;
 
-    sysint_t gMyLen = gAlloc;
+    int gMyLen = gAlloc;
 
     // Alloc two pixels more for interpolation (one at the beginning and one at the end).
     gAlloc += 2;
@@ -149,8 +149,8 @@ struct FOG_HIDDEN PatternGradientC
     // Sanity check.
     FOG_ASSERT(w <= size || offset <= (size - w));
 
-    sysint_t count = (sysint_t)stops.getLength();
-    sysint_t end = offset + w;
+    int count = (int)stops.getLength();
+    int end = offset + w;
 
     if (count == 0 || w == 0) return;
 
@@ -161,16 +161,17 @@ struct FOG_HIDDEN PatternGradientC
     }
     else
     {
-      sysint_t i = (reverse) ? count - 1 : 0;
-      sysint_t iinc = (reverse) ? -1 : 1;
+      int i = (reverse) ? count - 1 : 0;
+      int iinc = (reverse) ? -1 : 1;
 
       Argb primaryStopColor = stops.at(i).getArgb();
       Argb secondaryStopArgb;
 
       float primaryStopOffset = 0.0;
       float secondaryStopOffset;
-      sysint_t x1 = 0;
-      sysint_t x2 = 0;
+
+      int x1 = 0;
+      int x2 = 0;
 
       for (; i < count && (sysint_t)x1 < end; i += iinc,
         primaryStopOffset = secondaryStopOffset,
@@ -191,27 +192,31 @@ struct FOG_HIDDEN PatternGradientC
         // Skip all siblings and the first one.
         if (secondaryStopOffset == primaryStopOffset) continue;
 
-        // get pixel coordinates and skip that caller not wants
+        // Get pixel coordinates and skip that caller not wants.
         x2 = (sysint_t)((float)size * secondaryStopOffset);
-        if (x2 < (sysint_t)offset) continue; // not reached the beggining
-        if (x2 > (sysint_t)size) return;     // reached the end
 
-        sysint_t cx1 = x1; if (cx1 < (sysint_t)offset) cx1 = (sysint_t)offset;
-        sysint_t cx2 = x2; if (cx2 > (sysint_t)end) cx2 = (sysint_t)end;
+        // Not reached the beggining.
+        if (x2 < (sysint_t)offset) continue;
+
+        // Reached the end.
+        if (x2 > (sysint_t)size) return;
+
+        int cx1 = Math::max<int>(x1, offset);
+        int cx2 = Math::min<int>(x2, end);
 
         if (cx2 - cx1)
         {
           gradientSpan(
-            // pointer to destination, it's needed to decrease it by 'offset'
+            // Pointer to destination, it's needed to decrease it by 'offset'.
             dst + (sysint_t)(cx1 - offset) * 4,
-            // primary and secondary colors
+            // Primary and secondary colors.
             primaryStopColor, secondaryStopArgb,
-            // width, x1, x2
+            // Width, x1, x2.
             cx2 - cx1, cx1 - x1, x2 - x1);
         }
       }
 
-      // TODO: draw last point
+      // TODO: draw the last point.
       // if (size == width) ((uint32_t*)dst)[size-1] = secondaryStopArgb;
     }
   }
@@ -318,7 +323,7 @@ struct FOG_HIDDEN PatternGradientC
       return rasterFuncs.pattern.solid_init(ctx, d->obj.stops->at(0).getArgb());
     }
 
-    sysint_t gLength = (int)(sqrtxxyy + 0.5);
+    int gLength = (int)(sqrtxxyy + 0.5);
     if (gLength < 1) gLength = 1;
     if (gLength > MAX_INTERPOLATION_POINTS) gLength = MAX_INTERPOLATION_POINTS;
 
@@ -825,10 +830,10 @@ fetchForwardNext:
 
     DoublePoint points[2];
     m.transformPoints(points, d->data.gradient->points, 2);
-
-    sysint_t gLength = 256 * d->obj.stops->getLength();
+    
+    int gLength = 256 * (int)d->obj.stops->getLength();
     if (gLength > 4096) gLength = 4096;
-    sysint_t gAlloc = gLength;
+    int gAlloc = gLength;
 
     // This calculation is based on AntiGrain 2.4 <www.antigrain.com>
     // ----------------------------------------------------------------
@@ -950,12 +955,12 @@ fetchForwardNext:
   {
     P_FETCH_SPAN8_INIT()
     const uint32_t* colors = (const uint32_t*)ctx->radialGradient.colors;
+
+    int index;
     int colorsLength = ctx->radialGradient.colorsLength;
 
     uint32_t color0 = colors[0];
     uint32_t color1 = colors[colorsLength];
-
-    int index;
 
     double dx = (double)x - ctx->radialGradient.dx;
     double dy = (double)y - ctx->radialGradient.dy;
@@ -1021,12 +1026,12 @@ fetchForwardNext:
   {
     P_FETCH_SPAN8_INIT()
     const uint32_t* colors = (const uint32_t*)ctx->radialGradient.colors;
-    sysint_t colorsLength = ctx->radialGradient.colorsLength;
+
+    int index;
+    int colorsLength = ctx->radialGradient.colorsLength;
 
     uint32_t color0 = colors[0];
     uint32_t color1 = colors[colorsLength-1];
-
-    int index;
 
     double dx = (double)x - ctx->radialGradient.dx;
     double dy = (double)y - ctx->radialGradient.dy;
@@ -1107,7 +1112,7 @@ fetchForwardNext:
     DoublePoint points[2];
     m.transformPoints(points, d->data.gradient->points, 2);
 
-    sysint_t gLength = 256 * d->obj.stops->getLength();
+    int gLength = 256 * (int)d->obj.stops->getLength();
     if (gLength > 4096) gLength = 4096;
 
     ctx->conicalGradient.dx = points[0].x;
@@ -1134,9 +1139,9 @@ fetchForwardNext:
   {
     P_FETCH_SPAN8_INIT()
     const uint32_t* colors = (const uint32_t*)ctx->radialGradient.colors;
-    sysint_t colorsLength = ctx->radialGradient.colorsLength;
 
     int index;
+    int colorsLength = ctx->radialGradient.colorsLength;
 
     double dx = (double)x - ctx->conicalGradient.dx;
     double dy = (double)y - ctx->conicalGradient.dy;

@@ -219,7 +219,7 @@ start:
       // Prefetch next cache line, here this increases the performance about
       // 0.0001% :) Not really much, but it's the reason why prefetches are
       // generally not used in Fog-Framework.
-      _mm_prefetch(src + 64, _MM_HINT_T0);
+      sse2_prefetch_t0(src + 64);
 
       ssse3_load16u(src0xmm, src     );
       ssse3_load16u(src2xmm, src + 16);

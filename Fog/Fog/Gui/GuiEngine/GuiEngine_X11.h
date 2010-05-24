@@ -508,9 +508,9 @@ struct FOG_GUIENGINE_X11_API X11GuiWindow : public GuiWindow
   //! @brief X Input Context (XIC).
   XIC _xic;
 
-  //! @brief Whether the x11 window is input only (default false)
+  //! @brief Whether the X11 window is input only (default false).
   bool _inputOnly;
-  //! @brief Whether the x11 window received MapRequest and currently is hidden.
+  //! @brief Whether the X11 window received MapRequest and currently is hidden.
   //! (It's requested to be mapped, but parent is hidden).
   bool _mapRequest;
 

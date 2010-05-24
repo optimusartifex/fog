@@ -31,7 +31,7 @@ void Event::run()
 
     // Remove object from its event queue
     {
-      Fog::AutoLock locked(*fog_object_lock);
+      Fog::AutoLock locked(Object::_internalLock.instance());
 
       if (this == r->_events)
       {

@@ -96,13 +96,13 @@ err_t Palette::setArgb32(sysuint_t index, const Argb* pal, sysuint_t count)
   {
     rasterFuncs.dib.convert[IMAGE_FORMAT_PRGB32][IMAGE_FORMAT_ARGB32](
       reinterpret_cast<uint8_t*>(_d->data + INDEX_PRGB32 + index),
-      reinterpret_cast<const uint8_t*>(pal), count, NULL);
+      reinterpret_cast<const uint8_t*>(pal), (uint32_t)count, NULL);
   }
   else
   {
     rasterFuncs.dib.memcpy32(
       reinterpret_cast<uint8_t*>(_d->data + INDEX_PRGB32 + index),
-      reinterpret_cast<const uint8_t*>(pal), count, NULL);
+      reinterpret_cast<const uint8_t*>(pal), (uint32_t)count, NULL);
   }
 
   if (oldContainsAlpha && !newContainsAlpha)
@@ -130,10 +130,10 @@ err_t Palette::setXrgb32(sysuint_t index, const Argb* pal, sysuint_t count)
 
   rasterFuncs.dib.convert[IMAGE_FORMAT_ARGB32][IMAGE_FORMAT_XRGB32](
     reinterpret_cast<uint8_t*>(_d->data + INDEX_ARGB32 + index),
-    reinterpret_cast<const uint8_t*>(pal), count, NULL);
+    reinterpret_cast<const uint8_t*>(pal), (uint32_t)count, NULL);
   rasterFuncs.dib.convert[IMAGE_FORMAT_PRGB32][IMAGE_FORMAT_XRGB32](
     reinterpret_cast<uint8_t*>(_d->data + INDEX_PRGB32 + index),
-    reinterpret_cast<const uint8_t*>(pal), count, NULL);
+    reinterpret_cast<const uint8_t*>(pal), (uint32_t)count, NULL);
 
   if (updateAlpha) _d->isAlphaUsed = isAlphaUsed(_d->data, 256);
   return ERR_OK;
@@ -154,7 +154,7 @@ uint8_t Palette::findColor(uint8_t r, uint8_t g, uint8_t b) const
     int dist = (rd * rd) + (gd * gd) + (bd * bd);
     if (dist < smallest)
     {
-      if (dist == 0) return i;
+      if (dist == 0) return (uint8_t)i;
       best = i;
       smallest = dist;
     }

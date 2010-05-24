@@ -69,9 +69,12 @@ void BorderLayout::onRemove(LayoutItem* item)
   {
     uint32_t edge = item->getLayoutData<LayoutData>()->_edge;
 
-    if (edge & Y_MASK) {
+    if (edge & Y_MASK)
+    {
       _y.remove(item);
-    } else if (edge & X_MASK) {
+    }
+    else if (edge & X_MASK)
+    {
       _x.remove(item);
     }
 
@@ -288,7 +291,8 @@ void BorderLayout::setLayoutGeometry(const IntRect& rect)
       height = availHeight - marginY;
       CLEAN(height, hint.getMinimumSize().getHeight(), hint.getMaximumSize().getHeight()); 
 
-      if (prop->_offset != 0) {
+      if (prop->_offset != 0)
+      {
         width += prop->_offset;
         prop->_offset = 0;
       }
@@ -335,7 +339,8 @@ void BorderLayout::setSort(SortType s)
 
 const List<LayoutItem*>& BorderLayout::getList()
 {
-  if (_sort == 0) {
+  if (_sort == 0)
+  {
     return _children;
   }
   else

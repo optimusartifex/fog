@@ -870,7 +870,7 @@ void RasterPaintEngine::CTX_SYMBOL(_doPaintImage)(
         srcStride *= CTX_DELTA; \
       } \
       \
-      sysint_t w = dst.w; \
+      int w = dst.w; \
       \
       do { \
         CODE \
@@ -967,7 +967,7 @@ NAME##_nodelta_advance: \
           \
           while (cbox != clipTo) \
           { \
-            sysint_t w = cbox->x2 - x1; \
+            int w = cbox->x2 - x1; \
             FOG_ASSERT(w > 0); \
             \
             CODE \
@@ -984,7 +984,7 @@ NAME##_nodelta_advance: \
           int x2 = cbox->x2; \
           if (x2 > maxX) x2 = maxX; \
           { \
-            sysint_t w = x2 - x1; \
+            int w = x2 - x1; \
             FOG_ASSERT(w > 0); \
             \
             CODE \
@@ -1073,7 +1073,7 @@ NAME##_delta_advance: \
           \
           while (cbox != clipTo) \
           { \
-            sysint_t w = cbox->x2 - x1; \
+            int w = cbox->x2 - x1; \
             FOG_ASSERT(w > 0); \
             \
             CODE \
@@ -1090,7 +1090,7 @@ NAME##_delta_advance: \
           int x2 = cbox->x2; \
           if (x2 > maxX) x2 = maxX; \
           { \
-            sysint_t w = x2 - x1; \
+            int w = x2 - x1; \
             FOG_ASSERT(w > 0); \
             \
             CODE \

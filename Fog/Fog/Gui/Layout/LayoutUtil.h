@@ -15,8 +15,6 @@
 #include <Fog/Gui/Constants.h>
 #include <Fog/Gui/Layout/GridLayout.h>
 
-// LAYOUT TODO: Rename to LayoutUtil.cpp/.h
-
 namespace Fog {
 
 // ============================================================================

@@ -129,7 +129,7 @@ struct NTOAOut
   //! @brief Output (pointer to non null terminated string in @c buf).
   char* result;
   //! @brief Output length.
-  uint32_t length;
+  sysuint_t length;
   //! @brief Decimal point position (for dtoa).
   uint32_t decpt;
   //! @brief output flags.

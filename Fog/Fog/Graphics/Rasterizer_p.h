@@ -133,8 +133,8 @@ struct FOG_HIDDEN Rasterizer
   {
     CellXYBuffer* prev;
     CellXYBuffer* next;
-    sysuint_t capacity;
-    sysuint_t count;
+    uint32_t capacity;
+    uint32_t count;
     CellXY cells[1];
   };
 
@@ -148,8 +148,8 @@ struct FOG_HIDDEN Rasterizer
   //! buffer. Each index to this table represents one row.
   struct FOG_HIDDEN RowInfo
   {
-    sysuint_t index;
-    sysuint_t count;
+    uint32_t index;
+    uint32_t count;
   };
 
   // --------------------------------------------------------------------------

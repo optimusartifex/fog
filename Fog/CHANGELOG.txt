@@ -1,3 +1,7 @@
+2010-05-19
+- Moved object hierarchy management into Fog::Object.
+- Cleaned up Widget + Layout code.
+
 2010-05-15
 - Added ARGB<->AHSV color conversion.
 - Added Painter::drawImage() that can stretch image.

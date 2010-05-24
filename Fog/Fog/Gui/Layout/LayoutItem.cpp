@@ -21,28 +21,6 @@ namespace Fog {
 // [Helpers]
 // ============================================================================
 
-static IntSize calculateMaximumSizeHelper(const IntSize& sizeHint, const IntSize& minSize, const IntSize& maxSize, const LayoutPolicy& sizePolicy, uint32_t align)
-{
-  if (align & ALIGNMENT_HORIZONTAL_MASK && align & ALIGNMENT_VERTICAL_MASK)
-    return IntSize(WIDGET_MAX_SIZE, WIDGET_MAX_SIZE);
-
-  IntSize s = maxSize;
-  IntSize hint = sizeHint.expandedTo(minSize);
-  if (s.getWidth() == WIDGET_MAX_SIZE && !(align & ALIGNMENT_HORIZONTAL_MASK))
-    if (!(sizePolicy.getPolicy() & LAYOUT_GROWING_WIDTH))
-      s.setWidth(hint.getWidth());
-
-  if (s.getHeight() == WIDGET_MAX_SIZE && !(align & ALIGNMENT_VERTICAL_MASK))
-    if (!(sizePolicy.getPolicy() & LAYOUT_GROWING_WIDTH))
-      s.setHeight(hint.getHeight());
-
-  if (align & ALIGNMENT_HORIZONTAL_MASK)
-    s.setWidth(WIDGET_MAX_SIZE);
-  if (align & ALIGNMENT_VERTICAL_MASK)
-    s.setHeight(WIDGET_MAX_SIZE);
-  return s;
-}
-
 static IntSize calculateMinimumSizeHelper(const IntSize& sizeHint, const IntSize& minSizeHint, const IntSize& minSize, const IntSize& maxSize, const LayoutPolicy& sizePolicy)
 {
   IntSize s(0, 0);
@@ -72,23 +50,107 @@ static IntSize calculateMinimumSizeHelper(const IntSize& sizeHint, const IntSize
   return s.expandedTo(IntSize(0, 0));
 }
 
+static IntSize calculateMaximumSizeHelper(const IntSize& sizeHint, const IntSize& minSize, const IntSize& maxSize, const LayoutPolicy& sizePolicy, uint32_t align)
+{
+  if (align & ALIGNMENT_HORIZONTAL_MASK && align & ALIGNMENT_VERTICAL_MASK)
+    return IntSize(WIDGET_MAX_SIZE, WIDGET_MAX_SIZE);
+
+  IntSize s = maxSize;
+  IntSize hint = sizeHint.expandedTo(minSize);
+
+  if (s.getWidth() == WIDGET_MAX_SIZE && !(align & ALIGNMENT_HORIZONTAL_MASK))
+    if (!(sizePolicy.getPolicy() & LAYOUT_GROWING_WIDTH))
+      s.setWidth(hint.getWidth());
+
+  if (s.getHeight() == WIDGET_MAX_SIZE && !(align & ALIGNMENT_VERTICAL_MASK))
+    if (!(sizePolicy.getPolicy() & LAYOUT_GROWING_WIDTH))
+      s.setHeight(hint.getHeight());
+
+  if (align & ALIGNMENT_HORIZONTAL_MASK)
+    s.setWidth(WIDGET_MAX_SIZE);
+  if (align & ALIGNMENT_VERTICAL_MASK)
+    s.setHeight(WIDGET_MAX_SIZE);
+
+  return s;
+}
+
 // ============================================================================
 // [Fog::LayoutItem]
 // ============================================================================
 
-LayoutItem::LayoutItem(uint32_t alignment) : _alignment(alignment), _withinLayout(0), _layoutdata(0), _dirty(1), _propertydirty(1)
+LayoutItem::LayoutItem(uint32_t alignment) : 
+  _alignment(alignment),
+  _withinLayout(0),
+  _layoutdata(0),
+  _dirty(1),
+  _propertydirty(1),
+  _contentmargin(0)
 {
-  _contentmargin.set(0,0,0,0);
 }
 
 LayoutItem::~LayoutItem() 
 {
 }
 
-int LayoutItem::calcMargin(int margin, MarginPosition pos) const
+int LayoutItem::calcMargin(int margin, uint32_t location) const
 {
   return margin;
 }
+
+#define MARGIN_CHANGED() \
+  _dirty = 1; \
+  updateLayout();
+
+void LayoutItem::setContentMargin(const Margin& m)
+{
+  setContentMargin(m.top, m.right, m.bottom, m.left);
+}
+
+void LayoutItem::setContentMargin(int top, int right, int bottom, int left)
+{
+  Margin newMargin(
+    calcMargin(top, MARGIN_TOP),
+    calcMargin(right, MARGIN_RIGHT),
+    calcMargin(bottom, MARGIN_BOTTOM),
+    calcMargin(left, MARGIN_LEFT));
+
+  if (_contentmargin == newMargin) return;
+  MARGIN_CHANGED()
+}
+
+void LayoutItem::setContentTopMargin(int m)
+{
+  int newMargin = calcMargin(m, MARGIN_TOP);
+
+  if (_contentmargin.getTop() == newMargin) return;
+  MARGIN_CHANGED()
+}
+
+void LayoutItem::setContentRightMargin(int m)
+{
+  int newMargin = calcMargin(m, MARGIN_RIGHT);
+
+  if (_contentmargin.getRight() == newMargin) return;
+  MARGIN_CHANGED()
+}
+
+void LayoutItem::setContentBottomMargin(int m)
+{
+  int newMargin = calcMargin(m, MARGIN_BOTTOM);
+
+  if (_contentmargin.getBottom() == newMargin) return;
+  MARGIN_CHANGED()
+}
+
+void LayoutItem::setContentLeftMargin(int m)
+{
+  int newMargin = calcMargin(m, MARGIN_LEFT);
+
+  if (_contentmargin.getLeft() == newMargin) return;
+  MARGIN_CHANGED()
+}
+
+#undef MARGIN_CHANGED
 
 bool LayoutItem::hasLayoutHeightForWidth() const
 {
@@ -107,7 +169,7 @@ int LayoutItem::getLayoutMinimumHeightForWidth(int width) const
 
 void LayoutItem::updateLayout()
 {
-  if(_withinLayout) _withinLayout->updateLayout();
+  if (_withinLayout) _withinLayout->updateLayout();
 }
 
 void LayoutItem::clearDirty()

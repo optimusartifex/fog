@@ -35,23 +35,43 @@ struct EventLoop;
 struct FOG_API Timer : public Object
 {
   FOG_DECLARE_OBJECT(Timer, Object)
+    
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   Timer();
   virtual ~Timer();
+
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE TimeDelta getInterval() const { return _interval; }
+  void setInterval(TimeDelta interval);
+
+  // --------------------------------------------------------------------------
+  // [State]
+  // --------------------------------------------------------------------------
 
   bool isRunning();
 
   bool start();
   void stop();
 
-  FOG_INLINE TimeDelta getInterval() const { return _interval; }
-  void setInterval(TimeDelta interval);
+  // --------------------------------------------------------------------------
+  // [Event Handlers]
+  // --------------------------------------------------------------------------
 
   virtual void onTimer(TimerEvent* e);
 
   FOG_EVENT_BEGIN()
     FOG_EVENT_DEF(EVENT_TIMER, onTimer, TimerEvent, OVERRIDE)
   FOG_EVENT_END()
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
 
 protected:
   Task* _task;

@@ -49,7 +49,7 @@ static sysuint_t addToState(TextCodec::State* state, const uint8_t* cur, const u
   sysuint_t bufSize = Math::min((sysuint_t)(end - cur), 8 - curSize);
 
   memcpy(state->buffer + curSize, cur, bufSize);
-  state->count += bufSize;
+  state->count += (uint32_t)bufSize;
 
   return state->count;
 }
@@ -997,7 +997,7 @@ static TextCodec::Engine* _8BitCodec_create(uint32_t code, uint32_t flags, const
 
   for (i = 0; i < 256; i++)
   {
-    uint32_t uc = (i < 128) ? i : encode[i-128];
+    uint32_t uc = (i < 128) ? (uint32_t)i : encode[i-128];
     uint32_t ucPage = uc >> 8;
     uint32_t ucIndex = uc & 0xFF;
 
@@ -1267,7 +1267,7 @@ inputTruncated:
   {
     sysuint_t bufSize = (sysuint_t)(srcEnd - srcCur);
     memcpy(state->buffer, srcCur, bufSize);
-    state->count = bufSize;
+    state->count = (uint32_t)bufSize;
   }
   else
   {
@@ -1490,7 +1490,7 @@ notSurrogatePair:
     {
       sysuint_t bufSize = (sysuint_t)(srcEnd - srcCur);
       memcpy(state->buffer, srcCur, bufSize);
-      state->count = bufSize;
+      state->count = (uint32_t)bufSize;
     }
     else
     {
@@ -1703,7 +1703,7 @@ processChar:
     {
       sysuint_t bufSize = (sysuint_t)(srcEnd - srcCur);
       memcpy(state->buffer, srcCur, bufSize);
-      state->count = bufSize;
+      state->count = (uint32_t)bufSize;
     }
     else
     {
@@ -1895,7 +1895,7 @@ processChar:
     {
       sysuint_t bufSize = (sysuint_t)(srcEnd - srcCur);
       memcpy(state->buffer, srcCur, bufSize);
-      state->count = bufSize;
+      state->count = (uint32_t)bufSize;
     }
     else
     {
@@ -2180,7 +2180,7 @@ TextCodec TextCodec::fromMime(const char* mime)
     if (mimeCompare(TextCodec_class[i].mime, mime, mimeLength)) break;
   }
 
-  return TextCodec::fromCode(i < FOG_ARRAY_SIZE(TextCodec_class) ? i : 0);
+  return TextCodec::fromCode((uint32_t)(i < FOG_ARRAY_SIZE(TextCodec_class) ? i : 0));
 }
 
 TextCodec TextCodec::fromMime(const String& mime)

@@ -1260,13 +1260,15 @@ void Region::free()
 
 uint32_t Region::getType() const
 {
-  uint32_t len = _d->length;
+  sysuint_t len = _d->length;
 
   // If t < 2 then it can be 0 or 1, which means REGION_TYPE_EMPTY or 
   // REGION_TYPE_SIMPLE, respectively.
   return isInfinite()
     ? REGION_TYPE_INFINITE
-    : len < 2 ? len : REGION_TYPE_COMPLEX;
+    : len < 2 
+      ? (uint32_t)len
+      : REGION_TYPE_COMPLEX;
 }
 
 err_t Region::setSharable(bool val)
@@ -1994,8 +1996,8 @@ HRGN Region::toHRGN() const
 
   hdr->dwSize = sizeof(RGNDATAHEADER);
   hdr->iType = RDH_RECTANGLES;
-  hdr->nCount = length;
-  hdr->nRgnSize = length * sizeof(RECT);
+  hdr->nCount = (uint32_t)length;
+  hdr->nRgnSize = (DWORD)(length * sizeof(RECT));
   BoxToRECT(&hdr->rcBound, &d->extents);
 
   RECT* r = (RECT *)((uint8_t *)hdr + sizeof(RGNDATAHEADER));
@@ -2003,7 +2005,7 @@ HRGN Region::toHRGN() const
   {
     BoxToRECT(r, &d->rects[i]);
   }
-  return ExtCreateRegion(NULL, sizeof(RGNDATAHEADER) + (sizeof(RECT)*length), (RGNDATA *)hdr);
+  return ExtCreateRegion(NULL, (DWORD)(sizeof(RGNDATAHEADER) + (length * sizeof(RECT))), (RGNDATA *)hdr);
 }
 
 err_t Region::fromHRGN(HRGN hrgn)

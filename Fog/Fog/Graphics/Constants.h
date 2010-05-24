@@ -1665,19 +1665,19 @@ enum IMAGE_DATA_FLAGS
   //! the default and currently only the null image data has this flag unset.
   //!
   //! @note This flag is compatible to standard Fog-Core data flags.
-  IMAGE_DATA_FLAG_DYNAMIC = OBJECT_DATA_FLAG_DYNAMIC,
+  IMAGE_DATA_FLAG_DYNAMIC = CONTAINER_FLAG_DYNAMIC,
 
   //! @brief Image instance is shareable (creating weak copy when 
   //! assigned to other image instance).
   //!
   //! @note This flag is compatible to standard Fog-Core data flags.
-  IMAGE_DATA_FLAG_SHARABLE = OBJECT_DATA_FLAG_SHARABLE,
+  IMAGE_DATA_FLAG_SHARABLE = CONTAINER_FLAG_SHARABLE,
 
   //! @brief Keep alive this instance when assigning other image into it, 
   //! creating deep copy instead of weak-reference.
   //!
   //! @note This flag is compatible to standard Fog-Core data flags.
-  IMAGE_DATA_FLAG_KEEP_ALIVE = OBJECT_DATA_FLAG_KEEP_ALIVE,
+  IMAGE_DATA_FLAG_KEEP_ALIVE = CONTAINER_FLAG_KEEP_ALIVE,
 
   // --------------------------------------------------------------------------
   // [Extended Flags]

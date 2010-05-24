@@ -23,14 +23,14 @@ namespace Fog {
 FlowLayout::FlowLayout(Widget *parent, int margin, int hSpacing, int vSpacing)
   : Layout(parent), _hSpace(hSpacing), _vSpace(vSpacing)
 {
-  setContentMargins(margin, margin, margin, margin);
+  setContentMargin(margin, margin, margin, margin);
 }
 
 FlowLayout::FlowLayout(int margin, int hSpacing, int vSpacing) :
   _hSpace(hSpacing),
   _vSpace(vSpacing)
 {
-  setContentMargins(margin, margin, margin, margin);
+  setContentMargin(margin, margin, margin, margin);
 }
 
 FlowLayout::~FlowLayout()
@@ -106,7 +106,7 @@ IntSize FlowLayout::getLayoutMinimumSize() const
     size = size.expandedTo(getAt(i)->getLayoutMinimumSize());
   }
 
-  int l = 2 * getContentMargins().left;
+  int l = 2 * getContentMargin().left;
 
   size = size + IntSize(l, l);
   return size;
@@ -114,7 +114,7 @@ IntSize FlowLayout::getLayoutMinimumSize() const
 
 int FlowLayout::doLayout(const IntRect &rect, bool testOnly) const
 {
-  IntMargins margins = getContentMargins();
+  Margin margins = getContentMargin();
   IntRect effectiveRect = rect.adjusted(+margins.left, +margins.top, -margins.right, -margins.bottom);
 
   int x = effectiveRect.x;

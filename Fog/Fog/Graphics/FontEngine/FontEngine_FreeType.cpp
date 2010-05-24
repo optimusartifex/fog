@@ -364,7 +364,7 @@ String FontConfigLibrary::resolveFontPath(const String& family, uint32_t size, c
 {
   FOG_ASSERT(ok);
 
-  TemporaryByteArray<TEMP_LENGTH> family8;
+  TemporaryByteArray<TEMPORARY_LENGTH> family8;
   TextCodec::local8().appendFromUnicode(family8, family);
 
   FcPattern* p1;
@@ -751,7 +751,8 @@ FontFace* FTFontEngine::createDefaultFace()
 
     const char* p = defaultFaceNames;
 
-    while (*p) {
+    while (*p)
+    {
       sysuint_t plen = strlen(p);
       face = createFace(Ascii8(p, plen), size, options, FloatMatrix());
       if (face) break;
@@ -1303,8 +1304,10 @@ GlyphData* FTFontFace::renderGlyph(uint32_t uc)
       glyphd->_offsetX,
       glyphd->_offsetY);
 
-    for (y = 0; y != imaged->_height; y++) {
-      for (x = 0; x != imaged->_width; x++) {
+    for (y = 0; y != imaged->_height; y++)
+    {
+      for (x = 0; x != imaged->_width; x++)
+      {
         fprintf(stderr, "%.2X ", imaged->_base[y * imaged->_stride + x]);
       }
       fprintf(stderr, "\n");
@@ -1399,7 +1402,7 @@ bool FTFontFile::load()
   }
   else
   {
-    TemporaryByteArray<TEMP_LENGTH> fileName8;
+    TemporaryByteArray<TEMPORARY_LENGTH> fileName8;
     TextCodec::local8().appendFromUnicode(fileName8, fileName);
 
     loadError = _freeTypeLib->pFT_New_Face(_freeTypeLib->ftLibrary, fileName8.getData(), 0, &currentFace);

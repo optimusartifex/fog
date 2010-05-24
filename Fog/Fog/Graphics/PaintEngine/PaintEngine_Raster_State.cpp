@@ -49,8 +49,7 @@ void RasterPaintVarState::save(RasterPaintEngine* engine)
     {
       solid = engine->ctx.solid;
     }
-
-    if (engine->ctx.ops.sourceType == PAINTER_SOURCE_PATTERN)
+    else // if (engine->ctx.ops.sourceType == PAINTER_SOURCE_PATTERN)
     {
       pattern.init(engine->ctx.pattern.instance());
       if (engine->ctx.pctx && engine->ctx.pctx->initialized)
@@ -142,6 +141,7 @@ void RasterPaintVarState::restore(RasterPaintEngine* engine)
           engine->_resetRasterPatternContext();
         }
 
+        engine->ctx.ops.sourceFormat = ops.sourceFormat;
         engine->ctx.solid = solid;
         break;
 
@@ -157,16 +157,28 @@ void RasterPaintVarState::restore(RasterPaintEngine* engine)
           engine->ctx.pattern.instance() = pattern.instance();
         }
 
-        if (engine->ctx.pctx && engine->ctx.pctx->initialized)
+        if (engine->ctx.pctx != NULL && 
+            engine->ctx.pctx->initialized)
         {
           if (engine->ctx.pctx->refCount.deref())
           {
             engine->ctx.pctx->destroy(engine->ctx.pctx);
             engine->blockAllocator.free(engine->ctx.pctx);
           }
+          engine->ctx.pctx = NULL;
         }
 
-        engine->ctx.pctx = pctx;
+        engine->ctx.ops.sourceFormat = ops.sourceFormat;
+
+        if (engine->ctx.pctx == NULL)
+        {
+          engine->ctx.pctx = pctx;
+        }
+        else if (pctx)
+        {
+          engine->blockAllocator.free(engine->ctx.pctx);
+          engine->ctx.pctx = pctx;
+        }
 
         pattern.destroy();
         break;

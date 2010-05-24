@@ -31,7 +31,7 @@ Layout::Layout() :
   _flexcount(0),
   _nextactivate(0)
 {
-  _flags |= OBJ_IS_LAYOUT;  
+  _objectFlags |= OBJECT_FLAG_IS_LAYOUT;  
 }
 
 Layout::Layout(Widget* parent, Layout* parentLayout) :
@@ -43,7 +43,7 @@ Layout::Layout(Widget* parent, Layout* parentLayout) :
   _parentItem(0),
   _nextactivate(0)
 {
-  _flags |= OBJ_IS_LAYOUT;
+  _objectFlags |= OBJECT_FLAG_IS_LAYOUT;
 
   if (parentLayout)
   {
@@ -113,8 +113,9 @@ void Layout::markAsDirty()
         GuiWindow* window = w->getClosestGuiWindow();
         if (window)
         {
-          _activated = 0;
           FOG_ASSERT(window->_activatelist == 0);
+
+          _activated = 0;
           _nextactivate = window->_activatelist;
           window->_activatelist = this;
           w->update(WIDGET_REPAINT_ALL);
@@ -142,7 +143,7 @@ Widget* Layout::getParentWidget() const
     }
     else
     {
-      return 0;
+      return NULL;
     }
   }
 
@@ -150,7 +151,7 @@ Widget* Layout::getParentWidget() const
   return (Widget*)(_parentItem);
 }
 
-int Layout::calcMargin(int margin, MarginPosition pos) const
+int Layout::calcMargin(int margin, uint32_t location) const
 {
   if (margin >= 0)
   {
@@ -163,7 +164,7 @@ int Layout::calcMargin(int margin, MarginPosition pos) const
   else if (const Widget* pw = getParentWidget())
   {
     // TODO: Move margins to theme?
-    if (pw->isGuiWindow())
+    if (pw->hasGuiWindow())
       return LAYOUT_DEFAULT_WINDOW_MARGIN;
     else
       return LAYOUT_DEFAULT_WIDGET_MARGIN;
@@ -205,6 +206,11 @@ int Layout::getSpacing() const
 
     return 0;
   }  
+}
+
+void Layout::setSpacing(int spacing)
+{
+  _spacing = spacing;
 }
 
 uint32_t Layout::getLayoutExpandingDirections() const
@@ -344,25 +350,30 @@ int Layout::addChild(LayoutItem* item)
 {  
   if (item->isWidget())
   {
-    Widget* w = static_cast<Widget*>(item);
-    Widget* layoutparent = getParentWidget();
-    Widget* widgetparent = w->getParent();
+    Widget* widget = static_cast<Widget*>(item);
 
-    if (widgetparent && widgetparent->getLayout() && item->_withinLayout)
+    Widget* parentLayout = this->getParentWidget();
+    Widget* parentWidget = widget->getParentWidget();
+
+    if (parentWidget != NULL && 
+        parentWidget->getLayout() != NULL && 
+        item->_withinLayout)
     {
-      if (removeAllWidgets(widgetparent->getLayout(), w))
+      if (removeAllWidgets(parentWidget->getLayout(), widget))
       {
-        //WARNING: removed from existing layout
+        // LAYOUT TODO: WARNING: removed from existing layout.
       }
     }
 
-    if (widgetparent && layoutparent && widgetparent != layoutparent)
+    if (parentWidget != NULL && 
+        parentLayout != NULL && 
+        parentWidget != parentLayout)
     {
-      w->setParent(layoutparent);
+      widget->setParent(parentLayout);
     }
-    else if (!widgetparent && layoutparent)
+    else if (parentWidget == NULL && parentLayout != NULL)
     {
-      w->setParent(layoutparent);
+      widget->setParent(parentLayout);
     }
   }
   else if (item->isLayout())
@@ -382,7 +393,7 @@ int Layout::addChildLayout(Layout* l)
 {
   if (l->_parentItem)
   {
-    //WARNING already has a parent!
+    // TODO: WARNING already has a parent!
     return -1;
   }
 
@@ -430,12 +441,13 @@ int Layout::getTotalHeightForWidth(int w) const
   return h;
 }
 
-void Layout::calcContentMargins(int&side, int&top) const
+void Layout::calcContentMargins(int& side, int& top) const
 {
   if (_toplevel)
   {
     Widget* parent = getParentWidget();
     FOG_ASSERT(parent);
+
     side = parent->getContentLeftMargin() + parent->getContentRightMargin();
     top = parent->getContentTopMargin() + parent->getContentBottomMargin();
   }
@@ -482,7 +494,7 @@ bool Layout::activate()
   bool hasW = parentwidget->hasMinimumWidth();
   bool calc = (!hasH || !hasW);
   
-  if (parentwidget->isGuiWindow())
+  if (parentwidget->hasGuiWindow())
   {
     IntSize ms = getTotalMinimumSize();
     if (calc)

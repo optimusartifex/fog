@@ -244,7 +244,7 @@ err_t FileUtil::toAbsolutePath(String& dst, const String& base, const String& pa
     err_t err;
     if (base.isEmpty())
     {
-      TemporaryString<TEMP_LENGTH> working;
+      TemporaryString<TEMPORARY_LENGTH> working;
       if ( (err = Application::getWorkingDirectory(working)) ) return err;
       if ( (err = FileUtil::joinPath(dst, working, path)) ) return err;
     }
@@ -432,7 +432,7 @@ bool FileUtil::testLocalName(const String& path)
 #else
   if (TextCodec::local8().isUnicode()) return true;
 
-  TemporaryByteArray<TEMP_LENGTH> path8;
+  TemporaryByteArray<TEMPORARY_LENGTH> path8;
   return TextCodec::local8().appendFromUnicode(path8, path) == ERR_OK;
 #endif
 }

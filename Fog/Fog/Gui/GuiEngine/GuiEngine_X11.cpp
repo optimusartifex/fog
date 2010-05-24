@@ -1239,7 +1239,7 @@ err_t X11GuiWindow::setTitle(const String& title)
 #if FOG_SIZEOF_WCHAR_T == 2
   const wchar_t *titleWChar = reinterpret_cast<const wchar_t *>(title.getData());
 #else
-  TemporaryByteArray<TEMP_LENGTH> titleW;
+  TemporaryByteArray<TEMPORARY_LENGTH> titleW;
   if ((err = TextCodec::utf32().appendFromUnicode(titleW, title))) return err;
   const wchar_t *titleWChar = reinterpret_cast<const wchar_t *>(titleW.nullTerminated());
 #endif
@@ -2135,9 +2135,12 @@ X11GuiEventLoop::~X11GuiEventLoop()
 
 void X11GuiEventLoop::_runInternal()
 {
-  static const sysuint_t WORK_PER_LOOP = 2;
+  static const uint32_t WORK_PER_LOOP = 2;
 
-  sysuint_t work = 0;
+  uint32_t work = 0;
+
+  // Sync with server before we get into the event loop.
+  _xsync();
 
   // Inspired in WinEventLoop and ported to X11GuiEventLoop.
   for (;;)
@@ -2283,10 +2286,10 @@ bool X11GuiEventLoop::_processNextXEvent()
   XEvent xe;
   engine->pXNextEvent(engine->getDisplay(), &xe);
 
-  X11GuiWindow* uiWindow = reinterpret_cast<X11GuiWindow*>(engine->handleToNative((void*)xe.xany.window));
+  X11GuiWindow* guiWindow = reinterpret_cast<X11GuiWindow*>(engine->getWindowFromHandle((void*)xe.xany.window));
 
   FOG_LISTENER_FOR_EACH(NativeEventListener, _nativeEventListenerList, onBeforeDispatch(&xe));
-  if (uiWindow) uiWindow->onX11Event(&xe);
+  if (guiWindow) guiWindow->onX11Event(&xe);
   FOG_LISTENER_FOR_EACH(NativeEventListener, _nativeEventListenerList, onAfterDispatch(&xe));
 
   return true;
@@ -2316,5 +2319,5 @@ void X11GuiEventLoop::_sendWakeUp()
 
 extern "C" FOG_DLL_EXPORT void* createGuiEngine()
 {
-  return new (std::nothrow) Fog::X11GuiEngine();
+  return new(std::nothrow) Fog::X11GuiEngine();
 }

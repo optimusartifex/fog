@@ -643,11 +643,9 @@ err_t Image::to8Bit(const Palette& pal)
       break;
 
     }
+
     default:
-    {
       FOG_ASSERT_NOT_REACHED();
-      return ERR_RT_ASSERTION_FAILURE;
-    }
   }
 
   return set(i);
@@ -2268,7 +2266,7 @@ static err_t _drawImage(
 
       for (int y = h; y; y--, dstPixels += dstStride, srcPixels += srcStride)
       {
-        vblit_copy(buf, srcPixels, bufSize, NULL);
+        vblit_copy(buf, srcPixels, (int)bufSize, NULL);
         vblit_full(dstPixels, buf, w, &closure);
       }
     }
@@ -2284,7 +2282,7 @@ static err_t _drawImage(
 
       for (int y = h; y; y--, dstPixels += dstStride, srcPixels += srcStride)
       {
-        vblit_copy(buf, srcPixels, bufSize, NULL);
+        vblit_copy(buf, srcPixels, (int)bufSize, NULL);
         vblit_span(dstPixels, &span, &closure);
       }
     }
@@ -2681,7 +2679,7 @@ err_t Image::fromHBITMAP(HBITMAP hBitmap)
     dibi.bmiHeader.biPlanes = 1;
     // GetDIBits(hdc, hBitmap, 0, 1, NULL, &dibi, DIB_RGB_COLORS);
 
-    sysuint_t y;
+    uint32_t y;
     for (y = bm.bmHeight; y; y--, destPixels += destStride)
     {
       GetDIBits(hdc, hBitmap, y, 1, (LPVOID)destPixels, &dibi, DIB_RGB_COLORS);

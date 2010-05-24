@@ -109,13 +109,11 @@ RasterPaintEngine::RasterPaintEngine(const ImageBuffer& buffer, ImageData* image
   workerManager(NULL),
   finishing(false)
 {
-
-  // BASIC SETUP (setup variables that will never change):
-  // - Setup primary context.
-  // - Rasterizer.
+  // Setup primary context.
   ctx.engine = this;
   ctx.pctx = NULL;
 
+  // Setup rasterizer.
   ras = Rasterizer::getRasterizer();
 
   // Setup primary layer.
@@ -138,8 +136,7 @@ RasterPaintEngine::RasterPaintEngine(const ImageBuffer& buffer, ImageData* image
   // so there is not a change actually.
   ctx.state &= ~(RASTER_STATE_PENDING_MASK);
 
-  // Setup multithreading if possible. If the painting buffer if too small,
-  // we will not use multithreading, because it has no sense.
+  // Setup multithreading if possible.
   if ((initFlags & PAINTER_INIT_MT) != 0 && cpuInfo->numberOfProcessors > 1)
   {
     uint64_t total = (uint64_t)buffer.width * (uint64_t)buffer.height;
@@ -165,7 +162,10 @@ RasterPaintEngine::~RasterPaintEngine()
 
   // First set engine to singlethreaded (this means flush and releasing all
   // threads), then we can destroy engine.
-  if (!isSingleThreaded()) setEngine(PAINT_ENGINE_RASTER_ST, 0);
+  if (!isSingleThreaded())
+  {
+    setEngine(PAINT_ENGINE_RASTER_ST, 0);
+  }
 
   // This is our context, it's imposible that other thread is using it at this
   // time!

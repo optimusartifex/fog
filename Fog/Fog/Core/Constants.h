@@ -16,35 +16,23 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::CreateSharable]
+// [Fog::CREATE_SHARABLE]
 // ============================================================================
 
 enum _CREATE_SHAREABLE { CREATE_SHAREABLE = 0 };
+
+// ============================================================================
+// [Fog::DONT_INITIALIZE]
+// ============================================================================
+
 enum _DONT_INITIALIZE { DONT_INITIALIZE = 0};
 
 // ============================================================================
-// [Fog::Constants]
+// [Fog::CONTAINER_FLAGS]
 // ============================================================================
 
-//! @brief Detect length means that string function should first detect it length.
-static const sysuint_t DETECT_LENGTH  = (sysuint_t)-1;
-//! @brief Returned by functions like indexOf() to indicate that element wasn't
-//! found.
-static const sysuint_t INVALID_INDEX  = (sysuint_t)-1;
-
-//! @brief Convenience value that can be used instead of zero.
-static const uint32_t NO_FLAGS = 0;
-
-//! @brief how much to reserve stack for local strings in Fog library or all
-//! additional libraries
-static const sysuint_t TEMP_LENGTH = 256;
-
-// ============================================================================
-// [Fog::OBJECT_DATA_FLAGS]
-// ============================================================================
-
-//! @brief Data flags used by many containers.
-enum OBJECT_DATA_FLAGS
+//! @brief Container data flags, used by many Fog-Framework containers.
+enum CONTAINER_FLAGS
 {
   //! @brief Data allocated by the container are dynamic.
   //!
@@ -56,19 +44,44 @@ enum OBJECT_DATA_FLAGS
   //! @note If container contains other data then this flag is related to
   //! the memory used to allocate the container data structure, not the data
   //! pointer in data structure.
-  OBJECT_DATA_FLAG_DYNAMIC = 0x01,
+  CONTAINER_FLAG_DYNAMIC = 0x01,
 
   //! @brief Data allocated by the container are shareable, so assigning the
   //! container instance into other one will create weak-reference instead
   //! if deep copy.
-  OBJECT_DATA_FLAG_SHARABLE = 0x02,
+  CONTAINER_FLAG_SHARABLE = 0x02,
 
   //! @brief Keep alive this instance copying all data to it when assigning
   //! other instance. This flag prevents weak-copy of other instance that is
   //! being assigned into the container. All template based containers that
   //! uses static allocation set this flag.
-  OBJECT_DATA_FLAG_KEEP_ALIVE = 0x04
+  CONTAINER_FLAG_KEEP_ALIVE = 0x04
 };
+
+// ============================================================================
+// [Fog::DETECT_LENGTH / INVALID_INDEX]
+// ============================================================================
+
+//! @brief Detect length means that string function should first detect it length.
+static const sysuint_t DETECT_LENGTH  = (sysuint_t)-1;
+//! @brief Returned by functions like indexOf() to indicate that element wasn't
+//! found.
+static const sysuint_t INVALID_INDEX  = (sysuint_t)-1;
+
+// ============================================================================
+// [Fog::NO_FLAGS]
+// ============================================================================
+
+//! @brief Convenience value that can be used instead of zero.
+static const uint32_t NO_FLAGS = 0;
+
+// ============================================================================
+// [Fog::TEMPORARY_LENGTH]
+// ============================================================================
+
+//! @brief how much to reserve stack for local strings in Fog library or all
+//! additional libraries.
+static const sysuint_t TEMPORARY_LENGTH = 256;
 
 // ============================================================================
 // [Fog::FORMAT_FLAGS]
@@ -200,7 +213,7 @@ enum DOUBLE_FORM
 enum LIBRARY_OPEN_MODE
 {
   //! @brief Don't use any flags.
-  LIBRARY_OPEN_NONE = 0,
+  LIBRARY_OPEN_NO_FLAGS = 0,
 
   //! @brief Open library with system prefix (default @c true).
   //!
@@ -268,9 +281,13 @@ enum USER_DIRECTORY
 //! @brief Value type id.
 enum VALUE_TYPE
 {
+  //! @brief Value is null.
   VALUE_TYPE_NULL = 0,
+  //! @brief Value is signed 32-bit integer.
   VALUE_TYPE_INTEGER = 1,
+  //! @brief Value is double-precision floating point.
   VALUE_TYPE_DOUBLE = 2,
+  //! @brief Value is string.
   VALUE_TYPE_STRING = 3
 };
 
@@ -312,6 +329,67 @@ enum TYPEINFO_FLAGS
   TYPEINFO_HAS_COMPARE   = 0x00000400,
   TYPEINFO_HAS_EQ        = 0x00000800,
   TYPEINFO_MASK          = 0xFFFFFF00
+};
+
+// ============================================================================
+// [Fog::OBJECT_EVENT_HANDLER_PROTOTYPE]
+// ============================================================================
+
+//! @brief Object event handler prototype
+enum OBJECT_EVENT_HANDLER_PROTOTYPE
+{
+  //! @brief Event handler not accepts arguments.
+  OBJECT_EVENT_HANDLER_VOID = 0,
+  //! @brief Event handler accepts <code>Event*</code> argument.
+  OBJECT_EVENT_HANDLER_EVENTPTR = 1
+};
+
+// ============================================================================
+// [Fog::OBJECT_EVENT_POLICY]
+// ============================================================================
+
+//! @brief @ref Object event handler behavior.
+//!
+//! @sa @ref Object.
+enum OBJECT_EVENT_HANDLER_BEHAVIOR
+{
+  OBJECT_EVENT_HANDLER_REVERSE = 0,
+  OBJECT_EVENT_HANDLER_CASCADE = 1,
+  OBJECT_EVENT_HANDLER_OVERRIDE = 2
+};
+
+// ============================================================================
+// [Fog::OBJECT_FLAGS]
+// ============================================================================
+
+//! @brief @ref Object flags.
+enum OBJECT_FLAGS
+{
+  //! @brief Object instance can be deleted by @c delete operator (this is the
+  //! default).
+  OBJECT_FLAG_CAN_DELETE = (1 << 0),
+
+  // OBJECT TODO: Remove?
+  //HasChildAddedEventHandler = (1 << 2),
+  //HasChildRemovedEventHandler = (1 << 3),
+  //HasParentChangedEventHandler = (1 << 4),
+
+  //! @brief Object was created and create event was received.
+  OBJECT_FLAG_CREATED = (1 << 5),
+  //! @brief Object will be destroyed, method @c destroyLater() was called.
+  OBJECT_FLAG_DESTROY_LATER = (1 << 6),
+
+  // --------------------------------------------------------------------------
+  // [Object Identification]
+  // --------------------------------------------------------------------------
+
+  // These flags were designed for fast object identification in a Fog-Gui
+  // library. Generally all flags above 1 << 16 are used by Fog-Gui.
+
+  //! @brief The @ref Object instance is @ref Widget.
+  OBJECT_FLAG_IS_WIDGET = (1 << 16),
+  //! @brief The @ref Object instance is @ref Layout.
+  OBJECT_FLAG_IS_LAYOUT = (1 << 17)
 };
 
 // ============================================================================
@@ -431,35 +509,6 @@ enum ERR_CORE_ENUM
   ERR_RT_OBJECT_ALREADY_EXISTS,
 
   // --------------------------------------------------------------------------
-  // [IO]
-  // --------------------------------------------------------------------------
-
-  // TODO: What is difference between ERR_IO_TOO_BIG and ERR_IO_FILE_TOO_BIG.
-
-  ERR_IO_TOO_BIG,
-  ERR_IO_NOT_A_FILE,
-  ERR_IO_NOT_A_DIRECTORY,
-  ERR_IO_FILE_IS_EMPTY,
-
-  ERR_IO_FILE_TOO_BIG,
-
-  ERR_IO_CANT_READ,
-  ERR_IO_CANT_WRITE,
-  ERR_IO_CANT_SEEK,
-  ERR_IO_CANT_RESIZE,
-  ERR_IO_CANT_TRUNCATE,
-
-  ERR_IO_FILE_NOT_EXISTS,
-  ERR_IO_DIR_ALREADY_EXISTS,
-
-  // --------------------------------------------------------------------------
-  // [Library]
-  // --------------------------------------------------------------------------
-
-  ERR_LIB_LOAD_FAILED,
-  ERR_LIB_SYMBOL_NOT_FOUND,
-
-  // --------------------------------------------------------------------------
   // [String / TextCodec]
   // --------------------------------------------------------------------------
 
@@ -493,6 +542,35 @@ enum ERR_CORE_ENUM
   ERR_STRING_LOST,
 
   // --------------------------------------------------------------------------
+  // [IO]
+  // --------------------------------------------------------------------------
+
+  // TODO: What is difference between ERR_IO_TOO_BIG and ERR_IO_FILE_TOO_BIG.
+
+  ERR_IO_TOO_BIG,
+  ERR_IO_NOT_A_FILE,
+  ERR_IO_NOT_A_DIRECTORY,
+  ERR_IO_FILE_IS_EMPTY,
+
+  ERR_IO_FILE_TOO_BIG,
+
+  ERR_IO_CANT_READ,
+  ERR_IO_CANT_WRITE,
+  ERR_IO_CANT_SEEK,
+  ERR_IO_CANT_RESIZE,
+  ERR_IO_CANT_TRUNCATE,
+
+  ERR_IO_FILE_NOT_EXISTS,
+  ERR_IO_DIR_ALREADY_EXISTS,
+
+  // --------------------------------------------------------------------------
+  // [Library]
+  // --------------------------------------------------------------------------
+
+  ERR_LIBRARY_LOAD_FAILED,
+  ERR_LIBRARY_SYMBOL_NOT_FOUND,
+
+  // --------------------------------------------------------------------------
   // [Environment]
   // --------------------------------------------------------------------------
 
@@ -509,6 +587,21 @@ enum ERR_CORE_ENUM
   // --------------------------------------------------------------------------
   // [Object]
   // --------------------------------------------------------------------------
+
+  //! @brief Object is not part of a hierarchy.
+  //!
+  //! Tried to remove object from a bad ascendant.
+  //!
+  //! @note This is very likely a runtime error and should be reported.
+  ERR_OBJECT_NOT_PART_OF_HIERARCHY,
+
+  //! @brief Object has already part of a different hierarchy.
+  //!
+  //! Tried to add object to another, but the object was already added to
+  //! another else. You must first remove it from its current parent.
+  //!
+  //! @note This is very likely a runtime error and should be reported.
+  ERR_OBJECT_ALREADY_PART_OF_HIERARCHY,
 
   //! @brief Property not exists.
   ERR_OBJECT_INVALID_PROPERTY,

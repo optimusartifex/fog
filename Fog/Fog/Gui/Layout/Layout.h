@@ -70,7 +70,7 @@ struct FOG_API Layout : public LayoutItem
   // [Margin]
   // --------------------------------------------------------------------------
 
-  virtual int calcMargin(int margin, MarginPosition pos) const;  
+  virtual int calcMargin(int margin, uint32_t location) const;  
   IntRect getContentsRect() const;
 
   //helper method
@@ -81,7 +81,7 @@ struct FOG_API Layout : public LayoutItem
   // --------------------------------------------------------------------------
 
   virtual int getSpacing() const;
-  virtual void setSpacing(int spacing) { _spacing = spacing; }
+  virtual void setSpacing(int spacing);
   
   // --------------------------------------------------------------------------
   // [Expanding Directions]

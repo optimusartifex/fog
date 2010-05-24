@@ -209,11 +209,14 @@ XmlWriter::~XmlWriter()
     {
 #if 0
       //FIXME:
-      if ((strCur = WUniStrStr(strCur, U_("]]>")) )) {
+      if ((strCur = WUniStrStr(strCur, U_("]]>")) ))
+      {
         //WXmlCharContent(root, D + 8, (S += 2) - D - 10, 0);
       }
       else
+      {
         __XML_CHAR_ERROR(XmlReaderUnclosedCDATA);
+      }
 #endif
     }
 

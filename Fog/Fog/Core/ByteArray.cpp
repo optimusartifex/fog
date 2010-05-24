@@ -896,7 +896,7 @@ err_t ByteArray::appendDouble(double d, int doubleForm, const FormatFlags& ff)
   // Decimal form.
   if (doubleForm == DF_DECIMAL)
   {
-    StringUtil::dtoa(d, 3, precision, &out);
+    StringUtil::dtoa(d, 3, (uint32_t)precision, &out);
 
     decpt = out.decpt;
     if (out.decpt == 9999) goto __InfOrNaN;

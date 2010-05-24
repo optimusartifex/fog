@@ -65,6 +65,7 @@ struct FOG_API BorderLayout : public Layout
   struct LayoutData : public LayoutItem::FlexLayoutData
   {
     LayoutData(Layout* layout) : _user(layout) {}
+
     FOG_INLINE bool hasFlex() const { return _user.hasFlex(); }
     FOG_INLINE int getFlex() const { return _user.getFlex(); }
     FOG_INLINE void setFlex(int flex) { return _user.setFlex(flex); }

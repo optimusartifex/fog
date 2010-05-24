@@ -29,6 +29,8 @@ struct FOG_API Button : public ButtonBase
   Button();
   virtual ~Button();
 
+  virtual IntSize getSizeHint() const;
+
   // [Event Handlers]
 
   // Fog::Widget Events.

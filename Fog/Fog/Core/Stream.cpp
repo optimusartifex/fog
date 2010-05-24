@@ -330,45 +330,50 @@ int64_t HANDLEStreamDevice::tell() const
 
 sysuint_t HANDLEStreamDevice::read(void* buffer, sysuint_t size)
 {
-  DWORD bytesRead;
+  DWORD bytesRead = 0;
 
 #if FOG_ARCH_BITS == 64
-  bytesRead = 0;
   while (size > 0)
   {
-    DWORD size32 = Math::min<sysuint_t>(size, UINT32_MAX);
-    DWORD rd;
+    DWORD size32 = (DWORD)Math::min<sysuint_t>(size, UINT32_MAX);
+    DWORD rd = 0;
 
-    if (ReadFile(hFile, buffer, size32, &rd, NULL) == 0)
-    {
-      return (sysuint_t)-1;
-    }
-    else
-    {
-      bytesRead += rd;
-      if (rd != size32) break;
+    BOOL result = ReadFile(hFile, buffer, size32, &rd, NULL);
 
-      buffer = (char*)buffer + rd;
-      size -= size32;
-    }
+    bytesRead += rd;
+    if (rd != size32) break;
+
+    buffer = (char*)buffer + rd;
+    size -= size32;
   }
-  return bytesRead;
 #else
-  if (ReadFile(hFile, buffer, size, &bytesRead, NULL) == 0)
-    return (sysuint_t)-1;
-  else
-    return bytesRead;
+  ReadFile(hFile, buffer, (DWORD)size, &bytesRead, NULL);
 #endif
+  return bytesRead;
 }
 
 sysuint_t HANDLEStreamDevice::write(const void* buffer, sysuint_t size)
 {
-  DWORD bytesWritten;
+  DWORD bytesWritten = 0;
 
-  if (WriteFile(hFile, buffer, size, &bytesWritten, NULL) == 0)
-    return (sysuint_t)-1;
-  else
-    return bytesWritten;
+#if FOG_ARCH_BITS == 64
+  while (size > 0)
+  {
+    DWORD size32 = (DWORD)Math::min<sysuint_t>(size, UINT32_MAX);
+    DWORD wr = 0;
+
+    BOOL result = WriteFile(hFile, buffer, size32, &wr, NULL);
+
+    bytesWritten += wr;
+    if (wr != size32) break;
+
+    buffer = (char*)buffer + wr;
+    size -= size32;
+  }
+#else
+  WriteFile(hFile, buffer, (DWORD)size, &bytesWritten, NULL);
+#endif
+  return bytesWritten;
 }
 
 err_t HANDLEStreamDevice::getSize(int64_t* size)
@@ -402,7 +407,10 @@ err_t HANDLEStreamDevice::truncate(int64_t offset)
 
 void HANDLEStreamDevice::close()
 {
-  if ((flags & STREAM_IS_CLOSABLE) != 0) CloseHandle(hFile);
+  if ((flags & STREAM_IS_CLOSABLE) != 0)
+  {
+    CloseHandle(hFile);
+  }
 }
 #endif // FOG_OS_WINDOWS
 
@@ -449,19 +457,19 @@ err_t FdStreamDevice::openFile(const String& fileName, uint32_t openFlags, Strea
   FOG_ASSERT((openFlags & (STREAM_OPEN_READ | STREAM_OPEN_WRITE)) != 0);
 
   int fd;
-  int fdFlags = 0; // be quite
+  int fdFlags = 0; // Be quite.
 
   uint32_t fflags = STREAM_IS_OPEN | STREAM_IS_SEEKABLE | STREAM_IS_CLOSABLE;
   if (openFlags & STREAM_OPEN_READ ) fflags |= STREAM_IS_READABLE;
   if (openFlags & STREAM_OPEN_WRITE) fflags |= STREAM_IS_WRITABLE;
 
-  // Convert path to local file system string
+  // Convert path to local file system string.
   err_t err;
-  TemporaryByteArray<TEMP_LENGTH> fileName8;
+  TemporaryByteArray<TEMPORARY_LENGTH> fileName8;
 
   if ((err = TextCodec::local8().appendFromUnicode(fileName8, fileName))) return err;
 
-  // Read / Write
+  // Read / Write.
   if ((openFlags & STREAM_OPEN_RW) == STREAM_OPEN_RW)
     fdFlags = O_RDWR;
   else if ((openFlags & STREAM_OPEN_READ) != 0)
@@ -469,24 +477,24 @@ err_t FdStreamDevice::openFile(const String& fileName, uint32_t openFlags, Strea
   else if ((openFlags & STREAM_OPEN_WRITE) != 0)
     fdFlags = O_WRONLY;
 
-  // Truncate / Append
+  // Truncate / Append.
   if (openFlags & STREAM_OPEN_WRITE)
   {
     if (openFlags & STREAM_OPEN_TRUNCATE) fdFlags |= O_TRUNC;
     if (openFlags & STREAM_OPEN_APPEND  ) fdFlags |= O_APPEND;
   }
 
-  // Only create file, fail if file exist
+  // Only create file, fail if file exist.
   if (openFlags & (STREAM_OPEN_CREATE | STREAM_OPEN_CREATE_ONLY) ==
                   (STREAM_OPEN_CREATE | STREAM_OPEN_CREATE_ONLY))
   {
     fdFlags |= O_EXCL;
   }
 
-  // Open file
+  // Open file.
   fd = ::open64(fileName8.getData(), fdFlags | O_LARGEFILE);
 
-  // Try to create file if open failed (or create it if OpenCreate flag was set)
+  // Try to create file if open failed (or create it if OpenCreate flag was set).
   if (fd < 0 && (errno == ENOENT) && (openFlags & STREAM_OPEN_CREATE) != 0)
   {
     fd = ::open64(fileName8.getData(), fdFlags | O_CREAT | O_LARGEFILE, 0644);
@@ -494,12 +502,12 @@ err_t FdStreamDevice::openFile(const String& fileName, uint32_t openFlags, Strea
 
   if (fd < 0)
   {
-    // Error (Invalid file descriptor)
+    // Error (Invalid file descriptor).
     return errno;
   }
   else
   {
-    // Success
+    // Success.
     *dst = new(std::nothrow) FdStreamDevice(fd, fflags);
     return ERR_OK;
   }
@@ -988,7 +996,7 @@ err_t Stream::openFile(const String& fileName, uint32_t openFlags)
   // Create path if asked for.
   if ((openFlags & CREATE_PATH_FLAGS) == CREATE_PATH_FLAGS)
   {
-    TemporaryString<TEMP_LENGTH> dirName;
+    TemporaryString<TEMPORARY_LENGTH> dirName;
     if ((err = FileUtil::extractDirectory(dirName, fileName))) return err;
 
     if (!dirName.isEmpty() && dirName != Ascii8("."))

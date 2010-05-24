@@ -36,8 +36,8 @@ static void buildTable(ByteArrayMatcher::SkipTable* skipTable, const char* ps, s
 
     while (a--)
     {
-      data[0] = i; data[1] = i; data[2] = i; data[3] = i;
-      data[4] = i; data[5] = i; data[6] = i; data[7] = i;
+      data[0] = (uint)i; data[1] = (uint)i; data[2] = (uint)i; data[3] = (uint)i;
+      data[4] = (uint)i; data[5] = (uint)i; data[6] = (uint)i; data[7] = (uint)i;
       data += 8;
     }
 

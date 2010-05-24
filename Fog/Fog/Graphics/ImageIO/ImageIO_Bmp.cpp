@@ -488,7 +488,7 @@ err_t BmpDecoderDevice::readImage(Image& image)
   uint32_t x = 0;
   uint32_t y = 0;
   uint32_t i;
-  uint32_t stride;
+  sysint_t stride;
 
   LocalBuffer<512> rawBufferStorage;
   LocalBuffer<512> rleBufferStorage;

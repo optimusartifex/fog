@@ -740,7 +740,7 @@ err_t PathStrokerPrivate::stroke(const DoublePoint* src, sysuint_t count, bool o
     //   The firstI will be one. Path is self-closing, but unfortunatelly the
     //   closing point vertex is already there (fourth command).
     //
-    int firstI = i;
+    sysuint_t firstI = i;
 
     cp[i] = src[count - 1];
     cd[i] = dist[count - 1];

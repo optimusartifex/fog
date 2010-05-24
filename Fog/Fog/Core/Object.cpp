@@ -25,89 +25,85 @@
 #include <Fog/Core/Thread.h>
 #include <Fog/Core/Value.h>
 
-FOG_CVAR_DECLARE Fog::Lock* fog_object_lock;
-
 namespace Fog {
-
-// ============================================================================
-// [Fog::Object_Local]
-// ============================================================================
-
-struct Object_Local
-{
-  FOG_INLINE Object_Local()
-  {
-    static const char object_string[] = "Fog::Object";
-
-    fog_object_lock = &object_lock;
-
-    object_metaClass.base = NULL;
-    object_metaClass.name = object_string;
-    object_metaClass.hash = HashUtil::hashString(object_string, FOG_ARRAY_SIZE(object_string)-1);
-  }
-  FOG_INLINE ~Object_Local()
-  {
-    fog_object_lock = NULL;
-  }
-
-  Lock object_lock;
-  MetaClass object_metaClass;
-};
-
-static Static<Object_Local> object_local;
 
 // ============================================================================
 // [Fog::Object]
 // ============================================================================
 
+const MetaClass* Object::_staticMetaClass;
+Static<Lock> Object::_internalLock;
+
 Object::Object() :
-  _flags(0),
+  _objectFlags(0),
   _objectId(0),
-  _thread(Thread::getCurrent()),
+  _parent(NULL),
+  _homeThread(Thread::getCurrent()),
   _events(NULL)
 {
 }
 
 Object::~Object()
 {
-  // Delete all connections
-  if (!_connection.isEmpty()) removeAllListeners();
+  // Delete all children.
+  err_t err = _deleteChildren();
+  if (err != ERR_OK)
+  {
+    fog_stderr_msg("Fog::Object", "~Object()", "_deleteChildren() failed (%u).");
+  }
 
-  // Demove all posted events.
+  // Delete all connections.
+  if (!_forwardConnection.isEmpty())
+  {
+    removeAllListeners();
+  }
+
+  // Delete all posted events.
   if (_events)
   {
-    AutoLock locked(*fog_object_lock);
+    AutoLock locked(Object::_internalLock.instance());
 
-    // set "wasDeleted" in all pending events
+    // Set "wasDeleted" for all pending events.
     Event* e = _events;
     while (e)
     {
+      // Event will be deleted by event loop, we need only to mark it for
+      // deletion so it won't be processed (called).
       e->_wasDeleted = 1;
-      // Go to previous, because newest pending events are stored
-      // first
+
+      // Go to previous, because newest pending events are stored first.
       e = e->_prev;
     }
   }
 }
 
-void Object::deleteLater()
+void Object::destroyLater()
 {
-  if (!(_flags & OBJ_POSTED_DELETE_LATER_EVENT))
+  if (!(_objectFlags & OBJECT_FLAG_DESTROY_LATER))
   {
-    if (!getThread()) 
+    if (!getHomeThread()) 
     {
-      fog_stderr_msg("Fog::Object", "deleteLater", "Can't post DeleteLater event, because object thread has no event loop");
+      fog_stderr_msg("Fog::Object", "destroyLater", "Can't post DeleteLater event, because object thread has no event loop");
       return;
     }
 
-    _flags |= OBJ_POSTED_DELETE_LATER_EVENT;
+    _objectFlags |= OBJECT_FLAG_DESTROY_LATER;
     postEvent(new(std::nothrow) DestroyEvent());
   }
 }
 
 void Object::destroy()
 {
-  if (canDelete()) delete this;
+  // First delete all children. This is last oportunity to remove them on
+  // current class instance (destructors are changing vtable).
+  err_t err = _deleteChildren();
+  if (err != ERR_OK)
+  {
+    fog_stderr_msg("Fog::Object", "destroy()", "_deleteChildren() failed (%u).");
+  }
+
+  if (canDelete()) 
+    delete this;
 }
 
 // ============================================================================
@@ -116,12 +112,25 @@ void Object::destroy()
 
 const MetaClass* Object::getStaticMetaClass()
 {
-  return &object_local.instance().object_metaClass;
+  return _staticMetaClass;
 }
 
-const MetaClass* Object::getMetaClass() const
+const MetaClass* Object::_getStaticMetaClassRace(MetaClass** p)
 {
-  return &object_local.instance().object_metaClass;
+  while (AtomicOperation<sysuint_t>::get((sysuint_t*)p) == 0)
+  {
+    // Yield is not optimal, but this should really rarely happen and if we
+    // had the luck then there is 100% probability that it will not happen 
+    // again.
+    Thread::_yield();
+  }
+
+  return *p;
+}
+
+const MetaClass* Object::getObjectMetaClass() const
+{
+  return _staticMetaClass;
 }
 
 // ============================================================================
@@ -143,6 +152,101 @@ void Object::setObjectName(const String& objectName)
     _objectName = objectName;
     _objectName.squeeze();
   }
+}
+
+// ============================================================================
+// [Fog::Object - Object Hierarchy]
+// ============================================================================
+
+err_t Object::setParent(Object* parent)
+{
+  // If our parent is a given parent then do nothing, it's not error.
+  if (_parent == parent) 
+  {
+    return ERR_OK;
+  }
+
+  // If we have a parent then it's needed to break the hierarchy first.
+  if (_parent != NULL) 
+  {
+    FOG_RETURN_ON_ERROR(_parent->removeChild(this));
+  }
+
+  // Now set the new parent. NULL is valid value so we must make sure the
+  // object is not null before calling its method.
+  if (parent)
+  {
+    FOG_RETURN_ON_ERROR(parent->addChild(this));
+  }
+
+  return ERR_OK;
+}
+
+err_t Object::addChild(Object* child)
+{
+  FOG_ASSERT(child != NULL);
+
+  // If object is already in our hierarchy then we return quitly.
+  if (child->getParent() == this)
+    return ERR_OK;
+
+  // If object has different parent then it's an error.
+  if (child->hasParent())
+    return ERR_OBJECT_ALREADY_PART_OF_HIERARCHY;
+
+  // Okay, now we can call the virtual _addChild() method.
+  return _addChild(_children.getLength(), child);
+}
+
+err_t Object::removeChild(Object* child)
+{
+  FOG_ASSERT(child != NULL);
+
+  if (child->getParent() != this)
+    return ERR_OBJECT_NOT_PART_OF_HIERARCHY;
+
+  sysuint_t index = _children.indexOf(child);
+  // It must be here if parent check passed!
+  FOG_ASSERT(index != INVALID_INDEX);
+
+  // Okay, now we can call the virtual _removeChild() method.
+  return _removeChild(index, child);
+}
+
+err_t Object::_addChild(sysuint_t index, Object* child)
+{
+  // Index must be valid or equal to children list length (this means append).
+  FOG_ASSERT(index <= _children.getLength());
+
+  FOG_RETURN_ON_ERROR(_children.insert(index, child));
+  child->_parent = this;
+
+  return ERR_OK;
+}
+
+err_t Object::_removeChild(sysuint_t index, Object* child)
+{
+  // Index must be valid.
+  FOG_ASSERT(index < _children.getLength() && _children.at(index) == child);
+
+  FOG_RETURN_ON_ERROR(_children.removeAt(index));
+  child->_parent = NULL;
+
+  return ERR_OK;
+}
+
+err_t Object::_deleteChildren()
+{
+  err_t err = ERR_OK;
+
+  sysuint_t index;
+  while ((index = _children.getLength()) != 0)
+  {
+    Object* child = _children.at(--index);
+    if ((err = _removeChild(index, child)) != ERR_OK) break;
+  }
+
+  return err;
 }
 
 // ============================================================================
@@ -192,37 +296,37 @@ err_t Object::setProperty(const ManagedString& name, const Value& value)
 bool Object::addListener(uint32_t code, void (*fn)(Event*))
 {
   Delegate1<Event*> del(fn);
-  return _addListener(code, NULL, (const void*)&del, DELEGATE_EVENT);
+  return _addListener(code, NULL, (const void*)&del, OBJECT_EVENT_HANDLER_EVENTPTR);
 }
 
 bool Object::addListener(uint32_t code, void (*fn)())
 {
   Delegate0<> del(fn);
-  return _addListener(code, NULL, (const void*)&del, DELEGATE_VOID);
+  return _addListener(code, NULL, (const void*)&del, OBJECT_EVENT_HANDLER_VOID);
 }
 
 bool Object::removeListener(uint32_t code, void (*fn)(Event*))
 {
   Delegate1<Event*> del(fn);
-  return _removeListener(code, NULL, (const void*)&del, DELEGATE_EVENT);
+  return _removeListener(code, NULL, (const void*)&del, OBJECT_EVENT_HANDLER_EVENTPTR);
 }
 
 bool Object::removeListener(uint32_t code, void (*fn)())
 {
   Delegate0<> del(fn);
-  return _removeListener(code, NULL, (const void*)&del, DELEGATE_VOID);
+  return _removeListener(code, NULL, (const void*)&del, OBJECT_EVENT_HANDLER_VOID);
 }
 
 uint Object::removeListener(Object* listener)
 {
-  AutoLock locked(*fog_object_lock);
+  AutoLock locked(Object::_internalLock.instance());
   uint result = 0;
 
   ObjectConnection* prev;
   ObjectConnection* conn;
   ObjectConnection* next;
 
-  UnorderedHash<uint32_t, ObjectConnection*>::MutableIterator it(_connection);
+  UnorderedHash<uint32_t, ObjectConnection*>::MutableIterator it(_forwardConnection);
 
   for (it.toStart(); it.isValid(); )
   {
@@ -237,7 +341,7 @@ uint Object::removeListener(Object* listener)
 
         if (listener)
         {
-          listener->_backref.remove(conn);
+          listener->_backwardConnection.remove(conn);
         }
 
         delete conn;
@@ -267,14 +371,14 @@ removed:
 
 uint Object::removeAllListeners()
 {
-  AutoLock locked(*fog_object_lock);
+  AutoLock locked(Object::_internalLock.instance());
 
   uint result = 0;
 
   ObjectConnection* conn;
   ObjectConnection* next;
 
-  UnorderedHash<uint32_t, ObjectConnection*>::MutableIterator it(_connection);
+  UnorderedHash<uint32_t, ObjectConnection*>::MutableIterator it(_forwardConnection);
 
   for (it.toStart(); it.isValid(); it.toNext())
   {
@@ -286,7 +390,7 @@ uint Object::removeAllListeners()
 
       if (conn->listener)
       {
-        conn->listener->_backref.remove(conn);
+        conn->listener->_backwardConnection.remove(conn);
       }
 
       delete conn;
@@ -294,17 +398,17 @@ uint Object::removeAllListeners()
     } while (conn);
   }
 
-  _connection.clear();
+  _forwardConnection.clear();
   return result;
 }
 
 // Private.
 bool Object::_addListener(uint32_t code, Object* listener, const void* del, uint32_t type)
 {
-  AutoLock locked(*fog_object_lock);
+  AutoLock locked(Object::_internalLock.instance());
 
   ObjectConnection* prev = NULL;
-  ObjectConnection* conn = _connection.value(code, NULL);
+  ObjectConnection* conn = _forwardConnection.value(code, NULL);
   Delegate0<> d = *(const Delegate0<> *)del;
 
   if (conn)
@@ -327,18 +431,18 @@ bool Object::_addListener(uint32_t code, Object* listener, const void* del, uint
   if (prev)
     prev->next = conn;
   else
-    _connection.put(code, conn);
+    _forwardConnection.put(code, conn);
 
-  if (listener) listener->_backref.append(conn);
+  if (listener) listener->_backwardConnection.append(conn);
   return true;
 }
 
 bool Object::_removeListener(uint32_t code, Object* listener, const void* del, uint32_t type)
 {
-  AutoLock locked(*fog_object_lock);
+  AutoLock locked(Object::_internalLock.instance());
 
   ObjectConnection* prev = NULL;
-  ObjectConnection* conn = _connection.value(code, NULL);
+  ObjectConnection* conn = _forwardConnection.value(code, NULL);
   if (!conn) return false;
   Delegate0<> d = *(const Delegate0<> *)del;
 
@@ -352,11 +456,11 @@ bool Object::_removeListener(uint32_t code, Object* listener, const void* del, u
       if (prev)
         prev->next = next;
       else if (next)
-        _connection.put(code, next);
+        _forwardConnection.put(code, next);
       else
-        _connection.remove(code);
+        _forwardConnection.remove(code);
 
-      if (listener) listener->_backref.remove(conn);
+      if (listener) listener->_backwardConnection.remove(conn);
       
       delete conn;
       return true;
@@ -369,19 +473,27 @@ bool Object::_removeListener(uint32_t code, Object* listener, const void* del, u
   return false;
 }
 
-// TODO: Add removing possibility for currently called listeners
+// OBJECT TODO: Add removing possibility for currently called listeners
 void Object::_callListeners(Event* e)
 {
   uint32_t code = e->getCode();
 
-  ObjectConnection* conn = _connection.value(code);
+  ObjectConnection* conn = _forwardConnection.value(code);
   if (!conn) return;
 
   do {
-    if (conn->type == DELEGATE_VOID)
-      conn->delegateVoid.instance()();
-    else
-      conn->delegateEvent.instance()(e);
+    switch (conn->type)
+    {
+      case OBJECT_EVENT_HANDLER_VOID:
+        conn->delegateVoid.instance()();
+        break;
+      case OBJECT_EVENT_HANDLER_EVENTPTR:
+        conn->delegateEvent.instance()(e);
+        break;
+      default:
+        FOG_ASSERT_NOT_REACHED();
+        break;
+    }
   } while ((conn = conn->next));
 }
 
@@ -394,12 +506,12 @@ void Object::postEvent(Event* e)
   Thread* thread;
   EventLoop* eventLoop;
 
-  if ((thread = getThread()) == NULL) goto fail;
+  if ((thread = getHomeThread()) == NULL) goto fail;
   if ((eventLoop = thread->getEventLoop()) == NULL) goto fail;
 
   // Link event with object event queue.
   {
-    AutoLock locked(*fog_object_lock);
+    AutoLock locked(_internalLock.instance());
 
     e->_prev = this->_events;
     this->_events = e;
@@ -412,7 +524,7 @@ void Object::postEvent(Event* e)
   return;
 
 fail:
-  fog_stderr_msg("Fog::Object", "postEvent", "Can't post event to object which has no owner thread or event loop. Deleting event.");
+  fog_stderr_msg("Fog::Object", "postEvent", "Can't post event to object which has no home thread or event loop. Deleting event.");
   delete e;
 }
 
@@ -482,16 +594,21 @@ FOG_CAPI_DECLARE void* fog_object_cast_helper(Fog::Object* self, const Fog::Meta
   using namespace Fog;
 
   FOG_ASSERT(self);
-  const MetaClass* selfMetaClass = self->getMetaClass();
+  const MetaClass* selfMetaClass = self->getObjectMetaClass();
 
-  for (;;)
-  {
-    // compare meta classes for match. Each class has only one meta class,
-    // so pointers comparision is the best way
-    if (selfMetaClass == targetMetaClass) return (void*)self;
-    // iterate over base classes and return if there is no one
-    if ((selfMetaClass = selfMetaClass->base) == NULL) return NULL;
-  }
+  // Iterate over meta classes and try to find the target one.
+  do {
+    // Compare meta classes for match. Each class has only one meta class,
+    // so pointers comparision is the best way here.
+    if (selfMetaClass == targetMetaClass)
+      return (void*)self;
+    
+    // Not match? Try base meta class, again and again until there is no
+    // base class (Fog::Object is root).
+  } while ((selfMetaClass = selfMetaClass->base) != NULL);
+
+  // No match.
+  return NULL;
 }
 
 FOG_CAPI_DECLARE void* fog_object_cast_string(Fog::Object* self, const char* className)
@@ -500,7 +617,7 @@ FOG_CAPI_DECLARE void* fog_object_cast_string(Fog::Object* self, const char* cla
 
   FOG_ASSERT(self);
 
-  const MetaClass* metaClass = self->getMetaClass();
+  const MetaClass* metaClass = self->getObjectMetaClass();
   uint32_t classHash = HashUtil::hashString(className, DETECT_LENGTH);
 
   for (;;)
@@ -526,7 +643,20 @@ FOG_INIT_DECLARE err_t fog_object_init(void)
 {
   using namespace Fog;
 
-  object_local.init();
+  // Initialize the Object meta class.
+  static MetaClass _privateObjectMetaClass;
+  static const char _privateObjectClassName[] = "Fog::Object";
+
+  _privateObjectMetaClass.base = NULL;
+  _privateObjectMetaClass.name = _privateObjectClassName;
+  _privateObjectMetaClass.hash = HashUtil::hashString(
+    _privateObjectClassName, FOG_ARRAY_SIZE(_privateObjectClassName) - 1);
+
+  Object::_staticMetaClass = &_privateObjectMetaClass;
+
+  // Initialize the internal lock.
+  Object::_internalLock.init();
+
   return ERR_OK;
 }
 
@@ -534,6 +664,10 @@ FOG_INIT_DECLARE void fog_object_shutdown(void)
 {
   using namespace Fog;
 
-  object_local.destroy();
+  // The meta class shouldn't be used from now.
+  Object::_staticMetaClass = NULL;
+
+  // Destroy the internal lock.
+  Object::_internalLock.destroy();
 }
 

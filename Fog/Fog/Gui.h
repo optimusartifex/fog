@@ -76,21 +76,21 @@
 
 #include <Fog/Core/Build.h>
 
+#include <Fog/Gui/BorderLayout.h>
+#include <Fog/Gui/BoxLayout.h>
 #include <Fog/Gui/Button.h>
 #include <Fog/Gui/ButtonBase.h>
 #include <Fog/Gui/CheckBox.h>
 #include <Fog/Gui/Composite.h>
 #include <Fog/Gui/Constants.h>
 #include <Fog/Gui/Event.h>
+#include <Fog/Gui/FlowLayout.h>
 #include <Fog/Gui/GuiEngine.h>
-#include <Fog/Gui/Layout/BorderLayout.h>
-#include <Fog/Gui/Layout/BoxLayout.h>
-#include <Fog/Gui/Layout/FlowLayout.h>
-#include <Fog/Gui/Layout/GridLayout.h>
-#include <Fog/Gui/Layout/Layout.h>
-#include <Fog/Gui/Layout/LayoutHint.h>
-#include <Fog/Gui/Layout/LayoutItem.h>
-#include <Fog/Gui/Theme.h>
+#include <Fog/Gui/GridLayout.h>
+#include <Fog/Gui/Layout.h>
+#include <Fog/Gui/LayoutHint.h>
+#include <Fog/Gui/LayoutItem.h>
+#include <Fog/Gui/ThemeEngine.h>
 #include <Fog/Gui/Widget.h>
 #include <Fog/Gui/Window.h>
 #include <Fog/Gui/Animation.h>

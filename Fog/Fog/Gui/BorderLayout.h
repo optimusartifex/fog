@@ -4,12 +4,12 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_GUI_LAYOUT_BORDERLAYOUT_H
-#define _FOG_GUI_LAYOUT_BORDERLAYOUT_H
+#ifndef _FOG_GUI_BORDERLAYOUT_H
+#define _FOG_GUI_BORDERLAYOUT_H
 
 // [Dependencies]
 #include <Fog/Core/List.h>
-#include <Fog/Gui/Layout/Layout.h>
+#include <Fog/Gui/Layout.h>
 
 namespace Fog {
 
@@ -114,4 +114,4 @@ struct FOG_API BorderLayout : public Layout
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_GUI_LAYOUT_BORDERLAYOUT_H
+#endif // _FOG_GUI_BORDERLAYOUT_H

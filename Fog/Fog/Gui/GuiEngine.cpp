@@ -8,7 +8,7 @@
 #include <Fog/Graphics/Image.h>
 #include <Fog/Graphics/Painter.h>
 #include <Fog/Gui/GuiEngine.h>
-#include <Fog/Gui/Layout/Layout.h>
+#include <Fog/Gui/Layout.h>
 #include <Fog/Gui/Widget_p.h>
 
 FOG_IMPLEMENT_OBJECT(Fog::GuiEngine)

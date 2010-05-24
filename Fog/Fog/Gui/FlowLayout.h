@@ -4,11 +4,11 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_GUI_LAYOUT_FLOWLAYOUT_H
-#define _FOG_GUI_LAYOUT_FLOWLAYOUT_H
+#ifndef _FOG_GUI_FLOWLAYOUT_H
+#define _FOG_GUI_FLOWLAYOUT_H
 
 // [Dependencies]
-#include <Fog/Gui/Layout/Layout.h>
+#include <Fog/Gui/Layout.h>
 #include <Fog/Core/List.h>
 
 //! @addtogroup Fog_Gui
@@ -62,4 +62,4 @@ private:
 
 } // Fog namespace
 
-#endif // _FOG_GUI_LAYOUT_FLOWLAYOUT_H
+#endif // _FOG_GUI_FLOWLAYOUT_H

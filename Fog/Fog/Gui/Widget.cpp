@@ -16,8 +16,8 @@
 #include <Fog/Graphics/Region.h>
 #include <Fog/Gui/Constants.h>
 #include <Fog/Gui/GuiEngine.h>
-#include <Fog/Gui/Layout/Layout.h>
-#include <Fog/Gui/Layout/LayoutItem.h>
+#include <Fog/Gui/Layout.h>
+#include <Fog/Gui/LayoutItem.h>
 #include <Fog/Gui/Widget_p.h>
 
 FOG_IMPLEMENT_OBJECT(Fog::Widget)

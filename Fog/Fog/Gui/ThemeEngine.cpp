@@ -10,23 +10,23 @@
 
 // [Dependencies]
 #include <Fog/Graphics/Painter.h>
-#include <Fog/Gui/Theme.h>
+#include <Fog/Gui/ThemeEngine.h>
 
-FOG_IMPLEMENT_OBJECT(Fog::Theme)
+FOG_IMPLEMENT_OBJECT(Fog::ThemeEngine)
 
 namespace Fog {
 
 // ============================================================================
-// [Fog::Theme]
+// [Fog::ThemeEngine]
 // ============================================================================
 
-Theme* Theme::_instance;
+ThemeEngine* ThemeEngine::_instance;
 
-Theme::Theme()
+ThemeEngine::ThemeEngine()
 {
 }
 
-Theme::~Theme()
+ThemeEngine::~ThemeEngine()
 {
 }
 

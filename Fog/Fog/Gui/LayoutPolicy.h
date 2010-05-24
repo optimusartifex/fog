@@ -4,18 +4,19 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_GUI_LAYOUT_LAYOUTPOLICY_H
-#define _FOG_GUI_LAYOUT_LAYOUTPOLICY_H
+#ifndef _FOG_GUI_LAYOUTPOLICY_H
+#define _FOG_GUI_LAYOUTPOLICY_H
 
 // [Dependencies]
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/Object.h>
 #include <Fog/Graphics/Geometry.h>
 #include <Fog/Gui/Constants.h>
-//! @addtogroup Fog_Gui
-//! @{
 
 namespace Fog {
+
+//! @addtogroup Fog_Gui_Layout
+//! @{
 
 // ============================================================================
 // [Forward Declarations]
@@ -29,8 +30,10 @@ struct SpacerItem;
 // [Fog::LayoutPolicy]
 // ============================================================================
 
-struct LayoutPolicy {
-  LayoutPolicy(uint32_t policy)  {
+struct FOG_HIDDEN LayoutPolicy
+{
+  LayoutPolicy(uint32_t policy)
+  {
     _data._all = 0;
     _data._policy = policy;
   }
@@ -52,8 +55,10 @@ struct LayoutPolicy {
   FOG_INLINE bool isHorizontalPolicyExpanding() const { return getHorizontalPolicy() == LAYOUT_POLICY_WIDTH_EXPANDING; }
   FOG_INLINE bool isVerticalPolicyExpanding() const { return getVerticalPolicy() == LAYOUT_POLICY_HEIGHT_EXPANDING; }
 
-  uint32_t expandingDirections() const {
+  uint32_t expandingDirections() const
+  {
     uint32_t result;
+
     if (_data._policy & LAYOUT_EXPANDING_WIDTH)
       result |= ORIENTATION_HORIZONTAL;
     if (_data._policy & LAYOUT_EXPANDING_HEIGHT)
@@ -62,27 +67,31 @@ struct LayoutPolicy {
     return result;
   }
 
-  //is this method really usefull?
-  void transpose() {    
-    uint32_t result = (_data._policy << LAYOUT_HEIGHT_SHIFT); //move vertial to horizontal position
+  // LAYOUT TODO: is this method really usefull?
+  void transpose()
+  {
+    // Move vertial to horizontal position.
+    uint32_t result = (_data._policy << LAYOUT_HEIGHT_SHIFT);
     result |= (_data._policy >> LAYOUT_HEIGHT_SHIFT);
     _data._policy = (result & 0xFF);
 
     uint32_t hStretch = uint32_t(getHorizontalStretch());
     uint32_t vStretch = uint32_t(getVerticalStretch());
+
     setHorizontalStretch(vStretch);
     setVerticalStretch(hStretch);
   }
 
-
-  FOG_INLINE void setHeightForWidth(bool b) { _data._heightForWidth = b; }
+  FOG_INLINE void setHeightForWidth(bool heightForWidth) { _data._heightForWidth = heightForWidth; }
   FOG_INLINE bool hasHeightForWidth() const { return _data._heightForWidth; }
 
-  bool operator==(const LayoutPolicy& s) const { return _data._all == s._data._all; }
-  bool operator!=(const LayoutPolicy& s) const { return _data._all != s._data._all; }
+  FOG_INLINE bool operator==(const LayoutPolicy& s) const { return _data._all == s._data._all; }
+  FOG_INLINE bool operator!=(const LayoutPolicy& s) const { return _data._all != s._data._all; }
 
-  union u {
-    struct {
+  union Data
+  {
+    struct
+    {
       uint32_t _policy : 8;  
       uint32_t _horizontalStretch : 8;
       uint32_t _verticalStretch : 8;
@@ -93,9 +102,10 @@ struct LayoutPolicy {
 
     uint32_t _all;
   } _data;
-
 };
 
-}
+//! @}
 
-#endif
+} // Fog namespace
+
+#endif // _FOG_GUI_LAYOUTPOLICY_H

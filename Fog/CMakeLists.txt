@@ -754,14 +754,22 @@ Source_Group("Svg" FILES ${FOG_SVG_LIB_SOURCES} ${FOG_SVG_MAIN_HEADERS})
 
 Set(FOG_GUI_LIB_SOURCES
   Fog/Gui/Animation.cpp
+  Fog/Gui/BorderLayout.cpp
+  Fog/Gui/BoxLayout.cpp
   Fog/Gui/Button.cpp
   Fog/Gui/ButtonBase.cpp
   Fog/Gui/CheckBox.cpp
   Fog/Gui/Composite.cpp
   Fog/Gui/Event.cpp
+  Fog/Gui/FlowLayout.cpp
+  Fog/Gui/GridLayout.cpp
   Fog/Gui/GuiEngine.cpp
+  Fog/Gui/Layout.cpp
+  Fog/Gui/LayoutHint.cpp
+  Fog/Gui/LayoutItem.cpp
+  Fog/Gui/LayoutUtil.cpp
   Fog/Gui/Margin.cpp
-  Fog/Gui/Theme.cpp
+  Fog/Gui/ThemeEngine.cpp
   Fog/Gui/ToolBar.cpp
   Fog/Gui/ToolButton.cpp
   Fog/Gui/Widget.cpp
@@ -771,15 +779,24 @@ Set(FOG_GUI_LIB_SOURCES
 Set(FOG_GUI_MAIN_HEADERS
   Fog/Gui.h
   Fog/Gui/Animation.h
+  Fog/Gui/BorderLayout.h
+  Fog/Gui/BoxLayout.h
   Fog/Gui/Button.h
   Fog/Gui/ButtonBase.h
   Fog/Gui/CheckBox.h
   Fog/Gui/Composite.h
   Fog/Gui/Constants.h
   Fog/Gui/Event.h
+  Fog/Gui/FlowLayout.h
+  Fog/Gui/GridLayout.h
   Fog/Gui/GuiEngine.h
+  Fog/Gui/Layout.h
+  Fog/Gui/LayoutHint.h
+  Fog/Gui/LayoutItem.h
+  Fog/Gui/LayoutPolicy.h
+  Fog/Gui/LayoutUtil.h
   Fog/Gui/Margin.h
-  Fog/Gui/Theme.h
+  Fog/Gui/ThemeEngine.h
   Fog/Gui/ToolBar.h
   Fog/Gui/ToolButton.h
   Fog/Gui/Widget.h
@@ -787,54 +804,31 @@ Set(FOG_GUI_MAIN_HEADERS
   Fog/Gui/Window.h
 )
 
-Set(FOG_GUI_ENGINE_WIN_SOURCES
+Set(FOG_GUI_GUIENGINE_WIN_SOURCES
   Fog/Gui/GuiEngine/GuiEngine_Windows.cpp
 )
 
-Set(FOG_GUI_ENGINE_WIN_HEADERS
+Set(FOG_GUI_GUIENGINE_WIN_HEADERS
   Fog/Gui/GuiEngine/GuiEngine_Windows.h
 )
 
-Set(FOG_GUI_ENGINE_X11_SOURCES
+Set(FOG_GUI_GUIENGINE_X11_SOURCES
   Fog/Gui/GuiEngine/GuiEngine_X11.cpp
 )
 
-Set(FOG_GUI_ENGINE_X11_HEADERS
+Set(FOG_GUI_GUIENGINE_X11_HEADERS
   Fog/Gui/GuiEngine/GuiEngine_X11.h
   Fog/Gui/GuiEngine/GuiEngine_X11_Xlib.h
 )
 
-Set(FOG_GUI_LAYOUT_SOURCES
-  Fog/Gui/Layout/BorderLayout.cpp
-  Fog/Gui/Layout/BoxLayout.cpp
-  Fog/Gui/Layout/FlowLayout.cpp  
-  Fog/Gui/Layout/GridLayout.cpp
-  Fog/Gui/Layout/Layout.cpp
-  Fog/Gui/Layout/LayoutHint.cpp
-  Fog/Gui/Layout/LayoutItem.cpp
-  Fog/Gui/Layout/LayoutUtil.cpp
+Set(FOG_GUI_THEMEENGINE_SOURCES
+  Fog/Gui/ThemeEngine/ThemeEngine_Default.cpp
+  Fog/Gui/ThemeEngine/ThemeEngine_UxTheme.cpp
 )
 
-Set(FOG_GUI_LAYOUT_HEADERS
-  Fog/Gui/Layout/BorderLayout.h
-  Fog/Gui/Layout/BoxLayout.h
-  Fog/Gui/Layout/FlowLayout.h
-  Fog/Gui/Layout/GridLayout.h  
-  Fog/Gui/Layout/Layout.h
-  Fog/Gui/Layout/LayoutHint.h
-  Fog/Gui/Layout/LayoutItem.h
-  Fog/Gui/Layout/LayoutPolicy.h
-  Fog/Gui/Layout/LayoutUtil.h
-)
-
-Set(FOG_GUI_THEME_SOURCES
-  Fog/Gui/Theme/Theme_Default.cpp
-  Fog/Gui/Theme/Theme_UxTheme.cpp
-)
-
-Set(FOG_GUI_THEME_HEADERS
-  Fog/Gui/Theme/Theme_Default_p.h
-  Fog/Gui/Theme/Theme_UxTheme_p.h
+Set(FOG_GUI_THEMEENGINE_HEADERS
+  Fog/Gui/ThemeEngine/ThemeEngine_Default_p.h
+  Fog/Gui/ThemeEngine/ThemeEngine_UxTheme_p.h
 )
 
 # Source groups.
@@ -843,8 +837,8 @@ Source_Group("Gui" FILES
 )
 
 Source_Group("Gui/GuiEngine" FILES
-  ${FOG_GUI_ENGINE_X11_SOURCES} ${FOG_GUI_ENGINE_X11_HEADERS}
-  ${FOG_GUI_ENGINE_WIN_SOURCES} ${FOG_GUI_ENGINE_WIN_HEADERS}
+  ${FOG_GUI_GUIENGINE_X11_SOURCES} ${FOG_GUI_GUIENGINE_X11_HEADERS}
+  ${FOG_GUI_GUIENGINE_WIN_SOURCES} ${FOG_GUI_GUIENGINE_WIN_HEADERS}
 )
 
 Source_Group("Gui/Layout" FILES
@@ -880,8 +874,7 @@ Set(FOG_ALL_SOURCES
   ${FOG_GRAPHICS_RASTERENGINE_SOURCES}
   # Fog-Gui.
   ${FOG_GUI_LIB_SOURCES}
-  ${FOG_GUI_LAYOUT_SOURCES}
-  ${FOG_GUI_THEME_SOURCES}
+  ${FOG_GUI_THEME_ENGINE_SOURCES}
   # Fog-Svg.
   ${FOG_SVG_LIB_SOURCES}
   # Fog-Xml.
@@ -902,10 +895,9 @@ Set(FOG_ALL_HEADERS
   ${FOG_GRAPHICS_RASTERENGINE_HEADERS}
   # Fog-Gui.
   ${FOG_GUI_MAIN_HEADERS}
-  ${FOG_GUI_ENGINE_WIN_HEADERS}
-  ${FOG_GUI_ENGINE_X11_HEADERS}
-  ${FOG_GUI_LAYOUT_HEADERS}
-  ${FOG_GUI_THEME_HEADERS}
+  ${FOG_GUI_GUIENGINE_WIN_HEADERS}
+  ${FOG_GUI_GUIENGINE_X11_HEADERS}
+  ${FOG_GUI_THEMEENGINE_HEADERS}
   # Fog-Svg.
   ${FOG_SVG_MAIN_HEADERS}
   # Fog-Xml.
@@ -913,8 +905,8 @@ Set(FOG_ALL_HEADERS
 )
 
 If(FOG_GUI_WINDOWS)
-  Set(FOG_ALL_SOURCES ${FOG_ALL_SOURCES} ${FOG_GUI_ENGINE_WIN_SOURCES})
-  Set(FOG_ALL_HEADERS ${FOG_ALL_HEADERS} ${FOG_GUI_ENGINE_WIN_HEADERS})
+  Set(FOG_ALL_SOURCES ${FOG_ALL_SOURCES} ${FOG_GUI_GUIENGINE_WIN_SOURCES})
+  Set(FOG_ALL_HEADERS ${FOG_ALL_HEADERS} ${FOG_GUI_GUIENGINE_WIN_HEADERS})
 EndIf(FOG_GUI_WINDOWS)
 
 # Write CMAKE_ #defines into Fog/Core/Build/Config.h files
@@ -944,7 +936,9 @@ Install(TARGETS Fog DESTINATION lib)
 
 # Build Fog_Gui_X11 plugin.
 If(FOG_GUI_X11 AND FOG_BUILD_GUI_X11)
-  Add_Library(Fog_Gui_X11 SHARED ${FOG_GUI_ENGINE_X11_SOURCES})
+  Add_Library(Fog_Gui_X11 SHARED 
+    ${FOG_GUI_GUIENGINE_X11_SOURCES}
+    ${FOG_GUI_GUIENGINE_X11_HEADERS})
   Target_Link_Libraries(Fog_Gui_X11 Fog ${FOG_LIBRARIES})
   Install(TARGETS Fog_Gui_X11 DESTINATION lib)
 EndIf(FOG_GUI_X11 AND FOG_BUILD_GUI_X11)

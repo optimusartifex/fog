@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_GUI_LAYOUT_LAYOUTHINT_H
-#define _FOG_GUI_LAYOUT_LAYOUTHINT_H
+#ifndef _FOG_GUI_LAYOUTHINT_H
+#define _FOG_GUI_LAYOUTHINT_H
 
 // [Dependencies]
 #include <Fog/Graphics/Geometry.h>
@@ -102,4 +102,4 @@ struct FOG_HIDDEN LayoutHint
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_GUI_LAYOUT_LAYOUTHINT_H
+#endif // _FOG_GUI_LAYOUTHINT_H

@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_GUI_THEME_H
-#define _FOG_GUI_THEME_H
+#ifndef _FOG_GUI_THEMEENGINE_H
+#define _FOG_GUI_THEMEENGINE_H
 
 // [Dependencies]
 #include <Fog/Core/Object.h>
@@ -16,20 +16,20 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::Theme]
+// [Fog::ThemeEngine]
 // ============================================================================
 
-//! @brief Theme.
-struct FOG_API Theme : public Object
+//! @brief Theme engine.
+struct FOG_API ThemeEngine : public Object
 {
-  FOG_DECLARE_OBJECT(Theme, Object)
+  FOG_DECLARE_OBJECT(ThemeEngine, Object)
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  Theme();
-  virtual ~Theme();
+  ThemeEngine();
+  virtual ~ThemeEngine();
 
   // --------------------------------------------------------------------------
   // [Properties]
@@ -43,9 +43,9 @@ struct FOG_API Theme : public Object
   // [Statics]
   // --------------------------------------------------------------------------
 
-  static Theme* _instance;
+  static ThemeEngine* _instance;
 
-  static FOG_INLINE Theme* getInstance() { return _instance; }
+  static FOG_INLINE ThemeEngine* getInstance() { return _instance; }
 };
 
 //! @}
@@ -53,4 +53,4 @@ struct FOG_API Theme : public Object
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_GUI_THEME_H
+#endif // _FOG_GUI_THEMEENGINE_H

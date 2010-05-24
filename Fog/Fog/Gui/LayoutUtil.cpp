@@ -11,8 +11,8 @@
 // [Dependencies]
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Math.h>
-#include <Fog/Gui/Layout/LayoutUtil.h>
-#include <Fog/Gui/Layout/GridLayout.h>
+#include <Fog/Gui/LayoutUtil.h>
+#include <Fog/Gui/GridLayout.h>
 
 namespace Fog {
 namespace LayoutUtil {

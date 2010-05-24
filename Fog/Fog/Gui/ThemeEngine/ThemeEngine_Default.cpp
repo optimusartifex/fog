@@ -10,21 +10,21 @@
 
 // [Dependencies]
 #include <Fog/Graphics/Painter.h>
-#include <Fog/Gui/Theme/Theme_Default_p.h>
+#include <Fog/Gui/ThemeEngine/ThemeEngine_Default_p.h>
 
-FOG_IMPLEMENT_OBJECT(Fog::DefaultTheme)
+FOG_IMPLEMENT_OBJECT(Fog::DefaultThemeEngine)
 
 namespace Fog {
 
 // ============================================================================
-// [Fog::DefaultTheme]
+// [Fog::DefaultThemeEngine]
 // ============================================================================
 
-DefaultTheme::DefaultTheme()
+DefaultThemeEngine::DefaultThemeEngine()
 {
 }
 
-DefaultTheme::~DefaultTheme()
+DefaultThemeEngine::~DefaultThemeEngine()
 {
 }
 

@@ -4,16 +4,16 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_GUI_LAYOUT_LAYOUTITEM_H
-#define _FOG_GUI_LAYOUT_LAYOUTITEM_H
+#ifndef _FOG_GUI_LAYOUTITEM_H
+#define _FOG_GUI_LAYOUTITEM_H
 
 // [Dependencies]
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/Object.h>
 #include <Fog/Graphics/Geometry.h>
 #include <Fog/Gui/Constants.h>
-#include <Fog/Gui/Layout/LayoutPolicy.h>
-#include <Fog/Gui/Layout/LayoutHint.h>
+#include <Fog/Gui/LayoutPolicy.h>
+#include <Fog/Gui/LayoutHint.h>
 #include <Fog/Gui/Margin.h>
 
 namespace Fog {
@@ -331,4 +331,4 @@ struct FOG_API LayoutItem : public Object
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_GUI_LAYOUT_LAYOUTITEM_H
+#endif // _FOG_GUI_LAYOUTITEM_H

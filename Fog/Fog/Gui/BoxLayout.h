@@ -4,11 +4,11 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_GUI_LAYOUT_BOXLAYOUT_H
-#define _FOG_GUI_LAYOUT_BOXLAYOUT_H
+#ifndef _FOG_GUI_BOXLAYOUT_H
+#define _FOG_GUI_BOXLAYOUT_H
 
 // [Dependencies]
-#include <Fog/Gui/Layout/Layout.h>
+#include <Fog/Gui/Layout.h>
 
 namespace Fog {
 
@@ -151,4 +151,4 @@ struct FOG_API VBoxLayout : public BoxLayout
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_GUI_LAYOUT_BOXLAYOUT_H
+#endif // _FOG_GUI_BOXLAYOUT_H

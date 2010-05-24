@@ -4,15 +4,15 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_GUI_LAYOUT_LAYOUT_H
-#define _FOG_GUI_LAYOUT_LAYOUT_H
+#ifndef _FOG_GUI_LAYOUT_H
+#define _FOG_GUI_LAYOUT_H
 
 // [Dependencies]
 #include <Fog/Core/Object.h>
 #include <Fog/Graphics/Geometry.h>
 #include <Fog/Gui/Constants.h>
 #include <Fog/Gui/Event.h>
-#include <Fog/Gui/Layout/LayoutItem.h>
+#include <Fog/Gui/LayoutItem.h>
 
 namespace Fog {
 
@@ -212,4 +212,4 @@ private:
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_GUI_LAYOUT_LAYOUT_H
+#endif // _FOG_GUI_LAYOUT_H

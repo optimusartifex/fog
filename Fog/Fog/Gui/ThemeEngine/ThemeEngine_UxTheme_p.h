@@ -4,16 +4,17 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_GUI_THEME_UXTHEME_P_H
-#define _FOG_GUI_THEME_UXTHEME_P_H
+#ifndef _FOG_GUI_THEMEENGINE_UXTHEME_P_H
+#define _FOG_GUI_THEMEENGINE_UXTHEME_P_H
 
 #include <Fog/Core/Build.h>
 #if defined(FOG_OS_WINDOWS)
 
 // [Dependencies]
 #include <Fog/Core/Library.h>
+#include <Fog/Core/Object.h>
 #include <Fog/Gui/Constants.h>
-#include <Fog/Gui/Theme.h>
+#include <Fog/Gui/ThemeEngine.h>
 
 #include <uxtheme.h>
 
@@ -23,7 +24,7 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::UxTheme]
+// [Fog::UxThemeLibrary]
 // ============================================================================
 
 //! @internal
@@ -95,10 +96,14 @@ private:
   FOG_DISABLE_COPY(UxThemeLibrary)
 };
 
+// ============================================================================
+// [Fog::UxThemeEngine]
+// ============================================================================
+
 //! @internal
-struct FOG_API UxThemeEngine : public Theme
+struct FOG_API UxThemeEngine : public ThemeEngine
 {
-  FOG_DECLARE_OBJECT(UxThemeEngine, Theme)
+  FOG_DECLARE_OBJECT(UxThemeEngine, ThemeEngine)
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -106,6 +111,10 @@ struct FOG_API UxThemeEngine : public Theme
 
   UxThemeEngine();
   virtual ~UxThemeEngine();
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
 };
 
 //! @}
@@ -114,4 +123,4 @@ struct FOG_API UxThemeEngine : public Theme
 
 // [Guard]
 #endif // FOG_OS_WINDOWS
-#endif // _FOG_GUI_THEME_UXTHEME_P_H
+#endif // _FOG_GUI_THEMEENGINE_UXTHEME_P_H

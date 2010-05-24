@@ -9,8 +9,8 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Gui/Layout/GridLayout.h>
-#include <Fog/Gui/Layout/LayoutUtil.h>
+#include <Fog/Gui/GridLayout.h>
+#include <Fog/Gui/LayoutUtil.h>
 #include <Fog/Gui/Widget.h>
 
 FOG_IMPLEMENT_OBJECT(Fog::GridLayout)

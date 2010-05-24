@@ -4,11 +4,12 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_GUI_THEME_DEFAULT_P_H
-#define _FOG_GUI_THEME_DEFAULT_P_H
+#ifndef _FOG_GUI_THEMEENGINE_DEFAULT_P_H
+#define _FOG_GUI_THEMEENGINE_DEFAULT_P_H
 
 // [Dependencies]
-#include <Fog/Gui/Theme.h>
+#include <Fog/Core/Object.h>
+#include <Fog/Gui/ThemeEngine.h>
 
 namespace Fog {
 
@@ -20,16 +21,16 @@ namespace Fog {
 // ============================================================================
 
 //! @internal
-struct FOG_API DefaultTheme : public Theme
+struct FOG_API DefaultThemeEngine : public ThemeEngine
 {
-  FOG_DECLARE_OBJECT(DefaultTheme, Theme)
+  FOG_DECLARE_OBJECT(DefaultThemeEngine, ThemeEngine)
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  DefaultTheme();
-  virtual ~DefaultTheme();
+  DefaultThemeEngine();
+  virtual ~DefaultThemeEngine();
 };
 
 //! @}
@@ -37,4 +38,4 @@ struct FOG_API DefaultTheme : public Theme
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_GUI_THEME_DEFAULT_P_H
+#endif // _FOG_GUI_THEMEENGINE_DEFAULT_P_H

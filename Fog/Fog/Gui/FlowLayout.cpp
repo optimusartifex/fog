@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Gui/Layout/FlowLayout.h>
+#include <Fog/Gui/FlowLayout.h>
 #include <Fog/Gui/Widget.h>
 
 FOG_IMPLEMENT_OBJECT(Fog::FlowLayout)

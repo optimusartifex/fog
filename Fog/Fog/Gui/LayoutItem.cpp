@@ -9,8 +9,8 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Gui/Layout/LayoutItem.h>
-#include <Fog/Gui/Layout/Layout.h>
+#include <Fog/Gui/Layout.h>
+#include <Fog/Gui/LayoutItem.h>
 #include <Fog/Gui/Widget.h>
 
 FOG_IMPLEMENT_OBJECT(Fog::LayoutItem)

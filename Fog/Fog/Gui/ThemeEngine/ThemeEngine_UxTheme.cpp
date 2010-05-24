@@ -12,9 +12,11 @@
 #if defined(FOG_OS_WINDOWS)
 
 // [Dependencies]
+#include <Fog/Core/Constants.h>
+#include <Fog/Core/Library.h>
 #include <Fog/Core/Lock.h>
 #include <Fog/Graphics/Painter.h>
-#include <Fog/Gui/Theme/Theme_UxTheme_p.h>
+#include <Fog/Gui/ThemeEngine/ThemeEngine_UxTheme_p.h>
 
 FOG_IMPLEMENT_OBJECT(Fog::UxThemeEngine)
 

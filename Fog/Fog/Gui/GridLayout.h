@@ -4,12 +4,12 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_GUI_LAYOUT_GRIDLAYOUT_H
-#define _FOG_GUI_LAYOUT_GRIDLAYOUT_H
+#ifndef _FOG_GUI_GRIDLAYOUT_H
+#define _FOG_GUI_GRIDLAYOUT_H
 
 // [Dependencies]
 #include <Fog/Core/List.h>
-#include <Fog/Gui/Layout/Layout.h>
+#include <Fog/Gui/Layout.h>
 
 namespace Fog {
 
@@ -249,4 +249,4 @@ private:
 
 } // Fog namespace
 
-#endif // _FOG_GUI_LAYOUT_GRIDLAYOUT_H
+#endif // _FOG_GUI_GRIDLAYOUT_H

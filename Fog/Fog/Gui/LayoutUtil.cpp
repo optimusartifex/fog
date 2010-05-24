@@ -23,7 +23,7 @@ static FOG_INLINE void calculateFlexOffsetsT(T* head, int avail, int& used)
   if (head == NULL) return;
 
   bool grow = avail > used;
-  int remaining = Math::abs(avail - used);        
+  int remaining = Math::abs(avail - used);
 
   FOG_ASSERT(remaining != 0);
 
@@ -59,9 +59,9 @@ static FOG_INLINE void calculateFlexOffsetsT(T* head, int avail, int& used)
     // Should not happen, but just to be sure :-)
     if (flexSum == 0)
       break;
-    
+
     set = true;
-    
+
     // Never take more space than the parent has!
     flexStep = Math::min<float>((float)remaining, flexStep * flexSum) / flexSum;
 

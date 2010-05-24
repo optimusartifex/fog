@@ -252,13 +252,13 @@ struct MyWindow : public Window
     } else {
       layout = new BorderLayout(this);
     }
-    
-    layout->addItem(_buttons.at(0), BorderLayout::SOUTH);
-    layout->addItem(_buttons.at(1), BorderLayout::WEST);
-    layout->addItem(_buttons.at(2), BorderLayout::CENTER);
-    layout->addItem(_buttons.at(3), BorderLayout::EAST);
-    layout->addItem(_buttons.at(4), BorderLayout::NORTH);
-    layout->addItem(_buttons.at(5), BorderLayout::NORTH);
+
+    layout->addItem(_buttons.at(0), LAYOUT_EDGE_SOUTH);
+    layout->addItem(_buttons.at(1), LAYOUT_EDGE_WEST);
+    layout->addItem(_buttons.at(2), LAYOUT_EDGE_CENTER);
+    layout->addItem(_buttons.at(3), LAYOUT_EDGE_EAST);
+    layout->addItem(_buttons.at(4), LAYOUT_EDGE_NORTH);
+    layout->addItem(_buttons.at(5), LAYOUT_EDGE_NORTH);
 
     LayoutItem* item = _buttons.at(3);
     BorderLayout::LayoutData* d = (BorderLayout::LayoutData*)item->_layoutdata;
@@ -446,7 +446,7 @@ MyWindow::MyWindow(uint32_t createFlags) :
   _scale = 1.0;
   _spread = PATTERN_SPREAD_REPEAT;
 
-  //testBorderLayout();
+  testBorderLayout();
   //setContentRightMargin(0);
 }
 
@@ -456,8 +456,8 @@ MyWindow::~MyWindow()
 
 void MyWindow::onPaint(PaintEvent* e)
 {
-  uint32_t vis = getVisibility();
 /*
+  uint32_t vis = getVisibility();
   if(vis == WIDGET_VISIBLE) {
     setWindowTitle(Ascii8("STATE: VISIBLE"));
   } else if(vis == WIDGET_VISIBLE_MAXIMIZED){

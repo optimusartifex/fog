@@ -35,7 +35,7 @@ BorderLayout::~BorderLayout()
 {
 }
 
-void BorderLayout::addItem(LayoutItem *item, Edge edge, int flex)
+void BorderLayout::addItem(LayoutItem *item, uint32_t edge, int flex)
 {
   if (Layout::addChild(item) == -1) return;
 
@@ -44,11 +44,11 @@ void BorderLayout::addItem(LayoutItem *item, Edge edge, int flex)
   prop->_edge = edge;
   prop->_user.setFlex(flex);
 
-  if (edge & Y_MASK)
+  if (edge & LAYOUT_EDGE_Y_MASK)
   {
     _y.append(item);        
   }
-  else if (edge & X_MASK)
+  else if (edge & LAYOUT_EDGE_X_MASK)
   {
     _x.append(item);
   }
@@ -59,7 +59,7 @@ void BorderLayout::addItem(LayoutItem *item, Edge edge, int flex)
     return;
   }
 
-  if (_sort != SORTNONE && item != _center)
+  if (_sort != LAYOUT_SORT_NONE && item != _center)
     _sortdirty = 1;
 }
 
@@ -69,16 +69,16 @@ void BorderLayout::onRemove(LayoutItem* item)
   {
     uint32_t edge = item->getLayoutData<LayoutData>()->_edge;
 
-    if (edge & Y_MASK)
+    if (edge & LAYOUT_EDGE_Y_MASK)
     {
       _y.remove(item);
     }
-    else if (edge & X_MASK)
+    else if (edge & LAYOUT_EDGE_X_MASK)
     {
       _x.remove(item);
     }
 
-    if (_sort != SORTNONE)
+    if (_sort != LAYOUT_SORT_NONE)
       _sortdirty = 1;
   }
   else
@@ -89,13 +89,15 @@ void BorderLayout::onRemove(LayoutItem* item)
 
 void BorderLayout::calculateLayoutHint(LayoutHint& hint)
 {
-  int widthX=0, minWidthX=0;
-  int heightX=0, minHeightX=0;
-  int widthY=0, minWidthY=0;
-  int heightY=0, minHeightY=0;
+  int widthX = 0, minWidthX = 0;
+  int heightX = 0, minHeightX = 0;
+  int widthY = 0, minWidthY = 0;
+  int heightY = 0, minHeightY = 0;
 
-  int spacingX= getSpacing(), spacingY=getSpacing();
-  int spacingSumX=-spacingX, spacingSumY=-spacingY;
+  int spacingX = getSpacing();
+  int spacingY = getSpacing();
+  int spacingSumX = -spacingX;
+  int spacingSumY = -spacingY;
 
   const List<LayoutItem*>& list = getList();
 
@@ -113,19 +115,19 @@ void BorderLayout::calculateLayoutHint(LayoutHint& hint)
     int marginX = item->getContentLeftMargin() + item->getContentRightMargin();
     int marginY = item->getContentTopMargin() + item->getContentBottomMargin();
 
-    if (prop->_edge & X_MASK)
+    if (prop->_edge & LAYOUT_EDGE_X_MASK)
     {
       widthY = Math::max(widthY, hint.getSizeHint().getWidth() + widthX + marginX);
       minWidthY = Math::max(minWidthY,hint.getMinimumSize().getWidth() + minWidthX + marginX);
 
-      // Add the needed heights of this widget
+      // Add the needed heights of this widget.
       heightY += hint.getSizeHint().getHeight() + marginY;
       minHeightY += hint.getMinimumSize().getHeight() + marginY;
 
-      // Add spacing
+      // Add spacing.
       spacingSumY += spacingY;
 
-      //Allocated height
+      // Allocated height.
       _allocatedHeight += hint.getSizeHint().getHeight() + marginY + spacingY;
 
       if (prop->hasFlex())
@@ -140,19 +142,19 @@ void BorderLayout::calculateLayoutHint(LayoutHint& hint)
         _horizontalflex = item;
       }
     }
-    else if (prop->_edge & Y_MASK)
+    else if (prop->_edge & LAYOUT_EDGE_Y_MASK)
     {
       heightX = Math::max(heightX, hint.getSizeHint().getHeight() + heightY + marginY);
       minHeightX = Math::max(minHeightX, hint.getMinimumSize().getHeight() + minHeightY + marginY);
 
-      // Add the needed widths of this widget
+      // Add the needed widths of this widget.
       widthX += hint.getSizeHint().getWidth() + marginX;
       minWidthX += hint.getMinimumSize().getWidth() + marginX;
 
-      // Add spacing
+      // Add spacing.
       spacingSumX += spacingX;
 
-      //Allocated width
+      // Allocated width.
       _allocatedWidth += hint.getSizeHint().getWidth() + marginX + spacingX;
 
       if (prop->hasFlex())
@@ -178,16 +180,17 @@ void BorderLayout::calculateLayoutHint(LayoutHint& hint)
       heightY += hint.getSizeHint().getHeight() + marginY;
       minHeightY += hint.getMinimumSize().getHeight() + marginY;
 
-      // Add spacing
+      // Add spacing.
       spacingSumX += spacingX;
       spacingSumY += spacingY;
 
-      //Allocated height / Allocated width
+      // Allocated height / Allocated width.
       _allocatedHeight += hint.getSizeHint().getHeight() + marginY + spacingY;
       _allocatedWidth += hint.getSizeHint().getWidth() + marginX + spacingX;
 
+      // Center has min flex value of 1!
       LayoutData* prop = item->getLayoutData<LayoutData>();
-      prop->setFlex(prop->getFlex() < 1 ? 1:prop->getFlex()); //center has min flex value of 1!
+      prop->setFlex(prop->getFlex() < 1 ? 1:prop->getFlex());
     }
   }
 
@@ -259,9 +262,9 @@ void BorderLayout::setLayoutGeometry(const IntRect& rect)
     int marginY = item->getContentYMargins();
     int marginX = item->getContentXMargins();
 
-    if (prop->_edge & Y_MASK)
+    if (prop->_edge & LAYOUT_EDGE_Y_MASK)
     {
-      //NORTH or SOUTH
+      // NORTH or SOUTH.
       width = availWidth - marginX;
       CLEAN(width, hint.getMinimumSize().getWidth(), hint.getMaximumSize().getWidth());        
 
@@ -275,7 +278,7 @@ void BorderLayout::setLayoutGeometry(const IntRect& rect)
       int used = height + marginY + spacingY;
 
       // Update coordinates, for next child
-      if (prop->_edge == NORTH)
+      if (prop->_edge == LAYOUT_EDGE_NORTH)
       {
         curTop += used;
       }
@@ -286,7 +289,7 @@ void BorderLayout::setLayoutGeometry(const IntRect& rect)
 
       availHeight -= used;
     }
-    else if (prop->_edge & X_MASK)
+    else if (prop->_edge & LAYOUT_EDGE_X_MASK)
     {
       height = availHeight - marginY;
       CLEAN(height, hint.getMinimumSize().getHeight(), hint.getMaximumSize().getHeight()); 
@@ -301,7 +304,7 @@ void BorderLayout::setLayoutGeometry(const IntRect& rect)
       int used = width + marginX + spacingX;        
 
       // Update coordinates, for next child
-      if (prop->_edge == WEST)
+      if (prop->_edge == LAYOUT_EDGE_WEST)
       {
         curLeft += used;
       }
@@ -326,14 +329,12 @@ void BorderLayout::setLayoutGeometry(const IntRect& rect)
   }
 }
 
-void BorderLayout::setSort(SortType s)
+void BorderLayout::setSort(uint32_t s)
 {
-  if (_sort != s)
-  {
-    _sort = s;
-    _sortdirty = 1;
-  }
+  if (_sort == s) return;
 
+  _sort = s;
+  _sortdirty = 1;
   invalidateLayout();
 }
 
@@ -350,12 +351,12 @@ const List<LayoutItem*>& BorderLayout::getList()
       _sorted.clear();
       _sorted.reserve(_x.getLength() + _y.getLength());
 
-      if (_sort == SORTX)
+      if (_sort == LAYOUT_SORT_X)
       {
         _sorted.append(_x);
         _sorted.append(_y);
       }
-      else if (_sort == SORTY)
+      else if (_sort == LAYOUT_SORT_Y)
       {
         _sorted.append(_y);
         _sorted.append(_x);

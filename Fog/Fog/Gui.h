@@ -91,6 +91,8 @@
 #include <Fog/Gui/LayoutHint.h>
 #include <Fog/Gui/LayoutItem.h>
 #include <Fog/Gui/ThemeEngine.h>
+#include <Fog/Gui/ToolBar.h>
+#include <Fog/Gui/ToolButton.h>
 #include <Fog/Gui/Widget.h>
 #include <Fog/Gui/Window.h>
 #include <Fog/Gui/Animation.h>

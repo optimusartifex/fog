@@ -39,6 +39,35 @@ const int LAYOUT_DEFAULT_WIDGET_MARGIN = 9;
 const int LAYOUT_DEFAULT_WINDOW_MARGIN = 11;
 
 // ============================================================================
+// [Fog::LAYOUT_EDGE]
+// ============================================================================
+
+//! @brief Layout edge.
+//!
+//! @sa @ref BorderLayout.
+enum LAYOUT_EDGE
+{
+  LAYOUT_EDGE_X_MASK = 0x01,
+  LAYOUT_EDGE_Y_MASK = 0x02,
+
+  LAYOUT_EDGE_NORTH = 0x08 | LAYOUT_EDGE_Y_MASK,
+  LAYOUT_EDGE_SOUTH = 0x10 | LAYOUT_EDGE_Y_MASK,
+  LAYOUT_EDGE_WEST = 0x20 | LAYOUT_EDGE_X_MASK,
+  LAYOUT_EDGE_EAST = 0x40 | LAYOUT_EDGE_X_MASK,
+  LAYOUT_EDGE_CENTER = 0x80
+};
+
+//! @brief Layout sort type.
+//!
+//! @sa @ref BorderLayout.
+enum LAYOUT_SORT
+{
+  LAYOUT_SORT_NONE = 0,
+  LAYOUT_SORT_X = 1,
+  LAYOUT_SORT_Y = 2
+};
+
+// ============================================================================
 // [Fog::LAYOUT_CONSTRAINT]
 // ============================================================================
 

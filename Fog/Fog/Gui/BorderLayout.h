@@ -25,26 +25,6 @@ struct FOG_API BorderLayout : public Layout
 {
   FOG_DECLARE_OBJECT(BorderLayout, Layout)    
 
-  // LAYOUT TODO: Move to Constants.h, LAYOUT_EDGE?
-  enum Edge {
-    X_MASK = 1,
-    Y_MASK = 2,     
-    
-    NORTH = 8 | Y_MASK,
-    SOUTH = 16 | Y_MASK,
-    WEST = 32 | X_MASK,
-    EAST = 64 | X_MASK,
-    CENTER = 128
-  };
-
-  // LAYOUT TODO: Move to Constants.h, LAYOUT_SORT?
-  enum SortType
-  {
-    SORTNONE = 0,
-    SORTX = 1,
-    SORTY = 2
-  };
-
   BorderLayout(Widget* parent=0);
   virtual ~BorderLayout();
 
@@ -78,14 +58,14 @@ struct FOG_API BorderLayout : public Layout
 
   typedef LayoutProperty PropertyType;
 
-  void addItem(LayoutItem *item, Edge edge, int flex = -1);
+  void addItem(LayoutItem *item, uint32_t edge, int flex = -1);
 
   virtual void onRemove(LayoutItem* item);
 
   virtual void calculateLayoutHint(LayoutHint& hint);
   virtual void setLayoutGeometry(const IntRect&);
 
-  void setSort(SortType s);
+  void setSort(uint32_t s);
   const List<LayoutItem*>& getList();
 
   FOG_INLINE bool isDirty() { return _dirty || _sortdirty; }

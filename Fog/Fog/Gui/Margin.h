@@ -81,8 +81,8 @@ struct FOG_HIDDEN Margin
   FOG_INLINE Margin& setRight(int right) { this->right = right; return *this; }
   FOG_INLINE Margin& setBottom(int bottom) { this->bottom = bottom; return *this; }
 
-  FOG_INLINE Margin& setVertical(int vertical) { this->top = this->bottom = vertical; }
-  FOG_INLINE Margin& setHorizontal(int horizontal) { this->left = this->right = horizontal; }
+  FOG_INLINE Margin& setVertical(int vertical) { this->top = this->bottom = vertical; return *this; }
+  FOG_INLINE Margin& setHorizontal(int horizontal) { this->left = this->right = horizontal; return *this; }
 
   FOG_INLINE Margin& setMargin(int all)
   {
@@ -90,6 +90,8 @@ struct FOG_HIDDEN Margin
     this->right  = all;
     this->bottom = all;
     this->left   = all;
+
+    return *this;
   }
 
   FOG_INLINE Margin& setMargin(int vertical, int horizontal)
@@ -98,6 +100,8 @@ struct FOG_HIDDEN Margin
     this->right  = horizontal;
     this->bottom = vertical;
     this->left   = horizontal;
+    
+    return *this;
   }
 
   FOG_INLINE Margin& setMargin(int top, int right, int bottom, int left)

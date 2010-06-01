@@ -353,6 +353,7 @@ Set(FOG_CORE_ARCH_SOURCES
 Set(FOG_CORE_ARCH_HEADERS
   Fog/Core/Arch/Atomic_gcc_x86x64.h
   Fog/Core/Arch/Atomic_clang_x86x64.h
+  Fog/Core/Arch/Atomic_gcc_intrin.h
   Fog/Core/Arch/Atomic_msc_intrin.h
   Fog/Core/Arch/Atomic_msc_x86.h
 )

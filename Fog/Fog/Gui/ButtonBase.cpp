@@ -42,7 +42,7 @@ void ButtonBase::setText(const String& text)
 {
   _text = text;
 
-  repaint(WIDGET_REPAINT_AREA);
+  update(WIDGET_UPDATE_PAINT);
 }
 
 int ButtonBase::getChecked() const
@@ -91,7 +91,7 @@ void ButtonBase::onFocus(FocusEvent* e)
       if (_isSpaceDown)
       {
         _isSpaceDown = false;
-        repaint(WIDGET_REPAINT_AREA);
+        update(WIDGET_UPDATE_PAINT);
       }
       break;
   }
@@ -107,7 +107,7 @@ void ButtonBase::onKey(KeyEvent* e)
       if ((e->getKey() & KEY_MASK) == KEY_SPACE)
       {
         _isSpaceDown = true;
-        repaint(WIDGET_REPAINT_AREA);
+        update(WIDGET_UPDATE_PAINT);
         e->accept();
         return;
       }
@@ -116,7 +116,7 @@ void ButtonBase::onKey(KeyEvent* e)
       if ((e->getKey() & KEY_MASK) == KEY_SPACE)
       {
         _isSpaceDown = false;
-        repaint(WIDGET_REPAINT_AREA);
+        update(WIDGET_UPDATE_PAINT);
         e->accept();
         return;
       }
@@ -132,24 +132,24 @@ void ButtonBase::onMouse(MouseEvent* e)
   {
     case EVENT_MOUSE_IN:
       _isMouseOver = true;
-      repaint(WIDGET_REPAINT_AREA);
+      update(WIDGET_UPDATE_PAINT);
       break;
     case EVENT_MOUSE_OUT:
       _isMouseOver = false;
-      repaint(WIDGET_REPAINT_AREA);
+      update(WIDGET_UPDATE_PAINT);
       break;
     case EVENT_MOUSE_PRESS:
-      if (e->getButton() == BUTTON_LEFT)
+      if (e->getButton() == BUTTON_LEFT && !_isMouseDown)
       {
         _isMouseDown = true;
-        repaint(WIDGET_REPAINT_AREA);
+        update(WIDGET_UPDATE_PAINT);
       }
       break;
     case EVENT_MOUSE_RELEASE:
-      if (e->getButton() == BUTTON_LEFT)
+      if (e->getButton() == BUTTON_LEFT && _isMouseDown)
       {
         _isMouseDown = false;
-        repaint(WIDGET_REPAINT_AREA);
+        update(WIDGET_UPDATE_PAINT);
       }
       break;
   }

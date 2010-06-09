@@ -11,6 +11,7 @@
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/List.h>
 #include <Fog/Core/Lock.h>
+#include <Fog/Core/StringUtil.h>
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/Font.h>
 #include <Fog/Graphics/Matrix.h>
@@ -340,6 +341,12 @@ WinFontFace::~WinFontFace()
 
 err_t WinFontFace::getGlyphSet(const Char* str, sysuint_t length, GlyphSet& glyphSet)
 {
+  if (length == DETECT_LENGTH) length = StringUtil::len(str);
+  if (length == 0) return ERR_OK;
+
+  // This really shouldn't happen!
+  if (str[0].isTrailSurrogate()) return ERR_STRING_INVALID_UTF16;
+
   FOG_RETURN_ON_ERROR(glyphSet.begin(length));
 
   AutoLock locked(lock);

@@ -377,7 +377,6 @@ void VBoxLayout::calculateLayoutHint(LayoutHint& hint)
   hint._maximumSize.set(INT_MAX,INT_MAX);
 }
 
-
 int VBoxLayout::doLayout(const IntRect &rect)
 {
   int availWidth = rect.getWidth();

@@ -15,20 +15,6 @@
 namespace Fog {
 
 // ============================================================================
-// [Fog::ChildEvent]
-// ============================================================================
-
-ChildEvent::ChildEvent(uint32_t code, Widget* child) :
-  Fog::Event(code),
-  _child(child)
-{
-}
-
-ChildEvent::~ChildEvent()
-{
-}
-
-// ============================================================================
 // [Fog::LayoutEvent]
 // ============================================================================
 
@@ -68,17 +54,18 @@ VisibilityEvent::~VisibilityEvent()
 }
 
 // ============================================================================
-// [Fog::ConfigureEvent]
+// [Fog::GeometryEvent]
 // ============================================================================
 
-ConfigureEvent::ConfigureEvent() : 
-  Event(EVENT_CONFIGURE),
-  _geometry(0, 0, 0, 0),
-  _changed(0)
+GeometryEvent::GeometryEvent() : 
+  Event(EVENT_GEOMETRY),
+  _widgetGeometry(0, 0, 0, 0),
+  _clientGeometry(0, 0, 0, 0),
+  _changedFlags(0)
 {
 }
 
-ConfigureEvent::~ConfigureEvent()
+GeometryEvent::~GeometryEvent()
 {
 }
 

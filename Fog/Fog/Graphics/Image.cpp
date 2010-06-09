@@ -2485,9 +2485,9 @@ err_t Image::glyphFromPath(Image& glyph, IntPoint& offset, const DoublePath& pat
 
   rasterizer->finalize();
 
-  if (rasterizer->hasCells())
+  if (rasterizer->isValid())
   {
-    IntBox bounds(rasterizer->getCellsBounds());
+    IntBox bounds(rasterizer->getBoundingBox());
 
     Scanline8 scanline;
 

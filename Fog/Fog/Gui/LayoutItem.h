@@ -181,7 +181,7 @@ struct FOG_API LayoutItem : public Object
   // [LayoutHint]
   // --------------------------------------------------------------------------
 
-  //! @brief Mark this layout for a need to repaint
+  //! @brief Mark this layout for a need to repaint.
   virtual void updateLayout();
 
   virtual void calculateLayoutHint(LayoutHint& hint) = 0;

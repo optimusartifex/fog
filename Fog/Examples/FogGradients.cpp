@@ -46,28 +46,28 @@ void MyWindow::onKey(KeyEvent* e)
   {
     if (e->getKey() == KEY_SPACE)
     {
-      useRegion^=1;
-      repaint(WIDGET_REPAINT_AREA);
+      useRegion ^= 1;
+      update(WIDGET_UPDATE_PAINT);
     }
     else if (e->getKey() == KEY_UP)
     {
       _rotate -= 0.002;
-      repaint(WIDGET_REPAINT_AREA);
+      update(WIDGET_UPDATE_PAINT);
     }
     else if (e->getKey() == KEY_DOWN)
     {
       _rotate += 0.002;
-      repaint(WIDGET_REPAINT_AREA);
+      update(WIDGET_UPDATE_PAINT);
     }
     else if (e->getKey() == KEY_LEFT)
     {
       _scale -= 0.1;
-      repaint(WIDGET_REPAINT_AREA);
+      update(WIDGET_UPDATE_PAINT);
     }
     else if (e->getKey() == KEY_RIGHT)
     {
       _scale += 0.1;
-      repaint(WIDGET_REPAINT_AREA);
+      update(WIDGET_UPDATE_PAINT);
     }
   }
 

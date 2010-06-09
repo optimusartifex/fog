@@ -221,6 +221,10 @@ err_t Object::_addChild(sysuint_t index, Object* child)
   FOG_RETURN_ON_ERROR(_children.insert(index, child));
   child->_parent = this;
 
+  // Send 'child-add' event.
+  ChildEvent e(EVENT_CHILD_ADD, child);
+  sendEvent(&e);
+
   return ERR_OK;
 }
 
@@ -231,6 +235,10 @@ err_t Object::_removeChild(sysuint_t index, Object* child)
 
   FOG_RETURN_ON_ERROR(_children.removeAt(index));
   child->_parent = NULL;
+
+  // Send 'child-remove' event.
+  ChildEvent e(EVENT_CHILD_REMOVE, child);
+  sendEvent(&e);
 
   return ERR_OK;
 }
@@ -546,7 +554,7 @@ void Object::sendEvent(Event* e)
   _callListeners(e);
 }
 
-void Object::sendEventById(uint32_t code)
+void Object::sendEventByCode(uint32_t code)
 {
   Event e(code, 0);
   sendEvent(&e);
@@ -556,8 +564,8 @@ void Object::sendEventById(uint32_t code)
 // [Fog::Object - Event handlers]
 // ============================================================================
 
-// onEvent is normally defined by FOG_EVENT_BEGIN() and FOG_EVENT_END() macro,
-// but Fog::Object is exception.
+// The onEvent() method is normally defined by FOG_EVENT_BEGIN() and
+// FOG_EVENT_END() macros, but Fog::Object is an exception.
 void Object::onEvent(Event* e)
 {
   switch (e->getCode())
@@ -567,6 +575,15 @@ void Object::onEvent(Event* e)
       break;
     case EVENT_DESTROY:
       onDestroy(reinterpret_cast<DestroyEvent*>(e));
+      break;
+
+    case EVENT_CHILD_ADD:
+    case EVENT_CHILD_REMOVE:
+      onChild(reinterpret_cast<ChildEvent*>(e));
+      break;
+
+    case EVENT_PROPERTY:
+      onProperty(reinterpret_cast<PropertyEvent*>(e));
       break;
   }
 }
@@ -579,7 +596,11 @@ void Object::onDestroy(DestroyEvent* e)
 {
 }
 
-void Object::onPropertyChanged(PropertyChangedEvent* e)
+void Object::onChild(ChildEvent* e)
+{
+}
+
+void Object::onProperty(PropertyEvent* e)
 {
 }
 

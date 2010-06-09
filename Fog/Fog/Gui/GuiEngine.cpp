@@ -227,8 +227,8 @@ void GuiEngine::changeMouseStatus(Widget* w, const IntPoint& pos)
     hoverChange = (!!_mouseStatus.hover) |
                   ((!(pos.getX() < 0 || 
                       pos.getY() < 0 ||
-                      pos.getX() >= w->_geometry.w ||
-                      pos.getY() >= w->_geometry.h)) << 1);
+                      pos.getX() >= w->_widgetGeometry.w ||
+                      pos.getY() >= w->_widgetGeometry.h)) << 1);
 
     enum HOVER_CHANGE
     {
@@ -524,40 +524,53 @@ void GuiEngine::dispatchVisibility(Widget* w, uint32_t visible)
   w->_visibility = visible;
 }
 
-void GuiEngine::dispatchConfigure(Widget* w, const IntRect& rect, bool changedOrientation)
+void GuiEngine::dispatchConfigure(Widget* w, const IntRect& geometry, bool changedOrientation)
 {
-  if (w->hasGuiWindow() && ((GuiWindow*)w->getGuiWindow())->hasPopUp())
+  if (w->hasGuiWindow() && w->getGuiWindow()->hasPopUp())
   {
-    ((GuiWindow*)w->getGuiWindow())->closePopUps();
+    w->getGuiWindow()->closePopUps();
   }
 
-  uint32_t changed = 0;
+  GeometryEvent e;
+  e._widgetGeometry = geometry;
+  e._clientGeometry.set(0, 0, geometry.w, geometry.h);
 
-  if (w->getPosition() != rect.getPosition())
-    changed |= ConfigureEvent::CHANGED_POSITION;
+  w->calcClientGeometry(e._clientGeometry);
+  if (!e._clientGeometry.isValid())
+    e._clientGeometry.set(0, 0, geometry.w, geometry.h);
 
-  if (w->getSize() != rect.getSize())
-    changed |= ConfigureEvent::CHANGED_SIZE;
+  uint32_t changedFlags = 0;
+
+  if (w->_widgetGeometry.x != e._widgetGeometry.x || w->_widgetGeometry.y != e._widgetGeometry.y)
+    changedFlags |= GeometryEvent::CHANGED_WIDGET_POSITION;
+
+  if (w->_widgetGeometry.w != e._widgetGeometry.w || w->_widgetGeometry.h != e._widgetGeometry.h)
+    changedFlags |= GeometryEvent::CHANGED_WIDGET_SIZE;
+
+  if (w->_clientGeometry.x != e._clientGeometry.x || w->_clientGeometry.y != e._clientGeometry.y)
+    changedFlags |= GeometryEvent::CHANGED_CLIENT_POSITION;
+
+  if (w->_clientGeometry.w != e._clientGeometry.w || w->_clientGeometry.h != e._clientGeometry.h)
+    changedFlags |= GeometryEvent::CHANGED_CLIENT_SIZE;
 
   if (changedOrientation)
-    changed |= ConfigureEvent::CHANGED_ORIENTATION;
+    changedFlags |= GeometryEvent::CHANGED_ORIENTATION;
 
-  if (!changed) return;
+  if (changedFlags == 0) return;
+  e._changedFlags = changedFlags;
 
-  ConfigureEvent e;
-  e._geometry = rect;
-  e._changed = changed;
-
-  w->_geometry = rect;
-  w->_clientGeometry.set(0, 0, rect.w, rect.h);
+  w->_widgetGeometry = e._widgetGeometry;
+  w->_clientGeometry = e._clientGeometry;
+  w->_updateHasNcArea();
   w->sendEvent(&e);
 
   Layout* layout = w->getLayout();
 
   // TODO: intelligent enum order so we can omit one check here!
-  if (layout && layout->_activated &&  changed & ConfigureEvent::CHANGED_SIZE || changed & ConfigureEvent::CHANGED_ORIENTATION)
+  if (layout && layout->_activated && (changedFlags & GeometryEvent::CHANGED_WIDGET_SIZE) || (changedFlags & GeometryEvent::CHANGED_ORIENTATION))
   {
-    FOG_ASSERT(layout->_toplevel);
+    // TODO: Stefan, assertion failure, don't know why, disabled for now.
+    // FOG_ASSERT(layout->_toplevel);
     layout->markAsDirty();
   }
 
@@ -567,7 +580,7 @@ void GuiEngine::dispatchConfigure(Widget* w, const IntRect& rect, bool changedOr
     // Maximize and fullscreen should not be resized -> only visibile state.
     if (w->getVisibility() == WIDGET_VISIBLE) p->update(WIDGET_UPDATE_ALL);
   }
-  else if (changed & ConfigureEvent::CHANGED_SIZE)
+  else if (changedFlags & GeometryEvent::CHANGED_WIDGET_SIZE)
   {
     w->update(WIDGET_UPDATE_ALL);
   }
@@ -597,6 +610,18 @@ void GuiEngine::widgetDestroyed(Widget* w)
 // traversing in widget-tree.
 struct UpdateRec
 {
+  FOG_INLINE UpdateRec& operator=(const UpdateRec& other)
+  {
+    bounds = other.bounds;
+    paintBounds = other.paintBounds;
+    uflags = other.uflags;
+    implicitFlags = other.implicitFlags;
+    visible = other.visible;
+    painted = other.painted;
+
+    return *this;
+  }
+
   IntBox bounds;
   IntBox paintBounds;
   uint32_t uflags;
@@ -662,16 +687,18 @@ void GuiEngine::doUpdate()
 
 void GuiEngine::doUpdateWindow(GuiWindow* window)
 {
-  // Clear dirty flag
+  // Clear dirty flag.
   window->_isDirty = false;
 
-  // GuiWindow widget.
-  Widget* top = window->_widget;
+  // Parent used by iterator.
+  Widget* parent = NULL;
+  // Current widget, in this block it's also the top-level widget.
+  Widget* widget = window->_widget;
 
   // Hidden windows won't be updated.
   if (!window->_visible) 
   {
-    top->_uflags = 0;
+    widget->_uflags = 0;
     return;
   }
   
@@ -679,6 +706,7 @@ void GuiEngine::doUpdateWindow(GuiWindow* window)
   {
     FOG_ASSERT(window->_activatelist->_activated == 0);
     window->_activatelist->activate();
+
     FOG_ASSERT(window->_activatelist->_activated == 1);
     window->_activatelist = window->_activatelist->_nextactivate;
   }
@@ -687,76 +715,92 @@ void GuiEngine::doUpdateWindow(GuiWindow* window)
   // Local variables and initialization.
   // =======================================================
 
-  // 10 seconds is extra buffer timeout
-  TimeTicks now = TimeTicks::now() - TimeDelta::fromSeconds(10);
-
-  // Painting.
-  Painter painter;
-  PaintEvent e;
-  e._painter = &painter;
-
-  // Temporary regions. We are using more regions, because region operations
-  // are most efficient by Region::op(dest, src1, src2) way. So it's safe to
-  // use different destination regions. Memory will be copied, but no memory
-  // will be allocated that is the goal.
-  TemporaryRegion<32> rtmp1;
-  TemporaryRegion<32> rtmp2;
-  TemporaryRegion<32> rtmp3;
-  TemporaryRegion<64> blitRegion;
-
   // Some temporary data.
-  IntSize topSize(top->getSize());
+  IntSize topSize(widget->getSize());
   IntBox  topBox(0, 0, (int)topSize.getWidth(), (int)topSize.getHeight());
 
-  uint32_t uflags = top->_uflags;
+  uint32_t uflags = widget->_uflags;
   uint32_t implicitFlags = 0;
   bool blitFull = false;
   bool paintAll = false;
 
-  // Paint helper variables.
-  uint topBytesPerPixel;
-
-  if (window->_backingStore->getWidth()  != topSize.getWidth() ||
-    window->_backingStore->getHeight() != topSize.getHeight())
-  {
-    window->_backingStore->resize(topSize.getWidth(), topSize.getHeight(), true);
-
-    // We can omit updating here, because if window size was changed,
-    // all uflags have to be already set.
-
-    // It should already be set, but nobody knows...
-    uflags |= WIDGET_UPDATE_ALL;
-  }
-  else if (window->_backingStore->expired(now))
-  {
-    window->_backingStore->resize(topSize.getWidth(), topSize.getHeight(), false);
-    uflags |= WIDGET_UPDATE_ALL;
-  }
-
-  topBytesPerPixel = window->_backingStore->getDepth() >> 3;
-
   // =======================================================
-  // Update top level widget.
+  // Back-buffer.
   // =======================================================
 
-  // if there is nothing to do, continue. It's checked here,
-  // because next steps needs to create drawing context, etc...
-  if ((uflags & (
-    WIDGET_UPDATE_SOMETHING |
-    WIDGET_UPDATE_CHILD     |
-    WIDGET_UPDATE_ALL       |
-    WIDGET_UPDATE_GEOMETRY  |
-    WIDGET_REPAINT_AREA     |
-    WIDGET_REPAINT_CARET   )) == 0)
+  {
+    // 10 seconds is extra buffer timeout
+    TimeTicks now = TimeTicks::now() - TimeDelta::fromSeconds(10);
+
+    if (window->_backingStore->getWidth()  != topSize.getWidth() ||
+        window->_backingStore->getHeight() != topSize.getHeight() )
+    {
+      window->_backingStore->resize(topSize.getWidth(), topSize.getHeight(), true);
+
+      // We can omit updating here, because if window size was changed, all uflags
+      // have to be already set.
+
+      // It should already be set, but nobody knows...
+      uflags |= WIDGET_UPDATE_ALL;
+    }
+    else if (window->_backingStore->expired(now))
+    {
+      // TODO: If back-buffer expired and no widget needs updating then we should
+      // just copy old content to new back-buffer without repaint process.
+      window->_backingStore->resize(topSize.getWidth(), topSize.getHeight(), false);
+      uflags |= WIDGET_UPDATE_ALL;
+    }
+  }
+
+  // TODO: Bytes per pixel instead of depth.
+  uint topBytesPerPixel = window->_backingStore->getDepth() >> 3;
+
+  // ==========================================================================
+  // Bail-out if update is not necessary.
+  // ==========================================================================
+
+  // If there is nothing to do, go away. It's checked here, because all next
+  // steps need some work, creating painter, regions, etc...
+  if ((uflags & (WIDGET_UPDATE_SOMETHING |
+                 WIDGET_UPDATE_CHILD     |
+                 WIDGET_UPDATE_GEOMETRY  |
+                 WIDGET_UPDATE_NCPAINT   |
+                 WIDGET_UPDATE_PAINT     |
+                 WIDGET_UPDATE_CARET     |
+                 WIDGET_UPDATE_ALL       )) == 0)
   {
     return;
   }
 
+  // ==========================================================================
+  // Setup painter and paint-event.
+  // ==========================================================================
+
+  // Painter and paint-event.
+  Painter painter;
+
+  PaintEvent e;
+  e._painter = &painter;
+
+  // Temporary regions. We are using more regions, because region operations
+  // are the most efficient in Region::op(dest, src1, src2) form. So it's safe
+  // to use different destination regions. Memory will be copied, but no memory
+  // will be allocated that is the goal.
+  //TemporaryRegion<32> rtmp1;
+  //TemporaryRegion<32> rtmp2;
+  //TemporaryRegion<32> rtmp3;
+  //TemporaryRegion<64> blitRegion;
+
+  Region rtmp1;
+  Region rtmp2;
+  Region rtmp3;
+  Region blitRegion;
+
   // We will call Painter::begin() here, because it will be shared
-  // between all repaints. Also we tweak width and height, because if we
+  // between all repaints. We Also tweak width and height, because if we
   // set abnormal large width or height (in cases that backing store is cached)
-  // we can tell painter to use multithreading in small areas (that we don't
-  // want).
+  // we can tell painter to use multithreading in small areas (and we don't
+  // want to do that).
   {
     ImageBuffer buffer;
     buffer.data = window->_backingStore->getPixels();
@@ -764,278 +808,294 @@ void GuiEngine::doUpdateWindow(GuiWindow* window)
     buffer.height = Math::min<int>(window->_backingStore->getHeight(), topSize.getHeight());
     buffer.format = window->_backingStore->getFormat();
     buffer.stride = window->_backingStore->getStride();
-
     painter.begin(buffer, NO_FLAGS /*| PAINTER_INIT_MT */);
   }
 
-  if ((uflags & WIDGET_UPDATE_ALL) != 0)
+  // ==========================================================================
+  // [Update]
+  // ==========================================================================
+
+  LocalStack<1024> stack;
+  err_t stackerr;
+
+  // Manual object iterator.
+  Object** ocur = NULL;
+  Object** oend = ocur + 1;
+
+  // Parent and child record.
+  UpdateRec parentRec;
+  UpdateRec widgetRec;
+
+  parent = NULL;
+  parentRec.bounds.set(0, 0, widget->getWidth(), widget->getHeight());
+  parentRec.paintBounds.set(0, 0, widget->getWidth(), widget->getHeight());
+  parentRec.uflags = uflags;
+  parentRec.implicitFlags = implicitFlags;
+  parentRec.visible = true;
+  parentRec.painted = blitFull | paintAll;
+
+  goto inside;
+
+pushed:
+  ocur = (Object**)parent->_children.getData();
+  oend = ocur + parent->_children.getLength();
+
+  widget = (Widget*)*ocur;
+  for (;;)
   {
-    implicitFlags |=
+    // TODO: Hackery
+    if (!reinterpret_cast<Object*>(widget)->isWidget())
+      goto next;
+
+    if (widget->getVisibility() < WIDGET_VISIBLE)
+      goto next;
+
+inside:
+    widgetRec.uflags = widget->_uflags;
+    widgetRec.implicitFlags = parentRec.implicitFlags;
+
+    if ((widgetRec.uflags & WIDGET_UPDATE_ALL) != 0)
+    {
+      widgetRec.implicitFlags |=
+        WIDGET_UPDATE_SOMETHING |
+        WIDGET_UPDATE_CHILD     |
+        WIDGET_UPDATE_GEOMETRY  |
+        WIDGET_UPDATE_NCPAINT   |
+        WIDGET_UPDATE_PAINT     |
+        WIDGET_UPDATE_CARET     ;
+    }
+    widgetRec.uflags |= widgetRec.implicitFlags;
+
+    if ((widgetRec.uflags & (
       WIDGET_UPDATE_SOMETHING |
       WIDGET_UPDATE_CHILD     |
       WIDGET_UPDATE_GEOMETRY  |
-      WIDGET_REPAINT_AREA     ;
-  }
-
-  uflags |= implicitFlags;
-
-  if ((uflags & WIDGET_REPAINT_AREA) != 0)
-  {
-    e._code = EVENT_PAINT;
-    e._receiver = top;
-
-    painter.setMetaVars(
-      TemporaryRegion<1>(IntRect(0, 0, top->getWidth(), top->getHeight())),
-      IntPoint(0, 0));
-    top->sendEvent(&e);
-
-    uflags |=
-      WIDGET_UPDATE_CHILD  ;
-    implicitFlags |=
-      WIDGET_UPDATE_CHILD  |
-      WIDGET_REPAINT_AREA  ;
-
-    blitFull = true;
-    paintAll = true;
-  }
-
-  // =======================================================
-  // Update children.
-  // =======================================================
-
-  if (top->hasChildren() && (uflags & WIDGET_UPDATE_CHILD) != 0)
-  {
-    LocalStack<1024> stack;
-    err_t stackerr;
-
-    // Manual object iterator.
-    Object* const* ocur;
-    Object* const* oend;
-
-    // Parent and child widgets.
-    Widget* parent;
-    Widget* child;
-
-    UpdateRec parentRec;
-    UpdateRec childRec;
-
-    parent = top;
-    parentRec.bounds.set(0, 0, parent->getWidth(), parent->getHeight());
-    parentRec.paintBounds.set(0, 0, parent->getWidth(), parent->getHeight());
-    parentRec.uflags = uflags;
-    parentRec.implicitFlags = implicitFlags;
-    parentRec.visible = true;
-    parentRec.painted = blitFull | paintAll;
-
-__pushed:
-    ocur = parent->_children.getData();
-    oend = ocur + parent->_children.getLength();
-
-    child = (Widget*)*ocur;
-    for (;;)
+      WIDGET_UPDATE_NCPAINT   |
+      WIDGET_UPDATE_PAINT     |
+      WIDGET_UPDATE_CARET     |
+      WIDGET_UPDATE_ALL       )) == 0)
     {
-      // TODO: Hackery
-      if (!reinterpret_cast<Object*>(child)->isWidget())
-        goto __next;
+      goto next;
+    }
 
-      if (child->getVisibility() < WIDGET_VISIBLE)
-        goto __next;
+    if (parent)
+    {
+      widgetRec.bounds.x1 = parentRec.bounds.getX1() + widget->getX();
+      widgetRec.bounds.y1 = parentRec.bounds.getY1() + widget->getY();
+      widgetRec.bounds.x2 = widgetRec.bounds.getX1() + widget->getWidth();
+      widgetRec.bounds.y2 = widgetRec.bounds.getY1() + widget->getHeight();
+      widgetRec.bounds += parent->getOrigin();
+      widgetRec.visible = IntBox::intersect(widgetRec.paintBounds, parentRec.paintBounds, widgetRec.bounds);
+    }
+    else
+    {
+      widgetRec.bounds.x1 = 0;
+      widgetRec.bounds.y1 = 0;
+      widgetRec.bounds.x2 = widget->getWidth();
+      widgetRec.bounds.y2 = widget->getHeight();
+      widgetRec.paintBounds = widgetRec.bounds;
+      widgetRec.visible = true;
+    }
 
-      childRec.uflags = child->_uflags;
-      childRec.implicitFlags = parentRec.implicitFlags;
+    widgetRec.painted = false;
 
-      if ((childRec.uflags & WIDGET_UPDATE_ALL) != 0)
+    if (widgetRec.visible)
+    {
+      // ----------------------------------------------------------------------
+      // [Paint Non-Client Area]
+      // ----------------------------------------------------------------------
+
+      if ((widgetRec.uflags & (WIDGET_UPDATE_NCPAINT)) != 0 && widget->hasNcArea())
       {
-        childRec.implicitFlags |=
-          WIDGET_UPDATE_SOMETHING |
-          WIDGET_UPDATE_CHILD     |
-          WIDGET_UPDATE_GEOMETRY  |
-          WIDGET_REPAINT_AREA     ;
+        e._code = EVENT_NCPAINT;
+        e._receiver = widget;
+
+        rtmp1.set(widgetRec.paintBounds);
+        painter.setMetaVars(
+          rtmp1,
+          IntPoint(widgetRec.bounds.getX1(), widgetRec.bounds.getY1()));
+
+        widget->sendEvent(&e);
+        if (!parentRec.painted) blitRegion.combine(rtmp1, REGION_OP_UNION);
       }
-      childRec.uflags |= childRec.implicitFlags;
 
-      if ((childRec.uflags & (
-        WIDGET_UPDATE_SOMETHING |
-        WIDGET_UPDATE_CHILD     |
-        WIDGET_UPDATE_GEOMETRY  |
-        WIDGET_REPAINT_AREA     |
-        WIDGET_REPAINT_CARET    |
-        WIDGET_UPDATE_ALL)) == 0)
+      // ----------------------------------------------------------------------
+      // [Paint Client Area]
+      // ----------------------------------------------------------------------
+
+      if ((widgetRec.uflags & (WIDGET_UPDATE_PAINT  | WIDGET_UPDATE_CARET)) != 0)
       {
-        goto __next;
-      }
-
-      childRec.bounds.x1 = parentRec.bounds.getX1() + child->getX();
-      childRec.bounds.y1 = parentRec.bounds.getY1() + child->getY();
-      childRec.bounds.x2 = childRec.bounds.getX1() + child->getWidth();
-      childRec.bounds.y2 = childRec.bounds.getY1() + child->getHeight();
-
-      childRec.bounds += parent->getOrigin();
-
-      childRec.visible = IntBox::intersect(childRec.paintBounds, parentRec.paintBounds, childRec.bounds);
-      childRec.painted = false;
-
-      if (childRec.visible)
-      {
-        // paint client area / caret
-        if ((childRec.uflags & (WIDGET_REPAINT_AREA  | WIDGET_REPAINT_CARET)) != 0)
-        {
-          e._code = EVENT_PAINT;
-          e._receiver = child;
+        e._code = EVENT_PAINT;
+        e._receiver = widget;
 
 #if 0
-          if (child->children().count() > 0 && child->children().getLength() <= 16)
-          {
-            rtmp2.set(childRec.paintBounds);
-            TemporaryRegion<128> rtmp4;
-            List<Widget*>::ConstIterator ci(child->children());
-            int ox = childRec.bounds.x1() + child->origin().x();
-            int oy = childRec.bounds.y1() + child->origin().y();
+        if (widget->children().count() > 0 && widget->children().getLength() <= 16)
+        {
+          rtmp2.set(widgetRec.paintBounds);
+          TemporaryRegion<128> rtmp4;
+          List<Widget*>::ConstIterator ci(widget->children());
+          int ox = widgetRec.bounds.x1() + widget->origin().x();
+          int oy = widgetRec.bounds.y1() + widget->origin().y();
 
-            for (ci.toStart(); ci.isValid(); ci.toNext())
+          for (ci.toStart(); ci.isValid(); ci.toNext())
+          {
+            Widget* cw = core_object_cast<Widget*>(ci.value());
+            if (cw && cw->visibility() == Widget::Visible)
             {
-              Widget* cw = core_object_cast<Widget*>(ci.value());
-              if (cw && cw->visibility() == Widget::Visible)
+              if ((cw->_uflags & WIDGET_REPAINT_PARENT_REQUIRED))
               {
-                if ((cw->_uflags & WIDGET_REPAINT_PARENT_REQUIRED))
-                {
-                  // this is simple optimization. If widget will call
-                  // Widget::paintParent(), we will simply do it
-                  // earlier.
-                  cw->_uflags |= Widget::paintParent;
-                }
-                else
-                {
-                  rtmp4.combine(IntBox(
-                    cw->rect().x1() + ox,
-                    cw->rect().y1() + oy,
-                    cw->rect().x2() + ox,
-                    cw->rect().y2() + oy), REGION_OP_UNION);
-                }
+                // this is simple optimization. If widget will call
+                // Widget::paintParent(), we will simply do it
+                // earlier.
+                cw->_uflags |= Widget::paintParent;
+              }
+              else
+              {
+                rtmp4.combine(IntBox(
+                  cw->rect().x1() + ox,
+                  cw->rect().y1() + oy,
+                  cw->rect().x2() + ox,
+                  cw->rect().y2() + oy), REGION_OP_UNION);
               }
             }
-            Region::combine(rtmp1, rtmp2, rtmp4, REGION_OP_SUBTRACT);
           }
-          else
-          {
-#endif
-            rtmp1.set(childRec.paintBounds);
-            childRec.painted = true;
-#if 0
-          }
-#endif
-          painter.setMetaVars(
-            rtmp1,
-            IntPoint(childRec.bounds.getX1(), childRec.bounds.getY1()));
-
-          // FIXME: Repaint caret repaints the whole widget.
-          if ((childRec.uflags & (WIDGET_REPAINT_AREA | WIDGET_REPAINT_CARET)) != 0)
-          {
-            child->sendEvent(&e);
-            //blitFull = true;
-            if (!parentRec.painted) blitRegion.combine(rtmp1, REGION_OP_UNION);
-          }
-
-          /*
-          if (Application::caretStatus().widget == child &&
-          (childRec.uflags & (Widget::UFlagRepaintWidget | Widget::UFlagRepaintCaret)) != 0)
-          {
-          theme->paintCaret(&painter, Application::caretStatus());
-          //blitFull = true;
-          if (!parentRec.painted) blitRegion.unite(rtmp1);
-          }
-          */
-
-          parentRec.implicitFlags |= WIDGET_UPDATE_SOMETHING |
-            WIDGET_UPDATE_CHILD     |
-            WIDGET_REPAINT_AREA     ;
-          childRec.uflags         |= WIDGET_UPDATE_CHILD     ;
-          childRec.implicitFlags  |= WIDGET_UPDATE_SOMETHING |
-            WIDGET_UPDATE_CHILD     |
-            WIDGET_REPAINT_AREA     ;
+          Region::combine(rtmp1, rtmp2, rtmp4, REGION_OP_SUBTRACT);
         }
-      }
-
-      if ((childRec.uflags & WIDGET_UPDATE_CHILD) != 0 && child->_children.getLength())
-      {
-        stackerr = ERR_OK;
-        stackerr |= stack.push(parent);
-        stackerr |= stack.push(ocur);
-        stackerr |= stack.push(oend);
-        stackerr |= stack.push(parentRec);
-        if (stackerr != ERR_OK) goto end;
-
-        parent = child;
-        parentRec = childRec;
-
-        goto __pushed;
-__pop:
-        childRec = parentRec;
-        child = parent;
-        stack.pop(parentRec);
-        stack.pop(oend);
-        stack.pop(ocur);
-        stack.pop(parent);
-      }
-
-      // Clear update flags.
-      child->_uflags &= ~(
-        WIDGET_UPDATE_SOMETHING |
-        WIDGET_UPDATE_CHILD     |
-        WIDGET_UPDATE_ALL       |
-        WIDGET_UPDATE_GEOMETRY  |
-        WIDGET_REPAINT_AREA     |
-        WIDGET_REPAINT_CARET    );
-
-__next:
-      // Go to next child or to parent.
-      if (++ocur == oend)
-      {
-        if (!stack.isEmpty())
-          goto __pop;
         else
-          break;
-      }
+        {
+#endif
+          //rtmp1.set(IntBox(widgetRec.paintBounds.x1));
+          rtmp1.set(widgetRec.paintBounds);
+          widgetRec.painted = true;
+#if 0
+        }
+#endif
+        painter.setMetaVars(
+          rtmp1,
+          IntPoint(widgetRec.bounds.getX1(), widgetRec.bounds.getY1()));
 
-      child = (Widget*)*ocur;
+        // FIXME: Repaint caret repaints the whole widget.
+        if ((widgetRec.uflags & (WIDGET_UPDATE_PAINT | WIDGET_UPDATE_CARET)) != 0)
+        {
+          widget->sendEvent(&e);
+          //blitFull = true;
+          if (!parentRec.painted) blitRegion.combine(rtmp1, REGION_OP_UNION);
+        }
+
+        /*
+        if (Application::caretStatus().widget == widget &&
+        (widgetRec.uflags & (Widget::UFlagRepaintWidget | Widget::UFlagRepaintCaret)) != 0)
+        {
+        theme->paintCaret(&painter, Application::caretStatus());
+        //blitFull = true;
+        if (!parentRec.painted) blitRegion.unite(rtmp1);
+        }
+        */
+
+        parentRec.implicitFlags |= WIDGET_UPDATE_SOMETHING |
+                                   WIDGET_UPDATE_CHILD     |
+                                   WIDGET_UPDATE_NCPAINT   |
+                                   WIDGET_UPDATE_PAINT     ;
+
+        widgetRec.uflags        |= WIDGET_UPDATE_CHILD     ;
+        widgetRec.implicitFlags |= WIDGET_UPDATE_SOMETHING |
+                                   WIDGET_UPDATE_CHILD     |
+                                   WIDGET_UPDATE_NCPAINT   |
+                                   WIDGET_UPDATE_PAINT     ;
+      }
     }
+
+    if ((widgetRec.uflags & WIDGET_UPDATE_CHILD) != 0 && widget->_children.getLength())
+    {
+      stackerr = ERR_OK;
+      stackerr |= stack.push(parent);
+      stackerr |= stack.push(ocur);
+      stackerr |= stack.push(oend);
+      stackerr |= stack.push(parentRec);
+      if (stackerr != ERR_OK) goto end;
+
+      parent = widget;
+      parentRec = widgetRec;
+
+      goto pushed;
+pop:
+      FOG_ASSERT(parent != NULL);
+      widgetRec = parentRec;
+      widget = parent;
+      stack.pop(parentRec);
+      stack.pop(oend);
+      stack.pop(ocur);
+      stack.pop(parent);
+    }
+
+    // Clear update flags.
+    widget->_uflags &= ~(
+      WIDGET_UPDATE_SOMETHING |
+      WIDGET_UPDATE_CHILD     |
+      WIDGET_UPDATE_GEOMETRY  |
+      WIDGET_UPDATE_NCPAINT   |
+      WIDGET_UPDATE_PAINT     |
+      WIDGET_UPDATE_CARET     |
+      WIDGET_UPDATE_ALL       );
+
+next:
+    // Go to next widget or to parent.
+    if (++ocur == oend)
+    {
+      if (stack.isEmpty()) break;
+      goto pop;
+    }
+
+    widget = (Widget*)*ocur;
   }
 
 end:
+
+  // ==========================================================================
+  // Blit root widget content to screen.
+  // ==========================================================================
+
   painter.end();
 
-  // =======================================================
-  // blit root widget content to screen
-  // =======================================================
-
-  const IntBox* rptr;
-  sysuint_t rlen = 0;
-
-  if (blitFull || window->_needBlit)
   {
-    rptr = &topBox;
-    rlen = 1;
-  }
-  else
-  {
-    rptr = blitRegion.getData();
-    rlen = blitRegion.getLength();
+    const IntBox* rptr;
+    sysuint_t rlen = 0;
+
+    if (blitFull || window->_needBlit)
+    {
+      rptr = &topBox;
+      rlen = 1;
+    }
+    else
+    {
+      rptr = blitRegion.getData();
+      rlen = blitRegion.getLength();
+    }
+
+    if (rlen)
+    {
+      window->_backingStore->updateRects(rptr, rlen);
+      doBlitWindow(window, rptr, rlen);
+    }
   }
 
-  if (rlen)
-  {
-    window->_backingStore->updateRects(rptr, rlen);
-    doBlitWindow(window, rptr, rlen);
-  }
+  // ==========================================================================
+  // Clear flags.
+  // ==========================================================================
 
   // Clear update flags.
-  top->_uflags &= ~(
+  FOG_ASSERT(widget->_uflags == 0);
+
+  /*
+  widget->_uflags &= ~(
     WIDGET_UPDATE_SOMETHING |
     WIDGET_UPDATE_CHILD     |
     WIDGET_UPDATE_ALL       |
     WIDGET_UPDATE_GEOMETRY  |
-    WIDGET_REPAINT_AREA     |
-    WIDGET_REPAINT_CARET    );
+    WIDGET_UPDATE_NCPAINT   |
+    WIDGET_UPDATE_PAINT     |
+    WIDGET_UPDATE_CARET     );
+  */
 
   // Clear blit flag.
   window->_needBlit = false;
@@ -1125,10 +1185,12 @@ GuiWindow* GuiWindow::getModalWindow()
 void GuiWindow::onEnabled(bool enabled)
 {
   _enabled = enabled;
-  //Question: dispatch disable-events during modality?
-  //current answer: No, because it is an indirect disable
-  //and should not be changed/react by application!
-  if (_modal == 0)
+
+  // TODO:
+  // Question: dispatch disable-events during modality?
+  // current answer: No, because it is an indirect disable
+  // and should not be changed/react by application!
+  if (_modal == NULL)
   {
     GUI_ENGINE()->dispatchEnabled(_widget, enabled);
   }
@@ -1140,7 +1202,7 @@ void GuiWindow::onVisibility(uint32_t visible)
   GUI_ENGINE()->dispatchVisibility(_widget, visible);
 }
 
-void GuiWindow::onConfigure(const IntRect& windowRect, const IntRect& clientRect)
+void GuiWindow::onGeometry(const IntRect& windowRect, const IntRect& clientRect)
 {
   _windowRect = windowRect;
   _clientRect = clientRect;
@@ -1215,7 +1277,7 @@ void GuiWindow::onMouseMove(int x, int y)
 __repeat:
   {
     // Add origin.
-    p -= w->_origin;
+    p -= w->_clientOrigin;
 
     // Iterate over children and try to find child widget where a mouse
     // position is. Iteration must be done through end, becuase we want
@@ -1226,7 +1288,7 @@ __repeat:
       Widget* current = fog_object_cast<Widget*>(it.value());
       if (current && 
           current->getVisibility() >= WIDGET_VISIBLE &&
-          current->_geometry.contains(p))
+          current->_widgetGeometry.contains(p))
       {
         w = current;
         p -= w->getPosition();

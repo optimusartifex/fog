@@ -1053,13 +1053,15 @@ err_t FTFontFace::getGlyphSet(const Char* str, sysuint_t length, GlyphSet& glyph
   // This really shouldn't happen!
   if (str[0].isTrailSurrogate()) return ERR_STRING_INVALID_UTF16;
 
-  err_t err;
-  if ((err = glyphSet.begin(length))) return err;
+  FOG_RETURN_ON_ERROR(glyphSet.begin(length));
 
   AutoLock locked(lock);
+
   GlyphData* glyphd;
 
+  err_t err = ERR_OK;
   sysuint_t remain = length;
+
   do {
     // Get unicode character, it's also needed to handle surrogate pairs.
     uint32_t uc = str[0].ch();

@@ -24,14 +24,17 @@ namespace Fog {
 #define FOG_WIDGET_TREE_ITERATOR_EX(__name__, __basewidget__, __conditional__, __before_traverse__, __after_traverse__, __push__, __pop__) \
   if ((__basewidget__)->_children.getLength()) \
   { \
-    Fog::LocalStack<512> stack; \
-    Fog::Widget** childCur = (Fog::Widget** )( __basewidget__->_children.getData() ); \
-    Fog::Widget** childEnd = childCur + ( __basewidget__->_children.getLength() ); \
-    Fog::Widget* child; \
+    ::Fog::LocalStack<512> stack; \
+    ::Fog::Widget** childCur = (::Fog::Widget** )( __basewidget__->_children.getData() ); \
+    ::Fog::Widget** childEnd = childCur + ( __basewidget__->_children.getLength() ); \
+    ::Fog::Widget* child; \
     \
     for (;;) \
     { \
       child = *childCur; \
+      \
+      if (!((::Fog::Object*)child)->isWidget()) \
+        goto __name__##_next; \
       \
       __before_traverse__ \
       \
@@ -43,7 +46,7 @@ namespace Fog {
         stack.push(childCur); \
         stack.push(childEnd); \
         \
-        childCur = (Fog::Widget** )child->_children.getData(); \
+        childCur = (::Fog::Widget** )child->_children.getData(); \
         childEnd = childCur + child->_children.getLength(); \
         \
         continue; \

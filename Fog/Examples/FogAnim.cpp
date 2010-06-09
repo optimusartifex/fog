@@ -141,7 +141,7 @@ void MyWindow::onTimer(TimerEvent* e)
   for (sysuint_t i = 0; i < NumPoints; i++) mp[i].move(bounds);
   clr.move();
 
-  repaint(WIDGET_REPAINT_AREA);
+  update(WIDGET_UPDATE_PAINT);
 }
 
 // ============================================================================

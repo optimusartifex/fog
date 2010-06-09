@@ -1022,10 +1022,9 @@ err_t WinGuiWindow::create(uint32_t flags)
 
   if (_handle)
   {
-    //just update window with new styles
+    // Just update window with new styles.
     DWORD style = GetWindowLong((HWND)_handle,GWL_STYLE);
     DWORD exstyle = GetWindowLong((HWND)_handle,GWL_EXSTYLE);
-
 
     bool b = (flags & WINDOW_FRAMELESS) != 0 || (flags & WINDOW_POPUP) != 0 || (flags & WINDOW_FULLSCREEN) != 0;
     if (b)
@@ -1037,8 +1036,8 @@ err_t WinGuiWindow::create(uint32_t flags)
 
     if (visible)
     {
-      //prevent flickering!
-      SendMessage((HWND)_handle, WM_SETREDRAW, (WPARAM) FALSE, (LPARAM) 0);
+      // Prevent flickering!
+      SendMessage((HWND)_handle, WM_SETREDRAW, (WPARAM)FALSE, (LPARAM)0);
     }
 
     if (reinterpret_cast<WinGuiBackBuffer*>(_backingStore)->_prgb != b)
@@ -1053,12 +1052,12 @@ err_t WinGuiWindow::create(uint32_t flags)
       }
     }
 
-    //it's much easier to first remove all possible flags
-    //and then create a complete new flag and or it with the clean old one
+    // It's much easier to first remove all possible flags and then create
+    // a complete new flag and or it with the clean old one.
     style &=~ (WS_OVERLAPPED | WS_CAPTION | WS_POPUP | WS_SYSMENU | WS_DLGFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | CS_NOCLOSE | WS_THICKFRAME | WS_BORDER);
     
-    SetWindowLong((HWND)_handle,GWL_STYLE,style|dwStyle);
-    SetWindowLong((HWND)_handle,GWL_EXSTYLE, dwStyleEx);
+    SetWindowLong((HWND)_handle, GWL_STYLE, style | dwStyle);
+    SetWindowLong((HWND)_handle, GWL_EXSTYLE, dwStyleEx);
     
     doSystemMenu(flags);
 
@@ -1149,11 +1148,10 @@ err_t WinGuiWindow::create(uint32_t flags)
   // Get correct window and client rectangle.
   getWindowRect(&_windowRect, &_clientRect);
 
-
   return ERR_OK;
 
 fail:
-  return ERR_GUI_CANT_CREATE_UIWINDOW;
+  return ERR_GUI_CANT_CREATE_WINDOW;
 }
 
 err_t WinGuiWindow::destroy()
@@ -1255,24 +1253,19 @@ err_t WinGuiWindow::hide()
   return ERR_OK;
 }
 
-err_t WinGuiWindow::move(const IntPoint& pt)
+err_t WinGuiWindow::setPosition(const IntPoint& pos)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
-  if ((_windowRect.getX() != pt.getX()) | (_windowRect.getY1() != pt.getY()))
+  if ((_windowRect.x != pos.x) | (_windowRect.y != pos.y))
   {
-    MoveWindow((HWND)_handle,
-      pt.getX(),
-      pt.getY(), 
-      _windowRect.getWidth(),
-      _windowRect.getHeight(),
-      FALSE);
+    MoveWindow((HWND)_handle, pos.x, pos.y, _windowRect.w, _windowRect.h, FALSE);
   }
 
   return ERR_OK;
 }
 
-err_t WinGuiWindow::resize(const IntSize& size)
+err_t WinGuiWindow::setSize(const IntSize& size)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
   if ((size.getWidth() <= 0) | (size.getHeight() <= 0)) return ERR_RT_INVALID_ARGUMENT;
@@ -1290,18 +1283,18 @@ err_t WinGuiWindow::resize(const IntSize& size)
   return ERR_OK;
 }
 
-err_t WinGuiWindow::reconfigure(const IntRect& rect)
+err_t WinGuiWindow::setGeometry(const IntRect& geometry)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
-  if (!rect.isValid()) return ERR_RT_INVALID_ARGUMENT;
+  if (!geometry.isValid()) return ERR_RT_INVALID_ARGUMENT;
 
-  if (_windowRect != rect)
+  if (_windowRect != geometry)
   {
     MoveWindow((HWND)_handle, 
-      rect.getX(),
-      rect.getY(),
-      rect.getWidth(),
-      rect.getHeight(),
+      geometry.getX(),
+      geometry.getY(),
+      geometry.getWidth(),
+      geometry.getHeight(),
       TRUE);
   }
 
@@ -1630,11 +1623,11 @@ LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
 
       case WM_USER:
       {
-        // Message is sent to create a onConfigure on maximized application start.
+        // Message is sent to create a onGeometry on maximized application start.
         IntRect wr;
         IntRect cr;
         getWindowRect(&wr, &cr);
-        onConfigure(wr, cr);
+        onGeometry(wr, cr);
         return 0;
       }
 
@@ -1706,7 +1699,7 @@ LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
         IntRect wr;
         IntRect cr;
         getWindowRect(&wr, &cr);
-        onConfigure(wr, cr);
+        onGeometry(wr, cr);
         return 0;
       }
 

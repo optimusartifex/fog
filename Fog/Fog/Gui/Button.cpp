@@ -33,7 +33,7 @@ Button::~Button()
 
 IntSize Button::getSizeHint() const
 {
-  return IntSize(30, 10);
+  return IntSize(50, 24);
 }
 
 void Button::onPaint(PaintEvent* e)

@@ -25,32 +25,6 @@ struct Painter;
 //! @{
 
 // ============================================================================
-// [Fog::ChildEvent]
-// ============================================================================
-
-struct FOG_API ChildEvent : public Event
-{
-  // --------------------------------------------------------------------------
-  // [Construction / Destruction]
-  // --------------------------------------------------------------------------
-
-  ChildEvent(uint32_t code = 0, Widget* child = NULL);
-  virtual ~ChildEvent();
-
-  // --------------------------------------------------------------------------
-  // [Methods]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE Widget* child() const { return _child; }
-
-  // --------------------------------------------------------------------------
-  // [Members]
-  // --------------------------------------------------------------------------
-
-  Widget* _child;
-};
-
-// ============================================================================
 // [Fog::StateEvent]
 // ============================================================================
 
@@ -81,47 +55,55 @@ struct FOG_API VisibilityEvent : public Event
 };
 
 // ============================================================================
-// [Fog::ConfigureEvent]
+// [Fog::GeometryEvent]
 // ============================================================================
 
-struct FOG_API ConfigureEvent : public Event
+struct FOG_API GeometryEvent : public Event
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  ConfigureEvent();
-  virtual ~ConfigureEvent();
+  GeometryEvent();
+  virtual ~GeometryEvent();
 
   // --------------------------------------------------------------------------
-  // [Methods]
+  // [Accessors]
   // --------------------------------------------------------------------------
 
   enum CHANGED_FLAGS
   {
-    CHANGED_POSITION = (1 << 0),
-    CHANGED_SIZE = (1 << 1),
-    CHANGED_WINDOW_POSITION = (1 << 2),
-    CHANGED_WINDOW_SIZE = (1 << 3),
-    CHANGED_ORIENTATION = (1 << 4)
+    CHANGED_WIDGET_POSITION = 0x0001,
+    CHANGED_WIDGET_SIZE = 0x0002,
+
+    CHANGED_CLIENT_POSITION = 0x0004,
+    CHANGED_CLIENT_SIZE = 0x0008,
+
+    CHANGED_WINDOW_POSITION = 0x0010,
+    CHANGED_WINDOW_SIZE = 0x0020,
+
+    CHANGED_ORIENTATION = 0x0080
   };
 
-  FOG_INLINE const IntRect& getGeometry() const { return _geometry; }
-  FOG_INLINE uint32_t getChangedFlags() const { return _changed; }
+  FOG_INLINE const IntRect& getWidgetGeometry() const { return _widgetGeometry; }
+  FOG_INLINE const IntRect& getClientGeometry() const { return _clientGeometry; }
+  FOG_INLINE uint32_t getChangedFlags() const { return _changedFlags; }
 
-  FOG_INLINE bool isChangedPosition() const { return (_changed & CHANGED_POSITION) != 0; }
-  FOG_INLINE bool isChangedSize() const { return (_changed & CHANGED_SIZE) != 0; }
-  FOG_INLINE bool isChangedWindowPosition() const { return (_changed & CHANGED_WINDOW_POSITION) != 0; }
-  FOG_INLINE bool isChangedWindowSize() const { return (_changed & CHANGED_WINDOW_SIZE) != 0; }
-  FOG_INLINE bool isChangedOrientation() const { return (_changed & CHANGED_ORIENTATION) != 0; }
+  FOG_INLINE bool isChangedWidgetPosition() const { return (_changedFlags & CHANGED_WIDGET_POSITION) != 0; }
+  FOG_INLINE bool isChangedWidgetSize    () const { return (_changedFlags & CHANGED_WIDGET_SIZE    ) != 0; }
+  FOG_INLINE bool isChangedClientPosition() const { return (_changedFlags & CHANGED_CLIENT_POSITION) != 0; }
+  FOG_INLINE bool isChangedClientSize    () const { return (_changedFlags & CHANGED_CLIENT_SIZE    ) != 0; }
+  FOG_INLINE bool isChangedWindowPosition() const { return (_changedFlags & CHANGED_WINDOW_POSITION) != 0; }
+  FOG_INLINE bool isChangedWindowSize    () const { return (_changedFlags & CHANGED_WINDOW_SIZE    ) != 0; }
+  FOG_INLINE bool isChangedOrientation   () const { return (_changedFlags & CHANGED_ORIENTATION    ) != 0; }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  // TODO: Is this needed?
-  IntRect _geometry;
-  uint32_t _changed;
+  IntRect _widgetGeometry;
+  IntRect _clientGeometry;
+  uint32_t _changedFlags;
 };
 
 // ============================================================================
@@ -142,12 +124,14 @@ struct FOG_API OriginEvent : public Event
   // --------------------------------------------------------------------------
 
   FOG_INLINE const IntPoint& getOrigin() const { return _origin; }
+  FOG_INLINE const IntPoint& getDifference() const { return _difference; }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
   IntPoint _origin;
+  IntPoint _difference;
 };
 
 // ============================================================================

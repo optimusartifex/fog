@@ -710,8 +710,8 @@ intersectNop:
 void RasterPaintEngine::CTX_SYMBOL(_doMaskPath)(
   RasterPaintContext* ctx, Rasterizer* ras, uint32_t clipOp)
 {
-  int y = ras->getCellsBounds().y1;
-  int y_end = ras->getCellsBounds().y2;
+  int y = ras->getBoundingBox().y1;
+  int y_end = ras->getBoundingBox().y2;
 
 #if CTX_MT_MODE == 1
   int delta = ctx->delta;

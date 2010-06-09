@@ -58,7 +58,7 @@ void MyWindow::onKey(KeyEvent* e)
     }
   }
 
-  repaint(WIDGET_REPAINT_AREA);
+  update(WIDGET_UPDATE_PAINT);
   base::onKey(e);
 }
 

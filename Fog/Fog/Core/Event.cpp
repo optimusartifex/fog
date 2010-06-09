@@ -95,6 +95,25 @@ void DestroyEvent::run()
 }
 
 // ============================================================================
+// [Fog::ChildEvent]
+// ============================================================================
+
+ChildEvent::ChildEvent(uint32_t code, Object* child) :
+  Event(code),
+  _child(child)
+{
+}
+
+ChildEvent::~ChildEvent()
+{
+}
+
+Event* ChildEvent::clone() const
+{
+  return ( new(std::nothrow) ChildEvent(getCode(), getChild()) )->_cloned(getReceiver());
+}
+
+// ============================================================================
 // [Fog::TimerEvent]
 // ============================================================================
 
@@ -104,28 +123,32 @@ TimerEvent::TimerEvent(Timer* timer) :
 {
 }
 
-Event* TimerEvent::clone()
+TimerEvent::~TimerEvent()
+{
+}
+
+Event* TimerEvent::clone() const
 {
   return ( new(std::nothrow) TimerEvent(getTimer()) )->_cloned(getReceiver());
 }
 
 // ============================================================================
-// [Fog::PropertyChangedEvent]
+// [Fog::PropertyEvent]
 // ============================================================================
 
-PropertyChangedEvent::PropertyChangedEvent(const String& name) :
-  Event(EVENT_CHANGE_PROPERTY),
+PropertyEvent::PropertyEvent(const String& name) :
+  Event(EVENT_PROPERTY),
   _name(name)
 {
 }
 
-PropertyChangedEvent::~PropertyChangedEvent()
+PropertyEvent::~PropertyEvent()
 {
 }
 
-Event* PropertyChangedEvent::clone() const
+Event* PropertyEvent::clone() const
 { 
-  return ( new(std::nothrow) PropertyChangedEvent(getName()) )->_cloned(getReceiver());
+  return ( new(std::nothrow) PropertyEvent(getName()) )->_cloned(getReceiver());
 }
 
 } // Fog namespace

@@ -3556,7 +3556,7 @@ bool RasterPaintEngine::_doRasterizePath_st(const DoublePath& path, const IntBox
   ras->addPath(*p);
   ras->finalize();
 
-  return ras->hasCells();
+  return ras->isValid();
 }
 
 // ============================================================================

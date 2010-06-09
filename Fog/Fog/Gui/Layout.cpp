@@ -134,6 +134,22 @@ void Layout::markAsDirty()
 
 Widget* Layout::getParentWidget() const
 {
+  LayoutItem* parent = _parentItem;
+  if (parent == NULL) return NULL;
+
+  do {
+    if (parent->isWidget())
+    {
+      return reinterpret_cast<Widget*>(parent);
+    }
+
+    FOG_ASSERT(parent->isLayout());
+    parent = reinterpret_cast<Layout*>(parent)->_parentItem;
+  } while (parent);
+
+  return NULL;
+
+/*
   if (!_toplevel)
   {
     if (_parentItem)
@@ -149,6 +165,7 @@ Widget* Layout::getParentWidget() const
 
   FOG_ASSERT(_parentItem && _parentItem->isWidget());
   return (Widget*)(_parentItem);
+*/
 }
 
 int Layout::calcMargin(int margin, uint32_t location) const
@@ -386,7 +403,7 @@ int Layout::addChild(LayoutItem* item)
   _children.append(item);
   invalidateLayout();
 
-  return getLength() -1;
+  return getLength() - 1;
 }
 
 int Layout::addChildLayout(Layout* l)

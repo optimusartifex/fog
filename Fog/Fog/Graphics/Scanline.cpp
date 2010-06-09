@@ -49,7 +49,7 @@ err_t Scanline8::_prepareScanline(int w)
   w = Math::max<int>(w + SPAN_CMASK_LENGTH_THRESHOLD, 512);
 
   // See prepareScanline()
-  FOG_ASSERT(_maskCapacity < w);
+  FOG_ASSERT(_maskCapacity < (uint)w);
 
   if (_maskData) Memory::free(_maskData);
 

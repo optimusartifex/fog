@@ -24,7 +24,9 @@ struct FOG_API Composite : public Widget
 {
   FOG_DECLARE_OBJECT(Composite, Widget)
 
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   Composite(uint32_t createFlags = 0);
   virtual ~Composite();

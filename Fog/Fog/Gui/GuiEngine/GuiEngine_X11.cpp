@@ -957,7 +957,8 @@ X11GuiWindow::~X11GuiWindow()
 
 err_t X11GuiWindow::create(uint32_t createFlags)
 {
-  if (_handle) return ERR_GUI_WINDOW_ALREADY_EXISTS;
+  if (_handle) 
+    return ERR_OK;
 
   X11GuiEngine* engine = GUI_ENGINE();
 
@@ -1104,7 +1105,8 @@ err_t X11GuiWindow::create(uint32_t createFlags)
 
 err_t X11GuiWindow::destroy()
 {
-  if (!_handle) return ERR_RT_INVALID_HANDLE;
+  if (!_handle)
+    return ERR_OK;
 
   X11GuiEngine* engine = GUI_ENGINE();
 
@@ -1163,11 +1165,11 @@ err_t X11GuiWindow::hide()
   return ERR_OK;
 }
 
-err_t X11GuiWindow::move(const IntPoint& pt)
+err_t X11GuiWindow::setPosition(const IntPoint& pos)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
-  if (_windowRect.getX() != pt.getX() || _windowRect.getY() != pt.getY())
+  if (_windowRect.getX() != pos.getX() || _windowRect.getY() != pos.getY())
   {
     X11GuiEngine* engine = GUI_ENGINE();
 
@@ -1175,13 +1177,13 @@ err_t X11GuiWindow::move(const IntPoint& pt)
     if ((_xflags & XFlag_Configured) == 0)
       setMoveableHints();
 
-    engine->pXMoveWindow(engine->getDisplay(), (XID)getHandle(), pt.getX(), pt.getY());
+    engine->pXMoveWindow(engine->getDisplay(), (XID)getHandle(), pos.getX(), pos.getY());
   }
 
   return ERR_OK;
 }
 
-err_t X11GuiWindow::resize(const IntSize& size)
+err_t X11GuiWindow::setSize(const IntSize& size)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
   if (size.getWidth() <= 0 || size.getHeight() <= 0) return ERR_RT_INVALID_ARGUMENT;
@@ -1196,14 +1198,14 @@ err_t X11GuiWindow::resize(const IntSize& size)
   return ERR_OK;
 }
 
-err_t X11GuiWindow::reconfigure(const IntRect& rect)
+err_t X11GuiWindow::setGeometry(const IntRect& rect)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
   if (!rect.isValid()) return ERR_RT_INVALID_ARGUMENT;
 
   if (_windowRect != rect)
   {
-    // some window managers can change widget move request
+    // Some window managers can change widget move request.
     if ((_xflags & XFlag_Configured) == 0)
       setMoveableHints();
 
@@ -1426,7 +1428,7 @@ void X11GuiWindow::onX11Event(XEvent* xe)
         windowRect.getWidth(),
         windowRect.getHeight());
 
-      onConfigure(windowRect, clientRect);
+      onGeometry(windowRect, clientRect);
       break;
     }
 

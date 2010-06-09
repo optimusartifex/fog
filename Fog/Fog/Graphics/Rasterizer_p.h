@@ -12,18 +12,13 @@
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/Geometry.h>
 #include <Fog/Graphics/Path.h>
+#include <Fog/Graphics/Span_p.h>
 #include <Fog/Graphics/Scanline_p.h>
 
 namespace Fog {
 
 //! @addtogroup Fog_Graphics_Private
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct Span8;
 
 // ============================================================================
 // [Fog::Rasterizer]
@@ -174,13 +169,22 @@ struct FOG_HIDDEN Rasterizer
   virtual void reset() = 0;
 
   // --------------------------------------------------------------------------
-  // [Clipping]
+  // [Clip Box]
   // --------------------------------------------------------------------------
 
   FOG_INLINE const IntBox& getClipBox() const { return _clipBox; }
 
   virtual void setClipBox(const IntBox& clipBox) = 0;
   virtual void resetClipBox() = 0;
+
+  // --------------------------------------------------------------------------
+  // [Bounding Box]
+  // --------------------------------------------------------------------------
+
+  //! @brief Get rasterized object bounding box.
+  //!
+  //! @note This method is only valid after @c finalize() call.
+  FOG_INLINE const IntBox& getBoundingBox() const { return _boundingBox; }
 
   // --------------------------------------------------------------------------
   // [Error]
@@ -206,51 +210,11 @@ struct FOG_HIDDEN Rasterizer
   virtual void setAlpha(uint32_t alpha) = 0;
 
   // --------------------------------------------------------------------------
-  // [Finalized]
+  // [Finalized / Empty]
   // --------------------------------------------------------------------------
 
   FOG_INLINE bool finalized() const { return _finalized; }
-
-  // --------------------------------------------------------------------------
-  // [Auto-close]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE bool getAutoClose() const { return _autoClose; }
-  FOG_INLINE void setAutoClose(bool autoClose) { _autoClose = autoClose; }
-
-  // --------------------------------------------------------------------------
-  // [Cells / Rows]
-  // --------------------------------------------------------------------------
-
-  //! @brief Get sorted cells.
-  //!
-  //! @note This method is only valid after finalize() call.
-  FOG_INLINE const CellX* getCellsSorted() const { return _cellsSorted; }
-
-  //! @brief Get count of cells in _cellsSorted array.
-  //!
-  //! @note This method is only valid after finalize() call.
-  FOG_INLINE sysuint_t getCellsCount() const { return _cellsCount; }
-
-  //! @brief Get bounds of rasterized cells.
-  //!
-  //! @note This method is only valid after finalize() call.
-  FOG_INLINE const IntBox& getCellsBounds() const { return _cellsBounds; }
-
-  //! @brief Get whether there are cells in rasterizer.
-  //!
-  //! @note This method is only valid after finalize() call.
-  FOG_INLINE bool hasCells() const { return _cellsCount != 0; }
-
-  //! @brief Rows info (index and count of cells in row).
-  //!
-  //! @note This method is only valid after finalize() call.
-  FOG_INLINE const RowInfo* getRowsInfo() const { return _rowsInfo; }
-
-  //! @brief Get count of rows in _rowsInfo array.
-  //!
-  //! @note This method is only valid after finalize() call.
-  FOG_INLINE sysuint_t getRowsCount() const { return _cellsBounds.y2 - _cellsBounds.y1; }
+  FOG_INLINE bool isValid() const { return _isValid; }
 
   // --------------------------------------------------------------------------
   // [Commands]
@@ -307,11 +271,8 @@ struct FOG_HIDDEN Rasterizer
   //! @brief Clip bounding box (always must be valid, initialy set to zero).
   IntBox _clipBox;
 
-  //! @brief Cells bounding box (min / max).
-  IntBox _cellsBounds;
-
-  //! @brief Rasterizer error code.
-  err_t _error;
+  //! @brief bounding box of rasterized object (after clipping).
+  IntBox _boundingBox;
 
   //! @brief Fill rule;
   uint32_t _fillRule;
@@ -319,40 +280,14 @@ struct FOG_HIDDEN Rasterizer
   //! @brief Alpha.
   uint32_t _alpha;
 
+  //! @brief Rasterizer error code.
+  err_t _error;
+
   //! @brief Whether rasterizer is finalized.
   bool _finalized;
 
-  //! @brief Whether auto close path on moveTo command.
-  bool _autoClose;
-
-  //! @brief Sorted cells.
-  //!
-  //! @note This value is only valid after finalize() call.
-  CellX* _cellsSorted;
-
-  //! @brief Sorted cells array capacity.
-  //!
-  //! @note This value is only valid after finalize() call.
-  sysuint_t _cellsCapacity;
-
-  //! @brief Total count of cells in all buffers.
-  //!
-  //! @note This value is updated only by reset(), nextCellBuffer() and 
-  //! finalizeCellBuffer() methods, it not contains exact cells count until
-  //! one of these methods isn't called.
-  //!
-  //! @note This value is only valid after finalize() call.
-  sysuint_t _cellsCount;
-
-  //! @brief Rows info (index and count of cells in row).
-  //!
-  //! @note This value is only valid after finalize() call.
-  RowInfo* _rowsInfo;
-
-  //! @brief Rows array capacity.
-  //!
-  //! @note This value is only valid after finalize() call.
-  sysuint_t _rowsCapacity;
+  //! @brief Whether the rasterized object is empty (not paint).
+  bool _isValid;
 
 private:
   //! @brief Link to next pooled @c Rasterizer instance. Always NULL when you 

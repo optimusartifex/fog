@@ -1872,8 +1872,8 @@ NAME##_advance: \
 NAME##_end: \
   ;
 
-  int y = ras->getCellsBounds().y1;
-  int y_end = ras->getCellsBounds().y2;
+  int y = ras->getBoundingBox().y1;
+  int y_end = ras->getBoundingBox().y2;
   sysint_t stride = ctx->paintLayer.stride;
 
 #if CTX_MT_MODE == 1

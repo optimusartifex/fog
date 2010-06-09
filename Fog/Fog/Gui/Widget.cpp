@@ -31,9 +31,9 @@ namespace Fog {
 Widget::Widget(uint32_t createFlags) :
   _parentWidget(NULL),
   _guiWindow(NULL),
-  _geometry(0, 0, 0, 0),
+  _widgetGeometry(0, 0, 0, 0),
   _clientGeometry(0, 0, 0, 0),
-  _origin(0, 0),
+  _clientOrigin(0, 0),
   _layout(NULL),
   _layoutPolicy(LAYOUT_POLICY_WIDTH_PREFERRED|LAYOUT_POLICY_HEIGHT_PREFERRED),
   _lastFocus(NULL),
@@ -42,6 +42,7 @@ Widget::Widget(uint32_t createFlags) :
   _state(WIDGET_ENABLED),
   _visibility(WIDGET_HIDDEN),
   _focusPolicy(FOCUS_NONE),
+  _hasNcArea(false),
   _hasFocus(false),
   _orientation(ORIENTATION_HORIZONTAL),
   _reserved(0),
@@ -139,24 +140,28 @@ err_t Widget::_removeChild(sysuint_t index, Object* child)
 }
 
 // ============================================================================
-// [Fog::Widget - GuiWindow]
+// [Fog::Widget - Gui-Window]
 // ============================================================================
 
 GuiWindow* Widget::getClosestGuiWindow() const
 {
-  Widget* w = const_cast<Widget*>(this);
+  Widget* widget = const_cast<Widget*>(this);
+  GuiWindow* window = NULL;
 
   do {
-    if (w->hasGuiWindow()) return w->getGuiWindow();
-    w = w->getParentWidget();
-  } while (w);
+    window = widget->getGuiWindow();
+    if (window != NULL) break;
 
-  return NULL;
+    widget = widget->getParentWidget();
+  } while (widget);
+
+  return window;
 }
 
 err_t Widget::createWindow(uint32_t createFlags)
 {
-  if (_guiWindow) return ERR_GUI_WINDOW_ALREADY_EXISTS;
+  if (hasGuiWindow())
+    return ERR_OK;
 
   GuiEngine* ge = Application::getInstance()->getGuiEngine();
   if (ge == NULL) return ERR_GUI_NO_ENGINE;
@@ -171,7 +176,8 @@ err_t Widget::createWindow(uint32_t createFlags)
 
 err_t Widget::destroyWindow()
 {
-  if (!_guiWindow) return ERR_RT_INVALID_HANDLE;
+  if (!hasGuiWindow())
+    return ERR_OK;
 
   if (_guiWindow->isModal())
   {
@@ -223,73 +229,111 @@ err_t Widget::setWindowGranularity(const IntPoint& pt)
 }
 
 // ============================================================================
-// [Fog::Widget - Geometry]
+// [Fog::Widget - Core Geometry]
 // ============================================================================
 
-void Widget::setGeometry(const IntRect& geometry)
-{  
-  if (_geometry == geometry) return;
-  if (_guiWindow)
-  {
-    _guiWindow->reconfigure(geometry);
-  }
-  else
-  {
-    GuiEngine* ge = Application::getInstance()->getGuiEngine();
-    if (!ge) return;
-
-    ge->dispatchConfigure(this, geometry, false);
-  }
-}
-
-void Widget::setPosition(const IntPoint& pt)
+void Widget::setPosition(const IntPoint& pos)
 {
-  if (_geometry.getPosition() == pt) return;  
-  if (_guiWindow)
+  if (_widgetGeometry.getPosition() == pos) return;
+
+  if (hasGuiWindow())
   {
-    _guiWindow->move(pt);
-    _geometry.setX(pt.getX()).setY(pt.getY());
+    _guiWindow->setPosition(pos);
   }
   else
   {
-    if (_layout) return;
-    GuiEngine* ge = Application::getInstance()->getGuiEngine();
-    if (!ge) return;
+    GuiEngine* engine = Application::getInstance()->getGuiEngine();
+    if (engine == NULL) return;
 
-    IntSize size = getSize();
-    ge->dispatchConfigure(this, IntRect(pt.x, pt.y, size.w, size.h), false);
+    engine->dispatchConfigure(this, IntRect(pos.x, pos.y, _widgetGeometry.w, _widgetGeometry.h), false);
   }
 }
 
 void Widget::setSize(const IntSize& sz)
 {
-  if (_geometry.getSize() == sz) return;  
-  if (_guiWindow)
+  if (_widgetGeometry.getSize() == sz) return;
+
+  if (hasGuiWindow())
   {
-    _guiWindow->resize(sz);
+    _guiWindow->setSize(sz);
   }
   else
   {
-    if (_layout) return;
-    GuiEngine* ge = Application::getInstance()->getGuiEngine();
-    if (!ge) return;
+    GuiEngine* engine = Application::getInstance()->getGuiEngine();
+    if (engine == NULL) return;
 
-    ge->dispatchConfigure(this, IntRect(_geometry.x, _geometry.y, sz.w, sz.h), false);
+    engine->dispatchConfigure(this, IntRect(_widgetGeometry.x, _widgetGeometry.y, sz.w, sz.h), false);
   }
 }
 
+void Widget::setGeometry(const IntRect& geometry)
+{
+  if (_widgetGeometry == geometry) return;
+
+  if (hasGuiWindow())
+  {
+    _guiWindow->setGeometry(geometry);
+  }
+  else
+  {
+    GuiEngine* engine = Application::getInstance()->getGuiEngine();
+    if (engine == NULL) return;
+
+    engine->dispatchConfigure(this, geometry, false);
+  }
+}
+
+// ============================================================================
+// [Fog::Widget - Client Geometry]
+// ============================================================================
+
+void Widget::calcWidgetSize(IntSize& size) const
+{
+  // Default action is to do nothing.
+}
+
+void Widget::calcClientGeometry(IntRect& geometry) const
+{
+  // Default action is to do nothing.
+}
+
+void Widget::updateClientGeometry()
+{
+  if (hasGuiWindow())
+  {
+    _guiWindow->setGeometry(_widgetGeometry);
+  }
+  else
+  {
+    GuiEngine* engine = Application::getInstance()->getGuiEngine();
+    if (engine == NULL) return;
+
+    engine->dispatchConfigure(this, _widgetGeometry, false);
+  }
+}
+
+// ============================================================================
+// [Fog::Widget - Client Origin]
+// ============================================================================
+
 void Widget::setOrigin(const IntPoint& pt)
 {
-  if (_origin == pt) return;
+  if (_clientOrigin == pt) return;
 
   OriginEvent e;
   e._origin = pt;
+  e._difference = pt - _clientOrigin;
 
-  _origin = pt;
+  _clientOrigin = pt;
   sendEvent(&e);
 
+  // TODO: Not optimal, widget can tell to scroll and update only changed part.
   update(WIDGET_UPDATE_ALL);
 }
+
+// ============================================================================
+// [Fog::Widget - Translate Coordinates]
+// ============================================================================
 
 bool Widget::worldToClient(IntPoint* coords) const
 {
@@ -302,7 +346,7 @@ bool Widget::worldToClient(IntPoint* coords) const
     if (w->hasGuiWindow())
       return w->getGuiWindow()->worldToClient(coords);
 
-    coords->translate(-(w->_geometry.x), -(w->_geometry.y));
+    coords->translate(-(w->_widgetGeometry.x), -(w->_widgetGeometry.y));
     w = w->getParentWidget();
   } while (w);
 
@@ -319,7 +363,7 @@ bool Widget::clientToWorld(IntPoint* coords) const
     if (w->hasGuiWindow())
       return w->getGuiWindow()->clientToWorld(coords);
 
-    coords->translate(w->_geometry.x, w->_geometry.y);
+    coords->translate(w->_widgetGeometry.x, w->_widgetGeometry.y);
     w = w->getParentWidget();
   } while (w);
 
@@ -340,10 +384,10 @@ bool Widget::translateCoordinates(Widget* to, Widget* from, IntPoint* coords)
 
   while (w->hasParent() && w->getParent()->isWidget())
   {
-    x += w->_origin.x;
-    y += w->_origin.y;
-    x += w->_geometry.x;
-    y += w->_geometry.y;
+    x += w->_clientOrigin.x;
+    y += w->_clientOrigin.y;
+    x += w->_widgetGeometry.x;
+    y += w->_widgetGeometry.y;
 
     w = reinterpret_cast<Widget*>(w->getParent());
 
@@ -361,10 +405,10 @@ bool Widget::translateCoordinates(Widget* to, Widget* from, IntPoint* coords)
 
   while (w->hasParent() && w->getParent()->isWidget())
   {
-    x -= w->_origin.x;
-    y -= w->_origin.y;
-    x -= w->_geometry.x;
-    y -= w->_geometry.y;
+    x -= w->_clientOrigin.x;
+    y -= w->_clientOrigin.y;
+    x -= w->_widgetGeometry.x;
+    y -= w->_widgetGeometry.y;
 
     w = reinterpret_cast<Widget*>(w->getParent());
 
@@ -383,30 +427,12 @@ bool Widget::translateCoordinates(Widget* to, Widget* from, IntPoint* coords)
 // [Fog::Widget - Hit Testing]
 // ============================================================================
 
-Widget* Widget::hitTest(const IntPoint& pt) const
-{
-  int x = pt.getX();
-  int y = pt.getY();
-
-  if (x < 0 || y < 0 || x > _geometry.w || y > _geometry.h) return NULL;
-
-  List<Object*>::ConstIterator it(_children);
-  for (it.toEnd(); it.isValid(); it.toPrevious())
-  {
-    Widget* widget = fog_object_cast<Widget*>(it.value());
-    if (widget && widget->_geometry.contains(pt))
-      return widget;
-  }
-
-  return const_cast<Widget*>(this);
-}
-
 Widget* Widget::getChildAt(const IntPoint& pt, bool recursive) const
 {
   int x = pt.getX();
   int y = pt.getY();
 
-  if (x < 0 || y < 0 || x > _geometry.w || y > _geometry.h) return NULL;
+  if (x < 0 || y < 0 || x > _widgetGeometry.w || y > _widgetGeometry.h) return NULL;
 
   Widget* current = const_cast<Widget*>(this);
 
@@ -416,9 +442,11 @@ repeat:
     for (it.toEnd(); it.isValid(); it.toPrevious())
     {
       Widget* widget = fog_object_cast<Widget*>(it.value());
-      if (widget && widget->_geometry.contains(pt))
+      if (widget && widget->_widgetGeometry.contains(pt))
       {
         current = widget;
+        if (!recursive) break;
+
         x -= current->getX();
         y -= current->getY();
         if (current->hasChildren()) goto repeat;
@@ -511,7 +539,8 @@ Layout* Widget::takeLayout()
 // [Layout Policy]
 // ============================================================================
 
-bool Widget::hasLayoutHeightForWidth() const { 
+bool Widget::hasLayoutHeightForWidth() const
+{
   if (isEmpty())
     return false;
 
@@ -521,7 +550,8 @@ bool Widget::hasLayoutHeightForWidth() const {
   return _layoutPolicy.hasHeightForWidth();
 }
 
-int Widget::getLayoutHeightForWidth(int width) const {
+int Widget::getLayoutHeightForWidth(int width) const
+{
   if (isEmpty())
     return -1;
 
@@ -533,14 +563,15 @@ int Widget::getLayoutHeightForWidth(int width) const {
   else
     ret = _layout->getTotalHeightForWidth(width);    
 
-  Math::min(ret,getMaximumHeight());
-  Math::max(ret,getMinimumHeight());
+  ret = Math::min(ret, getMaximumHeight());
+  ret = Math::max(ret, getMinimumHeight());
 
-  Math::max(ret,0);
+  ret = Math::max(ret, 0);
   return ret;
 }
 
-uint32_t Widget::getLayoutExpandingDirections() const {    
+uint32_t Widget::getLayoutExpandingDirections() const
+{    
   if (isEmpty())
     return 0;
 
@@ -640,8 +671,8 @@ void Widget::setLayoutGeometry(const IntRect& rect)
     y += (r.getHeight() - s.getHeight()) / 2;
   }
 
-  //we don't need to use setGeometry, because the Layout
-  //is only activated during repainting.
+  // We don't need to use setGeometry(), because the Layout is only activated
+  // during update process.
   IntRect geometry(x, y, s.getWidth(), s.getHeight());
   
   if (_guiWindow)
@@ -651,23 +682,29 @@ void Widget::setLayoutGeometry(const IntRect& rect)
   }
   else
   {
+    // IMPORTANT TODO:
     // TODO WIDGET: create method for this! (currently copied from Base::dispatchConfigure)
-    uint32_t changed = 0;
+    uint32_t changedFlags = 0;
 
     if (getPosition() != geometry.getPosition())
-      changed |= ConfigureEvent::CHANGED_POSITION;
+      changedFlags |= GeometryEvent::CHANGED_WIDGET_POSITION;
 
     if (getSize() != geometry.getSize())
-      changed |= ConfigureEvent::CHANGED_SIZE;
+      changedFlags |= GeometryEvent::CHANGED_WIDGET_SIZE;
 
-    if (changed)
+    if (changedFlags)
     {
-      ConfigureEvent e;
-      e._geometry = geometry;
-      e._changed = changed;
+      GeometryEvent e;
 
-      _geometry = geometry;
-      _clientGeometry.set(0, 0, geometry.w, geometry.h);
+      e._widgetGeometry = geometry;
+      e._clientGeometry.set(0, 0, geometry.w, geometry.h);
+      calcClientGeometry(e._clientGeometry);
+
+      _widgetGeometry = e._widgetGeometry;
+      _clientGeometry = e._clientGeometry;
+      _updateHasNcArea();
+
+      e._changedFlags = changedFlags;
       sendEvent(&e);
     }
   }
@@ -788,7 +825,7 @@ void Widget::setMinimumSize(const IntSize& minSize)
 
   invalidateLayout();
   
-  if (_geometry.getWidth() < size.getWidth() || _geometry.getHeight() < size.getHeight())
+  if (_widgetGeometry.getWidth() < size.getWidth() || _widgetGeometry.getHeight() < size.getHeight())
   {
     resize(size);
   }
@@ -812,7 +849,7 @@ void Widget::setMaximumSize(const IntSize& maxSize)
 
   invalidateLayout();
 
-  if (_geometry.getWidth() > size.getWidth() || _geometry.getHeight() > size.getHeight())
+  if (_widgetGeometry.getWidth() > size.getWidth() || _widgetGeometry.getHeight() > size.getHeight())
   {
     resize(size);
   }
@@ -1022,6 +1059,7 @@ void Widget::setWindowHints(uint32_t flags)
   setWindowFlags(flags);
 }
 
+// TODO: Update unused, purpose?
 void Widget::changeFlag(uint32_t flag, bool set, bool update)
 {
   uint32_t flags = _windowFlags;
@@ -1042,14 +1080,14 @@ void Widget::setDragAble(bool drag, bool update)
 {
   if (drag == isDragAble()) return;
 
-  changeFlag(WINDOW_DRAGABLE,drag,update);
+  changeFlag(WINDOW_DRAGABLE, drag, update);
 }
 
 void Widget::setResizeAble(bool resize, bool update) 
 {
   if (resize == isResizeAble()) return;
 
-  changeFlag(WINDOW_FIXED_SIZE,!resize,update);
+  changeFlag(WINDOW_FIXED_SIZE, !resize, update);
 }
 
 // ============================================================================
@@ -1058,14 +1096,14 @@ void Widget::setResizeAble(bool resize, bool update)
 
 void Widget::setOrientation(uint32_t val)
 {
-  if (orientation() == val) return;
+  if (getOrientation() == val) return;
 
   _orientation = val;
 
   GuiEngine* ge = Application::getInstance()->getGuiEngine();
   if (!ge) return;
 
-  ge->dispatchConfigure(this, _geometry, true);
+  ge->dispatchConfigure(this, _widgetGeometry, true);
 }
 
 // ============================================================================
@@ -1188,11 +1226,6 @@ void Widget::update(uint32_t updateFlags)
 // [Fog::Widget - Repaint]
 // ============================================================================
 
-void Widget::repaint(uint32_t repaintFlags)
-{
-  update(repaintFlags);
-}
-
 uint32_t Widget::getPaintHint() const
 {
   return WIDGET_PAINT_SCREEN;
@@ -1207,27 +1240,15 @@ err_t Widget::getPropagatedRegion(Region* dst) const
 // [Fog::Widget - Events]
 // ============================================================================
 
-void Widget::onChild(ChildEvent* e)
+void Widget::onState(StateEvent* e)
 {
 }
 
-void Widget::onEnable(StateEvent* e)
+void Widget::onVisibility(VisibilityEvent* e)
 {
 }
 
-void Widget::onDisable(StateEvent* e)
-{
-}
-
-void Widget::onShow(VisibilityEvent* e)
-{
-}
-
-void Widget::onHide(VisibilityEvent* e)
-{
-}
-
-void Widget::onConfigure(ConfigureEvent* e)
+void Widget::onGeometry(GeometryEvent* e)
 {
 }
 
@@ -1236,6 +1257,10 @@ void Widget::onFocus(FocusEvent* e)
 }
 
 void Widget::onKey(KeyEvent* e)
+{
+}
+
+void Widget::onNcMouse(MouseEvent* e)
 {
 }
 
@@ -1256,6 +1281,10 @@ void Widget::onWheel(MouseEvent* e)
 }
 
 void Widget::onSelection(SelectionEvent* e)
+{
+}
+
+void Widget::onNcPaint(PaintEvent* e)
 {
 }
 

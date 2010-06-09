@@ -4,6 +4,8 @@
 #include <Fog/Svg.h>
 #include <Fog/Xml.h>
 
+#include "Fog/Gui/Frame.h"
+
 // This is for MY testing:)
 
 using namespace Fog;
@@ -41,7 +43,7 @@ struct XPButton : public ButtonBase {
     _default = def;
   }
 
-  virtual void onConfigure(ConfigureEvent* e) {
+  virtual void onGeometry(GeometryEvent* e) {
     int width = _geometry.getWidth();
     int height = _geometry.getHeight();
   }
@@ -225,7 +227,8 @@ struct MyWindow : public Window
   // [Event Handlers]
   virtual void onPaint(PaintEvent* e);
 
-  void createButtons(int count) {
+  void createButtons(int count)
+  {
     _buttons.clear();
     _buttons.reserve(count);
 
@@ -238,13 +241,14 @@ struct MyWindow : public Window
       buttonx1->setText(str);
       buttonx1->show(); 
 
-      buttonx1->setMinimumSize(IntSize(40,40));
+      // buttonx1->setMinimumSize(IntSize(40,40));
       _buttons.append(buttonx1);
     }
 
   }
 
-  void testBorderLayout(Layout* parent=0) {
+  void testBorderLayout(Layout* parent=0)
+  {
     createButtons(6);
     BorderLayout* layout;
     if(parent) {
@@ -266,7 +270,8 @@ struct MyWindow : public Window
     d = d;
   }
 
-  void testGridLayout(Layout* parent=0) {
+  void testGridLayout(Layout* parent=0)
+  {
     createButtons(8);
 
     GridLayout* layout;
@@ -290,13 +295,15 @@ struct MyWindow : public Window
     
   }
 
-  void onButtonClick(MouseEvent* ev) {
+  void onButtonClick(MouseEvent* ev)
+  {
     _buttons.at(0)->getLayoutProperties<VBoxLayout>()->setFlex(1);
     _layout->_dirty = 1;
     invalidateLayout();
   }
 
-  void testVBoxLayout(Layout* parent = 0) {
+  void testVBoxLayout(Layout* parent = 0)
+  {
     const int COUNT = 8;
     createButtons(COUNT);
 
@@ -324,7 +331,8 @@ struct MyWindow : public Window
     layout->addItem(cb);
   }
 
-  void testHBoxLayout(Layout* parent = 0) {
+  void testHBoxLayout(Layout* parent = 0)
+  {
     const int COUNT = 8;
     createButtons(COUNT);
     HBoxLayout* layout;
@@ -342,34 +350,60 @@ struct MyWindow : public Window
     _buttons.at(2)->getLayoutProperties<HBoxLayout>()->setFlex(2);
   }
 
-  void testNestedLayout() {
+  void testFrame()
+  {
+    VBoxLayout* layout = new VBoxLayout(this, 0, 0);
 
+    {
+      TextField* textField = new TextField();
+      textField->show();
+      textField->setMinimumSize(IntSize(100, 20));
+      addChild(textField);
+      layout->addItem(textField);
+    }
+
+    {
+      TextField* textField = new TextField();
+      textField->show();
+      textField->setMinimumSize(IntSize(100, 20));
+      addChild(textField);
+      layout->addItem(textField);
+    }
   }
 
-  void onModalClose() {
+  void testNestedLayout()
+  {
+  }
+
+  void onModalClose()
+  {
     _modalwindow->hide();
     _modalwindow->destroy();
     _modalwindow = 0;
   }
 
-  virtual void onClose(CloseEvent* e) {
+  virtual void onClose(CloseEvent* e)
+  {
     this->destroyWindow();
   }
 
-  void onModalTestClick(MouseEvent* e) {
+  void onModalTestClick(MouseEvent* e)
+  {
     _modalwindow = new MyModalWindow(_mcount);
     _modalwindow->setSize(IntSize(200,300));
     _modalwindow->addListener(EVENT_CLOSE, this, &MyWindow::onModalClose);
     _modalwindow->showModal(getGuiWindow());
   }
 
-  void onPopUpClick(MouseEvent* e) {
+  void onPopUpClick(MouseEvent* e)
+  {
     if(_popup->getVisibility() < WIDGET_VISIBLE) {
       _popup->show();
     }
   }
 
-  void onFrameTestClick(MouseEvent* e) {
+  void onFrameTestClick(MouseEvent* e)
+  {
     if(getWindowFlags() & WINDOW_NATIVE) {
       setWindowFlags(WINDOW_TYPE_TOOL|WINDOW_TRANSPARENT);
     } else {
@@ -377,7 +411,8 @@ struct MyWindow : public Window
     }
   }
 
-  void onFullScreenClick(MouseEvent* e) {
+  void onFullScreenClick(MouseEvent* e)
+  {
     if(isFullScreen()) {
       show();
     } else {      
@@ -385,7 +420,8 @@ struct MyWindow : public Window
     }
   }
 
-  void onTransparencyClick(MouseEvent* e) {
+  void onTransparencyClick(MouseEvent* e)
+  {
     WidgetOpacityAnimation* anim = new WidgetOpacityAnimation(this);
     anim->setDuration(TimeDelta::fromMilliseconds(1000));
 
@@ -446,7 +482,8 @@ MyWindow::MyWindow(uint32_t createFlags) :
   _scale = 1.0;
   _spread = PATTERN_SPREAD_REPEAT;
 
-  testBorderLayout();
+  //testVBoxLayout();
+  testFrame();
   //setContentRightMargin(0);
 }
 
@@ -456,20 +493,6 @@ MyWindow::~MyWindow()
 
 void MyWindow::onPaint(PaintEvent* e)
 {
-/*
-  uint32_t vis = getVisibility();
-  if(vis == WIDGET_VISIBLE) {
-    setWindowTitle(Ascii8("STATE: VISIBLE"));
-  } else if(vis == WIDGET_VISIBLE_MAXIMIZED){
-    setWindowTitle(Ascii8("STATE: MAXIMIZED"));
-  } else if(vis == WIDGET_VISIBLE_MINIMIZED){
-    setWindowTitle(Ascii8("STATE: MINIMIZED"));
-  } else if(vis == WIDGET_HIDDEN){
-    setWindowTitle(Ascii8("STATE: HIDDEN"));
-  } else if(vis == WIDGET_VISIBLE_RESTORE){
-    setWindowTitle(Ascii8("STATE: RESTORED"));
-  }
-*/
   TimeTicks ticks = TimeTicks::highResNow();
   Painter* p = e->getPainter();
 

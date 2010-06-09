@@ -378,9 +378,10 @@ struct FOG_API GuiWindow : public Object
 
   virtual err_t show(uint32_t state) = 0;
   virtual err_t hide() = 0;
-  virtual err_t move(const IntPoint& pt) = 0;
-  virtual err_t resize(const IntSize& size) = 0;
-  virtual err_t reconfigure(const IntRect& rect) = 0;
+
+  virtual err_t setPosition(const IntPoint& pos) = 0;
+  virtual err_t setSize(const IntSize& size) = 0;
+  virtual err_t setGeometry(const IntRect& geometry) = 0;
 
   virtual err_t takeFocus() = 0;
 
@@ -403,7 +404,7 @@ struct FOG_API GuiWindow : public Object
   virtual void onEnabled(bool enabled);
   virtual void onVisibility(uint32_t visible);
 
-  virtual void onConfigure(const IntRect& windowRect, const IntRect& clientRect);
+  virtual void onGeometry(const IntRect& windowRect, const IntRect& clientRect);
 
   virtual void onMouseHover(int x, int y);
   virtual void onMouseMove(int x, int y);

@@ -57,7 +57,7 @@ void RasterPaintCalcFillPath::run(RasterPaintContext* ctx)
   ras->finalize();
 
   cmd->ras = ras;
-  cmd->status.set(ras->hasCells() ? RASTER_COMMAND_READY : RASTER_COMMAND_SKIP);
+  cmd->status.set(ras->isValid() ? RASTER_COMMAND_READY : RASTER_COMMAND_SKIP);
 }
 
 void RasterPaintCalcFillPath::release(RasterPaintContext* ctx)
@@ -100,7 +100,7 @@ void RasterPaintCalcStrokePath::run(RasterPaintContext* ctx)
   ras->finalize();
 
   cmd->ras = ras;
-  cmd->status.set(ras->hasCells() ? RASTER_COMMAND_READY : RASTER_COMMAND_SKIP);
+  cmd->status.set(ras->isValid() ? RASTER_COMMAND_READY : RASTER_COMMAND_SKIP);
 }
 
 void RasterPaintCalcStrokePath::release(RasterPaintContext* ctx)

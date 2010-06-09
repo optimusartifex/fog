@@ -111,6 +111,10 @@ enum WIDGET_LIMITS
 
 enum WIDGET_UPDATE_FLAGS
 {
+  // --------------------------------------------------------------------------
+  // [Geometry / Layout]
+  // --------------------------------------------------------------------------
+
   //! @brief Something needs update (set if something needs update).
   WIDGET_UPDATE_SOMETHING = (1 << 0),
 
@@ -120,29 +124,27 @@ enum WIDGET_UPDATE_FLAGS
   //! @brief Update the widget geometry.
   WIDGET_UPDATE_GEOMETRY = (1 << 2),
 
-  //! @brief Update everything for the widget and all children.
-  WIDGET_UPDATE_ALL = (1 << 31)
+  // --------------------------------------------------------------------------
+  // [Paint]
+  // --------------------------------------------------------------------------
 
-  // Repaint flags starts at (1 << 16).
-};
+  //! @brief Repaint non-client area.
+  WIDGET_UPDATE_NCPAINT = (1 << 16),
 
-// ============================================================================
-// [Fog::WIDGET_REPAINT_FLAGS]
-// ============================================================================
+  //! @brief Repaint client area.
+  WIDGET_UPDATE_PAINT  = (1 << 17),
 
-//! @brief Flags used by @c Widget::repaint() method.
-enum WIDGET_REPAINT_FLAGS
-{
-  //! @brief Repaint whole widget area (repaints the widget).
-  WIDGET_REPAINT_AREA  = (1 << 16),
-
-  //! @brief Repaint only caret.
-  WIDGET_REPAINT_CARET = (1 << 17),
+  //! @brief Repaint caret.
+  WIDGET_UPDATE_CARET = (1 << 18),
 
   //! @brief Repaint everything, including caret.
   //!
-  //! Combination of @c WIDGET_REPAINT_AREA and @c WIDGET_REPAINT_CARET
-  WIDGET_REPAINT_ALL = WIDGET_REPAINT_AREA | WIDGET_REPAINT_CARET
+  //! Combination of @c WIDGET_UPDATE_NCPAINT, @c WIDGET_UPDATE_PAINT and @c
+  //! WIDGET_UPDATE_CARET.
+  WIDGET_REPAINT_ALL = WIDGET_UPDATE_NCPAINT | WIDGET_UPDATE_PAINT | WIDGET_UPDATE_CARET,
+
+  //! @brief Update everything for the widget and all children.
+  WIDGET_UPDATE_ALL = (1 << 31)
 };
 
 // ============================================================================
@@ -155,11 +157,11 @@ enum WIDGET_PAINT_HINT
   //! @brief Widget paint event will repaint the whole widget (default).
   //!
   //! This is the default and most optimized mode, fast themes should use this
-  //! for most controls.
+  //! for large controls (tables, lists, grids, etc...).
   WIDGET_PAINT_SCREEN = 0x0000,
 
-  //! @brief Widget paint event will not repaint whole widget, in some regions
-  //! the parent content is propagated.
+  //! @brief Widget paint event will not repaint the whole widget, in some
+  //! regions the parent content is propagated.
   //!
   //! This flag must be returned by @c Widget::getPaintHint() if widget want
   //! to base content on parent, otherwise the result of painting is undefined
@@ -182,6 +184,7 @@ enum WIDGET_STATE
   //! @brief Widget is enabled and it parent too.
   WIDGET_ENABLED = 2,
 };
+
 // ============================================================================
 // [Fog::WIDGET_VISIBILITY]
 // ============================================================================
@@ -192,13 +195,24 @@ enum WIDGET_VISIBILITY
   //! @brief Widget is hidden.
   WIDGET_HIDDEN = 0,
   //! @brief Widget is hidden by parent that's not visible.
-  WIDGET_HIDDEN_BY_PARENT = 1, 
+  WIDGET_HIDDEN_BY_PARENT = 1,
   WIDGET_VISIBLE_MINIMIZED = 2,
+
   //! @brief Widget is visible.
   WIDGET_VISIBLE = 3,
   WIDGET_VISIBLE_RESTORE = 4,
   WIDGET_VISIBLE_MAXIMIZED = 5,
   WIDGET_VISIBLE_FULLSCREEN = 6
+};
+
+// ============================================================================
+// [Fog::FRAME_STYLE]
+// ============================================================================
+
+enum FRAME_STYLE
+{
+  FRAME_NONE = 0,
+  FRAME_TEXT_AREA = 1
 };
 
 // ============================================================================
@@ -262,15 +276,15 @@ enum LAYOUT_POLICY_FLAGS
   LAYOUT_HEIGHT_MASK = 0xF0,
   LAYOUT_HEIGHT_SHIFT = 4,  
 
-  LAYOUT_EXPANDING_WIDTH = 0x1 << LAYOUT_WIDTH_SHIFT,
-  LAYOUT_SHRINKING_WIDTH = 0x2 << LAYOUT_WIDTH_SHIFT,
-  LAYOUT_GROWING_WIDTH = 0x4 << LAYOUT_WIDTH_SHIFT,
-  LAYOUT_IGNORE_WIDTH  = 0x8 << LAYOUT_WIDTH_SHIFT,
+  LAYOUT_EXPANDING_WIDTH = (0x1 << LAYOUT_WIDTH_SHIFT),
+  LAYOUT_SHRINKING_WIDTH = (0x2 << LAYOUT_WIDTH_SHIFT),
+  LAYOUT_GROWING_WIDTH = (0x4 << LAYOUT_WIDTH_SHIFT),
+  LAYOUT_IGNORE_WIDTH  = (0x8 << LAYOUT_WIDTH_SHIFT),
 
-  LAYOUT_EXPANDING_HEIGHT = 0x1 << LAYOUT_HEIGHT_SHIFT,
-  LAYOUT_SHRINKING_HEIGHT = 0x2 << LAYOUT_HEIGHT_SHIFT,
-  LAYOUT_GROWING_HEIGHT = 0x4 << LAYOUT_HEIGHT_SHIFT,
-  LAYOUT_IGNORE_HEIGHT  = 0x8 << LAYOUT_HEIGHT_SHIFT
+  LAYOUT_EXPANDING_HEIGHT = (0x1 << LAYOUT_HEIGHT_SHIFT),
+  LAYOUT_SHRINKING_HEIGHT = (0x2 << LAYOUT_HEIGHT_SHIFT),
+  LAYOUT_GROWING_HEIGHT = (0x4 << LAYOUT_HEIGHT_SHIFT),
+  LAYOUT_IGNORE_HEIGHT  = (0x8 << LAYOUT_HEIGHT_SHIFT)
 };
 
 // ============================================================================
@@ -289,11 +303,11 @@ enum LAYOUT_POLICY
   LAYOUT_POLICY_WIDTH_PREFERRED = 
     LAYOUT_GROWING_WIDTH |
     LAYOUT_SHRINKING_WIDTH,
-  
+
   LAYOUT_POLICY_WIDTH_MINIMUM_EXPANDING = 
     LAYOUT_GROWING_WIDTH |
     LAYOUT_EXPANDING_WIDTH,
-  
+
   LAYOUT_POLICY_WIDTH_EXPANDING = 
     LAYOUT_GROWING_WIDTH |
     LAYOUT_EXPANDING_WIDTH | 
@@ -310,33 +324,34 @@ enum LAYOUT_POLICY
   LAYOUT_POLICY_HEIGHT_PREFERRED = 
     LAYOUT_GROWING_HEIGHT | 
     LAYOUT_SHRINKING_HEIGHT,
-  
+
   LAYOUT_POLICY_HEIGHT_MINIMUM_EXPANDING = 
     LAYOUT_GROWING_HEIGHT | 
     LAYOUT_EXPANDING_HEIGHT,
-  
+
   LAYOUT_POLICY_HEIGHT_EXPANDING = 
     LAYOUT_GROWING_HEIGHT | 
     LAYOUT_EXPANDING_HEIGHT | 
     LAYOUT_SHRINKING_HEIGHT,
-  
+
   LAYOUT_POLICY_HEIGHT_IGNORED = 
     LAYOUT_GROWING_HEIGHT | 
     LAYOUT_IGNORE_HEIGHT | 
     LAYOUT_SHRINKING_HEIGHT
 };
 
+// ============================================================================
+// [Fog::MINMAXSIZE]
+// ============================================================================
 
-// ============================================================================
-// [Fog::LAYOUT_POLICY]
-// ============================================================================
+// TODO: Rename...
 enum MINMAXSIZE
 {
   MIN_WIDTH_IS_SET   = 1,
   MIN_HEIGHT_IS_SET = 2,
 
   MAX_WIDTH_IS_SET   = 1,
-  MAX_HEIGHT_IS_SET = 2,
+  MAX_HEIGHT_IS_SET = 2
 };
 
 // ============================================================================
@@ -894,17 +909,10 @@ enum ANIMATION_EVENT_TYPE
 enum EVENT_GUI_ENUM
 {
   // --------------------------------------------------------------------------
-  // [ChildEvent]
-  // --------------------------------------------------------------------------
-
-  EVENT_CHILD_ADD = 100,
-  EVENT_CHILD_REMOVE,
-
-  // --------------------------------------------------------------------------
   // [LayoutEvent]
   // --------------------------------------------------------------------------
 
-  EVENT_LAYOUT_SET,
+  EVENT_LAYOUT_SET = 100,
   EVENT_LAYOUT_REMOVE,
 
   EVENT_LAYOUT_ITEM_ADD,
@@ -931,10 +939,10 @@ enum EVENT_GUI_ENUM
   EVENT_HIDE_BY_PARENT,
 
   // --------------------------------------------------------------------------
-  // [ConfigureEvent]
+  // [GeometryEvent]
   // --------------------------------------------------------------------------
 
-  EVENT_CONFIGURE,
+  EVENT_GEOMETRY,
 
   // --------------------------------------------------------------------------
   // [OriginEvent]
@@ -960,6 +968,12 @@ enum EVENT_GUI_ENUM
   // [MouseEvent]
   // --------------------------------------------------------------------------
 
+  EVENT_NCMOUSE_IN,
+  EVENT_NCMOUSE_OUT,
+  EVENT_NCMOUSE_MOVE,
+  EVENT_NCMOUSE_PRESS,
+  EVENT_NCMOUSE_RELEASE,
+
   EVENT_MOUSE_IN,
   EVENT_MOUSE_OUT,
   EVENT_MOUSE_MOVE,
@@ -981,6 +995,7 @@ enum EVENT_GUI_ENUM
   // [PaintEvent]
   // --------------------------------------------------------------------------
 
+  EVENT_NCPAINT,
   EVENT_PAINT,
 
   // --------------------------------------------------------------------------
@@ -1032,8 +1047,8 @@ enum ERR_GUI_ENUM
   ERR_GUI_NO_ENGINE = ERR_GUI_START,
   ERR_GUI_INTERNAL_ERROR,
 
-  ERR_GUI_CANT_CREATE_UIENGINE,
-  ERR_GUI_CANT_CREATE_UIWINDOW,
+  ERR_GUI_CANT_CREATE_GUIENGINE,
+  ERR_GUI_CANT_CREATE_GUIWINDOW,
 
   ERR_GUI_LIBX11_NOT_LOADED,
   ERR_GUI_LIBEXT_NOT_LOADED,
@@ -1044,7 +1059,7 @@ enum ERR_GUI_ENUM
   ERR_GUI_CANT_CREATE_COLORMAP,
   ERR_GUI_CANT_TRANSLETE_COORDINATES,
 
-  ERR_GUI_WINDOW_ALREADY_EXISTS,
+  ERR_GUI_CANT_CREATE_WINDOW,
 
   //! @brief Can't load native theme (UxTheme.dll).
   ERR_THEME_NATIVE_NOT_AVAILABLE,

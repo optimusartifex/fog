@@ -578,7 +578,7 @@ struct FOG_API Object
   //! @brief Send event @a e immediately.
   void sendEvent(Event* e);
   //! @brief Send simple event (only event id) immediately.
-  void sendEventById(uint32_t eventId);
+  void sendEventByCode(uint32_t eventId);
 
   //! @brief Generic event handler.
   //!
@@ -589,8 +589,10 @@ struct FOG_API Object
   virtual void onCreate(CreateEvent* e);
   //! @brief Destroy object event.
   virtual void onDestroy(DestroyEvent* e);
+  //! @brief Child added or removed.
+  virtual void onChild(ChildEvent* e);
   //! @brief Property changed event.
-  virtual void onPropertyChanged(PropertyChangedEvent* e);
+  virtual void onProperty(PropertyEvent* e);
 
   // --------------------------------------------------------------------------
   // [Statics]

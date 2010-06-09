@@ -1857,8 +1857,8 @@ err_t Region::frame(const IntPoint& pt)
 
 static err_t Region_doPath(Region* self, Rasterizer* rasterizer, uint8_t threshold)
 {
-  if (!rasterizer->hasCells()) return ERR_OK;
-  IntBox bounds(rasterizer->getCellsBounds());
+  if (!rasterizer->isValid()) return ERR_OK;
+  IntBox bounds(rasterizer->getBoundingBox());
 
   Scanline8 scanline;
 

@@ -111,9 +111,9 @@ struct FOG_API WinGuiWindow : public GuiWindow
   virtual err_t show(uint32_t state);
   virtual err_t hide();
 
-  virtual err_t move(const IntPoint& pt);
-  virtual err_t resize(const IntSize& size);
-  virtual err_t reconfigure(const IntRect& rect);
+  virtual err_t setPosition(const IntPoint& pos);
+  virtual err_t setSize(const IntSize& size);
+  virtual err_t setGeometry(const IntRect& geometry);
 
   virtual err_t takeFocus();
 

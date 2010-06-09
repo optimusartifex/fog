@@ -683,13 +683,23 @@ Set(FOG_GRAPHICS_RASTERENGINE_HEADERS
   Fog/Graphics/RasterEngine/C_p.h
 )
 
+Set(FOG_GRAPHICS_RASTERIZER_SOURCES
+  Fog/Graphics/Rasterizer/Rasterizer_Analytic.cpp
+  Fog/Graphics/Rasterizer/Rasterizer_SLEFA.cpp
+)
+
+Set(FOG_GRAPHICS_RASTERIZER_HEADERS
+  Fog/Graphics/Rasterizer/LiangBarsky_p.h
+  Fog/Graphics/Rasterizer/Rasterizer_Analytic_p.h
+  Fog/Graphics/Rasterizer/Rasterizer_SLEFA_p.h
+)
+
 # Optimize specific files for speed
 Set_Source_Files_Properties(Fog/Graphics/Image.cpp                             PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
 Set_Source_Files_Properties(Fog/Graphics/PathUtil.cpp                          PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
 Set_Source_Files_Properties(Fog/Graphics/PathUtil_SSE2.cpp                     PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_SSE2}")
-Set_Source_Files_Properties(Fog/Graphics/Rasterizer.cpp                        PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
+Set_Source_Files_Properties(${FOG_GRAPHICS_RASTERIZER_SOURCES}                 PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
 Set_Source_Files_Properties(Fog/Graphics/Region.cpp                            PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
-Set_Source_Files_Properties(Fog/Graphics/Scanline.cpp                          PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
 
 Set_Source_Files_Properties(Fog/Graphics/RasterEngine/Init_C.cpp               PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
 Set_Source_Files_Properties(Fog/Graphics/RasterEngine/Init_MMX.cpp             PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_MMX}")
@@ -699,11 +709,12 @@ Set_Source_Files_Properties(Fog/Graphics/RasterEngine/Init_SSE2.cpp            P
 Set_Source_Files_Properties(Fog/Graphics/RasterEngine/Init_SSSE3.cpp           PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_SSSE3}")
 
 # Source groups.
-Source_Group("Graphics"               FILES ${FOG_GRAPHICS_LIB_SOURCES}          ${FOG_GRAPHICS_MAIN_HEADERS})
-Source_Group("Graphics/ImageIO"       FILES ${FOG_GRAPHICS_IMAGEIO_SOURCES}      ${FOG_GRAPHICS_IMAGEIO_HEADERS})
-Source_Group("Graphics/FontEngine"    FILES ${FOG_GRAPHICS_FONTENGINE_SOURCES}   ${FOG_GRAPHICS_FONTENGINE_HEADERS})
-Source_Group("Graphics/PaintEngine"   FILES ${FOG_GRAPHICS_PAINTENGINE_SOURCES}  ${FOG_GRAPHICS_PAINTENGINE_HEADERS})
+Source_Group("Graphics"               FILES ${FOG_GRAPHICS_LIB_SOURCES}          ${FOG_GRAPHICS_MAIN_HEADERS}        )
+Source_Group("Graphics/ImageIO"       FILES ${FOG_GRAPHICS_IMAGEIO_SOURCES}      ${FOG_GRAPHICS_IMAGEIO_HEADERS}     )
+Source_Group("Graphics/FontEngine"    FILES ${FOG_GRAPHICS_FONTENGINE_SOURCES}   ${FOG_GRAPHICS_FONTENGINE_HEADERS}  )
+Source_Group("Graphics/PaintEngine"   FILES ${FOG_GRAPHICS_PAINTENGINE_SOURCES}  ${FOG_GRAPHICS_PAINTENGINE_HEADERS} )
 Source_Group("Graphics/RasterEngine"  FILES ${FOG_GRAPHICS_RASTERENGINE_SOURCES} ${FOG_GRAPHICS_RASTERENGINE_HEADERS})
+Source_Group("Graphics/Rasterizer"    FILES ${FOG_GRAPHICS_RASTERIZER_SOURCES}   ${FOG_GRAPHICS_RASTERIZER_HEADERS}  )
 
 # =============================================================================
 # [Fog-Xml]
@@ -764,13 +775,23 @@ Set(FOG_GUI_LIB_SOURCES
   Fog/Gui/Composite.cpp
   Fog/Gui/Event.cpp
   Fog/Gui/FlowLayout.cpp
+  Fog/Gui/Frame.cpp
   Fog/Gui/GridLayout.cpp
+  Fog/Gui/GroupBox.cpp
   Fog/Gui/GuiEngine.cpp
   Fog/Gui/Layout.cpp
   Fog/Gui/LayoutHint.cpp
   Fog/Gui/LayoutItem.cpp
   Fog/Gui/LayoutUtil.cpp
   Fog/Gui/Margin.cpp
+  Fog/Gui/MenuBar.cpp
+  Fog/Gui/MenuItem.cpp
+  Fog/Gui/MenuSeparator.cpp
+  Fog/Gui/RadioButton.cpp
+  Fog/Gui/ScrollArea.cpp
+  Fog/Gui/ScrollBar.cpp
+  Fog/Gui/TextArea.cpp
+  Fog/Gui/TextField.cpp
   Fog/Gui/ThemeEngine.cpp
   Fog/Gui/ToolBar.cpp
   Fog/Gui/ToolButton.cpp
@@ -790,7 +811,9 @@ Set(FOG_GUI_MAIN_HEADERS
   Fog/Gui/Constants.h
   Fog/Gui/Event.h
   Fog/Gui/FlowLayout.h
+  Fog/Gui/Frame.h
   Fog/Gui/GridLayout.h
+  Fog/Gui/GroupBox.h
   Fog/Gui/GuiEngine.h
   Fog/Gui/Layout.h
   Fog/Gui/LayoutHint.h
@@ -798,6 +821,14 @@ Set(FOG_GUI_MAIN_HEADERS
   Fog/Gui/LayoutPolicy.h
   Fog/Gui/LayoutUtil.h
   Fog/Gui/Margin.h
+  Fog/Gui/MenuBar.h
+  Fog/Gui/MenuItem.h
+  Fog/Gui/MenuSeparator.h
+  Fog/Gui/RadioButton.h
+  Fog/Gui/ScrollArea.h
+  Fog/Gui/ScrollBar.h
+  Fog/Gui/TextArea.h
+  Fog/Gui/TextField.h
   Fog/Gui/ThemeEngine.h
   Fog/Gui/ToolBar.h
   Fog/Gui/ToolButton.h
@@ -874,6 +905,7 @@ Set(FOG_ALL_SOURCES
   ${FOG_GRAPHICS_FONTENGINE_SOURCES}
   ${FOG_GRAPHICS_PAINTENGINE_SOURCES}
   ${FOG_GRAPHICS_RASTERENGINE_SOURCES}
+  ${FOG_GRAPHICS_RASTERIZER_SOURCES}
   # Fog-Gui.
   ${FOG_GUI_LIB_SOURCES}
   ${FOG_GUI_THEME_ENGINE_SOURCES}
@@ -895,6 +927,7 @@ Set(FOG_ALL_HEADERS
   ${FOG_GRAPHICS_FONTENGINE_HEADERS}
   ${FOG_GRAPHICS_PAINTENGINE_HEADERS}
   ${FOG_GRAPHICS_RASTERENGINE_HEADERS}
+  ${FOG_GRAPHICS_RASTERIZER_HEADERS}
   # Fog-Gui.
   ${FOG_GUI_MAIN_HEADERS}
   ${FOG_GUI_GUIENGINE_WIN_HEADERS}

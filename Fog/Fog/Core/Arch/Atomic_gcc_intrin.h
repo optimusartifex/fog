@@ -18,17 +18,17 @@ struct AtomicInt32
 
   static FOG_INLINE void set(int32_t* atomic, int32_t value)
   {
-    __sync_lock_test_and_set((long*)atomic, value);
+    __sync_lock_test_and_set(atomic, value);
   }
 
   static FOG_INLINE int32_t setXchg(int32_t* atomic, int32_t value)
   {
-    return __sync_lock_test_and_set((long*)atomic, value);
+    return __sync_lock_test_and_set(atomic, value);
   }
 
   static FOG_INLINE bool cmpXchg(int32_t* atomic, int32_t compar, int32_t value)
   {
-    return __sync_bool_compare_and_swap((long*)atomic, compar, value);
+    return __sync_bool_compare_and_swap(atomic, compar, value);
   }
  
   static FOG_INLINE int32_t get(const int32_t* atomic)
@@ -46,32 +46,32 @@ struct AtomicInt32
 
   static FOG_INLINE void inc(int32_t* atomic)
   {
-    __sync_fetch_and_add((long*)atomic, 1);
+    __sync_fetch_and_add(atomic, 1);
   }
  
   static FOG_INLINE void dec(int32_t* atomic)
   {
-    __sync_fetch_and_sub((long*)atomic, 1);
+    __sync_fetch_and_sub(atomic, 1);
   }
  
   static FOG_INLINE void add(int32_t* atomic, int32_t value)
   {
-    __sync_fetch_and_add((long*)atomic, value);
+    __sync_fetch_and_add(atomic, value);
   }
  
   static FOG_INLINE void sub(int32_t* atomic, int32_t value)
   {
-    __sync_fetch_and_sub((long*)atomic, value);
+    __sync_fetch_and_sub(atomic, value);
   }
  
   static FOG_INLINE int32_t addXchg(int32_t* atomic, int32_t value)
   {
-    return __sync_fetch_and_add((long*)atomic, value);
+    return __sync_fetch_and_add(atomic, value);
   }
  
   static FOG_INLINE int32_t subXchg(int32_t* atomic, int32_t value)
   {
-    return __sync_fetch_and_sub((long*)atomic, value);
+    return __sync_fetch_and_sub(atomic, value);
   }
  
   static FOG_INLINE bool deref(int32_t* atomic)
@@ -107,17 +107,17 @@ struct AtomicInt64
 
   static FOG_INLINE void set(int64_t* atomic, int64_t value)
   {
-    __sync_lock_test_and_set((long long*)atomic, value);
+    __sync_lock_test_and_set(atomic, value);
   }
  
   static FOG_INLINE int64_t setXchg(int64_t* atomic, int64_t value)
   {
-    return __sync_lock_test_and_set((long long*)atomic, value);
+    return __sync_lock_test_and_set(atomic, value);
   }
  
   static FOG_INLINE bool cmpXchg(int64_t* atomic, int64_t compar, int64_t value)
   {
-    return __sync_bool_compare_and_swap((long long*)atomic, compar, value);
+    return __sync_bool_compare_and_swap(atomic, compar, value);
   }
  
   static FOG_INLINE int64_t get(const int64_t* atomic)
@@ -135,32 +135,32 @@ struct AtomicInt64
  
   static FOG_INLINE void inc(int64_t* atomic)
   {
-    __sync_fetch_and_add((long long*)atomic, 1);
+    __sync_fetch_and_add(atomic, 1);
   }
  
   static FOG_INLINE void dec(int64_t* atomic)
   {
-    __sync_fetch_and_add((long long*)atomic, 1);
+    __sync_fetch_and_add(atomic, 1);
   }
  
   static FOG_INLINE void add(int64_t* atomic, int64_t value)
   {
-    __sync_fetch_and_add((long long*)atomic, value);
+    __sync_fetch_and_add(atomic, value);
   }
  
   static FOG_INLINE void sub(int64_t* atomic, int64_t value)
   {
-    __sync_fetch_and_sub((long long*)atomic, value);
+    __sync_fetch_and_sub(atomic, value);
   }
  
   static FOG_INLINE int64_t addXchg(int64_t* atomic, int64_t value)
   {
-    return __sync_fetch_and_add((long long*)atomic, value);
+    return __sync_fetch_and_add(atomic, value);
   }
  
   static FOG_INLINE int64_t subXchg(int64_t* atomic, int64_t value)
   {
-    return __sync_fetch_and_sub((long long*)atomic, value);
+    return __sync_fetch_and_sub(atomic, value);
   }
  
   static FOG_INLINE bool deref(int64_t* atomic)

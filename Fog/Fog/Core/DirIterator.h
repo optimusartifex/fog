@@ -17,6 +17,7 @@
 
 #if defined(FOG_OS_POSIX)
 #include <sys/stat.h>
+#include <dirent.h>
 #endif // FOG_OS_POSIX
 
 namespace Fog {
@@ -146,6 +147,10 @@ private:
 #if defined(FOG_OS_POSIX)
   ByteArray _pathCache;
   sysuint_t _pathCacheBaseLength;
+  union {
+    struct dirent _dent;
+    uint8_t _dentBuf[offsetof(struct dirent, d_name) + _POSIX_NAME_MAX + 1];
+  };
 #endif // FOG_OS_POSIX
 
   bool _skipDots;

@@ -293,7 +293,7 @@ bool DirIterator::read(DirEntry& to)
   if (!_handle) return false;
 
   struct dirent *de;
-  while ((de = ::readdir((DIR*)(_handle))) != NULL)
+  while (::readdir_r((DIR*)_handle, &_dent, &de) == 0 && (de != NULL))
   {
     const char* name = de->d_name;
 

@@ -1364,7 +1364,12 @@ void X11GuiWindow::releaseOwner()
 
 void X11GuiWindow::setTransparency(float val)
 {
-  // TODO GUI: X11 transparency.
+  X11GuiEngine* engine = GUI_ENGINE();
+  uint32_t opacity = (uint32_t)(val * (float)0xffffffffu);
+  XAtom opacityAtom = engine->getAtom(X11GuiEngine::Atom_NET_WM_WINDOW_OPACITY);
+  engine->pXChangeProperty(engine->getDisplay(), (XID)getHandle(),
+    opacityAtom, XA_CARDINAL, 32, PropModeReplace,
+    (unsigned char*)&opacity, 1L);
 }
 
 void X11GuiWindow::moveToTop(GuiWindow* w)

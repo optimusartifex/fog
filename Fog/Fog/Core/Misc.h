@@ -94,7 +94,7 @@ private:
 //!
 //! This stack class allocates some memory on the <b>stack</b> and if
 //! it's needed it allocs blocks of memory on the heap.
-template<ulong N>
+template<sysuint_t N>
 struct LocalStack
 {
   struct Node

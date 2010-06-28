@@ -495,6 +495,13 @@ struct FOG_API String
   sysuint_t lastIndexOf(const StringFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
 
   // --------------------------------------------------------------------------
+  // [IndexOfAny / LastIndexOfAny]
+  // --------------------------------------------------------------------------
+
+  sysuint_t indexOfAny(const Char* chars, sysuint_t numChars, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  sysuint_t lastIndexOfAny(const Char* chars, sysuint_t numChars, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+
+  // --------------------------------------------------------------------------
   // [StartsWith / EndsWith]
   // --------------------------------------------------------------------------
 

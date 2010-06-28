@@ -3012,6 +3012,28 @@ sysuint_t String::lastIndexOf(const StringFilter& filter,
 }
 
 // ============================================================================
+// [Fog::String - IndexOf / LastIndexOf]
+// ============================================================================
+
+sysuint_t String::indexOfAny(const Char* chars, sysuint_t numChars, uint cs, const Range& range) const
+{
+	sysuint_t rstart, rlen;
+  if (!chars || !fitToRange(*this, &rstart, &rlen, range)) return INVALID_INDEX;
+
+  sysuint_t i = StringUtil::indexOfAny(getData() + rstart, rlen, chars, numChars, cs);
+  return i != INVALID_INDEX ? i + rstart : i;
+}
+
+sysuint_t String::lastIndexOfAny(const Char* chars, sysuint_t numChars, uint cs, const Range& range) const
+{
+	sysuint_t rstart, rlen;
+  if (!chars || !fitToRange(*this, &rstart, &rlen, range)) return INVALID_INDEX;
+
+  sysuint_t i = StringUtil::lastIndexOfAny(getData() + rstart, rlen, chars, numChars, cs);
+  return i != INVALID_INDEX ? i + rstart : i;
+}
+
+// ============================================================================
 // [Fog::String - StartsWith / EndsWith]
 // ============================================================================
 

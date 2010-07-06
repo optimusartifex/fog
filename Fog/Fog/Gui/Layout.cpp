@@ -24,11 +24,11 @@ namespace Fog {
 
 Layout::Layout() : 
   _parentItem(0),
-  _toplevel(0),
-  _spacing(0),
-  _enabled(1),
-  _activated(1),
   _flexcount(0),
+  _spacing(0),
+  _toplevel(0),
+  _activated(1),
+  _enabled(1),
   _nextactivate(0)
 {
   _objectFlags |= OBJECT_FLAG_IS_LAYOUT;  

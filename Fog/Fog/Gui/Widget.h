@@ -748,7 +748,7 @@ protected:
   // GUI TODO: Move...
   struct ExtendedData
   {
-    ExtendedData() : _maxheight(WIDGET_MAX_SIZE), _maxwidth(WIDGET_MAX_SIZE), _minheight(WIDGET_MIN_SIZE), _minwidth(WIDGET_MIN_SIZE) {}
+    ExtendedData() : _maxwidth(WIDGET_MAX_SIZE), _maxheight(WIDGET_MAX_SIZE), _minwidth(WIDGET_MIN_SIZE), _minheight(WIDGET_MIN_SIZE) {}
     int _maxwidth;
     int _maxheight;
     int _minwidth;

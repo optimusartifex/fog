@@ -80,7 +80,7 @@ struct FOG_API GridLayout : public Layout
   // TODO: What about visibility, FOG_API?
   struct Column : public LayoutItem::FlexLayoutData
   {
-    Column(int colid, GridLayout* layout) : _minWidth(0), _maxWidth(INT_MAX), _hintWidth(-1), _flex(0.0), _colid(colid),_layout(layout)
+    Column(int colid, GridLayout* layout) : _minWidth(0), _maxWidth(INT_MAX), _hintWidth(-1), _colid(colid), _flex(0.0), _layout(layout)
     {
       FOG_ASSERT(_layout);
       _layoutdata = this;
@@ -121,7 +121,7 @@ struct FOG_API GridLayout : public Layout
   // TODO: What about visibility, FOG_API?
   struct Row : public LayoutItem::FlexLayoutData
   {
-    Row(int rowid) : _minHeight(0), _maxHeight(INT_MAX), _hintHeight(-1), _flex(0.0), _rowid(rowid)
+    Row(int rowid) : _minHeight(0), _maxHeight(INT_MAX), _hintHeight(-1), _rowid(rowid), _flex(0.0)
     {
       _layoutdata = this;
     }
@@ -199,7 +199,7 @@ private:
 
   struct LayoutProperties : public LayoutItem::FlexLayoutData
   {
-    LayoutProperties() : _colspannext(0), _rowspannext(0), _colspan(-1), _rowspan(-1)
+    LayoutProperties() : _colspan(-1), _rowspan(-1), _colspannext(0), _rowspannext(0)
     {
     }
 

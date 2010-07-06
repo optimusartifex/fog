@@ -79,12 +79,12 @@ static IntSize calculateMaximumSizeHelper(const IntSize& sizeHint, const IntSize
 // ============================================================================
 
 LayoutItem::LayoutItem(uint32_t alignment) : 
-  _alignment(alignment),
-  _withinLayout(0),
   _layoutdata(0),
+  _contentmargin(0),
+  _withinLayout(0),
+  _alignment(alignment),
   _dirty(1),
-  _propertydirty(1),
-  _contentmargin(0)
+  _propertydirty(1)
 {
 }
 

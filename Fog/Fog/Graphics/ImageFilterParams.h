@@ -120,6 +120,7 @@ struct FOG_HIDDEN FloatSymmetricConvolveParams
     vMatrix = other.vMatrix;
     borderExtend = other.borderExtend;
     borderColor = other.borderColor;
+    return *this;
   }
 
   // --------------------------------------------------------------------------

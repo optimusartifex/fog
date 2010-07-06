@@ -23,14 +23,14 @@ namespace Fog {
 
 GridLayout::GridLayout(Widget* parent, int rows, int colums) :
   Layout(parent),
-  _colwidth(0),
-  _rowheight(0),
+  _rowflexibles(0),
+  _colflexibles(0),
   _vspacing(0),
   _hspacing(0),
+  _colwidth(0),
+  _rowheight(0),
   _colspan(0),
-  _rowspan(0),
-  _rowflexibles(0),
-  _colflexibles(0)
+  _rowspan(0)
 {
   if (rows >= 0 && colums >= 0)
   {

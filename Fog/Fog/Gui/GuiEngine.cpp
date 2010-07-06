@@ -1132,6 +1132,10 @@ void GuiEngine::_onButtonRepeatTimeOut(TimerEvent* e)
 
 GuiWindow::GuiWindow(Widget* widget) :
   _widget(widget),
+  _activatelist(NULL),
+  _owner(NULL),
+  _modal(0),
+  _lastmodal(NULL),
   _handle(NULL),
   _backingStore(NULL),
   _enabled(true),
@@ -1139,13 +1143,9 @@ GuiWindow::GuiWindow(Widget* widget) :
   _hasFocus(false),
   _needBlit(true),
   _isDirty(false),
+  _modalpolicy(MODAL_NONE),
   _windowRect(0, 0, 1, 1),
   _clientRect(0, 0, 1, 1),
-  _owner(NULL),
-  _modalpolicy(MODAL_NONE),
-  _modal(0),
-  _lastmodal(NULL),
-  _activatelist(NULL),
   _sizeGranularity(1, 1)
 {
 }

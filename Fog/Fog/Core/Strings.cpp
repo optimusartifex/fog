@@ -179,7 +179,7 @@ static const char fog_strings_data[] =
 #endif // FOG_OS_WINDOWS
 };
 
-FOG_CVAR_DECLARE Fog::ManagedString::Cache* fog_strings;
+Fog::ManagedString::Cache* fog_strings;
 
 } // Fog namespace
 

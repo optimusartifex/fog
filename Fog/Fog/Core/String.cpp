@@ -3017,7 +3017,7 @@ sysuint_t String::lastIndexOf(const StringFilter& filter,
 
 sysuint_t String::indexOfAny(const Char* chars, sysuint_t numChars, uint cs, const Range& range) const
 {
-	sysuint_t rstart, rlen;
+  sysuint_t rstart, rlen;
   if (!chars || !fitToRange(*this, &rstart, &rlen, range)) return INVALID_INDEX;
 
   sysuint_t i = StringUtil::indexOfAny(getData() + rstart, rlen, chars, numChars, cs);
@@ -3026,7 +3026,7 @@ sysuint_t String::indexOfAny(const Char* chars, sysuint_t numChars, uint cs, con
 
 sysuint_t String::lastIndexOfAny(const Char* chars, sysuint_t numChars, uint cs, const Range& range) const
 {
-	sysuint_t rstart, rlen;
+  sysuint_t rstart, rlen;
   if (!chars || !fitToRange(*this, &rstart, &rlen, range)) return INVALID_INDEX;
 
   sysuint_t i = StringUtil::lastIndexOfAny(getData() + rstart, rlen, chars, numChars, cs);

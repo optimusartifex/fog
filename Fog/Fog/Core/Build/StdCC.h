@@ -160,7 +160,7 @@
 
 // Visibility.
 #if __GNUC__ >= 4
-# define FOG_HIDDEN __attribute__((visibility("default")))
+# define FOG_HIDDEN __attribute__((visibility("hidden")))
 #else
 # define FOG_HIDDEN
 #endif
@@ -170,7 +170,7 @@
 # define FOG_DLL_EXPORT __declspec(dllexport)
 #else
 # define FOG_DLL_IMPORT
-# define FOG_DLL_EXPORT __attribute__((visibility ("default")))
+# define FOG_DLL_EXPORT __attribute__((visibility("default")))
 #endif
 
 // Likely / unlikely.
@@ -245,7 +245,7 @@
 
 // Visibility.
 #if __GNUC__ >= 4
-# define FOG_HIDDEN __attribute__((visibility("default")))
+# define FOG_HIDDEN __attribute__((visibility("hidden")))
 #else
 # define FOG_HIDDEN
 #endif
@@ -255,7 +255,7 @@
 # define FOG_DLL_EXPORT __declspec(dllexport)
 #elif (__GNUC__ >= 4)
 # define FOG_DLL_IMPORT
-# define FOG_DLL_EXPORT __attribute__((visibility ("default")))
+# define FOG_DLL_EXPORT __attribute__((visibility("default")))
 #else
 # define FOG_DLL_IMPORT
 # define FOG_DLL_EXPORT
@@ -283,13 +283,13 @@
 # define FOG_CVAR_EXTERN_BASE(api) extern "C" api
 # define FOG_CVAR_DECLARE_BASE(api)
 #else
-# define FOG_CVAR_EXTERN_BASE(api) extern "C"
+# define FOG_CVAR_EXTERN_BASE(api) extern "C" api
 # define FOG_CVAR_DECLARE_BASE(api)
 #endif // __MINGW32__
 
 // C API.
 #define FOG_CAPI_EXTERN_BASE(api) extern "C" api
-#define FOG_CAPI_DECLARE_BASE(api) extern "C" api
+#define FOG_CAPI_DECLARE_BASE(api) extern "C"
 
 // C API - static initializers we can hide them...
 #define FOG_INIT_EXTERN_BASE(api) extern "C" FOG_HIDDEN

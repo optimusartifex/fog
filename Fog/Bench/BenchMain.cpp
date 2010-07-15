@@ -26,18 +26,18 @@ static void writeInfo(BenchmarkMaster* master)
   msg.appendFormat("Surface  : %dx%d\n", master->getWidth(), master->getHeight());
   msg.appendFormat("Quantity : %d\n", master->getQuantity());
   msg.appendFormat("\n");
-  msg.appendFormat("Processor: %s\n", Fog::cpuInfo->brand);
+  msg.appendFormat("Processor: %s\n", Fog::getCpuInfo()->brand);
   msg.appendFormat("Features1: MMX=%s, MMXExt=%s, 3dNow=%s, 3dNowExt=%s, SSE=%s\n",
-    yesno[Fog::cpuInfo->hasFeature(Fog::CpuInfo::FEATURE_MMX)],
-    yesno[Fog::cpuInfo->hasFeature(Fog::CpuInfo::FEATURE_MMXExt)],
-    yesno[Fog::cpuInfo->hasFeature(Fog::CpuInfo::FEATURE_3dNow)],
-    yesno[Fog::cpuInfo->hasFeature(Fog::CpuInfo::FEATURE_3dNowExt)],
-    yesno[Fog::cpuInfo->hasFeature(Fog::CpuInfo::FEATURE_SSE)]);
+    yesno[Fog::getCpuInfo()->hasFeature(Fog::CpuInfo::FEATURE_MMX)],
+    yesno[Fog::getCpuInfo()->hasFeature(Fog::CpuInfo::FEATURE_MMXExt)],
+    yesno[Fog::getCpuInfo()->hasFeature(Fog::CpuInfo::FEATURE_3dNow)],
+    yesno[Fog::getCpuInfo()->hasFeature(Fog::CpuInfo::FEATURE_3dNowExt)],
+    yesno[Fog::getCpuInfo()->hasFeature(Fog::CpuInfo::FEATURE_SSE)]);
   msg.appendFormat("Features2: SSE2=%s, SSE3=%s, SSSE3=%s\n",
-    yesno[Fog::cpuInfo->hasFeature(Fog::CpuInfo::FEATURE_SSE2)],
-    yesno[Fog::cpuInfo->hasFeature(Fog::CpuInfo::FEATURE_SSE3)],
-    yesno[Fog::cpuInfo->hasFeature(Fog::CpuInfo::FEATURE_SSSE3)]);
-  msg.appendFormat("CPU count: %u\n", Fog::cpuInfo->numberOfProcessors);
+    yesno[Fog::getCpuInfo()->hasFeature(Fog::CpuInfo::FEATURE_SSE2)],
+    yesno[Fog::getCpuInfo()->hasFeature(Fog::CpuInfo::FEATURE_SSE3)],
+    yesno[Fog::getCpuInfo()->hasFeature(Fog::CpuInfo::FEATURE_SSSE3)]);
+  msg.appendFormat("CPU count: %u\n", Fog::getCpuInfo()->numberOfProcessors);
   msg.appendFormat("\n");
   benchLog(msg);
 }

@@ -43,6 +43,8 @@ namespace Fog {
 
 // [Fog::Cpu]
 
+FOG_CVAR_DECLARE CpuInfo fog_cpuinfo;
+
 static uint32_t detectNumberOfProcessors(void)
 {
 #if defined(FOG_OS_WINDOWS)
@@ -64,8 +66,6 @@ static uint32_t detectNumberOfProcessors(void)
   return 1;
 #endif
 }
-
-FOG_CVAR_DECLARE CpuInfo* cpuInfo;
 
 #if defined(FOG_ARCH_X86) || defined(FOG_ARCH_X86_64)
 void cpuid(uint32_t in, CpuId* out)
@@ -263,10 +263,7 @@ FOG_INIT_DECLARE err_t fog_cpuinfo_init(void)
 {
   using namespace Fog;
 
-  static CpuInfo staticCpuInfo;
-  cpuInfo = &staticCpuInfo;
-  detectCpuInfo(cpuInfo);
-
+  detectCpuInfo(&fog_cpuinfo);
   return ERR_OK;
 }
 

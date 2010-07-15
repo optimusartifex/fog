@@ -49,7 +49,7 @@ union FOG_HIDDEN CpuId
 //! Small example how to check for SSE2 support.
 //!
 //! @verbatim
-//! if (Fog::cpuInfo->hasFeature(Fog::CpuInfo::FEATURE_SSE2))
+//! if (Fog::getCpuInfo()->hasFeature(Fog::CpuInfo::FEATURE_SSE2))
 //! {
 //!   // cpu has SSE2 support
 //! }
@@ -148,17 +148,19 @@ struct FOG_HIDDEN CpuInfo
     BUG_AMD_LOCK_MB = 1U << 0
   };
 
-  FOG_INLINE bool hasFeature(uint32_t feature)
-  { return (features & feature) != 0; }
+  FOG_INLINE bool hasFeature(uint32_t feature) const
+  { return (this->features & feature) != 0; }
 
-  FOG_INLINE bool hasFeatures(uint32_t features)
-  { return (features & features) == features; }
+  FOG_INLINE bool hasFeatures(uint32_t features) const
+  { return (this->features & features) == features; }
 
-  FOG_INLINE bool hasBug(uint32_t bug)
-  { return (bugs & bug) != 0; }
+  FOG_INLINE bool hasBug(uint32_t bug) const
+  { return (this->bugs & bug) != 0; }
 };
 
-FOG_CVAR_EXTERN CpuInfo* cpuInfo;
+FOG_CVAR_EXTERN CpuInfo fog_cpuinfo;
+
+FOG_INLINE static const CpuInfo* getCpuInfo() { return &fog_cpuinfo; }
 
 #if defined(FOG_ARCH_X86) || defined(FOG_ARCH_X86_64)
 //! @brief Retrieve CPUID values.

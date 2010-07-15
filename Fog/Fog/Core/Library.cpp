@@ -93,7 +93,12 @@ static err_t systemOpenLibrary(const String& fileName, void** handle)
   if ((err = TextCodec::local8().appendFromUnicode(fileName8, fileName))) return err;
 
   void* h = (void*)::dlopen(fileName8.getData(), RTLD_NOW);
-  if (h == NULL) return ERR_LIBRARY_LOAD_FAILED;
+  if (h == NULL)
+  {
+    // If something bad happens...
+    // printf("ERROR: %s\n", dlerror());
+    return ERR_LIBRARY_LOAD_FAILED;
+  }
 
   *handle = h;
   return ERR_OK;

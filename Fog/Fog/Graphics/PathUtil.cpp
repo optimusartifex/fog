@@ -631,7 +631,7 @@ FOG_INIT_DECLARE err_t fog_pathutil_init(void)
   fog_pathutil_init_sse2();
 #else
 #if (defined(FOG_ARCH_X86) || defined(FOG_ARCH_X86_64))
-  if (cpuInfo->hasFeature(CpuInfo::FEATURE_SSE2)) fog_pathutil_init_sse2();
+  if (getCpuInfo()->hasFeature(CpuInfo::FEATURE_SSE2)) fog_pathutil_init_sse2();
 #endif // FOG_ARCH_X86 || FOG_ARCH_X86_64
 #endif // FOG_HARDCODE_SSE2
 

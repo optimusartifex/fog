@@ -733,21 +733,21 @@ FOG_INIT_DECLARE err_t fog_rasterengine_init(void)
   // Install it only if x86 architecture is used. In 64-bit mode the SSE2
   // implementation is always available and it's better choice.
 #if defined(FOG_ARCH_X86)
-  if (cpuInfo->hasFeature(CpuInfo::FEATURE_MMX  )) fog_rasterengine_init_mmx();
-  if (cpuInfo->hasFeature(CpuInfo::FEATURE_3dNow)) fog_rasterengine_init_mmx3dnow();
-  if (cpuInfo->hasFeature(CpuInfo::FEATURE_SSE  )) fog_rasterengine_init_mmxsse();
+  if (getCpuInfo()->hasFeature(CpuInfo::FEATURE_MMX  )) fog_rasterengine_init_mmx();
+  if (getCpuInfo()->hasFeature(CpuInfo::FEATURE_3dNow)) fog_rasterengine_init_mmx3dnow();
+  if (getCpuInfo()->hasFeature(CpuInfo::FEATURE_SSE  )) fog_rasterengine_init_mmxsse();
 #endif // FOG_ARCH_X86
 
   // Install SSE2 optimized code if supported.
 #if defined(FOG_HARDCODE_SSE2)
   fog_rasterengine_init_sse2();
 #elif defined(FOG_ARCH_X86) || defined(FOG_ARCH_X86_64)
-  if (cpuInfo->hasFeature(CpuInfo::FEATURE_SSE2)) fog_rasterengine_init_sse2();
+  if (getCpuInfo()->hasFeature(CpuInfo::FEATURE_SSE2)) fog_rasterengine_init_sse2();
 #endif // SSE2
 
   // Install SSSE3 optimized code if supported.
 #if defined(FOG_ARCH_X86) || defined(FOG_ARCH_X86_64)
-  if (cpuInfo->hasFeature(CpuInfo::FEATURE_SSSE3)) fog_rasterengine_init_ssse3();
+  if (getCpuInfo()->hasFeature(CpuInfo::FEATURE_SSSE3)) fog_rasterengine_init_ssse3();
 #endif // SSSE3
 
   return ERR_OK;

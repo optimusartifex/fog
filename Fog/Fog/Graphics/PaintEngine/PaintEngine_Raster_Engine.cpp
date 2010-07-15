@@ -137,7 +137,7 @@ RasterPaintEngine::RasterPaintEngine(const ImageBuffer& buffer, ImageData* image
   ctx.state &= ~(RASTER_STATE_PENDING_MASK);
 
   // Setup multithreading if possible.
-  if ((initFlags & PAINTER_INIT_MT) != 0 && cpuInfo->numberOfProcessors > 1)
+  if ((initFlags & PAINTER_INIT_MT) != 0 && getCpuInfo()->numberOfProcessors > 1)
   {
     uint64_t total = (uint64_t)buffer.width * (uint64_t)buffer.height;
 
@@ -237,7 +237,7 @@ err_t RasterPaintEngine::setEngine(uint32_t engine, uint32_t threads)
   // Start multithreading...
   if (mt)
   {
-    uint max = Math::min<uint>(threads > 0 ? threads : cpuInfo->numberOfProcessors, RASTER_MAX_WORKERS);
+    uint max = Math::min<uint>(threads > 0 ? threads : getCpuInfo()->numberOfProcessors, RASTER_MAX_WORKERS);
 
     // Whether to enable main-task mode (currently the main-task mode is less
     // performant so it's disabled by default).

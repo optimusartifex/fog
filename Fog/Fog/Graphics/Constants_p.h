@@ -153,7 +153,7 @@ enum OPERATOR_CHAR_STATIC
 //!
 //! @brief Operator characteristics that can be used by raster paint engine
 //! dynamically (based on operator).
-extern FOG_HIDDEN uint32_t OperatorCharacteristics[OPERATOR_COUNT];
+extern FOG_API uint32_t OperatorCharacteristics[OPERATOR_COUNT];
 
 // ============================================================================
 // [PATTERN_FETCH_MODE]

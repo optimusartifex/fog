@@ -475,7 +475,7 @@ public:
 
     // On Athlon X2 CPUs (e.g. model 15) QueryPerformanceCounter is
     // unreliable. Fallback to low-res clock.
-    if (strcmp(cpuInfo->vendor, "AuthenticAMD") == 0 && cpuInfo->family == 15)
+    if (strcmp(getCpuInfo()->vendor, "AuthenticAMD") == 0 && getCpuInfo()->family == 15)
     {
       disableHighResClock();
     }

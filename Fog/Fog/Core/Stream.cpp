@@ -11,7 +11,6 @@
 // [Dependencies]
 #include <Fog/Core/ByteArray.h>
 #include <Fog/Core/FileSystem.h>
-#include <Fog/Core/FileUtil.h>
 #include <Fog/Core/MapFile.h>
 #include <Fog/Core/Math.h>
 #include <Fog/Core/Memory.h>
@@ -997,7 +996,7 @@ err_t Stream::openFile(const String& fileName, uint32_t openFlags)
   if ((openFlags & CREATE_PATH_FLAGS) == CREATE_PATH_FLAGS)
   {
     TemporaryString<TEMPORARY_LENGTH> dirName;
-    if ((err = FileUtil::extractDirectory(dirName, fileName))) return err;
+    if ((err = FileSystem::extractDirectory(dirName, fileName))) return err;
 
     if (!dirName.isEmpty() && dirName != Ascii8("."))
     {

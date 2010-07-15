@@ -239,7 +239,6 @@ Set(FOG_CORE_LIB_SOURCES
   Fog/Core/Event.cpp
   Fog/Core/EventLoop.cpp
   Fog/Core/FileSystem.cpp
-  Fog/Core/FileUtil.cpp
   Fog/Core/Hash.cpp
   Fog/Core/HashUtil.cpp
   Fog/Core/Init.cpp
@@ -302,7 +301,6 @@ Set(FOG_CORE_MAIN_HEADERS
   Fog/Core/Event.h
   Fog/Core/EventLoop.h
   Fog/Core/FileSystem.h
-  Fog/Core/FileUtil.h
   Fog/Core/Hash.h
   Fog/Core/HashUtil.h
   Fog/Core/Lazy.h

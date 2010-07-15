@@ -102,6 +102,37 @@ static FOG_INLINE bool isDirectory(const String& fileName)
 FOG_API err_t createDirectory(const String& dir, bool recursive = true);
 FOG_API err_t deleteDirectory(const String& dir);
 
+FOG_API err_t extractFile(String& dst, const String& path);
+FOG_API err_t extractDirectory(String& dst, const String& path);
+FOG_API err_t extractExtension(String& dst, const String& path);
+FOG_API err_t normalizePath(String& dst, const String& path);
+FOG_API err_t toAbsolutePath(String& dst, const String& base, const String& path);
+FOG_API err_t joinPath(String& dst, const String& base, const String& part);
+
+FOG_API bool isPathContainsFile(const String& path, const String& file, uint cs = CASE_SENSITIVE);
+FOG_API bool isPathContainsDirectory(const String& path, const String& directory, uint cs = CASE_SENSITIVE);
+FOG_API bool isPathContainsExtension(const String& path, const String& extension, uint cs = CASE_SENSITIVE);
+FOG_API bool isNormalizedPath(const String& path);
+FOG_API bool isAbsolutePath(const String& path);
+
+FOG_API bool testLocalName(const String& path);
+
+#if defined(FOG_OS_WINDOWS)
+static const char directorySeparatorA = '\\';
+static const Char directorySeparatorU = Char('\\');
+
+static const char pathSeparatorA = ';';
+static const Char pathSeparatorU = Char(';');
+#endif // FOG_OS_WINDOWS
+
+#if defined(FOG_OS_POSIX)
+static const char directorySeparatorA = '/';
+static const Char directorySeparatorU = Char('/');
+
+static const char pathSeparatorA = ':';
+static const Char pathSeparatorU = Char(':');
+#endif // FOG_OS_POSIX
+
 //! @}
 
 } // FileSystem namespace

@@ -12,7 +12,6 @@
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/AutoLock.h>
 #include <Fog/Core/FileSystem.h>
-#include <Fog/Core/FileUtil.h>
 #include <Fog/Core/List.h>
 #include <Fog/Core/Lock.h>
 #include <Fog/Core/ManagedString.h>
@@ -288,7 +287,7 @@ FOG_API err_t createDecoderForFile(const String& fileName, DecoderDevice** devic
   if (err != ERR_OK) goto end;
 
   // Extract extension to help opening from stream.
-  if ((err = FileUtil::extractExtension(extension, fileName)) || (err = extension.lower())) goto end;
+  if ((err = FileSystem::extractExtension(extension, fileName)) || (err = extension.lower())) goto end;
 
   // Finally create device.
   err = createDecoderForStream(stream, extension, device);

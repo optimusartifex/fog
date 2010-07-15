@@ -11,7 +11,6 @@
 // [Dependencies]
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/FileSystem.h>
-#include <Fog/Core/FileUtil.h>
 #include <Fog/Core/MapFile.h>
 #include <Fog/Core/Math.h>
 #include <Fog/Core/Memory.h>
@@ -2777,7 +2776,7 @@ err_t Image::writeToFile(const String& fileName) const
   if (err) return err;
 
   TemporaryString<16> extension;
-  if ((err = FileUtil::extractExtension(extension, fileName)) || (err = extension.lower()))
+  if ((err = FileSystem::extractExtension(extension, fileName)) || (err = extension.lower()))
   {
     return err;
   }

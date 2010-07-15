@@ -12,7 +12,6 @@
 #include <Fog/Core/AutoLock.h>
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/FileSystem.h>
-#include <Fog/Core/FileUtil.h>
 #include <Fog/Core/Hash.h>
 #include <Fog/Core/Lock.h>
 #include <Fog/Core/Memory.h>
@@ -262,7 +261,7 @@ List<String> FontEngine::getDefaultFontDirectories()
 #if defined(FOG_OS_WINDOWS)
   // Add WIN font directory.
   String winFonts = OS::getWindowsDirectory();
-  FileUtil::joinPath(winFonts, winFonts, Ascii8("fonts"));
+  FileSystem::joinPath(winFonts, winFonts, Ascii8("fonts"));
   paths.append(winFonts);
 #elif defined(FOG_OS_MAC)
   // Add MAC font directories.

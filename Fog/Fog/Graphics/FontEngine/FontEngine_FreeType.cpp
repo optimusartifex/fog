@@ -16,7 +16,6 @@
 #include <Fog/Core/Memory.h>
 #include <Fog/Core/OS.h>
 #include <Fog/Core/FileSystem.h>
-#include <Fog/Core/FileUtil.h>
 #include <Fog/Core/Static.h>
 #include <Fog/Core/Strings.h>
 #include <Fog/Core/StringUtil.h>

@@ -12,7 +12,6 @@
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/DirIterator.h>
 #include <Fog/Core/FileSystem.h>
-#include <Fog/Core/FileUtil.h>
 #include <Fog/Core/String.h>
 #include <Fog/Core/StringUtil.h>
 #include <Fog/Core/TextCodec.h>
@@ -114,7 +113,7 @@ err_t DirIterator::open(const String& path)
 
   err_t err;
 
-  if ((err = FileUtil::toAbsolutePath(pathAbs, String(), path)) ||
+  if ((err = FileSystem::toAbsolutePath(pathAbs, String(), path)) ||
       (err = t.set(pathAbs)) ||
       (err = t.append(Ascii8("\\*"))) ||
       (err = t.slashesToWin()))
@@ -261,7 +260,7 @@ err_t DirIterator::open(const String& path)
 
   err_t err;
 
-  if ((err = FileUtil::toAbsolutePath(pathAbs, String(), path))) return err;
+  if ((err = FileSystem::toAbsolutePath(pathAbs, String(), path))) return err;
   if ((err = TextCodec::local8().appendFromUnicode(t, pathAbs))) return err;
 
   if ((_handle = (void*)::opendir(t.getData())) != NULL)

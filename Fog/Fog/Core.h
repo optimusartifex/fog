@@ -327,7 +327,6 @@ struct Implicit
 #include <Fog/Core/Event.h>
 #include <Fog/Core/EventLoop.h>
 #include <Fog/Core/FileSystem.h>
-#include <Fog/Core/FileUtil.h>
 #include <Fog/Core/Hash.h>
 #include <Fog/Core/HashUtil.h>
 #include <Fog/Core/Lazy.h>

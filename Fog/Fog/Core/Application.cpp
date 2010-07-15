@@ -19,7 +19,7 @@
 #include <Fog/Core/ByteArray.h>
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/EventLoop.h>
-#include <Fog/Core/FileUtil.h>
+#include <Fog/Core/FileSystem.h>
 #include <Fog/Core/Hash.h>
 #include <Fog/Core/Library.h>
 #include <Fog/Core/Misc.h>
@@ -233,10 +233,10 @@ EventLoop* Application_Local::createEventLoop(const String& name)
 void Application_Local::applicationArgumentsWasSet()
 {
   applicationExecutable = applicationArguments.at(0);
-  FileUtil::toAbsolutePath(applicationExecutable, String(), applicationExecutable);
+  FileSystem::toAbsolutePath(applicationExecutable, String(), applicationExecutable);
 
   String applicationDirectory;
-  FileUtil::extractDirectory(applicationDirectory, applicationExecutable);
+  FileSystem::extractDirectory(applicationDirectory, applicationExecutable);
 
   // Application directory usually contains plugins and library itself under
   // Windows, but we will add it also for posix OSes. It can help if application

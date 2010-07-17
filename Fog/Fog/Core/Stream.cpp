@@ -1142,7 +1142,7 @@ sysuint_t Stream::read(ByteArray& dst, sysuint_t size)
   return n;
 }
 
-sysuint_t Stream::readAll(ByteArray& dst, int64_t maxBytes)
+sysuint_t Stream::readAll(ByteArray& dst, sysuint_t maxBytes)
 {
   dst.clear();
 
@@ -1160,7 +1160,7 @@ sysuint_t Stream::readAll(ByteArray& dst, int64_t maxBytes)
 nonSeekable:
     // This happen for example in /proc/ or in virtual files. We will try to
     // read everything we can.
-    uint64_t remain = (maxBytes < 0) ? UINT64_MAX : (uint64_t)maxBytes;
+    uint64_t remain = (maxBytes == 0) ? UINT64_MAX : (uint64_t)maxBytes;
 
     for (;;)
     {

@@ -340,7 +340,7 @@ void Qt4Module_Image::prepare(int quantity, int sw, int sh)
 
   for (int a = 0; a < NUM_SPRITES; a++)
   {
-    images[a] = sprite[a].scale(Fog::IntSize(sw, sh));
+    images[a] = sprite[a].scaled(Fog::IntSize(sw, sh));
     images_qt4[a] = QImage(
       (unsigned char*)images[a].getFirst(),
       images[a].getWidth(),

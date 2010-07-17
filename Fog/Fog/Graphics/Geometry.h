@@ -825,9 +825,21 @@ struct IntSize
     return *this;
   }
 
+  FOG_INLINE IntSize& adjust(const IntSize& sz)
+  {
+    w += sz.w;
+    h += sz.h;
+    return *this;
+  }
+
   FOG_INLINE IntSize adjusted(int sw, int sh) const
   {
     return IntSize(w + sw, h + sh);
+  }
+
+  FOG_INLINE IntSize adjusted(const IntSize& sz) const
+  {
+    return IntSize(w + sz.w, h + sz.h);
   }
 
   // --------------------------------------------------------------------------
@@ -841,7 +853,7 @@ struct IntSize
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const IntSize& operator=(const IntSize& other)
+  FOG_INLINE IntSize& operator=(const IntSize& other)
   {
     return set(other);
   }
@@ -854,6 +866,20 @@ struct IntSize
   FOG_INLINE bool operator!=(const IntSize& other) const
   {
     return (w != other.w) | (h != other.h);
+  }
+
+  FOG_INLINE IntSize& operator+=(const IntSize& other)
+  {
+    w += other.w;
+    h += other.h;
+    return *this;
+  }
+
+  FOG_INLINE IntSize& operator-=(const IntSize& other)
+  {
+    w -= other.w;
+    h -= other.h;
+    return *this;
   }
 
   FOG_INLINE IntSize expandedTo(const IntSize& otherSize) const
@@ -983,6 +1009,20 @@ struct FloatSize
   // [Adjust]
   // --------------------------------------------------------------------------
 
+  FOG_INLINE FloatSize& adjust(int sw, int sh)
+  {
+    w += sw;
+    h += sh;
+    return *this;
+  }
+
+  FOG_INLINE FloatSize& adjust(const IntSize& sz)
+  {
+    w += sz.w;
+    h += sz.h;
+    return *this;
+  }
+
   FOG_INLINE FloatSize& adjust(float sw, float sh)
   {
     w += sw;
@@ -990,9 +1030,31 @@ struct FloatSize
     return *this;
   }
 
+  FOG_INLINE FloatSize& adjust(const FloatSize& sz)
+  {
+    w += sz.w;
+    h += sz.h;
+    return *this;
+  }
+
+  FOG_INLINE FloatSize adjusted(int sw, int sh) const
+  {
+    return FloatSize(w + sw, h + sh);
+  }
+
+  FOG_INLINE FloatSize adjusted(const IntSize& sz) const
+  {
+    return FloatSize(w + sz.w, h + sz.h);
+  }
+
   FOG_INLINE FloatSize adjusted(float sw, float sh) const
   {
     return FloatSize(w + sw, h + sh);
+  }
+
+  FOG_INLINE FloatSize adjusted(const FloatSize& sz) const
+  {
+    return FloatSize(w + sz.w, h + sz.h);
   }
 
   // --------------------------------------------------------------------------
@@ -1005,12 +1067,12 @@ struct FloatSize
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const FloatSize& operator=(const IntSize& other)
+  FOG_INLINE FloatSize& operator=(const IntSize& other)
   {
     return set(other);
   }
 
-  FOG_INLINE const FloatSize& operator=(const FloatSize& other)
+  FOG_INLINE FloatSize& operator=(const FloatSize& other)
   {
     return set(other);
   }
@@ -1023,6 +1085,34 @@ struct FloatSize
   FOG_INLINE bool operator!=(const FloatSize& other) const
   {
     return (w != other.w) | (h != other.h);
+  }
+
+  FOG_INLINE FloatSize& operator+=(const IntSize& other)
+  {
+    w += other.w;
+    h += other.h;
+    return *this;
+  }
+
+  FOG_INLINE FloatSize& operator+=(const FloatSize& other)
+  {
+    w += other.w;
+    h += other.h;
+    return *this;
+  }
+
+  FOG_INLINE FloatSize& operator-=(const IntSize& other)
+  {
+    w -= other.w;
+    h -= other.h;
+    return *this;
+  }
+
+  FOG_INLINE FloatSize& operator-=(const FloatSize& other)
+  {
+    w -= other.w;
+    h -= other.h;
+    return *this;
   }
 
   // --------------------------------------------------------------------------
@@ -1167,6 +1257,34 @@ struct DoubleSize
   // [Adjust]
   // --------------------------------------------------------------------------
 
+  FOG_INLINE DoubleSize& adjust(int sw, int sh)
+  {
+    w += sw;
+    h += sh;
+    return *this;
+  }
+
+  FOG_INLINE DoubleSize& adjust(const IntSize& sz)
+  {
+    w += sz.w;
+    h += sz.h;
+    return *this;
+  }
+
+  FOG_INLINE DoubleSize& adjust(float sw, float sh)
+  {
+    w += sw;
+    h += sh;
+    return *this;
+  }
+
+  FOG_INLINE DoubleSize& adjust(const FloatSize& sz)
+  {
+    w += sz.w;
+    h += sz.h;
+    return *this;
+  }
+
   FOG_INLINE DoubleSize& adjust(double sw, double sh)
   {
     w += sw;
@@ -1174,9 +1292,41 @@ struct DoubleSize
     return *this;
   }
 
+  FOG_INLINE DoubleSize& adjust(const DoubleSize& sz)
+  {
+    w += sz.w;
+    h += sz.h;
+    return *this;
+  }
+
+  FOG_INLINE DoubleSize adjusted(int sw, int sh) const
+  {
+    return DoubleSize(w + sw, h + sh);
+  }
+
+  FOG_INLINE DoubleSize adjusted(const IntSize& sz) const
+  {
+    return DoubleSize(w + sz.w, h + sz.h);
+  }
+
+  FOG_INLINE DoubleSize adjusted(float sw, float sh) const
+  {
+    return DoubleSize(w + sw, h + sh);
+  }
+
+  FOG_INLINE DoubleSize adjusted(const FloatSize& sz) const
+  {
+    return DoubleSize(w + sz.w, h + sz.h);
+  }
+
   FOG_INLINE DoubleSize adjusted(double sw, double sh) const
   {
     return DoubleSize(w + sw, h + sh);
+  }
+
+  FOG_INLINE DoubleSize adjusted(const DoubleSize& sz) const
+  {
+    return DoubleSize(w + sz.w, h + sz.h);
   }
 
   // --------------------------------------------------------------------------
@@ -1189,17 +1339,17 @@ struct DoubleSize
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const DoubleSize& operator=(const IntSize& other)
+  FOG_INLINE DoubleSize& operator=(const IntSize& other)
   {
     return set(other);
   }
 
-  FOG_INLINE const DoubleSize& operator=(const FloatSize& other)
+  FOG_INLINE DoubleSize& operator=(const FloatSize& other)
   {
     return set(other);
   }
 
-  FOG_INLINE const DoubleSize& operator=(const DoubleSize& other)
+  FOG_INLINE DoubleSize& operator=(const DoubleSize& other)
   {
     return set(other);
   }
@@ -1212,6 +1362,48 @@ struct DoubleSize
   FOG_INLINE bool operator!=(const DoubleSize& other) const
   {
     return (w != other.w) | (h != other.h);
+  }
+
+  FOG_INLINE DoubleSize& operator+=(const IntSize& other)
+  {
+    w += other.w;
+    h += other.h;
+    return *this;
+  }
+
+  FOG_INLINE DoubleSize& operator+=(const FloatSize& other)
+  {
+    w += other.w;
+    h += other.h;
+    return *this;
+  }
+
+  FOG_INLINE DoubleSize& operator+=(const DoubleSize& other)
+  {
+    w += other.w;
+    h += other.h;
+    return *this;
+  }
+
+  FOG_INLINE DoubleSize& operator-=(const IntSize& other)
+  {
+    w -= other.w;
+    h -= other.h;
+    return *this;
+  }
+
+  FOG_INLINE DoubleSize& operator-=(const FloatSize& other)
+  {
+    w -= other.w;
+    h -= other.h;
+    return *this;
+  }
+
+  FOG_INLINE DoubleSize& operator-=(const DoubleSize& other)
+  {
+    w -= other.w;
+    h -= other.h;
+    return *this;
   }
 
   // --------------------------------------------------------------------------
@@ -1342,8 +1534,8 @@ struct IntRect
   FOG_INLINE IntRect& translate(int rx, int ry) { x += rx; y += ry; return *this; }
   FOG_INLINE IntRect& translate(const IntPoint& p) { x += p.x; y += p.y; return *this; }
 
-  FOG_INLINE IntRect translated(int rx, int ry) { return IntRect(x + rx, y + ry, w, h); }
-  FOG_INLINE IntRect translated(const IntPoint& p) { return IntRect(x + p.x, y + p.y, w, h); }
+  FOG_INLINE IntRect translated(int rx, int ry) const { return IntRect(x + rx, y + ry, w, h); }
+  FOG_INLINE IntRect translated(const IntPoint& p) const { return IntRect(x + p.x, y + p.y, w, h); }
 
   // --------------------------------------------------------------------------
   // [Algebra]
@@ -1779,7 +1971,7 @@ struct FloatRect
 
   FOG_INLINE FloatRect adjusted(float px, float py) const
   {
-    return adjusted(px, py);
+    return FloatRect(x + px, y + py, w - px - px, h - py - py);
   }
 
   // --------------------------------------------------------------------------

@@ -474,7 +474,7 @@ void CairoModule_Image::prepare(int quantity, int sw, int sh)
 
   for (int a = 0; a < NUM_SPRITES; a++)
   {
-    images[a] = sprite[a].scale(Fog::IntSize(sw, sh));
+    images[a] = sprite[a].scaled(Fog::IntSize(sw, sh));
     images_cairo[a] = cairo_image_surface_create_for_data(
       (unsigned char*)images[a].getFirst(),
       CAIRO_FORMAT_ARGB32,

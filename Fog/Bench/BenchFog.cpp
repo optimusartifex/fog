@@ -354,7 +354,7 @@ void FogModule_Image::prepare(int quantity, int sw, int sh)
   r_rect.init(quantity, w, h, sw, sh);
   r_numb.init(quantity, 0, NUM_SPRITES - 1);
 
-  for (int a = 0; a < 4; a++) images[a] = sprite[a].scale(Fog::IntSize(sw, sh));
+  for (int a = 0; a < 4; a++) images[a] = sprite[a].scaled(Fog::IntSize(sw, sh));
 }
 
 void FogModule_Image::finish()

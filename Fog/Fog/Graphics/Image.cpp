@@ -1794,7 +1794,7 @@ err_t Image::filter(const ImageFilter& f, const IntRect* area)
 // [Fog::Image - Scaling]
 // ============================================================================
 
-Image Image::scale(const IntSize& to, uint32_t interpolationType)
+Image Image::scaled(const IntSize& to, uint32_t interpolationType) const
 {
   Image dst;
 

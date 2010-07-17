@@ -480,7 +480,7 @@ struct FOG_API Image
   // [Scaling]
   // --------------------------------------------------------------------------
 
-  Image scale(const IntSize& to, uint32_t interpolationType = IMAGE_INTERPOLATION_SMOOTH);
+  Image scaled(const IntSize& to, uint32_t interpolationType = IMAGE_INTERPOLATION_SMOOTH) const;
 
   // --------------------------------------------------------------------------
   // [Painting]
@@ -515,13 +515,13 @@ struct FOG_API Image
   // --------------------------------------------------------------------------
 
   //! @brief Check if point at a given coordinates @a x and @a y is in image.
-  FOG_INLINE bool hasPoint(int x, int y) 
+  FOG_INLINE bool hasPoint(int x, int y) const
   { 
     return (uint)x < (uint)getWidth() && (uint)y < (uint)getHeight(); 
   }
   
   //! @brief Check if point at a given coordinates @a at is in image.
-  FOG_INLINE bool hasPoint(const IntPoint& pt)
+  FOG_INLINE bool hasPoint(const IntPoint& pt) const
   { 
     return (uint)pt.x < (uint)getWidth() && (uint)pt.y < (uint)getHeight(); 
   }

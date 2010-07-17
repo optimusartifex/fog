@@ -149,6 +149,7 @@ struct FOG_API Stream
   FOG_INLINE bool isWritable() const { return (_d->flags & STREAM_IS_WRITABLE) != 0; }
   FOG_INLINE bool isClosable() const { return (_d->flags & STREAM_IS_CLOSABLE) != 0; }
 
+  FOG_INLINE bool isFile()     const { return (_d->flags & (STREAM_IS_FD | STREAM_IS_HFILE)) != 0; }
   FOG_INLINE bool isHFILE()    const { return (_d->flags & STREAM_IS_HFILE   ) != 0; }
   FOG_INLINE bool isFD()       const { return (_d->flags & STREAM_IS_FD      ) != 0; }
   FOG_INLINE bool isMemory()   const { return (_d->flags & STREAM_IS_MEMORY  ) != 0; }
@@ -188,7 +189,7 @@ struct FOG_API Stream
 
   sysuint_t read(void* buffer, sysuint_t size);
   sysuint_t read(ByteArray& dst, sysuint_t size);
-  sysuint_t readAll(ByteArray& dst, int64_t maxBytes = -1);
+  sysuint_t readAll(ByteArray& dst, sysuint_t maxBytes = 0);
 
   sysuint_t write(const void* buffer, sysuint_t size);
   sysuint_t write(const ByteArray& data);

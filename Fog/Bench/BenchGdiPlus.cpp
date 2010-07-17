@@ -394,7 +394,7 @@ void GdiPlusModule_Image::prepare(int quantity, int sw, int sh)
 
   for (int a = 0; a < 4; a++)
   {
-    images[a] = sprite[a].scale(Fog::IntSize(sw, sh));
+    images[a] = sprite[a].scaled(Fog::IntSize(sw, sh));
     images_gdip[a] = new Gdiplus::Bitmap(
       images[a].getWidth(),
       images[a].getHeight(),

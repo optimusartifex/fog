@@ -478,7 +478,7 @@ struct FOG_API Font
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  const Font& operator=(const Font& other);
+  Font& operator=(const Font& other);
 
   // --------------------------------------------------------------------------
   // [Engine]

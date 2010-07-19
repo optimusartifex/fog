@@ -217,8 +217,8 @@ start:
       __m128i dst4xmm, dst6xmm;
 
       // Prefetch next cache line, here this increases the performance about
-      // 0.0001% :) Not really much, but it's the reason why prefetches are
-      // generally not used in Fog-Framework.
+      // 0.0001% :) Not really much, but this is the reason why prefetches are
+      // not used in Fog-Framework in the most cases.
       sse2_prefetch_t0(src + 64);
 
       ssse3_load16u(src0xmm, src     );
@@ -230,15 +230,15 @@ start:
       inv2xmm = _mm_packs_epi16(src4xmm, src6xmm);
 
       inv0xmm = _mm_packs_epi16(inv0xmm, inv2xmm);
+      sse2_negate_alpha_1x4B(inv2xmm, src2xmm);
       inv0xmm = _mm_cmpeq_epi8(inv0xmm, _mm_setzero_si128());
 
       int k = _mm_movemask_epi8(inv0xmm);
+      sse2_negate_alpha_1x4B(inv0xmm, src0xmm);
       if (k == 0xFFFF) goto skip;
 
       sse2_load16a(dst0xmm, dst     );
       sse2_load16a(dst2xmm, dst + 16);
-      sse2_negate_alpha_1x4B(inv0xmm, src0xmm);
-      sse2_negate_alpha_1x4B(inv2xmm, src2xmm);
 
       sse2_load16a(dst4xmm, dst + 32);
       sse2_load16a(dst6xmm, dst + 48);

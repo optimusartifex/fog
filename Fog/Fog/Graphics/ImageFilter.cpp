@@ -39,7 +39,7 @@ private:
 };
 
 NullFilterEngine::NullFilterEngine() :
-  ImageFilterEngine(IMAGE_FILTER_TYPE_NONE)
+  ImageFilterEngine(IMAGE_FILTER_NONE)
 {
 }
 
@@ -78,7 +78,7 @@ private:
 };
 
 ColorLutFilterEngine::ColorLutFilterEngine(const ColorLutData& lutData) :
-  ImageFilterEngine(IMAGE_FILTER_TYPE_COLOR_LUT)
+  ImageFilterEngine(IMAGE_FILTER_COLOR_LUT)
 {
   setColorLut(lutData);
 
@@ -129,7 +129,7 @@ struct FOG_HIDDEN ColorMatrixFilterEngine : public ImageFilterEngine
 };
 
 ColorMatrixFilterEngine::ColorMatrixFilterEngine(const ColorMatrixFilterEngine& other) :
-  ImageFilterEngine(IMAGE_FILTER_TYPE_COLOR_MATRIX),
+  ImageFilterEngine(IMAGE_FILTER_COLOR_MATRIX),
   cm(other.cm)
 {
   characteristics |=
@@ -140,7 +140,7 @@ ColorMatrixFilterEngine::ColorMatrixFilterEngine(const ColorMatrixFilterEngine& 
 }
 
 ColorMatrixFilterEngine::ColorMatrixFilterEngine(const ColorMatrix& cm) :
-  ImageFilterEngine(IMAGE_FILTER_TYPE_COLOR_MATRIX),
+  ImageFilterEngine(IMAGE_FILTER_COLOR_MATRIX),
   cm(cm)
 {
   characteristics |=
@@ -233,7 +233,7 @@ private:
 };
 
 BlurFilterEngine::BlurFilterEngine(const BlurParams& params) :
-  ImageFilterEngine(IMAGE_FILTER_TYPE_COLOR_LUT), params(params)
+  ImageFilterEngine(IMAGE_FILTER_COLOR_LUT), params(params)
 {
   update();
 }
@@ -367,14 +367,14 @@ ImageFilterBase::~ImageFilterBase()
 
 err_t ImageFilterBase::getColorLut(ColorLut& colorLut) const
 {
-  if (_d->type != IMAGE_FILTER_TYPE_COLOR_LUT) return ERR_RT_INVALID_OBJECT;
+  if (_d->type != IMAGE_FILTER_COLOR_LUT) return ERR_RT_INVALID_OBJECT;
 
   return colorLut.setData(&reinterpret_cast<ColorLutFilterEngine*>(_d)->lut);
 }
 
 err_t ImageFilterBase::getColorMatrix(ColorMatrix& colorMatrix) const
 {
-  if (_d->type != IMAGE_FILTER_TYPE_COLOR_MATRIX) return ERR_RT_INVALID_OBJECT;
+  if (_d->type != IMAGE_FILTER_COLOR_MATRIX) return ERR_RT_INVALID_OBJECT;
 
   colorMatrix = reinterpret_cast<ColorMatrixFilterEngine*>(_d)->cm;
   return ERR_OK;
@@ -382,7 +382,7 @@ err_t ImageFilterBase::getColorMatrix(ColorMatrix& colorMatrix) const
 
 err_t ImageFilterBase::getBlur(BlurParams& params) const
 {
-  if (_d->type != IMAGE_FILTER_TYPE_BLUR) return ERR_RT_INVALID_OBJECT;
+  if (_d->type != IMAGE_FILTER_BLUR) return ERR_RT_INVALID_OBJECT;
 
   params = reinterpret_cast<BlurFilterEngine*>(_d)->params;
   return ERR_OK;
@@ -390,7 +390,7 @@ err_t ImageFilterBase::getBlur(BlurParams& params) const
 
 err_t ImageFilterBase::setColorLut(const ColorLut& colorLut)
 {
-  if (_d->type == IMAGE_FILTER_TYPE_COLOR_LUT && _d->refCount.get() == 1)
+  if (_d->type == IMAGE_FILTER_COLOR_LUT && _d->refCount.get() == 1)
   {
     // Not needed to create new ColorLutFilterEngine instance.
     reinterpret_cast<ColorLutFilterEngine *>(_d)->setColorLut(*colorLut.getData());
@@ -408,7 +408,7 @@ err_t ImageFilterBase::setColorLut(const ColorLut& colorLut)
 
 err_t ImageFilterBase::setColorMatrix(const ColorMatrix& colorMatrix)
 {
-  if (_d->type == IMAGE_FILTER_TYPE_COLOR_LUT && _d->refCount.get() == 1)
+  if (_d->type == IMAGE_FILTER_COLOR_LUT && _d->refCount.get() == 1)
   {
     // Not needed to create new ColorMatrixFilterEngine instance.
     reinterpret_cast<ColorMatrixFilterEngine *>(_d)->setColorMatrix(colorMatrix);
@@ -426,7 +426,7 @@ err_t ImageFilterBase::setColorMatrix(const ColorMatrix& colorMatrix)
 
 err_t ImageFilterBase::setBlur(const BlurParams& params)
 {
-  if (_d->type == IMAGE_FILTER_TYPE_BLUR && _d->refCount.get() == 1)
+  if (_d->type == IMAGE_FILTER_BLUR && _d->refCount.get() == 1)
   {
     // Not needed to create new BlurFilterEngine instance.
     reinterpret_cast<BlurFilterEngine *>(_d)->setParams(params);

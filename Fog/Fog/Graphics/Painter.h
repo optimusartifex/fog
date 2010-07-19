@@ -243,7 +243,7 @@ struct FOG_API Painter
   FOG_INLINE Pattern getSourcePattern() const { return _engine->getSourcePattern(); }
 
   //! @brief Set source as solid @a rgba color.
-  FOG_INLINE err_t setSource(Argb argb) { return _engine->setSource(argb); }
+  FOG_INLINE err_t setSource(const Argb& argb) { return _engine->setSource(argb); }
 
   //! @brief Set source as pattern @a pattern.
   FOG_INLINE err_t setSource(const Pattern& pattern) { return _engine->setSource(pattern); }

@@ -281,9 +281,9 @@ struct FOG_API FloatMatrix
   void transformVector(float* x, float* y) const;
 
   //! @overload
-  FOG_INLINE void transformPoint(FloatPoint* p) { return transformPoint(&p->x, &p->y); }
+  FOG_INLINE void transformPoint(FloatPoint* p) const { return transformPoint(&p->x, &p->y); }
   //! @overload
-  FOG_INLINE void transformVector(FloatPoint* v) { return transformVector(&v->x, &v->y); }
+  FOG_INLINE void transformVector(FloatPoint* v) const { return transformVector(&v->x, &v->y); }
 
   //! @brief Transform an array of points.
   void transformPoints(FloatPoint* dst, const FloatPoint* src, sysuint_t count) const;
@@ -369,11 +369,11 @@ struct FOG_API FloatMatrix
 
   //! @brief Multiply the matrix by another one and return
   //! the result in a separete matrix.
-  FOG_INLINE FloatMatrix operator*(const FloatMatrix& m) { return FloatMatrix(*this).multiply(m, MATRIX_APPEND); }
+  FOG_INLINE FloatMatrix operator*(const FloatMatrix& m) const { return FloatMatrix(*this).multiply(m, MATRIX_APPEND); }
 
   //! @brief Multiply the matrix by inverse of another one
   //! and return the result in a separete matrix.
-  FOG_INLINE FloatMatrix operator/(const FloatMatrix& m) { return FloatMatrix(*this).multiplyInv(m, MATRIX_APPEND); }
+  FOG_INLINE FloatMatrix operator/(const FloatMatrix& m) const { return FloatMatrix(*this).multiplyInv(m, MATRIX_APPEND); }
 
   //! @brief Calculate and return the inverse matrix.
   FOG_INLINE FloatMatrix operator~() const { return inverted(); }
@@ -704,9 +704,9 @@ struct FOG_API DoubleMatrix
   void transformVector(double* x, double* y) const;
 
   //! @overload
-  FOG_INLINE void transformPoint(DoublePoint* p) { return transformPoint(&p->x, &p->y); }
+  FOG_INLINE void transformPoint(DoublePoint* p) const { return transformPoint(&p->x, &p->y); }
   //! @overload
-  FOG_INLINE void transformVector(DoublePoint* v) { return transformVector(&v->x, &v->y); }
+  FOG_INLINE void transformVector(DoublePoint* v) const { return transformVector(&v->x, &v->y); }
 
   //! @brief Transform an array of points.
   void transformPoints(DoublePoint* dst, const DoublePoint* src, sysuint_t count) const;
@@ -785,11 +785,11 @@ struct FOG_API DoubleMatrix
 
   //! @brief Multiply the matrix by another one and return
   //! the result in a separete matrix.
-  FOG_INLINE DoubleMatrix operator*(const DoubleMatrix& m) { return DoubleMatrix(*this).multiply(m, MATRIX_APPEND); }
+  FOG_INLINE DoubleMatrix operator*(const DoubleMatrix& m) const { return DoubleMatrix(*this).multiply(m, MATRIX_APPEND); }
 
   //! @brief Multiply the matrix by inverse of another one 
   //! and return the result in a separete matrix.
-  FOG_INLINE DoubleMatrix operator/(const DoubleMatrix& m) { return DoubleMatrix(*this).multiplyInv(m, MATRIX_APPEND); }
+  FOG_INLINE DoubleMatrix operator/(const DoubleMatrix& m) const { return DoubleMatrix(*this).multiplyInv(m, MATRIX_APPEND); }
 
   //! @brief Calculate and return the inverse matrix.
   FOG_INLINE DoubleMatrix operator~() const { return inverted(); }

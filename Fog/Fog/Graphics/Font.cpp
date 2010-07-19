@@ -507,7 +507,7 @@ err_t Font::getTextExtents(const Char* str, sysuint_t length, TextExtents& exten
 // [Fog::Font - Operator Overload]
 // ============================================================================
 
-const Font& Font::operator=(const Font& other)
+Font& Font::operator=(const Font& other)
 {
   setFont(other);
   return *this;

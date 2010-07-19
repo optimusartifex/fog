@@ -1702,25 +1702,25 @@ enum IMAGE_DATA_FLAGS
 enum IMAGE_FILTER_TYPE
 {
   //! @brief Image filter is null (NOP).
-  IMAGE_FILTER_TYPE_NONE = 0,
+  IMAGE_FILTER_NONE = 0,
 
   // --------------------------------------------------------------------------
   // [ColorFilter]
   // --------------------------------------------------------------------------
 
   //! @brief @c ColorLut image filter.
-  IMAGE_FILTER_TYPE_COLOR_LUT = 1,
+  IMAGE_FILTER_COLOR_LUT = 1,
   //! @brief @c ColorMatrix image filter.
-  IMAGE_FILTER_TYPE_COLOR_MATRIX = 2,
+  IMAGE_FILTER_COLOR_MATRIX = 2,
 
   // --------------------------------------------------------------------------
   // [ImageFilter]
   // --------------------------------------------------------------------------
 
   //! @brief Image filter is box blur.
-  IMAGE_FILTER_TYPE_BLUR = 3,
+  IMAGE_FILTER_BLUR = 3,
   //! @brief Image filter is convolution.
-  IMAGE_FILTER_TYPE_CONVOLUTION = 4
+  IMAGE_FILTER_CONVOLUTION = 4
 };
 
 // ============================================================================
@@ -1845,6 +1845,16 @@ enum IMAGE_FILTER_BLUR_TYPE
 static const float IMAGE_FILTER_BLUR_MAX_RADIUS = 255.0f;
 
 // ============================================================================
+// [Fog::IMAGE_FILTER_ALPHA_MODE]
+// ============================================================================
+
+enum IMAGE_FILTER_ALPHA_MODE
+{
+  IMAGE_FILTER_ALPHA_NORMAL,
+  IMAGE_FILTER_ALPHA_INCLUDE
+};
+
+// ============================================================================
 // [Fog::IMAGE_FILTER_EXTEND_TYPE]
 // ============================================================================
 
@@ -1865,16 +1875,6 @@ enum IMAGE_FILTER_EXTEND_TYPE
 
   //! @brief Count of border extend types (for error checking).
   IMAGE_FILTER_EXTEND_COUNT = 4
-};
-
-// ============================================================================
-// [Fog::IMAGE_FILTER_ALPHA_MODE]
-// ============================================================================
-
-enum IMAGE_FILTER_ALPHA_MODE
-{
-  IMAGE_FILTER_ALPHA_NORMAL,
-  IMAGE_FILTER_ALPHA_INCLUDE
 };
 
 // ============================================================================

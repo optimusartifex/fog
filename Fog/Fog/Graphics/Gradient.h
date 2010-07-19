@@ -157,7 +157,7 @@ struct FOG_HIDDEN Gradient
     return *this;
   }
 
-private:
+protected:
   uint32_t _type;
   uint32_t _spread;
   DoublePoint _start;

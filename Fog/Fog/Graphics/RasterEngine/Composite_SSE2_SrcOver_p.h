@@ -690,10 +690,11 @@ vMaskAlphaSparseSkip4:
 
       uint32_t src0 = READ_32(src);
       if (RasterUtil::isAlpha0x00_ARGB32(src0)) goto cMaskOpaqueSkip1;
+      src0xmm = _mm_cvtsi32_si128(src0);
       if (RasterUtil::isAlpha0xFF_ARGB32(src0)) goto cMaskOpaqueFill1;
 
       sse2_load4(dst0xmm, dst);
-      sse2_unpack_1x1W(src0xmm, src0);
+      sse2_unpack_1x1W(src0xmm, src0xmm);
       sse2_unpack_1x1W(dst0xmm, dst0xmm);
 
       sse2_expand_alpha_1x1W(msk0xmm, src0xmm);
@@ -734,6 +735,7 @@ cMaskOpaqueSkip1:
       sse2_negate_2x2W(msk0xmm, msk0xmm, msk1xmm, msk1xmm);
       sse2_muldiv255_2x2W(dst0xmm, dst0xmm, msk0xmm, dst1xmm, dst1xmm, msk1xmm);
       sse2_adds_2x2W(src0xmm, src0xmm, dst0xmm, src1xmm, src1xmm, dst1xmm);
+      sse2_pack_2x2W(src0xmm, src0xmm, src1xmm);
 
 cMaskOpaqueFill4:
       sse2_store16a(dst, src0xmm);
@@ -763,10 +765,11 @@ cMaskOpaqueSkip4:
 
         uint32_t src0 = READ_32(src);
         if (RasterUtil::isAlpha0x00_ARGB32(src0)) goto cMaskOpaqueSkip1;
+        src0xmm = _mm_cvtsi32_si128(src0);
         if (RasterUtil::isAlpha0xFF_ARGB32(src0)) goto cMaskOpaqueFill1;
 
         sse2_load4(dst0xmm, dst);
-        sse2_unpack_1x1W(src0xmm, src0);
+        sse2_unpack_1x1W(src0xmm, src0xmm);
         sse2_unpack_1x1W(dst0xmm, dst0xmm);
 
         sse2_expand_alpha_1x1W(msk0xmm, src0xmm);
@@ -807,6 +810,7 @@ cMaskOpaqueSkip1:
         sse2_negate_2x2W(msk0xmm, msk0xmm, msk1xmm, msk1xmm);
         sse2_muldiv255_2x2W(dst0xmm, dst0xmm, msk0xmm, dst1xmm, dst1xmm, msk1xmm);
         sse2_adds_2x2W(src0xmm, src0xmm, dst0xmm, src1xmm, src1xmm, dst1xmm);
+        sse2_pack_2x2W(src0xmm, src0xmm, src1xmm);
 
 cMaskOpaqueFill4:
         sse2_store16a(dst, src0xmm);
@@ -1668,11 +1672,12 @@ vMaskAlphaSparseSkip4:
 
       uint32_t src0 = READ_32(src);
       if (RasterUtil::isAlpha0x00_ARGB32(src0)) goto cMaskOpaqueSkip1;
+      src0xmm = _mm_cvtsi32_si128(src0);
       if (RasterUtil::isAlpha0xFF_ARGB32(src0)) goto cMaskOpaqueFill1;
 
       sse2_load4(dst0xmm, dst);
       sse2_fill_alpha_1x1B(dst0xmm);
-      sse2_unpack_1x1W(src0xmm, src0);
+      sse2_unpack_1x1W(src0xmm, src0xmm);
       sse2_unpack_1x1W(dst0xmm, dst0xmm);
 
       sse2_expand_alpha_1x1W(msk0xmm, src0xmm);
@@ -1742,11 +1747,12 @@ cMaskOpaqueSkip4:
 
         uint32_t src0 = READ_32(src);
         if (RasterUtil::isAlpha0x00_ARGB32(src0)) goto cMaskOpaqueSkip1;
+        src0xmm = _mm_cvtsi32_si128(src0);
         if (RasterUtil::isAlpha0xFF_ARGB32(src0)) goto cMaskOpaqueFill1;
 
         sse2_load4(dst0xmm, dst);
         sse2_fill_alpha_1x1B(dst0xmm);
-        sse2_unpack_1x1W(src0xmm, src0);
+        sse2_unpack_1x1W(src0xmm, src0xmm);
         sse2_unpack_1x1W(dst0xmm, dst0xmm);
 
         sse2_expand_alpha_1x1W(msk0xmm, src0xmm);
@@ -1964,11 +1970,12 @@ vMaskAlphaDenseSkip4:
         if (RasterUtil::isAlpha0x00_ARGB32(src0)) goto vMaskAlphaSparseSkip1;
 
         msk0 = ByteUtil::scalar_muldiv255(src0 >> 24, msk0);
+        src0xmm = _mm_cvtsi32_si128(src0);
         if (msk0 == 0xFF) goto vMaskAlphaSparseFill1;
 
         sse2_load4(dst0xmm, dst);
         sse2_fill_alpha_1x1B(dst0xmm);
-        sse2_unpack_1x1W(src0xmm, src0);
+        sse2_unpack_1x1W(src0xmm, src0xmm);
         sse2_unpack_1x1W(dst0xmm, dst0xmm);
 
         sse2_expand_mask_1x1W(a0xmm, msk0);

@@ -213,8 +213,9 @@ struct FOG_API DoublePath
   // [Start / End]
   // --------------------------------------------------------------------------
 
-  err_t start(sysuint_t* index);
+  err_t start(sysuint_t* index = NULL);
 
+  // TODO: Clarify, merge? I think that close() will be okay.
   err_t endPoly(uint32_t cmdflags = PATH_CMD_FLAG_CLOSE);
   err_t closePolygon(uint32_t cmdflags = PATH_CMD_FLAG_NONE);
 

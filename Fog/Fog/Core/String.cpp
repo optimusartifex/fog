@@ -2287,10 +2287,10 @@ err_t String::lower()
 
 modify:
   {
+    sysuint_t n = (sysuint_t)(strCur - d->data);
+
     FOG_RETURN_ON_ERROR(detach());
     d = _d;
-
-    sysuint_t n = (sysuint_t)(strCur - d->data);
 
     strCur = d->data + n;
     strEnd = d->data + d->length;
@@ -2319,10 +2319,10 @@ err_t String::upper()
 
 modify:
   {
+    sysuint_t n = (sysuint_t)(strCur - d->data);
+
     FOG_RETURN_ON_ERROR(detach());
     d = _d;
-
-    sysuint_t n = (sysuint_t)(strCur - d->data);
 
     strCur = d->data + n;
     strEnd = d->data + d->length;

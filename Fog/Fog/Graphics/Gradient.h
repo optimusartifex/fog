@@ -36,7 +36,7 @@ struct FOG_HIDDEN Gradient
   // --------------------------------------------------------------------------
 
   FOG_INLINE Gradient() :
-    _type(PATTERN_TYPE_LINEAR_GRADIENT),
+    _type(PATTERN_LINEAR_GRADIENT),
     _spread(PATTERN_SPREAD_PAD),
     _start(0.0, 0.0),
     _end(0.0, 0.0),
@@ -55,7 +55,7 @@ struct FOG_HIDDEN Gradient
   }
 
   FOG_INLINE Gradient(uint32_t type, uint32_t spread, const DoublePoint& start, const DoublePoint& end, const List<ArgbStop>& stops) :
-    _type((type < PATTERN_TYPE_LINEAR_GRADIENT) | (type > PATTERN_TYPE_CONICAL_GRADIENT) ? PATTERN_TYPE_LINEAR_GRADIENT : type),
+    _type((type < PATTERN_LINEAR_GRADIENT) | (type > PATTERN_CONICAL_GRADIENT) ? PATTERN_LINEAR_GRADIENT : type),
     _spread(spread >= PATTERN_SPREAD_COUNT ? PATTERN_SPREAD_PAD : spread),
     _start(start),
     _end(end),
@@ -65,7 +65,7 @@ struct FOG_HIDDEN Gradient
   }
 
   FOG_INLINE Gradient(uint32_t type, uint32_t spread, const DoublePoint& start, const DoublePoint& end, double radius, const List<ArgbStop>& stops) :
-    _type((type < PATTERN_TYPE_LINEAR_GRADIENT) | (type > PATTERN_TYPE_CONICAL_GRADIENT) ? PATTERN_TYPE_LINEAR_GRADIENT : type),
+    _type((type < PATTERN_LINEAR_GRADIENT) | (type > PATTERN_CONICAL_GRADIENT) ? PATTERN_LINEAR_GRADIENT : type),
     _spread(spread >= PATTERN_SPREAD_COUNT ? PATTERN_SPREAD_PAD : spread),
     _start(start),
     _end(end),
@@ -89,7 +89,7 @@ struct FOG_HIDDEN Gradient
 
   FOG_INLINE void setType(uint32_t type)
   {
-    if ((type < PATTERN_TYPE_LINEAR_GRADIENT) | (type > PATTERN_TYPE_CONICAL_GRADIENT)) return;
+    if ((type < PATTERN_LINEAR_GRADIENT) | (type > PATTERN_CONICAL_GRADIENT)) return;
     _type = type;
   }
 

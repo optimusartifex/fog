@@ -43,7 +43,7 @@ void Button::onPaint(PaintEvent* e)
   IntRect bounds(0, 0, s.w, s.h);
 
   Pattern pat;
-  pat.setType(PATTERN_TYPE_LINEAR_GRADIENT);
+  pat.setType(PATTERN_LINEAR_GRADIENT);
   pat.setSpread(PATTERN_SPREAD_PAD);
 
   IntPoint pts[2];

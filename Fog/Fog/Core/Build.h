@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_BUILD_BUILD_H
-#define _FOG_BUILD_BUILD_H
+#ifndef _FOG_CORE_BUILD_H
+#define _FOG_CORE_BUILD_H
 
 // [Dependencies]
 #include <Fog/Core/Build/Config.h>
@@ -19,4 +19,4 @@
 #include <Fog/Core/Build/StdMain.h>
 
 // [Guard]
-#endif // _FOG_BUILD_BUILD_H
+#endif // _FOG_CORE_BUILD_H

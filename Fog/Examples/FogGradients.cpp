@@ -90,7 +90,7 @@ void MyWindow::onPaint(PaintEvent* e)
   DoubleSize size(128.0, 128.0);
   String s;
 
-  pat.setType(PATTERN_TYPE_LINEAR_GRADIENT);
+  pat.setType(PATTERN_LINEAR_GRADIENT);
   pat.addStop(ArgbStop(0.0, 0xFFFF0000));
   pat.addStop(ArgbStop(0.5, 0xFFFFFF00));
   pat.addStop(ArgbStop(1.0, 0xFFFFFFFF));
@@ -104,7 +104,7 @@ void MyWindow::onPaint(PaintEvent* e)
 
   for (int y = 0; y < 4; y++)
   {
-    pat.setType(PATTERN_TYPE_LINEAR_GRADIENT);
+    pat.setType(PATTERN_LINEAR_GRADIENT);
     pat.setSpread(y);
 
     s.format("Linear %s", spread_names[y]);
@@ -115,7 +115,7 @@ void MyWindow::onPaint(PaintEvent* e)
     pat.setPoints(DoublePoint(64.0, 40.0), DoublePoint(64.0, 80.0));
     paintPattern(p, IntPoint(1, y), size, pat, s);
 
-    pat.setType(PATTERN_TYPE_RADIAL_GRADIENT);
+    pat.setType(PATTERN_RADIAL_GRADIENT);
     s.format("Radial %s", spread_names[y]);
 
     pat.setPoints(DoublePoint(64.0, 64.0), DoublePoint(40.0, 40.0));
@@ -126,7 +126,7 @@ void MyWindow::onPaint(PaintEvent* e)
     pat.setRadius(40.0);
     paintPattern(p, IntPoint(3, y), size, pat, s);
 
-    pat.setType(PATTERN_TYPE_CONICAL_GRADIENT);
+    pat.setType(PATTERN_CONICAL_GRADIENT);
     s.format("Conical %s", spread_names[y]);
 
     pat.setPoints(DoublePoint(64.0, 64.0), DoublePoint(128.0, 64.0));

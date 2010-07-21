@@ -154,10 +154,10 @@ struct FOG_API ListPrivate_
 // 1 = MoveableType
 // 2 = ClassType
 template<typename T, uint __TypeInfo__>
-struct ListPrivate_T {};
+struct FOG_HIDDEN ListPrivate_T {};
 
 template<typename T>
-struct ListPrivate_T<T, 0> : public ListPrivate_
+struct FOG_HIDDEN ListPrivate_T<T, 0> : public ListPrivate_
 {
   typedef bool (*ElementEqFn)(const T* a, const T* b);
   typedef int (*ElementCompareFn)(const T* a, const T* b);
@@ -204,7 +204,7 @@ struct ListPrivate_T<T, 0> : public ListPrivate_
 };
 
 template<typename T>
-struct ListPrivate_T<T, 1> : public ListPrivate_
+struct FOG_HIDDEN ListPrivate_T<T, 1> : public ListPrivate_
 {
   typedef bool (*ElementEqFn)(const T* a, const T* b);
   typedef int (*ElementCompareFn)(const T* a, const T* b);
@@ -251,10 +251,10 @@ struct ListPrivate_T<T, 1> : public ListPrivate_
 };
 
 template<typename T>
-struct ListPrivate_T<T, 2> : public ListPrivate_T<T, 1> {};
+struct FOG_HIDDEN ListPrivate_T<T, 2> : public ListPrivate_T<T, 1> {};
 
 template<typename T>
-struct ListPrivate : public ListPrivate_T<T, TypeInfo<T>::TYPE> {};
+struct FOG_HIDDEN ListPrivate : public ListPrivate_T<T, TypeInfo<T>::TYPE> {};
 
 // ===========================================================================
 // [Fog::List<T>]
@@ -270,7 +270,7 @@ struct ListPrivate : public ListPrivate_T<T, TypeInfo<T>::TYPE> {};
 //!
 //! Use List<T> as an universal list container.
 template<typename T>
-struct List
+struct FOG_HIDDEN List
 {
   // [Value Type]
 
@@ -594,7 +594,7 @@ struct List
   // [Iterators]
 
   //! @brief Read only iterator.
-  struct ConstIterator
+  struct FOG_HIDDEN ConstIterator
   {
     const List<T>* _owner;
     const T* _beg;
@@ -662,7 +662,7 @@ struct List
   };
 
   //! @brief Read / Write iterator.
-  struct MutableIterator
+  struct FOG_HIDDEN MutableIterator
   {
     List<T>* _owner;
     T* _beg;

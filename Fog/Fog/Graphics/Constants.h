@@ -2255,21 +2255,21 @@ enum PATH_DIRECTION
 enum PATTERN_TYPE
 {
   //! @brief Null pattern (nothing will be paint using this pattern).
-  PATTERN_TYPE_NONE = 0x0,
+  PATTERN_NONE = 0x0,
   //! @brief Solid color pattern.
-  PATTERN_TYPE_SOLID = 0x1,
+  PATTERN_SOLID = 0x1,
   //! @brief Texture pattern (@c Image).
-  PATTERN_TYPE_TEXTURE = 0x2,
+  PATTERN_TEXTURE = 0x2,
 
   //! @brief Mask for all gradient patterns.
-  PATTERN_TYPE_IS_GRADIENT = 0x10,
+  PATTERN_IS_GRADIENT = 0x10,
 
   //! @brief Linear gradient pattern.
-  PATTERN_TYPE_LINEAR_GRADIENT = PATTERN_TYPE_IS_GRADIENT | 0x0,
+  PATTERN_LINEAR_GRADIENT = PATTERN_IS_GRADIENT | 0x0,
   //! @brief Radial gradient pattern.
-  PATTERN_TYPE_RADIAL_GRADIENT = PATTERN_TYPE_IS_GRADIENT | 0x1,
+  PATTERN_RADIAL_GRADIENT = PATTERN_IS_GRADIENT | 0x1,
   //! @brief Conical gradient pattern.
-  PATTERN_TYPE_CONICAL_GRADIENT = PATTERN_TYPE_IS_GRADIENT | 0x2
+  PATTERN_CONICAL_GRADIENT = PATTERN_IS_GRADIENT | 0x2
 };
 
 // ============================================================================

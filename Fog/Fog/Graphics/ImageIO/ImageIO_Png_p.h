@@ -41,52 +41,55 @@ struct FOG_HIDDEN PngLibrary
   err_t init();
   void close();
 
-  enum { NUM_SYMBOLS = 34 };
+  enum { NUM_SYMBOLS = 36 };
   union
   {
     struct
     {
-      FOG_CDECL png_structp (*create_read_struct)(png_const_charp user_ver, png_voidp error_ptr, png_error_ptr error_fn, png_error_ptr warn_fn);
-      FOG_CDECL void (*destroy_read_struct)(png_structpp ptr_ptr, png_infopp info_ptr_ptr, png_infopp end_info_ptr_ptr);
-      FOG_CDECL png_infop (*create_info_struct)(png_structp png_ptr);
-      FOG_CDECL void (*read_info)(png_structp png_ptr, png_infop info_ptr);
-      FOG_CDECL void(*read_rows)(png_structp png_ptr, png_bytepp row, png_bytepp display_row, png_uint_32 num_rows);
-      FOG_CDECL void (*read_image)(png_structp png_ptr, png_bytepp image);
-      FOG_CDECL void (*read_end)(png_structp png_ptr, png_infop info_ptr);
-      FOG_CDECL png_structp (*create_write_struct)(png_const_charp user_ver, png_voidp error_ptr, png_error_ptr error_fn, png_error_ptr warn_fn);
-      FOG_CDECL void (*destroy_write_struct)(png_structpp ptr_ptr, png_infopp info_ptr_ptr);
-      FOG_CDECL void (*write_info)(png_structp png_ptr, png_infop info_ptr);
-      FOG_CDECL void (*write_rows)(png_structp png_ptr, png_bytepp row, png_uint_32 num_rows);
-      FOG_CDECL void (*write_end)(png_structp png_ptr, png_infop info_ptr);
-      FOG_CDECL void (*set_expand_gray_1_2_4_to_8)(png_structp png_ptr);
-      FOG_CDECL void (*set_gray_to_rgb)(png_structp png_ptr);
-      FOG_CDECL void (*set_strip_16)(png_structp png_ptr);
-      FOG_CDECL void (*set_swap_alpha)(png_structp png_ptr);
-      FOG_CDECL void (*set_filler)(png_structp png_ptr, png_uint_32 filler, int flags);
-      FOG_CDECL void (*set_packing)(png_structp png_ptr);
-      FOG_CDECL void (*set_packswap)(png_structp png_ptr);
-      FOG_CDECL void (*set_shift)(png_structp png_ptr, png_color_8p true_bits);
-      FOG_CDECL void (*set_error_fn)(png_structp png_ptr, png_voidp error_ptr, png_error_ptr error_fn, png_error_ptr warning_fn);
-      FOG_CDECL void (*set_read_fn)(png_structp png_ptr, png_voidp io_ptr, png_rw_ptr read_data_fn);
-      FOG_CDECL void (*set_write_fn)(png_structp png_ptr, png_voidp io_ptr, png_rw_ptr write_data_fn, png_flush_ptr output_flush_fn);
-      FOG_CDECL void (*set_bgr)(png_structp png_ptr);
-      FOG_CDECL void (*set_expand)(png_structp png_ptr);
-      FOG_CDECL int (*set_interlace_handling)(png_structp png_ptr);
-      FOG_CDECL void (*set_compression_level)(png_structp png_ptr, int level);
-      FOG_CDECL void (*set_IHDR)(png_structp png_ptr,
+      png_structp (FOG_CDECL *create_read_struct)(png_const_charp user_ver, png_voidp error_ptr, png_error_ptr error_fn, png_error_ptr warn_fn);
+      void (FOG_CDECL *destroy_read_struct)(png_structpp ptr_ptr, png_infopp info_ptr_ptr, png_infopp end_info_ptr_ptr);
+      png_infop (FOG_CDECL *create_info_struct)(png_structp png_ptr);
+      void (FOG_CDECL *read_info)(png_structp png_ptr, png_infop info_ptr);
+      void (FOG_CDECL *read_rows)(png_structp png_ptr, png_bytepp row, png_bytepp display_row, png_uint_32 num_rows);
+      void (FOG_CDECL *read_image)(png_structp png_ptr, png_bytepp image);
+      void (FOG_CDECL *read_end)(png_structp png_ptr, png_infop info_ptr);
+      png_structp (FOG_CDECL *create_write_struct)(png_const_charp user_ver, png_voidp error_ptr, png_error_ptr error_fn, png_error_ptr warn_fn);
+      void (FOG_CDECL *destroy_write_struct)(png_structpp ptr_ptr, png_infopp info_ptr_ptr);
+      void (FOG_CDECL *write_info)(png_structp png_ptr, png_infop info_ptr);
+      void (FOG_CDECL *write_rows)(png_structp png_ptr, png_bytepp row, png_uint_32 num_rows);
+      void (FOG_CDECL *write_end)(png_structp png_ptr, png_infop info_ptr);
+
+      void (FOG_CDECL *set_expand_gray_1_2_4_to_8)(png_structp png_ptr);
+      void (FOG_CDECL *set_gray_to_rgb)(png_structp png_ptr);
+      void (FOG_CDECL *set_strip_16)(png_structp png_ptr);
+      void (FOG_CDECL *set_swap_alpha)(png_structp png_ptr);
+      void (FOG_CDECL *set_filler)(png_structp png_ptr, png_uint_32 filler, int flags);
+      void (FOG_CDECL *set_packing)(png_structp png_ptr);
+      void (FOG_CDECL *set_packswap)(png_structp png_ptr);
+      void (FOG_CDECL *set_shift)(png_structp png_ptr, png_color_8p true_bits);
+      void (FOG_CDECL *set_error_fn)(png_structp png_ptr, png_voidp error_ptr, png_error_ptr error_fn, png_error_ptr warning_fn);
+      void (FOG_CDECL *set_read_fn)(png_structp png_ptr, png_voidp io_ptr, png_rw_ptr read_data_fn);
+      void (FOG_CDECL *set_write_fn)(png_structp png_ptr, png_voidp io_ptr, png_rw_ptr write_data_fn, png_flush_ptr output_flush_fn);
+      void (FOG_CDECL *set_bgr)(png_structp png_ptr);
+      void (FOG_CDECL *set_expand)(png_structp png_ptr);
+      int (FOG_CDECL *set_interlace_handling)(png_structp png_ptr);
+      void (FOG_CDECL *set_compression_level)(png_structp png_ptr, int level);
+      jmp_buf* (FOG_CDECL *set_longjmp_fn)(png_structp png_ptr, png_longjmp_ptr fn, size_t jmp_buf_size);
+      void (FOG_CDECL *set_IHDR)(png_structp png_ptr,
         png_infop info_ptr, png_uint_32 width, png_uint_32 height, int bit_depth,
         int color_type, int interlace_method, int compression_method,
         int filter_method);
-      FOG_CDECL void (*set_PLTE)(png_structp png_ptr, png_infop info_ptr, png_colorp palette, int num_palette);
-      FOG_CDECL void (*set_sBIT)(png_structp png_ptr, png_infop info_ptr, png_color_8p sig_bit);
+      void (FOG_CDECL *set_PLTE)(png_structp png_ptr, png_infop info_ptr, png_colorp palette, int num_palette);
+      void (FOG_CDECL *set_sBIT)(png_structp png_ptr, png_infop info_ptr, png_color_8p sig_bit);
 
-      FOG_CDECL png_uint_32 (*get_valid)(png_structp png_ptr, png_infop info_ptr, png_uint_32 flag);
-      FOG_CDECL png_byte (*get_bit_depth)(png_structp png_ptr, png_infop info_ptr);
-      FOG_CDECL png_uint_32 (*get_IHDR)(png_structp png_ptr,
+      png_byte (FOG_CDECL *get_bit_depth)(png_structp png_ptr, png_infop info_ptr);
+      png_voidp (FOG_CDECL *get_io_ptr)(png_structp png_ptr);
+      png_uint_32 (FOG_CDECL *get_valid)(png_structp png_ptr, png_infop info_ptr, png_uint_32 flag);
+      png_uint_32 (FOG_CDECL *get_IHDR)(png_structp png_ptr,
         png_infop info_ptr, png_uint_32 *width, png_uint_32 *height,
         int *bit_depth, int *color_type, int *interlace_method,
         int *compression_method, int *filter_method);
-      FOG_CDECL void (*error)(png_structp png_ptr, png_const_charp error_message);
+      void (FOG_CDECL *error)(png_structp png_ptr, png_const_charp error_message);
     };
     void* addr[NUM_SYMBOLS];
   };

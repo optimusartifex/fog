@@ -36,6 +36,15 @@ namespace Fog {
 namespace ImageIO {
 
 // ============================================================================
+// [Statics]
+// ============================================================================
+
+// Because PNG API changed and we can't access the png struct anymore the
+// png provider is needed. It's safe without deprecation warnings and with
+// better binary compatibility theoretically with any libpng version.
+static ImageIO::PngProvider* pngProvider;
+
+// ============================================================================
 // [Fog::ImageIO::PngLibrary]
 // ============================================================================
 
@@ -90,11 +99,13 @@ err_t PngLibrary::init()
     "png_set_expand\0"
     "png_set_interlace_handling\0"
     "png_set_compression_level\0"
+    "png_set_longjmp_fn\0"
     "png_set_IHDR\0"
     "png_set_PLTE\0"
     "png_set_sBIT\0"
-    "png_get_valid\0"
     "png_get_bit_depth\0"
+    "png_get_io_ptr\0"
+    "png_get_valid\0"
     "png_get_IHDR\0"
     "png_error\0";
 
@@ -128,6 +139,8 @@ void PngLibrary::close()
 
 PngProvider::PngProvider()
 {
+  pngProvider = this;
+
   // Name of ImageIO Provider.
   _name = fog_strings->getString(STR_GRAPHICS_PNG);
 
@@ -144,6 +157,7 @@ PngProvider::PngProvider()
 
 PngProvider::~PngProvider()
 {
+  pngProvider = NULL;
 }
 
 uint32_t PngProvider::checkSignature(const void* mem, sysuint_t length) const
@@ -192,7 +206,8 @@ err_t PngProvider::createDevice(uint32_t deviceType, BaseDevice** device) const
 
 static void png_user_read_data(png_structp png_ptr, png_bytep data, png_size_t length)
 {
-  PngDecoderDevice* device = reinterpret_cast<PngDecoderDevice*>(png_ptr->io_ptr);
+  PngDecoderDevice* device = reinterpret_cast<PngDecoderDevice*>(
+    pngProvider->_pngLibrary.get_io_ptr(png_ptr));
 
   if (device->getStream().read(data, length) != length)
   {
@@ -203,22 +218,18 @@ static void png_user_read_data(png_structp png_ptr, png_bytep data, png_size_t l
 
 static void png_user_write_data(png_structp png_ptr, png_bytep data, png_size_t length)
 {
-  PngEncoderDevice* device = reinterpret_cast<PngEncoderDevice*>(png_ptr->io_ptr);
+  PngEncoderDevice* device = reinterpret_cast<PngEncoderDevice*>(
+    pngProvider->_pngLibrary.get_io_ptr(png_ptr));
 
   if (device->getStream().write(data, length) != length)
   {
     PngLibrary& png = reinterpret_cast<PngProvider*>(device->getProvider())->_pngLibrary;
-    png.error(png_ptr, "Erite Error");
+    png.error(png_ptr, "Write Error");
   }
 }
 
 static void user_flush_data(png_structp png_ptr)
 {
-}
-
-static void user_error_fn(png_structp png_ptr, png_const_charp error_msg)
-{
-  longjmp(png_ptr->jmpbuf, 1);
 }
 
 // ============================================================================
@@ -270,7 +281,7 @@ err_t PngDecoderDevice::readHeader()
     return _headerResult;
   }
 
-  if (setjmp(((png_structp)_png_ptr)->jmpbuf))
+  if (setjmp(*png.set_longjmp_fn(_png_ptr, longjmp, sizeof(jmp_buf))))
   {
     return (_headerResult = ERR_IMAGEIO_LIBPNG_ERROR);
   }
@@ -298,13 +309,13 @@ err_t PngDecoderDevice::readHeader()
   _actualFrame = 0;
   _framesCount = 1;
 
-  if (_info_ptr->color_type == PNG_COLOR_TYPE_PALETTE)
+  if (_png_color_type == PNG_COLOR_TYPE_PALETTE)
   {
     _format = IMAGE_FORMAT_I8;
   }
   else if (
-    _info_ptr->color_type == PNG_COLOR_TYPE_RGB_ALPHA ||
-    _info_ptr->color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
+    _png_color_type == PNG_COLOR_TYPE_RGB_ALPHA ||
+    _png_color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
   {
     _format = IMAGE_FORMAT_ARGB32;
   }
@@ -341,7 +352,7 @@ err_t PngDecoderDevice::readImage(Image& image)
   bool hasAlpha = false;
   bool hasGrey = false;
 
-  if (setjmp(_png_ptr->jmpbuf))
+  if (setjmp(*png.set_longjmp_fn((png_structp)_png_ptr, longjmp, sizeof(jmp_buf))))
   {
     return ERR_IMAGEIO_LIBPNG_ERROR;
   }
@@ -352,18 +363,18 @@ err_t PngDecoderDevice::readImage(Image& image)
   // Tell libpng to strip 16 bit/color files down to 8 bits/color.
   png.set_strip_16(_png_ptr);
 
-  if (_info_ptr->color_type == PNG_COLOR_TYPE_RGB_ALPHA)
+  if (_png_color_type == PNG_COLOR_TYPE_RGB_ALPHA)
   {
     hasAlpha = true;
   }
 
-  if (_info_ptr->color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
+  if (_png_color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
   {
     hasAlpha = true;
     hasGrey = true;
   }
 
-  if (_info_ptr->color_type == PNG_COLOR_TYPE_GRAY)
+  if (_png_color_type == PNG_COLOR_TYPE_GRAY)
   {
     hasGrey = true;
   }
@@ -374,7 +385,7 @@ err_t PngDecoderDevice::readImage(Image& image)
   // byte into separate bytes (useful for paletted and grayscale images).
   png.set_packing(_png_ptr);
 
-  if (_info_ptr->color_type != PNG_COLOR_TYPE_PALETTE)
+  if (_png_color_type != PNG_COLOR_TYPE_PALETTE)
   {
     // We want ARGB.
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
@@ -532,7 +543,7 @@ err_t PngEncoderDevice::writeImage(const Image& image)
     goto end_destroy_write_struct;
   }
 
-  if (setjmp(png_ptr->jmpbuf))
+  if (setjmp(*png.set_longjmp_fn((png_structp)png_ptr, longjmp, sizeof(jmp_buf))))
   {
     err = ERR_IMAGEIO_LIBPNG_ERROR;
     goto end_destroy_write_struct;
@@ -558,7 +569,7 @@ err_t PngEncoderDevice::writeImage(const Image& image)
     case IMAGE_FORMAT_A8:
     {
       png.set_IHDR(png_ptr, info_ptr, width, height, 8,
-        PNG_COLOR_TYPE_RGB_ALPHA, png_ptr->interlaced,
+        PNG_COLOR_TYPE_RGB_ALPHA, PNG_INTERLACE_NONE,
         PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
       png.set_bgr(png_ptr);
@@ -580,7 +591,7 @@ err_t PngEncoderDevice::writeImage(const Image& image)
     case IMAGE_FORMAT_XRGB32:
     {
       png.set_IHDR(png_ptr, info_ptr, width, height, 8,
-        PNG_COLOR_TYPE_RGB, png_ptr->interlaced,
+        PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
         PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 
       sig_bit.red = 8;
@@ -602,7 +613,7 @@ err_t PngEncoderDevice::writeImage(const Image& image)
       uint32_t numEntries = 256;
 
       png.set_IHDR(png_ptr, info_ptr, width, height, 8,
-        PNG_COLOR_TYPE_PALETTE, png_ptr->interlaced,
+        PNG_COLOR_TYPE_PALETTE, PNG_INTERLACE_NONE,
         PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 
       for (uint32_t i = 0; i < numEntries; i++)

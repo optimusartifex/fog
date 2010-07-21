@@ -2383,16 +2383,16 @@ RasterPattern* RasterPaintEngine::_getRasterPatternContext()
 
     switch (pattern.getType())
     {
-      case PATTERN_TYPE_TEXTURE:
+      case PATTERN_TEXTURE:
         err = rasterFuncs.pattern.texture_init(pctx, pattern, matrix, ctx.hints.imageInterpolation);
         break;
-      case PATTERN_TYPE_LINEAR_GRADIENT:
+      case PATTERN_LINEAR_GRADIENT:
         err = rasterFuncs.pattern.linear_gradient_init(pctx, pattern, matrix, ctx.hints.colorInterpolation);
         break;
-      case PATTERN_TYPE_RADIAL_GRADIENT:
+      case PATTERN_RADIAL_GRADIENT:
         err = rasterFuncs.pattern.radial_gradient_init(pctx, pattern, matrix, ctx.hints.colorInterpolation);
         break;
-      case PATTERN_TYPE_CONICAL_GRADIENT:
+      case PATTERN_CONICAL_GRADIENT:
         err = rasterFuncs.pattern.conical_gradient_init(pctx, pattern, matrix, ctx.hints.colorInterpolation);
         break;
       default:

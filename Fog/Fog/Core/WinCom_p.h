@@ -7,6 +7,7 @@
 #ifndef _FOG_CORE_WINCOM_P_H
 #define _FOG_CORE_WINCOM_P_H
 
+// [Dependencies]
 #include <Fog/Core/Build.h>
 #if defined(FOG_OS_WINDOWS)
 

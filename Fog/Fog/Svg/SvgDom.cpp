@@ -2459,7 +2459,7 @@ err_t SvgLinearGradientElement::onApplyPattern(SvgContext* context, SvgElement* 
   Pattern pattern;
 
   // Set gradient type to linear gradient.
-  pattern.setType(PATTERN_TYPE_LINEAR_GRADIENT);
+  pattern.setType(PATTERN_LINEAR_GRADIENT);
 
   // Set gradient transform matrix.
   if (a_gradientTransform.isAssigned()) pattern.setMatrix(a_gradientTransform.getMatrix());
@@ -2584,7 +2584,7 @@ err_t SvgRadialGradientElement::onApplyPattern(SvgContext* context, SvgElement* 
   Pattern pattern;
 
   // Set gradient type to radial gradient.
-  pattern.setType(PATTERN_TYPE_RADIAL_GRADIENT);
+  pattern.setType(PATTERN_RADIAL_GRADIENT);
 
   // Set gradient transform matrix.
   if (a_gradientTransform.isAssigned()) pattern.setMatrix(a_gradientTransform.getMatrix());

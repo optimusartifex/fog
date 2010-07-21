@@ -7,9 +7,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// [Guard]
 #ifndef _FOG_CORE_LISTENERLIST_H
 #define _FOG_CORE_LISTENERLIST_H
 
+// [Dependencies]
 #include <Fog/Core/Build.h>
 #include <Fog/Core/List.h>
 
@@ -102,4 +104,5 @@ private:
 
 } // Fog namespace
 
+// [Guard]
 #endif  // _FOG_CORE_LISTENERLIST_H

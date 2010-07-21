@@ -111,7 +111,7 @@ void FogModule_FillRect::bench(int quantity)
   else
   {
     Fog::Pattern pattern;
-    pattern.setType(Fog::PATTERN_TYPE_LINEAR_GRADIENT);
+    pattern.setType(Fog::PATTERN_LINEAR_GRADIENT);
     pattern.setSpread(Fog::PATTERN_SPREAD_PAD);
 
     for (int a = 0; a < quantity; a++)
@@ -157,7 +157,7 @@ void FogModule_FillRectSubPX::bench(int quantity)
   else
   {
     Fog::Pattern pattern;
-    pattern.setType(Fog::PATTERN_TYPE_LINEAR_GRADIENT);
+    pattern.setType(Fog::PATTERN_LINEAR_GRADIENT);
     pattern.setSpread(Fog::PATTERN_SPREAD_PAD);
 
     for (int a = 0; a < quantity; a++, sub += inc)
@@ -210,7 +210,7 @@ void FogModule_FillRectAffine::bench(int quantity)
   else
   {
     Fog::Pattern pattern;
-    pattern.setType(Fog::PATTERN_TYPE_LINEAR_GRADIENT);
+    pattern.setType(Fog::PATTERN_LINEAR_GRADIENT);
     pattern.setSpread(Fog::PATTERN_SPREAD_PAD);
 
     for (int a = 0; a < quantity; a++, rot += 0.01)
@@ -257,7 +257,7 @@ void FogModule_FillRound::bench(int quantity)
   else
   {
     Fog::Pattern pattern;
-    pattern.setType(Fog::PATTERN_TYPE_LINEAR_GRADIENT);
+    pattern.setType(Fog::PATTERN_LINEAR_GRADIENT);
     pattern.setSpread(Fog::PATTERN_SPREAD_PAD);
 
     for (int a = 0; a < quantity; a++)
@@ -318,7 +318,7 @@ void FogModule_FillPolygon::bench(int quantity)
   else
   {
     Fog::Pattern pattern;
-    pattern.setType(Fog::PATTERN_TYPE_LINEAR_GRADIENT);
+    pattern.setType(Fog::PATTERN_LINEAR_GRADIENT);
     pattern.setSpread(Fog::PATTERN_SPREAD_PAD);
 
     for (int a = 0; a < quantity; a++)

@@ -22,12 +22,12 @@ static FOG_INLINE void Pattern_initData(PatternData* d)
 {
   uint32_t type = d->type;
 
-  if (type == PATTERN_TYPE_TEXTURE)
+  if (type == PATTERN_TEXTURE)
   {
     d->obj.texture.init();
     d->data.texture->area.clear();
   }
-  else if (type & PATTERN_TYPE_IS_GRADIENT)
+  else if (type & PATTERN_IS_GRADIENT)
   {
     d->obj.stops.init();
     d->data.gradient->points[0].clear();
@@ -40,11 +40,11 @@ static FOG_INLINE void Pattern_freeData(PatternData* d)
 {
   uint32_t type = d->type;
 
-  if (type == PATTERN_TYPE_TEXTURE)
+  if (type == PATTERN_TEXTURE)
   {
     d->obj.texture.destroy();
   }
-  else if (type & PATTERN_TYPE_IS_GRADIENT)
+  else if (type & PATTERN_IS_GRADIENT)
   {
     d->obj.stops.destroy();
   }
@@ -67,7 +67,7 @@ Pattern::Pattern(const Argb& argb)
   _d = new(std::nothrow) PatternData();
   if (!_d) { _d = _dnull->ref(); return; }
 
-  _d->type = PATTERN_TYPE_SOLID;
+  _d->type = PATTERN_SOLID;
   _d->obj.argb->setArgb(argb);
 }
 
@@ -96,11 +96,11 @@ err_t Pattern::setType(uint32_t type)
 {
   if (_d->type == type) return ERR_OK;
 
-  if (!((uint)type <= 0x2U || (type >= PATTERN_TYPE_LINEAR_GRADIENT && type <= PATTERN_TYPE_CONICAL_GRADIENT)))
+  if (!((uint)type <= 0x2U || (type >= PATTERN_LINEAR_GRADIENT && type <= PATTERN_CONICAL_GRADIENT)))
     return ERR_RT_INVALID_ARGUMENT;
 
   // Optimize [Gradient -> Gradient] type switching.
-  if ((_d->type & PATTERN_TYPE_IS_GRADIENT) != 0 && (type & PATTERN_TYPE_IS_GRADIENT) != 0)
+  if ((_d->type & PATTERN_IS_GRADIENT) != 0 && (type & PATTERN_IS_GRADIENT) != 0)
   {
     FOG_RETURN_ON_ERROR(detach());
     _d->type = type;
@@ -142,7 +142,7 @@ void Pattern::reset()
   else
   {
     _d->deleteResources();
-    _d->type = PATTERN_TYPE_NONE;
+    _d->type = PATTERN_NONE;
     _d->spread = PATTERN_SPREAD_PAD;
     _d->matrix.reset();
   }
@@ -275,7 +275,7 @@ err_t Pattern::setColor(const Argb& argb)
     PatternData* newd = new(std::nothrow) PatternData();
     if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
-    newd->type = PATTERN_TYPE_SOLID;
+    newd->type = PATTERN_SOLID;
     newd->spread = _d->spread;
     newd->matrix = _d->matrix;
 
@@ -311,7 +311,7 @@ static err_t Pattern_setTexturePrivate(Pattern* self, const Image& texture, cons
   if (self->_d->refCount.get() == 1)
   {
     self->_d->deleteResources();
-    self->_d->type = PATTERN_TYPE_TEXTURE;
+    self->_d->type = PATTERN_TEXTURE;
 
     self->_d->obj.texture.init(texture);
     self->_d->data.texture->area = textureArea;
@@ -323,7 +323,7 @@ static err_t Pattern_setTexturePrivate(Pattern* self, const Image& texture, cons
     PatternData* newd = new(std::nothrow) PatternData();
     if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
-    newd->type = PATTERN_TYPE_TEXTURE;
+    newd->type = PATTERN_TEXTURE;
     newd->spread = self->_d->spread;
     newd->matrix = self->_d->matrix;
 
@@ -366,7 +366,7 @@ Gradient Pattern::getGradient() const
 {
   PatternData* d = _d;
 
-  if (d->type & PATTERN_TYPE_IS_GRADIENT)
+  if (d->type & PATTERN_IS_GRADIENT)
   {
     return Gradient(
       d->type,
@@ -597,7 +597,7 @@ Pattern& Pattern::operator=(const Argb& rgba)
 PatternData::PatternData()
 {
   refCount.init(1);
-  type = PATTERN_TYPE_NONE;
+  type = PATTERN_NONE;
   spread = PATTERN_SPREAD_PAD;
 }
 
@@ -610,16 +610,16 @@ PatternData::PatternData(const PatternData& other) :
 
   switch (type)
   {
-    case PATTERN_TYPE_SOLID:
+    case PATTERN_SOLID:
       obj.argb.init(other.obj.argb.instance());
       break;
-    case PATTERN_TYPE_TEXTURE:
+    case PATTERN_TEXTURE:
       obj.texture.init(other.obj.texture.instance());
       data.texture->area = other.data.texture->area;
       break;
-    case PATTERN_TYPE_LINEAR_GRADIENT:
-    case PATTERN_TYPE_RADIAL_GRADIENT:
-    case PATTERN_TYPE_CONICAL_GRADIENT:
+    case PATTERN_LINEAR_GRADIENT:
+    case PATTERN_RADIAL_GRADIENT:
+    case PATTERN_CONICAL_GRADIENT:
       obj.stops.init(other.obj.stops.instance());
       data.gradient->points[0] = other.data.gradient->points[0];
       data.gradient->points[1] = other.data.gradient->points[1];

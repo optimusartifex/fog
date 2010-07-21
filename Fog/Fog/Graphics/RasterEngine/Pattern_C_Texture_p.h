@@ -79,8 +79,8 @@ struct FOG_HIDDEN PatternTextureC
   {
     PatternData* d = pattern._d;
 
-    // Only PATTERN_TYPE_TEXTURE type pattern can be passed to init().
-    FOG_ASSERT(d->type == PATTERN_TYPE_TEXTURE);
+    // Only PATTERN_TEXTURE type pattern can be passed to init().
+    FOG_ASSERT(d->type == PATTERN_TEXTURE);
 
     // If texture is empty image we tread it as 0x00000000 solid color.
     if (d->obj.texture->isEmpty()) return rasterFuncs.pattern.solid_init(ctx, 0x00000000);

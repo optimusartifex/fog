@@ -6,9 +6,9 @@
 #ifndef _FOG_CORE_BUILD_STDOS_H
 #define _FOG_CORE_BUILD_STDOS_H
 
-#if !defined(FOG_IDE) && !defined(_FOG_BUILD_BUILD_H)
+#if !defined(FOG_IDE) && !defined(_FOG_CORE_BUILD_H)
 #error "Fog::Core::Build - StdOS.h can be only included by Fog/Core/Build.h"
-#endif // _FOG_BUILD_BUILD_H
+#endif // _FOG_CORE_BUILD_H
 
 // ============================================================================
 // [Fog::Core::Build - OS]

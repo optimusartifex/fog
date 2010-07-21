@@ -418,7 +418,6 @@ struct FOG_API Font
   FOG_INLINE bool hasGlyphs() const { return (_d->flags & FONT_FACE_GLYPHS) != 0; }
   FOG_INLINE bool hasOutlines() const { return (_d->flags & FONT_FACE_OUTLINES) != 0; }
   FOG_INLINE bool hasKerning() const { return (_d->flags & FONT_FACE_KERNING) != 0; }
-
   FOG_INLINE bool hasQuantizedMetrics() const { return (_d->flags & FONT_FACE_QUANTIZED_METRICS) != 0; }
 
   // --------------------------------------------------------------------------

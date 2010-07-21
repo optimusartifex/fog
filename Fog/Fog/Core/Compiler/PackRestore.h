@@ -3,8 +3,8 @@
 // [License]
 // MIT, See COPYING file in package
 
-#if !defined(_FOG_BUILD_BUILD_H)
+#if !defined(_FOG_CORE_BUILD_H)
 # error "You can include this header only after including Fog/Core/Build.h or any other Fog header."
-#endif // _FOG_BUILD_BUILD_H
+#endif // _FOG_CORE_BUILD_H
 
 #pragma pack(pop)

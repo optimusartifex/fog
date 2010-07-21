@@ -229,7 +229,7 @@ struct FOG_HIDDEN PatternGradientC
     RasterPattern* ctx, const Pattern& pattern, const DoubleMatrix& matrix, uint32_t interpolationType)
   {
     PatternData* d = pattern._d;
-    FOG_ASSERT(d->type == PATTERN_TYPE_LINEAR_GRADIENT);
+    FOG_ASSERT(d->type == PATTERN_LINEAR_GRADIENT);
 
     if (d->obj.stops->getLength() == 0)
     {
@@ -818,7 +818,7 @@ fetchForwardNext:
     RasterPattern* ctx, const Pattern& pattern, const DoubleMatrix& matrix, uint32_t interpolationType)
   {
     PatternData* d = pattern._d;
-    FOG_ASSERT(d->type == PATTERN_TYPE_RADIAL_GRADIENT);
+    FOG_ASSERT(d->type == PATTERN_RADIAL_GRADIENT);
 
     if (d->obj.stops->getLength() == 0)
       return rasterFuncs.pattern.solid_init(ctx, 0x00000000);
@@ -1096,7 +1096,7 @@ fetchForwardNext:
     RasterPattern* ctx, const Pattern& pattern, const DoubleMatrix& matrix, uint32_t interpolationType)
   {
     PatternData* d = pattern._d;
-    FOG_ASSERT(d->type == PATTERN_TYPE_CONICAL_GRADIENT);
+    FOG_ASSERT(d->type == PATTERN_CONICAL_GRADIENT);
 
     if (d->obj.stops->getLength() == 0)
     {

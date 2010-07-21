@@ -47,22 +47,22 @@ struct FOG_HIDDEN JpegLibrary
   {
     struct
     {
-      FOG_CDECL JDIMENSION (*write_scanlines)(jpeg_compress_struct*, uint8_t**, unsigned int);
-      FOG_CDECL JDIMENSION (*read_scanlines)(jpeg_decompress_struct*, uint8_t**, unsigned int);
-      FOG_CDECL void (*set_defaults)(jpeg_compress_struct*);
-      FOG_CDECL void (*set_quality)(jpeg_compress_struct*, int /* quality */, int /* force_baseline*/);
-      FOG_CDECL struct jpeg_error_mgr* (*std_error)(jpeg_error_mgr*);
-      FOG_CDECL int (*read_header)(jpeg_decompress_struct*, int);
-      FOG_CDECL void (*calc_output_dimensions)(jpeg_decompress_struct*);
-      FOG_CDECL int (*start_compress)(jpeg_compress_struct*, int);
-      FOG_CDECL int (*start_decompress)(jpeg_decompress_struct*);
-      FOG_CDECL JDIMENSION (*create_compress)(jpeg_compress_struct*, int, size_t);
-      FOG_CDECL JDIMENSION (*create_decompress)(jpeg_decompress_struct*, int, size_t);
-      FOG_CDECL int (*finish_compress)(jpeg_compress_struct*);
-      FOG_CDECL int (*finish_decompress)(jpeg_decompress_struct*);
-      FOG_CDECL int (*resync_to_restart)(jpeg_decompress_struct*, int);
-      FOG_CDECL void (*destroy_compress)(jpeg_compress_struct*);
-      FOG_CDECL void (*destroy_decompress)(jpeg_decompress_struct*);
+      JDIMENSION (FOG_CDECL *write_scanlines)(jpeg_compress_struct*, uint8_t**, unsigned int);
+      JDIMENSION (FOG_CDECL *read_scanlines)(jpeg_decompress_struct*, uint8_t**, unsigned int);
+      void (FOG_CDECL *set_defaults)(jpeg_compress_struct*);
+      void (FOG_CDECL *set_quality)(jpeg_compress_struct*, int /* quality */, int /* force_baseline*/);
+      struct jpeg_error_mgr* (FOG_CDECL *std_error)(jpeg_error_mgr*);
+      int (FOG_CDECL *read_header)(jpeg_decompress_struct*, int);
+      void (FOG_CDECL *calc_output_dimensions)(jpeg_decompress_struct*);
+      int (FOG_CDECL *start_compress)(jpeg_compress_struct*, int);
+      int (FOG_CDECL *start_decompress)(jpeg_decompress_struct*);
+      JDIMENSION (FOG_CDECL *create_compress)(jpeg_compress_struct*, int, size_t);
+      JDIMENSION (FOG_CDECL *create_decompress)(jpeg_decompress_struct*, int, size_t);
+      int (FOG_CDECL *finish_compress)(jpeg_compress_struct*);
+      int (FOG_CDECL *finish_decompress)(jpeg_decompress_struct*);
+      int (FOG_CDECL *resync_to_restart)(jpeg_decompress_struct*, int);
+      void (FOG_CDECL *destroy_compress)(jpeg_compress_struct*);
+      void (FOG_CDECL *destroy_decompress)(jpeg_decompress_struct*);
     };
     void* addr[NUM_SYMBOLS];
   };

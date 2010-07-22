@@ -366,6 +366,7 @@ Set(FOG_CORE_BUILD_HEADERS
   Fog/Core/Build/StdInt.h
   Fog/Core/Build/StdMacros.h
   Fog/Core/Build/StdMain.h
+  Fog/Core/Build/StdNew.h
   Fog/Core/Build/StdOS.h
 )
 

@@ -51,12 +51,21 @@ FOG_API sysuint_t calcOptimalCapacity(sysuint_t sizeof_d, sysuint_t sizeof_eleme
 
 //! @brief Checks if @a index and @a range are correct positions in @a length. @a range
 //! can be modified. Returns @c true if range check is ok.
+// TODO: DEPRECATED
 FOG_INLINE bool checkRange(sysuint_t length, sysuint_t index, sysuint_t *range)
 {
   if (index >= length) return false;
 
   sysuint_t max = length - index;
   if (*range > max) *range = max;
+  return true;
+}
+
+// TODO: RENAME
+FOG_INLINE bool checkRange_A(sysuint_t length, sysuint_t start, sysuint_t *end)
+{
+  if (start >= length) return false;
+  if (*end > length) *end = length;
   return true;
 }
 

@@ -122,29 +122,36 @@ err_t StringMatcher::setPattern(const StringMatcher& matcher)
   return ERR_OK;
 }
 
-Range StringMatcher::match(const Char* str, sysuint_t length, uint cs, const Range& range) const
+Range StringMatcher::match(const Char* str, sysuint_t slen, uint cs, const Range& range) const
 {
-  FOG_ASSERT(length != DETECT_LENGTH);
-  FOG_ASSERT(range.index <= length);
-  FOG_ASSERT(length - range.index >= range.length);
+  Range m(INVALID_INDEX, INVALID_INDEX);
+
+  FOG_ASSERT(slen != DETECT_LENGTH);
+  FOG_ASSERT(range.isValid());
+  FOG_ASSERT(range.getStart() <= slen);
 
   sysuint_t patternLength = _pattern.getLength();
 
-  // simple reject
-  if (patternLength == 0 || patternLength > length) return INVALID_INDEX;
+  // Simple reject.
+  if (patternLength == 0 || patternLength > slen) return m;
 
-  // we want 0 or 1
+  // We want 0 or 1.
   cs = !!cs;
 
-  const Char* strCur = str + range.index;
+  const Char* strCur = str + range.getStart();
   const Char* patternStr = _pattern.getData();
 
   // Simple 'Char' search.
   if (patternLength == 1)
   {
-    sysuint_t i = StringUtil::indexOf(strCur, range.length, patternStr[0], cs);
-    if (i != INVALID_INDEX) i += range.index;
-    return i;
+    sysuint_t i = StringUtil::indexOf(strCur, range.getLengthNoCheck(), patternStr[0], cs);
+
+    if (i != INVALID_INDEX)
+    {
+      i += range.getStart();
+      m.setRange(i, i + 1);
+    }
+    return m;
   }
 
   if (_skipTable[cs].status.get() != StringMatcher::SkipTable::STATUS_INITIALIZED)
@@ -155,7 +162,7 @@ Range StringMatcher::match(const Char* str, sysuint_t length, uint cs, const Ran
   const uint* skipTable = _skipTable[cs].data;
 
   sysuint_t skip;
-  sysuint_t remain = range.length;
+  sysuint_t remain = range.getLengthNoCheck();
 
   patternStr += patternLength - 1;
   strCur     += patternLength - 1;
@@ -220,7 +227,7 @@ Range StringMatcher::match(const Char* str, sysuint_t length, uint cs, const Ran
     }
   }
 
-  return Range(INVALID_INDEX);
+  return m;
 }
 
 sysuint_t StringMatcher::getLength() const

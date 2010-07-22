@@ -458,10 +458,10 @@ struct FOG_API DoublePath
   //!
   //! This method must be called after path was manually changed by getMData() or
   //! similar methods to invalidate type of path.
-  FOG_INLINE void invalidateFlatPath() const { _d->flat = 0xFF; }
+  FOG_INLINE void invalidateFlatPath() const { FOG_ASSERT(isDetached()); _d->flat = 0xFF; }
 
   //! @brief Invalidate path bounding box.
-  FOG_INLINE void invalidateBoundingBox() const { _d->boundingBoxDirty = true; }
+  FOG_INLINE void invalidateBoundingBox() const { FOG_ASSERT(isDetached()); _d->boundingBoxDirty = true; }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]

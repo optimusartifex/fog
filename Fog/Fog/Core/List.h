@@ -16,6 +16,7 @@
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/Memory.h>
 #include <Fog/Core/SequenceInfo.h>
+#include <Fog/Core/Range.h>
 #include <Fog/Core/Static.h>
 #include <Fog/Core/Std.h>
 #include <Fog/Core/TypeInfo.h>
@@ -444,9 +445,11 @@ struct FOG_HIDDEN List
     sysuint_t length = d->length;
 
     const T* cur = reinterpret_cast<const T*>(d->p);
-
     for (i = 0; i < length; i++, cur++)
+    {
       if (cur[0] == element) return i;
+    }
+
     return INVALID_INDEX;
   }
 
@@ -458,14 +461,17 @@ struct FOG_HIDDEN List
     sysuint_t i;
     sysuint_t length = d->length;
 
-    sysuint_t index = range_.index;
-    sysuint_t range = range_.length;
+    sysuint_t rstart = range_.getStart();
+    sysuint_t rend = range_.getEnd();
 
-    if (!Std::checkRange(length, index, &range)) return INVALID_INDEX;
-    const T* cur = reinterpret_cast<const T*>(d->p) + index;
+    if (!Std::checkRange_A(length, rstart, &rend)) return INVALID_INDEX;
 
-    for (i = 0; i < range; i++, cur++)
-      if (cur[0] == element) return index + i;
+    const T* cur = reinterpret_cast<const T*>(d->p) + rstart;
+    for (i = rstart; i < rend; i++, cur++)
+    {
+      if (cur[0] == element) return i;
+    }
+
     return INVALID_INDEX;
   }
 
@@ -475,13 +481,13 @@ struct FOG_HIDDEN List
   {
     const ListData* d = _d;
 
-    sysuint_t i;
-    sysuint_t length = d->length;
+    sysuint_t i = d->length - 1;
+    const T* cur = reinterpret_cast<const T*>(d->p) + i;
 
-    const T* cur = reinterpret_cast<const T*>(d->p) + (length - 1);
-
-    for (i = length - 1; i != INVALID_INDEX; i--, cur--)
+    for (; i != INVALID_INDEX; i--, cur--)
+    {
       if (cur[0] == element) return i;
+    }
     return INVALID_INDEX;
   }
 
@@ -493,14 +499,22 @@ struct FOG_HIDDEN List
     sysuint_t i;
     sysuint_t length = d->length;
 
-    sysuint_t index = range_.index;
-    sysuint_t range = range_.length;
+    sysuint_t rstart = range_.getStart();
+    sysuint_t rend = range_.getEnd();
 
-    if (!Std::checkRange(length, index, &range)) return INVALID_INDEX;
-    const T* cur = reinterpret_cast<T*>(d->p) + (index + range - 1);
+    if (!Std::checkRange_A(length, rstart, &rend)) return INVALID_INDEX;
 
-    for (i = range - 1; i != INVALID_INDEX; i--, cur--)
-      if (cur[0] == element) return index + i;
+    rstart--;
+    rend--;
+    const T* cur = reinterpret_cast<T*>(d->p) + rend;
+
+    for (;;)
+    {
+      if (cur[0] == element) return i;
+      if (i == rstart) break;
+      i--; cur--;
+    }
+
     return INVALID_INDEX;
   }
 

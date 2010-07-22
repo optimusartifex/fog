@@ -97,7 +97,7 @@ struct FOG_API ByteArrayMatcher : public ByteArrayFilter
 
   virtual sysuint_t getLength() const;
 
-  virtual Range match(const char* str, sysuint_t length, uint cs, const Range& range) const;
+  virtual Range match(const char* str, sysuint_t slen, uint cs, const Range& range) const;
 
   // --------------------------------------------------------------------------
   // [Operator Overload]

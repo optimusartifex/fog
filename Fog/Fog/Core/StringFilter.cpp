@@ -10,6 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Assert.h>
+#include <Fog/Core/Math.h>
 #include <Fog/Core/StringFilter.h>
 
 namespace Fog {
@@ -26,32 +27,32 @@ StringFilter::~StringFilter()
 {
 }
 
-Range StringFilter::indexOf(const Char* str, sysuint_t length, uint cs, const Range& range) const
+Range StringFilter::indexOf(const Char* str, sysuint_t slen, uint cs, const Range& range) const
 {
   Range m(INVALID_INDEX, INVALID_INDEX);
-  if (range.index >= length) return m;
+  if (range.getStart() >= slen) return m;
 
-  sysuint_t i = range.index;
-  sysuint_t e = (length - i < range.length) ? length - i : range.index + range.length;
+  sysuint_t rstart = range.getStart();
+  sysuint_t rend = Math::min(slen, range.getEnd());
 
-  m = match(str, length, cs, Range(i, e - i));
+  if (rstart < rend) m = match(str, slen, cs, Range(rstart, rend));
   return m;
 }
 
-Range StringFilter::lastIndexOf(const Char* str, sysuint_t length, uint cs, const Range& range) const
+Range StringFilter::lastIndexOf(const Char* str, sysuint_t slen, uint cs, const Range& range) const
 {
   Range m(INVALID_INDEX, INVALID_INDEX);
-  if (range.index >= length) return m;
+  if (range.getStart() >= slen) return m;
 
-  sysuint_t i = range.index;
-  sysuint_t e = (length - i < range.length) ? length - i : range.index + range.length;
+  sysuint_t rstart = range.getStart();
+  sysuint_t rend = Math::min(slen, range.getEnd());
 
   for (;;)
   {
-    Range t = match(str, length, cs, Range(i, e - i));
-    if (t.index == INVALID_INDEX) break;
+    Range t = match(str, slen, cs, Range(rstart, rend));
+    if (t.getStart() == INVALID_INDEX) break;
 
-    i = t.index + t.length;
+    rstart = t.getEnd();
     m = t;
   }
 

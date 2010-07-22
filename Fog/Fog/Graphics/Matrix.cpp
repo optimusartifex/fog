@@ -530,9 +530,9 @@ float FloatMatrix::getAverageScaling() const
 
 FloatPoint FloatMatrix::getAbsoluteScaling() const
 {
-  // Used to calculate scaling coefficients in image resampling.
-  // When there is considerable shear this method gives us much
-  // better estimation than just sx, sy.
+  // Used to calculate scaling coefficients in image resampling. When there is
+  // considerable shear this method gives us much better estimation than just
+  // sx, sy.
   float x = Math::sqrt(sx  * sx  + shx * shx);
   float y = Math::sqrt(shy * shy + sy  * sy);
 
@@ -1000,9 +1000,9 @@ double DoubleMatrix::getAverageScaling() const
 
 DoublePoint DoubleMatrix::getAbsoluteScaling() const
 {
-  // Used to calculate scaling coefficients in image resampling. 
-  // When there is considerable shear this method gives us much
-  // better estimation than just sx, sy.
+  // Used to calculate scaling coefficients in image resampling. When there is 
+  // considerable shear this method gives us much better estimation than just
+  // sx, sy.
   double x = Math::sqrt(sx  * sx  + shx * shx);
   double y = Math::sqrt(shy * shy + sy  * sy);
 

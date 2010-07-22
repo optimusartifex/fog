@@ -13,6 +13,7 @@
 #include <Fog/Core/Atomic.h>
 #include <Fog/Core/Basics.h>
 #include <Fog/Core/Constants.h>
+#include <Fog/Core/Range.h>
 #include <Fog/Core/Static.h>
 #include <Fog/Core/TypeInfo.h>
 
@@ -456,6 +457,13 @@ struct FOG_API ByteArray
   sysuint_t lastIndexOf(char ch, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
   sysuint_t lastIndexOf(const ByteArray& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
   sysuint_t lastIndexOf(const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+
+  // --------------------------------------------------------------------------
+  // [IndexOfAny / LastIndexOfAny]
+  // --------------------------------------------------------------------------
+
+  sysuint_t indexOfAny(const char* chars, sysuint_t numChars, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  sysuint_t lastIndexOfAny(const char* chars, sysuint_t numChars, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
 
   // --------------------------------------------------------------------------
   // [StartsWith / EndsWith]

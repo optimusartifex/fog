@@ -96,7 +96,7 @@ struct FOG_API StringMatcher : public StringFilter
   // --------------------------------------------------------------------------
 
   virtual sysuint_t getLength() const;
-  virtual Range match(const Char* str, sysuint_t length, uint cs, const Range& range) const;
+  virtual Range match(const Char* str, sysuint_t slen, uint cs, const Range& range) const;
 
   // --------------------------------------------------------------------------
   // [Operator Overload]

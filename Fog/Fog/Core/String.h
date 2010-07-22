@@ -14,6 +14,7 @@
 #include <Fog/Core/Basics.h>
 #include <Fog/Core/Char.h>
 #include <Fog/Core/Constants.h>
+#include <Fog/Core/Range.h>
 #include <Fog/Core/Static.h>
 #include <Fog/Core/TypeInfo.h>
 

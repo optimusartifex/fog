@@ -33,18 +33,19 @@ namespace Fog {
 // ============================================================================
 
 static FOG_INLINE bool fitToRange(
-  const String& s, sysuint_t* _start, sysuint_t* _len, const Range& range)
+  const String& s, sysuint_t* _start, sysuint_t* _end, const Range& range)
 {
-  sysuint_t start = range.index;
+  sysuint_t rstart = range.getStart();
+  sysuint_t rend = range.getEnd();
+  if (rstart >= rend) return false;
+
   sysuint_t slen = s.getLength();
+  if (rstart >= slen) return false;
 
-  if (start >= slen) return false;
+  if (rend > slen) rend = slen;
 
-  sysuint_t r = slen - start;
-  if (r > range.length) r = range.length;
-
-  *_start = start;
-  *_len = r;
+  *_start = rstart;
+  *_end = rend;
   return true;
 }
 
@@ -1757,12 +1758,12 @@ err_t String::insert(sysuint_t index, const String& _other)
 
 sysuint_t String::remove(const Range& range)
 {
-  sysuint_t rstart, rlen;
-  if (!fitToRange(*this, &rstart, &rlen, range)) return 0;
+  sysuint_t rstart, rend;
+  if (!fitToRange(*this, &rstart, &rend, range)) return 0;
 
   sysuint_t lenPart1 = rstart;
-  sysuint_t lenPart2 = getLength() - rstart - rlen;
-  sysuint_t lenAfter = getLength() - rlen;
+  sysuint_t lenPart2 = getLength() - rend;
+  sysuint_t lenAfter = lenPart1 + lenPart2;
 
   if (_d->refCount.get() > 1)
   {
@@ -1770,7 +1771,7 @@ sysuint_t String::remove(const Range& range)
     if (!newd) return 0;
 
     StringUtil::copy(newd->data, _d->data, lenPart1);
-    StringUtil::copy(newd->data + rstart, _d->data + rstart + rlen, lenPart2);
+    StringUtil::copy(newd->data + rstart, _d->data + rend, lenPart2);
     newd->length = lenAfter;
     newd->data[lenAfter] = 0;
 
@@ -1778,27 +1779,26 @@ sysuint_t String::remove(const Range& range)
   }
   else
   {
-    StringUtil::move(_d->data + rstart, _d->data + rstart + rlen, lenPart2);
+    StringUtil::move(_d->data + rstart, _d->data + rend, lenPart2);
     _d->length = lenAfter;
     _d->data[lenAfter] = 0;
     _d->hashCode = 0;
   }
 
-  return rlen;
+  return rend - rstart;
 }
 
 sysuint_t String::remove(Char ch, uint cs, const Range& range)
 {
-  sysuint_t rstart, rlen;
-  if (!fitToRange(*this, &rstart, &rlen, range)) return 0;
+  sysuint_t rstart, rend;
+  if (!fitToRange(*this, &rstart, &rend, range)) return 0;
 
   Data* d = _d;
   sysuint_t length = d->length;
-  sysuint_t tail;
 
   Char* strBeg = d->data;
   Char* strCur = strBeg + rstart;
-  Char* strEnd = strCur + rlen;
+  Char* strEnd = strBeg + rend;
   Char* destCur;
 
   if (cs == CASE_SENSITIVE)
@@ -1815,26 +1815,21 @@ caseSensitiveRemove:
     if (d->refCount.get() > 1)
     {
       rstart = strCur - strBeg;
-      rlen = strEnd - strCur;
-
       if (detach() != ERR_OK) return 0;
 
       d = _d;
-
       strBeg = d->data;
-      strCur = strBeg + rstart;
-      strEnd = strCur + rlen;
-    }
-    destCur = strCur;
 
+      strCur = strBeg + rstart;
+      strEnd = strBeg + rend;
+    }
+
+    destCur = strCur;
     while (strCur != strEnd)
     {
       if (*strCur != ch) *destCur++ = *strCur;
       strCur++;
     }
-
-    tail = length - (rstart + rlen);
-    StringUtil::copy(destCur, strCur, tail);
   }
   else
   {
@@ -1853,14 +1848,13 @@ caseInsensitiveRemove:
     if (d->refCount.get() > 1)
     {
       rstart = strCur - strBeg;
-      rlen = strEnd - strCur;
-
       if (detach() != ERR_OK) return 0;
-      d = _d;
 
+      d = _d;
       strBeg = d->data;
+
       strCur = strBeg + rstart;
-      strEnd = strCur + rlen;
+      strEnd = strBeg + rend;
     }
     destCur = strCur;
 
@@ -1869,27 +1863,28 @@ caseInsensitiveRemove:
       if (*strCur != chLower && *strCur != chUpper) *destCur++ = *strCur;
       strCur++;
     }
-
-    tail = length - (rstart + rlen);
-    StringUtil::copy(destCur, strCur, tail);
   }
 
-  d->length = (sysuint_t)(destCur - d->data);
-  d->data[d->length] = 0;
+  sysuint_t tail = length - rend;
+  StringUtil::copy(destCur, strCur, tail);
+
+  sysuint_t after = (sysuint_t)(destCur - d->data) + tail;
+  d->length = after;
+  d->data[after] = 0;
   d->hashCode = 0;
-  return length - d->length;
+  return length - after;
 }
 
 sysuint_t String::remove(const String& other, uint cs, const Range& range)
 {
-  sysuint_t rstart, rlen;
-  if (!fitToRange(*this, &rstart, &rlen, range)) return 0;
-
   sysuint_t len = other.getLength();
   if (len == 0) return 0;
   if (len == 1) return remove(other.at(0), cs, range);
 
-  if (rlen >= 256)
+  sysuint_t rstart, rend;
+  if (!fitToRange(*this, &rstart, &rend, range)) return 0;
+
+  if (rend - rstart >= 256)
   {
     // Match using StringMatcher.
     StringMatcher matcher;
@@ -1903,25 +1898,17 @@ sysuint_t String::remove(const String& other, uint cs, const Range& range)
     const Char* aStr = getData();
     const Char* bStr = other.getData();
 
-    sysuint_t aLength = getLength();
-    sysuint_t bLength = len;
-
-    Range ranges[128]; // Maximal length is 256 and minimal pattern size is 2.
+    // Maximal length is 256 and minimal pattern size is 2.
+    Range ranges[128];
     sysuint_t count = 0;
-    sysuint_t rpos = rstart;
-    sysuint_t rend = rstart + rlen;
 
     for (;;)
     {
-      sysuint_t i = StringUtil::indexOf(aStr + rpos, rend - rpos, bStr, bLength);
+      sysuint_t i = StringUtil::indexOf(aStr + rstart, rend - rstart, bStr, len);
       if (i == INVALID_INDEX) break;
-      rpos += i;
-
-      ranges[count].index = rpos;
-      ranges[count].length = bLength;
-      count++;
-
-      rpos += bLength;
+      rstart += i;
+      ranges[count++].setRange(rstart, rstart + len);
+      rstart += len;
     }
 
     return remove(ranges, count);
@@ -1930,22 +1917,21 @@ sysuint_t String::remove(const String& other, uint cs, const Range& range)
 
 sysuint_t String::remove(const StringFilter& filter, uint cs, const Range& range)
 {
-  sysuint_t rstart, rlen;
-  if (!fitToRange(*this, &rstart, &rlen, range)) return 0;
+  sysuint_t rstart, rend;
+  if (!fitToRange(*this, &rstart, &rend, range)) return 0;
 
   const Char* str = getData();
   sysuint_t len = getLength();
-  sysuint_t rend = rstart + rlen;
 
   List<Range> ranges;
 
   for (;;)
   {
-    Range r = filter.indexOf(str, len, cs, Range(rstart, rstart - rend));
-    if (r.index == INVALID_INDEX) break;
+    Range r = filter.indexOf(str, len, cs, Range(rstart, rend));
+    if (r.getStart() == INVALID_INDEX) break;
 
     ranges.append(r);
-    rstart = r.index + r.length;
+    rstart = r.getEnd();
   }
 
   return remove(ranges.getData(), ranges.getLength());
@@ -1962,12 +1948,12 @@ sysuint_t String::remove(const Range* range, sysuint_t count)
   {
     i = 0;
     Char* s = _d->data;
-    sysuint_t dstPos = range[0].index;
+    sysuint_t dstPos = range[0].getStart();
     sysuint_t srcPos = dstPos;
 
     do {
-      srcPos += range[i].length;
-      sysuint_t j = ((++i == count) ? len : range[i].index) - srcPos;
+      srcPos += range[i].getLengthNoCheck();
+      sysuint_t j = ((++i == count) ? len : range[i].getStart()) - srcPos;
 
       StringUtil::copy(s + dstPos, s + srcPos, j);
 
@@ -1984,7 +1970,7 @@ sysuint_t String::remove(const Range* range, sysuint_t count)
     sysuint_t deleteLength = 0;
     sysuint_t lengthAfter;
 
-    for (i = 0; i < count; i++) deleteLength += range[i].length;
+    for (i = 0; i < count; i++) deleteLength += range[i].getLengthNoCheck();
     FOG_ASSERT(len >= deleteLength);
 
     lengthAfter = len - deleteLength;
@@ -1996,14 +1982,14 @@ sysuint_t String::remove(const Range* range, sysuint_t count)
     Char* dstData = newd->data;
     Char* srgetData = _d->data;
 
-    sysuint_t dstPos = range[0].index;
+    sysuint_t dstPos = range[0].getStart();
     sysuint_t srcPos = dstPos;
 
     StringUtil::copy(dstData, srgetData, dstPos);
 
     do {
-      srcPos += range[i].length;
-      sysuint_t j = ((++i == count) ? len : range[i].index) - srcPos;
+      srcPos += range[i].getLengthNoCheck();
+      sysuint_t j = ((++i == count) ? len : range[i].getStart()) - srcPos;
 
       StringUtil::copy(dstData + dstPos, srgetData + srcPos, j);
 
@@ -2025,45 +2011,49 @@ sysuint_t String::remove(const Range* range, sysuint_t count)
 
 err_t String::replace(const Range& range, const String& replacement)
 {
-  sysuint_t rstart, rlen;
-  if (!fitToRange(*this, &rstart, &rlen, range)) return ERR_OK;
+  sysuint_t rstart, rend;
+  if (!fitToRange(*this, &rstart, &rend, range)) return ERR_OK;
 
   const Char* replacementData = replacement.getData();
   sysuint_t replacementLength = replacement.getLength();
 
   if (_d->refCount.get() == 1 && _d != replacement._d)
   {
-    Char* s = _d->data + rstart;
-    sysuint_t lengthAfter = _d->length - rlen + replacementLength;
-    if (lengthAfter < _d->length) return ERR_RT_OVERFLOW;
+    sysuint_t len = getLength();
+    sysuint_t lenAfter = len - (rend - rstart) + replacementLength;
+    if (lenAfter < len) return ERR_RT_OVERFLOW;
 
-    if (_d->capacity >= lengthAfter)
+    if (_d->capacity >= lenAfter)
     {
-      StringUtil::move(s + replacementLength, s + rlen, _d->length - rstart - rlen);
-      StringUtil::copy(s, replacementData, replacementLength);
+      Char* sdata = _d->data;
+      Char* sstart = sdata + rstart;
 
-      _d->length = lengthAfter;
+      StringUtil::move(sstart + replacementLength, sdata + rend, len - rend);
+      StringUtil::copy(sstart, replacementData, replacementLength);
+
+      _d->length = lenAfter;
       _d->hashCode = 0;
-      _d->data[lengthAfter] = 0;
+      _d->data[lenAfter] = 0;
       return ERR_OK;
     }
   }
 
-  Range r(rstart, rlen);
+  Range r(rstart, rend);
   return replace(&r, 1, replacementData, replacementLength);
 }
 
-err_t String::replace(Char before, Char after,
-  uint cs, const Range& range)
+err_t String::replace(Char before, Char after, uint cs, const Range& range)
 {
-  sysuint_t rstart, rlen;
-  if (!fitToRange(*this, &rstart, &rlen, range)) return ERR_OK;
+  sysuint_t rstart, rend;
+  if (!fitToRange(*this, &rstart, &rend, range)) return ERR_OK;
 
   Data* d = _d;
-  sysuint_t length = d->length;
 
-  Char* strCur = d->data + rstart;
-  Char* strEnd = strCur + rlen;
+  Char* strCur = d->data;
+  Char* strEnd = strCur;
+
+  strCur += rstart;
+  strEnd += rend;
 
   if (cs == CASE_SENSITIVE)
   {
@@ -2079,13 +2069,15 @@ caseSensitiveReplace:
     if (d->refCount.get() > 1)
     {
       rstart = (sysuint_t)(strCur - d->data);
-      rlen = (sysuint_t)(strEnd - strCur);
 
       FOG_RETURN_ON_ERROR(_detach());
       d = _d;
 
-      strCur = d->data + rstart;
-      strEnd = strCur + rlen;
+      strCur = d->data;
+      strEnd = strCur;
+
+      strCur += rstart;
+      strEnd += rend;
     }
 
     while (strCur != strEnd)
@@ -2112,13 +2104,15 @@ caseInsensitiveReplace:
     if (d->refCount.get() > 1)
     {
       rstart = (sysuint_t)(strCur - d->data);
-      rlen = (sysuint_t)(strEnd - strCur);
 
       FOG_RETURN_ON_ERROR(_detach());
       d = _d;
 
-      strCur = d->data + rstart;
-      strEnd = strCur + rlen;
+      strCur = d->data;
+      strEnd = strCur;
+
+      strCur += rstart;
+      strEnd += rend;
     }
 
     while (strCur != strEnd)
@@ -2128,19 +2122,19 @@ caseInsensitiveReplace:
     }
   }
 
+  d->hashCode = 0;
   return ERR_OK;
 }
 
-err_t String::replace(const String& before, const String& after,
-  uint cs, const Range& range)
+err_t String::replace(const String& before, const String& after,  uint cs, const Range& range)
 {
-  sysuint_t rstart, rlen;
-  if (!fitToRange(*this, &rstart, &rlen, range)) return 0;
+  sysuint_t rstart, rend;
+  if (!fitToRange(*this, &rstart, &rend, range)) return 0;
 
   sysuint_t len = before.getLength();
   if (len == 0) return 0;
 
-  if (rlen >= 256)
+  if (rend - rstart >= 256)
   {
     // Match using StringMatcher.
     StringMatcher matcher;
@@ -2154,50 +2148,40 @@ err_t String::replace(const String& before, const String& after,
     const Char* aStr = getData();
     const Char* bStr = before.getData();
 
-    sysuint_t aLength = getLength();
-    sysuint_t bLength = len;
-
     Range ranges[256];
     sysuint_t count = 0;
-    sysuint_t rpos = rstart;
-    sysuint_t rend = rstart + rlen;
 
     for (;;)
     {
-      sysuint_t i = StringUtil::indexOf(aStr + rpos, rend - rpos, bStr, bLength);
+      sysuint_t i = StringUtil::indexOf(aStr + rstart, rend - rstart, bStr, len);
       if (i == INVALID_INDEX) break;
-      rpos += i;
 
-      ranges[count].index = rpos;
-      ranges[count].length = bLength;
-      count++;
-
-      rpos += bLength;
+      rstart += i;
+      ranges[count++].setRange(rstart, rstart + len);
+      rstart += len;
     }
 
     return replace(ranges, count, after.getData(), after.getLength());
   }
 }
 
-err_t String::replace(const StringFilter& filter, const String& after,
-  uint cs, const Range& range)
+err_t String::replace(const StringFilter& filter, const String& after, uint cs, const Range& range)
 {
-  sysuint_t rstart, rlen;
-  if (!fitToRange(*this, &rstart, &rlen, range)) return 0;
+  sysuint_t rstart, rend;
+  if (!fitToRange(*this, &rstart, &rend, range)) return 0;
 
   const Char* str = getData();
   sysuint_t len = getLength();
-  sysuint_t rend = rstart + rlen;
 
   List<Range> ranges;
 
   for (;;)
   {
-    Range r = filter.indexOf(str, len, cs, Range(rstart, rstart - rend));
-    if (r.index == INVALID_INDEX) break;
+    Range r = filter.indexOf(str, len, cs, Range(rstart, rend));
+    if (r.getStart() == INVALID_INDEX) break;
 
     ranges.append(r);
-    rstart = r.index + r.length;
+    rstart = r.getEnd();
   }
 
   return replace(ranges.getData(), ranges.getLength(), after.getData(), after.getLength());
@@ -2211,14 +2195,21 @@ err_t String::replace(const Range* m, sysuint_t mcount, const Char* after, sysui
   const Char* cur = getData();
 
   // Get total count of characters we remove.
-  sysuint_t mTotal = 0;
-  for (i = 0; i < mcount; i++) mTotal += m[i].length;
+  sysuint_t mtotal = 0;
+  for (i = 0; i < mcount; i++)
+  {
+    sysuint_t rstart = m[i].getStart();
+    sysuint_t rend = m[i].getEnd();
+    if (rstart >= len || rstart >= rend) return ERR_RT_INVALID_ARGUMENT;
+
+    mtotal += rend - rstart;
+  }
 
   // Get total count of characters we add.
-  sysuint_t aTotal = alen * mcount;
+  sysuint_t atotal = alen * mcount;
 
   // Get target length.
-  sysuint_t lenAfter = len - mTotal + aTotal;
+  sysuint_t lenAfter = len - mtotal + atotal;
 
   Data* newd = Data::alloc(lenAfter);
   if (!newd) return ERR_RT_OUT_OF_MEMORY;
@@ -2230,8 +2221,8 @@ err_t String::replace(const Range* m, sysuint_t mcount, const Char* after, sysui
   // Serialize
   for (i = 0; i < mcount; i++)
   {
-    sysuint_t mstart = m[i].index;
-    sysuint_t mlen = m[i].length;
+    sysuint_t mstart = m[i].getStart();
+    sysuint_t mend = m[i].getEnd();
 
     // Begin
     t = mstart - pos;
@@ -2244,7 +2235,7 @@ err_t String::replace(const Range* m, sysuint_t mcount, const Char* after, sysui
     StringUtil::copy(p, after, alen);
     p += alen; remain -= alen;
 
-    pos = mstart + mlen;
+    pos = mend;
   }
 
   // Last piece of string
@@ -2627,15 +2618,14 @@ List<String> String::split(const StringFilter& filter, uint splitBehavior, uint 
   {
     sysuint_t remain = (sysuint_t)(strEnd - strCur);
     Range m = filter.match(strCur, remain, cs, Range(0, remain));
-    sysuint_t splitLength = (m.index != INVALID_INDEX) ? m.index : remain;
+    sysuint_t splitLength = (m.getStart() != INVALID_INDEX) ? m.getStart() : remain;
 
     if ((splitLength == 0 && splitBehavior == SPLIT_KEEP_EMPTY_PARTS) || splitLength != 0)
       result.append(String(strCur, splitLength));
 
-    if (m.index == INVALID_INDEX) break;
+    if (m.getStart() == INVALID_INDEX) break;
 
-    strCur += m.index;
-    strCur += m.length;
+    strCur += m.getEnd();
   }
 
   return result;
@@ -2704,12 +2694,11 @@ String String::join(const List<String>& seq, const String& separator)
 
 String String::substring(const Range& range) const
 {
-  String ret;
-
-  sysuint_t rstart, rlen;
-  if (fitToRange(*this, &rstart, &rlen, range)) ret.set(Utf16(getData() + rstart, rlen));
-
-  return ret;
+  sysuint_t rstart, rend;
+  if (fitToRange(*this, &rstart, &rend, range))
+    return String(Utf16(getData() + rstart, rend - rstart));
+  else
+    return String();
 }
 
 // ============================================================================
@@ -2784,9 +2773,9 @@ err_t String::atod(double* dst, const Locale* locale, sysuint_t* end, uint32_t* 
 bool String::contains(Char ch,
   uint cs, const Range& range) const
 {
-  sysuint_t rstart, rlen;
-  if (fitToRange(*this, &rstart, &rlen, range))
-    return StringUtil::indexOf(getData() + rstart, rlen, ch, cs) != INVALID_INDEX;
+  sysuint_t rstart, rend;
+  if (fitToRange(*this, &rstart, &rend, range))
+    return StringUtil::indexOf(getData() + rstart, rend - rstart, ch, cs) != INVALID_INDEX;
   else
     return false;
 }
@@ -2801,7 +2790,7 @@ bool String::contains(const StringFilter& filter,
   uint cs, const Range& range) const
 {
   Range m = filter.indexOf(getData(), getLength(), cs, range);
-  return m.index != INVALID_INDEX;
+  return m.getStart() != INVALID_INDEX;
 }
 
 // ============================================================================
@@ -2811,9 +2800,9 @@ bool String::contains(const StringFilter& filter,
 sysuint_t String::countOf(Char ch,
   uint cs, const Range& range) const
 {
-  sysuint_t rstart, rlen;
-  if (fitToRange(*this, &rstart, &rlen, range))
-    return StringUtil::countOf(getData() + rstart, rlen, ch, cs);
+  sysuint_t rstart, rend;
+  if (fitToRange(*this, &rstart, &rend, range))
+    return StringUtil::countOf(getData() + rstart, rend - rstart, ch, cs);
   else
     return 0;
 }
@@ -2821,14 +2810,14 @@ sysuint_t String::countOf(Char ch,
 sysuint_t String::countOf(const String& pattern,
   uint cs, const Range& range) const
 {
-  sysuint_t rstart, rlen;
-  if (!fitToRange(*this, &rstart, &rlen, range)) return 0;
+  sysuint_t rstart, rend;
+  if (!fitToRange(*this, &rstart, &rend - rstart, range)) return 0;
 
   sysuint_t len = pattern.getLength();
   if (len == 0) return 0;
   if (len == 1) return countOf(pattern.at(0), cs, range);
 
-  if (rlen >= 256)
+  if (rend - rstart >= 256)
   {
     // Match using StringMatcher.
     StringMatcher matcher;
@@ -2842,22 +2831,16 @@ sysuint_t String::countOf(const String& pattern,
     const Char* aStr = getData();
     const Char* bStr = pattern.getData();
 
-    sysuint_t aLength = getLength();
-    sysuint_t bLength = len;
-
-    sysuint_t rpos = rstart;
-    sysuint_t rend = rstart + rlen;
-
     sysuint_t count = 0;
 
     for (;;)
     {
-      sysuint_t i = StringUtil::indexOf(aStr + rpos, rend - rpos, bStr, bLength);
+      sysuint_t i = StringUtil::indexOf(aStr + rstart, rend - rstart, bStr, len);
       if (i == INVALID_INDEX) break;
-      rpos += i;
+      rstart += i;
 
       count++;
-      rpos += bLength;
+      rstart += len;
     }
 
     return count;
@@ -2867,21 +2850,20 @@ sysuint_t String::countOf(const String& pattern,
 sysuint_t String::countOf(const StringFilter& filter,
   uint cs, const Range& range) const
 {
-  sysuint_t rstart, rlen;
-  if (!fitToRange(*this, &rstart, &rlen, range)) return 0;
+  sysuint_t rstart, rend;
+  if (!fitToRange(*this, &rstart, &rend, range)) return 0;
 
   const Char* str = getData();
   sysuint_t len = getLength();
-  sysuint_t rend = rstart + rlen;
   sysuint_t count = 0;
 
   for (;;)
   {
-    Range r = filter.indexOf(str, len, cs, Range(rstart, rstart - rend));
-    if (r.index == INVALID_INDEX) break;
+    Range r = filter.indexOf(str, len, cs, Range(rstart, rend));
+    if (r.getStart() == INVALID_INDEX) break;
 
     count++;
-    rstart = r.index + r.length;
+    rstart = r.getEnd();
   }
 
   return count;
@@ -2894,24 +2876,24 @@ sysuint_t String::countOf(const StringFilter& filter,
 sysuint_t String::indexOf(Char ch,
   uint cs, const Range& range) const
 {
-  sysuint_t rstart, rlen;
-  if (!fitToRange(*this, &rstart, &rlen, range)) return INVALID_INDEX;
+  sysuint_t rstart, rend;
+  if (!fitToRange(*this, &rstart, &rend, range)) return INVALID_INDEX;
 
-  sysuint_t i = StringUtil::indexOf(getData() + rstart, rlen, ch, cs);
+  sysuint_t i = StringUtil::indexOf(getData() + rstart, rend - rstart, ch, cs);
   return i != INVALID_INDEX ? i + rstart : i;
 }
 
 sysuint_t String::indexOf(const String& pattern,
   uint cs, const Range& range) const
 {
-  sysuint_t rstart, rlen;
-  if (!fitToRange(*this, &rstart, &rlen, range)) return INVALID_INDEX;
+  sysuint_t rstart, rend;
+  if (!fitToRange(*this, &rstart, &rend, range)) return INVALID_INDEX;
 
   sysuint_t len = pattern.getLength();
   if (len == 0) return INVALID_INDEX;
   if (len == 1) return indexOf(pattern.at(0), cs, range);
 
-  if (rlen >= 256)
+  if (rend - rstart >= 256)
   {
     // Match using StringMatcher.
     StringMatcher matcher;
@@ -2922,7 +2904,7 @@ sysuint_t String::indexOf(const String& pattern,
   else
   {
     // Match using naive algorithm.
-    sysuint_t i = StringUtil::indexOf(getData() + rstart, rlen, pattern.getData(), len, cs);
+    sysuint_t i = StringUtil::indexOf(getData() + rstart, rend - rstart, pattern.getData(), len, cs);
     return (i == INVALID_INDEX) ? i : i + rstart;
   }
 }
@@ -2930,34 +2912,34 @@ sysuint_t String::indexOf(const String& pattern,
 sysuint_t String::indexOf(const StringFilter& filter,
   uint cs, const Range& range) const
 {
-  sysuint_t rstart, rlen;
-  if (!fitToRange(*this, &rstart, &rlen, range)) return INVALID_INDEX;
+  sysuint_t rstart, rend;
+  if (!fitToRange(*this, &rstart, &rend, range)) return INVALID_INDEX;
 
-  Range m = filter.match(getData(), getLength(), cs, Range(rstart, rlen));
-  return m.index;
+  Range m = filter.match(getData(), getLength(), cs, Range(rstart, rend));
+  return m.getStart();
 }
 
 sysuint_t String::lastIndexOf(Char ch,
   uint cs, const Range& range) const
 {
-  sysuint_t rstart, rlen;
-  if (!fitToRange(*this, &rstart, &rlen, range)) return INVALID_INDEX;
+  sysuint_t rstart, rend;
+  if (!fitToRange(*this, &rstart, &rend, range)) return INVALID_INDEX;
 
-  sysuint_t i = StringUtil::lastIndexOf(getData() + rstart, rlen, ch, cs);
+  sysuint_t i = StringUtil::lastIndexOf(getData() + rstart, rend - rstart, ch, cs);
   return i != INVALID_INDEX ? i + rstart : i;
 }
 
 sysuint_t String::lastIndexOf(const String& pattern,
   uint cs, const Range& range) const
 {
-  sysuint_t rstart, rlen;
-  if (!fitToRange(*this, &rstart, &rlen, range)) return INVALID_INDEX;
+  sysuint_t rstart, rend;
+  if (!fitToRange(*this, &rstart, &rend, range)) return INVALID_INDEX;
 
   sysuint_t len = pattern.getLength();
   if (len == 0) return INVALID_INDEX;
   if (len == 1) return lastIndexOf(pattern.at(0), cs, range);
 
-  if (rlen >= 256)
+  if (rend - rstart >= 256)
   {
     // Match using StringMatcher.
     StringMatcher matcher;
@@ -2975,14 +2957,11 @@ sysuint_t String::lastIndexOf(const String& pattern,
 
     for (;;)
     {
-      sysuint_t i = StringUtil::indexOf(aData + rstart, rlen, bData, len);
+      sysuint_t i = StringUtil::indexOf(aData + rstart, rend - rstart, bData, len);
       if (i == INVALID_INDEX) break;
 
       result = i + rstart;
-
-      i += len;
-      rstart += i;
-      rlen -= i;
+      rstart = result + len;
     }
     return result;
   }
@@ -2991,45 +2970,42 @@ sysuint_t String::lastIndexOf(const String& pattern,
 sysuint_t String::lastIndexOf(const StringFilter& filter,
   uint cs, const Range& range) const
 {
-  sysuint_t rstart, rlen;
-  if (!fitToRange(*this, &rstart, &rlen, range)) return INVALID_INDEX;
+  sysuint_t rstart, rend;
+  if (!fitToRange(*this, &rstart, &rend, range)) return INVALID_INDEX;
 
   sysuint_t result = INVALID_INDEX;
 
   for (;;)
   {
-    Range m = filter.match(getData(), getLength(), cs, Range(rstart, rlen));
-    if (m.index == INVALID_INDEX) break;
+    Range m = filter.match(getData(), getLength(), cs, Range(rstart, rend));
+    if (m.getStart() == INVALID_INDEX) break;
 
-    result = m.index;
-
-    sysuint_t d = m.index + m.length;
-    rstart += d;
-    rlen -= d;
+    result = m.getStart();
+    rstart = m.getEnd();
   }
 
   return result;
 }
 
 // ============================================================================
-// [Fog::String - IndexOf / LastIndexOf]
+// [Fog::String - IndexOfAny / LastIndexOfAny]
 // ============================================================================
 
 sysuint_t String::indexOfAny(const Char* chars, sysuint_t numChars, uint cs, const Range& range) const
 {
-  sysuint_t rstart, rlen;
-  if (!chars || !fitToRange(*this, &rstart, &rlen, range)) return INVALID_INDEX;
+  sysuint_t rstart, rend;
+  if (!chars || !fitToRange(*this, &rstart, &rend, range)) return INVALID_INDEX;
 
-  sysuint_t i = StringUtil::indexOfAny(getData() + rstart, rlen, chars, numChars, cs);
+  sysuint_t i = StringUtil::indexOfAny(getData() + rstart, rend - rstart, chars, numChars, cs);
   return i != INVALID_INDEX ? i + rstart : i;
 }
 
 sysuint_t String::lastIndexOfAny(const Char* chars, sysuint_t numChars, uint cs, const Range& range) const
 {
-  sysuint_t rstart, rlen;
-  if (!chars || !fitToRange(*this, &rstart, &rlen, range)) return INVALID_INDEX;
+  sysuint_t rstart, rend;
+  if (!chars || !fitToRange(*this, &rstart, &rend, range)) return INVALID_INDEX;
 
-  sysuint_t i = StringUtil::lastIndexOfAny(getData() + rstart, rlen, chars, numChars, cs);
+  sysuint_t i = StringUtil::lastIndexOfAny(getData() + rstart, rend - rstart, chars, numChars, cs);
   return i != INVALID_INDEX ? i + rstart : i;
 }
 
@@ -3066,7 +3042,7 @@ bool String::startsWith(const StringFilter& filter, uint cs) const
   sysuint_t flen = filter.getLength();
 
   if (flen == INVALID_INDEX) flen = getLength();
-  return filter.match(getData(), getLength(), cs, Range(0, flen)).index == 0;
+  return filter.match(getData(), getLength(), cs, Range(0, flen)).getStart() == 0;
 }
 
 bool String::endsWith(const Ascii8& str, uint cs) const
@@ -3106,17 +3082,15 @@ bool String::endsWith(const StringFilter& filter, uint cs) const
     for (;;)
     {
       Range r = filter.match(getData(), len, cs, Range(i));
-      if (r.index == INVALID_INDEX) return false;
-      if (r.index + r.length == len) return true;
-
-      i = r.index + 1;
+      if (r.getStart() == INVALID_INDEX) return false;
+      if ((i = r.getEnd()) == len) return true;
     }
   }
   else
   {
     return flen <= getLength() &&
       filter.match(
-        getData() + getLength() - flen, getLength(), cs, Range(0, flen)).index == 0;
+        getData() + getLength() - flen, getLength(), cs, Range(0, flen)).getStart() == 0;
   }
 }
 

@@ -38,7 +38,7 @@
 
 
 
-//! @defgroup Fog_Graphics_Geometry Geometry classes and primitives
+//! @defgroup Fog_Graphics_Geometry Geometry
 //! @ingroup Fog_Graphics_Public
 
 
@@ -48,17 +48,17 @@
 
 
 
-//! @defgroup Fog_Graphics_Painting Painting and related classes
+//! @defgroup Fog_Graphics_Painting Painting
 //! @ingroup Fog_Graphics_Public
 
 
 
-//! @defgroup Fog_Graphics_Text Text and font-management
+//! @defgroup Fog_Graphics_Text Text and Fonts
 //! @ingroup Fog_Graphics_Public
 
 
 
-//! @defgroup Fog_Graphics_Other Non-categorized classes and functions
+//! @defgroup Fog_Graphics_Other Other
 //! @ingroup Fog_Graphics_Public
 
 // ============================================================================
@@ -113,6 +113,7 @@
 #include <Fog/Graphics/PathUtil.h>
 #include <Fog/Graphics/Pattern.h>
 #include <Fog/Graphics/Region.h>
+#include <Fog/Graphics/Shader.h>
 #include <Fog/Graphics/TextLayout.h>
 #include <Fog/Graphics/TextOnPath.h>
 

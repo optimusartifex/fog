@@ -12,6 +12,7 @@
 #include <Fog/Core/Hash.h>
 #include <Fog/Core/List.h>
 #include <Fog/Core/ManagedString.h>
+#include <Fog/Core/Range.h>
 #include <Fog/Core/String.h>
 #include <Fog/Xml/Constants.h>
 
@@ -380,7 +381,7 @@ struct FOG_API XmlText : public XmlElement
   err_t appendData(const String& data);
   err_t deleteData();
   err_t insertData(sysuint_t start, const String& data);
-  err_t replaceData(sysuint_t start, sysuint_t len, const String& data);
+  err_t replaceData(const Range& range, const String& data);
 
 protected:
   String _data;

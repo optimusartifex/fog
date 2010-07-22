@@ -1025,7 +1025,7 @@ doClose:
   }
 
 end:
-  if (mtx) path.applyMatrix(*mtx, Range(subPathIndex, DETECT_LENGTH));
+  if (mtx) path.applyMatrix(*mtx, Range(subPathIndex));
   return err;
 }
 

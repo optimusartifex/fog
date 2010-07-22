@@ -222,7 +222,7 @@ err_t FileSystem::createDirectory(const String& dir, bool recursive)
 
   do {
     i++;
-    i = dirAbs.indexOf(Char('/'), CASE_SENSITIVE, Range(i, length - i));
+    i = dirAbs.indexOf(Char('/'), CASE_SENSITIVE, Range(i, i + length));
 
     err = createDirectoryHelper(dirAbs.getData(), (i == INVALID_INDEX) ? length : i);
     if (err != ERR_OK && err != ERR_IO_DIR_ALREADY_EXISTS) return err;
@@ -388,7 +388,7 @@ err_t FileSystem::createDirectory(const String& dir, bool recursive)
 
   do {
     i++;
-    i = dirAbs.indexOf(Char('/'), CASE_SENSITIVE, Range(i, length - i));
+    i = dirAbs.indexOf(Char('/'), CASE_SENSITIVE, Range(i, i + length));
 
     err = createDirectoryHelper(dirAbs.getData(), (i == INVALID_INDEX) ? length : i);
     if (err != ERR_OK && err != ERR_IO_DIR_ALREADY_EXISTS) return err;

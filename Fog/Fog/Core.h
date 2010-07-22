@@ -154,7 +154,7 @@
 
 
 
-//! @defgroup Fog_Core_Debugging Debugging and assertions
+//! @defgroup Fog_Core_Debugging Debugging
 //! @ingroup Fog_Core_Public
 
 
@@ -340,6 +340,7 @@ struct Implicit
 #include <Fog/Core/Misc.h>
 #include <Fog/Core/OS.h>
 #include <Fog/Core/Object.h>
+#include <Fog/Core/Range.h>
 #include <Fog/Core/SequenceInfo.h>
 #include <Fog/Core/Static.h>
 #include <Fog/Core/Stream.h>

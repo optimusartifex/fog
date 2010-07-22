@@ -749,10 +749,10 @@ err_t XmlText::insertData(sysuint_t start, const String& data)
   return _data.insert(start, data);
 }
 
-err_t XmlText::replaceData(sysuint_t start, sysuint_t len, const String& data)
+err_t XmlText::replaceData(const Range& range, const String& data)
 {
   FOG_ASSERT(getType() == XML_ELEMENT_TEXT);
-  return _data.replace(Range(start, len), data);
+  return _data.replace(range, data);
 }
 
 // ============================================================================

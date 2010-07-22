@@ -983,9 +983,9 @@ err_t SvgImageLinkAttribute::setValue(const String& value)
 
     if (semicolon != INVALID_INDEX && separator != INVALID_INDEX)
     {
-      String type = value.substring(Range(5, semicolon - 5));
+      String type = value.substring(Range(5, semicolon));
       String extension;
-      String encoding = value.substring(Range(semicolon + 1, separator - semicolon - 1));
+      String encoding = value.substring(Range(semicolon + 1, separator));
 
       ByteArray memio;
       Stream stream;

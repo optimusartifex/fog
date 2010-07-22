@@ -256,6 +256,7 @@ Set(FOG_CORE_LIB_SOURCES
   Fog/Core/Misc.cpp
   Fog/Core/Object.cpp
   Fog/Core/OS.cpp
+  Fog/Core/Range.cpp
   Fog/Core/Std.cpp
   Fog/Core/Stream.cpp
   Fog/Core/String.cpp
@@ -317,6 +318,7 @@ Set(FOG_CORE_MAIN_HEADERS
   Fog/Core/Misc.h
   Fog/Core/Object.h
   Fog/Core/OS.h
+  Fog/Core/Range.h
   Fog/Core/SequenceInfo.h
   Fog/Core/Static.h
   Fog/Core/Std.h

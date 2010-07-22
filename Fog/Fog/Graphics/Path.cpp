@@ -1477,11 +1477,15 @@ err_t DoublePath::applyMatrix(const DoubleMatrix& matrix)
 err_t DoublePath::applyMatrix(const DoubleMatrix& matrix, const Range& range)
 {
   sysuint_t length = _d->length;
-  if (range.index >= length) return ERR_OK;
+
+  sysuint_t rstart = range.getStart();
+  sysuint_t rend = range.getEnd();
+
+  if (rend > length) rend = length;
+  if (rstart >= rend) return ERR_OK;
 
   FOG_RETURN_ON_ERROR(detach());
-
-  PathUtil::transformPoints(_d->vertices + range.index, Math::min(range.length, length - range.index), &matrix);
+  PathUtil::transformPoints(_d->vertices + range.getStart(), rend - rstart, &matrix);
 
   // Bounding box is no longer valid.
   _d->boundingBoxDirty = true;

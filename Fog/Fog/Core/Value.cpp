@@ -90,7 +90,7 @@ NullValueData::NullValueData() :
 
 err_t NullValueData::clone(void* dst) const
 {
-  new(dst) NullValueData();
+  fog_new_p(dst) NullValueData();
   return ERR_OK;
 }
 
@@ -148,7 +148,7 @@ IntegerValueData::IntegerValueData(int64_t content) :
 
 err_t IntegerValueData::clone(void* dst) const
 {
-  new(dst) IntegerValueData(i64);
+  fog_new_p(dst) IntegerValueData(i64);
   return ERR_OK;
 }
 
@@ -220,7 +220,7 @@ DoubleValueData::DoubleValueData(double content) :
 
 err_t DoubleValueData::clone(void* dst) const
 {
-  new(dst) DoubleValueData(d);
+  fog_new_p(dst) DoubleValueData(d);
   return ERR_OK;
 }
 
@@ -303,7 +303,7 @@ struct FOG_HIDDEN StringValueData : public ValueData
 StringValueData::StringValueData(const String& content) : 
   ValueData(VALUE_TYPE_STRING)
 {
-  new (str()) String(content);
+  fog_new_p(str()) String(content);
 }
 
 StringValueData::~StringValueData()
@@ -313,7 +313,7 @@ StringValueData::~StringValueData()
 
 err_t StringValueData::clone(void* dst) const
 {
-  new(dst) StringValueData(*str());
+  fog_new_p(dst) StringValueData(*str());
   return ERR_OK;
 }
 
@@ -381,42 +381,42 @@ Value Value::null()
 Value Value::fromBool(bool val)
 {
   return Value(
-    new(ValueData::allogetData()) 
+    fog_new_p(ValueData::allogetData())
       IntegerValueData(static_cast<int64_t>(val)));
 }
 
 Value Value::fromInt32(int32_t val)
 {
   return Value(
-    new(ValueData::allogetData()) 
+    fog_new_p(ValueData::allogetData())
       IntegerValueData(static_cast<int64_t>(val)));
 }
 
 Value Value::fromInt64(int64_t val)
 {
   return Value(
-    new(ValueData::allogetData()) 
+    fog_new_p(ValueData::allogetData())
       IntegerValueData(val));
 }
 
 Value Value::fromDouble(double val)
 {
   return Value(
-    new(ValueData::allogetData()) 
+    fog_new_p(ValueData::allogetData())
       DoubleValueData(val));
 }
 
 Value Value::fromString(const String& val)
 {
   return Value(
-    new(ValueData::allogetData()) 
+    fog_new_p(ValueData::allogetData())
       StringValueData(val));
 }
 
 Value Value::fromErrno()
 {
   return Value(
-    new(ValueData::allogetData()) 
+    fog_new_p(ValueData::allogetData())
       IntegerValueData(errno));
 }
 
@@ -424,7 +424,7 @@ Value Value::fromErrno()
 Value Value::fromWinLastError()
 {
   return Value(
-    new(ValueData::allogetData()) 
+    fog_new_p(ValueData::allogetData())
       IntegerValueData(GetLastError()));
 }
 #endif // FOG_OS_WINDOWS
@@ -460,7 +460,7 @@ err_t Value::setInt64(int64_t val)
     if (!isInteger())
     {
       _d->~ValueData();
-      new(_d) IntegerValueData(val);
+      fog_new_p(_d) IntegerValueData(val);
     }
     else
     {
@@ -473,7 +473,7 @@ err_t Value::setInt64(int64_t val)
     if (!p) return ERR_RT_OUT_OF_MEMORY;
 
     atomicPtrXchg(&_d, 
-      reinterpret_cast<ValueData*>(new(p) IntegerValueData(val)))->deref();
+      reinterpret_cast<ValueData*>(fog_new_p(p) IntegerValueData(val)))->deref();
   }
   return ERR_OK;
 }
@@ -485,7 +485,7 @@ err_t Value::setDouble(double val)
     if (!isDouble())
     {
       _d->~ValueData();
-      new(_d) DoubleValueData(val);
+      fog_new_p(_d) DoubleValueData(val);
     }
     else
     {
@@ -498,7 +498,7 @@ err_t Value::setDouble(double val)
     if (!p) return ERR_RT_OUT_OF_MEMORY;
 
     atomicPtrXchg(&_d,
-      reinterpret_cast<ValueData*>(new(p) DoubleValueData(val)))->deref();
+      reinterpret_cast<ValueData*>(fog_new_p(p) DoubleValueData(val)))->deref();
   }
   return ERR_OK;
 }
@@ -510,7 +510,7 @@ err_t Value::setString(const String& val)
     if (!isString())
     {
       _d->~ValueData();
-      new(_d) StringValueData(val);
+      fog_new_p(_d) StringValueData(val);
     }
     else
     {
@@ -523,7 +523,7 @@ err_t Value::setString(const String& val)
     if (!p) return ERR_RT_OUT_OF_MEMORY;
 
     atomicPtrXchg(&_d,
-      reinterpret_cast<ValueData*>(new(p) StringValueData(val)))->deref();
+      reinterpret_cast<ValueData*>(fog_new_p(p) StringValueData(val)))->deref();
   }
   return ERR_OK;
 }

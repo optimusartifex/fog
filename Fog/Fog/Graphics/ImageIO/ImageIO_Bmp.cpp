@@ -80,10 +80,10 @@ err_t BmpProvider::createDevice(uint32_t deviceType, BaseDevice** device) const
   switch (deviceType)
   {
     case IMAGE_IO_DEVICE_DECODER:
-      d = new(std::nothrow) BmpDecoderDevice(const_cast<BmpProvider*>(this));
+      d = fog_new BmpDecoderDevice(const_cast<BmpProvider*>(this));
       break;
     case IMAGE_IO_DEVICE_ENCODER:
-      d = new(std::nothrow) BmpEncoderDevice(const_cast<BmpProvider*>(this));
+      d = fog_new BmpEncoderDevice(const_cast<BmpProvider*>(this));
       break;
     default:
       return ERR_RT_INVALID_ARGUMENT;
@@ -1113,5 +1113,5 @@ FOG_IMPLEMENT_OBJECT(Fog::ImageIO::BmpEncoderDevice)
 FOG_INIT_DECLARE void fog_imageio_init_bmp(void)
 {
   using namespace Fog;
-  ImageIO::addProvider(IMAGE_IO_DEVICE_BOTH, new(std::nothrow) ImageIO::BmpProvider());
+  ImageIO::addProvider(IMAGE_IO_DEVICE_BOTH, fog_new ImageIO::BmpProvider());
 }

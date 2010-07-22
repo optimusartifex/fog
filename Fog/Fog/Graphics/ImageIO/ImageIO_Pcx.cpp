@@ -72,10 +72,10 @@ err_t PcxProvider::createDevice(uint32_t deviceType, BaseDevice** device) const
   switch (deviceType)
   {
     case IMAGE_IO_DEVICE_DECODER:
-      d = new(std::nothrow) PcxDecoderDevice(const_cast<PcxProvider*>(this));
+      d = fog_new PcxDecoderDevice(const_cast<PcxProvider*>(this));
       break;
     case IMAGE_IO_DEVICE_ENCODER:
-      d = new(std::nothrow) PcxEncoderDevice(const_cast<PcxProvider*>(this));
+      d = fog_new PcxEncoderDevice(const_cast<PcxProvider*>(this));
       break;
     default:
       return ERR_RT_INVALID_ARGUMENT;
@@ -894,5 +894,5 @@ FOG_IMPLEMENT_OBJECT(Fog::ImageIO::PcxEncoderDevice)
 FOG_INIT_DECLARE void fog_imageio_init_pcx(void)
 {
   using namespace Fog;
-  ImageIO::addProvider(IMAGE_IO_DEVICE_BOTH, new(std::nothrow) ImageIO::PcxProvider());
+  ImageIO::addProvider(IMAGE_IO_DEVICE_BOTH, fog_new ImageIO::PcxProvider());
 }

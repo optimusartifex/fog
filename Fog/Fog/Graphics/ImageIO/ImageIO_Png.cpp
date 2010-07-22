@@ -185,10 +185,10 @@ err_t PngProvider::createDevice(uint32_t deviceType, BaseDevice** device) const
   switch (deviceType)
   {
     case IMAGE_IO_DEVICE_DECODER:
-      d = new(std::nothrow) PngDecoderDevice(const_cast<PngProvider*>(this));
+      d = fog_new PngDecoderDevice(const_cast<PngProvider*>(this));
       break;
     case IMAGE_IO_DEVICE_ENCODER:
-      d = new(std::nothrow) PngEncoderDevice(const_cast<PngProvider*>(this));
+      d = fog_new PngEncoderDevice(const_cast<PngProvider*>(this));
       break;
     default:
       return ERR_RT_INVALID_ARGUMENT;
@@ -704,7 +704,7 @@ FOG_INIT_DECLARE void fog_imageio_init_png(void)
 {
   using namespace Fog;
 
-  ImageIO::PngProvider* provider = new(std::nothrow) ImageIO::PngProvider();
+  ImageIO::PngProvider* provider = fog_new ImageIO::PngProvider();
   ImageIO::addProvider(IMAGE_IO_DEVICE_BOTH, provider);
 }
 

@@ -292,12 +292,14 @@ bool DirIterator::read(DirEntry& to)
   if (!_handle) return false;
 
   struct dirent *de;
+  bool skipDots = getSkipDots();
+
   while (::readdir_r((DIR*)_handle, &_dent, &de) == 0 && (de != NULL))
   {
     const char* name = de->d_name;
 
     // Skip "." and ".."
-    if (name[0] == '.' && skipDots())
+    if (name[0] == '.' && skipDots)
     {
       if (name[1] == '\0' || (name[1] == '.' && name[2] == '\0')) continue;
     }

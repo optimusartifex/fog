@@ -39,7 +39,7 @@ void BorderLayout::addItem(LayoutItem *item, uint32_t edge, int flex)
 {
   if (Layout::addChild(item) == -1) return;
 
-  item->_layoutdata = new(std::nothrow) LayoutData(this);
+  item->_layoutdata = fog_new LayoutData(this);
   LayoutData* prop = item->getLayoutData<LayoutData>();
   prop->_edge = edge;
   prop->_user.setFlex(flex);

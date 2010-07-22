@@ -61,7 +61,7 @@ ULONG STDMETHODCALLTYPE WinIStream::AddRef(void)
 ULONG STDMETHODCALLTYPE WinIStream::Release(void) 
 {
   ULONG res = (ULONG)InterlockedDecrement(&_refCount);
-  if (res == 0) delete this;
+  if (res == 0) fog_delete(this);
   return res;
 }
 

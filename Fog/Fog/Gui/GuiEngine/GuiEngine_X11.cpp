@@ -861,12 +861,12 @@ void X11GuiEngine::freeRGB(XColormap colormap, const uint8_t* palconv, uint coun
 
 GuiWindow* X11GuiEngine::createGuiWindow(Widget* widget)
 {
-  return new(std::nothrow) X11GuiWindow(widget);
+  return fog_new X11GuiWindow(widget);
 }
 
 void X11GuiEngine::destroyGuiWindow(GuiWindow* native)
 {
-  delete native;
+  fog_delete(native);
 }
 
 // ============================================================================
@@ -946,13 +946,13 @@ X11GuiWindow::X11GuiWindow(Widget* widget) :
   _mapRequest(false),
   _xflags(0)
 {
-  _backingStore = new(std::nothrow) X11GuiBackBuffer();
+  _backingStore = fog_new X11GuiBackBuffer();
 }
 
 X11GuiWindow::~X11GuiWindow()
 {
   destroy();
-  delete _backingStore;
+  fog_delete(_backingStore);
 }
 
 err_t X11GuiWindow::create(uint32_t createFlags)
@@ -2326,5 +2326,5 @@ void X11GuiEventLoop::_sendWakeUp()
 
 extern "C" FOG_DLL_EXPORT void* createGuiEngine()
 {
-  return new(std::nothrow) Fog::X11GuiEngine();
+  return fog_new Fog::X11GuiEngine();
 }

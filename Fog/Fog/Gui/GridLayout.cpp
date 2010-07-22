@@ -232,7 +232,7 @@ void GridLayout::addItem(LayoutItem* item, int row, int column, int rowSpan, int
       }
     }
 
-    item->_layoutdata = new(std::nothrow) LayoutProperties();
+    item->_layoutdata = fog_new LayoutProperties();
   }
 
   // Add Columns and Rows needed for insertion
@@ -258,7 +258,7 @@ void GridLayout::addItem(LayoutItem* item, int row, int column, int rowSpan, int
   {
     while ((uint)ccolumn > _cols.getLength())
     {
-      Column* c = new(std::nothrow) Column((int)_cols.getLength(), this);
+      Column* c = fog_new Column((int)_cols.getLength(), this);
       _cols.append(c);
     }
   }
@@ -268,7 +268,7 @@ void GridLayout::addItem(LayoutItem* item, int row, int column, int rowSpan, int
   {
     while ((uint)crow > _rows.getLength())
     {
-      Row* r = new(std::nothrow) Row((int)_rows.getLength());
+      Row* r = fog_new Row((int)_rows.getLength());
       _rows.append(r);
     }
   }

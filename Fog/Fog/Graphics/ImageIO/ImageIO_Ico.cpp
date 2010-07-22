@@ -97,7 +97,7 @@ err_t IcoProvider::createDevice(uint32_t deviceType, BaseDevice** device) const
   switch (deviceType)
   {
     case IMAGE_IO_DEVICE_DECODER:
-      d = new(std::nothrow) IcoDecoderDevice(const_cast<IcoProvider*>(this));
+      d = fog_new IcoDecoderDevice(const_cast<IcoProvider*>(this));
       break;
     case IMAGE_IO_DEVICE_ENCODER:
       return ERR_IMAGEIO_NO_ENCODER;
@@ -282,7 +282,7 @@ err_t IcoDecoderDevice::readImage(Image& image)
     if (image.getFormat() == IMAGE_FORMAT_XRGB32) image.forceFormat(IMAGE_FORMAT_ARGB32);
   }
 
-  delete decoder;
+  fog_delete(decoder);
 
 end:
   // We always increment actual frame, because if there is no PNG loader we can
@@ -303,5 +303,5 @@ FOG_IMPLEMENT_OBJECT(Fog::ImageIO::IcoDecoderDevice)
 FOG_INIT_DECLARE void fog_imageio_init_ico(void)
 {
   using namespace Fog;
-  ImageIO::addProvider(IMAGE_IO_DEVICE_DECODER, new(std::nothrow) ImageIO::IcoProvider());
+  ImageIO::addProvider(IMAGE_IO_DEVICE_DECODER, fog_new ImageIO::IcoProvider());
 }

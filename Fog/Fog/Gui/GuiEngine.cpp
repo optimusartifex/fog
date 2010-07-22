@@ -658,7 +658,7 @@ void GuiEngine::update()
   if (!_updateStatus.scheduled)
   {
     _updateStatus.scheduled = true;
-    _updateStatus.task = new(std::nothrow) UpdateTask();
+    _updateStatus.task = fog_new UpdateTask();
     Application::getInstance()->getEventLoop()->postTask(_updateStatus.task);
   }
 }

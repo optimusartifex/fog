@@ -447,12 +447,12 @@ void WinGuiEngine::doBlitWindow(GuiWindow* window, const IntBox* rects, sysuint_
 
 GuiWindow* WinGuiEngine::createGuiWindow(Widget* widget)
 {
-  return new(std::nothrow) WinGuiWindow(widget);
+  return fog_new WinGuiWindow(widget);
 }
 
 void WinGuiEngine::destroyGuiWindow(GuiWindow* native)
 {
-  delete native;
+  fog_delete(native);
 }
 
 // ============================================================================
@@ -764,13 +764,13 @@ WinGuiWindow::WinGuiWindow(Widget* widget) :
   {
     b = (widget->getWindowFlags() & WINDOW_TRANSPARENT) != 0;
   }
-  _backingStore = new(std::nothrow) WinGuiBackBuffer(b);
+  _backingStore = fog_new WinGuiBackBuffer(b);
 }
 
 WinGuiWindow::~WinGuiWindow()
 {
   destroy();
-  delete _backingStore;
+  fog_delete(_backingStore);
 }
 
 void WinGuiWindow::moveToTop(GuiWindow* w)

@@ -184,7 +184,7 @@ err_t Widget::destroyWindow()
     _guiWindow->getOwner()->endModal(_guiWindow);
   }
 
-  delete _guiWindow;
+  fog_delete(_guiWindow);
   _guiWindow = NULL;
   return true;
 }
@@ -903,7 +903,7 @@ void Widget::setVisible(uint32_t val)
 
     int rrr = _windowFlags & WINDOW_TRANSPARENT;
 
-    _fullscreendata = new(std::nothrow) FullScreenData;
+    _fullscreendata = fog_new FullScreenData;
     _fullscreendata->_restorewindowFlags = _windowFlags;
     _fullscreendata->_restoregeometry = _guiWindow->_windowRect;
     _fullscreendata->_restoretransparency = _transparency;
@@ -921,7 +921,7 @@ void Widget::setVisible(uint32_t val)
     setWindowFlags(_fullscreendata->_restorewindowFlags);
     setGeometry(_fullscreendata->_restoregeometry);
 
-    delete _fullscreendata;
+    fog_delete(_fullscreendata);
     _fullscreendata = 0;
   }
 

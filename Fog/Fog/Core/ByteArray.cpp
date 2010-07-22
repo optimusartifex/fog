@@ -1241,9 +1241,9 @@ err_t ByteArray::appendVformatc(const char* fmt, const TextCodec& tc, va_list ap
       else if (c == 't')
       {
         c = (uint8_t)*(++fmt);
-        if (sizeof(ptrdiff_t) > sizeof(long))
+        if (sizeof(size_t) > sizeof(long))
           sizeFlags |= ARG_SIZE_LL;
-        else if (sizeof(ptrdiff_t) > sizeof(int))
+        else if (sizeof(size_t) > sizeof(int))
           sizeFlags |= ARG_SIZE_L;
       }
       // 'M' = max type (Core extension).

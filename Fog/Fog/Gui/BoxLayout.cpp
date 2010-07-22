@@ -52,7 +52,7 @@ void BoxLayout::addItem(LayoutItem *item, int flex)
   {
     return;
   }
-  LayoutData* data = new(std::nothrow) LayoutData(this);
+  LayoutData* data = fog_new LayoutData(this);
   data->_user.setFlex(flex);
 
   item->_layoutdata = data;

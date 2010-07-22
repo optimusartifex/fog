@@ -45,7 +45,7 @@ struct SequenceInfo_TypeInitFree
   {
     T* dest = (T*)_dest;
     T* end = dest + count;
-    while (dest != end) new (dest++) T;
+    while (dest != end) fog_new_p(dest++) T;
   }
 
   static FOG_NO_INLINE void free(void* _dest, sysuint_t count)
@@ -68,13 +68,13 @@ struct SequenceInfo_TypeMove
     if (dest < src)
     {
       end += count;
-      while (dest != end) { new(dest++) T(*src); src++->~T(); }
+      while (dest != end) { fog_new_p(dest++) T(*src); src++->~T(); }
     }
     else
     {
       dest += count;
       src += count;
-      while (dest != end) { new(--dest) T(*(--src)); src->~T(); }
+      while (dest != end) { fog_new_p(--dest) T(*(--src)); src->~T(); }
     }
   }
 };
@@ -87,7 +87,7 @@ struct SequenceInfo_TypeCopy
     T* dest = (T*)_dest;
     T* end = dest + count;
     T* src = (T*)_src;
-    while (dest != end) new(dest++) T(*src++);
+    while (dest != end) fog_new_p(dest++) T(*src++);
   }
 };
 

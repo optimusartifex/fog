@@ -780,14 +780,14 @@ FontFace* FTFontEngine::createFace(
 
     if (!file)
     {
-      file = new(std::nothrow) FTFontFile(fileName, family);
+      file = fog_new FTFontFile(fileName, family);
 
       // Ensure that file is OK.
       if (!file) return NULL;
 
       if (file->loadError)
       {
-        delete file;
+        fog_delete(file);
         return NULL;
       }
 
@@ -827,7 +827,7 @@ void FTFontEngine::close()
       fog_stderr_msg("Fog::FTFontEngine", "close", "FTFile not dereferenced (refCount %ld)", (long)file->refCount.get());
     }
 
-    delete file;
+    fog_delete(file);
   }
 }
 
@@ -1211,12 +1211,12 @@ GlyphData* FTFontFace::renderGlyph(uint32_t uc)
 
     width += slot->bitmap.width;
 
-    glyphd = new(std::nothrow) GlyphData();
+    glyphd = fog_new GlyphData();
     if (glyphd == NULL) goto end;
 
     if (width != 0 && glyphd->bitmap.create(width, slot->bitmap.rows, IMAGE_FORMAT_A8) != ERR_OK)
     {
-      delete glyphd;
+      fog_delete(glyphd);
       glyphd = NULL;
       goto end;
     }
@@ -1476,7 +1476,7 @@ FontFace* FTFontFile::createFace(uint32_t size, const FontOptions& options)
   if (setupSize(size))
   {
     // freetype not returned an error, so create new face and fill it
-    face = new(std::nothrow) FTFontFace();
+    face = fog_new FTFontFace();
     if (!face) goto end;
 
     face->file = this->ref();

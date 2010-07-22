@@ -37,7 +37,7 @@ FlowLayout::~FlowLayout()
 {
   LayoutItem *item;
   while ((item = takeAt(0)))
-    delete item;
+    fog_delete(item);
 }
 
 void FlowLayout::add(LayoutItem *item)

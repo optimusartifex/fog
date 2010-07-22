@@ -16,6 +16,7 @@
 #include <Fog/Core/Build/StdInt.h>
 #include <Fog/Core/Build/StdHeaders.h>
 #include <Fog/Core/Build/StdMacros.h>
+#include <Fog/Core/Build/StdNew.h>
 #include <Fog/Core/Build/StdMain.h>
 
 // [Guard]

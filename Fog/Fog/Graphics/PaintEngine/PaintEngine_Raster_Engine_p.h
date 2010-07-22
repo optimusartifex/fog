@@ -704,7 +704,7 @@ FOG_INLINE T* RasterPaintEngine::_createCommand()
   T* command = reinterpret_cast<T*>(workerManager->commandAllocator.alloc(sizeof(T)));
   if (FOG_UNLIKELY(command == NULL)) return NULL;
 
-  new(command) T;
+  fog_new_p(command) T;
 
   command->refCount.init((uint)workerManager->numWorkers);
   command->status.init(RASTER_COMMAND_READY);
@@ -722,7 +722,7 @@ FOG_INLINE T* RasterPaintEngine::_createCommand(sysuint_t size)
   T* command = reinterpret_cast<T*>(workerManager->commandAllocator.alloc(size));
   if (FOG_UNLIKELY(command == NULL)) return NULL;
 
-  new(command) T;
+  fog_new_p(command) T;
 
   command->refCount.init((uint)workerManager->numWorkers);
   command->status.init(RASTER_COMMAND_READY);
@@ -737,7 +737,7 @@ T* RasterPaintEngine::_createCalc()
   T* calculation = reinterpret_cast<T*>(workerManager->commandAllocator.alloc(sizeof(T)));
   if (FOG_UNLIKELY(calculation == NULL)) return NULL;
 
-  return new(calculation) T;
+  return fog_new_p(calculation) T;
 }
 
 FOG_INLINE void RasterPaintEngine::_beforeNewAction()

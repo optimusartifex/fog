@@ -105,7 +105,7 @@ err_t Locale::_detach()
 {
   if (isDetached()) return ERR_OK;
 
-  Data* newd = new(std::nothrow) Data(*_d);
+  Data* newd = fog_new Data(*_d);
   if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
   atomicPtrXchg(&_d, newd)->deref();
@@ -181,7 +181,7 @@ Locale::Data::~Data()
 
 void Locale::Data::deref()
 {
-  if (refCount.deref()) delete this;
+  if (refCount.deref()) fog_delete(this);
 }
 
 } // Fog namespace

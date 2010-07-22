@@ -379,7 +379,7 @@ FOG_DECLARE_TYPEINFO(char, Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
 #endif // FOG_CC_BORLAND
 
 // TODO: long and ulong checking
-#if !(defined(FOG_CC_GNU) && FOG_ARCH_BITS == 64)
+#if !(defined(FOG_CC_GNU) && FOG_ARCH_BITS == 64) && !defined(FOG_CC_CLANG)
 FOG_DECLARE_TYPEINFO(long, Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
 FOG_DECLARE_TYPEINFO(ulong, Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
 #endif // long / ulong

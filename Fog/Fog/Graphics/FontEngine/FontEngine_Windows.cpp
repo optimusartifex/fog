@@ -278,7 +278,7 @@ FontFace* WinFontEngine::createFace(
   DeleteDC(hdc);
 
   // Everything should be OK, create new font face.
-  face = new(std::nothrow) WinFontFace();
+  face = fog_new WinFontFace();
   if (!face) goto failFreeHFONT;
 
   face->family = family;
@@ -501,7 +501,7 @@ GlyphData* WinFontFace::renderGlyph(HDC hdc, uint32_t uc)
     dataSize = 0;
   }
 
-  glyphd = new(std::nothrow) GlyphData();
+  glyphd = fog_new GlyphData();
   if (glyphd == NULL) return NULL;
 
   // Whitespace?
@@ -520,7 +520,7 @@ GlyphData* WinFontFace::renderGlyph(HDC hdc, uint32_t uc)
   // Alloc image for glyph
   if (glyphd->bitmap.create(gm.gmBlackBoxX, gm.gmBlackBoxY, IMAGE_FORMAT_A8) != ERR_OK)
   {
-    delete glyphd;
+    fog_delete(glyphd);
     return NULL;
   }
   bitmapd = glyphd->bitmap._d;
@@ -534,7 +534,7 @@ GlyphData* WinFontFace::renderGlyph(HDC hdc, uint32_t uc)
   // If previous call to GetGlyphOutlineW was ok, this should be also ok, but nobody knows.
   if (dataSize == GDI_ERROR)
   {
-    delete glyphd;
+    fog_delete(glyphd);
     return NULL;
   }
 

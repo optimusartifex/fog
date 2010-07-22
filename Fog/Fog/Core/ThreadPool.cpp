@@ -103,7 +103,7 @@ Thread* ThreadPool::getThread(int workId)
 
     if (!thread->start(Ascii8("Default")))
     {
-      delete thread;
+      fog_delete(thread);
       Memory::free(pe);
       return NULL;
     }
@@ -184,7 +184,7 @@ Thread* ThreadPool::_createThread()
   String threadName;
   threadName.format("Fog::ThreadPool #", _numThreads);
 
-  Thread* thread = new(std::nothrow) Thread(threadName);
+  Thread* thread = fog_new Thread(threadName);
   if (!thread) return NULL;
 
   // Update statistics.
@@ -204,7 +204,7 @@ void ThreadPool::releaseAllAvailable()
     Thread* thread = cur->thread;
 
     Memory::free(cur);
-    delete thread;
+    fog_delete(thread);
 
     cur = next;
     _numThreads--;

@@ -977,6 +977,17 @@ EndIf(FOG_GUI_X11 AND FOG_BUILD_GUI_X11)
 
 # Build benchmark.
 If(FOG_BUILD_BENCH)
+  If(WIN32)
+    # Gdi+ benchmark.
+    Set(FOG_BENCH_GDIPLUS TRUE)
+  Else(WIN32)
+    # Cairo benchmark.
+    Set(FOG_BENCH_CAIRO TRUE)
+
+    # Qt4 benchmark.
+    Set(FOG_BENCH_QT4 TRUE)
+  EndIf(WIN32)
+
   Set(FOG_BENCH_SOURCES
     Bench/BenchBase.cpp
     Bench/BenchBase.h
@@ -991,19 +1002,40 @@ If(FOG_BUILD_BENCH)
     Bench/BenchMain.cpp
   )
 
-  If(NOT WIN32)
-    Include_Directories(/usr/include/cairo)
-    # Include_Directories(/usr/include/qt4)
-    # Link_Directories(/usr/lib/qt4)
-  EndIf(NOT WIN32)
+  # Cairo benchmark.
+  If(FOG_BENCH_CAIRO)
+    Add_Definitions(-DFOG_BENCH_CAIRO)
+    If(NOT WIN32)
+      Include_Directories(/usr/include/cairo)
+    EndIf(NOT WIN32)
+  EndIf(FOG_BENCH_CAIRO)
+
+  # Gdi+ benchmark.
+  If(FOG_BENCH_GDIPLUS)
+    Add_Definitions(-DFOG_BENCH_GDIPLUS)
+  EndIf(FOG_BENCH_GDIPLUS)
+
+  # Qt4 benchmark.
+  If(FOG_BENCH_QT4)
+    Add_Definitions(-DFOG_BENCH_QT4)
+    If(NOT WIN32)
+      Include_Directories(/usr/include/qt4)
+      Link_Directories(/usr/lib/qt4)
+    EndIf(NOT WIN32)
+  EndIf(FOG_BENCH_QT4)
 
   Add_Executable(FogBench ${FOG_BENCH_SOURCES})
   Target_Link_Libraries(FogBench Fog ${FOG_LIBRARIES})
 
-  If(NOT WIN32)
+  # Cairo benchmark.
+  If(FOG_BENCH_CAIRO)
     Target_Link_Libraries(FogBench cairo)
-    # Target_Link_Libraries(FogBench QtCore QtGui)
-  EndIf(NOT WIN32)
+  EndIf(FOG_BENCH_CAIRO)
+
+  # Qt4 benchmark.
+  If(FOG_BENCH_QT4)
+    Target_Link_Libraries(FogBench QtCore QtGui)
+  EndIf(FOG_BENCH_QT4)
 EndIf(FOG_BUILD_BENCH)
 
 # Build examples.

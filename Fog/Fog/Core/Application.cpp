@@ -294,14 +294,14 @@ Application::~Application()
   {
     uiToClose = _nativeEngine->_library;
 
-    delete _nativeEngine;
+    fog_delete(_nativeEngine);
     _nativeEngine = NULL;
   }
 
   // Delete EventLoop if associated.
   if (_eventLoop)
   {
-    delete _eventLoop;
+    fog_delete(_eventLoop);
     _eventLoop = NULL;
 
     // Unset main thread event loop (this is safe, we will destroy it later

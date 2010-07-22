@@ -16,7 +16,7 @@ static Gdiplus::Brush* setupGdiPlusPatternForPoint(
   stops[1] = 0.5; clr[1].SetValue(0x7FFF0000);
   stops[2] = 1.0; clr[2].SetValue(argb.getValue());
 
-  Gdiplus::LinearGradientBrush* brush = new Gdiplus::LinearGradientBrush(
+  Gdiplus::LinearGradientBrush* brush = fog_new Gdiplus::LinearGradientBrush(
     Gdiplus::PointF((Gdiplus::REAL)pt0.x, (Gdiplus::REAL)pt0.y),
     Gdiplus::PointF((Gdiplus::REAL)pt1.x, (Gdiplus::REAL)pt1.y),
     Gdiplus::Color(0xFFFFFFFF), Gdiplus::Color(0xFF000000));
@@ -40,7 +40,7 @@ static Gdiplus::Brush* setupGdiPlusPatternForRect(
 
 GdiPlusModule::GdiPlusModule(int w, int h) : AbstractModule(w, h)
 {
-  screen_gdip = new Gdiplus::Bitmap(
+  screen_gdip = fog_new Gdiplus::Bitmap(
     screen.getWidth(),
     screen.getHeight(),
     screen.getStride(),
@@ -49,7 +49,7 @@ GdiPlusModule::GdiPlusModule(int w, int h) : AbstractModule(w, h)
 
   for (int a = 0; a < NUM_SPRITES; a++)
   {
-    sprite_gdip[a] = new Gdiplus::Bitmap(
+    sprite_gdip[a] = fog_new Gdiplus::Bitmap(
       sprite[a].getWidth(),
       sprite[a].getHeight(),
       sprite[a].getStride(),
@@ -60,9 +60,9 @@ GdiPlusModule::GdiPlusModule(int w, int h) : AbstractModule(w, h)
 
 GdiPlusModule::~GdiPlusModule()
 {
-  delete screen_gdip;
+  fog_delete(screen_gdip);
 
-  for (int a = 0; a < NUM_SPRITES; a++) delete sprite_gdip[a];
+  for (int a = 0; a < NUM_SPRITES; a++) fog_delete(sprite_gdip[a]);
 }
 
 Fog::String GdiPlusModule::getEngine()
@@ -146,7 +146,7 @@ void GdiPlusModule_FillRect::bench(int quantity)
 
       Gdiplus::Brush* brush = setupGdiPlusPatternForRect(r, r_argb.data[a]);
       gr.FillRectangle(brush, r.x, r.y, r.w, r.h);
-      delete brush;
+      fog_delete(brush);
     }
   }
 }
@@ -191,7 +191,7 @@ void GdiPlusModule_FillRectSubPX::bench(int quantity)
 
       Gdiplus::Brush* brush = setupGdiPlusPatternForRect(r, r_argb.data[a]);
       gr.FillRectangle(brush, (float)r.x + sub, (float)r.y + sub, (float)r.w, (float)r.h);
-      delete brush;
+      fog_delete(brush);
     }
   }
 }
@@ -247,7 +247,7 @@ void GdiPlusModule_FillRectAffine::bench(int quantity)
 
       Gdiplus::Brush* brush = setupGdiPlusPatternForRect(r, r_argb.data[a]);
       gr.FillRectangle(brush, r.x, r.y, r.w, r.h);
-      delete brush;
+      fog_delete(brush);
     }
   }
 }
@@ -296,7 +296,7 @@ void GdiPlusModule_FillRound::bench(int quantity)
     {
       Gdiplus::Brush* brush = setupGdiPlusPatternForRect(r, r_argb.data[a]);
       gr.FillPath(brush, &path);
-      delete brush;
+      fog_delete(brush);
     }
   }
 }
@@ -370,7 +370,7 @@ void GdiPlusModule_FillPolygon::bench(int quantity)
 
       Gdiplus::Brush* brush = setupGdiPlusPatternForPoint(polyData[0], polyData[9], r_argb.data[a]);
       gr.FillPath(brush, &path);
-      delete brush;
+      fog_delete(brush);
     }
   }
 }
@@ -395,7 +395,7 @@ void GdiPlusModule_Image::prepare(int quantity, int sw, int sh)
   for (int a = 0; a < 4; a++)
   {
     images[a] = sprite[a].scaled(Fog::IntSize(sw, sh));
-    images_gdip[a] = new Gdiplus::Bitmap(
+    images_gdip[a] = fog_new Gdiplus::Bitmap(
       images[a].getWidth(),
       images[a].getHeight(),
       images[a].getStride(),
@@ -411,7 +411,7 @@ void GdiPlusModule_Image::finish()
 
   for (int a = 0; a < 4; a++)
   {
-    delete images_gdip[a];
+    fog_delete(images_gdip[a]);
   }
 }
 

@@ -314,7 +314,7 @@ struct FOG_API TextCodec
     // [Implicit Sharing]
 
     FOG_INLINE Engine* ref() const { refCount.inc(); return (Engine*)this; }
-    FOG_INLINE void deref() { if (refCount.deref()) delete this; }
+    FOG_INLINE void deref() { if (refCount.deref()) fog_delete(this); }
 
     // [Members]
 
@@ -444,12 +444,7 @@ struct FOG_API TextCodec
     BuiltInUTF8 = 3,
     BuiltInUTF16 = 4,
     BuiltInUTF32 = 5,
-
-#if FOG_SIZEOF_WCHAR_T == 2
-    BuiltInWChar = BuiltInUTF16,
-#else
-    BuiltInWChar = BuiltInUTF32,
-#endif // FOG_SIZEOF_WCHAR_T
+    BuiltInWChar = (FOG_SIZEOF_WCHAR_T == 2) ? BuiltInUTF16 : BuiltInUTF32,
 
     BuiltInCount = 6
   };

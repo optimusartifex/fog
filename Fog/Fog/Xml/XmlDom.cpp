@@ -54,7 +54,7 @@ void XmlAttribute::destroy()
 {
   if (_offset == -1)
   {
-    delete this;
+    fog_delete(this);
   }
   else
   {
@@ -180,7 +180,7 @@ void XmlElement::_unmanage()
 
 XmlElement* XmlElement::clone() const
 {
-  XmlElement* e = new(std::nothrow) XmlElement(_tagName);
+  XmlElement* e = fog_new XmlElement(_tagName);
   if (e) _copyAttributes(e, const_cast<XmlElement*>(this));
   return e;
 }
@@ -348,7 +348,7 @@ err_t XmlElement::deleteChild(XmlElement* ch)
     err_t err = ch->unlink();
     if (err) return err;
 
-    delete ch;
+    fog_delete(ch);
     return ERR_OK;
   }
   else
@@ -367,7 +367,7 @@ err_t XmlElement::deleteAll()
     e->_parent = NULL;
     e->_prevSibling = NULL;
     e->_nextSibling = NULL;
-    delete e;
+    fog_delete(e);
 
     e = next;
   } while (e);
@@ -592,7 +592,7 @@ err_t XmlElement::setTextContent(const String& text)
   else
   {
     deleteAll();
-    XmlText* e = new(std::nothrow) XmlText(text);
+    XmlText* e = fog_new XmlText(text);
     if (!e) return ERR_RT_OUT_OF_MEMORY;
     return appendChild(e);
   }
@@ -676,9 +676,9 @@ err_t XmlElement::_removeAttributes()
 XmlAttribute* XmlElement::_createAttribute(const ManagedString& name) const
 {
   if (name == fog_strings->getString(STR_XML_id))
-    return new(std::nothrow) XmlIdAttribute(const_cast<XmlElement*>(this), name);
+    return fog_new XmlIdAttribute(const_cast<XmlElement*>(this), name);
   else
-    return new(std::nothrow) XmlAttribute(const_cast<XmlElement*>(this), name);
+    return fog_new XmlAttribute(const_cast<XmlElement*>(this), name);
 }
 
 void XmlElement::_copyAttributes(XmlElement* dst, XmlElement* src)
@@ -709,7 +709,7 @@ XmlText::~XmlText()
 
 XmlElement* XmlText::clone() const
 {
-  return new(std::nothrow) XmlText(_data);
+  return fog_new XmlText(_data);
 }
 
 String XmlText::getTextContent() const
@@ -792,7 +792,7 @@ XmlComment::~XmlComment()
 
 XmlElement* XmlComment::clone() const
 {
-  return new(std::nothrow) XmlComment(_data);
+  return fog_new XmlComment(_data);
 }
 
 const String& XmlComment::getData() const
@@ -825,7 +825,7 @@ XmlCDATA::~XmlCDATA()
 
 XmlElement* XmlCDATA::clone() const
 {
-  return new(std::nothrow) XmlCDATA(_data);
+  return fog_new XmlCDATA(_data);
 }
 
 const String& XmlCDATA::getData() const
@@ -858,7 +858,7 @@ XmlPI::~XmlPI()
 
 XmlElement* XmlPI::clone() const
 {
-  return new(std::nothrow) XmlPI(_data);
+  return fog_new XmlPI(_data);
 }
 
 const String& XmlPI::getData() const
@@ -1040,13 +1040,13 @@ XmlDocument::~XmlDocument()
 
 XmlElement* XmlDocument::clone() const
 {
-  XmlDocument* doc = new(std::nothrow) XmlDocument();
+  XmlDocument* doc = fog_new XmlDocument();
   if (!doc) return NULL;
 
   for (XmlElement* ch = firstChild(); ch; ch = ch->nextSibling())
   {
     XmlElement* e = ch->clone();
-    if (e && doc->appendChild(e) != ERR_OK) delete e;
+    if (e && doc->appendChild(e) != ERR_OK) fog_delete(e);
   }
 
   return doc;
@@ -1059,12 +1059,12 @@ XmlElement* XmlDocument::createElement(const ManagedString& tagName)
 
 XmlElement* XmlDocument::createElementStatic(const ManagedString& tagName)
 {
-  return new(std::nothrow) XmlElement(tagName);
+  return fog_new XmlElement(tagName);
 }
 
 XmlDomReader* XmlDocument::createDomReader()
 {
-  return new(std::nothrow) XmlDomReader(this);
+  return fog_new XmlDomReader(this);
 }
 
 err_t XmlDocument::setDocumentRoot(XmlElement* e)
@@ -1103,7 +1103,7 @@ err_t XmlDocument::readFromFile(const String& fileName)
   if (!reader) return ERR_RT_OUT_OF_MEMORY;
 
   err_t err = reader->parseFile(fileName);
-  delete reader;
+  fog_delete(reader);
   return err;
 }
 
@@ -1115,7 +1115,7 @@ err_t XmlDocument::readFromStream(Stream& stream)
   if (!reader) return ERR_RT_OUT_OF_MEMORY;
 
   err_t err = reader->parseStream(stream);
-  delete reader;
+  fog_delete(reader);
   return err;
 }
 
@@ -1127,7 +1127,7 @@ err_t XmlDocument::readFromMemory(const void* mem, sysuint_t size)
   if (!reader) return ERR_RT_OUT_OF_MEMORY;
 
   err_t err = reader->parseMemory(mem, size);
-  delete reader;
+  fog_delete(reader);
   return err;
 }
 
@@ -1139,7 +1139,7 @@ err_t XmlDocument::readFromString(const String& str)
   if (!reader) return ERR_RT_OUT_OF_MEMORY;
 
   err_t err = reader->parseString(str);
-  delete reader;
+  fog_delete(reader);
   return err;
 }
 

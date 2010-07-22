@@ -68,7 +68,7 @@ Painter::Painter(Image& image, const IntRect& rect, uint32_t initFlags)
 
 Painter::~Painter()
 {
-  if (_engine != _dnull) delete _engine;
+  if (_engine != _dnull) fog_delete(_engine);
 }
 
 err_t Painter::begin(Image& image, uint32_t initFlags)
@@ -89,7 +89,7 @@ err_t Painter::begin(Image& image, uint32_t initFlags)
   buffer.import(image._d);
 
   // Create paint engine.
-  PaintEngine* d = new(std::nothrow) RasterPaintEngine(buffer, image._d, initFlags);
+  PaintEngine* d = fog_new RasterPaintEngine(buffer, image._d, initFlags);
   if (!d) return ERR_RT_OUT_OF_MEMORY;
 
   _engine = d;
@@ -115,7 +115,7 @@ err_t Painter::begin(Image& image, const IntRect& rect, uint32_t initFlags)
   buffer.import(image._d, rect);
 
   // Create paint engine.
-  PaintEngine* d = new(std::nothrow) RasterPaintEngine(buffer, image._d, initFlags);
+  PaintEngine* d = fog_new RasterPaintEngine(buffer, image._d, initFlags);
   if (!d) return ERR_RT_OUT_OF_MEMORY;
 
   _engine = d;
@@ -132,7 +132,7 @@ err_t Painter::begin(const ImageBuffer& buffer, uint32_t initFlags)
   if (!Painter_isFormatSupported(buffer.format)) return ERR_PAINTER_UNSUPPORTED_FORMAT;
 
   // Create paint engine.
-  PaintEngine* d = new(std::nothrow) RasterPaintEngine(buffer, NULL, initFlags);
+  PaintEngine* d = fog_new RasterPaintEngine(buffer, NULL, initFlags);
   if (!d) return ERR_RT_OUT_OF_MEMORY;
 
   _engine = d;
@@ -143,7 +143,7 @@ void Painter::end()
 {
   if (_engine == _dnull) return;
 
-  delete _engine;
+  fog_delete(_engine);
   _engine = _dnull;
 }
 

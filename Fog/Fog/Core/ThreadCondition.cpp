@@ -328,7 +328,8 @@ ThreadCondition::CVEvent* ThreadCondition::getEventForWaiting()
   if (0 == _recyclingListSize)
   {
     FOG_ASSERT(_recyclingList.isEmpty());
-    cv_event = new(std::nothrow) CVEvent();
+    cv_event = fog_new CVEvent();
+    // TODO: if (cv_event == NULL) ???
     cv_event->initListElement();
     _allocationCounter++;
     FOG_ASSERT(cv_event->handle());
@@ -402,7 +403,7 @@ ThreadCondition::CVEvent::~CVEvent()
     {
       CVEvent* cv_event = popFront();
       FOG_ASSERT(cv_event->validateAsItem());
-      delete cv_event;
+      fog_delete(cv_event);
     }
   }
 

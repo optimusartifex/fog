@@ -79,7 +79,7 @@ bool Timer::start()
 {
   stop();
 
-  _task = new(std::nothrow) TimerTask(this);
+  _task = fog_new TimerTask(this);
   getHomeThread()->getEventLoop()->postTask(_task, true, static_cast<int>(_interval.inMilliseconds()));
   return true;
 }

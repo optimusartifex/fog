@@ -322,7 +322,7 @@ void Thread::stop()
   FOG_ASSERT(_id != _tid());
 
   // StopSoon may have already been called.
-  if (_eventLoop) _eventLoop->postTask(new(std::nothrow) QuitTask());
+  if (_eventLoop) _eventLoop->postTask(fog_new QuitTask());
 
   // Wait for the thread to exit. It should already have terminated but make
   // sure this assumption is valid.
@@ -347,7 +347,7 @@ void Thread::stopSoon()
   // to someone calling Quit() on our event loop directly.
   FOG_ASSERT(_eventLoop);
 
-  _eventLoop->postTask(new(std::nothrow) QuitTask());
+  _eventLoop->postTask(fog_new QuitTask());
 
   // The thread can't receive messages anymore.
   _eventLoop = NULL;
@@ -390,7 +390,7 @@ void Thread::main()
     cleanUp();
 
     // We can't receive messages anymore.
-    delete _eventLoop;
+    fog_delete(_eventLoop);
     _eventLoop = NULL;
   }
   else

@@ -222,7 +222,7 @@ void LayoutItem::removeLayoutStruct()
 {
   if (_layoutdata)
   {
-    delete _layoutdata;
+    fog_delete(_layoutdata);
     _layoutdata = NULL;
   }
 }

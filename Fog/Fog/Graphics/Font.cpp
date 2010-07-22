@@ -228,7 +228,7 @@ FontFace* FontFace::ref() const
 
 void FontFace::deref()
 {
-  if (refCount.deref()) delete this;
+  if (refCount.deref()) fog_delete(this);
 }
 
 uint32_t FontFace::getHashCode() const
@@ -624,7 +624,7 @@ FOG_INIT_DECLARE err_t fog_font_init(void)
   font_local->listInitialized = false;
 
   // Font Faces.
-  Font::sharedNone = new(std::nothrow) NullFontFace();
+  Font::sharedNone = fog_new NullFontFace();
   if (!Font::sharedNone) return ERR_RT_OUT_OF_MEMORY;
   Font::sharedDefault = Font::sharedNone->ref();
 
@@ -632,7 +632,7 @@ FOG_INIT_DECLARE err_t fog_font_init(void)
 #if defined(FOG_FONT_WINDOWS)
   if (!Font::_engine)
   {
-    Font::_engine = new(std::nothrow) WinFontEngine();
+    Font::_engine = fog_new WinFontEngine();
     if (Font::_engine == NULL) { err = ERR_RT_OUT_OF_MEMORY; goto fail; }
   }
 #endif // FOG_FONT_WINDOWS
@@ -640,7 +640,7 @@ FOG_INIT_DECLARE err_t fog_font_init(void)
 #if defined(FOG_FONT_FREETYPE)
   if (!Font::_engine)
   {
-    Font::_engine = new(std::nothrow) FTFontEngine();
+    Font::_engine = fog_new FTFontEngine();
     if (Font::_engine == NULL) { err = ERR_RT_OUT_OF_MEMORY; goto fail; }
   }
 #endif // FOG_FONT_FREETYPE
@@ -690,7 +690,7 @@ FOG_INIT_DECLARE void fog_font_shutdown(void)
   // Destroy font engine.
   if (Font::_engine)
   {
-    delete Font::_engine;
+    fog_delete(Font::_engine);
     Font::_engine = NULL;
   }
 

@@ -2665,7 +2665,7 @@ err_t GifProvider::createDevice(uint32_t deviceType, BaseDevice** device) const
   switch (deviceType)
   {
     case IMAGE_IO_DEVICE_DECODER:
-      d = new(std::nothrow) GifDecoderDevice(const_cast<GifProvider*>(this));
+      d = fog_new GifDecoderDevice(const_cast<GifProvider*>(this));
       break;
     case IMAGE_IO_DEVICE_ENCODER:
       return ERR_IMAGEIO_NO_ENCODER;
@@ -2892,5 +2892,5 @@ FOG_IMPLEMENT_OBJECT(Fog::ImageIO::GifEncoderDevice)
 FOG_INIT_DECLARE void fog_imageio_init_gif(void)
 {
   using namespace Fog;
-  ImageIO::addProvider(IMAGE_IO_DEVICE_DECODER, new(std::nothrow) ImageIO::GifProvider());
+  ImageIO::addProvider(IMAGE_IO_DEVICE_DECODER, fog_new ImageIO::GifProvider());
 }

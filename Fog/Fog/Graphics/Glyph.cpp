@@ -54,7 +54,7 @@ err_t Glyph::_detach()
 {
   if (isDetached()) return ERR_OK;
 
-  GlyphData* newd = new(std::nothrow) GlyphData(_d);
+  GlyphData* newd = fog_new GlyphData(_d);
   if (newd == NULL) return ERR_RT_OUT_OF_MEMORY;
 
   atomicPtrXchg(&_d, newd)->deref();

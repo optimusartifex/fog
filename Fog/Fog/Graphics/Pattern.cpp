@@ -64,7 +64,7 @@ Pattern::Pattern(const Pattern& other) :
 
 Pattern::Pattern(const Argb& argb)
 {
-  _d = new(std::nothrow) PatternData();
+  _d = fog_new PatternData();
   if (!_d) { _d = _dnull->ref(); return; }
 
   _d->type = PATTERN_SOLID;
@@ -80,7 +80,7 @@ err_t Pattern::_detach()
 {
   if (_d->refCount.get() == 1) return ERR_OK;
 
-  PatternData* newd = new(std::nothrow) PatternData(*_d);
+  PatternData* newd = fog_new PatternData(*_d);
   if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
   atomicPtrXchg(&_d, newd)->deref();
@@ -119,7 +119,7 @@ err_t Pattern::setType(uint32_t type)
   }
   else
   {
-    PatternData* newd = new(std::nothrow) PatternData();
+    PatternData* newd = fog_new PatternData();
     if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
     newd->type = type;
@@ -272,7 +272,7 @@ err_t Pattern::setColor(const Argb& argb)
   }
   else
   {
-    PatternData* newd = new(std::nothrow) PatternData();
+    PatternData* newd = fog_new PatternData();
     if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
     newd->type = PATTERN_SOLID;
@@ -320,7 +320,7 @@ static err_t Pattern_setTexturePrivate(Pattern* self, const Image& texture, cons
   }
   else
   {
-    PatternData* newd = new(std::nothrow) PatternData();
+    PatternData* newd = fog_new PatternData();
     if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
     newd->type = PATTERN_TEXTURE;
@@ -400,7 +400,7 @@ err_t Pattern::setGradient(const Gradient& gradient)
   }
   else
   {
-    PatternData* newd = new(std::nothrow) PatternData();
+    PatternData* newd = fog_new PatternData();
     if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
     newd->type = gradient._type;

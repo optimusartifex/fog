@@ -13,14 +13,16 @@
 
 #if defined(FOG_OS_WINDOWS)
 
+// Benchmarks are configured in CMakeLists.txt.
+
 // There are no GDI+ headers when using MinGW.
 #if !defined(__MINGW32__)
-#define FOG_BENCH_GDIPLUS
+// #define FOG_BENCH_GDIPLUS
 #endif
 
 #else
 
-#define FOG_BENCH_CAIRO
+// #define FOG_BENCH_CAIRO
 // #define FOG_BENCH_QT4
 
 #endif

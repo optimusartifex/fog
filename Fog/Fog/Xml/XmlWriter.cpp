@@ -95,9 +95,9 @@ XmlWriter::~XmlWriter()
         strCur += xmlStrCSPN(strCur, strEnd, XML_CHAR_SPACE | XML_CHAR_EQUAL | XML_CHAR_SLASH | XML_CHAR_GT);
         if (*strCur == '=' || strCur->isSpace())
         {
-          // Create a new attribute
+          // Create a new attribute.
           {
-            XmlAttribute *a = new XmlAttribute();
+            XmlAttribute *a = fog_new XmlAttribute();
 
             a->_prev = attributes;
             a->_next = NULL;

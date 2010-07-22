@@ -156,7 +156,7 @@ ImageData* WinDibImageData::_createInstance()
     reinterpret_cast<WinDibImageData*>(Memory::alloc(sizeof(WinDibImageData)));
   if (d == NULL) return NULL;
 
-  return new(d) WinDibImageData();
+  return fog_new_p(d) WinDibImageData();
 }
 
 HBITMAP WinDibImageData::_createDibSection(int w, int h, uint32_t format,

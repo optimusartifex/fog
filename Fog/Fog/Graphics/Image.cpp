@@ -2719,7 +2719,7 @@ err_t Image::readFromFile(const String& fileName)
 
   err = decoder->readImage(*this);
 
-  delete decoder;
+  fog_delete(decoder);
   return err;
 }
 
@@ -2736,7 +2736,7 @@ err_t Image::readFromStream(Stream& stream, const String& extension)
 
   err = decoder->readImage(*this);
 
-  delete decoder;
+  fog_delete(decoder);
   return err;
 }
 
@@ -2798,7 +2798,7 @@ err_t Image::writeToStream(Stream& stream, const String& extension) const
     encoder->attachStream(stream);
     err = encoder->writeImage(*this);
 
-    delete encoder;
+    fog_delete(encoder);
     return err;
   }
 
@@ -2900,7 +2900,7 @@ ImageData* Image::_allocData(sysuint_t size)
   ImageData* d = (ImageData*)Memory::alloc(ImageData::getSizeFor(size));
   if (!d) return NULL;
 
-  new (d) ImageData();
+  fog_new_p(d) ImageData();
   d->data = (size != 0) ? d->buffer : NULL;
   d->first = d->data;
   return d;

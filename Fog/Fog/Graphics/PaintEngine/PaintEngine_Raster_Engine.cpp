@@ -247,7 +247,7 @@ err_t RasterPaintEngine::setEngine(uint32_t engine, uint32_t threads)
     fog_debug("Fog::Painter::setEngine() - starting multithreading (%d threads)", max);
 #endif // FOG_DEBUG_RASTER_SYNCHRONIZATION
 
-    if ((workerManager = new(std::nothrow) RasterWorkerManager()) == NULL)
+    if ((workerManager = fog_new RasterWorkerManager()) == NULL)
     {
       return ERR_RT_OUT_OF_MEMORY;
     }
@@ -285,7 +285,7 @@ err_t RasterPaintEngine::setEngine(uint32_t engine, uint32_t threads)
       fog_debug("Fog::Painter::setEngine() - failed to get %d threads from pool, releasing...", max - 1);
 #endif // FOG_DEBUG_RASTER_SYNCHRONIZATION
 
-      delete workerManager;
+      fog_delete(workerManager);
       workerManager = NULL;
 
       // Bailout.
@@ -378,7 +378,7 @@ err_t RasterPaintEngine::setEngine(uint32_t engine, uint32_t threads)
 
     if (mainTask) mainTask->destroy();
 
-    delete workerManager;
+    fog_delete(workerManager);
     workerManager = NULL;
 
 #if defined(FOG_DEBUG_RASTER_SYNCHRONIZATION)
@@ -971,13 +971,13 @@ err_t RasterPaintEngine::save(uint32_t flags)
   {
     state = reinterpret_cast<RasterPaintState*>(blockAllocator.alloc(sizeof(RasterPaintState)));
     if (FOG_UNLIKELY(state == NULL)) return ERR_RT_OUT_OF_MEMORY;
-    new (state) RasterPaintState(ctx.layerId, flags);
+    fog_new_p(state) RasterPaintState(ctx.layerId, flags);
   }
   else
   {
     state = reinterpret_cast<RasterPaintVarState*>(blockAllocator.alloc(sizeof(RasterPaintVarState)));
     if (FOG_UNLIKELY(state == NULL)) return ERR_RT_OUT_OF_MEMORY;
-    new (state) RasterPaintVarState(ctx.layerId, flags);
+    fog_new_p(state) RasterPaintVarState(ctx.layerId, flags);
   }
 
   err_t err = states.append(reinterpret_cast<RasterPaintState*>(state));

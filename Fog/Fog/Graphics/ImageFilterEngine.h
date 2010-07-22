@@ -131,7 +131,7 @@ struct FOG_API ImageFilterEngine
   //! zero the object is destroyed.
   FOG_INLINE void deref()
   {
-    if (refCount.deref()) delete this;
+    if (refCount.deref()) fog_delete(this);
   }
 
   //! @brief Clone filter with all arguments.

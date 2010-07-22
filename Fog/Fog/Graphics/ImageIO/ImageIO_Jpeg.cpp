@@ -155,10 +155,10 @@ err_t JpegProvider::createDevice(uint32_t deviceType, BaseDevice** device) const
   switch (deviceType)
   {
     case IMAGE_IO_DEVICE_DECODER:
-      d = new(std::nothrow) JpegDecoderDevice(const_cast<JpegProvider*>(this));
+      d = fog_new JpegDecoderDevice(const_cast<JpegProvider*>(this));
       break;
     case IMAGE_IO_DEVICE_ENCODER:
-      d = new(std::nothrow) JpegEncoderDevice(const_cast<JpegProvider*>(this));
+      d = fog_new JpegEncoderDevice(const_cast<JpegProvider*>(this));
       break;
     default:
       return ERR_RT_INVALID_ARGUMENT;
@@ -769,7 +769,7 @@ FOG_INIT_DECLARE void fog_imageio_init_jpeg(void)
 {
   using namespace Fog;
 
-  ImageIO::JpegProvider* provider = new(std::nothrow) ImageIO::JpegProvider();
+  ImageIO::JpegProvider* provider = fog_new ImageIO::JpegProvider();
   ImageIO::addProvider(IMAGE_IO_DEVICE_BOTH, provider);
 }
 

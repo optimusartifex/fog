@@ -101,7 +101,7 @@ const void* ColorLutFilterEngine::getContext() const
 
 ImageFilterEngine* ColorLutFilterEngine::clone() const
 {
-  return new(std::nothrow) ColorLutFilterEngine(lut);
+  return fog_new ColorLutFilterEngine(lut);
 }
 
 void ColorLutFilterEngine::setColorLut(const ColorLutData& lutData)
@@ -163,7 +163,7 @@ const void* ColorMatrixFilterEngine::getContext() const
 
 ImageFilterEngine* ColorMatrixFilterEngine::clone() const
 {
-  return new(std::nothrow) ColorMatrixFilterEngine(*this);
+  return fog_new ColorMatrixFilterEngine(*this);
 }
 
 void ColorMatrixFilterEngine::setColorMatrix(const ColorMatrix& other)
@@ -281,7 +281,7 @@ const void* BlurFilterEngine::getContext() const
 
 ImageFilterEngine* BlurFilterEngine::clone() const
 {
-  return new(std::nothrow) BlurFilterEngine(params);
+  return fog_new BlurFilterEngine(params);
 }
 
 void BlurFilterEngine::setParams(const BlurParams& params)
@@ -398,7 +398,7 @@ err_t ImageFilterBase::setColorLut(const ColorLut& colorLut)
   }
   else
   {
-    ImageFilterEngine* e = new(std::nothrow) ColorLutFilterEngine(*colorLut.getData());
+    ImageFilterEngine* e = fog_new ColorLutFilterEngine(*colorLut.getData());
     if (e == NULL) return ERR_RT_OUT_OF_MEMORY;
 
     atomicPtrXchg(&_d, e)->deref();
@@ -416,7 +416,7 @@ err_t ImageFilterBase::setColorMatrix(const ColorMatrix& colorMatrix)
   }
   else
   {
-    ImageFilterEngine* e = new(std::nothrow) ColorMatrixFilterEngine(colorMatrix);
+    ImageFilterEngine* e = fog_new ColorMatrixFilterEngine(colorMatrix);
     if (e == NULL) return ERR_RT_OUT_OF_MEMORY;
 
     atomicPtrXchg(&_d, e)->deref();
@@ -434,7 +434,7 @@ err_t ImageFilterBase::setBlur(const BlurParams& params)
   }
   else
   {
-    ImageFilterEngine* e = new(std::nothrow) BlurFilterEngine(params);
+    ImageFilterEngine* e = fog_new BlurFilterEngine(params);
     if (e == NULL) return ERR_RT_OUT_OF_MEMORY;
 
     atomicPtrXchg(&_d, e)->deref();

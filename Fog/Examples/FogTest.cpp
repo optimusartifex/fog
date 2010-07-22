@@ -174,7 +174,7 @@ struct MyModalWindow : public Window
 {
   MyModalWindow(int x) : Window(WINDOW_TYPE_DEFAULT), _x(x)
   {
-    Button* button5 = new Button();
+    Button* button5 = fog_new Button();
     addChild(button5);
     button5->setGeometry(IntRect(40, 200, 100, 20));
     button5->setText(Ascii8("Test ModalWindow"));
@@ -184,7 +184,7 @@ struct MyModalWindow : public Window
 
   void onModalTestClick(MouseEvent* e)
   {
-    _modalwindow = new MyModalWindow(_x+1);
+    _modalwindow = fog_new MyModalWindow(_x+1);
     _modalwindow->setSize(IntSize(200,300));
     _modalwindow->addListener(EVENT_CLOSE, this, &MyModalWindow::onModalClose);
     _modalwindow->showModal(getGuiWindow());
@@ -233,7 +233,7 @@ struct MyWindow : public Window
     _buttons.reserve(count);
 
     for(int i=0;i<count;++i) {
-      Button* buttonx1 = new Button();
+      Button* buttonx1 = fog_new Button();
       addChild(buttonx1);
       //button4->setGeometry(IntRect(40, 160, 100, 20));
       String str;
@@ -252,9 +252,9 @@ struct MyWindow : public Window
     createButtons(6);
     BorderLayout* layout;
     if(parent) {
-      layout = new BorderLayout();      
+      layout = fog_new BorderLayout();
     } else {
-      layout = new BorderLayout(this);
+      layout = fog_new BorderLayout(this);
     }
 
     layout->addItem(_buttons.at(0), LAYOUT_EDGE_SOUTH);
@@ -276,9 +276,9 @@ struct MyWindow : public Window
 
     GridLayout* layout;
     if(parent) {
-      layout = new GridLayout();      
+      layout = fog_new GridLayout();
     } else {
-      layout = new GridLayout(this);
+      layout = fog_new GridLayout(this);
     }
 
     layout->addItem(_buttons.at(0),0,0);
@@ -309,9 +309,9 @@ struct MyWindow : public Window
 
     VBoxLayout* layout;
     if(parent) {
-      layout = new VBoxLayout(0,0);      
+      layout = fog_new VBoxLayout(0,0);
     } else {
-      layout = new VBoxLayout(this,0,0);
+      layout = fog_new VBoxLayout(this,0,0);
     }
 
     for(int i=0;i<COUNT;++i) {
@@ -325,7 +325,7 @@ struct MyWindow : public Window
 
     _buttons.at(0)->addListener(EVENT_CLICK,this,&MyWindow::onButtonClick);
 
-    CheckBox* cb = new CheckBox();
+    CheckBox* cb = fog_new CheckBox();
     cb->setText(Ascii8("Check box"));
     cb->show();
     layout->addItem(cb);
@@ -337,9 +337,9 @@ struct MyWindow : public Window
     createButtons(COUNT);
     HBoxLayout* layout;
     if(parent) {
-      layout = new HBoxLayout(0,0);      
+      layout = fog_new HBoxLayout(0,0);
     } else {
-      layout = new HBoxLayout(this,0,0);
+      layout = fog_new HBoxLayout(this,0,0);
     }
 
     for(int i=0;i<COUNT;++i) {
@@ -352,10 +352,10 @@ struct MyWindow : public Window
 
   void testFrame()
   {
-    VBoxLayout* layout = new VBoxLayout(this, 0, 0);
+    VBoxLayout* layout = fog_new VBoxLayout(this, 0, 0);
 
     {
-      TextField* textField = new TextField();
+      TextField* textField = fog_new TextField();
       textField->show();
       textField->setMinimumSize(IntSize(100, 20));
       addChild(textField);
@@ -363,7 +363,7 @@ struct MyWindow : public Window
     }
 
     {
-      TextField* textField = new TextField();
+      TextField* textField = fog_new TextField();
       textField->show();
       textField->setMinimumSize(IntSize(100, 20));
       addChild(textField);
@@ -389,7 +389,7 @@ struct MyWindow : public Window
 
   void onModalTestClick(MouseEvent* e)
   {
-    _modalwindow = new MyModalWindow(_mcount);
+    _modalwindow = fog_new MyModalWindow(_mcount);
     _modalwindow->setSize(IntSize(200,300));
     _modalwindow->addListener(EVENT_CLOSE, this, &MyWindow::onModalClose);
     _modalwindow->showModal(getGuiWindow());
@@ -422,7 +422,7 @@ struct MyWindow : public Window
 
   void onTransparencyClick(MouseEvent* e)
   {
-    WidgetOpacityAnimation* anim = new WidgetOpacityAnimation(this);
+    WidgetOpacityAnimation* anim = fog_new WidgetOpacityAnimation(this);
     anim->setDuration(TimeDelta::fromMilliseconds(1000));
 
     anim->setStartOpacity(0.0f);

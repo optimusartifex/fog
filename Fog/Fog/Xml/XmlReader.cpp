@@ -645,7 +645,7 @@ err_t XmlDomReader::onAddElement(const Utf16& tagName)
   err_t err = _current->appendChild(e);
   if (err)
   {
-    delete e;
+    fog_delete(e);
     return err;
   }
   else
@@ -683,11 +683,11 @@ err_t XmlDomReader::onAddText(const Utf16& data, bool isWhiteSpace)
       return ERR_XML_SYNTAX_ERROR;
   }
 
-  XmlElement* e = new(std::nothrow) XmlText(String(data));
+  XmlElement* e = fog_new XmlText(String(data));
   if (!e) return ERR_RT_OUT_OF_MEMORY;
 
   err_t err = _current->appendChild(e);
-  if (err) delete e;
+  if (err) fog_delete(e);
   return err;
 }
 
@@ -695,11 +695,11 @@ err_t XmlDomReader::onAddCDATA(const Utf16& data)
 {
   if (_current == _document) return ERR_XML_DOCUMENT_INVALID_CHILD;
 
-  XmlElement* e = new(std::nothrow) XmlCDATA(String(data));
+  XmlElement* e = fog_new XmlCDATA(String(data));
   if (!e) return ERR_RT_OUT_OF_MEMORY;
 
   err_t err = _current->appendChild(e);
-  if (err) delete e;
+  if (err) fog_delete(e);
   return err;
 }
 
@@ -715,21 +715,21 @@ err_t XmlDomReader::onAddDOCTYPE(const List<String>& doctype)
 
 err_t XmlDomReader::onAddPI(const Utf16& data)
 {
-  XmlElement* e = new(std::nothrow) XmlPI(String(data));
+  XmlElement* e = fog_new XmlPI(String(data));
   if (!e) return ERR_RT_OUT_OF_MEMORY;
 
   err_t err = _current->appendChild(e);
-  if (err) delete e;
+  if (err) fog_delete(e);
   return err;
 }
 
 err_t XmlDomReader::onAddComment(const Utf16& data)
 {
-  XmlElement* e = new(std::nothrow) XmlComment(String(data));
+  XmlElement* e = fog_new XmlComment(String(data));
   if (!e) return ERR_RT_OUT_OF_MEMORY;
 
   err_t err = _current->appendChild(e);
-  if (err) delete e;
+  if (err) fog_delete(e);
   return err;
 }
 

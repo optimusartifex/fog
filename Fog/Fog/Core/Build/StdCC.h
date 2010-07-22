@@ -87,127 +87,62 @@
 // never used. Adding FOG_IDE as defined macro to your IDE can help with code
 // assist.
 #if defined(FOG_IDE)
-
 #define FOG_CC_IDE
 
+// Standard attributes.
 #define FOG_INLINE inline
 #define FOG_NO_INLINE
 #define FOG_NO_RETURN
 #define FOG_DEPRECATED
+
+// Restrict support.
 #define FOG_RESTRICT
 
+// 32-bit x86 calling conventions.
 #define FOG_FASTCALL
 #define FOG_STDCALL
 #define FOG_CDECL
 
+// Visibility.
 #define FOG_HIDDEN
 
 #define FOG_DLL_IMPORT
 #define FOG_DLL_EXPORT
 
+// Likely / unlikely.
 #define FOG_LIKELY(exp) (exp)
 #define FOG_UNLIKELY(exp) (exp)
 
+// Nothrow.
+#define FOG_NOTHROW throw()
+
+// Unused.
 #define FOG_UNUSED(a)
+
+// Align.
 #define FOG_ALIGN_BEGIN(__n__)
 #define FOG_ALIGN_END(__n__)
 #define FOG_ALIGNED_TYPE(__type__, __n__) __type__
 #define FOG_ALIGNED_VAR(__type__, __name__ __n__) __type__ __name__
 
+// Macro begin / end.
 #define FOG_BEGIN_MACRO do {
 #define FOG_END_MACRO } while(0)
 
-#define FOG_API
-
+// Variables.
 #define FOG_CVAR_EXTERN_BASE(api) extern "C"
-#define FOG_CVAR_DECLARE_BASE(api)
+#define FOG_CVAR_DECLARE_BASE(api) extern "C"
 
+// C API.
 #define FOG_CAPI_EXTERN_BASE(api) extern "C"
 #define FOG_CAPI_DECLARE_BASE(api) extern "C"
 
+// C API.
 #define FOG_INIT_EXTERN_BASE(api) extern "C"
 #define FOG_INIT_DECLARE_BASE(api) extern "C"
 
-// ============================================================================
-// [Fog::Core::Build - Compiler - Clang]
-// ============================================================================
-
-#elif defined(__clang__)
-#define FOG_CC_CLANG __clang__
-
-// Standard attributes.
-#define FOG_INLINE inline __attribute__((always_inline))
-#define FOG_NO_INLINE __attribute__((noinline))
-#define FOG_NO_RETURN __attribute__((noreturn))
-#define FOG_DEPRECATED __attribute__((deprecated))
-
-// Restrict support.
-# define FOG_RESTRICT __restrict__
-
-// 32-bit x86 calling conventions.
-#ifdef FOG_ARCH_X86
-# define FOG_FASTCALL __attribute__((regparm(3)))
-# define FOG_STDCALL __attribute__((stdcall))
-# define FOG_CDECL __attribute__((cdecl))
-#else
-# define FOG_FASTCALL
-# define FOG_STDCALL
-# define FOG_CDECL
-#endif
-
-// Features setup.
-#define FOG_CC_HAVE_PARTIAL_TEMPLATE_SPECIALIZATION
-
-// Visibility.
-#if __GNUC__ >= 4
-# define FOG_HIDDEN __attribute__((visibility("hidden")))
-#else
-# define FOG_HIDDEN
-#endif
-
-#if defined(FOG_OS_WINDOWS)
-# define FOG_DLL_IMPORT __declspec(dllimport)
-# define FOG_DLL_EXPORT __declspec(dllexport)
-#else
-# define FOG_DLL_IMPORT
-# define FOG_DLL_EXPORT __attribute__((visibility("default")))
-#endif
-
-// Likely / unlikely.
-#define FOG_LIKELY(exp) __builtin_expect(!!(exp), 1)
-#define FOG_UNLIKELY(exp) __builtin_expect(!!(exp), 0)
-
-// Unused.
-#define FOG_UNUSED(a) (void)(a)
-
-// Align.
-#define FOG_ALIGN_BEGIN(__n__)
-#define FOG_ALIGN_END(__n__) __attribute__((aligned(__n__)))
-#define FOG_ALIGNED_TYPE(__type__, __n__) __attribute__((aligned(__n__))) __type__
-#define FOG_ALIGNED_VAR(__type__, __name__, __n__) __type__ __attribute__((aligned(__n__))) __name__
-
-// Macro begin / end.
-#define FOG_BEGIN_MACRO ({
-#define FOG_END_MACRO })
-
-// Variables.
-# define FOG_CVAR_EXTERN_BASE(api) extern "C"
-# define FOG_CVAR_DECLARE_BASE(api)
-
-// C API.
-#define FOG_CAPI_EXTERN_BASE(api) extern "C" api
-#define FOG_CAPI_DECLARE_BASE(api) extern "C" api
-
-// C API - static initializers we can hide them...
-#define FOG_INIT_EXTERN_BASE(api) extern "C" FOG_HIDDEN
-#define FOG_INIT_DECLARE_BASE(api) extern "C" FOG_HIDDEN
-
 // API.
-#if defined(Fog_EXPORTS)
-# define FOG_API FOG_DLL_EXPORT
-#else
-# define FOG_API FOG_DLL_IMPORT
-#endif // Fog_EXPORTS
+#define FOG_API
 
 // ============================================================================
 // [Fog::Core::Build - Compiler - GNU C/C++]
@@ -265,6 +200,9 @@
 #define FOG_LIKELY(exp) __builtin_expect(!!(exp), 1)
 #define FOG_UNLIKELY(exp) __builtin_expect(!!(exp), 0)
 
+// Nothrow.
+#define FOG_NOTHROW throw()
+
 // Unused.
 #define FOG_UNUSED(a) (void)(a)
 
@@ -290,6 +228,90 @@
 // C API.
 #define FOG_CAPI_EXTERN_BASE(api) extern "C" api
 #define FOG_CAPI_DECLARE_BASE(api) extern "C"
+
+// C API - static initializers we can hide them...
+#define FOG_INIT_EXTERN_BASE(api) extern "C" FOG_HIDDEN
+#define FOG_INIT_DECLARE_BASE(api) extern "C" FOG_HIDDEN
+
+// API.
+#if defined(Fog_EXPORTS)
+# define FOG_API FOG_DLL_EXPORT
+#else
+# define FOG_API FOG_DLL_IMPORT
+#endif // Fog_EXPORTS
+
+// ============================================================================
+// [Fog::Core::Build - Compiler - Clang]
+// ============================================================================
+
+#elif defined(__clang__)
+#define FOG_CC_CLANG __clang__
+
+// Standard attributes.
+#define FOG_INLINE inline __attribute__((always_inline))
+#define FOG_NO_INLINE __attribute__((noinline))
+#define FOG_NO_RETURN __attribute__((noreturn))
+#define FOG_DEPRECATED __attribute__((deprecated))
+
+// Restrict support.
+# define FOG_RESTRICT __restrict__
+
+// 32-bit x86 calling conventions.
+#ifdef FOG_ARCH_X86
+# define FOG_FASTCALL __attribute__((regparm(3)))
+# define FOG_STDCALL __attribute__((stdcall))
+# define FOG_CDECL __attribute__((cdecl))
+#else
+# define FOG_FASTCALL
+# define FOG_STDCALL
+# define FOG_CDECL
+#endif
+
+// Features setup.
+#define FOG_CC_HAVE_PARTIAL_TEMPLATE_SPECIALIZATION
+
+// Visibility.
+#if __GNUC__ >= 4
+# define FOG_HIDDEN __attribute__((visibility("hidden")))
+#else
+# define FOG_HIDDEN
+#endif
+
+#if defined(FOG_OS_WINDOWS)
+# define FOG_DLL_IMPORT __declspec(dllimport)
+# define FOG_DLL_EXPORT __declspec(dllexport)
+#else
+# define FOG_DLL_IMPORT
+# define FOG_DLL_EXPORT __attribute__((visibility("default")))
+#endif
+
+// Likely / unlikely.
+#define FOG_LIKELY(exp) __builtin_expect(!!(exp), 1)
+#define FOG_UNLIKELY(exp) __builtin_expect(!!(exp), 0)
+
+// Nothrow.
+#define FOG_NOTHROW throw()
+
+// Unused.
+#define FOG_UNUSED(a) (void)(a)
+
+// Align.
+#define FOG_ALIGN_BEGIN(__n__)
+#define FOG_ALIGN_END(__n__) __attribute__((aligned(__n__)))
+#define FOG_ALIGNED_TYPE(__type__, __n__) __attribute__((aligned(__n__))) __type__
+#define FOG_ALIGNED_VAR(__type__, __name__, __n__) __type__ __attribute__((aligned(__n__))) __name__
+
+// Macro begin / end.
+#define FOG_BEGIN_MACRO ({
+#define FOG_END_MACRO })
+
+// Variables.
+# define FOG_CVAR_EXTERN_BASE(api) extern "C"
+# define FOG_CVAR_DECLARE_BASE(api)
+
+// C API.
+#define FOG_CAPI_EXTERN_BASE(api) extern "C" api
+#define FOG_CAPI_DECLARE_BASE(api) extern "C" api
 
 // C API - static initializers we can hide them...
 #define FOG_INIT_EXTERN_BASE(api) extern "C" FOG_HIDDEN
@@ -373,6 +395,9 @@
 // Likely / unlikely.
 #define FOG_LIKELY(exp) (exp)
 #define FOG_UNLIKELY(exp) (exp)
+
+// Nothrow.
+#define FOG_NOTHROW throw()
 
 // Unused.
 #define FOG_UNUSED(a) (void)(a)

@@ -85,7 +85,7 @@ struct FOG_HIDDEN ManagedStringLocal
       node = node->next;
     }
 
-    node = new(std::nothrow) Node(s);
+    node = fog_new Node(s);
     node->string.squeeze();
     if (!node) return node;
 
@@ -165,7 +165,7 @@ struct FOG_HIDDEN ManagedStringLocal
     String str;
     if (str.set(Utf16(s, length)) != ERR_OK) return NULL;
 
-    node = new(std::nothrow) Node(str);
+    node = fog_new Node(str);
     if (!node) return node;
 
     if (prev)
@@ -201,7 +201,7 @@ struct FOG_HIDDEN ManagedStringLocal
         else
           _buckets[hashMod] = node->next;
 
-        delete node;
+        fog_delete(node);
         if (--_length <= _shrinkLength) _rehash(_shrinkCapacity);
         return;
       }
@@ -463,7 +463,7 @@ ManagedString::Cache* ManagedString::createCache(const char* strings, sysuint_t 
       d->hashCode = 0;
       StringUtil::copy(d->data, pBeg, len + 1);
 
-      *pList++ = managed_local->addNodeNoLock(new(pNodes) Node(d));
+      *pList++ = managed_local->addNodeNoLock(fog_new_p(pNodes) Node(d));
       pNodes += sizeof(Node);
       pChars += String::Data::sizeFor(len);
 
@@ -477,7 +477,7 @@ ManagedString::Cache* ManagedString::createCache(const char* strings, sysuint_t 
   }
 
   FOG_ASSERT(count == counter);
-  new (self) Cache(name, counter);
+  fog_new_p(self) Cache(name, counter);
   self->_name = name;
   self->_name.squeeze();
 

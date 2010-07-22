@@ -57,7 +57,7 @@ struct DeleteTask : public CancelableTask
 {
   explicit DeleteTask(T* obj) : _obj(obj) {}
 
-  virtual void run() { if (_obj) delete _obj; }
+  virtual void run() { if (_obj) fog_delete(_obj); }
   virtual void cancel() { _obj = NULL; }
 
 private:

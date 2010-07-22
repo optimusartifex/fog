@@ -43,7 +43,7 @@ private:
   FOG_DISABLE_COPY(ListenerListBase)
 };
 
-template <class ListenerType>
+template <typename ListenerType>
 struct ListenerList : public ListenerListBase
 {
   FOG_INLINE ListenerList() {}
@@ -80,12 +80,12 @@ struct ListenerList : public ListenerListBase
       if (--_list._notifyDepth == 0) _list._compact();
     }
 
-  private:
+  //private:
     const ListenerList<ListenerType>& _list;
   };
 
-private:
-  friend struct ListenerList<ListenerType>::Scope;
+//private:
+//  friend struct ListenerList<ListenerType>::Scope;
 
   FOG_DISABLE_COPY(ListenerList)
 };

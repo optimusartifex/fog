@@ -75,7 +75,7 @@ struct Lazy : public LazyBase
   {
     // Delete and clear pointer, because LazyBase checks for it
     // and can assert if it's not NULL
-    if (_ptr) { delete reinterpret_cast<T*>(_ptr); _ptr = NULL; }
+    if (_ptr) { fog_delete(reinterpret_cast<T*>(_ptr)); _ptr = NULL; }
   }
 
   //! @brief Get or create the lazy instance.
@@ -85,7 +85,7 @@ struct Lazy : public LazyBase
   FOG_INLINE T* operator->() { return get(); }
 
 protected:
-  virtual void* _create() { return new(std::nothrow) T(); }
+  virtual void* _create() { return fog_new T(); }
 };
 
 // @}

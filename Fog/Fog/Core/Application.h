@@ -108,7 +108,7 @@ public:
   template<typename GuiEngineType>
   struct _GuiEngineCtorHelper
   {
-    static GuiEngine* ctor() { return new(std::nothrow) GuiEngineType(); }
+    static GuiEngine* ctor() { return fog_new GuiEngineType(); }
   };
 
   template<typename GuiEngineType>
@@ -140,7 +140,7 @@ public:
   template<typename EventLoopType>
   struct _EventLoopCtorHelper
   {
-    static EventLoop* ctor() { return new(std::nothrow) EventLoopType(); }
+    static EventLoop* ctor() { return fog_new EventLoopType(); }
   };
 
   template<typename EventLoopType>

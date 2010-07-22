@@ -46,7 +46,7 @@ struct FOG_API GlyphData
 
   FOG_INLINE void deref()
   {
-    if (refCount.deref()) delete this;
+    if (refCount.deref()) fog_delete(this);
   }
 
   // --------------------------------------------------------------------------

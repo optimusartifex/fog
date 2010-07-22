@@ -441,10 +441,10 @@ err_t GdiPlusProvider::createDevice(uint32_t deviceType, BaseDevice** device) co
   switch (deviceType)
   {
     case IMAGE_IO_DEVICE_DECODER:
-      d = new(std::nothrow) GdiPlusDecoderDevice(const_cast<GdiPlusProvider*>(this));
+      d = fog_new GdiPlusDecoderDevice(const_cast<GdiPlusProvider*>(this));
       break;
     case IMAGE_IO_DEVICE_ENCODER:
-      d = new(std::nothrow) GdiPlusEncoderDevice(const_cast<GdiPlusProvider*>(this));
+      d = fog_new GdiPlusEncoderDevice(const_cast<GdiPlusProvider*>(this));
       break;
     default:
       return ERR_RT_INVALID_ARGUMENT;
@@ -478,7 +478,7 @@ GdiPlusDecoderDevice::~GdiPlusDecoderDevice()
 
 void GdiPlusDecoderDevice::attachStream(Stream& stream)
 {
-  _istream = new(std::nothrow) WinIStream(stream);
+  _istream = fog_new WinIStream(stream);
 
   base::attachStream(stream);
 }
@@ -635,7 +635,7 @@ GdiPlusEncoderDevice::~GdiPlusEncoderDevice()
 
 void GdiPlusEncoderDevice::attachStream(Stream& stream)
 {
-  _istream = new(std::nothrow) WinIStream(stream);
+  _istream = fog_new WinIStream(stream);
 
   base::attachStream(stream);
 }
@@ -764,13 +764,13 @@ FOG_INIT_DECLARE void fog_imageio_init_gdiplus(void)
   ImageIO::_gdiPlusRefCount.init(0);
   ImageIO::GdiPlusProvider* provider;
 
-  provider = new(std::nothrow) ImageIO::GdiPlusProvider(IMAGE_IO_FILE_PNG);
+  provider = fog_new ImageIO::GdiPlusProvider(IMAGE_IO_FILE_PNG);
   ImageIO::addProvider(IMAGE_IO_DEVICE_BOTH, provider);
 
-  provider = new(std::nothrow) ImageIO::GdiPlusProvider(IMAGE_IO_FILE_JPEG);
+  provider = fog_new ImageIO::GdiPlusProvider(IMAGE_IO_FILE_JPEG);
   ImageIO::addProvider(IMAGE_IO_DEVICE_BOTH, provider);
 
-  provider = new(std::nothrow) ImageIO::GdiPlusProvider(IMAGE_IO_FILE_TIFF);
+  provider = fog_new ImageIO::GdiPlusProvider(IMAGE_IO_FILE_TIFF);
   ImageIO::addProvider(IMAGE_IO_DEVICE_BOTH, provider);
 }
 

@@ -15,6 +15,7 @@
 // [Dependencies]
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Constants.h>
+#include <Fog/Core/Memory.h>
 #include <Fog/Core/ThreadLocalStorage.h>
 
 #if defined(FOG_OS_WINDOWS)
@@ -74,7 +75,9 @@ void** ThreadLocalStorage::initialize()
   FOG_ASSERT(TlsGetValue(_tlsKey) == NULL);
 
   // Create an array to store our data.
-  void** tlsData = new(std::nothrow) void*[ThreadLocalStorageSize];
+  void** tlsData = reinterpret_cast<void**>(
+    Memory::alloc(ThreadLocalStorageSize* sizeof(void*)));
+  // TODO: if (tlsData == NULL) ???
   memset(tlsData, 0, sizeof(void*[ThreadLocalStorageSize]));
   TlsSetValue(_tlsKey, tlsData);
   return tlsData;
@@ -141,8 +144,7 @@ void ThreadLocalStorage::threadExit()
   void** tls_data = static_cast<void**>(TlsGetValue(_tlsKey));
 
   // Maybe we have never initialized TLS for this thread.
-  if (!tls_data)
-    return;
+  if (!tls_data) return;
 
   for (int slot = 0; slot < _tlsMax; slot++)
   {
@@ -153,7 +155,7 @@ void ThreadLocalStorage::threadExit()
     }
   }
 
-  delete[] tls_data;
+  Memory::free(tls_data);
 
   // In case there are other "onexit" handlers...
   TlsSetValue(_tlsKey, NULL);

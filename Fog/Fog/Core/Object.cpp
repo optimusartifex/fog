@@ -88,7 +88,7 @@ void Object::destroyLater()
     }
 
     _objectFlags |= OBJECT_FLAG_DESTROY_LATER;
-    postEvent(new(std::nothrow) DestroyEvent());
+    postEvent(fog_new DestroyEvent());
   }
 }
 
@@ -102,8 +102,7 @@ void Object::destroy()
     fog_stderr_msg("Fog::Object", "destroy()", "_deleteChildren() failed (%u).");
   }
 
-  if (canDelete()) 
-    delete this;
+  if (canDelete()) fog_delete(this);
 }
 
 // ============================================================================
@@ -352,7 +351,7 @@ uint Object::removeListener(Object* listener)
           listener->_backwardConnection.remove(conn);
         }
 
-        delete conn;
+        fog_delete(conn);
 
         if (prev)
           prev->next = next;
@@ -401,7 +400,7 @@ uint Object::removeAllListeners()
         conn->listener->_backwardConnection.remove(conn);
       }
 
-      delete conn;
+      fog_delete(conn);
       conn = next;
     } while (conn);
   }
@@ -428,7 +427,8 @@ bool Object::_addListener(uint32_t code, Object* listener, const void* del, uint
     } while (conn);
   }
 
-  conn = new(std::nothrow) ObjectConnection;
+  conn = fog_new ObjectConnection;
+  // TODO: if (conn == NULL) ...
   conn->next = NULL;
   conn->attachedObject = this;
   conn->listener = listener;
@@ -470,7 +470,7 @@ bool Object::_removeListener(uint32_t code, Object* listener, const void* del, u
 
       if (listener) listener->_backwardConnection.remove(conn);
       
-      delete conn;
+      fog_delete(conn);
       return true;
     }
 
@@ -533,12 +533,12 @@ void Object::postEvent(Event* e)
 
 fail:
   fog_stderr_msg("Fog::Object", "postEvent", "Can't post event to object which has no home thread or event loop. Deleting event.");
-  delete e;
+  fog_delete(e);
 }
 
 void Object::postEvent(uint32_t code)
 {
-  Event* e = new(std::nothrow) Event(code, 0);
+  Event* e = fog_new Event(code, 0);
   if (e) postEvent(e);
 }
 

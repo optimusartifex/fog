@@ -357,7 +357,7 @@ struct FOG_API Widget : public LayoutItem
 
   // WIDGET TODO: Move to .cpp
   FOG_INLINE void checkMinMaxBlock()
-  { if (!_extra) _extra = new(std::nothrow) ExtendedData(); }
+  { if (!_extra) _extra = fog_new ExtendedData(); }
   
   bool checkMinimumSize(int width, int height);
   bool checkMaximumSize(int width, int height);

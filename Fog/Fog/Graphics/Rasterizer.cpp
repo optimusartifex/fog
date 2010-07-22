@@ -101,7 +101,7 @@ Rasterizer* Rasterizer::getRasterizer()
   }
   else
   {
-    rasterizer = new(std::nothrow) AnalyticRasterizer();
+    rasterizer = fog_new AnalyticRasterizer();
   }
 
   return rasterizer;
@@ -174,7 +174,7 @@ void Rasterizer::cleanup()
   while (rasterizerCurr)
   {
     rasterizerNext = rasterizerCurr->_poolNext;
-    delete rasterizerCurr;
+    fog_delete(rasterizerCurr);
     rasterizerCurr = rasterizerNext;
   }
 

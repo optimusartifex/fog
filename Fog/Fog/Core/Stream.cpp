@@ -72,7 +72,7 @@ StreamDevice* StreamDevice::ref() const
 
 void StreamDevice::deref()
 {
-  if (refCount.deref()) delete this;
+  if (refCount.deref()) fog_delete(this);
 }
 
 ByteArray StreamDevice::getBuffer() const
@@ -268,7 +268,7 @@ err_t HANDLEStreamDevice::openFile(const String& _fileName, uint32_t openFlags, 
       }
       else
       {
-        *dst = new(std::nothrow) HANDLEStreamDevice(hFile, fflags);
+        *dst = fog_new HANDLEStreamDevice(hFile, fflags);
         return ERR_OK;
       }
     }
@@ -286,7 +286,7 @@ err_t HANDLEStreamDevice::openFile(const String& _fileName, uint32_t openFlags, 
       SetFilePointer(hFile, 0, 0, FILE_END);
     }
 
-    *dst = new(std::nothrow) HANDLEStreamDevice(hFile, fflags);
+    *dst = fog_new HANDLEStreamDevice(hFile, fflags);
     return ERR_OK;
   }
 }
@@ -507,7 +507,7 @@ err_t FdStreamDevice::openFile(const String& fileName, uint32_t openFlags, Strea
   else
   {
     // Success.
-    *dst = new(std::nothrow) FdStreamDevice(fd, fflags);
+    *dst = fog_new FdStreamDevice(fd, fflags);
     return ERR_OK;
   }
 }
@@ -1025,13 +1025,13 @@ err_t Stream::openMMap(const String& fileName, bool loadOnFail)
 {
   close();
 
-  MMapStreamDevice* newd = new(std::nothrow) MMapStreamDevice();
+  MMapStreamDevice* newd = fog_new MMapStreamDevice();
   if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
   err_t err = newd->map(fileName, loadOnFail);
   if (err != ERR_OK)
   {
-    delete newd;
+    fog_delete(newd);
     return err;
   }
 
@@ -1054,7 +1054,7 @@ err_t Stream::openHandle(HANDLE hFile, uint32_t openFlags, bool canClose)
   if (openFlags & STREAM_OPEN_WRITE) fflags |= STREAM_IS_WRITABLE;
   if (canClose) fflags |= STREAM_IS_CLOSABLE;
 
-  StreamDevice* newd = new(std::nothrow) HANDLEStreamDevice(hFile, fflags);
+  StreamDevice* newd = fog_new HANDLEStreamDevice(hFile, fflags);
   if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
   atomicPtrXchg(&_d, newd)->deref();
@@ -1073,7 +1073,7 @@ err_t Stream::openFd(int fd, uint32_t openFlags, bool canClose)
   if (openFlags & STREAM_OPEN_WRITE) fflags |= STREAM_IS_WRITABLE;
   if (canClose) fflags |= STREAM_IS_CLOSABLE;
 
-  StreamDevice* newd = new(std::nothrow) FdStreamDevice(fd, fflags);
+  StreamDevice* newd = fog_new FdStreamDevice(fd, fflags);
   if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
   atomicPtrXchg(&_d, newd)->deref();
@@ -1092,7 +1092,7 @@ err_t Stream::openBuffer(const ByteArray& buffer)
 {
   close();
 
-  StreamDevice* newd = new(std::nothrow) ByteArrayStreamDevice(buffer, 
+  StreamDevice* newd = fog_new ByteArrayStreamDevice(buffer,
     STREAM_IS_READABLE | STREAM_IS_WRITABLE);
   if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
@@ -1110,7 +1110,7 @@ err_t Stream::openBuffer(void* buffer, sysuint_t size, uint32_t openFlags)
   if (openFlags & STREAM_OPEN_READ ) fflags |= STREAM_IS_READABLE;
   if (openFlags & STREAM_OPEN_WRITE) fflags |= STREAM_IS_WRITABLE;
 
-  StreamDevice* newd = new(std::nothrow) MemoryStreamDevice(buffer, size, fflags);
+  StreamDevice* newd = fog_new MemoryStreamDevice(buffer, size, fflags);
   if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
   atomicPtrXchg(&_d, newd)->deref();

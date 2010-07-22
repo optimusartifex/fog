@@ -146,7 +146,6 @@ struct FOG_HIDDEN PathStrokeParams
     {
       uint8_t _startCap;
       uint8_t _endCap;
-
       uint8_t _lineJoin;
       uint8_t _innerJoin;
     };

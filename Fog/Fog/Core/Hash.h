@@ -203,7 +203,7 @@ struct UnorderedHash : public UnorderedAbstract
         {
           do {
             Node* next = node->next;
-            delete node;
+            fog_delete(node);
             node = next;
           } while (node);
           buckets[i] = NULL;
@@ -313,7 +313,7 @@ struct UnorderedHash : public UnorderedAbstract
 
     FOG_INLINE void remove()
     {
-      delete (Node*)_removeCurrent();
+      fog_delete((Node*)_removeCurrent());
     }
   };
 };
@@ -353,7 +353,7 @@ err_t UnorderedHash<KeyType, ValueType>::_detach(Node* exclude)
       if (FOG_LIKELY(node != exclude))
       {
         uint32_t hashMod = node->hashCode % bc;
-        Node* n = new(std::nothrow) Node(node->hashCode, node->key, node->value);
+        Node* n = fog_new Node(node->hashCode, node->key, node->value);
         if (FOG_UNLIKELY(!n)) goto alloc_fail;
 
         n->next = (Node*)newd->buckets[hashMod];
@@ -426,7 +426,7 @@ err_t UnorderedHash<KeyType, ValueType>::put(const KeyType& key, const ValueType
   }
   else
   {
-    node = new(std::nothrow) Node(hashCode, key, value);
+    node = fog_new Node(hashCode, key, value);
     if (!node) return ERR_RT_OUT_OF_MEMORY;
 
     if (prev)
@@ -460,7 +460,7 @@ err_t UnorderedHash<KeyType, ValueType>::remove(const KeyType& key)
       else
         _d->buckets[hashMod] = node->next;
 
-      delete node;
+      fog_delete(node);
       if (--_d->length <= _d->shrinkLength) _rehash(_d->shrinkCapacity);
       return ERR_OK;
     }
@@ -514,7 +514,7 @@ ValueType* UnorderedHash<KeyType, ValueType>::mod(const KeyType& key)
 
   if (!node)
   {
-    node = new(std::nothrow) Node(hashCode, key);
+    node = fog_new Node(hashCode, key);
     if (!node) return NULL;
 
     if (prev)
@@ -652,7 +652,7 @@ struct UnorderedSet : public UnorderedAbstract
         {
           do {
             Node* next = node->next;
-            delete node;
+            fog_delete(node);
             node = next;
           } while (node);
           buckets[i] = NULL;
@@ -743,7 +743,7 @@ struct UnorderedSet : public UnorderedAbstract
 
     FOG_INLINE void remove()
     {
-      delete (Node*)_removeCurrent();
+      fog_delete((Node*)_removeCurrent());
     }
   };
 };
@@ -765,7 +765,7 @@ err_t UnorderedSet<KeyType>::_detach(Node* exclude)
       if (FOG_LIKELY(node != exclude))
       {
         uint32_t hashMod = node->hashCode % bc;
-        Node* n = new(std::nothrow) Node(node->hashCode, node->key, node->value);
+        Node* n = fog_new Node(node->hashCode, node->key, node->value);
         if (FOG_UNLIKELY(!n)) goto alloc_fail;
 
         n->next = (Node*)newd->buckets[hashMod];
@@ -837,7 +837,7 @@ err_t UnorderedSet<KeyType>::put(const KeyType& key)
   }
   else
   {
-    node = new(std::nothrow) Node(hashCode, key);
+    node = fog_new Node(hashCode, key);
     if (!node) return ERR_RT_OUT_OF_MEMORY;
 
     if (prev)
@@ -871,7 +871,7 @@ err_t UnorderedSet<KeyType>::remove(const KeyType& key)
       else
         _d->buckets[hashMod] = node->next;
 
-      delete node;
+      fog_delete(node);
       if (--_d->length <= _d->shrinkLength) _rehash(_d->shrinkCapacity);
       return true;
     }

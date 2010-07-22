@@ -122,15 +122,14 @@ struct FOG_API DirIterator
   err_t rewind();
   int64_t tell();
 
+  FOG_INLINE bool isOpen() const  { return _handle != NULL; }
+
+  FOG_INLINE bool getSkipDots() const { return _skipDots; }
   FOG_INLINE void setSkipDots(bool val) { _skipDots = val; }
 
   FOG_INLINE void* getHandle() const { return _handle; }
-
   FOG_INLINE const String& getPath() const { return _path; }
 
-  FOG_INLINE bool isOpen() const  { return _handle != NULL; }
-
-  FOG_INLINE bool skipDots() const { return _skipDots; }
 
 private:
   void* _handle;

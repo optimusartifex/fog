@@ -19,6 +19,7 @@
 # include <windows.h>
 #endif
 
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,9 +28,6 @@
 # include <stdarg.h>
 #endif // FOG_HAVE_STDARG_H
  
-// Fog placement new/delete operator, std::nothrow.
-#include <new>
-
 #if defined(FOG_HARDCODE_MMX)
 # include <Fog/Core/Compiler/IntrinMMX.h>
 #endif // FOG_HARDCODE_MMX

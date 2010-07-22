@@ -360,7 +360,7 @@ Provider* Provider::ref() const
 
 void Provider::deref()
 {
-  if (_refCount.deref()) delete this;
+  if (_refCount.deref()) fog_delete(this);
 }
 
 bool Provider::supportsImageExtension(const String& extension) const

@@ -101,7 +101,7 @@ err_t NullCodec::appendToUnicode(String& dst, const void* src, sysuint_t size, S
 
 static TextCodec::Engine* NullCodec_create(uint32_t code, uint32_t flags, const char* mime, void*)
 {
-  return new(std::nothrow) NullCodec(code, flags, mime);
+  return fog_new NullCodec(code, flags, mime);
 }
 
 // ============================================================================
@@ -1013,7 +1013,7 @@ static TextCodec::Engine* _8BitCodec_create(uint32_t code, uint32_t flags, const
     decode->uc[ucIndex] = (uint8_t)i;
   }
 
-  return new(std::nothrow) _8BitCodec(code, flags, mime, page8);
+  return fog_new _8BitCodec(code, flags, mime, page8);
 
 fail:
   // Silently destroy codec data and return NULL.
@@ -1283,7 +1283,7 @@ end:
 
 static TextCodec::Engine* UTF8Codec_create(uint32_t code, uint32_t flags, const char* mime, void*)
 {
-  return new(std::nothrow) UTF8Codec(code, flags, mime);
+  return fog_new UTF8Codec(code, flags, mime);
 }
 
 // ============================================================================
@@ -1507,7 +1507,7 @@ end:
 
 static TextCodec::Engine* UTF16Codec_create(uint32_t code, uint32_t flags, const char* mime, void*)
 {
-  return new(std::nothrow) UTF16Codec(code, flags, mime);
+  return fog_new UTF16Codec(code, flags, mime);
 }
 
 // ============================================================================
@@ -1720,7 +1720,7 @@ end:
 
 static TextCodec::Engine* UCS2Codec_create(uint32_t code, uint32_t flags, const char* mime, void*)
 {
-  return new(std::nothrow) UCS2Codec(code, flags, mime);
+  return fog_new UCS2Codec(code, flags, mime);
 }
 
 // ============================================================================
@@ -1912,7 +1912,7 @@ end:
 
 static TextCodec::Engine* UTF32Codec_create(uint32_t code, uint32_t flags, const char* mime, void*)
 {
-  return new(std::nothrow) UTF32Codec(code, flags, mime);
+  return fog_new UTF32Codec(code, flags, mime);
 }
 
 // ============================================================================
@@ -2322,30 +2322,30 @@ FOG_INIT_DECLARE err_t fog_textcodec_init(void)
   TextCodec* addr = (TextCodec*)TextCodec::_codecs;
 
   // Initialize null text codec.
-  new (&addr[TextCodec::BuiltInNull]) 
+  fog_new_p(&addr[TextCodec::BuiltInNull])
     TextCodec(TextCodec::fromCode(TextCodec::None));
 
   // Initialize ASCII text codec.
-  new (&addr[TextCodec::BuiltInAscii]) 
+  fog_new_p(&addr[TextCodec::BuiltInAscii])
     TextCodec(TextCodec::fromCode(TextCodec::ISO8859_1));
   
   // Initialize local 8-bit text codec. If there was problem to initialize it,
   // we will use ASCII one.
-  new (&addr[TextCodec::BuiltInLocal]) 
+  fog_new_p(&addr[TextCodec::BuiltInLocal])
     TextCodec(TextCodec::fromMime(getCodeset()));
   if (addr[TextCodec::BuiltInLocal].isNull())
     addr[TextCodec::BuiltInLocal] = addr[TextCodec::BuiltInAscii];
 
   // Initialize UTF-8 text codec.
-  new (&addr[TextCodec::BuiltInUTF8]) 
+  fog_new_p(&addr[TextCodec::BuiltInUTF8])
     TextCodec(TextCodec::fromCode(TextCodec::UTF8));
   
   // Initialize UTF-16 text codec.
-  new (&addr[TextCodec::BuiltInUTF16]) 
+  fog_new_p(&addr[TextCodec::BuiltInUTF16])
     TextCodec(TextCodec::fromCode(TextCodec::UTF16));
   
   // Initialize UTF-32 text codec.
-  new (&addr[TextCodec::BuiltInUTF32]) 
+  fog_new_p(&addr[TextCodec::BuiltInUTF32])
     TextCodec(TextCodec::fromCode(TextCodec::UTF32));
 
   return ERR_OK;

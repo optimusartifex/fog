@@ -2634,7 +2634,6 @@ sysuint_t ByteArray::countOf(const ByteArray& pattern, uint cs, const Range& ran
     const char* aStr = getData();
     const char* bStr = pattern.getData();
 
-    sysuint_t rstart = rstart;
     sysuint_t count = 0;
 
     for (;;)

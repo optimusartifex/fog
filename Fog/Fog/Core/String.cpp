@@ -2811,7 +2811,7 @@ sysuint_t String::countOf(const String& pattern,
   uint cs, const Range& range) const
 {
   sysuint_t rstart, rend;
-  if (!fitToRange(*this, &rstart, &rend - rstart, range)) return 0;
+  if (!fitToRange(*this, &rstart, &rend, range)) return 0;
 
   sysuint_t len = pattern.getLength();
   if (len == 0) return 0;

@@ -17,27 +17,29 @@ namespace Fog {
 // [RetainPtr]
 // =============================================================================
 
-template <typename T> template <typename U> inline RetainPtr<T>& RetainPtr<T>::operator=(const RetainPtr<U>& o)
+template <typename T> template <typename U>
+inline RetainPtr<T>& RetainPtr<T>::operator=(const RetainPtr<U>& o)
 {
-    PtrType optr = o.get();
-    if (optr)
-        CFRetain(optr);
-    PtrType ptr = m_ptr;
-    m_ptr = optr;
-    if (ptr)
-        CFRelease(ptr);
-    return *this;
+  PtrType optr = o.get();
+  if (optr)
+    CFRetain(optr);
+  PtrType ptr = m_ptr;
+  m_ptr = optr;
+  if (ptr)
+    CFRelease(ptr);
+  return *this;
 }
 
-template <typename T> template <typename U> inline RetainPtr<T>& RetainPtr<T>::operator=(U* optr)
+template <typename T> template <typename U>
+inline RetainPtr<T>& RetainPtr<T>::operator=(U* optr)
 {
-    if (optr)
-        CFRetain(optr);
-    PtrType ptr = m_ptr;
-    m_ptr = optr;
-    if (ptr)
-        CFRelease(ptr);
-    return *this;
+  if (optr)
+    CFRetain(optr);
+  PtrType ptr = m_ptr;
+  m_ptr = optr;
+  if (ptr)
+    CFRelease(ptr);
+  return *this;
 }
 
 // ==============================================================================
@@ -46,20 +48,18 @@ template <typename T> template <typename U> inline RetainPtr<T>& RetainPtr<T>::o
 
 String stringFromCFString(const RetainPtr<CFStringRef>& str)
 {
-	sysuint_t len = CFStringGetLength(str.get());
-	char* data;
-	if (CFStringGetCString(str.get(), data, len, kCFStringEncodingUnicode))
-	{
-		return String(Utf16((Char*)data, len));
-	}
-	return String();
+  sysuint_t len = CFStringGetLength(str.get());
+  char* data;
+  if (CFStringGetCString(str.get(), data, len, kCFStringEncodingUnicode))
+  return String(Utf16((Char*)data, len));
+  return String();
 }
 
 CFStringRef CFStringFromString(const String& str)
 {
-	ByteArray tmp;
-	TextCodec::utf32().fromUnicode(tmp, str);
-	return CFStringCreateWithCString(NULL, tmp.getData(), kCFStringEncodingUnicode);
+  ByteArray tmp;
+  TextCodec::utf32().fromUnicode(tmp, str);
+  return CFStringCreateWithCString(NULL, tmp.getData(), kCFStringEncodingUnicode);
 }
 
 // TODO NSString -> String and vice versa

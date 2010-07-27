@@ -13,9 +13,11 @@
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/FileSystem.h>
 #include <Fog/Core/Hash.h>
+#include <Fog/Core/Lock.h>
 #include <Fog/Core/Memory.h>
 #include <Fog/Core/OS.h>
 #include <Fog/Core/Static.h>
+#include <Fog/Core/String.h>
 #include <Fog/Core/UserInfo.h>
 #include <Fog/Graphics/Color.h>
 #include <Fog/Graphics/Constants.h>
@@ -619,8 +621,6 @@ FOG_INIT_EXTERN void fog_font_shutdown(void);
 FOG_INIT_DECLARE err_t fog_font_init(void)
 {
   using namespace Fog;
-
-  fog_debug("fog_font_init called");
 
   err_t err = ERR_OK;
 

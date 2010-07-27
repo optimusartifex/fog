@@ -1659,7 +1659,6 @@ err_t RasterPaintEngine::drawText(const DoublePoint& pt_, const String& text, co
 
 err_t RasterPaintEngine::drawText(const IntRect& rect, const String& text, const Font& font, uint32_t align, const IntRect* clip_)
 {
-  fog_debug("drawText (alpha)");
   RASTER_ENTER_PAINT_FUNC();
 
   int tx = ctx.finalTranslate.x;

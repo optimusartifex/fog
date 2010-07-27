@@ -76,7 +76,6 @@ List<String> MacFontEngine::getFontList()
 
 FontFace* MacFontEngine::createDefaultFace()
 {
-  fog_debug("createDefaultFace");
   return createFace(Ascii8("Times"), 12, FontOptions(), FloatMatrix());
 }
 
@@ -163,29 +162,22 @@ static void pathFromCGPathApply(void* info, const CGPathElement* element)
   switch(element->type)
   {
       case kCGPathElementMoveToPoint:
-          fog_debug("  path.moveTo(%f, %f);", element->points[0].x + offset.getX(), offset.getY() - element->points[0].y);
           path.moveTo(element->points[0].x + offset.getX(),
               offset.getY() - element->points[0].y);
           break;
 
       case kCGPathElementAddLineToPoint:
-      fog_debug("  path.lineTo(%f, %f);", element->points[0].x + offset.getX(), offset.getY() - element->points[0].y);
           path.lineTo(element->points[0].x + offset.getX(),
               offset.getY() - element->points[0].y);
           break;
 
     case kCGPathElementAddQuadCurveToPoint:
-    fog_debug("  path.curveTo(%f, %f, %f, %f);", element->points[0].x + offset.getX(), offset.getY() - element->points[0].y, element->points[1].x + offset.getX(), offset.getY() - element->points[1].y);
         path.curveTo(
            element->points[0].x + offset.getX(), offset.getY() - element->points[0].y,
            element->points[1].x + offset.getX(), offset.getY() - element->points[1].y);
         break;
 
     case kCGPathElementAddCurveToPoint:
-       fog_debug("  path.cubicTo(%f, %f, %f, %f);", element->points[0].x + offset.getX(), offset.getY() - element->points[0].y,
-                                               element->points[1].x + offset.getX(), offset.getY() - element->points[1].y,
-                                               element->points[2].x + offset.getX(), offset.getY() - element->points[2].y);
-
         path.cubicTo(
            element->points[0].x + offset.getX(), offset.getY() - element->points[0].y,
            element->points[1].x + offset.getX(), offset.getY() - element->points[1].y,
@@ -193,7 +185,6 @@ static void pathFromCGPathApply(void* info, const CGPathElement* element)
         break;
 
     case kCGPathElementCloseSubpath:
-        fog_debug("  path.closePolygon();");
         path.closePolygon();
         break;
 
@@ -209,11 +200,13 @@ DoublePath MacFontFace::renderGlyph(uint32_t uc, DoublePoint& offset)
   CGGlyph glyph;
   CTFontGetGlyphsForCharacters(font.get(), &unichar, &glyph, 1);
   RetainPtr<CGPathRef> path = CTFontCreatePathForGlyph(font.get(), glyph, NULL);
+  if (!path)
+  {
+    fog_stderr_msg("Fog::MacFontEngine", "renderGlyph", "Could not create path for glyph");
+  }
   DoublePath p;
   CGPathApply(path.get(), new ApplyInfo(p, offset), pathFromCGPathApply);
-  double x = CTFontGetAdvancesForGlyphs(font.get(), kCTFontHorizontalOrientation, &glyph, NULL, 1);
-  fog_debug("%i = %f", uc, x);
-  offset.translate(x, 0.0);
+  offset.translate(CTFontGetAdvancesForGlyphs(font.get(), kCTFontHorizontalOrientation, &glyph, NULL, 1), 0.0);
   return p;
 }
 
@@ -221,7 +214,6 @@ err_t MacFontFace::getOutline(const Char* str, sysuint_t length, DoublePath& dst
 {
   ByteArray result;
   TextCodec::local8().fromUnicode(result, str, length);
-  fog_debug("--- %s ---", result.getData());
   AutoLock locked(lock);
 
   DoublePoint offset(0.0, 0.0);

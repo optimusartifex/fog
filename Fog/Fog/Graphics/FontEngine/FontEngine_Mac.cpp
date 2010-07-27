@@ -166,36 +166,34 @@ static void pathFromCGPathApply(void* info, const CGPathElement* element)
 
   switch(element->type)
   {
-      case kCGPathElementMoveToPoint:
-          path.moveTo(element->points[0].x + offset.getX(),
-              offset.getY() - element->points[0].y);
-          break;
+    case kCGPathElementMoveToPoint:
+      path.moveTo(element->points[0].x + offset.getX(), offset.getY() - element->points[0].y);
+      break;
 
-      case kCGPathElementAddLineToPoint:
-          path.lineTo(element->points[0].x + offset.getX(),
-              offset.getY() - element->points[0].y);
-          break;
+    case kCGPathElementAddLineToPoint:
+      path.lineTo(element->points[0].x + offset.getX(), offset.getY() - element->points[0].y);
+      break;
 
     case kCGPathElementAddQuadCurveToPoint:
-        path.curveTo(
-           element->points[0].x + offset.getX(), offset.getY() - element->points[0].y,
-           element->points[1].x + offset.getX(), offset.getY() - element->points[1].y);
-        break;
+      path.curveTo(
+         element->points[0].x + offset.getX(), offset.getY() - element->points[0].y,
+         element->points[1].x + offset.getX(), offset.getY() - element->points[1].y);
+      break;
 
     case kCGPathElementAddCurveToPoint:
-        path.cubicTo(
-           element->points[0].x + offset.getX(), offset.getY() - element->points[0].y,
-           element->points[1].x + offset.getX(), offset.getY() - element->points[1].y,
-           element->points[2].x + offset.getX(), offset.getY() - element->points[2].y);
-        break;
+      path.cubicTo(
+         element->points[0].x + offset.getX(), offset.getY() - element->points[0].y,
+         element->points[1].x + offset.getX(), offset.getY() - element->points[1].y,
+         element->points[2].x + offset.getX(), offset.getY() - element->points[2].y);
+      break;
 
     case kCGPathElementCloseSubpath:
-        path.closePolygon();
-        break;
+      path.closePolygon();
+      break;
 
     default:
-        fog_debug("Unknown path element type %d", element->type);
-        break;
+      fog_debug("Unknown path element type %d", element->type);
+      break;
   }
 }
 
@@ -208,35 +206,46 @@ DoublePath MacFontFace::renderGlyph(uint32_t uc, DoublePoint& offset)
     fog_stderr_msg("Fog::MacFontFace", "renderGlyph", "Could not encode unicode character");
     return DoublePath();
   }
-  CGAffineTransform* transform = new CGAffineTransform;
-  transform->a = matrix.sx;
-  transform->b = matrix.shy;
-  transform->c = matrix.shx;
-  transform->d = matrix.sy;
-  RetainPtr<CGPathRef> path = CTFontCreatePathForGlyph(font.get(), glyph, transform);
+
+  CGAffineTransform transform;
+  transform.a = matrix.sx;
+  transform.b = matrix.shy;
+  transform.c = matrix.shx;
+  transform.d = matrix.sy;
+  transform.tx = matrix.tx;
+  transform.ty = matrix.ty;
+
+  DoublePath p;
+  CGSize sz;
+
+  RetainPtr<CGPathRef> path = CTFontCreatePathForGlyph(font.get(), glyph, &transform);
   if (!path)
   {
     fog_stderr_msg("Fog::MacFontFace", "renderGlyph", "Could not create path for glyph %i", uc);
-    return DoublePath();
+    return p;
   }
-  DoublePath p;
+
   CGPathApply(path.get(), new ApplyInfo(p, offset), pathFromCGPathApply);
-  offset.translate(CTFontGetAdvancesForGlyphs(font.get(), kCTFontHorizontalOrientation, &glyph, NULL, 1), 0.0);
+  CTFontGetAdvancesForGlyphs(font.get(), kCTFontHorizontalOrientation, &glyph, &sz, 1);
+  offset.translate(sz.width, 0.0);
+
   return p;
 }
 
 err_t MacFontFace::getOutline(const Char* str, sysuint_t length, DoublePath& dst)
 {
+  // TODO: What is this
   ByteArray result;
   TextCodec::local8().fromUnicode(result, str, length);
+
   AutoLock locked(lock);
 
   DoublePoint offset(0.0, 0.0);
   for (sysuint_t i = 0; i < length; i++)
   {
-	dst.addPath(renderGlyph(str[i].ch(), offset), offset);
+    dst.addPath(renderGlyph(str[i].ch(), offset), offset);
   }
-  
+
   return ERR_OK;
 }
 

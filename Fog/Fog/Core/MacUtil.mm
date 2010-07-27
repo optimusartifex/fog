@@ -23,8 +23,8 @@ inline RetainPtr<T>& RetainPtr<T>::operator=(const RetainPtr<U>& o)
   PtrType optr = o.get();
   if (optr)
     CFRetain(optr);
-  PtrType ptr = m_ptr;
-  m_ptr = optr;
+  PtrType ptr = _ptr;
+  _ptr = optr;
   if (ptr)
     CFRelease(ptr);
   return *this;
@@ -35,8 +35,8 @@ inline RetainPtr<T>& RetainPtr<T>::operator=(U* optr)
 {
   if (optr)
     CFRetain(optr);
-  PtrType ptr = m_ptr;
-  m_ptr = optr;
+  PtrType ptr = _ptr;
+  _ptr = optr;
   if (ptr)
     CFRelease(ptr);
   return *this;

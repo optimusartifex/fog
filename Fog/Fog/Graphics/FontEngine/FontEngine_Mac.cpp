@@ -87,7 +87,12 @@ FontFace* MacFontEngine::createFace(
 {
   MacFontFace* face = new(std::nothrow) MacFontFace();
 
-  face->font = CTFontCreateWithName(CFStringFromString(family), size, NULL);
+  CGAffineTransform* transform = new CGAffineTransform;
+  transform->a = matrix.sx;
+  transform->b = matrix.shy;
+  transform->c = matrix.shx;
+  transform->d = matrix.sy;
+  face->font = CTFontCreateWithName(CFStringFromString(family), size, transform);
   face->family = family;
   face->family.squeeze();
   face->metrics._size = size;
@@ -198,11 +203,21 @@ DoublePath MacFontFace::renderGlyph(uint32_t uc, DoublePoint& offset)
 {
   UniChar unichar = static_cast<UniChar>(uc);
   CGGlyph glyph;
-  CTFontGetGlyphsForCharacters(font.get(), &unichar, &glyph, 1);
-  RetainPtr<CGPathRef> path = CTFontCreatePathForGlyph(font.get(), glyph, NULL);
+  if (!CTFontGetGlyphsForCharacters(font.get(), &unichar, &glyph, 1))
+  {
+    fog_stderr_msg("Fog::MacFontFace", "renderGlyph", "Could not encode unicode character");
+    return DoublePath();
+  }
+  CGAffineTransform* transform = new CGAffineTransform;
+  transform->a = matrix.sx;
+  transform->b = matrix.shy;
+  transform->c = matrix.shx;
+  transform->d = matrix.sy;
+  RetainPtr<CGPathRef> path = CTFontCreatePathForGlyph(font.get(), glyph, transform);
   if (!path)
   {
-    fog_stderr_msg("Fog::MacFontEngine", "renderGlyph", "Could not create path for glyph");
+    fog_stderr_msg("Fog::MacFontFace", "renderGlyph", "Could not create path for glyph %i", uc);
+    return DoublePath();
   }
   DoublePath p;
   CGPathApply(path.get(), new ApplyInfo(p, offset), pathFromCGPathApply);
@@ -219,9 +234,6 @@ err_t MacFontFace::getOutline(const Char* str, sysuint_t length, DoublePath& dst
   DoublePoint offset(0.0, 0.0);
   for (sysuint_t i = 0; i < length; i++)
   {
-	dst.moveTo(offset);
-	dst.lineTo(offset.getX(), offset.getY()-30.0);
-	dst.closePolygon();
 	dst.addPath(renderGlyph(str[i].ch(), offset), offset);
   }
   

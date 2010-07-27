@@ -165,6 +165,10 @@ Else(WIN32)
       Set(FOG_LIBRARIES "${FOG_LIBRARIES} -ldl")
     EndIf(FOG_LIBRARY_DL_EXISTS)
   EndIf(FOG_HAVE_DLFCN_H)
+  
+  If(APPLE)
+    Set(FOG_LIBRARIES "${FOG_LIBRARIES} -framework Carbon")
+  EndIf(APPLE)
 EndIf(WIN32)
 
 # =============================================================================
@@ -190,7 +194,9 @@ EndIf(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 If(WIN32)
   Set(FOG_FONT_WINDOWS TRUE)
-Else(WIN32)
+ElseIf(APPLE)
+  Set(FOG_FONT_MAC TRUE)
+Else(APPLE)
   Find_File(HAVE_FREETYPE freetype-config)
   If(HAVE_FREETYPE)
     Exec_Program(freetype-config ARGS --cflags OUTPUT_VARIABLE FREETYPE_CONFIG_OUT RETURN_VALUE FREETYPE_CONFIG_RET)
@@ -249,6 +255,7 @@ Set(FOG_CORE_LIB_SOURCES
   Fog/Core/Locale.cpp
   Fog/Core/Lock.cpp
   Fog/Core/ManagedString.cpp
+  Fog/Core/MacUtil.mm
   Fog/Core/MapFile.cpp
   Fog/Core/Math.cpp
   Fog/Core/Memory.cpp
@@ -310,6 +317,7 @@ Set(FOG_CORE_MAIN_HEADERS
   Fog/Core/ListenerList.h
   Fog/Core/Locale.h
   Fog/Core/Lock.h
+  Fog/Core/MacUtil.h
   Fog/Core/ManagedString.h
   Fog/Core/MapFile.h
   Fog/Core/Math.h
@@ -518,12 +526,14 @@ Set(FOG_GRAPHICS_IMAGEIO_HEADERS
 
 Set(FOG_GRAPHICS_FONTENGINE_SOURCES
   Fog/Graphics/FontEngine/FontEngine_FreeType.cpp
-  Fog/Graphics/FontEngine/FontEngine_Windows.cpp
+  Fog/Graphics/FontEngine/FontEngine_Mac.cpp
   Fog/Graphics/FontEngine/FontEngine_Null.cpp
+  Fog/Graphics/FontEngine/FontEngine_Windows.cpp
 )
 
 Set(FOG_GRAPHICS_FONTENGINE_HEADERS
   Fog/Graphics/FontEngine/FontEngine_FreeType.h
+  Fog/Graphics/FontEngine/FontEngine_Mac.h
   Fog/Graphics/FontEngine/FontEngine_Null_p.h
   Fog/Graphics/FontEngine/FontEngine_Windows.h
 )

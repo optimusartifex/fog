@@ -521,3 +521,4 @@ FOG_GUI_MAIN()
   app.addListener(EVENT_LAST_WINDOW_CLOSED, &app, &Application::quit);
   return app.run();
 }
+

@@ -1659,6 +1659,7 @@ err_t RasterPaintEngine::drawText(const DoublePoint& pt_, const String& text, co
 
 err_t RasterPaintEngine::drawText(const IntRect& rect, const String& text, const Font& font, uint32_t align, const IntRect* clip_)
 {
+  fog_debug("drawText (alpha)");
   RASTER_ENTER_PAINT_FUNC();
 
   int tx = ctx.finalTranslate.x;
@@ -1671,11 +1672,20 @@ err_t RasterPaintEngine::drawText(const IntRect& rect, const String& text, const
     clip.set(clip_->x + tx, clip_->y + ty, clip_->w, clip_->h);
     clip_ = &clip;
   }
+  
+  // TODO: Not optimal, no clip used.
+  if (ctx.hints.transformType >= RASTER_TRANSFORM_SUBPX || ctx.hints.forceOutlineText)
+  {
+    tmpPath0.clear();
+    FOG_RETURN_ON_ERROR(font.getOutline(text, tmpPath0));
+  }
+  else
+  {
+	tmpGlyphSet.clear();
+    FOG_RETURN_ON_ERROR(font.getGlyphSet(text.getData(), text.getLength(), tmpGlyphSet));
+  }
 
-  tmpGlyphSet.clear();
-  FOG_RETURN_ON_ERROR(font.getGlyphSet(text.getData(), text.getLength(), tmpGlyphSet));
-
-  int wsize = tmpGlyphSet.getAdvance();
+  int wsize = tmpPath0.getBoundingRect().getWidth();
   int hsize = font.getHeight();
 
   int x = rect.x + tx;
@@ -1710,8 +1720,6 @@ err_t RasterPaintEngine::drawText(const IntRect& rect, const String& text, const
   // TODO: Not optimal, no clip used.
   if (ctx.hints.transformType >= RASTER_TRANSFORM_SUBPX || ctx.hints.forceOutlineText)
   {
-    tmpPath0.clear();
-    FOG_RETURN_ON_ERROR(font.getOutline(text, tmpPath0));
     tmpPath0.translate((double)x - tx, (double)y - ty + font.getAscent());
     return _serializePaintPath(tmpPath0, false);
   }
@@ -2325,7 +2333,11 @@ void RasterPaintEngine::_setCapsDefaults()
   ctx.hints.aaQuality = ANTI_ALIASING_SMOOTH;
   ctx.hints.imageInterpolation = IMAGE_INTERPOLATION_SMOOTH;
   ctx.hints.colorInterpolation = COLOR_INTERPOLATION_SMOOTH;
+#if defined(FOG_FONT_MAC)
+  ctx.hints.forceOutlineText = true;
+#else
   ctx.hints.forceOutlineText = false;
+#endif
   ctx.hints.lineIsSimple = true;
 
   ctx.funcs = rasterFuncs.getCompositeFuncs(OPERATOR_SRC_OVER, ctx.paintLayer.format);

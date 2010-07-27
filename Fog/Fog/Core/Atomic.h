@@ -148,10 +148,7 @@ static FOG_INLINE T* atomicPtrXchg(T** atomic, T* value)
 
 } // Fog namespace
 
-// ============================================================================
-// [Fog::TypeInfo<T>]
-// ============================================================================
-
+// [TypeInfo]
 #include <Fog/Core/TypeInfo.h>
 FOG_DECLARE_TYPEINFO_TEMPLATE1(Fog::Atomic, typename, T, Fog::TYPEINFO_PRIMITIVE)
 

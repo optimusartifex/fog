@@ -80,6 +80,9 @@
 //! @brief Used for windows font subsystem.
 #cmakedefine FOG_FONT_WINDOWS
 
+//! @brief Used for mac font subsystem.
+#cmakedefine FOG_FONT_MAC
+
 //! @brief Used for fontconfig support (Unix/Linux).
 #cmakedefine FOG_HAVE_FONTCONFIG
 //! @brief Used if freetype library is located

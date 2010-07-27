@@ -13,11 +13,9 @@
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/FileSystem.h>
 #include <Fog/Core/Hash.h>
-#include <Fog/Core/Lock.h>
 #include <Fog/Core/Memory.h>
 #include <Fog/Core/OS.h>
 #include <Fog/Core/Static.h>
-#include <Fog/Core/String.h>
 #include <Fog/Core/UserInfo.h>
 #include <Fog/Graphics/Color.h>
 #include <Fog/Graphics/Constants.h>
@@ -26,12 +24,16 @@
 #include <Fog/Graphics/GlyphCache.h>
 
 #if defined(FOG_FONT_WINDOWS)
-#include <Fog/Graphics/FontEngine/FontEngine_Windows.h>
+# include <Fog/Graphics/FontEngine/FontEngine_Windows.h>
 #endif // FOG_FONT_WINDOWS
 
 #if defined(FOG_FONT_FREETYPE)
-#include <Fog/Graphics/FontEngine/FontEngine_FreeType.h>
+# include <Fog/Graphics/FontEngine/FontEngine_FreeType.h>
 #endif // FOG_FONT_FREETYPE
+
+#if defined(FOG_FONT_MAC)
+# include <Fog/Graphics/FontEngine/FontEngine_Mac.h>
+#endif // FOG_FONT_MAC
 
 #include <Fog/Graphics/FontEngine/FontEngine_Null_p.h>
 
@@ -618,6 +620,8 @@ FOG_INIT_DECLARE err_t fog_font_init(void)
 {
   using namespace Fog;
 
+  fog_debug("fog_font_init called");
+
   err_t err = ERR_OK;
 
   font_local.init();
@@ -644,6 +648,14 @@ FOG_INIT_DECLARE err_t fog_font_init(void)
     if (Font::_engine == NULL) { err = ERR_RT_OUT_OF_MEMORY; goto fail; }
   }
 #endif // FOG_FONT_FREETYPE
+
+#if defined(FOG_FONT_MAC)
+  if (!Font::_engine)
+  {
+    Font::_engine = fog_new MacFontEngine();
+    if (Font::_engine == NULL) { err = ERR_RT_OUT_OF_MEMORY; goto fail; }
+  }
+#endif  // FOG_FONT_MAC
 
   // Add engine specific font directories.
   Font::addFontPaths(Font::_engine->getDefaultFontDirectories());

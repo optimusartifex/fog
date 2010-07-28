@@ -87,12 +87,12 @@ FontFace* MacFontEngine::createFace(
 {
   MacFontFace* face = new(std::nothrow) MacFontFace();
 
-  CGAffineTransform* transform = new CGAffineTransform;
-  transform->a = matrix.sx;
-  transform->b = matrix.shy;
-  transform->c = matrix.shx;
-  transform->d = matrix.sy;
-  face->font = CTFontCreateWithName(CFStringFromString(family), size, transform);
+  CGAffineTransform transform;
+  transform.a = matrix.sx;
+  transform.b = matrix.shy;
+  transform.c = matrix.shx;
+  transform.d = matrix.sy;
+  face->font = CTFontCreateWithName(CFStringFromString(family), size, &transform);
   face->family = family;
   face->family.squeeze();
   face->metrics._size = size;
@@ -164,7 +164,7 @@ static void pathFromCGPathApply(void* info, const CGPathElement* element)
   DoublePath& path = static_cast<ApplyInfo*>(info)->path;
   DoublePoint offset = static_cast<ApplyInfo*>(info)->offset;
 
-  switch(element->type)
+  switch (element->type)
   {
     case kCGPathElementMoveToPoint:
       path.moveTo(element->points[0].x + offset.getX(), offset.getY() - element->points[0].y);
@@ -225,7 +225,8 @@ DoublePath MacFontFace::renderGlyph(uint32_t uc, DoublePoint& offset)
     return p;
   }
 
-  CGPathApply(path.get(), new ApplyInfo(p, offset), pathFromCGPathApply);
+  ApplyInfo info(p, offset);
+  CGPathApply(path.get(), &info, pathFromCGPathApply);
   CTFontGetAdvancesForGlyphs(font.get(), kCTFontHorizontalOrientation, &glyph, &sz, 1);
   offset.translate(sz.width, 0.0);
 
@@ -234,10 +235,6 @@ DoublePath MacFontFace::renderGlyph(uint32_t uc, DoublePoint& offset)
 
 err_t MacFontFace::getOutline(const Char* str, sysuint_t length, DoublePath& dst)
 {
-  // TODO: What is this
-  ByteArray result;
-  TextCodec::local8().fromUnicode(result, str, length);
-
   AutoLock locked(lock);
 
   DoublePoint offset(0.0, 0.0);

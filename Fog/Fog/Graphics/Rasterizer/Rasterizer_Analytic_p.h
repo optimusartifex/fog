@@ -137,6 +137,11 @@ struct FOG_HIDDEN AnalyticRasterizer : public Rasterizer
     Rasterizer* _rasterizer, Scanline8& scanline, int y,
     const Span8* clipSpans);
 
+  //! @brief Get cell buffer instance.
+  static CellXYBuffer* getCellXYBuffer();
+  //! @brief Release cell buffer instance.
+  static void releaseCellXYBuffer(CellXYBuffer* cellBuffer);
+
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
@@ -149,7 +154,7 @@ struct FOG_HIDDEN AnalyticRasterizer : public Rasterizer
   //! @brief Sorted cells array capacity.
   //!
   //! @note This value is only valid after finalize() call.
-  sysuint_t _cellsCapacity;
+  uint32_t _cellsCapacity;
 
   //! @brief Total count of cells in all buffers.
   //!
@@ -158,7 +163,7 @@ struct FOG_HIDDEN AnalyticRasterizer : public Rasterizer
   //! one of these methods isn't called.
   //!
   //! @note This value is only valid after finalize() call.
-  sysuint_t _cellsCount;
+  uint32_t _cellsCount;
 
   //! @brief Rows info (index and count of cells in row).
   //!
@@ -168,10 +173,10 @@ struct FOG_HIDDEN AnalyticRasterizer : public Rasterizer
   //! @brief Rows array capacity.
   //!
   //! @note This value is only valid after finalize() call.
-  sysuint_t _rowsCapacity;
+  uint32_t _rowsCapacity;
 
   //! @brief Whether rasterizer clipping is enabled.
-  int _clipping;
+  uint _clipping;
   //! @brief Rasterizer clip box in 24x8 format.
   IntBox _clip24x8;
 

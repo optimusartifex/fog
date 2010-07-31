@@ -14,7 +14,6 @@
 
 // [Dependencies]
 #include <Fog/Core/Assert.h>
-#include <Fog/Core/AutoLock.h>
 #include <Fog/Core/EventLoop.h>
 #include <Fog/Core/Lazy.h>
 #include <Fog/Core/List.h>

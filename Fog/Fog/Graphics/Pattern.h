@@ -103,14 +103,13 @@ struct FOG_API PatternData
   } obj;
 
   //! @internal
+  //!
+  //! @brief Data for all pattern types.
   union ObjectData
   {
     Static< TextureData > texture;
     Static< GradientData > gradient;
-  };
-
-  //! @brief Data for all pattern types.
-  ObjectData data;
+  } data;
 };
 
 // ============================================================================

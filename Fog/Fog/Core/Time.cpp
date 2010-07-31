@@ -9,7 +9,6 @@
 
 // [Dependencies]
 #include <Fog/Core/Assert.h>
-#include <Fog/Core/AutoLock.h>
 #include <Fog/Core/CpuInfo.h>
 #include <Fog/Core/Lazy.h>
 #include <Fog/Core/Lock.h>

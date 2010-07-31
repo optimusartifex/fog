@@ -9,7 +9,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/AutoLock.h>
 #include <Fog/Core/ByteArray.h>
 #include <Fog/Core/Lock.h>
 #include <Fog/Core/Math.h>
@@ -18,8 +17,8 @@
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/RasterEngine_p.h>
 #include <Fog/Graphics/Rasterizer_p.h>
-#include <Fog/Graphics/Rasterizer/Rasterizer_Analytic_p.h>
 #include <Fog/Graphics/Rasterizer/LiangBarsky_p.h>
+#include <Fog/Graphics/Rasterizer/Rasterizer_Analytic_p.h>
 #include <Fog/Graphics/Span_p.h>
 
 namespace Fog {
@@ -149,7 +148,7 @@ void AnalyticRasterizer::reset()
   _clipBox.clear();
   _clip24x8.clear();
 
-  _finalized = false;
+  _isFinalized = false;
   _isValid = false;
 
   _x1 = 0;
@@ -278,7 +277,7 @@ void AnalyticRasterizer::updateFunctions()
 
 void AnalyticRasterizer::addPath(const DoublePath& path)
 {
-  FOG_ASSERT(_finalized == false);
+  FOG_ASSERT(_isFinalized == false);
 
   sysuint_t i = path.getLength();
   if (!i) return;
@@ -898,7 +897,7 @@ static FOG_INLINE void swapCells(T* FOG_RESTRICT a, T* FOG_RESTRICT b)
 }
 
 template<class Cell>
-static FOG_INLINE void qsortCells(Cell* start, sysuint_t num)
+static FOG_INLINE void qsortCells(Cell* start, uint32_t num)
 {
   Cell*  stack[80];
   Cell** top; 
@@ -1008,7 +1007,7 @@ static FOG_INLINE void qsortCells(Cell* start, sysuint_t num)
 void AnalyticRasterizer::finalize()
 {
   // Perform sort only the first time.
-  if (_finalized) return;
+  if (_isFinalized) return;
 
   closePolygon();
   if (_curCell == &_invalidCell) return;
@@ -1033,12 +1032,12 @@ void AnalyticRasterizer::finalize()
   _boundingBox.x2++;
   _boundingBox.y2++;
 
-  sysuint_t rows = (sysuint_t)(_boundingBox.y2 - _boundingBox.y1);
+  uint32_t rows = (uint32_t)(_boundingBox.y2 - _boundingBox.y1);
 
   if (_cellsCapacity < _cellsCount)
   {
     // Reserve a bit more if initial value is too small.
-    sysuint_t cap = Math::max(_cellsCount, (sysuint_t)256);
+    uint32_t cap = Math::max(_cellsCount, (uint32_t)256);
 
     if (_cellsSorted) Memory::free(_cellsSorted);
     _cellsSorted = (CellX*)Memory::alloc(sizeof(CellX) * cap);
@@ -1048,7 +1047,7 @@ void AnalyticRasterizer::finalize()
   if (_rowsCapacity < rows)
   {
     // Reserve a bit more if initial value is too small.
-    sysuint_t cap = Math::max(rows, (sysuint_t)256);
+    uint32_t cap = Math::max(rows, (uint32_t)256);
 
     if (_rowsInfo) Memory::free(_rowsInfo);
     _rowsInfo = (RowInfo*)Memory::alloc(sizeof(RowInfo) * cap);
@@ -1064,7 +1063,7 @@ void AnalyticRasterizer::finalize()
 
   // Work variables.
   CellXYBuffer* buf;
-  sysuint_t i;
+  uint32_t i;
   CellXY* cell;
 
   // Create the Y-histogram (count the numbers of cells for each Y).
@@ -1121,7 +1120,7 @@ void AnalyticRasterizer::finalize()
   freeXYCellBuffers(false);
 
   // Mark rasterizer as sorted.
-  _finalized = true;
+  _isFinalized = true;
   _isValid = hasCells();
 }
 
@@ -1184,7 +1183,7 @@ Span8* AnalyticRasterizer::_sweepScanlineSimpleImpl(
   AnalyticRasterizer* rasterizer =
     reinterpret_cast<AnalyticRasterizer*>(_rasterizer);
 
-  FOG_ASSERT(rasterizer->_finalized);
+  FOG_ASSERT(rasterizer->_isFinalized);
   if (y >= rasterizer->_boundingBox.y2) return NULL;
 
   const RowInfo& ri = rasterizer->_rowsInfo[y - rasterizer->_boundingBox.y1];
@@ -1321,7 +1320,7 @@ Span8* AnalyticRasterizer::_sweepScanlineRegionImpl(
   AnalyticRasterizer* rasterizer =
     reinterpret_cast<AnalyticRasterizer*>(_rasterizer);
 
-  FOG_ASSERT(rasterizer->_finalized);
+  FOG_ASSERT(rasterizer->_isFinalized);
   if (y >= rasterizer->_boundingBox.y2) return NULL;
 
   const RowInfo& ri = rasterizer->_rowsInfo[y - rasterizer->_boundingBox.y1];
@@ -1531,7 +1530,7 @@ Span8* AnalyticRasterizer::_sweepScanlineSpansImpl(
   AnalyticRasterizer* rasterizer =
     reinterpret_cast<AnalyticRasterizer*>(_rasterizer);
 
-  FOG_ASSERT(rasterizer->_finalized);
+  FOG_ASSERT(rasterizer->_isFinalized);
   if (y >= rasterizer->_boundingBox.y2) return NULL;
 
   const RowInfo& ri = rasterizer->_rowsInfo[y - rasterizer->_boundingBox.y1];
@@ -1811,10 +1810,12 @@ advanceClip:
             if ((clipCur = clipCur->getNext()) == NULL) goto end;
             clipX2 = clipCur->getX2();
             CLIP_SPAN_CHANGED()
+
             if (nextX > clipX1)
             {
               int toX = Math::min<int>(nextX, clipX2);
               FOG_ASSERT(clipX1 < toX);
+    
               if (Span8::isPtrCMask(clipMask))
               {
                 uint alphaAdj = ByteUtil::scalar_muldiv255(alpha, Span8::ptrToCMask(clipMask));

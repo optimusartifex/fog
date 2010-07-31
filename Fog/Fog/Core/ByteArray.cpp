@@ -101,7 +101,7 @@ ByteArray::ByteArray(const char* str, sysuint_t length)
   if (!_d) _d = _dnull->refAlways();
 }
 
-ByteArray::ByteArray(const Str8& str)
+ByteArray::ByteArray(const Stub8& str)
 {
   const char* s = str.getData();
   sysuint_t length = (str.getLength() == DETECT_LENGTH)
@@ -524,7 +524,7 @@ err_t ByteArray::set(char ch, sysuint_t length)
   return ERR_OK;
 }
 
-err_t ByteArray::set(const Str8& str)
+err_t ByteArray::set(const Stub8& str)
 {
   const char* s = str.getData();
   sysuint_t length = (str.getLength() == DETECT_LENGTH)
@@ -775,7 +775,7 @@ err_t ByteArray::append(char ch, sysuint_t length)
   return ERR_OK;
 }
 
-err_t ByteArray::append(const Str8& other)
+err_t ByteArray::append(const Stub8& other)
 {
   const char* s = other.getData();
   sysuint_t length = other.getLength();
@@ -1035,7 +1035,7 @@ __exponentialForm:
   goto __ret;
 
 __InfOrNaN:
-  err |= append(Str8((const char*)out.result, out.length));
+  err |= append(Stub8((const char*)out.result, out.length));
 __ret:
   // Apply padding.
   numberLength = _d->length - beginLength;
@@ -1427,7 +1427,7 @@ ffUnsigned:
           sysuint_t fill = (fieldWidth > slen) ? fieldWidth - slen : 0;
 
           if (fill && (directives & FORMAT_LEFT_ADJUSTED) == 0) append(char(' '), fill);
-          append(Str8(s, slen));
+          append(Stub8(s, slen));
           if (fill && (directives & FORMAT_LEFT_ADJUSTED) != 0) append(char(' '), fill);
           break;
         }
@@ -1449,7 +1449,7 @@ ffUnsigned:
 end:
     if (c == '\0')
     {
-      if (fmtBeginChunk != fmt) append(Str8(fmtBeginChunk, (sysuint_t)(fmt - fmtBeginChunk)));
+      if (fmtBeginChunk != fmt) append(Stub8(fmtBeginChunk, (sysuint_t)(fmt - fmtBeginChunk)));
       break;
     }
 
@@ -1478,7 +1478,7 @@ err_t ByteArray::appendWformat(const ByteArray& fmt, char lex, const ByteArray* 
     if (*fmtCur == lex)
     {
       fmtBeg = fmtCur;
-      if ( (err = append(Str8(fmtBeg, (sysuint_t)(fmtCur - fmtBeg)))) ) goto done;
+      if ( (err = append(Stub8(fmtBeg, (sysuint_t)(fmtCur - fmtBeg)))) ) goto done;
 
       if (++fmtCur != fmtEnd)
       {
@@ -1504,7 +1504,7 @@ err_t ByteArray::appendWformat(const ByteArray& fmt, char lex, const ByteArray* 
 
   if (fmtCur != fmtBeg)
   {
-    err = append(Str8(fmtBeg, (sysuint_t)(fmtCur - fmtBeg)));
+    err = append(Stub8(fmtBeg, (sysuint_t)(fmtCur - fmtBeg)));
   }
 
 done:
@@ -1520,7 +1520,7 @@ err_t ByteArray::prepend(char ch, sysuint_t length)
   return insert(0, ch, length);
 }
 
-err_t ByteArray::prepend(const Str8& other)
+err_t ByteArray::prepend(const Stub8& other)
 {
   return insert(0, other);
 }
@@ -1545,7 +1545,7 @@ err_t ByteArray::insert(sysuint_t index, char ch, sysuint_t length)
   return ERR_OK;
 }
 
-err_t ByteArray::insert(sysuint_t index, const Str8& other)
+err_t ByteArray::insert(sysuint_t index, const Stub8& other)
 {
   const char* s = other.getData();
   sysuint_t length = other.getLength();
@@ -2510,7 +2510,7 @@ ByteArray ByteArray::substring(const Range& range) const
 {
   sysuint_t rstart, rend;
   if (fitToRange(*this, &rstart, &rend, range))
-    return ByteArray(Str8(getData() + rstart, rend - rstart));
+    return ByteArray(Stub8(getData() + rstart, rend - rstart));
   else
     return ByteArray();
 }
@@ -2810,10 +2810,10 @@ sysuint_t ByteArray::lastIndexOfAny(const char* chars, sysuint_t numChars, uint 
 
 bool ByteArray::startsWith(char ch, uint cs) const
 {
-  return startsWith(Str8(&ch, 1), cs);
+  return startsWith(Stub8(&ch, 1), cs);
 }
 
-bool ByteArray::startsWith(const Str8& str, uint cs) const
+bool ByteArray::startsWith(const Stub8& str, uint cs) const
 {
   const char* s = str.getData();
   sysuint_t length = str.getLength();
@@ -2838,10 +2838,10 @@ bool ByteArray::startsWith(const ByteArrayFilter& filter, uint cs) const
 
 bool ByteArray::endsWith(char ch, uint cs) const
 {
-  return endsWith(Str8(&ch, 1), cs);
+  return endsWith(Stub8(&ch, 1), cs);
 }
 
-bool ByteArray::endsWith(const Str8& str, uint cs) const
+bool ByteArray::endsWith(const Stub8& str, uint cs) const
 {
   const char* s = str.getData();
   sysuint_t slen = str.getLength();
@@ -2936,7 +2936,7 @@ int ByteArray::icompare(const ByteArray* a, const ByteArray* b)
   return (int)((sysint_t)aLen - (sysint_t)bLen);
 }
 
-bool ByteArray::eq(const Str8& other, uint cs) const
+bool ByteArray::eq(const Stub8& other, uint cs) const
 {
   sysuint_t len = other.getLength();
   if (len == DETECT_LENGTH)
@@ -2971,7 +2971,7 @@ bool ByteArray::eq(const ByteArray& other, uint cs) const
   return getLength() == other.getLength() && StringUtil::eq(getData(), other.getData(), getLength(), cs);
 }
 
-int ByteArray::compare(const Str8& other, uint cs) const
+int ByteArray::compare(const Stub8& other, uint cs) const
 {
   sysuint_t aLen = getLength();
   sysuint_t bLen = other.getLength();

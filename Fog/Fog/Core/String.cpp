@@ -572,7 +572,7 @@ err_t String::set(const String& other)
 
 err_t String::set(const void* str, sysuint_t size, const TextCodec& tc)
 {
-  return tc.toUnicode(*this, Str8((const char*)str, size));
+  return tc.toUnicode(*this, Stub8((const char*)str, size));
 }
 
 err_t String::setUtf8(const char* s, sysuint_t length)

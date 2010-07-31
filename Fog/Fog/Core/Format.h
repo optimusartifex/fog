@@ -4,19 +4,17 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_BASICS_H
-#define _FOG_CORE_BASICS_H
+#ifndef _FOG_CORE_FORMAT_H
+#define _FOG_CORE_FORMAT_H
 
 // [Dependencies]
-#include <Fog/Core/Build.h>
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Constants.h>
-#include <Fog/Core/Char.h>
 #include <Fog/Core/TypeInfo.h>
 
 namespace Fog {
 
-//! @addtogroup Fog_Core_Essentials
+//! @addtogroup Fog_Core_String
 //! @{
 
 // ============================================================================
@@ -31,7 +29,9 @@ struct FOG_HIDDEN FormatFlags
   // --------------------------------------------------------------------------
 
   FOG_INLINE FormatFlags(sysuint_t precision = NO_PRECISION, sysuint_t width = NO_WIDTH, uint32_t flags = NO_FLAGS) :
-    precision(precision), width(width), flags(flags)
+    precision(precision),
+    width(width),
+    flags(flags)
   {
   }
 
@@ -55,4 +55,4 @@ struct FOG_HIDDEN FormatFlags
 FOG_DECLARE_TYPEINFO(Fog::FormatFlags, Fog::TYPEINFO_PRIMITIVE)
 
 // [Guard]
-#endif // _FOG_CORE_BASICS_H
+#endif // _FOG_CORE_FORMAT_H

@@ -55,7 +55,7 @@ Set(FOG_CFLAGS_SSSE3 "")
 # * -fpredictive-commoning
 
 If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-  Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-rtti -fvisibility=hidden")
+  Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-rtti -fvisibility=hidden -fvisibility-inlines-hidden")
   Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstrict-aliasing -fmerge-all-constants -fno-keep-static-consts")
   Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-math-errno -Winline")
   If(NOT ${CMAKE_BUILD_TYPE} MATCHES "Debug")
@@ -233,7 +233,6 @@ Set(FOG_CORE_LIB_SOURCES
   Fog/Core/Algorithms.cpp
   Fog/Core/Application.cpp
   Fog/Core/Assert.cpp
-  Fog/Core/Basics.cpp
   Fog/Core/Byte.cpp
   Fog/Core/ByteArray.cpp
   Fog/Core/ByteArrayFilter.cpp
@@ -245,6 +244,7 @@ Set(FOG_CORE_LIB_SOURCES
   Fog/Core/Event.cpp
   Fog/Core/EventLoop.cpp
   Fog/Core/FileSystem.cpp
+  Fog/Core/Format.cpp
   Fog/Core/Hash.cpp
   Fog/Core/HashUtil.cpp
   Fog/Core/Init.cpp
@@ -272,6 +272,7 @@ Set(FOG_CORE_LIB_SOURCES
   Fog/Core/Strings.cpp
   Fog/Core/StringUtil.cpp
   Fog/Core/StringUtil_gen.cpp
+  Fog/Core/Stub.cpp
   Fog/Core/Task.cpp
   Fog/Core/TextCodec.cpp
   Fog/Core/Thread.cpp
@@ -293,9 +294,6 @@ Set(FOG_CORE_MAIN_HEADERS
   Fog/Core/Application.h
   Fog/Core/Assert.h
   Fog/Core/Atomic.h
-  Fog/Core/AutoLock.h
-  Fog/Core/AutoUnlock.h
-  Fog/Core/Basics.h
   Fog/Core/Byte.h
   Fog/Core/ByteArray.h
   Fog/Core/ByteArrayFilter.h
@@ -309,6 +307,7 @@ Set(FOG_CORE_MAIN_HEADERS
   Fog/Core/Event.h
   Fog/Core/EventLoop.h
   Fog/Core/FileSystem.h
+  Fog/Core/Format.h
   Fog/Core/Hash.h
   Fog/Core/HashUtil.h
   Fog/Core/Lazy.h
@@ -336,6 +335,7 @@ Set(FOG_CORE_MAIN_HEADERS
   Fog/Core/StringMatcher.h
   Fog/Core/Strings.h
   Fog/Core/StringUtil.h
+  Fog/Core/Stub.h
   Fog/Core/Swap.h
   Fog/Core/Task.h
   Fog/Core/TextCodec.h

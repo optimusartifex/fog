@@ -10,7 +10,6 @@
 
 // [Dependencies]
 #include <Fog/Core/Assert.h>
-#include <Fog/Core/AutoLock.h>
 #include <Fog/Core/Byte.h>
 #include <Fog/Core/ByteArray.h>
 #include <Fog/Core/Constants.h>
@@ -2109,7 +2108,7 @@ static TextCodec::Engine* getEngine(uint32_t code)
   if (code >= TextCodec::Invalid) code = 0;
 
   TextCodec::Engine** _ptr = &deviceInstances[code];
-  TextCodec::Engine* v = AtomicOperation<TextCodec::Engine*>::get(_ptr);
+  TextCodec::Engine* v = AtomicCore<TextCodec::Engine*>::get(_ptr);
 
   enum { CREATING_NOW = 1 };
 
@@ -2117,19 +2116,19 @@ static TextCodec::Engine* getEngine(uint32_t code)
   if (v != NULL && v != (TextCodec::Engine*)CREATING_NOW) goto ret;
 
   // Create instance
-  if (AtomicOperation<TextCodec::Engine*>::cmpXchg(_ptr,
+  if (AtomicCore<TextCodec::Engine*>::cmpXchg(_ptr,
     (TextCodec::Engine*)NULL,
     (TextCodec::Engine*)CREATING_NOW))
   {
     const TextCodec_Class &c = TextCodec_class[code];
     v = c.create(c.code, c.flags, c.mime, c.tables);
-    AtomicOperation<TextCodec::Engine*>::set(_ptr, v);
+    AtomicCore<TextCodec::Engine*>::set(_ptr, v);
     goto ret;
   }
 
   // Race.
   // This is very rare situation, but it can happen!
-  while ((v = AtomicOperation<TextCodec::Engine*>::get(_ptr)) == (TextCodec::Engine*)CREATING_NOW)
+  while ((v = AtomicCore<TextCodec::Engine*>::get(_ptr)) == (TextCodec::Engine*)CREATING_NOW)
   {
     Thread::_yield();
   }

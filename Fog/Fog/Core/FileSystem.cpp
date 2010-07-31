@@ -336,7 +336,7 @@ bool FileSystem::findFile(const List<String>& paths, const String& fileName, Str
     TextCodec::local8().fromUnicode(path8, it.value());
 
     // Append directory separator if needed
-    if (path8.getLength() && !path8.endsWith(Str8("/", 1))) path8.append('/');
+    if (path8.getLength() && !path8.endsWith(Stub8("/", 1))) path8.append('/');
 
     // Append file
     path8.append(fileName8);

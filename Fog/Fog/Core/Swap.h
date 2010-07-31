@@ -13,7 +13,7 @@
 
 namespace Fog {
 
-//! @addtogroup Fog_Core_Essentials
+//! @addtogroup Fog_Core_Util
 //! @{
 
 //! @brief Swap @a a and @a b.

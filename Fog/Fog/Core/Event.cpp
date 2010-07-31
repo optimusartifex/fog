@@ -10,7 +10,6 @@
 
 // [Dependencies]
 #include <Fog/Core/Atomic.h>
-#include <Fog/Core/AutoLock.h>
 #include <Fog/Core/Event.h>
 #include <Fog/Core/Lock.h>
 #include <Fog/Core/Object.h>

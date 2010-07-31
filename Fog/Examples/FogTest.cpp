@@ -4,8 +4,6 @@
 #include <Fog/Svg.h>
 #include <Fog/Xml.h>
 
-#include "Fog/Gui/Frame.h"
-
 // This is for MY testing:)
 
 using namespace Fog;

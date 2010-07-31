@@ -10,10 +10,9 @@
 
 // [Dependencies]
 #include <Fog/Core/Atomic.h>
-#include <Fog/Core/AutoLock.h>
-#include <Fog/Core/AutoUnlock.h>
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/CpuInfo.h>
+#include <Fog/Core/Lock.h>
 #include <Fog/Core/Math.h>
 #include <Fog/Core/Memory.h>
 #include <Fog/Core/MemoryAllocator_p.h>

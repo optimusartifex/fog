@@ -164,12 +164,12 @@
 
 
 
-//! @defgroup Fog_Core_Essentials Essential classes and algorithms
+//! @defgroup Fog_Core_Language Language (C++) compile-time information and tools
 //! @ingroup Fog_Core_Public
 
 
 
-//! @defgroup Fog_Core_Library Dynamic libraries and plugins
+//! @defgroup Fog_Core_Library Libraries and plugins
 //! @ingroup Fog_Core_Public
 
 
@@ -199,7 +199,17 @@
 
 
 
+//! @defgroup Fog_Core_String Strings, byte arrays and formatting
+//! @ingroup Fog_Core_Public
+
+
+
 //! @defgroup Fog_Core_Threading Threading, tasks, timers and event loop
+//! @ingroup Fog_Core_Public
+
+
+
+//! @defgroup Fog_Core_Util Utility classes and functions
 //! @ingroup Fog_Core_Public
 
 

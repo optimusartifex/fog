@@ -14,8 +14,8 @@
 
 // [Dependencies]
 #include <Fog/Core/Assert.h>
-#include <Fog/Core/AutoLock.h>
 #include <Fog/Core/Constants.h>
+#include <Fog/Core/Lock.h>
 #include <Fog/Core/ThreadEvent.h>
 #include <Fog/Core/Time.h>
 

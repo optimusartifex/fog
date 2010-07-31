@@ -15,13 +15,13 @@
 // [Dependencies]
 #include <Fog/Core/Application.h>
 #include <Fog/Core/Assert.h>
-#include <Fog/Core/AutoLock.h>
 #include <Fog/Core/ByteArray.h>
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/EventLoop.h>
 #include <Fog/Core/FileSystem.h>
 #include <Fog/Core/Hash.h>
 #include <Fog/Core/Library.h>
+#include <Fog/Core/Lock.h>
 #include <Fog/Core/Misc.h>
 #include <Fog/Core/Object.h>
 #include <Fog/Core/Static.h>

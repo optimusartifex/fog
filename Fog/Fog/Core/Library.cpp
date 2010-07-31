@@ -10,7 +10,6 @@
 
 // [Dependencies]
 #include <Fog/Core/Assert.h>
-#include <Fog/Core/AutoLock.h>
 #include <Fog/Core/ByteArray.h>
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/FileSystem.h>

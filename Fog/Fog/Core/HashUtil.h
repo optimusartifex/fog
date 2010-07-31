@@ -24,7 +24,7 @@
 namespace Fog {
 namespace HashUtil {
 
-//! @addtogroup Fog_Core_Essentials
+//! @addtogroup Fog_Core_Util
 //! @{
 
 // ============================================================================

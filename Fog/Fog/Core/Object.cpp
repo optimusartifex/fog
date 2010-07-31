@@ -9,13 +9,13 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/AutoLock.h>
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/Event.h>
 #include <Fog/Core/EventLoop.h>
 #include <Fog/Core/Hash.h>
 #include <Fog/Core/HashUtil.h>
 #include <Fog/Core/List.h>
+#include <Fog/Core/Lock.h>
 #include <Fog/Core/ManagedString.h>
 #include <Fog/Core/Object.h>
 #include <Fog/Core/Static.h>
@@ -116,7 +116,7 @@ const MetaClass* Object::getStaticMetaClass()
 
 const MetaClass* Object::_getStaticMetaClassRace(MetaClass** p)
 {
-  while (AtomicOperation<sysuint_t>::get((sysuint_t*)p) == 0)
+  while (AtomicCore<sysuint_t>::get((sysuint_t*)p) == 0)
   {
     // Yield is not optimal, but this should really rarely happen and if we
     // had the luck then there is 100% probability that it will not happen 

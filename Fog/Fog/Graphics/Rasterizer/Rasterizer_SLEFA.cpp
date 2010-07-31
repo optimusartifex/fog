@@ -9,7 +9,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/AutoLock.h>
 #include <Fog/Core/ByteArray.h>
 #include <Fog/Core/Lock.h>
 #include <Fog/Core/Math.h>
@@ -18,8 +17,8 @@
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/RasterEngine_p.h>
 #include <Fog/Graphics/Rasterizer_p.h>
-#include <Fog/Graphics/Rasterizer/Rasterizer_SLEFA_p.h>
 #include <Fog/Graphics/Rasterizer/LiangBarsky_p.h>
+#include <Fog/Graphics/Rasterizer/Rasterizer_SLEFA_p.h>
 #include <Fog/Graphics/Span_p.h>
 
 namespace Fog {

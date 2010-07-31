@@ -52,7 +52,6 @@ String stringFromCFString(const RetainPtr<CFStringRef>& str)
   char* data;
   if (CFStringGetCString(str.get(), data, len, kCFStringEncodingUnicode))
   return String(Utf16((Char*)data, len));
-  return String();
 }
 
 CFStringRef CFStringFromString(const String& str)

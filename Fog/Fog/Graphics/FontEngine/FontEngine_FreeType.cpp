@@ -8,7 +8,6 @@
 #if defined(FOG_FONT_FREETYPE)
 
 // [Dependencies]
-#include <Fog/Core/AutoLock.h>
 #include <Fog/Core/Hash.h>
 #include <Fog/Core/Lock.h>
 #include <Fog/Core/Library.h>

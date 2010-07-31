@@ -153,7 +153,7 @@ public: \
     /* set to one then it's being initialized by another thread and we must*/ \
     /* wait. All other values means that it's initialized.                 */ \
     \
-    if (Fog::AtomicOperation<sysuint_t>::cmpXchg(reinterpret_cast<sysuint_t*>(&_privateMetaClass.name), 0, 1)) \
+    if (Fog::AtomicCore<sysuint_t>::cmpXchg(reinterpret_cast<sysuint_t*>(&_privateMetaClass.name), 0, 1)) \
     { \
       /* Called the first time, we must initialize the meta class right now. */ \
       _privateMetaClass.base = base::getStaticMetaClass(); \
@@ -161,7 +161,7 @@ public: \
       _privateMetaClass.name = _privateClassName; \
       \
       /* Assign meta class to _staticMetaClass pointer. */ \
-      Fog::AtomicOperation<sysuint_t>::setXchg((sysuint_t*)(_staticMetaClass), (sysuint_t)(&_privateMetaClass)); \
+      Fog::AtomicCore<sysuint_t>::setXchg((sysuint_t*)(_staticMetaClass), (sysuint_t)(&_privateMetaClass)); \
       \
       /* Everything done. */ \
       return _staticMetaClass; \

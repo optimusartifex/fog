@@ -210,10 +210,10 @@ struct FOG_HIDDEN Rasterizer
   virtual void setAlpha(uint32_t alpha) = 0;
 
   // --------------------------------------------------------------------------
-  // [Finalized / Empty]
+  // [Finalized / Valid]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool finalized() const { return _finalized; }
+  FOG_INLINE bool isFinalized() const { return _isFinalized; }
   FOG_INLINE bool isValid() const { return _isValid; }
 
   // --------------------------------------------------------------------------
@@ -231,7 +231,7 @@ struct FOG_HIDDEN Rasterizer
   FOG_INLINE Span8* sweepScanline(Scanline8& scanline, int y)
   { return _sweepScanlineSimpleFn(this, scanline, y); }
 
-  //! @brief Enhanced version of @c sweepScanline() that accepts clip boundary.
+  //! @brief Enhanced version of @c sweepScanline() that accepts clip region.
   //!
   //! This method is called by raster paint engine if clipping region is complex.
   FOG_INLINE Span8* sweepScanline(Scanline8& scanline, int y, const IntBox* clipBoxes, sysuint_t count)
@@ -264,8 +264,17 @@ struct FOG_HIDDEN Rasterizer
   // [Members]
   // --------------------------------------------------------------------------
 
+private:
+  //! @brief Link to next pooled @c Rasterizer instance. Always NULL when you 
+  //! get rasterizer by @c Rasterizer::getRasterizer() method.
+  Rasterizer* _pool;
+
+public:
+  //! @brief Sweep scanline using box clipping.
   SweepScanlineSimpleFn _sweepScanlineSimpleFn;
+  //! @brief Sweep scanline using region clipping.
   SweepScanlineRegionFn _sweepScanlineRegionFn;
+  //! @brief Sweep scanline using anti-aliased clipping.
   SweepScanlineSpansFn _sweepScanlineSpansFn;
 
   //! @brief Clip bounding box (always must be valid, initialy set to zero).
@@ -284,16 +293,12 @@ struct FOG_HIDDEN Rasterizer
   err_t _error;
 
   //! @brief Whether rasterizer is finalized.
-  bool _finalized;
+  bool _isFinalized;
 
   //! @brief Whether the rasterized object is empty (not paint).
   bool _isValid;
 
 private:
-  //! @brief Link to next pooled @c Rasterizer instance. Always NULL when you 
-  //! get rasterizer by @c Rasterizer::getRasterizer() method.
-  Rasterizer* _poolNext;
-
   FOG_DISABLE_COPY(Rasterizer)
 };
 

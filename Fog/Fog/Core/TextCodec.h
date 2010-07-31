@@ -16,7 +16,7 @@
 
 namespace Fog {
 
-//! @addtogroup Fog_Core_Other
+//! @addtogroup Fog_Core_String
 //! @{
 
 // ============================================================================

@@ -23,7 +23,7 @@
 
 namespace Fog {
 
-//! @addtogroup Fog_Core_Essentials
+//! @addtogroup Fog_Core_Collections
 //! @{
 
 // ============================================================================

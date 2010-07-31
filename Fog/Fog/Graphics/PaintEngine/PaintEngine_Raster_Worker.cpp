@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/AutoLock.h>
+#include <Fog/Core/Lock.h>
 #include <Fog/Core/ThreadCondition.h>
 #include <Fog/Core/ThreadEvent.h>
 
@@ -77,7 +77,7 @@ void RasterWorkerTask::run()
         RasterPaintCalc** pclc = (RasterPaintCalc**)&mgr->calcData[calcCurrent++];
         RasterPaintCalc* clc = *pclc;
 
-        if (clc && AtomicOperation<RasterPaintCalc*>::cmpXchg(pclc, clc, NULL))
+        if (clc && AtomicCore<RasterPaintCalc*>::cmpXchg(pclc, clc, NULL))
         {
 #if defined(FOG_DEBUG_RASTER_COMMANDS)
           fog_debug("Fog::Painter[Worker #%d]::run() - calculation %d (%p)", ctx.id, (int)calcCurrent, clc);

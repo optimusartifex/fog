@@ -15,11 +15,12 @@
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/Range.h>
 #include <Fog/Core/Static.h>
+#include <Fog/Core/Stub.h>
 #include <Fog/Core/TypeInfo.h>
 
 namespace Fog {
 
-//! @addtogroup Fog_Core_Essentials
+//! @addtogroup Fog_Core_String
 //! @{
 
 // ============================================================================
@@ -139,7 +140,7 @@ struct FOG_API ByteArray
 
   explicit ByteArray(const char* str);
   ByteArray(const char* str, sysuint_t length);
-  ByteArray(const Str8& str);
+  ByteArray(const Stub8& str);
 
   explicit FOG_INLINE ByteArray(Data* d) : _d(d) {}
 
@@ -244,10 +245,10 @@ struct FOG_API ByteArray
   // --------------------------------------------------------------------------
 
   err_t set(char ch, sysuint_t length = 1);
-  err_t set(const Str8& str);
+  err_t set(const Stub8& str);
   err_t set(const ByteArray& other);
 
-  FOG_INLINE err_t set(const char* s, sysuint_t length = DETECT_LENGTH) { return set(Str8(s, length)); }
+  FOG_INLINE err_t set(const char* s, sysuint_t length = DETECT_LENGTH) { return set(Stub8(s, length)); }
 
   err_t setDeep(const ByteArray& other);
 
@@ -279,10 +280,10 @@ struct FOG_API ByteArray
   // --------------------------------------------------------------------------
 
   err_t append(char ch, sysuint_t length = 1);
-  err_t append(const Str8& other);
+  err_t append(const Stub8& other);
   err_t append(const ByteArray& other);
 
-  FOG_INLINE err_t append(const char* s, sysuint_t length = DETECT_LENGTH) { return append(Str8(s, length)); }
+  FOG_INLINE err_t append(const char* s, sysuint_t length = DETECT_LENGTH) { return append(Stub8(s, length)); }
 
   err_t appendBool(bool b);
   err_t appendInt(int32_t n, int base = 10);
@@ -311,20 +312,20 @@ struct FOG_API ByteArray
   // --------------------------------------------------------------------------
 
   err_t prepend(char ch, sysuint_t length = 1);
-  err_t prepend(const Str8& other);
+  err_t prepend(const Stub8& other);
   err_t prepend(const ByteArray& other);
 
-  FOG_INLINE err_t prepend(const char* s, sysuint_t length = DETECT_LENGTH) { return prepend(Str8(s, length)); }
+  FOG_INLINE err_t prepend(const char* s, sysuint_t length = DETECT_LENGTH) { return prepend(Stub8(s, length)); }
 
   // --------------------------------------------------------------------------
   // [Insert]
   // --------------------------------------------------------------------------
 
   err_t insert(sysuint_t index, char ch, sysuint_t length = 1);
-  err_t insert(sysuint_t index, const Str8& other);
+  err_t insert(sysuint_t index, const Stub8& other);
   err_t insert(sysuint_t index, const ByteArray& other);
 
-  FOG_INLINE err_t insert(sysuint_t index, const char* s, sysuint_t length = DETECT_LENGTH) { return insert(index, Str8(s, length)); }
+  FOG_INLINE err_t insert(sysuint_t index, const char* s, sysuint_t length = DETECT_LENGTH) { return insert(index, Stub8(s, length)); }
 
   // --------------------------------------------------------------------------
   // [Remove]
@@ -470,30 +471,30 @@ struct FOG_API ByteArray
   // --------------------------------------------------------------------------
 
   bool startsWith(char ch, uint cs = CASE_SENSITIVE) const;
-  bool startsWith(const Str8& str, uint cs = CASE_SENSITIVE) const;
+  bool startsWith(const Stub8& str, uint cs = CASE_SENSITIVE) const;
   bool startsWith(const ByteArray& str, uint cs = CASE_SENSITIVE) const;
   bool startsWith(const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE) const;
 
-  FOG_INLINE bool startsWith(const char* str, uint cs = CASE_SENSITIVE) const { return startsWith(Str8(str), cs); }
+  FOG_INLINE bool startsWith(const char* str, uint cs = CASE_SENSITIVE) const { return startsWith(Stub8(str), cs); }
 
   bool endsWith(char ch, uint cs = CASE_SENSITIVE) const;
-  bool endsWith(const Str8& str, uint cs = CASE_SENSITIVE) const;
+  bool endsWith(const Stub8& str, uint cs = CASE_SENSITIVE) const;
   bool endsWith(const ByteArray& str, uint cs = CASE_SENSITIVE) const;
   bool endsWith(const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE) const;
 
-  FOG_INLINE bool endsWith(const char* str, uint cs = CASE_SENSITIVE) const { return endsWith(Str8(str), cs); }
+  FOG_INLINE bool endsWith(const char* str, uint cs = CASE_SENSITIVE) const { return endsWith(Stub8(str), cs); }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
   FOG_INLINE ByteArray& operator=(char ch) { set(ch); return *this; }
-  FOG_INLINE ByteArray& operator=(const Str8& str) { set(str); return *this; }
+  FOG_INLINE ByteArray& operator=(const Stub8& str) { set(str); return *this; }
   FOG_INLINE ByteArray& operator=(const ByteArray& other) { set(other); return *this; }
   FOG_INLINE ByteArray& operator=(const char* str) { set(str); return *this; }
 
   FOG_INLINE ByteArray& operator+=(char ch) { append(ch); return *this; }
-  FOG_INLINE ByteArray& operator+=(const Str8& str) { append(str); return *this; }
+  FOG_INLINE ByteArray& operator+=(const Stub8& str) { append(str); return *this; }
   FOG_INLINE ByteArray& operator+=(const ByteArray& other) { append(other); return *this; }
   FOG_INLINE ByteArray& operator+=(const char* str) { append(str); return *this; }
 
@@ -509,15 +510,15 @@ struct FOG_API ByteArray
   static int compare(const ByteArray* a, const ByteArray* b);
   static int icompare(const ByteArray* a, const ByteArray* b);
 
-  bool eq(const Str8& other, uint cs = CASE_SENSITIVE) const;
+  bool eq(const Stub8& other, uint cs = CASE_SENSITIVE) const;
   bool eq(const ByteArray& other, uint cs = CASE_SENSITIVE) const;
 
-  FOG_INLINE bool eq(const char* other, uint cs = CASE_SENSITIVE) const { return eq(Str8(other), cs); }
+  FOG_INLINE bool eq(const char* other, uint cs = CASE_SENSITIVE) const { return eq(Stub8(other), cs); }
 
-  int compare(const Str8& other, uint cs = CASE_SENSITIVE) const;
+  int compare(const Stub8& other, uint cs = CASE_SENSITIVE) const;
   int compare(const ByteArray& other, uint cs = CASE_SENSITIVE) const;
 
-  FOG_INLINE int compare(const char* other, uint cs = CASE_SENSITIVE) const { return compare(Str8(other), cs); }
+  FOG_INLINE int compare(const char* other, uint cs = CASE_SENSITIVE) const { return compare(Stub8(other), cs); }
 
   // --------------------------------------------------------------------------
   // [Utf8 support]
@@ -578,7 +579,7 @@ struct TemporaryByteArray : public ByteArray
   {
   }
 
-  FOG_INLINE TemporaryByteArray(const Str8& str) :
+  FOG_INLINE TemporaryByteArray(const Stub8& str) :
     ByteArray(Data::adopt((void*)&_storage, N, str.getData(), str.getLength()))
   {
   }
@@ -625,7 +626,7 @@ struct TemporaryByteArray : public ByteArray
   // conversion will break template and new string will be allocated).
 
   FOG_INLINE TemporaryByteArray<N>& operator=(char ch) { set(ch); return *this; }
-  FOG_INLINE TemporaryByteArray<N>& operator=(const Str8& str) { set(str); return *this; }
+  FOG_INLINE TemporaryByteArray<N>& operator=(const Stub8& str) { set(str); return *this; }
   FOG_INLINE TemporaryByteArray<N>& operator=(const char* str) { set(str); return *this; }
   FOG_INLINE TemporaryByteArray<N>& operator=(const ByteArray& other) { set(other); return *this; }
   FOG_INLINE TemporaryByteArray<N>& operator=(const TemporaryByteArray<N>& other) { set(other); return *this; }
@@ -639,7 +640,7 @@ struct TemporaryByteArray : public ByteArray
 // [Global Operator Overload]
 // ============================================================================
 
-//! @addtogroup Fog_Core_Essentials
+//! @addtogroup Fog_Core_String
 //! @{
 
 static FOG_INLINE const Fog::ByteArray operator+(const Fog::ByteArray& a, const Fog::ByteArray& b) { return Fog::ByteArray(a, b); }
@@ -647,8 +648,8 @@ static FOG_INLINE const Fog::ByteArray operator+(const Fog::ByteArray& a, const 
 static FOG_INLINE const Fog::ByteArray operator+(const Fog::ByteArray& a, char b) { Fog::ByteArray t(a); t.append(b); return t; }
 static FOG_INLINE const Fog::ByteArray operator+(char a, const Fog::ByteArray& b) { Fog::ByteArray t(b); t.append(a); return t; }
 
-static FOG_INLINE const Fog::ByteArray operator+(const Fog::ByteArray& a, const Fog::Str8& b) { Fog::ByteArray t(a); t.append(b); return t; }
-static FOG_INLINE const Fog::ByteArray operator+(const Fog::Str8& b, const Fog::ByteArray& a) { Fog::ByteArray t(b); t.append(a); return t; }
+static FOG_INLINE const Fog::ByteArray operator+(const Fog::ByteArray& a, const Fog::Stub8& b) { Fog::ByteArray t(a); t.append(b); return t; }
+static FOG_INLINE const Fog::ByteArray operator+(const Fog::Stub8& b, const Fog::ByteArray& a) { Fog::ByteArray t(b); t.append(a); return t; }
 
 static FOG_INLINE const Fog::ByteArray operator+(const Fog::ByteArray& a, const char* b) { Fog::ByteArray t(a); t.append(b); return t; }
 static FOG_INLINE const Fog::ByteArray operator+(const char* b, const Fog::ByteArray& a) { Fog::ByteArray t(b); t.append(a); return t; }
@@ -660,12 +661,12 @@ static FOG_INLINE bool operator< (const Fog::ByteArray& a, const Fog::ByteArray&
 static FOG_INLINE bool operator>=(const Fog::ByteArray& a, const Fog::ByteArray& b) { return  a.compare(b) >= 0; }
 static FOG_INLINE bool operator> (const Fog::ByteArray& a, const Fog::ByteArray& b) { return  a.compare(b) >  0; }
 
-static FOG_INLINE bool operator==(const Fog::ByteArray& a, const Fog::Str8& b) { return  a.eq(b); }
-static FOG_INLINE bool operator!=(const Fog::ByteArray& a, const Fog::Str8& b) { return !a.eq(b); }
-static FOG_INLINE bool operator<=(const Fog::ByteArray& a, const Fog::Str8& b) { return  a.compare(b) <= 0; }
-static FOG_INLINE bool operator< (const Fog::ByteArray& a, const Fog::Str8& b) { return  a.compare(b) <  0; }
-static FOG_INLINE bool operator>=(const Fog::ByteArray& a, const Fog::Str8& b) { return  a.compare(b) >= 0; }
-static FOG_INLINE bool operator> (const Fog::ByteArray& a, const Fog::Str8& b) { return  a.compare(b) >  0; }
+static FOG_INLINE bool operator==(const Fog::ByteArray& a, const Fog::Stub8& b) { return  a.eq(b); }
+static FOG_INLINE bool operator!=(const Fog::ByteArray& a, const Fog::Stub8& b) { return !a.eq(b); }
+static FOG_INLINE bool operator<=(const Fog::ByteArray& a, const Fog::Stub8& b) { return  a.compare(b) <= 0; }
+static FOG_INLINE bool operator< (const Fog::ByteArray& a, const Fog::Stub8& b) { return  a.compare(b) <  0; }
+static FOG_INLINE bool operator>=(const Fog::ByteArray& a, const Fog::Stub8& b) { return  a.compare(b) >= 0; }
+static FOG_INLINE bool operator> (const Fog::ByteArray& a, const Fog::Stub8& b) { return  a.compare(b) >  0; }
 
 static FOG_INLINE bool operator==(const Fog::ByteArray& a, const char* b) { return  a.eq(b); }
 static FOG_INLINE bool operator!=(const Fog::ByteArray& a, const char* b) { return !a.eq(b); }
@@ -674,12 +675,12 @@ static FOG_INLINE bool operator< (const Fog::ByteArray& a, const char* b) { retu
 static FOG_INLINE bool operator>=(const Fog::ByteArray& a, const char* b) { return  a.compare(b) >= 0; }
 static FOG_INLINE bool operator> (const Fog::ByteArray& a, const char* b) { return  a.compare(b) >  0; }
 
-static FOG_INLINE bool operator==(const Fog::Str8& a, const Fog::ByteArray& b) { return  b.eq(a); }
-static FOG_INLINE bool operator!=(const Fog::Str8& a, const Fog::ByteArray& b) { return !b.eq(a); }
-static FOG_INLINE bool operator<=(const Fog::Str8& a, const Fog::ByteArray& b) { return  b.compare(a) >= 0; }
-static FOG_INLINE bool operator< (const Fog::Str8& a, const Fog::ByteArray& b) { return  b.compare(a) >  0; }
-static FOG_INLINE bool operator>=(const Fog::Str8& a, const Fog::ByteArray& b) { return  b.compare(a) <= 0; }
-static FOG_INLINE bool operator> (const Fog::Str8& a, const Fog::ByteArray& b) { return  b.compare(a) <  0; }
+static FOG_INLINE bool operator==(const Fog::Stub8& a, const Fog::ByteArray& b) { return  b.eq(a); }
+static FOG_INLINE bool operator!=(const Fog::Stub8& a, const Fog::ByteArray& b) { return !b.eq(a); }
+static FOG_INLINE bool operator<=(const Fog::Stub8& a, const Fog::ByteArray& b) { return  b.compare(a) >= 0; }
+static FOG_INLINE bool operator< (const Fog::Stub8& a, const Fog::ByteArray& b) { return  b.compare(a) >  0; }
+static FOG_INLINE bool operator>=(const Fog::Stub8& a, const Fog::ByteArray& b) { return  b.compare(a) <= 0; }
+static FOG_INLINE bool operator> (const Fog::Stub8& a, const Fog::ByteArray& b) { return  b.compare(a) <  0; }
 
 static FOG_INLINE bool operator==(const char* a, const Fog::ByteArray& b) { return  b.eq(a); }
 static FOG_INLINE bool operator!=(const char* a, const Fog::ByteArray& b) { return !b.eq(a); }

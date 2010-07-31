@@ -10,7 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Assert.h>
-#include <Fog/Core/AutoLock.h>
+#include <Fog/Core/Lock.h>
 #include <Fog/Core/Thread.h>
 #include <Fog/Core/ThreadPool.h>
 

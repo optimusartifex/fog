@@ -16,11 +16,12 @@
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/Range.h>
 #include <Fog/Core/Static.h>
+#include <Fog/Core/Stub.h>
 #include <Fog/Core/TypeInfo.h>
 
 #include <wchar.h>
 
-//! @addtogroup Fog_Core_Essentials
+//! @addtogroup Fog_Core_String
 //! @{
 
 namespace Fog {

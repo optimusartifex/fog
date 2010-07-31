@@ -9,7 +9,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/AutoLock.h>
 #include <Fog/Core/ByteArray.h>
 #include <Fog/Core/Lock.h>
 #include <Fog/Core/Math.h>
@@ -74,10 +73,10 @@ Rasterizer::Rasterizer()
 
   _error = ERR_OK;
 
-  _finalized = false;
+  _isFinalized = false;
   _isValid = false;
 
-  _poolNext = NULL;
+  _pool = NULL;
 }
 
 Rasterizer::~Rasterizer()
@@ -96,8 +95,8 @@ Rasterizer* Rasterizer::getRasterizer()
   if (rasterizer_local->rasterizers)
   {
     rasterizer = rasterizer_local->rasterizers;
-    rasterizer_local->rasterizers = rasterizer->_poolNext;
-    rasterizer->_poolNext = NULL;
+    rasterizer_local->rasterizers = rasterizer->_pool;
+    rasterizer->_pool = NULL;
   }
   else
   {
@@ -111,7 +110,7 @@ void Rasterizer::releaseRasterizer(Rasterizer* rasterizer)
 {
   AutoLock locked(rasterizer_local->lock);
 
-  rasterizer->_poolNext = rasterizer_local->rasterizers;
+  rasterizer->_pool = rasterizer_local->rasterizers;
   rasterizer_local->rasterizers = rasterizer;
 }
 
@@ -173,7 +172,7 @@ void Rasterizer::cleanup()
 
   while (rasterizerCurr)
   {
-    rasterizerNext = rasterizerCurr->_poolNext;
+    rasterizerNext = rasterizerCurr->_pool;
     fog_delete(rasterizerCurr);
     rasterizerCurr = rasterizerNext;
   }

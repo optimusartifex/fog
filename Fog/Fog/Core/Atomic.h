@@ -43,11 +43,11 @@ struct AtomicOperationHelper {};
 namespace Fog {
 
 // ============================================================================
-// [Fog::AtomicOperation]
+// [Fog::AtomicCore]
 // ============================================================================
 
 template<typename T>
-struct AtomicOperation
+struct AtomicCore
 {
   typedef T Type;
 
@@ -117,7 +117,7 @@ struct AtomicOperation
 template<typename T>
 struct Atomic
 {
-  typedef AtomicOperation<T> Op;
+  typedef AtomicCore<T> Op;
 
   mutable T _atomic;
 
@@ -138,7 +138,7 @@ struct Atomic
 template<typename T>
 static FOG_INLINE T* atomicPtrXchg(T** atomic, T* value)
 {
-  return (T*)(void*)AtomicOperation<void*>::setXchg((void**)atomic, (void*)value);
+  return (T*)(void*)AtomicCore<void*>::setXchg((void**)atomic, (void*)value);
 }
 
 //! @brief Macro to help setting @c Fog::Atomic structure in static data.

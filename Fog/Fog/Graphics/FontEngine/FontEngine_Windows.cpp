@@ -7,7 +7,6 @@
 
 #if defined(FOG_FONT_WINDOWS)
 
-#include <Fog/Core/AutoLock.h>
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/List.h>
 #include <Fog/Core/Lock.h>

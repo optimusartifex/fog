@@ -31,22 +31,22 @@ LazyBase::~LazyBase()
 
 void* LazyBase::_get()
 {
-  void* v = AtomicOperation<void*>::get(&_ptr);
+  void* v = AtomicCore<void*>::get(&_ptr);
 
   // Already created, just return it
   if (v != NULL && v != (void*)STATE_CREATING_NOW) return v;
 
   // Create instance
-  if (AtomicOperation<void*>::cmpXchg(&_ptr, (void*)NULL, (void*)STATE_CREATING_NOW))
+  if (AtomicCore<void*>::cmpXchg(&_ptr, (void*)NULL, (void*)STATE_CREATING_NOW))
   {
     v = _create();
-    AtomicOperation<void*>::set(&_ptr, v);
+    AtomicCore<void*>::set(&_ptr, v);
     return v;
   }
 
   // Race.
   // This is very rare situation, but it can happen!
-  while ((v = AtomicOperation<void*>::get(&_ptr)) == (void*)STATE_CREATING_NOW)
+  while ((v = AtomicCore<void*>::get(&_ptr)) == (void*)STATE_CREATING_NOW)
   {
     Thread::_yield();
   }

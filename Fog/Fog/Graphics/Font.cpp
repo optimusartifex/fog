@@ -9,7 +9,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/AutoLock.h>
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/FileSystem.h>
 #include <Fog/Core/Hash.h>
@@ -24,6 +23,7 @@
 #include <Fog/Graphics/Font.h>
 #include <Fog/Graphics/Glyph.h>
 #include <Fog/Graphics/GlyphCache.h>
+#include <Fog/Graphics/Matrix.h>
 
 #if defined(FOG_FONT_WINDOWS)
 # include <Fog/Graphics/FontEngine/FontEngine_Windows.h>

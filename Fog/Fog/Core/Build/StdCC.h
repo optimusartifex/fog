@@ -179,11 +179,11 @@
 #define FOG_CC_HAVE_PARTIAL_TEMPLATE_SPECIALIZATION
 
 // Visibility.
-#if __GNUC__ >= 4
-# define FOG_HIDDEN __attribute__((visibility("hidden")))
-#else
+//#if __GNUC__ >= 4
+//# define FOG_HIDDEN __attribute__((visibility("hidden")))
+//#else
 # define FOG_HIDDEN
-#endif
+//#endif
 
 #if defined(FOG_OS_WINDOWS)
 # define FOG_DLL_IMPORT __declspec(dllimport)

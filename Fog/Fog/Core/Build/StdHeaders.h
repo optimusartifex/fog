@@ -29,15 +29,15 @@
 #endif // FOG_HAVE_STDARG_H
  
 #if defined(FOG_HARDCODE_MMX)
-# include <Fog/Core/Compiler/IntrinMMX.h>
+# include <Fog/Core/Intrin/IntrinMMX.h>
 #endif // FOG_HARDCODE_MMX
 
 #if defined(FOG_HARDCODE_SSE)
-# include <Fog/Core/Compiler/IntrinSSE.h>
+# include <Fog/Core/Intrin/IntrinSSE.h>
 #endif // FOG_HARDCODE_SSE
 
 #if defined(FOG_HARDCODE_SSE2)
-# include <Fog/Core/Compiler/IntrinSSE2.h>
+# include <Fog/Core/Intrin/IntrinSSE2.h>
 #endif // FOG_HARDCODE_SSE2
 
 // ============================================================================

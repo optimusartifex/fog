@@ -4,7 +4,7 @@
 // MIT, See COPYING file in package
 
 // [Dependencies]
-#include <Fog/Core/Compiler/IntrinSSE2.h>
+#include <Fog/Core/Intrin/IntrinSSE2.h>
 #include <Fog/Core/Math.h>
 #include <Fog/Graphics/Matrix.h>
 #include <Fog/Graphics/PathUtil.h>

@@ -120,7 +120,7 @@ struct AtomicInt32
 
 // Specialize.
 template<>
-struct AtomicOperationHelper<4> : public AtomicInt32 {};
+struct AtomicImplementation<4> : public AtomicInt32 {};
 
 } // Fog namespace
 

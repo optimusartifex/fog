@@ -31,7 +31,7 @@ extern FOG_API const uint32_t raster_demultiply_reciprocal_table_d[256];
 // [Fog::Argb]
 // ============================================================================
 
-#include <Fog/Core/Compiler/PackByte.h>
+#include <Fog/Core/Pack/PackByte.h>
 //! @brief Color in ARGB32 format.
 //!
 //! Use to store and manipulate 32-bit ARGB color entities (8-bits for each
@@ -271,7 +271,7 @@ struct FOG_HIDDEN Argb
     uint32_t _value;
   };
 };
-#include <Fog/Core/Compiler/PackRestore.h>
+#include <Fog/Core/Pack/PackRestore.h>
 
 // ============================================================================
 // [Fog::ArgbStop]

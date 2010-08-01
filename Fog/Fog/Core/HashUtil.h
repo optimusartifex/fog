@@ -8,15 +8,10 @@
 #define _FOG_CORE_HASHUTIL_H
 
 // [Dependencies]
-#include <Fog/Core/Build.h>
 #include <Fog/Core/Assert.h>
-#include <Fog/Core/Atomic.h>
 #include <Fog/Core/Char.h>
 #include <Fog/Core/Constants.h>
-#include <Fog/Core/List.h>
 #include <Fog/Core/Math.h>
-#include <Fog/Core/Memory.h>
-#include <Fog/Core/SequenceInfo.h>
 #include <Fog/Core/Static.h>
 #include <Fog/Core/Std.h>
 #include <Fog/Core/TypeInfo.h>
@@ -24,11 +19,11 @@
 namespace Fog {
 namespace HashUtil {
 
-//! @addtogroup Fog_Core_Util
+//! @addtogroup Fog_Core_Collections
 //! @{
 
 // ============================================================================
-// [Fog::HashUtil::hashData/hashString]
+// [Fog::HashUtil::makeDataHash/makeStringHash]
 // ============================================================================
 
 //! @brief Hash data.
@@ -36,77 +31,81 @@ namespace HashUtil {
 //! @param data Pointer to data sequence.
 //! @param size Size of data. You cant use DETECT_LENGTH here.
 //!
-//! @note @c hashData() and @c hashString() methods will result in different
-//! hashes, also the speed of hashString() is maximized.
-FOG_API uint32_t hashData(const void* data, sysuint_t size);
+//! @note @c makeDataHash() and @c makeStringHash() methods will result in different
+//! hashes, also the speed of makeStringHash() is maximized.
+FOG_API uint32_t makeDataHash(const void* data, sysuint_t size);
 
 // STANDARD hash functions for 8 bit and 16 bit NULL terminated strings.
 // 8 bit and 16 bit hashes are compatible between LATIN1 and UTF16 strings.
 //
-// BIG NOTE: hashString() and hashData() functions are INCOMPATIBLE!
+// BIG NOTE: makeStringHash() and makeDataHash() functions are INCOMPATIBLE!
 
 //! @brief Hash 8-bit string.
 //!
 //! @param key 8-bit string to hash.
 //! @param length Length of string or DETECT_LENGTH to detect it.
 //!
-//! @note Hashing LATIN1 and UTF16 strings produces equal hash results.
+//! @note Hashing LATIN1 and UTF16 strings produces equal result. H
 //!
-//! @note @c hashData() and @c hashString() methods will result in different
-//! hashes, also the speed of hashString() is maximized.
-FOG_API uint32_t hashString(const char* key, sysuint_t length);
+//! @note @c makeDataHash() and @c makeStringHash() methods will result in different
+//! hashes, also the speed of makeStringHash() is maximized.
+FOG_API uint32_t makeStringHash(const char* key, sysuint_t length);
 
 //! @brief Hash 16-bit string.
 //!
 //! @param key 16-bit string to hash.
 //! @param length Length of string or DETECT_LENGTH to detect it.
 //!
-//! @note Hashing LATIN1 and UTF16 strings produces equal hash results.
+//! @note Hashing LATIN1 and UTF16 strings produces equal result.
 //!
-//! @note @c hashData() and @c hashString() methods will result in different
-//! hashes, also the speed of hashString() is maximized.
-FOG_API uint32_t hashString(const Char* key, sysuint_t length);
+//! @note @c makeDataHash() and @c makeStringHash() methods will result in different
+//! hashes, also the speed of makeStringHash() is maximized.
+FOG_API uint32_t makeStringHash(const Char* key, sysuint_t length);
+
+// ============================================================================
+// [Fog::HashUtil::combineHash]
+// ============================================================================
 
 //! @brief Combine two hash values into one.
-static FOG_INLINE uint32_t combineHash(uint32_t hash0, uint32_t hash1)
+static FOG_INLINE uint32_t combineHash(uint32_t h0, uint32_t h1)
 {
- return hash0 + hash1;
+  return h0 + h1;
 }
 
 //! @brief Combine three hash values into one.
 static FOG_INLINE uint32_t combineHash(uint32_t h0, uint32_t h1, uint32_t h2)
 {
- return h0 + h1 + h2;
+  return h0 + h1 + h2;
 }
 
 //! @brief Combine four hash values into one.
 static FOG_INLINE uint32_t combineHash(uint32_t h0, uint32_t h1, uint32_t h2, uint32_t h3)
 {
- return h0 + h1 + h2 + h3;
+  return h0 + h1 + h2 + h3;
 }
 
 //! @brief Combine five hash values into one.
 static FOG_INLINE uint32_t combineHash(uint32_t h0, uint32_t h1, uint32_t h2, uint32_t h3, uint32_t h4)
 {
- return h0 + h1 + h2 + h3 + h4;
+  return h0 + h1 + h2 + h3 + h4;
 }
 
 //! @brief Combine six hash values into one.
 static FOG_INLINE uint32_t combineHash(uint32_t h0, uint32_t h1, uint32_t h2, uint32_t h3, uint32_t h4, uint32_t h5)
 {
- return h0 + h1 + h2 + h3 + h4 + h5;
+  return h0 + h1 + h2 + h3 + h4 + h5;
 }
 
 //! @brief Combine seven hash values into one.
 static FOG_INLINE uint32_t combineHash(uint32_t h0, uint32_t h1, uint32_t h2, uint32_t h3, uint32_t h4, uint32_t h5, uint32_t h6)
 {
- return h0 + h1 + h2 + h3 + h4 + h5 + h6;
+  return h0 + h1 + h2 + h3 + h4 + h5 + h6;
 }
 
 //! @brief Combine eight hash values into one.
 static FOG_INLINE uint32_t combineHash(uint32_t h0, uint32_t h1, uint32_t h2, uint32_t h3, uint32_t h4, uint32_t h5, uint32_t h6, uint32_t h7)
 {
- return h0 + h1 + h2 + h3 + h4 + h5 + h6 + h7;
+  return h0 + h1 + h2 + h3 + h4 + h5 + h6 + h7;
 }
 
 // ============================================================================

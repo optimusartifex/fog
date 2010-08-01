@@ -323,7 +323,6 @@ struct Implicit
 #include <Fog/Core/Application.h>
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Atomic.h>
-#include <Fog/Core/Basics.h>
 #include <Fog/Core/Byte.h>
 #include <Fog/Core/ByteArray.h>
 #include <Fog/Core/ByteArrayFilter.h>
@@ -337,6 +336,7 @@ struct Implicit
 #include <Fog/Core/Event.h>
 #include <Fog/Core/EventLoop.h>
 #include <Fog/Core/FileSystem.h>
+#include <Fog/Core/Format.h>
 #include <Fog/Core/Hash.h>
 #include <Fog/Core/HashUtil.h>
 #include <Fog/Core/Lazy.h>
@@ -359,6 +359,7 @@ struct Implicit
 #include <Fog/Core/StringMatcher.h>
 #include <Fog/Core/StringUtil.h>
 #include <Fog/Core/Strings.h>
+#include <Fog/Core/Stub.h>
 #include <Fog/Core/TextCodec.h>
 #include <Fog/Core/Thread.h>
 #include <Fog/Core/ThreadCondition.h>

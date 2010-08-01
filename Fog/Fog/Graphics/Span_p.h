@@ -32,7 +32,7 @@ enum SPAN_CMASK_LENGTH_ENUM
 // [Fog::Span]
 // ============================================================================
 
-#include <Fog/Core/Compiler/PackByte.h>
+#include <Fog/Core/Pack/PackByte.h>
 //! @internal
 //!
 //! @brief Span is small element that contains position, length, CMask (const
@@ -180,13 +180,13 @@ struct FOG_HIDDEN Span
   //! @brief Pointer to the next span (or @c NULL if this is the last one).
   Span* _next;
 };
-#include <Fog/Core/Compiler/PackRestore.h>
+#include <Fog/Core/Pack/PackRestore.h>
 
 // ============================================================================
 // [Fog::Span8]
 // ============================================================================
 
-#include <Fog/Core/Compiler/PackByte.h>
+#include <Fog/Core/Pack/PackByte.h>
 //! @internal
 //!
 //! @brief Span that is used by rendering to 8-bit image formats.
@@ -280,13 +280,13 @@ struct FOG_HIDDEN Span8 : public Span
     return (uint8_t*)(void*)mask;
   }
 };
-#include <Fog/Core/Compiler/PackRestore.h>
+#include <Fog/Core/Pack/PackRestore.h>
 
 // ============================================================================
 // [Fog::SpanExt8]
 // ============================================================================
 
-#include <Fog/Core/Compiler/PackByte.h>
+#include <Fog/Core/Pack/PackByte.h>
 //! @internal
 //!
 //! @brief Span extended by a @c data pointer, based on @c Span8.
@@ -324,7 +324,7 @@ struct FOG_HIDDEN SpanExt8 : public Span8
   //! with span.
   uint8_t* _data;
 };
-#include <Fog/Core/Compiler/PackRestore.h>
+#include <Fog/Core/Pack/PackRestore.h>
 
 //! @}
 

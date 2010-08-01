@@ -98,7 +98,7 @@ static int styleToId(const ManagedString& name)
   return i;
 }
 
-#include <Fog/Core/Compiler/PackByte.h>
+#include <Fog/Core/Pack/PackByte.h>
 struct FOG_HIDDEN SvgStyleAttribute : public XmlAttribute
 {
   // [Construction / Destruction]
@@ -165,7 +165,7 @@ struct FOG_HIDDEN SvgStyleAttribute : public XmlAttribute
 private:
   FOG_DISABLE_COPY(SvgStyleAttribute)
 };
-#include <Fog/Core/Compiler/PackRestore.h>
+#include <Fog/Core/Pack/PackRestore.h>
 
 SvgStyleAttribute::SvgStyleAttribute(XmlElement* element, const ManagedString& name, int offset) :
   XmlAttribute(element, name, offset),

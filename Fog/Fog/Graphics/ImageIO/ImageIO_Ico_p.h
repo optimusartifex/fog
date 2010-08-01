@@ -26,7 +26,7 @@ namespace ImageIO {
 // [Fog::ImageIO::IcoHeader]
 // ============================================================================
 
-#include <Fog/Core/Compiler/PackByte.h>
+#include <Fog/Core/Pack/PackByte.h>
 
 //! @internal
 //!
@@ -38,13 +38,13 @@ struct IcoHeader
   uint16_t count;
 };
 
-#include <Fog/Core/Compiler/PackRestore.h>
+#include <Fog/Core/Pack/PackRestore.h>
 
 // ============================================================================
 // [Fog::ImageIO::IcoEntry]
 // ============================================================================
 
-#include <Fog/Core/Compiler/PackByte.h>
+#include <Fog/Core/Pack/PackByte.h>
 
 //! @internal
 //!
@@ -61,7 +61,7 @@ struct IcoEntry
   uint32_t offset;
 };
 
-#include <Fog/Core/Compiler/PackRestore.h>
+#include <Fog/Core/Pack/PackRestore.h>
 
 // ============================================================================
 // [Fog::ImageIO::IcoProvider]

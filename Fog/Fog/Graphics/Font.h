@@ -257,7 +257,7 @@ private:
 // [Fog::IntKerningPair / FloatKerningPair]
 // ============================================================================
 
-#include <Fog/Core/Compiler/PackByte.h>
+#include <Fog/Core/Pack/PackByte.h>
 
 //! @brief Kerning pair used if font uses quantized metrics.
 struct IntKerningPair
@@ -278,7 +278,7 @@ struct FloatKerningPair
   float amount;
 };
 
-#include <Fog/Core/Compiler/PackRestore.h>
+#include <Fog/Core/Pack/PackRestore.h>
 
 // ============================================================================
 // [Fog::FontFace]

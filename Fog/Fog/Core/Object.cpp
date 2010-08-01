@@ -639,7 +639,7 @@ FOG_CAPI_DECLARE void* fog_object_cast_string(Fog::Object* self, const char* cla
   FOG_ASSERT(self);
 
   const MetaClass* metaClass = self->getObjectMetaClass();
-  uint32_t classHash = HashUtil::hashString(className, DETECT_LENGTH);
+  uint32_t classHash = HashUtil::makeStringHash(className, DETECT_LENGTH);
 
   for (;;)
   {
@@ -670,7 +670,7 @@ FOG_INIT_DECLARE err_t fog_object_init(void)
 
   _privateObjectMetaClass.base = NULL;
   _privateObjectMetaClass.name = _privateObjectClassName;
-  _privateObjectMetaClass.hash = HashUtil::hashString(
+  _privateObjectMetaClass.hash = HashUtil::makeStringHash(
     _privateObjectClassName, FOG_ARRAY_SIZE(_privateObjectClassName) - 1);
 
   Object::_staticMetaClass = &_privateObjectMetaClass;

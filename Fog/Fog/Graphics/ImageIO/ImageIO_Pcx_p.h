@@ -25,7 +25,7 @@ namespace ImageIO {
 // [Fog::ImageIO::PcxHeader]
 // ============================================================================
 
-#include <Fog/Core/Compiler/PackByte.h>
+#include <Fog/Core/Pack/PackByte.h>
 
 //! @internal
 struct PcxHeader
@@ -50,7 +50,7 @@ struct PcxHeader
   uint8_t unused[54];
 };
 
-#include <Fog/Core/Compiler/PackRestore.h>
+#include <Fog/Core/Pack/PackRestore.h>
 
 // ============================================================================
 // [Fog::ImageIO::PcxProvider]

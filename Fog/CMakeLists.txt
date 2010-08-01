@@ -380,29 +380,36 @@ Set(FOG_CORE_BUILD_HEADERS
   Fog/Core/Build/StdOS.h
 )
 
-Set(FOG_CORE_COMPILER_SOURCES
+Set(FOG_CORE_INTRIN_SOURCES
 )
 
-Set(FOG_CORE_COMPILER_HEADERS
-  Fog/Core/Compiler/PackByte.h
-  Fog/Core/Compiler/PackWord.h
-  Fog/Core/Compiler/PackDWord.h
-  Fog/Core/Compiler/PackQWord.h
-  Fog/Core/Compiler/PackRestore.h
-  Fog/Core/Compiler/Intrin3dNow.h
-  Fog/Core/Compiler/IntrinMMX.h
-  Fog/Core/Compiler/IntrinMMXExt.h
-  Fog/Core/Compiler/IntrinSSE.h
-  Fog/Core/Compiler/IntrinSSE2.h
-  Fog/Core/Compiler/IntrinSSE3.h
-  Fog/Core/Compiler/IntrinSSSE3.h
+Set(FOG_CORE_INTRIN_HEADERS
+  Fog/Core/Intrin/Intrin3dNow.h
+  Fog/Core/Intrin/IntrinMMX.h
+  Fog/Core/Intrin/IntrinMMXExt.h
+  Fog/Core/Intrin/IntrinSSE.h
+  Fog/Core/Intrin/IntrinSSE2.h
+  Fog/Core/Intrin/IntrinSSE3.h
+  Fog/Core/Intrin/IntrinSSSE3.h
+)
+
+Set(FOG_CORE_PACK_SOURCES
+)
+
+Set(FOG_CORE_PACK_HEADERS
+  Fog/Core/Pack/PackByte.h
+  Fog/Core/Pack/PackWord.h
+  Fog/Core/Pack/PackDWord.h
+  Fog/Core/Pack/PackQWord.h
+  Fog/Core/Pack/PackRestore.h
 )
 
 # Source groups.
 Source_Group("Core" FILES ${FOG_CORE_LIB_SOURCES} ${FOG_CORE_MAIN_HEADERS})
 Source_Group("Core/Arch" FILES ${FOG_CORE_ARCH_SOURCES} ${FOG_CORE_ARCH_HEADERS})
 Source_Group("Core/Build" FILES ${FOG_CORE_BUILD_SOURCES} ${FOG_CORE_BUILD_HEADERS})
-Source_Group("Core/Compiler" FILES ${FOG_CORE_COMPILER_SOURCES} ${FOG_CORE_COMPILER_HEADERS})
+Source_Group("Core/Intrin" FILES ${FOG_CORE_INTRIN_SOURCES} ${FOG_CORE_INTRIN_HEADERS})
+Source_Group("Core/Pack" FILES ${FOG_CORE_PACK_SOURCES} ${FOG_CORE_PACK_HEADERS})
 
 # =============================================================================
 # [Fog-Graphics]
@@ -908,7 +915,8 @@ Set(FOG_ALL_SOURCES
   ${FOG_CORE_LIB_SOURCES}
   ${FOG_CORE_ARCH_SOURCES}
   ${FOG_CORE_BUILD_SOURCES}
-  ${FOG_CORE_COMPILER_SOURCES}
+  ${FOG_CORE_INTRIN_SOURCES}
+  ${FOG_CORE_PACK_SOURCES}
   # Fog-Graphics.
   ${FOG_GRAPHICS_LIB_SOURCES}
   ${FOG_GRAPHICS_IMAGEIO_SOURCES}
@@ -930,7 +938,8 @@ Set(FOG_ALL_HEADERS
   ${FOG_CORE_MAIN_HEADERS}
   ${FOG_CORE_ARCH_HEADERS}
   ${FOG_CORE_BUILD_HEADERS}
-  ${FOG_CORE_COMPILER_HEADERS}
+  ${FOG_CORE_INTRIN_HEADERS}
+  ${FOG_CORE_PACK_HEADERS}
   # Fog-Graphics.
   ${FOG_GRAPHICS_MAIN_HEADERS}
   ${FOG_GRAPHICS_IMAGEIO_HEADERS}

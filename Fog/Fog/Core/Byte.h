@@ -22,7 +22,7 @@ namespace Fog {
 // [Fog::Byte]
 // ============================================================================
 
-#include <Fog/Core/Compiler/PackByte.h>
+#include <Fog/Core/Pack/PackByte.h>
 //! @brief byte (8-bits) character.
 struct FOG_HIDDEN Byte
 {
@@ -121,7 +121,7 @@ struct FOG_HIDDEN Byte
   //! @brief Unicode character value.
   uint8_t _ch;
 };
-#include <Fog/Core/Compiler/PackRestore.h>
+#include <Fog/Core/Pack/PackRestore.h>
 
 //! @}
 

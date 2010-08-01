@@ -9,7 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Build.h>
-#include <Fog/Core/Compiler/IntrinMMX.h>
+#include <Fog/Core/Intrin/IntrinMMX.h>
 
 // ============================================================================
 // [Fog::Core - MMX-Ext - Fixes]

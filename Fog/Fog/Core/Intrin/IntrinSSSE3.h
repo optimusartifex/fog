@@ -8,7 +8,7 @@
 #define _FOG_CORE_COMPILER_INTRINSSSE3_H
 
 // [Dependencies]
-#include <Fog/Core/Compiler/IntrinSSE3.h>
+#include <Fog/Core/Intrin/IntrinSSE3.h>
 
 #include <tmmintrin.h>
 

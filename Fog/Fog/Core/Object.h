@@ -157,7 +157,7 @@ public: \
     { \
       /* Called the first time, we must initialize the meta class right now. */ \
       _privateMetaClass.base = base::getStaticMetaClass(); \
-      _privateMetaClass.hash = Fog::HashUtil::hashString(_privateClassName, FOG_ARRAY_SIZE(_privateClassName) - 1); \
+      _privateMetaClass.hash = Fog::HashUtil::makeStringHash(_privateClassName, FOG_ARRAY_SIZE(_privateClassName) - 1); \
       _privateMetaClass.name = _privateClassName; \
       \
       /* Assign meta class to _staticMetaClass pointer. */ \

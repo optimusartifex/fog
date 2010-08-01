@@ -720,7 +720,7 @@ sysuint_t lastIndexOfAny(const Char* str, sysuint_t length, const Char* ch, sysu
 
 // Boolean translating table from 'char*' or 'Fog::Char*' into 'bool'
 // Should be 12 bytes
-#include <Fog/Core/Compiler/PackByte.h>
+#include <Fog/Core/Pack/PackByte.h>
 struct BoolMap
 {
   char str[10];
@@ -748,7 +748,7 @@ static const BoolMap boolMap[] =
   { { '1', 0  , 0  , 0  , 0  , 0  , 0  , 0  ,  0 ,  0 }, 1, true  },
   { { '0', 0  , 0  , 0  , 0  , 0  , 0  , 0  ,  0 ,  0 }, 1, false }
 };
-#include <Fog/Core/Compiler/PackRestore.h>
+#include <Fog/Core/Pack/PackRestore.h>
 
 // ============================================================================
 // [Fog::StringUtil::asciiMap]

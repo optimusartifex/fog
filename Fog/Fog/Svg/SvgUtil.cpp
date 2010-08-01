@@ -17,13 +17,13 @@ namespace SvgUtil {
 // [Fog::SvgUtil - Color & Opacity]
 // ============================================================================
 
-#include <Fog/Core/Compiler/PackByte.h>
+#include <Fog/Core/Pack/PackByte.h>
 struct SvgNamedColor
 {
   char name[22];
   uint32_t value;
 };
-#include <Fog/Core/Compiler/PackRestore.h>
+#include <Fog/Core/Pack/PackRestore.h>
 
 #define __SVG_COLOR(R, G, B) \
   ( 0xFF000000U | (((uint32_t)R) << 16) | (((uint32_t)G) << 8) | ((uint32_t)B) )

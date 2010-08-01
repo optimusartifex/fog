@@ -8,7 +8,7 @@
 #define _FOG_CORE_COMPILER_INTRINSSE3_H
 
 // [Dependencies]
-#include <Fog/Core/Compiler/IntrinSSE2.h>
+#include <Fog/Core/Intrin/IntrinSSE2.h>
 
 #if defined(_MSC_VER)
 # include <intrin.h>

@@ -24,7 +24,7 @@ namespace Fog {
 // [Fog::SvgCoord]
 // ============================================================================
 
-#include <Fog/Core/Compiler/PackByte.h>
+#include <Fog/Core/Pack/PackByte.h>
 struct FOG_HIDDEN SvgCoord
 {
   FOG_INLINE SvgCoord() {}
@@ -33,7 +33,7 @@ struct FOG_HIDDEN SvgCoord
   float value;
   uint32_t unit;
 };
-#include <Fog/Core/Compiler/PackRestore.h>
+#include <Fog/Core/Pack/PackRestore.h>
 
 //! @}
 

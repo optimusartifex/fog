@@ -30,7 +30,7 @@
 // [GdiPlus - Flat API]
 // ============================================================================
 
-#include <Fog/Core/Compiler/PackQWord.h>
+#include <Fog/Core/Pack/PackQWord.h>
 
 typedef uint32_t GpARGB;
 typedef int GpPixelFormat;
@@ -230,7 +230,7 @@ struct GpRect
   int Height;
 };
 
-#include <Fog/Core/Compiler/PackRestore.h>
+#include <Fog/Core/Pack/PackRestore.h>
 
 namespace Fog {
 namespace ImageIO {

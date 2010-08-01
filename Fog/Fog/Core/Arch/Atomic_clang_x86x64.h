@@ -151,7 +151,7 @@ struct AtomicInt32
 
 // Specialize.
 template<>
-struct AtomicOperationHelper<4> : public AtomicInt32 {};
+struct AtomicImplementation<4> : public AtomicInt32 {};
 
 // ============================================================================
 // [Fog::AtomicInt64]
@@ -294,7 +294,7 @@ struct AtomicInt64
 
 // Specialize.
 template<>
-struct AtomicOperationHelper<8> : public AtomicInt64 {};
+struct AtomicImplementation<8> : public AtomicInt64 {};
 
 #endif // FOG_ARCH_BITS == 64
 

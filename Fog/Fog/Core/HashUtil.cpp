@@ -21,7 +21,7 @@ namespace Fog {
 namespace HashUtil {
 
 // ===========================================================================
-// [Fog::HashUtil::hashData]
+// [Fog::HashUtil::makeDataHash]
 // ===========================================================================
 
 // From OSSP val - Value Access <http://www.ossp.org/pkg/lib/val/>
@@ -37,7 +37,7 @@ namespace HashUtil {
 // consistency reasons with the other hash functions (i.e. same function
 // signature). It can be definetely recommended as a good general
 // purpose hash function.
-uint32_t hashData(const void* data, sysuint_t size)
+uint32_t makeDataHash(const void* data, sysuint_t size)
 {
   const uint8_t* k = (const uint8_t*)data;
   uint32_t a, b, c;
@@ -105,10 +105,10 @@ uint32_t hashData(const void* data, sysuint_t size)
 }
 
 // ===========================================================================
-// [Fog::HashUtil::hashString]
+// [Fog::HashUtil::makeStringHash]
 // ===========================================================================
 
-uint32_t hashString(const char* key, sysuint_t length)
+uint32_t makeStringHash(const char* key, sysuint_t length)
 {
   uint32_t hash = 0x12345678;
 
@@ -125,7 +125,7 @@ uint32_t hashString(const char* key, sysuint_t length)
   return hash;
 }
 
-uint32_t hashString(const Char* key, sysuint_t length)
+uint32_t makeStringHash(const Char* key, sysuint_t length)
 {
   uint32_t hash = 0x12345678;
 

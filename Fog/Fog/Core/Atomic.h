@@ -16,11 +16,11 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::AtomicOperationHelper]
+// [Fog::AtomicImplementation]
 // ============================================================================
 
 template<sysuint_t IntSize>
-struct AtomicOperationHelper {};
+struct AtomicImplementation {};
 
 } // Fog namespace
 
@@ -51,7 +51,7 @@ struct AtomicCore
 {
   typedef T Type;
 
-  typedef AtomicOperationHelper<sizeof(T)> __Backend;
+  typedef AtomicImplementation<sizeof(T)> __Backend;
   typedef typename __Backend::Type __BackendType;
 
   static FOG_INLINE void set(T* atomic, T value)

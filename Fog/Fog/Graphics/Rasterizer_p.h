@@ -65,7 +65,7 @@ struct FOG_HIDDEN Rasterizer
   // [Cell]
   // --------------------------------------------------------------------------
 
-#include <Fog/Core/Compiler/PackDWord.h>
+#include <Fog/Core/Pack/PackDWord.h>
   //! @internal
   struct FOG_HIDDEN CellXY
   {
@@ -84,9 +84,9 @@ struct FOG_HIDDEN Rasterizer
     FOG_INLINE void addCovers(int _cover, int _area) { cover += _cover; area += _area; }
     FOG_INLINE bool hasCovers() const { return (cover | area) != 0; }
   };
-#include <Fog/Core/Compiler/PackRestore.h>
+#include <Fog/Core/Pack/PackRestore.h>
 
-#include <Fog/Core/Compiler/PackDWord.h>
+#include <Fog/Core/Pack/PackDWord.h>
   //! @internal
   struct FOG_HIDDEN CellX
   {
@@ -115,7 +115,7 @@ struct FOG_HIDDEN Rasterizer
       area = other.area;
     }
   };
-#include <Fog/Core/Compiler/PackRestore.h>
+#include <Fog/Core/Pack/PackRestore.h>
 
   // --------------------------------------------------------------------------
   // [CellXYBuffer]

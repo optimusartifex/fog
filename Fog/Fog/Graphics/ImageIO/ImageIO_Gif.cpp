@@ -193,14 +193,14 @@ typedef uint8_t *GifRowType;
 typedef uint16_t GifPrefixType;
 typedef int GifWord;
 
-#include <Fog/Core/Compiler/PackByte.h>
+#include <Fog/Core/Pack/PackByte.h>
 struct GifColorType
 {
   uint8_t Red;
   uint8_t Green;
   uint8_t Blue;
 };
-#include <Fog/Core/Compiler/PackRestore.h>
+#include <Fog/Core/Pack/PackRestore.h>
 
 struct ColorMapObject
 {

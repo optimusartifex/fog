@@ -25,7 +25,7 @@ namespace ImageIO {
 // [Fog::ImageIO::BmpFileHeader]
 // ============================================================================
 
-#include <Fog/Core/Compiler/PackByte.h>
+#include <Fog/Core/Pack/PackByte.h>
 
 //! @internal
 //!
@@ -42,13 +42,13 @@ struct BmpFileHeader
   uint32_t imageOffset;     //!< @brief Offset to image data (54, 124, ...).
 };
 
-#include <Fog/Core/Compiler/PackRestore.h>
+#include <Fog/Core/Pack/PackRestore.h>
 
 // ============================================================================
 // [Fog::ImageIO::BmpOS2V1Header]
 // ============================================================================
 
-#include <Fog/Core/Compiler/PackByte.h>
+#include <Fog/Core/Pack/PackByte.h>
 
 //! @internal
 //!
@@ -64,13 +64,13 @@ struct BmpOS2V1Header
   uint16_t bitsPerPixel;    //!< @brief Bits per pixel (1, 4, 8 or 24).
 };
 
-#include <Fog/Core/Compiler/PackRestore.h>
+#include <Fog/Core/Pack/PackRestore.h>
 
 // ============================================================================
 // [Fog::ImageIO::BmpWinV3Header]
 // ============================================================================
 
-#include <Fog/Core/Compiler/PackByte.h>
+#include <Fog/Core/Pack/PackByte.h>
 
 //! @internal
 //!
@@ -92,13 +92,13 @@ struct BmpWinV3Header
   uint32_t colorsImportant; //!< @brief Minimum number of important colors.
 };
 
-#include <Fog/Core/Compiler/PackRestore.h>
+#include <Fog/Core/Pack/PackRestore.h>
 
 // ============================================================================
 // [Fog::ImageIO::BmpWinV4Header]
 // ============================================================================
 
-#include <Fog/Core/Compiler/PackByte.h>
+#include <Fog/Core/Pack/PackByte.h>
 
 //! @internal
 //!
@@ -138,13 +138,13 @@ struct BmpWinV4Header
   uint32_t bGamma;          //!< @brief Gamma blue coordinate scale value.
 };
 
-#include <Fog/Core/Compiler/PackRestore.h>
+#include <Fog/Core/Pack/PackRestore.h>
 
 // ============================================================================
 // [Fog::ImageIO::BmpWinV5Header]
 // ============================================================================
 
-#include <Fog/Core/Compiler/PackByte.h>
+#include <Fog/Core/Pack/PackByte.h>
 
 //! @internal
 //!
@@ -190,7 +190,7 @@ struct BmpWinV5Header
   uint32_t reserved;        //!< @brief Reserved, should be zero.
 };
 
-#include <Fog/Core/Compiler/PackRestore.h>
+#include <Fog/Core/Pack/PackRestore.h>
 
 // ============================================================================
 // [Fog::ImageIO::BmpDataHeader]

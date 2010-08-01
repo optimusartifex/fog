@@ -23,7 +23,7 @@ namespace Fog {
 // [Fog::Char]
 // ============================================================================
 
-#include <Fog/Core/Compiler/PackByte.h>
+#include <Fog/Core/Pack/PackByte.h>
 //! @brief 16-bit unicode character.
 struct FOG_HIDDEN Char
 {
@@ -186,7 +186,7 @@ struct FOG_HIDDEN Char
   //! @brief 16-bit unicode character value.
   uint16_t _ch;
 };
-#include <Fog/Core/Compiler/PackRestore.h>
+#include <Fog/Core/Pack/PackRestore.h>
 
 //! @}
 

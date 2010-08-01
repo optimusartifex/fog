@@ -11,6 +11,7 @@
 // [Dependencies]
 #include <Fog/Core/Lock.h>
 #include <Fog/Core/Hash.h>
+#include <Fog/Core/HashUtil.h>
 #include <Fog/Core/ManagedString.h>
 #include <Fog/Core/StringUtil.h>
 
@@ -138,7 +139,7 @@ struct FOG_HIDDEN ManagedStringLocal
 
     FOG_ASSERT(length != 0);
 
-    uint32_t hashCode = HashUtil::hashString(s, length);
+    uint32_t hashCode = HashUtil::makeStringHash(s, length);
     uint32_t hashMod = hashCode % _capacity;
 
     Node* node = _buckets[hashMod];
@@ -234,7 +235,7 @@ struct FOG_HIDDEN ManagedStringLocal
     sysuint_t length = _s.getLength();
     if (length == DETECT_LENGTH) length = StringUtil::len(s);
 
-    uint32_t hashCode = HashUtil::hashString(s, length);
+    uint32_t hashCode = HashUtil::makeStringHash(s, length);
     uint32_t hashMod = hashCode % _capacity;
 
     Node* node = _buckets[hashMod];

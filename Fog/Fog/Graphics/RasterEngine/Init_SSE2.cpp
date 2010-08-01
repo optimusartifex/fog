@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Compiler/IntrinSSE2.h>
+#include <Fog/Core/Intrin/IntrinSSE2.h>
 #include <Fog/Core/Math.h>
 #include <Fog/Core/Misc.h>
 #include <Fog/Graphics/ByteUtil_p.h>

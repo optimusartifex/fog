@@ -300,7 +300,7 @@ enum RASTER_COMMAND_STATUS
 // [Fog::RasterClipVSpan]
 // ============================================================================
 
-#include <Fog/Core/Compiler/PackByte.h>
+#include <Fog/Core/Pack/PackByte.h>
 //! @internal
 //!
 //! @brief Raster paint engine span managed by clip-manager.
@@ -314,7 +314,7 @@ struct FOG_HIDDEN RasterClipVSpan8 : public Span8
   //! @brief Span allocator category
   uint poolId : 8;
 };
-#include <Fog/Core/Compiler/PackRestore.h>
+#include <Fog/Core/Pack/PackRestore.h>
 
 // ============================================================================
 // [Fog::RasterClipMask]

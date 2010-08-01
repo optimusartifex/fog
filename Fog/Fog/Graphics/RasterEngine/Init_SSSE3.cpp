@@ -14,9 +14,9 @@
 // TODO: Move this check somewhere else, maybe into Build.h?
 #if (defined(FOG_CC_IDE)) || (defined(FOG_CC_GNU) && FOG_CC_GNU >= 4) || (defined(FOG_CC_MSVC) && FOG_CC_MSVC >= 1500)
 
-#include <Fog/Core/Compiler/IntrinSSE2.h>
-#include <Fog/Core/Compiler/IntrinSSE3.h>
-#include <Fog/Core/Compiler/IntrinSSSE3.h>
+#include <Fog/Core/Intrin/IntrinSSE2.h>
+#include <Fog/Core/Intrin/IntrinSSE3.h>
+#include <Fog/Core/Intrin/IntrinSSSE3.h>
 #include <Fog/Core/Math.h>
 #include <Fog/Core/Misc.h>
 #include <Fog/Graphics/ByteUtil_p.h>

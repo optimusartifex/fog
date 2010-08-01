@@ -22,15 +22,15 @@
 // [Dependencies]
 // ============================================================================
 
-#include <Fog/Core/Compiler/IntrinMMX.h>
+#include <Fog/Core/Intrin/IntrinMMX.h>
 
 #if defined(FOG_RASTER_MMX3DNOW)
-#include <Fog/Core/Compiler/IntrinMMXExt.h>
-#include <Fog/Core/Compiler/Intrin3dNow.h>
+#include <Fog/Core/Intrin/IntrinMMXExt.h>
+#include <Fog/Core/Intrin/Intrin3dNow.h>
 #endif // FOG_RASTER_MMX3DNOW
 
 #if defined(FOG_RASTER_MMXSSE)
-#include <Fog/Core/Compiler/IntrinSSE.h>
+#include <Fog/Core/Intrin/IntrinSSE.h>
 #endif // FOG_RASTER_MMXSSE
 
 #include <Fog/Core/Math.h>

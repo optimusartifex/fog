@@ -3402,7 +3402,7 @@ uint32_t String::getHashCode() const
   uint32_t h = _d->hashCode;
   if (h) return h;
 
-  return (_d->hashCode = HashUtil::hashString(getData(), getLength()));
+  return (_d->hashCode = HashUtil::makeStringHash(getData(), getLength()));
 }
 
 // ============================================================================

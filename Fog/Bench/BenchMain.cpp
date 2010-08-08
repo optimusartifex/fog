@@ -106,12 +106,12 @@ static void benchAll()
   FogBenchmarkContext ctx_fog_st(&master, Fog::Ascii8("Fog-st"));
   ctx_fog_st.run();
 
-  //FogBenchmarkContext ctx_fog_mt(&master, Fog::Ascii8("Fog-mt"));
-  //ctx_fog_mt.run();
+  FogBenchmarkContext ctx_fog_mt(&master, Fog::Ascii8("Fog-mt"));
+  ctx_fog_mt.run();
 
 #if defined(FOG_BENCH_GDIPLUS)
-  //GdiPlusBenchmarkContext ctx_gdiplus(&master);
-  //ctx_gdiplus.run();
+  GdiPlusBenchmarkContext ctx_gdiplus(&master);
+  ctx_gdiplus.run();
 #endif // FOG_BENCH_GDIPLUS
 
 #if defined(FOG_BENCH_QT4)

@@ -19,7 +19,6 @@
 #include <Fog/Graphics/RasterEngine_p.h>
 #include <Fog/Graphics/Rasterizer_p.h>
 #include <Fog/Graphics/Rasterizer/Rasterizer_Analytic_p.h>
-#include <Fog/Graphics/Rasterizer/Rasterizer_SLEFA_p.h>
 
 namespace Fog {
 
@@ -56,27 +55,30 @@ static Static<RasterizerLocal> rasterizer_local;
 
 Rasterizer::Rasterizer()
 {
-  // Must be set by the real rasterizer.
-  _sweepScanlineSimpleFn = NULL;
-  _sweepScanlineRegionFn = NULL;
-  _sweepScanlineSpansFn = NULL;
+  // Rasterizer pool.
+  _pool = NULL;
 
+  // Clip-box / bounding-box.
   _clipBox.clear();
   _boundingBox.clear();
 
-  // Set fill rule to invalid, real rasterizer will set it to default in 
-  // construction time (and also set the _sweep... methods).
-  _fillRule = FILL_RULE_COUNT;
+  // Default fill rule.
+  _fillRule = FILL_DEFAULT;
 
   // Default alpha is full-opaque.
   _alpha = 0xFF;
 
+  // No error at this time.
   _error = ERR_OK;
 
+  // Not finalized, not valid.
   _isFinalized = false;
   _isValid = false;
 
-  _pool = NULL;
+  // Sweep-scanline is initialized during initialize() or finalize().
+  _sweepScanlineSimpleFn = NULL;
+  _sweepScanlineRegionFn = NULL;
+  _sweepScanlineSpansFn = NULL;
 }
 
 Rasterizer::~Rasterizer()

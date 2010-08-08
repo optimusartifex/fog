@@ -39,7 +39,7 @@ struct FOG_HIDDEN Range
   }
 
   //! @brief Create a range from @a start to @a end.
-  explicit FOG_INLINE Range(sysuint_t start, sysuint_t end = DETECT_LENGTH) :
+  FOG_INLINE explicit Range(sysuint_t start, sysuint_t end = DETECT_LENGTH) :
     _start(start),
     _end(end)
   {

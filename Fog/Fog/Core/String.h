@@ -149,7 +149,7 @@ struct FOG_API String
   String(const Ascii8& str);
   String(const Utf16& str);
 
-  explicit FOG_INLINE String(Data* d) : _d(d) {}
+  FOG_INLINE explicit String(Data* d) : _d(d) {}
 
   ~String();
 

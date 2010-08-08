@@ -37,8 +37,8 @@ struct FOG_HIDDEN Stub8
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  explicit FOG_INLINE Stub8(const char* data, sysuint_t length = DETECT_LENGTH) : _data(data), _length(length) {}
-  explicit FOG_INLINE Stub8(const uint8_t* data, sysuint_t length = DETECT_LENGTH) : _data(reinterpret_cast<const char*>(data)), _length(length) {}
+  FOG_INLINE explicit Stub8(const char* data, sysuint_t length = DETECT_LENGTH) : _data(data), _length(length) {}
+  FOG_INLINE explicit Stub8(const uint8_t* data, sysuint_t length = DETECT_LENGTH) : _data(reinterpret_cast<const char*>(data)), _length(length) {}
 
   // --------------------------------------------------------------------------
   // [Methods]
@@ -77,8 +77,8 @@ struct FOG_HIDDEN Ascii8 : public Stub8
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  explicit FOG_INLINE Ascii8(const char* data, sysuint_t length = DETECT_LENGTH) : Stub8(data, length) {}
-  explicit FOG_INLINE Ascii8(const uint8_t* data, sysuint_t length = DETECT_LENGTH) : Stub8(data, length) {}
+  FOG_INLINE explicit Ascii8(const char* data, sysuint_t length = DETECT_LENGTH) : Stub8(data, length) {}
+  FOG_INLINE explicit Ascii8(const uint8_t* data, sysuint_t length = DETECT_LENGTH) : Stub8(data, length) {}
 };
 
 // ============================================================================
@@ -92,8 +92,8 @@ struct FOG_HIDDEN Local8 : public Stub8
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  explicit FOG_INLINE Local8(const char* data, sysuint_t length = DETECT_LENGTH) : Stub8(data, length) {}
-  explicit FOG_INLINE Local8(const uint8_t* data, sysuint_t length = DETECT_LENGTH) : Stub8(data, length) {}
+  FOG_INLINE explicit Local8(const char* data, sysuint_t length = DETECT_LENGTH) : Stub8(data, length) {}
+  FOG_INLINE explicit Local8(const uint8_t* data, sysuint_t length = DETECT_LENGTH) : Stub8(data, length) {}
 };
 
 // ============================================================================
@@ -107,8 +107,8 @@ struct FOG_HIDDEN Utf8 : public Stub8
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  explicit FOG_INLINE Utf8(const char* data, sysuint_t length = DETECT_LENGTH) : Stub8(data, length) {}
-  explicit FOG_INLINE Utf8(const uint8_t* data, sysuint_t length = DETECT_LENGTH) : Stub8(data, length) {}
+  FOG_INLINE explicit Utf8(const char* data, sysuint_t length = DETECT_LENGTH) : Stub8(data, length) {}
+  FOG_INLINE explicit Utf8(const uint8_t* data, sysuint_t length = DETECT_LENGTH) : Stub8(data, length) {}
 };
 
 // ============================================================================
@@ -122,11 +122,11 @@ struct FOG_HIDDEN Utf16
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  explicit FOG_INLINE Utf16(const uint16_t* data, sysuint_t length = DETECT_LENGTH) : _data(reinterpret_cast<const Char*>(data)), _length(length) {}
-  explicit FOG_INLINE Utf16(const Char* data, sysuint_t length = DETECT_LENGTH) : _data(data), _length(length) {}
+  FOG_INLINE explicit Utf16(const uint16_t* data, sysuint_t length = DETECT_LENGTH) : _data(reinterpret_cast<const Char*>(data)), _length(length) {}
+  FOG_INLINE explicit Utf16(const Char* data, sysuint_t length = DETECT_LENGTH) : _data(data), _length(length) {}
 
 #if FOG_SIZEOF_WCHAR_T == 2
-  explicit FOG_INLINE Utf16(const wchar_t* data, sysuint_t length = DETECT_LENGTH) : _data(reinterpret_cast<const Char*>(data)), _length(length) {}
+  FOG_INLINE explicit Utf16(const wchar_t* data, sysuint_t length = DETECT_LENGTH) : _data(reinterpret_cast<const Char*>(data)), _length(length) {}
 #endif // FOG_SIZEOF_WCHAR_T == 2
 
   // --------------------------------------------------------------------------

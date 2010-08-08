@@ -9,7 +9,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/ByteArray.h>
 #include <Fog/Core/Lock.h>
 #include <Fog/Core/Math.h>
 #include <Fog/Core/Memory.h>
@@ -22,6 +21,35 @@
 #include <Fog/Graphics/Span_p.h>
 
 namespace Fog {
+
+// ----------------------------------------------------------------------------
+// Anti-Grain Geometry - Version 2.4
+// Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
+//
+// Permission to copy, use, modify, sell and distribute this software 
+// is granted provided this copyright notice appears in all copies. 
+// This software is provided "as is" without express or implied
+// warranty, and with no claim as to its suitability for any purpose.
+//
+// ----------------------------------------------------------------------------
+//
+// The author gratefully acknowleges the support of David Turner, 
+// Robert Wilhelm, and Werner Lemberg - the authors of the FreeType 
+// libray - in producing this work. See http://www.freetype.org for details.
+//
+// ----------------------------------------------------------------------------
+// Contact: mcseem@antigrain.com
+//          mcseemagg@yahoo.com
+//          http://www.antigrain.com
+// ----------------------------------------------------------------------------
+//
+// Adaptation for 32-bit screen coordinates has been sponsored by 
+// Liberty Technology Systems, Inc., visit http://lib-sys.com
+//
+// Liberty Technology Systems, Inc. is the provider of
+// PostScript and PDF technology for software developers.
+//
+// ----------------------------------------------------------------------------
 
 // ============================================================================
 // [Fog::Rasterizer - Debugging]
@@ -61,35 +89,6 @@ static FOG_INLINE int upscale(double v) { return Math::iround(v * POLY_SUBPIXEL_
 // [Fog::AnalyticRasterizer - Construction / Destruction]
 // ============================================================================
 
-// ----------------------------------------------------------------------------
-// Anti-Grain Geometry - Version 2.4
-// Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
-//
-// Permission to copy, use, modify, sell and distribute this software 
-// is granted provided this copyright notice appears in all copies. 
-// This software is provided "as is" without express or implied
-// warranty, and with no claim as to its suitability for any purpose.
-//
-// ----------------------------------------------------------------------------
-//
-// The author gratefully acknowleges the support of David Turner, 
-// Robert Wilhelm, and Werner Lemberg - the authors of the FreeType 
-// libray - in producing this work. See http://www.freetype.org for details.
-//
-// ----------------------------------------------------------------------------
-// Contact: mcseem@antigrain.com
-//          mcseemagg@yahoo.com
-//          http://www.antigrain.com
-// ----------------------------------------------------------------------------
-//
-// Adaptation for 32-bit screen coordinates has been sponsored by 
-// Liberty Technology Systems, Inc., visit http://lib-sys.com
-//
-// Liberty Technology Systems, Inc. is the provider of
-// PostScript and PDF technology for software developers.
-//
-// ----------------------------------------------------------------------------
-
 AnalyticRasterizer::AnalyticRasterizer()
 {
   _bufferFirst = Rasterizer::getCellXYBuffer();
@@ -101,8 +100,6 @@ AnalyticRasterizer::AnalyticRasterizer()
 
   _rowsInfo = NULL;
   _rowsCapacity = 0;
-
-  setFillRule(FILL_DEFAULT);
 
   reset();
 }
@@ -120,7 +117,8 @@ void AnalyticRasterizer::pooled()
   reset();
 
   // Defaults.
-  _fillRule = FILL_EVEN_ODD;
+  _fillRule = FILL_DEFAULT;
+  _alpha = 0xFF;
 
   freeXYCellBuffers(false);
 
@@ -140,16 +138,26 @@ void AnalyticRasterizer::pooled()
   }
 }
 
+// ============================================================================
+// [Fog::AnalyticRasterizer - Reset / Initialize / Finalize]
+// ============================================================================
+
 void AnalyticRasterizer::reset()
 {
-  _error = ERR_OK;
-
-  _clipping = false;
   _clipBox.clear();
-  _clip24x8.clear();
+  _boundingBox.set(0x7FFFFFFF, 0x7FFFFFFF, -0x7FFFFFFF, -0x7FFFFFFF);
+
+  _error = ERR_OK;
 
   _isFinalized = false;
   _isValid = false;
+
+  _sweepScanlineSimpleFn = NULL;
+  _sweepScanlineRegionFn = NULL;
+  _sweepScanlineSpansFn = NULL;
+
+  _clipping = false;
+  _clip24x8.clear();
 
   _x1 = 0;
   _y1 = 0;
@@ -165,75 +173,299 @@ void AnalyticRasterizer::reset()
   _endCell = _curCell + 1;
 
   _cellsCount = 0; 
-  _boundingBox.set(0x7FFFFFFF, 0x7FFFFFFF, -0x7FFFFFFF, -0x7FFFFFFF);
 }
 
-// ============================================================================
-// [Fog::AnalyticRasterizer - Clipping]
-// ============================================================================
-
-void AnalyticRasterizer::setClipBox(const IntBox& clipBox)
+void AnalyticRasterizer::initialize()
 {
-  _clipping = true;
-  _clipBox = clipBox;
+  _sweepScanlineSimpleFn = NULL;
+  _sweepScanlineRegionFn = NULL;
+  _sweepScanlineSpansFn = NULL;
 
-  _clip24x8.set(clipBox.x1 << POLY_SUBPIXEL_SHIFT, clipBox.y1 << POLY_SUBPIXEL_SHIFT,
-                clipBox.x2 << POLY_SUBPIXEL_SHIFT, clipBox.y2 << POLY_SUBPIXEL_SHIFT);
+  if (_clipBox.isValid())
+  {
+    _clipping = true;
+    _clip24x8.set(_clipBox.x1 << POLY_SUBPIXEL_SHIFT, _clipBox.y1 << POLY_SUBPIXEL_SHIFT,
+                  _clipBox.x2 << POLY_SUBPIXEL_SHIFT, _clipBox.y2 << POLY_SUBPIXEL_SHIFT);
+  }
+  else
+  {
+    _clipping = false;
+    _clip24x8.clear();
+  }
 }
 
-void AnalyticRasterizer::resetClipBox()
+template <typename T>
+static FOG_INLINE void swapCells(T* FOG_RESTRICT a, T* FOG_RESTRICT b)
 {
-  _clipping = false;
-  _clipBox.clear();
-  _clip24x8.clear();
+  T temp;
+
+  temp.set(*a);
+  a->set(*b);
+  b->set(temp);
 }
 
-// ============================================================================
-// [Fog::AnalyticRasterizer - Error]
-// ============================================================================
-
-void AnalyticRasterizer::setError(err_t error)
+template<class Cell>
+static FOG_INLINE void qsortCells(Cell* start, uint32_t num)
 {
-  _error = error;
+  Cell*  stack[80];
+  Cell** top; 
+  Cell*  limit;
+  Cell*  base;
+
+  limit = start + num;
+  base  = start;
+  top   = stack;
+
+  for (;;)
+  {
+    sysuint_t len = sysuint_t(limit - base);
+
+    Cell* i;
+    Cell* j;
+    Cell* pivot;
+
+    if (len > RASTERIZER_QSORT_THRESHOLD)
+    {
+      // We use base + len/2 as the pivot.
+      pivot = base + len / 2;
+      swapCells(base, pivot);
+
+      i = base + 1;
+      j = limit - 1;
+
+      // Now ensure that *i <= *base <= *j .
+      if (j->x < i->x) swapCells(i, j);
+      if (base->x < i->x) swapCells(base, i);
+      if (j->x < base->x) swapCells(base, j);
+
+      for (;;)
+      {
+        int x = base->x;
+        do { i++; } while (i->x < x);
+        do { j--; } while (x < j->x);
+
+        if (i > j) break;
+        swapCells(i, j);
+      }
+
+      swapCells(base, j);
+
+      // Now, push the largest sub-array.
+      if (j - base > limit - i)
+      {
+        top[0] = base;
+        top[1] = j;
+        base   = i;
+      }
+      else
+      {
+        top[0] = i;
+        top[1] = limit;
+        limit  = j;
+      }
+      top += 2;
+    }
+    else
+    {
+      // The sub-array is small, perform insertion sort.
+      j = base;
+      i = j + 1;
+
+      for (; i < limit; j = i, i++)
+      {
+        // Optimization experiment for X64, not successful:
+        //
+        // int j1X = j[1].x;
+        // uint64_t j1T = ((uint64_t*)&j[1].cover)[0];
+        //
+        // for (;;)
+        // {
+        //   int j0X = j[0].x;
+        //   if (j0X < j1X) break;
+        //
+        //   j[1].x = j0X;
+        //   ((uint64_t*)&j[1].cover)[0] = ((uint64_t*)&j[0].cover)[0];
+        //
+        //   j[0].x = j1X;
+        //   ((uint64_t*)&j[0].cover)[0] = j1T;
+        //
+        //   if (j-- == base) break;
+        // }
+        for (; j[0].x >= j[1].x; j--)
+        {
+          swapCells(j + 1, j);
+          if (j == base) break;
+        }
+      }
+
+      if (top > stack)
+      {
+        top  -= 2;
+        base  = top[0];
+        limit = top[1];
+      }
+      else
+      {
+        break;
+      }
+    }
+  }
 }
 
-void AnalyticRasterizer::resetError()
+void AnalyticRasterizer::finalize()
 {
-  _error = ERR_OK;
-}
+  // Perform sort only the first time.
+  if (_isFinalized) return;
 
-// ============================================================================
-// [Fog::AnalyticRasterizer - Fill Rule]
-// ============================================================================
+  closePolygon();
+  if (_curCell == &_invalidCell) return;
 
-void AnalyticRasterizer::setFillRule(uint32_t fillRule)
-{
-  if (_fillRule == fillRule) return;
-  FOG_ASSERT(fillRule < FILL_RULE_COUNT);
+  if (_curCell->hasCovers()) _curCell++;
+  if (!finalizeCellBuffer() || !_cellsCount) return;
 
-  _fillRule = fillRule;
-  updateFunctions();
-}
+  // DBG: Check to see if min/max works well.
+  // for (uint nc = 0; nc < m_numCells; nc++)
+  // {
+  //   cell_type* cell = m_cells[nc >> cell_block_shift] + (nc & cell_block_mask);
+  //   if (cell->x < _boundingBox.x1 || 
+  //       cell->y < _boundingBox.y1 || 
+  //       cell->x > _boundingBox.x2 || 
+  //       cell->y > _boundingBox.y2)
+  //   {
+  //     cell = cell; // Breakpoint here
+  //   }
+  // }
 
-// ============================================================================
-// [Fog::AnalyticRasterizer - Alpha]
-// ============================================================================
+  // Normalize bounding box to our standard, x2/y2 coordinates are outside.
+  _boundingBox.x2++;
+  _boundingBox.y2++;
 
-void AnalyticRasterizer::setAlpha(uint32_t alpha)
-{
-  if (_alpha == alpha) return;
-  FOG_ASSERT(alpha <= 0xFF);
+  uint32_t rows = (uint32_t)(_boundingBox.y2 - _boundingBox.y1);
 
-  _alpha = alpha;
-  updateFunctions();
-}
+  if (_cellsCapacity < _cellsCount)
+  {
+    // Reserve a bit more if initial value is too small.
+    uint32_t cap = Math::max(_cellsCount, (uint32_t)256);
 
-// ============================================================================
-// [Fog::AnalyticRasterizer - Update Functions]
-// ============================================================================
+    if (_cellsSorted) Memory::free(_cellsSorted);
+    _cellsSorted = (CellX*)Memory::alloc(sizeof(CellX) * cap);
+    if (_cellsSorted) _cellsCapacity = cap;
+  }
 
-void AnalyticRasterizer::updateFunctions()
-{
+  if (_rowsCapacity < rows)
+  {
+    // Reserve a bit more if initial value is too small.
+    uint32_t cap = Math::max(rows, (uint32_t)256);
+
+    if (_rowsInfo) Memory::free(_rowsInfo);
+    _rowsInfo = (RowInfo*)Memory::alloc(sizeof(RowInfo) * cap);
+    if (_rowsInfo) _rowsCapacity = cap;
+  }
+
+  // Report error if something failed.
+  if (!_cellsSorted || !_rowsInfo)
+  {
+    setError(ERR_RT_OUT_OF_MEMORY);
+    return;
+  }
+
+  // Work variables.
+  CellXYBuffer* buf;
+  uint32_t i;
+  CellXY* cell;
+
+  // Create the Y-histogram (count the numbers of cells for each Y).
+
+  // If we are here _bufferFirst and _bufferCurrent must exist.
+  FOG_ASSERT(_bufferFirst);
+  FOG_ASSERT(_bufferCurrent);
+
+  // Zero all values in lookup table (and histogram) - this is initial state.
+  Memory::zero(_rowsInfo, sizeof(RowInfo) * rows);
+
+  // --------------------------------------------------------------------------
+  {
+    static int minCover = INT_MAX;
+    static int maxCover = INT_MIN;
+    static int minArea = INT_MAX;
+    static int maxArea = INT_MIN;
+
+    int oldMinCover = minCover;
+    int oldMaxCover = maxCover;
+    int oldMinArea = minArea;
+    int oldMaxArea = maxArea;
+
+    buf = _bufferFirst;
+    do {
+      cell = buf->cells;
+      for (i = buf->count; i; i--, cell++)
+      {
+        if (minCover > cell->cover) minCover = cell->cover;
+        if (maxCover < cell->cover) maxCover = cell->cover;
+        if (minArea > (cell->area>>8)) minArea = cell->area >> 8;
+        if (maxArea < (cell->area>>8)) maxArea = cell->area >> 8;
+      }
+
+      // Stop if this is last used cells buffer.
+      if (buf == _bufferCurrent) break;
+    } while ((buf = buf->next));
+    if (minCover != oldMinCover || maxCover != oldMaxCover ||
+        minArea != oldMinArea || maxArea != oldMaxArea)
+    {
+      printf("Cover [%d %d], Area [%d %d ... %x %x]\n", minCover, maxCover, minArea, maxArea, minArea, maxArea);
+    }
+  }
+  // --------------------------------------------------------------------------
+
+  buf = _bufferFirst;
+  do {
+    cell = buf->cells;
+    for (i = buf->count; i; i--, cell++) _rowsInfo[cell->y - _boundingBox.y1].index++;
+
+    // Stop if this is last used cells buffer.
+    if (buf == _bufferCurrent) break;
+  } while ((buf = buf->next));
+
+  // Convert the Y-histogram into the array of starting indexes.
+  {
+    uint32_t start = 0;
+    for (i = 0; i < rows; i++)
+    {
+      uint32_t v = _rowsInfo[i].index;
+      _rowsInfo[i].index = start;
+      start += v;
+    }
+  }
+
+  // Fill the cell pointer array sorted by Y.
+  buf = _bufferFirst;
+  do {
+    cell = buf->cells;
+    for (i = buf->count; i; i--, cell++)
+    {
+      RowInfo& ri =_rowsInfo[cell->y - _boundingBox.y1];
+      _cellsSorted[ri.index + ri.count++].set(*cell);
+    }
+
+    // Stop if this is last used cells buffer.
+    if (buf == _bufferCurrent) break;
+  } while ((buf = buf->next));
+
+  // Finally arrange the X-arrays.
+  for (i = 0; i < rows; i++)
+  {
+    const RowInfo& ri = _rowsInfo[i];
+    if (ri.count > 1) qsortCells(_cellsSorted + ri.index, ri.count);
+  }
+
+  // Free unused cell buffers.
+  freeXYCellBuffers(false);
+
+  // Mark rasterizer as sorted.
+  _isFinalized = true;
+  _isValid = hasCells();
+
+  // Setup sweep scanline methods.
   switch (_fillRule)
   {
     case FILL_NON_ZERO:
@@ -537,7 +769,7 @@ FOG_INLINE void AnalyticRasterizer::clipLineY(int24x8_t x1, int24x8_t y1, int24x
 }
 
 // ============================================================================
-// [Fog::AnalyticRasterizer - Render]
+// [Fog::AnalyticRasterizer - Renderer]
 // ============================================================================
 
 void AnalyticRasterizer::renderLine(int24x8_t x1, int24x8_t y1, int24x8_t x2, int24x8_t y2)
@@ -880,248 +1112,6 @@ void AnalyticRasterizer::freeXYCellBuffers(bool all)
       _bufferFirst->prev = NULL;
     }
   }
-}
-
-// ============================================================================
-// [Fog::AnalyticRasterizer - Finalize]
-// ============================================================================
-
-template <typename T>
-static FOG_INLINE void swapCells(T* FOG_RESTRICT a, T* FOG_RESTRICT b)
-{
-  T temp;
-
-  temp.set(*a);
-  a->set(*b);
-  b->set(temp);
-}
-
-template<class Cell>
-static FOG_INLINE void qsortCells(Cell* start, uint32_t num)
-{
-  Cell*  stack[80];
-  Cell** top; 
-  Cell*  limit;
-  Cell*  base;
-
-  limit = start + num;
-  base  = start;
-  top   = stack;
-
-  for (;;)
-  {
-    sysuint_t len = sysuint_t(limit - base);
-
-    Cell* i;
-    Cell* j;
-    Cell* pivot;
-
-    if (len > RASTERIZER_QSORT_THRESHOLD)
-    {
-      // We use base + len/2 as the pivot.
-      pivot = base + len / 2;
-      swapCells(base, pivot);
-
-      i = base + 1;
-      j = limit - 1;
-
-      // Now ensure that *i <= *base <= *j .
-      if (j->x < i->x) swapCells(i, j);
-      if (base->x < i->x) swapCells(base, i);
-      if (j->x < base->x) swapCells(base, j);
-
-      for (;;)
-      {
-        int x = base->x;
-        do { i++; } while (i->x < x);
-        do { j--; } while (x < j->x);
-
-        if (i > j) break;
-        swapCells(i, j);
-      }
-
-      swapCells(base, j);
-
-      // Now, push the largest sub-array.
-      if (j - base > limit - i)
-      {
-        top[0] = base;
-        top[1] = j;
-        base   = i;
-      }
-      else
-      {
-        top[0] = i;
-        top[1] = limit;
-        limit  = j;
-      }
-      top += 2;
-    }
-    else
-    {
-      // The sub-array is small, perform insertion sort.
-      j = base;
-      i = j + 1;
-
-      for (; i < limit; j = i, i++)
-      {
-        // Optimization experiment for X64, not successful:
-        //
-        // int j1X = j[1].x;
-        // uint64_t j1T = ((uint64_t*)&j[1].cover)[0];
-        //
-        // for (;;)
-        // {
-        //   int j0X = j[0].x;
-        //   if (j0X < j1X) break;
-        //
-        //   j[1].x = j0X;
-        //   ((uint64_t*)&j[1].cover)[0] = ((uint64_t*)&j[0].cover)[0];
-        //
-        //   j[0].x = j1X;
-        //   ((uint64_t*)&j[0].cover)[0] = j1T;
-        //
-        //   if (j-- == base) break;
-        // }
-        for (; j[0].x >= j[1].x; j--)
-        {
-          swapCells(j + 1, j);
-          if (j == base) break;
-        }
-      }
-
-      if (top > stack)
-      {
-        top  -= 2;
-        base  = top[0];
-        limit = top[1];
-      }
-      else
-      {
-        break;
-      }
-    }
-  }
-}
-
-void AnalyticRasterizer::finalize()
-{
-  // Perform sort only the first time.
-  if (_isFinalized) return;
-
-  closePolygon();
-  if (_curCell == &_invalidCell) return;
-
-  if (_curCell->hasCovers()) _curCell++;
-  if (!finalizeCellBuffer() || !_cellsCount) return;
-
-  // DBG: Check to see if min/max works well.
-  // for (uint nc = 0; nc < m_numCells; nc++)
-  // {
-  //   cell_type* cell = m_cells[nc >> cell_block_shift] + (nc & cell_block_mask);
-  //   if (cell->x < _boundingBox.x1 || 
-  //       cell->y < _boundingBox.y1 || 
-  //       cell->x > _boundingBox.x2 || 
-  //       cell->y > _boundingBox.y2)
-  //   {
-  //     cell = cell; // Breakpoint here
-  //   }
-  // }
-
-  // Normalize bounding box to our standard, x2/y2 coordinates are outside.
-  _boundingBox.x2++;
-  _boundingBox.y2++;
-
-  uint32_t rows = (uint32_t)(_boundingBox.y2 - _boundingBox.y1);
-
-  if (_cellsCapacity < _cellsCount)
-  {
-    // Reserve a bit more if initial value is too small.
-    uint32_t cap = Math::max(_cellsCount, (uint32_t)256);
-
-    if (_cellsSorted) Memory::free(_cellsSorted);
-    _cellsSorted = (CellX*)Memory::alloc(sizeof(CellX) * cap);
-    if (_cellsSorted) _cellsCapacity = cap;
-  }
-
-  if (_rowsCapacity < rows)
-  {
-    // Reserve a bit more if initial value is too small.
-    uint32_t cap = Math::max(rows, (uint32_t)256);
-
-    if (_rowsInfo) Memory::free(_rowsInfo);
-    _rowsInfo = (RowInfo*)Memory::alloc(sizeof(RowInfo) * cap);
-    if (_rowsInfo) _rowsCapacity = cap;
-  }
-
-  // Report error if something failed.
-  if (!_cellsSorted || !_rowsInfo)
-  {
-    setError(ERR_RT_OUT_OF_MEMORY);
-    return;
-  }
-
-  // Work variables.
-  CellXYBuffer* buf;
-  uint32_t i;
-  CellXY* cell;
-
-  // Create the Y-histogram (count the numbers of cells for each Y).
-
-  // If we are here _bufferFirst and _bufferCurrent must exist.
-  FOG_ASSERT(_bufferFirst);
-  FOG_ASSERT(_bufferCurrent);
-
-  // Zero all values in lookup table (and histogram) - this is initial state.
-  Memory::zero(_rowsInfo, sizeof(RowInfo) * rows);
-
-  buf = _bufferFirst;
-  do {
-    cell = buf->cells;
-    for (i = buf->count; i; i--, cell++) _rowsInfo[cell->y - _boundingBox.y1].index++;
-
-    // Stop if this is last used cells buffer.
-    if (buf == _bufferCurrent) break;
-  } while ((buf = buf->next));
-
-  // Convert the Y-histogram into the array of starting indexes.
-  {
-    uint32_t start = 0;
-    for (i = 0; i < rows; i++)
-    {
-      uint32_t v = _rowsInfo[i].index;
-      _rowsInfo[i].index = start;
-      start += v;
-    }
-  }
-
-  // Fill the cell pointer array sorted by Y.
-  buf = _bufferFirst;
-  do {
-    cell = buf->cells;
-    for (i = buf->count; i; i--, cell++)
-    {
-      RowInfo& ri =_rowsInfo[cell->y - _boundingBox.y1];
-      _cellsSorted[ri.index + ri.count++].set(*cell);
-    }
-
-    // Stop if this is last used cells buffer.
-    if (buf == _bufferCurrent) break;
-  } while ((buf = buf->next));
-
-  // Finally arrange the X-arrays.
-  for (i = 0; i < rows; i++)
-  {
-    const RowInfo& ri = _rowsInfo[i];
-    if (ri.count > 1) qsortCells(_cellsSorted + ri.index, ri.count);
-  }
-
-  // Free unused cell buffers.
-  freeXYCellBuffers(false);
-
-  // Mark rasterizer as sorted.
-  _isFinalized = true;
-  _isValid = hasCells();
 }
 
 // ============================================================================

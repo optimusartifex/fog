@@ -68,7 +68,7 @@ struct Lazy : public LazyBase
   FOG_INLINE Lazy() {}
 
   //! @brief Constructor used by the library (internal).
-  explicit FOG_INLINE Lazy(_DONT_INITIALIZE x) : LazyBase(DONT_INITIALIZE) {}
+  FOG_INLINE explicit Lazy(_DONT_INITIALIZE x) : LazyBase(DONT_INITIALIZE) {}
 
   //! @brief Destructor, will destroy the lazy instance.
   virtual ~Lazy()

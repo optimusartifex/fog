@@ -142,7 +142,7 @@ struct FOG_API ByteArray
   ByteArray(const char* str, sysuint_t length);
   ByteArray(const Stub8& str);
 
-  explicit FOG_INLINE ByteArray(Data* d) : _d(d) {}
+  FOG_INLINE explicit ByteArray(Data* d) : _d(d) {}
 
   ~ByteArray();
 

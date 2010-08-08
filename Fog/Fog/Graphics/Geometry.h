@@ -26,6 +26,7 @@ struct IntPoint;
 struct IntRect;
 struct IntSize;
 
+struct FloatBox;
 struct FloatPoint;
 struct FloatRect;
 struct FloatSize;
@@ -1757,26 +1758,6 @@ struct FloatRect
   {
   }
 
-  FOG_INLINE FloatRect(const IntRect& other)
-    : x((float)other.x), y((float)other.y), w((float)other.w), h((float)other.h)
-  {
-  }
-
-  FOG_INLINE FloatRect(const IntPoint& pt0, const IntPoint& pt1)
-    : x((float)pt0.x), y((float)pt0.y), w((float)pt1.x - (float)pt0.x), h((float)pt1.y - (float)pt0.y)
-  {
-  }
-
-  FOG_INLINE FloatRect(const IntPoint& pt0, const IntSize& sz)
-    : x((float)pt0.x), y((float)pt0.y), w((float)sz.w), h((float)sz.h)
-  {
-  }
-
-  FOG_INLINE FloatRect(int rx, int ry, int rw, int rh)
-    : x((float)rx), y((float)ry), w((float)rw), h((float)rh)
-  {
-  }
-
   FOG_INLINE FloatRect(const FloatRect& other)
     : x(other.x), y(other.y), w(other.w), h(other.h)
   {
@@ -1794,6 +1775,21 @@ struct FloatRect
 
   FOG_INLINE FloatRect(float rx, float ry, float rw, float rh)
     : x(rx), y(ry), w(rw), h(rh)
+  {
+  }
+
+  FOG_INLINE explicit FloatRect(const IntRect& other)
+    : x((float)other.x), y((float)other.y), w((float)other.w), h((float)other.h)
+  {
+  }
+
+  FOG_INLINE FloatRect(const IntPoint& pt0, const IntPoint& pt1)
+    : x((float)pt0.x), y((float)pt0.y), w((float)pt1.x - (float)pt0.x), h((float)pt1.y - (float)pt0.y)
+  {
+  }
+
+  FOG_INLINE FloatRect(const IntPoint& pt0, const IntSize& sz)
+    : x((float)pt0.x), y((float)pt0.y), w((float)sz.w), h((float)sz.h)
   {
   }
 
@@ -2138,46 +2134,6 @@ struct DoubleRect
   {
   }
 
-  FOG_INLINE DoubleRect(const IntRect& other)
-    : x((double)other.x), y((double)other.y), w((double)other.w), h((double)other.h)
-  {
-  }
-
-  FOG_INLINE DoubleRect(const IntPoint& pt0, const IntPoint& pt1)
-    : x((double)pt0.x), y((double)pt0.y), w((double)pt1.x - (double)pt0.x), h((double)pt1.y - (double)pt0.y)
-  {
-  }
-
-  FOG_INLINE DoubleRect(const IntPoint& pt0, const IntSize& sz)
-    : x((double)pt0.x), y((double)pt0.y), w((double)sz.w), h((double)sz.h)
-  {
-  }
-
-  FOG_INLINE DoubleRect(int rx, int ry, int rw, int rh)
-    : x((double)rx), y((double)ry), w((double)rw), h((double)rh)
-  {
-  }
-
-  FOG_INLINE DoubleRect(const FloatRect& other)
-    : x((double)other.x), y((double)other.y), w((double)other.w), h((double)other.h)
-  {
-  }
-
-  FOG_INLINE DoubleRect(const FloatPoint& pt0, const FloatPoint& pt1)
-    : x((double)pt0.x), y((double)pt0.y), w((double)pt1.x - (double)pt0.x), h((double)pt1.y - (double)pt0.y)
-  {
-  }
-
-  FOG_INLINE DoubleRect(const FloatPoint& pt0, const FloatSize& sz)
-    : x((double)pt0.x), y((double)pt0.y), w((double)sz.w), h((double)sz.h)
-  {
-  }
-
-  FOG_INLINE DoubleRect(float rx, float ry, float rw, float rh)
-    : x((double)rx), y((double)ry), w((double)rw), h((double)rh)
-  {
-  }
-
   FOG_INLINE DoubleRect(const DoubleRect& other)
     : x(other.x), y(other.y), w(other.w), h(other.h)
   {
@@ -2195,6 +2151,36 @@ struct DoubleRect
 
   FOG_INLINE DoubleRect(double rx, double ry, double rw, double rh)
     : x(rx), y(ry), w(rw), h(rh)
+  {
+  }
+
+  FOG_INLINE explicit DoubleRect(const FloatRect& other)
+    : x((double)other.x), y((double)other.y), w((double)other.w), h((double)other.h)
+  {
+  }
+
+  FOG_INLINE DoubleRect(const FloatPoint& pt0, const FloatPoint& pt1)
+    : x((double)pt0.x), y((double)pt0.y), w((double)pt1.x - (double)pt0.x), h((double)pt1.y - (double)pt0.y)
+  {
+  }
+
+  FOG_INLINE DoubleRect(const FloatPoint& pt0, const FloatSize& sz)
+    : x((double)pt0.x), y((double)pt0.y), w((double)sz.w), h((double)sz.h)
+  {
+  }
+
+  FOG_INLINE explicit DoubleRect(const IntRect& other)
+    : x((double)other.x), y((double)other.y), w((double)other.w), h((double)other.h)
+  {
+  }
+
+  FOG_INLINE DoubleRect(const IntPoint& pt0, const IntPoint& pt1)
+    : x((double)pt0.x), y((double)pt0.y), w((double)pt1.x - (double)pt0.x), h((double)pt1.y - (double)pt0.y)
+  {
+  }
+
+  FOG_INLINE DoubleRect(const IntPoint& pt0, const IntSize& sz)
+    : x((double)pt0.x), y((double)pt0.y), w((double)sz.w), h((double)sz.h)
   {
   }
 
@@ -2624,8 +2610,10 @@ struct IntBox
   {
   }
 
-  FOG_INLINE IntBox(const IntRect& other);
-  // Defined later.
+  FOG_INLINE explicit IntBox(const IntRect& other) : 
+    x1(other.x), y1(other.y), x2(other.x + other.w), y2(other.y + other.h)
+  {
+  }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -2731,8 +2719,8 @@ struct IntBox
   //! do not overlap. Remember, x2() and y2() coords aren't in the rectangle.
   FOG_INLINE bool overlaps(const IntBox& r) const
   {
-    return (( ((y1 - r.y2) ^ (y2-r.y1)) &
-              ((x1 - r.x2) ^ (x2-r.x1)) ) < 0);
+    return (( ((y1 - r.y2) ^ (y2 - r.y1)) &
+              ((x1 - r.x2) ^ (x2 - r.x1)) ) < 0);
   }
 
   //! @brief Returns @c true if rectangle completely subsumes @a r.
@@ -2845,7 +2833,7 @@ struct IntBox
   // --------------------------------------------------------------------------
 
   FOG_INLINE IntRect toIntRect() const { return IntRect(x1, y1, x2 - x1, y2 - y1); }
-  FOG_INLINE FloatRect toFloatRect() const { return FloatRect(x1, y1, x2 - x1, y2 - y1); }
+  FOG_INLINE FloatRect toFloatRect() const { return FloatRect((float)x1, (float)y1, (float)(x2 - x1), (float)(y2 - y1)); }
   FOG_INLINE DoubleRect toDoubleRect() const { return DoubleRect(x1, y1, x2 - x1, y2 - y1); }
 
   // --------------------------------------------------------------------------
@@ -2885,6 +2873,613 @@ struct IntBox
 };
 
 // ============================================================================
+// [Fog::FloatBox]
+// ============================================================================
+
+//! @brief Box (32-bit float version).
+struct FloatBox
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE FloatBox()
+  {
+  }
+
+  FOG_INLINE FloatBox(float px1, float py1, float px2, float py2) :
+    x1(px1), y1(py1), x2(px2), y2(py2)
+  {
+  }
+
+  FOG_INLINE FloatBox(const FloatBox& other) :
+    x1(other.x1), y1(other.y1), x2(other.x2), y2(other.y2)
+  {
+  }
+
+  FOG_INLINE explicit FloatBox(const FloatRect& other) : 
+    x1(other.x), y1(other.y), x2(other.x + other.w), y2(other.y + other.h)
+  {
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE float getX() const { return x1; }
+  FOG_INLINE float getY() const { return y1; }
+  FOG_INLINE float getWidth() const { return x2 - x1; }
+  FOG_INLINE float getHeight() const { return y2 - y1; }
+
+  FOG_INLINE float getX1() const { return x1; }
+  FOG_INLINE float getY1() const { return y1; }
+  FOG_INLINE float getX2() const { return x2; }
+  FOG_INLINE float getY2() const { return y2; }
+
+  FOG_INLINE FloatPoint getPosition() const { return FloatPoint(x1, y1); }
+  FOG_INLINE FloatSize getSize() const { return FloatSize(x2 - x1, y2 - y1); }
+
+  FOG_INLINE FloatBox& set(const FloatBox &other)
+  { 
+    if (sizeof(FloatBox) == 16)
+    {
+      Memory::copy16B(static_cast<void*>(this), static_cast<const void*>(&other));
+    }
+    else
+    {
+      x1 = other.x1;
+      y1 = other.y1;
+      x2 = other.x2;
+      y2 = other.y2;
+    }
+    return *this;
+  }
+  
+  FOG_INLINE FloatBox& set(float px1, float py1, float px2, float py2)
+  { 
+    x1 = px1; 
+    y1 = py1; 
+    x2 = px2; 
+    y2 = py2;
+
+    return *this;
+  }
+
+  FOG_INLINE FloatBox& setX(float x) { x1 = x; return *this; }
+  FOG_INLINE FloatBox& setY(float y) { y1 = y; return *this; }
+  FOG_INLINE FloatBox& setWidth(float w) { x2 = x1 + w; return *this; }
+  FOG_INLINE FloatBox& setHeight(float h) { y2 = y1 + h; return *this; }
+
+  FOG_INLINE FloatBox& setX1(float px1) { x1 = px1; return *this; }
+  FOG_INLINE FloatBox& setY1(float py1) { y1 = py1; return *this; }
+  FOG_INLINE FloatBox& setX2(float px2) { x2 = px2; return *this; }
+  FOG_INLINE FloatBox& setY2(float py2) { y2 = py2; return *this; }
+
+  // --------------------------------------------------------------------------
+  // [Clear]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE FloatBox& clear()
+  {
+    x1 = 0.0f;
+    y1 = 0.0f;
+    x2 = 0.0f;
+    y2 = 0.0f;
+    return *this;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Translate]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE FloatBox& translate(float px, float py)
+  { 
+    x1 += px;
+    y1 += py;
+    x2 += px;
+    y2 += py;
+    return *this;
+  }
+
+  FOG_INLINE FloatBox& translate(const FloatPoint& pt)
+  { 
+    x1 += pt.x;
+    y1 += pt.y;
+    x2 += pt.x;
+    y2 += pt.y;
+    return *this;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Algebra]
+  // --------------------------------------------------------------------------
+
+  //! @brief Checks if two rectangles overlap.
+  //! @return @c true if two rectangles overlap, @c false if two rectangles
+  //! do not overlap. Remember, x2() and y2() coords aren't in the rectangle.
+  FOG_INLINE bool overlaps(const FloatBox& r) const
+  {
+    return ((r.x1 >= x1) | (r.x2 <= x2) |
+            (r.y1 >= y1) | (r.y2 <= y2) );
+  }
+
+  //! @brief Returns @c true if rectangle completely subsumes @a r.
+  FOG_INLINE bool subsumes(const FloatBox& r) const
+  {
+    return ((r.x1 >= x1) & (r.x2 <= x2) &
+            (r.y1 >= y1) & (r.y2 <= y2) );
+  }
+
+  static FOG_INLINE bool intersect(FloatBox& dest, const FloatBox& src1, const FloatBox& src2)
+  {
+    dest.set(Math::max(src1.x1, src2.x1),
+             Math::max(src1.y1, src2.y1),
+             Math::min(src1.x2, src2.x2),
+             Math::min(src1.y2, src2.y2));
+    return dest.isValid();
+  }
+
+  // --------------------------------------------------------------------------
+  // [HitTest]
+  // --------------------------------------------------------------------------
+
+  //! @brief Returns @c true if given point is in rectangle.
+  //! @brief x Point x coordinate.
+  //! @brief y Point y coordinate.
+  //! @return @c true if point is in rectangle.
+  FOG_INLINE bool contains(float px, float py) const
+  {
+    return ((px >= x1) & (py >= y1) & (px < x2) & (py < y2));
+  }
+
+  //! @brief Returns @c true if given point @a pt is in rectangle.
+  //! @brief x Point x coordinate.
+  //! @brief y Point y coordinate.
+  //! @return @c true if point is in rectangle.
+  FOG_INLINE bool contains(const FloatPoint& pt) const
+  {
+    return ((pt.x >= x1) & (pt.y >= y1) & (pt.x < x2) & (pt.y < y2));
+  }
+
+  // --------------------------------------------------------------------------
+  // [Valid]
+  // --------------------------------------------------------------------------
+
+  //! @brief Returns @c true if rectangle is valid.
+  //!
+  //! Rectangle is only valid if @c x2 is greater than @c x1 and @c y2 is
+  //! greater than @c y1.
+  FOG_INLINE bool isValid() const
+  {
+    return (x2 > x1) & (y2 > y1);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Equality]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(float px1, float py1, float px2, float py2) const
+  {
+    return (x1 == px1) & (y1 == py1) & (x2 == px2) & (y2 == py2);
+  }
+
+  FOG_INLINE bool eq(const FloatBox& other) const
+  {
+    return (x1 == other.x1) & (y1 == other.y1) & (x2 == other.x2) & (y2 == other.y2);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Shrink / Expand]
+  // --------------------------------------------------------------------------
+
+  //! @brief Shrinks rectangle by @c n coordinates.
+  FOG_INLINE FloatBox& shrink(float n)
+  {
+    x1 += n;
+    y1 += n;
+    x2 -= n;
+    y2 -= n;
+    
+    return *this;
+  }
+
+  //! @brief Expands rectangle by @c n coordinates.
+  FOG_INLINE FloatBox& expand(float n)
+  {
+    x1 -= n;
+    y1 -= n;
+    x2 += n;
+    y2 += n;
+
+    return *this;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Convert]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE IntRect toIntRect() const { return IntRect((int)x1, (int)y1, (int)(x2 - x1), (int)(y2 - y1)); }
+  FOG_INLINE FloatRect toFloatRect() const { return FloatRect(x1, y1, x2 - x1, y2 - y1); }
+  FOG_INLINE DoubleRect toDoubleRect() const { return DoubleRect(x1, y1, x2 - x1, y2 - y1); }
+
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE FloatBox& operator=(const FloatBox& other)
+  {
+    return set(other);
+  }
+
+  FOG_INLINE FloatBox& operator+=(const FloatPoint& pt)
+  {
+    return translate(pt);
+  }
+
+  FOG_INLINE FloatBox& operator-=(const FloatPoint& pt)
+  {
+    x1 -= pt.x;
+    y1 -= pt.y;
+    x2 -= pt.x;
+    y2 -= pt.y;
+    return *this;
+  }
+
+  FOG_INLINE bool operator==(const FloatBox& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const FloatBox& other) const { return !eq(other); }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  float x1;
+  float y1;
+  float x2;
+  float y2;
+};
+
+// ============================================================================
+// [Fog::DoubleBox]
+// ============================================================================
+
+//! @brief Box (64-bit float version).
+struct DoubleBox
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE DoubleBox()
+  {
+  }
+
+  FOG_INLINE DoubleBox(double px1, double py1, double px2, double py2) :
+    x1(px1), y1(py1), x2(px2), y2(py2)
+  {
+  }
+
+  FOG_INLINE DoubleBox(const DoubleBox& other) :
+    x1(other.x1), y1(other.y1), x2(other.x2), y2(other.y2)
+  {
+  }
+
+  FOG_INLINE explicit DoubleBox(const FloatBox& other) :
+    x1(other.x1), y1(other.y1), x2(other.x2), y2(other.y2)
+  {
+  }
+
+  FOG_INLINE explicit DoubleBox(const IntBox& other) :
+    x1(other.x1), y1(other.y1), x2(other.x2), y2(other.y2)
+  {
+  }
+
+  FOG_INLINE DoubleBox(const DoubleRect& other) : 
+    x1(other.x), y1(other.y), x2(other.x + other.w), y2(other.y + other.h)
+  {
+  }
+
+  FOG_INLINE explicit DoubleBox(const FloatRect& other) : 
+    x1(other.x), y1(other.y), x2(other.x + other.w), y2(other.y + other.h)
+  {
+  }
+
+  FOG_INLINE explicit DoubleBox(const IntRect& other) : 
+    x1(other.x), y1(other.y), x2(other.x + other.w), y2(other.y + other.h)
+  {
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE double getX() const { return x1; }
+  FOG_INLINE double getY() const { return y1; }
+  FOG_INLINE double getWidth() const { return x2 - x1; }
+  FOG_INLINE double getHeight() const { return y2 - y1; }
+
+  FOG_INLINE double getX1() const { return x1; }
+  FOG_INLINE double getY1() const { return y1; }
+  FOG_INLINE double getX2() const { return x2; }
+  FOG_INLINE double getY2() const { return y2; }
+
+  FOG_INLINE DoublePoint getPosition() const { return DoublePoint(x1, y1); }
+  FOG_INLINE DoubleSize getSize() const { return DoubleSize(x2 - x1, y2 - y1); }
+
+  FOG_INLINE DoubleBox& set(const DoubleBox &other)
+  { 
+    if (sizeof(DoubleBox) == 32)
+    {
+      Memory::copy32B(static_cast<void*>(this), static_cast<const void*>(&other));
+    }
+    else
+    {
+      x1 = other.x1;
+      y1 = other.y1;
+      x2 = other.x2;
+      y2 = other.y2;
+    }
+    return *this;
+  }
+  
+  FOG_INLINE DoubleBox& set(const FloatBox &other)
+  { 
+    x1 = other.x1;
+    y1 = other.y1;
+    x2 = other.x2;
+    y2 = other.y2;
+    return *this;
+  }
+
+  FOG_INLINE DoubleBox& set(const IntBox &other)
+  { 
+    x1 = other.x1;
+    y1 = other.y1;
+    x2 = other.x2;
+    y2 = other.y2;
+    return *this;
+  }
+
+  FOG_INLINE DoubleBox& set(double px1, double py1, double px2, double py2)
+  { 
+    x1 = px1; 
+    y1 = py1; 
+    x2 = px2; 
+    y2 = py2;
+
+    return *this;
+  }
+
+  FOG_INLINE DoubleBox& setX(double x) { x1 = x; return *this; }
+  FOG_INLINE DoubleBox& setY(double y) { y1 = y; return *this; }
+  FOG_INLINE DoubleBox& setWidth(double w) { x2 = x1 + w; return *this; }
+  FOG_INLINE DoubleBox& setHeight(double h) { y2 = y1 + h; return *this; }
+
+  FOG_INLINE DoubleBox& setX1(double px1) { x1 = px1; return *this; }
+  FOG_INLINE DoubleBox& setY1(double py1) { y1 = py1; return *this; }
+  FOG_INLINE DoubleBox& setX2(double px2) { x2 = px2; return *this; }
+  FOG_INLINE DoubleBox& setY2(double py2) { y2 = py2; return *this; }
+
+  // --------------------------------------------------------------------------
+  // [Clear]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE DoubleBox& clear()
+  {
+    x1 = 0.0;
+    y1 = 0.0;
+    x2 = 0.0;
+    y2 = 0.0;
+    return *this;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Translate]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE DoubleBox& translate(double px, double py)
+  { 
+    x1 += px;
+    y1 += py;
+    x2 += px;
+    y2 += py;
+    return *this;
+  }
+
+  FOG_INLINE DoubleBox& translate(const DoublePoint& pt)
+  { 
+    x1 += pt.x;
+    y1 += pt.y;
+    x2 += pt.x;
+    y2 += pt.y;
+    return *this;
+  }
+
+  FOG_INLINE DoubleBox& translate(const IntPoint& pt)
+  { 
+    x1 += pt.x;
+    y1 += pt.y;
+    x2 += pt.x;
+    y2 += pt.y;
+    return *this;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Algebra]
+  // --------------------------------------------------------------------------
+
+  //! @brief Checks if two rectangles overlap.
+  //! @return @c true if two rectangles overlap, @c false if two rectangles
+  //! do not overlap. Remember, x2() and y2() coords aren't in the rectangle.
+  FOG_INLINE bool overlaps(const DoubleBox& r) const
+  {
+    return ((r.x1 >= x1) | (r.x2 <= x2) |
+            (r.y1 >= y1) | (r.y2 <= y2) );
+  }
+
+  //! @brief Returns @c true if rectangle completely subsumes @a r.
+  FOG_INLINE bool subsumes(const DoubleBox& r) const
+  {
+    return ((r.x1 >= x1) & (r.x2 <= x2) &
+            (r.y1 >= y1) & (r.y2 <= y2) );
+  }
+
+  static FOG_INLINE bool intersect(DoubleBox& dest, const DoubleBox& src1, const DoubleBox& src2)
+  {
+    dest.set(Math::max(src1.x1, src2.x1),
+             Math::max(src1.y1, src2.y1),
+             Math::min(src1.x2, src2.x2),
+             Math::min(src1.y2, src2.y2));
+    return dest.isValid();
+  }
+
+  // --------------------------------------------------------------------------
+  // [HitTest]
+  // --------------------------------------------------------------------------
+
+  //! @brief Returns @c true if given point is in rectangle.
+  //! @brief x Point x coordinate.
+  //! @brief y Point y coordinate.
+  //! @return @c true if point is in rectangle.
+  FOG_INLINE bool contains(double px, double py) const
+  {
+    return ((px >= x1) & (py >= y1) & (px < x2) & (py < y2));
+  }
+
+  //! @brief Returns @c true if given point @a pt is in rectangle.
+  //! @brief x Point x coordinate.
+  //! @brief y Point y coordinate.
+  //! @return @c true if point is in rectangle.
+  FOG_INLINE bool contains(const DoublePoint& pt) const
+  {
+    return ((pt.x >= x1) & (pt.y >= y1) & (pt.x < x2) & (pt.y < y2));
+  }
+
+  //! @overload
+  FOG_INLINE bool contains(const FloatPoint& pt) const
+  {
+    double px = pt.x;
+    double py = pt.y;
+
+    return ((px >= x1) & (py >= y1) & (px < x2) & (py < y2));
+  }
+
+  //! @overload
+  FOG_INLINE bool contains(const IntPoint& pt) const
+  {
+    double px = pt.x;
+    double py = pt.y;
+
+    return ((px >= x1) & (py >= y1) & (px < x2) & (py < y2));
+  }
+
+  // --------------------------------------------------------------------------
+  // [Valid]
+  // --------------------------------------------------------------------------
+
+  //! @brief Returns @c true if rectangle is valid.
+  //!
+  //! Rectangle is only valid if @c x2 is greater than @c x1 and @c y2 is
+  //! greater than @c y1.
+  FOG_INLINE bool isValid() const
+  {
+    return (x2 > x1) & (y2 > y1);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Equality]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(double px1, double py1, double px2, double py2) const
+  {
+    return (x1 == px1) & (y1 == py1) & (x2 == px2) & (y2 == py2);
+  }
+
+  FOG_INLINE bool eq(const DoubleBox& other) const
+  {
+    return (x1 == other.x1) & (y1 == other.y1) & (x2 == other.x2) & (y2 == other.y2);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Shrink / Expand]
+  // --------------------------------------------------------------------------
+
+  //! @brief Shrinks rectangle by @c n coordinates.
+  FOG_INLINE DoubleBox& shrink(double n)
+  {
+    x1 += n;
+    y1 += n;
+    x2 -= n;
+    y2 -= n;
+    
+    return *this;
+  }
+
+  //! @brief Expands rectangle by @c n coordinates.
+  FOG_INLINE DoubleBox& expand(double n)
+  {
+    x1 -= n;
+    y1 -= n;
+    x2 += n;
+    y2 += n;
+
+    return *this;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Convert]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE IntRect toIntRect() const { return IntRect((int)x1, (int)y1, (int)(x2 - x1), (int)(y2 - y1)); }
+  FOG_INLINE FloatRect toFloatRect() const { return FloatRect((float)x1, (float)y1, (float)(x2 - x1), (float)(y2 - y1)); }
+  FOG_INLINE DoubleRect toDoubleRect() const { return DoubleRect(x1, y1, x2 - x1, y2 - y1); }
+
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE DoubleBox& operator=(const DoubleBox& other) { return set(other); }
+  FOG_INLINE DoubleBox& operator=(const FloatBox& other) { return set(other); }
+  FOG_INLINE DoubleBox& operator=(const IntBox& other) { return set(other); }
+
+  FOG_INLINE DoubleBox& operator+=(const DoublePoint& pt) { return translate(pt); }
+  FOG_INLINE DoubleBox& operator+=(const FloatPoint& pt) { return translate(pt); }
+  FOG_INLINE DoubleBox& operator+=(const IntPoint& pt) { return translate(pt); }
+
+  FOG_INLINE DoubleBox& operator-=(const DoublePoint& pt)
+  {
+    x1 -= pt.x; y1 -= pt.y;
+    x2 -= pt.x; y2 -= pt.y;
+    return *this;
+  }
+
+  FOG_INLINE DoubleBox& operator-=(const FloatPoint& pt)
+  {
+    x1 -= pt.x; y1 -= pt.y;
+    x2 -= pt.x; y2 -= pt.y;
+    return *this;
+  }
+
+  FOG_INLINE DoubleBox& operator-=(const IntPoint& pt)
+  {
+    x1 -= pt.x; y1 -= pt.y;
+    x2 -= pt.x; y2 -= pt.y;
+    return *this;
+  }
+
+  FOG_INLINE bool operator==(const DoubleBox& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const DoubleBox& other) const { return !eq(other); }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  double x1;
+  double y1;
+  double x2;
+  double y2;
+};
+
+// ============================================================================
 // [Defined Later]
 // ============================================================================
 
@@ -2901,7 +3496,6 @@ FOG_INLINE DoubleRect IntRect::toDoubleRect() const { return DoubleRect((double)
 FOG_INLINE DoubleRect FloatRect::toDoubleRect() const { return DoubleRect((double)x, (double)y, (double)w, (double)h); }
 
 FOG_INLINE IntRect::IntRect(const IntBox& box) : x(box.x1), y(box.y1), w(box.x2 - box.x1), h(box.y2 - box.y1) {}
-FOG_INLINE IntBox::IntBox(const IntRect& rect) : x1(rect.x), y1(rect.y), x2(rect.x + rect.w), y2(rect.y + rect.h) {}
 
 //! @}
 

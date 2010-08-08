@@ -35,10 +35,11 @@ void RasterPaintCalcFillPath::run(RasterPaintContext* ctx)
     Math::feq(matrix->ty, 0.0) == 0);
 
   ras->reset();
-  ras->setClipBox(clipBox);
 
+  ras->setClipBox(clipBox);
   ras->setAlpha(cmd->ops.alpha255);
   ras->setFillRule(fillRule);
+  ras->initialize();
 
   if (!path->isFlat() || !noTransform)
   {
@@ -89,12 +90,13 @@ void RasterPaintCalcStrokePath::run(RasterPaintContext* ctx)
     ctx->tmpCalcPath.translate(matrix->tx, matrix->ty);
 
   ras->reset();
-  ras->setClipBox(clipBox);
 
+  ras->setClipBox(clipBox);
   // Stroke not respects fill rule set in caps
   // state, instead we are using FILL_NON_ZERO.
-  ras->setAlpha(cmd->ops.alpha255);
   ras->setFillRule(FILL_NON_ZERO);
+  ras->setAlpha(cmd->ops.alpha255);
+  ras->initialize();
 
   ras->addPath(ctx->tmpCalcPath);
   ras->finalize();

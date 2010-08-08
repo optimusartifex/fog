@@ -1671,20 +1671,26 @@ err_t RasterPaintEngine::drawText(const IntRect& rect, const String& text, const
     clip_ = &clip;
   }
   
+  int wsize;
+  int hsize;
+
   // TODO: Not optimal, no clip used.
   if (ctx.hints.transformType >= RASTER_TRANSFORM_SUBPX || ctx.hints.forceOutlineText)
   {
     tmpPath0.clear();
     FOG_RETURN_ON_ERROR(font.getOutline(text, tmpPath0));
+
+    wsize = (int)tmpPath0.getBoundingRect().getWidth();
+    hsize = (int)font.getHeight();
   }
   else
   {
-	tmpGlyphSet.clear();
+    tmpGlyphSet.clear();
     FOG_RETURN_ON_ERROR(font.getGlyphSet(text.getData(), text.getLength(), tmpGlyphSet));
-  }
 
-  int wsize = tmpPath0.getBoundingRect().getWidth();
-  int hsize = font.getHeight();
+    wsize = tmpGlyphSet.getAdvance();
+    hsize = (int)font.getHeight();
+  }
 
   int x = rect.x + tx;
   int y = rect.y + ty;
@@ -3519,10 +3525,8 @@ bool RasterPaintEngine::_doRasterizePath_st(const DoublePath& path, const IntBox
     : NULL;
 
   ras->reset();
-  ras->setClipBox(clipBox);
 
   const DoublePath* p = &path;
-
   bool noTransform = (
     ctx.hints.transformType == RASTER_TRANSFORM_EXACT &&
     ctx.finalTranslate.x == 0 &&
@@ -3562,6 +3566,9 @@ bool RasterPaintEngine::_doRasterizePath_st(const DoublePath& path, const IntBox
     // Fill respects the given fill rule.
     ras->setFillRule(fillRule);
   }
+
+  ras->setClipBox(clipBox);
+  ras->initialize();
 
   ras->addPath(*p);
   ras->finalize();

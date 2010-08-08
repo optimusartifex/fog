@@ -53,29 +53,33 @@ struct FOG_HIDDEN AnalyticRasterizer : public Rasterizer
   AnalyticRasterizer();
   virtual ~AnalyticRasterizer();
 
-  // --------------------------------------------------------------------------
-  // [Methods]
-  // --------------------------------------------------------------------------
-
   virtual void pooled();
+
+  // --------------------------------------------------------------------------
+  // [Reset / Initialize / Finalize]
+  // --------------------------------------------------------------------------
+
   virtual void reset();
+  virtual void initialize();
+  virtual void finalize();
 
-  virtual void setClipBox(const IntBox& clipBox);
-  virtual void resetClipBox();
-
-  virtual void setError(err_t error);
-  virtual void resetError();
-
-  virtual void setFillRule(uint32_t fillRule);
-  virtual void setAlpha(uint32_t alpha);
-
-  void updateFunctions();
+  // --------------------------------------------------------------------------
+  // [Commands]
+  // --------------------------------------------------------------------------
 
   virtual void addPath(const DoublePath& path);
   void closePolygon();
 
+  // --------------------------------------------------------------------------
+  // [Clipper]
+  // --------------------------------------------------------------------------
+
   void clipLine(int24x8_t x1, int24x8_t y1, int24x8_t x2, int24x8_t y2, uint f1, uint f2);
   FOG_INLINE void clipLineY(int24x8_t x1, int24x8_t y1, int24x8_t x2, int24x8_t y2, uint f1, uint f2);
+
+  // --------------------------------------------------------------------------
+  // [Renderer]
+  // --------------------------------------------------------------------------
 
   void renderLine(int24x8_t x1, int24x8_t y1, int24x8_t x2, int24x8_t y2);
   FOG_INLINE void renderHLine(int ey, int24x8_t x1, int24x8_t y1, int24x8_t x2, int24x8_t y2);
@@ -117,8 +121,6 @@ struct FOG_HIDDEN AnalyticRasterizer : public Rasterizer
   bool finalizeCellBuffer();
 
   void freeXYCellBuffers(bool all);
-
-  virtual void finalize();
 
   template<int _RULE, int _USE_ALPHA>
   FOG_INLINE uint _calculateAlpha(int area) const;

@@ -34,11 +34,28 @@ namespace Fog {
 //! and 8 bits for fractional - see poly_subpixel_shift. This class can be 
 //! used in the following  way:
 //!
-//! 1. getFillRule() / setFillRule(int fillRule) - set fill rule.
+//! 1. Reset/setup rasterizer:
 //!
-//! 2. reset() - optional, needed only if you are reusing rasterizer.
+//!    reset() - If rasterizer is reused, reset ensures that all data related
+//!    to previous rasterization are lost.
 //!
-//! 3. addPath(path) - make the polygon. One can create more than one contour,
+//!    getFillRule() / setFillRule(int fillRule) - Fill rule management.
+//!    getAlpha() / setAlpha() - Alpha management.
+//!    getClipBox() / setClipBox() / resetClipBox() - Set clip box management.
+//!
+//!    You can omit initialization if you are reusing rasterizer and these
+//!    members are already set to demanded values.
+//!
+//! 2. Initialize rasterizer:
+//!
+//!    initialize() - Init is method that will initialize the rasterizer and
+//!    after calling it you cannot call setup methods (in ideal case setup will
+//!    do nothing, in worst case your application can crash or call assertion
+//!    failure in debug-more).
+//!
+//! 3. Call commands:
+//!
+//!    addPath(path) - Make the polygon. One can create more than one contour,
 //!    but each contour must consist of at least 3 vertices, is the absolute
 //!    minimum of vertices that define a triangle. The algorithm does not check
 //!    either the number of vertices nor coincidence of their coordinates, but
@@ -53,7 +70,15 @@ namespace Fog {
 //!    contours with the same vertex order will be rendered without "holes" 
 //!    while the intersecting contours with different orders will have "holes".
 //!
-//! setFillRule() can be called anytime before "sweeping".
+//! 4. Finalize rasterizer:
+//!
+//!    finalize() - Finalize the shape. Finalize step is rasterizer dependent
+//!    and may or may not rasterize or pre-rasterize some areas.
+//!
+//! 5. Sweep scanlines.
+//!
+//!    sweepScanline() - Sweep scanline to scanline container. This scanline
+//!    can be passed to renderer or clipper.
 //!
 //! Rasterizers are pooled to maximize performance and decrease memory 
 //! fragmentation. If you want to create or free rasterizer use methods
@@ -64,6 +89,30 @@ struct FOG_HIDDEN Rasterizer
   // --------------------------------------------------------------------------
   // [Cell]
   // --------------------------------------------------------------------------
+
+  // Analytic rasterizer with 8-bit precision cell members:
+  //
+  //   X     - a horizontal pixel position in pixel units. Should be relative
+  //           to horizontal clipping bounding box.
+  //   Cover - a value at interval -256 to 256. This means that 10-bits are
+  //           enough to store the value.
+  //   Area  - a value at interval -(511<<8) to (511<<8). It can be effectively
+  //           compressed into 10-bits by shifting it right and preserving a
+  //           sign.
+  //
+  // This means that cell structure can be compressed into:
+  //
+  // DWORD (32-bit):
+  //   X     - 12 bits.
+  //   Cover - 10 bits.
+  //   Area  - 10 bits.
+  // Applicable for resolution up to 4096 pixels in horizontal.
+  //
+  // QWORD (64-bit):
+  //   X     - 32 bits.
+  //   Cover - 16 bits.
+  //   Area  - 16 bits.
+  // Applicable for any resolution.
 
 #include <Fog/Core/Pack/PackDWord.h>
   //! @internal
@@ -148,14 +197,6 @@ struct FOG_HIDDEN Rasterizer
   };
 
   // --------------------------------------------------------------------------
-  // [Typedefs]
-  // --------------------------------------------------------------------------
-
-  typedef Span8* (*SweepScanlineSimpleFn)(Rasterizer* rasterizer, Scanline8& scanline, int y);
-  typedef Span8* (*SweepScanlineRegionFn)(Rasterizer* rasterizer, Scanline8& scanline, int y, const IntBox* clipBoxes, sysuint_t count);
-  typedef Span8* (*SweepScanlineSpansFn)(Rasterizer* rasterizer, Scanline8& scanline, int y, const Span8* clipSpans);
-
-  // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
@@ -165,17 +206,13 @@ struct FOG_HIDDEN Rasterizer
   //! @brief Called before rasterizer is pooled. Default implementation is NOP.
   virtual void pooled() = 0;
 
-  //! @brief Reset rasterizer.
-  virtual void reset() = 0;
-
   // --------------------------------------------------------------------------
   // [Clip Box]
   // --------------------------------------------------------------------------
 
   FOG_INLINE const IntBox& getClipBox() const { return _clipBox; }
-
-  virtual void setClipBox(const IntBox& clipBox) = 0;
-  virtual void resetClipBox() = 0;
+  FOG_INLINE void setClipBox(const IntBox& clipBox) { _clipBox = clipBox; }
+  FOG_INLINE void resetClipBox() { _clipBox.clear(); }
 
   // --------------------------------------------------------------------------
   // [Bounding Box]
@@ -191,23 +228,22 @@ struct FOG_HIDDEN Rasterizer
   // --------------------------------------------------------------------------
 
   FOG_INLINE err_t getError() const { return _error; }
-
-  virtual void setError(err_t error) = 0;
-  virtual void resetError() = 0;
+  FOG_INLINE void setError(err_t error) { _error = error; }
+  FOG_INLINE void resetError() { _error = ERR_OK; }
 
   // --------------------------------------------------------------------------
   // [Fill Rule]
   // --------------------------------------------------------------------------
 
   FOG_INLINE uint32_t getFillRule() const { return _fillRule; }
-  virtual void setFillRule(uint32_t fillRule) = 0;
+  FOG_INLINE void setFillRule(uint32_t fillRule) { _fillRule = fillRule; }
 
   // --------------------------------------------------------------------------
   // [Alpha]
   // --------------------------------------------------------------------------
 
   FOG_INLINE uint32_t getAlpha() const { return _alpha; }
-  virtual void setAlpha(uint32_t alpha) = 0;
+  FOG_INLINE void setAlpha(uint32_t alpha) { _alpha = alpha; }
 
   // --------------------------------------------------------------------------
   // [Finalized / Valid]
@@ -217,15 +253,35 @@ struct FOG_HIDDEN Rasterizer
   FOG_INLINE bool isValid() const { return _isValid; }
 
   // --------------------------------------------------------------------------
+  // [Reset / Initialize / Finalize]
+  // --------------------------------------------------------------------------
+
+  //! @brief Reset rasterizer.
+  virtual void reset() = 0;
+
+  //! @brief Initialize the rasterizer, called after setup methods and before
+  //! adding path(s).
+  //!
+  //! During setup the methods like setAlpha(), setFillRule() can be called,
+  //! after calling initialize() these methods shouldn't be called, because
+  //! rasterizer can use different algorithms to perform rasterization (even-odd
+  //! vs. non-zero fill rule, alpha, quality, etc...).
+  virtual void initialize() = 0;
+  virtual void finalize() = 0;
+
+  // --------------------------------------------------------------------------
   // [Commands]
   // --------------------------------------------------------------------------
 
   virtual void addPath(const DoublePath& path) = 0;
-  virtual void finalize() = 0;
 
   // --------------------------------------------------------------------------
   // [Sweep]
   // --------------------------------------------------------------------------
+
+  typedef Span8* (*SweepScanlineSimpleFn)(Rasterizer* rasterizer, Scanline8& scanline, int y);
+  typedef Span8* (*SweepScanlineRegionFn)(Rasterizer* rasterizer, Scanline8& scanline, int y, const IntBox* clipBoxes, sysuint_t count);
+  typedef Span8* (*SweepScanlineSpansFn)(Rasterizer* rasterizer, Scanline8& scanline, int y, const Span8* clipSpans);
 
   //! @brief Sweep scanline @a y.
   FOG_INLINE Span8* sweepScanline(Scanline8& scanline, int y)
@@ -270,13 +326,6 @@ private:
   Rasterizer* _pool;
 
 public:
-  //! @brief Sweep scanline using box clipping.
-  SweepScanlineSimpleFn _sweepScanlineSimpleFn;
-  //! @brief Sweep scanline using region clipping.
-  SweepScanlineRegionFn _sweepScanlineRegionFn;
-  //! @brief Sweep scanline using anti-aliased clipping.
-  SweepScanlineSpansFn _sweepScanlineSpansFn;
-
   //! @brief Clip bounding box (always must be valid, initialy set to zero).
   IntBox _clipBox;
 
@@ -297,6 +346,13 @@ public:
 
   //! @brief Whether the rasterized object is empty (not paint).
   bool _isValid;
+
+  //! @brief Sweep scanline using box clipping.
+  SweepScanlineSimpleFn _sweepScanlineSimpleFn;
+  //! @brief Sweep scanline using region clipping.
+  SweepScanlineRegionFn _sweepScanlineRegionFn;
+  //! @brief Sweep scanline using anti-aliased clipping.
+  SweepScanlineSpansFn _sweepScanlineSpansFn;
 
 private:
   FOG_DISABLE_COPY(Rasterizer)

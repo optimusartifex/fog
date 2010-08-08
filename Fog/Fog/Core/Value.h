@@ -87,7 +87,7 @@ struct FOG_API Value
 
   Value();
   Value(const Value& other);
-  explicit FOG_INLINE Value(ValueData* d) : _d(d) {}
+  FOG_INLINE explicit Value(ValueData* d) : _d(d) {}
   ~Value();
 
   Value& operator=(const Value& other);

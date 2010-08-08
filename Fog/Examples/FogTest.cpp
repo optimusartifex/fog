@@ -481,7 +481,7 @@ MyWindow::MyWindow(uint32_t createFlags) :
   _spread = PATTERN_SPREAD_REPEAT;
 
   //testVBoxLayout();
-  testFrame();
+  //testFrame();
   //setContentRightMargin(0);
 }
 
@@ -501,6 +501,14 @@ void MyWindow::onPaint(PaintEvent* e)
   p->setSource(Argb(0xFFFFFFFF));
   p->fillAll();
 
+  DoublePath path;
+  path.moveTo(150, 100);
+  path.lineTo(250, 105);
+  path.lineTo(200, 200);
+  path.lineTo(100, 200);
+  p->setSource(Argb(0xFF000000));
+  p->fillPath(path);
+
   p->restore();
 }
 
@@ -513,7 +521,7 @@ FOG_GUI_MAIN()
   Application app(Ascii8("Gui"));
 
   MyWindow window(WINDOW_TYPE_DEFAULT);
-  window.setSize(IntSize(100, 100));
+  window.setSize(IntSize(400, 400));
   window.show();
 
   app.addListener(EVENT_LAST_WINDOW_CLOSED, &app, &Application::quit);

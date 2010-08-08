@@ -287,7 +287,7 @@ struct FOG_HIDDEN List
   FOG_INLINE List() : _d(ListPrivate_::_dnull->ref()) {}
   FOG_INLINE List(const List& other) : _d(other._d->ref()) {}
 
-  explicit FOG_INLINE List(ListData* d) : _d(d) {}
+  FOG_INLINE explicit List(ListData* d) : _d(d) {}
 
   FOG_INLINE ~List() { ListPrivate<T>::deref(_d); }
 

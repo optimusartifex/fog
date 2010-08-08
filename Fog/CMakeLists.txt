@@ -255,7 +255,6 @@ Set(FOG_CORE_LIB_SOURCES
   Fog/Core/Locale.cpp
   Fog/Core/Lock.cpp
   Fog/Core/ManagedString.cpp
-  Fog/Core/MacUtil.mm
   Fog/Core/MapFile.cpp
   Fog/Core/Math.cpp
   Fog/Core/Memory.cpp
@@ -353,6 +352,13 @@ Set(FOG_CORE_MAIN_HEADERS
   Fog/Core/WinIStream_p.h
   Fog/Core/WinUtil_p.h
 )
+
+If(0)
+Set(FOG_CORE_LIB_SOURCES
+  ${FOG_CORE_LIB_SOURCES
+  Fog/Core/MacUtil.mm
+)
+EndIf()
 
 Set(FOG_CORE_ARCH_SOURCES
 )
@@ -702,13 +708,11 @@ Set(FOG_GRAPHICS_RASTERENGINE_HEADERS
 
 Set(FOG_GRAPHICS_RASTERIZER_SOURCES
   Fog/Graphics/Rasterizer/Rasterizer_Analytic.cpp
-  Fog/Graphics/Rasterizer/Rasterizer_SLEFA.cpp
 )
 
 Set(FOG_GRAPHICS_RASTERIZER_HEADERS
   Fog/Graphics/Rasterizer/LiangBarsky_p.h
   Fog/Graphics/Rasterizer/Rasterizer_Analytic_p.h
-  Fog/Graphics/Rasterizer/Rasterizer_SLEFA_p.h
 )
 
 # Optimize specific files for speed

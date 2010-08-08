@@ -383,40 +383,6 @@ void AnalyticRasterizer::finalize()
   // Zero all values in lookup table (and histogram) - this is initial state.
   Memory::zero(_rowsInfo, sizeof(RowInfo) * rows);
 
-  // --------------------------------------------------------------------------
-  {
-    static int minCover = INT_MAX;
-    static int maxCover = INT_MIN;
-    static int minArea = INT_MAX;
-    static int maxArea = INT_MIN;
-
-    int oldMinCover = minCover;
-    int oldMaxCover = maxCover;
-    int oldMinArea = minArea;
-    int oldMaxArea = maxArea;
-
-    buf = _bufferFirst;
-    do {
-      cell = buf->cells;
-      for (i = buf->count; i; i--, cell++)
-      {
-        if (minCover > cell->cover) minCover = cell->cover;
-        if (maxCover < cell->cover) maxCover = cell->cover;
-        if (minArea > (cell->area>>8)) minArea = cell->area >> 8;
-        if (maxArea < (cell->area>>8)) maxArea = cell->area >> 8;
-      }
-
-      // Stop if this is last used cells buffer.
-      if (buf == _bufferCurrent) break;
-    } while ((buf = buf->next));
-    if (minCover != oldMinCover || maxCover != oldMaxCover ||
-        minArea != oldMinArea || maxArea != oldMaxArea)
-    {
-      printf("Cover [%d %d], Area [%d %d ... %x %x]\n", minCover, maxCover, minArea, maxArea, minArea, maxArea);
-    }
-  }
-  // --------------------------------------------------------------------------
-
   buf = _bufferFirst;
   do {
     cell = buf->cells;

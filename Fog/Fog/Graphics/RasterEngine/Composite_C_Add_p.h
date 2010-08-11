@@ -23,32 +23,32 @@ struct FOG_HIDDEN CompositeAddC : public CompositeBaseFuncsC32<CompositeAddC>
   enum { CHARACTERISTICS = OPERATOR_CHAR_ADD };
 
   static FOG_INLINE void prgb32_op_prgb32_32b(
-    ByteUtil::byte1x2& dst0, ByteUtil::byte1x2 a0, ByteUtil::byte1x2 b0,
-    ByteUtil::byte1x2& dst1, ByteUtil::byte1x2 a1, ByteUtil::byte1x2 b1)
+    ByteSIMD::b32_1x2& dst0, ByteSIMD::b32_1x2 a0, ByteSIMD::b32_1x2 b0,
+    ByteSIMD::b32_1x2& dst1, ByteSIMD::b32_1x2 a1, ByteSIMD::b32_1x2 b1)
   {
-    ByteUtil::byte2x2_addus_byte2x2(dst0, a0, b0, dst1, a1, b1);
+    ByteSIMD::b32_2x2AddusB32_2x2(dst0, a0, b0, dst1, a1, b1);
   }
 
   static FOG_INLINE void prgb32_op_xrgb32_32b(
-    ByteUtil::byte1x2& dst0, ByteUtil::byte1x2 a0, ByteUtil::byte1x2 b0,
-    ByteUtil::byte1x2& dst1, ByteUtil::byte1x2 a1, ByteUtil::byte1x2 b1)
+    ByteSIMD::b32_1x2& dst0, ByteSIMD::b32_1x2 a0, ByteSIMD::b32_1x2 b0,
+    ByteSIMD::b32_1x2& dst1, ByteSIMD::b32_1x2 a1, ByteSIMD::b32_1x2 b1)
   {
-    ByteUtil::byte2x2_addus_byte2x2(dst0, a0, b0, dst1, a1, b1);
-    ByteUtil::byte1x2_fill_hi(dst1, dst1);
+    ByteSIMD::b32_2x2AddusB32_2x2(dst0, a0, b0, dst1, a1, b1);
+    ByteSIMD::b32_1x2FillB1(dst1, dst1);
   }
 
   static FOG_INLINE void xrgb32_op_prgb32_32b(
-    ByteUtil::byte1x2& dst0, ByteUtil::byte1x2 a0, ByteUtil::byte1x2 b0,
-    ByteUtil::byte1x2& dst1, ByteUtil::byte1x2 a1, ByteUtil::byte1x2 b1)
+    ByteSIMD::b32_1x2& dst0, ByteSIMD::b32_1x2 a0, ByteSIMD::b32_1x2 b0,
+    ByteSIMD::b32_1x2& dst1, ByteSIMD::b32_1x2 a1, ByteSIMD::b32_1x2 b1)
   {
-    ByteUtil::byte2x2_addus_byte2x2(dst0, a0, b0, dst1, a1, b1);
+    ByteSIMD::b32_2x2AddusB32_2x2(dst0, a0, b0, dst1, a1, b1);
   }
 
   static FOG_INLINE void xrgb32_op_xrgb32_32b(
-    ByteUtil::byte1x2& dst0, ByteUtil::byte1x2 a0, ByteUtil::byte1x2 b0,
-    ByteUtil::byte1x2& dst1, ByteUtil::byte1x2 a1, ByteUtil::byte1x2 b1)
+    ByteSIMD::b32_1x2& dst0, ByteSIMD::b32_1x2 a0, ByteSIMD::b32_1x2 b0,
+    ByteSIMD::b32_1x2& dst1, ByteSIMD::b32_1x2 a1, ByteSIMD::b32_1x2 b1)
   {
-    ByteUtil::byte2x2_addus_byte2x2(dst0, a0, b0, dst1, a1, b1);
+    ByteSIMD::b32_2x2AddusB32_2x2(dst0, a0, b0, dst1, a1, b1);
   }
 };
 

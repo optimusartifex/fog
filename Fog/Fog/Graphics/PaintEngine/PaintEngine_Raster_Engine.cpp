@@ -10,6 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Atomic.h>
+#include <Fog/Core/ByteSIMD_p.h>
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/CpuInfo.h>
 #include <Fog/Core/Lock.h>
@@ -22,7 +23,6 @@
 #include <Fog/Core/ThreadCondition.h>
 #include <Fog/Core/ThreadPool.h>
 #include <Fog/Graphics/AnalyticRasterizer_p.h>
-#include <Fog/Graphics/ByteUtil_p.h>
 #include <Fog/Graphics/Color.h>
 #include <Fog/Graphics/ColorLut.h>
 #include <Fog/Graphics/Constants_p.h>
@@ -682,8 +682,6 @@ err_t RasterPaintEngine::setAlpha(float alpha)
   else
     ctx.state &= ~RASTER_STATE_NO_PAINT_ALPHA;
 
-  // TODO RASTERIZER: Why?
-  rasterizer.setAlpha(ctx.ops.alpha255);
   return ERR_OK;
 }
 
@@ -3562,8 +3560,9 @@ bool RasterPaintEngine::_doRasterizePath_st(const DoublePath& path, const IntBox
   }
 
   rasterizer.setClipBox(clipBox);
-  rasterizer.initialize();
+  rasterizer.setAlpha(ctx.ops.alpha255);
 
+  rasterizer.initialize();
   rasterizer.addPath(*p);
   rasterizer.finalize();
 

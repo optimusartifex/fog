@@ -156,7 +156,7 @@ struct FOG_HIDDEN CompositeSrcSSE2
         __m128i dst0xmm;
         __m128i msk0xmm;
 
-        uint32_t msk0 = ByteUtil::scalar_neg255(READ_8(msk));
+        uint32_t msk0 = ByteSIMD::u32Negate255(READ_8(msk));
 
         sse2_load4(dst0xmm, dst);
         sse2_expand_mask_1x1W(msk0xmm, msk0);
@@ -207,7 +207,7 @@ struct FOG_HIDDEN CompositeSrcSSE2
         if (msk0 == 0x00) goto vMaskAlphaSparseSkip1;
 
         dst0xmm = src0orig;
-        msk0 = ByteUtil::scalar_neg255(msk0);
+        msk0 = ByteSIMD::u32Negate255(msk0);
         if (msk0 == 0x00) goto vMaskAlphaSparseFill1;
 
         sse2_load4(dst0xmm, dst);
@@ -1101,9 +1101,9 @@ vMaskAlphaSparseSkip4:
         __m128i msk0xmm;
 
         uint32_t msk0 = READ_8(msk);
-        uint32_t src0 = ByteUtil::scalar_muldiv255(READ_8(src), msk0);
+        uint32_t src0 = ByteSIMD::u32MulDiv255(READ_8(src), msk0);
 
-        msk0 = ByteUtil::scalar_neg255(msk0);
+        msk0 = ByteSIMD::u32Negate255(msk0);
         sse2_load4(dst0xmm, dst);
 
         src0xmm = _mm_cvtsi32_si128(src0 << 24);
@@ -1166,8 +1166,8 @@ vMaskAlphaSparseSkip4:
         uint32_t msk0 = READ_8(msk);
         if (msk0 == 0x00) goto vMaskAlphaSparseSkip1;
 
-        src0 = ByteUtil::scalar_muldiv255(READ_8(src), msk0);
-        msk0 = ByteUtil::scalar_neg255(msk0);
+        src0 = ByteSIMD::u32MulDiv255(READ_8(src), msk0);
+        msk0 = ByteSIMD::u32Negate255(msk0);
         src0xmm = _mm_cvtsi32_si128(src0 << 24);
         msk0xmm = _mm_cvtsi32_si128(msk0);
 
@@ -1596,7 +1596,7 @@ vMaskAlphaSparseSkip4:
         __m128i dst0xmm;
         __m128i msk0xmm;
 
-        uint32_t msk0 = ByteUtil::scalar_neg255(READ_8(msk));
+        uint32_t msk0 = ByteSIMD::u32Negate255(READ_8(msk));
 
         sse2_load4(dst0xmm, dst);
         sse2_expand_mask_1x1W(msk0xmm, msk0);
@@ -1646,7 +1646,7 @@ vMaskAlphaSparseSkip4:
         uint32_t msk0 = READ_8(msk);
         if (msk0 == 0x00) goto vMaskAlphaSparseSkip1;
 
-        msk0 = ByteUtil::scalar_neg255(msk0);
+        msk0 = ByteSIMD::u32Negate255(msk0);
         msk0xmm = src0orig;
         if (msk0 == 0x00) goto vMaskAlphaSparseFill1;
         msk0xmm = _mm_cvtsi32_si128(msk0);

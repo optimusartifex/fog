@@ -297,6 +297,7 @@ Set(FOG_CORE_MAIN_HEADERS
   Fog/Core/ByteArray.h
   Fog/Core/ByteArrayFilter.h
   Fog/Core/ByteArrayMatcher.h
+  Fog/Core/ByteSIMD_p.h
   Fog/Core/Char.h
   Fog/Core/Constants.h
   Fog/Core/CpuInfo.h
@@ -472,7 +473,6 @@ Set(FOG_GRAPHICS_LIB_SOURCES
 Set(FOG_GRAPHICS_MAIN_HEADERS
   Fog/Graphics.h
   Fog/Graphics/AnalyticRasterizer_p.h
-  Fog/Graphics/ByteUtil_p.h
   Fog/Graphics/Color.h
   Fog/Graphics/ColorAnalyzer_p.h
   Fog/Graphics/ColorLut.h

@@ -91,14 +91,13 @@ void RasterPaintCalcStrokePath::run(RasterPaintContext* ctx)
     ctx->tmpCalcPath.translate(matrix->tx, matrix->ty);
 
   ras->reset();
-
   ras->setClipBox(clipBox);
   // Stroke not respects fill rule set in caps
   // state, instead we are using FILL_NON_ZERO.
   ras->setFillRule(FILL_NON_ZERO);
   ras->setAlpha(cmd->ops.alpha255);
-  ras->initialize();
 
+  ras->initialize();
   ras->addPath(ctx->tmpCalcPath);
   ras->finalize();
 

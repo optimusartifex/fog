@@ -174,7 +174,7 @@ struct FOG_HIDDEN CompositeClearSSE2
         uint32_t msk0 = READ_8(msk0);
         if (msk0 == 0x00) goto vMaskAlphaSparseSkip1;
 
-        msk0 = ByteUtil::scalar_neg255(msk0);
+        msk0 = ByteSIMD::u32Negate255(msk0);
         sse2_expand_mask_1x1W(msk0xmm, msk0);
         if (msk0 == 0x00) goto vMaskAlphaSparseFill1;
 
@@ -375,7 +375,7 @@ vMaskAlphaSparseSkip4:
         uint32_t msk0 = READ_8(msk);
         if (msk0 == 0x00) goto vMaskAlphaSparseSkip1;
 
-        msk0 = ByteUtil::scalar_neg255(msk0);
+        msk0 = ByteSIMD::u32Negate255(msk0);
         msk0xmm = _mm_cvtsi32_si128(msk0);
         if (msk0 == 0x00) goto vMaskAlphaSparseFill1;
 

@@ -128,8 +128,6 @@ void RasterPaintVarState::restore(RasterPaintEngine* engine)
 
     engine->ctx.ops.alpha255 = ops.alpha255;
     engine->ctx.alpha = alpha;
-    // TODO RASTERIZER: Why?
-    engine->rasterizer.setAlpha(ops.alpha255);
 
     switch (ops.sourceType)
     {

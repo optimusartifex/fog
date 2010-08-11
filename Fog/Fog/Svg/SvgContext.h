@@ -239,25 +239,23 @@ struct FOG_API SvgContext
 
   FOG_INLINE void setupFillStyle()
   {
-    _painter->setAlpha(_fillStyle.opacity);
-
     if (_fillStyle.type == SVG_SOURCE_COLOR)
       _painter->setSource(_fillStyle.color);
     else
       _painter->setSource(_fillStyle.pattern);
 
+    _painter->setAlpha(_fillStyle.opacity);
     _painter->setFillRule(_fillRule);
   }
 
   FOG_INLINE void setupStrokeStyle()
   {
-    _painter->setAlpha(_lineStyle.opacity);
-
     if (_lineStyle.type == SVG_SOURCE_COLOR)
       _painter->setSource(_lineStyle.color);
     else
       _painter->setSource(_lineStyle.pattern);
 
+    _painter->setAlpha(_lineStyle.opacity);
     _painter->setStrokeParams(_strokeParams);
   }
 

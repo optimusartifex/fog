@@ -26,8 +26,10 @@ namespace Fog {
 void RasterPaintCalcFillPath::run(RasterPaintContext* ctx)
 {
   RasterPaintCmdPath* cmd = reinterpret_cast<RasterPaintCmdPath*>(relatedTo);
-  Rasterizer* ras = Rasterizer::getRasterizer();
-  if (ras == NULL) { cmd->status.set(RASTER_COMMAND_SKIP); return; }
+  AnalyticRasterizer* ras;
+
+  cmd->rasterizer.init();
+  ras = cmd->rasterizer.instancep();
 
   bool noTransform = (
     transformType == RASTER_TRANSFORM_EXACT &&
@@ -35,7 +37,6 @@ void RasterPaintCalcFillPath::run(RasterPaintContext* ctx)
     Math::feq(matrix->ty, 0.0) == 0);
 
   ras->reset();
-
   ras->setClipBox(clipBox);
   ras->setAlpha(cmd->ops.alpha255);
   ras->setFillRule(fillRule);
@@ -56,8 +57,6 @@ void RasterPaintCalcFillPath::run(RasterPaintContext* ctx)
   }
 
   ras->finalize();
-
-  cmd->ras = ras;
   cmd->status.set(ras->isValid() ? RASTER_COMMAND_READY : RASTER_COMMAND_SKIP);
 }
 
@@ -73,8 +72,10 @@ void RasterPaintCalcFillPath::release(RasterPaintContext* ctx)
 void RasterPaintCalcStrokePath::run(RasterPaintContext* ctx)
 {
   RasterPaintCmdPath* cmd = reinterpret_cast<RasterPaintCmdPath*>(relatedTo);
-  Rasterizer* ras = Rasterizer::getRasterizer();
-  if (ras == NULL) { cmd->status.set(RASTER_COMMAND_SKIP); return; }
+  AnalyticRasterizer* ras;
+
+  cmd->rasterizer.init();
+  ras = cmd->rasterizer.instancep();
 
   bool noTransform = (
     transformType == RASTER_TRANSFORM_EXACT &&
@@ -101,7 +102,6 @@ void RasterPaintCalcStrokePath::run(RasterPaintContext* ctx)
   ras->addPath(ctx->tmpCalcPath);
   ras->finalize();
 
-  cmd->ras = ras;
   cmd->status.set(ras->isValid() ? RASTER_COMMAND_READY : RASTER_COMMAND_SKIP);
 }
 

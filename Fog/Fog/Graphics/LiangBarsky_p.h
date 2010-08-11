@@ -24,11 +24,11 @@ namespace Fog {
 
 //! @internal
 //!
-//! @brief Liang-Barsky clipping.
+//! @brief Liang-Barsky clipping implementation, used by @c AnalyticRasterizer.
 struct FOG_HIDDEN LiangBarsky
 {
-  // Clipping flags.
-  enum FLAGS
+  //! @brief Clipped flags.
+  enum CLIPPED_FLAGS
   {
     CLIPPED_X1 = 0x4,
     CLIPPED_X2 = 0x1,
@@ -38,43 +38,44 @@ struct FOG_HIDDEN LiangBarsky
     CLIPPED_Y  = CLIPPED_Y1 | CLIPPED_Y2
   };
 
-  //----------------------------------------------------------clipping_flags
-  // Determine the clipping code of the vertex according to the 
-  // Cyrus-Beck line clipping algorithm
-  //
-  //        |        |
-  //  0110  |  0010  | 0011
-  //        |        |
-  // -------+--------+-------- clipBox.y2
-  //        |        |
-  //  0100  |  0000  | 0001
-  //        |        |
-  // -------+--------+-------- clipBox.y1
-  //        |        |
-  //  1100  |  1000  | 1001
-  //        |        |
-  //  clipBox.x1  clipBox.x2
-  //
-  // 
+  //! @brief Determine the clipping code of the vertex according to the 
+  //! Cyrus-Beck line clipping algorithm.
+  //!
+  //! @verbatim
+  //!        |        |
+  //!  0110  |  0010  | 0011
+  //!        |        |
+  //! -------+--------+-------- clipBox.y2
+  //!        |        |
+  //!  0100  |  0000  | 0001
+  //!        |        |
+  //! -------+--------+-------- clipBox.y1
+  //!        |        |
+  //!  1100  |  1000  | 1001
+  //!        |        |
+  //!  clipBox.x1  clipBox.x2
+  //! @endverbatim
   template<typename T, typename BoxT>
   static FOG_INLINE uint getClippingFlags(T x, T y, const BoxT& clipBox)
   {
     return (x > clipBox.x2) | ((y > clipBox.y2) << 1) | ((x < clipBox.x1) << 2) | ((y < clipBox.y1) << 3);
   }
 
+  //! @brief Determine the clipping code of the horizontal direction only.
   template<typename T, typename BoxT>
   static FOG_INLINE uint getClippingFlagsX(T x, const BoxT& clipBox)
   {
     return (x > clipBox.x2) | ((x < clipBox.x1) << 2);
   }
 
+  //! @brief Determine the clipping code of the vertical direction only.
   template<typename T, typename BoxT>
   static FOG_INLINE uint getClippingFlagsY(T y, const BoxT& clipBox)
   {
     return ((y > clipBox.y2) << 1) | ((y < clipBox.y1) << 3);
   }
 
-  // Clip LiangBarsky.
+  //! @brief Clip using Liang-Barsky algorithm.
   template<typename T, typename BoxT>
   static FOG_INLINE uint clipLiangBarsky(T x1, T y1, T x2, T y2, const BoxT& clipBox,
     T* FOG_RESTRICT x, T* FOG_RESTRICT y)
@@ -208,7 +209,7 @@ struct FOG_HIDDEN LiangBarsky
     return np;
   }
 
-  // Move point.
+  //! @brief Move point.
   template<typename T, typename BoxT>
   static FOG_INLINE bool clipMovePoint(T x1, T y1, T x2, T y2, const BoxT& clipBox,
     T* FOG_RESTRICT x,
@@ -237,12 +238,12 @@ struct FOG_HIDDEN LiangBarsky
     return true;
   }
 
-  // Clip line segment.
-  //
-  // Returns:
-  //   (ret    ) >= 4  - Fully clipped
-  //   (ret & 1) != 0  - First point has been moved
-  //   (ret & 2) != 0  - Second point has been moved
+  //! @brief Clip line segment.
+  //!
+  //! Returns:
+  //!   (ret    ) >= 4  - Fully clipped
+  //!   (ret & 1) != 0  - First point has been moved
+  //!   (ret & 2) != 0  - Second point has been moved
   template<typename T, typename BoxT>
   static FOG_INLINE unsigned clipLineSegment(
     T* FOG_RESTRICT x1, T* FOG_RESTRICT y1,

@@ -14,12 +14,12 @@
 #include <Fog/Core/MemoryAllocator_p.h>
 #include <Fog/Core/Thread.h>
 #include <Fog/Core/ThreadCondition.h>
+#include <Fog/Graphics/AnalyticRasterizer_p.h>
 #include <Fog/Graphics/ImageFilter.h>
 #include <Fog/Graphics/PaintEngine.h>
 #include <Fog/Graphics/Path.h>
 #include <Fog/Graphics/PathStroker.h>
 #include <Fog/Graphics/RasterEngine_p.h>
-#include <Fog/Graphics/Rasterizer_p.h>
 #include <Fog/Graphics/Scanline_p.h>
 #include <Fog/Graphics/Span_p.h>
 
@@ -566,8 +566,8 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   static void _doPaintGlyphSet_mt(RasterPaintContext* ctx, const IntPoint& pt, const GlyphSet& glyphSet, const IntBox& boundingBox);
 
   // Paint an output from rasterizer (rasterized path).
-  static void _doPaintPath_st(RasterPaintContext* ctx, Rasterizer* ras);
-  static void _doPaintPath_mt(RasterPaintContext* ctx, Rasterizer* ras);
+  static void _doPaintPath_st(RasterPaintContext* ctx, AnalyticRasterizer* ras);
+  static void _doPaintPath_mt(RasterPaintContext* ctx, AnalyticRasterizer* ras);
 
   // --------------------------------------------------------------------------
   // [Renderers - Clipping]
@@ -584,8 +584,8 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   static void _doMaskBoxes_mt(RasterPaintContext* ctx, const IntBox* box, sysuint_t count, uint32_t clipOp);
 
   // Combine rasterized path with clip-mask.
-  static void _doMaskPath_st(RasterPaintContext* ctx, Rasterizer* ras, uint32_t clipOp);
-  static void _doMaskPath_mt(RasterPaintContext* ctx, Rasterizer* ras, uint32_t clipOp);
+  static void _doMaskPath_st(RasterPaintContext* ctx, AnalyticRasterizer* ras, uint32_t clipOp);
+  static void _doMaskPath_mt(RasterPaintContext* ctx, AnalyticRasterizer* ras, uint32_t clipOp);
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -603,7 +603,7 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
 
   // If we are running in single-core environment it's better to use one
   // rasterizer for everythging.
-  Rasterizer* ras;
+  AnalyticRasterizer rasterizer;
 
   // Multithreading
   RasterWorkerManager* workerManager;

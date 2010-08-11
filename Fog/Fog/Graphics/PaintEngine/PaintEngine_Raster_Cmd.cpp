@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Graphics/Rasterizer_p.h>
+#include <Fog/Graphics/AnalyticRasterizer_p.h>
 #include <Fog/Graphics/PaintEngine/PaintEngine_Raster_Cmd_p.h>
 #include <Fog/Graphics/PaintEngine/PaintEngine_Raster_Context_p.h>
 #include <Fog/Graphics/PaintEngine/PaintEngine_Raster_Engine_p.h>
@@ -140,13 +140,13 @@ void RasterPaintCmdGlyphSet::release(RasterPaintContext* ctx)
 void RasterPaintCmdPath::run(RasterPaintContext* ctx)
 {
   _beforePaint(ctx);
-  ctx->engine->_doPaintPath_mt(ctx, ras);
+  ctx->engine->_doPaintPath_mt(ctx, rasterizer.instancep());
   _afterPaint(ctx);
 }
 
 void RasterPaintCmdPath::release(RasterPaintContext* ctx)
 {
-  Rasterizer::releaseRasterizer(ras);
+  rasterizer.destroy();
   _releasePattern(ctx);
 }
 

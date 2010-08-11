@@ -4,16 +4,15 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_GRAPHICS_RASTERIZER_P_H
-#define _FOG_GRAPHICS_RASTERIZER_P_H
+#ifndef _FOG_GRAPHICS_ANALYTICRASTERIZER_P_H
+#define _FOG_GRAPHICS_ANALYTICRASTERIZER_P_H
 
 // [Dependencies]
-#include <Fog/Core/Build.h>
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/Geometry.h>
 #include <Fog/Graphics/Path.h>
-#include <Fog/Graphics/Span_p.h>
 #include <Fog/Graphics/Scanline_p.h>
+#include <Fog/Graphics/Span_p.h>
 
 namespace Fog {
 
@@ -21,7 +20,7 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::Rasterizer]
+// [Fog::AnalyticRasterizer]
 // ============================================================================
 
 //! @internal
@@ -80,11 +79,10 @@ namespace Fog {
 //!    sweepScanline() - Sweep scanline to scanline container. This scanline
 //!    can be passed to renderer or clipper.
 //!
-//! Rasterizers are pooled to maximize performance and decrease memory 
-//! fragmentation. If you want to create or free rasterizer use methods
-//! @c Rasterizer::getRasterizer() and @c Rasterizer::releaseRasterizer(),
-//! respectively.
-struct FOG_HIDDEN Rasterizer
+//! Analytic rasterizer can be used in multithreaded environment. The 
+//! sweepScanline() method is thread safe and is normally called by more
+//! threads if multithreaded rendering is active.
+struct FOG_HIDDEN AnalyticRasterizer
 {
   // --------------------------------------------------------------------------
   // [Cell]
@@ -200,11 +198,8 @@ struct FOG_HIDDEN Rasterizer
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  Rasterizer();
-  virtual ~Rasterizer();
-
-  //! @brief Called before rasterizer is pooled. Default implementation is NOP.
-  virtual void pooled() = 0;
+  AnalyticRasterizer();
+  ~AnalyticRasterizer();
 
   // --------------------------------------------------------------------------
   // [Clip Box]
@@ -257,7 +252,7 @@ struct FOG_HIDDEN Rasterizer
   // --------------------------------------------------------------------------
 
   //! @brief Reset rasterizer.
-  virtual void reset() = 0;
+  void reset();
 
   //! @brief Initialize the rasterizer, called after setup methods and before
   //! adding path(s).
@@ -266,22 +261,41 @@ struct FOG_HIDDEN Rasterizer
   //! after calling initialize() these methods shouldn't be called, because
   //! rasterizer can use different algorithms to perform rasterization (even-odd
   //! vs. non-zero fill rule, alpha, quality, etc...).
-  virtual void initialize() = 0;
-  virtual void finalize() = 0;
+  void initialize();
+  void finalize();
 
   // --------------------------------------------------------------------------
   // [Commands]
   // --------------------------------------------------------------------------
 
-  virtual void addPath(const DoublePath& path) = 0;
+  void addPath(const DoublePath& path);
+  void closePolygon();
+
+  // --------------------------------------------------------------------------
+  // [Clipper]
+  // --------------------------------------------------------------------------
+
+  void clipLine(int24x8_t x1, int24x8_t y1, int24x8_t x2, int24x8_t y2, uint f1, uint f2);
+  FOG_INLINE void clipLineY(int24x8_t x1, int24x8_t y1, int24x8_t x2, int24x8_t y2, uint f1, uint f2);
+
+  // --------------------------------------------------------------------------
+  // [Renderer]
+  // --------------------------------------------------------------------------
+
+  void renderLine(int24x8_t x1, int24x8_t y1, int24x8_t x2, int24x8_t y2);
+  FOG_INLINE void renderHLine(int ey, int24x8_t x1, int24x8_t y1, int24x8_t x2, int24x8_t y2);
+
+  FOG_INLINE void addCurCell();
+  FOG_INLINE void addCurCell_Always();
+  FOG_INLINE void setCurCell(int x, int y);
 
   // --------------------------------------------------------------------------
   // [Sweep]
   // --------------------------------------------------------------------------
 
-  typedef Span8* (*SweepScanlineSimpleFn)(Rasterizer* rasterizer, Scanline8& scanline, int y);
-  typedef Span8* (*SweepScanlineRegionFn)(Rasterizer* rasterizer, Scanline8& scanline, int y, const IntBox* clipBoxes, sysuint_t count);
-  typedef Span8* (*SweepScanlineSpansFn)(Rasterizer* rasterizer, Scanline8& scanline, int y, const Span8* clipSpans);
+  typedef Span8* (*SweepScanlineSimpleFn)(AnalyticRasterizer* rasterizer, Scanline8& scanline, int y);
+  typedef Span8* (*SweepScanlineRegionFn)(AnalyticRasterizer* rasterizer, Scanline8& scanline, int y, const IntBox* clipBoxes, sysuint_t count);
+  typedef Span8* (*SweepScanlineSpansFn)(AnalyticRasterizer* rasterizer, Scanline8& scanline, int y, const Span8* clipSpans);
 
   //! @brief Sweep scanline @a y.
   FOG_INLINE Span8* sweepScanline(Scanline8& scanline, int y)
@@ -300,13 +314,59 @@ struct FOG_HIDDEN Rasterizer
   { return _sweepScanlineSpansFn(this, scanline, y, clipSpans); }
 
   // --------------------------------------------------------------------------
-  // [Pooling]
+  // [Cells / Rows]
   // --------------------------------------------------------------------------
 
-  //! @brief Get rasterizer instance.
-  static Rasterizer* getRasterizer();
-  //! @brief Release rasterizer instance.
-  static void releaseRasterizer(Rasterizer* rasterizer);
+  //! @brief Get sorted cells.
+  //!
+  //! @note This method is only valid after finalize() call.
+  FOG_INLINE const CellX* getCellsSorted() const { return _cellsSorted; }
+
+  //! @brief Get count of cells in _cellsSorted array.
+  //!
+  //! @note This method is only valid after finalize() call.
+  FOG_INLINE sysuint_t getCellsCount() const { return _cellsCount; }
+
+  //! @brief Get whether there are cells in rasterizer.
+  //!
+  //! @note This method is only valid after finalize() call.
+  FOG_INLINE bool hasCells() const { return _cellsCount != 0; }
+
+  //! @brief Rows info (index and count of cells in row).
+  //!
+  //! @note This method is only valid after finalize() call.
+  FOG_INLINE const RowInfo* getRowsInfo() const { return _rowsInfo; }
+
+  //! @brief Get count of rows in _rowsInfo array.
+  //!
+  //! @note This method is only valid after finalize() call.
+  FOG_INLINE sysuint_t getRowsCount() const { return _boundingBox.y2 - _boundingBox.y1; }
+
+  bool nextCellBuffer();
+  bool finalizeCellBuffer();
+
+  void freeXYCellBuffers(bool all);
+
+  template<int _RULE, int _USE_ALPHA>
+  FOG_INLINE uint _calculateAlpha(int area) const;
+
+  template<int _RULE, int _USE_ALPHA>
+  static Span8* _sweepScanlineSimpleImpl(
+    AnalyticRasterizer* rasterizer, Scanline8& scanline, int y);
+
+  template<int _RULE, int _USE_ALPHA>
+  static Span8* _sweepScanlineRegionImpl(
+    AnalyticRasterizer* rasterizer, Scanline8& scanline, int y,
+    const IntBox* clipBoxes, sysuint_t count);
+
+  template<int _RULE, int _USE_ALPHA>
+  static Span8* _sweepScanlineSpansImpl(
+    AnalyticRasterizer* rasterizer, Scanline8& scanline, int y,
+    const Span8* clipSpans);
+
+  // --------------------------------------------------------------------------
+  // [Cache]
+  // --------------------------------------------------------------------------
 
   //! @brief Get cell buffer instance.
   static CellXYBuffer* getCellXYBuffer();
@@ -320,12 +380,6 @@ struct FOG_HIDDEN Rasterizer
   // [Members]
   // --------------------------------------------------------------------------
 
-private:
-  //! @brief Link to next pooled @c Rasterizer instance. Always NULL when you 
-  //! get rasterizer by @c Rasterizer::getRasterizer() method.
-  Rasterizer* _pool;
-
-public:
   //! @brief Clip bounding box (always must be valid, initialy set to zero).
   IntBox _clipBox;
 
@@ -338,7 +392,7 @@ public:
   //! @brief Alpha.
   uint32_t _alpha;
 
-  //! @brief Rasterizer error code.
+  //! @brief Error code (in case that error happened it's reported here).
   err_t _error;
 
   //! @brief Whether rasterizer is finalized.
@@ -354,8 +408,73 @@ public:
   //! @brief Sweep scanline using anti-aliased clipping.
   SweepScanlineSpansFn _sweepScanlineSpansFn;
 
+  //! @brief Sorted cells.
+  //!
+  //! @note This value is only valid after finalize() call.
+  CellX* _cellsSorted;
+
+  //! @brief Sorted cells array capacity.
+  //!
+  //! @note This value is only valid after finalize() call.
+  uint32_t _cellsCapacity;
+
+  //! @brief Total count of cells in all buffers.
+  //!
+  //! @note This value is updated only by reset(), nextCellBuffer() and 
+  //! finalizeCellBuffer() methods, it not contains exact cells count until
+  //! one of these methods isn't called.
+  //!
+  //! @note This value is only valid after finalize() call.
+  uint32_t _cellsCount;
+
+  //! @brief Rows info (index and count of cells in row).
+  //!
+  //! @note This value is only valid after finalize() call.
+  RowInfo* _rowsInfo;
+
+  //! @brief Rows array capacity.
+  //!
+  //! @note This value is only valid after finalize() call.
+  uint32_t _rowsCapacity;
+
+  //! @brief Whether rasterizer clipping is enabled.
+  uint _clipping;
+  //! @brief Clip box in 24x8 format.
+  IntBox _clip24x8;
+
+  //! @brief Current x position.
+  int24x8_t _x1;
+  //! @brief Current y position.
+  int24x8_t _y1;
+  //! @brief Current [x, y] clipping flags.
+  uint _f1;
+
+  //! @brief Last moveTo x position (for closePolygon).
+  int24x8_t _startX1;
+  //! @brief Last moveTo y position (for closePolygon).
+  int24x8_t _startY1;
+  //! @brief Last moveTo clipping flags (for closePolygon).
+  uint _startF1;
+
+  //! @brief Pointer to first cell buffer.
+  CellXYBuffer* _bufferFirst;
+  //! @brief Pointer to last cell buffer (currently used one).
+  CellXYBuffer* _bufferLast;
+  //! @brief Pointer to currently used cell buffer (this is usually the last 
+  //! one, but this is not condition if rasterizer was reused).
+  CellXYBuffer* _bufferCurrent;
+
+  //! @brief Current cell in the buffer (_cells).
+  CellXY* _curCell;
+  //! @brief End cell in the buffer (this cell is first invalid cell in that buffer).
+  CellXY* _endCell;
+
+  //! @brief Invalid cell. It is set to _curCell and _endCell if memory
+  //! allocation failed. It prevents to dereference the @c NULL pointer.
+  CellXY _invalidCell;
+
 private:
-  FOG_DISABLE_COPY(Rasterizer)
+  FOG_DISABLE_COPY(AnalyticRasterizer)
 };
 
 //! @}
@@ -363,4 +482,4 @@ private:
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_GRAPHICS_RASTERIZER_P_H
+#endif // _FOG_GRAPHICS_ANALYTICRASTERIZER_P_H

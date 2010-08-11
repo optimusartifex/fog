@@ -11,6 +11,7 @@
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Atomic.h>
 #include <Fog/Core/Static.h>
+#include <Fog/Graphics/AnalyticRasterizer_p.h>
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/Geometry.h>
 #include <Fog/Graphics/Glyph.h>
@@ -34,7 +35,6 @@ namespace Fog {
 // ============================================================================
 
 struct RasterPaintCalc;
-struct Rasterizer;
 
 // ============================================================================
 // [Fog::RasterPaintCmd]
@@ -371,7 +371,7 @@ struct FOG_HIDDEN RasterPaintCmdPath : public RasterPaintCmdDraw
   //! @brief Rasterizer (where path is rasterized by @c RasterPaintCalc).
   //!
   //! Rasterizer is set-up by calculation.
-  Rasterizer* ras;
+  Static<AnalyticRasterizer> rasterizer;
 };
 
 //! @}

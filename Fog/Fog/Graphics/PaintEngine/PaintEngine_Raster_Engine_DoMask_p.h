@@ -708,7 +708,7 @@ intersectNop:
 // ============================================================================
 
 void RasterPaintEngine::CTX_SYMBOL(_doMaskPath)(
-  RasterPaintContext* ctx, Rasterizer* ras, uint32_t clipOp)
+  RasterPaintContext* ctx, AnalyticRasterizer* ras, uint32_t clipOp)
 {
   int y = ras->getBoundingBox().y1;
   int y_end = ras->getBoundingBox().y2;

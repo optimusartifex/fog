@@ -21,6 +21,7 @@
 #include <Fog/Core/Thread.h>
 #include <Fog/Core/ThreadCondition.h>
 #include <Fog/Core/ThreadPool.h>
+#include <Fog/Graphics/AnalyticRasterizer_p.h>
 #include <Fog/Graphics/ByteUtil_p.h>
 #include <Fog/Graphics/Color.h>
 #include <Fog/Graphics/ColorLut.h>
@@ -33,7 +34,6 @@
 #include <Fog/Graphics/Matrix.h>
 #include <Fog/Graphics/Painter.h>
 #include <Fog/Graphics/PathStroker.h>
-#include <Fog/Graphics/Rasterizer_p.h>
 #include <Fog/Graphics/RasterEngine_p.h>
 #include <Fog/Graphics/RasterEngine/C_p.h>
 #include <Fog/Graphics/RasterUtil_p.h>
@@ -112,9 +112,6 @@ RasterPaintEngine::RasterPaintEngine(const ImageBuffer& buffer, ImageData* image
   ctx.engine = this;
   ctx.pctx = NULL;
 
-  // Setup rasterizer.
-  ras = Rasterizer::getRasterizer();
-
   // Setup primary layer.
   ctx.paintLayer.pixels = buffer.data;
   ctx.paintLayer.width = buffer.width;
@@ -176,8 +173,6 @@ RasterPaintEngine::~RasterPaintEngine()
     // free it because of assertion in the Fog::BlockMemoryAllocator.
     blockAllocator.free(ctx.pctx);
   }
-
-  Rasterizer::releaseRasterizer(ras);
 }
 
 // ============================================================================
@@ -687,7 +682,8 @@ err_t RasterPaintEngine::setAlpha(float alpha)
   else
     ctx.state &= ~RASTER_STATE_NO_PAINT_ALPHA;
 
-  ras->setAlpha(ctx.ops.alpha255);
+  // TODO RASTERIZER: Why?
+  rasterizer.setAlpha(ctx.ops.alpha255);
   return ERR_OK;
 }
 
@@ -2890,7 +2886,7 @@ err_t RasterPaintEngine::_serializePaintImageAffine(const DoublePoint& pt, const
       ctx.pctx = &imagectx;
 
       // Render path using specific pattern context.
-      _doPaintPath_st(&ctx, ras);
+      _doPaintPath_st(&ctx, &rasterizer);
 
       // Destroy pattern context.
       imagectx.destroy(&imagectx);
@@ -2942,7 +2938,6 @@ err_t RasterPaintEngine::_serializePaintImageAffine(const DoublePoint& pt, const
 
     cmd->status.init(RASTER_COMMAND_WAIT);
     cmd->calculation = clc;
-    cmd->ras = NULL; // Will be initialized by calculation.
 
     // Init paint specialized for affine blit.
     cmd->ops.data = ctx.ops.data;
@@ -2998,7 +2993,7 @@ err_t RasterPaintEngine::_serializePaintPath(const DoublePath& path, bool stroke
   if (isSingleThreaded())
   {
     if (_doRasterizePath_st(path, ctx.finalClipBox, ctx.hints.fillRule, stroke))
-      _doPaintPath_st(&ctx, ras);
+      _doPaintPath_st(&ctx, &rasterizer);
   }
   // Multithreaded.
   else
@@ -3009,7 +3004,6 @@ err_t RasterPaintEngine::_serializePaintPath(const DoublePath& path, bool stroke
     if (FOG_UNLIKELY(cmd == NULL)) return ERR_RT_OUT_OF_MEMORY;
 
     cmd->status.init(RASTER_COMMAND_WAIT);
-    cmd->ras = NULL; // Will be initialized by calculation.
 
     if (stroke)
     {
@@ -3382,7 +3376,7 @@ err_t RasterPaintEngine::_serializeMaskPath(const DoublePath& path, bool stroke,
   {
     if (_doRasterizePath_st(path, ctx.workClipBox, ctx.hints.clipRule, stroke))
     {
-      _doMaskPath_st(&ctx, ras, clipOp);
+      _doMaskPath_st(&ctx, &rasterizer, clipOp);
       return ERR_OK;
     }
     else
@@ -3524,7 +3518,7 @@ bool RasterPaintEngine::_doRasterizePath_st(const DoublePath& path, const IntBox
     ? matrix = &ctx.finalMatrix
     : NULL;
 
-  ras->reset();
+  rasterizer.reset();
 
   const DoublePath* p = &path;
   bool noTransform = (
@@ -3551,7 +3545,7 @@ bool RasterPaintEngine::_doRasterizePath_st(const DoublePath& path, const IntBox
 
     // Stroke not respects fill rule set in the caps state, instead
     // we are using FILL_NON_ZERO.
-    ras->setFillRule(FILL_NON_ZERO);
+    rasterizer.setFillRule(FILL_NON_ZERO);
   }
   else
   {
@@ -3564,16 +3558,16 @@ bool RasterPaintEngine::_doRasterizePath_st(const DoublePath& path, const IntBox
     }
 
     // Fill respects the given fill rule.
-    ras->setFillRule(fillRule);
+    rasterizer.setFillRule(fillRule);
   }
 
-  ras->setClipBox(clipBox);
-  ras->initialize();
+  rasterizer.setClipBox(clipBox);
+  rasterizer.initialize();
 
-  ras->addPath(*p);
-  ras->finalize();
+  rasterizer.addPath(*p);
+  rasterizer.finalize();
 
-  return ras->isValid();
+  return rasterizer.isValid();
 }
 
 // ============================================================================

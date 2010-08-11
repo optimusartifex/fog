@@ -422,6 +422,7 @@ Source_Group("Core/Pack" FILES ${FOG_CORE_PACK_SOURCES} ${FOG_CORE_PACK_HEADERS}
 # =============================================================================
 
 Set(FOG_GRAPHICS_LIB_SOURCES
+  Fog/Graphics/AnalyticRasterizer.cpp
   Fog/Graphics/Color.cpp
   Fog/Graphics/ColorAnalyzer.cpp
   Fog/Graphics/ColorLut.cpp
@@ -445,6 +446,7 @@ Set(FOG_GRAPHICS_LIB_SOURCES
   Fog/Graphics/ImageFilterParams.cpp
   Fog/Graphics/ImageIO.cpp
   Fog/Graphics/ImagePixels.cpp
+  Fog/Graphics/LiangBarsky_p.h
   Fog/Graphics/Matrix.cpp
   Fog/Graphics/Painter.cpp
   Fog/Graphics/PaintEngine.cpp
@@ -457,7 +459,6 @@ Set(FOG_GRAPHICS_LIB_SOURCES
   Fog/Graphics/PathUtil_SSE2.cpp
   Fog/Graphics/Pattern.cpp
   Fog/Graphics/RasterEngine.cpp
-  Fog/Graphics/Rasterizer.cpp
   Fog/Graphics/Reduce.cpp
   Fog/Graphics/Region.cpp
   Fog/Graphics/Scanline.cpp
@@ -470,6 +471,7 @@ Set(FOG_GRAPHICS_LIB_SOURCES
 
 Set(FOG_GRAPHICS_MAIN_HEADERS
   Fog/Graphics.h
+  Fog/Graphics/AnalyticRasterizer_p.h
   Fog/Graphics/ByteUtil_p.h
   Fog/Graphics/Color.h
   Fog/Graphics/ColorAnalyzer_p.h
@@ -506,7 +508,6 @@ Set(FOG_GRAPHICS_MAIN_HEADERS
   Fog/Graphics/PathTransform.h
   Fog/Graphics/Pattern.h
   Fog/Graphics/RasterEngine_p.h
-  Fog/Graphics/Rasterizer_p.h
   Fog/Graphics/RasterUtil_p.h
   Fog/Graphics/Reduce_p.h
   Fog/Graphics/Region.h
@@ -706,20 +707,11 @@ Set(FOG_GRAPHICS_RASTERENGINE_HEADERS
   Fog/Graphics/RasterEngine/C_p.h
 )
 
-Set(FOG_GRAPHICS_RASTERIZER_SOURCES
-  Fog/Graphics/Rasterizer/Rasterizer_Analytic.cpp
-)
-
-Set(FOG_GRAPHICS_RASTERIZER_HEADERS
-  Fog/Graphics/Rasterizer/LiangBarsky_p.h
-  Fog/Graphics/Rasterizer/Rasterizer_Analytic_p.h
-)
-
 # Optimize specific files for speed
+Set_Source_Files_Properties(Fog/Graphics/AnalyticRasterizer.cpp                PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
 Set_Source_Files_Properties(Fog/Graphics/Image.cpp                             PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
 Set_Source_Files_Properties(Fog/Graphics/PathUtil.cpp                          PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
 Set_Source_Files_Properties(Fog/Graphics/PathUtil_SSE2.cpp                     PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_SSE2}")
-Set_Source_Files_Properties(${FOG_GRAPHICS_RASTERIZER_SOURCES}                 PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
 Set_Source_Files_Properties(Fog/Graphics/Region.cpp                            PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
 
 Set_Source_Files_Properties(Fog/Graphics/RasterEngine/Init_C.cpp               PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
@@ -735,7 +727,6 @@ Source_Group("Graphics/ImageIO"       FILES ${FOG_GRAPHICS_IMAGEIO_SOURCES}     
 Source_Group("Graphics/FontEngine"    FILES ${FOG_GRAPHICS_FONTENGINE_SOURCES}   ${FOG_GRAPHICS_FONTENGINE_HEADERS}  )
 Source_Group("Graphics/PaintEngine"   FILES ${FOG_GRAPHICS_PAINTENGINE_SOURCES}  ${FOG_GRAPHICS_PAINTENGINE_HEADERS} )
 Source_Group("Graphics/RasterEngine"  FILES ${FOG_GRAPHICS_RASTERENGINE_SOURCES} ${FOG_GRAPHICS_RASTERENGINE_HEADERS})
-Source_Group("Graphics/Rasterizer"    FILES ${FOG_GRAPHICS_RASTERIZER_SOURCES}   ${FOG_GRAPHICS_RASTERIZER_HEADERS}  )
 
 # =============================================================================
 # [Fog-Xml]
@@ -927,7 +918,6 @@ Set(FOG_ALL_SOURCES
   ${FOG_GRAPHICS_FONTENGINE_SOURCES}
   ${FOG_GRAPHICS_PAINTENGINE_SOURCES}
   ${FOG_GRAPHICS_RASTERENGINE_SOURCES}
-  ${FOG_GRAPHICS_RASTERIZER_SOURCES}
   # Fog-Gui.
   ${FOG_GUI_LIB_SOURCES}
   ${FOG_GUI_THEME_ENGINE_SOURCES}
@@ -950,7 +940,6 @@ Set(FOG_ALL_HEADERS
   ${FOG_GRAPHICS_FONTENGINE_HEADERS}
   ${FOG_GRAPHICS_PAINTENGINE_HEADERS}
   ${FOG_GRAPHICS_RASTERENGINE_HEADERS}
-  ${FOG_GRAPHICS_RASTERIZER_HEADERS}
   # Fog-Gui.
   ${FOG_GUI_MAIN_HEADERS}
   ${FOG_GUI_GUIENGINE_WIN_HEADERS}

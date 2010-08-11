@@ -1763,7 +1763,7 @@ void RasterPaintEngine::CTX_SYMBOL(_doPaintGlyphSet)(
 // ============================================================================
 
 void RasterPaintEngine::CTX_SYMBOL(_doPaintPath)(
-  RasterPaintContext* ctx, Rasterizer* ras)
+  RasterPaintContext* ctx, AnalyticRasterizer* ras)
 {
   FOG_ASSERT(ctx->finalClipType != RASTER_CLIP_NULL);
 

@@ -9,15 +9,17 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
+#include <Fog/Core/ByteArray.h>
 #include <Fog/Core/Lock.h>
 #include <Fog/Core/Math.h>
 #include <Fog/Core/Memory.h>
+#include <Fog/Core/Static.h>
+#include <Fog/Graphics/AnalyticRasterizer_p.h>
 #include <Fog/Graphics/ByteUtil_p.h>
 #include <Fog/Graphics/Constants.h>
+#include <Fog/Graphics/Image.h>
+#include <Fog/Graphics/LiangBarsky_p.h>
 #include <Fog/Graphics/RasterEngine_p.h>
-#include <Fog/Graphics/Rasterizer_p.h>
-#include <Fog/Graphics/Rasterizer/LiangBarsky_p.h>
-#include <Fog/Graphics/Rasterizer/Rasterizer_Analytic_p.h>
 #include <Fog/Graphics/Span_p.h>
 
 namespace Fog {
@@ -52,13 +54,37 @@ namespace Fog {
 // ----------------------------------------------------------------------------
 
 // ============================================================================
-// [Fog::Rasterizer - Debugging]
+// [Fog::AnalyticRasterizer - Debugging]
 // ============================================================================
 
 // #define FOG_DEBUG_RASTERIZER)
 
 // ============================================================================
-// [Fog::Rasterizer - Constants]
+// [Fog::AnalyticRasterizer - Local]
+// ============================================================================
+
+struct FOG_HIDDEN AnalyticRasterizerLocal
+{
+  AnalyticRasterizerLocal() : 
+    cellBuffers(NULL),
+    cellsBufferCapacity(2048)
+  {
+  }
+
+  ~AnalyticRasterizerLocal()
+  {
+  }
+
+  Lock lock;
+
+  AnalyticRasterizer::CellXYBuffer* cellBuffers;
+  uint32_t cellsBufferCapacity;
+};
+
+static Static<AnalyticRasterizerLocal> analyticrasterizer_local;
+
+// ============================================================================
+// [Fog::AnalyticRasterizer - Constants]
 // ============================================================================
 
 enum POLY_SUBPIXEL_ENUM
@@ -91,7 +117,29 @@ static FOG_INLINE int upscale(double v) { return Math::iround(v * POLY_SUBPIXEL_
 
 AnalyticRasterizer::AnalyticRasterizer()
 {
-  _bufferFirst = Rasterizer::getCellXYBuffer();
+  // Clip-box / bounding-box.
+  _clipBox.clear();
+  _boundingBox.clear();
+
+  // Default fill rule.
+  _fillRule = FILL_DEFAULT;
+
+  // Default alpha is full-opaque.
+  _alpha = 0xFF;
+
+  // No error at this time.
+  _error = ERR_OK;
+
+  // Not finalized, not valid.
+  _isFinalized = false;
+  _isValid = false;
+
+  // Sweep-scanline is initialized during initialize() or finalize().
+  _sweepScanlineSimpleFn = NULL;
+  _sweepScanlineRegionFn = NULL;
+  _sweepScanlineSpansFn = NULL;
+
+  _bufferFirst = getCellXYBuffer();
   _bufferLast = _bufferFirst;
 
   _cellsSorted = NULL;
@@ -106,36 +154,10 @@ AnalyticRasterizer::AnalyticRasterizer()
 
 AnalyticRasterizer::~AnalyticRasterizer()
 {
-  if (_bufferFirst) Rasterizer::releaseCellXYBuffer(_bufferFirst);
+  if (_bufferFirst) releaseCellXYBuffer(_bufferFirst);
 
   if (_cellsSorted) Memory::free(_cellsSorted);
   if (_rowsInfo) Memory::free(_rowsInfo);
-}
-
-void AnalyticRasterizer::pooled()
-{
-  reset();
-
-  // Defaults.
-  _fillRule = FILL_DEFAULT;
-  _alpha = 0xFF;
-
-  freeXYCellBuffers(false);
-
-  // If this rasterizer was used for something really big, we will free the
-  // memory.
-  if (_cellsCapacity > 1024)
-  {
-    Memory::free(_cellsSorted);
-    _cellsSorted = NULL;
-    _cellsCapacity = 0;
-  }
-  if (_rowsCapacity > 1024)
-  {
-    Memory::free(_rowsInfo);
-    _rowsInfo = NULL;
-    _rowsCapacity = 0;
-  }
 }
 
 // ============================================================================
@@ -1015,7 +1037,7 @@ bool AnalyticRasterizer::nextCellBuffer()
 
   // Next buffer not found, try to get cell buffer from pool (getCellXYBuffer
   // can also allocate new buffer if the pool is empty).
-  _bufferCurrent = Rasterizer::getCellXYBuffer();
+  _bufferCurrent = getCellXYBuffer();
   if (_bufferCurrent)
   {
     // Link
@@ -1062,7 +1084,7 @@ void AnalyticRasterizer::freeXYCellBuffers(bool all)
     CellXYBuffer* candidate = (all) ? _bufferFirst : _bufferFirst->next;
     if (!candidate) return;
 
-    Rasterizer::releaseCellXYBuffer(candidate);
+    releaseCellXYBuffer(candidate);
     if (all)
     {
       _bufferFirst = NULL;
@@ -1128,17 +1150,13 @@ FOG_INLINE uint AnalyticRasterizer::_calculateAlpha(int area) const
   }
 
   if (_USE_ALPHA) cover = ByteUtil::scalar_muldiv255(cover, _alpha);
-  //return _gamma[cover];
   return cover;
 }
 
 template<int _RULE, int _USE_ALPHA>
 Span8* AnalyticRasterizer::_sweepScanlineSimpleImpl(
-  Rasterizer* _rasterizer, Scanline8& scanline, int y)
+  AnalyticRasterizer* rasterizer, Scanline8& scanline, int y)
 {
-  AnalyticRasterizer* rasterizer =
-    reinterpret_cast<AnalyticRasterizer*>(_rasterizer);
-
   FOG_ASSERT(rasterizer->_isFinalized);
   if (y >= rasterizer->_boundingBox.y2) return NULL;
 
@@ -1270,12 +1288,9 @@ Span8* AnalyticRasterizer::_sweepScanlineSimpleImpl(
 
 template<int _RULE, int _USE_ALPHA>
 Span8* AnalyticRasterizer::_sweepScanlineRegionImpl(
-  Rasterizer* _rasterizer, Scanline8& scanline, int y,
+  AnalyticRasterizer* rasterizer, Scanline8& scanline, int y,
   const IntBox* clipBoxes, sysuint_t count)
 {
-  AnalyticRasterizer* rasterizer =
-    reinterpret_cast<AnalyticRasterizer*>(_rasterizer);
-
   FOG_ASSERT(rasterizer->_isFinalized);
   if (y >= rasterizer->_boundingBox.y2) return NULL;
 
@@ -1480,12 +1495,9 @@ end:
 
 template<int _RULE, int _USE_ALPHA>
 Span8* AnalyticRasterizer::_sweepScanlineSpansImpl(
-  Rasterizer* _rasterizer, Scanline8& scanline, int y,
+  AnalyticRasterizer* rasterizer, Scanline8& scanline, int y,
   const Span8* clipSpans)
 {
-  AnalyticRasterizer* rasterizer =
-    reinterpret_cast<AnalyticRasterizer*>(_rasterizer);
-
   FOG_ASSERT(rasterizer->_isFinalized);
   if (y >= rasterizer->_boundingBox.y2) return NULL;
 
@@ -1807,4 +1819,92 @@ end:
 #undef CLIP_SPAN_CHANGED
 }
 
+// ============================================================================
+// [Fog::AnalyticRasterizer - Cache]
+// ============================================================================
+
+AnalyticRasterizer::CellXYBuffer* AnalyticRasterizer::getCellXYBuffer()
+{
+  CellXYBuffer* cellBuffer = NULL;
+
+  {
+    AutoLock locked(analyticrasterizer_local->lock);
+    if (analyticrasterizer_local->cellBuffers)
+    {
+      cellBuffer = analyticrasterizer_local->cellBuffers;
+      analyticrasterizer_local->cellBuffers = cellBuffer->next;
+      cellBuffer->next = NULL;
+      cellBuffer->prev = NULL;
+      cellBuffer->count = 0;
+    }
+  }
+
+  if (cellBuffer == NULL)
+  {
+    cellBuffer = (CellXYBuffer*)Memory::alloc(
+      sizeof(CellXYBuffer) - sizeof(CellXY) + sizeof(CellXY) * analyticrasterizer_local->cellsBufferCapacity);
+    if (cellBuffer == NULL) return NULL;
+
+    cellBuffer->next = NULL;
+    cellBuffer->prev = NULL;
+    cellBuffer->count = 0;
+    cellBuffer->capacity = analyticrasterizer_local->cellsBufferCapacity;
+  }
+
+  return cellBuffer;
+}
+
+void AnalyticRasterizer::releaseCellXYBuffer(CellXYBuffer* cellBuffer)
+{
+  AutoLock locked(analyticrasterizer_local->lock);
+
+  // Get last.
+  CellXYBuffer* last = cellBuffer;
+  while (last->next) last = last->next;
+
+  last->next = analyticrasterizer_local->cellBuffers;
+  analyticrasterizer_local->cellBuffers = cellBuffer;
+}
+
+void AnalyticRasterizer::cleanup()
+{
+  // Free all cell buffers.
+  CellXYBuffer* cur;
+  CellXYBuffer* next;
+
+  {
+    AutoLock locked(analyticrasterizer_local->lock);
+
+    cur = analyticrasterizer_local->cellBuffers;
+    analyticrasterizer_local->cellBuffers = NULL;
+  }
+
+  while (cur)
+  {
+    next = cur->next;
+    Memory::free(cur);
+    cur = next;
+  }
+}
+
 } // Fog namespace
+
+// ============================================================================
+// [Library Initializers]
+// ============================================================================
+
+FOG_INIT_DECLARE err_t fog_analyticrasterizer_init(void)
+{
+  using namespace Fog;
+
+  analyticrasterizer_local.init();
+  return ERR_OK;
+}
+
+FOG_INIT_DECLARE void fog_analyticrasterizer_shutdown(void)
+{
+  using namespace Fog;
+
+  AnalyticRasterizer::cleanup();
+  analyticrasterizer_local.destroy();
+}

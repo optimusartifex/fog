@@ -16,6 +16,7 @@
 #include <Fog/Core/Memory.h>
 #include <Fog/Core/Misc.h>
 #include <Fog/Core/Std.h>
+#include <Fog/Graphics/AnalyticRasterizer_p.h>
 #include <Fog/Graphics/ColorLut.h>
 #include <Fog/Graphics/ColorMatrix.h>
 #include <Fog/Graphics/Constants.h>
@@ -27,7 +28,6 @@
 #include <Fog/Graphics/RasterEngine_p.h>
 #include <Fog/Graphics/RasterEngine/Bresenham_p.h>
 #include <Fog/Graphics/RasterEngine/C_p.h>
-#include <Fog/Graphics/Rasterizer_p.h>
 #include <Fog/Graphics/Reduce_p.h>
 #include <Fog/Graphics/Scanline_p.h>
 
@@ -2463,30 +2463,26 @@ err_t Image::glyphFromPath(Image& glyph, IntPoint& offset, const DoublePath& pat
     return ERR_OK;
   }
 
-  Rasterizer* rasterizer = Rasterizer::getRasterizer();
-  if (rasterizer == NULL) return ERR_RT_OUT_OF_MEMORY;
-
+  AnalyticRasterizer rasterizer;
   err_t err = ERR_OK;
 
   if (path.isFlat())
   {
-    rasterizer->addPath(path);
+    rasterizer.addPath(path);
   }
   else
   {
     DoublePath temp;
-
     err = path.flattenTo(temp, NULL, 1.0);
     if (err != ERR_OK) goto end;
 
-    rasterizer->addPath(temp);
+    rasterizer.addPath(temp);
   }
 
-  rasterizer->finalize();
-
-  if (rasterizer->isValid())
+  rasterizer.finalize();
+  if (rasterizer.isValid())
   {
-    IntBox bounds(rasterizer->getBoundingBox());
+    IntBox bounds(rasterizer.getBoundingBox());
 
     Scanline8 scanline;
 
@@ -2504,7 +2500,7 @@ err_t Image::glyphFromPath(Image& glyph, IntPoint& offset, const DoublePath& pat
     {
       Memory::zero(glyphData, glyphStride);
 
-      Span8* span = rasterizer->sweepScanline(scanline, y + bounds.y1);
+      Span8* span = rasterizer.sweepScanline(scanline, y + bounds.y1);
       while (span)
       {
         uint8_t* p = glyphData + (uint)(span->getX1() - bounds.x1);
@@ -2532,7 +2528,6 @@ empty:
     offset.clear();
   }
 
-  Rasterizer::releaseRasterizer(rasterizer);
   return err;
 }
 

@@ -15,10 +15,10 @@
 #include <Fog/Core/Math.h>
 #include <Fog/Core/Misc.h>
 #include <Fog/Core/Std.h>
+#include <Fog/Graphics/AnalyticRasterizer_p.h>
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/Matrix.h>
 #include <Fog/Graphics/Path.h>
-#include <Fog/Graphics/Rasterizer_p.h>
 #include <Fog/Graphics/Region.h>
 #include <Fog/Graphics/Scanline_p.h>
 
@@ -1855,7 +1855,7 @@ err_t Region::frame(const IntPoint& pt)
   return frame(*this, *this, pt);
 }
 
-static err_t Region_doPath(Region* self, Rasterizer* rasterizer, uint8_t threshold)
+static err_t Region_doPath(Region* self, AnalyticRasterizer* rasterizer, uint8_t threshold)
 {
   if (!rasterizer->isValid()) return ERR_OK;
   IntBox bounds(rasterizer->getBoundingBox());
@@ -1914,30 +1914,26 @@ err_t Region::fromPath(const DoublePath& path, const DoubleMatrix* matrix, uint3
 
   if (path.isEmpty()) return ERR_OK;
 
-  Rasterizer* rasterizer = Rasterizer::getRasterizer();
-  if (rasterizer == NULL) return ERR_RT_OUT_OF_MEMORY;
+  AnalyticRasterizer rasterizer;
 
   err_t err = ERR_OK;
   if (path.isFlat() && matrix == NULL)
   {
-    rasterizer->addPath(path);
+    rasterizer.addPath(path);
   }
   else
   {
     DoublePath temp;
-
     err = path.flattenTo(temp, matrix, 1.0);
     if (err != ERR_OK) goto end;
 
-    rasterizer->addPath(temp);
+    rasterizer.addPath(temp);
   }
 
-  rasterizer->finalize();
-  err = Region_doPath(this, rasterizer, (uint8_t)threshold);
+  rasterizer.finalize();
+  err = Region_doPath(this, &rasterizer, (uint8_t)threshold);
 
 end:
-  Rasterizer::releaseRasterizer(rasterizer);
-
   if (err != ERR_OK) clear();
   return err;
 }

@@ -542,7 +542,7 @@ vMaskAlphaSparseBoundNoMask:
     V_BLIT_SPAN8_CASE_CMASK_ALPHA()
     {
       uint32_t msk0inv;
-      if ((OP::CHARACTERISTICS & OPERATOR_CHAR_UNBOUND)) msk0inv = Face::u32Negate255(msk0);
+      if ((OP::CHARACTERISTICS & OPERATOR_CHAR_UNBOUND)) msk0inv = Face::b32_1x1Negate255(msk0);
 
       do {
         Face::b32_1x2 src0, src1;
@@ -611,7 +611,7 @@ vMaskAlphaSparseBoundNoMask:
           Face::b32_1x2 dst0inv, dst1inv;
 
           Face::b32_2x2Unpack0213(dst0, dst1, READ_32(dst));
-          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::u32Negate255(msk0));
+          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::b32_1x1Negate255(msk0));
           Face::b32_2x2Pack0213(dst0inv, dst0inv, dst1inv);
 
           Face::b32_2x2Unpack0213(src0, src1, READ_32(src));
@@ -627,7 +627,7 @@ vMaskAlphaSparseBoundNoMask:
           Face::b32_1x2 dst0inv, dst1inv;
 
           Face::b32_2x2Unpack0213(dst0, dst1, READ_32(dst));
-          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::u32Negate255(msk0));
+          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::b32_1x1Negate255(msk0));
           Face::b32_2x2Pack0213(dst0inv, dst0inv, dst1inv);
 
           Face::b32_2x2Unpack0213(src0, src1, READ_32(src));
@@ -680,7 +680,7 @@ vMaskAlphaSparseBoundNoMask:
         {
           Face::b32_1x2 dst0inv, dst1inv;
 
-          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::u32Negate255(msk0));
+          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::b32_1x1Negate255(msk0));
           Face::b32_2x2Pack0213(dst0inv, dst0inv, dst1inv);
           Face::b32_2x2MulDiv255U(src0, src0, src1, src1, msk0);
 
@@ -693,7 +693,7 @@ vMaskAlphaSparseBoundNoMask:
         {
           Face::b32_1x2 dst0inv, dst1inv;
 
-          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::u32Negate255(msk0));
+          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::b32_1x1Negate255(msk0));
           Face::b32_2x2Pack0213(dst0inv, dst0inv, dst1inv);
 
           OP::prgb32_op_prgb32_32b(dst0, dst0, src0, dst1, dst1, src1);
@@ -888,7 +888,7 @@ cMaskOpaqueSkip:
     V_BLIT_SPAN8_CASE_CMASK_ALPHA()
     {
       uint32_t msk0inv;
-      if ((OP::CHARACTERISTICS & OPERATOR_CHAR_UNBOUND)) msk0inv = Face::u32Negate255(msk0);
+      if ((OP::CHARACTERISTICS & OPERATOR_CHAR_UNBOUND)) msk0inv = Face::b32_1x1Negate255(msk0);
 
       do {
         Face::b32_1x2 src0, src1;
@@ -903,7 +903,7 @@ cMaskOpaqueSkip:
           Face::b32_2x2Pack0213(dst0inv, dst0inv, dst1inv);
 
           Face::b32_2x2Unpack0213(src0, src1, READ_32(src));
-          Face::b32_2x2PremultiplyU(src0, src0, src1, src1, Face::u32MulDiv255(Face::b32_1x2GetB1(src1), msk0));
+          Face::b32_2x2PremultiplyU(src0, src0, src1, src1, Face::b32_1x1MulDiv255(Face::b32_1x2GetB1(src1), msk0));
 
           OP::prgb32_op_prgb32_32b(dst0, dst0, src0, dst1, dst1, src1);
 
@@ -930,7 +930,7 @@ cMaskOpaqueSkip:
         {
           Face::b32_2x2Unpack0213(dst0, dst1, READ_32(dst));
           Face::b32_2x2Unpack0213(src0, src1, READ_32(src));
-          Face::b32_2x2PremultiplyU(src0, src0, src1, src1, Face::u32MulDiv255(Face::b32_1x2GetB1(src1), msk0));
+          Face::b32_2x2PremultiplyU(src0, src0, src1, src1, Face::b32_1x1MulDiv255(Face::b32_1x2GetB1(src1), msk0));
 
           OP::prgb32_op_prgb32_32b(dst0, dst0, src0, dst1, dst1, src1);
 
@@ -957,11 +957,11 @@ cMaskOpaqueSkip:
           Face::b32_1x2 dst0inv, dst1inv;
 
           Face::b32_2x2Unpack0213(dst0, dst1, READ_32(dst));
-          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::u32Negate255(msk0));
+          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::b32_1x1Negate255(msk0));
           Face::b32_2x2Pack0213(dst0inv, dst0inv, dst1inv);
 
           Face::b32_2x2Unpack0213(src0, src1, READ_32(src));
-          Face::b32_2x2PremultiplyU(src0, src0, src1, src1, Face::u32MulDiv255(Face::b32_1x2GetB1(src1), msk0));
+          Face::b32_2x2PremultiplyU(src0, src0, src1, src1, Face::b32_1x1MulDiv255(Face::b32_1x2GetB1(src1), msk0));
 
           OP::prgb32_op_prgb32_32b(dst0, dst0, src0, dst1, dst1, src1);
 
@@ -973,7 +973,7 @@ cMaskOpaqueSkip:
           Face::b32_1x2 dst0inv, dst1inv;
 
           Face::b32_2x2Unpack0213(dst0, dst1, READ_32(dst));
-          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::u32Negate255(msk0));
+          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::b32_1x1Negate255(msk0));
           Face::b32_2x2Pack0213(dst0inv, dst0inv, dst1inv);
 
           Face::b32_2x2Unpack0213(src0, src1, READ_32(src));
@@ -988,7 +988,7 @@ cMaskOpaqueSkip:
         {
           Face::b32_2x2Unpack0213(dst0, dst1, READ_32(dst));
           Face::b32_2x2Unpack0213(src0, src1, READ_32(src));
-          Face::b32_2x2PremultiplyU(src0, src0, src1, src1, Face::u32MulDiv255(Face::b32_1x2GetB1(src1), msk0));
+          Face::b32_2x2PremultiplyU(src0, src0, src1, src1, Face::b32_1x1MulDiv255(Face::b32_1x2GetB1(src1), msk0));
 
           OP::prgb32_op_prgb32_32b(dst0, dst0, src0, dst1, dst1, src1);
 
@@ -1026,9 +1026,9 @@ cMaskOpaqueSkip:
         {
           Face::b32_1x2 dst0inv, dst1inv;
 
-          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::u32Negate255(msk0));
+          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::b32_1x1Negate255(msk0));
           Face::b32_2x2Pack0213(dst0inv, dst0inv, dst1inv);
-          Face::b32_2x2PremultiplyU(src0, src0, src1, src1, Face::u32MulDiv255(Face::b32_1x2GetB1(src1), msk0));
+          Face::b32_2x2PremultiplyU(src0, src0, src1, src1, Face::b32_1x1MulDiv255(Face::b32_1x2GetB1(src1), msk0));
 
           OP::prgb32_op_prgb32_32b(dst0, dst0, src0, dst1, dst1, src1);
 
@@ -1039,7 +1039,7 @@ cMaskOpaqueSkip:
         {
           Face::b32_1x2 dst0inv, dst1inv;
 
-          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::u32Negate255(msk0));
+          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::b32_1x1Negate255(msk0));
           Face::b32_2x2Pack0213(dst0inv, dst0inv, dst1inv);
           Face::b32_2x2PremultiplyA(src0, src0, src1, src1);
 
@@ -1050,7 +1050,7 @@ cMaskOpaqueSkip:
         }
         else
         {
-          Face::b32_2x2PremultiplyU(src0, src0, src1, src1, Face::u32MulDiv255(Face::b32_1x2GetB1(src1), msk0));
+          Face::b32_2x2PremultiplyU(src0, src0, src1, src1, Face::b32_1x1MulDiv255(Face::b32_1x2GetB1(src1), msk0));
 
           OP::prgb32_op_prgb32_32b(dst0, dst0, src0, dst1, dst1, src1);
 
@@ -1196,7 +1196,7 @@ cMaskOpaqueSkip:
     V_BLIT_SPAN8_CASE_CMASK_ALPHA()
     {
       uint32_t msk0inv;
-      if ((OP::CHARACTERISTICS & OPERATOR_CHAR_UNBOUND)) msk0inv = Face::u32Negate255(msk0);
+      if ((OP::CHARACTERISTICS & OPERATOR_CHAR_UNBOUND)) msk0inv = Face::b32_1x1Negate255(msk0);
 
       do {
         Face::b32_1x2 src0, src1;
@@ -1265,7 +1265,7 @@ cMaskOpaqueSkip:
           Face::b32_1x2 dst0inv, dst1inv;
 
           Face::b32_2x2Unpack0213(dst0, dst1, READ_32(dst));
-          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::u32Negate255(msk0));
+          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::b32_1x1Negate255(msk0));
           Face::b32_2x2Pack0213(dst0inv, dst0inv, dst1inv);
 
           Face::b32_2x2Unpack0213(src0, src1, READ_32(src) | 0xFF000000);
@@ -1281,7 +1281,7 @@ cMaskOpaqueSkip:
           Face::b32_1x2 dst0inv, dst1inv;
 
           Face::b32_2x2Unpack0213(dst0, dst1, READ_32(dst));
-          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::u32Negate255(msk0));
+          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::b32_1x1Negate255(msk0));
           Face::b32_2x2Pack0213(dst0inv, dst0inv, dst1inv);
 
           Face::b32_2x2Unpack0213(src0, src1, READ_32(src));
@@ -1330,7 +1330,7 @@ cMaskOpaqueSkip:
         {
           Face::b32_1x2 dst0inv, dst1inv;
 
-          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::u32Negate255(msk0));
+          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::b32_1x1Negate255(msk0));
           Face::b32_2x2Pack0213(dst0inv, dst0inv, dst1inv);
 
           Face::b32_2x2MulDiv255U(src0, src0, src1, src1, msk0);
@@ -1344,7 +1344,7 @@ cMaskOpaqueSkip:
         {
           Face::b32_1x2 dst0inv, dst1inv;
 
-          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::u32Negate255(msk0));
+          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::b32_1x1Negate255(msk0));
           Face::b32_2x2Pack0213(dst0inv, dst0inv, dst1inv);
 
           OP::prgb32_op_xrgb32_32b(dst0, dst0, src0, dst1, dst1, src1);
@@ -1814,7 +1814,7 @@ vMaskAlphaSparseBoundNoMask:
     V_BLIT_SPAN8_CASE_CMASK_ALPHA()
     {
       uint32_t msk0inv;
-      if ((OP::CHARACTERISTICS & OPERATOR_CHAR_UNBOUND)) msk0inv = Face::u32Negate255(msk0);
+      if ((OP::CHARACTERISTICS & OPERATOR_CHAR_UNBOUND)) msk0inv = Face::b32_1x1Negate255(msk0);
 
       do {
         Face::b32_1x2 src0, src1;
@@ -1883,7 +1883,7 @@ vMaskAlphaSparseBoundNoMask:
           Face::b32_1x2 dst0inv, dst1inv;
 
           Face::b32_2x2Unpack0213(dst0, dst1, READ_32(dst));
-          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::u32Negate255(msk0));
+          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::b32_1x1Negate255(msk0));
           Face::b32_2x2Pack0213(dst0inv, dst0inv, dst1inv);
 
           Face::b32_2x2Unpack0213(src0, src1, READ_32(src));
@@ -1899,7 +1899,7 @@ vMaskAlphaSparseBoundNoMask:
           Face::b32_1x2 dst0inv, dst1inv;
 
           Face::b32_2x2Unpack0213(dst0, dst1, READ_32(dst));
-          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::u32Negate255(msk0));
+          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::b32_1x1Negate255(msk0));
           Face::b32_2x2Pack0213(dst0inv, dst0inv, dst1inv);
 
           Face::b32_2x2Unpack0213(src0, src1, READ_32(src));
@@ -1948,7 +1948,7 @@ vMaskAlphaSparseBoundNoMask:
         {
           Face::b32_1x2 dst0inv, dst1inv;
 
-          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::u32Negate255(msk0));
+          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::b32_1x1Negate255(msk0));
           Face::b32_2x2Pack0213(dst0inv, dst0inv, dst1inv);
 
           Face::b32_2x2MulDiv255U(src0, src0, src1, src1, msk0);
@@ -1962,7 +1962,7 @@ vMaskAlphaSparseBoundNoMask:
         {
           Face::b32_1x2 dst0inv, dst1inv;
 
-          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::u32Negate255(msk0));
+          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::b32_1x1Negate255(msk0));
           Face::b32_2x2Pack0213(dst0inv, dst0inv, dst1inv);
 
           OP::xrgb32_op_prgb32_32b(dst0, dst0, src0, dst1, dst1, src1);
@@ -2128,7 +2128,7 @@ vMaskAlphaSparseNoMask:
     V_BLIT_SPAN8_CASE_CMASK_ALPHA()
     {
       uint32_t msk0inv;
-      if ((OP::CHARACTERISTICS & OPERATOR_CHAR_UNBOUND)) msk0inv = Face::u32Negate255(msk0);
+      if ((OP::CHARACTERISTICS & OPERATOR_CHAR_UNBOUND)) msk0inv = Face::b32_1x1Negate255(msk0);
 
       do {
         Face::b32_1x2 src0, src1;
@@ -2143,7 +2143,7 @@ vMaskAlphaSparseNoMask:
           Face::b32_2x2Pack0213(dst0inv, dst0inv, dst1inv);
 
           Face::b32_2x2Unpack0213(src0, src1, READ_32(src));
-          Face::b32_2x2PremultiplyU(src0, src0, src1, src1, Face::u32MulDiv255(Face::b32_1x2GetB1(src1), msk0));
+          Face::b32_2x2PremultiplyU(src0, src0, src1, src1, Face::b32_1x1MulDiv255(Face::b32_1x2GetB1(src1), msk0));
 
           OP::xrgb32_op_prgb32_32b(dst0, dst0, src0, dst1, dst1, src1);
 
@@ -2170,7 +2170,7 @@ vMaskAlphaSparseNoMask:
         {
           Face::b32_2x2Unpack0213(dst0, dst1, READ_32(dst));
           Face::b32_2x2Unpack0213(src0, src1, READ_32(src));
-          Face::b32_2x2PremultiplyU(src0, src0, src1, src1, Face::u32MulDiv255(Face::b32_1x2GetB1(src1), msk0));
+          Face::b32_2x2PremultiplyU(src0, src0, src1, src1, Face::b32_1x1MulDiv255(Face::b32_1x2GetB1(src1), msk0));
 
           OP::xrgb32_op_prgb32_32b(dst0, dst0, src0, dst1, dst1, src1);
 
@@ -2197,11 +2197,11 @@ vMaskAlphaSparseNoMask:
           Face::b32_1x2 dst0inv, dst1inv;
 
           Face::b32_2x2Unpack0213(dst0, dst1, READ_32(dst));
-          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::u32Negate255(msk0));
+          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::b32_1x1Negate255(msk0));
           Face::b32_2x2Pack0213(dst0inv, dst0inv, dst1inv);
 
           Face::b32_2x2Unpack0213(src0, src1, READ_32(src));
-          Face::b32_2x2PremultiplyU(src0, src0, src1, src1, Face::u32MulDiv255(Face::b32_1x2GetB1(src1), msk0));
+          Face::b32_2x2PremultiplyU(src0, src0, src1, src1, Face::b32_1x1MulDiv255(Face::b32_1x2GetB1(src1), msk0));
 
           OP::xrgb32_op_prgb32_32b(dst0, dst0, src0, dst1, dst1, src1);
 
@@ -2213,7 +2213,7 @@ vMaskAlphaSparseNoMask:
           Face::b32_1x2 dst0inv, dst1inv;
 
           Face::b32_2x2Unpack0213(dst0, dst1, READ_32(dst));
-          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::u32Negate255(msk0));
+          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::b32_1x1Negate255(msk0));
           Face::b32_2x2Pack0213(dst0inv, dst0inv, dst1inv);
 
           Face::b32_2x2Unpack0213(src0, src1, READ_32(src));
@@ -2228,7 +2228,7 @@ vMaskAlphaSparseNoMask:
         {
           Face::b32_2x2Unpack0213(dst0, dst1, READ_32(dst));
           Face::b32_2x2Unpack0213(src0, src1, READ_32(src));
-          Face::b32_2x2PremultiplyU(src0, src0, src1, src1, Face::u32MulDiv255(Face::b32_1x2GetB1(src1), msk0));
+          Face::b32_2x2PremultiplyU(src0, src0, src1, src1, Face::b32_1x1MulDiv255(Face::b32_1x2GetB1(src1), msk0));
 
           OP::xrgb32_op_prgb32_32b(dst0, dst0, src0, dst1, dst1, src1);
 
@@ -2262,9 +2262,9 @@ vMaskAlphaSparseNoMask:
         {
           Face::b32_1x2 dst0inv, dst1inv;
 
-          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::u32Negate255(msk0));
+          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::b32_1x1Negate255(msk0));
           Face::b32_2x2Pack0213(dst0inv, dst0inv, dst1inv);
-          Face::b32_2x2PremultiplyU(src0, src0, src1, src1, Face::u32MulDiv255(Face::b32_1x2GetB1(src1), msk0));
+          Face::b32_2x2PremultiplyU(src0, src0, src1, src1, Face::b32_1x1MulDiv255(Face::b32_1x2GetB1(src1), msk0));
 
           OP::xrgb32_op_prgb32_32b(dst0, dst0, src0, dst1, dst1, src1);
 
@@ -2275,7 +2275,7 @@ vMaskAlphaSparseNoMask:
         {
           Face::b32_1x2 dst0inv, dst1inv;
 
-          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::u32Negate255(msk0));
+          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::b32_1x1Negate255(msk0));
           Face::b32_2x2Pack0213(dst0inv, dst0inv, dst1inv);
           Face::b32_2x2PremultiplyA(src0, src0, src1, src1);
 
@@ -2286,7 +2286,7 @@ vMaskAlphaSparseNoMask:
         }
         else
         {
-          Face::b32_2x2PremultiplyU(src0, src0, src1, src1, Face::u32MulDiv255(Face::b32_1x2GetB1(src1), msk0));
+          Face::b32_2x2PremultiplyU(src0, src0, src1, src1, Face::b32_1x1MulDiv255(Face::b32_1x2GetB1(src1), msk0));
 
           OP::xrgb32_op_prgb32_32b(dst0, dst0, src0, dst1, dst1, src1);
 
@@ -2392,7 +2392,7 @@ vMaskAlphaSparseNoMask:
     V_BLIT_SPAN8_CASE_CMASK_ALPHA()
     {
       uint32_t msk0inv;
-      if ((OP::CHARACTERISTICS & OPERATOR_CHAR_UNBOUND)) msk0inv = Face::u32Negate255(msk0);
+      if ((OP::CHARACTERISTICS & OPERATOR_CHAR_UNBOUND)) msk0inv = Face::b32_1x1Negate255(msk0);
 
       do {
         Face::b32_1x2 src0, src1;
@@ -2461,7 +2461,7 @@ vMaskAlphaSparseNoMask:
           Face::b32_1x2 dst0inv, dst1inv;
 
           Face::b32_2x2Unpack0213(dst0, dst1, READ_32(dst));
-          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::u32Negate255(msk0));
+          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::b32_1x1Negate255(msk0));
           Face::b32_2x2Pack0213(dst0inv, dst0inv, dst1inv);
 
           Face::b32_2x2Unpack0213(src0, src1, READ_32(src) | 0xFF000000);
@@ -2477,7 +2477,7 @@ vMaskAlphaSparseNoMask:
           Face::b32_1x2 dst0inv, dst1inv;
 
           Face::b32_2x2Unpack0213(dst0, dst1, READ_32(dst));
-          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::u32Negate255(msk0));
+          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::b32_1x1Negate255(msk0));
           Face::b32_2x2Pack0213(dst0inv, dst0inv, dst1inv);
 
           Face::b32_2x2Unpack0213(src0, src1, READ_32(src));
@@ -2526,7 +2526,7 @@ vMaskAlphaSparseNoMask:
         {
           Face::b32_1x2 dst0inv, dst1inv;
 
-          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::u32Negate255(msk0));
+          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::b32_1x1Negate255(msk0));
           Face::b32_2x2Pack0213(dst0inv, dst0inv, dst1inv);
           Face::b32_2x2MulDiv255U(src0, src0, src1, src1, msk0);
 
@@ -2539,7 +2539,7 @@ vMaskAlphaSparseNoMask:
         {
           Face::b32_1x2 dst0inv, dst1inv;
 
-          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::u32Negate255(msk0));
+          Face::b32_2x2MulDiv255U(dst0inv, dst0, dst1inv, dst1, Face::b32_1x1Negate255(msk0));
           Face::b32_2x2Pack0213(dst0inv, dst0inv, dst1inv);
 
           OP::xrgb32_op_xrgb32_32b(dst0, dst0, src0, dst1, dst1, src1);

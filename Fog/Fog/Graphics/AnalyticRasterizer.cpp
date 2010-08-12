@@ -1149,7 +1149,7 @@ FOG_INLINE uint AnalyticRasterizer8::_calculateAlpha(int area) const
     if (cover > AA_MASK) cover = AA_MASK;
   }
 
-  if (_USE_ALPHA) cover = Face::u32MulDiv255(cover, _alpha);
+  if (_USE_ALPHA) cover = Face::b32_1x1MulDiv255(cover, _alpha);
   return cover;
 }
 
@@ -1586,7 +1586,7 @@ advanceClip:
       if (Span8::isPtrCMask(clipMask))
       {
         uint32_t m = Span8::ptrToCMask(clipMask);
-        if ((alpha = Face::u32MulDiv255(alpha, m)) == 0)
+        if ((alpha = Face::b32_1x1MulDiv255(alpha, m)) == 0)
         {
           if (clipX2 <= nextX) goto advanceClip;
           continue;
@@ -1616,7 +1616,7 @@ advanceClip:
           }
 
           coversh = cover << (POLY_SUBPIXEL_SHIFT + 1);
-          alpha = Face::u32MulDiv255(
+          alpha = Face::b32_1x1MulDiv255(
             rasterizer->_calculateAlpha<_RULE, _USE_ALPHA>(coversh - area), m);
 
           FOG_ASSERT(x >= clipX1 && x < clipX2);
@@ -1638,7 +1638,7 @@ advanceClip:
       }
       else
       {
-        if ((alpha = Face::u32MulDiv255(alpha, clipMask[x])) == 0)
+        if ((alpha = Face::b32_1x1MulDiv255(alpha, clipMask[x])) == 0)
         {
           if (clipX2 <= nextX) goto advanceClip;
           continue;
@@ -1670,7 +1670,7 @@ advanceClip:
           FOG_ASSERT(x >= clipX1 && x < clipX2);
           
           coversh = cover << (POLY_SUBPIXEL_SHIFT + 1);
-          alpha = Face::u32MulDiv255(
+          alpha = Face::b32_1x1MulDiv255(
             rasterizer->_calculateAlpha<_RULE, _USE_ALPHA>(coversh - area), clipMask[x]);
 
           if (++x == nextX)
@@ -1720,7 +1720,7 @@ advanceClip:
         {
           FOG_ASSERT(x >= clipX1 && x < clipX2);
           uint m = (Span8::isPtrCMask(clipMask)) ? Span8::ptrToCMask(clipMask) : clipMask[x];
-          alpha = Face::u32MulDiv255(alpha, m);
+          alpha = Face::b32_1x1MulDiv255(alpha, m);
           if (alpha)
           {
             scanline.newVSpanAlpha(x);
@@ -1756,7 +1756,7 @@ advanceClip:
 
           if (Span8::isPtrCMask(clipMask))
           {
-            uint alphaAdj = Face::u32MulDiv255(alpha, Span8::ptrToCMask(clipMask));
+            uint alphaAdj = Face::b32_1x1MulDiv255(alpha, Span8::ptrToCMask(clipMask));
             if (alphaAdj) scanline.addCSpanOrMergeVSpan(x, toX, alphaAdj);
           }
           else
@@ -1786,7 +1786,7 @@ advanceClip:
     
               if (Span8::isPtrCMask(clipMask))
               {
-                uint alphaAdj = Face::u32MulDiv255(alpha, Span8::ptrToCMask(clipMask));
+                uint alphaAdj = Face::b32_1x1MulDiv255(alpha, Span8::ptrToCMask(clipMask));
                 if (alphaAdj) scanline.addCSpanOrMergeVSpan(clipX1, toX, alphaAdj);
               }
               else

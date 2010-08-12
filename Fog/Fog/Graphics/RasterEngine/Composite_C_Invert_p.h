@@ -33,7 +33,7 @@ struct FOG_HIDDEN CompositeInvertC : public CompositeBaseFuncsC32<CompositeInver
     uint32_t ba = Face::b32_1x2GetB1(b1);
     Face::b32_2x2MulDiv255U(dst0, dst0, dst1, dst1, ba);
 
-    Face::b32_2x2MulDiv255U(a0, a0, a1, a1, Face::u32Negate255(ba));
+    Face::b32_2x2MulDiv255U(a0, a0, a1, a1, Face::b32_1x1Negate255(ba));
     Face::b32_2x2AddusB32_2x2(dst0, dst0, a0, dst1, dst1, a1);
   }
 
@@ -57,7 +57,7 @@ struct FOG_HIDDEN CompositeInvertC : public CompositeBaseFuncsC32<CompositeInver
     uint32_t ba = Face::b32_1x2GetB1(b1);
     Face::b32_2x2MulDiv255U(dst0, dst0, dst1, dst1, ba);
 
-    Face::b32_2x2MulDiv255U(a0, a0, a1, a1, Face::u32Negate255(ba));
+    Face::b32_2x2MulDiv255U(a0, a0, a1, a1, Face::b32_1x1Negate255(ba));
     Face::b32_2x2AddusB32_2x2(dst0, dst0, a0, dst1, dst1, a1);
 
     Face::b32_1x2FillB1(dst1, dst1);

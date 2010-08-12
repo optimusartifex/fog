@@ -1,4 +1,4 @@
-// [Fog-Face Library - Private API]
+// [Fog-Face Library - Public API]
 //
 // [License]
 // MIT, See COPYING file in package

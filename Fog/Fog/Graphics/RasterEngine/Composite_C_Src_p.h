@@ -64,7 +64,7 @@ struct FOG_HIDDEN CompositeSrcC
     C_BLIT_SPAN8_CASE_CMASK_ALPHA()
     {
       uint32_t srcm = Face::b32_2x2MulDiv255U_Pack0213(src0orig, src1orig, msk0);
-      uint32_t msk0inv = Face::u32Negate255(msk0);
+      uint32_t msk0inv = Face::b32_1x1Negate255(msk0);
 
       do {
         ((uint32_t*)dst)[0] = Face::p32_1x4MulDiv255U32(READ_32(dst), msk0inv) + srcm;
@@ -84,7 +84,7 @@ struct FOG_HIDDEN CompositeSrcC
 
         dst0 = READ_32(dst);
         src0 = Face::b32_2x2MulDiv255U_Pack0213(src0orig, src1orig, msk0);
-        dst0 = Face::p32_1x4MulDiv255U32(dst0, Face::u32Negate255(msk0));
+        dst0 = Face::p32_1x4MulDiv255U32(dst0, Face::b32_1x1Negate255(msk0));
 
         ((uint32_t*)dst)[0] = src0 + dst0;
 
@@ -109,7 +109,7 @@ struct FOG_HIDDEN CompositeSrcC
 
         dst0 = READ_32(dst);
         src0 = Face::b32_2x2MulDiv255U_Pack0213(src0orig, src1orig, msk0);
-        src0 += Face::p32_1x4MulDiv255U32(dst0, Face::u32Negate255(msk0));
+        src0 += Face::p32_1x4MulDiv255U32(dst0, Face::b32_1x1Negate255(msk0));
 
 vMaskAlphaSparseFill:
         ((uint32_t*)dst)[0] = src0;
@@ -166,7 +166,7 @@ vMaskAlphaSparseSkip:
     // [CMask - Alpha] --------------------------------------------------------
     V_BLIT_SPAN8_CASE_CMASK_ALPHA()
     {
-      uint32_t msk0inv = Face::u32Negate255(msk0);
+      uint32_t msk0inv = Face::b32_1x1Negate255(msk0);
 
       do {
         uint32_t dst0 = READ_32(dst);
@@ -189,7 +189,7 @@ vMaskAlphaSparseSkip:
         uint32_t msk0 = READ_8(msk);
 
         src0 = Face::p32_1x4MulDiv255U32(src0, msk0);
-        src0 += Face::p32_1x4MulDiv255U32(dst0, Face::u32Negate255(msk0));
+        src0 += Face::p32_1x4MulDiv255U32(dst0, Face::b32_1x1Negate255(msk0));
 
         ((uint32_t*)dst)[0] = src0;
 
@@ -215,7 +215,7 @@ vMaskAlphaSparseSkip:
 
         dst0 = READ_32(dst);
         src0 = Face::p32_1x4MulDiv255U32(src0, msk0);
-        src0 += Face::p32_1x4MulDiv255U32(dst0, Face::u32Negate255(msk0));
+        src0 += Face::p32_1x4MulDiv255U32(dst0, Face::b32_1x1Negate255(msk0));
 
 vMaskAlphaSparseFill:
         ((uint32_t*)dst)[0] = src0;
@@ -275,14 +275,14 @@ vMaskAlphaSparseSkip:
     // [CMask - Alpha] --------------------------------------------------------
     V_BLIT_SPAN8_CASE_CMASK_ALPHA()
     {
-      uint32_t msk0inv = Face::u32Negate255(msk0);
+      uint32_t msk0inv = Face::b32_1x1Negate255(msk0);
 
       do {
         uint32_t dst0 = READ_32(dst);
         uint32_t src0 = READ_32(src);
 
         ((uint32_t*)dst)[0] = Face::p32_2x4MulDiv255U32_Add(
-          src0 | 0xFF000000, Face::u32MulDiv255(msk0, src0 >> 24), dst0, msk0inv);
+          src0 | 0xFF000000, Face::b32_1x1MulDiv255(msk0, src0 >> 24), dst0, msk0inv);
 
         dst += 4;
         src += 4;
@@ -301,8 +301,8 @@ vMaskAlphaSparseSkip:
         src0 = READ_32(src);
         dst0 = READ_32(dst);
         msk0 = READ_8(msk);
-        src0 = Face::p32_1x4MulDiv255U32(src0 | 0xFF000000, Face::u32MulDiv255(msk0, (src0 >> 24)));
-        src0 += Face::p32_1x4MulDiv255U32(dst0, Face::u32Negate255(msk0));
+        src0 = Face::p32_1x4MulDiv255U32(src0 | 0xFF000000, Face::b32_1x1MulDiv255(msk0, (src0 >> 24)));
+        src0 += Face::p32_1x4MulDiv255U32(dst0, Face::b32_1x1Negate255(msk0));
 
         ((uint32_t*)dst)[0] = src0;
 
@@ -327,8 +327,8 @@ vMaskAlphaSparseSkip:
         if (msk0 == 0xFF) goto vMaskAlphaSparseFill;
 
         dst0 = READ_32(dst);
-        src0 = Face::p32_1x4MulDiv255U32(src0 | 0xFF000000, Face::u32MulDiv255(msk0, (src0 >> 24)));
-        src0 += Face::p32_1x4MulDiv255U32(dst0, Face::u32Negate255(msk0));
+        src0 = Face::p32_1x4MulDiv255U32(src0 | 0xFF000000, Face::b32_1x1MulDiv255(msk0, (src0 >> 24)));
+        src0 += Face::p32_1x4MulDiv255U32(dst0, Face::b32_1x1Negate255(msk0));
 
 vMaskAlphaSparseFill:
         ((uint32_t*)dst)[0] = src0;
@@ -386,7 +386,7 @@ vMaskAlphaSparseSkip:
     // [CMask - Alpha] --------------------------------------------------------
     V_BLIT_SPAN8_CASE_CMASK_ALPHA()
     {
-      uint32_t msk0inv = Face::u32Negate255(msk0);
+      uint32_t msk0inv = Face::b32_1x1Negate255(msk0);
 
       do {
         uint32_t dst0 = READ_32(dst);
@@ -409,7 +409,7 @@ vMaskAlphaSparseSkip:
         uint32_t msk0 = READ_8(msk);
 
         src0 = Face::p32_1x4MulDiv255U32(src0, msk0);
-        src0 += Face::p32_1x4MulDiv255U32(dst0, Face::u32Negate255(msk0));
+        src0 += Face::p32_1x4MulDiv255U32(dst0, Face::b32_1x1Negate255(msk0));
 
         ((uint32_t*)dst)[0] = src0;
 
@@ -435,7 +435,7 @@ vMaskAlphaSparseSkip:
 
         dst0 = READ_32(dst);
         src0 = Face::p32_1x4MulDiv255U32(src0, msk0);
-        src0 += Face::p32_1x4MulDiv255U32(dst0, Face::u32Negate255(msk0));
+        src0 += Face::p32_1x4MulDiv255U32(dst0, Face::b32_1x1Negate255(msk0));
 
 vMaskAlphaSparseFill:
         ((uint32_t*)dst)[0] = src0;
@@ -493,11 +493,11 @@ vMaskAlphaSparseSkip:
     // [CMask - Alpha] --------------------------------------------------------
     V_BLIT_SPAN8_CASE_CMASK_ALPHA()
     {
-      uint32_t msk0inv = Face::u32Negate255(msk0);
+      uint32_t msk0inv = Face::b32_1x1Negate255(msk0);
 
       do {
         uint32_t dst0 = READ_32(dst);
-        uint32_t src0 = Face::u32MulDiv255(READ_8(src), msk0) << 24;
+        uint32_t src0 = Face::b32_1x1MulDiv255(READ_8(src), msk0) << 24;
         ((uint32_t*)dst)[0] = src0 + Face::p32_1x4MulDiv255U32(dst0, msk0inv);
 
         dst += 4;
@@ -517,8 +517,8 @@ vMaskAlphaSparseSkip:
         src0 = READ_8(src);
         dst0 = READ_32(dst);
 
-        src0 = Face::u32MulDiv255(src0, msk0) << 24;
-        src0 += Face::p32_1x4MulDiv255U32(dst0, Face::u32Negate255(msk0));
+        src0 = Face::b32_1x1MulDiv255(src0, msk0) << 24;
+        src0 += Face::p32_1x4MulDiv255U32(dst0, Face::b32_1x1Negate255(msk0));
 
         ((uint32_t*)dst)[0] = src0;
 
@@ -543,8 +543,8 @@ vMaskAlphaSparseSkip:
         if (msk0 == 0xFF) goto vMaskAlphaSparseFill;
 
         dst0 = READ_32(dst);
-        src0 = Face::u32MulDiv255(src0 >> 24, msk0) << 24;
-        src0 += Face::p32_1x4MulDiv255U32(dst0, Face::u32Negate255(msk0));
+        src0 = Face::b32_1x1MulDiv255(src0 >> 24, msk0) << 24;
+        src0 += Face::p32_1x4MulDiv255U32(dst0, Face::b32_1x1Negate255(msk0));
 
 vMaskAlphaSparseFill:
         ((uint32_t*)dst)[0] = src0;
@@ -605,7 +605,7 @@ vMaskAlphaSparseSkip:
     // [CMask - Alpha] --------------------------------------------------------
     V_BLIT_SPAN8_CASE_CMASK_ALPHA()
     {
-      uint32_t msk0inv = Face::u32Negate255(msk0);
+      uint32_t msk0inv = Face::b32_1x1Negate255(msk0);
 
       do {
         Face::b32_1x2 dst0 = READ_32(dst);
@@ -627,7 +627,7 @@ vMaskAlphaSparseSkip:
         uint32_t msk0 = READ_8(msk);
 
         src0 = Face::p32_1x4MulDiv255U32(src0, msk0);
-        src0 += Face::p32_1x4MulDiv255U32(dst0, Face::u32Negate255(msk0));
+        src0 += Face::p32_1x4MulDiv255U32(dst0, Face::b32_1x1Negate255(msk0));
 
         ((uint32_t*)dst)[0] = src0;
 
@@ -653,7 +653,7 @@ vMaskAlphaSparseSkip:
 
         dst0 = READ_32(dst);
         src0 = Face::p32_1x4MulDiv255U32(src0, msk0);
-        src0 += Face::p32_1x4MulDiv255U32(dst0, Face::u32Negate255(msk0));
+        src0 += Face::p32_1x4MulDiv255U32(dst0, Face::b32_1x1Negate255(msk0));
 
 vMaskAlphaSparseFill:
         ((uint32_t*)dst)[0] = src0;
@@ -729,7 +729,7 @@ vMaskAlphaSparseSkip:
     C_BLIT_SPAN8_CASE_CMASK_ALPHA()
     {
       uint32_t srcm = Face::b32_2x2MulDiv255U_Pack0213(src0orig, src1orig, msk0);
-      uint32_t msk0inv = Face::u32Negate255(msk0);
+      uint32_t msk0inv = Face::b32_1x1Negate255(msk0);
 
       do {
         ((uint32_t*)dst)[0] = Face::p32_1x4MulDiv255U32(READ_32(dst), msk0inv) + srcm;
@@ -749,7 +749,7 @@ vMaskAlphaSparseSkip:
 
         dst0 = READ_32(dst);
         src0 = Face::b32_2x2MulDiv255U_Pack0213(src0orig, src1orig, msk0);
-        dst0 = Face::p32_1x4MulDiv255U32(dst0, Face::u32Negate255(msk0));
+        dst0 = Face::p32_1x4MulDiv255U32(dst0, Face::b32_1x1Negate255(msk0));
 
         ((uint32_t*)dst)[0] = src0 + dst0;
 
@@ -774,7 +774,7 @@ vMaskAlphaSparseSkip:
 
         dst0 = READ_32(dst);
         src0 = Face::b32_2x2MulDiv255U_Pack0213(src0orig, src1orig, msk0);
-        src0 += Face::p32_1x4MulDiv255U32(dst0, Face::u32Negate255(msk0));
+        src0 += Face::p32_1x4MulDiv255U32(dst0, Face::b32_1x1Negate255(msk0));
 
 vMaskAlphaSparseFill:
         ((uint32_t*)dst)[0] = src0;
@@ -831,7 +831,7 @@ vMaskAlphaSparseSkip:
     // [CMask - Alpha] --------------------------------------------------------
     V_BLIT_SPAN8_CASE_CMASK_ALPHA()
     {
-      uint32_t msk0inv = Face::u32Negate255(msk0);
+      uint32_t msk0inv = Face::b32_1x1Negate255(msk0);
 
       do {
         uint32_t dst0 = READ_32(dst);
@@ -856,7 +856,7 @@ vMaskAlphaSparseSkip:
         uint32_t msk0 = READ_8(msk);
 
         src0 = Face::p32_1x3MulDiv255U32_FXXX(src0, msk0);
-        src0 += Face::p32_1x3MulDiv255U32_ZXXX(dst0, Face::u32Negate255(msk0));
+        src0 += Face::p32_1x3MulDiv255U32_ZXXX(dst0, Face::b32_1x1Negate255(msk0));
 
         ((uint32_t*)dst)[0] = src0;
 
@@ -882,7 +882,7 @@ vMaskAlphaSparseSkip:
 
         dst0 = READ_32(dst);
         src0 = Face::p32_1x3MulDiv255U32_FXXX(src0, msk0);
-        src0 += Face::p32_1x3MulDiv255U32_ZXXX(dst0, Face::u32Negate255(msk0));
+        src0 += Face::p32_1x3MulDiv255U32_ZXXX(dst0, Face::b32_1x1Negate255(msk0));
 
 vMaskAlphaSparseFill:
         ((uint32_t*)dst)[0] = src0;
@@ -940,14 +940,14 @@ vMaskAlphaSparseSkip:
     // [CMask - Alpha] --------------------------------------------------------
     V_BLIT_SPAN8_CASE_CMASK_ALPHA()
     {
-      uint32_t msk0inv = Face::u32Negate255(msk0);
+      uint32_t msk0inv = Face::b32_1x1Negate255(msk0);
 
       do {
         uint32_t dst0 = READ_32(dst);
         uint32_t src0 = READ_32(src);
 
         ((uint32_t*)dst)[0] =
-          Face::p32_1x3MulDiv255U32_FXXX(src0, Face::u32MulDiv255(msk0, src0 >> 24)) +
+          Face::p32_1x3MulDiv255U32_FXXX(src0, Face::b32_1x1MulDiv255(msk0, src0 >> 24)) +
           Face::p32_1x3MulDiv255U32_ZXXX(dst0, msk0inv);
 
         dst += 4;
@@ -964,8 +964,8 @@ vMaskAlphaSparseSkip:
         uint32_t src0 = READ_32(src);
         uint32_t msk0 = READ_8(msk);
 
-        src0 = Face::p32_1x3MulDiv255U32_FXXX(src0, Face::u32MulDiv255(msk0, (src0 >> 24)));
-        src0 += Face::p32_1x3MulDiv255U32_ZXXX(dst0, Face::u32Negate255(msk0));
+        src0 = Face::p32_1x3MulDiv255U32_FXXX(src0, Face::b32_1x1MulDiv255(msk0, (src0 >> 24)));
+        src0 += Face::p32_1x3MulDiv255U32_ZXXX(dst0, Face::b32_1x1Negate255(msk0));
 
         ((uint32_t*)dst)[0] = src0;
 
@@ -990,8 +990,8 @@ vMaskAlphaSparseSkip:
         if (msk0 == 0xFF) goto vMaskAlphaSparseFill;
 
         dst0 = READ_32(dst);
-        src0 = Face::p32_1x3MulDiv255U32_FXXX(src0, Face::u32MulDiv255(msk0, (src0 >> 24)));
-        src0 += Face::p32_1x3MulDiv255U32_ZXXX(dst0, Face::u32Negate255(msk0));
+        src0 = Face::p32_1x3MulDiv255U32_FXXX(src0, Face::b32_1x1MulDiv255(msk0, (src0 >> 24)));
+        src0 += Face::p32_1x3MulDiv255U32_ZXXX(dst0, Face::b32_1x1Negate255(msk0));
 
 vMaskAlphaSparseFill:
         ((uint32_t*)dst)[0] = src0;
@@ -1049,7 +1049,7 @@ vMaskAlphaSparseSkip:
     // [CMask - Alpha] --------------------------------------------------------
     V_BLIT_SPAN8_CASE_CMASK_ALPHA()
     {
-      uint32_t msk0inv = Face::u32Negate255(msk0);
+      uint32_t msk0inv = Face::b32_1x1Negate255(msk0);
 
       do {
         uint32_t dst0 = READ_32(dst);
@@ -1074,7 +1074,7 @@ vMaskAlphaSparseSkip:
         uint32_t msk0 = READ_8(msk);
 
         src0 = Face::p32_1x3MulDiv255U32_FXXX(src0, msk0);
-        src0 += Face::p32_1x3MulDiv255U32_ZXXX(dst0, Face::u32Negate255(msk0));
+        src0 += Face::p32_1x3MulDiv255U32_ZXXX(dst0, Face::b32_1x1Negate255(msk0));
 
         ((uint32_t*)dst)[0] = src0;
 
@@ -1100,7 +1100,7 @@ vMaskAlphaSparseSkip:
 
         dst0 = READ_32(dst);
         src0 = Face::p32_1x3MulDiv255U32_FXXX(src0, msk0);
-        src0 += Face::p32_1x3MulDiv255U32_ZXXX(dst0, Face::u32Negate255(msk0));
+        src0 += Face::p32_1x3MulDiv255U32_ZXXX(dst0, Face::b32_1x1Negate255(msk0));
 
 vMaskAlphaSparseFill:
         ((uint32_t*)dst)[0] = src0;
@@ -1161,7 +1161,7 @@ vMaskAlphaSparseSkip:
     // [CMask - Alpha] --------------------------------------------------------
     V_BLIT_SPAN8_CASE_CMASK_ALPHA()
     {
-      uint32_t msk0inv = Face::u32Negate255(msk0);
+      uint32_t msk0inv = Face::b32_1x1Negate255(msk0);
 
       do {
         Face::b32_1x2 dst0 = READ_32(dst);
@@ -1186,7 +1186,7 @@ vMaskAlphaSparseSkip:
         uint32_t msk0 = READ_8(msk);
 
         src0 = Face::p32_1x3MulDiv255U32_FXXX(src0, msk0);
-        src0 += Face::p32_1x3MulDiv255U32_ZXXX(dst0, Face::u32Negate255(msk0));
+        src0 += Face::p32_1x3MulDiv255U32_ZXXX(dst0, Face::b32_1x1Negate255(msk0));
 
         ((uint32_t*)dst)[0] = src0;
 
@@ -1212,7 +1212,7 @@ vMaskAlphaSparseSkip:
 
         dst0 = READ_32(dst);
         src0 = Face::p32_1x4MulDiv255U32(src0, msk0);
-        src0 += Face::p32_1x4MulDiv255U32(dst0, Face::u32Negate255(msk0));
+        src0 += Face::p32_1x4MulDiv255U32(dst0, Face::b32_1x1Negate255(msk0));
 
 vMaskAlphaSparseFill:
         ((uint32_t*)dst)[0] = src0 | 0xFF000000;

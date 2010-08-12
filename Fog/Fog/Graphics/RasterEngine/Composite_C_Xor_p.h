@@ -26,8 +26,8 @@ struct FOG_HIDDEN CompositeXorC : public CompositeBaseFuncsC32<CompositeXorC>
     Face::b32_1x2& dst0, Face::b32_1x2 a0, Face::b32_1x2 b0,
     Face::b32_1x2& dst1, Face::b32_1x2 a1, Face::b32_1x2 b1)
   {
-    uint32_t aainv = Face::u32Negate255(Face::b32_1x2GetB1(a1));
-    uint32_t bainv = Face::u32Negate255(Face::b32_1x2GetB1(b1));
+    uint32_t aainv = Face::b32_1x1Negate255(Face::b32_1x2GetB1(a1));
+    uint32_t bainv = Face::b32_1x1Negate255(Face::b32_1x2GetB1(b1));
 
     Face::b32_2x2MulDiv255U_2x_Add(
       dst0, a0, bainv, b0, aainv,

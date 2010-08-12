@@ -1,4 +1,4 @@
-// [Fog-Core Library - Public API]
+// [Fog-Face Library - Public API]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -48,9 +48,12 @@
 //!
 //! Functions defined by @ref Fog_Face_Byte do operation on:
 //!
-//!   1. scalar bytes   - all functions using prefix "u32"
-//!   1. packed bytes   - all functions using prefix "p32_XxX" or "p64_XxX"
-//!   2. unpacked bytes - all functions using prefix "b32_XxX" or "b64_XxX"
+//!   1. scalar bytes
+//!      - all functions using prefix "b32_1x1"
+//!   2. packed bytes in sparse format (0x00B100B0, etc...)
+//!      - all functions using prefix "b32_XxX" or "b64_XxX"
+//!   3. packed bytes in dense format (0xB3B2B1B0, etc...)
+//!      - all functions using prefix "p32_XxX" or "p64_XxX"
 //!
 //! Data-type width is always described by the function prefix or type definition:
 //!
@@ -113,7 +116,7 @@
 #endif // FOG_DOXYGEN
 
 // ============================================================================
-// [Fog-Core Include Files]
+// [Fog-Face Include Files]
 // ============================================================================
 
 #include <Fog/Face/Features.h>

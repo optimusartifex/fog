@@ -208,7 +208,7 @@ struct FOG_HIDDEN Scanline8
 
     sysuint_t w = (uint)(x2 - x1);
     do {
-      _maskCurrent[0] = Face::u32MulDiv255(mskA[0], mskB);
+      _maskCurrent[0] = Face::b32_1x1MulDiv255(mskA[0], mskB);
       _maskCurrent++;
       mskA++;
     } while (--w);

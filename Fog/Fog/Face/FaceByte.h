@@ -1,4 +1,4 @@
-// [Fog-Face Library - Private API]
+// [Fog-Face Library - Public API]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -85,13 +85,13 @@ static const b64_1x4 B64_1x4_MASK_PLUS_ONE = FOG_UINT64_C(0x1000010010000100);
 //! @brief Result = x + y
 //!
 //! @note Result is not saturated.
-static FOG_INLINE uint32_t u32Add(b32_1x1 x, b32_1x1 y)
+static FOG_INLINE uint32_t b32_1x1Add(b32_1x1 x, b32_1x1 y)
 {
   return x + y;
 }
 
 //! @brief Result = min(x + y, 255)
-static FOG_INLINE uint32_t u32Addus(b32_1x1 x, b32_1x1 y)
+static FOG_INLINE uint32_t b32_1x1Addus(b32_1x1 x, b32_1x1 y)
 {
   x += y;
 #if defined(FOG_FACE_HAS_CONDITIONAL_INSTRUCTIONS)
@@ -107,16 +107,24 @@ static FOG_INLINE uint32_t u32Addus(b32_1x1 x, b32_1x1 y)
 // [Fog::Face - U32 - Sub/Subus]
 // ============================================================================
 
-//! @brief Result = x - y
+//! @brief Subtract @a y from @a x and return the result. The @a y shouldn't be
+//! larger than @a x, because the result is not saturated.
 //!
-//! @note Result is not saturated.
-static FOG_INLINE uint32_t u32Sub(b32_1x1 x, b32_1x1 y)
+//! @verbatim
+//! Result = x - y
+//! @endverbatim
+static FOG_INLINE uint32_t b32_1x1Sub(b32_1x1 x, b32_1x1 y)
 {
   return x - y;
 }
 
-//! @brief Result = max(x - y, 0)
-static FOG_INLINE uint32_t u32Subus(b32_1x1 x, b32_1x1 y)
+//! @brief Subtract @a y from @a x using unsigned saturation and return the 
+//! result.
+//!
+//! @verbatim
+//! Result = max(x - y, 0)
+//! @endverbatim
+static FOG_INLINE uint32_t b32_1x1Subus(b32_1x1 x, b32_1x1 y)
 {
   x -= y;
 #if defined(FOG_FACE_HAS_CONDITIONAL_INSTRUCTIONS)
@@ -134,7 +142,7 @@ static FOG_INLINE uint32_t u32Subus(b32_1x1 x, b32_1x1 y)
 //! @brief Accurate division by 255. The result is equal to <code>(val / 255.0)</code>.
 //!
 //! @note This template is used for accurate alpha blending.
-static FOG_INLINE uint32_t u32Div255(uint32_t i)
+static FOG_INLINE uint32_t b32_1x1Div255(uint32_t i)
 {
   return ( (((uint32_t)i << 8U) + ((uint32_t)i + 256U)) >> 16U );
 }
@@ -142,7 +150,7 @@ static FOG_INLINE uint32_t u32Div255(uint32_t i)
 //! @brief Accurate division by 256. The result is equal to <code>(val / 256.0)</code>.
 //!
 //! @not This template is simply implemented as a right shift by 8-bits.
-static FOG_INLINE uint32_t u32Div256(uint32_t i)
+static FOG_INLINE uint32_t b32_1x1Div256(uint32_t i)
 {
   return (i >> 8);
 }
@@ -152,7 +160,7 @@ static FOG_INLINE uint32_t u32Div256(uint32_t i)
 // ============================================================================
 
 //! @brief Result = (x * a) / 255
-static FOG_INLINE b32_1x1 u32MulDiv255(b32_1x1 x, b32_1x1 a)
+static FOG_INLINE b32_1x1 b32_1x1MulDiv255(b32_1x1 x, b32_1x1 a)
 {
   x *= a;
   x = ((x + (x >> 8) + 0x80U) >> 8);
@@ -160,7 +168,7 @@ static FOG_INLINE b32_1x1 u32MulDiv255(b32_1x1 x, b32_1x1 a)
 }
 
 //! @brief Result = (x * a) / 256
-static FOG_INLINE uint32_t u32MulDiv256(b32_1x1 x, uint32_t a)
+static FOG_INLINE uint32_t b32_1x1MulDiv256(b32_1x1 x, uint32_t a)
 {
   return (x * a) >> 8;
 }
@@ -170,7 +178,7 @@ static FOG_INLINE uint32_t u32MulDiv256(b32_1x1 x, uint32_t a)
 // ============================================================================
 
 //! @brief Result = {(x * a) + (y * (255 - a))} / 255
-static FOG_INLINE uint32_t u32Lerp255(b32_1x1 x, b32_1x1 y, b32_1x1 a)
+static FOG_INLINE uint32_t b32_1x1Lerp255(b32_1x1 x, b32_1x1 y, b32_1x1 a)
 {
   x *= a;
   y *= a ^ 0xFFU;
@@ -180,7 +188,7 @@ static FOG_INLINE uint32_t u32Lerp255(b32_1x1 x, b32_1x1 y, b32_1x1 a)
 }
 
 //! @brief Result = {(x * a) + (y * (256 - a))} / 256
-static FOG_INLINE uint32_t u32Lerp256(b32_1x1 x, b32_1x1 y, uint32_t a)
+static FOG_INLINE uint32_t b32_1x1Lerp256(b32_1x1 x, b32_1x1 y, uint32_t a)
 {
   x *= a;
   y *= 256U - a;
@@ -192,13 +200,13 @@ static FOG_INLINE uint32_t u32Lerp256(b32_1x1 x, b32_1x1 y, uint32_t a)
 // ============================================================================
 
 //! @brief Result = 255 - x
-static FOG_INLINE uint32_t u32Negate255(b32_1x1 x)
+static FOG_INLINE uint32_t b32_1x1Negate255(b32_1x1 x)
 {
   return x ^ 0xFFU;
 }
 
 //! @brief Result = 256 - x
-static FOG_INLINE uint32_t u32Negate256(uint32_t x)
+static FOG_INLINE uint32_t b32_1x1Negate256(uint32_t x)
 {
   return 256U - x;
 }
@@ -208,7 +216,7 @@ static FOG_INLINE uint32_t u32Negate256(uint32_t x)
 // ============================================================================
 
 //! @brief Result = x | (x << 8) | (x << 16) | (x << 24)
-static FOG_INLINE uint32_t u32Extend(b32_1x1 x)
+static FOG_INLINE uint32_t b32_1x1Extend(b32_1x1 x)
 {
 #if defined(FOG_FACE_HAS_FAST_MULTIPLY)
   return x * 0x01010101U;
@@ -311,12 +319,16 @@ static FOG_INLINE b32_1x1 b32_1x2GetB1(b32_1x2 a0) { return (a0 >> 16); }
 // [Fog::Face - B32_1x2 - Set]
 // ============================================================================
 
+//! @brief Set B0 BYTE in @a a0 to @a u and store the result to @a dst0.
+//! The B1 BYTE is not modified.
 static FOG_INLINE void b32_1x2SetB0(
   b32_1x2& dst0, b32_1x2 a0, b32_1x1 u)
 {
   dst0 = (a0 & 0x00FF0000U) | u;
 }
 
+//! @brief Set B1 BYTE in @a a0 to @a u and store the result to @a dst0.
+//! The B0 BYTE is not modified.
 static FOG_INLINE void b32_1x2SetB1(
   b32_1x2& dst0, b32_1x2 a0, b32_1x1 u)
 {
@@ -430,7 +442,8 @@ static FOG_INLINE void b32_2x2ExpandB1(
 // [Fog::Face - B32_1x2 - Saturate]
 // ============================================================================
 
-//! @brief
+//! @brief Saturate @a dst0. Can be used after two BYTEs were added and 
+//! resulting value might be larger than BYTE.
 //!
 //! @verbatim
 //! dst0 = min(dst0, 255)
@@ -443,7 +456,8 @@ static FOG_INLINE void b32_1x2Saturate(
   dst0 &= 0x00FF00FFU;
 }
 
-//! @brief
+//! @brief Saturate @a dst0/dst1. Can be used after two BYTEs were added
+//! and resulting value might be larger than BYTE.
 //!
 //! @verbatim
 //! dst0 = min(dst0, 255)
@@ -463,7 +477,7 @@ static FOG_INLINE void b32_2x2Saturate(
 // [Fog::Face - B32_1x2 - Add]
 // ============================================================================
 
-//! @brief
+//! @brief Add @a b0 to @a a0 and store the result to @a dst0.
 //!
 //! @verbatim
 //! dst0 = a0 + b0
@@ -474,7 +488,7 @@ static FOG_INLINE void b32_1x2AddB32_1x2(
   dst0 = a0 + b0;
 }
 
-//! @brief
+//! @brief Add @a b0/b1 to @a a0/a1 and store the result to @a dst0/dst1.
 //!
 //! @verbatim
 //! dst0 = a0 + b0
@@ -488,7 +502,7 @@ static FOG_INLINE void b32_2x2AddB32_2x2(
   dst1 = a1 + b1;
 }
 
-//! @brief
+//! @brief Add @a u to @a a0 and store the result to @a dst0.
 //!
 //! @verbatim
 //! dst0 = a0 + u
@@ -500,7 +514,7 @@ static FOG_INLINE void b32_1x2AddU(
   dst0 = a0 + u;
 }
 
-//! @brief
+//! @brief Add @a u to @a a0/a1 and store the result to @a dst0/dst1.
 //!
 //! @verbatim
 //! dst0 = a0 + u
@@ -515,7 +529,7 @@ static FOG_INLINE void b32_2x2AddU(
   dst1 = a1 + u;
 }
 
-//! @brief
+//! @brief Add @a b0 to @a a0, saturate and store the result to @a dst0.
 //!
 //! @verbatim
 //! dst0 = min(a0 + b0, 255)
@@ -527,7 +541,8 @@ static FOG_INLINE void b32_1x2AddusB32_1x2(
   b32_1x2Saturate(dst0);
 }
 
-//! @brief
+//! @brief Add @a b0/b1 to @a a0/a1, saturate and store the result to 
+//! @a dst0/dst1.
 //!
 //! @verbatim
 //! dst0 = min(a0 + b0, 255)
@@ -542,7 +557,7 @@ static FOG_INLINE void b32_2x2AddusB32_2x2(
   b32_2x2Saturate(dst0, dst1);
 }
 
-//! @brief
+//! @brief Add @a u to @a a0, saturate and store the result to @a dst0.
 //!
 //! @verbatim
 //! dst0 = min(a0 + u, 255)
@@ -555,7 +570,8 @@ static FOG_INLINE void b32_1x2AddusU(
   b32_1x2Saturate(dst0);
 }
 
-//! @brief
+//! @brief Add @a u to @a a0/a1, saturate and store the result to 
+//! @a dst0/dst1.
 //!
 //! @verbatim
 //! dst0 = min(a0 + u, 255)

@@ -30,7 +30,7 @@ struct FOG_HIDDEN CompositeSubtractC : public CompositeBaseFuncsC32<CompositeSub
     uint32_t ba = Face::b32_1x2GetB1(b1);
 
     Face::b32_2x2SubusB32_2x2(dst0, a0, b0, dst1, a1, b1);
-    Face::b32_1x2SetB1(dst1, dst1, (aa + ba - Face::u32MulDiv255(aa, ba)));
+    Face::b32_1x2SetB1(dst1, dst1, (aa + ba - Face::b32_1x1MulDiv255(aa, ba)));
   }
 
   static FOG_INLINE void prgb32_op_xrgb32_32b(

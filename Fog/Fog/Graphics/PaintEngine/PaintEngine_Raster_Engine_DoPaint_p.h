@@ -620,7 +620,7 @@ NAME##_Again: \
                 { \
                   uint32_t msk0 = curSpan->getCMask(); \
                   if (USE_ALPHA) \
-                    msk0 = Face::u32MulDiv255(msk0, ALPHA); \
+                    msk0 = Face::b32_1x1MulDiv255(msk0, ALPHA); \
                   SCANLINE.addCSpan(x1, x2, msk0); \
                 } \
                 else \
@@ -1499,7 +1499,7 @@ NAME##_end: \
           { \
             uint32_t msk0 = curSpan->getCMask(); \
             if (USE_ALPHA) \
-              msk0 = Face::u32MulDiv255(msk0, ALPHA); \
+              msk0 = Face::b32_1x1MulDiv255(msk0, ALPHA); \
             SCANLINE.addCSpan(x1, x2, msk0); \
           } \
           else \

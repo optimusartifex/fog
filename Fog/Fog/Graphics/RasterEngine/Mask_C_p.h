@@ -106,7 +106,7 @@ struct FOG_HIDDEN MaskIntersectC
       C_LOOP_8x4_INIT()
 
       C_LOOP_8x4_SMALL_BEGIN(bltOp)
-        dst[0] = (uint8_t)Face::u32MulDiv255(READ_8(a), b0);
+        dst[0] = (uint8_t)Face::b32_1x1MulDiv255(READ_8(a), b0);
 
         dst += 1;
         a += 1;
@@ -135,7 +135,7 @@ struct FOG_HIDDEN MaskIntersectC
     C_LOOP_8x4_INIT()
 
     C_LOOP_8x4_SMALL_BEGIN(bltOp)
-      dst[0] = (uint8_t)Face::u32MulDiv255(READ_8(a), READ_8(b));
+      dst[0] = (uint8_t)Face::b32_1x1MulDiv255(READ_8(a), READ_8(b));
 
       dst += 1;
       a += 1;

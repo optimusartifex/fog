@@ -841,7 +841,7 @@ cMaskOpaqueSkip4:
         uint32_t msk0;
         if (RasterUtil::isAlpha0x00_ARGB32(src0)) goto cMaskAlphaSkip1;
 
-        msk0 = Face::u32MulDiv255(src0 >> 24, msk0);
+        msk0 = Face::b32_1x1MulDiv255(src0 >> 24, msk0);
 
         sse2_load4(dst0xmm, dst);
         sse2_unpack_1x1W(src0xmm, src0);
@@ -908,7 +908,7 @@ cMaskAlphaSkip4:
         if (RasterUtil::isAlpha0x00_ARGB32(src0)) goto vMaskAlphaSkip1;
 
         sse2_load4(dst0xmm, dst);
-        msk0 = Face::u32MulDiv255(src0 >> 24, READ_8(msk));
+        msk0 = Face::b32_1x1MulDiv255(src0 >> 24, READ_8(msk));
         sse2_unpack_1x1W(src0xmm, src0);
         sse2_unpack_1x1W(dst0xmm, dst0xmm);
 
@@ -1827,7 +1827,7 @@ cMaskOpaqueSkip4:
         sse2_load4(dst0xmm, dst);
         sse2_fill_alpha_1x1B(dst0xmm);
 
-        m0 = Face::u32MulDiv255(src0 >> 24, msk0);
+        m0 = Face::b32_1x1MulDiv255(src0 >> 24, msk0);
 
         sse2_unpack_1x1W(src0xmm, src0);
         sse2_unpack_1x1W(dst0xmm, dst0xmm);
@@ -1894,7 +1894,7 @@ cMaskAlphaSkip4:
         if (RasterUtil::isAlpha0x00_ARGB32(src0)) goto vMaskAlphaDenseSkip1;
 
         msk0 = READ_8(msk);
-        msk0 = Face::u32MulDiv255(src0 >> 24, msk0);
+        msk0 = Face::b32_1x1MulDiv255(src0 >> 24, msk0);
 
         sse2_load4(dst0xmm, dst);
         sse2_fill_alpha_1x1B(dst0xmm);
@@ -1969,7 +1969,7 @@ vMaskAlphaDenseSkip4:
         src0 = READ_32(src);
         if (RasterUtil::isAlpha0x00_ARGB32(src0)) goto vMaskAlphaSparseSkip1;
 
-        msk0 = Face::u32MulDiv255(src0 >> 24, msk0);
+        msk0 = Face::b32_1x1MulDiv255(src0 >> 24, msk0);
         src0xmm = _mm_cvtsi32_si128(src0);
         if (msk0 == 0xFF) goto vMaskAlphaSparseFill1;
 

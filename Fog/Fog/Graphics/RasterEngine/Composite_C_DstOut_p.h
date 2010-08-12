@@ -76,7 +76,7 @@ struct FOG_HIDDEN CompositeDstOutC : public CompositeBaseFuncsC32<CompositeDstOu
       if (srca == 0xFF) goto cMaskOpaqueFill;
 
       dst0 = READ_32(dst);
-      dst0 = ByteSIMD::p32MulDiv255U(dst0, ByteSIMD::u32Negate255(srca));
+      dst0 = ByteSIMD::p32_1x4MulDiv255U32(dst0, ByteSIMD::u32Negate255(srca));
 
 cMaskOpaqueFill:
       ((uint32_t*)dst)[0] = dst0;
@@ -108,7 +108,7 @@ cMaskOpaqueSkip:
         if (srca == 0xFF) goto cMaskOpaqueFill;
 
         dst0 = READ_32(dst);
-        dst0 = ByteSIMD::p32MulDiv255U(dst0, ByteSIMD::u32Negate255(srca));
+        dst0 = ByteSIMD::p32_1x4MulDiv255U32(dst0, ByteSIMD::u32Negate255(srca));
 
 cMaskOpaqueFill:
         ((uint32_t*)dst)[0] = dst0;
@@ -131,7 +131,7 @@ cMaskOpaqueSkip:
         if (srca == 0x00) goto cMaskAlphaSkip;
 
         dst0 = READ_32(dst);
-        dst0 = ByteSIMD::p32MulDiv255U(dst0, ByteSIMD::u32Negate255(srca));
+        dst0 = ByteSIMD::p32_1x4MulDiv255U32(dst0, ByteSIMD::u32Negate255(srca));
 
         ((uint32_t*)dst)[0] = dst0;
 
@@ -153,7 +153,7 @@ cMaskAlphaSkip:
         if (srca == 0x00) goto vMaskAlphaDenseSkip;
 
         dst0 = READ_32(dst);
-        dst0 = ByteSIMD::p32MulDiv255U(dst0, ByteSIMD::u32Negate255(srca));
+        dst0 = ByteSIMD::p32_1x4MulDiv255U32(dst0, ByteSIMD::u32Negate255(srca));
 
         ((uint32_t*)dst)[0] = dst0;
 
@@ -179,7 +179,7 @@ vMaskAlphaDenseSkip:
         if (srca == 0x00) goto vMaskAlphaSparseSkip;
 
         dst0 = READ_32(dst);
-        dst0 = ByteSIMD::p32MulDiv255U(dst0, ByteSIMD::u32Negate255(srca));
+        dst0 = ByteSIMD::p32_1x4MulDiv255U32(dst0, ByteSIMD::u32Negate255(srca));
 
         ((uint32_t*)dst)[0] = dst0;
 
@@ -230,7 +230,7 @@ vMaskAlphaSparseSkip:
       if (srca == 0xFF) goto cMaskOpaqueFill;
 
       dst0 = READ_32(dst);
-      dst0 = ByteSIMD::p32MulDiv255U(dst0, ByteSIMD::u32Negate255(srca));
+      dst0 = ByteSIMD::p32_1x4MulDiv255U32(dst0, ByteSIMD::u32Negate255(srca));
 
 cMaskOpaqueFill:
       ((uint32_t*)dst)[0] = dst0;
@@ -262,7 +262,7 @@ cMaskOpaqueSkip:
         if (srca == 0xFF) goto cMaskOpaqueFill;
 
         dst0 = READ_32(dst);
-        dst0 = ByteSIMD::p32MulDiv255U(dst0, ByteSIMD::u32Negate255(srca));
+        dst0 = ByteSIMD::p32_1x4MulDiv255U32(dst0, ByteSIMD::u32Negate255(srca));
 
 cMaskOpaqueFill:
         ((uint32_t*)dst)[0] = dst0;
@@ -285,7 +285,7 @@ cMaskOpaqueSkip:
         if (srca == 0x00) goto cMaskAlphaSkip;
 
         dst0 = READ_32(dst);
-        dst0 = ByteSIMD::p32MulDiv255U(dst0, ByteSIMD::u32Negate255(srca));
+        dst0 = ByteSIMD::p32_1x4MulDiv255U32(dst0, ByteSIMD::u32Negate255(srca));
 
         ((uint32_t*)dst)[0] = dst0;
 
@@ -307,7 +307,7 @@ cMaskAlphaSkip:
         if (srca == 0x00) goto vMaskAlphaDenseSkip;
 
         dst0 = READ_32(dst);
-        dst0 = ByteSIMD::p32MulDiv255U(dst0, ByteSIMD::u32Negate255(srca));
+        dst0 = ByteSIMD::p32_1x4MulDiv255U32(dst0, ByteSIMD::u32Negate255(srca));
 
         ((uint32_t*)dst)[0] = dst0;
 
@@ -333,7 +333,7 @@ vMaskAlphaDenseSkip:
         if (srca == 0x00) goto vMaskAlphaSparseSkip;
 
         dst0 = READ_32(dst);
-        dst0 = ByteSIMD::p32MulDiv255U(dst0, ByteSIMD::u32Negate255(srca));
+        dst0 = ByteSIMD::p32_1x4MulDiv255U32(dst0, ByteSIMD::u32Negate255(srca));
 
         ((uint32_t*)dst)[0] = dst0;
 
@@ -384,7 +384,7 @@ vMaskAlphaSparseSkip:
       if (srca == 0xFF) goto cMaskOpaqueFill;
 
       dst0 = READ_32(dst);
-      dst0 = ByteSIMD::p32MulDiv255U(dst0, ByteSIMD::u32Negate255(srca)) | 0xFF000000;
+      dst0 = ByteSIMD::p32_1x3MulDiv255U32_FXXX(dst0, ByteSIMD::u32Negate255(srca));
 
 cMaskOpaqueFill:
       ((uint32_t*)dst)[0] = dst0;
@@ -416,7 +416,7 @@ cMaskOpaqueSkip:
         if (srca == 0xFF) goto cMaskOpaqueFill;
 
         dst0 = READ_32(dst);
-        dst0 = ByteSIMD::p32MulDiv255U(dst0, ByteSIMD::u32Negate255(srca)) | 0xFF000000;
+        dst0 = ByteSIMD::p32_1x3MulDiv255U32_FXXX(dst0, ByteSIMD::u32Negate255(srca));
 
 cMaskOpaqueFill:
         ((uint32_t*)dst)[0] = dst0;
@@ -439,7 +439,7 @@ cMaskOpaqueSkip:
         if (srca == 0x00) goto cMaskAlphaSkip;
 
         dst0 = READ_32(dst);
-        dst0 = ByteSIMD::p32MulDiv255U(dst0, ByteSIMD::u32Negate255(srca)) | 0xFF000000;
+        dst0 = ByteSIMD::p32_1x3MulDiv255U32_FXXX(dst0, ByteSIMD::u32Negate255(srca));
 
         ((uint32_t*)dst)[0] = dst0;
 
@@ -461,7 +461,7 @@ cMaskAlphaSkip:
         if (srca == 0x00) goto vMaskAlphaDenseSkip;
 
         dst0 = READ_32(dst);
-        dst0 = ByteSIMD::p32MulDiv255U(dst0, ByteSIMD::u32Negate255(srca)) | 0xFF000000;
+        dst0 = ByteSIMD::p32_1x3MulDiv255U32_FXXX(dst0, ByteSIMD::u32Negate255(srca));
 
         ((uint32_t*)dst)[0] = dst0;
 
@@ -487,7 +487,7 @@ vMaskAlphaDenseSkip:
         if (srca == 0x00) goto vMaskAlphaSparseSkip;
 
         dst0 = READ_32(dst);
-        dst0 = ByteSIMD::p32MulDiv255U(dst0, ByteSIMD::u32Negate255(srca)) | 0xFF000000;
+        dst0 = ByteSIMD::p32_1x3MulDiv255U32_FXXX(dst0, ByteSIMD::u32Negate255(srca));
 
         ((uint32_t*)dst)[0] = dst0;
 
@@ -538,7 +538,7 @@ vMaskAlphaSparseSkip:
       if (srca == 0xFF) goto cMaskOpaqueFill;
 
       dst0 = READ_32(dst);
-      dst0 = ByteSIMD::p32MulDiv255U(dst0, ByteSIMD::u32Negate255(srca)) | 0xFF000000;
+      dst0 = ByteSIMD::p32_1x3MulDiv255U32_FXXX(dst0, ByteSIMD::u32Negate255(srca));
 
 cMaskOpaqueFill:
       ((uint32_t*)dst)[0] = dst0;
@@ -570,7 +570,7 @@ cMaskOpaqueSkip:
         if (srca == 0xFF) goto cMaskOpaqueFill;
 
         dst0 = READ_32(dst);
-        dst0 = ByteSIMD::p32MulDiv255U(dst0, ByteSIMD::u32Negate255(srca)) | 0xFF000000;
+        dst0 = ByteSIMD::p32_1x3MulDiv255U32_FXXX(dst0, ByteSIMD::u32Negate255(srca));
 
 cMaskOpaqueFill:
         ((uint32_t*)dst)[0] = dst0;
@@ -593,7 +593,7 @@ cMaskOpaqueSkip:
         if (srca == 0x00) goto cMaskAlphaSkip;
 
         dst0 = READ_32(dst);
-        dst0 = ByteSIMD::p32MulDiv255U(dst0, ByteSIMD::u32Negate255(srca)) | 0xFF000000;
+        dst0 = ByteSIMD::p32_1x3MulDiv255U32_FXXX(dst0, ByteSIMD::u32Negate255(srca));
 
         ((uint32_t*)dst)[0] = dst0;
 
@@ -615,7 +615,7 @@ cMaskAlphaSkip:
         if (srca == 0x00) goto vMaskAlphaDenseSkip;
 
         dst0 = READ_32(dst);
-        dst0 = ByteSIMD::p32MulDiv255U(dst0, ByteSIMD::u32Negate255(srca)) | 0xFF000000;
+        dst0 = ByteSIMD::p32_1x3MulDiv255U32_FXXX(dst0, ByteSIMD::u32Negate255(srca));
 
         ((uint32_t*)dst)[0] = dst0;
 
@@ -641,7 +641,7 @@ vMaskAlphaDenseSkip:
         if (srca == 0x00) goto vMaskAlphaSparseSkip;
 
         dst0 = READ_32(dst);
-        dst0 = ByteSIMD::p32MulDiv255U(dst0, ByteSIMD::u32Negate255(srca)) | 0xFF000000;
+        dst0 = ByteSIMD::p32_1x3MulDiv255U32_FXXX(dst0, ByteSIMD::u32Negate255(srca));
 
         ((uint32_t*)dst)[0] = dst0;
 

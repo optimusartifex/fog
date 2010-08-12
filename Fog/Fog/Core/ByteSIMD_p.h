@@ -119,32 +119,32 @@ typedef uint64_t b64_1x4;
 // ============================================================================
 
 //! @brief Scalar half-BYTE value stored in 32-bit integer.
-static const b32_1x1 BYTE1x1HALF = 0x00000080U;
+static const b32_1x1 B32_1x1_HALF = 0x00000080U;
 //! @brief Scalar full-BYTE mask stored in 32-bit integer.
-static const b32_1x1 BYTE1x1MASK = 0x000000FFU;
+static const b32_1x1 B32_1x1_MASK = 0x000000FFU;
 //! @brief Scalar full-BYTE mask+1 stored in 32-bit integer.
-static const b32_1x1 BYTE1x1MASK_PLUS_ONE = 0x00000100U;
+static const b32_1x1 B32_1x1_MASK_PLUS_ONE = 0x00000100U;
 
 //! @brief Packed two half-BYTE values stored in 32-bit integer.
-static const b32_1x2 BYTE1x2HALF = 0x00800080U;
+static const b32_1x2 B32_1x2_HALF = 0x00800080U;
 //! @brief Packed two full-BYTE masks stored in 32-bit integer.
-static const b32_1x2 BYTE1x2MASK = 0x00FF00FFU;
+static const b32_1x2 B32_1x2_MASK = 0x00FF00FFU;
 //! @brief Packed two full-BYTE masks+1 stored in 32-bit integer.
-static const b32_1x2 BYTE1x2MASK_PLUS_ONE = 0x10000100U;
+static const b32_1x2 B32_1x2_MASK_PLUS_ONE = 0x10000100U;
 
 //! @brief Packed three half-BYTE values stored in 64-bit integer.
-static const b64_1x3 BYTE_1x3HALF = FOG_UINT64_C(0x0000008000800080);
+static const b64_1x3 B64_1x3_HALF = FOG_UINT64_C(0x0000008000800080);
 //! @brief Packed three half-BYTE masks stored in 64-bit integer.
-static const b64_1x3 BYTE_1x3MASK = FOG_UINT64_C(0x000000FF00FF00FF);
+static const b64_1x3 B64_1x3_MASK = FOG_UINT64_C(0x000000FF00FF00FF);
 //! @brief Packed three half-BYTE masks+1 stored in 64-bit integer.
-static const b64_1x3 BYTE_1x3MASK_PLUS_ONE = FOG_UINT64_C(0x0000010010000100);
+static const b64_1x3 B64_1x3_MASK_PLUS_ONE = FOG_UINT64_C(0x0000010010000100);
 
 //! @brief Packed four half-BYTE values stored in 64-bit integer.
-static const b64_1x4 BYTE_1x4HALF = FOG_UINT64_C(0x0080008000800080);
+static const b64_1x4 B64_1x4_HALF = FOG_UINT64_C(0x0080008000800080);
 //! @brief Packed four half-BYTE masks stored in 64-bit integer.
-static const b64_1x4 BYTE_1x4MASK = FOG_UINT64_C(0x00FF00FF00FF00FF);
+static const b64_1x4 B64_1x4_MASK = FOG_UINT64_C(0x00FF00FF00FF00FF);
 //! @brief Packed four half-BYTE masks+1 stored in 64-bit integer.
-static const b64_1x4 BYTE_1x4MASK_PLUS_ONE = FOG_UINT64_C(0x1000010010000100);
+static const b64_1x4 B64_1x4_MASK_PLUS_ONE = FOG_UINT64_C(0x1000010010000100);
 
 // ============================================================================
 // [Fog::ByteSIMD - U32 - Add/Addus]
@@ -212,7 +212,7 @@ static FOG_INLINE uint32_t u32Div255(uint32_t i)
 //! @not This template is simply implemented as a right shift by 8-bits.
 static FOG_INLINE uint32_t u32Div256(uint32_t i)
 {
-  return (i >> 8U);
+  return (i >> 8);
 }
 
 // ============================================================================
@@ -300,14 +300,14 @@ static FOG_INLINE void b32_2x2Pack0213(
 static FOG_INLINE void b32_2x2Unpack02(
   b32_1x2& dst0, uint32_t a0)
 {
-  dst0 = (a0 & BYTE1x2MASK);
+  dst0 = (a0 & B32_1x2_MASK);
 }
 
 //! @brief Unpack 1st and 3rd BYTE of single DWORD into one b32_1x2 value.
 static FOG_INLINE void b32_2x2Unpack13(
   b32_1x2& dst0, uint32_t a0)
 {
-  dst0 = (a0 >> 8) & BYTE1x2MASK;
+  dst0 = (a0 >> 8) & B32_1x2_MASK;
 }
 
 //! @brief Unpack all bytes of DWORD into two b32_1x2 values.
@@ -317,8 +317,8 @@ static FOG_INLINE void b32_2x2Unpack0213(
 {
   dst0 = a0;
   dst1 = a0 >> 8;
-  dst0 &= BYTE1x2MASK;
-  dst1 &= BYTE1x2MASK;
+  dst0 &= B32_1x2_MASK;
+  dst1 &= B32_1x2_MASK;
 }
 
 //! @brief Unpack '021' bytes of DWORD into two b32_1x2 values.
@@ -328,8 +328,8 @@ static FOG_INLINE void b32_2x2Unpack021X(
 {
   dst0 = a0;
   dst1 = a0 >> 8;
-  dst0 &= BYTE1x2MASK;
-  dst1 &= BYTE1x1MASK;
+  dst0 &= B32_1x2_MASK;
+  dst1 &= B32_1x1_MASK;
 }
 
 // ============================================================================
@@ -392,7 +392,8 @@ static FOG_INLINE void b32_1x2SetB1(
 //! @brief Copy @a a0 to @a dst0.
 //!
 //! @verbatim
-//! dst0 = a0;
+//! dst0 = a0
+//! @endverbatim
 static FOG_INLINE void b32_1x2Copy(
   b32_1x2& dst0, b32_1x2 a0)
 {
@@ -496,7 +497,7 @@ static FOG_INLINE void b32_2x2ExpandB1(
 static FOG_INLINE void b32_1x2Saturate(
   b32_1x2& dst0)
 {
-  dst0 |= BYTE1x2MASK_PLUS_ONE - ((dst0 >> 8) & BYTE1x2MASK);
+  dst0 |= B32_1x2_MASK_PLUS_ONE - ((dst0 >> 8) & B32_1x2_MASK);
 
   dst0 &= 0x00FF00FFU;
 }
@@ -510,8 +511,8 @@ static FOG_INLINE void b32_1x2Saturate(
 static FOG_INLINE void b32_2x2Saturate(
   b32_1x2& dst0, b32_1x2& dst1)
 {
-  dst0 |= BYTE1x2MASK_PLUS_ONE - ((dst0 >> 8) & BYTE1x2MASK);
-  dst1 |= BYTE1x2MASK_PLUS_ONE - ((dst1 >> 8) & BYTE1x2MASK);
+  dst0 |= B32_1x2_MASK_PLUS_ONE - ((dst0 >> 8) & B32_1x2_MASK);
+  dst1 |= B32_1x2_MASK_PLUS_ONE - ((dst1 >> 8) & B32_1x2_MASK);
 
   dst0 &= 0x00FF00FFU;
   dst1 &= 0x00FF00FFU;
@@ -695,9 +696,9 @@ static FOG_INLINE void b32_2x2SubU(
 static FOG_INLINE void b32_1x2SubusB32_1x2(
   b32_1x2& dst0, b32_1x2 a0, b32_1x2 b0)
 {
-  dst0 = (a0 ^ BYTE1x2MASK) + b0;
+  dst0 = (a0 ^ B32_1x2_MASK) + b0;
   b32_1x2Saturate(dst0);
-  dst0 ^= BYTE1x2MASK;
+  dst0 ^= B32_1x2_MASK;
 }
 
 //! @brief Subtract with unsigned saturation @a b0/b1 from @a a0/a1 and 
@@ -711,11 +712,11 @@ static FOG_INLINE void b32_2x2SubusB32_2x2(
   b32_1x2& dst0, b32_1x2 a0, b32_1x2 b0,
   b32_1x2& dst1, b32_1x2 a1, b32_1x2 b1)
 {
-  dst0 = (a0 ^ BYTE1x2MASK) + b0;
-  dst1 = (a1 ^ BYTE1x2MASK) + b1;
+  dst0 = (a0 ^ B32_1x2_MASK) + b0;
+  dst1 = (a1 ^ B32_1x2_MASK) + b1;
   b32_2x2Saturate(dst0, dst1);
-  dst0 ^= BYTE1x2MASK;
-  dst1 ^= BYTE1x2MASK;
+  dst0 ^= B32_1x2_MASK;
+  dst1 ^= B32_1x2_MASK;
 }
 
 //! @brief Subtract with unsigned saturation extended @a u from @a a0 and 
@@ -728,9 +729,9 @@ static FOG_INLINE void b32_1x2SubusU(
   b32_1x2& dst0, b32_1x2 a0, uint32_t u)
 {
   b32_1x2ExtendB0(u, u);
-  dst0 = (a0 ^ BYTE1x2MASK) + u;
+  dst0 = (a0 ^ B32_1x2_MASK) + u;
   b32_1x2Saturate(dst0);
-  dst0 ^= BYTE1x2MASK;
+  dst0 ^= B32_1x2_MASK;
 }
 
 //! @brief Subtract with unsigned saturation extended @a u from @a a0/a1 and 
@@ -745,11 +746,11 @@ static FOG_INLINE void b32_2x2SubusU(
   b32_1x2& dst1, b32_1x2 a1, uint32_t u)
 {
   b32_1x2ExtendB0(u, u);
-  dst0 = (a0 ^ BYTE1x2MASK) + u;
-  dst1 = (a1 ^ BYTE1x2MASK) + u;
+  dst0 = (a0 ^ B32_1x2_MASK) + u;
+  dst1 = (a1 ^ B32_1x2_MASK) + u;
   b32_2x2Saturate(dst0, dst1);
-  dst0 ^= BYTE1x2MASK;
-  dst1 ^= BYTE1x2MASK;
+  dst0 ^= B32_1x2_MASK;
+  dst1 ^= B32_1x2_MASK;
 }
 
 // ============================================================================
@@ -864,7 +865,7 @@ static FOG_INLINE void b32_2x2MulU(
 static FOG_INLINE void b32_1x2MulDiv255U(
   b32_1x2& dst0, b32_1x2 a0, uint32_t u)
 {
-  dst0 = a0 * u; dst0 = ((dst0 + ((dst0 >> 8) & BYTE1x2MASK) + BYTE1x2HALF) >> 8) & BYTE1x2MASK;
+  dst0 = a0 * u; dst0 = ((dst0 + ((dst0 >> 8) & B32_1x2_MASK) + B32_1x2_HALF) >> 8) & B32_1x2_MASK;
 }
 
 //! @brief Multiply @a a0/a1 with @a u, divide by 255 and store the result
@@ -878,8 +879,8 @@ static FOG_INLINE void b32_2x2MulDiv255U(
   b32_1x2& dst0, b32_1x2 a0,
   b32_1x2& dst1, b32_1x2 a1, uint32_t u)
 {
-  dst0 = a0 * u; dst0 = ((dst0 + ((dst0 >> 8) & BYTE1x2MASK) + BYTE1x2HALF) >> 8) & BYTE1x2MASK;
-  dst1 = a1 * u; dst1 = ((dst1 + ((dst1 >> 8) & BYTE1x2MASK) + BYTE1x2HALF) >> 8) & BYTE1x2MASK;
+  dst0 = a0 * u; dst0 = ((dst0 + ((dst0 >> 8) & B32_1x2_MASK) + B32_1x2_HALF) >> 8) & B32_1x2_MASK;
+  dst1 = a1 * u; dst1 = ((dst1 + ((dst1 >> 8) & B32_1x2_MASK) + B32_1x2_HALF) >> 8) & B32_1x2_MASK;
 }
 
 //! @brief Multiply @a a0/a1 with @a u0/u1, divide by 255 and store the result 
@@ -893,8 +894,8 @@ static FOG_INLINE void b32_2x2MulDiv255U(
   b32_1x2& dst0, b32_1x2 a0, uint32_t u0,
   b32_1x2& dst1, b32_1x2 a1, uint32_t u1)
 {
-  dst0 = a0 * u0; dst0 = ((dst0 + ((dst0 >> 8) & BYTE1x2MASK) + BYTE1x2HALF) >> 8) & BYTE1x2MASK;
-  dst1 = a1 * u1; dst1 = ((dst1 + ((dst1 >> 8) & BYTE1x2MASK) + BYTE1x2HALF) >> 8) & BYTE1x2MASK;
+  dst0 = a0 * u0; dst0 = ((dst0 + ((dst0 >> 8) & B32_1x2_MASK) + B32_1x2_HALF) >> 8) & B32_1x2_MASK;
+  dst1 = a1 * u1; dst1 = ((dst1 + ((dst1 >> 8) & B32_1x2_MASK) + B32_1x2_HALF) >> 8) & B32_1x2_MASK;
 }
 
 //! @brief Multiply @a a0/a1 with @a u, divide by 255, pack and return as 
@@ -908,12 +909,12 @@ static FOG_INLINE uint32_t b32_2x2MulDiv255U_Pack0213(
   b32_1x2 a1, uint32_t u)
 {
   a0 *= u;
-  a0 = ((a0 + ((a0 >> 8) & BYTE1x2MASK) + BYTE1x2HALF) >> 8) & 0x00FF00FFU;
+  a0 = ((a0 + ((a0 >> 8) & B32_1x2_MASK) + B32_1x2_HALF) >> 8) & 0x00FF00FFU;
 
   a1 *= u;
-  a1 = ((a1 + ((a1 >> 8) & BYTE1x2MASK) + BYTE1x2HALF)     ) & 0xFF00FF00U;
+  a1 = ((a1 + ((a1 >> 8) & B32_1x2_MASK) + B32_1x2_HALF)     ) & 0xFF00FF00U;
 
-  return a0 | a1;
+  return a0 + a1;
 }
 
 //! @brief Multiply @a a0/a1 with @a u0/u1, divide by 255, pack and return as 
@@ -927,12 +928,12 @@ static FOG_INLINE uint32_t b32_2x2MulDiv255U_Pack0213(
   b32_1x2 a1, uint32_t u1)
 {
   a0 *= u0;
-  a0 = ((a0 + ((a0 >> 8) & BYTE1x2MASK) + BYTE1x2HALF) >> 8) & 0x00FF00FFU;
+  a0 = ((a0 + ((a0 >> 8) & B32_1x2_MASK) + B32_1x2_HALF) >> 8) & 0x00FF00FFU;
 
   a1 *= u1;
-  a1 = ((a1 + ((a1 >> 8) & BYTE1x2MASK) + BYTE1x2HALF)     ) & 0xFF00FF00U;
+  a1 = ((a1 + ((a1 >> 8) & B32_1x2_MASK) + B32_1x2_HALF)     ) & 0xFF00FF00U;
 
-  return a0 | a1;
+  return a0 + a1;
 }
 
 //! @brief Multiply @a a0 with @a b0, divide by 255, add @a c0 and store the 
@@ -975,7 +976,7 @@ static FOG_INLINE void b32_1x2MulDiv255B32_1x2(
   b32_1x2& dst0, b32_1x2 a0, b32_1x2 b0)
 {
   dst0 = ((a0 & 0x000000FFU) * (b0 & 0x000000FFU)) | ((a0 & 0x00FF0000U) * ((b0 & 0x00FF0000U) >> 16));
-  dst0 = ((dst0 + ((dst0 >> 8) & BYTE1x2MASK) + BYTE1x2HALF) >> 8) & BYTE1x2MASK;
+  dst0 = ((dst0 + ((dst0 >> 8) & B32_1x2_MASK) + B32_1x2_HALF) >> 8) & B32_1x2_MASK;
 }
 
 //! @brief Multiply @a a0/a1 with @a b0/b1, divide by 255 and store the result 
@@ -991,8 +992,8 @@ static FOG_INLINE void b32_2x2MulDiv255B32_2x2(
 {
   dst0 = ((a0 & 0x000000FFU) * (b0 & 0x000000FFU)) | ((a0 & 0x00FF0000U) * ((b0 & 0x00FF0000U) >> 16));
   dst1 = ((a1 & 0x000000FFU) * (b1 & 0x000000FFU)) | ((a1 & 0x00FF0000U) * ((b1 & 0x00FF0000U) >> 16));
-  dst0 = ((dst0 + ((dst0 >> 8) & BYTE1x2MASK) + BYTE1x2HALF) >> 8) & BYTE1x2MASK;
-  dst1 = ((dst1 + ((dst1 >> 8) & BYTE1x2MASK) + BYTE1x2HALF) >> 8) & BYTE1x2MASK;
+  dst0 = ((dst0 + ((dst0 >> 8) & B32_1x2_MASK) + B32_1x2_HALF) >> 8) & B32_1x2_MASK;
+  dst1 = ((dst1 + ((dst1 >> 8) & B32_1x2_MASK) + B32_1x2_HALF) >> 8) & B32_1x2_MASK;
 }
 
 //! @brief Multiply @a a0 with @a b0/b1, divide by 255, add @a c0 and store 
@@ -1061,7 +1062,7 @@ static FOG_INLINE void b32_2x2MulDiv255B32_2x2_AddusB32_2x2(
 static FOG_INLINE void b32_1x2MulDiv255U_2x_Add(
   b32_1x2& dst0, b32_1x2 a0, uint32_t b0, b32_1x2 c0, uint32_t d0)
 {
-  dst0 = a0 * b0 + c0 * d0; dst0 = ((dst0 + ((dst0 >> 8) & BYTE1x2MASK) + BYTE1x2HALF) >> 8) & BYTE1x2MASK;
+  dst0 = a0 * b0 + c0 * d0; dst0 = ((dst0 + ((dst0 >> 8) & B32_1x2_MASK) + B32_1x2_HALF) >> 8) & B32_1x2_MASK;
 }
 
 //! @brief Multiply @a a0/a1 with @a b0/b1, @a c0/c1 with @a d0/d1, add, divide by 255 and 
@@ -1075,8 +1076,8 @@ static FOG_INLINE void b32_2x2MulDiv255U_2x_Add(
   b32_1x2& dst0, b32_1x2 a0, uint32_t b0, b32_1x2 c0, uint32_t d0,
   b32_1x2& dst1, b32_1x2 a1, uint32_t b1, b32_1x2 c1, uint32_t d1)
 {
-  dst0 = a0 * b0 + c0 * d0; dst0 = ((dst0 + ((dst0 >> 8) & BYTE1x2MASK) + BYTE1x2HALF) >> 8) & BYTE1x2MASK;
-  dst1 = a1 * b1 + c1 * d1; dst1 = ((dst1 + ((dst1 >> 8) & BYTE1x2MASK) + BYTE1x2HALF) >> 8) & BYTE1x2MASK;
+  dst0 = a0 * b0 + c0 * d0; dst0 = ((dst0 + ((dst0 >> 8) & B32_1x2_MASK) + B32_1x2_HALF) >> 8) & B32_1x2_MASK;
+  dst1 = a1 * b1 + c1 * d1; dst1 = ((dst1 + ((dst1 >> 8) & B32_1x2_MASK) + B32_1x2_HALF) >> 8) & B32_1x2_MASK;
 }
 
 //! @brief Multiply @a a0 with @a b0, @a c0 with @a d0, add using saturation, 
@@ -1120,7 +1121,7 @@ static FOG_INLINE void b32_2x2MulDiv255U_2x_Addus(
 static FOG_INLINE void b32_1x2MulDiv256U(
   b32_1x2& dst0, b32_1x2 a0, uint32_t u)
 {
-  dst0 = ((a0 * u) >> 8) & BYTE1x2MASK;
+  dst0 = ((a0 * u) >> 8) & B32_1x2_MASK;
 }
 
 //! @brief Multiply @a a0/a1 with @a u, divide by 256 and store the result to
@@ -1134,8 +1135,8 @@ static FOG_INLINE void b32_2x2MulDiv256U(
   b32_1x2& dst0, b32_1x2 a0,
   b32_1x2& dst1, b32_1x2 a1, uint32_t u)
 {
-  dst0 = ((a0 * u) >> 8) & BYTE1x2MASK;
-  dst0 = ((a1 * u) >> 8) & BYTE1x2MASK;
+  dst0 = ((a0 * u) >> 8) & B32_1x2_MASK;
+  dst0 = ((a1 * u) >> 8) & B32_1x2_MASK;
 }
 
 // ============================================================================
@@ -1226,7 +1227,7 @@ static FOG_INLINE void b32_2x2MinB32_2x2(
 //! @brief Take larger value from @a a0 and @a u and store it to @a dst0.
 //!
 //! @verbatim
-//! dst0 = max(a0, u);
+//! dst0 = max(a0, u)
 //! @endverbatim
 static FOG_INLINE void b32_1x2MaxU(
   b32_1x2& dst0, b32_1x2 a0, uint32_t u)
@@ -1257,7 +1258,7 @@ static FOG_INLINE void b32_2x2MaxU(
 //! @brief Take larger value from @a a0 and @a b0 and store it to @a dst0.
 //!
 //! @verbatim
-//! dst0 = max(a0, b0);
+//! dst0 = max(a0, b0)
 //! @endverbatim
 static FOG_INLINE void b32_1x2MaxB32_1x2(
   b32_1x2& dst0, b32_1x2 a0, b32_1x2 b0)
@@ -1424,8 +1425,8 @@ static FOG_INLINE void b32_2x2PremultiplyU(
 
   u <<= 16;
 
-  dst0 = ((dst0 + ((dst0 >> 8) & BYTE1x2MASK) + BYTE1x2HALF) >> 8) & BYTE1x2MASK;
-  dst1 = ((dst1 +  (dst1 >> 8)                + BYTE1x1HALF) >> 8);
+  dst0 = ((dst0 + ((dst0 >> 8) & B32_1x2_MASK) + B32_1x2_HALF) >> 8) & B32_1x2_MASK;
+  dst1 = ((dst1 +  (dst1 >> 8)                 + B32_1x1_HALF) >> 8);
   dst1 |= u;
 }
 
@@ -1454,8 +1455,8 @@ static FOG_INLINE void b32_2x2InterpolateU255(
   dst0 = dst0 + ((dst0 >> 8) & 0x00FF00FFU) + 0x00800080U;
   dst1 = dst1 + ((dst1 >> 8) & 0x00FF00FFU) + 0x00800080U;
 
-  dst0 &= BYTE1x2MASK;
-  dst1 &= BYTE1x2MASK;
+  dst0 &= B32_1x2_MASK;
+  dst1 &= B32_1x2_MASK;
 }
 
 static FOG_INLINE void b32_2x2InterpolateU256(
@@ -1468,8 +1469,8 @@ static FOG_INLINE void b32_2x2InterpolateU256(
   dst0 >>= 8;
   dst1 >>= 8;
 
-  dst0 &= BYTE1x2MASK;
-  dst1 &= BYTE1x2MASK;
+  dst0 &= B32_1x2_MASK;
+  dst1 &= B32_1x2_MASK;
 }
 
 static FOG_INLINE uint32_t b32_2x2InterpolateU255_Pack0213(
@@ -1485,7 +1486,7 @@ static FOG_INLINE uint32_t b32_2x2InterpolateU255_Pack0213(
   a0 &= 0x00FF00FFU;
   a1 &= 0xFF00FF00U;
 
-  return a0 | a1;
+  return a0 + a1;
 }
 
 static FOG_INLINE uint32_t b32_2x2InterpolateU256_Pack0213(
@@ -1500,7 +1501,7 @@ static FOG_INLINE uint32_t b32_2x2InterpolateU256_Pack0213(
   a0 &= 0x00FF00FFU;
   a1 &= 0xFF00FF00U;
 
-  return a0 | a1;
+  return a0 + a1;
 }
 
 // ============================================================================
@@ -1521,18 +1522,18 @@ static FOG_INLINE void b64_1x4Pack0213(uint32_t& dst0, b64_1x4 x0)
 static FOG_INLINE void b64_1x4Unpack0213(
   b64_1x4& dst0, uint32_t a0)
 {
-  dst0 = ((b64_1x4)a0 | ((b64_1x4)a0 << 24)) & BYTE_1x4MASK;
+  dst0 = ((b64_1x4)a0 | ((b64_1x4)a0 << 24)) & B64_1x4_MASK;
 }
 
 //! @brief Unpack '021' bytes of DWORD into one b64_1x4 value.
 static FOG_INLINE void b64_1x4Unpack021X(
   b64_1x4& dst0, uint32_t a0)
 {
-  dst0 = ((b64_1x4)a0 | ((b64_1x4)a0 << 24)) & BYTE_1x3MASK;
+  dst0 = ((b64_1x4)a0 | ((b64_1x4)a0 << 24)) & B64_1x3_MASK;
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - P32 - MulDiv255]
+// [Fog::ByteSIMD - P32_1x4 - MulDiv]
 // ============================================================================
 
 // NOTE: These functions are included here, because there are sometimes useful,
@@ -1541,49 +1542,51 @@ static FOG_INLINE void b64_1x4Unpack021X(
 // and you should consider to use pure b32_1x2 or b64_1x4 solution instead.
 
 // x_c' = (x_c * a) / 255
-static FOG_INLINE uint32_t p32MulDiv255U(uint32_t x, uint32_t a)
+static FOG_INLINE uint32_t p32_1x4MulDiv255U32(uint32_t x0, uint32_t a0)
 {
 #if FOG_ARCH_BITS == 64
   uint64_t x0 = ((uint64_t)x | ((uint64_t)x << 24)) & FOG_UINT64_C(0x00FF00FF00FF00FF);
-  x0 *= a;
+  x0 *= a0;
   x0 = (x0 + ((x0 >> 8) & FOG_UINT64_C(0x00FF00FF00FF00FF)) + FOG_UINT64_C(0x0080008000800080)) >> 8;
   x0 &= FOG_UINT64_C(0x00FF00FF00FF00FF);
-  return (uint32_t)(x0 | (x0 >> 24));
+  return (uint32_t)(x0 + (x0 >> 24));
 #else
-  uint32_t t0 = ((x & 0x00FF00FFU)     ) * a;
-  uint32_t t1 = ((x & 0xFF00FF00U) >> 8) * a;
+  uint32_t t0 = ((x0     ) & 0x00FF00FFU) * a0;
+  uint32_t t1 = ((x0 >> 8) & 0x00FF00FFU) * a0;
 
-  x  = ((t0 + ((t0 >> 8) & 0x00FF00FFU) + 0x00800080U) >> 8) & 0x00FF00FFU;
-  x |= ((t1 + ((t1 >> 8) & 0x00FF00FFU) + 0x00800080U)     ) & 0xFF00FF00U;
+  t0 = ((t0 + ((t0 >> 8) & 0x00FF00FFU) + 0x00800080U) & 0xFF00FF00U) >> 8;
+  t1 = ((t1 + ((t1 >> 8) & 0x00FF00FFU) + 0x00800080U) & 0xFF00FF00U);
 
-  return x;
+  return t0 + t1;
 #endif
 }
 
 // x_c' = (x_c * a) / 255
 // x_a' = 0x00
-static FOG_INLINE uint32_t p32MulDiv255U_0XXX(uint32_t x, uint32_t a)
+static FOG_INLINE uint32_t p32_1x3MulDiv255U32_ZXXX(
+  uint32_t x0, uint32_t a0)
 {
 #if FOG_ARCH_BITS == 64
   uint64_t x0 = ((uint64_t)x | ((uint64_t)x << 24)) & FOG_UINT64_C(0x000000FF00FF00FF);
-  x0 *= a;
+  x0 *= a0;
   x0 = (x0 + ((x0 >> 8) & FOG_UINT64_C(0x000000FF00FF00FF)) + FOG_UINT64_C(0x0000008000800080)) >> 8;
   x0 &= FOG_UINT64_C(0x000000FF00FF00FF);
   return (uint32_t)(x0 | (x0 >> 24));
 #else
-  uint32_t t0 = ((x & 0x00FF00FFU)     ) * a;
-  uint32_t t1 = ((x & 0x0000FF00U) >> 8) * a;
+  uint32_t t0 = ((x0     ) & 0x00FF00FFU) * a0;
+  uint32_t t1 = ((x0 >> 8) & 0x000000FFU) * a0;
 
-  x  = ((t0 + ((t0 >> 8) & 0x00FF00FFU) + 0x00800080U) >> 8) & 0x00FF00FFU;
-  x |= ((t1 + ((t1 >> 8) & 0x000000FFU) + 0x00000080U)     ) & 0x0000FF00U;
+  t0 = ((t0 + ((t0 >> 8) & 0x00FF00FFU) + 0x00800080U) & 0xFF00FF00U) >> 8;
+  t1 = ((t1 + ((t1 >> 8)              ) + 0x00000080U) & 0xFF00FF00U);
 
-  return x;
+  return t0 + t1;
 #endif
 }
 
 // x_c' = (x_c * a) / 255
 // x_a' = 0xFF
-static FOG_INLINE uint32_t p32MulDiv255U_FXXX(uint32_t x, uint32_t a)
+static FOG_INLINE uint32_t p32_1x3MulDiv255U32_FXXX(
+  uint32_t x0, uint32_t a0)
 {
 #if FOG_ARCH_BITS == 64
   uint64_t x0 = ((uint64_t)x | ((uint64_t)x << 24)) & FOG_UINT64_C(0x000000FF00FF00FF);
@@ -1592,27 +1595,89 @@ static FOG_INLINE uint32_t p32MulDiv255U_FXXX(uint32_t x, uint32_t a)
   x0 &= FOG_UINT64_C(0x00FF00FF00FF00FF);
   return (uint32_t)(x0 | (x0 >> 24));
 #else
-  uint32_t t0 = ((x & 0x00FF00FFU)     ) * a;
-  uint32_t t1 = ((x & 0x0000FF00U) >> 8) * a;
+  uint32_t t0 = ((x0     ) & 0x00FF00FFU) * a0;
+  uint32_t t1 = ((x0 >> 8) & 0x000000FFU) * a0;
 
-  x  = ((t0 + ((t0 >> 8) & 0x00FF00FFU) + 0x00800080U) >> 8) & 0x00FF00FFU;
-  x |= ((t1 + ((t1 >> 8) & 0x00FF00FFU) + 0xFF000080U)     ) & 0xFF00FF00U;
+  t0 = ((t0 + ((t0 >> 8) & 0x00FF00FFU) + 0x00800080U) & 0xFF00FF00U) >> 8;
+  t1 = ((t1 + ((t1 >> 8)              ) + 0xFF000080U) & 0xFF00FF00U);
 
-  return x;
+  return t0 + t1;
 #endif
 }
 
+static FOG_INLINE uint32_t p32_1x4MulDiv256U32(
+  uint32_t x0, uint32_t a0)
+{
+  uint32_t t0 = ((x0     ) & 0x00FF00FFU) * a0;
+  uint32_t t1 = ((x0 >> 8) & 0x00FF00FFU) * a0;
+
+  t0 = (t0 & 0xFF00FF00U) >> 8;
+  t1 = (t1 & 0xFF00FF00U);
+
+  return t0 + t1;
+}
+
+static FOG_INLINE uint32_t p32_1x3MulDiv256U32_ZXXX(
+  uint32_t x0, uint32_t a0)
+{
+  uint32_t t0 = (x0 & 0x00FF00FFU) * a0;
+  uint32_t t1 = (x0 & 0x0000FF00U) * a0;
+
+  t0 = (t0 & 0xFF00FF00U);
+  t1 = (t1 & 0x00FF0000U);
+
+  return (t0 + t1) >> 8;
+}
+
+static FOG_INLINE uint32_t p32_1x3MulDiv256U32_FXXX(
+  uint32_t x0, uint32_t a0)
+{
+  uint32_t t0 = (x0 & 0x00FF00FFU) * a0;
+  uint32_t t1 = (x0 & 0x0000FF00U) * a0;
+
+  t0 = (t0 & 0xFF00FF00U);
+  t1 = (t1 & 0x00FF0000U);
+
+  return ((t0 + t1) >> 8) | 0xFF000000;
+}
+
+static FOG_INLINE uint32_t p32_2x4MulDiv255U32_Add(
+  uint32_t x0, uint32_t a0,
+  uint32_t y0, uint32_t b0)
+{
+  uint32_t t0 = ((x0     ) & 0x00FF00FFU) * a0 + ((y0     ) & 0x00FF00FFU) * b0;
+  uint32_t t1 = ((x0 >> 8) & 0x00FF00FFU) * a0 + ((y0 >> 8) & 0x00FF00FFU) * b0;
+
+  t0 = ((t0 + ((t0 >> 8) & 0x00FF00FFU) + 0x00800080U) & 0xFF00FF00U) >> 8;
+  t1 = ((t1 + ((t1 >> 8) & 0x00FF00FFU) + 0x00800080U) & 0xFF00FF00U);
+
+  return t0 + t1;
+}
+
+static FOG_INLINE uint32_t p32_2x4MulDiv256U32_Add(
+  uint32_t x0, uint32_t a0,
+  uint32_t y0, uint32_t b0)
+{
+  uint32_t t0 = ((x0     ) & 0x00FF00FFU) * a0 + ((y0     ) & 0x00FF00FFU) * b0;
+  uint32_t t1 = ((x0 >> 8) & 0x00FF00FFU) * a0 + ((y0 >> 8) & 0x00FF00FFU) * b0;
+
+  t0 = (t0 & 0xFF00FF00U) >> 8;
+  t1 = (t1 & 0xFF00FF00U);
+
+  return t0 + t1;
+}
+
 // ============================================================================
-// [Fog::ByteSIMD - P32 - Add]
+// [Fog::ByteSIMD - P32_1x4 - Add]
 // ============================================================================
 
-static FOG_INLINE uint32_t p32AddP32(uint32_t x, uint32_t y)
+static FOG_INLINE uint32_t p32_1x4AddP32_1x4(uint32_t x, uint32_t y)
 {
   return x + y;
 }
 
 // x_c' = min(x_c + y_c, 255)
-static FOG_INLINE uint32_t p32AddusP32(uint32_t x, uint32_t y)
+static FOG_INLINE uint32_t p32_1x4AddusP32_1x4(uint32_t x, uint32_t y)
 {
 #if FOG_ARCH_BITS == 64
   uint64_t x0 = ((uint64_t)x | ((uint64_t)x << 24)) & FOG_UINT64_C(0x00FF00FF00FF00FF);
@@ -1624,24 +1689,24 @@ static FOG_INLINE uint32_t p32AddusP32(uint32_t x, uint32_t y)
 
   return (uint32_t)(x0 | (x0 >> 24));
 #else
-  uint32_t t0 = (x & 0x00FF00FFU);
-  uint32_t t1 = (x & 0xFF00FF00U) >> 8;
+  uint32_t t0 = (x     ) & 0x00FF00FFU;
+  uint32_t t1 = (x >> 8) & 0x00FF00FFU;
 
-  t0 += (y & 0x00FF00FFU);
-  t1 += (y & 0xFF00FF00U) >> 8;
+  t0 += (y     ) & 0x00FF00FFU;
+  t1 += (y >> 8) & 0x00FF00FFU;
 
   t0 |= 0x01000100U - ((t0 >> 8) & 0x00FF00FFU);
   t1 |= 0x01000100U - ((t1 >> 8) & 0x00FF00FFU);
 
-  t0 &= 0x00FF00FFU;
-  t1 &= 0x00FF00FFU;
+  t0 = (t0 & 0x00FF00FFU);
+  t1 = (t1 & 0x00FF00FFU) << 8;
 
-  return t0 | (t1 << 8);
+  return t0 + t1;
 #endif
 }
 
 // x_c' = (x_c * a) / 255 + y
-static FOG_INLINE uint32_t p32MulDiv255U_AddusP32(uint32_t x, uint32_t a, uint32_t y)
+static FOG_INLINE uint32_t p32_1x4MulDiv255U_AddusP32_1x4(uint32_t x, uint32_t a, uint32_t y)
 {
 #if FOG_ARCH_BITS == 64
   uint64_t x0 = ((uint64_t)x | ((uint64_t)x << 24)) & FOG_UINT64_C(0x00FF00FF00FF00FF);
@@ -1657,62 +1722,23 @@ static FOG_INLINE uint32_t p32MulDiv255U_AddusP32(uint32_t x, uint32_t a, uint32
 
   return (uint32_t)(x0 | (x0 >> 24));
 #else
-  uint32_t t0 = ((x & 0x00FF00FFU)     ) * a;
-  uint32_t t1 = ((x & 0xFF00FF00U) >> 8) * a;
+  uint32_t t0 = ((x     ) & 0x00FF00FFU) * a;
+  uint32_t t1 = ((x >> 8) & 0x00FF00FFU) * a;
 
   t0 = ((t0 + ((t0 >> 8) & 0x00FF00FFU) + 0x00800080U) >> 8) & 0x00FF00FFU;
   t1 = ((t1 + ((t1 >> 8) & 0x00FF00FFU) + 0x00800080U) >> 8) & 0x00FF00FFU;
 
-  t0 += (y & 0x00FF00FFU);
-  t1 += (y & 0xFF00FF00U) >> 8;
+  t0 += (y     ) & 0x00FF00FFU;
+  t1 += (y >> 8) & 0x00FF00FFU;
 
   t0 |= 0x01000100U - ((t0 >> 8) & 0x00FF00FFU);
   t1 |= 0x01000100U - ((t1 >> 8) & 0x00FF00FFU);
 
-  t0 &= 0x00FF00FFU;
-  t1 &= 0x00FF00FFU;
+  t0 = (t0 & 0x00FF00FFU);
+  t1 = (t1 & 0x00FF00FFU) << 8;
 
-  return t0 | (t1 << 8);
+  return t0 + t1;
 #endif
-}
-
-// ============================================================================
-// [Fog::ByteSIMD - P32 - MulDiv]
-// ============================================================================
-
-static FOG_INLINE uint32_t p32MulDiv255P32(
-  uint32_t x0, uint32_t a0)
-{
-  uint32_t t0 = ((x0 & 0x00FF00FFU)     ) * a0;
-  uint32_t t1 = ((x0 & 0xFF00FF00U) >> 8) * a0;
-
-  t0 = (t0 + ((t0 >> 8) & 0x00FF00FFU) + 0x00800080U);
-  t1 = (t1 + ((t1 >> 8) & 0x00FF00FFU) + 0x00800080U);
-
-  return ((t0 & 0xFF00FF00U) >> 8) + (t1 & 0xFF00FF00U);
-}
-
-static FOG_INLINE uint32_t p32_2x4MulDiv255U32_Add(
-  uint32_t x0, uint32_t a0,
-  uint32_t y0, uint32_t b0)
-{
-  uint32_t t0 = ((x0 & 0x00FF00FFU)     ) * a0 + ((y0 & 0x00FF00FFU)     ) * b0;
-  uint32_t t1 = ((x0 & 0xFF00FF00U) >> 8) * a0 + ((y0 & 0xFF00FF00U) >> 8) * b0;
-
-  t0 = (t0 + ((t0 >> 8) & 0x00FF00FFU) + 0x00800080U);
-  t1 = (t1 + ((t1 >> 8) & 0x00FF00FFU) + 0x00800080U);
-
-  return ((t0 & 0xFF00FF00U) >> 8) + (t1 & 0xFF00FF00U);
-}
-
-static FOG_INLINE uint32_t p32_2x4MulDiv256U32_Add(
-  uint32_t x0, uint32_t a0,
-  uint32_t y0, uint32_t b0)
-{
-  uint32_t t0 = ((x0 & 0x00FF00FFU)     ) * a0 + ((y0 & 0x00FF00FFU)     ) * b0;
-  uint32_t t1 = ((x0 & 0xFF00FF00U) >> 8) * a0 + ((y0 & 0xFF00FF00U) >> 8) * b0;
-
-  return ((t0 & 0xFF00FF00U) >> 8) + (t1 & 0xFF00FF00U);
 }
 
 //! @}

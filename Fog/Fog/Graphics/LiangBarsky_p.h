@@ -24,7 +24,7 @@ namespace Fog {
 
 //! @internal
 //!
-//! @brief Liang-Barsky clipping implementation, used by @c AnalyticRasterizer.
+//! @brief Liang-Barsky clipping implementation, used by @c AnalyticRasterizer8.
 struct FOG_HIDDEN LiangBarsky
 {
   //! @brief Clipped flags.

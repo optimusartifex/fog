@@ -371,7 +371,7 @@ struct FOG_HIDDEN RasterPaintCmdPath : public RasterPaintCmdDraw
   //! @brief Rasterizer (where path is rasterized by @c RasterPaintCalc).
   //!
   //! Rasterizer is set-up by calculation.
-  Static<AnalyticRasterizer> rasterizer;
+  Static<AnalyticRasterizer8> rasterizer;
 };
 
 //! @}

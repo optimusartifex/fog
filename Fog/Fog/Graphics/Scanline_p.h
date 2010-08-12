@@ -9,8 +9,8 @@
 
 // [Dependencies]
 #include <Fog/Core/Assert.h>
-#include <Fog/Core/ByteSIMD_p.h>
 #include <Fog/Core/MemoryAllocator_p.h>
+#include <Fog/Face/FaceByte.h>
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/Span_p.h>
 #include <Fog/Graphics/RasterUtil_p.h>
@@ -208,7 +208,7 @@ struct FOG_HIDDEN Scanline8
 
     sysuint_t w = (uint)(x2 - x1);
     do {
-      _maskCurrent[0] = ByteSIMD::u32MulDiv255(mskA[0], mskB);
+      _maskCurrent[0] = Face::u32MulDiv255(mskA[0], mskB);
       _maskCurrent++;
       mskA++;
     } while (--w);

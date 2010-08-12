@@ -106,7 +106,7 @@ struct FOG_HIDDEN MaskIntersectC
       C_LOOP_8x4_INIT()
 
       C_LOOP_8x4_SMALL_BEGIN(bltOp)
-        dst[0] = (uint8_t)ByteSIMD::u32MulDiv255(READ_8(a), b0);
+        dst[0] = (uint8_t)Face::u32MulDiv255(READ_8(a), b0);
 
         dst += 1;
         a += 1;
@@ -116,9 +116,9 @@ struct FOG_HIDDEN MaskIntersectC
         uint32_t a0;
         uint32_t a1;
 
-        ByteSIMD::b32_2x2Unpack0213(a0, a1, READ_32(a));
-        ByteSIMD::b32_2x2MulDiv255U(a0, a0, b0, a1, a1, b0);
-        ByteSIMD::b32_2x2Pack0213(a0, a0, a1);
+        Face::b32_2x2Unpack0213(a0, a1, READ_32(a));
+        Face::b32_2x2MulDiv255U(a0, a0, b0, a1, a1, b0);
+        Face::b32_2x2Pack0213(a0, a0, a1);
 
         ((uint32_t*)dst)[0] = a0;
 
@@ -135,7 +135,7 @@ struct FOG_HIDDEN MaskIntersectC
     C_LOOP_8x4_INIT()
 
     C_LOOP_8x4_SMALL_BEGIN(bltOp)
-      dst[0] = (uint8_t)ByteSIMD::u32MulDiv255(READ_8(a), READ_8(b));
+      dst[0] = (uint8_t)Face::u32MulDiv255(READ_8(a), READ_8(b));
 
       dst += 1;
       a += 1;
@@ -146,10 +146,10 @@ struct FOG_HIDDEN MaskIntersectC
       uint32_t a0, a1;
       uint32_t b0, b1;
 
-      ByteSIMD::b32_2x2Unpack0213(a0, a1, READ_32(a));
-      ByteSIMD::b32_2x2Unpack0213(b0, b1, READ_32(b));
-      ByteSIMD::b32_2x2MulDiv255B32_2x2(a0, a0, b0, a1, a1, b1);
-      ByteSIMD::b32_2x2Pack0213(a0, a0, a1);
+      Face::b32_2x2Unpack0213(a0, a1, READ_32(a));
+      Face::b32_2x2Unpack0213(b0, b1, READ_32(b));
+      Face::b32_2x2MulDiv255B32_2x2(a0, a0, b0, a1, a1, b1);
+      Face::b32_2x2Pack0213(a0, a0, a1);
 
       ((uint32_t*)dst)[0] = a0;
 

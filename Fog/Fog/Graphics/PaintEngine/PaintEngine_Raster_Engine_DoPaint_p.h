@@ -620,7 +620,7 @@ NAME##_Again: \
                 { \
                   uint32_t msk0 = curSpan->getCMask(); \
                   if (USE_ALPHA) \
-                    msk0 = ByteSIMD::u32MulDiv255(msk0, ALPHA); \
+                    msk0 = Face::u32MulDiv255(msk0, ALPHA); \
                   SCANLINE.addCSpan(x1, x2, msk0); \
                 } \
                 else \
@@ -1499,7 +1499,7 @@ NAME##_end: \
           { \
             uint32_t msk0 = curSpan->getCMask(); \
             if (USE_ALPHA) \
-              msk0 = ByteSIMD::u32MulDiv255(msk0, ALPHA); \
+              msk0 = Face::u32MulDiv255(msk0, ALPHA); \
             SCANLINE.addCSpan(x1, x2, msk0); \
           } \
           else \
@@ -1763,7 +1763,7 @@ void RasterPaintEngine::CTX_SYMBOL(_doPaintGlyphSet)(
 // ============================================================================
 
 void RasterPaintEngine::CTX_SYMBOL(_doPaintPath)(
-  RasterPaintContext* ctx, AnalyticRasterizer* ras)
+  RasterPaintContext* ctx, AnalyticRasterizer8* ras)
 {
   FOG_ASSERT(ctx->finalClipType != RASTER_CLIP_NULL);
 

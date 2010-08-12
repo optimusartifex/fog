@@ -26,7 +26,7 @@ namespace Fog {
 void RasterPaintCalcFillPath::run(RasterPaintContext* ctx)
 {
   RasterPaintCmdPath* cmd = reinterpret_cast<RasterPaintCmdPath*>(relatedTo);
-  AnalyticRasterizer* ras;
+  AnalyticRasterizer8* ras;
 
   cmd->rasterizer.init();
   ras = cmd->rasterizer.instancep();
@@ -72,7 +72,7 @@ void RasterPaintCalcFillPath::release(RasterPaintContext* ctx)
 void RasterPaintCalcStrokePath::run(RasterPaintContext* ctx)
 {
   RasterPaintCmdPath* cmd = reinterpret_cast<RasterPaintCmdPath*>(relatedTo);
-  AnalyticRasterizer* ras;
+  AnalyticRasterizer8* ras;
 
   cmd->rasterizer.init();
   ras = cmd->rasterizer.instancep();

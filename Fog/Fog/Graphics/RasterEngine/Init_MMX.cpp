@@ -33,9 +33,9 @@
 #include <Fog/Core/Intrin/IntrinSSE.h>
 #endif // FOG_RASTER_MMXSSE
 
-#include <Fog/Core/ByteSIMD_p.h>
 #include <Fog/Core/Math.h>
 #include <Fog/Core/Misc.h>
+#include <Fog/Face/FaceByte.h>
 #include <Fog/Graphics/Color.h>
 #include <Fog/Graphics/ColorAnalyzer_p.h>
 #include <Fog/Graphics/ColorLut.h>

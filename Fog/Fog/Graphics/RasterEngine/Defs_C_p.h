@@ -468,11 +468,11 @@ __group__##_end: \
 
 #define C_PATTERN_INTERPOLATE_32_2(DST, SRC0, WEIGHT0, SRC1, WEIGHT1) \
 { \
-  ByteSIMD::b64_1x4 pixT0; \
-  ByteSIMD::b64_1x4 pixT1; \
+  Face::b64_1x4 pixT0; \
+  Face::b64_1x4 pixT1; \
   \
-  ByteSIMD::b64_1x4Unpack0213(pixT0, (SRC0)); \
-  ByteSIMD::b64_1x4Unpack0213(pixT1, (SRC1)); \
+  Face::b64_1x4Unpack0213(pixT0, (SRC0)); \
+  Face::b64_1x4Unpack0213(pixT1, (SRC1)); \
   \
   pixT0 *= (uint)(WEIGHT0); \
   pixT1 *= (uint)(WEIGHT1); \
@@ -485,8 +485,8 @@ __group__##_end: \
 
 #define C_PATTERN_INTERPOLATE_32_2_WITH_ZERO(DST, SRC0, WEIGHT0) \
 { \
-  ByteSIMD::b64_1x4 pixT0; \
-  ByteSIMD::b64_1x4Unpack0213(pixT0, (SRC0)); \
+  Face::b64_1x4 pixT0; \
+  Face::b64_1x4Unpack0213(pixT0, (SRC0)); \
   pixT0 *= (uint)(WEIGHT0); \
   pixT0 &= FOG_UINT64_C(0xFF00FF00FF00FF00); \
   DST = (uint32_t)((pixT0 >> 8) | (pixT0 >> 32)); \
@@ -494,19 +494,19 @@ __group__##_end: \
 
 #define C_PATTERN_INTERPOLATE_32_4(DST, SRC0, WEIGHT0, SRC1, WEIGHT1, SRC2, WEIGHT2, SRC3, WEIGHT3) \
 { \
-  ByteSIMD::b64_1x4 pixT0; \
-  ByteSIMD::b64_1x4 pixT1; \
-  ByteSIMD::b64_1x4 pixT2; \
+  Face::b64_1x4 pixT0; \
+  Face::b64_1x4 pixT1; \
+  Face::b64_1x4 pixT2; \
   \
-  ByteSIMD::b64_1x4Unpack0213(pixT0, (SRC0)); \
-  ByteSIMD::b64_1x4Unpack0213(pixT1, (SRC1)); \
+  Face::b64_1x4Unpack0213(pixT0, (SRC0)); \
+  Face::b64_1x4Unpack0213(pixT1, (SRC1)); \
   \
   pixT0 *= (uint)(WEIGHT0); \
   pixT1 *= (uint)(WEIGHT1); \
   pixT0 += pixT1; \
   \
-  ByteSIMD::b64_1x4Unpack0213(pixT1, (SRC2)); \
-  ByteSIMD::b64_1x4Unpack0213(pixT2, (SRC3)); \
+  Face::b64_1x4Unpack0213(pixT1, (SRC2)); \
+  Face::b64_1x4Unpack0213(pixT2, (SRC3)); \
   \
   pixT1 *= (uint)(WEIGHT2); \
   pixT2 *= (uint)(WEIGHT3); \
@@ -522,13 +522,13 @@ __group__##_end: \
 
 #define C_PATTERN_INTERPOLATE_32_2(DST, SRC0, WEIGHT0, SRC1, WEIGHT1) \
 { \
-  ByteSIMD::b32_1x2 pixT0_0, pixT0_1; \
-  ByteSIMD::b32_1x2 pixT1_0, pixT1_1; \
+  Face::b32_1x2 pixT0_0, pixT0_1; \
+  Face::b32_1x2 pixT1_0, pixT1_1; \
   \
   uint __weight; \
   \
-  ByteSIMD::b32_2x2Unpack0213(pixT0_0, pixT0_1, (SRC0)); \
-  ByteSIMD::b32_2x2Unpack0213(pixT1_0, pixT1_1, (SRC1)); \
+  Face::b32_2x2Unpack0213(pixT0_0, pixT0_1, (SRC0)); \
+  Face::b32_2x2Unpack0213(pixT1_0, pixT1_1, (SRC1)); \
   \
   __weight = WEIGHT0; \
   pixT0_0 *= __weight; \
@@ -551,8 +551,8 @@ __group__##_end: \
 { \
   uint __weight; \
   \
-  ByteSIMD::b32_1x2 pixT0_0, pixT0_1; \
-  ByteSIMD::b32_2x2Unpack0213(pixT0_0, pixT0_1, (SRC0)); \
+  Face::b32_1x2 pixT0_0, pixT0_1; \
+  Face::b32_2x2Unpack0213(pixT0_0, pixT0_1, (SRC0)); \
   \
   __weight = WEIGHT0; \
   pixT0_0 *= __weight; \
@@ -566,13 +566,13 @@ __group__##_end: \
 
 #define C_PATTERN_INTERPOLATE_32_4(DST, SRC0, WEIGHT0, SRC1, WEIGHT1, SRC2, WEIGHT2, SRC3, WEIGHT3) \
 { \
-  ByteSIMD::b32_1x2 pixT0_0, pixT0_1; \
-  ByteSIMD::b32_1x2 pixT1_0, pixT1_1; \
+  Face::b32_1x2 pixT0_0, pixT0_1; \
+  Face::b32_1x2 pixT1_0, pixT1_1; \
   \
   uint __weight; \
   \
-  ByteSIMD::b32_2x2Unpack0213(pixT0_0, pixT0_1, (SRC0)); \
-  ByteSIMD::b32_2x2Unpack0213(pixT1_0, pixT1_1, (SRC1)); \
+  Face::b32_2x2Unpack0213(pixT0_0, pixT0_1, (SRC0)); \
+  Face::b32_2x2Unpack0213(pixT1_0, pixT1_1, (SRC1)); \
   \
   __weight = (WEIGHT0); \
   pixT0_0 *= __weight; \
@@ -585,7 +585,7 @@ __group__##_end: \
   pixT0_0 += pixT1_0; \
   pixT0_1 += pixT1_1; \
   \
-  ByteSIMD::b32_2x2Unpack0213(pixT1_0, pixT1_1, (SRC2)); \
+  Face::b32_2x2Unpack0213(pixT1_0, pixT1_1, (SRC2)); \
   \
   __weight = (WEIGHT2); \
   pixT1_0 *= __weight; \
@@ -594,7 +594,7 @@ __group__##_end: \
   pixT0_0 += pixT1_0; \
   pixT0_1 += pixT1_1; \
   \
-  ByteSIMD::b32_2x2Unpack0213(pixT1_0, pixT1_1, (SRC3)); \
+  Face::b32_2x2Unpack0213(pixT1_0, pixT1_1, (SRC3)); \
   \
   __weight = (WEIGHT3); \
   pixT1_0 *= __weight; \

@@ -566,8 +566,8 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   static void _doPaintGlyphSet_mt(RasterPaintContext* ctx, const IntPoint& pt, const GlyphSet& glyphSet, const IntBox& boundingBox);
 
   // Paint an output from rasterizer (rasterized path).
-  static void _doPaintPath_st(RasterPaintContext* ctx, AnalyticRasterizer* ras);
-  static void _doPaintPath_mt(RasterPaintContext* ctx, AnalyticRasterizer* ras);
+  static void _doPaintPath_st(RasterPaintContext* ctx, AnalyticRasterizer8* ras);
+  static void _doPaintPath_mt(RasterPaintContext* ctx, AnalyticRasterizer8* ras);
 
   // --------------------------------------------------------------------------
   // [Renderers - Clipping]
@@ -584,8 +584,8 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   static void _doMaskBoxes_mt(RasterPaintContext* ctx, const IntBox* box, sysuint_t count, uint32_t clipOp);
 
   // Combine rasterized path with clip-mask.
-  static void _doMaskPath_st(RasterPaintContext* ctx, AnalyticRasterizer* ras, uint32_t clipOp);
-  static void _doMaskPath_mt(RasterPaintContext* ctx, AnalyticRasterizer* ras, uint32_t clipOp);
+  static void _doMaskPath_st(RasterPaintContext* ctx, AnalyticRasterizer8* ras, uint32_t clipOp);
+  static void _doMaskPath_mt(RasterPaintContext* ctx, AnalyticRasterizer8* ras, uint32_t clipOp);
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -603,7 +603,7 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
 
   // If we are running in single-core environment it's better to use one
   // rasterizer for everythging.
-  AnalyticRasterizer rasterizer;
+  AnalyticRasterizer8 rasterizer;
 
   // Multithreading
   RasterWorkerManager* workerManager;

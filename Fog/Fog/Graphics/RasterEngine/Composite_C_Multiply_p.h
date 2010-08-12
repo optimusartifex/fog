@@ -23,53 +23,53 @@ struct FOG_HIDDEN CompositeMultiplyC : public CompositeBaseFuncsC32<CompositeMul
   enum { CHARACTERISTICS = OPERATOR_CHAR_MULTIPLY };
 
   static FOG_INLINE void prgb32_op_prgb32_32b(
-    ByteSIMD::b32_1x2& dst0, ByteSIMD::b32_1x2 a0, ByteSIMD::b32_1x2 b0,
-    ByteSIMD::b32_1x2& dst1, ByteSIMD::b32_1x2 a1, ByteSIMD::b32_1x2 b1)
+    Face::b32_1x2& dst0, Face::b32_1x2 a0, Face::b32_1x2 b0,
+    Face::b32_1x2& dst1, Face::b32_1x2 a1, Face::b32_1x2 b1)
   {
-    uint32_t aa = ByteSIMD::b32_1x2GetB1(a1);
-    uint32_t ba = ByteSIMD::b32_1x2GetB1(b1);
+    uint32_t aa = Face::b32_1x2GetB1(a1);
+    uint32_t ba = Face::b32_1x2GetB1(b1);
 
-    ByteSIMD::b32_2x2MulDiv255B32_2x2(dst0, a0, b0, dst1, a1, b1);
+    Face::b32_2x2MulDiv255B32_2x2(dst0, a0, b0, dst1, a1, b1);
 
-    ByteSIMD::b32_2x2MulDiv255U(a0, a0, a1, a1, ByteSIMD::u32Negate255(ba));
-    ByteSIMD::b32_2x2MulDiv255U(b0, b0, b1, b1, ByteSIMD::u32Negate255(aa));
+    Face::b32_2x2MulDiv255U(a0, a0, a1, a1, Face::u32Negate255(ba));
+    Face::b32_2x2MulDiv255U(b0, b0, b1, b1, Face::u32Negate255(aa));
 
-    ByteSIMD::b32_2x2AddB32_2x2(dst0, dst0, a0, dst1, dst1, a1);
-    ByteSIMD::b32_2x2AddusB32_2x2(dst0, dst0, b0, dst1, dst1, b1);
+    Face::b32_2x2AddB32_2x2(dst0, dst0, a0, dst1, dst1, a1);
+    Face::b32_2x2AddusB32_2x2(dst0, dst0, b0, dst1, dst1, b1);
   }
 
   static FOG_INLINE void prgb32_op_xrgb32_32b(
-    ByteSIMD::b32_1x2& dst0, ByteSIMD::b32_1x2 a0, ByteSIMD::b32_1x2 b0,
-    ByteSIMD::b32_1x2& dst1, ByteSIMD::b32_1x2 a1, ByteSIMD::b32_1x2 b1)
+    Face::b32_1x2& dst0, Face::b32_1x2 a0, Face::b32_1x2 b0,
+    Face::b32_1x2& dst1, Face::b32_1x2 a1, Face::b32_1x2 b1)
   {
-    uint32_t aa = ByteSIMD::b32_1x2GetB1(a1);
-    ByteSIMD::b32_2x2MulDiv255B32_2x2(dst0, a0, b0, dst1, a1, b1);
+    uint32_t aa = Face::b32_1x2GetB1(a1);
+    Face::b32_2x2MulDiv255B32_2x2(dst0, a0, b0, dst1, a1, b1);
 
-    ByteSIMD::b32_2x2MulDiv255U(b0, b0, b1, b1, ByteSIMD::u32Negate255(aa));
-    ByteSIMD::b32_2x2AddB32_2x2(dst0, dst0, a0, dst1, dst1, a1);
+    Face::b32_2x2MulDiv255U(b0, b0, b1, b1, Face::u32Negate255(aa));
+    Face::b32_2x2AddB32_2x2(dst0, dst0, a0, dst1, dst1, a1);
 
-    ByteSIMD::b32_1x2FillB1(dst1, dst1);
+    Face::b32_1x2FillB1(dst1, dst1);
   }
 
   static FOG_INLINE void xrgb32_op_prgb32_32b(
-    ByteSIMD::b32_1x2& dst0, ByteSIMD::b32_1x2 a0, ByteSIMD::b32_1x2 b0,
-    ByteSIMD::b32_1x2& dst1, ByteSIMD::b32_1x2 a1, ByteSIMD::b32_1x2 b1)
+    Face::b32_1x2& dst0, Face::b32_1x2 a0, Face::b32_1x2 b0,
+    Face::b32_1x2& dst1, Face::b32_1x2 a1, Face::b32_1x2 b1)
   {
-    uint32_t ba = ByteSIMD::b32_1x2GetB1(b1);
-    ByteSIMD::b32_2x2MulDiv255B32_2x2(dst0, a0, b0, dst1, a1, b1);
+    uint32_t ba = Face::b32_1x2GetB1(b1);
+    Face::b32_2x2MulDiv255B32_2x2(dst0, a0, b0, dst1, a1, b1);
 
-    ByteSIMD::b32_2x2MulDiv255U(a0, a0, a1, a1, ByteSIMD::u32Negate255(ba));
-    ByteSIMD::b32_2x2AddB32_2x2(dst0, dst0, a0, dst1, dst1, a1);
+    Face::b32_2x2MulDiv255U(a0, a0, a1, a1, Face::u32Negate255(ba));
+    Face::b32_2x2AddB32_2x2(dst0, dst0, a0, dst1, dst1, a1);
 
-    ByteSIMD::b32_1x2FillB1(dst1, dst1);
+    Face::b32_1x2FillB1(dst1, dst1);
   }
 
   static FOG_INLINE void xrgb32_op_xrgb32_32b(
-    ByteSIMD::b32_1x2& dst0, ByteSIMD::b32_1x2 a0, ByteSIMD::b32_1x2 b0,
-    ByteSIMD::b32_1x2& dst1, ByteSIMD::b32_1x2 a1, ByteSIMD::b32_1x2 b1)
+    Face::b32_1x2& dst0, Face::b32_1x2 a0, Face::b32_1x2 b0,
+    Face::b32_1x2& dst1, Face::b32_1x2 a1, Face::b32_1x2 b1)
   {
-    ByteSIMD::b32_2x2MulDiv255B32_2x2(dst0, a0, b0, dst1, a1, b1);
-    ByteSIMD::b32_1x2FillB1(dst1, dst1);
+    Face::b32_2x2MulDiv255B32_2x2(dst0, a0, b0, dst1, a1, b1);
+    Face::b32_1x2FillB1(dst1, dst1);
   }
 };
 

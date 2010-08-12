@@ -1855,7 +1855,7 @@ err_t Region::frame(const IntPoint& pt)
   return frame(*this, *this, pt);
 }
 
-static err_t Region_doPath(Region* self, AnalyticRasterizer* rasterizer, uint8_t threshold)
+static err_t Region_doPath(Region* self, AnalyticRasterizer8* rasterizer, uint8_t threshold)
 {
   if (!rasterizer->isValid()) return ERR_OK;
   IntBox bounds(rasterizer->getBoundingBox());
@@ -1914,7 +1914,7 @@ err_t Region::fromPath(const DoublePath& path, const DoubleMatrix* matrix, uint3
 
   if (path.isEmpty()) return ERR_OK;
 
-  AnalyticRasterizer rasterizer;
+  AnalyticRasterizer8 rasterizer;
 
   err_t err = ERR_OK;
   if (path.isFlat() && matrix == NULL)

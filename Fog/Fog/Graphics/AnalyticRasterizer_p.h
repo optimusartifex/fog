@@ -20,7 +20,7 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::AnalyticRasterizer]
+// [Fog::AnalyticRasterizer8]
 // ============================================================================
 
 //! @internal
@@ -30,31 +30,31 @@ namespace Fog {
 //! Polygon rasterizer that is used to render filled polygons with 
 //! high-quality Anti-Aliasing. Internally, by default, the class uses 
 //! integer coordinates in format 24.8, i.e. 24 bits for integer part 
-//! and 8 bits for fractional - see poly_subpixel_shift. This class can be 
-//! used in the following  way:
+//! and 8 bits for fractional. This class can be used in the following way:
 //!
 //! 1. Reset/setup rasterizer:
 //!
 //!    reset() - If rasterizer is reused, reset ensures that all data related
-//!    to previous rasterization are lost.
+//!    to previous rasterization are lost. It is the requirement.
 //!
-//!    getFillRule() / setFillRule(int fillRule) - Fill rule management.
-//!    getAlpha() / setAlpha() - Alpha management.
-//!    getClipBox() / setClipBox() / resetClipBox() - Set clip box management.
+//!    @c getFillRule() / @c setFillRule(int fillRule) - Fill rule management.
+//!    @c getAlpha() / @c setAlpha() - Alpha management.
+//!    @c getClipBox() / @c setClipBox() / resetClipBox() - Set clip box management.
 //!
 //!    You can omit initialization if you are reusing rasterizer and these
-//!    members are already set to demanded values.
+//!    members are already set to demanded values. These values are never
+//!    changed when using reset(), @c initialize() or @c finalize().
 //!
 //! 2. Initialize rasterizer:
 //!
-//!    initialize() - Init is method that will initialize the rasterizer and
-//!    after calling it you cannot call setup methods (in ideal case setup will
-//!    do nothing, in worst case your application can crash or call assertion
-//!    failure in debug-more).
+//!    @c initialize() - Init is method that will initialize the rasterizer.
+//!    After calling this method you cannot call setup methods (in ideal case
+//!    setup will do nothing, in worst case your application can crash or call
+//!    assertion failure in debug-more).
 //!
 //! 3. Call commands:
 //!
-//!    addPath(path) - Make the polygon. One can create more than one contour,
+//!    @c addPath(path) - Make the polygon. One can create more than one contour,
 //!    but each contour must consist of at least 3 vertices, is the absolute
 //!    minimum of vertices that define a triangle. The algorithm does not check
 //!    either the number of vertices nor coincidence of their coordinates, but
@@ -71,46 +71,133 @@ namespace Fog {
 //!
 //! 4. Finalize rasterizer:
 //!
-//!    finalize() - Finalize the shape. Finalize step is rasterizer dependent
+//!    @c finalize() - Finalize the shape. Finalize step is rasterizer dependent
 //!    and may or may not rasterize or pre-rasterize some areas.
 //!
 //! 5. Sweep scanlines.
 //!
-//!    sweepScanline() - Sweep scanline to scanline container. This scanline
+//!    @c sweepScanline() - Sweep scanline to scanline container. This scanline
 //!    can be passed to renderer or clipper.
 //!
-//! Analytic rasterizer can be used in multithreaded environment. The 
-//! sweepScanline() method is thread safe and is normally called by more
-//! threads if multithreaded rendering is active.
-struct FOG_HIDDEN AnalyticRasterizer
+//! Analytic rasterizer can be used in multi-threaded environment. The 
+//! sweepScanline() method is thread-safe and is normally called by more
+//! threads if multi-threaded rendering is active.
+//!
+//! Analytic rasterizer with 8-bit precision cell members:
+//!
+//!   X     - a horizontal pixel position in pixel units. Should be relative
+//!           to horizontal clipping bounding box.
+//!   Cover - a value at interval -256 to 256. This means that 10-bits are
+//!           enough to store the value.
+//!   Area  - a value at interval -(511<<8) to (511<<8). It can be effectively
+//!           compressed into 10-bits by shifting it right and preserving a
+//!           sign.
+//!
+//! This means that cell structure can be compressed into:
+//!
+//!   DWORD (32-bit):
+//!   - X     - 12 bits.
+//!   - Cover - 10 bits.
+//!   - Area  - 10 bits.
+//!   Applicable for resolution up to 4096 pixels in horizontal.
+//!
+//!   QWORD (64-bit):
+//!   - X     - 32 bits.
+//!   - Cover - 16 bits.
+//!   - Area  - 16 bits.
+//!   Applicable for any resolution (x is 32-bit integer).
+//!
+//! NOTE: Cell area value is always stored in compact format. This means that
+//! if you need the real number you need to shift it to left by 8-bits.
+struct FOG_HIDDEN AnalyticRasterizer8
 {
   // --------------------------------------------------------------------------
   // [Cell]
   // --------------------------------------------------------------------------
 
-  // Analytic rasterizer with 8-bit precision cell members:
-  //
-  //   X     - a horizontal pixel position in pixel units. Should be relative
-  //           to horizontal clipping bounding box.
-  //   Cover - a value at interval -256 to 256. This means that 10-bits are
-  //           enough to store the value.
-  //   Area  - a value at interval -(511<<8) to (511<<8). It can be effectively
-  //           compressed into 10-bits by shifting it right and preserving a
-  //           sign.
-  //
-  // This means that cell structure can be compressed into:
-  //
-  // DWORD (32-bit):
-  //   X     - 12 bits.
-  //   Cover - 10 bits.
-  //   Area  - 10 bits.
-  // Applicable for resolution up to 4096 pixels in horizontal.
-  //
-  // QWORD (64-bit):
-  //   X     - 32 bits.
-  //   Cover - 16 bits.
-  //   Area  - 16 bits.
-  // Applicable for any resolution.
+#include <Fog/Core/Pack/PackByte.h>
+  //! @internal.
+  //!
+  //! @brief Compact version of cell that fits into DWORD (32-bit integer).
+  struct FOG_HIDDEN SmallCell
+  {
+    enum {
+      //! @brief Maximum x position in @c AnalyticRasterizer8::SmallCell (12-bit, 4095).
+      MAX_X = 0x00000FFF
+    };
+
+    //! @brief Set all cell values at once.
+    FOG_INLINE void setData(int x, int cover, int area)
+    {
+      FOG_ASSERT(x >= 0 && x <= MAX_X);
+
+      _combined = ((uint)x << 20)
+                + (((uint)cover & 0x3FFU) << 10)
+                + (((uint)area & 0x3FFU));
+    }
+
+    //! @brief Get x coordinate.
+    FOG_INLINE int getX() const { return (int)(_combined >> 20); }
+    //! @brief Get cell cover.
+    FOG_INLINE int getCover() const { return ((int)(_combined << 12)) >> 22; }
+    //! @brief Get cell area.
+    FOG_INLINE int getArea() const { return ((int)(_combined << 22)) >> 22; }
+
+    //! @brief X, cover and area packed in DWORD.
+    uint32_t _combined;
+  };
+#include <Fog/Core/Pack/PackRestore.h>
+
+#include <Fog/Core/Pack/PackByte.h>
+  //! @internal.
+  //!
+  //! @brief Full version of cell that fits into QWORD (64-bit integer).
+  struct FOG_HIDDEN FullCell
+  {
+    enum {
+      //! @brief Maximum x position in @c AnalyticRasterizer8::FullCell (32-bit).
+      MAX_X = 0xFFFFFFFF
+    };
+
+    //! @brief Set all cell values at once.
+    FOG_INLINE void setData(int x, int cover, int area)
+    {
+      FOG_ASSERT(x >= 0);
+
+      _x = (uint32_t)x;
+      _cover = (int16_t)cover;
+      _area = (int16_t)area;
+    }
+
+    //! @brief Get x coordinate.
+    FOG_INLINE int getX() const { return (int)_x; }
+    //! @brief Get cell cover.
+    FOG_INLINE int getCover() const { return (int)_cover; }
+    //! @brief Get cell area.
+    FOG_INLINE int getArea() const { return (int)_area; }
+
+    //! @brief X coordinate in full-precision.
+    uint32_t _x;
+    //! @brief Cover value.
+    int16_t _cover;
+    //! @brief Area value.
+    int16_t _area;
+  };
+#include <Fog/Core/Pack/PackRestore.h>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include <Fog/Core/Pack/PackDWord.h>
   //! @internal
@@ -198,8 +285,8 @@ struct FOG_HIDDEN AnalyticRasterizer
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  AnalyticRasterizer();
-  ~AnalyticRasterizer();
+  AnalyticRasterizer8();
+  ~AnalyticRasterizer8();
 
   // --------------------------------------------------------------------------
   // [Clip Box]
@@ -293,9 +380,9 @@ struct FOG_HIDDEN AnalyticRasterizer
   // [Sweep]
   // --------------------------------------------------------------------------
 
-  typedef Span8* (*SweepScanlineSimpleFn)(AnalyticRasterizer* rasterizer, Scanline8& scanline, int y);
-  typedef Span8* (*SweepScanlineRegionFn)(AnalyticRasterizer* rasterizer, Scanline8& scanline, int y, const IntBox* clipBoxes, sysuint_t count);
-  typedef Span8* (*SweepScanlineSpansFn)(AnalyticRasterizer* rasterizer, Scanline8& scanline, int y, const Span8* clipSpans);
+  typedef Span8* (*SweepScanlineSimpleFn)(AnalyticRasterizer8* rasterizer, Scanline8& scanline, int y);
+  typedef Span8* (*SweepScanlineRegionFn)(AnalyticRasterizer8* rasterizer, Scanline8& scanline, int y, const IntBox* clipBoxes, sysuint_t count);
+  typedef Span8* (*SweepScanlineSpansFn)(AnalyticRasterizer8* rasterizer, Scanline8& scanline, int y, const Span8* clipSpans);
 
   //! @brief Sweep scanline @a y.
   FOG_INLINE Span8* sweepScanline(Scanline8& scanline, int y)
@@ -352,16 +439,16 @@ struct FOG_HIDDEN AnalyticRasterizer
 
   template<int _RULE, int _USE_ALPHA>
   static Span8* _sweepScanlineSimpleImpl(
-    AnalyticRasterizer* rasterizer, Scanline8& scanline, int y);
+    AnalyticRasterizer8* rasterizer, Scanline8& scanline, int y);
 
   template<int _RULE, int _USE_ALPHA>
   static Span8* _sweepScanlineRegionImpl(
-    AnalyticRasterizer* rasterizer, Scanline8& scanline, int y,
+    AnalyticRasterizer8* rasterizer, Scanline8& scanline, int y,
     const IntBox* clipBoxes, sysuint_t count);
 
   template<int _RULE, int _USE_ALPHA>
   static Span8* _sweepScanlineSpansImpl(
-    AnalyticRasterizer* rasterizer, Scanline8& scanline, int y,
+    AnalyticRasterizer8* rasterizer, Scanline8& scanline, int y,
     const Span8* clipSpans);
 
   // --------------------------------------------------------------------------
@@ -410,12 +497,12 @@ struct FOG_HIDDEN AnalyticRasterizer
 
   //! @brief Sorted cells.
   //!
-  //! @note This value is only valid after finalize() call.
+  //! @note This value is only valid after @c finalize() call.
   CellX* _cellsSorted;
 
   //! @brief Sorted cells array capacity.
   //!
-  //! @note This value is only valid after finalize() call.
+  //! @note This value is only valid after @c finalize() call.
   uint32_t _cellsCapacity;
 
   //! @brief Total count of cells in all buffers.
@@ -424,17 +511,17 @@ struct FOG_HIDDEN AnalyticRasterizer
   //! finalizeCellBuffer() methods, it not contains exact cells count until
   //! one of these methods isn't called.
   //!
-  //! @note This value is only valid after finalize() call.
+  //! @note This value is only valid after @c finalize() call.
   uint32_t _cellsCount;
 
   //! @brief Rows info (index and count of cells in row).
   //!
-  //! @note This value is only valid after finalize() call.
+  //! @note This value is only valid after @c finalize() call.
   RowInfo* _rowsInfo;
 
   //! @brief Rows array capacity.
   //!
-  //! @note This value is only valid after finalize() call.
+  //! @note This value is only valid after @c finalize() call.
   uint32_t _rowsCapacity;
 
   //! @brief Whether rasterizer clipping is enabled.
@@ -449,11 +536,11 @@ struct FOG_HIDDEN AnalyticRasterizer
   //! @brief Current [x, y] clipping flags.
   uint _f1;
 
-  //! @brief Last moveTo x position (for closePolygon).
+  //! @brief Last moveTo x position (for @c closePolygon() method).
   int24x8_t _startX1;
-  //! @brief Last moveTo y position (for closePolygon).
+  //! @brief Last moveTo y position (for @c closePolygon() method).
   int24x8_t _startY1;
-  //! @brief Last moveTo clipping flags (for closePolygon).
+  //! @brief Last moveTo clipping flags (for @c closePolygon() method).
   uint _startF1;
 
   //! @brief Pointer to first cell buffer.
@@ -474,7 +561,7 @@ struct FOG_HIDDEN AnalyticRasterizer
   CellXY _invalidCell;
 
 private:
-  FOG_DISABLE_COPY(AnalyticRasterizer)
+  FOG_DISABLE_COPY(AnalyticRasterizer8)
 };
 
 //! @}

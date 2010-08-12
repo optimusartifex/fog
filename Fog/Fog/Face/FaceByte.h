@@ -1,92 +1,24 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Face Library - Private API]
 //
 // [License]
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_BYTESIMD_P_H
-#define _FOG_CORE_BYTESIMD_P_H
+#ifndef _FOG_FACE_FACEBYTE_H
+#define _FOG_FACE_FACEBYTE_H
 
 // [Dependencies]
 #include <Fog/Core/Build.h>
-#include <Fog/Graphics/Constants.h>
+#include <Fog/Face/Features.h>
 
 namespace Fog {
+namespace Face {
 
-//! @internal
-//! 
-//! @brief Collection of typedefs and functions to work with bytes/words packed
-//! in 32-bit or 64-bit unsigned integers.
-//!
-//! Functions defined by @c ByteSIMD do operation on:
-//!
-//!   1. scalar values - all functions using prefix "scalar_"
-//!   2. packed values - all functions using prefix "byteXxX_"
-//!
-//! Data-type width is always described by the function prefix or type definition:
-//!
-//!   1. @c b32_1x1 - [00.00.00.B0] - Scalar one byte stored in 32-bit unsigned
-//!      integer.
-//!   2. @c b32_1x2 - [00.B1.00.B0] - Packed two bytes stored in 32-bit unsigned
-//!      integer.
-//!   3. @c b64_1x1 - [00.00.00.00.00.00.00.B0] - Scalar one byte stored in
-//!      64-bit unsigned integer.
-//!   4. @c b64_1x3 - [00.00.00.B2.00.B1.00.B0] - Packed three bytes stored in
-//!      64-bit unsigned integer.
-//!   4. @c b64_1x4 - [00.B3.00.B2.00.B1.00.B0] - Packed four bytes stored in
-//!      64-bit unsigned integer.
-//!
-//! SIMD functionality is usually used to do manipulation with pixels, but
-//! the @c ByteSIMD module was written without computer graphics expectations
-//! and can be used to work with other multimedia content (for example audio).
-//!
-//! Data format for working with pixels in 32-bit mode:
-//!
-//!   - @c b32_1x2 b0 [0x00RR00BB]
-//!   - @c b32_1x2 b1 [0x00AA00GG]
-//!
-//!   - unpacked using b32_2x2Unpack0213(b0, b1, source);
-//!   - packed using b32_2x2Pack0213(dest, b0, b1);
-//!
-//! Data format for working with pixels in 64-bit mode:
-//!
-//!   - @c b64_1x4 b0 [0x00AA00GG00RR00BB]
-//!
-//!   - unpacked using b64_1x4Unpack0213(b0, source);
-//!   - packed using b64_1x4Pack0213(dest, b0);
-//!
-//! The reason to not unpack bytes to 0x00AA00RR/00GG00BB is that it's more
-//! expensive, unpacking even and odd bytes separately is simpler and working
-//! with the data is the same. Notice that the position of bytes/pixels is
-//! different to position when using MMX/SSE2 assembler.
-//!
-//! Function input/output parameter naming terminology:
-//!
-//!   - @c b32_1x1 - scalar at range of 0 to 255.
-//!   - @c uint32_t - scalar at range of 0 to 256.
-//!   - @c b32_1x2 - packed two BYTEs in 32-bit unsigned integer.
-//!   - @c b32_2x2 - packed two BYTEs in two 32-bit unsigned integers. These two
-//!     integers are always passed/returned together.
-//!   - @c b64_1x3 - packed three BYTEs in 64-bit unsigned integer.
-//!   - @c b64_1x4 - packed four BYTEs in 64-bit unsigned integer.
-namespace ByteSIMD {
-
-//! @addtogroup Fog_Core_Private
+//! @addtogroup Fog_Face_Byte
 //! @{
 
 // ============================================================================
-// [Fog::ByteSIMD - Implementation Choices]
-// ============================================================================
-
-// Whether to use conditional instruction (if) instead of bit manipulation in
-// some cases. Enabling this may improve or decrease the performance of code
-// depending on compiler and target platform. If you are sure that your 
-// compiler can generate good code (using cmov on x86 platform) then it's
-// good to define it.
-// #define FOG_BYTESIMD_USE_CONDITIONAL_INSTRUCTIONS
-
-// ============================================================================
-// [Fog::ByteSIMD - Types]
+// [Fog::Face - Types]
 // ============================================================================
 
 //! @brief Scalar BYTE stored in 32-bit unsigned integer.
@@ -115,7 +47,7 @@ typedef uint64_t b64_1x3;
 typedef uint64_t b64_1x4;
 
 // ============================================================================
-// [Fog::ByteSIMD - Constants]
+// [Fog::Face - Constants]
 // ============================================================================
 
 //! @brief Scalar half-BYTE value stored in 32-bit integer.
@@ -147,7 +79,7 @@ static const b64_1x4 B64_1x4_MASK = FOG_UINT64_C(0x00FF00FF00FF00FF);
 static const b64_1x4 B64_1x4_MASK_PLUS_ONE = FOG_UINT64_C(0x1000010010000100);
 
 // ============================================================================
-// [Fog::ByteSIMD - U32 - Add/Addus]
+// [Fog::Face - U32 - Add/Addus]
 // ============================================================================
 
 //! @brief Result = x + y
@@ -162,7 +94,7 @@ static FOG_INLINE uint32_t u32Add(b32_1x1 x, b32_1x1 y)
 static FOG_INLINE uint32_t u32Addus(b32_1x1 x, b32_1x1 y)
 {
   x += y;
-#if defined(FOG_BYTESIMD_USE_CONDITIONAL_INSTRUCTIONS)
+#if defined(FOG_FACE_HAS_CONDITIONAL_INSTRUCTIONS)
   if (x > 255) x = 255;
 #else
   x |= 0x0100U - ((x >> 8) & 0x00FFU);
@@ -172,7 +104,7 @@ static FOG_INLINE uint32_t u32Addus(b32_1x1 x, b32_1x1 y)
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - U32 - Sub/Subus]
+// [Fog::Face - U32 - Sub/Subus]
 // ============================================================================
 
 //! @brief Result = x - y
@@ -187,7 +119,7 @@ static FOG_INLINE uint32_t u32Sub(b32_1x1 x, b32_1x1 y)
 static FOG_INLINE uint32_t u32Subus(b32_1x1 x, b32_1x1 y)
 {
   x -= y;
-#if defined(FOG_BYTESIMD_USE_CONDITIONAL_INSTRUCTIONS)
+#if defined(FOG_FACE_HAS_CONDITIONAL_INSTRUCTIONS)
   if ((int32_t)x < 0) x = 0;
 #else
   x &= (x >> 24) ^ 0xFFU;
@@ -196,7 +128,7 @@ static FOG_INLINE uint32_t u32Subus(b32_1x1 x, b32_1x1 y)
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - U32 - Div255/256]
+// [Fog::Face - U32 - Div255/256]
 // ============================================================================
 
 //! @brief Accurate division by 255. The result is equal to <code>(val / 255.0)</code>.
@@ -216,7 +148,7 @@ static FOG_INLINE uint32_t u32Div256(uint32_t i)
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - U32 - MulDiv255/256]
+// [Fog::Face - U32 - MulDiv255/256]
 // ============================================================================
 
 //! @brief Result = (x * a) / 255
@@ -234,7 +166,7 @@ static FOG_INLINE uint32_t u32MulDiv256(b32_1x1 x, uint32_t a)
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - U32 - Lerp255/256]
+// [Fog::Face - U32 - Lerp255/256]
 // ============================================================================
 
 //! @brief Result = {(x * a) + (y * (255 - a))} / 255
@@ -256,7 +188,7 @@ static FOG_INLINE uint32_t u32Lerp256(b32_1x1 x, b32_1x1 y, uint32_t a)
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - U32 - Neg255/256]
+// [Fog::Face - U32 - Neg255/256]
 // ============================================================================
 
 //! @brief Result = 255 - x
@@ -272,17 +204,23 @@ static FOG_INLINE uint32_t u32Negate256(uint32_t x)
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - U32 - Extend]
+// [Fog::Face - U32 - Extend]
 // ============================================================================
 
 //! @brief Result = x | (x << 8) | (x << 16) | (x << 24)
 static FOG_INLINE uint32_t u32Extend(b32_1x1 x)
 {
+#if defined(FOG_FACE_HAS_FAST_MULTIPLY)
   return x * 0x01010101U;
+#else
+  x |= x << 8;
+  x |= x << 16;
+  return x;
+#endif
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - B32_1x2 - Pack]
+// [Fog::Face - B32_1x2 - Pack]
 // ============================================================================
 
 //! @brief Pack x0 and x1 into single DWORD.
@@ -293,7 +231,7 @@ static FOG_INLINE void b32_2x2Pack0213(
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - B32_1x2 - Unpack]
+// [Fog::Face - B32_1x2 - Unpack]
 // ============================================================================
 
 //! @brief Unpack 0st and 2nd BYTE of single DWORD into one b32_1x2 value.
@@ -333,7 +271,7 @@ static FOG_INLINE void b32_2x2Unpack021X(
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - B32_1x2 - Zero / Fill]
+// [Fog::Face - B32_1x2 - Zero / Fill]
 // ============================================================================
 
 static FOG_INLINE void b32_1x2ZeroB0(
@@ -361,7 +299,7 @@ static FOG_INLINE void b32_1x2FillB1(
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - B32_1x2 - Get]
+// [Fog::Face - B32_1x2 - Get]
 // ============================================================================
 
 //! @brief Get B0 (LO) BYTE from B32_1x2.
@@ -370,7 +308,7 @@ static FOG_INLINE b32_1x1 b32_1x2GetB0(b32_1x2 a0) { return (a0 & 0xFFU); }
 static FOG_INLINE b32_1x1 b32_1x2GetB1(b32_1x2 a0) { return (a0 >> 16); }
 
 // ============================================================================
-// [Fog::ByteSIMD - B32_1x2 - Set]
+// [Fog::Face - B32_1x2 - Set]
 // ============================================================================
 
 static FOG_INLINE void b32_1x2SetB0(
@@ -386,7 +324,7 @@ static FOG_INLINE void b32_1x2SetB1(
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - B32_1x2 - Copy]
+// [Fog::Face - B32_1x2 - Copy]
 // ============================================================================
 
 //! @brief Copy @a a0 to @a dst0.
@@ -415,7 +353,7 @@ static FOG_INLINE void b32_2x2Copy(
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - B32_1x2 - Extend]
+// [Fog::Face - B32_1x2 - Extend]
 // ============================================================================
 
 //! @brief Extend src0.B0 to dst0, src0.B1 must be zero before call.
@@ -426,11 +364,15 @@ static FOG_INLINE void b32_2x2Copy(
 static FOG_INLINE void b32_1x2ExtendB0(
   b32_1x2& dst0, b32_1x2 src0)
 {
+#if defined(FOG_FACE_HAS_FAST_MULTIPLY)
   dst0 = src0 * 0x00010001U;
+#else
+  dst0 = src0 + (src0 << 16);
+#endif
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - B32_1x2 - Expand]
+// [Fog::Face - B32_1x2 - Expand]
 // ============================================================================
 
 //! @brief Expand src0.B0 to [dst0.B0, dst0.B1].
@@ -441,8 +383,7 @@ static FOG_INLINE void b32_1x2ExtendB0(
 static FOG_INLINE void b32_1x2ExpandB0(
   b32_1x2& dst0, b32_1x2 src0)
 {
-  dst0 = (src0 << 16);
-  dst0 |= (src0 & 0x000000FFU);
+  dst0 = (src0 & 0xFFU) + (src0 << 16);
 }
 
 //! @brief Expand src0.B0 to [dst0.B0, dst0.B1] and [dst1.B0, dst1.B1].
@@ -486,7 +427,7 @@ static FOG_INLINE void b32_2x2ExpandB1(
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - B32_1x2 - Saturate]
+// [Fog::Face - B32_1x2 - Saturate]
 // ============================================================================
 
 //! @brief
@@ -519,7 +460,7 @@ static FOG_INLINE void b32_2x2Saturate(
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - B32_1x2 - Add]
+// [Fog::Face - B32_1x2 - Add]
 // ============================================================================
 
 //! @brief
@@ -631,7 +572,7 @@ static FOG_INLINE void b32_2x2AddusU(
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - B32_1x2 - Sub]
+// [Fog::Face - B32_1x2 - Sub]
 // ============================================================================
 
 //! @brief Subtract @a b0 from @a a0 and store the result to @a dst0.
@@ -754,7 +695,7 @@ static FOG_INLINE void b32_2x2SubusU(
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - B32_1x2 - AddSub]
+// [Fog::Face - B32_1x2 - AddSub]
 // ============================================================================
 
 //! @brief Add @a b0 to @a a0, subtract @a c0 from it and store the result
@@ -824,7 +765,7 @@ static FOG_INLINE void b32_2x2AddSubusB32_2x2(
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - B32_1x2 - Mul]
+// [Fog::Face - B32_1x2 - Mul]
 // ============================================================================
 
 //! @brief Multiply @a a0 with @a u and store the result to @a dst0.
@@ -853,7 +794,7 @@ static FOG_INLINE void b32_2x2MulU(
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - B32_1x2 - MulDiv]
+// [Fog::Face - B32_1x2 - MulDiv]
 // ============================================================================
 
 //! @brief Multiply @a a0 with @a u, divide by 255 and store the result to
@@ -1140,7 +1081,7 @@ static FOG_INLINE void b32_2x2MulDiv256U(
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - B32_1x2 - Min / Max]
+// [Fog::Face - B32_1x2 - Min / Max]
 // ============================================================================
 
 //! @brief Take smaller value from @a a0 and @a u and store it to @a dst0.
@@ -1291,7 +1232,7 @@ static FOG_INLINE void b32_2x2MaxB32_2x2(
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - B32_1x2 - Shift]
+// [Fog::Face - B32_1x2 - Shift]
 // ============================================================================
 
 static FOG_INLINE void b32_1x2ShiftLeftU(
@@ -1365,7 +1306,7 @@ static FOG_INLINE void b32_2x2ShiftRightU(
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - B32_1x2 - Negate]
+// [Fog::Face - B32_1x2 - Negate]
 // ============================================================================
 
 static FOG_INLINE void b32_1x2Negate(
@@ -1411,7 +1352,7 @@ static FOG_INLINE void b32_2x2Negate_B1(
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - B32_1x2 - Premultiply]
+// [Fog::Face - B32_1x2 - Premultiply]
 // ============================================================================
 
 //! @brief Premultiply the pixel stored in @a a0 and @a a1 and store the result
@@ -1442,7 +1383,7 @@ static FOG_INLINE void b32_2x2PremultiplyA(
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - B32_1x2 - Interpolate]
+// [Fog::Face - B32_1x2 - Interpolate]
 // ============================================================================
 
 static FOG_INLINE void b32_2x2InterpolateU255(
@@ -1505,7 +1446,7 @@ static FOG_INLINE uint32_t b32_2x2InterpolateU256_Pack0213(
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - B64_1x4 - Pack]
+// [Fog::Face - B64_1x4 - Pack]
 // ============================================================================
 
 //! @brief Pack b64_1x4 value into DWORD.
@@ -1515,7 +1456,7 @@ static FOG_INLINE void b64_1x4Pack0213(uint32_t& dst0, b64_1x4 x0)
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - B64_1x4 - Unpack]
+// [Fog::Face - B64_1x4 - Unpack]
 // ============================================================================
 
 //! @brief Unpack all bytes of DWORD into one b64_1x4 value.
@@ -1533,7 +1474,7 @@ static FOG_INLINE void b64_1x4Unpack021X(
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - P32_1x4 - MulDiv]
+// [Fog::Face - P32_1x4 - MulDiv]
 // ============================================================================
 
 // NOTE: These functions are included here, because there are sometimes useful,
@@ -1544,7 +1485,7 @@ static FOG_INLINE void b64_1x4Unpack021X(
 // x_c' = (x_c * a) / 255
 static FOG_INLINE uint32_t p32_1x4MulDiv255U32(uint32_t x0, uint32_t a0)
 {
-#if FOG_ARCH_BITS == 64
+#if defined(FOG_FACE_HAS_64BIT)
   uint64_t x0 = ((uint64_t)x | ((uint64_t)x << 24)) & FOG_UINT64_C(0x00FF00FF00FF00FF);
   x0 *= a0;
   x0 = (x0 + ((x0 >> 8) & FOG_UINT64_C(0x00FF00FF00FF00FF)) + FOG_UINT64_C(0x0080008000800080)) >> 8;
@@ -1566,7 +1507,7 @@ static FOG_INLINE uint32_t p32_1x4MulDiv255U32(uint32_t x0, uint32_t a0)
 static FOG_INLINE uint32_t p32_1x3MulDiv255U32_ZXXX(
   uint32_t x0, uint32_t a0)
 {
-#if FOG_ARCH_BITS == 64
+#if defined(FOG_FACE_HAS_64BIT)
   uint64_t x0 = ((uint64_t)x | ((uint64_t)x << 24)) & FOG_UINT64_C(0x000000FF00FF00FF);
   x0 *= a0;
   x0 = (x0 + ((x0 >> 8) & FOG_UINT64_C(0x000000FF00FF00FF)) + FOG_UINT64_C(0x0000008000800080)) >> 8;
@@ -1588,7 +1529,7 @@ static FOG_INLINE uint32_t p32_1x3MulDiv255U32_ZXXX(
 static FOG_INLINE uint32_t p32_1x3MulDiv255U32_FXXX(
   uint32_t x0, uint32_t a0)
 {
-#if FOG_ARCH_BITS == 64
+#if defined(FOG_FACE_HAS_64BIT)
   uint64_t x0 = ((uint64_t)x | ((uint64_t)x << 24)) & FOG_UINT64_C(0x000000FF00FF00FF);
   x0 *= a;
   x0 = (x0 + ((x0 >> 8) & FOG_UINT64_C(0x000000FF00FF00FF)) + FOG_UINT64_C(0xFF00008000800080)) >> 8;
@@ -1668,7 +1609,7 @@ static FOG_INLINE uint32_t p32_2x4MulDiv256U32_Add(
 }
 
 // ============================================================================
-// [Fog::ByteSIMD - P32_1x4 - Add]
+// [Fog::Face - P32_1x4 - Add]
 // ============================================================================
 
 static FOG_INLINE uint32_t p32_1x4AddP32_1x4(uint32_t x, uint32_t y)
@@ -1679,7 +1620,7 @@ static FOG_INLINE uint32_t p32_1x4AddP32_1x4(uint32_t x, uint32_t y)
 // x_c' = min(x_c + y_c, 255)
 static FOG_INLINE uint32_t p32_1x4AddusP32_1x4(uint32_t x, uint32_t y)
 {
-#if FOG_ARCH_BITS == 64
+#if defined(FOG_FACE_HAS_64BIT)
   uint64_t x0 = ((uint64_t)x | ((uint64_t)x << 24)) & FOG_UINT64_C(0x00FF00FF00FF00FF);
   uint64_t y0 = ((uint64_t)y | ((uint64_t)y << 24)) & FOG_UINT64_C(0x00FF00FF00FF00FF);
 
@@ -1708,7 +1649,7 @@ static FOG_INLINE uint32_t p32_1x4AddusP32_1x4(uint32_t x, uint32_t y)
 // x_c' = (x_c * a) / 255 + y
 static FOG_INLINE uint32_t p32_1x4MulDiv255U_AddusP32_1x4(uint32_t x, uint32_t a, uint32_t y)
 {
-#if FOG_ARCH_BITS == 64
+#if defined(FOG_FACE_HAS_64BIT)
   uint64_t x0 = ((uint64_t)x | ((uint64_t)x << 24)) & FOG_UINT64_C(0x00FF00FF00FF00FF);
   uint64_t y0 = ((uint64_t)y | ((uint64_t)y << 24)) & FOG_UINT64_C(0x00FF00FF00FF00FF);
 
@@ -1743,8 +1684,8 @@ static FOG_INLINE uint32_t p32_1x4MulDiv255U_AddusP32_1x4(uint32_t x, uint32_t a
 
 //! @}
 
-} // ByteSIMD namespace
+} // Face namespace
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_CORE_BYTESIMD_P_H
+#endif // _FOG_FACE_FACEBYTE_H

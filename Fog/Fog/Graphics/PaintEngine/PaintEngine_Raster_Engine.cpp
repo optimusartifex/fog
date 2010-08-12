@@ -10,7 +10,6 @@
 
 // [Dependencies]
 #include <Fog/Core/Atomic.h>
-#include <Fog/Core/ByteSIMD_p.h>
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/CpuInfo.h>
 #include <Fog/Core/Lock.h>
@@ -22,6 +21,7 @@
 #include <Fog/Core/Thread.h>
 #include <Fog/Core/ThreadCondition.h>
 #include <Fog/Core/ThreadPool.h>
+#include <Fog/Face/FaceByte.h>
 #include <Fog/Graphics/AnalyticRasterizer_p.h>
 #include <Fog/Graphics/Color.h>
 #include <Fog/Graphics/ColorLut.h>

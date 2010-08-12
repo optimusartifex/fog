@@ -2463,7 +2463,7 @@ err_t Image::glyphFromPath(Image& glyph, IntPoint& offset, const DoublePath& pat
     return ERR_OK;
   }
 
-  AnalyticRasterizer rasterizer;
+  AnalyticRasterizer8 rasterizer;
   err_t err = ERR_OK;
 
   if (path.isFlat())

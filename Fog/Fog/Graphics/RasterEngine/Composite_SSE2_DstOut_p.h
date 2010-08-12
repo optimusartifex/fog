@@ -625,8 +625,8 @@ vMaskAlphaSparseSkip4:
         uint32_t msk0 = READ_8(msk);
         uint32_t src0 = READ_8(src);
 
-        msk0 = ByteSIMD::u32MulDiv255(src0, msk0);
-        msk0 = ByteSIMD::u32Negate255(msk0);
+        msk0 = Face::u32MulDiv255(src0, msk0);
+        msk0 = Face::u32Negate255(msk0);
 
         sse2_load4(dst0xmm, dst);
         msk0xmm = _mm_cvtsi32_si128(msk0);
@@ -687,8 +687,8 @@ vMaskAlphaSparseSkip4:
         if (msk0 == 0x00) goto vMaskAlphaSparseSkip1;
 
         src0 = READ_8(src0);
-        msk0 = ByteSIMD::u32MulDiv255(src0, msk0);
-        msk0 = ByteSIMD::u32Negate255(msk0);
+        msk0 = Face::u32MulDiv255(src0, msk0);
+        msk0 = Face::u32Negate255(msk0);
 
         sse2_load4(dst0xmm, dst);
         msk0xmm = _mm_cvtsi32_si128(msk0);
@@ -1374,8 +1374,8 @@ vMaskAlphaSparseSkip4:
         uint32_t msk0 = READ_8(msk);
         uint32_t src0 = READ_8(src);
 
-        msk0 = ByteSIMD::u32MulDiv255(src0, msk0);
-        msk0 = ByteSIMD::u32Negate255(msk0);
+        msk0 = Face::u32MulDiv255(src0, msk0);
+        msk0 = Face::u32Negate255(msk0);
 
         sse2_load4(dst0xmm, dst);
         msk0xmm = _mm_cvtsi32_si128(msk0);
@@ -1438,8 +1438,8 @@ vMaskAlphaSparseSkip4:
         if (msk0 == 0x00) goto vMaskAlphaSparseSkip1;
 
         src0 = READ_8(src0);
-        msk0 = ByteSIMD::u32MulDiv255(src0, msk0);
-        msk0 = ByteSIMD::u32Negate255(msk0);
+        msk0 = Face::u32MulDiv255(src0, msk0);
+        msk0 = Face::u32Negate255(msk0);
 
         sse2_load4(dst0xmm, dst);
         msk0xmm = _mm_cvtsi32_si128(msk0);

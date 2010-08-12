@@ -287,7 +287,7 @@ Set(FOG_CORE_LIB_SOURCES
   Fog/Core/WinUtil.cpp
 )
 
-Set(FOG_CORE_MAIN_HEADERS
+Set(FOG_CORE_LIB_HEADERS
   Fog/Core.h
   Fog/Core/Algorithms.h
   Fog/Core/Application.h
@@ -297,7 +297,6 @@ Set(FOG_CORE_MAIN_HEADERS
   Fog/Core/ByteArray.h
   Fog/Core/ByteArrayFilter.h
   Fog/Core/ByteArrayMatcher.h
-  Fog/Core/ByteSIMD_p.h
   Fog/Core/Char.h
   Fog/Core/Constants.h
   Fog/Core/CpuInfo.h
@@ -412,11 +411,27 @@ Set(FOG_CORE_PACK_HEADERS
 )
 
 # Source groups.
-Source_Group("Core" FILES ${FOG_CORE_LIB_SOURCES} ${FOG_CORE_MAIN_HEADERS})
+Source_Group("Core" FILES ${FOG_CORE_LIB_SOURCES} ${FOG_CORE_LIB_HEADERS})
 Source_Group("Core/Arch" FILES ${FOG_CORE_ARCH_SOURCES} ${FOG_CORE_ARCH_HEADERS})
 Source_Group("Core/Build" FILES ${FOG_CORE_BUILD_SOURCES} ${FOG_CORE_BUILD_HEADERS})
 Source_Group("Core/Intrin" FILES ${FOG_CORE_INTRIN_SOURCES} ${FOG_CORE_INTRIN_HEADERS})
 Source_Group("Core/Pack" FILES ${FOG_CORE_PACK_SOURCES} ${FOG_CORE_PACK_HEADERS})
+
+# =============================================================================
+# [Fog-Face]
+# =============================================================================
+
+Set(FOG_FACE_LIB_SOURCES
+)
+
+Set(FOG_FACE_LIB_HEADERS
+  Fog/Face.h
+  Fog/Face/FaceByte.h
+  Fog/Face/Features.h
+)
+
+# Source groups.
+Source_Group("Face" FILES ${FOG_FACE_LIB_SOURCES} ${FOG_FACE_LIB_HEADERS})
 
 # =============================================================================
 # [Fog-Graphics]
@@ -470,7 +485,7 @@ Set(FOG_GRAPHICS_LIB_SOURCES
   Fog/Graphics/TextOnPath.cpp
 )
 
-Set(FOG_GRAPHICS_MAIN_HEADERS
+Set(FOG_GRAPHICS_LIB_HEADERS
   Fog/Graphics.h
   Fog/Graphics/AnalyticRasterizer_p.h
   Fog/Graphics/Color.h
@@ -708,7 +723,7 @@ Set(FOG_GRAPHICS_RASTERENGINE_HEADERS
 )
 
 # Optimize specific files for speed
-Set_Source_Files_Properties(Fog/Graphics/AnalyticRasterizer.cpp                PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
+Set_Source_Files_Properties(Fog/Graphics/AnalyticRasterizer8.cpp                PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
 Set_Source_Files_Properties(Fog/Graphics/Image.cpp                             PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
 Set_Source_Files_Properties(Fog/Graphics/PathUtil.cpp                          PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
 Set_Source_Files_Properties(Fog/Graphics/PathUtil_SSE2.cpp                     PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_SSE2}")
@@ -722,7 +737,7 @@ Set_Source_Files_Properties(Fog/Graphics/RasterEngine/Init_SSE2.cpp            P
 Set_Source_Files_Properties(Fog/Graphics/RasterEngine/Init_SSSE3.cpp           PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_SSSE3}")
 
 # Source groups.
-Source_Group("Graphics"               FILES ${FOG_GRAPHICS_LIB_SOURCES}          ${FOG_GRAPHICS_MAIN_HEADERS}        )
+Source_Group("Graphics"               FILES ${FOG_GRAPHICS_LIB_SOURCES}          ${FOG_GRAPHICS_LIB_HEADERS}         )
 Source_Group("Graphics/ImageIO"       FILES ${FOG_GRAPHICS_IMAGEIO_SOURCES}      ${FOG_GRAPHICS_IMAGEIO_HEADERS}     )
 Source_Group("Graphics/FontEngine"    FILES ${FOG_GRAPHICS_FONTENGINE_SOURCES}   ${FOG_GRAPHICS_FONTENGINE_HEADERS}  )
 Source_Group("Graphics/PaintEngine"   FILES ${FOG_GRAPHICS_PAINTENGINE_SOURCES}  ${FOG_GRAPHICS_PAINTENGINE_HEADERS} )
@@ -739,7 +754,7 @@ Set(FOG_XML_LIB_SOURCES
   Fog/Xml/XmlWriter.cpp
 )
 
-Set(FOG_XML_MAIN_HEADERS
+Set(FOG_XML_LIB_HEADERS
   Fog/Xml.h
   Fog/Xml/Constants.h
   Fog/Xml/XmlDom.h
@@ -748,7 +763,7 @@ Set(FOG_XML_MAIN_HEADERS
   Fog/Xml/XmlWriter.h
 )
 
-Source_Group("Xml" FILES ${FOG_XML_LIB_SOURCES} ${FOG_XML_MAIN_HEADERS})
+Source_Group("Xml" FILES ${FOG_XML_LIB_SOURCES} ${FOG_XML_LIB_HEADERS})
 
 # =============================================================================
 # [Fog-Svg]
@@ -761,7 +776,7 @@ Set(FOG_SVG_LIB_SOURCES
   Fog/Svg/SvgUtil.cpp
 )
 
-Set(FOG_SVG_MAIN_HEADERS
+Set(FOG_SVG_LIB_HEADERS
   Fog/Svg.h
   Fog/Svg/Constants.h
   Fog/Svg/SvgBase.h
@@ -771,7 +786,7 @@ Set(FOG_SVG_MAIN_HEADERS
 )
 
 # Source groups.
-Source_Group("Svg" FILES ${FOG_SVG_LIB_SOURCES} ${FOG_SVG_MAIN_HEADERS})
+Source_Group("Svg" FILES ${FOG_SVG_LIB_SOURCES} ${FOG_SVG_LIB_HEADERS})
 
 # =============================================================================
 # [Fog-Gui]
@@ -811,7 +826,7 @@ Set(FOG_GUI_LIB_SOURCES
   Fog/Gui/Window.cpp
 )
 
-Set(FOG_GUI_MAIN_HEADERS
+Set(FOG_GUI_LIB_HEADERS
   Fog/Gui.h
   Fog/Gui/Animation.h
   Fog/Gui/BorderLayout.h
@@ -878,7 +893,7 @@ Set(FOG_GUI_THEMEENGINE_HEADERS
 
 # Source groups.
 Source_Group("Gui" FILES
-  ${FOG_GUI_LIB_SOURCES} ${FOG_GUI_MAIN_HEADERS}
+  ${FOG_GUI_LIB_SOURCES} ${FOG_GUI_LIB_HEADERS}
 )
 
 Source_Group("Gui/GuiEngine" FILES
@@ -912,6 +927,8 @@ Set(FOG_ALL_SOURCES
   ${FOG_CORE_BUILD_SOURCES}
   ${FOG_CORE_INTRIN_SOURCES}
   ${FOG_CORE_PACK_SOURCES}
+  # Fog-Face.
+  ${FOG_FACE_LIB_SOURCES}
   # Fog-Graphics.
   ${FOG_GRAPHICS_LIB_SOURCES}
   ${FOG_GRAPHICS_IMAGEIO_SOURCES}
@@ -929,26 +946,28 @@ Set(FOG_ALL_SOURCES
 
 Set(FOG_ALL_HEADERS
   # Fog-Core.
-  ${FOG_CORE_MAIN_HEADERS}
+  ${FOG_CORE_LIB_HEADERS}
   ${FOG_CORE_ARCH_HEADERS}
   ${FOG_CORE_BUILD_HEADERS}
   ${FOG_CORE_INTRIN_HEADERS}
   ${FOG_CORE_PACK_HEADERS}
+  # Fog-Face.
+  ${FOG_FACE_LIB_HEADERS}
   # Fog-Graphics.
-  ${FOG_GRAPHICS_MAIN_HEADERS}
+  ${FOG_GRAPHICS_LIB_HEADERS}
   ${FOG_GRAPHICS_IMAGEIO_HEADERS}
   ${FOG_GRAPHICS_FONTENGINE_HEADERS}
   ${FOG_GRAPHICS_PAINTENGINE_HEADERS}
   ${FOG_GRAPHICS_RASTERENGINE_HEADERS}
   # Fog-Gui.
-  ${FOG_GUI_MAIN_HEADERS}
+  ${FOG_GUI_LIB_HEADERS}
   ${FOG_GUI_GUIENGINE_WIN_HEADERS}
   ${FOG_GUI_GUIENGINE_X11_HEADERS}
   ${FOG_GUI_THEMEENGINE_HEADERS}
   # Fog-Svg.
-  ${FOG_SVG_MAIN_HEADERS}
+  ${FOG_SVG_LIB_HEADERS}
   # Fog-Xml.
-  ${FOG_XML_MAIN_HEADERS}
+  ${FOG_XML_LIB_HEADERS}
 )
 
 If(FOG_GUI_WINDOWS)

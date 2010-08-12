@@ -10,11 +10,11 @@
 
 // [Dependencies]
 #include <Fog/Core/ByteArray.h>
-#include <Fog/Core/ByteSIMD_p.h>
 #include <Fog/Core/Lock.h>
 #include <Fog/Core/Math.h>
 #include <Fog/Core/Memory.h>
 #include <Fog/Core/Static.h>
+#include <Fog/Face/FaceByte.h>
 #include <Fog/Graphics/AnalyticRasterizer_p.h>
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/Image.h>
@@ -54,13 +54,13 @@ namespace Fog {
 // ----------------------------------------------------------------------------
 
 // ============================================================================
-// [Fog::AnalyticRasterizer - Debugging]
+// [Fog::AnalyticRasterizer8 - Debugging]
 // ============================================================================
 
 // #define FOG_DEBUG_RASTERIZER)
 
 // ============================================================================
-// [Fog::AnalyticRasterizer - Local]
+// [Fog::AnalyticRasterizer8 - Local]
 // ============================================================================
 
 struct FOG_HIDDEN AnalyticRasterizerLocal
@@ -77,14 +77,14 @@ struct FOG_HIDDEN AnalyticRasterizerLocal
 
   Lock lock;
 
-  AnalyticRasterizer::CellXYBuffer* cellBuffers;
+  AnalyticRasterizer8::CellXYBuffer* cellBuffers;
   uint32_t cellsBufferCapacity;
 };
 
 static Static<AnalyticRasterizerLocal> analyticrasterizer_local;
 
 // ============================================================================
-// [Fog::AnalyticRasterizer - Constants]
+// [Fog::AnalyticRasterizer8 - Constants]
 // ============================================================================
 
 enum POLY_SUBPIXEL_ENUM
@@ -112,10 +112,10 @@ static FOG_INLINE int muldiv(double a, double b, double c) { return Math::iround
 static FOG_INLINE int upscale(double v) { return Math::iround(v * POLY_SUBPIXEL_SCALE); }
 
 // ============================================================================
-// [Fog::AnalyticRasterizer - Construction / Destruction]
+// [Fog::AnalyticRasterizer8 - Construction / Destruction]
 // ============================================================================
 
-AnalyticRasterizer::AnalyticRasterizer()
+AnalyticRasterizer8::AnalyticRasterizer8()
 {
   // Clip-box / bounding-box.
   _clipBox.clear();
@@ -152,7 +152,7 @@ AnalyticRasterizer::AnalyticRasterizer()
   reset();
 }
 
-AnalyticRasterizer::~AnalyticRasterizer()
+AnalyticRasterizer8::~AnalyticRasterizer8()
 {
   if (_bufferFirst) releaseCellXYBuffer(_bufferFirst);
 
@@ -161,10 +161,10 @@ AnalyticRasterizer::~AnalyticRasterizer()
 }
 
 // ============================================================================
-// [Fog::AnalyticRasterizer - Reset / Initialize / Finalize]
+// [Fog::AnalyticRasterizer8 - Reset / Initialize / Finalize]
 // ============================================================================
 
-void AnalyticRasterizer::reset()
+void AnalyticRasterizer8::reset()
 {
   _clipBox.clear();
   _boundingBox.set(0x7FFFFFFF, 0x7FFFFFFF, -0x7FFFFFFF, -0x7FFFFFFF);
@@ -197,7 +197,7 @@ void AnalyticRasterizer::reset()
   _cellsCount = 0; 
 }
 
-void AnalyticRasterizer::initialize()
+void AnalyticRasterizer8::initialize()
 {
   _sweepScanlineSimpleFn = NULL;
   _sweepScanlineRegionFn = NULL;
@@ -334,7 +334,7 @@ static FOG_INLINE void qsortCells(Cell* start, uint32_t num)
   }
 }
 
-void AnalyticRasterizer::finalize()
+void AnalyticRasterizer8::finalize()
 {
   // Perform sort only the first time.
   if (_isFinalized) return;
@@ -492,10 +492,10 @@ void AnalyticRasterizer::finalize()
 }
 
 // ============================================================================
-// [Fog::AnalyticRasterizer - Commands]
+// [Fog::AnalyticRasterizer8 - Commands]
 // ============================================================================
 
-void AnalyticRasterizer::addPath(const DoublePath& path)
+void AnalyticRasterizer8::addPath(const DoublePath& path)
 {
   FOG_ASSERT(_isFinalized == false);
 
@@ -612,7 +612,7 @@ void AnalyticRasterizer::addPath(const DoublePath& path)
   }
 }
 
-void AnalyticRasterizer::closePolygon()
+void AnalyticRasterizer8::closePolygon()
 {
   if (_x1 != _startX1 || _y1 != _startY1)
   {
@@ -624,10 +624,10 @@ void AnalyticRasterizer::closePolygon()
 }
 
 // ============================================================================
-// [Fog::AnalyticRasterizer - Clipper]
+// [Fog::AnalyticRasterizer8 - Clipper]
 // ============================================================================
 
-void AnalyticRasterizer::clipLine(int24x8_t x1, int24x8_t y1, int24x8_t x2, int24x8_t y2, uint f1, uint f2)
+void AnalyticRasterizer8::clipLine(int24x8_t x1, int24x8_t y1, int24x8_t x2, int24x8_t y2, uint f1, uint f2)
 {
   // Invisible by Y.
   if ((f1 & 10) == (f2 & 10) && (f1 & 10) != 0) return;
@@ -708,7 +708,7 @@ void AnalyticRasterizer::clipLine(int24x8_t x1, int24x8_t y1, int24x8_t x2, int2
   }
 }
 
-FOG_INLINE void AnalyticRasterizer::clipLineY(int24x8_t x1, int24x8_t y1, int24x8_t x2, int24x8_t y2, uint f1, uint f2)
+FOG_INLINE void AnalyticRasterizer8::clipLineY(int24x8_t x1, int24x8_t y1, int24x8_t x2, int24x8_t y2, uint f1, uint f2)
 {
   f1 &= 10;
   f2 &= 10;
@@ -757,10 +757,10 @@ FOG_INLINE void AnalyticRasterizer::clipLineY(int24x8_t x1, int24x8_t y1, int24x
 }
 
 // ============================================================================
-// [Fog::AnalyticRasterizer - Renderer]
+// [Fog::AnalyticRasterizer8 - Renderer]
 // ============================================================================
 
-void AnalyticRasterizer::renderLine(int24x8_t x1, int24x8_t y1, int24x8_t x2, int24x8_t y2)
+void AnalyticRasterizer8::renderLine(int24x8_t x1, int24x8_t y1, int24x8_t x2, int24x8_t y2)
 {
   enum DXLimitEnum { DXLimit = 16384 << POLY_SUBPIXEL_SHIFT };
 
@@ -771,8 +771,8 @@ void AnalyticRasterizer::renderLine(int24x8_t x1, int24x8_t y1, int24x8_t x2, in
     int cx = (x1 + x2) >> 1;
     int cy = (y1 + y2) >> 1;
 
-    AnalyticRasterizer::renderLine(x1, y1, cx, cy);
-    AnalyticRasterizer::renderLine(cx, cy, x2, y2);
+    AnalyticRasterizer8::renderLine(x1, y1, cx, cy);
+    AnalyticRasterizer8::renderLine(cx, cy, x2, y2);
     return;
   }
 
@@ -907,7 +907,7 @@ void AnalyticRasterizer::renderLine(int24x8_t x1, int24x8_t y1, int24x8_t x2, in
   renderHLine(ey1, x_from, POLY_SUBPIXEL_SCALE - first, x2, fy2);
 }
 
-FOG_INLINE void AnalyticRasterizer::renderHLine(int ey, int24x8_t x1, int24x8_t y1, int24x8_t x2, int24x8_t y2)
+FOG_INLINE void AnalyticRasterizer8::renderHLine(int ey, int24x8_t x1, int24x8_t y1, int24x8_t x2, int24x8_t y2)
 {
   int ex1;
   int ex2;
@@ -995,19 +995,19 @@ FOG_INLINE void AnalyticRasterizer::renderHLine(int ey, int24x8_t x1, int24x8_t 
   _curCell->setCell(ex1, ey, delta, (fx2 + POLY_SUBPIXEL_SCALE - first) * delta);
 }
 
-FOG_INLINE void AnalyticRasterizer::addCurCell()
+FOG_INLINE void AnalyticRasterizer8::addCurCell()
 {
   if (!_curCell->hasCovers()) return;
   if (FOG_UNLIKELY(++_curCell == _endCell)) nextCellBuffer();
 }
 
-FOG_INLINE void AnalyticRasterizer::addCurCell_Always()
+FOG_INLINE void AnalyticRasterizer8::addCurCell_Always()
 {
   FOG_ASSERT(_curCell->hasCovers());
   if (FOG_UNLIKELY(++_curCell == _endCell)) nextCellBuffer();
 }
 
-FOG_INLINE void AnalyticRasterizer::setCurCell(int x, int y)
+FOG_INLINE void AnalyticRasterizer8::setCurCell(int x, int y)
 {
   if (_curCell->hasPosition(x, y)) return;
 
@@ -1015,7 +1015,7 @@ FOG_INLINE void AnalyticRasterizer::setCurCell(int x, int y)
   _curCell->setCell(x, y, 0, 0);
 }
 
-bool AnalyticRasterizer::nextCellBuffer()
+bool AnalyticRasterizer8::nextCellBuffer()
 {
   // If there is no buffer we quietly do nothing.
   if (FOG_UNLIKELY(!_bufferCurrent)) goto error;
@@ -1061,7 +1061,7 @@ init:
   return true;
 }
 
-bool AnalyticRasterizer::finalizeCellBuffer()
+bool AnalyticRasterizer8::finalizeCellBuffer()
 {
   // If there is no buffer we quietly do nothing.
   if (!_bufferCurrent) return false;
@@ -1076,7 +1076,7 @@ bool AnalyticRasterizer::finalizeCellBuffer()
   return true;
 }
 
-void AnalyticRasterizer::freeXYCellBuffers(bool all)
+void AnalyticRasterizer8::freeXYCellBuffers(bool all)
 {
   if (_bufferFirst != NULL)
   {
@@ -1103,7 +1103,7 @@ void AnalyticRasterizer::freeXYCellBuffers(bool all)
 }
 
 // ============================================================================
-// [Fog::AnalyticRasterizer - Sweep]
+// [Fog::AnalyticRasterizer8 - Sweep]
 // ============================================================================
 
 #if defined(FOG_DEBUG_RASTERIZER)
@@ -1133,7 +1133,7 @@ static void dumpSpans(int y, const Span8* span)
 #endif // FOG_DEBUG_RASTERIZER
 
 template<int _RULE, int _USE_ALPHA>
-FOG_INLINE uint AnalyticRasterizer::_calculateAlpha(int area) const
+FOG_INLINE uint AnalyticRasterizer8::_calculateAlpha(int area) const
 {
   int cover = area >> (POLY_SUBPIXEL_SHIFT*2 + 1 - AA_SHIFT);
   if (cover < 0) cover = -cover;
@@ -1149,13 +1149,13 @@ FOG_INLINE uint AnalyticRasterizer::_calculateAlpha(int area) const
     if (cover > AA_MASK) cover = AA_MASK;
   }
 
-  if (_USE_ALPHA) cover = ByteSIMD::u32MulDiv255(cover, _alpha);
+  if (_USE_ALPHA) cover = Face::u32MulDiv255(cover, _alpha);
   return cover;
 }
 
 template<int _RULE, int _USE_ALPHA>
-Span8* AnalyticRasterizer::_sweepScanlineSimpleImpl(
-  AnalyticRasterizer* rasterizer, Scanline8& scanline, int y)
+Span8* AnalyticRasterizer8::_sweepScanlineSimpleImpl(
+  AnalyticRasterizer8* rasterizer, Scanline8& scanline, int y)
 {
   FOG_ASSERT(rasterizer->_isFinalized);
   if (y >= rasterizer->_boundingBox.y2) return NULL;
@@ -1287,8 +1287,8 @@ Span8* AnalyticRasterizer::_sweepScanlineSimpleImpl(
 }
 
 template<int _RULE, int _USE_ALPHA>
-Span8* AnalyticRasterizer::_sweepScanlineRegionImpl(
-  AnalyticRasterizer* rasterizer, Scanline8& scanline, int y,
+Span8* AnalyticRasterizer8::_sweepScanlineRegionImpl(
+  AnalyticRasterizer8* rasterizer, Scanline8& scanline, int y,
   const IntBox* clipBoxes, sysuint_t count)
 {
   FOG_ASSERT(rasterizer->_isFinalized);
@@ -1494,8 +1494,8 @@ end:
 }
 
 template<int _RULE, int _USE_ALPHA>
-Span8* AnalyticRasterizer::_sweepScanlineSpansImpl(
-  AnalyticRasterizer* rasterizer, Scanline8& scanline, int y,
+Span8* AnalyticRasterizer8::_sweepScanlineSpansImpl(
+  AnalyticRasterizer8* rasterizer, Scanline8& scanline, int y,
   const Span8* clipSpans)
 {
   FOG_ASSERT(rasterizer->_isFinalized);
@@ -1586,7 +1586,7 @@ advanceClip:
       if (Span8::isPtrCMask(clipMask))
       {
         uint32_t m = Span8::ptrToCMask(clipMask);
-        if ((alpha = ByteSIMD::u32MulDiv255(alpha, m)) == 0)
+        if ((alpha = Face::u32MulDiv255(alpha, m)) == 0)
         {
           if (clipX2 <= nextX) goto advanceClip;
           continue;
@@ -1616,7 +1616,7 @@ advanceClip:
           }
 
           coversh = cover << (POLY_SUBPIXEL_SHIFT + 1);
-          alpha = ByteSIMD::u32MulDiv255(
+          alpha = Face::u32MulDiv255(
             rasterizer->_calculateAlpha<_RULE, _USE_ALPHA>(coversh - area), m);
 
           FOG_ASSERT(x >= clipX1 && x < clipX2);
@@ -1638,7 +1638,7 @@ advanceClip:
       }
       else
       {
-        if ((alpha = ByteSIMD::u32MulDiv255(alpha, clipMask[x])) == 0)
+        if ((alpha = Face::u32MulDiv255(alpha, clipMask[x])) == 0)
         {
           if (clipX2 <= nextX) goto advanceClip;
           continue;
@@ -1670,7 +1670,7 @@ advanceClip:
           FOG_ASSERT(x >= clipX1 && x < clipX2);
           
           coversh = cover << (POLY_SUBPIXEL_SHIFT + 1);
-          alpha = ByteSIMD::u32MulDiv255(
+          alpha = Face::u32MulDiv255(
             rasterizer->_calculateAlpha<_RULE, _USE_ALPHA>(coversh - area), clipMask[x]);
 
           if (++x == nextX)
@@ -1720,7 +1720,7 @@ advanceClip:
         {
           FOG_ASSERT(x >= clipX1 && x < clipX2);
           uint m = (Span8::isPtrCMask(clipMask)) ? Span8::ptrToCMask(clipMask) : clipMask[x];
-          alpha = ByteSIMD::u32MulDiv255(alpha, m);
+          alpha = Face::u32MulDiv255(alpha, m);
           if (alpha)
           {
             scanline.newVSpanAlpha(x);
@@ -1756,7 +1756,7 @@ advanceClip:
 
           if (Span8::isPtrCMask(clipMask))
           {
-            uint alphaAdj = ByteSIMD::u32MulDiv255(alpha, Span8::ptrToCMask(clipMask));
+            uint alphaAdj = Face::u32MulDiv255(alpha, Span8::ptrToCMask(clipMask));
             if (alphaAdj) scanline.addCSpanOrMergeVSpan(x, toX, alphaAdj);
           }
           else
@@ -1786,7 +1786,7 @@ advanceClip:
     
               if (Span8::isPtrCMask(clipMask))
               {
-                uint alphaAdj = ByteSIMD::u32MulDiv255(alpha, Span8::ptrToCMask(clipMask));
+                uint alphaAdj = Face::u32MulDiv255(alpha, Span8::ptrToCMask(clipMask));
                 if (alphaAdj) scanline.addCSpanOrMergeVSpan(clipX1, toX, alphaAdj);
               }
               else
@@ -1820,10 +1820,10 @@ end:
 }
 
 // ============================================================================
-// [Fog::AnalyticRasterizer - Cache]
+// [Fog::AnalyticRasterizer8 - Cache]
 // ============================================================================
 
-AnalyticRasterizer::CellXYBuffer* AnalyticRasterizer::getCellXYBuffer()
+AnalyticRasterizer8::CellXYBuffer* AnalyticRasterizer8::getCellXYBuffer()
 {
   CellXYBuffer* cellBuffer = NULL;
 
@@ -1854,7 +1854,7 @@ AnalyticRasterizer::CellXYBuffer* AnalyticRasterizer::getCellXYBuffer()
   return cellBuffer;
 }
 
-void AnalyticRasterizer::releaseCellXYBuffer(CellXYBuffer* cellBuffer)
+void AnalyticRasterizer8::releaseCellXYBuffer(CellXYBuffer* cellBuffer)
 {
   AutoLock locked(analyticrasterizer_local->lock);
 
@@ -1866,7 +1866,7 @@ void AnalyticRasterizer::releaseCellXYBuffer(CellXYBuffer* cellBuffer)
   analyticrasterizer_local->cellBuffers = cellBuffer;
 }
 
-void AnalyticRasterizer::cleanup()
+void AnalyticRasterizer8::cleanup()
 {
   // Free all cell buffers.
   CellXYBuffer* cur;
@@ -1905,6 +1905,6 @@ FOG_INIT_DECLARE void fog_analyticrasterizer_shutdown(void)
 {
   using namespace Fog;
 
-  AnalyticRasterizer::cleanup();
+  AnalyticRasterizer8::cleanup();
   analyticrasterizer_local.destroy();
 }

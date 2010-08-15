@@ -39,7 +39,9 @@ namespace Face {
 //! 64-bit processor.
 
 #if FOG_ARCH_BITS >= 64
-#define FOG_FACE_HAS_64BIT
+# if !defined(FOG_FACE_HAS_64BIT)
+#  define FOG_FACE_HAS_64BIT
+# endif
 #endif
 
 // ============================================================================
@@ -56,8 +58,11 @@ namespace Face {
 //! generate good code (using cmov on x86 platform) then it's good to define 
 //! it (target code will be smaller and faster).
 
-#if defined(FOG_ARCH_X86) || defined(FOG_ARCH_X86_64)
-#define FOG_FACE_HAS_CONDITIONAL_INSTRUCTIONS
+#if defined(FOG_ARCH_X86) || \
+    defined(FOG_ARCH_X86_64)
+# if !defined(FOG_FACE_HAS_CONDITIONAL_INSTRUCTIONS)
+#  define FOG_FACE_HAS_CONDITIONAL_INSTRUCTIONS
+# endif
 #endif
 
 // ============================================================================
@@ -94,7 +99,9 @@ namespace Face {
 #if defined(FOG_ARCH_X86) || \
     defined(FOG_ARCH_X86_64) || \
     defined(FOG_ARCH_PPC)
-#define FOG_FACE_HAS_FAST_MULTIPLY
+# if !defined(FOG_FACE_HAS_FAST_MULTIPLY)
+#  define FOG_FACE_HAS_FAST_MULTIPLY
+# endif
 #endif
 
 //! @}

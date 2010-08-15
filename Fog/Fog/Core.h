@@ -184,7 +184,7 @@
 
 
 
-//! @defgroup Fog_Core_Memory Memory management and debugging
+//! @defgroup Fog_Core_Memory Memory management
 //! @ingroup Fog_Core_Public
 
 
@@ -347,6 +347,8 @@ struct Implicit
 #include <Fog/Core/MapFile.h>
 #include <Fog/Core/Math.h>
 #include <Fog/Core/Memory.h>
+#include <Fog/Core/MemoryBuffer.h>
+#include <Fog/Core/MemoryManager.h>
 #include <Fog/Core/Misc.h>
 #include <Fog/Core/OS.h>
 #include <Fog/Core/Object.h>

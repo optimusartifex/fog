@@ -187,6 +187,7 @@ HANDLEStreamDevice::HANDLEStreamDevice(HANDLE hFile, uint32_t fflags) :
 
 HANDLEStreamDevice::~HANDLEStreamDevice()
 {
+  close();
 }
 
 err_t HANDLEStreamDevice::openFile(const String& _fileName, uint32_t openFlags, StreamDevice** dst)

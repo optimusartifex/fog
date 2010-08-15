@@ -12,6 +12,7 @@
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/Memory.h>
+#include <Fog/Core/MemoryBuffer.h>
 #include <Fog/Core/Math.h>
 #include <Fog/Core/Misc.h>
 #include <Fog/Core/Std.h>
@@ -1861,13 +1862,14 @@ static err_t Region_doPath(Region* self, AnalyticRasterizer8* rasterizer, uint8_
   IntBox bounds(rasterizer->getBoundingBox());
 
   Scanline8 scanline;
+  MemoryBuffer tmp;
 
   int w = bounds.getWidth();
   int h = bounds.getHeight();
 
   for (int y = 0; y < h; y++)
   {
-    Span8* span = rasterizer->sweepScanline(scanline, y + bounds.y1);
+    Span8* span = rasterizer->sweepScanline(scanline, tmp, y + bounds.y1);
     while (span)
     {
       if (span->isCMask())
@@ -1907,6 +1909,7 @@ static err_t Region_doPath(Region* self, AnalyticRasterizer8* rasterizer, uint8_
 
 err_t Region::fromPath(const DoublePath& path, const DoubleMatrix* matrix, uint32_t threshold)
 {
+  // TODO RASTERIZER: Calculate bounding box before.
   clear();
 
   if (threshold == 0) return ERR_RT_INVALID_ARGUMENT;

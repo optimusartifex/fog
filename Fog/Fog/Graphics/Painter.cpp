@@ -13,8 +13,8 @@
 #include <Fog/Graphics/Painter.h>
 #include <Fog/Graphics/PaintEngine.h>
 
-#include <Fog/Graphics/PaintEngine/PaintEngine_Null_p.h>
-#include <Fog/Graphics/PaintEngine/PaintEngine_Raster_Engine_p.h>
+#include <Fog/Graphics/PaintEngine/NullPaintEngine_p.h>
+#include <Fog/Graphics/PaintEngine/RasterPaintEngine_p.h>
 
 namespace Fog {
 

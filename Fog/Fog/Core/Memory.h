@@ -46,6 +46,12 @@ FOG_CAPI_EXTERN void fog_memory_xchg(uint8_t* addr1, uint8_t* addr2, sysuint_t c
 namespace Fog {
 
 // ============================================================================
+// [Forward Declarations]
+// ============================================================================
+
+struct MemoryManager;
+
+// ============================================================================
 // [Fog::Uint64Union]
 // ============================================================================
 
@@ -76,9 +82,15 @@ namespace Memory {
 //! @addtogroup Fog_Core_Memory
 //! @{
 
-// --------------------------------------------------------------------------
-// [Alloc / Free]
-// --------------------------------------------------------------------------
+// ============================================================================
+// [Fog::Memory - Memory Manager]
+// ============================================================================
+
+FOG_API MemoryManager* getDefaultManager();
+
+// ============================================================================
+// [Fog::Memory - Alloc / Free]
+// ============================================================================
 
 static FOG_INLINE void* alloc(sysuint_t size)
 {
@@ -105,9 +117,9 @@ static FOG_INLINE void free(void* addr)
   fog_memory_free(addr);
 }
 
-// --------------------------------------------------------------------------
-// [Memory Operations]
-// --------------------------------------------------------------------------
+// ============================================================================
+// [Fog::Memory - Ops]
+// ============================================================================
 
 static FOG_INLINE void* dup(void* addr, sysuint_t size)
 {
@@ -134,9 +146,9 @@ static FOG_INLINE void zero(void* dst, sysuint_t size)
   fog_memory_zero(dst, size);
 }
 
-// --------------------------------------------------------------------------
-// [Memory Operations - NT]
-// --------------------------------------------------------------------------
+// ============================================================================
+// [Fog::Memory - Ops (NT)]
+// ============================================================================
 
 static FOG_INLINE void copy_nt(void* dst, const void* src, sysuint_t size)
 {
@@ -158,9 +170,9 @@ static FOG_INLINE void zero_nt(void* dst, sysuint_t size)
   fog_memory_zero_nt(dst, size);
 }
 
-// --------------------------------------------------------------------------
-// [Copy]
-// --------------------------------------------------------------------------
+// ============================================================================
+// [Fog::Memory - Copy]
+// ============================================================================
 
 static FOG_INLINE void copy1B(void* dst, const void* src)
 {
@@ -272,76 +284,9 @@ static FOG_INLINE void copy64B(void* dst, const void* src)
 #endif
 }
 
-// --------------------------------------------------------------------------
-// [Eq]
-// --------------------------------------------------------------------------
-
-static FOG_INLINE bool eq1B(const void* a, const void* b)
-{
-  return ((uint8_t *)a)[0] == ((uint8_t *)b)[0];
-}
-
-static FOG_INLINE bool eq2B(const void* a, const void* b)
-{
-  return ((uint16_t *)a)[0] == ((uint16_t *)b)[0];
-}
-
-static FOG_INLINE bool eq3B(const void* a, const void* b)
-{
-  return ((uint16_t *)a)[0] == ((uint16_t *)b)[0] &&
-         ((uint8_t  *)a)[2] == ((uint8_t  *)b)[2] ;
-}
-
-static FOG_INLINE bool eq4B(const void* a, const void* b)
-{
-  return ((uint32_t *)a)[0] == ((uint32_t *)b)[0];
-}
-
-static FOG_INLINE bool eq8B(const void* a, const void* b)
-{
-#if FOG_ARCH_BITS == 64
-  return ((uint64_t *)a)[0] == ((uint64_t *)b)[0];
-#else
-  return ((uint32_t *)a)[0] == ((uint32_t *)b)[0] &&
-         ((uint32_t *)a)[1] == ((uint32_t *)b)[1] ;
-#endif 
-}
-
-static FOG_INLINE bool eq16B(const void* a, const void* b)
-{
-#if FOG_ARCH_BITS == 64
-  return ((uint64_t *)a)[0] == ((uint64_t *)b)[0] &&
-         ((uint64_t *)a)[1] == ((uint64_t *)b)[1] ;
-#else
-  return ((uint32_t *)a)[0] == ((uint32_t *)b)[0] &&
-         ((uint32_t *)a)[1] == ((uint32_t *)b)[1] &&
-         ((uint32_t *)a)[2] == ((uint32_t *)b)[2] &&
-         ((uint32_t *)a)[3] == ((uint32_t *)b)[3] ;
-#endif 
-}
-
-static FOG_INLINE bool eq32B(const void* a, const void* b)
-{
-#if FOG_ARCH_BITS == 64
-  return ((uint64_t *)a)[0] == ((uint64_t *)b)[0] &&
-         ((uint64_t *)a)[1] == ((uint64_t *)b)[1] &&
-         ((uint64_t *)a)[2] == ((uint64_t *)b)[2] &&
-         ((uint64_t *)a)[3] == ((uint64_t *)b)[3] ;
-#else
-  return ((uint32_t *)a)[0] == ((uint32_t *)b)[0] &&
-         ((uint32_t *)a)[1] == ((uint32_t *)b)[1] &&
-         ((uint32_t *)a)[2] == ((uint32_t *)b)[2] &&
-         ((uint32_t *)a)[3] == ((uint32_t *)b)[3] &&
-         ((uint32_t *)a)[4] == ((uint32_t *)b)[4] &&
-         ((uint32_t *)a)[5] == ((uint32_t *)b)[5] &&
-         ((uint32_t *)a)[6] == ((uint32_t *)b)[6] &&
-         ((uint32_t *)a)[7] == ((uint32_t *)b)[7] ;
-#endif 
-}
-
-// --------------------------------------------------------------------------
-// [Zero]
-// --------------------------------------------------------------------------
+// ============================================================================
+// [Fog::Memory - Zero]
+// ============================================================================
 
 static FOG_INLINE void zero1B(void* a)
 {
@@ -412,9 +357,76 @@ static FOG_INLINE void zero32B(void* a)
 #endif
 }
 
-// --------------------------------------------------------------------------
-// [XChg]
-// --------------------------------------------------------------------------
+// ============================================================================
+// [Fog::Memory - Eq]
+// ============================================================================
+
+static FOG_INLINE bool eq1B(const void* a, const void* b)
+{
+  return ((uint8_t *)a)[0] == ((uint8_t *)b)[0];
+}
+
+static FOG_INLINE bool eq2B(const void* a, const void* b)
+{
+  return ((uint16_t *)a)[0] == ((uint16_t *)b)[0];
+}
+
+static FOG_INLINE bool eq3B(const void* a, const void* b)
+{
+  return ((uint16_t *)a)[0] == ((uint16_t *)b)[0] &&
+         ((uint8_t  *)a)[2] == ((uint8_t  *)b)[2] ;
+}
+
+static FOG_INLINE bool eq4B(const void* a, const void* b)
+{
+  return ((uint32_t *)a)[0] == ((uint32_t *)b)[0];
+}
+
+static FOG_INLINE bool eq8B(const void* a, const void* b)
+{
+#if FOG_ARCH_BITS == 64
+  return ((uint64_t *)a)[0] == ((uint64_t *)b)[0];
+#else
+  return ((uint32_t *)a)[0] == ((uint32_t *)b)[0] &&
+         ((uint32_t *)a)[1] == ((uint32_t *)b)[1] ;
+#endif 
+}
+
+static FOG_INLINE bool eq16B(const void* a, const void* b)
+{
+#if FOG_ARCH_BITS == 64
+  return ((uint64_t *)a)[0] == ((uint64_t *)b)[0] &&
+         ((uint64_t *)a)[1] == ((uint64_t *)b)[1] ;
+#else
+  return ((uint32_t *)a)[0] == ((uint32_t *)b)[0] &&
+         ((uint32_t *)a)[1] == ((uint32_t *)b)[1] &&
+         ((uint32_t *)a)[2] == ((uint32_t *)b)[2] &&
+         ((uint32_t *)a)[3] == ((uint32_t *)b)[3] ;
+#endif 
+}
+
+static FOG_INLINE bool eq32B(const void* a, const void* b)
+{
+#if FOG_ARCH_BITS == 64
+  return ((uint64_t *)a)[0] == ((uint64_t *)b)[0] &&
+         ((uint64_t *)a)[1] == ((uint64_t *)b)[1] &&
+         ((uint64_t *)a)[2] == ((uint64_t *)b)[2] &&
+         ((uint64_t *)a)[3] == ((uint64_t *)b)[3] ;
+#else
+  return ((uint32_t *)a)[0] == ((uint32_t *)b)[0] &&
+         ((uint32_t *)a)[1] == ((uint32_t *)b)[1] &&
+         ((uint32_t *)a)[2] == ((uint32_t *)b)[2] &&
+         ((uint32_t *)a)[3] == ((uint32_t *)b)[3] &&
+         ((uint32_t *)a)[4] == ((uint32_t *)b)[4] &&
+         ((uint32_t *)a)[5] == ((uint32_t *)b)[5] &&
+         ((uint32_t *)a)[6] == ((uint32_t *)b)[6] &&
+         ((uint32_t *)a)[7] == ((uint32_t *)b)[7] ;
+#endif 
+}
+
+// ============================================================================
+// [Fog::Memory - Xchg]
+// ============================================================================
 
 static FOG_INLINE void xchg1B(void* a, void* b)
 {
@@ -564,9 +576,9 @@ static FOG_INLINE void xchgPtr(T** a, T** b)
 #endif
 }
 
-// --------------------------------------------------------------------------
-// [BSwap]
-// --------------------------------------------------------------------------
+// ============================================================================
+// [Fog::Memory - BSwap]
+// ============================================================================
 
 static FOG_INLINE uint16_t bswap16(uint16_t x)
 {
@@ -683,7 +695,7 @@ static FOG_INLINE uint64_t bswap64be(uint64_t x) { return __FOG_SWAP(bswap64(x),
 
 //! @}
 
-} // Memory namespace.
+} // Memory namespace
 } // Fog namespace
 
 // [Guard]

@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Core Library - Public API]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -14,7 +14,7 @@
 
 namespace Fog {
 
-//! @addtogroup Fog_Core_Private
+//! @addtogroup Fog_Core_Memory
 //! @{
 
 // ============================================================================
@@ -60,7 +60,7 @@ struct FOG_HIDDEN BlockMemoryAllocator
   //! @brief Size of one block (decreased by some value to always fit in 
   //! one/two pages). 96 bytes reserved for @c ::malloc() data and our
   //! @c Block data.
-  enum { BLOCK_SIZE = 8000 };
+  enum { BLOCK_SIZE = 8080 };
 
   // --------------------------------------------------------------------------
   // [Block]
@@ -153,8 +153,8 @@ FOG_INLINE void BlockMemoryAllocator::free(void* ptr)
 //!
 //! This is hackery for performance. Concept is that objects created by
 //! @c ZoneMemoryAllocator are freed all at once. This means that lifetime of
-//! these objects are same as the lifetime of the @c ZoneMemoryAllocator itself.
-//! Optionally it's possible to call @c record() and @c revert() methods
+//! these objects are the same as the lifetime of the @c ZoneMemoryAllocator
+//! itself. Optionally it's possible to call @c record() and @c revert() methods
 //! that can be used to record current allocation position and to revert
 //! it back. This is used by clip-span engine to reuse memory used by the 
 //! clip state that was restored (data not needed anymore).
@@ -296,7 +296,6 @@ struct FOG_HIDDEN ZoneMemoryAllocator
   // --------------------------------------------------------------------------
 
 private:
-
   FOG_INLINE Chunk* _allocChunk()
   {
     return reinterpret_cast<Chunk*>(

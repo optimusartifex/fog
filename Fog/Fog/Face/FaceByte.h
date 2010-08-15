@@ -1502,11 +1502,11 @@ static FOG_INLINE void b64_1x4Unpack021X(
 static FOG_INLINE uint32_t p32_1x4MulDiv255U32(uint32_t x0, uint32_t a0)
 {
 #if defined(FOG_FACE_HAS_64BIT)
-  uint64_t x0 = ((uint64_t)x | ((uint64_t)x << 24)) & FOG_UINT64_C(0x00FF00FF00FF00FF);
-  x0 *= a0;
-  x0 = (x0 + ((x0 >> 8) & FOG_UINT64_C(0x00FF00FF00FF00FF)) + FOG_UINT64_C(0x0080008000800080)) >> 8;
-  x0 &= FOG_UINT64_C(0x00FF00FF00FF00FF);
-  return (uint32_t)(x0 + (x0 >> 24));
+  uint64_t t0 = ((uint64_t)x0 | ((uint64_t)x0 << 24)) & FOG_UINT64_C(0x00FF00FF00FF00FF);
+  t0 *= a0;
+  t0 = (t0 + ((t0 >> 8) & FOG_UINT64_C(0x00FF00FF00FF00FF)) + FOG_UINT64_C(0x0080008000800080)) >> 8;
+  t0 &= FOG_UINT64_C(0x00FF00FF00FF00FF);
+  return (uint32_t)(t0 + (t0 >> 24));
 #else
   uint32_t t0 = ((x0     ) & 0x00FF00FFU) * a0;
   uint32_t t1 = ((x0 >> 8) & 0x00FF00FFU) * a0;
@@ -1524,11 +1524,11 @@ static FOG_INLINE uint32_t p32_1x3MulDiv255U32_ZXXX(
   uint32_t x0, uint32_t a0)
 {
 #if defined(FOG_FACE_HAS_64BIT)
-  uint64_t x0 = ((uint64_t)x | ((uint64_t)x << 24)) & FOG_UINT64_C(0x000000FF00FF00FF);
-  x0 *= a0;
-  x0 = (x0 + ((x0 >> 8) & FOG_UINT64_C(0x000000FF00FF00FF)) + FOG_UINT64_C(0x0000008000800080)) >> 8;
-  x0 &= FOG_UINT64_C(0x000000FF00FF00FF);
-  return (uint32_t)(x0 | (x0 >> 24));
+  uint64_t t0 = ((uint64_t)x0 | ((uint64_t)x0 << 24)) & FOG_UINT64_C(0x000000FF00FF00FF);
+  t0 *= a0;
+  t0 = (t0 + ((t0 >> 8) & FOG_UINT64_C(0x000000FF00FF00FF)) + FOG_UINT64_C(0x0000008000800080)) >> 8;
+  t0 &= FOG_UINT64_C(0x000000FF00FF00FF);
+  return (uint32_t)(t0 | (t0 >> 24));
 #else
   uint32_t t0 = ((x0     ) & 0x00FF00FFU) * a0;
   uint32_t t1 = ((x0 >> 8) & 0x000000FFU) * a0;
@@ -1546,11 +1546,11 @@ static FOG_INLINE uint32_t p32_1x3MulDiv255U32_FXXX(
   uint32_t x0, uint32_t a0)
 {
 #if defined(FOG_FACE_HAS_64BIT)
-  uint64_t x0 = ((uint64_t)x | ((uint64_t)x << 24)) & FOG_UINT64_C(0x000000FF00FF00FF);
-  x0 *= a;
-  x0 = (x0 + ((x0 >> 8) & FOG_UINT64_C(0x000000FF00FF00FF)) + FOG_UINT64_C(0xFF00008000800080)) >> 8;
-  x0 &= FOG_UINT64_C(0x00FF00FF00FF00FF);
-  return (uint32_t)(x0 | (x0 >> 24));
+  uint64_t t0 = ((uint64_t)x0 | ((uint64_t)x0 << 24)) & FOG_UINT64_C(0x000000FF00FF00FF);
+  t0 *= a0;
+  t0 = (t0 + ((t0 >> 8) & FOG_UINT64_C(0x000000FF00FF00FF)) + FOG_UINT64_C(0xFF00008000800080)) >> 8;
+  t0 &= FOG_UINT64_C(0x00FF00FF00FF00FF);
+  return (uint32_t)(t0 | (t0 >> 24));
 #else
   uint32_t t0 = ((x0     ) & 0x00FF00FFU) * a0;
   uint32_t t1 = ((x0 >> 8) & 0x000000FFU) * a0;

@@ -14,6 +14,7 @@
 #include <Fog/Core/MapFile.h>
 #include <Fog/Core/Math.h>
 #include <Fog/Core/Memory.h>
+#include <Fog/Core/MemoryBuffer.h>
 #include <Fog/Core/Misc.h>
 #include <Fog/Core/Std.h>
 #include <Fog/Graphics/AnalyticRasterizer_p.h>
@@ -2456,6 +2457,7 @@ err_t Image::scroll(int scrollX, int scrollY, const IntRect& r)
 
 err_t Image::glyphFromPath(Image& glyph, IntPoint& offset, const DoublePath& path)
 {
+  // TODO RASTERIZER: Calculate bounding box before.
   if (path.isEmpty())
   {
     glyph.free();
@@ -2485,6 +2487,7 @@ err_t Image::glyphFromPath(Image& glyph, IntPoint& offset, const DoublePath& pat
     IntBox bounds(rasterizer.getBoundingBox());
 
     Scanline8 scanline;
+    MemoryBuffer tmp;
 
     int w = bounds.getWidth();
     int h = bounds.getHeight();
@@ -2500,7 +2503,7 @@ err_t Image::glyphFromPath(Image& glyph, IntPoint& offset, const DoublePath& pat
     {
       Memory::zero(glyphData, glyphStride);
 
-      Span8* span = rasterizer.sweepScanline(scanline, y + bounds.y1);
+      Span8* span = rasterizer.sweepScanline(scanline, tmp, y + bounds.y1);
       while (span)
       {
         uint8_t* p = glyphData + (uint)(span->getX1() - bounds.x1);

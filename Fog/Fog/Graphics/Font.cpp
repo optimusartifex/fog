@@ -26,18 +26,18 @@
 #include <Fog/Graphics/Matrix.h>
 
 #if defined(FOG_FONT_WINDOWS)
-# include <Fog/Graphics/FontEngine/FontEngine_Windows.h>
+# include <Fog/Graphics/FontEngine/WinFontEngine.h>
 #endif // FOG_FONT_WINDOWS
 
 #if defined(FOG_FONT_FREETYPE)
-# include <Fog/Graphics/FontEngine/FontEngine_FreeType.h>
+# include <Fog/Graphics/FontEngine/FTFontEngine.h>
 #endif // FOG_FONT_FREETYPE
 
 #if defined(FOG_FONT_MAC)
-# include <Fog/Graphics/FontEngine/FontEngine_Mac.h>
+# include <Fog/Graphics/FontEngine/MacFontEngine.h>
 #endif // FOG_FONT_MAC
 
-#include <Fog/Graphics/FontEngine/FontEngine_Null_p.h>
+#include <Fog/Graphics/FontEngine/NullFontEngine_p.h>
 
 namespace Fog {
 

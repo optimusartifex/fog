@@ -32,7 +32,7 @@
 #include <Fog/Gui/GuiEngine.h>
 
 #if defined(FOG_OS_WINDOWS)
-# include <Fog/Gui/GuiEngine/GuiEngine_Windows.h>
+# include <Fog/Gui/GuiEngine/WinGuiEngine.h>
 // windows.h is already included by Fog/Core/Build.h
 # include <io.h>
 #else

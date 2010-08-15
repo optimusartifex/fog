@@ -636,4 +636,4 @@ void GridLayout::invalidateLayout()
   _colwidth = 0;
 }
 
-} // Fog namespace.
+} // Fog namespace

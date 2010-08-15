@@ -2213,6 +2213,9 @@ enum PAINTER_SOURCE_TYPE
 // [Fog::PATH_CMD_DATA]
 // ============================================================================
 
+// TODO: Too much path commands related to STOP/END/FLAG_CLOSE. Rename STOP to
+// CLOSE, FLAG_CW to CLOSE_CW and FLAG_CCW to CLOSE_CCW. Remove END command.
+
 //! @brief Command data type and flags.
 enum PATH_CMD_DATA
 {

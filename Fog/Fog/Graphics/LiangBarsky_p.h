@@ -55,24 +55,42 @@ struct FOG_HIDDEN LiangBarsky
   //!        |        |
   //!  clipBox.x1  clipBox.x2
   //! @endverbatim
+  template<typename T>
+  static FOG_INLINE uint getClippingFlags(T x, T y, T cx1, T cy1, T cx2, T cy2)
+  {
+    return (x > cx2) | ((y > cy2) << 1) | ((x < (T)cx1) << 2) | ((y < (T)cy1) << 3);
+  }
+
   template<typename T, typename BoxT>
   static FOG_INLINE uint getClippingFlags(T x, T y, const BoxT& clipBox)
   {
-    return (x > clipBox.x2) | ((y > clipBox.y2) << 1) | ((x < clipBox.x1) << 2) | ((y < clipBox.y1) << 3);
+    return getClippingFlags(x, y, clipBox.x1, clipBox.y1, clipBox.x2, clipBox.y2);
   }
 
   //! @brief Determine the clipping code of the horizontal direction only.
+  template<typename T>
+  static FOG_INLINE uint getClippingFlagsX(T x, T cx1, T cx2)
+  {
+    return (x > cx2) | ((x < cx1) << 2);
+  }
+
   template<typename T, typename BoxT>
   static FOG_INLINE uint getClippingFlagsX(T x, const BoxT& clipBox)
   {
-    return (x > clipBox.x2) | ((x < clipBox.x1) << 2);
+    return getClippingFlagsX(x, clipBox.x1, clipBox.y2);
   }
 
   //! @brief Determine the clipping code of the vertical direction only.
+  template<typename T>
+  static FOG_INLINE uint getClippingFlagsY(T y, T cy1, T cy2)
+  {
+    return ((y > cy2) << 1) | ((y < cy1) << 3);
+  }
+
   template<typename T, typename BoxT>
   static FOG_INLINE uint getClippingFlagsY(T y, const BoxT& clipBox)
   {
-    return ((y > clipBox.y2) << 1) | ((y < clipBox.y1) << 3);
+    return getClippingFlagsY(y, clipBox.y1, clipBox.y2);
   }
 
   //! @brief Clip using Liang-Barsky algorithm.

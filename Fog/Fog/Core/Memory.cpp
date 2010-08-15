@@ -11,9 +11,10 @@
 // [Dependencies]
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Constants.h>
+#include <Fog/Core/Lock.h>
 #include <Fog/Core/Math.h>
 #include <Fog/Core/Memory.h>
-#include <Fog/Core/Lock.h>
+#include <Fog/Core/MemoryManager.h>
 #include <Fog/Core/Static.h>
 #include <Fog/Core/Std.h>
 
@@ -440,6 +441,41 @@ FOG_CAPI_DECLARE void fog_memory_xchg(uint8_t* addr1, uint8_t* addr2, sysuint_t 
 #endif // FOG_ARCH_BITS
 }
 
+// ===========================================================================
+// [Fog::Memory - Memory Manager]
+// ===========================================================================
+
+namespace Fog {
+
+struct FOG_HIDDEN DefaultMemoryManager : public MemoryManager
+{
+  DefaultMemoryManager();
+
+  virtual void* alloc(sysuint_t size, sysuint_t* allocated);
+  virtual void free(void* ptr, sysuint_t size);
+};
+
+DefaultMemoryManager::DefaultMemoryManager()
+{
+}
+
+void* DefaultMemoryManager::alloc(sysuint_t size, sysuint_t* allocated)
+{
+  void* ptr = Memory::alloc(size);
+  if (allocated) *allocated = ptr ? size : 0;
+  return ptr;
+}
+
+void DefaultMemoryManager::free(void* ptr, sysuint_t size)
+{
+  Memory::free(ptr);
+}
+
+static Static<DefaultMemoryManager> default_memory_manager;
+MemoryManager* Memory::getDefaultManager() { return default_memory_manager.instancep(); }
+
+} // Fog namespace
+
 // ============================================================================
 // [Library Initializers]
 // ============================================================================
@@ -447,6 +483,8 @@ FOG_CAPI_DECLARE void fog_memory_xchg(uint8_t* addr1, uint8_t* addr2, sysuint_t 
 FOG_INIT_DECLARE err_t fog_memory_init(void)
 {
   using namespace Fog;
+
+  default_memory_manager.init();
 
   fog_memory_copy   = fog_memory_copy_C;
   fog_memory_move   = fog_memory_move_C;
@@ -473,4 +511,6 @@ FOG_INIT_DECLARE void fog_memory_shutdown(void)
 #if defined(FOG_DEBUG_MEMORY)
   fog_memdbg_shutdown();
 #endif // FOG_DEBUG_MEMORY
+
+  default_memory_manager.destroy();
 }

@@ -259,6 +259,8 @@ Set(FOG_CORE_LIB_SOURCES
   Fog/Core/Math.cpp
   Fog/Core/Memory.cpp
   Fog/Core/MemoryAllocator.cpp
+  Fog/Core/MemoryBuffer.cpp
+  Fog/Core/MemoryManager.cpp
   Fog/Core/Misc.cpp
   Fog/Core/Object.cpp
   Fog/Core/OS.cpp
@@ -321,6 +323,8 @@ Set(FOG_CORE_LIB_HEADERS
   Fog/Core/Math.h
   Fog/Core/Memory.h
   Fog/Core/MemoryAllocator_p.h
+  Fog/Core/MemoryBuffer.h
+  Fog/Core/MemoryManager.h
   Fog/Core/Misc.h
   Fog/Core/Object.h
   Fog/Core/OS.h
@@ -554,45 +558,45 @@ Set(FOG_GRAPHICS_IMAGEIO_HEADERS
 )
 
 Set(FOG_GRAPHICS_FONTENGINE_SOURCES
-  Fog/Graphics/FontEngine/FontEngine_FreeType.cpp
-  Fog/Graphics/FontEngine/FontEngine_Mac.cpp
-  Fog/Graphics/FontEngine/FontEngine_Null.cpp
-  Fog/Graphics/FontEngine/FontEngine_Windows.cpp
+  Fog/Graphics/FontEngine/FTFontEngine.cpp
+  Fog/Graphics/FontEngine/MacFontEngine.cpp
+  Fog/Graphics/FontEngine/NullFontEngine.cpp
+  Fog/Graphics/FontEngine/WinFontEngine.cpp
 )
 
 Set(FOG_GRAPHICS_FONTENGINE_HEADERS
-  Fog/Graphics/FontEngine/FontEngine_FreeType.h
-  Fog/Graphics/FontEngine/FontEngine_Mac.h
-  Fog/Graphics/FontEngine/FontEngine_Null_p.h
-  Fog/Graphics/FontEngine/FontEngine_Windows.h
+  Fog/Graphics/FontEngine/FTFontEngine.h
+  Fog/Graphics/FontEngine/MacFontEngine.h
+  Fog/Graphics/FontEngine/NullFontEngine_p.h
+  Fog/Graphics/FontEngine/WinFontEngine.h
 )
 
 Set(FOG_GRAPHICS_PAINTENGINE_SOURCES
-  Fog/Graphics/PaintEngine/PaintEngine_Null.cpp
-  Fog/Graphics/PaintEngine/PaintEngine_Raster_Action.cpp
-  Fog/Graphics/PaintEngine/PaintEngine_Raster_Calc.cpp
-  Fog/Graphics/PaintEngine/PaintEngine_Raster_Cmd.cpp
-  Fog/Graphics/PaintEngine/PaintEngine_Raster_Context.cpp
-  Fog/Graphics/PaintEngine/PaintEngine_Raster_Engine.cpp
-  Fog/Graphics/PaintEngine/PaintEngine_Raster_Render.cpp
-  Fog/Graphics/PaintEngine/PaintEngine_Raster_State.cpp
-  Fog/Graphics/PaintEngine/PaintEngine_Raster_Worker.cpp
+  Fog/Graphics/PaintEngine/NullPaintEngine.cpp
+  Fog/Graphics/PaintEngine/RasterPaintAction.cpp
+  Fog/Graphics/PaintEngine/RasterPaintCalc.cpp
+  Fog/Graphics/PaintEngine/RasterPaintCmd.cpp
+  Fog/Graphics/PaintEngine/RasterPaintContext.cpp
+  Fog/Graphics/PaintEngine/RasterPaintEngine.cpp
+  Fog/Graphics/PaintEngine/RasterPaintRender.cpp
+  Fog/Graphics/PaintEngine/RasterPaintState.cpp
+  Fog/Graphics/PaintEngine/RasterPaintWorker.cpp
 )
 
 Set(FOG_GRAPHICS_PAINTENGINE_HEADERS
-  Fog/Graphics/PaintEngine/PaintEngine_Null_p.h
-  Fog/Graphics/PaintEngine/PaintEngine_Raster_Action_p.h
-  Fog/Graphics/PaintEngine/PaintEngine_Raster_Base_p.h
-  Fog/Graphics/PaintEngine/PaintEngine_Raster_Calc_p.h
-  Fog/Graphics/PaintEngine/PaintEngine_Raster_Cmd_p.h
-  Fog/Graphics/PaintEngine/PaintEngine_Raster_Context_p.h
-  Fog/Graphics/PaintEngine/PaintEngine_Raster_Engine_p.h
-  Fog/Graphics/PaintEngine/PaintEngine_Raster_Engine_DoMask_p.h
-  Fog/Graphics/PaintEngine/PaintEngine_Raster_Engine_DoPaint_p.h
-  Fog/Graphics/PaintEngine/PaintEngine_Raster_Render_p.h
-  Fog/Graphics/PaintEngine/PaintEngine_Raster_State_p.h
-  Fog/Graphics/PaintEngine/PaintEngine_Raster_Util_p.h
-  Fog/Graphics/PaintEngine/PaintEngine_Raster_Worker_p.h
+  Fog/Graphics/PaintEngine/NullPaintEngine_p.h
+  Fog/Graphics/PaintEngine/RasterPaintAction_p.h
+  Fog/Graphics/PaintEngine/RasterPaintBase_p.h
+  Fog/Graphics/PaintEngine/RasterPaintCalc_p.h
+  Fog/Graphics/PaintEngine/RasterPaintCmd_p.h
+  Fog/Graphics/PaintEngine/RasterPaintContext_p.h
+  Fog/Graphics/PaintEngine/RasterPaintEngine_p.h
+  Fog/Graphics/PaintEngine/RasterPaintEngine_DoMask_p.h
+  Fog/Graphics/PaintEngine/RasterPaintEngine_DoPaint_p.h
+  Fog/Graphics/PaintEngine/RasterPaintRender_p.h
+  Fog/Graphics/PaintEngine/RasterPaintState_p.h
+  Fog/Graphics/PaintEngine/RasterPaintUtil_p.h
+  Fog/Graphics/PaintEngine/RasterPaintWorker_p.h
 )
 
 Set(FOG_GRAPHICS_RASTERENGINE_SOURCES
@@ -723,7 +727,7 @@ Set(FOG_GRAPHICS_RASTERENGINE_HEADERS
 )
 
 # Optimize specific files for speed
-Set_Source_Files_Properties(Fog/Graphics/AnalyticRasterizer8.cpp                PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
+Set_Source_Files_Properties(Fog/Graphics/AnalyticRasterizer8.cpp               PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
 Set_Source_Files_Properties(Fog/Graphics/Image.cpp                             PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
 Set_Source_Files_Properties(Fog/Graphics/PathUtil.cpp                          PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
 Set_Source_Files_Properties(Fog/Graphics/PathUtil_SSE2.cpp                     PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_SSE2}")
@@ -738,8 +742,8 @@ Set_Source_Files_Properties(Fog/Graphics/RasterEngine/Init_SSSE3.cpp           P
 
 # Source groups.
 Source_Group("Graphics"               FILES ${FOG_GRAPHICS_LIB_SOURCES}          ${FOG_GRAPHICS_LIB_HEADERS}         )
-Source_Group("Graphics/ImageIO"       FILES ${FOG_GRAPHICS_IMAGEIO_SOURCES}      ${FOG_GRAPHICS_IMAGEIO_HEADERS}     )
 Source_Group("Graphics/FontEngine"    FILES ${FOG_GRAPHICS_FONTENGINE_SOURCES}   ${FOG_GRAPHICS_FONTENGINE_HEADERS}  )
+Source_Group("Graphics/ImageIO"       FILES ${FOG_GRAPHICS_IMAGEIO_SOURCES}      ${FOG_GRAPHICS_IMAGEIO_HEADERS}     )
 Source_Group("Graphics/PaintEngine"   FILES ${FOG_GRAPHICS_PAINTENGINE_SOURCES}  ${FOG_GRAPHICS_PAINTENGINE_HEADERS} )
 Source_Group("Graphics/RasterEngine"  FILES ${FOG_GRAPHICS_RASTERENGINE_SOURCES} ${FOG_GRAPHICS_RASTERENGINE_HEADERS})
 
@@ -865,30 +869,32 @@ Set(FOG_GUI_LIB_HEADERS
 )
 
 Set(FOG_GUI_GUIENGINE_WIN_SOURCES
-  Fog/Gui/GuiEngine/GuiEngine_Windows.cpp
+  Fog/Gui/GuiEngine/WinGuiEngine.cpp
+  Fog/Gui/GuiEngine/WinUxThemeLibrary.cpp
 )
 
 Set(FOG_GUI_GUIENGINE_WIN_HEADERS
-  Fog/Gui/GuiEngine/GuiEngine_Windows.h
+  Fog/Gui/GuiEngine/WinGuiEngine.h
+  Fog/Gui/GuiEngine/WinUxThemeLibrary.h
 )
 
 Set(FOG_GUI_GUIENGINE_X11_SOURCES
-  Fog/Gui/GuiEngine/GuiEngine_X11.cpp
+  Fog/Gui/GuiEngine/X11GuiEngine.cpp
 )
 
 Set(FOG_GUI_GUIENGINE_X11_HEADERS
-  Fog/Gui/GuiEngine/GuiEngine_X11.h
-  Fog/Gui/GuiEngine/GuiEngine_X11_Xlib.h
+  Fog/Gui/GuiEngine/X11GuiEngine.h
+  Fog/Gui/GuiEngine/X11Headers.h
 )
 
 Set(FOG_GUI_THEMEENGINE_SOURCES
-  Fog/Gui/ThemeEngine/ThemeEngine_Default.cpp
-  Fog/Gui/ThemeEngine/ThemeEngine_UxTheme.cpp
+  Fog/Gui/ThemeEngine/DefaultThemeEngine.cpp
+  Fog/Gui/ThemeEngine/WinThemeEngine.cpp
 )
 
 Set(FOG_GUI_THEMEENGINE_HEADERS
-  Fog/Gui/ThemeEngine/ThemeEngine_Default_p.h
-  Fog/Gui/ThemeEngine/ThemeEngine_UxTheme_p.h
+  Fog/Gui/ThemeEngine/DefaultThemeEngine_p.h
+  Fog/Gui/ThemeEngine/WinThemeEngine_p.h
 )
 
 # Source groups.
@@ -901,12 +907,8 @@ Source_Group("Gui/GuiEngine" FILES
   ${FOG_GUI_GUIENGINE_WIN_SOURCES} ${FOG_GUI_GUIENGINE_WIN_HEADERS}
 )
 
-Source_Group("Gui/Layout" FILES
-  ${FOG_GUI_LAYOUT_SOURCES} ${FOG_GUI_LAYOUT_HEADERS}
-)
-
-Source_Group("Gui/Theme" FILES
-  ${FOG_GUI_THEME_SOURCES} ${FOG_GUI_THEME_HEADERS}
+Source_Group("Gui/ThemeEngine" FILES
+  ${FOG_GUI_THEMEENGINE_SOURCES} ${FOG_GUI_THEMEENGINE_HEADERS}
 )
 
 # Gui backends.
@@ -937,7 +939,7 @@ Set(FOG_ALL_SOURCES
   ${FOG_GRAPHICS_RASTERENGINE_SOURCES}
   # Fog-Gui.
   ${FOG_GUI_LIB_SOURCES}
-  ${FOG_GUI_THEME_ENGINE_SOURCES}
+  ${FOG_GUI_THEMEENGINE_SOURCES}
   # Fog-Svg.
   ${FOG_SVG_LIB_SOURCES}
   # Fog-Xml.

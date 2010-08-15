@@ -223,6 +223,7 @@ struct MyWindow : public Window
   virtual ~MyWindow();
 
   // [Event Handlers]
+  virtual void onKey(KeyEvent* e);
   virtual void onPaint(PaintEvent* e);
 
   void createButtons(int count)
@@ -489,6 +490,22 @@ MyWindow::~MyWindow()
 {
 }
 
+void MyWindow::onKey(KeyEvent* e)
+{
+  if (e->getCode() == EVENT_KEY_PRESS)
+  {
+    switch (e->getKey())
+    {
+      case KEY_UP   : _suby -= 0.05; update(WIDGET_UPDATE_ALL); break;
+      case KEY_DOWN : _suby += 0.05; update(WIDGET_UPDATE_ALL); break;
+      case KEY_LEFT : _subx -= 0.05; update(WIDGET_UPDATE_ALL); break;
+      case KEY_RIGHT: _subx += 0.05; update(WIDGET_UPDATE_ALL); break;
+    }
+  }
+
+  base::onKey(e);
+}
+
 void MyWindow::onPaint(PaintEvent* e)
 {
   TimeTicks ticks = TimeTicks::highResNow();
@@ -501,6 +518,16 @@ void MyWindow::onPaint(PaintEvent* e)
   p->setSource(Argb(0xFFFFFFFF));
   p->fillAll();
 
+  DoubleRect rect(50.0 + _subx, 50.0 + _suby, 100, 100);
+
+  p->setSource(Argb(0xFF000000));
+  p->fillRect(rect);
+
+  //DoublePath path;
+  //path.addRect(rect);
+  //p->fillPath(path);
+
+/*
   DoublePath path;
   path.moveTo(150, 100);
   path.lineTo(250, 105);
@@ -508,6 +535,7 @@ void MyWindow::onPaint(PaintEvent* e)
   path.lineTo(100, 200);
   p->setSource(Argb(0xFF000000));
   p->fillPath(path);
+*/
 
   p->restore();
 }

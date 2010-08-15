@@ -387,9 +387,14 @@ static FOG_INLINE int16x16_t doubleToFixed16x16(double d)
   return data.i32_0;
 }
 
+static FOG_INLINE int24x8_t doubleToFixed24x8(double d)
+{
+  return (int24x8_t)(d * 256.0);
+}
+
 static FOG_INLINE int48x16_t doubleToFixed48x16(double d)
 {
-  return (int64_t)(d * 65536.0);
+  return (int48x16_t)(d * 65536.0);
 }
 
 // ============================================================================

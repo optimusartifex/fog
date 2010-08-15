@@ -51,16 +51,39 @@ Set(FOG_CFLAGS_SSE2 "")
 Set(FOG_CFLAGS_SSE3 "")
 Set(FOG_CFLAGS_SSSE3 "")
 
-# GCC flags we can try in future:
-# * -fpredictive-commoning
-
 If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-  Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-rtti -fvisibility=hidden -fvisibility-inlines-hidden")
-  Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstrict-aliasing -fmerge-all-constants -fno-keep-static-consts")
+  # Generate smaller code which not uses exceptions/rtti.
+  Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-rtti")
+
+  # As default we hide all symbols not declared by FOG_API
+  Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -fvisibility-inlines-hidden")
+
+  # Decrease code size by merging all constants and removing unused ones,
+  # standard violation not effects us.
+  Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmerge-all-constants -fno-keep-static-consts")
+
+  # Strict aliasing, Fog-Framework should be well written.
+  Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstrict-aliasing")
+
+  # We are not interested in math-errno.
   Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-math-errno -Winline")
+
+  # TODO: Detect if GCC supports it:
+  #   Use link-time-optimization.
+  #   Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
+
+  # Experimental flags, may improve performance
+  Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fgcse-sm")
+  Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fgcse-las")
+  Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpredictive-commoning")
+
+  # If we are not debugging the code should be optimized. The O2 generates 
+  # probably the best code. O3 gives no speed improvement and code is always
+  # larger.
   If(NOT ${CMAKE_BUILD_TYPE} MATCHES "Debug")
     Set(FOG_CFLAGS_OPTIMIZE "-O2")
   EndIf(NOT ${CMAKE_BUILD_TYPE} MATCHES "Debug")
+
   Set(FOG_CFLAGS_MMX "${FOG_CFLAGS_OPTIMIZE} -mmmx")
   Set(FOG_CFLAGS_3DNOW "${FOG_CFLAGS_OPTIMIZE} -mmmx -m3dnow")
   Set(FOG_CFLAGS_SSE "${FOG_CFLAGS_OPTIMIZE} -mmmx -msse")
@@ -1021,7 +1044,7 @@ If(FOG_BUILD_BENCH)
     Set(FOG_BENCH_CAIRO TRUE)
 
     # Qt4 benchmark.
-    # Set(FOG_BENCH_QT4 TRUE)
+    Set(FOG_BENCH_QT4 TRUE)
   EndIf(WIN32)
 
   Set(FOG_BENCH_SOURCES

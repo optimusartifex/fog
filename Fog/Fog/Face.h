@@ -106,7 +106,7 @@
 //! Function input/output parameter naming terminology:
 //!
 //!   - @c b32_1x1 - scalar at range of 0 to 255.
-//!   - @c uint32_t - scalar at range of 0 to 256.
+//!   - @c uint32_t - scalar at range of 0 to 256 or larger, depends to context.
 //!   - @c b32_1x2 - packed two BYTEs in 32-bit unsigned integer.
 //!   - @c b32_2x2 - packed two BYTEs in two 32-bit unsigned integers. These two
 //!     integers are always passed/returned together.

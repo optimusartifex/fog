@@ -418,6 +418,61 @@ struct FOG_HIDDEN AnalyticRasterizer8
   };
 
   // --------------------------------------------------------------------------
+  // [Shape]
+  // --------------------------------------------------------------------------
+
+  //! @brief Rasterizer shape.
+  //!
+  //! Analytic rasterizer contains fast-paths which may be used to rasterizer
+  //! specific shapes. The common, the most universal shape, which can be used
+  //! by any path-data is @c SHAPE_PATH. All other shapes are specific to
+  //! the input data.
+  //!
+  //! @note All shapes are filled.
+  enum SHAPE
+  {
+    //! @brief Initial state.
+    SHAPE_NONE = 0,
+    //! @brief Path (universal).
+    SHAPE_PATH = 1,
+    //! @brief Rectangle, only subpixel translation.
+    //!
+    //! The data are stored in @c SubPxRectangleShape structure, allocated
+    //! using @c CellStorage.
+    SHAPE_SUBPX_RECTANGLE = 2,
+    //! @brief Rectangle after affine transform, may be used also for
+    //! BUTT or SQUARE lines.
+    //!
+    //! The data are stored in @c AffineRectangleShape structure, allocated
+    //! using @c CellStorage.
+    //!
+    //! @note This shape doesn't cover the perspective transform, the
+    //! @c SHAPE_PATH is used for that case.
+    SHAPE_AFFINE_RECTANGLE = 3
+  };
+
+  //! @brief Structure that holds data related to @c SHAPE_SUBPX_RECTANGLE.
+  struct FOG_HIDDEN SubPxRectangleShape
+  {
+    //! @brief Original rectangle passed to the @c addRect().
+    DoubleRect rect;
+    //! @brief Original rectangle bounds.
+    IntBox bounds;
+
+    //! @brief Top-coverage values.
+    uint8_t coverageT[4];
+    //! @brief Inner-coverage values.
+    uint8_t coverageI[4];
+    //! @brief Bottom-coverage values.
+    uint8_t coverageB[4];
+  };
+
+  //! @brief Structure that holds data related to @c SHAPE_AFFINE_RECTANGLE.
+  struct FOG_HIDDEN AffineRectangleShape
+  {
+  };
+
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
@@ -495,6 +550,11 @@ struct FOG_HIDDEN AnalyticRasterizer8
 
   //! @brief Add path to the rasterizer, generating cells immediately.
   void addPath(const DoublePath& path);
+  //! @brief Add rectangle to the rasterizer.
+  void addRect(const DoubleRect& rect);
+
+  //! @brief Convert any shape to SHAPE_PATH.
+  void convertToPath();
 
   // --------------------------------------------------------------------------
   // [Cache]
@@ -562,7 +622,8 @@ struct FOG_HIDDEN AnalyticRasterizer8
   IntBox _boundingBox;
 
   //! @brief Translation offset added to each point in @c addPath(). Generated
-  //! by @c initialize().
+  //! by @c initialize().  FOG_ASSERT(_shape == SHAPE_PATH);
+
   //!
   //! Translation offset simplifies mathematics used to access @c _rows[] structure
   //! and also guarantees that no point will be negative. If @c _clipBox is 
@@ -582,6 +643,9 @@ struct FOG_HIDDEN AnalyticRasterizer8
 
   //! @brief Fill rule;
   uint8_t _fillRule;
+
+  //! @brief Shape.
+  uint8_t _shape;
 
   //! @brief Whether rasterizer is finalized.
   uint8_t _isFinalized;

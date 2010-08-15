@@ -445,7 +445,9 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   err_t _serializePaintImage(const IntRect& dst, const Image& image, const IntRect& src);
   err_t _serializePaintImageAffine(const DoublePoint& pt, const Image& image, const IntRect& irect);
   err_t _serializePaintGlyphSet(const IntPoint& pt, const GlyphSet& glyphSet, const IntRect* clip);
+
   err_t _serializePaintPath(const DoublePath& path, bool stroke);
+  err_t _serializePaintRect(const DoubleRect& rect);
 
   // --------------------------------------------------------------------------
   // [Serializers - Clipping]
@@ -540,12 +542,11 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   // [Rasterization]
   // --------------------------------------------------------------------------
 
-  //! @brief Rasterizer used only by singlethreaded mode. Output is places to
-  //! the default rasterizer.
-  //!
-  //! @note Can be only called if singlethreaded mode is used. There is assert
-  //! so don't try it in mt-mode :)
+  //! @brief Rasterize path using the engine main rasterizer (single-threaded).
   bool _doRasterizePath_st(const DoublePath& path, const IntBox& clipBox, uint32_t fillRule, bool stroke);
+
+  //! @brief Rasterize rect using the engine main rasterizer (single-threaded).
+  bool _doRasterizeRect_st(const DoubleRect& rect, const IntBox& clipBox);
 
   // --------------------------------------------------------------------------
   // [Renderers - Painting]

@@ -1488,10 +1488,7 @@ err_t RasterPaintEngine::fillRect(const DoubleRect& r)
     }
   }
 
-usePath:
-  curPath.clear();
-  curPath.addRect(r);
-  return _serializePaintPath(curPath, false);
+  return _serializePaintRect(r);
 }
 
 err_t RasterPaintEngine::fillRects(const DoubleRect* r, sysuint_t count)
@@ -3041,6 +3038,26 @@ err_t RasterPaintEngine::_serializePaintPath(const DoublePath& path, bool stroke
   return ERR_OK;
 }
 
+err_t RasterPaintEngine::_serializePaintRect(const DoubleRect& rect)
+{
+  // Check whether we can use pixel-aligned blitter (speed optimization).
+  if (ctx.hints.transformType <= RASTER_TRANSFORM_SUBPX)
+  {
+    // Singlethreaded.
+    if (isSingleThreaded())
+    {
+      RASTER_SERIALIZE_ENSURE_PATTERN();
+      if (_doRasterizeRect_st(rect, ctx.finalClipBox))
+        _doPaintPath_st(&ctx, &rasterizer);
+      return ERR_OK;
+    }
+  }
+
+  curPath.clear();
+  curPath.addRect(rect);
+  return _serializePaintPath(curPath, false);
+}
+
 // ============================================================================
 // [Fog::RasterPaintEngine - Serializers - Clipping]
 // ============================================================================
@@ -3564,6 +3581,27 @@ bool RasterPaintEngine::_doRasterizePath_st(const DoublePath& path, const IntBox
 
   rasterizer.initialize();
   rasterizer.addPath(*p);
+  rasterizer.finalize();
+
+  return rasterizer.isValid();
+}
+
+bool RasterPaintEngine::_doRasterizeRect_st(const DoubleRect& rect, const IntBox& clipBox)
+{
+  // Can be only used by single-threaded engine.
+  FOG_ASSERT(isSingleThreaded());
+  // Not available for affine/perspective transforms.
+  FOG_ASSERT(ctx.hints.transformType < RASTER_TRANSFORM_AFFINE);
+
+  DoubleRect r(rect);
+  r.translate(ctx.finalMatrix.tx, ctx.finalMatrix.ty);
+
+  rasterizer.reset();
+  rasterizer.setClipBox(clipBox);
+  rasterizer.setAlpha(ctx.ops.alpha255);
+
+  rasterizer.initialize();
+  rasterizer.addRect(r);
   rasterizer.finalize();
 
   return rasterizer.isValid();

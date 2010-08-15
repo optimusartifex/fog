@@ -68,12 +68,12 @@ static FOG_INLINE int upscale(double v)
 
 static FOG_INLINE bool useCellD(const AnalyticRasterizer8* rasterizer)
 {
-  return false;
-  //return rasterizer->_size.w <= AnalyticRasterizer8::CellD::MAX_X;
+  return rasterizer->_size.w <= AnalyticRasterizer8::CellD::MAX_X;
 }
 
 // Forward Declarations.
-static void _setupSweepFunctions(AnalyticRasterizer8* rasterizer);
+static void _initPathSweepFunctions(AnalyticRasterizer8* rasterizer);
+static void _initRectSweepFunctions(AnalyticRasterizer8* rasterizer);
 
 // ============================================================================
 // [Fog::AnalyticRasterizer8 - Construction / Destruction]
@@ -119,8 +119,9 @@ void AnalyticRasterizer8::reset()
   // Default alpha is fully-opaque.
   _alpha = 0xFF;
 
-  // Default fill rule.
+  // Default fill rule / shape.
   _fillRule = FILL_DEFAULT;
+  _shape = SHAPE_NONE;
   // Not finalized, not valid.
   _isFinalized = false;
   _isValid = false;
@@ -137,6 +138,7 @@ err_t AnalyticRasterizer8::initialize()
 
   _error = ERR_OK;
 
+  _shape = SHAPE_NONE;
   _isFinalized = false;
   _isValid = false;
 
@@ -167,20 +169,6 @@ err_t AnalyticRasterizer8::initialize()
     _rowsCapacity = i;
   }
 
-  if (_storage)
-  {
-    _current = _storage;
-    _current->setup(_current->getStorageSize(), useCellD(this) ? (uint)ChunkD::CHUNK_SIZE : (uint)ChunkQ::CHUNK_SIZE);
-  }
-  else
-  {
-    if (!getNextChunkStorage(useCellD(this) ? (uint)ChunkD::CHUNK_SIZE : (uint)ChunkQ::CHUNK_SIZE))
-    {
-      _error = ERR_RT_OUT_OF_MEMORY;
-      goto end;
-    }
-  }
-
 end:
   return _error;
 }
@@ -190,25 +178,53 @@ err_t AnalyticRasterizer8::finalize()
   // If already finalized this is the NOP.
   if (_error || _isFinalized) return _error;
 
-  if (_boundingBox.y1 == -1)
+  switch (_shape)
   {
-    _isFinalized = true;
-    _isValid = false;
-    return ERR_OK;
+    case SHAPE_NONE:
+    {
+      _isFinalized = true;
+      _isValid = false;
+      break;
+    }
+
+    case SHAPE_PATH:
+    {
+      if (_boundingBox.y1 == -1)
+      {
+        _isFinalized = true;
+        _isValid = false;
+        return ERR_OK;
+      }
+
+      // Translate bounding box to match _clipBox.
+      _boundingBox.translate(_clipBox.x1, _clipBox.y1);
+      // Normalize bounding box to our standard, x2/y2 coordinates are outside.
+      _boundingBox.x2++;
+      _boundingBox.y2++;
+
+      _isFinalized = true;
+      _isValid = true;
+
+      _initPathSweepFunctions(this);
+      break;
+    }
+
+    case SHAPE_SUBPX_RECTANGLE:
+    {
+      SubPxRectangleShape* shapeData =
+        reinterpret_cast<SubPxRectangleShape*>(_rows);
+
+      _boundingBox = shapeData->bounds;
+      _boundingBox.x2++;
+      _boundingBox.y2++;
+
+      _isFinalized = true;
+      _isValid = true;
+
+      _initRectSweepFunctions(this);
+      break;
+    }
   }
-
-  // Translate bounding box to match _clipBox.
-  _boundingBox.translate(_clipBox.x1, _clipBox.y1);
-  // Normalize bounding box to our standard, x2/y2 coordinates are outside.
-  _boundingBox.x2++;
-  _boundingBox.y2++;
-
-  // Mark rasterizer as finalized.
-  _isFinalized = true;
-  // Rasterizer output is only valid if bounding box is not empty.
-  _isValid = true;
-
-  _setupSweepFunctions(this);
 
   return ERR_OK;
 }
@@ -217,15 +233,35 @@ err_t AnalyticRasterizer8::finalize()
 // [Fog::AnalyticRasterizer8 - Commands]
 // ============================================================================
 
-template<typename _CHUNK_TYPE, typename _CELL_TYPE>
-static void _addPath(AnalyticRasterizer8* rasterizer, const DoublePath& path)
+static bool _initCells(AnalyticRasterizer8* rasterizer)
 {
-  sysuint_t i = path.getLength();
-  if (!i) return;
+  uint chunkSize = useCellD(rasterizer)
+    ? (uint)AnalyticRasterizer8::ChunkD::CHUNK_SIZE
+    : (uint)AnalyticRasterizer8::ChunkQ::CHUNK_SIZE;
 
-  const uint8_t* commands = path.getCommands();
+  // Initialize cells storage.
+  if (rasterizer->_storage)
+  {
+    rasterizer->_current = rasterizer->_storage;
+    rasterizer->_current->setup(rasterizer->_current->getStorageSize(), chunkSize);
+  }
+  else
+  {
+    if (!rasterizer->getNextChunkStorage(chunkSize))
+    {
+      rasterizer->setError(ERR_RT_OUT_OF_MEMORY);
+      return false;
+    }
+  }
+  return true;
+}
+
+template<typename _CHUNK_TYPE, typename _CELL_TYPE>
+static void _addPath(
+  AnalyticRasterizer8* rasterizer,
+  const DoublePoint* vertices, const uint8_t* commands, sysuint_t i)
+{
   const uint8_t* end = commands + i;
-  const DoublePoint* vertices = path.getVertices();
 
   int24x8_t startX1; // Start moveTo x position.
   int24x8_t startY1; // Start moveTo y position.
@@ -323,10 +359,154 @@ void AnalyticRasterizer8::addPath(const DoublePath& path)
   if (_error) return;
   FOG_ASSERT(_isFinalized == false);
 
+  sysuint_t length = path.getLength();
+  if (length == 0) return;
+
+  if (_shape == SHAPE_NONE)
+  {
+    // Initialize cells and set shape to SHAPE_PATH.
+    if (!_initCells(this)) return;
+    _shape = SHAPE_PATH;
+  }
+  else if (_shape != SHAPE_PATH)
+  {
+    convertToPath();
+  }
+
   if (useCellD(this))
-    _addPath<ChunkD, CellD>(this, path);
+    _addPath<ChunkD, CellD>(this, path.getVertices(), path.getCommands(), length);
   else
-    _addPath<ChunkQ, CellQ>(this, path);
+    _addPath<ChunkQ, CellQ>(this, path.getVertices(), path.getCommands(), length);
+}
+
+void AnalyticRasterizer8::addRect(const DoubleRect& rect)
+{
+  // Initial addRect(), we try to add rectangle to the data section and to 
+  // initialize shape to SHAPE_SUBPX_RECTANGLE.
+  if (_shape == SHAPE_NONE)
+  {
+    // Convert to fixed point.
+    int rx1 = Math::doubleToFixed24x8(rect.x) + _offset.x;
+    int ry1 = Math::doubleToFixed24x8(rect.y) + _offset.y;
+    int rx2 = Math::doubleToFixed24x8(rect.x + rect.w) + _offset.x;
+    int ry2 = Math::doubleToFixed24x8(rect.y + rect.h) + _offset.y;
+
+    // Clip.
+    if (rx1 < 0) rx1 = 0;
+    if (ry1 < 0) ry1 = 0;
+    if (rx2 > _size24x8.w) rx2 = _size24x8.w;
+    if (ry2 > _size24x8.w) ry2 = _size24x8.h;
+    if (rx1 >= rx2 || ry1 >= ry2) return;
+
+    // Okay, the rectangle is in the clipBox.
+    SubPxRectangleShape* shapeData =
+      reinterpret_cast<SubPxRectangleShape*>(_rows);
+    shapeData->rect = rect;
+    shapeData->bounds.set(
+      (rx1) >> 8, (ry1) >> 8,
+      (rx2) >> 8, (ry2) >> 8);
+
+    uint fx1 = rx1 & 0xFF;
+    uint fy1 = ry1 & 0xFF;
+    uint fx2 = rx2 & 0xFF;
+    uint fy2 = ry2 & 0xFF;
+
+    uint horzLeft   = 256 - fx1;
+    uint horzRight  = fx2;
+
+    uint vertTop    = 256 - fy1;
+    uint vertBottom = fy2;
+
+    if (shapeData->bounds.x1 == shapeData->bounds.x2)
+    {
+      horzRight -= horzLeft;
+      horzLeft = horzRight;
+    }
+
+    if (shapeData->bounds.y1 == shapeData->bounds.y2)
+    {
+      vertBottom -= vertTop;
+      vertTop = vertBottom;
+    }
+
+    shapeData->coverageT[0] = Math::boundToByte((horzLeft * vertTop) >> 8);
+    shapeData->coverageT[1] = Math::boundToByte(vertTop);
+    shapeData->coverageT[2] = Math::boundToByte((horzRight * vertTop) >> 8);
+
+    shapeData->coverageI[0] = Math::boundToByte(horzLeft);
+    shapeData->coverageI[1] = 0xFF;
+    shapeData->coverageI[2] = Math::boundToByte(horzRight);
+
+    shapeData->coverageB[0] = Math::boundToByte((horzLeft * vertBottom) >> 8);
+    shapeData->coverageB[1] = Math::boundToByte(vertBottom);
+    shapeData->coverageB[2] = Math::boundToByte((horzRight * vertBottom) >> 8);
+
+    _shape = SHAPE_SUBPX_RECTANGLE;
+    return;
+  }
+
+  if (_shape != SHAPE_PATH) convertToPath();
+
+  DoublePoint vertices[5];
+  uint8_t commands[5];
+
+  double x1 = rect.x;
+  double y1 = rect.y;
+  double x2 = rect.x + rect.w;
+  double y2 = rect.y + rect.h;
+
+  vertices[0].set(x1, y1);
+  vertices[1].set(x2, y1);
+  vertices[2].set(x2, y2);
+  vertices[3].set(x1, y1);
+  vertices[4].set(NAN, NAN);
+
+  commands[0] = PATH_CMD_MOVE_TO;
+  commands[1] = PATH_CMD_LINE_TO;
+  commands[2] = PATH_CMD_LINE_TO;
+  commands[3] = PATH_CMD_LINE_TO;
+  commands[4] = PATH_CMD_END;
+
+  if (useCellD(this))
+    _addPath<ChunkD, CellD>(this, vertices, commands, 5);
+  else
+    _addPath<ChunkQ, CellQ>(this, vertices, commands, 5);
+}
+
+void AnalyticRasterizer8::convertToPath()
+{
+  switch (_shape)
+  {
+    case SHAPE_NONE:
+    {
+      _shape = SHAPE_PATH;
+      break;
+    }
+
+    case SHAPE_PATH:
+    {
+      break;
+    }
+
+    case SHAPE_SUBPX_RECTANGLE:
+    {
+      SubPxRectangleShape* shapeData =
+        reinterpret_cast<SubPxRectangleShape*>(_rows);
+      DoubleRect rect = shapeData->rect;
+
+      if (!_initCells(this)) { _shape = SHAPE_NONE; return; }
+
+      _shape = SHAPE_PATH;
+      addRect(rect);
+      break;
+    }
+
+    case SHAPE_AFFINE_RECTANGLE:
+    {
+      // TODO: Rasterizer affine rectangle.
+      break;
+    }
+  }
 }
 
 // ============================================================================
@@ -1017,14 +1197,15 @@ static FOG_INLINE uint _calculateAlpha(const AnalyticRasterizer8* rasterizer, in
 }
 
 template<typename _CHUNK_TYPE, typename _CELL_TYPE, int _RULE, int _USE_ALPHA>
-Span8* _sweepScanlineSimpleImpl(
+static Span8* _sweepScanlineSimpleImpl(
   AnalyticRasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y)
 {
   FOG_ASSERT(rasterizer->_isFinalized);
 
-  if (y >= rasterizer->_boundingBox.y2) return NULL;
-
   y -= rasterizer->_clipBox.y1;
+  if ((uint)y >= rasterizer->_size.h) return NULL;
+
+  int xOffset = rasterizer->_clipBox.x1;
 
   _CHUNK_TYPE* chunk = reinterpret_cast<_CHUNK_TYPE*>(rasterizer->_rows[y]);
   _CELL_TYPE* cellCur = chunk->getCells();
@@ -1073,7 +1254,7 @@ Span8* _sweepScanlineSimpleImpl(
   qsortCells<_CELL_TYPE>(cellCur, numCells);
 
   int x;
-  int nextX = cellCur->getX();
+  int nextX = cellCur->getX() + xOffset;
   int area;
   int cover = 0;
 
@@ -1089,7 +1270,10 @@ Span8* _sweepScanlineSimpleImpl(
     while (--numCells)
     {
       cellCur++;
-      if ((nextX = cellCur->getX()) != x) break;
+
+      nextX = cellCur->getX() + xOffset;
+      if (nextX != x) break;
+
       area  += cellCur->getArea();
       cover += cellCur->getCover();
     }
@@ -1122,7 +1306,10 @@ Span8* _sweepScanlineSimpleImpl(
         while (--numCells)
         {
           cellCur++;
-          if ((nextX = cellCur->getX()) != x) break;
+
+          nextX = cellCur->getX() + xOffset;
+          if (nextX != x) break;
+
           area  += cellCur->getArea();
           cover += cellCur->getCover();
         }
@@ -1191,23 +1378,79 @@ Span8* _sweepScanlineSimpleImpl(
   return scanline.getSpans();
 }
 
-template<typename _CHUNK_TYPE, typename CELL_TYPE, int _RULE, int _USE_ALPHA>
-Span8* _sweepScanlineRegionImpl(
+template<typename _CHUNK_TYPE, typename _CELL_TYPE, int _RULE, int _USE_ALPHA>
+static Span8* _sweepScanlineRegionImpl(
   AnalyticRasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y,
   const IntBox* clipBoxes, sysuint_t count)
 {
+  // TODO:
   return NULL;
 }
 
-template<typename _CHUNK_TYPE, typename CELL_TYPE, int _RULE, int _USE_ALPHA>
-Span8* _sweepScanlineSpansImpl(
+template<typename _CHUNK_TYPE, typename _CELL_TYPE, int _RULE, int _USE_ALPHA>
+static Span8* _sweepScanlineSpansImpl(
   AnalyticRasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y,
   const Span8* clipSpans)
 {
+  // TODO:
   return NULL;
 }
 
-static void _setupSweepFunctions(AnalyticRasterizer8* rasterizer)
+static Span8* _sweepRectSimpleImpl(
+  AnalyticRasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y)
+{
+  y -= rasterizer->_boundingBox.y1;
+  if ((uint)y >= rasterizer->_boundingBox.y2) return NULL;
+
+  int xOffset = rasterizer->_clipBox.x1;
+
+  if (scanline.newScanline(rasterizer->_boundingBox.x1, rasterizer->_boundingBox.x2) != ERR_OK)
+    return NULL;
+
+  AnalyticRasterizer8::SubPxRectangleShape* shapeData =
+    reinterpret_cast<AnalyticRasterizer8::SubPxRectangleShape*>(rasterizer->_rows);
+
+  int x1 = shapeData->bounds.x1;
+  int x2 = shapeData->bounds.x2;
+
+  int w = x2 - x1;
+  int h = shapeData->bounds.y2 - shapeData->bounds.y1;
+
+  uint8_t left;
+  uint8_t right;
+  uint8_t area;
+
+  if (y == 0)
+  {
+    left  = shapeData->coverageT[0];
+    area  = shapeData->coverageT[1];
+    right = shapeData->coverageT[2];
+  }
+  else if (y == h)
+  {
+    left  = shapeData->coverageB[0];
+    area  = shapeData->coverageB[1];
+    right = shapeData->coverageB[2];
+  }
+  else
+  {
+    left  = shapeData->coverageI[0];
+    area  = shapeData->coverageI[1];
+    right = shapeData->coverageI[2];
+  }
+
+  scanline.addVSpanAlpha(x1, x1 + 1)[0] = (uint8_t)left;
+  if (w > 1) scanline.addCSpan(x1 + 1, x2, area);
+  if (w > 0) scanline.addVSpanAlphaOrMergeVSpan(x2, x2 + 1)[0] = right;
+
+  if (scanline.endScanline() != ERR_OK) return NULL;
+#if defined(FOG_DEBUG_RASTERIZER)
+  dumpSpans(y, scanline.getSpans());
+#endif // FOG_DEBUG_RASTERIZER
+  return scanline.getSpans();
+}
+
+static void _initPathSweepFunctions(AnalyticRasterizer8* rasterizer)
 {
 #define SETUP_SWEEP(rasterizer, _FILL_MODE, _USE_ALPHA) \
   do { \
@@ -1246,6 +1489,22 @@ static void _setupSweepFunctions(AnalyticRasterizer8* rasterizer)
       FOG_ASSERT_NOT_REACHED();
   }
 }
+
+static void _initRectSweepFunctions(AnalyticRasterizer8* rasterizer)
+{
+  rasterizer->_sweepScanlineSimpleFn = _sweepRectSimpleImpl;
+  // TODO:
+  rasterizer->_sweepScanlineRegionFn = NULL;
+  rasterizer->_sweepScanlineSpansFn = NULL;
+}
+
+
+
+
+
+
+
+
 
 #if 0
 template<int _RULE, int _USE_ALPHA>
@@ -1781,544 +2040,3 @@ end:
 #endif
 
 } // Fog namespace
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#if 0
-FOG_INLINE void AnalyticRasterizer8::addCurCell()
-{
-  if (!_curCell->hasCovers()) return;
-  if (FOG_UNLIKELY(++_curCell == _endCell)) nextCellBuffer();
-}
-
-FOG_INLINE void AnalyticRasterizer8::addCurCell_Always()
-{
-  FOG_ASSERT(_curCell->hasCovers());
-  if (FOG_UNLIKELY(++_curCell == _endCell)) nextCellBuffer();
-}
-
-FOG_INLINE void AnalyticRasterizer8::setCurCell(int x, int y)
-{
-  if (_curCell->hasPosition(x, y)) return;
-
-  addCurCell();
-  _curCell->setCell(x, y, 0, 0);
-}
-
-bool AnalyticRasterizer8::nextCellBuffer()
-{
-  // If there is no buffer we quietly do nothing.
-  if (FOG_UNLIKELY(!_bufferCurrent)) goto error;
-
-  // If we are starting filling we just return true.
-  if (_curCell == &_invalidCell) goto init;
-
-  // Finalize current buffer.
-  _bufferCurrent->count = _bufferCurrent->capacity;
-  _cellsCount += _bufferCurrent->count;
-
-  // Try to get next buffer. First try link in current buffer, otherwise use
-  // rasterizer's pool.
-  if (_bufferCurrent->next)
-  {
-    _bufferCurrent = _bufferCurrent->next;
-    goto init;
-  }
-
-  // Next buffer not found, try to get cell buffer from pool (getCellXYBuffer
-  // can also allocate new buffer if the pool is empty).
-  _bufferCurrent = getCellXYBuffer();
-  if (_bufferCurrent)
-  {
-    // Link
-    _bufferLast->next = _bufferCurrent;
-    _bufferCurrent->prev = _bufferLast;
-    _bufferLast = _bufferCurrent;
-    goto init;
-  }
-
-error:
-  // Initialize cell pointers to _invalidCell.
-  _curCell = &_invalidCell;
-  _endCell = _curCell + 1;
-
-  if (_error != ERR_RT_OUT_OF_MEMORY) setError(ERR_RT_OUT_OF_MEMORY);
-  return false;
-
-init:
-  _curCell = _bufferCurrent->cells;
-  _endCell = _curCell + _bufferCurrent->capacity;
-  return true;
-}
-
-bool AnalyticRasterizer8::finalizeCellBuffer()
-{
-  // If there is no buffer we quietly do nothing.
-  if (!_bufferCurrent) return false;
-
-  _bufferCurrent->count = (uint32_t)(_curCell - _bufferCurrent->cells);
-  _cellsCount += _bufferCurrent->count;
-
-  // Clear cell pointers (after finalize the access to cells is forbidden).
-  _curCell = &_invalidCell;
-  _endCell = _curCell + 1;
-
-  return true;
-}
-
-void AnalyticRasterizer8::freeXYCellBuffers(bool all)
-{
-  if (_bufferFirst != NULL)
-  {
-    // Release all cell buffers except the first one.
-    CellXYBuffer* candidate = (all) ? _bufferFirst : _bufferFirst->next;
-    if (!candidate) return;
-
-    releaseCellXYBuffer(candidate);
-    if (all)
-    {
-      _bufferFirst = NULL;
-      _bufferLast = NULL;
-    }
-    else
-    {
-      // First cell is now last cell.
-      _bufferLast = _bufferFirst;
-
-      // Clear links.
-      _bufferFirst->next = NULL;
-      _bufferFirst->prev = NULL;
-    }
-  }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#include <Fog/Core/Pack/PackDWord.h>
-  //! @internal
-  struct FOG_HIDDEN CellXY
-  {
-    int x;
-    int y;
-    int cover;
-    int area;
-
-    FOG_INLINE void setCell(int _x, int _y, int _cover, int _area) { x = _x; y = _y; cover = _cover; area = _area; }
-    FOG_INLINE void setCell(const CellXY& other) { x = other.x; y = other.y; cover = other.cover; area = other.area; }
-
-    FOG_INLINE void setPosition(int _x, int _y) { x = _x, y = _y; }
-    FOG_INLINE bool hasPosition(int _x, int _y) const { return ((_x - x) | (_y - y)) == 0; }
-
-    FOG_INLINE void setCovers(int _cover, int _area) { cover = _cover; area = _area; }
-    FOG_INLINE void addCovers(int _cover, int _area) { cover += _cover; area += _area; }
-    FOG_INLINE bool hasCovers() const { return (cover | area) != 0; }
-  };
-#include <Fog/Core/Pack/PackRestore.h>
-
-#include <Fog/Core/Pack/PackDWord.h>
-  //! @internal
-  struct FOG_HIDDEN CellX
-  {
-    int x;
-    int cover;
-    int area;
-
-    FOG_INLINE void set(int _x, int _cover, int _area)
-    {
-      x = _x;
-      cover = _cover;
-      area = _area;
-    }
-
-    FOG_INLINE void set(const CellX& other)
-    {
-      x = other.x;
-      cover = other.cover;
-      area = other.area;
-    }
-
-    FOG_INLINE void set(const CellXY& other)
-    {
-      x = other.x;
-      cover = other.cover;
-      area = other.area;
-    }
-  };
-#include <Fog/Core/Pack/PackRestore.h>
-
-  // --------------------------------------------------------------------------
-  // [CellXYBuffer]
-  // --------------------------------------------------------------------------
-
-  //! @internal
-  //!
-  //! @brief Cell buffer.
-  struct FOG_HIDDEN CellXYBuffer
-  {
-    CellXYBuffer* prev;
-    CellXYBuffer* next;
-    uint32_t capacity;
-    uint32_t count;
-    CellXY cells[1];
-  };
-
-  // --------------------------------------------------------------------------
-  // [RowInfo]
-  // --------------------------------------------------------------------------
-
-  //! @internal
-  //!
-  //! @brief Lookup table that contains index and count of cells in sorted cells
-  //! buffer. Each index to this table represents one row.
-  struct FOG_HIDDEN RowInfo
-  {
-    uint32_t index;
-    uint32_t count;
-  };
-
-  //! @brief Sorted cells.
-  //!
-  //! @note This value is only valid after @c finalize() call.
-  CellX* _cellsSorted;
-
-  //! @brief Sorted cells array capacity.
-  //!
-  //! @note This value is only valid after @c finalize() call.
-  uint32_t _cellsCapacity;
-
-  //! @brief Total count of cells in all buffers.
-  //!
-  //! @note This value is updated only by reset(), nextCellBuffer() and 
-  //! finalizeCellBuffer() methods, it not contains exact cells count until
-  //! one of these methods isn't called.
-  //!
-  //! @note This value is only valid after @c finalize() call.
-  uint32_t _cellsCount;
-
-  // --------------------------------------------------------------------------
-  // [Cache]
-  // --------------------------------------------------------------------------
-
-  //! @brief Get cell buffer instance.
-  static CellXYBuffer* getCellXYBuffer();
-  //! @brief Release cell buffer instance.
-  static void releaseCellXYBuffer(CellXYBuffer* cellBuffer);
-
-  //! @brief Free all pooled rasterizer and cell buffer instances.
-  static void cleanup();
-
-  //! @brief Get sorted cells.
-  //!
-  //! @note This method is only valid after finalize() call.
-  FOG_INLINE const CellX* getCellsSorted() const { return _cellsSorted; }
-
-  //! @brief Get count of cells in _cellsSorted array.
-  //!
-  //! @note This method is only valid after finalize() call.
-  FOG_INLINE sysuint_t getCellsCount() const { return _cellsCount; }
-
-  //! @brief Get whether there are cells in rasterizer.
-  //!
-  //! @note This method is only valid after finalize() call.
-  FOG_INLINE bool hasCells() const { return _cellsCount != 0; }
-
-  //! @brief Rows info (index and count of cells in row).
-  //!
-  //! @note This method is only valid after finalize() call.
-  FOG_INLINE const RowInfo* getRowsInfo() const { return _rowsInfo; }
-
-  //! @brief Get count of rows in _rowsInfo array.
-  //!
-  //! @note This method is only valid after finalize() call.
-  FOG_INLINE sysuint_t getRowsCount() const { return _boundingBox.y2 - _boundingBox.y1; }
-
-  //! @brief Current cell in the buffer (_cells).
-  CellXY* _curCell;
-  //! @brief End cell in the buffer (this cell is first invalid cell in that buffer).
-  CellXY* _endCell;
-
-  //! @brief Invalid cell. It is set to _curCell and _endCell if memory
-  //! allocation failed. It prevents to dereference the @c NULL pointer.
-  CellXY _invalidCell;
-
-  //! @brief Pointer to first cell buffer.
-  CellXYBuffer* _bufferFirst;
-  //! @brief Pointer to last cell buffer (currently used one).
-  CellXYBuffer* _bufferLast;
-  //! @brief Pointer to currently used cell buffer (this is usually the last 
-  //! one, but this is not condition if rasterizer was reused).
-  CellXYBuffer* _bufferCurrent;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ============================================================================
-// [Fog::AnalyticRasterizer8 - Local]
-// ============================================================================
-
-struct FOG_HIDDEN AnalyticRasterizerLocal
-{
-  AnalyticRasterizerLocal() : 
-    cellBuffers(NULL),
-    cellsBufferCapacity(2048)
-  {
-  }
-
-  ~AnalyticRasterizerLocal()
-  {
-  }
-
-  Lock lock;
-
-  AnalyticRasterizer8::CellXYBuffer* cellBuffers;
-  uint32_t cellsBufferCapacity;
-};
-
-static Static<AnalyticRasterizerLocal> analyticrasterizer_local;
-
-// ============================================================================
-// [Fog::AnalyticRasterizer8 - Cache]
-// ============================================================================
-
-AnalyticRasterizer8::CellXYBuffer* AnalyticRasterizer8::getCellXYBuffer()
-{
-  CellXYBuffer* cellBuffer = NULL;
-
-  {
-    AutoLock locked(analyticrasterizer_local->lock);
-    if (analyticrasterizer_local->cellBuffers)
-    {
-      cellBuffer = analyticrasterizer_local->cellBuffers;
-      analyticrasterizer_local->cellBuffers = cellBuffer->next;
-      cellBuffer->next = NULL;
-      cellBuffer->prev = NULL;
-      cellBuffer->count = 0;
-    }
-  }
-
-  if (cellBuffer == NULL)
-  {
-    cellBuffer = (CellXYBuffer*)Memory::alloc(
-      sizeof(CellXYBuffer) - sizeof(CellXY) + sizeof(CellXY) * analyticrasterizer_local->cellsBufferCapacity);
-    if (cellBuffer == NULL) return NULL;
-
-    cellBuffer->next = NULL;
-    cellBuffer->prev = NULL;
-    cellBuffer->count = 0;
-    cellBuffer->capacity = analyticrasterizer_local->cellsBufferCapacity;
-  }
-
-  return cellBuffer;
-}
-
-void AnalyticRasterizer8::releaseCellXYBuffer(CellXYBuffer* cellBuffer)
-{
-  AutoLock locked(analyticrasterizer_local->lock);
-
-  // Get last.
-  CellXYBuffer* last = cellBuffer;
-  while (last->next) last = last->next;
-
-  last->next = analyticrasterizer_local->cellBuffers;
-  analyticrasterizer_local->cellBuffers = cellBuffer;
-}
-
-void AnalyticRasterizer8::cleanup()
-{
-  // Free all cell buffers.
-  CellXYBuffer* cur;
-  CellXYBuffer* next;
-
-  {
-    AutoLock locked(analyticrasterizer_local->lock);
-
-    cur = analyticrasterizer_local->cellBuffers;
-    analyticrasterizer_local->cellBuffers = NULL;
-  }
-
-  while (cur)
-  {
-    next = cur->next;
-    Memory::free(cur);
-    cur = next;
-  }
-}
-
-// ============================================================================
-// [Library Initializers]
-// ============================================================================
-
-FOG_INIT_DECLARE err_t fog_analyticrasterizer_init(void)
-{
-  using namespace Fog;
-
-  analyticrasterizer_local.init();
-  return ERR_OK;
-}
-
-FOG_INIT_DECLARE void fog_analyticrasterizer_shutdown(void)
-{
-  using namespace Fog;
-
-  AnalyticRasterizer8::cleanup();
-  analyticrasterizer_local.destroy();
-}
-
-  // Finally arrange the X-arrays.
-  // for (i = 0; i < rows; i++)
-  // {
-  //   const RowInfo& ri = _rowsInfo[i];
-  //   if (ri.count > 1) qsortCells(_cellsSorted + ri.index, ri.count);
-  // }
-
-#endif

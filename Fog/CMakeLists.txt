@@ -1044,7 +1044,7 @@ If(FOG_BUILD_BENCH)
     Set(FOG_BENCH_CAIRO TRUE)
 
     # Qt4 benchmark.
-    Set(FOG_BENCH_QT4 TRUE)
+    # Set(FOG_BENCH_QT4 TRUE)
   EndIf(WIN32)
 
   Set(FOG_BENCH_SOURCES

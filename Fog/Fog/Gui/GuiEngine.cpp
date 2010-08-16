@@ -64,12 +64,17 @@ GuiEngine::GuiEngine()
   _buttonRepeat[1].addListener(EVENT_TIMER, this, &GuiEngine::_onButtonRepeatTimeOut);
   _buttonRepeat[2].addListener(EVENT_TIMER, this, &GuiEngine::_onButtonRepeatTimeOut);
 
-  memset(&_updateStatus, 0, sizeof(_updateStatus));
+  _updateStatus.scheduled = 0;
+  _updateStatus.updating = 0;
+  _updateStatus.task = NULL;
 }
 
 GuiEngine::~GuiEngine()
 {
-  if (_updateStatus.task) _updateStatus.task->cancel();
+  if (_updateStatus.task)
+  {
+    _updateStatus.task->cancel();
+  }
 }
 
 // ============================================================================
@@ -439,7 +444,6 @@ void GuiEngine::dispatchVisibility(Widget* w, uint32_t visible)
   if (visible >= WIDGET_VISIBLE)
   {
     if (visibility == WIDGET_HIDDEN_BY_PARENT && !w->hasGuiWindow()) return;
-
     w->_visibility = visible;
 
     uint32_t code = EVENT_SHOW;
@@ -520,7 +524,6 @@ void GuiEngine::dispatchVisibility(Widget* w, uint32_t visible)
   {
     visible = WIDGET_VISIBLE;
   }
-
   w->_visibility = visible;
 }
 
@@ -701,7 +704,7 @@ void GuiEngine::doUpdateWindow(GuiWindow* window)
     widget->_uflags = 0;
     return;
   }
-  
+
   while (window->_activatelist)
   {
     FOG_ASSERT(window->_activatelist->_activated == 0);
@@ -1198,7 +1201,7 @@ void GuiWindow::onEnabled(bool enabled)
 
 void GuiWindow::onVisibility(uint32_t visible)
 {
-  _visible = visible >= WIDGET_VISIBLE;
+  _visible = (visible >= WIDGET_VISIBLE);
   GUI_ENGINE()->dispatchVisibility(_widget, visible);
 }
 

@@ -1414,34 +1414,21 @@ static Span8* _sweepRectSimpleImpl(
   int x2 = shapeData->bounds.x2;
 
   int w = x2 - x1;
-  int h = shapeData->bounds.y2 - shapeData->bounds.y1;
 
-  uint8_t left;
-  uint8_t right;
-  uint8_t area;
+  const uint8_t* covers = shapeData->coverageI;
 
-  if (y == 0)
+  if (FOG_UNLIKELY(y == 0))
   {
-    left  = shapeData->coverageT[0];
-    area  = shapeData->coverageT[1];
-    right = shapeData->coverageT[2];
+    covers = shapeData->coverageT;
   }
-  else if (y == h)
+  else if (FOG_UNLIKELY(y == (shapeData->bounds.y2 - shapeData->bounds.y1)))
   {
-    left  = shapeData->coverageB[0];
-    area  = shapeData->coverageB[1];
-    right = shapeData->coverageB[2];
-  }
-  else
-  {
-    left  = shapeData->coverageI[0];
-    area  = shapeData->coverageI[1];
-    right = shapeData->coverageI[2];
+    covers = shapeData->coverageB;
   }
 
-  scanline.addVSpanAlpha(x1, x1 + 1)[0] = (uint8_t)left;
-  if (w > 1) scanline.addCSpan(x1 + 1, x2, area);
-  if (w > 0) scanline.addVSpanAlphaOrMergeVSpan(x2, x2 + 1)[0] = right;
+  scanline.addVSpanAlpha(x1, x1 + 1)[0] = (uint8_t)covers[0];
+  if (w > 1) scanline.addCSpanOrMergeVSpan(x1 + 1, x2, covers[1]);
+  if (w > 0) scanline.addVSpanAlphaOrMergeVSpan(x2, x2 + 1)[0] = covers[2];
 
   if (scanline.endScanline() != ERR_OK) return NULL;
 #if defined(FOG_DEBUG_RASTERIZER)

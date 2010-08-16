@@ -58,7 +58,7 @@ static void writeSummary(BenchmarkMaster* master)
 
   msg.appendFormat("------------------------+----------");
   for (c = 0; c < contextsCount; c++)
-    msg.appendFormat("+----------------");
+    msg.appendFormat("+-----------");
   msg.appendFormat("\n");
 
   for (i = 0; i < testsCount; i++)
@@ -79,19 +79,19 @@ static void writeSummary(BenchmarkMaster* master)
       Fog::TimeDelta delta;
       if (master->_contexts.at(c)->_values.contains(name))
         delta = master->_contexts.at(c)->_values.value(name);
-      msg.appendFormat("|%10.3f [ms] ", delta.inMillisecondsF());
+      msg.appendFormat("|%10.3f ", delta.inMillisecondsF());
     }
     msg.appendFormat("\n");
   }
 
   msg.appendFormat("-----------------------------------");
   for (c = 0; c < contextsCount; c++)
-    msg.appendFormat("+----------------");
+    msg.appendFormat("+-----------");
   msg.appendFormat("\n");
 
   msg.appendFormat("Summary                            ");
   for (c = 0; c < contextsCount; c++)
-    msg.appendFormat("|%10.3f [ms] ", master->_contexts.at(c)->_allTotal.inMillisecondsF());
+    msg.appendFormat("|%10.3f ", master->_contexts.at(c)->_allTotal.inMillisecondsF());
   msg.appendFormat("\n");
 
   msg.appendFormat("\n");

@@ -264,8 +264,8 @@ void AbstractBenchmarkContext::header()
 void AbstractBenchmarkContext::footer()
 {
   Fog::String msg;
-  msg.appendFormat("-----------------------------------+---------------\n");
-  msg.appendFormat("Summary                            |%10.3f [ms]\n", _allTotal.inMillisecondsF());
+  msg.appendFormat("-----------------------------------+----------\n");
+  msg.appendFormat("Summary                            |%10.3f\n", _allTotal.inMillisecondsF());
   msg.appendFormat("\n");
   benchLog(msg);
 }
@@ -301,7 +301,7 @@ void AbstractBenchmarkContext::bench(AbstractModule& mod, uint32_t op, uint32_t 
     Fog::String time;
 
     if (sw != 0 && sh != 0) size.format("%dx%d", sw, sh);
-    time.format("%10.3f [ms]", delta.inMillisecondsF());
+    time.format("%10.3f", delta.inMillisecondsF());
 
     msg.appendFormat("%-24W|%-10W|%W\n", &name, &size, &time);
     benchLog(msg);

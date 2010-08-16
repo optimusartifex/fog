@@ -1196,25 +1196,17 @@ static FOG_INLINE uint _calculateAlpha(const AnalyticRasterizer8* rasterizer, in
   return cover;
 }
 
-template<typename _CHUNK_TYPE, typename _CELL_TYPE, int _RULE, int _USE_ALPHA>
-static Span8* _sweepScanlineSimpleImpl(
-  AnalyticRasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y)
+template<typename _CHUNK_TYPE, typename _CELL_TYPE>
+static bool _mergeCells(AnalyticRasterizer8* rasterizer, void* _chunks, MemoryBuffer& temp, _CELL_TYPE** cellsOut, uint* numCellsOut)
 {
-  FOG_ASSERT(rasterizer->_isFinalized);
-
-  y -= rasterizer->_clipBox.y1;
-  if ((uint)y >= rasterizer->_size.h) return NULL;
-
-  int xOffset = rasterizer->_clipBox.x1;
-
-  _CHUNK_TYPE* chunk = reinterpret_cast<_CHUNK_TYPE*>(rasterizer->_rows[y]);
+  _CHUNK_TYPE* chunk = reinterpret_cast<_CHUNK_TYPE*>(_chunks);
   _CELL_TYPE* cellCur = chunk->getCells();
 
   uint numCells = chunk->getCount();
-  if (!numCells) return NULL;
+  if (!numCells) return false;
 
   {
-    // First calculate count of cells needed to alloc.
+    // First calculate count of cellCur needed to alloc.
     _CHUNK_TYPE* chunkCur;
 
     chunkCur = chunk->getPrev();
@@ -1225,13 +1217,22 @@ static Span8* _sweepScanlineSimpleImpl(
     };
 
     _CELL_TYPE* buf = reinterpret_cast<_CELL_TYPE*>(temp.alloc((sysuint_t)numCells * sizeof(_CELL_TYPE)));
-    if (!buf) return NULL;
+    if (!buf) return false;
 
     chunkCur = chunk;
     do {
       cellCur = chunkCur->getCells();
       uint i = chunkCur->getCount();
 
+      if (i > 1 && cellCur[0].getComparable() > cellCur[1].getComparable())
+      {
+        cellCur += i - 1;
+        do { buf->setData(*cellCur); buf++; cellCur--; } while (--i);
+      }
+      else
+      {
+        do { buf->setData(*cellCur); buf++; cellCur++; } while (--i);
+      }
       //if (i == _CHUNK_TYPE::CELLS_COUNT)
       //{
       //  Memory::copy32B(buf     , cellCur     );
@@ -1241,7 +1242,7 @@ static Span8* _sweepScanlineSimpleImpl(
       //}
       //else
       //{
-      do { buf->setData(*cellCur); buf++; cellCur++; } while (--i);
+      // do { buf->setData(*cellCur); buf++; cellCur++; } while (--i);
       //}
 
       chunkCur = chunkCur->getPrev();
@@ -1253,6 +1254,27 @@ static Span8* _sweepScanlineSimpleImpl(
   // QSort.
   qsortCells<_CELL_TYPE>(cellCur, numCells);
 
+  *cellsOut = cellCur;
+  *numCellsOut = numCells;
+  return true;
+}
+
+template<typename _CHUNK_TYPE, typename _CELL_TYPE, int _RULE, int _USE_ALPHA>
+static Span8* _sweepScanlineSimpleImpl(
+  AnalyticRasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y)
+{
+  FOG_ASSERT(rasterizer->_isFinalized);
+
+  y -= rasterizer->_clipBox.y1;
+  if ((uint)y >= (uint)rasterizer->_size.h) return NULL;
+
+  _CELL_TYPE* cellCur;
+  uint numCells;
+
+  if (!_mergeCells<_CHUNK_TYPE, _CELL_TYPE>(rasterizer, rasterizer->_rows[y], temp, &cellCur, &numCells))
+    return NULL;
+
+  int xOffset = rasterizer->_clipBox.x1;
   int x;
   int nextX = cellCur->getX() + xOffset;
   int area;
@@ -1400,7 +1422,7 @@ static Span8* _sweepRectSimpleImpl(
   AnalyticRasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y)
 {
   y -= rasterizer->_boundingBox.y1;
-  if ((uint)y >= rasterizer->_boundingBox.y2) return NULL;
+  if ((uint)y >= (uint)rasterizer->_boundingBox.y2) return NULL;
 
   int xOffset = rasterizer->_clipBox.x1;
 

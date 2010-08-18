@@ -517,15 +517,15 @@ void MyWindow::onPaint(PaintEvent* e)
   // Clear everything to white.
   p->setSource(Argb(0xFFFFFFFF));
   p->fillAll();
+  p->setSource(Argb(0xFF000000));
 
   DoubleRect rect(50.0 + _subx, 50.0 + _suby, 100, 100);
 
-  p->setSource(Argb(0xFF000000));
-  p->fillRect(rect);
+  //p->fillRect(rect);
 
-  //DoublePath path;
-  //path.addRect(rect);
-  //p->fillPath(path);
+  DoublePath path;
+  path.addRect(rect);
+  p->fillPath(path);
 
 /*
   DoublePath path;

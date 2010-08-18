@@ -95,17 +95,19 @@ struct MemoryBuffer;
 //!           to horizontal clipping bounding box.
 //!   Cover - a value at interval -256 to 256. This means that 10-bits are
 //!           enough to store the value.
-//!   Area  - a value at interval -(511<<8) to (511<<8). It can be effectively
-//!           compressed into 10-bits by shifting it right and preserving a
-//!           sign.
+//!   Area  - a value at interval -(511<<8) to (511<<8). This value is Cover
+//!           multiplied by Weight in range (0-511). This member can be 
+//!           effectively compressed into 9-bits by using only the weight
+//!           and doing multiplication in sweepScanline(). This is how Fog
+//!           rasterizer works!
 //!
 //! This means that cell structure can be compressed into:
 //!
 //!   DWORD (32-bit):
-//!   - X     - 12 bits.
+//!   - X     - 13 bits.
 //!   - Cover - 10 bits.
-//!   - Area  - 10 bits.
-//!   Applicable for resolution up to 4096 pixels in horizontal.
+//!   - Area  - 9  bits.
+//!   Applicable for resolution up to 8192 pixels in horizontal.
 //!
 //!   QWORD (64-bit):
 //!   - X     - 32 bits.
@@ -221,32 +223,36 @@ struct FOG_HIDDEN AnalyticRasterizer8
   {
     enum
     {
-      //! @brief Maximum x position in @c AnalyticRasterizer8::CellD (12-bit, 4095).
-      MAX_X = 0x00000FFF
+      //! @brief Maximum x position in @c AnalyticRasterizer8::CellD (12-bit, 8191).
+      MAX_X = 0x00001FFF
     };
 
     //! @brief Set all cell values at once.
-    FOG_INLINE void setData(int x, int cover, int area)
+    FOG_INLINE void setData(int x, int cover, int weight)
     {
       FOG_ASSERT(x >= 0 && x <= MAX_X);
-      //printf("DATA: %d (%x) %d (%x)\n", cover, cover, area, area);
+      FOG_ASSERT(cover >= -256 && cover <= 256);
+      FOG_ASSERT(weight >= 0 && weight <= 511);
 
-      _combined = ( (((uint)x        )         ) << 20 )
-                + ( (((uint)cover    ) & 0x3FFU) << 10 )
-                + ( (((uint)area >> 8) & 0x3FFU)       );
+      _combined = ( (((uint)x     )         ) << 19 )
+                + ( (((uint)cover ) & 0x3FFU) <<  9 )
+                + ( (((uint)weight)         )       );
     }
 
+    //! @brief Set all cell values to @a data.
     FOG_INLINE void setData(const CellD& data)
     {
       _combined = data._combined;
     }
 
     //! @brief Get the x coordinate.
-    FOG_INLINE int getX() const { return (int)(_combined >> 20); }
+    FOG_INLINE int getX() const { return (int)(_combined >> 19); }
     //! @brief Get the cell cover.
-    FOG_INLINE int getCover() const { return ((int)(_combined << 12)) >> 22; }
-    //! @brief Get the cell area.
-    FOG_INLINE int getArea() const { return ((int)(_combined << 22)) >> (22-8); }
+    FOG_INLINE int getCover() const { return ((int)(_combined << 13)) >> 22; }
+    //! @brief Get the cell weight .
+    FOG_INLINE int getWeight() const { return (int)(_combined & 0x1FF); }
+    //! @brief Get the cell area (cover * weight).
+    FOG_INLINE int getArea() const { return getCover() * getWeight(); }
 
     //! @brief Get comparable value (for sorting).
     FOG_INLINE uint32_t getComparable() const { return _combined; }
@@ -324,15 +330,18 @@ struct FOG_HIDDEN AnalyticRasterizer8
     };
 
     //! @brief Set all cell values at once.
-    FOG_INLINE void setData(int x, int cover, int area)
+    FOG_INLINE void setData(int x, int cover, int weight)
     {
       FOG_ASSERT(x >= 0);
+      FOG_ASSERT(cover >= -256 && cover <= 256);
+      FOG_ASSERT(weight >= 0 && weight <= 511);
 
       _x = (uint32_t)x;
       _cover = (int16_t)(cover);
-      _area = (int16_t)(area >> 8);
+      _weight = (uint16_t)(uint)(weight);
     }
 
+    //! @brief Set all cell values to @a data.
     FOG_INLINE void setData(const CellQ& data)
     {
       _combined = data._combined;
@@ -342,8 +351,10 @@ struct FOG_HIDDEN AnalyticRasterizer8
     FOG_INLINE int getX() const { return (int)_x; }
     //! @brief Get cell cover.
     FOG_INLINE int getCover() const { return (int)_cover; }
+    //! @brief Get cell weight.
+    FOG_INLINE int getWeight() const { return (int)_weight; }
     //! @brief Get cell area.
-    FOG_INLINE int getArea() const { return (int)_area << 8; }
+    FOG_INLINE int getArea() const { return getCover() * getWeight(); }
 
     //! @brief Get comparable value (for sorting).
     FOG_INLINE uint32_t getComparable() const { return _x; }
@@ -357,7 +368,7 @@ struct FOG_HIDDEN AnalyticRasterizer8
         //! @brief Cover value.
         int16_t _cover;
         //! @brief Area value.
-        int16_t _area;
+        uint16_t _weight;
       };
 
       //! @brief X, cover and area packed in a QWORD.

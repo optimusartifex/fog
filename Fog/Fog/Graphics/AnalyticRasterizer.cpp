@@ -713,12 +713,12 @@ FOG_INLINE bool AnalyticRasterizer8::clipLineY(int24x8_t x1, int24x8_t y1, int24
     } \
   } while (0)
 
-#define ADD_CELL_SINGLE(CHUNK_TYPE, _bail, _y, _x, _cover, _area) \
+#define ADD_CELL_SINGLE(CHUNK_TYPE, _bail, _y, _x, _cover, _weight) \
   do { \
     CHUNK_TYPE* _chunk; \
     GET_CHUNK(CHUNK_TYPE, _bail, _y, _chunk); \
     \
-    _chunk->getCells()[_chunk->getCount()].setData(_x, _cover, _area); \
+    _chunk->getCells()[_chunk->getCount()].setData(_x, _cover, _weight); \
     _chunk->incCount(1); \
   } while (0)
 
@@ -816,28 +816,24 @@ bool AnalyticRasterizer8::renderLine(int24x8_t x1, int24x8_t y1, int24x8_t x2, i
   if (dx == 0)
   {
     int two_fx = (x1 - (ex1 << POLY_SUBPIXEL_SHIFT)) << 1;
-    int area;
 
     first = POLY_SUBPIXEL_SCALE;
     if (dy < 0) { first = 0; incr = -1; }
 
     delta = first - fy1;
-    area = two_fx * delta;
-    ADD_CELL_SINGLE(_CHUNK_TYPE, _bail, ey1, ex1, delta, area);
+    ADD_CELL_SINGLE(_CHUNK_TYPE, _bail, ey1, ex1, delta, two_fx);
 
     ey1 += incr;
     delta = first + first - POLY_SUBPIXEL_SCALE;
-    area = two_fx * delta;
 
     while (ey1 != ey2)
     {
-      ADD_CELL_SINGLE(_CHUNK_TYPE, _bail, ey1, ex1, delta, area);
+      ADD_CELL_SINGLE(_CHUNK_TYPE, _bail, ey1, ex1, delta, two_fx);
       ey1 += incr;
     }
 
     delta = first + fy2 - POLY_SUBPIXEL_SCALE;
-    area = two_fx * delta;
-    ADD_CELL_SINGLE(_CHUNK_TYPE, _bail, ey1, ex1, delta, area);
+    ADD_CELL_SINGLE(_CHUNK_TYPE, _bail, ey1, ex1, delta, two_fx);
     return true;
   }
 
@@ -921,7 +917,7 @@ FOG_INLINE bool AnalyticRasterizer8::renderHLine(int ey, int24x8_t x1, int24x8_t
   if (ex1 == ex2)
   {
     delta = y2 - y1;
-    chunk->getCells()[index].setData(ex1, delta, delta * (fx1 + fx2));
+    chunk->getCells()[index].setData(ex1, delta, fx1 + fx2);
     chunk->incCount(1);
     return true;
   }
@@ -938,7 +934,7 @@ FOG_INLINE bool AnalyticRasterizer8::renderHLine(int ey, int24x8_t x1, int24x8_t
 
     if (mod < 0) { mod += dx; delta--; }
 
-    chunk->getCells()[index++].setData(ex1, delta, delta * fx1);
+    chunk->getCells()[index++].setData(ex1, delta, fx1);
 
     ex1--;
     y1 += delta;
@@ -965,7 +961,7 @@ FOG_INLINE bool AnalyticRasterizer8::renderHLine(int ey, int24x8_t x1, int24x8_t
             ADD_CHUNK(_CHUNK_TYPE, _bail, ey, chunk);
             index = 0;
           }
-          chunk->getCells()[index++].setData(ex1, delta, delta * POLY_SUBPIXEL_SCALE);
+          chunk->getCells()[index++].setData(ex1, delta, POLY_SUBPIXEL_SCALE);
         }
 
         y1 += delta;
@@ -980,7 +976,7 @@ FOG_INLINE bool AnalyticRasterizer8::renderHLine(int ey, int24x8_t x1, int24x8_t
       index = 0;
     }
 
-    chunk->getCells()[index++].setData(ex1, delta, (fx2 + POLY_SUBPIXEL_SCALE) * delta);
+    chunk->getCells()[index++].setData(ex1, delta, fx2 + POLY_SUBPIXEL_SCALE);
     chunk->setCount(index);
     return true;
   }
@@ -992,7 +988,7 @@ FOG_INLINE bool AnalyticRasterizer8::renderHLine(int ey, int24x8_t x1, int24x8_t
 
     if (mod < 0) { mod += dx; delta--; }
 
-    chunk->getCells()[index++].setData(ex1, delta, delta * (fx1 + POLY_SUBPIXEL_SCALE));
+    chunk->getCells()[index++].setData(ex1, delta, fx1 + POLY_SUBPIXEL_SCALE);
 
     ex1++;
     y1 += delta;
@@ -1019,7 +1015,7 @@ FOG_INLINE bool AnalyticRasterizer8::renderHLine(int ey, int24x8_t x1, int24x8_t
             ADD_CHUNK(_CHUNK_TYPE, _bail, ey, chunk);
             index = 0;
           }
-          chunk->getCells()[index++].setData(ex1, delta, delta * POLY_SUBPIXEL_SCALE);
+          chunk->getCells()[index++].setData(ex1, delta, POLY_SUBPIXEL_SCALE);
         }
 
         y1 += delta;
@@ -1034,7 +1030,7 @@ FOG_INLINE bool AnalyticRasterizer8::renderHLine(int ey, int24x8_t x1, int24x8_t
       index = 0;
     }
 
-    chunk->getCells()[index++].setData(ex1, delta, fx2 * delta);
+    chunk->getCells()[index++].setData(ex1, delta, fx2);
     chunk->setCount(index);
     return true;
   }
@@ -1224,6 +1220,7 @@ static bool _mergeCells(AnalyticRasterizer8* rasterizer, void* _chunks, MemoryBu
       cellCur = chunkCur->getCells();
       uint i = chunkCur->getCount();
 
+      // Copy cells reversed if they are in reverse order.
       if (i > 1 && cellCur[0].getComparable() > cellCur[1].getComparable())
       {
         cellCur += i - 1;
@@ -1233,17 +1230,6 @@ static bool _mergeCells(AnalyticRasterizer8* rasterizer, void* _chunks, MemoryBu
       {
         do { buf->setData(*cellCur); buf++; cellCur++; } while (--i);
       }
-      //if (i == _CHUNK_TYPE::CELLS_COUNT)
-      //{
-      //  Memory::copy32B(buf     , cellCur     );
-      //  Memory::copy16B(buf +  8, cellCur +  8);
-      //  Memory::copy12B(buf + 12, cellCur + 12);
-      //  buf += _CHUNK_TYPE::CELLS_COUNT;
-      //}
-      //else
-      //{
-      // do { buf->setData(*cellCur); buf++; cellCur++; } while (--i);
-      //}
 
       chunkCur = chunkCur->getPrev();
     } while (chunkCur);

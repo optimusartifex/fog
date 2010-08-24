@@ -75,6 +75,9 @@ If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   # Experimental flags, may improve performance
   Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fgcse-sm")
   Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fgcse-las")
+
+  # TODO: This flag is not available for GCC 4.2.1 - Which versions support it?
+  #       We need something like If(GCC_VERSION >= 4.3)
   Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpredictive-commoning")
 
   # If we are not debugging the code should be optimized. The O2 generates 
@@ -380,7 +383,7 @@ Set(FOG_CORE_LIB_HEADERS
   Fog/Core/WinUtil_p.h
 )
 
-If(0)
+If(APPLE)
 Set(FOG_CORE_LIB_SOURCES
   ${FOG_CORE_LIB_SOURCES
   Fog/Core/MacUtil.mm

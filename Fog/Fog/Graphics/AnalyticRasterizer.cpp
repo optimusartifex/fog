@@ -1171,6 +1171,27 @@ static void dumpSpans(int y, const Span8* span)
 }
 #endif // FOG_DEBUG_RASTERIZER
 
+// Formula:
+//
+// Cover = ?
+// Weight = ?
+// Area = Cover * Weight;
+//
+// FIRST:
+//   Alpha = abs( ((Cover << (POLY_SUBPIXEL_SHIFT + 1)) - Area) >> (POLY_SUBPIXEL_SHIFT * 2 + 1 - AA_SHIFT) );
+//   Alpha = abs( ((Cover << 9) - Area) >> 9);
+//
+// SPAN:
+//   Alpha = abs( ((Cover << (POLY_SUBPIXEL_SHIFT + 1))       ) >> (POLY_SUBPIXEL_SHIFT * 2 + 1 - AA_SHIFT) );
+//   Alpha = abs( Cover );
+//
+// NON_ZERO:
+//   if (Alpha > AA_MASK) Alpha = AA_MASK;
+//
+// EVEN_ODD:
+//   Alpha &= AA_MASK_2;
+//   if (Alpha > AA_SCALE) Alpha = AA_SCALE_2 - cover;
+//   if (Alpha > AA_MASK) Alpha = AA_MASK;
 template<int _RULE, int _USE_ALPHA>
 static FOG_INLINE uint _calculateAlpha(const AnalyticRasterizer8* rasterizer, int area)
 {

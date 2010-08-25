@@ -53,7 +53,7 @@ static void writeSummary(BenchmarkMaster* master)
 
   msg.appendFormat("Test                    |Size      ");
   for (c = 0; c < contextsCount; c++)
-    msg.appendFormat("|%-16W", &master->_contexts.at(c)->_name);
+    msg.appendFormat("|%-11W", &master->_contexts.at(c)->_name);
   msg.appendFormat("\n");
 
   msg.appendFormat("------------------------+----------");

@@ -39,11 +39,11 @@ List<String> MacFontEngine::getFontList()
   List<String> fonts;
 
   // Create a font collection of all the fonts available in the system.
-  RetainPtr<CTFontCollectionRef> fontCollection =
+  CFType<CTFontCollectionRef> fontCollection =
       CTFontCollectionCreateFromAvailableFonts(NULL);
 
   // Get the font descriptors for the font collection.
-  RetainPtr<CFArrayRef> fontDescriptors = CTFontCollectionCreateMatchingFontDescriptors(fontCollection.get());
+  CFType<CFArrayRef> fontDescriptors = CTFontCollectionCreateMatchingFontDescriptors(fontCollection.get());
 
   // Go through the array of font descriptors and append the font each for each
   // descriptor to the result string list.
@@ -51,7 +51,7 @@ List<String> MacFontEngine::getFontList()
   for (sysint_t i=0; i<count; ++i)
   {
       // Get the font descriptor for index.
-    RetainPtr<CTFontDescriptorRef> value = static_cast<CTFontDescriptorRef>(CFArrayGetValueAtIndex(fontDescriptors.get(), i));
+    CFType<CTFontDescriptorRef> value = static_cast<CTFontDescriptorRef>(CFArrayGetValueAtIndex(fontDescriptors.get(), i));
     if(value == NULL)
     {
       fog_stderr_msg("Fog::MacFontEngine", "getFontList", "Invalid cast");
@@ -59,7 +59,7 @@ List<String> MacFontEngine::getFontList()
     }
 
     // Get the font name from the descriptor.
-    RetainPtr<CFStringRef> name = static_cast<CFStringRef>(CTFontDescriptorCopyAttribute(value.get(), kCTFontNameAttribute));
+    CFType<CFStringRef> name = static_cast<CFStringRef>(CTFontDescriptorCopyAttribute(value.get(), kCTFontNameAttribute));
     if(name == NULL)
     {
         fog_stderr_msg("Fog::MacEngine", "getFontList", "Invalid cast");
@@ -217,7 +217,7 @@ DoublePath MacFontFace::renderGlyph(uint32_t uc, DoublePoint& offset)
   DoublePath p;
   CGSize sz;
 
-  RetainPtr<CGPathRef> path = CTFontCreatePathForGlyph(font.get(), glyph, &transform);
+  CFType<CGPathRef> path = CTFontCreatePathForGlyph(font.get(), glyph, &transform);
   if (!path)
   {
     fog_stderr_msg("Fog::MacFontFace", "renderGlyph", "Could not create path for glyph %i", uc);

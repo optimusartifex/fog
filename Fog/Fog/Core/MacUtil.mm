@@ -14,11 +14,11 @@
 namespace Fog {
 
 // =============================================================================
-// [RetainPtr]
+// [CFType]
 // =============================================================================
 
 template <typename T> template <typename U>
-inline RetainPtr<T>& RetainPtr<T>::operator=(const RetainPtr<U>& o)
+inline CFType<T>& CFType<T>::operator=(const CFType<U>& o)
 {
   PtrType optr = o.get();
   if (optr)
@@ -31,7 +31,7 @@ inline RetainPtr<T>& RetainPtr<T>::operator=(const RetainPtr<U>& o)
 }
 
 template <typename T> template <typename U>
-inline RetainPtr<T>& RetainPtr<T>::operator=(U* optr)
+inline CFType<T>& CFType<T>::operator=(U* optr)
 {
   if (optr)
     CFRetain(optr);
@@ -46,7 +46,7 @@ inline RetainPtr<T>& RetainPtr<T>::operator=(U* optr)
 // [String Conversion]
 // ==============================================================================
 
-String stringFromCFString(const RetainPtr<CFStringRef>& str)
+String stringFromCFString(const CFType<CFStringRef>& str)
 {
   sysuint_t len = CFStringGetLength(str.get());
   char* data;

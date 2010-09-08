@@ -30,8 +30,6 @@ struct AtomicImplementation {};
 
 #if defined(FOG_CC_GNU) && (defined(FOG_ARCH_X86) || defined(FOG_ARCH_X86_64))
 # include <Fog/Core/Arch/Atomic_gcc_x86x64.h>
-#elif defined(FOG_CC_CLANG) && (defined(FOG_ARCH_X86) || defined(FOG_ARCH_X86_64))
-# include <Fog/Core/Arch/Atomic_clang_x86x64.h>
 #elif defined(FOG_CC_GNU) || defined(FOG_CC_CLANG)
 # include <Fog/Core/Arch/Atomic_gcc_intrin.h>
 #elif (defined(FOG_CC_MSVC) && FOG_CC_MSVC < 1400) || defined(FOG_CC_BORLAND)

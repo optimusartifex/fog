@@ -71,7 +71,7 @@ struct FOG_API MacFontMaster
   Atomic<sysuint_t> refCount;
   String family;
 
-  RetainPtr<CTFontRef> font;
+  CFType<CTFontRef> font;
 
   FloatKerningPair* kerningPairs;
   uint32_t kerningCount;
@@ -118,7 +118,7 @@ struct FOG_API MacFontFace : public FontFace
   //! @brief Glyph cache.
   GlyphCache glyphCache;
   //! @brief Mac font handle.
-  RetainPtr<CTFontRef> font;
+  CFType<CTFontRef> font;
 
 private:
   DoublePath renderGlyph(uint32_t uc, DoublePoint& offset);

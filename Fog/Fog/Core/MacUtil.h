@@ -18,7 +18,7 @@
 namespace Fog {
 
 // =================================================================================
-// [RetainPtr]
+// [CFType]
 // =================================================================================
 
 template <typename T>
@@ -34,16 +34,16 @@ struct RemovePointer<T*>
 };
 
 template <typename T>
-struct RetainPtr
+struct CFType
 {
   typedef typename RemovePointer<T>::type ValueType;
   typedef ValueType* PtrType;
 
-  RetainPtr() : _ptr(0) {}
-  RetainPtr(PtrType ptr) : _ptr(ptr) { if (ptr) CFRetain(ptr); }
-  RetainPtr(const RetainPtr& o) : _ptr(o._ptr) { if (PtrType ptr = _ptr) CFRetain(ptr); }
-  ~RetainPtr() { if (PtrType ptr = _ptr) CFRelease(ptr); }
-  template <typename U> RetainPtr(const RetainPtr<U>& o) : _ptr(o.get()) { if (PtrType ptr = _ptr) CFRetain(ptr); }
+  CFType() : _ptr(0) {}
+  CFType(PtrType ptr) : _ptr(ptr) { if (ptr) CFRetain(ptr); }
+  CFType(const CFType& o) : _ptr(o._ptr) { if (PtrType ptr = _ptr) CFRetain(ptr); }
+  ~CFType() { if (PtrType ptr = _ptr) CFRelease(ptr); }
+  template <typename U> CFType(const CFType<U>& o) : _ptr(o.get()) { if (PtrType ptr = _ptr) CFRetain(ptr); }
 
   PtrType get() const { return _ptr; }
   PtrType releaseRef() { PtrType tmp = _ptr; _ptr = 0; return tmp; }
@@ -52,15 +52,15 @@ struct RetainPtr
   bool operator!() const { return !_ptr; }
   
   //! @brief  This conversion operator allows implicit conversion to bool but not to other integer types.
-  typedef PtrType RetainPtr::*UnspecifiedBoolType;
-  operator UnspecifiedBoolType() const { return _ptr ? &RetainPtr::_ptr : 0; }
+  typedef PtrType CFType::*UnspecifiedBoolType;
+  operator UnspecifiedBoolType() const { return _ptr ? &CFType::_ptr : 0; }
 
-  RetainPtr& operator=(const RetainPtr&);
+  CFType& operator=(const CFType&);
 
   template <typename U>
-  RetainPtr& operator=(const RetainPtr<U>&);
+  CFType& operator=(const CFType<U>&);
 
-  RetainPtr& operator=(PtrType optr)
+  CFType& operator=(PtrType optr)
   {
     if (optr)
       CFRetain(optr);
@@ -72,14 +72,14 @@ struct RetainPtr
   
   }
   template <typename U>
-  RetainPtr& operator=(U*);
+  CFType& operator=(U*);
 
 private:
   PtrType _ptr;
 };
 
 template <typename T>
-FOG_INLINE RetainPtr<T>& RetainPtr<T>::operator=(const RetainPtr<T>& o)
+FOG_INLINE CFType<T>& CFType<T>::operator=(const CFType<T>& o)
 {
   PtrType optr = o.get();
   if (optr)
@@ -92,7 +92,7 @@ FOG_INLINE RetainPtr<T>& RetainPtr<T>::operator=(const RetainPtr<T>& o)
 }
 
 template <class T>
-FOG_INLINE void swap(RetainPtr<T>& a, RetainPtr<T>& b)
+FOG_INLINE void swap(CFType<T>& a, CFType<T>& b)
 {
   a.swap(b);
 }
@@ -101,32 +101,32 @@ FOG_INLINE void swap(RetainPtr<T>& a, RetainPtr<T>& b)
 // TODO For any unknown reason, these compare operators hide the string compare 
 // operators
 #if 0
-template <typename T, typename U> inline bool operator==(const RetainPtr<T>& a, const RetainPtr<U>& b)
+template <typename T, typename U> inline bool operator==(const CFType<T>& a, const CFType<U>& b)
 { 
   return a.get() == b.get(); 
 }
 
-template <typename T, typename U> inline bool operator==(const RetainPtr<T>& a, U* b)
+template <typename T, typename U> inline bool operator==(const CFType<T>& a, U* b)
 { 
   return a.get() == b; 
 }
 
-template <typename T, typename U> inline bool operator==(T* a, const RetainPtr<U>& b) 
+template <typename T, typename U> inline bool operator==(T* a, const CFType<U>& b) 
 {
   return a == b.get(); 
 }
 
-template <typename T, typename U> inline bool operator!=(const RetainPtr<T>& a, const RetainPtr<U>& b)
+template <typename T, typename U> inline bool operator!=(const CFType<T>& a, const CFType<U>& b)
 { 
   return a.get() != b.get(); 
 }
 
-template <typename T, typename U> inline bool operator!=(const RetainPtr<T>& a, U* b)
+template <typename T, typename U> inline bool operator!=(const CFType<T>& a, U* b)
 {
   return a.get() != b; 
 }
 
-template <typename T, typename U> inline bool operator!=(T* a, const RetainPtr<U>& b)
+template <typename T, typename U> inline bool operator!=(T* a, const CFType<U>& b)
 { 
   return a != b.get(); 
 }
@@ -136,7 +136,7 @@ template <typename T, typename U> inline bool operator!=(T* a, const RetainPtr<U
 // [Carbon and Cocoa String Conversions]
 // =================================================================================
 
-String stringFromCFString(const RetainPtr<CFStringRef>& str);
+String stringFromCFString(const CFType<CFStringRef>& str);
 CFStringRef CFStringFromString(const String& str);
 
 } // Fog namespace

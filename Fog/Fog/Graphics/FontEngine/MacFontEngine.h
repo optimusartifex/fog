@@ -15,10 +15,14 @@
 #include <Fog/Core/MacUtil.h>
 #include <Fog/Graphics/Font.h>
 
-#include <Carbon/Carbon.h>
-
 //! @addtogroup Fog_Graphics_Text
 //! @{
+
+#ifdef __OBJC__
+@class NSFont;
+#else
+class NSFont;
+#endif
 
 namespace Fog {
 
@@ -57,6 +61,8 @@ struct FOG_API MacFontEngine : public FontEngine
 
 private:
   FOG_DISABLE_COPY(MacFontEngine)
+
+  AutoNSAutoreleasePool _pool;
 };
 
 // ============================================================================
@@ -71,7 +77,7 @@ struct FOG_API MacFontMaster
   Atomic<sysuint_t> refCount;
   String family;
 
-  CFType<CTFontRef> font;
+  NSFont* font;
 
   FloatKerningPair* kerningPairs;
   uint32_t kerningCount;
@@ -118,7 +124,7 @@ struct FOG_API MacFontFace : public FontFace
   //! @brief Glyph cache.
   GlyphCache glyphCache;
   //! @brief Mac font handle.
-  CFType<CTFontRef> font;
+  NSFont* font;
 
 private:
   DoublePath renderGlyph(uint32_t uc, DoublePoint& offset);
@@ -131,7 +137,6 @@ private:
 } // Fog namespace
 
 //! @}
-
 #else
 #warning "Fog::FontEngine::Mac support not enabled but header file included!"
 #endif // FOG_FONT_MAC

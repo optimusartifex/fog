@@ -78,7 +78,7 @@ If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
 
   # TODO: This flag is not available for GCC 4.2.1 - Which versions support it?
   #       We need something like If(GCC_VERSION >= 4.3)
-  Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpredictive-commoning")
+  # Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpredictive-commoning")
 
   # If we are not debugging the code should be optimized. The O2 generates 
   # probably the best code. O3 gives no speed improvement and code is always
@@ -193,7 +193,7 @@ Else(WIN32)
   EndIf(FOG_HAVE_DLFCN_H)
   
   If(APPLE)
-    Set(FOG_LIBRARIES "${FOG_LIBRARIES} -framework Carbon")
+    Set(FOG_LIBRARIES "${FOG_LIBRARIES} -framework Cocoa")
   EndIf(APPLE)
 EndIf(WIN32)
 
@@ -384,10 +384,10 @@ Set(FOG_CORE_LIB_HEADERS
 )
 
 If(APPLE)
-Set(FOG_CORE_LIB_SOURCES
-  ${FOG_CORE_LIB_SOURCES
-  Fog/Core/MacUtil.mm
-)
+  Set(FOG_CORE_LIB_SOURCES
+    ${FOG_CORE_LIB_SOURCES}
+    Fog/Core/MacUtil.mm
+  )
 EndIf()
 
 Set(FOG_CORE_ARCH_SOURCES
@@ -395,7 +395,6 @@ Set(FOG_CORE_ARCH_SOURCES
 
 Set(FOG_CORE_ARCH_HEADERS
   Fog/Core/Arch/Atomic_gcc_x86x64.h
-  Fog/Core/Arch/Atomic_clang_x86x64.h
   Fog/Core/Arch/Atomic_gcc_intrin.h
   Fog/Core/Arch/Atomic_msc_intrin.h
   Fog/Core/Arch/Atomic_msc_x86.h
@@ -585,10 +584,17 @@ Set(FOG_GRAPHICS_IMAGEIO_HEADERS
 
 Set(FOG_GRAPHICS_FONTENGINE_SOURCES
   Fog/Graphics/FontEngine/FTFontEngine.cpp
-  Fog/Graphics/FontEngine/MacFontEngine.cpp
   Fog/Graphics/FontEngine/NullFontEngine.cpp
   Fog/Graphics/FontEngine/WinFontEngine.cpp
 )
+
+If(APPLE)
+  Set(FOG_GRAPHICS_FONTENGINE_SOURCES
+    ${FOG_GRAPHICS_FONTENGINE_SOURCES}
+    Fog/Graphics/FontEngine/MacFontEngine.mm
+  )
+EndIf()
+
 
 Set(FOG_GRAPHICS_FONTENGINE_HEADERS
   Fog/Graphics/FontEngine/FTFontEngine.h

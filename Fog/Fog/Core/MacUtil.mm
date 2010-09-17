@@ -8,6 +8,9 @@
 #if defined(FOG_OS_MAC)
 
 #include <Fog/Core/MacUtil.h>
+#include <Fog/Core/String.h>
+#include <Fog/Core/ByteArray.h>
+#include <Fog/Core/TextCodec.h>
 
 #import <Cocoa/Cocoa.h>
 
@@ -22,6 +25,22 @@ AutoNSAutoreleasePool::~AutoNSAutoreleasePool()
 {
     [_pool release];
 }
+
+// ============================================================================
+
+NSString* toNSString(const String& str)
+{
+  ByteArray tmp;
+  TextCodec::local8().fromUnicode(tmp, str);
+  return [[NSString alloc] initWithCString:tmp.getData() encoding:NSUTF8StringEncoding];
+}
+
+
+String fromNSString(NSString* str) 
+{
+	return (Char*)[str UTF8String];
+}
+
 
 
 } // Fog namespace

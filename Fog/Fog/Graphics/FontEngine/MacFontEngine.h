@@ -18,6 +18,10 @@
 //! @addtogroup Fog_Graphics_Text
 //! @{
 
+// ============================================================================
+// [Forward Declarations]
+// ============================================================================
+
 #ifdef __OBJC__
 @class NSFont;
 #else
@@ -25,12 +29,6 @@ class NSFont;
 #endif
 
 namespace Fog {
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct MacFontEngine;
 
 // ============================================================================
 // [Fog::MacFontEngine]
@@ -83,8 +81,6 @@ struct FOG_API MacFontMaster
   uint32_t kerningCount;
 
 private:
-  friend struct MacFontEngine;
-
   FOG_DISABLE_COPY(MacFontMaster)
 };
 
@@ -121,16 +117,10 @@ struct FOG_API MacFontFace : public FontFace
 
   //! @brief Lock.
   mutable Lock lock;
-  //! @brief Glyph cache.
-  GlyphCache glyphCache;
   //! @brief Mac font handle.
   NSFont* font;
 
 private:
-  DoublePath renderGlyph(uint32_t uc, DoublePoint& offset);
-
-  friend struct MacFontEngine;
-
   FOG_DISABLE_COPY(MacFontFace)
 };
 

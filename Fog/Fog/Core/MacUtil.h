@@ -24,6 +24,8 @@ class NSString;
 
 namespace Fog {
 
+//! @brief AutoNSAutoreleasePool allocates an NSAutoreleasePool on instatiation and
+//! releases it on destruction. 
 class AutoNSAutoreleasePool
 {
 public:
@@ -39,10 +41,8 @@ private:
 // [Cocoa String Conversions]
 // =================================================================================
 
-/* TODO
 String fromNSString(NSString* str);
 NSString* toNSString(const String& str);
-*/
 
 } // Fog namespace
 

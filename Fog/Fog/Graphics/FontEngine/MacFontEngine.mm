@@ -24,19 +24,6 @@
 
 namespace Fog {
 
-// TODO move it to Core/MacUtil.h
-static NSString* toNSString(const String& str)
-{
-  ByteArray tmp;
-  TextCodec::local8().fromUnicode(tmp, str);
-  return [[NSString alloc] initWithCString:tmp.getData() encoding:NSUTF8StringEncoding];
-}
-
-static String fromNSString(NSString* str) 
-{
-	return (Char*)[str UTF8String];
-}
-
 // ============================================================================
 // [Fog::MacFontEngine]
 // ============================================================================

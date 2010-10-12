@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -869,7 +869,7 @@ skip:
       __m128i src0mm;
 
       sse2_load4(src0mm, src);
-      src0mm = _mm_or_si128(src0mm, FOG_GET_SSE_CONST_PI(FF000000FF000000_FF000000FF000000));
+      src0mm = _mm_or_si128(src0mm, FOG_SSE_GET_CONST_PI(FF000000FF000000_FF000000FF000000));
       sse2_store4(dst, src0mm);
 
       src += 4;
@@ -880,7 +880,7 @@ skip:
       __m128i src0mm;
 
       sse2_load16u(src0mm, src);
-      src0mm = _mm_or_si128(src0mm, FOG_GET_SSE_CONST_PI(FF000000FF000000_FF000000FF000000));
+      src0mm = _mm_or_si128(src0mm, FOG_SSE_GET_CONST_PI(FF000000FF000000_FF000000FF000000));
       sse2_store16a(dst, src0mm);
 
       src += 16;
@@ -1060,7 +1060,7 @@ skip:
       sse2_unpack_1x1W(src0mm, src0mm);
       sse2_premultiply_1x1W(src0mm, src0mm);
       sse2_pack_1x1W(src0mm, src0mm);
-      src0mm = _mm_or_si128(src0mm, FOG_GET_SSE_CONST_PI(FF000000FF000000_FF000000FF000000));
+      src0mm = _mm_or_si128(src0mm, FOG_SSE_GET_CONST_PI(FF000000FF000000_FF000000FF000000));
       sse2_store4(dst, src0mm);
 
       dst += 4;
@@ -1075,7 +1075,7 @@ skip:
       sse2_unpack_2x2W(src0mm, src1mm, src0mm);
       sse2_premultiply_2x2W(src0mm, src0mm, src1mm, src1mm);
       sse2_pack_2x2W(src0mm, src0mm, src1mm);
-      src0mm = _mm_or_si128(src0mm, FOG_GET_SSE_CONST_PI(FF000000FF000000_FF000000FF000000));
+      src0mm = _mm_or_si128(src0mm, FOG_SSE_GET_CONST_PI(FF000000FF000000_FF000000FF000000));
       sse2_store16a(dst, src0mm);
 
       dst += 16;
@@ -1110,7 +1110,7 @@ skip:
       sse2_swap_1x1W(src0mm, src0mm);
       sse2_premultiply_1x1W(src0mm, src0mm);
       sse2_pack_1x1W(src0mm, src0mm);
-      src0mm = _mm_or_si128(src0mm, FOG_GET_SSE_CONST_PI(FF000000FF000000_FF000000FF000000));
+      src0mm = _mm_or_si128(src0mm, FOG_SSE_GET_CONST_PI(FF000000FF000000_FF000000FF000000));
       sse2_store4(dst, src0mm);
 
       dst += 4;
@@ -1126,7 +1126,7 @@ skip:
       sse2_swap_2x2W(src0mm, src0mm, src1mm, src1mm);
       sse2_premultiply_2x2W(src0mm, src0mm, src1mm, src1mm);
       sse2_pack_2x2W(src0mm, src0mm, src1mm);
-      src0mm = _mm_or_si128(src0mm, FOG_GET_SSE_CONST_PI(FF000000FF000000_FF000000FF000000));
+      src0mm = _mm_or_si128(src0mm, FOG_SSE_GET_CONST_PI(FF000000FF000000_FF000000FF000000));
       sse2_store16a(dst, src0mm);
 
       dst += 16;
@@ -1313,14 +1313,14 @@ skip:
       pix0xmmB = _mm_srli_epi32(pix0xmmB, 3);
       pix1xmmB = _mm_srli_epi32(pix1xmmB, 3);
 
-      pix0xmmR = _mm_and_si128(pix0xmmR, FOG_GET_SSE_CONST_PI(00007C0000007C00_00007C0000007C00));
-      pix1xmmR = _mm_and_si128(pix1xmmR, FOG_GET_SSE_CONST_PI(00007C0000007C00_00007C0000007C00));
+      pix0xmmR = _mm_and_si128(pix0xmmR, FOG_SSE_GET_CONST_PI(00007C0000007C00_00007C0000007C00));
+      pix1xmmR = _mm_and_si128(pix1xmmR, FOG_SSE_GET_CONST_PI(00007C0000007C00_00007C0000007C00));
 
-      pix0xmmG = _mm_and_si128(pix0xmmG, FOG_GET_SSE_CONST_PI(000007E0000007E0_000007E0000007E0));
-      pix1xmmG = _mm_and_si128(pix1xmmG, FOG_GET_SSE_CONST_PI(000007E0000007E0_000007E0000007E0));
+      pix0xmmG = _mm_and_si128(pix0xmmG, FOG_SSE_GET_CONST_PI(000007E0000007E0_000007E0000007E0));
+      pix1xmmG = _mm_and_si128(pix1xmmG, FOG_SSE_GET_CONST_PI(000007E0000007E0_000007E0000007E0));
 
-      pix0xmmB = _mm_and_si128(pix0xmmB, FOG_GET_SSE_CONST_PI(0000001F0000001F_0000001F0000001F));
-      pix1xmmB = _mm_and_si128(pix1xmmB, FOG_GET_SSE_CONST_PI(0000001F0000001F_0000001F0000001F));
+      pix0xmmB = _mm_and_si128(pix0xmmB, FOG_SSE_GET_CONST_PI(0000001F0000001F_0000001F0000001F));
+      pix1xmmB = _mm_and_si128(pix1xmmB, FOG_SSE_GET_CONST_PI(0000001F0000001F_0000001F0000001F));
 
       pix0xmmB = _mm_or_si128(pix0xmmB, pix0xmmG);
       pix1xmmB = _mm_or_si128(pix1xmmB, pix1xmmG);
@@ -1388,19 +1388,19 @@ skip:
       pix0xmmB0 = _mm_slli_epi32(pix0xmmB0, 5);
       pix1xmmB0 = _mm_slli_epi32(pix1xmmB0, 5);
 
-      pix0xmmR0 = _mm_and_si128(pix0xmmR0, FOG_GET_SSE_CONST_PI(000000F8000000F8_000000F8000000F8));
-      pix1xmmR0 = _mm_and_si128(pix1xmmR0, FOG_GET_SSE_CONST_PI(000000F8000000F8_000000F8000000F8));
+      pix0xmmR0 = _mm_and_si128(pix0xmmR0, FOG_SSE_GET_CONST_PI(000000F8000000F8_000000F8000000F8));
+      pix1xmmR0 = _mm_and_si128(pix1xmmR0, FOG_SSE_GET_CONST_PI(000000F8000000F8_000000F8000000F8));
 
-      pix0xmmG0 = _mm_and_si128(pix0xmmG0, FOG_GET_SSE_CONST_PI(0000000700000007_0000000700000007));
-      pix1xmmG0 = _mm_and_si128(pix1xmmG0, FOG_GET_SSE_CONST_PI(0000000700000007_0000000700000007));
+      pix0xmmG0 = _mm_and_si128(pix0xmmG0, FOG_SSE_GET_CONST_PI(0000000700000007_0000000700000007));
+      pix1xmmG0 = _mm_and_si128(pix1xmmG0, FOG_SSE_GET_CONST_PI(0000000700000007_0000000700000007));
 
       pix0xmmR0 = _mm_packs_epi32(pix0xmmR0, pix1xmmR0);
 
-      pix0xmmB0 = _mm_and_si128(pix0xmmB0, FOG_GET_SSE_CONST_PI(00001F0000001F00_00001F0000001F00));
-      pix1xmmB0 = _mm_and_si128(pix1xmmB0, FOG_GET_SSE_CONST_PI(00001F0000001F00_00001F0000001F00));
+      pix0xmmB0 = _mm_and_si128(pix0xmmB0, FOG_SSE_GET_CONST_PI(00001F0000001F00_00001F0000001F00));
+      pix1xmmB0 = _mm_and_si128(pix1xmmB0, FOG_SSE_GET_CONST_PI(00001F0000001F00_00001F0000001F00));
 
-      pix0xmmG1 = _mm_and_si128(pix0xmmG1, FOG_GET_SSE_CONST_PI(00001C0000001C00_00001C0000001C00));
-      pix1xmmG1 = _mm_and_si128(pix1xmmG1, FOG_GET_SSE_CONST_PI(00001C0000001C00_00001C0000001C00));
+      pix0xmmG1 = _mm_and_si128(pix0xmmG1, FOG_SSE_GET_CONST_PI(00001C0000001C00_00001C0000001C00));
+      pix1xmmG1 = _mm_and_si128(pix1xmmG1, FOG_SSE_GET_CONST_PI(00001C0000001C00_00001C0000001C00));
 
       pix0xmmB0 = _mm_packs_epi32(pix0xmmB0, pix1xmmB0);
       pix0xmmG0 = _mm_packs_epi32(pix0xmmG0, pix1xmmG0);
@@ -1463,14 +1463,14 @@ skip:
       pix0xmmB = _mm_srli_epi32(pix0xmmB, 3);
       pix1xmmB = _mm_srli_epi32(pix1xmmB, 3);
 
-      pix0xmmR = _mm_and_si128(pix0xmmR, FOG_GET_SSE_CONST_PI(00007C0000007C00_00007C0000007C00));
-      pix1xmmR = _mm_and_si128(pix1xmmR, FOG_GET_SSE_CONST_PI(00007C0000007C00_00007C0000007C00));
+      pix0xmmR = _mm_and_si128(pix0xmmR, FOG_SSE_GET_CONST_PI(00007C0000007C00_00007C0000007C00));
+      pix1xmmR = _mm_and_si128(pix1xmmR, FOG_SSE_GET_CONST_PI(00007C0000007C00_00007C0000007C00));
 
-      pix0xmmG = _mm_and_si128(pix0xmmG, FOG_GET_SSE_CONST_PI(000003E0000003E0_000003E0000003E0));
-      pix1xmmG = _mm_and_si128(pix1xmmG, FOG_GET_SSE_CONST_PI(000003E0000003E0_000003E0000003E0));
+      pix0xmmG = _mm_and_si128(pix0xmmG, FOG_SSE_GET_CONST_PI(000003E0000003E0_000003E0000003E0));
+      pix1xmmG = _mm_and_si128(pix1xmmG, FOG_SSE_GET_CONST_PI(000003E0000003E0_000003E0000003E0));
 
-      pix0xmmB = _mm_and_si128(pix0xmmB, FOG_GET_SSE_CONST_PI(0000001F0000001F_0000001F0000001F));
-      pix1xmmB = _mm_and_si128(pix1xmmB, FOG_GET_SSE_CONST_PI(0000001F0000001F_0000001F0000001F));
+      pix0xmmB = _mm_and_si128(pix0xmmB, FOG_SSE_GET_CONST_PI(0000001F0000001F_0000001F0000001F));
+      pix1xmmB = _mm_and_si128(pix1xmmB, FOG_SSE_GET_CONST_PI(0000001F0000001F_0000001F0000001F));
 
       pix0xmmB = _mm_or_si128(pix0xmmB, pix0xmmR);
       pix1xmmB = _mm_or_si128(pix1xmmB, pix1xmmR);
@@ -1536,19 +1536,19 @@ skip:
       pix0xmmB0 = _mm_slli_epi32(pix0xmmB0, 5);
       pix1xmmB0 = _mm_slli_epi32(pix1xmmB0, 5);
 
-      pix0xmmR0 = _mm_and_si128(pix0xmmR0, FOG_GET_SSE_CONST_PI(000000F8000000F8_000000F8000000F8));
-      pix1xmmR0 = _mm_and_si128(pix1xmmR0, FOG_GET_SSE_CONST_PI(000000F8000000F8_000000F8000000F8));
+      pix0xmmR0 = _mm_and_si128(pix0xmmR0, FOG_SSE_GET_CONST_PI(000000F8000000F8_000000F8000000F8));
+      pix1xmmR0 = _mm_and_si128(pix1xmmR0, FOG_SSE_GET_CONST_PI(000000F8000000F8_000000F8000000F8));
 
-      pix0xmmG0 = _mm_and_si128(pix0xmmG0, FOG_GET_SSE_CONST_PI(0000000300000003_0000000300000003));
-      pix1xmmG0 = _mm_and_si128(pix1xmmG0, FOG_GET_SSE_CONST_PI(0000000300000003_0000000300000003));
+      pix0xmmG0 = _mm_and_si128(pix0xmmG0, FOG_SSE_GET_CONST_PI(0000000300000003_0000000300000003));
+      pix1xmmG0 = _mm_and_si128(pix1xmmG0, FOG_SSE_GET_CONST_PI(0000000300000003_0000000300000003));
 
       pix0xmmR0 = _mm_packs_epi32(pix0xmmR0, pix1xmmR0);
 
-      pix0xmmB0 = _mm_and_si128(pix0xmmB0, FOG_GET_SSE_CONST_PI(00001F0000001F00_00001F0000001F00));
-      pix1xmmB0 = _mm_and_si128(pix1xmmB0, FOG_GET_SSE_CONST_PI(00001F0000001F00_00001F0000001F00));
+      pix0xmmB0 = _mm_and_si128(pix0xmmB0, FOG_SSE_GET_CONST_PI(00001F0000001F00_00001F0000001F00));
+      pix1xmmB0 = _mm_and_si128(pix1xmmB0, FOG_SSE_GET_CONST_PI(00001F0000001F00_00001F0000001F00));
 
-      pix0xmmG1 = _mm_and_si128(pix0xmmG1, FOG_GET_SSE_CONST_PI(0000380000003800_0000380000003800));
-      pix1xmmG1 = _mm_and_si128(pix1xmmG1, FOG_GET_SSE_CONST_PI(0000380000003800_0000380000003800));
+      pix0xmmG1 = _mm_and_si128(pix0xmmG1, FOG_SSE_GET_CONST_PI(0000380000003800_0000380000003800));
+      pix1xmmG1 = _mm_and_si128(pix1xmmG1, FOG_SSE_GET_CONST_PI(0000380000003800_0000380000003800));
 
       pix0xmmB0 = _mm_packs_epi32(pix0xmmB0, pix1xmmB0);
       pix0xmmG0 = _mm_packs_epi32(pix0xmmG0, pix1xmmG0);

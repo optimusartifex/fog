@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -43,7 +43,7 @@ err_t Palette::_detach()
 
   newd->refCount.init(1);
   newd->isAlphaUsed = _d->isAlphaUsed;
-  Memory::copy(newd->data, _d->data, sizeof(Argb) * 512);
+  Memory::copy(newd->data, _d->data, sizeof(ArgbI) * 512);
 
   atomicPtrXchg(&_d, newd)->deref();
   return ERR_OK;
@@ -57,7 +57,7 @@ void Palette::free()
 void Palette::clear()
 {
   if (isDetached())
-    Memory::zero(_d->data, 512 * sizeof(Argb));
+    Memory::zero(_d->data, 512 * sizeof(ArgbI));
   else
     atomicPtrXchg(&_d, _dnull->ref())->deref();
 }
@@ -73,11 +73,11 @@ err_t Palette::setDeep(const Palette& other)
   err_t err = detach();
   if (err) return err;
 
-  Memory::copy(_d->data, other._d->data, 256 * 2 * sizeof(Argb));
+  Memory::copy(_d->data, other._d->data, 256 * 2 * sizeof(ArgbI));
   return ERR_OK;
 }
 
-err_t Palette::setArgb32(sysuint_t index, const Argb* pal, sysuint_t count)
+err_t Palette::setArgb32(sysuint_t index, const ArgbI* pal, sysuint_t count)
 {
   if (index > 255 || count == 0) return ERR_RT_INVALID_ARGUMENT;
   if (256 - index > count) count = 256 - index;
@@ -89,7 +89,7 @@ err_t Palette::setArgb32(sysuint_t index, const Argb* pal, sysuint_t count)
   uint32_t newContainsAlpha = isAlphaUsed(pal, count);
 
   // Copy data to palette.
-  Memory::copy(_d->data + INDEX_ARGB32 + index, pal, sizeof(Argb) * count);
+  Memory::copy(_d->data + INDEX_ARGB32 + index, pal, sizeof(ArgbI) * count);
 
   // Premultiply.
   if (newContainsAlpha)
@@ -117,7 +117,7 @@ err_t Palette::setArgb32(sysuint_t index, const Argb* pal, sysuint_t count)
   return ERR_OK;
 }
 
-err_t Palette::setXrgb32(sysuint_t index, const Argb* pal, sysuint_t count)
+err_t Palette::setXrgb32(sysuint_t index, const ArgbI* pal, sysuint_t count)
 {
   if (index > 255 || count == 0) return ERR_RT_INVALID_ARGUMENT;
   if (256 - index > count) count = 256 - index;
@@ -142,7 +142,7 @@ err_t Palette::setXrgb32(sysuint_t index, const Argb* pal, sysuint_t count)
 uint8_t Palette::findColor(uint8_t r, uint8_t g, uint8_t b) const
 {
   sysuint_t i, best = 0;
-  const Argb* data = _d->data;
+  const ArgbI* data = _d->data;
   int smallest = INT_MAX;
 
   for (i = 0; i < 256; i++, data++)
@@ -199,7 +199,7 @@ Palette Palette::colorCube(int nr, int ng, int nb)
   if (pal.detach()) return pal;
   if (nr <= 0 || ng <= 0 || nb <= 0) return pal;
 
-  Argb* data = pal._d->data;
+  ArgbI* data = pal._d->data;
 
   int i = 0, r, g, b;
 
@@ -217,7 +217,7 @@ Palette Palette::colorCube(int nr, int ng, int nb)
         if (ng > 1) palg = (g * 255) / (ng - 1);
         if (nb > 1) palb = (b * 255) / (nb - 1);
 
-        Argb color(0xFF, palr, palg, palb);
+        ArgbI color(0xFF, palr, palg, palb);
         data[INDEX_ARGB32 + i] = color;
         data[INDEX_PRGB32 + i] = color;
 
@@ -231,7 +231,7 @@ end:
 }
 
 // static
-bool Palette::isGreyOnly(const Argb* data, sysuint_t count)
+bool Palette::isGreyOnly(const ArgbI* data, sysuint_t count)
 {
   sysuint_t i;
 
@@ -245,11 +245,11 @@ bool Palette::isGreyOnly(const Argb* data, sysuint_t count)
   return i == 0;
 }
 
-bool Palette::isAlphaUsed(const Argb* data, sysuint_t count)
+bool Palette::isAlphaUsed(const ArgbI* data, sysuint_t count)
 {
   for (int i = 0; i < 256; i++)
   {
-    if (!data[i].isAlpha0xFF()) return true;
+    if (!data[i].isOpaque()) return true;
   }
 
   return false;
@@ -275,7 +275,7 @@ FOG_INIT_DECLARE err_t fog_palette_init(void)
   d = Palette::_dnull.instancep();
   d->refCount.init(1);
   d->isAlphaUsed = false;
-  Memory::zero(d->data, 512 * sizeof(Argb));
+  Memory::zero(d->data, 512 * sizeof(ArgbI));
 
   for (i = 0, c0 = 0xFF000000; i < 256; i++)
   {

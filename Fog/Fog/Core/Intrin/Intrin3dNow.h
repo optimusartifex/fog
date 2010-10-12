@@ -1,11 +1,11 @@
-// [Fog/Cpu Library - Public API]
+// [Fog-Core]
 //
 // [License]
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_COMPILER_INTRIN3DNOW_H
-#define _FOG_CORE_COMPILER_INTRIN3DNOW_H
+#ifndef _FOG_CORE_INTRIN_INTRIN3DNOW_H
+#define _FOG_CORE_INTRIN_INTRIN3DNOW_H
 
 // [Dependencies]
 #include <Fog/Core/Build.h>
@@ -19,7 +19,7 @@
 
 namespace Fog {
 
-//! @addtogroup Fog_Core_Intrinsics
+//! @addtogroup Fog_Core_Intrin
 //! @{
 
 union FOG_ALIGNED_TYPE(mm3dnow_t, 8)
@@ -41,4 +41,4 @@ union FOG_ALIGNED_TYPE(mm3dnow_t, 8)
 }
 
 // [Guard]
-#endif // _FOG_CORE_COMPILER_INTRIN3DNOW_H
+#endif // _FOG_CORE_INTRIN_INTRIN3DNOW_H

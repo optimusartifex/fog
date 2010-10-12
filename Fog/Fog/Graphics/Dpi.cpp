@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -60,14 +60,14 @@ void Dpi::reset()
 
 float Dpi::toDeviceSpace(float value, uint32_t valueType) const
 {
-  if ((uint32_t)valueType >= DPI_VALUE_COUNT) return 0.0f;
+  if (FOG_UNLIKELY((uint32_t)valueType >= DPI_VALUE_COUNT)) return 0.0f;
 
   return value * _data[valueType];
 }
 
 float Dpi::fromDeviceSpace(float value, uint32_t valueType) const
 {
-  if ((uint32_t)valueType >= DPI_VALUE_COUNT) return 0.0f;
+  if (FOG_UNLIKELY((uint32_t)valueType >= DPI_VALUE_COUNT)) return 0.0f;
 
   return value / _data[valueType];
 }

@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -43,10 +43,10 @@ RasterPaintContext::RasterPaintContext() :
   closure.dstPalette = NULL;
   closure.srcPalette = NULL;
 
-  finalClipBox.clear();
+  finalClipBox.reset();
   finalClipType = RASTER_CLIP_NULL;
 
-  finalOrigin.clear();
+  finalOrigin.reset();
 
   mask = NULL;
   clearSpanPools();
@@ -167,11 +167,11 @@ RasterPaintMasterContext::RasterPaintMasterContext()
 
   workClipType = RASTER_CLIP_NULL;
 
-  metaOrigin.clear();
-  userOrigin.clear();
+  metaOrigin.reset();
+  userOrigin.reset();
 
-  workClipBox.clear();
-  finalTranslate.clear();
+  workClipBox.reset();
+  finalTranslate.reset();
 
   approximationScale = 1.0;
 }

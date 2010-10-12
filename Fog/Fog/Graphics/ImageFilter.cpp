@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -90,7 +90,7 @@ ColorLutFilterEngine::ColorLutFilterEngine(const ColorLutData& lutData) :
 
 ColorFilterFn ColorLutFilterEngine::getColorFilterFn(uint32_t format) const
 {
-  if (format >= IMAGE_FORMAT_COUNT) return NULL;
+  if (FOG_UNLIKELY(format >= IMAGE_FORMAT_COUNT)) return NULL;
   return (ColorFilterFn)rasterFuncs.filter.color_lut[format];
 }
 
@@ -110,13 +110,13 @@ void ColorLutFilterEngine::setColorLut(const ColorLutData& lutData)
 }
 
 // ============================================================================
-// [Fog::ColorMatrixFilterEngine]
+// [Fog::ColorTransformFilterEngine]
 // ============================================================================
 
-struct FOG_HIDDEN ColorMatrixFilterEngine : public ImageFilterEngine
+struct FOG_HIDDEN ColorTransformFilterEngine : public ImageFilterEngine
 {
-  ColorMatrixFilterEngine(const ColorMatrixFilterEngine& other);
-  ColorMatrixFilterEngine(const ColorMatrix& cm);
+  ColorTransformFilterEngine(const ColorTransformFilterEngine& other);
+  ColorTransformFilterEngine(const ColorMatrix& cm);
 
   virtual ColorFilterFn getColorFilterFn(uint32_t format) const;
   virtual const void* getContext() const;
@@ -128,7 +128,7 @@ struct FOG_HIDDEN ColorMatrixFilterEngine : public ImageFilterEngine
   ColorMatrix cm;
 };
 
-ColorMatrixFilterEngine::ColorMatrixFilterEngine(const ColorMatrixFilterEngine& other) :
+ColorTransformFilterEngine::ColorTransformFilterEngine(const ColorTransformFilterEngine& other) :
   ImageFilterEngine(IMAGE_FILTER_COLOR_MATRIX),
   cm(other.cm)
 {
@@ -139,7 +139,7 @@ ColorMatrixFilterEngine::ColorMatrixFilterEngine(const ColorMatrixFilterEngine& 
     IMAGE_FILTER_CHAR_SUPPORTS_A8     ;
 }
 
-ColorMatrixFilterEngine::ColorMatrixFilterEngine(const ColorMatrix& cm) :
+ColorTransformFilterEngine::ColorTransformFilterEngine(const ColorMatrix& cm) :
   ImageFilterEngine(IMAGE_FILTER_COLOR_MATRIX),
   cm(cm)
 {
@@ -150,23 +150,23 @@ ColorMatrixFilterEngine::ColorMatrixFilterEngine(const ColorMatrix& cm) :
     IMAGE_FILTER_CHAR_SUPPORTS_A8     ;
 }
 
-ColorFilterFn ColorMatrixFilterEngine::getColorFilterFn(uint32_t format) const
+ColorFilterFn ColorTransformFilterEngine::getColorFilterFn(uint32_t format) const
 {
-  if (format >= IMAGE_FORMAT_COUNT) return NULL;
+  if (FOG_UNLIKELY(format >= IMAGE_FORMAT_COUNT)) return NULL;
   return (ColorFilterFn)rasterFuncs.filter.color_matrix[format];
 }
 
-const void* ColorMatrixFilterEngine::getContext() const
+const void* ColorTransformFilterEngine::getContext() const
 {
   return reinterpret_cast<const void*>(&cm);
 }
 
-ImageFilterEngine* ColorMatrixFilterEngine::clone() const
+ImageFilterEngine* ColorTransformFilterEngine::clone() const
 {
-  return fog_new ColorMatrixFilterEngine(*this);
+  return fog_new ColorTransformFilterEngine(*this);
 }
 
-void ColorMatrixFilterEngine::setColorMatrix(const ColorMatrix& other)
+void ColorTransformFilterEngine::setColorMatrix(const ColorMatrix& other)
 {
   cm = other;
 }
@@ -189,7 +189,7 @@ static void makeGaussianBlurKernel(List<float>& dst_, double radius)
 
   // Reciprocals.
   double re = 1.0 / (2.0 * sigma2);
-  double rs = 1.0 / Math::sqrt(2.0 * M_PI * sigma);
+  double rs = 1.0 / Math::sqrt(2.0 * MATH_PI * sigma);
 
   double total = 0;
 
@@ -240,7 +240,7 @@ BlurFilterEngine::BlurFilterEngine(const BlurParams& params) :
 
 ImageFilterFn BlurFilterEngine::getImageFilterFn(uint32_t format, uint32_t processing) const
 {
-  if (format >= IMAGE_FORMAT_COUNT) return NULL;
+  if (FOG_UNLIKELY(format >= IMAGE_FORMAT_COUNT)) return NULL;
 
   switch (params.blur)
   {
@@ -376,7 +376,7 @@ err_t ImageFilterBase::getColorMatrix(ColorMatrix& colorMatrix) const
 {
   if (_d->type != IMAGE_FILTER_COLOR_MATRIX) return ERR_RT_INVALID_OBJECT;
 
-  colorMatrix = reinterpret_cast<ColorMatrixFilterEngine*>(_d)->cm;
+  colorMatrix = reinterpret_cast<ColorTransformFilterEngine*>(_d)->cm;
   return ERR_OK;
 }
 
@@ -410,13 +410,13 @@ err_t ImageFilterBase::setColorMatrix(const ColorMatrix& colorMatrix)
 {
   if (_d->type == IMAGE_FILTER_COLOR_LUT && _d->refCount.get() == 1)
   {
-    // Not needed to create new ColorMatrixFilterEngine instance.
-    reinterpret_cast<ColorMatrixFilterEngine *>(_d)->setColorMatrix(colorMatrix);
+    // Not needed to create new ColorTransformFilterEngine instance.
+    reinterpret_cast<ColorTransformFilterEngine *>(_d)->setColorMatrix(colorMatrix);
     return ERR_OK;
   }
   else
   {
-    ImageFilterEngine* e = fog_new ColorMatrixFilterEngine(colorMatrix);
+    ImageFilterEngine* e = fog_new ColorTransformFilterEngine(colorMatrix);
     if (e == NULL) return ERR_RT_OUT_OF_MEMORY;
 
     atomicPtrXchg(&_d, e)->deref();

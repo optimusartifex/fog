@@ -1,4 +1,4 @@
-// [Fog-Core Library - Public API]
+// [Fog-Core]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -129,7 +129,7 @@ struct FOG_API Library
 //!
 //! This macro should be placed only once per loadable object. Use it with
 //! @c FOG_LIBRARY_ENTRY and @c FOG_LIBRARY_LEAVE macros together.
-#if defined(FOG_LIBRARY_WINDOWS)
+#if defined(FOG_OS_WINDOWS)
 #define FOG_LIBRARY_DECLARE(library) \
 \
 static void library##Entry(void); \

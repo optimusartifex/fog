@@ -1,4 +1,4 @@
-// [Fog-Core Library - Public API]
+// [Fog-Core]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -269,11 +269,11 @@ public:
 
   // Converts an exploded structure representing either the local time or UTC
   // into a Time class.
-  FOG_INLINE static Time fromUTCExploded(const Exploded& exploded)
+  static FOG_INLINE Time fromUTCExploded(const Exploded& exploded)
   {
     return fromExploded(false, exploded);
   }
-  FOG_INLINE static Time fromLocalExploded(const Exploded& exploded)
+  static FOG_INLINE Time fromLocalExploded(const Exploded& exploded)
   {
     return fromExploded(true, exploded);
   }
@@ -282,7 +282,7 @@ public:
   // when deserializing a |Time| structure, using a value known to be
   // compatible. It is not provided as a constructor because the integer type
   // may be unclear from the perspective of a caller.
-  FOG_INLINE static Time fromInternalValue(int64_t us)
+  static FOG_INLINE Time fromInternalValue(int64_t us)
   {
     return Time(us);
   }

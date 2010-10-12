@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -19,7 +19,7 @@
 #include <Fog/Graphics/Glyph.h>
 #include <Fog/Graphics/GlyphCache.h>
 #include <Fog/Graphics/GlyphSet.h>
-#include <Fog/Graphics/Matrix.h>
+#include <Fog/Graphics/Transform.h>
 
 namespace Fog {
 
@@ -37,7 +37,7 @@ struct FontManager;
 struct FontMetrics;
 struct FontOptions;
 
-struct DoublePath;
+struct PathD;
 struct GlyphSet;
 struct TextExtents;
 
@@ -254,13 +254,13 @@ private:
 };
 
 // ============================================================================
-// [Fog::IntKerningPair / FloatKerningPair]
+// [Fog::KerningPairI / KerningPairF]
 // ============================================================================
 
 #include <Fog/Core/Pack/PackByte.h>
 
 //! @brief Kerning pair used if font uses quantized metrics.
-struct IntKerningPair
+struct KerningPairI
 {
   uint16_t first;
   uint16_t second;
@@ -271,7 +271,7 @@ struct IntKerningPair
 //!
 //! Floating kerning pairs are shared for all font sizes. To get demanded 
 //! value use Font::getKerningScale() value.
-struct FloatKerningPair
+struct KerningPairF
 {
   uint16_t first;
   uint16_t second;
@@ -304,7 +304,7 @@ struct FOG_API FontFace
   virtual void deref();
 
   virtual err_t getGlyphSet(const Char* str, sysuint_t length, GlyphSet& glyphSet) = 0;
-  virtual err_t getOutline(const Char* str, sysuint_t length, DoublePath& dst) = 0;
+  virtual err_t getOutline(const Char* str, sysuint_t length, PathD& dst) = 0;
   virtual err_t getTextExtents(const Char* str, sysuint_t length, TextExtents& extents) = 0;
 
   // --------------------------------------------------------------------------
@@ -332,7 +332,7 @@ struct FOG_API FontFace
   //! @brief Font metrics.
   FontMetrics metrics;
   //! @brief Transformation matrix.
-  FloatMatrix matrix;
+  TransformF transform;
 };
 
 // ============================================================================
@@ -361,7 +361,7 @@ struct FOG_API FontEngine
     const String& family,
     float size,
     const FontOptions& options,
-    const FloatMatrix& matrix) = 0;
+    const TransformF& matrix) = 0;
 
   virtual List<String> getDefaultFontDirectories();
 
@@ -441,7 +441,7 @@ struct FOG_API Font
   FOG_INLINE float getAverageWidth() const { return _d->metrics._averageWidth; }
   FOG_INLINE float getMaximumWidth() const { return _d->metrics._maximumWidth; }
 
-  FOG_INLINE const FloatMatrix& getMatrix() const { return _d->matrix; }
+  FOG_INLINE const TransformF& getTransform() const { return _d->transform; }
 
   err_t setFamily(const String& family);
 
@@ -453,12 +453,12 @@ struct FOG_API Font
   err_t setHinting(uint32_t hinting);
 
   err_t setSize(float size);
-  err_t setMatrix(const FloatMatrix& matrix);
+  err_t setTransform(const TransformF& transform);
 
   err_t setFont(const Font& other);
   err_t setFont(const String& family, float size);
   err_t setFont(const String& family, float size, const FontOptions& options);
-  err_t setFont(const String& family, float size, const FontOptions& options, const FloatMatrix& matrix);
+  err_t setFont(const String& family, float size, const FontOptions& options, const TransformF& transform);
 
   // --------------------------------------------------------------------------
   // [Face Methods]
@@ -467,8 +467,8 @@ struct FOG_API Font
   err_t getGlyphSet(const String& str, GlyphSet& glyphSet) const;
   err_t getGlyphSet(const Char* str, sysuint_t length, GlyphSet& glyphSet) const;
 
-  err_t getOutline(const String& str, DoublePath& dst) const;
-  err_t getOutline(const Char* str, sysuint_t length, DoublePath& dst) const;
+  err_t getOutline(const String& str, PathD& dst) const;
+  err_t getOutline(const Char* str, sysuint_t length, PathD& dst) const;
 
   err_t getTextExtents(const String& str, TextExtents& extents) const;
   err_t getTextExtents(const Char* str, sysuint_t length, TextExtents& extents) const;
@@ -518,7 +518,7 @@ struct FOG_API Font
     const String& family,
     float size,
     const FontOptions& options,
-    const FloatMatrix& matrix);
+    const TransformF& matrix);
 
   static err_t putFace(FontFace* face);
 
@@ -540,8 +540,8 @@ private:
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::IntKerningPair, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::FloatKerningPair, Fog::TYPEINFO_PRIMITIVE)
+FOG_DECLARE_TYPEINFO(Fog::KerningPairI, Fog::TYPEINFO_PRIMITIVE)
+FOG_DECLARE_TYPEINFO(Fog::KerningPairF, Fog::TYPEINFO_PRIMITIVE)
 FOG_DECLARE_TYPEINFO(Fog::Font, Fog::TYPEINFO_MOVABLE)
 
 // [Guard]

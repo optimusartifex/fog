@@ -1,4 +1,4 @@
-// [Fog-Face Library - Public API]
+// [Fog-Face]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -23,6 +23,10 @@ namespace Face {
 // #define FOG_FACE_HAS_64BIT
 // #define FOG_FACE_HAS_CONDITIONAL_INSTRUCTIONS
 // #define FOG_FACE_HAS_FAST_MULTIPLY
+
+// #define FOG_FACE_HAS_MMX
+// #define FOG_FACE_HAS_SSE
+// #define FOG_FACE_HAS_SSE2
 
 // ============================================================================
 // [FOG_FACE_HAS_64BIT]
@@ -103,6 +107,30 @@ namespace Face {
 #  define FOG_FACE_HAS_FAST_MULTIPLY
 # endif
 #endif
+
+// ============================================================================
+// [FOG_FACE_HAS_MMX]
+// ============================================================================
+
+#if defined(FOG_HARDCODE_MMX)
+# define FOG_FACE_HAS_MMX
+#endif // FOG_HARDCODE_MMX
+
+// ============================================================================
+// [FOG_FACE_HAS_SSE]
+// ============================================================================
+
+#if defined(FOG_HARDCODE_SSE)
+# define FOG_FACE_HAS_SSE
+#endif // FOG_HARDCODE_SSE
+
+// ============================================================================
+// [FOG_FACE_HAS_SSE2]
+// ============================================================================
+
+#if defined(FOG_HARDCODE_SSE2)
+# define FOG_FACE_HAS_SSE2
+#endif // FOG_HARDCODE_SSE2
 
 //! @}
 

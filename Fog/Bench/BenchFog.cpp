@@ -5,7 +5,7 @@
 // ============================================================================
 
 static void setupFogPatternForPoint(
-  Fog::Pattern& pattern, const Fog::DoublePoint& pt0, const Fog::DoublePoint& pt1, const Fog::Argb& argb)
+  Fog::Pattern& pattern, const Fog::PointD& pt0, const Fog::PointD& pt1, const Fog::ArgbI& argb)
 {
   pattern.setPoints(pt0, pt1);
   pattern.resetStops();
@@ -15,11 +15,11 @@ static void setupFogPatternForPoint(
 }
 
 static void setupFogPatternForRect(
-  Fog::Pattern& pattern, const Fog::IntRect& rect, const Fog::Argb& argb)
+  Fog::Pattern& pattern, const Fog::RectI& rect, const Fog::ArgbI& argb)
 {
   setupFogPatternForPoint(pattern,
-    Fog::DoublePoint(rect.x, rect.y),
-    Fog::DoublePoint(rect.x+rect.w, rect.y+rect.h),
+    Fog::PointD(rect.x, rect.y),
+    Fog::PointD(rect.x+rect.w, rect.y+rect.h),
     argb);
 }
 
@@ -148,10 +148,10 @@ void FogModule_FillRectSubPX::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++, sub += inc)
     {
-      Fog::IntRect r = r_rect.data[a];
+      Fog::RectI r = r_rect.data[a];
 
       p.setSource(r_argb.data[a]);
-      p.fillRect(Fog::DoubleRect(sub + r.x, sub + r.y, (double)r.w, (double)r.h));
+      p.fillRect(Fog::RectD(sub + r.x, sub + r.y, (double)r.w, (double)r.h));
     }
   }
   else
@@ -162,11 +162,11 @@ void FogModule_FillRectSubPX::bench(int quantity)
 
     for (int a = 0; a < quantity; a++, sub += inc)
     {
-      Fog::IntRect r = r_rect.data[a];
+      Fog::RectI r = r_rect.data[a];
 
       setupFogPatternForRect(pattern, r_rect.data[a], r_argb.data[a]);
       p.setSource(pattern);
-      p.fillRect(Fog::DoubleRect(sub + r.x, sub + r.y, (double)r.w, (double)r.h));
+      p.fillRect(Fog::RectD(sub + r.x, sub + r.y, (double)r.w, (double)r.h));
       p.resetSource();
     }
   }
@@ -197,12 +197,12 @@ void FogModule_FillRectAffine::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++, rot += 0.01)
     {
-      Fog::DoubleMatrix m;
-      m.translate(cx, cy);
-      m.rotate(rot);
-      m.translate(-cx, -cy);
+      Fog::TransformD t;
+      t.translate(cx, cy);
+      t.rotate(rot);
+      t.translate(-cx, -cy);
 
-      p.setMatrix(m);
+      p.setTransform(t);
       p.setSource(r_argb.data[a]);
       p.fillRect(r_rect.data[a]);
     }
@@ -215,11 +215,11 @@ void FogModule_FillRectAffine::bench(int quantity)
 
     for (int a = 0; a < quantity; a++, rot += 0.01)
     {
-      Fog::DoubleMatrix m;
-      m.translate(cx, cy);
-      m.rotate(rot);
-      m.translate(-cx, -cy);
-      p.setMatrix(m);
+      Fog::TransformD t;
+      t.translate(cx, cy);
+      t.rotate(rot);
+      t.translate(-cx, -cy);
+      p.setTransform(t);
 
       setupFogPatternForRect(pattern, r_rect.data[a], r_argb.data[a]);
       p.setSource(pattern);
@@ -251,7 +251,7 @@ void FogModule_FillRound::bench(int quantity)
     for (int a = 0; a < quantity; a++)
     {
       p.setSource(r_argb.data[a]);
-      p.fillRound(r_rect.data[a], Fog::IntPoint(8, 8));
+      p.fillRound(r_rect.data[a], Fog::PointI(8, 8));
     }
   }
   else
@@ -264,7 +264,7 @@ void FogModule_FillRound::bench(int quantity)
     {
       setupFogPatternForRect(pattern, r_rect.data[a], r_argb.data[a]);
       p.setSource(pattern);
-      p.fillRound(r_rect.data[a], Fog::IntPoint(8, 8));
+      p.fillRound(r_rect.data[a], Fog::PointI(8, 8));
       p.resetSource();
     }
   }
@@ -300,13 +300,13 @@ void FogModule_FillPolygon::bench(int quantity)
   configurePainter(p);
 
   p.setFillRule(Fog::FILL_EVEN_ODD);
-  Fog::DoublePath path;
+  Fog::PathD path;
 
   if (source == BENCH_SOURCE_ARGB)
   {
     for (int a = 0; a < quantity; a++)
     {
-      const Fog::DoublePoint* polyData = &r_poly.data[a * 10];
+      const Fog::PointD* polyData = &r_poly.data[a * 10];
 
       path.clear();
       path.addPolygon(polyData, 10);
@@ -323,7 +323,7 @@ void FogModule_FillPolygon::bench(int quantity)
 
     for (int a = 0; a < quantity; a++)
     {
-      const Fog::DoublePoint* polyData = &r_poly.data[a * 10];
+      const Fog::PointD* polyData = &r_poly.data[a * 10];
 
       path.clear();
       path.addPolygon(polyData, 10);
@@ -354,7 +354,7 @@ void FogModule_Image::prepare(int quantity, int sw, int sh)
   r_rect.init(quantity, w, h, sw, sh);
   r_numb.init(quantity, 0, NUM_SPRITES - 1);
 
-  for (int a = 0; a < 4; a++) images[a] = sprite[a].scaled(Fog::IntSize(sw, sh));
+  for (int a = 0; a < 4; a++) images[a] = sprite[a].scaled(Fog::SizeI(sw, sh));
 }
 
 void FogModule_Image::finish()
@@ -397,12 +397,12 @@ void FogModule_ImageAffine::bench(int quantity)
 
   for (int a = 0; a < quantity; a++, rot += 0.01)
   {
-    Fog::DoubleMatrix m;
-    m.translate(cx, cy);
-    m.rotate(rot);
-    m.translate(-cx, -cy);
+    Fog::TransformD t;
+    t.translate(cx, cy);
+    t.rotate(rot);
+    t.translate(-cx, -cy);
 
-    p.setMatrix(m);
+    p.setTransform(t);
     p.drawImage(r_rect.data[a].getPosition(), images[r_numb.data[a]]);
   }
 }
@@ -475,7 +475,7 @@ void FogBenchmarkContext::run()
 {
   header();
 
-  const Fog::IntSize* sizes = _master->getSizes().getData();
+  const Fog::SizeI* sizes = _master->getSizes().getData();
   sysuint_t s;
 
   int engine = (getName() == Fog::Ascii8("Fog-st"))

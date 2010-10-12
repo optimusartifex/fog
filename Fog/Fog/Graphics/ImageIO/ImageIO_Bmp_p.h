@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -316,7 +316,7 @@ struct FOG_HIDDEN BmpDecoderDevice : public DecoderDevice
   // How many bytes to skip to get bitmap data.
   uint32_t bmpSkipBytes;
 
-  // Argb masks / shifts.
+  // ArgbI masks / shifts.
   uint32_t rMask;
   uint32_t gMask;
   uint32_t bMask;

@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -32,7 +32,7 @@ err_t NullFontFace::getGlyphSet(const Char* str, sysuint_t length, GlyphSet& gly
   return ERR_FONT_INVALID_FACE;
 }
 
-err_t NullFontFace::getOutline(const Char* str, sysuint_t length, DoublePath& dst)
+err_t NullFontFace::getOutline(const Char* str, sysuint_t length, PathD& dst)
 {
   FOG_UNUSED(str);
   FOG_UNUSED(length);

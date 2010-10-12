@@ -1,4 +1,4 @@
-// [Fog-Core Library - Public API]
+// [Fog-Core]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -33,8 +33,8 @@ public:
     ~AutoNSAutoreleasePool();
 
 private:
-	FOG_DISABLE_COPY(AutoNSAutoreleasePool)
-	
+  FOG_DISABLE_COPY(AutoNSAutoreleasePool)
+  
     NSAutoreleasePool* _pool;
 };
 // =================================================================================

@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -85,8 +85,8 @@ struct FOG_API GeometryEvent : public Event
     CHANGED_ORIENTATION = 0x0080
   };
 
-  FOG_INLINE const IntRect& getWidgetGeometry() const { return _widgetGeometry; }
-  FOG_INLINE const IntRect& getClientGeometry() const { return _clientGeometry; }
+  FOG_INLINE const RectI& getWidgetGeometry() const { return _widgetGeometry; }
+  FOG_INLINE const RectI& getClientGeometry() const { return _clientGeometry; }
   FOG_INLINE uint32_t getChangedFlags() const { return _changedFlags; }
 
   FOG_INLINE bool isChangedWidgetPosition() const { return (_changedFlags & CHANGED_WIDGET_POSITION) != 0; }
@@ -101,8 +101,8 @@ struct FOG_API GeometryEvent : public Event
   // [Members]
   // --------------------------------------------------------------------------
 
-  IntRect _widgetGeometry;
-  IntRect _clientGeometry;
+  RectI _widgetGeometry;
+  RectI _clientGeometry;
   uint32_t _changedFlags;
 };
 
@@ -123,15 +123,15 @@ struct FOG_API OriginEvent : public Event
   // [Methods]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const IntPoint& getOrigin() const { return _origin; }
-  FOG_INLINE const IntPoint& getDifference() const { return _difference; }
+  FOG_INLINE const PointI& getOrigin() const { return _origin; }
+  FOG_INLINE const PointI& getDifference() const { return _difference; }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  IntPoint _origin;
-  IntPoint _difference;
+  PointI _origin;
+  PointI _difference;
 };
 
 // ============================================================================
@@ -233,7 +233,7 @@ struct FOG_API MouseEvent : public Event
 
   //! @brief Returns mouse position relative to client or non-client 
   //! area (depends to event type).
-  FOG_INLINE const IntPoint& getPosition() const { return _position; }
+  FOG_INLINE const PointI& getPosition() const { return _position; }
 
   //! @brief Get if event was generated outside of widget.
   FOG_INLINE bool isOutside() const { return _isOutside; }
@@ -254,7 +254,7 @@ struct FOG_API MouseEvent : public Event
   uint32_t _modifiers;
 
   //! @brief Relative mouse position.
-  IntPoint _position;
+  PointI _position;
 
   //! @brief True if event is outside of widget (grabbing).
   bool _isOutside;

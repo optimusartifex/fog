@@ -20,14 +20,6 @@ Set(FOG_DIR ${CMAKE_SOURCE_DIR})
 Set(FOG_LIBRARIES "")
 Set(CMAKE_CXX_STANDARD_LIBRARIES "")
 
-# =============================================================================
-# [3rdparty Libraries]
-# =============================================================================
-
-# =============================================================================
-# [Include cmake helpers we need]
-# =============================================================================
-
 Include(CheckIncludeFiles)
 Include(CheckLibraryExists)
 Include(CheckTypeSize)
@@ -40,7 +32,7 @@ Include(FindThreads)
 Include_Directories(${FOG_DIR})
 
 # =============================================================================
-# [CFlags]
+# [Compiler flags]
 # =============================================================================
 
 Set(FOG_CFLAGS_OPTIMIZE "")
@@ -162,40 +154,43 @@ If(UNIX)
 EndIf(UNIX)
 
 # =============================================================================
+# [Platform Specific]
+# =============================================================================
+
+If(WIN32)
+  Set(FOG_OS_WINDOWS TRUE)
+  Add_Definitions(-D_UNICODE)
+Else(WIN32)
+  Set(FOG_OS_POSIX TRUE)
+EndIf(WIN32)
+
+If(APPLE)
+  Set(FOG_OS_MAC TRUE)
+  Set(FOG_LIBRARIES "${FOG_LIBRARIES} -framework Cocoa")
+EndIf(APPLE)
+
+# =============================================================================
 # [Windows specific setup]
 # =============================================================================
 
-# Unicode
-If(WIN32)
-  Add_Definitions(-D_UNICODE)
-EndIf(WIN32)
-
-If(WIN32)
+If(FOG_OS_WINDOWS)
   Set(FOG_LIBRARIES ${FOG_LIBRARIES} user32 gdi32 advapi32 winmm uuid)
-EndIf(WIN32)
+EndIf(FOG_OS_WINDOWS)
 
 # =============================================================================
 # [Dynamic loadable library support]
 # =============================================================================
 
-If(WIN32)
-  # Windows dll support
-  Set(FOG_LIBRARY_WINDOWS 1)
-Else(WIN32)
+If(FOG_OS_POSIX)
   # Unix libdl 
   Check_Include_Files(dlfcn.h FOG_HAVE_DLFCN_H)
   If(FOG_HAVE_DLFCN_H)
-    Check_Library_Exists(dl dlopen "" FOG_LIBRARY_DL_EXISTS)
-    If(FOG_LIBRARY_DL_EXISTS)
-      Set(FOG_LIBRARY_DL 1)
+    Check_Library_Exists(dl dlopen "" FOG_LIBDL_EXISTS)
+    If(FOG_LIBDL_EXISTS)
       Set(FOG_LIBRARIES "${FOG_LIBRARIES} -ldl")
-    EndIf(FOG_LIBRARY_DL_EXISTS)
+    EndIf(FOG_LIBDL_EXISTS)
   EndIf(FOG_HAVE_DLFCN_H)
-  
-  If(APPLE)
-    Set(FOG_LIBRARIES "${FOG_LIBRARIES} -framework Cocoa")
-  EndIf(APPLE)
-EndIf(WIN32)
+EndIf(FOG_OS_POSIX)
 
 # =============================================================================
 # [Threads support]
@@ -252,6 +247,26 @@ If(NOT FOG_HAVE_LIBPNG)
 EndIf(NOT FOG_HAVE_LIBPNG)
 
 # =============================================================================
+# [Fog-Canvas]
+# =============================================================================
+
+Set(FOG_CANVAS_LIB_SOURCES
+  Fog/Canvas/CanvasDelegate.cpp
+  Fog/Canvas/CanvasElement.cpp
+  Fog/Canvas/CanvasView.cpp
+)
+
+Set(FOG_CANVAS_LIB_HEADERS
+  Fog/Canvas.h
+  Fog/Canvas/CanvasDelegate.h
+  Fog/Canvas/CanvasElement.h
+  Fog/Canvas/CanvasView.h
+)
+
+# Source groups.
+Source_Group("Canvas" FILES ${FOG_CANVAS_LIB_SOURCES} ${FOG_CANVAS_LIB_HEADERS})
+
+# =============================================================================
 # [Fog-Core]
 # =============================================================================
 
@@ -271,6 +286,7 @@ Set(FOG_CORE_LIB_SOURCES
   Fog/Core/EventLoop.cpp
   Fog/Core/FileSystem.cpp
   Fog/Core/Format.cpp
+  Fog/Core/Funcs.cpp
   Fog/Core/Hash.cpp
   Fog/Core/HashUtil.cpp
   Fog/Core/Init.cpp
@@ -335,6 +351,7 @@ Set(FOG_CORE_LIB_HEADERS
   Fog/Core/EventLoop.h
   Fog/Core/FileSystem.h
   Fog/Core/Format.h
+  Fog/Core/Funcs.h
   Fog/Core/Hash.h
   Fog/Core/HashUtil.h
   Fog/Core/Lazy.h
@@ -384,10 +401,10 @@ Set(FOG_CORE_LIB_HEADERS
 )
 
 If(APPLE)
-  Set(FOG_CORE_LIB_SOURCES
-    ${FOG_CORE_LIB_SOURCES}
-    Fog/Core/MacUtil.mm
-  )
+Set(FOG_CORE_LIB_SOURCES
+  ${FOG_CORE_LIB_SOURCES}
+  Fog/Core/MacUtil.mm
+)
 EndIf()
 
 Set(FOG_CORE_ARCH_SOURCES
@@ -415,6 +432,22 @@ Set(FOG_CORE_BUILD_HEADERS
   Fog/Core/Build/StdOS.h
 )
 
+Set(FOG_CORE_FACE_SOURCES
+)
+
+Set(FOG_CORE_FACE_HEADERS
+  Fog/Core/Face/FaceC.h
+  Fog/Core/Face/Face3dNow.h
+  Fog/Core/Face/Face3dNowExt.h
+  Fog/Core/Face/FaceMMX.h
+  Fog/Core/Face/FaceMMXExt.h
+  Fog/Core/Face/FaceSSE.h
+  Fog/Core/Face/FaceSSE2.h
+  Fog/Core/Face/FaceSSE3.h
+  Fog/Core/Face/FaceSSSE3.h
+  Fog/Core/Face/Features.h
+)
+
 Set(FOG_CORE_INTRIN_SOURCES
 )
 
@@ -440,27 +473,12 @@ Set(FOG_CORE_PACK_HEADERS
 )
 
 # Source groups.
-Source_Group("Core" FILES ${FOG_CORE_LIB_SOURCES} ${FOG_CORE_LIB_HEADERS})
-Source_Group("Core/Arch" FILES ${FOG_CORE_ARCH_SOURCES} ${FOG_CORE_ARCH_HEADERS})
-Source_Group("Core/Build" FILES ${FOG_CORE_BUILD_SOURCES} ${FOG_CORE_BUILD_HEADERS})
+Source_Group("Core"        FILES ${FOG_CORE_LIB_SOURCES}    ${FOG_CORE_LIB_HEADERS}   )
+Source_Group("Core/Arch"   FILES ${FOG_CORE_ARCH_SOURCES}   ${FOG_CORE_ARCH_HEADERS}  )
+Source_Group("Core/Build"  FILES ${FOG_CORE_BUILD_SOURCES}  ${FOG_CORE_BUILD_HEADERS} )
+Source_Group("Core/Face"   FILES ${FOG_CORE_FACE_SOURCES}   ${FOG_CORE_FACE_HEADERS}  )
 Source_Group("Core/Intrin" FILES ${FOG_CORE_INTRIN_SOURCES} ${FOG_CORE_INTRIN_HEADERS})
-Source_Group("Core/Pack" FILES ${FOG_CORE_PACK_SOURCES} ${FOG_CORE_PACK_HEADERS})
-
-# =============================================================================
-# [Fog-Face]
-# =============================================================================
-
-Set(FOG_FACE_LIB_SOURCES
-)
-
-Set(FOG_FACE_LIB_HEADERS
-  Fog/Face.h
-  Fog/Face/FaceByte.h
-  Fog/Face/Features.h
-)
-
-# Source groups.
-Source_Group("Face" FILES ${FOG_FACE_LIB_SOURCES} ${FOG_FACE_LIB_HEADERS})
+Source_Group("Core/Pack"   FILES ${FOG_CORE_PACK_SOURCES}   ${FOG_CORE_PACK_HEADERS}  )
 
 # =============================================================================
 # [Fog-Graphics]
@@ -475,9 +493,11 @@ Set(FOG_GRAPHICS_LIB_SOURCES
   Fog/Graphics/ColorUtil.cpp
   Fog/Graphics/Constants.cpp
   Fog/Graphics/ConvolutionMatrix.cpp
+  Fog/Graphics/Curve.cpp
   Fog/Graphics/DitherMatrix.cpp
   Fog/Graphics/Dpi.cpp
   Fog/Graphics/Font.cpp
+  Fog/Graphics/Funcs.cpp
   Fog/Graphics/Geometry.cpp
   Fog/Graphics/Glyph.cpp
   Fog/Graphics/GlyphCache.cpp
@@ -492,7 +512,6 @@ Set(FOG_GRAPHICS_LIB_SOURCES
   Fog/Graphics/ImageIO.cpp
   Fog/Graphics/ImagePixels.cpp
   Fog/Graphics/LiangBarsky_p.h
-  Fog/Graphics/Matrix.cpp
   Fog/Graphics/Painter.cpp
   Fog/Graphics/PaintEngine.cpp
   Fog/Graphics/PaintUtil.cpp
@@ -500,8 +519,6 @@ Set(FOG_GRAPHICS_LIB_SOURCES
   Fog/Graphics/Path.cpp
   Fog/Graphics/PathStroker.cpp
   Fog/Graphics/PathTransform.cpp
-  Fog/Graphics/PathUtil.cpp
-  Fog/Graphics/PathUtil_SSE2.cpp
   Fog/Graphics/Pattern.cpp
   Fog/Graphics/RasterEngine.cpp
   Fog/Graphics/Reduce.cpp
@@ -512,6 +529,10 @@ Set(FOG_GRAPHICS_LIB_SOURCES
   Fog/Graphics/TextIterator.cpp
   Fog/Graphics/TextLayout.cpp
   Fog/Graphics/TextOnPath.cpp
+  Fog/Graphics/Transform.cpp
+  Fog/Graphics/Transform_3dNow.cpp
+  Fog/Graphics/Transform_SSE.cpp
+  Fog/Graphics/Transform_SSE2.cpp
 )
 
 Set(FOG_GRAPHICS_LIB_HEADERS
@@ -525,9 +546,11 @@ Set(FOG_GRAPHICS_LIB_HEADERS
   Fog/Graphics/Constants.h
   Fog/Graphics/Constants_p.h
   Fog/Graphics/ConvolutionMatrix.h
+  Fog/Graphics/Curve_p.h
   Fog/Graphics/DitherMatrix_p.h
   Fog/Graphics/Dpi.h
   Fog/Graphics/Font.h
+  Fog/Graphics/Funcs.h
   Fog/Graphics/Geometry.h
   Fog/Graphics/Glyph.h
   Fog/Graphics/GlyphCache.h
@@ -541,14 +564,13 @@ Set(FOG_GRAPHICS_LIB_HEADERS
   Fog/Graphics/ImageFilterParams.h
   Fog/Graphics/ImageIO.h
   Fog/Graphics/ImagePixels.h
-  Fog/Graphics/Matrix.h
+  Fog/Graphics/Transform.h
   Fog/Graphics/Painter.h
   Fog/Graphics/PaintEngine.h
   Fog/Graphics/PaintUtil.h
   Fog/Graphics/Palette.h
   Fog/Graphics/Path.h
   Fog/Graphics/PathStroker.h
-  Fog/Graphics/PathUtil.h
   Fog/Graphics/PathTransform.h
   Fog/Graphics/Pattern.h
   Fog/Graphics/RasterEngine_p.h
@@ -589,10 +611,10 @@ Set(FOG_GRAPHICS_FONTENGINE_SOURCES
 )
 
 If(APPLE)
-  Set(FOG_GRAPHICS_FONTENGINE_SOURCES
-    ${FOG_GRAPHICS_FONTENGINE_SOURCES}
-    Fog/Graphics/FontEngine/MacFontEngine.mm
-  )
+Set(FOG_GRAPHICS_FONTENGINE_SOURCES
+  ${FOG_GRAPHICS_FONTENGINE_SOURCES}
+  Fog/Graphics/FontEngine/MacFontEngine.mm
+)
 EndIf()
 
 
@@ -758,11 +780,13 @@ Set(FOG_GRAPHICS_RASTERENGINE_HEADERS
   Fog/Graphics/RasterEngine/C_p.h
 )
 
-# Optimize specific files for speed
-Set_Source_Files_Properties(Fog/Graphics/AnalyticRasterizer8.cpp               PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
+# Optimize specific files for speed.
+Set_Source_Files_Properties(Fog/Graphics/AnalyticRasterizer.cpp                PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
 Set_Source_Files_Properties(Fog/Graphics/Image.cpp                             PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
-Set_Source_Files_Properties(Fog/Graphics/PathUtil.cpp                          PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
-Set_Source_Files_Properties(Fog/Graphics/PathUtil_SSE2.cpp                     PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_SSE2}")
+Set_Source_Files_Properties(Fog/Graphics/Transform.cpp                         PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
+Set_Source_Files_Properties(Fog/Graphics/Transform_3dNow.cpp                   PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_3DNOW}")
+Set_Source_Files_Properties(Fog/Graphics/Transform_SSE.cpp                     PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_SSE}")
+Set_Source_Files_Properties(Fog/Graphics/Transform_SSE2.cpp                    PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_SSE2}")
 Set_Source_Files_Properties(Fog/Graphics/Region.cpp                            PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
 
 Set_Source_Files_Properties(Fog/Graphics/RasterEngine/Init_C.cpp               PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")
@@ -955,14 +979,15 @@ EndIf(WIN32)
 # =============================================================================
 
 Set(FOG_ALL_SOURCES
+  # Fog-Canvas.
+  ${FOG_CANVAS_LIB_SOURCES}
   # Fog-Core.
   ${FOG_CORE_LIB_SOURCES}
   ${FOG_CORE_ARCH_SOURCES}
   ${FOG_CORE_BUILD_SOURCES}
+  ${FOG_CORE_FACE_SOURCES}
   ${FOG_CORE_INTRIN_SOURCES}
   ${FOG_CORE_PACK_SOURCES}
-  # Fog-Face.
-  ${FOG_FACE_LIB_SOURCES}
   # Fog-Graphics.
   ${FOG_GRAPHICS_LIB_SOURCES}
   ${FOG_GRAPHICS_IMAGEIO_SOURCES}
@@ -979,14 +1004,15 @@ Set(FOG_ALL_SOURCES
 )
 
 Set(FOG_ALL_HEADERS
+  # Fog-Canvas.
+  ${FOG_CANVAS_LIB_HEADERS}
   # Fog-Core.
   ${FOG_CORE_LIB_HEADERS}
   ${FOG_CORE_ARCH_HEADERS}
   ${FOG_CORE_BUILD_HEADERS}
+  ${FOG_CORE_FACE_HEADERS}
   ${FOG_CORE_INTRIN_HEADERS}
   ${FOG_CORE_PACK_HEADERS}
-  # Fog-Face.
-  ${FOG_FACE_LIB_HEADERS}
   # Fog-Graphics.
   ${FOG_GRAPHICS_LIB_HEADERS}
   ${FOG_GRAPHICS_IMAGEIO_HEADERS}

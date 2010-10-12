@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -69,6 +69,12 @@ struct FOG_API Dpi
 //! @}
 
 } // Fog namespace
+
+// ============================================================================
+// [Fog::TypeInfo<T>]
+// ============================================================================
+
+FOG_DECLARE_TYPEINFO(Fog::Dpi, Fog::TYPEINFO_MOVABLE)
 
 // [Guard]
 #endif // _FOG_GRAPHICS_DPI_H

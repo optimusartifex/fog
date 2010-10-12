@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -44,7 +44,7 @@ struct FOG_HIDDEN Reduce
 
   //! @internal
   //!
-  //! @brief Argb entity with usage information.
+  //! @brief ArgbI entity with usage information.
   struct Entity
   {
     uint32_t key;

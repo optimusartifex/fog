@@ -1,4 +1,4 @@
-// [Fog-Core Library - Public API]
+// [Fog-Core]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -15,93 +15,6 @@
 #if defined(FOG_HAVE_FLOAT_H)
 #include <float.h>
 #endif // FOG_HAVE_FLOAT_H
-
-// ============================================================================
-// [Fog::Math - Constants]
-// ============================================================================
-
-// Some constants are not defined by MSVC.
-
-// Constants with 'l' suffix are gcc extensions for long double types. Long
-// doubles are not normally used by Fog, but they are here for completness.
-
-// e
-#if !defined(M_E)
-# define M_E            2.7182818284590452354
-# define M_El           2.7182818284590452353602874713526625L
-#endif
-
-// log_2 e
-#if !defined(M_LOG2E)
-# define M_LOG2E        1.4426950408889634074
-# define M_LOG2El       1.4426950408889634073599246810018921L
-#endif
-
-// log_10 e
-#if !defined(M_LOG10E)
-# define M_LOG10E       0.43429448190325182765
-# define M_LOG10El      0.4342944819032518276511289189166051L
-#endif
-
-// log_e 2
-#if !defined(M_LN2)
-# define M_LN2          0.69314718055994530942
-# define M_LN2l         0.6931471805599453094172321214581766L
-#endif
-
-// log_e 10
-#if !defined(M_LN10)
-# define M_LN10         2.30258509299404568402
-# define M_LN10l        2.3025850929940456840179914546843642L
-#endif
-
-// pi
-#if !defined(M_PI)
-# define M_PI           3.14159265358979323846
-# define M_PIl          3.1415926535897932384626433832795029L
-#endif
-
-// pi/2
-#if !defined(M_PI_2)
-# define M_PI_2         1.57079632679489661923
-# define M_PI_2l        1.5707963267948966192313216916397514L
-#endif
-
-// pi/4
-#if !defined(M_PI_4)
-# define M_PI_4         0.78539816339744830962
-# define M_PI_4l        0.7853981633974483096156608458198757L
-#endif
-
-// 1/pi
-#if !defined(M_1_PI)
-# define M_1_PI         0.31830988618379067154
-# define M_1_PIl        0.3183098861837906715377675267450287L
-#endif
-
-// 2/pi
-#if !defined(M_2_PI)
-# define M_2_PI         0.63661977236758134308
-# define M_2_PIl        0.6366197723675813430755350534900574L
-#endif
-
-// 2/sqrt(pi)
-#if !defined(M_2_SQRTPI)
-# define M_2_SQRTPI     1.12837916709551257390
-# define M_2_SQRTPIl    1.1283791670955125738961589031215452L
-#endif
-
-// sqrt(2)
-#if !defined(M_SQRT2)
-# define M_SQRT2        1.41421356237309504880
-# define M_SQRT2l       1.4142135623730950488016887242096981L
-#endif
-
-// 1/sqrt(2)
-#if !defined(M_SQRT1_2)
-# define M_SQRT1_2      0.70710678118654752440
-# define M_SQRT1_2l     0.7071067811865475244008443621048490L
-#endif
 
 // ============================================================================
 // [Fog::Math - NaN and Inf]
@@ -152,6 +65,65 @@ static FOG_HIDDEN const uint32_t fog_inf[2] = { 0x00000000, 0x7FF00000 };
 #endif
 
 namespace Fog {
+
+// ============================================================================
+// [Fog::Math - Constants]
+// ============================================================================
+
+//! @addtogroup Fog_Core_Math
+//! @{
+
+//! @brief e.
+static const double MATH_E = 2.7182818284590452354;
+
+//! @brief log_2(e).
+static const double MATH_LOG2E = 1.4426950408889634074;
+
+//! @brief log_10(e).
+static const double MATH_LOG10E = 0.43429448190325182765;
+
+//! @brief log_e(2).
+static const double MATH_LN2 = 0.69314718055994530942;
+
+//! @brief log_e(10).
+static const double MATH_LN10 = 2.30258509299404568402;
+
+//! @brief Pi.
+static const double MATH_PI = 3.14159265358979323846;
+
+//! @brief pi / 2.
+static const double MATH_PI_DIV_2 = 1.57079632679489661923;
+
+//! @brief pi / 4.
+static const double MATH_PI_DIV_4 = 0.78539816339744830962;
+
+//! @brief 1 / pi.
+static const double MATH_1_DIV_PI = 0.31830988618379067154;
+
+//! @brief 2 / pi.
+static const double MATH_2_DIV_PI = 0.63661977236758134308;
+
+//! @brief 2 / sqrt(pi).
+static const double MATH_2_DIV_SQRTPI = 1.12837916709551257390;
+
+//! @brief sqrt(2).
+static const double MATH_SQRT2 = 1.41421356237309504880;
+
+//! @brief 1/sqrt(2).
+static const double MATH_1_DIV_SQRT2 = 0.70710678118654752440;
+
+//! @brief Default epsilon used in math for 32-bit floats.
+static const float MATH_EPSILON_F = 1e-8f;
+
+//! @brief Default epsilon used in math for 64-bit floats.
+static const double MATH_EPSILON_D = 1e-14;
+
+//! @}
+
+// ============================================================================
+// [Fog::Math - Namespace]
+// ============================================================================
+
 namespace Math {
 
 //! @addtogroup Fog_Core_Math
@@ -256,20 +228,20 @@ static FOG_INLINE bool isNaN(double x)
 }
 
 // ============================================================================
-// [Fog::Math - Floating point ops with epsilon]
+// [Fog::Math - Fuzzy Comparison Using Epsilon]
 // ============================================================================
 
-//! @brief Default epsilon used in math for 32-bit floats.
-static const float DEFAULT_FLOAT_EPSILON = 1e-8f;
+static FOG_INLINE bool fzero(float a, float epsilon = MATH_EPSILON_F) { return abs(a) <= epsilon; }
+static FOG_INLINE bool fzero(double a, double epsilon = MATH_EPSILON_D) { return abs(a) <= epsilon; }
 
-//! @brief Default epsilon used in math for 64-bit floats.
-static const double DEFAULT_DOUBLE_EPSILON = 1e-14;
+static FOG_INLINE bool feq(float a, float b, float epsilon = MATH_EPSILON_F) { return abs(a - b) <= epsilon; }
+static FOG_INLINE bool feq(double a, double b, double epsilon = MATH_EPSILON_D) { return abs(a - b) <= epsilon; }
 
-template<typename T>
-static FOG_INLINE bool feq(T a, T b, T epsilon = (T)0.000001)
-{
-  return fabs(a - b) <= epsilon;
-}
+static FOG_INLINE bool flt(float a, float b, float epsilon = MATH_EPSILON_F) { return a < b + epsilon; }
+static FOG_INLINE bool flt(double a, double b, double epsilon = MATH_EPSILON_D) { return a < b + epsilon; }
+
+static FOG_INLINE bool fgt(float a, float b, float epsilon = MATH_EPSILON_F) { return a > b - epsilon; }
+static FOG_INLINE bool fgt(double a, double b, double epsilon = MATH_EPSILON_D) { return a > b - epsilon; }
 
 // ============================================================================
 // [Fog::Math - Float <-> Integer]
@@ -328,7 +300,7 @@ static FOG_INLINE uint uround(float v) { return (uint)(int)(v + 0.5f); }
 
 static FOG_INLINE int iround(double v) { return (int)((v < 0.0) ? v - 0.5 : v + 0.5); }
 static FOG_INLINE uint uround(double v) { return (uint)(int)(v + 0.5); }
-#endif 
+#endif
 
 static FOG_INLINE int ifloor(double v) { return iround(::floor(v)); }
 static FOG_INLINE int iceil(double v) { return iround(::ceil(v)); }
@@ -401,11 +373,11 @@ static FOG_INLINE int48x16_t doubleToFixed48x16(double d)
 // [Fog::Math - Degrees <-> Radians]
 // ============================================================================
 
-static FOG_INLINE float deg2rad(float deg) { return deg * ((float)M_PI / 180.0f); }
-static FOG_INLINE float rad2deg(float rad) { return rad * (180.0f / (float)M_PI); }
+static FOG_INLINE float deg2rad(float deg) { return deg * ((float)MATH_PI / 180.0f); }
+static FOG_INLINE float rad2deg(float rad) { return rad * (180.0f / (float)MATH_PI); }
 
-static FOG_INLINE double deg2rad(double deg) { return deg * (M_PI / 180.0); }
-static FOG_INLINE double rad2deg(double rad) { return rad * (180.0 / M_PI); }
+static FOG_INLINE double deg2rad(double deg) { return deg * (MATH_PI / 180.0); }
+static FOG_INLINE double rad2deg(double rad) { return rad * (180.0 / MATH_PI); }
 
 // ============================================================================
 // [Fog::Math - Trigonometric Functions]
@@ -413,9 +385,11 @@ static FOG_INLINE double rad2deg(double rad) { return rad * (180.0 / M_PI); }
 
 static FOG_INLINE float sin(float rad) { return ::sinf(rad); }
 static FOG_INLINE float cos(float rad) { return ::cosf(rad); }
+static FOG_INLINE float tan(float rad) { return ::tanf(rad); }
 
 static FOG_INLINE double sin(double rad) { return ::sin(rad); }
 static FOG_INLINE double cos(double rad) { return ::cos(rad); }
+static FOG_INLINE double tan(double rad) { return ::tan(rad); }
 
 #if defined(FOG_CC_GNU) && !defined(FOG_OS_MAC) && !defined(FOG_OS_WINDOWS)
 static FOG_INLINE void sincos(float rad, float* sinResult, float* cosResult)
@@ -441,12 +415,56 @@ static FOG_INLINE void sincos(double rad, double* sinResult, double* cosResult)
 }
 #endif
 
+static FOG_INLINE float asin(float x) { return ::asinf(x); }
+static FOG_INLINE double asin(double x) { return ::asin(x); }
+
+static FOG_INLINE float acos(float x) { return ::acosf(x); }
+static FOG_INLINE double acos(double x) { return ::acos(x); }
+
+static FOG_INLINE float atan2(float x, float y) { return ::atan2f(x, y); }
+static FOG_INLINE double atan2(double x, double y) { return ::atan2(x, y); }
+
 // ============================================================================
 // [Fog::Math - Sqrt]
 // ============================================================================
 
 static FOG_INLINE float sqrt(float x) { return ::sqrtf(x); }
 static FOG_INLINE double sqrt(double x) { return ::sqrt(x); }
+
+// ============================================================================
+// [Fog::Math - Pow]
+// ============================================================================
+
+static FOG_INLINE float pow(float x, float y) { return ::powf(x, y); }
+static FOG_INLINE double pow(double x, double y) { return ::pow(x, y); }
+
+static FOG_INLINE float pow2(float x) { return x * x; }
+static FOG_INLINE double pow2(double x) { return x * x; }
+
+static FOG_INLINE float pow3(float x) { return x * x * x; }
+static FOG_INLINE double pow3(double x) { return x * x * x; }
+
+// ============================================================================
+// [Fog::Math - Dist]
+// ============================================================================
+
+static FOG_INLINE float dist(
+  float x0, float y0,
+  float x1, float y1)
+{
+  float dx = x1 - x0;
+  float dy = y1 - y0;
+  return Math::sqrt(dx * dx + dy * dy);
+}
+
+static FOG_INLINE double dist(
+  double x0, double y0,
+  double x1, double y1)
+{
+  double dx = x1 - x0;
+  double dy = y1 - y0;
+  return Math::sqrt(dx * dx + dy * dy);
+}
 
 //! @}
 

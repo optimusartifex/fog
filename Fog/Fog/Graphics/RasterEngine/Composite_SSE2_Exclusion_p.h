@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -36,11 +36,11 @@ struct FOG_HIDDEN CompositeExclusionSSE2 :
     sse2_muldiv255_1x1W(x0xmm, a0xmm, b0xmm);
     sse2_muldiv255_1x1W(y0xmm, y0xmm, b0xmm);
 
-    x0xmm = _mm_mullo_epi16(x0xmm, FOG_GET_SSE_CONST_PI(0001000200020002_0001000200020002));
+    x0xmm = _mm_mullo_epi16(x0xmm, FOG_SSE_GET_CONST_PI(0001000200020002_0001000200020002));
 
     dst0xmm = _mm_add_epi16(a0xmm, y0xmm);
     dst0xmm = _mm_subs_epu16(dst0xmm, x0xmm);
-    dst0xmm = _mm_min_epi16(dst0xmm, FOG_GET_SSE_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
+    dst0xmm = _mm_min_epi16(dst0xmm, FOG_SSE_GET_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
   }
 
   static FOG_INLINE void prgb32_op_xrgb32_0xXX_unpacked_1x1W(
@@ -54,11 +54,11 @@ struct FOG_HIDDEN CompositeExclusionSSE2 :
     sse2_muldiv255_1x1W(x0xmm, a0xmm, b0xmm);
     sse2_muldiv255_1x1W(y0xmm, y0xmm, b0xmm);
 
-    x0xmm = _mm_mullo_epi16(x0xmm, FOG_GET_SSE_CONST_PI(0001000200020002_0001000200020002));
+    x0xmm = _mm_mullo_epi16(x0xmm, FOG_SSE_GET_CONST_PI(0001000200020002_0001000200020002));
 
     dst0xmm = _mm_add_epi16(a0xmm, y0xmm);
     dst0xmm = _mm_subs_epu16(dst0xmm, x0xmm);
-    dst0xmm = _mm_min_epi16(dst0xmm, FOG_GET_SSE_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
+    dst0xmm = _mm_min_epi16(dst0xmm, FOG_SSE_GET_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
 
     sse2_fill_alpha_1x1W(dst0xmm);
   }
@@ -79,7 +79,7 @@ struct FOG_HIDDEN CompositeExclusionSSE2 :
 
     dst0xmm = _mm_add_epi16(a0xmm, b0xmm);
     dst0xmm = _mm_subs_epu16(dst0xmm, x0xmm);
-    dst0xmm = _mm_min_epi16(dst0xmm, FOG_GET_SSE_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
+    dst0xmm = _mm_min_epi16(dst0xmm, FOG_SSE_GET_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
 
     sse2_fill_alpha_1x1W(dst0xmm);
   }
@@ -94,7 +94,7 @@ struct FOG_HIDDEN CompositeExclusionSSE2 :
 
     dst0xmm = _mm_add_epi16(a0xmm, b0xmm);
     dst0xmm = _mm_subs_epu16(dst0xmm, x0xmm);
-    dst0xmm = _mm_min_epi16(dst0xmm, FOG_GET_SSE_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
+    dst0xmm = _mm_min_epi16(dst0xmm, FOG_SSE_GET_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
 
     sse2_fill_alpha_1x1W(dst0xmm);
   }
@@ -111,16 +111,16 @@ struct FOG_HIDDEN CompositeExclusionSSE2 :
     sse2_muldiv255_2x2W(x0xmm, a0xmm, b0xmm, x1xmm, a1xmm, b1xmm);
     sse2_muldiv255_2x2W(y0xmm, y0xmm, b0xmm, y1xmm, y1xmm, b1xmm);
 
-    x0xmm = _mm_mullo_epi16(x0xmm, FOG_GET_SSE_CONST_PI(0001000200020002_0001000200020002));
-    x1xmm = _mm_mullo_epi16(x1xmm, FOG_GET_SSE_CONST_PI(0001000200020002_0001000200020002));
+    x0xmm = _mm_mullo_epi16(x0xmm, FOG_SSE_GET_CONST_PI(0001000200020002_0001000200020002));
+    x1xmm = _mm_mullo_epi16(x1xmm, FOG_SSE_GET_CONST_PI(0001000200020002_0001000200020002));
 
     dst0xmm = _mm_add_epi16(a0xmm, y0xmm);
     dst1xmm = _mm_add_epi16(a1xmm, y1xmm);
     dst0xmm = _mm_subs_epu16(dst0xmm, x0xmm);
     dst1xmm = _mm_subs_epu16(dst1xmm, x1xmm);
 
-    dst0xmm = _mm_min_epi16(dst0xmm, FOG_GET_SSE_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
-    dst1xmm = _mm_min_epi16(dst1xmm, FOG_GET_SSE_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
+    dst0xmm = _mm_min_epi16(dst0xmm, FOG_SSE_GET_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
+    dst1xmm = _mm_min_epi16(dst1xmm, FOG_SSE_GET_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
   }
 
   static FOG_INLINE void prgb32_op_xrgb32_0xXX_unpacked_2x2W(
@@ -135,16 +135,16 @@ struct FOG_HIDDEN CompositeExclusionSSE2 :
     sse2_muldiv255_2x2W(x0xmm, a0xmm, b0xmm, x1xmm, a1xmm, b1xmm);
     sse2_muldiv255_2x2W(y0xmm, y0xmm, b0xmm, y1xmm, y1xmm, b1xmm);
 
-    x0xmm = _mm_mullo_epi16(x0xmm, FOG_GET_SSE_CONST_PI(0001000200020002_0001000200020002));
-    x1xmm = _mm_mullo_epi16(x1xmm, FOG_GET_SSE_CONST_PI(0001000200020002_0001000200020002));
+    x0xmm = _mm_mullo_epi16(x0xmm, FOG_SSE_GET_CONST_PI(0001000200020002_0001000200020002));
+    x1xmm = _mm_mullo_epi16(x1xmm, FOG_SSE_GET_CONST_PI(0001000200020002_0001000200020002));
 
     dst0xmm = _mm_add_epi16(a0xmm, y0xmm);
     dst1xmm = _mm_add_epi16(a1xmm, y1xmm);
     dst0xmm = _mm_subs_epu16(dst0xmm, x0xmm);
     dst1xmm = _mm_subs_epu16(dst1xmm, x1xmm);
 
-    dst0xmm = _mm_min_epi16(dst0xmm, FOG_GET_SSE_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
-    dst1xmm = _mm_min_epi16(dst1xmm, FOG_GET_SSE_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
+    dst0xmm = _mm_min_epi16(dst0xmm, FOG_SSE_GET_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
+    dst1xmm = _mm_min_epi16(dst1xmm, FOG_SSE_GET_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
 
     sse2_fill_alpha_2x2W(dst0xmm, dst1xmm);
   }
@@ -161,16 +161,16 @@ struct FOG_HIDDEN CompositeExclusionSSE2 :
     sse2_muldiv255_2x2W(x0xmm, a0xmm, b0xmm, x1xmm, a1xmm, b1xmm);
     sse2_muldiv255_2x2W(y0xmm, y0xmm, b0xmm, y1xmm, y1xmm, b1xmm);
 
-    x0xmm = _mm_mullo_epi16(x0xmm, FOG_GET_SSE_CONST_PI(0001000200020002_0001000200020002));
-    x1xmm = _mm_mullo_epi16(x1xmm, FOG_GET_SSE_CONST_PI(0001000200020002_0001000200020002));
+    x0xmm = _mm_mullo_epi16(x0xmm, FOG_SSE_GET_CONST_PI(0001000200020002_0001000200020002));
+    x1xmm = _mm_mullo_epi16(x1xmm, FOG_SSE_GET_CONST_PI(0001000200020002_0001000200020002));
 
     dst0xmm = _mm_add_epi16(a0xmm, y0xmm);
     dst1xmm = _mm_add_epi16(a1xmm, y1xmm);
     dst0xmm = _mm_subs_epu16(dst0xmm, x0xmm);
     dst1xmm = _mm_subs_epu16(dst1xmm, x1xmm);
 
-    dst0xmm = _mm_min_epi16(dst0xmm, FOG_GET_SSE_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
-    dst1xmm = _mm_min_epi16(dst1xmm, FOG_GET_SSE_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
+    dst0xmm = _mm_min_epi16(dst0xmm, FOG_SSE_GET_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
+    dst1xmm = _mm_min_epi16(dst1xmm, FOG_SSE_GET_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
   }
 
   static FOG_INLINE void xrgb32_op_xrgb32_unpacked_2x2W(
@@ -188,8 +188,8 @@ struct FOG_HIDDEN CompositeExclusionSSE2 :
     dst0xmm = _mm_subs_epu16(dst0xmm, x0xmm);
     dst1xmm = _mm_subs_epu16(dst1xmm, x1xmm);
 
-    dst0xmm = _mm_min_epi16(dst0xmm, FOG_GET_SSE_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
-    dst1xmm = _mm_min_epi16(dst1xmm, FOG_GET_SSE_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
+    dst0xmm = _mm_min_epi16(dst0xmm, FOG_SSE_GET_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
+    dst1xmm = _mm_min_epi16(dst1xmm, FOG_SSE_GET_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
 
     sse2_fill_alpha_2x2W(dst0xmm, dst1xmm);
   }
@@ -210,8 +210,8 @@ struct FOG_HIDDEN CompositeExclusionSSE2 :
     dst0xmm = _mm_subs_epu16(dst0xmm, x0xmm);
     dst1xmm = _mm_subs_epu16(dst1xmm, x1xmm);
 
-    dst0xmm = _mm_min_epi16(dst0xmm, FOG_GET_SSE_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
-    dst1xmm = _mm_min_epi16(dst1xmm, FOG_GET_SSE_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
+    dst0xmm = _mm_min_epi16(dst0xmm, FOG_SSE_GET_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
+    dst1xmm = _mm_min_epi16(dst1xmm, FOG_SSE_GET_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
 
     sse2_fill_alpha_2x2W(dst0xmm, dst1xmm);
   }

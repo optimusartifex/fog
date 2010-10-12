@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -54,7 +54,7 @@ struct FOG_API WinFontEngine : public FontEngine
     const String& family,
     float size, 
     const FontOptions& options,
-    const FloatMatrix& matrix);
+    const TransformF& matrix);
 
 private:
   FOG_DISABLE_COPY(WinFontEngine)
@@ -75,7 +75,7 @@ struct FOG_API WinFontMaster
   LOGFONTW logFont;
   HFONT hFont;
 
-  FloatKerningPair* kerningPairs;
+  KerningPairF* kerningPairs;
   uint32_t kerningCount;
 
 private:
@@ -102,7 +102,7 @@ struct FOG_API WinFontFace : public FontFace
   // --------------------------------------------------------------------------
 
   virtual err_t getGlyphSet(const Char* str, sysuint_t length, GlyphSet& glyphSet);
-  virtual err_t getOutline(const Char* str, sysuint_t length, DoublePath& dst);
+  virtual err_t getOutline(const Char* str, sysuint_t length, PathD& dst);
   virtual err_t getTextExtents(const Char* str, sysuint_t length, TextExtents& extents);
 
   // --------------------------------------------------------------------------

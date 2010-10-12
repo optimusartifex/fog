@@ -1,11 +1,11 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_GRAPHICS_DITHERMATRIX_P_H
-#define _FOG_GRAPHICS_DITHERMATRIX_P_H
+#ifndef _FOG_GRAPHICS_DITHERTRANSFORM_P_H
+#define _FOG_GRAPHICS_DITHERTRANSFORM_P_H
 
 // [Dependencies]
 #include <Fog/Core/Build.h>
@@ -94,4 +94,4 @@ struct FOG_HIDDEN DitherMatrix
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_GRAPHICS_DITHERMATRIX_P_H
+#endif // _FOG_GRAPHICS_DITHERTRANSFORM_P_H

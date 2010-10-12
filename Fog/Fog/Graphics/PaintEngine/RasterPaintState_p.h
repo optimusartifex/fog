@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -10,10 +10,10 @@
 // [Dependencies]
 #include <Fog/Core/Assert.h>
 #include <Fog/Graphics/Geometry.h>
-#include <Fog/Graphics/Matrix.h>
 #include <Fog/Graphics/PathStroker.h>
 #include <Fog/Graphics/Pattern.h>
 #include <Fog/Graphics/Region.h>
+#include <Fog/Graphics/Transform.h>
 
 #include <Fog/Graphics/PaintEngine/RasterPaintBase_p.h>
 
@@ -158,12 +158,12 @@ struct FOG_HIDDEN RasterPaintVarState : public RasterPaintState
   //! @brief Painter user matrix.
   //!
   //! Used by @c PAINTER_STATE_MATRIX.
-  Static<DoubleMatrix> userMatrix;
+  Static<TransformD> userTransform;
 
   //! @brief Painter work origin (meta + user origin).
   //!
   //! Used by @c PAINTER_STATE_CLIP_AREA.
-  IntPoint finalOrigin;
+  PointI finalOrigin;
 
   //! @brief Painter work region (combined meta region and user region).
   //!
@@ -173,7 +173,7 @@ struct FOG_HIDDEN RasterPaintVarState : public RasterPaintState
   //! @brief Clip box (work region extents).
   //!
   //! Used by @c PAINTER_STATE_CLIP_AREA.
-  IntBox finalClipBox;
+  BoxI finalClipBox;
 
   //! @brief Clip mask.
   //!

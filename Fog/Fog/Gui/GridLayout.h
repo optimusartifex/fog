@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -74,7 +74,7 @@ struct FOG_API GridLayout : public Layout
   // --------------------------------------------------------------------------
 
   virtual void calculateLayoutHint(LayoutHint& hint);
-  virtual void setLayoutGeometry(const IntRect&);
+  virtual void setLayoutGeometry(const RectI&);
   virtual void invalidateLayout();
 
   // TODO: What about visibility, FOG_API?

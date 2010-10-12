@@ -7,14 +7,14 @@
 // ============================================================================
 
 static Gdiplus::Brush* setupGdiPlusPatternForPoint(
-  const Fog::DoublePoint& pt0, const Fog::DoublePoint& pt1, const Fog::Argb& argb)
+  const Fog::PointD& pt0, const Fog::PointD& pt1, const Fog::ArgbI& argb)
 {
   Gdiplus::Color clr[3];
   Gdiplus::REAL stops[3];
 
   stops[0] = 0.0; clr[0].SetValue(0xFFFFFFFF);
   stops[1] = 0.5; clr[1].SetValue(0x7FFF0000);
-  stops[2] = 1.0; clr[2].SetValue(argb.getValue());
+  stops[2] = 1.0; clr[2].SetValue(argb.getPacked());
 
   Gdiplus::LinearGradientBrush* brush = new Gdiplus::LinearGradientBrush(
     Gdiplus::PointF((Gdiplus::REAL)pt0.x, (Gdiplus::REAL)pt0.y),
@@ -26,11 +26,11 @@ static Gdiplus::Brush* setupGdiPlusPatternForPoint(
 }
 
 static Gdiplus::Brush* setupGdiPlusPatternForRect(
-  const Fog::IntRect& rect, const Fog::Argb& argb)
+  const Fog::RectI& rect, const Fog::ArgbI& argb)
 {
   return setupGdiPlusPatternForPoint(
-    Fog::DoublePoint(rect.x, rect.y),
-    Fog::DoublePoint(rect.x+rect.w, rect.y+rect.h),
+    Fog::PointD(rect.x, rect.y),
+    Fog::PointD(rect.x+rect.w, rect.y+rect.h),
     argb);
 }
 
@@ -130,7 +130,7 @@ void GdiPlusModule_FillRect::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++)
     {
-      Fog::IntRect r = r_rect.data[a];
+      Fog::RectI r = r_rect.data[a];
 
       Gdiplus::Color c(r_argb.data[a]);
       Gdiplus::SolidBrush br(c);
@@ -142,7 +142,7 @@ void GdiPlusModule_FillRect::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++)
     {
-      Fog::IntRect r = r_rect.data[a];
+      Fog::RectI r = r_rect.data[a];
 
       Gdiplus::Brush* brush = setupGdiPlusPatternForRect(r, r_argb.data[a]);
       gr.FillRectangle(brush, r.x, r.y, r.w, r.h);
@@ -175,7 +175,7 @@ void GdiPlusModule_FillRectSubPX::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++, sub += inc)
     {
-      Fog::IntRect r = r_rect.data[a];
+      Fog::RectI r = r_rect.data[a];
 
       Gdiplus::Color c(r_argb.data[a]);
       Gdiplus::SolidBrush br(c);
@@ -187,7 +187,7 @@ void GdiPlusModule_FillRectSubPX::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++, sub += inc)
     {
-      Fog::IntRect r = r_rect.data[a];
+      Fog::RectI r = r_rect.data[a];
 
       Gdiplus::Brush* brush = setupGdiPlusPatternForRect(r, r_argb.data[a]);
       gr.FillRectangle(brush, (float)r.x + sub, (float)r.y + sub, (float)r.w, (float)r.h);
@@ -221,7 +221,7 @@ void GdiPlusModule_FillRectAffine::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++, rot += 0.01f)
     {
-      Fog::IntRect r = r_rect.data[a];
+      Fog::RectI r = r_rect.data[a];
 
       gr.ResetTransform();
       gr.TranslateTransform((Gdiplus::REAL)cx, (Gdiplus::REAL)cy);
@@ -238,7 +238,7 @@ void GdiPlusModule_FillRectAffine::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++, rot += 0.01f)
     {
-      Fog::IntRect r = r_rect.data[a];
+      Fog::RectI r = r_rect.data[a];
 
       gr.ResetTransform();
       gr.TranslateTransform((Gdiplus::REAL)cx, (Gdiplus::REAL)cy);
@@ -271,7 +271,7 @@ void GdiPlusModule_FillRound::bench(int quantity)
 
   for (int a = 0; a < quantity; a++)
   {
-    Fog::IntRect r = r_rect.data[a];
+    Fog::RectI r = r_rect.data[a];
 
     Gdiplus::REAL r_x = (Gdiplus::REAL)r.x - (Gdiplus::REAL)0.5;
     Gdiplus::REAL r_y = (Gdiplus::REAL)r.y - (Gdiplus::REAL)0.5;
@@ -334,7 +334,7 @@ void GdiPlusModule_FillPolygon::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++)
     {
-      const Fog::DoublePoint* polyData = &r_poly.data[a*10];
+      const Fog::PointD* polyData = &r_poly.data[a*10];
 
       Gdiplus::GraphicsPath path;
       Gdiplus::PointF lines[10];
@@ -356,7 +356,7 @@ void GdiPlusModule_FillPolygon::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++)
     {
-      const Fog::DoublePoint* polyData = &r_poly.data[a*10];
+      const Fog::PointD* polyData = &r_poly.data[a*10];
 
       Gdiplus::GraphicsPath path;
       Gdiplus::PointF lines[10];
@@ -394,7 +394,7 @@ void GdiPlusModule_Image::prepare(int quantity, int sw, int sh)
 
   for (int a = 0; a < 4; a++)
   {
-    images[a] = sprite[a].scaled(Fog::IntSize(sw, sh));
+    images[a] = sprite[a].scaled(Fog::SizeI(sw, sh));
     images_gdip[a] = new Gdiplus::Bitmap(
       images[a].getWidth(),
       images[a].getHeight(),
@@ -491,7 +491,7 @@ void GdiPlusBenchmarkContext::run()
 {
   header();
 
-  const Fog::IntSize* sizes = _master->getSizes().getData();
+  const Fog::SizeI* sizes = _master->getSizes().getData();
   int quantity = _master->_quantity;
   sysuint_t s;
 

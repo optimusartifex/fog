@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -39,7 +39,7 @@ struct FOG_API FTFontFace : public FontFace
   virtual ~FTFontFace();
 
   virtual err_t getGlyphSet(const Char* str, sysuint_t length, GlyphSet& glyphSet);
-  virtual err_t getOutline(const Char* str, sysuint_t length, DoublePath& dst);
+  virtual err_t getOutline(const Char* str, sysuint_t length, PathD& dst);
   virtual err_t getTextExtents(const Char* str, sysuint_t length, TextExtents& extents);
 
   //! @brief Glyph cache lock.
@@ -76,7 +76,7 @@ struct FOG_API FTFontEngine : public FontEngine
   virtual FontFace* createFace(
     const String& family, float size, 
     const FontOptions& options, 
-    const FloatMatrix& matrix);
+    const TransformF& matrix);
 
   virtual List<String> getDefaultFontDirectories();
 

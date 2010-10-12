@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -63,7 +63,7 @@ uint32_t BoxLayout::getLayoutExpandingDirections() const
   return ORIENTATION_HORIZONTAL;
 }
 
-void BoxLayout::setLayoutGeometry(const IntRect &rect)
+void BoxLayout::setLayoutGeometry(const RectI &rect)
 {
   // LAYOUT TODO: check oldrect and newrect if we really need to reposition.
   Layout::setLayoutGeometry(rect);
@@ -161,8 +161,8 @@ void HBoxLayout::calculateLayoutHint(LayoutHint& hint)
   for (int i = 0; i < getLength(); i++)
   {
     LayoutItem* item = getAt(i);
-    IntSize hint = item->getLayoutSizeHint();
-    IntSize min = item->getLayoutMinimumSize();
+    SizeI hint = item->getLayoutSizeHint();
+    SizeI min = item->getLayoutMinimumSize();
     LayoutData * data = static_cast<LayoutData*> (item->_layoutdata);
 
     // Sum up widths.
@@ -210,7 +210,7 @@ void HBoxLayout::calculateLayoutHint(LayoutHint& hint)
   hint._maximumSize.set(INT_MAX,INT_MAX);
 }
 
-int HBoxLayout::doLayout(const IntRect &rect)
+int HBoxLayout::doLayout(const RectI &rect)
 {    
   if (!rect.isValid())
     return 0;
@@ -255,7 +255,7 @@ int HBoxLayout::doLayout(const IntRect &rect)
       i--;
 
     LayoutItem* child = getAt(i);
-    IntSize hint = child->getLayoutSizeHint();
+    SizeI hint = child->getLayoutSizeHint();
 
     int width = hint.getWidth();
     width += ((LayoutItem::FlexLayoutData*)child->_layoutdata)->_offset;
@@ -277,7 +277,7 @@ int HBoxLayout::doLayout(const IntRect &rect)
     }
 
     // Layout child.
-    child->setLayoutGeometry(IntRect(left, top, width, height));
+    child->setLayoutGeometry(RectI(left, top, width, height));
 
     // Add width.
     left += width;
@@ -320,8 +320,8 @@ void VBoxLayout::calculateLayoutHint(LayoutHint& hint)
   for (int i = 0; i < getLength(); i++)
   {
     LayoutItem* item = getAt(i);
-    IntSize hint = item->getLayoutSizeHint();
-    IntSize min = item->getLayoutMinimumSize();
+    SizeI hint = item->getLayoutSizeHint();
+    SizeI min = item->getLayoutMinimumSize();
 
     LayoutData * prop = static_cast<LayoutData*> (item->_layoutdata);
 
@@ -377,7 +377,7 @@ void VBoxLayout::calculateLayoutHint(LayoutHint& hint)
   hint._maximumSize.set(INT_MAX,INT_MAX);
 }
 
-int VBoxLayout::doLayout(const IntRect &rect)
+int VBoxLayout::doLayout(const RectI &rect)
 {
   int availWidth = rect.getWidth();
   int availHeight = rect.getHeight();
@@ -419,7 +419,7 @@ int VBoxLayout::doLayout(const IntRect &rect)
       i--;
 
     LayoutItem* child = getAt(i);
-    IntSize hint = child->getLayoutSizeHint();
+    SizeI hint = child->getLayoutSizeHint();
 
     height = hint.getHeight();
     height += ((LayoutItem::FlexLayoutData*)child->_layoutdata)->_offset;
@@ -441,7 +441,7 @@ int VBoxLayout::doLayout(const IntRect &rect)
     }
 
     // Layout child.
-    child->setLayoutGeometry(IntRect(left, top, width, height));
+    child->setLayoutGeometry(RectI(left, top, width, height));
 
     // Add height.
     top += height;

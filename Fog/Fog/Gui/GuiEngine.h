@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -90,8 +90,8 @@ struct FOG_API GuiEngine : public Object
   struct CaretStatus
   {
     Widget* widget;
-    IntRect rect;
-    Argb color;
+    RectI rect;
+    ArgbI color;
     uint32_t type;
     uint32_t animation;
   };
@@ -109,7 +109,7 @@ struct FOG_API GuiEngine : public Object
     //! @brief Widget where mouse is.
     Widget* widget;
     //! @brief Mouse position relative to @c widget.
-    IntPoint position;
+    PointI position;
     //! @brief Hover state.
     uint32_t hover;
     //! @brief Pressed buttons.
@@ -123,7 +123,7 @@ struct FOG_API GuiEngine : public Object
     //! @brief System window where mouse is (or NULL).
     GuiWindow* uiWindow;
     //! @brief Mouse position relative to @c uiWindow (in client area).
-    IntPoint position;
+    PointI position;
     //! @brief Hover state.
     uint32_t hover;
     //! @brief Pressed buttons.
@@ -196,7 +196,7 @@ struct FOG_API GuiEngine : public Object
 
   virtual void invalidateMouseStatus();
   virtual void updateMouseStatus();
-  virtual void changeMouseStatus(Widget* w, const IntPoint& pos);
+  virtual void changeMouseStatus(Widget* w, const PointI& pos);
 
   virtual void clearSystemMouseStatus();
 
@@ -226,7 +226,7 @@ struct FOG_API GuiEngine : public Object
 
   virtual void dispatchEnabled(Widget* w, bool enabled);
   virtual void dispatchVisibility(Widget* w, uint32_t visible);
-  virtual void dispatchConfigure(Widget* w, const IntRect& rect, bool changedOrientation);
+  virtual void dispatchConfigure(Widget* w, const RectI& rect, bool changedOrientation);
 
   //! @brief Called by widget destructor to erase all links to the widget from UIEngine.
   virtual void widgetDestroyed(Widget* w);
@@ -248,7 +248,7 @@ struct FOG_API GuiEngine : public Object
   virtual void doUpdateWindow(GuiWindow* window);
 
   //! @brief Blits window content into screen. Called usually from @c doUpdateWindow().
-  virtual void doBlitWindow(GuiWindow* window, const IntBox* rects, sysuint_t count) = 0;
+  virtual void doBlitWindow(GuiWindow* window, const BoxI* rects, sysuint_t count) = 0;
 
   // --------------------------------------------------------------------------
   // [GuiWindow Create / Destroy]
@@ -379,9 +379,9 @@ struct FOG_API GuiWindow : public Object
   virtual err_t show(uint32_t state) = 0;
   virtual err_t hide() = 0;
 
-  virtual err_t setPosition(const IntPoint& pos) = 0;
-  virtual err_t setSize(const IntSize& size) = 0;
-  virtual err_t setGeometry(const IntRect& geometry) = 0;
+  virtual err_t setPosition(const PointI& pos) = 0;
+  virtual err_t setSize(const SizeI& size) = 0;
+  virtual err_t setGeometry(const RectI& geometry) = 0;
 
   virtual err_t takeFocus() = 0;
 
@@ -391,11 +391,11 @@ struct FOG_API GuiWindow : public Object
   virtual err_t setIcon(const Image& icon) = 0;
   virtual err_t getIcon(Image& icon) = 0;
 
-  virtual err_t setSizeGranularity(const IntPoint& pt) = 0;
-  virtual err_t getSizeGranularity(IntPoint& pt) = 0;
+  virtual err_t setSizeGranularity(const PointI& pt) = 0;
+  virtual err_t getSizeGranularity(PointI& pt) = 0;
 
-  virtual err_t worldToClient(IntPoint* coords) = 0;
-  virtual err_t clientToWorld(IntPoint* coords) = 0;
+  virtual err_t worldToClient(PointI* coords) = 0;
+  virtual err_t clientToWorld(PointI* coords) = 0;
 
   // --------------------------------------------------------------------------
   // [Windowing System]
@@ -404,7 +404,7 @@ struct FOG_API GuiWindow : public Object
   virtual void onEnabled(bool enabled);
   virtual void onVisibility(uint32_t visible);
 
-  virtual void onGeometry(const IntRect& windowRect, const IntRect& clientRect);
+  virtual void onGeometry(const RectI& windowRect, const RectI& clientRect);
 
   virtual void onMouseHover(int x, int y);
   virtual void onMouseMove(int x, int y);
@@ -541,14 +541,14 @@ struct FOG_API GuiWindow : public Object
   MODAL_POLICY _modalpolicy;
 
   //! @brief Window bound rectangle.
-  IntRect _windowRect;
+  RectI _windowRect;
   //! @brief Window client rectangle.
-  IntRect _clientRect;
+  RectI _clientRect;
 
   //! @brief Window title.
   String _title;
   //! @brief Window resize granularity.
-  IntPoint _sizeGranularity;
+  PointI _sizeGranularity;
 
   uint32_t _visibility;
 
@@ -578,7 +578,7 @@ struct FOG_API GuiBackBuffer
 
   virtual bool resize(int width, int height, bool cache) = 0;
   virtual void destroy() = 0;
-  virtual void updateRects(const IntBox* rects, sysuint_t count) = 0;
+  virtual void updateRects(const BoxI* rects, sysuint_t count) = 0;
 
   // --------------------------------------------------------------------------
   // [Generic Methods]

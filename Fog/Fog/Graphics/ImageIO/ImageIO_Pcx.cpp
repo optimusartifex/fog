@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -681,12 +681,12 @@ err_t PcxDecoderDevice::readImage(Image& image)
     {
       for (x = 0; x < nColors; x++) 
       {
-        pdest[x] = Argb(0xFF, dataCur[0], dataCur[1], dataCur[2]);
+        pdest[x] = ArgbI(0xFF, dataCur[0], dataCur[1], dataCur[2]);
         dataCur += 3;
       }
     }
 
-    _palette.setXrgb32(0, (Argb*)pal, 256);
+    _palette.setXrgb32(0, (ArgbI*)pal, 256);
   }
 
   // apply palette if needed
@@ -817,7 +817,7 @@ err_t PcxEncoderDevice::writeImage(const Image& image)
       // Standard indexed image.
       else
       {
-        PCX_convertPaletteToPcx(palette + 1, (uint8_t*)image.getPalette().getData(), 256, sizeof(Argb));
+        PCX_convertPaletteToPcx(palette + 1, (uint8_t*)image.getPalette().getData(), 256, sizeof(ArgbI));
       }
 
       if (_stream.write((const char*)palette, 768+1) != 768+1) goto fail;

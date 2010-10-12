@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -215,14 +215,14 @@ err_t Widget::setWindowIcon(const Image& icon)
   return _guiWindow->setIcon(icon);
 }
 
-IntPoint Widget::getWindowGranularity() const
+PointI Widget::getWindowGranularity() const
 {
-  IntPoint sz(0, 0);
+  PointI sz(0, 0);
   if (_guiWindow) _guiWindow->getSizeGranularity(sz);
   return sz;
 }
 
-err_t Widget::setWindowGranularity(const IntPoint& pt)
+err_t Widget::setWindowGranularity(const PointI& pt)
 {
   if (!_guiWindow) return ERR_RT_INVALID_HANDLE;
   return _guiWindow->setSizeGranularity(pt);
@@ -232,7 +232,7 @@ err_t Widget::setWindowGranularity(const IntPoint& pt)
 // [Fog::Widget - Core Geometry]
 // ============================================================================
 
-void Widget::setPosition(const IntPoint& pos)
+void Widget::setPosition(const PointI& pos)
 {
   if (_widgetGeometry.getPosition() == pos) return;
 
@@ -245,11 +245,11 @@ void Widget::setPosition(const IntPoint& pos)
     GuiEngine* engine = Application::getInstance()->getGuiEngine();
     if (engine == NULL) return;
 
-    engine->dispatchConfigure(this, IntRect(pos.x, pos.y, _widgetGeometry.w, _widgetGeometry.h), false);
+    engine->dispatchConfigure(this, RectI(pos.x, pos.y, _widgetGeometry.w, _widgetGeometry.h), false);
   }
 }
 
-void Widget::setSize(const IntSize& sz)
+void Widget::setSize(const SizeI& sz)
 {
   if (_widgetGeometry.getSize() == sz) return;
 
@@ -262,11 +262,11 @@ void Widget::setSize(const IntSize& sz)
     GuiEngine* engine = Application::getInstance()->getGuiEngine();
     if (engine == NULL) return;
 
-    engine->dispatchConfigure(this, IntRect(_widgetGeometry.x, _widgetGeometry.y, sz.w, sz.h), false);
+    engine->dispatchConfigure(this, RectI(_widgetGeometry.x, _widgetGeometry.y, sz.w, sz.h), false);
   }
 }
 
-void Widget::setGeometry(const IntRect& geometry)
+void Widget::setGeometry(const RectI& geometry)
 {
   if (_widgetGeometry == geometry) return;
 
@@ -287,12 +287,12 @@ void Widget::setGeometry(const IntRect& geometry)
 // [Fog::Widget - Client Geometry]
 // ============================================================================
 
-void Widget::calcWidgetSize(IntSize& size) const
+void Widget::calcWidgetSize(SizeI& size) const
 {
   // Default action is to do nothing.
 }
 
-void Widget::calcClientGeometry(IntRect& geometry) const
+void Widget::calcClientGeometry(RectI& geometry) const
 {
   // Default action is to do nothing.
 }
@@ -316,7 +316,7 @@ void Widget::updateClientGeometry()
 // [Fog::Widget - Client Origin]
 // ============================================================================
 
-void Widget::setOrigin(const IntPoint& pt)
+void Widget::setOrigin(const PointI& pt)
 {
   if (_clientOrigin == pt) return;
 
@@ -335,7 +335,7 @@ void Widget::setOrigin(const IntPoint& pt)
 // [Fog::Widget - Translate Coordinates]
 // ============================================================================
 
-bool Widget::worldToClient(IntPoint* coords) const
+bool Widget::worldToClient(PointI* coords) const
 {
   Widget* w = const_cast<Widget*>(this);
 
@@ -353,7 +353,7 @@ bool Widget::worldToClient(IntPoint* coords) const
   return false;
 }
 
-bool Widget::clientToWorld(IntPoint* coords) const
+bool Widget::clientToWorld(PointI* coords) const
 {
   Widget* w = const_cast<Widget*>(this);
 
@@ -370,7 +370,7 @@ bool Widget::clientToWorld(IntPoint* coords) const
   return false;
 }
 
-bool Widget::translateCoordinates(Widget* to, Widget* from, IntPoint* coords)
+bool Widget::translateCoordinates(Widget* to, Widget* from, PointI* coords)
 {
   Widget* w;
   int x, y;
@@ -427,7 +427,7 @@ bool Widget::translateCoordinates(Widget* to, Widget* from, IntPoint* coords)
 // [Fog::Widget - Hit Testing]
 // ============================================================================
 
-Widget* Widget::getChildAt(const IntPoint& pt, bool recursive) const
+Widget* Widget::getChildAt(const PointI& pt, bool recursive) const
 {
   int x = pt.getX();
   int y = pt.getY();
@@ -485,7 +485,7 @@ void Widget::calculateLayoutHint(LayoutHint& hint)
 
   //TODO: REMOVE THIS AFTER EASY TESTING!!!
   //TODO: REMOVED...
-  // hint._sizeHint = IntSize(40, 40);
+  // hint._sizeHint = SizeI(40, 40);
 }
 
 void Widget::setLayout(Layout* lay)
@@ -594,22 +594,22 @@ uint32_t Widget::getLayoutExpandingDirections() const
 }
 
 // SetLayoutGeometry using rect as layoutRect (without margins).
-void Widget::setLayoutGeometry(const IntRect& rect)
+void Widget::setLayoutGeometry(const RectI& rect)
 {
   // If widget isn't visible -> nothing to do.
   if (isEmpty())
     return;
 
   // LAYOUT TODO: widget margin.
-  IntRect r = rect;  
+  RectI r = rect;  
 
   // Make sure the widget will never be bigger than maximum size.
-  IntSize s = r.getSize().boundedTo(getLayoutMaximumSize());
+  SizeI s = r.getSize().boundedTo(getLayoutMaximumSize());
   uint32_t alignment = _alignment;
 
   if (alignment & (ALIGNMENT_HORIZONTAL_MASK | ALIGNMENT_VERTICAL_MASK))
   {
-    IntSize prefered(getLayoutSizeHint());
+    SizeI prefered(getLayoutSizeHint());
     LayoutPolicy sp = _layoutPolicy;
 
     if (sp.isHorizontalPolicyIgnored())
@@ -673,7 +673,7 @@ void Widget::setLayoutGeometry(const IntRect& rect)
 
   // We don't need to use setGeometry(), because the Layout is only activated
   // during update process.
-  IntRect geometry(x, y, s.getWidth(), s.getHeight());
+  RectI geometry(x, y, s.getWidth(), s.getHeight());
   
   if (_guiWindow)
   {
@@ -737,28 +737,28 @@ int Widget::getHeightForWidth(int width) const
   return -1;
 }
 
-IntSize Widget::getMinimumSizeHint() const
+SizeI Widget::getMinimumSizeHint() const
 {
   if (_layout)
     return _layout->getTotalMinimumSize();
   else
-    return IntSize(-1, -1);
+    return SizeI(-1, -1);
 }
 
-IntSize Widget::getMaximumSizeHint() const
+SizeI Widget::getMaximumSizeHint() const
 {
   if (_layout)
     return _layout->getTotalMaximumSize();
   else
-    return IntSize(-1, -1);
+    return SizeI(-1, -1);
 }
 
-IntSize Widget::getSizeHint() const
+SizeI Widget::getSizeHint() const
 {
   if (_layout)
     return _layout->getTotalSizeHint();
   else
-    return IntSize(-1, -1);
+    return SizeI(-1, -1);
 }
 
 // ============================================================================
@@ -807,9 +807,9 @@ bool Widget::checkMaximumSize(int w, int h)
   return true;
 }
 
-void Widget::setMinimumSize(const IntSize& minSize)
+void Widget::setMinimumSize(const SizeI& minSize)
 {
-  IntSize lastmin(-1,-1);
+  SizeI lastmin(-1,-1);
 
   if (_extra)
   {
@@ -821,7 +821,7 @@ void Widget::setMinimumSize(const IntSize& minSize)
     return;
   }
 
-  IntSize size(getMinimumWidth(),getMinimumHeight());
+  SizeI size(getMinimumWidth(),getMinimumHeight());
 
   invalidateLayout();
   
@@ -833,9 +833,9 @@ void Widget::setMinimumSize(const IntSize& minSize)
   //TODO: Write EventListener for GuiWindow to allow/disallow min/max
 }
 
-void Widget::setMaximumSize(const IntSize& maxSize)
+void Widget::setMaximumSize(const SizeI& maxSize)
 {
-  IntSize lastmin(-1, -1);
+  SizeI lastmin(-1, -1);
 
   if (_extra)
   {
@@ -845,7 +845,7 @@ void Widget::setMaximumSize(const IntSize& maxSize)
   if (!checkMaximumSize(maxSize.getWidth(),maxSize.getHeight())) //nothing changed
     return;
 
-  IntSize size(getMaximumWidth(),getMaximumHeight());
+  SizeI size(getMaximumWidth(),getMaximumHeight());
 
   invalidateLayout();
 
@@ -912,7 +912,7 @@ void Widget::setVisible(uint32_t val)
     Application::getInstance()->getGuiEngine()->getDisplayInfo(&info);
 
     setWindowFlags(WINDOW_TYPE_FULLSCREEN | getWindowHints());
-    setGeometry(IntRect(0,0,info.width, info.height));
+    setGeometry(RectI(0,0,info.width, info.height));
   }
   else if (_visibility == WIDGET_VISIBLE_FULLSCREEN && val == WIDGET_VISIBLE)
   {
@@ -1233,7 +1233,7 @@ uint32_t Widget::getPaintHint() const
 
 err_t Widget::getPropagatedRegion(Region* dst) const
 {
-  return dst->set(IntBox(0, 0, getWidth(), getHeight()));
+  return dst->set(BoxI(0, 0, getWidth(), getHeight()));
 }
 
 // ============================================================================

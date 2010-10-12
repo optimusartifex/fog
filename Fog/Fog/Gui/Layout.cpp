@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -190,7 +190,7 @@ int Layout::calcMargin(int margin, uint32_t location) const
   return 0;
 }
 
-IntRect Layout::getContentsRect() const
+RectI Layout::getContentsRect() const
 {
   return _rect.adjusted(
     +_contentmargin.left,
@@ -241,12 +241,12 @@ bool Layout::hasLayoutHeightForWidth() const
   return false;
 }
 
-void Layout::setLayoutGeometry(const IntRect& r)
+void Layout::setLayoutGeometry(const RectI& r)
 {
   _rect = r;
 }
 
-IntRect Layout::getLayoutGeometry() const
+RectI Layout::getLayoutGeometry() const
 {
   return _rect;
 }
@@ -427,24 +427,24 @@ int Layout::addChildLayout(Layout* l)
   return getLength() -1;
 }
 
-IntSize Layout::getTotalMinimumSize() const
+SizeI Layout::getTotalMinimumSize() const
 {
   int side = 0, top = 0;
   calcContentMargins(side, top);
 
-  IntSize s = getLayoutMinimumSize();
-  return s + IntSize(side, top);
+  SizeI s = getLayoutMinimumSize();
+  return s + SizeI(side, top);
 }
 
-IntSize Layout::getTotalMaximumSize() const
+SizeI Layout::getTotalMaximumSize() const
 {
   int side = 0, top = 0;
   calcContentMargins(side, top);
 
-  IntSize s = getLayoutMaximumSize();
+  SizeI s = getLayoutMaximumSize();
   if (_toplevel)
   {
-    s = IntSize(Math::min<int>(s.getWidth() + side, WIDGET_MAX_SIZE), Math::min<int>(s.getHeight() + top, WIDGET_MAX_SIZE));
+    s = SizeI(Math::min<int>(s.getWidth() + side, WIDGET_MAX_SIZE), Math::min<int>(s.getHeight() + top, WIDGET_MAX_SIZE));
   }
 
   return s;
@@ -470,23 +470,23 @@ void Layout::calcContentMargins(int& side, int& top) const
   }
 }
 
-IntSize Layout::getTotalSizeHint() const
+SizeI Layout::getTotalSizeHint() const
 {
   int side=0, top=0;
   calcContentMargins(side,top);
 
-  IntSize s = getLayoutSizeHint();
+  SizeI s = getLayoutSizeHint();
   if (hasLayoutHeightForWidth())
     s.setHeight(getLayoutHeightForWidth(s.getWidth() + side));
 
-  return s + IntSize(side, top);
+  return s + SizeI(side, top);
 }
 
-void Layout::callSetGeometry(const IntSize& size)
+void Layout::callSetGeometry(const SizeI& size)
 {
   if (size.isValid())
   {
-    IntRect rect = getParentWidget()->getClientContentGeometry();
+    RectI rect = getParentWidget()->getClientContentGeometry();
     //TODO: EntireRect
     setLayoutGeometry(rect);
   }
@@ -513,7 +513,7 @@ bool Layout::activate()
   
   if (parentwidget->hasGuiWindow())
   {
-    IntSize ms = getTotalMinimumSize();
+    SizeI ms = getTotalMinimumSize();
     if (calc)
     {
       if (hasW) ms.setWidth(parentwidget->getMinimumSize().getWidth());      
@@ -533,7 +533,7 @@ bool Layout::activate()
   }
   else if (calc)
   {
-    IntSize ms = parentwidget->getMinimumSize();
+    SizeI ms = parentwidget->getMinimumSize();
     if (!hasH) ms.setHeight(0);
     if (!hasW) ms.setWidth(0);
     parentwidget->setMinimumSize(ms);

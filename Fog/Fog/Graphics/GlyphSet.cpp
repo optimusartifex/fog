@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -65,7 +65,7 @@ void GlyphSet::clear()
   {
     freeGlyphs(_d->glyphs(), _d->length);
     _d->length = 0;
-    _d->extents.clear();
+    _d->extents.reset();
     _d->advance = 0;
   }
 }
@@ -215,7 +215,7 @@ GlyphSet::Data* GlyphSet::Data::adopt(void* data, sysuint_t capacity)
   d->flags = 0;
   d->capacity = capacity;
   d->length = 0;
-  d->extents.clear();
+  d->extents.reset();
   d->advance = 0;
 
   return d;
@@ -232,7 +232,7 @@ GlyphSet::Data* GlyphSet::Data::alloc(sysuint_t capacity)
   d->flags = IsDynamic | IsSharable;
   d->capacity = capacity;
   d->length = 0;
-  d->extents.clear();
+  d->extents.reset();
   d->advance = 0;
 
   return d;

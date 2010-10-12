@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -15,11 +15,12 @@
 #include <Fog/Core/Memory.h>
 #include <Fog/Core/Std.h>
 #include <Fog/Core/Swap.h>
-#include <Fog/Graphics/Matrix.h>
 #include <Fog/Graphics/Constants.h>
+#include <Fog/Graphics/Curve_p.h>
+#include <Fog/Graphics/Funcs.h>
 #include <Fog/Graphics/Path.h>
-#include <Fog/Graphics/PathUtil.h>
 #include <Fog/Graphics/Region.h>
+#include <Fog/Graphics/Transform.h>
 
 namespace Fog {
 
@@ -27,17 +28,17 @@ namespace Fog {
 // [Fog::Path - Construction / Destruction]
 // ============================================================================
 
-DoublePath::DoublePath()
+PathD::PathD()
 {
   _d = _dnull->ref();
 }
 
-DoublePath::DoublePath(const DoublePath& other)
+PathD::PathD(const PathD& other)
 {
   _d = other._d->ref();
 }
 
-DoublePath::~DoublePath()
+PathD::~PathD()
 {
   _d->deref();
 }
@@ -46,29 +47,29 @@ DoublePath::~DoublePath()
 // [Fog::Path - Implicit Sharing]
 // ============================================================================
 
-Static<DoublePathData> DoublePath::_dnull;
+Static<PathDData> PathD::_dnull;
 
 static FOG_INLINE sysuint_t _getPathDataSize(sysuint_t capacity)
 {
-  sysuint_t s = sizeof(DoublePathData);
+  sysuint_t s = sizeof(PathDData);
 
   s += capacity * sizeof(uint8_t);
-  s += capacity * sizeof(DoublePoint);
+  s += capacity * sizeof(PointD);
 
   return s;
 }
 
-static FOG_INLINE void _updatePathDataPointers(DoublePathData* d, sysuint_t capacity)
+static FOG_INLINE void _updatePathDataPointers(PathDData* d, sysuint_t capacity)
 {
-  d->vertices = reinterpret_cast<DoublePoint*>(
+  d->vertices = reinterpret_cast<PointD*>(
     d->commands + (((capacity + 15) & ~15) * sizeof(uint8_t)));
 }
 
-DoublePathData* DoublePath::_allocData(sysuint_t capacity)
+PathDData* PathD::_allocData(sysuint_t capacity)
 {
   sysuint_t dsize = _getPathDataSize(capacity);
 
-  DoublePathData* d = reinterpret_cast<DoublePathData*>(Memory::alloc(dsize));
+  PathDData* d = reinterpret_cast<PathDData*>(Memory::alloc(dsize));
   if (!d) return NULL;
 
   d->refCount.init(1);
@@ -80,12 +81,12 @@ DoublePathData* DoublePath::_allocData(sysuint_t capacity)
   return d;
 }
 
-DoublePathData* DoublePath::_reallocData(DoublePathData* d, sysuint_t capacity)
+PathDData* PathD::_reallocData(PathDData* d, sysuint_t capacity)
 {
   FOG_ASSERT(d->length <= capacity);
   sysuint_t dsize = _getPathDataSize(capacity);
 
-  DoublePathData* newd = reinterpret_cast<DoublePathData*>(Memory::alloc(dsize));
+  PathDData* newd = reinterpret_cast<PathDData*>(Memory::alloc(dsize));
   if (!newd) return NULL;
 
   sysuint_t length = d->length;
@@ -102,18 +103,18 @@ DoublePathData* DoublePath::_reallocData(DoublePathData* d, sysuint_t capacity)
   _updatePathDataPointers(newd, capacity);
 
   Memory::copy(newd->commands, d->commands, length * sizeof(uint8_t));
-  Memory::copy(newd->vertices, d->vertices, length * sizeof(DoublePoint));
+  Memory::copy(newd->vertices, d->vertices, length * sizeof(PointD));
 
   d->deref();
   return newd;
 }
 
-DoublePathData* DoublePath::_copyData(const DoublePathData* d)
+PathDData* PathD::_copyData(const PathDData* d)
 {
   sysuint_t length = d->length;
   if (!length) return _dnull->ref();
 
-  DoublePathData* newd = _allocData(length);
+  PathDData* newd = _allocData(length);
   if (!newd) return NULL;
 
   newd->length = length;
@@ -124,7 +125,7 @@ DoublePathData* DoublePath::_copyData(const DoublePathData* d)
   newd->boundingBoxMax = d->boundingBoxMax;
 
   Memory::copy(newd->commands, d->commands, length * sizeof(uint8_t));
-  Memory::copy(newd->vertices, d->vertices, length * sizeof(DoublePoint));
+  Memory::copy(newd->vertices, d->vertices, length * sizeof(PointD));
 
   return newd;
 }
@@ -133,7 +134,7 @@ DoublePathData* DoublePath::_copyData(const DoublePathData* d)
 // [Fog::Path - Helpers]
 // ============================================================================
 
-static FOG_INLINE void _relativeToAbsolute(DoublePathData* d, double* x, double* y)
+static FOG_INLINE void _relativeToAbsolute(PathDData* d, double* x, double* y)
 {
   sysuint_t last = d->length;
   if (!last) return;
@@ -143,12 +144,12 @@ static FOG_INLINE void _relativeToAbsolute(DoublePathData* d, double* x, double*
   uint8_t cmd = d->commands[last];
   if (!PathCmd::isVertex(cmd)) return;
 
-  const DoublePoint& pt = d->vertices[last];
+  const PointD& pt = d->vertices[last];
   *x += pt.x;
   *y += pt.y;
 }
 
-static FOG_INLINE void _relativeToAbsolute(DoublePathData* d, double* x0, double* y0, double* x1, double* y1)
+static FOG_INLINE void _relativeToAbsolute(PathDData* d, double* x0, double* y0, double* x1, double* y1)
 {
   sysuint_t last = d->length;
   if (!last) return;
@@ -158,14 +159,14 @@ static FOG_INLINE void _relativeToAbsolute(DoublePathData* d, double* x0, double
   uint8_t cmd = d->commands[last];
   if (!PathCmd::isVertex(cmd)) return;
 
-  const DoublePoint& pt = d->vertices[last];
+  const PointD& pt = d->vertices[last];
   *x0 += pt.x;
   *y0 += pt.y;
   *x1 += pt.x;
   *y1 += pt.y;
 }
 
-static FOG_INLINE void _relativeToAbsolute(DoublePathData* d, double* x0, double* y0, double* x1, double* y1, double* x2, double* y2)
+static FOG_INLINE void _relativeToAbsolute(PathDData* d, double* x0, double* y0, double* x1, double* y1, double* x2, double* y2)
 {
   sysuint_t last = d->length;
   if (!last) return;
@@ -175,7 +176,7 @@ static FOG_INLINE void _relativeToAbsolute(DoublePathData* d, double* x0, double
   uint8_t cmd = d->commands[last];
   if (!PathCmd::isVertex(cmd)) return;
 
-  const DoublePoint& pt = d->vertices[last];
+  const PointD& pt = d->vertices[last];
 
   *x0 += pt.x;
   *y0 += pt.y;
@@ -189,14 +190,14 @@ static FOG_INLINE void _relativeToAbsolute(DoublePathData* d, double* x0, double
 // [Fog::Path - Data]
 // ============================================================================
 
-err_t DoublePath::reserve(sysuint_t capacity)
+err_t PathD::reserve(sysuint_t capacity)
 {
   if (_d->refCount.get() == 1 && _d->capacity >= capacity) return ERR_OK;
 
   sysuint_t length = _d->length;
   if (capacity < length) capacity = length;
 
-  DoublePathData* newd = _allocData(capacity);
+  PathDData* newd = _allocData(capacity);
   if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
   newd->length = length;
@@ -207,33 +208,33 @@ err_t DoublePath::reserve(sysuint_t capacity)
   newd->boundingBoxMax = _d->boundingBoxMax;
 
   Memory::copy(newd->commands, _d->commands, length * sizeof(uint8_t));
-  Memory::copy(newd->vertices, _d->vertices, length * sizeof(DoublePoint));
+  Memory::copy(newd->vertices, _d->vertices, length * sizeof(PointD));
 
   atomicPtrXchg(&_d, newd)->deref();
   return ERR_OK;
 }
 
-void DoublePath::squeeze()
+void PathD::squeeze()
 {
   if (_d->length == _d->capacity) return;
 
   if (_d->refCount.get() == 1)
   {
-    DoublePathData* newd = _reallocData(_d, _d->length);
+    PathDData* newd = _reallocData(_d, _d->length);
     if (!newd) return;
 
     atomicPtrXchg(&_d, newd);
   }
   else
   {
-    DoublePathData* newd = _copyData(_d);
+    PathDData* newd = _copyData(_d);
     if (!newd) return;
 
     atomicPtrXchg(&_d, newd)->deref();
   }
 }
 
-sysuint_t DoublePath::_add(sysuint_t count)
+sysuint_t PathD::_add(sysuint_t count)
 {
   sysuint_t length = _d->length;
   sysuint_t remain = _d->capacity - length;
@@ -246,9 +247,9 @@ sysuint_t DoublePath::_add(sysuint_t count)
   else
   {
     sysuint_t optimalCapacity =
-      Std::calcOptimalCapacity(sizeof(DoublePathData), sizeof(DoublePoint) + sizeof(uint8_t), length, length + count);
+      Std::calcOptimalCapacity(sizeof(PathDData), sizeof(PointD) + sizeof(uint8_t), length, length + count);
 
-    DoublePathData* newd = _allocData(optimalCapacity);
+    PathDData* newd = _allocData(optimalCapacity);
     if (!newd) return INVALID_INDEX;
 
     newd->length = length + count;
@@ -259,25 +260,25 @@ sysuint_t DoublePath::_add(sysuint_t count)
     newd->boundingBoxMax = _d->boundingBoxMax;
 
     Memory::copy(newd->commands, _d->commands, length * sizeof(uint8_t));
-    Memory::copy(newd->vertices, _d->vertices, length * sizeof(DoublePoint));
+    Memory::copy(newd->vertices, _d->vertices, length * sizeof(PointD));
 
     atomicPtrXchg(&_d, newd)->deref();
     return length;
   }
 }
 
-err_t DoublePath::_detach()
+err_t PathD::_detach()
 {
   if (isDetached()) return ERR_OK;
 
-  DoublePathData* newd = _copyData(_d);
+  PathDData* newd = _copyData(_d);
   if (!newd) return ERR_RT_OUT_OF_MEMORY;
 
   atomicPtrXchg(&_d, newd)->deref();
   return ERR_OK;
 }
 
-err_t DoublePath::set(const DoublePath& other)
+err_t PathD::set(const PathD& other)
 {
   if (_d == other._d) return ERR_OK;
 
@@ -285,10 +286,10 @@ err_t DoublePath::set(const DoublePath& other)
   return ERR_OK;
 }
 
-err_t DoublePath::setDeep(const DoublePath& other)
+err_t PathD::setDeep(const PathD& other)
 {
-  DoublePathData* self_d = _d;
-  DoublePathData* other_d = other._d;
+  PathDData* self_d = _d;
+  PathDData* other_d = other._d;
 
   if (self_d == other_d) return ERR_OK;
   if (other_d->length == 0) { clear(); return ERR_OK; }
@@ -307,12 +308,12 @@ err_t DoublePath::setDeep(const DoublePath& other)
   self_d->boundingBoxMax = other_d->boundingBoxMax;
 
   Memory::copy(self_d->commands, other_d->commands, length * sizeof(uint8_t));
-  Memory::copy(self_d->vertices, other_d->vertices, length * sizeof(DoublePoint));
+  Memory::copy(self_d->vertices, other_d->vertices, length * sizeof(PointD));
 
   return ERR_OK;
 }
 
-void DoublePath::clear()
+void PathD::clear()
 {
   if (_d->refCount.get() > 1)
   {
@@ -324,12 +325,12 @@ void DoublePath::clear()
 
     _d->flat = 1;
     _d->boundingBoxDirty = true;
-    _d->boundingBoxMin.clear();
-    _d->boundingBoxMax.clear();
+    _d->boundingBoxMin.reset();
+    _d->boundingBoxMax.reset();
   }
 }
 
-void DoublePath::free()
+void PathD::free()
 {
   atomicPtrXchg(&_d, _dnull->ref())->deref();
 }
@@ -360,7 +361,7 @@ void DoublePath::free()
     { \
       DOUBLE_QUAD_COEFF_AT_T(t, a, b, c) \
       \
-      DoublePoint __p(a * startPoint.x + b * pts[0].x + c * pts[1].x, \
+      PointD __p(a * startPoint.x + b * pts[0].x + c * pts[1].x, \
                       a * startPoint.y + b * pts[0].y + c * pts[1].y); \
       \
       if (__p.x < pMin.x) pMin.x = __p.x; else if (__p.x > pMax.x) pMax.x = __p.x; \
@@ -368,8 +369,8 @@ void DoublePath::free()
     } \
   }
 
-static void DoublePath_calcQuadExtrema(
-  const DoublePoint& startPoint, const DoublePoint* pts, DoublePoint& pMin, DoublePoint& pMax)
+static void PathD_calcQuadExtrema(
+  const PointD& startPoint, const PointD* pts, PointD& pMin, PointD& pMax)
 {
   // Merge end point.
   if (pts[1].x < pMin.x) pMin.x = pts[1].x;
@@ -412,7 +413,7 @@ static void DoublePath_calcQuadExtrema(
     { \
       DOUBLE_CUBIC_COEFF_AT_T(t, a, b, c, d) \
       \
-      DoublePoint __p(a * startPoint.x + b * pts[0].x + c * pts[1].x + d * pts[2].x, \
+      PointD __p(a * startPoint.x + b * pts[0].x + c * pts[1].x + d * pts[2].x, \
                       a * startPoint.y + b * pts[0].y + c * pts[1].y + d * pts[2].y); \
       \
       if (__p.x < pMin.x) pMin.x = __p.x; else if (__p.x > pMax.x) pMax.x = __p.x; \
@@ -420,8 +421,8 @@ static void DoublePath_calcQuadExtrema(
     } \
   }
 
-static void DoublePath_calcCubicExtrema(
-  const DoublePoint& startPoint, const DoublePoint* pts, DoublePoint& pMin, DoublePoint& pMax)
+static void PathD_calcCubicExtrema(
+  const PointD& startPoint, const PointD* pts, PointD& pMin, PointD& pMax)
 {
   // Merge end point.
   if (pts[2].x < pMin.x) pMin.x = pts[2].x;
@@ -479,20 +480,20 @@ static void DoublePath_calcCubicExtrema(
   }
 }
 
-DoubleRect DoublePath::getBoundingRect() const
+RectD PathD::getBoundingRect() const
 {
   if (_d->boundingBoxDirty)
   {
     sysuint_t i = _d->length;
 
     const uint8_t* cmd = _d->commands;
-    const DoublePoint* pts = _d->vertices;
+    const PointD* pts = _d->vertices;
 
     bool first = false;
 
-    DoublePoint pMin(0.0, 0.0);
-    DoublePoint pMax(0.0, 0.0);
-    DoublePoint pLast(0.0, 0.0);
+    PointD pMin(0.0, 0.0);
+    PointD pMax(0.0, 0.0);
+    PointD pLast(0.0, 0.0);
 
     if (i > 0)
     {
@@ -546,7 +547,7 @@ DoubleRect DoublePath::getBoundingRect() const
             FOG_ASSERT(i >= 2);
             if (FOG_UNLIKELY(i < 2)) break;
 
-            DoublePath_calcQuadExtrema(pLast, pts, pMin, pMax);
+            PathD_calcQuadExtrema(pLast, pts, pMin, pMax);
             pLast = pts[1];
 
             i -= 2;
@@ -558,7 +559,7 @@ DoubleRect DoublePath::getBoundingRect() const
             FOG_ASSERT(i >= 3);
             if (FOG_UNLIKELY(i < 3)) break;
 
-            DoublePath_calcCubicExtrema(pLast, pts, pMin, pMax);
+            PathD_calcCubicExtrema(pLast, pts, pMin, pMax);
             pLast = pts[2];
 
             i -= 3;
@@ -568,7 +569,7 @@ DoubleRect DoublePath::getBoundingRect() const
 
           case PATH_CMD_STOP:
           case PATH_CMD_END:
-            pLast.clear();
+            pLast.reset();
 
             i--;
             cmd++;
@@ -583,18 +584,18 @@ DoubleRect DoublePath::getBoundingRect() const
     _d->boundingBoxMax = pMax;
   }
   
-  return DoubleRect(
+  return RectD(
     _d->boundingBoxMin.x,
     _d->boundingBoxMin.y,
     _d->boundingBoxMax.x - _d->boundingBoxMin.x,
     _d->boundingBoxMax.y - _d->boundingBoxMin.y);
 }
 
-err_t DoublePath::fitTo(const DoubleRect& toRect)
+err_t PathD::fitTo(const RectD& toRect)
 {
   if (!toRect.isValid()) return ERR_RT_INVALID_ARGUMENT;
 
-  DoubleRect currentRect = getBoundingRect();
+  RectD currentRect = getBoundingRect();
   if (!currentRect.isValid()) return ERR_OK;
 
   double cx = currentRect.x;
@@ -609,7 +610,7 @@ err_t DoublePath::fitTo(const DoubleRect& toRect)
   FOG_RETURN_ON_ERROR(detach());
 
   sysuint_t i, length = _d->length;
-  DoublePoint* pts = _d->vertices;
+  PointD* pts = _d->vertices;
 
   for (i = 0; i < length; i++, pts++)
   {
@@ -629,7 +630,7 @@ err_t DoublePath::fitTo(const DoubleRect& toRect)
 // [Fog::Path - SubPath]
 // ============================================================================
 
-sysuint_t DoublePath::getSubPathLength(sysuint_t subPathId) const
+sysuint_t PathD::getSubPathLength(sysuint_t subPathId) const
 {
   sysuint_t length = _d->length;
   if (subPathId >= length) return 0;
@@ -637,7 +638,7 @@ sysuint_t DoublePath::getSubPathLength(sysuint_t subPathId) const
   sysuint_t i = length - subPathId;
 
   const uint8_t* commands = _d->commands + subPathId;
-  const DoublePoint* vertices = _d->vertices + subPathId;
+  const PointD* vertices = _d->vertices + subPathId;
 
   do {
     if (PathCmd::isMoveTo(commands[0])) break;
@@ -653,7 +654,7 @@ sysuint_t DoublePath::getSubPathLength(sysuint_t subPathId) const
 // [Fog::Path - Start / End]
 // ============================================================================
 
-err_t DoublePath::start(sysuint_t* index)
+err_t PathD::start(sysuint_t* index)
 {
   if (_d->length && !PathCmd::isStop(_d->commands[_d->length-1]))
   {
@@ -661,7 +662,7 @@ err_t DoublePath::start(sysuint_t* index)
     if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
     uint8_t* commands = _d->commands + pos;
-    DoublePoint* vertices = _d->vertices + pos;
+    PointD* vertices = _d->vertices + pos;
 
     commands[0] = PATH_CMD_STOP;
     vertices[0].set(NAN, NAN);
@@ -671,7 +672,7 @@ err_t DoublePath::start(sysuint_t* index)
   return ERR_OK;
 }
 
-err_t DoublePath::endPoly(uint32_t flags)
+err_t PathD::endPoly(uint32_t flags)
 {
   if (_d->length && PathCmd::isVertex(_d->commands[_d->length-1]))
   {
@@ -679,7 +680,7 @@ err_t DoublePath::endPoly(uint32_t flags)
     if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
     uint8_t* commands = _d->commands + pos;
-    DoublePoint* vertices = _d->vertices + pos;
+    PointD* vertices = _d->vertices + pos;
 
     commands[0] = PATH_CMD_END | flags;
     vertices[0].set(NAN, NAN);
@@ -688,7 +689,7 @@ err_t DoublePath::endPoly(uint32_t flags)
   return ERR_OK;
 }
 
-err_t DoublePath::closePolygon(uint32_t flags)
+err_t PathD::closePolygon(uint32_t flags)
 {
   return endPoly(flags | PATH_CMD_FLAG_CLOSE);
 }
@@ -697,13 +698,13 @@ err_t DoublePath::closePolygon(uint32_t flags)
 // [Fog::Path - MoveTo]
 // ============================================================================
 
-err_t DoublePath::moveTo(double x, double y)
+err_t PathD::moveTo(double x, double y)
 {
   sysuint_t pos = _add(1);
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
   uint8_t* commands = _d->commands + pos;
-  DoublePoint* vertices = _d->vertices + pos;
+  PointD* vertices = _d->vertices + pos;
 
   commands[0] = PATH_CMD_MOVE_TO;
   vertices[0].set(x, y);
@@ -714,7 +715,7 @@ err_t DoublePath::moveTo(double x, double y)
   return ERR_OK;
 }
 
-err_t DoublePath::moveRel(double dx, double dy)
+err_t PathD::moveRel(double dx, double dy)
 {
   _relativeToAbsolute(_d, &dx, &dy);
   return moveTo(dx, dy);
@@ -724,13 +725,13 @@ err_t DoublePath::moveRel(double dx, double dy)
 // [Fog::Path - LineTo]
 // ============================================================================
 
-err_t DoublePath::lineTo(double x, double y)
+err_t PathD::lineTo(double x, double y)
 {
   sysuint_t pos = _add(1);
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
   uint8_t* commands = _d->commands + pos;
-  DoublePoint* vertices = _d->vertices + pos;
+  PointD* vertices = _d->vertices + pos;
 
   commands[0] = PATH_CMD_LINE_TO;
   vertices[0].set(x, y);
@@ -741,19 +742,19 @@ err_t DoublePath::lineTo(double x, double y)
   return ERR_OK;
 }
 
-err_t DoublePath::lineRel(double dx, double dy)
+err_t PathD::lineRel(double dx, double dy)
 {
   _relativeToAbsolute(_d, &dx, &dy);
   return lineTo(dx, dy);
 }
 
-err_t DoublePath::lineTo(const double* x, const double* y, sysuint_t count)
+err_t PathD::lineTo(const double* x, const double* y, sysuint_t count)
 {
   sysuint_t pos = _add(count);
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
   uint8_t* commands = _d->commands + pos;
-  DoublePoint* vertices = _d->vertices + pos;
+  PointD* vertices = _d->vertices + pos;
 
   for (sysuint_t i = 0; i < count; i++)
   {
@@ -767,13 +768,13 @@ err_t DoublePath::lineTo(const double* x, const double* y, sysuint_t count)
   return ERR_OK;
 }
 
-err_t DoublePath::lineTo(const DoublePoint* pts, sysuint_t count)
+err_t PathD::lineTo(const PointD* pts, sysuint_t count)
 {
   sysuint_t pos = _add(count);
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
   uint8_t* commands = _d->commands + pos;
-  DoublePoint* vertices = _d->vertices + pos;
+  PointD* vertices = _d->vertices + pos;
 
   for (sysuint_t i = 0; i < count; i++)
   {
@@ -787,7 +788,7 @@ err_t DoublePath::lineTo(const DoublePoint* pts, sysuint_t count)
   return ERR_OK;
 }
 
-err_t DoublePath::hlineTo(double x)
+err_t PathD::hlineTo(double x)
 {
   sysuint_t last = _d->length;
 
@@ -797,7 +798,7 @@ err_t DoublePath::hlineTo(double x)
   return lineTo(x, y);
 }
 
-err_t DoublePath::hlineRel(double dx)
+err_t PathD::hlineRel(double dx)
 {
   double dy = 0.0;
   _relativeToAbsolute(_d, &dx, &dy);
@@ -805,7 +806,7 @@ err_t DoublePath::hlineRel(double dx)
   return lineTo(dx, dy);
 }
 
-err_t DoublePath::vlineTo(double y)
+err_t PathD::vlineTo(double y)
 {
   sysuint_t last = _d->length;
 
@@ -815,7 +816,7 @@ err_t DoublePath::vlineTo(double y)
   return lineTo(x, y);
 }
 
-err_t DoublePath::vlineRel(double dy)
+err_t PathD::vlineRel(double dy)
 {
   double dx = 0.0;
   _relativeToAbsolute(_d, &dx, &dy);
@@ -832,7 +833,7 @@ static void _arcToBezier(
   double rx, double ry,
   double start,
   double sweep,
-  DoublePoint* dst)
+  PointD* dst)
 {
   sweep *= 0.5;
 
@@ -865,12 +866,12 @@ static void _arcToBezier(
   }
 }
 
-err_t DoublePath::_arcTo(double cx, double cy, double rx, double ry, double start, double sweep, uint8_t initialCommand, bool closePath)
+err_t PathD::_arcTo(double cx, double cy, double rx, double ry, double start, double sweep, uint8_t initialCommand, bool closePath)
 {
-  start = fmod(start, 2.0 * M_PI);
+  start = fmod(start, 2.0 * MATH_PI);
 
-  if (sweep >=  2.0 * M_PI) sweep =  2.0 * M_PI;
-  if (sweep <= -2.0 * M_PI) sweep = -2.0 * M_PI;
+  if (sweep >=  2.0 * MATH_PI) sweep =  2.0 * MATH_PI;
+  if (sweep <= -2.0 * MATH_PI) sweep = -2.0 * MATH_PI;
 
   // Degenerated.
   if (fabs(sweep) < 1e-10)
@@ -879,7 +880,7 @@ err_t DoublePath::_arcTo(double cx, double cy, double rx, double ry, double star
     if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
     uint8_t* commands = _d->commands + pos;
-    DoublePoint* vertices = _d->vertices + pos;
+    PointD* vertices = _d->vertices + pos;
 
     double aSin;
     double aCos;
@@ -898,7 +899,7 @@ err_t DoublePath::_arcTo(double cx, double cy, double rx, double ry, double star
     if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
     uint8_t* commands = _d->commands + pos;
-    DoublePoint* vertices = _d->vertices + pos;
+    PointD* vertices = _d->vertices + pos;
 
     double totalSweep = 0.0;
     double localSweep = 0.0;
@@ -917,10 +918,10 @@ err_t DoublePath::_arcTo(double cx, double cy, double rx, double ry, double star
       if (sweep < 0.0)
       {
         prevSweep   = totalSweep;
-        localSweep  = -M_PI * 0.5;
-        totalSweep -=  M_PI * 0.5;
+        localSweep  = -MATH_PI * 0.5;
+        totalSweep -=  MATH_PI * 0.5;
 
-        if (totalSweep <= sweep + PathUtil::BEZIER_ARC_ANGLE_EPSILON)
+        if (totalSweep <= sweep + CURVE_ARC_ANGLE_EPSILON_D)
         {
           localSweep = sweep - prevSweep;
           done = true;
@@ -929,10 +930,10 @@ err_t DoublePath::_arcTo(double cx, double cy, double rx, double ry, double star
       else
       {
         prevSweep   = totalSweep;
-        localSweep  = M_PI * 0.5;
-        totalSweep += M_PI * 0.5;
+        localSweep  = MATH_PI * 0.5;
+        totalSweep += MATH_PI * 0.5;
 
-        if (totalSweep >= sweep - PathUtil::BEZIER_ARC_ANGLE_EPSILON)
+        if (totalSweep >= sweep - CURVE_ARC_ANGLE_EPSILON_D)
         {
           localSweep = sweep - prevSweep;
           done = true;
@@ -962,7 +963,7 @@ err_t DoublePath::_arcTo(double cx, double cy, double rx, double ry, double star
   return ERR_OK;
 }
 
-err_t DoublePath::_svgArcTo(
+err_t PathD::_svgArcTo(
   double rx, double ry,
   double angle,
   bool largeArcFlag,
@@ -982,7 +983,7 @@ err_t DoublePath::_svgArcTo(
     uint8_t cmd = _d->commands[mark - 1];
     if (PathCmd::isVertex(cmd))
     {
-      const DoublePoint* vertex = _d->vertices + mark - 1;
+      const PointD* vertex = _d->vertices + mark - 1;
       x0 = vertex[0].x;
       y0 = vertex[0].y;
 
@@ -1059,7 +1060,7 @@ err_t DoublePath::_svgArcTo(
   double v = p / n;
   if (v < -1.0) v = -1.0;
   if (v >  1.0) v =  1.0;
-  double startAngle = sign * acos(v);
+  double startAngle = sign * Math::acos(v);
 
   // Calculate the sweep angle.
   n = Math::sqrt((ux*ux + uy*uy) * (vx*vx + vy*vy));
@@ -1068,12 +1069,12 @@ err_t DoublePath::_svgArcTo(
   v = p / n;
   if (v < -1.0) v = -1.0;
   if (v >  1.0) v =  1.0;
-  double sweepAngle = sign * acos(v);
+  double sweepAngle = sign * Math::acos(v);
 
   if (!sweepFlag && sweepAngle > 0)
-    sweepAngle -= M_PI * 2.0;
+    sweepAngle -= MATH_PI * 2.0;
   else if (sweepFlag && sweepAngle < 0)
-    sweepAngle += M_PI * 2.0;
+    sweepAngle += MATH_PI * 2.0;
 
   err_t err = _arcTo(0.0, 0.0, rx, ry, startAngle, sweepAngle, initialCommand, false);
   if (err) return err;
@@ -1084,15 +1085,17 @@ err_t DoublePath::_svgArcTo(
 
   // We can now build and transform the resulting arc.
   {
-    DoubleMatrix matrix = DoubleMatrix::fromRotation(angle);
-    matrix.translate(cx, cy, MATRIX_APPEND);
-    PathUtil::transformPoints(_d->vertices + mark, _d->length - mark, &matrix);
+    TransformD transform = TransformD::fromRotation(angle);
+    transform.translate(cx, cy, MATRIX_ORDER_APPEND);
+
+    PointD* pts = _d->vertices + mark;
+    _g2d.transformd.mapPointsD[TRANSFORM_TYPE_AFFINE](transform, pts, pts, _d->length - mark);
   }
 
   // We must make sure that the starting and ending points exactly coincide
   // with the initial (x0, y0) and (x2, y2).
   {
-    DoublePoint* vertex = _d->vertices;
+    PointD* vertex = _d->vertices;
     vertex[mark].x = x0;
     vertex[mark].y = y0;
     vertex[_d->length - 1].x = x2;
@@ -1106,18 +1109,18 @@ err_t DoublePath::_svgArcTo(
   return err;
 }
 
-err_t DoublePath::arcTo(double cx, double cy, double rx, double ry, double start, double sweep)
+err_t PathD::arcTo(double cx, double cy, double rx, double ry, double start, double sweep)
 {
   return _arcTo(cx, cy, rx, ry, start, sweep, PATH_CMD_LINE_TO, false);
 }
 
-err_t DoublePath::arcRel(double cx, double cy, double rx, double ry, double start, double sweep)
+err_t PathD::arcRel(double cx, double cy, double rx, double ry, double start, double sweep)
 {
   _relativeToAbsolute(_d, &cx, &cy);
   return _arcTo(cx, cy, rx, ry, start, sweep, PATH_CMD_LINE_TO, false);
 }
 
-err_t DoublePath::svgArcTo(
+err_t PathD::svgArcTo(
   double rx, double ry,
   double angle,
   bool largeArcFlag,
@@ -1127,7 +1130,7 @@ err_t DoublePath::svgArcTo(
   return _svgArcTo(rx, ry, angle, largeArcFlag, sweepFlag, x2, y2, PATH_CMD_LINE_TO, false);
 }
 
-err_t DoublePath::svgArcRel(
+err_t PathD::svgArcRel(
   double rx, double ry,
   double angle,
   bool largeArcFlag,
@@ -1142,13 +1145,13 @@ err_t DoublePath::svgArcRel(
 // [Fog::Path - CurveTo]
 // ============================================================================
 
-err_t DoublePath::curveTo(double cx, double cy, double tx, double ty)
+err_t PathD::curveTo(double cx, double cy, double tx, double ty)
 {
   sysuint_t pos = _add(2);
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
   uint8_t* commands = _d->commands + pos;
-  DoublePoint* vertices = _d->vertices + pos;
+  PointD* vertices = _d->vertices + pos;
 
   commands[0] = PATH_CMD_CURVE_3;
   commands[1] = PATH_CMD_CURVE_3;
@@ -1164,18 +1167,18 @@ err_t DoublePath::curveTo(double cx, double cy, double tx, double ty)
   return ERR_OK;
 }
 
-err_t DoublePath::curveRel(double cx, double cy, double tx, double ty)
+err_t PathD::curveRel(double cx, double cy, double tx, double ty)
 {
   _relativeToAbsolute(_d, &cx, &cy, &tx, &ty);
   return curveTo(cx, cy, tx, ty);
 }
 
-err_t DoublePath::curveTo(double tx, double ty)
+err_t PathD::curveTo(double tx, double ty)
 {
   sysuint_t length = _d->length;
   if (!length || !PathCmd::isVertex(_d->commands[--length])) return ERR_OK;
 
-  const DoublePoint* vertex = _d->vertices + length;
+  const PointD* vertex = _d->vertices + length;
 
   double cx = vertex[0].x;
   double cy = vertex[0].y;
@@ -1191,7 +1194,7 @@ err_t DoublePath::curveTo(double tx, double ty)
   return curveTo(cx, cy, tx, ty);
 }
 
-err_t DoublePath::curveRel(double tx, double ty)
+err_t PathD::curveRel(double tx, double ty)
 {
   _relativeToAbsolute(_d, &tx, &ty);
   return curveTo(tx, ty);
@@ -1201,13 +1204,13 @@ err_t DoublePath::curveRel(double tx, double ty)
 // [Fog::Path - CubicTo]
 // ============================================================================
 
-err_t DoublePath::cubicTo(double cx1, double cy1, double cx2, double cy2, double tx, double ty)
+err_t PathD::cubicTo(double cx1, double cy1, double cx2, double cy2, double tx, double ty)
 {
   sysuint_t pos = _add(3);
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
   uint8_t* commands = _d->commands + pos;
-  DoublePoint* vertices = _d->vertices + pos;
+  PointD* vertices = _d->vertices + pos;
 
   commands[0] = PATH_CMD_CURVE_4;
   commands[1] = PATH_CMD_CURVE_4;
@@ -1225,18 +1228,18 @@ err_t DoublePath::cubicTo(double cx1, double cy1, double cx2, double cy2, double
   return ERR_OK;
 }
 
-err_t DoublePath::cubicRel(double cx1, double cy1, double cx2, double cy2, double tx, double ty)
+err_t PathD::cubicRel(double cx1, double cy1, double cx2, double cy2, double tx, double ty)
 {
   _relativeToAbsolute(_d, &cx1, &cy1, &cx2, &cy2, &tx, &ty);
   return cubicTo(cx1, cy1, cx2, cy2, tx, ty);
 }
 
-err_t DoublePath::cubicTo(double cx2, double cy2, double tx, double ty)
+err_t PathD::cubicTo(double cx2, double cy2, double tx, double ty)
 {
   sysuint_t length = _d->length;
   if (!length || !PathCmd::isVertex(_d->commands[--length])) return ERR_OK;
 
-  const DoublePoint* vertex = _d->vertices + length;
+  const PointD* vertex = _d->vertices + length;
 
   double cx1 = vertex[0].x;
   double cy1 = vertex[0].y;
@@ -1252,7 +1255,7 @@ err_t DoublePath::cubicTo(double cx2, double cy2, double tx, double ty)
   return cubicTo(cx1, cy1, cx2, cy2, tx, ty);
 }
 
-err_t DoublePath::cubicRel(double cx2, double cy2, double tx, double ty)
+err_t PathD::cubicRel(double cx2, double cy2, double tx, double ty)
 {
   _relativeToAbsolute(_d, &cx2, &cy2, &tx, &ty);
   return cubicTo(cx2, cy2, tx, ty);
@@ -1262,7 +1265,7 @@ err_t DoublePath::cubicRel(double cx2, double cy2, double tx, double ty)
 // [Fog::Path - FlipX / FlipY]
 // ============================================================================
 
-err_t DoublePath::flipX(double x1, double x2)
+err_t PathD::flipX(double x1, double x2)
 {
   sysuint_t i = _d->length;
   if (!i) return ERR_OK;
@@ -1270,7 +1273,7 @@ err_t DoublePath::flipX(double x1, double x2)
   FOG_RETURN_ON_ERROR(detach());
 
   double x = x1 + x2;
-  DoublePoint* vertices = _d->vertices;
+  PointD* vertices = _d->vertices;
 
   do {
     vertices[0].x = x - vertices[0].x;
@@ -1290,7 +1293,7 @@ err_t DoublePath::flipX(double x1, double x2)
   return ERR_OK;
 }
 
-err_t DoublePath::flipY(double y1, double y2)
+err_t PathD::flipY(double y1, double y2)
 {
   sysuint_t i = _d->length;
   if (!i) return ERR_OK;
@@ -1298,7 +1301,7 @@ err_t DoublePath::flipY(double y1, double y2)
   FOG_RETURN_ON_ERROR(detach());
 
   double y = y1 + y2;
-  DoublePoint* vertices = _d->vertices;
+  PointD* vertices = _d->vertices;
 
   do {
     vertices[0].y = y - vertices[0].y;
@@ -1322,14 +1325,14 @@ err_t DoublePath::flipY(double y1, double y2)
 // [Fog::Path - Translate]
 // ============================================================================
 
-err_t DoublePath::translate(double dx, double dy)
+err_t PathD::translate(double dx, double dy)
 {
   sysuint_t i = _d->length;
   if (!i) return ERR_OK;
 
   FOG_RETURN_ON_ERROR(detach());
 
-  DoublePoint* vertices = _d->vertices;
+  PointD* vertices = _d->vertices;
 
   do {
     vertices[0].translate(dx, dy);
@@ -1345,7 +1348,7 @@ err_t DoublePath::translate(double dx, double dy)
   return ERR_OK;
 }
 
-err_t DoublePath::translateSubPath(sysuint_t subPathId, double dx, double dy)
+err_t PathD::translateSubPath(sysuint_t subPathId, double dx, double dy)
 {
   if (subPathId >= _d->length) return ERR_RT_INVALID_ARGUMENT;
 
@@ -1355,7 +1358,7 @@ err_t DoublePath::translateSubPath(sysuint_t subPathId, double dx, double dy)
   FOG_RETURN_ON_ERROR(detach());
 
   uint8_t* commands = _d->commands;
-  DoublePoint* vertices = _d->vertices;
+  PointD* vertices = _d->vertices;
 
   do {
     if (PathCmd::isStop(commands[0])) break;
@@ -1375,14 +1378,14 @@ err_t DoublePath::translateSubPath(sysuint_t subPathId, double dx, double dy)
 // [Fog::Path - Scale]
 // ============================================================================
 
-err_t DoublePath::scale(double sx, double sy, bool keepStartPos)
+err_t PathD::scale(double sx, double sy, bool keepStartPos)
 {
   sysuint_t i = _d->length;
   if (!i) return ERR_OK;
 
   FOG_RETURN_ON_ERROR(detach());
 
-  DoublePoint* vertices = _d->vertices;
+  PointD* vertices = _d->vertices;
 
   if (keepStartPos)
   {
@@ -1412,8 +1415,8 @@ err_t DoublePath::scale(double sx, double sy, bool keepStartPos)
 
     if (!_d->boundingBoxDirty)
     {
-      DoublePoint& bMin = _d->boundingBoxMin;
-      DoublePoint& bMax = _d->boundingBoxMin;
+      PointD& bMin = _d->boundingBoxMin;
+      PointD& bMax = _d->boundingBoxMin;
 
       bMin.x *= sx;
       bMin.y *= sy;
@@ -1439,8 +1442,8 @@ err_t DoublePath::scale(double sx, double sy, bool keepStartPos)
 
     if (!_d->boundingBoxDirty)
     {
-      DoublePoint& bMin = _d->boundingBoxMin;
-      DoublePoint& bMax = _d->boundingBoxMin;
+      PointD& bMin = _d->boundingBoxMin;
+      PointD& bMax = _d->boundingBoxMin;
 
       bMin.x *= sx;
       bMin.y *= sy;
@@ -1460,13 +1463,15 @@ err_t DoublePath::scale(double sx, double sy, bool keepStartPos)
 // [Fog::Path - ApplyMatrix]
 // ============================================================================
 
-err_t DoublePath::applyMatrix(const DoubleMatrix& matrix)
+err_t PathD::applyMatrix(const TransformD& transform)
 {
   if (!_d->length) return ERR_OK;
 
-  FOG_RETURN_ON_ERROR(detach());
+  uint32_t transformType = transform.getType();
+  if (transformType == TRANSFORM_TYPE_IDENTITY) return ERR_OK;
 
-  PathUtil::transformPoints(_d->vertices, _d->length, &matrix);
+  FOG_RETURN_ON_ERROR(detach());
+  _g2d.transformd.mapPointsD[transformType](transform, _d->vertices, _d->vertices, _d->length);
 
   // Bounding box is no longer valid.
   _d->boundingBoxDirty = true;
@@ -1474,7 +1479,7 @@ err_t DoublePath::applyMatrix(const DoubleMatrix& matrix)
   return ERR_OK;
 }
 
-err_t DoublePath::applyMatrix(const DoubleMatrix& matrix, const Range& range)
+err_t PathD::applyMatrix(const TransformD& transform, const Range& range)
 {
   sysuint_t length = _d->length;
 
@@ -1484,8 +1489,13 @@ err_t DoublePath::applyMatrix(const DoubleMatrix& matrix, const Range& range)
   if (rend > length) rend = length;
   if (rstart >= rend) return ERR_OK;
 
+  uint32_t transformType = transform.getType();
+  if (transformType == TRANSFORM_TYPE_IDENTITY) return ERR_OK;
+
   FOG_RETURN_ON_ERROR(detach());
-  PathUtil::transformPoints(_d->vertices + range.getStart(), rend - rstart, &matrix);
+
+  PointD* pts = _d->vertices + range.getStart();
+  _g2d.transformd.mapPointsD[transformType](transform, pts, pts, rend - rstart);
 
   // Bounding box is no longer valid.
   _d->boundingBoxDirty = true;
@@ -1497,12 +1507,12 @@ err_t DoublePath::applyMatrix(const DoubleMatrix& matrix, const Range& range)
 // [Fog::Path - Add]
 // ============================================================================
 
-err_t DoublePath::addRect(const IntRect& r, uint32_t direction)
+err_t PathD::addRect(const RectI& r, uint32_t direction)
 {
-  return addRect(DoubleRect(r.x, r.y, r.w, r.h), direction);
+  return addRect(RectD(r.x, r.y, r.w, r.h), direction);
 }
 
-err_t DoublePath::addRect(const DoubleRect& r, uint32_t direction)
+err_t PathD::addRect(const RectD& r, uint32_t direction)
 {
   if (!r.isValid()) return ERR_OK;
 
@@ -1510,7 +1520,7 @@ err_t DoublePath::addRect(const DoubleRect& r, uint32_t direction)
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
   uint8_t* commands = _d->commands + pos;
-  DoublePoint* vertices = _d->vertices + pos;
+  PointD* vertices = _d->vertices + pos;
 
   double x0 = r.x;
   double y0 = r.y;
@@ -1568,13 +1578,13 @@ err_t DoublePath::addRect(const DoubleRect& r, uint32_t direction)
   return ERR_OK;
 }
 
-static err_t DoublePath_addPoly(DoublePath* path, const IntPoint* pts, sysuint_t count, bool closePath)
+static err_t PathD_addPoly(PathD* path, const PointI* pts, sysuint_t count, bool closePath)
 {
   sysuint_t pos = path->_add(count + closePath);
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
   uint8_t* commands = path->_d->commands + pos;
-  DoublePoint* vertices = path->_d->vertices + pos;
+  PointD* vertices = path->_d->vertices + pos;
 
   commands[0] = PATH_CMD_MOVE_TO;
   memset(&commands[1], PATH_CMD_LINE_TO, count - 1);
@@ -1593,13 +1603,13 @@ static err_t DoublePath_addPoly(DoublePath* path, const IntPoint* pts, sysuint_t
   return ERR_OK;
 }
 
-static err_t DoublePath_addPoly(DoublePath* path, const DoublePoint* pts, sysuint_t count, bool closePath)
+static err_t PathD_addPoly(PathD* path, const PointD* pts, sysuint_t count, bool closePath)
 {
   sysuint_t pos = path->_add(count + closePath);
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
   uint8_t* commands = path->_d->commands + pos;
-  DoublePoint* vertices = path->_d->vertices + pos;
+  PointD* vertices = path->_d->vertices + pos;
 
   commands[0] = PATH_CMD_MOVE_TO;
   memset(&commands[1], PATH_CMD_LINE_TO, count - 1);
@@ -1621,36 +1631,36 @@ static err_t DoublePath_addPoly(DoublePath* path, const DoublePoint* pts, sysuin
   return ERR_OK;
 }
 
-err_t DoublePath::addPolygon(const IntPoint* pts, sysuint_t count)
+err_t PathD::addPolygon(const PointI* pts, sysuint_t count)
 {
   if (count < 3 || pts == NULL) return ERR_RT_INVALID_ARGUMENT;
-  return DoublePath_addPoly(this, pts, count, true);
+  return PathD_addPoly(this, pts, count, true);
 }
 
-err_t DoublePath::addPolygon(const DoublePoint* pts, sysuint_t count)
+err_t PathD::addPolygon(const PointD* pts, sysuint_t count)
 {
   if (count < 3 || pts == NULL) return ERR_RT_INVALID_ARGUMENT;
-  return DoublePath_addPoly(this, pts, count, true);
+  return PathD_addPoly(this, pts, count, true);
 }
 
-err_t DoublePath::addPolyLine(const IntPoint* pts, sysuint_t count)
+err_t PathD::addPolyLine(const PointI* pts, sysuint_t count)
 {
   if (count < 2) return ERR_RT_INVALID_ARGUMENT;
-  return DoublePath_addPoly(this, pts, count, false);
+  return PathD_addPoly(this, pts, count, false);
 }
 
-err_t DoublePath::addPolyLine(const DoublePoint* pts, sysuint_t count)
+err_t PathD::addPolyLine(const PointD* pts, sysuint_t count)
 {
   if (count < 2) return ERR_RT_INVALID_ARGUMENT;
-  return DoublePath_addPoly(this, pts, count, false);
+  return PathD_addPoly(this, pts, count, false);
 }
 
-err_t DoublePath::addRegion(const Region& r, uint32_t direction)
+err_t PathD::addRegion(const Region& r, uint32_t direction)
 {
   return addRects(r.getData(), r.getLength(), direction);
 }
 
-err_t DoublePath::addRects(const IntRect* r, sysuint_t count, uint32_t direction)
+err_t PathD::addRects(const RectI* r, sysuint_t count, uint32_t direction)
 {
   if (!count) return ERR_OK;
   FOG_ASSERT(r);
@@ -1659,7 +1669,7 @@ err_t DoublePath::addRects(const IntRect* r, sysuint_t count, uint32_t direction
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
   uint8_t* commands = _d->commands + pos;
-  DoublePoint* vertices = _d->vertices + pos;
+  PointD* vertices = _d->vertices + pos;
 
   if (direction == PATH_DIRECTION_CW)
   {
@@ -1721,7 +1731,7 @@ err_t DoublePath::addRects(const IntRect* r, sysuint_t count, uint32_t direction
   return ERR_OK;
 }
 
-err_t DoublePath::addRects(const IntBox* r, sysuint_t count, uint32_t direction)
+err_t PathD::addRects(const BoxI* r, sysuint_t count, uint32_t direction)
 {
   if (!count) return ERR_OK;
   FOG_ASSERT(r);
@@ -1730,7 +1740,7 @@ err_t DoublePath::addRects(const IntBox* r, sysuint_t count, uint32_t direction)
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
   uint8_t* commands = _d->commands + pos;
-  DoublePoint* vertices = _d->vertices + pos;
+  PointD* vertices = _d->vertices + pos;
 
   if (direction == PATH_DIRECTION_CW)
   {
@@ -1792,7 +1802,7 @@ err_t DoublePath::addRects(const IntBox* r, sysuint_t count, uint32_t direction)
   return ERR_OK;
 }
 
-err_t DoublePath::addRects(const DoubleRect* r, sysuint_t count, uint32_t direction)
+err_t PathD::addRects(const RectD* r, sysuint_t count, uint32_t direction)
 {
   if (!count) return ERR_OK;
   FOG_ASSERT(r);
@@ -1801,7 +1811,7 @@ err_t DoublePath::addRects(const DoubleRect* r, sysuint_t count, uint32_t direct
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
   uint8_t* commands = _d->commands + pos;
-  DoublePoint* vertices = _d->vertices + pos;
+  PointD* vertices = _d->vertices + pos;
 
   if (direction == PATH_DIRECTION_CW)
   {
@@ -1863,7 +1873,7 @@ err_t DoublePath::addRects(const DoubleRect* r, sysuint_t count, uint32_t direct
   return ERR_OK;
 }
 
-err_t DoublePath::addRound(const DoubleRect& r, const DoublePoint& radius, uint32_t direction)
+err_t PathD::addRound(const RectD& r, const PointD& radius, uint32_t direction)
 {
   if (!r.isValid()) return ERR_OK;
 
@@ -1890,31 +1900,31 @@ err_t DoublePath::addRound(const DoubleRect& r, const DoublePoint& radius, uint3
     err |= moveTo(x0 + rx, y0);
 
     err |= lineTo(x1 - rx, y0);
-    err |= arcTo(x1 - rx, y0 + ry, rx, ry, M_PI * 1.5, M_PI * 0.5);
+    err |= arcTo(x1 - rx, y0 + ry, rx, ry, MATH_PI * 1.5, MATH_PI * 0.5);
 
     err |= lineTo(x1, y1 - ry);
-    err |= arcTo(x1 - rx, y1 - ry, rx, ry, M_PI * 0.0, M_PI * 0.5);
+    err |= arcTo(x1 - rx, y1 - ry, rx, ry, MATH_PI * 0.0, MATH_PI * 0.5);
 
     err |= lineTo(x0 + rx, y1);
-    err |= arcTo(x0 + rx, y1 - ry, rx, ry, M_PI * 0.5, M_PI * 0.5);
+    err |= arcTo(x0 + rx, y1 - ry, rx, ry, MATH_PI * 0.5, MATH_PI * 0.5);
 
     err |= lineTo(x0, y0 + ry);
-    err |= arcTo(x0 + rx, y0 + ry, rx, ry, M_PI * 1.0, M_PI * 0.5);
+    err |= arcTo(x0 + rx, y0 + ry, rx, ry, MATH_PI * 1.0, MATH_PI * 0.5);
   }
   else
   {
     err |= moveTo(x0 + rx, y0);
 
-    err |= arcTo(x0 + rx, y0 + ry, rx, ry, M_PI * 1.5, M_PI * -0.5);
+    err |= arcTo(x0 + rx, y0 + ry, rx, ry, MATH_PI * 1.5, MATH_PI * -0.5);
     err |= lineTo(x0, y1 - ry);
 
-    err |= arcTo(x0 + rx, y1 - ry, rx, ry, M_PI * 1.0, M_PI * -0.5);
+    err |= arcTo(x0 + rx, y1 - ry, rx, ry, MATH_PI * 1.0, MATH_PI * -0.5);
     err |= lineTo(x1 - rx, y1);
 
-    err |= arcTo(x1 - rx, y1 - ry, rx, ry, M_PI * 0.5, M_PI * -0.5);
+    err |= arcTo(x1 - rx, y1 - ry, rx, ry, MATH_PI * 0.5, MATH_PI * -0.5);
     err |= lineTo(x1, y0 + ry);
 
-    err |= arcTo(x1 - rx, y0 + ry, rx, ry, M_PI * 0.0, M_PI * -0.5);
+    err |= arcTo(x1 - rx, y0 + ry, rx, ry, MATH_PI * 0.0, MATH_PI * -0.5);
   }
 
   err |= closePolygon();
@@ -1932,7 +1942,7 @@ err_t DoublePath::addRound(const DoubleRect& r, const DoublePoint& radius, uint3
   return err;
 }
 
-err_t DoublePath::addEllipse(const DoubleRect& r, uint32_t direction)
+err_t PathD::addEllipse(const RectD& r, uint32_t direction)
 {
   if (!r.isValid()) return ERR_OK;
 
@@ -1943,27 +1953,27 @@ err_t DoublePath::addEllipse(const DoubleRect& r, uint32_t direction)
 
   if (direction == PATH_DIRECTION_CW)
   {
-    return _arcTo(cx, cy, rx, ry, 0.0, M_PI * 2.0, PATH_CMD_MOVE_TO, true);
+    return _arcTo(cx, cy, rx, ry, 0.0, MATH_PI * 2.0, PATH_CMD_MOVE_TO, true);
   }
   else
   {
-    return _arcTo(cx, cy, rx, ry, 0.0, M_PI * -2.0, PATH_CMD_MOVE_TO, true);
+    return _arcTo(cx, cy, rx, ry, 0.0, MATH_PI * -2.0, PATH_CMD_MOVE_TO, true);
   }
 }
 
-err_t DoublePath::addEllipse(const DoublePoint& cp, const DoublePoint& r, uint32_t direction)
+err_t PathD::addEllipse(const PointD& cp, const PointD& r, uint32_t direction)
 {
   if (direction == PATH_DIRECTION_CW)
   {
-    return _arcTo(cp.x, cp.y, r.x, r.y, 0.0, M_PI * 2.0, PATH_CMD_MOVE_TO, true);
+    return _arcTo(cp.x, cp.y, r.x, r.y, 0.0, MATH_PI * 2.0, PATH_CMD_MOVE_TO, true);
   }
   else
   {
-    return _arcTo(cp.x, cp.y, r.x, r.y, 0.0, M_PI * -2.0, PATH_CMD_MOVE_TO, true);
+    return _arcTo(cp.x, cp.y, r.x, r.y, 0.0, MATH_PI * -2.0, PATH_CMD_MOVE_TO, true);
   }
 }
 
-err_t DoublePath::addArc(const DoubleRect& r, double start, double sweep, uint32_t direction)
+err_t PathD::addArc(const RectD& r, double start, double sweep, uint32_t direction)
 {
   if (!r.isValid()) return ERR_OK;
 
@@ -1976,13 +1986,13 @@ err_t DoublePath::addArc(const DoubleRect& r, double start, double sweep, uint32
   return _arcTo(cx, cy, rx, ry, start, sweep, PATH_CMD_MOVE_TO, false);
 }
 
-err_t DoublePath::addArc(const DoublePoint& cp, const DoublePoint& r, double start, double sweep, uint32_t direction)
+err_t PathD::addArc(const PointD& cp, const PointD& r, double start, double sweep, uint32_t direction)
 {
   if (direction == PATH_DIRECTION_CCW) { start += sweep; sweep = -sweep; }
   return _arcTo(cp.x, cp.y, r.x, r.y, start, sweep, PATH_CMD_MOVE_TO, false);
 }
 
-err_t DoublePath::addChord(const DoubleRect& r, double start, double sweep, uint32_t direction)
+err_t PathD::addChord(const RectD& r, double start, double sweep, uint32_t direction)
 {
   if (!r.isValid()) return ERR_OK;
 
@@ -1995,13 +2005,13 @@ err_t DoublePath::addChord(const DoubleRect& r, double start, double sweep, uint
   return _arcTo(cx, cy, rx, ry, start, sweep, PATH_CMD_MOVE_TO, true);
 }
 
-err_t DoublePath::addChord(const DoublePoint& cp, const DoublePoint& r, double start, double sweep, uint32_t direction)
+err_t PathD::addChord(const PointD& cp, const PointD& r, double start, double sweep, uint32_t direction)
 {
   if (direction == PATH_DIRECTION_CCW) { start += sweep; sweep = -sweep; }
   return _arcTo(cp.x, cp.y, r.x, r.y, start, sweep, PATH_CMD_MOVE_TO, true);
 }
 
-err_t DoublePath::addPie(const DoubleRect& r, double start, double sweep, uint32_t direction)
+err_t PathD::addPie(const RectD& r, double start, double sweep, uint32_t direction)
 {
   if (!r.isValid()) return ERR_OK;
 
@@ -2010,17 +2020,17 @@ err_t DoublePath::addPie(const DoubleRect& r, double start, double sweep, uint32
   double cx = r.x + rx;
   double cy = r.y + ry;
 
-  return addPie(DoublePoint(cx, cy), DoublePoint(rx, ry), start, sweep);
+  return addPie(PointD(cx, cy), PointD(rx, ry), start, sweep);
 }
 
-err_t DoublePath::addPie(const DoublePoint& cp, const DoublePoint& r, double start, double sweep, uint32_t direction)
+err_t PathD::addPie(const PointD& cp, const PointD& r, double start, double sweep, uint32_t direction)
 {
-  if (sweep >= M_PI*2.0) return addEllipse(cp, r, direction);
+  if (sweep >= MATH_PI * 2.0) return addEllipse(cp, r, direction);
 
   if (direction == PATH_DIRECTION_CCW) { start += sweep; sweep = -sweep; }
 
-  start = fmod(start, M_PI * 2.0);
-  if (start < 0) start += M_PI * 2.0;
+  start = fmod(start, MATH_PI * 2.0);
+  if (start < 0) start += MATH_PI * 2.0;
 
   err_t err;
 
@@ -2030,7 +2040,7 @@ err_t DoublePath::addPie(const DoublePoint& cp, const DoublePoint& r, double sta
   return ERR_OK;
 }
 
-err_t DoublePath::addPath(const DoublePath& path)
+err_t PathD::addPath(const PathD& path)
 {
   sysuint_t count = path.getLength();
   if (count == 0) return ERR_OK;
@@ -2041,7 +2051,7 @@ err_t DoublePath::addPath(const DoublePath& path)
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
   Memory::copy(_d->commands + pos, path._d->commands, count * sizeof(uint8_t));
-  Memory::copy(_d->vertices + pos, path._d->vertices, count * sizeof(DoublePoint));
+  Memory::copy(_d->vertices + pos, path._d->vertices, count * sizeof(PointD));
 
   _d->flat = flat;
 
@@ -2062,7 +2072,7 @@ err_t DoublePath::addPath(const DoublePath& path)
   return ERR_OK;
 }
 
-err_t DoublePath::addPath(const DoublePath& path, const DoublePoint& pt)
+err_t PathD::addPath(const PathD& path, const PointD& pt)
 {
   sysuint_t count = path.getLength();
   if (count == 0) return ERR_OK;
@@ -2072,8 +2082,11 @@ err_t DoublePath::addPath(const DoublePath& path, const DoublePoint& pt)
   sysuint_t pos = _add(count);
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
+  TransformD transform = TransformD::fromTranslation(pt);
+  uint32_t transformType = transform.getType();
+
   Memory::copy(_d->commands + pos, path._d->commands, count * sizeof(uint8_t));
-  PathUtil::translatePoints(_d->vertices + pos, path._d->vertices, count, &pt);
+  _g2d.transformd.mapPointsD[transformType](transform, _d->vertices + pos, path._d->vertices, count);
 
   _d->flat = flat;
 
@@ -2094,7 +2107,7 @@ err_t DoublePath::addPath(const DoublePath& path, const DoublePoint& pt)
   return ERR_OK;
 }
 
-err_t DoublePath::addPath(const DoublePath& path, const DoubleMatrix& matrix)
+err_t PathD::addPath(const PathD& path, const TransformD& transform)
 {
   sysuint_t count = path.getLength();
   if (count == 0) return ERR_OK;
@@ -2104,8 +2117,10 @@ err_t DoublePath::addPath(const DoublePath& path, const DoubleMatrix& matrix)
   sysuint_t pos = _add(count);
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
+  uint32_t transformType = transform.getType();
+
   Memory::copy(_d->commands + pos, path._d->commands, count * sizeof(uint8_t));
-  PathUtil::transformPoints(_d->vertices + pos, path._d->vertices, count, &matrix);
+  _g2d.transformd.mapPointsD[transformType](transform, _d->vertices + pos, path._d->vertices, count);
 
   _d->flat = flat;
 
@@ -2116,7 +2131,7 @@ err_t DoublePath::addPath(const DoublePath& path, const DoubleMatrix& matrix)
 // [Fog::Path - Flatten]
 // ============================================================================
 
-bool DoublePath::isFlat() const
+bool PathD::isFlat() const
 {
   uint flat = _d->flat;
   if (flat != 0xFF) return (bool)flat;
@@ -2133,20 +2148,20 @@ bool DoublePath::isFlat() const
   return (bool)flat;
 }
 
-err_t DoublePath::flatten()
+err_t PathD::flatten()
 {
   return flattenTo(*this, NULL, 1.0);
 }
 
-err_t DoublePath::flatten(const DoubleMatrix* matrix, double approximationScale)
+err_t PathD::flatten(const TransformD* matrix, double approximationScale)
 {
   return flattenTo(*this, NULL, 1.0);
 }
 
-static err_t DoublePath_flattenData(
-  DoublePath& dst,
-  const uint8_t* srcCommands, const DoublePoint* srcVertices, sysuint_t srcCount,
-  const DoubleMatrix* matrix, double approximationScale)
+static err_t PathD_flattenData(
+  PathD& dst,
+  const uint8_t* srcCommands, const PointD* srcVertices, sysuint_t srcCount,
+  const TransformD* matrix, double approximationScale)
 {
   dst.clear();
   if (srcCount == 0) return ERR_OK;
@@ -2158,12 +2173,12 @@ static err_t DoublePath_flattenData(
   if (dst.reserve(grow)) return ERR_RT_OUT_OF_MEMORY;
 
   uint8_t* dstCommands;
-  DoublePoint* dstVertices;
+  PointD* dstVertices;
 
-  double lastx = 0.0;
-  double lasty = 0.0;
+  PointD coords[4];
+  coords[0].reset();
 
-  // Encuse space and update dstCommands / dstVertices pointers.
+  // Ensure space and update dstCommands / dstVertices pointers.
 ensureSpace:
   {
     sysuint_t pos = dst._add(srcCount);
@@ -2185,8 +2200,9 @@ ensureSpace:
       case PATH_CMD_LINE_TO:
       {
         dstCommands[0] = srcCommands[0];
-        dstVertices[0].x = lastx = srcVertices[0].x;
-        dstVertices[0].y = lasty = srcVertices[0].y;
+        dstVertices[0] = srcVertices[0];
+
+        coords[0] = srcVertices[0];
 
         dstCommands++;
         dstVertices++;
@@ -2222,17 +2238,16 @@ ensureSpace:
         dst._d->length = dstLength;
 
         // Approximate curve.
-        err = PathUtil::functionMap.approximateCurve3(
+        coords[1] = srcVertices[0];
+        coords[2] = srcVertices[1];
+        err = _g2d.quadcurved.approximate(
+          coords,
           dst,
-          lastx, lasty,
-          srcVertices[0].x, srcVertices[0].y,
-          srcVertices[1].x, srcVertices[1].y,
           initialCommand,
-          approximationScale, 0.0);
+          approximationScale);
         if (err) goto error;
 
-        lastx = srcVertices[1].x;
-        lasty = srcVertices[1].y;
+        coords[0] = srcVertices[1];
 
         srcCommands += 2;
         srcVertices += 2;
@@ -2269,18 +2284,17 @@ ensureSpace:
         dst._d->length = dstLength;
 
         // Approximate curve.
-        err = PathUtil::functionMap.approximateCurve4(
+        coords[1] = srcVertices[0];
+        coords[2] = srcVertices[1];
+        coords[3] = srcVertices[2];
+        err = _g2d.cubiccurved.approximate(
+          coords,
           dst,
-          lastx, lasty,
-          srcVertices[0].x, srcVertices[0].y,
-          srcVertices[1].x, srcVertices[1].y,
-          srcVertices[2].x, srcVertices[2].y,
           initialCommand,
-          approximationScale, 0.0, 0.0);
+          approximationScale);
         if (err) goto error;
 
-        lastx = srcVertices[2].x;
-        lasty = srcVertices[2].y;
+        coords[0] = srcVertices[2];
 
         srcCommands += 3;
         srcVertices += 3;
@@ -2295,8 +2309,7 @@ ensureSpace:
       default:
       {
         dstCommands[0] = srcCommands[0];
-        dstVertices[0].x = srcVertices[0].x;
-        dstVertices[0].y = srcVertices[0].y;
+        dstVertices[0] = srcVertices[0];
 
         dstCommands++;
         dstVertices++;
@@ -2323,7 +2336,7 @@ error:
   return err;
 }
 
-err_t DoublePath::flattenTo(DoublePath& dst, const DoubleMatrix* matrix, double approximationScale) const
+err_t PathD::flattenTo(PathD& dst, const TransformD* matrix, double approximationScale) const
 {
   // --------------------------------------------------------------------------
   // Contains only lines (flat path).
@@ -2354,23 +2367,23 @@ err_t DoublePath::flattenTo(DoublePath& dst, const DoubleMatrix* matrix, double 
   // result to first one.
   if (this == &dst)
   {
-    DoublePath tmp(*this);
+    PathD tmp(*this);
 
-    return DoublePath_flattenData(dst,
+    return PathD_flattenData(dst,
       tmp.getCommands(),
       tmp.getVertices(),
       tmp.getLength(), matrix, approximationScale);
   }
   else
   {
-    return DoublePath_flattenData(dst,
+    return PathD_flattenData(dst,
       getCommands(),
       getVertices(),
       getLength(), matrix, approximationScale);
   }
 }
 
-err_t DoublePath::flattenSubPathTo(DoublePath& dst, sysuint_t subPathId, const DoubleMatrix* matrix, double approximationScale) const
+err_t PathD::flattenSubPathTo(PathD& dst, sysuint_t subPathId, const TransformD* matrix, double approximationScale) const
 {
   sysuint_t len = getSubPathLength(subPathId);
 
@@ -2413,16 +2426,16 @@ err_t DoublePath::flattenSubPathTo(DoublePath& dst, sysuint_t subPathId, const D
   // result to first one.
   if (this == &dst)
   {
-    DoublePath tmp(*this);
+    PathD tmp(*this);
 
-    return DoublePath_flattenData(dst,
+    return PathD_flattenData(dst,
       tmp.getCommands() + subPathId,
       tmp.getVertices() + subPathId,
       len, matrix, approximationScale);
   }
   else
   {
-    return DoublePath_flattenData(dst,
+    return PathD_flattenData(dst,
       getCommands() + subPathId,
       getVertices() + subPathId,
       len, matrix, approximationScale);
@@ -2439,14 +2452,14 @@ FOG_INIT_DECLARE err_t fog_path_init(void)
 {
   using namespace Fog;
 
-  DoublePathData* d = DoublePath::_dnull.instancep();
+  PathDData* d = PathD::_dnull.instancep();
 
   d->refCount.init(1);
 
   d->flat = true;
   d->boundingBoxDirty = true;
-  d->boundingBoxMin.clear();
-  d->boundingBoxMax.clear();
+  d->boundingBoxMin.reset();
+  d->boundingBoxMax.reset();
 
   d->capacity = 0;
   d->length = 0;
@@ -2458,5 +2471,5 @@ FOG_INIT_DECLARE void fog_path_shutdown(void)
 {
   using namespace Fog;
 
-  DoublePath::_dnull->refCount.dec();
+  PathD::_dnull->refCount.dec();
 }

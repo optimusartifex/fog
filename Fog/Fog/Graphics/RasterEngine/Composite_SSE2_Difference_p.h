@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -45,7 +45,7 @@ struct FOG_HIDDEN CompositeDifferenceSSE2 :
     x0xmm = _mm_min_epi16(x0xmm, y0xmm);
 
     // x0xmm *= 2 (except alpha)
-    x0xmm = _mm_mullo_epi16(x0xmm, FOG_GET_SSE_CONST_PI(0001000200020002_0001000200020002));
+    x0xmm = _mm_mullo_epi16(x0xmm, FOG_SSE_GET_CONST_PI(0001000200020002_0001000200020002));
 
     dst0xmm = _mm_add_epi16(a0xmm, b0xmm);
     dst0xmm = _mm_subs_epu16(dst0xmm, x0xmm);
@@ -59,7 +59,7 @@ struct FOG_HIDDEN CompositeDifferenceSSE2 :
     sse2_expand_alpha_1x1W(x0xmm, a0xmm);
     sse2_muldiv255_1x1W(x0xmm, x0xmm, b0xmm);
     x0xmm = _mm_min_epi16(x0xmm, a0xmm);
-    x0xmm = _mm_mullo_epi16(x0xmm, FOG_GET_SSE_CONST_PI(0001000200020002_0001000200020002));
+    x0xmm = _mm_mullo_epi16(x0xmm, FOG_SSE_GET_CONST_PI(0001000200020002_0001000200020002));
 
     dst0xmm = _mm_add_epi16(a0xmm, b0xmm);
     dst0xmm = _mm_subs_epu16(dst0xmm, x0xmm);
@@ -94,7 +94,7 @@ struct FOG_HIDDEN CompositeDifferenceSSE2 :
     sse2_expand_alpha_1x1W(x0xmm, b0xmm);
     sse2_muldiv255_1x1W(x0xmm, x0xmm, a0xmm);
     x0xmm = _mm_min_epi16(x0xmm, a0xmm);
-    x0xmm = _mm_mullo_epi16(x0xmm, FOG_GET_SSE_CONST_PI(0001000200020002_0001000200020002));
+    x0xmm = _mm_mullo_epi16(x0xmm, FOG_SSE_GET_CONST_PI(0001000200020002_0001000200020002));
 
     dst0xmm = _mm_add_epi16(a0xmm, b0xmm);
     dst0xmm = _mm_subs_epu16(dst0xmm, x0xmm);
@@ -116,8 +116,8 @@ struct FOG_HIDDEN CompositeDifferenceSSE2 :
 
     x0xmm = _mm_min_epi16(x0xmm, y0xmm);
     x1xmm = _mm_min_epi16(x1xmm, y1xmm);
-    x0xmm = _mm_mullo_epi16(x0xmm, FOG_GET_SSE_CONST_PI(0001000200020002_0001000200020002));
-    x1xmm = _mm_mullo_epi16(x1xmm, FOG_GET_SSE_CONST_PI(0001000200020002_0001000200020002));
+    x0xmm = _mm_mullo_epi16(x0xmm, FOG_SSE_GET_CONST_PI(0001000200020002_0001000200020002));
+    x1xmm = _mm_mullo_epi16(x1xmm, FOG_SSE_GET_CONST_PI(0001000200020002_0001000200020002));
 
     dst0xmm = _mm_add_epi16(a0xmm, b0xmm);
     dst1xmm = _mm_add_epi16(a1xmm, b1xmm);
@@ -135,8 +135,8 @@ struct FOG_HIDDEN CompositeDifferenceSSE2 :
     sse2_muldiv255_2x2W(x0xmm, x0xmm, b0xmm, x1xmm, x1xmm, b1xmm);
     x0xmm = _mm_min_epi16(x0xmm, a0xmm);
     x1xmm = _mm_min_epi16(x1xmm, a1xmm);
-    x0xmm = _mm_mullo_epi16(x0xmm, FOG_GET_SSE_CONST_PI(0001000200020002_0001000200020002));
-    x1xmm = _mm_mullo_epi16(x1xmm, FOG_GET_SSE_CONST_PI(0001000200020002_0001000200020002));
+    x0xmm = _mm_mullo_epi16(x0xmm, FOG_SSE_GET_CONST_PI(0001000200020002_0001000200020002));
+    x1xmm = _mm_mullo_epi16(x1xmm, FOG_SSE_GET_CONST_PI(0001000200020002_0001000200020002));
 
     dst0xmm = _mm_add_epi16(a0xmm, b0xmm);
     dst1xmm = _mm_add_epi16(a1xmm, b1xmm);
@@ -185,8 +185,8 @@ struct FOG_HIDDEN CompositeDifferenceSSE2 :
 
     x0xmm = _mm_min_epi16(x0xmm, a0xmm);
     x1xmm = _mm_min_epi16(x1xmm, a1xmm);
-    x0xmm = _mm_mullo_epi16(x0xmm, FOG_GET_SSE_CONST_PI(0001000200020002_0001000200020002));
-    x1xmm = _mm_mullo_epi16(x1xmm, FOG_GET_SSE_CONST_PI(0001000200020002_0001000200020002));
+    x0xmm = _mm_mullo_epi16(x0xmm, FOG_SSE_GET_CONST_PI(0001000200020002_0001000200020002));
+    x1xmm = _mm_mullo_epi16(x1xmm, FOG_SSE_GET_CONST_PI(0001000200020002_0001000200020002));
 
     dst0xmm = _mm_add_epi16(a0xmm, b0xmm);
     dst1xmm = _mm_add_epi16(a1xmm, b1xmm);

@@ -1,4 +1,4 @@
-// [Fog-Core Library - Public API]
+// [Fog-Core]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -106,6 +106,18 @@ static FOG_INLINE uint32_t combineHash(uint32_t h0, uint32_t h1, uint32_t h2, ui
 static FOG_INLINE uint32_t combineHash(uint32_t h0, uint32_t h1, uint32_t h2, uint32_t h3, uint32_t h4, uint32_t h5, uint32_t h6, uint32_t h7)
 {
   return h0 + h1 + h2 + h3 + h4 + h5 + h6 + h7;
+}
+
+//! @brief Combine nine hash values into one.
+static FOG_INLINE uint32_t combineHash(uint32_t h0, uint32_t h1, uint32_t h2, uint32_t h3, uint32_t h4, uint32_t h5, uint32_t h6, uint32_t h7, uint32_t h8)
+{
+  return h0 + h1 + h2 + h3 + h4 + h5 + h6 + h7 + h8;
+}
+
+//! @brief Combine ten hash values into one.
+static FOG_INLINE uint32_t combineHash(uint32_t h0, uint32_t h1, uint32_t h2, uint32_t h3, uint32_t h4, uint32_t h5, uint32_t h6, uint32_t h7, uint32_t h8, uint32_t h9)
+{
+  return h0 + h1 + h2 + h3 + h4 + h5 + h6 + h7 + h8 + h9;
 }
 
 // ============================================================================

@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -22,7 +22,7 @@ struct FOG_HIDDEN NullFontFace : public FontFace
   virtual ~NullFontFace();
 
   virtual err_t getGlyphSet(const Char* str, sysuint_t length, GlyphSet& glyphSet);
-  virtual err_t getOutline(const Char* str, sysuint_t length, DoublePath& dst);
+  virtual err_t getOutline(const Char* str, sysuint_t length, PathD& dst);
   virtual err_t getTextExtents(const Char* str, sysuint_t length, TextExtents& extents);
 
 private:

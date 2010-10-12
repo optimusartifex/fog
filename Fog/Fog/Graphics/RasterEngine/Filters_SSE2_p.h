@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -112,8 +112,8 @@ struct FOG_HIDDEN FilterSSE2
         __m128 demul1 = _mm_load_ss(&raster_demultiply_reciprocal_table_f[src[ARGB32_ABYTE+4]]);
 
         // demul |= [1.0f, 0x0, 0x0, 0x0]
-        demul0 = _mm_castsi128_ps(_mm_or_si128(_mm_castps_si128(demul0), FOG_GET_SSE_CONST_PI(3F80000000000000_0000000000000000)));
-        demul1 = _mm_castsi128_ps(_mm_or_si128(_mm_castps_si128(demul1), FOG_GET_SSE_CONST_PI(3F80000000000000_0000000000000000)));
+        demul0 = _mm_castsi128_ps(_mm_or_si128(_mm_castps_si128(demul0), FOG_SSE_GET_CONST_PI(3F80000000000000_0000000000000000)));
+        demul1 = _mm_castsi128_ps(_mm_or_si128(_mm_castps_si128(demul1), FOG_SSE_GET_CONST_PI(3F80000000000000_0000000000000000)));
 
         demul0 = _mm_shuffle_ps(demul0, demul0, _MM_SHUFFLE(3, 0, 0, 0));
         demul1 = _mm_shuffle_ps(demul1, demul1, _MM_SHUFFLE(3, 0, 0, 0));
@@ -195,7 +195,7 @@ struct FOG_HIDDEN FilterSSE2
 
       demul = _mm_load_ss(&raster_demultiply_reciprocal_table_f[src[ARGB32_ABYTE]]);
       // demul |= [1.0f, 0x0, 0x0, 0x0]
-      demul = _mm_castsi128_ps(_mm_or_si128(_mm_castps_si128(demul), FOG_GET_SSE_CONST_PI(3F80000000000000_0000000000000000)));
+      demul = _mm_castsi128_ps(_mm_or_si128(_mm_castps_si128(demul), FOG_SSE_GET_CONST_PI(3F80000000000000_0000000000000000)));
       demul = _mm_shuffle_ps(demul, demul, _MM_SHUFFLE(3, 0, 0, 0));
       pixf = _mm_mul_ps(pixf, demul);
 
@@ -374,7 +374,7 @@ struct FOG_HIDDEN FilterSSE2
       __m128 result0, result1;
 
       sse2_load8(pix0, src);
-      pix0 = _mm_or_si128(pix0, FOG_GET_SSE_CONST_PI(FF000000FF000000_FF000000FF000000));
+      pix0 = _mm_or_si128(pix0, FOG_SSE_GET_CONST_PI(FF000000FF000000_FF000000FF000000));
 
       {
         __m128i xmmz = _mm_setzero_si128();
@@ -439,7 +439,7 @@ struct FOG_HIDDEN FilterSSE2
       __m128 result;
 
       sse2_load4(pix, src);
-      pix = _mm_or_si128(pix, FOG_GET_SSE_CONST_PI(FF000000FF000000_FF000000FF000000));
+      pix = _mm_or_si128(pix, FOG_SSE_GET_CONST_PI(FF000000FF000000_FF000000FF000000));
       sse2_unpack_to_float(pixf, pix);
 
       result = pt;
@@ -779,7 +779,7 @@ struct FOG_HIDDEN FilterSSE2
         sse2_mul_const_4D(pix, sum, mmMul);
         pix = _mm_srl_epi32(pix, mmShr);
         sse2_pack_1x1D(pix, pix);
-        pix = _mm_or_si128(pix, FOG_GET_SSE_CONST_PI(FF000000FF000000_FF000000FF000000));
+        pix = _mm_or_si128(pix, FOG_SSE_GET_CONST_PI(FF000000FF000000_FF000000FF000000));
         sse2_store4(dstCur, pix);
 
         dstCur += 4;
@@ -1068,7 +1068,7 @@ struct FOG_HIDDEN FilterSSE2
         sse2_mul_const_4D(pix, sum, mmMul);
         pix = _mm_srl_epi32(pix, mmShr);
         sse2_pack_1x1D(pix, pix);
-        pix = _mm_or_si128(pix, FOG_GET_SSE_CONST_PI(FF000000FF000000_FF000000FF000000));
+        pix = _mm_or_si128(pix, FOG_SSE_GET_CONST_PI(FF000000FF000000_FF000000FF000000));
         sse2_store4(dstCur, pix);
 
         dstCur += dstStride;

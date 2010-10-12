@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -102,7 +102,6 @@
 #include <Fog/Graphics/ImageFilterEngine.h>
 #include <Fog/Graphics/ImageFilterParams.h>
 #include <Fog/Graphics/ImageIO.h>
-#include <Fog/Graphics/Matrix.h>
 #include <Fog/Graphics/Painter.h>
 #include <Fog/Graphics/PaintEngine.h>
 #include <Fog/Graphics/PaintUtil.h>
@@ -110,12 +109,12 @@
 #include <Fog/Graphics/Path.h>
 #include <Fog/Graphics/PathStroker.h>
 #include <Fog/Graphics/PathTransform.h>
-#include <Fog/Graphics/PathUtil.h>
 #include <Fog/Graphics/Pattern.h>
 #include <Fog/Graphics/Region.h>
 #include <Fog/Graphics/Shader.h>
 #include <Fog/Graphics/TextLayout.h>
 #include <Fog/Graphics/TextOnPath.h>
+#include <Fog/Graphics/Transform.h>
 
 // [Guard]
 #endif // _FOG_GRAPHICS_H

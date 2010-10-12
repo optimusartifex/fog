@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -15,6 +15,7 @@
 #include <Fog/Graphics/Geometry.h>
 #include <Fog/Graphics/Image.h>
 #include <Fog/Graphics/Path.h>
+#include <Fog/Graphics/Transform.h>
 
 namespace Fog {
 
@@ -29,7 +30,6 @@ struct BlurParams;
 struct ColorLut;
 struct ColorMatrix;
 struct ConvolveParams;
-struct DoubleMatrix;
 struct FloatSymmetricConvolveParams;
 struct IntSymmetricConvolveParams;
 struct Pattern;
@@ -67,11 +67,11 @@ extern FOG_API const float raster_demultiply_reciprocal_table_f[256];
 
 //! @internal
 typedef void (FOG_FASTCALL *RasterDither8Fn)(
-  uint8_t* dst, const uint8_t* src, int w, const IntPoint& origin, const uint8_t* palConv);
+  uint8_t* dst, const uint8_t* src, int w, const PointI& origin, const uint8_t* palConv);
 
 //! @internal
 typedef void (FOG_FASTCALL *RasterDither16Fn)(
-  uint8_t* dst, const uint8_t* src, int w, const IntPoint& origin);
+  uint8_t* dst, const uint8_t* src, int w, const PointI& origin);
 
 // ============================================================================
 // [Fog::RasterEngine - Prototypes - Interpolate]
@@ -90,7 +90,7 @@ typedef void (FOG_FASTCALL *RasterInterpolateArgbFn)(
 
 //! @internal
 typedef err_t (FOG_FASTCALL *RasterPatternInitFn)(
-  RasterPattern* ctx, const Pattern& pattern, const DoubleMatrix& matrix);
+  RasterPattern* ctx, const Pattern& pattern, const TransformD& transform);
 
 //! @internal
 typedef void (FOG_FASTCALL *RasterPatternDestroyFn)(
@@ -110,11 +110,11 @@ typedef err_t (FOG_FASTCALL *RasterSolidInitFn)(
 
 //! @internal
 typedef err_t (FOG_FASTCALL *RasterTextureInitFn)(
-  RasterPattern* ctx, const Pattern& pattern, const DoubleMatrix& matrix, uint32_t imageInterpolationType);
+  RasterPattern* ctx, const Pattern& pattern, const TransformD& transform, uint32_t imageInterpolationType);
 
 //! @internal
 typedef err_t (FOG_FASTCALL *RasterTextureInitBlitFn)(
-  RasterPattern* ctx, const Image& image, const IntRect& irect, const DoubleMatrix& matrix, uint32_t spread, uint32_t imageInterpolationType);
+  RasterPattern* ctx, const Image& image, const RectI& irect, const TransformD& transform, uint32_t spread, uint32_t imageInterpolationType);
 
 //! @internal
 typedef err_t (FOG_FASTCALL *RasterTextureInitScaleFn)(
@@ -124,7 +124,7 @@ typedef err_t (FOG_FASTCALL *RasterTextureInitScaleFn)(
 
 //! @internal
 typedef err_t (FOG_FASTCALL *RasterGradientInitFn)(
-  RasterPattern* ctx, const Pattern& pattern, const DoubleMatrix& matrix, uint32_t colorInterpolationType);
+  RasterPattern* ctx, const Pattern& pattern, const TransformD& transform, uint32_t colorInterpolationType);
 
 // ============================================================================
 // [Fog::RasterEngine - Prototypes - Filter]
@@ -136,7 +136,7 @@ typedef void (FOG_FASTCALL *RasterColorLutFn)(
   uint8_t* dst, const uint8_t* src, int width);
 
 //! @internal
-typedef void (FOG_FASTCALL *RasterColorMatrixFn)(
+typedef void (FOG_FASTCALL *RasterColorTransformFn)(
   const ColorMatrix* cm,
   uint8_t* dst, const uint8_t* src, int width);
 
@@ -255,46 +255,46 @@ struct RasterClosure
 //! Context contains method that can render pattern span at specific coordinate.
 //!
 //!
-//! @section Explanation of inverted affine transformation
+//! @section Explanation about inverted matrix transformation
 //!
-//! We are always using inverted affine transformation to fetch gradient or
-//! texture (if affine transformation is in use) and some constructs can be
-//! very hard to understand.
+//! We are always using inverted transformation matrix to fetch gradient or
+//! texture (if transformation is used) and some constructs can be very hard 
+//! to understand.
 //!
-//! So these steps are generally needed to successfully fetch the transformed
-//! image or gradient:
+//! These steps are generally needed to successfully fetch transformed image 
+//! or gradient:
 //!
 //! 1. Adjust destination coordinates by [0.5, 0.5] - This adjustment moves the
-//!    destination to the center of pixel (remember, center is never [0, 0]).
+//!    destination to the center of pixel (remember, center is [0.5, 0.5]).
 //!
 //!    In the code it's usually written as:
 //!
 //!      double rx = (double)x + 0.5;
 //!      double ry = (double)y + 0.5;
 //!
-//! 2. Transform the centered coordinate using inverted affine matrix. Matrix
-//!    is precalculated so you never invert it in fetcher.
+//! 2. Transform the centered coordinate using inverted transformation matrix.
+//!    Inverted matrix is precalculated so you shouldn't invert it in fetcher.
 //!
 //!    The common formula is:
 //!
-//!      double sx = rx * ctx->m[MATRIX_SX ] + 
-//!                  ry * ctx->m[MATRIX_SHX] + 
-//!                  ctx->m[MATRIX_TX];
+//!      double sx = rx * ctx->inv._00 + 
+//!                  ry * ctx->inv._10 + 
+//!                  ctx->inv._20;
 //!
-//!      double sy = rx * ctx->m[MATRIX_SHY] + 
-//!                  ry * ctx->m[MATRIX_SY ] +
-//!                  ctx->m[MATRIX_TY];
+//!      double sy = rx * ctx->inv._01 + 
+//!                  ry * ctx->inv._11 +
+//!                  ctx->inv._21;
 //!
 //!    But in many cases the resulting coordinates are converted to 16x16 or 48x16
 //!    fixed point, using following code:
 //!
-//!      int fx = Math::doubleToFixed16x16(rx * ctx->m[MATRIX_SX ] + 
-//!                                        ry * ctx->m[MATRIX_SHX] + 
-//!                                        ctx->m[MATRIX_TX]);
+//!      int fx = Math::doubleToFixed16x16(rx * ctx->inv._00 + 
+//!                                        ry * ctx->inv._10 + 
+//!                                        ctx->inv._20);
 //!
-//!      int fy = Math::doubleToFixed16x16(rx * ctx->m[MATRIX_SHY] +
-//!                                        ry * ctx->m[MATRIX_SY ] +
-//!                                        ctx->m[MATRIX_TY]);
+//!      int fy = Math::doubleToFixed16x16(rx * ctx->inv._01 +
+//!                                        ry * ctx->inv._11 +
+//!                                        ctx->inv._21);
 //!
 //! 3. After transformation we move back the centered pixel:
 //!
@@ -329,14 +329,18 @@ struct RasterPattern
   //! @brief Bytes per pixel fetched by the pattern (related to depth).
   uint32_t bytesPerPixel;
 
+  // TODO: Should be removed, we can use inverse matrix.
   //! @brief True if context is transformed.
   //!
   //! @note This is never set for translation only matrices. Scale or shear is
   //! condition to set this variable to true.
   uint32_t isTransformed;
 
-  //! @brief Embedded matrix data (no @c Matrix instance here).
-  double m[6];
+  //! @brief Inverted transformation matrix 
+  //!
+  //! Used to map pixels back to user coordinates (gradients and patterns).
+  TransformD inv;
+  //double m[6];
 
   //! @internal
   //!
@@ -586,7 +590,7 @@ struct RasterFuncs
 
   struct InterpolateFuncs
   {
-    // [Argb]
+    // [ArgbI]
 
     RasterInterpolateArgbFn gradient[IMAGE_FORMAT_COUNT];
   };
@@ -669,7 +673,7 @@ struct RasterFuncs
     // [ColorLut / ColorMatrix]
 
     RasterColorLutFn color_lut[IMAGE_FORMAT_COUNT];
-    RasterColorMatrixFn color_matrix[IMAGE_FORMAT_COUNT];
+    RasterColorTransformFn color_matrix[IMAGE_FORMAT_COUNT];
 
     // [Copy Area]
 

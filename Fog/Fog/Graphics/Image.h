@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -30,7 +30,7 @@ namespace Fog {
 struct ColorFilter;
 struct ColorLut;
 struct ColorMatrix;
-struct DoublePath;
+struct PathD;
 struct ImageData;
 struct ImageFilter;
 struct ImagePixels;
@@ -59,7 +59,7 @@ struct ImageBuffer
   FOG_INLINE void import(ImageData* d);
   //! @brief Import @c ImageData instance into @c ImageBuffer, using only
   //! specified rectangle @a rect.
-  FOG_INLINE void import(ImageData* d, const IntRect& rect);
+  FOG_INLINE void import(ImageData* d, const RectI& rect);
 
   //! @brief Image buffer width.
   int width;
@@ -368,7 +368,7 @@ struct FOG_API Image
   err_t set(const Image& other);
 
   //! @brief Copy part of other image to the image.
-  err_t set(const Image& other, const IntRect& area);
+  err_t set(const Image& other, const RectI& area);
 
   //! @brief Set other image to this image making deep copy of it.
   err_t setDeep(const Image& other);
@@ -402,14 +402,14 @@ struct FOG_API Image
   //! @brief Set image palette.
   err_t setPalette(const Palette& palette);
   //! @brief Set image palette entries.
-  err_t setPalette(sysuint_t index, const Argb* rgba, sysuint_t count);
+  err_t setPalette(sysuint_t index, const ArgbI* rgba, sysuint_t count);
 
   // --------------------------------------------------------------------------
   // [Lock / Unlock Pixels]
   // --------------------------------------------------------------------------
 
   err_t lockPixels(ImagePixels& pixels, uint32_t lockMode = IMAGE_LOCK_READWRITE);
-  err_t lockPixels(ImagePixels& pixels, const IntRect& rect, uint32_t lockMode = IMAGE_LOCK_READWRITE);
+  err_t lockPixels(ImagePixels& pixels, const RectI& rect, uint32_t lockMode = IMAGE_LOCK_READWRITE);
   err_t unlockPixels(ImagePixels& pixels);
 
   // --------------------------------------------------------------------------
@@ -466,39 +466,39 @@ struct FOG_API Image
   // [Color Filter]
   // --------------------------------------------------------------------------
 
-  err_t filter(const ColorFilter& f, const IntRect* area = NULL);
-  err_t filter(const ColorLut& lut, const IntRect* area = NULL);
-  err_t filter(const ColorMatrix& cm, const IntRect* area = NULL);
+  err_t filter(const ColorFilter& f, const RectI* area = NULL);
+  err_t filter(const ColorLut& lut, const RectI* area = NULL);
+  err_t filter(const ColorMatrix& cm, const RectI* area = NULL);
 
   // --------------------------------------------------------------------------
   // [Image Filter]
   // --------------------------------------------------------------------------
 
-  err_t filter(const ImageFilter& f, const IntRect* area = NULL);
+  err_t filter(const ImageFilter& f, const RectI* area = NULL);
 
   // --------------------------------------------------------------------------
   // [Scaling]
   // --------------------------------------------------------------------------
 
-  Image scaled(const IntSize& to, uint32_t interpolationType = IMAGE_INTERPOLATION_SMOOTH) const;
+  Image scaled(const SizeI& to, uint32_t interpolationType = IMAGE_INTERPOLATION_SMOOTH) const;
 
   // --------------------------------------------------------------------------
   // [Painting]
   // --------------------------------------------------------------------------
 
-  err_t clear(Argb c0);
+  err_t clear(ArgbI c0);
 
-  err_t drawPixel(const IntPoint& pt, Argb c0);
-  err_t drawLine(const IntPoint& pt0, const IntPoint& pt1, Argb c0, bool lastPoint = true);
+  err_t drawPixel(const PointI& pt, ArgbI c0);
+  err_t drawLine(const PointI& pt0, const PointI& pt1, ArgbI c0, bool lastPoint = true);
 
-  err_t fillRect(const IntRect& r, Argb c0, int op = OPERATOR_SRC_OVER);
+  err_t fillRect(const RectI& r, ArgbI c0, int op = OPERATOR_SRC_OVER);
 
-  err_t fillQGradient(const IntRect& r, Argb c0, Argb c1, Argb c2, Argb c3, int op = OPERATOR_SRC_OVER);
-  err_t fillHGradient(const IntRect& r, Argb c0, Argb c1, int op = OPERATOR_SRC_OVER);
-  err_t fillVGradient(const IntRect& r, Argb c0, Argb c1, int op = OPERATOR_SRC_OVER);
+  err_t fillQGradient(const RectI& r, ArgbI c0, ArgbI c1, ArgbI c2, ArgbI c3, int op = OPERATOR_SRC_OVER);
+  err_t fillHGradient(const RectI& r, ArgbI c0, ArgbI c1, int op = OPERATOR_SRC_OVER);
+  err_t fillVGradient(const RectI& r, ArgbI c0, ArgbI c1, int op = OPERATOR_SRC_OVER);
 
-  err_t drawImage(const IntPoint& pt, const Image& src, uint32_t op = OPERATOR_SRC_OVER, uint32_t opacity = 255);
-  err_t drawImage(const IntPoint& pt, const Image& src, const IntRect& srcRect, uint32_t op = OPERATOR_SRC_OVER, uint32_t opacity = 255);
+  err_t drawImage(const PointI& pt, const Image& src, uint32_t op = OPERATOR_SRC_OVER, uint32_t opacity = 255);
+  err_t drawImage(const PointI& pt, const Image& src, const RectI& srcRect, uint32_t op = OPERATOR_SRC_OVER, uint32_t opacity = 255);
 
   //! @brief Scroll data in image.
   //!
@@ -508,7 +508,7 @@ struct FOG_API Image
   //! @brief Scroll data in image only in rectangle @a r.
   //!
   //! @note Data that was scrolled out are unchanged.
-  err_t scroll(int x, int y, const IntRect& r);
+  err_t scroll(int x, int y, const RectI& r);
 
   // --------------------------------------------------------------------------
   // [Misc]
@@ -521,12 +521,12 @@ struct FOG_API Image
   }
   
   //! @brief Check if point at a given coordinates @a at is in image.
-  FOG_INLINE bool hasPoint(const IntPoint& pt) const
+  FOG_INLINE bool hasPoint(const PointI& pt) const
   { 
     return (uint)pt.x < (uint)getWidth() && (uint)pt.y < (uint)getHeight(); 
   }
 
-  static err_t glyphFromPath(Image& glyph, IntPoint& offset, const DoublePath& path);
+  static err_t glyphFromPath(Image& glyph, PointI& offset, const PathD& path);
 
   // --------------------------------------------------------------------------
   // [Windows Support]
@@ -637,7 +637,7 @@ FOG_INLINE void ImageBuffer::import(ImageData* d)
   data = d->first;
 }
 
-FOG_INLINE void ImageBuffer::import(ImageData* d, const IntRect& rect)
+FOG_INLINE void ImageBuffer::import(ImageData* d, const RectI& rect)
 {
   // Rect must be normalized.
   FOG_ASSERT(rect.x >= 0 && rect.y >= 0 &&rect.x + rect.w <= d->width && rect.y + rect.h <= d->height);
@@ -658,7 +658,7 @@ FOG_INLINE void ImageBuffer::import(ImageData* d, const IntRect& rect)
 // [Fog::TypeInfo<T>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::Image , Fog::TYPEINFO_MOVABLE)
+FOG_DECLARE_TYPEINFO(Fog::Image, Fog::TYPEINFO_MOVABLE)
 
 // [Guard]
 #endif // _FOG_GRAPHICS_IMAGE_H

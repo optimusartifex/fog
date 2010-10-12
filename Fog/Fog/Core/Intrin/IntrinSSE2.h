@@ -1,11 +1,11 @@
-// [Fog-Core Library - Public API]
+// [Fog-Core]
 //
 // [License]
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_COMPILER_INTRINSSE2_H
-#define _FOG_CORE_COMPILER_INTRINSSE2_H
+#ifndef _FOG_CORE_INTRIN_INTRINSSE2_H
+#define _FOG_CORE_INTRIN_INTRINSSE2_H
 
 // [Dependencies]
 #include <Fog/Core/Build.h>
@@ -47,7 +47,7 @@ static FOG_INLINE __m128i _mm_castps_si128(__m128 n) { return *(__m128i*)&n; }
 
 namespace Fog {
 
-//! @addtogroup Fog_Core_Intrinsics
+//! @addtogroup Fog_Core_Intrin
 //! @{
 
 //! @brief SSE2 data type that can be used to store / load data to / from
@@ -72,131 +72,5 @@ union FOG_ALIGNED_TYPE(sse2_t, 16)
 
 }
 
-// ============================================================================
-// [Fog::Core - SSE2 - Macros]
-// ============================================================================
-
-//! @addtogroup Fog_Core_Intrinsics
-//! @{
-
-#define FOG_DECLARE_SSE_CONST_PI8_VAR(name, val0, val1, val2, val3, val4, val5, val6, val7, val8, val9, val10, val11, val12, val13, val14, val15) \
-  FOG_ALIGNED_VAR(static const uint8_t, _sse2_const_##name[16], 16) = \
-  { \
-    (uint8_t)(val15), \
-    (uint8_t)(val14), \
-    (uint8_t)(val13), \
-    (uint8_t)(val12), \
-    (uint8_t)(val11), \
-    (uint8_t)(val10), \
-    (uint8_t)(val9), \
-    (uint8_t)(val8), \
-    (uint8_t)(val7), \
-    (uint8_t)(val6), \
-    (uint8_t)(val5), \
-    (uint8_t)(val4), \
-    (uint8_t)(val3), \
-    (uint8_t)(val2), \
-    (uint8_t)(val1), \
-    (uint8_t)(val0)  \
-  }
-
-#define FOG_DECLARE_SSE_CONST_PI8_SET(name, val0) \
-  FOG_ALIGNED_VAR(static const uint8_t, _sse2_const_##name[16], 16) = \
-  { \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0), \
-    (uint8_t)(val0)  \
-  }
-
-#define FOG_DECLARE_SSE_CONST_PI16_VAR(name, val0, val1, val2, val3, val4, val5, val6, val7) \
-  FOG_ALIGNED_VAR(static const uint16_t, _sse2_const_##name[8], 16) = \
-  { \
-    (uint16_t)(val7), \
-    (uint16_t)(val6), \
-    (uint16_t)(val5), \
-    (uint16_t)(val4), \
-    (uint16_t)(val3), \
-    (uint16_t)(val2), \
-    (uint16_t)(val1), \
-    (uint16_t)(val0)  \
-  }
-
-#define FOG_DECLARE_SSE_CONST_PI16_SET(name, val0) \
-  FOG_ALIGNED_VAR(static const uint16_t, _sse2_const_##name[8], 16) = \
-  { \
-    (uint16_t)(val0), \
-    (uint16_t)(val0), \
-    (uint16_t)(val0), \
-    (uint16_t)(val0), \
-    (uint16_t)(val0), \
-    (uint16_t)(val0), \
-    (uint16_t)(val0), \
-    (uint16_t)(val0)  \
-  }
-
-#define FOG_DECLARE_SSE_CONST_PI32_VAR(name, val0, val1, val2, val3) \
-  FOG_ALIGNED_VAR(static const uint32_t, _sse2_const_##name[4], 16) = \
-  { \
-    (uint32_t)(val3), \
-    (uint32_t)(val2), \
-    (uint32_t)(val1), \
-    (uint32_t)(val0)  \
-  }
-
-#define FOG_DECLARE_SSE_CONST_PI32_SET(name, val0) \
-  FOG_ALIGNED_VAR(static const uint32_t, _sse2_const_##name[4], 16) = \
-  { \
-    (uint32_t)(val0), \
-    (uint32_t)(val0), \
-    (uint32_t)(val0), \
-    (uint32_t)(val0)  \
-  }
-
-#define FOG_DECLARE_SSE_CONST_PI64_VAR(name, val0, val1) \
-  FOG_ALIGNED_VAR(static const uint64_t, _sse2_const_##name[2], 16) = \
-  { \
-    (uint64_t)(val1), \
-    (uint64_t)(val0)  \
-  }
-
-#define FOG_DECLARE_SSE_CONST_PI64_SET(name, val0) \
-  FOG_ALIGNED_VAR(static const uint64_t, _sse2_const_##name[2], 16) = \
-  { \
-    (uint64_t)(val0), \
-    (uint64_t)(val0)  \
-  }
-
-#define FOG_DECLARE_SSE_CONST_PD_VAR(name, val0, val1) \
-  FOG_ALIGNED_VAR(static const double, _sse2_const_##name[2], 16) = \
-  { \
-    val1, \
-    val0  \
-  }
-
-#define FOG_DECLARE_SSE_CONST_PD_SET(name, val0) \
-  FOG_ALIGNED_VAR(static const double, _sse2_const_##name[2], 16) = \
-  { \
-    val0, \
-    val0  \
-  }
-
-#define FOG_GET_SSE_CONST_PD(name) (*(const __m128d*)_sse2_const_##name)
-#define FOG_GET_SSE_CONST_PI(name) (*(const __m128i*)_sse2_const_##name)
-
-//! @}
-
 // [Guard]
-#endif // _FOG_CORE_COMPILER_INTRINSSE2_H
+#endif // _FOG_CORE_INTRIN_INTRINSSE2_H

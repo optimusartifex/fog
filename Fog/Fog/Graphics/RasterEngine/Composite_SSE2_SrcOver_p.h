@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -365,7 +365,7 @@ cMaskOpaqueSkip1:
 
       sse2_load16a(dst0xmm, dst);
       alp0xmm = _mm_shuffle_epi32(src0xmm, _MM_SHUFFLE(3, 2, 1, 0));
-      alp0xmm = _mm_xor_si128(alp0xmm, FOG_GET_SSE_CONST_PI(FF000000FF000000_FF000000FF000000));
+      alp0xmm = _mm_xor_si128(alp0xmm, FOG_SSE_GET_CONST_PI(FF000000FF000000_FF000000FF000000));
       sse2_unpack_2x2W(dst0xmm, dst1xmm, dst0xmm);
       sse2_unpack_2x2W(alp0xmm, alp1xmm, alp0xmm);
       sse2_expand_alpha_2x2W(alp0xmm, alp0xmm, alp1xmm, alp1xmm);
@@ -434,7 +434,7 @@ cMaskOpaqueSkip1:
 
         sse2_load16a(dst0xmm, dst);
         alp0xmm = _mm_shuffle_epi32(src0xmm, _MM_SHUFFLE(3, 2, 1, 0));
-        alp0xmm = _mm_xor_si128(alp0xmm, FOG_GET_SSE_CONST_PI(FF000000FF000000_FF000000FF000000));
+        alp0xmm = _mm_xor_si128(alp0xmm, FOG_SSE_GET_CONST_PI(FF000000FF000000_FF000000FF000000));
         sse2_unpack_2x2W(dst0xmm, dst1xmm, dst0xmm);
         sse2_unpack_2x2W(alp0xmm, alp1xmm, alp0xmm);
         sse2_expand_alpha_2x2W(alp0xmm, alp0xmm, alp1xmm, alp1xmm);
@@ -1341,7 +1341,7 @@ cMaskOpaqueSkip1:
 
       sse2_load16a(dst0xmm, dst);
       alp0xmm = _mm_shuffle_epi32(src0xmm, _MM_SHUFFLE(3, 2, 1, 0));
-      alp0xmm = _mm_xor_si128(alp0xmm, FOG_GET_SSE_CONST_PI(FF000000FF000000_FF000000FF000000));
+      alp0xmm = _mm_xor_si128(alp0xmm, FOG_SSE_GET_CONST_PI(FF000000FF000000_FF000000FF000000));
       sse2_fill_alpha_1x4B(dst0xmm);
       sse2_unpack_2x2W(alp0xmm, alp1xmm, alp0xmm);
       sse2_unpack_2x2W(dst0xmm, dst1xmm, dst0xmm);
@@ -1408,7 +1408,7 @@ cMaskOpaqueSkip1:
 
         sse2_load16a(dst0xmm, dst);
         alp0xmm = _mm_shuffle_epi32(src0xmm, _MM_SHUFFLE(3, 2, 1, 0));
-        alp0xmm = _mm_xor_si128(alp0xmm, FOG_GET_SSE_CONST_PI(FF000000FF000000_FF000000FF000000));
+        alp0xmm = _mm_xor_si128(alp0xmm, FOG_SSE_GET_CONST_PI(FF000000FF000000_FF000000FF000000));
         sse2_fill_alpha_1x4B(dst0xmm);
         sse2_unpack_2x2W(alp0xmm, alp1xmm, alp0xmm);
         sse2_unpack_2x2W(dst0xmm, dst1xmm, dst0xmm);

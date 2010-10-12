@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -52,17 +52,17 @@ namespace Fog {
 // Input data characteristics:
 // - Already clipped to SIMPLE or COMPLEX clip region.
 void RasterPaintEngine::CTX_SYMBOL(_doPaintBoxes)(
-  RasterPaintContext* ctx, const IntBox* box, sysuint_t count)
+  RasterPaintContext* ctx, const BoxI* box, sysuint_t count)
 {
   FOG_ASSERT(ctx->finalClipType != RASTER_CLIP_NULL);
 
   if (FOG_UNLIKELY(!count)) return;
 
-  const IntBox* curBox;
-  const IntBox* endBox = box + count;
+  const BoxI* curBox;
+  const BoxI* endBox = box + count;
 
-  const IntBox* curBand = box;
-  const IntBox* endBand;
+  const BoxI* curBand = box;
+  const BoxI* endBand;
 
   uint8_t* pixels = ctx->paintLayer.pixels;
   sysint_t stride = ctx->paintLayer.stride;
@@ -809,7 +809,7 @@ NAME##_End: \
 // - Already clipped to SIMPLE clip rectangle. If clip region is COMPLEX,
 //   additional clipping must be performed by callee (here).
 void RasterPaintEngine::CTX_SYMBOL(_doPaintImage)(
-  RasterPaintContext* ctx, const IntRect& dst, const Image& image, const IntRect& src)
+  RasterPaintContext* ctx, const RectI& dst, const Image& image, const RectI& src)
 {
   FOG_ASSERT(ctx->finalClipType != RASTER_CLIP_NULL);
 
@@ -885,10 +885,10 @@ void RasterPaintEngine::CTX_SYMBOL(_doPaintImage)(
     /* --------------------------------------------------------------------- */ \
     else /* if (ctx->finalClipType == RASTER_CLIP_REGION) */ \
     { \
-      const IntBox* clipCur = ctx->finalRegion.getData(); \
-      const IntBox* clipTo; \
-      const IntBox* clipNext; \
-      const IntBox* clipEnd = clipCur + ctx->finalRegion.getLength(); \
+      const BoxI* clipCur = ctx->finalRegion.getData(); \
+      const BoxI* clipTo; \
+      const BoxI* clipNext; \
+      const BoxI* clipEnd = clipCur + ctx->finalRegion.getLength(); \
       \
       uint8_t* dstBase; \
       const uint8_t* srcBase; \
@@ -958,7 +958,7 @@ NAME##_nodelta_advance: \
             goto NAME##_nodelta_advance; \
           } \
           \
-          const IntBox* cbox = clipCur; \
+          const BoxI* cbox = clipCur; \
           int x1 = cbox->x1; \
           if (x1 < minX) x1 = minX; \
           \
@@ -1064,7 +1064,7 @@ NAME##_delta_advance: \
             goto NAME##_delta_advance; \
           } \
           \
-          const IntBox* cbox = clipCur; \
+          const BoxI* cbox = clipCur; \
           int x1 = cbox->x1; \
           if (x1 < minX) x1 = minX; \
           \
@@ -1152,10 +1152,10 @@ NAME##_end: \
     /* --------------------------------------------------------------------- */ \
     else /* if (ctx->finalClipType == RASTER_CLIP_REGION) */ \
     { \
-      const IntBox* clipCur = ctx->finalRegion.getData(); \
-      const IntBox* clipTo; \
-      const IntBox* clipNext; \
-      const IntBox* clipEnd = clipCur + ctx->finalRegion.getLength(); \
+      const BoxI* clipCur = ctx->finalRegion.getData(); \
+      const BoxI* clipTo; \
+      const BoxI* clipNext; \
+      const BoxI* clipEnd = clipCur + ctx->finalRegion.getLength(); \
       \
       uint8_t* dstBase = ctx->paintLayer.pixels; \
       uint8_t* dstCur; \
@@ -1598,7 +1598,7 @@ NAME##_End: \
 // TODO: Hardcoded to A8 glyph format.
 // TODO: Region and mask clipping not implemented yet.
 void RasterPaintEngine::CTX_SYMBOL(_doPaintGlyphSet)(
-  RasterPaintContext* ctx, const IntPoint& pt, const GlyphSet& glyphSet, const IntBox& boundingBox)
+  RasterPaintContext* ctx, const PointI& pt, const GlyphSet& glyphSet, const BoxI& boundingBox)
 {
   FOG_ASSERT(ctx->finalClipType != RASTER_CLIP_NULL);
   if (FOG_UNLIKELY(!glyphSet.getLength())) return;
@@ -1788,9 +1788,9 @@ void RasterPaintEngine::CTX_SYMBOL(_doPaintPath)(
   /* --------------------------------------------------------------------- */ \
   else if (ctx->finalClipType == RASTER_CLIP_REGION) \
   { \
-    const IntBox* clipCur = ctx->finalRegion.getData(); \
-    const IntBox* clipTo; \
-    const IntBox* clipEnd = clipCur + ctx->finalRegion.getLength(); \
+    const BoxI* clipCur = ctx->finalRegion.getData(); \
+    const BoxI* clipTo; \
+    const BoxI* clipEnd = clipCur + ctx->finalRegion.getLength(); \
     sysuint_t clipLen; \
     \
     /* Advance clip pointer. */ \

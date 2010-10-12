@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -110,7 +110,7 @@ struct FOG_API GlyphSet
     //! @brief Length.
     sysuint_t length;
     //! @brief Extents.
-    IntRect extents;
+    RectI extents;
     //! @brief Advance;
     int advance;
     //! @brief Glyphs data (inlined to this structure).
@@ -136,7 +136,7 @@ struct FOG_API GlyphSet
   FOG_INLINE sysuint_t getCapacity() const { return _d->capacity; }
   FOG_INLINE sysuint_t getLength() const { return _d->length; }
 
-  FOG_INLINE const IntRect& getExtents() const { return _d->extents; }
+  FOG_INLINE const RectI& getExtents() const { return _d->extents; }
   FOG_INLINE int getAdvance() const { return _d->advance; }
 
   FOG_INLINE const Glyph* glyphs() const { return _d->glyphs(); }

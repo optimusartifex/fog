@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -262,7 +262,7 @@ struct FOG_API WidgetPositionAnimation : public WidgetAnimation
 
   virtual void onStep(AnimationEvent* e) {    
     if (_widget) {
-      IntPoint p;
+      PointI p;
 
       p.setX((int)_start.getX() + (_end.getX() - _start.getX()) * _position);
       p.setY((int)_start.getY() + (_end.getY() - _start.getY()) * _position);
@@ -271,15 +271,15 @@ struct FOG_API WidgetPositionAnimation : public WidgetAnimation
     }
   }
 
-  FOG_INLINE IntPoint getStartPosition() const { return _start; }
-  FOG_INLINE IntPoint getEndPosition() const { return _end; }
+  FOG_INLINE PointI getStartPosition() const { return _start; }
+  FOG_INLINE PointI getEndPosition() const { return _end; }
 
-  void setStartPosition(const IntPoint& start) { _start = start; }
-  void setEndPosition(const IntPoint& end) { _end = end; }
+  void setStartPosition(const PointI& start) { _start = start; }
+  void setEndPosition(const PointI& end) { _end = end; }
 
 protected:
-  IntPoint _start;
-  IntPoint _end;
+  PointI _start;
+  PointI _end;
 };
 
 // ============================================================================
@@ -309,7 +309,7 @@ struct FOG_API WidgetSizeAnimation : public WidgetAnimation
 
   virtual void onStep(AnimationEvent* e) {    
     if (_widget) {
-      IntSize p;
+      SizeI p;
 
       p.setWidth((int)_start.getWidth() + (_end.getWidth() - _start.getWidth()) * _position);
       p.setHeight((int)_start.getHeight() + (_end.getHeight() - _start.getHeight()) * _position);
@@ -318,15 +318,15 @@ struct FOG_API WidgetSizeAnimation : public WidgetAnimation
     }
   }
 
-  FOG_INLINE IntSize getStartPosition() const { return _start; }
-  FOG_INLINE IntSize getEndPosition() const { return _end; }
+  FOG_INLINE SizeI getStartPosition() const { return _start; }
+  FOG_INLINE SizeI getEndPosition() const { return _end; }
 
-  void setStartPosition(const IntSize& start) { _start = start; }
-  void setEndPosition(const IntSize& end) { _end = end; }
+  void setStartPosition(const SizeI& start) { _start = start; }
+  void setEndPosition(const SizeI& end) { _end = end; }
 
 protected:
-  IntSize _start;
-  IntSize _end;
+  SizeI _start;
+  SizeI _end;
 };
 
 // ============================================================================
@@ -356,7 +356,7 @@ struct FOG_API WidgetGeometryAnimation : public WidgetAnimation
 
   virtual void onStep(AnimationEvent* e) {    
     if (_widget) {
-      IntRect p;
+      RectI p;
 
       p.setX((int)_start.getX() + (_end.getX() - _start.getX()) * _position);
       p.setY((int)_start.getY() + (_end.getY() - _start.getY()) * _position);
@@ -368,15 +368,15 @@ struct FOG_API WidgetGeometryAnimation : public WidgetAnimation
     }
   }
 
-  FOG_INLINE IntRect getStartPosition() const { return _start; }
-  FOG_INLINE IntRect getEndPosition() const { return _end; }
+  FOG_INLINE RectI getStartPosition() const { return _start; }
+  FOG_INLINE RectI getEndPosition() const { return _end; }
 
-  void setStartPosition(const IntRect& start) { _start = start; }
-  void setEndPosition(const IntRect& end) { _end = end; }
+  void setStartPosition(const RectI& start) { _start = start; }
+  void setEndPosition(const RectI& end) { _end = end; }
 
 protected:
-  IntRect _start;
-  IntRect _end;
+  RectI _start;
+  RectI _end;
 };
 
 } // Fog namespace

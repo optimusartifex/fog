@@ -1,11 +1,11 @@
-// [Fog-Core Library - Public API]
+// [Fog-Core]
 //
 // [License]
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_INTRIN_MMX_H
-#define _FOG_CORE_INTRIN_MMX_H
+#ifndef _FOG_CORE_INTRIN_INTRINMMX_H
+#define _FOG_CORE_INTRIN_INTRINMMX_H
 
 // [Dependencies]
 #include <Fog/Core/Build.h>
@@ -17,7 +17,7 @@
 
 namespace Fog {
 
-//! @addtogroup Fog_Core_Intrinsics
+//! @addtogroup Fog_Core_Intrin
 //! @{
 
 //! @brief MMX data type that can be used to store / load data to / from
@@ -43,7 +43,7 @@ union FOG_ALIGNED_TYPE(mmx_t, 8)
 // [Fog::Core - MMX - Macros]
 // ============================================================================
 
-//! @addtogroup Fog_Core_Intrinsics
+//! @addtogroup Fog_Core_Intrin
 //! @{
 
 // #define MMX_SHUFFLE(z, y, x, w) (((z) << 6) | ((y) << 4) | ((x) << 2) | (w))
@@ -65,7 +65,7 @@ union FOG_ALIGNED_TYPE(mmx_t, 8)
 #endif // __MINGW32__
 
 #define FOG_MMX_DECLARE_CONST_PI8_VAR(name, val0, val1, val2, val3, val4, val5, val6, val7) \
-  FOG_ALIGNED_VAR(static const uint8_t, _sse2_const_##name[8], 8) = \
+  FOG_ALIGNED_VAR(static const uint8_t, _sse_const_##name[8], 8) = \
   { \
     (uint8_t)(val7), \
     (uint8_t)(val6), \
@@ -147,4 +147,4 @@ union FOG_ALIGNED_TYPE(mmx_t, 8)
 //! @}
 
 // [Guard]
-#endif // _FOG_CORE_INTRIN_MMX_H
+#endif // _FOG_CORE_INTRIN_INTRINMMX_H

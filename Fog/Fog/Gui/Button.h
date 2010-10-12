@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -29,7 +29,7 @@ struct FOG_API Button : public ButtonBase
   Button();
   virtual ~Button();
 
-  virtual IntSize getSizeHint() const;
+  virtual SizeI getSizeHint() const;
 
   // [Event Handlers]
 

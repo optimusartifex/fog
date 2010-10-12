@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -35,11 +35,11 @@ void GroupBox::setLabel(const String& label)
   update(WIDGET_UPDATE_NCPAINT);
 }
 
-void GroupBox::calcWidgetSize(IntSize& size) const
+void GroupBox::calcWidgetSize(SizeI& size) const
 {
 }
 
-void GroupBox::calcClientGeometry(IntRect& geometry) const
+void GroupBox::calcClientGeometry(RectI& geometry) const
 {
 }
 

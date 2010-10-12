@@ -1,4 +1,4 @@
-// [Fog-Xml Library - Public API]
+// [Fog-Xml]
 //
 // [License]
 // MIT, See COPYING file in package

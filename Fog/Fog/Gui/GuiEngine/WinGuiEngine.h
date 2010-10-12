@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -43,7 +43,7 @@ struct FOG_API WinGuiEngine : public GuiEngine
   // [Update]
   // --------------------------------------------------------------------------
 
-  virtual void doBlitWindow(GuiWindow* window, const IntBox* rects, sysuint_t count);
+  virtual void doBlitWindow(GuiWindow* window, const BoxI* rects, sysuint_t count);
 
   // --------------------------------------------------------------------------
   // [GuiWindow]
@@ -111,9 +111,9 @@ struct FOG_API WinGuiWindow : public GuiWindow
   virtual err_t show(uint32_t state);
   virtual err_t hide();
 
-  virtual err_t setPosition(const IntPoint& pos);
-  virtual err_t setSize(const IntSize& size);
-  virtual err_t setGeometry(const IntRect& geometry);
+  virtual err_t setPosition(const PointI& pos);
+  virtual err_t setSize(const SizeI& size);
+  virtual err_t setGeometry(const RectI& geometry);
 
   virtual err_t takeFocus();
 
@@ -123,11 +123,11 @@ struct FOG_API WinGuiWindow : public GuiWindow
   virtual err_t setIcon(const Image& icon);
   virtual err_t getIcon(Image& icon);
 
-  virtual err_t setSizeGranularity(const IntPoint& pt);
-  virtual err_t getSizeGranularity(IntPoint& pt);
+  virtual err_t setSizeGranularity(const PointI& pt);
+  virtual err_t getSizeGranularity(PointI& pt);
 
-  virtual err_t worldToClient(IntPoint* coords);
-  virtual err_t clientToWorld(IntPoint* coords);
+  virtual err_t worldToClient(PointI* coords);
+  virtual err_t clientToWorld(PointI* coords);
 
   virtual void setOwner(GuiWindow* owner);
   virtual void releaseOwner();
@@ -156,7 +156,7 @@ struct FOG_API WinGuiWindow : public GuiWindow
 
   virtual LRESULT onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-  void getWindowRect(IntRect* windowRect, IntRect* clientRect);
+  void getWindowRect(RectI* windowRect, RectI* clientRect);
 
   friend struct WinGuiEngine;
 
@@ -185,13 +185,13 @@ struct FOG_API WinGuiBackBuffer : public GuiBackBuffer
 
   virtual bool resize(int width, int height, bool cache);
   virtual void destroy();
-  virtual void updateRects(const IntBox* rects, sysuint_t count);
+  virtual void updateRects(const BoxI* rects, sysuint_t count);
 
   // --------------------------------------------------------------------------
   // [Helpers]
   // --------------------------------------------------------------------------
 
-  void blitRects(HDC target, const IntBox* rects, sysuint_t count);
+  void blitRects(HDC target, const BoxI* rects, sysuint_t count);
 
   // --------------------------------------------------------------------------
   // [Accessors]

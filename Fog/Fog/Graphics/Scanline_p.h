@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -9,8 +9,8 @@
 
 // [Dependencies]
 #include <Fog/Core/Assert.h>
+#include <Fog/Core/Face/FaceC.h>
 #include <Fog/Core/MemoryAllocator_p.h>
-#include <Fog/Face/FaceByte.h>
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/Span_p.h>
 #include <Fog/Graphics/RasterUtil_p.h>

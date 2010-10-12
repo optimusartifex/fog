@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -733,7 +733,7 @@ FontFace* FTFontEngine::createDefaultFace()
   FontFace* face = NULL;
 
 #if defined(FOG_HAVE_FONTCONFIG)
-  face = createFace(Ascii8("default"), size, options, FloatMatrix());
+  face = createFace(Ascii8("default"), size, options, TransformF());
 #endif
 
   // If face wasn't loaded, try some generic font names.
@@ -752,7 +752,7 @@ FontFace* FTFontEngine::createDefaultFace()
     while (*p)
     {
       sysuint_t plen = strlen(p);
-      face = createFace(Ascii8(p, plen), size, options, FloatMatrix());
+      face = createFace(Ascii8(p, plen), size, options, TransformF());
       if (face) break;
 
       p += plen + 1;
@@ -765,7 +765,7 @@ FontFace* FTFontEngine::createDefaultFace()
 FontFace* FTFontEngine::createFace(
   const String& family, float size,
   const FontOptions& options, 
-  const FloatMatrix& matrix)
+  const TransformF& matrix)
 {
   // Bail if FreeType library is not loaded.
   if (!_freeTypeLib->ok) return NULL;
@@ -836,7 +836,7 @@ void FTFontEngine::close()
 
 static FOG_INLINE double fx26p6ToDouble(int p) { return double(p) / 64.0; }
 
-static err_t decompose_ft_glyph_outline(const FT_Outline& outline, bool flipY, const DoubleMatrix* mtx, DoublePath& path)
+static err_t decompose_ft_glyph_outline(const FT_Outline& outline, bool flipY, const TransformD* mtx, PathD& path)
 {
   int n;         // Index of contour in outline.
   int first = 0; // Index of first point in contour.
@@ -1089,7 +1089,7 @@ err_t FTFontFace::getGlyphSet(const Char* str, sysuint_t length, GlyphSet& glyph
   return err;
 }
 
-err_t FTFontFace::getOutline(const Char* str, sysuint_t length, DoublePath& dst)
+err_t FTFontFace::getOutline(const Char* str, sysuint_t length, PathD& dst)
 {
   // if (scalable == 0) return ERR_FONT_CANT_GET_OUTLINE;
 

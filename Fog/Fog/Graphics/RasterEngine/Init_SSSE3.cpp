@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -14,12 +14,12 @@
 // TODO: Move this check somewhere else, maybe into Build.h?
 #if (defined(FOG_CC_IDE)) || (defined(FOG_CC_GNU) && FOG_CC_GNU >= 4) || (defined(FOG_CC_MSVC) && FOG_CC_MSVC >= 1500)
 
+#include <Fog/Core/Face/FaceC.h>
 #include <Fog/Core/Intrin/IntrinSSE2.h>
 #include <Fog/Core/Intrin/IntrinSSE3.h>
 #include <Fog/Core/Intrin/IntrinSSSE3.h>
 #include <Fog/Core/Math.h>
 #include <Fog/Core/Misc.h>
-#include <Fog/Face/FaceByte.h>
 #include <Fog/Graphics/Color.h>
 #include <Fog/Graphics/ColorLut.h>
 #include <Fog/Graphics/ColorMatrix.h>
@@ -30,12 +30,12 @@
 #include <Fog/Graphics/ImageFilter.h>
 #include <Fog/Graphics/ImageFilterEngine.h>
 #include <Fog/Graphics/ImageFilterParams.h>
-#include <Fog/Graphics/Matrix.h>
 #include <Fog/Graphics/Path.h>
 #include <Fog/Graphics/Pattern.h>
 #include <Fog/Graphics/RasterEngine_p.h>
 #include <Fog/Graphics/RasterUtil_p.h>
 #include <Fog/Graphics/Span_p.h>
+#include <Fog/Graphics/Transform.h>
 
 // [Fog::RasterEngine::SSSE3]
 #include <Fog/Graphics/RasterEngine/C_p.h>

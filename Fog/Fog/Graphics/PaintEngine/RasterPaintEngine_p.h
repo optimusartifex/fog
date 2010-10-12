@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -103,17 +103,17 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   // [Meta]
   // --------------------------------------------------------------------------
 
-  virtual err_t setMetaVars(const Region& region, const IntPoint& origin);
+  virtual err_t setMetaVars(const Region& region, const PointI& origin);
   virtual err_t resetMetaVars();
 
-  virtual err_t setUserVars(const Region& region, const IntPoint& origin);
+  virtual err_t setUserVars(const Region& region, const PointI& origin);
   virtual err_t resetUserVars();
 
   virtual Region getMetaRegion() const;
   virtual Region getUserRegion() const;
 
-  virtual IntPoint getMetaOrigin() const;
-  virtual IntPoint getUserOrigin() const;
+  virtual PointI getMetaOrigin() const;
+  virtual PointI getUserOrigin() const;
 
   // --------------------------------------------------------------------------
   // [Paint Parameters]
@@ -121,10 +121,10 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
 
   virtual uint32_t getSourceType() const;
 
-  virtual Argb getSourceArgb() const;
+  virtual ArgbI getSourceArgb() const;
   virtual Pattern getSourcePattern() const;
 
-  virtual err_t setSource(Argb argb);
+  virtual err_t setSource(ArgbI argb);
   virtual err_t setSource(const Pattern& pattern);
 
   virtual err_t resetSource();
@@ -184,9 +184,9 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   // [Transformations]
   // --------------------------------------------------------------------------
 
-  virtual DoubleMatrix getMatrix() const;
-  virtual err_t setMatrix(const DoubleMatrix& m);
-  virtual err_t resetMatrix();
+  virtual TransformD getTransform() const;
+  virtual err_t setTransform(const TransformD& m);
+  virtual err_t resetTransform();
 
   virtual err_t rotate(double angle, uint32_t order);
 
@@ -198,12 +198,12 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   virtual err_t translate(int x, int y, uint32_t order);
   virtual err_t translate(double x, double y, uint32_t order);
 
-  virtual err_t transform(const DoubleMatrix& m, uint32_t order);
+  virtual err_t transform(const TransformD& m, uint32_t order);
 
-  virtual err_t worldToScreen(DoublePoint* pt) const;
-  virtual err_t screenToWorld(DoublePoint* pt) const;
+  virtual err_t worldToScreen(PointD* pt) const;
+  virtual err_t screenToWorld(PointD* pt) const;
 
-  virtual err_t alignPoint(DoublePoint* pt) const;
+  virtual err_t alignPoint(PointD* pt) const;
 
   // --------------------------------------------------------------------------
   // [State]
@@ -216,17 +216,17 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   // [Clipping]
   // --------------------------------------------------------------------------
 
-  virtual err_t clipRect(const IntRect& rect, uint32_t clipOp);
-  virtual err_t clipMask(const IntPoint& pt, const Image& mask, uint32_t clipOp);
+  virtual err_t clipRect(const RectI& rect, uint32_t clipOp);
+  virtual err_t clipMask(const PointI& pt, const Image& mask, uint32_t clipOp);
   virtual err_t clipRegion(const Region& region, uint32_t clipOp);
 
-  virtual err_t clipRect(const DoubleRect& rect, uint32_t clipOp);
-  virtual err_t clipMask(const DoublePoint& pt, const Image& mask, uint32_t clipOp);
-  virtual err_t clipRects(const DoubleRect* r, sysuint_t count, uint32_t clipOp);
-  virtual err_t clipRound(const DoubleRect& r, const DoublePoint& radius, uint32_t clipOp);
-  virtual err_t clipEllipse(const DoublePoint& cp, const DoublePoint& r, uint32_t clipOp);
-  virtual err_t clipArc(const DoublePoint& cp, const DoublePoint& r, double start, double sweep, uint32_t clipOp);
-  virtual err_t clipPath(const DoublePath& path, bool stroke, uint32_t clipOp);
+  virtual err_t clipRect(const RectD& rect, uint32_t clipOp);
+  virtual err_t clipMask(const PointD& pt, const Image& mask, uint32_t clipOp);
+  virtual err_t clipRects(const RectD* r, sysuint_t count, uint32_t clipOp);
+  virtual err_t clipRound(const RectD& r, const PointD& radius, uint32_t clipOp);
+  virtual err_t clipEllipse(const PointD& cp, const PointD& r, uint32_t clipOp);
+  virtual err_t clipArc(const PointD& cp, const PointD& r, double start, double sweep, uint32_t clipOp);
+  virtual err_t clipPath(const PathD& path, bool stroke, uint32_t clipOp);
 
   virtual err_t resetClip();
 
@@ -234,13 +234,13 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   // [Raster Drawing]
   // --------------------------------------------------------------------------
 
-  virtual err_t drawPoint(const IntPoint& p);
-  virtual err_t drawLine(const IntPoint& start, const IntPoint& end);
-  virtual err_t drawRect(const IntRect& r);
-  virtual err_t drawRound(const IntRect& r, const IntPoint& radius);
-  virtual err_t fillRect(const IntRect& r);
-  virtual err_t fillRects(const IntRect* r, sysuint_t count);
-  virtual err_t fillRound(const IntRect& r, const IntPoint& radius);
+  virtual err_t drawPoint(const PointI& p);
+  virtual err_t drawLine(const PointI& start, const PointI& end);
+  virtual err_t drawRect(const RectI& r);
+  virtual err_t drawRound(const RectI& r, const PointI& radius);
+  virtual err_t fillRect(const RectI& r);
+  virtual err_t fillRects(const RectI* r, sysuint_t count);
+  virtual err_t fillRound(const RectI& r, const PointI& radius);
   virtual err_t fillRegion(const Region& region);
 
   virtual err_t fillAll();
@@ -249,60 +249,60 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   // [Vector Drawing]
   // --------------------------------------------------------------------------
 
-  virtual err_t drawPoint(const DoublePoint& p);
-  virtual err_t drawLine(const DoublePoint& start, const DoublePoint& end);
-  virtual err_t drawLine(const DoublePoint* pts, sysuint_t count);
-  virtual err_t drawPolygon(const DoublePoint* pts, sysuint_t count);
-  virtual err_t drawRect(const DoubleRect& r);
-  virtual err_t drawRects(const DoubleRect* r, sysuint_t count);
-  virtual err_t drawRound(const DoubleRect& r, const DoublePoint& radius);
-  virtual err_t drawEllipse(const DoublePoint& cp, const DoublePoint& r);
-  virtual err_t drawArc(const DoublePoint& cp, const DoublePoint& r, double start, double sweep);
-  virtual err_t drawPath(const DoublePath& path);
+  virtual err_t drawPoint(const PointD& p);
+  virtual err_t drawLine(const PointD& start, const PointD& end);
+  virtual err_t drawLine(const PointD* pts, sysuint_t count);
+  virtual err_t drawPolygon(const PointD* pts, sysuint_t count);
+  virtual err_t drawRect(const RectD& r);
+  virtual err_t drawRects(const RectD* r, sysuint_t count);
+  virtual err_t drawRound(const RectD& r, const PointD& radius);
+  virtual err_t drawEllipse(const PointD& cp, const PointD& r);
+  virtual err_t drawArc(const PointD& cp, const PointD& r, double start, double sweep);
+  virtual err_t drawPath(const PathD& path);
 
-  virtual err_t fillPolygon(const DoublePoint* pts, sysuint_t count);
-  virtual err_t fillRect(const DoubleRect& r);
-  virtual err_t fillRects(const DoubleRect* r, sysuint_t count);
-  virtual err_t fillRound(const DoubleRect& r, const DoublePoint& radius);
-  virtual err_t fillEllipse(const DoublePoint& cp, const DoublePoint& r);
-  virtual err_t fillArc(const DoublePoint& cp, const DoublePoint& r, double start, double sweep);
-  virtual err_t fillPath(const DoublePath& path);
+  virtual err_t fillPolygon(const PointD* pts, sysuint_t count);
+  virtual err_t fillRect(const RectD& r);
+  virtual err_t fillRects(const RectD* r, sysuint_t count);
+  virtual err_t fillRound(const RectD& r, const PointD& radius);
+  virtual err_t fillEllipse(const PointD& cp, const PointD& r);
+  virtual err_t fillArc(const PointD& cp, const PointD& r, double start, double sweep);
+  virtual err_t fillPath(const PathD& path);
 
   // --------------------------------------------------------------------------
   // [Glyph Drawing]
   // --------------------------------------------------------------------------
 
-  virtual err_t drawGlyph(const IntPoint&p, const Image& glyph, const IntRect* irect);
-  virtual err_t drawGlyph(const DoublePoint&p, const Image& glyph, const IntRect* irect);
+  virtual err_t drawGlyph(const PointI&p, const Image& glyph, const RectI* irect);
+  virtual err_t drawGlyph(const PointD&p, const Image& glyph, const RectI* irect);
 
-  virtual err_t drawGlyph(const IntPoint& pt, const Glyph& glyph, const IntRect* grect);
-  virtual err_t drawGlyph(const DoublePoint& pt, const Glyph& glyph, const IntRect* grect);
+  virtual err_t drawGlyph(const PointI& pt, const Glyph& glyph, const RectI* grect);
+  virtual err_t drawGlyph(const PointD& pt, const Glyph& glyph, const RectI* grect);
 
-  virtual err_t drawGlyphSet(const IntPoint& pt, const GlyphSet& glyphSet, const IntRect* clip);
-  virtual err_t drawGlyphSet(const DoublePoint& pt, const GlyphSet& glyphSet, const IntRect* clip);
+  virtual err_t drawGlyphSet(const PointI& pt, const GlyphSet& glyphSet, const RectI* clip);
+  virtual err_t drawGlyphSet(const PointD& pt, const GlyphSet& glyphSet, const RectI* clip);
 
   // --------------------------------------------------------------------------
   // [Text Drawing]
   // --------------------------------------------------------------------------
 
-  virtual err_t drawText(const IntPoint& pt, const String& text, const Font& font, const IntRect* clip);
-  virtual err_t drawText(const DoublePoint& pt, const String& text, const Font& font, const IntRect* clip);
+  virtual err_t drawText(const PointI& pt, const String& text, const Font& font, const RectI* clip);
+  virtual err_t drawText(const PointD& pt, const String& text, const Font& font, const RectI* clip);
 
-  virtual err_t drawText(const IntRect& rect, const String& text, const Font& font, uint32_t align, const IntRect* clip);
-  virtual err_t drawText(const DoubleRect& rect, const String& text, const Font& font, uint32_t align, const IntRect* clip);
+  virtual err_t drawText(const RectI& rect, const String& text, const Font& font, uint32_t align, const RectI* clip);
+  virtual err_t drawText(const RectD& rect, const String& text, const Font& font, uint32_t align, const RectI* clip);
 
   // --------------------------------------------------------------------------
   // [Image drawing]
   // --------------------------------------------------------------------------
 
-  virtual err_t drawImage(const IntPoint& p, const Image& image, const IntRect* irect);
-  virtual err_t drawImage(const DoublePoint& p, const Image& image, const IntRect* irect);
+  virtual err_t drawImage(const PointI& p, const Image& image, const RectI* irect);
+  virtual err_t drawImage(const PointD& p, const Image& image, const RectI* irect);
 
-  virtual err_t drawImage(const IntRect& rect, const Image& image, const IntRect* irect);
-  virtual err_t drawImage(const DoubleRect& rect, const Image& image, const IntRect* irect);
+  virtual err_t drawImage(const RectI& rect, const Image& image, const RectI* irect);
+  virtual err_t drawImage(const RectD& rect, const Image& image, const RectI* irect);
 
   err_t stretchImageHelper(
-    const DoublePoint& pt, const Image& image, const IntRect& srcRect,
+    const PointD& pt, const Image& image, const RectI& srcRect,
     double scaleX, double scaleY);
 
   // --------------------------------------------------------------------------
@@ -385,7 +385,7 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   err_t _clipOpInfinite(uint32_t clipOp);
 
   //! @brief Do clip operation with box.
-  err_t _clipOpBox(const IntBox& box, uint32_t clipOp);
+  err_t _clipOpBox(const BoxI& box, uint32_t clipOp);
 
   //! @brief Do clip operation with region.
   err_t _clipOpRegion(const Region& region, uint32_t clipOp);
@@ -405,7 +405,7 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   //! Helper method that will destroy clip mask (if exists) and set clipping
   //! to @a box. Clip type is set to @c RASTER_CLIP_SIMPLE and schedule flags
   //! are set when running in the multithreaded mode.
-  err_t _clipSetBox(const IntBox& box);
+  err_t _clipSetBox(const BoxI& box);
 
   //! @brief Set clip region to @a region.
   //!
@@ -441,19 +441,19 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
 
   // Serializers are always called from painter thread.
   err_t _serializePaintRegion(const Region& region);
-  err_t _serializePaintBoxes(const IntBox* box, sysuint_t count);
-  err_t _serializePaintImage(const IntRect& dst, const Image& image, const IntRect& src);
-  err_t _serializePaintImageAffine(const DoublePoint& pt, const Image& image, const IntRect& irect);
-  err_t _serializePaintGlyphSet(const IntPoint& pt, const GlyphSet& glyphSet, const IntRect* clip);
+  err_t _serializePaintBoxes(const BoxI* box, sysuint_t count);
+  err_t _serializePaintImage(const RectI& dst, const Image& image, const RectI& src);
+  err_t _serializePaintImageAffine(const PointD& pt, const Image& image, const RectI& irect);
+  err_t _serializePaintGlyphSet(const PointI& pt, const GlyphSet& glyphSet, const RectI* clip);
 
-  err_t _serializePaintPath(const DoublePath& path, bool stroke);
-  err_t _serializePaintRect(const DoubleRect& rect);
+  err_t _serializePaintPath(const PathD& path, bool stroke);
+  err_t _serializePaintRect(const RectD& rect);
 
   // --------------------------------------------------------------------------
   // [Serializers - Clipping]
   // --------------------------------------------------------------------------
 
-  RasterClipMask* _allocClipMask(const IntBox& workBox);
+  RasterClipMask* _allocClipMask(const BoxI& workBox);
   void _destroyClipMask(RasterClipMask* mask);
 
   //! @brief Serialize new clip mask command.
@@ -476,7 +476,7 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   //! @param bounds Limit bounds of new mask to @a bounds. Used when next clip
   //! operator is @c CLIP_OP_INTERSECT to prevent creating of unnecessary spans.
   //! In all other cases the bounds must be get by ctx.finalRegion.getExtents().
-  err_t _serializeMaskConvert(const IntBox& bounds);
+  err_t _serializeMaskConvert(const BoxI& bounds);
 
   // Serializers are only used if we are working with RASTER_CLIP_MASK clipping.
   // If clip can be represented using Region then serializers are not used, but
@@ -485,10 +485,10 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   err_t _serializeMaskSave();
   err_t _serializeMaskRestore(RasterClipMask* toMask);
 
-  err_t _serializeMaskBox(const IntBox& box, uint32_t clipOp);
-  // err_t _serializeClipMask(const IntPoint& pt, const Image& mask, const IntBox& ibox);
+  err_t _serializeMaskBox(const BoxI& box, uint32_t clipOp);
+  // err_t _serializeClipMask(const PointI& pt, const Image& mask, const BoxI& ibox);
   err_t _serializeMaskRegion(const Region& region, uint32_t clipOp);
-  err_t _serializeMaskPath(const DoublePath& path, bool stroke, uint32_t clipOp);
+  err_t _serializeMaskPath(const PathD& path, bool stroke, uint32_t clipOp);
 
   // --------------------------------------------------------------------------
   // [Serializers - Helpers]
@@ -543,10 +543,10 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   // --------------------------------------------------------------------------
 
   //! @brief Rasterize path using the engine main rasterizer (single-threaded).
-  bool _doRasterizePath_st(const DoublePath& path, const IntBox& clipBox, uint32_t fillRule, bool stroke);
+  bool _doRasterizePath_st(const PathD& path, const BoxI& clipBox, uint32_t fillRule, bool stroke);
 
   //! @brief Rasterize rect using the engine main rasterizer (single-threaded).
-  bool _doRasterizeRect_st(const DoubleRect& rect, const IntBox& clipBox);
+  bool _doRasterizeRect_st(const RectD& rect, const BoxI& clipBox);
 
   // --------------------------------------------------------------------------
   // [Renderers - Painting]
@@ -555,16 +555,16 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   // Paint region represented by @a count of boxes in @a box.
   //
   // Input boxes are clipped to finalRegion (or workRegion if clip-mask is used).
-  static void _doPaintBoxes_st(RasterPaintContext* ctx, const IntBox* box, sysuint_t count);
-  static void _doPaintBoxes_mt(RasterPaintContext* ctx, const IntBox* box, sysuint_t count);
+  static void _doPaintBoxes_st(RasterPaintContext* ctx, const BoxI* box, sysuint_t count);
+  static void _doPaintBoxes_mt(RasterPaintContext* ctx, const BoxI* box, sysuint_t count);
 
   // Paint an image.
-  static void _doPaintImage_st(RasterPaintContext* ctx, const IntRect& dst, const Image& image, const IntRect& src);
-  static void _doPaintImage_mt(RasterPaintContext* ctx, const IntRect& dst, const Image& image, const IntRect& src);
+  static void _doPaintImage_st(RasterPaintContext* ctx, const RectI& dst, const Image& image, const RectI& src);
+  static void _doPaintImage_mt(RasterPaintContext* ctx, const RectI& dst, const Image& image, const RectI& src);
 
   // Paint a glyph set.
-  static void _doPaintGlyphSet_st(RasterPaintContext* ctx, const IntPoint& pt, const GlyphSet& glyphSet, const IntBox& boundingBox);
-  static void _doPaintGlyphSet_mt(RasterPaintContext* ctx, const IntPoint& pt, const GlyphSet& glyphSet, const IntBox& boundingBox);
+  static void _doPaintGlyphSet_st(RasterPaintContext* ctx, const PointI& pt, const GlyphSet& glyphSet, const BoxI& boundingBox);
+  static void _doPaintGlyphSet_mt(RasterPaintContext* ctx, const PointI& pt, const GlyphSet& glyphSet, const BoxI& boundingBox);
 
   // Paint an output from rasterizer (rasterized path).
   static void _doPaintPath_st(RasterPaintContext* ctx, AnalyticRasterizer8* ras);
@@ -577,12 +577,12 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   // Convert clip region represented by @a count of boxes in @a box.
   //
   // Used to convert region into non-initialized mask, rows will be overwritten.
-  static void _doMaskConvert_st(RasterPaintContext* ctx, const IntBox* box, sysuint_t count);
-  static void _doMaskConvert_mt(RasterPaintContext* ctx, const IntBox* box, sysuint_t count);
+  static void _doMaskConvert_st(RasterPaintContext* ctx, const BoxI* box, sysuint_t count);
+  static void _doMaskConvert_mt(RasterPaintContext* ctx, const BoxI* box, sysuint_t count);
 
   // Combine region represented by @a count of boxes in @a box with clip-mask.
-  static void _doMaskBoxes_st(RasterPaintContext* ctx, const IntBox* box, sysuint_t count, uint32_t clipOp);
-  static void _doMaskBoxes_mt(RasterPaintContext* ctx, const IntBox* box, sysuint_t count, uint32_t clipOp);
+  static void _doMaskBoxes_st(RasterPaintContext* ctx, const BoxI* box, sysuint_t count, uint32_t clipOp);
+  static void _doMaskBoxes_mt(RasterPaintContext* ctx, const BoxI* box, sysuint_t count, uint32_t clipOp);
 
   // Combine rasterized path with clip-mask.
   static void _doMaskPath_st(RasterPaintContext* ctx, AnalyticRasterizer8* ras, uint32_t clipOp);
@@ -610,12 +610,12 @@ struct FOG_HIDDEN RasterPaintEngine : public PaintEngine
   RasterWorkerManager* workerManager;
 
   // Temporary path.
-  DoublePath curPath;
+  PathD curPath;
 
   // Temporary path #0.
-  DoublePath tmpPath0;
+  PathD tmpPath0;
   // Temporary path #1.
-  DoublePath tmpPath1;
+  PathD tmpPath1;
 
   // Temporary glyph set.
   GlyphSet tmpGlyphSet;

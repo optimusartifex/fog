@@ -1,4 +1,4 @@
-// [Fog Library - Public API]
+// [Fog-Core]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -48,10 +48,11 @@ FOG_INIT_FUNC(fog_object);
 FOG_INIT_FUNC(fog_application);
 
 // Fog-Graphics
+FOG_INIT_FUNC(fog_curve);
+FOG_INIT_FUNC(fog_transform);
+FOG_INIT_FUNC(fog_path);
 FOG_INIT_FUNC(fog_rasterengine);
 FOG_INIT_FUNC(fog_palette);
-FOG_INIT_FUNC(fog_path);
-FOG_INIT_FUNC(fog_pathutil);
 FOG_INIT_FUNC(fog_region);
 FOG_INIT_FUNC(fog_image);
 FOG_INIT_FUNC(fog_imageio);
@@ -117,10 +118,11 @@ static const FogInitEntry fog_init_entries[] =
   INIT_ENTRY(fog_application),      // Depends to Many
 
   // Fog-Graphics
+  INIT_ENTRY(fog_curve),
+  INIT_ENTRY(fog_transform),
+  INIT_ENTRY(fog_path),
   INIT_ENTRY(fog_rasterengine),
   INIT_ENTRY(fog_palette),
-  INIT_ENTRY(fog_path),
-  INIT_ENTRY(fog_pathutil),
   INIT_ENTRY(fog_region),
   INIT_ENTRY(fog_image),
   INIT_ENTRY(fog_imageio),

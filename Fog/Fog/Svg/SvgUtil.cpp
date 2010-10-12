@@ -1,4 +1,4 @@
-// [Fog-Svg Library - Public API]
+// [Fog-Svg]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -6,7 +6,7 @@
 // [Dependencies]
 #include <Fog/Core/Math.h>
 #include <Fog/Core/StringUtil.h>
-#include <Fog/Graphics/Matrix.h>
+#include <Fog/Graphics/Transform.h>
 #include <Fog/Svg/Constants.h>
 #include <Fog/Svg/SvgUtil.h>
 
@@ -212,10 +212,10 @@ static uint8_t doubleHexToColorValue(Char c0, Char c1)
   return (i << 4) | j;
 }
 
-FOG_API int parseColor(const String& str, Argb* dst)
+FOG_API int parseColor(const String& str, ArgbI* dst)
 {
   int status = SVG_SOURCE_INVALID;
-  Argb color(0xFF000000);
+  ArgbI color(0xFF000000);
 
   const Char* strCur = str.getData();
   const Char* strEnd = strCur + str.getLength();
@@ -354,14 +354,12 @@ bail:
   return status;
 }
 
-err_t serializeColor(String& dst, Argb color)
+err_t serializeColor(String& dst, ArgbI color)
 {
-  err_t err;
+  FOG_RETURN_ON_ERROR( dst.append(Char('#')) );
+  FOG_RETURN_ON_ERROR( dst.appendInt(color.getPacked(), 16, FormatFlags(6, 6)) ); 
 
-  if ((err = dst.append(Char('#'))) ||
-      (err = dst.appendInt(color.getValue(), 16, FormatFlags(6, 6)))) return err;
-
-  return err;
+  return ERR_OK;
 }
 
 err_t parseOpacity(const String& str, float* dst)
@@ -407,7 +405,7 @@ err_t parseOpacity(const String& str, float* dst)
 // [Fog::SvgUtil - Matrix]
 // ============================================================================
 
-err_t parseMatrix(const String& str, DoubleMatrix* dst)
+err_t parseMatrix(const String& str, TransformD* dst)
 {
   err_t status = ERR_OK;
 
@@ -419,7 +417,7 @@ err_t parseMatrix(const String& str, DoubleMatrix* dst)
   double d[6];
   sysuint_t d_count;
 
-  DoubleMatrix w;
+  TransformD w;
 
 start:
   // Skip spaces.
@@ -493,7 +491,7 @@ done:
   if (functionLen == 6 && StringUtil::eq(functionName, "matrix", 6))
   {
     if (d_count != 6) goto end;
-    w.multiply(*reinterpret_cast<DoubleMatrix *>(d), MATRIX_PREPEND);
+    w.transform(TransformD(d[0], d[1], d[2], d[3], d[4], d[5]), MATRIX_ORDER_PREPEND);
   }
   // translate() function.
   else if (functionLen == 9 && StringUtil::eq(functionName, "translate", 9))
@@ -502,7 +500,7 @@ done:
 
     // If ty is not provided, it's assumed to be zero.
     if (d_count == 1) d[1] = 0.0;
-    w.translate(d[0], d[1], MATRIX_PREPEND);
+    w.translate(d[0], d[1], MATRIX_ORDER_PREPEND);
   }
   // scale() function.
   else if (functionLen == 5 && StringUtil::eq(functionName, "scale", 5))
@@ -518,23 +516,23 @@ done:
   {
     if (d_count != 1 && d_count != 3) goto end;
 
-    if (d_count == 3) w.translate(d[1], d[2], MATRIX_PREPEND);
-    w.rotate(Math::deg2rad(d[0]), MATRIX_PREPEND);
-    if (d_count == 3) w.translate(-d[1], -d[2], MATRIX_PREPEND);
+    if (d_count == 3) w.translate(d[1], d[2], MATRIX_ORDER_PREPEND);
+    w.rotate(Math::deg2rad(d[0]), MATRIX_ORDER_PREPEND);
+    if (d_count == 3) w.translate(-d[1], -d[2], MATRIX_ORDER_PREPEND);
   }
   // skewX() function.
   else if (functionLen == 5 && StringUtil::eq(functionName, "skewX", 5))
   {
     if (d_count != 1) goto end;
 
-    w.skew(Math::deg2rad(d[0]), 0.0, MATRIX_PREPEND);
+    w.skew(Math::deg2rad(d[0]), 0.0, MATRIX_ORDER_PREPEND);
   }
   // skewY() function.
   else if (functionLen == 5 && StringUtil::eq(functionName, "skewY", 5))
   {
     if (d_count != 1) goto end;
 
-    w.skew(0.0, Math::deg2rad(d[0]), MATRIX_PREPEND);
+    w.skew(0.0, Math::deg2rad(d[0]), MATRIX_ORDER_PREPEND);
   }
   else
   {
@@ -605,12 +603,10 @@ SvgCoord parseCoord(const String& str)
 
 err_t serializeCoord(String& dst, const SvgCoord& coord)
 {
-  err_t err;
+  FOG_RETURN_ON_ERROR( dst.appendDouble(coord.value) );
 
-  if ((err = dst.appendDouble(coord.value))) return err;
-
-  if ((coord.unit < SVG_UNIT_INVALID || coord.unit != SVG_UNIT_NONE) &&
-      (err = dst.append(Ascii8(&svgUnitNames[coord.unit * 2], 2)))) return err;
+  if (coord.unit < SVG_UNIT_INVALID || coord.unit != SVG_UNIT_NONE)
+    FOG_RETURN_ON_ERROR( dst.append(Ascii8(&svgUnitNames[coord.unit * 2], 2)) );
 
   return ERR_OK;
 }
@@ -619,9 +615,9 @@ err_t serializeCoord(String& dst, const SvgCoord& coord)
 // [Fog::SvgUtil - Paths]
 // ============================================================================
 
-DoublePath parsePoints(const String& str, bool close)
+PathD parsePoints(const String& str, bool close)
 {
-  DoublePath path;
+  PathD path;
 
   const Char* strCur = str.getData();
   const Char* strEnd = strCur + str.getLength();
@@ -678,9 +674,9 @@ bail:
   return path;
 }
 
-DoublePath parsePath(const String& str)
+PathD parsePath(const String& str)
 {
-  DoublePath path;
+  PathD path;
 
   const Char* strCur = str.getData();
   const Char* strEnd = strCur + str.getLength();

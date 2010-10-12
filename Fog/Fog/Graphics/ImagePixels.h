@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -56,7 +56,7 @@ struct FOG_API ImagePixels
   // --------------------------------------------------------------------------
 
   //! @brief Get size of the buffer.
-  FOG_INLINE IntSize getSize() const { return _size; }
+  FOG_INLINE SizeI getSize() const { return _size; }
   //! @brief Get width of image pixels buffer.
   FOG_INLINE int getWidth() const { return _size.getWidth(); }
   //! @brief Get height of image pixels buffer.
@@ -83,7 +83,7 @@ protected:
   // --------------------------------------------------------------------------
 
   //! @brief Image pixels size (width and height).
-  IntSize _size;
+  SizeI _size;
   //! @brief Image pixels format.
   uint32_t _format;
   //! @brief Image pixels flags.

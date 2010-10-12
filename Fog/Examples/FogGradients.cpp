@@ -18,7 +18,7 @@ struct MyWindow : public Window
   virtual void onPaint(PaintEvent* e);
 
   // Helper to paint pattern in rect with title.
-  void paintPattern(Painter* p, const IntPoint& pos, const DoubleSize& size, const Pattern& pattern, const String& name);
+  void paintPattern(Painter* p, const PointI& pos, const SizeD& size, const Pattern& pattern, const String& name);
 
   bool useRegion;
   double _rotate;
@@ -87,7 +87,7 @@ void MyWindow::onPaint(PaintEvent* e)
   p->setOperator(OPERATOR_SRC_OVER);
 
   Pattern pat;
-  DoubleSize size(128.0, 128.0);
+  SizeD size(128.0, 128.0);
   String s;
 
   pat.setType(PATTERN_LINEAR_GRADIENT);
@@ -97,9 +97,9 @@ void MyWindow::onPaint(PaintEvent* e)
 
   //p->setAlpha(0.9f);
 
-  p->translate(-getWidth()/2, -getHeight()/2, MATRIX_APPEND);
-  p->rotate(_rotate, MATRIX_APPEND);
-  p->translate(getWidth()/2, getHeight()/2, MATRIX_APPEND);
+  p->translate(-getWidth()/2, -getHeight()/2, MATRIX_ORDER_APPEND);
+  p->rotate(_rotate, MATRIX_ORDER_APPEND);
+  p->translate(getWidth()/2, getHeight()/2, MATRIX_ORDER_APPEND);
   p->scale(_scale, _scale);
 
   for (int y = 0; y < 4; y++)
@@ -109,33 +109,33 @@ void MyWindow::onPaint(PaintEvent* e)
 
     s.format("Linear %s", spread_names[y]);
 
-    pat.setPoints(DoublePoint(48.0, 48.0), DoublePoint(80.0, 80.0));
-    paintPattern(p, IntPoint(0, y), size, pat, s);
+    pat.setPoints(PointD(48.0, 48.0), PointD(80.0, 80.0));
+    paintPattern(p, PointI(0, y), size, pat, s);
 
-    pat.setPoints(DoublePoint(64.0, 40.0), DoublePoint(64.0, 80.0));
-    paintPattern(p, IntPoint(1, y), size, pat, s);
+    pat.setPoints(PointD(64.0, 40.0), PointD(64.0, 80.0));
+    paintPattern(p, PointI(1, y), size, pat, s);
 
     pat.setType(PATTERN_RADIAL_GRADIENT);
     s.format("Radial %s", spread_names[y]);
 
-    pat.setPoints(DoublePoint(64.0, 64.0), DoublePoint(40.0, 40.0));
+    pat.setPoints(PointD(64.0, 64.0), PointD(40.0, 40.0));
     pat.setRadius(40.0);
-    paintPattern(p, IntPoint(2, y), size, pat, s);
+    paintPattern(p, PointI(2, y), size, pat, s);
 
-    pat.setPoints(DoublePoint(64.0, 64.0), DoublePoint(20.0, 20.0));
+    pat.setPoints(PointD(64.0, 64.0), PointD(20.0, 20.0));
     pat.setRadius(40.0);
-    paintPattern(p, IntPoint(3, y), size, pat, s);
+    paintPattern(p, PointI(3, y), size, pat, s);
 
     pat.setType(PATTERN_CONICAL_GRADIENT);
     s.format("Conical %s", spread_names[y]);
 
-    pat.setPoints(DoublePoint(64.0, 64.0), DoublePoint(128.0, 64.0));
+    pat.setPoints(PointD(64.0, 64.0), PointD(128.0, 64.0));
     pat.setRadius(40.0);
-    paintPattern(p, IntPoint(4, y), size, pat, s);
+    paintPattern(p, PointI(4, y), size, pat, s);
   }
 }
 
-void MyWindow::paintPattern(Painter* p, const IntPoint& pos, const DoubleSize& size, const Pattern& pattern, const String& name)
+void MyWindow::paintPattern(Painter* p, const PointI& pos, const SizeD& size, const Pattern& pattern, const String& name)
 {
   double x = 10 + pos.x * (size.w + 20.0);
   double y = 10 + pos.y * (size.h + 20.0);
@@ -152,22 +152,22 @@ void MyWindow::paintPattern(Painter* p, const IntPoint& pos, const DoubleSize& s
     {
       for (xx = 0; xx < size.w; xx += 20)
       {
-        r.combine(IntRect(x+xx+1, y+21+yy, 10, 10), REGION_OP_UNION);
+        r.combine(RectI(x+xx+1, y+21+yy, 10, 10), REGION_OP_UNION);
       }
     }
     p->fillRegion(r);
   }
   else
   {
-    p->fillRect(IntRect((int)x, (int)y + 20, (int)size.w + 2, (int)size.h + 2));
+    p->fillRect(RectI((int)x, (int)y + 20, (int)size.w + 2, (int)size.h + 2));
   }
 
   p->save();
   p->setAlpha(1.0f);
 
   p->setSource(0xFFFFFFFF);
-  p->drawText(IntRect((int)x, (int)y, (int)size.w, 20), name, getFont(), TEXT_ALIGN_CENTER);
-  p->drawRect(IntRect((int)x - 1, (int)y + 19, (int)size.w + 3, (int)size.h + 3));
+  p->drawText(RectI((int)x, (int)y, (int)size.w, 20), name, getFont(), TEXT_ALIGN_CENTER);
+  p->drawRect(RectI((int)x - 1, (int)y + 19, (int)size.w + 3, (int)size.h + 3));
 
   p->restore();
 }
@@ -181,7 +181,7 @@ FOG_GUI_MAIN()
   Application app(Ascii8("Gui"));
 
   MyWindow window;
-  window.setSize(IntSize(800, 640));
+  window.setSize(SizeI(800, 640));
   window.show();
   window.addListener(EVENT_CLOSE, &app, &Application::quit);
 

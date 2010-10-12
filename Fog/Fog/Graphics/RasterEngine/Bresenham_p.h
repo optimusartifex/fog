@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -22,7 +22,7 @@ namespace RasterEngine {
 //! @brief Class that's used by software painters to draw aliased line using
 //! bresenham algorithm.
 //!
-//! This class is internal and it adventage is that is can clip line using
+//! This class is internal and it advantage is that is can clip line using
 //! only arithetic (no floating point), so it can be used together with MMX
 //! or 3dNow! instructions.
 //!
@@ -223,12 +223,12 @@ struct FOG_HIDDEN BresenhamLineIterator
     return true;
   }
 
-  FOG_INLINE bool initAndClip(int x1, int y1, int x2, int y2, const IntBox& clip)
+  FOG_INLINE bool initAndClip(int x1, int y1, int x2, int y2, const BoxI& clip)
   {
     return initAndClip(x1, y1, x2, y2, clip.getX1(), clip.getY1(), clip.getX2()-1, clip.getY2()-1);
   }
 
-  FOG_INLINE bool initAndClip(int x1, int y1, int x2, int y2, const IntRect& clip)
+  FOG_INLINE bool initAndClip(int x1, int y1, int x2, int y2, const RectI& clip)
   {
     return initAndClip(x1, y1, x2, y2, clip.getX1(), clip.getY1(), clip.getX2()-1, clip.getY2()-1);
   }

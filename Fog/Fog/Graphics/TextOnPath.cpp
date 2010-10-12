@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -10,7 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Graphics/TextOnPath.h>
-#include <Fog/Graphics/Matrix.h>
+#include <Fog/Graphics/Transform.h>
 
 namespace Fog {
 
@@ -40,12 +40,12 @@ TextOnPath::~TextOnPath()
 {
 }
 
-err_t TextOnPath::transform(DoublePath& dst, const DoublePath& src) const
+err_t TextOnPath::transform(PathD& dst, const PathD& src) const
 {
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t TextOnPath::setPath(const DoublePath& path, const DoubleMatrix* matrix)
+err_t TextOnPath::setPath(const PathD& path, const TransformD* matrix)
 {
   // Use larger scaling factor to increase path on path precision.
   double scalingFactor = 3.0;

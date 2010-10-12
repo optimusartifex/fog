@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -33,9 +33,9 @@
 #include <Fog/Core/Intrin/IntrinSSE.h>
 #endif // FOG_RASTER_MMXSSE
 
+#include <Fog/Core/Face/FaceC.h>
 #include <Fog/Core/Math.h>
 #include <Fog/Core/Misc.h>
-#include <Fog/Face/FaceByte.h>
 #include <Fog/Graphics/Color.h>
 #include <Fog/Graphics/ColorAnalyzer_p.h>
 #include <Fog/Graphics/ColorLut.h>
@@ -47,12 +47,12 @@
 #include <Fog/Graphics/ImageFilter.h>
 #include <Fog/Graphics/ImageFilterEngine.h>
 #include <Fog/Graphics/ImageFilterParams.h>
-#include <Fog/Graphics/Matrix.h>
 #include <Fog/Graphics/Path.h>
 #include <Fog/Graphics/Pattern.h>
 #include <Fog/Graphics/RasterEngine_p.h>
 #include <Fog/Graphics/RasterUtil_p.h>
 #include <Fog/Graphics/Span_p.h>
+#include <Fog/Graphics/Transform.h>
 
 // ============================================================================
 // [RasterEngine - MMX]

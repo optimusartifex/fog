@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -74,7 +74,7 @@ struct FOG_HIDDEN PatternTextureC
   static err_t FOG_FASTCALL init(
     RasterPattern* ctx,
     const Pattern& pattern,
-    const DoubleMatrix& matrix,
+    const TransformD& transform,
     uint32_t interpolationType)
   {
     PatternData* d = pattern._d;
@@ -85,8 +85,8 @@ struct FOG_HIDDEN PatternTextureC
     // If texture is empty image we tread it as 0x00000000 solid color.
     if (d->obj.texture->isEmpty()) return rasterFuncs.pattern.solid_init(ctx, 0x00000000);
 
-    // Multiply pattern matrix with a given matrix (painter transformations).
-    DoubleMatrix m(pattern._d->matrix.multiplied(matrix));
+    // Multiply pattern transformation matrix with a given transform (painter transformations).
+    TransformD m(pattern._d->transform.multiplied(transform));
 
     // Call init_blit() which will initialize the context.
     return init_blit(ctx, d->obj.texture.instance(), d->data.texture->area, m, d->spread, interpolationType);
@@ -94,8 +94,8 @@ struct FOG_HIDDEN PatternTextureC
 
   static err_t FOG_FASTCALL init_blit(
     RasterPattern* ctx,
-    const Image& image, const IntRect& irect, 
-    const DoubleMatrix& matrix,
+    const Image& image, const RectI& irect, 
+    const TransformD& transform,
     uint32_t spread, uint32_t interpolationType)
   {
     // Only valid images can be passed to init_blit.
@@ -103,8 +103,8 @@ struct FOG_HIDDEN PatternTextureC
     FOG_ASSERT(spread < PATTERN_SPREAD_COUNT);
 
     uint32_t format = image.getFormat();
-    bool isTransformed = (!Math::feq(matrix.sx, 1.0) || !Math::feq(matrix.shy, 0.0) ||
-                          !Math::feq(matrix.sy, 1.0) || !Math::feq(matrix.shx, 0.0) );
+    bool isTransformed = (!Math::feq(transform._00, 1.0) || !Math::feq(transform._01, 0.0) ||
+                          !Math::feq(transform._11, 1.0) || !Math::feq(transform._10, 0.0) );
 
     ctx->texture.texture.init(image);
     ctx->texture.pal = NULL;
@@ -172,8 +172,8 @@ struct FOG_HIDDEN PatternTextureC
 
     if (!isTransformed)
     {
-      int64_t startx = Math::doubleToFixed48x16(matrix.tx);
-      int64_t starty = Math::doubleToFixed48x16(matrix.ty);
+      int64_t startx = Math::doubleToFixed48x16(transform._20);
+      int64_t starty = Math::doubleToFixed48x16(transform._21);
 
       uint fx = (int)(startx >> 8) & 0xFF;
       uint fy = (int)(starty >> 8) & 0xFF;
@@ -233,12 +233,13 @@ struct FOG_HIDDEN PatternTextureC
     if (!ctx->fetch)
     {
       // Transform.
-      matrix.inverted().saveTo(ctx->m);
+      // TODO: Check for return value.
+      ctx->inv = transform.inverted();
 
       // Inner loop increments and bounds (16.16 fixed point).
       {
-        int dx = Math::doubleToFixed16x16(ctx->m[MATRIX_SX]);
-        int dy = Math::doubleToFixed16x16(ctx->m[MATRIX_SHY]);
+        int dx = Math::doubleToFixed16x16(ctx->inv._00);
+        int dy = Math::doubleToFixed16x16(ctx->inv._01);
 
         int fxmax = ctx->texture.w << 16;
         int fymax = ctx->texture.h << 16;
@@ -2007,8 +2008,8 @@ fetchSolidLoop:
     int tw = ctx->texture.w;
     int th = ctx->texture.h;
 
-    int fx = Math::doubleToFixed16x16(rx * ctx->m[MATRIX_SX ] + ry * ctx->m[MATRIX_SHX] + ctx->m[MATRIX_TX]);
-    int fy = Math::doubleToFixed16x16(rx * ctx->m[MATRIX_SHY] + ry * ctx->m[MATRIX_SY ] + ctx->m[MATRIX_TY]);
+    int fx = Math::doubleToFixed16x16(rx * ctx->inv._00 + ry * ctx->inv._10 + ctx->inv._20);
+    int fy = Math::doubleToFixed16x16(rx * ctx->inv._01 + ry * ctx->inv._11 + ctx->inv._21);
 
     int dx = ctx->texture.dx;
     int dy = ctx->texture.dy;
@@ -2061,8 +2062,8 @@ fetchSolidLoop:
     int tw = ctx->texture.w;
     int th = ctx->texture.h;
 
-    int fx = Math::doubleToFixed16x16(rx * ctx->m[MATRIX_SX ] + ry * ctx->m[MATRIX_SHX] + ctx->m[MATRIX_TX]);
-    int fy = Math::doubleToFixed16x16(rx * ctx->m[MATRIX_SHY] + ry * ctx->m[MATRIX_SY ] + ctx->m[MATRIX_TY]);
+    int fx = Math::doubleToFixed16x16(rx * ctx->inv._00 + ry * ctx->inv._10 + ctx->inv._20);
+    int fy = Math::doubleToFixed16x16(rx * ctx->inv._01 + ry * ctx->inv._11 + ctx->inv._21);
 
     int dx = ctx->texture.dx;
     int dy = ctx->texture.dy;
@@ -2111,8 +2112,8 @@ fetchSolidLoop:
     double rx = (double)x + 0.5;
     double ry = (double)y + 0.5;
 
-    int fx = Math::doubleToFixed16x16(rx * ctx->m[MATRIX_SX ] + ry * ctx->m[MATRIX_SHX] + ctx->m[MATRIX_TX]);
-    int fy = Math::doubleToFixed16x16(rx * ctx->m[MATRIX_SHY] + ry * ctx->m[MATRIX_SY ] + ctx->m[MATRIX_TY]);
+    int fx = Math::doubleToFixed16x16(rx * ctx->inv._00 + ry * ctx->inv._10 + ctx->inv._20);
+    int fy = Math::doubleToFixed16x16(rx * ctx->inv._01 + ry * ctx->inv._11 + ctx->inv._21);
 
     int dx = ctx->texture.dx;
     int dy = ctx->texture.dy;
@@ -2176,8 +2177,8 @@ fetchSolidLoop:
     double rx = (double)x + 0.5;
     double ry = (double)y + 0.5;
 
-    int fx = Math::doubleToFixed16x16(rx * ctx->m[MATRIX_SX ] + ry * ctx->m[MATRIX_SHX] + ctx->m[MATRIX_TX]);
-    int fy = Math::doubleToFixed16x16(rx * ctx->m[MATRIX_SHY] + ry * ctx->m[MATRIX_SY ] + ctx->m[MATRIX_TY]);
+    int fx = Math::doubleToFixed16x16(rx * ctx->inv._00 + ry * ctx->inv._10 + ctx->inv._20);
+    int fy = Math::doubleToFixed16x16(rx * ctx->inv._01 + ry * ctx->inv._11 + ctx->inv._21);
 
     int dx = ctx->texture.dx;
     int dy = ctx->texture.dy;
@@ -2258,8 +2259,8 @@ fetchSolidLoop:
     int dx = ctx->texture.dx;
     int dy = ctx->texture.dy;
 
-    int fx = Math::doubleToFixed16x16(rx * ctx->m[MATRIX_SX ] + ry * ctx->m[MATRIX_SHX] + ctx->m[MATRIX_TX]);
-    int fy = Math::doubleToFixed16x16(rx * ctx->m[MATRIX_SHY] + ry * ctx->m[MATRIX_SY ] + ctx->m[MATRIX_TY]);
+    int fx = Math::doubleToFixed16x16(rx * ctx->inv._00 + ry * ctx->inv._10 + ctx->inv._20);
+    int fy = Math::doubleToFixed16x16(rx * ctx->inv._01 + ry * ctx->inv._11 + ctx->inv._21);
 
     fx -= 0x8000;
     fy -= 0x8000;
@@ -2362,8 +2363,8 @@ fetchSolidLoop:
     int dx = ctx->texture.dx;
     int dy = ctx->texture.dy;
 
-    int fx = Math::doubleToFixed16x16(rx * ctx->m[MATRIX_SX ] + ry * ctx->m[MATRIX_SHX] + ctx->m[MATRIX_TX]);
-    int fy = Math::doubleToFixed16x16(rx * ctx->m[MATRIX_SHY] + ry * ctx->m[MATRIX_SY ] + ctx->m[MATRIX_TY]);
+    int fx = Math::doubleToFixed16x16(rx * ctx->inv._00 + ry * ctx->inv._10 + ctx->inv._20);
+    int fy = Math::doubleToFixed16x16(rx * ctx->inv._01 + ry * ctx->inv._11 + ctx->inv._21);
 
     fx -= 0x8000;
     fy -= 0x8000;
@@ -2451,8 +2452,8 @@ fetchSolidLoop:
     int dx = ctx->texture.dx;
     int dy = ctx->texture.dy;
 
-    int fx = Math::doubleToFixed16x16(rx * ctx->m[MATRIX_SX ] + ry * ctx->m[MATRIX_SHX] + ctx->m[MATRIX_TX]);
-    int fy = Math::doubleToFixed16x16(rx * ctx->m[MATRIX_SHY] + ry * ctx->m[MATRIX_SY ] + ctx->m[MATRIX_TY]);
+    int fx = Math::doubleToFixed16x16(rx * ctx->inv._00 + ry * ctx->inv._10 + ctx->inv._20);
+    int fy = Math::doubleToFixed16x16(rx * ctx->inv._01 + ry * ctx->inv._11 + ctx->inv._21);
 
     int fxmax = ctx->texture.fxmax;
     int fymax = ctx->texture.fymax;
@@ -2548,8 +2549,8 @@ fetchSolidLoop:
     int dx = ctx->texture.dx;
     int dy = ctx->texture.dy;
 
-    int fx = Math::doubleToFixed16x16(rx * ctx->m[MATRIX_SX ] + ry * ctx->m[MATRIX_SHX] + ctx->m[MATRIX_TX]);
-    int fy = Math::doubleToFixed16x16(rx * ctx->m[MATRIX_SHY] + ry * ctx->m[MATRIX_SY ] + ctx->m[MATRIX_TY]);
+    int fx = Math::doubleToFixed16x16(rx * ctx->inv._00 + ry * ctx->inv._10 + ctx->inv._20);
+    int fy = Math::doubleToFixed16x16(rx * ctx->inv._01 + ry * ctx->inv._11 + ctx->inv._21);
 
     int fxmax = ctx->texture.fxmax;
     int fymax = ctx->texture.fymax;

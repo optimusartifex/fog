@@ -1,4 +1,4 @@
-// [Fog-Core Library - Public API]
+// [Fog-Core]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -292,7 +292,7 @@ err_t UserInfo::getDirectory(String& dst, int id)
   err_t err;
 
   dst.clear();
-  if ((uint)id >= (uint)USER_DIRECTORY_COUNT) return ERR_RT_INVALID_ARGUMENT;
+  if (FOG_UNLIKELY((uint)id >= (uint)USER_DIRECTORY_COUNT)) return ERR_RT_INVALID_ARGUMENT;
 
   switch (id)
   {

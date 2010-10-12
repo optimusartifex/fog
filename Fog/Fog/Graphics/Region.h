@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -25,8 +25,8 @@ namespace Fog {
 // [Forward Declarations]
 // ============================================================================
 
-struct DoublePath;
-struct DoubleMatrix;
+struct PathD;
+struct TransformD;
 
 // ============================================================================
 // [Fog::RegionData]
@@ -44,16 +44,16 @@ struct FOG_API RegionData
   void deref();
 
   static RegionData* adopt(void* address, sysuint_t capacity);
-  static RegionData* adopt(void* address, sysuint_t capacity, const IntBox& r);
-  static RegionData* adopt(void* address, sysuint_t capacity, const IntBox* extents, const IntBox* rects, sysuint_t count);
+  static RegionData* adopt(void* address, sysuint_t capacity, const BoxI& r);
+  static RegionData* adopt(void* address, sysuint_t capacity, const BoxI* extents, const BoxI* rects, sysuint_t count);
   
   static RegionData* create(sysuint_t capacity);
-  static RegionData* create(sysuint_t capacity, const IntBox* extents, const IntBox* rects, sysuint_t count);
+  static RegionData* create(sysuint_t capacity, const BoxI* extents, const BoxI* rects, sysuint_t count);
 
   static RegionData* copy(const RegionData* other);
 
   static FOG_INLINE sysuint_t sizeFor(sysuint_t capacity)
-  { return sizeof(RegionData) - sizeof(IntBox) + sizeof(IntBox) * capacity; }
+  { return sizeof(RegionData) - sizeof(BoxI) + sizeof(BoxI) * capacity; }
 
   // [Flags]
 
@@ -93,9 +93,9 @@ struct FOG_API RegionData
   //! @brief Count of used rectangles.
   sysuint_t length;
   //! @brief Region extents.
-  IntBox extents;
+  BoxI extents;
   //! @brief Region rectangles, always YX sorted.
-  IntBox rects[1];
+  BoxI rects[1];
 };
 
 // ============================================================================
@@ -111,8 +111,8 @@ struct FOG_API Region
 
   Region();
   Region(const Region& other);
-  explicit Region(const IntBox& rect);
-  explicit Region(const IntRect& rect);
+  explicit Region(const BoxI& rect);
+  explicit Region(const RectI& rect);
 
   FOG_INLINE explicit Region(RegionData* d) : _d(d) {}
   FOG_INLINE explicit Region(_DONT_INITIALIZE) {}
@@ -166,13 +166,13 @@ struct FOG_API Region
   // --------------------------------------------------------------------------
 
   //! @brief Get const pointer to the region data.
-  FOG_INLINE const IntBox* getData() const  { return _d->rects; }
+  FOG_INLINE const BoxI* getData() const  { return _d->rects; }
 
   //! @brief Get mutable pointer to the region data.
-  FOG_INLINE IntBox* getMData() { return detach() == ERR_OK ? _d->rects : (IntBox*)NULL; }
+  FOG_INLINE BoxI* getMData() { return detach() == ERR_OK ? _d->rects : (BoxI*)NULL; }
 
   //! @brief Get mutable pointer to the region data.
-  FOG_INLINE IntBox* getXData()
+  FOG_INLINE BoxI* getXData()
   {
     FOG_ASSERT_X(isDetached(), "Fog::Region::getXData() - Not detached");
     return _d->rects; 
@@ -192,7 +192,7 @@ struct FOG_API Region
   FOG_INLINE bool isEmpty() const  { return _d->length == 0; }
 
   //! @brief Returns region extents.
-  FOG_INLINE const IntBox& getExtents() const  { return _d->extents; }
+  FOG_INLINE const BoxI& getExtents() const  { return _d->extents; }
 
   //! @brief Reserve @a n rectangles in region and detach it. If retion is
   //! infinite then ERR_RT_INVALID_CONTEXT is returned.
@@ -207,11 +207,11 @@ struct FOG_API Region
   // --------------------------------------------------------------------------
 
   //! @brief Tests if a given point is in region, see @c REGION_HIT_TEST enum.
-  uint32_t hitTest(const IntPoint& pt) const;
-  uint32_t hitTest(const IntRect& r) const;
-  uint32_t hitTest(const IntBox& r) const;
+  uint32_t hitTest(const PointI& pt) const;
+  uint32_t hitTest(const RectI& r) const;
+  uint32_t hitTest(const BoxI& r) const;
 
-  FOG_INLINE uint32_t hitTest(int x, int y) const { return hitTest(IntPoint(x, y)); }
+  FOG_INLINE uint32_t hitTest(int x, int y) const { return hitTest(PointI(x, y)); }
 
   // --------------------------------------------------------------------------
   // [Clear]
@@ -225,8 +225,8 @@ struct FOG_API Region
   // --------------------------------------------------------------------------
 
   err_t set(const Region& r);
-  err_t set(const IntRect& r);
-  err_t set(const IntBox& r);
+  err_t set(const RectI& r);
+  err_t set(const BoxI& r);
   
   //! @brief Creates a deep copy instead of reference.
   //!
@@ -239,22 +239,22 @@ struct FOG_API Region
   //! @return @c ERR_OK on success, error code on failure.
   err_t setDeep(const Region& r);
 
-  err_t set(const IntRect* rects, sysuint_t count);
-  err_t set(const IntBox* rects, sysuint_t count);
+  err_t set(const RectI* rects, sysuint_t count);
+  err_t set(const BoxI* rects, sysuint_t count);
 
   err_t combine(const Region& r, uint32_t combineOp);
-  err_t combine(const IntRect& r, uint32_t combineOp);
-  err_t combine(const IntBox& r, uint32_t combineOp);
+  err_t combine(const RectI& r, uint32_t combineOp);
+  err_t combine(const BoxI& r, uint32_t combineOp);
 
-  err_t translate(const IntPoint& pt);
-  err_t shrink(const IntPoint& pt);
-  err_t frame(const IntPoint& pt);
+  err_t translate(const PointI& pt);
+  err_t shrink(const PointI& pt);
+  err_t frame(const PointI& pt);
 
-  FOG_INLINE err_t translate(int x, int y) { return translate(IntPoint(x, y)); }
-  FOG_INLINE err_t shrink(int x, int y) { return shrink(IntPoint(x, y)); }
-  FOG_INLINE err_t frame(int x, int y) { return frame(IntPoint(x, y)); }
+  FOG_INLINE err_t translate(int x, int y) { return translate(PointI(x, y)); }
+  FOG_INLINE err_t shrink(int x, int y) { return shrink(PointI(x, y)); }
+  FOG_INLINE err_t frame(int x, int y) { return frame(PointI(x, y)); }
 
-  err_t fromPath(const DoublePath& path, const DoubleMatrix* matrix = NULL, uint32_t threshold = 0x7F);
+  err_t fromPath(const PathD& path, const TransformD* matrix = NULL, uint32_t threshold = 0x7F);
 
   bool eq(const Region& other) const;
 
@@ -272,28 +272,28 @@ struct FOG_API Region
   // --------------------------------------------------------------------------
 
   FOG_INLINE Region& operator=(const Region& r) { set(r); return *this; }
-  FOG_INLINE Region& operator=(const IntRect& r) { set(r); return *this; }
-  FOG_INLINE Region& operator=(const IntBox& r) { set(r); return *this; }
+  FOG_INLINE Region& operator=(const RectI& r) { set(r); return *this; }
+  FOG_INLINE Region& operator=(const BoxI& r) { set(r); return *this; }
 
   FOG_INLINE Region& operator+=(const Region& r) { combine(r, REGION_OP_UNION); return *this; }
-  FOG_INLINE Region& operator+=(const IntRect& r) { combine(r, REGION_OP_UNION); return *this; }
-  FOG_INLINE Region& operator+=(const IntBox& r) { combine(r, REGION_OP_UNION); return *this; }
+  FOG_INLINE Region& operator+=(const RectI& r) { combine(r, REGION_OP_UNION); return *this; }
+  FOG_INLINE Region& operator+=(const BoxI& r) { combine(r, REGION_OP_UNION); return *this; }
 
   FOG_INLINE Region& operator|=(const Region& r) { combine(r, REGION_OP_UNION); return *this; }
-  FOG_INLINE Region& operator|=(const IntRect& r) { combine(r, REGION_OP_UNION); return *this; }
-  FOG_INLINE Region& operator|=(const IntBox& r) { combine(r, REGION_OP_UNION); return *this; }
+  FOG_INLINE Region& operator|=(const RectI& r) { combine(r, REGION_OP_UNION); return *this; }
+  FOG_INLINE Region& operator|=(const BoxI& r) { combine(r, REGION_OP_UNION); return *this; }
 
   FOG_INLINE Region& operator&=(const Region& r) { combine(r, REGION_OP_INTERSECT); return *this; }
-  FOG_INLINE Region& operator&=(const IntRect& r) { combine(r, REGION_OP_INTERSECT); return *this; }
-  FOG_INLINE Region& operator&=(const IntBox& r) { combine(r, REGION_OP_INTERSECT); return *this; }
+  FOG_INLINE Region& operator&=(const RectI& r) { combine(r, REGION_OP_INTERSECT); return *this; }
+  FOG_INLINE Region& operator&=(const BoxI& r) { combine(r, REGION_OP_INTERSECT); return *this; }
 
   FOG_INLINE Region& operator^=(const Region& r) { combine(r, REGION_OP_XOR); return *this; }
-  FOG_INLINE Region& operator^=(const IntRect& r) { combine(r, REGION_OP_XOR); return *this; }
-  FOG_INLINE Region& operator^=(const IntBox& r) { combine(r, REGION_OP_XOR); return *this; }
+  FOG_INLINE Region& operator^=(const RectI& r) { combine(r, REGION_OP_XOR); return *this; }
+  FOG_INLINE Region& operator^=(const BoxI& r) { combine(r, REGION_OP_XOR); return *this; }
 
   FOG_INLINE Region& operator-=(const Region& r) { combine(r, REGION_OP_SUBTRACT); return *this; }
-  FOG_INLINE Region& operator-=(const IntRect& r) { combine(r, REGION_OP_SUBTRACT); return *this; }
-  FOG_INLINE Region& operator-=(const IntBox& r) { combine(r, REGION_OP_SUBTRACT); return *this; }
+  FOG_INLINE Region& operator-=(const RectI& r) { combine(r, REGION_OP_SUBTRACT); return *this; }
+  FOG_INLINE Region& operator-=(const BoxI& r) { combine(r, REGION_OP_SUBTRACT); return *this; }
 
   FOG_INLINE bool operator==(const Region& other) const { return  eq(other); }
   FOG_INLINE bool operator!=(const Region& other) const { return !eq(other); }
@@ -314,20 +314,20 @@ struct FOG_API Region
   static const Region& infinite() { return _infinite; }
 
   static err_t combine(Region& dst, const Region& src1, const Region& src2, uint32_t combineOp);
-  static err_t combine(Region& dst, const Region& src1, const IntBox& src2, uint32_t combineOp);
-  static err_t combine(Region& dst, const IntBox& src1, const Region& src2, uint32_t combineOp);
-  static err_t combine(Region& dst, const IntBox& src1, const IntBox& src2, uint32_t combineOp);
+  static err_t combine(Region& dst, const Region& src1, const BoxI& src2, uint32_t combineOp);
+  static err_t combine(Region& dst, const BoxI& src1, const Region& src2, uint32_t combineOp);
+  static err_t combine(Region& dst, const BoxI& src1, const BoxI& src2, uint32_t combineOp);
 
-  static err_t translate(Region& dst, const Region& src, const IntPoint& pt);
-  static err_t shrink(Region& dst, const Region& src, const IntPoint& pt);
-  static err_t frame(Region& dst, const Region& src, const IntPoint& pt);
+  static err_t translate(Region& dst, const Region& src, const PointI& pt);
+  static err_t shrink(Region& dst, const Region& src, const PointI& pt);
+  static err_t frame(Region& dst, const Region& src, const PointI& pt);
 
   //! @brief Special method that will intersect two regions and clip them.
   //!
   //! @note Calling this method is faster than doing these operations individually.
-  static err_t intersectAndClip(Region& dst, const Region& src1Region, const Region& src2Region, const IntBox& clip);
+  static err_t intersectAndClip(Region& dst, const Region& src1Region, const Region& src2Region, const BoxI& clip);
   //! @overload
-  static err_t translateAndClip(Region& dst, const Region& src1Region, const IntPoint& pt, const IntBox& clip);
+  static err_t translateAndClip(Region& dst, const Region& src1Region, const PointI& pt, const BoxI& clip);
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -348,7 +348,7 @@ struct TemporaryRegion : public Region
     RegionData d;
     // There will be 1 rect more, because some compilers gives me warnings
     // about this construct when <N == 1>
-    IntBox rects[N];
+    BoxI rects[N];
   } _storage;
 
   FOG_INLINE TemporaryRegion() :
@@ -366,13 +366,13 @@ struct TemporaryRegion : public Region
   {
   }
 
-  FOG_INLINE explicit TemporaryRegion(const IntBox& r) :
+  FOG_INLINE explicit TemporaryRegion(const BoxI& r) :
     Region(RegionData::adopt((void*)&_storage, N, r))
   {
   }
 
-  FOG_INLINE explicit TemporaryRegion(const IntRect& r) :
-    Region(RegionData::adopt((void*)&_storage, N, IntBox(r)))
+  FOG_INLINE explicit TemporaryRegion(const RectI& r) :
+    Region(RegionData::adopt((void*)&_storage, N, BoxI(r)))
   {
   }
 
@@ -397,7 +397,7 @@ struct TemporaryRegion : public Region
     return reinterpret_cast<TemporaryRegion&>(set(r));
   }
 
-  FOG_INLINE TemporaryRegion& operator=(const IntBox& r)
+  FOG_INLINE TemporaryRegion& operator=(const BoxI& r)
   {
     return reinterpret_cast<TemporaryRegion&>(set(r));
   }
@@ -413,17 +413,17 @@ FOG_INLINE const Fog::Region operator&(const Fog::Region& src1, const Fog::Regio
 FOG_INLINE const Fog::Region operator^(const Fog::Region& src1, const Fog::Region& src2) { Fog::Region r; Fog::Region::combine(r, src1, src2, Fog::REGION_OP_XOR      ); return r; }
 FOG_INLINE const Fog::Region operator-(const Fog::Region& src1, const Fog::Region& src2) { Fog::Region r; Fog::Region::combine(r, src1, src2, Fog::REGION_OP_SUBTRACT ); return r; }
 
-FOG_INLINE const Fog::Region operator+(const Fog::Region& src1, const Fog::IntRect& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_UNION    ); return r; }
-FOG_INLINE const Fog::Region operator|(const Fog::Region& src1, const Fog::IntRect& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_UNION    ); return r; }
-FOG_INLINE const Fog::Region operator&(const Fog::Region& src1, const Fog::IntRect& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_INTERSECT); return r; }
-FOG_INLINE const Fog::Region operator^(const Fog::Region& src1, const Fog::IntRect& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_XOR      ); return r; }
-FOG_INLINE const Fog::Region operator-(const Fog::Region& src1, const Fog::IntRect& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_SUBTRACT ); return r; }
+FOG_INLINE const Fog::Region operator+(const Fog::Region& src1, const Fog::RectI& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_UNION    ); return r; }
+FOG_INLINE const Fog::Region operator|(const Fog::Region& src1, const Fog::RectI& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_UNION    ); return r; }
+FOG_INLINE const Fog::Region operator&(const Fog::Region& src1, const Fog::RectI& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_INTERSECT); return r; }
+FOG_INLINE const Fog::Region operator^(const Fog::Region& src1, const Fog::RectI& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_XOR      ); return r; }
+FOG_INLINE const Fog::Region operator-(const Fog::Region& src1, const Fog::RectI& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_SUBTRACT ); return r; }
 
-FOG_INLINE const Fog::Region operator+(const Fog::Region& src1, const Fog::IntBox& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_UNION    ); return r; }
-FOG_INLINE const Fog::Region operator|(const Fog::Region& src1, const Fog::IntBox& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_UNION    ); return r; }
-FOG_INLINE const Fog::Region operator&(const Fog::Region& src1, const Fog::IntBox& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_INTERSECT); return r; }
-FOG_INLINE const Fog::Region operator^(const Fog::Region& src1, const Fog::IntBox& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_XOR      ); return r; }
-FOG_INLINE const Fog::Region operator-(const Fog::Region& src1, const Fog::IntBox& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_SUBTRACT ); return r; }
+FOG_INLINE const Fog::Region operator+(const Fog::Region& src1, const Fog::BoxI& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_UNION    ); return r; }
+FOG_INLINE const Fog::Region operator|(const Fog::Region& src1, const Fog::BoxI& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_UNION    ); return r; }
+FOG_INLINE const Fog::Region operator&(const Fog::Region& src1, const Fog::BoxI& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_INTERSECT); return r; }
+FOG_INLINE const Fog::Region operator^(const Fog::Region& src1, const Fog::BoxI& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_XOR      ); return r; }
+FOG_INLINE const Fog::Region operator-(const Fog::Region& src1, const Fog::BoxI& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_SUBTRACT ); return r; }
 
 // ============================================================================
 // [Fog::TypeInfo<>]

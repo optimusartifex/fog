@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -35,8 +35,8 @@ struct FOG_API ScrollArea : public Frame
   // [Client Geometry]
   // --------------------------------------------------------------------------
 
-  virtual void calcWidgetSize(IntSize& size) const;
-  virtual void calcClientGeometry(IntRect& geometry) const;
+  virtual void calcWidgetSize(SizeI& size) const;
+  virtual void calcClientGeometry(RectI& geometry) const;
 
   // --------------------------------------------------------------------------
   // [Members]

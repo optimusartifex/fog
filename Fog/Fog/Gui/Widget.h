@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -149,9 +149,9 @@ struct FOG_API Widget : public LayoutItem
   err_t setWindowIcon(const Image& icon);
 
   //! @brief Get native gui window resize granularity.
-  IntPoint getWindowGranularity() const;
+  PointI getWindowGranularity() const;
   //! @brief Set native gui window resize granularity.
-  err_t setWindowGranularity(const IntPoint& pt);
+  err_t setWindowGranularity(const PointI& pt);
 
   // --------------------------------------------------------------------------
   // [Widget Geometry]
@@ -171,11 +171,11 @@ struct FOG_API Widget : public LayoutItem
   }
 
   //! @brief Get widget geometry.
-  FOG_INLINE const IntRect& getGeometry() const { return _widgetGeometry; }
+  FOG_INLINE const RectI& getGeometry() const { return _widgetGeometry; }
   //! @brief Get widget position relative to parent.
-  FOG_INLINE const IntPoint& getPosition() const { return _widgetGeometry.getPosition(); }
+  FOG_INLINE const PointI& getPosition() const { return _widgetGeometry.getPosition(); }
   //! @brief Get widget size.
-  FOG_INLINE const IntSize& getSize() const { return _widgetGeometry.getSize(); }
+  FOG_INLINE const SizeI& getSize() const { return _widgetGeometry.getSize(); }
 
   //! @brief Get widget left position, this method is equal to @c left().
   FOG_INLINE int getX() const { return _widgetGeometry.x; }
@@ -189,37 +189,37 @@ struct FOG_API Widget : public LayoutItem
   //! @brief Set widget position to @a pt.
   //!
   //! @note To set widget position and size together use @c setGeometry().
-  void setPosition(const IntPoint& pos);
+  void setPosition(const PointI& pos);
 
   //! @brief Set the widget size to @a sz.
   //!
   //! @note To set widget position and size together use @c setGeometry().
-  void setSize(const IntSize& size);
+  void setSize(const SizeI& size);
 
   //! @brief Set widget position and size to @a geometry.
-  void setGeometry(const IntRect& geometry);
+  void setGeometry(const RectI& geometry);
 
   //! @brief Set widget position to @a pt.
   //!
   //! This method is similar to @c setPosition().
-  FOG_INLINE void move(const IntPoint& pt) { setPosition(pt); }
+  FOG_INLINE void move(const PointI& pt) { setPosition(pt); }
 
   //! @brief Set widget size to @a size.
   //!
   //! This method is similar to @c setSize().
-  FOG_INLINE void resize(const IntSize& size) { setSize(size); }
+  FOG_INLINE void resize(const SizeI& size) { setSize(size); }
 
   // --------------------------------------------------------------------------
   // [Client Geometry]
   // --------------------------------------------------------------------------
 
   //! @brief Get widget client geometry.
-  FOG_INLINE const IntRect& getClientGeometry() const { return _clientGeometry; }
+  FOG_INLINE const RectI& getClientGeometry() const { return _clientGeometry; }
 
   //! @brief Get widget position relative to parent.
-  FOG_INLINE const IntPoint& getClientPosition() const { return _clientGeometry.getPosition(); }
+  FOG_INLINE const PointI& getClientPosition() const { return _clientGeometry.getPosition(); }
   //! @brief Get widget size.
-  FOG_INLINE const IntSize& getClientSize() const { return _clientGeometry.getSize(); }
+  FOG_INLINE const SizeI& getClientSize() const { return _clientGeometry.getSize(); }
 
   //! @brief Get widget left position, this method is equal to @c left().
   FOG_INLINE int getClientX() const { return _clientGeometry.x; }
@@ -231,14 +231,14 @@ struct FOG_API Widget : public LayoutItem
   FOG_INLINE int getClientHeight() const { return _clientGeometry.h; }
 
   //! @brief Calculate widget geometry from client geometry.
-  virtual void calcWidgetSize(IntSize& size) const;
+  virtual void calcWidgetSize(SizeI& size) const;
 
   //! @brief Calculate client geometry from widget geometry.
   //!
   //! Initial position of rect is [0, 0] and initial size is [width, height].
   //! The default implementation is to do nothing, this means leaving size and
   //! position as is (so non-client area is unused).
-  virtual void calcClientGeometry(IntRect& geometry) const;
+  virtual void calcClientGeometry(RectI& geometry) const;
 
   //! @brief Update client geometry and layout.
   //!
@@ -247,12 +247,12 @@ struct FOG_API Widget : public LayoutItem
   void updateClientGeometry();
 
   // WIDGET TODO: Move to .cpp
-  FOG_INLINE IntRect getClientContentGeometry() const
+  FOG_INLINE RectI getClientContentGeometry() const
   {
-    IntRect ret = _clientGeometry;
+    RectI ret = _clientGeometry;
 
     if (ret.getWidth() == 0 && ret.getHeight() == 0)
-      return IntRect(0, 0, 0, 0);
+      return RectI(0, 0, 0, 0);
 
     ret.setLeft(getContentLeftMargin());
     ret.setTop(getContentTopMargin());
@@ -267,10 +267,10 @@ struct FOG_API Widget : public LayoutItem
   // --------------------------------------------------------------------------
 
   //! @brief Get widget origin.
-  FOG_INLINE const IntPoint& getOrigin() const { return _clientOrigin; }
+  FOG_INLINE const PointI& getOrigin() const { return _clientOrigin; }
 
   //! @brief Set widget origin to @a pt.
-  void setOrigin(const IntPoint& pt);
+  void setOrigin(const PointI& pt);
 
   // --------------------------------------------------------------------------
   // [Translate Coordinates]
@@ -278,20 +278,20 @@ struct FOG_API Widget : public LayoutItem
 
   //! @brief Translate world coordinate @a coord into client (relative to the
   //! widget).
-  bool worldToClient(IntPoint* coord) const;
+  bool worldToClient(PointI* coord) const;
 
   //! @brief Translate client coordinate @a coord into world (relative to the
   //! screen).
-  bool clientToWorld(IntPoint* coord) const;
+  bool clientToWorld(PointI* coord) const;
 
   //! @brief Translate coordinates between two widgets.
-  static bool translateCoordinates(Widget* to, Widget* from, IntPoint* coords);
+  static bool translateCoordinates(Widget* to, Widget* from, PointI* coords);
 
   // --------------------------------------------------------------------------
   // [Hit Testing]
   // --------------------------------------------------------------------------
 
-  Widget* getChildAt(const IntPoint& pt, bool recursive = false) const;
+  Widget* getChildAt(const PointI& pt, bool recursive = false) const;
 
   // --------------------------------------------------------------------------
   // [Widget Layout]
@@ -323,7 +323,7 @@ struct FOG_API Widget : public LayoutItem
   //methods for doing real geometry changes
   //don't dispatch geometry events because updates will be done AFTER finishing all
   //geometry changes
-  virtual void setLayoutGeometry(const IntRect& TODO_give_me_a_name);
+  virtual void setLayoutGeometry(const RectI& TODO_give_me_a_name);
 
   // --------------------------------------------------------------------------
   // [Layout Policy]
@@ -343,9 +343,9 @@ struct FOG_API Widget : public LayoutItem
   // [Layout SizeHint]
   // --------------------------------------------------------------------------
 
-  virtual IntSize getMinimumSizeHint() const;
-  virtual IntSize getMaximumSizeHint() const;
-  virtual IntSize getSizeHint() const;
+  virtual SizeI getMinimumSizeHint() const;
+  virtual SizeI getMaximumSizeHint() const;
+  virtual SizeI getSizeHint() const;
 
   // --------------------------------------------------------------------------
   // [Layout Fixed Size]
@@ -361,29 +361,29 @@ struct FOG_API Widget : public LayoutItem
   
   bool checkMinimumSize(int width, int height);
   bool checkMaximumSize(int width, int height);
-  void setMinimumSize(const IntSize& minSize);
-  void setMaximumSize(const IntSize& minSize);
+  void setMinimumSize(const SizeI& minSize);
+  void setMaximumSize(const SizeI& minSize);
   
   // WIDGET TODO: Move to .cpp
   FOG_INLINE void setMinimumHeight(int height)
   {
     int width = hasMinimumHeight()? _extra->_minwidth : -1;
-    setMinimumSize(IntSize(width,height));
+    setMinimumSize(SizeI(width,height));
   }
   FOG_INLINE void setMinimumWidth(int width)
   {
     int height = hasMinimumHeight()? _extra->_maxheight : -1;
-    setMinimumSize(IntSize(width,height));
+    setMinimumSize(SizeI(width,height));
   }
   FOG_INLINE void setMaximumHeight(int height)
   {
     int width = hasMaximumHeight()? _extra->_minwidth : -1;
-    setMaximumSize(IntSize(width,height));
+    setMaximumSize(SizeI(width,height));
   }
   void setMaximumWidth(int width)
   {
     int height = hasMaximumHeight()? _extra->_maxheight : -1;
-    setMaximumSize(IntSize(width,height));
+    setMaximumSize(SizeI(width,height));
   }
 
   FOG_INLINE bool hasMinimumHeight() const { return _minset & MIN_HEIGHT_IS_SET; }
@@ -395,8 +395,8 @@ struct FOG_API Widget : public LayoutItem
   FOG_INLINE int getMinimumWidth() const { return getMinimumSize().getWidth(); }
   FOG_INLINE int getMaximumWidth() const { return getMaximumSize().getWidth(); }
 
-  FOG_INLINE IntSize getMinimumSize() const { return _extra ? IntSize(_extra->_minwidth, _extra->_minheight) : IntSize(WIDGET_MIN_SIZE, WIDGET_MIN_SIZE); }
-  FOG_INLINE IntSize getMaximumSize() const { return _extra ? IntSize(_extra->_maxwidth, _extra->_maxheight) : IntSize(WIDGET_MAX_SIZE, WIDGET_MAX_SIZE); }
+  FOG_INLINE SizeI getMinimumSize() const { return _extra ? SizeI(_extra->_minwidth, _extra->_minheight) : SizeI(WIDGET_MIN_SIZE, WIDGET_MIN_SIZE); }
+  FOG_INLINE SizeI getMaximumSize() const { return _extra ? SizeI(_extra->_maxwidth, _extra->_maxheight) : SizeI(WIDGET_MAX_SIZE, WIDGET_MAX_SIZE); }
 
   // --------------------------------------------------------------------------
   // [Layout State]
@@ -729,17 +729,17 @@ protected:
   GuiWindow* _guiWindow;
 
   //! @brief Widget main geometry (geometry relative to widget parent or screen).
-  IntRect _widgetGeometry;
+  RectI _widgetGeometry;
   //! @brief Widget client geometry (geometry where all children are placed).
-  IntRect _clientGeometry;
+  RectI _clientGeometry;
   //! @brief Client origin.
-  IntPoint _clientOrigin;
+  PointI _clientOrigin;
 
   // GUI TODO: Move to GuiWindow.
   struct FullScreenData
   {
     //! @brief Main geometry for restoration from fullscreen mode
-    IntRect _restoregeometry;
+    RectI _restoregeometry;
     //! @brief Window Style for restoration of fullscreen
     uint32_t _restorewindowFlags;
     float _restoretransparency;

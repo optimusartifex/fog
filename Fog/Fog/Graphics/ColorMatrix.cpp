@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -137,7 +137,7 @@ ColorMatrix& ColorMatrix::multiply(const ColorMatrix& other, uint32_t order)
   const ColorMatrix* mat1 = &save;
   const ColorMatrix* mat2 = &other;
 
-  if (order == MATRIX_APPEND)
+  if (order == MATRIX_ORDER_APPEND)
   {
     mat1 = &other;
     mat2 = &save;
@@ -198,7 +198,7 @@ void ColorMatrix::transformVector(float* FOG_RESTRICT v) const
   v[3] = temp[3];
 }
 
-void ColorMatrix::transformRgb(Argb* clr) const
+void ColorMatrix::transformRgb(ArgbI* clr) const
 {
   float r = (float)clr->getRed();
   float g = (float)clr->getGreen();
@@ -213,7 +213,7 @@ void ColorMatrix::transformRgb(Argb* clr) const
   clr->setBlue (Math::boundToByte(tb));
 }
 
-void ColorMatrix::transformArgb(Argb* clr) const
+void ColorMatrix::transformArgb(ArgbI* clr) const
 {
   float r = (float)clr->getRed  ();
   float g = (float)clr->getGreen();

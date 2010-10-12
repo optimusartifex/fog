@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -48,7 +48,7 @@ static FOG_INLINE int Raster_alignToDelta(int y, int offset, int delta)
 
 //! @brief Whether the source rectangle @a src can be converted to aligned
 //! rectangle @a dst, used to call various fast-paths.
-static FOG_INLINE bool Raster_canAlignToGrid(IntBox& dst, const DoubleRect& src, double x, double y)
+static FOG_INLINE bool Raster_canAlignToGrid(BoxI& dst, const RectD& src, double x, double y)
 {
   int rx = Math::iround((src.x + x) * 256.0);
   if ((rx & 0xFF) != 0x00) return false;
@@ -130,7 +130,7 @@ static FOG_INLINE bool Raster_canAlignToGrid(IntBox& dst, const DoubleRect& src,
 
 #define RASTER_ENTER_CLIP_FUNC() \
   FOG_BEGIN_MACRO \
-    if (clipOp >= CLIP_OP_COUNT) return ERR_RT_INVALID_ARGUMENT; \
+    if (FOG_UNLIKELY(clipOp >= CLIP_OP_COUNT)) return ERR_RT_INVALID_ARGUMENT; \
     \
     if (FOG_UNLIKELY(ctx.state & RASTER_STATE_NO_PAINT_WORK_REGION)) \
       return ERR_OK; \
@@ -138,7 +138,7 @@ static FOG_INLINE bool Raster_canAlignToGrid(IntBox& dst, const DoubleRect& src,
 
 #define RASTER_ENTER_CLIP_COND(__condition__) \
   FOG_BEGIN_MACRO \
-    if (clipOp >= CLIP_OP_COUNT) return ERR_RT_INVALID_ARGUMENT; \
+    if (FOG_UNLIKELY(clipOp >= CLIP_OP_COUNT)) return ERR_RT_INVALID_ARGUMENT; \
     \
     if (FOG_UNLIKELY(ctx.state & RASTER_STATE_NO_PAINT_WORK_REGION)) \
       return ERR_OK; \
@@ -161,14 +161,14 @@ static FOG_INLINE uint32_t Raster_getClipType(const Region& src)
 // Binary search region (YX sorted rectangles) and match the first one that
 // contains a given 'y'. If there is no such region then the next one will be
 // returned
-static FOG_INLINE const IntBox* Raster_searchRegion(const IntBox* start, sysuint_t length, int y)
+static FOG_INLINE const BoxI* Raster_searchRegion(const BoxI* start, sysuint_t length, int y)
 {
   FOG_ASSERT(start != NULL);
   FOG_ASSERT(length > 0);
 
   // Binary search for matching position.
-  const IntBox* base = start;
-  const IntBox* r;
+  const BoxI* base = start;
+  const BoxI* r;
 
   sysuint_t i;
 

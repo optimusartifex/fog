@@ -1,11 +1,11 @@
-// [Fog-Core Library - Public API]
+// [Fog-Core]
 //
 // [License]
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_INTRIN_MMXEXT_H
-#define _FOG_CORE_INTRIN_MMXEXT_H
+#ifndef _FOG_CORE_INTRIN_INTRINMMXEXT_H
+#define _FOG_CORE_INTRIN_INTRINMMXEXT_H
 
 // [Dependencies]
 #include <Fog/Core/Build.h>
@@ -33,4 +33,4 @@ static FOG_INLINE int _mm_movemask_pi8(__m64 a)
 #endif // FOG_CC_GNU
 
 // [Guard]
-#endif // _FOG_CORE_INTRIN_MMXEXT_H
+#endif // _FOG_CORE_INTRIN_INTRINMMXEXT_H

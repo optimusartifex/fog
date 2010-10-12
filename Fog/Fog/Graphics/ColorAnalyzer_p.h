@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -40,10 +40,10 @@ struct FOG_HIDDEN ColorAnalyzer
   }
 
   static FOG_INLINE uint32_t analyzeAlpha(
-    const Argb* data,
+    const ArgbI* data,
     size_t count)
   {
-    return analyzeAlpha((const uint8_t*)data, count, ARGB32_ABYTE, sizeof(Argb));
+    return analyzeAlpha((const uint8_t*)data, count, ARGB32_ABYTE, sizeof(ArgbI));
   }
 
   static FOG_INLINE uint32_t analyzeAlpha(

@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -21,9 +21,9 @@ namespace Fog {
 // [Helpers]
 // ============================================================================
 
-static IntSize calculateMinimumSizeHelper(const IntSize& sizeHint, const IntSize& minSizeHint, const IntSize& minSize, const IntSize& maxSize, const LayoutPolicy& sizePolicy)
+static SizeI calculateMinimumSizeHelper(const SizeI& sizeHint, const SizeI& minSizeHint, const SizeI& minSize, const SizeI& maxSize, const LayoutPolicy& sizePolicy)
 {
-  IntSize s(0, 0);
+  SizeI s(0, 0);
 
   if (sizePolicy.isHorizontalPolicyIgnored())
   {
@@ -47,16 +47,16 @@ static IntSize calculateMinimumSizeHelper(const IntSize& sizeHint, const IntSize
   if (minSize.getHeight() > 0)
     s.setHeight(minSize.getHeight());
 
-  return s.expandedTo(IntSize(0, 0));
+  return s.expandedTo(SizeI(0, 0));
 }
 
-static IntSize calculateMaximumSizeHelper(const IntSize& sizeHint, const IntSize& minSize, const IntSize& maxSize, const LayoutPolicy& sizePolicy, uint32_t align)
+static SizeI calculateMaximumSizeHelper(const SizeI& sizeHint, const SizeI& minSize, const SizeI& maxSize, const LayoutPolicy& sizePolicy, uint32_t align)
 {
   if (align & ALIGNMENT_HORIZONTAL_MASK && align & ALIGNMENT_VERTICAL_MASK)
-    return IntSize(WIDGET_MAX_SIZE, WIDGET_MAX_SIZE);
+    return SizeI(WIDGET_MAX_SIZE, WIDGET_MAX_SIZE);
 
-  IntSize s = maxSize;
-  IntSize hint = sizeHint.expandedTo(minSize);
+  SizeI s = maxSize;
+  SizeI hint = sizeHint.expandedTo(minSize);
 
   if (s.getWidth() == WIDGET_MAX_SIZE && !(align & ALIGNMENT_HORIZONTAL_MASK))
     if (!(sizePolicy.getPolicy() & LAYOUT_GROWING_WIDTH))
@@ -183,7 +183,7 @@ void LayoutItem::clearDirty()
   }
   else
   {
-    _cache._maximumSize = _cache._minimumSize = _cache._sizeHint = IntSize(0,0);
+    _cache._maximumSize = _cache._minimumSize = _cache._sizeHint = SizeI(0,0);
   }
 
   _dirty = 0;
@@ -204,14 +204,14 @@ const LayoutHint& LayoutItem::getLayoutHint() const
   return _cache;
 }
 
-IntSize LayoutItem::calculateMaximumSize() const 
+SizeI LayoutItem::calculateMaximumSize() const 
 {
   FOG_ASSERT(this->isWidget());
   const Widget *w = (Widget *)this;
   return calculateMaximumSizeHelper(w->getSizeHint().expandedTo(w->getMinimumSizeHint()), w->getMinimumSize(), w->getMaximumSize(), w->getLayoutPolicy(), w->getLayoutAlignment());
 }
 
-IntSize LayoutItem::calculateMinimumSize() const
+SizeI LayoutItem::calculateMinimumSize() const
 {
   FOG_ASSERT(this->isWidget());
   const Widget *w = (Widget *)this;

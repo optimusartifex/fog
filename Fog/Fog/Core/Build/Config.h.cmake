@@ -15,11 +15,24 @@
 #define FOG_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}"
 
 // ============================================================================
-// [Debugging]
+// [Debug]
 // ============================================================================
 
 #cmakedefine FOG_DEBUG
 #cmakedefine FOG_DEBUG_MEMORY
+
+// ============================================================================
+// [MMX/SSE support]
+// ============================================================================
+
+//! @brief Build Fog with MMX support
+#cmakedefine FOG_BUILD_MMX
+//! @brief Build Fog with MMXExt support
+#cmakedefine FOG_BUILD_MMXEXT
+//! @brief Build Fog with SSE support
+#cmakedefine FOG_BUILD_SSE
+//! @brief Build Fog with SSE2 support
+#cmakedefine FOG_BUILD_SSE2
 
 // ============================================================================
 // [Byte Order]
@@ -56,15 +69,6 @@
 #cmakedefine FOG_HAVE_UNISTD_H
 
 // ============================================================================
-// [Dynamic Loadable Library Support]
-// ============================================================================
-
-//! @brief Defined if we are using Windows dynamic library loader.
-#cmakedefine FOG_LIBRARY_WINDOWS
-//! @brief Defined if we are using Linux @c dlopen() dynamic library loader.
-#cmakedefine FOG_LIBRARY_DL
-
-// ============================================================================
 // [Libraries]
 // ============================================================================
 
@@ -74,42 +78,37 @@
 #cmakedefine FOG_HAVE_LIBPNG
 
 // ============================================================================
-// [Fog/Font Backends]
+// [Fog-Font Backends]
 // ============================================================================
 
-//! @brief Used for windows font subsystem.
+//! @brief Whether to build Windows font support.
+//!
+//! This is default when using Windows.
 #cmakedefine FOG_FONT_WINDOWS
-
-//! @brief Used for mac font subsystem.
+//! @brief Whether to build Mac font support.
+//!
+//! This is default when using Mac.
 #cmakedefine FOG_FONT_MAC
-
-//! @brief Used for fontconfig support (Unix/Linux).
-#cmakedefine FOG_HAVE_FONTCONFIG
-//! @brief Used if freetype library is located
-//! (can be used together with Windows font subsystem).
+//! @brief Whether to build FreeType support
+//!
+//! This is default when using Linux/BSD. May be used together with Windows/Mac
+//! font support.
 #cmakedefine FOG_FONT_FREETYPE
+//! @brief Whether to build FontConfig support.
+//!
+//! Can be enabled only if FOG_FONT_FREETYPE is defined.
+#cmakedefine FOG_HAVE_FONTCONFIG
 
 // ============================================================================
-// [Fog/Gui Backends]
+// [Fog-Gui Backends]
 // ============================================================================
 
-//! @brief Defined if we can use Windows GUI.
+//! @brief Whether to build Windows GUI support.
 #cmakedefine FOG_GUI_WINDOWS
-//! @brief Defined if we can use X Window System (this not means that we depend to it).
+//! @brief Defined to build Mac GUI support.
+#cmakedefine FOG_GUI_MAC
+//! @brief Whether to build X11 GUI support (plugin).
 #cmakedefine FOG_GUI_X11
-
-// ============================================================================
-// [MMX/SSE support]
-// ============================================================================
-
-//! @brief Build Fog with MMX support
-#cmakedefine FOG_BUILD_MMX
-//! @brief Build Fog with MMXExt support
-#cmakedefine FOG_BUILD_MMXEXT
-//! @brief Build Fog with SSE support
-#cmakedefine FOG_BUILD_SSE
-//! @brief Build Fog with SSE2 support
-#cmakedefine FOG_BUILD_SSE2
 
 // [Guard]
 #endif // _FOG_BUILD_CONFIG_H

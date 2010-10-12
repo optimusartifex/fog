@@ -1,4 +1,4 @@
-// [Fog-Core Library - Public API]
+// [Fog-Core]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -20,17 +20,16 @@
 #include <Fog/Core/String.h>
 #include <Fog/Core/TextCodec.h>
 
-#if defined(FOG_LIBRARY_WINDOWS)
-#include <windows.h>
-#endif // FOG_LIBRARY_WINDOWS
-
-#if defined(FOG_LIBRARY_DL)
-#include <dlfcn.h>
-#include <errno.h>
-#ifndef RTLD_NOW
-#define RTLD_NOW 0
+// [Platform Specific]
+#if defined(FOG_OS_WINDOWS)
+# include <windows.h>
+#else
+# include <dlfcn.h>
+# include <errno.h>
+# ifndef RTLD_NOW
+#  define RTLD_NOW 0
+# endif
 #endif
-#endif // FOG_LIBRARY_DL
 
 namespace Fog {
 
@@ -50,10 +49,11 @@ struct Library_Local
 static Static<Library_Local> library_local;
 
 // ============================================================================
-// [Fog::Library - Platform]
+// [Fog::Library - Windows Support]
 // ============================================================================
 
-#if defined(FOG_LIBRARY_WINDOWS)
+#if defined(FOG_OS_WINDOWS)
+
 static err_t systemOpenLibrary(const String& fileName, void** handle)
 {
   TemporaryString<TEMPORARY_LENGTH> fileNameW;
@@ -81,9 +81,13 @@ static void* systemLoadSymbol(void* handle, const char* symbol)
   if (handle == NULL) return NULL;
   return (void*)GetProcAddress((HINSTANCE)handle, symbol);
 }
-#endif // FOG_LIBRARY_WINDOWS
 
-#if defined(FOG_LIBRARY_DL)
+// ============================================================================
+// [Fog::Library - Posix Support]
+// ============================================================================
+
+#else
+
 static err_t systemOpenLibrary(const String& fileName, void** handle)
 {
   err_t err;
@@ -113,7 +117,8 @@ static void* systemLoadSymbol(void* handle, const char* symbol)
   if (handle == NULL) return NULL;
   return (void *)::dlsym(handle, symbol);
 }
-#endif // FOG_LIBRARY_DL
+
+#endif
 
 // ============================================================================
 // [Fog::LibraryData]

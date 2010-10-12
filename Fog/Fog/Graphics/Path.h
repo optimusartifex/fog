@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -25,8 +25,8 @@ namespace Fog {
 // [Forward Declarations]
 // ============================================================================
 
-struct FloatMatrix;
-struct DoubleMatrix;
+struct TransformF;
+struct TransformD;
 struct Region;
 
 // ============================================================================
@@ -57,20 +57,20 @@ struct FOG_HIDDEN PathCmd
 };
 
 // ============================================================================
-// [Fog::DoublePathData]
+// [Fog::PathDData]
 // ============================================================================
 
 //! @brief Path data (64-bit float version)
-struct FOG_HIDDEN DoublePathData
+struct FOG_HIDDEN PathDData
 {
   // --------------------------------------------------------------------------
   // [Implicit Sharing]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE DoublePathData* ref() const
+  FOG_INLINE PathDData* ref() const
   {
     refCount.inc();
-    return const_cast<DoublePathData*>(this);
+    return const_cast<PathDData*>(this);
   }
 
   FOG_INLINE void deref()
@@ -97,43 +97,43 @@ struct FOG_HIDDEN DoublePathData
   sysuint_t length;
 
   //! @brief Path bounding box minimum.
-  DoublePoint boundingBoxMin;
+  PointD boundingBoxMin;
   //! @brief Path bounding box maximum.
-  DoublePoint boundingBoxMax;
+  PointD boundingBoxMax;
 
   //! @brief Vertices data (aligned to 16 bytes).
-  DoublePoint* vertices;
+  PointD* vertices;
   //! @brief Commands data (space for aligning).
   uint8_t commands[16];
 };
 
 // ============================================================================
-// [Fog::DoublePath]
+// [Fog::PathD]
 // ============================================================================
 
 //! @brief Path (64-bit float version)
 //!
 //! Path defines graphics shape that can be filled or stroked by a painter.
-struct FOG_API DoublePath
+struct FOG_API PathD
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  DoublePath();
-  DoublePath(const DoublePath& other);
-  FOG_INLINE explicit DoublePath(DoublePathData* d) : _d(d) {}
-  ~DoublePath();
+  PathD();
+  PathD(const PathD& other);
+  FOG_INLINE explicit PathD(PathDData* d) : _d(d) {}
+  ~PathD();
 
   // --------------------------------------------------------------------------
   // [Implicit Sharing]
   // --------------------------------------------------------------------------
 
-  static Static<DoublePathData> _dnull;
+  static Static<PathDData> _dnull;
 
-  static DoublePathData* _allocData(sysuint_t capacity);
-  static DoublePathData* _reallocData(DoublePathData* d, sysuint_t capacity);
-  static DoublePathData* _copyData(const DoublePathData* d);
+  static PathDData* _allocData(sysuint_t capacity);
+  static PathDData* _reallocData(PathDData* d, sysuint_t capacity);
+  static PathDData* _copyData(const PathDData* d);
 
   FOG_INLINE sysuint_t refCount() const { return _d->refCount.get(); }
   FOG_INLINE bool isDetached() const { return _d->refCount.get() == 1; }
@@ -157,14 +157,14 @@ struct FOG_API DoublePath
   //! @brief Get path commands array.
   FOG_INLINE const uint8_t* getCommands() const { return _d->commands; }
   //! @brief Get path vertices array.
-  FOG_INLINE const DoublePoint* getVertices() const { return _d->vertices; }
+  FOG_INLINE const PointD* getVertices() const { return _d->vertices; }
 
   FOG_INLINE uint8_t* getMCommands()
   {
     return detach() == ERR_OK ? _d->commands : NULL;
   }
 
-  FOG_INLINE DoublePoint* getMVertices()
+  FOG_INLINE PointD* getMVertices()
   {
     return detach() == ERR_OK ? _d->vertices : NULL;
   }
@@ -175,7 +175,7 @@ struct FOG_API DoublePath
     return _d->commands;
   }
 
-  FOG_INLINE DoublePoint* getXVertices()
+  FOG_INLINE PointD* getXVertices()
   {
     FOG_ASSERT_X(isDetached(), "Fog::Path::getXVertices() - Non-detached data.");
     return _d->vertices;
@@ -187,8 +187,8 @@ struct FOG_API DoublePath
   sysuint_t _add(sysuint_t count);
   err_t _detach();
 
-  err_t set(const DoublePath& other);
-  err_t setDeep(const DoublePath& other);
+  err_t set(const PathD& other);
+  err_t setDeep(const PathD& other);
 
   void clear();
   void free();
@@ -197,8 +197,8 @@ struct FOG_API DoublePath
   // [BoundingRect / FitTo]
   // --------------------------------------------------------------------------
 
-  DoubleRect getBoundingRect() const;
-  err_t fitTo(const DoubleRect& toRect);
+  RectD getBoundingRect() const;
+  err_t fitTo(const RectD& toRect);
 
   // --------------------------------------------------------------------------
   // [SubPath]
@@ -226,8 +226,8 @@ struct FOG_API DoublePath
   err_t moveTo(double x, double y);
   err_t moveRel(double dx, double dy);
 
-  FOG_INLINE err_t moveTo(const DoublePoint& pt) { return moveTo(pt.x, pt.y); }
-  FOG_INLINE err_t moveRel(const DoublePoint& pt) { return moveRel(pt.x, pt.y); }
+  FOG_INLINE err_t moveTo(const PointD& pt) { return moveTo(pt.x, pt.y); }
+  FOG_INLINE err_t moveRel(const PointD& pt) { return moveRel(pt.x, pt.y); }
 
   // --------------------------------------------------------------------------
   // [LineTo]
@@ -236,11 +236,11 @@ struct FOG_API DoublePath
   err_t lineTo(double x, double y);
   err_t lineRel(double dx, double dy);
 
-  FOG_INLINE err_t lineTo(const DoublePoint& pt) { return lineTo(pt.x, pt.y); }
-  FOG_INLINE err_t lineRel(const DoublePoint& pt) { return lineRel(pt.x, pt.y); }
+  FOG_INLINE err_t lineTo(const PointD& pt) { return lineTo(pt.x, pt.y); }
+  FOG_INLINE err_t lineRel(const PointD& pt) { return lineRel(pt.x, pt.y); }
 
   err_t lineTo(const double* x, const double* y, sysuint_t count);
-  err_t lineTo(const DoublePoint* pts, sysuint_t count);
+  err_t lineTo(const PointD* pts, sysuint_t count);
 
   err_t hlineTo(double x);
   err_t hlineRel(double dx);
@@ -264,10 +264,10 @@ struct FOG_API DoublePath
   err_t arcTo(double cx, double cy, double rx, double ry, double start, double sweep);
   err_t arcRel(double cx, double cy, double rx, double ry, double start, double sweep);
 
-  FOG_INLINE err_t arcTo(const DoublePoint& cp, const DoublePoint& r, double start, double sweep)
+  FOG_INLINE err_t arcTo(const PointD& cp, const PointD& r, double start, double sweep)
   { return arcTo(cp.x, cp.y, r.x, r.y, start, sweep); }
 
-  FOG_INLINE err_t arcRel(const DoublePoint& cp, const DoublePoint& r, double start, double sweep)
+  FOG_INLINE err_t arcRel(const PointD& cp, const PointD& r, double start, double sweep)
   { return arcRel(cp.x, cp.y, r.x, r.y, start, sweep); }
 
   err_t svgArcTo(
@@ -294,16 +294,16 @@ struct FOG_API DoublePath
   err_t curveTo(double tx, double ty);
   err_t curveRel(double tx, double ty);
 
-  FOG_INLINE err_t curveTo(const DoublePoint& cp, const DoublePoint& to)
+  FOG_INLINE err_t curveTo(const PointD& cp, const PointD& to)
   { return curveTo(cp.x, cp.y, to.x, to.y); }
 
-  FOG_INLINE err_t curveRel(const DoublePoint& cp, const DoublePoint& to)
+  FOG_INLINE err_t curveRel(const PointD& cp, const PointD& to)
   { return curveRel(cp.x, cp.y, to.x, to.y); }
 
-  FOG_INLINE err_t curveTo(const DoublePoint& to)
+  FOG_INLINE err_t curveTo(const PointD& to)
   { return curveTo(to.x, to.y); }
 
-  FOG_INLINE err_t curveRel(const DoublePoint& to)
+  FOG_INLINE err_t curveRel(const PointD& to)
   { return curveRel(to.x, to.y); }
 
   // --------------------------------------------------------------------------
@@ -316,16 +316,16 @@ struct FOG_API DoublePath
   err_t cubicTo(double cx2, double cy2, double tx, double ty);
   err_t cubicRel(double cx2, double cy2, double tx, double ty);
 
-  FOG_INLINE err_t cubicTo(const DoublePoint& cp1, const DoublePoint& cp2, const DoublePoint& to)
+  FOG_INLINE err_t cubicTo(const PointD& cp1, const PointD& cp2, const PointD& to)
   { return cubicTo(cp1.x, cp1.y, cp2.x, cp2.y, to.x, to.y); }
 
-  FOG_INLINE err_t cubicRel(const DoublePoint& cp1, const DoublePoint& cp2, const DoublePoint& to)
+  FOG_INLINE err_t cubicRel(const PointD& cp1, const PointD& cp2, const PointD& to)
   { return cubicRel(cp1.x, cp1.y, cp2.x, cp2.y, to.x, to.y); }
 
-  FOG_INLINE err_t cubicTo(const DoublePoint& cp2, const DoublePoint& to)
+  FOG_INLINE err_t cubicTo(const PointD& cp2, const PointD& to)
   { return cubicTo(cp2.x, cp2.y, to.x, to.y); }
 
-  FOG_INLINE err_t cubicRel(const DoublePoint& cp2, const DoublePoint& to)
+  FOG_INLINE err_t cubicRel(const PointD& cp2, const PointD& to)
   { return cubicRel(cp2.x, cp2.y, to.x, to.y); }
 
   // --------------------------------------------------------------------------
@@ -345,11 +345,11 @@ struct FOG_API DoublePath
   err_t translateSubPath(sysuint_t subPathId, double dx, double dy);
 
   //! @brief Translate each vertex in path by @a pt.
-  FOG_INLINE err_t translate(const DoublePoint& pt)
+  FOG_INLINE err_t translate(const PointD& pt)
   { return translate(pt.x, pt.y); }
 
   //! @brief Translate each vertex in sub-path @a subPathId by @a pt.
-  FOG_INLINE err_t translateSubPath(sysuint_t subPathId, const DoublePoint& pt)
+  FOG_INLINE err_t translateSubPath(sysuint_t subPathId, const PointD& pt)
   { return translateSubPath(subPathId, pt.x, pt.y); }
 
   // --------------------------------------------------------------------------
@@ -360,79 +360,79 @@ struct FOG_API DoublePath
   err_t scale(double sx, double sy, bool keepStartPos = false);
 
   //! @brief Scale each vertex in path by @a pt.
-  FOG_INLINE err_t scale(const DoublePoint& pt, bool keepStartPos = false)
+  FOG_INLINE err_t scale(const PointD& pt, bool keepStartPos = false)
   { return scale(pt.x, pt.y, keepStartPos); }
 
   // --------------------------------------------------------------------------
   // [ApplyMatrix]
   // --------------------------------------------------------------------------
 
-  //! @brief Apply affine matrix transformations to each vertex in path.
-  err_t applyMatrix(const DoubleMatrix& matrix);
-  //! @brief Apply affine matrix transformations to vertex that starts with
+  //! @brief Apply matrix transformations to each vertex in path.
+  err_t applyMatrix(const TransformD& matrix);
+  //! @brief Apply matrix transformations to vertex that starts with
   //! @a index and range is given by @a range argument.
-  err_t applyMatrix(const DoubleMatrix& matrix, const Range& range);
+  err_t applyMatrix(const TransformD& matrix, const Range& range);
 
   // --------------------------------------------------------------------------
   // [Complex]
   // --------------------------------------------------------------------------
 
   //! @brief Add closed rectangle into the path.
-  err_t addRect(const IntRect& r, uint32_t direction = PATH_DIRECTION_CW);
+  err_t addRect(const RectI& r, uint32_t direction = PATH_DIRECTION_CW);
   //! @brief Add closed rectangle into the path.
-  err_t addRect(const DoubleRect& r, uint32_t direction = PATH_DIRECTION_CW);
+  err_t addRect(const RectD& r, uint32_t direction = PATH_DIRECTION_CW);
 
   //! @brief Add closed polygon into the path.
-  err_t addPolygon(const IntPoint* pts, sysuint_t count);
+  err_t addPolygon(const PointI* pts, sysuint_t count);
   //! @brief Add closed polygon into the path.
-  err_t addPolygon(const DoublePoint* pts, sysuint_t count);
+  err_t addPolygon(const PointD* pts, sysuint_t count);
 
   //! @brief Add closed polygon into the path.
-  err_t addPolyLine(const IntPoint* pts, sysuint_t count);
+  err_t addPolyLine(const PointI* pts, sysuint_t count);
   //! @brief Add closed polygon into the path.
-  err_t addPolyLine(const DoublePoint* pts, sysuint_t count);
+  err_t addPolyLine(const PointD* pts, sysuint_t count);
 
   //! @brief Add region (converted to set of rectangles).
   err_t addRegion(const Region& r, uint32_t direction = PATH_DIRECTION_CW);
 
   //! @brief Add rectangles into the path.
-  err_t addRects(const IntRect* r, sysuint_t count, uint32_t direction = PATH_DIRECTION_CW);
+  err_t addRects(const RectI* r, sysuint_t count, uint32_t direction = PATH_DIRECTION_CW);
 
   //! @brief Add rectangles into the path.
-  err_t addRects(const IntBox* r, sysuint_t count, uint32_t direction = PATH_DIRECTION_CW);
+  err_t addRects(const BoxI* r, sysuint_t count, uint32_t direction = PATH_DIRECTION_CW);
 
   //! @brief Add rectangles into the path.
-  err_t addRects(const DoubleRect* r, sysuint_t count, uint32_t direction = PATH_DIRECTION_CW);
+  err_t addRects(const RectD* r, sysuint_t count, uint32_t direction = PATH_DIRECTION_CW);
 
   //! @brief Add round into the path.
-  err_t addRound(const DoubleRect& r, const DoublePoint& radius, uint32_t direction = PATH_DIRECTION_CW);
+  err_t addRound(const RectD& r, const PointD& radius, uint32_t direction = PATH_DIRECTION_CW);
 
   //! @brief Add a closed ellipse into the path.
-  err_t addEllipse(const DoubleRect& r, uint32_t direction = PATH_DIRECTION_CW);
+  err_t addEllipse(const RectD& r, uint32_t direction = PATH_DIRECTION_CW);
   //! @overload
-  err_t addEllipse(const DoublePoint& cp, const DoublePoint& r, uint32_t direction = PATH_DIRECTION_CW);
+  err_t addEllipse(const PointD& cp, const PointD& r, uint32_t direction = PATH_DIRECTION_CW);
 
   //! @brief Add an arc into the path.
-  err_t addArc(const DoubleRect& r, double start, double sweep, uint32_t direction = PATH_DIRECTION_CW);
+  err_t addArc(const RectD& r, double start, double sweep, uint32_t direction = PATH_DIRECTION_CW);
   //! @overload
-  err_t addArc(const DoublePoint& cp, const DoublePoint& r, double start, double sweep, uint32_t direction = PATH_DIRECTION_CW);
+  err_t addArc(const PointD& cp, const PointD& r, double start, double sweep, uint32_t direction = PATH_DIRECTION_CW);
 
   //! @brief Add a chord into the path.
-  err_t addChord(const DoubleRect& r, double start, double sweep, uint32_t direction = PATH_DIRECTION_CW);
+  err_t addChord(const RectD& r, double start, double sweep, uint32_t direction = PATH_DIRECTION_CW);
   //! @overload
-  err_t addChord(const DoublePoint& cp, const DoublePoint& r, double start, double sweep, uint32_t direction = PATH_DIRECTION_CW);
+  err_t addChord(const PointD& cp, const PointD& r, double start, double sweep, uint32_t direction = PATH_DIRECTION_CW);
 
   //! @brief Add a pie into the path.
-  err_t addPie(const DoubleRect& r, double start, double sweep, uint32_t direction = PATH_DIRECTION_CW);
+  err_t addPie(const RectD& r, double start, double sweep, uint32_t direction = PATH_DIRECTION_CW);
   //! @overload
-  err_t addPie(const DoublePoint& cp, const DoublePoint& r, double start, double sweep, uint32_t direction = PATH_DIRECTION_CW);
+  err_t addPie(const PointD& cp, const PointD& r, double start, double sweep, uint32_t direction = PATH_DIRECTION_CW);
 
   //! @brief Add another path into the path.
-  err_t addPath(const DoublePath& path);
+  err_t addPath(const PathD& path);
   //! @brief Add a translated path into the path.
-  err_t addPath(const DoublePath& path, const DoublePoint& pt);
+  err_t addPath(const PathD& path, const PointD& pt);
   //! @brief Add a transformed path into the path.
-  err_t addPath(const DoublePath& path, const DoubleMatrix& matrix);
+  err_t addPath(const PathD& path, const TransformD& transform);
 
   // --------------------------------------------------------------------------
   // [Flatness]
@@ -445,10 +445,10 @@ struct FOG_API DoublePath
   bool isFlat() const;
 
   err_t flatten();
-  err_t flatten(const DoubleMatrix* matrix, double approximationScale = 1.0);
+  err_t flatten(const TransformD* matrix, double approximationScale = 1.0);
 
-  err_t flattenTo(DoublePath& dst, const DoubleMatrix* matrix, double approximationScale = 1.0) const;
-  err_t flattenSubPathTo(DoublePath& dst, sysuint_t subPathId, const DoubleMatrix* matrix, double approximationScale = 1.0) const;
+  err_t flattenTo(PathD& dst, const TransformD* matrix, double approximationScale = 1.0) const;
+  err_t flattenSubPathTo(PathD& dst, sysuint_t subPathId, const TransformD* matrix, double approximationScale = 1.0) const;
 
   // --------------------------------------------------------------------------
   // [Invalidate]
@@ -467,7 +467,7 @@ struct FOG_API DoublePath
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE DoublePath& operator=(const DoublePath& other)
+  FOG_INLINE PathD& operator=(const PathD& other)
   {
     set(other);
     return *this;
@@ -477,7 +477,7 @@ struct FOG_API DoublePath
   // [Members]
   // --------------------------------------------------------------------------
 
-  FOG_DECLARE_D(DoublePathData)
+  FOG_DECLARE_D(PathDData)
 };
 
 //! @}

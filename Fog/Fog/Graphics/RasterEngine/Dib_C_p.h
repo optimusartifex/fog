@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -1658,7 +1658,7 @@ struct FOG_HIDDEN DibC
   // --------------------------------------------------------------------------
 
   static void FOG_FASTCALL i8rgb232_from_xrgb32_dither(
-    uint8_t* dst, const uint8_t* src, int w, const IntPoint& origin, const uint8_t* palConv)
+    uint8_t* dst, const uint8_t* src, int w, const PointI& origin, const uint8_t* palConv)
   {
     const uint8_t* dt = DitherMatrix::matrix[origin.getY() & DitherMatrix::MASK];
     int dx = origin.getX();
@@ -1690,7 +1690,7 @@ struct FOG_HIDDEN DibC
   }
 
   static void FOG_FASTCALL i8rgb222_from_xrgb32_dither(
-    uint8_t* dst, const uint8_t* src, int w, const IntPoint& origin, const uint8_t* palConv)
+    uint8_t* dst, const uint8_t* src, int w, const PointI& origin, const uint8_t* palConv)
   {
     const uint8_t* dt = DitherMatrix::matrix[origin.getY() & DitherMatrix::MASK];
     int dx = origin.getX();
@@ -1724,7 +1724,7 @@ struct FOG_HIDDEN DibC
   }
 
   static void FOG_FASTCALL i8rgb111_from_xrgb32_dither(
-    uint8_t* dst, const uint8_t* src, int w, const IntPoint& origin, const uint8_t* palConv)
+    uint8_t* dst, const uint8_t* src, int w, const PointI& origin, const uint8_t* palConv)
   {
     const uint8_t* dt = DitherMatrix::matrix[origin.getY() & DitherMatrix::MASK];
     int dx = origin.getX();
@@ -1756,7 +1756,7 @@ struct FOG_HIDDEN DibC
   }
 
   static void FOG_FASTCALL rgb16_555_native_from_xrgb32_dither(
-    uint8_t* dst, const uint8_t* src, int w, const IntPoint& origin)
+    uint8_t* dst, const uint8_t* src, int w, const PointI& origin)
   {
     const uint8_t* dt = DitherMatrix::matrix[origin.getY() & DitherMatrix::MASK];
     int dx = origin.getX();
@@ -1784,7 +1784,7 @@ struct FOG_HIDDEN DibC
   }
 
   static void FOG_FASTCALL rgb16_565_native_from_xrgb32_dither(
-    uint8_t* dst, const uint8_t* src, int w, const IntPoint& origin)
+    uint8_t* dst, const uint8_t* src, int w, const PointI& origin)
   {
     const uint8_t* dt = DitherMatrix::matrix[origin.getY() & DitherMatrix::MASK];
     int dx = origin.getX();
@@ -1814,7 +1814,7 @@ struct FOG_HIDDEN DibC
   }
 
   static void FOG_FASTCALL rgb16_555_swapped_from_xrgb32_dither(
-    uint8_t* dst, const uint8_t* src, int w, const IntPoint& origin)
+    uint8_t* dst, const uint8_t* src, int w, const PointI& origin)
   {
     const uint8_t* dt = DitherMatrix::matrix[origin.getY() & DitherMatrix::MASK];
     int dx = origin.getX();
@@ -1842,7 +1842,7 @@ struct FOG_HIDDEN DibC
   }
 
   static void FOG_FASTCALL rgb16_565_swapped_from_xrgb32_dither(
-    uint8_t* dst, const uint8_t* src, int w, const IntPoint& origin)
+    uint8_t* dst, const uint8_t* src, int w, const PointI& origin)
   {
     const uint8_t* dt = DitherMatrix::matrix[origin.getY() & DitherMatrix::MASK];
     int dx = origin.getX();

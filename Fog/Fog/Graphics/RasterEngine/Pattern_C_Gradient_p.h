@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -114,8 +114,8 @@ struct FOG_HIDDEN PatternGradientC
 
     if (spread != PATTERN_SPREAD_NONE)
     {
-      cFirst = stops.at(0).getArgb();
-      cLast = (spread != PATTERN_SPREAD_PAD) ? cFirst : (uint32_t)stops.top().getArgb();
+      cFirst = stops.at(0).getArgbI();
+      cLast = (spread != PATTERN_SPREAD_PAD) ? cFirst : (uint32_t)stops.top().getArgbI();
 
       // Premultiply.
       if (hasAlpha)
@@ -156,7 +156,7 @@ struct FOG_HIDDEN PatternGradientC
 
     if (count == 1 || size == 1)
     {
-      Argb color = stops.at(0).getArgb();
+      ArgbI color = stops.at(0).getArgbI();
       gradientSpan(dst, color, color, size, 0, size);
     }
     else
@@ -164,8 +164,8 @@ struct FOG_HIDDEN PatternGradientC
       int i = (reverse) ? count - 1 : 0;
       int iinc = (reverse) ? -1 : 1;
 
-      Argb primaryStopColor = stops.at(i).getArgb();
-      Argb secondaryStopArgb;
+      ArgbI primaryStopColor = stops.at(i).getArgbI();
+      ArgbI secondaryStopArgb;
 
       float primaryStopOffset = 0.0;
       float secondaryStopOffset;
@@ -179,7 +179,7 @@ struct FOG_HIDDEN PatternGradientC
         x1 = x2)
       {
         secondaryStopOffset = stops.at(i).getOffset();
-        secondaryStopArgb = stops.at(i).getArgb();
+        secondaryStopArgb = stops.at(i).getArgbI();
 
         // Stop offset can be at range from 0.0 to 1.0 including.
         if (secondaryStopOffset < 0.0f) secondaryStopOffset = 0.0f;
@@ -226,7 +226,7 @@ struct FOG_HIDDEN PatternGradientC
   // --------------------------------------------------------------------------
 
   static err_t FOG_FASTCALL init_linear(
-    RasterPattern* ctx, const Pattern& pattern, const DoubleMatrix& matrix, uint32_t interpolationType)
+    RasterPattern* ctx, const Pattern& pattern, const TransformD& transform, uint32_t interpolationType)
   {
     PatternData* d = pattern._d;
     FOG_ASSERT(d->type == PATTERN_LINEAR_GRADIENT);
@@ -237,24 +237,23 @@ struct FOG_HIDDEN PatternGradientC
     }
     if (d->obj.stops->getLength() == 1)
     {
-      return rasterFuncs.pattern.solid_init(ctx, d->obj.stops->at(0).getArgb());
+      return rasterFuncs.pattern.solid_init(ctx, d->obj.stops->at(0).getArgbI());
     }
 
-    // If points are equal, we will fill everything by last color. This is
-    // defined in SVG.
+    // If all offsets are equal, we use a last color, defined by SVG.
     if (Math::feq(d->data.gradient->points[0].x, d->data.gradient->points[1].x) &&
         Math::feq(d->data.gradient->points[0].y, d->data.gradient->points[1].y))
     {
-      return rasterFuncs.pattern.solid_init(ctx, d->obj.stops->at(d->obj.stops->getLength() - 1).getArgb());
+      return rasterFuncs.pattern.solid_init(ctx, d->obj.stops->at(d->obj.stops->getLength() - 1).getArgbI());
     }
 
     // FIXME: TODO: Not correct code
 #if 0
-    DoubleMatrix m(pattern._d->matrix.multiplied(matrix));
-    DoublePoint points[2];
+    TransformD m(pattern._d->transform.multiplied(transform));
+    PointD points[2];
 
     double f = (m.sx * m.sy) - (m.shy * m.shx);
-    if (fabs(f) < 1e-20)
+    if (Math::abs(f) < 1e-20)
     {
       return rasterFuncs.pattern.solid_init(ctx, d->obj.stops->at(0).rgba);
     }
@@ -297,13 +296,13 @@ struct FOG_HIDDEN PatternGradientC
 
 
 #if 1
-    DoubleMatrix m(pattern._d->matrix.multiplied(matrix));
-    DoublePoint pts[2];
+    TransformD m(pattern._d->transform.multiplied(transform));
+    PointD pts[2];
 
     double px = d->data.gradient->points[0].x;
     double py = d->data.gradient->points[0].y;
 
-    m.transformPoints(pts, d->data.gradient->points, 2);
+    m.mapPoints(pts, d->data.gradient->points, 2);
 
     double vx = d->data.gradient->points[1].x - d->data.gradient->points[0].x;
     double vy = d->data.gradient->points[1].y - d->data.gradient->points[0].y;
@@ -311,8 +310,8 @@ struct FOG_HIDDEN PatternGradientC
     double wx = pts[1].x - pts[0].x;
     double wy = pts[1].y - pts[0].y;
 
-    double dx = ( (m.sy  * vx) - (m.shy * vy));
-    double dy = (-(m.shx * vx) + (m.sx  * vy));
+    double dx = ( (m._11 * vx) - (m._01 * vy));
+    double dy = (-(m._10 * vx) + (m._00 * vy));
 
     //double dx2dy2 = dx * dx + dy * dy;
     double dx2dy2 = dx * dx + dy * dy;
@@ -320,7 +319,7 @@ struct FOG_HIDDEN PatternGradientC
 
     if (Math::abs(dx) < 0.000001 && Math::abs(dy) < 0.000001)
     {
-      return rasterFuncs.pattern.solid_init(ctx, d->obj.stops->at(0).getArgb());
+      return rasterFuncs.pattern.solid_init(ctx, d->obj.stops->at(0).getArgbI());
     }
 
     int gLength = (int)(sqrtxxyy + 0.5);
@@ -344,7 +343,7 @@ struct FOG_HIDDEN PatternGradientC
 
 
 #if 0
-    DoubleMatrix m(pattern._d->matrix.multiplied(matrix));
+    TransformD m(pattern._d->transform.multiplied(transform));
 
     double px = d->points[0].x;
     double py = d->points[0].y;
@@ -815,7 +814,7 @@ fetchForwardNext:
   // --------------------------------------------------------------------------
 
   static err_t FOG_FASTCALL init_radial(
-    RasterPattern* ctx, const Pattern& pattern, const DoubleMatrix& matrix, uint32_t interpolationType)
+    RasterPattern* ctx, const Pattern& pattern, const TransformD& transform, uint32_t interpolationType)
   {
     PatternData* d = pattern._d;
     FOG_ASSERT(d->type == PATTERN_RADIAL_GRADIENT);
@@ -824,12 +823,12 @@ fetchForwardNext:
       return rasterFuncs.pattern.solid_init(ctx, 0x00000000);
 
     if (d->obj.stops->getLength() == 1)
-      return rasterFuncs.pattern.solid_init(ctx, d->obj.stops->at(0).getArgb());
+      return rasterFuncs.pattern.solid_init(ctx, d->obj.stops->at(0).getArgbI());
 
-    DoubleMatrix m(pattern._d->matrix.multiplied(matrix));
+    TransformD m(pattern._d->transform.multiplied(transform));
 
-    DoublePoint points[2];
-    m.transformPoints(points, d->data.gradient->points, 2);
+    PointD points[2];
+    m.mapPoints(points, d->data.gradient->points, 2);
     
     int gLength = 256 * (int)d->obj.stops->getLength();
     if (gLength > 4096) gLength = 4096;
@@ -932,7 +931,7 @@ fetchForwardNext:
       double d2 = dx * fy - dyfx;
       double d3 = r2 * (dx * dx + dydy) - d2 * d2;
 
-      index = (int) ((dx * fx + dyfy + Math::sqrt(fabs(d3))) * scale);
+      index = (int) ((dx * fx + dyfy + Math::sqrt(Math::abs(d3))) * scale);
 
       if (index < 0)
         ((uint32_t*)dst)[0] = color0;
@@ -992,7 +991,7 @@ fetchForwardNext:
       P_FETCH_SPAN8_SET_CURRENT()
 
       do {
-        index = (int)((dd + Math::sqrt(fabs(cc))) * scale);
+        index = (int)((dd + Math::sqrt(Math::abs(cc))) * scale);
 
         if (index < 0)
           ((uint32_t*)dst)[0] = color0;
@@ -1063,7 +1062,7 @@ fetchForwardNext:
       P_FETCH_SPAN8_SET_CURRENT()
 
       do {
-        index = (int)((dd + Math::sqrt(fabs(cc))) * scale) % colorsLength;
+        index = (int)((dd + Math::sqrt(Math::abs(cc))) * scale) % colorsLength;
         if (index < 0) index += colorsLength;
 
         ((uint32_t*)dst)[0] = colors[index];
@@ -1093,7 +1092,7 @@ fetchForwardNext:
   // --------------------------------------------------------------------------
 
   static err_t FOG_FASTCALL init_conical(
-    RasterPattern* ctx, const Pattern& pattern, const DoubleMatrix& matrix, uint32_t interpolationType)
+    RasterPattern* ctx, const Pattern& pattern, const TransformD& transform, uint32_t interpolationType)
   {
     PatternData* d = pattern._d;
     FOG_ASSERT(d->type == PATTERN_CONICAL_GRADIENT);
@@ -1104,22 +1103,22 @@ fetchForwardNext:
     }
     if (d->obj.stops->getLength() == 1)
     {
-      return rasterFuncs.pattern.solid_init(ctx, d->obj.stops->at(0).getArgb());
+      return rasterFuncs.pattern.solid_init(ctx, d->obj.stops->at(0).getArgbI());
     }
 
-    DoubleMatrix m(pattern._d->matrix.multiplied(matrix));
+    TransformD m(pattern._d->transform.multiplied(transform));
 
-    DoublePoint points[2];
-    m.transformPoints(points, d->data.gradient->points, 2);
+    PointD points[2];
+    m.mapPoints(points, d->data.gradient->points, 2);
 
     int gLength = 256 * (int)d->obj.stops->getLength();
     if (gLength > 4096) gLength = 4096;
 
     ctx->conicalGradient.dx = points[0].x;
     ctx->conicalGradient.dy = points[0].y;
-    ctx->conicalGradient.angle = atan2(
+    ctx->conicalGradient.angle = Math::atan2(
       (points[0].x - points[1].x),
-      (points[0].y - points[1].y)) + (M_PI/2.0);
+      (points[0].y - points[1].y)) + (MATH_PI/2.0);
 
     err_t err = init_generic(ctx, d->obj.stops.instance(), gLength, d->spread);
     if (err) return err;
@@ -1145,15 +1144,15 @@ fetchForwardNext:
 
     double dx = (double)x - ctx->conicalGradient.dx;
     double dy = (double)y - ctx->conicalGradient.dy;
-    double scale = (double)colorsLength / (M_PI * 2.0);
+    double scale = (double)colorsLength / (MATH_PI * 2.0);
     double add = ctx->conicalGradient.angle;
-    if (add < M_PI) add += M_PI * 2.0;
+    if (add < MATH_PI) add += MATH_PI * 2.0;
 
     P_FETCH_SPAN8_BEGIN()
       P_FETCH_SPAN8_SET_CURRENT()
 
       do {
-        index = (int)((atan2(dy, dx) + add) * scale);
+        index = (int)((Math::atan2(dy, dx) + add) * scale);
         if (index >= colorsLength) index -= colorsLength;
 
         ((uint32_t*)dst)[0] = colors[index];

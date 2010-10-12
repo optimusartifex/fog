@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -13,10 +13,10 @@
 #include <Fog/Core/StringUtil.h>
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/Font.h>
-#include <Fog/Graphics/Matrix.h>
 #include <Fog/Graphics/Geometry.h>
 #include <Fog/Graphics/Path.h>
 #include <Fog/Graphics/TextLayout.h>
+#include <Fog/Graphics/Transform.h>
 
 #include <Fog/Graphics/FontEngine/WinFontEngine.h>
 
@@ -71,7 +71,7 @@ static const MAT2 mat2identity =
   {0, 0}, {0, 1}
 };
 
-static err_t decompose_win32_glyph_outline(const uint8_t* gbuf, uint size, bool flipY, const DoubleMatrix* mtx, DoublePath& path)
+static err_t decompose_win32_glyph_outline(const uint8_t* gbuf, uint size, bool flipY, const TransformD* mtx, PathD& path)
 {
   const uint8_t* cur_glyph = gbuf;
   const uint8_t* end_glyph = gbuf + size;
@@ -93,7 +93,7 @@ static err_t decompose_win32_glyph_outline(const uint8_t* gbuf, uint size, bool 
     if (flipY) y = -y;
 
     path.closePolygon();
-    path.moveTo(DoublePoint(x, y));
+    path.moveTo(PointD(x, y));
 
     while (cur_poly < end_poly)
     {
@@ -107,7 +107,7 @@ static err_t decompose_win32_glyph_outline(const uint8_t* gbuf, uint size, bool 
           x = FIXEDToDouble(pc->apfx[i].x);
           y = FIXEDToDouble(pc->apfx[i].y);
           if (flipY) y = -y;
-          path.lineTo(DoublePoint(x, y));
+          path.lineTo(PointD(x, y));
         }
       }
       
@@ -134,7 +134,7 @@ static err_t decompose_win32_glyph_outline(const uint8_t* gbuf, uint size, bool 
           x2 = FIXEDToDouble(pnt_c.x);
           y2 = FIXEDToDouble(pnt_c.y);
           if (flipY) { y = -y; y2 = -y2; }
-          path.curveTo(DoublePoint(x, y), DoublePoint(x2, y2));
+          path.curveTo(PointD(x, y), PointD(x2, y2));
         }
       }
       cur_poly += sizeof(WORD) * 2 + sizeof(POINTFX) * pc->cpfx;
@@ -236,14 +236,14 @@ FontFace* WinFontEngine::createDefaultFace()
   memcpy(&gDefaultFont, &(ncm.lfMessageFont), sizeof(LOGFONT));
   */
 
-  return createFace(Ascii8("arial"), 12, FontOptions(), FloatMatrix());
+  return createFace(Ascii8("arial"), 12, FontOptions(), TransformF());
 }
 
 FontFace* WinFontEngine::createFace(
   const String& family,
   float size, 
   const FontOptions& options,
-  const FloatMatrix& matrix)
+  const TransformF& transform)
 {
   WinFontFace* face = NULL;
 
@@ -289,7 +289,7 @@ FontFace* WinFontEngine::createFace(
   face->metrics._maximumWidth = (float)textMetrics.tmMaxCharWidth;
   face->metrics._height = (float)textMetrics.tmHeight;
   face->options = options;
-  face->matrix = matrix;
+  face->transform = transform;
   face->hFont = hFont;
 
   return face;
@@ -396,12 +396,12 @@ end:
   return err;
 }
 
-err_t WinFontFace::getOutline(const Char* str, sysuint_t length, DoublePath& dst)
+err_t WinFontFace::getOutline(const Char* str, sysuint_t length, PathD& dst)
 {
   AutoLock locked(lock);
 
   err_t err = ERR_OK;
-  DoubleMatrix matrix;
+  TransformD transform;
 
   GLYPHMETRICS gm;
   ZeroMemory(&gm, sizeof(gm));
@@ -436,9 +436,9 @@ repeat:
       goto repeat;
     }
 
-    if ((err = decompose_win32_glyph_outline(glyphData, dataSize, true, &matrix, dst))) goto end;
+    if ((err = decompose_win32_glyph_outline(glyphData, dataSize, true, &transform, dst))) goto end;
 
-    matrix.translate(gm.gmCellIncX, gm.gmCellIncY);
+    transform.translate(gm.gmCellIncX, gm.gmCellIncY);
   }
 
 end:
@@ -478,16 +478,16 @@ GlyphData* WinFontFace::renderGlyph(HDC hdc, uint32_t uc)
 
   MAT2 mat2;
 
-  if (matrix.isIdentity())
+  if (transform.isIdentity())
   {
     mat2 = mat2identity;
   }
   else
   {
-    mat2.eM11 = FloatToFIXED(matrix.sx);
-    mat2.eM12 = FloatToFIXED(matrix.shy);
-    mat2.eM21 = FloatToFIXED(matrix.shx);
-    mat2.eM22 = FloatToFIXED(matrix.sy);
+    mat2.eM11 = FloatToFIXED(transform._00);
+    mat2.eM12 = FloatToFIXED(transform._01);
+    mat2.eM21 = FloatToFIXED(transform._10);
+    mat2.eM22 = FloatToFIXED(transform._11);
   }
 
   uint32_t dataSize = GetGlyphOutlineW(hdc, uc, GGO_GRAY8_BITMAP, &gm, 0, NULL, &mat2);

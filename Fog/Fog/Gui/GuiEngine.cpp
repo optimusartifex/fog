@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -183,7 +183,7 @@ void GuiEngine::updateMouseStatus()
 {
 }
 
-void GuiEngine::changeMouseStatus(Widget* w, const IntPoint& pos)
+void GuiEngine::changeMouseStatus(Widget* w, const PointI& pos)
 {
   if (_mouseStatus.widget != w)
   {
@@ -527,7 +527,7 @@ void GuiEngine::dispatchVisibility(Widget* w, uint32_t visible)
   w->_visibility = visible;
 }
 
-void GuiEngine::dispatchConfigure(Widget* w, const IntRect& geometry, bool changedOrientation)
+void GuiEngine::dispatchConfigure(Widget* w, const RectI& geometry, bool changedOrientation)
 {
   if (w->hasGuiWindow() && w->getGuiWindow()->hasPopUp())
   {
@@ -625,8 +625,8 @@ struct UpdateRec
     return *this;
   }
 
-  IntBox bounds;
-  IntBox paintBounds;
+  BoxI bounds;
+  BoxI paintBounds;
   uint32_t uflags;
   uint32_t implicitFlags;
   uint32_t visible;
@@ -719,8 +719,8 @@ void GuiEngine::doUpdateWindow(GuiWindow* window)
   // =======================================================
 
   // Some temporary data.
-  IntSize topSize(widget->getSize());
-  IntBox  topBox(0, 0, (int)topSize.getWidth(), (int)topSize.getHeight());
+  SizeI topSize(widget->getSize());
+  BoxI  topBox(0, 0, (int)topSize.getWidth(), (int)topSize.getHeight());
 
   uint32_t uflags = widget->_uflags;
   uint32_t implicitFlags = 0;
@@ -888,7 +888,7 @@ inside:
       widgetRec.bounds.x2 = widgetRec.bounds.getX1() + widget->getWidth();
       widgetRec.bounds.y2 = widgetRec.bounds.getY1() + widget->getHeight();
       widgetRec.bounds += parent->getOrigin();
-      widgetRec.visible = IntBox::intersect(widgetRec.paintBounds, parentRec.paintBounds, widgetRec.bounds);
+      widgetRec.visible = BoxI::intersect(widgetRec.paintBounds, parentRec.paintBounds, widgetRec.bounds);
     }
     else
     {
@@ -916,7 +916,7 @@ inside:
         rtmp1.set(widgetRec.paintBounds);
         painter.setMetaVars(
           rtmp1,
-          IntPoint(widgetRec.bounds.getX1(), widgetRec.bounds.getY1()));
+          PointI(widgetRec.bounds.getX1(), widgetRec.bounds.getY1()));
 
         widget->sendEvent(&e);
         if (!parentRec.painted) blitRegion.combine(rtmp1, REGION_OP_UNION);
@@ -954,7 +954,7 @@ inside:
               }
               else
               {
-                rtmp4.combine(IntBox(
+                rtmp4.combine(BoxI(
                   cw->rect().x1() + ox,
                   cw->rect().y1() + oy,
                   cw->rect().x2() + ox,
@@ -967,7 +967,7 @@ inside:
         else
         {
 #endif
-          //rtmp1.set(IntBox(widgetRec.paintBounds.x1));
+          //rtmp1.set(BoxI(widgetRec.paintBounds.x1));
           rtmp1.set(widgetRec.paintBounds);
           widgetRec.painted = true;
 #if 0
@@ -975,7 +975,7 @@ inside:
 #endif
         painter.setMetaVars(
           rtmp1,
-          IntPoint(widgetRec.bounds.getX1(), widgetRec.bounds.getY1()));
+          PointI(widgetRec.bounds.getX1(), widgetRec.bounds.getY1()));
 
         // FIXME: Repaint caret repaints the whole widget.
         if ((widgetRec.uflags & (WIDGET_UPDATE_PAINT | WIDGET_UPDATE_CARET)) != 0)
@@ -1061,7 +1061,7 @@ end:
   painter.end();
 
   {
-    const IntBox* rptr;
+    const BoxI* rptr;
     sysuint_t rlen = 0;
 
     if (blitFull || window->_needBlit)
@@ -1205,12 +1205,12 @@ void GuiWindow::onVisibility(uint32_t visible)
   GUI_ENGINE()->dispatchVisibility(_widget, visible);
 }
 
-void GuiWindow::onGeometry(const IntRect& windowRect, const IntRect& clientRect)
+void GuiWindow::onGeometry(const RectI& windowRect, const RectI& clientRect)
 {
   _windowRect = windowRect;
   _clientRect = clientRect;
 
-  GUI_ENGINE()->dispatchConfigure(_widget, IntRect(
+  GUI_ENGINE()->dispatchConfigure(_widget, RectI(
     windowRect.getX(),
     windowRect.getY(),
     clientRect.getWidth(),
@@ -1245,7 +1245,7 @@ void GuiWindow::onMouseMove(int x, int y)
   }
   guiEngine->_systemMouseStatus.position.set(x, y);
 
-  IntPoint p(x, y);
+  PointI p(x, y);
 
   // ----------------------------------
   // Grabbing mode

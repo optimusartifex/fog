@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -166,7 +166,7 @@ Palette Reduce::toPalette()
   FOG_ASSERT(_count < 256);
 
   for (uint32_t i = 0; i < _count; i++) colors[i] = _entities[i].key;
-  palette.setArgb32(0, (Argb*)colors, _count);
+  palette.setArgb32(0, (ArgbI*)colors, _count);
 
   return palette;
 }

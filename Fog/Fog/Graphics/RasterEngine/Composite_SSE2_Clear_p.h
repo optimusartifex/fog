@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -261,7 +261,7 @@ vMaskAlphaSparseSkip4:
     uint8_t* dst, const RasterSolid* src, int w, const RasterClosure* closure)
   {
     FOG_UNUSED(src);
-    __m128i zero0xmm = FOG_GET_SSE_CONST_PI(FF000000FF000000_FF000000FF000000);
+    __m128i zero0xmm = FOG_SSE_GET_CONST_PI(FF000000FF000000_FF000000FF000000);
 
     xxxx32_cblit_full_inline(dst, w, zero0xmm);
   }
@@ -270,7 +270,7 @@ vMaskAlphaSparseSkip4:
     uint8_t* dst, const RasterSolid* src, const Span* span, const RasterClosure* closure)
   {
     FOG_UNUSED(src);
-    __m128i zero0xmm = FOG_GET_SSE_CONST_PI(FF000000FF000000_FF000000FF000000);
+    __m128i zero0xmm = FOG_SSE_GET_CONST_PI(FF000000FF000000_FF000000FF000000);
 
     // [Begin] ----------------------------------------------------------------
     C_BLIT_SPAN8_BEGIN(4)

@@ -20,11 +20,11 @@ struct MyPopUp : public Widget
     p->setOperator(OPERATOR_SRC_OVER);
 
     // Clear everything to white.
-    p->setSource(Argb(0xAAFFFFFF));
+    p->setSource(ArgbI(0xAAFFFFFF));
     p->fillAll();
 
-    p->setSource(Argb(0xFF000000));
-    p->drawText(IntPoint(0,0),Ascii8("TEXT TEXT"),getFont());
+    p->setSource(ArgbI(0xFF000000));
+    p->drawText(PointI(0,0),Ascii8("TEXT TEXT"),getFont());
   }
 };
 
@@ -117,7 +117,7 @@ struct XPButton : public ButtonBase {
   }
 
   virtual void onPaint(PaintEvent* e) {    
-    IntRect r = getClientContentGeometry(); //for easy margin support
+    RectI r = getClientContentGeometry(); //for easy margin support
     RECT rect;
     rect.left = r.x;
     rect.right = r.getWidth();
@@ -130,12 +130,12 @@ struct XPButton : public ButtonBase {
 
     if(_theme.IsThemeBackgroundPartiallyTransparent(TYPE,state)) {
       //button
-      //_image.clear(Argb(0x00000000));
+      //_image.clear(ArgbI(0x00000000));
       //_theme.getThemeBackgroundRegion(_hdc,TYPE,state,&rect,&_rgn);
       //SelectClipRgn(_hdc, _rgn);
     } else {
       //tab
-      _image.clear(Argb(0xFFFFFFFF));
+      _image.clear(ArgbI(0xFFFFFFFF));
     }    
 
     //Clip on Region to support Transparency! ... needed?
@@ -144,10 +144,10 @@ struct XPButton : public ButtonBase {
 
     //draws with a really ugly font... why?? (also if I set the font within window -> maybe because I open them with null hwnd)
     //BOOL ret = _theme.drawThemeText(_hdc,BP_PUSHBUTTON,state,(wchar_t*)_text.getData(),_text.getLength(),DT_CENTER|DT_VCENTER|DT_SINGLELINE,0,&rect);     
-    e->getPainter()->setSource(Argb(0xFFFFFFFF));
-    e->getPainter()->fillRect(IntRect(0, 0, getWidth(), getHeight()));
-    e->getPainter()->drawImage(IntPoint(0,0),_image);
-    e->getPainter()->setSource(Argb(0xFF000000));
+    e->getPainter()->setSource(ArgbI(0xFFFFFFFF));
+    e->getPainter()->fillRect(RectI(0, 0, getWidth(), getHeight()));
+    e->getPainter()->drawImage(PointI(0,0),_image);
+    e->getPainter()->setSource(ArgbI(0xFF000000));
     e->getPainter()->drawText(r, _text, _font, TEXT_ALIGN_CENTER);
   }
 
@@ -174,7 +174,7 @@ struct MyModalWindow : public Window
   {
     Button* button5 = fog_new Button();
     addChild(button5);
-    button5->setGeometry(IntRect(40, 200, 100, 20));
+    button5->setGeometry(RectI(40, 200, 100, 20));
     button5->setText(Ascii8("Test ModalWindow"));
     button5->show();  
     button5->addListener(EVENT_CLICK, this, &MyModalWindow::onModalTestClick);
@@ -183,7 +183,7 @@ struct MyModalWindow : public Window
   void onModalTestClick(MouseEvent* e)
   {
     _modalwindow = fog_new MyModalWindow(_x+1);
-    _modalwindow->setSize(IntSize(200,300));
+    _modalwindow->setSize(SizeI(200,300));
     _modalwindow->addListener(EVENT_CLOSE, this, &MyModalWindow::onModalClose);
     _modalwindow->showModal(getGuiWindow());
   }
@@ -200,13 +200,13 @@ struct MyModalWindow : public Window
     Painter* p = e->getPainter();
     p->setOperator(OPERATOR_SRC);
     // Clear everything to white.
-    p->setSource(Argb(0xFF000000));
+    p->setSource(ArgbI(0xFF000000));
     p->fillAll();
 
-    p->setSource(Argb(0xFFFFFFFF));
+    p->setSource(ArgbI(0xFFFFFFFF));
     String s;
     s.format("MODAL DIALOG NO: %i", _x);
-    p->drawText(IntPoint(0,0),s,getFont());
+    p->drawText(PointI(0,0),s,getFont());
   }
 
   int _x;
@@ -234,13 +234,13 @@ struct MyWindow : public Window
     for(int i=0;i<count;++i) {
       Button* buttonx1 = fog_new Button();
       addChild(buttonx1);
-      //button4->setGeometry(IntRect(40, 160, 100, 20));
+      //button4->setGeometry(RectI(40, 160, 100, 20));
       String str;
       str.format("XButton%i", i);
       buttonx1->setText(str);
       buttonx1->show(); 
 
-      // buttonx1->setMinimumSize(IntSize(40,40));
+      // buttonx1->setMinimumSize(SizeI(40,40));
       _buttons.append(buttonx1);
     }
 
@@ -356,7 +356,7 @@ struct MyWindow : public Window
     {
       TextField* textField = fog_new TextField();
       textField->show();
-      textField->setMinimumSize(IntSize(100, 20));
+      textField->setMinimumSize(SizeI(100, 20));
       addChild(textField);
       layout->addItem(textField);
     }
@@ -364,7 +364,7 @@ struct MyWindow : public Window
     {
       TextField* textField = fog_new TextField();
       textField->show();
-      textField->setMinimumSize(IntSize(100, 20));
+      textField->setMinimumSize(SizeI(100, 20));
       addChild(textField);
       layout->addItem(textField);
     }
@@ -389,7 +389,7 @@ struct MyWindow : public Window
   void onModalTestClick(MouseEvent* e)
   {
     _modalwindow = fog_new MyModalWindow(_mcount);
-    _modalwindow->setSize(IntSize(200,300));
+    _modalwindow->setSize(SizeI(200,300));
     _modalwindow->addListener(EVENT_CLOSE, this, &MyWindow::onModalClose);
     _modalwindow->showModal(getGuiWindow());
   }
@@ -435,7 +435,7 @@ struct MyWindow : public Window
     Application::getInstance()->getAnimationDispatcher()->addAnimation(anim);
   }
 
-  void paintImage(Painter* painter, const IntPoint& pos, const Image& im, const String& name);
+  void paintImage(Painter* painter, const PointI& pos, const Image& im, const String& name);
 
   Button* button;
 
@@ -454,6 +454,7 @@ struct MyWindow : public Window
 
 
   List<Widget*> _buttons;
+  bool _clip;
 
   //FlowLayout* _layout;
 };
@@ -481,6 +482,7 @@ MyWindow::MyWindow(uint32_t createFlags) :
   _scale = 1.0;
   _spread = PATTERN_SPREAD_REPEAT;
 
+  _clip = false;
   //testVBoxLayout();
   //testFrame();
   //setContentRightMargin(0);
@@ -500,6 +502,9 @@ void MyWindow::onKey(KeyEvent* e)
       case KEY_DOWN : _suby += 0.05; update(WIDGET_UPDATE_ALL); break;
       case KEY_LEFT : _subx -= 0.05; update(WIDGET_UPDATE_ALL); break;
       case KEY_RIGHT: _subx += 0.05; update(WIDGET_UPDATE_ALL); break;
+
+      case KEY_SPACE: update(WIDGET_UPDATE_ALL); break;
+      case KEY_C: _clip = !_clip; update(WIDGET_UPDATE_ALL); break;
     }
   }
 
@@ -515,27 +520,43 @@ void MyWindow::onPaint(PaintEvent* e)
   p->setOperator(OPERATOR_SRC);
 
   // Clear everything to white.
-  p->setSource(Argb(0xFFFFFFFF));
+  p->setSource(ArgbI(0xFFFFFFFF));
   p->fillAll();
-  p->setSource(Argb(0xFF000000));
+  p->setSource(ArgbI(0xFF000000));
 
-  DoubleRect rect(50.0 + _subx, 50.0 + _suby, 100, 100);
+  RectD rect(10.0 + _subx, 10.0 + _suby, 100, 100);
 
   //p->fillRect(rect);
 
-  DoublePath path;
-  path.addRect(rect);
-  p->fillPath(path);
+  if (_clip)
+  {
+    Region region;
+    region.combine(RectI(  4,   4,  50,  60), REGION_OP_UNION);
+    region.combine(RectI( 64,   4, 200,  60), REGION_OP_UNION);
+    region.combine(RectI(  4,  70,  50, 140), REGION_OP_UNION);
+    region.combine(RectI( 64,  70, 200, 140), REGION_OP_UNION);
 
-/*
-  DoublePath path;
+    p->save();
+    p->setSource(ArgbI(0xFFCFCFFF));
+    p->fillRegion(region);
+    p->restore();
+    p->clipRegion(region, CLIP_OP_REPLACE);
+  }
+
+  //PathD path;
+  //path.addRect(rect);
+  //p->fillPath(path);
+  p->fillRect(rect);
+
+  /*
+  PathD path;
   path.moveTo(150, 100);
   path.lineTo(250, 105);
   path.lineTo(200, 200);
   path.lineTo(100, 200);
-  p->setSource(Argb(0xFF000000));
+  p->setSource(ArgbI(0xFF000000));
   p->fillPath(path);
-*/
+  */
 
   p->restore();
 }
@@ -549,10 +570,9 @@ FOG_GUI_MAIN()
   Application app(Ascii8("Gui"));
 
   MyWindow window(WINDOW_TYPE_DEFAULT);
-  window.setSize(IntSize(400, 400));
+  window.setSize(SizeI(400, 400));
   window.show();
 
   app.addListener(EVENT_LAST_WINDOW_CLOSED, &app, &Application::quit);
   return app.run();
 }
-

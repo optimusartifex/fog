@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -33,7 +33,7 @@ ImagePixels::~ImagePixels()
 
 void ImagePixels::_clear()
 {
-  _size.clear();
+  _size.reset();
   _format = IMAGE_FORMAT_NULL;
   _stride = 0;
   _data = NULL;

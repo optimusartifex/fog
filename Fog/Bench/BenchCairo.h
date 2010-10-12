@@ -93,7 +93,7 @@ struct CairoModule_FillRound : public CairoModule_FillRect
   virtual void bench(int quantity);
   Fog::String getType();
 
-  void addRound(cairo_t* cr, Fog::IntRect rect, double radius);
+  void addRound(cairo_t* cr, Fog::RectI rect, double radius);
 };
 
 // ============================================================================

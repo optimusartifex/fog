@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -23,8 +23,8 @@ namespace Fog {
 // [Forward Declarations]
 // ============================================================================
 
-struct DoubleMatrix;
-struct DoublePath;
+struct TransformD;
+struct PathD;
 struct PathStrokerPrivate;
 
 // ============================================================================
@@ -184,8 +184,8 @@ struct FOG_API PathStroker
   // [Stroking]
   // --------------------------------------------------------------------------
 
-  err_t stroke(DoublePath& dst) const;
-  err_t stroke(DoublePath& dst, const DoublePath& src) const;
+  err_t stroke(PathD& dst) const;
+  err_t stroke(PathD& dst, const PathD& src) const;
 
   // --------------------------------------------------------------------------
   // [Members]

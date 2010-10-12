@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -48,9 +48,9 @@ struct FOG_API Layout : public LayoutItem
   // --------------------------------------------------------------------------
   // [Total Layout Size Hints]
   // --------------------------------------------------------------------------
-  IntSize getTotalSizeHint() const;
-  IntSize getTotalMaximumSize() const;
-  IntSize getTotalMinimumSize() const;
+  SizeI getTotalSizeHint() const;
+  SizeI getTotalMaximumSize() const;
+  SizeI getTotalMinimumSize() const;
   int getTotalHeightForWidth(int width) const;
 
   // --------------------------------------------------------------------------
@@ -71,7 +71,7 @@ struct FOG_API Layout : public LayoutItem
   // --------------------------------------------------------------------------
 
   virtual int calcMargin(int margin, uint32_t location) const;  
-  IntRect getContentsRect() const;
+  RectI getContentsRect() const;
 
   //helper method
   void calcContentMargins(int& side, int& top) const;
@@ -99,9 +99,9 @@ struct FOG_API Layout : public LayoutItem
   // [Geometry]
   // --------------------------------------------------------------------------
 
-  virtual void setLayoutGeometry(const IntRect& r);
-  virtual IntRect getLayoutGeometry() const;
-  void callSetGeometry(const IntSize& size);
+  virtual void setLayoutGeometry(const RectI& r);
+  virtual RectI getLayoutGeometry() const;
+  void callSetGeometry(const SizeI& size);
 
   // --------------------------------------------------------------------------
   // [Invalidation]
@@ -157,7 +157,7 @@ struct FOG_API Layout : public LayoutItem
   //! @brief Parent item (Widget or Layout) of this Layout.
   LayoutItem* _parentItem;
   //! @brief Current rect of this Layout.
-  IntRect _rect;
+  RectI _rect;
 
   //! @brief Size constraint
   //! LAYOUT TODO: Not implemented).

@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -37,8 +37,8 @@ struct FOG_HIDDEN InterpolateC
     int xw = (x2 - x1);
     if (xw == 0) return;
 
-    // Width is decreased by 1 to fit our gradient schema that first and last
-    // points in interpolation are always equal to c0 and c1 recpectively.
+    // Width is decreased by 1 to fit our gradient schema where first and last
+    // points are always equal to c0 and c1, respectively.
     if (w) w--;
 
     // Loop counter.
@@ -126,8 +126,8 @@ struct FOG_HIDDEN InterpolateC
     int xw = (x2 - x1);
     if (xw == 0) return;
 
-    // Width is decreased by 1 to fit our gradient schema that first and last
-    // points in interpolation are always equal to c0 and c1 recpectively.
+    // Width is decreased by 1 to fit our gradient schema where first and last
+    // points are always equal to c0 and c1, respectively.
     if (w) w--;
 
     // Loop counter.
@@ -216,8 +216,8 @@ struct FOG_HIDDEN InterpolateC
     int xw = (x2 - x1);
     if (xw == 0) return;
 
-    // Width is decreased by 1 to fit our gradient schema that first and last
-    // points in interpolation are always equal to c0 and c1 recpectively.
+    // Width is decreased by 1 to fit our gradient schema where first and last
+    // points are always equal to c0 and c1, respectively.
     if (w) w--;
 
     c0 |= 0xFF000000;
@@ -295,8 +295,8 @@ struct FOG_HIDDEN InterpolateC
     int xw = (x2 - x1);
     if (xw == 0) return;
 
-    // Width is decreased by 1 to fit our gradient schema that first and last
-    // points in interpolation are always equal to c0 and c1 recpectively.
+    // Width is decreased by 1 to fit our gradient schema where first and last
+    // points are always equal to c0 and c1, respectively.
     if (w) w--;
 
     // Loop counter.

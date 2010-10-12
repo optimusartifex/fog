@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -31,22 +31,22 @@ Button::~Button()
 {
 }
 
-IntSize Button::getSizeHint() const
+SizeI Button::getSizeHint() const
 {
-  return IntSize(50, 24);
+  return SizeI(50, 24);
 }
 
 void Button::onPaint(PaintEvent* e)
 {
   Painter* p = e->getPainter();
-  IntSize s = getClientSize();
-  IntRect bounds(0, 0, s.w, s.h);
+  SizeI s = getClientSize();
+  RectI bounds(0, 0, s.w, s.h);
 
   Pattern pat;
   pat.setType(PATTERN_LINEAR_GRADIENT);
   pat.setSpread(PATTERN_SPREAD_PAD);
 
-  IntPoint pts[2];
+  PointI pts[2];
   pts[0].set(0, 0);
   pts[1].set(0, s.h);
   if (isDown()) swap(pts[0], pts[1]);
@@ -56,7 +56,7 @@ void Button::onPaint(PaintEvent* e)
   pat.addStop(ArgbStop(1.00f, isMouseOver() ? 0xFFCADAFF : 0xFFB8C8FF));
   
   p->setSource(pat);
-  p->fillRound(bounds, IntPoint(3, 3));
+  p->fillRound(bounds, PointI(3, 3));
   p->resetSource();
 
   pat.resetStops();
@@ -66,12 +66,12 @@ void Button::onPaint(PaintEvent* e)
   // p->setSource(0xFF70709F);
   p->setSource(pat);
   p->drawRound(
-    DoubleRect(
+    RectD(
       (double)bounds.x + 0.5,
       (double)bounds.y + 0.5,
       (double)bounds.w - 1.0,
       (double)bounds.h - 1.0), 
-    DoublePoint(3.0, 3.0));
+    PointD(3.0, 3.0));
 
   p->setSource(0xFF000000);
   if (isDown()) bounds.translate(1, 1);

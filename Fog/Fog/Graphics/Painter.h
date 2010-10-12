@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -81,7 +81,7 @@ struct FOG_API Painter
   //! the @a rect area.
   //!
   //! @sa Painter::begin().
-  Painter(Image& image, const IntRect& rect, uint32_t initFlags = NO_FLAGS);
+  Painter(Image& image, const RectI& rect, uint32_t initFlags = NO_FLAGS);
 
   //! @brief Destroy painter instance.
   //!
@@ -109,7 +109,7 @@ struct FOG_API Painter
   //! destroy or work with image. If you want to use the image you provided,
   //! but you want to continue paniting on it then call @c Painter::flush() 
   //! with @c PAINTER_FLUSH_SYNC flag to make content in the image ready.
-  err_t begin(Image& image, const IntRect& rect, uint32_t initFlags = NO_FLAGS);
+  err_t begin(Image& image, const RectI& rect, uint32_t initFlags = NO_FLAGS);
 
   //! @brief Begin painting to the custom image buffer @a buffer.
   //!
@@ -136,7 +136,7 @@ struct FOG_API Painter
   //!
   //! @note Calling Painter::switchTo() will destroy all layers and saved states,
   //! it's like calling @c Painter::end(), but reusing the paint engine.
-  err_t switchTo(Image& image, const IntRect& rect);
+  err_t switchTo(Image& image, const RectI& rect);
 
   //! @brief Finish painting and switch target to @a buffer, leaving 
   //! the engine configuration.
@@ -198,7 +198,7 @@ struct FOG_API Painter
   //!
   //! This function was designed as an optimization for windowing systems to
   //! set all important origin and clipping information per one function call.
-  FOG_INLINE err_t setMetaVars(const Region& region, const IntPoint& origin) { return _engine->setMetaVars(region, origin); }
+  FOG_INLINE err_t setMetaVars(const Region& region, const PointI& origin) { return _engine->setMetaVars(region, origin); }
 
   //! @brief Reset meta variables (setting meta region to infinite and meta
   //! origin to zero).
@@ -208,7 +208,7 @@ struct FOG_API Painter
   FOG_INLINE err_t resetMetaVars() { return _engine->resetMetaVars(); }
 
   //! @brief Set user variables (user origin, user region).
-  FOG_INLINE err_t setUserVars(const Region& region, const IntPoint& origin) { return _engine->setUserVars(region, origin); }
+  FOG_INLINE err_t setUserVars(const Region& region, const PointI& origin) { return _engine->setUserVars(region, origin); }
   //! @brief Reset user variables (setting user region to infinite and user
   //! origin to zero).
   FOG_INLINE err_t resetUserVars() { return _engine->resetUserVars(); }
@@ -219,9 +219,9 @@ struct FOG_API Painter
   FOG_INLINE Region getUserRegion() const { return _engine->getUserRegion(); }
 
   //! @brief Get meta origin.
-  FOG_INLINE IntPoint getMetaOrigin() const { return _engine->getMetaOrigin(); }
+  FOG_INLINE PointI getMetaOrigin() const { return _engine->getMetaOrigin(); }
   //! @brief Get user origin.
-  FOG_INLINE IntPoint getUserOrigin() const { return _engine->getUserOrigin(); }
+  FOG_INLINE PointI getUserOrigin() const { return _engine->getUserOrigin(); }
 
   // --------------------------------------------------------------------------
   // [Paint Parameters]
@@ -230,20 +230,20 @@ struct FOG_API Painter
   //! @brief Get source type, see @c PAINTER_SOURCE_TYPE.
   FOG_INLINE uint32_t getSourceType() const { return _engine->getSourceType(); }
 
-  //! @brief Get source color as @c Argb instance.
+  //! @brief Get source color as @c ArgbI instance.
   //!
-  //! If current source isn't solid color, the @c Argb(0x00000000) color is
+  //! If current source isn't solid color, the @c ArgbI(0x00000000) color is
   //! returned.
-  FOG_INLINE Argb getSourceArgb() const { return _engine->getSourceArgb(); }
+  FOG_INLINE ArgbI getSourceArgb() const { return _engine->getSourceArgb(); }
 
   //! @brief Get source pattern.
   //!
-  //! If source color was set through @c setSource(Argb argb) method,
+  //! If source color was set through @c setSource(ArgbI argb) method,
   //! pattern is created automatically.
   FOG_INLINE Pattern getSourcePattern() const { return _engine->getSourcePattern(); }
 
   //! @brief Set source as solid @a rgba color.
-  FOG_INLINE err_t setSource(const Argb& argb) { return _engine->setSource(argb); }
+  FOG_INLINE err_t setSource(const ArgbI& argb) { return _engine->setSource(argb); }
 
   //! @brief Set source as pattern @a pattern.
   FOG_INLINE err_t setSource(const Pattern& pattern) { return _engine->setSource(pattern); }
@@ -362,41 +362,41 @@ struct FOG_API Painter
   // --------------------------------------------------------------------------
 
   //! @brief Get current working matrix.
-  FOG_INLINE DoubleMatrix getMatrix() const { return _engine->getMatrix(); }
+  FOG_INLINE TransformD getTransform() const { return _engine->getTransform(); }
   //! @brief Set current working matrix to @a m.
-  FOG_INLINE err_t setMatrix(const DoubleMatrix& m) { return _engine->setMatrix(m); }
+  FOG_INLINE err_t setTransform(const TransformD& transform) { return _engine->setTransform(transform); }
   //! @brief Reset current working matrix (to identity).
-  FOG_INLINE err_t resetMatrix() { return _engine->resetMatrix(); }
+  FOG_INLINE err_t resetTransform() { return _engine->resetTransform(); }
 
   //! @brief Rotate current working matrix .
-  FOG_INLINE err_t rotate(double angle, uint32_t order = MATRIX_PREPEND) { return _engine->rotate(angle, order); }
+  FOG_INLINE err_t rotate(double angle, uint32_t order = MATRIX_ORDER_PREPEND) { return _engine->rotate(angle, order); }
 
-  FOG_INLINE err_t scale(int sx, int sy, uint32_t order = MATRIX_PREPEND) { return _engine->scale(sx, sy, order); }
+  FOG_INLINE err_t scale(int sx, int sy, uint32_t order = MATRIX_ORDER_PREPEND) { return _engine->scale(sx, sy, order); }
   //! @brief Scale current working matrix.
-  FOG_INLINE err_t scale(double sx, double sy, uint32_t order = MATRIX_PREPEND) { return _engine->scale(sx, sy, order); }
+  FOG_INLINE err_t scale(double sx, double sy, uint32_t order = MATRIX_ORDER_PREPEND) { return _engine->scale(sx, sy, order); }
 
   //! @brief Skew current working matrix.
-  FOG_INLINE err_t skew(double sx, double sy, uint32_t order = MATRIX_PREPEND) { return _engine->skew(sx, sy, order); }
+  FOG_INLINE err_t skew(double sx, double sy, uint32_t order = MATRIX_ORDER_PREPEND) { return _engine->skew(sx, sy, order); }
 
   //! @brief Translate current working matrix.
-  FOG_INLINE err_t translate(int x, int y, uint32_t order = MATRIX_PREPEND) { return _engine->translate(x, y, order); }
+  FOG_INLINE err_t translate(int x, int y, uint32_t order = MATRIX_ORDER_PREPEND) { return _engine->translate(x, y, order); }
   //! @brief Translate current working matrix.
-  FOG_INLINE err_t translate(double x, double y, uint32_t order = MATRIX_PREPEND) { return _engine->translate(x, y, order); }
+  FOG_INLINE err_t translate(double x, double y, uint32_t order = MATRIX_ORDER_PREPEND) { return _engine->translate(x, y, order); }
 
   //! @brief Transform current working matrix.
-  FOG_INLINE err_t transform(const DoubleMatrix& m, uint32_t order = MATRIX_PREPEND) { return _engine->transform(m, order); }
+  FOG_INLINE err_t transform(const TransformD& m, uint32_t order = MATRIX_ORDER_PREPEND) { return _engine->transform(m, order); }
 
   //! @brief Convert world coordinate into screen one (using transformation matrix).
-  FOG_INLINE err_t worldToScreen(DoublePoint* pt) const { return _engine->worldToScreen(pt); }
+  FOG_INLINE err_t worldToScreen(PointD* pt) const { return _engine->worldToScreen(pt); }
   //! @brief Convert screen coordinate into world one (using transformation matrix).
-  FOG_INLINE err_t screenToWorld(DoublePoint* pt) const { return _engine->screenToWorld(pt); }
+  FOG_INLINE err_t screenToWorld(PointD* pt) const { return _engine->screenToWorld(pt); }
 
   //! @brief Align point to center of the raster (X.5, Y.5), after after all
   //! transformations were applied.
   //!
   //! This method is useful when you need to paint really sharp lines or other
   //! primitives.
-  FOG_INLINE err_t alignPoint(DoublePoint* pt) const { return _engine->alignPoint(pt); }
+  FOG_INLINE err_t alignPoint(PointD* pt) const { return _engine->alignPoint(pt); }
 
   // --------------------------------------------------------------------------
   // [State]
@@ -412,26 +412,26 @@ struct FOG_API Painter
   // --------------------------------------------------------------------------
 
   //! @brief Combine actual clip mask with rectangle @a rect.
-  FOG_INLINE err_t clipRect(const IntRect& rect, uint32_t clipOp) { return _engine->clipRect(rect, clipOp); }
+  FOG_INLINE err_t clipRect(const RectI& rect, uint32_t clipOp) { return _engine->clipRect(rect, clipOp); }
   //! @brief Combine actual clip mask with mask @a mask at position @a pt.
-  FOG_INLINE err_t clipMask(const IntPoint& pt, const Image& mask, uint32_t clipOp) { return _engine->clipMask(pt, mask, clipOp); }
+  FOG_INLINE err_t clipMask(const PointI& pt, const Image& mask, uint32_t clipOp) { return _engine->clipMask(pt, mask, clipOp); }
   //! @brief Combine actual clip mask with region @a region.
   FOG_INLINE err_t clipRegion(const Region& region, uint32_t clipOp) { return _engine->clipRegion(region, clipOp); }
 
   //! @brief Combine actual clip mask with rectangle @a rect.
-  FOG_INLINE err_t clipRect(const DoubleRect& rect, uint32_t clipOp) { return _engine->clipRect(rect, clipOp); }
+  FOG_INLINE err_t clipRect(const RectD& rect, uint32_t clipOp) { return _engine->clipRect(rect, clipOp); }
   //! @brief Combine actual clip mask with mask @a mask at position @a pt.
-  FOG_INLINE err_t clipMask(const DoublePoint& pt, const Image& mask, uint32_t clipOp) { return _engine->clipMask(pt, mask, clipOp); }
+  FOG_INLINE err_t clipMask(const PointD& pt, const Image& mask, uint32_t clipOp) { return _engine->clipMask(pt, mask, clipOp); }
   //! @brief Combine actual clip mask with rectangles @a r.
-  FOG_INLINE err_t clipRects(const DoubleRect* r, sysuint_t count, uint32_t clipOp) { return _engine->clipRects(r, count, clipOp); }
+  FOG_INLINE err_t clipRects(const RectD* r, sysuint_t count, uint32_t clipOp) { return _engine->clipRects(r, count, clipOp); }
   //! @brief Combine actual clip mask with round @a r.
-  FOG_INLINE err_t clipRound(const DoubleRect& r, const DoublePoint& radius, uint32_t clipOp) { return _engine->clipRound(r, radius, clipOp); }
+  FOG_INLINE err_t clipRound(const RectD& r, const PointD& radius, uint32_t clipOp) { return _engine->clipRound(r, radius, clipOp); }
   //! @brief Combine actual clip mask with ellipse at @a cp with radius @a r.
-  FOG_INLINE err_t clipEllipse(const DoublePoint& cp, const DoublePoint& r, uint32_t clipOp) { return _engine->clipEllipse(cp, r, clipOp); }
+  FOG_INLINE err_t clipEllipse(const PointD& cp, const PointD& r, uint32_t clipOp) { return _engine->clipEllipse(cp, r, clipOp); }
   //! @brief Combine actual clip mask with arc at @a cp.
-  FOG_INLINE err_t clipArc(const DoublePoint& cp, const DoublePoint& r, double start, double sweep, uint32_t clipOp) { return _engine->clipArc(cp, r, start, sweep, clipOp); }
+  FOG_INLINE err_t clipArc(const PointD& cp, const PointD& r, double start, double sweep, uint32_t clipOp) { return _engine->clipArc(cp, r, start, sweep, clipOp); }
   //! @brief Combine actual clip mask with path @a path.
-  FOG_INLINE err_t clipPath(const DoublePath& path, bool stroke, uint32_t clipOp) { return _engine->clipPath(path, stroke, clipOp); }
+  FOG_INLINE err_t clipPath(const PathD& path, bool stroke, uint32_t clipOp) { return _engine->clipPath(path, stroke, clipOp); }
 
   //! @brief Reset clipping.
   FOG_INLINE err_t resetClip() { return _engine->resetClip(); }
@@ -441,21 +441,21 @@ struct FOG_API Painter
   // --------------------------------------------------------------------------
 
   //! @brief Draw point.
-  FOG_INLINE err_t drawPoint(const IntPoint& p) { return _engine->drawPoint(p); }
+  FOG_INLINE err_t drawPoint(const PointI& p) { return _engine->drawPoint(p); }
   //! @brief Draw line.
-  FOG_INLINE err_t drawLine(const IntPoint& start, const IntPoint& end) { return _engine->drawLine(start, end); }
+  FOG_INLINE err_t drawLine(const PointI& start, const PointI& end) { return _engine->drawLine(start, end); }
 
   //! @brief Draw rectangle.
-  FOG_INLINE err_t drawRect(const IntRect& r) { return _engine->drawRect(r); }
+  FOG_INLINE err_t drawRect(const RectI& r) { return _engine->drawRect(r); }
   //! @brief Draw rounded rectangle.
-  FOG_INLINE err_t drawRound(const IntRect& r, const IntPoint& radius) { return _engine->drawRound(r, radius); }
+  FOG_INLINE err_t drawRound(const RectI& r, const PointI& radius) { return _engine->drawRound(r, radius); }
 
   //! @brief Fill rectangle.
-  FOG_INLINE err_t fillRect(const IntRect& r) { return _engine->fillRect(r); }
+  FOG_INLINE err_t fillRect(const RectI& r) { return _engine->fillRect(r); }
   //! @brief Fill rectangles.
-  FOG_INLINE err_t fillRects(const IntRect* r, sysuint_t count) { return _engine->fillRects(r, count); }
+  FOG_INLINE err_t fillRects(const RectI* r, sysuint_t count) { return _engine->fillRects(r, count); }
   //! @brief Fill rounded rectangle.
-  FOG_INLINE err_t fillRound(const IntRect& r, const IntPoint& radius) { return _engine->fillRound(r, radius); }
+  FOG_INLINE err_t fillRound(const RectI& r, const PointI& radius) { return _engine->fillRound(r, radius); }
   //! @brief Fill region.
   FOG_INLINE err_t fillRegion(const Region& region) { return _engine->fillRegion(region); }
 
@@ -466,78 +466,78 @@ struct FOG_API Painter
   // --------------------------------------------------------------------------
 
   //! @brief Draw point.
-  FOG_INLINE err_t drawPoint(const DoublePoint& p) { return _engine->drawPoint(p); }
+  FOG_INLINE err_t drawPoint(const PointD& p) { return _engine->drawPoint(p); }
   //! @brief Draw line.
-  FOG_INLINE err_t drawLine(const DoublePoint& start, const DoublePoint& end) { return _engine->drawLine(start, end); }
+  FOG_INLINE err_t drawLine(const PointD& start, const PointD& end) { return _engine->drawLine(start, end); }
   //! @brief Draw poly-line.
-  FOG_INLINE err_t drawLine(const DoublePoint* pts, sysuint_t count) { return _engine->drawLine(pts, count); }
+  FOG_INLINE err_t drawLine(const PointD* pts, sysuint_t count) { return _engine->drawLine(pts, count); }
 
   //! @brief Draw polygon.
-  FOG_INLINE err_t drawPolygon(const DoublePoint* pts, sysuint_t count) { return _engine->drawPolygon(pts, count); }
+  FOG_INLINE err_t drawPolygon(const PointD* pts, sysuint_t count) { return _engine->drawPolygon(pts, count); }
   //! @brief Draw rectangle.
-  FOG_INLINE err_t drawRect(const DoubleRect& r) { return _engine->drawRect(r); }
+  FOG_INLINE err_t drawRect(const RectD& r) { return _engine->drawRect(r); }
   //! @brief Draw rectangles.
-  FOG_INLINE err_t drawRects(const DoubleRect* r, sysuint_t count) { return _engine->drawRects(r, count); }
+  FOG_INLINE err_t drawRects(const RectD* r, sysuint_t count) { return _engine->drawRects(r, count); }
   //! @brief Draw rounded rectangle.
-  FOG_INLINE err_t drawRound(const DoubleRect& r, const DoublePoint& radius) { return _engine->drawRound(r, radius); }
+  FOG_INLINE err_t drawRound(const RectD& r, const PointD& radius) { return _engine->drawRound(r, radius); }
   //! @brief Draw ellipse.
-  FOG_INLINE err_t drawEllipse(const DoublePoint& cp, const DoublePoint& r) { return _engine->drawEllipse(cp, r); }
+  FOG_INLINE err_t drawEllipse(const PointD& cp, const PointD& r) { return _engine->drawEllipse(cp, r); }
   //! @brief Draw arc.
-  FOG_INLINE err_t drawArc(const DoublePoint& cp, const DoublePoint& r, double start, double sweep) { return _engine->drawArc(cp, r, start, sweep); }
+  FOG_INLINE err_t drawArc(const PointD& cp, const PointD& r, double start, double sweep) { return _engine->drawArc(cp, r, start, sweep); }
   //! @brief Draw path.
-  FOG_INLINE err_t drawPath(const DoublePath& path) { return _engine->drawPath(path); }
+  FOG_INLINE err_t drawPath(const PathD& path) { return _engine->drawPath(path); }
 
   //! @brief Fill polygon.
-  FOG_INLINE err_t fillPolygon(const DoublePoint* pts, sysuint_t count) { return _engine->fillPolygon(pts, count); }
+  FOG_INLINE err_t fillPolygon(const PointD* pts, sysuint_t count) { return _engine->fillPolygon(pts, count); }
   //! @brief Fill rectangle.
-  FOG_INLINE err_t fillRect(const DoubleRect& r) { return _engine->fillRect(r); }
+  FOG_INLINE err_t fillRect(const RectD& r) { return _engine->fillRect(r); }
   //! @brief Fill rectangles.
-  FOG_INLINE err_t fillRects(const DoubleRect* r, sysuint_t count) { return _engine->fillRects(r, count); }
+  FOG_INLINE err_t fillRects(const RectD* r, sysuint_t count) { return _engine->fillRects(r, count); }
   //! @brief Fill rounded rectangle.
-  FOG_INLINE err_t fillRound(const DoubleRect& r, const DoublePoint& radius) { return _engine->fillRound(r, radius); }
+  FOG_INLINE err_t fillRound(const RectD& r, const PointD& radius) { return _engine->fillRound(r, radius); }
   //! @brief Fill ellipse.
-  FOG_INLINE err_t fillEllipse(const DoublePoint& cp, const DoublePoint& r) { return _engine->fillEllipse(cp, r); }
+  FOG_INLINE err_t fillEllipse(const PointD& cp, const PointD& r) { return _engine->fillEllipse(cp, r); }
   //! @brief Fill arc.
-  FOG_INLINE err_t fillArc(const DoublePoint& cp, const DoublePoint& r, double start, double sweep) { return _engine->fillArc(cp, r, start, sweep); }
+  FOG_INLINE err_t fillArc(const PointD& cp, const PointD& r, double start, double sweep) { return _engine->fillArc(cp, r, start, sweep); }
   //! @brief Fill path.
-  FOG_INLINE err_t fillPath(const DoublePath& path) { return _engine->fillPath(path); }
+  FOG_INLINE err_t fillPath(const PathD& path) { return _engine->fillPath(path); }
 
   // --------------------------------------------------------------------------
   // [Glyph Drawing]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t drawGlyph(const IntPoint& pt, const Image& glyph, const IntRect* irect = 0)
+  FOG_INLINE err_t drawGlyph(const PointI& pt, const Image& glyph, const RectI* irect = 0)
   { return _engine->drawGlyph(pt, glyph, irect); }
 
-  FOG_INLINE err_t drawGlyph(const DoublePoint& pt, const Image& glyph, const IntRect* irect = 0)
+  FOG_INLINE err_t drawGlyph(const PointD& pt, const Image& glyph, const RectI* irect = 0)
   { return _engine->drawGlyph(pt, glyph, irect); }
 
-  FOG_INLINE err_t drawGlyph(const IntPoint& pt, const Glyph& glyph, const IntRect* grect = 0)
+  FOG_INLINE err_t drawGlyph(const PointI& pt, const Glyph& glyph, const RectI* grect = 0)
   { return _engine->drawGlyph(pt, glyph, grect); }
 
-  FOG_INLINE err_t drawGlyph(const DoublePoint& pt, const Glyph& glyph, const IntRect* grect = 0)
+  FOG_INLINE err_t drawGlyph(const PointD& pt, const Glyph& glyph, const RectI* grect = 0)
   { return _engine->drawGlyph(pt, glyph, grect); }
 
-  FOG_INLINE err_t drawGlyphSet(const IntPoint& pt, const GlyphSet& glyphSet, const IntRect* clip = 0)
+  FOG_INLINE err_t drawGlyphSet(const PointI& pt, const GlyphSet& glyphSet, const RectI* clip = 0)
   { return _engine->drawGlyphSet(pt, glyphSet, clip); }
 
-  FOG_INLINE err_t drawGlyphSet(const DoublePoint& pt, const GlyphSet& glyphSet, const IntRect* clip = 0)
+  FOG_INLINE err_t drawGlyphSet(const PointD& pt, const GlyphSet& glyphSet, const RectI* clip = 0)
   { return _engine->drawGlyphSet(pt, glyphSet, clip); }
 
   // --------------------------------------------------------------------------
   // [Text drawing]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t drawText(const IntPoint& pt, const String& text, const Font& font, const IntRect* clip = NULL)
+  FOG_INLINE err_t drawText(const PointI& pt, const String& text, const Font& font, const RectI* clip = NULL)
   { return _engine->drawText(pt, text, font, clip); }
 
-  FOG_INLINE err_t drawText(const DoublePoint& pt, const String& text, const Font& font, const IntRect* clip = NULL)
+  FOG_INLINE err_t drawText(const PointD& pt, const String& text, const Font& font, const RectI* clip = NULL)
   { return _engine->drawText(pt, text, font, clip); }
 
-  FOG_INLINE err_t drawText(const IntRect& rect, const String& text, const Font& font, uint32_t align, const IntRect* clip = NULL)
+  FOG_INLINE err_t drawText(const RectI& rect, const String& text, const Font& font, uint32_t align, const RectI* clip = NULL)
   { return _engine->drawText(rect, text, font, align, clip); }
 
-  FOG_INLINE err_t drawText(const DoubleRect& rect, const String& text, const Font& font, uint32_t align, const IntRect* clip = NULL)
+  FOG_INLINE err_t drawText(const RectD& rect, const String& text, const Font& font, uint32_t align, const RectI* clip = NULL)
   { return _engine->drawText(rect, text, font, align, clip); }
 
   // --------------------------------------------------------------------------
@@ -545,35 +545,35 @@ struct FOG_API Painter
   // --------------------------------------------------------------------------
 
   //! @brief Draw image at position @a pt.
-  FOG_INLINE err_t drawImage(const IntPoint& pt, const Image& image)
+  FOG_INLINE err_t drawImage(const PointI& pt, const Image& image)
   { return _engine->drawImage(pt, image, NULL); }
 
   //! @brief Draw part of image given by @a irect at position @a pt.
-  FOG_INLINE err_t drawImage(const IntPoint& pt, const Image& image, const IntRect& irect)
+  FOG_INLINE err_t drawImage(const PointI& pt, const Image& image, const RectI& irect)
   { return _engine->drawImage(pt, image, &irect); }
 
   //! @brief Draw image at position @a pt.
-  FOG_INLINE err_t drawImage(const DoublePoint& pt, const Image& image)
+  FOG_INLINE err_t drawImage(const PointD& pt, const Image& image)
   { return _engine->drawImage(pt, image, NULL); }
 
   //! @brief Draw part of image given by @a irect at position @a pt.
-  FOG_INLINE err_t drawImage(const DoublePoint& pt, const Image& image, const IntRect& irect)
+  FOG_INLINE err_t drawImage(const PointD& pt, const Image& image, const RectI& irect)
   { return _engine->drawImage(pt, image, &irect); }
 
   //! @brief Stretch and draw image to @a rect.
-  FOG_INLINE err_t drawImage(const IntRect& rect, const Image& image)
+  FOG_INLINE err_t drawImage(const RectI& rect, const Image& image)
   { return _engine->drawImage(rect, image, NULL); }
 
   //! @brief Stretch and draw part of image given by @a irect to @a rect.
-  FOG_INLINE err_t drawImage(const IntRect& rect, const Image& image, const IntRect& irect)
+  FOG_INLINE err_t drawImage(const RectI& rect, const Image& image, const RectI& irect)
   { return _engine->drawImage(rect, image, &irect); }
 
   //! @brief Stretch and draw image to @a rect.
-  FOG_INLINE err_t drawImage(const DoubleRect& rect, const Image& image)
+  FOG_INLINE err_t drawImage(const RectD& rect, const Image& image)
   { return _engine->drawImage(rect, image, NULL); }
 
   //! @brief Stretch and draw part of image given by @a irect to @a rect.
-  FOG_INLINE err_t drawImage(const DoubleRect& rect, const Image& image, const IntRect& irect)
+  FOG_INLINE err_t drawImage(const RectD& rect, const Image& image, const RectI& irect)
   { return _engine->drawImage(rect, image, &irect); }
 
   // --------------------------------------------------------------------------

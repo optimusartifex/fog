@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -46,16 +46,16 @@ struct FOG_API FlowLayout : public Layout
 
   virtual void add(LayoutItem *item);
 
-  virtual IntSize getLayoutSizeHint() const;
+  virtual SizeI getLayoutSizeHint() const;
   virtual uint32_t getLayoutExpandingDirections() const;
   virtual bool hasLayoutHeightForWidth() const;
   virtual int getLayoutHeightForWidth(int) const;
-  virtual IntSize getLayoutMinimumSize() const;
+  virtual SizeI getLayoutMinimumSize() const;
 
-  virtual void setLayoutGeometry(const IntRect &rect);
+  virtual void setLayoutGeometry(const RectI &rect);
 
 private:
-  int doLayout(const IntRect &rect, bool testOnly) const;
+  int doLayout(const RectI &rect, bool testOnly) const;
   int _hSpace;
   int _vSpace;
 };

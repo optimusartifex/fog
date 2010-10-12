@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -46,7 +46,7 @@ struct FOG_API PaletteData
   mutable Atomic<sysuint_t> refCount;
   uint32_t isAlphaUsed;
 
-  Argb data[512];
+  ArgbI data[512];
 };
 
 // ============================================================================
@@ -100,7 +100,7 @@ struct FOG_API Palette
   // --------------------------------------------------------------------------
 
   //! @brief Returns const pointer to palette data.
-  FOG_INLINE const Argb* getData() const
+  FOG_INLINE const ArgbI* getData() const
   {
     return _d->data;
   }
@@ -108,7 +108,7 @@ struct FOG_API Palette
   //! @brief Returns mutable pointer to palette data.
   //!
   //! @note If you change some data, you must call update() method.
-  FOG_INLINE Argb* getMData()
+  FOG_INLINE ArgbI* getMData()
   {
     return (detach() == ERR_OK) ? _d->data : NULL;
   }
@@ -116,13 +116,13 @@ struct FOG_API Palette
   //! @brief Returns mutable pointer to palette data and not calls detach().
   //!
   //! @note If you change some data, you must call update() method.
-  FOG_INLINE Argb* getXData()
+  FOG_INLINE ArgbI* getXData()
   {
     FOG_ASSERT_X(isDetached(), "Fog::Palette::getXData() - Non detached data.");
     return _d->data;
   }
 
-  FOG_INLINE Argb at(sysuint_t index) const
+  FOG_INLINE ArgbI at(sysuint_t index) const
   { 
     FOG_ASSERT_X(index < 256, "Fog::Palette::at() - Index out of range.");
     return _d->data[index];
@@ -140,10 +140,10 @@ struct FOG_API Palette
   err_t setDeep(const Palette& other);
 
   //! @brief Set palette entries starting at index @a index to @a pal.
-  err_t setArgb32(sysuint_t index, const Argb* pal, sysuint_t count);
+  err_t setArgb32(sysuint_t index, const ArgbI* pal, sysuint_t count);
 
   //! @brief Set palette entries starting at index @a index to @a pal.
-  err_t setXrgb32(sysuint_t index, const Argb* pal, sysuint_t count);
+  err_t setXrgb32(sysuint_t index, const ArgbI* pal, sysuint_t count);
 
   uint8_t findColor(uint8_t r, uint8_t g, uint8_t b) const;
 
@@ -179,8 +179,8 @@ struct FOG_API Palette
   static Static<PaletteData> sharedGrey;
   static Static<PaletteData> sharedA8;
 
-  static bool isGreyOnly(const Argb* data, sysuint_t count);
-  static bool isAlphaUsed(const Argb* data, sysuint_t count);
+  static bool isGreyOnly(const ArgbI* data, sysuint_t count);
+  static bool isAlphaUsed(const ArgbI* data, sysuint_t count);
 
   // --------------------------------------------------------------------------
   // [Members]

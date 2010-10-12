@@ -17,7 +17,7 @@ struct MyWindow : public Window
   virtual void onKey(KeyEvent* e);
   virtual void onPaint(PaintEvent* e);
 
-  void paintImage(Painter* painter, const IntPoint& pos, const Image& im, const String& name);
+  void paintImage(Painter* painter, const PointI& pos, const Image& im, const String& name);
 
   Image i[2];
   int _opacity;
@@ -102,21 +102,21 @@ void MyWindow::onPaint(PaintEvent* e)
   for (int a = 0; a < OPERATOR_COUNT; a++)
   {
     Image im(i[1]);
-    im.drawImage(IntPoint(0, 0), i[0], a, _opacity);
-    paintImage(p, IntPoint(x, y), im, Ascii8(opname[a]));
+    im.drawImage(PointI(0, 0), i[0], a, _opacity);
+    paintImage(p, PointI(x, y), im, Ascii8(opname[a]));
 
     if (++x == 6) { x = 0; y++; }
   }
 }
 
-void MyWindow::paintImage(Painter* p, const IntPoint& pos, const Image& im, const String& name)
+void MyWindow::paintImage(Painter* p, const PointI& pos, const Image& im, const String& name)
 {
   int x = 10 + pos.x * 152;
   int y = 10 + pos.y * 152;
 
-  p->drawText(IntRect(x, y, 130, 20), name, getFont(), TEXT_ALIGN_CENTER);
-  p->drawRect(IntRect(x, y + 20, 130, 130));
-  p->drawImage(IntPoint(x + 1, y + 21), im);
+  p->drawText(RectI(x, y, 130, 20), name, getFont(), TEXT_ALIGN_CENTER);
+  p->drawRect(RectI(x, y + 20, 130, 130));
+  p->drawImage(PointI(x + 1, y + 21), im);
 }
 
 // ============================================================================
@@ -128,7 +128,7 @@ FOG_GUI_MAIN()
   Application app(Ascii8("Gui"));
 
   MyWindow window;
-  window.setSize(IntSize(20 + 6 * 152 - 22, 20 + 4 * 152));
+  window.setSize(SizeI(20 + 6 * 152 - 22, 20 + 4 * 152));
   window.show();
   window.addListener(EVENT_CLOSE, &app, &Application::quit);
 

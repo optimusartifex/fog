@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -608,7 +608,7 @@ err_t PngEncoderDevice::writeImage(const Image& image)
 
     case IMAGE_FORMAT_I8:
     {
-      const Argb* ipal = image.getPalette().getData();
+      const ArgbI* ipal = image.getPalette().getData();
       png_color entries[256];
       uint32_t numEntries = 256;
 

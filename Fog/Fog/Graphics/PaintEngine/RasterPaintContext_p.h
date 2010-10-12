@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -12,12 +12,12 @@
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/Geometry.h>
 #include <Fog/Graphics/Image.h>
-#include <Fog/Graphics/Matrix.h>
 #include <Fog/Graphics/PathStroker.h>
 #include <Fog/Graphics/Pattern.h>
 #include <Fog/Graphics/RasterEngine_p.h>
 #include <Fog/Graphics/Region.h>
 #include <Fog/Graphics/Scanline_p.h>
+#include <Fog/Graphics/Transform.h>
 
 #include <Fog/Graphics/PaintEngine/RasterPaintBase_p.h>
 
@@ -220,10 +220,10 @@ struct FOG_HIDDEN RasterPaintContext
   uint32_t finalClipType;
 
   //! @brief Work clip box.
-  IntBox workClipBox;
+  BoxI workClipBox;
 
   //! @brief Final clip box (or final region extents if final region is complex).
-  IntBox finalClipBox;
+  BoxI finalClipBox;
 
   //! @brief Private work region that contains only metaRegion & userRegion,
   //! it not contains clip region (if clip region not exists then this is the
@@ -235,7 +235,7 @@ struct FOG_HIDDEN RasterPaintContext
   Region finalRegion;
 
   //! @brief Meta origin translated by used origin.
-  IntPoint finalOrigin;
+  PointI finalOrigin;
 
   //! @brief Current clip mask.
   RasterClipMask* mask;
@@ -306,7 +306,7 @@ struct FOG_HIDDEN RasterPaintContext
   // --------------------------------------------------------------------------
 
   //! @brief Temporary path per context, used by calculations.
-  DoublePath tmpCalcPath;
+  PathD tmpCalcPath;
 
 private:
   FOG_DISABLE_COPY(RasterPaintContext)
@@ -365,28 +365,28 @@ struct FOG_HIDDEN RasterPaintMasterContext : public RasterPaintContext
   Static<Pattern> pattern;
 
   //! @brief The meta origin.
-  IntPoint metaOrigin;
+  PointI metaOrigin;
   //! @brief The meta region.
   Region metaRegion;
 
   //! @brief User origin.
-  IntPoint userOrigin;
+  PointI userOrigin;
   //! @brief User region.
   Region userRegion;
 
   //! @brief Meta matrix.
-  DoubleMatrix metaMatrix;
+  TransformD metaTransform;
 
   //! @brief User transformation matrix.
-  DoubleMatrix userMatrix;
+  TransformD userTransform;
 
   //! @brief Work transformation matrix (the matrix used to transform
   //! coordinates from user space to raster).
-  DoubleMatrix finalMatrix;
+  TransformD finalTransform;
 
   //! @brief Transformation translate point in pixels (can be used if
   //! transform type is @c RASTER_TRANSFORM_EXACT).
-  IntPoint finalTranslate;
+  PointI finalTranslate;
 
   //! @brief Transformation approximation scale used by path flattening
   //! and stroking.

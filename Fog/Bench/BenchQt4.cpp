@@ -7,7 +7,7 @@
 // ============================================================================
 
 static QBrush setupQt4PatternForPoint(
-  const Fog::DoublePoint& pt0, const Fog::DoublePoint& pt1, const Fog::Argb& argb)
+  const Fog::PointD& pt0, const Fog::PointD& pt1, const Fog::ArgbI& argb)
 {
   QLinearGradient pattern(pt0.x, pt0.y, pt1.x, pt1.y);
   pattern.setSpread(QGradient::PadSpread);
@@ -18,11 +18,11 @@ static QBrush setupQt4PatternForPoint(
 }
 
 static QBrush setupQt4PatternForRect(
-  const Fog::IntRect& rect, const Fog::Argb& argb)
+  const Fog::RectI& rect, const Fog::ArgbI& argb)
 {
   return setupQt4PatternForPoint(
-    Fog::DoublePoint(rect.x, rect.y),
-    Fog::DoublePoint(rect.x + rect.w, rect.y + rect.h),
+    Fog::PointD(rect.x, rect.y),
+    Fog::PointD(rect.x + rect.w, rect.y + rect.h),
     argb);
 }
 
@@ -108,8 +108,8 @@ void Qt4Module_FillRect::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++)
     {
-      Fog::IntRect r(r_rect.data[a]);
-      Fog::Argb c(r_argb.data[a]);
+      Fog::RectI r(r_rect.data[a]);
+      Fog::ArgbI c(r_argb.data[a]);
 
       p.fillRect(QRect(r.x, r.y, r.w, r.h), QColor(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha()));
     }
@@ -118,8 +118,8 @@ void Qt4Module_FillRect::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++)
     {
-      Fog::IntRect r(r_rect.data[a]);
-      Fog::Argb c(r_argb.data[a]);
+      Fog::RectI r(r_rect.data[a]);
+      Fog::ArgbI c(r_argb.data[a]);
 
       p.fillRect(QRect(r.x, r.y, r.w, r.h), setupQt4PatternForRect(r, c));
     }
@@ -150,8 +150,8 @@ void Qt4Module_FillRectSubPX::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++, sub += inc)
     {
-      Fog::IntRect r(r_rect.data[a]);
-      Fog::Argb c(r_argb.data[a]);
+      Fog::RectI r(r_rect.data[a]);
+      Fog::ArgbI c(r_argb.data[a]);
 
       p.fillRect(QRectF(sub + r.x, sub + r.y, r.w, r.h), QColor(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha()));
     }
@@ -160,8 +160,8 @@ void Qt4Module_FillRectSubPX::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++, sub += inc)
     {
-      Fog::IntRect r(r_rect.data[a]);
-      Fog::Argb c(r_argb.data[a]);
+      Fog::RectI r(r_rect.data[a]);
+      Fog::ArgbI c(r_argb.data[a]);
 
       p.fillRect(QRectF(sub + r.x, r.y, sub + r.w, r.h), setupQt4PatternForRect(r, c));
     }
@@ -193,10 +193,10 @@ void Qt4Module_FillRectAffine::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++, rot += 0.01)
     {
-      Fog::IntRect r(r_rect.data[a]);
-      Fog::Argb c(r_argb.data[a]);
+      Fog::RectI r(r_rect.data[a]);
+      Fog::ArgbI c(r_argb.data[a]);
 
-      Fog::DoubleMatrix m;
+      Fog::TransformD m;
       m.translate(cx, cy);
       m.rotate(rot);
       m.translate(-cx, -cy);
@@ -209,10 +209,10 @@ void Qt4Module_FillRectAffine::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++, rot += 0.01)
     {
-      Fog::IntRect r(r_rect.data[a]);
-      Fog::Argb c(r_argb.data[a]);
+      Fog::RectI r(r_rect.data[a]);
+      Fog::ArgbI c(r_argb.data[a]);
 
-      Fog::DoubleMatrix m;
+      Fog::TransformD m;
       m.translate(cx, cy);
       m.rotate(rot);
       m.translate(-cx, -cy);
@@ -246,8 +246,8 @@ void Qt4Module_FillRound::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++)
     {
-      Fog::IntRect r(r_rect.data[a]);
-      Fog::Argb c(r_argb.data[a]);
+      Fog::RectI r(r_rect.data[a]);
+      Fog::ArgbI c(r_argb.data[a]);
 
       p.setBrush(QBrush(QColor(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha())));
       p.drawRoundedRect(QRect(r.x, r.y, r.w, r.h), 8.0, 8.0);
@@ -257,8 +257,8 @@ void Qt4Module_FillRound::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++)
     {
-      Fog::IntRect r(r_rect.data[a]);
-      Fog::Argb c(r_argb.data[a]);
+      Fog::RectI r(r_rect.data[a]);
+      Fog::ArgbI c(r_argb.data[a]);
 
       p.setBrush(setupQt4PatternForRect(r, c));
       p.drawRoundedRect(QRect(r.x, r.y, r.w, r.h), 8.0, 8.0);
@@ -301,8 +301,8 @@ void Qt4Module_FillPolygon::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++)
     {
-      const Fog::DoublePoint* polyData = &r_poly.data[a*10];
-      Fog::Argb c = r_argb.data[a];
+      const Fog::PointD* polyData = &r_poly.data[a*10];
+      Fog::ArgbI c = r_argb.data[a];
 
       p.setBrush(QColor(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha()));
       p.drawPolygon((const QPointF*)(polyData), 10, Qt::OddEvenFill);
@@ -312,8 +312,8 @@ void Qt4Module_FillPolygon::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++)
     {
-      const Fog::DoublePoint* polyData = &r_poly.data[a*10];
-      Fog::Argb c = r_argb.data[a];
+      const Fog::PointD* polyData = &r_poly.data[a*10];
+      Fog::ArgbI c = r_argb.data[a];
 
       p.setBrush(setupQt4PatternForPoint(polyData[0], polyData[9], c));
       p.drawPolygon((const QPointF*)(&r_poly.data[a * 10]), 10, Qt::OddEvenFill);
@@ -340,7 +340,7 @@ void Qt4Module_Image::prepare(int quantity, int sw, int sh)
 
   for (int a = 0; a < NUM_SPRITES; a++)
   {
-    images[a] = sprite[a].scaled(Fog::IntSize(sw, sh));
+    images[a] = sprite[a].scaled(Fog::SizeI(sw, sh));
     images_qt4[a] = QImage(
       (unsigned char*)images[a].getFirst(),
       images[a].getWidth(),
@@ -399,7 +399,7 @@ void Qt4Module_ImageAffine::bench(int quantity)
     int x = r_rect.data[a].x;
     int y = r_rect.data[a].y;
 
-    Fog::DoubleMatrix m;
+    Fog::TransformD m;
     m.translate(cx, cy);
     m.rotate(rot);
     m.translate(-cx, -cy);
@@ -437,7 +437,7 @@ void Qt4BenchmarkContext::run()
 {
   header();
 
-  const Fog::IntSize* sizes = _master->getSizes().getData();
+  const Fog::SizeI* sizes = _master->getSizes().getData();
   int quantity = _master->_quantity;
   sysuint_t s;
 

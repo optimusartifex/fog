@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -191,16 +191,16 @@ struct FOG_API LayoutItem : public Object
   void clearDirty();
   const LayoutHint& getLayoutHint() const;
 
-  FOG_INLINE const IntSize& getLayoutSizeHint() const { return getLayoutHint()._sizeHint; }
-  FOG_INLINE const IntSize& getLayoutMinimumSize() const { return getLayoutHint()._minimumSize; }
-  FOG_INLINE const IntSize& getLayoutMaximumSize() const { return getLayoutHint()._maximumSize; }
+  FOG_INLINE const SizeI& getLayoutSizeHint() const { return getLayoutHint()._sizeHint; }
+  FOG_INLINE const SizeI& getLayoutMinimumSize() const { return getLayoutHint()._minimumSize; }
+  FOG_INLINE const SizeI& getLayoutMaximumSize() const { return getLayoutHint()._maximumSize; }
 
   // --------------------------------------------------------------------------
   // [Calculate SizeHint]
   // --------------------------------------------------------------------------
 
-  IntSize calculateMinimumSize() const;
-  IntSize calculateMaximumSize() const;
+  SizeI calculateMinimumSize() const;
+  SizeI calculateMaximumSize() const;
 
   // --------------------------------------------------------------------------
   // [Expanding Directions]
@@ -224,9 +224,9 @@ struct FOG_API LayoutItem : public Object
   // [Geometry]
   // --------------------------------------------------------------------------
 
-  virtual void setLayoutGeometry(const IntRect&) = 0;
+  virtual void setLayoutGeometry(const RectI&) = 0;
   // LAYOUT TODO: Move to .cpp
-  virtual IntRect getLayoutGeometry() const { return IntRect(); }
+  virtual RectI getLayoutGeometry() const { return RectI(); }
 
   // --------------------------------------------------------------------------
   // [Alignment]

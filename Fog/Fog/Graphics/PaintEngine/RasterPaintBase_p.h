@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -161,7 +161,7 @@ enum RASTER_CLIP_TYPE
   //! @brief Null clip (no paint).
   RASTER_CLIP_NULL = 0,
 
-  //! @brief Clip is very simple - one rectangle (@c IntBox instance).
+  //! @brief Clip is very simple - one rectangle (@c BoxI instance).
   //!
   //! This flag is never set together with @c RASTER_CLIP_REGION, only one flag
   //! can be set at the time.
@@ -367,7 +367,7 @@ struct FOG_HIDDEN RasterClipMask
   uint saved;
 
   //! @brief Work clip box, copied from master.
-  IntBox workBox;
+  BoxI workBox;
 
   //! @brief Work width (minimal width of allocated mask per row).
   uint width;
@@ -537,7 +537,7 @@ union FOG_HIDDEN RasterPaintHints
 
     //! @brief Whether the mata matrix is used (this means that it's not identity
     //! matrix). Simple cases where meta matrix is not used are optimized.
-    uint32_t metaMatrixUsed : 1;
+    uint32_t metaTransformUsed : 1;
   };
 
   //! @brief All data packed in single integer.

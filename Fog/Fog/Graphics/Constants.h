@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -94,6 +94,21 @@ enum ARGB32_BYTEPOS
 };
 
 // ============================================================================
+// [Fog::AXIS_FLAGS]
+// ============================================================================
+
+//! @brief Axis.
+enum AXIS_FLAGS
+{
+  //! @brief X axis.
+  AXIS_X = 0x1,
+  //! @brief Y axis.
+  AXIS_Y = 0x2,
+  //! @brief Z axis.
+  AXIS_Z = 0x4
+};
+
+// ============================================================================
 // [Fog::CLIP_OP]
 // ============================================================================
 
@@ -129,10 +144,36 @@ enum CLIP_RULE
 };
 
 // ============================================================================
+// [Fog::COLOR_MODEL_TYPE]
+// ============================================================================
+
+enum COLOR_MODEL_TYPE
+{
+  COLOR_MODEL_NONE = 0,
+  COLOR_MODEL_ARGB = 1,
+  COLOR_MODEL_AHSV = 2,
+  COLOR_MODEL_ACMYK = 3,
+
+  COLOR_MODEL_COUNT = 4
+};
+
+// ============================================================================
+// [Fog::COLOR_OP]
+// ============================================================================
+
+enum COLOR_OP
+{
+  COLOR_OP_NONE = 0,
+  COLOR_OP_LERP = 1,
+
+  COLOR_OP_COUNT = 2
+};
+
+// ============================================================================
 // [Fog::COLOR_CHANNEL_TYPE]
 // ============================================================================
 
-//! @brief Argb color channels.
+//! @brief ArgbI color channels.
 enum COLOR_CHANNEL_TYPE
 {
   COLOR_CHANNEL_RED = 0x1,
@@ -1376,12 +1417,12 @@ enum DIB_FORMAT
 
   //! @brief 32-bit ARGB, non-premultiplied (compatible to @c IMAGE_FORMAT_ARGB32).
   //!
-  //! Eequivalent to @c Argb.
+  //! Eequivalent to @c ArgbI.
   DIB_FORMAT_ARGB32_NATIVE = 1,
 
   //! @brief 32-bit XRGB, no alpha (compatible to @c IMAGE_FORMAT_XRGB32).
   //!
-  //! equivalent to @c Argb, where alpha is set to 255).
+  //! equivalent to @c ArgbI, where alpha is set to 255).
   DIB_FORMAT_XRGB32_NATIVE = 2,
 
   //! @brief 8-bit alpha channel (compatible to @c IMAGE_FORMAT_A8).
@@ -1515,12 +1556,12 @@ enum IMAGE_FORMAT
 
   //! @brief 32-bit ARGB, non-premultiplied.
   //!
-  //! Eequivalent to @c Argb.
+  //! Eequivalent to @c ArgbI.
   IMAGE_FORMAT_ARGB32 = 1,
 
   //! @brief 32-bit XRGB, no alpha.
   //!
-  //! equivalent to @c Argb, where alpha is set to 255).
+  //! equivalent to @c ArgbI, where alpha is set to 255).
   IMAGE_FORMAT_XRGB32 = 2,
 
   //! @brief 8-bit alpha channel only.
@@ -1951,27 +1992,6 @@ enum COLOR_INTERPOLATION_TYPE
 };
 
 // ============================================================================
-// [Fog::MATRIX_DATA]
-// ============================================================================
-
-//! @brief Matrix data offsets.
-enum MATRIX_DATA
-{
-  //! @brief Scale X offset.
-  MATRIX_SX = 0,
-  //! @brief Scale Y offset.
-  MATRIX_SY = 3,
-  //! @brief Shear X offset.
-  MATRIX_SHX = 2,
-  //! @brief Shear Y offset.
-  MATRIX_SHY = 1,
-  //! @brief Translate X offset.
-  MATRIX_TX = 4,
-  //! @brief Translate Y offset.
-  MATRIX_TY = 5
-};
-
-// ============================================================================
 // [Fog::MATRIX_ORDER]
 // ============================================================================
 
@@ -1980,24 +2000,86 @@ enum MATRIX_ORDER
 {
   //! @brief The second matrix which is multiplied with the primary matrix is
   //! on the left (default for all graphics / color matrix operations).
-  MATRIX_PREPEND = 0,
+  MATRIX_ORDER_PREPEND = 0,
 
   //! @brief The second matrix which is multiplied with the primary matrix is
   //! on the right.
-  MATRIX_APPEND = 1
+  MATRIX_ORDER_APPEND = 1
 };
 
 // ============================================================================
-// [Fog::MATRIX_TYPE]
+// [Fog::TRANSFORM_TYPE]
 // ============================================================================
 
-//! @brief Matrix type bit masks.
-enum MATRIX_TYPE
+//! @brief Type of matrix.
+enum TRANSFORM_TYPE
 {
-  MATRIX_TYPE_IDENTITY = 0x00,
-  MATRIX_TYPE_TRANSLATE = 0x01,
-  MATRIX_TYPE_SCALE = 0x02,
-  MATRIX_TYPE_SHEAR = 0x04
+  //! @brief Matrix is identity (all zeros, 1 at diagonals).
+  TRANSFORM_TYPE_IDENTITY = 0,
+  //! @brief Matrix is translation (_20, _21 elements).
+  TRANSFORM_TYPE_TRANSLATION = 1,
+  //! @brief Matrix is scaling (_00, _11, _20, _21 elements).
+  TRANSFORM_TYPE_SCALING = 2,
+  //! @brief Matrix is rotation (affine part is used).
+  TRANSFORM_TYPE_ROTATION = 3,
+  //! @brief Matrix is affine.
+  TRANSFORM_TYPE_AFFINE = 4,
+  //! @brief Matrix is projection.
+  TRANSFORM_TYPE_PROJECTION = 5,
+
+  //! @brief Count of matrix types (for asserts, etc).
+  TRANSFORM_TYPE_COUNT = 6,
+
+  //! @brief Matrix is dirty.
+  TRANSFORM_TYPE_DIRTY = 0x8
+};
+
+// ============================================================================
+// [Fog::TRANSFORM_CREATE_TYPE]
+// ============================================================================
+
+//! @brief Type of matrix to create.
+enum TRANSFORM_CREATE_TYPE
+{
+  TRANSFORM_CREATE_IDENTITY = 0,
+  TRANSFORM_CREATE_TRANSLATION = 1,
+  TRANSFORM_CREATE_SCALING = 2,
+  TRANSFORM_CREATE_ROTATION = 3,
+  TRANSFORM_CREATE_SKEWING = 4,
+  TRANSFORM_CREATE_LINE_SEGMENT = 5,
+  TRANSFORM_CREATE_REFLECTION_U = 6,
+  TRANSFORM_CREATE_REFLECTION_XY = 7,
+  TRANSFORM_CREATE_REFLECTION_UNIT = 8,
+  TRANSFORM_CREATE_PARALLELOGRAM = 9,
+  TRANSFORM_CREATE_QUAD_TO_QUAD = 10,
+
+  TRANSFORM_CREATE_COUNT = 11
+};
+
+// ============================================================================
+// [Fog::TRANSFORM_OP_TYPE]
+// ============================================================================
+
+//! @brief Type of transform operation.
+enum TRANSFORM_OP_TYPE
+{
+  //! @brief Translate matrix.
+  TRANSFORM_OP_TRANSLATE = 0,
+  //! @brief Scale matrix.
+  TRANSFORM_OP_SCALE = 1,
+  //! @brief Rotate matrix.
+  TRANSFORM_OP_ROTATE = 2,
+  //! @brief Skew matrix.
+  TRANSFORM_OP_SKEW = 3,
+  //! @brief Flip matrix.
+  TRANSFORM_OP_FLIP = 4,
+  //! @brief Multiply with other matrix.
+  TRANSFORM_OP_MULTIPLY = 5,
+  //! @brief Multiply with other matrix, but invert it before multiplication.
+  TRANSFORM_OP_MULTIPLY_INV = 6,
+
+  //! @brief Count of matrix transform operations.
+  TRANSFORM_OP_COUNT = 7
 };
 
 // ============================================================================
@@ -2011,9 +2093,9 @@ enum FILL_RULE
   FILL_NON_ZERO = 0,
   //! @brief Fill using even-odd rule.
   FILL_EVEN_ODD = 1,
-  //! @brief Initial (default) fill rule for painter and rasterizer.
-  FILL_DEFAULT = FILL_EVEN_ODD,
 
+  //! @brief Default fill-rule.
+  FILL_DEFAULT = FILL_EVEN_ODD,
   //! @brief Used to catch invalid arguments.
   FILL_RULE_COUNT = 2
 };
@@ -2040,8 +2122,9 @@ enum LINE_CAP
   LINE_CAP_ROUND_REVERT = 3,
   LINE_CAP_TRIANGLE = 4,
   LINE_CAP_TRIANGLE_REVERT = 5,
-  LINE_CAP_DEFAULT = LINE_CAP_BUTT,
 
+  //! @brief Default line-cap type.
+  LINE_CAP_DEFAULT = LINE_CAP_BUTT,
   //! @brief Used to catch invalid arguments.
   LINE_CAP_COUNT = 6
 };
@@ -2058,8 +2141,9 @@ enum LINE_JOIN
   LINE_JOIN_BEVEL = 2,
   LINE_JOIN_MITER_REVERT = 3,
   LINE_JOIN_MITER_ROUND = 4,
-  LINE_JOIN_DEFAULT = LINE_JOIN_MITER,
 
+  //! @brief Default line-join type.
+  LINE_JOIN_DEFAULT = LINE_JOIN_MITER,
   //! @brief Used to catch invalid arguments.
   LINE_JOIN_COUNT = 5
 };
@@ -2077,8 +2161,8 @@ enum INNER_JOIN
   INNER_JOIN_BEVEL = 1,
   INNER_JOIN_ROUND = 2,
   INNER_JOIN_JAG = 3,
-  INNER_JOIN_DEFAULT = INNER_JOIN_MITER,
 
+  INNER_JOIN_DEFAULT = INNER_JOIN_MITER,
   //! @brief Used to catch invalid arguments.
   INNER_JOIN_COUNT = 4
 };
@@ -2203,7 +2287,7 @@ enum PAINTER_STATE_FLAGS
 //! @brief Type of source assigned in @c Painter or @c PaintEngine.
 enum PAINTER_SOURCE_TYPE
 {
-  //! @brief Painter source is ARGB color, see @c Painter::setSource(Argb argb).
+  //! @brief Painter source is ARGB color, see @c Painter::setSource(ArgbI argb).
   PAINTER_SOURCE_ARGB = 0,
   //! @brief Painter source is pattern color, see @c Painter::setPattern(const Pattern& pattern).
   PAINTER_SOURCE_PATTERN = 1

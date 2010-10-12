@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -29,11 +29,11 @@
 #include <Fog/Core/Math.h>
 #include <Fog/Core/Memory.h>
 #include <Fog/Core/Misc.h>
-#include <Fog/Graphics/Matrix.h>
 #include <Fog/Graphics/Constants.h>
+#include <Fog/Graphics/Curve_p.h>
 #include <Fog/Graphics/Path.h>
 #include <Fog/Graphics/PathStroker.h>
-#include <Fog/Graphics/PathUtil.h>
+#include <Fog/Graphics/Transform.h>
 
 namespace Fog {
 
@@ -43,7 +43,7 @@ namespace Fog {
 
 struct FOG_HIDDEN PathStrokerPrivate
 {
-  FOG_INLINE PathStrokerPrivate(const PathStroker& stroker, DoublePath& dst) :
+  FOG_INLINE PathStrokerPrivate(const PathStroker& stroker, PathD& dst) :
     stroker(stroker),
     dst(dst),
     distances(NULL),
@@ -55,43 +55,44 @@ struct FOG_HIDDEN PathStrokerPrivate
   {
   }
 
-  FOG_INLINE void addVertex(double x, double y)
-  {
-    dst.lineTo(x, y);
-  }
+  err_t _begin();
+  err_t _grow();
 
-  void calcCap(
-    const DoublePoint& v0,
-    const DoublePoint& v1,
+  err_t calcCap(
+    const PointD& v0,
+    const PointD& v1,
     double len,
     uint32_t cap);
 
-  void calcJoin(
-    const DoublePoint& v0,
-    const DoublePoint& v1,
-    const DoublePoint& v2,
+  err_t calcJoin(
+    const PointD& v0,
+    const PointD& v1,
+    const PointD& v2,
     double len1,
     double len2);
 
-  void calcArc(
+  err_t calcArc(
     double x, double y,
     double dx1, double dy1,
     double dx2, double dy2);
 
-  void calcMiter(
-    const DoublePoint& v0,
-    const DoublePoint& v1,
-    const DoublePoint& v2,
+  err_t calcMiter(
+    const PointD& v0,
+    const PointD& v1,
+    const PointD& v2,
     double dx1, double dy1,
     double dx2, double dy2,
     int lineJoin,
     double mlimit,
     double dbevel);
 
-  err_t stroke(const DoublePoint* src, sysuint_t count, bool outline);
+  err_t stroke(const PointD* src, sysuint_t count, bool outline);
 
   const PathStroker& stroker;
-  DoublePath& dst;
+
+  PathD& dst;
+  PointD* dstCur;
+  PointD* dstEnd;
 
   //! @brief Memory buffer used to store distances.
   LocalBuffer<1024> buffer;
@@ -148,25 +149,25 @@ void PathStroker::_update()
   }
 
   _wEps = _w / 1024.0;
-  _da = acos(_wAbs / (_wAbs + 0.125 / _approximationScale)) * 2.0;
+  _da = Math::acos(_wAbs / (_wAbs + 0.125 / _approximationScale)) * 2.0;
 }
 
-err_t PathStroker::stroke(DoublePath& dst) const
+err_t PathStroker::stroke(PathD& dst) const
 {
   return stroke(dst, dst);
 }
 
-err_t PathStroker::stroke(DoublePath& dst, const DoublePath& src) const
+err_t PathStroker::stroke(PathD& dst, const PathD& src) const
 {
-  err_t err;
-
   // We need:
   // - the Path instances have to be different.
   // - source path must be flat.
   if (&dst == &src || !src.isFlat())
   {
-    DoublePath tmp;
-    if ((err = src.flattenTo(tmp, NULL, _approximationScale))) return err;
+    PathD tmp;
+    FOG_RETURN_ON_ERROR(
+      src.flattenTo(tmp, NULL, _approximationScale)
+    );
     return stroke(dst, tmp);
   }
 
@@ -174,7 +175,7 @@ err_t PathStroker::stroke(DoublePath& dst, const DoublePath& src) const
   PathStrokerPrivate p(*this, dst);
 
   const uint8_t* commands = src.getCommands();
-  const DoublePoint* vertices = src.getVertices();
+  const PointD* vertices = src.getVertices();
 
   // Traverse path, find moveTo / lineTo segments and stroke them.
   const uint8_t* subCommand = NULL;
@@ -198,7 +199,9 @@ err_t PathStroker::stroke(DoublePath& dst, const DoublePath& src) const
         sysuint_t subStart = (sysuint_t)(subCommand - commands);
         sysuint_t subLength = (sysuint_t)(curCommand - subCommand);
 
-        if ((err = p.stroke(vertices + subStart, subLength, false))) return err;
+        FOG_RETURN_ON_ERROR(
+          p.stroke(vertices + subStart, subLength, false)
+        );
       }
 
       // Advance to new subpath.
@@ -212,7 +215,9 @@ err_t PathStroker::stroke(DoublePath& dst, const DoublePath& src) const
         sysuint_t subStart = (sysuint_t)(subCommand - commands);
         sysuint_t subLength = (sysuint_t)(curCommand - subCommand);
 
-        if ((err = p.stroke(vertices + subStart, subLength, PathCmd::isClose(cmd)))) return err;
+        FOG_RETURN_ON_ERROR(
+          p.stroke(vertices + subStart, subLength, PathCmd::isClose(cmd))
+        );
       }
 
       // We clear beginning mark, because we expect PATH_MOVE_TO command from now.
@@ -230,7 +235,9 @@ err_t PathStroker::stroke(DoublePath& dst, const DoublePath& src) const
     sysuint_t subStart = (sysuint_t)(subCommand - commands);
     sysuint_t subLength = (sysuint_t)(curCommand - subCommand);
 
-    if ((err = p.stroke(vertices + subStart, subLength, false))) return err;
+    FOG_RETURN_ON_ERROR(
+      p.stroke(vertices + subStart, subLength, false)
+    );
   }
 
   return ERR_OK;
@@ -240,20 +247,80 @@ err_t PathStroker::stroke(DoublePath& dst, const DoublePath& src) const
 // [Fog::StrokerPrivate]
 // ============================================================================
 
-void PathStrokerPrivate::calcArc(
+#define ADD_VERTEX(x, y) \
+  do { \
+    if (FOG_UNLIKELY(dstCur == dstEnd)) FOG_RETURN_ON_ERROR(_grow()); \
+    dstCur->set(x, y); \
+    dstCur++; \
+  } while(0)
+
+#define CUR_INDEX() \
+  ( (sysuint_t)(dstCur - dst._d->vertices) )
+
+err_t PathStrokerPrivate::_begin()
+{
+  sysuint_t cap = dst.getCapacity();
+  sysuint_t remain = cap - dst.getLength();
+  if (remain < 64 || !dst.isDetached())
+  {
+    if (cap < 256)
+      cap = 256;
+    else
+      cap *= 2;
+    FOG_RETURN_ON_ERROR(dst.reserve(cap));
+  }
+
+  dstCur = const_cast<PointD*>(dst.getVertices());
+  dstEnd = dstCur;
+
+  dstCur += dst.getLength();
+  dstEnd += dst.getCapacity();
+
+  return ERR_OK;
+}
+
+err_t PathStrokerPrivate::_grow()
+{
+  sysuint_t len = dst._d->length;
+  sysuint_t cap = dst._d->capacity;
+
+  dst._d->length = cap;
+  if (cap < 256)
+    cap = 512;
+  else
+    cap *= 2;
+
+  err_t err = dst.reserve(cap);
+  if (err)
+  {
+    dst._d->length = len;
+    return err;
+  }
+
+  dstCur = const_cast<PointD*>(dst.getVertices());
+  dstEnd = dstCur;
+
+  dstCur += dst.getLength();
+  dstEnd += dst.getCapacity();
+
+  return ERR_OK;
+};
+
+#if 0
+err_t PathStrokerPrivate::calcArc(
   double x,   double y,
   double dx1, double dy1,
   double dx2, double dy2)
 {
-  double a1 = atan2(dy1 * stroker._wSign, dx1 * stroker._wSign);
-  double a2 = atan2(dy2 * stroker._wSign, dx2 * stroker._wSign);
+  double a1 = Math::atan2(dy1 * stroker._wSign, dx1 * stroker._wSign);
+  double a2 = Math::atan2(dy2 * stroker._wSign, dx2 * stroker._wSign);
   double da = stroker._da;
   int i, n;
 
-  addVertex(x + dx1, y + dy1);
+  ADD_VERTEX(x + dx1, y + dy1);
   if (stroker._wSign > 0)
   {
-    if (a1 > a2) a2 += 2.0 * M_PI;
+    if (a1 > a2) a2 += 2.0 * MATH_PI;
     n = int((a2 - a1) / da);
     da = (a2 - a1) / (n + 1);
     a1 += da;
@@ -264,13 +331,13 @@ void PathStrokerPrivate::calcArc(
       double a1Cos;
       Math::sincos(a1, &a1Sin, &a1Cos);
 
-      addVertex(x + a1Cos * stroker._w, y + a1Sin * stroker._w);
+      ADD_VERTEX(x + a1Cos * stroker._w, y + a1Sin * stroker._w);
       a1 += da;
     }
   }
   else
   {
-    if (a1 < a2) a2 -= 2.0 * M_PI;
+    if (a1 < a2) a2 -= 2.0 * MATH_PI;
     n = int((a1 - a2) / da);
     da = (a1 - a2) / (n + 1);
     a1 -= da;
@@ -281,17 +348,62 @@ void PathStrokerPrivate::calcArc(
       double a1Cos;
       Math::sincos(a1, &a1Sin, &a1Cos);
 
-      addVertex(x + a1Cos * stroker._w, y + a1Sin * stroker._w);
+      ADD_VERTEX(x + a1Cos * stroker._w, y + a1Sin * stroker._w);
       a1 -= da;
     }
   }
-  addVertex(x + dx2, y + dy2);
+
+  ADD_VERTEX(x + dx2, y + dy2);
+  return ERR_OK;
+}
+#endif
+
+err_t PathStrokerPrivate::calcArc(
+  double x,   double y,
+  double dx1, double dy1,
+  double dx2, double dy2)
+{
+  double a1, a2;
+  double da = stroker._da;
+  int i, n;
+
+  ADD_VERTEX(x + dx1, y + dy1);
+  if (stroker._wSign > 0)
+  {
+    a1 = Math::atan2(dy1, dx1);
+    a2 = Math::atan2(dy2, dx2);
+    if (a1 > a2) a2 += 2.0 * MATH_PI;
+    n = int((a2 - a1) / da);
+  }
+  else
+  {
+    a1 = Math::atan2(-dy1, -dx1);
+    a2 = Math::atan2(-dy2, -dx2);
+    if (a1 < a2) a2 -= 2.0 * MATH_PI;
+    n = int((a1 - a2) / da);
+  }
+
+  da = (a2 - a1) / (n + 1);
+  a1 += da;
+
+  for (i = 0; i < n; i++)
+  {
+    double a1Sin;
+    double a1Cos;
+    Math::sincos(a1, &a1Sin, &a1Cos);
+
+    ADD_VERTEX(x + a1Cos * stroker._w, y + a1Sin * stroker._w);
+    a1 += da;
+  }
+
+  ADD_VERTEX(x + dx2, y + dy2);
+  return ERR_OK;
 }
 
-void PathStrokerPrivate::calcMiter(
-  const DoublePoint& v0,
-  const DoublePoint& v1,
-  const DoublePoint& v2,
+err_t PathStrokerPrivate::calcMiter(
+  const PointD& v0,
+  const PointD& v1,
+  const PointD& v2,
   double dx1, double dy1,
   double dx2, double dy2,
   int lineJoin,
@@ -304,7 +416,7 @@ void PathStrokerPrivate::calcMiter(
   double lim = stroker._wAbs * mlimit;
   bool intersectionFailed  = true; // Assume the worst
 
-  if (PathUtil::calcIntersection(
+  if (calcIntersection(
     v0.x + dx1, v0.y - dy1,
     v1.x + dx1, v1.y - dy1,
     v1.x + dx2, v1.y - dy2,
@@ -312,12 +424,12 @@ void PathStrokerPrivate::calcMiter(
     &xi, &yi))
   {
     // Calculation of the intersection succeeded.
-    di = PathUtil::calcDistance(v1.x, v1.y, xi, yi);
+    di = Math::dist(v1.x, v1.y, xi, yi);
     if (di <= lim)
     {
       // Inside the miter limit.
-      addVertex(xi, yi);
-      return;
+      ADD_VERTEX(xi, yi);
+      return ERR_OK;
     }
     intersectionFailed = false;
   }
@@ -332,13 +444,13 @@ void PathStrokerPrivate::calcMiter(
     // the previous one or goes back.
     double x2 = v1.x + dx1;
     double y2 = v1.y - dy1;
-    if ((PathUtil::crossProduct(v0.x, v0.y, v1.x, v1.y, x2, y2) < 0.0) ==
-        (PathUtil::crossProduct(v1.x, v1.y, v2.x, v2.y, x2, y2) < 0.0))
+    if ((crossProduct(v0.x, v0.y, v1.x, v1.y, x2, y2) < 0.0) ==
+        (crossProduct(v1.x, v1.y, v2.x, v2.y, x2, y2) < 0.0))
     {
       // This case means that the next segment continues the previous one
       // (straight line).
-      addVertex(v1.x + dx1, v1.y - dy1);
-      return;
+      ADD_VERTEX(v1.x + dx1, v1.y - dy1);
+      return ERR_OK;
     }
   }
 
@@ -348,12 +460,12 @@ void PathStrokerPrivate::calcMiter(
     case LINE_JOIN_MITER_REVERT:
       // For the compatibility with SVG, PDF, etc, we use a simple bevel
       // join instead of "smart" bevel.
-      addVertex(v1.x + dx1, v1.y - dy1);
-      addVertex(v1.x + dx2, v1.y - dy2);
+      ADD_VERTEX(v1.x + dx1, v1.y - dy1);
+      ADD_VERTEX(v1.x + dx2, v1.y - dy2);
       break;
 
     case LINE_JOIN_MITER_ROUND:
-      calcArc(v1.x, v1.y, dx1, -dy1, dx2, -dy2);
+      FOG_RETURN_ON_ERROR( calcArc(v1.x, v1.y, dx1, -dy1, dx2, -dy2) );
       break;
 
     default:
@@ -361,8 +473,8 @@ void PathStrokerPrivate::calcMiter(
       if (intersectionFailed)
       {
         mlimit *= stroker._wSign;
-        addVertex(v1.x + dx1 + dy1 * mlimit, v1.y - dy1 + dx1 * mlimit);
-        addVertex(v1.x + dx2 - dy2 * mlimit, v1.y - dy2 - dx2 * mlimit);
+        ADD_VERTEX(v1.x + dx1 + dy1 * mlimit, v1.y - dy1 + dx1 * mlimit);
+        ADD_VERTEX(v1.x + dx2 - dy2 * mlimit, v1.y - dy2 - dx2 * mlimit);
       }
       else
       {
@@ -371,16 +483,18 @@ void PathStrokerPrivate::calcMiter(
         double x2 = v1.x + dx2;
         double y2 = v1.y - dy2;
         di = (lim - dbevel) / (di - dbevel);
-        addVertex(x1 + (xi - x1) * di, y1 + (yi - y1) * di);
-        addVertex(x2 + (xi - x2) * di, y2 + (yi - y2) * di);
+        ADD_VERTEX(x1 + (xi - x1) * di, y1 + (yi - y1) * di);
+        ADD_VERTEX(x2 + (xi - x2) * di, y2 + (yi - y2) * di);
       }
       break;
   }
+
+  return ERR_OK;
 }
 
-void PathStrokerPrivate::calcCap(
-  const DoublePoint& v0,
-  const DoublePoint& v1,
+err_t PathStrokerPrivate::calcCap(
+  const PointD& v0,
+  const PointD& v1,
   double len,
   uint32_t cap)
 {
@@ -396,8 +510,8 @@ void PathStrokerPrivate::calcCap(
   {
     case LINE_CAP_BUTT:
     {
-      addVertex(v0.x - dx1, v0.y + dy1);
-      addVertex(v0.x + dx1, v0.y - dy1);
+      ADD_VERTEX(v0.x - dx1, v0.y + dy1);
+      ADD_VERTEX(v0.x + dx1, v0.y - dy1);
       break;
     }
 
@@ -406,28 +520,28 @@ void PathStrokerPrivate::calcCap(
       double dx2 = dy1 * stroker._wSign;
       double dy2 = dx1 * stroker._wSign;
 
-      addVertex(v0.x - dx1 - dx2, v0.y + dy1 - dy2);
-      addVertex(v0.x + dx1 - dx2, v0.y - dy1 - dy2);
+      ADD_VERTEX(v0.x - dx1 - dx2, v0.y + dy1 - dy2);
+      ADD_VERTEX(v0.x + dx1 - dx2, v0.y - dy1 - dy2);
       break;
     }
 
     case LINE_CAP_ROUND:
     {
       int i;
-      int n = int(M_PI / stroker._da);
-      double da = M_PI / (n + 1);
+      int n = int(MATH_PI / stroker._da);
+      double da = MATH_PI / (n + 1);
       double a1;
 
-      addVertex(v0.x - dx1, v0.y + dy1);
+      ADD_VERTEX(v0.x - dx1, v0.y + dy1);
 
       if (stroker._wSign > 0)
       {
-        a1 = atan2(dy1, -dx1) + da;
+        a1 = Math::atan2(dy1, -dx1) + da;
       }
       else
       {
         da = -da;
-        a1 = atan2(-dy1, dx1) + da;
+        a1 = Math::atan2(-dy1, dx1) + da;
       }
 
       for (i = 0; i < n; i++)
@@ -436,19 +550,19 @@ void PathStrokerPrivate::calcCap(
         double a1_cos;
         Math::sincos(a1, &a1_sin, &a1_cos);
 
-        addVertex(v0.x + a1_cos * stroker._w, v0.y + a1_sin * stroker._w);
+        ADD_VERTEX(v0.x + a1_cos * stroker._w, v0.y + a1_sin * stroker._w);
         a1 += da;
       }
 
-      addVertex(v0.x + dx1, v0.y - dy1);
+      ADD_VERTEX(v0.x + dx1, v0.y - dy1);
       break;
     }
 
     case LINE_CAP_ROUND_REVERT:
     {
       int i;
-      int n = int(M_PI / stroker._da);
-      double da = M_PI / (n + 1);
+      int n = int(MATH_PI / stroker._da);
+      double da = MATH_PI / (n + 1);
       double a1;
 
       double dx2 = dy1 * stroker._wSign;
@@ -457,16 +571,16 @@ void PathStrokerPrivate::calcCap(
       double vx = v0.x - dx2;
       double vy = v0.y - dy2;
 
-      addVertex(vx - dx1, vy + dy1);
+      ADD_VERTEX(vx - dx1, vy + dy1);
 
       if (stroker._wSign > 0)
       {
         da = -da;
-        a1 = atan2(dy1, -dx1) + da;
+        a1 = Math::atan2(dy1, -dx1) + da;
       }
       else
       {
-        a1 = atan2(-dy1, dx1) + da;
+        a1 = Math::atan2(-dy1, dx1) + da;
       }
 
       for (i = 0; i < n; i++)
@@ -475,11 +589,11 @@ void PathStrokerPrivate::calcCap(
         double a1_cos;
         Math::sincos(a1, &a1_sin, &a1_cos);
 
-        addVertex(vx + a1_cos * stroker._w, vy + a1_sin * stroker._w);
+        ADD_VERTEX(vx + a1_cos * stroker._w, vy + a1_sin * stroker._w);
         a1 += da;
       }
 
-      addVertex(vx + dx1, vy - dy1);
+      ADD_VERTEX(vx + dx1, vy - dy1);
       break;
     }
 
@@ -488,9 +602,9 @@ void PathStrokerPrivate::calcCap(
       double dx2 = dy1 * stroker._wSign;
       double dy2 = dx1 * stroker._wSign;
 
-      addVertex(v0.x - dx1, v0.y + dy1);
-      addVertex(v0.x - dx2, v0.y - dy2);
-      addVertex(v0.x + dx1, v0.y - dy1);
+      ADD_VERTEX(v0.x - dx1, v0.y + dy1);
+      ADD_VERTEX(v0.x - dx2, v0.y - dy2);
+      ADD_VERTEX(v0.x + dx1, v0.y - dy1);
       break;
     }
 
@@ -499,17 +613,19 @@ void PathStrokerPrivate::calcCap(
       double dx2 = dy1 * stroker._wSign;
       double dy2 = dx1 * stroker._wSign;
 
-      addVertex(v0.x - dx1 - dx2, v0.y + dy1 - dy2);
-      addVertex(v0.x, v0.y);
-      addVertex(v0.x + dx1 - dx2, v0.y - dy1 - dy2);
+      ADD_VERTEX(v0.x - dx1 - dx2, v0.y + dy1 - dy2);
+      ADD_VERTEX(v0.x, v0.y);
+      ADD_VERTEX(v0.x + dx1 - dx2, v0.y - dy1 - dy2);
     }
   }
+
+  return ERR_OK;
 }
 
-void PathStrokerPrivate::calcJoin(
-  const DoublePoint& v0,
-  const DoublePoint& v1,
-  const DoublePoint& v2,
+err_t PathStrokerPrivate::calcJoin(
+  const PointD& v0,
+  const PointD& v1,
+  const PointD& v2,
   double len1,
   double len2)
 {
@@ -521,7 +637,7 @@ void PathStrokerPrivate::calcJoin(
   double dx2 = (v2.y - v1.y) * wilen2;
   double dy2 = (v2.x - v1.x) * wilen2;
 
-  double cp = PathUtil::crossProduct(v0.x, v0.y, v1.x, v1.y, v2.x, v2.y);
+  double cp = crossProduct(v0.x, v0.y, v1.x, v1.y, v2.x, v2.y);
 
   if (cp != 0 && (cp > 0) == (stroker._w > 0))
   {
@@ -532,12 +648,12 @@ void PathStrokerPrivate::calcJoin(
     switch (stroker._params._innerJoin)
     {
       case INNER_JOIN_BEVEL:
-        addVertex(v1.x + dx1, v1.y - dy1);
-        addVertex(v1.x + dx2, v1.y - dy2);
+        ADD_VERTEX(v1.x + dx1, v1.y - dy1);
+        ADD_VERTEX(v1.x + dx2, v1.y - dy2);
         break;
 
       case INNER_JOIN_MITER:
-        calcMiter(v0, v1, v2, dx1, dy1, dx2, dy2, LINE_JOIN_MITER_REVERT, limit, 0);
+        FOG_RETURN_ON_ERROR( calcMiter(v0, v1, v2, dx1, dy1, dx2, dy2, LINE_JOIN_MITER_REVERT, limit, 0) );
         break;
 
       case INNER_JOIN_JAG:
@@ -545,23 +661,23 @@ void PathStrokerPrivate::calcJoin(
         cp = (dx1-dx2) * (dx1-dx2) + (dy1-dy2) * (dy1-dy2);
         if (cp < len1 * len1 && cp < len2 * len2)
         {
-          calcMiter(v0, v1, v2, dx1, dy1, dx2, dy2, LINE_JOIN_MITER_REVERT, limit, 0);
+          FOG_RETURN_ON_ERROR( calcMiter(v0, v1, v2, dx1, dy1, dx2, dy2, LINE_JOIN_MITER_REVERT, limit, 0) );
         }
         else
         {
           if (stroker._params._innerJoin == INNER_JOIN_JAG)
           {
-            addVertex(v1.x + dx1, v1.y - dy1);
-            addVertex(v1.x,       v1.y      );
-            addVertex(v1.x + dx2, v1.y - dy2);
+            ADD_VERTEX(v1.x + dx1, v1.y - dy1);
+            ADD_VERTEX(v1.x,       v1.y      );
+            ADD_VERTEX(v1.x + dx2, v1.y - dy2);
           }
           else
           {
-            addVertex(v1.x + dx1, v1.y - dy1);
-            addVertex(v1.x,       v1.y      );
-            calcArc(v1.x, v1.y, dx2, -dy2, dx1, -dy1);
-            addVertex(v1.x,       v1.y      );
-            addVertex(v1.x + dx2, v1.y - dy2);
+            ADD_VERTEX(v1.x + dx1, v1.y - dy1);
+            ADD_VERTEX(v1.x,       v1.y      );
+            FOG_RETURN_ON_ERROR( calcArc(v1.x, v1.y, dx2, -dy2, dx1, -dy1) );
+            ADD_VERTEX(v1.x,       v1.y      );
+            ADD_VERTEX(v1.x + dx2, v1.y - dy2);
           }
         }
         break;
@@ -601,20 +717,20 @@ void PathStrokerPrivate::calcJoin(
       // out this entire "if".
       if (stroker._approximationScale * (stroker._wAbs - dbevel) < stroker._wEps)
       {
-        if (PathUtil::calcIntersection(
+        if (calcIntersection(
           v0.x + dx1, v0.y - dy1,
           v1.x + dx1, v1.y - dy1,
           v1.x + dx2, v1.y - dy2,
           v2.x + dx2, v2.y - dy2,
           &dx, &dy))
         {
-          addVertex(dx, dy);
+          ADD_VERTEX(dx, dy);
         }
         else
         {
-          addVertex(v1.x + dx1, v1.y - dy1);
+          ADD_VERTEX(v1.x + dx1, v1.y - dy1);
         }
-        return;
+        return ERR_OK;
       }
     }
 
@@ -623,38 +739,47 @@ void PathStrokerPrivate::calcJoin(
       case LINE_JOIN_MITER:
       case LINE_JOIN_MITER_REVERT:
       case LINE_JOIN_MITER_ROUND:
-        calcMiter(v0, v1, v2, dx1, dy1, dx2, dy2,
-          stroker._params._lineJoin,
-          stroker._params._miterLimit, dbevel);
+        FOG_RETURN_ON_ERROR(
+          calcMiter(v0, v1, v2, dx1, dy1, dx2, dy2,
+            stroker._params._lineJoin,
+            stroker._params._miterLimit, dbevel)
+        );
         break;
 
       case LINE_JOIN_ROUND:
-        calcArc(v1.x, v1.y, dx1, -dy1, dx2, -dy2);
+        FOG_RETURN_ON_ERROR(
+          calcArc(v1.x, v1.y, dx1, -dy1, dx2, -dy2)
+        );
         break;
 
       case LINE_JOIN_BEVEL:
-        addVertex(v1.x + dx1, v1.y - dy1);
-        addVertex(v1.x + dx2, v1.y - dy2);
+        ADD_VERTEX(v1.x + dx1, v1.y - dy1);
+        ADD_VERTEX(v1.x + dx2, v1.y - dy2);
         break;
 
       default:
         FOG_ASSERT_NOT_REACHED();
     }
   }
+
+  return ERR_OK;
 }
 
-err_t PathStrokerPrivate::stroke(const DoublePoint* src, sysuint_t count, bool outline)
+err_t PathStrokerPrivate::stroke(const PointD* src, sysuint_t count, bool outline)
 {
-  const DoublePoint* cur;
+  // Can't stroke one-vertex array.
+  if (count <= 1) return ERR_PATH_CANT_STROKE;
+  // To do outline we need at least three vertices.
+  if (outline && count <= 2) return ERR_PATH_CANT_STROKE;
+
+  const PointD* cur;
   sysuint_t i;
   sysuint_t moveToPosition0 = dst.getLength();
   sysuint_t moveToPosition1 = INVALID_INDEX;
 
-  // Can't stroke one-vertex array.
-  if (count <= 1) return ERR_PATH_CANT_STROKE;
-
-  // To do outline we need almost three vertices.
-  if (outline && count <= 2) return ERR_PATH_CANT_STROKE;
+  FOG_RETURN_ON_ERROR(
+    _begin()
+  );
 
   // Alloc or realloc array for our distances (distance between individual
   // vertices [0]->[1], [1]->[2], ...). Distance at index[0] means distance
@@ -679,16 +804,16 @@ err_t PathStrokerPrivate::stroke(const DoublePoint* src, sysuint_t count, bool o
 
   for (i = count - 1, cur = src, dist = distances; i; i--, cur++, dist++)
   {
-    double d = PathUtil::calcDistance(cur[0].x, cur[0].y, cur[1].x, cur[1].y);
-    if (d <= PathUtil::PATH_VERTEX_DIST_EPSILON) d = 0.0;
+    double d = Math::dist(cur[0].x, cur[0].y, cur[1].x, cur[1].y);
+    if (d <= PATH_VERTEX_DIST_EPSILON) d = 0.0;
 
     dist[0] = d;
   }
 
-  const DoublePoint* srcEnd = src + count;
+  const PointD* srcEnd = src + count;
 
-  DoublePoint cp[3]; // Current points.
-  double cd[3];      // Current distances.
+  PointD cp[3]; // Current points.
+  double cd[3]; // Current distances.
 
   // If something went wrong.
   // for (i = 0; i < count; i++)
@@ -700,20 +825,20 @@ err_t PathStrokerPrivate::stroke(const DoublePoint* src, sysuint_t count, bool o
   // [Outline]
   // --------------------------------------------------------------------------
 
-#define IS_DEGENERATED_DIST(__dist__) ((__dist__) <= PathUtil::PATH_VERTEX_DIST_EPSILON)
+#define IS_DEGENERATED_DIST(__dist__) ((__dist__) <= PATH_VERTEX_DIST_EPSILON)
 
   if (outline)
   {
     // We need also to calc distance between first and last point.
     {
-      double d = PathUtil::calcDistance(src[0].x, src[0].y, src[count-1].x, src[count-1].y);
-      if (d <= PathUtil::PATH_VERTEX_DIST_EPSILON) d = 0.0;
+      double d = Math::dist(src[0].x, src[0].y, src[count-1].x, src[count-1].y);
+      if (d <= PATH_VERTEX_DIST_EPSILON) d = 0.0;
 
       distances[count - 1] = d;
     }
 
-    DoublePoint fp[2]; // First points.
-    double fd[2];      // First distances.
+    PointD fp[2]; // First points.
+    double fd[2]; // First distances.
 
     // ------------------------------------------------------------------------
     // [Outline 1]
@@ -785,16 +910,17 @@ err_t PathStrokerPrivate::stroke(const DoublePoint* src, sysuint_t count, bool o
 
     // End joins.
 outline1Done:
-    calcJoin(cp[1], cp[2], fp[0], cd[1], cd[2]);
-    calcJoin(cp[2], fp[0], fp[1], cd[2], fd[0]);
+    FOG_RETURN_ON_ERROR( calcJoin(cp[1], cp[2], fp[0], cd[1], cd[2]) );
+    FOG_RETURN_ON_ERROR( calcJoin(cp[2], fp[0], fp[1], cd[2], fd[0]) );
 
-    dst.closePolygon(PATH_CMD_FLAG_CLOSE | PATH_CMD_FLAG_CW);
+    // Close path (CW).
+    ADD_VERTEX(NAN, NAN);
 
     // ------------------------------------------------------------------------
     // [Outline 2]
     // ------------------------------------------------------------------------
 
-    moveToPosition1 = dst.getLength();
+    moveToPosition1 = CUR_INDEX();
 
     cur = src + count;
     dist = distances + count;
@@ -842,10 +968,11 @@ outline1Done:
 
     // End joins.
 outline2Done:
-    calcJoin(cp[1], cp[2], fp[0], cd[2], fd[0]);
-    calcJoin(cp[2], fp[0], fp[1], fd[0], fd[1]);
+    FOG_RETURN_ON_ERROR( calcJoin(cp[1], cp[2], fp[0], cd[2], fd[0]) );
+    FOG_RETURN_ON_ERROR( calcJoin(cp[2], fp[0], fp[1], fd[0], fd[1]) );
 
-    dst.closePolygon(PATH_CMD_FLAG_CLOSE | PATH_CMD_FLAG_CCW);
+    // Close path (CCW).
+    ADD_VERTEX(NAN, NAN);
   }
 
   // --------------------------------------------------------------------------
@@ -875,7 +1002,7 @@ outline2Done:
     } while (i < 2);
 
     // Start cap.
-    calcCap(cp[0], cp[1], cd[0], stroker._params._startCap);
+    FOG_RETURN_ON_ERROR( calcCap(cp[0], cp[1], cd[0], stroker._params._startCap) );
 
     // Make the outline.
     if (cur == srcEnd) goto pen1Done;
@@ -899,7 +1026,7 @@ pen1Loop:
       cp[2] = *cur++;
       cd[2] = *dist++;
 
-      calcJoin(cp[0], cp[1], cp[2], cd[0], cd[1]);
+      FOG_RETURN_ON_ERROR( calcJoin(cp[0], cp[1], cp[2], cd[0], cd[1]) );
       if (cur == srcEnd) goto pen1Done;
 
       while (FOG_UNLIKELY(dist[0] == 0.0))
@@ -926,7 +1053,7 @@ pen1Done:
     } while (i < 2);
 
     // End cap.
-    calcCap(cp[0], cp[1], cd[1], stroker._params._endCap);
+    FOG_RETURN_ON_ERROR( calcCap(cp[0], cp[1], cd[1], stroker._params._endCap) );
 
     // Make the outline.
     if (cur == src) goto pen2Done;
@@ -963,22 +1090,39 @@ pen2Loop:
       cp[2] = *cur;
       cd[2] = *dist;
 
-      calcJoin(cp[0], cp[1], cp[2], cd[1], cd[2]);
+      FOG_RETURN_ON_ERROR( calcJoin(cp[0], cp[1], cp[2], cd[1], cd[2]) );
     }
 pen2Done:
-    dst.closePolygon(PATH_CMD_FLAG_CLOSE | PATH_CMD_FLAG_CCW);
+    // Close path (CCW).
+    ADD_VERTEX(NAN, NAN);
   }
 
-  // Fix path adding PATH_CMD_MOVE_TO commands at begin of each outline. This
-  // allowed us to simplify addVertex() inline using only PATH_CMD_LINE_TO.
-  uint8_t* dstCommands = const_cast<uint8_t*>(dst.getCommands());
+  // Fix length of path.
+  {
+    sysuint_t finalLength = CUR_INDEX();
+    dst._d->length = finalLength;
+    FOG_ASSERT(finalLength <= dst._d->capacity);
 
-  if (moveToPosition0 < dst.getLength()) dstCommands[moveToPosition0] = PATH_CMD_MOVE_TO;
-  if (moveToPosition1 < dst.getLength()) dstCommands[moveToPosition1] = PATH_CMD_MOVE_TO;
+    // Fix path adding PATH_CMD_MOVE_TO/CLOSE commands at begin of each 
+    // outline and filling rest by PATH_CMD_LINE_TO. This allowed us to 
+    // simplify ADD_VERTEX() macro.
+    uint8_t* dstCommands = const_cast<uint8_t*>(dst.getCommands());
+
+    if (moveToPosition0 < finalLength)
+    {
+      memset(dstCommands + moveToPosition0, (unsigned int)(PATH_CMD_LINE_TO), finalLength - moveToPosition0);
+      dstCommands[moveToPosition0] = PATH_CMD_MOVE_TO;
+      dstCommands[finalLength - 1] = PATH_CMD_END | PATH_CMD_FLAG_CLOSE | PATH_CMD_FLAG_CW;
+    }
+    if (moveToPosition1 < finalLength)
+    {
+      dstCommands[moveToPosition1 - 1] = PATH_CMD_END | PATH_CMD_FLAG_CLOSE | PATH_CMD_FLAG_CCW;
+      dstCommands[moveToPosition1] = PATH_CMD_MOVE_TO;
+    }
+  }
 
   return ERR_OK;
 }
-
 
 #if 0
 
@@ -986,16 +1130,16 @@ pen2Done:
 // [Fog::Path - Dash]
 // ============================================================================
 
-err_t DoublePath::dash(const List<double>& dashes, double startOffset, double approximationScale)
+err_t PathD::dash(const List<double>& dashes, double startOffset, double approximationScale)
 {
   return dashTo(*this, dashes, startOffset, approximationScale);
 }
 
-err_t DoublePath::dashTo(DoublePath& dst, const List<double>& dashes, double startOffset, double approximationScale)
+err_t PathD::dashTo(PathD& dst, const List<double>& dashes, double startOffset, double approximationScale)
 {
   if (getType() != LineType)
   {
-    DoublePath tmp;
+    PathD tmp;
     flattenTo(tmp, NULL, approximationScale);
     return tmp.dashTo(dst, dashes, startOffset, approximationScale);
   }
@@ -1018,7 +1162,7 @@ err_t DoublePath::dashTo(DoublePath& dst, const List<double>& dashes, double sta
 
     if (this == &dst)
     {
-      DoublePath tmp;
+      PathD tmp;
       err_t err = concatToPath(tmp, dasher);
       if (err) return err;
       return dst.set(tmp);
@@ -1035,17 +1179,17 @@ err_t DoublePath::dashTo(DoublePath& dst, const List<double>& dashes, double sta
 // [Fog::Path - Stroke]
 // ============================================================================
 
-err_t DoublePath::stroke(const StrokerParams& strokeParams, double approximationScale)
+err_t PathD::stroke(const StrokerParams& strokeParams, double approximationScale)
 {
   return strokeTo(*this, strokeParams);
 }
 
 #if 1
-err_t DoublePath::strokeTo(DoublePath& dst, const StrokerParams& strokeParams, double approximationScale) const
+err_t PathD::strokeTo(PathD& dst, const StrokerParams& strokeParams, double approximationScale) const
 {
   if (getType() != LineType)
   {
-    DoublePath tmp;
+    PathD tmp;
     flattenTo(tmp, NULL, approximationScale);
     return tmp.strokeTo(dst, strokeParams, approximationScale);
   }
@@ -1062,7 +1206,7 @@ err_t DoublePath::strokeTo(DoublePath& dst, const StrokerParams& strokeParams, d
 
     if (this == &dst)
     {
-      DoublePath tmp;
+      PathD tmp;
       err_t err = concatToPath(tmp, stroker);
       if (err) return err;
       return dst.set(tmp);
@@ -1082,7 +1226,7 @@ err_t DoublePath::strokeTo(DoublePath& dst, const StrokerParams& strokeParams, d
   err_t dash(const List<double>& dashes, double startOffset, double approximationScale = 1.0);
 
   //! @brief Similar method to @c dash(), but with specified destination path.
-  err_t dashTo(DoublePath& dst, const List<double>& dashes, double startOffset, double approximationScale = 1.0);
+  err_t dashTo(PathD& dst, const List<double>& dashes, double startOffset, double approximationScale = 1.0);
 
   // [Stroke]
 
@@ -1092,7 +1236,7 @@ err_t DoublePath::strokeTo(DoublePath& dst, const StrokerParams& strokeParams, d
   err_t stroke(const StrokerParams& strokeParams, double approximationScale = 1.0);
 
   //! @brief Similar method to @c stroke(), but with specified destination path.
-  err_t strokeTo(DoublePath& dst, const StrokerParams& strokeParams, double approximationScale = 1.0) const;
+  err_t strokeTo(PathD& dst, const StrokerParams& strokeParams, double approximationScale = 1.0) const;
 
 #endif
 

@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -23,7 +23,7 @@
 #include <Fog/Graphics/Font.h>
 #include <Fog/Graphics/Glyph.h>
 #include <Fog/Graphics/GlyphCache.h>
-#include <Fog/Graphics/Matrix.h>
+#include <Fog/Graphics/Transform.h>
 
 #if defined(FOG_FONT_WINDOWS)
 # include <Fog/Graphics/FontEngine/WinFontEngine.h>
@@ -60,7 +60,7 @@ struct FOG_HIDDEN FontFaceEntry
     family(other.family),
     size(other.size),
     options(other.options),
-    matrix(other.matrix)
+    transform(other.transform)
   {
   }
 
@@ -68,11 +68,11 @@ struct FOG_HIDDEN FontFaceEntry
     const String& family,
     float size,
     const FontOptions& options,
-    const FloatMatrix& matrix) :
+    const TransformF& transform) :
       family(family),
       size(size),
       options(options),
-      matrix(matrix)
+      transform(transform)
   {
   }
 
@@ -86,7 +86,7 @@ struct FOG_HIDDEN FontFaceEntry
       family.getHashCode(),
       HashUtil::getHashCode(size),
       options.getHashCode(),
-      matrix.getHashCode());
+      transform.getHashCode());
   }
 
   // [Operator Overload]
@@ -96,17 +96,17 @@ struct FOG_HIDDEN FontFaceEntry
     family = other.family;
     size = other.size;
     options = other.options;
-    matrix = other.matrix;
+    transform = other.transform;
   }
 
   FOG_INLINE bool operator==(const FontFaceEntry& other) const
   {
-    return (family == other.family) && (size == other.size) && (options == other.options) && (matrix == other.matrix);
+    return (family == other.family) && (size == other.size) && (options == other.options) && (transform == other.transform);
   }
 
   FOG_INLINE bool operator!=(const FontFaceEntry& other) const
   {
-    return (family != other.family) || (size != other.size) || (options != other.options) || (matrix != other.matrix);
+    return (family != other.family) || (size != other.size) || (options != other.options) || (transform != other.transform);
   }
 
   // [Members]
@@ -118,7 +118,7 @@ struct FOG_HIDDEN FontFaceEntry
   //! @brief Font caps.
   FontOptions options;
   //! @brief Transformation matrix.
-  FloatMatrix matrix;
+  TransformF transform;
 };
 
 // ============================================================================
@@ -142,7 +142,7 @@ struct FOG_HIDDEN Font_Local
     const String& family,
     float size,
     const FontOptions& options,
-    const FloatMatrix& matrix);
+    const TransformF& transform);
 
   err_t putFaceToCache(FontFace* face);
 
@@ -176,10 +176,10 @@ FontFace* Font_Local::getFaceFromCache(
   const String& family,
   float size,
   const FontOptions& options,
-  const FloatMatrix& matrix)
+  const TransformF& transform)
 {
   AutoLock locked(lock);
-  FontFace* face = faceCache.value(FontFaceEntry(family, size, options, matrix), NULL);
+  FontFace* face = faceCache.value(FontFaceEntry(family, size, options, transform), NULL);
 
   if (face) face = face->ref();
   return face;
@@ -193,7 +193,7 @@ err_t Font_Local::putFaceToCache(FontFace* face)
       face->family, 
       face->metrics.getSize(),
       face->options,
-      face->matrix),
+      face->transform),
     face, false);
 
   if (err == ERR_OK) face->ref();
@@ -241,7 +241,7 @@ uint32_t FontFace::getHashCode() const
     family.getHashCode(),
     HashUtil::getHashCode(metrics.getSize()),
     options.getHashCode(),
-    matrix.getHashCode());
+    transform.getHashCode());
 }
 
 // ============================================================================
@@ -347,12 +347,12 @@ void Font::free()
 
 err_t Font::setFamily(const String& family)
 {
-  return setFont(family, getSize(), getOptions(), getMatrix());
+  return setFont(family, getSize(), getOptions(), getTransform());
 }
 
 err_t Font::setOptions(const FontOptions& options)
 {
-  return setFont(getFamily(), getSize(), options, getMatrix());
+  return setFont(getFamily(), getSize(), options, getTransform());
 }
 
 err_t Font::setWeight(uint32_t weight)
@@ -361,7 +361,7 @@ err_t Font::setWeight(uint32_t weight)
 
   FontOptions options = getOptions();
   options.setWeight(weight);
-  return setFont(getFamily(), getSize(), options, getMatrix());
+  return setFont(getFamily(), getSize(), options, getTransform());
 }
 
 err_t Font::setStyle(uint32_t style)
@@ -370,7 +370,7 @@ err_t Font::setStyle(uint32_t style)
 
   FontOptions options = getOptions();
   options.setStyle(style);
-  return setFont(getFamily(), getSize(), options, getMatrix());
+  return setFont(getFamily(), getSize(), options, getTransform());
 }
 
 err_t Font::setDecoration(uint32_t decoration)
@@ -379,7 +379,7 @@ err_t Font::setDecoration(uint32_t decoration)
 
   FontOptions options = getOptions();
   options.setDecoration(decoration);
-  return setFont(getFamily(), getSize(), options, getMatrix());
+  return setFont(getFamily(), getSize(), options, getTransform());
 }
 
 err_t Font::setKerning(uint32_t kerning)
@@ -388,7 +388,7 @@ err_t Font::setKerning(uint32_t kerning)
 
   FontOptions options = getOptions();
   options.setKerning(kerning);
-  return setFont(getFamily(), getSize(), options, getMatrix());
+  return setFont(getFamily(), getSize(), options, getTransform());
 }
 
 err_t Font::setHinting(uint32_t hinting)
@@ -397,19 +397,19 @@ err_t Font::setHinting(uint32_t hinting)
 
   FontOptions options = getOptions();
   options.setHinting(hinting);
-  return setFont(getFamily(), getSize(), options, getMatrix());
+  return setFont(getFamily(), getSize(), options, getTransform());
 }
 
 err_t Font::setSize(float size)
 {
   if (getSize() == size) return ERR_OK;
 
-  return setFont(getFamily(), size, getOptions(), getMatrix());
+  return setFont(getFamily(), size, getOptions(), getTransform());
 }
 
-err_t Font::setMatrix(const FloatMatrix& matrix)
+err_t Font::setTransform(const TransformF& transform)
 {
-  return setFont(getFamily(), getSize(), getOptions(), matrix);
+  return setFont(getFamily(), getSize(), getOptions(), transform);
 }
 
 err_t Font::setFont(const Font& other)
@@ -420,20 +420,20 @@ err_t Font::setFont(const Font& other)
 
 err_t Font::setFont(const String& family, float size)
 {
-  return setFont(family, size, getOptions(), getMatrix());
+  return setFont(family, size, getOptions(), getTransform());
 }
 
 err_t Font::setFont(const String& family, float size, const FontOptions& options)
 {
-  return setFont(family, size, options, getMatrix());
+  return setFont(family, size, options, getTransform());
 }
 
-err_t Font::setFont(const String& family, float size, const FontOptions& options, const FloatMatrix& matrix)
+err_t Font::setFont(const String& family, float size, const FontOptions& options, const TransformF& transform)
 {
   FontFace* face;
 
   // Try to get the font face from cache.
-  face = font_local->getFaceFromCache(family, size, options, matrix);
+  face = font_local->getFaceFromCache(family, size, options, transform);
   if (face)
   {
     atomicPtrXchg(&_d, face->ref())->deref();
@@ -441,7 +441,7 @@ err_t Font::setFont(const String& family, float size, const FontOptions& options
   }
 
   // If we failed, try to create the font face through font engine.
-  face = _engine->createFace(family, size, options, matrix);
+  face = _engine->createFace(family, size, options, transform);
   if (!face) return ERR_FONT_NOT_MATCHED;
 
   // And put it to the cache.
@@ -463,7 +463,7 @@ err_t Font::setFont(const String& family, float size, const FontOptions& options
   if (err == ERR_RT_OBJECT_ALREADY_EXISTS)
   {
     FontFace* other = font_local->getFaceFromCache(
-      face->family, face->metrics.getSize(), face->options, face->matrix);
+      face->family, face->metrics.getSize(), face->options, face->transform);
     // It can also happen that cached face was deleted, in this case we use the
     // out one again :)
     if (other) { face->deref(); face = other; }
@@ -487,12 +487,12 @@ err_t Font::getGlyphSet(const Char* str, sysuint_t length, GlyphSet& glyphSet) c
   return _d->getGlyphSet(str, length, glyphSet);
 }
 
-err_t Font::getOutline(const String& str, DoublePath& dst) const
+err_t Font::getOutline(const String& str, PathD& dst) const
 {
   return _d->getOutline(str.getData(), str.getLength(), dst);
 }
 
-err_t Font::getOutline(const Char* str, sysuint_t length, DoublePath& dst) const
+err_t Font::getOutline(const Char* str, sysuint_t length, PathD& dst) const
 {
   return _d->getOutline(str, length, dst);
 }

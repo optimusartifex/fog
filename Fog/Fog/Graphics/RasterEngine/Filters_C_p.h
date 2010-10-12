@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -187,7 +187,7 @@ struct FOG_HIDDEN FilterC
       tb = Math::bound<int>(tb, 0, 255);
       ta = Math::bound<int>(ta, 0, 255);
 
-      ((uint32_t*)dst)[0] = Argb::make(ta, tr, tg, tb);
+      ((uint32_t*)dst)[0] = ArgbI::pack(ta, tr, tg, tb);
 
       dst += 4;
       src += 4;
@@ -215,7 +215,7 @@ struct FOG_HIDDEN FilterC
       tg = Math::bound<int>(tg, 0, 255);
       tb = Math::bound<int>(tb, 0, 255);
 
-      ((uint32_t*)dst)[0] = Argb::make(0xFF, tr, tg, tb);
+      ((uint32_t*)dst)[0] = ArgbI::pack(0xFF, tr, tg, tb);
 
       dst += 4;
       src += 4;

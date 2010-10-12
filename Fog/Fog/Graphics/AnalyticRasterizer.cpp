@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -10,12 +10,12 @@
 
 // [Dependencies]
 #include <Fog/Core/ByteArray.h>
+#include <Fog/Core/Face/FaceC.h>
 #include <Fog/Core/Lock.h>
 #include <Fog/Core/Math.h>
 #include <Fog/Core/Memory.h>
 #include <Fog/Core/MemoryBuffer.h>
 #include <Fog/Core/Static.h>
-#include <Fog/Face/FaceByte.h>
 #include <Fog/Graphics/AnalyticRasterizer_p.h>
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/Image.h>
@@ -111,7 +111,7 @@ AnalyticRasterizer8::~AnalyticRasterizer8()
 void AnalyticRasterizer8::reset()
 {
   // Clip-box / bounding-box.
-  _clipBox.clear();
+  _clipBox.reset();
   _boundingBox.set(-1, -1, -1, -1);
 
   // Clear error state.
@@ -142,9 +142,9 @@ err_t AnalyticRasterizer8::initialize()
   _isFinalized = false;
   _isValid = false;
 
-  _offset.set(-_clipBox.x1, -_clipBox.y1);
   _size.set(_clipBox.getWidth(), _clipBox.getHeight());
   _size24x8.set(_size.w << POLY_SUBPIXEL_SHIFT, _size.h << POLY_SUBPIXEL_SHIFT);
+  _offset24x8.set((-_clipBox.x1) << POLY_SUBPIXEL_SHIFT, (-_clipBox.y1) << POLY_SUBPIXEL_SHIFT);
 
   _sweepScanlineSimpleFn = NULL;
   _sweepScanlineRegionFn = NULL;
@@ -181,29 +181,11 @@ err_t AnalyticRasterizer8::finalize()
   switch (_shape)
   {
     case SHAPE_NONE:
-    {
-      _isFinalized = true;
-      _isValid = false;
-      break;
-    }
+      goto notValid;
 
     case SHAPE_PATH:
     {
-      if (_boundingBox.y1 == -1)
-      {
-        _isFinalized = true;
-        _isValid = false;
-        return ERR_OK;
-      }
-
-      // Translate bounding box to match _clipBox.
-      _boundingBox.translate(_clipBox.x1, _clipBox.y1);
-      // Normalize bounding box to our standard, x2/y2 coordinates are outside.
-      _boundingBox.x2++;
-      _boundingBox.y2++;
-
-      _isFinalized = true;
-      _isValid = true;
+      if (_boundingBox.y1 == -1) goto notValid;
 
       _initPathSweepFunctions(this);
       break;
@@ -215,17 +197,30 @@ err_t AnalyticRasterizer8::finalize()
         reinterpret_cast<SubPxRectangleShape*>(_rows);
 
       _boundingBox = shapeData->bounds;
-      _boundingBox.x2++;
-      _boundingBox.y2++;
+      if (!_boundingBox.isValid()) goto notValid;
 
-      _isFinalized = true;
-      _isValid = true;
+      shapeData->xLeft  = shapeData->bounds.x1 + _clipBox.x1;
+      shapeData->xRight = shapeData->bounds.x2 + _clipBox.x1;
 
       _initRectSweepFunctions(this);
       break;
     }
   }
 
+  // Translate bounding box to match _clipBox.
+  _boundingBox.translate(_clipBox.x1, _clipBox.y1);
+  // Normalize bounding box to our standard, x2/y2 coordinates are outside.
+  _boundingBox.x2++;
+  _boundingBox.y2++;
+
+  _isFinalized = true;
+  _isValid = true;
+
+  return ERR_OK;
+
+notValid:
+  _isFinalized = true;
+  _isValid = false;
   return ERR_OK;
 }
 
@@ -259,7 +254,7 @@ static bool _initCells(AnalyticRasterizer8* rasterizer)
 template<typename _CHUNK_TYPE, typename _CELL_TYPE>
 static void _addPath(
   AnalyticRasterizer8* rasterizer,
-  const DoublePoint* vertices, const uint8_t* commands, sysuint_t i)
+  const PointD* vertices, const uint8_t* commands, sysuint_t i)
 {
   const uint8_t* end = commands + i;
 
@@ -284,8 +279,8 @@ static void _addPath(
       if (commands == end) return;
       if (PathCmd::isMoveTo(cmd))
       {
-        x1 = startX1 = upscale(vertices->x) + rasterizer->_offset.x;
-        y1 = startY1 = upscale(vertices->y) + rasterizer->_offset.y;
+        x1 = startX1 = upscale(vertices->x) + rasterizer->_offset24x8.x;
+        y1 = startY1 = upscale(vertices->y) + rasterizer->_offset24x8.y;
         f1 = startF1 = LiangBarsky::getClippingFlags(x1, y1, 0, 0, rasterizer->_size24x8.w, rasterizer->_size24x8.h);
 
         vertices++;
@@ -305,8 +300,8 @@ static void _addPath(
 
       if (PathCmd::isLineTo(cmd))
       {
-        int24x8_t x2 = upscale(vertices->x) + rasterizer->_offset.x;
-        int24x8_t y2 = upscale(vertices->y) + rasterizer->_offset.y;
+        int24x8_t x2 = upscale(vertices->x) + rasterizer->_offset24x8.x;
+        int24x8_t y2 = upscale(vertices->y) + rasterizer->_offset24x8.y;
         uint f2 = LiangBarsky::getClippingFlags(x2, y2, 0, 0, rasterizer->_size24x8.w, rasterizer->_size24x8.h);
 
         if ((x1 != x2) | (y1 != y2) && !rasterizer->clipLine<_CHUNK_TYPE, _CELL_TYPE>(x1, y1, x2, y2, f1, f2))
@@ -333,8 +328,8 @@ closePath:
 
         if (PathCmd::isMoveTo(cmd))
         {
-          x1 = startX1 = upscale(vertices->x) + rasterizer->_offset.x;
-          y1 = startY1 = upscale(vertices->y) + rasterizer->_offset.y;
+          x1 = startX1 = upscale(vertices->x) + rasterizer->_offset24x8.x;
+          y1 = startY1 = upscale(vertices->y) + rasterizer->_offset24x8.y;
           f1 = startF1 = LiangBarsky::getClippingFlags(x1, y1, 0, 0, rasterizer->_size24x8.w, rasterizer->_size24x8.h);
         }
         else
@@ -354,7 +349,7 @@ _bail:
   return;
 }
 
-void AnalyticRasterizer8::addPath(const DoublePath& path)
+void AnalyticRasterizer8::addPath(const PathD& path)
 {
   if (_error) return;
   FOG_ASSERT(_isFinalized == false);
@@ -379,17 +374,17 @@ void AnalyticRasterizer8::addPath(const DoublePath& path)
     _addPath<ChunkQ, CellQ>(this, path.getVertices(), path.getCommands(), length);
 }
 
-void AnalyticRasterizer8::addRect(const DoubleRect& rect)
+void AnalyticRasterizer8::addRect(const RectD& rect)
 {
   // Initial addRect(), we try to add rectangle to the data section and to 
   // initialize shape to SHAPE_SUBPX_RECTANGLE.
   if (_shape == SHAPE_NONE)
   {
     // Convert to fixed point.
-    int rx1 = Math::doubleToFixed24x8(rect.x) + _offset.x;
-    int ry1 = Math::doubleToFixed24x8(rect.y) + _offset.y;
-    int rx2 = Math::doubleToFixed24x8(rect.x + rect.w) + _offset.x;
-    int ry2 = Math::doubleToFixed24x8(rect.y + rect.h) + _offset.y;
+    int rx1 = Math::doubleToFixed24x8(rect.x) + _offset24x8.x;
+    int ry1 = Math::doubleToFixed24x8(rect.y) + _offset24x8.y;
+    int rx2 = Math::doubleToFixed24x8(rect.x + rect.w) + _offset24x8.x;
+    int ry2 = Math::doubleToFixed24x8(rect.y + rect.h) + _offset24x8.y;
 
     // Clip.
     if (rx1 < 0) rx1 = 0;
@@ -447,7 +442,7 @@ void AnalyticRasterizer8::addRect(const DoubleRect& rect)
 
   if (_shape != SHAPE_PATH) convertToPath();
 
-  DoublePoint vertices[5];
+  PointD vertices[5];
   uint8_t commands[5];
 
   double x1 = rect.x;
@@ -492,7 +487,7 @@ void AnalyticRasterizer8::convertToPath()
     {
       SubPxRectangleShape* shapeData =
         reinterpret_cast<SubPxRectangleShape*>(_rows);
-      DoubleRect rect = shapeData->rect;
+      RectD rect = shapeData->rect;
 
       if (!_initCells(this)) { _shape = SHAPE_NONE; return; }
 
@@ -673,7 +668,7 @@ FOG_INLINE bool AnalyticRasterizer8::clipLineY(int24x8_t x1, int24x8_t y1, int24
       ty2 = 0;
     }
 
-    if (f2 & 2) // y2 > cliphy2
+    if (f2 & 2) // y2 > clip.y2
     {
       tx2 = x1 + muldiv(_size24x8.h - y1, x2 - x1, y2 - y1);
       ty2 = _size24x8.h;
@@ -1142,7 +1137,7 @@ static FOG_INLINE void qsortCells(CELL* start, uint32_t num)
 }
 
 // ============================================================================
-// [Fog::AnalyticRasterizer8 - Sweep]
+// [Fog::AnalyticRasterizer8 - Sweep - Dump]
 // ============================================================================
 
 #if defined(FOG_DEBUG_RASTERIZER)
@@ -1170,6 +1165,10 @@ static void dumpSpans(int y, const Span8* span)
   printf("%s\n", b.getData());
 }
 #endif // FOG_DEBUG_RASTERIZER
+
+// ============================================================================
+// [Fog::AnalyticRasterizer8 - Sweep - Helpers]
+// ============================================================================
 
 // Formula:
 //
@@ -1266,14 +1265,18 @@ static bool _mergeCells(AnalyticRasterizer8* rasterizer, void* _chunks, MemoryBu
   return true;
 }
 
+// ============================================================================
+// [Fog::AnalyticRasterizer8 - Sweep - Scanline (Analytic-Rasterizer)]
+// ============================================================================
+
 template<typename _CHUNK_TYPE, typename _CELL_TYPE, int _RULE, int _USE_ALPHA>
 static Span8* _sweepScanlineSimpleImpl(
   AnalyticRasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y)
 {
-  FOG_ASSERT(rasterizer->_isFinalized);
-
   y -= rasterizer->_clipBox.y1;
-  if ((uint)y >= (uint)rasterizer->_size.h) return NULL;
+
+  FOG_ASSERT(rasterizer->_isFinalized);
+  FOG_ASSERT((uint)y < (uint)rasterizer->_size.h);
 
   _CELL_TYPE* cellCur;
   uint numCells;
@@ -1410,144 +1413,30 @@ static Span8* _sweepScanlineSimpleImpl(
 template<typename _CHUNK_TYPE, typename _CELL_TYPE, int _RULE, int _USE_ALPHA>
 static Span8* _sweepScanlineRegionImpl(
   AnalyticRasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y,
-  const IntBox* clipBoxes, sysuint_t count)
+  const BoxI* clipBoxes, sysuint_t count)
 {
-  // TODO:
-  return NULL;
-}
+  y -= rasterizer->_clipBox.y1;
 
-template<typename _CHUNK_TYPE, typename _CELL_TYPE, int _RULE, int _USE_ALPHA>
-static Span8* _sweepScanlineSpansImpl(
-  AnalyticRasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y,
-  const Span8* clipSpans)
-{
-  // TODO:
-  return NULL;
-}
+  FOG_ASSERT(rasterizer->_isFinalized);
+  FOG_ASSERT((uint)y < (uint)rasterizer->_size.h);
 
-static Span8* _sweepRectSimpleImpl(
-  AnalyticRasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y)
-{
-  y -= rasterizer->_boundingBox.y1;
-  if ((uint)y >= (uint)rasterizer->_boundingBox.y2) return NULL;
+  _CELL_TYPE* cellCur;
+  uint numCells;
 
-  int xOffset = rasterizer->_clipBox.x1;
-
-  if (scanline.newScanline(rasterizer->_boundingBox.x1, rasterizer->_boundingBox.x2) != ERR_OK)
+  if (!_mergeCells<_CHUNK_TYPE, _CELL_TYPE>(rasterizer, rasterizer->_rows[y], temp, &cellCur, &numCells))
     return NULL;
 
-  AnalyticRasterizer8::SubPxRectangleShape* shapeData =
-    reinterpret_cast<AnalyticRasterizer8::SubPxRectangleShape*>(rasterizer->_rows);
-
-  int x1 = shapeData->bounds.x1;
-  int x2 = shapeData->bounds.x2;
-
-  int w = x2 - x1;
-
-  const uint8_t* covers = shapeData->coverageI;
-
-  if (FOG_UNLIKELY(y == 0))
-  {
-    covers = shapeData->coverageT;
-  }
-  else if (FOG_UNLIKELY(y == (shapeData->bounds.y2 - shapeData->bounds.y1)))
-  {
-    covers = shapeData->coverageB;
-  }
-
-  scanline.addVSpanAlpha(x1, x1 + 1)[0] = (uint8_t)covers[0];
-  if (w > 1) scanline.addCSpanOrMergeVSpan(x1 + 1, x2, covers[1]);
-  if (w > 0) scanline.addVSpanAlphaOrMergeVSpan(x2, x2 + 1)[0] = covers[2];
-
-  if (scanline.endScanline() != ERR_OK) return NULL;
-#if defined(FOG_DEBUG_RASTERIZER)
-  dumpSpans(y, scanline.getSpans());
-#endif // FOG_DEBUG_RASTERIZER
-  return scanline.getSpans();
-}
-
-static void _initPathSweepFunctions(AnalyticRasterizer8* rasterizer)
-{
-#define SETUP_SWEEP(rasterizer, _FILL_MODE, _USE_ALPHA) \
-  do { \
-    if (useCellD(rasterizer)) \
-    { \
-      rasterizer->_sweepScanlineSimpleFn = _sweepScanlineSimpleImpl<AnalyticRasterizer8::ChunkD, AnalyticRasterizer8::CellD, _FILL_MODE, _USE_ALPHA>; \
-      rasterizer->_sweepScanlineRegionFn = _sweepScanlineRegionImpl<AnalyticRasterizer8::ChunkD, AnalyticRasterizer8::CellD, _FILL_MODE, _USE_ALPHA>; \
-      rasterizer->_sweepScanlineSpansFn  = _sweepScanlineSpansImpl <AnalyticRasterizer8::ChunkD, AnalyticRasterizer8::CellD, _FILL_MODE, _USE_ALPHA>; \
-    } \
-    else \
-    { \
-      rasterizer->_sweepScanlineSimpleFn = _sweepScanlineSimpleImpl<AnalyticRasterizer8::ChunkQ, AnalyticRasterizer8::CellQ, _FILL_MODE, _USE_ALPHA>; \
-      rasterizer->_sweepScanlineRegionFn = _sweepScanlineRegionImpl<AnalyticRasterizer8::ChunkQ, AnalyticRasterizer8::CellQ, _FILL_MODE, _USE_ALPHA>; \
-      rasterizer->_sweepScanlineSpansFn  = _sweepScanlineSpansImpl <AnalyticRasterizer8::ChunkQ, AnalyticRasterizer8::CellQ, _FILL_MODE, _USE_ALPHA>; \
-    } \
-  } while(0)
-
-  // Setup sweep scanline methods.
-  switch (rasterizer->_fillRule)
-  {
-    case FILL_NON_ZERO:
-      if (rasterizer->_alpha == 0xFF)
-        SETUP_SWEEP(rasterizer, FILL_NON_ZERO, 0);
-      else
-        SETUP_SWEEP(rasterizer, FILL_NON_ZERO, 1);
-      break;
-
-    case FILL_EVEN_ODD:
-      if (rasterizer->_alpha == 0xFF)
-        SETUP_SWEEP(rasterizer, FILL_EVEN_ODD, 0);
-      else
-        SETUP_SWEEP(rasterizer, FILL_EVEN_ODD, 1);
-      break;
-
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
-}
-
-static void _initRectSweepFunctions(AnalyticRasterizer8* rasterizer)
-{
-  rasterizer->_sweepScanlineSimpleFn = _sweepRectSimpleImpl;
-  // TODO:
-  rasterizer->_sweepScanlineRegionFn = NULL;
-  rasterizer->_sweepScanlineSpansFn = NULL;
-}
-
-
-
-
-
-
-
-
-
-#if 0
-template<int _RULE, int _USE_ALPHA>
-Span8* AnalyticRasterizer8::_sweepScanlineRegionImpl(
-  AnalyticRasterizer8* rasterizer, Scanline8& scanline, int y,
-  const IntBox* clipBoxes, sysuint_t count)
-{
-  FOG_ASSERT(rasterizer->_isFinalized);
-  if (y >= rasterizer->_boundingBox.y2) return NULL;
-
-  const RowInfo& ri = rasterizer->_rowsInfo[y - rasterizer->_boundingBox.y1];
-
-  uint numCells = ri.count;
-  if (!numCells) return NULL;
-
-  const CellX* cellCur = &rasterizer->_cellsSorted[ri.index];
-
   // Clipping.
-  const IntBox* clipCur = clipBoxes;
-  const IntBox* clipEnd = clipBoxes + count;
+  const BoxI* clipCur = clipBoxes;
+  const BoxI* clipEnd = clipBoxes + count;
   if (FOG_UNLIKELY(clipCur == clipEnd)) return NULL;
 
   if (scanline.newScanline(rasterizer->_boundingBox.x1, rasterizer->_boundingBox.x2) != ERR_OK)
     return NULL;
 
+  int xOffset = rasterizer->_clipBox.x1;
   int x;
-  int nextX = cellCur->x;
+  int nextX = cellCur->getX() + xOffset;
   int area;
   int cover = 0;
   int coversh;
@@ -1570,16 +1459,19 @@ advanceClip:
   for (;;)
   {
     x      = nextX;
-    area   = cellCur->area;
-    cover += cellCur->cover;
+    area   = cellCur->getArea();
+    cover += cellCur->getCover();
     FOG_ASSERT(x < clipX2);
 
     while (--numCells)
     {
       cellCur++;
-      if ((nextX = cellCur->x) != x) break;
-      area  += cellCur->area;
-      cover += cellCur->cover;
+
+      nextX = cellCur->getX() + xOffset;
+      if (nextX != x) break;
+
+      area  += cellCur->getArea();
+      cover += cellCur->getCover();
     }
 
     coversh = cover << (POLY_SUBPIXEL_SHIFT + 1);
@@ -1612,15 +1504,18 @@ advanceClip:
       for (;;)
       {
         x      = nextX;
-        area   = cellCur->area;
-        cover += cellCur->cover;
+        area   = cellCur->getArea();
+        cover += cellCur->getCover();
 
         while (--numCells)
         {
           cellCur++;
-          if ((nextX = cellCur->x) != x) break;
-          area  += cellCur->area;
-          cover += cellCur->cover;
+
+          nextX = cellCur->getX() + xOffset;
+          if (nextX != x) break;
+
+          area  += cellCur->getArea();
+          cover += cellCur->getCover();
         }
 
         coversh = cover << (POLY_SUBPIXEL_SHIFT + 1);
@@ -1730,20 +1625,21 @@ end:
   return scanline.getSpans();
 }
 
-template<int _RULE, int _USE_ALPHA>
-Span8* AnalyticRasterizer8::_sweepScanlineSpansImpl(
-  AnalyticRasterizer8* rasterizer, Scanline8& scanline, int y,
+template<typename _CHUNK_TYPE, typename _CELL_TYPE, int _RULE, int _USE_ALPHA>
+static Span8* _sweepScanlineSpansImpl(
+  AnalyticRasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y,
   const Span8* clipSpans)
 {
+  y -= rasterizer->_clipBox.y1;
+
   FOG_ASSERT(rasterizer->_isFinalized);
-  if (y >= rasterizer->_boundingBox.y2) return NULL;
+  FOG_ASSERT((uint)y < (uint)rasterizer->_size.h);
 
-  const RowInfo& ri = rasterizer->_rowsInfo[y - rasterizer->_boundingBox.y1];
+  _CELL_TYPE* cellCur;
+  uint numCells;
 
-  uint numCells = ri.count;
-  if (!numCells) return NULL;
-
-  const CellX* cellCur = &rasterizer->_cellsSorted[ri.index];
+  if (!_mergeCells<_CHUNK_TYPE, _CELL_TYPE>(rasterizer, rasterizer->_rows[y], temp, &cellCur, &numCells))
+    return NULL;
 
   // Clipping.
   const Span8* clipCur = clipSpans;
@@ -1752,8 +1648,9 @@ Span8* AnalyticRasterizer8::_sweepScanlineSpansImpl(
   if (scanline.newScanline(rasterizer->_boundingBox.x1, rasterizer->_boundingBox.x2) != ERR_OK)
     return NULL;
 
+  int xOffset = rasterizer->_clipBox.x1;
   int x;
-  int nextX = cellCur->x;
+  int nextX = cellCur->getX() + xOffset;
   int area;
   int cover = 0;
   int coversh;
@@ -1786,16 +1683,19 @@ advanceClip:
   for (;;)
   {
     x      = nextX;
-    area   = cellCur->area;
-    cover += cellCur->cover;
+    area   = cellCur->getArea();
+    cover += cellCur->getCover();
     FOG_ASSERT(x < clipX2);
 
     while (--numCells)
     {
       cellCur++;
-      if ((nextX = cellCur->x) != x) break;
-      area  += cellCur->area;
-      cover += cellCur->cover;
+
+      nextX = cellCur->getX() + xOffset;
+      if (nextX != x) break;
+
+      area  += cellCur->getArea();
+      cover += cellCur->getCover();
     }
 
     coversh = cover << (POLY_SUBPIXEL_SHIFT + 1);
@@ -1841,15 +1741,18 @@ advanceClip:
         for (;;)
         {
           x      = nextX;
-          area   = cellCur->area;
-          cover += cellCur->cover;
+          area   = cellCur->getArea();
+          cover += cellCur->getCover();
 
           while (--numCells)
           {
             cellCur++;
-            if ((nextX = cellCur->x) != x) break;
-            area  += cellCur->area;
-            cover += cellCur->cover;
+
+            nextX = cellCur->getX() + xOffset;
+            if (nextX != x) break;
+
+            area  += cellCur->getArea();
+            cover += cellCur->getCover();
           }
 
           coversh = cover << (POLY_SUBPIXEL_SHIFT + 1);
@@ -1892,15 +1795,18 @@ advanceClip:
         for (;;)
         {
           x      = nextX;
-          area   = cellCur->area;
-          cover += cellCur->cover;
+          area   = cellCur->getArea();
+          cover += cellCur->getCover();
 
           while (--numCells)
           {
             cellCur++;
-            if ((nextX = cellCur->x) != x) break;
-            area  += cellCur->area;
-            cover += cellCur->cover;
+
+            nextX = cellCur->getX() + xOffset;
+            if (nextX != x) break;
+
+            area  += cellCur->getArea();
+            cover += cellCur->getCover();
           }
 
           FOG_ASSERT(x >= clipX1 && x < clipX2);
@@ -2053,6 +1959,174 @@ end:
 
 #undef CLIP_SPAN_CHANGED
 }
-#endif
+
+static void _initPathSweepFunctions(AnalyticRasterizer8* rasterizer)
+{
+#define SETUP_SWEEP(rasterizer, _FILL_MODE, _USE_ALPHA) \
+  do { \
+    if (useCellD(rasterizer)) \
+    { \
+      rasterizer->_sweepScanlineSimpleFn = _sweepScanlineSimpleImpl<AnalyticRasterizer8::ChunkD, AnalyticRasterizer8::CellD, _FILL_MODE, _USE_ALPHA>; \
+      rasterizer->_sweepScanlineRegionFn = _sweepScanlineRegionImpl<AnalyticRasterizer8::ChunkD, AnalyticRasterizer8::CellD, _FILL_MODE, _USE_ALPHA>; \
+      rasterizer->_sweepScanlineSpansFn  = _sweepScanlineSpansImpl <AnalyticRasterizer8::ChunkD, AnalyticRasterizer8::CellD, _FILL_MODE, _USE_ALPHA>; \
+    } \
+    else \
+    { \
+      rasterizer->_sweepScanlineSimpleFn = _sweepScanlineSimpleImpl<AnalyticRasterizer8::ChunkQ, AnalyticRasterizer8::CellQ, _FILL_MODE, _USE_ALPHA>; \
+      rasterizer->_sweepScanlineRegionFn = _sweepScanlineRegionImpl<AnalyticRasterizer8::ChunkQ, AnalyticRasterizer8::CellQ, _FILL_MODE, _USE_ALPHA>; \
+      rasterizer->_sweepScanlineSpansFn  = _sweepScanlineSpansImpl <AnalyticRasterizer8::ChunkQ, AnalyticRasterizer8::CellQ, _FILL_MODE, _USE_ALPHA>; \
+    } \
+  } while(0)
+
+  // Setup sweep scanline methods.
+  switch (rasterizer->_fillRule)
+  {
+    case FILL_NON_ZERO:
+      if (rasterizer->_alpha == 0xFF)
+        SETUP_SWEEP(rasterizer, FILL_NON_ZERO, 0);
+      else
+        SETUP_SWEEP(rasterizer, FILL_NON_ZERO, 1);
+      break;
+
+    case FILL_EVEN_ODD:
+      if (rasterizer->_alpha == 0xFF)
+        SETUP_SWEEP(rasterizer, FILL_EVEN_ODD, 0);
+      else
+        SETUP_SWEEP(rasterizer, FILL_EVEN_ODD, 1);
+      break;
+
+    default:
+      FOG_ASSERT_NOT_REACHED();
+  }
+}
+
+// ============================================================================
+// [Fog::AnalyticRasterizer8 - Sweep - Rect (Subpixel-Rectangle)]
+// ============================================================================
+
+static Span8* _sweepRectSimpleImpl(
+  AnalyticRasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y)
+{
+  y -= rasterizer->_boundingBox.y1;
+
+  FOG_ASSERT(rasterizer->_isFinalized);
+  FOG_ASSERT((uint)y < (uint)rasterizer->_boundingBox.y2);
+
+  AnalyticRasterizer8::SubPxRectangleShape* shapeData =
+    reinterpret_cast<AnalyticRasterizer8::SubPxRectangleShape*>(rasterizer->_rows);
+
+  int x1 = shapeData->xLeft;
+  int x2 = shapeData->xRight;
+  int w = x2 - x1;
+
+  if (scanline.newScanline(rasterizer->_boundingBox.x1, rasterizer->_boundingBox.x2) != ERR_OK)
+    return NULL;
+
+  const uint8_t* covers = shapeData->coverageI;
+  if (FOG_UNLIKELY(y == 0))
+    covers = shapeData->coverageT;
+  else if (FOG_UNLIKELY(y == (shapeData->bounds.y2 - shapeData->bounds.y1)))
+    covers = shapeData->coverageB;
+
+  scanline.addVSpanAlpha(x1, x1 + 1)[0] = (uint8_t)covers[0];
+  if (w > 1) scanline.addCSpanOrMergeVSpan(x1 + 1, x2, covers[1]);
+  if (w > 0) scanline.addVSpanAlphaOrMergeVSpan(x2, x2 + 1)[0] = covers[2];
+
+  if (scanline.endScanline() != ERR_OK) return NULL;
+#if defined(FOG_DEBUG_RASTERIZER)
+  dumpSpans(y, scanline.getSpans());
+#endif // FOG_DEBUG_RASTERIZER
+  return scanline.getSpans();
+}
+
+static Span8* _sweepRectRegionImpl(
+  AnalyticRasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y,
+  const BoxI* clipBoxes, sysuint_t count)
+{
+  y -= rasterizer->_boundingBox.y1;
+
+  FOG_ASSERT(rasterizer->_isFinalized);
+  FOG_ASSERT((uint)y < (uint)rasterizer->_boundingBox.y2);
+
+  AnalyticRasterizer8::SubPxRectangleShape* shapeData =
+    reinterpret_cast<AnalyticRasterizer8::SubPxRectangleShape*>(rasterizer->_rows);
+
+  int x1 = shapeData->xLeft;
+  int x2 = shapeData->xRight;
+
+  // Clipping.
+  const BoxI* clipCur = clipBoxes;
+  const BoxI* clipEnd = clipBoxes + count;
+  if (FOG_UNLIKELY(clipCur == clipEnd)) return NULL;
+
+  // Current clip box start / end point (not part of clip span).
+  int clipX1;
+  int clipX2 = clipCur->x2;
+
+  // Advance clip (discard clip-boxes that can't intersect).
+  while (clipX2 <= x1)
+  {
+    if (++clipCur == clipEnd) return NULL;
+    clipX2 = clipCur->x2;
+  }
+
+  clipX1 = Math::max<int>(clipCur->x1, x1);
+  if (clipX1 > x2) return NULL;
+
+  if (scanline.newScanline(rasterizer->_boundingBox.x1, rasterizer->_boundingBox.x2) != ERR_OK)
+    return NULL;
+
+  const uint8_t* covers = shapeData->coverageI;
+  if (FOG_UNLIKELY(y == 0))
+    covers = shapeData->coverageT;
+  else if (FOG_UNLIKELY(y == (shapeData->bounds.y2 - shapeData->bounds.y1)))
+    covers = shapeData->coverageB;
+
+  if (clipX1 == x1)
+  {
+    clipX1++;
+    scanline.addVSpanAlpha(x1, clipX1)[0] = (uint8_t)covers[0];
+  }
+
+  uint8_t midcover = covers[1];
+  for (;;)
+  {
+    if (clipX1 < x2)
+    {
+      scanline.addCSpanOrMergeVSpan(clipX1, Math::min<int>(clipX2, x2), midcover);
+    }
+    if (clipX2 > x2)
+    {
+      scanline.addCSpanOrMergeVSpan(x2, x2 + 1, covers[2]);
+      break;
+    }
+
+    if (++clipBoxes == clipEnd) break;
+    clipX1 = clipBoxes->x1;
+    if (clipX1 > x2) break;
+    clipX2 = clipBoxes->x2;
+  }
+
+  if (scanline.endScanline() != ERR_OK) return NULL;
+#if defined(FOG_DEBUG_RASTERIZER)
+  dumpSpans(y, scanline.getSpans());
+#endif // FOG_DEBUG_RASTERIZER
+  return scanline.getSpans();
+}
+
+static Span8* _sweepRectSpansImpl(
+  AnalyticRasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y,
+  const Span8* clipSpans)
+{
+  // TODO:
+  return NULL;
+}
+
+static void _initRectSweepFunctions(AnalyticRasterizer8* rasterizer)
+{
+  rasterizer->_sweepScanlineSimpleFn = _sweepRectSimpleImpl;
+  rasterizer->_sweepScanlineRegionFn = _sweepRectRegionImpl;
+  rasterizer->_sweepScanlineSpansFn = _sweepRectSpansImpl;
+}
 
 } // Fog namespace

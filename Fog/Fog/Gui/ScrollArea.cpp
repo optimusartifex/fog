@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -30,12 +30,12 @@ ScrollArea::~ScrollArea()
 {
 }
 
-void ScrollArea::calcWidgetSize(IntSize& size) const
+void ScrollArea::calcWidgetSize(SizeI& size) const
 {
   Frame::calcWidgetSize(size);
 }
 
-void ScrollArea::calcClientGeometry(IntRect& geometry) const
+void ScrollArea::calcClientGeometry(RectI& geometry) const
 {
   Frame::calcClientGeometry(geometry);
 }

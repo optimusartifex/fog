@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -282,7 +282,7 @@ struct FOG_HIDDEN PatternGradientSSE2
     // root for next 4 pixels while we are processing current ones.
     __m128 idxf;
 
-    idxf = _mm_and_ps(cc, FOG_GET_SSE_CONST_PS(7FFFFFFF7FFFFFFF_7FFFFFFF7FFFFFFF)); // abs()
+    idxf = _mm_and_ps(cc, FOG_SSE_GET_CONST_PS(7FFFFFFF7FFFFFFF_7FFFFFFF7FFFFFFF)); // abs()
     idxf = _mm_sqrt_ps(idxf);
 
     for (;;)
@@ -313,7 +313,7 @@ struct FOG_HIDDEN PatternGradientSSE2
 
       // This step is important, _mm_sqrt_ps() is last called and from now
       // this register will not be used.
-      idxf = _mm_and_ps(cc, FOG_GET_SSE_CONST_PS(7FFFFFFF7FFFFFFF_7FFFFFFF7FFFFFFF)); // abs()
+      idxf = _mm_and_ps(cc, FOG_SSE_GET_CONST_PS(7FFFFFFF7FFFFFFF_7FFFFFFF7FFFFFFF)); // abs()
       idxf = _mm_sqrt_ps(idxf);
 
       // Pixel #0

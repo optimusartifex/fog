@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -329,7 +329,7 @@ err_t BmpDecoderDevice::readHeader()
 
         for (i = nColors; i; i--, pdestCur++, psrc24Cur += 3)
         {
-          *pdestCur = Argb(psrc24Cur[2], psrc24Cur[1], psrc24Cur[0], 0xFF);
+          *pdestCur = ArgbI(psrc24Cur[2], psrc24Cur[1], psrc24Cur[0], 0xFF);
         }
       }
       else

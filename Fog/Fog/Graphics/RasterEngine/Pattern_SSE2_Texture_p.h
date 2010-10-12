@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -261,7 +261,7 @@ fetchSkip:
 
     int fx;
     int fy;
-    sse2_vector_fetch_transformed(fx, fy, x, y, ctx->m);
+    sse2_vector_fetch_transformed(fx, fy, x, y, ctx->inv._data);
 
     const uint8_t* srcBits = ctx->texture.bits;
     sysint_t srcStride = ctx->texture.stride;
@@ -359,10 +359,10 @@ fetchSkip:
         }
 
         __x01_y1 = _mm_mullo_epi16(__x01_y1, __wy0);
-        __wy0 = _mm_xor_si128(__wy0, FOG_GET_SSE_CONST_PI(FFFFFFFFFFFFFFFF_FFFFFFFFFFFFFFFF));
-        __wx0 = _mm_xor_si128(__wx0, FOG_GET_SSE_CONST_PI(0000000000000000_FFFFFFFFFFFFFFFF));
-        __wy0 = _mm_add_epi16(__wy0, FOG_GET_SSE_CONST_PI(0101010101010101_0101010101010101));
-        __wx0 = _mm_add_epi16(__wx0, FOG_GET_SSE_CONST_PI(0000000000000000_0101010101010101));
+        __wy0 = _mm_xor_si128(__wy0, FOG_SSE_GET_CONST_PI(FFFFFFFFFFFFFFFF_FFFFFFFFFFFFFFFF));
+        __wx0 = _mm_xor_si128(__wx0, FOG_SSE_GET_CONST_PI(0000000000000000_FFFFFFFFFFFFFFFF));
+        __wy0 = _mm_add_epi16(__wy0, FOG_SSE_GET_CONST_PI(0101010101010101_0101010101010101));
+        __wx0 = _mm_add_epi16(__wx0, FOG_SSE_GET_CONST_PI(0000000000000000_0101010101010101));
         __x01_y0 = _mm_mullo_epi16(__x01_y0, __wy0);
         __x01_y0 = _mm_adds_epu8(__x01_y0, __x01_y1);
         __x01_y0 = _mm_srli_epi16(__x01_y0, 8);
@@ -417,7 +417,7 @@ fetchNoFilter:
 
     int fx;
     int fy;
-    sse2_vector_fetch_transformed(fx, fy, x, y, ctx->m);
+    sse2_vector_fetch_transformed(fx, fy, x, y, ctx->inv._data);
 
     const uint8_t* srcBits = ctx->texture.bits;
     sysint_t srcStride = ctx->texture.stride;
@@ -455,8 +455,8 @@ fetchNoFilter:
       __wy0_val = _mm_shuffle_epi32(__wy0_val, _MM_SHUFFLE(1, 0, 1, 0));
       __wy0_val = _mm_srli_epi16(__wy0_val, 8);
 
-      __wy0_inv = _mm_xor_si128(__wy0_val, FOG_GET_SSE_CONST_PI(FFFFFFFFFFFFFFFF_FFFFFFFFFFFFFFFF));
-      __wy0_inv = _mm_add_epi16(__wy0_inv, FOG_GET_SSE_CONST_PI(0101010101010101_0101010101010101));
+      __wy0_inv = _mm_xor_si128(__wy0_val, FOG_SSE_GET_CONST_PI(FFFFFFFFFFFFFFFF_FFFFFFFFFFFFFFFF));
+      __wy0_inv = _mm_add_epi16(__wy0_inv, FOG_SSE_GET_CONST_PI(0101010101010101_0101010101010101));
 
       P_FETCH_SPAN8_BEGIN()
         P_FETCH_SPAN8_SET_CURRENT()
@@ -518,10 +518,10 @@ fetchNoFilter:
           __x01_y0_1 = _mm_mullo_epi16(__x01_y0_1, __wy0_inv);
           __x01_y1_0 = _mm_mullo_epi16(__x01_y1_0, __wy0_val);
           __x01_y1_1 = _mm_mullo_epi16(__x01_y1_1, __wy0_val);
-          __wx0_0 = _mm_xor_si128(__wx0_0, FOG_GET_SSE_CONST_PI(0000000000000000_FFFFFFFFFFFFFFFF));
-          __wx0_1 = _mm_xor_si128(__wx0_1, FOG_GET_SSE_CONST_PI(0000000000000000_FFFFFFFFFFFFFFFF));
-          __wx0_0 = _mm_add_epi16(__wx0_0, FOG_GET_SSE_CONST_PI(0000000000000000_0101010101010101));
-          __wx0_1 = _mm_add_epi16(__wx0_1, FOG_GET_SSE_CONST_PI(0000000000000000_0101010101010101));
+          __wx0_0 = _mm_xor_si128(__wx0_0, FOG_SSE_GET_CONST_PI(0000000000000000_FFFFFFFFFFFFFFFF));
+          __wx0_1 = _mm_xor_si128(__wx0_1, FOG_SSE_GET_CONST_PI(0000000000000000_FFFFFFFFFFFFFFFF));
+          __wx0_0 = _mm_add_epi16(__wx0_0, FOG_SSE_GET_CONST_PI(0000000000000000_0101010101010101));
+          __wx0_1 = _mm_add_epi16(__wx0_1, FOG_SSE_GET_CONST_PI(0000000000000000_0101010101010101));
           __x01_y0_0 = _mm_adds_epu8(__x01_y0_0, __x01_y1_0);
           __x01_y0_1 = _mm_adds_epu8(__x01_y0_1, __x01_y1_1);
           __x01_y0_0 = _mm_srli_epi16(__x01_y0_0, 8);
@@ -586,9 +586,9 @@ fetchScaleOneContinue:
           pp.preprocess_2x2W(__x01_y0_0, __x01_y1_0);
 
           __x01_y1_0 = _mm_mullo_epi16(__x01_y1_0, __wy0_val);
-          __wx0_0 = _mm_xor_si128(__wx0_0, FOG_GET_SSE_CONST_PI(0000000000000000_FFFFFFFFFFFFFFFF));
+          __wx0_0 = _mm_xor_si128(__wx0_0, FOG_SSE_GET_CONST_PI(0000000000000000_FFFFFFFFFFFFFFFF));
           __x01_y0_0 = _mm_mullo_epi16(__x01_y0_0, __wy0_inv);
-          __wx0_0 = _mm_add_epi16(__wx0_0, FOG_GET_SSE_CONST_PI(0000000000000000_0101010101010101));
+          __wx0_0 = _mm_add_epi16(__wx0_0, FOG_SSE_GET_CONST_PI(0000000000000000_0101010101010101));
           __x01_y0_0 = _mm_adds_epu8(__x01_y0_0, __x01_y1_0);
           __x01_y0_0 = _mm_srli_epi16(__x01_y0_0, 8);
           __x01_y0_0 = _mm_mullo_epi16(__x01_y0_0, __wx0_0);
@@ -705,14 +705,14 @@ fetchScaleOneDone:
 
           __x01_y1_0 = _mm_mullo_epi16(__x01_y1_0, __wy0_0);
           __x01_y1_1 = _mm_mullo_epi16(__x01_y1_1, __wy0_1);
-          __wy0_0 = _mm_xor_si128(__wy0_0, FOG_GET_SSE_CONST_PI(FFFFFFFFFFFFFFFF_FFFFFFFFFFFFFFFF));
-          __wy0_1 = _mm_xor_si128(__wy0_1, FOG_GET_SSE_CONST_PI(FFFFFFFFFFFFFFFF_FFFFFFFFFFFFFFFF));
-          __wx0_0 = _mm_xor_si128(__wx0_0, FOG_GET_SSE_CONST_PI(0000000000000000_FFFFFFFFFFFFFFFF));
-          __wx0_1 = _mm_xor_si128(__wx0_1, FOG_GET_SSE_CONST_PI(0000000000000000_FFFFFFFFFFFFFFFF));
-          __wy0_0 = _mm_add_epi16(__wy0_0, FOG_GET_SSE_CONST_PI(0101010101010101_0101010101010101));
-          __wy0_1 = _mm_add_epi16(__wy0_1, FOG_GET_SSE_CONST_PI(0101010101010101_0101010101010101));
-          __wx0_0 = _mm_add_epi16(__wx0_0, FOG_GET_SSE_CONST_PI(0000000000000000_0101010101010101));
-          __wx0_1 = _mm_add_epi16(__wx0_1, FOG_GET_SSE_CONST_PI(0000000000000000_0101010101010101));
+          __wy0_0 = _mm_xor_si128(__wy0_0, FOG_SSE_GET_CONST_PI(FFFFFFFFFFFFFFFF_FFFFFFFFFFFFFFFF));
+          __wy0_1 = _mm_xor_si128(__wy0_1, FOG_SSE_GET_CONST_PI(FFFFFFFFFFFFFFFF_FFFFFFFFFFFFFFFF));
+          __wx0_0 = _mm_xor_si128(__wx0_0, FOG_SSE_GET_CONST_PI(0000000000000000_FFFFFFFFFFFFFFFF));
+          __wx0_1 = _mm_xor_si128(__wx0_1, FOG_SSE_GET_CONST_PI(0000000000000000_FFFFFFFFFFFFFFFF));
+          __wy0_0 = _mm_add_epi16(__wy0_0, FOG_SSE_GET_CONST_PI(0101010101010101_0101010101010101));
+          __wy0_1 = _mm_add_epi16(__wy0_1, FOG_SSE_GET_CONST_PI(0101010101010101_0101010101010101));
+          __wx0_0 = _mm_add_epi16(__wx0_0, FOG_SSE_GET_CONST_PI(0000000000000000_0101010101010101));
+          __wx0_1 = _mm_add_epi16(__wx0_1, FOG_SSE_GET_CONST_PI(0000000000000000_0101010101010101));
           __x01_y0_0 = _mm_mullo_epi16(__x01_y0_0, __wy0_0);
           __x01_y0_1 = _mm_mullo_epi16(__x01_y0_1, __wy0_1);
           __x01_y0_0 = _mm_adds_epu8(__x01_y0_0, __x01_y1_0);
@@ -792,10 +792,10 @@ fetchAffineOneContinue:
           pp.preprocess_2x2W(__x01_y0_0, __x01_y1_0);
 
           __x01_y1_0 = _mm_mullo_epi16(__x01_y1_0, __wy0_0);
-          __wy0_0 = _mm_xor_si128(__wy0_0, FOG_GET_SSE_CONST_PI(FFFFFFFFFFFFFFFF_FFFFFFFFFFFFFFFF));
-          __wx0_0 = _mm_xor_si128(__wx0_0, FOG_GET_SSE_CONST_PI(0000000000000000_FFFFFFFFFFFFFFFF));
-          __wy0_0 = _mm_add_epi16(__wy0_0, FOG_GET_SSE_CONST_PI(0101010101010101_0101010101010101));
-          __wx0_0 = _mm_add_epi16(__wx0_0, FOG_GET_SSE_CONST_PI(0000000000000000_0101010101010101));
+          __wy0_0 = _mm_xor_si128(__wy0_0, FOG_SSE_GET_CONST_PI(FFFFFFFFFFFFFFFF_FFFFFFFFFFFFFFFF));
+          __wx0_0 = _mm_xor_si128(__wx0_0, FOG_SSE_GET_CONST_PI(0000000000000000_FFFFFFFFFFFFFFFF));
+          __wy0_0 = _mm_add_epi16(__wy0_0, FOG_SSE_GET_CONST_PI(0101010101010101_0101010101010101));
+          __wx0_0 = _mm_add_epi16(__wx0_0, FOG_SSE_GET_CONST_PI(0000000000000000_0101010101010101));
           __x01_y0_0 = _mm_mullo_epi16(__x01_y0_0, __wy0_0);
           __x01_y0_0 = _mm_adds_epu8(__x01_y0_0, __x01_y1_0);
           __x01_y0_0 = _mm_srli_epi16(__x01_y0_0, 8);
@@ -841,7 +841,7 @@ fetchAffineOneDone:
 
     int fx;
     int fy;
-    sse2_vector_fetch_transformed(fx, fy, x, y, ctx->m);
+    sse2_vector_fetch_transformed(fx, fy, x, y, ctx->inv._data);
 
     int fxmax = ctx->texture.fxmax;
     int fymax = ctx->texture.fymax;
@@ -937,10 +937,10 @@ fetchAffineOneDone:
         pp.preprocess_2x2W(__x01_y0, __x01_y1);
 
         __x01_y1 = _mm_mullo_epi16(__x01_y1, __wy0);
-        __wy0 = _mm_xor_si128(__wy0, FOG_GET_SSE_CONST_PI(FFFFFFFFFFFFFFFF_FFFFFFFFFFFFFFFF));
-        __wx0 = _mm_xor_si128(__wx0, FOG_GET_SSE_CONST_PI(0000000000000000_FFFFFFFFFFFFFFFF));
-        __wy0 = _mm_add_epi16(__wy0, FOG_GET_SSE_CONST_PI(0101010101010101_0101010101010101));
-        __wx0 = _mm_add_epi16(__wx0, FOG_GET_SSE_CONST_PI(0000000000000000_0101010101010101));
+        __wy0 = _mm_xor_si128(__wy0, FOG_SSE_GET_CONST_PI(FFFFFFFFFFFFFFFF_FFFFFFFFFFFFFFFF));
+        __wx0 = _mm_xor_si128(__wx0, FOG_SSE_GET_CONST_PI(0000000000000000_FFFFFFFFFFFFFFFF));
+        __wy0 = _mm_add_epi16(__wy0, FOG_SSE_GET_CONST_PI(0101010101010101_0101010101010101));
+        __wx0 = _mm_add_epi16(__wx0, FOG_SSE_GET_CONST_PI(0000000000000000_0101010101010101));
         __x01_y0 = _mm_mullo_epi16(__x01_y0, __wy0);
         __x01_y0 = _mm_adds_epu8(__x01_y0, __x01_y1);
         __x01_y0 = _mm_srli_epi16(__x01_y0, 8);
@@ -993,7 +993,7 @@ fetchDone:
 
     int fx;
     int fy;
-    sse2_vector_fetch_transformed(fx, fy, x, y, ctx->m);
+    sse2_vector_fetch_transformed(fx, fy, x, y, ctx->inv._data);
 
     int fxmax = ctx->texture.fxmax;
     int fymax = ctx->texture.fymax;
@@ -1088,10 +1088,10 @@ fetchDone:
         pp.preprocess_2x2W(__x01_y0, __x01_y1);
 
         __x01_y1 = _mm_mullo_epi16(__x01_y1, __wy0);
-        __wy0 = _mm_xor_si128(__wy0, FOG_GET_SSE_CONST_PI(FFFFFFFFFFFFFFFF_FFFFFFFFFFFFFFFF));
-        __wx0 = _mm_xor_si128(__wx0, FOG_GET_SSE_CONST_PI(0000000000000000_FFFFFFFFFFFFFFFF));
-        __wy0 = _mm_add_epi16(__wy0, FOG_GET_SSE_CONST_PI(0101010101010101_0101010101010101));
-        __wx0 = _mm_add_epi16(__wx0, FOG_GET_SSE_CONST_PI(0000000000000000_0101010101010101));
+        __wy0 = _mm_xor_si128(__wy0, FOG_SSE_GET_CONST_PI(FFFFFFFFFFFFFFFF_FFFFFFFFFFFFFFFF));
+        __wx0 = _mm_xor_si128(__wx0, FOG_SSE_GET_CONST_PI(0000000000000000_FFFFFFFFFFFFFFFF));
+        __wy0 = _mm_add_epi16(__wy0, FOG_SSE_GET_CONST_PI(0101010101010101_0101010101010101));
+        __wx0 = _mm_add_epi16(__wx0, FOG_SSE_GET_CONST_PI(0000000000000000_0101010101010101));
         __x01_y0 = _mm_mullo_epi16(__x01_y0, __wy0);
         __x01_y0 = _mm_adds_epu8(__x01_y0, __x01_y1);
         __x01_y0 = _mm_srli_epi16(__x01_y0, 8);

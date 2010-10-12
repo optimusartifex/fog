@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -10,8 +10,8 @@
 // [Dependencies]
 #include <Fog/Core/List.h>
 #include <Fog/Graphics/Geometry.h>
-#include <Fog/Graphics/Matrix.h>
 #include <Fog/Graphics/Path.h>
+#include <Fog/Graphics/Transform.h>
 
 namespace Fog {
 
@@ -27,7 +27,7 @@ struct FOG_API PathTransform
   PathTransform();
   virtual ~PathTransform();
 
-  virtual err_t transform(DoublePath& dst, const DoublePath& src) const = 0;
+  virtual err_t transform(PathD& dst, const PathD& src) const = 0;
 
 private:
   FOG_DISABLE_COPY(PathTransform)
@@ -42,17 +42,17 @@ struct FOG_API TextOnPath : public PathTransform
   TextOnPath();
   virtual ~TextOnPath();
 
-  virtual err_t transform(DoublePath& dst, const DoublePath& src) const;
+  virtual err_t transform(PathD& dst, const PathD& src) const;
 
-  FOG_INLINE const DoublePath& getPath() const { return _path; }
+  FOG_INLINE const PathD& getPath() const { return _path; }
   FOG_INLINE double getCalcLength() const { return _calcLength; }
   FOG_INLINE double getBaseLength() const { return _baseLength; }
 
-  err_t setPath(const DoublePath& path, const DoubleMatrix* matrix = NULL);
+  err_t setPath(const PathD& path, const TransformD* matrix = NULL);
   err_t setBaseLength(double baseLength);
 
 private:
-  DoublePath _path;
+  PathD _path;
   List<double> _dist;
 
   double _calcLength;

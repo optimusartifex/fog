@@ -1,4 +1,4 @@
-// [Fog-Svg Library - Public API]
+// [Fog-Svg]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -86,7 +86,7 @@ struct FOG_API SvgContext
 
     uint32_t type;
     float opacity;
-    Argb color;
+    ArgbI color;
     Pattern pattern;
   };
 
@@ -103,9 +103,9 @@ struct FOG_API SvgContext
   // [Matrix]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE DoubleMatrix getMatrix() const
+  FOG_INLINE TransformD getTransform() const
   {
-    return _painter->getMatrix();
+    return _painter->getTransform();
   }
 
   // --------------------------------------------------------------------------
@@ -132,7 +132,7 @@ struct FOG_API SvgContext
     _fillStyle.type = SVG_SOURCE_NONE;
   }
 
-  FOG_INLINE void setFillColor(Argb color)
+  FOG_INLINE void setFillColor(ArgbI color)
   {
     _fillStyle.type = SVG_SOURCE_COLOR;
     _fillStyle.color = color;
@@ -173,7 +173,7 @@ struct FOG_API SvgContext
     _lineStyle.type = SVG_SOURCE_NONE;
   }
 
-  FOG_INLINE void setStrokeColor(Argb color)
+  FOG_INLINE void setStrokeColor(ArgbI color)
   {
     _lineStyle.type = SVG_SOURCE_COLOR;
     _lineStyle.color = color;
@@ -259,13 +259,13 @@ struct FOG_API SvgContext
     _painter->setStrokeParams(_strokeParams);
   }
 
-  void drawEllipse(const DoublePoint& cp, const DoublePoint& r);
-  void drawLine(const DoublePoint& p1, const DoublePoint& p2);
-  void drawRect(const DoubleRect& rect);
-  void drawRound(const DoubleRect& rect, const DoublePoint& r);
-  void drawPath(const DoublePath& path);
+  void drawEllipse(const PointD& cp, const PointD& r);
+  void drawLine(const PointD& p1, const PointD& p2);
+  void drawRect(const RectD& rect);
+  void drawRound(const RectD& rect, const PointD& r);
+  void drawPath(const PathD& path);
 
-  void drawImage(const DoublePoint& pt, const Image& im);
+  void drawImage(const PointD& pt, const Image& im);
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -299,13 +299,13 @@ struct FOG_HIDDEN SvgContextBackup
 
   FOG_INLINE SvgContextBackup() :
     _context(NULL),
-    _matrix(DONT_INITIALIZE),
-    _matrixBackup(false)
+    _transform(DONT_INITIALIZE),
+    _transformBackup(false)
   {
   }
   
   FOG_INLINE SvgContextBackup(SvgContext* context) :
-    _matrix(DONT_INITIALIZE)
+    _transform(DONT_INITIALIZE)
   {
     init(context);
   }
@@ -329,7 +329,7 @@ struct FOG_HIDDEN SvgContextBackup
     _lineStyle.init(_context->_lineStyle);
     _strokeParams.init(_context->_strokeParams);
 
-    _matrixBackup = false;
+    _transformBackup = false;
   }
 
   FOG_INLINE void destroy()
@@ -340,7 +340,7 @@ struct FOG_HIDDEN SvgContextBackup
     _context->_lineStyle = _lineStyle.instance();
     _context->_strokeParams = _strokeParams.instance();
 
-    if (_matrixBackup) _context->_painter->setMatrix(_matrix);
+    if (_transformBackup) _context->_painter->setTransform(_transform);
 
     _fillStyle.destroy();
     _lineStyle.destroy();
@@ -352,7 +352,7 @@ struct FOG_HIDDEN SvgContextBackup
   // --------------------------------------------------------------------------
 
   SvgContext* _context;
-  DoubleMatrix _matrix;
+  TransformD _transform;
 
   Static<SvgContext::Style> _fillStyle;
   uint32_t _fillRule;
@@ -360,7 +360,7 @@ struct FOG_HIDDEN SvgContextBackup
   Static<SvgContext::Style> _lineStyle;
   Static<PathStrokeParams> _strokeParams;
 
-  bool _matrixBackup;
+  bool _transformBackup;
 
 private:
   friend struct SvgContext;

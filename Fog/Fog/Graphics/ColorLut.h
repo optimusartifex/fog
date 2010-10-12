@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -22,7 +22,7 @@ namespace Fog {
 // [Forward Declarations]
 // ============================================================================
 
-struct Argb;
+struct ArgbI;
 
 // ============================================================================
 // [Fog::ColorLutData]

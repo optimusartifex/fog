@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -25,13 +25,13 @@ static FOG_INLINE void Pattern_initData(PatternData* d)
   if (type == PATTERN_TEXTURE)
   {
     d->obj.texture.init();
-    d->data.texture->area.clear();
+    d->data.texture->area.reset();
   }
   else if (type & PATTERN_IS_GRADIENT)
   {
     d->obj.stops.init();
-    d->data.gradient->points[0].clear();
-    d->data.gradient->points[1].clear();
+    d->data.gradient->points[0].reset();
+    d->data.gradient->points[1].reset();
     d->data.gradient->radius = 0.0;
   }
 }
@@ -62,7 +62,7 @@ Pattern::Pattern(const Pattern& other) :
 {
 }
 
-Pattern::Pattern(const Argb& argb)
+Pattern::Pattern(const ArgbI& argb)
 {
   _d = fog_new PatternData();
   if (!_d) { _d = _dnull->ref(); return; }
@@ -124,7 +124,7 @@ err_t Pattern::setType(uint32_t type)
 
     newd->type = type;
     newd->spread = _d->spread;
-    newd->matrix = _d->matrix;
+    newd->transform = _d->transform;
 
     Pattern_initData(newd);
     atomicPtrXchg(&_d, newd)->deref();
@@ -144,14 +144,14 @@ void Pattern::reset()
     _d->deleteResources();
     _d->type = PATTERN_NONE;
     _d->spread = PATTERN_SPREAD_PAD;
-    _d->matrix.reset();
+    _d->transform.reset();
   }
 }
 
 err_t Pattern::setSpread(uint32_t spread)
 {
   if (_d->spread == spread) return ERR_OK;
-  if (spread >= PATTERN_SPREAD_COUNT) return ERR_RT_INVALID_ARGUMENT;
+  if (FOG_UNLIKELY(spread >= PATTERN_SPREAD_COUNT)) return ERR_RT_INVALID_ARGUMENT;
 
   FOG_RETURN_ON_ERROR(detach());
 
@@ -159,27 +159,27 @@ err_t Pattern::setSpread(uint32_t spread)
   return ERR_OK;
 }
 
-err_t Pattern::setMatrix(const FloatMatrix& matrix)
+err_t Pattern::setTransform(const TransformF& transform)
 {
   FOG_RETURN_ON_ERROR(detach());
 
-  _d->matrix = matrix;
+  _d->transform = transform;
   return ERR_OK;
 }
 
-err_t Pattern::setMatrix(const DoubleMatrix& matrix)
+err_t Pattern::setTransform(const TransformD& transform)
 {
   FOG_RETURN_ON_ERROR(detach());
 
-  _d->matrix = matrix;
+  _d->transform = transform;
   return ERR_OK;
 }
 
-err_t Pattern::resetMatrix()
+err_t Pattern::resetTransform()
 {
   FOG_RETURN_ON_ERROR(detach());
 
-  _d->matrix.reset();
+  _d->transform.reset();
   return ERR_OK;
 }
 
@@ -192,7 +192,7 @@ err_t Pattern::translate(double x, double y, uint32_t order)
 {
   FOG_RETURN_ON_ERROR(detach());
 
-  _d->matrix.translate(x, y, order);
+  _d->transform.translate(x, y, order);
   return ERR_OK;
 }
 
@@ -205,7 +205,7 @@ err_t Pattern::rotate(double a, uint32_t order)
 {
   FOG_RETURN_ON_ERROR(detach());
 
-  _d->matrix.rotate(a, order);
+  _d->transform.rotate(a, order);
   return ERR_OK;
 }
 
@@ -218,7 +218,7 @@ err_t Pattern::scale(double x, double y, uint32_t order)
 {
   FOG_RETURN_ON_ERROR(detach());
 
-  _d->matrix.scale(x, y, order);
+  _d->transform.scale(x, y, order);
   return ERR_OK;
 }
 
@@ -231,20 +231,20 @@ err_t Pattern::skew(double x, double y, uint32_t order)
 {
   FOG_RETURN_ON_ERROR(detach());
 
-  _d->matrix.skew(x, y, order);
+  _d->transform.skew(x, y, order);
   return ERR_OK;
 }
 
-err_t Pattern::transform(const FloatMatrix& m, uint32_t order)
+err_t Pattern::transform(const TransformF& m, uint32_t order)
 {
-  return transform(m.toDoubleMatrix(), order);
+  return transform(m.toTransformD(), order);
 }
 
-err_t Pattern::transform(const DoubleMatrix& m, uint32_t order)
+err_t Pattern::transform(const TransformD& m, uint32_t order)
 {
   FOG_RETURN_ON_ERROR(detach());
 
-  _d->matrix.multiply(m, order);
+  _d->transform.transform(m, order);
   return ERR_OK;
 }
 
@@ -252,15 +252,15 @@ err_t Pattern::transform(const DoubleMatrix& m, uint32_t order)
 // [Fog::Pattern - Solid]
 // ============================================================================
 
-Argb Pattern::getColor() const
+ArgbI Pattern::getColor() const
 {
   if (isSolid())
     return _d->obj.argb.instance();
   else
-    return Argb(0x00000000);
+    return ArgbI(0x00000000);
 }
 
-err_t Pattern::setColor(const Argb& argb)
+err_t Pattern::setColor(const ArgbI& argb)
 {
   if (isSolid())
   {
@@ -277,7 +277,7 @@ err_t Pattern::setColor(const Argb& argb)
 
     newd->type = PATTERN_SOLID;
     newd->spread = _d->spread;
-    newd->matrix = _d->matrix;
+    newd->transform = _d->transform;
 
     newd->obj.argb->setArgb(argb);
 
@@ -298,15 +298,15 @@ Image Pattern::getTexture() const
     return Image();
 }
 
-IntRect Pattern::getTextureArea() const
+RectI Pattern::getTextureArea() const
 {
   if (isTexture())
     return _d->data.texture->area;
   else
-    return IntRect(0, 0, 0, 0);
+    return RectI(0, 0, 0, 0);
 }
 
-static err_t Pattern_setTexturePrivate(Pattern* self, const Image& texture, const IntRect& textureArea)
+static err_t Pattern_setTexturePrivate(Pattern* self, const Image& texture, const RectI& textureArea)
 {
   if (self->_d->refCount.get() == 1)
   {
@@ -325,7 +325,7 @@ static err_t Pattern_setTexturePrivate(Pattern* self, const Image& texture, cons
 
     newd->type = PATTERN_TEXTURE;
     newd->spread = self->_d->spread;
-    newd->matrix = self->_d->matrix;
+    newd->transform = self->_d->transform;
 
     newd->obj.texture.init(texture);
     newd->data.texture->area = textureArea;
@@ -338,10 +338,10 @@ static err_t Pattern_setTexturePrivate(Pattern* self, const Image& texture, cons
 err_t Pattern::setTexture(const Image& texture)
 {
   return Pattern_setTexturePrivate(this, 
-    texture, IntRect(0, 0, texture.getWidth(), texture.getHeight()));
+    texture, RectI(0, 0, texture.getWidth(), texture.getHeight()));
 }
 
-err_t Pattern::setTexture(const Image& texture, const IntRect& textureArea)
+err_t Pattern::setTexture(const Image& texture, const RectI& textureArea)
 {
   int x1 = textureArea.x;
   int y1 = textureArea.y;
@@ -355,7 +355,7 @@ err_t Pattern::setTexture(const Image& texture, const IntRect& textureArea)
     return ERR_RT_INVALID_ARGUMENT;
 
   return Pattern_setTexturePrivate(this, 
-    texture, IntRect(x1, y1, x2 - x1, y2 - y1));
+    texture, RectI(x1, y1, x2 - x1, y2 - y1));
 }
 
 // ============================================================================
@@ -416,33 +416,33 @@ err_t Pattern::setGradient(const Gradient& gradient)
   }
 }
 
-DoublePoint Pattern::getStartPoint() const
+PointD Pattern::getStartPoint() const
 {
   if (isGradient())
     return _d->data.gradient->points[0];
   else
-    return DoublePoint(0.0, 0.0);
+    return PointD(0.0, 0.0);
 }
 
-DoublePoint Pattern::getEndPoint() const
+PointD Pattern::getEndPoint() const
 {
   if (isGradient())
     return _d->data.gradient->points[1];
   else
-    return DoublePoint(0.0, 0.0);
+    return PointD(0.0, 0.0);
 }
 
-err_t Pattern::setStartPoint(const IntPoint& pt)
+err_t Pattern::setStartPoint(const PointI& pt)
 {
-  return setStartPoint(pt.toDoublePoint());
+  return setStartPoint(pt.toPointD());
 }
 
-err_t Pattern::setStartPoint(const FloatPoint& pt)
+err_t Pattern::setStartPoint(const PointF& pt)
 {
-  return setStartPoint(pt.toDoublePoint());
+  return setStartPoint(pt.toPointD());
 
 }
-err_t Pattern::setStartPoint(const DoublePoint& pt)
+err_t Pattern::setStartPoint(const PointD& pt)
 {
   if (!isGradient()) return ERR_RT_INVALID_OBJECT;
   if (_d->data.gradient->points[0] == pt) return ERR_OK;
@@ -453,17 +453,17 @@ err_t Pattern::setStartPoint(const DoublePoint& pt)
   return ERR_OK;
 }
 
-err_t Pattern::setEndPoint(const IntPoint& pt)
+err_t Pattern::setEndPoint(const PointI& pt)
 {
-  return setEndPoint(pt.toDoublePoint());
+  return setEndPoint(pt.toPointD());
 }
 
-err_t Pattern::setEndPoint(const FloatPoint& pt)
+err_t Pattern::setEndPoint(const PointF& pt)
 {
-  return setEndPoint(pt.toDoublePoint());
+  return setEndPoint(pt.toPointD());
 }
 
-err_t Pattern::setEndPoint(const DoublePoint& pt)
+err_t Pattern::setEndPoint(const PointD& pt)
 {
   if (!isGradient()) return ERR_RT_INVALID_OBJECT;
   if (_d->data.gradient->points[1] == pt) return ERR_OK;
@@ -474,17 +474,17 @@ err_t Pattern::setEndPoint(const DoublePoint& pt)
   return ERR_OK;
 }
 
-err_t Pattern::setPoints(const IntPoint& startPt, const IntPoint& endPt)
+err_t Pattern::setPoints(const PointI& startPt, const PointI& endPt)
 {
-  return setPoints(startPt.toDoublePoint(), endPt.toDoublePoint());
+  return setPoints(startPt.toPointD(), endPt.toPointD());
 }
 
-err_t Pattern::setPoints(const FloatPoint& startPt, const FloatPoint& endPt)
+err_t Pattern::setPoints(const PointF& startPt, const PointF& endPt)
 {
-  return setPoints(startPt.toDoublePoint(), endPt.toDoublePoint());
+  return setPoints(startPt.toPointD(), endPt.toPointD());
 }
 
-err_t Pattern::setPoints(const DoublePoint& startPt, const DoublePoint& endPt)
+err_t Pattern::setPoints(const PointD& startPt, const PointD& endPt)
 {
   if (!isGradient()) return ERR_RT_INVALID_OBJECT;
 
@@ -562,7 +562,7 @@ err_t Pattern::addStop(const ArgbStop& stop)
   {
     if (it.value().getOffset() == s.getOffset())
     {
-      it.value().setArgb(s.getArgb());
+      it.value().setArgb(s.getArgbI());
       return ERR_OK;
     }
     else if (it.value().getOffset() > s.getOffset())
@@ -584,7 +584,7 @@ Pattern& Pattern::operator=(const Pattern& other)
   return *this;
 }
 
-Pattern& Pattern::operator=(const Argb& rgba)
+Pattern& Pattern::operator=(const ArgbI& rgba)
 {
   setColor(rgba);
   return *this;
@@ -604,7 +604,7 @@ PatternData::PatternData()
 PatternData::PatternData(const PatternData& other) :
   type(other.type),
   spread(other.spread),
-  matrix(other.matrix)
+  transform(other.transform)
 {
   refCount.init(1);
 

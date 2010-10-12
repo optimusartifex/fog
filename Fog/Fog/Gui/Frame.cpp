@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -37,7 +37,7 @@ void Frame::setFrameStyle(uint32_t frameStyle)
   _frameStyle = frameStyle;
 
   // Make layout / client geometry dirty only if the size changes.
-  IntRect newClientGeometry(0, 0, getWidth(), getHeight());
+  RectI newClientGeometry(0, 0, getWidth(), getHeight());
   calcClientGeometry(newClientGeometry);
 
   if (!newClientGeometry.isValid())
@@ -59,7 +59,7 @@ void Frame::setFrameStyle(uint32_t frameStyle)
   }
 }
 
-void Frame::calcWidgetSize(IntSize& size) const
+void Frame::calcWidgetSize(SizeI& size) const
 {
   switch (_frameStyle)
   {
@@ -73,7 +73,7 @@ void Frame::calcWidgetSize(IntSize& size) const
   }
 }
 
-void Frame::calcClientGeometry(IntRect& geometry) const
+void Frame::calcClientGeometry(RectI& geometry) const
 {
   switch (_frameStyle)
   {
@@ -99,7 +99,7 @@ void Frame::onNcPaint(PaintEvent* e)
 
     case FRAME_TEXT_AREA:
       p->setSource(0xFF9F9F9F);
-      p->drawRect(IntRect(0, 0, getWidth() - 1, getHeight() - 1));
+      p->drawRect(RectI(0, 0, getWidth() - 1, getHeight() - 1));
       break;
   }
 }

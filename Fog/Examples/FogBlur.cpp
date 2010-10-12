@@ -19,7 +19,7 @@ struct MyWindow : public Window
   virtual void onKey(KeyEvent* e);
   virtual void onPaint(PaintEvent* e);
 
-  void paintImage(Painter* painter, const IntPoint& pos, const Image& im, const String& name);
+  void paintImage(Painter* painter, const PointI& pos, const Image& im, const String& name);
 
   Image i[2];
   float _baseRadius;
@@ -82,7 +82,7 @@ void MyWindow::onPaint(PaintEvent* e)
     Image im(i[0]);
     im.filter(ImageFilter(BlurParams(IMAGE_FILTER_BLUR_BOX, radius, radius, IMAGE_FILTER_EXTEND_COLOR, 0x00000000)));
     s.format("Box blur %g", radius);
-    paintImage(p, IntPoint(x, y), im, s);
+    paintImage(p, PointI(x, y), im, s);
   }
 
   y++;
@@ -92,7 +92,7 @@ void MyWindow::onPaint(PaintEvent* e)
     Image im(i[0]);
     im.filter(ImageFilter(BlurParams(IMAGE_FILTER_BLUR_LINEAR, radius, radius, IMAGE_FILTER_EXTEND_COLOR, 0x00000000)));
     s.format("Linear blur %g", radius);
-    paintImage(p, IntPoint(x, y), im, s);
+    paintImage(p, PointI(x, y), im, s);
   }
 
   y++;
@@ -102,18 +102,18 @@ void MyWindow::onPaint(PaintEvent* e)
     Image im(i[0]);
     im.filter(ImageFilter(BlurParams(IMAGE_FILTER_BLUR_GAUSSIAN, radius, radius, IMAGE_FILTER_EXTEND_COLOR, 0x00000000)));
     s.format("Gaussian blur %g", radius);
-    paintImage(p, IntPoint(x, y), im, s);
+    paintImage(p, PointI(x, y), im, s);
   }
 }
 
-void MyWindow::paintImage(Painter* p, const IntPoint& pos, const Image& im, const String& name)
+void MyWindow::paintImage(Painter* p, const PointI& pos, const Image& im, const String& name)
 {
   int x = 10 + pos.x * 152;
   int y = 10 + pos.y * 152;
 
-  p->drawText(IntRect(x, y, 130, 20), name, getFont(), TEXT_ALIGN_CENTER);
-  p->drawRect(IntRect(x, y + 20, 130, 130));
-  p->drawImage(IntPoint(x + 1, y + 21), im);
+  p->drawText(RectI(x, y, 130, 20), name, getFont(), TEXT_ALIGN_CENTER);
+  p->drawRect(RectI(x, y + 20, 130, 130));
+  p->drawImage(PointI(x + 1, y + 21), im);
 }
 
 // ============================================================================
@@ -125,7 +125,7 @@ FOG_GUI_MAIN()
   Application app(Ascii8("Gui"));
 
   MyWindow window;
-  window.setSize(IntSize(20 + 3 * 152 - 22, 20 + 3 * 152));
+  window.setSize(SizeI(20 + 3 * 152 - 22, 20 + 3 * 152));
 
   window.addListener(EVENT_CLOSE, &app, &Application::quit);
   window.show();

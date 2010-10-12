@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -40,7 +40,7 @@ struct FOG_HIDDEN LayoutHint
   {
   }
 
-  FOG_INLINE LayoutHint(const IntSize& sizeHint, const IntSize& minimumSize, const IntSize& maximumSize) :
+  FOG_INLINE LayoutHint(const SizeI& sizeHint, const SizeI& minimumSize, const SizeI& maximumSize) :
     _sizeHint(sizeHint),
     _minimumSize(minimumSize),
     _maximumSize(maximumSize)
@@ -55,13 +55,13 @@ struct FOG_HIDDEN LayoutHint
   // [Methods]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE IntSize getSizeHint() const { return _sizeHint; }
-  FOG_INLINE IntSize getMinimumSize() const { return _minimumSize; }
-  FOG_INLINE IntSize getMaximumSize() const { return _maximumSize; }
+  FOG_INLINE SizeI getSizeHint() const { return _sizeHint; }
+  FOG_INLINE SizeI getMinimumSize() const { return _minimumSize; }
+  FOG_INLINE SizeI getMaximumSize() const { return _maximumSize; }
 
-  FOG_INLINE void setSizeHint(const IntSize& sizeHint) { _sizeHint = sizeHint; }
-  FOG_INLINE void setMinimumSize(const IntSize& minimumSize) { _minimumSize = minimumSize; }
-  FOG_INLINE void setMaximumSize(const IntSize& maximumSize) { _maximumSize = maximumSize; }
+  FOG_INLINE void setSizeHint(const SizeI& sizeHint) { _sizeHint = sizeHint; }
+  FOG_INLINE void setMinimumSize(const SizeI& minimumSize) { _minimumSize = minimumSize; }
+  FOG_INLINE void setMaximumSize(const SizeI& maximumSize) { _maximumSize = maximumSize; }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
@@ -92,9 +92,9 @@ struct FOG_HIDDEN LayoutHint
   // [Members]
   // --------------------------------------------------------------------------
 
-  IntSize _sizeHint;
-  IntSize _minimumSize;
-  IntSize _maximumSize;
+  SizeI _sizeHint;
+  SizeI _minimumSize;
+  SizeI _maximumSize;
 };
 
 //! @}

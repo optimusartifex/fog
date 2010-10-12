@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -36,7 +36,7 @@ static FOG_INLINE bool Painter_isFormatSupported(uint32_t format)
   return true;
 }
 
-static FOG_INLINE bool Painter_isRectValid(const Image& image, const IntRect& rect)
+static FOG_INLINE bool Painter_isRectValid(const Image& image, const RectI& rect)
 {
   int x1 = rect.x;
   int y1 = rect.y;
@@ -60,7 +60,7 @@ Painter::Painter(Image& image, uint32_t initFlags)
   begin(image, initFlags);
 }
 
-Painter::Painter(Image& image, const IntRect& rect, uint32_t initFlags)
+Painter::Painter(Image& image, const RectI& rect, uint32_t initFlags)
 {
   _engine = _dnull;
   begin(image, rect, initFlags);
@@ -96,7 +96,7 @@ err_t Painter::begin(Image& image, uint32_t initFlags)
   return ERR_OK;
 }
 
-err_t Painter::begin(Image& image, const IntRect& rect, uint32_t initFlags)
+err_t Painter::begin(Image& image, const RectI& rect, uint32_t initFlags)
 {
   // End painting.
   end();
@@ -166,7 +166,7 @@ err_t Painter::switchTo(Image& image)
   return reinterpret_cast<RasterPaintEngine*>(_engine)->switchTo(buffer, image._d);
 }
 
-err_t Painter::switchTo(Image& image, const IntRect& rect)
+err_t Painter::switchTo(Image& image, const RectI& rect)
 {
   uint32_t engineType = _engine->getEngine();
 

@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -17,9 +17,9 @@
 #include <Fog/Graphics/Glyph.h>
 #include <Fog/Graphics/GlyphSet.h>
 #include <Fog/Graphics/Image.h>
-#include <Fog/Graphics/Matrix.h>
 #include <Fog/Graphics/Path.h>
 #include <Fog/Graphics/Region.h>
+#include <Fog/Graphics/Transform.h>
 
 #include <Fog/Graphics/PaintEngine/RasterPaintAction_p.h>
 #include <Fog/Graphics/PaintEngine/RasterPaintBase_p.h>
@@ -121,7 +121,7 @@ struct FOG_HIDDEN RasterPaintCmdLayerChange : public RasterPaintCmd
   //! @brief The layer data.
   RasterPaintLayer paintLayer;
 
-  IntPoint finalOrigin;
+  PointI finalOrigin;
 
   uint32_t workClipType;
   uint32_t finalClipType;
@@ -161,7 +161,7 @@ struct FOG_HIDDEN RasterPaintCmdUpdateRegion : public RasterPaintCmd
   // [Members]
   // --------------------------------------------------------------------------
 
-  IntPoint finalOrigin;
+  PointI finalOrigin;
 
   uint32_t workClipType;
   uint32_t finalClipType;
@@ -278,7 +278,7 @@ struct FOG_HIDDEN RasterPaintCmdBoxes : public RasterPaintCmdDraw
   // --------------------------------------------------------------------------
 
   sysuint_t count;
-  IntBox boxes[1];
+  BoxI boxes[1];
 };
 
 // ============================================================================
@@ -308,8 +308,8 @@ struct FOG_HIDDEN RasterPaintCmdImage : public RasterPaintCmdDraw
 
   Static<Image> image;
 
-  IntRect dst;
-  IntRect src;
+  RectI dst;
+  RectI src;
 };
 
 // ============================================================================
@@ -339,8 +339,8 @@ struct FOG_HIDDEN RasterPaintCmdGlyphSet : public RasterPaintCmdDraw
 
   Static<GlyphSet> glyphSet;
 
-  IntPoint pt;
-  IntBox boundingBox;
+  PointI pt;
+  BoxI boundingBox;
 };
 
 // ============================================================================

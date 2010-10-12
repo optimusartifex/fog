@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -81,24 +81,24 @@ bool FlowLayout::hasLayoutHeightForWidth() const
 
 int FlowLayout::getLayoutHeightForWidth(int width) const
 {
-  int height = doLayout(IntRect(0, 0, width, 0), true);
+  int height = doLayout(RectI(0, 0, width, 0), true);
   return height;
 }
 
-void FlowLayout::setLayoutGeometry(const IntRect &rect)
+void FlowLayout::setLayoutGeometry(const RectI &rect)
 {
   Layout::setLayoutGeometry(rect);
   doLayout(rect, false);
 }
 
-IntSize FlowLayout::getLayoutSizeHint() const
+SizeI FlowLayout::getLayoutSizeHint() const
 {
   return getLayoutMinimumSize();
 }
 
-IntSize FlowLayout::getLayoutMinimumSize() const
+SizeI FlowLayout::getLayoutMinimumSize() const
 {
-  IntSize size;
+  SizeI size;
   int len = getLength();
 
   for (int i = 0; i < len; i++)
@@ -108,14 +108,14 @@ IntSize FlowLayout::getLayoutMinimumSize() const
 
   int l = 2 * getContentMargin().left;
 
-  size = size + IntSize(l, l);
+  size = size + SizeI(l, l);
   return size;
 }
 
-int FlowLayout::doLayout(const IntRect &rect, bool testOnly) const
+int FlowLayout::doLayout(const RectI &rect, bool testOnly) const
 {
   Margin margins = getContentMargin();
-  IntRect effectiveRect = rect.adjusted(+margins.left, +margins.top, -margins.right, -margins.bottom);
+  RectI effectiveRect = rect.adjusted(+margins.left, +margins.top, -margins.right, -margins.bottom);
 
   int x = effectiveRect.x;
   int y = effectiveRect.y;
@@ -144,8 +144,8 @@ int FlowLayout::doLayout(const IntRect &rect, bool testOnly) const
 
     if (!testOnly) 
     {
-      IntRect rect;
-      IntSize tmp = item->getLayoutSizeHint();
+      RectI rect;
+      SizeI tmp = item->getLayoutSizeHint();
       rect.set(x, y, tmp.w, tmp.h);
       item->setLayoutGeometry(rect);
     }

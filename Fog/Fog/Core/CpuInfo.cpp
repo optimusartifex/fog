@@ -1,4 +1,4 @@
-// [Fog-Core Library - Public API]
+// [Fog-Core]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -147,22 +147,22 @@ void detectCpuInfo(CpuInfo* i)
     i->model  += ((out.eax >> 16) & 0x0F) << 4;
   }
 
-  if (out.ecx & 0x00000001U) i->features |= CpuInfo::FEATURE_SSE3;
-  if (out.ecx & 0x00000008U) i->features |= CpuInfo::FEATURE_MotitorMWait;
-  if (out.ecx & 0x00000200U) i->features |= CpuInfo::FEATURE_SSSE3;
-  if (out.ecx & 0x00002000U) i->features |= CpuInfo::FEATURE_CMPXCHG16B;
-  if (out.ecx & 0x00080000U) i->features |= CpuInfo::FEATURE_SSE4_1;
-  if (out.ecx & 0x00100000U) i->features |= CpuInfo::FEATURE_SSE4_2;
-  if (out.ecx & 0x00800000U) i->features |= CpuInfo::FEATURE_POPCNT;
+  if (out.ecx & 0x00000001U) i->features |= CPU_FEATURE_SSE3;
+  if (out.ecx & 0x00000008U) i->features |= CPU_FEATURE_MONITOR_MWAIT;
+  if (out.ecx & 0x00000200U) i->features |= CPU_FEATURE_SSSE3;
+  if (out.ecx & 0x00002000U) i->features |= CPU_FEATURE_CMPXCHG16B;
+  if (out.ecx & 0x00080000U) i->features |= CPU_FEATURE_SSE4_1;
+  if (out.ecx & 0x00100000U) i->features |= CPU_FEATURE_SSE4_2;
+  if (out.ecx & 0x00800000U) i->features |= CPU_FEATURE_POPCNT;
 
-  if (out.edx & 0x00000010U) i->features |= CpuInfo::FEATURE_RDTSC;
-  if (out.edx & 0x00000100U) i->features |= CpuInfo::FEATURE_CMPXCHG8B;
-  if (out.edx & 0x00008000U) i->features |= CpuInfo::FEATURE_CMOV;
-  if (out.edx & 0x00800000U) i->features |= CpuInfo::FEATURE_MMX;
-  if (out.edx & 0x01000000U) i->features |= CpuInfo::FEATURE_FXSR;
-  if (out.edx & 0x02000000U) i->features |= CpuInfo::FEATURE_SSE | CpuInfo::FEATURE_MMXExt;
-  if (out.edx & 0x04000000U) i->features |= CpuInfo::FEATURE_SSE | CpuInfo::FEATURE_SSE2;
-  if (out.edx & 0x10000000U) i->features |= CpuInfo::FEATURE_MultiThreading;
+  if (out.edx & 0x00000010U) i->features |= CPU_FEATURE_RDTSC;
+  if (out.edx & 0x00000100U) i->features |= CPU_FEATURE_CMPXCHG8B;
+  if (out.edx & 0x00008000U) i->features |= CPU_FEATURE_CMOV;
+  if (out.edx & 0x00800000U) i->features |= CPU_FEATURE_MMX;
+  if (out.edx & 0x01000000U) i->features |= CPU_FEATURE_FXSR;
+  if (out.edx & 0x02000000U) i->features |= CPU_FEATURE_SSE | CPU_FEATURE_MMX_EXT;
+  if (out.edx & 0x04000000U) i->features |= CPU_FEATURE_SSE | CPU_FEATURE_SSE2;
+  if (out.edx & 0x10000000U) i->features |= CPU_FEATURE_MULTITHREADING;
 
   if (strcmp(i->vendor, "AuthenticAMD") == 0 && 
       (out.edx & 0x10000000U))
@@ -182,7 +182,7 @@ void detectCpuInfo(CpuInfo* i)
   if (strcmp(i->vendor, "AuthenticAMD") == 0 && 
       i->family == 15 && i->model >= 32 && i->model <= 63) 
   {
-    i->bugs |= CpuInfo::BUG_AMD_LOCK_MB;
+    i->bugs |= CPU_BUG_AMD_LOCK_MB;
   }
 
   // Calling cpuid with 0x80000000 as the in argument
@@ -199,20 +199,20 @@ void detectCpuInfo(CpuInfo* i)
     switch (a)
     {
       case 0x80000001:
-        if (out.ecx & 0x00000001U) i->features |= CpuInfo::FEATURE_LAHF_SAHF;
-        if (out.ecx & 0x00000020U) i->features |= CpuInfo::FEATURE_LZCNT;
-        if (out.ecx & 0x00000040U) i->features |= CpuInfo::FEATURE_SSE4_A;
-        if (out.ecx & 0x00000080U) i->features |= CpuInfo::FEATURE_MSSE;
-        if (out.ecx & 0x00000100U) i->features |= CpuInfo::FEATURE_PREFETCH;
-        if (out.ecx & 0x00000800U) i->features |= CpuInfo::FEATURE_SSE5;
+        if (out.ecx & 0x00000001U) i->features |= CPU_FEATURE_LAHF_SAHF;
+        if (out.ecx & 0x00000020U) i->features |= CPU_FEATURE_LZCNT;
+        if (out.ecx & 0x00000040U) i->features |= CPU_FEATURE_SSE4_A;
+        if (out.ecx & 0x00000080U) i->features |= CPU_FEATURE_MSSE;
+        if (out.ecx & 0x00000100U) i->features |= CPU_FEATURE_PREFETCH;
+        if (out.ecx & 0x00000800U) i->features |= CPU_FEATURE_SSE5;
 
-        if (out.edx & 0x00100000U) i->features |= CpuInfo::FEATURE_ExecuteDisableBit;
-        if (out.edx & 0x00200000U) i->features |= CpuInfo::FEATURE_FFXSR;
-        if (out.edx & 0x00400000U) i->features |= CpuInfo::FEATURE_MMXExt;
-        if (out.edx & 0x08000000U) i->features |= CpuInfo::FEATURE_RDTSCP;
-        if (out.edx & 0x20000000U) i->features |= CpuInfo::FEATURE_64Bit;
-        if (out.edx & 0x40000000U) i->features |= CpuInfo::FEATURE_3dNowExt | CpuInfo::FEATURE_MMXExt;
-        if (out.edx & 0x80000000U) i->features |= CpuInfo::FEATURE_3dNow;
+        if (out.edx & 0x00100000U) i->features |= CPU_FEATURE_EXECUTE_DISABLE_BIT;
+        if (out.edx & 0x00200000U) i->features |= CPU_FEATURE_FFXSR;
+        if (out.edx & 0x00400000U) i->features |= CPU_FEATURE_MMX_EXT;
+        if (out.edx & 0x08000000U) i->features |= CPU_FEATURE_RDTSCP;
+        if (out.edx & 0x20000000U) i->features |= CPU_FEATURE_64_BIT;
+        if (out.edx & 0x40000000U) i->features |= CPU_FEATURE_3DNOW_EXT | CPU_FEATURE_MMX_EXT;
+        if (out.edx & 0x80000000U) i->features |= CPU_FEATURE_3DNOW;
         break;
 
       case 0x80000002:

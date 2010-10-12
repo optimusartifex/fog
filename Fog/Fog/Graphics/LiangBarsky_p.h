@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -58,7 +58,7 @@ struct FOG_HIDDEN LiangBarsky
   template<typename T>
   static FOG_INLINE uint getClippingFlags(T x, T y, T cx1, T cy1, T cx2, T cy2)
   {
-    return (x > cx2) | ((y > cy2) << 1) | ((x < (T)cx1) << 2) | ((y < (T)cy1) << 3);
+    return (x > cx2) | ((y > cy2) << 1) | ((x < cx1) << 2) | ((y < cy1) << 3);
   }
 
   template<typename T, typename BoxT>

@@ -64,7 +64,7 @@ Randomizer_Argb::~Randomizer_Argb() { free(); }
 void Randomizer_Argb::init(int quantity)
 {
   free();
-  data = (Fog::Argb*)Fog::Memory::alloc(sizeof(Fog::Argb) * quantity);
+  data = (Fog::ArgbI*)Fog::Memory::alloc(sizeof(Fog::ArgbI) * quantity);
   for (int a = 0; a < quantity; a++) data[a] = randColor();
 }
 
@@ -108,7 +108,7 @@ Randomizer_Rect::~Randomizer_Rect() { free(); }
 void Randomizer_Rect::init(int quantity, int w, int h, int sw, int sh)
 {
   free();
-  data = (Fog::IntRect*)Fog::Memory::alloc(sizeof(Fog::IntRect) * quantity);
+  data = (Fog::RectI*)Fog::Memory::alloc(sizeof(Fog::RectI) * quantity);
   for (int a = 0; a < quantity; a++) data[a] = randRect(w, h, sw, sh);
 }
 
@@ -128,7 +128,7 @@ Randomizer_Polygon::~Randomizer_Polygon() { free(); }
 void Randomizer_Polygon::init(int quantity, int w, int h, int sw, int sh)
 {
   free();
-  data = (Fog::DoublePoint*)Fog::Memory::alloc(sizeof(Fog::DoublePoint) * quantity * 10);
+  data = (Fog::PointD*)Fog::Memory::alloc(sizeof(Fog::PointD) * quantity * 10);
 
   double x = 0.0;
   double y = 0.0;
@@ -227,12 +227,12 @@ BenchmarkMaster::BenchmarkMaster()
   _height = 480;
   _quantity = 1000;
 
-  _sizes.append(Fog::IntSize(8  , 8  ));
-  _sizes.append(Fog::IntSize(16 , 16 ));
-  _sizes.append(Fog::IntSize(32 , 32 ));
-  _sizes.append(Fog::IntSize(64 , 64 ));
-  _sizes.append(Fog::IntSize(128, 128));
-  _sizes.append(Fog::IntSize(256, 256));
+  _sizes.append(Fog::SizeI(8  , 8  ));
+  _sizes.append(Fog::SizeI(16 , 16 ));
+  _sizes.append(Fog::SizeI(32 , 32 ));
+  _sizes.append(Fog::SizeI(64 , 64 ));
+  _sizes.append(Fog::SizeI(128, 128));
+  _sizes.append(Fog::SizeI(256, 256));
 }
 
 BenchmarkMaster::~BenchmarkMaster()

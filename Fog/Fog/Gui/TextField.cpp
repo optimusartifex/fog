@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -36,16 +36,16 @@ void TextField::setValue(const String& value)
   update(WIDGET_UPDATE_PAINT);
 }
 
-IntSize TextField::getSizeHint() const
+SizeI TextField::getSizeHint() const
 {
-  return IntSize(80, 20);
+  return SizeI(80, 20);
 }
 
 void TextField::onPaint(PaintEvent* e)
 {
   Painter* p = e->getPainter();
-  IntSize s = getClientSize();
-  IntRect bounds(0, 0, s.w, s.h);
+  SizeI s = getClientSize();
+  RectI bounds(0, 0, s.w, s.h);
 
   p->setSource(0xFFEEEEEE);
   //p->fillAll();

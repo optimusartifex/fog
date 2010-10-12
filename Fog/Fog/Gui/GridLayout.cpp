@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -554,7 +554,7 @@ int GridLayout::calculateSpanHeight(int crow, LayoutItem* item) const
   return height;
 }
 
-void GridLayout::setLayoutGeometry(const IntRect& rect)
+void GridLayout::setLayoutGeometry(const RectI& rect)
 {
   int maxRowIndex = (int)_rows.getLength();
   int maxColIndex = (int)_cols.getLength();
@@ -620,7 +620,7 @@ void GridLayout::setLayoutGeometry(const IntRect& rect)
       int cellLeft = curleft + item->getContentLeftMargin();
       int cellTop = curtop + item->getContentTopMargin();
 
-      item->setLayoutGeometry(IntRect(cellLeft, cellTop, cellWidth, cellHeight));
+      item->setLayoutGeometry(RectI(cellLeft, cellTop, cellWidth, cellHeight));
 
       curtop += height + _vspacing;
     }

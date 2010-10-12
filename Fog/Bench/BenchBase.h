@@ -63,23 +63,23 @@ static FOG_INLINE uint32_t randColor()
   return (rand() & 0xFFFF) | (rand() << 16);
 }
 
-static FOG_INLINE Fog::IntRect randRect(int w, int h, int rw, int rh)
+static FOG_INLINE Fog::RectI randRect(int w, int h, int rw, int rh)
 {
-  return Fog::IntRect(rand() % (w - rw), rand() % (h - rh), rw, rh);
+  return Fog::RectI(rand() % (w - rw), rand() % (h - rh), rw, rh);
 }
 
-static FOG_INLINE Fog::IntPoint randPoint(int w, int h)
+static FOG_INLINE Fog::PointI randPoint(int w, int h)
 {
-  return Fog::IntPoint(rand() % w, rand() % h);
+  return Fog::PointI(rand() % w, rand() % h);
 }
 
-static FOG_INLINE Fog::DoublePoint randPointD(int w, int h)
+static FOG_INLINE Fog::PointD randPointD(int w, int h)
 {
-  return Fog::DoublePoint(randDouble() * (double)w, randDouble() * (double)h);
+  return Fog::PointD(randDouble() * (double)w, randDouble() * (double)h);
 }
 
 // ============================================================================
-// [FogBench - Randomizer - Argb]
+// [FogBench - Randomizer - ArgbI]
 // ============================================================================
 
 struct Randomizer_Argb
@@ -90,7 +90,7 @@ struct Randomizer_Argb
   void init(int quantity);
   void free();
 
-  Fog::Argb* data;
+  Fog::ArgbI* data;
 };
 
 // ============================================================================
@@ -120,7 +120,7 @@ struct Randomizer_Rect
   void init(int quantity, int w, int h, int sw, int sh);
   void free();
 
-  Fog::IntRect* data;
+  Fog::RectI* data;
 };
 
 // ============================================================================
@@ -135,7 +135,7 @@ struct Randomizer_Polygon
   void init(int quantity, int w, int h, int sw, int sh);
   void free();
 
-  Fog::DoublePoint* data;
+  Fog::PointD* data;
 };
 
 // ============================================================================
@@ -152,12 +152,12 @@ struct BenchmarkMaster
   FOG_INLINE const int getWidth() const { return _width; }
   FOG_INLINE const int getHeight() const { return _height; }
   FOG_INLINE const int getQuantity() const { return _quantity; }
-  FOG_INLINE const Fog::List<Fog::IntSize>& getSizes() const { return _sizes; }
+  FOG_INLINE const Fog::List<Fog::SizeI>& getSizes() const { return _sizes; }
 
   int _width;
   int _height;
   int _quantity;
-  Fog::List<Fog::IntSize> _sizes;
+  Fog::List<Fog::SizeI> _sizes;
 
   Fog::List<Fog::String> _testNames;
   Fog::List<AbstractBenchmarkContext*> _contexts;

@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -87,7 +87,7 @@ void RasterPaintVarState::save(RasterPaintEngine* engine)
 
   if (flags & PAINTER_STATE_MATRIX)
   {
-    userMatrix.init(engine->ctx.userMatrix);
+    userTransform.init(engine->ctx.userTransform);
   }
 
   // --------------------------------------------------------------------------
@@ -221,7 +221,7 @@ void RasterPaintVarState::restore(RasterPaintEngine* engine)
 
   if (flags & PAINTER_STATE_MATRIX)
   {
-    engine->ctx.userMatrix = userMatrix.instance();
+    engine->ctx.userTransform = userTransform.instance();
     updateFinalMatrix = true;
   }
 

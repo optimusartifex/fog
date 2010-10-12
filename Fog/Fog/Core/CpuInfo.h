@@ -1,4 +1,4 @@
-// [Fog-Core Library - Public API]
+// [Fog-Core]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -13,6 +13,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Build.h>
+#include <Fog/Core/Constants.h>
 
 namespace Fog {
 
@@ -49,7 +50,7 @@ union FOG_HIDDEN CpuId
 //! Small example how to check for SSE2 support.
 //!
 //! @verbatim
-//! if (Fog::getCpuInfo()->hasFeature(Fog::CpuInfo::FEATURE_SSE2))
+//! if (Fog::CpuInfo::get()->hasFeature(Fog::CpuInfo::FEATURE_SSE2))
 //! {
 //!   // cpu has SSE2 support
 //! }
@@ -77,77 +78,6 @@ struct FOG_HIDDEN CpuInfo
   //! @brief Cpu bugs bitfield, see @c AsmJit::CpuInfo::BUG enum).
   uint32_t bugs;
 
-  //! @brief CPU features.
-  enum FEATURE
-  {
-    // [X86, X64]
-
-    //! @brief Cpu has RDTSC instruction.
-    FEATURE_RDTSC = 1U << 0,
-    //! @brief Cpu has RDTSCP instruction.
-    FEATURE_RDTSCP = 1U << 1,
-    //! @brief Cpu has CMOV instruction (conditional move)
-    FEATURE_CMOV = 1U << 2,
-    //! @brief Cpu has CMPXCHG8B instruction
-    FEATURE_CMPXCHG8B = 1U << 3,
-    //! @brief Cpu has CMPXCHG16B instruction (64 bit processors)
-    FEATURE_CMPXCHG16B = 1U << 4,
-    //! @brief Cpu has CLFUSH instruction
-    FEATURE_CLFLUSH = 1U << 5,
-    //! @brief Cpu has PREFETCH instruction
-    FEATURE_PREFETCH = 1U << 6,
-    //! @brief Cpu supports LAHF and SAHF instrictions.
-    FEATURE_LAHF_SAHF = 1U << 7,
-    //! @brief Cpu supports FXSAVE and FXRSTOR instructions.
-    FEATURE_FXSR = 1U << 8,
-    //! @brief Cpu supports FXSAVE and FXRSTOR instruction optimizations (FFXSR).
-    FEATURE_FFXSR = 1U << 9,
-
-    //! @brief Cpu has MMX.
-    FEATURE_MMX = 1U << 10,
-    //! @brief Cpu has extended MMX.
-    FEATURE_MMXExt = 1U << 11,
-    //! @brief Cpu has 3dNow!
-    FEATURE_3dNow = 1U << 12,
-    //! @brief Cpu has enchanced 3dNow!
-    FEATURE_3dNowExt = 1U << 13,
-    //! @brief Cpu has SSE.
-    FEATURE_SSE = 1U << 14,
-    //! @brief Cpu has Misaligned SSE (MSSE).
-    FEATURE_MSSE = 1U << 15,
-    //! @brief Cpu has SSE2.
-    FEATURE_SSE2 = 1U << 16,
-    //! @brief Cpu has SSE3.
-    FEATURE_SSE3 = 1U << 17,
-    //! @brief Cpu has Supplemental SSE3 (SSSE3).
-    FEATURE_SSSE3 = 1U << 18,
-    //! @brief Cpu has SSE4.A.
-    FEATURE_SSE4_A = 1U << 19,
-    //! @brief Cpu has SSE4.1.
-    FEATURE_SSE4_1 = 1U << 20,
-    //! @brief Cpu has SSE4.2.
-    FEATURE_SSE4_2 = 1U << 21,
-    //! @brief Cpu has SSE5.
-    FEATURE_SSE5 = 1U << 22,
-    //! @brief Cpu supports MONITOR and MWAIT instructions.
-    FEATURE_MotitorMWait = 1U << 23,
-    //! @brief Cpu supports POPCNT instruction.
-    FEATURE_POPCNT = 1U << 24,
-    //! @brief Cpu supports LZCNT instruction.
-    FEATURE_LZCNT  = 1U << 25,
-    //! @brief Cpu supports multithreading.
-    FEATURE_MultiThreading = 1U << 29,
-    //! @brief Cpu supports execute disable bit (execute protection).
-    FEATURE_ExecuteDisableBit = 1U << 30,
-    //! @brief Cpu supports 64 bits.
-    FEATURE_64Bit = 1U << 31
-  };
-
-  enum BUG
-  {
-    BUG_AMD_LOCK_MB = 1U << 0
-  };
-
   FOG_INLINE bool hasFeature(uint32_t feature) const
   { return (this->features & feature) != 0; }
 
@@ -156,11 +86,13 @@ struct FOG_HIDDEN CpuInfo
 
   FOG_INLINE bool hasBug(uint32_t bug) const
   { return (this->bugs & bug) != 0; }
+
+  static FOG_INLINE const CpuInfo* get();
 };
 
 FOG_CVAR_EXTERN CpuInfo fog_cpuinfo;
 
-FOG_INLINE static const CpuInfo* getCpuInfo() { return &fog_cpuinfo; }
+FOG_INLINE const CpuInfo* CpuInfo::get() { return &fog_cpuinfo; }
 
 #if defined(FOG_ARCH_X86) || defined(FOG_ARCH_X86_64)
 //! @brief Retrieve CPUID values.

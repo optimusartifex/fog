@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -82,8 +82,8 @@ struct FOG_API BoxLayout : public Layout
 protected:
   FOG_INLINE bool isForward() const { return _direction == 0; }
 
-  virtual void setLayoutGeometry(const IntRect &rect);    
-  virtual int doLayout(const IntRect &rect) = 0;
+  virtual void setLayoutGeometry(const RectI &rect);    
+  virtual int doLayout(const RectI &rect) = 0;
 
   int calculateHorizontalGaps(bool collapse = true);
   int calculateVerticalGaps(bool collapse = true);
@@ -116,7 +116,7 @@ struct FOG_API HBoxLayout : public BoxLayout
   // [Implementation]
   // --------------------------------------------------------------------------
 
-  virtual int doLayout(const IntRect &rect);
+  virtual int doLayout(const RectI &rect);
   virtual void calculateLayoutHint(LayoutHint& hint);
 };
 
@@ -142,7 +142,7 @@ struct FOG_API VBoxLayout : public BoxLayout
   // --------------------------------------------------------------------------
 
   // LAYOUT TODO: Was private!
-  virtual int doLayout(const IntRect &rect);
+  virtual int doLayout(const RectI &rect);
   virtual void calculateLayoutHint(LayoutHint& hint);
 };
 

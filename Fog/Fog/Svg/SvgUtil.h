@@ -1,4 +1,4 @@
-// [Fog-Svg Library - Public API]
+// [Fog-Svg]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -12,8 +12,8 @@
 #include <Fog/Core/List.h>
 #include <Fog/Core/String.h>
 #include <Fog/Graphics/Color.h>
-#include <Fog/Graphics/Matrix.h>
 #include <Fog/Graphics/Path.h>
+#include <Fog/Graphics/Transform.h>
 #include <Fog/Svg/SvgBase.h>
 
 namespace Fog {
@@ -35,10 +35,10 @@ namespace SvgUtil {
 //! whether a given string is 'none' or URI to pattern definition.
 //!
 //! @return One of @c SVG_SOURCE_TYPE enumeration value is returned.
-FOG_API int parseColor(const String& str, Argb* dst);
+FOG_API int parseColor(const String& str, ArgbI* dst);
 
 //! @brief Serialize SVG color using #RRGGBB notation.
-FOG_API err_t serializeColor(String& dst, Argb color);
+FOG_API err_t serializeColor(String& dst, ArgbI color);
 
 //! @brief Parse SVG opacity value: 0.0 to 1.0 or 0% to 100% and clamp it if.
 //! needed.
@@ -49,7 +49,7 @@ FOG_API err_t parseOpacity(const String& str, float* dst);
 // ============================================================================
 
 //! @brief Parse SVG matrix and save it to @a dst.
-FOG_API err_t parseMatrix(const String& str, DoubleMatrix* dst);
+FOG_API err_t parseMatrix(const String& str, TransformD* dst);
 
 // ============================================================================
 // [Fog::SvgUtil - Coordinates]
@@ -65,9 +65,9 @@ FOG_API err_t serializeCoord(String& dst, const SvgCoord& coord);
 // [Fog::SvgUtil - Paths]
 // ============================================================================
 
-FOG_API DoublePath parsePoints(const String& str, bool close);
+FOG_API PathD parsePoints(const String& str, bool close);
 
-FOG_API DoublePath parsePath(const String& str);
+FOG_API PathD parsePath(const String& str);
 
 } // SvgUtil namespace
 

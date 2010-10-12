@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -13,9 +13,9 @@
 #include <Fog/Core/Static.h>
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/Geometry.h>
-#include <Fog/Graphics/Matrix.h>
 #include <Fog/Graphics/Path.h>
 #include <Fog/Graphics/PathStroker.h>
+#include <Fog/Graphics/Transform.h>
 
 #include <Fog/Graphics/PaintEngine/RasterPaintAction_p.h>
 #include <Fog/Graphics/PaintEngine/RasterPaintBase_p.h>
@@ -90,13 +90,13 @@ struct FOG_HIDDEN RasterPaintCalcFillPath : public RasterPaintCalc
   // --------------------------------------------------------------------------
 
   //! @brief Path to process.
-  Static<DoublePath> path;
+  Static<PathD> path;
 
   //! @brief Transformation matrix.
-  Static<DoubleMatrix> matrix;
+  Static<TransformD> transform;
 
   //! @brief Clip box.
-  IntBox clipBox;
+  BoxI clipBox;
 
   //! @brief Transformation type (see @c RASTER_TRANSFORM_TYPE).
   uint32_t transformType;
@@ -137,13 +137,13 @@ struct FOG_HIDDEN RasterPaintCalcStrokePath : public RasterPaintCalc
   RasterPaintEngine* engine;
 
   //! @brief Path to process.
-  Static<DoublePath> path;
+  Static<PathD> path;
 
   //! @brief Transformation matrix.
-  Static<DoubleMatrix> matrix;
+  Static<TransformD> transform;
 
   //! @brief Clip box.
-  IntBox clipBox;
+  BoxI clipBox;
 
   //! @brief Transformation type (see @c RASTER_TRANSFORM_TYPE).
   uint32_t transformType;

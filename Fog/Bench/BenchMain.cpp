@@ -26,18 +26,18 @@ static void writeInfo(BenchmarkMaster* master)
   msg.appendFormat("Surface  : %dx%d\n", master->getWidth(), master->getHeight());
   msg.appendFormat("Quantity : %d\n", master->getQuantity());
   msg.appendFormat("\n");
-  msg.appendFormat("Processor: %s\n", Fog::getCpuInfo()->brand);
+  msg.appendFormat("Processor: %s\n", Fog::CpuInfo::get()->brand);
   msg.appendFormat("Features1: MMX=%s, MMXExt=%s, 3dNow=%s, 3dNowExt=%s, SSE=%s\n",
-    yesno[Fog::getCpuInfo()->hasFeature(Fog::CpuInfo::FEATURE_MMX)],
-    yesno[Fog::getCpuInfo()->hasFeature(Fog::CpuInfo::FEATURE_MMXExt)],
-    yesno[Fog::getCpuInfo()->hasFeature(Fog::CpuInfo::FEATURE_3dNow)],
-    yesno[Fog::getCpuInfo()->hasFeature(Fog::CpuInfo::FEATURE_3dNowExt)],
-    yesno[Fog::getCpuInfo()->hasFeature(Fog::CpuInfo::FEATURE_SSE)]);
+    yesno[Fog::CpuInfo::get()->hasFeature(Fog::CPU_FEATURE_MMX)],
+    yesno[Fog::CpuInfo::get()->hasFeature(Fog::CPU_FEATURE_MMX_EXT)],
+    yesno[Fog::CpuInfo::get()->hasFeature(Fog::CPU_FEATURE_3DNOW)],
+    yesno[Fog::CpuInfo::get()->hasFeature(Fog::CPU_FEATURE_3DNOW_EXT)],
+    yesno[Fog::CpuInfo::get()->hasFeature(Fog::CPU_FEATURE_SSE)]);
   msg.appendFormat("Features2: SSE2=%s, SSE3=%s, SSSE3=%s\n",
-    yesno[Fog::getCpuInfo()->hasFeature(Fog::CpuInfo::FEATURE_SSE2)],
-    yesno[Fog::getCpuInfo()->hasFeature(Fog::CpuInfo::FEATURE_SSE3)],
-    yesno[Fog::getCpuInfo()->hasFeature(Fog::CpuInfo::FEATURE_SSSE3)]);
-  msg.appendFormat("CPU count: %u\n", Fog::getCpuInfo()->numberOfProcessors);
+    yesno[Fog::CpuInfo::get()->hasFeature(Fog::CPU_FEATURE_SSE2)],
+    yesno[Fog::CpuInfo::get()->hasFeature(Fog::CPU_FEATURE_SSE3)],
+    yesno[Fog::CpuInfo::get()->hasFeature(Fog::CPU_FEATURE_SSSE3)]);
+  msg.appendFormat("CPU count: %u\n", Fog::CpuInfo::get()->numberOfProcessors);
   msg.appendFormat("\n");
   benchLog(msg);
 }
@@ -134,6 +134,31 @@ static void benchAll()
 #undef main
 int main(int argc, char* argv[])
 {
+  /*
+  {
+    using namespace Fog;
+    TransformF transform;
+    transform.setQuadToQuad(
+      BoxF(150, 150, 200, 200),
+      PointF(100, 100), PointF(200, 200), PointF(150, 300), PointF(130, 200));
+
+    PointF v0(30, 30);
+    PointF d0, d1;
+
+    transform.mapPoint(d0, PointF(0.0f, 0.0f));
+    transform.mapPoint(d1, v0);
+
+    printf(" 0,  0 -> %g %g\n", d0.x, d0.y);
+    printf("40, 40 -> %g %g\n", d1.x, d1.y);
+
+    d1 -= d0;
+    transform.mapVector(d0, v0);
+
+    printf("d0=%g %g\n", d0.x, d0.y);
+    printf("d1=%g %g\n", d1.x, d1.y);
+    return 1;
+  }*/
+
 #if defined(FOG_BENCH_GDIPLUS)
   // Initialize GDI+
   ULONG_PTR gdiplusToken;

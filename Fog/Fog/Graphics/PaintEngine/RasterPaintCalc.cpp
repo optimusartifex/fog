@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -31,10 +31,11 @@ void RasterPaintCalcFillPath::run(RasterPaintContext* ctx)
   cmd->rasterizer.init();
   ras = cmd->rasterizer.instancep();
 
+  // TODO: Use matrix type instead.
   bool noTransform = (
     transformType == RASTER_TRANSFORM_EXACT &&
-    Math::feq(matrix->tx, 0.0) &&
-    Math::feq(matrix->ty, 0.0) == 0);
+    Math::fzero(transform->_20) &&
+    Math::fzero(transform->_21));
 
   ras->reset();
   ras->setClipBox(clipBox);
@@ -44,7 +45,7 @@ void RasterPaintCalcFillPath::run(RasterPaintContext* ctx)
 
   if (!path->isFlat() || !noTransform)
   {
-    if (path->flattenTo(ctx->tmpCalcPath, noTransform ? NULL : matrix.instancep(), approximationScale) != ERR_OK)
+    if (path->flattenTo(ctx->tmpCalcPath, noTransform ? NULL : transform.instancep(), approximationScale) != ERR_OK)
     {
       cmd->status.set(RASTER_COMMAND_SKIP);
       return;
@@ -77,23 +78,24 @@ void RasterPaintCalcStrokePath::run(RasterPaintContext* ctx)
   cmd->rasterizer.init();
   ras = cmd->rasterizer.instancep();
 
+  // TODO: Use matrix type instead.
   bool noTransform = (
     transformType == RASTER_TRANSFORM_EXACT &&
-    Math::feq(matrix->tx, 0.0) &&
-    Math::feq(matrix->ty, 0.0) == 0);
+    Math::fzero(transform->_20) &&
+    Math::fzero(transform->_21) == 0);
 
   ctx->tmpCalcPath.clear();
   stroker->stroke(ctx->tmpCalcPath, path.instance());
 
   if (transformType >= RASTER_TRANSFORM_AFFINE)
-    ctx->tmpCalcPath.applyMatrix(matrix.instance());
+    ctx->tmpCalcPath.applyMatrix(transform.instance());
   else if (!noTransform)
-    ctx->tmpCalcPath.translate(matrix->tx, matrix->ty);
+    ctx->tmpCalcPath.translate(transform->_20, transform->_21);
 
   ras->reset();
   ras->setClipBox(clipBox);
-  // Stroke not respects fill rule set in caps
-  // state, instead we are using FILL_NON_ZERO.
+  // Stroke doesnt't respect fill rule set in caps state, instead we are using
+  // FILL_NON_ZERO.
   ras->setFillRule(FILL_NON_ZERO);
   ras->setAlpha(cmd->ops.alpha255);
 

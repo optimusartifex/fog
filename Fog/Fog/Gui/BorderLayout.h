@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -63,7 +63,7 @@ struct FOG_API BorderLayout : public Layout
   virtual void onRemove(LayoutItem* item);
 
   virtual void calculateLayoutHint(LayoutHint& hint);
-  virtual void setLayoutGeometry(const IntRect&);
+  virtual void setLayoutGeometry(const RectI&);
 
   void setSort(uint32_t s);
   const List<LayoutItem*>& getList();

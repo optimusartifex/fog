@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Private API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package

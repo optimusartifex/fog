@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -14,7 +14,7 @@
 #include <Fog/Graphics/Geometry.h>
 #include <Fog/Graphics/Gradient.h>
 #include <Fog/Graphics/Image.h>
-#include <Fog/Graphics/Matrix.h>
+#include <Fog/Graphics/Transform.h>
 
 namespace Fog {
 
@@ -70,7 +70,7 @@ struct FOG_API PatternData
   uint32_t spread;
 
   //! @brief Pattern transformation matrix.
-  DoubleMatrix matrix;
+  TransformD transform;
 
   //! @internal
   struct GradientData
@@ -80,7 +80,7 @@ struct FOG_API PatternData
     //! - Linear gradient - points[0] is start point and points[1] is end point.
     //! - Radial gradient - points[0] is center point, points[1] is focal point.
     //! - Conical gradient - points[0] is center point, points[1] is end point (for angle).
-    DoublePoint points[2];
+    PointD points[2];
     //! @brief Used only for PATTERN_RADIAL_GRADIENT - circle radius.
     double radius;
   };
@@ -88,7 +88,7 @@ struct FOG_API PatternData
   //! @internal
   struct TextureData
   {
-    IntRect area;
+    RectI area;
   };
 
   //! @internal
@@ -97,7 +97,7 @@ struct FOG_API PatternData
   //! texture data and gradient stops.
   union ObjectInst
   {
-    Static< Argb > argb;
+    Static< ArgbI > argb;
     Static< Image > texture;
     Static< List<ArgbStop> > stops;
   } obj;
@@ -135,7 +135,7 @@ struct FOG_API Pattern
 
   Pattern();
   Pattern(const Pattern& other);
-  explicit Pattern(const Argb& argb);
+  explicit Pattern(const ArgbI& argb);
   FOG_INLINE explicit Pattern(PatternData* d) : _d(d) {}
   ~Pattern();
 
@@ -183,21 +183,22 @@ struct FOG_API Pattern
   // [Matrix]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE DoubleMatrix getMatrix() const { return _d->matrix; }
-  err_t setMatrix(const FloatMatrix& matrix);
-  err_t setMatrix(const DoubleMatrix& matrix);
-  err_t resetMatrix();
+  FOG_INLINE TransformD getTransform() const { return _d->transform; }
+  err_t setTransform(const TransformF& transform);
+  err_t setTransform(const TransformD& transform);
+  err_t resetTransform();
 
-  err_t translate(float x, float y, uint32_t order = MATRIX_PREPEND);
-  err_t translate(double x, double y, uint32_t order = MATRIX_PREPEND);
-  err_t rotate(float a, uint32_t order = MATRIX_PREPEND);
-  err_t rotate(double a, uint32_t order = MATRIX_PREPEND);
-  err_t scale(float x, float y, uint32_t order = MATRIX_PREPEND);
-  err_t scale(double x, double y, uint32_t order = MATRIX_PREPEND);
-  err_t skew(float x, float y, uint32_t order = MATRIX_PREPEND);
-  err_t skew(double x, double y, uint32_t order = MATRIX_PREPEND);
-  err_t transform(const FloatMatrix& m, uint32_t order = MATRIX_PREPEND);
-  err_t transform(const DoubleMatrix& m, uint32_t order = MATRIX_PREPEND);
+  // TODO: Use TRANSFORM_OP and merge to one exported function.
+  err_t translate(float x, float y, uint32_t order = MATRIX_ORDER_PREPEND);
+  err_t translate(double x, double y, uint32_t order = MATRIX_ORDER_PREPEND);
+  err_t rotate(float a, uint32_t order = MATRIX_ORDER_PREPEND);
+  err_t rotate(double a, uint32_t order = MATRIX_ORDER_PREPEND);
+  err_t scale(float x, float y, uint32_t order = MATRIX_ORDER_PREPEND);
+  err_t scale(double x, double y, uint32_t order = MATRIX_ORDER_PREPEND);
+  err_t skew(float x, float y, uint32_t order = MATRIX_ORDER_PREPEND);
+  err_t skew(double x, double y, uint32_t order = MATRIX_ORDER_PREPEND);
+  err_t transform(const TransformF& m, uint32_t order = MATRIX_ORDER_PREPEND);
+  err_t transform(const TransformD& m, uint32_t order = MATRIX_ORDER_PREPEND);
 
   // --------------------------------------------------------------------------
   // [Solid]
@@ -205,12 +206,12 @@ struct FOG_API Pattern
 
   //! @brief Get pattern color (for @c PATTERN_SOLID type).
   //!
-  //! If the pattern is not @c PATTERN_SOLID type, the Argb(0, 0, 0, 0) color is
+  //! If the pattern is not @c PATTERN_SOLID type, the ArgbI(0, 0, 0, 0) color is
   //! returned.
-  Argb getColor() const;
+  ArgbI getColor() const;
 
   //! @brief Set pattern type to @c PATTERN_SOLID and its color to @a argb.
-  err_t setColor(const Argb& argb);
+  err_t setColor(const ArgbI& argb);
 
   // --------------------------------------------------------------------------
   // [Texture]
@@ -220,7 +221,7 @@ struct FOG_API Pattern
   Image getTexture() const;
 
   //! @brief Get texture area (for @c PATTERN_TEXTURE type).
-  IntRect getTextureArea() const;
+  RectI getTextureArea() const;
 
   //! @brief Set pattern type to @c PATTERN_TEXTURE and the texture to @a texture.
   //!
@@ -230,7 +231,7 @@ struct FOG_API Pattern
   //! - @c ERR_RT_OUT_OF_MEMORY - If memory allocation failed.
   err_t setTexture(const Image& texture);
   //! @overload
-  err_t setTexture(const Image& texture, const IntRect& textureArea);
+  err_t setTexture(const Image& texture, const RectI& textureArea);
 
   // --------------------------------------------------------------------------
   // [Gradient]
@@ -239,20 +240,20 @@ struct FOG_API Pattern
   Gradient getGradient() const;
   err_t setGradient(const Gradient& gradient);
 
-  DoublePoint getStartPoint() const;
-  DoublePoint getEndPoint() const;
+  PointD getStartPoint() const;
+  PointD getEndPoint() const;
 
-  err_t setStartPoint(const IntPoint& pt);
-  err_t setStartPoint(const FloatPoint& pt);
-  err_t setStartPoint(const DoublePoint& pt);
+  err_t setStartPoint(const PointI& pt);
+  err_t setStartPoint(const PointF& pt);
+  err_t setStartPoint(const PointD& pt);
 
-  err_t setEndPoint(const IntPoint& pt);
-  err_t setEndPoint(const FloatPoint& pt);
-  err_t setEndPoint(const DoublePoint& pt);
+  err_t setEndPoint(const PointI& pt);
+  err_t setEndPoint(const PointF& pt);
+  err_t setEndPoint(const PointD& pt);
 
-  err_t setPoints(const IntPoint& startPt, const IntPoint& endPt);
-  err_t setPoints(const FloatPoint& startPt, const FloatPoint& endPt);
-  err_t setPoints(const DoublePoint& startPt, const DoublePoint& endPt);
+  err_t setPoints(const PointI& startPt, const PointI& endPt);
+  err_t setPoints(const PointF& startPt, const PointF& endPt);
+  err_t setPoints(const PointD& startPt, const PointD& endPt);
 
   //! @brief Get radial gradient radius (for @c PATTERN_RADIAL_GRADIENT type)
   double getRadius() const;
@@ -303,7 +304,7 @@ struct FOG_API Pattern
   // --------------------------------------------------------------------------
 
   Pattern& operator=(const Pattern& other);
-  Pattern& operator=(const Argb& rgba);
+  Pattern& operator=(const ArgbI& rgba);
 
   // --------------------------------------------------------------------------
   // [Members]

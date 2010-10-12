@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -24,14 +24,14 @@ namespace Fog {
 // [Forward Declarations]
 // ============================================================================
 
-struct IntRect;
+struct RectI;
 
 // ============================================================================
-// [Fog::IntConvolutionMatrix]
+// [Fog::ConvolutionMatrixI]
 // ============================================================================
 
 //! @brief Convolution matrix.
-struct FOG_API IntConvolutionMatrix
+struct FOG_API ConvolutionMatrixI
 {
   // --------------------------------------------------------------------------
   // [Value Type]
@@ -77,14 +77,14 @@ struct FOG_API IntConvolutionMatrix
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  IntConvolutionMatrix();
-  IntConvolutionMatrix(const IntConvolutionMatrix& other);
+  ConvolutionMatrixI();
+  ConvolutionMatrixI(const ConvolutionMatrixI& other);
 
-  FOG_INLINE explicit IntConvolutionMatrix(Data* d) : _d(d) {}
+  FOG_INLINE explicit ConvolutionMatrixI(Data* d) : _d(d) {}
 
-  ~IntConvolutionMatrix();
+  ~ConvolutionMatrixI();
 
-  static IntConvolutionMatrix fromData(int w, int h, const ValueType* data);
+  static ConvolutionMatrixI fromData(int w, int h, const ValueType* data);
 
   // --------------------------------------------------------------------------
   // [Implicit Sharing]
@@ -131,13 +131,13 @@ struct FOG_API IntConvolutionMatrix
   int getCell(int x, int y) const;
   err_t setCell(int x, int y, int val);
 
-  err_t fill(const IntRect& rect, ValueType value);
+  err_t fill(const RectI& rect, ValueType value);
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  IntConvolutionMatrix& operator=(const IntConvolutionMatrix& other);
+  ConvolutionMatrixI& operator=(const ConvolutionMatrixI& other);
 
   ValueType* operator[](int y);
 

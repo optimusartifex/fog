@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -42,7 +42,7 @@ struct FOG_API TextField : public Frame
   // [Layout]
   // --------------------------------------------------------------------------
 
-  virtual IntSize getSizeHint() const;
+  virtual SizeI getSizeHint() const;
 
   // --------------------------------------------------------------------------
   // [Event Handlers]

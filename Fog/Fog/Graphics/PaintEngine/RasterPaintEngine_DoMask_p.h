@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -43,14 +43,14 @@ namespace Fog {
 // ============================================================================
 
 void RasterPaintEngine::CTX_SYMBOL(_doMaskConvert)(
-  RasterPaintContext* ctx, const IntBox* box, sysuint_t count)
+  RasterPaintContext* ctx, const BoxI* box, sysuint_t count)
 {
   // Can't be called with empty region.
   FOG_ASSERT(count > 0);
 
-  const IntBox* curBand;
-  const IntBox* endBand = box;
-  const IntBox* endRegion = endBand + count;
+  const BoxI* curBand;
+  const BoxI* endBand = box;
+  const BoxI* endRegion = endBand + count;
 
   int y1;
   int y2;
@@ -80,7 +80,7 @@ void RasterPaintEngine::CTX_SYMBOL(_doMaskConvert)(
     while (endBand != endRegion && endBand->y1 == y1) endBand++;
 
     do {
-      const IntBox* curBox = curBand;
+      const BoxI* curBox = curBand;
       Span8* first = ctx->allocCSpan();
       Span8* span = first;
 
@@ -109,14 +109,14 @@ void RasterPaintEngine::CTX_SYMBOL(_doMaskConvert)(
 // ============================================================================
 
 void RasterPaintEngine::CTX_SYMBOL(_doMaskBoxes)(
-  RasterPaintContext* ctx, const IntBox* box, sysuint_t count, uint32_t clipOp)
+  RasterPaintContext* ctx, const BoxI* box, sysuint_t count, uint32_t clipOp)
 {
   // Can't be called with empty region.
   FOG_ASSERT(count > 0);
 
-  const IntBox* curInBand;
-  const IntBox* endInBand = box;
-  const IntBox* endInRegion = endInBand + count;
+  const BoxI* curInBand;
+  const BoxI* endInBand = box;
+  const BoxI* endInRegion = endInBand + count;
 
   int y1 = endInBand->y1;
   int y2 = endInRegion[-1].y2;
@@ -310,7 +310,7 @@ void RasterPaintEngine::CTX_SYMBOL(_doMaskBoxes)(
 
         RASTER_CLIP_BOX_LOOP_BEGIN()
           do {
-            const IntBox* curInBox = curInBand;
+            const BoxI* curInBox = curInBand;
 
             Span8 baseSpan;
             Span8* curOutSpan = ctx->getClipSpan(y1);
@@ -382,7 +382,7 @@ void RasterPaintEngine::CTX_SYMBOL(_doMaskBoxes)(
           RASTER_CLIP_BOX_SKIP_NON_INTERSECT_INPUT()
 
           do {
-            const IntBox* curInBox = curInBand;
+            const BoxI* curInBox = curInBand;
             Span8* curInSpan = ctx->getClipSpan(y1);
 
             Span8 baseSpan;

@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -68,7 +68,7 @@ err_t Glyph::setBitmap(const Image& bitmap)
   return _d->bitmap.set(bitmap);
 }
 
-err_t Glyph::setOffset(const IntPoint& offset)
+err_t Glyph::setOffset(const PointI& offset)
 {
   FOG_RETURN_ON_ERROR(detach());
 

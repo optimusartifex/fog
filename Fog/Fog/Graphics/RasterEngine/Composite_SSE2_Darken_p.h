@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -62,12 +62,12 @@ struct FOG_HIDDEN CompositeDarkenSSE2 :
     sse2_expand_pixel_lo_1x2W(x0xmm, b0xmm);
     sse2_expand_pixel_lo_1x2W(y0xmm, y0xmm);
 
-    y0xmm = _mm_xor_si128(y0xmm, FOG_GET_SSE_CONST_PI(00FF00FF00FF00FF_0000000000000000));
+    y0xmm = _mm_xor_si128(y0xmm, FOG_SSE_GET_CONST_PI(00FF00FF00FF00FF_0000000000000000));
     sse2_muldiv255_1x2W(x0xmm, x0xmm, y0xmm);
     y0xmm = _mm_shuffle_epi32(x0xmm, _MM_SHUFFLE(1, 0, 3, 2));
     dst0xmm = _mm_min_epi16(a0xmm, x0xmm);   // dst0xmm = min(Sc.Da, Dca)
     dst0xmm = _mm_adds_epu8(dst0xmm, y0xmm); // dst0xmm += Sc.(1 - Da)
-    dst0xmm = _mm_or_si128(dst0xmm, FOG_GET_SSE_CONST_PI(00FF000000000000_00FF000000000000));
+    dst0xmm = _mm_or_si128(dst0xmm, FOG_SSE_GET_CONST_PI(00FF000000000000_00FF000000000000));
   }
 
   static FOG_INLINE void prgb32_op_xrgb32_0xFF_unpacked_1x1W(
@@ -92,12 +92,12 @@ struct FOG_HIDDEN CompositeDarkenSSE2 :
     sse2_expand_pixel_lo_1x2W(x0xmm, a0xmm);
     sse2_expand_pixel_lo_1x2W(y0xmm, y0xmm);
 
-    y0xmm = _mm_xor_si128(y0xmm, FOG_GET_SSE_CONST_PI(00FF00FF00FF00FF_0000000000000000));
+    y0xmm = _mm_xor_si128(y0xmm, FOG_SSE_GET_CONST_PI(00FF00FF00FF00FF_0000000000000000));
     sse2_muldiv255_1x2W(x0xmm, x0xmm, y0xmm);
     y0xmm = _mm_shuffle_epi32(x0xmm, _MM_SHUFFLE(1, 0, 3, 2));
     dst0xmm = _mm_min_epi16(b0xmm, x0xmm);   // dst0xmm = min(Sca, Dca.Sa)
     dst0xmm = _mm_adds_epu8(dst0xmm, y0xmm); // dst0xmm += Dc.(1 - Sa)
-    dst0xmm = _mm_or_si128(dst0xmm, FOG_GET_SSE_CONST_PI(00FF000000000000_00FF000000000000));
+    dst0xmm = _mm_or_si128(dst0xmm, FOG_SSE_GET_CONST_PI(00FF000000000000_00FF000000000000));
   }
 
   static FOG_INLINE void prgb32_op_prgb32_unpacked_2x2W(

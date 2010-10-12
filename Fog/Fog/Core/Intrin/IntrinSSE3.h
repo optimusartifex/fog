@@ -1,11 +1,11 @@
-// [Fog-Core Library - Public API]
+// [Fog-Core]
 //
 // [License]
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_COMPILER_INTRINSSE3_H
-#define _FOG_CORE_COMPILER_INTRINSSE3_H
+#ifndef _FOG_CORE_INTRIN_INTRINSSE3_H
+#define _FOG_CORE_INTRIN_INTRINSSE3_H
 
 // [Dependencies]
 #include <Fog/Core/Intrin/IntrinSSE2.h>
@@ -17,5 +17,5 @@
 #endif
 
 // [Guard]
-#endif // _FOG_CORE_COMPILER_INTRINSSE3_H
+#endif // _FOG_CORE_INTRIN_INTRINSSE3_H
 

@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -12,6 +12,13 @@
 #include <Fog/Graphics/Constants.h>
 
 namespace Fog {
+
+// Defined also by Fog/Graphics/RasterEngine_p.h, we need it for efficient
+// demultiply.
+extern FOG_API const uint32_t raster_demultiply_reciprocal_table_d[256];
+
+// TODO: Remove this file, move low-level functions to Fog-Face framework.
+
 namespace ColorUtil {
 
 //! @addtogroup Fog_Graphics_Other
@@ -31,7 +38,7 @@ static FOG_INLINE uint32_t premultiply(uint32_t x)
   x0 *= a;
   x0 = (x0 + ((x0 >> 8) & FOG_UINT64_C(0x00FF00FF00FF00FF)) + FOG_UINT64_C(0x0080008000800080)) >> 8;
   x0 &= FOG_UINT64_C(0x00FF00FF00FF00FF);
-  return (uint32_t)(x0 | (x0 >> 24));
+  return (uint32_t)(x0 + (x0 >> 24));
 #else
   uint32_t a = x >> 24;
   uint32_t t0 = (x & 0x00FF00FF) * a;
@@ -40,7 +47,7 @@ static FOG_INLINE uint32_t premultiply(uint32_t x)
   t0 = ((t0 + ((t0 >> 8) & 0x00FF00FF) + 0x00800080) >> 8) & 0x00FF00FF;
   t1 = ((t1 + ((t1 >> 8) & 0x0000FF00) + 0x00008000) >> 8) & 0x0000FF00;
 
-  return (a << 24) | t0 | t1;
+  return (a << 24) + t0 + t1;
 #endif
 }
 
@@ -48,12 +55,13 @@ static FOG_INLINE uint32_t premultiply(uint32_t x)
 static FOG_INLINE uint32_t premultiply(uint32_t a, uint32_t r, uint32_t g, uint32_t b)
 {
 #if FOG_ARCH_BITS == 64
-  uint64_t x0 = ((uint64_t)b      ) | ((uint64_t)r << 16)              | 
-                ((uint64_t)g << 32) | FOG_UINT64_C(0x00FF000000000000) ;
+  uint64_t x0 = ((uint64_t)(b             )      ) |
+                ((uint64_t)(r             ) << 16) | 
+                ((uint64_t)(g | 0x00FF0000) << 32) ;
   x0 *= a;
   x0 = (x0 + ((x0 >> 8) & FOG_UINT64_C(0x00FF00FF00FF00FF)) + FOG_UINT64_C(0x0080008000800080)) >> 8;
   x0 &= FOG_UINT64_C(0x00FF00FF00FF00FF);
-  return (uint32_t)(x0 | (x0 >> 24));
+  return (uint32_t)(x0 + (x0 >> 24));
 #else
   uint32_t t0 = (b | (r  << 16)) * a;
   uint32_t t1 = (g | 0x00FF0000) * a;
@@ -61,7 +69,7 @@ static FOG_INLINE uint32_t premultiply(uint32_t a, uint32_t r, uint32_t g, uint3
   t0 = ((t0 + ((t0 >> 8) & 0x00FF00FF) + 0x00800080) >> 8) & 0x00FF00FF;
   t1 = ((t1 + ((t1 >> 8) & 0x00FF00FF) + 0x00800080)     ) & 0xFF00FF00;
 
-  return t0 | t1;
+  return t0 + t1;
 #endif
 }
 
@@ -79,15 +87,8 @@ static FOG_INLINE uint32_t demultiply(uint32_t x)
   g = ((g * recip) >>  8) & 0x0000FF00;
   b = ((b * recip) >> 16) & 0x000000FF;
 
-  return (a << 24) | r | g | b;
+  return (a << 24) + r + g + b;
 }
-
-// ============================================================================
-// [Fog::ColorUtil - ARGB <-> AHSV]
-// ============================================================================
-
-FOG_API Argb argbFromAhsv(const Ahsv& ahsv);
-FOG_API Ahsv ahsvFromArgb(Argb argb);
 
 //! @}
 

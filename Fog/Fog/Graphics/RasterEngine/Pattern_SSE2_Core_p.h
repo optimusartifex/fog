@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Private API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -81,8 +81,8 @@ namespace RasterEngine {
   __w0xmm = _mm_srli_epi16(__w0xmm, 8); \
   __w0xmm = _mm_shufflelo_epi16(__w0xmm, _MM_SHUFFLE(0, 0, 0, 0)); \
   __w0xmm = _mm_shuffle_epi32(__w0xmm, _MM_SHUFFLE(0, 0, 0, 0)); \
-  __w0xmm = _mm_xor_si128(__w0xmm, FOG_GET_SSE_CONST_PI(0000000000000000_FFFFFFFFFFFFFFFF)); \
-  __w0xmm = _mm_add_epi16(__w0xmm, FOG_GET_SSE_CONST_PI(0000000000000000_0101010101010101)); \
+  __w0xmm = _mm_xor_si128(__w0xmm, FOG_SSE_GET_CONST_PI(0000000000000000_FFFFFFFFFFFFFFFF)); \
+  __w0xmm = _mm_add_epi16(__w0xmm, FOG_SSE_GET_CONST_PI(0000000000000000_0101010101010101)); \
   \
   sse2_unpack_1x2W(__x0xmm, __x0xmm); \
   \
@@ -142,8 +142,8 @@ namespace RasterEngine {
   COND \
   sse2_load8(__x1xmm, &colors[pos]); \
   \
-  __w0xmm = _mm_xor_si128(__w0xmm, FOG_GET_SSE_CONST_PI(0000000000000000_FFFFFFFFFFFFFFFF)); \
-  __w0xmm = _mm_add_epi16(__w0xmm, FOG_GET_SSE_CONST_PI(0000000000000000_0101010101010101)); \
+  __w0xmm = _mm_xor_si128(__w0xmm, FOG_SSE_GET_CONST_PI(0000000000000000_FFFFFFFFFFFFFFFF)); \
+  __w0xmm = _mm_add_epi16(__w0xmm, FOG_SSE_GET_CONST_PI(0000000000000000_0101010101010101)); \
   \
   pos = (int)(yy >> 16); yy += ax; \
   COND \
@@ -168,9 +168,9 @@ namespace RasterEngine {
   __w0xmm = _mm_srli_epi16(__w0xmm, 8); \
   \
   __x0xmm = _mm_srli_epi16(__x0xmm, 8); \
-  __w0xmm = _mm_xor_si128(__w0xmm, FOG_GET_SSE_CONST_PI(0000000000000000_FFFFFFFFFFFFFFFF)); \
+  __w0xmm = _mm_xor_si128(__w0xmm, FOG_SSE_GET_CONST_PI(0000000000000000_FFFFFFFFFFFFFFFF)); \
   __x1xmm = _mm_srli_epi16(__x1xmm, 8); \
-  __w0xmm = _mm_add_epi16(__w0xmm, FOG_GET_SSE_CONST_PI(0000000000000000_0101010101010101)); \
+  __w0xmm = _mm_add_epi16(__w0xmm, FOG_SSE_GET_CONST_PI(0000000000000000_0101010101010101)); \
   \
   __x0xmm = _mm_packus_epi16(__x0xmm, __x1xmm); \
   \
@@ -296,33 +296,33 @@ struct FOG_HIDDEN PP_XRGB32_SSE2
 
   FOG_INLINE void preprocess_1x1B(__m128i& pix0)
   {
-    pix0 = _mm_or_si128(pix0, FOG_GET_SSE_CONST_PI(0000000000000000_00000000FF000000));
+    pix0 = _mm_or_si128(pix0, FOG_SSE_GET_CONST_PI(0000000000000000_00000000FF000000));
   }
 
   FOG_INLINE void preprocess_1x2B(__m128i& pix0)
   {
-    pix0 = _mm_or_si128(pix0, FOG_GET_SSE_CONST_PI(0000000000000000_FF000000FF000000));
+    pix0 = _mm_or_si128(pix0, FOG_SSE_GET_CONST_PI(0000000000000000_FF000000FF000000));
   }
 
   FOG_INLINE void preprocess_1x4B(__m128i& pix0)
   {
-    pix0 = _mm_or_si128(pix0, FOG_GET_SSE_CONST_PI(FF000000FF000000_FF000000FF000000));
+    pix0 = _mm_or_si128(pix0, FOG_SSE_GET_CONST_PI(FF000000FF000000_FF000000FF000000));
   }
 
   FOG_INLINE void preprocess_1x1W(__m128i& pix0)
   {
-    pix0 = _mm_or_si128(pix0, FOG_GET_SSE_CONST_PI(00FF000000000000_00FF000000000000));
+    pix0 = _mm_or_si128(pix0, FOG_SSE_GET_CONST_PI(00FF000000000000_00FF000000000000));
   }
 
   FOG_INLINE void preprocess_1x2W(__m128i& pix0)
   {
-    pix0 = _mm_or_si128(pix0, FOG_GET_SSE_CONST_PI(00FF000000000000_00FF000000000000));
+    pix0 = _mm_or_si128(pix0, FOG_SSE_GET_CONST_PI(00FF000000000000_00FF000000000000));
   }
 
   FOG_INLINE void preprocess_2x2W(__m128i& pix0, __m128i& pix1)
   {
-    pix0 = _mm_or_si128(pix0, FOG_GET_SSE_CONST_PI(00FF000000000000_00FF000000000000));
-    pix1 = _mm_or_si128(pix1, FOG_GET_SSE_CONST_PI(00FF000000000000_00FF000000000000));
+    pix0 = _mm_or_si128(pix0, FOG_SSE_GET_CONST_PI(00FF000000000000_00FF000000000000));
+    pix1 = _mm_or_si128(pix1, FOG_SSE_GET_CONST_PI(00FF000000000000_00FF000000000000));
   }
 };
 

@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -54,7 +54,7 @@ struct FOG_HIDDEN Gradient
   {
   }
 
-  FOG_INLINE Gradient(uint32_t type, uint32_t spread, const DoublePoint& start, const DoublePoint& end, const List<ArgbStop>& stops) :
+  FOG_INLINE Gradient(uint32_t type, uint32_t spread, const PointD& start, const PointD& end, const List<ArgbStop>& stops) :
     _type((type < PATTERN_LINEAR_GRADIENT) | (type > PATTERN_CONICAL_GRADIENT) ? PATTERN_LINEAR_GRADIENT : type),
     _spread(spread >= PATTERN_SPREAD_COUNT ? PATTERN_SPREAD_PAD : spread),
     _start(start),
@@ -64,7 +64,7 @@ struct FOG_HIDDEN Gradient
   {
   }
 
-  FOG_INLINE Gradient(uint32_t type, uint32_t spread, const DoublePoint& start, const DoublePoint& end, double radius, const List<ArgbStop>& stops) :
+  FOG_INLINE Gradient(uint32_t type, uint32_t spread, const PointD& start, const PointD& end, double radius, const List<ArgbStop>& stops) :
     _type((type < PATTERN_LINEAR_GRADIENT) | (type > PATTERN_CONICAL_GRADIENT) ? PATTERN_LINEAR_GRADIENT : type),
     _spread(spread >= PATTERN_SPREAD_COUNT ? PATTERN_SPREAD_PAD : spread),
     _start(start),
@@ -112,17 +112,17 @@ struct FOG_HIDDEN Gradient
   // [Points]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const DoublePoint& getStartPoint() const { return _start; }
-  FOG_INLINE const DoublePoint& getEndPoint() const { return _end; }
+  FOG_INLINE const PointD& getStartPoint() const { return _start; }
+  FOG_INLINE const PointD& getEndPoint() const { return _end; }
 
-  FOG_INLINE void setStartPoint(const IntPoint& pt) { _start = pt; }
-  FOG_INLINE void setStartPoint(const DoublePoint& pt) { _start = pt; }
+  FOG_INLINE void setStartPoint(const PointI& pt) { _start = pt; }
+  FOG_INLINE void setStartPoint(const PointD& pt) { _start = pt; }
 
-  FOG_INLINE void setEndPoint(const IntPoint& pt) { _end = pt; }
-  FOG_INLINE void setEndPoint(const DoublePoint& pt) { _end = pt; }
+  FOG_INLINE void setEndPoint(const PointI& pt) { _end = pt; }
+  FOG_INLINE void setEndPoint(const PointD& pt) { _end = pt; }
 
-  FOG_INLINE void setPoints(const IntPoint& startPt, const IntPoint& endPt) { _start = startPt; _end = endPt; }
-  FOG_INLINE void setPoints(const DoublePoint& startPt, const DoublePoint& endPt) { _start = startPt; _end = endPt; }
+  FOG_INLINE void setPoints(const PointI& startPt, const PointI& endPt) { _start = startPt; _end = endPt; }
+  FOG_INLINE void setPoints(const PointD& startPt, const PointD& endPt) { _start = startPt; _end = endPt; }
 
   // --------------------------------------------------------------------------
   // [Radius]
@@ -160,8 +160,8 @@ struct FOG_HIDDEN Gradient
 protected:
   uint32_t _type;
   uint32_t _spread;
-  DoublePoint _start;
-  DoublePoint _end;
+  PointD _start;
+  PointD _end;
   double _radius;
   List<ArgbStop> _stops;
 

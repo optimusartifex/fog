@@ -7,7 +7,7 @@
 // ============================================================================
 
 static cairo_pattern_t* setupCairoPatternForPoint(
-  const Fog::DoublePoint& pt0, const Fog::DoublePoint& pt1, const Fog::Argb& argb)
+  const Fog::PointD& pt0, const Fog::PointD& pt1, const Fog::ArgbI& argb)
 {
   cairo_pattern_t* pattern = cairo_pattern_create_linear(pt0.x, pt0.y, pt1.x, pt1.y);
 
@@ -24,11 +24,11 @@ static cairo_pattern_t* setupCairoPatternForPoint(
 }
 
 static cairo_pattern_t* setupCairoPatternForRect(
-  const Fog::IntRect& rect, const Fog::Argb& argb)
+  const Fog::RectI& rect, const Fog::ArgbI& argb)
 {
   return setupCairoPatternForPoint(
-    Fog::DoublePoint(rect.x, rect.y),
-    Fog::DoublePoint(rect.x + rect.w, rect.y + rect.h),
+    Fog::PointD(rect.x, rect.y),
+    Fog::PointD(rect.x + rect.w, rect.y + rect.h),
     argb);
 }
 
@@ -114,8 +114,8 @@ void CairoModule_FillRect::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++)
     {
-      Fog::IntRect r(r_rect.data[a]);
-      Fog::Argb c(r_argb.data[a]);
+      Fog::RectI r(r_rect.data[a]);
+      Fog::ArgbI c(r_argb.data[a]);
 
       cairo_set_source_rgba(cr,
         (double)c.getRed  () / 255.0,
@@ -130,8 +130,8 @@ void CairoModule_FillRect::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++)
     {
-      Fog::IntRect r(r_rect.data[a]);
-      Fog::Argb c(r_argb.data[a]);
+      Fog::RectI r(r_rect.data[a]);
+      Fog::ArgbI c(r_argb.data[a]);
 
       cairo_pattern_t* pattern = setupCairoPatternForRect(r, c);
       cairo_set_source(cr, pattern);
@@ -168,8 +168,8 @@ void CairoModule_FillRectSubPX::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++, sub += inc)
     {
-      Fog::IntRect r(r_rect.data[a]);
-      Fog::Argb c(r_argb.data[a]);
+      Fog::RectI r(r_rect.data[a]);
+      Fog::ArgbI c(r_argb.data[a]);
 
       cairo_set_source_rgba(cr,
         (double)c.getRed() / 255.0,
@@ -184,8 +184,8 @@ void CairoModule_FillRectSubPX::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++, sub += inc)
     {
-      Fog::IntRect r(r_rect.data[a]);
-      Fog::Argb c(r_argb.data[a]);
+      Fog::RectI r(r_rect.data[a]);
+      Fog::ArgbI c(r_argb.data[a]);
 
       cairo_pattern_t* pattern = setupCairoPatternForRect(r, c);
       cairo_set_source(cr, pattern);
@@ -223,8 +223,8 @@ void CairoModule_FillRectAffine::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++, rot += 0.01)
     {
-      Fog::IntRect r(r_rect.data[a]);
-      Fog::Argb c(r_argb.data[a]);
+      Fog::RectI r(r_rect.data[a]);
+      Fog::ArgbI c(r_argb.data[a]);
 
       cairo_identity_matrix(cr);
       cairo_translate(cr, cx, cy);
@@ -244,8 +244,8 @@ void CairoModule_FillRectAffine::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++, rot += 0.01)
     {
-      Fog::IntRect r(r_rect.data[a]);
-      Fog::Argb c(r_argb.data[a]);
+      Fog::RectI r(r_rect.data[a]);
+      Fog::ArgbI c(r_argb.data[a]);
 
       cairo_identity_matrix(cr);
       cairo_translate(cr, cx, cy);
@@ -284,8 +284,8 @@ void CairoModule_FillRound::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++)
     {
-      Fog::IntRect r(r_rect.data[a]);
-      Fog::Argb c(r_argb.data[a]);
+      Fog::RectI r(r_rect.data[a]);
+      Fog::ArgbI c(r_argb.data[a]);
 
       cairo_set_source_rgba(cr,
         (double)c.getRed() / 255.0,
@@ -300,8 +300,8 @@ void CairoModule_FillRound::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++)
     {
-      Fog::IntRect r(r_rect.data[a]);
-      Fog::Argb c(r_argb.data[a]);
+      Fog::RectI r(r_rect.data[a]);
+      Fog::ArgbI c(r_argb.data[a]);
 
       cairo_pattern_t* pattern = setupCairoPatternForRect(r, c);
       cairo_set_source(cr, pattern);
@@ -319,7 +319,7 @@ Fog::String CairoModule_FillRound::getType()
   return Fog::Ascii8("FillRound");
 }
 
-void CairoModule_FillRound::addRound(cairo_t* cr, Fog::IntRect rect, double radius)
+void CairoModule_FillRound::addRound(cairo_t* cr, Fog::RectI rect, double radius)
 {
   double x0 = rect.x;
   double y0 = rect.y;
@@ -409,8 +409,8 @@ void CairoModule_FillPolygon::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++)
     {
-      Fog::Argb c = r_argb.data[a];
-      const Fog::DoublePoint* polyData = &r_poly.data[a*10];
+      Fog::ArgbI c = r_argb.data[a];
+      const Fog::PointD* polyData = &r_poly.data[a*10];
 
       cairo_set_source_rgba(cr,
         (double)c.getRed() / 255.0,
@@ -433,8 +433,8 @@ void CairoModule_FillPolygon::bench(int quantity)
   {
     for (int a = 0; a < quantity; a++)
     {
-      Fog::Argb c = r_argb.data[a];
-      const Fog::DoublePoint* polyData = &r_poly.data[a*10];
+      Fog::ArgbI c = r_argb.data[a];
+      const Fog::PointD* polyData = &r_poly.data[a*10];
 
       cairo_pattern_t* pattern = setupCairoPatternForPoint(polyData[0], polyData[9], c);
       cairo_set_source(cr, pattern);
@@ -474,7 +474,7 @@ void CairoModule_Image::prepare(int quantity, int sw, int sh)
 
   for (int a = 0; a < NUM_SPRITES; a++)
   {
-    images[a] = sprite[a].scaled(Fog::IntSize(sw, sh));
+    images[a] = sprite[a].scaled(Fog::SizeI(sw, sh));
     images_cairo[a] = cairo_image_surface_create_for_data(
       (unsigned char*)images[a].getFirst(),
       CAIRO_FORMAT_ARGB32,
@@ -621,7 +621,7 @@ void CairoBenchmarkContext::run()
 {
   header();
 
-  const Fog::IntSize* sizes = _master->getSizes().getData();
+  const Fog::SizeI* sizes = _master->getSizes().getData();
   int quantity = _master->_quantity;
   sysuint_t s;
 

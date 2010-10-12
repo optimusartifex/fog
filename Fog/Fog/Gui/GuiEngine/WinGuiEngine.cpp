@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -77,7 +77,7 @@ namespace Fog {
 #define GUI_ENGINE() \
   reinterpret_cast<WinGuiEngine*>(Application::getInstance()->getGuiEngine())
 
-static void hwndGetRect(HWND handle, IntRect* out)
+static void hwndGetRect(HWND handle, RectI* out)
 {
   RECT wr;
   RECT cr;
@@ -404,7 +404,7 @@ void WinGuiEngine::updateDisplayInfo()
 // [Fog::WinGuiEngine - Update]
 // ============================================================================
 
-void WinGuiEngine::doBlitWindow(GuiWindow* window, const IntBox* rects, sysuint_t count)
+void WinGuiEngine::doBlitWindow(GuiWindow* window, const BoxI* rects, sysuint_t count)
 {
   Widget* w = window->getWidget();
 
@@ -1253,7 +1253,7 @@ err_t WinGuiWindow::hide()
   return ERR_OK;
 }
 
-err_t WinGuiWindow::setPosition(const IntPoint& pos)
+err_t WinGuiWindow::setPosition(const PointI& pos)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
@@ -1265,7 +1265,7 @@ err_t WinGuiWindow::setPosition(const IntPoint& pos)
   return ERR_OK;
 }
 
-err_t WinGuiWindow::setSize(const IntSize& size)
+err_t WinGuiWindow::setSize(const SizeI& size)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
   if ((size.getWidth() <= 0) | (size.getHeight() <= 0)) return ERR_RT_INVALID_ARGUMENT;
@@ -1283,7 +1283,7 @@ err_t WinGuiWindow::setSize(const IntSize& size)
   return ERR_OK;
 }
 
-err_t WinGuiWindow::setGeometry(const IntRect& geometry)
+err_t WinGuiWindow::setGeometry(const RectI& geometry)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
   if (!geometry.isValid()) return ERR_RT_INVALID_ARGUMENT;
@@ -1343,7 +1343,7 @@ err_t WinGuiWindow::getIcon(Image& icon)
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t WinGuiWindow::setSizeGranularity(const IntPoint& pt)
+err_t WinGuiWindow::setSizeGranularity(const PointI& pt)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
@@ -1351,7 +1351,7 @@ err_t WinGuiWindow::setSizeGranularity(const IntPoint& pt)
   return ERR_OK;
 }
 
-err_t WinGuiWindow::getSizeGranularity(IntPoint& pt)
+err_t WinGuiWindow::getSizeGranularity(PointI& pt)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
@@ -1359,7 +1359,7 @@ err_t WinGuiWindow::getSizeGranularity(IntPoint& pt)
   return ERR_OK;
 }
 
-err_t WinGuiWindow::worldToClient(IntPoint* coords)
+err_t WinGuiWindow::worldToClient(PointI* coords)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
@@ -1368,7 +1368,7 @@ err_t WinGuiWindow::worldToClient(IntPoint* coords)
     : (err_t)ERR_GUI_CANT_TRANSLETE_COORDINATES;
 }
 
-err_t WinGuiWindow::clientToWorld(IntPoint* coords)
+err_t WinGuiWindow::clientToWorld(PointI* coords)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
@@ -1624,8 +1624,8 @@ LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
       case WM_USER:
       {
         // Message is sent to create a onGeometry on maximized application start.
-        IntRect wr;
-        IntRect cr;
+        RectI wr;
+        RectI cr;
         getWindowRect(&wr, &cr);
         onGeometry(wr, cr);
         return 0;
@@ -1696,8 +1696,8 @@ LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
           }
         }
 
-        IntRect wr;
-        IntRect cr;
+        RectI wr;
+        RectI cr;
         getWindowRect(&wr, &cr);
         onGeometry(wr, cr);
         return 0;
@@ -1772,7 +1772,7 @@ defWindowProc:
   return DefWindowProc(hwnd, message, wParam, lParam);
 }
 
-void WinGuiWindow::getWindowRect(IntRect* windowRect, IntRect* clientRect)
+void WinGuiWindow::getWindowRect(RectI* windowRect, RectI* clientRect)
 {
   RECT wr;
   RECT cr;
@@ -1931,12 +1931,12 @@ void WinGuiBackBuffer::destroy()
   resize(0, 0, false);
 }
 
-void WinGuiBackBuffer::updateRects(const IntBox* rects, sysuint_t count)
+void WinGuiBackBuffer::updateRects(const BoxI* rects, sysuint_t count)
 {
   // There is nothing to do (this is mainly for X11).
 }
 
-void WinGuiBackBuffer::blitRects(HDC target, const IntBox* rects, sysuint_t count)
+void WinGuiBackBuffer::blitRects(HDC target, const BoxI* rects, sysuint_t count)
 {
   sysuint_t i;
 

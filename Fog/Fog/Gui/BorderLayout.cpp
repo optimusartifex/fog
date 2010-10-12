@@ -1,4 +1,4 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -209,7 +209,7 @@ void BorderLayout::calculateLayoutHint(LayoutHint& hint)
 
 #define CLEAN(VAR, MIN, MAX) VAR = VAR < MIN ? MIN : ( VAR > MAX ? MAX : VAR)
 
-void BorderLayout::setLayoutGeometry(const IntRect& rect)
+void BorderLayout::setLayoutGeometry(const RectI& rect)
 {
   int availWidth = rect.getWidth();
   int availHeight = rect.getHeight();
@@ -315,7 +315,7 @@ void BorderLayout::setLayoutGeometry(const IntRect& rect)
       availWidth -= used;
     }
 
-    item->setLayoutGeometry(IntRect(left,top,width,height));
+    item->setLayoutGeometry(RectI(left,top,width,height));
   }
 
   if (_center)
@@ -325,7 +325,7 @@ void BorderLayout::setLayoutGeometry(const IntRect& rect)
     CLEAN(width, _center->getLayoutMinimumSize().getWidth(), _center->getLayoutMaximumSize().getWidth());
     CLEAN(height, _center->getLayoutMinimumSize().getHeight(), _center->getLayoutMaximumSize().getHeight());
 
-    _center->setLayoutGeometry(IntRect(curLeft + _center->getContentLeftMargin(),curTop + _center->getContentTopMargin(),width,height));
+    _center->setLayoutGeometry(RectI(curLeft + _center->getContentLeftMargin(),curTop + _center->getContentTopMargin(),width,height));
   }
 }
 

@@ -1,4 +1,4 @@
-// [Fog-Graphics Library - Public API]
+// [Fog-Graphics]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -35,7 +35,7 @@ struct ColorMatrix;
 struct ConvolveParams;
 struct ImageFilter;
 struct ImageFilterBase;
-struct IntRect;
+struct RectI;
 
 //! @brief Base class for @c ImageFilter and @c ColorFilter.
 //!

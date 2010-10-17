@@ -97,6 +97,7 @@ struct FOG_HIDDEN FontFaceEntry
     size = other.size;
     options = other.options;
     transform = other.transform;
+    return *this;
   }
 
   FOG_INLINE bool operator==(const FontFaceEntry& other) const

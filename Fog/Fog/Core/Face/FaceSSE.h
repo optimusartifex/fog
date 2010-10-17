@@ -14,7 +14,7 @@
 
 #include <Fog/Core/Intrin/IntrinSSE.h>
 #if defined(FOG_FACE_HAS_SSE2)
-#include <Fog/Code/Intrin/IntrinSSE2.h>
+#include <Fog/Core/Intrin/IntrinSSE2.h>
 #endif // FOG_FACE_HAS_SSE2
 
 // ============================================================================

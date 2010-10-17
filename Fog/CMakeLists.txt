@@ -160,14 +160,11 @@ EndIf(UNIX)
 If(WIN32)
   Set(FOG_OS_WINDOWS TRUE)
   Add_Definitions(-D_UNICODE)
+ElseIf(APPLE)
+  Set(FOG_OS_MAC TRUE)
 Else(WIN32)
   Set(FOG_OS_POSIX TRUE)
 EndIf(WIN32)
-
-If(APPLE)
-  Set(FOG_OS_MAC TRUE)
-  Set(FOG_LIBRARIES "${FOG_LIBRARIES} -framework Cocoa")
-EndIf(APPLE)
 
 # =============================================================================
 # [Windows specific setup]
@@ -176,6 +173,14 @@ EndIf(APPLE)
 If(FOG_OS_WINDOWS)
   Set(FOG_LIBRARIES ${FOG_LIBRARIES} user32 gdi32 advapi32 winmm uuid)
 EndIf(FOG_OS_WINDOWS)
+
+# =============================================================================
+# [Mac specific setup]
+# =============================================================================
+
+If(FOG_OS_MAC)
+  Set(FOG_LIBRARIES "${FOG_LIBRARIES} -framework Cocoa")
+EndIf(FOG_OS_MAC)
 
 # =============================================================================
 # [Dynamic loadable library support]

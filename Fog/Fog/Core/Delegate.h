@@ -22,6 +22,9 @@
 // - Renamed Delegate.GetMemento -> Delegate.memento
 // - Renamed Delegate.SetMemento -> Delegate.setMemento
 // - Added macros to translate DELEGATEXXX -> Fog::DelegateXXX
+// - Changed #ifdef FASTDLGT_MICROSOFT_MFP -> #ifdef  FASTDLGT_MICROSOFT_MFP || __clang__
+//   since class GenericClass also doesn't work with clang. 
+
 
 // ----------------------------------------------------------------------------
 // BIG THANKS TO Don Clugston for creating and licencing this file
@@ -292,7 +295,7 @@ struct VoidToDefaultVoid<void> { typedef DefaultVoid type; };
 // code if it knows the class only uses single inheritance.
 
 // Compilers using Microsoft's structure need to be treated as a special case.
-#ifdef  FASTDLGT_MICROSOFT_MFP
+#ifdef  FASTDLGT_MICROSOFT_MFP || __clang__
 
 #ifdef FASTDLGT_HASINHERITANCE_KEYWORDS
   // For Microsoft and Intel, we want to ensure that it's the most efficient type of MFP 

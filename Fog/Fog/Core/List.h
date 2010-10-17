@@ -12,6 +12,7 @@
 #include <Fog/Core/Assert.h>
 #include <Fog/Core/Atomic.h>
 #include <Fog/Core/Char.h>
+#include <Fog/Core/String.h>
 #include <Fog/Core/Constants.h>
 #include <Fog/Core/Memory.h>
 #include <Fog/Core/SequenceInfo.h>

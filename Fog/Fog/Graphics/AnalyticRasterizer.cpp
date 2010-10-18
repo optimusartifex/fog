@@ -143,7 +143,7 @@ err_t AnalyticRasterizer8::initialize()
   _isValid = false;
 
   _size.set(_clipBox.getWidth(), _clipBox.getHeight());
-  _size24x8.set(_size.w << POLY_SUBPIXEL_SHIFT, _size.h << POLY_SUBPIXEL_SHIFT);
+  _size24x8.set((_size.w - 1) << POLY_SUBPIXEL_SHIFT, (_size.h - 1) << POLY_SUBPIXEL_SHIFT);
   _offset24x8.set((-_clipBox.x1) << POLY_SUBPIXEL_SHIFT, (-_clipBox.y1) << POLY_SUBPIXEL_SHIFT);
 
   _sweepScanlineSimpleFn = NULL;
@@ -212,6 +212,9 @@ err_t AnalyticRasterizer8::finalize()
   // Normalize bounding box to our standard, x2/y2 coordinates are outside.
   _boundingBox.x2++;
   _boundingBox.y2++;
+
+  FOG_ASSERT(_boundingBox.x2 <= _clipBox.x2);
+  FOG_ASSERT(_boundingBox.y2 <= _clipBox.y2);
 
   _isFinalized = true;
   _isValid = true;
@@ -1046,7 +1049,7 @@ static FOG_INLINE void swapCells(CELL* FOG_RESTRICT a, CELL* FOG_RESTRICT b)
   *b = temp;
 }
 
-template<class CELL>
+template<typename CELL>
 static FOG_INLINE void qsortCells(CELL* start, uint32_t num)
 {
   CELL*  stack[80];

@@ -2478,10 +2478,10 @@ static bool FOG_FASTCALL _G2d_TransformF_invert(TransformF& self, const Transfor
 
       double t00 =  (double)a._11 * d;
       double t01 = -(double)a._01 * d;
-      double t10 =  (double)a._00 * d;
-      double t11 = -(double)a._10 * d;
-      double t20 =  (double)a._20 * t00 - (double)a._21 * t10;
-      double t21 =  (double)a._20 * t01 - (double)a._21 * t11;
+      double t10 = -(double)a._10 * d;
+      double t11 =  (double)a._00 * d;
+      double t20 = -(double)a._20 * t00 - (double)a._21 * t10;
+      double t21 = -(double)a._20 * t01 - (double)a._21 * t11;
 
       self._setData(a._type,
         (float)t00, (float)t01, 0.0f,
@@ -2582,10 +2582,10 @@ static bool FOG_FASTCALL _G2d_TransformD_invert(TransformD& self, const Transfor
 
       double t00 =  a._11 * d;
       double t01 = -a._01 * d;
-      double t10 =  a._00 * d;
-      double t11 = -a._10 * d;
-      double t20 =  a._20 * t00 - a._21 * t10;
-      double t21 =  a._20 * t01 - a._21 * t11;
+      double t10 = -a._10 * d;
+      double t11 =  a._00 * d;
+      double t20 = -a._20 * t00 - a._21 * t10;
+      double t21 = -a._20 * t01 - a._21 * t11;
 
       self._setData(a._type,
         t00, t01, 0.0,

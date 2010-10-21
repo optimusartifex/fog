@@ -2844,9 +2844,15 @@ err_t RasterPaintEngine::_serializePaintImageAffine(const PointD& pt, const Imag
   // Create new transformation matrix (based on current matrix and point
   // where the image should be drawn).
   const TransformD& tr = ctx.finalTransform;
-  PointD pt_;
-  tr.mapPoint(pt_, pt);
-  TransformD matrix(tr._00, tr._01, tr._10, tr._11, pt_.x, pt_.y);
+  TransformD matrix(tr);
+
+  // TODO: Correct in all cases?
+  matrix.translate(pt);
+
+  // FIXME: Remove, old transform code, not works with perspective...
+  //PointD pt_;
+  //tr.mapPoint(pt_, pt);
+  //TransformD matrix(tr._00, tr._01, tr._10, tr._11, pt_.x, pt_.y);
 
   // Make the path.
   curPath.clear();

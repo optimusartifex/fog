@@ -1115,7 +1115,7 @@ fetchDone:
       P_FETCH_SPAN8_HOLE(
       {
         fx += dx * hole;
-        fy += fy * hole;
+        fy += dy * hole;
 
         if ((fx <= -fxmax) | (fx >= fxmax)) fx %= fxmax;
         if ((fy <= -fymax) | (fy >= fymax)) fy %= fymax;

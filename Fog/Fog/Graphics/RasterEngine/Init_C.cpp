@@ -65,9 +65,7 @@
 #include <Fog/Graphics/RasterEngine/Pattern_C_Texture_p.h>
 #include <Fog/Graphics/RasterEngine/Filters_C_p.h>
 
-// Decide whether pure C implementation is needed. In case that we are compiling
-// for SSE2-only machine, we can omit C/MMX implementation that will result in
-// a smaller binary size of the library.
+// We can disable C implementation when hardcoding for SSE2.
 #if !defined(FOG_HARDCODE_SSE2)
 # define FOG_RASTERUTIL_INIT_C
 #endif // FOG_HARDCODE_SSE2

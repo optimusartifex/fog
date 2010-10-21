@@ -805,7 +805,7 @@ err_t PathStrokerPrivate::stroke(const PointD* src, sysuint_t count, bool outlin
   for (i = count - 1, cur = src, dist = distances; i; i--, cur++, dist++)
   {
     double d = Math::dist(cur[0].x, cur[0].y, cur[1].x, cur[1].y);
-    if (d <= PATH_VERTEX_DIST_EPSILON) d = 0.0;
+    if (d <= PATH_VERTEX_DIST_EPSILON_D) d = 0.0;
 
     dist[0] = d;
   }
@@ -825,14 +825,14 @@ err_t PathStrokerPrivate::stroke(const PointD* src, sysuint_t count, bool outlin
   // [Outline]
   // --------------------------------------------------------------------------
 
-#define IS_DEGENERATED_DIST(__dist__) ((__dist__) <= PATH_VERTEX_DIST_EPSILON)
+#define IS_DEGENERATED_DIST(__dist__) ((__dist__) <= PATH_VERTEX_DIST_EPSILON_D)
 
   if (outline)
   {
     // We need also to calc distance between first and last point.
     {
       double d = Math::dist(src[0].x, src[0].y, src[count-1].x, src[count-1].y);
-      if (d <= PATH_VERTEX_DIST_EPSILON) d = 0.0;
+      if (d <= PATH_VERTEX_DIST_EPSILON_D) d = 0.0;
 
       distances[count - 1] = d;
     }

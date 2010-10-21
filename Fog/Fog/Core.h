@@ -335,6 +335,7 @@ struct Implicit
 #include <Fog/Core/DirIterator.h>
 #include <Fog/Core/Event.h>
 #include <Fog/Core/EventLoop.h>
+#include <Fog/Core/Error.h>
 #include <Fog/Core/FileSystem.h>
 #include <Fog/Core/Format.h>
 #include <Fog/Core/Hash.h>

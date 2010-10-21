@@ -2249,12 +2249,11 @@ err_t RasterPaintEngine::_updateMatrix(bool translationChangedOnly)
 
     ctx.hints.transformType = (uint8_t)transformType;
 
-    // sqrt(2.0)/2 ~~ 0.7071068
     if (transformType >= RASTER_TRANSFORM_AFFINE)
     {
       double x = ctx.finalTransform._00 + ctx.finalTransform._10;
       double y = ctx.finalTransform._01 + ctx.finalTransform._11;
-      ctx.approximationScale = Math::sqrt(x * x + y * y) * 0.7071068;
+      ctx.approximationScale = Math::sqrt(x * x + y * y) * MATH_1_DIV_SQRT2;
     }
     else
     {

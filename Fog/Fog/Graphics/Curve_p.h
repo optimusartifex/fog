@@ -10,27 +10,9 @@
 // [Dependencies]
 #include <Fog/Graphics/Constants.h>
 #include <Fog/Graphics/Funcs.h>
+#include <Fog/Graphics/Geometry.h>
 
 namespace Fog {
-
-// ============================================================================
-// [Fog::Curve::Structures]
-// ============================================================================
-
-struct CurveDApproximate3Data
-{
-  double x1, y1;
-  double x2, y2;
-  double x3, y3;
-};
-
-struct CurveDApproximate4Data
-{
-  double x1, y1;
-  double x2, y2;
-  double x3, y3;
-  double x4, y4;
-};
 
 //! @addtogroup Fog_Graphics_Geometry
 //! @{
@@ -40,10 +22,10 @@ struct CurveDApproximate4Data
 // ============================================================================
 
 //! @brief Coinciding points maximal distance (Epsilon).
-static const double PATH_VERTEX_DIST_EPSILON = 1.0e-14;
+static const double PATH_VERTEX_DIST_EPSILON_D = 1.0e-14;
 
 //! @brief See calcIntersection (Epsilon).
-static const double INTERSECTION_EPSILON = 1.0e-30;
+static const double INTERSECTION_EPSILON_D = 1.0e-30;
 
 //! @brief This epsilon is used to prevent us from adding degenerate curves
 //! (converging to a single point).
@@ -53,9 +35,9 @@ static const double INTERSECTION_EPSILON = 1.0e-30;
 //! becomes inaccurate. But slight exceeding is quite appropriate.
 static const double CURVE_ARC_ANGLE_EPSILON_D = 0.01;
 
-static const double CURVE_DISTANCE_EPSILON = 1e-30;
-static const double CURVE_COLLINEARITY_EPSILON = 1e-30;
-static const double CURVE_ANGLE_TOLERANCE_EPSILON = 0.01;
+static const double CURVE_DISTANCE_EPSILON_D = 1e-30;
+static const double CURVE_COLLINEARITY_EPSILON_D = 1e-30;
+static const double CURVE_ANGLE_TOLERANCE_EPSILON_D = 0.01;
 
 // ============================================================================
 // [Fog::Curve::Helpers]
@@ -77,10 +59,12 @@ static FOG_INLINE bool calcIntersection(
 {
   double num = (ay-cy) * (dx-cx) - (ax-cx) * (dy-cy);
   double den = (bx-ax) * (dy-cy) - (by-ay) * (dx-cx);
-  if (Math::abs(den) < INTERSECTION_EPSILON) return false;
+  if (Math::abs(den) < INTERSECTION_EPSILON_D) return false;
+
   double r = num / den;
   *x = ax + r * (bx-ax);
   *y = ay + r * (by-ay);
+
   return true;
 }
 
@@ -93,19 +77,73 @@ static FOG_INLINE double crossProduct(
 }
 
 // ============================================================================
-// [Fog::CurveF]
+// [Fog::QuadCurveF]
 // ============================================================================
 
-struct FOG_HIDDEN CurveF
+struct FOG_HIDDEN QuadCurveF
 {
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  PointF p[3];
 };
 
 // ============================================================================
-// [Fog::CurveD]
+// [Fog::QuadCurveD]
 // ============================================================================
 
-struct FOG_HIDDEN CurveD
+struct FOG_HIDDEN QuadCurveD
 {
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t approximate(PathD& dst, uint8_t initialCommand, double approximationScale) const
+  {
+    return _g2d.quadcurved.approximate(p, dst, initialCommand, approximationScale);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  PointD p[3];
+};
+
+// ============================================================================
+// [Fog::CubicCurveF]
+// ============================================================================
+
+struct FOG_HIDDEN CubicCurveF
+{
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  PointF p[4];
+};
+
+// ============================================================================
+// [Fog::CubicCurveD]
+// ============================================================================
+
+struct FOG_HIDDEN CubicCurveD
+{
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t approximate(PathD& dst, uint8_t initialCommand, double approximationScale) const
+  {
+    return _g2d.cubiccurved.approximate(p, dst, initialCommand, approximationScale);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  PointD p[4];
 };
 
 //! @}

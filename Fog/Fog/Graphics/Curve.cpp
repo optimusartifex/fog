@@ -32,9 +32,7 @@
 
 namespace Fog {
 
-// Decide whether pure C implementation is needed. In case that we are compiling
-// for SSE2-only machine, we can omit C implementation that will result in
-// smaller binary size of the library.
+// We can disable C implementation when hardcoding for SSE2.
 #if !defined(FOG_HARDCODE_SSE2)
 # define FOG_CURVE_INIT_C
 #endif // FOG_HARDCODE_SSE2
@@ -61,12 +59,12 @@ static err_t FOG_FASTCALL _G2d_QuadCurveD_approximate(
 {
   double distanceToleranceSquare = Math::pow2(0.5 / approximationScale);
   double angleTolerance = 0.0;
-  double x1 = self[0].x;
-  double y1 = self[0].y;
-  double x2 = self[1].x;
-  double y2 = self[1].y;
-  double x3 = self[2].x;
-  double y3 = self[2].y;
+  double x0 = self[0].x;
+  double y0 = self[0].y;
+  double x1 = self[1].x;
+  double y1 = self[1].y;
+  double x2 = self[2].x;
+  double y2 = self[2].y;
 
   sysuint_t initialLength = dst._d->length;
   sysuint_t level = 0;
@@ -74,7 +72,8 @@ static err_t FOG_FASTCALL _G2d_QuadCurveD_approximate(
   PointD* curVertex;
   PointD* endVertex;
 
-  CurveDApproximate3Data stack[CURVE_APPROXIMATE3_RECURSION_LIMIT];
+  PointD _stack[CURVE_APPROXIMATE3_RECURSION_LIMIT * 3];
+  PointD* stack = _stack;
 
 realloc:
   {
@@ -100,39 +99,39 @@ realloc:
     }
 
     // Calculate all the mid-points of the line segments.
+    double x01   = (x0 + x1) * 0.5;
+    double y01   = (y0 + y1) * 0.5;
     double x12   = (x1 + x2) * 0.5;
     double y12   = (y1 + y2) * 0.5;
-    double x23   = (x2 + x3) * 0.5;
-    double y23   = (y2 + y3) * 0.5;
-    double x123  = (x12 + x23) * 0.5;
-    double y123  = (y12 + y23) * 0.5;
+    double x012  = (x01 + x12) * 0.5;
+    double y012  = (y01 + y12) * 0.5;
 
-    double dx = x3-x1;
-    double dy = y3-y1;
-    double d = Math::abs(((x2 - x3) * dy - (y2 - y3) * dx));
+    double dx = x2-x0;
+    double dy = y2-y0;
+    double d = Math::abs(((x1 - x2) * dy - (y1 - y2) * dx));
     double da;
 
-    if (d > CURVE_COLLINEARITY_EPSILON)
+    if (d > CURVE_COLLINEARITY_EPSILON_D)
     {
       // Regular case.
       if (d * d <= distanceToleranceSquare * (dx*dx + dy*dy))
       {
         // If the curvature doesn't exceed the distanceTolerance value
         // we tend to finish subdivisions.
-        if (angleTolerance < CURVE_ANGLE_TOLERANCE_EPSILON)
+        if (angleTolerance < CURVE_ANGLE_TOLERANCE_EPSILON_D)
         {
-          ADD_VERTEX(x123, y123);
+          ADD_VERTEX(x012, y012);
           goto ret;
         }
 
         // Angle & Cusp Condition.
-        da = Math::abs(Math::atan2(y3 - y2, x3 - x2) - Math::atan2(y2 - y1, x2 - x1));
+        da = Math::abs(Math::atan2(y2 - y1, x2 - x1) - Math::atan2(y1 - y0, x1 - x0));
         if (da >= MATH_PI) da = 2.0 * MATH_PI - da;
 
         if (da < angleTolerance)
         {
           // Finally we can stop the recursion.
-          ADD_VERTEX(x123, y123);
+          ADD_VERTEX(x012, y012);
           goto ret;
         }
       }
@@ -143,11 +142,11 @@ realloc:
       da = dx*dx + dy*dy;
       if (da == 0)
       {
-        d = calcSqDistance(x1, y1, x2, y2);
+        d = calcSqDistance(x0, y0, x1, y1);
       }
       else
       {
-        d = ((x2 - x1)*dx + (y2 - y1)*dy) / da;
+        d = ((x1 - x0)*dx + (y1 - y0)*dy) / da;
 
         if (d > 0 && d < 1)
         {
@@ -157,15 +156,15 @@ realloc:
         }
 
         if (d <= 0)
-          d = calcSqDistance(x2, y2, x1, y1);
+          d = calcSqDistance(x1, y1, x0, y0);
         else if (d >= 1)
-          d = calcSqDistance(x2, y2, x3, y3);
+          d = calcSqDistance(x1, y1, x2, y2);
         else
-          d = calcSqDistance(x2, y2, x1 + d*dx, y1 + d*dy);
+          d = calcSqDistance(x1, y1, x0 + d*dx, y0 + d*dy);
       }
       if (d < distanceToleranceSquare)
       {
-        ADD_VERTEX(x2, y2);
+        ADD_VERTEX(x1, y1);
         goto ret;
       }
     }
@@ -173,48 +172,49 @@ realloc:
     // Continue subdivision.
     //
     // Original code from antigrain was:
-    //   recursive_bezier(x1, y1, x12, y12, x123, y123, level + 1);
-    //   recursive_bezier(x123, y123, x23, y23, x3, y3, level + 1);
+    //   recursive_bezier(x0, y0, x01, y01, x012, y012, level + 1);
+    //   recursive_bezier(x012, y012, x12, y12, x2, y2, level + 1);
     //
-    // First recursive subdivision will be set into x1, y1, x2, y2, x3, y3,
+    // First recursive subdivision will be set into x0, y0, x1, y1, x2, y2,
     // second subdivision will be added into stack.
 
     if (level < CURVE_APPROXIMATE3_RECURSION_LIMIT)
     {
-      stack[level].x1 = x123;
-      stack[level].y1 = y123;
-      stack[level].x2 = x23;
-      stack[level].y2 = y23;
-      stack[level].x3 = x3;
-      stack[level].y3 = y3;
+      stack[0].set(x012, y012);
+      stack[1].set(x12 , y12 );
+      stack[2].set(x2  , y2  );
+
+      stack += 3;
       level++;
 
-      x2 = x12;
-      y2 = y12;
-      x3 = x123;
-      y3 = y123;
+      x1 = x01;
+      y1 = y01;
+      x2 = x012;
+      y2 = y012;
 
       continue;
     }
     else
     {
-      if (Math::isNaN(x123)) goto invalidNumber;
+      if (Math::isNaN(x012)) goto invalidNumber;
     }
 
 ret:
     if (level == 0) break;
 
+    stack -= 3;
     level--;
-    x1 = stack[level].x1;
-    y1 = stack[level].y1;
-    x2 = stack[level].x2;
-    y2 = stack[level].y2;
-    x3 = stack[level].x3;
-    y3 = stack[level].y3;
+
+    x0 = stack[0].x;
+    y0 = stack[0].y;
+    x1 = stack[1].x;
+    y1 = stack[1].y;
+    x2 = stack[2].x;
+    y2 = stack[2].y;
   }
 
   // Add end point.
-  ADD_VERTEX(x3, y3);
+  ADD_VERTEX(x2, y2);
 
   {
     // Update dst length.
@@ -258,14 +258,14 @@ static err_t FOG_FASTCALL _G2d_CubicCurveD_approximate(
   double distanceToleranceSquare = Math::pow2(0.5 / approximationScale);
   double angleTolerance = 0.0;
   double cuspLimit = 0.0;
-  double x1 = self[0].x;
-  double y1 = self[0].y;
-  double x2 = self[1].x;
-  double y2 = self[1].y;
-  double x3 = self[2].x;
-  double y3 = self[2].y;
-  double x4 = self[3].x;
-  double y4 = self[3].y;
+  double x0 = self[0].x;
+  double y0 = self[0].y;
+  double x1 = self[1].x;
+  double y1 = self[1].y;
+  double x2 = self[2].x;
+  double y2 = self[2].y;
+  double x3 = self[3].x;
+  double y3 = self[3].y;
 
   sysuint_t initialLength = dst._d->length;
   sysuint_t level = 0;
@@ -273,7 +273,8 @@ static err_t FOG_FASTCALL _G2d_CubicCurveD_approximate(
   PointD* curVertex;
   PointD* endVertex;
 
-  CurveDApproximate4Data stack[CURVE_APPROXIMATE4_RECURSION_LIMIT];
+  PointD _stack[CURVE_APPROXIMATE4_RECURSION_LIMIT * 4];
+  PointD* stack = _stack;
 
 realloc:
   {
@@ -299,46 +300,46 @@ realloc:
     }
 
     // Calculate all the mid-points of the line segments.
+    double x01   = (x0 + x1) * 0.5;
+    double y01   = (y0 + y1) * 0.5;
     double x12   = (x1 + x2) * 0.5;
     double y12   = (y1 + y2) * 0.5;
     double x23   = (x2 + x3) * 0.5;
     double y23   = (y2 + y3) * 0.5;
-    double x34   = (x3 + x4) * 0.5;
-    double y34   = (y3 + y4) * 0.5;
+    double x012  = (x01 + x12) * 0.5;
+    double y012  = (y01 + y12) * 0.5;
     double x123  = (x12 + x23) * 0.5;
     double y123  = (y12 + y23) * 0.5;
-    double x234  = (x23 + x34) * 0.5;
-    double y234  = (y23 + y34) * 0.5;
-    double x1234 = (x123 + x234) * 0.5;
-    double y1234 = (y123 + y234) * 0.5;
+    double x0123 = (x012 + x123) * 0.5;
+    double y0123 = (y012 + y123) * 0.5;
 
     // Try to approximate the full cubic curve by a single straight line.
-    double dx = x4 - x1;
-    double dy = y4 - y1;
+    double dx = x3 - x0;
+    double dy = y3 - y0;
 
-    double d2 = Math::abs(((x2 - x4) * dy - (y2 - y4) * dx));
-    double d3 = Math::abs(((x3 - x4) * dy - (y3 - y4) * dx));
+    double d2 = Math::abs(((x1 - x3) * dy - (y1 - y3) * dx));
+    double d3 = Math::abs(((x2 - x3) * dy - (y2 - y3) * dx));
     double da1, da2, k;
 
-    switch ((int(d2 > CURVE_COLLINEARITY_EPSILON) << 1) +
-             int(d3 > CURVE_COLLINEARITY_EPSILON))
+    switch ((int(d2 > CURVE_COLLINEARITY_EPSILON_D) << 1) +
+             int(d3 > CURVE_COLLINEARITY_EPSILON_D))
     {
       // All collinear OR p1 == p4.
       case 0:
         k = dx*dx + dy*dy;
         if (k == 0)
         {
-          d2 = calcSqDistance(x1, y1, x2, y2);
-          d3 = calcSqDistance(x4, y4, x3, y3);
+          d2 = calcSqDistance(x0, y0, x1, y1);
+          d3 = calcSqDistance(x3, y3, x2, y2);
         }
         else
         {
           k   = 1.0 / k;
-          da1 = x2 - x1;
-          da2 = y2 - y1;
+          da1 = x1 - x0;
+          da2 = y1 - y0;
           d2  = k * (da1 * dx + da2 * dy);
-          da1 = x3 - x1;
-          da2 = y3 - y1;
+          da1 = x2 - x0;
+          da2 = y2 - y0;
           d3  = k * (da1 * dx + da2 * dy);
 
           if (d2 > 0 && d2 < 1 && d3 > 0 && d3 < 1)
@@ -349,25 +350,25 @@ realloc:
           }
 
           if (d2 <= 0)
-            d2 = calcSqDistance(x2, y2, x1, y1);
+            d2 = calcSqDistance(x1, y1, x0, y0);
           else if (d2 >= 1)
-            d2 = calcSqDistance(x2, y2, x4, y4);
+            d2 = calcSqDistance(x1, y1, x3, y3);
           else
-            d2 = calcSqDistance(x2, y2, x1 + d2*dx, y1 + d2*dy);
+            d2 = calcSqDistance(x1, y1, x0 + d2*dx, y0 + d2*dy);
 
           if (d3 <= 0)
-            d3 = calcSqDistance(x3, y3, x1, y1);
+            d3 = calcSqDistance(x2, y2, x0, y0);
           else if (d3 >= 1)
-            d3 = calcSqDistance(x3, y3, x4, y4);
+            d3 = calcSqDistance(x2, y2, x3, y3);
           else
-            d3 = calcSqDistance(x3, y3, x1 + d3*dx, y1 + d3*dy);
+            d3 = calcSqDistance(x2, y2, x0 + d3*dx, y0 + d3*dy);
         }
 
         if (d2 > d3)
         {
           if (d2 < distanceToleranceSquare)
           {
-            ADD_VERTEX(x2, y2);
+            ADD_VERTEX(x1, y1);
             goto ret;
           }
         }
@@ -375,7 +376,7 @@ realloc:
         {
           if (d3 < distanceToleranceSquare)
           {
-            ADD_VERTEX(x3, y3);
+            ADD_VERTEX(x2, y2);
             goto ret;
           }
         }
@@ -385,20 +386,20 @@ realloc:
     case 1:
       if (d3 * d3 <= distanceToleranceSquare * (dx*dx + dy*dy))
       {
-        if (angleTolerance < CURVE_ANGLE_TOLERANCE_EPSILON)
+        if (angleTolerance < CURVE_ANGLE_TOLERANCE_EPSILON_D)
         {
-          ADD_VERTEX(x23, y23);
+          ADD_VERTEX(x12, y12);
           goto ret;
         }
 
         // Angle Condition.
-        da1 = Math::abs(Math::atan2(y4 - y3, x4 - x3) - Math::atan2(y3 - y2, x3 - x2));
+        da1 = Math::abs(Math::atan2(y3 - y2, x3 - x2) - Math::atan2(y2 - y1, x2 - x1));
         if (da1 >= MATH_PI) da1 = 2.0 * MATH_PI - da1;
 
         if (da1 < angleTolerance)
         {
+          ADD_VERTEX(x1, y1);
           ADD_VERTEX(x2, y2);
-          ADD_VERTEX(x3, y3);
           goto ret;
         }
 
@@ -406,7 +407,7 @@ realloc:
         {
           if (da1 > cuspLimit)
           {
-            ADD_VERTEX(x3, y3);
+            ADD_VERTEX(x2, y2);
             goto ret;
           }
         }
@@ -417,20 +418,20 @@ realloc:
     case 2:
       if (d2 * d2 <= distanceToleranceSquare * (dx*dx + dy*dy))
       {
-        if (angleTolerance < CURVE_ANGLE_TOLERANCE_EPSILON)
+        if (angleTolerance < CURVE_ANGLE_TOLERANCE_EPSILON_D)
         {
-          ADD_VERTEX(x23, y23);
+          ADD_VERTEX(x12, y12);
           goto ret;
         }
 
         // Angle Condition.
-        da1 = Math::abs(Math::atan2(y3 - y2, x3 - x2) - Math::atan2(y2 - y1, x2 - x1));
+        da1 = Math::abs(Math::atan2(y2 - y1, x2 - x1) - Math::atan2(y1 - y0, x1 - x0));
         if (da1 >= MATH_PI) da1 = 2.0 * MATH_PI - da1;
 
         if (da1 < angleTolerance)
         {
+          ADD_VERTEX(x1, y1);
           ADD_VERTEX(x2, y2);
-          ADD_VERTEX(x3, y3);
           goto ret;
         }
 
@@ -438,7 +439,7 @@ realloc:
         {
           if (da1 > cuspLimit)
           {
-            ADD_VERTEX(x3, y3);
+            ADD_VERTEX(x2, y2);
             goto ret;
           }
         }
@@ -451,23 +452,23 @@ realloc:
       {
         // If the curvature doesn't exceed the distance_tolerance value
         // we tend to finish subdivisions.
-        if (angleTolerance < CURVE_ANGLE_TOLERANCE_EPSILON)
+        if (angleTolerance < CURVE_ANGLE_TOLERANCE_EPSILON_D)
         {
-          ADD_VERTEX(x23, y23);
+          ADD_VERTEX(x12, y12);
           goto ret;
         }
 
         // Angle & Cusp Condition.
-        k   = Math::atan2(y3 - y2, x3 - x2);
-        da1 = Math::abs(k - Math::atan2(y2 - y1, x2 - x1));
-        da2 = Math::abs(Math::atan2(y4 - y3, x4 - x3) - k);
+        k   = Math::atan2(y2 - y1, x2 - x1);
+        da1 = Math::abs(k - Math::atan2(y1 - y0, x1 - x0));
+        da2 = Math::abs(Math::atan2(y3 - y2, x3 - x2) - k);
         if (da1 >= MATH_PI) da1 = 2.0 * MATH_PI - da1;
         if (da2 >= MATH_PI) da2 = 2.0 * MATH_PI - da2;
 
         if (da1 + da2 < angleTolerance)
         {
           // Finally we can stop the recursion.
-          ADD_VERTEX(x23, y23);
+          ADD_VERTEX(x12, y12);
           goto ret;
         }
 
@@ -475,13 +476,13 @@ realloc:
         {
           if (da1 > cuspLimit)
           {
-            ADD_VERTEX(x2, y2);
+            ADD_VERTEX(x1, y1);
             goto ret;
           }
 
           if (da2 > cuspLimit)
           {
-            ADD_VERTEX(x3, y3);
+            ADD_VERTEX(x2, y2);
             goto ret;
           }
         }
@@ -492,53 +493,53 @@ realloc:
     // Continue subdivision.
     //
     // Original antigrain code:
-    //   recursive_bezier(x1, y1, x12, y12, x123, y123, x1234, y1234, level + 1);
-    //   recursive_bezier(x1234, y1234, x234, y234, x34, y34, x4, y4, level + 1);
+    //   recursive_bezier(x0, y0, x01, y01, x012, y012, x0123, y0123, level + 1);
+    //   recursive_bezier(x0123, y0123, x123, y123, x23, y23, x3, y3, level + 1);
     //
-    // First recursive subdivision will be set into x1, y1, x2, y2, x3, y3,
+    // First recursive subdivision will be set into x0, y0, x1, y1, x2, y2,
     // second subdivision will be added into stack.
     if (level < CURVE_APPROXIMATE4_RECURSION_LIMIT)
     {
-      stack[level].x1 = x1234;
-      stack[level].y1 = y1234;
-      stack[level].x2 = x234;
-      stack[level].y2 = y234;
-      stack[level].x3 = x34;
-      stack[level].y3 = y34;
-      stack[level].x4 = x4;
-      stack[level].y4 = y4;
+      stack[0].set(x0123, y0123);
+      stack[1].set(x123 , y123 );
+      stack[2].set(x23  , y23  );
+      stack[3].set(x3   , y3   );
+
+      stack += 4;
       level++;
 
-      x2 = x12;
-      y2 = y12;
-      x3 = x123;
-      y3 = y123;
-      x4 = x1234;
-      y4 = y1234;
+      x1 = x01;
+      y1 = y01;
+      x2 = x012;
+      y2 = y012;
+      x3 = x0123;
+      y3 = y0123;
 
       continue;
     }
     else
     {
-      if (Math::isNaN(x1234)) goto invalidNumber;
+      if (Math::isNaN(x0123)) goto invalidNumber;
     }
 
 ret:
     if (level == 0) break;
 
+    stack -= 4;
     level--;
-    x1 = stack[level].x1;
-    y1 = stack[level].y1;
-    x2 = stack[level].x2;
-    y2 = stack[level].y2;
-    x3 = stack[level].x3;
-    y3 = stack[level].y3;
-    x4 = stack[level].x4;
-    y4 = stack[level].y4;
+
+    x0 = stack[0].x;
+    y0 = stack[0].y;
+    x1 = stack[1].x;
+    y1 = stack[1].y;
+    x2 = stack[2].x;
+    y2 = stack[2].y;
+    x3 = stack[3].x;
+    y3 = stack[3].y;
   }
 
   // Add end point.
-  ADD_VERTEX(x4, y4);
+  ADD_VERTEX(x3, y3);
 
   {
     // Update dst length.

@@ -93,6 +93,7 @@ struct FOG_HIDDEN LiangBarsky
     return getClippingFlagsY(y, clipBox.y1, clipBox.y2);
   }
 
+  // TODO: UNUSED
   //! @brief Clip using Liang-Barsky algorithm.
   template<typename T, typename BoxT>
   static FOG_INLINE uint clipLiangBarsky(T x1, T y1, T x2, T y2, const BoxT& clipBox,

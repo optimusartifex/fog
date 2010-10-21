@@ -11,9 +11,7 @@
 
 namespace Fog {
 
-// Decide whether pure C implementation is needed. In case that we are compiling
-// for SSE2-only machine, we can omit C implementation that will result in
-// smaller binary size of the library.
+// We can disable C implementation when hardcoding for SSE2.
 #if !defined(FOG_HARDCODE_SSE2)
 # define FOG_TRANSFORM_INIT_C
 #endif // FOG_HARDCODE_SSE2

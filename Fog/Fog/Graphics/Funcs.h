@@ -75,11 +75,11 @@ struct G2dFuncs
     PathD& dst,
     uint8_t initialCommand,
     double approximationScale);
-
+/*
   typedef uint (FOG_FASTCALL *CubicCurveD_GetInflectionPointsFn)(
     const PointD* self,
     double* dst);
-
+*/
   struct _FuncsQuadCurveF
   {
   };
@@ -96,7 +96,7 @@ struct G2dFuncs
   struct _FuncsCubicCurveD
   {
     CubicCurveD_ApproximateFn approximate;
-    CubicCurveD_GetInflectionPointsFn getInflectionPoints;
+    //CubicCurveD_GetInflectionPointsFn getInflectionPoints;
   };
 
   _FuncsQuadCurveF quadcurvef;

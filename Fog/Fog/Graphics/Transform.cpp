@@ -778,7 +778,7 @@ static uint32_t FOG_FASTCALL _G2d_TransformD_update(const TransformD& self)
 // [Fog::Transform - Transform]
 // ============================================================================
 
-#define ENCODE_OP(opType, order) ((opType) | ((order) << 4))
+#define ENCODE_OP(__opType__, __order__) ((int)(__opType__) | ((int)(__order__) << 4))
 
 static err_t FOG_FASTCALL _G2d_TransformF_transform(TransformF& self, uint32_t opType, const void* params)
 {
@@ -852,8 +852,8 @@ static err_t FOG_FASTCALL _G2d_TransformF_transform(TransformF& self, uint32_t o
       self._20 += x;
       self._21 += y;
 
-      self._type = Math::min<uint32_t>(
-        self._type            | TRANSFORM_TYPE_DIRTY,
+      self._type = Math::max<uint32_t>(
+        self._type                 | TRANSFORM_TYPE_DIRTY,
         TRANSFORM_TYPE_TRANSLATION | TRANSFORM_TYPE_DIRTY);
       break;
     }
@@ -902,8 +902,8 @@ static err_t FOG_FASTCALL _G2d_TransformF_transform(TransformF& self, uint32_t o
           self._00 *= x;
           self._11 *= y;
 
-          self._type = Math::min<uint32_t>(
-            self._type        | TRANSFORM_TYPE_DIRTY, 
+          self._type = Math::max<uint32_t>(
+            self._type             | TRANSFORM_TYPE_DIRTY, 
             TRANSFORM_TYPE_SCALING | TRANSFORM_TYPE_DIRTY);
           break;
         }
@@ -957,8 +957,8 @@ static err_t FOG_FASTCALL _G2d_TransformF_transform(TransformF& self, uint32_t o
           self._11 *= y;
           self._20 *= x;
           self._21 *= y;
-          self._type = Math::min<uint32_t>(
-            self._type        | TRANSFORM_TYPE_DIRTY,
+          self._type = Math::max<uint32_t>(
+            self._type             | TRANSFORM_TYPE_DIRTY,
             TRANSFORM_TYPE_SCALING | TRANSFORM_TYPE_DIRTY);
           break;
         }
@@ -1066,20 +1066,20 @@ static err_t FOG_FASTCALL _G2d_TransformF_transform(TransformF& self, uint32_t o
       {
         case TRANSFORM_TYPE_TRANSLATION:
         {
-          self._00 = aCos;
-          self._01 = aSin;
-          self._10 =-aSin;
-          self._11 = aCos;
-          // ... fall through ...
-        }
-
-        case TRANSFORM_TYPE_IDENTITY:
-        {
           float t20 = self._20 * aCos + self._21 *-aSin;
           float t21 = self._20 * aSin + self._21 * aCos;
 
           self._20 = t20;
           self._21 = t21;
+          // ... fall through ...
+        }
+
+        case TRANSFORM_TYPE_IDENTITY:
+        {
+          self._00 = aCos;
+          self._01 = aSin;
+          self._10 =-aSin;
+          self._11 = aCos;
 
           self._type = TRANSFORM_TYPE_ROTATION | TRANSFORM_TYPE_DIRTY;
           break;
@@ -1579,8 +1579,8 @@ static err_t FOG_FASTCALL _G2d_TransformD_transform(TransformD& self, uint32_t o
       self._20 += x;
       self._21 += y;
 
-      self._type = Math::min<uint32_t>(
-        self._type            | TRANSFORM_TYPE_DIRTY,
+      self._type = Math::max<uint32_t>(
+        self._type                 | TRANSFORM_TYPE_DIRTY,
         TRANSFORM_TYPE_TRANSLATION | TRANSFORM_TYPE_DIRTY);
       break;
     }
@@ -1629,8 +1629,8 @@ static err_t FOG_FASTCALL _G2d_TransformD_transform(TransformD& self, uint32_t o
           self._00 *= x;
           self._11 *= y;
 
-          self._type = Math::min<uint32_t>(
-            self._type        | TRANSFORM_TYPE_DIRTY, 
+          self._type = Math::max<uint32_t>(
+            self._type             | TRANSFORM_TYPE_DIRTY, 
             TRANSFORM_TYPE_SCALING | TRANSFORM_TYPE_DIRTY);
           break;
         }
@@ -1684,8 +1684,8 @@ static err_t FOG_FASTCALL _G2d_TransformD_transform(TransformD& self, uint32_t o
           self._11 *= y;
           self._20 *= x;
           self._21 *= y;
-          self._type = Math::min<uint32_t>(
-            self._type        | TRANSFORM_TYPE_DIRTY,
+          self._type = Math::max<uint32_t>(
+            self._type             | TRANSFORM_TYPE_DIRTY,
             TRANSFORM_TYPE_SCALING | TRANSFORM_TYPE_DIRTY);
           break;
         }
@@ -1791,22 +1791,23 @@ static err_t FOG_FASTCALL _G2d_TransformD_transform(TransformD& self, uint32_t o
 
       switch (selfType)
       {
+        // TODO: Something is wrong...
         case TRANSFORM_TYPE_TRANSLATION:
-        {
-          self._00 = aCos;
-          self._01 = aSin;
-          self._10 =-aSin;
-          self._11 = aCos;
-          // ... fall through ...
-        }
-
-        case TRANSFORM_TYPE_IDENTITY:
         {
           double t20 = self._20 * aCos + self._21 *-aSin;
           double t21 = self._20 * aSin + self._21 * aCos;
 
           self._20 = t20;
           self._21 = t21;
+          // ... fall through ...
+        }
+
+        case TRANSFORM_TYPE_IDENTITY:
+        {
+          self._00 = aCos;
+          self._01 = aSin;
+          self._10 =-aSin;
+          self._11 = aCos;
 
           self._type = TRANSFORM_TYPE_ROTATION | TRANSFORM_TYPE_DIRTY;
           break;

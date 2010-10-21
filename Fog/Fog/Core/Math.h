@@ -370,6 +370,13 @@ static FOG_INLINE int48x16_t doubleToFixed48x16(double d)
 }
 
 // ============================================================================
+// [Fog::Math - Recip]
+// ============================================================================
+
+static FOG_INLINE float recip(float x) { return 1.0f / x; }
+static FOG_INLINE double recip(double x) { return 1.0 / x; }
+
+// ============================================================================
 // [Fog::Math - Degrees <-> Radians]
 // ============================================================================
 
@@ -392,6 +399,8 @@ static FOG_INLINE double cos(double rad) { return ::cos(rad); }
 static FOG_INLINE double tan(double rad) { return ::tan(rad); }
 
 #if defined(FOG_CC_GNU) && !defined(FOG_OS_MAC) && !defined(FOG_OS_WINDOWS)
+
+// Use GCC sincos() implementation.
 static FOG_INLINE void sincos(float rad, float* sinResult, float* cosResult)
 {
   ::sincosf(rad, sinResult, cosResult);
@@ -401,7 +410,46 @@ static FOG_INLINE void sincos(double rad, double* sinResult, double* cosResult)
 {
   ::sincos(rad, sinResult, cosResult);
 }
+
+#elif defined(FOG_CC_MSVC) && defined(FOG_ARCH_X86)
+
+// Use inline FPU assembly, faster than calling sin() and cos() separately.
+// Thanks to Jacques for suggestions about this!
+static FOG_INLINE void sincos(float rad, float* sinResult, float* cosResult)
+{
+  _asm
+  {
+    fld rad              ; // Load rad into fpu.
+    fsincos              ; // Compute both sin and cos.
+
+                         ; // While FPU stalls, load adresses.
+    mov edx, cosResult   ; // Load cosResult address.
+    mov eax, sinResult   ; // Load sinResult address.
+
+    fstp dword ptr [edx] ; // Pop and store cosResult.
+    fstp dword ptr [eax] ; // Pop and store sinResult.
+  }
+}
+
+static FOG_INLINE void sincos(double rad, double* sinResult, double* cosResult)
+{
+  _asm
+  {
+    fld rad              ; // Load rad into fpu.
+    fsincos              ; // Compute both sin and cos.
+
+                         ; // While FPU stalls, load adresses.
+    mov edx, cosResult   ; // Load cosResult address.
+    mov eax, sinResult   ; // Load sinResult address.
+
+    fstp qword ptr [edx] ; // Pop and store cosResult.
+    fstp qword ptr [eax] ; // Pop and store sinResult.
+  }
+}
+
 #else
+
+// No specific version available? Use sin() and cos()...
 static FOG_INLINE void sincos(float rad, float* sinResult, float* cosResult)
 {
   *sinResult = ::sinf(rad);
@@ -430,6 +478,15 @@ static FOG_INLINE double atan2(double x, double y) { return ::atan2(x, y); }
 
 static FOG_INLINE float sqrt(float x) { return ::sqrtf(x); }
 static FOG_INLINE double sqrt(double x) { return ::sqrt(x); }
+
+// ============================================================================
+// [Fog::Math - Hypot]
+//
+// "Math::hypot(x, y) == Math::sqrt(x * x + y * y)"
+// ============================================================================
+
+static FOG_INLINE float hypot(float x, float y) { return ::hypotf(x, y); }
+static FOG_INLINE double hypot(double x, double y) { return ::hypot(x, y); }
 
 // ============================================================================
 // [Fog::Math - Pow]

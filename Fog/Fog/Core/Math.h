@@ -419,7 +419,7 @@ static FOG_INLINE void sincos(float rad, float* sinResult, float* cosResult)
 {
   _asm
   {
-    fld rad              ; // Load rad into fpu.
+    fld rad              ; // Load rad into FPU.
     fsincos              ; // Compute both sin and cos.
 
                          ; // While FPU stalls, load adresses.
@@ -435,7 +435,7 @@ static FOG_INLINE void sincos(double rad, double* sinResult, double* cosResult)
 {
   _asm
   {
-    fld rad              ; // Load rad into fpu.
+    fld rad              ; // Load rad into FPU.
     fsincos              ; // Compute both sin and cos.
 
                          ; // While FPU stalls, load adresses.

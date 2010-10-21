@@ -885,7 +885,7 @@ err_t RasterPaintEngine::scale(double sx, double sy, uint32_t order)
 
 err_t RasterPaintEngine::skew(double sx, double sy, uint32_t order)
 {
-  ctx.userTransform.scale(sx, sy, order);
+  ctx.userTransform.skew(sx, sy, order);
   return _updateMatrix(false);
 }
 

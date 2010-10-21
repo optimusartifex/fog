@@ -64,10 +64,6 @@ If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   #   Use link-time-optimization.
   #   Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
 
-  # Experimental flags, may improve performance
-  Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fgcse-sm")
-  Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fgcse-las")
-
   # TODO: This flag is not available for GCC 4.2.1 - Which versions support it?
   #       We need something like If(GCC_VERSION >= 4.3)
   # Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpredictive-commoning")
@@ -289,6 +285,7 @@ Set(FOG_CORE_LIB_SOURCES
   Fog/Core/DirIterator.cpp
   Fog/Core/Event.cpp
   Fog/Core/EventLoop.cpp
+  Fog/Core/Error.cpp
   Fog/Core/FileSystem.cpp
   Fog/Core/Format.cpp
   Fog/Core/Funcs.cpp
@@ -354,6 +351,7 @@ Set(FOG_CORE_LIB_HEADERS
   Fog/Core/DirIterator.h
   Fog/Core/Event.h
   Fog/Core/EventLoop.h
+  Fog/Core/Error.h
   Fog/Core/FileSystem.h
   Fog/Core/Format.h
   Fog/Core/Funcs.h

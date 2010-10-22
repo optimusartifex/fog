@@ -12,17 +12,6 @@
 namespace Fog {
 
 // ============================================================================
-// [Fog::Transform - Helpers]
-// ============================================================================
-
-static __m128d _mm_load_pd_unpack(const double* p)
-{
-  __m128d result = _mm_load_sd(p);
-  result = _mm_unpacklo_pd(result, result);
-  return result;
-}
-
-// ============================================================================
 // [Fog::Transform - MapPoint(s)]
 // ============================================================================
 
@@ -30,8 +19,11 @@ static void FOG_FASTCALL _G2d_TransformD_mapPointD_SSE2(const TransformD& self, 
 {
   uint32_t selfType = self.getType();
 
-  __m128d m_20_21 = _mm_loadu_pd(&self._20);
-  __m128d src0 = _mm_loadu_pd(&src.x);
+  __m128d m_20_21;
+  __m128d src0;
+
+  Face::m128dLoad16u(m_20_21, &self._20);
+  Face::m128dLoad16u(src0, &src.x);
 
   switch (selfType)
   {
@@ -49,7 +41,7 @@ static void FOG_FASTCALL _G2d_TransformD_mapPointD_SSE2(const TransformD& self, 
 
     case TRANSFORM_TYPE_TRANSLATION:
     {
-      src0 = _mm_add_pd(src0, m_20_21);
+      Face::m128dAddPD(src0, src0, m_20_21);
       break;
     }
 
@@ -58,12 +50,14 @@ static void FOG_FASTCALL _G2d_TransformD_mapPointD_SSE2(const TransformD& self, 
     {
       __m128d m_00_11 = _mm_setr_pd(self._00, self._11);
       __m128d m_10_01 = _mm_setr_pd(self._10, self._01);
-      __m128d rev0 = _mm_shuffle_pd(src0, src0, _MM_SHUFFLE2(0, 1));
+      __m128d rev0;
 
-      src0 = _mm_mul_pd(src0, m_00_11);
-      rev0 = _mm_mul_pd(rev0, m_10_01);
-      src0 = _mm_add_pd(src0, m_20_21);
-      src0 = _mm_add_pd(src0, rev0);
+      Face::m128dSwapPD(rev0, src0);
+
+      Face::m128dMulPD(src0, src0, m_00_11);
+      Face::m128dMulPD(rev0, rev0, m_10_01);
+      Face::m128dAddPD(src0, src0, m_20_21);
+      Face::m128dAddPD(src0, src0, rev0);
       break;
     }
 
@@ -78,10 +72,10 @@ static void FOG_FASTCALL _G2d_TransformD_mapPointD_SSE2(const TransformD& self, 
 
       // src0.x = (x * _00 + y * _01 + _20)
       // src0.y = (x * _01 + y * _11 + _21)
-      src0 = _mm_mul_pd(src0, m_00_11);
-      rev0 = _mm_mul_pd(rev0, m_10_01);
-      src0 = _mm_add_pd(src0, m_20_21);
-      src0 = _mm_add_pd(src0, rev0);
+      Face::m128dMulPD(src0, src0, m_00_11);
+      Face::m128dMulPD(rev0, rev0, m_10_01);
+      Face::m128dAddPD(src0, src0, m_20_21);
+      Face::m128dAddPD(src0, src0, rev0);
 
       inv0 = _mm_add_pd(inv0, _mm_shuffle_pd(inv0, inv0, _MM_SHUFFLE2(0, 1)));
       inv0 = _mm_add_sd(inv0, _mm_load_sd(&self._22));
@@ -93,7 +87,7 @@ static void FOG_FASTCALL _G2d_TransformD_mapPointD_SSE2(const TransformD& self, 
       inv0 = _mm_div_sd(_mm_load_sd(&FOG_SSE_GET_CONST_SD(m128d_one)), inv0);
       inv0 = _mm_unpacklo_pd(inv0, inv0);
 
-      src0 = _mm_mul_pd(src0, inv0);
+      Face::m128dMulPD(src0, src0, inv0);
       break;
     }
 
@@ -101,7 +95,7 @@ static void FOG_FASTCALL _G2d_TransformD_mapPointD_SSE2(const TransformD& self, 
       FOG_ASSERT_NOT_REACHED();
   }
 
-  _mm_storeu_pd(&dst.x, src0);
+  Face::m128dStore16u(&dst.x, src0);
 }
 
 static void FOG_FASTCALL _G2d_TransformD_mapPointsD_Identity_SSE2(const TransformD& self, PointD* dst, const PointD* src, sysuint_t length)
@@ -126,54 +120,62 @@ static void FOG_FASTCALL _G2d_TransformD_mapPointsD_Translation_SSE2(const Trans
   {
     for (i = length >> 2; i; i--, dst += 4, src += 4)
     {
-      __m128d src0 = _mm_load_pd(&src[0].x);
-      __m128d src1 = _mm_load_pd(&src[1].x);
-      __m128d src2 = _mm_load_pd(&src[2].x);
-      __m128d src3 = _mm_load_pd(&src[3].x);
+      __m128d src0, src1, src2, src3;
 
-      src0 = _mm_add_pd(src0, m_20_21);
-      src1 = _mm_add_pd(src1, m_20_21);
-      src2 = _mm_add_pd(src2, m_20_21);
-      src3 = _mm_add_pd(src3, m_20_21);
+      Face::m128dLoad16a(src0, &src[0].x);
+      Face::m128dLoad16a(src1, &src[1].x);
+      Face::m128dLoad16a(src2, &src[2].x);
+      Face::m128dLoad16a(src3, &src[3].x);
 
-      _mm_store_pd(&dst[0].x, src0);
-      _mm_store_pd(&dst[1].x, src1);
-      _mm_store_pd(&dst[2].x, src2);
-      _mm_store_pd(&dst[3].x, src3);
+      Face::m128dAddPD(src0, src0, m_20_21);
+      Face::m128dAddPD(src1, src1, m_20_21);
+      Face::m128dAddPD(src2, src2, m_20_21);
+      Face::m128dAddPD(src3, src3, m_20_21);
+
+      Face::m128dStore16a(&dst[0].x, src0);
+      Face::m128dStore16a(&dst[1].x, src1);
+      Face::m128dStore16a(&dst[2].x, src2);
+      Face::m128dStore16a(&dst[3].x, src3);
     }
 
     for (i = length & 3; i; i--, dst++, src++)
     {
-      __m128d src0 = _mm_load_pd(&src[0].x);
-      src0 = _mm_add_pd(src0, m_20_21);
-      _mm_store_pd(&dst[0].x, src0);
+      __m128d src0;
+
+      Face::m128dLoad16a(src0, &src[0].x);
+      Face::m128dAddPD(src0, src0, m_20_21);
+      Face::m128dStore16a(&dst[0].x, src0);
     }
   }
   else
   {
     for (i = length >> 2; i; i--, dst += 4, src += 4)
     {
-      __m128d src0 = _mm_loadu_pd(&src[0].x);
-      __m128d src1 = _mm_loadu_pd(&src[1].x);
-      __m128d src2 = _mm_loadu_pd(&src[2].x);
-      __m128d src3 = _mm_loadu_pd(&src[3].x);
+      __m128d src0, src1, src2, src3;
 
-      src0 = _mm_add_pd(src0, m_20_21);
-      src1 = _mm_add_pd(src1, m_20_21);
-      src2 = _mm_add_pd(src2, m_20_21);
-      src3 = _mm_add_pd(src3, m_20_21);
+      Face::m128dLoad16u(src0, &src[0].x);
+      Face::m128dLoad16u(src1, &src[1].x);
+      Face::m128dLoad16u(src2, &src[2].x);
+      Face::m128dLoad16u(src3, &src[3].x);
 
-      _mm_storeu_pd(&dst[0].x, src0);
-      _mm_storeu_pd(&dst[1].x, src1);
-      _mm_storeu_pd(&dst[2].x, src2);
-      _mm_storeu_pd(&dst[3].x, src3);
+      Face::m128dAddPD(src0, src0, m_20_21);
+      Face::m128dAddPD(src1, src1, m_20_21);
+      Face::m128dAddPD(src2, src2, m_20_21);
+      Face::m128dAddPD(src3, src3, m_20_21);
+
+      Face::m128dStore16u(&dst[0].x, src0);
+      Face::m128dStore16u(&dst[1].x, src1);
+      Face::m128dStore16u(&dst[2].x, src2);
+      Face::m128dStore16u(&dst[3].x, src3);
     }
 
     for (i = length & 3; i; i--, dst++, src++)
     {
-      __m128d src0 = _mm_loadu_pd(&src[0].x);
-      src0 = _mm_add_pd(src0, m_20_21);
-      _mm_storeu_pd(&dst[0].x, src0);
+      __m128d src0;
+
+      Face::m128dLoad16u(src0, &src[0].x);
+      Face::m128dAddPD(src0, src0, m_20_21);
+      Face::m128dStore16u(&dst[0].x, src0);
     }
   }
 }
@@ -189,70 +191,74 @@ static void FOG_FASTCALL _G2d_TransformD_mapPointsD_Scaling_SSE2(const Transform
   {
     for (i = length >> 2; i; i--, dst += 4, src += 4)
     {
-      __m128d src0 = _mm_load_pd(&src[0].x);
-      __m128d src1 = _mm_load_pd(&src[1].x);
-      __m128d src2 = _mm_load_pd(&src[2].x);
-      __m128d src3 = _mm_load_pd(&src[3].x);
+      __m128d src0, src1, src2, src3;
 
-      src0 = _mm_mul_pd(src0, m_00_11);
-      src1 = _mm_mul_pd(src1, m_00_11);
-      src2 = _mm_mul_pd(src2, m_00_11);
-      src3 = _mm_mul_pd(src3, m_00_11);
+      Face::m128dLoad16a(src0, &src[0].x);
+      Face::m128dLoad16a(src1, &src[1].x);
+      Face::m128dLoad16a(src2, &src[2].x);
+      Face::m128dLoad16a(src3, &src[3].x);
 
-      src0 = _mm_add_pd(src0, m_20_21);
-      src1 = _mm_add_pd(src1, m_20_21);
-      src2 = _mm_add_pd(src2, m_20_21);
-      src3 = _mm_add_pd(src3, m_20_21);
+      Face::m128dMulPD(src0, src0, m_00_11);
+      Face::m128dMulPD(src1, src1, m_00_11);
+      Face::m128dMulPD(src2, src2, m_00_11);
+      Face::m128dMulPD(src3, src3, m_00_11);
 
-      _mm_store_pd(&dst[0].x, src0);
-      _mm_store_pd(&dst[1].x, src1);
-      _mm_store_pd(&dst[2].x, src2);
-      _mm_store_pd(&dst[3].x, src3);
+      Face::m128dAddPD(src0, src0, m_20_21);
+      Face::m128dAddPD(src1, src1, m_20_21);
+      Face::m128dAddPD(src2, src2, m_20_21);
+      Face::m128dAddPD(src3, src3, m_20_21);
+
+      Face::m128dStore16a(&dst[0].x, src0);
+      Face::m128dStore16a(&dst[1].x, src1);
+      Face::m128dStore16a(&dst[2].x, src2);
+      Face::m128dStore16a(&dst[3].x, src3);
     }
 
     for (i = length & 3; i; i--, dst++, src++)
     {
-      __m128d src0 = _mm_load_pd(&src[0].x);
-
-      src0 = _mm_mul_pd(src0, m_00_11);
-      src0 = _mm_add_pd(src0, m_20_21);
-
-      _mm_store_pd(&dst[0].x, src0);
+      __m128d src0;
+      
+      Face::m128dLoad16a(src0, &src[0].x);
+      Face::m128dMulPD(src0, src0, m_00_11);
+      Face::m128dAddPD(src0, src0, m_20_21);
+      Face::m128dStore16a(&dst[0].x, src0);
     }
   }
   else
   {
     for (i = length >> 2; i; i--, dst += 4, src += 4)
     {
-      __m128d src0 = _mm_loadu_pd(&src[0].x);
-      __m128d src1 = _mm_loadu_pd(&src[1].x);
-      __m128d src2 = _mm_loadu_pd(&src[2].x);
-      __m128d src3 = _mm_loadu_pd(&src[3].x);
+      __m128d src0, src1, src2, src3;
 
-      src0 = _mm_mul_pd(src0, m_00_11);
-      src1 = _mm_mul_pd(src1, m_00_11);
-      src2 = _mm_mul_pd(src2, m_00_11);
-      src3 = _mm_mul_pd(src3, m_00_11);
+      Face::m128dLoad16u(src0, &src[0].x);
+      Face::m128dLoad16u(src1, &src[1].x);
+      Face::m128dLoad16u(src2, &src[2].x);
+      Face::m128dLoad16u(src3, &src[3].x);
 
-      src0 = _mm_add_pd(src0, m_20_21);
-      src1 = _mm_add_pd(src1, m_20_21);
-      src2 = _mm_add_pd(src2, m_20_21);
-      src3 = _mm_add_pd(src3, m_20_21);
+      Face::m128dMulPD(src0, src0, m_00_11);
+      Face::m128dMulPD(src1, src1, m_00_11);
+      Face::m128dMulPD(src2, src2, m_00_11);
+      Face::m128dMulPD(src3, src3, m_00_11);
 
-      _mm_storeu_pd(&dst[0].x, src0);
-      _mm_storeu_pd(&dst[1].x, src1);
-      _mm_storeu_pd(&dst[2].x, src2);
-      _mm_storeu_pd(&dst[3].x, src3);
+      Face::m128dAddPD(src0, src0, m_20_21);
+      Face::m128dAddPD(src1, src1, m_20_21);
+      Face::m128dAddPD(src2, src2, m_20_21);
+      Face::m128dAddPD(src3, src3, m_20_21);
+
+      Face::m128dStore16u(&dst[0].x, src0);
+      Face::m128dStore16u(&dst[1].x, src1);
+      Face::m128dStore16u(&dst[2].x, src2);
+      Face::m128dStore16u(&dst[3].x, src3);
     }
 
     for (i = length & 3; i; i--, dst++, src++)
     {
-      __m128d src0 = _mm_loadu_pd(&src[0].x);
-
-      src0 = _mm_mul_pd(src0, m_00_11);
-      src0 = _mm_add_pd(src0, m_20_21);
-
-      _mm_storeu_pd(&dst[0].x, src0);
+      __m128d src0;
+      
+      Face::m128dLoad16u(src0, &src[0].x);
+      Face::m128dMulPD(src0, src0, m_00_11);
+      Face::m128dAddPD(src0, src0, m_20_21);
+      Face::m128dStore16u(&dst[0].x, src0);
     }
   }
 }
@@ -269,92 +275,104 @@ static void FOG_FASTCALL _G2d_TransformD_mapPointsD_Affine_SSE2(const TransformD
   {
     for (i = length >> 2; i; i--, dst += 4, src += 4)
     {
-      __m128d src0 = _mm_load_pd(&src[0].x);
-      __m128d src1 = _mm_load_pd(&src[1].x);
-      __m128d src2 = _mm_load_pd(&src[2].x);
-      __m128d src3 = _mm_load_pd(&src[3].x);
+      __m128d src0, src1, src2, src3;
+      __m128d rev0, rev1, rev2, rev3;
 
-      __m128d rev0 = _mm_shuffle_pd(src0, src0, _MM_SHUFFLE2(0, 1));
-      __m128d rev1 = _mm_shuffle_pd(src1, src1, _MM_SHUFFLE2(0, 1));
+      Face::m128dLoad16a(src0, &src[0].x);
+      Face::m128dLoad16a(src1, &src[1].x);
+      Face::m128dLoad16a(src2, &src[2].x);
+      Face::m128dLoad16a(src3, &src[3].x);
 
-      src0 = _mm_mul_pd(src0, m_00_11);
-      src1 = _mm_mul_pd(src1, m_00_11);
-      rev0 = _mm_mul_pd(rev0, m_10_01);
-      rev1 = _mm_mul_pd(rev1, m_10_01);
-      src0 = _mm_add_pd(src0, m_20_21);
-      src1 = _mm_add_pd(src1, m_20_21);
-      src0 = _mm_add_pd(src0, rev0);
-      src1 = _mm_add_pd(src1, rev1);
+      Face::m128dSwapPD(rev0, src0);
+      Face::m128dSwapPD(rev1, src1);
 
-      __m128d rev2 = _mm_shuffle_pd(src2, src2, _MM_SHUFFLE2(0, 1));
-      __m128d rev3 = _mm_shuffle_pd(src3, src3, _MM_SHUFFLE2(0, 1));
+      Face::m128dMulPD(src0, src0, m_00_11);
+      Face::m128dMulPD(src1, src1, m_00_11);
+      Face::m128dMulPD(rev0, rev0, m_10_01);
+      Face::m128dMulPD(rev1, rev1, m_10_01);
 
-      src2 = _mm_mul_pd(src2, m_00_11);
-      src3 = _mm_mul_pd(src3, m_00_11);
-      rev2 = _mm_mul_pd(rev2, m_10_01);
-      rev3 = _mm_mul_pd(rev3, m_10_01);
-      src2 = _mm_add_pd(src2, m_20_21);
-      src3 = _mm_add_pd(src3, m_20_21);
-      src2 = _mm_add_pd(src2, rev2);
-      src3 = _mm_add_pd(src3, rev3);
+      Face::m128dAddPD(src0, src0, m_20_21);
+      Face::m128dAddPD(src1, src1, m_20_21);
+      Face::m128dAddPD(src0, src0, rev0);
+      Face::m128dAddPD(src1, src1, rev1);
 
-      _mm_store_pd(&dst[0].x, src0);
-      _mm_store_pd(&dst[1].x, src1);
-      _mm_store_pd(&dst[2].x, src2);
-      _mm_store_pd(&dst[3].x, src3);
+      Face::m128dSwapPD(rev2, src2);
+      Face::m128dSwapPD(rev3, src3);
+
+      Face::m128dMulPD(src2, src2, m_00_11);
+      Face::m128dMulPD(src3, src3, m_00_11);
+      Face::m128dMulPD(rev2, rev2, m_10_01);
+      Face::m128dMulPD(rev3, rev3, m_10_01);
+
+      Face::m128dAddPD(src2, src2, m_20_21);
+      Face::m128dAddPD(src3, src3, m_20_21);
+      Face::m128dAddPD(src2, src2, rev2);
+      Face::m128dAddPD(src3, src3, rev3);
+
+      Face::m128dStore16a(&dst[0].x, src0);
+      Face::m128dStore16a(&dst[1].x, src1);
+      Face::m128dStore16a(&dst[2].x, src2);
+      Face::m128dStore16a(&dst[3].x, src3);
     }
   }
   else
   {
     for (i = length >> 2; i; i--, dst += 4, src += 4)
     {
-      __m128d src0 = _mm_loadu_pd(&src[0].x);
-      __m128d src1 = _mm_loadu_pd(&src[1].x);
-      __m128d src2 = _mm_loadu_pd(&src[2].x);
-      __m128d src3 = _mm_loadu_pd(&src[3].x);
+      __m128d src0, src1, src2, src3;
+      __m128d rev0, rev1, rev2, rev3;
 
-      __m128d rev0 = _mm_shuffle_pd(src0, src0, _MM_SHUFFLE2(0, 1));
-      __m128d rev1 = _mm_shuffle_pd(src1, src1, _MM_SHUFFLE2(0, 1));
+      Face::m128dLoad16u(src0, &src[0].x);
+      Face::m128dLoad16u(src1, &src[1].x);
+      Face::m128dLoad16u(src2, &src[2].x);
+      Face::m128dLoad16u(src3, &src[3].x);
 
-      src0 = _mm_mul_pd(src0, m_00_11);
-      src1 = _mm_mul_pd(src1, m_00_11);
-      rev0 = _mm_mul_pd(rev0, m_10_01);
-      rev1 = _mm_mul_pd(rev1, m_10_01);
-      src0 = _mm_add_pd(src0, m_20_21);
-      src1 = _mm_add_pd(src1, m_20_21);
-      src0 = _mm_add_pd(src0, rev0);
-      src1 = _mm_add_pd(src1, rev1);
+      Face::m128dSwapPD(rev0, src0);
+      Face::m128dSwapPD(rev1, src1);
 
-      __m128d rev2 = _mm_shuffle_pd(src2, src2, _MM_SHUFFLE2(0, 1));
-      __m128d rev3 = _mm_shuffle_pd(src3, src3, _MM_SHUFFLE2(0, 1));
+      Face::m128dMulPD(src0, src0, m_00_11);
+      Face::m128dMulPD(src1, src1, m_00_11);
+      Face::m128dMulPD(rev0, rev0, m_10_01);
+      Face::m128dMulPD(rev1, rev1, m_10_01);
 
-      src2 = _mm_mul_pd(src2, m_00_11);
-      src3 = _mm_mul_pd(src3, m_00_11);
-      rev2 = _mm_mul_pd(rev2, m_10_01);
-      rev3 = _mm_mul_pd(rev3, m_10_01);
-      src2 = _mm_add_pd(src2, m_20_21);
-      src3 = _mm_add_pd(src3, m_20_21);
-      src2 = _mm_add_pd(src2, rev2);
-      src3 = _mm_add_pd(src3, rev3);
+      Face::m128dAddPD(src0, src0, m_20_21);
+      Face::m128dAddPD(src1, src1, m_20_21);
+      Face::m128dAddPD(src0, src0, rev0);
+      Face::m128dAddPD(src1, src1, rev1);
 
-      _mm_storeu_pd(&dst[0].x, src0);
-      _mm_storeu_pd(&dst[1].x, src1);
-      _mm_storeu_pd(&dst[2].x, src2);
-      _mm_storeu_pd(&dst[3].x, src3);
+      Face::m128dSwapPD(rev2, src2);
+      Face::m128dSwapPD(rev3, src3);
+
+      Face::m128dMulPD(src2, src2, m_00_11);
+      Face::m128dMulPD(src3, src3, m_00_11);
+      Face::m128dMulPD(rev2, rev2, m_10_01);
+      Face::m128dMulPD(rev3, rev3, m_10_01);
+
+      Face::m128dAddPD(src2, src2, m_20_21);
+      Face::m128dAddPD(src3, src3, m_20_21);
+      Face::m128dAddPD(src2, src2, rev2);
+      Face::m128dAddPD(src3, src3, rev3);
+
+      Face::m128dStore16u(&dst[0].x, src0);
+      Face::m128dStore16u(&dst[1].x, src1);
+      Face::m128dStore16u(&dst[2].x, src2);
+      Face::m128dStore16u(&dst[3].x, src3);
     }
   }
 
   for (i = length & 3; i; i--, dst++, src++)
   {
-    __m128d src0 = _mm_loadu_pd(&src[0].x);
-    __m128d rev0 = _mm_shuffle_pd(src0, src0, _MM_SHUFFLE2(0, 1));
+    __m128d src0, rev0;
 
-    src0 = _mm_mul_pd(src0, m_00_11);
-    rev0 = _mm_mul_pd(rev0, m_10_01);
-    src0 = _mm_add_pd(src0, m_20_21);
-    src0 = _mm_add_pd(src0, rev0);
+    Face::m128dLoad16u(src0, &src[0].x);
+    Face::m128dSwapPD(rev0, src0);
+    
+    Face::m128dMulPD(src0, src0, m_00_11);
+    Face::m128dMulPD(rev0, rev0, m_10_01);
+    Face::m128dAddPD(src0, src0, m_20_21);
+    Face::m128dAddPD(src0, src0, rev0);
 
-    _mm_storeu_pd(&dst[0].x, src0);
+    Face::m128dStore16u(&dst[0].x, src0);
   }
 }
 
@@ -364,17 +382,21 @@ static void FOG_FASTCALL _G2d_TransformD_mapPointsD_Projection_SSE2(const Transf
 
   if (length >= 2)
   {
-    __m128d m_00_00 = _mm_load_pd_unpack(&self._00);
-    __m128d m_01_01 = _mm_load_pd_unpack(&self._01);
-    __m128d m_02_02 = _mm_load_pd_unpack(&self._02);
+    __m128d m_00_00, m_01_01, m_02_02;
+    __m128d m_10_10, m_11_11, m_12_12;
+    __m128d m_20_20, m_21_21, m_22_22;
 
-    __m128d m_10_10 = _mm_load_pd_unpack(&self._10);
-    __m128d m_11_11 = _mm_load_pd_unpack(&self._11);
-    __m128d m_12_12 = _mm_load_pd_unpack(&self._12);
+    Face::m128dExtractLo(m_00_00, &self._00);
+    Face::m128dExtractLo(m_01_01, &self._01);
+    Face::m128dExtractLo(m_02_02, &self._02);
 
-    __m128d m_20_20 = _mm_load_pd_unpack(&self._20);
-    __m128d m_21_21 = _mm_load_pd_unpack(&self._21);
-    __m128d m_22_22 = _mm_load_pd_unpack(&self._22);
+    Face::m128dExtractLo(m_10_10, &self._10);
+    Face::m128dExtractLo(m_11_11, &self._11);
+    Face::m128dExtractLo(m_12_12, &self._12);
+
+    Face::m128dExtractLo(m_20_20, &self._20);
+    Face::m128dExtractLo(m_21_21, &self._21);
+    Face::m128dExtractLo(m_22_22, &self._22);
 
     for (i = length >> 1; i; i--, dst += 2, src += 2)
     {
@@ -385,20 +407,20 @@ static void FOG_FASTCALL _G2d_TransformD_mapPointsD_Projection_SSE2(const Transf
 
       // src0xx = [x0, x1]
       // src0yy = [y0, y1]
-      src0xx = _mm_load_sd(&src[0].x);
-      src0yy = _mm_load_sd(&src[0].y);
+      Face::m128dLoad8(src0xx, &src[0].x);
+      Face::m128dLoad8(src0yy, &src[0].y);
 
-      src0xx = _mm_loadh_pd(src0xx, &src[1].x);
-      src0yy = _mm_loadh_pd(src0yy, &src[1].y);
+      Face::m128dLoad8Hi(src0xx, &src[1].x);
+      Face::m128dLoad8Hi(src0yy, &src[1].y);
 
       src1xx = src0xx;
       src1yy = src0yy;
 
       // rcp0 = 1.0 / (x * _02 + y * _12 + _22)
-      src1xx = _mm_mul_pd(src1xx, m_02_02);
-      src1yy = _mm_mul_pd(src1yy, m_12_12);
-      src1xx = _mm_add_pd(src1xx, m_22_22);
-      src1xx = _mm_add_pd(src1xx, src1yy);
+      Face::m128dMulPD(src1xx, src1xx, m_02_02);
+      Face::m128dMulPD(src1yy, src1yy, m_12_12);
+      Face::m128dAddPD(src1xx, src1xx, m_22_22);
+      Face::m128dAddPD(src1xx, src1xx, src1yy);
 
       rcp0   = FOG_SSE_GET_CONST_PD(m128d_sgn_mask);
       rcp0   = _mm_and_pd(rcp0, src1xx);
@@ -412,25 +434,25 @@ static void FOG_FASTCALL _G2d_TransformD_mapPointsD_Projection_SSE2(const Transf
       src1xx = src0xx;
       src1yy = src0yy;
 
-      src0xx = _mm_mul_pd(src0xx, m_00_00);
-      src0yy = _mm_mul_pd(src0yy, m_11_11);
+      Face::m128dMulPD(src0xx, src0xx, m_00_00);
+      Face::m128dMulPD(src0yy, src0yy, m_11_11);
 
-      src1xx = _mm_mul_pd(src1xx, m_01_01);
-      src1yy = _mm_mul_pd(src1yy, m_10_10);
+      Face::m128dMulPD(src1xx, src1xx, m_01_01);
+      Face::m128dMulPD(src1yy, src1yy, m_10_10);
 
-      src0xx = _mm_add_pd(src0xx, m_20_20);
-      src0yy = _mm_add_pd(src0yy, m_21_21);
+      Face::m128dAddPD(src0xx, src0xx, m_20_20);
+      Face::m128dAddPD(src0yy, src0yy, m_21_21);
 
-      src0xx = _mm_add_pd(src0xx, src1yy);
-      src0yy = _mm_add_pd(src0yy, src1xx);
+      Face::m128dAddPD(src0xx, src0xx, src1yy);
+      Face::m128dAddPD(src0yy, src0yy, src1xx);
 
-      src0xx = _mm_mul_pd(src0xx, rcp0);
-      src0yy = _mm_mul_pd(src0yy, rcp0);
+      Face::m128dMulPD(src0xx, src0xx, rcp0);
+      Face::m128dMulPD(src0yy, src0yy, rcp0);
 
-      _mm_storel_pd(&dst[0].x, src0xx);
-      _mm_storel_pd(&dst[0].y, src0yy);
-      _mm_storeh_pd(&dst[1].x, src0xx);
-      _mm_storeh_pd(&dst[1].y, src0yy);
+      Face::m128dStore8Lo(&dst[0].x, src0xx);
+      Face::m128dStore8Lo(&dst[0].y, src0yy);
+      Face::m128dStore8Hi(&dst[1].x, src0xx);
+      Face::m128dStore8Hi(&dst[1].y, src0yy);
     }
   }
 
@@ -447,10 +469,10 @@ static void FOG_FASTCALL _G2d_TransformD_mapPointsD_Projection_SSE2(const Transf
 
     // src0.x = (x * _00 + y * _10 + _20)
     // src0.y = (x * _01 + y * _11 + _21)
-    src0 = _mm_mul_pd(src0, m_00_11);
-    rev0 = _mm_mul_pd(rev0, m_10_01);
-    src0 = _mm_add_pd(src0, m_20_21);
-    src0 = _mm_add_pd(src0, rev0);
+    Face::m128dMulPD(src0, src0, m_00_11);
+    Face::m128dMulPD(rev0, rev0, m_10_01);
+    Face::m128dAddPD(src0, src0, m_20_21);
+    Face::m128dAddPD(src0, src0, rev0);
 
     inv0 = _mm_add_pd(inv0, _mm_shuffle_pd(inv0, inv0, _MM_SHUFFLE2(0, 1)));
     inv0 = _mm_add_sd(inv0, _mm_load_sd(&self._22));

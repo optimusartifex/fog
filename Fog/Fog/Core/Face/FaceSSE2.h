@@ -71,6 +71,18 @@ static FOG_INLINE void m128dLoad8(m128d& dst0, const SrcT* srcp)
 }
 
 template<typename SrcT>
+static FOG_INLINE void m128dLoad8Lo(m128d& dst0, const SrcT* srcp)
+{
+  dst0 = _mm_loadl_pd(dst0, reinterpret_cast<const double*>(srcp));
+}
+
+template<typename SrcT>
+static FOG_INLINE void m128dLoad8Hi(m128d& dst0, const SrcT* srcp)
+{
+  dst0 = _mm_loadh_pd(dst0, reinterpret_cast<const double*>(srcp));
+}
+
+template<typename SrcT>
 static FOG_INLINE void m128iLoad16a(m128i& dst0, const SrcT* srcp)
 {
   dst0 = _mm_load_si128(reinterpret_cast<const m128i*>(srcp));
@@ -126,6 +138,18 @@ static FOG_INLINE void m128dStore8(DstT* dstp, const m128d& src0)
 }
 
 template<typename DstT>
+static FOG_INLINE void m128dStore8Lo(DstT* dstp, const m128d& src0)
+{
+  _mm_storel_pd(reinterpret_cast<double*>(dstp), src0);
+}
+
+template<typename DstT>
+static FOG_INLINE void m128dStore8Hi(DstT* dstp, const m128d& src0)
+{
+  _mm_storeh_pd(reinterpret_cast<double*>(dstp), src0);
+}
+
+template<typename DstT>
 static FOG_INLINE void m128iStore16a(DstT* dstp, const m128i& src0)
 {
   _mm_store_si128(reinterpret_cast<m128i*>(dstp), src0);
@@ -165,6 +189,13 @@ static FOG_INLINE void m128dStore16nta(DstT* dstp, const m128d& src0)
 // [Fog::Face - SSE2 - Shuffle]
 // ============================================================================
 
+template<typename SrcT>
+static FOG_INLINE void m128dExtractLo(m128d& dst, const SrcT* srcp)
+{
+  dst = _mm_load_sd(reinterpret_cast<const double*>(srcp));
+  dst = _mm_unpacklo_pd(dst, dst);
+}
+
 static FOG_INLINE void m128dExtractLo(m128d& dst, const m128d& a)
 {
   dst = _mm_unpacklo_pd(a, a);
@@ -183,6 +214,11 @@ static FOG_INLINE void m128dExtractHi(m128d& dst, const m128d& a)
 static FOG_INLINE void m128dExtractHi(m128d& dst, const m128d& a, const m128d& b)
 {
   dst = _mm_unpackhi_pd(a, b);
+}
+
+static FOG_INLINE void m128dSwapPD(m128d& dst, const m128d& src)
+{
+  dst = _mm_shuffle_pd(src, src, _MM_SHUFFLE2(0, 1));
 }
 
 // ============================================================================

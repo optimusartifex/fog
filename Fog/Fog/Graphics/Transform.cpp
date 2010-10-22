@@ -3109,14 +3109,13 @@ FOG_INIT_DECLARE err_t fog_transform_init(void)
   _g2d.transformd.getRotation = _G2d_TransformD_getRotation;
   _g2d.transformd.getAverageScaling = _G2d_TransformD_getAverageScaling;
 
-  // TODO: SSE implementation required.
   _g2d.transformf.mapPointF = _G2d_TransformF_mapPointF;
   _g2d.transformf.mapVectorF = _G2d_TransformF_mapVectorF;
 
+#if defined(FOG_TRANSFORM_INIT_C)
+
   _g2d.transformd.mapPointD = _G2d_TransformD_mapPointD;
   _g2d.transformd.mapVectorD = _G2d_TransformD_mapVectorD;
-
-#if defined(FOG_TRANSFORM_INIT_C)
 
   _g2d.transformf.mapPointsF[TRANSFORM_TYPE_IDENTITY   ] = _G2d_TransformF_mapPointsF_Identity;
   _g2d.transformf.mapPointsF[TRANSFORM_TYPE_TRANSLATION] = _G2d_TransformF_mapPointsF_Translation;

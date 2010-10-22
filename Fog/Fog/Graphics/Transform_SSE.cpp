@@ -15,14 +15,6 @@ namespace Fog {
 // [Fog::Transform - MapPoint(s)]
 // ============================================================================
 
-static void FOG_FASTCALL _G2d_TransformF_mapPointF_SSE(const TransformF& self, PointF& dst, const PointF& src)
-{
-  uint32_t selfType = self.getType();
-
-
-  // TODO.
-}
-
 static void FOG_FASTCALL _G2d_TransformF_mapPointsF_Identity_SSE(const TransformF& self, PointF* dst, const PointF* src, sysuint_t length)
 {
   sysuint_t i;
@@ -414,17 +406,6 @@ static void FOG_FASTCALL _G2d_TransformF_mapPointsF_Projection_SSE(const Transfo
   }
 }
 
-// ============================================================================
-// [Fog::Transform - MapVector]
-// ============================================================================
-
-static void FOG_FASTCALL _G2d_TransformF_mapVectorF_SSE(const TransformF& self, PointF& dst, const PointF& src)
-{
-  uint32_t selfType = self.getType();
-
-  // TODO.
-}
-
 } // Fog namespace
 
 // ============================================================================
@@ -434,10 +415,6 @@ static void FOG_FASTCALL _G2d_TransformF_mapVectorF_SSE(const TransformF& self, 
 FOG_INIT_DECLARE void fog_transform_init_sse(void)
 {
   using namespace Fog;
-
-  // TODO:
-  //_g2d.transformf.mapPointF = _G2d_TransformF_mapPointF_SSE;
-  //_g2d.transformf.mapVectorF = _G2d_TransformF_mapVectorF_SSE;
 
   _g2d.transformf.mapPointsF[TRANSFORM_TYPE_IDENTITY   ] = _G2d_TransformF_mapPointsF_Identity_SSE;
   _g2d.transformf.mapPointsF[TRANSFORM_TYPE_TRANSLATION] = _G2d_TransformF_mapPointsF_Translation_SSE;

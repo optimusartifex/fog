@@ -266,7 +266,7 @@ err_t Thread::setAffinity(int mask)
 
 #if defined(FOG_OS_WINDOWS)
   DWORD_PTR result = SetThreadAffinityMask(_handle, (DWORD_PTR)mask);
-  if (result == 0)
+  if (result != 0)
     return ERR_OK;
   else
     return ERR_RT_INVALID_ARGUMENT;
@@ -283,7 +283,7 @@ err_t Thread::resetAffinity()
 #if defined(FOG_OS_WINDOWS)
   size_t affinityMask = (1 << CpuInfo::get()->numberOfProcessors) - 1;
   DWORD_PTR result = SetThreadAffinityMask(_handle, (DWORD_PTR)(affinityMask));
-  if (result == 0)
+  if (result != 0)
     return ERR_OK;
   else
     return ERR_RT_INVALID_ARGUMENT;

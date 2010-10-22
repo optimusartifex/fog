@@ -51,18 +51,42 @@ static FOG_INLINE void m128fZero(m128f& dst0)
 // [Fog::Face - SSE - Load/Store]
 // ============================================================================
 
+//! @brief Load scalar SP-FP value from @a srcp to @a dst.
+//!
+//! @verbatim
+//! dst[0] = ((float*)srcp)[0]
+//! dst[1] = 0.0
+//! dst[2] = 0.0
+//! dst[3] = 0.0
+//! @endverbatim
 template<typename SrcT>
 static FOG_INLINE void m128fLoad4(m128f& dst0, const SrcT* srcp)
 {
   dst0 = _mm_load_ss(reinterpret_cast<const float*>(srcp));
 }
 
+//! @brief Load two SP-FP values from @a srcp to @a dst.
+//!
+//! @verbatim
+//! dst[0] = ((float*)srcp)[0]
+//! dst[1] = ((float*)srcp)[0]
+//! dst[2] = {NO CHANGE}
+//! dst[3] = {NO CHANGE}
+//! @endverbatim
 template<typename SrcT>
 static FOG_INLINE void m128fLoad8Lo(m128f& dst0, const SrcT* srcp)
 {
   dst0 = _mm_loadl_pi(dst0, reinterpret_cast<const __m64*>(srcp));
 }
 
+//! @brief Load two SP-FP values from @a srcp to @a dst.
+//!
+//! @verbatim
+//! dst[0] = {NO CHANGE}
+//! dst[1] = {NO CHANGE}
+//! dst[2] = ((float*)srcp)[0]
+//! dst[3] = ((float*)srcp)[0]
+//! @endverbatim
 template<typename SrcT>
 static FOG_INLINE void m128fLoad8Hi(m128f& dst0, const SrcT* srcp)
 {
@@ -121,6 +145,14 @@ static FOG_INLINE void m128fStore16nta(DstT* dstp, const m128f& src0)
 // [Fog::Face - SSE - Shuffle]
 // ============================================================================
 
+//! @brief Shuffle SP-FP values from @a to @a dst.
+//!
+//! @verbatim
+//! dst[0] = a[W]
+//! dst[1] = a[X]
+//! dst[2] = a[Y]
+//! dst[3] = a[Z]
+//! @endverbatim
 template<int Z, int Y, int X, int W>
 static FOG_INLINE void m128fShuffle(m128f& dst, const m128f& a)
 {
@@ -131,6 +163,14 @@ static FOG_INLINE void m128fShuffle(m128f& dst, const m128f& a)
 #endif // FOG_FACE_HAS_SSE2
 }
 
+//! @brief Shuffle SP-FP values from @a and @a b to @a dst.
+//!
+//! @verbatim
+//! dst[0] = a[W]
+//! dst[1] = a[X]
+//! dst[2] = b[Y]
+//! dst[3] = b[Z]
+//! @endverbatim
 template<int Z, int Y, int X, int W>
 static FOG_INLINE void m128fShuffle(m128f& dst, const m128f& a, const m128f& b)
 {
@@ -215,11 +255,27 @@ static FOG_INLINE void m128fMoveHL(m128f& dst, const m128f& a, const m128f& b)
 // [Fog::Face - SSE - Add]
 // ============================================================================
 
+//! @brief Add scalar SP-FP value of @b to @a and store the result into @a dst.
+//!
+//! @verbatim
+//! dst[0] = a[0] + b[0]
+//! dst[1] = a[1]
+//! dst[2] = a[2]
+//! dst[3] = a[3]
+//! @endverbatim
 static FOG_INLINE void m128fAddSS(m128f& dst, const m128f& a, const m128f& b)
 {
   dst = _mm_add_ss(a, b);
 }
 
+//! @brief Add packed SP-FP values of @b to @a and store the result into @a dst.
+//!
+//! @verbatim
+//! dst[0] = a[0] + b[0]
+//! dst[1] = a[1] + b[1]
+//! dst[2] = a[2] + b[2]
+//! dst[3] = a[3] + b[3]
+//! @endverbatim
 static FOG_INLINE void m128fAddPS(m128f& dst, const m128f& a, const m128f& b)
 {
   dst = _mm_add_ps(a, b);

@@ -190,35 +190,35 @@ static FOG_INLINE void m128dStore16nta(DstT* dstp, const m128d& src0)
 // ============================================================================
 
 template<typename SrcT>
-static FOG_INLINE void m128dExtractLo(m128d& dst, const SrcT* srcp)
+static FOG_INLINE void m128dExtendLo(m128d& dst, const SrcT* srcp)
 {
   dst = _mm_load_sd(reinterpret_cast<const double*>(srcp));
   dst = _mm_unpacklo_pd(dst, dst);
 }
 
-static FOG_INLINE void m128dExtractLo(m128d& dst, const m128d& a)
+static FOG_INLINE void m128dSwapPD(m128d& dst, const m128d& src)
+{
+  dst = _mm_shuffle_pd(src, src, _MM_SHUFFLE2(0, 1));
+}
+
+static FOG_INLINE void m128dExtendLo(m128d& dst, const m128d& a)
 {
   dst = _mm_unpacklo_pd(a, a);
 }
 
-static FOG_INLINE void m128dExtractLo(m128d& dst, const m128d& a, const m128d& b)
-{
-  dst = _mm_unpacklo_pd(a, b);
-}
-
-static FOG_INLINE void m128dExtractHi(m128d& dst, const m128d& a)
+static FOG_INLINE void m128dExtendHi(m128d& dst, const m128d& a)
 {
   dst = _mm_unpackhi_pd(a, a);
 }
 
-static FOG_INLINE void m128dExtractHi(m128d& dst, const m128d& a, const m128d& b)
+static FOG_INLINE void m128dUnpackLo(m128d& dst, const m128d& a, const m128d& b)
 {
-  dst = _mm_unpackhi_pd(a, b);
+  dst = _mm_unpacklo_pd(a, b);
 }
 
-static FOG_INLINE void m128dSwapPD(m128d& dst, const m128d& src)
+static FOG_INLINE void m128dUnpackHi(m128d& dst, const m128d& a, const m128d& b)
 {
-  dst = _mm_shuffle_pd(src, src, _MM_SHUFFLE2(0, 1));
+  dst = _mm_unpackhi_pd(a, b);
 }
 
 // ============================================================================
@@ -394,6 +394,49 @@ static FOG_INLINE void m128dXor(m128d& dst, const m128d& a, const m128d& b)
 static FOG_INLINE void m128iXor(m128i& dst, const m128i& a, const m128i& b)
 {
   dst = _mm_xor_si128(a, b);
+}
+
+// ============================================================================
+// [Fog::Face - SSE2 - Epsilon]
+// ============================================================================
+
+static FOG_INLINE void m128dEpsilonSD(m128d& dst, const m128d& a)
+{
+  m128d sgn;
+  sgn = FOG_SSE_GET_CONST_PD(m128d_sgn_mask);
+  sgn = _mm_and_pd(sgn, a);
+
+  dst = _mm_and_pd(a, FOG_SSE_GET_CONST_PD(m128d_num_mask));
+  dst = _mm_max_sd(dst, FOG_SSE_GET_CONST_PD(m128d_epsilon));
+  dst = _mm_or_pd(dst, sgn);
+}
+
+static FOG_INLINE void m128dEpsilonPD(m128d& dst, const m128d& a)
+{
+  m128d sgn;
+  sgn = FOG_SSE_GET_CONST_PD(m128d_sgn_mask);
+  sgn = _mm_and_pd(sgn, a);
+
+  dst = _mm_and_pd(a, FOG_SSE_GET_CONST_PD(m128d_num_mask));
+  dst = _mm_max_pd(dst, FOG_SSE_GET_CONST_PD(m128d_epsilon));
+  dst = _mm_or_pd(dst, sgn);
+}
+
+// ============================================================================
+// [Fog::Face - SSE2 - MoveMask]
+// ============================================================================
+
+//! @brief Create a 16-bit mask from the most significant bits of the 16 signed 
+//! or unsigned 8-bit integers in a and zero extend the upper bits.
+static FOG_INLINE void m128iMoveMask8(int& dst, const m128i& a)
+{
+  dst = _mm_movemask_epi8(a);
+}
+
+//! @brief Create a 2-bit mask from the most significant bits of the four DP-FP values.
+static FOG_INLINE void m128dMoveMask(int& dst, const m128d& a)
+{
+  dst = _mm_movemask_pd(a);
 }
 
 //! @}

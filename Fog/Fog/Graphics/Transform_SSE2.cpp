@@ -23,7 +23,7 @@ static void FOG_FASTCALL _G2d_TransformD_mapPointD_SSE2(const TransformD& self, 
   __m128d src0;
 
   Face::m128dLoad16u(m_20_21, &self._20);
-  Face::m128dLoad16u(src0, &src.x);
+  Face::m128dLoad16u(src0, &src);
 
   switch (selfType)
   {
@@ -95,7 +95,7 @@ static void FOG_FASTCALL _G2d_TransformD_mapPointD_SSE2(const TransformD& self, 
       FOG_ASSERT_NOT_REACHED();
   }
 
-  Face::m128dStore16u(&dst.x, src0);
+  Face::m128dStore16u(&dst, src0);
 }
 
 static void FOG_FASTCALL _G2d_TransformD_mapPointsD_Identity_SSE2(const TransformD& self, PointD* dst, const PointD* src, sysuint_t length)
@@ -386,17 +386,17 @@ static void FOG_FASTCALL _G2d_TransformD_mapPointsD_Projection_SSE2(const Transf
     __m128d m_10_10, m_11_11, m_12_12;
     __m128d m_20_20, m_21_21, m_22_22;
 
-    Face::m128dExtractLo(m_00_00, &self._00);
-    Face::m128dExtractLo(m_01_01, &self._01);
-    Face::m128dExtractLo(m_02_02, &self._02);
+    Face::m128dExtendLo(m_00_00, &self._00);
+    Face::m128dExtendLo(m_01_01, &self._01);
+    Face::m128dExtendLo(m_02_02, &self._02);
 
-    Face::m128dExtractLo(m_10_10, &self._10);
-    Face::m128dExtractLo(m_11_11, &self._11);
-    Face::m128dExtractLo(m_12_12, &self._12);
+    Face::m128dExtendLo(m_10_10, &self._10);
+    Face::m128dExtendLo(m_11_11, &self._11);
+    Face::m128dExtendLo(m_12_12, &self._12);
 
-    Face::m128dExtractLo(m_20_20, &self._20);
-    Face::m128dExtractLo(m_21_21, &self._21);
-    Face::m128dExtractLo(m_22_22, &self._22);
+    Face::m128dExtendLo(m_20_20, &self._20);
+    Face::m128dExtendLo(m_21_21, &self._21);
+    Face::m128dExtendLo(m_22_22, &self._22);
 
     for (i = length >> 1; i; i--, dst += 2, src += 2)
     {
@@ -422,12 +422,8 @@ static void FOG_FASTCALL _G2d_TransformD_mapPointsD_Projection_SSE2(const Transf
       Face::m128dAddPD(src1xx, src1xx, m_22_22);
       Face::m128dAddPD(src1xx, src1xx, src1yy);
 
-      rcp0   = FOG_SSE_GET_CONST_PD(m128d_sgn_mask);
-      rcp0   = _mm_and_pd(rcp0, src1xx);
-      src1xx = _mm_and_pd(src1xx, FOG_SSE_GET_CONST_PD(m128d_num_mask));
-      rcp0   = _mm_or_pd(rcp0, FOG_SSE_GET_CONST_PD(m128d_one));
-      src1xx = _mm_max_pd(src1xx, FOG_SSE_GET_CONST_PD(m128d_epsilon));
-      rcp0   = _mm_div_pd(rcp0, src1xx);
+      Face::m128dEpsilonPD(src1xx, src1xx);
+      Face::m128dRcpPD(rcp0, src1xx);
 
       // src0xx = (x * _00 + y * _10 + _20) * rcp0
       // src0yy = (x * _01 + y * _11 + _21) * rcp0
@@ -465,7 +461,6 @@ static void FOG_FASTCALL _G2d_TransformD_mapPointsD_Projection_SSE2(const Transf
     __m128d src0 = _mm_loadu_pd(&src[0].x);
     __m128d rev0 = _mm_shuffle_pd(src0, src0, _MM_SHUFFLE2(0, 1));
     __m128d inv0 = _mm_mul_pd(src0, _mm_setr_pd(self._02, self._12));
-    __m128d tmp0 = _mm_load_sd(&FOG_SSE_GET_CONST_SD(m128d_sgn_mask));
 
     // src0.x = (x * _00 + y * _10 + _20)
     // src0.y = (x * _01 + y * _11 + _21)
@@ -477,15 +472,12 @@ static void FOG_FASTCALL _G2d_TransformD_mapPointsD_Projection_SSE2(const Transf
     inv0 = _mm_add_pd(inv0, _mm_shuffle_pd(inv0, inv0, _MM_SHUFFLE2(0, 1)));
     inv0 = _mm_add_sd(inv0, _mm_load_sd(&self._22));
 
-    tmp0 = _mm_and_pd(tmp0, inv0);
-    inv0 = _mm_xor_pd(inv0, tmp0);
-    inv0 = _mm_max_sd(inv0, _mm_load_sd(&FOG_SSE_GET_CONST_SD(m128d_epsilon)));
-    inv0 = _mm_xor_pd(inv0, tmp0);
-    inv0 = _mm_div_sd(_mm_load_sd(&FOG_SSE_GET_CONST_SD(m128d_one)), inv0);
-    inv0 = _mm_unpacklo_pd(inv0, inv0);
+    Face::m128dEpsilonSD(inv0, inv0);
+    Face::m128dRcpSD(inv0, inv0);
+    Face::m128dExtendLo(inv0, inv0);
 
-    src0 = _mm_mul_pd(src0, inv0);
-    _mm_storeu_pd(&dst[0].x, src0);
+    Face::m128dMulPD(src0, src0, inv0);
+    Face::m128dStore16u(dst, src0);
   }
 }
 
@@ -539,7 +531,7 @@ static void FOG_FASTCALL _G2d_TransformD_mapVectorD_SSE2(const TransformD& self,
     src0 = _mm_sub_pd(src0, _mm_mul_pd(rcpX, _mm_unpackhi_pd(rcp0, rcp0)));
   }
 
-  _mm_storeu_pd(&dst.x, src0);
+  Face::m128dStore16u(&dst, src0);
 }
 
 } // Fog namespace

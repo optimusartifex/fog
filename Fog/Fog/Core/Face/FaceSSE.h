@@ -39,6 +39,15 @@ namespace Face {
 typedef __m128 m128f;
 
 // ============================================================================
+// [Fog::Face - SSE - Zero]
+// ============================================================================
+
+static FOG_INLINE void m128fZero(m128f& dst0)
+{
+  dst0 = _mm_setzero_ps();
+}
+
+// ============================================================================
 // [Fog::Face - SSE - Load/Store]
 // ============================================================================
 
@@ -46,6 +55,18 @@ template<typename SrcT>
 static FOG_INLINE void m128fLoad4(m128f& dst0, const SrcT* srcp)
 {
   dst0 = _mm_load_ss(reinterpret_cast<const float*>(srcp));
+}
+
+template<typename SrcT>
+static FOG_INLINE void m128fLoad8Lo(m128f& dst0, const SrcT* srcp)
+{
+  dst0 = _mm_loadl_pi(dst0, reinterpret_cast<const __m64*>(srcp));
+}
+
+template<typename SrcT>
+static FOG_INLINE void m128fLoad8Hi(m128f& dst0, const SrcT* srcp)
+{
+  dst0 = _mm_loadh_pi(dst0, reinterpret_cast<const __m64*>(srcp));
 }
 
 template<typename SrcT>
@@ -64,6 +85,18 @@ template<typename DstT>
 static FOG_INLINE void m128fStore4(DstT* dstp, const m128f& src0)
 {
   _mm_store_ss(reinterpret_cast<float*>(dstp), src0);
+}
+
+template<typename DstT>
+static FOG_INLINE void m128fStore8Lo(DstT* dstp, const m128f& src0)
+{
+  _mm_storel_pi(reinterpret_cast<__m64*>(dstp), src0);
+}
+
+template<typename DstT>
+static FOG_INLINE void m128fStore8Hi(DstT* dstp, const m128f& src0)
+{
+  _mm_storeh_pi(reinterpret_cast<__m64*>(dstp), src0);
 }
 
 template<typename DstT>
@@ -104,14 +137,78 @@ static FOG_INLINE void m128fShuffle(m128f& dst, const m128f& a, const m128f& b)
   dst = _mm_shuffle_ps(a, b, _MM_SHUFFLE(Z, Y, X, W));
 }
 
+//! @brief Swap low/high two SP-FP values.
+//!
+//! @verbatim
+//! dst[0] := a[1]
+//! dst[1] := a[0]
+//! dst[2] := a[3]
+//! dst[3] := a[2]
+//! @endverbatim
 static FOG_INLINE void m128fSwapXY(m128f& dst, const m128f& a)
 {
   m128fShuffle<2, 3, 0, 1>(dst, a);
 }
 
+//! @brief Extend SP-FP value at @a into all packed ones.
+//!
+//! @verbatim
+//! dst[0] := a[0]
+//! dst[1] := a[0]
+//! dst[2] := a[0]
+//! dst[3] := a[0]
+//! @endverbatim
 static FOG_INLINE void m128fExtendSS(m128f& dst, const m128f& a)
 {
   m128fShuffle<0, 0, 0, 0>(dst, a);
+}
+
+//! @brief Select and interleave the lower two SP-FP values from @a a and @a b.
+//!
+//! @verbatim
+//! dst[0] = a[0]
+//! dst[1] = b[0]
+//! dst[2] = a[1]
+//! dst[3] = b[1]
+//! @endverbatim
+static FOG_INLINE void m128fUnpackLo(m128f& dst, const m128f& a, const m128f& b)
+{
+  dst = _mm_unpacklo_ps(a, b);
+}
+
+//! @brief Select and interleave the upper two SP-FP values from @a a and @a b.
+//!
+//! @verbatim
+//! dst[0] = a[2]
+//! dst[1] = b[2]
+//! dst[2] = a[3]
+//! dst[3] = b[3]
+//! @endverbatim
+static FOG_INLINE void m128fUnpackHi(m128f& dst, const m128f& a, const m128f& b)
+{
+  dst = _mm_unpackhi_ps(a, b);
+}
+
+//! @verbatim
+//! dst[0] := b[0]
+//! dst[1] := b[1]
+//! dst[2] := a[0]
+//! dst[3] := a[1]
+//! @endverbatim
+static FOG_INLINE void m128fMoveLH(m128f& dst, const m128f& a, const m128f& b)
+{
+  dst = _mm_movelh_ps(a, b);
+}
+
+//! @verbatim
+//! dst[0] := b[2]
+//! dst[1] := b[3]
+//! dst[2] := a[2]
+//! dst[3] := a[3]
+//! @endverbatim
+static FOG_INLINE void m128fMoveHL(m128f& dst, const m128f& a, const m128f& b)
+{
+  dst = _mm_movehl_ps(a, b);
 }
 
 // ============================================================================
@@ -284,6 +381,16 @@ static FOG_INLINE void m128fEpsilonPS(m128f& dst, const m128f& a)
   dst = _mm_and_ps(a, FOG_SSE_GET_CONST_PS(m128f_num_mask));
   dst = _mm_max_ps(dst, FOG_SSE_GET_CONST_PS(m128f_epsilon));
   dst = _mm_or_ps(dst, sgn);
+}
+
+// ============================================================================
+// [Fog::Face - SSE - MoveMask]
+// ============================================================================
+
+//! @brief Create a 4-bit mask from the most significant bits of the four SP-FP values.
+static FOG_INLINE void m128fMoveMask(int& dst, const m128f& a)
+{
+  dst = _mm_movemask_ps(a);
 }
 
 //! @}

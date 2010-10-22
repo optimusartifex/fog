@@ -91,18 +91,14 @@ static void FOG_FASTCALL _G2d_TransformF_mapPointsF_Translation_SSE(const Transf
 
   if (length & 1)
   {
-    Face::m128f src0x, src0y;
-    Face::m128f m_21_20_21_20;
+    Face::m128f src0;
 
-    Face::m128fLoad4(src0x, &src->x);
-    Face::m128fLoad4(src0y, &src->y);
+    Face::m128fZero(src0);
+    Face::m128fLoad8Lo(src0, src);
 
-    Face::m128fAddSS(src0x, src0x, m_20_21_20_21);
-    Face::m128fSwapXY(m_21_20_21_20, m_20_21_20_21);
-    Face::m128fAddSS(src0y, src0y, m_21_20_21_20);
+    Face::m128fAddPS(src0, src0, m_20_21_20_21);
 
-    Face::m128fStore4(&dst->x, src0x);
-    Face::m128fStore4(&dst->y, src0y);
+    Face::m128fStore8Lo(dst, src0);
   }
 }
 
@@ -156,23 +152,15 @@ static void FOG_FASTCALL _G2d_TransformF_mapPointsF_Scaling_SSE(const TransformF
 
   if (length & 1)
   {
-    Face::m128f src0x, src0y;
-    Face::m128f m_11_00_11_00;
-    Face::m128f m_21_20_21_20;
+    Face::m128f src0;
 
-    Face::m128fLoad4(src0x, &src->x);
-    Face::m128fLoad4(src0y, &src->y);
-  
-    Face::m128fMulSS(src0x, src0x, m_00_11_00_11);
-    Face::m128fSwapXY(m_11_00_11_00, m_00_11_00_11);
-    Face::m128fMulSS(src0y, src0y, m_11_00_11_00);
+    Face::m128fZero(src0);
+    Face::m128fLoad8Lo(src0, src);
 
-    Face::m128fAddSS(src0x, src0x, m_20_21_20_21);
-    Face::m128fSwapXY(m_21_20_21_20, m_20_21_20_21);
-    Face::m128fAddSS(src0y, src0y, m_21_20_21_20);
+    Face::m128fMulPS(src0, src0, m_00_11_00_11);
+    Face::m128fAddPS(src0, src0, m_20_21_20_21);
 
-    Face::m128fStore4(&dst->x, src0x);
-    Face::m128fStore4(&dst->y, src0y);
+    Face::m128fStore8Lo(dst, src0);
   }
 }
 
@@ -251,29 +239,19 @@ static void FOG_FASTCALL _G2d_TransformF_mapPointsF_Affine_SSE(const TransformF&
 
   if (length & 1)
   {
-    Face::m128f src0x, src0y;
-    Face::m128f tmp0x, tmp0y;
+    Face::m128f src0, tmp0;
 
-    Face::m128fLoad4(src0x, &src->x);
-    Face::m128fLoad4(src0y, &src->y);
+    Face::m128fZero(src0);
+    Face::m128fLoad8Lo(src0, src);
+    Face::m128fSwapXY(tmp0, src0);
 
-    tmp0x = src0x;
-    tmp0y = src0y;
+    Face::m128fMulPS(src0, src0, m_00_11_00_11);
+    Face::m128fMulPS(tmp0, tmp0, m_10_01_10_01);
 
-    Face::m128fMulSS(src0x, src0x, _mm_load_ss(&self._00));
-    Face::m128fMulSS(src0y, src0y, _mm_load_ss(&self._11));
+    Face::m128fAddPS(src0, src0, m_20_21_20_21);
+    Face::m128fAddPS(src0, src0, tmp0);
 
-    Face::m128fMulSS(tmp0x, tmp0x, _mm_load_ss(&self._01));
-    Face::m128fMulSS(tmp0y, tmp0y, _mm_load_ss(&self._10));
-
-    Face::m128fAddSS(src0x, src0x, _mm_load_ss(&self._20));
-    Face::m128fAddSS(src0y, src0y, _mm_load_ss(&self._21));
-
-    Face::m128fAddSS(src0x, src0x, tmp0y);
-    Face::m128fAddSS(src0y, src0y, tmp0x);
-
-    Face::m128fStore4(&dst->x, src0x);
-    Face::m128fStore4(&dst->y, src0y);
+    Face::m128fStore8Lo(dst, src0);
   }
 }
 
@@ -374,12 +352,8 @@ static void FOG_FASTCALL _G2d_TransformF_mapPointsF_Projection_SSE(const Transfo
     Face::m128f tmp01;
     Face::m128f rcp01;
 
-    Face::m128fLoad4(src01, &src->x);
-    Face::m128fLoad4(tmp01, &src->y);
-
-    Face::m128fShuffle<1, 0, 1, 0>(src01, src01);
-    Face::m128fShuffle<0, 1, 0, 1>(tmp01, tmp01);
-    Face::m128fOr(src01, src01, tmp01);
+    Face::m128fZero(src01);
+    Face::m128fLoad8Lo(src01, src);
 
     Face::m128fShuffle<2, 2, 0, 0>(rcp01, src01);
     Face::m128fShuffle<3, 3, 1, 1>(tmp01, src01);
@@ -400,9 +374,7 @@ static void FOG_FASTCALL _G2d_TransformF_mapPointsF_Projection_SSE(const Transfo
     Face::m128fAddPS(src01, src01, tmp01);
     Face::m128fMulPS(src01, src01, rcp01);
 
-    Face::m128fSwapXY(tmp01, src01);
-    Face::m128fStore4(&dst->x, src01);
-    Face::m128fStore4(&dst->y, tmp01);
+    Face::m128fStore8Lo(dst, src01);
   }
 }
 

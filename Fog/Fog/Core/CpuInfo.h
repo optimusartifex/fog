@@ -3,10 +3,6 @@
 // [License]
 // MIT, See COPYING file in package
 
-// Copyright (c) 2006-2008 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 // [Guard]
 #ifndef _FOG_CORE_CPUINFO_H
 #define _FOG_CORE_CPUINFO_H
@@ -50,13 +46,13 @@ union FOG_HIDDEN CpuId
 //! Small example how to check for SSE2 support.
 //!
 //! @verbatim
-//! if (Fog::CpuInfo::get()->hasFeature(Fog::CpuInfo::FEATURE_SSE2))
+//! if (Fog::CpuInfo::get()->hasFeature(Fog::CPU_FEATURE_SSE2))
 //! {
-//!   // cpu has SSE2 support
+//!   // Cpu has SSE2 support.
 //! }
 //! else
 //! {
-//!   // cpu hasn't SSE2 support
+//!   // Cpu hasn't SSE2 support.
 //! }
 //! @endverbatim
 struct FOG_HIDDEN CpuInfo

@@ -42,6 +42,14 @@ typedef __m128 m128f;
 // [Fog::Face - SSE - Zero]
 // ============================================================================
 
+//! @brief Clear content of @a dst0.
+//!
+//! @verbatim
+//! dst[0] = 0.0
+//! dst[1] = 0.0
+//! dst[2] = 0.0
+//! dst[3] = 0.0
+//! @endverbatim
 static FOG_INLINE void m128fZero(m128f& dst0)
 {
   dst0 = _mm_setzero_ps();
@@ -93,48 +101,105 @@ static FOG_INLINE void m128fLoad8Hi(m128f& dst0, const SrcT* srcp)
   dst0 = _mm_loadh_pi(dst0, reinterpret_cast<const __m64*>(srcp));
 }
 
+//! @brief Aligned load of four packed SP-FP values.
+//!
+//! @verbatim
+//! dst[0] = ((float*)srcp)[0]
+//! dst[1] = ((float*)srcp)[1]
+//! dst[2] = ((float*)srcp)[2]
+//! dst[3] = ((float*)srcp)[3]
+//! @endverbatim
 template<typename SrcT>
 static FOG_INLINE void m128fLoad16a(m128f& dst0, const SrcT* srcp)
 {
   dst0 = _mm_load_ps(reinterpret_cast<const float*>(srcp));
 }
 
+//! @brief Unaligned load of four packed SP-FP values.
+//!
+//! @verbatim
+//! dst[0] = ((float*)srcp)[0]
+//! dst[1] = ((float*)srcp)[1]
+//! dst[2] = ((float*)srcp)[2]
+//! dst[3] = ((float*)srcp)[3]
+//! @endverbatim
 template<typename SrcT>
 static FOG_INLINE void m128fLoad16u(m128f& dst0, const SrcT* srcp)
 {
   dst0 = _mm_loadu_ps(reinterpret_cast<const float*>(srcp));
 }
 
+//! @brief Store scalar SP-FP value.
+//!
+//! @verbatim
+//! ((float*)dstp)[0] = src0[0]
+//! @endverbatim
 template<typename DstT>
 static FOG_INLINE void m128fStore4(DstT* dstp, const m128f& src0)
 {
   _mm_store_ss(reinterpret_cast<float*>(dstp), src0);
 }
 
+//! @brief Store two packed SP-FP values (low).
+//!
+//! @verbatim
+//! ((float*)dstp)[0] = src0[0]
+//! ((float*)dstp)[1] = src0[1]
+//! @endverbatim
 template<typename DstT>
 static FOG_INLINE void m128fStore8Lo(DstT* dstp, const m128f& src0)
 {
   _mm_storel_pi(reinterpret_cast<__m64*>(dstp), src0);
 }
 
+//! @brief Store two packed SP-FP values (high).
+//!
+//! @verbatim
+//! ((float*)dstp)[0] = src0[2]
+//! ((float*)dstp)[1] = src0[3]
+//! @endverbatim
 template<typename DstT>
 static FOG_INLINE void m128fStore8Hi(DstT* dstp, const m128f& src0)
 {
   _mm_storeh_pi(reinterpret_cast<__m64*>(dstp), src0);
 }
 
+//! @brief Aligned store of four packed SP-FP values.
+//!
+//! @verbatim
+//! ((float*)dstp)[0] = src0[0]
+//! ((float*)dstp)[1] = src0[1]
+//! ((float*)dstp)[2] = src0[2]
+//! ((float*)dstp)[3] = src0[3]
+//! @endverbatim
 template<typename DstT>
 static FOG_INLINE void m128fStore16a(DstT* dstp, const m128f& src0)
 {
   _mm_store_ps(reinterpret_cast<float*>(dstp), src0);
 }
 
+//! @brief Unaligned store of four packed SP-FP values.
+//!
+//! @verbatim
+//! ((float*)dstp)[0] = src0[0]
+//! ((float*)dstp)[1] = src0[1]
+//! ((float*)dstp)[2] = src0[2]
+//! ((float*)dstp)[3] = src0[3]
+//! @endverbatim
 template<typename DstT>
 static FOG_INLINE void m128fStore16u(DstT* dstp, const m128f& src0)
 {
   _mm_storeu_ps(reinterpret_cast<float*>(dstp), src0);
 }
 
+//! @brief Aligned store of four packed SP-FP values (using non-thermal hint).
+//!
+//! @verbatim
+//! ((float*)dstp)[0] = src0[0]
+//! ((float*)dstp)[1] = src0[1]
+//! ((float*)dstp)[2] = src0[2]
+//! ((float*)dstp)[3] = src0[3]
+//! @endverbatim
 template<typename DstT>
 static FOG_INLINE void m128fStore16nta(DstT* dstp, const m128f& src0)
 {
@@ -229,6 +294,8 @@ static FOG_INLINE void m128fUnpackHi(m128f& dst, const m128f& a, const m128f& b)
   dst = _mm_unpackhi_ps(a, b);
 }
 
+//! @brief Move low SP-FP values from @a a and @a b to @a dst.
+//!
 //! @verbatim
 //! dst[0] := b[0]
 //! dst[1] := b[1]
@@ -240,6 +307,8 @@ static FOG_INLINE void m128fMoveLH(m128f& dst, const m128f& a, const m128f& b)
   dst = _mm_movelh_ps(a, b);
 }
 
+//! @brief Move high SP-FP values from @a a and @a b to @a dst.
+//!
 //! @verbatim
 //! dst[0] := b[2]
 //! dst[1] := b[3]
@@ -393,21 +462,57 @@ static FOG_INLINE void m128fMaxPS(m128f& dst, const m128f& a, const m128f& b)
 // [Fog::Face - SSE - BitOps]
 // ============================================================================
 
+//! @brief Perform a bitwise logical AND between @a and @a b and store result
+//! to @a dst.
+//!
+//! @verbatim
+//! dst[0] = a[0] & b[0]
+//! dst[1] = a[1] & b[1]
+//! dst[2] = a[2] & b[2]
+//! dst[3] = a[3] & b[3]
+//! @endverbatim
 static FOG_INLINE void m128fAnd(m128f& dst, const m128f& a, const m128f& b)
 {
   dst = _mm_and_ps(a, b);
 }
 
+//! @brief Perform a bitwise logical ANDNOT between @a and @a b and store result
+//! to @a dst.
+//!
+//! @verbatim
+//! dst[0] = (~a[0]) & b[0]
+//! dst[1] = (~a[1]) & b[1]
+//! dst[2] = (~a[2]) & b[2]
+//! dst[3] = (~a[3]) & b[3]
+//! @endverbatim
 static FOG_INLINE void m128fAndNot(m128f& dst, const m128f& a, const m128f& b)
 {
   dst = _mm_andnot_ps(a, b);
 }
 
+//! @brief Perform a bitwise logical OR between @a and @a b and store result
+//! to @a dst.
+//!
+//! @verbatim
+//! dst[0] = a[0] | b[0]
+//! dst[1] = a[1] | b[1]
+//! dst[2] = a[2] | b[2]
+//! dst[3] = a[3] | b[3]
+//! @endverbatim
 static FOG_INLINE void m128fOr(m128f& dst, const m128f& a, const m128f& b)
 {
   dst = _mm_or_ps(a, b);
 }
 
+//! @brief Perform a bitwise logical XOR between @a and @a b and store result
+//! to @a dst.
+//!
+//! @verbatim
+//! dst[0] = a[0] ^ b[0]
+//! dst[1] = a[1] ^ b[1]
+//! dst[2] = a[2] ^ b[2]
+//! dst[3] = a[3] ^ b[3]
+//! @endverbatim
 static FOG_INLINE void m128fXor(m128f& dst, const m128f& a, const m128f& b)
 {
   dst = _mm_xor_ps(a, b);
@@ -417,9 +522,19 @@ static FOG_INLINE void m128fXor(m128f& dst, const m128f& a, const m128f& b)
 // [Fog::Face - SSE - Epsilon]
 // ============================================================================
 
+//! @brief Make sure that scalar SP-FP value in a[0] is larger than epsilon
+//! (Used to make a reciprocal).
+//!
+//! @verbatim
+//! dst[0] = a[0] < 0 ? max(a[0], -epsilon) : min(a[0], epsilon)
+//! dst[1] = a[1]
+//! dst[2] = a[2]
+//! dst[3] = a[3]
+//! @endverbatim
 static FOG_INLINE void m128fEpsilonSS(m128f& dst, const m128f& a)
 {
   m128f sgn;
+
   sgn = FOG_SSE_GET_CONST_PS(m128f_sgn_mask);
   sgn = _mm_and_ps(sgn, a);
 
@@ -428,9 +543,19 @@ static FOG_INLINE void m128fEpsilonSS(m128f& dst, const m128f& a)
   dst = _mm_or_ps(dst, sgn);
 }
 
+//! @brief Make sure that packed SP-FP values in a are larger than epsilon
+//! (Used to make a reciprocals).
+//!
+//! @verbatim
+//! dst[0] = a[0] < 0 ? max(a[0], -epsilon) : min(a[0], epsilon)
+//! dst[1] = a[1] < 0 ? max(a[0], -epsilon) : min(a[0], epsilon)
+//! dst[2] = a[2] < 0 ? max(a[0], -epsilon) : min(a[0], epsilon)
+//! dst[3] = a[3] < 0 ? max(a[0], -epsilon) : min(a[0], epsilon)
+//! @endverbatim
 static FOG_INLINE void m128fEpsilonPS(m128f& dst, const m128f& a)
 {
   m128f sgn;
+
   sgn = FOG_SSE_GET_CONST_PS(m128f_sgn_mask);
   sgn = _mm_and_ps(sgn, a);
 
@@ -444,6 +569,13 @@ static FOG_INLINE void m128fEpsilonPS(m128f& dst, const m128f& a)
 // ============================================================================
 
 //! @brief Create a 4-bit mask from the most significant bits of the four SP-FP values.
+//!
+//! @verbatim
+//! dst = (signbit(a[0]) << 0)
+//!     | (signbit(a[1]) << 1)
+//!     | (signbit(a[2]) << 2)
+//!     | (signbit(a[3]) << 3)
+//! @endverbatim
 static FOG_INLINE void m128fMoveMask(int& dst, const m128f& a)
 {
   dst = _mm_movemask_ps(a);

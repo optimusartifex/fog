@@ -70,22 +70,19 @@ static void FOG_FASTCALL _G2d_TransformD_mapPointD_SSE2(const TransformD& self, 
       __m128d inv0 = _mm_mul_pd(src0, _mm_setr_pd(self._02, self._12));
       __m128d tmp0 = _mm_load_sd(&FOG_SSE_GET_CONST_SD(m128d_sgn_mask));
 
+      Face::m128dAddPD(inv0, inv0, _mm_shuffle_pd(inv0, inv0, _MM_SHUFFLE2(0, 1)));
+      Face::m128dAddSD(inv0, inv0, _mm_load_sd(&self._22));
+
+      Face::m128dEpsilonSD(inv0, inv0);
+      Face::m128dRcpSD(inv0, inv0);
+      Face::m128dExtendLo(inv0, inv0);
+
       // src0.x = (x * _00 + y * _01 + _20)
       // src0.y = (x * _01 + y * _11 + _21)
       Face::m128dMulPD(src0, src0, m_00_11);
       Face::m128dMulPD(rev0, rev0, m_10_01);
       Face::m128dAddPD(src0, src0, m_20_21);
       Face::m128dAddPD(src0, src0, rev0);
-
-      inv0 = _mm_add_pd(inv0, _mm_shuffle_pd(inv0, inv0, _MM_SHUFFLE2(0, 1)));
-      inv0 = _mm_add_sd(inv0, _mm_load_sd(&self._22));
-
-      tmp0 = _mm_and_pd(tmp0, inv0);
-      inv0 = _mm_xor_pd(inv0, tmp0);
-      inv0 = _mm_max_sd(inv0, _mm_load_sd(&FOG_SSE_GET_CONST_SD(m128d_epsilon)));
-      inv0 = _mm_xor_pd(inv0, tmp0);
-      inv0 = _mm_div_sd(_mm_load_sd(&FOG_SSE_GET_CONST_SD(m128d_one)), inv0);
-      inv0 = _mm_unpacklo_pd(inv0, inv0);
 
       Face::m128dMulPD(src0, src0, inv0);
       break;
@@ -469,8 +466,8 @@ static void FOG_FASTCALL _G2d_TransformD_mapPointsD_Projection_SSE2(const Transf
     Face::m128dAddPD(src0, src0, m_20_21);
     Face::m128dAddPD(src0, src0, rev0);
 
-    inv0 = _mm_add_pd(inv0, _mm_shuffle_pd(inv0, inv0, _MM_SHUFFLE2(0, 1)));
-    inv0 = _mm_add_sd(inv0, _mm_load_sd(&self._22));
+    Face::m128dAddPD(inv0, inv0, _mm_shuffle_pd(inv0, inv0, _MM_SHUFFLE2(0, 1)));
+    Face::m128dAddSD(inv0, inv0, _mm_load_sd(&self._22));
 
     Face::m128dEpsilonSD(inv0, inv0);
     Face::m128dRcpSD(inv0, inv0);

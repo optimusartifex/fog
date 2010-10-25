@@ -53,19 +53,20 @@ List<String> MacFontEngine::getFontList()
 
 FontFace* MacFontEngine::createDefaultFace()
 {
-  return createFace(Ascii8("Times"), 12, FontOptions(), FloatMatrix());
+  return createFace(Ascii8("Times"), 12, FontOptions(), TransformF());
 }
 
 FontFace* MacFontEngine::createFace(
   const String& family,
   float size, 
   const FontOptions& options,
-  const FloatMatrix& matrix)
+  const TransformF& matrix)
 {
   MacFontFace* face = fog_new MacFontFace();
 
   NSAffineTransform* transform = [NSAffineTransform transform];
-  [transform setTransformStruct: (NSAffineTransformStruct){matrix.sx, matrix.shy, matrix.shx, matrix.sy, 0, 0}];
+  const float* data = matrix.getData();
+  [transform setTransformStruct: (NSAffineTransformStruct){data[0], data[1], data[3], data[4], data[6], data[7]}];
   [transform scaleBy: size]; // Font size isn’t part of the glyph -> we have to scale it here
   [transform scaleXBy:1.0 yBy:-1.0]; // flip
   face->font = [NSFont fontWithDescriptor: [NSFontDescriptor fontDescriptorWithName: toNSString(family) size: size]
@@ -79,7 +80,7 @@ FontFace* MacFontEngine::createFace(
   // face->metrics._maximumWidth = ??
   face->metrics._height = [face->font xHeight];
   face->options = options;
-  face->matrix = matrix;
+  face->transform = matrix;
 
   return face;
 }
@@ -126,7 +127,7 @@ err_t MacFontFace::getGlyphSet(const Char* str, sysuint_t length, GlyphSet& glyp
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t MacFontFace::getOutline(const Char* str, sysuint_t length, DoublePath& dst)
+err_t MacFontFace::getOutline(const Char* str, sysuint_t length, PathD& dst)
 {
   AutoLock locked(lock);
 

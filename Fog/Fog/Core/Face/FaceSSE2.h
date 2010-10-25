@@ -182,7 +182,7 @@ static FOG_INLINE void m128iStore16nta(DstT* dstp, const m128i& src0)
 template<typename DstT>
 static FOG_INLINE void m128dStore16nta(DstT* dstp, const m128d& src0)
 {
-  _mm_stream_pd(reinterpret_cast<m128i*>(dstp), src0);
+  _mm_stream_pd(dstp, src0);
 }
 
 // ============================================================================

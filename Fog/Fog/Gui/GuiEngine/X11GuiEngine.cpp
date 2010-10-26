@@ -484,7 +484,7 @@ void X11GuiEngine::doUpdate()
   pXSync(_display, false);
 }
 
-void X11GuiEngine::doBlitWindow(GuiWindow* window, const IntBox* rects, sysuint_t count)
+void X11GuiEngine::doBlitWindow(GuiWindow* window, const BoxI* rects, sysuint_t count)
 {
   reinterpret_cast<X11GuiBackBuffer*>(window->_backingStore)->blitRects(
     (XID)window->getHandle(), rects, count);
@@ -1166,7 +1166,7 @@ err_t X11GuiWindow::hide()
   return ERR_OK;
 }
 
-err_t X11GuiWindow::setPosition(const IntPoint& pos)
+err_t X11GuiWindow::setPosition(const PointI& pos)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
@@ -1184,7 +1184,7 @@ err_t X11GuiWindow::setPosition(const IntPoint& pos)
   return ERR_OK;
 }
 
-err_t X11GuiWindow::setSize(const IntSize& size)
+err_t X11GuiWindow::setSize(const SizeI& size)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
   if (size.getWidth() <= 0 || size.getHeight() <= 0) return ERR_RT_INVALID_ARGUMENT;
@@ -1199,7 +1199,7 @@ err_t X11GuiWindow::setSize(const IntSize& size)
   return ERR_OK;
 }
 
-err_t X11GuiWindow::setGeometry(const IntRect& rect)
+err_t X11GuiWindow::setGeometry(const RectI& rect)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
   if (!rect.isValid()) return ERR_RT_INVALID_ARGUMENT;
@@ -1289,7 +1289,7 @@ err_t X11GuiWindow::getIcon(Image& icon)
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t X11GuiWindow::setSizeGranularity(const IntPoint& pt)
+err_t X11GuiWindow::setSizeGranularity(const PointI& pt)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
@@ -1313,7 +1313,7 @@ err_t X11GuiWindow::setSizeGranularity(const IntPoint& pt)
   return ERR_OK;
 }
 
-err_t X11GuiWindow::getSizeGranularity(IntPoint& pt)
+err_t X11GuiWindow::getSizeGranularity(PointI& pt)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
@@ -1321,7 +1321,7 @@ err_t X11GuiWindow::getSizeGranularity(IntPoint& pt)
   return ERR_OK;
 }
 
-err_t X11GuiWindow::worldToClient(IntPoint* coords)
+err_t X11GuiWindow::worldToClient(PointI* coords)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
@@ -1336,7 +1336,7 @@ err_t X11GuiWindow::worldToClient(IntPoint* coords)
   return (ok) ? (err_t)ERR_OK : (err_t)ERR_GUI_CANT_TRANSLETE_COORDINATES;
 }
 
-err_t X11GuiWindow::clientToWorld(IntPoint* coords)
+err_t X11GuiWindow::clientToWorld(PointI* coords)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
@@ -1423,12 +1423,12 @@ void X11GuiWindow::onX11Event(XEvent* xe)
       while (engine->pXCheckTypedWindowEvent(engine->getDisplay(), xe->xany.window, XConfigureNotify, xe)) 
         continue;
 
-      IntRect windowRect(
+      RectI windowRect(
         xe->xconfigure.x,
         xe->xconfigure.y,
         (int)xe->xconfigure.width,
         (int)xe->xconfigure.height);
-      IntRect clientRect(
+      RectI clientRect(
         0,
         0,
         windowRect.getWidth(),
@@ -1569,7 +1569,7 @@ __keyPressNoXIC:
       if (!_isDirty)
       {
         do {
-          IntBox box(
+          BoxI box(
             xe->xexpose.x,
             xe->xexpose.y,
             xe->xexpose.x + xe->xexpose.width,
@@ -1957,7 +1957,7 @@ void X11GuiBackBuffer::destroy()
   resize(0, 0, false);
 }
 
-void X11GuiBackBuffer::updateRects(const IntBox* rects, sysuint_t count)
+void X11GuiBackBuffer::updateRects(const BoxI* rects, sysuint_t count)
 {
   X11GuiEngine* engine = GUI_ENGINE();
 
@@ -2007,7 +2007,7 @@ void X11GuiBackBuffer::updateRects(const IntBox* rects, sysuint_t count)
         case 8:
           while (y1 < y2)
           {
-            ((RasterDither8Fn)_convertFunc)(dstCur, srcCur, w, IntPoint(x1, y1), palConv);
+            ((RasterDither8Fn)_convertFunc)(dstCur, srcCur, w, PointI(x1, y1), palConv);
 
             dstCur += dstStride;
             srcCur += srcStride;
@@ -2018,7 +2018,7 @@ void X11GuiBackBuffer::updateRects(const IntBox* rects, sysuint_t count)
 #if 0
           while (y1 < y2)
           {
-            ((RasterDither16Fn)_convertFunc)(dstCur, srcCur, w, IntPoint(x1, y1));
+            ((RasterDither16Fn)_convertFunc)(dstCur, srcCur, w, PointI(x1, y1));
 
             dstCur += dstStride;
             srcCur += srcStride;
@@ -2073,7 +2073,7 @@ void X11GuiBackBuffer::updateRects(const IntBox* rects, sysuint_t count)
   }
 }
 
-void X11GuiBackBuffer::blitRects(XID target, const IntBox* rects, sysuint_t count)
+void X11GuiBackBuffer::blitRects(XID target, const BoxI* rects, sysuint_t count)
 {
   X11GuiEngine* engine = GUI_ENGINE();
   sysuint_t i;

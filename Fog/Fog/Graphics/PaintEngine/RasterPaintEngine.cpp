@@ -1605,20 +1605,21 @@ err_t RasterPaintEngine::drawText(const PointI& pt_, const String& text, const F
 {
   RASTER_ENTER_PAINT_FUNC();
 
+  int tx = ctx.finalTranslate.x;
+  int ty = ctx.finalTranslate.y;
+
+  PointI pt(pt_.x + tx, pt_.y + ty);
+
   // TODO: Not optimal, no clip used.
   if (ctx.hints.transformType >= RASTER_TRANSFORM_SUBPX || ctx.hints.forceOutlineText)
   {
     tmpPath0.clear();
     FOG_RETURN_ON_ERROR(font.getOutline(text, tmpPath0));
-    tmpPath0.translate((double)pt_.x, (double)pt_.y + font.getAscent());
+    tmpPath0.translate(pt);
     return _serializePaintPath(tmpPath0, false);
   }
   else
   {
-    int tx = ctx.finalTranslate.x;
-    int ty = ctx.finalTranslate.y;
-
-    PointI pt(pt_.x + tx, pt_.y + ty);
     RectI clip;
 
     if (clip_)
@@ -1707,7 +1708,7 @@ err_t RasterPaintEngine::drawText(const RectI& rect, const String& text, const F
   // TODO: Not optimal, no clip used.
   if (ctx.hints.transformType >= RASTER_TRANSFORM_SUBPX || ctx.hints.forceOutlineText)
   {
-    tmpPath0.translate((double)x - tx, (double)y - ty + font.getAscent());
+    tmpPath0.translate(x, y);
     return _serializePaintPath(tmpPath0, false);
   }
   else

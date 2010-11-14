@@ -78,7 +78,7 @@ FontFace* MacFontEngine::createFace(
   face->metrics._size = size;
   face->metrics._ascent = [face->font ascender];
   face->metrics._descent = [face->font descender];
-  face->metrics._averageWidth = [font boundingRectForGlyph:[font glyphWithName:@"x"]].size.width;
+  face->metrics._averageWidth = [face->font boundingRectForGlyph:[face->font glyphWithName:@"x"]].size.width;
   // face->metrics._maximumWidth = ??
   face->metrics._height = [face->font xHeight];
   face->options = options;

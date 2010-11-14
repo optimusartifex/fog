@@ -3283,6 +3283,7 @@ err_t RasterPaintEngine::_serializeMaskConvert(const BoxI& bounds)
   else
   {
     // TODO: Multithreaded clipping not implemented yet.
+    return ERR_RT_NOT_IMPLEMENTED;
   }
 }
 

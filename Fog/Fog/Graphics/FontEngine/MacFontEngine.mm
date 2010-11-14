@@ -53,7 +53,7 @@ List<String> MacFontEngine::getFontList()
 
 FontFace* MacFontEngine::createDefaultFace()
 {
-  return createFace(Ascii8("Times"), 12, FontOptions(), TransformF());
+  return createFace(Ascii8("Lucida Grande"), 12, FontOptions(), TransformF());
 }
 
 FontFace* MacFontEngine::createFace(
@@ -67,8 +67,10 @@ FontFace* MacFontEngine::createFace(
   NSAffineTransform* transform = [NSAffineTransform transform];
   const float* data = matrix.getData();
   [transform setTransformStruct: (NSAffineTransformStruct){data[0], data[1], data[3], data[4], data[6], data[7]}];
-  [transform scaleBy: size]; // Font size isn’t part of the glyph -> we have to scale it here
-  [transform scaleXBy:1.0 yBy:-1.0]; // flip
+  // Font size isn’t part of the glyph, so we have to scale it here
+  [transform scaleBy: size*1.2];
+  // flip it
+  [transform scaleXBy:1.0 yBy:-1.0];
   face->font = [NSFont fontWithDescriptor: [NSFontDescriptor fontDescriptorWithName: toNSString(family) size: size]
                             textTransform: transform];
   face->family = family;
@@ -76,7 +78,7 @@ FontFace* MacFontEngine::createFace(
   face->metrics._size = size;
   face->metrics._ascent = [face->font ascender];
   face->metrics._descent = [face->font descender];
-  // face->metrics._averageWidth = ??
+  face->metrics._averageWidth = [font boundingRectForGlyph:[font glyphWithName:@"x"]].size.width;
   // face->metrics._maximumWidth = ??
   face->metrics._height = [face->font xHeight];
   face->options = options;
@@ -129,6 +131,12 @@ err_t MacFontFace::getGlyphSet(const Char* str, sysuint_t length, GlyphSet& glyp
 
 err_t MacFontFace::getOutline(const Char* str, sysuint_t length, PathD& dst)
 {
+  if (length == DETECT_LENGTH) length = StringUtil::len(str);
+  if (length == 0) return ERR_OK;
+
+  // This really shouldn't happen!
+  if (str[0].isTrailSurrogate()) return ERR_STRING_INVALID_UTF16;
+
   AutoLock locked(lock);
 
   NSTextStorage* storage = [[NSTextStorage alloc] initWithString:toNSString(str)];
@@ -170,7 +178,7 @@ err_t MacFontFace::getOutline(const Char* str, sysuint_t length, PathD& dst)
     }	
     else if (el == NSClosePathBezierPathElement) 
     {
-	  dst.closePolygon();
+      dst.closePolygon();
     }
   }
 

@@ -120,20 +120,32 @@ err_t DirIterator::open(const String& path)
   {
     return err;
   }
-
-  if ((_handle = (void*)FindFirstFileW(reinterpret_cast<const wchar_t*>(t.getData()), &_winFindData)) != (void*)INVALID_HANDLE_VALUE)
+  
+  _handle = (void*)FindFirstFileW(reinterpret_cast<const wchar_t*>(t.getData()), &_winFindData);
+  
+  // Try to open with long file name support if path is too long
+  if (_handle == (void*)INVALID_HANDLE_VALUE)
   {
-    _path = pathAbs;
-    _position = 0;
-    _fileInEntry = true;
+    err = GetLastError();
+    if ((err == ERROR_PATH_NOT_FOUND) &&
+        (err = t.prepend(Ascii8("\\\\?\\"))) == ERR_OK)
+    {
+      _handle = (void*)FindFirstFileW(reinterpret_cast<const wchar_t*>(t.getData()), &_winFindData);
+      err = GetLastError();
+    }
+    
+    if (_handle == (void*)INVALID_HANDLE_VALUE)
+    {
+      _handle = NULL;
+      return err;
+    }
+  }
+  
+  _path = pathAbs;
+  _position = 0;
+  _fileInEntry = true;
 
-    return ERR_OK;
-  }
-  else 
-  {
-    _handle = NULL;
-    return GetLastError();
-  }
+  return ERR_OK;
 }
 
 void DirIterator::close()

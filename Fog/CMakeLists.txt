@@ -155,7 +155,7 @@ EndIf(UNIX)
 
 If(WIN32)
   Set(FOG_OS_WINDOWS TRUE)
-  Add_Definitions(-D_UNICODE)
+  Add_Definitions(-D_UNICODE -DUNICODE)
 ElseIf(APPLE)
   Set(FOG_OS_MAC TRUE)
 Else(WIN32)
@@ -404,8 +404,7 @@ Set(FOG_CORE_LIB_HEADERS
 )
 
 If(APPLE)
-Set(FOG_CORE_LIB_SOURCES
-  ${FOG_CORE_LIB_SOURCES}
+List(APPEND FOG_CORE_LIB_SOURCES
   Fog/Core/MacUtil.mm
 )
 EndIf()
@@ -614,8 +613,7 @@ Set(FOG_GRAPHICS_FONTENGINE_SOURCES
 )
 
 If(APPLE)
-Set(FOG_GRAPHICS_FONTENGINE_SOURCES
-  ${FOG_GRAPHICS_FONTENGINE_SOURCES}
+List(APPEND FOG_GRAPHICS_FONTENGINE_SOURCES
   Fog/Graphics/FontEngine/MacFontEngine.mm
 )
 EndIf()
@@ -782,6 +780,15 @@ Set(FOG_GRAPHICS_RASTERENGINE_HEADERS
   Fog/Graphics/RasterEngine/Bresenham_p.h
   Fog/Graphics/RasterEngine/C_p.h
 )
+
+# Win64 doesn't support 3dNow intrins
+If(FOG_OS_WINDOWS)
+  If(FOG_SIZEOF_VOID EQUAL 8)
+    List(REMOVE_ITEM FOG_GRAPHICS_LIB_SOURCES
+      Fog/Graphics/Transform_3dNow.cpp
+    )
+  EndIf(FOG_SIZEOF_VOID EQUAL 8)
+EndIf(FOG_OS_WINDOWS)
 
 # Optimize specific files for speed.
 Set_Source_Files_Properties(Fog/Graphics/AnalyticRasterizer.cpp                PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}")

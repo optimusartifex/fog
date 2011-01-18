@@ -92,7 +92,6 @@ DirIterator::DirIterator() :
 DirIterator::DirIterator(const String& path) :
   _handle(NULL),
   _position(-1),
-  _fileInEntry(false),
   _skipDots(true)
 {
   memset(&_winFindData, 0, sizeof(WIN32_FIND_DATAW));
@@ -143,7 +142,6 @@ err_t DirIterator::open(const String& path)
   
   _path = pathAbs;
   _position = 0;
-  _fileInEntry = true;
 
   return ERR_OK;
 }
@@ -160,11 +158,23 @@ void DirIterator::close()
   memset(&_winFindData, 0, sizeof(WIN32_FIND_DATAW));
 }
 
+bool DirIterator::read(String& fileName)
+{
+  // TODO: optimize using internal WIN32_FIND_DATA
+  DirEntry e;
+  if (read(e))
+  {
+    fileName = e.getName();
+    return true;
+  }
+  return false;
+}
+
 bool DirIterator::read(DirEntry& to)
 {
   if (!_handle) return false;
 
-  if (!_fileInEntry)
+  if (_position != 0)
   {
     // try to read next file entry
 __readNext:
@@ -173,7 +183,6 @@ __readNext:
   else 
   {
     memcpy(&to._winFindData, &_winFindData, sizeof(WIN32_FIND_DATAW));
-    _fileInEntry = false;
   }
 
   _position++;
@@ -187,8 +196,8 @@ __readNext:
     if (_skipDots)
     {
       const WCHAR* cfn = to._winFindData.cFileName;
-      if (cfn[0] == TEXT('.') && 
-        ((cfn[1] == 0) || (cfn[1] == TEXT('.') && cfn[2] == 0) ))
+      if (cfn[0] == L'.' && 
+        ((cfn[1] == 0) || (cfn[1] == L'.' && cfn[2] == 0) ))
       {
         goto __readNext;
       }
@@ -224,6 +233,7 @@ err_t DirIterator::rewind()
   HANDLE h = FindFirstFileW(reinterpret_cast<const wchar_t*>(t.getData()), &_winFindData);
   if (h == INVALID_HANDLE_VALUE)
   {
+    // TODO: long filename support as in open()
     return GetLastError();
   }
 
@@ -271,9 +281,20 @@ err_t DirIterator::open(const String& path)
   TemporaryByteArray<TEMPORARY_LENGTH> t;
 
   err_t err;
+  long direntSize;
 
   if ((err = FileSystem::toAbsolutePath(pathAbs, String(), path))) return err;
   if ((err = TextCodec::local8().appendFromUnicode(t, pathAbs))) return err;
+
+  // Get max size of file name in this directory + fallback
+  direntSize = pathconf(t.getData(), _PC_NAME_MAX);
+  if (direntSize == -1) direntSize = _POSIX_NAME_MAX;
+  // Add offset of d_name field + 1 to get correct dirent size
+  direntSize += offsetof(struct dirent, d_name) + 1;
+
+  // Ugly typecast from long, but there is no better way
+  _dent = (struct dirent*)Memory::alloc((sysuint_t)direntSize);
+  if (!_dent) return ERR_RT_OUT_OF_MEMORY;
 
   if ((_handle = (void*)::opendir(t.getData())) != NULL)
   {
@@ -284,6 +305,7 @@ err_t DirIterator::open(const String& path)
   }
   else
   {
+    Memory::free(_dent);
     return errno;
   }
 }
@@ -293,10 +315,34 @@ void DirIterator::close()
   if (!_handle) return;
 
   ::closedir((DIR*)(_handle));
+  Memory::free(_dent);
   _handle = NULL;
   _path.clear();
   _pathCache.clear();
   _pathCacheBaseLength = 0;
+}
+
+bool DirIterator::read(String& fileName)
+{
+  if (!_handle) return false;
+
+  struct dirent *de;
+  bool skipDots = getSkipDots();
+
+  while (::readdir_r((DIR*)_handle, _dent, &de) == 0 && (de != NULL))
+  {
+    const char* name = de->d_name;
+
+    // Skip "." and ".."
+    if (name[0] == '.' && skipDots)
+    {
+      if (name[1] == '\0' || (name[1] == '.' && name[2] == '\0')) continue;
+    }
+
+    // Translate entry name to unicode
+    return (TextCodec::local8().toUnicode(fileName, name) == ERR_OK);
+  }
+  return false;
 }
 
 bool DirIterator::read(DirEntry& to)
@@ -306,7 +352,7 @@ bool DirIterator::read(DirEntry& to)
   struct dirent *de;
   bool skipDots = getSkipDots();
 
-  while (::readdir_r((DIR*)_handle, &_dent, &de) == 0 && (de != NULL))
+  while (::readdir_r((DIR*)_handle, _dent, &de) == 0 && (de != NULL))
   {
     const char* name = de->d_name;
 

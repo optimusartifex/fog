@@ -118,6 +118,7 @@ struct FOG_API DirIterator
   err_t open(const String& path);
   void close();
   bool read(DirEntry& to);
+  bool read(String& fileName);
 
   err_t rewind();
   int64_t tell();
@@ -146,10 +147,7 @@ private:
 #if defined(FOG_OS_POSIX)
   ByteArray _pathCache;
   sysuint_t _pathCacheBaseLength;
-  union {
-    struct dirent _dent;
-    uint8_t _dentBuf[offsetof(struct dirent, d_name) + _POSIX_NAME_MAX + 1];
-  };
+  struct dirent *_dent;
 #endif // FOG_OS_POSIX
 
   bool _skipDots;

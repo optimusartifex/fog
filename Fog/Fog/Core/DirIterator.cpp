@@ -240,7 +240,6 @@ err_t DirIterator::rewind()
   ::FindClose((HANDLE)_handle);
   _handle = (void*)h;
   _position = 0;
-  _fileInEntry = true;
 
   return ERR_OK;
 }

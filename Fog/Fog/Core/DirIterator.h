@@ -141,7 +141,6 @@ private:
 #if defined(FOG_OS_WINDOWS)
   WIN32_FIND_DATAW _winFindData;
   int64_t _position;
-  bool _fileInEntry;
 #endif // FOG_OS_WINDOWS
 
 #if defined(FOG_OS_POSIX)

@@ -16,7 +16,7 @@ Project(Fog C CXX)
 # [Basics]
 # =============================================================================
 
-Set(FOG_DIR ${CMAKE_SOURCE_DIR})
+Set(FOG_DIR "${CMAKE_SOURCE_DIR}")
 Set(FOG_LIBRARIES "")
 Set(CMAKE_CXX_STANDARD_LIBRARIES "")
 
@@ -29,7 +29,8 @@ Include(FindThreads)
 # [Include Directories]
 # =============================================================================
 
-Include_Directories(${FOG_DIR})
+Include_Directories("${FOG_DIR}")
+Include_Directories("${CMAKE_BINARY_DIR}")
 
 # =============================================================================
 # [Compiler flags]
@@ -115,7 +116,8 @@ EndIf(WORDS_BIGENDIAN)
 # [Size of POD types]
 # =============================================================================
 
-Check_Type_Size("void*" FOG_SIZEOF_VOID)
+Check_Type_Size("void*" FOG_SIZEOF_VOID_PTR)
+# Check_Type_Size("void*" FOG_SIZEOF_VOID)
 Check_Type_Size("short" FOG_SIZEOF_SHORT)
 Check_Type_Size("int" FOG_SIZEOF_INT)
 Check_Type_Size("long" FOG_SIZEOF_LONG)
@@ -783,11 +785,11 @@ Set(FOG_GRAPHICS_RASTERENGINE_HEADERS
 
 # Win64 doesn't support 3dNow intrins
 If(FOG_OS_WINDOWS)
-  If(FOG_SIZEOF_VOID EQUAL 8)
+  If(FOG_SIZEOF_VOID_PTR EQUAL 8)
     List(REMOVE_ITEM FOG_GRAPHICS_LIB_SOURCES
       Fog/Graphics/Transform_3dNow.cpp
     )
-  EndIf(FOG_SIZEOF_VOID EQUAL 8)
+  EndIf(FOG_SIZEOF_VOID_PTR EQUAL 8)
 EndIf(FOG_OS_WINDOWS)
 
 # Optimize specific files for speed.
@@ -1046,7 +1048,7 @@ If(FOG_GUI_WINDOWS)
 EndIf(FOG_GUI_WINDOWS)
 
 # Write CMAKE_ #defines into Fog/Core/Build/Config.h files
-Configure_File(${FOG_DIR}/Fog/Core/Build/Config.h.cmake ${FOG_DIR}/Fog/Core/Build/Config.h)
+Configure_File("${FOG_DIR}/Fog/Core/Build/Config.h.cmake" "${CMAKE_BINARY_DIR}/Fog/Core/Build/Config.h")
 
 # Trim libraries string (come compilers can complain if there are extra whitespaces).
 String(STRIP "${FOG_LIBRARIES}" FOG_LIBRARIES)

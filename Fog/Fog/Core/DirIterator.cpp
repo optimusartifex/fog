@@ -252,6 +252,17 @@ int64_t DirIterator::tell()
 
 #if defined(FOG_OS_POSIX)
 
+
+// NOTE:
+// glibc's readdir is reentrant. POSIX guarantees only readdir_r to be reentrant
+// __linux__ is defined on Linux, __GNU__ on HURD and __GLIBC__ on Debian GNU/k*BSD
+// TODO(jardasmid): Add defines for more systems that have reentrant readdir()
+// TODO(jardasmid): maybe check reentrancy in CMakeLists.txt
+#if defined(__linux__) || defined(__GNU__) || defined(__GLIBC__)
+# define FOG_READDIR_IS_REENTRANT
+#endif
+
+
 DirIterator::DirIterator() :
   _handle(NULL),
   _skipDots(true),
@@ -262,7 +273,8 @@ DirIterator::DirIterator() :
 DirIterator::DirIterator(const String& path) :
   _handle(NULL),
   _skipDots(true),
-  _pathCacheBaseLength(0)
+  _pathCacheBaseLength(0),
+  _dent(NULL)
 {
   open(path);
 }
@@ -280,23 +292,34 @@ err_t DirIterator::open(const String& path)
   TemporaryByteArray<TEMPORARY_LENGTH> t;
 
   err_t err;
-  long direntSize;
 
   if ((err = FileSystem::toAbsolutePath(pathAbs, String(), path))) return err;
   if ((err = TextCodec::local8().appendFromUnicode(t, pathAbs))) return err;
 
-  // Get max size of file name in this directory + fallback
-  direntSize = pathconf(t.getData(), _PC_NAME_MAX);
-  if (direntSize == -1) direntSize = _POSIX_NAME_MAX;
-  // Add offset of d_name field + 1 to get correct dirent size
-  direntSize += offsetof(struct dirent, d_name) + 1;
-
-  // Ugly typecast from long, but there is no better way
-  _dent = (struct dirent*)Memory::alloc((sysuint_t)direntSize);
-  if (!_dent) return ERR_RT_OUT_OF_MEMORY;
-
   if ((_handle = (void*)::opendir(t.getData())) != NULL)
   {
+#if !defined(FOG_READDIR_IS_REENTRANT)
+    long direntSize;
+    // TODO(jardasmid): use dirfd(_handle) BSD extension adopted by POSIX.1-2008
+    //                  and fpathconf() to prevent possible race condition
+    //                  between opendir() and pathconf() and possible
+    //                  buffer overflow attack
+    
+    // Get max size of file name in this directory + fallback
+    direntSize = pathconf(t.getData(), _PC_NAME_MAX);
+    if (direntSize == -1) direntSize = _POSIX_NAME_MAX;
+    // Add offset of d_name field + 1 to get correct dirent size
+    direntSize += offsetof(struct dirent, d_name) + 1;
+
+    // Ugly typecast from long, but there is no better way
+    _dent = (struct dirent*)Memory::alloc((sysuint_t)direntSize);
+    if (!_dent)
+    {
+      ::closedir((DIR*)_handle);
+      _handle = NULL;
+      return ERR_RT_OUT_OF_MEMORY;
+    }
+#endif
     _path = pathAbs;
     _pathCache = t;
     _pathCacheBaseLength = _pathCache.getLength();
@@ -314,7 +337,9 @@ void DirIterator::close()
   if (!_handle) return;
 
   ::closedir((DIR*)(_handle));
+#if !defined(FOG_READDIR_IS_REENTRANT)
   Memory::free(_dent);
+#endif
   _handle = NULL;
   _path.clear();
   _pathCache.clear();
@@ -324,11 +349,15 @@ void DirIterator::close()
 bool DirIterator::read(String& fileName)
 {
   if (!_handle) return false;
-
+  
   struct dirent *de;
   bool skipDots = getSkipDots();
-
+  
+#if defined(FOG_READDIR_IS_REENTRANT)
+  while ((de = readdir((DIR*)_handle)) != NULL)
+#else
   while (::readdir_r((DIR*)_handle, _dent, &de) == 0 && (de != NULL))
+#endif
   {
     const char* name = de->d_name;
 
@@ -351,7 +380,11 @@ bool DirIterator::read(DirEntry& to)
   struct dirent *de;
   bool skipDots = getSkipDots();
 
+#if defined(FOG_READDIR_IS_REENTRANT)
+  while ((de = readdir((DIR*)_handle)) != NULL)
+#else
   while (::readdir_r((DIR*)_handle, _dent, &de) == 0 && (de != NULL))
+#endif
   {
     const char* name = de->d_name;
 

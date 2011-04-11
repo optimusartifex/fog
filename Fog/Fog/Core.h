@@ -7,9 +7,9 @@
 #ifndef _FOG_CORE_H
 #define _FOG_CORE_H
 
-#if defined(_MSVC)
+#if defined(_MSC_VER)
 #pragma once
-#endif // _MSVC
+#endif // _MSC_VER
 
 #if defined(FOG_DOXYGEN)
 
@@ -33,11 +33,6 @@
 //! @defgroup Fog_Core_Public Fog-Core
 //!
 //! Public classes and functions related to Fog-Core library.
-
-//! @internal
-//! @defgroup Fog_Core_Private Fog-Core (private)
-//!
-//! Private classes and functions related to Fog-Core library.
 
 
 
@@ -122,7 +117,7 @@
 //! - @ref FOG_DLL_IMPORT.
 //! - @ref FOG_DLL_EXPORT.
 //! - @ref FOG_FASTCALL.
-//! - @ref FOG_HIDDEN.
+//! - @ref FOG_NO_EXPORT.
 //! - @ref FOG_INLINE.
 //! - @ref FOG_NO_RETURN.
 //! - @ref FOG_STDCALL.
@@ -189,32 +184,27 @@
 
 
 
-//! @defgroup Fog_Core_Object Object-system, properties and events
-//! @ingroup Fog_Core_Public
-
-
-
 //! @defgroup Fog_Core_Streaming Filesystem and streams
 //! @ingroup Fog_Core_Public
 
 
 
-//! @defgroup Fog_Core_String Strings, byte arrays and formatting
+//! @defgroup Fog_Core_System Object-system, properties, events and timers
 //! @ingroup Fog_Core_Public
 
 
 
-//! @defgroup Fog_Core_Threading Threading, tasks, timers and event loop
+//! @defgroup Fog_Core_Threading Threading, tasks, timers, event loop and atomic ops
+//! @ingroup Fog_Core_Public
+
+
+
+//! @defgroup Fog_Core_Tools Strings, byte arrays, formatting and other tooling classes
 //! @ingroup Fog_Core_Public
 
 
 
 //! @defgroup Fog_Core_Util Utility classes and functions
-//! @ingroup Fog_Core_Public
-
-
-
-//! @defgroup Fog_Core_Other Non-categorized classes and functions
 //! @ingroup Fog_Core_Public
 
 
@@ -237,7 +227,7 @@ struct Implicit
   // [Implicit Sharing]
 
   //! @brief Returns reference count of object data.
-  sysuint_t refCount() const;
+  sysuint_t getRefCount() const;
 
   //! @brief Returns @c true if object is not sharing data with another.
   //!
@@ -250,19 +240,19 @@ struct Implicit
   //! than 1, the data will be detached.
   //!
   //! Detaching means creating exact copy of data.
-  void detach();
+  err_t detach();
 
   //! @brief Private detach function.
-  void _detach();
+  err_t _detach();
 
-  //! @brief Frees all memory allocated by this object.
+  //! @brief Reset the object to the construction state.
   //!
-  //! If object data is allocated by dynamic memory allocation,
-  //! they will be freed and object will share null data.
+  //! All object data will be destroyed and all memory allocated by the object
+  //! will be freed.
   //!
   //! If object data is allocated statically by template or other
   //! construction, it will be set to empty, but still ready to use.
-  void free();
+  void reset();
 
   // [Flags]
 
@@ -317,63 +307,82 @@ struct Implicit
 // [Fog-Core Include Files]
 // ============================================================================
 
-#include <Fog/Core/Build.h>
+#include <Fog/Core/Config/Config.h>
 
-#include <Fog/Core/Algorithms.h>
-#include <Fog/Core/Application.h>
-#include <Fog/Core/Assert.h>
-#include <Fog/Core/Atomic.h>
-#include <Fog/Core/Byte.h>
-#include <Fog/Core/ByteArray.h>
-#include <Fog/Core/ByteArrayFilter.h>
-#include <Fog/Core/ByteArrayMatcher.h>
-#include <Fog/Core/Char.h>
-#include <Fog/Core/CharUtil.h>
-#include <Fog/Core/Constants.h>
-#include <Fog/Core/CpuInfo.h>
-#include <Fog/Core/Delegate.h>
-#include <Fog/Core/DirIterator.h>
-#include <Fog/Core/Event.h>
-#include <Fog/Core/EventLoop.h>
-#include <Fog/Core/Error.h>
-#include <Fog/Core/FileSystem.h>
-#include <Fog/Core/Format.h>
-#include <Fog/Core/Hash.h>
-#include <Fog/Core/HashUtil.h>
-#include <Fog/Core/Lazy.h>
-#include <Fog/Core/Library.h>
-#include <Fog/Core/List.h>
-#include <Fog/Core/Locale.h>
-#include <Fog/Core/ManagedString.h>
-#include <Fog/Core/MapFile.h>
-#include <Fog/Core/Math.h>
-#include <Fog/Core/Memory.h>
-#include <Fog/Core/MemoryBuffer.h>
-#include <Fog/Core/MemoryManager.h>
-#include <Fog/Core/Misc.h>
-#include <Fog/Core/OS.h>
-#include <Fog/Core/Object.h>
-#include <Fog/Core/Range.h>
-#include <Fog/Core/SequenceInfo.h>
-#include <Fog/Core/Static.h>
-#include <Fog/Core/Stream.h>
-#include <Fog/Core/String.h>
-#include <Fog/Core/StringFilter.h>
-#include <Fog/Core/StringMatcher.h>
-#include <Fog/Core/StringUtil.h>
-#include <Fog/Core/Strings.h>
-#include <Fog/Core/Stub.h>
-#include <Fog/Core/TextCodec.h>
-#include <Fog/Core/Thread.h>
-#include <Fog/Core/ThreadCondition.h>
-#include <Fog/Core/ThreadEvent.h>
-#include <Fog/Core/ThreadLocalStorage.h>
-#include <Fog/Core/ThreadPool.h>
-#include <Fog/Core/Time.h>
-#include <Fog/Core/Timer.h>
-#include <Fog/Core/TypeInfo.h>
-#include <Fog/Core/UserInfo.h>
-#include <Fog/Core/Value.h>
+#include <Fog/Core/Collection/Algorithms.h>
+#include <Fog/Core/Collection/Hash.h>
+#include <Fog/Core/Collection/HashUtil.h>
+#include <Fog/Core/Collection/List.h>
+#include <Fog/Core/Collection/PBuffer.h>
+#include <Fog/Core/Collection/PHash.h>
+#include <Fog/Core/Collection/PList.h>
+#include <Fog/Core/Collection/PStack.h>
+#include <Fog/Core/Collection/Util.h>
+#include <Fog/Core/Cpu/Cpu.h>
+#include <Fog/Core/Cpu/Initializer.h>
+#include <Fog/Core/Data/Value.h>
+#include <Fog/Core/DateTime/Time.h>
+#include <Fog/Core/DateTime/TimeDelta.h>
+#include <Fog/Core/DateTime/TimeTicks.h>
+#include <Fog/Core/Global/Api.h>
+#include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/Global/Error.h>
+#include <Fog/Core/Global/SequenceInfo.h>
+#include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Swap.h>
+#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/TypeVariant.h>
+#include <Fog/Core/Global/Uninitialized.h>
+#include <Fog/Core/IO/DirEntry.h>
+#include <Fog/Core/IO/DirIterator.h>
+#include <Fog/Core/IO/FileSystem.h>
+#include <Fog/Core/IO/MapFile.h>
+#include <Fog/Core/IO/Stream.h>
+#include <Fog/Core/Library/Library.h>
+#include <Fog/Core/Math/Fixed.h>
+#include <Fog/Core/Math/FloatBits.h>
+#include <Fog/Core/Math/Fuzzy.h>
+#include <Fog/Core/Math/Math.h>
+#include <Fog/Core/Math/Solve.h>
+#include <Fog/Core/Memory/BSwap.h>
+#include <Fog/Core/Memory/Memory.h>
+#include <Fog/Core/Memory/MemoryBuffer.h>
+#include <Fog/Core/Memory/MemoryManager.h>
+#include <Fog/Core/OS/OS.h>
+#include <Fog/Core/OS/UserInfo.h>
+#include <Fog/Core/System/Application.h>
+#include <Fog/Core/System/Delegate.h>
+#include <Fog/Core/System/Event.h>
+#include <Fog/Core/System/EventLoop.h>
+#include <Fog/Core/System/Object.h>
+#include <Fog/Core/System/Timer.h>
+#include <Fog/Core/Threading/Atomic.h>
+#include <Fog/Core/Threading/AtomicPadding.h>
+#include <Fog/Core/Threading/Lock.h>
+#include <Fog/Core/Threading/Thread.h>
+#include <Fog/Core/Threading/ThreadCondition.h>
+#include <Fog/Core/Threading/ThreadEvent.h>
+#include <Fog/Core/Threading/ThreadLocalStorage.h>
+#include <Fog/Core/Threading/ThreadPool.h>
+#include <Fog/Core/Tools/Byte.h>
+#include <Fog/Core/Tools/ByteArray.h>
+#include <Fog/Core/Tools/ByteArrayFilter.h>
+#include <Fog/Core/Tools/ByteArrayMatcher.h>
+#include <Fog/Core/Tools/Char.h>
+#include <Fog/Core/Tools/CharUtil.h>
+#include <Fog/Core/Tools/Format.h>
+#include <Fog/Core/Tools/Lazy.h>
+#include <Fog/Core/Tools/Locale.h>
+#include <Fog/Core/Tools/ManagedString.h>
+#include <Fog/Core/Tools/Range.h>
+#include <Fog/Core/Tools/String.h>
+#include <Fog/Core/Tools/StringFilter.h>
+#include <Fog/Core/Tools/StringMatcher.h>
+#include <Fog/Core/Tools/StringUtil.h>
+#include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Tools/Stub.h>
+#include <Fog/Core/Tools/TextCodec.h>
 
 // [Guard]
 #endif // _FOG_CORE_H

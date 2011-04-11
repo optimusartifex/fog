@@ -3,9 +3,9 @@
 // [License]
 // MIT, See COPYING file in package
 
-#if defined(_MSVC)
+#if defined(_MSC_VER)
 #pragma once
-#endif // _MSVC
+#endif // _MSC_VER
 
 // [Guard]
 #ifndef _FOG_GUI_H
@@ -20,12 +20,6 @@
 //! @defgroup Fog_Gui_Public Fog-Gui
 //!
 //! Public classes and functions related to Fog-Gui library.
-
-//! @internal
-//!
-//! @defgroup Fog_Gui_Private Fog-Gui (private)
-//!
-//! Private classes and functions related to Fog-Gui library.
 
 
 
@@ -74,41 +68,41 @@
 // [Fog-Gui Include Files]
 // ============================================================================
 
-#include <Fog/Core/Build.h>
+#include <Fog/Core/Config/Config.h>
 
-#include <Fog/Gui/Animation.h>
-#include <Fog/Gui/BorderLayout.h>
-#include <Fog/Gui/BoxLayout.h>
-#include <Fog/Gui/Button.h>
-#include <Fog/Gui/ButtonBase.h>
-#include <Fog/Gui/CheckBox.h>
-#include <Fog/Gui/Composite.h>
-#include <Fog/Gui/Constants.h>
-#include <Fog/Gui/Event.h>
-#include <Fog/Gui/FlowLayout.h>
-#include <Fog/Gui/Frame.h>
-#include <Fog/Gui/GuiEngine.h>
-#include <Fog/Gui/GridLayout.h>
-#include <Fog/Gui/GroupBox.h>
-#include <Fog/Gui/Layout.h>
-#include <Fog/Gui/LayoutHint.h>
-#include <Fog/Gui/LayoutItem.h>
-#include <Fog/Gui/LayoutPolicy.h>
-#include <Fog/Gui/LayoutUtil.h>
-#include <Fog/Gui/Margin.h>
-#include <Fog/Gui/MenuBar.h>
-#include <Fog/Gui/MenuItem.h>
-#include <Fog/Gui/MenuSeparator.h>
-#include <Fog/Gui/RadioButton.h>
-#include <Fog/Gui/ScrollArea.h>
-#include <Fog/Gui/ScrollBar.h>
-#include <Fog/Gui/ThemeEngine.h>
-#include <Fog/Gui/TextArea.h>
-#include <Fog/Gui/TextField.h>
-#include <Fog/Gui/ToolBar.h>
-#include <Fog/Gui/ToolButton.h>
-#include <Fog/Gui/Widget.h>
-#include <Fog/Gui/Window.h>
+#include <Fog/Gui/Animation/Animation.h>
+#include <Fog/Gui/Engine/GuiEngine.h>
+#include <Fog/Gui/Global/Constants.h>
+#include <Fog/Gui/Layout/BorderLayout.h>
+#include <Fog/Gui/Layout/BoxLayout.h>
+#include <Fog/Gui/Layout/FlowLayout.h>
+#include <Fog/Gui/Layout/GridLayout.h>
+#include <Fog/Gui/Layout/Layout.h>
+#include <Fog/Gui/Layout/LayoutHint.h>
+#include <Fog/Gui/Layout/LayoutItem.h>
+#include <Fog/Gui/Layout/LayoutPolicy.h>
+#include <Fog/Gui/Layout/LayoutUtil.h>
+#include <Fog/Gui/Layout/Margin.h>
+#include <Fog/Gui/Theming/ThemeEngine.h>
+#include <Fog/Gui/Widget/Button.h>
+#include <Fog/Gui/Widget/ButtonBase.h>
+#include <Fog/Gui/Widget/CheckBox.h>
+#include <Fog/Gui/Widget/Composite.h>
+#include <Fog/Gui/Widget/Event.h>
+#include <Fog/Gui/Widget/Frame.h>
+#include <Fog/Gui/Widget/GroupBox.h>
+#include <Fog/Gui/Widget/MenuBar.h>
+#include <Fog/Gui/Widget/MenuItem.h>
+#include <Fog/Gui/Widget/MenuSeparator.h>
+#include <Fog/Gui/Widget/RadioButton.h>
+#include <Fog/Gui/Widget/ScrollArea.h>
+#include <Fog/Gui/Widget/ScrollBar.h>
+#include <Fog/Gui/Widget/TextArea.h>
+#include <Fog/Gui/Widget/TextField.h>
+#include <Fog/Gui/Widget/ToolBar.h>
+#include <Fog/Gui/Widget/ToolButton.h>
+#include <Fog/Gui/Widget/Widget.h>
+#include <Fog/Gui/Widget/Window.h>
 
 // [Guard]
 #endif // _FOG_GUI_H

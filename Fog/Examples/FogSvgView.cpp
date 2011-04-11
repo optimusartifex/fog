@@ -1,5 +1,5 @@
 #include <Fog/Core.h>
-#include <Fog/Graphics.h>
+#include <Fog/G2d.h>
 #include <Fog/Gui.h>
 #include <Fog/Svg.h>
 #include <Fog/Xml.h>
@@ -25,7 +25,10 @@ struct MyWindow : public Window
 
   float fps;
   float fpsCounter;
-  double rotate;
+
+  float rotate;
+  float scale;
+
   Time fpsTime;
 
   err_t error;
@@ -40,7 +43,9 @@ MyWindow::MyWindow(uint32_t createFlags) :
   timer.addListener(EVENT_TIMER, this, &MyWindow::onTimer);
 
   fps = 0.0f;
-  rotate = 0.0;
+  fpsCounter = 0.0f;
+  rotate = 0.0f;
+  scale = 1.0f;
 
   setWindowTitle(Ascii8("SvgView"));
 }
@@ -68,6 +73,15 @@ void MyWindow::onKey(KeyEvent* e)
           fpsTime = Time::now();
         }
         break;
+
+      case KEY_Q:
+        scale += 0.1f;
+        update(WIDGET_UPDATE_PAINT);
+        break;
+      case KEY_W:
+        scale -= 0.1f;
+        update(WIDGET_UPDATE_PAINT);
+        break;
     }
   }
 
@@ -76,7 +90,7 @@ void MyWindow::onKey(KeyEvent* e)
 
 void MyWindow::onTimer(TimerEvent* e)
 {
-  rotate += 0.005;
+  rotate += 0.005f;
   update(WIDGET_UPDATE_PAINT);
 }
 
@@ -86,23 +100,25 @@ void MyWindow::onPaint(PaintEvent* e)
 
   Painter* p = e->getPainter();
 
-  p->setSource(0xFFFFFFFF);
-  p->fillAll();
+  p->setSource(Argb32(0xFFFFFFFF));
+  p->clear();
 
   p->save();
 
   if (1)
   {
-    p->translate(p->getWidth() / 2, p->getHeight() / 2);
-    p->rotate(rotate);
-    p->translate(-p->getWidth() / 2, -p->getHeight() / 2);
+    SizeF size;
+    p->getSize(size);
 
-    //TransformD perspective;
-    //perspective.setQuadToQuad(PointD(0, 0), PointD(400, 270), PointD(320, 400), PointD(0, 400), BoxD(0, 0, 400, 400));
-    //p->setTransform(perspective);
+    p->translate(PointF(size.w / 2.0f, size.h / 2.0f));
+    p->rotate(rotate);
+    p->translate(PointF(-size.w / 2.0f, -size.h / 2.0f));
+    p->scale(PointF(scale, scale));
   }
 
-  SvgContext context(p);
+  p->translate(PointF(100.0f, 100.0f));
+
+  SvgRenderContext context(p);
   svg.onRender(&context);
 
   p->restore();
@@ -127,9 +143,20 @@ void MyWindow::onPaint(PaintEvent* e)
 
   String text;
   text.format("FPS: %g, Time: %g", fps, frameDelta.inMillisecondsF());
+  setWindowTitle(text);
 
-  p->setSource(ArgbI(0xFFFF0000));
-  p->drawText(PointI(0, 0), text, getFont());
+  p->resetTransform();
+  {
+    PathD path;
+    Font font = getFont();
+    font.setSize(25);
+    font.getOutline(text, path);
+    p->setSource(Argb32(0xFFFF0000));
+    path.translate(PointD(30, 30));
+    p->fillPath(path);
+  }
+
+  // p->fillText(PointI(0, 0), text, getFont());
 }
 
 // ============================================================================
@@ -143,8 +170,28 @@ FOG_GUI_MAIN()
   List<String> arguments = Application::getApplicationArguments();
   String fileName;
 
-  if (arguments.getLength() < 2) return 1;
-  fileName = arguments.at(1);
+  if (arguments.getLength() >= 2)
+  {
+    fileName = arguments.at(1);
+  }
+  else
+  {
+    // My testing images...
+    fileName = Ascii8("/my/upload/img/svg/tiger.svg");
+
+    //fileName = Ascii8("/my/upload/img/svg/map-krasnaya-plyana.svg");
+    //fileName = Ascii8("/my/upload/img/svg/Map_Multilayer_Scaled.svg");
+    //fileName = Ascii8("C:/my/svg/map-krasnaya-plyana.svg");
+    //fileName = Ascii8("C:/my/svg/Map_Multilayer_Scaled.svg");
+    //fileName = Ascii8("C:/my/svg/froggy.svg");
+    //fileName = Ascii8("C:/my/svg/fire_engine.svg");
+    //fileName = Ascii8("C:/my/svg/map-imeretinka.svg");
+    //fileName = Ascii8("C:/My/svg/linear3.svg");
+
+    //fileName = Ascii8("C:/my/svg/ISO_12233-reschart.svg");
+    //fileName = Ascii8("C:/my/svg/lorem_ipsum_compound.svg");
+    //fileName = Ascii8("C:/my/svg/tiger.svg");
+  }
 
   MyWindow window;
   window.error = window.svg.readFromFile(fileName);
@@ -159,8 +206,8 @@ FOG_GUI_MAIN()
     root->getAttribute(Ascii8("height")).atoi32(&h);
   }
 
-  if (w < 200) w = 200;
-  if (h < 60) h = 60;
+  if (w < 800) w = 800;
+  if (h < 500) h = 500;
 
   window.setSize(SizeI(w, h));
   window.show();

@@ -1,5 +1,5 @@
 #include <Fog/Core.h>
-#include <Fog/Graphics.h>
+#include <Fog/G2d.h>
 #include <Fog/Gui.h>
 #include <Fog/Svg.h>
 #include <Fog/Xml.h>
@@ -7,211 +7,6 @@
 // This is for MY testing:)
 
 using namespace Fog;
-
-struct MyPopUp : public Widget
-{
-  MyPopUp() : Widget(WINDOW_INLINE_POPUP)
-  {
-  }
-
-  virtual void onPaint(PaintEvent* e)
-  {
-    Painter* p = e->getPainter();
-    p->setOperator(OPERATOR_SRC_OVER);
-
-    // Clear everything to white.
-    p->setSource(ArgbI(0xAAFFFFFF));
-    p->fillAll();
-
-    p->setSource(ArgbI(0xFF000000));
-    p->drawText(PointI(0,0),Ascii8("TEXT TEXT"),getFont());
-  }
-};
-
-#if 0
-//TABP_TABITEM
-//BP_PUSHBUTTON
-
-struct XPButton : public ButtonBase {
-  XPButton() : _hBitmap(0), _hdc(0), _default(false), TYPE(TABP_TABITEM), _rgn(0), isbutton(true) {
-    _theme.openTheme(L"Button");
-  }
-
-  void setDefault(bool def) {
-    _default = def;
-  }
-
-  virtual void onGeometry(GeometryEvent* e) {
-    int width = _geometry.getWidth();
-    int height = _geometry.getHeight();
-  }
-
-  FOG_INLINE int calcState() const {
-    int state = 0;
-
-    if(isbutton) {
-      state = isMouseOver() ? PBS_HOT : (_default ? PBS_DEFAULTED : PBS_NORMAL);
-      state = isMouseDown() ? PBS_PRESSED : state;
-      state = !isEnabled() ? PBS_DISABLED : state;
-    } else {
-      state = isMouseOver() ? TIS_HOT : TIS_NORMAL;
-      state = isMouseDown() ? TIS_SELECTED : state;
-      state = !isEnabled() ? TIS_DISABLED : state;
-    }
-
-    return state;
-  }
-
-  void createBitmap(int width, int height) {
-    int targetBPP = 32;
-    // Define bitmap attributes.
-    BITMAPINFO bmi;
-
-    if(_hdc)
-      DeleteDC(_hdc);
-
-    if(_hBitmap)
-      DeleteObject(_hBitmap);
-
-    _hdc = CreateCompatibleDC(NULL);
-    if (_hdc == NULL) {
-      return;
-    }
-
-    //Fog::Memory::zero();
-    Fog::Memory::zero(&bmi, sizeof(bmi));
-    bmi.bmiHeader.biSize        = sizeof(bmi.bmiHeader);
-    bmi.bmiHeader.biWidth       = width;
-    bmi.bmiHeader.biHeight      = -height;
-    bmi.bmiHeader.biPlanes      = 1;
-    bmi.bmiHeader.biBitCount    = targetBPP;
-    bmi.bmiHeader.biCompression = BI_RGB;
-
-    unsigned char* pixels = NULL;
-
-    _hBitmap = CreateDIBSection(NULL, &bmi, DIB_RGB_COLORS, (void**)&pixels, NULL, 0);
-    if (_hBitmap == NULL) 
-    {
-      DeleteDC(_hdc);
-      return;
-    }
-
-    // Select bitmap to DC.
-    SelectObject(_hdc, _hBitmap);
-
-    DIBSECTION info;
-    GetObjectW(_hBitmap, sizeof(DIBSECTION), &info);
-
-    _buffer.data = pixels;
-    _buffer.width = width;
-    _buffer.height = height;
-    _buffer.stride = info.dsBm.bmWidthBytes;
-
-    if(_theme.IsThemeBackgroundPartiallyTransparent(TYPE,calcState())) {
-      _buffer.format = IMAGE_FORMAT_PRGB32;
-    } else {
-      _buffer.format = IMAGE_FORMAT_XRGB32;
-    }
-
-    _image.adopt(_buffer);
-  }
-
-  virtual void onPaint(PaintEvent* e) {    
-    RectI r = getClientContentGeometry(); //for easy margin support
-    RECT rect;
-    rect.left = r.x;
-    rect.right = r.getWidth();
-    rect.top = r.y;
-    rect.bottom = r.getHeight();
-
-    //createBitmap(r.getWidth(), r.getHeight());
-
-    int state = calcState();
-
-    if(_theme.IsThemeBackgroundPartiallyTransparent(TYPE,state)) {
-      //button
-      //_image.clear(ArgbI(0x00000000));
-      //_theme.getThemeBackgroundRegion(_hdc,TYPE,state,&rect,&_rgn);
-      //SelectClipRgn(_hdc, _rgn);
-    } else {
-      //tab
-      _image.clear(ArgbI(0xFFFFFFFF));
-    }    
-
-    //Clip on Region to support Transparency! ... needed?
-
-    BOOL result = _theme.drawThemeBackground(_hdc, TYPE,  state, &rect, NULL);
-
-    //draws with a really ugly font... why?? (also if I set the font within window -> maybe because I open them with null hwnd)
-    //BOOL ret = _theme.drawThemeText(_hdc,BP_PUSHBUTTON,state,(wchar_t*)_text.getData(),_text.getLength(),DT_CENTER|DT_VCENTER|DT_SINGLELINE,0,&rect);     
-    e->getPainter()->setSource(ArgbI(0xFFFFFFFF));
-    e->getPainter()->fillRect(RectI(0, 0, getWidth(), getHeight()));
-    e->getPainter()->drawImage(PointI(0,0),_image);
-    e->getPainter()->setSource(ArgbI(0xFF000000));
-    e->getPainter()->drawText(r, _text, _font, TEXT_ALIGN_CENTER);
-  }
-
-private:
-  UxTheme _theme;
-  HBITMAP _hBitmap;
-  HRGN _rgn;
-  HDC _hdc;
-
-  ImageBuffer _buffer;
-
-  Image _image;
-  bool _default;
-
-  const int TYPE;
-
-  const int isbutton;
-};
-#endif
-
-struct MyModalWindow : public Window
-{
-  MyModalWindow(int x) : Window(WINDOW_TYPE_DEFAULT), _x(x)
-  {
-    Button* button5 = fog_new Button();
-    addChild(button5);
-    button5->setGeometry(RectI(40, 200, 100, 20));
-    button5->setText(Ascii8("Test ModalWindow"));
-    button5->show();  
-    button5->addListener(EVENT_CLICK, this, &MyModalWindow::onModalTestClick);
-  }
-
-  void onModalTestClick(MouseEvent* e)
-  {
-    _modalwindow = fog_new MyModalWindow(_x+1);
-    _modalwindow->setSize(SizeI(200,300));
-    _modalwindow->addListener(EVENT_CLOSE, this, &MyModalWindow::onModalClose);
-    _modalwindow->showModal(getGuiWindow());
-  }
-
-  void onModalClose()
-  {
-    _modalwindow->hide();
-    //_modalwindow->destroy();
-    _modalwindow = 0;
-  }
-
-  virtual void onPaint(PaintEvent* e)
-  {
-    Painter* p = e->getPainter();
-    p->setOperator(OPERATOR_SRC);
-    // Clear everything to white.
-    p->setSource(ArgbI(0xFF000000));
-    p->fillAll();
-
-    p->setSource(ArgbI(0xFFFFFFFF));
-    String s;
-    s.format("MODAL DIALOG NO: %i", _x);
-    p->drawText(PointI(0,0),s,getFont());
-  }
-
-  int _x;
-  MyModalWindow* _modalwindow;
-};
 
 struct MyWindow : public Window
 {
@@ -224,239 +19,28 @@ struct MyWindow : public Window
 
   // [Event Handlers]
   virtual void onKey(KeyEvent* e);
+  virtual void onTimer(TimerEvent* e);
   virtual void onPaint(PaintEvent* e);
-
-  void createButtons(int count)
-  {
-    _buttons.clear();
-    _buttons.reserve(count);
-
-    for(int i=0;i<count;++i) {
-      Button* buttonx1 = fog_new Button();
-      addChild(buttonx1);
-      //button4->setGeometry(RectI(40, 160, 100, 20));
-      String str;
-      str.format("XButton%i", i);
-      buttonx1->setText(str);
-      buttonx1->show(); 
-
-      // buttonx1->setMinimumSize(SizeI(40,40));
-      _buttons.append(buttonx1);
-    }
-
-  }
-
-  void testBorderLayout(Layout* parent=0)
-  {
-    createButtons(6);
-    BorderLayout* layout;
-    if(parent) {
-      layout = fog_new BorderLayout();
-    } else {
-      layout = fog_new BorderLayout(this);
-    }
-
-    layout->addItem(_buttons.at(0), LAYOUT_EDGE_SOUTH);
-    layout->addItem(_buttons.at(1), LAYOUT_EDGE_WEST);
-    layout->addItem(_buttons.at(2), LAYOUT_EDGE_CENTER);
-    layout->addItem(_buttons.at(3), LAYOUT_EDGE_EAST);
-    layout->addItem(_buttons.at(4), LAYOUT_EDGE_NORTH);
-    layout->addItem(_buttons.at(5), LAYOUT_EDGE_NORTH);
-
-    LayoutItem* item = _buttons.at(3);
-    BorderLayout::LayoutData* d = (BorderLayout::LayoutData*)item->_layoutdata;
-    item->getLayoutProperties<BorderLayout>()->setFlex(1);
-    d = d;
-  }
-
-  void testGridLayout(Layout* parent=0)
-  {
-    createButtons(8);
-
-    GridLayout* layout;
-    if(parent) {
-      layout = fog_new GridLayout();
-    } else {
-      layout = fog_new GridLayout(this);
-    }
-
-    layout->addItem(_buttons.at(0),0,0);
-    layout->addItem(_buttons.at(1),0,1);
-    layout->addItem(_buttons.at(2),0,2);
-    layout->addItem(_buttons.at(3),1,0,1,3);
-    layout->addItem(_buttons.at(4),2,0,2);
-    layout->addItem(_buttons.at(5),2,1);
-    layout->addItem(_buttons.at(6),3,1);
-    layout->addItem(_buttons.at(6),3,2);
-
-    layout->setRowFlex(2, 1);
-    layout->setColumnFlex(1, 1);    
-    
-  }
-
-  void onButtonClick(MouseEvent* ev)
-  {
-    _buttons.at(0)->getLayoutProperties<VBoxLayout>()->setFlex(1);
-    _layout->_dirty = 1;
-    invalidateLayout();
-  }
-
-  void testVBoxLayout(Layout* parent = 0)
-  {
-    const int COUNT = 8;
-    createButtons(COUNT);
-
-    VBoxLayout* layout;
-    if(parent) {
-      layout = fog_new VBoxLayout(0,0);
-    } else {
-      layout = fog_new VBoxLayout(this,0,0);
-    }
-
-    for(int i=0;i<COUNT;++i) {
-      layout->addItem(_buttons.at(i));
-    }
-
-    layout->setSpacing(2);
-
-    _buttons.at(3)->getLayoutProperties<VBoxLayout>()->setFlex(1);
-    _buttons.at(2)->getLayoutProperties<VBoxLayout>()->setFlex(2);
-
-    _buttons.at(0)->addListener(EVENT_CLICK,this,&MyWindow::onButtonClick);
-
-    CheckBox* cb = fog_new CheckBox();
-    cb->setText(Ascii8("Check box"));
-    cb->show();
-    layout->addItem(cb);
-  }
-
-  void testHBoxLayout(Layout* parent = 0)
-  {
-    const int COUNT = 8;
-    createButtons(COUNT);
-    HBoxLayout* layout;
-    if(parent) {
-      layout = fog_new HBoxLayout(0,0);
-    } else {
-      layout = fog_new HBoxLayout(this,0,0);
-    }
-
-    for(int i=0;i<COUNT;++i) {
-      layout->addItem(_buttons.at(i));
-    }
-
-    _buttons.at(3)->getLayoutProperties<HBoxLayout>()->setFlex(1);
-    _buttons.at(2)->getLayoutProperties<HBoxLayout>()->setFlex(2);
-  }
-
-  void testFrame()
-  {
-    VBoxLayout* layout = fog_new VBoxLayout(this, 0, 0);
-
-    {
-      TextField* textField = fog_new TextField();
-      textField->show();
-      textField->setMinimumSize(SizeI(100, 20));
-      addChild(textField);
-      layout->addItem(textField);
-    }
-
-    {
-      TextField* textField = fog_new TextField();
-      textField->show();
-      textField->setMinimumSize(SizeI(100, 20));
-      addChild(textField);
-      layout->addItem(textField);
-    }
-  }
-
-  void testNestedLayout()
-  {
-  }
-
-  void onModalClose()
-  {
-    _modalwindow->hide();
-    _modalwindow->destroy();
-    _modalwindow = 0;
-  }
-
-  virtual void onClose(CloseEvent* e)
-  {
-    this->destroyWindow();
-  }
-
-  void onModalTestClick(MouseEvent* e)
-  {
-    _modalwindow = fog_new MyModalWindow(_mcount);
-    _modalwindow->setSize(SizeI(200,300));
-    _modalwindow->addListener(EVENT_CLOSE, this, &MyWindow::onModalClose);
-    _modalwindow->showModal(getGuiWindow());
-  }
-
-  void onPopUpClick(MouseEvent* e)
-  {
-    if(_popup->getVisibility() < WIDGET_VISIBLE) {
-      _popup->show();
-    }
-  }
-
-  void onFrameTestClick(MouseEvent* e)
-  {
-    if(getWindowFlags() & WINDOW_NATIVE) {
-      setWindowFlags(WINDOW_TYPE_TOOL|WINDOW_TRANSPARENT);
-    } else {
-      setWindowFlags(WINDOW_TYPE_DEFAULT|WINDOW_TRANSPARENT);
-    }
-  }
-
-  void onFullScreenClick(MouseEvent* e)
-  {
-    if(isFullScreen()) {
-      show();
-    } else {      
-      show(WIDGET_VISIBLE_FULLSCREEN);
-    }
-  }
-
-  void onTransparencyClick(MouseEvent* e)
-  {
-    WidgetOpacityAnimation* anim = fog_new WidgetOpacityAnimation(this);
-    anim->setDuration(TimeDelta::fromMilliseconds(1000));
-
-    anim->setStartOpacity(0.0f);
-    anim->setEndOpacity(1.0f);
-    
-    if(getTransparency() == 1.0) {
-      anim->setDirection(ANIMATION_BACKWARD);
-      anim->setStartOpacity(0.1f);
-    }
-
-    Application::getInstance()->getAnimationDispatcher()->addAnimation(anim);
-  }
 
   void paintImage(Painter* painter, const PointI& pos, const Image& im, const String& name);
 
-  Button* button;
-
   Image i[2];
-  double _subx;
-  double _suby;
-  double _rotate;
-  double _shearX;
-  double _shearY;
-  double _scale;
+  LinearGradientF gradient;
+
+  float _subx;
+  float _suby;
+  float _rotate;
+  float _shearX;
+  float _shearY;
+  float _scale;
   int _spread;
-
-  Widget* _popup;
-  int _mcount;
-  MyModalWindow* _modalwindow;
-
-
-  List<Widget*> _buttons;
   bool _clip;
 
-  //FlowLayout* _layout;
+  // FPS...
+  Timer timer;
+  float fps;
+  float fpsCounter;
+  Time fpsTime;
 };
 
 FOG_IMPLEMENT_OBJECT(MyWindow)
@@ -464,6 +48,11 @@ FOG_IMPLEMENT_OBJECT(MyWindow)
 MyWindow::MyWindow(uint32_t createFlags) :
   Window(createFlags)
 {
+  timer.setInterval(TimeDelta::fromMilliseconds(2));
+  timer.addListener(EVENT_TIMER, this, &MyWindow::onTimer);
+  fps = 0.0f;
+  fpsCounter = 0.0f;
+
   setWindowTitle(Ascii8("Testing..."));
 
   i[0].readFromFile(Ascii8("babelfish.png"));
@@ -472,20 +61,23 @@ MyWindow::MyWindow(uint32_t createFlags) :
   i[0].convert(IMAGE_FORMAT_PRGB32);
   i[1].convert(IMAGE_FORMAT_PRGB32);
 
-  _mcount = 0;
-
-  _subx = 0.0;
-  _suby = 0.0;
-  _rotate = 0.0;
-  _shearX = 0.0;
-  _shearY = 0.0;
-  _scale = 1.0;
-  _spread = PATTERN_SPREAD_REPEAT;
+  _subx = 0.0f;
+  _suby = 0.0f;
+  _rotate = 0.0f;
+  _shearX = 0.0f;
+  _shearY = 0.0f;
+  _scale = 1.0f;
+  _spread = GRADIENT_SPREAD_REPEAT;
 
   _clip = false;
   //testVBoxLayout();
   //testFrame();
   //setContentRightMargin(0);
+
+  gradient.addStop(ColorStop(0.00f, Argb32(0xFF0000FF)));
+  gradient.addStop(ColorStop(0.33f, Argb32(0xFFFFFF00)));
+  gradient.addStop(ColorStop(0.66f, Argb32(0xFFFF0000)));
+  gradient.addStop(ColorStop(1.00f, Argb32(0xFF000000)));
 }
 
 MyWindow::~MyWindow()
@@ -498,12 +90,34 @@ void MyWindow::onKey(KeyEvent* e)
   {
     switch (e->getKey())
     {
-      case KEY_UP   : _suby -= 0.05; update(WIDGET_UPDATE_ALL); break;
-      case KEY_DOWN : _suby += 0.05; update(WIDGET_UPDATE_ALL); break;
-      case KEY_LEFT : _subx -= 0.05; update(WIDGET_UPDATE_ALL); break;
-      case KEY_RIGHT: _subx += 0.05; update(WIDGET_UPDATE_ALL); break;
+      case KEY_SPACE:
+        if (timer.isRunning())
+        {
+          timer.stop();
+        }
+        else
+        {
+          timer.start();
+          fps = 0.0f;
+          fpsCounter = 0.0f;
+          fpsTime = Time::now();
+        }
+        break;
 
-      case KEY_SPACE: update(WIDGET_UPDATE_ALL); break;
+      case KEY_UP   : _suby -= 0.05f; update(WIDGET_UPDATE_ALL); break;
+      case KEY_DOWN : _suby += 0.05f; update(WIDGET_UPDATE_ALL); break;
+      case KEY_LEFT : _subx -= 0.05f; update(WIDGET_UPDATE_ALL); break;
+      case KEY_RIGHT: _subx += 0.05f; update(WIDGET_UPDATE_ALL); break;
+
+      case KEY_Q: _rotate -= 0.05f; update(WIDGET_UPDATE_ALL); break;
+      case KEY_W: _rotate += 0.05f; update(WIDGET_UPDATE_ALL); break;
+
+      case KEY_A: _shearX -= 0.05f; update(WIDGET_UPDATE_ALL); break;
+      case KEY_S: _shearX += 0.05f; update(WIDGET_UPDATE_ALL); break;
+
+      case KEY_Z: _shearY -= 0.05f; update(WIDGET_UPDATE_ALL); break;
+      case KEY_X: _shearY += 0.05f; update(WIDGET_UPDATE_ALL); break;
+
       case KEY_C: _clip = !_clip; update(WIDGET_UPDATE_ALL); break;
     }
   }
@@ -511,22 +125,55 @@ void MyWindow::onKey(KeyEvent* e)
   base::onKey(e);
 }
 
+void MyWindow::onTimer(TimerEvent* e)
+{
+  _rotate += 0.005f;
+  update(WIDGET_UPDATE_PAINT);
+}
+
 void MyWindow::onPaint(PaintEvent* e)
 {
-  TimeTicks ticks = TimeTicks::highResNow();
+  Time startTime = Time::now();
   Painter* p = e->getPainter();
 
   p->save();
-  p->setOperator(OPERATOR_SRC);
+  p->setCompositingOperator(COMPOSITE_SRC);
+
+  p->translate(PointF(200, 200));
+  p->rotate(_rotate);
+  //p->translate(PointF(-200, -200));
+  //p->skew(PointF(_shearX, _shearY));
 
   // Clear everything to white.
-  p->setSource(ArgbI(0xFFFFFFFF));
-  p->fillAll();
-  p->setSource(ArgbI(0xFF000000));
+  p->setSource(Argb32(0xFFFFFFFF));
+  p->clear();
 
-  RectD rect(10.0 + _subx, 10.0 + _suby, 100, 100);
+  //p->setSource(Argb32(0xFF000000));
 
-  //p->fillRect(rect);
+  gradient.setStart(PointF(100.0f, 100.0f));
+  gradient.setEnd(PointF(400.0f, 400.0f));
+  gradient.setGradientSpread(GRADIENT_SPREAD_REFLECT);
+
+  TransformF perspective;
+  perspective.setQuadToQuad(PointF(100, 100), PointF(400, 100), PointF(300, 400), PointF(150, 400), BoxF(100, 100, 400, 400));
+  p->transform(perspective);
+
+  p->setSource(gradient);
+
+  p->clear();
+  // p->fillCircle(CircleF(PointF(310.0f, 310.0f), 300.0f));
+  //p->fillBox(BoxI(50, 50, 450, 450));
+  p->setSource(Argb32(0xFFFFFFFF));
+
+  p->setOpacity(0.5f);
+  p->drawBox(BoxI(100, 100, 400, 400)); 
+  //p->fillCircle(CircleF(PointF(200, 200), 100.0f));
+
+  /*
+  p->fillRect(RectI(10, 10, 200, 200));
+
+  RectF rect(10.0f + _subx, 10.0f + _suby, 100.0f, 100.0f);
+
 
   if (_clip)
   {
@@ -537,16 +184,77 @@ void MyWindow::onPaint(PaintEvent* e)
     region.combine(RectI( 64,  70, 200, 140), REGION_OP_UNION);
 
     p->save();
-    p->setSource(ArgbI(0xFFCFCFFF));
+    p->setFillColor(Argb32(0xFFCFCFFF));
     p->fillRegion(region);
     p->restore();
-    p->clipRegion(region, CLIP_OP_REPLACE);
+    p->clipRegion(CLIP_OP_REPLACE, region);
   }
+  */
+  
+  PathF path;
+  PathF clip;
 
-  //PathD path;
-  //path.addRect(rect);
-  //p->fillPath(path);
-  p->fillRect(rect);
+  static int seedNum = 13;
+  srand(seedNum++);
+
+  path.circle(CircleF(PointF(240.0f, 240.0f), 115.0f), PATH_DIRECTION_CW);
+  path.ellipse(EllipseF(PointF(320.0f, 320.0f), PointF(115.0f, 50.0f)), PATH_DIRECTION_CCW);
+  path._modifiedBoundingBox();
+  //path.moveTo(PointF(200.0f, 100.0f));
+  //path.cubicTo(PointF(400.0f, 250.0f),
+  //  PointF(440.0f, 220.0f), PointF(200.0f, 400.0f));
+
+  //path.lineTo(PointF(89.0f, 6.0f));
+  //path.lineTo(PointF(222.0f, 240.0f));
+  //path.lineTo(PointF(492.0f, 16.0f));
+  // path.moveTo(PointF(100.0f, 100.0f));
+/*
+  for (int i = 0; i < 300; i++)
+  {
+    PointF p1(rand() % 500, rand() % 400);
+    PointF p2(rand() % 500, rand() % 400);
+    PointF p3(rand() % 500, rand() % 400);
+
+    path.cubicTo(p1, p2, p3);
+  }
+*/
+/*
+  path.moveTo(PointF(200.0f, 100.0f));
+  path.lineTo(PointF(300.0f, 300.0f));
+  path.lineTo(PointF(100.0f, 300.0f));
+  path.lineTo(PointF(200.0f, 200.0f));
+  path.lineTo(PointF(200.0f, 350.0f));
+  path.lineTo(PointF(150.0f, 220.0f));
+*/
+  /*
+  PathClipperF clipper(RectF(150.0f, 150.0f, 200.0f, 200.0f));
+  clipper.clipPath(clip, path);
+
+  p->rotate(_rotate);
+
+  p->setSource(Argb32(0xFF0000FF));
+  p->fillPath(path);
+
+  p->setSource(Argb32(0xFFFF0000));
+  p->fillPath(clip);
+  */
+
+  /*
+  p->setSource(Argb32(0xFFFFFF00));
+  p->fillEllipse(EllipseF(PointF(300, 300), PointF(150, 150)));
+
+  p->setSource(Argb32(0xFF000000));
+  p->fillEllipse(EllipseF(PointF(300, 300), PointF(135, 135)));
+  */
+
+  //p->setSource(Argb32(0xFFFFFF00));
+  //p->fillRect(RectI(50, 50, 300, 300));
+/*
+  p->setOpacity(0.1f);
+  p->fillRect(RectI(150, 150, 200, 200));
+  p->resetOpacity();
+*/
+  //p->fillRect(rect);
 
   /*
   PathD path;
@@ -554,11 +262,40 @@ void MyWindow::onPaint(PaintEvent* e)
   path.lineTo(250, 105);
   path.lineTo(200, 200);
   path.lineTo(100, 200);
-  p->setSource(ArgbI(0xFF000000));
+  p->setSource(Argb32(0xFF000000));
   p->fillPath(path);
   */
 
   p->restore();
+
+  /*
+  p->save();
+  p->skew(PointF(1.05f, 1.05f));
+  p->setStrokeColor(Argb32(0xFF000000));
+  p->strokeRect(RectI(50, 50, 128, 128));
+  p->blitImage(PointI(50, 50), i[0]);
+  p->restore();
+  */
+
+  Time lastTime = Time::now();
+
+  TimeDelta frameDelta = lastTime - startTime;
+  TimeDelta fpsDelta = lastTime - fpsTime;
+
+  if (fpsDelta.inMillisecondsF() >= 1000.0f)
+  {
+    fps = fpsCounter;
+    fpsCounter = 0.0f;
+    fpsTime = lastTime;
+  }
+  else
+  {
+    fpsCounter++;
+  }
+
+  String text;
+  text.format("FPS: %g, Time: %g", fps, frameDelta.inMillisecondsF());
+  setWindowTitle(text);
 }
 
 // ============================================================================
@@ -570,9 +307,10 @@ FOG_GUI_MAIN()
   Application app(Ascii8("Gui"));
 
   MyWindow window(WINDOW_TYPE_DEFAULT);
-  window.setSize(SizeI(400, 400));
+
+  window.addListener(EVENT_CLOSE, &app, &Application::quit);
+  window.setSize(SizeI(1200, 800));
   window.show();
 
-  app.addListener(EVENT_LAST_WINDOW_CLOSED, &app, &Application::quit);
   return app.run();
 }

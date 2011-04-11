@@ -3,9 +3,9 @@
 // [License]
 // MIT, See COPYING file in package
 
-#if defined(_MSVC)
+#if defined(_MSC_VER)
 #pragma once
-#endif // _MSVC
+#endif // _MSC_VER
 
 // [Guard]
 #ifndef _FOG_SVG_H
@@ -19,11 +19,6 @@
 //! @defgroup Fog_Svg_Public Fog-Svg
 //!
 //! Public classes and functions related to Fog-Svg library.
-
-//! @internal
-//! @defgroup Fog_Svg_Private Fog-Svg (private)
-//!
-//! Private classes and functions related to Fog-Svg library.
 
 
 
@@ -50,13 +45,15 @@
 // [Fog-Graphics Include Files]
 // ============================================================================
 
-#include <Fog/Core/Build.h>
+#include <Fog/Core/Config/Config.h>
 
-#include <Fog/Svg/Constants.h>
-#include <Fog/Svg/SvgBase.h>
-#include <Fog/Svg/SvgContext.h>
-#include <Fog/Svg/SvgDom.h>
-#include <Fog/Svg/SvgUtil.h>
+#include <Fog/Svg/Dom/SvgDocument.h>
+#include <Fog/Svg/Dom/SvgElement.h>
+#include <Fog/Svg/Dom/SvgObject.h>
+#include <Fog/Svg/Global/Constants.h>
+#include <Fog/Svg/Render/SvgRender.h>
+#include <Fog/Svg/Tools/SvgCoord.h>
+#include <Fog/Svg/Tools/SvgUtil.h>
 
 // [Guard]
 #endif // _FOG_SVG_H

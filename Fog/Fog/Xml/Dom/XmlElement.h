@@ -1,0 +1,281 @@
+// [Fog-Xml]
+//
+// [License]
+// MIT, See COPYING file in package
+
+// [Guard]
+#ifndef _FOG_XML_DOM_XMLELEMENT_H
+#define _FOG_XML_DOM_XMLELEMENT_H
+
+// [Dependencies]
+#include <Fog/Core/Collection/List.h>
+#include <Fog/Core/Tools/ManagedString.h>
+#include <Fog/Core/Tools/String.h>
+#include <Fog/Xml/Global/Constants.h>
+#include <Fog/Xml/Dom/XmlAttribute.h>
+
+namespace Fog {
+
+//! @addtogroup Fog_Xml_Dom
+//! @{
+
+// ============================================================================
+// [Forward Declarations]
+// ============================================================================
+
+struct XmlDocument;
+struct XmlSaxReader;
+struct XmlSaxWriter;
+
+// ============================================================================
+// [Fog::XmlElement]
+// ============================================================================
+
+//! @brief Xml element.
+struct FOG_API XmlElement
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  XmlElement(const ManagedString& tagName);
+  virtual ~XmlElement();
+
+  // --------------------------------------------------------------------------
+  // [Type and Flags]
+  // --------------------------------------------------------------------------
+
+  //! @brief Return element type, see @c Type.
+  FOG_INLINE int getType() const { return _type; }
+
+  //! @brief Return true if element is @a TypeElement type.
+  FOG_INLINE bool isElement() const { return (_type & XML_ELEMENT_MASK) == XML_ELEMENT_BASE; }
+  //! @brief Return true if element is @a TypeText type.
+  FOG_INLINE bool isText() const { return (_type & XML_ELEMENT_MASK) == XML_ELEMENT_TEXT; }
+  //! @brief Return true if element is @a TypeCDATA type.
+  FOG_INLINE bool isCDATA() const { return (_type & XML_ELEMENT_MASK) == XML_ELEMENT_CDATA; }
+  //! @brief Return true if element is @a TypePI type.
+  FOG_INLINE bool isPI() const { return (_type & XML_ELEMENT_MASK) == XML_ELEMENT_PI; }
+  //! @brief Return true if element is @a TypeComment type.
+  FOG_INLINE bool isComment() const { return (_type & XML_ELEMENT_MASK) == XML_ELEMENT_COMMENT; }
+  //! @brief Return true if element is @a TypeDocument type.
+  FOG_INLINE bool isDocument() const { return (_type & XML_ELEMENT_MASK) == XML_ELEMENT_DOCUMENT; }
+
+  //! @brief Return true if element is SVG extension.
+  FOG_INLINE bool isSvg() const { return (_type & SVG_ELEMENT_MASK) != 0; }
+  //! @brief Return true if element is @c SvgElement.
+  FOG_INLINE bool isSvgElement() const { return _type == SVG_ELEMENT_BASE; }
+  //! @brief Return true if element is @c SvgDocument.
+  FOG_INLINE bool isSvgDocument() const { return _type == SVG_ELEMENT_DOCUMENT; }
+
+  // --------------------------------------------------------------------------
+  // [Manage / Unmanage]
+  // --------------------------------------------------------------------------
+
+protected:
+  //! @brief Start managing this element.
+  virtual void _manage(XmlDocument* doc);
+  //! @brief Stop managing this element.
+  virtual void _unmanage();
+
+  // --------------------------------------------------------------------------
+  // [Clone]
+  // --------------------------------------------------------------------------
+
+public:
+  //! @brief Clone this element with all children.
+  virtual XmlElement* clone() const;
+
+  // --------------------------------------------------------------------------
+  // [Serialize]
+  // --------------------------------------------------------------------------
+
+  virtual void serialize(XmlSaxWriter* writer);
+
+  // --------------------------------------------------------------------------
+  // [Normalize]
+  // --------------------------------------------------------------------------
+
+  //! @brief Normalize this element.
+  //!
+  //! Normalizing means to join text child elements and remove empty ones.
+  virtual void normalize();
+
+  // --------------------------------------------------------------------------
+  // [Dom]
+  // --------------------------------------------------------------------------
+
+  //! @brief Prepend @a ch element to this element.
+  err_t prependChild(XmlElement* ch);
+
+  //! @brief Append @a ch element to this element.
+  err_t appendChild(XmlElement* ch);
+
+  //! @brief Remove @a ch element from this element.
+  //!
+  //! @note Element will not be deleted.
+  err_t removeChild(XmlElement* ch);
+
+  //! @brief Replace @a newch element with @a oldch one.
+  //!
+  //! @note @a oldch element will not be deleted.
+  err_t replaceChild(XmlElement* newch, XmlElement* oldch);
+
+  //! @brief Remove and delete child element @a ch.
+  err_t deleteChild(XmlElement* ch);
+
+  //! @brief Delete all children elements.
+  err_t deleteAll();
+
+  //! @brief Unlink this element from its parent.
+  //!
+  //! @note this operation is same as removing this node from parent by
+  //! parent()->removeChild(this) call.
+  err_t unlink();
+
+  //! @internal
+  //!
+  //! @brief Unlink, but not unmanage this element from document.
+  err_t _unlinkUnmanaged();
+
+  //! @brief Returns true if @c e element is child of this element or all
+  //! its descendents.
+  bool contains(XmlElement* e, bool deep = false);
+
+  //! @brief Get XML-Document.
+  FOG_INLINE XmlDocument* getDocument() const { return _document; }
+
+  //! @brief Get parent node.
+  FOG_INLINE XmlElement* getParent() const { return _parent; }
+
+  //! @brief Get array of child nodes.
+  List<XmlElement*> childNodes() const;
+
+  //! @brief Get first child node.
+  FOG_INLINE XmlElement* firstChild() const { return _firstChild; }
+
+  //! @brief Get last child node.
+  FOG_INLINE XmlElement* lastChild() const { return _lastChild; }
+
+  //! @brief Get next sibling node.
+  FOG_INLINE XmlElement* nextSibling() const { return _nextSibling; }
+
+  //! @brief Get previous sibling node.
+  FOG_INLINE XmlElement* previousSibling() const { return _prevSibling; }
+
+  //! @brief Get whether the current node is first.
+  FOG_INLINE bool isFirst() const { return _prevSibling == NULL; }
+
+  //! @brief Get whether the current node is last.
+  FOG_INLINE bool isLast() const { return _nextSibling == NULL; }
+
+  //! @brief Get whether the current node has parent.
+  FOG_INLINE bool hasParent() const { return _parent != NULL; }
+
+  //! @brief Get whether the current node has child nodes.
+  FOG_INLINE bool hasChildNodes() const { return _firstChild != NULL; }
+ 
+  List<XmlElement*> childNodesByTagName(const String& tagName) const;
+
+  FOG_INLINE XmlElement* firstChildByTagName(const String& tagName) const
+  { return _nextChildByTagName(_firstChild, tagName); }
+
+  FOG_INLINE XmlElement* lastChildByTagName(const String& tagName) const
+  { return _previousChildByTagName(_lastChild, tagName); }
+
+  FOG_INLINE XmlElement* nextChildByTagName(const String& tagName) const
+  { return _nextChildByTagName(_nextSibling, tagName); }
+
+  FOG_INLINE XmlElement* previousChildByTagName(const String& tagName) const
+  { return _previousChildByTagName(_prevSibling, tagName); }
+
+  static XmlElement* _nextChildByTagName(XmlElement* refElement, const String& tagName);
+  static XmlElement* _previousChildByTagName(XmlElement* refElement, const String& tagName);
+
+  // --------------------------------------------------------------------------
+  // [Attributes]
+  // --------------------------------------------------------------------------
+
+  //! @brief Get whether the element contains xml-attributes / properties.
+  FOG_INLINE bool hasAttributes() const { return !_attributes.isEmpty(); }
+
+  //! @brief Get the array of attributes.
+  List<XmlAttribute*> attributes() const;
+
+  bool hasAttribute(const String& name) const;
+  err_t setAttribute(const String& name, const String& value);
+  String getAttribute(const String& name) const;
+  err_t removeAttribute(const String& name);
+
+  err_t removeAttributes();
+
+  // --------------------------------------------------------------------------
+  // [ID]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE String getId() const { return _id; }
+  err_t setId(const String& id);
+
+  // --------------------------------------------------------------------------
+  // [Element and Text]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE const String& getTagName() const { return _tagName.getString(); }
+  virtual err_t setTagName(const String& name);
+
+  virtual String getTextContent() const;
+  virtual err_t setTextContent(const String& text);
+
+  virtual err_t _setAttribute(const ManagedString& name, const String& value);
+  virtual String _getAttribute(const ManagedString& name) const;
+  virtual err_t _removeAttribute(const ManagedString& name);
+  virtual err_t _removeAttributes();
+
+  virtual XmlAttribute* _createAttribute(const ManagedString& name) const;
+  static void _copyAttributes(XmlElement* dst, XmlElement* src);
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+protected:
+  uint8_t _type;
+  uint8_t _reserved0;
+  uint8_t _reserved1;
+  mutable uint8_t _dirty;
+  uint32_t _flags;
+
+  XmlDocument* _document;
+  XmlElement* _parent;
+  XmlElement* _firstChild;
+  XmlElement* _lastChild;
+  XmlElement* _nextSibling;
+  XmlElement* _prevSibling;
+
+  //! @brief Children.
+  mutable List<XmlElement*> _children;
+  //! @brief Attributes.
+  List<XmlAttribute*> _attributes;
+
+  //! @brief Element tag name.
+  ManagedString _tagName;
+  //! @brief Element id.
+  String _id;
+  //! @brief Element id chain managed by @c XmlIdManager.
+  XmlElement* _hashNextId;
+
+private:
+  friend struct XmlAttribute;
+  friend struct XmlIdAttribute;
+  friend struct XmlDocument;
+  friend struct XmlIdManager;
+
+  FOG_DISABLE_COPY(XmlElement)
+};
+
+//! @}
+
+} // Fog namespace
+
+// [Guard]
+#endif // _FOG_XML_DOM_XMLELEMENT_H

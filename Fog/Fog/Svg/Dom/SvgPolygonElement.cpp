@@ -1,0 +1,69 @@
+// [Fog-Core]
+//
+// [License]
+// MIT, See COPYING file in package
+
+// [Precompiled Headers]
+#if defined(FOG_PRECOMP)
+#include FOG_PRECOMP
+#endif // FOG_PRECOMP
+
+// [Dependencies]
+#include <Fog/Core/Tools/Strings.h>
+#include <Fog/Svg/Dom/SvgPolygonElement_p.h>
+#include <Fog/Svg/Render/SvgRender.h>
+
+namespace Fog {
+
+// ============================================================================
+// [Fog::SvgPolygonElement]
+// ============================================================================
+
+SvgPolygonElement::SvgPolygonElement() :
+  SvgStyledElement(fog_strings->getString(STR_SVG_ELEMENT_polygon), SVG_ELEMENT_POLYGON),
+  a_points(NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_points), true, FOG_OFFSET_OF(SvgPolygonElement, a_points))
+{
+}
+
+SvgPolygonElement::~SvgPolygonElement()
+{
+  _removeAttributes();
+}
+
+XmlAttribute* SvgPolygonElement::_createAttribute(const ManagedString& name) const
+{
+  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_points)) return (XmlAttribute*)&a_points;
+
+  return base::_createAttribute(name);
+}
+
+err_t SvgPolygonElement::onRenderShape(SvgRenderContext* context) const
+{
+  if (a_points.isAssigned())
+  {
+    const PathF& path = a_points.getPath();
+    context->drawPath(path);
+    return ERR_OK;
+  }
+  else
+  {
+    return ERR_OK;
+  }
+}
+
+err_t SvgPolygonElement::onCalcBoundingBox(RectF* box) const
+{
+  if (a_points.isAssigned())
+  {
+    const PathF& path = a_points.getPath();
+    box->set(path.getBoundingRect());
+    return ERR_OK;
+  }
+  else
+  {
+    box->reset();
+    return ERR_OK;
+  }
+}
+
+} // Fog namespace

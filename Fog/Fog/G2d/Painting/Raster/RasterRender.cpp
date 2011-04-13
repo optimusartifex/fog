@@ -157,7 +157,6 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillTransformedBoxI(RasterContext& ctx, c
 
   uint32_t compositingOperator = ctx.paintHints.compositingOperator;
   uint32_t paintOpacity = ctx.rasterHints.opacity;
-  uint32_t isSourceOpaque = ctx.rasterHints.opaque;
 
   typename C::SpanExtP staticSpan;
 
@@ -201,9 +200,11 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillTransformedBoxI(RasterContext& ctx, c
 
     if (RasterUtil::isSolidContext(ctx.pc))
     {
+      bool isSrcOpaque = Face::p32PRGB32IsAlphaFF(ctx.solid.prgb32.p32);
+
       if (paintOpacity == C::_OPAQUE_VALUE)
       {
-        RenderCBlitLineFn blitFull = _g2d_render.getCBlitLine(dstFormat, compositingOperator, isSourceOpaque);
+        RenderCBlitLineFn blitFull = _g2d_render.getCBlitLine(dstFormat, compositingOperator, isSrcOpaque);
 
         dstPixels += x0 * ctx.layer.primaryBPP;
         do {
@@ -215,7 +216,7 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillTransformedBoxI(RasterContext& ctx, c
       }
       else
       {
-        RenderCBlitSpanFn blitSpan = _g2d_render.getCBlitSpan(dstFormat, compositingOperator, isSourceOpaque);
+        RenderCBlitSpanFn blitSpan = _g2d_render.getCBlitSpan(dstFormat, compositingOperator, isSrcOpaque);
 
         staticSpan.setPositionAndType(x0, box.x1, SPAN_C);
         staticSpan.setConstMask(paintOpacity);
@@ -360,7 +361,6 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillRasterizedShape(RasterContext& ctx, v
   uint32_t dstFormat = ctx.layer.primaryFormat;
 
   uint32_t compositingOperator = ctx.paintHints.compositingOperator;
-  uint32_t isSourceOpaque = ctx.rasterHints.opaque;
 
   // --------------------------------------------------------------------------
   // [Multithreading]
@@ -400,7 +400,8 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillRasterizedShape(RasterContext& ctx, v
 
     if (RasterUtil::isSolidContext(ctx.pc))
     {
-      RenderCBlitSpanFn blitSpan = _g2d_render.getCBlitSpan(dstFormat, compositingOperator, isSourceOpaque);
+      bool isSrcOpaque = Face::p32PRGB32IsAlphaFF(ctx.solid.prgb32.p32);
+      RenderCBlitSpanFn blitSpan = _g2d_render.getCBlitSpan(dstFormat, compositingOperator, isSrcOpaque);
       typename C::ScanlineP& sl = ctx.scanline8.instance();
 
       do {

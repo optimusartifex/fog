@@ -133,7 +133,7 @@ struct FOG_NO_EXPORT PatternTextureC
       case IMAGE_FORMAT_XRGB32:
       {
         ctx->texture.bits += irect.x * 4;
-        ctx->format = (spread == GRADIENT_SPREAD_CLAMP)
+        ctx->format = (spread == TEXTURE_TILE_CLAMP)
           ? IMAGE_FORMAT_PRGB32
           : IMAGE_FORMAT_XRGB32;
         ctx->depth = 32;
@@ -156,7 +156,7 @@ struct FOG_NO_EXPORT PatternTextureC
         ctx->texture.pal = reinterpret_cast<const uint32_t*>(pal.getData()) + ImagePalette::INDEX_PRGB32;
 
         ctx->texture.bits += irect.x;
-        ctx->format = (pal.isAlphaUsed() && spread != GRADIENT_SPREAD_CLAMP)
+        ctx->format = (pal.isAlphaUsed() && spread != TEXTURE_TILE_CLAMP)
           ? IMAGE_FORMAT_PRGB32
           : IMAGE_FORMAT_XRGB32;
         ctx->depth = 32;

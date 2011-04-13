@@ -993,9 +993,9 @@ static const ColorName* _G2d_Color_find(const Stub8& key)
       return cur;
     }
 
-    if (c0 > c1)
+    if (c0 < c1)
     {
-      base = cur;
+      base = cur + 1;
       lim--;
       continue;
     }

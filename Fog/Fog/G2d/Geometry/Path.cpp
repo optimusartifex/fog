@@ -1664,6 +1664,8 @@ static err_t _G2d_PathT_polygonT(typename PathT<Number>::T& self, const typename
 // [Fog::Path - Shape]
 // ============================================================================
 
+#define KAPPA (4.0 * (MATH_SQRT2 - 1.0) / 3.0)
+
 template<typename Number>
 static err_t _G2d_PathT_shape(
   typename PathT<Number>::T& self,
@@ -1809,6 +1811,9 @@ _ShapeRect:
       Number rx = Math::abs(data->radius.x);
       Number ry = Math::abs(data->radius.y);
 
+      Number rxKappaInv = rx * (Number)(1.0 - KAPPA);
+      Number ryKappaInv = ry * (Number)(1.0 - KAPPA);
+
       Number rw2 = r.w * Number(0.5);
       Number rh2 = r.h * Number(0.5);
 
@@ -1856,16 +1861,28 @@ _ShapeRect:
 
         commands[17] = PATH_CMD_CLOSE;
 
-        _G2d_PathT_arcToBezier(typename PointT<Number>::T(x1 - rx, y0 + ry), typename PointT<Number>::T(rx, ry), (Number)(MATH_PI * 1.5), (Number)(MATH_PI * 0.5), vertices +  1);
-        _G2d_PathT_arcToBezier(typename PointT<Number>::T(x1 - rx, y1 - ry), typename PointT<Number>::T(rx, ry), (Number)(MATH_PI * 0.0), (Number)(MATH_PI * 0.5), vertices +  5);
-        _G2d_PathT_arcToBezier(typename PointT<Number>::T(x0 + rx, y1 - ry), typename PointT<Number>::T(rx, ry), (Number)(MATH_PI * 0.5), (Number)(MATH_PI * 0.5), vertices +  9);
-        _G2d_PathT_arcToBezier(typename PointT<Number>::T(x0 + rx, y0 + ry), typename PointT<Number>::T(rx, ry), (Number)(MATH_PI * 1.0), (Number)(MATH_PI * 0.5), vertices + 13);
+        vertices[ 0].set(x0 + rx        , y0             );
 
-        vertices[ 0].set(x0 + rx, y0);
-        vertices[ 1].set(x1 - rx, y0);
-        vertices[ 5].set(x1, y1 - ry);
-        vertices[ 9].set(x0 + rx, y1);
-        vertices[13].set(x0, y0 + ry);
+        vertices[ 1].set(x1 - rx        , y0             );
+        vertices[ 2].set(x1 - rxKappaInv, y0             );
+        vertices[ 3].set(x1             , y0 + ryKappaInv);
+        vertices[ 4].set(x1             , y0 + ry        );
+
+        vertices[ 5].set(x1             , y1 - ry        );
+        vertices[ 6].set(x1             , y1 - ryKappaInv);
+        vertices[ 7].set(x1 - rxKappaInv, y1             );
+        vertices[ 8].set(x1 - rx        , y1             );
+
+        vertices[ 9].set(x0 + rx        , y1             );
+        vertices[10].set(x0 + rxKappaInv, y1             );
+        vertices[11].set(x0             , y1 - ryKappaInv);
+        vertices[12].set(x0             , y1 - ry        );
+
+        vertices[13].set(x0             , y0 + ry        );
+        vertices[14].set(x0             , y0 + ryKappaInv);
+        vertices[15].set(x0 + rxKappaInv, y0             );
+        vertices[16].set(x0 + rx        , y0);
+
         vertices[17].set(Math::getQNanT<Number>(), Math::getQNanT<Number>());
       }
       else
@@ -1892,15 +1909,26 @@ _ShapeRect:
 
         commands[16] = PATH_CMD_CLOSE;
 
-        _G2d_PathT_arcToBezier<Number>(typename PointT<Number>::T(x0 + rx, y0 + ry), typename PointT<Number>::T(rx, ry), (Number)(MATH_PI * 1.5), (Number)(-MATH_PI * 0.5), vertices + 0);
-        _G2d_PathT_arcToBezier<Number>(typename PointT<Number>::T(x0 + rx, y1 - ry), typename PointT<Number>::T(rx, ry), (Number)(MATH_PI * 1.0), (Number)(-MATH_PI * 0.5), vertices + 4);
-        _G2d_PathT_arcToBezier<Number>(typename PointT<Number>::T(x1 - rx, y1 - ry), typename PointT<Number>::T(rx, ry), (Number)(MATH_PI * 0.5), (Number)(-MATH_PI * 0.5), vertices + 8);
-        _G2d_PathT_arcToBezier<Number>(typename PointT<Number>::T(x1 - rx, y0 + ry), typename PointT<Number>::T(rx, ry), (Number)(MATH_PI * 0.0), (Number)(-MATH_PI * 0.5), vertices + 12);
+        vertices[ 0].set(x0 + rx        , y0             );
+        vertices[ 1].set(x0 + rxKappaInv, y0             );
+        vertices[ 2].set(x0             , y0 + ryKappaInv);
+        vertices[ 3].set(x0             , y0 + ry        );
 
-        vertices[ 0].set(x0 + rx, y0);
-        vertices[ 4].set(x0, y1 - ry);
-        vertices[ 8].set(x1 - rx, y1);
-        vertices[12].set(x1, y0 + ry);
+        vertices[ 4].set(x0             , y1 - ry        );
+        vertices[ 5].set(x0             , y1 - ryKappaInv);
+        vertices[ 6].set(x0 + rxKappaInv, y1             );
+        vertices[ 7].set(x0 + rx        , y1             );
+
+        vertices[ 8].set(x1 - rx        , y1             );
+        vertices[ 9].set(x1 - rxKappaInv, y1             );
+        vertices[10].set(x1             , y1 - ryKappaInv);
+        vertices[11].set(x1             , y1 - ry        );
+
+        vertices[12].set(x1             , y0 + ry        );
+        vertices[13].set(x1             , y0 + ryKappaInv);
+        vertices[14].set(x1 - rxKappaInv, y0             );
+        vertices[15].set(x1 - rx        , y0             );
+
         vertices[16].set(Math::getQNanT<Number>(), Math::getQNanT<Number>());
         self._d->length--;
       }
@@ -1924,7 +1952,6 @@ _ShapeRect:
       Number rx, rxKappa;
       Number ry, ryKappa;
 
-      Number _kappa = (Number)(4.0 * (MATH_SQRT2 - 1.0) / 3.0);
       typename PointT<Number>::T c;
 
       if (shapeType == SHAPE_TYPE_CIRCLE)
@@ -1953,8 +1980,8 @@ _ShapeRect:
 
       if (direction == PATH_DIRECTION_CCW) rx = -rx;
 
-      rxKappa = rx * _kappa;
-      ryKappa = ry * _kappa;
+      rxKappa = rx * (Number)(KAPPA);
+      ryKappa = ry * (Number)(KAPPA);
 
       commands[ 0] = PATH_CMD_MOVE_TO;
       commands[ 1] = PATH_CMD_CUBIC_TO;
@@ -1985,8 +2012,7 @@ _ShapeRect:
       vertices[11].set(c.x - rxKappa, c.y - ry     );
       vertices[12].set(c.x          , c.y - ry     );
 
-      vertices[13].set(Math::getQNanT<Number>(),
-                       Math::getQNanT<Number>());
+      vertices[13].set(Math::getQNanT<Number>(), Math::getQNanT<Number>());
 
       if (len == 0 || !boundingBoxDirty)
       {

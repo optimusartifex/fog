@@ -77,7 +77,7 @@ err_t XmlDomReader::onCloseElement(const Utf16& tagName)
 
 err_t XmlDomReader::onAddAttribute(const Utf16& name, const Utf16& value)
 {
-  return _current->setAttribute(ManagedString(name), String(value));
+  return _current->_setAttribute(ManagedString(name), String(value));
 }
 
 err_t XmlDomReader::onAddText(const Utf16& data, bool isWhiteSpace)

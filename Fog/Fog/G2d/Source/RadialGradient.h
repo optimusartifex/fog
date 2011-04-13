@@ -50,6 +50,14 @@ struct FOG_NO_EXPORT RadialGradientF : public GradientF
     _pts[2].set(rad, rad);
   }
 
+  FOG_INLINE RadialGradientF(const PointF& center, const PointF& focal, const PointF& rad) : 
+    GradientF(GRADIENT_TYPE_RADIAL)
+  {
+    _pts[0] = center;
+    _pts[1] = focal;
+    _pts[2] = rad;
+  }
+
   FOG_INLINE ~RadialGradientF()
   {
   }
@@ -63,11 +71,13 @@ struct FOG_NO_EXPORT RadialGradientF : public GradientF
 
   FOG_INLINE const PointF& getCenter() const { return _pts[0]; }
   FOG_INLINE const PointF& getFocal() const { return _pts[1]; }
-  FOG_INLINE float getRadius() const { return _pts[2].x; }
+  FOG_INLINE const PointF& getRadius() const { return _pts[2]; }
 
   FOG_INLINE void setCenter(const PointF& p) { _pts[0] = p; }
   FOG_INLINE void setFocal(const PointF& p) { _pts[1] = p; }
+
   FOG_INLINE void setRadius(float rad) { _pts[2].set(rad, rad); }
+  FOG_INLINE void setRadius(const PointF& rad) { _pts[2] = rad; }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
@@ -103,6 +113,14 @@ struct FOG_NO_EXPORT RadialGradientD : public GradientD
     _pts[2].set(rad, rad);
   }
 
+  FOG_INLINE RadialGradientD(const PointD& center, const PointD& focal, const PointD& rad) : 
+    GradientD(GRADIENT_TYPE_RADIAL)
+  {
+    _pts[0] = center;
+    _pts[1] = focal;
+    _pts[2] = rad;
+  }
+
   FOG_INLINE ~RadialGradientD()
   {
   }
@@ -116,11 +134,13 @@ struct FOG_NO_EXPORT RadialGradientD : public GradientD
 
   FOG_INLINE const PointD& getCenter() const { return _pts[0]; }
   FOG_INLINE const PointD& getFocal() const { return _pts[1]; }
-  FOG_INLINE double getRadius() const { return _pts[2].x; }
+  FOG_INLINE const PointD& getRadius() const { return _pts[2]; }
 
   FOG_INLINE void setCenter(const PointD& p) { _pts[0] = p; }
   FOG_INLINE void setFocal(const PointD& p) { _pts[1] = p; }
+
   FOG_INLINE void setRadius(double rad) { _pts[2].set(rad, rad); }
+  FOG_INLINE void setRadius(const PointD& rad) { _pts[2] = rad; }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]

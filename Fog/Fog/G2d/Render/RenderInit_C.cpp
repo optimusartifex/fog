@@ -215,7 +215,7 @@ FOG_NO_EXPORT void _g2d_render_init_c(void)
     RENDER_INIT(cblit_span[RENDER_CBLIT_PRGB     ], Render_C::CSrc::xrgb32_cblit_prgb32_span);
     RENDER_POST(cblit_span[RENDER_CBLIT_XRGB     ]);
 
-  //RENDER_INIT(vblit_line[IMAGE_FORMAT_PRGB32   ], Render_C::CSrc::frgb32_vblit_xrgb32_line);
+    RENDER_INIT(vblit_line[IMAGE_FORMAT_PRGB32   ], Render_C::CSrc::frgb32_vblit_xrgb32_line);
     RENDER_INIT(vblit_line[IMAGE_FORMAT_XRGB32   ], Render_C::CConvert::copy_32);
     RENDER_INIT(vblit_line[IMAGE_FORMAT_RGB24    ], Render_C::CSrc::frgb32_vblit_rgb24_line);
     RENDER_INIT(vblit_line[IMAGE_FORMAT_A8       ], Render_C::CSrc::comp8_vblit_a8_line        <Render_C::Access_XRGB32_Native>);
@@ -241,22 +241,22 @@ FOG_NO_EXPORT void _g2d_render_init_c(void)
   {
     G2dRenderApi::CompositeCoreFuncs& funcs = api.compositeCore[IMAGE_FORMAT_PRGB32][RENDER_COMPOSITE_CORE_SRC_OVER];
 
-  //RENDER_INIT(cblit_line[RENDER_CBLIT_PRGB     ], Render_C::CSrcOver::prgb32_cblit_prgb32_line);
+    RENDER_INIT(cblit_line[RENDER_CBLIT_PRGB     ], Render_C::CSrcOver::prgb32_cblit_prgb32_line);
     RENDER_POST(cblit_line[RENDER_CBLIT_XRGB     ]);
 
-  //RENDER_INIT(cblit_span[RENDER_CBLIT_PRGB     ], Render_C::CSrcOver::prgb32_cblit_prgb32_span);
+    RENDER_INIT(cblit_span[RENDER_CBLIT_PRGB     ], Render_C::CSrcOver::prgb32_cblit_prgb32_span);
     RENDER_POST(cblit_span[RENDER_CBLIT_XRGB     ]);
 
-  //RENDER_INIT(vblit_line[IMAGE_FORMAT_PRGB32   ], Render_C::CConvert::copy_32);
+    RENDER_INIT(vblit_line[IMAGE_FORMAT_PRGB32   ], Render_C::CSrcOver::prgb32_vblit_prgb32_line);
     RENDER_POST(vblit_line[IMAGE_FORMAT_XRGB32   ]);
     RENDER_POST(vblit_line[IMAGE_FORMAT_RGB24    ]);
   //RENDER_INIT(vblit_line[IMAGE_FORMAT_A8       ], Render_C::CSrc::prgb32_vblit_a8_line);
-  //RENDER_INIT(vblit_line[IMAGE_FORMAT_I8       ], Render_C::CSrc::prgb32_vblit_i8_line);
+    RENDER_INIT(vblit_line[IMAGE_FORMAT_I8       ], Render_C::CSrcOver::prgb32_vblit_i8_line);
   //RENDER_INIT(vblit_line[IMAGE_FORMAT_PRGB64   ], Render_C::CSrc::prgb32_vblit_prgb64_line);
     RENDER_POST(vblit_line[IMAGE_FORMAT_RGB48    ]);
   //RENDER_INIT(vblit_line[IMAGE_FORMAT_A16      ], Render_C::CSrc::prgb32_vblit_a16_line);
 
-  //RENDER_INIT(vblit_span[IMAGE_FORMAT_PRGB32   ], Render_C::CSrc::prgb32_vblit_prgb32_span);
+    RENDER_INIT(vblit_span[IMAGE_FORMAT_PRGB32   ], Render_C::CSrcOver::prgb32_vblit_prgb32_span);
     RENDER_POST(vblit_span[IMAGE_FORMAT_XRGB32   ]);
     RENDER_POST(vblit_span[IMAGE_FORMAT_RGB24    ]);
   //RENDER_INIT(vblit_span[IMAGE_FORMAT_A8       ], Render_C::CSrc::prgb32_vblit_a8_span);
@@ -273,22 +273,22 @@ FOG_NO_EXPORT void _g2d_render_init_c(void)
   {
     G2dRenderApi::CompositeCoreFuncs& funcs = api.compositeCore[IMAGE_FORMAT_XRGB32][RENDER_COMPOSITE_CORE_SRC_OVER];
 
-  //RENDER_INIT(cblit_line[RENDER_CBLIT_PRGB     ], Render_C::CSrc::prgb32_cblit_prgb32_line);
-  //RENDER_INIT(cblit_span[RENDER_CBLIT_PRGB     ], Render_C::CSrc::prgb32_cblit_prgb32_span);
+    RENDER_INIT(cblit_line[RENDER_CBLIT_PRGB     ], Render_C::CSrcOver::prgb32_cblit_prgb32_line);
+    RENDER_POST(cblit_line[RENDER_CBLIT_XRGB     ]);
 
-    RENDER_INIT(cblit_line[RENDER_CBLIT_XRGB     ], Render_C::CSrc::prgb32_cblit_prgb32_line);
-    RENDER_INIT(cblit_span[RENDER_CBLIT_XRGB     ], Render_C::CSrc::prgb32_cblit_prgb32_span);
+    RENDER_INIT(cblit_span[RENDER_CBLIT_PRGB     ], Render_C::CSrcOver::prgb32_cblit_prgb32_span);
+    RENDER_POST(cblit_span[RENDER_CBLIT_XRGB     ]);
 
-  //RENDER_INIT(vblit_line[IMAGE_FORMAT_PRGB32   ], Render_C::CSrc::frgb32_vblit_xrgb32_line);
+    RENDER_INIT(vblit_line[IMAGE_FORMAT_PRGB32   ], Render_C::CSrcOver::xrgb32_vblit_prgb32_line);
     RENDER_POST(vblit_line[IMAGE_FORMAT_XRGB32   ]);
     RENDER_POST(vblit_line[IMAGE_FORMAT_RGB24    ]);
   //RENDER_INIT(vblit_line[IMAGE_FORMAT_A8       ], Render_C::CSrc::prgb32_vblit_a8_line);
-  //RENDER_INIT(vblit_line[IMAGE_FORMAT_I8       ], Render_C::CSrc::prgb32_vblit_i8_line);
+    RENDER_INIT(vblit_line[IMAGE_FORMAT_I8       ], Render_C::CSrcOver::prgb32_vblit_i8_line);
   //RENDER_INIT(vblit_line[IMAGE_FORMAT_PRGB64   ], Render_C::CSrc::prgb32_vblit_prgb64_line);
     RENDER_POST(vblit_line[IMAGE_FORMAT_RGB48    ]);
   //RENDER_INIT(vblit_line[IMAGE_FORMAT_A16      ], Render_C::CSrc::prgb32_vblit_a16_line);
 
-  //RENDER_INIT(vblit_span[IMAGE_FORMAT_PRGB32   ], Render_C::CSrc::prgb32_vblit_prgb32_span);
+    RENDER_INIT(vblit_span[IMAGE_FORMAT_PRGB32   ], Render_C::CSrcOver::prgb32_vblit_prgb32_span);
     RENDER_POST(vblit_span[IMAGE_FORMAT_XRGB32   ]);
     RENDER_POST(vblit_span[IMAGE_FORMAT_RGB24    ]);
   //RENDER_INIT(vblit_span[IMAGE_FORMAT_A8       ], Render_C::CSrc::prgb32_vblit_a8_span);
@@ -369,6 +369,22 @@ FOG_NO_EXPORT void _g2d_render_init_c(void)
 
     gradient.linear.fetch_projection_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientLinear::fetch_projection_nearest_reflect_prgb32_xrgb32;
     gradient.linear.fetch_projection_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientLinear::fetch_projection_nearest_reflect_prgb32_xrgb32;
+  }
+#endif 
+
+  // --------------------------------------------------------------------------
+  // [Render - Gradient - Radial]
+  // --------------------------------------------------------------------------
+
+#if defined(FOG_RENDER_INIT_C)
+  {
+    G2dRenderApi::GradientFuncs& gradient = api.gradient;
+
+    gradient.create_f[GRADIENT_TYPE_RADIAL] = Render_C::PGradientRadial::create<float>;
+    gradient.create_d[GRADIENT_TYPE_RADIAL] = Render_C::PGradientRadial::create<double>;
+
+    gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_PAD] = Render_C::PGradientRadial::fetch_simple_nearest_pad_prgb32_xrgb32;
+    gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_PAD] = Render_C::PGradientRadial::fetch_simple_nearest_pad_prgb32_xrgb32;
   }
 #endif 
 }

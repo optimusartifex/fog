@@ -2040,20 +2040,17 @@ enum SHAPE_TYPE
 //! @brief Spread type.
 enum SPREAD
 {
-  //! @brief Pad spread (area outside the shape continues using nearest color - border).
+  //! @brief Pad spread (area outside the shape continues using border color).
   GRADIENT_SPREAD_PAD = 0,
   //! @brief Releat spread (pattern is repeated).
   GRADIENT_SPREAD_REPEAT = 1,
   //! @brief Reflect spread (pattern is reflected and then repeated).
   GRADIENT_SPREAD_REFLECT = 2,
-  //! @brief Clamp spread (area outside the shape definition is defined by a 
-  //! single color).
-  GRADIENT_SPREAD_CLAMP = 3,
 
   //! @brief Default spread.
   GRADIENT_SPREAD_DEFAULT = GRADIENT_SPREAD_PAD,
   //! @brief Count of spread types.
-  GRADIENT_SPREAD_COUNT = 4
+  GRADIENT_SPREAD_COUNT = 3
 };
 
 // ============================================================================
@@ -2142,23 +2139,19 @@ enum TEXT_HINT
 };
 
 // ============================================================================
-// [Fog::TILE_TYPE]
+// [Fog::TEXTURE_TILE]
 // ============================================================================
 
-// TODO: Rename?
-
-//! @brief Tile mode (see @c Texture).
-enum TILE_TYPE
+//! @brief Texture tiling mode (see @c Texture).
+enum TEXTURE_TILE
 {
-  TILE_TYPE_NONE = 0,
-  TILE_TYPE_PAD = 1,
-  TILE_TYPE_REPEAT = 2,
-  TILE_TYPE_REFLECT_X = 3,
-  TILE_TYPE_REFLECT_Y = 4,
-  TILE_TYPE_REFLECT_XY = 5,
+  TEXTURE_TILE_PAD = 0,
+  TEXTURE_TILE_REPEAT = 1,
+  TEXTURE_TILE_REFLECT = 2,
+  TEXTURE_TILE_CLAMP = 3,
 
-  TILE_TYPE_DEFAULT = TILE_TYPE_REPEAT,
-  TILE_TYPE_COUNT = 6
+  TEXTURE_TILE_DEFAULT = TEXTURE_TILE_REPEAT,
+  TEXTURE_TILE_COUNT = 4
 };
 
 // ============================================================================

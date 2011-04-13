@@ -197,7 +197,7 @@ typedef void (FOG_FASTCALL *RenderPatternDestroyFn)(
 //! @internal
 typedef void (FOG_FASTCALL *RenderPatternPrepareFn)(
   const RenderPatternContext* ctx,
-  RenderPatternFetcher* fetcher, int yPosition, int yAdvance, uint32_t mode);
+  RenderPatternFetcher* fetcher, int y, int delta, uint32_t mode);
 
 // ============================================================================
 // [Fog::Render - Prototype - Pattern - Fetch / Skip]

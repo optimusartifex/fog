@@ -180,7 +180,7 @@ struct FOG_NO_EXPORT Helpers
   // ==========================================================================
 
   static void FOG_FASTCALL p_solid_prepare(
-    const RenderPatternContext* ctx, RenderPatternFetcher* fetcher, int yPosition, int yAdvance, uint32_t mode)
+    const RenderPatternContext* ctx, RenderPatternFetcher* fetcher, int y, int delta, uint32_t mode)
   {
     fetcher->_ctx = ctx;
     fetcher->_fetch = _g2d_render.solid.fetch[ctx->_srcFormat];

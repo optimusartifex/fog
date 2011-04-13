@@ -86,9 +86,6 @@ union FOG_NO_EXPORT RasterHints
     //! @brief Opacity.
     uint32_t opacity : 24;
 
-    //! @brief Whether the source is opaque.
-    uint32_t opaque : 1;
-
     //! @brief Whether the final transformation matrix guarantees rect-to-rect
     //! output.
     //!

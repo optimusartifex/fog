@@ -44,7 +44,7 @@ struct FOG_NO_EXPORT PGradientLinear
     // In case that something fails.
     RenderSolid solid;
     solid.prgb32.p32 = stops.getAt(stops.getLength()-1).getArgb32();
-     Face::p32PRGB32FromARGB32(solid.prgb32.p32, solid.prgb32.p32);
+    Face::p32PRGB32FromARGB32(solid.prgb32.p32, solid.prgb32.p32);
 
     // --------------------------------------------------------------------
     // [Solid]
@@ -115,7 +115,6 @@ struct FOG_NO_EXPORT PGradientLinear
 
     else
     {
-      ctx->_inverse.transformd.instance() = inv;
       ctx->_prepare = prepare_projection;
       ctx->_destroy = PGradientBase::destroy;
 
@@ -319,8 +318,9 @@ _End:
         double pos = off + px / pz;
         if (pos < 0.0) pos = 0.0; 
         if (pos > len) pos = len;
+        int ipos = (int)pos;
 
-        ((uint32_t*)dst)[0] = table[(int)pos];
+        ((uint32_t*)dst)[0] = table[ipos];
         dst += 4;
 
         px += xx;

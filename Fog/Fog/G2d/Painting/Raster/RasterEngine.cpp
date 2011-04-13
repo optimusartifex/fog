@@ -1808,8 +1808,8 @@ err_t FOG_CDECL RasterPainterImpl_::setSourceArgb32(Painter& self, uint32_t argb
 
   engine->sourceType = PATTERN_TYPE_COLOR;
   engine->source.color.initCustom1(Argb32(argb32));
-
   Face::p32PRGB32FromARGB32(engine->ctx.solid.prgb32.p32, argb32);
+
   engine->ctx.pc = (RenderPatternContext*)(sysuint_t)0x1;
   if (engine->ctx.precision == IMAGE_PRECISION_BYTE) return ERR_OK;
 
@@ -1827,8 +1827,8 @@ err_t FOG_CDECL RasterPainterImpl_::setSourceArgb64(Painter& self, const Argb64&
 
   engine->sourceType = PATTERN_TYPE_COLOR;
   engine->source.color.initCustom1(argb64);
-
   Face::p64PRGB64FromARGB64(engine->ctx.solid.prgb64.p64, argb64.p64);
+
   engine->ctx.pc = (RenderPatternContext*)(sysuint_t)0x1;
   if (engine->ctx.precision == IMAGE_PRECISION_WORD) return ERR_OK;
 
@@ -3091,7 +3091,6 @@ void RasterPainterImpl_::setupOps(RasterPainterEngine* engine)
 
   engine->ctx.rasterHints.packed = 0;
   engine->ctx.rasterHints.opacity = engine->ctx.fullOpacityValueU;
-  engine->ctx.rasterHints.opaque = 1;
   engine->ctx.rasterHints.rectToRectTransform = 1;
   engine->ctx.rasterHints.idealLine = 1;
 

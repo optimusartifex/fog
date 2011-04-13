@@ -609,10 +609,10 @@ void Rasterizer8::addBox(const BoxF& box)
     BoxI box24x8(UNINITIALIZED);
 
     // Convert to fixed point.
-    box24x8.x0 = Math::fixed24x8FromFloat(box.x0 + _offsetD.x);
-    box24x8.y0 = Math::fixed24x8FromFloat(box.y0 + _offsetD.y);
-    box24x8.x1 = Math::fixed24x8FromFloat(box.x1 + _offsetD.x);
-    box24x8.y1 = Math::fixed24x8FromFloat(box.y1 + _offsetD.y);
+    box24x8.x0 = Math::fixed24x8FromFloat(box.x0 + _offsetF.x);
+    box24x8.y0 = Math::fixed24x8FromFloat(box.y0 + _offsetF.y);
+    box24x8.x1 = Math::fixed24x8FromFloat(box.x1 + _offsetF.x);
+    box24x8.y1 = Math::fixed24x8FromFloat(box.y1 + _offsetF.y);
     _addBox24x8(box24x8);
     return;
   }
@@ -683,7 +683,7 @@ void Rasterizer8::_addBox24x8(const BoxI& box24x8)
   if (x0 < 0) x0 = 0;
   if (y0 < 0) y0 = 0;
   if (x1 > _size24x8.w) x1 = _size24x8.w;
-  if (y1 > _size24x8.w) y1 = _size24x8.h;
+  if (y1 > _size24x8.h) y1 = _size24x8.h;
   if (x0 >= x1 || y0 >= y1) return;
 
   // Okay, the rectangle is in the clipBox.
@@ -707,17 +707,20 @@ void Rasterizer8::_addBox24x8(const BoxI& box24x8)
   if ((x0 & ~0xFF) == (x1 & ~0xFF)) { horzRight -= horzLeft; horzLeft = horzRight; }
   if ((y0 & ~0xFF) == (y1 & ~0xFF)) { vertBottom -= vertTop; vertTop = vertBottom; }
 
-  shape->coverageT[0] = (horzLeft * vertTop) >> 8;
-  shape->coverageT[1] = (vertTop);
-  shape->coverageT[2] = (horzRight * vertTop) >> 8;
+  vertTop *= _alpha;
+  vertBottom *= _alpha;
 
-  shape->coverageI[0] = horzLeft;
-  shape->coverageI[1] = 0xFF;
-  shape->coverageI[2] = horzRight;
+  shape->coverageT[0] = (horzLeft * vertTop) >> 16;
+  shape->coverageT[1] = (vertTop) >> 8;
+  shape->coverageT[2] = (horzRight * vertTop) >> 16;
 
-  shape->coverageB[0] = (horzLeft * vertBottom) >> 8;
-  shape->coverageB[1] = (vertBottom);
-  shape->coverageB[2] = (horzRight * vertBottom) >> 8;
+  shape->coverageI[0] = (horzLeft * _alpha) >> 8;
+  shape->coverageI[1] = _alpha;
+  shape->coverageI[2] = (horzRight * _alpha) >> 8;
+
+  shape->coverageB[0] = (horzLeft * vertBottom) >> 16;
+  shape->coverageB[1] = (vertBottom) >> 8;
+  shape->coverageB[2] = (horzRight * vertBottom) >> 16;
 
   _shape = RASTERIZER_SHAPE_RECT;
 }

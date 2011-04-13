@@ -25,7 +25,8 @@ struct MyWindow : public Window
   void paintImage(Painter* painter, const PointI& pos, const Image& im, const String& name);
 
   Image i[2];
-  LinearGradientF gradient;
+  LinearGradientF linear;
+  RadialGradientF radial;
 
   float _subx;
   float _suby;
@@ -74,10 +75,11 @@ MyWindow::MyWindow(uint32_t createFlags) :
   //testFrame();
   //setContentRightMargin(0);
 
-  gradient.addStop(ColorStop(0.00f, Argb32(0xFF0000FF)));
-  gradient.addStop(ColorStop(0.33f, Argb32(0xFFFFFF00)));
-  gradient.addStop(ColorStop(0.66f, Argb32(0xFFFF0000)));
-  gradient.addStop(ColorStop(1.00f, Argb32(0xFF000000)));
+  linear.addStop(ColorStop(0.00f, Argb32(0xFF0000FF)));
+  linear.addStop(ColorStop(0.33f, Argb32(0xFFFFFF00)));
+  linear.addStop(ColorStop(0.66f, Argb32(0xFFFF0000)));
+  linear.addStop(ColorStop(1.00f, Argb32(0x00000000)));
+  radial.setStops(linear.getStops());
 }
 
 MyWindow::~MyWindow()
@@ -119,6 +121,8 @@ void MyWindow::onKey(KeyEvent* e)
       case KEY_X: _shearY += 0.05f; update(WIDGET_UPDATE_ALL); break;
 
       case KEY_C: _clip = !_clip; update(WIDGET_UPDATE_ALL); break;
+
+      case KEY_ENTER: update(WIDGET_UPDATE_ALL); break;
     }
   }
 
@@ -141,6 +145,8 @@ void MyWindow::onPaint(PaintEvent* e)
 
   p->translate(PointF(200, 200));
   p->rotate(_rotate);
+  p->skew(PointF(_shearX, _shearY));
+  p->translate(PointF(_subx, _suby));
   //p->translate(PointF(-200, -200));
   //p->skew(PointF(_shearX, _shearY));
 
@@ -150,23 +156,31 @@ void MyWindow::onPaint(PaintEvent* e)
 
   //p->setSource(Argb32(0xFF000000));
 
-  gradient.setStart(PointF(100.0f, 100.0f));
-  gradient.setEnd(PointF(400.0f, 400.0f));
-  gradient.setGradientSpread(GRADIENT_SPREAD_REFLECT);
+  linear.setStart(PointF(100.0f, 100.0f));
+  linear.setEnd(PointF(400.0f, 400.0f));
+  linear.setGradientSpread(GRADIENT_SPREAD_REFLECT);
 
-  TransformF perspective;
-  perspective.setQuadToQuad(PointF(100, 100), PointF(400, 100), PointF(300, 400), PointF(150, 400), BoxF(100, 100, 400, 400));
-  p->transform(perspective);
+  radial.setCenter(PointF(250.0f, 250.0f));
+  radial.setFocal(PointF(250.0f, 670.0f));
+  radial.setRadius(PointF(150.0f, 150.0f));
+  radial.setGradientSpread(GRADIENT_SPREAD_PAD);
 
-  p->setSource(gradient);
+  //TransformF perspective;
+  //perspective.setQuadToQuad(PointF(100, 100), PointF(400, 100), PointF(300, 400), PointF(150, 400), BoxF(100, 100, 400, 400));
+  //p->transform(perspective);
 
+  p->setSource(radial);
   p->clear();
+
   // p->fillCircle(CircleF(PointF(310.0f, 310.0f), 300.0f));
   //p->fillBox(BoxI(50, 50, 450, 450));
-  p->setSource(Argb32(0xFFFFFFFF));
+  
+  p->setCompositingOperator(COMPOSITE_SRC_OVER);
+  p->setSource(Argb32(0x80FFFFFF));
+  //p->drawBox(BoxI(100, 100, 400, 400)); 
 
-  p->setOpacity(0.5f);
-  p->drawBox(BoxI(100, 100, 400, 400)); 
+  //p->setOpacity(0.5f);
+  p->drawBox(BoxF(100.0f, 100.0f, 400.0f, 400.0f));
   //p->fillCircle(CircleF(PointF(200, 200), 100.0f));
 
   /*

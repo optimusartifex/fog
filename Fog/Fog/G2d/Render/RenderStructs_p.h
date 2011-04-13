@@ -170,6 +170,7 @@ struct FOG_NO_EXPORT RenderPatternContext
       case IMAGE_FORMAT_PRGB64: _srcBPP = 8; break;
       case IMAGE_FORMAT_RGB48 : _srcBPP = 6; break;
       case IMAGE_FORMAT_A16   : _srcBPP = 2; break;
+
       default:
         FOG_ASSERT_NOT_REACHED();
     }
@@ -205,9 +206,9 @@ struct FOG_NO_EXPORT RenderPatternContext
   // [Prepare]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void prepare(RenderPatternFetcher* fetcher, int yPosition, int yAdvance, uint32_t mode) const
+  FOG_INLINE void prepare(RenderPatternFetcher* fetcher, int y, int delta, uint32_t mode) const
   {
-    _prepare(this, fetcher, yPosition, yAdvance, mode);
+    _prepare(this, fetcher, y, delta, mode);
   }
 
   // --------------------------------------------------------------------------
@@ -326,29 +327,50 @@ struct FOG_NO_EXPORT RenderPatternContext
       //! @brief Offset.
       double offset;
       double xx, yx;
+      //! @brief 16.16 fixed point representation of @c xx.
       Fixed16x16 xx16x16;
     } simple;
 
     struct _Projection
     {
+      //! @brief Offset.
       double offset;
       double xx, yx, zx;
       double xz, yz, zz;
     } proj;
   };
 
-  struct _GradientRadial
+  union _GradientRadial
   {
-    /*
-    double dx, dy;
-    double r0, fx0, fy0;
-    double r1, fx1, fy1;
-    double scale;
-    */
+    struct _Simple
+    {
+      double dx, dy;
+      double a;
+
+      double fx, fy;
+      double r;
+      /*
+      double dx, dy;
+      double r0, fx0, fy0;
+      double r1, fx1, fy1;
+      double scale;
+      */
+    } simple;
+
+    struct _Projection
+    {
+    } proj;
   };
 
-  struct _GradientConical
+  union _GradientConical
   {
+    struct _Simple
+    {
+    } simple;
+
+    struct _Projection
+    {
+    } proj;
     /*
     double dx, dy;
     double angle;
@@ -362,6 +384,7 @@ struct FOG_NO_EXPORT RenderPatternContext
     union
     {
       _GradientLinear linear;
+      _GradientRadial radial;
     };
   };
 
@@ -452,9 +475,19 @@ struct FOG_NO_EXPORT RenderPatternFetcher
     } proj;
   };
 
+  union _GradientRadial
+  {
+    struct _Simple
+    {
+      double y;
+      double d;
+    } simple;
+  };
+
   struct _GradientPacked
   {
     _GradientLinear linear;
+    _GradientRadial radial;
   };
 
   // --------------------------------------------------------------------------

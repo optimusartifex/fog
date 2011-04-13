@@ -520,9 +520,9 @@ _ClipLoop:
   if (i)
   {
     uint8_t* dstCmd;
-    typename PointT<Number>::T*  dstMark = NULL;
-    typename PointT<Number>::T*  dstPts = NULL;
-    typename PointT<Number>::T*  dstMax = NULL;
+    typename PointT<Number>::T* dstMark = NULL;
+    typename PointT<Number>::T* dstPts = NULL;
+    typename PointT<Number>::T* dstMax = NULL;
 
     Number lx, ly;
     Number ux, uy;

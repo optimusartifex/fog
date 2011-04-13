@@ -177,7 +177,7 @@ FOG_GUI_MAIN()
   else
   {
     // My testing images...
-    fileName = Ascii8("/my/upload/img/svg/tiger.svg");
+    //fileName = Ascii8("/my/upload/img/svg/tiger.svg");
 
     //fileName = Ascii8("/my/upload/img/svg/map-krasnaya-plyana.svg");
     //fileName = Ascii8("/my/upload/img/svg/Map_Multilayer_Scaled.svg");
@@ -185,12 +185,14 @@ FOG_GUI_MAIN()
     //fileName = Ascii8("C:/my/svg/Map_Multilayer_Scaled.svg");
     //fileName = Ascii8("C:/my/svg/froggy.svg");
     //fileName = Ascii8("C:/my/svg/fire_engine.svg");
-    //fileName = Ascii8("C:/my/svg/map-imeretinka.svg");
+    //fileName = Ascii8("C:/my/svg/tommek_Car.svg");
+    fileName = Ascii8("C:/my/svg/TestFOGFeatures.svg");
     //fileName = Ascii8("C:/My/svg/linear3.svg");
 
     //fileName = Ascii8("C:/my/svg/ISO_12233-reschart.svg");
     //fileName = Ascii8("C:/my/svg/lorem_ipsum_compound.svg");
     //fileName = Ascii8("C:/my/svg/tiger.svg");
+    fileName = Ascii8("C:/my/svg/lion.svg");
   }
 
   MyWindow window;

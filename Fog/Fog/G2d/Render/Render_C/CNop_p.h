@@ -21,7 +21,7 @@ namespace Render_C {
 struct FOG_NO_EXPORT CompositeNop
 {
   // ==========================================================================
-  // [CBlit - Full]
+  // [CBlit - Line]
   // ==========================================================================
 
   static void FOG_FASTCALL nop_cblit_line(
@@ -39,7 +39,7 @@ struct FOG_NO_EXPORT CompositeNop
   }
 
   // ==========================================================================
-  // [VBlit - Full]
+  // [VBlit - Line]
   // ==========================================================================
 
   static void FOG_FASTCALL nop_vblit_line(

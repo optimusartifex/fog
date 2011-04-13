@@ -25,14 +25,14 @@ struct FOG_NO_EXPORT Texture
 {
   FOG_INLINE Texture() :
     _fragment(0, 0, 0, 0),
-    _tileType(TILE_TYPE_DEFAULT)
+    _tileType(TEXTURE_TILE_DEFAULT)
   {
   }
 
   FOG_INLINE Texture(const Image& image) :
     _image(image),
     _fragment(0, 0, image.getWidth(), image.getHeight()),
-    _tileType(TILE_TYPE_DEFAULT)
+    _tileType(TEXTURE_TILE_DEFAULT)
   {
   }
 
@@ -54,7 +54,7 @@ struct FOG_NO_EXPORT Texture
   FOG_INLINE Texture(const Image& image, const RectI& fragment) :
     _image(image),
     _fragment(fragment),
-    _tileType(TILE_TYPE_DEFAULT)
+    _tileType(TEXTURE_TILE_DEFAULT)
   {
   }
 
@@ -103,7 +103,7 @@ struct FOG_NO_EXPORT Texture
   {
     _image = image;
     _fragment.set(0, 0, image.getWidth(), image.getHeight());
-    _tileType = TILE_TYPE_DEFAULT;
+    _tileType = TEXTURE_TILE_DEFAULT;
     _clampColor.reset();
   }
 
@@ -127,7 +127,7 @@ struct FOG_NO_EXPORT Texture
   {
     _image = image;
     _fragment = fragment;
-    _tileType = TILE_TYPE_DEFAULT;
+    _tileType = TEXTURE_TILE_DEFAULT;
     _clampColor.reset();
   }
 
@@ -163,7 +163,7 @@ struct FOG_NO_EXPORT Texture
   {
     _image.reset();
     _fragment.reset();
-    _tileType = TILE_TYPE_DEFAULT;
+    _tileType = TEXTURE_TILE_DEFAULT;
     _clampColor.reset();
   }
 
@@ -187,7 +187,7 @@ struct FOG_NO_EXPORT Texture
   RectI _fragment;
   //! @brief Tile mode.
   uint32_t _tileType;
-  //! @brief The background color for @c TILE_TYPE_CLAMP tile-type.
+  //! @brief The background color for @c TEXTURE_TILE_CLAMP tile-type.
   Color _clampColor;
 };
 

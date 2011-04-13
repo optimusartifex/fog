@@ -82,7 +82,6 @@ struct FOG_NO_EXPORT SvgStyleAttribute : public XmlAttribute
   Color _stopColor;
 
   float _opacity;
-
   float _fillOpacity;
   float _strokeOpacity;
   float _stopOpacity;

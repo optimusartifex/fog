@@ -132,6 +132,13 @@ err_t SvgStyledElement::onRender(SvgRenderContext* context) const
       context->getPainter()->transform(a_transform.getTransform());
     }
 
+    // Setup global parameters.
+    if (styleMask & ((1 << SVG_STYLE_OPACITY)))
+    {
+      state.saveGlobal();
+      context->setOpacity(a_style._opacity);
+    }
+
     // Setup fill parameters.
     if (styleMask & ((1 << SVG_STYLE_FILL               ) |
                      (1 << SVG_STYLE_FILL_OPACITY       ) |

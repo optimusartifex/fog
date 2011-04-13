@@ -19,15 +19,20 @@ SvgRenderContext::SvgRenderContext(Painter* painter) :
   _fillStyle.type = SVG_SOURCE_COLOR;
 
   _fillRule = FILL_RULE_EVEN_ODD;
-  _textCursor.reset();
+  _opacity = 1.0f;
 
+  _textCursor.reset();
   setDpi(90.0f);
 
-  painter->setFillRule(FILL_RULE_NON_ZERO);
+  _painter->save();
+  _painter->setCompositingOperator(COMPOSITE_SRC_OVER);
+  _painter->setFillRule(FILL_RULE_EVEN_ODD);
+  _painter->resetStrokeParams();
 }
 
 SvgRenderContext::~SvgRenderContext()
 {
+  _painter->restore();
 }
 
 void SvgRenderContext::setDpi(float dpi)
@@ -63,7 +68,7 @@ bool SvgRenderContext::setupFill()
     case SVG_SOURCE_URI:
       _painter->setSource(_fillStyle.pattern);
 _FillUsed:
-      _painter->setOpacity(_fillStyle.opacity);
+      _painter->setOpacity(_fillStyle.opacity * _opacity);
       _painter->setFillRule(_fillRule);
       return true;
 
@@ -89,7 +94,7 @@ bool SvgRenderContext::setupStroke()
     case SVG_SOURCE_URI:
       _painter->setSource(_strokeStyle.pattern);
 _StrokeUsed:
-      _painter->setOpacity(_strokeStyle.opacity);
+      _painter->setOpacity(_strokeStyle.opacity * _opacity);
       _painter->setStrokeParams(_strokeParams);
       return true;
 

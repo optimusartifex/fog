@@ -119,6 +119,13 @@ struct FOG_API SvgRenderContext
   }
 
   // --------------------------------------------------------------------------
+  // [Global Parameters]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE float getOpacity() { return _opacity; }
+  FOG_INLINE void setOpacity(float opacity) { _opacity = opacity; }
+
+  // --------------------------------------------------------------------------
   // [Fill Parameters]
   // --------------------------------------------------------------------------
 
@@ -352,6 +359,7 @@ struct FOG_API SvgRenderContext
   PathStrokerParamsF _strokeParams;
 
   uint32_t _fillRule;
+  float _opacity;
 
   PointF _textCursor;
   Font _font;
@@ -375,6 +383,7 @@ struct FOG_NO_EXPORT SvgRenderState
 
   FOG_INLINE SvgRenderState(SvgRenderContext* context) :
     _context(context),
+    _savedGlobal(false),
     _savedFill(false),
     _savedStroke(false),
     _savedTransform(false)
@@ -401,6 +410,17 @@ struct FOG_NO_EXPORT SvgRenderState
   FOG_INLINE void restoreTransform()
   {
     _context->getPainter()->setTransform(_transform.instance());
+  }
+
+  FOG_INLINE void saveGlobal()
+  {
+    _opacity = _context->getOpacity();
+    _savedGlobal = true;
+  }
+
+  FOG_INLINE void restoreGlobal()
+  {
+    _context->_opacity = _opacity;
   }
 
   FOG_INLINE void saveFill()
@@ -449,6 +469,9 @@ struct FOG_NO_EXPORT SvgRenderState
   Static<TransformF> _transform;
 
   uint32_t _fillRule;
+  float _opacity;
+
+  bool _savedGlobal;
   bool _savedFill;
   bool _savedStroke;
   bool _savedTransform;

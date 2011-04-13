@@ -19,6 +19,225 @@ namespace Render_C {
 
 struct FOG_NO_EXPORT PGradientRadial
 {
+  // ==========================================================================
+  // [Create]
+  // ==========================================================================
+
+  // TODO: 16-bit rasterizer.
+  template<typename Number>
+  static err_t FOG_FASTCALL create(
+    RenderPatternContext* ctx, uint32_t dstFormat, const BoxI& clipBox,
+    const typename GradientT<Number>::T& gradient,
+    const typename TransformT<Number>::T& tr,
+    uint32_t gradientQuality)
+  {
+    const ColorStopList& stops = gradient.getStops();
+    uint32_t spread = gradient.getGradientSpread();
+
+    FOG_ASSERT(gradient.getGradientType() == GRADIENT_TYPE_RADIAL);
+    FOG_ASSERT(stops.getLength() >= 1);
+    FOG_ASSERT(spread < GRADIENT_SPREAD_COUNT);
+
+    // In case that something fails.
+    RenderSolid solid;
+    solid.prgb32.p32 = stops.getAt(stops.getLength()-1).getArgb32();
+    Face::p32PRGB32FromARGB32(solid.prgb32.p32, solid.prgb32.p32);
+
+    // --------------------------------------------------------------------
+    // [Transform elliptic shape to a circle]
+    // --------------------------------------------------------------------
+
+    TransformD t(tr);
+
+    double r = gradient._pts[2].x;
+
+    double cx = gradient._pts[0].x;
+    double cy = gradient._pts[0].y;
+
+    double fx = gradient._pts[1].x;
+    double fy = gradient._pts[1].y;
+ 
+    bool zeroRadius = Math::isFuzzyZero(gradient._pts[2].x) ||
+                      Math::isFuzzyZero(gradient._pts[2].y);
+
+    if (r != gradient._pts[2].y && !zeroRadius)
+    {
+      double s = gradient._pts[2].y / r;
+
+      t.translate(PointD(cx, cy));
+      t.scale(PointD(1.0, s));
+      t.translate(PointD(-cx, -cy));
+    }
+
+    TransformD inv;
+    bool isInverted = TransformD::invert(inv, t);
+
+    // --------------------------------------------------------------------
+    // [Solid]
+    // --------------------------------------------------------------------
+
+    if (stops.getLength() < 2 || !isInverted || zeroRadius)
+    {
+      return Helpers::p_solid_create(ctx, dstFormat, solid);
+    }
+
+    // --------------------------------------------------------------------
+    // [Prepare]
+    // --------------------------------------------------------------------
+
+    typename PointT<Number>::T origin;
+    typename PointT<Number>::T pd = gradient._pts[1] - gradient._pts[0];
+
+    Number pd_x2y2 = pd.x * pd.x + pd.y * pd.y;
+    Number pd_dist = Math::sqrt(pd_x2y2);
+
+    FOG_RETURN_ON_ERROR(PGradientBase::create(ctx, dstFormat, clipBox, spread, stops));
+    int tableLength = ctx->_d.gradient.base.len;
+    
+    ctx->_inverse.transformd.initCustom1(inv);
+
+    double dx = cx - fx;
+    double dy = cy - fy;
+
+    // --------------------------------------------------------------------
+    // [Simple]
+    // --------------------------------------------------------------------
+
+    if (ctx->_inverse.transformd->getType() <= TRANSFORM_TYPE_AFFINE)
+    {
+      ctx->_prepare = prepare_simple;
+      ctx->_destroy = PGradientBase::destroy;
+
+      ctx->_d.gradient.radial.simple.dx = dx;
+      ctx->_d.gradient.radial.simple.dy = dy;
+      ctx->_d.gradient.radial.simple.a = r*r + dx*dx + dy*dy; 
+      
+      ctx->_d.gradient.radial.simple.fx = fx;
+      ctx->_d.gradient.radial.simple.fy = fy;
+      ctx->_d.gradient.radial.simple.r = r;
+
+      ctx->_fetch = _g2d_render.gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][spread];
+      ctx->_skip = skip_simple;
+    }
+
+    // --------------------------------------------------------------------
+    // [Projection]
+    // --------------------------------------------------------------------
+
+    else
+    {
+    }
+
+    return ERR_OK;
+  }
+
+  // ==========================================================================
+  // [Prepare]
+  // ==========================================================================
+
+  static void FOG_FASTCALL prepare_simple(
+    const RenderPatternContext* ctx, RenderPatternFetcher* fetcher, int _y, int _delta, uint32_t mode)
+  {
+    double y = (double)_y;
+    double d = (double)_delta;
+
+    fetcher->_ctx = ctx;
+    fetcher->_fetch = ctx->_fetch;
+    fetcher->_skip = ctx->_skip;
+    fetcher->_mode = mode;
+
+    fetcher->_d.gradient.radial.simple.y = y;
+    fetcher->_d.gradient.radial.simple.d = d;
+    // TODO:
+  }
+
+  static void FOG_FASTCALL prepare_projection(
+    const RenderPatternContext* ctx, RenderPatternFetcher* fetcher, int _y, int _delta, uint32_t mode)
+  {
+    double y = (double)_y;
+    double d = (double)_delta;
+
+    fetcher->_ctx = ctx;
+    fetcher->_fetch = ctx->_fetch;
+    fetcher->_skip = ctx->_skip;
+    fetcher->_mode = mode;
+
+    // TODO:
+  }
+
+  // ==========================================================================
+  // [Fetch - Pad]
+  // ==========================================================================
+
+  static void FOG_FASTCALL fetch_simple_nearest_pad_prgb32_xrgb32(
+    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+  {
+    const RenderPatternContext* ctx = fetcher->getContext();
+    const uint32_t* table = reinterpret_cast<const uint32_t*>(ctx->_d.gradient.base.table);
+
+    double len = ctx->_d.gradient.base.len;
+
+    P_FETCH_SPAN8_INIT()
+
+    // TODO:
+
+    P_FETCH_SPAN8_BEGIN()
+      P_FETCH_SPAN8_SET_CURRENT()
+
+      double _x = (double)x;
+
+      do {
+        //pos *= len;
+        //if (pos < 0.0) pos = 0.0;
+        //if (pos > len) pos = len;
+        //int ipos = (int)pos;
+
+        //((uint32_t*)dst)[0] = table[ipos];
+        //dst += 4;
+      } while (--w);
+
+      P_FETCH_SPAN8_NEXT()
+    P_FETCH_SPAN8_END()
+
+    // TODO:
+    fetcher->_d.gradient.radial.simple.y += fetcher->_d.gradient.radial.simple.d;
+  }
+
+  // ==========================================================================
+  // [Skip]
+  // ==========================================================================
+
+  static void FOG_FASTCALL skip_simple(
+    RenderPatternFetcher* fetcher, int step)
+  {
+    double s = step;
+
+    // TODO:
+  }
+
+  static void FOG_FASTCALL skip_projection(
+    RenderPatternFetcher* fetcher, int step)
+  {
+    double s = (double)step;
+
+    // TODO:
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #if 0
   // ==========================================================================
   // [Init]

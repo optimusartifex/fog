@@ -3,23 +3,11 @@
 // [License]
 // MIT, See COPYING file in package
 
-#include <Fog/Core/Build.h>
-
+#include <Fog/Core/Config/Config.h>
 #if defined(FOG_FONT_MAC)
 
-#include <Fog/Core/Constants.h>
-#include <Fog/Core/List.h>
-#include <Fog/Core/Lock.h>
-#include <Fog/Core/StringUtil.h>
-#include <Fog/Graphics/Constants.h>
-#include <Fog/Graphics/Font.h>
-#include <Fog/Graphics/Geometry.h>
-#include <Fog/Graphics/Path.h>
-#include <Fog/Graphics/TextLayout.h>
-#include <Fog/Core/TextCodec.h>
-
-#include <Fog/Graphics/FontEngine/MacFontEngine.h>
-
+#include <Fog/G2d/Font/MacFontEngine.h>
+#include <Fog/g2d/Text/TextLayout.h>
 #import <Cocoa/Cocoa.h>
 
 namespace Fog {
@@ -155,22 +143,22 @@ err_t MacFontFace::getOutline(const Char* str, sysuint_t length, PathD& dst)
     NSBezierPathElement el = [path elementAtIndex:i associatedPoints:controlPoints];
     if (el == NSMoveToBezierPathElement)
     {
-      dst.moveTo(controlPoints[0].x, controlPoints[0].y);
+      dst.moveTo(PointD(controlPoints[0].x, controlPoints[0].y));
     }
     else if (el == NSLineToBezierPathElement)
     {
-      dst.lineTo(controlPoints[0].x, controlPoints[0].y);
+      dst.lineTo(PointD(controlPoints[0].x, controlPoints[0].y));
     }
     else if (el == NSCurveToBezierPathElement)
     {
       dst.cubicTo(
-         controlPoints[0].x, controlPoints[0].y,
-         controlPoints[1].x, controlPoints[1].y,
-         controlPoints[2].x, controlPoints[2].y);
+         PointD(controlPoints[0].x, controlPoints[0].y),
+         PointD(controlPoints[1].x, controlPoints[1].y),
+         PointD(controlPoints[2].x, controlPoints[2].y));
     }	
     else if (el == NSClosePathBezierPathElement) 
     {
-	  dst.closePolygon();
+	    dst.close();
     }
   }
 

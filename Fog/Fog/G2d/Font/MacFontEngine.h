@@ -7,13 +7,11 @@
 #ifndef _FOG_GRAPHICS_FONT_MACFONTENGINE_H
 #define _FOG_GRAPHICS_FONT_MACFONTENGINE_H
 
-// [Dependencies]
-#include <Fog/Core/Build.h>
-
+#include <Fog/Core/Config/Config.h>
 #if defined(FOG_FONT_MAC)
 
-#include <Fog/Core/MacUtil.h>
-#include <Fog/Graphics/Font.h>
+#include <Fog/Core/Mac/MacUtil.h>
+#include <Fog/G2d/Font/Font.h>
 
 //! @addtogroup Fog_Graphics_Font
 //! @{

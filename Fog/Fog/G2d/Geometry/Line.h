@@ -145,7 +145,7 @@ struct FOG_NO_EXPORT LineF
 
   static FOG_INLINE uint32_t intersect(PointF& dst, const LineF& a, const LineF& b)
   {
-    _g2d.linef.intersect(&dst, a.p, b.p);
+    return _g2d.linef.intersect(&dst, a.p, b.p);
   }
 
   // --------------------------------------------------------------------------
@@ -268,7 +268,7 @@ struct FOG_NO_EXPORT LineD
 
   static FOG_INLINE uint32_t intersect(PointD& dst, const LineD& a, const LineD& b)
   {
-    _g2d.lined.intersect(&dst, a.p, b.p);
+    return _g2d.lined.intersect(&dst, a.p, b.p);
   }
 
   // --------------------------------------------------------------------------

@@ -7,12 +7,11 @@
 #ifndef _FOG_CORE_MACUTIL_H
 #define _FOG_CORE_MACUTIL_H
 
-#include <Fog/Core/Build.h>
-
+#include <Fog/Core/Config/Config.h>
 #if defined(FOG_OS_MAC)
 
 // [Dependencies]
-#include <Fog/Core/String.h>
+#include <Fog/Core/Tools/String.h>
 
 #ifdef __OBJC__
 @class NSAutoreleasePool;

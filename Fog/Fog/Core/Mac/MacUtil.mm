@@ -3,14 +3,12 @@
 // [License]
 // MIT, See COPYING file in package
 
-#include <Fog/Core/Build.h>
-
+#include <Fog/Core/Config/Config.h>
 #if defined(FOG_OS_MAC)
 
-#include <Fog/Core/MacUtil.h>
-#include <Fog/Core/String.h>
-#include <Fog/Core/ByteArray.h>
-#include <Fog/Core/TextCodec.h>
+#include <Fog/Core/Mac/MacUtil.h>
+#include <Fog/Core/Tools/ByteArray.h>
+#include <Fog/Core/Tools/TextCodec.h>
 
 #import <Cocoa/Cocoa.h>
 

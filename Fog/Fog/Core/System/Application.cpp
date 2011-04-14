@@ -346,20 +346,19 @@ List<String> Application::getApplicationArguments()
 #if defined(FOG_OS_WINDOWS)
 err_t Application::getWorkingDirectory(String& dst)
 {
-  err_t err;
+  FOG_RETURN_ON_ERROR(dst.prepare(256));
 
-  dst.prepare(256);
   for (;;)
   {
-    DWORD size = GetCurrentDirectoryW(dst.getCapacity()+1, reinterpret_cast<wchar_t*>(dst.getDataX()));
+    DWORD size = GetCurrentDirectoryW(dst.getCapacity() + 1, reinterpret_cast<wchar_t*>(dst.getDataX()));
     if (size >= dst.getCapacity())
     {
-      if ((err = dst.reserve(size))) return err;
+      FOG_RETURN_ON_ERROR(dst.reserve(size));
       continue;
     }
     else
     {
-      dst.resize(size);
+      FOG_RETURN_ON_ERROR(dst.resize(size));
       return dst.slashesToPosix();
     }
   }

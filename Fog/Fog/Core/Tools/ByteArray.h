@@ -221,7 +221,7 @@ struct FOG_API ByteArray
   {
     FOG_ASSERT_X(isDetached(), 
       "Fog::ByteArray::finishDataX() - Called on non-detached object.");
-    FOG_ASSERT_X(end < _d->data + _d->capacity,
+    FOG_ASSERT_X(end <= _d->data + _d->capacity,
       "Fog::ByteArray::finishDataX() - Buffer overflow.");
 
     *end = 0;

@@ -486,10 +486,13 @@ err_t FileSystem::normalizePath(String& dst, const String& _path)
   // - all "/../" eats previous directory
 
   sysuint_t pathLength = path.getLength();
-  bool prevSlash = false;
+  if (pathLength == 0)
+  {
+    dst.clear();
+    return ERR_OK;
+  }
 
-  err_t err;
-  if ( (err = dst.resize(pathLength)) ) return err;
+  FOG_RETURN_ON_ERROR(dst.resize(pathLength));
 
   Char* dstBeg = dst.getDataX();
   Char* dstCur = dstBeg;
@@ -498,6 +501,7 @@ err_t FileSystem::normalizePath(String& dst, const String& _path)
   const Char* pathEnd = pathCur + pathLength;
 
   Char c;
+  bool prevSlash = false;
 
   // Handle Windows absolute path "X:\"
 #if defined(FOG_OS_WINDOWS)
@@ -617,7 +621,9 @@ err_t FileSystem::toAbsolutePath(String& dst, const String& base, const String& 
     return FileSystem::normalizePath(dst, dst);
   }
   else
+  {
     return FileSystem::normalizePath(dst, path);
+  }
 }
 
 static err_t _joinPath(String& dst, const String& base, const String& part)

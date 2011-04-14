@@ -110,12 +110,29 @@ void Debug::failFunc(const char* className, const char* methodName, const char* 
 // [Fog::Debug - Assert]
 // ============================================================================
 
+#if defined(FOG_OS_WINDOWS)
+// When a FogApp is build using WIN32, there is no standard input/output. So
+// we can show a message-box before the application ends. This can help to 
+// solve some problems.
+static void WinAssertionFailure(const char* fileName, int line, const char* msg)
+{
+  char buffer[1024];
+
+  _snprintf(buffer, 1024, "%s, line %d\n\n%s\n", fileName, line, msg ? msg : "");
+  MessageBoxA(NULL, buffer, "ASSERTION FAILURE!", MB_OK);
+}
+#endif // FOG_OS_WINDOWS
+
 void Debug::assertMessage(const char* fileName, int line, const char* msg)
 {
   FILE* file = Debug_getFile();
 
   fprintf(file, "*** ASSERTION FAILURE *** (%s, line %d)\n", fileName, line);
   fputs(msg, file);
+
+#if defined(FOG_OS_WINDOWS)
+  WinAssertionFailure(fileName, line, msg);
+#endif // FOG_OS_WINDOWS
 
   exit(-1);
 }
@@ -129,6 +146,14 @@ void Debug::assertFormat(const char* fileName, int line, const char* fmt, ...)
     fprintf(file, "*** ASSERTION FAILURE *** (%s, line %d)\n", fileName, line);
     vfprintf(file, fmt, ap);
   va_end(ap);
+
+#if defined(FOG_OS_WINDOWS)
+  char buffer[1024];
+  va_start(ap, fmt);
+    _vsnprintf(buffer, 1024, fmt, ap);
+  va_end(ap);
+  WinAssertionFailure(fileName, line, buffer);
+#endif // FOG_OS_WINDOWS
 
   exit(-1);
 }

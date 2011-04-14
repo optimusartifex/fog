@@ -82,9 +82,6 @@ struct FOG_NO_EXPORT PGradientLinear
 
     if (tr.getType() <= TRANSFORM_TYPE_AFFINE)
     {
-      ctx->_prepare = prepare_simple;
-      ctx->_destroy = PGradientBase::destroy;
-
       // Negate and adjust the origin by 0.5 to move it to the center of
       // the pixel.
       tr.mapPoint(origin, gradient._pts[0]);
@@ -105,6 +102,8 @@ struct FOG_NO_EXPORT PGradientLinear
       ctx->_d.gradient.linear.simple.yx = dy;
       ctx->_d.gradient.linear.simple.xx16x16 = Math::fixed16x16FromFloat(dx);
 
+      ctx->_prepare = prepare_simple;
+      ctx->_destroy = PGradientBase::destroy;
       ctx->_fetch = _g2d_render.gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][spread];
       ctx->_skip = skip_simple;
     }
@@ -115,9 +114,6 @@ struct FOG_NO_EXPORT PGradientLinear
 
     else
     {
-      ctx->_prepare = prepare_projection;
-      ctx->_destroy = PGradientBase::destroy;
-
       double ax = (double)(pd.x);
       double ay = (double)(pd.y);
 
@@ -134,6 +130,8 @@ struct FOG_NO_EXPORT PGradientLinear
       ctx->_d.gradient.linear.proj.yz = inv._12;
       ctx->_d.gradient.linear.proj.zz = inv._22;
 
+      ctx->_prepare = prepare_projection;
+      ctx->_destroy = PGradientBase::destroy;
       ctx->_fetch = _g2d_render.gradient.linear.fetch_projection_nearest[IMAGE_FORMAT_PRGB32][spread];
       ctx->_skip = skip_projection;
     }
@@ -178,7 +176,7 @@ struct FOG_NO_EXPORT PGradientLinear
   }
 
   // ==========================================================================
-  // [Fetch - Pad]
+  // [Fetch - Simple]
   // ==========================================================================
 
   static void FOG_FASTCALL fetch_simple_nearest_pad_prgb32_xrgb32(
@@ -294,50 +292,6 @@ _End:
     fetcher->_d.gradient.linear.simple.pt += fetcher->_d.gradient.linear.simple.dt;
   }
 
-  static void FOG_FASTCALL fetch_projection_nearest_pad_prgb32_xrgb32(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
-  {
-    const RenderPatternContext* ctx = fetcher->getContext();
-    const uint32_t* table = reinterpret_cast<const uint32_t*>(ctx->_d.gradient.base.table);
-
-    P_FETCH_SPAN8_INIT()
-
-    double off = ctx->_d.gradient.linear.proj.offset;
-    double len = ctx->_d.gradient.base.len;
-    double xx = ctx->_d.gradient.linear.proj.xx;
-    double xz = ctx->_d.gradient.linear.proj.xz;
-
-    P_FETCH_SPAN8_BEGIN()
-      P_FETCH_SPAN8_SET_CURRENT()
-
-      double _x = (double)x;
-      double px = fetcher->_d.gradient.linear.proj.pt + _x * xx;
-      double pz = fetcher->_d.gradient.linear.proj.pz + _x * xz;
-
-      do {
-        double pos = off + px / pz;
-        if (pos < 0.0) pos = 0.0; 
-        if (pos > len) pos = len;
-        int ipos = (int)pos;
-
-        ((uint32_t*)dst)[0] = table[ipos];
-        dst += 4;
-
-        px += xx;
-        pz += xz;
-      } while (--w);
-
-      P_FETCH_SPAN8_NEXT()
-    P_FETCH_SPAN8_END()
-
-    fetcher->_d.gradient.linear.proj.pt += fetcher->_d.gradient.linear.proj.dt;
-    fetcher->_d.gradient.linear.proj.pz += fetcher->_d.gradient.linear.proj.dz;
-  }
-
-  // ==========================================================================
-  // [Fetch - Repeat]
-  // ==========================================================================
-
   static void FOG_FASTCALL fetch_simple_nearest_repeat_prgb32_xrgb32(
     RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
   {
@@ -421,49 +375,6 @@ _End:
 
     fetcher->_d.gradient.linear.simple.pt += fetcher->_d.gradient.linear.simple.dt;
   }
-
-  static void FOG_FASTCALL fetch_projection_nearest_repeat_prgb32_xrgb32(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
-  {
-    const RenderPatternContext* ctx = fetcher->getContext();
-    const uint32_t* table = reinterpret_cast<const uint32_t*>(ctx->_d.gradient.base.table);
-    
-    int lenMask = ctx->_d.gradient.base.len - 1;
-
-    P_FETCH_SPAN8_INIT()
-
-    double off = ctx->_d.gradient.linear.proj.offset;
-    double xx = ctx->_d.gradient.linear.proj.xx;
-    double xz = ctx->_d.gradient.linear.proj.xz;
-
-    P_FETCH_SPAN8_BEGIN()
-      P_FETCH_SPAN8_SET_CURRENT()
-
-      double _x = (double)x;
-      double px = fetcher->_d.gradient.linear.proj.pt + _x * xx;
-      double pz = fetcher->_d.gradient.linear.proj.pz + _x * xz;
-
-      do {
-        double pos = off + px / pz;
-        int ipos = (int)pos & lenMask;
-
-        ((uint32_t*)dst)[0] = table[ipos];
-        dst += 4;
-
-        px += xx;
-        pz += xz;
-      } while (--w);
-
-      P_FETCH_SPAN8_NEXT()
-    P_FETCH_SPAN8_END()
-
-    fetcher->_d.gradient.linear.proj.pt += fetcher->_d.gradient.linear.proj.dt;
-    fetcher->_d.gradient.linear.proj.pz += fetcher->_d.gradient.linear.proj.dz;
-  }
-
-  // ==========================================================================
-  // [Fetch - Reflect]
-  // ==========================================================================
 
   static void FOG_FASTCALL fetch_simple_nearest_reflect_prgb32_xrgb32(
     RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
@@ -557,14 +468,16 @@ _Backward:
     fetcher->_d.gradient.linear.simple.pt += fetcher->_d.gradient.linear.simple.dt;
   }
 
-  static void FOG_FASTCALL fetch_projection_nearest_reflect_prgb32_xrgb32(
+  // ==========================================================================
+  // [Fetch - Projection]
+  // ==========================================================================
+
+  template<typename Fetch>
+  static void FOG_FASTCALL fetch_projection_nearest_template_prgb32_xrgb32(
     RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
-    const uint32_t* table = reinterpret_cast<const uint32_t*>(ctx->_d.gradient.base.table);
-
-    int len = ctx->_d.gradient.base.len;
-    int lenMask2 = (len * 2) - 1;
+    Fetch f(ctx->_d.gradient.base.table, ctx->_d.gradient.base.len);
 
     P_FETCH_SPAN8_INIT()
 
@@ -580,11 +493,7 @@ _Backward:
       double pz = fetcher->_d.gradient.linear.proj.pz + _x * xz;
 
       do {
-        double pos = off + px / pz;
-        int ipos = (int)pos & lenMask2;
-        if (ipos > len) ipos ^= lenMask2;
-
-        ((uint32_t*)dst)[0] = table[ipos];
+        ((uint32_t*)dst)[0] = f.at_d(off + px / pz);
         dst += 4;
 
         px += xx;
@@ -605,7 +514,7 @@ _Backward:
   static void FOG_FASTCALL skip_simple(
     RenderPatternFetcher* fetcher, int step)
   {
-    double s = step;
+    double s = (double)step;
 
     fetcher->_d.gradient.linear.simple.pt += fetcher->_d.gradient.linear.simple.dt * s;
   }

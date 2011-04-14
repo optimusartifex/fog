@@ -14,6 +14,7 @@
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Geometry/PathStroker.h>
 #include <Fog/G2d/Geometry/Round.h>
+#include <Fog/G2d/Font/Font.h>
 #include <Fog/G2d/Painting/Painter.h>
 #include <Fog/G2d/Source/Pattern.h>
 #include <Fog/Svg/Global/Constants.h>
@@ -384,6 +385,7 @@ struct FOG_NO_EXPORT SvgRenderState
   FOG_INLINE SvgRenderState(SvgRenderContext* context) :
     _context(context),
     _savedGlobal(false),
+    _savedFont(false),
     _savedFill(false),
     _savedStroke(false),
     _savedTransform(false)
@@ -392,6 +394,8 @@ struct FOG_NO_EXPORT SvgRenderState
 
   FOG_INLINE ~SvgRenderState()
   {
+    if (_savedGlobal   ) restoreGlobal();;
+    if (_savedFont     ) restoreFont();;
     if (_savedFill     ) restoreFill();;
     if (_savedStroke   ) restoreStroke();;
     if (_savedTransform) restoreTransform();;
@@ -421,6 +425,18 @@ struct FOG_NO_EXPORT SvgRenderState
   FOG_INLINE void restoreGlobal()
   {
     _context->_opacity = _opacity;
+  }
+
+  FOG_INLINE void saveFont()
+  {
+    _font.initCustom1(_context->_font);
+    _savedFont = true;
+  }
+
+  FOG_INLINE void restoreFont()
+  {
+    _context->_font = _font.instance();
+    _font.destroy();
   }
 
   FOG_INLINE void saveFill()
@@ -468,10 +484,13 @@ struct FOG_NO_EXPORT SvgRenderState
   Static<PathStrokerParamsF> _strokeParams;
   Static<TransformF> _transform;
 
+  Static<Font> _font;
+
   uint32_t _fillRule;
   float _opacity;
 
   bool _savedGlobal;
+  bool _savedFont;
   bool _savedFill;
   bool _savedStroke;
   bool _savedTransform;

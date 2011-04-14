@@ -267,6 +267,78 @@ struct FOG_NO_EXPORT PGradientBase
       return (maxDiff < 0.02f) ? 1024 : 512;
     }
   }
+
+  // ==========================================================================
+  // [Fetchers]
+  // ==========================================================================
+
+  struct FOG_NO_EXPORT FetchPad_PRGB32
+  {
+    FOG_INLINE FetchPad_PRGB32(const void* table, int len) :
+      _table(reinterpret_cast<const uint32_t*>(table)),
+      _len(len),
+      _len_d(len)
+    {
+    }
+
+    FOG_INLINE uint32_t at_d(double d)
+    {
+      if (d < 0.0)
+        d = 0.0;
+      else if (d > _len_d)
+        d = _len_d;
+
+      uint i = (int)d;
+      return _table[i];
+    }
+
+    const uint32_t* _table;
+    int _len;
+    double _len_d;
+  };
+
+  struct FOG_NO_EXPORT FetchRepeat_PRGB32
+  {
+    FOG_INLINE FetchRepeat_PRGB32(const void* table, int len) :
+      _table(reinterpret_cast<const uint32_t*>(table)),
+      _lenMask(len - 1)
+    {
+    }
+
+    FOG_INLINE uint32_t at_d(double d)
+    {
+      uint i = (int)d;
+
+      i &= _lenMask;
+      return _table[i];
+    }
+
+    const uint32_t* _table;
+    uint _lenMask;
+  };
+
+  struct FOG_NO_EXPORT FetchReflect_PRGB32
+  {
+    FOG_INLINE FetchReflect_PRGB32(const void* table, int len) :
+      _table(reinterpret_cast<const uint32_t*>(table)),
+      _len(len),
+      _lenMask2(len * 2 - 1)
+    {
+    }
+
+    FOG_INLINE uint32_t at_d(double d)
+    {
+      uint i = (int)d;
+
+      i &= _lenMask2;
+      if (i > (uint)_len) i ^= _lenMask2;
+      return _table[i];
+    }
+
+    const uint32_t* _table;
+    int _len;
+    uint _lenMask2;
+  };
 };
 
 } // Render_C namespace

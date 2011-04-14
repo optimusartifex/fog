@@ -336,14 +336,6 @@ err_t parsePoints(PathF& dst, const String& str, bool closePath)
     err = StringUtil::atof(strCur, (sysuint_t)(strEnd - strCur), &coords[position], Char('.'), &numEnd);
     if (FOG_IS_ERROR(err)) goto _Bail;
 
-    strCur += numEnd;
-    if (strCur == strEnd) break;
-
-    if (*strCur == Char(','))
-    {
-      if (++strCur == strEnd) break;
-    }
-
     if (++position == 2)
     {
       if (first)
@@ -358,6 +350,14 @@ err_t parsePoints(PathF& dst, const String& str, bool closePath)
         if (FOG_IS_ERROR(err)) goto _Bail;
       }
       position = 0;
+    }
+
+    strCur += numEnd;
+    if (strCur == strEnd) break;
+
+    if (*strCur == Char(','))
+    {
+      if (++strCur == strEnd) break;
     }
   }
 

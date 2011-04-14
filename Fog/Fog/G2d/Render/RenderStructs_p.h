@@ -344,17 +344,23 @@ struct FOG_NO_EXPORT RenderPatternContext
   {
     struct _Simple
     {
-      double dx, dy;
-      double a;
-
       double fx, fy;
-      double r;
-      /*
-      double dx, dy;
-      double r0, fx0, fy0;
-      double r1, fx1, fy1;
+
+      double xx, yx;
+      double xy, yy;
+      double tx, ty;
+      
+      double r2mfxfx;
+      double r2mfyfy;
+      double _2_fxfy;
+
+      double b_d;
+      double d_d;
+      double d_d_x;
+      double d_d_y;
+      double d_d_d;
+
       double scale;
-      */
     } simple;
 
     struct _Projection
@@ -479,8 +485,8 @@ struct FOG_NO_EXPORT RenderPatternFetcher
   {
     struct _Simple
     {
-      double y;
-      double d;
+      double px, py;
+      double dx, dy;
     } simple;
   };
 

@@ -148,7 +148,6 @@ struct FOG_NO_EXPORT FontOptions
   // [Internal]
   // --------------------------------------------------------------------------
 
-protected:
   //! @brief Called by constructor, clears data where are unused fields.
   FOG_INLINE void _created()
   {

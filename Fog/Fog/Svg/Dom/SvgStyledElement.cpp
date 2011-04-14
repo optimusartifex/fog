@@ -139,6 +139,23 @@ err_t SvgStyledElement::onRender(SvgRenderContext* context) const
       context->setOpacity(a_style._opacity);
     }
 
+    // Setup font parameters.
+    if (styleMask & ((1 << SVG_STYLE_FONT_FAMILY) |
+                     (1 << SVG_STYLE_FONT_SIZE  )))
+    {
+      state.saveFont();
+
+      if (styleMask & (1 << SVG_STYLE_FONT_FAMILY))
+      {
+        context->_font.setFamily(a_style._fontFamily);
+      }
+
+      if (styleMask & (1 << SVG_STYLE_FONT_SIZE))
+      {
+        context->_font.setSize(a_style._fontSize.value);
+      }
+    }
+
     // Setup fill parameters.
     if (styleMask & ((1 << SVG_STYLE_FILL               ) |
                      (1 << SVG_STYLE_FILL_OPACITY       ) |

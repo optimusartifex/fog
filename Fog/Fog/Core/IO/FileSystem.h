@@ -84,7 +84,7 @@ enum FILE_FLAGS
 };
 
 #if defined(FOG_OS_POSIX)
-static int stat(const String& fileName, struct stat* s);
+FOG_API int stat(const String& fileName, struct stat* s);
 #endif // FOG_OS_POSIX
 
 FOG_API uint32_t testFile(const String& fileName, uint32_t flags);

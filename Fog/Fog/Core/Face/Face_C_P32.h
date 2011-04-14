@@ -3025,10 +3025,11 @@ static FOG_INLINE void p32Lerpus255PBW_SBW_2x(
 static FOG_INLINE void p32Lerpus256PBW_SBW(
   p32& dst0, const p32& x0, const p32& y0, const p32& z0, const p32& w0)
 {
+  // TODO: Unused variable
   uint32_t t0 = ((x0 * z0) >> 8) & 0x00FF00FFU;
   uint32_t t1 = ((y0 * w0) >> 8) & 0x00FF00FFU;
 
-  p32Addus255PBW(dst0, dst0, t0);
+  p32Addus255PBW(dst0, t0, t1);
 }
 
 //! @verbatim

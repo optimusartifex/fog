@@ -90,11 +90,11 @@ void AnimationDispatcher::onTimer(TimerEvent* e)
 // ============================================================================
 
 Animation::Animation(uint32_t t) : 
-  _type(t),
+  _position(0.0f),
   _step(10),
   _duration(TimeDelta::fromMilliseconds(200)),
-  _position(0.0f),
-  _direction(ANIMATION_FORWARD)
+  _direction(ANIMATION_FORWARD),
+  _type(t)
 {
 }
 

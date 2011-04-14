@@ -8,5 +8,4 @@
 #endif // _FOG_CORE_CONFIG_CONFIG_H
 
 // [GCC, MSVC, BORLAND]
-#pragma pack(push)
-#pragma pack(1)
+#pragma pack(push, 1)

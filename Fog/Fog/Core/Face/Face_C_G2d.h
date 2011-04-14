@@ -1073,15 +1073,16 @@ static FOG_INLINE void p32RGB16_000_565_MulDiv_SBW_8b(p32& dst0, const p32& x0, 
 
 static FOG_INLINE void p32RGB16_565_565_MulDiv_SBW_6b(p32& dst0, const p32& x0, const p32& u0_6b)
 {
+  // TODO: Unused variable
   uint32_t t0 = (x0 & 0x001F001FU);       // 0000000000011111 0000000000011111.
   uint32_t t1 = (x0 & 0x07E007E0U) >> 5;  // 0000011111100000 0000011111100000.
   uint32_t t2 = (x0 & 0xF800F800U) >> 6;  // 1111100000000000 1111100000000000.
 
   t0 = ((t0 * u0_6b) >> 6) & 0x001F001FU; // 0000000000011111 0000000000011111.
-  t0 = ((t0 * u0_6b) >> 1) & 0x07E007E0U; // 0000011111100000 0000011111100000.
-  t1 = ((t1 * u0_6b)     ) & 0xF800F800U; // 1111100000000000 1111100000000000.
+  t1 = ((t1 * u0_6b) >> 1) & 0x07E007E0U; // 0000011111100000 0000011111100000.
+  t2 = ((t2 * u0_6b)     ) & 0xF800F800U; // 1111100000000000 1111100000000000.
 
-  dst0 = _FOG_FACE_COMBINE_2(t0, t1);
+  dst0 = _FOG_FACE_COMBINE_3(t0, t1, t2);
 }
 
 static FOG_INLINE void p32RGB16_565_565_MulDiv_SBW_8b(p32& dst0, const p32& x0, const p32& u0_8b)

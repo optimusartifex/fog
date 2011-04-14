@@ -246,7 +246,6 @@ static int FOG_CDECL _G2d_CubicCurveT_simplifyForProcessing(const typename Point
 
     // One inflection point, subdivide at t[0].
     case 1:
-_OneInflection:
       if (t[0] <= Number(0.0) || t[0] >= Number(1.0)) goto _NoInflection;
 
       CubicCurveT<Number>::T::splitAt(self, pts, pts + 3, t[0]);

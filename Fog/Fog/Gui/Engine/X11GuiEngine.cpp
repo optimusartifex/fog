@@ -933,6 +933,7 @@ XID X11GuiEngine::getWmClientLeader()
     XA_WINDOW, 32, PropModeReplace, (unsigned char* )&clientLeader, 1);
 
   _wmClientLeader = clientLeader;
+  return _wmClientLeader;
 }
 
 // ============================================================================

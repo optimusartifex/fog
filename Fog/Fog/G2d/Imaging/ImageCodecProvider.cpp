@@ -262,7 +262,6 @@ static err_t createImageCodecByName(uint32_t codecType, const String& name, Imag
       : ERR_IMAGE_NO_ENCODER)
     : provider->createCodec(codecType, codec);
 
-end:
   return err;
 }
 
@@ -291,7 +290,6 @@ static err_t createImageCodecByExtension(uint32_t codecType, const String& exten
       : ERR_IMAGE_NO_ENCODER)
     : provider->createCodec(codecType, codec);
 
-end:
   return err;
 }
 

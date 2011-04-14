@@ -249,7 +249,9 @@ _FOG_MATH_DECLARE_VARIANT_TEMPLATE(getNInf)
 
 static FOG_INLINE bool isFinite(float x)
 {
-#if defined (FOG_CC_MSC)
+#if defined (FOG_CC_GNU)
+  return __builtin_finitef(x);
+#elif defined (FOG_CC_MSC)
   return _finite(x);
 #else
   return finitef(x);
@@ -267,7 +269,9 @@ static FOG_INLINE bool isFinite(double x)
 
 static FOG_INLINE bool isInfinite(float x)
 {
-#if defined (FOG_CC_MSC)
+#if defined (FOG_CC_GNU)
+  return __builtin_isinff(x);
+#elif defined (FOG_CC_MSC)
   return (_fpclass(x) & (_FPCLASS_NINF | _FPCLASS_PINF)) != 0;
 #else
   return isinff(x);
@@ -285,7 +289,9 @@ static FOG_INLINE bool isInfinite(double x)
 
 static FOG_INLINE bool isNaN(float x)
 {
-#if defined (FOG_CC_MSC)
+#if defined (FOG_CC_GNU)
+  return __builtin_isnanf(x);
+#elif defined (FOG_CC_MSC)
   return _isnan(x);
 #else
   return isnanf(x);

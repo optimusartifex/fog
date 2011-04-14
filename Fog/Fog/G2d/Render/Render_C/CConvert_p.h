@@ -1431,6 +1431,7 @@ struct FOG_NO_EXPORT CConvert
   static void FOG_FASTCALL argb64_native_from_argb16_4444(
     uint8_t* dst, const uint8_t* src, int w, const RenderClosure* closure)
   {
+    // TODO: UNUSED.
     Face::p32 fill = (uint32_t)reinterpret_cast<const RenderConverterPass*>(closure->data)->fill;
 
     do {
@@ -1448,6 +1449,7 @@ struct FOG_NO_EXPORT CConvert
   static void FOG_FASTCALL argb64_native_from_argb16_4444_bs(
     uint8_t* dst, const uint8_t* src, int w, const RenderClosure* closure)
   {
+    // TODO: Unused
     Face::p32 fill = (uint32_t)reinterpret_cast<const RenderConverterPass*>(closure->data)->fill;
 
     do {
@@ -1581,8 +1583,6 @@ struct FOG_NO_EXPORT CConvert
   static void FOG_FASTCALL argb64_native_from_argb32_8888_bs(
     uint8_t* dst, const uint8_t* src, int w, const RenderClosure* closure)
   {
-    const RenderConverterPass* d = reinterpret_cast<const RenderConverterPass*>(closure->data);
-
     do {
       Face::p32 pix0p_10, pix0p_32;
 
@@ -1714,8 +1714,6 @@ struct FOG_NO_EXPORT CConvert
   static void FOG_FASTCALL argb64_native_from_argb64_16161616_bs(
     uint8_t* dst, const uint8_t* src, int w, const RenderClosure* closure)
   {
-    const RenderConverterPass* d = reinterpret_cast<const RenderConverterPass*>(closure->data);
-
     do {
       Face::p64 pix0p;
 

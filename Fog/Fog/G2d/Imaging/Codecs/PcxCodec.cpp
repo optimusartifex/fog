@@ -901,7 +901,6 @@ err_t PcxEncoder::writeImage(const Image& image)
     }
   }
 
-_End:
   updateProgress(1.0f);
   return err;
 

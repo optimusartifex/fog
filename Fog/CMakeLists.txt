@@ -83,7 +83,7 @@ If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Winline")
 
   # Disable warnings.
-  Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-enum-compare")
+  # Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-enum-compare")
 
   # TODO: Detect if GCC supports it:
   #   Use link-time-optimization.
@@ -180,7 +180,7 @@ EndIf(UNIX)
 
 # TODO: Detect features.
 Set(FOG_OPTIMIZE_MMX   TRUE)
-Set(FOG_OPTIMIZE_3DNOW TRUE)
+# Set(FOG_OPTIMIZE_3DNOW TRUE)
 
 Set(FOG_OPTIMIZE_SSE   TRUE)
 Set(FOG_OPTIMIZE_SSE2  TRUE)

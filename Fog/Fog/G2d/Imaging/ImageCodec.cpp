@@ -26,16 +26,16 @@ namespace Fog {
 
 ImageCodec::ImageCodec(ImageCodecProvider* provider) :
   _provider(provider),
-  _streamType(provider->getStreamType()),
   _codecType(IMAGE_CODEC_NONE),
+  _streamType(provider->getStreamType()),
   _attachedOffset(FOG_UINT64_C(0)),
   _stream(),
   _size(0, 0),
   _depth(0),
   _planes(0),
-  _progress(0.0f),
   _actualFrame(0),
-  _framesCount(0)
+  _framesCount(0),
+  _progress(0.0f)
 {
 }
 

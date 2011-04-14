@@ -492,7 +492,7 @@ err_t BmpDecoder::readImage(Image& image)
       uint8_t* bufferCur;
       uint32_t b;
 
-      for (y = 0; y != _size.h; y++)
+      for (y = 0; y != (uint)_size.h; y++)
       {
         if (_stream.read(buffer, bmpStride) != bmpStride) goto _Truncated;
         bufferCur = buffer;
@@ -630,7 +630,7 @@ _Rle4Start:
     uint8_t* bufferCur;
     uint8_t b;
 
-    for (y = 0; y != _size.h; y++)
+    for (y = 0; y != (uint)_size.h; y++)
     {
       if (_stream.read(buffer, bmpStride) != bmpStride) goto _Truncated;
       bufferCur = buffer;
@@ -883,7 +883,6 @@ err_t BmpEncoder::writeImage(const Image& image)
     case IMAGE_FORMAT_PRGB64:
     case IMAGE_FORMAT_A8:
     case IMAGE_FORMAT_A16:
-_SaveAlpha:
     {
       bpl = (uint32_t)w * 4;
       skip = 0;
@@ -979,7 +978,7 @@ _SaveAlpha:
 
     if (converter.isCopy())
     {
-      for (uint y = 0; y != h; y++, scanline += stride)
+      for (uint y = 0; y != (uint)h; y++, scanline += stride)
       {
         if (_stream.write(scanline, bpl) != bpl) goto _Fail;
         if (skip && _stream.write(zeroBytes, skip) != skip) goto _Fail;
@@ -998,7 +997,7 @@ _SaveAlpha:
       memset(buffer + bpl, 0, skip);
       bpl += skip;
 
-      for (uint y = 0; y != h; y++, scanline += stride, ditherOrigin.y--)
+      for (uint y = 0; y != (uint)h; y++, scanline += stride, ditherOrigin.y--)
       {
         converter.blitSpan(buffer, scanline, w, ditherOrigin);
         if (_stream.write(buffer, bpl) != bpl) goto _Fail;

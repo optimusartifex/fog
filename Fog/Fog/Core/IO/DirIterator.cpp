@@ -190,15 +190,15 @@ int64_t DirIterator::tell()
 
 DirIterator::DirIterator() :
   _handle(NULL),
-  _skipDots(true),
-  _pathCacheBaseLength(0)
+  _pathCacheBaseLength(0),
+  _skipDots(true)
 {
 }
 
 DirIterator::DirIterator(const String& path) :
   _handle(NULL),
-  _skipDots(true),
-  _pathCacheBaseLength(0)
+  _pathCacheBaseLength(0),
+  _skipDots(true)
 {
   open(path);
 }

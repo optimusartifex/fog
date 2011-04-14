@@ -277,7 +277,6 @@ _FetchBackwardSkip:
         c0 = table[(uint)(pos >> 16)];
     }
 
-_FetchSolidBegin:
     P_FETCH_SPAN8_BEGIN()
       P_FETCH_SPAN8_SET_CURRENT()
       do {

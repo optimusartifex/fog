@@ -44,7 +44,6 @@ struct FOG_NO_EXPORT PGradientBase
     Face::p32 c0 = stops[0].getArgb32();
     Face::p32 c1;
 
-    uint32_t* dst = reinterpret_cast<uint32_t*>(_dst);
     float wf = (float)(_w << 8);
 
     sysuint_t pos;

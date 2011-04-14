@@ -40,11 +40,13 @@ struct DirIterator;
 //! @brief DirIterator entry.
 struct FOG_API DirEntry
 {
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
   DirEntry();
   DirEntry(const DirEntry& other);
   ~DirEntry();
-
-  DirEntry& operator=(const DirEntry& other);
 
   FOG_INLINE const String& getName() const { return _name; }
   FOG_INLINE uint32_t getType() const { return _type; }
@@ -71,7 +73,16 @@ struct FOG_API DirEntry
     TYPE_SOCKET = (1 << 6)
   };
 
-private:
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
+
+  DirEntry& operator=(const DirEntry& other);
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
   String _name;
   uint32_t _type;
   uint64_t _size;
@@ -83,8 +94,6 @@ private:
 #if defined(FOG_OS_POSIX)
   struct stat _statInfo;
 #endif // FOG_OS_POSIX
-
-  friend struct DirIterator;
 };
 
 //! @}

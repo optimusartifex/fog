@@ -9,6 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/IO/DirEntry.h>
+#include <Fog/Core/Tools/ByteArray.h>
 
 namespace Fog {
 
@@ -54,15 +55,8 @@ struct FOG_API DirIterator
   ~DirIterator();
 
   // --------------------------------------------------------------------------
-  // [Methods]
+  // [Accessors]
   // --------------------------------------------------------------------------
-
-  err_t open(const String& path);
-  void close();
-  bool read(DirEntry& to);
-
-  err_t rewind();
-  int64_t tell();
 
   FOG_INLINE bool isOpen() const  { return _handle != NULL; }
 
@@ -73,6 +67,27 @@ struct FOG_API DirIterator
   FOG_INLINE const String& getPath() const { return _path; }
 
   // --------------------------------------------------------------------------
+  // [Open / Close]
+  // --------------------------------------------------------------------------
+
+  err_t open(const String& path);
+  void close();
+
+  // --------------------------------------------------------------------------
+  // [Read]
+  // --------------------------------------------------------------------------
+
+  bool read(DirEntry& dirEntry);
+  bool read(String& fileName);
+
+  // --------------------------------------------------------------------------
+  // [Rewind / Tell]
+  // --------------------------------------------------------------------------
+
+  err_t rewind();
+  int64_t tell();
+
+  // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
@@ -80,19 +95,23 @@ private:
   void* _handle;
   String _path;
 
+  // --------------------------------------------------------------------------
+  // [Members - Windows Specific]
+  // --------------------------------------------------------------------------
+
 #if defined(FOG_OS_WINDOWS)
   WIN32_FIND_DATAW _winFindData;
   int64_t _position;
-  bool _fileInEntry;
 #endif // FOG_OS_WINDOWS
+
+  // --------------------------------------------------------------------------
+  // [Members - Posix Specific]
+  // --------------------------------------------------------------------------
 
 #if defined(FOG_OS_POSIX)
   ByteArray _pathCache;
   sysuint_t _pathCacheBaseLength;
-  union {
-    struct dirent _dent;
-    uint8_t _dentBuf[offsetof(struct dirent, d_name) + _POSIX_NAME_MAX + 1];
-  };
+  struct dirent *_dent;
 #endif // FOG_OS_POSIX
 
   bool _skipDots;

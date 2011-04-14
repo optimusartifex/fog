@@ -32,7 +32,7 @@
 namespace Fog {
 
 // ============================================================================
-// [Fog::DirIterator]
+// [Fog::DirIterator - Windows]
 // ============================================================================
 
 #if defined(FOG_OS_WINDOWS)
@@ -40,7 +40,6 @@ namespace Fog {
 DirIterator::DirIterator() :
   _handle(NULL),
   _position(-1),
-  _fileInEntry(false),
   _skipDots(true)
 {
   memset(&_winFindData, 0, sizeof(WIN32_FIND_DATAW));
@@ -49,7 +48,6 @@ DirIterator::DirIterator() :
 DirIterator::DirIterator(const String& path) :
   _handle(NULL),
   _position(-1),
-  _fileInEntry(false),
   _skipDots(true)
 {
   memset(&_winFindData, 0, sizeof(WIN32_FIND_DATAW));
@@ -78,19 +76,32 @@ err_t DirIterator::open(const String& path)
     return err;
   }
 
-  if ((_handle = (void*)FindFirstFileW(reinterpret_cast<const wchar_t*>(t.getData()), &_winFindData)) != (void*)INVALID_HANDLE_VALUE)
-  {
-    _path = pathAbs;
-    _position = 0;
-    _fileInEntry = true;
+  _handle = (void*)FindFirstFileW(reinterpret_cast<const wchar_t*>(t.getData()), &_winFindData);
 
-    return ERR_OK;
-  }
-  else 
+  // Try to open with long file name support if path is too long
+  if (_handle == (void*)INVALID_HANDLE_VALUE)
   {
-    _handle = NULL;
-    return GetLastError();
+    err = GetLastError();
+    if (err == ERROR_PATH_NOT_FOUND)
+    {
+      // TODO: Make this generic.
+      FOG_RETURN_ON_ERROR(t.prepend(Ascii8("\\\\?\\")));
+
+      _handle = (void*)FindFirstFileW(reinterpret_cast<const wchar_t*>(t.getData()), &_winFindData);
+      err = GetLastError();
+    }
+
+    if (_handle == (void*)INVALID_HANDLE_VALUE)
+    {
+      _handle = NULL;
+      return err;
+    }
   }
+
+  _path = pathAbs;
+  _position = 0;
+
+  return ERR_OK;
 }
 
 void DirIterator::close()
@@ -100,54 +111,59 @@ void DirIterator::close()
   ::FindClose((HANDLE)(_handle));
   _handle = NULL;
   _position = -1;
-  _fileInEntry = false;
   _path.clear();
   memset(&_winFindData, 0, sizeof(WIN32_FIND_DATAW));
 }
 
-bool DirIterator::read(DirEntry& to)
+bool DirIterator::read(DirEntry& dirEntry)
 {
   if (!_handle) return false;
 
-  if (!_fileInEntry)
+  if (_position != 0)
   {
-    // try to read next file entry
-__readNext:
-    if (!::FindNextFileW(_handle, &to._winFindData)) return false;
+    // Read next file entry.
+_Next:
+    if (!::FindNextFileW(_handle, &dirEntry._winFindData)) return false;
   }
   else 
   {
-    memcpy(&to._winFindData, &_winFindData, sizeof(WIN32_FIND_DATAW));
-    _fileInEntry = false;
+    memcpy(&dirEntry._winFindData, &_winFindData, sizeof(WIN32_FIND_DATAW));
   }
 
   _position++;
 
-  // we have valid file entry in to._winFindData
-  if (to._winFindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) 
+  // We have valid file entry in dirEntry._winFindData.
+  if (dirEntry._winFindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) 
   {
-    to._type = DirEntry::TYPE_DIRECTORY;
+    dirEntry._type = DirEntry::TYPE_DIRECTORY;
 
     // Skip "." and ".."
     if (_skipDots)
     {
-      const WCHAR* cfn = to._winFindData.cFileName;
-      if (cfn[0] == TEXT('.') && 
-        ((cfn[1] == 0) || (cfn[1] == TEXT('.') && cfn[2] == 0) ))
-      {
-        goto __readNext;
-      }
+      const WCHAR* cfn = dirEntry._winFindData.cFileName;
+
+      if (cfn[0] == TEXT('.') && ((cfn[1] == 0) || (cfn[1] == TEXT('.') && cfn[2] == 0) ))
+        goto _Next;
     }
   }
   else
   {
-    to._type = DirEntry::TYPE_FILE;
+    dirEntry._type = DirEntry::TYPE_FILE;
   }
 
-  to._size = ((uint64_t)(to._winFindData.nFileSizeHigh) << 32) |
-             ((uint64_t)(to._winFindData.nFileSizeLow));
-  to._name.set(reinterpret_cast<const Char*>(to._winFindData.cFileName));
+  dirEntry._size = ((uint64_t)(dirEntry._winFindData.nFileSizeHigh) << 32) |
+                   ((uint64_t)(dirEntry._winFindData.nFileSizeLow));
+  dirEntry._name.set(reinterpret_cast<const Char*>(dirEntry._winFindData.cFileName));
+  return true;
+}
 
+bool DirIterator::read(String& fileName)
+{
+  // TODO: optimize using internal WIN32_FIND_DATA.
+  DirEntry e;
+  if (!read(e)) return false;
+
+  fileName = e.getName();
   return true;
 }
 
@@ -169,13 +185,13 @@ err_t DirIterator::rewind()
   HANDLE h = FindFirstFileW(reinterpret_cast<const wchar_t*>(t.getData()), &_winFindData);
   if (h == INVALID_HANDLE_VALUE)
   {
+    // TODO: long filename support as in open()
     return GetLastError();
   }
 
   ::FindClose((HANDLE)_handle);
   _handle = (void*)h;
   _position = 0;
-  _fileInEntry = true;
 
   return ERR_OK;
 }
@@ -186,11 +202,22 @@ int64_t DirIterator::tell()
 }
 #endif // FOG_OS_WINDOWS
 
+// ============================================================================
+// [Fog::DirIterator - Posix]
+// ============================================================================
+
 #if defined(FOG_OS_POSIX)
+
+// Glibc's readdir is reentrant. POSIX guarantees only readdir_r to be reentrant
+// __linux__ is defined on Linux, __GNU__ on HURD and __GLIBC__ on Debian GNU/k*BSD
+#if defined(__linux__) || defined(__GNU__) || defined(__GLIBC__)
+# define FOG_HAVE_REENTRANT_READDIR
+#endif
 
 DirIterator::DirIterator() :
   _handle(NULL),
   _pathCacheBaseLength(0),
+  _dent(NULL),
   _skipDots(true)
 {
 }
@@ -198,6 +225,7 @@ DirIterator::DirIterator() :
 DirIterator::DirIterator(const String& path) :
   _handle(NULL),
   _pathCacheBaseLength(0),
+  _dent(NULL),
   _skipDots(true)
 {
   open(path);
@@ -215,10 +243,19 @@ err_t DirIterator::open(const String& path)
   TemporaryString<TEMPORARY_LENGTH> pathAbs;
   TemporaryByteArray<TEMPORARY_LENGTH> t;
 
-  err_t err;
+  // Get max size of file name in this directory + fallback.
+  long direntSize = pathconf(t.getData(), _PC_NAME_MAX);
+  if (direntSize == -1) direntSize = _POSIX_NAME_MAX;
 
-  if ((err = FileSystem::toAbsolutePath(pathAbs, String(), path))) return err;
-  if ((err = TextCodec::local8().appendFromUnicode(t, pathAbs))) return err;
+  // Add offset of d_name field + 1 to get correct dirent size.
+  direntSize += FOG_OFFSET_OF(struct dirent, d_name) + 1;
+
+  // Ugly typecast from long, but there is no better way.
+  _dent = reinterpret_cast<struct dirent*>(Memory::alloc((sysuint_t)direntSize));
+  if (!_dent) return ERR_RT_OUT_OF_MEMORY;
+
+  FOG_RETURN_ON_ERROR(FileSystem::toAbsolutePath(pathAbs, String(), path));
+  FOG_RETURN_ON_ERROR(TextCodec::local8().appendFromUnicode(t, pathAbs));
 
   if ((_handle = (void*)::opendir(t.getData())) != NULL)
   {
@@ -229,6 +266,7 @@ err_t DirIterator::open(const String& path)
   }
   else
   {
+    Memory::free(_dent);
     return errno;
   }
 }
@@ -239,19 +277,20 @@ void DirIterator::close()
 
   ::closedir((DIR*)(_handle));
   _handle = NULL;
+
   _path.clear();
   _pathCache.clear();
   _pathCacheBaseLength = 0;
 }
 
-bool DirIterator::read(DirEntry& to)
+bool DirIterator::read(DirEntry& dirEntry)
 {
   if (!_handle) return false;
 
   struct dirent *de;
   bool skipDots = getSkipDots();
 
-  while (::readdir_r((DIR*)_handle, &_dent, &de) == 0 && (de != NULL))
+  while (::readdir_r((DIR*)_handle, _dent, &de) == 0 && (de != NULL))
   {
     const char* name = de->d_name;
 
@@ -265,7 +304,7 @@ bool DirIterator::read(DirEntry& to)
     sysuint_t nameLength = strlen(name);
 
     // Translate entry name to unicode.
-    TextCodec::local8().toUnicode(to._name, name, nameLength);
+    TextCodec::local8().toUnicode(dirEntry._name, name, nameLength);
 
     _pathCache.resize(_pathCacheBaseLength);
     _pathCache.append('/');
@@ -273,7 +312,7 @@ bool DirIterator::read(DirEntry& to)
 
     uint type = 0;
 
-    if (::stat(_pathCache.getData(), &to._statInfo) != 0)
+    if (::stat(_pathCache.getData(), &dirEntry._statInfo) != 0)
     {
       // This is situation that's bad symbolic link (I was experienced
       // this) and there is no reason to write an error message...
@@ -281,33 +320,56 @@ bool DirIterator::read(DirEntry& to)
     else
     {
       // S_ISXXX are posix macros to get easy file type...
-      if (S_ISREG(to._statInfo.st_mode)) type |= DirEntry::TYPE_FILE;
-      if (S_ISDIR(to._statInfo.st_mode)) type |= DirEntry::TYPE_DIRECTORY;
+      if (S_ISREG(dirEntry._statInfo.st_mode)) type |= DirEntry::TYPE_FILE;
+      if (S_ISDIR(dirEntry._statInfo.st_mode)) type |= DirEntry::TYPE_DIRECTORY;
 #if defined(S_ISCHR)
-      if (S_ISCHR(to._statInfo.st_mode)) type |= DirEntry::TYPE_CHAR_DEVICE;
+      if (S_ISCHR(dirEntry._statInfo.st_mode)) type |= DirEntry::TYPE_CHAR_DEVICE;
 #endif
 #if defined(S_ISBLK)
-      if (S_ISBLK(to._statInfo.st_mode)) type |= DirEntry::TYPE_BLOCK_DEVICE;
+      if (S_ISBLK(dirEntry._statInfo.st_mode)) type |= DirEntry::TYPE_BLOCK_DEVICE;
 #endif
 #if defined(S_ISFIFO)
-      if (S_ISFIFO(to._statInfo.st_mode)) type |= DirEntry::TYPE_FIFO;
+      if (S_ISFIFO(dirEntry._statInfo.st_mode)) type |= DirEntry::TYPE_FIFO;
 #endif
 #if defined(S_ISLNK)
-      if (S_ISLNK(to._statInfo.st_mode)) type |= DirEntry::TYPE_LINK;
+      if (S_ISLNK(dirEntry._statInfo.st_mode)) type |= DirEntry::TYPE_LINK;
 #endif
 #if defined(S_ISSOCK)
-      if (S_ISSOCK(to._statInfo.st_mode)) type |= DirEntry::TYPE_SOCKET;
+      if (S_ISSOCK(dirEntry._statInfo.st_mode)) type |= DirEntry::TYPE_SOCKET;
 #endif
     }
 
-    to._type = type;
+    dirEntry._type = type;
     if (type == DirEntry::TYPE_FILE)
-      to._size = to._statInfo.st_size;
+      dirEntry._size = dirEntry._statInfo.st_size;
     else
-      to._size = 0;
+      dirEntry._size = 0;
     return true;
   }
 
+  return false;
+}
+
+bool DirIterator::read(String& fileName)
+{
+  if (!_handle) return false;
+
+  struct dirent *de;
+  bool skipDots = getSkipDots();
+
+  while (::readdir_r((DIR*)_handle, _dent, &de) == 0 && (de != NULL))
+  {
+    const char* name = de->d_name;
+
+    // Skip "." and ".."
+    if (name[0] == '.' && skipDots)
+    {
+      if (name[1] == '\0' || (name[1] == '.' && name[2] == '\0')) continue;
+    }
+
+    // Translate entry name to unicode.
+    return (TextCodec::local8().toUnicode(fileName, name) == ERR_OK);
+  }
   return false;
 }
 

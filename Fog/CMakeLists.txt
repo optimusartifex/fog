@@ -643,11 +643,11 @@ Set(FOG_G2D_FONT_HEADERS
   Fog/G2d/Font/NullFontEngine_p.h
 )
 
-If(WIN32)
+If(FOG_OS_WINDOWS)
   Set(FOG_FONT_WINDOWS TRUE)
-ElseIf(APPLE)
+ElseIf(FOG_OS_MAC)
   Set(FOG_FONT_MAC TRUE)
-Else(APPLE)
+Else()
   Find_File(HAVE_FREETYPE freetype-config)
   If(HAVE_FREETYPE)
     Exec_Program(freetype-config ARGS --cflags OUTPUT_VARIABLE FREETYPE_CONFIG_OUT RETURN_VALUE FREETYPE_CONFIG_RET)
@@ -657,7 +657,7 @@ Else(APPLE)
   If(NOT FOG_HAVE_FONTCONFIG)
     Check_Include_Files(fontconfig/fontconfig.h FOG_HAVE_FONTCONFIG)
   EndIf(NOT FOG_HAVE_FONTCONFIG)
-EndIf(WIN32)
+EndIf()
 
 If(FOG_FONT_WINDOWS)
   List(APPEND FOG_G2D_FONT_SOURCES Fog/G2d/Font/WinFontEngine.cpp)
@@ -1157,11 +1157,13 @@ Source_Group("G2d/Tools"            FILES ${FOG_G2D_TOOLS_SOURCES}            ${
 # =============================================================================
 
 # Gui backends.
-If(WIN32)
+If(FOG_OS_WINDOWS)
   Set(FOG_GUI_WINDOWS 1)
-Else(WIN32)
+ElseIf(FOG_OS_MAC)
+  # TODO: Mac Gui Engine.
+Else()
   Set(FOG_GUI_X11 1)
-EndIf(WIN32)
+EndIf()
 
 # [Fog/Gui]
 Set(FOG_GUI_LIB_SOURCES

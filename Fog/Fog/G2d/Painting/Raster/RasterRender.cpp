@@ -118,6 +118,12 @@ struct RasterRenderImpl
 
   static void FOG_FASTCALL fillTransformedPathF(RasterContext& ctx, const PathF& box, uint32_t fillRule);
   static void FOG_FASTCALL fillTransformedPathD(RasterContext& ctx, const PathD& box, uint32_t fillRule);
+
+  // --------------------------------------------------------------------------
+  // [Blit]
+  // --------------------------------------------------------------------------
+
+  static void FOG_FASTCALL blitAlignedImageI(RasterContext& ctx, const PointI& pt, const Image& srcImage, const RectI& srcFraction);
 };
 
 template<typename C>
@@ -131,6 +137,8 @@ void RasterRenderImpl<C>::initVTable(RasterRenderVTable& v)
 
   v.fillTransformedPathF = fillTransformedPathF;
   v.fillTransformedPathD = fillTransformedPathD;
+
+  v.blitAlignedImageI = blitAlignedImageI;
 }
 
 // ============================================================================
@@ -156,7 +164,7 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillTransformedBoxI(RasterContext& ctx, c
   uint32_t dstFormat = ctx.layer.primaryFormat;
 
   uint32_t compositingOperator = ctx.paintHints.compositingOperator;
-  uint32_t paintOpacity = ctx.rasterHints.opacity;
+  uint32_t opacity = ctx.rasterHints.opacity;
 
   typename C::SpanExtP staticSpan;
 
@@ -164,16 +172,9 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillTransformedBoxI(RasterContext& ctx, c
   // [Multithreading]
   // --------------------------------------------------------------------------
 
-  int delta = 1;
-  int offset = 0;
-  sysint_t dstStrideTimesDelta = dstStride;
-
-  if (C::_MODE == RASTER_MODE_MT)
-  {
-    delta = ctx.delta;
-    offset = ctx.offset;
-    dstStrideTimesDelta *= delta;
-  }
+  const int delta  = (C::_MODE == RASTER_MODE_MT) ? ctx.delta  : 1;
+  const int offset = (C::_MODE == RASTER_MODE_MT) ? ctx.offset : 0;
+  sysint_t dstStrideTimesDelta = (C::_MODE == RASTER_MODE_MT) ? dstStride*delta : dstStride;
 
   // --------------------------------------------------------------------------
   // [Clip == Box]
@@ -202,13 +203,13 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillTransformedBoxI(RasterContext& ctx, c
     {
       bool isSrcOpaque = Face::p32PRGB32IsAlphaFF(ctx.solid.prgb32.p32);
 
-      if (paintOpacity == C::_OPAQUE_VALUE)
+      if (opacity == C::_OPAQUE_VALUE)
       {
-        RenderCBlitLineFn blitFull = _g2d_render.getCBlitLine(dstFormat, compositingOperator, isSrcOpaque);
+        RenderCBlitLineFn blitLine = _g2d_render.getCBlitLine(dstFormat, compositingOperator, isSrcOpaque);
 
         dstPixels += x0 * ctx.layer.primaryBPP;
         do {
-          blitFull(dstPixels, &ctx.solid, w, &ctx.closure);
+          blitLine(dstPixels, &ctx.solid, w, &ctx.closure);
 
           y0 += delta;
           dstPixels += dstStrideTimesDelta;
@@ -219,7 +220,7 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillTransformedBoxI(RasterContext& ctx, c
         RenderCBlitSpanFn blitSpan = _g2d_render.getCBlitSpan(dstFormat, compositingOperator, isSrcOpaque);
 
         staticSpan.setPositionAndType(x0, box.x1, SPAN_C);
-        staticSpan.setConstMask(paintOpacity);
+        staticSpan.setConstMask(opacity);
         staticSpan.setNext(NULL);
 
         do {
@@ -241,19 +242,19 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillTransformedBoxI(RasterContext& ctx, c
       uint8_t* src = ctx.pcRowBuffer.getMemoryBuffer();
 
       staticSpan.setPositionAndType(x0, box.x1, SPAN_C);
-      staticSpan.setConstMask(paintOpacity);
+      staticSpan.setConstMask(opacity);
       staticSpan.setNext(NULL);
 
       RenderPatternFetcher fetcher;
-      if (paintOpacity == C::_OPAQUE_VALUE)
+      if (opacity == C::_OPAQUE_VALUE)
       {
-        RenderVBlitLineFn blitFull = _g2d_render.getVBlitLine(dstFormat, compositingOperator, pc->getSrcFormat());
+        RenderVBlitLineFn blitLine = _g2d_render.getVBlitLine(dstFormat, compositingOperator, pc->getSrcFormat());
         pc->prepare(&fetcher, y0, delta, RENDER_FETCH_REFERENCE);
 
         dstPixels += x0 * ctx.layer.primaryBPP;
         do {
           fetcher.fetch(&staticSpan, src);
-          blitFull(dstPixels, src, w, &ctx.closure);
+          blitLine(dstPixels, src, w, &ctx.closure);
 
           y0 += delta;
           dstPixels += dstStrideTimesDelta;
@@ -366,16 +367,9 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillRasterizedShape(RasterContext& ctx, v
   // [Multithreading]
   // --------------------------------------------------------------------------
 
-  int delta = 1;
-  int offset = 0;
-  sysint_t dstStrideTimesDelta = dstStride;
-
-  if (C::_MODE == RASTER_MODE_MT)
-  {
-    delta = ctx.delta;
-    offset = ctx.offset;
-    dstStrideTimesDelta *= delta;
-  }
+  const int delta  = (C::_MODE == RASTER_MODE_MT) ? ctx.delta  : 1;
+  const int offset = (C::_MODE == RASTER_MODE_MT) ? ctx.offset : 0;
+  sysint_t dstStrideTimesDelta = (C::_MODE == RASTER_MODE_MT) ? dstStride*delta : dstStride;
 
   // --------------------------------------------------------------------------
   // [Clip == Box]
@@ -508,6 +502,194 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillTransformedPathD(RasterContext& ctx, 
   else
   {
     // TODO: 16-bit rasterizer.
+  }
+}
+
+// ============================================================================
+// [Fog::RasterRender - Blit]
+// ============================================================================
+
+template<typename C>
+void FOG_FASTCALL RasterRenderImpl<C>::blitAlignedImageI(RasterContext& ctx, const PointI& pt, const Image& srcImage, const RectI& srcFraction)
+{
+  // --------------------------------------------------------------------------
+  // [Asserts]
+  // --------------------------------------------------------------------------
+
+  // ...
+
+  // --------------------------------------------------------------------------
+  // [Base]
+  // --------------------------------------------------------------------------
+
+  uint8_t* dstPixels = ctx.layer.pixels;
+  sysint_t dstStride = ctx.layer.stride;
+  uint32_t dstFormat = ctx.layer.primaryFormat;
+
+  const ImageData* srcd = srcImage._d;
+  const uint8_t* srcPixels = srcd->first;
+  sysint_t srcStride = srcd->stride;
+  uint32_t srcFormat = srcd->format;
+
+  uint32_t compositingOperator = ctx.paintHints.compositingOperator;
+  uint32_t opacity = ctx.rasterHints.opacity;
+
+  typename C::SpanExtP staticSpan;
+
+  // --------------------------------------------------------------------------
+  // [Multithreading]
+  // --------------------------------------------------------------------------
+
+  const int delta  = (C::_MODE == RASTER_MODE_MT) ? ctx.delta  : 1;
+  const int offset = (C::_MODE == RASTER_MODE_MT) ? ctx.offset : 0;
+
+  sysint_t dstStrideTimesDelta = (C::_MODE == RASTER_MODE_MT) ? dstStride*delta : dstStride;
+  sysint_t srcStrideTimesDelta = (C::_MODE == RASTER_MODE_MT) ? srcStride*delta : srcStride;
+
+  // --------------------------------------------------------------------------
+  // [Clip == Box]
+  // --------------------------------------------------------------------------
+
+  if (C::_CLIP == RASTER_CLIP_BOX)
+  {
+    int srcWidth = srcFraction.w;
+    int srcHeight = srcFraction.h;
+
+    int x0 = pt.x;
+    int y0 = pt.y;
+    int yEnd = y0 + srcHeight;
+
+    if (C::_MODE == RASTER_MODE_MT)
+    {
+      y0 = RasterUtil::alignToDelta(y0, offset, delta);
+      if (y0 >= yEnd) return;
+
+      dstPixels += y0 * dstStride;
+      srcPixels += (srcFraction.y + y0 - pt.y) * srcStride;
+    }
+    else
+    {
+      dstPixels += y0 * dstStride;
+      srcPixels += srcFraction.y * srcStride;
+    }
+    
+    if (opacity == C::_OPAQUE_VALUE)
+    {
+      RenderVBlitLineFn blitLine;
+
+      dstPixels += x0 * ctx.layer.primaryBPP;
+      srcPixels += srcFraction.x * srcd->bytesPerPixel;
+      ctx.closure.palette = srcd->palette._d;
+
+      // If compositing operator is SRC or SRC_OVER then any image format
+      // combination is supported. However, if compositing operator is one
+      // of other values, then only few image formats can be mixed together.
+      if (RenderUtil::isCompositeCoreOperator(compositingOperator))
+      {
+        blitLine = _g2d_render.getCompositeCoreFuncs(dstFormat, compositingOperator)->vblit_line[srcFormat];
+
+_Blit_ClipBox_Opaque_Direct:
+        do {
+          blitLine(dstPixels, srcPixels, srcWidth, &ctx.closure);
+
+          y0 += delta;
+          dstPixels += dstStrideTimesDelta;
+          srcPixels += srcStrideTimesDelta;
+        } while (y0 < yEnd);
+      }
+      else
+      {
+        uint32_t vBlitSrc = _g2d_render_compatibleFormat[dstFormat][srcFormat].srcFormat;
+        uint32_t vBlitId = _g2d_render_compatibleFormat[dstFormat][srcFormat].vblitId;
+
+        blitLine = _g2d_render.getCompositeExtFuncs(dstFormat, compositingOperator)->vblit_line[vBlitId];
+        if (srcFormat == vBlitSrc) goto _Blit_ClipBox_Opaque_Direct;
+
+        uint8_t* tmpPixels = ctx.pcRowBuffer.getMemoryBuffer();
+        RenderVBlitLineFn cvtLine = _g2d_render.getCompositeCoreFuncs(vBlitSrc, COMPOSITE_SRC)->vblit_line[srcFormat];
+
+        do {
+          cvtLine(tmpPixels, srcPixels, srcWidth, &ctx.closure);
+          blitLine(dstPixels, tmpPixels, srcWidth, &ctx.closure);
+
+          y0 += delta;
+          dstPixels += dstStrideTimesDelta;
+          srcPixels += srcStrideTimesDelta;
+        } while (y0 < yEnd);
+      }
+
+      ctx.closure.palette = NULL;
+    }
+    else
+    {
+      RenderVBlitSpanFn blitSpan;
+
+      staticSpan.setPositionAndType(x0, x0 + srcWidth, SPAN_C);
+      staticSpan.setConstMask(opacity);
+      staticSpan.setNext(NULL);
+
+      srcPixels += srcFraction.x * srcd->bytesPerPixel;
+      ctx.closure.palette = srcd->palette._d;
+
+      // If compositing operator is SRC or SRC_OVER then any image format
+      // combination is supported. However, if compositing operator is one
+      // of other values, then only few image formats can be mixed together.
+      if (RenderUtil::isCompositeCoreOperator(compositingOperator))
+      {
+        blitSpan = _g2d_render.getCompositeCoreFuncs(dstFormat, compositingOperator)->vblit_span[srcFormat];
+
+_Blit_ClipBox_Alpha_Direct:
+        do {
+          // SpanExt need non-const data pointer.
+          staticSpan.setData(const_cast<uint8_t*>(srcPixels));
+          blitSpan(dstPixels, &staticSpan, &ctx.closure);
+
+          y0 += delta;
+          dstPixels += dstStrideTimesDelta;
+          srcPixels += srcStrideTimesDelta;
+        } while (y0 < yEnd);
+      }
+      else
+      {
+        uint32_t vBlitSrc = _g2d_render_compatibleFormat[dstFormat][srcFormat].srcFormat;
+        uint32_t vBlitId = _g2d_render_compatibleFormat[dstFormat][srcFormat].vblitId;
+
+        blitSpan = _g2d_render.getCompositeExtFuncs(dstFormat, compositingOperator)->vblit_span[vBlitId];
+        if (srcFormat == vBlitSrc) goto _Blit_ClipBox_Alpha_Direct;
+
+        uint8_t* tmpPixels = ctx.pcRowBuffer.getMemoryBuffer();
+        RenderVBlitLineFn cvtLine = _g2d_render.getCompositeCoreFuncs(vBlitSrc, COMPOSITE_SRC)->vblit_line[srcFormat];
+
+        staticSpan.setData(tmpPixels);
+
+        do {
+          cvtLine(tmpPixels, srcPixels, srcWidth, &ctx.closure);
+          blitSpan(dstPixels, &staticSpan, &ctx.closure);
+
+          y0 += delta;
+          dstPixels += dstStrideTimesDelta;
+          srcPixels += srcStrideTimesDelta;
+        } while (y0 < yEnd);
+      }
+
+      ctx.closure.palette = NULL;
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // [Clip == Region]
+  // --------------------------------------------------------------------------
+
+  else if (C::_CLIP == RASTER_CLIP_REGION)
+  {
+  }
+
+  // --------------------------------------------------------------------------
+  // [Clip == Mask]
+  // --------------------------------------------------------------------------
+
+  else
+  {
   }
 }
 

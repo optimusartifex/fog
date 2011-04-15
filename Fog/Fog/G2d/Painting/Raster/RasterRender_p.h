@@ -64,6 +64,18 @@ struct FOG_NO_EXPORT RasterRenderVTable
 
   FillTransformedPathF fillTransformedPathF;
   FillTransformedPathD fillTransformedPathD;
+
+  // --------------------------------------------------------------------------
+  // [Blit - Types]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_FASTCALL *BlitAlignedImageI)(RasterContext& ctx, const PointI& pt, const Image& srcImage, const RectI& srcFraction);
+
+  // --------------------------------------------------------------------------
+  // [Blit - Funcs]
+  // --------------------------------------------------------------------------
+
+  BlitAlignedImageI blitAlignedImageI;
 };
 
 //! @internal

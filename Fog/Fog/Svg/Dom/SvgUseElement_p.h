@@ -8,6 +8,7 @@
 #define _FOG_SVG_DOM_SVGUSEELEMENT_P_H
 
 // [Dependencies]
+#include <Fog/Svg/Dom/SvgCoordAttribute_p.h>
 #include <Fog/Svg/Dom/SvgStyledElement_p.h>
 
 namespace Fog {
@@ -31,6 +32,12 @@ struct FOG_NO_EXPORT SvgUseElement : public SvgStyledElement
   virtual ~SvgUseElement();
 
   // --------------------------------------------------------------------------
+  // [SVG Attributes]
+  // --------------------------------------------------------------------------
+
+  virtual XmlAttribute* _createAttribute(const ManagedString& name) const;
+
+  // --------------------------------------------------------------------------
   // [SVG Rendering]
   // --------------------------------------------------------------------------
 
@@ -41,7 +48,8 @@ struct FOG_NO_EXPORT SvgUseElement : public SvgStyledElement
   // [SVG Embedded Attributes]
   // --------------------------------------------------------------------------
 
-  // NONE
+  SvgCoordAttribute a_x;
+  SvgCoordAttribute a_y;
 
 private:
   FOG_DISABLE_COPY(SvgUseElement)

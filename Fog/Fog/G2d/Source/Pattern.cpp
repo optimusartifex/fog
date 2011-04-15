@@ -321,7 +321,7 @@ err_t PatternF::setTexture(const Texture& texture)
 {
   PATTERNF_CHANGE()
 
-  _d->texture.init(texture);
+  PatternF_dinitTexture(_d, texture);
   return ERR_OK;
 }
 
@@ -361,7 +361,7 @@ err_t PatternF::setGradient(const GradientF& gr)
 {
   PATTERNF_CHANGE()
 
-  _d->gradient.init(gr);
+  PatternF_dinitGradient(_d, gr);
   return ERR_OK;
 }
 
@@ -369,7 +369,7 @@ err_t PatternF::setGradient(const GradientD& gr)
 {
   PATTERNF_CHANGE()
 
-  _d->gradient.initCustom1(gr);
+  PatternF_dinitGradient(_d, gr);
   return ERR_OK;
 }
 
@@ -381,37 +381,6 @@ err_t PatternF::setPattern(const PatternF& other)
 {
   atomicPtrXchg(&_d, other._d->ref())->deref();
   return ERR_OK;
-/*
-  if (_d == other._d) return ERR_OK;
-  PATTERNF_CHANGE()
-
-  switch (other.getType())
-  {
-    case PATTERN_TYPE_NONE:
-      _d->type = PATTERN_TYPE_NONE;
-      break;
-
-    case PATTERN_TYPE_COLOR:
-      _d->type = PATTERN_TYPE_COLOR;
-      _d->color.init(other._d->color.instance());
-      break;
-
-    case PATTERN_TYPE_GRADIENT:
-      _d->type = PATTERN_TYPE_GRADIENT;
-      _d->gradient.init(other._d->gradient.instance());
-      break;
-
-    case PATTERN_TYPE_TEXTURE:
-      _d->type = PATTERN_TYPE_TEXTURE;
-      _d->texture.init(other._d->texture.instance());
-      break;
-
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
-
-  return ERR_OK;
-  */
 }
 
 err_t PatternF::setPattern(const PatternD& other)

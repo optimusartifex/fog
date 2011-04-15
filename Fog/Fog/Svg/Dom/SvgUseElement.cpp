@@ -41,7 +41,7 @@ static Utf16 parseHtmlLinkId(const String& url)
   }
 
   idMark = idStr;
-  while ((c = *idStr).isAlnum() || c == Char('_'))
+  while ((c = *idStr).isAlnum() || c == Char('-') || c == Char('_'))
   {
     if (++idStr == idEnd) break;
   }
@@ -56,13 +56,23 @@ bail:
 // ============================================================================
 
 SvgUseElement::SvgUseElement() :
-  SvgStyledElement(fog_strings->getString(STR_SVG_ELEMENT_use), SVG_ELEMENT_USE)
+  SvgStyledElement(fog_strings->getString(STR_SVG_ELEMENT_use), SVG_ELEMENT_USE),
+  a_x(NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_x), FOG_OFFSET_OF(SvgUseElement, a_x)),
+  a_y(NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_y), FOG_OFFSET_OF(SvgUseElement, a_y))
 {
 }
 
 SvgUseElement::~SvgUseElement()
 {
   _removeAttributes();
+}
+
+XmlAttribute* SvgUseElement::_createAttribute(const ManagedString& name) const
+{
+  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_x)) return (XmlAttribute*)&a_x;
+  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_y)) return (XmlAttribute*)&a_y;
+
+  return base::_createAttribute(name);
 }
 
 err_t SvgUseElement::onRenderShape(SvgRenderContext* context) const
@@ -72,8 +82,19 @@ err_t SvgUseElement::onRenderShape(SvgRenderContext* context) const
 
   if (ref && ref->isSvgElement())
   {
+    float translateX = 0.0f;
+    float translateY = 0.0f;
+
+    if (a_x.isAssigned()) translateX = a_x.getCoordValue();
+    if (a_y.isAssigned()) translateY = a_y.getCoordValue();
+
+    if (translateX != 0.0f || translateY != 0.0f)
+      context->getPainter()->translate(PointF(translateX, translateY));
+
     reinterpret_cast<SvgElement*>(ref)->onRender(context);
-    return ERR_OK;
+
+    if (translateX != 0.0f || translateY != 0.0f)
+      context->getPainter()->translate(PointF(-translateX, -translateY));
   }
 
   return ERR_OK;

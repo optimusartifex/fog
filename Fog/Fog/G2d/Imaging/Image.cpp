@@ -1639,6 +1639,7 @@ err_t Image::fillRect(const RectI& r, const Color& color,  uint32_t compositingO
 
   bool isPRGBPixel;
   bool isOpaque;
+  uint32_t spanOpacity = 0;
 
   RenderSolid solid;
   Span span;
@@ -1657,7 +1658,7 @@ err_t Image::fillRect(const RectI& r, const Color& color,  uint32_t compositingO
       isPRGBPixel = Face::p32PRGB32IsAlphaFF(pix0);
       isOpaque    = (opacity_8 == 0x100);
 
-      reinterpret_cast<Span8*>(&span)->setConstMask(opacity_8);
+      spanOpacity = spanOpacity;
       break;
     }
 
@@ -1673,7 +1674,7 @@ err_t Image::fillRect(const RectI& r, const Color& color,  uint32_t compositingO
       isPRGBPixel = Face::p64PRGB64IsAlphaFFFF(pix0);
       isOpaque    = (opacity_16 == 0x10000);
 
-      reinterpret_cast<Span16*>(&span)->setConstMask(opacity_16);
+      spanOpacity = opacity_16;
       break;
     }
 
@@ -1723,6 +1724,7 @@ err_t Image::fillRect(const RectI& r, const Color& color,  uint32_t compositingO
 
     span.setPositionAndType(x0, x1, SPAN_C);
     span.setNext(NULL);
+    reinterpret_cast<Span16*>(&span)->setConstMask(spanOpacity);
 
     for (int i = 0; i < h; i++, dstPixels += dstStride)
     {

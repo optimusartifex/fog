@@ -4,12 +4,13 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_SVG_DOM_SVGSYMBOLELEMENT_P_H
-#define _FOG_SVG_DOM_SVGSYMBOLELEMENT_P_H
+#ifndef _FOG_SVG_DOM_SVGPATTERNELEMENT_P_H
+#define _FOG_SVG_DOM_SVGPATTERNELEMENT_P_H
 
 // [Dependencies]
 #include <Fog/Svg/Dom/SvgCoordAttribute_p.h>
 #include <Fog/Svg/Dom/SvgElement.h>
+#include <Fog/Svg/Dom/SvgEnumAttribute_p.h>
 
 namespace Fog {
 
@@ -17,10 +18,10 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::SvgSymbolElement]
+// [Fog::SvgPatternElement]
 // ============================================================================
 
-struct FOG_NO_EXPORT SvgSymbolElement : public SvgElement
+struct FOG_NO_EXPORT SvgPatternElement : public SvgElement
 {
   typedef SvgElement base;
 
@@ -28,21 +29,34 @@ struct FOG_NO_EXPORT SvgSymbolElement : public SvgElement
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  SvgSymbolElement();
-  virtual ~SvgSymbolElement();
+  SvgPatternElement();
+  virtual ~SvgPatternElement();
+
+  // --------------------------------------------------------------------------
+  // [SVG Attributes]
+  // --------------------------------------------------------------------------
+
+  XmlAttribute* _createAttribute(const ManagedString& name) const;
 
   // --------------------------------------------------------------------------
   // [SVG Rendering]
   // --------------------------------------------------------------------------
 
   virtual err_t onRender(SvgRenderContext* context) const;
+  virtual err_t onApplyPattern(SvgRenderContext* context, SvgElement* obj, int paintType) const;
 
   // --------------------------------------------------------------------------
   // [SVG Embedded Attributes]
   // --------------------------------------------------------------------------
 
+  SvgCoordAttribute a_x;
+  SvgCoordAttribute a_y;
+  SvgCoordAttribute a_width;
+  SvgCoordAttribute a_height;
+  SvgEnumAttribute a_patternUnits;
+
 private:
-  FOG_DISABLE_COPY(SvgSymbolElement)
+  FOG_DISABLE_COPY(SvgPatternElement)
 };
 
 //! @}
@@ -50,4 +64,4 @@ private:
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_SVG_DOM_SVGSYMBOLELEMENT_P_H
+#endif // _FOG_SVG_DOM_SVGPATTERNELEMENT_P_H

@@ -27,6 +27,7 @@
 #include <Fog/Svg/Dom/SvgMarkerElement_p.h>
 #include <Fog/Svg/Dom/SvgMaskElement_p.h>
 #include <Fog/Svg/Dom/SvgPathElement_p.h>
+#include <Fog/Svg/Dom/SvgPatternElement_p.h>
 #include <Fog/Svg/Dom/SvgPolygonElement_p.h>
 #include <Fog/Svg/Dom/SvgPolylineElement_p.h>
 #include <Fog/Svg/Dom/SvgRadialGradientElement_p.h>
@@ -90,12 +91,14 @@ XmlElement* SvgDocument::createElementStatic(const ManagedString& tagName)
   if (tagName == fog_strings->getString(STR_SVG_ELEMENT_line          )) return fog_new SvgLineElement();
   if (tagName == fog_strings->getString(STR_SVG_ELEMENT_linearGradient)) return fog_new SvgLinearGradientElement();
   if (tagName == fog_strings->getString(STR_SVG_ELEMENT_path          )) return fog_new SvgPathElement();
+  if (tagName == fog_strings->getString(STR_SVG_ELEMENT_pattern       )) return fog_new SvgPatternElement();
   if (tagName == fog_strings->getString(STR_SVG_ELEMENT_polygon       )) return fog_new SvgPolygonElement();
   if (tagName == fog_strings->getString(STR_SVG_ELEMENT_polyline      )) return fog_new SvgPolylineElement();
   if (tagName == fog_strings->getString(STR_SVG_ELEMENT_radialGradient)) return fog_new SvgRadialGradientElement();
   if (tagName == fog_strings->getString(STR_SVG_ELEMENT_rect          )) return fog_new SvgRectElement();
   if (tagName == fog_strings->getString(STR_SVG_ELEMENT_solidColor    )) return fog_new SvgSolidColorElement();
   if (tagName == fog_strings->getString(STR_SVG_ELEMENT_stop          )) return fog_new SvgStopElement();
+  if (tagName == fog_strings->getString(STR_SVG_ELEMENT_symbol        )) return fog_new SvgSymbolElement();
   if (tagName == fog_strings->getString(STR_SVG_ELEMENT_text          )) return fog_new SvgTextElement();
   if (tagName == fog_strings->getString(STR_SVG_ELEMENT_tspan         )) return fog_new SvgTSpanElement();
   if (tagName == fog_strings->getString(STR_SVG_ELEMENT_use           )) return fog_new SvgUseElement();

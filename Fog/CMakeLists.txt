@@ -1025,8 +1025,11 @@ Set(FOG_G2D_RENDER_C_HEADERS
   Fog/G2d/Render/Render_C/PGradientRadial_p.h
   Fog/G2d/Render/Render_C/PGradientRectangular_p.h
   Fog/G2d/Render/Render_C/PGradientTriangular_p.h
+  Fog/G2d/Render/Render_C/PTextureAffine_p.h
   Fog/G2d/Render/Render_C/PTextureAligned_p.h
   Fog/G2d/Render/Render_C/PTextureBase_p.h
+  Fog/G2d/Render/Render_C/PTextureOffset_p.h
+  Fog/G2d/Render/Render_C/PTextureProjection_p.h
   Fog/G2d/Render/Render_C/PTextureScale_p.h
 )
 
@@ -1368,6 +1371,7 @@ Set(FOG_SVG_DOM_SOURCES
   Fog/Svg/Dom/SvgMarkerElement.cpp
   Fog/Svg/Dom/SvgMaskElement.cpp
   Fog/Svg/Dom/SvgPathElement.cpp
+  Fog/Svg/Dom/SvgPatternElement.cpp
   Fog/Svg/Dom/SvgPolygonElement.cpp
   Fog/Svg/Dom/SvgPolylineElement.cpp
   Fog/Svg/Dom/SvgRadialGradientElement.cpp
@@ -1414,6 +1418,7 @@ Set(FOG_SVG_DOM_HEADERS
   Fog/Svg/Dom/SvgMarkerElement_p.h
   Fog/Svg/Dom/SvgMaskElement_p.h
   Fog/Svg/Dom/SvgPathElement_p.h
+  Fog/Svg/Dom/SvgPatternElement_p.h
   Fog/Svg/Dom/SvgPolygonElement_p.h
   Fog/Svg/Dom/SvgPolylineElement_p.h
   Fog/Svg/Dom/SvgRadialGradientElement_p.h

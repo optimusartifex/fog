@@ -2338,7 +2338,7 @@ err_t FOG_CDECL RasterPainterImpl_::applyTransformF(Painter& self, uint32_t tran
         // Need to convert parameters from 'Float' precision into 'Double'
         // precision. This is quite low-level.
         //
-        // Please see:
+        // Please see
         //
         //   Fog/G2d/Geometry/Transform.h
         //
@@ -3802,6 +3802,12 @@ struct RasterPainterImpl : public RasterPainterImpl_
 
   static err_t doFillUntransformedPathF(RasterPainterEngine* engine, const PathF& path, uint32_t fillRule, bool clip);
   static err_t doFillUntransformedPathD(RasterPainterEngine* engine, const PathD& path, uint32_t fillRule, bool clip);
+
+  // --------------------------------------------------------------------------
+  // [Painting - Blit]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE err_t doFillAlignedImageI(RasterPainterEngine* engine, const PointI& pt, const Image& srcImage, const RectI& srcFraction);
 };
 
 // ============================================================================
@@ -4278,9 +4284,10 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectF(Painter& self, const RectF& 
   {
     if (!engine->ctx.rasterHints.rectToRectTransform)
     {
-      engine->ctx.tmpPathF[0].clear();
-      engine->ctx.tmpPathF[0].rect(r, PATH_DIRECTION_CW);
-      return doFillUntransformedPathF(engine, engine->ctx.tmpPathF[0], FILL_RULE_NON_ZERO, true);
+      PathF& path = engine->ctx.tmpPathF[0];
+      path.clear();
+      path.rect(r, PATH_DIRECTION_CW);
+      return doFillUntransformedPathF(engine, path, FILL_RULE_NON_ZERO, true);
     }
 
     engine->finalTransformF.mapBox(box, box);
@@ -4303,9 +4310,10 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectD(Painter& self, const RectD& 
   {
     if (!engine->ctx.rasterHints.rectToRectTransform)
     {
-      engine->ctx.tmpPathD[0].clear();
-      engine->ctx.tmpPathD[0].rect(r, PATH_DIRECTION_CW);
-      return doFillUntransformedPathD(engine, engine->ctx.tmpPathD[0], FILL_RULE_NON_ZERO, true);
+      PathD& path = engine->ctx.tmpPathD[0];
+      path.clear();
+      path.rect(r, PATH_DIRECTION_CW);
+      return doFillUntransformedPathD(engine, path, FILL_RULE_NON_ZERO, true);
     }
 
     engine->finalTransformD.mapBox(box, box);
@@ -4317,14 +4325,29 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectD(Painter& self, const RectD& 
     return ERR_OK;
 }
 
+// TODO: It's easy to clip rectangles, so clip them here and call 
+// doFillTransformedPath() instead.
+
 template<int _MODE>
 err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectsI(Painter& self, const RectI* r, sysuint_t count)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
 
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
+  if (engine->ctx.paintHints.geometricPrecision)
+  {
+    PathD& path = engine->ctx.tmpPathD[0];
+    path.clear();
+    path.rects(r, count);
+    return doFillUntransformedPathD(engine, path, FILL_RULE_NON_ZERO, true);
+  }
+  else
+  {
+    PathF& path = engine->ctx.tmpPathF[0];
+    path.clear();
+    path.rects(r, count);
+    return doFillUntransformedPathF(engine, path, FILL_RULE_NON_ZERO, true);
+  }
 }
 
 template<int _MODE>
@@ -4336,9 +4359,11 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectsF(Painter& self, const RectF*
   if (count == 0) return ERR_OK;
   if (count == 1) return fillRectF(self, *r);
 
-  engine->ctx.tmpPathF[0].clear();
-  engine->ctx.tmpPathF[0].rects(r, count, PATH_DIRECTION_CW);
-  return doFillUntransformedPathF(engine, engine->ctx.tmpPathF[0], FILL_RULE_NON_ZERO, true);
+  PathF& path = engine->ctx.tmpPathF[0];
+  path.clear();
+  path.rects(r, count, PATH_DIRECTION_CW);
+
+  return doFillUntransformedPathF(engine, path, FILL_RULE_NON_ZERO, true);
 }
 
 template<int _MODE>
@@ -4350,10 +4375,13 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectsD(Painter& self, const RectD*
   if (count == 0) return ERR_OK;
   if (count == 1) return fillRectD(self, *r);
 
-  engine->ctx.tmpPathD[0].clear();
-  engine->ctx.tmpPathD[0].rects(r, count, PATH_DIRECTION_CW);
-  return doFillUntransformedPathD(engine, engine->ctx.tmpPathD[0], FILL_RULE_NON_ZERO, true);
+  PathD& path = engine->ctx.tmpPathD[0];
+  path.clear();
+  path.rects(r, count, PATH_DIRECTION_CW);
+  return doFillUntransformedPathD(engine, path, FILL_RULE_NON_ZERO, true);
 }
+
+// TODO: It's easy to clip polygon, do it here, PathClipper should be enabled to do that.
 
 template<int _MODE>
 err_t FOG_CDECL RasterPainterImpl<_MODE>::fillPolygonI(Painter& self, const PointI* p, sysuint_t count)
@@ -4363,15 +4391,17 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillPolygonI(Painter& self, const Poin
 
   if (engine->ctx.paintHints.geometricPrecision)
   {
-    engine->ctx.tmpPathD[0].clear();
-    engine->ctx.tmpPathD[0].polygon(p, count, PATH_DIRECTION_CW);
-    return doFillUntransformedPathD(engine, engine->ctx.tmpPathD[0], engine->ctx.paintHints.fillRule, true);
+    PathD& path = engine->ctx.tmpPathD[0];
+    path.clear();
+    path.polygon(p, count, PATH_DIRECTION_CW);
+    return doFillUntransformedPathD(engine, path, engine->ctx.paintHints.fillRule, true);
   }
   else
   {
-    engine->ctx.tmpPathF[0].clear();
-    engine->ctx.tmpPathF[0].polygon(p, count, PATH_DIRECTION_CW);
-    return doFillUntransformedPathF(engine, engine->ctx.tmpPathF[0], engine->ctx.paintHints.fillRule, true);
+    PathF& path = engine->ctx.tmpPathF[0];
+    path.clear();
+    path.polygon(p, count, PATH_DIRECTION_CW);
+    return doFillUntransformedPathF(engine, path, engine->ctx.paintHints.fillRule, true);
   }
 }
 
@@ -4381,9 +4411,10 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillPolygonF(Painter& self, const Poin
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
 
-  engine->ctx.tmpPathF[0].clear();
-  engine->ctx.tmpPathF[0].polygon(p, count, PATH_DIRECTION_CW);
-  return doFillUntransformedPathF(engine, engine->ctx.tmpPathF[0], engine->ctx.paintHints.fillRule, true);
+  PathF& path = engine->ctx.tmpPathF[0];
+  path.clear();
+  path.polygon(p, count, PATH_DIRECTION_CW);
+  return doFillUntransformedPathF(engine, path, engine->ctx.paintHints.fillRule, true);
 }
 
 template<int _MODE>
@@ -4392,9 +4423,10 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillPolygonD(Painter& self, const Poin
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
 
-  engine->ctx.tmpPathD[0].clear();
-  engine->ctx.tmpPathD[0].polygon(p, count, PATH_DIRECTION_CW);
-  return doFillUntransformedPathD(engine, engine->ctx.tmpPathD[0], engine->ctx.paintHints.fillRule, true);
+  PathD& path = engine->ctx.tmpPathD[0];
+  path.clear();
+  path.polygon(p, count, PATH_DIRECTION_CW);
+  return doFillUntransformedPathD(engine, path, engine->ctx.paintHints.fillRule, true);
 }
 
 template<int _MODE>
@@ -4406,9 +4438,10 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillShapeF(Painter& self, uint32_t sha
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
 
-  engine->ctx.tmpPathF[0].clear();
-  engine->ctx.tmpPathF[0]._shape(shapeType, shapeData, PATH_DIRECTION_CW, NULL);
-  return doFillUntransformedPathF(engine, engine->ctx.tmpPathF[0], engine->ctx.paintHints.fillRule, true);
+  PathF& path = engine->ctx.tmpPathF[0];
+  path.clear();
+  path._shape(shapeType, shapeData, PATH_DIRECTION_CW, NULL);
+  return doFillUntransformedPathF(engine, path, engine->ctx.paintHints.fillRule, true);
 }
 
 template<int _MODE>
@@ -4420,9 +4453,10 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillShapeD(Painter& self, uint32_t sha
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
 
-  engine->ctx.tmpPathD[0].clear();
-  engine->ctx.tmpPathD[0]._shape(shapeType, shapeData, PATH_DIRECTION_CW, NULL);
-  return doFillUntransformedPathD(engine, engine->ctx.tmpPathD[0], engine->ctx.paintHints.fillRule, true);
+  PathD& path = engine->ctx.tmpPathD[0];
+  path.clear();
+  path._shape(shapeType, shapeData, PATH_DIRECTION_CW, NULL);
+  return doFillUntransformedPathD(engine, path, engine->ctx.paintHints.fillRule, true);
 }
 
 template<int _MODE>
@@ -4582,13 +4616,84 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtI(Painter& self, const Poin
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
 
-  return ERR_RT_NOT_IMPLEMENTED;
+  switch (engine->finalTransformI._type)
+  {
+    case RASTER_INTEGRAL_TRANSFORM_NULL:
+    {
+      if (engine->ctx.paintHints.geometricPrecision)
+        return engine->vtable->blitImageAtD(self, PointD(p), i, ir);
+      else
+        return engine->vtable->blitImageAtF(self, PointF(p), i, ir);
+    }
+
+    case RASTER_INTEGRAL_TRANSFORM_SIMPLE:
+    {
+      int srcX = 0;
+      int srcY = 0;
+      int dstX = p.x + engine->finalTransformI._tx;
+      int dstY = p.y + engine->finalTransformI._ty;
+      int dstW = i.getWidth();
+      int dstH = i.getHeight();
+
+      if (ir != NULL)
+      {
+        if (!ir->isValid()) return ERR_OK;
+
+        srcX = ir->x; if (srcX < 0) return ERR_RT_INVALID_ARGUMENT;
+        srcY = ir->y; if (srcY < 0) return ERR_RT_INVALID_ARGUMENT;
+
+        dstW = Math::min(dstW, ir->w); if (dstW == 0) return ERR_OK;
+        dstH = Math::min(dstH, ir->h); if (dstH == 0) return ERR_OK;
+      }
+
+      int d;
+
+      if ((uint)(d = dstX - engine->ctx.finalClipBoxI.x1) >= (uint)engine->ctx.finalClipBoxI.getWidth())
+      {
+        dstX = 0; srcX = -d; if (d >= 0 || (dstW += d) <= 0) return ERR_OK;
+      }
+
+      if ((uint)(d = dstY - engine->ctx.finalClipBoxI.y1) >= (uint)engine->ctx.finalClipBoxI.getHeight())
+      {
+        dstY = 0; srcY = -d; if (d >= 0 || (dstH += d) <= 0) return ERR_OK;
+      }
+
+      if ((d = engine->ctx.finalClipBoxI.x1 - dstX) < dstW) dstW = d;
+      if ((d = engine->ctx.finalClipBoxI.y1 - dstY) < dstH) dstH = d;
+
+      return doFillAlignedImageI(engine, PointI(dstX, dstY), i, RectI(srcX, srcY, dstW, dstH));
+    }
+
+    case RASTER_INTEGRAL_TRANSFORM_SCALING:
+    {
+      // TODO:
+      break;
+    }
+
+    case RASTER_INTEGRAL_TRANSFORM_ROTATION:
+    {
+      // TODO:
+      break;
+    }
+
+    default:
+      FOG_ASSERT_NOT_REACHED();
+  }
+
+  return ERR_RT_INVALID_STATE;
 }
  
 template<int _MODE>
 err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtF(Painter& self, const PointF& p, const Image& i, const RectI* ir)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
+
+  if (ensureFinalTransformF(engine) && engine->finalTransformF.getType() > TRANSFORM_TYPE_TRANSLATION)
+  {
+  }
+  else
+  {
+  }
 
   return ERR_RT_NOT_IMPLEMENTED;
 }
@@ -5139,6 +5244,25 @@ err_t RasterPainterImpl<_MODE>::doFillUntransformedPathD(RasterPainterEngine* en
   {
     // TODO:
     return ERR_RT_NOT_IMPLEMENTED;
+  }
+}
+
+// ============================================================================
+// [Fog::RasterPainterImpl<> - Blit]
+// ============================================================================
+
+template<int _MODE>
+err_t FOG_INLINE RasterPainterImpl<_MODE>::doFillAlignedImageI(RasterPainterEngine* engine, 
+  const PointI& pt, const Image& srcImage, const RectI& srcFraction)
+{
+  if (_MODE == RASTER_MODE_ST)
+  {
+    engine->ctx.renderer->blitAlignedImageI(engine->ctx, pt, srcImage, srcFraction);
+    return ERR_OK;
+  }
+  else
+  {
+    // TODO:
   }
 }
 

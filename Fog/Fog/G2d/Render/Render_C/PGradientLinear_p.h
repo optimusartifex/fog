@@ -46,18 +46,18 @@ struct FOG_NO_EXPORT PGradientLinear
     solid.prgb32.p32 = stops.getAt(stops.getLength()-1).getArgb32();
     Face::p32PRGB32FromARGB32(solid.prgb32.p32, solid.prgb32.p32);
 
-    // --------------------------------------------------------------------
+    // ------------------------------------------------------------------------
     // [Solid]
-    // --------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     if (stops.getLength() < 2 || !isInverted)
     {
       return Helpers::p_solid_create(ctx, dstFormat, solid);
     }
 
-    // --------------------------------------------------------------------
+    // ------------------------------------------------------------------------
     // [Prepare]
-    // --------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     typename PointT<Number>::T origin;
     typename PointT<Number>::T pd = gradient._pts[1] - gradient._pts[0];
@@ -76,9 +76,9 @@ struct FOG_NO_EXPORT PGradientLinear
     FOG_RETURN_ON_ERROR(PGradientBase::create(ctx, dstFormat, clipBox, spread, stops));
     int tableLength = ctx->_d.gradient.base.len;
 
-    // --------------------------------------------------------------------
+    // ------------------------------------------------------------------------
     // [Simple]
-    // --------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     if (tr.getType() <= TRANSFORM_TYPE_AFFINE)
     {
@@ -108,9 +108,9 @@ struct FOG_NO_EXPORT PGradientLinear
       ctx->_skip = skip_simple;
     }
 
-    // --------------------------------------------------------------------
+    // ------------------------------------------------------------------------
     // [Projection]
-    // --------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     else
     {
@@ -259,7 +259,10 @@ _FetchForwardSkip:
         goto _FetchSolidLoop;
 
 _FetchBackwardSkip:
-        P_FETCH_SPAN8_NEXT()
+        P_FETCH_SPAN8_HOLE(
+        {
+          pos += hole * xx;
+        })
       P_FETCH_SPAN8_END()
 
       goto _End;
@@ -326,7 +329,8 @@ _End:
 
         P_FETCH_SPAN8_HOLE(
         {
-          pos = (pos + xx * hole) % len;
+          pos += xx * hole;
+          if (pos > len) pos %= len;
         })
       P_FETCH_SPAN8_END()
     }
@@ -348,7 +352,8 @@ _End:
 
         P_FETCH_SPAN8_HOLE(
         {
-          pos = (pos + xx * hole) % len;
+          pos += xx * hole;
+          if (pos > len) pos %= len;
           if (pos < 0) pos += len;
         })
       P_FETCH_SPAN8_END()

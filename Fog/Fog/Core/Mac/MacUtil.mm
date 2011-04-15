@@ -14,15 +14,22 @@
 
 namespace Fog {
 
-AutoNSAutoreleasePool::AutoNSAutoreleasePool()
+ScopedAutoreleasePool::ScopedAutoreleasePool()
 {
   _pool = [[NSAutoreleasePool alloc] init];
 }
 
-AutoNSAutoreleasePool::~AutoNSAutoreleasePool()
+ScopedAutoreleasePool::~ScopedAutoreleasePool()
 {
-  [_pool release];
+   [_pool drain];
 }
+
+void ScopedAutoreleasePool::recycle()
+{
+  [_pool drain];
+  _pool = [[NSAutoreleasePool alloc] init];
+}
+
 
 // ============================================================================
 

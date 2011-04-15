@@ -58,7 +58,7 @@ struct FOG_API MacFontEngine : public FontEngine
 private:
   FOG_DISABLE_COPY(MacFontEngine)
 
-  AutoNSAutoreleasePool _pool;
+  ScopedAutoreleasePool pool;
 };
 
 // ============================================================================

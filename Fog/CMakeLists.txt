@@ -868,6 +868,16 @@ Set_Source_Files_Properties(
   PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}"
 )
 
+# [Fog/G2d/Mac]
+If(FOG_OS_MAC)
+  Set(FOG_G2D_MAC_SOURCES 
+    Fog/G2d/Mac/MacUtil.mm
+  )
+  Set(FOG_G2D_MAC_HEADERS
+    Fog/G2d/Mac/MacUtil.h
+  )
+EndIf(FOG_OS_MAC)
+
 # [Fog/G2d/Painting]
 Set(FOG_G2D_PAINTING_SOURCES
   Fog/G2d/Painting/Painter.cpp
@@ -1155,6 +1165,10 @@ Source_Group("G2d/Source"           FILES ${FOG_G2D_SOURCE_SOURCES}           ${
 Source_Group("G2d/Text"             FILES ${FOG_G2D_TEXT_SOURCES}             ${FOG_G2D_TEXT_HEADERS}            )
 Source_Group("G2d/Tools"            FILES ${FOG_G2D_TOOLS_SOURCES}            ${FOG_G2D_TOOLS_HEADERS}           )
 
+If(FOG_OS_MAC)
+Source_Group("G2d/Mac"              FILES ${FOG_G2D_MAC_SOURCES}              ${FOG_G2D_MAC_HEADERS}             )
+EndIf(FOG_OS_MAC)
+
 # =============================================================================
 # [Fog-Gui]
 # =============================================================================
@@ -1162,8 +1176,8 @@ Source_Group("G2d/Tools"            FILES ${FOG_G2D_TOOLS_SOURCES}            ${
 # Gui backends.
 If(FOG_OS_WINDOWS)
   Set(FOG_GUI_WINDOWS 1)
-ElseIf(FOG_OS_MAC)
-  # TODO: Mac Gui Engine.
+ElseIf(APPLE)
+  Set(FOG_GUI_MAC 1)
 Else()
   Set(FOG_GUI_X11 1)
 EndIf()
@@ -1215,6 +1229,14 @@ Set(FOG_GUI_ENGINE_SOURCES
 
 Set(FOG_GUI_ENGINE_HEADERS
   Fog/Gui/Engine/GuiEngine.h
+)
+
+Set(FOG_GUI_ENGINE_MAC_SOURCES 
+  Fog/Gui/Engine/MacGuiEngine.mm
+)
+
+Set(FOG_GUI_ENGINE_MAC_HEADERS 
+  Fog/Gui/Engine/MacGuiEngine.h
 )
 
 Set(FOG_GUI_ENGINE_WIN_SOURCES
@@ -1324,6 +1346,7 @@ Source_Group("Gui"                  FILES ${FOG_GUI_LIB_SOURCES}              ${
 Source_Group("Gui/Animation"        FILES ${FOG_GUI_ANIMATION_SOURCES}        ${FOG_GUI_ANIMATION_HEADERS}       )
 Source_Group("Gui/Canvas"           FILES ${FOG_GUI_CANVAS_SOURCES}           ${FOG_GUI_CANVAS_HEADERS}          )
 Source_Group("Gui/Engine"           FILES ${FOG_GUI_ENGINE_SOURCES}           ${FOG_GUI_ENGINE_HEADERS}
+                                          ${FOG_GUI_ENGINE_MAC_SOURCES}       ${FOG_GUI_ENGINE_MAC_SOURCES}
                                           ${FOG_GUI_ENGINE_X11_SOURCES}       ${FOG_GUI_ENGINE_X11_HEADERS}
                                           ${FOG_GUI_ENGINE_WIN_SOURCES}       ${FOG_GUI_ENGINE_WIN_HEADERS}      )
 Source_Group("Gui/Global"           FILES ${FOG_GUI_GLOBAL_SOURCES}           ${FOG_GUI_GLOBAL_HEADERS}          )
@@ -1678,6 +1701,11 @@ If(FOG_OS_MAC)
   List(APPEND FOG_ALL_HEADERS ${FOG_CORE_MAC_HEADERS})
 EndIf(FOG_OS_MAC)
 
+If(FOG_GUI_MAC)
+  List(APPEND FOG_ALL_SOURCES ${FOG_GUI_ENGINE_MAC_SOURCES})
+  List(APPEND FOG_ALL_HEADERS ${FOG_GUI_ENGINE_MAC_HEADERS})
+EndIf(FOG_GUI_MAC)
+
 If(FOG_OS_WINDOWS)
   List(APPEND FOG_ALL_SOURCES ${FOG_CORE_WIN_SOURCES})
   List(APPEND FOG_ALL_HEADERS ${FOG_CORE_WIN_HEADERS})
@@ -1731,7 +1759,7 @@ If(FOG_BUILD_EXAMPLES)
     FogTest
   )
   ForEach(file ${FOG_EXAMPLE_SOURCES})
-    Add_Executable(${file} WIN32 Examples/${file})
+    Add_Executable(${file} WIN32 MACOSX_BUNDLE Examples/${file})
     Target_Link_Libraries(${file} Fog ${FOG_LIBRARIES})
   EndForEach(file)
 EndIf(FOG_BUILD_EXAMPLES)

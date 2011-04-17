@@ -106,7 +106,6 @@ MacFontFace::MacFontFace() :
 
 MacFontFace::~MacFontFace()
 {
-  [font release];
 }
 
 err_t MacFontFace::getGlyphSet(const Char* str, sysuint_t length, GlyphSet& glyphSet)

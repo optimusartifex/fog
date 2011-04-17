@@ -10,7 +10,13 @@
 #include <Fog/G2d/Mac/MacUtil.h>
 #include <Fog/Gui/Engine/MacGuiEngine.h>
 #include <Fog/Gui/Widget/Widget.h>
+#include <limits>
 
+#include <IOKit/IOMessage.h>
+#include <IOKit/pwr_mgt/IOPMLib.h>
+
+#import <AppKit/AppKit.h>
+#import <Foundation/Foundation.h>
 #import <Cocoa/Cocoa.h>
 
 FOG_IMPLEMENT_OBJECT(Fog::MacGuiEngine)
@@ -53,13 +59,15 @@ FOG_IMPLEMENT_OBJECT(Fog::MacGuiWindow)
 
 @implementation FogWindow 
 
-- (id)init:(Fog::MacGuiWindow*)fogWindow_ withFrame:(NSRect)frame
+- (id)init:(Fog::MacGuiWindow*)fogWindow_ frame:(NSRect)frame styleMask:(NSUInteger)style contentView:(NSView*)view
 {
   if (self = [super initWithContentRect: frame
-                              styleMask: NSResizableWindowMask
+                              styleMask: style
                                 backing: NSBackingStoreBuffered
                                   defer: NO])
   {
+    [self setContentView:view];
+    
     // initialize notifications
     NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
     
@@ -114,10 +122,10 @@ FOG_IMPLEMENT_OBJECT(Fog::MacGuiWindow)
 
 - (void)keyUp:(NSEvent*)event
 {
-  //using namespace Fog;
-  //
-  //uint32_t ch = (uint32_t)[[event charactersIgnoringModifiers] characterAtIndex:0];
-  //fogWindow->onKeyRelease(ch, 0, 0, (Char)ch);
+  using namespace Fog;
+  
+  uint32_t ch = (uint32_t)[[event charactersIgnoringModifiers] characterAtIndex:0];
+  fogWindow->onKeyRelease(ch, 0, 0, (Char)ch);
 }
 
 - (void)rightMouseUp:(NSEvent*)event
@@ -184,11 +192,11 @@ static void createApplicationMenu()
   // -----------------------------------------------------------------------------------
   {
     NSMenu* mainMenu = [[NSMenu alloc] initWithTitle:@"MainMenu"];
-	  
-	  // ---------------------------------------------------------------------------------
-	  // [Create Apple Menu]
-	  // ---------------------------------------------------------------------------------
-	  {
+    
+    // ---------------------------------------------------------------------------------
+    // [Create Apple Menu]
+    // ---------------------------------------------------------------------------------
+    {
 	    NSMenuItem* appleMenu = [mainMenu addItemWithTitle:@"Apple" action:NULL keyEquivalent:@""];
 	    NSMenu* submenu = [[NSMenu alloc] initWithTitle:@"Apple"];
 
@@ -354,8 +362,10 @@ err_t MacGuiWindow::create(uint32_t flags)
   
 
   NSRect frame = NSMakeRect(_widget->getX(), _widget->getY(), 500, 500);    
-  window = [[FogWindow alloc] init:this withFrame:frame];
-  [window setContentView: [[FogView alloc] init]];
+  window = [[FogWindow alloc] init: this
+                             frame: frame
+                         styleMask: styleMask
+                       contentView: [[FogView alloc] init]];
 
 	return ERR_OK;
 }
@@ -668,56 +678,142 @@ void MacGuiBackBuffer::updateRects(FogView* view, const BoxI* rects, sysuint_t c
 // [MacEventLoop]
 // ==============================================================================
 
-void MacEventLoop::_runInternal()
+const CFTimeInterval kCFTimeIntervalMax = std::numeric_limits<CFTimeInterval>::max();
+
+MacEventLoopBase::MacEventLoopBase() : 
+ EventLoop(Ascii8("Gui.Mac"))
 {
-  ScopedAutoreleasePool pool; 
+  _delayedWorkFireTime_ = kCFTimeIntervalMax;
+
+  _runLoop = CFRunLoopGetCurrent();
+  CFRetain(_runLoop);
   
-  for (;;)
+  // Set a repeating timer with a preposterous firing time and interval.  The
+  // timer will effectively never fire as-is.  The firing time will be adjusted
+  // as needed when ScheduleDelayedWork is called.
+  CFRunLoopTimerContext timerContext = CFRunLoopTimerContext();
+  timerContext.info = this;
+  _delayedWorkTimer = CFRunLoopTimerCreate(NULL,                // allocator
+                                             kCFTimeIntervalMax,  // fire time
+                                             kCFTimeIntervalMax,  // interval
+                                             0,                   // flags
+                                             0,                   // priority
+                                             runDelayedWorkTimer,
+                                             &timerContext);
+  CFRunLoopAddTimer(_runLoop, _delayedWorkTimer, kCFRunLoopCommonModes);
+  
+  // run work has 1st priority
+  CFRunLoopSourceContext sourceContext = CFRunLoopSourceContext();
+  sourceContext.info = this;
+  sourceContext.perform = runWorkSource;
+  _workSource = CFRunLoopSourceCreate(NULL, 1, &sourceContext);
+  CFRunLoopAddSource(_runLoop, _workSource, kCFRunLoopCommonModes);
+  
+  // run delayed work has 2nd priority
+  sourceContext.perform = runDelayedWorkSource;
+  _delayedWorkSource = CFRunLoopSourceCreate(NULL, 2, &sourceContext);
+  CFRunLoopAddSource(_runLoop, _delayedWorkSource, kCFRunLoopCommonModes);
+  
+  // run idle work has 3rd priority
+  sourceContext.perform = runIdleWorkSource;
+  _idleWorkSource = CFRunLoopSourceCreate(NULL, 3, &sourceContext);
+  CFRunLoopAddSource(_runLoop, _idleWorkSource, kCFRunLoopCommonModes);
+}
+
+MacEventLoopBase::~MacEventLoopBase()
+{
+  CFRunLoopRemoveSource(_runLoop, _idleWorkSource, kCFRunLoopCommonModes);
+  CFRelease(_idleWorkSource);
+
+  CFRunLoopRemoveSource(_runLoop, _delayedWorkSource, kCFRunLoopCommonModes);
+  CFRelease(_delayedWorkSource);
+
+  CFRunLoopRemoveSource(_runLoop, _workSource, kCFRunLoopCommonModes);
+  CFRelease(_workSource);
+
+  CFRunLoopRemoveTimer(_runLoop, _delayedWorkTimer, kCFRunLoopCommonModes);
+  CFRelease(_delayedWorkTimer);
+
+  CFRelease(_runLoop);
+}
+
+void MacEventLoopBase::_runInternal()
+{
+  CFRunLoopSourceSignal(_workSource);
+  CFRunLoopSourceSignal(_delayedWorkSource);
+  CFRunLoopSourceSignal(_idleWorkSource);
+  
+  _doRunInternal();
+}
+
+void MacEventLoopBase::_scheduleWork()
+{
+  CFRunLoopSourceSignal(_workSource);
+  CFRunLoopWakeUp(_runLoop);
+}
+
+void MacEventLoopBase::_scheduleDelayedWork(const Time& delayedWorkTime)
+{
+  Time::Exploded now;
+  delayedWorkTime.utcExplode(&now);
+  double seconds = now.second + (static_cast<double>((delayedWorkTime.toInternalValue()) % Time::MicrosecondsPerSecond) /
+                                                      Time::MicrosecondsPerSecond);
+  CFGregorianDate gregorian = { now.year, now.month, now.dayOfMonth, now.hour,now.minute, seconds };
+  _delayedWorkFireTime_ = CFGregorianDateGetAbsoluteTime(gregorian, NULL);
+
+  CFRunLoopTimerSetNextFireDate(_delayedWorkTimer, _delayedWorkFireTime_);
+}
+
+void MacEventLoopBase::runDelayedWorkTimer(CFRunLoopTimerRef timer, void* info)
+{
+  MacEventLoopBase* self = static_cast<MacEventLoopBase*>(info);
+  self->_delayedWorkFireTime_ = kCFTimeIntervalMax;
+  CFRunLoopSourceSignal(self->_delayedWorkSource);
+}
+
+bool MacEventLoopBase::runWork()
+{
+  bool did_work = _doWork();
+  if (did_work) CFRunLoopSourceSignal(_workSource);
+  return did_work;
+}
+
+bool MacEventLoopBase::runDelayedWork()
+{
+  _doDelayedWork(&_delayedWorkTime);
+
+  bool more_work = !_delayedWorkTime.isNull();
+  if (!more_work) return false;
+
+  TimeDelta delay = _delayedWorkTime - Time::now();
+  if (delay > TimeDelta()) _scheduleDelayedWork(_delayedWorkTime);
+  else CFRunLoopSourceSignal(_delayedWorkSource); // direct comeback!
+
+  return true;
+}
+
+// Called by MacEventLoopBase::runIdleWorkSource.
+bool MacEventLoopBase::runIdleWork()
+{
+  bool did_work = _doIdleWork();
+  if (did_work) CFRunLoopSourceSignal(_idleWorkSource);
+  return did_work;
+}
+
+void MacMainEventLoop::_doRunInternal()
+{
+  if (![NSApp isRunning])
   {
-    pool.recycle();
-    
-    // highest priority task: Process next events
-    NSEvent *event =
-        [NSApp
-            nextEventMatchingMask:NSAnyEventMask
-            untilDate:[NSDate distantFuture]
-            inMode:NSDefaultRunLoopMode
-            dequeue:YES];
-    [NSApp sendEvent:event];
-    [NSApp updateWindows];
-    if (_quitting) break;
-    
-    // doWork
-    bool didWork = _doWork();
-    if (_quitting) break;
-    
-    // doDelayedWork (TODO: _delayedWorkTime)
-    didWork |= _doDelayedWork(&_delayedWorkTime);
-    if (_quitting) break;
-    if (didWork) continue;
-    
-    // doIdleWork
-    didWork = _doIdleWork();
-    if (_quitting) break;
-    if (didWork) continue;
+    [NSApp run];
   }
 }
 
-void MacEventLoop::quit()
+void MacMainEventLoop::quit()
 {
   [NSApp terminate:nil];
 }
 
-void MacEventLoop::_scheduleWork()
-{
-  Debug::dbgFormat("scheduleWork");
-}
-
-void MacEventLoop::_scheduleDelayedWork(const Time& delayedWorkTime)
-{
-  _delayedWorkTime = delayedWorkTime;
-}
-
 } // namespace Fog
+
 
 #endif // defined(FOG_OS_MAC)

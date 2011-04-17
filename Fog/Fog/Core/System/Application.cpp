@@ -32,6 +32,8 @@
 # include <Fog/Gui/Engine/WinGuiEngine.h>
 // windows.h is already included by Fog/Core/Config/Config.h
 # include <io.h>
+#elif defined(FOG_OS_MAC)
+# include <Fog/Gui/Engine/MacGuiEngine.h>
 #else
 # include <errno.h>
 # if defined(FOG_HAVE_UNISTD_H)
@@ -419,6 +421,8 @@ String Application::detectGuiEngine()
 {
 #if defined(FOG_OS_WINDOWS)
   return Ascii8("Gui.Windows");
+#elif defined(FOG_OS_MAC)
+  return Ascii8("Gui.Mac");
 #elif defined(FOG_OS_POSIX)
   return Ascii8("Gui.X11");
 #endif // FOG_OS_POSIX
@@ -514,7 +518,12 @@ FOG_NO_EXPORT void _core_application_init(void)
     Application::registerGuiEngineType<WinGuiEngine>(winGuiEngineName);
     Application::registerEventLoopType<WinGuiEventLoop>(winGuiEngineName);
   }
-#endif // FOG_OS_WINDOWS
+#elif defined(FOG_OS_MAC)
+  {
+    Application::registerGuiEngineType<MacGuiEngine>(Ascii8("Gui.Mac"));
+    Application::registerEventLoopType<MacMainEventLoop>(Ascii8("Gui.Mac"));
+  }
+#endif
 }
 
 FOG_NO_EXPORT void _core_application_fini(void)

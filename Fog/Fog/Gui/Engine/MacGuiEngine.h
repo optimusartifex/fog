@@ -15,12 +15,16 @@
 #include <Fog/Gui/Engine/GuiEngine.h>
 #include <Fog/Core/Mac/MacUtil.h>
 
+#include <CoreFoundation/CoreFoundation.h>
+
 #ifdef __OBJC__
 @class NSEvent;
+@class NSRunLoop;
 @class FogView;          		// see MacGuiEngine.mm
 @class FogWindow;        		// see MacGuiEngine.mm
 #else
 class NSEvent;
+class NSRunLoop;
 class FogView;
 class FogWindow;
 #endif
@@ -161,25 +165,72 @@ struct FOG_API MacGuiBackBuffer : public GuiBackBuffer
 };
 
 // ============================================================================
-// [Fog::MacGuiEventLoop]
+// [Fog::MacEventLoop]
 // ============================================================================
 
-struct FOG_API MacEventLoop : public EventLoop
+// @brief Using CFRunLoop
+struct MacEventLoopBase : public EventLoop
 {
-  MacEventLoop() :
-   EventLoop(Ascii8("Gui.Mac"))
-  {}
+  MacEventLoopBase();
+  virtual ~MacEventLoopBase();
 
-  virtual ~MacEventLoop() {}
-
-  virtual void quit();
+  virtual void quit() = 0;
 
 protected:
   virtual void _runInternal();
   virtual void _scheduleWork();
   virtual void _scheduleDelayedWork(const Time& delayedWorkTime);
-  
+
+  // Subclasses implement the work they need to do in _doRunInternal().
+  // MacEventLoopBase will call this from _runInternal(). 
+  virtual void _doRunInternal() = 0;
+
+  // Accessors for private data members to be used by subclasses.
+  FOG_INLINE CFRunLoopRef runLoop() const { return _runLoop; }
+
+private:
+  // Timer callback scheduled by _scheduleDelayedWork.  This does not do any
+  // work, but it signals _delayedWorkSource so that delayed work can be
+  // performed within the appropriate priority constraints.
+  CFRunLoopTimerRef _delayedWorkTimer;
+  static void runDelayedWorkTimer(CFRunLoopTimerRef timer, void* info);
+
+  CFRunLoopSourceRef _workSource;
+  FOG_INLINE static void runWorkSource(void* info) { static_cast<MacEventLoopBase*>(info)->runWork(); }
+  bool runWork();
+
+  CFRunLoopSourceRef _delayedWorkSource;
+  FOG_INLINE static void runDelayedWorkSource(void* info) { static_cast<MacEventLoopBase*>(info)->runDelayedWork(); }
+  bool runDelayedWork();
+
+  CFRunLoopSourceRef _idleWorkSource;
+  FOG_INLINE static void runIdleWorkSource(void* info) { static_cast<MacEventLoopBase*>(info)->runIdleWork(); }
+  bool runIdleWork();
+
+  // The thread's run loop.
+  CFRunLoopRef _runLoop;
+
+  // The time that _delayedWorkTimer is scheduled to fire.  This is tracked
+  // independently of CFRunLoopTimerGetNextFireDate(_delayedWorkTimer)
+  // to be able to reset the timer properly after waking from system sleep.
+  // See PowerStateNotification.
+  CFAbsoluteTime _delayedWorkFireTime_;
+
   Time _delayedWorkTime;
+};
+
+// @brief Using NSRunLoop
+struct FOG_API MacNonMainEventLoop : public MacEventLoopBase
+{
+  virtual void quit();
+  virtual void _doRunInternal();
+};
+
+// @brief Using NSApplication
+struct FOG_API MacMainEventLoop : public MacEventLoopBase
+{
+  virtual void quit();
+  virtual void _doRunInternal();
 };
 
 //! @}

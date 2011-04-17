@@ -739,10 +739,10 @@ MacEventLoopBase::~MacEventLoopBase()
 
 void MacEventLoopBase::_runInternal()
 {
-  CFRunLoopSourceSignal(_workSource);
-  CFRunLoopSourceSignal(_delayedWorkSource);
-  CFRunLoopSourceSignal(_idleWorkSource);
-  
+  // CFRunLoopSourceSignal(_workSource);
+  // CFRunLoopSourceSignal(_delayedWorkSource);
+  // CFRunLoopSourceSignal(_idleWorkSource);
+  // 
   _doRunInternal();
 }
 

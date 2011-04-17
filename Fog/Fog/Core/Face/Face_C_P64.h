@@ -661,6 +661,16 @@ static FOG_INLINE void p64Pack2031(p32& dst0, const p64& x0)
 #endif
 }
 
+//! @brief Pack u64_1x4b value into DWORD.
+static FOG_INLINE void p64Pack2031_RShift8(p32& dst0, const p64& x0)
+{
+#if defined(FOG_FACE_P64_IS_TYPE)
+  dst0 = (uint32_t)(_FOG_FACE_COMBINE_2(_U64(x0 >> 8), _U64(x0) >> 32));
+#else
+  dst0 = (uint32_t)(_FOG_FACE_COMBINE_2(_FOG_FACE_U64_LO(x0) >> 8, _FOG_FACE_U64_HI(x0)));
+#endif
+}
+
 // ============================================================================
 // [Fog::Face - P64 - Unpack]
 // ============================================================================
@@ -670,7 +680,7 @@ static FOG_INLINE void p64UnpackPBWFromPBB2031(
   p64& dst0, const p32& x0)
 {
 #if defined(FOG_FACE_P64_IS_TYPE)
-  _U64(dst0) = _FOG_FACE_COMBINE_2(x0, x0 << 24) & FOG_UINT64_C(0x00FF00FF00FF00FF);
+  _U64(dst0) = (uint64_t)((uint64_t)x0 | ((uint64_t)x0 << 24)) & FOG_UINT64_C(0x00FF00FF00FF00FF);
 #else
   dst0.u32Lo = (x0     ) & 0x00FF00FFU;
   dst0.u32Hi = (x0 >> 8) & 0x00FF00FFU;
@@ -682,7 +692,7 @@ static FOG_INLINE void p64UnpackPBWFromPBB2031(
   p64& dst0, const p64& x0)
 {
 #if defined(FOG_FACE_P64_IS_TYPE)
-  _U64(dst0) = _FOG_FACE_COMBINE_2(_U64(x0), _U64(x0) << 24) & FOG_UINT64_C(0x00FF00FF00FF00FF);
+  _U64(dst0) = (uint64_t)(_U64(x0) | (_U64(x0) << 24)) & FOG_UINT64_C(0x00FF00FF00FF00FF);
 #else
   dst0.u32Lo = (x0.u32Lo     ) & 0x00FF00FFU;
   dst0.u32Hi = (x0.u32Lo >> 8) & 0x00FF00FFU;
@@ -694,7 +704,7 @@ static FOG_INLINE void p64UnpackPBWFromPBB20Z1(
   p64& dst0, const p32& x0)
 {
 #if defined(FOG_FACE_P64_IS_TYPE)
-  _U64(dst0) = _FOG_FACE_COMBINE_2(x0, x0 << 24) & FOG_UINT64_C(0x000000FF00FF00FF);
+  _U64(dst0) = (uint64_t)((uint64_t)x0 | ((uint64_t)x0 << 24)) & FOG_UINT64_C(0x000000FF00FF00FF);
 #else
   dst0.u32Lo = (x0     ) & 0x00FF00FFU;
   dst0.u32Hi = (x0 >> 8) & 0x000000FFU;
@@ -706,7 +716,7 @@ static FOG_INLINE void p64UnpackPBWFromPBB20Z1(
   p64& dst0, const p64& x0)
 {
 #if defined(FOG_FACE_P64_IS_TYPE)
-  _U64(dst0) = _FOG_FACE_COMBINE_2(x0, x0 << 24) & FOG_UINT64_C(0x000000FF00FF00FF);
+  _U64(dst0) = (uint64_t)(x0 | (x0 << 24)) & FOG_UINT64_C(0x000000FF00FF00FF);
 #else
   dst0.u32Lo = (x0.u32Lo     ) & 0x00FF00FFU;
   dst0.u32Hi = (x0.u32Lo >> 8) & 0x000000FFU;

@@ -364,7 +364,8 @@ struct FOG_NO_EXPORT CConvert
   static void FOG_FASTCALL pass_one_preprocess(
     uint8_t* dst, const uint8_t* src, int w, const RenderClosure* closure)
   {
-    const RenderConverterMulti* multi = reinterpret_cast<const RenderConverterMulti*>(closure->data);
+    const ImageConverterData* d = reinterpret_cast<const ImageConverterData*>(closure->data);
+    const RenderConverterMulti* multi = reinterpret_cast<const RenderConverterMulti*>(d->buffer);
 
     int step = (int)multi->step;
     FOG_ASSUME(step > 0);
@@ -384,7 +385,7 @@ struct FOG_NO_EXPORT CConvert
 
       // Convert.
       passClosure.data = (void*)&multi->pass[0];
-      multi->blit[1](dst, buffer, step, &passClosure);
+      multi->blit[0](dst, buffer, step, &passClosure);
 
       // Advance.
       if ((w -= step) == 0) break;
@@ -398,7 +399,8 @@ struct FOG_NO_EXPORT CConvert
   static void FOG_FASTCALL pass_one_postprocess(
     uint8_t* dst, const uint8_t* src, int w, const RenderClosure* closure)
   {
-    const RenderConverterMulti* multi = reinterpret_cast<const RenderConverterMulti*>(closure->data);
+    const ImageConverterData* d = reinterpret_cast<const ImageConverterData*>(closure->data);
+    const RenderConverterMulti* multi = reinterpret_cast<const RenderConverterMulti*>(d->buffer);
 
     RenderClosure passClosure;
     passClosure.ditherOrigin = closure->ditherOrigin;
@@ -406,7 +408,7 @@ struct FOG_NO_EXPORT CConvert
 
     // Convert.
     passClosure.data = (void*)&multi->pass[0];
-    multi->blit[1](dst, src, w, &passClosure);
+    multi->blit[0](dst, src, w, &passClosure);
 
     // Color-space conversion (middleware).
     multi->middleware(dst, dst, w, &passClosure);
@@ -415,7 +417,8 @@ struct FOG_NO_EXPORT CConvert
   static void FOG_FASTCALL pass_two(
     uint8_t* dst, const uint8_t* src, int w, const RenderClosure* closure)
   {
-    const RenderConverterMulti* multi = reinterpret_cast<const RenderConverterMulti*>(closure->data);
+    const ImageConverterData* d = reinterpret_cast<const ImageConverterData*>(closure->data);
+    const RenderConverterMulti* multi = reinterpret_cast<const RenderConverterMulti*>(d->buffer);
 
     int step = (int)multi->step;
     FOG_ASSUME(step > 0);
@@ -812,6 +815,38 @@ struct FOG_NO_EXPORT CConvert
       src += 8;
     } while (--w);
 #endif // FOG_ARCH_BITS
+  }
+
+  // ==========================================================================
+  // [Convert - Premultiply / Demultiply]
+  // ==========================================================================
+
+  static void FOG_FASTCALL prgb32_from_argb32(
+    uint8_t* dst, const uint8_t* src, int w, const RenderClosure* closure)
+  {
+    do {
+      Face::p32 c0;
+      Face::p32Load4aNative(c0, src);
+      Face::p32PRGB32FromARGB32(c0, c0);
+      Face::p32Store4aNative(dst, c0);
+
+      dst += 4;
+      src += 4;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb32_from_prgb32(
+    uint8_t* dst, const uint8_t* src, int w, const RenderClosure* closure)
+  {
+    do {
+      Face::p32 c0;
+      Face::p32Load4aNative(c0, src);
+      Face::p32ARGB32FromPRGB32(c0, c0);
+      Face::p32Store4aNative(dst, c0);
+
+      dst += 4;
+      src += 4;
+    } while (--w);
   }
 
   // ==========================================================================

@@ -72,6 +72,8 @@ FOG_NO_EXPORT void _g2d_render_init_c(void)
   {
     G2dRenderApi::ConvertFuncs& funcs = api.convert;
 
+    RENDER_INIT(init, Render_C::CConvert::init);
+
     RENDER_INIT(copy[RENDER_CONVERTER_COPY_8  ], (ImageConverterBlitLineFn)Render_C::CConvert::copy_8  );
     RENDER_INIT(copy[RENDER_CONVERTER_COPY_16 ], (ImageConverterBlitLineFn)Render_C::CConvert::copy_16 );
     RENDER_INIT(copy[RENDER_CONVERTER_COPY_24 ], (ImageConverterBlitLineFn)Render_C::CConvert::copy_24 );
@@ -85,6 +87,10 @@ FOG_NO_EXPORT void _g2d_render_init_c(void)
     RENDER_INIT(bswap[RENDER_CONVERTER_BSWAP_48], (ImageConverterBlitLineFn)Render_C::CConvert::bswap_48);
     RENDER_INIT(bswap[RENDER_CONVERTER_BSWAP_64], (ImageConverterBlitLineFn)Render_C::CConvert::bswap_64);
 
+    // Premultiply / Demultiply.
+    RENDER_INIT(prgb32_from_argb32, (ImageConverterBlitLineFn)Render_C::CConvert::prgb32_from_argb32);
+    RENDER_INIT(argb32_from_prgb32, (ImageConverterBlitLineFn)Render_C::CConvert::argb32_from_prgb32);
+ 
     // A8 Destination.
     RENDER_POST(a8_from_dib     [RENDER_CONVERTER_DIB_A8                 ]);
     RENDER_POST(a8_from_dib     [RENDER_CONVERTER_DIB_A16                ]);

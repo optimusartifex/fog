@@ -71,7 +71,7 @@ struct FOG_NO_EXPORT PTextureSimple
 
         accessor.fetchNorm(c0, src);
         dst = accessor.fill(dst, c0, i);
-        if (!w) goto _FetchSkip;
+        if (w == 0) goto _FetchSkip;
       }
 
       // ----------------------------------------------------------------------
@@ -80,7 +80,7 @@ struct FOG_NO_EXPORT PTextureSimple
 
       else if (Accessor::FETCH_REFERENCE && fetcher->_mode == RENDER_FETCH_REFERENCE && x < tw && w < tw - x)
       {
-        P_FETCH_SPAN8_SET_CUSTOM(src);
+        P_FETCH_SPAN8_SET_CUSTOM(src + (uint)x * Accessor::SRC_BPP);
         goto _FetchSkip;
       }
 
@@ -101,7 +101,7 @@ struct FOG_NO_EXPORT PTextureSimple
           dst += Accessor::DST_BPP;
           src += Accessor::SRC_BPP;
         } while (--i);
-        if (!w) goto _FetchSkip;
+        if (w == 0) goto _FetchSkip;
       }
 
       // ----------------------------------------------------------------------
@@ -198,12 +198,12 @@ _FetchEnd:
         dst = accessor.fill(dst, norm0, i);
         src += Accessor::SRC_BPP;
 
-        if (!w) goto _FetchSkip;
+        if (w == 0) goto _FetchSkip;
         goto _FetchFill;
       }
 
       // ----------------------------------------------------------------------
-      // [texture]
+      // [Fetch]
       // ----------------------------------------------------------------------
 
       else if (x < tw)
@@ -229,10 +229,7 @@ _FetchFill:
           src += Accessor::SRC_BPP;
         } while (--i);
 
-        if (!w) goto _FetchSkip;
-
-        accessor.normalize(c0, c0);
-        goto _FetchSolidLoop;
+        if (w == 0) goto _FetchSkip;
       }
 
       // ----------------------------------------------------------------------
@@ -302,7 +299,7 @@ _FetchEnd:
 
     if (y < 0 || y >= th - 1)
     {
-      y = (y < 0) ? y : th - 1;
+      y = (y < 0) ? 0 : th - 1;
       const uint8_t* srcLine = ctx->_d.texture.base.pixels + y * ctx->_d.texture.base.stride;
 
       P_FETCH_SPAN8_BEGIN()
@@ -322,7 +319,7 @@ _FetchEnd:
 
           accessor.fetchNorm(c0, srcLine);
           dst = accessor.fill(dst, c0, i);
-          if (!w) goto _FetchAlignedSkip;
+          if (w == 0) goto _FetchAlignedSkip;
         }
 
         // --------------------------------------------------------------------
@@ -352,14 +349,14 @@ _FetchEnd:
             dst += Accessor::DST_BPP;
             src += Accessor::SRC_BPP;
           } while (--i);
-          if (!w) goto _FetchAlignedSkip;
+          if (w == 0) goto _FetchAlignedSkip;
         }
 
         // --------------------------------------------------------------------
         // [Pad]
         // --------------------------------------------------------------------
 
-        accessor.fetchRaw(c0, srcLine + (uint)tw * Accessor::SRC_BPP - Accessor::SRC_BPP);
+        accessor.fetchNorm(c0, srcLine + (uint)tw * Accessor::SRC_BPP - Accessor::SRC_BPP);
         goto _FetchSolidLoop;
 
 _FetchAlignedSkip:
@@ -396,7 +393,7 @@ _FetchAlignedSkip:
           accessor.normalize(c0, c0);
 
           dst = accessor.fill(dst, c0, i);
-          if (!w) goto _FetchSub0YSkip;
+          if (w == 0) goto _FetchSub0YSkip;
         }
 
         // --------------------------------------------------------------------
@@ -422,7 +419,7 @@ _FetchAlignedSkip:
             srcCur0 += Accessor::SRC_BPP;
             srcCur1 += Accessor::SRC_BPP;
           } while (--i);
-          if (!w) goto _FetchSub0YSkip;
+          if (w == 0) goto _FetchSub0YSkip;
         }
 
         // --------------------------------------------------------------------
@@ -507,7 +504,6 @@ _FetchEnd:
         x += ctx->_d.texture.simple.tx;
 
         const uint8_t* src = srcLine;
-        typename Accessor::Pixel back0;
         int i;
 
         // --------------------------------------------------------------------
@@ -555,7 +551,7 @@ _FetchBorderFill:
             dst += Accessor::DST_BPP;
             src += Accessor::SRC_BPP;
           } while (--i);
-          if (!w) goto _FetchBorderSkip;
+          if (w == 0) goto _FetchBorderSkip;
         }
 
         // --------------------------------------------------------------------
@@ -588,8 +584,6 @@ _FetchBorderSkip:
         const uint8_t* srcCur1 = srcLine1;
 
         int i;
-        typename Accessor::Pixel back0;
-        typename Accessor::Pixel back1;
 
         // --------------------------------------------------------------------
         // [Pad]
@@ -648,7 +642,8 @@ _FetchInsideFill:
             srcCur0 += Accessor::SRC_BPP;
             srcCur1 += Accessor::SRC_BPP;
           } while (--i);
-          if (!w) goto _FetchInsideSkip;
+
+          if (w == 0) goto _FetchInsideSkip;
         }
         else
         {
@@ -1684,7 +1679,7 @@ _FetchSkip:
 
         accessor.fetchSolid(c0, ctx->_d.texture.base.clamp);
         dst = accessor.fill(dst, c0, i);
-        if (!w) goto _FetchSkip;
+        if (w == 0) goto _FetchSkip;
 
         x = 0;
       }
@@ -1695,7 +1690,7 @@ _FetchSkip:
 
       else if (Accessor::FETCH_REFERENCE && fetcher->_mode == RENDER_FETCH_REFERENCE && x < tw && w < tw - x)
       {
-        P_FETCH_SPAN8_SET_CUSTOM(src);
+        P_FETCH_SPAN8_SET_CUSTOM(src + (uint)x * Accessor::SRC_BPP);
         goto _FetchSkip;
       }
 
@@ -1716,7 +1711,7 @@ _FetchSkip:
           dst += Accessor::DST_BPP;
           src += Accessor::SRC_BPP;
         } while (--i);
-        if (!w) goto _FetchSkip;
+        if (w == 0) goto _FetchSkip;
       }
 
       // ----------------------------------------------------------------------
@@ -1810,7 +1805,7 @@ _FetchEnd:
 
         dst = accessor.fill(dst, back0, i);
 
-        if (!w) goto _FetchSkip;
+        if (w == 0) goto _FetchSkip;
         goto _FetchFill;
       }
 
@@ -1844,7 +1839,7 @@ _FetchFill:
         }
 
         // Interpolate last pixel on the row.
-        if (!w) goto _FetchSkip;
+        if (w == 0) goto _FetchSkip;
 
         accessor.normalize(back0, back0);
         accessor.fetchSolid(back1, ctx->_d.texture.base.clamp);
@@ -1925,7 +1920,7 @@ _FetchEnd:
     if (y == -1 || y == th - 1)
     {
       // Swap weight if (y == -1).
-      if (y < 0) { fY0X0 = fY1X0; y++; }
+      if (y < 0) { swap(fY0X0, fY1X0); y++; }
       const uint8_t* srcLine = ctx->_d.texture.base.pixels + y * ctx->_d.texture.base.stride;
 
       accessor.fetchSolid(c1, ctx->_d.texture.base.clamp);
@@ -1945,7 +1940,7 @@ _FetchEnd:
           w -= i;
 
           dst = accessor.fill(dst, c1, i);
-          if (!w) goto _FetchBorderSkip;
+          if (w == 0) goto _FetchBorderSkip;
         }
 
         // --------------------------------------------------------------------
@@ -1967,7 +1962,7 @@ _FetchEnd:
             dst += Accessor::DST_BPP;
             src += Accessor::SRC_BPP;
           } while (--i);
-          if (!w) goto _FetchBorderSkip;
+          if (w == 0) goto _FetchBorderSkip;
         }
 
         // --------------------------------------------------------------------
@@ -1993,6 +1988,7 @@ _FetchBorderSkip:
 
       P_FETCH_SPAN8_BEGIN()
         P_FETCH_SPAN8_SET_CURRENT_AND_MERGE_NEIGHBORS(Accessor::DST_BPP)
+        x += ctx->_d.texture.simple.tx;
 
         // --------------------------------------------------------------------
         // [Clamp]
@@ -2006,7 +2002,7 @@ _FetchBorderSkip:
 
           accessor.fetchSolid(c1, ctx->_d.texture.base.clamp);
           dst = accessor.fill(dst, c1, i);
-          if (!w) goto _FetchInsideSkip;
+          if (w == 0) goto _FetchInsideSkip;
         }
 
         // --------------------------------------------------------------------
@@ -2032,7 +2028,7 @@ _FetchBorderSkip:
             srcCur0 += Accessor::SRC_BPP;
             srcCur1 += Accessor::SRC_BPP;
           } while (--i);
-          if (!w) goto _FetchInsideSkip;
+          if (w == 0) goto _FetchInsideSkip;
         }
 
         // --------------------------------------------------------------------
@@ -2106,7 +2102,7 @@ _FetchEnd:
 
     if ((y < 0) | (y >= th - 1))
     {
-      if (y < 0) { y++; fY0X0 = fY1X0; fY0X1 = fY1X1; }
+      if (y < 0) { y++; swap(fY0X0, fY1X0); swap(fY0X1, fY1X1); }
 
       P_FETCH_SPAN8_BEGIN()
         P_FETCH_SPAN8_SET_CURRENT_AND_MERGE_NEIGHBORS(Accessor::DST_BPP)
@@ -2169,7 +2165,7 @@ _FetchBorderFill:
           }
 
           // Interpolate the last pixel on the row.
-          if (!w) goto _FetchBorderSkip;
+          if (w == 0) goto _FetchBorderSkip;
 
           accessor.fetchSolid(back1, ctx->_d.texture.base.clamp);
           accessor.interpolateNorm_2(back0, back0, fY0X0, back1, fY0X1 + fY1X0 + fY1X1);
@@ -2197,7 +2193,7 @@ _FetchBorderSkip:
 
     else
     {
-      if (y < 0) { y++; fY0X0 = fY1X0; fY0X1 = fY1X1; }
+      if (y < 0) { y++; swap(fY0X0, fY1X0); swap(fY0X1, fY1X1); }
 
       const uint8_t* srcLine = ctx->_d.texture.base.pixels + y * ctx->_d.texture.base.stride;
       const uint8_t* srcCur0 = srcLine;
@@ -2282,7 +2278,7 @@ _FetchInsideFill:
           }
 
           // Interpolate last pixel on the row.
-          if (!w) goto _FetchInsideSkip;
+          if (w == 0) goto _FetchInsideSkip;
 
           accessor.normalize(back0, back0);
           accessor.normalize(back1, back1);

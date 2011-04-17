@@ -88,7 +88,7 @@ err_t ImageConverter::create(
   const ImageFormatDescription& df = dstFormatDescription;
   const ImageFormatDescription& sf = srcFormatDescription;
 
-  if (df.isValid() || srcFormatDescription.isValid())
+  if (!df.isValid() || !sf.isValid())
   {
     err = ERR_RT_INVALID_ARGUMENT;
     goto _Fail;

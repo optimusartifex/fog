@@ -172,7 +172,7 @@ uint32_t PngCodecProvider::checkSignature(const void* mem, sysuint_t length) con
 
   // PNG check.
   sysuint_t i = Math::min<sysuint_t>(length, 8);
-  if (memcmp(mem, mimePNG, i) == 0) 
+  if (memcmp(mem, mimePNG, i) == 0)
     return 15 + ((uint32_t)i * 10);
 
   return 0;
@@ -342,8 +342,10 @@ err_t PngDecoder::readImage(Image& image)
   // Error code (default is success).
   uint32_t err = ERR_OK;
 
+  // Image converter (to convert non-premultiplied to premultiplied).
+  ImageConverter converter;
+
   // Variables.
-  png_uint_32 i;
   bool hasAlpha = false;
   bool hasGrey = false;
 
@@ -355,7 +357,7 @@ err_t PngDecoder::readImage(Image& image)
   // Change the order of packed pixels to least significant bit first.
   png.set_packswap(_png_ptr);
 
-  // Tell libpng to strip 16 bit/color files down to 8 bits/color.
+  // Tell libpng to strip 16 bits/color files down to 8 bits/color.
   png.set_strip_16(_png_ptr);
 
   if (_png_color_type == PNG_COLOR_TYPE_RGB_ALPHA ) hasAlpha = true;
@@ -391,18 +393,31 @@ err_t PngDecoder::readImage(Image& image)
 
   if ((err = image.create(_size, _format))) goto _End;
 
+  if (_format == IMAGE_FORMAT_PRGB32)
   {
-    int pass, number_passes = png.set_interlace_handling(_png_ptr);
+    err = converter.create(
+      ImageFormatDescription::getByFormat(_format),
+      ImageFormatDescription::fromArgb(32, IMAGE_FD_NONE, ARGB32_AMASK, ARGB32_RMASK, ARGB32_GMASK, ARGB32_BMASK));
+    if (FOG_IS_ERROR(err)) goto _End;
+  }
+
+  {
+    int passesCount = png.set_interlace_handling(_png_ptr);
+
+    int pass;
     int y = 0;
     int yi = 0;
-    int ytotal = number_passes * _size.h;
+    int ytotal = passesCount * _size.h;
 
-    for (pass = 0; pass < number_passes; pass++)
+    for (pass = 0; pass < passesCount; pass++)
     {
-      for (i = 0; i < _size.h; i++, y++, yi++)
+      uint8_t* dstPixels = image.getFirstX();
+      sysint_t dstStride = image.getStride();
+
+      for (y = 0; y < _size.h; y++, yi++, dstPixels += dstStride)
       {
-        uint8_t* row = image._d->first + i * image.getStride();
-        png.read_rows(_png_ptr, &row, NULL, 1);
+        png.read_rows(_png_ptr, &dstPixels, NULL, 1);
+        if (converter.isValid()) converter.blitSpan(dstPixels, dstPixels, _size.w);
         if ((yi & 15) == 0) updateProgress(yi, ytotal);
       }
     }

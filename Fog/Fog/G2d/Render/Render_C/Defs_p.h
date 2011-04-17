@@ -1405,13 +1405,12 @@ _##_Group_##_End: \
   Face::p64UnpackPBWFromPBB2031(_PixT0, (_Src0_)); \
   Face::p64UnpackPBWFromPBB2031(_PixT1, (_Src1_)); \
   \
-  _PixT0 *= (uint)(_Weight0_); \
-  _PixT1 *= (uint)(_Weight1_); \
-  _PixT0 += _PixT1; \
+  Face::p64Mul(_PixT0, _PixT0, _Weight0_); \
+  Face::p64Mul(_PixT1, _PixT1, _Weight1_); \
+  Face::p64Add(_PixT0, _PixT0, _PixT1); \
+  Face::p64And(_PixT0, _PixT0, Face::p64FromU64(FOG_UINT64_C(0xFF00FF00FF00FF00))); \
   \
-  _PixT0 &= FOG_UINT64_C(0xFF00FF00FF00FF00); \
-  \
-  _Dst_ = (uint32_t)((_PixT0 >> 8) | (_PixT0 >> 32)); \
+  Face::p64Pack2031_RShift8(_Dst_, _PixT0); \
 }
 
 #define P_INTERPOLATE_C_32_2_WITH_ZERO(_Dst_, _Src0_, _Weight0_) \
@@ -1419,9 +1418,10 @@ _##_Group_##_End: \
   Face::p64 _PixT0; \
   \
   Face::u64_1x4bUnpack0213(_PixT0, (_Src0_)); \
-  _PixT0 *= (uint)(_Weight0_); \
-  _PixT0 &= FOG_UINT64_C(0xFF00FF00FF00FF00); \
-  _Dst_ = (uint32_t)((_PixT0 >> 8) | (_PixT0 >> 32)); \
+  Face::p64Mul(_PixT0, _PixT0, _Weight0_); \
+  Face::p64And(_PixT0, _PixT0, Face::p64FromU64(FOG_UINT64_C(0xFF00FF00FF00FF00))); \
+  \
+  Face::p64Pack2031_RShift8(_Dst_, _PixT0); \
 }
 
 #define P_INTERPOLATE_C_32_4(_Dst_, _Src0_, _Weight0_, _Src1_, _Weight1_, _Src2_, _Weight2_, _Src3_, _Weight3_) \
@@ -1433,21 +1433,21 @@ _##_Group_##_End: \
   Face::p64UnpackPBWFromPBB2031(_PixT0, (_Src0_)); \
   Face::p64UnpackPBWFromPBB2031(_PixT1, (_Src1_)); \
   \
-  _PixT0 *= (uint32_t)(_Weight0_); \
-  _PixT1 *= (uint32_t)(_Weight1_); \
-  _PixT0 += _PixT1; \
+  Face::p64Mul(_PixT0, _PixT0, Face::p64FromU64(_Weight0_)); \
+  Face::p64Mul(_PixT1, _PixT1, Face::p64FromU64(_Weight1_)); \
+  Face::p64Add(_PixT0, _PixT0, _PixT1); \
   \
   Face::p64UnpackPBWFromPBB2031(_PixT1, (_Src2_)); \
   Face::p64UnpackPBWFromPBB2031(_PixT2, (_Src3_)); \
   \
-  _PixT1 *= (uint32_t)(_Weight2_); \
-  _PixT2 *= (uint32_t)(_Weight3_); \
-  _PixT0 += _PixT1; \
-  _PixT0 += _PixT2; \
+  Face::p64Mul(_PixT1, _PixT1, Face::p64FromU64(_Weight2_)); \
+  Face::p64Mul(_PixT2, _PixT2, Face::p64FromU64(_Weight3_)); \
+  Face::p64Add(_PixT0, _PixT0, _PixT1); \
+  Face::p64Add(_PixT0, _PixT0, _PixT2); \
   \
-  _PixT0 &= FOG_UINT64_C(0xFF00FF00FF00FF00); \
+  Face::p64And(_PixT0, _PixT0, Face::p64FromU64(FOG_UINT64_C(0xFF00FF00FF00FF00))); \
   \
-  _Dst_ = (uint32_t)_FOG_FACE_COMBINE_2(_PixT0 >> 8, _PixT0 >> 32); \
+  Face::p64Pack2031_RShift8(_Dst_, _PixT0); \
 }
 
 #else

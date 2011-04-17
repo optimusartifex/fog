@@ -185,9 +185,6 @@ protected:
   // MacEventLoopBase will call this from _runInternal(). 
   virtual void _doRunInternal() = 0;
 
-  // Accessors for private data members to be used by subclasses.
-  FOG_INLINE CFRunLoopRef runLoop() const { return _runLoop; }
-
 private:
   // Timer callback scheduled by _scheduleDelayedWork.  This does not do any
   // work, but it signals _delayedWorkSource so that delayed work can be

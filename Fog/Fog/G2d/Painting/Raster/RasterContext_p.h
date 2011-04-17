@@ -9,6 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Memory/MemoryBuffer.h>
+#include <Fog/G2d/Geometry/PathClipper.h>
 #include <Fog/G2d/Geometry/PathStroker.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Transform.h>
@@ -298,10 +299,12 @@ struct FOG_NO_EXPORT RasterContext
   uint32_t finalClipType;
   //! @brief Clip box (int).
   BoxI finalClipBoxI;
-  //! @brief Clip box (float).
-  BoxF finalClipBoxF;
-  //! @brief Clip box (double). 
-  BoxD finalClipBoxD;
+
+  //! @brief Clip box and clipper instance (float).
+  PathClipperF finalClipperF;
+  //! @brief Clip box and clipper instance (double). 
+  PathClipperD finalClipperD;
+
   //! @brief Clip region.
   Region finalRegion;
 

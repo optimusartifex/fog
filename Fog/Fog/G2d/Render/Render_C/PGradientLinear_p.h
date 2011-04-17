@@ -24,11 +24,10 @@ struct FOG_NO_EXPORT PGradientLinear
   // ==========================================================================
 
   // TODO: 16-bit rasterizer.
-  template<typename Number>
   static err_t FOG_FASTCALL create(
     RenderPatternContext* ctx, uint32_t dstFormat, const BoxI& clipBox,
-    const typename GradientT<Number>::T& gradient,
-    const typename TransformT<Number>::T& tr,
+    const GradientD& gradient,
+    const TransformD& tr,
     uint32_t gradientQuality)
   {
     const ColorStopList& stops = gradient.getStops();
@@ -38,13 +37,8 @@ struct FOG_NO_EXPORT PGradientLinear
     FOG_ASSERT(stops.getLength() >= 1);
     FOG_ASSERT(spread < GRADIENT_SPREAD_COUNT);
 
-    typename TransformT<Number>::T inv;
-    bool isInverted = TransformT<Number>::T::invert(inv, tr);
-
-    // In case that something fails.
-    RenderSolid solid;
-    solid.prgb32.p32 = stops.getAt(stops.getLength()-1).getArgb32();
-    Face::p32PRGB32FromARGB32(solid.prgb32.p32, solid.prgb32.p32);
+    TransformD inv(UNINITIALIZED);
+    bool isInverted = TransformD::invert(inv, tr);
 
     // ------------------------------------------------------------------------
     // [Solid]
@@ -52,25 +46,25 @@ struct FOG_NO_EXPORT PGradientLinear
 
     if (stops.getLength() < 2 || !isInverted)
     {
-      return Helpers::p_solid_create(ctx, dstFormat, solid);
+      return Helpers::p_solid_create_color(ctx, dstFormat, stops.getAt(stops.getLength()-1).getColor());
     }
 
     // ------------------------------------------------------------------------
     // [Prepare]
     // ------------------------------------------------------------------------
 
-    typename PointT<Number>::T origin;
-    typename PointT<Number>::T pd = gradient._pts[1] - gradient._pts[0];
+    PointD origin;
+    PointD pd = gradient._pts[1] - gradient._pts[0];
 
-    Number pd_x2y2 = pd.x * pd.x + pd.y * pd.y;
-    Number pd_dist = Math::sqrt(pd_x2y2);
+    double pd_x2y2 = pd.x * pd.x + pd.y * pd.y;
+    double pd_dist = Math::sqrt(pd_x2y2);
 
     // If there is no such distance between the start and end point then the
     // color of the last color-stop is used. This is used for compatibility 
     // with SVG.
     if (pd_dist < MATH_EPSILON_F)
     {
-      return _g2d_render.solid.create(ctx, dstFormat, solid);
+      return Helpers::p_solid_create_color(ctx, dstFormat, stops.getAt(stops.getLength()-1).getColor());
     }
 
     FOG_RETURN_ON_ERROR(PGradientBase::create(ctx, dstFormat, clipBox, spread, stops));
@@ -85,8 +79,8 @@ struct FOG_NO_EXPORT PGradientLinear
       // Negate and adjust the origin by 0.5 to move it to the center of
       // the pixel.
       tr.mapPoint(origin, gradient._pts[0]);
-      origin.x = -origin.x + Number(0.5);
-      origin.y = -origin.y + Number(0.5);
+      origin.x = -origin.x + 0.5;
+      origin.y = -origin.y + 0.5;
 
       double ax = (double)(pd.x);
       double ay = (double)(pd.y);
@@ -130,10 +124,10 @@ struct FOG_NO_EXPORT PGradientLinear
       ctx->_d.gradient.linear.proj.yz = inv._12;
       ctx->_d.gradient.linear.proj.zz = inv._22;
 
-      ctx->_prepare = prepare_projection;
+      ctx->_prepare = prepare_proj;
       ctx->_destroy = PGradientBase::destroy;
-      ctx->_fetch = _g2d_render.gradient.linear.fetch_projection_nearest[IMAGE_FORMAT_PRGB32][spread];
-      ctx->_skip = skip_projection;
+      ctx->_fetch = _g2d_render.gradient.linear.fetch_proj_nearest[IMAGE_FORMAT_PRGB32][spread];
+      ctx->_skip = skip_proj;
     }
 
     return ERR_OK;
@@ -158,7 +152,7 @@ struct FOG_NO_EXPORT PGradientLinear
     fetcher->_d.gradient.linear.simple.dt = d * ctx->_d.gradient.linear.simple.yx;
   }
 
-  static void FOG_FASTCALL prepare_projection(
+  static void FOG_FASTCALL prepare_proj(
     const RenderPatternContext* ctx, RenderPatternFetcher* fetcher, int _y, int _delta, uint32_t mode)
   {
     double y = (double)_y;
@@ -290,6 +284,10 @@ _FetchSolidLoop:
       P_FETCH_SPAN8_NEXT()
     P_FETCH_SPAN8_END()
 
+    // ------------------------------------------------------------------------
+    // [Advance]
+    // ------------------------------------------------------------------------
+
 _End:
     fetcher->_d.gradient.linear.simple.pt += fetcher->_d.gradient.linear.simple.dt;
   }
@@ -303,14 +301,10 @@ _End:
     P_FETCH_SPAN8_INIT()
 
     int xx = ctx->_d.gradient.linear.simple.xx16x16;
-    int pos = Math::fixed16x16FromFloat(fetcher->_d.gradient.linear.simple.pt) + x * xx;
     int len = ctx->_d.gradient.base.len16x16;
 
-    if ((uint)pos > (uint)len)
-    {
-      pos %= len;
-      if (pos < 0) pos += len;
-    }
+    int pos = Helpers::p_repeat_integer(
+      Math::fixed16x16FromFloat(fetcher->_d.gradient.linear.simple.pt) + x * xx, len);
 
     // ------------------------------------------------------------------------
     // [Forward Direction]
@@ -352,9 +346,7 @@ _End:
 
         P_FETCH_SPAN8_HOLE(
         {
-          pos += xx * hole;
-          if (pos > len) pos %= len;
-          if (pos < 0) pos += len;
+          pos = Helpers::p_repeat_integer(pos + xx * hole, len);
         })
       P_FETCH_SPAN8_END()
     }
@@ -377,6 +369,10 @@ _End:
       P_FETCH_SPAN8_END()
     }
 
+    // ------------------------------------------------------------------------
+    // [Advance]
+    // ------------------------------------------------------------------------
+
     fetcher->_d.gradient.linear.simple.pt += fetcher->_d.gradient.linear.simple.dt;
   }
 
@@ -389,21 +385,12 @@ _End:
     P_FETCH_SPAN8_INIT()
 
     int xx = ctx->_d.gradient.linear.simple.xx16x16;
-    int pos = Math::fixed16x16FromFloat(fetcher->_d.gradient.linear.simple.pt) + x * xx;
     int len = ctx->_d.gradient.base.len16x16;
-
     int len2 = len * 2;
-    if ((uint)pos > (uint)len2)
-    {
-      pos %= len2;
-      if (pos < 0) pos += len2;
-    }
 
-    if (pos > len)
-    {
-      pos = len2 - pos;
-      xx = -xx;
-    }
+    int pos = Helpers::p_repeat_integer(
+      Math::fixed16x16FromFloat(fetcher->_d.gradient.linear.simple.pt) + x * xx, len2);
+    if (pos > len) { pos = len2 - pos; xx = -xx; }
 
     // ------------------------------------------------------------------------
     // [Forward / Backward Direction]
@@ -444,8 +431,7 @@ _Backward:
 
         P_FETCH_SPAN8_HOLE(
         {
-          pos = (pos + xx * hole);
-          if ((uint)pos > (uint)len2) { pos %= len2; if (pos < 0) pos += len2; }
+          pos = Helpers::p_repeat_integer(pos + xx * hole, len2);
           if (pos > len) { pos = len2 - pos; xx = -xx; }
         })
       P_FETCH_SPAN8_END()
@@ -469,6 +455,10 @@ _Backward:
       P_FETCH_SPAN8_END()
     }
 
+    // ------------------------------------------------------------------------
+    // [Advance]
+    // ------------------------------------------------------------------------
+
     fetcher->_d.gradient.linear.simple.pt += fetcher->_d.gradient.linear.simple.dt;
   }
 
@@ -476,12 +466,12 @@ _Backward:
   // [Fetch - Projection]
   // ==========================================================================
 
-  template<typename Fetch>
-  static void FOG_FASTCALL fetch_projection_nearest_template_prgb32_xrgb32(
+  template<typename Accessor>
+  static void FOG_FASTCALL fetch_proj_nearest_template_prgb32_xrgb32(
     RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
-    Fetch f(ctx->_d.gradient.base.table, ctx->_d.gradient.base.len);
+    Accessor accessor(ctx);
 
     P_FETCH_SPAN8_INIT()
 
@@ -497,7 +487,7 @@ _Backward:
       double pz = fetcher->_d.gradient.linear.proj.pz + _x * xz;
 
       do {
-        ((uint32_t*)dst)[0] = f.at_d(off + px / pz);
+        ((uint32_t*)dst)[0] = accessor.at_d(off + px / pz);
         dst += 4;
 
         px += xx;
@@ -506,6 +496,10 @@ _Backward:
 
       P_FETCH_SPAN8_NEXT()
     P_FETCH_SPAN8_END()
+
+    // ------------------------------------------------------------------------
+    // [Advance]
+    // ------------------------------------------------------------------------
 
     fetcher->_d.gradient.linear.proj.pt += fetcher->_d.gradient.linear.proj.dt;
     fetcher->_d.gradient.linear.proj.pz += fetcher->_d.gradient.linear.proj.dz;
@@ -523,7 +517,7 @@ _Backward:
     fetcher->_d.gradient.linear.simple.pt += fetcher->_d.gradient.linear.simple.dt * s;
   }
 
-  static void FOG_FASTCALL skip_projection(
+  static void FOG_FASTCALL skip_proj(
     RenderPatternFetcher* fetcher, int step)
   {
     double s = (double)step;

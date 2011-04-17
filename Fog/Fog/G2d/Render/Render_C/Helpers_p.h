@@ -21,6 +21,29 @@ namespace Render_C {
 //! @internal
 struct FOG_NO_EXPORT Helpers
 {
+  static FOG_INLINE int p_repeat_integer(int x, int y)
+  {
+    if ((uint)x >= (uint)y)
+    {
+      x %= y;
+      if (x < 0) x += y;
+    }
+
+    return x;
+  }
+
+  static FOG_INLINE void p_reflect_integer(int& a0, int& a1, int maxMinus1, int max2Minus1)
+  {
+    a1 = a0 + 1;
+
+    if (a0 >= maxMinus1)
+    {
+      if (a0 > maxMinus1) a0 = max2Minus1 - a0;
+      a1 = max2Minus1 - a1;
+      if (a1 < 0) a1 = 0;
+    }
+  }
+
   // --------------------------------------------------------------------------
   // [Helpers - Pattern - Any - Repeat]
   // --------------------------------------------------------------------------
@@ -35,14 +58,12 @@ struct FOG_NO_EXPORT Helpers
       int i = Math::min(baseWidth, repeatWidth);
       repeatWidth -= i;
 
-      i -= 4;
-      while (i >= 0)
+      while ((i -= 4) >= 0)
       {
         Memory::copy_16(dst, src);
 
         dst += 16;
         src += 16;
-        i -= 4;
       }
       i += 4;
 
@@ -105,7 +126,36 @@ struct FOG_NO_EXPORT Helpers
   // [Helpers - Pattern - Solid - Create / Destroy]
   // ==========================================================================
 
-  static err_t FOG_FASTCALL p_solid_create(
+  static err_t FOG_FASTCALL p_solid_create_color(
+    RenderPatternContext* ctx, uint32_t dstFormat, const Color& color)
+  {
+    RenderSolid solid;
+
+    //! ${IMAGE_FORMAT:BEGIN}
+    switch (dstFormat)
+    {
+      case IMAGE_FORMAT_PRGB32:
+      case IMAGE_FORMAT_XRGB32:
+      case IMAGE_FORMAT_RGB24:
+      case IMAGE_FORMAT_A8:
+      case IMAGE_FORMAT_I8:
+        solid.prgb32.p32 = color.getArgb32().p32;
+        Face::p32PRGB32FromARGB32(solid.prgb32.p32, solid.prgb32.p32);
+        break;
+
+      case IMAGE_FORMAT_PRGB64:
+      case IMAGE_FORMAT_RGB48:
+      case IMAGE_FORMAT_A16:
+        solid.prgb64.p64 = color.getArgb64().p64;
+        Face::p64PRGB64FromARGB64(solid.prgb64.p64, solid.prgb64.p64);
+        break;
+    }
+    //! ${IMAGE_FORMAT:END}
+
+    return p_solid_create_solid(ctx, dstFormat, solid);
+  }
+
+  static err_t FOG_FASTCALL p_solid_create_solid(
     RenderPatternContext* ctx, uint32_t dstFormat, const RenderSolid& solid)
   {
     ctx->_initDst(dstFormat);

@@ -22,14 +22,16 @@
 #include <Fog/G2d/Render/Render_C/CSrc_p.h>
 #include <Fog/G2d/Render/Render_C/CSrcOver_p.h>
 #include <Fog/G2d/Render/Render_C/PGradientBase_p.h>
+#include <Fog/G2d/Render/Render_C/PGradientConical_p.h>
 #include <Fog/G2d/Render/Render_C/PGradientLinear_p.h>
 #include <Fog/G2d/Render/Render_C/PGradientRadial_p.h>
-#include <Fog/G2d/Render/Render_C/PGradientConical_p.h>
-#include <Fog/G2d/Render/Render_C/PGradientTriangular_p.h>
 #include <Fog/G2d/Render/Render_C/PGradientRectangular_p.h>
+#include <Fog/G2d/Render/Render_C/PGradientTriangular_p.h>
+#include <Fog/G2d/Render/Render_C/PTextureAffine_p.h>
 #include <Fog/G2d/Render/Render_C/PTextureBase_p.h>
-#include <Fog/G2d/Render/Render_C/PTextureAligned_p.h>
+#include <Fog/G2d/Render/Render_C/PTextureProjection_p.h>
 #include <Fog/G2d/Render/Render_C/PTextureScale_p.h>
+#include <Fog/G2d/Render/Render_C/PTextureSimple_p.h>
 
 // C implementation can be disabled when hardcoding for SSE2.
 #if !defined(FOG_HARDCODE_SSE2)
@@ -279,7 +281,7 @@ FOG_NO_EXPORT void _g2d_render_init_c(void)
     RENDER_INIT(cblit_span[RENDER_CBLIT_PRGB     ], Render_C::CSrcOver::prgb32_cblit_prgb32_span);
     RENDER_POST(cblit_span[RENDER_CBLIT_XRGB     ]);
 
-    RENDER_INIT(vblit_line[IMAGE_FORMAT_PRGB32   ], Render_C::CSrcOver::xrgb32_vblit_prgb32_line);
+    RENDER_INIT(vblit_line[IMAGE_FORMAT_PRGB32   ], Render_C::CSrcOver::prgb32_vblit_prgb32_line);
     RENDER_POST(vblit_line[IMAGE_FORMAT_XRGB32   ]);
     RENDER_POST(vblit_line[IMAGE_FORMAT_RGB24    ]);
   //RENDER_INIT(vblit_line[IMAGE_FORMAT_A8       ], Render_C::CSrc::prgb32_vblit_a8_line);
@@ -314,7 +316,7 @@ FOG_NO_EXPORT void _g2d_render_init_c(void)
   {
     G2dRenderApi::SolidFuncs& solid = api.solid;
 
-    solid.create = Render_C::Helpers::p_solid_create;
+    solid.create = Render_C::Helpers::p_solid_create_solid;
     solid.destroy = Render_C::Helpers::p_solid_destroy;
     solid.prepare = Render_C::Helpers::p_solid_prepare;
 
@@ -345,54 +347,208 @@ FOG_NO_EXPORT void _g2d_render_init_c(void)
   // [Render - Gradient - Linear]
   // --------------------------------------------------------------------------
 
-#if defined(FOG_RENDER_INIT_C)
   {
     G2dRenderApi::GradientFuncs& gradient = api.gradient;
 
-    gradient.create_f[GRADIENT_TYPE_LINEAR] = Render_C::PGradientLinear::create<float>;
-    gradient.create_d[GRADIENT_TYPE_LINEAR] = Render_C::PGradientLinear::create<double>;
+    gradient.create[GRADIENT_TYPE_LINEAR] = Render_C::PGradientLinear::create;
 
-    gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_PAD] = Render_C::PGradientLinear::fetch_simple_nearest_pad_prgb32_xrgb32;
-    gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_PAD] = Render_C::PGradientLinear::fetch_simple_nearest_pad_prgb32_xrgb32;
+#if defined(FOG_RENDER_INIT_C)
+    gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_PAD    ] = Render_C::PGradientLinear::fetch_simple_nearest_pad_prgb32_xrgb32;
+    gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_PAD    ] = Render_C::PGradientLinear::fetch_simple_nearest_pad_prgb32_xrgb32;
 
-    gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REPEAT] = Render_C::PGradientLinear::fetch_simple_nearest_repeat_prgb32_xrgb32;
-    gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REPEAT] = Render_C::PGradientLinear::fetch_simple_nearest_repeat_prgb32_xrgb32;
+    gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REPEAT ] = Render_C::PGradientLinear::fetch_simple_nearest_repeat_prgb32_xrgb32;
+    gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REPEAT ] = Render_C::PGradientLinear::fetch_simple_nearest_repeat_prgb32_xrgb32;
 
     gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientLinear::fetch_simple_nearest_reflect_prgb32_xrgb32;
     gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientLinear::fetch_simple_nearest_reflect_prgb32_xrgb32;
 
-    gradient.linear.fetch_projection_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_PAD] = Render_C::PGradientLinear::fetch_projection_nearest_template_prgb32_xrgb32<Render_C::PGradientBase::FetchPad_PRGB32>;
-    gradient.linear.fetch_projection_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_PAD] = Render_C::PGradientLinear::fetch_projection_nearest_template_prgb32_xrgb32<Render_C::PGradientBase::FetchPad_PRGB32>;
+    gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_PAD    ] = Render_C::PGradientLinear::fetch_proj_nearest_template_prgb32_xrgb32<Render_C::PGradientAccessorPad_PRGB32>;
+    gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_PAD    ] = Render_C::PGradientLinear::fetch_proj_nearest_template_prgb32_xrgb32<Render_C::PGradientAccessorPad_PRGB32>;
 
-    gradient.linear.fetch_projection_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REPEAT] = Render_C::PGradientLinear::fetch_projection_nearest_template_prgb32_xrgb32<Render_C::PGradientBase::FetchRepeat_PRGB32>;
-    gradient.linear.fetch_projection_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REPEAT] = Render_C::PGradientLinear::fetch_projection_nearest_template_prgb32_xrgb32<Render_C::PGradientBase::FetchRepeat_PRGB32>;
+    gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REPEAT ] = Render_C::PGradientLinear::fetch_proj_nearest_template_prgb32_xrgb32<Render_C::PGradientAccessorRepeat_PRGB32>;
+    gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REPEAT ] = Render_C::PGradientLinear::fetch_proj_nearest_template_prgb32_xrgb32<Render_C::PGradientAccessorRepeat_PRGB32>;
 
-    gradient.linear.fetch_projection_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientLinear::fetch_projection_nearest_template_prgb32_xrgb32<Render_C::PGradientBase::FetchReflect_PRGB32>;
-    gradient.linear.fetch_projection_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientLinear::fetch_projection_nearest_template_prgb32_xrgb32<Render_C::PGradientBase::FetchReflect_PRGB32>;
-  }
+    gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientLinear::fetch_proj_nearest_template_prgb32_xrgb32<Render_C::PGradientAccessorReflect_PRGB32>;
+    gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientLinear::fetch_proj_nearest_template_prgb32_xrgb32<Render_C::PGradientAccessorReflect_PRGB32>;
 #endif 
+  }
 
   // --------------------------------------------------------------------------
   // [Render - Gradient - Radial]
   // --------------------------------------------------------------------------
 
-#if defined(FOG_RENDER_INIT_C)
   {
     G2dRenderApi::GradientFuncs& gradient = api.gradient;
 
-    gradient.create_f[GRADIENT_TYPE_RADIAL] = Render_C::PGradientRadial::create<float>;
-    gradient.create_d[GRADIENT_TYPE_RADIAL] = Render_C::PGradientRadial::create<double>;
+    gradient.create[GRADIENT_TYPE_RADIAL] = Render_C::PGradientRadial::create;
 
-    gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_PAD] = Render_C::PGradientRadial::fetch_simple_nearest_template_prgb32_xrgb32<Render_C::PGradientBase::FetchPad_PRGB32>;
-    gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_PAD] = Render_C::PGradientRadial::fetch_simple_nearest_template_prgb32_xrgb32<Render_C::PGradientBase::FetchPad_PRGB32>;
+#if defined(FOG_RENDER_INIT_C)
+    gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_PAD    ] = Render_C::PGradientRadial::fetch_simple_nearest_template_prgb32_xrgb32<Render_C::PGradientAccessorPad_PRGB32>;
+    gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_PAD    ] = Render_C::PGradientRadial::fetch_simple_nearest_template_prgb32_xrgb32<Render_C::PGradientAccessorPad_PRGB32>;
 
-    gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REPEAT] = Render_C::PGradientRadial::fetch_simple_nearest_template_prgb32_xrgb32<Render_C::PGradientBase::FetchRepeat_PRGB32>;
-    gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REPEAT] = Render_C::PGradientRadial::fetch_simple_nearest_template_prgb32_xrgb32<Render_C::PGradientBase::FetchRepeat_PRGB32>;
+    gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REPEAT ] = Render_C::PGradientRadial::fetch_simple_nearest_template_prgb32_xrgb32<Render_C::PGradientAccessorRepeat_PRGB32>;
+    gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REPEAT ] = Render_C::PGradientRadial::fetch_simple_nearest_template_prgb32_xrgb32<Render_C::PGradientAccessorRepeat_PRGB32>;
 
-    gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientRadial::fetch_simple_nearest_template_prgb32_xrgb32<Render_C::PGradientBase::FetchReflect_PRGB32>;
-    gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientRadial::fetch_simple_nearest_template_prgb32_xrgb32<Render_C::PGradientBase::FetchReflect_PRGB32>;
+    gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientRadial::fetch_simple_nearest_template_prgb32_xrgb32<Render_C::PGradientAccessorReflect_PRGB32>;
+    gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientRadial::fetch_simple_nearest_template_prgb32_xrgb32<Render_C::PGradientAccessorReflect_PRGB32>;
+#endif
   }
-#endif 
+
+  // --------------------------------------------------------------------------
+  // [Render - Texture]
+  // --------------------------------------------------------------------------
+
+  {
+    G2dRenderApi::TextureFuncs& texture = api.texture;
+
+    texture.create = Render_C::PTextureBase::create;
+
+#if defined(FOG_RENDER_INIT_C)
+    texture.prgb32.fetch_simple_align[IMAGE_FORMAT_PRGB32][TEXTURE_TILE_PAD    ] = Render_C::PTextureSimple::fetch_align_pad<Render_C::PTextureAccessor_PRGB32_From_PRGB32>;
+    texture.prgb32.fetch_simple_align[IMAGE_FORMAT_XRGB32][TEXTURE_TILE_PAD    ] = Render_C::PTextureSimple::fetch_align_pad<Render_C::PTextureAccessor_PRGB32_From_XRGB32>;
+    texture.prgb32.fetch_simple_align[IMAGE_FORMAT_RGB24 ][TEXTURE_TILE_PAD    ] = Render_C::PTextureSimple::fetch_align_pad<Render_C::PTextureAccessor_PRGB32_From_RGB24 >;
+    texture.prgb32.fetch_simple_align[IMAGE_FORMAT_A8    ][TEXTURE_TILE_PAD    ] = Render_C::PTextureSimple::fetch_align_pad<Render_C::PTextureAccessor_PRGB32_From_A8    >;
+    texture.prgb32.fetch_simple_align[IMAGE_FORMAT_I8    ][TEXTURE_TILE_PAD    ] = Render_C::PTextureSimple::fetch_align_pad<Render_C::PTextureAccessor_PRGB32_From_I8    >;
+
+    texture.prgb32.fetch_simple_subx0[IMAGE_FORMAT_PRGB32][TEXTURE_TILE_PAD    ] = Render_C::PTextureSimple::fetch_subx0_pad<Render_C::PTextureAccessor_PRGB32_From_PRGB32>;
+    texture.prgb32.fetch_simple_subx0[IMAGE_FORMAT_XRGB32][TEXTURE_TILE_PAD    ] = Render_C::PTextureSimple::fetch_subx0_pad<Render_C::PTextureAccessor_PRGB32_From_XRGB32>;
+    texture.prgb32.fetch_simple_subx0[IMAGE_FORMAT_RGB24 ][TEXTURE_TILE_PAD    ] = Render_C::PTextureSimple::fetch_subx0_pad<Render_C::PTextureAccessor_PRGB32_From_RGB24 >;
+    texture.prgb32.fetch_simple_subx0[IMAGE_FORMAT_A8    ][TEXTURE_TILE_PAD    ] = Render_C::PTextureSimple::fetch_subx0_pad<Render_C::PTextureAccessor_PRGB32_From_A8    >;
+    texture.prgb32.fetch_simple_subx0[IMAGE_FORMAT_I8    ][TEXTURE_TILE_PAD    ] = Render_C::PTextureSimple::fetch_subx0_pad<Render_C::PTextureAccessor_PRGB32_From_I8    >;
+
+    texture.prgb32.fetch_simple_sub0y[IMAGE_FORMAT_PRGB32][TEXTURE_TILE_PAD    ] = Render_C::PTextureSimple::fetch_sub0y_pad<Render_C::PTextureAccessor_PRGB32_From_PRGB32>;
+    texture.prgb32.fetch_simple_sub0y[IMAGE_FORMAT_XRGB32][TEXTURE_TILE_PAD    ] = Render_C::PTextureSimple::fetch_sub0y_pad<Render_C::PTextureAccessor_PRGB32_From_XRGB32>;
+    texture.prgb32.fetch_simple_sub0y[IMAGE_FORMAT_RGB24 ][TEXTURE_TILE_PAD    ] = Render_C::PTextureSimple::fetch_sub0y_pad<Render_C::PTextureAccessor_PRGB32_From_RGB24 >;
+    texture.prgb32.fetch_simple_sub0y[IMAGE_FORMAT_A8    ][TEXTURE_TILE_PAD    ] = Render_C::PTextureSimple::fetch_sub0y_pad<Render_C::PTextureAccessor_PRGB32_From_A8    >;
+    texture.prgb32.fetch_simple_sub0y[IMAGE_FORMAT_I8    ][TEXTURE_TILE_PAD    ] = Render_C::PTextureSimple::fetch_sub0y_pad<Render_C::PTextureAccessor_PRGB32_From_I8    >;
+
+    texture.prgb32.fetch_simple_subxy[IMAGE_FORMAT_PRGB32][TEXTURE_TILE_PAD    ] = Render_C::PTextureSimple::fetch_subxy_pad<Render_C::PTextureAccessor_PRGB32_From_PRGB32>;
+    texture.prgb32.fetch_simple_subxy[IMAGE_FORMAT_XRGB32][TEXTURE_TILE_PAD    ] = Render_C::PTextureSimple::fetch_subxy_pad<Render_C::PTextureAccessor_PRGB32_From_XRGB32>;
+    texture.prgb32.fetch_simple_subxy[IMAGE_FORMAT_RGB24 ][TEXTURE_TILE_PAD    ] = Render_C::PTextureSimple::fetch_subxy_pad<Render_C::PTextureAccessor_PRGB32_From_RGB24 >;
+    texture.prgb32.fetch_simple_subxy[IMAGE_FORMAT_A8    ][TEXTURE_TILE_PAD    ] = Render_C::PTextureSimple::fetch_subxy_pad<Render_C::PTextureAccessor_PRGB32_From_A8    >;
+    texture.prgb32.fetch_simple_subxy[IMAGE_FORMAT_I8    ][TEXTURE_TILE_PAD    ] = Render_C::PTextureSimple::fetch_subxy_pad<Render_C::PTextureAccessor_PRGB32_From_I8    >;
+
+    texture.prgb32.fetch_simple_align[IMAGE_FORMAT_PRGB32][TEXTURE_TILE_REPEAT ] = Render_C::PTextureSimple::fetch_align_repeat<Render_C::PTextureAccessor_PRGB32_From_PRGB32>;
+    texture.prgb32.fetch_simple_align[IMAGE_FORMAT_XRGB32][TEXTURE_TILE_REPEAT ] = Render_C::PTextureSimple::fetch_align_repeat<Render_C::PTextureAccessor_PRGB32_From_XRGB32>;
+    texture.prgb32.fetch_simple_align[IMAGE_FORMAT_RGB24 ][TEXTURE_TILE_REPEAT ] = Render_C::PTextureSimple::fetch_align_repeat<Render_C::PTextureAccessor_PRGB32_From_RGB24 >;
+    texture.prgb32.fetch_simple_align[IMAGE_FORMAT_A8    ][TEXTURE_TILE_REPEAT ] = Render_C::PTextureSimple::fetch_align_repeat<Render_C::PTextureAccessor_PRGB32_From_A8    >;
+    texture.prgb32.fetch_simple_align[IMAGE_FORMAT_I8    ][TEXTURE_TILE_REPEAT ] = Render_C::PTextureSimple::fetch_align_repeat<Render_C::PTextureAccessor_PRGB32_From_I8    >;
+
+    texture.prgb32.fetch_simple_subx0[IMAGE_FORMAT_PRGB32][TEXTURE_TILE_REPEAT ] = Render_C::PTextureSimple::fetch_subx0_repeat<Render_C::PTextureAccessor_PRGB32_From_PRGB32>;
+    texture.prgb32.fetch_simple_subx0[IMAGE_FORMAT_XRGB32][TEXTURE_TILE_REPEAT ] = Render_C::PTextureSimple::fetch_subx0_repeat<Render_C::PTextureAccessor_PRGB32_From_XRGB32>;
+    texture.prgb32.fetch_simple_subx0[IMAGE_FORMAT_RGB24 ][TEXTURE_TILE_REPEAT ] = Render_C::PTextureSimple::fetch_subx0_repeat<Render_C::PTextureAccessor_PRGB32_From_RGB24 >;
+    texture.prgb32.fetch_simple_subx0[IMAGE_FORMAT_A8    ][TEXTURE_TILE_REPEAT ] = Render_C::PTextureSimple::fetch_subx0_repeat<Render_C::PTextureAccessor_PRGB32_From_A8    >;
+    texture.prgb32.fetch_simple_subx0[IMAGE_FORMAT_I8    ][TEXTURE_TILE_REPEAT ] = Render_C::PTextureSimple::fetch_subx0_repeat<Render_C::PTextureAccessor_PRGB32_From_I8    >;
+
+    texture.prgb32.fetch_simple_sub0y[IMAGE_FORMAT_PRGB32][TEXTURE_TILE_REPEAT ] = Render_C::PTextureSimple::fetch_sub0y_repeat<Render_C::PTextureAccessor_PRGB32_From_PRGB32>;
+    texture.prgb32.fetch_simple_sub0y[IMAGE_FORMAT_XRGB32][TEXTURE_TILE_REPEAT ] = Render_C::PTextureSimple::fetch_sub0y_repeat<Render_C::PTextureAccessor_PRGB32_From_XRGB32>;
+    texture.prgb32.fetch_simple_sub0y[IMAGE_FORMAT_RGB24 ][TEXTURE_TILE_REPEAT ] = Render_C::PTextureSimple::fetch_sub0y_repeat<Render_C::PTextureAccessor_PRGB32_From_RGB24 >;
+    texture.prgb32.fetch_simple_sub0y[IMAGE_FORMAT_A8    ][TEXTURE_TILE_REPEAT ] = Render_C::PTextureSimple::fetch_sub0y_repeat<Render_C::PTextureAccessor_PRGB32_From_A8    >;
+    texture.prgb32.fetch_simple_sub0y[IMAGE_FORMAT_I8    ][TEXTURE_TILE_REPEAT ] = Render_C::PTextureSimple::fetch_sub0y_repeat<Render_C::PTextureAccessor_PRGB32_From_I8    >;
+
+    texture.prgb32.fetch_simple_subxy[IMAGE_FORMAT_PRGB32][TEXTURE_TILE_REPEAT ] = Render_C::PTextureSimple::fetch_subxy_repeat<Render_C::PTextureAccessor_PRGB32_From_PRGB32>;
+    texture.prgb32.fetch_simple_subxy[IMAGE_FORMAT_XRGB32][TEXTURE_TILE_REPEAT ] = Render_C::PTextureSimple::fetch_subxy_repeat<Render_C::PTextureAccessor_PRGB32_From_XRGB32>;
+    texture.prgb32.fetch_simple_subxy[IMAGE_FORMAT_RGB24 ][TEXTURE_TILE_REPEAT ] = Render_C::PTextureSimple::fetch_subxy_repeat<Render_C::PTextureAccessor_PRGB32_From_RGB24 >;
+    texture.prgb32.fetch_simple_subxy[IMAGE_FORMAT_A8    ][TEXTURE_TILE_REPEAT ] = Render_C::PTextureSimple::fetch_subxy_repeat<Render_C::PTextureAccessor_PRGB32_From_A8    >;
+    texture.prgb32.fetch_simple_subxy[IMAGE_FORMAT_I8    ][TEXTURE_TILE_REPEAT ] = Render_C::PTextureSimple::fetch_subxy_repeat<Render_C::PTextureAccessor_PRGB32_From_I8    >;
+
+    texture.prgb32.fetch_simple_align[IMAGE_FORMAT_PRGB32][TEXTURE_TILE_REFLECT] = Render_C::PTextureSimple::fetch_align_reflect<Render_C::PTextureAccessor_PRGB32_From_PRGB32>;
+    texture.prgb32.fetch_simple_align[IMAGE_FORMAT_XRGB32][TEXTURE_TILE_REFLECT] = Render_C::PTextureSimple::fetch_align_reflect<Render_C::PTextureAccessor_PRGB32_From_XRGB32>;
+    texture.prgb32.fetch_simple_align[IMAGE_FORMAT_RGB24 ][TEXTURE_TILE_REFLECT] = Render_C::PTextureSimple::fetch_align_reflect<Render_C::PTextureAccessor_PRGB32_From_RGB24 >;
+    texture.prgb32.fetch_simple_align[IMAGE_FORMAT_A8    ][TEXTURE_TILE_REFLECT] = Render_C::PTextureSimple::fetch_align_reflect<Render_C::PTextureAccessor_PRGB32_From_A8    >;
+    texture.prgb32.fetch_simple_align[IMAGE_FORMAT_I8    ][TEXTURE_TILE_REFLECT] = Render_C::PTextureSimple::fetch_align_reflect<Render_C::PTextureAccessor_PRGB32_From_I8    >;
+
+    texture.prgb32.fetch_simple_subx0[IMAGE_FORMAT_PRGB32][TEXTURE_TILE_REFLECT] = Render_C::PTextureSimple::fetch_subx0_reflect<Render_C::PTextureAccessor_PRGB32_From_PRGB32>;
+    texture.prgb32.fetch_simple_subx0[IMAGE_FORMAT_XRGB32][TEXTURE_TILE_REFLECT] = Render_C::PTextureSimple::fetch_subx0_reflect<Render_C::PTextureAccessor_PRGB32_From_XRGB32>;
+    texture.prgb32.fetch_simple_subx0[IMAGE_FORMAT_RGB24 ][TEXTURE_TILE_REFLECT] = Render_C::PTextureSimple::fetch_subx0_reflect<Render_C::PTextureAccessor_PRGB32_From_RGB24 >;
+    texture.prgb32.fetch_simple_subx0[IMAGE_FORMAT_A8    ][TEXTURE_TILE_REFLECT] = Render_C::PTextureSimple::fetch_subx0_reflect<Render_C::PTextureAccessor_PRGB32_From_A8    >;
+    texture.prgb32.fetch_simple_subx0[IMAGE_FORMAT_I8    ][TEXTURE_TILE_REFLECT] = Render_C::PTextureSimple::fetch_subx0_reflect<Render_C::PTextureAccessor_PRGB32_From_I8    >;
+
+    texture.prgb32.fetch_simple_sub0y[IMAGE_FORMAT_PRGB32][TEXTURE_TILE_REFLECT] = Render_C::PTextureSimple::fetch_sub0y_reflect<Render_C::PTextureAccessor_PRGB32_From_PRGB32>;
+    texture.prgb32.fetch_simple_sub0y[IMAGE_FORMAT_XRGB32][TEXTURE_TILE_REFLECT] = Render_C::PTextureSimple::fetch_sub0y_reflect<Render_C::PTextureAccessor_PRGB32_From_XRGB32>;
+    texture.prgb32.fetch_simple_sub0y[IMAGE_FORMAT_RGB24 ][TEXTURE_TILE_REFLECT] = Render_C::PTextureSimple::fetch_sub0y_reflect<Render_C::PTextureAccessor_PRGB32_From_RGB24 >;
+    texture.prgb32.fetch_simple_sub0y[IMAGE_FORMAT_A8    ][TEXTURE_TILE_REFLECT] = Render_C::PTextureSimple::fetch_sub0y_reflect<Render_C::PTextureAccessor_PRGB32_From_A8    >;
+    texture.prgb32.fetch_simple_sub0y[IMAGE_FORMAT_I8    ][TEXTURE_TILE_REFLECT] = Render_C::PTextureSimple::fetch_sub0y_reflect<Render_C::PTextureAccessor_PRGB32_From_I8    >;
+
+    texture.prgb32.fetch_simple_subxy[IMAGE_FORMAT_PRGB32][TEXTURE_TILE_REFLECT] = Render_C::PTextureSimple::fetch_subxy_reflect<Render_C::PTextureAccessor_PRGB32_From_PRGB32>;
+    texture.prgb32.fetch_simple_subxy[IMAGE_FORMAT_XRGB32][TEXTURE_TILE_REFLECT] = Render_C::PTextureSimple::fetch_subxy_reflect<Render_C::PTextureAccessor_PRGB32_From_XRGB32>;
+    texture.prgb32.fetch_simple_subxy[IMAGE_FORMAT_RGB24 ][TEXTURE_TILE_REFLECT] = Render_C::PTextureSimple::fetch_subxy_reflect<Render_C::PTextureAccessor_PRGB32_From_RGB24 >;
+    texture.prgb32.fetch_simple_subxy[IMAGE_FORMAT_A8    ][TEXTURE_TILE_REFLECT] = Render_C::PTextureSimple::fetch_subxy_reflect<Render_C::PTextureAccessor_PRGB32_From_A8    >;
+    texture.prgb32.fetch_simple_subxy[IMAGE_FORMAT_I8    ][TEXTURE_TILE_REFLECT] = Render_C::PTextureSimple::fetch_subxy_reflect<Render_C::PTextureAccessor_PRGB32_From_I8    >;
+
+    texture.prgb32.fetch_simple_align[IMAGE_FORMAT_PRGB32][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureSimple::fetch_align_clamp<Render_C::PTextureAccessor_PRGB32_From_PRGB32>;
+    texture.prgb32.fetch_simple_align[IMAGE_FORMAT_XRGB32][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureSimple::fetch_align_clamp<Render_C::PTextureAccessor_PRGB32_From_XRGB32>;
+    texture.prgb32.fetch_simple_align[IMAGE_FORMAT_RGB24 ][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureSimple::fetch_align_clamp<Render_C::PTextureAccessor_PRGB32_From_RGB24 >;
+    texture.prgb32.fetch_simple_align[IMAGE_FORMAT_A8    ][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureSimple::fetch_align_clamp<Render_C::PTextureAccessor_PRGB32_From_A8    >;
+    texture.prgb32.fetch_simple_align[IMAGE_FORMAT_I8    ][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureSimple::fetch_align_clamp<Render_C::PTextureAccessor_PRGB32_From_I8    >;
+
+    texture.prgb32.fetch_simple_subx0[IMAGE_FORMAT_PRGB32][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureSimple::fetch_subx0_clamp<Render_C::PTextureAccessor_PRGB32_From_PRGB32>;
+    texture.prgb32.fetch_simple_subx0[IMAGE_FORMAT_XRGB32][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureSimple::fetch_subx0_clamp<Render_C::PTextureAccessor_PRGB32_From_XRGB32>;
+    texture.prgb32.fetch_simple_subx0[IMAGE_FORMAT_RGB24 ][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureSimple::fetch_subx0_clamp<Render_C::PTextureAccessor_PRGB32_From_RGB24 >;
+    texture.prgb32.fetch_simple_subx0[IMAGE_FORMAT_A8    ][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureSimple::fetch_subx0_clamp<Render_C::PTextureAccessor_PRGB32_From_A8    >;
+    texture.prgb32.fetch_simple_subx0[IMAGE_FORMAT_I8    ][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureSimple::fetch_subx0_clamp<Render_C::PTextureAccessor_PRGB32_From_I8    >;
+
+    texture.prgb32.fetch_simple_sub0y[IMAGE_FORMAT_PRGB32][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureSimple::fetch_sub0y_clamp<Render_C::PTextureAccessor_PRGB32_From_PRGB32>;
+    texture.prgb32.fetch_simple_sub0y[IMAGE_FORMAT_XRGB32][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureSimple::fetch_sub0y_clamp<Render_C::PTextureAccessor_PRGB32_From_XRGB32>;
+    texture.prgb32.fetch_simple_sub0y[IMAGE_FORMAT_RGB24 ][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureSimple::fetch_sub0y_clamp<Render_C::PTextureAccessor_PRGB32_From_RGB24 >;
+    texture.prgb32.fetch_simple_sub0y[IMAGE_FORMAT_A8    ][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureSimple::fetch_sub0y_clamp<Render_C::PTextureAccessor_PRGB32_From_A8    >;
+    texture.prgb32.fetch_simple_sub0y[IMAGE_FORMAT_I8    ][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureSimple::fetch_sub0y_clamp<Render_C::PTextureAccessor_PRGB32_From_I8    >;
+
+    texture.prgb32.fetch_simple_subxy[IMAGE_FORMAT_PRGB32][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureSimple::fetch_subxy_clamp<Render_C::PTextureAccessor_PRGB32_From_PRGB32>;
+    texture.prgb32.fetch_simple_subxy[IMAGE_FORMAT_XRGB32][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureSimple::fetch_subxy_clamp<Render_C::PTextureAccessor_PRGB32_From_XRGB32>;
+    texture.prgb32.fetch_simple_subxy[IMAGE_FORMAT_RGB24 ][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureSimple::fetch_subxy_clamp<Render_C::PTextureAccessor_PRGB32_From_RGB24 >;
+    texture.prgb32.fetch_simple_subxy[IMAGE_FORMAT_A8    ][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureSimple::fetch_subxy_clamp<Render_C::PTextureAccessor_PRGB32_From_A8    >;
+    texture.prgb32.fetch_simple_subxy[IMAGE_FORMAT_I8    ][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureSimple::fetch_subxy_clamp<Render_C::PTextureAccessor_PRGB32_From_I8    >;
+
+    texture.prgb32.fetch_affine_nearest [IMAGE_FORMAT_PRGB32][TEXTURE_TILE_PAD    ] = Render_C::PTextureAffine::fetch_affine_nearest_pad<Render_C::PTextureAccessor_PRGB32_From_PRGB32>;
+    texture.prgb32.fetch_affine_nearest [IMAGE_FORMAT_XRGB32][TEXTURE_TILE_PAD    ] = Render_C::PTextureAffine::fetch_affine_nearest_pad<Render_C::PTextureAccessor_PRGB32_From_XRGB32>;
+    texture.prgb32.fetch_affine_nearest [IMAGE_FORMAT_RGB24 ][TEXTURE_TILE_PAD    ] = Render_C::PTextureAffine::fetch_affine_nearest_pad<Render_C::PTextureAccessor_PRGB32_From_RGB24 >;
+    texture.prgb32.fetch_affine_nearest [IMAGE_FORMAT_A8    ][TEXTURE_TILE_PAD    ] = Render_C::PTextureAffine::fetch_affine_nearest_pad<Render_C::PTextureAccessor_PRGB32_From_A8    >;
+    texture.prgb32.fetch_affine_nearest [IMAGE_FORMAT_I8    ][TEXTURE_TILE_PAD    ] = Render_C::PTextureAffine::fetch_affine_nearest_pad<Render_C::PTextureAccessor_PRGB32_From_I8    >;
+
+    texture.prgb32.fetch_affine_bilinear[IMAGE_FORMAT_PRGB32][TEXTURE_TILE_PAD    ] = Render_C::PTextureAffine::fetch_affine_bilinear_pad<Render_C::PTextureAccessor_PRGB32_From_PRGB32>;
+    texture.prgb32.fetch_affine_bilinear[IMAGE_FORMAT_XRGB32][TEXTURE_TILE_PAD    ] = Render_C::PTextureAffine::fetch_affine_bilinear_pad<Render_C::PTextureAccessor_PRGB32_From_XRGB32>;
+    texture.prgb32.fetch_affine_bilinear[IMAGE_FORMAT_RGB24 ][TEXTURE_TILE_PAD    ] = Render_C::PTextureAffine::fetch_affine_bilinear_pad<Render_C::PTextureAccessor_PRGB32_From_RGB24 >;
+    texture.prgb32.fetch_affine_bilinear[IMAGE_FORMAT_A8    ][TEXTURE_TILE_PAD    ] = Render_C::PTextureAffine::fetch_affine_bilinear_pad<Render_C::PTextureAccessor_PRGB32_From_A8    >;
+    texture.prgb32.fetch_affine_bilinear[IMAGE_FORMAT_I8    ][TEXTURE_TILE_PAD    ] = Render_C::PTextureAffine::fetch_affine_bilinear_pad<Render_C::PTextureAccessor_PRGB32_From_I8    >;
+
+    texture.prgb32.fetch_affine_nearest [IMAGE_FORMAT_PRGB32][TEXTURE_TILE_REPEAT ] = Render_C::PTextureAffine::fetch_affine_nearest_repeat<Render_C::PTextureAccessor_PRGB32_From_PRGB32>;
+    texture.prgb32.fetch_affine_nearest [IMAGE_FORMAT_XRGB32][TEXTURE_TILE_REPEAT ] = Render_C::PTextureAffine::fetch_affine_nearest_repeat<Render_C::PTextureAccessor_PRGB32_From_XRGB32>;
+    texture.prgb32.fetch_affine_nearest [IMAGE_FORMAT_RGB24 ][TEXTURE_TILE_REPEAT ] = Render_C::PTextureAffine::fetch_affine_nearest_repeat<Render_C::PTextureAccessor_PRGB32_From_RGB24 >;
+    texture.prgb32.fetch_affine_nearest [IMAGE_FORMAT_A8    ][TEXTURE_TILE_REPEAT ] = Render_C::PTextureAffine::fetch_affine_nearest_repeat<Render_C::PTextureAccessor_PRGB32_From_A8    >;
+    texture.prgb32.fetch_affine_nearest [IMAGE_FORMAT_I8    ][TEXTURE_TILE_REPEAT ] = Render_C::PTextureAffine::fetch_affine_nearest_repeat<Render_C::PTextureAccessor_PRGB32_From_I8    >;
+
+    texture.prgb32.fetch_affine_bilinear[IMAGE_FORMAT_PRGB32][TEXTURE_TILE_REPEAT ] = Render_C::PTextureAffine::fetch_affine_bilinear_repeat<Render_C::PTextureAccessor_PRGB32_From_PRGB32>;
+    texture.prgb32.fetch_affine_bilinear[IMAGE_FORMAT_XRGB32][TEXTURE_TILE_REPEAT ] = Render_C::PTextureAffine::fetch_affine_bilinear_repeat<Render_C::PTextureAccessor_PRGB32_From_XRGB32>;
+    texture.prgb32.fetch_affine_bilinear[IMAGE_FORMAT_RGB24 ][TEXTURE_TILE_REPEAT ] = Render_C::PTextureAffine::fetch_affine_bilinear_repeat<Render_C::PTextureAccessor_PRGB32_From_RGB24 >;
+    texture.prgb32.fetch_affine_bilinear[IMAGE_FORMAT_A8    ][TEXTURE_TILE_REPEAT ] = Render_C::PTextureAffine::fetch_affine_bilinear_repeat<Render_C::PTextureAccessor_PRGB32_From_A8    >;
+    texture.prgb32.fetch_affine_bilinear[IMAGE_FORMAT_I8    ][TEXTURE_TILE_REPEAT ] = Render_C::PTextureAffine::fetch_affine_bilinear_repeat<Render_C::PTextureAccessor_PRGB32_From_I8    >;
+
+    texture.prgb32.fetch_affine_nearest [IMAGE_FORMAT_PRGB32][TEXTURE_TILE_REFLECT] = Render_C::PTextureAffine::fetch_affine_nearest_reflect<Render_C::PTextureAccessor_PRGB32_From_PRGB32>;
+    texture.prgb32.fetch_affine_nearest [IMAGE_FORMAT_XRGB32][TEXTURE_TILE_REFLECT] = Render_C::PTextureAffine::fetch_affine_nearest_reflect<Render_C::PTextureAccessor_PRGB32_From_XRGB32>;
+    texture.prgb32.fetch_affine_nearest [IMAGE_FORMAT_RGB24 ][TEXTURE_TILE_REFLECT] = Render_C::PTextureAffine::fetch_affine_nearest_reflect<Render_C::PTextureAccessor_PRGB32_From_RGB24 >;
+    texture.prgb32.fetch_affine_nearest [IMAGE_FORMAT_A8    ][TEXTURE_TILE_REFLECT] = Render_C::PTextureAffine::fetch_affine_nearest_reflect<Render_C::PTextureAccessor_PRGB32_From_A8    >;
+    texture.prgb32.fetch_affine_nearest [IMAGE_FORMAT_I8    ][TEXTURE_TILE_REFLECT] = Render_C::PTextureAffine::fetch_affine_nearest_reflect<Render_C::PTextureAccessor_PRGB32_From_I8    >;
+
+    texture.prgb32.fetch_affine_bilinear[IMAGE_FORMAT_PRGB32][TEXTURE_TILE_REFLECT] = Render_C::PTextureAffine::fetch_affine_bilinear_reflect<Render_C::PTextureAccessor_PRGB32_From_PRGB32>;
+    texture.prgb32.fetch_affine_bilinear[IMAGE_FORMAT_XRGB32][TEXTURE_TILE_REFLECT] = Render_C::PTextureAffine::fetch_affine_bilinear_reflect<Render_C::PTextureAccessor_PRGB32_From_XRGB32>;
+    texture.prgb32.fetch_affine_bilinear[IMAGE_FORMAT_RGB24 ][TEXTURE_TILE_REFLECT] = Render_C::PTextureAffine::fetch_affine_bilinear_reflect<Render_C::PTextureAccessor_PRGB32_From_RGB24 >;
+    texture.prgb32.fetch_affine_bilinear[IMAGE_FORMAT_A8    ][TEXTURE_TILE_REFLECT] = Render_C::PTextureAffine::fetch_affine_bilinear_reflect<Render_C::PTextureAccessor_PRGB32_From_A8    >;
+    texture.prgb32.fetch_affine_bilinear[IMAGE_FORMAT_I8    ][TEXTURE_TILE_REFLECT] = Render_C::PTextureAffine::fetch_affine_bilinear_reflect<Render_C::PTextureAccessor_PRGB32_From_I8    >;
+
+    texture.prgb32.fetch_affine_nearest [IMAGE_FORMAT_PRGB32][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureAffine::fetch_affine_nearest_clamp<Render_C::PTextureAccessor_PRGB32_From_PRGB32>;
+    texture.prgb32.fetch_affine_nearest [IMAGE_FORMAT_XRGB32][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureAffine::fetch_affine_nearest_clamp<Render_C::PTextureAccessor_PRGB32_From_XRGB32>;
+    texture.prgb32.fetch_affine_nearest [IMAGE_FORMAT_RGB24 ][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureAffine::fetch_affine_nearest_clamp<Render_C::PTextureAccessor_PRGB32_From_RGB24 >;
+    texture.prgb32.fetch_affine_nearest [IMAGE_FORMAT_A8    ][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureAffine::fetch_affine_nearest_clamp<Render_C::PTextureAccessor_PRGB32_From_A8    >;
+    texture.prgb32.fetch_affine_nearest [IMAGE_FORMAT_I8    ][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureAffine::fetch_affine_nearest_clamp<Render_C::PTextureAccessor_PRGB32_From_I8    >;
+
+    texture.prgb32.fetch_affine_bilinear[IMAGE_FORMAT_PRGB32][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureAffine::fetch_affine_bilinear_clamp<Render_C::PTextureAccessor_PRGB32_From_PRGB32>;
+    texture.prgb32.fetch_affine_bilinear[IMAGE_FORMAT_XRGB32][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureAffine::fetch_affine_bilinear_clamp<Render_C::PTextureAccessor_PRGB32_From_XRGB32>;
+    texture.prgb32.fetch_affine_bilinear[IMAGE_FORMAT_RGB24 ][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureAffine::fetch_affine_bilinear_clamp<Render_C::PTextureAccessor_PRGB32_From_RGB24 >;
+    texture.prgb32.fetch_affine_bilinear[IMAGE_FORMAT_A8    ][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureAffine::fetch_affine_bilinear_clamp<Render_C::PTextureAccessor_PRGB32_From_A8    >;
+    texture.prgb32.fetch_affine_bilinear[IMAGE_FORMAT_I8    ][TEXTURE_TILE_CLAMP  ] = Render_C::PTextureAffine::fetch_affine_bilinear_clamp<Render_C::PTextureAccessor_PRGB32_From_I8    >;
+#endif
+  }
 }
 
 } // Fog namespace

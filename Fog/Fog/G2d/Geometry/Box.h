@@ -324,17 +324,42 @@ struct BoxF
   FOG_INLINE BoxF(_Uninitialized) {}
 
   FOG_INLINE BoxF(float px0, float py0, float px1, float py1) :
-    x0(px0), y0(py0), x1(px1), y1(py1)
+    x0(px0),
+    y0(py0),
+    x1(px1),
+    y1(py1)
   {
   }
 
   FOG_INLINE BoxF(const BoxF& other) :
-    x0(other.x0), y0(other.y0), x1(other.x1), y1(other.y1)
+    x0(other.x0),
+    y0(other.y0),
+    x1(other.x1),
+    y1(other.y1)
+  {
+  }
+
+  explicit FOG_INLINE BoxF(const BoxI& other) :
+    x0((float)other.x0),
+    y0((float)other.y0),
+    x1((float)other.x1),
+    y1((float)other.y1)
+  {
+  }
+
+  explicit FOG_INLINE BoxF(const RectI& other) : 
+    x0((float)other.x),
+    y0((float)other.y),
+    x1((float)(other.x + other.w)),
+    y1((float)(other.y + other.h))
   {
   }
 
   explicit FOG_INLINE BoxF(const RectF& other) : 
-    x0(other.x), y0(other.y), x1(other.x + other.w), y1(other.y + other.h)
+    x0(other.x),
+    y0(other.y),
+    x1(other.x + other.w),
+    y1(other.y + other.h)
   {
   }
 
@@ -616,7 +641,7 @@ struct FOG_NO_EXPORT BoxD
   {
   }
 
-  FOG_INLINE BoxD(const RectD& other) : 
+  explicit FOG_INLINE BoxD(const RectD& other) : 
     x0(other.x), y0(other.y), x1(other.x + other.w), y1(other.y + other.h)
   {
   }

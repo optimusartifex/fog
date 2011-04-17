@@ -756,39 +756,19 @@ _VARGBGlyphMask:
   // [XRGB32 - VBlit - PRGB32 - Line]
   // ==========================================================================
 
-  static void FOG_FASTCALL xrgb32_vblit_prgb32_line(
-    uint8_t* dst, const uint8_t* src, int w, const RenderClosure* closure)
-  {
-  }
+  //static void FOG_FASTCALL xrgb32_vblit_prgb32_line(
+  //  uint8_t* dst, const uint8_t* src, int w, const RenderClosure* closure)
+  //{
+  //}
 
   // ==========================================================================
   // [XRGB32 - VBlit - PRGB32 - Span]
   // ==========================================================================
 
-  static void FOG_FASTCALL xrgb32_vblit_prgb32_span(
-    uint8_t* dst, const Span* span, const RenderClosure* closure)
-  {
-  }
-
-
-
-  // ==========================================================================
-  // [XRGB32 - VBlit - ARGB32 - Line]
-  // ==========================================================================
-
-  static void FOG_FASTCALL xrgb32_vblit_argb32_line(
-    uint8_t* dst, const uint8_t* src, int w, const RenderClosure* closure)
-  {
-  }
-
-  // ==========================================================================
-  // [XRGB32 - VBlit - ARGB32 - Span]
-  // ==========================================================================
-
-  static void FOG_FASTCALL xrgb32_vblit_argb32_span(
-    uint8_t* dst, const Span* span, const RenderClosure* closure)
-  {
-  }
+  //static void FOG_FASTCALL xrgb32_vblit_prgb32_span(
+  //  uint8_t* dst, const Span* span, const RenderClosure* closure)
+  //{
+  //}
 
 
 

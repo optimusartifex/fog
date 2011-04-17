@@ -73,14 +73,19 @@ err_t SvgPatternElement::onApplyPattern(SvgRenderContext* context, SvgElement* o
 
   Image image;
   FOG_RETURN_ON_ERROR(image.create(SizeI(w, h), IMAGE_FORMAT_PRGB32));  
-  image.clear(Color(Argb32(0x00000000)));
 
   Painter painter(image);
+
+  painter.setSource(Argb32(0x00000000));
+  painter.setCompositingOperator(COMPOSITE_SRC);
+  painter.clear();
+
   SvgRenderContext ctx(&painter);
   SvgElement::_walkAndRender(this, &ctx);
+  painter.end();
 
   PatternF pattern;
-  pattern.setTexture(Texture(image));
+  pattern.setTexture(Texture(image, TEXTURE_TILE_REPEAT));
 
   if (paintType == SVG_PAINT_FILL)
     context->setFillPattern(pattern);

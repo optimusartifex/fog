@@ -1608,8 +1608,9 @@ enum IMAGE_QUALITY
   IMAGE_QUALITY_BILINEAR = 1,
   IMAGE_QUALITY_BILINEAR_HQ = 2,
   IMAGE_QUALITY_BICUBIC = 3,
+  IMAGE_QUALITY_BICUBIC_HQ = 4,
 
-  IMAGE_QUALITY_COUNT = 4,
+  IMAGE_QUALITY_COUNT = 5,
   IMAGE_QUALITY_DEFAULT = IMAGE_QUALITY_BILINEAR
 };
 
@@ -1934,10 +1935,10 @@ enum PATTERN_TYPE
   PATTERN_TYPE_NONE = 0,
   //! @brief Solid color pattern.
   PATTERN_TYPE_COLOR = 1,
+  //! @brief Texture pattern (@c Texture).
+  PATTERN_TYPE_TEXTURE = 2,
   //! @brief Gradient pattern (@c GradientF or @c GradientD).
-  PATTERN_TYPE_GRADIENT = 2,
-  //! @brief Texture pattern (@c Image).
-  PATTERN_TYPE_TEXTURE = 3
+  PATTERN_TYPE_GRADIENT = 3
 };
 
 // ============================================================================

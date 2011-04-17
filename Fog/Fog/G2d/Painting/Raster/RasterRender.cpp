@@ -282,6 +282,7 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillTransformedBoxI(RasterContext& ctx, c
 
   else if (C::_CLIP == RASTER_CLIP_REGION)
   {
+    // TODO:
   }
 
   // --------------------------------------------------------------------------
@@ -290,6 +291,7 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillTransformedBoxI(RasterContext& ctx, c
 
   else
   {
+    // TODO:
   }
 }
 
@@ -446,6 +448,7 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillRasterizedShape(RasterContext& ctx, v
 
   else if (C::_CLIP == RASTER_CLIP_REGION)
   {
+    // TODO:
   }
 
   // --------------------------------------------------------------------------
@@ -454,6 +457,7 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillRasterizedShape(RasterContext& ctx, v
 
   else
   {
+    // TODO:
   }
 }
 
@@ -682,6 +686,7 @@ _Blit_ClipBox_Alpha_Direct:
 
   else if (C::_CLIP == RASTER_CLIP_REGION)
   {
+    // TODO:
   }
 
   // --------------------------------------------------------------------------
@@ -690,6 +695,7 @@ _Blit_ClipBox_Alpha_Direct:
 
   else
   {
+    // TODO:
   }
 }
 

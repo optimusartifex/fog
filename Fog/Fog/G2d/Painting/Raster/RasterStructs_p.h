@@ -97,6 +97,9 @@ union FOG_NO_EXPORT RasterHints
     //! pixel-aligned output.
     uint32_t rectToRectTransform : 1;
 
+    //! @brief Whether the final transform is also available in float format.
+    uint32_t finalTransformF : 1;
+
     //! @brief Whether the line width and caps are ideal.
     //!
     //! Ideal line means one-pixel width and square caps. If fastLineHint is set
@@ -120,26 +123,12 @@ struct FOG_NO_EXPORT RasterSource
     Static<Color> color;
     //! @brief Texture.
     Static<Texture> texture;
-
-    struct
-    {
-      //! @brief Gradient (float).
-      Static<GradientF> f;
-      //! @brief Gradient (double).
-      Static<GradientD> d;
-    } gradient;
+    //! @brief Gradient.
+    Static<GradientD> gradient;
   };
 
-  struct TransformData
-  {
-    //! @brief Transform (float).
-    Static<TransformF> f;
-    //! @brief Transform (double).
-    Static<TransformD> d;
-  };
-
-  TransformData transform;
-  TransformData adjusted;
+  Static<TransformD> transform;
+  Static<TransformD> adjusted;
 };
 
 // ============================================================================

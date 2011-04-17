@@ -1360,7 +1360,6 @@ _##_Group_##_End: \
     }
 
 #define P_FETCH_SPAN8_SET_CUSTOM(_Dst_) \
-    FOG_ASSERT(mode == RENDER_FETCH_REFERENCE); \
     reinterpret_cast<SpanExt8*>(span)->setData((uint8_t*)(_Dst_));
 
 #define P_FETCH_SPAN8_NEXT() \

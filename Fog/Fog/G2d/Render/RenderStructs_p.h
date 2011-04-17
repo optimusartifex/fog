@@ -249,21 +249,30 @@ struct FOG_NO_EXPORT RenderPatternContext
     //! @brief The texture image.
     Static<Image> texture;
 
-    //! @brief The texture (or texture fragment) bits.
-    const uint8_t* bits;
-    //! @brief The texture (or texture fragment) color-palette.
+    //! @brief The texture (or texture-fragment) pixels.
+    const uint8_t* pixels;
+    //! @brief The texture (or texture-fragment) color-palette.
     const uint32_t* pal;
-    //! @brief The texture (or texture fragment) size.
+    //! @brief The texture (or texture-fragment) size.
     int w, h;
-    //! @brief The texture (or texture fragment) stride.
+    //! @brief The texture (or texture-fragment) stride.
     sysint_t stride;
+
+    //! @brief Clamped pixel value (@c TEXTURE_TILE_CLAMP).
+    RenderSolid clamp;
   };
 
   struct _TextureSimple
   {
-    //! @brief The inverse offset.
-    int dx, dy;
+    //! @brief Translation (inverted).
+    int tx, ty;
 
+    //! @brief Used when @c TEXTURE_TILE_REPEAT or @c TEXTURE_TILE_REFLECT
+    //! tiling is used.
+    int repeatY;
+
+    //! @brief Fractional part in case that texture is misaligned
+    //! (translation coordinates aren't integers).
     union
     {
       struct
@@ -284,6 +293,27 @@ struct FOG_NO_EXPORT RenderPatternContext
 
   struct _TextureAffine
   {
+    double tx, ty;
+
+    double xx, yx;
+    double xy, yy;
+    
+    double mx, my; // Max X/Y.
+    double rx, ry; // Rew X/Y (for REPEAT/REFLECT tiling).
+
+    // Used by 16x16/48x16 fixed point.
+    int xx16x16, yx16x16;
+    int mx16x16, my16x16;
+    int rx16x16, ry16x16;
+
+    //! @brief Whether the xx is zero or very close (special-case).
+    int xxZero;
+    //! @brief Whether the yx is zero or very close (special-case).
+    int yxZero;
+
+    //! @brief Whether the fixed-point is safe for context bounding box.
+    int safeFixedPoint;
+
     // Used for affine transformation, in 16.16 fp.
     //int fxmax;
     //int fymax;
@@ -406,12 +436,6 @@ struct FOG_NO_EXPORT RenderPatternContext
 
     uint8_t raw[128];
   } _d;
-
-  union Inverse
-  {
-    Static<TransformF> transformf;
-    Static<TransformD> transformd;
-  } _inverse;
 };
 
 // ============================================================================
@@ -457,6 +481,17 @@ struct FOG_NO_EXPORT RenderPatternFetcher
 
   union _TexturePacked
   {
+    struct _Simple
+    {
+      int py;
+      int dy;
+    } simple;
+
+    struct _Affine
+    {
+      double px, py;
+      double dx, dy;
+    } affine;
   };
 
   // --------------------------------------------------------------------------
@@ -488,6 +523,10 @@ struct FOG_NO_EXPORT RenderPatternFetcher
       double px, py;
       double dx, dy;
     } simple;
+
+    struct _Projection
+    {
+    } proj;
   };
 
   struct _GradientPacked

@@ -144,8 +144,6 @@ struct FOG_NO_EXPORT RasterPainterEngine : public PainterEngine
 
   //! @brief Source type (see @c PATTERN_TYPE).
   uint8_t sourceType;
-  //! @brief Precision.
-  uint8_t sourcePrecision;
 
   //! @brief 'Saved-State' flags.
   //!
@@ -155,10 +153,6 @@ struct FOG_NO_EXPORT RasterPainterEngine : public PainterEngine
 
   //! @brief The strokeParams[F|D] precision.
   uint8_t strokeParamsPrecision;
-  //! @brief The userTransform[F|D] precision.
-  uint8_t userTransformPrecision;
-  //! @brief The finalTransform[F|D] precision.
-  uint8_t finalTransformPrecision;
 
   //! @brief The type of core clip (coreRegion, coreClipBox).
   //!
@@ -184,20 +178,14 @@ struct FOG_NO_EXPORT RasterPainterEngine : public PainterEngine
   // [Members - Transform]
   // --------------------------------------------------------------------------
 
-  //! @brief The core transformation matrix (float).
-  TransformF coreTransformF;
-  //! @brief The core transformation matrix (double).
-  TransformD coreTransformD;
-
-  //! @brief The user transformation matrix (float).
-  TransformF userTransformF;
-  //! @brief The user transformation matrix (double).
-  TransformD userTransformD;
-
+  //! @brief The core transformation matrix.
+  TransformD coreTransform;
+  //! @brief The user transformation matrix.
+  TransformD userTransform;
+  //! @brief The final transformation matrix (double).
+  TransformD finalTransform;
   //! @brief The final transformation matrix (float).
   TransformF finalTransformF;
-  //! @brief The final transformation matrix (double).
-  TransformD finalTransformD;
 
   //! @brief The core translation point in pixels (negated coreOrigin).
   PointI coreTranslationI;
@@ -282,8 +270,9 @@ struct FOG_NO_EXPORT RasterPainterEngine : public PainterEngine
   // Temporary regions.
   Region tmpRegion[2];
 
+  // TODO: Remove?
   // Temporary glyph set.
-  GlyphSet tmpGlyphSet;
+  //GlyphSet tmpGlyphSet;
 };
 
 //! @}

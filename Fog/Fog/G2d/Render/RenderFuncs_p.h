@@ -135,43 +135,16 @@ typedef err_t (FOG_FASTCALL *RenderPatternSolidCreateFn)(
   const RenderSolid& solid);
 
 //! @internal
-typedef err_t (FOG_FASTCALL *RenderPatternTextureCreateFFn)(
+typedef err_t (FOG_FASTCALL *RenderPatternTextureCreateFn)(
   RenderPatternContext* ctx, uint32_t dstFormat, const BoxI& boundingBox,
-  const Texture& texture, const TransformF& tr,
+  const Image& srcImage, const RectI& srcFragment, const TransformD& tr,
+  const Color& clampColor, uint32_t tileMode,
   uint32_t imageQuality);
 
 //! @internal
-typedef err_t (FOG_FASTCALL *RenderPatternTextureCreateDFn)(
+typedef err_t (FOG_FASTCALL *RenderPatternGradientCreateFn)(
   RenderPatternContext* ctx, uint32_t dstFormat, const BoxI& boundingBox,
-  const Texture& texture, const TransformD& tr,
-  uint32_t imageQuality);
-
-//! @internal
-typedef err_t (FOG_FASTCALL *RenderPatternImageCreateFFn)(
-  RenderPatternContext* ctx, uint32_t dstFormat, const BoxI& boundingBox,
-  const Image& srcImage, const RectI* srcFragment, const TransformF& tr,
-  uint32_t tile,
-  uint32_t imageQuality);
-
-//! @internal
-typedef err_t (FOG_FASTCALL *RenderPatternImageCreateDFn)(
-  RenderPatternContext* ctx, uint32_t dstFormat, const BoxI& boundingBox,
-  const Image& srcImage, const RectI* srcFragment, const TransformD& tr,
-  uint32_t tile,
-  uint32_t imageQuality);
-
-//! @internal
-typedef err_t (FOG_FASTCALL *RenderPatternGradientCreateFFn)(
-  RenderPatternContext* ctx, uint32_t dstFormat, const BoxI& boundingBox,
-  const GradientF& gradient,
-  const TransformF& tr,
-  uint32_t gradientQuality);
-
-//! @internal
-typedef err_t (FOG_FASTCALL *RenderPatternGradientCreateDFn)(
-  RenderPatternContext* ctx, uint32_t dstFormat, const BoxI& boundingBox,
-  const GradientD& gradient,
-  const TransformD& tr,
+  const GradientD& gradient, const TransformD& tr,
   uint32_t gradientQuality);
 
 // ============================================================================

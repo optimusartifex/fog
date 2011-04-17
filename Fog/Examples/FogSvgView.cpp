@@ -28,6 +28,7 @@ struct MyWindow : public Window
 
   float rotate;
   float scale;
+  PointF translate;
 
   Time fpsTime;
 
@@ -44,8 +45,10 @@ MyWindow::MyWindow(uint32_t createFlags) :
 
   fps = 0.0f;
   fpsCounter = 0.0f;
+
   rotate = 0.0f;
   scale = 1.0f;
+  translate.reset();
 
   setWindowTitle(Ascii8("SvgView"));
 }
@@ -80,6 +83,23 @@ void MyWindow::onKey(KeyEvent* e)
         break;
       case KEY_W:
         scale -= 0.1f;
+        update(WIDGET_UPDATE_PAINT);
+        break;
+
+      case KEY_LEFT:
+        translate.x -= .1f;
+        update(WIDGET_UPDATE_PAINT);
+        break;
+      case KEY_RIGHT:
+        translate.x += .1f;
+        update(WIDGET_UPDATE_PAINT);
+        break;
+      case KEY_UP:
+        translate.y -= .1f;
+        update(WIDGET_UPDATE_PAINT);
+        break;
+      case KEY_DOWN:
+        translate.y += .1f;
         update(WIDGET_UPDATE_PAINT);
         break;
     }
@@ -117,6 +137,7 @@ void MyWindow::onPaint(PaintEvent* e)
   }
 
   p->translate(PointF(100.0f, 100.0f));
+  p->translate(translate);
 
   SvgRenderContext context(p);
   svg.onRender(&context);
@@ -182,17 +203,23 @@ FOG_GUI_MAIN()
     //fileName = Ascii8("/my/upload/img/svg/map-krasnaya-plyana.svg");
     //fileName = Ascii8("/my/upload/img/svg/Map_Multilayer_Scaled.svg");
     //fileName = Ascii8("C:/my/svg/map-krasnaya-plyana.svg");
+    //fileName = Ascii8("C:/my/svg/map-imeretinka.svg");
     //fileName = Ascii8("C:/my/svg/Map_Multilayer_Scaled.svg");
     //fileName = Ascii8("C:/my/svg/froggy.svg");
     //fileName = Ascii8("C:/my/svg/fire_engine.svg");
     //fileName = Ascii8("C:/my/svg/tommek_Car.svg");
-    fileName = Ascii8("C:/my/svg/TestFOGFeatures.svg");
+    //fileName = Ascii8("C:/my/svg/TestFOGFeatures.svg");
     //fileName = Ascii8("C:/My/svg/linear3.svg");
 
     //fileName = Ascii8("C:/my/svg/ISO_12233-reschart.svg");
     //fileName = Ascii8("C:/my/svg/lorem_ipsum_compound.svg");
     //fileName = Ascii8("C:/my/svg/tiger.svg");
-    fileName = Ascii8("C:/my/svg/lion.svg");
+    //fileName = Ascii8("C:/my/svg/lion.svg");
+    //fileName = Ascii8("C:/my/svg/Minimap_fixed.svg");
+    //fileName = Ascii8("C:/my/svg/path-lines-BE-01.svg");
+    //fileName = Ascii8("C:/my/svg/gradPatt-linearGr-BE-01.svg");
+    //fileName = Ascii8("C:/my/svg/brown_fish_01.svg");
+    fileName = Ascii8("C:/my/svg/pattern.svg");
   }
 
   MyWindow window;

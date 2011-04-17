@@ -233,7 +233,7 @@ struct FOG_NO_EXPORT PGradientBase
   }
 
   // ==========================================================================
-  // [Helpers]
+  // [Helpers - Cache]
   // ==========================================================================
 
   static int FOG_FASTCALL get_optimal_cache_length(const ColorStopList& stops)
@@ -266,78 +266,86 @@ struct FOG_NO_EXPORT PGradientBase
       return (maxDiff < 0.02f) ? 1024 : 512;
     }
   }
+};
 
-  // ==========================================================================
-  // [Fetchers]
-  // ==========================================================================
+// ============================================================================
+// [Fog::Render_C - PGradientAccessorPad_PRGB32]
+// ============================================================================
 
-  struct FOG_NO_EXPORT FetchPad_PRGB32
+struct FOG_NO_EXPORT PGradientAccessorPad_PRGB32
+{
+  FOG_INLINE PGradientAccessorPad_PRGB32(const RenderPatternContext* ctx) :
+    _table(reinterpret_cast<const uint32_t*>(ctx->_d.gradient.base.table)),
+    _len(ctx->_d.gradient.base.len),
+    _len_d(ctx->_d.gradient.base.len)
   {
-    FOG_INLINE FetchPad_PRGB32(const void* table, int len) :
-      _table(reinterpret_cast<const uint32_t*>(table)),
-      _len(len),
-      _len_d(len)
-    {
-    }
+  }
 
-    FOG_INLINE uint32_t at_d(double d)
-    {
-      if (d < 0.0)
-        d = 0.0;
-      else if (d > _len_d)
-        d = _len_d;
-
-      uint i = (int)d;
-      return _table[i];
-    }
-
-    const uint32_t* _table;
-    int _len;
-    double _len_d;
-  };
-
-  struct FOG_NO_EXPORT FetchRepeat_PRGB32
+  FOG_INLINE uint32_t at_d(double d)
   {
-    FOG_INLINE FetchRepeat_PRGB32(const void* table, int len) :
-      _table(reinterpret_cast<const uint32_t*>(table)),
-      _lenMask(len - 1)
-    {
-    }
+    if (d < 0.0)
+      d = 0.0;
+    else if (d > _len_d)
+      d = _len_d;
 
-    FOG_INLINE uint32_t at_d(double d)
-    {
-      uint i = (int)d;
+    uint i = (int)d;
+    return _table[i];
+  }
 
-      i &= _lenMask;
-      return _table[i];
-    }
+  const uint32_t* _table;
+  int _len;
+  double _len_d;
+};
 
-    const uint32_t* _table;
-    uint _lenMask;
-  };
+// ============================================================================
+// [Fog::Render_C - PGradientAccessorRepeat_PRGB32]
+// ============================================================================
 
-  struct FOG_NO_EXPORT FetchReflect_PRGB32
+struct FOG_NO_EXPORT PGradientAccessorRepeat_PRGB32
+{
+  FOG_INLINE PGradientAccessorRepeat_PRGB32(const RenderPatternContext* ctx) :
+    _table(reinterpret_cast<const uint32_t*>(ctx->_d.gradient.base.table)),
+    _lenMask(ctx->_d.gradient.base.len - 1)
   {
-    FOG_INLINE FetchReflect_PRGB32(const void* table, int len) :
-      _table(reinterpret_cast<const uint32_t*>(table)),
-      _len(len),
-      _lenMask2(len * 2 - 1)
-    {
-    }
+  }
 
-    FOG_INLINE uint32_t at_d(double d)
-    {
-      uint i = (int)d;
+  FOG_INLINE uint32_t at_d(double d)
+  {
+    uint i = (int)d;
 
-      i &= _lenMask2;
-      if (i > (uint)_len) i ^= _lenMask2;
-      return _table[i];
-    }
+    i &= _lenMask;
+    return _table[i];
+  }
 
-    const uint32_t* _table;
-    int _len;
-    uint _lenMask2;
-  };
+  const uint32_t* _table;
+  uint _lenMask;
+};
+
+// ============================================================================
+// [Fog::Render_C - PGradientAccessorReflect_PRGB32]
+// ============================================================================
+
+struct FOG_NO_EXPORT PGradientAccessorReflect_PRGB32
+{
+  FOG_INLINE PGradientAccessorReflect_PRGB32(const RenderPatternContext* ctx) :
+    _table(reinterpret_cast<const uint32_t*>(ctx->_d.gradient.base.table)),
+    _len(ctx->_d.gradient.base.len),
+    _lenMask2(ctx->_d.gradient.base.len * 2 - 1)
+  {
+  }
+
+  FOG_INLINE uint32_t at_d(double d)
+  {
+    uint i = (int)d;
+
+    i &= _lenMask2;
+    if (i > (uint)_len) i ^= _lenMask2;
+    return _table[i];
+  }
+
+  const uint32_t* _table;
+  int _len;
+  uint _lenMask2;
 };
 
 } // Render_C namespace

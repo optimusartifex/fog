@@ -19,6 +19,7 @@ struct MyWindow : public Window
 
   // [Event Handlers]
   virtual void onKey(KeyEvent* e);
+  virtual void onMouse(MouseEvent* e);
   virtual void onTimer(TimerEvent* e);
   virtual void onPaint(PaintEvent* e);
 
@@ -42,6 +43,8 @@ struct MyWindow : public Window
   float fps;
   float fpsCounter;
   Time fpsTime;
+
+  PointF _lastMousePoint;
 };
 
 FOG_IMPLEMENT_OBJECT(MyWindow)
@@ -56,11 +59,8 @@ MyWindow::MyWindow(uint32_t createFlags) :
 
   setWindowTitle(Ascii8("Testing..."));
 
-  i[0].readFromFile(Ascii8("babelfish.png"));
-  i[1].readFromFile(Ascii8("kweather.png"));
-
-  i[0].convert(IMAGE_FORMAT_PRGB32);
-  i[1].convert(IMAGE_FORMAT_PRGB32);
+  i[0].readFromFile(Ascii8("C:/My/Devel/Sprites/babelfish.png"));
+  i[1].readFromFile(Ascii8("C:/My/Devel/Sprites/kweather.png"));
 
   _subx = 0.0f;
   _suby = 0.0f;
@@ -80,6 +80,8 @@ MyWindow::MyWindow(uint32_t createFlags) :
   linear.addStop(ColorStop(0.66f, Argb32(0xFFFF0000)));
   linear.addStop(ColorStop(1.00f, Argb32(0x00000000)));
   radial.setStops(linear.getStops());
+
+  _lastMousePoint.set(250, 250);
 }
 
 MyWindow::~MyWindow()
@@ -129,6 +131,20 @@ void MyWindow::onKey(KeyEvent* e)
   base::onKey(e);
 }
 
+void MyWindow::onMouse(MouseEvent* e)
+{
+  if (e->getCode() == EVENT_MOUSE_PRESS)
+  {
+    if (e->getButton() == BUTTON_LEFT)
+    {
+      _lastMousePoint = e->getPosition();
+      update(WIDGET_UPDATE_ALL);
+    }
+  }
+
+  base::onMouse(e);
+}
+
 void MyWindow::onTimer(TimerEvent* e)
 {
   _rotate += 0.005f;
@@ -147,8 +163,7 @@ void MyWindow::onPaint(PaintEvent* e)
   p->rotate(_rotate);
   p->skew(PointF(_shearX, _shearY));
   p->translate(PointF(_subx, _suby));
-  //p->translate(PointF(-200, -200));
-  //p->skew(PointF(_shearX, _shearY));
+  p->translate(PointF(-200, -200));
 
   // Clear everything to white.
   p->setSource(Argb32(0xFFFFFFFF));
@@ -157,19 +172,20 @@ void MyWindow::onPaint(PaintEvent* e)
   //p->setSource(Argb32(0xFF000000));
 
   linear.setStart(PointF(100.0f, 100.0f));
-  linear.setEnd(PointF(400.0f, 400.0f));
+  linear.setEnd(PointF(_lastMousePoint));
   linear.setGradientSpread(GRADIENT_SPREAD_REFLECT);
 
   radial.setCenter(PointF(250.0f, 250.0f));
-  radial.setFocal(PointF(250.0f, 670.0f));
-  radial.setRadius(PointF(150.0f, 150.0f));
-  radial.setGradientSpread(GRADIENT_SPREAD_PAD);
+  radial.setFocal(_lastMousePoint);
+  //radial.setFocal(PointF(250.0f, 250.0f));
+  radial.setRadius(PointF(150.0f, 50.0f));
+  radial.setGradientSpread(GRADIENT_SPREAD_REFLECT);
 
   //TransformF perspective;
   //perspective.setQuadToQuad(PointF(100, 100), PointF(400, 100), PointF(300, 400), PointF(150, 400), BoxF(100, 100, 400, 400));
   //p->transform(perspective);
 
-  p->setSource(radial);
+  p->setSource(linear);
   p->clear();
 
   // p->fillCircle(CircleF(PointF(310.0f, 310.0f), 300.0f));
@@ -180,8 +196,14 @@ void MyWindow::onPaint(PaintEvent* e)
   //p->drawBox(BoxI(100, 100, 400, 400)); 
 
   //p->setOpacity(0.5f);
-  p->drawBox(BoxF(100.0f, 100.0f, 400.0f, 400.0f));
+  p->setSource(Texture(i[0], TEXTURE_TILE_CLAMP, Color(Argb32(0xFFFF0000))));
+  p->fillBox(BoxF(-5.0f, -5.0f, 400.0f, 400.0f));
+
+  //p->setSource(Argb32(0x80FFFFFF));
+  //p->drawBox(BoxF(0.0f, 0.0f, 400.0f, 400.0f));
   //p->fillCircle(CircleF(PointF(200, 200), 100.0f));
+
+  //p->blitImage(PointI(100, 100), i[0]);
 
   /*
   p->fillRect(RectI(10, 10, 200, 200));

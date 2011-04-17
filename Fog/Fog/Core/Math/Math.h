@@ -386,6 +386,20 @@ static FOG_INLINE uint uceil(double v) { return uround(::ceil(v)); }
 static FOG_INLINE float mod(float x, float y) { return ::fmodf(x, y); }
 static FOG_INLINE double mod(double x, double y) { return ::fmod(x, y); }
 
+static FOG_INLINE float repeat(float x, float y)
+{
+  if (x >= y || x <= -y) x = mod(x, y);
+  if (x < 0.0f) x += y;
+  return x;
+}
+
+static FOG_INLINE double repeat(double x, double y)
+{
+  if (x >= y || x <= -y) x = mod(x, y);
+  if (x < 0.0) x += y;
+  return x;
+}
+
 // ============================================================================
 // [Fog::Math - Recip]
 // ============================================================================

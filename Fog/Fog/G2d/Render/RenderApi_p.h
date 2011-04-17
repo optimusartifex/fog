@@ -141,7 +141,7 @@ struct FOG_NO_EXPORT G2dRenderApi
   struct FOG_NO_EXPORT SolidFuncs
   {
     // ------------------------------------------------------------------------
-    // [Create / Destry]
+    // [Create / Destroy]
     // ------------------------------------------------------------------------
 
     RenderPatternSolidCreateFn create;
@@ -172,41 +172,47 @@ struct FOG_NO_EXPORT G2dRenderApi
     // [Create]
     // ------------------------------------------------------------------------
 
-    RenderPatternTextureCreateFFn create_common_f;
-    RenderPatternTextureCreateDFn create_common_d;
+    RenderPatternTextureCreateFn create;
 
-    RenderPatternImageCreateFFn create_image_f;
-    RenderPatternImageCreateDFn create_image_d;
+    struct _Fetch
+    {
+      // ----------------------------------------------------------------------
+      // [Fetch - Simple]
+      // ----------------------------------------------------------------------
 
-    // ------------------------------------------------------------------------
-    // [Fetch - Simple]
-    // ------------------------------------------------------------------------
+      RenderPatternFetchFn fetch_simple_align[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
+      RenderPatternFetchFn fetch_simple_subx0[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
+      RenderPatternFetchFn fetch_simple_sub0y[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
+      RenderPatternFetchFn fetch_simple_subxy[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
 
-    RenderPatternFetchFn fetch_simple_aligned[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
-    RenderPatternFetchFn fetch_simple_subx0[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
-    RenderPatternFetchFn fetch_simple_sub0y[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
-    RenderPatternFetchFn fetch_simple_subxy[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+      // ----------------------------------------------------------------------
+      // [Fetch - Scale]
+      // ----------------------------------------------------------------------
 
-    // ------------------------------------------------------------------------
-    // [Fetch - Scale]
-    // ------------------------------------------------------------------------
+      RenderPatternFetchFn fetch_scale_nearest[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
+      RenderPatternFetchFn fetch_scale_bilinear[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
 
-    RenderPatternFetchFn fetch_scale_nearest[IMAGE_FORMAT_COUNT];
-    RenderPatternFetchFn fetch_scale_bilinear[IMAGE_FORMAT_COUNT];
+      // ----------------------------------------------------------------------
+      // [Fetch - Affine]
+      // ----------------------------------------------------------------------
 
-    // ------------------------------------------------------------------------
-    // [Fetch - Affine]
-    // ------------------------------------------------------------------------
+      RenderPatternFetchFn fetch_affine_nearest[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
+      RenderPatternFetchFn fetch_affine_bilinear[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
 
-    RenderPatternFetchFn fetch_affine_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
-    RenderPatternFetchFn fetch_affine_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+      // ----------------------------------------------------------------------
+      // [Fetch - Projection]
+      // ----------------------------------------------------------------------
 
-    // ------------------------------------------------------------------------
-    // [Fetch - Projection]
-    // ------------------------------------------------------------------------
+      RenderPatternFetchFn fetch_proj_nearest[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
+      RenderPatternFetchFn fetch_proj_bilinear[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
+    };
 
-    RenderPatternFetchFn fetch_projection_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
-    RenderPatternFetchFn fetch_projection_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+    _Fetch prgb32;
+    _Fetch a8;
+
+    _Fetch prgb64;
+    _Fetch rgb48;
+    _Fetch a16;
   };
 
   TextureFuncs texture;
@@ -227,33 +233,32 @@ struct FOG_NO_EXPORT G2dRenderApi
     // [Create / Destroy]
     // ------------------------------------------------------------------------
 
-    RenderPatternGradientCreateFFn create_f[GRADIENT_TYPE_COUNT];
-    RenderPatternGradientCreateDFn create_d[GRADIENT_TYPE_COUNT];
+    RenderPatternGradientCreateFn create[GRADIENT_TYPE_COUNT];
 
     // ------------------------------------------------------------------------
     // [Linear]
     // ------------------------------------------------------------------------
 
-    struct
+    struct _Linear
     {
       RenderPatternFetchFn fetch_simple_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
       RenderPatternFetchFn fetch_simple_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
 
-      RenderPatternFetchFn fetch_projection_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
-      RenderPatternFetchFn fetch_projection_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+      RenderPatternFetchFn fetch_proj_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+      RenderPatternFetchFn fetch_proj_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
     } linear;
 
     // ------------------------------------------------------------------------
     // [Radial]
     // ------------------------------------------------------------------------
 
-    struct
+    struct _Radial
     {
       RenderPatternFetchFn fetch_simple_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
       RenderPatternFetchFn fetch_simple_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
 
-      RenderPatternFetchFn fetch_projection_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
-      RenderPatternFetchFn fetch_projection_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+      RenderPatternFetchFn fetch_proj_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+      RenderPatternFetchFn fetch_proj_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
     } radial;
   };
 

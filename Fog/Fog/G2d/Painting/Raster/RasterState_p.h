@@ -68,18 +68,10 @@ struct FOG_NO_EXPORT RasterState
 
   //! @brief Source type (see @ref PATTERN_TYPE).
   uint8_t sourceType;
-  //! @brief Source precision (gradient and transform).
-  uint8_t sourcePrecision;
   //! @brief RasterPainterEngine::masterSave copy.
   uint8_t savedStateFlags;
-
   //! @brief The strokeParams[F|D] precision.
   uint8_t strokeParamsPrecision;
-  //! @brief The userTransform[F|D] precision.
-  uint8_t userTransformPrecision;
-  //! @brief The finalTransform[F|D] precision.
-  uint8_t finalTransformPrecision;
-
   //! @brief The type of core clip (coreRegion, coreClipBox).
   //!
   //! @note Don't miss it with the @c finalType member!
@@ -108,15 +100,12 @@ struct FOG_NO_EXPORT RasterState
   // [RASTER_STATE_TRANSFORM]
   // --------------------------------------------------------------------------
 
-  //! @brief The user transformation matrix (float).
-  Static<TransformF> userTransformF;
   //! @brief The user transformation matrix (double).
-  Static<TransformD> userTransformD;
-
+  Static<TransformD> userTransform;
+  //! @brief The final transformation matrix (double).
+  Static<TransformD> finalTransform;
   //! @brief The final transformation matrix (float).
   Static<TransformF> finalTransformF;
-  //! @brief The final transformation matrix (double).
-  Static<TransformD> finalTransformD;
 
   //! @brief The core translation point in pixels (negated coreOrigin).
   PointI coreTranslationI;

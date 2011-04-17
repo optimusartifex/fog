@@ -26,8 +26,8 @@ RasterContext::RasterContext() :
   precision(0xFFFFFFFF),
   finalClipType(RASTER_CLIP_NULL),
   finalClipBoxI(0, 0, 0, 0),
-  finalClipBoxF(0, 0, 0, 0),
-  finalClipBoxD(0, 0, 0, 0),
+  finalClipperF(BoxF(0, 0, 0, 0)),
+  finalClipperD(BoxD(0, 0, 0, 0)),
   // 4096 - Page-size.
   // 100  - Some memory for the OS/LibC memory allocator.
   maskMemoryAllocator(4096 * 2 - 100),
@@ -72,8 +72,8 @@ err_t RasterContext::_initByMaster(const RasterContext& master)
 
   finalClipType = master.finalClipType;
   finalClipBoxI = master.finalClipBoxI;
-  finalClipBoxF = master.finalClipBoxF;
-  finalClipBoxD = master.finalClipBoxD;
+  finalClipperF.setClipBox(master.finalClipperF.getClipBox());
+  finalClipperD.setClipBox(master.finalClipperD.getClipBox());
   finalRegion = master.finalRegion;
 
   paintHints = master.paintHints;

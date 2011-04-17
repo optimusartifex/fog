@@ -24,11 +24,10 @@ struct FOG_NO_EXPORT PGradientRadial
   // ==========================================================================
 
   // TODO: 16-bit rasterizer.
-  template<typename Number>
   static err_t FOG_FASTCALL create(
     RenderPatternContext* ctx, uint32_t dstFormat, const BoxI& clipBox,
-    const typename GradientT<Number>::T& gradient,
-    const typename TransformT<Number>::T& tr,
+    const GradientD& gradient,
+    const TransformD& tr,
     uint32_t gradientQuality)
   {
     const ColorStopList& stops = gradient.getStops();
@@ -37,11 +36,6 @@ struct FOG_NO_EXPORT PGradientRadial
     FOG_ASSERT(gradient.getGradientType() == GRADIENT_TYPE_RADIAL);
     FOG_ASSERT(stops.getLength() >= 1);
     FOG_ASSERT(spread < GRADIENT_SPREAD_COUNT);
-
-    // In case that something fails.
-    RenderSolid solid;
-    solid.prgb32.p32 = stops.getAt(stops.getLength()-1).getArgb32();
-    Face::p32PRGB32FromARGB32(solid.prgb32.p32, solid.prgb32.p32);
 
     // ------------------------------------------------------------------------
     // [Transform elliptic shape to a circle]
@@ -69,7 +63,7 @@ struct FOG_NO_EXPORT PGradientRadial
       fy = cy + (fy - cy) / s;
     }
 
-    TransformD inv;
+    TransformD inv(UNINITIALIZED);
     bool isInverted = TransformD::invert(inv, t);
 
     // ------------------------------------------------------------------------
@@ -78,7 +72,7 @@ struct FOG_NO_EXPORT PGradientRadial
 
     if (stops.getLength() < 2 || !isInverted || zeroRadius)
     {
-      return Helpers::p_solid_create(ctx, dstFormat, solid);
+      return Helpers::p_solid_create_color(ctx, dstFormat, stops.getAt(stops.getLength()-1).getColor());
     }
 
     // ------------------------------------------------------------------------
@@ -136,7 +130,7 @@ struct FOG_NO_EXPORT PGradientRadial
       // 
       //    d = x^2 * C1 + y^2 * C2 + x*y * C3
       // 
-      // Then the  equation can be separated into:
+      // Then the equation can be separated into:
       //
       //    D1 = x^2 * C1
       //    D2 = y^2 * C2
@@ -173,8 +167,8 @@ struct FOG_NO_EXPORT PGradientRadial
       ctx->_d.gradient.radial.simple.xy = inv._10;
       ctx->_d.gradient.radial.simple.yy = inv._11;
 
-      ctx->_d.gradient.radial.simple.tx = inv._20 - fxOrig + 0.5 * inv._00 + 0.5 * inv._10; // Center.
-      ctx->_d.gradient.radial.simple.ty = inv._21 - fyOrig + 0.5 * inv._01 + 0.5 * inv._11; // Center.
+      ctx->_d.gradient.radial.simple.tx = inv._20 - fxOrig + 0.5 * (inv._00 + inv._10); // Center.
+      ctx->_d.gradient.radial.simple.ty = inv._21 - fyOrig + 0.5 * (inv._01 + inv._11); // Center.
 
       ctx->_d.gradient.radial.simple.r2mfxfx = r2mfxfx;
       ctx->_d.gradient.radial.simple.r2mfyfy = r2mfyfy;
@@ -231,7 +225,7 @@ struct FOG_NO_EXPORT PGradientRadial
     fetcher->_d.gradient.radial.simple.dy = d * ctx->_d.gradient.radial.simple.yy;
   }
 
-  static void FOG_FASTCALL prepare_projection(
+  static void FOG_FASTCALL prepare_proj(
     const RenderPatternContext* ctx, RenderPatternFetcher* fetcher, int _y, int _delta, uint32_t mode)
   {
     double y = (double)_y;
@@ -249,12 +243,12 @@ struct FOG_NO_EXPORT PGradientRadial
   // [Fetch - Simple]
   // ==========================================================================
 
-  template<typename Fetch>
+  template<typename Accessor>
   static void FOG_FASTCALL fetch_simple_nearest_template_prgb32_xrgb32(
     RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
-    Fetch f(ctx->_d.gradient.base.table, ctx->_d.gradient.base.len);
+    Accessor accessor(ctx);
 
     P_FETCH_SPAN8_INIT()
 
@@ -276,11 +270,10 @@ struct FOG_NO_EXPORT PGradientRadial
                      ctx->_d.gradient.radial.simple.d_d_x * dx +
                      ctx->_d.gradient.radial.simple.d_d_y * dy;
       double d_d_d = ctx->_d.gradient.radial.simple.d_d_d;
-
       double scale = ctx->_d.gradient.radial.simple.scale;
 
       do {
-        ((uint32_t*)dst)[0] = f.at_d((b + Math::sqrt(Math::abs(d))) * scale);
+        ((uint32_t*)dst)[0] = accessor.at_d((b + Math::sqrt(Math::abs(d))) * scale);
         dst += 4;
 
         b   += b_d;
@@ -314,7 +307,7 @@ struct FOG_NO_EXPORT PGradientRadial
     fetcher->_d.gradient.radial.simple.py += fetcher->_d.gradient.radial.simple.dy * s;
   }
 
-  static void FOG_FASTCALL skip_projection(
+  static void FOG_FASTCALL skip_proj(
     RenderPatternFetcher* fetcher, int step)
   {
     double s = (double)step;

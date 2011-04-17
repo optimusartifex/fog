@@ -1036,11 +1036,10 @@ Set(FOG_G2D_RENDER_C_HEADERS
   Fog/G2d/Render/Render_C/PGradientRectangular_p.h
   Fog/G2d/Render/Render_C/PGradientTriangular_p.h
   Fog/G2d/Render/Render_C/PTextureAffine_p.h
-  Fog/G2d/Render/Render_C/PTextureAligned_p.h
   Fog/G2d/Render/Render_C/PTextureBase_p.h
-  Fog/G2d/Render/Render_C/PTextureOffset_p.h
   Fog/G2d/Render/Render_C/PTextureProjection_p.h
   Fog/G2d/Render/Render_C/PTextureScale_p.h
+  Fog/G2d/Render/Render_C/PTextureSimple_p.h
 )
 
 Set(FOG_G2D_RENDER_MMX_HEADERS

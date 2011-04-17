@@ -250,7 +250,7 @@ enum RASTER_MASTER_FLAGS
 
   //! @brief Some of the stroke parameters contains degenerated value (for 
   //! example line-width set to zero).
-  RASTER_NO_PAINT_STROKE_PARAMS = 0x00001000,
+  RASTER_NO_PAINT_STROKE = 0x00001000,
 
   RASTER_NO_PAINT_BASE_FLAGS   = RASTER_NO_PAINT_CORE_REGION          |
                                  RASTER_NO_PAINT_FINAL_REGION         |
@@ -258,10 +258,7 @@ enum RASTER_MASTER_FLAGS
                                  RASTER_NO_PAINT_CORE_TRANSFORM       |
                                  RASTER_NO_PAINT_FINAL_TRANSFORM      |
                                  RASTER_NO_PAINT_COMPOSITING_OPERATOR |
-                                 RASTER_NO_PAINT_OPACITY              |
-                                 RASTER_NO_PAINT_SOURCE               ,
-
-  RASTER_NO_PAINT_STROKE_FLAGS = RASTER_NO_PAINT_STROKE_PARAMS        ,
+                                 RASTER_NO_PAINT_OPACITY              ,
 
   // --------------------------------------------------------------------------
   // [Pending Flags - TOP-TO-BOTTOM Order]

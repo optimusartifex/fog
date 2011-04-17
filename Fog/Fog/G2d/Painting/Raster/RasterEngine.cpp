@@ -62,7 +62,8 @@ namespace Fog {
 
 #define _FOG_RASTER_ENTER_FILL_FUNC() \
   FOG_MACRO_BEGIN \
-    if (FOG_UNLIKELY((engine->masterFlags & (RASTER_NO_PAINT_BASE_FLAGS)) != 0)) \
+    if (FOG_UNLIKELY((engine->masterFlags & (RASTER_NO_PAINT_BASE_FLAGS | \
+                                             RASTER_NO_PAINT_SOURCE     )) != 0)) \
     { \
       return ERR_OK; \
     } \
@@ -70,7 +71,17 @@ namespace Fog {
 
 #define _FOG_RASTER_ENTER_STROKE_FUNC() \
   FOG_MACRO_BEGIN \
-    if (FOG_UNLIKELY((engine->masterFlags & (RASTER_NO_PAINT_BASE_FLAGS | RASTER_NO_PAINT_STROKE_FLAGS)) != 0)) \
+    if (FOG_UNLIKELY((engine->masterFlags & (RASTER_NO_PAINT_BASE_FLAGS | \
+                                             RASTER_NO_PAINT_SOURCE     | \
+                                             RASTER_NO_PAINT_STROKE     )) != 0)) \
+    { \
+      return ERR_OK; \
+    } \
+  FOG_MACRO_END
+
+#define _FOG_RASTER_ENTER_BLIT_FUNC() \
+  FOG_MACRO_BEGIN \
+    if (FOG_UNLIKELY((engine->masterFlags & (RASTER_NO_PAINT_BASE_FLAGS)) != 0)) \
     { \
       return ERR_OK; \
     } \
@@ -208,7 +219,6 @@ struct RasterPainterImpl_
   // --------------------------------------------------------------------------
 
   static FOG_INLINE bool ensureFinalTransformF(RasterPainterEngine* engine);
-  static FOG_INLINE bool ensureFinalTransformD(RasterPainterEngine* engine);
 
   // --------------------------------------------------------------------------
   // [Changed - Core]
@@ -792,7 +802,7 @@ err_t FOG_CDECL RasterPainterImpl_::setParameter(Painter& self, uint32_t paramet
       if ((engine->savedStateFlags & RASTER_STATE_STROKE) == 0) saveStroke(engine);
       engine->masterFlags &= ~(RASTER_NO_PAINT_COMPOSITING_OPERATOR |
                                RASTER_NO_PAINT_OPACITY              |
-                               RASTER_NO_PAINT_STROKE_PARAMS        );
+                               RASTER_NO_PAINT_STROKE               );
 
       engine->ctx.paintHints = v._hints;
       engine->ctx.rasterHints.opacity = (int)(v._opacity * engine->ctx.fullOpacityValueF) >> 8;
@@ -830,7 +840,7 @@ err_t FOG_CDECL RasterPainterImpl_::setParameter(Painter& self, uint32_t paramet
       if ((engine->savedStateFlags & RASTER_STATE_STROKE) == 0) saveStroke(engine);
       engine->masterFlags &= ~(RASTER_NO_PAINT_COMPOSITING_OPERATOR |
                                RASTER_NO_PAINT_OPACITY              |
-                               RASTER_NO_PAINT_STROKE_PARAMS        );
+                               RASTER_NO_PAINT_STROKE               );
 
       engine->ctx.paintHints = v._hints;
       engine->ctx.rasterHints.opacity = (int)(opacity * engine->ctx.fullOpacityValueF) >> 8;
@@ -1509,7 +1519,7 @@ err_t FOG_CDECL RasterPainterImpl_::resetParameter(Painter& self, uint32_t param
     case PAINTER_PARAMETER_STROKE_PARAMS_D:
     {
       if ((engine->savedStateFlags & RASTER_STATE_STROKE) == 0) saveStroke(engine);
-      engine->masterFlags &= ~RASTER_NO_PAINT_STROKE_PARAMS;
+      engine->masterFlags &= ~RASTER_NO_PAINT_STROKE;
 
       switch (engine->strokeParamsPrecision)
       {
@@ -1691,47 +1701,17 @@ err_t FOG_CDECL RasterPainterImpl_::getSourcePatternF(const Painter& self, Patte
       return ERR_OK;
 
     case PATTERN_TYPE_COLOR:
-      pattern.setColor(engine->source.color.instance());
+      FOG_RETURN_ON_ERROR(pattern.setColor(engine->source.color.instance()));
       return ERR_OK;
 
     case PATTERN_TYPE_GRADIENT:
-      switch (engine->sourcePrecision)
-      {
-        case RASTER_PRECISION_F:
-        case RASTER_PRECISION_BOTH:
-          pattern.setGradient(engine->source.gradient.f.instance());
-          pattern.setTransform(engine->source.transform.f.instance());
-          break;
-
-        case RASTER_PRECISION_D:
-          pattern.setGradient(engine->source.gradient.d.instance());
-          pattern.setTransform(engine->source.transform.d.instance());
-          break;
-
-        default:
-          FOG_ASSERT_NOT_REACHED();
-      }
+      FOG_RETURN_ON_ERROR(pattern.setGradient(engine->source.gradient.instance()));
+      FOG_RETURN_ON_ERROR(pattern.setTransform(engine->source.transform.instance()));
       return ERR_OK;
 
     case PATTERN_TYPE_TEXTURE:
-      pattern.setTexture(engine->source.texture.instance());
-
-      switch (engine->sourcePrecision)
-      {
-        case RASTER_PRECISION_NONE:
-          break;
-        case RASTER_PRECISION_F:
-        case RASTER_PRECISION_BOTH:
-          pattern.setTransform(engine->source.transform.f.instance());
-          break;
-
-        case RASTER_PRECISION_D:
-          pattern.setTransform(engine->source.transform.d.instance());
-          break;
-
-        default:
-          FOG_ASSERT_NOT_REACHED();
-      }
+      FOG_RETURN_ON_ERROR(pattern.setTexture(engine->source.texture.instance()));
+      FOG_RETURN_ON_ERROR(pattern.setTransform(engine->source.transform.instance()));
       return ERR_OK;
 
     default:
@@ -1750,47 +1730,17 @@ err_t FOG_CDECL RasterPainterImpl_::getSourcePatternD(const Painter& self, Patte
       return ERR_OK;
 
     case PATTERN_TYPE_COLOR:
-      pattern.setColor(engine->source.color.instance());
+      FOG_RETURN_ON_ERROR(pattern.setColor(engine->source.color.instance()));
       return ERR_OK;
 
     case PATTERN_TYPE_GRADIENT:
-      switch (engine->sourcePrecision)
-      {
-        case RASTER_PRECISION_D:
-        case RASTER_PRECISION_BOTH:
-          pattern.setGradient(engine->source.gradient.d.instance());
-          pattern.setTransform(engine->source.transform.d.instance());
-          break;
-
-        case RASTER_PRECISION_F:
-          pattern.setGradient(engine->source.gradient.f.instance());
-          pattern.setTransform(engine->source.transform.f.instance());
-          break;
-
-        default:
-          FOG_ASSERT_NOT_REACHED();
-      }
+      FOG_RETURN_ON_ERROR(pattern.setGradient(engine->source.gradient.instance()));
+      FOG_RETURN_ON_ERROR(pattern.setTransform(engine->source.transform.instance()));
       return ERR_OK;
 
     case PATTERN_TYPE_TEXTURE:
-      pattern.setTexture(engine->source.texture.instance());
-
-      switch (engine->sourcePrecision)
-      {
-        case RASTER_PRECISION_NONE:
-          break;
-        case RASTER_PRECISION_D:
-        case RASTER_PRECISION_BOTH:
-          pattern.setTransform(engine->source.transform.d.instance());
-          break;
-
-        case RASTER_PRECISION_F:
-          pattern.setTransform(engine->source.transform.f.instance());
-          break;
-
-        default:
-          FOG_ASSERT_NOT_REACHED();
-      }
+      FOG_RETURN_ON_ERROR(pattern.setTexture(engine->source.texture.instance()));
+      FOG_RETURN_ON_ERROR(pattern.setTransform(engine->source.transform.instance()));
       return ERR_OK;
 
     default:
@@ -1930,57 +1880,6 @@ err_t FOG_CDECL RasterPainterImpl_::setSourcePatternD(Painter& self, const Patte
   return ERR_RT_INVALID_STATE;
 }
 
-#if 0
-      if (!p._d->texture->_image.isValid()) goto _Invalid;
-
-      engine->sourceType = PATTERN_TYPE_TEXTURE;
-      engine->source.texture.initCustom1(p._d->texture.instance());
-      engine->ctx.pc = NULL;
-
-      if (p._d->transform.getType() != TRANSFORM_TYPE_IDENTITY)
-      {
-        if (engine->ctx.paintHints.geometricPrecision)
-        {
-          engine->sourcePrecision = RASTER_PRECISION_D;
-          engine->source.transform.d.instance() = p._d->transform;
-        }
-        else
-        {
-          engine->sourcePrecision = RASTER_PRECISION_F;
-          engine->source.transform.f.instance() = p._d->transform;
-        }
-      }
-      break;
-
-    case PATTERN_TYPE_GRADIENT:
-      engine->sourceType = PATTERN_TYPE_GRADIENT;
-      engine->ctx.pc = NULL;
-
-      if (engine->ctx.paintHints.geometricPrecision)
-      {
-        engine->sourcePrecision = RASTER_PRECISION_D;
-        engine->source.gradient.d.initCustom1(p._d->gradient.instance());
-
-        if (p._d->transform.getType() != TRANSFORM_TYPE_IDENTITY)
-          engine->source.transform.d.instance() = p._d->transform;
-      }
-      else
-      {
-        engine->sourcePrecision = RASTER_PRECISION_F;
-        engine->source.gradient.f.initCustom1(p._d->gradient.instance());
-            
-        if (p._d->transform.getType() != TRANSFORM_TYPE_IDENTITY)
-          engine->source.transform.f.instance() = p._d->transform;
-      }
-      break;
-
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
-
-#endif
-
-
 err_t FOG_CDECL RasterPainterImpl_::setSourceAbstract(Painter& self, uint32_t sourceId, const void* value, const void* tr)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
@@ -2008,30 +1907,14 @@ err_t FOG_CDECL RasterPainterImpl_::setSourceAbstract(Painter& self, uint32_t so
       if (tr)
       {
         if (sourceId == PAINTER_SOURCE_TEXTURE_F)
-        {
-          if (engine->ctx.paintHints.geometricPrecision)
-          {
-            engine->sourcePrecision = RASTER_PRECISION_D;
-            engine->source.transform.d.instance() = *reinterpret_cast<const TransformF*>(tr);
-            goto _HasTransformD;
-          }
-          else
-          {
-            engine->sourcePrecision = RASTER_PRECISION_F;
-            engine->source.transform.f.instance() = *reinterpret_cast<const TransformF*>(tr);
-            goto _HasTransformF;
-          }
-        }
+          engine->source.transform.instance() = *reinterpret_cast<const TransformF*>(tr);
         else
-        {
-          engine->sourcePrecision = RASTER_PRECISION_D;
-          engine->source.transform.d.instance() = *reinterpret_cast<const TransformD*>(tr);
-          goto _HasTransformD;
-        }
+          engine->source.transform.instance() = *reinterpret_cast<const TransformD*>(tr);
+        goto _HasTransform;
       }
       else
       {
-        engine->sourcePrecision = RASTER_PRECISION_NONE;
+        engine->source.transform.instance().reset();
         goto _NoTransform;
       }
     }
@@ -2045,41 +1928,19 @@ err_t FOG_CDECL RasterPainterImpl_::setSourceAbstract(Painter& self, uint32_t so
       const GradientF& gradient = VALUE_C(GradientF);
 
       engine->sourceType = PATTERN_TYPE_GRADIENT;
+      engine->source.gradient.initCustom1(gradient);
       engine->ctx.pc = NULL;
 
-      if (engine->ctx.paintHints.geometricPrecision)
+      if (tr) 
       {
-        engine->sourcePrecision = RASTER_PRECISION_D;
-        engine->source.gradient.d.initCustom1(gradient);
-
-        if (tr) 
-        {
-          engine->source.transform.d.instance() = *reinterpret_cast<const TransformF*>(tr);
-          goto _HasTransformD;
-        }
-        else
-        {
-          engine->source.transform.d.instance().reset();
-          goto _NoTransform;
-        }
+        engine->source.transform.instance() = *reinterpret_cast<const TransformF*>(tr);
+        goto _HasTransform;
       }
       else
       {
-        engine->sourcePrecision = RASTER_PRECISION_F;
-        engine->source.gradient.f.initCustom1(gradient);
-
-        if (tr) 
-        {
-          engine->source.transform.f.instance() = *reinterpret_cast<const TransformF*>(tr);
-          goto _HasTransformF;
-        }
-        else
-        {
-          engine->source.transform.f.instance().reset();
-          goto _NoTransform;
-        }
+        engine->source.transform.instance().reset();
+        goto _NoTransform;
       }
-
       return ERR_OK;
     }
 
@@ -2088,19 +1949,17 @@ err_t FOG_CDECL RasterPainterImpl_::setSourceAbstract(Painter& self, uint32_t so
       const GradientD& gradient = VALUE_C(GradientD);
 
       engine->sourceType = PATTERN_TYPE_GRADIENT;
+      engine->source.gradient.initCustom1(gradient);
       engine->ctx.pc = NULL;
-
-      engine->sourcePrecision = RASTER_PRECISION_D;
-      engine->source.gradient.d.initCustom1(gradient);
 
       if (tr)
       {
-        engine->source.transform.d.instance() = *reinterpret_cast<const TransformD*>(tr);
-        goto _HasTransformD;
+        engine->source.transform.instance() = *reinterpret_cast<const TransformD*>(tr);
+        goto _HasTransform;
       }
       else
       {
-        engine->source.transform.d.instance().reset();
+        engine->source.transform.instance().reset();
         goto _NoTransform;
       }
 
@@ -2114,76 +1973,15 @@ _Invalid:
   engine->ctx.pc = (RenderPatternContext*)(sysuint_t)0x1;
   return ERR_OK;
 
-_HasTransformF:
-  switch (engine->finalTransformPrecision)
-  {
-    case RASTER_PRECISION_NONE:
-      engine->source.adjusted.f.instance() = engine->source.transform.f.instance();
-      break;
-
-    case RASTER_PRECISION_D:
-      engine->finalTransformPrecision = RASTER_PRECISION_BOTH;
-      engine->finalTransformF = engine->finalTransformD;
-      // ... Fall through ...
-
-    case RASTER_PRECISION_F:
-    case RASTER_PRECISION_BOTH:
-      TransformF::multiply(engine->source.adjusted.f.instance(), engine->source.transform.f.instance(), engine->finalTransformF);
-      break;
-
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
-  return ERR_OK;
-
-_HasTransformD:
-  switch (engine->finalTransformPrecision)
-  {
-    case RASTER_PRECISION_NONE:
-      engine->source.adjusted.d.instance() = engine->source.transform.d.instance();
-      break;
-
-    case RASTER_PRECISION_F:
-      engine->finalTransformPrecision = RASTER_PRECISION_BOTH;
-      engine->finalTransformD = engine->finalTransformF;
-      // ... Fall through ...
-
-    case RASTER_PRECISION_D:
-    case RASTER_PRECISION_BOTH:
-      TransformD::multiply(engine->source.adjusted.d.instance(), engine->source.transform.d.instance(), engine->finalTransformD);
-      break;
-
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
+_HasTransform:
+  TransformD::multiply(engine->source.adjusted.instance(), engine->source.transform.instance(), engine->finalTransform);
   return ERR_OK;
 
 _NoTransform:
-  switch (engine->finalTransformPrecision)
-  {
-    case RASTER_PRECISION_NONE:
-      engine->source.adjusted.d.instance().reset();
-      break;
-
-    case RASTER_PRECISION_F:
-      if (sourceId == PAINTER_SOURCE_TEXTURE_F || sourceId == PAINTER_SOURCE_GRADIENT_F)
-      {
-        engine->source.adjusted.f.instance() = engine->finalTransformF;
-        break;
-      }
-
-      engine->finalTransformPrecision = RASTER_PRECISION_BOTH;
-      engine->finalTransformD = engine->finalTransformF;
-      // ... Fall through ...
-
-    case RASTER_PRECISION_D:
-    case RASTER_PRECISION_BOTH:
-      engine->source.adjusted.d.instance() = engine->finalTransformD;
-      break;
-
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
+  if (engine->finalTransform.getType() == TRANSFORM_TYPE_IDENTITY)
+    engine->source.adjusted.instance().reset();
+  else
+    engine->source.adjusted.instance() = engine->finalTransform;
   return ERR_OK;
 }
 
@@ -2194,93 +1992,23 @@ _NoTransform:
 err_t FOG_CDECL RasterPainterImpl_::getTransformF(const Painter& self, TransformF& tr)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
-
-  switch (engine->userTransformPrecision)
-  {
-    case RASTER_PRECISION_NONE:
-      tr.reset();
-      break;
-    case RASTER_PRECISION_F:
-    case RASTER_PRECISION_BOTH:
-      tr = engine->userTransformF;
-      break;
-    case RASTER_PRECISION_D:
-      tr = engine->userTransformD;
-      break;
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
-
+  tr = engine->userTransform;
   return ERR_OK;
 }
 
 err_t FOG_CDECL RasterPainterImpl_::getTransformD(const Painter& self, TransformD& tr)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
-
-  switch (engine->userTransformPrecision)
-  {
-    case RASTER_PRECISION_NONE:
-      tr.reset();
-      break;
-    case RASTER_PRECISION_D:
-    case RASTER_PRECISION_BOTH:
-      tr = engine->userTransformD;
-      break;
-    case RASTER_PRECISION_F:
-      tr = engine->userTransformF;
-      break;
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
-
+  tr = engine->userTransform;
   return ERR_OK;
 }
 
 err_t FOG_CDECL RasterPainterImpl_::setTransformF(Painter& self, const TransformF& tr)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
-
   if ((engine->savedStateFlags & RASTER_STATE_TRANSFORM) == 0) saveTransform(engine);
-  if (engine->ctx.paintHints.geometricPrecision)
-  {
-    switch (engine->userTransformPrecision)
-    {
-      case RASTER_PRECISION_BOTH:
-      case RASTER_PRECISION_F:
-        engine->userTransformF.reset();
-        // ... Fall through ...
 
-      case RASTER_PRECISION_NONE:
-      case RASTER_PRECISION_D:
-        engine->userTransformPrecision = RASTER_PRECISION_D;
-        engine->userTransformD = tr;
-        break;
-
-      default:
-        FOG_ASSERT_NOT_REACHED();
-    }
-  }
-  else
-  {
-    switch (engine->userTransformPrecision)
-    {
-      case RASTER_PRECISION_BOTH:
-      case RASTER_PRECISION_D:
-        engine->userTransformD.reset();
-        // ... Fall through ...
-
-      case RASTER_PRECISION_NONE:
-      case RASTER_PRECISION_F:
-        engine->userTransformPrecision = RASTER_PRECISION_F;
-        engine->userTransformF = tr;
-        break;
-
-      default:
-        FOG_ASSERT_NOT_REACHED();
-    }
-  }
-
+  engine->userTransform = tr;
   changedTransform(engine);
   return ERR_OK;
 }
@@ -2288,25 +2016,9 @@ err_t FOG_CDECL RasterPainterImpl_::setTransformF(Painter& self, const Transform
 err_t FOG_CDECL RasterPainterImpl_::setTransformD(Painter& self, const TransformD& tr)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
-
   if ((engine->savedStateFlags & RASTER_STATE_TRANSFORM) == 0) saveTransform(engine);
-  switch (engine->userTransformPrecision)
-  {
-    case RASTER_PRECISION_BOTH:
-    case RASTER_PRECISION_F:
-      engine->userTransformF.reset();
-      // ... Fall through ...
 
-    case RASTER_PRECISION_NONE:
-    case RASTER_PRECISION_D:
-      engine->userTransformPrecision = RASTER_PRECISION_D;
-      engine->userTransformD = tr;
-      break;
-
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
-
+  engine->userTransform = tr;
   changedTransform(engine);
   return ERR_OK;
 }
@@ -2317,96 +2029,45 @@ err_t FOG_CDECL RasterPainterImpl_::applyTransformF(Painter& self, uint32_t tran
   err_t err = ERR_OK;
 
   if ((engine->savedStateFlags & RASTER_STATE_TRANSFORM) == 0) saveTransform(engine);
-  if (engine->ctx.paintHints.geometricPrecision)
+
+  // Need to convert parameters from 'Float' precision into 'Double'
+  // precision. This is quite low-level.
+  //
+  // Please see
+  //
+  //   Fog/G2d/Geometry/Transform.h
+  //
+  // to get basic understanding how this works. It's simply a converter
+  // from the 'float' into the 'double' and from the 'TransformF' instance
+  // into the 'TransformD' instance.
+  double d[3];
+  Static<TransformD> tr;
+
+  switch (transformOp & 0xF)
   {
-    switch (engine->userTransformPrecision)
-    {
-      case RASTER_PRECISION_F:
-        engine->userTransformD = engine->userTransformF;
-        // ... Fall through ...
+    case TRANSFORM_OP_ROTATE_PT:
+      d[2] = reinterpret_cast<const float*>(params)[2];
+    case TRANSFORM_OP_TRANSLATE:
+    case TRANSFORM_OP_SCALE:
+    case TRANSFORM_OP_SKEW:
+      d[1] = reinterpret_cast<const float*>(params)[1];
+    case TRANSFORM_OP_ROTATE:
+      d[0] = reinterpret_cast<const float*>(params)[0];
+      err = _g2d.transformd.transform(engine->userTransform, transformOp, d);
+      break;
 
-      case RASTER_PRECISION_NONE:
-      case RASTER_PRECISION_BOTH:
-        engine->userTransformPrecision = RASTER_PRECISION_D;
-        // ... Fall through ...
+    case TRANSFORM_OP_FLIP:
+      err = _g2d.transformd.transform(engine->userTransform, transformOp, params);
+      break;
 
-      case RASTER_PRECISION_D:
-      {
-        double d[3];
-        Static<TransformD> tr;
-
-        // Need to convert parameters from 'Float' precision into 'Double'
-        // precision. This is quite low-level.
-        //
-        // Please see
-        //
-        //   Fog/G2d/Geometry/Transform.h
-        //
-        // to get basic understanding how this works. It's simply a converter
-        // from the 'float' into the 'double' and from the 'TransformF' instance
-        // into the 'TransformD' instance.
-        switch (transformOp & 0xF)
-        {
-          case TRANSFORM_OP_ROTATE_PT:
-            d[2] = reinterpret_cast<const float*>(params)[2];
-          case TRANSFORM_OP_TRANSLATE:
-          case TRANSFORM_OP_SCALE:
-          case TRANSFORM_OP_SKEW:
-            d[1] = reinterpret_cast<const float*>(params)[1];
-          case TRANSFORM_OP_ROTATE:
-            d[0] = reinterpret_cast<const float*>(params)[0];
-            err = _g2d.transformd.transform(engine->userTransformD, transformOp, d);
-            break;
-
-          case TRANSFORM_OP_FLIP:
-            err = _g2d.transformd.transform(engine->userTransformD, transformOp, params);
-            break;
-
-          case TRANSFORM_OP_MULTIPLY:
-          case TRANSFORM_OP_MULTIPLY_INV:
-            tr.initCustom1(*reinterpret_cast<const TransformF*>(params));
-            err = _g2d.transformd.transform(engine->userTransformD, transformOp, tr);
-            break;
-        }
-
-        break;
-      }
-
-      default:
-        FOG_ASSERT_NOT_REACHED();
-    }
-  }
-  else
-  {
-    switch (engine->userTransformPrecision)
-    {
-      case RASTER_PRECISION_D:
-        engine->userTransformF = engine->userTransformD;
-        // ... Fall through ...
-
-      case RASTER_PRECISION_BOTH:
-        engine->userTransformD.reset();
-        // ... Fall through ...
-
-      case RASTER_PRECISION_NONE:
-        engine->userTransformPrecision = RASTER_PRECISION_F;
-        // ... Fall through ...
-
-      case RASTER_PRECISION_F:
-        err = _g2d.transformf.transform(engine->userTransformF, transformOp, params);
-        break;
-
-      default:
-        FOG_ASSERT_NOT_REACHED();
-    }
+    case TRANSFORM_OP_MULTIPLY:
+    case TRANSFORM_OP_MULTIPLY_INV:
+      tr.initCustom1(*reinterpret_cast<const TransformF*>(params));
+      err = _g2d.transformd.transform(engine->userTransform, transformOp, tr);
+      break;
   }
 
-  if (FOG_IS_ERROR(err))
-  {
-    engine->userTransformPrecision = RASTER_PRECISION_NONE;
-    engine->userTransformF.reset();
-    engine->userTransformD.reset();
-  }
+  if (FOG_IS_ERROR(err)) engine->userTransform.reset();
 
   changedTransform(engine);
   return err;
@@ -2418,34 +2079,8 @@ err_t FOG_CDECL RasterPainterImpl_::applyTransformD(Painter& self, uint32_t tran
   err_t err = ERR_OK;
 
   if ((engine->savedStateFlags & RASTER_STATE_TRANSFORM) == 0) saveTransform(engine);
-  switch (engine->userTransformPrecision)
-  {
-    case RASTER_PRECISION_F:
-      engine->userTransformD = engine->userTransformF;
-      // ... Fall through ...
-
-    case RASTER_PRECISION_BOTH:
-      engine->userTransformF.reset();
-      // ... Fall through ...
-
-    case RASTER_PRECISION_NONE:
-      engine->userTransformPrecision = RASTER_PRECISION_D;
-      // ... Fall through ...
-
-    case RASTER_PRECISION_D:
-      err = _g2d.transformd.transform(engine->userTransformD, transformOp, params);
-      break;
-
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
-
-  if (FOG_IS_ERROR(err))
-  {
-    engine->userTransformPrecision = RASTER_PRECISION_NONE;
-    engine->userTransformF.reset();
-    engine->userTransformD.reset();
-  }
+  err = _g2d.transformd.transform(engine->userTransform, transformOp, params);
+  if (FOG_IS_ERROR(err)) engine->userTransform.reset();
 
   changedTransform(engine);
   return err;
@@ -2456,28 +2091,8 @@ err_t FOG_CDECL RasterPainterImpl_::resetTransform(Painter& self)
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
 
   if ((engine->savedStateFlags & RASTER_STATE_TRANSFORM) == 0) saveTransform(engine);
-  switch (engine->userTransformPrecision)
-  {
-    case RASTER_PRECISION_NONE:
-      break;
+  engine->userTransform.reset();
 
-    case RASTER_PRECISION_F:
-      engine->userTransformF.reset();
-      break;
-
-    case RASTER_PRECISION_BOTH:
-      engine->userTransformF.reset();
-      // ... Fall through ...
-
-    case RASTER_PRECISION_D:
-      engine->userTransformD.reset();
-      break;
-
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
-
-  engine->userTransformPrecision = RASTER_PRECISION_NONE;
   changedTransform(engine);
   return ERR_OK;
 }
@@ -2582,13 +2197,10 @@ err_t FOG_CDECL RasterPainterImpl_::restore(Painter& self)
         goto _RestoreSourceContinue;
 
       case PATTERN_TYPE_GRADIENT:
-        if (state->sourcePrecision & RASTER_PRECISION_F) Memory::copy_t<GradientF>(engine->source.gradient.f.instancep(), state->source.gradient.f.instancep());
-        if (state->sourcePrecision & RASTER_PRECISION_D) Memory::copy_t<GradientD>(engine->source.gradient.d.instancep(), state->source.gradient.d.instancep());
+        Memory::copy_t<GradientD>(engine->source.gradient.instancep(), state->source.gradient.instancep());
 
 _RestoreSourceContinue:
-        if (state->sourcePrecision & RASTER_PRECISION_F) Memory::copy_t<TransformF>(engine->source.transform.f.instancep(), state->source.transform.f.instancep());
-        if (state->sourcePrecision & RASTER_PRECISION_D) Memory::copy_t<TransformD>(engine->source.transform.d.instancep(), state->source.transform.d.instancep());
-
+        Memory::copy_t<TransformD>(engine->source.transform.instancep(), state->source.transform.instancep());
         engine->ctx.pc = state->pc;
         break;
 
@@ -2597,7 +2209,6 @@ _RestoreSourceContinue:
     }
 
     engine->sourceType = state->sourceType;
-    engine->sourcePrecision = state->sourcePrecision;
   }
 
   // ------------------------------------------------------------------------
@@ -2652,59 +2263,9 @@ _RestoreSourceContinue:
 
   if (restoreFlags & RASTER_STATE_TRANSFORM)
   {
-    switch (state->userTransformPrecision)
-    {
-      case RASTER_PRECISION_NONE:
-        if (engine->userTransformPrecision == RASTER_PRECISION_NONE) break;
-        engine->userTransformF.reset();
-        engine->userTransformD.reset();
-        break;
-
-      case RASTER_PRECISION_F:
-        engine->userTransformF = state->userTransformF.instance();
-        break;
-
-      case RASTER_PRECISION_D:
-        engine->userTransformD = state->userTransformD.instance();
-        break;
-
-      case RASTER_PRECISION_BOTH:
-        engine->userTransformF = state->userTransformF.instance();
-        engine->userTransformD = state->userTransformD.instance();
-        break;
-
-      default:
-        FOG_ASSERT_NOT_REACHED();
-    }
-
-    switch (state->finalTransformPrecision)
-    {
-      case RASTER_PRECISION_NONE:
-        if (engine->finalTransformPrecision == RASTER_PRECISION_NONE) break;
-
-        engine->finalTransformF = engine->coreTransformF;
-        engine->finalTransformD = engine->coreTransformD;
-        break;
-
-      case RASTER_PRECISION_F:
-        engine->finalTransformF = state->finalTransformF.instance();
-        break;
-
-      case RASTER_PRECISION_D:
-        engine->finalTransformD = state->finalTransformD.instance();
-        break;
-
-      case RASTER_PRECISION_BOTH:
-        engine->finalTransformF = state->finalTransformF.instance();
-        engine->finalTransformD = state->finalTransformD.instance();
-        break;
-
-      default:
-        FOG_ASSERT_NOT_REACHED();
-    }
-
-    engine->userTransformPrecision = state->userTransformPrecision;
-    engine->finalTransformPrecision = state->finalTransformPrecision;
+    engine->userTransform = state->userTransform.instance();
+    engine->finalTransform = state->finalTransform.instance();
+    engine->finalTransformF = state->finalTransformF.instance();
 
     engine->coreTranslationI = state->coreTranslationI;
     engine->finalTransformI._type = state->finalTransformI._type;
@@ -2765,7 +2326,6 @@ void RasterPainterImpl_::saveSource(RasterPainterEngine* engine)
 
   engine->savedStateFlags |= RASTER_STATE_SOURCE;
   state->sourceType = (uint8_t)engine->sourceType;
-  state->sourcePrecision = (uint8_t)engine->sourcePrecision;
 
   switch (engine->sourceType)
   {
@@ -2781,13 +2341,10 @@ void RasterPainterImpl_::saveSource(RasterPainterEngine* engine)
       goto _SaveSourceContinue;
 
     case PATTERN_TYPE_GRADIENT:
-      if (engine->sourcePrecision & RASTER_PRECISION_F) state->source.gradient.f.initCustom1(engine->source.gradient.f.instance());
-      if (engine->sourcePrecision & RASTER_PRECISION_D) state->source.gradient.d.initCustom1(engine->source.gradient.d.instance());
+      state->source.gradient.initCustom1(engine->source.gradient.instance());
 
 _SaveSourceContinue:
-      if (engine->sourcePrecision & RASTER_PRECISION_F) state->source.transform.f.initCustom1(engine->source.transform.f.instance());
-      if (engine->sourcePrecision & RASTER_PRECISION_D) state->source.transform.d.initCustom1(engine->source.transform.d.instance());
-
+      state->source.transform.initCustom1(engine->source.transform.instance());
       state->pc = NULL;
       if (!RasterUtil::isPatternContext(engine->ctx.pc)) break;
 
@@ -2840,50 +2397,9 @@ void RasterPainterImpl_::saveTransform(RasterPainterEngine* engine)
   FOG_ASSERT(state != NULL);
 
   engine->savedStateFlags |= RASTER_STATE_TRANSFORM;
-  state->userTransformPrecision = engine->userTransformPrecision;
-  state->finalTransformPrecision = engine->finalTransformPrecision;
-
-  switch (engine->userTransformPrecision)
-  {
-    case RASTER_PRECISION_NONE:
-      break;
-
-    case RASTER_PRECISION_F:
-      state->userTransformF.initCustom1(engine->userTransformF);
-      break;
-
-    case RASTER_PRECISION_BOTH:
-      state->userTransformF.initCustom1(engine->userTransformF);
-      // ... Fall through ...
-
-    case RASTER_PRECISION_D:
-      state->userTransformD.initCustom1(engine->userTransformD);
-      break;
-
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
-
-  switch (engine->finalTransformPrecision)
-  {
-    case RASTER_PRECISION_NONE:
-      break;
-
-    case RASTER_PRECISION_F:
-      state->finalTransformF.initCustom1(engine->finalTransformF);
-      break;
-
-    case RASTER_PRECISION_BOTH:
-      state->finalTransformF.initCustom1(engine->finalTransformF);
-      // ... Fall through ...
-
-    case RASTER_PRECISION_D:
-      state->finalTransformD.initCustom1(engine->finalTransformD);
-      break;
-
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
+  state->userTransform.initCustom1(engine->userTransform);
+  state->finalTransform.initCustom1(engine->finalTransform);
+  state->finalTransformF.initCustom1(engine->finalTransformF);
 
   state->coreTranslationI = engine->coreTranslationI;
   state->finalTransformI._type = engine->finalTransformI._type;
@@ -2933,8 +2449,7 @@ void RasterPainterImpl_::discardStates(RasterPainterEngine* engine)
           goto _DiscardSourceContinue;
 
         case PATTERN_TYPE_GRADIENT:
-          if (state->sourcePrecision & RASTER_PRECISION_F) state->source.gradient.f.destroy();
-          if (state->sourcePrecision & RASTER_PRECISION_D) state->source.gradient.d.destroy();
+          state->source.gradient.destroy();
 
 _DiscardSourceContinue:
           if (state->pc != NULL && state->pc->_refCount.deref())
@@ -3092,6 +2607,7 @@ void RasterPainterImpl_::setupOps(RasterPainterEngine* engine)
   engine->ctx.rasterHints.packed = 0;
   engine->ctx.rasterHints.opacity = engine->ctx.fullOpacityValueU;
   engine->ctx.rasterHints.rectToRectTransform = 1;
+  engine->ctx.rasterHints.finalTransformF = 0;
   engine->ctx.rasterHints.idealLine = 1;
 
   engine->opacityF = 1.0f;
@@ -3100,8 +2616,7 @@ void RasterPainterImpl_::setupOps(RasterPainterEngine* engine)
   engine->sourceType = PATTERN_TYPE_COLOR;
 
   engine->source.color.init();
-  engine->source.transform.f.init();
-  engine->source.transform.d.init();
+  engine->source.transform.init();
 }
 
 void RasterPainterImpl_::setupDefaultClip(RasterPainterEngine* engine)
@@ -3132,8 +2647,8 @@ void RasterPainterImpl_::setupDefaultClip(RasterPainterEngine* engine)
   // TODO:?
   engine->ctx.finalClipType = RASTER_CLIP_BOX;
   engine->ctx.finalClipBoxI = boundingBox;
-  engine->ctx.finalClipBoxF = boundingBox;
-  engine->ctx.finalClipBoxD = boundingBox;
+  engine->ctx.finalClipperF.setClipBox(BoxF(boundingBox));
+  engine->ctx.finalClipperD.setClipBox(BoxD(boundingBox));
   engine->ctx.finalRegion = engine->coreRegion;
 
   // TODO:
@@ -3155,7 +2670,6 @@ void RasterPainterImpl_::discardSource(RasterPainterEngine* engine)
   {
     case PATTERN_TYPE_NONE:
     case PATTERN_TYPE_COLOR:
-      FOG_ASSERT(engine->sourcePrecision == RASTER_PRECISION_NONE);
       break;
 
     case PATTERN_TYPE_TEXTURE:
@@ -3163,13 +2677,10 @@ void RasterPainterImpl_::discardSource(RasterPainterEngine* engine)
       goto _DiscardContinue;
 
     case PATTERN_TYPE_GRADIENT:
-      if (engine->sourcePrecision & RASTER_PRECISION_F) engine->source.gradient.f.destroy();
-      if (engine->sourcePrecision & RASTER_PRECISION_D) engine->source.gradient.d.destroy();
+      engine->source.gradient.destroy();
 
 _DiscardContinue:
-      engine->sourcePrecision = RASTER_PRECISION_NONE;
-      if (engine->source.transform.f->_type != TRANSFORM_TYPE_IDENTITY) engine->source.transform.f->reset();
-      if (engine->source.transform.d->_type != TRANSFORM_TYPE_IDENTITY) engine->source.transform.d->reset();
+      if (engine->source.transform->_type != TRANSFORM_TYPE_IDENTITY) engine->source.transform->reset();
 
       if (RasterUtil::isPatternContext(engine->ctx.pc) && engine->ctx.pc->_refCount.deref())
         destroyPatternContext(engine, engine->ctx.pc);
@@ -3188,7 +2699,7 @@ err_t RasterPainterImpl_::createPatternContext(RasterPainterEngine* engine)
   FOG_ASSERT(sourceType != PATTERN_TYPE_NONE);
   FOG_ASSERT(sourceType != PATTERN_TYPE_COLOR);
 
-  // First try to reuse context from pool.
+  // First try to reuse context from context-pool.
   RenderPatternContext* pc = reinterpret_cast<RenderPatternContext*>(engine->pcPool);
 
   if (FOG_IS_NULL(pc))
@@ -3214,32 +2725,27 @@ err_t RasterPainterImpl_::createPatternContext(RasterPainterEngine* engine)
   {
     case PATTERN_TYPE_TEXTURE:
     {
+      err = _g2d_render.texture.create(pc, 
+        engine->ctx.layer.primaryFormat,
+        engine->coreClipBox,
+        engine->source.texture->getImage(),
+        engine->source.texture->getFragment(),
+        engine->source.adjusted.instance(),
+        engine->source.texture->getClampColor(),
+        engine->source.texture->getTileType(),
+        engine->ctx.paintHints.imageQuality);
       break;
     }
     
     case PATTERN_TYPE_GRADIENT:
     {
-      // Try double-precision floating point first.
-      if (engine->sourcePrecision & RASTER_PRECISION_D)
-      {
-        uint32_t gradientType = engine->source.gradient.d->getGradientType();
-        err = _g2d_render.gradient.create_d[gradientType](pc, 
-          engine->ctx.layer.primaryFormat,
-          engine->coreClipBox,
-          engine->source.gradient.d.instance(),
-          engine->source.adjusted.d.instance(),
-          engine->ctx.paintHints.gradientQuality);
-      }
-      else
-      {
-        uint32_t gradientType = engine->source.gradient.f->getGradientType();
-        err = _g2d_render.gradient.create_f[gradientType](pc, 
-          engine->ctx.layer.primaryFormat,
-          engine->coreClipBox,
-          engine->source.gradient.f.instance(),
-          engine->source.adjusted.f.instance(),
-          engine->ctx.paintHints.gradientQuality);
-      }
+      uint32_t gradientType = engine->source.gradient->getGradientType();
+      err = _g2d_render.gradient.create[gradientType](pc, 
+        engine->ctx.layer.primaryFormat,
+        engine->coreClipBox,
+        engine->source.gradient.instance(),
+        engine->source.adjusted.instance(),
+        engine->ctx.paintHints.gradientQuality);
       break;
     }
 
@@ -3272,36 +2778,14 @@ void RasterPainterImpl_::destroyPatternContext(RasterPainterEngine* engine, Rend
 
 bool RasterPainterImpl_::ensureFinalTransformF(RasterPainterEngine* engine)
 {
-  switch (engine->finalTransformPrecision)
-  {
-    case RASTER_PRECISION_NONE:
-      return false;
-    case RASTER_PRECISION_D:
-      engine->finalTransformF = engine->finalTransformD;
-      engine->finalTransformPrecision = RASTER_PRECISION_BOTH;
-    case RASTER_PRECISION_F:
-    case RASTER_PRECISION_BOTH:
-      return true;
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
-}
+  if (engine->finalTransform._type == TRANSFORM_TYPE_IDENTITY) return false;
 
-bool RasterPainterImpl_::ensureFinalTransformD(RasterPainterEngine* engine)
-{
-  switch (engine->finalTransformPrecision)
+  if (!engine->ctx.rasterHints.finalTransformF)
   {
-    case RASTER_PRECISION_NONE:
-      return false;
-    case RASTER_PRECISION_F:
-      engine->finalTransformD = engine->finalTransformF;
-      engine->finalTransformPrecision = RASTER_PRECISION_BOTH;
-    case RASTER_PRECISION_D:
-    case RASTER_PRECISION_BOTH:
-      return true;
-    default:
-      FOG_ASSERT_NOT_REACHED();
+    engine->finalTransformF = engine->finalTransform;
+    engine->ctx.rasterHints.finalTransformF = 1;
   }
+  return true;
 }
 
 // ============================================================================
@@ -3381,25 +2865,17 @@ err_t RasterPainterImpl_::changedCoreClip(RasterPainterEngine* engine)
   {
     engine->coreTranslationI.reset();
 
-    engine->coreTransformF._type = TRANSFORM_TYPE_IDENTITY;
-    engine->coreTransformF._20 = 0.0f;
-    engine->coreTransformF._21 = 0.0f;
-    
-    engine->coreTransformD._type = TRANSFORM_TYPE_IDENTITY;
-    engine->coreTransformD._20 = 0.0;
-    engine->coreTransformD._21 = 0.0;
+    engine->coreTransform._type = TRANSFORM_TYPE_IDENTITY;
+    engine->coreTransform._20 = 0.0;
+    engine->coreTransform._21 = 0.0;
   }
   else
   {
     engine->coreTranslationI.set(-engine->coreOrigin.x, -engine->coreOrigin.y);
 
-    engine->coreTransformF._type = TRANSFORM_TYPE_TRANSLATION;
-    engine->coreTransformF._20 = (float)(engine->coreTranslationI.x);
-    engine->coreTransformF._21 = (float)(engine->coreTranslationI.y);
-    
-    engine->coreTransformD._type = TRANSFORM_TYPE_TRANSLATION;
-    engine->coreTransformD._20 = (double)(engine->coreTranslationI.x);
-    engine->coreTransformD._21 = (double)(engine->coreTranslationI.y);
+    engine->coreTransform._type = TRANSFORM_TYPE_TRANSLATION;
+    engine->coreTransform._20 = (double)(engine->coreTranslationI.x);
+    engine->coreTransform._21 = (double)(engine->coreTranslationI.y);
   }
   return ERR_OK;
 
@@ -3418,8 +2894,8 @@ _Fail:
 
 void RasterPainterImpl_::changedTransform(RasterPainterEngine* engine)
 {
-  uint32_t type;
   engine->ctx.rasterHints.rectToRectTransform = 1;
+  engine->ctx.rasterHints.finalTransformF = 0;
 
   engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_NULL;
   engine->finalTransformI._sx = 1;
@@ -3427,140 +2903,56 @@ void RasterPainterImpl_::changedTransform(RasterPainterEngine* engine)
   engine->finalTransformI._tx = 0;
   engine->finalTransformI._ty = 0;
 
-  switch (engine->userTransformPrecision)
+  if (engine->userTransform.getType() == TRANSFORM_TYPE_IDENTITY)
+    engine->finalTransform = engine->coreTransform;
+  else
+    TransformD::multiply(engine->finalTransform, engine->coreTransform, engine->userTransform);
+
+  switch (engine->finalTransform.getType())
   {
-    case RASTER_PRECISION_NONE:
-      // TODO
-      // engine->finalTransformF = engine->coreTransformF;
-      // engine->finalTransformD = engine->coreTransformD;
-      engine->finalTransformPrecision = RASTER_PRECISION_NONE;
+    case TRANSFORM_TYPE_PROJECTION:
+      engine->ctx.rasterHints.rectToRectTransform = 0;
+      break;
 
-      engine->finalTransformF = engine->coreTransformF;
-      engine->finalTransformD = engine->coreTransformD;
+    case TRANSFORM_TYPE_AFFINE:
+    case TRANSFORM_TYPE_ROTATION:
+      if ((!Math::isFuzzyZero(engine->finalTransform._00) && !Math::isFuzzyZero(engine->finalTransform._01)) ||
+          (!Math::isFuzzyZero(engine->finalTransform._10) && !Math::isFuzzyZero(engine->finalTransform._11)) )
+      {
+        engine->ctx.rasterHints.rectToRectTransform = 0;
+        break;
+      }
 
+      if (!Math::isFuzzyZero(engine->finalTransform._00)) break;
+      if (!Math::isFuzzyZero(engine->finalTransform._11)) break;
+
+      if (!Math::isFuzzyToInt(engine->finalTransform._01, engine->finalTransformI._sx)) break;
+      if (!Math::isFuzzyToInt(engine->finalTransform._10, engine->finalTransformI._sy)) break;
+
+      engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_SCALING;
+      goto _Translation;
+
+    case TRANSFORM_TYPE_SCALING:
+      if (!Math::isFuzzyToInt(engine->finalTransform._00, engine->finalTransformI._sx)) break;
+      if (!Math::isFuzzyToInt(engine->finalTransform._11, engine->finalTransformI._sy)) break;
+
+      engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_SCALING;
+      goto _Translation;
+
+    case TRANSFORM_TYPE_TRANSLATION:
       engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_SIMPLE;
-      engine->finalTransformI._tx = engine->coreTranslationI.x;
-      engine->finalTransformI._ty = engine->coreTranslationI.y;
+
+_Translation:
+      if (!Math::isFuzzyToInt(engine->finalTransform._20, engine->finalTransformI._tx)) break;
+      if (!Math::isFuzzyToInt(engine->finalTransform._21, engine->finalTransformI._ty)) break;
       return;
 
-    case RASTER_PRECISION_F:
-      TransformF::multiply(engine->finalTransformF, engine->coreTransformF, engine->userTransformF);
-      type = engine->finalTransformF.getType();
-
-      engine->finalTransformPrecision = RASTER_PRECISION_F;
-
-      switch (type)
-      {
-        case TRANSFORM_TYPE_PROJECTION:
-          engine->ctx.rasterHints.rectToRectTransform = 0;
-          break;
-
-        case TRANSFORM_TYPE_AFFINE:
-        case TRANSFORM_TYPE_ROTATION:
-          if ((!Math::isFuzzyZero(engine->finalTransformF._00) && !Math::isFuzzyZero(engine->finalTransformF._01)) ||
-              (!Math::isFuzzyZero(engine->finalTransformF._10) && !Math::isFuzzyZero(engine->finalTransformF._11)) )
-          {
-            engine->ctx.rasterHints.rectToRectTransform = 0;
-            break;
-          }
-
-          if (!Math::isFuzzyZero(engine->finalTransformF._00)) break;
-          if (!Math::isFuzzyZero(engine->finalTransformF._11)) break;
-
-          if (!Math::isFuzzyToInt(engine->finalTransformF._01, engine->finalTransformI._sx)) break;
-          if (!Math::isFuzzyToInt(engine->finalTransformF._10, engine->finalTransformI._sy)) break;
-
-          engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_ROTATION;
-          goto _TranslationF;
-
-        case TRANSFORM_TYPE_SCALING:
-          if (!Math::isFuzzyToInt(engine->finalTransformF._00, engine->finalTransformI._sx)) break;
-          if (!Math::isFuzzyToInt(engine->finalTransformF._11, engine->finalTransformI._sy)) break;
-
-          engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_SCALING;
-          goto _TranslationF;
-
-        case TRANSFORM_TYPE_TRANSLATION:
-          engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_SIMPLE;
-
-_TranslationF:
-          if (!Math::isFuzzyToInt(engine->finalTransformF._20, engine->finalTransformI._tx)) break;
-          if (!Math::isFuzzyToInt(engine->finalTransformF._21, engine->finalTransformI._ty)) break;
-          return;
-
-        case TRANSFORM_TYPE_IDENTITY:
-          engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_SIMPLE;
-          // Everything configured, using integralTransform and rectToRectTransform.
-          return;
-      }
-
-      // Transform is not integral.
+    case TRANSFORM_TYPE_IDENTITY:
+      engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_SIMPLE;
       return;
-
-    case RASTER_PRECISION_BOTH:
-    case RASTER_PRECISION_D:
-      TransformD::multiply(engine->finalTransformD, engine->coreTransformD, engine->userTransformD);
-      type = engine->finalTransformD.getType();
-
-      engine->finalTransformPrecision = RASTER_PRECISION_D;
-
-      if (engine->userTransformPrecision == RASTER_PRECISION_BOTH)
-      {
-        engine->finalTransformF = engine->finalTransformD;
-        engine->finalTransformF.getType();
-        engine->finalTransformPrecision = RASTER_PRECISION_BOTH;
-      }
-
-      switch (type)
-      {
-        case TRANSFORM_TYPE_PROJECTION:
-          engine->ctx.rasterHints.rectToRectTransform = 0;
-          break;
-
-        case TRANSFORM_TYPE_AFFINE:
-        case TRANSFORM_TYPE_ROTATION:
-          if ((!Math::isFuzzyZero(engine->finalTransformD._00) && !Math::isFuzzyZero(engine->finalTransformD._01)) ||
-              (!Math::isFuzzyZero(engine->finalTransformD._10) && !Math::isFuzzyZero(engine->finalTransformD._11)) )
-          {
-            engine->ctx.rasterHints.rectToRectTransform = 0;
-            break;
-          }
-
-          if (!Math::isFuzzyZero(engine->finalTransformF._00)) break;
-          if (!Math::isFuzzyZero(engine->finalTransformF._11)) break;
-
-          if (!Math::isFuzzyToInt(engine->finalTransformD._01, engine->finalTransformI._sx)) break;
-          if (!Math::isFuzzyToInt(engine->finalTransformD._10, engine->finalTransformI._sy)) break;
-
-          engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_SCALING;
-          goto _TranslationD;
-
-        case TRANSFORM_TYPE_SCALING:
-          if (!Math::isFuzzyToInt(engine->finalTransformD._00, engine->finalTransformI._sx)) break;
-          if (!Math::isFuzzyToInt(engine->finalTransformD._11, engine->finalTransformI._sy)) break;
-
-          engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_SCALING;
-          goto _TranslationF;
-
-        case TRANSFORM_TYPE_TRANSLATION:
-          engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_SIMPLE;
-
-_TranslationD:
-          if (!Math::isFuzzyToInt(engine->finalTransformD._20, engine->finalTransformI._tx)) break;
-          if (!Math::isFuzzyToInt(engine->finalTransformD._21, engine->finalTransformI._ty)) break;
-          return;
-
-        case TRANSFORM_TYPE_IDENTITY:
-          engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_SIMPLE;
-          return;
-      }
-
-      // Transform is not integral.
-      return;
-
-    default:
-      FOG_ASSERT_NOT_REACHED();
   }
+
+  // Transform is not integral.
 }
 
 // ============================================================================
@@ -3804,10 +3196,17 @@ struct RasterPainterImpl : public RasterPainterImpl_
   static err_t doFillUntransformedPathD(RasterPainterEngine* engine, const PathD& path, uint32_t fillRule, bool clip);
 
   // --------------------------------------------------------------------------
-  // [Painting - Blit]
+  // [Painting - BlitAlignedImage]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE err_t doFillAlignedImageI(RasterPainterEngine* engine, const PointI& pt, const Image& srcImage, const RectI& srcFraction);
+  static FOG_INLINE err_t doBlitAlignedImageI(RasterPainterEngine* engine, const PointI& pt, const Image& srcImage, const RectI& srcFraction);
+
+  // --------------------------------------------------------------------------
+  // [Painting - BlitUntransformedImage]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE err_t doBlitUntransformedImageF(RasterPainterEngine* engine, const BoxF& box, const Image& srcImage, const RectI& srcFraction);
+  static FOG_INLINE err_t doBlitUntransformedImageD(RasterPainterEngine* engine, const BoxD& box, const Image& srcImage, const RectI& srcFraction);
 };
 
 // ============================================================================
@@ -4293,7 +3692,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectF(Painter& self, const RectF& 
     engine->finalTransformF.mapBox(box, box);
   }
 
-  if (BoxF::intersect(box, box, engine->ctx.finalClipBoxF))
+  if (BoxF::intersect(box, box, engine->ctx.finalClipperF.getClipBox()))
     return doFillTransformedBoxF(engine, box);
   else
     return ERR_OK;
@@ -4306,7 +3705,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectD(Painter& self, const RectD& 
   _FOG_RASTER_ENTER_FILL_FUNC();
 
   BoxD box(r);
-  if (ensureFinalTransformD(engine))
+  if (engine->finalTransform.getType() != TRANSFORM_TYPE_IDENTITY)
   {
     if (!engine->ctx.rasterHints.rectToRectTransform)
     {
@@ -4316,10 +3715,10 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectD(Painter& self, const RectD& 
       return doFillUntransformedPathD(engine, path, FILL_RULE_NON_ZERO, true);
     }
 
-    engine->finalTransformD.mapBox(box, box);
+    engine->finalTransform.mapBox(box, box);
   }
 
-  if (BoxD::intersect(box, box, engine->ctx.finalClipBoxD))
+  if (BoxD::intersect(box, box, engine->ctx.finalClipperD.getClipBox()))
     return doFillTransformedBoxD(engine, box);
   else
     return ERR_OK;
@@ -4616,71 +4015,62 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtI(Painter& self, const Poin
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
 
-  switch (engine->finalTransformI._type)
+  if (i.isEmpty()) return ERR_OK;
+  _FOG_RASTER_ENTER_BLIT_FUNC();
+
+  if (engine->finalTransformI._type == RASTER_INTEGRAL_TRANSFORM_SIMPLE)
   {
-    case RASTER_INTEGRAL_TRANSFORM_NULL:
-    {
-      if (engine->ctx.paintHints.geometricPrecision)
-        return engine->vtable->blitImageAtD(self, PointD(p), i, ir);
-      else
-        return engine->vtable->blitImageAtF(self, PointF(p), i, ir);
-    }
+    int srcX = 0;
+    int srcY = 0;
+    int dstX = p.x + engine->finalTransformI._tx;
+    int dstY = p.y + engine->finalTransformI._ty;
+    int dstW = i.getWidth();
+    int dstH = i.getHeight();
 
-    case RASTER_INTEGRAL_TRANSFORM_SIMPLE:
+    if (ir != NULL)
     {
-      int srcX = 0;
-      int srcY = 0;
-      int dstX = p.x + engine->finalTransformI._tx;
-      int dstY = p.y + engine->finalTransformI._ty;
-      int dstW = i.getWidth();
-      int dstH = i.getHeight();
+      if (!ir->isValid()) return ERR_OK;
 
-      if (ir != NULL)
+      srcX = ir->x; 
+      srcY = ir->y; 
+
+      if ((uint)(srcX) >= (uint)dstW ||
+          (uint)(srcY) >= (uint)dstH ||
+          (uint)(ir->w - srcX) > (uint)dstW ||
+          (uint)(ir->h - srcY) > (uint)dstH)
       {
-        if (!ir->isValid()) return ERR_OK;
-
-        srcX = ir->x; if (srcX < 0) return ERR_RT_INVALID_ARGUMENT;
-        srcY = ir->y; if (srcY < 0) return ERR_RT_INVALID_ARGUMENT;
-
-        dstW = Math::min(dstW, ir->w); if (dstW == 0) return ERR_OK;
-        dstH = Math::min(dstH, ir->h); if (dstH == 0) return ERR_OK;
+        return ERR_RT_INVALID_ARGUMENT;
       }
 
-      int d;
-
-      if ((uint)(d = dstX - engine->ctx.finalClipBoxI.x1) >= (uint)engine->ctx.finalClipBoxI.getWidth())
-      {
-        dstX = 0; srcX = -d; if (d >= 0 || (dstW += d) <= 0) return ERR_OK;
-      }
-
-      if ((uint)(d = dstY - engine->ctx.finalClipBoxI.y1) >= (uint)engine->ctx.finalClipBoxI.getHeight())
-      {
-        dstY = 0; srcY = -d; if (d >= 0 || (dstH += d) <= 0) return ERR_OK;
-      }
-
-      if ((d = engine->ctx.finalClipBoxI.x1 - dstX) < dstW) dstW = d;
-      if ((d = engine->ctx.finalClipBoxI.y1 - dstY) < dstH) dstH = d;
-
-      return doFillAlignedImageI(engine, PointI(dstX, dstY), i, RectI(srcX, srcY, dstW, dstH));
+      dstW = ir->w;
+      dstH = ir->h;
+      if (dstW == 0 || dstH == 0) return ERR_OK;
     }
 
-    case RASTER_INTEGRAL_TRANSFORM_SCALING:
+    int d;
+
+    if ((uint)(d = dstX - engine->ctx.finalClipBoxI.x0) >= (uint)engine->ctx.finalClipBoxI.getWidth())
     {
-      // TODO:
-      break;
+      dstX = 0; srcX = -d; if (d >= 0 || (dstW += d) <= 0) return ERR_OK;
     }
 
-    case RASTER_INTEGRAL_TRANSFORM_ROTATION:
+    if ((uint)(d = dstY - engine->ctx.finalClipBoxI.y0) >= (uint)engine->ctx.finalClipBoxI.getHeight())
     {
-      // TODO:
-      break;
+      dstY = 0; srcY = -d; if (d >= 0 || (dstH += d) <= 0) return ERR_OK;
     }
 
-    default:
-      FOG_ASSERT_NOT_REACHED();
+    if ((d = engine->ctx.finalClipBoxI.x1 - dstX) < dstW) dstW = d;
+    if ((d = engine->ctx.finalClipBoxI.y1 - dstY) < dstH) dstH = d;
+
+    return doBlitAlignedImageI(engine, PointI(dstX, dstY), i, RectI(srcX, srcY, dstW, dstH));
   }
-
-  return ERR_RT_INVALID_STATE;
+  else
+  {
+    if (engine->ctx.paintHints.geometricPrecision)
+      return engine->vtable->blitImageAtD(self, PointD(p), i, ir);
+    else
+      return engine->vtable->blitImageAtF(self, PointF(p), i, ir);
+  }
 }
  
 template<int _MODE>
@@ -4688,14 +4078,51 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtF(Painter& self, const Poin
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
 
-  if (ensureFinalTransformF(engine) && engine->finalTransformF.getType() > TRANSFORM_TYPE_TRANSLATION)
+  if (i.isEmpty()) return ERR_OK;
+  _FOG_RASTER_ENTER_BLIT_FUNC();
+
+  int iX = 0;
+  int iY = 0;
+  int iW = i.getWidth();
+  int iH = i.getHeight();
+    
+  if (ir != NULL)
   {
-  }
-  else
-  {
+    if ((uint)(ir->x) >= (uint)iW ||
+        (uint)(ir->y) >= (uint)iH ||
+        (uint)(ir->w - ir->x) > (uint)iW ||
+        (uint)(ir->h - ir->y) > (uint)iH)
+    {
+      return ERR_RT_INVALID_ARGUMENT;
+    }
+
+    iX = ir->x;
+    iY = ir->y;
   }
 
-  return ERR_RT_NOT_IMPLEMENTED;
+  // Try to aligned blit.
+  if (engine->finalTransform.getType() <= TRANSFORM_TYPE_TRANSLATION)
+  {
+    PointD t((double)p.x + engine->finalTransform._20, 
+             (double)p.y + engine->finalTransform._21);
+
+    Fixed48x16 x48x16 = Math::fixed48x16FromFloat(t.x);
+    Fixed48x16 y48x16 = Math::fixed48x16FromFloat(t.y);
+
+    int fx = (int)(x48x16 >> 8) & 0xFF;
+    int fy = (int)(x48x16 >> 8) & 0xFF;
+
+    if ((fx | fy) == 0)
+      return doBlitAlignedImageI(engine, PointI((int)(x48x16 >> 16), (int)(y48x16 >> 16)), i, RectI(iX, iY, iW, iH));
+  }
+
+  BoxF box(UNINITIALIZED);
+  box.x0 = p.x;
+  box.y0 = p.y;
+  box.x1 = box.x0 + (float)iW;
+  box.y1 = box.y0 + (float)iH;
+
+  return doBlitUntransformedImageF(engine, box, i, RectI(iX, iY, iW, iH));
 }
  
 template<int _MODE>
@@ -4703,7 +4130,51 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtD(Painter& self, const Poin
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
 
-  return ERR_RT_NOT_IMPLEMENTED;
+  if (i.isEmpty()) return ERR_OK;
+  _FOG_RASTER_ENTER_BLIT_FUNC();
+
+  int iX = 0;
+  int iY = 0;
+  int iW = i.getWidth();
+  int iH = i.getHeight();
+    
+  if (ir != NULL)
+  {
+    if ((uint)(ir->x) >= (uint)iW ||
+        (uint)(ir->y) >= (uint)iH ||
+        (uint)(ir->w - ir->x) > (uint)iW ||
+        (uint)(ir->h - ir->y) > (uint)iH)
+    {
+      return ERR_RT_INVALID_ARGUMENT;
+    }
+
+    iX = ir->x;
+    iY = ir->y;
+  }
+
+  // Try to aligned blit.
+  if (engine->finalTransform.getType() <= TRANSFORM_TYPE_TRANSLATION)
+  {
+    PointD t(p.x + engine->finalTransform._20, 
+             p.y + engine->finalTransform._21);
+
+    Fixed48x16 x48x16 = Math::fixed48x16FromFloat(t.x);
+    Fixed48x16 y48x16 = Math::fixed48x16FromFloat(t.y);
+
+    int fx = (int)(x48x16 >> 8) & 0xFF;
+    int fy = (int)(x48x16 >> 8) & 0xFF;
+
+    if ((fx | fy) == 0)
+      return doBlitAlignedImageI(engine, PointI((int)(x48x16 >> 16), (int)(y48x16 >> 16)), i, RectI(iX, iY, iW, iH));
+  }
+
+  BoxD box(UNINITIALIZED);
+  box.x0 = p.x;
+  box.y0 = p.y;
+  box.x1 = box.x0 + (double)iW;
+  box.y1 = box.y0 + (double)iH;
+
+  return doBlitUntransformedImageD(engine, box, i, RectI(iX, iY, iW, iH));
 }
  
 template<int _MODE>
@@ -5139,18 +4610,17 @@ err_t RasterPainterImpl<_MODE>::doFillUntransformedPathF(RasterPainterEngine* en
     if (clip)
     {
       engine->ctx.tmpPathF[1].clear();
-      PathClipperF clipper(engine->ctx.finalClipBoxF);
 
       if (!hasTransform)
       {
-        switch (clipper.initPath(path))
+        switch (engine->ctx.finalClipperF.initPath(path))
         {
           case CLIPPER_INIT_ALREADY_CLIPPED:
             engine->ctx.renderer->fillTransformedPathF(engine->ctx, path, fillRule);
             return ERR_OK;
 
           case CLIPPER_INIT_NOT_CLIPPED:
-            FOG_RETURN_ON_ERROR(clipper.continuePath(engine->ctx.tmpPathF[1], path));
+            FOG_RETURN_ON_ERROR(engine->ctx.finalClipperF.continuePath(engine->ctx.tmpPathF[1], path));
             engine->ctx.renderer->fillTransformedPathF(engine->ctx, engine->ctx.tmpPathF[1], fillRule);
             return ERR_OK;
 
@@ -5160,7 +4630,7 @@ err_t RasterPainterImpl<_MODE>::doFillUntransformedPathF(RasterPainterEngine* en
       }
       else
       {
-        FOG_RETURN_ON_ERROR(clipper.clipPath(engine->ctx.tmpPathF[1], path, engine->finalTransformF));
+        FOG_RETURN_ON_ERROR(engine->ctx.finalClipperF.clipPath(engine->ctx.tmpPathF[1], path, engine->finalTransformF));
         engine->ctx.renderer->fillTransformedPathF(engine->ctx, engine->ctx.tmpPathF[1], fillRule);
         return ERR_OK;
       }
@@ -5194,23 +4664,22 @@ err_t RasterPainterImpl<_MODE>::doFillUntransformedPathD(RasterPainterEngine* en
 
   if (_MODE == RASTER_MODE_ST)
   {
-    bool hasTransform = ensureFinalTransformD(engine);
+    bool hasTransform = (engine->finalTransform.getType() != TRANSFORM_TYPE_IDENTITY);
 
     if (clip)
     {
       engine->ctx.tmpPathD[1].clear();
-      PathClipperD clipper(engine->ctx.finalClipBoxD);
 
       if (!hasTransform)
       {
-        switch (clipper.initPath(path))
+        switch (engine->ctx.finalClipperD.initPath(path))
         {
           case CLIPPER_INIT_ALREADY_CLIPPED:
             engine->ctx.renderer->fillTransformedPathD(engine->ctx, path, fillRule);
             return ERR_OK;
 
           case CLIPPER_INIT_NOT_CLIPPED:
-            FOG_RETURN_ON_ERROR(clipper.continuePath(engine->ctx.tmpPathD[1], path));
+            FOG_RETURN_ON_ERROR(engine->ctx.finalClipperD.continuePath(engine->ctx.tmpPathD[1], path));
             engine->ctx.renderer->fillTransformedPathD(engine->ctx, engine->ctx.tmpPathD[1], fillRule);
             return ERR_OK;
 
@@ -5220,7 +4689,7 @@ err_t RasterPainterImpl<_MODE>::doFillUntransformedPathD(RasterPainterEngine* en
       }
       else
       {
-        FOG_RETURN_ON_ERROR(clipper.clipPath(engine->ctx.tmpPathD[1], path, engine->finalTransformD));
+        FOG_RETURN_ON_ERROR(engine->ctx.finalClipperD.clipPath(engine->ctx.tmpPathD[1], path, engine->finalTransform));
         engine->ctx.renderer->fillTransformedPathD(engine->ctx, engine->ctx.tmpPathD[1], fillRule);
         return ERR_OK;
       }
@@ -5234,7 +4703,7 @@ err_t RasterPainterImpl<_MODE>::doFillUntransformedPathD(RasterPainterEngine* en
       }
       else
       {
-        FOG_RETURN_ON_ERROR(engine->finalTransformD.mapPath(engine->ctx.tmpPathD[1], path));
+        FOG_RETURN_ON_ERROR(engine->finalTransform.mapPath(engine->ctx.tmpPathD[1], path));
         engine->ctx.renderer->fillTransformedPathD(engine->ctx, engine->ctx.tmpPathD[1], fillRule);
         return ERR_OK;
       }
@@ -5248,12 +4717,12 @@ err_t RasterPainterImpl<_MODE>::doFillUntransformedPathD(RasterPainterEngine* en
 }
 
 // ============================================================================
-// [Fog::RasterPainterImpl<> - Blit]
+// [Fog::RasterPainterImpl<> - BlitAlignedImage]
 // ============================================================================
 
 template<int _MODE>
-err_t FOG_INLINE RasterPainterImpl<_MODE>::doFillAlignedImageI(RasterPainterEngine* engine, 
-  const PointI& pt, const Image& srcImage, const RectI& srcFraction)
+err_t FOG_INLINE RasterPainterImpl<_MODE>::doBlitAlignedImageI(
+  RasterPainterEngine* engine, const PointI& pt, const Image& srcImage, const RectI& srcFraction)
 {
   if (_MODE == RASTER_MODE_ST)
   {
@@ -5263,6 +4732,42 @@ err_t FOG_INLINE RasterPainterImpl<_MODE>::doFillAlignedImageI(RasterPainterEngi
   else
   {
     // TODO:
+    return ERR_RT_NOT_IMPLEMENTED;
+  }
+}
+
+// ============================================================================
+// [Fog::RasterPainterImpl<> - BlitUntransformedImage]
+// ============================================================================
+
+template<int _MODE>
+FOG_INLINE err_t RasterPainterImpl<_MODE>::doBlitUntransformedImageF(
+  RasterPainterEngine* engine, const BoxF& box, const Image& srcImage, const RectI& srcFraction)
+{
+  if (_MODE == RASTER_MODE_ST)
+  {
+
+    return ERR_RT_NOT_IMPLEMENTED;
+  }
+  else
+  {
+    // TODO:
+    return ERR_RT_NOT_IMPLEMENTED;
+  }
+}
+
+template<int _MODE>
+FOG_INLINE err_t RasterPainterImpl<_MODE>::doBlitUntransformedImageD(
+  RasterPainterEngine* engine, const BoxD& box, const Image& srcImage, const RectI& srcFraction)
+{
+  if (_MODE == RASTER_MODE_ST)
+  {
+    return ERR_RT_NOT_IMPLEMENTED;
+  }
+  else
+  {
+    // TODO:
+    return ERR_RT_NOT_IMPLEMENTED;
   }
 }
 
@@ -5282,11 +4787,8 @@ RasterPainterEngine::RasterPainterEngine() :
   masterMaskId(0),
   masterMaskSaved(0),
   sourceType(PATTERN_TYPE_COLOR),
-  sourcePrecision(RASTER_PRECISION_NONE),
   savedStateFlags(0xFF),
   strokeParamsPrecision(RASTER_PRECISION_NONE),
-  userTransformPrecision(RASTER_PRECISION_NONE),
-  finalTransformPrecision(RASTER_PRECISION_NONE),
   coreClipType(RASTER_CLIP_NULL),
   coreClipBox(0, 0, 0, 0),
   metaOrigin(0, 0),

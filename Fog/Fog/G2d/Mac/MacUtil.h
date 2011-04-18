@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_MACUTIL_H
-#define _FOG_G2D_MACUTIL_H
+#ifndef _FOG_G2D_MAC_MACUTIL_H
+#define _FOG_G2D_MAC_MACUTIL_H
 
 #include <Fog/Core/Config/Config.h>
 #if defined(FOG_OS_MAC)
@@ -31,4 +31,4 @@ NSRect FOG_INLINE toNSRect(const RectT& rect) { return NSMakeRect(rect.getX(), r
 #endif // FOG_OS_MAC
 
 // [Guard]
-#endif // _FOG_G2D_MACUTIL_H
+#endif // _FOG_G2D_MAC_MACUTIL_H

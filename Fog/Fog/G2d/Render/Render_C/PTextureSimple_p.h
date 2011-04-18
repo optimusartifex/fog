@@ -1776,7 +1776,7 @@ _FetchEnd:
 
     P_FETCH_SPAN8_INIT()
     int y = fetcher->_d.texture.simple.py;
-    if ((y < 0) | (y >= th)) goto _FetchSolid;
+    if ((uint)y >= (uint)th) goto _FetchSolid;
 
     srcLine = ctx->_d.texture.base.pixels + y * ctx->_d.texture.base.stride;
 
@@ -1789,40 +1789,53 @@ _FetchEnd:
       x += ctx->_d.texture.simple.tx;
 
       const uint8_t* src = srcLine;
-      accessor.fetchSolid(back0, ctx->_d.texture.base.clamp);
-
       int i;
 
       // ----------------------------------------------------------------------
-      // [Clamp]
+      // [Clamp / Border]
       // ----------------------------------------------------------------------
 
-      if (x < 0)
+      if (x < -1)
       {
-        i = Math::min(-x, w);
+        i = Math::min(-1-x, w);
         w -= i;
-        x = 0;
+        x = -1;
 
+        accessor.fetchSolid(back0, ctx->_d.texture.base.clamp);
         dst = accessor.fill(dst, back0, i);
 
         if (w == 0) goto _FetchSkip;
-        goto _FetchFill;
+        goto _FetchFirst;
       }
 
       // ----------------------------------------------------------------------
       // [Fetch]
       // ----------------------------------------------------------------------
 
-      else if (x <= tw)
+      else if (x < tw)
       {
-        if (x > 0)
+        if (x == -1)
+        {
+          accessor.fetchSolid(back0, ctx->_d.texture.base.clamp);
+_FetchFirst:
+          accessor.fetchNorm(back1, src);
+          accessor.interpolateNorm_2(back0, back0, fY0X0, back1, fY0X1);
+          accessor.store(dst, back0);
+
+          dst += Accessor::DST_BPP;
+          x++;
+          w--;
+          if (w == 0) goto _FetchSkip;
+        }
+        else
         {
           src += (uint)x * Accessor::SRC_BPP;
-          accessor.fetchRaw(back0, src - Accessor::SRC_BPP);
         }
 
-_FetchFill:
-        i = Math::min(tw - x, w);
+        accessor.fetchRaw(back0, src);
+        src += Accessor::SRC_BPP;
+
+        i = Math::min(tw - 1 - x, w);
         w -= i;
 
         while (i)
@@ -1848,7 +1861,8 @@ _FetchFill:
 
         back0 = back1;
         dst += Accessor::DST_BPP;
-        if (!--w) goto _FetchSkip;
+        w--;
+        if (w == 0) goto _FetchSkip;
       }
 
       // ----------------------------------------------------------------------
@@ -2100,7 +2114,7 @@ _FetchEnd:
     // [Loop - Border]
     // ------------------------------------------------------------------------
 
-    if ((y < 0) | (y >= th - 1))
+    if ((uint)y >= (uint)(th - 1))
     {
       if (y < 0) { y++; swap(fY0X0, fY1X0); swap(fY0X1, fY1X1); }
 
@@ -2123,32 +2137,32 @@ _FetchEnd:
         // [Clamp]
         // --------------------------------------------------------------------
 
-        if (x < 0)
+        if (x < -1)
         {
-          i = Math::min(-x, w);
+          i = Math::min(-1-x, w);
           w -= i;
-          x = 0;
+          x = -1;
 
           dst = accessor.fill(dst, back0, i);
 
-          if (w) goto _FetchBorderFill;
-          goto _FetchBorderSkip;
+          if (w == 0) goto _FetchBorderSkip;
+          goto _FetchBorderFirst;
         }
 
         // --------------------------------------------------------------------
         // [Fetch]
         // --------------------------------------------------------------------
 
-        else if (x <= tw)
+        else if (x < tw)
         {
-          if (x > 0)
+          if (x >= 0)
           {
             src += (uint)x * Accessor::SRC_BPP;
             accessor.fetchNorm(back0, src - Accessor::SRC_BPP);
           }
 
-_FetchBorderFill:
-          i = Math::min(tw - x, w);
+_FetchBorderFirst:
+          i = Math::min(tw - 1 - x, w);
           w -= i;
 
           while (i)
@@ -2172,7 +2186,8 @@ _FetchBorderFill:
           accessor.store(dst, back0);
 
           dst += Accessor::DST_BPP;
-          if (!--w) goto _FetchBorderSkip;
+          w--;
+          if (w == 0) goto _FetchBorderSkip;
         }
 
         // --------------------------------------------------------------------
@@ -2193,8 +2208,6 @@ _FetchBorderSkip:
 
     else
     {
-      if (y < 0) { y++; swap(fY0X0, fY1X0); swap(fY0X1, fY1X1); }
-
       const uint8_t* srcLine = ctx->_d.texture.base.pixels + y * ctx->_d.texture.base.stride;
       const uint8_t* srcCur0 = srcLine;
       const uint8_t* srcCur1 = srcLine + ctx->_d.texture.base.stride;
@@ -2205,33 +2218,32 @@ _FetchBorderSkip:
 
         int i;
 
-        accessor.fetchSolid(back0, ctx->_d.texture.base.clamp);
-        back1 = back0;
-
         // --------------------------------------------------------------------
         // [Clamp]
         // --------------------------------------------------------------------
 
-        if (x < 0)
+        if (x < -1)
         {
-          i = Math::min(-x, w);
+          i = Math::min(-1-x, w);
           w -= i;
-          x = 0;
+          x = -1;
 
+          accessor.fetchSolid(back0, ctx->_d.texture.base.clamp);
           dst = accessor.fill(dst, back0, i);
 
-          if (w) goto _FetchInsideFill;
-          goto _FetchInsideSkip;
+          if (w == 0) goto _FetchInsideSkip;
+          goto _FetchInsideFirst;
         }
 
         // --------------------------------------------------------------------
         // [Fetch]
         // --------------------------------------------------------------------
 
-        else if (x <= tw)
+        else if (x < tw)
         {
-          if (x == 0)
+          if (x == -1)
           {
+_FetchInsideFirst:
             // Interpolate the first pixel with the border (clamp) pixel. This
             // is needed to use RAW pixels in the main loop.
             accessor.fetchNorm(back0, srcCur0);
@@ -2239,23 +2251,27 @@ _FetchBorderSkip:
             accessor.interpolateNorm_2(back0, back0, fY0X1, back1, fY1X1);
 
             accessor.fetchSolid(back1, ctx->_d.texture.base.clamp);
-            accessor._cmul(back1, fY0X0, fY1X0);
+            accessor._cmul(back1, back1, fY0X0 + fY1X0);
             accessor._cadd(back0, back0, back1);
             accessor.store(dst, back0);
 
             dst += Accessor::DST_BPP;
             x++;
-            if (--w == 0) goto _FetchInsideSkip;
+            w--;
+            if (w == 0) goto _FetchInsideSkip;
+          }
+          else
+          {
+            srcCur0 += (uint)x * Accessor::SRC_BPP;
+            srcCur1 += (uint)x * Accessor::SRC_BPP;
           }
 
-          srcCur0 += x * Accessor::SRC_BPP;
-          srcCur1 += x * Accessor::SRC_BPP;
+          accessor.fetchRaw(back0, srcCur0);
+          accessor.fetchRaw(back1, srcCur1);
+          srcCur0 += Accessor::SRC_BPP;
+          srcCur1 += Accessor::SRC_BPP;
 
-          accessor.fetchRaw(back0, srcCur0 - Accessor::SRC_BPP);
-          accessor.fetchRaw(back1, srcCur1 - Accessor::SRC_BPP);
-
-_FetchInsideFill:
-          i = Math::min(tw - x, w);
+          i = Math::min(tw - 1 - x, w);
           w -= i;
 
           while (i)
@@ -2285,7 +2301,7 @@ _FetchInsideFill:
           accessor.interpolateNorm_2(back0, back0, fY0X0, back1, fY1X0);
 
           accessor.fetchSolid(back1, ctx->_d.texture.base.clamp);
-          accessor._cmul(back1, fY0X1, fY1X1);
+          accessor._cmul(back1, back1, fY0X1 + fY1X1);
           accessor._cadd(back0, back0, back1);
           accessor.store(dst, back0);
 

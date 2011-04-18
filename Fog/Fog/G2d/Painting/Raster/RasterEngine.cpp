@@ -4051,12 +4051,14 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtI(Painter& self, const Poin
 
     if ((uint)(d = dstX - engine->ctx.finalClipBoxI.x0) >= (uint)engine->ctx.finalClipBoxI.getWidth())
     {
-      dstX = 0; srcX = -d; if (d >= 0 || (dstW += d) <= 0) return ERR_OK;
+      dstX = 0; srcX = -d;
+      if (d >= 0 || (dstW += d) <= 0) return ERR_OK;
     }
 
     if ((uint)(d = dstY - engine->ctx.finalClipBoxI.y0) >= (uint)engine->ctx.finalClipBoxI.getHeight())
     {
-      dstY = 0; srcY = -d; if (d >= 0 || (dstH += d) <= 0) return ERR_OK;
+      dstY = 0; srcY = -d;
+      if (d >= 0 || (dstH += d) <= 0) return ERR_OK;
     }
 
     if ((d = engine->ctx.finalClipBoxI.x1 - dstX) < dstW) dstW = d;

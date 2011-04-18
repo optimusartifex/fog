@@ -277,10 +277,26 @@ struct FOG_NO_EXPORT PGradientAccessorBase_PRGB32
   typedef Face::p32 Pixel;
   enum { DST_BPP = 4 };
 
+  FOG_INLINE PGradientAccessorBase_PRGB32(const RenderPatternContext* ctx) :
+    _table(reinterpret_cast<const uint32_t*>(ctx->_d.gradient.base.table))
+  {
+  }
+
+  FOG_INLINE void fetchTable(Pixel& dst, int position)
+  {
+    dst = _table[position];
+  }
+
   FOG_INLINE void store(uint8_t* dst, const Pixel& src)
   {
     Face::p32Store4aNative(dst, src);
   }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  const uint32_t* _table;
 };
 
 // ============================================================================
@@ -290,7 +306,7 @@ struct FOG_NO_EXPORT PGradientAccessorBase_PRGB32
 struct FOG_NO_EXPORT PGradientAccessorPad_PRGB32 : public PGradientAccessorBase_PRGB32
 {
   FOG_INLINE PGradientAccessorPad_PRGB32(const RenderPatternContext* ctx) :
-    _table(reinterpret_cast<const uint32_t*>(ctx->_d.gradient.base.table)),
+    PGradientAccessorBase_PRGB32(ctx),
     _len(ctx->_d.gradient.base.len),
     _len_d(ctx->_d.gradient.base.len)
   {
@@ -302,12 +318,13 @@ struct FOG_NO_EXPORT PGradientAccessorPad_PRGB32 : public PGradientAccessorBase_
       d = 0.0;
     else if (d > _len_d)
       d = _len_d;
-
-    uint i = (int)d;
-    dst = _table[i];
+    fetchTable(dst, (int)d);
   }
 
-  const uint32_t* _table;
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
   int _len;
   double _len_d;
 };
@@ -319,20 +336,20 @@ struct FOG_NO_EXPORT PGradientAccessorPad_PRGB32 : public PGradientAccessorBase_
 struct FOG_NO_EXPORT PGradientAccessorRepeat_PRGB32 : public PGradientAccessorBase_PRGB32
 {
   FOG_INLINE PGradientAccessorRepeat_PRGB32(const RenderPatternContext* ctx) :
-    _table(reinterpret_cast<const uint32_t*>(ctx->_d.gradient.base.table)),
+    PGradientAccessorBase_PRGB32(ctx),
     _lenMask(ctx->_d.gradient.base.len - 1)
   {
   }
 
   FOG_INLINE void fetchAtD(Pixel& dst, double d)
   {
-    uint i = (int)d;
-
-    i &= _lenMask;
-    dst = _table[i];
+    fetchTable(dst, (int)d & _lenMask);
   }
 
-  const uint32_t* _table;
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
   uint _lenMask;
 };
 
@@ -343,7 +360,7 @@ struct FOG_NO_EXPORT PGradientAccessorRepeat_PRGB32 : public PGradientAccessorBa
 struct FOG_NO_EXPORT PGradientAccessorReflect_PRGB32 : public PGradientAccessorBase_PRGB32
 {
   FOG_INLINE PGradientAccessorReflect_PRGB32(const RenderPatternContext* ctx) :
-    _table(reinterpret_cast<const uint32_t*>(ctx->_d.gradient.base.table)),
+    PGradientAccessorBase_PRGB32(ctx),
     _len(ctx->_d.gradient.base.len),
     _lenMask2(ctx->_d.gradient.base.len * 2 - 1)
   {
@@ -355,10 +372,13 @@ struct FOG_NO_EXPORT PGradientAccessorReflect_PRGB32 : public PGradientAccessorB
 
     i &= _lenMask2;
     if (i > (uint)_len) i ^= _lenMask2;
-    dst = _table[i];
+    fetchTable(dst, i);
   }
 
-  const uint32_t* _table;
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
   int _len;
   uint _lenMask2;
 };

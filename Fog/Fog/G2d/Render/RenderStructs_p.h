@@ -294,22 +294,20 @@ struct FOG_NO_EXPORT RenderPatternContext
   struct _TextureAffine
   {
     double tx, ty;
-
-    double xx, yx;
-    double xy, yy;
-    
+    double xx, xy;
+    double yx, yy;
     double mx, my; // Max X/Y.
-    double rx, ry; // Rew X/Y (for REPEAT/REFLECT tiling).
+    double rx, ry; // Rewind X/Y (for REPEAT/REFLECT tiling).
 
     // Used by 16x16/48x16 fixed point.
-    int xx16x16, yx16x16;
+    int xx16x16, xy16x16;
     int mx16x16, my16x16;
     int rx16x16, ry16x16;
 
     //! @brief Whether the xx is zero or very close (special-case).
     int xxZero;
     //! @brief Whether the yx is zero or very close (special-case).
-    int yxZero;
+    int xyZero;
 
     //! @brief Whether the fixed-point is safe for context bounding box.
     int safeFixedPoint;
@@ -352,22 +350,24 @@ struct FOG_NO_EXPORT RenderPatternContext
 
   union _GradientLinear
   {
-    struct _Simple
+    struct _Shared
     {
       //! @brief Offset.
       double offset;
-      double xx, yx;
+    } shared;
+
+    struct _Simple : public _Shared
+    {
+      double xx, xy;
 
       //! @brief 16.16 fixed point representation of @c xx.
       Fixed16x16 xx16x16;
     } simple;
 
-    struct _Projection
+    struct _Projection : public _Shared
     {
-      //! @brief Offset.
-      double offset;
-      double xx, yx, zx;
-      double xz, yz, zz;
+      double xx, xy, xz;
+      double zx, zy, zz;
     } proj;
   };
 
@@ -378,8 +378,8 @@ struct FOG_NO_EXPORT RenderPatternContext
       double fx, fy;
       double scale;
 
-      double xx, yx;
-      double xy, yy;
+      double xx, xy;
+      double yx, yy;
       double tx, ty;
       
       double r2mfxfx;
@@ -398,25 +398,60 @@ struct FOG_NO_EXPORT RenderPatternContext
 
     struct _Projection : public _Shared
     {
-      double zx, zy;
-      double fxOrig, fyOrig;
+      double fxOrig;
+      double fyOrig;
+
+      double xz, yz;
       double tz;
     } proj;
   };
 
   union _GradientConical
   {
-    struct _Simple
+    struct _Shared
+    {
+      double xx, xy;
+      double yx, yy;
+      double tx, ty;
+
+      double offset;
+      double scale;
+    } shared;
+
+    struct _Simple : public _Shared
     {
     } simple;
 
-    struct _Projection
+    struct _Projection : public _Shared
     {
+      double xz;
+      double yz;
+      double tz;
     } proj;
-    /*
-    double dx, dy;
-    double angle;
-    */
+  };
+
+  union _GradientRectangular
+  {
+    struct _Shared
+    {
+      double xx, xy;
+      double yx, yy;
+      double tx, ty;
+
+      double px0, py0;
+      double px1, py1;
+    } shared;
+
+    struct _Simple : public _Shared
+    {
+    } simple;
+
+    struct _Projection : public _Shared
+    {
+      double xz;
+      double yz;
+      double tz;
+    } proj;
   };
 
   struct _GradientPacked
@@ -427,6 +462,8 @@ struct FOG_NO_EXPORT RenderPatternContext
     {
       _GradientLinear linear;
       _GradientRadial radial;
+      _GradientConical conical;
+      _GradientRectangular rectangular;
     };
   };
 
@@ -522,7 +559,8 @@ struct FOG_NO_EXPORT RenderPatternFetcher
     } proj;
   };
 
-  union _GradientRadial
+  // Shared between Radial/Conical/Rectangular.
+  union _GradientAny
   {
     struct _Simple
     {
@@ -540,7 +578,9 @@ struct FOG_NO_EXPORT RenderPatternFetcher
   struct _GradientPacked
   {
     _GradientLinear linear;
-    _GradientRadial radial;
+    _GradientAny radial;
+    _GradientAny conical;
+    _GradientAny rectangular;
   };
 
   // --------------------------------------------------------------------------

@@ -70,6 +70,9 @@ struct FOG_NO_EXPORT PGradientLinear
     FOG_RETURN_ON_ERROR(PGradientBase::create(ctx, dstFormat, clipBox, spread, stops));
     int tableLength = ctx->_d.gradient.base.len;
 
+    // TODO:
+    uint32_t srcFormat = IMAGE_FORMAT_PRGB32;
+
     // ------------------------------------------------------------------------
     // [Simple]
     // ------------------------------------------------------------------------
@@ -93,12 +96,12 @@ struct FOG_NO_EXPORT PGradientLinear
 
       ctx->_d.gradient.linear.simple.offset = origin.x * dx + origin.y * dy;
       ctx->_d.gradient.linear.simple.xx = dx;
-      ctx->_d.gradient.linear.simple.yx = dy;
+      ctx->_d.gradient.linear.simple.xy = dy;
       ctx->_d.gradient.linear.simple.xx16x16 = Math::fixed16x16FromFloat(dx);
 
       ctx->_prepare = prepare_simple;
       ctx->_destroy = PGradientBase::destroy;
-      ctx->_fetch = _g2d_render.gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][spread];
+      ctx->_fetch = _g2d_render.gradient.linear.fetch_simple_nearest[srcFormat][spread];
       ctx->_skip = skip_simple;
     }
 
@@ -117,16 +120,16 @@ struct FOG_NO_EXPORT PGradientLinear
       ctx->_d.gradient.linear.proj.offset = -gradient._pts[0].x * dx + -gradient._pts[0].y * dy;
 
       ctx->_d.gradient.linear.proj.xx = dx * inv._00 + dy * inv._01;
-      ctx->_d.gradient.linear.proj.yx = dx * inv._10 + dy * inv._11;
-      ctx->_d.gradient.linear.proj.zx = dx * inv._20 + dy * inv._21;
+      ctx->_d.gradient.linear.proj.xy = dx * inv._10 + dy * inv._11;
+      ctx->_d.gradient.linear.proj.xz = dx * inv._20 + dy * inv._21;
 
-      ctx->_d.gradient.linear.proj.xz = inv._02;
-      ctx->_d.gradient.linear.proj.yz = inv._12;
+      ctx->_d.gradient.linear.proj.zx = inv._02;
+      ctx->_d.gradient.linear.proj.zy = inv._12;
       ctx->_d.gradient.linear.proj.zz = inv._22;
 
       ctx->_prepare = prepare_proj;
       ctx->_destroy = PGradientBase::destroy;
-      ctx->_fetch = _g2d_render.gradient.linear.fetch_proj_nearest[IMAGE_FORMAT_PRGB32][spread];
+      ctx->_fetch = _g2d_render.gradient.linear.fetch_proj_nearest[srcFormat][spread];
       ctx->_skip = skip_proj;
     }
 
@@ -148,8 +151,8 @@ struct FOG_NO_EXPORT PGradientLinear
     fetcher->_skip = ctx->_skip;
     fetcher->_mode = mode;
 
-    fetcher->_d.gradient.linear.simple.pt = y * ctx->_d.gradient.linear.simple.yx + ctx->_d.gradient.linear.simple.offset;
-    fetcher->_d.gradient.linear.simple.dt = d * ctx->_d.gradient.linear.simple.yx;
+    fetcher->_d.gradient.linear.simple.pt = y * ctx->_d.gradient.linear.simple.xy + ctx->_d.gradient.linear.simple.offset;
+    fetcher->_d.gradient.linear.simple.dt = d * ctx->_d.gradient.linear.simple.xy;
   }
 
   static void FOG_FASTCALL prepare_proj(
@@ -163,10 +166,10 @@ struct FOG_NO_EXPORT PGradientLinear
     fetcher->_skip = ctx->_skip;
     fetcher->_mode = mode;
 
-    fetcher->_d.gradient.linear.proj.pt = y * ctx->_d.gradient.linear.proj.yx + ctx->_d.gradient.linear.proj.zx;
-    fetcher->_d.gradient.linear.proj.dt = d * ctx->_d.gradient.linear.proj.yx;
-    fetcher->_d.gradient.linear.proj.pz = y * ctx->_d.gradient.linear.proj.yz + ctx->_d.gradient.linear.proj.zz;
-    fetcher->_d.gradient.linear.proj.dz = d * ctx->_d.gradient.linear.proj.yz;
+    fetcher->_d.gradient.linear.proj.pt = y * ctx->_d.gradient.linear.proj.xy + ctx->_d.gradient.linear.proj.xz;
+    fetcher->_d.gradient.linear.proj.dt = d * ctx->_d.gradient.linear.proj.xy;
+    fetcher->_d.gradient.linear.proj.pz = y * ctx->_d.gradient.linear.proj.zy + ctx->_d.gradient.linear.proj.zz;
+    fetcher->_d.gradient.linear.proj.dz = d * ctx->_d.gradient.linear.proj.zy;
   }
 
   // ==========================================================================
@@ -477,14 +480,14 @@ _Backward:
 
     double off = ctx->_d.gradient.linear.proj.offset;
     double xx = ctx->_d.gradient.linear.proj.xx;
-    double xz = ctx->_d.gradient.linear.proj.xz;
+    double zx = ctx->_d.gradient.linear.proj.zx;
 
     P_FETCH_SPAN8_BEGIN()
       P_FETCH_SPAN8_SET_CURRENT()
 
       double _x = (double)x;
       double px = fetcher->_d.gradient.linear.proj.pt + _x * xx;
-      double pz = fetcher->_d.gradient.linear.proj.pz + _x * xz;
+      double pz = fetcher->_d.gradient.linear.proj.pz + _x * zx;
 
       do {
         typename Accessor::Pixel c0;
@@ -493,7 +496,7 @@ _Backward:
 
         dst += Accessor::DST_BPP;
         px += xx;
-        pz += xz;
+        pz += zx;
       } while (--w);
 
       P_FETCH_SPAN8_NEXT()

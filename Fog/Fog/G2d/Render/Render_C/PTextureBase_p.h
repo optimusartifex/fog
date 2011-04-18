@@ -263,13 +263,13 @@ _Has16BPC:
       ctx->_d.texture.affine.my = (double)ctx->_d.texture.base.h;
 
       ctx->_d.texture.affine.xx = inv._00;
-      ctx->_d.texture.affine.yx = inv._01;
+      ctx->_d.texture.affine.xy = inv._01;
 
-      ctx->_d.texture.affine.xy = inv._10;
+      ctx->_d.texture.affine.yx = inv._10;
       ctx->_d.texture.affine.yy = inv._11;
 
       ctx->_d.texture.affine.xxZero = Math::isFuzzyZero(ctx->_d.texture.affine.xx);
-      ctx->_d.texture.affine.yxZero = Math::isFuzzyZero(ctx->_d.texture.affine.yx);
+      ctx->_d.texture.affine.xyZero = Math::isFuzzyZero(ctx->_d.texture.affine.xy);
 
       if (tileMode == TEXTURE_TILE_REFLECT)
       {
@@ -282,15 +282,15 @@ _Has16BPC:
         // This could happen for very small (nearly degenerated) scaling.
         if (Math::abs(ctx->_d.texture.affine.xx) >= ctx->_d.texture.affine.mx)
           ctx->_d.texture.affine.xx = Math::mod(ctx->_d.texture.affine.xx, ctx->_d.texture.affine.mx);
-        if (Math::abs(ctx->_d.texture.affine.yx) >= ctx->_d.texture.affine.my)
-          ctx->_d.texture.affine.yx = Math::mod(ctx->_d.texture.affine.yx, ctx->_d.texture.affine.my);
+        if (Math::abs(ctx->_d.texture.affine.xy) >= ctx->_d.texture.affine.my)
+          ctx->_d.texture.affine.xy = Math::mod(ctx->_d.texture.affine.xy, ctx->_d.texture.affine.my);
 
         // Rewind X/Y.
         ctx->_d.texture.affine.rx = ctx->_d.texture.affine.mx;
         ctx->_d.texture.affine.ry = ctx->_d.texture.affine.my;
 
         if (ctx->_d.texture.affine.xx > 0.0) ctx->_d.texture.affine.rx = -ctx->_d.texture.affine.rx;
-        if (ctx->_d.texture.affine.yx > 0.0) ctx->_d.texture.affine.ry = -ctx->_d.texture.affine.ry;
+        if (ctx->_d.texture.affine.xy > 0.0) ctx->_d.texture.affine.ry = -ctx->_d.texture.affine.ry;
 
         ctx->_d.texture.affine.rx16x16 = Math::fixed16x16FromFloat(ctx->_d.texture.affine.rx);
         ctx->_d.texture.affine.ry16x16 = Math::fixed16x16FromFloat(ctx->_d.texture.affine.ry);
@@ -306,7 +306,7 @@ _Has16BPC:
       }
 
       ctx->_d.texture.affine.xx16x16 = Math::fixed16x16FromFloat(ctx->_d.texture.affine.xx);
-      ctx->_d.texture.affine.yx16x16 = Math::fixed16x16FromFloat(ctx->_d.texture.affine.yx);
+      ctx->_d.texture.affine.xy16x16 = Math::fixed16x16FromFloat(ctx->_d.texture.affine.xy);
 
       ctx->_d.texture.affine.mx16x16 = Math::fixed16x16FromFloat(ctx->_d.texture.affine.mx);
       ctx->_d.texture.affine.my16x16 = Math::fixed16x16FromFloat(ctx->_d.texture.affine.my);
@@ -407,10 +407,10 @@ _Has16BPC:
     fetcher->_skip = ctx->_skip;
     fetcher->_mode = mode;
 
-    fetcher->_d.texture.affine.px = y * ctx->_d.texture.affine.xy + ctx->_d.texture.affine.tx;
+    fetcher->_d.texture.affine.px = y * ctx->_d.texture.affine.yx + ctx->_d.texture.affine.tx;
     fetcher->_d.texture.affine.py = y * ctx->_d.texture.affine.yy + ctx->_d.texture.affine.ty;
 
-    fetcher->_d.texture.affine.dx = d * ctx->_d.texture.affine.xy;
+    fetcher->_d.texture.affine.dx = d * ctx->_d.texture.affine.yx;
     fetcher->_d.texture.affine.dy = d * ctx->_d.texture.affine.yy;
   }
 
@@ -425,10 +425,10 @@ _Has16BPC:
     fetcher->_skip = ctx->_skip;
     fetcher->_mode = mode;
 
-    fetcher->_d.texture.affine.px = Math::repeat(y * ctx->_d.texture.affine.xy + ctx->_d.texture.affine.tx, ctx->_d.texture.affine.mx);
+    fetcher->_d.texture.affine.px = Math::repeat(y * ctx->_d.texture.affine.yx + ctx->_d.texture.affine.tx, ctx->_d.texture.affine.mx);
     fetcher->_d.texture.affine.py = Math::repeat(y * ctx->_d.texture.affine.yy + ctx->_d.texture.affine.ty, ctx->_d.texture.affine.my);
 
-    fetcher->_d.texture.affine.dx = Math::repeat(d * ctx->_d.texture.affine.xy, ctx->_d.texture.affine.mx);
+    fetcher->_d.texture.affine.dx = Math::repeat(d * ctx->_d.texture.affine.yx, ctx->_d.texture.affine.mx);
     fetcher->_d.texture.affine.dy = Math::repeat(d * ctx->_d.texture.affine.yy, ctx->_d.texture.affine.my);
   }
 

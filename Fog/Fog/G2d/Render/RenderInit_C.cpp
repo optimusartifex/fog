@@ -410,6 +410,51 @@ FOG_NO_EXPORT void _g2d_render_init_c(void)
   }
 
   // --------------------------------------------------------------------------
+  // [Render - Gradient - Conical]
+  // --------------------------------------------------------------------------
+
+  {
+    G2dRenderApi::GradientFuncs& gradient = api.gradient;
+
+    gradient.create[GRADIENT_TYPE_CONICAL] = Render_C::PGradientConical::create;
+
+#if defined(FOG_RENDER_INIT_C)
+    gradient.conical.fetch_simple_nearest[IMAGE_FORMAT_PRGB32] = Render_C::PGradientConical::fetch_simple_nearest<Render_C::PGradientAccessorBase_PRGB32>;
+    gradient.conical.fetch_simple_nearest[IMAGE_FORMAT_XRGB32] = Render_C::PGradientConical::fetch_simple_nearest<Render_C::PGradientAccessorBase_PRGB32>;
+#endif
+  }
+
+  // --------------------------------------------------------------------------
+  // [Render - Gradient - Rectangular]
+  // --------------------------------------------------------------------------
+
+  {
+    G2dRenderApi::GradientFuncs& gradient = api.gradient;
+
+    gradient.create[GRADIENT_TYPE_RECTANGULAR] = Render_C::PGradientRectangular::create;
+
+#if defined(FOG_RENDER_INIT_C)
+    gradient.rectangular.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_PAD    ] = Render_C::PGradientRectangular::fetch_simple_nearest<Render_C::PGradientAccessorPad_PRGB32>;
+    gradient.rectangular.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_PAD    ] = Render_C::PGradientRectangular::fetch_simple_nearest<Render_C::PGradientAccessorPad_PRGB32>;
+
+    gradient.rectangular.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REPEAT ] = Render_C::PGradientRectangular::fetch_simple_nearest<Render_C::PGradientAccessorRepeat_PRGB32>;
+    gradient.rectangular.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REPEAT ] = Render_C::PGradientRectangular::fetch_simple_nearest<Render_C::PGradientAccessorRepeat_PRGB32>;
+
+    gradient.rectangular.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientRectangular::fetch_simple_nearest<Render_C::PGradientAccessorReflect_PRGB32>;
+    gradient.rectangular.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientRectangular::fetch_simple_nearest<Render_C::PGradientAccessorReflect_PRGB32>;
+
+    gradient.rectangular.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_PAD    ] = Render_C::PGradientRectangular::fetch_proj_nearest<Render_C::PGradientAccessorPad_PRGB32>;
+    gradient.rectangular.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_PAD    ] = Render_C::PGradientRectangular::fetch_proj_nearest<Render_C::PGradientAccessorPad_PRGB32>;
+
+    gradient.rectangular.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REPEAT ] = Render_C::PGradientRectangular::fetch_proj_nearest<Render_C::PGradientAccessorRepeat_PRGB32>;
+    gradient.rectangular.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REPEAT ] = Render_C::PGradientRectangular::fetch_proj_nearest<Render_C::PGradientAccessorRepeat_PRGB32>;
+
+    gradient.rectangular.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientRectangular::fetch_proj_nearest<Render_C::PGradientAccessorReflect_PRGB32>;
+    gradient.rectangular.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientRectangular::fetch_proj_nearest<Render_C::PGradientAccessorReflect_PRGB32>;
+#endif
+  }
+
+  // --------------------------------------------------------------------------
   // [Render - Texture]
   // --------------------------------------------------------------------------
 

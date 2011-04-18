@@ -260,6 +260,29 @@ struct FOG_NO_EXPORT G2dRenderApi
       RenderPatternFetchFn fetch_proj_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
       RenderPatternFetchFn fetch_proj_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
     } radial;
+
+    // ------------------------------------------------------------------------
+    // [Conical]
+    // ------------------------------------------------------------------------
+
+    struct _Conical
+    {
+      RenderPatternFetchFn fetch_simple_nearest[IMAGE_FORMAT_COUNT];
+      RenderPatternFetchFn fetch_simple_bilinear[IMAGE_FORMAT_COUNT];
+    } conical;
+
+    // ------------------------------------------------------------------------
+    // [Rectangular]
+    // ------------------------------------------------------------------------
+
+    struct _Rectangular
+    {
+      RenderPatternFetchFn fetch_simple_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+      RenderPatternFetchFn fetch_simple_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+
+      RenderPatternFetchFn fetch_proj_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+      RenderPatternFetchFn fetch_proj_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+    } rectangular;
   };
 
   GradientFuncs gradient;

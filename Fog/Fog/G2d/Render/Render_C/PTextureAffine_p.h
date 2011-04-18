@@ -44,7 +44,7 @@ struct FOG_NO_EXPORT PTextureAffine
     int th = ctx->_d.texture.base.h;
 
     double xx = ctx->_d.texture.affine.xx;
-    double yx = ctx->_d.texture.affine.yx;
+    double xy = ctx->_d.texture.affine.xy;
 
     double offx = fetcher->_d.texture.affine.px;
     double offy = fetcher->_d.texture.affine.py;
@@ -64,9 +64,9 @@ struct FOG_NO_EXPORT PTextureAffine
     if (ctx->_d.texture.affine.safeFixedPoint)
     {
       int xx16x16 = ctx->_d.texture.affine.xx16x16;
-      int yx16x16 = ctx->_d.texture.affine.yx16x16;
+      int xy16x16 = ctx->_d.texture.affine.xy16x16;
 
-      if (ctx->_d.texture.affine.yxZero)
+      if (ctx->_d.texture.affine.xyZero)
       {
         int py0 = Math::bound<int>((int)offy, 0, th);
         srcPixels += py0 * srcStride;
@@ -110,7 +110,7 @@ struct FOG_NO_EXPORT PTextureAffine
           {
             int i = Math::min<int>(w, MAX_FIXED_STEP);
             int px = Math::fixed16x16FromFloat(offx + _x * xx);
-            int py = Math::fixed16x16FromFloat(offy + _x * yx);
+            int py = Math::fixed16x16FromFloat(offy + _x * xy);
 
             w -= i;
 
@@ -124,7 +124,7 @@ struct FOG_NO_EXPORT PTextureAffine
 
               dst += Accessor::DST_BPP;
               px += xx16x16;
-              py += yx16x16;
+              py += xy16x16;
             } while (--i);
 
             if (w == 0) break;
@@ -147,7 +147,7 @@ struct FOG_NO_EXPORT PTextureAffine
         double _x = (double)x;
 
         double px = offx + _x * xx;
-        double py = offy + _x * yx;
+        double py = offy + _x * xy;
 
         do {
           int px0 = Math::bound<int>((int)px, 0, tw);
@@ -159,7 +159,7 @@ struct FOG_NO_EXPORT PTextureAffine
 
           dst += Accessor::DST_BPP;
           px += xx;
-          py += yx;
+          py += xy;
         } while (--w);
 
         P_FETCH_SPAN8_NEXT()
@@ -193,7 +193,7 @@ struct FOG_NO_EXPORT PTextureAffine
     int th = ctx->_d.texture.base.h;
 
     double xx = ctx->_d.texture.affine.xx;
-    double yx = ctx->_d.texture.affine.yx;
+    double xy = ctx->_d.texture.affine.xy;
 
     double offx = fetcher->_d.texture.affine.px;
     double offy = fetcher->_d.texture.affine.py;
@@ -213,9 +213,9 @@ struct FOG_NO_EXPORT PTextureAffine
     if (ctx->_d.texture.affine.safeFixedPoint)
     {
       int xx16x16 = ctx->_d.texture.affine.xx16x16;
-      int yx16x16 = ctx->_d.texture.affine.yx16x16;
+      int xy16x16 = ctx->_d.texture.affine.xy16x16;
 
-      if (ctx->_d.texture.affine.yxZero)
+      if (ctx->_d.texture.affine.xyZero)
       {
         int py0 = Math::bound<int>((int)offy, 0, th);
 
@@ -293,7 +293,7 @@ struct FOG_NO_EXPORT PTextureAffine
           {
             int i = Math::min<int>(w, MAX_FIXED_STEP);
             int px = Math::fixed16x16FromFloat(offx + _x * xx);
-            int py = Math::fixed16x16FromFloat(offy + _x * yx);
+            int py = Math::fixed16x16FromFloat(offy + _x * xy);
 
             w -= i;
 
@@ -346,7 +346,7 @@ struct FOG_NO_EXPORT PTextureAffine
 
               dst += Accessor::DST_BPP;
               px += xx16x16;
-              py += yx16x16;
+              py += xy16x16;
             } while (--i);
 
             if (w == 0) break;
@@ -369,7 +369,7 @@ struct FOG_NO_EXPORT PTextureAffine
         double _x = (double)x;
 
         double px = offx + _x * xx;
-        double py = offy + _x * yx;
+        double py = offy + _x * xy;
 
         do {
           int px0 = (int)px;
@@ -420,7 +420,7 @@ struct FOG_NO_EXPORT PTextureAffine
 
           dst += Accessor::DST_BPP;
           px += xx;
-          py += yx;
+          py += xy;
         } while (--w);
         P_FETCH_SPAN8_NEXT()
       P_FETCH_SPAN8_END()
@@ -453,7 +453,7 @@ struct FOG_NO_EXPORT PTextureAffine
     int th = ctx->_d.texture.base.h;
 
     double xx = ctx->_d.texture.affine.xx;
-    double yx = ctx->_d.texture.affine.yx;
+    double xy = ctx->_d.texture.affine.xy;
 
     double offx = fetcher->_d.texture.affine.px;
     double offy = fetcher->_d.texture.affine.py;
@@ -473,7 +473,7 @@ struct FOG_NO_EXPORT PTextureAffine
     if (ctx->_d.texture.affine.safeFixedPoint)
     {
       int xx16x16 = ctx->_d.texture.affine.xx16x16;
-      int yx16x16 = ctx->_d.texture.affine.yx16x16;
+      int xy16x16 = ctx->_d.texture.affine.xy16x16;
 
       int mx16x16 = ctx->_d.texture.affine.mx16x16;
       int my16x16 = ctx->_d.texture.affine.my16x16;
@@ -481,7 +481,7 @@ struct FOG_NO_EXPORT PTextureAffine
       int rx16x16 = ctx->_d.texture.affine.rx16x16;
       int ry16x16 = ctx->_d.texture.affine.ry16x16;
 
-      if (ctx->_d.texture.affine.yxZero)
+      if (ctx->_d.texture.affine.xyZero)
       {
         int py0 = (int)(offy);
         FOG_ASSERT(py0 >= 0 && py0 <= th);
@@ -527,7 +527,7 @@ struct FOG_NO_EXPORT PTextureAffine
           {
             int i = Math::min<int>(w, MAX_FIXED_STEP);
             int px = Helpers::p_repeat_integer(Math::fixed16x16FromFloat(offx + _x * xx), mx16x16);
-            int py = Helpers::p_repeat_integer(Math::fixed16x16FromFloat(offy + _x * yx), my16x16);
+            int py = Helpers::p_repeat_integer(Math::fixed16x16FromFloat(offy + _x * xy), my16x16);
 
             w -= i;
 
@@ -541,7 +541,7 @@ struct FOG_NO_EXPORT PTextureAffine
 
               dst += Accessor::DST_BPP;
               px += xx16x16;
-              py += yx16x16;
+              py += xy16x16;
 
               if ((uint)px >= (uint)mx16x16) px += rx16x16;
               if ((uint)py >= (uint)my16x16) py += ry16x16;
@@ -573,7 +573,7 @@ struct FOG_NO_EXPORT PTextureAffine
         double _x = (double)x;
 
         double px = Math::repeat(offx + _x * xx, mx);
-        double py = Math::repeat(offy + _x * yx, my);
+        double py = Math::repeat(offy + _x * xy, my);
 
         do {
           int px0 = (int)px;
@@ -585,7 +585,7 @@ struct FOG_NO_EXPORT PTextureAffine
 
           dst += Accessor::DST_BPP;
           px += xx; if ((mx < 0.0) | (px >= mx)) px += rx;
-          py += yx; if ((my < 0.0) | (py >= my)) py += ry;
+          py += xy; if ((my < 0.0) | (py >= my)) py += ry;
         } while (--w);
 
         P_FETCH_SPAN8_NEXT()
@@ -624,7 +624,7 @@ struct FOG_NO_EXPORT PTextureAffine
     int th = ctx->_d.texture.base.h;
 
     double xx = ctx->_d.texture.affine.xx;
-    double yx = ctx->_d.texture.affine.yx;
+    double xy = ctx->_d.texture.affine.xy;
 
     double offx = fetcher->_d.texture.affine.px;
     double offy = fetcher->_d.texture.affine.py;
@@ -644,7 +644,7 @@ struct FOG_NO_EXPORT PTextureAffine
     if (ctx->_d.texture.affine.safeFixedPoint)
     {
       int xx16x16 = ctx->_d.texture.affine.xx16x16;
-      int yx16x16 = ctx->_d.texture.affine.yx16x16;
+      int xy16x16 = ctx->_d.texture.affine.xy16x16;
 
       int mx16x16 = ctx->_d.texture.affine.mx16x16;
       int my16x16 = ctx->_d.texture.affine.my16x16;
@@ -652,7 +652,7 @@ struct FOG_NO_EXPORT PTextureAffine
       int rx16x16 = ctx->_d.texture.affine.rx16x16;
       int ry16x16 = ctx->_d.texture.affine.ry16x16;
 
-      if (ctx->_d.texture.affine.yxZero)
+      if (ctx->_d.texture.affine.xyZero)
       {
         int py0 = (int)(offy);
         FOG_ASSERT(py0 >= 0 && py0 <= th);
@@ -723,7 +723,7 @@ struct FOG_NO_EXPORT PTextureAffine
           {
             int i = Math::min<int>(w, MAX_FIXED_STEP);
             int px = Helpers::p_repeat_integer(Math::fixed16x16FromFloat(offx + _x * xx), mx16x16);
-            int py = Helpers::p_repeat_integer(Math::fixed16x16FromFloat(offy + _x * yx), my16x16);
+            int py = Helpers::p_repeat_integer(Math::fixed16x16FromFloat(offy + _x * xy), my16x16);
 
             w -= i;
 
@@ -761,7 +761,7 @@ struct FOG_NO_EXPORT PTextureAffine
 
               dst += Accessor::DST_BPP;
               px += xx16x16;
-              py += yx16x16;
+              py += xy16x16;
 
               if ((uint)px >= (uint)mx16x16) px += rx16x16;
               if ((uint)py >= (uint)my16x16) py += ry16x16;
@@ -793,7 +793,7 @@ struct FOG_NO_EXPORT PTextureAffine
         double _x = (double)x;
 
         double px = Math::repeat(offx + _x * xx, mx);
-        double py = Math::repeat(offy + _x * yx, my);
+        double py = Math::repeat(offy + _x * xy, my);
 
         do {
           int px0 = (int)px;
@@ -829,7 +829,7 @@ struct FOG_NO_EXPORT PTextureAffine
 
           dst += Accessor::DST_BPP;
           px += xx; if ((px < 0.0) | (px >= mx)) px += rx;
-          py += yx; if ((py < 0.0) | (py >= my)) py += ry;
+          py += xy; if ((py < 0.0) | (py >= my)) py += ry;
         } while (--w);
 
         P_FETCH_SPAN8_NEXT()
@@ -871,7 +871,7 @@ struct FOG_NO_EXPORT PTextureAffine
     int th2 = th * 2 - 1;
 
     double xx = ctx->_d.texture.affine.xx;
-    double yx = ctx->_d.texture.affine.yx;
+    double xy = ctx->_d.texture.affine.xy;
 
     double offx = fetcher->_d.texture.affine.px;
     double offy = fetcher->_d.texture.affine.py;
@@ -891,7 +891,7 @@ struct FOG_NO_EXPORT PTextureAffine
     if (ctx->_d.texture.affine.safeFixedPoint)
     {
       int xx16x16 = ctx->_d.texture.affine.xx16x16;
-      int yx16x16 = ctx->_d.texture.affine.yx16x16;
+      int xy16x16 = ctx->_d.texture.affine.xy16x16;
 
       int mx16x16 = ctx->_d.texture.affine.mx16x16;
       int my16x16 = ctx->_d.texture.affine.my16x16;
@@ -899,7 +899,7 @@ struct FOG_NO_EXPORT PTextureAffine
       int rx16x16 = ctx->_d.texture.affine.rx16x16;
       int ry16x16 = ctx->_d.texture.affine.ry16x16;
 
-      if (ctx->_d.texture.affine.yxZero)
+      if (ctx->_d.texture.affine.xyZero)
       {
         int py0 = (int)(offy);
         if (py0 > th) py0 = th2 - py0;
@@ -947,7 +947,7 @@ struct FOG_NO_EXPORT PTextureAffine
           {
             int i = Math::min<int>(w, MAX_FIXED_STEP);
             int px = Helpers::p_repeat_integer(Math::fixed16x16FromFloat(offx + _x * xx), mx16x16);
-            int py = Helpers::p_repeat_integer(Math::fixed16x16FromFloat(offy + _x * yx), my16x16);
+            int py = Helpers::p_repeat_integer(Math::fixed16x16FromFloat(offy + _x * xy), my16x16);
 
             w -= i;
 
@@ -964,7 +964,7 @@ struct FOG_NO_EXPORT PTextureAffine
 
               dst += Accessor::DST_BPP;
               px += xx16x16;
-              py += yx16x16;
+              py += xy16x16;
 
               if ((uint)px >= (uint)mx16x16) px += rx16x16;
               if ((uint)py >= (uint)my16x16) py += ry16x16;
@@ -996,7 +996,7 @@ struct FOG_NO_EXPORT PTextureAffine
         double _x = (double)x;
 
         double px = Math::repeat(offx + _x * xx, mx);
-        double py = Math::repeat(offy + _x * yx, my);
+        double py = Math::repeat(offy + _x * xy, my);
 
         do {
           int px0 = (int)px;
@@ -1011,7 +1011,7 @@ struct FOG_NO_EXPORT PTextureAffine
 
           dst += Accessor::DST_BPP;
           px += xx; if ((mx < 0.0) | (px >= mx)) px += rx;
-          py += yx; if ((my < 0.0) | (py >= my)) py += ry;
+          py += xy; if ((my < 0.0) | (py >= my)) py += ry;
         } while (--w);
 
         P_FETCH_SPAN8_NEXT()
@@ -1053,7 +1053,7 @@ struct FOG_NO_EXPORT PTextureAffine
     int th2 = th * 2 - 1;
 
     double xx = ctx->_d.texture.affine.xx;
-    double yx = ctx->_d.texture.affine.yx;
+    double xy = ctx->_d.texture.affine.xy;
 
     double offx = fetcher->_d.texture.affine.px;
     double offy = fetcher->_d.texture.affine.py;
@@ -1073,7 +1073,7 @@ struct FOG_NO_EXPORT PTextureAffine
     if (ctx->_d.texture.affine.safeFixedPoint)
     {
       int xx16x16 = ctx->_d.texture.affine.xx16x16;
-      int yx16x16 = ctx->_d.texture.affine.yx16x16;
+      int xy16x16 = ctx->_d.texture.affine.xy16x16;
 
       int mx16x16 = ctx->_d.texture.affine.mx16x16;
       int my16x16 = ctx->_d.texture.affine.my16x16;
@@ -1081,7 +1081,7 @@ struct FOG_NO_EXPORT PTextureAffine
       int rx16x16 = ctx->_d.texture.affine.rx16x16;
       int ry16x16 = ctx->_d.texture.affine.ry16x16;
 
-      if (ctx->_d.texture.affine.yxZero)
+      if (ctx->_d.texture.affine.xyZero)
       {
         int py0 = (int)(offy);
         int py1;
@@ -1151,7 +1151,7 @@ struct FOG_NO_EXPORT PTextureAffine
           {
             int i = Math::min<int>(w, MAX_FIXED_STEP);
             int px = Helpers::p_repeat_integer(Math::fixed16x16FromFloat(offx + _x * xx), mx16x16);
-            int py = Helpers::p_repeat_integer(Math::fixed16x16FromFloat(offy + _x * yx), my16x16);
+            int py = Helpers::p_repeat_integer(Math::fixed16x16FromFloat(offy + _x * xy), my16x16);
 
             w -= i;
 
@@ -1188,7 +1188,7 @@ struct FOG_NO_EXPORT PTextureAffine
 
               dst += Accessor::DST_BPP;
               px += xx16x16;
-              py += yx16x16;
+              py += xy16x16;
 
               if ((uint)px >= (uint)mx16x16) px += rx16x16;
               if ((uint)py >= (uint)my16x16) py += ry16x16;
@@ -1220,7 +1220,7 @@ struct FOG_NO_EXPORT PTextureAffine
         double _x = (double)x;
 
         double px = Math::repeat(offx + _x * xx, mx);
-        double py = Math::repeat(offy + _x * yx, my);
+        double py = Math::repeat(offy + _x * xy, my);
 
         do {
           int px0 = (int)px, px1;
@@ -1255,7 +1255,7 @@ struct FOG_NO_EXPORT PTextureAffine
 
           dst += Accessor::DST_BPP;
           px += xx; if ((px < 0.0) | (px >= mx)) px += rx;
-          py += yx; if ((py < 0.0) | (py >= my)) py += ry;
+          py += xy; if ((py < 0.0) | (py >= my)) py += ry;
         } while (--w);
 
         P_FETCH_SPAN8_NEXT()
@@ -1294,7 +1294,7 @@ struct FOG_NO_EXPORT PTextureAffine
     int th = ctx->_d.texture.base.h;
 
     double xx = ctx->_d.texture.affine.xx;
-    double yx = ctx->_d.texture.affine.yx;
+    double xy = ctx->_d.texture.affine.xy;
 
     double offx = fetcher->_d.texture.affine.px;
     double offy = fetcher->_d.texture.affine.py;
@@ -1317,9 +1317,9 @@ struct FOG_NO_EXPORT PTextureAffine
     if (ctx->_d.texture.affine.safeFixedPoint)
     {
       int xx16x16 = ctx->_d.texture.affine.xx16x16;
-      int yx16x16 = ctx->_d.texture.affine.yx16x16;
+      int xy16x16 = ctx->_d.texture.affine.xy16x16;
 
-      if (ctx->_d.texture.affine.yxZero)
+      if (ctx->_d.texture.affine.xyZero)
       {
         int py0 = (int)offy;
         if ((uint)py0 > (uint)th) goto _FetchSolid;
@@ -1372,7 +1372,7 @@ struct FOG_NO_EXPORT PTextureAffine
           {
             int i = Math::min<int>(w, MAX_FIXED_STEP);
             int px = Math::fixed16x16FromFloat(offx + _x * xx);
-            int py = Math::fixed16x16FromFloat(offy + _x * yx);
+            int py = Math::fixed16x16FromFloat(offy + _x * xy);
 
             w -= i;
 
@@ -1393,7 +1393,7 @@ struct FOG_NO_EXPORT PTextureAffine
 
               dst += Accessor::DST_BPP;
               px += xx16x16;
-              py += yx16x16;
+              py += xy16x16;
             } while (--i);
 
             if (w == 0) break;
@@ -1416,7 +1416,7 @@ struct FOG_NO_EXPORT PTextureAffine
         double _x = (double)x;
 
         double px = offx + _x * xx;
-        double py = offy + _x * yx;
+        double py = offy + _x * xy;
 
         do {
           int px0 = (int)px;
@@ -1435,7 +1435,7 @@ struct FOG_NO_EXPORT PTextureAffine
 
           dst += Accessor::DST_BPP;
           px += xx;
-          py += yx;
+          py += xy;
         } while (--w);
 
         P_FETCH_SPAN8_NEXT()
@@ -1482,7 +1482,7 @@ _FetchEnd:
     int th = ctx->_d.texture.base.h;
 
     double xx = ctx->_d.texture.affine.xx;
-    double yx = ctx->_d.texture.affine.yx;
+    double xy = ctx->_d.texture.affine.xy;
 
     double offx = fetcher->_d.texture.affine.px;
     double offy = fetcher->_d.texture.affine.py;
@@ -1505,9 +1505,9 @@ _FetchEnd:
     if (ctx->_d.texture.affine.safeFixedPoint)
     {
       int xx16x16 = ctx->_d.texture.affine.xx16x16;
-      int yx16x16 = ctx->_d.texture.affine.yx16x16;
+      int xy16x16 = ctx->_d.texture.affine.xy16x16;
 
-      if (ctx->_d.texture.affine.yxZero && offy >= 0.0 && offy < (double)th)
+      if (ctx->_d.texture.affine.xyZero && offy >= 0.0 && offy < (double)th)
       {
         int py0 = (int)offy;
         FOG_ASSERT(py0 >= 0 && py0 < th);
@@ -1607,7 +1607,7 @@ _FixedScaleInterpolate:
           {
             int i = Math::min<int>(w, MAX_FIXED_STEP);
             int px = Math::fixed16x16FromFloat(offx + _x * xx);
-            int py = Math::fixed16x16FromFloat(offy + _x * yx);
+            int py = Math::fixed16x16FromFloat(offy + _x * xy);
 
             w -= i;
 
@@ -1672,7 +1672,7 @@ _FixedScaleInterpolate:
               accessor.store(dst, pix_x0y0);
               dst += Accessor::DST_BPP;
               px += xx16x16;
-              py += yx16x16;
+              py += xy16x16;
             } while (--i);
 
             if (w == 0) break;
@@ -1695,7 +1695,7 @@ _FixedScaleInterpolate:
         double _x = (double)x;
 
         double px = offx + _x * xx;
-        double py = offy + _x * yx;
+        double py = offy + _x * xy;
 
         do {
           int px0 = (int)px;
@@ -1761,7 +1761,7 @@ _FixedScaleInterpolate:
           accessor.store(dst, pix_x0y0);
           dst += Accessor::DST_BPP;
           px += xx;
-          py += yx;
+          py += xy;
         } while (--w);
         P_FETCH_SPAN8_NEXT()
       P_FETCH_SPAN8_END()

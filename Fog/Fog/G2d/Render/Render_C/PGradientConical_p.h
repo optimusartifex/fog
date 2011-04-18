@@ -19,91 +19,166 @@ namespace Render_C {
 
 struct FOG_NO_EXPORT PGradientConical
 {
-#if 0
   // ==========================================================================
-  // [Init]
+  // [Create]
   // ==========================================================================
 
-  static err_t FOG_FASTCALL init_conical(
-    RenderPatternContext* ctx, const Pattern& pattern, const TransformD& transform, uint32_t interpolationType)
+  // TODO: 16-bit rasterizer.
+  static err_t FOG_FASTCALL create(
+    RenderPatternContext* ctx, uint32_t dstFormat, const BoxI& clipBox,
+    const GradientD& gradient,
+    const TransformD& tr,
+    uint32_t gradientQuality)
   {
-    PatternData* d = pattern._d;
-    FOG_ASSERT(d->type == PATTERN_TYPE_CONICAL_GRADIENT);
+    const ColorStopList& stops = gradient.getStops();
+    uint32_t spread = gradient.getGradientSpread();
 
-    if (d->obj.stops->getLength() == 0)
+    FOG_ASSERT(gradient.getGradientType() == GRADIENT_TYPE_CONICAL);
+    FOG_ASSERT(stops.getLength() >= 1);
+    FOG_ASSERT(spread < GRADIENT_SPREAD_COUNT);
+
+    // ------------------------------------------------------------------------
+    // [Transform input matrix to get the center point at (0, 0)].
+    // ------------------------------------------------------------------------
+    TransformD t(tr);
+
+    double cx = gradient._pts[0].x;
+    double cy = gradient._pts[0].y;
+    t.translate(PointD(cx, cy));
+
+    TransformD inv(UNINITIALIZED);
+    bool isInverted = TransformD::invert(inv, t);
+
+    // ------------------------------------------------------------------------
+    // [Solid]
+    // ------------------------------------------------------------------------
+
+    if (stops.getLength() < 2 || !isInverted)
     {
-      return rasterFuncs.pattern.solid_init(ctx, 0x00000000);
-    }
-    if (d->obj.stops->getLength() == 1)
-    {
-      return rasterFuncs.pattern.solid_init(ctx, d->obj.stops->at(0).getArgb32());
+      return Helpers::p_solid_create_color(ctx, dstFormat, stops.getAt(stops.getLength()-1).getColor());
     }
 
-    TransformD m(pattern._d->transform.multiplied(transform));
+    // ------------------------------------------------------------------------
+    // [Prepare]
+    // ------------------------------------------------------------------------
 
-    PointD points[2];
-    m.mapPoints(points, d->data.gradient->points, 2);
+    FOG_RETURN_ON_ERROR(PGradientBase::create(ctx, dstFormat, clipBox, spread, stops));
+    int tableLength = ctx->_d.gradient.base.len;
 
-    int gLength = 256 * (int)d->obj.stops->getLength();
-    if (gLength > 4096) gLength = 4096;
+    // TODO:
+    uint32_t srcFormat = IMAGE_FORMAT_PRGB32;
 
-    ctx->conicalGradient.dx = points[0].x;
-    ctx->conicalGradient.dy = points[0].y;
-    ctx->conicalGradient.angle = Math::atan2(
-      (points[0].x - points[1].x),
-      (points[0].y - points[1].y)) + (MATH_PI/2.0);
+    double angle = Math::repeat(gradient._pts[1].x * (1.0 / (2.0 * MATH_PI)), 1.0);
 
-    err_t err = init_generic(ctx, d->obj.stops.instance(), gLength, d->spread);
-    if (FOG_IS_ERROR(err)) return err;
+    // There is no such concept like conical gradient using perspective 
+    // transform, because the function atan2(y/w, x/w) can be simplified to
+    // atan2(y, x), later to atan(y/x). This allows to completely remove the
+    // projection part of the transform.
+    //
+    // TODO: Maybe the sign of the projection position is important, more
+    // research needed.
+    ctx->_d.gradient.conical.shared.xx = inv._00;
+    ctx->_d.gradient.conical.shared.xy = inv._01;
 
-    // Set fetch function.
-    ctx->fetch = rasterFuncs.pattern.conical_gradient_fetch;
+    ctx->_d.gradient.conical.shared.yx = inv._10;
+    ctx->_d.gradient.conical.shared.yy = inv._11;
 
-    // Set destroy function.
-    ctx->destroy = destroy_generic;
+    ctx->_d.gradient.conical.shared.tx = inv._20 + 0.5 * (inv._00 + inv._10); // Center.
+    ctx->_d.gradient.conical.shared.ty = inv._21 + 0.5 * (inv._01 + inv._11); // Center.
 
-    ctx->initialized = true;
+    ctx->_d.gradient.conical.shared.offset = (double)tableLength * (2.0 - angle);
+    ctx->_d.gradient.conical.shared.scale = (double)(tableLength - 1) / (2.0 * MATH_PI);
+
+    ctx->_prepare = prepare_simple;
+    ctx->_destroy = PGradientBase::destroy;
+    ctx->_fetch = _g2d_render.gradient.conical.fetch_simple_nearest[srcFormat];
+    ctx->_skip = skip_simple;
+
     return ERR_OK;
   }
 
   // ==========================================================================
-  // [Fetch]
+  // [Prepare]
   // ==========================================================================
 
-  static void FOG_FASTCALL fetch_conical(
-    const RenderPatternContext* ctx, Span* span, uint8_t* buffer, int y, uint32_t mode)
+  static void FOG_FASTCALL prepare_simple(
+    const RenderPatternContext* ctx, RenderPatternFetcher* fetcher, int _y, int _delta, uint32_t mode)
   {
+    double y = (double)_y;
+    double d = (double)_delta;
+
+    fetcher->_ctx = ctx;
+    fetcher->_fetch = ctx->_fetch;
+    fetcher->_skip = ctx->_skip;
+    fetcher->_mode = mode;
+
+    fetcher->_d.gradient.conical.simple.px = y * ctx->_d.gradient.conical.simple.yx + ctx->_d.gradient.conical.simple.tx;
+    fetcher->_d.gradient.conical.simple.py = y * ctx->_d.gradient.conical.simple.yy + ctx->_d.gradient.conical.simple.ty;
+
+    fetcher->_d.gradient.conical.simple.dx = d * ctx->_d.gradient.conical.simple.yx;
+    fetcher->_d.gradient.conical.simple.dy = d * ctx->_d.gradient.conical.simple.yy;
+  }
+
+  // ==========================================================================
+  // [Fetch - Simple]
+  // ==========================================================================
+
+  template<typename Accessor>
+  static void FOG_FASTCALL fetch_simple_nearest(
+    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+  {
+    const RenderPatternContext* ctx = fetcher->getContext();
+    Accessor accessor(ctx);
+
     P_FETCH_SPAN8_INIT()
-    const uint32_t* colors = (const uint32_t*)ctx->radialGradient.colors;
 
-    int index;
-    int colorsLength = ctx->radialGradient.colorsLength;
+    double dx = ctx->_d.gradient.conical.simple.xx;
+    double dy = ctx->_d.gradient.conical.simple.xy;
 
-    double dx = (double)x - ctx->conicalGradient.dx;
-    double dy = (double)y - ctx->conicalGradient.dy;
-    double scale = (double)colorsLength / (MATH_PI * 2.0);
-    double add = ctx->conicalGradient.angle;
-    if (add < MATH_PI) add += MATH_PI * 2.0;
+    double offset = ctx->_d.gradient.conical.simple.offset;
+    double scale = ctx->_d.gradient.conical.simple.scale;
+
+    int lenMask = ctx->_d.gradient.base.len - 1;
 
     P_FETCH_SPAN8_BEGIN()
       P_FETCH_SPAN8_SET_CURRENT()
 
-      do {
-        index = (int)((Math::atan2(dy, dx) + add) * scale);
-        if (index >= colorsLength) index -= colorsLength;
+      double _x = (double)x;
+      double px = _x * dx + fetcher->_d.gradient.conical.simple.px;
+      double py = _x * dy + fetcher->_d.gradient.conical.simple.py;
 
-        ((uint32_t*)dst)[0] = colors[index];
-        dst += 4;
-        dx += 1.0;
+      do {
+        double a = Math::atan2(py, px);
+        int ipos = (int)(offset - a * scale) & lenMask;
+
+        typename Accessor::Pixel c0;
+        accessor.fetchTable(c0, ipos);
+        accessor.store(dst, c0);
+
+        dst += Accessor::DST_BPP;
+        px += dx;
+        py += dy;
       } while (--w);
 
-      P_FETCH_SPAN8_HOLE(
-      {
-        dx += hole;
-      })
+      P_FETCH_SPAN8_NEXT()
     P_FETCH_SPAN8_END()
+
+    fetcher->_d.gradient.conical.simple.px += fetcher->_d.gradient.conical.simple.dx;
+    fetcher->_d.gradient.conical.simple.py += fetcher->_d.gradient.conical.simple.dy;
   }
-#endif
+
+  // ==========================================================================
+  // [Skip]
+  // ==========================================================================
+
+  static void FOG_FASTCALL skip_simple(
+    RenderPatternFetcher* fetcher, int step)
+  {
+    double s = (double)step;
+
+    fetcher->_d.gradient.conical.simple.px += fetcher->_d.gradient.conical.simple.dx * s;
+    fetcher->_d.gradient.conical.simple.py += fetcher->_d.gradient.conical.simple.dy * s;
+  }
 };
 
 } // Render_C namespace

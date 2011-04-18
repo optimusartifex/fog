@@ -22,13 +22,14 @@
 #cmakedefine FOG_DEBUG_MEMORY
 
 // ============================================================================
-// [MMX/SSE support]
+// [Optimizations]
 // ============================================================================
 
 //! @brief Enable support for MMX instructions.
 #cmakedefine FOG_OPTIMIZE_MMX
 //! @brief Enable support for 3dNow! instructions.
 #cmakedefine FOG_OPTIMIZE_3DNOW
+
 //! @brief Enable support for SSE instructions.
 #cmakedefine FOG_OPTIMIZE_SSE
 //! @brief Enable support for SSE2 instructions.

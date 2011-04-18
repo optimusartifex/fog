@@ -27,6 +27,7 @@ Set(FOG_DIR ${CMAKE_SOURCE_DIR})
 Set(FOG_LIBRARIES "")
 Set(CMAKE_CXX_STANDARD_LIBRARIES "")
 
+Include(CheckCXXCompilerFlag)
 Include(CheckIncludeFiles)
 Include(CheckLibraryExists)
 Include(CheckTypeSize)
@@ -39,7 +40,7 @@ Include(FindThreads)
 Include_Directories(${FOG_DIR})
 
 # =============================================================================
-# [Fog - OS Detection]
+# [OS Detection]
 # =============================================================================
 
 If(WIN32)
@@ -51,7 +52,7 @@ Else()
 EndIf()
 
 # =============================================================================
-# [Compiler flags]
+# [C++ Compiler - Clear all flags]
 # =============================================================================
 
 Set(FOG_CFLAGS_OPTIMIZE "")
@@ -62,16 +63,36 @@ Set(FOG_CFLAGS_SSE2 "")
 Set(FOG_CFLAGS_SSE3 "")
 Set(FOG_CFLAGS_SSSE3 "")
 
+# =============================================================================
+# [C++ Compiler - GCC Support]
+# =============================================================================
+
 If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+  # Check for supported compiler flags.
+  Check_CXX_Compiler_Flag("-fmerge-all-constants" FOG_CC_HAS_FMERGE_ALL_CONSTANTS)
+  Check_CXX_Compiler_Flag("-fno-keep-static-consts" FOG_CC_HAS_FNO_KEEP_STATIC_CONSTS)
+  Check_CXX_Compiler_Flag("-flto" FOG_CC_HAS_FLTO)
+
+  Check_CXX_Compiler_Flag("-Winline" FOG_CC_HAS_WINLINE)
+  Check_CXX_Compiler_Flag("-Wno-enum-compare" FOG_CC_HAS_WNO_ENUM_COMPARE)
+
   # Turn off exceptions (smaller code).
   Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions")
 
   # Hide all symbols by default. Exported symbols are declared by FOG_API.
   Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -fvisibility-inlines-hidden")
 
-  # Decrease code size by merging all constants and removing unused ones,
-  # standard violation not effects us.
-  Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmerge-all-constants -fno-keep-static-consts")
+  # -fmerge-all-constants / -fno-keep-static-consts
+  #
+  # Decrease code size by merging all constants (standard violation) and 
+  # removing unused ones. It's against standard so it must be turned-on
+  # explicitly.
+  If (${FOG_CC_HAS_FMERGE_ALL_CONSTANTS})
+    Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmerge-all-constants")
+  EndIf()
+  If (${FOG_CC_HAS_FNO_KEEP_STATIC_CONSTS})
+    Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-keep-static-consts")
+  EndIf()
 
   # Strict aliasing, Fog-Framework should be well written.
   Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstrict-aliasing")
@@ -79,23 +100,35 @@ If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   # We are not interested in math-errno.
   Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-math-errno")
 
-  # Enable warnings:
-  Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Winline")
+  # -flto
+  #
+  # Use link-time optimization.
+  If (${FOG_CC_HAS_FLTO})
+    Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
+  EndIf()
 
-  # Disable warnings.
-  # Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-enum-compare")
+  # -Winline:
+  #
+  # I want to see all functions which are not inlined. This could help when
+  # looking for non-inlined function in Fog::G2d inner loops.
+  If (${FOG_CC_HAS_WINLINE})
+    Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Winline")
+  EndIf()
 
-  # TODO: Detect if GCC supports it:
-  #   Use link-time-optimization.
-  #   Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
+  # -Wno-enum-compare.
+  If (${FOG_CC_HAS_WNO_ENUM_COMPARE})
+    Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-enum-compare")
+  EndIf()
 
-  # If we are not debugging the code should be optimized. The O2 generates 
-  # probably the best code. O3 gives no speed improvement and code is always
-  # larger.
+  # Use -O2 as a standard optimization level when running release builds. The
+  # -O3 not improve the performance, because all inner loops used by Fog are
+  # generally optimized - there is no that compiler can do. Another argument
+  # to use -O2 is that -O3 produces larger binaries with no speed improvement.
   If(NOT ${CMAKE_BUILD_TYPE} MATCHES "Debug")
     Set(FOG_CFLAGS_OPTIMIZE "-O2")
-  EndIf(NOT ${CMAKE_BUILD_TYPE} MATCHES "Debug")
+  EndIf()
 
+  # Setup FOG_CFLAGS specific to GCC.
   Set(FOG_CFLAGS_MMX "${FOG_CFLAGS_OPTIMIZE} -mmmx")
   Set(FOG_CFLAGS_3DNOW "${FOG_CFLAGS_OPTIMIZE} -mmmx -m3dnow")
   Set(FOG_CFLAGS_SSE "${FOG_CFLAGS_OPTIMIZE} -mmmx -msse")
@@ -103,6 +136,10 @@ If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   Set(FOG_CFLAGS_SSE3 "${FOG_CFLAGS_OPTIMIZE} -msse3")
   Set(FOG_CFLAGS_SSSE3 "${FOG_CFLAGS_OPTIMIZE} -mssse3")
 EndIf(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+
+# =============================================================================
+# [C++ Compiler - MSVC Support]
+# =============================================================================
 
 If(MSVC)
   Set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Oi /Oy /GF /GS- /GR-")
@@ -120,6 +157,11 @@ If(${CMAKE_BUILD_TYPE} MATCHES "Debug")
   Set(FOG_DEBUG TRUE)
 EndIf(${CMAKE_BUILD_TYPE} MATCHES "Debug")
 
+# =============================================================================
+# [C++ Compiler - Windows Specific Flags]
+# =============================================================================
+
+# Always use UNICODE when building for Windows.
 If(FOG_OS_WINDOWS)
   Add_Definitions(-D_UNICODE)
 EndIf(FOG_OS_WINDOWS)
@@ -168,22 +210,24 @@ If(UNIX)
   If(NOT FOG_HAVE_UNISTD_H)
     Check_Include_Files(unistd.h FOG_HAVE_UNISTD_H)
   EndIf(NOT FOG_HAVE_UNISTD_H)
-  
+
   If(NOT FOG_HAVE_FENV_H)
     Check_Include_Files(fenv.h FOG_HAVE_FENV_H)
   EndIf(NOT FOG_HAVE_FENV_H)
 EndIf(UNIX)
 
 # =============================================================================
-# [Fog - CPU Specific]
+# [Optimizations]
 # =============================================================================
 
-# TODO: Detect features.
-Set(FOG_OPTIMIZE_MMX   TRUE)
-# Set(FOG_OPTIMIZE_3DNOW TRUE)
+# Disable MMX/3dNow while building for AMD64.
+If (${FOG_SIZEOF_VOID} EQUAL 4)
+  Set(FOG_OPTIMIZE_MMX TRUE)
+  # Set(FOG_OPTIMIZE_3DNOW TRUE)
+EndIf()
 
-Set(FOG_OPTIMIZE_SSE   TRUE)
-Set(FOG_OPTIMIZE_SSE2  TRUE)
+Set(FOG_OPTIMIZE_SSE TRUE)
+Set(FOG_OPTIMIZE_SSE2 TRUE)
 Set(FOG_OPTIMIZE_SSSE3 TRUE)
 
 # =============================================================================

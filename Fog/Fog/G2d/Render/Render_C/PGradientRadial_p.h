@@ -82,55 +82,67 @@ struct FOG_NO_EXPORT PGradientRadial
     FOG_RETURN_ON_ERROR(PGradientBase::create(ctx, dstFormat, clipBox, spread, stops));
     int tableLength = ctx->_d.gradient.base.len;
     
+    double fxOrig = fx;
+    double fyOrig = fy;
+
+    fx -= cx;
+    fy -= cy;
+
+    double r2 = r  * r;
+    double fx2 = fx * fx;
+    double fy2 = fy * fy;
+    double dd = r2 - (fx2 + fy2);
+
+    // Divisor degenerated to zero, that means that focal point is near
+    // the border of a circle.
+    if (Math::isFuzzyZero(dd))
+    {
+      if (!Math::isFuzzyZero(fx)) fx += (fx < 0.0) ? 0.5 : -0.5;
+      if (!Math::isFuzzyZero(fy)) fy += (fy < 0.0) ? 0.5 : -0.5;
+
+      fx2 = fx * fx;
+      fy2 = fy * fy;
+      dd = r2 - (fx2 + fy2);
+    }
+
+    double ax = inv._00; // Linear X increment per one device pixel.
+    double ay = inv._01; // Linear Y increment per one device pixel.
+
+    double r2mfxfx = r2 - fx2;
+    double r2mfyfy = r2 - fy2;
+    double _2_fxfy = 2. * fx * fy;
+
+    double axax = ax * ax;
+    double ayay = ay * ay;
+    double axay = ax * ay;
+
+    // The radial gradient fetcher uses following equation:
+    //
+    //    b = x * fx + y * fy
+    //    d = x^2 * (r^2 - fy^2) + y^2 * (r^2 - fx^2) + x*y * (2*fx*fy)
+    //
+    //    pos = ((b + sqrt(d))) * scale)
+    //
+    // Which can be simplified if we eliminate constants:
+    //
+    //    C1 = r^2 - fy^2
+    //    C2 = r^2 - fx^2
+    //    C3 = 2*fx*fy
+    //
+    //    b = x * fx + y * fy
+    //    d = x^2 * C1 + y^2 * C2 + x*y * C3
+    //
+    //    pos = ((b + sqrt(d))) * scale)
+
     // ------------------------------------------------------------------------
     // [Simple]
     // ------------------------------------------------------------------------
 
     if (inv.getType() <= TRANSFORM_TYPE_AFFINE)
     {
-      double fxOrig = fx;
-      double fyOrig = fy;
-
-      fx -= cx;
-      fy -= cy;
-
-      double r2 = r  * r;
-      double fx2 = fx * fx;
-      double fy2 = fy * fy;
-      double dd = r2 - (fx2 + fy2);
-
-      // Divisor degenerated to zero, that means that focal point is near
-      // the border of a circle.
-      if (Math::isFuzzyZero(dd))
-      {
-        if (!Math::isFuzzyZero(fx)) fx += (fx < 0.0) ? 0.5 : -0.5;
-        if (!Math::isFuzzyZero(fy)) fy += (fy < 0.0) ? 0.5 : -0.5;
-
-        fx2 = fx * fx;
-        fy2 = fy * fy;
-        dd = r2 - (fx2 + fy2);
-      }
-
-      // The radial gradient fetcher uses following equation:
-      // 
-      //    b = x * fx + y * fy
-      //    d = x^2 * (r^2 - fy^2) + y^2 * (r^2 - fx^2) + x*y * (2*fx*fy)
-      //
-      //    pos = ((b + sqrt(d))) * scale)
-      //
       // The x and y variables increase linearly, this means that we can use 
       // double differentiation to get delta (d) and delta-of-delta (dd). We 
-      // first eliminate the equations which are constant, so:
-      //
-      //    C1 = r^2 - fy^2
-      //    C2 = r^2 - fx^2
-      //    C3 = 2*fx*fy
-      //
-      // The equation:
-      // 
-      //    d = x^2 * C1 + y^2 * C2 + x*y * C3
-      // 
-      // Then the equation can be separated into:
+      // first separate the equation into three ones:
       //
       //    D1 = x^2 * C1
       //    D2 = y^2 * C2
@@ -140,22 +152,15 @@ struct FOG_NO_EXPORT PGradientRadial
       //
       // So we have general equation 'x^2 * C' and we must find the deltas:
       //
-      //   'x^2 * C': First delta 'd' at step 't'     : t^2 * C + x * 2*C
-      //   'x^2 * C': Second delta 'd' at step 't'    : t^2 * 2*C
+      //   'x^2 * C': 1st delta 'd' at step 't'    : t^2 * C + x * 2*C
+      //   'x^2 * C': 2nd delta 'd' at step 't'    : t^2 * 2*C
       //
       //   ( Hint, use Mathematica DifferenceDelta[x*x*C, {x, 1, t}] )
       //
       // The equation 'x*y*C' can't be separated, so we have:
       //
-      //   'x*y * C': First delta 'd' at step 'tx/ty' : x*ty * C + y*tx * C + tx*ty * C
-      //   'x*y * C': Second delta 'd' at step 'tx/ty': tx*ty * 2*C
-
-      double ax = inv._00; // Linear X increment per one device pixel.
-      double ay = inv._01; // Linear Y increment per one device pixel.
-
-      double r2mfxfx = r2 - fx2;
-      double r2mfyfy = r2 - fy2;
-      double _2_fxfy = 2. * fx * fy;
+      //   'x*y * C': 1st delta 'd' at step 'tx/ty': x*ty * C + y*tx * C + tx*ty * C
+      //   'x*y * C': 2nd delta 'd' at step 'tx/ty': tx*ty * 2*C
 
       ctx->_d.gradient.radial.simple.fx  = fx;
       ctx->_d.gradient.radial.simple.fy  = fy;
@@ -174,16 +179,11 @@ struct FOG_NO_EXPORT PGradientRadial
       ctx->_d.gradient.radial.simple.r2mfyfy = r2mfyfy;
       ctx->_d.gradient.radial.simple._2_fxfy = _2_fxfy;
 
-      ctx->_d.gradient.radial.simple.b_d   = ax * fx + 
-                                             ay * fy;
-      ctx->_d.gradient.radial.simple.d_d   = ax * ax * r2mfyfy + 
-                                             ay * ay * r2mfxfx +
-                                             ax * ay * _2_fxfy;
-      ctx->_d.gradient.radial.simple.d_d_x = 2. * ax * r2mfyfy + ay * _2_fxfy;
-      ctx->_d.gradient.radial.simple.d_d_y = 2. * ay * r2mfxfx + ax * _2_fxfy;
-      ctx->_d.gradient.radial.simple.d_d_d = 2. * ax * ax * r2mfyfy +
-                                             2. * ay * ay * r2mfxfx + 
-                                             2. * ax * ay * _2_fxfy;
+      ctx->_d.gradient.radial.simple.b_d   = ax * fx + ay * fy;
+      ctx->_d.gradient.radial.simple.d_d   = axax * r2mfyfy + ayay * r2mfxfx + axay * _2_fxfy;
+      ctx->_d.gradient.radial.simple.d_d_x = 2. * (ax * r2mfyfy) + ay * _2_fxfy;
+      ctx->_d.gradient.radial.simple.d_d_y = 2. * (ay * r2mfxfx) + ax * _2_fxfy;
+      ctx->_d.gradient.radial.simple.d_d_d = 2. * (axax * r2mfyfy + ayay * r2mfxfx + axay * _2_fxfy);
 
       ctx->_prepare = prepare_simple;
       ctx->_destroy = PGradientBase::destroy;
@@ -197,7 +197,15 @@ struct FOG_NO_EXPORT PGradientRadial
 
     else
     {
+      // The x and y variables do not increase linearly, so the double
+      // differentiation is not possible.
+
       // TODO:
+
+      ctx->_prepare = prepare_simple;
+      ctx->_destroy = PGradientBase::destroy;
+      ctx->_fetch = _g2d_render.gradient.radial.fetch_proj_nearest[IMAGE_FORMAT_PRGB32][spread];
+      ctx->_skip = skip_simple;
     }
 
     return ERR_OK;

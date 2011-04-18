@@ -19,7 +19,7 @@ Delegates - FastDelegate <http://www.codeproject.com/cpp/FastDelegate.asp>.
 Threading and Event loops - Chromium <http://code.google.com/p/chromium/>.
 Unicode support - Ultimate++ <http://www.ultimatepp.com>.
 
-Fog-Graphics
+Fog-G2d
 ============
 
 Color matrix - AggOO <http://www.dratek.com/>.

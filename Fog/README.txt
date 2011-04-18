@@ -6,7 +6,7 @@ http://code.google.com/p/fog/
 Introduction
 ============
 
-Fog library is library for crossplatform development in C++ language. Main goal
+Fog library is library for cross-platform development in C++ language. Main goal
 of the Fog library is to provide very fast and accurate graphics output on all 
 supported operating systems and architectures. Currently Fog is not only graphics 
 library, it contains many other classes related to cross-platform development, but
@@ -31,7 +31,7 @@ Linux/BSD:
   - pthreads   (direct   - linked)
   - libdl      (direct   - linked)
   - librt      (direct   - linked)
-- Fog-Graphics
+- Fog-G2d
   - libjpeg    (optional - runtime loading)
   - libpng     (optional - runtime loading)
   - Fontconfig (optional - runtime loading)

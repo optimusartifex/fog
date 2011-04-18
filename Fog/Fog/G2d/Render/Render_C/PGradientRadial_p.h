@@ -134,6 +134,23 @@ struct FOG_NO_EXPORT PGradientRadial
     //
     //    pos = ((b + sqrt(d))) * scale)
 
+    ctx->_d.gradient.radial.shared.fx  = fx;
+    ctx->_d.gradient.radial.shared.fy  = fy;
+    ctx->_d.gradient.radial.shared.scale = (double)tableLength / dd;
+
+    ctx->_d.gradient.radial.shared.xx = inv._00;
+    ctx->_d.gradient.radial.shared.yx = inv._01;
+
+    ctx->_d.gradient.radial.shared.xy = inv._10;
+    ctx->_d.gradient.radial.shared.yy = inv._11;
+
+    ctx->_d.gradient.radial.shared.tx = inv._20 - fxOrig + 0.5 * (inv._00 + inv._10); // Center.
+    ctx->_d.gradient.radial.shared.ty = inv._21 - fyOrig + 0.5 * (inv._01 + inv._11); // Center.
+
+    ctx->_d.gradient.radial.shared.r2mfxfx = r2mfxfx;
+    ctx->_d.gradient.radial.shared.r2mfyfy = r2mfyfy;
+    ctx->_d.gradient.radial.shared._2_fxfy = _2_fxfy;
+
     // ------------------------------------------------------------------------
     // [Simple]
     // ------------------------------------------------------------------------
@@ -162,23 +179,6 @@ struct FOG_NO_EXPORT PGradientRadial
       //   'x*y * C': 1st delta 'd' at step 'tx/ty': x*ty * C + y*tx * C + tx*ty * C
       //   'x*y * C': 2nd delta 'd' at step 'tx/ty': tx*ty * 2*C
 
-      ctx->_d.gradient.radial.simple.fx  = fx;
-      ctx->_d.gradient.radial.simple.fy  = fy;
-      ctx->_d.gradient.radial.simple.scale = (double)tableLength / dd;
-
-      ctx->_d.gradient.radial.simple.xx = inv._00;
-      ctx->_d.gradient.radial.simple.yx = inv._01;
-
-      ctx->_d.gradient.radial.simple.xy = inv._10;
-      ctx->_d.gradient.radial.simple.yy = inv._11;
-
-      ctx->_d.gradient.radial.simple.tx = inv._20 - fxOrig + 0.5 * (inv._00 + inv._10); // Center.
-      ctx->_d.gradient.radial.simple.ty = inv._21 - fyOrig + 0.5 * (inv._01 + inv._11); // Center.
-
-      ctx->_d.gradient.radial.simple.r2mfxfx = r2mfxfx;
-      ctx->_d.gradient.radial.simple.r2mfyfy = r2mfyfy;
-      ctx->_d.gradient.radial.simple._2_fxfy = _2_fxfy;
-
       ctx->_d.gradient.radial.simple.b_d   = ax * fx + ay * fy;
       ctx->_d.gradient.radial.simple.d_d   = axax * r2mfyfy + ayay * r2mfxfx + axay * _2_fxfy;
       ctx->_d.gradient.radial.simple.d_d_x = 2. * (ax * r2mfyfy) + ay * _2_fxfy;
@@ -197,15 +197,25 @@ struct FOG_NO_EXPORT PGradientRadial
 
     else
     {
-      // The x and y variables do not increase linearly, so the double
-      // differentiation is not possible.
+      // No specific optimization can be performed, because x/y don't increase
+      // linearly. 
 
-      // TODO:
+      ctx->_d.gradient.radial.proj.zx = inv._02;
+      ctx->_d.gradient.radial.proj.zy = inv._12;
+      ctx->_d.gradient.radial.proj.tz = inv._22 + 0.5 * (inv._02 + inv._12); // Center.
 
-      ctx->_prepare = prepare_simple;
+      // We can't translate focal point in projection, it has to be calcualted
+      // after x/y is divided by z.
+      ctx->_d.gradient.radial.proj.tx += fxOrig;
+      ctx->_d.gradient.radial.proj.ty += fyOrig;
+
+      ctx->_d.gradient.radial.proj.fxOrig = fxOrig;
+      ctx->_d.gradient.radial.proj.fyOrig = fyOrig;
+
+      ctx->_prepare = prepare_proj;
       ctx->_destroy = PGradientBase::destroy;
       ctx->_fetch = _g2d_render.gradient.radial.fetch_proj_nearest[IMAGE_FORMAT_PRGB32][spread];
-      ctx->_skip = skip_simple;
+      ctx->_skip = skip_proj;
     }
 
     return ERR_OK;
@@ -244,7 +254,13 @@ struct FOG_NO_EXPORT PGradientRadial
     fetcher->_skip = ctx->_skip;
     fetcher->_mode = mode;
 
-    // TODO:
+    fetcher->_d.gradient.radial.proj.px = y * ctx->_d.gradient.radial.proj.xy + ctx->_d.gradient.radial.proj.tx;
+    fetcher->_d.gradient.radial.proj.py = y * ctx->_d.gradient.radial.proj.yy + ctx->_d.gradient.radial.proj.ty;
+    fetcher->_d.gradient.radial.proj.pz = y * ctx->_d.gradient.radial.proj.zy + ctx->_d.gradient.radial.proj.tz;
+
+    fetcher->_d.gradient.radial.proj.dx = d * ctx->_d.gradient.radial.proj.xy;
+    fetcher->_d.gradient.radial.proj.dy = d * ctx->_d.gradient.radial.proj.yy;
+    fetcher->_d.gradient.radial.proj.dz = d * ctx->_d.gradient.radial.proj.zy;
   }
 
   // ==========================================================================
@@ -252,7 +268,7 @@ struct FOG_NO_EXPORT PGradientRadial
   // ==========================================================================
 
   template<typename Accessor>
-  static void FOG_FASTCALL fetch_simple_nearest_template_prgb32_xrgb32(
+  static void FOG_FASTCALL fetch_simple_nearest(
     RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
@@ -281,8 +297,10 @@ struct FOG_NO_EXPORT PGradientRadial
       double scale = ctx->_d.gradient.radial.simple.scale;
 
       do {
-        ((uint32_t*)dst)[0] = accessor.at_d((b + Math::sqrt(Math::abs(d))) * scale);
-        dst += 4;
+        typename Accessor::Pixel c0;
+        accessor.fetchAtD(c0, (b + Math::sqrt(Math::abs(d))) * scale);
+        accessor.store(dst, c0);
+        dst += Accessor::DST_BPP;
 
         b   += b_d;
         d   += d_d;
@@ -300,7 +318,54 @@ struct FOG_NO_EXPORT PGradientRadial
   // [Fetch - Projection]
   // ==========================================================================
 
-  // TODO
+  template<typename Accessor>
+  static void FOG_FASTCALL fetch_proj_nearest(
+    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+  {
+    const RenderPatternContext* ctx = fetcher->getContext();
+    Accessor accessor(ctx);
+
+    P_FETCH_SPAN8_INIT()
+
+    P_FETCH_SPAN8_BEGIN()
+      P_FETCH_SPAN8_SET_CURRENT()
+
+      double _x = (double)x;
+      double dz = _x * ctx->_d.gradient.radial.proj.zx + fetcher->_d.gradient.radial.proj.pz;
+      double dzRecip = 1.0 / dz; 
+
+      double dx = _x * ctx->_d.gradient.radial.proj.xx + fetcher->_d.gradient.radial.proj.px;
+      double dy = _x * ctx->_d.gradient.radial.proj.yx + fetcher->_d.gradient.radial.proj.py;
+      double scale = ctx->_d.gradient.radial.simple.scale;
+
+      do {
+        double rx = dx * dzRecip - ctx->_d.gradient.radial.proj.fxOrig;
+        double ry = dy * dzRecip - ctx->_d.gradient.radial.proj.fyOrig;
+
+        dz += ctx->_d.gradient.radial.proj.zx;
+        dzRecip = 1.0 / dz;
+        dx += ctx->_d.gradient.radial.proj.xx;
+        dy += ctx->_d.gradient.radial.proj.yx;
+
+        double b = ctx->_d.gradient.radial.proj.fx * rx + 
+                   ctx->_d.gradient.radial.proj.fy * ry;
+        double d = ctx->_d.gradient.radial.proj.r2mfyfy * rx * rx + 
+                   ctx->_d.gradient.radial.proj.r2mfxfx * ry * ry +
+                   ctx->_d.gradient.radial.proj._2_fxfy * rx * ry;
+
+        typename Accessor::Pixel c0;
+        accessor.fetchAtD(c0, (b + Math::sqrt(Math::abs(d))) * scale);
+        accessor.store(dst, c0);
+        dst += Accessor::DST_BPP;
+      } while (--w);
+
+      P_FETCH_SPAN8_NEXT()
+    P_FETCH_SPAN8_END()
+
+    fetcher->_d.gradient.radial.proj.px += fetcher->_d.gradient.radial.proj.dx;
+    fetcher->_d.gradient.radial.proj.py += fetcher->_d.gradient.radial.proj.dy;
+    fetcher->_d.gradient.radial.proj.pz += fetcher->_d.gradient.radial.proj.dz;
+  }
 
   // ==========================================================================
   // [Skip]
@@ -320,7 +385,9 @@ struct FOG_NO_EXPORT PGradientRadial
   {
     double s = (double)step;
 
-    // TODO:
+    fetcher->_d.gradient.radial.proj.px += fetcher->_d.gradient.radial.proj.dx * s;
+    fetcher->_d.gradient.radial.proj.py += fetcher->_d.gradient.radial.proj.dy * s;
+    fetcher->_d.gradient.radial.proj.pz += fetcher->_d.gradient.radial.proj.dz * s;
   }
 };
 

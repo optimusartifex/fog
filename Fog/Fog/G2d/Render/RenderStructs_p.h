@@ -357,6 +357,7 @@ struct FOG_NO_EXPORT RenderPatternContext
       //! @brief Offset.
       double offset;
       double xx, yx;
+
       //! @brief 16.16 fixed point representation of @c xx.
       Fixed16x16 xx16x16;
     } simple;
@@ -372,9 +373,10 @@ struct FOG_NO_EXPORT RenderPatternContext
 
   union _GradientRadial
   {
-    struct _Simple
+    struct _Shared
     {
       double fx, fy;
+      double scale;
 
       double xx, yx;
       double xy, yy;
@@ -383,18 +385,22 @@ struct FOG_NO_EXPORT RenderPatternContext
       double r2mfxfx;
       double r2mfyfy;
       double _2_fxfy;
+    } shared;
 
+    struct _Simple : public _Shared
+    {
       double b_d;
       double d_d;
       double d_d_x;
       double d_d_y;
       double d_d_d;
-
-      double scale;
     } simple;
 
-    struct _Projection
+    struct _Projection : public _Shared
     {
+      double zx, zy;
+      double fxOrig, fyOrig;
+      double tz;
     } proj;
   };
 
@@ -526,6 +532,8 @@ struct FOG_NO_EXPORT RenderPatternFetcher
 
     struct _Projection
     {
+      double px, py, pz;
+      double dx, dy, dz;
     } proj;
   };
 

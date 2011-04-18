@@ -467,7 +467,7 @@ _Backward:
   // ==========================================================================
 
   template<typename Accessor>
-  static void FOG_FASTCALL fetch_proj_nearest_template_prgb32_xrgb32(
+  static void FOG_FASTCALL fetch_proj_nearest(
     RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
@@ -487,9 +487,11 @@ _Backward:
       double pz = fetcher->_d.gradient.linear.proj.pz + _x * xz;
 
       do {
-        ((uint32_t*)dst)[0] = accessor.at_d(off + px / pz);
-        dst += 4;
+        typename Accessor::Pixel c0;
+        accessor.fetchAtD(c0, off + px / pz);
+        accessor.store(dst, c0);
 
+        dst += Accessor::DST_BPP;
         px += xx;
         pz += xz;
       } while (--w);

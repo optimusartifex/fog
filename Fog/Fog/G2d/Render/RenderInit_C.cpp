@@ -368,15 +368,15 @@ FOG_NO_EXPORT void _g2d_render_init_c(void)
     gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientLinear::fetch_simple_nearest_reflect_prgb32_xrgb32;
     gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientLinear::fetch_simple_nearest_reflect_prgb32_xrgb32;
 
-    gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_PAD    ] = Render_C::PGradientLinear::fetch_proj_nearest_template_prgb32_xrgb32<Render_C::PGradientAccessorPad_PRGB32>;
-    gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_PAD    ] = Render_C::PGradientLinear::fetch_proj_nearest_template_prgb32_xrgb32<Render_C::PGradientAccessorPad_PRGB32>;
+    gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_PAD    ] = Render_C::PGradientLinear::fetch_proj_nearest<Render_C::PGradientAccessorPad_PRGB32>;
+    gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_PAD    ] = Render_C::PGradientLinear::fetch_proj_nearest<Render_C::PGradientAccessorPad_PRGB32>;
 
-    gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REPEAT ] = Render_C::PGradientLinear::fetch_proj_nearest_template_prgb32_xrgb32<Render_C::PGradientAccessorRepeat_PRGB32>;
-    gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REPEAT ] = Render_C::PGradientLinear::fetch_proj_nearest_template_prgb32_xrgb32<Render_C::PGradientAccessorRepeat_PRGB32>;
+    gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REPEAT ] = Render_C::PGradientLinear::fetch_proj_nearest<Render_C::PGradientAccessorRepeat_PRGB32>;
+    gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REPEAT ] = Render_C::PGradientLinear::fetch_proj_nearest<Render_C::PGradientAccessorRepeat_PRGB32>;
 
-    gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientLinear::fetch_proj_nearest_template_prgb32_xrgb32<Render_C::PGradientAccessorReflect_PRGB32>;
-    gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientLinear::fetch_proj_nearest_template_prgb32_xrgb32<Render_C::PGradientAccessorReflect_PRGB32>;
-#endif 
+    gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientLinear::fetch_proj_nearest<Render_C::PGradientAccessorReflect_PRGB32>;
+    gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientLinear::fetch_proj_nearest<Render_C::PGradientAccessorReflect_PRGB32>;
+#endif
   }
 
   // --------------------------------------------------------------------------
@@ -389,14 +389,23 @@ FOG_NO_EXPORT void _g2d_render_init_c(void)
     gradient.create[GRADIENT_TYPE_RADIAL] = Render_C::PGradientRadial::create;
 
 #if defined(FOG_RENDER_INIT_C)
-    gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_PAD    ] = Render_C::PGradientRadial::fetch_simple_nearest_template_prgb32_xrgb32<Render_C::PGradientAccessorPad_PRGB32>;
-    gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_PAD    ] = Render_C::PGradientRadial::fetch_simple_nearest_template_prgb32_xrgb32<Render_C::PGradientAccessorPad_PRGB32>;
+    gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_PAD    ] = Render_C::PGradientRadial::fetch_simple_nearest<Render_C::PGradientAccessorPad_PRGB32>;
+    gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_PAD    ] = Render_C::PGradientRadial::fetch_simple_nearest<Render_C::PGradientAccessorPad_PRGB32>;
 
-    gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REPEAT ] = Render_C::PGradientRadial::fetch_simple_nearest_template_prgb32_xrgb32<Render_C::PGradientAccessorRepeat_PRGB32>;
-    gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REPEAT ] = Render_C::PGradientRadial::fetch_simple_nearest_template_prgb32_xrgb32<Render_C::PGradientAccessorRepeat_PRGB32>;
+    gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REPEAT ] = Render_C::PGradientRadial::fetch_simple_nearest<Render_C::PGradientAccessorRepeat_PRGB32>;
+    gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REPEAT ] = Render_C::PGradientRadial::fetch_simple_nearest<Render_C::PGradientAccessorRepeat_PRGB32>;
 
-    gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientRadial::fetch_simple_nearest_template_prgb32_xrgb32<Render_C::PGradientAccessorReflect_PRGB32>;
-    gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientRadial::fetch_simple_nearest_template_prgb32_xrgb32<Render_C::PGradientAccessorReflect_PRGB32>;
+    gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientRadial::fetch_simple_nearest<Render_C::PGradientAccessorReflect_PRGB32>;
+    gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientRadial::fetch_simple_nearest<Render_C::PGradientAccessorReflect_PRGB32>;
+
+    gradient.radial.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_PAD    ] = Render_C::PGradientRadial::fetch_proj_nearest<Render_C::PGradientAccessorPad_PRGB32>;
+    gradient.radial.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_PAD    ] = Render_C::PGradientRadial::fetch_proj_nearest<Render_C::PGradientAccessorPad_PRGB32>;
+
+    gradient.radial.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REPEAT ] = Render_C::PGradientRadial::fetch_proj_nearest<Render_C::PGradientAccessorRepeat_PRGB32>;
+    gradient.radial.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REPEAT ] = Render_C::PGradientRadial::fetch_proj_nearest<Render_C::PGradientAccessorRepeat_PRGB32>;
+
+    gradient.radial.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientRadial::fetch_proj_nearest<Render_C::PGradientAccessorReflect_PRGB32>;
+    gradient.radial.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REFLECT] = Render_C::PGradientRadial::fetch_proj_nearest<Render_C::PGradientAccessorReflect_PRGB32>;
 #endif
   }
 

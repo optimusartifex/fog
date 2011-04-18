@@ -258,9 +258,12 @@ struct FOG_NO_EXPORT CConvert
         multi->blit[0] = mfFromSf;
         multi->blit[1] = dfFromMf;
         d->blitFn = pass_two;
-
-        return ERR_OK;
       }
+      return ERR_OK;
+    }
+    else
+    {
+      return ERR_RT_INVALID_ARGUMENT;
     }
   }
 

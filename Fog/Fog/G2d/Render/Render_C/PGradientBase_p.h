@@ -269,10 +269,25 @@ struct FOG_NO_EXPORT PGradientBase
 };
 
 // ============================================================================
+// [Fog::Render_C - PGradientAccessorBase_PRGB32]
+// ============================================================================
+
+struct FOG_NO_EXPORT PGradientAccessorBase_PRGB32
+{
+  typedef Face::p32 Pixel;
+  enum { DST_BPP = 4 };
+
+  FOG_INLINE void store(uint8_t* dst, const Pixel& src)
+  {
+    Face::p32Store4aNative(dst, src);
+  }
+};
+
+// ============================================================================
 // [Fog::Render_C - PGradientAccessorPad_PRGB32]
 // ============================================================================
 
-struct FOG_NO_EXPORT PGradientAccessorPad_PRGB32
+struct FOG_NO_EXPORT PGradientAccessorPad_PRGB32 : public PGradientAccessorBase_PRGB32
 {
   FOG_INLINE PGradientAccessorPad_PRGB32(const RenderPatternContext* ctx) :
     _table(reinterpret_cast<const uint32_t*>(ctx->_d.gradient.base.table)),
@@ -281,7 +296,7 @@ struct FOG_NO_EXPORT PGradientAccessorPad_PRGB32
   {
   }
 
-  FOG_INLINE uint32_t at_d(double d)
+  FOG_INLINE void fetchAtD(Pixel& dst, double d)
   {
     if (d < 0.0)
       d = 0.0;
@@ -289,7 +304,7 @@ struct FOG_NO_EXPORT PGradientAccessorPad_PRGB32
       d = _len_d;
 
     uint i = (int)d;
-    return _table[i];
+    dst = _table[i];
   }
 
   const uint32_t* _table;
@@ -301,7 +316,7 @@ struct FOG_NO_EXPORT PGradientAccessorPad_PRGB32
 // [Fog::Render_C - PGradientAccessorRepeat_PRGB32]
 // ============================================================================
 
-struct FOG_NO_EXPORT PGradientAccessorRepeat_PRGB32
+struct FOG_NO_EXPORT PGradientAccessorRepeat_PRGB32 : public PGradientAccessorBase_PRGB32
 {
   FOG_INLINE PGradientAccessorRepeat_PRGB32(const RenderPatternContext* ctx) :
     _table(reinterpret_cast<const uint32_t*>(ctx->_d.gradient.base.table)),
@@ -309,12 +324,12 @@ struct FOG_NO_EXPORT PGradientAccessorRepeat_PRGB32
   {
   }
 
-  FOG_INLINE uint32_t at_d(double d)
+  FOG_INLINE void fetchAtD(Pixel& dst, double d)
   {
     uint i = (int)d;
 
     i &= _lenMask;
-    return _table[i];
+    dst = _table[i];
   }
 
   const uint32_t* _table;
@@ -325,7 +340,7 @@ struct FOG_NO_EXPORT PGradientAccessorRepeat_PRGB32
 // [Fog::Render_C - PGradientAccessorReflect_PRGB32]
 // ============================================================================
 
-struct FOG_NO_EXPORT PGradientAccessorReflect_PRGB32
+struct FOG_NO_EXPORT PGradientAccessorReflect_PRGB32 : public PGradientAccessorBase_PRGB32
 {
   FOG_INLINE PGradientAccessorReflect_PRGB32(const RenderPatternContext* ctx) :
     _table(reinterpret_cast<const uint32_t*>(ctx->_d.gradient.base.table)),
@@ -334,13 +349,13 @@ struct FOG_NO_EXPORT PGradientAccessorReflect_PRGB32
   {
   }
 
-  FOG_INLINE uint32_t at_d(double d)
+  FOG_INLINE void fetchAtD(Pixel& dst, double d)
   {
     uint i = (int)d;
 
     i &= _lenMask2;
     if (i > (uint)_len) i ^= _lenMask2;
-    return _table[i];
+    dst = _table[i];
   }
 
   const uint32_t* _table;

@@ -1078,7 +1078,6 @@ Set(FOG_G2D_RENDER_C_HEADERS
   Fog/G2d/Render/Render_C/PGradientLinear_p.h
   Fog/G2d/Render/Render_C/PGradientRadial_p.h
   Fog/G2d/Render/Render_C/PGradientRectangular_p.h
-  Fog/G2d/Render/Render_C/PGradientTriangular_p.h
   Fog/G2d/Render/Render_C/PTextureAffine_p.h
   Fog/G2d/Render/Render_C/PTextureBase_p.h
   Fog/G2d/Render/Render_C/PTextureProjection_p.h
@@ -1116,7 +1115,6 @@ Set(FOG_G2D_SOURCE_SOURCES
   Fog/G2d/Source/RadialGradient.cpp
   Fog/G2d/Source/RectangularGradient.cpp
   Fog/G2d/Source/Texture.cpp
-  Fog/G2d/Source/TriangularGradient.cpp
 )
 
 If(FOG_OPTIMIZE_SSE2)
@@ -1147,7 +1145,6 @@ Set(FOG_G2D_SOURCE_HEADERS
   Fog/G2d/Source/RadialGradient.h
   Fog/G2d/Source/RectangularGradient.h
   Fog/G2d/Source/Texture.h
-  Fog/G2d/Source/TriangularGradient.h
 )
 
 # [Fog/G2d/Text]

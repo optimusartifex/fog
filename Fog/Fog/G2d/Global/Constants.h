@@ -1016,7 +1016,7 @@ enum GRADIENT_QUALITY
 {
   //! @brief Normal interpolation quality (good for the most purposes).
   GRADIENT_QUALITY_NORMAL = 0,
-  //! @brief High interpolation quality (slower, but precise).
+  //! @brief High interpolation quality (slower, but more precise).
   GRADIENT_QUALITY_HIGH = 1,
 
   //! @brief Default interpolation quality, @c GRADIENT_QUALITY_NORMAL.
@@ -1037,15 +1037,13 @@ enum GRADIENT_TYPE
   GRADIENT_TYPE_RADIAL = 1,
   //! @brief Conical gradient type.
   GRADIENT_TYPE_CONICAL = 2,
-  //! @brief Triangular gradient type.
-  GRADIENT_TYPE_TRIANGULAR = 3,
   //! @brief Rectangular gradient type.
-  GRADIENT_TYPE_RECTANGULAR = 4,
+  GRADIENT_TYPE_RECTANGULAR = 3,
 
   //! @brief Invalid gradient type, used internally.
-  GRADIENT_TYPE_INVALID = 5,
+  GRADIENT_TYPE_INVALID = 4,
   //! @brief Count of gradient types.
-  GRADIENT_TYPE_COUNT = 5,
+  GRADIENT_TYPE_COUNT = 4
 };
 
 // ============================================================================

@@ -24,7 +24,6 @@ GradientF::GradientF(uint32_t gradientType) :
   _pts[0].reset();
   _pts[1].reset();
   _pts[2].reset();
-  _pts[3].reset();
 }
 
 GradientF::GradientF(const GradientF& other) : 
@@ -35,7 +34,6 @@ GradientF::GradientF(const GradientF& other) :
   _pts[0] = other._pts[0];
   _pts[1] = other._pts[1];
   _pts[2] = other._pts[2];
-  _pts[3] = other._pts[3];
 }
 
 GradientF::GradientF(const GradientD& other) :
@@ -46,7 +44,6 @@ GradientF::GradientF(const GradientD& other) :
   _pts[0] = other._pts[0];
   _pts[1] = other._pts[1];
   _pts[2] = other._pts[2];
-  _pts[3] = other._pts[3];
 }
 
 GradientF::~GradientF()
@@ -62,7 +59,6 @@ err_t GradientF::setGradient(const GradientF& other)
   _pts[0] = other._pts[0];
   _pts[1] = other._pts[1];
   _pts[2] = other._pts[2];
-  _pts[3] = other._pts[3];
 
   return ERR_OK;
 }
@@ -76,7 +72,6 @@ err_t GradientF::setGradient(const GradientD& other)
   _pts[0] = other._pts[0];
   _pts[1] = other._pts[1];
   _pts[2] = other._pts[2];
-  _pts[3] = other._pts[3];
 
   return ERR_OK;
 }
@@ -90,7 +85,6 @@ void GradientF::reset()
   _pts[0].reset();
   _pts[1].reset();
   _pts[2].reset();
-  _pts[3].reset();
 }
 
 // ============================================================================
@@ -104,7 +98,6 @@ GradientD::GradientD(uint32_t gradientType) :
   _pts[0].reset();
   _pts[1].reset();
   _pts[2].reset();
-  _pts[3].reset();
 }
 
 GradientD::GradientD(const GradientF& other) : 
@@ -115,7 +108,6 @@ GradientD::GradientD(const GradientF& other) :
   _pts[0] = other._pts[0];
   _pts[1] = other._pts[1];
   _pts[2] = other._pts[2];
-  _pts[3] = other._pts[3];
 }
 
 GradientD::GradientD(const GradientD& other) : 
@@ -126,7 +118,6 @@ GradientD::GradientD(const GradientD& other) :
   _pts[0] = other._pts[0];
   _pts[1] = other._pts[1];
   _pts[2] = other._pts[2];
-  _pts[3] = other._pts[3];
 }
 
 GradientD::~GradientD()
@@ -142,7 +133,6 @@ err_t GradientD::setGradient(const GradientF& other)
   _pts[0] = other._pts[0];
   _pts[1] = other._pts[1];
   _pts[2] = other._pts[2];
-  _pts[3] = other._pts[3];
 
   return ERR_OK;
 }
@@ -156,7 +146,6 @@ err_t GradientD::setGradient(const GradientD& other)
   _pts[0] = other._pts[0];
   _pts[1] = other._pts[1];
   _pts[2] = other._pts[2];
-  _pts[3] = other._pts[3];
 
   return ERR_OK;
 }
@@ -170,7 +159,6 @@ void GradientD::reset()
   _pts[0].reset();
   _pts[1].reset();
   _pts[2].reset();
-  _pts[3].reset();
 }
 
 } // Fog namespace

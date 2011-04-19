@@ -146,7 +146,6 @@
 #include <Fog/G2d/Source/RadialGradient.h>
 #include <Fog/G2d/Source/RectangularGradient.h>
 #include <Fog/G2d/Source/Texture.h>
-#include <Fog/G2d/Source/TriangularGradient.h>
 #include <Fog/G2d/Text/TextIterator.h>
 #include <Fog/G2d/Text/TextLayout.h>
 #include <Fog/G2d/Text/TextRect.h>

@@ -26,7 +26,6 @@
 #include <Fog/G2d/Render/Render_C/PGradientLinear_p.h>
 #include <Fog/G2d/Render/Render_C/PGradientRadial_p.h>
 #include <Fog/G2d/Render/Render_C/PGradientRectangular_p.h>
-#include <Fog/G2d/Render/Render_C/PGradientTriangular_p.h>
 #include <Fog/G2d/Render/Render_C/PTextureAffine_p.h>
 #include <Fog/G2d/Render/Render_C/PTextureBase_p.h>
 #include <Fog/G2d/Render/Render_C/PTextureProjection_p.h>

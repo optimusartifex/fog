@@ -37,8 +37,6 @@
 #include <Fog/G2d/Source/RadialGradient.h>
 #include <Fog/G2d/Source/RectangularGradient.h>
 #include <Fog/G2d/Source/Texture.h>
-#include <Fog/G2d/Source/TriangularGradient.h>
-
 
 // [Dependencies - Fog::Render_C]
 #include <Fog/G2d/Render/Render_C/Access_p.h>

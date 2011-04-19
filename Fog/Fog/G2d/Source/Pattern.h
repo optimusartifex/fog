@@ -27,7 +27,6 @@
 #include <Fog/G2d/Source/RadialGradient.h>
 #include <Fog/G2d/Source/RectangularGradient.h>
 #include <Fog/G2d/Source/Texture.h>
-#include <Fog/G2d/Source/TriangularGradient.h>
 
 namespace Fog {
 
@@ -332,9 +331,6 @@ struct FOG_API PatternF
   FOG_INLINE err_t getGradient(ConicalGradientF& gr) const { return _getGradientF(GRADIENT_TYPE_CONICAL, gr); }
   FOG_INLINE err_t getGradient(ConicalGradientD& gr) const { return _getGradientD(GRADIENT_TYPE_CONICAL, gr); }
 
-  FOG_INLINE err_t getGradient(TriangularGradientF& gr) const { return _getGradientF(GRADIENT_TYPE_TRIANGULAR, gr); }
-  FOG_INLINE err_t getGradient(TriangularGradientD& gr) const { return _getGradientD(GRADIENT_TYPE_TRIANGULAR, gr); }
-
   FOG_INLINE err_t getGradient(RectangularGradientF& gr) const { return _getGradientF(GRADIENT_TYPE_RECTANGULAR, gr); }
   FOG_INLINE err_t getGradient(RectangularGradientD& gr) const { return _getGradientD(GRADIENT_TYPE_RECTANGULAR, gr); }
 
@@ -539,9 +535,6 @@ struct FOG_API PatternD
 
   FOG_INLINE err_t getGradient(ConicalGradientF& gr) const { return _getGradientF(GRADIENT_TYPE_CONICAL, gr); }
   FOG_INLINE err_t getGradient(ConicalGradientD& gr) const { return _getGradientD(GRADIENT_TYPE_CONICAL, gr); }
-
-  FOG_INLINE err_t getGradient(TriangularGradientF& gr) const { return _getGradientF(GRADIENT_TYPE_TRIANGULAR, gr); }
-  FOG_INLINE err_t getGradient(TriangularGradientD& gr) const { return _getGradientD(GRADIENT_TYPE_TRIANGULAR, gr); }
 
   FOG_INLINE err_t getGradient(RectangularGradientF& gr) const { return _getGradientF(GRADIENT_TYPE_RECTANGULAR, gr); }
   FOG_INLINE err_t getGradient(RectangularGradientD& gr) const { return _getGradientD(GRADIENT_TYPE_RECTANGULAR, gr); }

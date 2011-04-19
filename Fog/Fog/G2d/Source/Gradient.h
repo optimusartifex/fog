@@ -140,18 +140,11 @@ struct FOG_API GradientF
   //! Radial gradient:
   //! - pts[0] - Center point.
   //! - pts[1] - Focal point.
-  //! - pts[2] - Center radius.
+  //! - pts[2] - Radius (x, y).
   //!
   //! Conical gradient:
   //! - pts[0] - Center point.
-  //! - pts[1] - Angle (x),
-  //!            Sweep (y).
-  //!
-  //! Triangular gradient.
-  //! - pts[0] - First point.
-  //! - pts[1] - Second point.
-  //! - pts[2] - Third point.
-  //! - pts[3] - Focal point.
+  //! - pts[1] - Angle (x), sweep (y).
   //!
   //! Rectangular gradient.
   //! - pts[0] - First point.
@@ -270,18 +263,11 @@ struct FOG_API GradientD
   //! Radial gradient:
   //! - pts[0] - Center point.
   //! - pts[1] - Focal point.
-  //! - pts[2] - Center radius.
+  //! - pts[2] - Radius (x, y).
   //!
   //! Conical gradient:
   //! - pts[0] - Center point.
-  //! - pts[1] - Angle (x),
-  //!            Sweep (y).
-  //!
-  //! Triangular gradient.
-  //! - pts[0] - First point.
-  //! - pts[1] - Second point.
-  //! - pts[2] - Third point.
-  //! - pts[3] - Focal point.
+  //! - pts[1] - Angle (x), sweep (y).
   //!
   //! Rectangular gradient.
   //! - pts[0] - First point.

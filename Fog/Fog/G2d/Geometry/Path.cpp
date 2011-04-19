@@ -387,6 +387,8 @@ _Repeat:
             i--;
             cmd++;
             pts++;
+
+            isFirst = false;
           }
           break;
         }

@@ -12,7 +12,7 @@
 #include <Fog/G2d/Global/Api.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Painting/PainterEngine.h>
-#include <Fog/G2d/Painting/PaintParams.h>
+#include <Fog/G2d/Painting/PainterParams.h>
 
 namespace Fog {
 
@@ -328,33 +328,33 @@ struct FOG_NO_EXPORT Painter
   // --------------------------------------------------------------------------
 
   //! @brief Get the paint parameters (float).
-  FOG_INLINE err_t getPaintParams(PaintParamsF& val) const
+  FOG_INLINE err_t getsetPainterParams(PaintParamsF& val) const
   {
-    return _vtable->getParameter(*this, PAINTER_PARAMETER_PAINT_PARAMS_F, &val);
+    return _vtable->getParameter(*this, PAINTER_PARAMETER_PARAMS_F, &val);
   }
 
   //! @brief Get the paint parameters (double).
-  FOG_INLINE err_t getPaintParams(PaintParamsD& val) const
+  FOG_INLINE err_t getsetPainterParams(PaintParamsD& val) const
   {
-    return _vtable->getParameter(*this, PAINTER_PARAMETER_PAINT_PARAMS_D, &val);
+    return _vtable->getParameter(*this, PAINTER_PARAMETER_PARAMS_D, &val);
   }
 
   //! @brief Set the paint parameters (float).
-  FOG_INLINE err_t setPaintParams(const PaintParamsF& val)
+  FOG_INLINE err_t setsetPainterParams(const PaintParamsF& val)
   {
-    return _vtable->setParameter(*this, PAINTER_PARAMETER_PAINT_PARAMS_F, &val);
+    return _vtable->setParameter(*this, PAINTER_PARAMETER_PARAMS_F, &val);
   }
 
   //! @brief Set the paint parameters (double).
-  FOG_INLINE err_t setPaintParams(const PaintParamsD& val)
+  FOG_INLINE err_t setsetPainterParams(const PaintParamsD& val)
   {
-    return _vtable->setParameter(*this, PAINTER_PARAMETER_PAINT_PARAMS_D, &val);
+    return _vtable->setParameter(*this, PAINTER_PARAMETER_PARAMS_D, &val);
   }
 
   //! @brief Reset the paint parameters.
-  FOG_INLINE err_t resetPaintParams()
+  FOG_INLINE err_t resetsetPainterParams()
   {
-    return _vtable->resetParameter(*this, PAINTER_PARAMETER_PAINT_PARAMS_F);
+    return _vtable->resetParameter(*this, PAINTER_PARAMETER_PARAMS_F);
   }
 
   // --------------------------------------------------------------------------

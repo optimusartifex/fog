@@ -9,10 +9,10 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/G2d/Painting/PaintUtil.h>
+#include <Fog/G2d/Painting/PainterUtil.h>
 
 namespace Fog {
-namespace PaintUtil {
+namespace PainterUtil {
 
 void draw3dRect(Painter* p, const RectI& r, Argb32 color1, Argb32 color2, bool checked)
 {
@@ -39,5 +39,5 @@ void draw3dRect(Painter* p, const RectI& r, Argb32 color1, Argb32 color2, bool c
   p->restore();
 }
 
-} // PaintUtil namespace
+} // PainterUtil namespace
 } // Fog namespace

@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_PAINTING_PAINTPARAMS_H
-#define _FOG_G2D_PAINTING_PAINTPARAMS_H
+#ifndef _FOG_G2D_PAINTING_PAINTERPARAMS_H
+#define _FOG_G2D_PAINTING_PAINTERPARAMS_H
 
 // [Dependencies]
 #include <Fog/Core/Global/TypeInfo.h>
@@ -298,4 +298,4 @@ FOG_DECLARE_TYPEINFO(Fog::PaintParamsF, Fog::TYPEINFO_MOVABLE)
 FOG_DECLARE_TYPEINFO(Fog::PaintParamsD, Fog::TYPEINFO_MOVABLE)
 
 // [Guard]
-#endif // _FOG_G2D_PAINTING_PAINTPARAMS_H
+#endif // _FOG_G2D_PAINTING_PAINTERPARAMS_H

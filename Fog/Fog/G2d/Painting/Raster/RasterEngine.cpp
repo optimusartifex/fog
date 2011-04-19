@@ -394,7 +394,7 @@ err_t FOG_CDECL RasterPainterImpl_::getParameter(const Painter& self, uint32_t p
     // [Paint Params]
     // ------------------------------------------------------------------------
 
-    case PAINTER_PARAMETER_PAINT_PARAMS_F:
+    case PAINTER_PARAMETER_PARAMS_F:
     {
       PaintParamsF& params = VALUE_M(PaintParamsF);
       
@@ -424,7 +424,7 @@ err_t FOG_CDECL RasterPainterImpl_::getParameter(const Painter& self, uint32_t p
       return ERR_OK;
     }
 
-    case PAINTER_PARAMETER_PAINT_PARAMS_D:
+    case PAINTER_PARAMETER_PARAMS_D:
     {
       PaintParamsD& params = VALUE_M(PaintParamsD);
 
@@ -795,7 +795,7 @@ err_t FOG_CDECL RasterPainterImpl_::setParameter(Painter& self, uint32_t paramet
     // [Paint Params]
     // ------------------------------------------------------------------------
 
-    case PAINTER_PARAMETER_PAINT_PARAMS_F:
+    case PAINTER_PARAMETER_PARAMS_F:
     {
       const PaintParamsF& v = VALUE_C(PaintParamsF);
 
@@ -832,7 +832,7 @@ err_t FOG_CDECL RasterPainterImpl_::setParameter(Painter& self, uint32_t paramet
       return ERR_OK;
     }
 
-    case PAINTER_PARAMETER_PAINT_PARAMS_D:
+    case PAINTER_PARAMETER_PARAMS_D:
     {
       const PaintParamsD& v = VALUE_C(PaintParamsD);
       float opacity = (float)v._opacity;
@@ -1428,8 +1428,8 @@ err_t FOG_CDECL RasterPainterImpl_::resetParameter(Painter& self, uint32_t param
     // [Paint Params]
     // ------------------------------------------------------------------------
 
-    case PAINTER_PARAMETER_PAINT_PARAMS_F:
-    case PAINTER_PARAMETER_PAINT_PARAMS_D:
+    case PAINTER_PARAMETER_PARAMS_F:
+    case PAINTER_PARAMETER_PARAMS_D:
     {
       // TODO:
       return ERR_OK;

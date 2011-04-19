@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/G2d/Painting/PaintParams.h>
+#include <Fog/G2d/Painting/PainterParams.h>
 
 namespace Fog {
 } // Fog namespace

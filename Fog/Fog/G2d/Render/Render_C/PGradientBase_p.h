@@ -269,15 +269,15 @@ struct FOG_NO_EXPORT PGradientBase
 };
 
 // ============================================================================
-// [Fog::Render_C - PGradientAccessorBase_PRGB32]
+// [Fog::Render_C - PGradientAccessor_PRGB32_Base]
 // ============================================================================
 
-struct FOG_NO_EXPORT PGradientAccessorBase_PRGB32
+struct FOG_NO_EXPORT PGradientAccessor_PRGB32_Base
 {
   typedef Face::p32 Pixel;
   enum { DST_BPP = 4 };
 
-  FOG_INLINE PGradientAccessorBase_PRGB32(const RenderPatternContext* ctx) :
+  FOG_INLINE PGradientAccessor_PRGB32_Base(const RenderPatternContext* ctx) :
     _table(reinterpret_cast<const uint32_t*>(ctx->_d.gradient.base.table))
   {
   }
@@ -300,13 +300,13 @@ struct FOG_NO_EXPORT PGradientAccessorBase_PRGB32
 };
 
 // ============================================================================
-// [Fog::Render_C - PGradientAccessorPad_PRGB32]
+// [Fog::Render_C - PGradientAccessor_PRGB32_Pad]
 // ============================================================================
 
-struct FOG_NO_EXPORT PGradientAccessorPad_PRGB32 : public PGradientAccessorBase_PRGB32
+struct FOG_NO_EXPORT PGradientAccessor_PRGB32_Pad : public PGradientAccessor_PRGB32_Base
 {
-  FOG_INLINE PGradientAccessorPad_PRGB32(const RenderPatternContext* ctx) :
-    PGradientAccessorBase_PRGB32(ctx),
+  FOG_INLINE PGradientAccessor_PRGB32_Pad(const RenderPatternContext* ctx) :
+    PGradientAccessor_PRGB32_Base(ctx),
     _len(ctx->_d.gradient.base.len),
     _len_d(ctx->_d.gradient.base.len)
   {
@@ -330,13 +330,13 @@ struct FOG_NO_EXPORT PGradientAccessorPad_PRGB32 : public PGradientAccessorBase_
 };
 
 // ============================================================================
-// [Fog::Render_C - PGradientAccessorRepeat_PRGB32]
+// [Fog::Render_C - PGradientAccessor_PRGB32_Repeat]
 // ============================================================================
 
-struct FOG_NO_EXPORT PGradientAccessorRepeat_PRGB32 : public PGradientAccessorBase_PRGB32
+struct FOG_NO_EXPORT PGradientAccessor_PRGB32_Repeat : public PGradientAccessor_PRGB32_Base
 {
-  FOG_INLINE PGradientAccessorRepeat_PRGB32(const RenderPatternContext* ctx) :
-    PGradientAccessorBase_PRGB32(ctx),
+  FOG_INLINE PGradientAccessor_PRGB32_Repeat(const RenderPatternContext* ctx) :
+    PGradientAccessor_PRGB32_Base(ctx),
     _lenMask(ctx->_d.gradient.base.len - 1)
   {
   }
@@ -354,13 +354,13 @@ struct FOG_NO_EXPORT PGradientAccessorRepeat_PRGB32 : public PGradientAccessorBa
 };
 
 // ============================================================================
-// [Fog::Render_C - PGradientAccessorReflect_PRGB32]
+// [Fog::Render_C - PGradientAccessor_PRGB32_Reflect]
 // ============================================================================
 
-struct FOG_NO_EXPORT PGradientAccessorReflect_PRGB32 : public PGradientAccessorBase_PRGB32
+struct FOG_NO_EXPORT PGradientAccessor_PRGB32_Reflect : public PGradientAccessor_PRGB32_Base
 {
-  FOG_INLINE PGradientAccessorReflect_PRGB32(const RenderPatternContext* ctx) :
-    PGradientAccessorBase_PRGB32(ctx),
+  FOG_INLINE PGradientAccessor_PRGB32_Reflect(const RenderPatternContext* ctx) :
+    PGradientAccessor_PRGB32_Base(ctx),
     _len(ctx->_d.gradient.base.len),
     _lenMask2(ctx->_d.gradient.base.len * 2 - 1)
   {

@@ -40,7 +40,7 @@ Include(FindThreads)
 Include_Directories(${FOG_DIR})
 
 # =============================================================================
-# [OS Detection]
+# [OS - Detect]
 # =============================================================================
 
 If(WIN32)
@@ -52,7 +52,7 @@ Else()
 EndIf()
 
 # =============================================================================
-# [C++ Compiler - Clear all flags]
+# [C++ Compiler - Clear Flags]
 # =============================================================================
 
 Set(FOG_CFLAGS_OPTIMIZE "")
@@ -135,7 +135,7 @@ If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   Set(FOG_CFLAGS_SSE2 "${FOG_CFLAGS_OPTIMIZE} -msse2")
   Set(FOG_CFLAGS_SSE3 "${FOG_CFLAGS_OPTIMIZE} -msse3")
   Set(FOG_CFLAGS_SSSE3 "${FOG_CFLAGS_OPTIMIZE} -mssse3")
-EndIf(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+EndIf()
 
 # =============================================================================
 # [C++ Compiler - MSVC Support]
@@ -151,11 +151,11 @@ If(MSVC)
   Set(FOG_CFLAGS_SSE2 "${FOG_CFLAGS_OPTIMIZE} /arch:SSE2")
   Set(FOG_CFLAGS_SSE3 "${FOG_CFLAGS_OPTIMIZE} /arch:SSE2")
   Set(FOG_CFLAGS_SSSE3 "${FOG_CFLAGS_OPTIMIZE} /arch:SSE2")
-EndIf(MSVC)
+EndIf()
 
 If(${CMAKE_BUILD_TYPE} MATCHES "Debug")
   Set(FOG_DEBUG TRUE)
-EndIf(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+EndIf()
 
 # =============================================================================
 # [C++ Compiler - Windows Specific Flags]
@@ -164,10 +164,10 @@ EndIf(${CMAKE_BUILD_TYPE} MATCHES "Debug")
 # Always use UNICODE when building for Windows.
 If(FOG_OS_WINDOWS)
   Add_Definitions(-D_UNICODE)
-EndIf(FOG_OS_WINDOWS)
+EndIf()
 
 # =============================================================================
-# [Endianness]
+# [Architecture - Endianness]
 # =============================================================================
 
 Include(TestBigEndian)
@@ -175,12 +175,12 @@ Test_Big_Endian(WORDS_BIGENDIAN)
 
 If(WORDS_BIGENDIAN)
   Set(FOG_BYTE_ORDER 0)
-Else(WORDS_BIGENDIAN)
+Else()
   Set(FOG_BYTE_ORDER 1)
-EndIf(WORDS_BIGENDIAN)
+EndIf()
 
 # =============================================================================
-# [Size of POD types]
+# [Architecture - Size of POD types]
 # =============================================================================
 
 Check_Type_Size("void*" FOG_SIZEOF_VOID)
@@ -191,33 +191,7 @@ Check_Type_Size("wchar_t" FOG_SIZEOF_WCHAR_T)
 Set(CMAKE_EXTRA_INCLUDE_FILES)
 
 # =============================================================================
-# [Presence of headers]
-# =============================================================================
-
-If(NOT FOG_HAVE_FLOAT_H)
-  Check_Include_Files(float.h FOG_HAVE_FLOAT_H)
-EndIf(NOT FOG_HAVE_FLOAT_H)
-
-If(NOT FOG_HAVE_LIMITS_H)
-  Check_Include_Files(limits.h FOG_HAVE_LIMITS_H)
-EndIf(NOT FOG_HAVE_LIMITS_H)
-
-If(NOT FOG_HAVE_STDINT_H)
-  Check_Include_Files(stdint.h FOG_HAVE_STDINT_H)
-EndIf(NOT FOG_HAVE_STDINT_H)
-
-If(UNIX)
-  If(NOT FOG_HAVE_UNISTD_H)
-    Check_Include_Files(unistd.h FOG_HAVE_UNISTD_H)
-  EndIf(NOT FOG_HAVE_UNISTD_H)
-
-  If(NOT FOG_HAVE_FENV_H)
-    Check_Include_Files(fenv.h FOG_HAVE_FENV_H)
-  EndIf(NOT FOG_HAVE_FENV_H)
-EndIf(UNIX)
-
-# =============================================================================
-# [Optimizations]
+# [Architecture - Enable/Disable Optimizations]
 # =============================================================================
 
 # Disable MMX/3dNow while building for AMD64.
@@ -231,16 +205,62 @@ Set(FOG_OPTIMIZE_SSE2 TRUE)
 Set(FOG_OPTIMIZE_SSSE3 TRUE)
 
 # =============================================================================
-# [Fog - Platform Specific]
+# [Environment - Header Files]
+# =============================================================================
+
+If(NOT FOG_HAVE_FLOAT_H)
+  Check_Include_Files(float.h FOG_HAVE_FLOAT_H)
+EndIf()
+
+If(NOT FOG_HAVE_LIMITS_H)
+  Check_Include_Files(limits.h FOG_HAVE_LIMITS_H)
+EndIf()
+
+If(NOT FOG_HAVE_STDINT_H)
+  Check_Include_Files(stdint.h FOG_HAVE_STDINT_H)
+EndIf()
+
+If(UNIX)
+  If(NOT FOG_HAVE_UNISTD_H)
+    Check_Include_Files(unistd.h FOG_HAVE_UNISTD_H)
+  EndIf()
+
+  If(NOT FOG_HAVE_FENV_H)
+    Check_Include_Files(fenv.h FOG_HAVE_FENV_H)
+  EndIf()
+EndIf()
+
+# =============================================================================
+# [OS - Libraries]
 # =============================================================================
 
 If(FOG_OS_WINDOWS)
   List(APPEND FOG_LIBRARIES user32 gdi32 advapi32 winmm uuid)
-EndIf(FOG_OS_WINDOWS)
+EndIf()
 
 If(FOG_OS_MAC)
   List(APPEND FOG_LIBRARIES "-framework Cocoa")
-EndIf(FOG_OS_MAC)
+EndIf()
+
+If(FOG_OS_POSIX)
+  # librt is Linux specific library (not available in BSD/MAC).
+  If(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    List(APPEND FOG_LIBRARIES "-lrt")
+  EndIf()
+
+  # libdl for dynamic-library opening.
+  Check_Include_Files(dlfcn.h FOG_HAVE_DLFCN_H)
+  If(FOG_HAVE_DLFCN_H)
+    Check_Library_Exists(dl dlopen "" FOG_LIBDL_EXISTS)
+    If(FOG_LIBDL_EXISTS)
+      List(APPEND FOG_LIBRARIES "-ldl")
+    EndIf()
+  EndIf()
+EndIf()
+
+If(CMAKE_THREAD_LIBS_INIT)
+  List(APPEND FOG_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
+EndIf()
 
 # =============================================================================
 # [Fog/Core - Files]
@@ -338,11 +358,6 @@ Set(FOG_CORE_DATETIME_HEADERS
   Fog/Core/DateTime/TimeTicks.h
 )
 
-# Library rt is Linux specific (not included in BSD/MAC).
-If(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-  List(APPEND FOG_LIBRARIES "-lrt")
-EndIf(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-
 # [Fog/Core/Face]
 Set(FOG_CORE_FACE_SOURCES
   Fog/Core/Face/Face_Constants.cpp
@@ -423,17 +438,6 @@ Set(FOG_CORE_LIBRARY_SOURCES
 Set(FOG_CORE_LIBRARY_HEADERS
   Fog/Core/Library/Library.h
 )
-
-If(FOG_OS_POSIX)
-  # Unix libdl 
-  Check_Include_Files(dlfcn.h FOG_HAVE_DLFCN_H)
-  If(FOG_HAVE_DLFCN_H)
-    Check_Library_Exists(dl dlopen "" FOG_LIBDL_EXISTS)
-    If(FOG_LIBDL_EXISTS)
-      List(APPEND FOG_LIBRARIES "-ldl")
-    EndIf(FOG_LIBDL_EXISTS)
-  EndIf(FOG_HAVE_DLFCN_H)
-EndIf(FOG_OS_POSIX)
 
 # [Fog/Core/Math]
 Set(FOG_CORE_MATH_SOURCES
@@ -550,10 +554,6 @@ Set(FOG_CORE_THREADING_HEADERS
   Fog/Core/Threading/ThreadPool.h
 )
 
-If(CMAKE_THREAD_LIBS_INIT)
-  List(APPEND FOG_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
-EndIf(CMAKE_THREAD_LIBS_INIT)
-
 # [Fog/Core/Tools]
 Set(FOG_CORE_TOOLS_SOURCES
   Fog/Core/Tools/Byte.cpp
@@ -598,16 +598,6 @@ Set(FOG_CORE_TOOLS_HEADERS
   Fog/Core/Tools/TextCodec.h
 )
 
-# [Fog/Core/Mac]
-If(FOG_OS_MAC)
-  Set(FOG_CORE_MAC_SOURCES 
-    Fog/Core/Mac/MacUtil.mm
-  )
-  Set(FOG_CORE_MAC_HEADERS
-    Fog/Core/Mac/MacUtil.h
-  )
-EndIf(FOG_OS_MAC)
-
 # [Fog/Core/Win]
 If(FOG_OS_WINDOWS)
   Set(FOG_CORE_WIN_SOURCES 
@@ -624,7 +614,17 @@ If(FOG_OS_WINDOWS)
     Fog/Core/Win/WinUtil_p.h
     Fog/Core/Win/WinUxThemeLibrary.h
   )
-EndIf(FOG_OS_WINDOWS)
+EndIf()
+
+# [Fog/Core/Mac]
+If(FOG_OS_MAC)
+  Set(FOG_CORE_MAC_SOURCES 
+    Fog/Core/Mac/MacUtil.mm
+  )
+  Set(FOG_CORE_MAC_HEADERS
+    Fog/Core/Mac/MacUtil.h
+  )
+EndIf()
 
 # Source groups.
 Source_Group("Core"                 FILES ${FOG_CORE_LIB_SOURCES}             ${FOG_CORE_LIB_HEADERS}            )
@@ -646,13 +646,13 @@ Source_Group("Core/System"          FILES ${FOG_CORE_SYSTEM_SOURCES}          ${
 Source_Group("Core/Threading"       FILES ${FOG_CORE_THREADING_SOURCES}       ${FOG_CORE_THREADING_HEADERS}      )
 Source_Group("Core/Tools"           FILES ${FOG_CORE_TOOLS_SOURCES}           ${FOG_CORE_TOOLS_HEADERS}          )
 
-If(FOG_OS_MAC)
-Source_Group("Core/Mac"             FILES ${FOG_CORE_MAC_SOURCES}             ${FOG_CORE_MAC_HEADERS}            )
-EndIf(FOG_OS_MAC)
-
 If(FOG_OS_WINDOWS)
 Source_Group("Core/Win"             FILES ${FOG_CORE_WIN_SOURCES}             ${FOG_CORE_WIN_HEADERS}            )
-EndIf(FOG_OS_WINDOWS)
+EndIf()
+
+If(FOG_OS_MAC)
+Source_Group("Core/Mac"             FILES ${FOG_CORE_MAC_SOURCES}             ${FOG_CORE_MAC_HEADERS}            )
+EndIf()
 
 # =============================================================================
 # [Fog/G2d - Files]
@@ -696,29 +696,29 @@ Else()
   If(HAVE_FREETYPE)
     Exec_Program(freetype-config ARGS --cflags OUTPUT_VARIABLE FREETYPE_CONFIG_OUT RETURN_VALUE FREETYPE_CONFIG_RET)
     Set(FOG_FONT_FREETYPE TRUE)
-  EndIf(HAVE_FREETYPE)
+  EndIf()
 
   If(NOT FOG_HAVE_FONTCONFIG)
     Check_Include_Files(fontconfig/fontconfig.h FOG_HAVE_FONTCONFIG)
-  EndIf(NOT FOG_HAVE_FONTCONFIG)
+  EndIf()
 EndIf()
 
 If(FOG_FONT_WINDOWS)
   List(APPEND FOG_G2D_FONT_SOURCES Fog/G2d/Font/WinFontEngine.cpp)
   List(APPEND FOG_G2D_FONT_HEADERS Fog/G2d/Font/WinFontEngine.h)
-EndIf(FOG_FONT_WINDOWS)
-
-If(FOG_FONT_MAC)
-  List(APPEND FOG_G2D_FONT_SOURCES Fog/G2d/Font/MacFontEngine.mm)
-  List(APPEND FOG_G2D_FONT_HEADERS Fog/G2d/Font/MacFontEngine.h)
-EndIf(FOG_FONT_MAC)
+EndIf()
 
 If(FOG_FONT_FREETYPE)
   Set_Source_Files_Properties(
     Fog/G2d/Font/FTFontEngine.cpp
     PROPERTIES COMPILE_FLAGS "${FREETYPE_CONFIG_OUT}"
   )
-EndIf(FOG_FONT_FREETYPE)
+EndIf()
+
+If(FOG_FONT_MAC)
+  List(APPEND FOG_G2D_FONT_SOURCES Fog/G2d/Font/MacFontEngine.mm)
+  List(APPEND FOG_G2D_FONT_HEADERS Fog/G2d/Font/MacFontEngine.h)
+EndIf()
 
 # [Fog/G2d/Geometry]
 Set(FOG_G2D_GEOMETRY_SOURCES
@@ -785,7 +785,7 @@ If(FOG_OPTIMIZE_3DNOW)
     Fog/G2d/Geometry/Transform_3dNow.cpp
     PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_3DNOW}"
   )
-EndIf(FOG_OPTIMIZE_3DNOW)
+EndIf()
 
 If(FOG_OPTIMIZE_SSE)
   List(APPEND FOG_G2D_GEOMETRY_SOURCES
@@ -797,7 +797,7 @@ If(FOG_OPTIMIZE_SSE)
     Fog/G2d/Geometry/Transform_SSE.cpp
     PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_SSE}"
   )
-EndIf(FOG_OPTIMIZE_SSE)
+EndIf()
 
 If(FOG_OPTIMIZE_SSE2)
   List(APPEND FOG_G2D_GEOMETRY_SOURCES
@@ -809,7 +809,7 @@ If(FOG_OPTIMIZE_SSE2)
     Fog/G2d/Geometry/Transform_SSE2.cpp
     PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_SSE2}"
   )
-EndIf(FOG_OPTIMIZE_SSE2)
+EndIf()
 
 # [Fog/G2d/Global]
 Set(FOG_G2D_GLOBAL_SOURCES
@@ -897,44 +897,34 @@ Set(FOG_G2D_IMAGING_EFFECTS_HEADERS
 If(FOG_OS_WINDOWS)
   List(APPEND FOG_G2D_IMAGING_SOURCES Fog/G2d/Imaging/WinImage.cpp)
   List(APPEND FOG_G2D_IMAGING_HEADERS Fog/G2d/Imaging/WinImage_p.h)
-EndIf(FOG_OS_WINDOWS)
+EndIf()
 
 If(NOT FOG_HAVE_LIBJPEG)
   Check_Include_Files(jconfig.h FOG_HAVE_LIBJPEG)
-EndIf(NOT FOG_HAVE_LIBJPEG)
+EndIf()
 
 If(NOT FOG_HAVE_LIBPNG)
   Check_Include_Files(png.h FOG_HAVE_LIBPNG)
-EndIf(NOT FOG_HAVE_LIBPNG)
+EndIf()
 
 Set_Source_Files_Properties(
   Fog/G2d/Imaging/Image.cpp
   PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}"
 )
 
-# [Fog/G2d/Mac]
-If(FOG_OS_MAC)
-  Set(FOG_G2D_MAC_SOURCES 
-    Fog/G2d/Mac/MacUtil.mm
-  )
-  Set(FOG_G2D_MAC_HEADERS
-    Fog/G2d/Mac/MacUtil.h
-  )
-EndIf(FOG_OS_MAC)
-
 # [Fog/G2d/Painting]
 Set(FOG_G2D_PAINTING_SOURCES
   Fog/G2d/Painting/Painter.cpp
   Fog/G2d/Painting/PainterEngine.cpp
-  Fog/G2d/Painting/PaintParams.cpp
-  Fog/G2d/Painting/PaintUtil.cpp
+  Fog/G2d/Painting/PainterParams.cpp
+  Fog/G2d/Painting/PainterUtil.cpp
 )
 
 Set(FOG_G2D_PAINTING_HEADERS
   Fog/G2d/Painting/Painter.h
   Fog/G2d/Painting/PainterEngine.h
-  Fog/G2d/Painting/PaintParams.h
-  Fog/G2d/Painting/PaintUtil.h
+  Fog/G2d/Painting/PainterParams.h
+  Fog/G2d/Painting/PainterUtil.h
 )
 
 Set(FOG_G2D_PAINTING_NULL_SOURCES
@@ -971,7 +961,6 @@ Set(FOG_G2D_PAINTING_RASTER_HEADERS
 )
 
 # [Fog/G2d/Rasterizer]
-
 Set(FOG_G2D_RASTERIZER_SOURCES
   Fog/G2d/Rasterizer/Rasterizer.cpp
   Fog/G2d/Rasterizer/Rasterizer_Line.cpp
@@ -1184,6 +1173,16 @@ Set_Source_Files_Properties(
   PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}"
 )
 
+# [Fog/G2d/Mac]
+If(FOG_OS_MAC)
+  Set(FOG_G2D_MAC_SOURCES 
+    Fog/G2d/Mac/MacUtil.mm
+  )
+  Set(FOG_G2D_MAC_HEADERS
+    Fog/G2d/Mac/MacUtil.h
+  )
+EndIf()
+
 # Source groups.
 Source_Group("G2d"                  FILES ${FOG_G2D_LIB_SOURCES}              ${FOG_G2D_LIB_HEADERS}             )
 Source_Group("G2d/Font"             FILES ${FOG_G2D_FONT_SOURCES}             ${FOG_G2D_FONT_HEADERS}            )
@@ -1207,7 +1206,7 @@ Source_Group("G2d/Tools"            FILES ${FOG_G2D_TOOLS_SOURCES}            ${
 
 If(FOG_OS_MAC)
 Source_Group("G2d/Mac"              FILES ${FOG_G2D_MAC_SOURCES}              ${FOG_G2D_MAC_HEADERS}             )
-EndIf(FOG_OS_MAC)
+EndIf()
 
 # =============================================================================
 # [Fog-Gui]
@@ -1736,25 +1735,25 @@ Set(FOG_ALL_HEADERS
   ${FOG_XML_TOOLS_HEADERS}
 )
 
-If(FOG_OS_MAC)
-  List(APPEND FOG_ALL_SOURCES ${FOG_CORE_MAC_SOURCES})
-  List(APPEND FOG_ALL_HEADERS ${FOG_CORE_MAC_HEADERS})
-EndIf(FOG_OS_MAC)
-
-If(FOG_GUI_MAC)
-  List(APPEND FOG_ALL_SOURCES ${FOG_GUI_ENGINE_MAC_SOURCES})
-  List(APPEND FOG_ALL_HEADERS ${FOG_GUI_ENGINE_MAC_HEADERS})
-EndIf(FOG_GUI_MAC)
-
 If(FOG_OS_WINDOWS)
   List(APPEND FOG_ALL_SOURCES ${FOG_CORE_WIN_SOURCES})
   List(APPEND FOG_ALL_HEADERS ${FOG_CORE_WIN_HEADERS})
-EndIf(FOG_OS_WINDOWS)
+EndIf()
+
+If(FOG_OS_MAC)
+  List(APPEND FOG_ALL_SOURCES ${FOG_CORE_MAC_SOURCES})
+  List(APPEND FOG_ALL_HEADERS ${FOG_CORE_MAC_HEADERS})
+EndIf()
 
 If(FOG_GUI_WINDOWS)
   List(APPEND FOG_ALL_SOURCES ${FOG_GUI_ENGINE_WIN_SOURCES})
   List(APPEND FOG_ALL_HEADERS ${FOG_GUI_ENGINE_WIN_HEADERS})
-EndIf(FOG_GUI_WINDOWS)
+EndIf()
+
+If(FOG_GUI_MAC)
+  List(APPEND FOG_ALL_SOURCES ${FOG_GUI_ENGINE_MAC_SOURCES})
+  List(APPEND FOG_ALL_HEADERS ${FOG_GUI_ENGINE_MAC_HEADERS})
+EndIf()
 
 # Write CMAKE_ #defines into Fog/Core/Config/Defs/ConfigCMake.h files
 Configure_File(
@@ -1770,13 +1769,13 @@ ForEach(i ${FOG_ALL_HEADERS})
   Get_Filename_Component(name ${i} NAME)
   If(NOT "${name}" MATCHES "_p.h$")
     Install(FILES ${i} DESTINATION "include/${path}")
-  EndIf(NOT "${name}" MATCHES "_p.h$")
+  EndIf()
 EndForEach(i)
 
 # TODO: Quick hack, do not open freetype dynamically, we can link to it.
 If(NOT WIN32)
   Include_Directories(/usr/include/freetype2)
-EndIf(NOT WIN32)
+EndIf()
 
 # Build Fog library.
 Add_Library(Fog SHARED ${FOG_ALL_SOURCES} ${FOG_ALL_HEADERS})
@@ -1790,7 +1789,7 @@ If(FOG_GUI_X11 AND FOG_BUILD_GUI_X11)
     ${FOG_GUI_ENGINE_X11_HEADERS})
   Target_Link_Libraries(Fog_Gui_X11 Fog ${FOG_LIBRARIES})
   Install(TARGETS Fog_Gui_X11 DESTINATION lib)
-EndIf(FOG_GUI_X11 AND FOG_BUILD_GUI_X11)
+EndIf()
 
 # Build examples.
 If(FOG_BUILD_EXAMPLES)
@@ -1802,4 +1801,4 @@ If(FOG_BUILD_EXAMPLES)
     Add_Executable(${file} WIN32 MACOSX_BUNDLE Examples/${file})
     Target_Link_Libraries(${file} Fog ${FOG_LIBRARIES})
   EndForEach(file)
-EndIf(FOG_BUILD_EXAMPLES)
+EndIf()

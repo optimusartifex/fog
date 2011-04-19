@@ -1789,8 +1789,8 @@ enum PAINTER_PARAMETER
   // [Paint Params]
   // --------------------------------------------------------------------------
 
-  PAINTER_PARAMETER_PAINT_PARAMS_F = 7,
-  PAINTER_PARAMETER_PAINT_PARAMS_D = 8,
+  PAINTER_PARAMETER_PARAMS_F = 7,
+  PAINTER_PARAMETER_PARAMS_D = 8,
 
   // --------------------------------------------------------------------------
   // [Paint Hints]

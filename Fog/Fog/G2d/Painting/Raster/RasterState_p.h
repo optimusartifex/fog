@@ -8,7 +8,7 @@
 #define _FOG_G2D_PAINTING_RASTER_RASTERSTATE_P_H
 
 // [Dependencies]
-#include <Fog/G2d/Painting/PaintParams.h>
+#include <Fog/G2d/Painting/PainterParams.h>
 #include <Fog/G2d/Painting/Raster/RasterConstants_p.h>
 #include <Fog/G2d/Painting/Raster/RasterStructs_p.h>
 #include <Fog/G2d/Render/RenderStructs_p.h>

@@ -15,7 +15,7 @@
 #include <Fog/G2d/Geometry/Transform.h>
 #include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Imaging/Image.h>
-#include <Fog/G2d/Painting/PaintParams.h>
+#include <Fog/G2d/Painting/PainterParams.h>
 #include <Fog/G2d/Painting/Raster/RasterFuncs_p.h>
 #include <Fog/G2d/Painting/Raster/RasterRender_p.h>
 #include <Fog/G2d/Painting/Raster/RasterStructs_p.h>

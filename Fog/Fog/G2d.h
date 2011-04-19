@@ -127,8 +127,8 @@
 #include <Fog/G2d/Imaging/Effects/SharpenEffect.h>
 #include <Fog/G2d/Painting/Painter.h>
 #include <Fog/G2d/Painting/PainterEngine.h>
-#include <Fog/G2d/Painting/PaintParams.h>
-#include <Fog/G2d/Painting/PaintUtil.h>
+#include <Fog/G2d/Painting/PainterParams.h>
+#include <Fog/G2d/Painting/PainterUtil.h>
 #include <Fog/G2d/Shader/Shader.h>
 #include <Fog/G2d/Source/Acmyk.h>
 #include <Fog/G2d/Source/Ahsl.h>

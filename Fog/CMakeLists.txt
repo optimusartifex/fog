@@ -1788,8 +1788,8 @@ EndForEach()
 
 # Write CMAKE_ #defines into Fog/Core/Config/Defs/ConfigCMake.h files
 Configure_File(
-  ${CMAKE_CURRENT_SOURCE_DIR}/${FOG_DIR}/Fog/Core/Config/Defs/ConfigCMake.h.cmake
-  ${CMAKE_CURRENT_SOURCE_DIR}/${FOG_DIR}/Fog/Core/Config/Defs/ConfigCMake.h)
+  ${CMAKE_CURRENT_LIST_DIR}/Fog/Core/Config/Defs/ConfigCMake.h.cmake
+  ${CMAKE_CURRENT_LIST_DIR}/Fog/Core/Config/Defs/ConfigCMake.h)
 
 # =============================================================================
 # [Setup - Fix]

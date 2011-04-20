@@ -14,7 +14,7 @@
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Memory.h>
 #include <Fog/G2d/Global/Constants.h>
-#include <Fog/G2d/Global/Init_p.h>
+#include <Fog/G2d/Global/Init_G2d_p.h>
 #include <Fog/G2d/Imaging/ImagePalette.h>
 #include <Fog/G2d/Render/RenderApi_p.h>
 #include <Fog/G2d/Render/RenderConstants_p.h>

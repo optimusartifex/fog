@@ -5,7 +5,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Init_Core_p.h>
 #include <Fog/Core/Global/Static.h>
 #include <Fog/Core/Threading/Lock.h>
 

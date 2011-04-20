@@ -12,7 +12,7 @@
 #include <Fog/Core/Collection/Hash.h>
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Init_Core_p.h>
 #include <Fog/Core/Memory/Memory.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringUtil.h>

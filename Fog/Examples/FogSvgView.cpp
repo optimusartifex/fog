@@ -219,7 +219,10 @@ FOG_GUI_MAIN()
     //fileName = Ascii8("C:/my/svg/path-lines-BE-01.svg");
     //fileName = Ascii8("C:/my/svg/gradPatt-linearGr-BE-01.svg");
     //fileName = Ascii8("C:/my/svg/brown_fish_01.svg");
-    fileName = Ascii8("C:/my/svg/pattern.svg");
+    //fileName = Ascii8("C:/my/svg/pattern.svg");
+    //fileName = Ascii8("C:/my/svg/paint-fill-BE-01.svg");
+
+    fileName = Ascii8("C:/my/svg/biswajyotim_Jug.svg");
   }
 
   MyWindow window;

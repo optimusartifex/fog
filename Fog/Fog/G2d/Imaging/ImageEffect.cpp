@@ -4,7 +4,7 @@
 // MIT, See COPYING file in package
 
 // [Dependencies]
-#include <Fog/G2d/Global/Init_p.h>
+#include <Fog/G2d/Global/Init_G2d_p.h>
 #include <Fog/G2d/Imaging/ImageEffect.h>
 
 namespace Fog {

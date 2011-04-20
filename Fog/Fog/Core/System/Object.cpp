@@ -14,7 +14,7 @@
 #include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Data/Value.h>
 #include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Init_Core_p.h>
 #include <Fog/Core/Global/Static.h>
 #include <Fog/Core/System/Event.h>
 #include <Fog/Core/System/EventLoop.h>

@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Init_Core_p.h>
 #include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>

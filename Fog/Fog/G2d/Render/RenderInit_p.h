@@ -8,7 +8,7 @@
 #define _FOG_G2D_RENDER_RENDERINIT_P_H
 
 // [Dependencies]
-#include <Fog/G2d/Global/Init_p.h>
+#include <Fog/G2d/Global/Init_G2d_p.h>
 
 namespace Fog {
 

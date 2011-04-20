@@ -53,6 +53,7 @@ err_t SvgLinearGradientElement::onApplyPattern(SvgRenderContext* context, SvgEle
   // SVG TODO: Linear Gradient.
 
   LinearGradientF gradient;
+  TransformF tr;
 
   // Set spread method.
   if (a_spreadMethod.isAssigned()) gradient.setGradientSpread(a_spreadMethod.getEnumValue());
@@ -68,10 +69,11 @@ err_t SvgLinearGradientElement::onApplyPattern(SvgRenderContext* context, SvgEle
     float x2 = a_x2.isAssigned() ? context->translateCoord(a_x2.getCoord()) : 1.0f;
     float y2 = a_y2.isAssigned() ? context->translateCoord(a_y2.getCoord()) : 0.0f;
 
-    x1 = bbox.x + bbox.w * x1;
-    y1 = bbox.y + bbox.h * y1;
-    x2 = bbox.x + bbox.w * x2;
-    y2 = bbox.y + bbox.h * y2;
+    tr._type = TRANSFORM_TYPE_SCALING;
+    tr._00 = bbox.w;
+    tr._11 = bbox.h;
+    tr._20 = bbox.x;
+    tr._21 = bbox.y;
 
     gradient.setStart(PointF(x1, y1));
     gradient.setEnd(PointF(x2, y2));
@@ -96,9 +98,12 @@ err_t SvgLinearGradientElement::onApplyPattern(SvgRenderContext* context, SvgEle
   // Add color stops.
   _walkAndAddColorStops(const_cast<SvgLinearGradientElement*>(this), gradient);
 
+  if (a_gradientTransform.isAssigned())
+    tr.transform(a_gradientTransform.getTransform(), MATRIX_ORDER_APPEND);
+
   // Create PatternF instance and set transform.
   PatternF pattern(gradient);
-  if (a_gradientTransform.isAssigned()) pattern.setTransform(a_gradientTransform.getTransform());
+  pattern.setTransform(tr);
 
   if (paintType == SVG_PAINT_FILL)
     context->setFillPattern(pattern);

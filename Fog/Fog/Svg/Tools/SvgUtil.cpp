@@ -146,7 +146,10 @@ _Start:
 
     // Parse number.
     sysuint_t end;
-    if (StringUtil::atof(strCur, (sysuint_t)(strEnd - strCur), &d[d_count++], Char('.'), &end) != ERR_OK) goto _End;
+    if (StringUtil::atof(strCur, (sysuint_t)(strEnd - strCur), &d[d_count++], Char('.'), &end) != ERR_OK)
+    {
+      goto _End;
+    }
 
     strCur += end;
 

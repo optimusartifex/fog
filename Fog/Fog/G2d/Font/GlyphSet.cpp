@@ -13,7 +13,7 @@
 #include <Fog/Core/Memory/Memory.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/G2d/Font/GlyphSet.h>
-#include <Fog/G2d/Global/Init_p.h>
+#include <Fog/G2d/Global/Init_G2d_p.h>
 
 namespace Fog {
 

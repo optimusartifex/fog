@@ -22,7 +22,7 @@
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Geometry/Transform.h>
 #include <Fog/G2d/Global/Api.h>
-#include <Fog/G2d/Global/Init_p.h>
+#include <Fog/G2d/Global/Init_G2d_p.h>
 
 namespace Fog {
 

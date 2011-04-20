@@ -11,7 +11,7 @@
 // [Dependencies]
 #include <Fog/Core/Memory/BSwap.h>
 #include <Fog/G2d/Imaging/ImageFormatDescription.h>
-#include <Fog/G2d/Global/Init_p.h>
+#include <Fog/G2d/Global/Init_G2d_p.h>
 
 namespace Fog {
 

@@ -12,7 +12,7 @@
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Global/Static.h>
 #include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Init_Core_p.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/BSwap.h>
 #include <Fog/Core/Memory/Memory.h>

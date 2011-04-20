@@ -9,19 +9,20 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Svg/Global/Init_p.h>
+#include <Fog/Xml/Global/Init_Xml_p.h>
 
 namespace Fog {
 
 // ============================================================================
-// [Fog::Svg - Library Initializers]
+// [Fog::Xml - Library Initializers]
 // ============================================================================
 
-FOG_NO_EXPORT void _svg_init(void)
+FOG_NO_EXPORT void _xml_init(void)
 {
+  _xml_xmlentity_init();
 }
 
-FOG_NO_EXPORT void _svg_fini(void)
+FOG_NO_EXPORT void _xml_fini(void)
 {
 }
 

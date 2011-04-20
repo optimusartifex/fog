@@ -2,28 +2,43 @@
 # [Project]
 # =============================================================================
 
-CMake_Minimum_Required(VERSION 2.6)
-Project(Fog C CXX)
+CMake_Minimum_Required(VERSION 2.8)
 
 Message("== ========================================")
-Message("== [Welcome to Fog-Framework]")
+Message("== [Fog-Framework]")
 Message("== ========================================")
+
+If(NOT FOG_BUILD_STATIC)
+  Project(Fog C CXX)
+  Message("-- Fog cmake-project created")
+Else()
+  Message("-- Fog included from existing list-file")
+EndIf()
 
 # =============================================================================
 # [Configuration]
 # =============================================================================
 
-# Whether to build examples.
+# Whether to build static library (default FALSE)
+# Set(FOG_BUILD_STATIC TRUE)
+
+# Whether to build examples (default FALSE).
 # Set(FOG_BUILD_EXAMPLES TRUE)
 
-# Whether to build support for X11.
+# Whether to build support for X11 (default FALSE)
 # Set(FOG_BUILD_GUI_X11 TRUE)
 
 # =============================================================================
 # [Basics]
 # =============================================================================
 
-Set(FOG_DIR ${CMAKE_SOURCE_DIR})
+If(NOT FOG_DIR)
+  Set(FOG_DIR ${CMAKE_CURRENT_LIST_DIR})
+  Message("-- Initializing FOG_DIR=${FOG_DIR}")
+Else()
+  Message("-- Using Custom FOG_DIR=${FOG_DIR}")
+EndIf()
+
 Set(FOG_LIBRARIES "")
 Set(CMAKE_CXX_STANDARD_LIBRARIES "")
 
@@ -395,6 +410,7 @@ Set(FOG_CORE_GLOBAL_SOURCES
   Fog/Core/Global/Debug.cpp
   Fog/Core/Global/Error.cpp
   Fog/Core/Global/Init.cpp
+  Fog/Core/Global/Init_Core.cpp
   Fog/Core/Global/Uninitialized.cpp
 )
 
@@ -404,7 +420,8 @@ Set(FOG_CORE_GLOBAL_HEADERS
   Fog/Core/Global/Constants.h
   Fog/Core/Global/Debug.h
   Fog/Core/Global/Error.h
-  Fog/Core/Global/Init_p.h
+  Fog/Core/Global/Init.h
+  Fog/Core/Global/Init_Core_p.h
   Fog/Core/Global/Static.h
   Fog/Core/Global/SequenceInfo.h
   Fog/Core/Global/Swap.h
@@ -815,13 +832,13 @@ EndIf()
 Set(FOG_G2D_GLOBAL_SOURCES
   Fog/G2d/Global/Api.cpp
   Fog/G2d/Global/Constants.cpp
-  Fog/G2d/Global/Init.cpp
+  Fog/G2d/Global/Init_G2d.cpp
 )
 
 Set(FOG_G2D_GLOBAL_HEADERS
   Fog/G2d/Global/Api.h
   Fog/G2d/Global/Constants.h
-  Fog/G2d/Global/Init_p.h
+  Fog/G2d/Global/Init_G2d_p.h
 )
 
 # [Fog/G2d/Imaging]
@@ -1253,12 +1270,12 @@ Set(FOG_GUI_CANVAS_HEADERS
 
 # [Fog/Gui/Global]
 Set(FOG_GUI_GLOBAL_SOURCES
-  Fog/Gui/Global/Init.cpp
+  Fog/Gui/Global/Init_UI.cpp
 )
 
 Set(FOG_GUI_GLOBAL_HEADERS
   Fog/Gui/Global/Constants.h
-  Fog/Gui/Global/Init_p.h
+  Fog/Gui/Global/Init_UI_p.h
 )
 
 # [Fog/Gui/Engine]
@@ -1499,12 +1516,12 @@ Set(FOG_SVG_DOM_HEADERS
 )
 
 Set(FOG_SVG_GLOBAL_SOURCES
-  Fog/Svg/Global/Init.cpp
+  Fog/Svg/Global/Init_Svg.cpp
 )
 
 Set(FOG_SVG_GLOBAL_HEADERS
   Fog/Svg/Global/Constants.h
-  Fog/Svg/Global/Init_p.h
+  Fog/Svg/Global/Init_Svg_p.h
 )
 
 Set(FOG_SVG_RENDER_SOURCES
@@ -1570,12 +1587,12 @@ Set(FOG_XML_DOM_HEADERS
 )
 
 Set(FOG_XML_GLOBAL_SOURCES
-  Fog/Xml/Global/Init.cpp
+  Fog/Xml/Global/Init_Xml.cpp
 )
 
 Set(FOG_XML_GLOBAL_HEADERS
   Fog/Xml/Global/Constants.h
-  Fog/Xml/Global/Init_p.h
+  Fog/Xml/Global/Init_Xml_p.h
 )
 
 Set(FOG_XML_IO_SOURCES
@@ -1608,7 +1625,7 @@ Source_Group("Xml/IO"               FILES ${FOG_XML_IO_SOURCES}               ${
 Source_Group("Xml/Tools"            FILES ${FOG_XML_TOOLS_SOURCES}            ${FOG_XML_TOOLS_HEADERS}           )
 
 # =============================================================================
-# [Finalize]
+# [Fog-All]
 # =============================================================================
 
 Set(FOG_ALL_SOURCES
@@ -1755,44 +1772,79 @@ If(FOG_GUI_MAC)
   List(APPEND FOG_ALL_HEADERS ${FOG_GUI_ENGINE_MAC_HEADERS})
 EndIf()
 
+Set(FOG_ALL_SOURCES_CORRECTED "")
+ForEach(i ${FOG_ALL_SOURCES})
+  List(APPEND FOG_ALL_SOURCES_CORRECTED ${FOG_DIR}/${i})
+EndForEach()
+
+Set(FOG_ALL_HEADERS_CORRECTED "")
+ForEach(i ${FOG_ALL_HEADERS})
+  List(APPEND FOG_ALL_HEADERS_CORRECTED ${FOG_DIR}/${i})
+EndForEach()
+
+# =============================================================================
+# [Setup - Fog/Core/Config/ConfigCMake.h]
+# =============================================================================
+
 # Write CMAKE_ #defines into Fog/Core/Config/Defs/ConfigCMake.h files
 Configure_File(
-  ${FOG_DIR}/Fog/Core/Config/Defs/ConfigCMake.h.cmake
-  ${FOG_DIR}/Fog/Core/Config/Defs/ConfigCMake.h)
+  ${CMAKE_CURRENT_SOURCE_DIR}/${FOG_DIR}/Fog/Core/Config/Defs/ConfigCMake.h.cmake
+  ${CMAKE_CURRENT_SOURCE_DIR}/${FOG_DIR}/Fog/Core/Config/Defs/ConfigCMake.h)
+
+# =============================================================================
+# [Setup - Fix]
+# =============================================================================
+
+# TODO: Quick hack, do not open freetype dynamically, we can link to it.
+If(FOG_FONT_FREETYPE)
+  Include_Directories(/usr/include/freetype2)
+EndIf()
 
 # Trim libraries string (come compilers can complain if there are extra whitespaces).
 String(STRIP "${FOG_LIBRARIES}" FOG_LIBRARIES)
 
-# Install header files.
-ForEach(i ${FOG_ALL_HEADERS})
-  Get_Filename_Component(path ${i} PATH)
-  Get_Filename_Component(name ${i} NAME)
-  If(NOT "${name}" MATCHES "_p.h$")
-    Install(FILES ${i} DESTINATION "include/${path}")
-  EndIf()
-EndForEach(i)
+# =============================================================================
+# [Setup - Install Header Files]
+# =============================================================================
 
-# TODO: Quick hack, do not open freetype dynamically, we can link to it.
-If(NOT WIN32)
-  Include_Directories(/usr/include/freetype2)
+If(NOT FOG_BUILD_STATIC)
+  ForEach(i ${FOG_ALL_HEADERS})
+    Get_Filename_Component(path ${i} PATH)
+    Get_Filename_Component(name ${i} NAME)
+    If(NOT "${name}" MATCHES "_p.h$")
+      Install(FILES ${i} DESTINATION "include/${path}")
+    EndIf()
+  EndForEach()
 EndIf()
 
-# Build Fog library.
-Add_Library(Fog SHARED ${FOG_ALL_SOURCES} ${FOG_ALL_HEADERS})
-Target_Link_Libraries(Fog ${FOG_LIBRARIES})
-Install(TARGETS Fog DESTINATION lib)
+# =============================================================================
+# [Setup - Binary - Fog]
+# =============================================================================
 
-# Build Fog_Gui_X11 plugin.
-If(FOG_GUI_X11 AND FOG_BUILD_GUI_X11)
-  Add_Library(Fog_Gui_X11 SHARED 
-    ${FOG_GUI_ENGINE_X11_SOURCES}
-    ${FOG_GUI_ENGINE_X11_HEADERS})
+If(NOT FOG_BUILD_STATIC)
+  Add_Library(Fog SHARED ${FOG_ALL_SOURCES_CORRECTED} ${FOG_ALL_HEADERS_CORRECTED})
+  Target_Link_Libraries(Fog ${FOG_LIBRARIES})
+  Install(TARGETS Fog DESTINATION lib)
+Else()
+  Add_Library(Fog STATIC ${FOG_ALL_SOURCES_CORRECTED} ${FOG_ALL_HEADERS_CORRECTED})
+  Target_Link_Libraries(Fog ${FOG_LIBRARIES})
+EndIf()
+
+# =============================================================================
+# [Setup - Binary - Fog_Gui_X11]
+# =============================================================================
+
+If(NOT FOG_BUILD_STATIC AND FOG_GUI_X11 AND FOG_BUILD_GUI_X11)
+  Add_Library(Fog_Gui_X11 SHARED ${FOG_GUI_ENGINE_X11_SOURCES} ${FOG_GUI_ENGINE_X11_HEADERS})
   Target_Link_Libraries(Fog_Gui_X11 Fog ${FOG_LIBRARIES})
   Install(TARGETS Fog_Gui_X11 DESTINATION lib)
 EndIf()
 
-# Build examples.
-If(FOG_BUILD_EXAMPLES)
+# =============================================================================
+# [Setup - Binary - Examples]
+# =============================================================================
+
+If(NOT FOG_BUILD_STATIC AND FOG_BUILD_EXAMPLES)
   Set(FOG_EXAMPLE_SOURCES
     FogSvgView
     FogTest

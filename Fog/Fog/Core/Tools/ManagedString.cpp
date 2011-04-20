@@ -11,7 +11,7 @@
 // [Dependencies]
 #include <Fog/Core/Collection/Hash.h>
 #include <Fog/Core/Collection/HashUtil.h>
-#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Init_Core_p.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/StringUtil.h>

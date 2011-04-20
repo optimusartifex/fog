@@ -11,7 +11,7 @@
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Global/Debug.h>
-#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Init_Core_p.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Threading/Thread.h>
 #include <Fog/Core/Threading/ThreadPool.h>

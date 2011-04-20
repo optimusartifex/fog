@@ -9,20 +9,19 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Xml/Global/Init_p.h>
+#include <Fog/Gui/Global/Init_UI_p.h>
 
 namespace Fog {
 
 // ============================================================================
-// [Fog::Xml - Library Initializers]
+// [Fog::Gui - Library Initializers]
 // ============================================================================
 
-FOG_NO_EXPORT void _xml_init(void)
+FOG_NO_EXPORT void _gui_init(void)
 {
-  _xml_xmlentity_init();
 }
 
-FOG_NO_EXPORT void _xml_fini(void)
+FOG_NO_EXPORT void _gui_fini(void)
 {
 }
 

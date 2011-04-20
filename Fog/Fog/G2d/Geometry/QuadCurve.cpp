@@ -16,7 +16,7 @@
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/QuadCurve.h>
-#include <Fog/G2d/Global/Init_p.h>
+#include <Fog/G2d/Global/Init_G2d_p.h>
 
 namespace Fog {
 

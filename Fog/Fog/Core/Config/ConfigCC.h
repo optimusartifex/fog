@@ -99,7 +99,9 @@
 // ============================================================================
 
 #if !defined(FOG_API)
-# if defined(Fog_EXPORTS)
+# if defined(FOG_BUILD_STATIC)
+#  define FOG_API
+# elif defined(Fog_EXPORTS)
 #  define FOG_API FOG_DLL_EXPORT
 # else
 #  define FOG_API FOG_DLL_IMPORT

@@ -12,7 +12,7 @@
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/Error.h>
-#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Init_Core_p.h>
 
 #if defined(FOG_OS_WINDOWS)
 # include <windows.h>

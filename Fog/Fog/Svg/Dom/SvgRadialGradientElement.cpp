@@ -68,17 +68,19 @@ err_t SvgRadialGradientElement::onApplyPattern(SvgRenderContext* context, SvgEle
     float cy = a_cy.isAssigned() ? context->translateCoord(a_cy.getCoord()) : 0.5f;
     float fx = a_fx.isAssigned() ? context->translateCoord(a_fx.getCoord()) : cx;
     float fy = a_fy.isAssigned() ? context->translateCoord(a_fy.getCoord()) : cy;
-    float r  = a_r.isAssigned() ? context->translateCoord(a_r.getCoord()) : 0.5f;
+    float rx = a_r.isAssigned() ? context->translateCoord(a_r.getCoord()) : 0.5f;
+    float ry = rx;
 
     cx = bbox.x + bbox.w * cx;
     cy = bbox.y + bbox.h * cy;
     fx = bbox.x + bbox.w * fx;
     fy = bbox.y + bbox.h * fy;
-    r = Math::min(bbox.w, bbox.h) * r;
+    rx = bbox.w * rx;
+    ry = bbox.h * ry;
 
     gradient.setCenter(PointF(cx, cy));
     gradient.setFocal(PointF(fx, fy));
-    gradient.setRadius(r);
+    gradient.setRadius(PointF(rx, ry));
   }
   else if (a_cx.isAssigned() && a_cy.isAssigned() && a_cx.isAssigned() && a_r.isAssigned())
   {
@@ -90,7 +92,7 @@ err_t SvgRadialGradientElement::onApplyPattern(SvgRenderContext* context, SvgEle
 
     gradient.setCenter(PointF(cx, cy));
     gradient.setFocal(PointF(fx, fy));
-    gradient.setRadius(r);
+    gradient.setRadius(PointF(r, r));
   }
   else
   {

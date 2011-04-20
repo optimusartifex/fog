@@ -12,7 +12,7 @@
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/Arc.h>
-#include <Fog/G2d/Global/Init_p.h>
+#include <Fog/G2d/Global/Init_G2d_p.h>
 
 namespace Fog {
 

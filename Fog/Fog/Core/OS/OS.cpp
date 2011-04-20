@@ -11,7 +11,7 @@
 // [Dependencies]
 #include <Fog/Core/Config/Config.h>
 #include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Init_Core_p.h>
 #include <Fog/Core/Global/Static.h>
 #include <Fog/Core/OS/OS.h>
 #include <Fog/Core/Tools/ByteArray.h>

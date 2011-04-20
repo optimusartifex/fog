@@ -328,6 +328,7 @@ struct Implicit
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/Error.h>
+#include <Fog/Core/Global/Init.h>
 #include <Fog/Core/Global/SequenceInfo.h>
 #include <Fog/Core/Global/Static.h>
 #include <Fog/Core/Global/Swap.h>

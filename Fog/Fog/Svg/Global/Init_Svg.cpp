@@ -9,19 +9,19 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Gui/Global/Init_p.h>
+#include <Fog/Svg/Global/Init_Svg_p.h>
 
 namespace Fog {
 
 // ============================================================================
-// [Fog::Gui - Library Initializers]
+// [Fog::Svg - Library Initializers]
 // ============================================================================
 
-FOG_NO_EXPORT void _gui_init(void)
+FOG_NO_EXPORT void _svg_init(void)
 {
 }
 
-FOG_NO_EXPORT void _gui_fini(void)
+FOG_NO_EXPORT void _svg_fini(void)
 {
 }
 

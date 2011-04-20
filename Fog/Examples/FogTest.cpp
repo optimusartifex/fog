@@ -178,17 +178,17 @@ void MyWindow::onPaint(PaintEvent* e)
   radial.setCenter(PointF(250.0f, 250.0f));
   radial.setFocal(_lastMousePoint);
   //radial.setFocal(PointF(250.0f, 250.0f));
-  radial.setRadius(PointF(150.0f, 50.0f));
+  radial.setRadius(PointF(150.0f, 150.0f));
   radial.setGradientSpread(GRADIENT_SPREAD_REFLECT);
 
   //TransformF perspective;
   //perspective.setQuadToQuad(PointF(100, 100), PointF(400, 100), PointF(300, 400), PointF(150, 400), BoxF(100, 100, 400, 400));
   //p->transform(perspective);
 
-  p->setSource(linear);
-  p->clear();
+  //p->setSource(radial);
+  //p->clear();
 
-  // p->fillCircle(CircleF(PointF(310.0f, 310.0f), 300.0f));
+  //p->fillCircle(CircleF(PointF(310.0f, 310.0f), 300.0f));
   //p->fillBox(BoxI(50, 50, 450, 450));
   
   p->setCompositingOperator(COMPOSITE_SRC_OVER);
@@ -196,8 +196,22 @@ void MyWindow::onPaint(PaintEvent* e)
   //p->drawBox(BoxI(100, 100, 400, 400)); 
 
   //p->setOpacity(0.5f);
-  p->setSource(Texture(i[0], TEXTURE_TILE_CLAMP, Color(Argb32(0xFFFF0000))));
-  p->fillBox(BoxF(-5.0f, -5.0f, 400.0f, 400.0f));
+  {
+    //ConicalGradientF gr(PointF(200, 200), MATH_PI);
+    //gr.setStops(linear.getStops());
+    //p->setSource(gr);
+
+    RectangularGradientF gr(PointF(200, 200), PointF(400, 400), _lastMousePoint);
+    gr.setStops(linear.getStops());
+    gr.setGradientSpread(GRADIENT_SPREAD_PAD);
+    p->setSource(gr);
+  }
+
+  p->clear();
+  //p->setSource(radial);
+  //p->setSource(Texture(i[0], TEXTURE_TILE_CLAMP, Color(Argb32(0xFFFF0000))));
+  //p->fillBox(BoxF(0.0f, 0.0f, 400.0f, 400.0f));
+  //p->fillBox(BoxF(200.0f, 200.0f, 400.0f, 400.0f));
 
   //p->setSource(Argb32(0x80FFFFFF));
   //p->drawBox(BoxF(0.0f, 0.0f, 400.0f, 400.0f));

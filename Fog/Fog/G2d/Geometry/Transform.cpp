@@ -11,7 +11,7 @@
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Transform.h>
 #include <Fog/G2d/Global/Constants.h>
-#include <Fog/G2d/Global/Init_p.h>
+#include <Fog/G2d/Global/Init_G2d_p.h>
 
 namespace Fog {
 

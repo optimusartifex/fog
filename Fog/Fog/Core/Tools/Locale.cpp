@@ -15,7 +15,7 @@
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Init_Core_p.h>
 #include <Fog/Core/Tools/ByteArray.h>
 #include <Fog/Core/Tools/Locale.h>
 #include <Fog/Core/Tools/String.h>

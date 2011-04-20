@@ -10,7 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Init_Core_p.h>
 #include <Fog/Core/Math/Math.h>
 
 namespace Fog {

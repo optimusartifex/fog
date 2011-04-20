@@ -10,7 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/Util.h>
-#include <Fog/G2d/Global/Init_p.h>
+#include <Fog/G2d/Global/Init_G2d_p.h>
 #include <Fog/G2d/Source/ColorStop.h>
 #include <Fog/G2d/Source/ColorStopCache.h>
 #include <Fog/G2d/Source/ColorStopList.h>

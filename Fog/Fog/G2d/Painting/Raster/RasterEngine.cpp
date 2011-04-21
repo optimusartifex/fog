@@ -958,6 +958,7 @@ err_t FOG_CDECL RasterPainterImpl_::setParameter(Painter& self, uint32_t paramet
       if (vFloat < 0.0f || vFloat > 1.0f) return ERR_RT_INVALID_ARGUMENT;
 
 _GlobalOpacityF:
+      engine->masterFlags &= ~RASTER_NO_PAINT_OPACITY;
       engine->opacityF = vFloat;
       engine->ctx.rasterHints.opacity = (int)(vFloat * engine->ctx.fullOpacityValueF) >> 8;
 

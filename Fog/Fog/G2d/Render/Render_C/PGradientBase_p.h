@@ -93,7 +93,23 @@ struct FOG_NO_EXPORT PGradientBase
           aPos += 0x800000; rPos += 0x800000;
           gPos += 0x800000; bPos += 0x800000;
 
-          if (aInc == 0)
+          if (aInc == 0 && Face::p32ARGB32IsAlphaFF(c1))
+          {
+            mask |= 0xFF000000;
+
+            for (i = 0; i <= len; i++)
+            {
+              Face::p32 cp = _FOG_FACE_COMBINE_3((rPos & 0xFF000000) >>  8,
+                                                 (gPos & 0xFF000000) >> 16,
+                                                 (bPos             ) >> 24) ^ mask;
+              dst[i] = cp;
+
+              rPos += rInc;
+              gPos += gInc;
+              bPos += bInc;
+            }
+          }
+          else
           {
             for (i = 0; i <= len; i++)
             {
@@ -105,23 +121,6 @@ struct FOG_NO_EXPORT PGradientBase
               dst[i] = cp;
 
               aPos += aInc;
-              rPos += rInc;
-              gPos += gInc;
-              bPos += bInc;
-            }
-          }
-          else
-          {
-            mask |= 0xFF000000;
-
-            for (i = 0; i <= len; i++)
-            {
-              Face::p32 cp = _FOG_FACE_COMBINE_3((rPos & 0xFF000000) >>  8,
-                                                 (gPos & 0xFF000000) >> 16,
-                                                 (bPos             ) >> 24) ^ mask;
-              Face::p32PRGB32FromARGB32(cp, cp);
-              dst[i] = cp;
-
               rPos += rInc;
               gPos += gInc;
               bPos += bInc;

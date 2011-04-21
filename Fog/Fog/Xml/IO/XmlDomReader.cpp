@@ -27,8 +27,57 @@
 #include <Fog/Xml/Dom/XmlText.h>
 #include <Fog/Xml/Global/Constants.h>
 #include <Fog/Xml/IO/XmlDomReader.h>
+#include <Fog/Xml/Tools/XmlEntity_p.h>
 
 namespace Fog {
+
+// ============================================================================
+// [Helpers]
+// ============================================================================
+
+// Decode text that contains XML entities into plain form, for example
+// &quot;Hello&quot will be decoded to "Hello".
+static err_t xmlDecodeText(String& dst, const Utf16& src)
+{
+  sysuint_t length = src.getLength();
+
+  // Not allowed here.
+  FOG_ASSERT(length != DETECT_LENGTH);
+
+  dst.clear();
+  if (length == 0) return ERR_OK;
+
+  FOG_RETURN_ON_ERROR(dst.resize(length));
+
+  Char* dstPtr = dst.getDataX();
+  const Char* srcPtr = src.getData();
+  const Char* srcEnd = srcPtr + length;
+
+  do {
+    if (srcPtr[0] != Char('&'))
+    {
+      dstPtr[0] = srcPtr[0];
+      dstPtr++;
+      srcPtr++;
+    }
+    else
+    {
+      const Char* mark = ++srcPtr;
+      while (srcPtr != srcEnd && srcPtr[0] != Char(';')) srcPtr++;
+
+      // TODO: Unterminated entity.
+      if (srcPtr == srcEnd)
+        break;
+
+      dstPtr[0] = XmlEntity::decode(mark, (sysuint_t)(srcPtr - mark));
+      dstPtr++;
+      srcPtr++;
+    }
+  } while (srcPtr != srcEnd);
+
+  dst.finishDataX(dstPtr);
+  return ERR_OK;
+}
 
 // ============================================================================
 // [Fog::XmlDomReader]
@@ -77,11 +126,17 @@ err_t XmlDomReader::onCloseElement(const Utf16& tagName)
 
 err_t XmlDomReader::onAddAttribute(const Utf16& name, const Utf16& value)
 {
-  return _current->_setAttribute(ManagedString(name), String(value));
+  String decodedValue;
+  FOG_RETURN_ON_ERROR(xmlDecodeText(decodedValue, value));
+
+  return _current->_setAttribute(ManagedString(name), decodedValue);
 }
 
 err_t XmlDomReader::onAddText(const Utf16& data, bool isWhiteSpace)
 {
+  String decodedData;
+  FOG_RETURN_ON_ERROR(xmlDecodeText(decodedData, data));
+
   if (_current == _document)
   {
     if (isWhiteSpace)
@@ -90,7 +145,7 @@ err_t XmlDomReader::onAddText(const Utf16& data, bool isWhiteSpace)
       return ERR_XML_SYNTAX_ERROR;
   }
 
-  XmlElement* e = fog_new XmlText(String(data));
+  XmlElement* e = fog_new XmlText(decodedData);
   if (!e) return ERR_RT_OUT_OF_MEMORY;
 
   err_t err = _current->appendChild(e);

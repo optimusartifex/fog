@@ -170,14 +170,6 @@ err_t XmlSaxReader::parseString(const Char* s, sysuint_t len)
   int state = XML_SAX_STATE_READY;  // Current state.
   int element = XML_SAX_ELEMENT_TAG;// Element type.
   int depth = 0;                    // Current depth.
-  bool skipTagText = true;          // skip tag text...?
-
-  // Temporary reusable strings.
-  String tempTagName;
-  String tempAttrName;
-  String tempAttrValue;
-  String tempText;
-  String tempData;
 
   List<String> doctype;
 

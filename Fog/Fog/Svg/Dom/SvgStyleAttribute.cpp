@@ -422,7 +422,7 @@ err_t SvgStyleAttribute::setStyle(int styleId, const String& value)
       break;
 
     case SVG_STYLE_STROKE_DASH_ARRAY:
-      err = ERR_RT_NOT_IMPLEMENTED;
+      //err = ERR_RT_NOT_IMPLEMENTED;
       break;
 
     case SVG_STYLE_STROKE_DASH_OFFSET:

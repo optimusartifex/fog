@@ -43,10 +43,31 @@ static Utf16 parseCssLinkId(const String& url)
   const Char* idEnd;
   const Char* idMark;
 
+  Char quot;
+
   if (url.getLength() < 7) goto _Bail;
 
-  idStr = url.getData() + 5;
-  idEnd = idStr + url.getLength() - 5;
+  idStr = url.getData();
+  idEnd = idStr + url.getLength();
+
+  // Add url(
+  idStr += 4;
+
+  // Detect quot, if used.
+  quot = idStr[0];
+  if (quot == Char('\"') || quot == Char('\''))
+  {
+    idStr++;
+    idEnd--;
+  }
+  else
+  {
+    quot = Char(')');
+  }
+
+  // Invalid ID.
+  if (idStr + 1 >= idEnd || idStr[0] != Char('#')) goto _Bail;
+  idStr++;
 
   while (idStr->isSpace())
   {
@@ -54,7 +75,7 @@ static Utf16 parseCssLinkId(const String& url)
   }
 
   idMark = idStr;
-  while (*idStr != Char(')'))
+  while (idStr[0] != quot)
   {
     if (++idStr == idEnd) goto _Bail;
   }

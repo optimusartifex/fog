@@ -2954,6 +2954,7 @@ _Translation:
   }
 
   // Transform is not integral.
+  engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_NULL;
 }
 
 // ============================================================================
@@ -3110,7 +3111,7 @@ struct RasterPainterImpl : public RasterPainterImpl_
   static err_t FOG_CDECL blitImageInI(Painter& self, const RectI& r, const Image& i, const RectI* ir);
   static err_t FOG_CDECL blitImageInF(Painter& self, const RectF& r, const Image& i, const RectI* ir);
   static err_t FOG_CDECL blitImageInD(Painter& self, const RectD& r, const Image& i, const RectI* ir);
- 
+
   static err_t FOG_CDECL blitImageMaskedAtI(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
   static err_t FOG_CDECL blitImageMaskedAtF(Painter& self, const PointF& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
   static err_t FOG_CDECL blitImageMaskedAtD(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
@@ -3175,19 +3176,19 @@ struct RasterPainterImpl : public RasterPainterImpl_
   static err_t FOG_CDECL flush(Painter& self, uint32_t flags);
 
   // --------------------------------------------------------------------------
-  // [Painting - FillTransformedBox]
+  // [Painting - FillRawBox]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE err_t doFillTransformedBoxI(RasterPainterEngine* engine, const BoxI& box);
-  static FOG_INLINE err_t doFillTransformedBoxF(RasterPainterEngine* engine, const BoxF& box);
-  static FOG_INLINE err_t doFillTransformedBoxD(RasterPainterEngine* engine, const BoxD& box);
+  static FOG_INLINE err_t doFillRawBoxI(RasterPainterEngine* engine, const BoxI& box);
+  static FOG_INLINE err_t doFillRawBoxF(RasterPainterEngine* engine, const BoxF& box);
+  static FOG_INLINE err_t doFillRawBoxD(RasterPainterEngine* engine, const BoxD& box);
 
   // --------------------------------------------------------------------------
-  // [Painting - FillTransformedPath]
+  // [Painting - FillRawPath]
   // --------------------------------------------------------------------------
 
-  static FOG_NO_INLINE err_t doFillTransformedPathF(RasterPainterEngine* engine, const PathF& path, uint32_t fillRule, bool clip);
-  static FOG_NO_INLINE err_t doFillTransformedPathD(RasterPainterEngine* engine, const PathD& path, uint32_t fillRule, bool clip);
+  static FOG_NO_INLINE err_t doFillRawPathF(RasterPainterEngine* engine, const PathF& path, uint32_t fillRule, bool clip);
+  static FOG_NO_INLINE err_t doFillRawPathD(RasterPainterEngine* engine, const PathD& path, uint32_t fillRule, bool clip);
 
   // --------------------------------------------------------------------------
   // [Painting - FillUntransformedPath]
@@ -3197,17 +3198,17 @@ struct RasterPainterImpl : public RasterPainterImpl_
   static err_t doFillUntransformedPathD(RasterPainterEngine* engine, const PathD& path, uint32_t fillRule, bool clip);
 
   // --------------------------------------------------------------------------
-  // [Painting - BlitAlignedImage]
+  // [Painting - BlitRawImage]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE err_t doBlitAlignedImageI(RasterPainterEngine* engine, const PointI& pt, const Image& srcImage, const RectI& srcFraction);
+  static FOG_INLINE err_t doBlitRawImageI(RasterPainterEngine* engine, const PointI& pt, const Image& srcImage, const RectI& srcFragment);
 
   // --------------------------------------------------------------------------
   // [Painting - BlitUntransformedImage]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE err_t doBlitUntransformedImageF(RasterPainterEngine* engine, const BoxF& box, const Image& srcImage, const RectI& srcFraction);
-  static FOG_INLINE err_t doBlitUntransformedImageD(RasterPainterEngine* engine, const BoxD& box, const Image& srcImage, const RectI& srcFraction);
+  static FOG_INLINE err_t doBlitUntransformedImageF(RasterPainterEngine* engine, const BoxF& box, const Image& srcImage, const RectI& srcFragment);
+  static FOG_INLINE err_t doBlitUntransformedImageD(RasterPainterEngine* engine, const BoxD& box, const Image& srcImage, const RectI& srcFragment);
 };
 
 // ============================================================================
@@ -3446,7 +3447,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::clear(Painter& self)
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
 
-  doFillTransformedBoxI(engine, engine->ctx.finalClipBoxI);
+  doFillRawBoxI(engine, engine->ctx.finalClipBoxI);
   return ERR_OK;
 }
 
@@ -3667,7 +3668,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectI(Painter& self, const RectI& 
   {
     BoxI box(UNINITIALIZED);
     if (doIntegralTransformAndClip(engine, box, r))
-      return doFillTransformedBoxI(engine, box);
+      return doFillRawBoxI(engine, box);
     else
       return ERR_OK;
   }
@@ -3694,7 +3695,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectF(Painter& self, const RectF& 
   }
 
   if (BoxF::intersect(box, box, engine->ctx.finalClipperF.getClipBox()))
-    return doFillTransformedBoxF(engine, box);
+    return doFillRawBoxF(engine, box);
   else
     return ERR_OK;
 }
@@ -3720,13 +3721,13 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectD(Painter& self, const RectD& 
   }
 
   if (BoxD::intersect(box, box, engine->ctx.finalClipperD.getClipBox()))
-    return doFillTransformedBoxD(engine, box);
+    return doFillRawBoxD(engine, box);
   else
     return ERR_OK;
 }
 
 // TODO: It's easy to clip rectangles, so clip them here and call 
-// doFillTransformedPath() instead.
+// doFillRawPath() instead.
 
 template<int _MODE>
 err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectsI(Painter& self, const RectI* r, sysuint_t count)
@@ -4065,7 +4066,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtI(Painter& self, const Poin
     if ((d = engine->ctx.finalClipBoxI.x1 - dstX) < dstW) dstW = d;
     if ((d = engine->ctx.finalClipBoxI.y1 - dstY) < dstH) dstH = d;
 
-    return doBlitAlignedImageI(engine, PointI(dstX, dstY), i, RectI(srcX, srcY, dstW, dstH));
+    return doBlitRawImageI(engine, PointI(dstX, dstY), i, RectI(srcX, srcY, dstW, dstH));
   }
   else
   {
@@ -4103,7 +4104,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtF(Painter& self, const Poin
     iY = ir->y;
   }
 
-  // Try to aligned blit.
+  // Try aligned blit.
   if (engine->finalTransform.getType() <= TRANSFORM_TYPE_TRANSLATION)
   {
     PointD t((double)p.x + engine->finalTransform._20, 
@@ -4113,10 +4114,10 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtF(Painter& self, const Poin
     Fixed48x16 y48x16 = Math::fixed48x16FromFloat(t.y);
 
     int fx = (int)(x48x16 >> 8) & 0xFF;
-    int fy = (int)(x48x16 >> 8) & 0xFF;
+    int fy = (int)(y48x16 >> 8) & 0xFF;
 
     if ((fx | fy) == 0)
-      return doBlitAlignedImageI(engine, PointI((int)(x48x16 >> 16), (int)(y48x16 >> 16)), i, RectI(iX, iY, iW, iH));
+      return doBlitRawImageI(engine, PointI((int)(x48x16 >> 16), (int)(y48x16 >> 16)), i, RectI(iX, iY, iW, iH));
   }
 
   BoxF box(UNINITIALIZED);
@@ -4155,7 +4156,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtD(Painter& self, const Poin
     iY = ir->y;
   }
 
-  // Try to aligned blit.
+  // Try aligned blit.
   if (engine->finalTransform.getType() <= TRANSFORM_TYPE_TRANSLATION)
   {
     PointD t(p.x + engine->finalTransform._20, 
@@ -4165,10 +4166,10 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtD(Painter& self, const Poin
     Fixed48x16 y48x16 = Math::fixed48x16FromFloat(t.y);
 
     int fx = (int)(x48x16 >> 8) & 0xFF;
-    int fy = (int)(x48x16 >> 8) & 0xFF;
+    int fy = (int)(y48x16 >> 8) & 0xFF;
 
     if ((fx | fy) == 0)
-      return doBlitAlignedImageI(engine, PointI((int)(x48x16 >> 16), (int)(y48x16 >> 16)), i, RectI(iX, iY, iW, iH));
+      return doBlitRawImageI(engine, PointI((int)(x48x16 >> 16), (int)(y48x16 >> 16)), i, RectI(iX, iY, iW, iH));
   }
 
   BoxD box(UNINITIALIZED);
@@ -4179,7 +4180,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtD(Painter& self, const Poin
 
   return doBlitUntransformedImageD(engine, box, i, RectI(iX, iY, iW, iH));
 }
- 
+
 template<int _MODE>
 err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageInI(Painter& self, const RectI& r, const Image& i, const RectI* ir)
 {
@@ -4195,7 +4196,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageInF(Painter& self, const Rect
 
   return ERR_RT_NOT_IMPLEMENTED;
 }
- 
+
 template<int _MODE>
 err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageInD(Painter& self, const RectD& r, const Image& i, const RectI* ir)
 {
@@ -4505,17 +4506,17 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::flush(Painter& self, uint32_t flags)
 }
 
 // ============================================================================
-// [Fog::RasterPainterImpl<> - FillTransformedBox]
+// [Fog::RasterPainterImpl<> - FillRawBox]
 // ============================================================================
 
 template<int _MODE>
-FOG_INLINE err_t RasterPainterImpl<_MODE>::doFillTransformedBoxI(RasterPainterEngine* engine, const BoxI& box)
+FOG_INLINE err_t RasterPainterImpl<_MODE>::doFillRawBoxI(RasterPainterEngine* engine, const BoxI& box)
 {
   _FOG_RASTER_ENSURE_PATTERN(engine);
 
   if (_MODE == RASTER_MODE_ST)
   {
-    engine->ctx.renderer->fillTransformedBoxI(engine->ctx, box);
+    engine->ctx.renderer->fillRawBoxI(engine->ctx, box);
     return ERR_OK;
   }
   else
@@ -4526,13 +4527,13 @@ FOG_INLINE err_t RasterPainterImpl<_MODE>::doFillTransformedBoxI(RasterPainterEn
 }
 
 template<int _MODE>
-FOG_INLINE err_t RasterPainterImpl<_MODE>::doFillTransformedBoxF(RasterPainterEngine* engine, const BoxF& box)
+FOG_INLINE err_t RasterPainterImpl<_MODE>::doFillRawBoxF(RasterPainterEngine* engine, const BoxF& box)
 {
   _FOG_RASTER_ENSURE_PATTERN(engine);
 
   if (_MODE == RASTER_MODE_ST)
   {
-    engine->ctx.renderer->fillTransformedBoxF(engine->ctx, box);
+    engine->ctx.renderer->fillRawBoxF(engine->ctx, box);
     return ERR_OK;
   }
   else
@@ -4543,13 +4544,13 @@ FOG_INLINE err_t RasterPainterImpl<_MODE>::doFillTransformedBoxF(RasterPainterEn
 }
 
 template<int _MODE>
-FOG_INLINE err_t RasterPainterImpl<_MODE>::doFillTransformedBoxD(RasterPainterEngine* engine, const BoxD& box)
+FOG_INLINE err_t RasterPainterImpl<_MODE>::doFillRawBoxD(RasterPainterEngine* engine, const BoxD& box)
 {
   _FOG_RASTER_ENSURE_PATTERN(engine);
 
   if (_MODE == RASTER_MODE_ST)
   {
-    engine->ctx.renderer->fillTransformedBoxD(engine->ctx, box);
+    engine->ctx.renderer->fillRawBoxD(engine->ctx, box);
     return ERR_OK;
   }
   else
@@ -4560,17 +4561,17 @@ FOG_INLINE err_t RasterPainterImpl<_MODE>::doFillTransformedBoxD(RasterPainterEn
 }
 
 // ============================================================================
-// [Fog::RasterPainterImpl<> - FillTransformedPath]
+// [Fog::RasterPainterImpl<> - FillRawPath]
 // ============================================================================
 
 template<int _MODE>
-err_t RasterPainterImpl<_MODE>::doFillTransformedPathF(RasterPainterEngine* engine, const PathF& path, uint32_t fillRule, bool clip)
+err_t RasterPainterImpl<_MODE>::doFillRawPathF(RasterPainterEngine* engine, const PathF& path, uint32_t fillRule, bool clip)
 {
   _FOG_RASTER_ENSURE_PATTERN(engine);
 
   if (_MODE == RASTER_MODE_ST)
   {
-    engine->ctx.renderer->fillTransformedPathF(engine->ctx, path, fillRule, clip);
+    engine->ctx.renderer->fillRawPathF(engine->ctx, path, fillRule, clip);
     return ERR_OK;
   }
   else
@@ -4581,13 +4582,13 @@ err_t RasterPainterImpl<_MODE>::doFillTransformedPathF(RasterPainterEngine* engi
 }
 
 template<int _MODE>
-err_t RasterPainterImpl<_MODE>::doFillTransformedPathD(RasterPainterEngine* engine, const PathD& path, uint32_t fillRule, bool clip)
+err_t RasterPainterImpl<_MODE>::doFillRawPathD(RasterPainterEngine* engine, const PathD& path, uint32_t fillRule, bool clip)
 {
   _FOG_RASTER_ENSURE_PATTERN(engine);
 
   if (_MODE == RASTER_MODE_ST)
   {
-    engine->ctx.renderer->fillTransformedPathD(engine->ctx, path, fillRule, clip);
+    engine->ctx.renderer->fillRawPathD(engine->ctx, path, fillRule, clip);
     return ERR_OK;
   }
   else
@@ -4619,12 +4620,12 @@ err_t RasterPainterImpl<_MODE>::doFillUntransformedPathF(RasterPainterEngine* en
         switch (engine->ctx.finalClipperF.initPath(path))
         {
           case CLIPPER_INIT_ALREADY_CLIPPED:
-            engine->ctx.renderer->fillTransformedPathF(engine->ctx, path, fillRule);
+            engine->ctx.renderer->fillRawPathF(engine->ctx, path, fillRule);
             return ERR_OK;
 
           case CLIPPER_INIT_NOT_CLIPPED:
             FOG_RETURN_ON_ERROR(engine->ctx.finalClipperF.continuePath(engine->ctx.tmpPathF[1], path));
-            engine->ctx.renderer->fillTransformedPathF(engine->ctx, engine->ctx.tmpPathF[1], fillRule);
+            engine->ctx.renderer->fillRawPathF(engine->ctx, engine->ctx.tmpPathF[1], fillRule);
             return ERR_OK;
 
           default:
@@ -4634,7 +4635,7 @@ err_t RasterPainterImpl<_MODE>::doFillUntransformedPathF(RasterPainterEngine* en
       else
       {
         FOG_RETURN_ON_ERROR(engine->ctx.finalClipperF.clipPath(engine->ctx.tmpPathF[1], path, engine->finalTransformF));
-        engine->ctx.renderer->fillTransformedPathF(engine->ctx, engine->ctx.tmpPathF[1], fillRule);
+        engine->ctx.renderer->fillRawPathF(engine->ctx, engine->ctx.tmpPathF[1], fillRule);
         return ERR_OK;
       }
     }
@@ -4642,13 +4643,13 @@ err_t RasterPainterImpl<_MODE>::doFillUntransformedPathF(RasterPainterEngine* en
     {
       if (!hasTransform)
       {
-        engine->ctx.renderer->fillTransformedPathF(engine->ctx, path, fillRule);
+        engine->ctx.renderer->fillRawPathF(engine->ctx, path, fillRule);
         return ERR_OK;
       }
       else
       {
         FOG_RETURN_ON_ERROR(engine->finalTransformF.mapPath(engine->ctx.tmpPathF[1], path));
-        engine->ctx.renderer->fillTransformedPathF(engine->ctx, engine->ctx.tmpPathF[1], fillRule);
+        engine->ctx.renderer->fillRawPathF(engine->ctx, engine->ctx.tmpPathF[1], fillRule);
         return ERR_OK;
       }
     }
@@ -4678,12 +4679,12 @@ err_t RasterPainterImpl<_MODE>::doFillUntransformedPathD(RasterPainterEngine* en
         switch (engine->ctx.finalClipperD.initPath(path))
         {
           case CLIPPER_INIT_ALREADY_CLIPPED:
-            engine->ctx.renderer->fillTransformedPathD(engine->ctx, path, fillRule);
+            engine->ctx.renderer->fillRawPathD(engine->ctx, path, fillRule);
             return ERR_OK;
 
           case CLIPPER_INIT_NOT_CLIPPED:
             FOG_RETURN_ON_ERROR(engine->ctx.finalClipperD.continuePath(engine->ctx.tmpPathD[1], path));
-            engine->ctx.renderer->fillTransformedPathD(engine->ctx, engine->ctx.tmpPathD[1], fillRule);
+            engine->ctx.renderer->fillRawPathD(engine->ctx, engine->ctx.tmpPathD[1], fillRule);
             return ERR_OK;
 
           default:
@@ -4693,7 +4694,7 @@ err_t RasterPainterImpl<_MODE>::doFillUntransformedPathD(RasterPainterEngine* en
       else
       {
         FOG_RETURN_ON_ERROR(engine->ctx.finalClipperD.clipPath(engine->ctx.tmpPathD[1], path, engine->finalTransform));
-        engine->ctx.renderer->fillTransformedPathD(engine->ctx, engine->ctx.tmpPathD[1], fillRule);
+        engine->ctx.renderer->fillRawPathD(engine->ctx, engine->ctx.tmpPathD[1], fillRule);
         return ERR_OK;
       }
     }
@@ -4701,13 +4702,13 @@ err_t RasterPainterImpl<_MODE>::doFillUntransformedPathD(RasterPainterEngine* en
     {
       if (!hasTransform)
       {
-        engine->ctx.renderer->fillTransformedPathD(engine->ctx, path, fillRule);
+        engine->ctx.renderer->fillRawPathD(engine->ctx, path, fillRule);
         return ERR_OK;
       }
       else
       {
         FOG_RETURN_ON_ERROR(engine->finalTransform.mapPath(engine->ctx.tmpPathD[1], path));
-        engine->ctx.renderer->fillTransformedPathD(engine->ctx, engine->ctx.tmpPathD[1], fillRule);
+        engine->ctx.renderer->fillRawPathD(engine->ctx, engine->ctx.tmpPathD[1], fillRule);
         return ERR_OK;
       }
     }
@@ -4720,16 +4721,16 @@ err_t RasterPainterImpl<_MODE>::doFillUntransformedPathD(RasterPainterEngine* en
 }
 
 // ============================================================================
-// [Fog::RasterPainterImpl<> - BlitAlignedImage]
+// [Fog::RasterPainterImpl<> - BlitRawImage]
 // ============================================================================
 
 template<int _MODE>
-err_t FOG_INLINE RasterPainterImpl<_MODE>::doBlitAlignedImageI(
-  RasterPainterEngine* engine, const PointI& pt, const Image& srcImage, const RectI& srcFraction)
+err_t FOG_INLINE RasterPainterImpl<_MODE>::doBlitRawImageI(
+  RasterPainterEngine* engine, const PointI& pt, const Image& srcImage, const RectI& srcFragment)
 {
   if (_MODE == RASTER_MODE_ST)
   {
-    engine->ctx.renderer->blitAlignedImageI(engine->ctx, pt, srcImage, srcFraction);
+    engine->ctx.renderer->blitRawImageI(engine->ctx, pt, srcImage, srcFragment);
     return ERR_OK;
   }
   else
@@ -4745,12 +4746,71 @@ err_t FOG_INLINE RasterPainterImpl<_MODE>::doBlitAlignedImageI(
 
 template<int _MODE>
 FOG_INLINE err_t RasterPainterImpl<_MODE>::doBlitUntransformedImageF(
-  RasterPainterEngine* engine, const BoxF& box, const Image& srcImage, const RectI& srcFraction)
+  RasterPainterEngine* engine, const BoxF& box, const Image& srcImage, const RectI& srcFragment)
 {
   if (_MODE == RASTER_MODE_ST)
   {
+    err_t err;
+    uint32_t transformType = engine->finalTransform.getType();
 
-    return ERR_RT_NOT_IMPLEMENTED;
+    RenderPatternContext* pcOld = engine->ctx.pc;
+    RenderPatternContext pc;
+
+    if (transformType <= TRANSFORM_TYPE_TRANSLATION)
+    {
+      TransformD& tr = engine->finalTransform;
+      double trOld20 = tr._20;
+      double trOld21 = tr._21;
+
+      BoxF boxClipped(box);
+      boxClipped.translate(PointF((float)trOld20, (float)trOld21));
+
+      if (!BoxF::intersect(boxClipped, boxClipped, engine->ctx.finalClipperF.getClipBox()))
+        return ERR_OK;
+
+      tr._type = TRANSFORM_TYPE_TRANSLATION;
+      tr._20 += box.x0;
+      tr._21 += box.y0;
+
+      FOG_RETURN_ON_ERROR(
+        _g2d_render.texture.create(&pc, 
+          engine->ctx.layer.primaryFormat,
+          engine->coreClipBox,
+          srcImage, srcFragment,
+          tr, Color(), TEXTURE_TILE_PAD, engine->ctx.paintHints.imageQuality)
+      );
+
+      tr._type = transformType;
+      tr._20 = trOld20;
+      tr._21 = trOld21;
+
+      engine->ctx.pc = &pc;
+      err = doFillRawBoxF(engine, boxClipped);
+    }
+    else
+    {
+      TransformD tr(engine->finalTransform);
+      tr.translate(PointD(box.x0, box.y0));
+
+      FOG_RETURN_ON_ERROR(
+        _g2d_render.texture.create(&pc, 
+          engine->ctx.layer.primaryFormat,
+          engine->coreClipBox,
+          srcImage, srcFragment,
+          tr, Color(), TEXTURE_TILE_PAD, engine->ctx.paintHints.imageQuality)
+      );
+
+      PathF& path = engine->ctx.tmpPathF[0];
+      path.clear();
+      path.box(box);
+
+      engine->ctx.pc = &pc;
+      err = doFillUntransformedPathF(engine, path, FILL_RULE_NON_ZERO, true);
+    }
+
+    engine->ctx.pc = pcOld;
+    pc.destroy();
+    return err;
   }
   else
   {
@@ -4761,11 +4821,71 @@ FOG_INLINE err_t RasterPainterImpl<_MODE>::doBlitUntransformedImageF(
 
 template<int _MODE>
 FOG_INLINE err_t RasterPainterImpl<_MODE>::doBlitUntransformedImageD(
-  RasterPainterEngine* engine, const BoxD& box, const Image& srcImage, const RectI& srcFraction)
+  RasterPainterEngine* engine, const BoxD& box, const Image& srcImage, const RectI& srcFragment)
 {
   if (_MODE == RASTER_MODE_ST)
   {
-    return ERR_RT_NOT_IMPLEMENTED;
+    err_t err;
+    uint32_t transformType = engine->finalTransform.getType();
+
+    RenderPatternContext* pcOld = engine->ctx.pc;
+    RenderPatternContext pc;
+
+    if (transformType <= TRANSFORM_TYPE_TRANSLATION)
+    {
+      TransformD& tr = engine->finalTransform;
+      double trOld20 = tr._20;
+      double trOld21 = tr._21;
+
+      BoxD boxClipped(box);
+      boxClipped.translate(PointD(trOld20, trOld21));
+
+      if (!BoxD::intersect(boxClipped, boxClipped, engine->ctx.finalClipperD.getClipBox()))
+        return ERR_OK;
+
+      tr._type = TRANSFORM_TYPE_TRANSLATION;
+      tr._20 += box.x0;
+      tr._21 += box.y0;
+
+      FOG_RETURN_ON_ERROR(
+        _g2d_render.texture.create(&pc, 
+          engine->ctx.layer.primaryFormat,
+          engine->coreClipBox,
+          srcImage, srcFragment,
+          tr, Color(), TEXTURE_TILE_PAD, engine->ctx.paintHints.imageQuality)
+      );
+
+      tr._type = transformType;
+      tr._20 = trOld20;
+      tr._21 = trOld21;
+
+      engine->ctx.pc = &pc;
+      err = doFillRawBoxD(engine, boxClipped);
+    }
+    else
+    {
+      TransformD tr(engine->finalTransform);
+      tr.translate(PointD(box.x0, box.y0));
+
+      FOG_RETURN_ON_ERROR(
+        _g2d_render.texture.create(&pc, 
+          engine->ctx.layer.primaryFormat,
+          engine->coreClipBox,
+          srcImage, srcFragment,
+          tr, Color(), TEXTURE_TILE_PAD, engine->ctx.paintHints.imageQuality)
+      );
+
+      PathD& path = engine->ctx.tmpPathD[0];
+      path.clear();
+      path.box(box);
+
+      engine->ctx.pc = &pc;
+      err = doFillUntransformedPathD(engine, path, FILL_RULE_NON_ZERO, true);
+    }
+
+    engine->ctx.pc = pcOld;
+    pc.destroy();
+    return err;
   }
   else
   {

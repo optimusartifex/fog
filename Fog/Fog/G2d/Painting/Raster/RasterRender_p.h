@@ -24,20 +24,20 @@ namespace Fog {
 struct FOG_NO_EXPORT RasterRenderVTable
 {
   // --------------------------------------------------------------------------
-  // [FillTransformedBox - Types]
+  // [FillRawBox - Types]
   // --------------------------------------------------------------------------
 
-  typedef void (FOG_FASTCALL *FillTransformedBoxI)(RasterContext& ctx, const BoxI& box);
-  typedef void (FOG_FASTCALL *FillTransformedBoxF)(RasterContext& ctx, const BoxF& box);
-  typedef void (FOG_FASTCALL *FillTransformedBoxD)(RasterContext& ctx, const BoxD& box);
+  typedef void (FOG_FASTCALL *FillRawBoxI)(RasterContext& ctx, const BoxI& box);
+  typedef void (FOG_FASTCALL *FillRawBoxF)(RasterContext& ctx, const BoxF& box);
+  typedef void (FOG_FASTCALL *FillRawBoxD)(RasterContext& ctx, const BoxD& box);
 
   // --------------------------------------------------------------------------
-  // [FillTransformedBox - Funcs]
+  // [FillRawBox - Funcs]
   // --------------------------------------------------------------------------
 
-  FillTransformedBoxI fillTransformedBoxI;
-  FillTransformedBoxF fillTransformedBoxF;
-  FillTransformedBoxD fillTransformedBoxD;
+  FillRawBoxI fillRawBoxI;
+  FillRawBoxF fillRawBoxF;
+  FillRawBoxD fillRawBoxD;
 
   // --------------------------------------------------------------------------
   // [FillRasterizedShape - Types]
@@ -52,30 +52,30 @@ struct FOG_NO_EXPORT RasterRenderVTable
   FillRasterizedShape fillRasterizedShape;
 
   // --------------------------------------------------------------------------
-  // FillTransformedPath - Types]
+  // FillRawPath - Types]
   // --------------------------------------------------------------------------
 
-  typedef void (FOG_FASTCALL *FillTransformedPathF)(RasterContext& ctx, const PathF& path, uint32_t fillRule);
-  typedef void (FOG_FASTCALL *FillTransformedPathD)(RasterContext& ctx, const PathD& path, uint32_t fillRule);
+  typedef void (FOG_FASTCALL *FillRawPathF)(RasterContext& ctx, const PathF& path, uint32_t fillRule);
+  typedef void (FOG_FASTCALL *FillRawPathD)(RasterContext& ctx, const PathD& path, uint32_t fillRule);
 
   // --------------------------------------------------------------------------
-  // [FillTransformedPath - Funcs]
+  // [FillRawPath - Funcs]
   // --------------------------------------------------------------------------
 
-  FillTransformedPathF fillTransformedPathF;
-  FillTransformedPathD fillTransformedPathD;
+  FillRawPathF fillRawPathF;
+  FillRawPathD fillRawPathD;
 
   // --------------------------------------------------------------------------
   // [Blit - Types]
   // --------------------------------------------------------------------------
 
-  typedef void (FOG_FASTCALL *BlitAlignedImageI)(RasterContext& ctx, const PointI& pt, const Image& srcImage, const RectI& srcFraction);
+  typedef void (FOG_FASTCALL *BlitRawImageI)(RasterContext& ctx, const PointI& pt, const Image& srcImage, const RectI& srcFragment);
 
   // --------------------------------------------------------------------------
   // [Blit - Funcs]
   // --------------------------------------------------------------------------
 
-  BlitAlignedImageI blitAlignedImageI;
+  BlitRawImageI blitRawImageI;
 };
 
 //! @internal

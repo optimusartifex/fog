@@ -99,12 +99,12 @@ struct RasterRenderImpl
   static void initVTable(RasterRenderVTable& v);
 
   // --------------------------------------------------------------------------
-  // [FillTransformedBox]
+  // [FillRawBox]
   // --------------------------------------------------------------------------
 
-  static void FOG_FASTCALL fillTransformedBoxI(RasterContext& ctx, const BoxI& box);
-  static void FOG_FASTCALL fillTransformedBoxF(RasterContext& ctx, const BoxF& box);
-  static void FOG_FASTCALL fillTransformedBoxD(RasterContext& ctx, const BoxD& box);
+  static void FOG_FASTCALL fillRawBoxI(RasterContext& ctx, const BoxI& box);
+  static void FOG_FASTCALL fillRawBoxF(RasterContext& ctx, const BoxF& box);
+  static void FOG_FASTCALL fillRawBoxD(RasterContext& ctx, const BoxD& box);
 
   // --------------------------------------------------------------------------
   // [FillRasterizedShape]
@@ -113,40 +113,40 @@ struct RasterRenderImpl
   static void FOG_FASTCALL fillRasterizedShape(RasterContext& ctx, void* _rasterizer);
 
   // --------------------------------------------------------------------------
-  // [FillTransformedPath]
+  // [FillRawPath]
   // --------------------------------------------------------------------------
 
-  static void FOG_FASTCALL fillTransformedPathF(RasterContext& ctx, const PathF& box, uint32_t fillRule);
-  static void FOG_FASTCALL fillTransformedPathD(RasterContext& ctx, const PathD& box, uint32_t fillRule);
+  static void FOG_FASTCALL fillRawPathF(RasterContext& ctx, const PathF& box, uint32_t fillRule);
+  static void FOG_FASTCALL fillRawPathD(RasterContext& ctx, const PathD& box, uint32_t fillRule);
 
   // --------------------------------------------------------------------------
   // [Blit]
   // --------------------------------------------------------------------------
 
-  static void FOG_FASTCALL blitAlignedImageI(RasterContext& ctx, const PointI& pt, const Image& srcImage, const RectI& srcFraction);
+  static void FOG_FASTCALL blitRawImageI(RasterContext& ctx, const PointI& pt, const Image& srcImage, const RectI& srcFragment);
 };
 
 template<typename C>
 void RasterRenderImpl<C>::initVTable(RasterRenderVTable& v)
 {
-  v.fillTransformedBoxI = fillTransformedBoxI;
-  v.fillTransformedBoxF = fillTransformedBoxF;
-  v.fillTransformedBoxD = fillTransformedBoxD;
+  v.fillRawBoxI = fillRawBoxI;
+  v.fillRawBoxF = fillRawBoxF;
+  v.fillRawBoxD = fillRawBoxD;
 
   v.fillRasterizedShape = fillRasterizedShape;
 
-  v.fillTransformedPathF = fillTransformedPathF;
-  v.fillTransformedPathD = fillTransformedPathD;
+  v.fillRawPathF = fillRawPathF;
+  v.fillRawPathD = fillRawPathD;
 
-  v.blitAlignedImageI = blitAlignedImageI;
+  v.blitRawImageI = blitRawImageI;
 }
 
 // ============================================================================
-// [Fog::RasterRender - FillTransformedBox]
+// [Fog::RasterRender - FillRawBox]
 // ============================================================================
 
 template<typename C>
-void FOG_FASTCALL RasterRenderImpl<C>::fillTransformedBoxI(RasterContext& ctx, const BoxI& box)
+void FOG_FASTCALL RasterRenderImpl<C>::fillRawBoxI(RasterContext& ctx, const BoxI& box)
 {
   // --------------------------------------------------------------------------
   // [Asserts]
@@ -296,7 +296,7 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillTransformedBoxI(RasterContext& ctx, c
 }
 
 template<typename C>
-void FOG_FASTCALL RasterRenderImpl<C>::fillTransformedBoxF(RasterContext& ctx, const BoxF& box)
+void FOG_FASTCALL RasterRenderImpl<C>::fillRawBoxF(RasterContext& ctx, const BoxF& box)
 {
   if (C::_PRECISION == IMAGE_PRECISION_BYTE)
   {
@@ -318,7 +318,7 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillTransformedBoxF(RasterContext& ctx, c
 }
 
 template<typename C>
-void FOG_FASTCALL RasterRenderImpl<C>::fillTransformedBoxD(RasterContext& ctx, const BoxD& box)
+void FOG_FASTCALL RasterRenderImpl<C>::fillRawBoxD(RasterContext& ctx, const BoxD& box)
 {
   if (C::_PRECISION == IMAGE_PRECISION_BYTE)
   {
@@ -462,11 +462,11 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillRasterizedShape(RasterContext& ctx, v
 }
 
 // ============================================================================
-// [Fog::RasterRender - FillTransformedPath]
+// [Fog::RasterRender - FillRawPath]
 // ============================================================================
 
 template<typename C>
-void FOG_FASTCALL RasterRenderImpl<C>::fillTransformedPathF(RasterContext& ctx, const PathF& path, uint32_t fillRule)
+void FOG_FASTCALL RasterRenderImpl<C>::fillRawPathF(RasterContext& ctx, const PathF& path, uint32_t fillRule)
 {
   if (C::_PRECISION == IMAGE_PRECISION_BYTE)
   {
@@ -488,7 +488,7 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillTransformedPathF(RasterContext& ctx, 
 }
 
 template<typename C>
-void FOG_FASTCALL RasterRenderImpl<C>::fillTransformedPathD(RasterContext& ctx, const PathD& path, uint32_t fillRule)
+void FOG_FASTCALL RasterRenderImpl<C>::fillRawPathD(RasterContext& ctx, const PathD& path, uint32_t fillRule)
 {
   if (C::_PRECISION == IMAGE_PRECISION_BYTE)
   {
@@ -514,7 +514,7 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillTransformedPathD(RasterContext& ctx, 
 // ============================================================================
 
 template<typename C>
-void FOG_FASTCALL RasterRenderImpl<C>::blitAlignedImageI(RasterContext& ctx, const PointI& pt, const Image& srcImage, const RectI& srcFraction)
+void FOG_FASTCALL RasterRenderImpl<C>::blitRawImageI(RasterContext& ctx, const PointI& pt, const Image& srcImage, const RectI& srcFragment)
 {
   // --------------------------------------------------------------------------
   // [Asserts]
@@ -556,8 +556,8 @@ void FOG_FASTCALL RasterRenderImpl<C>::blitAlignedImageI(RasterContext& ctx, con
 
   if (C::_CLIP == RASTER_CLIP_BOX)
   {
-    int srcWidth = srcFraction.w;
-    int srcHeight = srcFraction.h;
+    int srcWidth = srcFragment.w;
+    int srcHeight = srcFragment.h;
 
     int x0 = pt.x;
     int y0 = pt.y;
@@ -569,12 +569,12 @@ void FOG_FASTCALL RasterRenderImpl<C>::blitAlignedImageI(RasterContext& ctx, con
       if (y0 >= yEnd) return;
 
       dstPixels += y0 * dstStride;
-      srcPixels += (srcFraction.y + y0 - pt.y) * srcStride;
+      srcPixels += (srcFragment.y + y0 - pt.y) * srcStride;
     }
     else
     {
       dstPixels += y0 * dstStride;
-      srcPixels += srcFraction.y * srcStride;
+      srcPixels += srcFragment.y * srcStride;
     }
     
     if (opacity == C::_OPAQUE_VALUE)
@@ -582,7 +582,7 @@ void FOG_FASTCALL RasterRenderImpl<C>::blitAlignedImageI(RasterContext& ctx, con
       RenderVBlitLineFn blitLine;
 
       dstPixels += x0 * ctx.layer.primaryBPP;
-      srcPixels += srcFraction.x * srcd->bytesPerPixel;
+      srcPixels += srcFragment.x * srcd->bytesPerPixel;
       ctx.closure.palette = srcd->palette._d;
 
       // If compositing operator is SRC or SRC_OVER then any image format
@@ -632,7 +632,7 @@ _Blit_ClipBox_Opaque_Direct:
       staticSpan.setConstMask(opacity);
       staticSpan.setNext(NULL);
 
-      srcPixels += srcFraction.x * srcd->bytesPerPixel;
+      srcPixels += srcFragment.x * srcd->bytesPerPixel;
       ctx.closure.palette = srcd->palette._d;
 
       // If compositing operator is SRC or SRC_OVER then any image format

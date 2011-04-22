@@ -10,11 +10,7 @@
 #include <Fog/G2d/Mac/MacUtil.h>
 #include <Fog/Gui/Engine/MacGuiEngine.h>
 #include <Fog/Gui/Widget/Widget.h>
-#include <limits>
-
-#include <IOKit/IOMessage.h>
-#include <IOKit/pwr_mgt/IOPMLib.h>
-
+#include <climits>
 #import <AppKit/AppKit.h>
 #import <Foundation/Foundation.h>
 #import <Cocoa/Cocoa.h>
@@ -678,12 +674,10 @@ void MacGuiBackBuffer::updateRects(FogView* view, const BoxI* rects, sysuint_t c
 // [MacEventLoop]
 // ==============================================================================
 
-const CFTimeInterval kCFTimeIntervalMax = std::numeric_limits<CFTimeInterval>::max();
-
 MacEventLoopBase::MacEventLoopBase() : 
  EventLoop(Ascii8("Gui.Mac"))
 {
-  _delayedWorkFireTime_ = kCFTimeIntervalMax;
+  _delayedWorkFireTime = DBL_MAX;
 
   _runLoop = CFRunLoopGetCurrent();
   CFRetain(_runLoop);
@@ -693,11 +687,11 @@ MacEventLoopBase::MacEventLoopBase() :
   // as needed when ScheduleDelayedWork is called.
   CFRunLoopTimerContext timerContext = CFRunLoopTimerContext();
   timerContext.info = this;
-  _delayedWorkTimer = CFRunLoopTimerCreate(NULL,                // allocator
-                                             kCFTimeIntervalMax,  // fire time
-                                             kCFTimeIntervalMax,  // interval
-                                             0,                   // flags
-                                             0,                   // priority
+  _delayedWorkTimer = CFRunLoopTimerCreate(NULL,       // allocator
+                                             DBL_MAX,  // fire time
+                                             DBL_MAX,  // interval
+                                             0,        // flags
+                                             0,        // priority
                                              runDelayedWorkTimer,
                                              &timerContext);
   CFRunLoopAddTimer(_runLoop, _delayedWorkTimer, kCFRunLoopCommonModes);
@@ -737,15 +731,6 @@ MacEventLoopBase::~MacEventLoopBase()
   CFRelease(_runLoop);
 }
 
-void MacEventLoopBase::_runInternal()
-{
-  // CFRunLoopSourceSignal(_workSource);
-  // CFRunLoopSourceSignal(_delayedWorkSource);
-  // CFRunLoopSourceSignal(_idleWorkSource);
-  // 
-  _doRunInternal();
-}
-
 void MacEventLoopBase::_scheduleWork()
 {
   CFRunLoopSourceSignal(_workSource);
@@ -759,15 +744,15 @@ void MacEventLoopBase::_scheduleDelayedWork(const Time& delayedWorkTime)
   double seconds = now.second + (static_cast<double>((delayedWorkTime.toInternalValue()) % Time::MicrosecondsPerSecond) /
                                                       Time::MicrosecondsPerSecond);
   CFGregorianDate gregorian = { now.year, now.month, now.dayOfMonth, now.hour,now.minute, seconds };
-  _delayedWorkFireTime_ = CFGregorianDateGetAbsoluteTime(gregorian, NULL);
+  _delayedWorkFireTime = CFGregorianDateGetAbsoluteTime(gregorian, NULL);
 
-  CFRunLoopTimerSetNextFireDate(_delayedWorkTimer, _delayedWorkFireTime_);
+  CFRunLoopTimerSetNextFireDate(_delayedWorkTimer, _delayedWorkFireTime);
 }
 
 void MacEventLoopBase::runDelayedWorkTimer(CFRunLoopTimerRef timer, void* info)
 {
   MacEventLoopBase* self = static_cast<MacEventLoopBase*>(info);
-  self->_delayedWorkFireTime_ = kCFTimeIntervalMax;
+  self->_delayedWorkFireTime = DBL_MAX;
   CFRunLoopSourceSignal(self->_delayedWorkSource);
 }
 
@@ -800,12 +785,27 @@ bool MacEventLoopBase::runIdleWork()
   return did_work;
 }
 
-void MacMainEventLoop::_doRunInternal()
+// ==============================================================================
+// [MacNonMainEventLoop]
+// ==============================================================================
+
+void MacNonMainEventLoop::_runInternal()
 {
-  if (![NSApp isRunning])
-  {
-    [NSApp run];
-  }
+  [[NSRunLoop currentMainLoop] run];
+}
+
+void MacNonMainEventLoop::quit()
+{
+  // TODO
+}
+
+// ==============================================================================
+// [MacMainEventLoop]
+// ==============================================================================
+
+void MacMainEventLoop::_runInternal()
+{
+  if (![NSApp isRunning]) [NSApp run];
 }
 
 void MacMainEventLoop::quit()

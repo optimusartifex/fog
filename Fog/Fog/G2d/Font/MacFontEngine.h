@@ -57,8 +57,6 @@ struct FOG_API MacFontEngine : public FontEngine
 
 private:
   FOG_DISABLE_COPY(MacFontEngine)
-
-  ScopedAutoreleasePool pool;
 };
 
 // ============================================================================
@@ -120,6 +118,8 @@ struct FOG_API MacFontFace : public FontFace
 
 private:
   FOG_DISABLE_COPY(MacFontFace)
+  
+  ScopedAutoreleasePool pool;
 };
 
 } // Fog namespace

@@ -177,13 +177,9 @@ struct MacEventLoopBase : public EventLoop
   virtual void quit() = 0;
 
 protected:
-  virtual void _runInternal();
+  virtual void _runInternal() = 0;
   virtual void _scheduleWork();
   virtual void _scheduleDelayedWork(const Time& delayedWorkTime);
-
-  // Subclasses implement the work they need to do in _doRunInternal().
-  // MacEventLoopBase will call this from _runInternal(). 
-  virtual void _doRunInternal() = 0;
 
 private:
   // Timer callback scheduled by _scheduleDelayedWork.  This does not do any
@@ -211,7 +207,7 @@ private:
   // independently of CFRunLoopTimerGetNextFireDate(_delayedWorkTimer)
   // to be able to reset the timer properly after waking from system sleep.
   // See PowerStateNotification.
-  CFAbsoluteTime _delayedWorkFireTime_;
+  CFAbsoluteTime _delayedWorkFireTime;
 
   Time _delayedWorkTime;
 };
@@ -220,14 +216,14 @@ private:
 struct FOG_API MacNonMainEventLoop : public MacEventLoopBase
 {
   virtual void quit();
-  virtual void _doRunInternal();
+  virtual void _runInternal();
 };
 
 // @brief Using NSApplication
 struct FOG_API MacMainEventLoop : public MacEventLoopBase
 {
   virtual void quit();
-  virtual void _doRunInternal();
+  virtual void _runInternal();
 };
 
 //! @}

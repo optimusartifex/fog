@@ -40,7 +40,7 @@ static void* FOG_CDECL _Core_Memory_alloc(sysuint_t size)
 {
   void* addr = ::malloc(size);
 
-  if (FOG_UNLIKELY(addr == NULL) && size > 0)
+  if (FOG_IS_NULL(addr) && size > 0)
   {
     Memory::cleanup();
     addr = ::malloc(size);
@@ -53,7 +53,7 @@ static void* FOG_CDECL _Core_Memory_calloc(sysuint_t size)
 {
   void* addr = ::calloc(size, 1);
 
-  if (FOG_UNLIKELY(addr == NULL) && size > 0)
+  if (FOG_IS_NULL(addr) && size > 0)
   {
     Memory::cleanup();
     addr = ::calloc(size, 1);
@@ -64,12 +64,12 @@ static void* FOG_CDECL _Core_Memory_calloc(sysuint_t size)
 
 static void* FOG_CDECL _Core_Memory_realloc(void* addr, sysuint_t size)
 {
-  if (FOG_UNLIKELY(addr == NULL)) { return Memory::alloc(size); }
+  if (FOG_IS_NULL(addr)) { return Memory::alloc(size); }
   if (FOG_UNLIKELY(size == 0)) { Memory::free(addr); return NULL; }
 
   void* anew = ::realloc(addr, size);
 
-  if (FOG_UNLIKELY(anew == NULL))
+  if (FOG_IS_NULL(anew))
   {
     Memory::cleanup();
     anew = ::realloc(addr, size);
@@ -81,8 +81,7 @@ static void* FOG_CDECL _Core_Memory_realloc(void* addr, sysuint_t size)
 static void* FOG_CDECL _Core_Memory_reallocOrFree(void* addr, sysuint_t size)
 {
   void* anew = Memory::realloc(addr, size);
-  if (FOG_UNLIKELY(anew == NULL) && size > 0) Memory::free(addr);
-
+  if (FOG_IS_NULL(anew) && size > 0) Memory::free(addr);
   return anew;
 }
 
@@ -129,13 +128,21 @@ static void _Core_Memory_xchg(uint8_t* addr1, uint8_t* addr2, sysuint_t count)
 {
   sysuint_t i;
 
-#if FOG_ARCH_BITS == 32
-  for (i = count >> 2; i; i--, addr1 += 4, addr2 += 4) Memory::xchg_4((void*)addr1, (void*)addr2);
-  for (i = count & 3; i; i--, addr1 += 1, addr2 += 1) Memory::xchg_1((void*)addr1, (void*)addr2);
-#else
-  for (i = count >> 3; i; i--, addr1 += 8, addr2 += 8) Memory::xchg_8((void*)addr1, (void*)addr2);
-  for (i = count & 7; i; i--, addr1 += 1, addr2 += 1) Memory::xchg_1((void*)addr1, (void*)addr2);
-#endif // FOG_ARCH_BITS
+  for (i = count / (sizeof(sysuint_t)); i; i--)
+  {
+    Memory::xchg_t<sysuint_t>((sysuint_t*)addr1, (sysuint_t*)addr2);
+
+    addr1 += sizeof(sysuint_t);
+    addr2 += sizeof(sysuint_t);
+  }
+
+  for (i = count & (sizeof(sysuint_t) - 1); i; i--)
+  {
+    Memory::xchg_1((void*)addr1, (void*)addr2);
+
+    addr1++;
+    addr2++;
+  }
 }
 
 // ===========================================================================

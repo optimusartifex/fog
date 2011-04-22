@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_SVG_RENDER_SVGRENDER_H
-#define _FOG_SVG_RENDER_SVGRENDER_H
+#ifndef _FOG_SVG_VISIT_SVGRENDER_H
+#define _FOG_SVG_VISIT_SVGRENDER_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Static.h>
@@ -19,10 +19,11 @@
 #include <Fog/G2d/Source/Pattern.h>
 #include <Fog/Svg/Global/Constants.h>
 #include <Fog/Svg/Tools/SvgCoord.h>
+#include <Fog/Svg/Visit/SvgVisitor.h>
 
 namespace Fog {
 
-//! @addtogroup Fog_Svg_Render
+//! @addtogroup Fog_Svg_Visit
 //! @{
 
 // ============================================================================
@@ -96,7 +97,7 @@ struct FOG_API SvgRenderContext
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  SvgRenderContext(Painter* painter);
+  SvgRenderContext(Painter* painter, SvgVisitor* visitor = NULL);
   ~SvgRenderContext();
 
   // --------------------------------------------------------------------------
@@ -106,6 +107,20 @@ struct FOG_API SvgRenderContext
   FOG_INLINE Painter* getPainter() const
   {
     return _painter;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Visitor]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool hasVisitor() const
+  {
+    return _visitor != NULL;
+  }
+
+  FOG_INLINE SvgVisitor* getVisitor() const 
+  {
+    return _visitor;
   }
 
   // --------------------------------------------------------------------------
@@ -354,6 +369,7 @@ struct FOG_API SvgRenderContext
   // --------------------------------------------------------------------------
 
   Painter* _painter;
+  SvgVisitor* _visitor;
 
   SvgRenderStyle _fillStyle;
   SvgRenderStyle _strokeStyle;
@@ -504,4 +520,4 @@ private:
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_SVG_RENDER_SVGRENDER_H
+#endif // _FOG_SVG_VISIT_SVGRENDER_H

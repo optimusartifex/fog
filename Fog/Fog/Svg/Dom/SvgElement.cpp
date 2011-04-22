@@ -11,6 +11,8 @@
 // [Dependencies]
 #include <Fog/Svg/Dom/SvgDocument.h>
 #include <Fog/Svg/Dom/SvgElement.h>
+#include <Fog/Svg/Visit/SvgRender.h>
+#include <Fog/Svg/Visit/SvgVisitor.h>
 
 namespace Fog {
 
@@ -24,10 +26,6 @@ SvgElement::SvgElement(const ManagedString& tagName, uint32_t svgType) :
   _boundingRectDirty(true),
   _visible(true),
   _unused(0)
-#if 0
-,
-  _styles(NULL)
-#endif
 {
   _type |= SVG_ELEMENT_MASK;
   _flags &= ~(XML_ALLOWED_TAG);
@@ -77,16 +75,30 @@ err_t SvgElement::_walkAndRender(const XmlElement* root, SvgRenderContext* conte
   err_t err = ERR_OK;
   XmlElement* e;
 
-  for (e = root->firstChild(); e; e = e->nextSibling())
+  SvgVisitor* visitor = context->getVisitor();
+  if (visitor == NULL)
   {
-    if (e->isSvgElement() && reinterpret_cast<SvgElement*>(e)->getVisible())
+    for (e = root->firstChild(); e; e = e->nextSibling())
     {
-      err = reinterpret_cast<SvgElement*>(e)->onRender(context);
-      if (FOG_IS_ERROR(err)) break;
+      if (e->isSvgElement() && reinterpret_cast<SvgElement*>(e)->getVisible())
+      {
+        err = reinterpret_cast<SvgElement*>(e)->onRender(context);
+        if (FOG_IS_ERROR(err)) break;
+      }
     }
-    else if (e->hasChildNodes())
+  }
+  else
+  {
+    for (e = root->firstChild(); e; e = e->nextSibling())
     {
-      _walkAndRender(e, context);
+      if (e->isSvgElement() && reinterpret_cast<SvgElement*>(e)->getVisible() && visitor->canVisit(e))
+      {
+        visitor->onBegin(e);
+        err = reinterpret_cast<SvgElement*>(e)->onRender(context);
+        visitor->onEnd(e);
+
+        if (FOG_IS_ERROR(err)) break;
+      }
     }
   }
 

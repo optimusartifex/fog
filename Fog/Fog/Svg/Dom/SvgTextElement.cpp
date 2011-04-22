@@ -11,7 +11,7 @@
 // [Dependencies]
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Svg/Dom/SvgTextElement_p.h>
-#include <Fog/Svg/Render/SvgRender.h>
+#include <Fog/Svg/Visit/SvgRender.h>
 #include <Fog/Xml/Dom/XmlText.h>
 
 namespace Fog {
@@ -58,12 +58,13 @@ err_t SvgTextElement::onRenderShape(SvgRenderContext* context) const
 
   for (e = firstChild(); e; e = e->nextSibling())
   {
-    if (e->isSvgElement())
-    {
-      err = reinterpret_cast<SvgElement*>(e)->onRender(context);
-      if (FOG_IS_ERROR(err)) break;
-    }
-    else if (e->isText())
+    // TODO: Needed?
+    //if (e->isSvgElement() && reinterpret_cast<SvgElement*>(e)->getVisible())
+    //{
+    //  err = reinterpret_cast<SvgElement*>(e)->onRender(context);
+    //  if (FOG_IS_ERROR(err)) break;
+    //}
+    if (e->isText())
     {
       String text = e->getTextContent();
       text.simplify();
@@ -73,10 +74,6 @@ err_t SvgTextElement::onRenderShape(SvgRenderContext* context) const
       context->_font.getOutline(text, path);
       path.translate(PointD(x, y));
       context->drawPath(path);
-    }
-    else if (e->hasChildNodes())
-    {
-      _walkAndRender(e, context);
     }
   }
 

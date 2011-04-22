@@ -11,7 +11,7 @@
 // [Dependencies]
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Svg/Dom/SvgCircleElement_p.h>
-#include <Fog/Svg/Render/SvgRender.h>
+#include <Fog/Svg/Visit/SvgRender.h>
 
 namespace Fog {
 

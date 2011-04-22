@@ -203,7 +203,7 @@ FOG_GUI_MAIN()
     //fileName = Ascii8("/my/upload/img/svg/map-krasnaya-plyana.svg");
     //fileName = Ascii8("/my/upload/img/svg/Map_Multilayer_Scaled.svg");
     //fileName = Ascii8("C:/my/svg/map-krasnaya-plyana.svg");
-    //fileName = Ascii8("C:/my/svg/map-imeretinka.svg");
+    fileName = Ascii8("C:/my/svg/map-imeretinka.svg");
     //fileName = Ascii8("C:/my/svg/Map_Multilayer_Scaled.svg");
     //fileName = Ascii8("C:/my/svg/froggy.svg");
     //fileName = Ascii8("C:/my/svg/fire_engine.svg");
@@ -222,7 +222,7 @@ FOG_GUI_MAIN()
     //fileName = Ascii8("C:/my/svg/pattern.svg");
     //fileName = Ascii8("C:/my/svg/paint-fill-BE-01.svg");
 
-    fileName = Ascii8("C:/my/svg/biswajyotim_Jug.svg");
+    //fileName = Ascii8("C:/my/svg/jean_victor_balin_check.svg");
   }
 
   MyWindow window;

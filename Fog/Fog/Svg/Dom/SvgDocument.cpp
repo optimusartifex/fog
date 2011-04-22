@@ -32,6 +32,7 @@
 #include <Fog/Svg/Dom/SvgPolylineElement_p.h>
 #include <Fog/Svg/Dom/SvgRadialGradientElement_p.h>
 #include <Fog/Svg/Dom/SvgRectElement_p.h>
+#include <Fog/Svg/Dom/SvgRootElement_p.h>
 #include <Fog/Svg/Dom/SvgSolidColorElement_p.h>
 #include <Fog/Svg/Dom/SvgStopElement_p.h>
 #include <Fog/Svg/Dom/SvgSymbolElement_p.h>
@@ -42,6 +43,9 @@
 #include <Fog/Svg/Dom/SvgTSpanElement_p.h>
 #include <Fog/Svg/Dom/SvgUseElement_p.h>
 #include <Fog/Svg/Dom/SvgViewElement_p.h>
+
+#include <Fog/Svg/Visit/SvgHitTest.h>
+#include <Fog/Svg/Visit/SvgRender.h>
 
 namespace Fog {
 
@@ -98,6 +102,7 @@ XmlElement* SvgDocument::createElementStatic(const ManagedString& tagName)
   if (tagName == fog_strings->getString(STR_SVG_ELEMENT_rect          )) return fog_new SvgRectElement();
   if (tagName == fog_strings->getString(STR_SVG_ELEMENT_solidColor    )) return fog_new SvgSolidColorElement();
   if (tagName == fog_strings->getString(STR_SVG_ELEMENT_stop          )) return fog_new SvgStopElement();
+  if (tagName == fog_strings->getString(STR_SVG_ELEMENT_svg           )) return fog_new SvgRootElement();
   if (tagName == fog_strings->getString(STR_SVG_ELEMENT_symbol        )) return fog_new SvgSymbolElement();
   if (tagName == fog_strings->getString(STR_SVG_ELEMENT_text          )) return fog_new SvgTextElement();
   if (tagName == fog_strings->getString(STR_SVG_ELEMENT_tspan         )) return fog_new SvgTSpanElement();

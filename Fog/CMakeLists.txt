@@ -479,9 +479,11 @@ Set(FOG_CORE_MATH_HEADERS
 Set(FOG_CORE_MEMORY_SOURCES
   Fog/Core/Memory/BlockMemoryAllocator.cpp
   Fog/Core/Memory/Memory.cpp
+  Fog/Core/Memory/MemoryAlloc.cpp
+  Fog/Core/Memory/MemoryAllocDebug.cpp
   Fog/Core/Memory/MemoryBuffer.cpp
-  Fog/Core/Memory/MemoryDebugger.cpp
   Fog/Core/Memory/MemoryManager.cpp
+  Fog/Core/Memory/MemoryOps.cpp
   Fog/Core/Memory/ZoneMemoryAllocator.cpp
 )
 
@@ -494,8 +496,8 @@ Set(FOG_CORE_MEMORY_HEADERS
   Fog/Core/Memory/BSwap_msc_intrin.h
   Fog/Core/Memory/BSwap_msc_x86.h
   Fog/Core/Memory/Memory.h
+  Fog/Core/Memory/MemoryAlloc.h
   Fog/Core/Memory/MemoryBuffer.h
-  Fog/Core/Memory/MemoryDebugger_p.h
   Fog/Core/Memory/MemoryManager.h
   Fog/Core/Memory/MemoryOps.h
   Fog/Core/Memory/ZoneMemoryAllocator_p.h
@@ -1455,6 +1457,7 @@ Set(FOG_SVG_DOM_SOURCES
   Fog/Svg/Dom/SvgPolylineElement.cpp
   Fog/Svg/Dom/SvgRadialGradientElement.cpp
   Fog/Svg/Dom/SvgRectElement.cpp
+  Fog/Svg/Dom/SvgRootElement.cpp
   Fog/Svg/Dom/SvgSolidColorElement.cpp
   Fog/Svg/Dom/SvgStopElement.cpp
   Fog/Svg/Dom/SvgStyledElement.cpp
@@ -1502,6 +1505,7 @@ Set(FOG_SVG_DOM_HEADERS
   Fog/Svg/Dom/SvgPolylineElement_p.h
   Fog/Svg/Dom/SvgRadialGradientElement_p.h
   Fog/Svg/Dom/SvgRectElement_p.h
+  Fog/Svg/Dom/SvgRootElement_p.h
   Fog/Svg/Dom/SvgSolidColorElement_p.h
   Fog/Svg/Dom/SvgStopElement_p.h
   Fog/Svg/Dom/SvgStyledElement_p.h
@@ -1524,12 +1528,15 @@ Set(FOG_SVG_GLOBAL_HEADERS
   Fog/Svg/Global/Init_Svg_p.h
 )
 
-Set(FOG_SVG_RENDER_SOURCES
-  Fog/Svg/Render/SvgRender.cpp
+Set(FOG_SVG_VISIT_SOURCES
+  Fog/Svg/Visit/SvgHitTest.cpp
+  Fog/Svg/Visit/SvgRender.cpp
 )
 
-Set(FOG_SVG_RENDER_HEADERS
-  Fog/Svg/Render/SvgRender.h
+Set(FOG_SVG_VISIT_HEADERS
+  Fog/Svg/Visit/SvgHitTest.h
+  Fog/Svg/Visit/SvgRender.h
+  Fog/Svg/Visit/SvgVisitor.h
 )
 
 Set(FOG_SVG_TOOLS_SOURCES
@@ -1546,8 +1553,8 @@ Set(FOG_SVG_TOOLS_HEADERS
 Source_Group("Svg"                  FILES ${FOG_SVG_LIB_SOURCES}              ${FOG_SVG_LIB_HEADERS}             )
 Source_Group("Svg/Dom"              FILES ${FOG_SVG_DOM_SOURCES}              ${FOG_SVG_DOM_HEADERS}             )
 Source_Group("Svg/Global"           FILES ${FOG_SVG_GLOBAL_SOURCES}           ${FOG_SVG_GLOBAL_HEADERS}          )
-Source_Group("Svg/Render"           FILES ${FOG_SVG_RENDER_SOURCES}           ${FOG_SVG_RENDER_HEADERS}          )
 Source_Group("Svg/Tools"            FILES ${FOG_SVG_TOOLS_SOURCES}            ${FOG_SVG_TOOLS_HEADERS}           )
+Source_Group("Svg/Visit"            FILES ${FOG_SVG_VISIT_SOURCES}            ${FOG_SVG_VISIT_HEADERS}           )
 
 # =============================================================================
 # [Fog-Xml]
@@ -1677,8 +1684,8 @@ Set(FOG_ALL_SOURCES
   ${FOG_SVG_LIB_SOURCES}
   ${FOG_SVG_DOM_SOURCES}
   ${FOG_SVG_GLOBAL_SOURCES}
-  ${FOG_SVG_RENDER_SOURCES}
   ${FOG_SVG_TOOLS_SOURCES}
+  ${FOG_SVG_VISIT_SOURCES}
   # Fog/Xml.
   ${FOG_XML_LIB_SOURCES}
   ${FOG_XML_DOM_SOURCES}
@@ -1742,8 +1749,8 @@ Set(FOG_ALL_HEADERS
   ${FOG_SVG_LIB_HEADERS}
   ${FOG_SVG_DOM_HEADERS}
   ${FOG_SVG_GLOBAL_HEADERS}
-  ${FOG_SVG_RENDER_HEADERS}
   ${FOG_SVG_TOOLS_HEADERS}
+  ${FOG_SVG_VISIT_HEADERS}
   # Fog/Xml.
   ${FOG_XML_LIB_HEADERS}
   ${FOG_XML_DOM_HEADERS}

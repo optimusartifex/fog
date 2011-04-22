@@ -108,10 +108,10 @@ void MyWindow::onKey(KeyEvent* e)
         }
         break;
 
-      case KEY_UP   : _suby -= 0.05f; update(WIDGET_UPDATE_ALL); break;
-      case KEY_DOWN : _suby += 0.05f; update(WIDGET_UPDATE_ALL); break;
-      case KEY_LEFT : _subx -= 0.05f; update(WIDGET_UPDATE_ALL); break;
-      case KEY_RIGHT: _subx += 0.05f; update(WIDGET_UPDATE_ALL); break;
+      case KEY_UP   : _suby -= 0.2f; update(WIDGET_UPDATE_ALL); break;
+      case KEY_DOWN : _suby += 0.2f; update(WIDGET_UPDATE_ALL); break;
+      case KEY_LEFT : _subx -= 0.2f; update(WIDGET_UPDATE_ALL); break;
+      case KEY_RIGHT: _subx += 0.2f; update(WIDGET_UPDATE_ALL); break;
 
       case KEY_Q: _rotate -= 0.05f; update(WIDGET_UPDATE_ALL); break;
       case KEY_W: _rotate += 0.05f; update(WIDGET_UPDATE_ALL); break;
@@ -217,13 +217,12 @@ void MyWindow::onPaint(PaintEvent* e)
   //p->drawBox(BoxF(0.0f, 0.0f, 400.0f, 400.0f));
   //p->fillCircle(CircleF(PointF(200, 200), 100.0f));
 
-  //p->blitImage(PointI(100, 100), i[0]);
+  p->blitImage(PointI(100, 100), i[0]);
 
   /*
   p->fillRect(RectI(10, 10, 200, 200));
 
   RectF rect(10.0f + _subx, 10.0f + _suby, 100.0f, 100.0f);
-
 
   if (_clip)
   {

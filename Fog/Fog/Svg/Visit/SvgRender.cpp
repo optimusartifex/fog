@@ -4,7 +4,7 @@
 // MIT, See COPYING file in package
 
 // [Dependencies]
-#include <Fog/Svg/Render/SvgRender.h>
+#include <Fog/Svg/Visit/SvgRender.h>
 
 namespace Fog {
 
@@ -12,8 +12,9 @@ namespace Fog {
 // [Fog::SvgRenderContext]
 // ============================================================================
 
-SvgRenderContext::SvgRenderContext(Painter* painter) :
-  _painter(painter)
+SvgRenderContext::SvgRenderContext(Painter* painter, SvgVisitor* visitor) :
+  _painter(painter),
+  _visitor(visitor)
 {
   _strokeStyle.type = SVG_SOURCE_NONE;
   _fillStyle.type = SVG_SOURCE_COLOR;

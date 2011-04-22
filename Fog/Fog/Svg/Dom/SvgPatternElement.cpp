@@ -12,7 +12,7 @@
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/G2d/Source/Pattern.h>
 #include <Fog/Svg/Dom/SvgPatternElement_p.h>
-#include <Fog/Svg/Render/SvgRender.h>
+#include <Fog/Svg/Visit/SvgRender.h>
 
 namespace Fog {
 

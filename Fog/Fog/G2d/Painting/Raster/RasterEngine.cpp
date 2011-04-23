@@ -4053,13 +4053,13 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtI(Painter& self, const Poin
 
     if ((uint)(d = dstX - engine->ctx.finalClipBoxI.x0) >= (uint)engine->ctx.finalClipBoxI.getWidth())
     {
-      dstX = 0; srcX = -d;
+      dstX = 0; srcX -= d;
       if (d >= 0 || (dstW += d) <= 0) return ERR_OK;
     }
 
     if ((uint)(d = dstY - engine->ctx.finalClipBoxI.y0) >= (uint)engine->ctx.finalClipBoxI.getHeight())
     {
-      dstY = 0; srcY = -d;
+      dstY = 0; srcY -= d;
       if (d >= 0 || (dstH += d) <= 0) return ERR_OK;
     }
 
@@ -4116,8 +4116,31 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtF(Painter& self, const Poin
     int fx = (int)(x48x16 >> 8) & 0xFF;
     int fy = (int)(y48x16 >> 8) & 0xFF;
 
+    // If fx and fy == 0 then it is possible to blit image using BlitRawImage.
     if ((fx | fy) == 0)
-      return doBlitRawImageI(engine, PointI((int)(x48x16 >> 16), (int)(y48x16 >> 16)), i, RectI(iX, iY, iW, iH));
+    {
+      int dstX = (int)(x48x16 >> 16);
+      int dstY = (int)(y48x16 >> 16);
+
+      int d;
+
+      if ((uint)(d = dstX - engine->ctx.finalClipBoxI.x0) >= (uint)engine->ctx.finalClipBoxI.getWidth())
+      {
+        dstX = 0; iX -= d;
+        if (d >= 0 || (iW += d) <= 0) return ERR_OK;
+      }
+
+      if ((uint)(d = dstY - engine->ctx.finalClipBoxI.y0) >= (uint)engine->ctx.finalClipBoxI.getHeight())
+      {
+        dstY = 0; iY -= d;
+        if (d >= 0 || (iH += d) <= 0) return ERR_OK;
+      }
+
+      if ((d = engine->ctx.finalClipBoxI.x1 - dstX) < iW) iW = d;
+      if ((d = engine->ctx.finalClipBoxI.y1 - dstY) < iH) iH = d;
+
+      return doBlitRawImageI(engine, PointI(dstX, dstY), i, RectI(iX, iY, iW, iH));
+    }
   }
 
   BoxF box(UNINITIALIZED);
@@ -4168,8 +4191,31 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtD(Painter& self, const Poin
     int fx = (int)(x48x16 >> 8) & 0xFF;
     int fy = (int)(y48x16 >> 8) & 0xFF;
 
+    // If fx and fy == 0 then it is possible to blit image using BlitRawImage.
     if ((fx | fy) == 0)
-      return doBlitRawImageI(engine, PointI((int)(x48x16 >> 16), (int)(y48x16 >> 16)), i, RectI(iX, iY, iW, iH));
+    {
+      int dstX = (int)(x48x16 >> 16);
+      int dstY = (int)(y48x16 >> 16);
+
+      int d;
+
+      if ((uint)(d = dstX - engine->ctx.finalClipBoxI.x0) >= (uint)engine->ctx.finalClipBoxI.getWidth())
+      {
+        dstX = 0; iX -= d;
+        if (d >= 0 || (iW += d) <= 0) return ERR_OK;
+      }
+
+      if ((uint)(d = dstY - engine->ctx.finalClipBoxI.y0) >= (uint)engine->ctx.finalClipBoxI.getHeight())
+      {
+        dstY = 0; iY -= d;
+        if (d >= 0 || (iH += d) <= 0) return ERR_OK;
+      }
+
+      if ((d = engine->ctx.finalClipBoxI.x1 - dstX) < iW) iW = d;
+      if ((d = engine->ctx.finalClipBoxI.y1 - dstY) < iH) iH = d;
+
+      return doBlitRawImageI(engine, PointI(dstX, dstY), i, RectI(iX, iY, iW, iH));
+    }
   }
 
   BoxD box(UNINITIALIZED);

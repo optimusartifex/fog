@@ -9,7 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Svg/Dom/SvgCoordAttribute_p.h>
-#include <Fog/Svg/Dom/SvgElement.h>
+#include <Fog/Svg/Dom/SvgStyledElement_p.h>
 
 namespace Fog {
 
@@ -20,9 +20,9 @@ namespace Fog {
 // [Fog::SvgRootElement]
 // ============================================================================
 
-struct FOG_NO_EXPORT SvgRootElement : public SvgElement
+struct FOG_NO_EXPORT SvgRootElement : public SvgStyledElement
 {
-  typedef SvgElement base;
+  typedef SvgStyledElement base;
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -41,7 +41,7 @@ struct FOG_NO_EXPORT SvgRootElement : public SvgElement
   // [SVG Rendering]
   // --------------------------------------------------------------------------
 
-  virtual err_t onRender(SvgRenderContext* context) const;
+  virtual err_t onRenderShape(SvgRenderContext* context) const;
   virtual err_t onCalcBoundingBox(RectF* box) const;
 
   // --------------------------------------------------------------------------

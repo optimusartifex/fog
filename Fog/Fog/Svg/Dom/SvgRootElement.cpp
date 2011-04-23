@@ -20,7 +20,7 @@ namespace Fog {
 // ============================================================================
 
 SvgRootElement::SvgRootElement() :
-  SvgElement(fog_strings->getString(STR_SVG_ELEMENT_svg), SVG_ELEMENT_SVG),
+  SvgStyledElement(fog_strings->getString(STR_SVG_ELEMENT_svg), SVG_ELEMENT_SVG),
   a_x     (NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_x     ), FOG_OFFSET_OF(SvgRootElement, a_x     )),
   a_y     (NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_y     ), FOG_OFFSET_OF(SvgRootElement, a_y     )),
   a_width (NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_width ), FOG_OFFSET_OF(SvgRootElement, a_width )),
@@ -43,26 +43,12 @@ XmlAttribute* SvgRootElement::_createAttribute(const ManagedString& name) const
   return base::_createAttribute(name);
 }
 
-err_t SvgRootElement::onRender(SvgRenderContext* context) const
+err_t SvgRootElement::onRenderShape(SvgRenderContext* context) const
 {
-  err_t err = ERR_OK;
-  SvgVisitor* visitor = context->getVisitor();
-
-  if (visitor)
-  {
-    if (visitor->canVisit(const_cast<SvgRootElement*>(this)))
-    {
-      visitor->onBegin(const_cast<SvgRootElement*>(this));
-      err = SvgElement::_walkAndRender(this, context);
-      visitor->onEnd(const_cast<SvgRootElement*>(this));
-    }
-  }
+  if (hasChildNodes())
+    return _walkAndRender(this, context);
   else
-  {
-    err = SvgElement::_walkAndRender(this, context);
-  }
-
-  return err;
+    return ERR_OK;
 }
 
 err_t SvgRootElement::onCalcBoundingBox(RectF* box) const

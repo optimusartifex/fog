@@ -93,7 +93,7 @@ static void FOG_CDECL _G2d_CubicCurveT_getExtrema(const typename PointT<Number>:
     c = Number(3.0) * (-self[0].y +                self[1].y                         );
   }
 
-  dstBox->set(pMin.x, pMin.y, pMax.x, pMax.y);
+  dstBox->setBox(pMin.x, pMin.y, pMax.x, pMax.y);
 }
 
 // ============================================================================

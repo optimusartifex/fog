@@ -49,6 +49,8 @@ struct FOG_NO_EXPORT PieF : ArcF
   FOG_INLINE PieF(const RectF& r, float start_, float sweep_) : ArcF(r, start_, sweep_) {}
   FOG_INLINE PieF(const BoxF& r, float start_, float sweep_) : ArcF(r, start_, sweep_) {}
 
+  explicit FOG_INLINE PieF(const ArcD& other) : ArcF(other) {}
+
   // --------------------------------------------------------------------------
   // [BoundingRect]
   // --------------------------------------------------------------------------
@@ -59,12 +61,6 @@ struct FOG_NO_EXPORT PieF : ArcF
     _g2d.arcf.getBoundingRect(this, &result, true);
     return result;
   }
-
-  // --------------------------------------------------------------------------
-  // [Convert]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE PieD toPieD() const;
 };
 
 // ============================================================================
@@ -87,6 +83,8 @@ struct FOG_NO_EXPORT PieD : ArcD
   FOG_INLINE PieD(const RectD& r, double start_, double sweep_) : ArcD(r, start_, sweep_) {}
   FOG_INLINE PieD(const BoxD& r, double start_, double sweep_) : ArcD(r, start_, sweep_) {}
 
+  explicit FOG_INLINE PieD(const ArcF& other) : ArcD(other) {}
+
   // --------------------------------------------------------------------------
   // [BoundingRect]
   // --------------------------------------------------------------------------
@@ -97,20 +95,7 @@ struct FOG_NO_EXPORT PieD : ArcD
     _g2d.arcd.getBoundingRect(this, &result, true);
     return result;
   }
-
-  // --------------------------------------------------------------------------
-  // [Convert]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE PieF toPieF() const;
 };
-
-// ============================================================================
-// [Implemented-Later]
-// ============================================================================
-
-FOG_INLINE PieD PieF::toPieD() const { return PieD(center.toPointD(), radius.toPointD(), (double)start, (double)sweep); }
-FOG_INLINE PieF PieD::toPieF() const { return PieF(center.toPointF(), radius.toPointF(), (float)start, (float)sweep); }
 
 // ============================================================================
 // [Fog::PieT<>]

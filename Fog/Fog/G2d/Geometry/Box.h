@@ -51,20 +51,10 @@ struct BoxI
   FOG_INLINE BoxI() {}
   FOG_INLINE BoxI(_Uninitialized) {}
 
-  FOG_INLINE BoxI(int px0, int py0, int px1, int py1) :
-    x0(px0), y0(py0), x1(px1), y1(py1)
-  {
-  }
+  FOG_INLINE BoxI(const BoxI& other) { setBox(other); }
+  FOG_INLINE BoxI(int px0, int py0, int px1, int py1) { setBox(px0, py0, px1, py1); }
 
-  FOG_INLINE BoxI(const BoxI& other) :
-    x0(other.x0), y0(other.y0), x1(other.x1), y1(other.y1)
-  {
-  }
-
-  explicit FOG_INLINE BoxI(const RectI& other) :
-    x0(other.x), y0(other.y), x1(other.x + other.w), y1(other.y + other.h)
-  {
-  }
+  explicit FOG_INLINE BoxI(const RectI& other) { setRect(other); }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -83,19 +73,37 @@ struct BoxI
   FOG_INLINE PointI getPosition() const { return PointI(x0, y0); }
   FOG_INLINE SizeI getSize() const { return SizeI(x1 - x0, y1 - y0); }
 
-  FOG_INLINE BoxI& set(const BoxI &other)
+  FOG_INLINE BoxI& setBox(const BoxI& other)
   {
     Memory::copy_t<BoxI>(this, &other);
     return *this;
   }
 
-  FOG_INLINE BoxI& set(int px0, int py0, int px1, int py1)
+  FOG_INLINE BoxI& setBox(int px0, int py0, int px1, int py1)
   {
     x0 = px0;
     y0 = py0;
     x1 = px1;
     y1 = py1;
 
+    return *this;
+  }
+
+  FOG_INLINE BoxI& setRect(const RectI& other)
+  {
+    x0 = other.x;
+    y0 = other.y;
+    x1 = other.x + other.w;
+    y1 = other.y + other.h;
+    return *this;
+  }
+
+  FOG_INLINE BoxI& setRect(int px, int py, int pw, int ph)
+  {
+    x0 = px;
+    y0 = py;
+    x1 = px + pw;
+    y1 = py + ph;
     return *this;
   }
 
@@ -237,21 +245,11 @@ struct BoxI
   }
 
   // --------------------------------------------------------------------------
-  // [Convert]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE RectI toRectI() const { return RectI(x0, y0, x1 - x0, y1 - y0); }
-  FOG_INLINE RectF toRectF() const { return RectF((float)x0, (float)y0, (float)(x1 - x0), (float)(y1 - y0)); }
-  FOG_INLINE RectD toRectD() const { return RectD(x0, y0, x1 - x0, y1 - y0); }
-
-  FOG_INLINE BoxF toBoxF() const;
-  FOG_INLINE BoxD toBoxD() const;
-
-  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE BoxI& operator=(const BoxI& other) { return set(other); }
+  FOG_INLINE BoxI& operator=(const BoxI& other) { return setBox(other); }
+  FOG_INLINE BoxI& operator=(const RectI& other) { return setRect(other); }
 
   FOG_INLINE BoxI operator+(const PointI& p) const { return BoxI(x0 + p.x, y0 + p.y, x1 + p.x, y1 + p.y); }
   FOG_INLINE BoxI operator-(const PointI& p) const { return BoxI(x0 - p.x, y0 - p.y, x1 - p.x, y1 - p.y); }
@@ -285,18 +283,18 @@ struct BoxI
 
     _mm_storeu_si128((__m128i *)(&dest), xmm0);
 #else
-    dest.set(Math::max(src1.x0, src2.x0), Math::max(src1.y0, src2.y0),
-             Math::min(src1.x1, src2.x1), Math::min(src1.y1, src2.y1));
+    dest.setBox(Math::max(src1.x0, src2.x0), Math::max(src1.y0, src2.y0),
+                Math::min(src1.x1, src2.x1), Math::min(src1.y1, src2.y1));
 #endif // FOG_HARDCODE_SSE2
     return dest.isValid();
   }
 
   static FOG_INLINE void bound(BoxI& dest, const BoxI& src1, const BoxI& src2)
   {
-    dest.set(Math::min(src1.x0, src2.x0),
-             Math::min(src1.y0, src2.y0),
-             Math::max(src1.x1, src2.x1),
-             Math::max(src1.y1, src2.y1));
+    dest.setBox(Math::min(src1.x0, src2.x0),
+                Math::min(src1.y0, src2.y0),
+                Math::max(src1.x1, src2.x1),
+                Math::max(src1.y1, src2.y1));
   }
 
   // --------------------------------------------------------------------------
@@ -323,45 +321,14 @@ struct BoxF
   FOG_INLINE BoxF() {}
   FOG_INLINE BoxF(_Uninitialized) {}
 
-  FOG_INLINE BoxF(float px0, float py0, float px1, float py1) :
-    x0(px0),
-    y0(py0),
-    x1(px1),
-    y1(py1)
-  {
-  }
+  FOG_INLINE BoxF(const BoxF& other) { setBox(other); }
+  FOG_INLINE BoxF(float px0, float py0, float px1, float py1) { setBox(px0, py0, px1, py1); }
 
-  FOG_INLINE BoxF(const BoxF& other) :
-    x0(other.x0),
-    y0(other.y0),
-    x1(other.x1),
-    y1(other.y1)
-  {
-  }
-
-  explicit FOG_INLINE BoxF(const BoxI& other) :
-    x0((float)other.x0),
-    y0((float)other.y0),
-    x1((float)other.x1),
-    y1((float)other.y1)
-  {
-  }
-
-  explicit FOG_INLINE BoxF(const RectI& other) :
-    x0((float)other.x),
-    y0((float)other.y),
-    x1((float)(other.x + other.w)),
-    y1((float)(other.y + other.h))
-  {
-  }
-
-  explicit FOG_INLINE BoxF(const RectF& other) :
-    x0(other.x),
-    y0(other.y),
-    x1(other.x + other.w),
-    y1(other.y + other.h)
-  {
-  }
+  explicit FOG_INLINE BoxF(const BoxI& other) { setBox(other); }
+  explicit FOG_INLINE BoxF(const BoxD& other) { setBox(other); }
+  explicit FOG_INLINE BoxF(const RectI& other) { setRect(other); }
+  explicit FOG_INLINE BoxF(const RectF& other) { setRect(other); }
+  explicit FOG_INLINE BoxF(const RectD& other) { setRect(other); }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -380,26 +347,68 @@ struct BoxF
   FOG_INLINE PointF getPosition() const { return PointF(x0, y0); }
   FOG_INLINE SizeF getSize() const { return SizeF(x1 - x0, y1 - y0); }
 
-  FOG_INLINE BoxF& set(const BoxI& other)
-  {
-    x0 = (float)other.x0; y0 = (float)other.y0;
-    x1 = (float)other.x1; y1 = (float)other.y1;
-    return *this;
-  }
-
-  FOG_INLINE BoxF& set(const BoxF& other)
+  FOG_INLINE BoxF& setBox(const BoxF& other)
   {
     Memory::copy_t<BoxF>(this, &other);
     return *this;
   }
 
-  FOG_INLINE BoxF& set(float px0, float py0, float px1, float py1)
+  FOG_INLINE BoxF& setBox(const BoxI& other)
+  {
+    x0 = float(other.x0);
+    y0 = float(other.y0);
+    x1 = float(other.x1);
+    y1 = float(other.y1);
+    return *this;
+  }
+
+  FOG_INLINE BoxF& setBox(const BoxD& other);
+
+  FOG_INLINE BoxF& setBox(float px0, float py0, float px1, float py1)
   {
     x0 = px0;
     y0 = py0;
     x1 = px1;
     y1 = py1;
+    return *this;
+  }
 
+  FOG_INLINE BoxF& setRect(const RectF& rect)
+  {
+    x0 = rect.x;
+    y0 = rect.y;
+    x1 = rect.x + rect.w;
+    y1 = rect.y + rect.h;
+
+    return *this;
+  }
+
+  FOG_INLINE BoxF& setRect(const RectI& rect)
+  {
+    x0 = float(rect.x);
+    y0 = float(rect.y);
+    x1 = float(rect.x + rect.w);
+    y1 = float(rect.y + rect.h);
+
+    return *this;
+  }
+
+  FOG_INLINE BoxF& setRect(const RectD& rect)
+  {
+    x0 = float(rect.x);
+    y0 = float(rect.y);
+    x1 = float(rect.x + rect.w);
+    y1 = float(rect.y + rect.h);
+
+    return *this;
+  }
+
+  FOG_INLINE BoxF& setRect(float px, float py, float pw, float ph)
+  {
+    x0 = px;
+    y0 = py;
+    x1 = px + pw;
+    y1 = py + ph;
     return *this;
   }
 
@@ -445,6 +454,18 @@ struct BoxF
     y0 += p.y;
     x1 += p.x;
     y1 += p.y;
+    return *this;
+  }
+
+  FOG_INLINE BoxF& translate(const PointI& p)
+  {
+    float px = float(p.x);
+    float py = float(p.y);
+
+    x0 += px;
+    y0 += py;
+    x1 += px;
+    y1 += py;
     return *this;
   }
 
@@ -544,22 +565,16 @@ struct BoxF
   }
 
   // --------------------------------------------------------------------------
-  // [Convert]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE RectI toRectI() const { return RectI((int)x0, (int)y0, (int)(x1 - x0), (int)(y1 - y0)); }
-  FOG_INLINE RectF toRectF() const { return RectF(x0, y0, x1 - x0, y1 - y0); }
-  FOG_INLINE RectD toRectD() const { return RectD(x0, y0, x1 - x0, y1 - y0); }
-
-  FOG_INLINE BoxI toBoxI() const;
-  FOG_INLINE BoxD toBoxD() const;
-
-  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE BoxF& operator=(const BoxI& other) { return set(other); }
-  FOG_INLINE BoxF& operator=(const BoxF& other) { return set(other); }
+  FOG_INLINE BoxF& operator=(const BoxI& other) { return setBox(other); }
+  FOG_INLINE BoxF& operator=(const BoxF& other) { return setBox(other); }
+  FOG_INLINE BoxF& operator=(const BoxD& other) { return setBox(other); }
+
+  FOG_INLINE BoxF& operator=(const RectI& other) { return setRect(other); }
+  FOG_INLINE BoxF& operator=(const RectF& other) { return setRect(other); }
+  FOG_INLINE BoxF& operator=(const RectD& other) { return setRect(other); }
 
   FOG_INLINE BoxF operator+(const PointI& p) const { return BoxF(x0 + (float)p.x, y0 + (float)p.y, x1 + (float)p.x, y1 + (float)p.y); }
   FOG_INLINE BoxF operator+(const PointF& p) const { return BoxF(x0 + (float)p.x, y0 + (float)p.y, x1 + (float)p.x, y1 + (float)p.y); }
@@ -582,19 +597,19 @@ struct BoxF
 
   static FOG_INLINE bool intersect(BoxF& dest, const BoxF& src1, const BoxF& src2)
   {
-    dest.set(Math::max(src1.x0, src2.x0),
-             Math::max(src1.y0, src2.y0),
-             Math::min(src1.x1, src2.x1),
-             Math::min(src1.y1, src2.y1));
+    dest.setBox(Math::max(src1.x0, src2.x0),
+                Math::max(src1.y0, src2.y0),
+                Math::min(src1.x1, src2.x1),
+                Math::min(src1.y1, src2.y1));
     return dest.isValid();
   }
 
   static FOG_INLINE void bound(BoxF& dest, const BoxF& src1, const BoxF& src2)
   {
-    dest.set(Math::min(src1.x0, src2.x0),
-             Math::min(src1.y0, src2.y0),
-             Math::max(src1.x1, src2.x1),
-             Math::max(src1.y1, src2.y1));
+    dest.setBox(Math::min(src1.x0, src2.x0),
+                Math::min(src1.y0, src2.y0),
+                Math::max(src1.x1, src2.x1),
+                Math::max(src1.y1, src2.y1));
   }
 
   // --------------------------------------------------------------------------
@@ -621,40 +636,15 @@ struct FOG_NO_EXPORT BoxD
   FOG_INLINE BoxD() {}
   FOG_INLINE BoxD(_Uninitialized) {}
 
-  FOG_INLINE BoxD(double px0, double py0, double px1, double py1) :
-    x0(px0), y0(py0), x1(px1), y1(py1)
-  {
-  }
+  FOG_INLINE BoxD(const BoxD& other) { setBox(other); }
+  FOG_INLINE BoxD(double px0, double py0, double px1, double py1) { setBox(px0, py0, px1, py1); }
 
-  FOG_INLINE BoxD(const BoxD& other) :
-    x0(other.x0), y0(other.y0), x1(other.x1), y1(other.y1)
-  {
-  }
+  explicit FOG_INLINE BoxD(const BoxF& other) { setBox(other); }
+  explicit FOG_INLINE BoxD(const BoxI& other) { setBox(other); }
 
-  explicit FOG_INLINE BoxD(const BoxF& other) :
-    x0(other.x0), y0(other.y0), x1(other.x1), y1(other.y1)
-  {
-  }
-
-  explicit FOG_INLINE BoxD(const BoxI& other) :
-    x0(other.x0), y0(other.y0), x1(other.x1), y1(other.y1)
-  {
-  }
-
-  explicit FOG_INLINE BoxD(const RectD& other) :
-    x0(other.x), y0(other.y), x1(other.x + other.w), y1(other.y + other.h)
-  {
-  }
-
-  explicit FOG_INLINE BoxD(const RectF& other) :
-    x0(other.x), y0(other.y), x1(other.x + other.w), y1(other.y + other.h)
-  {
-  }
-
-  explicit FOG_INLINE BoxD(const RectI& other) :
-    x0(other.x), y0(other.y), x1(other.x + other.w), y1(other.y + other.h)
-  {
-  }
+  explicit FOG_INLINE BoxD(const RectD& other) { setRect(other); }
+  explicit FOG_INLINE BoxD(const RectF& other) { setRect(other); }
+  explicit FOG_INLINE BoxD(const RectI& other) { setRect(other); }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -673,37 +663,72 @@ struct FOG_NO_EXPORT BoxD
   FOG_INLINE PointD getPosition() const { return PointD(x0, y0); }
   FOG_INLINE SizeD getSize() const { return SizeD(x1 - x0, y1 - y0); }
 
-  FOG_INLINE BoxD& set(const BoxD &other)
+  FOG_INLINE BoxD& setBox(const BoxD& other)
   {
     Memory::copy_t<BoxD>(this, &other);
     return *this;
   }
 
-  FOG_INLINE BoxD& set(const BoxF &other)
+  FOG_INLINE BoxD& setBox(const BoxF& other)
   {
-    x0 = other.x0;
-    y0 = other.y0;
-    x1 = other.x1;
-    y1 = other.y1;
+    x0 = double(other.x0);
+    y0 = double(other.y0);
+    x1 = double(other.x1);
+    y1 = double(other.y1);
     return *this;
   }
 
-  FOG_INLINE BoxD& set(const BoxI &other)
+  FOG_INLINE BoxD& setBox(const BoxI& other)
   {
-    x0 = other.x0;
-    y0 = other.y0;
-    x1 = other.x1;
-    y1 = other.y1;
+    x0 = double(other.x0);
+    y0 = double(other.y0);
+    x1 = double(other.x1);
+    y1 = double(other.y1);
     return *this;
   }
 
-  FOG_INLINE BoxD& set(double px0, double py0, double px1, double py1)
+  FOG_INLINE BoxD& setBox(double px0, double py0, double px1, double py1)
   {
     x0 = px0;
     y0 = py0;
     x1 = px1;
     y1 = py1;
+    return *this;
+  }
 
+  FOG_INLINE BoxD& setRect(const RectD& other)
+  {
+    x0 = other.x;
+    y0 = other.y;
+    x1 = other.x + other.w;
+    y1 = other.y + other.h;
+    return *this;
+  }
+
+  FOG_INLINE BoxD& setRect(const RectF& other)
+  {
+    x0 = double(other.x);
+    y0 = double(other.y);
+    x1 = double(other.x + other.w);
+    y1 = double(other.y + other.h);
+    return *this;
+  }
+
+  FOG_INLINE BoxD& setRect(const RectI& other)
+  {
+    x0 = double(other.x);
+    y0 = double(other.y);
+    x1 = double(other.x + other.w);
+    y1 = double(other.y + other.h);
+    return *this;
+  }
+
+  FOG_INLINE BoxD& setRect(double px, double py, double pw, double ph)
+  {
+    x0 = px;
+    y0 = py;
+    x1 = px + pw;
+    y1 = py + ph;
     return *this;
   }
 
@@ -753,6 +778,15 @@ struct FOG_NO_EXPORT BoxD
   }
 
   FOG_INLINE BoxD& translate(const PointI& p)
+  {
+    x0 += p.x;
+    y0 += p.y;
+    x1 += p.x;
+    y1 += p.y;
+    return *this;
+  }
+
+  FOG_INLINE BoxD& translate(const PointF& p)
   {
     x0 += p.x;
     y0 += p.y;
@@ -875,23 +909,16 @@ struct FOG_NO_EXPORT BoxD
   }
 
   // --------------------------------------------------------------------------
-  // [Convert]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE RectI toRectI() const { return RectI((int)x0, (int)y0, (int)(x1 - x0), (int)(y1 - y0)); }
-  FOG_INLINE RectF toRectF() const { return RectF((float)x0, (float)y0, (float)(x1 - x0), (float)(y1 - y0)); }
-  FOG_INLINE RectD toRectD() const { return RectD(x0, y0, x1 - x0, y1 - y0); }
-
-  FOG_INLINE BoxI toBoxI() const;
-  FOG_INLINE BoxF toBoxF() const;
-
-  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE BoxD& operator=(const BoxI& other) { return set(other); }
-  FOG_INLINE BoxD& operator=(const BoxF& other) { return set(other); }
-  FOG_INLINE BoxD& operator=(const BoxD& other) { return set(other); }
+  FOG_INLINE BoxD& operator=(const BoxI& other) { return setBox(other); }
+  FOG_INLINE BoxD& operator=(const BoxF& other) { return setBox(other); }
+  FOG_INLINE BoxD& operator=(const BoxD& other) { return setBox(other); }
+
+  FOG_INLINE BoxD& operator=(const RectI& other) { return setRect(other); }
+  FOG_INLINE BoxD& operator=(const RectF& other) { return setRect(other); }
+  FOG_INLINE BoxD& operator=(const RectD& other) { return setRect(other); }
 
   FOG_INLINE BoxD operator+(const PointI& p) const { return BoxD(x0 + (double)p.x, y0 + (double)p.y, x1 + (double)p.x, y1 + (double)p.y); }
   FOG_INLINE BoxD operator+(const PointF& p) const { return BoxD(x0 + (double)p.x, y0 + (double)p.y, x1 + (double)p.x, y1 + (double)p.y); }
@@ -918,19 +945,19 @@ struct FOG_NO_EXPORT BoxD
 
   static FOG_INLINE bool intersect(BoxD& dest, const BoxD& src1, const BoxD& src2)
   {
-    dest.set(Math::max(src1.x0, src2.x0),
-             Math::max(src1.y0, src2.y0),
-             Math::min(src1.x1, src2.x1),
-             Math::min(src1.y1, src2.y1));
+    dest.setBox(Math::max(src1.x0, src2.x0),
+                Math::max(src1.y0, src2.y0),
+                Math::min(src1.x1, src2.x1),
+                Math::min(src1.y1, src2.y1));
     return dest.isValid();
   }
 
   static FOG_INLINE void bound(BoxD& dest, const BoxD& src1, const BoxD& src2)
   {
-    dest.set(Math::min(src1.x0, src2.x0),
-             Math::min(src1.y0, src2.y0),
-             Math::max(src1.x1, src2.x1),
-             Math::max(src1.y1, src2.y1));
+    dest.setBox(Math::min(src1.x0, src2.x0),
+                Math::min(src1.y0, src2.y0),
+                Math::max(src1.x1, src2.x1),
+                Math::max(src1.y1, src2.y1));
   }
 
   // --------------------------------------------------------------------------
@@ -947,18 +974,77 @@ struct FOG_NO_EXPORT BoxD
 // [Implemented-Later]
 // ============================================================================
 
-FOG_INLINE RectI::RectI(const BoxI& box) : x(box.x0), y(box.y0), w(box.x1 - box.x0), h(box.y1 - box.y0) {}
-FOG_INLINE RectF::RectF(const BoxF& box) : x(box.x0), y(box.y0), w(box.x1 - box.x0), h(box.y1 - box.y0) {}
-FOG_INLINE RectD::RectD(const BoxD& box) : x(box.x0), y(box.y0), w(box.x1 - box.x0), h(box.y1 - box.y0) {}
+FOG_INLINE BoxF& BoxF::setBox(const BoxD& other)
+{
+  x0 = float(other.x0);
+  y0 = float(other.y0);
+  x1 = float(other.x1);
+  y1 = float(other.y1);
+  return *this;
+}
 
-FOG_INLINE BoxF BoxI::toBoxF() const { return BoxF((float)x0, (float)y0, (float)x1, (float)y1); }
-FOG_INLINE BoxD BoxI::toBoxD() const { return BoxD((double)x0, (double)y0, (double)x1, (double)y1); }
+FOG_INLINE RectI& RectI::setBox(const BoxI& box)
+{
+  x = box.x0;
+  y = box.y0;
+  w = box.x1 - box.x0;
+  h = box.y1 - box.y0;
+  return *this;
+}
 
-FOG_INLINE BoxI BoxF::toBoxI() const { return BoxI((int)x0, (int)y0, (int)x1, (int)y1); }
-FOG_INLINE BoxD BoxF::toBoxD() const { return BoxD((double)x0, (double)y0, (double)x1, (double)y1); }
+FOG_INLINE RectF& RectF::setBox(const BoxF& other)
+{
+  x = other.x0;
+  y = other.y0;
+  w = other.x1 - other.x0;
+  h = other.y1 - other.y0;
+  return *this;
+}
 
-FOG_INLINE BoxI BoxD::toBoxI() const { return BoxI((int)x0, (int)y0, (int)x1, (int)y1); }
-FOG_INLINE BoxF BoxD::toBoxF() const { return BoxF((float)x0, (float)y0, (float)x1, (float)y1); }
+FOG_INLINE RectF& RectF::setBox(const BoxI& other)
+{
+  x = float(other.x0);
+  y = float(other.y0);
+  w = float(other.x1 - other.x0);
+  h = float(other.y1 - other.y0);
+  return *this;
+}
+
+FOG_INLINE RectF& RectF::setBox(const BoxD& other)
+{
+  x = float(other.x0);
+  y = float(other.y0);
+  w = float(other.x1 - other.x0);
+  h = float(other.y1 - other.y0);
+  return *this;
+}
+
+FOG_INLINE RectD& RectD::setBox(const BoxD& other)
+{
+  x = other.x0;
+  y = other.y0;
+  w = other.x1 - other.x0;
+  h = other.y1 - other.y0;
+  return *this;
+}
+
+FOG_INLINE RectD& RectD::setBox(const BoxF& other)
+{
+  x = double(other.x0);
+  y = double(other.y0);
+  w = double(other.x1 - other.x0);
+  h = double(other.y1 - other.y0);
+  return *this;
+}
+
+FOG_INLINE RectD& RectD::setBox(const BoxI& other)
+{
+  x = double(other.x0);
+  y = double(other.y0);
+  w = double(other.x1 - other.x0);
+  h = double(other.y1 - other.y0);
+  return *this;
+}
 
 // ============================================================================
 // [Fog::BoxT<>]

@@ -133,7 +133,7 @@ struct FOG_NO_EXPORT ShapeF
   explicit FOG_INLINE ShapeF(const CubicCurveF& cubic) { _type = SHAPE_TYPE_CUBIC; _data.cubic.instance() = cubic; }
   explicit FOG_INLINE ShapeF(const ArcF& arc) { _type = SHAPE_TYPE_ARC; _data.arc.instance() = arc; }
 
-  explicit FOG_INLINE ShapeF(const BoxF& box) { _type = SHAPE_TYPE_RECT; _data.rect.instance() = box.toRectF(); }
+  explicit FOG_INLINE ShapeF(const BoxF& box) { _type = SHAPE_TYPE_RECT; _data.rect.instance() = box; }
   explicit FOG_INLINE ShapeF(const RectF& rect) { _type = SHAPE_TYPE_RECT; _data.rect.instance() = rect; }
   explicit FOG_INLINE ShapeF(const RoundF& round) { _type = SHAPE_TYPE_ROUND; _data.round.instance() = round; }
   explicit FOG_INLINE ShapeF(const CircleF& circle) { _type = SHAPE_TYPE_CIRCLE; _data.circle.instance() = circle; }
@@ -197,7 +197,7 @@ struct FOG_NO_EXPORT ShapeF
   FOG_INLINE PieF& getPie() { return _data.pie.instance(); }
   FOG_INLINE const PieF& getPie() const { return _data.pie.instance(); }
 
-  FOG_INLINE void setBox(const BoxF& box) { _type = SHAPE_TYPE_RECT; _data.rect.instance() = box.toRectF(); }
+  FOG_INLINE void setBox(const BoxF& box) { _type = SHAPE_TYPE_RECT; _data.rect.instance() = box; }
   FOG_INLINE void setRect(const RectF& rect) { _type = SHAPE_TYPE_RECT; _data.rect.instance() = rect; }
   FOG_INLINE void setRound(const RoundF& round) { _type = SHAPE_TYPE_ROUND; _data.round.instance() = round; }
   FOG_INLINE void setCircle(const CircleF& circle) { _type = SHAPE_TYPE_CIRCLE; _data.circle.instance() = circle; }
@@ -255,7 +255,7 @@ struct FOG_NO_EXPORT ShapeD
   explicit FOG_INLINE ShapeD(const CubicCurveD& cubic) { _type = SHAPE_TYPE_LINE; _data.cubic.instance() = cubic; }
   explicit FOG_INLINE ShapeD(const ArcD& arc) { _type = SHAPE_TYPE_ARC; _data.arc.instance() = arc; }
 
-  explicit FOG_INLINE ShapeD(const BoxD& box) { _type = SHAPE_TYPE_RECT; _data.rect.instance() = box.toRectF(); }
+  explicit FOG_INLINE ShapeD(const BoxD& box) { _type = SHAPE_TYPE_RECT; _data.rect.instance() = box; }
   explicit FOG_INLINE ShapeD(const RectD& rect) { _type = SHAPE_TYPE_RECT; _data.rect.instance() = rect; }
   explicit FOG_INLINE ShapeD(const RoundD& round) { _type = SHAPE_TYPE_ROUND; _data.round.instance() = round; }
   explicit FOG_INLINE ShapeD(const CircleD& circle) { _type = SHAPE_TYPE_CIRCLE; _data.circle.instance() = circle; }
@@ -319,7 +319,7 @@ struct FOG_NO_EXPORT ShapeD
   FOG_INLINE PieD& getPie() { return _data.pie.instance(); }
   FOG_INLINE const PieD& getPie() const { return _data.pie.instance(); }
 
-  FOG_INLINE void setBox(const BoxD& box) { _type = SHAPE_TYPE_RECT; _data.rect.instance() = box.toRectF(); }
+  FOG_INLINE void setBox(const BoxD& box) { _type = SHAPE_TYPE_RECT; _data.rect.instance() = box; }
   FOG_INLINE void setRect(const RectD& rect) { _type = SHAPE_TYPE_RECT; _data.rect.instance() = rect; }
   FOG_INLINE void setRound(const RoundD& round) { _type = SHAPE_TYPE_ROUND; _data.round.instance() = round; }
 

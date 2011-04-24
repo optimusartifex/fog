@@ -50,8 +50,10 @@ struct FOG_NO_EXPORT EllipseF
   FOG_INLINE EllipseF(const PointF& cp, const PointF& rp) { setEllipse(cp, rp); }
   FOG_INLINE EllipseF(const PointF& cp, float rad) { setEllipse(cp, rad); }
 
-  FOG_INLINE EllipseF(const RectF& r) { setEllipse(r); }
-  FOG_INLINE EllipseF(const BoxF& r) { setEllipse(r); }
+  explicit FOG_INLINE EllipseF(const RectF& r) { setEllipse(r); }
+  explicit FOG_INLINE EllipseF(const BoxF& r) { setEllipse(r); }
+
+  explicit FOG_INLINE EllipseF(const EllipseD& ellipse);
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -65,6 +67,7 @@ struct FOG_NO_EXPORT EllipseF
   FOG_INLINE void setRadius(float rad) { radius.set(rad, rad); }
 
   FOG_INLINE void setEllipse(const EllipseF& ellipse) { center = ellipse.center; radius = ellipse.radius; }
+  FOG_INLINE void setEllipse(const EllipseD& ellipse);
   FOG_INLINE void setEllipse(const PointF& cp, const PointF& rp) { center = cp; radius = rp; }
 
   FOG_INLINE void setEllipse(const CircleF& circle) { center = circle.center; radius.set(circle.radius, circle.radius); }
@@ -101,12 +104,6 @@ struct FOG_NO_EXPORT EllipseF
   {
     center += pt;
   }
-
-  // --------------------------------------------------------------------------
-  // [Convert]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE EllipseD toEllipseD() const;
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
@@ -154,8 +151,8 @@ struct FOG_NO_EXPORT EllipseD
   FOG_INLINE EllipseD(const PointD& cp, const PointD& rp) { setEllipse(cp, rp); }
   FOG_INLINE EllipseD(const PointD& cp, double rad) { setEllipse(cp, rad); }
 
-  FOG_INLINE EllipseD(const RectD& r) { setEllipse(r); }
-  FOG_INLINE EllipseD(const BoxD& r) { setEllipse(r); }
+  explicit FOG_INLINE EllipseD(const RectD& r) { setEllipse(r); }
+  explicit FOG_INLINE EllipseD(const BoxD& r) { setEllipse(r); }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -207,12 +204,6 @@ struct FOG_NO_EXPORT EllipseD
   }
 
   // --------------------------------------------------------------------------
-  // [Convert]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE EllipseF toEllipseF() const;
-
-  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
@@ -244,8 +235,17 @@ struct FOG_NO_EXPORT EllipseD
 // [Implemented-Later]
 // ============================================================================
 
-FOG_INLINE EllipseD EllipseF::toEllipseD() const { return EllipseD(center.toPointD(), radius.toPointD()); }
-FOG_INLINE EllipseF EllipseD::toEllipseF() const { return EllipseF(center.toPointF(), radius.toPointF()); }
+FOG_INLINE EllipseF::EllipseF(const EllipseD& ellipse) :
+  center(ellipse.center),
+  radius(ellipse.radius)
+{
+}
+
+FOG_INLINE void EllipseF::setEllipse(const EllipseD& ellipse)
+{
+  center = ellipse.center;
+  radius = ellipse.radius;
+}
 
 // ============================================================================
 // [Fog::EllipseT<>]

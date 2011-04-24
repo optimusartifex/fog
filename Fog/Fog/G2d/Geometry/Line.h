@@ -46,10 +46,12 @@ struct FOG_NO_EXPORT LineF
   FOG_INLINE LineF() { reset(); }
   FOG_INLINE LineF(_Uninitialized) {}
 
-  FOG_INLINE LineF(const LineF& other) { p[0] = other.p[0]; p[1] = other.p[1]; }
+  FOG_INLINE LineF(const LineF& other) { setLine(other); }
   FOG_INLINE LineF(const PointF& pt0, const PointF& pt1) { p[0] = pt0; p[1] = pt1; }
   FOG_INLINE LineF(float x0, float y0, float x1, float y1) { p[0].set(x0, y0); p[1].set(x1, y1); }
   FOG_INLINE LineF(const PointF* pts) { p[0] = pts[0]; p[1] = pts[1]; }
+
+  explicit FOG_INLINE LineF(const LineD& other) { setLine(other); }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -77,6 +79,8 @@ struct FOG_NO_EXPORT LineF
   }
 
   FOG_INLINE void setLine(const LineF& line) { p[0] = line.p[0]; p[1] = line.p[1]; }
+  FOG_INLINE void setLine(const LineD& line);
+  
   FOG_INLINE void setLine(const PointF& pt0, const PointF& pt1) { p[0] = pt0; p[1] = pt1; }
   FOG_INLINE void setLine(float x0, float y0, float x1, float y1) { p[0].set(x0, y0); p[1].set(x1, y1); }
 
@@ -84,7 +88,11 @@ struct FOG_NO_EXPORT LineF
   // [Reset]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void reset() { p[0].reset(); p[1].reset(); }
+  FOG_INLINE void reset()
+  {
+    p[0].reset();
+    p[1].reset();
+  }
 
   // --------------------------------------------------------------------------
   // [BoundingRect]
@@ -114,20 +122,11 @@ struct FOG_NO_EXPORT LineF
   }
 
   // --------------------------------------------------------------------------
-  // [Convert]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE LineD toLineD() const;
-
-  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE LineF& operator=(const LineF& other)
-  {
-    setLine(other);
-    return *this;
-  }
+  FOG_INLINE LineF& operator=(const LineF& other) { setLine(other); return *this; }
+  FOG_INLINE LineF& operator=(const LineD& other) { setLine(other); return *this; }
 
   FOG_INLINE bool operator==(const LineF& other)
   {
@@ -169,10 +168,12 @@ struct FOG_NO_EXPORT LineD
   FOG_INLINE LineD() { reset(); }
   FOG_INLINE LineD(_Uninitialized) {}
 
-  FOG_INLINE LineD(const LineD& other) { p[0] = other.p[0]; p[1] = other.p[1]; }
+  FOG_INLINE LineD(const LineD& other) { setLine(other); }
   FOG_INLINE LineD(const PointD& pt0, const PointD& pt1) { p[0] = pt0; p[1] = pt1; }
   FOG_INLINE LineD(double x0, double y0, double x1, double y1) { p[0].set(x0, y0); p[1].set(x1, y1); }
   FOG_INLINE LineD(const PointD* pts) { p[0] = pts[0]; p[1] = pts[1]; }
+
+  explicit FOG_INLINE LineD(const LineF& other) { setLine(other); }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -200,6 +201,8 @@ struct FOG_NO_EXPORT LineD
   }
 
   FOG_INLINE void setLine(const LineD& line) { p[0] = line.p[0]; p[1] = line.p[1]; }
+  FOG_INLINE void setLine(const LineF& line) { p[0] = line.p[0]; p[1] = line.p[1]; }
+
   FOG_INLINE void setLine(const PointD& pt0, const PointD& pt1) { p[0] = pt0; p[1] = pt1; }
   FOG_INLINE void setLine(double x0, double y0, double x1, double y1) { p[0].set(x0, y0); p[1].set(x1, y1); }
 
@@ -207,7 +210,11 @@ struct FOG_NO_EXPORT LineD
   // [Reset]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void reset() { p[0].reset(); p[1].reset(); }
+  FOG_INLINE void reset()
+  {
+    p[0].reset();
+    p[1].reset();
+  }
 
   // --------------------------------------------------------------------------
   // [BoundingRect]
@@ -237,20 +244,11 @@ struct FOG_NO_EXPORT LineD
   }
 
   // --------------------------------------------------------------------------
-  // [Convert]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE LineF toLineF() const;
-
-  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE LineD& operator=(const LineD& other)
-  {
-    setLine(other);
-    return *this;
-  }
+  FOG_INLINE LineD& operator=(const LineD& other) { setLine(other); return *this; }
+  FOG_INLINE LineD& operator=(const LineF& other) { setLine(other); return *this; }
 
   FOG_INLINE bool operator==(const LineD& other)
   {
@@ -282,8 +280,11 @@ struct FOG_NO_EXPORT LineD
 // [Implemented-Later]
 // ============================================================================
 
-FOG_INLINE LineD LineF::toLineD() const { return LineD(p[0].toPointD(), p[1].toPointD()); }
-FOG_INLINE LineF LineD::toLineF() const { return LineF(p[0].toPointF(), p[1].toPointF()); }
+FOG_INLINE void LineF::setLine(const LineD& line)
+{
+  p[0] = line.p[0];
+  p[1] = line.p[1];
+}
 
 // ============================================================================
 // [Fog::LineT<>]

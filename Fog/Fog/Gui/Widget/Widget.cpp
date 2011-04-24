@@ -698,7 +698,7 @@ void Widget::setLayoutGeometry(const RectI& rect)
       GeometryEvent e;
 
       e._widgetGeometry = geometry;
-      e._clientGeometry.set(0, 0, geometry.w, geometry.h);
+      e._clientGeometry.setRect(0, 0, geometry.w, geometry.h);
       calcClientGeometry(e._clientGeometry);
 
       _widgetGeometry = e._widgetGeometry;

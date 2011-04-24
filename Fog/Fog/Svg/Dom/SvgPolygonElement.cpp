@@ -56,7 +56,7 @@ err_t SvgPolygonElement::onCalcBoundingBox(RectF* box) const
   if (a_points.isAssigned())
   {
     const PathF& path = a_points.getPath();
-    box->set(path.getBoundingRect());
+    box->setRect(path.getBoundingRect());
     return ERR_OK;
   }
   else

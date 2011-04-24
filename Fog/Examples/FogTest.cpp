@@ -224,7 +224,7 @@ void MyWindow::onPaint(PaintEvent* e)
 
   //p->scale(PointF(2.0f, 2.0f));
   //p->blitImage(PointI(100, 100), i[0]);
-  //p->setSource(Argb32(0xFF000000));
+  p->setSource(Argb32(0xFF000000));
   //p->fillRect(RectI(100, 100, 300, 300));
 
   //p->blitImage(RectI(100, 100, 100, 100), i[0]);
@@ -270,16 +270,18 @@ void MyWindow::onPaint(PaintEvent* e)
   //path.lineTo(PointF(222.0f, 240.0f));
   //path.lineTo(PointF(492.0f, 16.0f));
   // path.moveTo(PointF(100.0f, 100.0f));
-/*
+
+  path.moveTo(PointF(200, 200));
   for (int i = 0; i < 300; i++)
   {
     PointF p1(rand() % 500, rand() % 400);
     PointF p2(rand() % 500, rand() % 400);
     PointF p3(rand() % 500, rand() % 400);
 
-    path.cubicTo(p1, p2, p3);
+    path.ellipse(EllipseF(p1, p2));
+    //path.cubicTo(p1, p2, p3);
   }
-*/
+
 /*
   path.moveTo(PointF(200.0f, 100.0f));
   path.lineTo(PointF(300.0f, 300.0f));
@@ -288,6 +290,8 @@ void MyWindow::onPaint(PaintEvent* e)
   path.lineTo(PointF(200.0f, 350.0f));
   path.lineTo(PointF(150.0f, 220.0f));
 */
+
+  p->fillPath(path);
   /*
   PathClipperF clipper(RectF(150.0f, 150.0f, 200.0f, 200.0f));
   clipper.clipPath(clip, path);

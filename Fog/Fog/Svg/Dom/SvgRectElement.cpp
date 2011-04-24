@@ -85,7 +85,7 @@ err_t SvgRectElement::onCalcBoundingBox(RectF* box) const
     float rx = a_x.isAssigned() ? a_x.getCoordValue() : 0.0f;
     float ry = a_y.isAssigned() ? a_y.getCoordValue() : 0.0f;
 
-    box->set(rx, ry, rw, rh);
+    box->setRect(rx, ry, rw, rh);
     return ERR_OK;
   }
 

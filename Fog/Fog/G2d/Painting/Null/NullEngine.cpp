@@ -174,13 +174,13 @@ struct FOG_NO_EXPORT MyPainterImpl
   static err_t FOG_CDECL fillTextInF(Painter& self, const TextRectF& r, const String& text, const Font& font, const RectF* clip);
   static err_t FOG_CDECL fillTextInD(Painter& self, const TextRectD& r, const String& text, const Font& font, const RectD* clip);
 
-  static err_t FOG_CDECL fillMaskAtI(Painter& self, const PointI& p, const Image& m, const RectI* mr);
-  static err_t FOG_CDECL fillMaskAtF(Painter& self, const PointF& p, const Image& m, const RectI* mr);
-  static err_t FOG_CDECL fillMaskAtD(Painter& self, const PointD& p, const Image& m, const RectI* mr);
+  static err_t FOG_CDECL fillMaskAtI(Painter& self, const PointI& p, const Image& m, const RectI* mFragment);
+  static err_t FOG_CDECL fillMaskAtF(Painter& self, const PointF& p, const Image& m, const RectI* mFragment);
+  static err_t FOG_CDECL fillMaskAtD(Painter& self, const PointD& p, const Image& m, const RectI* mFragment);
 
-  static err_t FOG_CDECL fillMaskInI(Painter& self, const RectI& r, const Image& m, const RectI* mr);
-  static err_t FOG_CDECL fillMaskInF(Painter& self, const RectF& r, const Image& m, const RectI* mr);
-  static err_t FOG_CDECL fillMaskInD(Painter& self, const RectD& r, const Image& m, const RectI* mr);
+  static err_t FOG_CDECL fillMaskInI(Painter& self, const RectI& r, const Image& m, const RectI* mFragment);
+  static err_t FOG_CDECL fillMaskInF(Painter& self, const RectF& r, const Image& m, const RectI* mFragment);
+  static err_t FOG_CDECL fillMaskInD(Painter& self, const RectD& r, const Image& m, const RectI* mFragment);
 
   static err_t FOG_CDECL fillRegion(Painter& self, const Region& r);
 
@@ -188,21 +188,21 @@ struct FOG_NO_EXPORT MyPainterImpl
   // [Blit]
   // --------------------------------------------------------------------------
 
-  static err_t FOG_CDECL blitImageAtI(Painter& self, const PointI& p, const Image& i, const RectI* ir);
-  static err_t FOG_CDECL blitImageAtF(Painter& self, const PointF& p, const Image& i, const RectI* ir);
-  static err_t FOG_CDECL blitImageAtD(Painter& self, const PointD& p, const Image& i, const RectI* ir);
+  static err_t FOG_CDECL blitImageAtI(Painter& self, const PointI& p, const Image& i, const RectI* iFragment);
+  static err_t FOG_CDECL blitImageAtF(Painter& self, const PointF& p, const Image& i, const RectI* iFragment);
+  static err_t FOG_CDECL blitImageAtD(Painter& self, const PointD& p, const Image& i, const RectI* iFragment);
 
-  static err_t FOG_CDECL blitImageInI(Painter& self, const RectI& r, const Image& i, const RectI* ir);
-  static err_t FOG_CDECL blitImageInF(Painter& self, const RectF& r, const Image& i, const RectI* ir);
-  static err_t FOG_CDECL blitImageInD(Painter& self, const RectD& r, const Image& i, const RectI* ir);
+  static err_t FOG_CDECL blitImageInI(Painter& self, const RectI& r, const Image& i, const RectI* iFragment);
+  static err_t FOG_CDECL blitImageInF(Painter& self, const RectF& r, const Image& i, const RectI* iFragment);
+  static err_t FOG_CDECL blitImageInD(Painter& self, const RectD& r, const Image& i, const RectI* iFragment);
 
-  static err_t FOG_CDECL blitMaskedImageAtI(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
-  static err_t FOG_CDECL blitMaskedImageAtF(Painter& self, const PointF& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
-  static err_t FOG_CDECL blitMaskedImageAtD(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
+  static err_t FOG_CDECL blitMaskedImageAtI(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
+  static err_t FOG_CDECL blitMaskedImageAtF(Painter& self, const PointF& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
+  static err_t FOG_CDECL blitMaskedImageAtD(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
 
-  static err_t FOG_CDECL blitMaskedImageInI(Painter& self, const RectI& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
-  static err_t FOG_CDECL blitMaskedImageInF(Painter& self, const RectF& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
-  static err_t FOG_CDECL blitMaskedImageInD(Painter& self, const RectD& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
+  static err_t FOG_CDECL blitMaskedImageInI(Painter& self, const RectI& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
+  static err_t FOG_CDECL blitMaskedImageInF(Painter& self, const RectF& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
+  static err_t FOG_CDECL blitMaskedImageInD(Painter& self, const RectD& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
 
   // --------------------------------------------------------------------------
   // [Clip]
@@ -234,13 +234,13 @@ struct FOG_NO_EXPORT MyPainterImpl
   static err_t FOG_CDECL clipTextInF(Painter& self, uint32_t clipOp, const TextRectF& r, const String& text, const Font& font, const RectF* clip);
   static err_t FOG_CDECL clipTextInD(Painter& self, uint32_t clipOp, const TextRectD& r, const String& text, const Font& font, const RectD* clip);
 
-  static err_t FOG_CDECL clipMaskAtI(Painter& self, uint32_t clipOp, const PointI& p, const Image& m, const RectI* mr);
-  static err_t FOG_CDECL clipMaskAtF(Painter& self, uint32_t clipOp, const PointF& p, const Image& m, const RectI* mr);
-  static err_t FOG_CDECL clipMaskAtD(Painter& self, uint32_t clipOp, const PointD& p, const Image& m, const RectI* mr);
+  static err_t FOG_CDECL clipMaskAtI(Painter& self, uint32_t clipOp, const PointI& p, const Image& m, const RectI* mFragment);
+  static err_t FOG_CDECL clipMaskAtF(Painter& self, uint32_t clipOp, const PointF& p, const Image& m, const RectI* mFragment);
+  static err_t FOG_CDECL clipMaskAtD(Painter& self, uint32_t clipOp, const PointD& p, const Image& m, const RectI* mFragment);
 
-  static err_t FOG_CDECL clipMaskInI(Painter& self, uint32_t clipOp, const RectI& r, const Image& m, const RectI* mr);
-  static err_t FOG_CDECL clipMaskInF(Painter& self, uint32_t clipOp, const RectF& r, const Image& m, const RectI* mr);
-  static err_t FOG_CDECL clipMaskInD(Painter& self, uint32_t clipOp, const RectD& r, const Image& m, const RectI* mr);
+  static err_t FOG_CDECL clipMaskInI(Painter& self, uint32_t clipOp, const RectI& r, const Image& m, const RectI* mFragment);
+  static err_t FOG_CDECL clipMaskInF(Painter& self, uint32_t clipOp, const RectF& r, const Image& m, const RectI* mFragment);
+  static err_t FOG_CDECL clipMaskInD(Painter& self, uint32_t clipOp, const RectD& r, const Image& m, const RectI* mFragment);
 
   static err_t FOG_CDECL clipRegion(Painter& self, uint32_t clipOp, const Region& r);
 
@@ -688,37 +688,37 @@ err_t FOG_CDECL MyPainterImpl::fillTextInD(Painter& self, const TextRectD& r, co
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::fillMaskAtI(Painter& self, const PointI& p, const Image& m, const RectI* mr)
+err_t FOG_CDECL MyPainterImpl::fillMaskAtI(Painter& self, const PointI& p, const Image& m, const RectI* mFragment)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::fillMaskAtF(Painter& self, const PointF& p, const Image& m, const RectI* mr)
+err_t FOG_CDECL MyPainterImpl::fillMaskAtF(Painter& self, const PointF& p, const Image& m, const RectI* mFragment)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::fillMaskAtD(Painter& self, const PointD& p, const Image& m, const RectI* mr)
+err_t FOG_CDECL MyPainterImpl::fillMaskAtD(Painter& self, const PointD& p, const Image& m, const RectI* mFragment)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::fillMaskInI(Painter& self, const RectI& r, const Image& m, const RectI* mr)
+err_t FOG_CDECL MyPainterImpl::fillMaskInI(Painter& self, const RectI& r, const Image& m, const RectI* mFragment)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::fillMaskInF(Painter& self, const RectF& r, const Image& m, const RectI* mr)
+err_t FOG_CDECL MyPainterImpl::fillMaskInF(Painter& self, const RectF& r, const Image& m, const RectI* mFragment)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::fillMaskInD(Painter& self, const RectD& r, const Image& m, const RectI* mr)
+err_t FOG_CDECL MyPainterImpl::fillMaskInD(Painter& self, const RectD& r, const Image& m, const RectI* mFragment)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
@@ -734,73 +734,73 @@ err_t FOG_CDECL MyPainterImpl::fillRegion(Painter& self, const Region& r)
 // [Fog::MyPainterImpl - Blit]
 // ============================================================================
 
-err_t FOG_CDECL MyPainterImpl::blitImageAtI(Painter& self, const PointI& p, const Image& i, const RectI* ir)
+err_t FOG_CDECL MyPainterImpl::blitImageAtI(Painter& self, const PointI& p, const Image& i, const RectI* iFragment)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::blitImageAtF(Painter& self, const PointF& p, const Image& i, const RectI* ir)
+err_t FOG_CDECL MyPainterImpl::blitImageAtF(Painter& self, const PointF& p, const Image& i, const RectI* iFragment)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::blitImageAtD(Painter& self, const PointD& p, const Image& i, const RectI* ir)
+err_t FOG_CDECL MyPainterImpl::blitImageAtD(Painter& self, const PointD& p, const Image& i, const RectI* iFragment)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::blitImageInI(Painter& self, const RectI& r, const Image& i, const RectI* ir)
+err_t FOG_CDECL MyPainterImpl::blitImageInI(Painter& self, const RectI& r, const Image& i, const RectI* iFragment)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::blitImageInF(Painter& self, const RectF& r, const Image& i, const RectI* ir)
+err_t FOG_CDECL MyPainterImpl::blitImageInF(Painter& self, const RectF& r, const Image& i, const RectI* iFragment)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::blitImageInD(Painter& self, const RectD& r, const Image& i, const RectI* ir)
+err_t FOG_CDECL MyPainterImpl::blitImageInD(Painter& self, const RectD& r, const Image& i, const RectI* iFragment)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::blitMaskedImageAtI(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
+err_t FOG_CDECL MyPainterImpl::blitMaskedImageAtI(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::blitMaskedImageAtF(Painter& self, const PointF& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
+err_t FOG_CDECL MyPainterImpl::blitMaskedImageAtF(Painter& self, const PointF& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::blitMaskedImageAtD(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
+err_t FOG_CDECL MyPainterImpl::blitMaskedImageAtD(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::blitMaskedImageInI(Painter& self, const RectI& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
+err_t FOG_CDECL MyPainterImpl::blitMaskedImageInI(Painter& self, const RectI& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::blitMaskedImageInF(Painter& self, const RectF& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
+err_t FOG_CDECL MyPainterImpl::blitMaskedImageInF(Painter& self, const RectF& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::blitMaskedImageInD(Painter& self, const RectD& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
+err_t FOG_CDECL MyPainterImpl::blitMaskedImageInD(Painter& self, const RectD& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
@@ -924,37 +924,37 @@ err_t FOG_CDECL MyPainterImpl::clipTextInD(Painter& self, uint32_t clipOp, const
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::clipMaskAtI(Painter& self, uint32_t clipOp, const PointI& p, const Image& m, const RectI* mr)
+err_t FOG_CDECL MyPainterImpl::clipMaskAtI(Painter& self, uint32_t clipOp, const PointI& p, const Image& m, const RectI* mFragment)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::clipMaskAtF(Painter& self, uint32_t clipOp, const PointF& p, const Image& m, const RectI* mr)
+err_t FOG_CDECL MyPainterImpl::clipMaskAtF(Painter& self, uint32_t clipOp, const PointF& p, const Image& m, const RectI* mFragment)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::clipMaskAtD(Painter& self, uint32_t clipOp, const PointD& p, const Image& m, const RectI* mr)
+err_t FOG_CDECL MyPainterImpl::clipMaskAtD(Painter& self, uint32_t clipOp, const PointD& p, const Image& m, const RectI* mFragment)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::clipMaskInI(Painter& self, uint32_t clipOp, const RectI& r, const Image& m, const RectI* mr)
+err_t FOG_CDECL MyPainterImpl::clipMaskInI(Painter& self, uint32_t clipOp, const RectI& r, const Image& m, const RectI* mFragment)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::clipMaskInF(Painter& self, uint32_t clipOp, const RectF& r, const Image& m, const RectI* mr)
+err_t FOG_CDECL MyPainterImpl::clipMaskInF(Painter& self, uint32_t clipOp, const RectF& r, const Image& m, const RectI* mFragment)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::clipMaskInD(Painter& self, uint32_t clipOp, const RectD& r, const Image& m, const RectI* mr)
+err_t FOG_CDECL MyPainterImpl::clipMaskInD(Painter& self, uint32_t clipOp, const RectD& r, const Image& m, const RectI* mFragment)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
@@ -1330,15 +1330,15 @@ struct FOG_NO_EXPORT NullPainterImpl
   static err_t FOG_CDECL doShape(Painter& self, uint32_t shapeType, const void* shapeData);
   static err_t FOG_CDECL doPath(Painter& self, const Any& p);
   static err_t FOG_CDECL doText(Painter& self, const Any& p, const String& text, const Font& font, const Any* clip);
-  static err_t FOG_CDECL doMask(Painter& self, const Any& p, const Image& m, const Any* mr);
+  static err_t FOG_CDECL doMask(Painter& self, const Any& p, const Image& m, const Any* mFragment);
   static err_t FOG_CDECL doRegion(Painter& self, const Region& r);
 
   // --------------------------------------------------------------------------
   // [Blit]
   // --------------------------------------------------------------------------
 
-  static err_t FOG_CDECL blitImage(Painter& self, const Any& p, const Image& i, const Any* ir);
-  static err_t FOG_CDECL blitMaskedImage(Painter& self, const Any& p, const Image& i, const Image& m, const Any* ir, const Any* mr);
+  static err_t FOG_CDECL blitImage(Painter& self, const Any& p, const Image& i, const Any* iFragment);
+  static err_t FOG_CDECL blitMaskedImage(Painter& self, const Any& p, const Image& i, const Image& m, const Any* iFragment, const Any* mFragment);
 
   // --------------------------------------------------------------------------
   // [Clip]
@@ -1350,7 +1350,7 @@ struct FOG_NO_EXPORT NullPainterImpl
   static err_t FOG_CDECL clipShape(Painter& self, uint32_t clipOp, uint32_t shapeType, const void* shapeData);
   static err_t FOG_CDECL clipPath(Painter& self, uint32_t clipOp, const Any& p);
   static err_t FOG_CDECL clipText(Painter& self, uint32_t clipOp, const Any& p, const String& text, const Font& font, const Any* clip);
-  static err_t FOG_CDECL clipMask(Painter& self, uint32_t clipOp, const Any& p, const Image& m, const Any* mr);
+  static err_t FOG_CDECL clipMask(Painter& self, uint32_t clipOp, const Any& p, const Image& m, const Any* mFragment);
   static err_t FOG_CDECL clipRegion(Painter& self, uint32_t clipOp, const Region& r);
   static err_t FOG_CDECL resetClip(Painter& self);
 
@@ -1627,7 +1627,7 @@ err_t FOG_CDECL NullPainterImpl::doText(Painter& self, const Any& p, const Strin
   return ERR_RT_INVALID_STATE;
 }
 
-err_t FOG_CDECL NullPainterImpl::doMask(Painter& self, const Any& p, const Image& m, const Any* mr)
+err_t FOG_CDECL NullPainterImpl::doMask(Painter& self, const Any& p, const Image& m, const Any* mFragment)
 {
   return ERR_RT_INVALID_STATE;
 }
@@ -1641,12 +1641,12 @@ err_t FOG_CDECL NullPainterImpl::doRegion(Painter& self, const Region& r)
 // [Fog::NullPainterImpl - Blit]
 // ============================================================================
 
-err_t FOG_CDECL NullPainterImpl::blitImage(Painter& self, const Any& p, const Image& i, const Any* ir)
+err_t FOG_CDECL NullPainterImpl::blitImage(Painter& self, const Any& p, const Image& i, const Any* iFragment)
 {
   return ERR_RT_INVALID_STATE;
 }
 
-err_t FOG_CDECL NullPainterImpl::blitMaskedImage(Painter& self, const Any& p, const Image& i, const Image& m, const Any* ir, const Any* mr)
+err_t FOG_CDECL NullPainterImpl::blitMaskedImage(Painter& self, const Any& p, const Image& i, const Image& m, const Any* iFragment, const Any* mFragment)
 {
   return ERR_RT_INVALID_STATE;
 }
@@ -1685,7 +1685,7 @@ err_t FOG_CDECL NullPainterImpl::clipText(Painter& self, uint32_t clipOp, const 
   return ERR_RT_INVALID_STATE;
 }
 
-err_t FOG_CDECL NullPainterImpl::clipMask(Painter& self, uint32_t clipOp, const Any& p, const Image& m, const Any* mr)
+err_t FOG_CDECL NullPainterImpl::clipMask(Painter& self, uint32_t clipOp, const Any& p, const Image& m, const Any* mFragment)
 {
   return ERR_RT_INVALID_STATE;
 }

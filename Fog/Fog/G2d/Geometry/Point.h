@@ -146,13 +146,6 @@ struct FOG_NO_EXPORT PointI
   }
 
   // --------------------------------------------------------------------------
-  // [Convert]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE PointF toPointF() const;
-  FOG_INLINE PointD toPointD() const;
-
-  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
@@ -199,11 +192,26 @@ struct PointF
   FOG_INLINE PointF() {}
   FOG_INLINE PointF(_Uninitialized) {}
 
-  FOG_INLINE PointF(const PointI& other) : x((float)other.x), y((float)other.y) {}
-  FOG_INLINE PointF(const PointF& other) : x(other.x), y(other.y) {}
+  FOG_INLINE PointF(const PointF& other) :
+    x(other.x),
+    y(other.y)
+  {
+  }
 
-  FOG_INLINE PointF(int px, int py) : x((float)px), y((float)py) {}
-  FOG_INLINE PointF(float px, float py) : x(px), y(py) {}
+  FOG_INLINE PointF(int px, int py) :
+    x(float(px)),
+    y(float(py)) 
+  {
+  }
+
+  FOG_INLINE PointF(float px, float py) :
+    x(px),
+    y(py)
+  {
+  }
+
+  explicit FOG_INLINE PointF(const PointI& other) { set(other); }
+  explicit FOG_INLINE PointF(const PointD& other) { set(other); }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -342,12 +350,6 @@ struct PointF
   }
 
   // --------------------------------------------------------------------------
-  // [Convert]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE PointD toPointD() const;
-
-  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
@@ -397,27 +399,39 @@ struct PointD
   FOG_INLINE PointD() {}
   FOG_INLINE PointD(_Uninitialized) {}
 
-  FOG_INLINE PointD(const PointI& other) : x((double)other.x), y((double)other.y)
+  FOG_INLINE PointD(int px, int py) :
+    x(double(px)),
+    y(double(py))
   {
   }
 
-  FOG_INLINE PointD(int px, int py) : x((double)px), y((double)py)
+  FOG_INLINE PointD(float px, float py) :
+    x(double(px)),
+    y(double(py))
   {
   }
 
-  FOG_INLINE PointD(const PointF& other) : x((double)other.x), y((double)other.y)
+  FOG_INLINE PointD(const PointD& other) :
+    x(other.x),
+    y(other.y)
   {
   }
 
-  FOG_INLINE PointD(float px, float py) : x((float)px), y((float)py)
+  FOG_INLINE PointD(double px, double py) :
+    x(px),
+    y(py)
   {
   }
 
-  FOG_INLINE PointD(const PointD& other) : x(other.x), y(other.y)
+  explicit FOG_INLINE PointD(const PointI& other) :
+    x((double)other.x),
+    y((double)other.y)
   {
   }
 
-  FOG_INLINE PointD(double px, double py) : x(px), y(py)
+  explicit FOG_INLINE PointD(const PointF& other) :
+    x((double)other.x),
+    y((double)other.y)
   {
   }
 
@@ -562,12 +576,6 @@ struct PointD
   }
 
   // --------------------------------------------------------------------------
-  // [Convert]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE PointF toPointF() const { return PointF((float)x, (float)y); }
-
-  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
@@ -611,11 +619,10 @@ struct PointD
 // [Implemented-Later]
 // ============================================================================
 
-FOG_INLINE PointF& PointF::set(const PointD& other) { return set((float)other.x, (float)other.y); }
-
-FOG_INLINE PointF PointI::toPointF() const { return PointF((float)x, (float)y); }
-FOG_INLINE PointD PointI::toPointD() const { return PointD((double)x, (double)y); }
-FOG_INLINE PointD PointF::toPointD() const { return PointD((double)x, (double)y); }
+FOG_INLINE PointF& PointF::set(const PointD& other)
+{
+  return set(float(other.x), float(other.y));
+}
 
 // ============================================================================
 // [Fog::PointT<>]

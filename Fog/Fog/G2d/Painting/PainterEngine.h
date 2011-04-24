@@ -294,21 +294,21 @@ struct FOG_NO_EXPORT PainterVTable
   // [Blit - Types]
   // --------------------------------------------------------------------------
 
-  typedef err_t (FOG_CDECL *BlitImageAtI)(Painter& self, const PointI& p, const Image& i, const RectI* ir);
-  typedef err_t (FOG_CDECL *BlitImageAtF)(Painter& self, const PointF& p, const Image& i, const RectI* ir);
-  typedef err_t (FOG_CDECL *BlitImageAtD)(Painter& self, const PointD& p, const Image& i, const RectI* ir);
+  typedef err_t (FOG_CDECL *BlitImageAtI)(Painter& self, const PointI& p, const Image& i, const RectI* iFragment);
+  typedef err_t (FOG_CDECL *BlitImageAtF)(Painter& self, const PointF& p, const Image& i, const RectI* iFragment);
+  typedef err_t (FOG_CDECL *BlitImageAtD)(Painter& self, const PointD& p, const Image& i, const RectI* iFragment);
 
-  typedef err_t (FOG_CDECL *BlitImageInI)(Painter& self, const RectI& r, const Image& i, const RectI* ir);
-  typedef err_t (FOG_CDECL *BlitImageInF)(Painter& self, const RectF& r, const Image& i, const RectI* ir);
-  typedef err_t (FOG_CDECL *BlitImageInD)(Painter& self, const RectD& r, const Image& i, const RectI* ir);
+  typedef err_t (FOG_CDECL *BlitImageInI)(Painter& self, const RectI& r, const Image& i, const RectI* iFragment);
+  typedef err_t (FOG_CDECL *BlitImageInF)(Painter& self, const RectF& r, const Image& i, const RectI* iFragment);
+  typedef err_t (FOG_CDECL *BlitImageInD)(Painter& self, const RectD& r, const Image& i, const RectI* iFragment);
 
-  typedef err_t (FOG_CDECL *BlitMaskedImageAtI)(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
-  typedef err_t (FOG_CDECL *BlitMaskedImageAtF)(Painter& self, const PointF& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
-  typedef err_t (FOG_CDECL *BlitMaskedImageAtD)(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
+  typedef err_t (FOG_CDECL *BlitMaskedImageAtI)(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
+  typedef err_t (FOG_CDECL *BlitMaskedImageAtF)(Painter& self, const PointF& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
+  typedef err_t (FOG_CDECL *BlitMaskedImageAtD)(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
 
-  typedef err_t (FOG_CDECL *BlitMaskedImageInI)(Painter& self, const RectI& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
-  typedef err_t (FOG_CDECL *BlitMaskedImageInF)(Painter& self, const RectF& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
-  typedef err_t (FOG_CDECL *BlitMaskedImageInD)(Painter& self, const RectD& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
+  typedef err_t (FOG_CDECL *BlitMaskedImageInI)(Painter& self, const RectI& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
+  typedef err_t (FOG_CDECL *BlitMaskedImageInF)(Painter& self, const RectF& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
+  typedef err_t (FOG_CDECL *BlitMaskedImageInD)(Painter& self, const RectD& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
 
   // --------------------------------------------------------------------------
   // [Blit - Funcs]

@@ -1692,7 +1692,7 @@ static err_t _G2d_PathT_shape(
 
     case SHAPE_TYPE_LINE:
     {
-      const LineF* data = reinterpret_cast<const LineF*>(shapeData);
+      const typename LineT<Number>::T* data = reinterpret_cast<const typename LineT<Number>::T*>(shapeData);
       if ((pos = self._add(2)) == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
       uint8_t* commands = self._d->commands + pos;
@@ -1718,7 +1718,7 @@ static err_t _G2d_PathT_shape(
 
     case SHAPE_TYPE_QUAD:
     {
-      const QuadCurveF* data = reinterpret_cast<const QuadCurveF*>(shapeData);
+      const typename QuadCurveT<Number>::T* data = reinterpret_cast<const typename QuadCurveT<Number>::T*>(shapeData);
       if ((pos = self._add(3)) == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
       uint8_t* commands = self._d->commands + pos;
@@ -1748,7 +1748,7 @@ static err_t _G2d_PathT_shape(
 
     case SHAPE_TYPE_CUBIC:
     {
-      const CubicCurveF* data = reinterpret_cast<const CubicCurveF*>(shapeData);
+      const typename CubicCurveT<Number>::T* data = reinterpret_cast<const typename CubicCurveT<Number>::T*>(shapeData);
       if ((pos = self._add(4)) == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
       uint8_t* commands = self._d->commands + pos;
@@ -1781,7 +1781,7 @@ static err_t _G2d_PathT_shape(
 
     case SHAPE_TYPE_ARC:
     {
-      const ArcF* data = reinterpret_cast<const ArcF*>(shapeData);
+      const typename ArcT<Number>::T* data = reinterpret_cast<const typename ArcT<Number>::T*>(shapeData);
 
       Number start = data->start;
       Number sweep = data->sweep;
@@ -1937,7 +1937,7 @@ _ShapeRect:
 
       if (len == 0 || !boundingBoxDirty)
       {
-        self._d->boundingBox.set(x0, y0, x1, y1);
+        self._d->boundingBox.setBox(x0, y0, x1, y1);
 
         if (len > 0) BoxT<Number>::T::bound(self._d->boundingBox, self._d->boundingBox, oldBoundingBox);
         boundingBoxDirty = false;
@@ -2021,7 +2021,7 @@ _ShapeRect:
         rx = Math::abs(rx);
         ry = Math::abs(ry);
 
-        self._d->boundingBox.set(c.x - rx, c.y - ry, c.x + rx, c.y + ry);
+        self._d->boundingBox.setBox(c.x - rx, c.y - ry, c.x + rx, c.y + ry);
 
         if (len > 0)
           BoxT<Number>::T::bound(self._d->boundingBox, self._d->boundingBox, oldBoundingBox);
@@ -2035,7 +2035,7 @@ _ShapeRect:
     case SHAPE_TYPE_CHORD:
     case SHAPE_TYPE_PIE:
     {
-      const ArcF* data = reinterpret_cast<const ArcF*>(shapeData);
+      const typename ArcT<Number>::T* data = reinterpret_cast<const typename ArcT<Number>::T*>(shapeData);
 
       Number start = data->start;
       Number sweep = data->sweep;

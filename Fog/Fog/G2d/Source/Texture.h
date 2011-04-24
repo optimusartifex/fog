@@ -102,7 +102,7 @@ struct FOG_NO_EXPORT Texture
   FOG_INLINE void setTexture(const Image& image)
   {
     _image = image;
-    _fragment.set(0, 0, image.getWidth(), image.getHeight());
+    _fragment.setRect(0, 0, image.getWidth(), image.getHeight());
     _tileType = TEXTURE_TILE_DEFAULT;
     _clampColor.reset();
   }
@@ -110,7 +110,7 @@ struct FOG_NO_EXPORT Texture
   FOG_INLINE void setTexture(const Image& image, uint32_t tileType)
   {
     _image = image;
-    _fragment.set(0, 0, image.getWidth(), image.getHeight());
+    _fragment.setRect(0, 0, image.getWidth(), image.getHeight());
     _tileType = tileType;
     _clampColor.reset();
   }
@@ -118,7 +118,7 @@ struct FOG_NO_EXPORT Texture
   FOG_INLINE void setTexture(const Image& image, uint32_t tileType, const Color& clampColor)
   {
     _image = image;
-    _fragment.set(0, 0, image.getWidth(), image.getHeight());
+    _fragment.setRect(0, 0, image.getWidth(), image.getHeight());
     _tileType = tileType;
     _clampColor = clampColor;
   }

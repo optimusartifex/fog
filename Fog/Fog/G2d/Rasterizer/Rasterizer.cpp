@@ -109,7 +109,7 @@ void Rasterizer8::reset()
 {
   // Clip-box / Bounding-box.
   _sceneBox.reset();
-  _boundingBox.set(-1, -1, -1, -1);
+  _boundingBox.setBox(-1, -1, -1, -1);
 
   // Clear error state.
   _error = ERR_OK;
@@ -131,7 +131,7 @@ void Rasterizer8::reset()
 
 err_t Rasterizer8::initialize()
 {
-  _boundingBox.set(-1, -1, -1, -1);
+  _boundingBox.setBox(-1, -1, -1, -1);
 
   _error = ERR_OK;
   _shape = SHAPE_TYPE_NONE;
@@ -195,7 +195,7 @@ err_t Rasterizer8::finalize()
     case RASTERIZER_SHAPE_RECT:
     {
       RectShape* shape = reinterpret_cast<RectShape*>(_rows);
-      _boundingBox.set(shape->bounds);
+      _boundingBox.setBox(shape->bounds);
       _initRectSweepFunctions(this);
       break;
     }
@@ -689,8 +689,8 @@ void Rasterizer8::_addBox24x8(const BoxI& box24x8)
   // Okay, the rectangle is in the clipBox.
   RectShape* shape = reinterpret_cast<RectShape*>(_rows);
 
-  shape->bounds.set(x0 >> 8, y0 >> 8, x1 >> 8, y1 >> 8);
-  shape->box24x8.set(x0, y0, x1, y1);
+  shape->bounds.setBox(x0 >> 8, y0 >> 8, x1 >> 8, y1 >> 8);
+  shape->box24x8.setBox(x0, y0, x1, y1);
   shape->xLeft = _sceneBox.x0 + shape->bounds.x0;
   shape->xRight = _sceneBox.x0 + shape->bounds.x1;
 

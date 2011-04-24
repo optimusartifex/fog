@@ -99,7 +99,7 @@ static void _copyRectsExtents(BoxI* dest, const BoxI* src, sysuint_t length, Box
     *dest = *src;
   }
 
-  extents->set(extentsX0, extentsY0, extentsX1, extentsY1);
+  extents->setBox(extentsX0, extentsY0, extentsX1, extentsY1);
 }
 
 // ============================================================================
@@ -485,7 +485,7 @@ static err_t _unitePrivate(Region* dest, const BoxI* src1, sysuint_t count1, con
       if (top != bot)
       {
         const BoxI* ovrlp = src1;
-        while (ovrlp != src1BandEnd) { (*destCur++).set(ovrlp->x0, top, ovrlp->x1, bot); ovrlp++; }
+        while (ovrlp != src1BandEnd) { (*destCur++).setBox(ovrlp->x0, top, ovrlp->x1, bot); ovrlp++; }
 
         destCur = _coalesce(destCur, &prevBand, &curBand);
       }
@@ -498,7 +498,7 @@ static err_t _unitePrivate(Region* dest, const BoxI* src1, sysuint_t count1, con
       if (top != bot)
       {
         const BoxI* ovrlp = src2;
-        while (ovrlp != src2BandEnd) { (*destCur++).set(ovrlp->x0, top, ovrlp->x1, bot); ovrlp++; }
+        while (ovrlp != src2BandEnd) { (*destCur++).setBox(ovrlp->x0, top, ovrlp->x1, bot); ovrlp++; }
 
         destCur = _coalesce(destCur, &prevBand, &curBand);
       }
@@ -523,7 +523,7 @@ static err_t _unitePrivate(Region* dest, const BoxI* src1, sysuint_t count1, con
           if (destCur[-1].x1 < __x1__) destCur[-1].x1 = __x1__;     \
         }                                                           \
         else {                                                      \
-          (*destCur++).set(__x0__, __y0__, __x1__, __y1__);         \
+          (*destCur++).setBox(__x0__, __y0__, __x1__, __y1__);      \
         }
 
       while ((i1 != src1BandEnd) && (i2 != src2BandEnd))
@@ -584,7 +584,7 @@ static err_t _unitePrivate(Region* dest, const BoxI* src1, sysuint_t count1, con
     int y1 = Math::max(src->y0, ybot);
 
     // Append first band and coalesce.
-    while (src != srcEnd && src->y0 == y0) { (*destCur++).set(src->x0, y1, src->x1, src->y1); src++; }
+    while (src != srcEnd && src->y0 == y0) { (*destCur++).setBox(src->x0, y1, src->x1, src->y1); src++; }
     destCur = _coalesce(destCur, &prevBand, &curBand);
 
     // Append remaining rectangles, coalesce isn't needed.
@@ -743,7 +743,7 @@ static err_t _intersectPrivate(Region* dest, const BoxI* src1, sysuint_t count1,
         if (x0 < x1)
         {
           // Append rectangle.
-          destCur->set(x0, ytop, x1, ybot);
+          destCur->setBox(x0, ytop, x1, ybot);
           destCur++;
         }
 
@@ -800,7 +800,7 @@ static err_t _intersectPrivate(Region* dest, const BoxI* src1, sysuint_t count1,
     }
 
     dest->_d->length = length;
-    dest->_d->extents.set(extentsX0, destBegin[0].y0, extentsX1, destCur[-1].y1);
+    dest->_d->extents.setBox(extentsX0, destBegin[0].y0, extentsX1, destCur[-1].y1);
   }
   else
   {
@@ -902,7 +902,7 @@ static err_t _subtractPrivate(Region* dest, const BoxI* src1, sysuint_t count1, 
       prevBand = destBegin + prevBandIndex;                       \
       curBand = destBegin + curBandIndex;                         \
     }                                                             \
-    destCur->set(__x0__, __y0__, __x1__, __y1__);                 \
+    destCur->setBox(__x0__, __y0__, __x1__, __y1__);              \
     destCur++;                                                    \
                                                                   \
     if (FOG_UNLIKELY(extentsX0 > __x0__)) extentsX0 = __x0__;     \
@@ -1049,7 +1049,7 @@ static err_t _subtractPrivate(Region* dest, const BoxI* src1, sysuint_t count1, 
   {
     if (memOverlap) dest->_d->deref();
 
-    newd->extents.set(extentsX0, destBegin[0].y0, extentsX1, destCur[-1].y1);
+    newd->extents.setBox(extentsX0, destBegin[0].y0, extentsX1, destCur[-1].y1);
     newd->length = length;
     dest->_d = newd;
   }
@@ -2116,8 +2116,8 @@ err_t Region::translate(Region& dest, const Region& src, const PointI& pt)
 
     dest_d = dest._d;
 
-    dest_d->extents.set(src_d->extents.x0 + x, src_d->extents.y0 + y,
-                        src_d->extents.x1 + x, src_d->extents.y1 + y);
+    dest_d->extents.setBox(src_d->extents.x0 + x, src_d->extents.y0 + y,
+                           src_d->extents.x1 + x, src_d->extents.y1 + y);
     dest_d->length = src_d->length;
 
     dest_r = dest_d->rects;
@@ -2125,7 +2125,7 @@ err_t Region::translate(Region& dest, const Region& src, const PointI& pt)
 
     for (i = dest_d->length; i; i--, dest_r++)
     {
-      dest_r->set(src_r->x0 + x, src_r->y0 + y, src_r->x1 + x, src_r->y1 + y);
+      dest_r->setBox(src_r->x0 + x, src_r->y0 + y, src_r->x1 + x, src_r->y1 + y);
     }
   }
   return ERR_OK;
@@ -2320,7 +2320,7 @@ err_t Region::intersectAndClip(Region& dst, const Region& src1Region, const Regi
         if (x0 < x1)
         {
           // Append rectangle.
-          destCur->set(x0, ytopAdjusted, x1, ybotAdjusted);
+          destCur->setBox(x0, ytopAdjusted, x1, ybotAdjusted);
           destCur++;
         }
 
@@ -2377,7 +2377,7 @@ err_t Region::intersectAndClip(Region& dst, const Region& src1Region, const Regi
     }
 
     dst._d->length = length;
-    dst._d->extents.set(extentsX0, destBegin[0].y0, extentsX1, destCur[-1].y1);
+    dst._d->extents.setBox(extentsX0, destBegin[0].y0, extentsX1, destCur[-1].y1);
   }
   else
   {
@@ -2479,7 +2479,7 @@ _Next:
         if (extentsX0 > x0) extentsX0 = x0;
         if (extentsX1 < x1) extentsX1 = x1;
 
-        destCur->set(x0, srcY0, x1, srcY1);
+        destCur->setBox(x0, srcY0, x1, srcY1);
         destCur++;
       }
 
@@ -2496,7 +2496,7 @@ _End:
     if (newd) atomicPtrXchg(&dst._d, newd)->deref();
 
     dst._d->length = (sysuint_t)(destCur - dst._d->rects);
-    dst._d->extents.set(extentsX0, dst._d->rects[0].y0, extentsX1, destCur[-1].y1);
+    dst._d->extents.setBox(extentsX0, dst._d->rects[0].y0, extentsX1, destCur[-1].y1);
   }
   else
   {
@@ -2527,8 +2527,8 @@ FOG_NO_EXPORT void _g2d_region_init(void)
   d = Region::_dinfinite.instancep();
   d->refCount.init(1);
   d->flags = RegionData::IsSharable;
-  d->extents.set(INT_MIN, INT_MIN, INT_MAX, INT_MAX);
-  d->rects[0].set(INT_MIN, INT_MIN, INT_MAX, INT_MAX);
+  d->extents.setBox(INT_MIN, INT_MIN, INT_MAX, INT_MAX);
+  d->rects[0].setBox(INT_MIN, INT_MIN, INT_MAX, INT_MAX);
 
   _oempty_region.instance()._d = Region::_dnull.instancep();
   _oinfinite_region.instance()._d = Region::_dinfinite.instancep();

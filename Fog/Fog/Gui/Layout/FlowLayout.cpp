@@ -144,9 +144,8 @@ int FlowLayout::doLayout(const RectI &rect, bool testOnly) const
 
     if (!testOnly)
     {
-      RectI rect;
-      SizeI tmp = item->getLayoutSizeHint();
-      rect.set(x, y, tmp.w, tmp.h);
+      SizeI tmp(item->getLayoutSizeHint());
+      RectI rect(x, y, tmp.w, tmp.h);
       item->setLayoutGeometry(rect);
     }
 

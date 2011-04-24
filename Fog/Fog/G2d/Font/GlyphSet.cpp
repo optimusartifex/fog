@@ -155,8 +155,8 @@ err_t GlyphSet::end()
 
   int x0 = 0;
   int y0 = 0;
-  int x2 = 0;
-  int y2 = 0;
+  int x1 = 0;
+  int y1 = 0;
 
   for (i = 0; i < len; i++)
   {
@@ -164,18 +164,18 @@ err_t GlyphSet::end()
 
     int gx0 = advanceX + gd->offset.x;
     int gy0 = advanceY + gd->offset.y;
-    int gx2 = gx0 + gd->bitmap.getWidth();
-    int gy2 = gy0 + gd->bitmap.getHeight();
+    int gx1 = gx0 + gd->bitmap.getWidth();
+    int gy1 = gy0 + gd->bitmap.getHeight();
 
     if (x0 > gx0) x0 = gx0;
     if (y0 > gy0) y0 = gy0;
-    if (x2 < gx2) x2 = gx2;
-    if (y2 < gy2) y2 = gy2;
+    if (x1 < gx1) x1 = gx1;
+    if (y1 < gy1) y1 = gy1;
 
     advanceX += gd->advance;
   }
 
-  _d->extents.set(x0, y0, x2 - x0, y2 - y0);
+  _d->extents.setRect(x0, y0, x1 - x0, y1 - y0);
   _d->advance = advanceX;
 
   return ERR_OK;
@@ -281,7 +281,7 @@ FOG_NO_EXPORT void _g2d_glyphset_init(void)
   d->flags = GlyphSet::Data::IsSharable;
   d->capacity = 0;
   d->length = 0;
-  d->extents.set(0, 0, 0, 0);
+  d->extents.setRect(0, 0, 0, 0);
   memset(d->data, 0, sizeof(d->data));
 }
 

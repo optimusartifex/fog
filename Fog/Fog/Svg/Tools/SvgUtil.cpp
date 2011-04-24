@@ -348,7 +348,7 @@ err_t parseViewBox(BoxF& box, const String& str)
 _Bail:
   // TODO: Error reporting.
 
-  box.set(coords[0], coords[1], coords[2], coords[3]);
+  box.setBox(coords[0], coords[1], coords[2], coords[3]);
   return err;
 }
 

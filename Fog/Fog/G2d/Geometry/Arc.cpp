@@ -113,7 +113,7 @@ static void FOG_CDECL _G2d_ArcT_getBoundingRect(const typename ArcT<Number>::T* 
   // Translate.
   Number cx = self->center.x;
   Number cy = self->center.y;
-  dst->set(cx + minx, cy + miny, cx + maxx - minx, cy + maxy - miny);
+  dst->setRect(cx + minx, cy + miny, maxx - minx, maxy - miny);
 }
 
 // ============================================================================

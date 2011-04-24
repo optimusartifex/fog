@@ -70,7 +70,7 @@ err_t SvgCircleElement::onCalcBoundingBox(RectF* box) const
 
     if (r <= 0.0f) goto _Fail;
 
-    box->set(cx - r, cy - r, r * 2.0f, r * 2.0f);
+    box->setRect(cx - r, cy - r, r * 2.0f, r * 2.0f);
     return ERR_OK;
   }
 

@@ -3090,13 +3090,13 @@ struct RasterPainterImpl : public RasterPainterImpl_
   static err_t FOG_CDECL fillTextInF(Painter& self, const TextRectF& r, const String& text, const Font& font, const RectF* clip);
   static err_t FOG_CDECL fillTextInD(Painter& self, const TextRectD& r, const String& text, const Font& font, const RectD* clip);
 
-  static err_t FOG_CDECL fillMaskAtI(Painter& self, const PointI& p, const Image& m, const RectI* mr);
-  static err_t FOG_CDECL fillMaskAtF(Painter& self, const PointF& p, const Image& m, const RectI* mr);
-  static err_t FOG_CDECL fillMaskAtD(Painter& self, const PointD& p, const Image& m, const RectI* mr);
+  static err_t FOG_CDECL fillMaskAtI(Painter& self, const PointI& p, const Image& m, const RectI* mFragment);
+  static err_t FOG_CDECL fillMaskAtF(Painter& self, const PointF& p, const Image& m, const RectI* mFragment);
+  static err_t FOG_CDECL fillMaskAtD(Painter& self, const PointD& p, const Image& m, const RectI* mFragment);
 
-  static err_t FOG_CDECL fillMaskInI(Painter& self, const RectI& r, const Image& m, const RectI* mr);
-  static err_t FOG_CDECL fillMaskInF(Painter& self, const RectF& r, const Image& m, const RectI* mr);
-  static err_t FOG_CDECL fillMaskInD(Painter& self, const RectD& r, const Image& m, const RectI* mr);
+  static err_t FOG_CDECL fillMaskInI(Painter& self, const RectI& r, const Image& m, const RectI* mFragment);
+  static err_t FOG_CDECL fillMaskInF(Painter& self, const RectF& r, const Image& m, const RectI* mFragment);
+  static err_t FOG_CDECL fillMaskInD(Painter& self, const RectD& r, const Image& m, const RectI* mFragment);
 
   static err_t FOG_CDECL fillRegion(Painter& self, const Region& r);
 
@@ -3104,21 +3104,21 @@ struct RasterPainterImpl : public RasterPainterImpl_
   // [Blit]
   // --------------------------------------------------------------------------
 
-  static err_t FOG_CDECL blitImageAtI(Painter& self, const PointI& p, const Image& i, const RectI* ir);
-  static err_t FOG_CDECL blitImageAtF(Painter& self, const PointF& p, const Image& i, const RectI* ir);
-  static err_t FOG_CDECL blitImageAtD(Painter& self, const PointD& p, const Image& i, const RectI* ir);
+  static err_t FOG_CDECL blitImageAtI(Painter& self, const PointI& p, const Image& i, const RectI* iFragment);
+  static err_t FOG_CDECL blitImageAtF(Painter& self, const PointF& p, const Image& i, const RectI* iFragment);
+  static err_t FOG_CDECL blitImageAtD(Painter& self, const PointD& p, const Image& i, const RectI* iFragment);
 
-  static err_t FOG_CDECL blitImageInI(Painter& self, const RectI& r, const Image& i, const RectI* ir);
-  static err_t FOG_CDECL blitImageInF(Painter& self, const RectF& r, const Image& i, const RectI* ir);
-  static err_t FOG_CDECL blitImageInD(Painter& self, const RectD& r, const Image& i, const RectI* ir);
+  static err_t FOG_CDECL blitImageInI(Painter& self, const RectI& r, const Image& i, const RectI* iFragment);
+  static err_t FOG_CDECL blitImageInF(Painter& self, const RectF& r, const Image& i, const RectI* iFragment);
+  static err_t FOG_CDECL blitImageInD(Painter& self, const RectD& r, const Image& i, const RectI* iFragment);
 
-  static err_t FOG_CDECL blitMaskedImageAtI(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
-  static err_t FOG_CDECL blitMaskedImageAtF(Painter& self, const PointF& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
-  static err_t FOG_CDECL blitMaskedImageAtD(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
+  static err_t FOG_CDECL blitMaskedImageAtI(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
+  static err_t FOG_CDECL blitMaskedImageAtF(Painter& self, const PointF& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
+  static err_t FOG_CDECL blitMaskedImageAtD(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
 
-  static err_t FOG_CDECL blitMaskedImageInI(Painter& self, const RectI& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
-  static err_t FOG_CDECL blitMaskedImageInF(Painter& self, const RectF& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
-  static err_t FOG_CDECL blitMaskedImageInD(Painter& self, const RectD& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
+  static err_t FOG_CDECL blitMaskedImageInI(Painter& self, const RectI& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
+  static err_t FOG_CDECL blitMaskedImageInF(Painter& self, const RectF& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
+  static err_t FOG_CDECL blitMaskedImageInD(Painter& self, const RectD& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
 
   // --------------------------------------------------------------------------
   // [Clip]
@@ -3150,13 +3150,13 @@ struct RasterPainterImpl : public RasterPainterImpl_
   static err_t FOG_CDECL clipTextInF(Painter& self, uint32_t clipOp, const TextRectF& r, const String& text, const Font& font, const RectF* clip);
   static err_t FOG_CDECL clipTextInD(Painter& self, uint32_t clipOp, const TextRectD& r, const String& text, const Font& font, const RectD* clip);
 
-  static err_t FOG_CDECL clipMaskAtI(Painter& self, uint32_t clipOp, const PointI& p, const Image& m, const RectI* mr);
-  static err_t FOG_CDECL clipMaskAtF(Painter& self, uint32_t clipOp, const PointF& p, const Image& m, const RectI* mr);
-  static err_t FOG_CDECL clipMaskAtD(Painter& self, uint32_t clipOp, const PointD& p, const Image& m, const RectI* mr);
+  static err_t FOG_CDECL clipMaskAtI(Painter& self, uint32_t clipOp, const PointI& p, const Image& m, const RectI* mFragment);
+  static err_t FOG_CDECL clipMaskAtF(Painter& self, uint32_t clipOp, const PointF& p, const Image& m, const RectI* mFragment);
+  static err_t FOG_CDECL clipMaskAtD(Painter& self, uint32_t clipOp, const PointD& p, const Image& m, const RectI* mFragment);
 
-  static err_t FOG_CDECL clipMaskInI(Painter& self, uint32_t clipOp, const RectI& r, const Image& m, const RectI* mr);
-  static err_t FOG_CDECL clipMaskInF(Painter& self, uint32_t clipOp, const RectF& r, const Image& m, const RectI* mr);
-  static err_t FOG_CDECL clipMaskInD(Painter& self, uint32_t clipOp, const RectD& r, const Image& m, const RectI* mr);
+  static err_t FOG_CDECL clipMaskInI(Painter& self, uint32_t clipOp, const RectI& r, const Image& m, const RectI* mFragment);
+  static err_t FOG_CDECL clipMaskInF(Painter& self, uint32_t clipOp, const RectF& r, const Image& m, const RectI* mFragment);
+  static err_t FOG_CDECL clipMaskInD(Painter& self, uint32_t clipOp, const RectD& r, const Image& m, const RectI* mFragment);
 
   static err_t FOG_CDECL clipRegion(Painter& self, uint32_t clipOp, const Region& r);
 
@@ -3663,9 +3663,9 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectI(Painter& self, const RectI& 
   if (engine->finalTransformI._type == RASTER_INTEGRAL_TRANSFORM_NULL)
   {
     if (engine->ctx.paintHints.geometricPrecision)
-      return fillRectD(self, r.toRectD());
+      return fillRectD(self, RectD(r));
     else
-      return fillRectF(self, r.toRectF());
+      return fillRectF(self, RectF(r));
   }
   else
   {
@@ -3942,7 +3942,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillTextInD(Painter& self, const TextR
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillMaskAtI(Painter& self, const PointI& p, const Image& m, const RectI* mr)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::fillMaskAtI(Painter& self, const PointI& p, const Image& m, const RectI* mFragment)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
@@ -3952,7 +3952,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillMaskAtI(Painter& self, const Point
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillMaskAtF(Painter& self, const PointF& p, const Image& m, const RectI* mr)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::fillMaskAtF(Painter& self, const PointF& p, const Image& m, const RectI* mFragment)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
@@ -3962,7 +3962,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillMaskAtF(Painter& self, const Point
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillMaskAtD(Painter& self, const PointD& p, const Image& m, const RectI* mr)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::fillMaskAtD(Painter& self, const PointD& p, const Image& m, const RectI* mFragment)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
@@ -3972,7 +3972,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillMaskAtD(Painter& self, const Point
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillMaskInI(Painter& self, const RectI& r, const Image& m, const RectI* mr)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::fillMaskInI(Painter& self, const RectI& r, const Image& m, const RectI* mFragment)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
@@ -3982,7 +3982,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillMaskInI(Painter& self, const RectI
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillMaskInF(Painter& self, const RectF& r, const Image& m, const RectI* mr)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::fillMaskInF(Painter& self, const RectF& r, const Image& m, const RectI* mFragment)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
@@ -3992,7 +3992,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillMaskInF(Painter& self, const RectF
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillMaskInD(Painter& self, const RectD& r, const Image& m, const RectI* mr)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::fillMaskInD(Painter& self, const RectD& r, const Image& m, const RectI* mFragment)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
@@ -4042,13 +4042,13 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRegion(Painter& self, const Region
   }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtI(Painter& self, const PointI& p, const Image& i, const RectI* ir)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtI(Painter& self, const PointI& p, const Image& i, const RectI* iFragment)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
   if (i.isEmpty()) return ERR_OK;
 
   _FOG_RASTER_ENTER_BLIT_FUNC();
-  _FOG_RASTER_GET_IMAGE_PARAMS(i, ir)
+  _FOG_RASTER_GET_IMAGE_PARAMS(i, iFragment)
 
   int dstX = p.x, dstW;
   int dstY = p.y, dstH;
@@ -4059,9 +4059,9 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtI(Painter& self, const Poin
     case RASTER_INTEGRAL_TRANSFORM_NULL:
     {
       if (engine->ctx.paintHints.geometricPrecision)
-        return engine->vtable->blitImageAtD(self, PointD(p), i, ir);
+        return engine->vtable->blitImageAtD(self, PointD(p), i, iFragment);
       else
-        return engine->vtable->blitImageAtF(self, PointF(p), i, ir);
+        return engine->vtable->blitImageAtF(self, PointF(p), i, iFragment);
     }
 
     case RASTER_INTEGRAL_TRANSFORM_SIMPLE:
@@ -4139,13 +4139,13 @@ _Scaling:
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtF(Painter& self, const PointF& p, const Image& i, const RectI* ir)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtF(Painter& self, const PointF& p, const Image& i, const RectI* iFragment)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
   if (i.isEmpty()) return ERR_OK;
 
   _FOG_RASTER_ENTER_BLIT_FUNC();
-  _FOG_RASTER_GET_IMAGE_PARAMS(i, ir)
+  _FOG_RASTER_GET_IMAGE_PARAMS(i, iFragment)
 
   uint32_t transformType = engine->finalTransform.getType();
   BoxD box(double(p.x), double(p.y), double(p.x) + double(iW), double(p.y) + double(iH));
@@ -4226,13 +4226,13 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtF(Painter& self, const Poin
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtD(Painter& self, const PointD& p, const Image& i, const RectI* ir)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtD(Painter& self, const PointD& p, const Image& i, const RectI* iFragment)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
   if (i.isEmpty()) return ERR_OK;
 
   _FOG_RASTER_ENTER_BLIT_FUNC();
-  _FOG_RASTER_GET_IMAGE_PARAMS(i, ir)
+  _FOG_RASTER_GET_IMAGE_PARAMS(i, iFragment)
 
   uint32_t transformType = engine->finalTransform.getType();
   BoxD box(double(p.x), double(p.y), double(p.x) + double(iW), double(p.y) + double(iH));
@@ -4313,16 +4313,16 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtD(Painter& self, const Poin
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageInI(Painter& self, const RectI& r, const Image& i, const RectI* ir)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageInI(Painter& self, const RectI& r, const Image& i, const RectI* iFragment)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
   if (i.isEmpty()) return ERR_OK;
 
   _FOG_RASTER_ENTER_BLIT_FUNC();
-  _FOG_RASTER_GET_IMAGE_PARAMS(i, ir)
+  _FOG_RASTER_GET_IMAGE_PARAMS(i, iFragment)
 
   // Try to use unscaled blit if possible.
-  if (r.w == iW && r.h == iH) return engine->vtable->blitImageAtI(self, PointI(r.x, r.y), i, ir);
+  if (r.w == iW && r.h == iH) return engine->vtable->blitImageAtI(self, PointI(r.x, r.y), i, iFragment);
 
   uint32_t transformType = engine->finalTransform.getType();
   BoxD box(double(r.x), double(r.y), double(r.x) + double(r.w), double(r.y) + double(r.h));
@@ -4353,13 +4353,13 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageInI(Painter& self, const Rect
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageInF(Painter& self, const RectF& r, const Image& i, const RectI* ir)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageInF(Painter& self, const RectF& r, const Image& i, const RectI* iFragment)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
   if (i.isEmpty()) return ERR_OK;
 
   _FOG_RASTER_ENTER_BLIT_FUNC();
-  _FOG_RASTER_GET_IMAGE_PARAMS(i, ir)
+  _FOG_RASTER_GET_IMAGE_PARAMS(i, iFragment)
 
   uint32_t transformType = engine->finalTransform.getType();
   BoxD box(double(r.x), double(r.y), double(r.x) + double(r.w), double(r.y) + double(r.h));
@@ -4382,13 +4382,13 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageInF(Painter& self, const Rect
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageInD(Painter& self, const RectD& r, const Image& i, const RectI* ir)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageInD(Painter& self, const RectD& r, const Image& i, const RectI* iFragment)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
   if (i.isEmpty()) return ERR_OK;
 
   _FOG_RASTER_ENTER_BLIT_FUNC();
-  _FOG_RASTER_GET_IMAGE_PARAMS(i, ir)
+  _FOG_RASTER_GET_IMAGE_PARAMS(i, iFragment)
 
   uint32_t transformType = engine->finalTransform.getType();
   BoxD box(double(r.x), double(r.y), double(r.x) + double(r.w), double(r.y) + double(r.h));
@@ -4411,7 +4411,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageInD(Painter& self, const Rect
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageAtI(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageAtI(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
 
@@ -4419,7 +4419,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageAtI(Painter& self, cons
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageAtF(Painter& self, const PointF& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageAtF(Painter& self, const PointF& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
 
@@ -4427,7 +4427,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageAtF(Painter& self, cons
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageAtD(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageAtD(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
 
@@ -4435,7 +4435,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageAtD(Painter& self, cons
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageInI(Painter& self, const RectI& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageInI(Painter& self, const RectI& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
 
@@ -4443,7 +4443,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageInI(Painter& self, cons
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageInF(Painter& self, const RectF& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageInF(Painter& self, const RectF& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
 
@@ -4451,7 +4451,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageInF(Painter& self, cons
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageInD(Painter& self, const RectD& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageInD(Painter& self, const RectD& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
 
@@ -4615,7 +4615,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::clipTextInD(Painter& self, uint32_t cl
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipMaskAtI(Painter& self, uint32_t clipOp, const PointI& p, const Image& m, const RectI* mr)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::clipMaskAtI(Painter& self, uint32_t clipOp, const PointI& p, const Image& m, const RectI* mFragment)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
 
@@ -4623,7 +4623,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::clipMaskAtI(Painter& self, uint32_t cl
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipMaskAtF(Painter& self, uint32_t clipOp, const PointF& p, const Image& m, const RectI* mr)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::clipMaskAtF(Painter& self, uint32_t clipOp, const PointF& p, const Image& m, const RectI* mFragment)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
 
@@ -4631,7 +4631,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::clipMaskAtF(Painter& self, uint32_t cl
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipMaskAtD(Painter& self, uint32_t clipOp, const PointD& p, const Image& m, const RectI* mr)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::clipMaskAtD(Painter& self, uint32_t clipOp, const PointD& p, const Image& m, const RectI* mFragment)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
 
@@ -4639,7 +4639,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::clipMaskAtD(Painter& self, uint32_t cl
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipMaskInI(Painter& self, uint32_t clipOp, const RectI& r, const Image& m, const RectI* mr)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::clipMaskInI(Painter& self, uint32_t clipOp, const RectI& r, const Image& m, const RectI* mFragment)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
 
@@ -4647,7 +4647,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::clipMaskInI(Painter& self, uint32_t cl
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipMaskInF(Painter& self, uint32_t clipOp, const RectF& r, const Image& m, const RectI* mr)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::clipMaskInF(Painter& self, uint32_t clipOp, const RectF& r, const Image& m, const RectI* mFragment)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
 
@@ -4655,7 +4655,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::clipMaskInF(Painter& self, uint32_t cl
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipMaskInD(Painter& self, uint32_t clipOp, const RectD& r, const Image& m, const RectI* mr)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::clipMaskInD(Painter& self, uint32_t clipOp, const RectD& r, const Image& m, const RectI* mFragment)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
 

@@ -1078,14 +1078,6 @@ _ClipQuadCmd_EvaluateY:
                   dstPts += 2;
                   dstCmd += 2;
 
-#if defined(FOG_DEBUG)
-                  {
-                    typename BoxT<Number>::T curveBoundingBox =
-                      QuadCurveT<Number>::T::getBoundingBox(dstPts - 3);
-                    FOG_ASSERT(clipBox.subsumes(curveBoundingBox));
-                  }
-#endif // FOG_DEBUG
-
                   dstMark = dstPts;
                 }
                 else
@@ -1351,14 +1343,6 @@ _ClipCubicCmd_EvaluateY:
 
                   dstPts += 3;
                   dstCmd += 3;
-
-#if defined(FOG_DEBUG)
-                  {
-                    typename BoxT<Number>::T curveBoundingBox =
-                      CubicCurveT<Number>::T::getBoundingBox(dstPts - 4);
-                    FOG_ASSERT(clipBox.subsumes(curveBoundingBox));
-                  }
-#endif // FOG_DEBUG
 
                   dstMark = dstPts;
                 }

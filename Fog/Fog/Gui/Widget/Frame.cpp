@@ -41,7 +41,7 @@ void Frame::setFrameStyle(uint32_t frameStyle)
   calcClientGeometry(newClientGeometry);
 
   if (!newClientGeometry.isValid())
-    newClientGeometry.set(0, 0, getWidth(), getHeight());
+    newClientGeometry.setRect(0, 0, getWidth(), getHeight());
 
   if (_clientGeometry == newClientGeometry)
   {

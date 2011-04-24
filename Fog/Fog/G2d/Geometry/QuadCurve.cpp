@@ -52,7 +52,7 @@ static void FOG_CDECL _G2d_QuadCurveT_getExtrema(const typename PointT<Number>::
   _FOG_QUAD_MERGE(Number, t0);
   _FOG_QUAD_MERGE(Number, t1);
 
-  dstBox->set(pMin.x, pMin.y, pMax.x, pMax.y);
+  dstBox->setBox(pMin.x, pMin.y, pMax.x, pMax.y);
 }
 
 // ============================================================================

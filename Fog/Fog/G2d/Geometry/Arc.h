@@ -46,13 +46,8 @@ struct FOG_NO_EXPORT ArcF
   FOG_INLINE ArcF() { reset(); }
   FOG_INLINE ArcF(_Uninitialized) {}
 
-  FOG_INLINE ArcF(const ArcF& other)
-  {
-    center = other.center;
-    radius = other.radius;
-    start = other.start;
-    sweep = other.sweep;
-  }
+  FOG_INLINE ArcF(const ArcF& other) { setArc(other); }
+  explicit FOG_INLINE ArcF(const ArcD& other) { setArc(other); }
 
   FOG_INLINE ArcF(const PointF& cp, float rad, float start_, float sweep_)
   {
@@ -115,6 +110,8 @@ struct FOG_NO_EXPORT ArcF
     sweep = other.sweep;
   }
 
+  FOG_INLINE void setArc(const ArcD& other);
+
   FOG_INLINE void setArc(const PointF& cp, float rad, float start_, float sweep_)
   {
     center = cp;
@@ -164,20 +161,11 @@ struct FOG_NO_EXPORT ArcF
   }
 
   // --------------------------------------------------------------------------
-  // [Convert]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE ArcD toArcD() const;
-
-  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE ArcF& operator=(const ArcF& other)
-  {
-    setArc(other);
-    return *this;
-  }
+  FOG_INLINE ArcF& operator=(const ArcF& other) { setArc(other); return *this; }
+  FOG_INLINE ArcF& operator=(const ArcD& other) { setArc(other); return *this; }
 
   FOG_INLINE bool operator==(const ArcF& other)
   {
@@ -216,13 +204,7 @@ struct FOG_NO_EXPORT ArcD
   FOG_INLINE ArcD() { reset(); }
   FOG_INLINE ArcD(_Uninitialized) {}
 
-  FOG_INLINE ArcD(const ArcD& other)
-  {
-    center = other.center;
-    radius = other.radius;
-    start = other.start;
-    sweep = other.sweep;
-  }
+  FOG_INLINE ArcD(const ArcD& other) { setArc(other); }
 
   FOG_INLINE ArcD(const PointD& cp, double rad, double start_, double sweep_)
   {
@@ -252,6 +234,8 @@ struct FOG_NO_EXPORT ArcD
     sweep = sweep_;
   }
 
+  explicit FOG_INLINE ArcD(const ArcF& other) { setArc(other); }
+
   // --------------------------------------------------------------------------
   // [Accessors]
   // --------------------------------------------------------------------------
@@ -278,6 +262,14 @@ struct FOG_NO_EXPORT ArcD
   FOG_INLINE void setSweep(double sweep_) { sweep = sweep_; }
 
   FOG_INLINE void setArc(const ArcD& other)
+  {
+    center = other.center;
+    radius = other.radius;
+    start = other.start;
+    sweep = other.sweep;
+  }
+
+  FOG_INLINE void setArc(const ArcF& other)
   {
     center = other.center;
     radius = other.radius;
@@ -334,20 +326,11 @@ struct FOG_NO_EXPORT ArcD
   }
 
   // --------------------------------------------------------------------------
-  // [Convert]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE ArcF toArcF() const;
-
-  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE ArcD& operator=(const ArcD& other)
-  {
-    setArc(other);
-    return *this;
-  }
+  FOG_INLINE ArcD& operator=(const ArcD& other) { setArc(other); return *this; }
+  FOG_INLINE ArcD& operator=(const ArcF& other) { setArc(other); return *this; }
 
   FOG_INLINE bool operator==(const ArcD& other)
   {
@@ -376,8 +359,13 @@ struct FOG_NO_EXPORT ArcD
 // [Implemented-Later]
 // ============================================================================
 
-FOG_INLINE ArcD ArcF::toArcD() const { return ArcD(center.toPointD(), radius.toPointD(), (double)start, (double)sweep); }
-FOG_INLINE ArcF ArcD::toArcF() const { return ArcF(center.toPointF(), radius.toPointF(), (float)start, (float)sweep); }
+FOG_INLINE void ArcF::setArc(const ArcD& other)
+{
+  center = other.center;
+  radius = other.radius;
+  start = float(other.start);
+  sweep = float(other.sweep);
+}
 
 // ============================================================================
 // [Fog::ArcT<>]

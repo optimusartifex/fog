@@ -47,6 +47,8 @@ struct FOG_NO_EXPORT CircleF
   FOG_INLINE CircleF(const CircleF& other) { center = other.center; radius = other.radius; }
   FOG_INLINE CircleF(const PointF& cp, float rad) { center = cp; radius = rad; }
 
+  explicit FOG_INLINE CircleF(const CircleD& circle);
+
   // --------------------------------------------------------------------------
   // [Accessors]
   // --------------------------------------------------------------------------
@@ -90,12 +92,6 @@ struct FOG_NO_EXPORT CircleF
   }
 
   // --------------------------------------------------------------------------
-  // [Convert]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE CircleD toCircleD() const;
-
-  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
@@ -134,11 +130,32 @@ struct FOG_NO_EXPORT CircleD
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE CircleD() { reset(); }
-  FOG_INLINE CircleD(_Uninitialized) {}
+  FOG_INLINE CircleD()
+  {
+    reset();
+  }
 
-  FOG_INLINE CircleD(const CircleD& other) { center = other.center; radius = other.radius; }
-  FOG_INLINE CircleD(const PointD& cp, double r) { center = cp; radius = r; }
+  FOG_INLINE CircleD(_Uninitialized)
+  {
+  }
+
+  FOG_INLINE CircleD(const CircleD& other) : 
+    center(other.center),
+    radius(other.radius)
+  {
+  }
+  
+  FOG_INLINE CircleD(const PointD& cp, double r) :
+    center(cp),
+    radius(r)
+  {
+  }
+
+  explicit FOG_INLINE CircleD(const CircleF& circle) :
+    center(circle.center),
+    radius(circle.radius)
+  {
+  }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -183,12 +200,6 @@ struct FOG_NO_EXPORT CircleD
   }
 
   // --------------------------------------------------------------------------
-  // [Convert]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE CircleF toCircleF() const;
-
-  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
@@ -220,8 +231,11 @@ struct FOG_NO_EXPORT CircleD
 // [Implemented-Later]
 // ============================================================================
 
-FOG_INLINE CircleD CircleF::toCircleD() const { return CircleD(center.toPointD(), (double)radius); }
-FOG_INLINE CircleF CircleD::toCircleF() const { return CircleF(center.toPointF(), (float)radius); }
+FOG_INLINE CircleF::CircleF(const CircleD& circle) :
+  center(float(circle.center.x), float(circle.center.y)),
+  radius(float(circle.radius))
+{
+}
 
 // ============================================================================
 // [Fog::CircleT<>]

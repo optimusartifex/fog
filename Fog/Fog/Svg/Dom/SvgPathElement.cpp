@@ -56,7 +56,7 @@ err_t SvgPathElement::onCalcBoundingBox(RectF* box) const
   if (a_d.isAssigned())
   {
     const PathF& path = a_d.getPath();
-    box->set(path.getBoundingRect());
+    box->setRect(path.getBoundingRect());
     return ERR_OK;
   }
   else

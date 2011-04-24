@@ -10,8 +10,10 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Swap.h>
+#include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Painting/Painter.h>
 #include <Fog/G2d/Painting/PainterUtil.h>
+#include <Fog/G2d/Source/LinearGradient.h>
 #include <Fog/G2d/Text/TextRect.h>
 #include <Fog/Gui/Widget/Button.h>
 
@@ -47,12 +49,12 @@ void Button::onPaint(PaintEvent* e)
     (float)bounds.x + 0.5f, (float)bounds.y + 0.5f,
     (float)bounds.w - 1.0f, (float)bounds.h - 1.0f, 3.0f);
 
-  PointI pts[2];
-  pts[0].set(0, 0);
-  pts[1].set(0, s.h);
+  PointF pts[2];
+  pts[0].set(0.0f, 0.0f);
+  pts[1].set(0.0f, float(s.h));
   if (isDown()) swap(pts[0], pts[1]);
 
-  LinearGradientF gf(pts[0].toPointF(), pts[1].toPointF());
+  LinearGradientF gf(pts[0], pts[1]);
   LinearGradientF gs(gf);
 
   gf.setGradientSpread(GRADIENT_SPREAD_PAD);

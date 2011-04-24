@@ -537,11 +537,11 @@ void GuiEngine::dispatchConfigure(Widget* w, const RectI& geometry, bool changed
 
   GeometryEvent e;
   e._widgetGeometry = geometry;
-  e._clientGeometry.set(0, 0, geometry.w, geometry.h);
+  e._clientGeometry.setRect(0, 0, geometry.w, geometry.h);
 
   w->calcClientGeometry(e._clientGeometry);
   if (!e._clientGeometry.isValid())
-    e._clientGeometry.set(0, 0, geometry.w, geometry.h);
+    e._clientGeometry.setRect(0, 0, geometry.w, geometry.h);
 
   uint32_t changedFlags = 0;
 
@@ -830,8 +830,8 @@ void GuiEngine::doUpdateWindow(GuiWindow* window)
   UpdateRec widgetRec;
 
   parent = NULL;
-  parentRec.bounds.set(0, 0, widget->getWidth(), widget->getHeight());
-  parentRec.paintBounds.set(0, 0, widget->getWidth(), widget->getHeight());
+  parentRec.bounds.setBox(0, 0, widget->getWidth(), widget->getHeight());
+  parentRec.paintBounds.setBox(0, 0, widget->getWidth(), widget->getHeight());
   parentRec.uflags = uflags;
   parentRec.implicitFlags = implicitFlags;
   parentRec.visible = true;

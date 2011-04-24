@@ -49,8 +49,10 @@ struct FOG_NO_EXPORT RoundF
   FOG_INLINE RoundF(const RectF& r, const PointF& rp) { rect = r; radius = rp; }
   FOG_INLINE RoundF(const RectF& r, float rad) { rect = r; radius.set(rad, rad); }
 
-  FOG_INLINE RoundF(float rx, float ry, float rw, float rh, float rad) { rect.set(rx, ry, rw, rh); radius.set(rad, rad); }
-  FOG_INLINE RoundF(float rx, float ry, float rw, float rh, float radx, float rady) { rect.set(rx, ry, rw, rh); radius.set(radx, rady); }
+  FOG_INLINE RoundF(float rx, float ry, float rw, float rh, float rad) { rect.setRect(rx, ry, rw, rh); radius.set(rad, rad); }
+  FOG_INLINE RoundF(float rx, float ry, float rw, float rh, float radx, float rady) { rect.setRect(rx, ry, rw, rh); radius.set(radx, rady); }
+
+  explicit RoundF(const RoundD& other) { setRound(other); }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -64,12 +66,13 @@ struct FOG_NO_EXPORT RoundF
   FOG_INLINE void setRadius(float rad) { radius.set(rad, rad); }
 
   FOG_INLINE void setRound(const RoundF& other) { rect = other.rect; radius = other.radius; }
+  FOG_INLINE void setRound(const RoundD& other);
 
   FOG_INLINE void setRound(const RectF& r, const PointF& rp) { rect = r; radius = rp; }
   FOG_INLINE void setRound(const RectF& r, float rad) { rect = r; radius.set(rad, rad); }
 
-  FOG_INLINE void setRound(float rx, float ry, float rw, float rh, float rad) { rect.set(rx, ry, rw, rh); radius.set(rad, rad); }
-  FOG_INLINE void setRound(float rx, float ry, float rw, float rh, float radx, float rady) { rect.set(rx, ry, rw, rh); radius.set(radx, rady); }
+  FOG_INLINE void setRound(float rx, float ry, float rw, float rh, float rad) { rect.setRect(rx, ry, rw, rh); radius.set(rad, rad); }
+  FOG_INLINE void setRound(float rx, float ry, float rw, float rh, float radx, float rady) { rect.setRect(rx, ry, rw, rh); radius.set(radx, rady); }
 
   // --------------------------------------------------------------------------
   // [Reset]
@@ -98,12 +101,6 @@ struct FOG_NO_EXPORT RoundF
   {
     rect.translate(pt);
   }
-
-  // --------------------------------------------------------------------------
-  // [Convert]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE RoundD toRoundD() const;
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
@@ -152,8 +149,10 @@ struct FOG_NO_EXPORT RoundD
   FOG_INLINE RoundD(const RectD& r, const PointD& rp) { rect = r; radius = rp; }
   FOG_INLINE RoundD(const RectD& r, double rad) { rect = r; radius.set(rad, rad); }
 
-  FOG_INLINE RoundD(double rx, double ry, double rw, double rh, double rad) { rect.set(rx, ry, rw, rh); radius.set(rad, rad); }
-  FOG_INLINE RoundD(double rx, double ry, double rw, double rh, double radx, double rady) { rect.set(rx, ry, rw, rh); radius.set(radx, rady); }
+  FOG_INLINE RoundD(double rx, double ry, double rw, double rh, double rad) { rect.setRect(rx, ry, rw, rh); radius.set(rad, rad); }
+  FOG_INLINE RoundD(double rx, double ry, double rw, double rh, double radx, double rady) { rect.setRect(rx, ry, rw, rh); radius.set(radx, rady); }
+
+  explicit FOG_INLINE RoundD(const RoundF& other) { rect = other.rect; radius = other.radius; }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -166,13 +165,14 @@ struct FOG_NO_EXPORT RoundD
   FOG_INLINE void setRadius(const PointD& rp) { radius = rp; }
   FOG_INLINE void setRadius(double rad) { radius.set(rad, rad); }
 
+  FOG_INLINE void setRound(const RoundF& other) { rect = other.rect; radius = other.radius; }
   FOG_INLINE void setRound(const RoundD& other) { rect = other.rect; radius = other.radius; }
 
   FOG_INLINE void setRound(const RectD& r, const PointD& rp) { rect = r; radius = rp; }
   FOG_INLINE void setRound(const RectD& r, double rad) { rect = r; radius.set(rad, rad); }
 
-  FOG_INLINE void setRound(double rx, double ry, double rw, double rh, double rad) { rect.set(rx, ry, rw, rh); radius.set(rad, rad); }
-  FOG_INLINE void setRound(double rx, double ry, double rw, double rh, double radx, double rady) { rect.set(rx, ry, rw, rh); radius.set(radx, rady); }
+  FOG_INLINE void setRound(double rx, double ry, double rw, double rh, double rad) { rect.setRect(rx, ry, rw, rh); radius.set(rad, rad); }
+  FOG_INLINE void setRound(double rx, double ry, double rw, double rh, double radx, double rady) { rect.setRect(rx, ry, rw, rh); radius.set(radx, rady); }
 
   // --------------------------------------------------------------------------
   // [Reset]
@@ -234,7 +234,11 @@ struct FOG_NO_EXPORT RoundD
 // [Implemented-Later]
 // ============================================================================
 
-FOG_INLINE RoundD RoundF::toRoundD() const { return RoundD(rect.toRectD(), radius.toPointD()); }
+FOG_INLINE void RoundF::setRound(const RoundD& other)
+{
+  rect = other.rect;
+  radius = other.radius;
+}
 
 // ============================================================================
 // [Fog::RoundT<>]

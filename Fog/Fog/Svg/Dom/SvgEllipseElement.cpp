@@ -75,7 +75,7 @@ err_t SvgEllipseElement::onCalcBoundingBox(RectF* box) const
 
     if (rx <= 0.0f || ry <= 0.0f) goto _Fail;
 
-    box->set(cx - rx, cy - ry, rx * 2.0f, ry * 2.0f);
+    box->setRect(cx - rx, cy - ry, rx * 2.0f, ry * 2.0f);
     return ERR_OK;
   }
 

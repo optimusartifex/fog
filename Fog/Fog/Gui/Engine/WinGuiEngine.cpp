@@ -88,7 +88,7 @@ static void hwndGetRect(HWND handle, RectI* out)
   int cw = cr.right - cr.left;
   int ch = cr.bottom - cr.top;
 
-  out->set(wr.left, wr.top, cw, ch);
+  out->setRect(wr.left, wr.top, cw, ch);
 }
 
 static LRESULT CALLBACK hwndWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -1780,8 +1780,8 @@ void WinGuiWindow::getWindowRect(RectI* windowRect, RectI* clientRect)
   ::GetWindowRect((HWND)_handle, &wr);
   ::GetClientRect((HWND)_handle, &cr);
 
-  windowRect->set(wr.left, wr.top, wr.right - wr.left, wr.bottom - wr.top);
-  clientRect->set(cr.left, cr.top, cr.right - cr.left, cr.bottom - cr.top);
+  windowRect->setBox(wr.left, wr.top, wr.right, wr.bottom);
+  clientRect->setBox(cr.left, cr.top, cr.right, cr.bottom);
 }
 
 // ============================================================================

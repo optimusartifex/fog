@@ -66,7 +66,7 @@ err_t SvgLineElement::onCalcBoundingBox(RectF* box) const
   float w = (x1 < x2) ? x2 - x1 : x1 - x2;
   float h = (y1 < y2) ? y2 - y1 : y1 - y2;
 
-  box->set(x, y, w, h);
+  box->setRect(x, y, w, h);
   return ERR_OK;
 }
 

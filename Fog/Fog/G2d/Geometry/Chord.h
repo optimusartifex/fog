@@ -49,11 +49,7 @@ struct FOG_NO_EXPORT ChordF : ArcF
   FOG_INLINE ChordF(const RectF& r, float start_, float sweep_) : ArcF(r, start_, sweep_) {}
   FOG_INLINE ChordF(const BoxF& r, float start_, float sweep_) : ArcF(r, start_, sweep_) {}
 
-  // --------------------------------------------------------------------------
-  // [Convert]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE ChordD toChordD() const;
+  explicit FOG_INLINE ChordF(const ArcD& other) : ArcF(other) {}
 };
 
 // ============================================================================
@@ -76,19 +72,8 @@ struct FOG_NO_EXPORT ChordD : ArcD
   FOG_INLINE ChordD(const RectD& r, double start_, double sweep_) : ArcD(r, start_, sweep_) {}
   FOG_INLINE ChordD(const BoxD& r, double start_, double sweep_) : ArcD(r, start_, sweep_) {}
 
-  // --------------------------------------------------------------------------
-  // [Convert]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE ChordF toChordF() const;
+  explicit FOG_INLINE ChordD(const ArcF& other) : ArcD(other) {}
 };
-
-// ============================================================================
-// [Implemented-Later]
-// ============================================================================
-
-FOG_INLINE ChordD ChordF::toChordD() const { return ChordD(center.toPointD(), radius.toPointD(), (double)start, (double)sweep); }
-FOG_INLINE ChordF ChordD::toChordF() const { return ChordF(center.toPointF(), radius.toPointF(), (float)start, (float)sweep); }
 
 // ============================================================================
 // [Fog::ChordT<>]

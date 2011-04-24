@@ -336,7 +336,7 @@ bool XmlElement::contains(XmlElement* e, bool deep)
   return false;
 }
 
-List<XmlElement*> XmlElement::childNodes() const
+List<XmlElement*> XmlElement::getChildNodes() const
 {
   if (_dirty)
   {
@@ -353,14 +353,14 @@ List<XmlElement*> XmlElement::childNodes() const
   return _children;
 }
 
-List<XmlElement*> XmlElement::childNodesByTagName(const String& tagName) const
+List<XmlElement*> XmlElement::getChildNodesByTagName(const String& tagName) const
 {
   List<XmlElement*> elms;
 
   ManagedString tagNameM;
   if (tagNameM.setIfManaged(tagName) != ERR_OK) return elms;
 
-  for (XmlElement* e = firstChild(); e; e = e->nextSibling())
+  for (XmlElement* e = getFirstChild(); e; e = e->getNextSibling())
   {
     if (e->_tagName == tagNameM) elms.append(e);
   }
@@ -373,7 +373,7 @@ XmlElement* XmlElement::_nextChildByTagName(XmlElement* refElement, const String
   XmlElement* e = refElement;
   if (e == NULL) return e;
 
-  while ((e = e->nextSibling()))
+  while ((e = e->getNextSibling()))
   {
     if (e->_tagName == tagName) break;
   }
@@ -385,7 +385,7 @@ XmlElement* XmlElement::_previousChildByTagName(XmlElement* refElement, const St
   XmlElement* e = refElement;
   if (e == NULL) return e;
 
-  while ((e = e->previousSibling()))
+  while ((e = e->getPreviousSibling()))
   {
     if (e->_tagName == tagName) break;
   }
@@ -484,7 +484,7 @@ String XmlElement::getTextContent() const
   else
   {
     String s;
-    for (XmlElement* e = firstChild(); e; e = e->nextSibling()) s.append(e->getTextContent());
+    for (XmlElement* e = getFirstChild(); e; e = e->getNextSibling()) s.append(e->getTextContent());
     return s;
   }
 }

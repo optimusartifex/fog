@@ -71,7 +71,7 @@ void SvgAbstractGradientElement::_walkAndAddColorStops(XmlElement* root, Gradien
   int depth = 0;
 
 _Start:
-  for (stop = root->firstChild(); stop; stop = stop->nextSibling())
+  for (stop = root->getFirstChild(); stop; stop = stop->getNextSibling())
   {
     if (stop->isSvg() && reinterpret_cast<SvgElement*>(stop)->getSvgType() == SVG_ELEMENT_STOP)
     {

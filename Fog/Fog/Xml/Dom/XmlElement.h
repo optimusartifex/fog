@@ -149,19 +149,19 @@ public:
   FOG_INLINE XmlElement* getParent() const { return _parent; }
 
   //! @brief Get array of child nodes.
-  List<XmlElement*> childNodes() const;
+  List<XmlElement*> getChildNodes() const;
 
   //! @brief Get first child node.
-  FOG_INLINE XmlElement* firstChild() const { return _firstChild; }
+  FOG_INLINE XmlElement* getFirstChild() const { return _firstChild; }
 
   //! @brief Get last child node.
-  FOG_INLINE XmlElement* lastChild() const { return _lastChild; }
+  FOG_INLINE XmlElement* getLastChild() const { return _lastChild; }
 
   //! @brief Get next sibling node.
-  FOG_INLINE XmlElement* nextSibling() const { return _nextSibling; }
+  FOG_INLINE XmlElement* getNextSibling() const { return _nextSibling; }
 
   //! @brief Get previous sibling node.
-  FOG_INLINE XmlElement* previousSibling() const { return _prevSibling; }
+  FOG_INLINE XmlElement* getPreviousSibling() const { return _prevSibling; }
 
   //! @brief Get whether the current node is first.
   FOG_INLINE bool isFirst() const { return _prevSibling == NULL; }
@@ -175,18 +175,18 @@ public:
   //! @brief Get whether the current node has child nodes.
   FOG_INLINE bool hasChildNodes() const { return _firstChild != NULL; }
 
-  List<XmlElement*> childNodesByTagName(const String& tagName) const;
+  List<XmlElement*> getChildNodesByTagName(const String& tagName) const;
 
-  FOG_INLINE XmlElement* firstChildByTagName(const String& tagName) const
+  FOG_INLINE XmlElement* getFirstChildByTagName(const String& tagName) const
   { return _nextChildByTagName(_firstChild, tagName); }
 
-  FOG_INLINE XmlElement* lastChildByTagName(const String& tagName) const
+  FOG_INLINE XmlElement* getLastChildByTagName(const String& tagName) const
   { return _previousChildByTagName(_lastChild, tagName); }
 
-  FOG_INLINE XmlElement* nextChildByTagName(const String& tagName) const
+  FOG_INLINE XmlElement* getNextChildByTagName(const String& tagName) const
   { return _nextChildByTagName(_nextSibling, tagName); }
 
-  FOG_INLINE XmlElement* previousChildByTagName(const String& tagName) const
+  FOG_INLINE XmlElement* getPreviousChildByTagName(const String& tagName) const
   { return _previousChildByTagName(_prevSibling, tagName); }
 
   static XmlElement* _nextChildByTagName(XmlElement* refElement, const String& tagName);

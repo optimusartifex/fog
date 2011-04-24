@@ -56,7 +56,7 @@ err_t SvgTextElement::onRenderShape(SvgRenderContext* context) const
 
   context->_textCursor.set(x, y);
 
-  for (e = firstChild(); e; e = e->nextSibling())
+  for (e = getFirstChild(); e; e = e->getNextSibling())
   {
     // TODO: Needed?
     //if (e->isSvgElement() && reinterpret_cast<SvgElement*>(e)->getVisible())

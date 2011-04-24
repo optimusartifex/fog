@@ -67,7 +67,7 @@ XmlElement* SvgDocument::clone() const
   SvgDocument* doc = fog_new SvgDocument();
   if (!doc) return NULL;
 
-  for (XmlElement* ch = firstChild(); ch; ch = ch->nextSibling())
+  for (XmlElement* ch = getFirstChild(); ch; ch = ch->getNextSibling())
   {
     XmlElement* e = ch->clone();
     if (e && doc->appendChild(e) != ERR_OK) { fog_delete(e); goto _Fail; }
@@ -117,6 +117,12 @@ XmlElement* SvgDocument::createElementStatic(const ManagedString& tagName)
 err_t SvgDocument::onRender(SvgRenderContext* context) const
 {
   return SvgElement::_walkAndRender(this, context);
+}
+
+err_t SvgDocument::render(Painter* painter, SvgVisitor* visitor) const
+{
+  SvgRenderContext ctx(painter, visitor);
+  return onRender(&ctx);
 }
 
 } // Fog namespace

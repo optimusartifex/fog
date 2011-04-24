@@ -50,7 +50,7 @@ XmlElement* XmlDocument::clone() const
   XmlDocument* doc = fog_new XmlDocument();
   if (!doc) return NULL;
 
-  for (XmlElement* ch = firstChild(); ch; ch = ch->nextSibling())
+  for (XmlElement* ch = getFirstChild(); ch; ch = ch->getNextSibling())
   {
     XmlElement* e = ch->clone();
     if (e && doc->appendChild(e) != ERR_OK) fog_delete(e);

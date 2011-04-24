@@ -21,7 +21,9 @@ namespace Fog {
 // [Forward Declarations]
 // ============================================================================
 
+struct Painter;
 struct SvgRenderContext;
+struct SvgVisitor;
 
 // ============================================================================
 // [Fog::SvgDocument]
@@ -58,6 +60,12 @@ struct FOG_API SvgDocument :
   // --------------------------------------------------------------------------
 
   virtual err_t onRender(SvgRenderContext* context) const;
+
+  // --------------------------------------------------------------------------
+  // [SVG Public]
+  // --------------------------------------------------------------------------
+
+  err_t render(Painter* painter, SvgVisitor* visitor = NULL) const;
 
 private:
   FOG_DISABLE_COPY(SvgDocument)

@@ -139,8 +139,7 @@ void MyWindow::onPaint(PaintEvent* e)
   p->translate(PointF(100.0f, 100.0f));
   p->translate(translate);
 
-  SvgRenderContext context(p);
-  svg.onRender(&context);
+  svg.render(p);
 
   p->restore();
 

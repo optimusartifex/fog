@@ -78,7 +78,7 @@ err_t SvgElement::_walkAndRender(const XmlElement* root, SvgRenderContext* conte
   SvgVisitor* visitor = context->getVisitor();
   if (visitor == NULL)
   {
-    for (e = root->firstChild(); e; e = e->nextSibling())
+    for (e = root->getFirstChild(); e; e = e->getNextSibling())
     {
       if (e->isSvgElement() && reinterpret_cast<SvgElement*>(e)->getVisible())
       {
@@ -89,7 +89,7 @@ err_t SvgElement::_walkAndRender(const XmlElement* root, SvgRenderContext* conte
   }
   else
   {
-    for (e = root->firstChild(); e; e = e->nextSibling())
+    for (e = root->getFirstChild(); e; e = e->getNextSibling())
     {
       if (e->isSvgElement() && reinterpret_cast<SvgElement*>(e)->getVisible() && visitor->canVisit(e))
       {

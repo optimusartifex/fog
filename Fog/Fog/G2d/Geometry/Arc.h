@@ -141,14 +141,21 @@ struct FOG_NO_EXPORT ArcF
   }
 
   // --------------------------------------------------------------------------
-  // [BoundingRect]
+  // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
+
+  FOG_INLINE BoxF getBoundingBox() const
+  {
+    BoxF result;
+    _g2d.arcf.getBoundingBox(this, &result, false);
+    return result;
+  }
 
   FOG_INLINE RectF getBoundingRect() const
   {
-    RectF result;
-    _g2d.arcf.getBoundingRect(this, &result, false);
-    return result;
+    BoxF result;
+    _g2d.arcf.getBoundingBox(this, &result, false);
+    return RectF(result);
   }
 
   // --------------------------------------------------------------------------
@@ -306,14 +313,21 @@ struct FOG_NO_EXPORT ArcD
   }
 
   // --------------------------------------------------------------------------
-  // [BoundingRect]
+  // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
+
+  FOG_INLINE BoxD getBoundingBox() const
+  {
+    BoxD result;
+    _g2d.arcd.getBoundingBox(this, &result, false);
+    return result;
+  }
 
   FOG_INLINE RectD getBoundingRect() const
   {
-    RectD result;
-    _g2d.arcd.getBoundingRect(this, &result, false);
-    return result;
+    BoxD result;
+    _g2d.arcd.getBoundingBox(this, &result, false);
+    return RectD(result);
   }
 
   // --------------------------------------------------------------------------

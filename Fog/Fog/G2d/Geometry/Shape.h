@@ -206,14 +206,21 @@ struct FOG_NO_EXPORT ShapeF
   FOG_INLINE void setPie(const PieF& pie) { _type = SHAPE_TYPE_PIE; _data.pie.instance() = pie; }
 
   // --------------------------------------------------------------------------
-  // [BoundingRect]
+  // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
+
+  FOG_INLINE BoxF getBoundingBox() const
+  {
+    BoxF result(UNINITIALIZED);
+    _g2d.shapef.getBoundingBox(_type, &_data, &result);
+    return result;
+  }
 
   FOG_INLINE RectF getBoundingRect() const
   {
-    RectF result;
-    _g2d.shapef.getBoundingRect(_type, &_data, &result);
-    return result;
+    BoxF result(UNINITIALIZED);
+    _g2d.shapef.getBoundingBox(_type, &_data, &result);
+    return RectF(result);
   }
 
   // --------------------------------------------------------------------------
@@ -329,14 +336,21 @@ struct FOG_NO_EXPORT ShapeD
   FOG_INLINE void setPie(const PieD& pie) { _type = SHAPE_TYPE_PIE; _data.pie.instance() = pie; }
 
   // --------------------------------------------------------------------------
-  // [BoundingRect]
+  // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
+
+  FOG_INLINE BoxD getBoundingBox() const
+  {
+    BoxD result(UNINITIALIZED);
+    _g2d.shaped.getBoundingBox(_type, &_data, &result);
+    return result;
+  }
 
   FOG_INLINE RectD getBoundingRect() const
   {
-    RectD result;
-    _g2d.shaped.getBoundingRect(_type, &_data, &result);
-    return result;
+    BoxD result(UNINITIALIZED);
+    _g2d.shaped.getBoundingBox(_type, &_data, &result);
+    return RectD(result);
   }
 
   // --------------------------------------------------------------------------

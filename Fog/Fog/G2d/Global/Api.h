@@ -80,17 +80,17 @@ struct _G2dApi
   // [Arc]
   // --------------------------------------------------------------------------
 
-  typedef void (FOG_CDECL *ArcF_GetBoundingRect)(const ArcF* self, RectF* dst, bool includeCenterPoint);
-  typedef void (FOG_CDECL *ArcD_GetBoundingRect)(const ArcD* self, RectD* dst, bool includeCenterPoint);
+  typedef void (FOG_CDECL *ArcF_GetBoundingBox)(const ArcF* self, BoxF* dst, bool includeCenterPoint);
+  typedef void (FOG_CDECL *ArcD_GetBoundingBox)(const ArcD* self, BoxD* dst, bool includeCenterPoint);
 
   struct _FuncsArcF
   {
-    ArcF_GetBoundingRect getBoundingRect;
+    ArcF_GetBoundingBox getBoundingBox;
   } arcf;
 
   struct _FuncsArcD
   {
-    ArcD_GetBoundingRect getBoundingRect;
+    ArcD_GetBoundingBox getBoundingBox;
   } arcd;
 
   // --------------------------------------------------------------------------
@@ -514,17 +514,17 @@ struct _G2dApi
   // [Shape]
   // --------------------------------------------------------------------------
 
-  typedef void (FOG_CDECL *ShapeF_GetBoundingRect)(uint32_t shapeType, const void* shapeData, RectF* dst);
-  typedef void (FOG_CDECL *ShapeD_GetBoundingRect)(uint32_t shapeType, const void* shapeData, RectD* dst);
+  typedef void (FOG_CDECL *ShapeF_GetBoundingBox)(uint32_t shapeType, const void* shapeData, BoxF* dst);
+  typedef void (FOG_CDECL *ShapeD_GetBoundingBox)(uint32_t shapeType, const void* shapeData, BoxD* dst);
 
   struct _FuncsShapeF
   {
-    ShapeF_GetBoundingRect getBoundingRect;
+    ShapeF_GetBoundingBox getBoundingBox;
   } shapef;
 
   struct _FuncsShapeD
   {
-    ShapeD_GetBoundingRect getBoundingRect;
+    ShapeD_GetBoundingBox getBoundingBox;
   } shaped;
 
   // --------------------------------------------------------------------------

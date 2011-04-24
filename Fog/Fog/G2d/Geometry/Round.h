@@ -14,6 +14,7 @@
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Memory.h>
+#include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Global/Api.h>
@@ -85,8 +86,13 @@ struct FOG_NO_EXPORT RoundF
   }
 
   // --------------------------------------------------------------------------
-  // [BoundingRect]
+  // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
+
+  FOG_INLINE BoxF getBoundingBox() const
+  {
+    return BoxF(rect);
+  }
 
   FOG_INLINE RectF getBoundingRect() const
   {
@@ -185,8 +191,13 @@ struct FOG_NO_EXPORT RoundD
   }
 
   // --------------------------------------------------------------------------
-  // [BoundingRect]
+  // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
+
+  FOG_INLINE BoxD getBoundingBox() const
+  {
+    return BoxD(rect);
+  }
 
   FOG_INLINE RectD getBoundingRect() const
   {

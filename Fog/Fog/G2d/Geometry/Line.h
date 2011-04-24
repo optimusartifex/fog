@@ -95,8 +95,21 @@ struct FOG_NO_EXPORT LineF
   }
 
   // --------------------------------------------------------------------------
-  // [BoundingRect]
+  // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
+
+  FOG_INLINE BoxF getBoundingBox() const
+  {
+    float x0 = p[0].x;
+    float y0 = p[0].y;
+    float x1 = p[1].x;
+    float y1 = p[1].y;
+
+    if (x0 > x1) swap(x0, x1);
+    if (y0 > y1) swap(y0, y1);
+
+    return BoxF(x0, y0, x1, y1);
+  }
 
   FOG_INLINE RectF getBoundingRect() const
   {
@@ -217,8 +230,21 @@ struct FOG_NO_EXPORT LineD
   }
 
   // --------------------------------------------------------------------------
-  // [BoundingRect]
+  // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
+
+  FOG_INLINE BoxD getBoundingBox() const
+  {
+    double x0 = p[0].x;
+    double y0 = p[0].y;
+    double x1 = p[1].x;
+    double y1 = p[1].y;
+
+    if (x0 > x1) swap(x0, x1);
+    if (y0 > y1) swap(y0, y1);
+
+    return BoxD(x0, y0, x1, y1);
+  }
 
   FOG_INLINE RectD getBoundingRect() const
   {

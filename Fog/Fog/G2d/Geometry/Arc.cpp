@@ -21,7 +21,7 @@ namespace Fog {
 // ============================================================================
 
 template<typename Number>
-static void FOG_CDECL _G2d_ArcT_getBoundingRect(const typename ArcT<Number>::T* self, typename RectT<Number>::T* dst, bool includeCenterPoint)
+static void FOG_CDECL _G2d_ArcT_getBoundingBox(const typename ArcT<Number>::T* self, typename BoxT<Number>::T* dst, bool includeCenterPoint)
 {
   // The bounding box is calculated using unit circle (-1, -1 to 1, 1) and then
   // scaled using radius (rx, ry) and translated using center point (cx, cy).
@@ -113,7 +113,7 @@ static void FOG_CDECL _G2d_ArcT_getBoundingRect(const typename ArcT<Number>::T* 
   // Translate.
   Number cx = self->center.x;
   Number cy = self->center.y;
-  dst->setRect(cx + minx, cy + miny, maxx - minx, maxy - miny);
+  dst->setBox(cx + minx, cy + miny, cx + maxx, cy + maxy);
 }
 
 // ============================================================================
@@ -122,8 +122,8 @@ static void FOG_CDECL _G2d_ArcT_getBoundingRect(const typename ArcT<Number>::T* 
 
 FOG_NO_EXPORT void _g2d_arc_init(void)
 {
-  _g2d.arcf.getBoundingRect = _G2d_ArcT_getBoundingRect<float>;
-  _g2d.arcd.getBoundingRect = _G2d_ArcT_getBoundingRect<double>;
+  _g2d.arcf.getBoundingBox = _G2d_ArcT_getBoundingBox<float>;
+  _g2d.arcd.getBoundingBox = _G2d_ArcT_getBoundingBox<double>;
 }
 
 } // Fog namespace

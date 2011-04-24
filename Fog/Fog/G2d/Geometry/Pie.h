@@ -52,14 +52,21 @@ struct FOG_NO_EXPORT PieF : ArcF
   explicit FOG_INLINE PieF(const ArcD& other) : ArcF(other) {}
 
   // --------------------------------------------------------------------------
-  // [BoundingRect]
+  // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
+
+  FOG_INLINE BoxF getBoundingBox() const
+  {
+    BoxF result;
+    _g2d.arcf.getBoundingBox(this, &result, true);
+    return result;
+  }
 
   FOG_INLINE RectF getBoundingRect() const
   {
-    RectF result;
-    _g2d.arcf.getBoundingRect(this, &result, true);
-    return result;
+    BoxF result;
+    _g2d.arcf.getBoundingBox(this, &result, true);
+    return RectF(result);
   }
 };
 
@@ -86,14 +93,21 @@ struct FOG_NO_EXPORT PieD : ArcD
   explicit FOG_INLINE PieD(const ArcF& other) : ArcD(other) {}
 
   // --------------------------------------------------------------------------
-  // [BoundingRect]
+  // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
+
+  FOG_INLINE BoxD getBoundingBox() const
+  {
+    BoxD result;
+    _g2d.arcd.getBoundingBox(this, &result, true);
+    return result;
+  }
 
   FOG_INLINE RectD getBoundingRect() const
   {
-    RectD result;
-    _g2d.arcd.getBoundingRect(this, &result, true);
-    return result;
+    BoxD result;
+    _g2d.arcd.getBoundingBox(this, &result, true);
+    return RectD(result);
   }
 };
 

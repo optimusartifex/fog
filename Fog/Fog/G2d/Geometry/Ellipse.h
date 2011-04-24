@@ -83,8 +83,18 @@ struct FOG_NO_EXPORT EllipseF
   FOG_INLINE void reset() { center.reset(); radius.reset(); }
 
   // --------------------------------------------------------------------------
-  // [BoundingRect]
+  // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
+
+  FOG_INLINE BoxF getBoundingBox() const
+  {
+    float x0 = center.x - radius.x;
+    float y0 = center.y - radius.y;
+    float x1 = center.x + radius.x;
+    float y1 = center.y + radius.y;
+
+    return BoxF(x0, y0, x1, y1);
+  }
 
   FOG_INLINE RectF getBoundingRect() const
   {
@@ -181,8 +191,18 @@ struct FOG_NO_EXPORT EllipseD
   FOG_INLINE void reset() { center.reset(); radius.reset(); }
 
   // --------------------------------------------------------------------------
-  // [BoundingRect]
+  // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
+
+  FOG_INLINE BoxD getBoundingBox() const
+  {
+    double x0 = center.x - radius.x;
+    double y0 = center.y - radius.y;
+    double x1 = center.x + radius.x;
+    double y1 = center.y + radius.y;
+
+    return BoxD(x0, y0, x1, y1);
+  }
 
   FOG_INLINE RectD getBoundingRect() const
   {

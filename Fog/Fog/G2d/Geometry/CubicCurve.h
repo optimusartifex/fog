@@ -138,21 +138,21 @@ struct FOG_NO_EXPORT CubicCurveF
   }
 
   // --------------------------------------------------------------------------
-  // [BoundingRect / BoundingBox]
+  // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
-
-  FOG_INLINE RectF getBoundingRect() const
-  {
-    BoxF box;
-    _g2d.cubiccurvef.getExtrema(p, &box);
-    return RectF(box);
-  }
 
   FOG_INLINE BoxF getBoundingBox() const
   {
     BoxF box;
     _g2d.cubiccurvef.getExtrema(p, &box);
     return box;
+  }
+
+  FOG_INLINE RectF getBoundingRect() const
+  {
+    BoxF box;
+    _g2d.cubiccurvef.getExtrema(p, &box);
+    return RectF(box);
   }
 
   // --------------------------------------------------------------------------
@@ -474,21 +474,21 @@ struct FOG_NO_EXPORT CubicCurveD
   }
 
   // --------------------------------------------------------------------------
-  // [BoundingRect / BoundingBox]
+  // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
-
-  FOG_INLINE RectD getBoundingRect() const
-  {
-    BoxD box;
-    _g2d.cubiccurved.getExtrema(p, &box);
-    return RectD(box);
-  }
 
   FOG_INLINE BoxD getBoundingBox() const
   {
     BoxD box;
     _g2d.cubiccurved.getExtrema(p, &box);
     return box;
+  }
+
+  FOG_INLINE RectD getBoundingRect() const
+  {
+    BoxD box;
+    _g2d.cubiccurved.getExtrema(p, &box);
+    return RectD(box);
   }
 
   // --------------------------------------------------------------------------

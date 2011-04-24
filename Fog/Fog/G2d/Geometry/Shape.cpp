@@ -17,7 +17,7 @@
 namespace Fog {
 
 template<typename Number>
-static void FOG_CDECL _G2d_ShapeT_getBoundingRect(uint32_t shapeType, const void* shapeData, typename RectT<Number>::T* dst)
+static void FOG_CDECL _G2d_ShapeT_getBoundingBox(uint32_t shapeType, const void* shapeData, typename BoxT<Number>::T* dst)
 {
   switch (shapeType)
   {
@@ -27,19 +27,19 @@ static void FOG_CDECL _G2d_ShapeT_getBoundingRect(uint32_t shapeType, const void
       break;
 
     case SHAPE_TYPE_LINE:
-      *dst = reinterpret_cast<const typename LineT<Number>::T*>(shapeData)->getBoundingRect();
+      *dst = reinterpret_cast<const typename LineT<Number>::T*>(shapeData)->getBoundingBox();
       break;
 
     case SHAPE_TYPE_QUAD:
-      *dst = reinterpret_cast<const typename QuadCurveT<Number>::T*>(shapeData)->getBoundingRect();
+      *dst = reinterpret_cast<const typename QuadCurveT<Number>::T*>(shapeData)->getBoundingBox();
       break;
 
     case SHAPE_TYPE_CUBIC:
-      *dst = reinterpret_cast<const typename CubicCurveT<Number>::T*>(shapeData)->getBoundingRect();
+      *dst = reinterpret_cast<const typename CubicCurveT<Number>::T*>(shapeData)->getBoundingBox();
       break;
 
     case SHAPE_TYPE_ARC:
-      *dst = reinterpret_cast<const typename ArcT<Number>::T*>(shapeData)->getBoundingRect();
+      *dst = reinterpret_cast<const typename ArcT<Number>::T*>(shapeData)->getBoundingBox();
       break;
 
     case SHAPE_TYPE_RECT:
@@ -47,23 +47,23 @@ static void FOG_CDECL _G2d_ShapeT_getBoundingRect(uint32_t shapeType, const void
       break;
 
     case SHAPE_TYPE_ROUND:
-      *dst = reinterpret_cast<const typename RoundT<Number>::T*>(shapeData)->getBoundingRect();
+      *dst = reinterpret_cast<const typename RoundT<Number>::T*>(shapeData)->getBoundingBox();
       break;
 
     case SHAPE_TYPE_CIRCLE:
-      *dst = reinterpret_cast<const typename CircleT<Number>::T*>(shapeData)->getBoundingRect();
+      *dst = reinterpret_cast<const typename CircleT<Number>::T*>(shapeData)->getBoundingBox();
       break;
 
     case SHAPE_TYPE_ELLIPSE:
-      *dst = reinterpret_cast<const typename EllipseT<Number>::T*>(shapeData)->getBoundingRect();
+      *dst = reinterpret_cast<const typename EllipseT<Number>::T*>(shapeData)->getBoundingBox();
       break;
 
     case SHAPE_TYPE_CHORD:
-      *dst = reinterpret_cast<const typename ChordT<Number>::T*>(shapeData)->getBoundingRect();
+      *dst = reinterpret_cast<const typename ChordT<Number>::T*>(shapeData)->getBoundingBox();
       break;
 
     case SHAPE_TYPE_PIE:
-      *dst = reinterpret_cast<const typename PieT<Number>::T*>(shapeData)->getBoundingRect();
+      *dst = reinterpret_cast<const typename PieT<Number>::T*>(shapeData)->getBoundingBox();
       break;
   }
 }
@@ -74,8 +74,8 @@ static void FOG_CDECL _G2d_ShapeT_getBoundingRect(uint32_t shapeType, const void
 
 FOG_NO_EXPORT void _g2d_shape_init(void)
 {
-  _g2d.shapef.getBoundingRect = _G2d_ShapeT_getBoundingRect<float>;
-  _g2d.shaped.getBoundingRect = _G2d_ShapeT_getBoundingRect<double>;
+  _g2d.shapef.getBoundingBox = _G2d_ShapeT_getBoundingBox<float>;
+  _g2d.shaped.getBoundingBox = _G2d_ShapeT_getBoundingBox<double>;
 }
 
 FOG_NO_EXPORT void _g2d_shape_fini(void)

@@ -172,7 +172,7 @@ void MyWindow::onPaint(PaintEvent* e)
 
   // Clear everything to white.
   p->setSource(Argb32(0xFFFFFFFF));
-  p->clear();
+  p->fillAll();
 
   //p->setSource(Argb32(0xFF000000));
 

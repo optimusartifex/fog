@@ -1114,15 +1114,6 @@ struct FOG_NO_EXPORT Painter
   };
 
   // --------------------------------------------------------------------------
-  // [Clear]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE err_t clear()
-  {
-    return _vtable->clear(*this);
-  }
-
-  // --------------------------------------------------------------------------
   // [Draw]
   // --------------------------------------------------------------------------
 
@@ -1181,6 +1172,8 @@ struct FOG_NO_EXPORT Painter
   // --------------------------------------------------------------------------
   // [Fill]
   // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t fillAll() { return _vtable->fillAll(*this); }
 
   FOG_INLINE err_t fillBox(const BoxI& box) { return fillRect(RectI(box)); }
   FOG_INLINE err_t fillBox(const BoxF& box) { return fillRect(RectF(box)); }

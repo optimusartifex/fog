@@ -121,7 +121,7 @@ void MyWindow::onPaint(PaintEvent* e)
   Painter* p = e->getPainter();
 
   p->setSource(Argb32(0xFFFFFFFF));
-  p->clear();
+  p->fillAll();
 
   p->save();
 

@@ -78,7 +78,7 @@ err_t SvgPatternElement::onApplyPattern(SvgRenderContext* context, SvgElement* o
 
   painter.setSource(Argb32(0x00000000));
   painter.setCompositingOperator(COMPOSITE_SRC);
-  painter.clear();
+  painter.fillAll();
 
   SvgRenderContext ctx(&painter);
   SvgElement::_walkAndRender(this, &ctx);

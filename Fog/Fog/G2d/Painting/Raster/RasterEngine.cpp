@@ -3033,12 +3033,6 @@ struct RasterPainterImpl : public RasterPainterImpl_
   static void initVTable(RasterPainterVTable& v);
 
   // --------------------------------------------------------------------------
-  // [Clear]
-  // --------------------------------------------------------------------------
-
-  static err_t FOG_CDECL clear(Painter& self);
-
-  // --------------------------------------------------------------------------
   // [Draw]
   // --------------------------------------------------------------------------
 
@@ -3063,6 +3057,8 @@ struct RasterPainterImpl : public RasterPainterImpl_
   // --------------------------------------------------------------------------
   // [Fill]
   // --------------------------------------------------------------------------
+
+  static err_t FOG_CDECL fillAll(Painter& self);
 
   static err_t FOG_CDECL fillRectI(Painter& self, const RectI& r);
   static err_t FOG_CDECL fillRectF(Painter& self, const RectF& r);
@@ -3297,12 +3293,6 @@ void RasterPainterImpl<_MODE>::initVTable(RasterPainterVTable& v)
   v.mapPointD = mapPointD;
 
   // --------------------------------------------------------------------------
-  // [Clear]
-  // --------------------------------------------------------------------------
-
-  v.clear = clear;
-
-  // --------------------------------------------------------------------------
   // [Draw]
   // --------------------------------------------------------------------------
 
@@ -3327,6 +3317,8 @@ void RasterPainterImpl<_MODE>::initVTable(RasterPainterVTable& v)
   // --------------------------------------------------------------------------
   // [Fill]
   // --------------------------------------------------------------------------
+
+  v.fillAll = fillAll;
 
   v.fillRectI = fillRectI;
   v.fillRectF = fillRectF;
@@ -3445,7 +3437,7 @@ void RasterPainterImpl<_MODE>::initVTable(RasterPainterVTable& v)
 // ============================================================================
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clear(Painter& self)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::fillAll(Painter& self)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
   _FOG_RASTER_ENTER_FILL_FUNC();

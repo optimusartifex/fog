@@ -180,7 +180,7 @@ struct FOG_NO_EXPORT PainterVTable
   // [Paint - Types]
   // --------------------------------------------------------------------------
 
-  typedef err_t (FOG_CDECL *Clear)(Painter& self);
+  typedef err_t (FOG_CDECL *FillAll)(Painter& self);
 
   typedef err_t (FOG_CDECL *PaintRectI)(Painter& self, const RectI& r);
   typedef err_t (FOG_CDECL *PaintRectF)(Painter& self, const RectF& r);
@@ -223,12 +223,6 @@ struct FOG_NO_EXPORT PainterVTable
   typedef err_t (FOG_CDECL *PaintRegion)(Painter& self, const Region& r);
 
   // --------------------------------------------------------------------------
-  // [Paint - Clear]
-  // --------------------------------------------------------------------------
-
-  Clear clear;
-
-  // --------------------------------------------------------------------------
   // [Paint - Draw]
   // --------------------------------------------------------------------------
 
@@ -253,6 +247,8 @@ struct FOG_NO_EXPORT PainterVTable
   // --------------------------------------------------------------------------
   // [Paint - Fill]
   // --------------------------------------------------------------------------
+
+  FillAll fillAll;
 
   PaintRectI fillRectI;
   PaintRectF fillRectF;

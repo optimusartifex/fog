@@ -49,7 +49,7 @@ void TextField::onPaint(PaintEvent* e)
   RectI bounds(0, 0, s.w, s.h);
 
   p->setSource(Argb32(0xFFEEEEEE));
-  p->clear();
+  p->fillAll();
 
   p->setSource(Argb32(0xFF000000));
   p->fillText(TextRectI(bounds, TEXT_ALIGN_LEFT | TEXT_ALIGN_VCENTER), _value, _font);

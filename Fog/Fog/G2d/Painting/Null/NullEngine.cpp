@@ -117,12 +117,6 @@ struct FOG_NO_EXPORT MyPainterImpl
   static err_t FOG_CDECL mapPointD(const Painter& self, uint32_t mapOp, PointD& pt);
 
   // --------------------------------------------------------------------------
-  // [Clear]
-  // --------------------------------------------------------------------------
-
-  static err_t FOG_CDECL clear(Painter& self);
-
-  // --------------------------------------------------------------------------
   // [Draw]
   // --------------------------------------------------------------------------
 
@@ -147,6 +141,8 @@ struct FOG_NO_EXPORT MyPainterImpl
   // --------------------------------------------------------------------------
   // [Fill]
   // --------------------------------------------------------------------------
+
+  static err_t FOG_CDECL fillAll(Painter& self);
 
   static err_t FOG_CDECL fillRectI(Painter& self, const RectI& r);
   static err_t FOG_CDECL fillRectF(Painter& self, const RectF& r);
@@ -479,16 +475,6 @@ err_t FOG_CDECL MyPainterImpl::mapPointD(const Painter& self, uint32_t mapOp, Po
 }
 
 // ============================================================================
-// [Fog::MyPainterImpl - Clear]
-// ============================================================================
-
-err_t FOG_CDECL MyPainterImpl::clear(Painter& self)
-{
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-// ============================================================================
 // [Fog::MyPainterImpl - Draw]
 // ============================================================================
 
@@ -573,6 +559,12 @@ err_t FOG_CDECL MyPainterImpl::drawPathD(Painter& self, const PathD& p)
 // ============================================================================
 // [Fog::MyPainterImpl - Fill]
 // ============================================================================
+
+err_t FOG_CDECL MyPainterImpl::fillAll(Painter& self)
+{
+  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  return ERR_RT_NOT_IMPLEMENTED;
+}
 
 err_t FOG_CDECL MyPainterImpl::fillRectI(Painter& self, const RectI& r)
 {
@@ -1083,12 +1075,6 @@ static void _g2d_painter_init_my()
   v.mapPointD = MyPainterImpl::mapPointD;
 
   // --------------------------------------------------------------------------
-  // [Clear]
-  // --------------------------------------------------------------------------
-
-  v.clear = MyPainterImpl::clear;
-
-  // --------------------------------------------------------------------------
   // [Draw]
   // --------------------------------------------------------------------------
 
@@ -1113,6 +1099,8 @@ static void _g2d_painter_init_my()
   // --------------------------------------------------------------------------
   // [Fill]
   // --------------------------------------------------------------------------
+
+  v.fillAll = MyPainterImpl::fillAll;
 
   v.fillRectI = MyPainterImpl::fillRectI;
   v.fillRectF = MyPainterImpl::fillRectF;
@@ -1315,14 +1303,10 @@ struct FOG_NO_EXPORT NullPainterImpl
   static err_t FOG_CDECL mapPoint(const Painter& self, uint32_t mapOp, Any& pt);
 
   // --------------------------------------------------------------------------
-  // [Clear]
-  // --------------------------------------------------------------------------
-
-  static err_t FOG_CDECL clear(Painter& self);
-
-  // --------------------------------------------------------------------------
   // [Draw/Fill]
   // --------------------------------------------------------------------------
+
+  static err_t FOG_CDECL fillAll(Painter& self);
 
   static err_t FOG_CDECL doRect(Painter& self, const Any& r);
   static err_t FOG_CDECL doRects(Painter& self, const Any* r, sysuint_t count);
@@ -1585,17 +1569,13 @@ err_t FOG_CDECL NullPainterImpl::mapPoint(const Painter& self, uint32_t mapOp, A
 }
 
 // ============================================================================
-// [Fog::NullPainterImpl - Clear]
+// [Fog::NullPainterImpl - Draw/Fill]
 // ============================================================================
 
-err_t FOG_CDECL NullPainterImpl::clear(Painter& self)
+err_t FOG_CDECL NullPainterImpl::fillAll(Painter& self)
 {
   return ERR_RT_INVALID_STATE;
 }
-
-// ============================================================================
-// [Fog::NullPainterImpl - Draw/Fill]
-// ============================================================================
 
 err_t FOG_CDECL NullPainterImpl::doRect(Painter& self, const Any& r)
 {
@@ -1821,12 +1801,6 @@ FOG_NO_EXPORT void _g2d_painter_init_null()
   v.mapPointD = (PainterVTable::MapPointD)NullPainterImpl::mapPoint;
 
   // --------------------------------------------------------------------------
-  // [Clear]
-  // --------------------------------------------------------------------------
-
-  v.clear = NullPainterImpl::clear;
-
-  // --------------------------------------------------------------------------
   // [Draw]
   // --------------------------------------------------------------------------
 
@@ -1851,6 +1825,8 @@ FOG_NO_EXPORT void _g2d_painter_init_null()
   // --------------------------------------------------------------------------
   // [Fill]
   // --------------------------------------------------------------------------
+
+  v.fillAll = NullPainterImpl::fillAll;
 
   v.fillRectI = (PainterVTable::PaintRectI)NullPainterImpl::doRect;
   v.fillRectF = (PainterVTable::PaintRectF)NullPainterImpl::doRect;

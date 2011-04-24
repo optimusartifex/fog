@@ -60,7 +60,7 @@ struct FOG_API XmlDocument : public XmlElement
   virtual err_t setDocumentRoot(XmlElement* e);
 
   //! @brief Return document root element.
-  FOG_INLINE XmlElement* documentRoot() const { return _documentRoot; }
+  FOG_INLINE XmlElement* getDocumentRoot() const { return _documentRoot; }
 
   // --------------------------------------------------------------------------
   // [Clear]

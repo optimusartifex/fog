@@ -229,7 +229,7 @@ FOG_GUI_MAIN()
   window.error = window.svg.readFromFile(fileName);
 
   int w = 0, h = 0;
-  XmlElement* root = window.svg.documentRoot();
+  XmlElement* root = window.svg.getDocumentRoot();
 
   // TODO: There is no API to get SVG width/height.
   if (root)

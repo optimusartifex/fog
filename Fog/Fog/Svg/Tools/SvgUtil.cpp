@@ -305,6 +305,54 @@ err_t parseCoord(SvgCoord& coord, const String& str)
 }
 
 // ============================================================================
+// [Fog::SvgUtil - Parse - ViewBox]
+// ============================================================================
+
+err_t parseViewBox(BoxF& box, const String& str)
+{
+  err_t err = ERR_OK;
+
+  const Char* strCur = str.getData();
+  const Char* strEnd = strCur + str.getLength();
+
+  float coords[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+  uint32_t position = 0;
+  sysuint_t numEnd;
+
+  // Finished?
+  if (strCur == strEnd) goto _Bail;
+
+  // Parse coordinates.
+  for (position = 0; position < 4; position++)
+  {
+    // Skip spaces.
+    while (strCur->isSpace())
+    {
+      if (++strCur == strEnd) goto _Bail;
+    }
+
+    // Parse number.
+    err = StringUtil::atof(strCur, (sysuint_t)(strEnd - strCur), &coords[position], Char('.'), &numEnd);
+    if (FOG_IS_ERROR(err)) goto _Bail;
+
+    strCur += numEnd;
+    if (strCur == strEnd) break;
+
+    // Parse optional comma.
+    if (*strCur == Char(','))
+    {
+      if (++strCur == strEnd) break;
+    }
+  }
+
+_Bail:
+  // TODO: Error reporting.
+
+  box.set(coords[0], coords[1], coords[2], coords[3]);
+  return err;
+}
+
+// ============================================================================
 // [Fog::SvgUtil - Parse - Points]
 // ============================================================================
 

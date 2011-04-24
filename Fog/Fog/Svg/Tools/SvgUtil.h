@@ -42,6 +42,8 @@ FOG_API err_t parseTransform(TransformF& dst, const String& str);
 //! @brief Parse SVG coorinate and return it.
 FOG_API err_t parseCoord(SvgCoord& coord, const String& str);
 
+FOG_API err_t parseViewBox(BoxF& box, const String& str);
+
 FOG_API err_t parsePoints(PathF& dst, const String& str, bool closePath);
 FOG_API err_t parsePath(PathF& dst, const String& str);
 

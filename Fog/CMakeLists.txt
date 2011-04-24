@@ -1469,6 +1469,7 @@ Set(FOG_SVG_DOM_SOURCES
   Fog/Svg/Dom/SvgTSpanElement.cpp
   Fog/Svg/Dom/SvgUseElement.cpp
   Fog/Svg/Dom/SvgViewElement.cpp
+  Fog/Svg/Dom/SvgViewBoxAttribute.cpp
 )
 
 Set(FOG_SVG_DOM_HEADERS
@@ -1517,6 +1518,7 @@ Set(FOG_SVG_DOM_HEADERS
   Fog/Svg/Dom/SvgTSpanElement_p.h
   Fog/Svg/Dom/SvgUseElement_p.h
   Fog/Svg/Dom/SvgViewElement_p.h
+  Fog/Svg/Dom/SvgViewBoxAttribute_p.h
 )
 
 Set(FOG_SVG_GLOBAL_SOURCES

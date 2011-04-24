@@ -28,6 +28,15 @@ for root, dirs, files in os.walk("../"):
 
       fixed = False
 
+      if " \n" in data:
+        print "Fixing space before \\n in: " + path
+        while True:
+          oldl = len(data)
+          data = data.replace(" \n", "\n")
+          if oldl == len(data): break;
+
+        fixed = True
+      
       if "\r" in data:
         print "Fixing \\r\\n in: " + path
         data = data.replace("\r", "")

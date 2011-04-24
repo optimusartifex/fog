@@ -10,6 +10,7 @@
 // [Dependencies]
 #include <Fog/Svg/Dom/SvgCoordAttribute_p.h>
 #include <Fog/Svg/Dom/SvgStyledElement_p.h>
+#include <Fog/Svg/Dom/SvgViewBoxAttribute_p.h>
 
 namespace Fog {
 
@@ -52,6 +53,7 @@ struct FOG_NO_EXPORT SvgRootElement : public SvgStyledElement
   SvgCoordAttribute a_y;
   SvgCoordAttribute a_width;
   SvgCoordAttribute a_height;
+  SvgViewBoxAttribute a_viewBox;
 
   // TODO: Rendering Model.
   // TODO: ViewBox.

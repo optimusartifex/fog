@@ -92,61 +92,41 @@ _FOG_DEFINE_RASTER_RENDERER_CONFIG(RasterRenderConfig_MT_PW_CM, RasterRenderMode
 template<typename C>
 struct RasterRenderImpl
 {
-  // --------------------------------------------------------------------------
-  // [Init]
-  // --------------------------------------------------------------------------
-
   static void initVTable(RasterRenderVTable& v);
 
-  // --------------------------------------------------------------------------
-  // [FillRawBox]
-  // --------------------------------------------------------------------------
+  static void FOG_FASTCALL fillNormalizedBoxI(RasterContext& ctx, const BoxI& box);
+  static void FOG_FASTCALL fillNormalizedBoxF(RasterContext& ctx, const BoxF& box);
+  static void FOG_FASTCALL fillNormalizedBoxD(RasterContext& ctx, const BoxD& box);
 
-  static void FOG_FASTCALL fillRawBoxI(RasterContext& ctx, const BoxI& box);
-  static void FOG_FASTCALL fillRawBoxF(RasterContext& ctx, const BoxF& box);
-  static void FOG_FASTCALL fillRawBoxD(RasterContext& ctx, const BoxD& box);
-
-  // --------------------------------------------------------------------------
-  // [FillRasterizedShape]
-  // --------------------------------------------------------------------------
+  static void FOG_FASTCALL fillNormalizedPathF(RasterContext& ctx, const PathF& box, uint32_t fillRule);
+  static void FOG_FASTCALL fillNormalizedPathD(RasterContext& ctx, const PathD& box, uint32_t fillRule);
 
   static void FOG_FASTCALL fillRasterizedShape(RasterContext& ctx, void* _rasterizer);
 
-  // --------------------------------------------------------------------------
-  // [FillRawPath]
-  // --------------------------------------------------------------------------
-
-  static void FOG_FASTCALL fillRawPathF(RasterContext& ctx, const PathF& box, uint32_t fillRule);
-  static void FOG_FASTCALL fillRawPathD(RasterContext& ctx, const PathD& box, uint32_t fillRule);
-
-  // --------------------------------------------------------------------------
-  // [Blit]
-  // --------------------------------------------------------------------------
-
-  static void FOG_FASTCALL blitRawImageI(RasterContext& ctx, const PointI& pt, const Image& srcImage, const RectI& srcFragment);
+  static void FOG_FASTCALL blitNormalizedImageI(RasterContext& ctx, const PointI& pt, const Image& srcImage, const RectI& srcFragment);
 };
 
 template<typename C>
 void RasterRenderImpl<C>::initVTable(RasterRenderVTable& v)
 {
-  v.fillRawBoxI = fillRawBoxI;
-  v.fillRawBoxF = fillRawBoxF;
-  v.fillRawBoxD = fillRawBoxD;
+  v.fillNormalizedBoxI = fillNormalizedBoxI;
+  v.fillNormalizedBoxF = fillNormalizedBoxF;
+  v.fillNormalizedBoxD = fillNormalizedBoxD;
+
+  v.fillNormalizedPathF = fillNormalizedPathF;
+  v.fillNormalizedPathD = fillNormalizedPathD;
 
   v.fillRasterizedShape = fillRasterizedShape;
 
-  v.fillRawPathF = fillRawPathF;
-  v.fillRawPathD = fillRawPathD;
-
-  v.blitRawImageI = blitRawImageI;
+  v.blitNormalizedImageI = blitNormalizedImageI;
 }
 
 // ============================================================================
-// [Fog::RasterRender - FillRawBox]
+// [Fog::RasterRender - FillNormalizedBox]
 // ============================================================================
 
 template<typename C>
-void FOG_FASTCALL RasterRenderImpl<C>::fillRawBoxI(RasterContext& ctx, const BoxI& box)
+void FOG_FASTCALL RasterRenderImpl<C>::fillNormalizedBoxI(RasterContext& ctx, const BoxI& box)
 {
   // --------------------------------------------------------------------------
   // [Asserts]
@@ -296,7 +276,7 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillRawBoxI(RasterContext& ctx, const Box
 }
 
 template<typename C>
-void FOG_FASTCALL RasterRenderImpl<C>::fillRawBoxF(RasterContext& ctx, const BoxF& box)
+void FOG_FASTCALL RasterRenderImpl<C>::fillNormalizedBoxF(RasterContext& ctx, const BoxF& box)
 {
   if (C::_PRECISION == IMAGE_PRECISION_BYTE)
   {
@@ -318,7 +298,7 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillRawBoxF(RasterContext& ctx, const Box
 }
 
 template<typename C>
-void FOG_FASTCALL RasterRenderImpl<C>::fillRawBoxD(RasterContext& ctx, const BoxD& box)
+void FOG_FASTCALL RasterRenderImpl<C>::fillNormalizedBoxD(RasterContext& ctx, const BoxD& box)
 {
   if (C::_PRECISION == IMAGE_PRECISION_BYTE)
   {
@@ -328,6 +308,54 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillRawBoxD(RasterContext& ctx, const Box
     if (ctx.rasterizer8->initialize() != ERR_OK) return;
 
     ctx.rasterizer8->addBox(box);
+    ctx.rasterizer8->finalize();
+
+    if (ctx.rasterizer8->isValid())
+      ctx.renderer->fillRasterizedShape(ctx, &ctx.rasterizer8);
+  }
+  else
+  {
+    // TODO: 16-bit rasterizer.
+  }
+}
+
+// ============================================================================
+// [Fog::RasterRender - FillNormalizedPath]
+// ============================================================================
+
+template<typename C>
+void FOG_FASTCALL RasterRenderImpl<C>::fillNormalizedPathF(RasterContext& ctx, const PathF& path, uint32_t fillRule)
+{
+  if (C::_PRECISION == IMAGE_PRECISION_BYTE)
+  {
+    ctx.rasterizer8->setSceneBox(ctx.finalClipBoxI);
+    ctx.rasterizer8->setFillRule(fillRule);
+    ctx.rasterizer8->setAlpha(ctx.rasterHints.opacity);
+    if (ctx.rasterizer8->initialize() != ERR_OK) return;
+
+    ctx.rasterizer8->addPath(path);
+    ctx.rasterizer8->finalize();
+
+    if (ctx.rasterizer8->isValid())
+      ctx.renderer->fillRasterizedShape(ctx, &ctx.rasterizer8);
+  }
+  else
+  {
+    // TODO: 16-bit rasterizer.
+  }
+}
+
+template<typename C>
+void FOG_FASTCALL RasterRenderImpl<C>::fillNormalizedPathD(RasterContext& ctx, const PathD& path, uint32_t fillRule)
+{
+  if (C::_PRECISION == IMAGE_PRECISION_BYTE)
+  {
+    ctx.rasterizer8->setSceneBox(ctx.finalClipBoxI);
+    ctx.rasterizer8->setFillRule(fillRule);
+    ctx.rasterizer8->setAlpha(ctx.rasterHints.opacity);
+    if (ctx.rasterizer8->initialize() != ERR_OK) return;
+
+    ctx.rasterizer8->addPath(path);
     ctx.rasterizer8->finalize();
 
     if (ctx.rasterizer8->isValid())
@@ -371,7 +399,7 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillRasterizedShape(RasterContext& ctx, v
 
   const int delta  = (C::_MODE == RASTER_MODE_MT) ? ctx.delta  : 1;
   const int offset = (C::_MODE == RASTER_MODE_MT) ? ctx.offset : 0;
-  sysint_t dstStrideTimesDelta = (C::_MODE == RASTER_MODE_MT) ? dstStride*delta : dstStride;
+  sysint_t dstStrideTimesDelta = (C::_MODE == RASTER_MODE_MT) ? dstStride * delta : dstStride;
 
   // --------------------------------------------------------------------------
   // [Clip == Box]
@@ -462,59 +490,11 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillRasterizedShape(RasterContext& ctx, v
 }
 
 // ============================================================================
-// [Fog::RasterRender - FillRawPath]
-// ============================================================================
-
-template<typename C>
-void FOG_FASTCALL RasterRenderImpl<C>::fillRawPathF(RasterContext& ctx, const PathF& path, uint32_t fillRule)
-{
-  if (C::_PRECISION == IMAGE_PRECISION_BYTE)
-  {
-    ctx.rasterizer8->setSceneBox(ctx.finalClipBoxI);
-    ctx.rasterizer8->setFillRule(fillRule);
-    ctx.rasterizer8->setAlpha(ctx.rasterHints.opacity);
-    if (ctx.rasterizer8->initialize() != ERR_OK) return;
-
-    ctx.rasterizer8->addPath(path);
-    ctx.rasterizer8->finalize();
-
-    if (ctx.rasterizer8->isValid())
-      ctx.renderer->fillRasterizedShape(ctx, &ctx.rasterizer8);
-  }
-  else
-  {
-    // TODO: 16-bit rasterizer.
-  }
-}
-
-template<typename C>
-void FOG_FASTCALL RasterRenderImpl<C>::fillRawPathD(RasterContext& ctx, const PathD& path, uint32_t fillRule)
-{
-  if (C::_PRECISION == IMAGE_PRECISION_BYTE)
-  {
-    ctx.rasterizer8->setSceneBox(ctx.finalClipBoxI);
-    ctx.rasterizer8->setFillRule(fillRule);
-    ctx.rasterizer8->setAlpha(ctx.rasterHints.opacity);
-    if (ctx.rasterizer8->initialize() != ERR_OK) return;
-
-    ctx.rasterizer8->addPath(path);
-    ctx.rasterizer8->finalize();
-
-    if (ctx.rasterizer8->isValid())
-      ctx.renderer->fillRasterizedShape(ctx, &ctx.rasterizer8);
-  }
-  else
-  {
-    // TODO: 16-bit rasterizer.
-  }
-}
-
-// ============================================================================
 // [Fog::RasterRender - Blit]
 // ============================================================================
 
 template<typename C>
-void FOG_FASTCALL RasterRenderImpl<C>::blitRawImageI(RasterContext& ctx, const PointI& pt, const Image& srcImage, const RectI& srcFragment)
+void FOG_FASTCALL RasterRenderImpl<C>::blitNormalizedImageI(RasterContext& ctx, const PointI& pt, const Image& srcImage, const RectI& srcFragment)
 {
   // --------------------------------------------------------------------------
   // [Asserts]

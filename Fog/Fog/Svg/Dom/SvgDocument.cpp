@@ -1,4 +1,4 @@
-// [Fog-Core]
+// [Fog-Svg]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -107,6 +107,7 @@ XmlElement* SvgDocument::createElementStatic(const ManagedString& tagName)
   if (tagName == fog_strings->getString(STR_SVG_ELEMENT_text          )) return fog_new SvgTextElement();
   if (tagName == fog_strings->getString(STR_SVG_ELEMENT_tspan         )) return fog_new SvgTSpanElement();
   if (tagName == fog_strings->getString(STR_SVG_ELEMENT_use           )) return fog_new SvgUseElement();
+  if (tagName == fog_strings->getString(STR_SVG_ELEMENT_view          )) return fog_new SvgViewElement();
 
   // If element is not SVG, use the base class to create a default element
   // for the given tagName. But remember, this element won't be processed.

@@ -2992,18 +2992,64 @@ static err_t FOG_CDECL _G2d_TransformD_mapPathD(const TransformD& self, PathD& d
 
 static void FOG_CDECL _G2d_TransformF_mapBoxF(const TransformF& self, BoxF& dst, const BoxF& src)
 {
-  self.mapPoints((PointF*)&dst, (const PointF*)&src, 2);
+  uint32_t transformType = self.getType();
 
-  if (dst.x0 > dst.x1) swap(dst.x0, dst.x1);
-  if (dst.y0 > dst.y1) swap(dst.y0, dst.y1);
+  if (transformType <= TRANSFORM_TYPE_SCALING)
+  {
+    _g2d.transformf.mapPointsF[transformType](self, (PointF*)&dst, (const PointF*)&src, 2);
+
+    if (dst.x0 > dst.x1) swap(dst.x0, dst.x1);
+    if (dst.y0 > dst.y1) swap(dst.y0, dst.y1);
+  }
+  else
+  {
+    PointF pts[4] =
+    { 
+      PointF(src.x0, src.y0),
+      PointF(src.x1, src.y0),
+      PointF(src.x1, src.y1),
+      PointF(src.x0, src.y1)
+    };
+
+    _g2d.transformf.mapPointsF[transformType](self, pts, pts, 4);
+
+    dst.x0 = Math::min(pts[0].x, pts[1].x, pts[2].x, pts[3].x);
+    dst.y0 = Math::min(pts[0].y, pts[1].y, pts[2].y, pts[3].y);
+
+    dst.x1 = Math::max(pts[0].x, pts[1].x, pts[2].x, pts[3].x);
+    dst.y1 = Math::max(pts[0].y, pts[1].y, pts[2].y, pts[3].y);
+  }
 }
 
 static void FOG_CDECL _G2d_TransformD_mapBoxD(const TransformD& self, BoxD& dst, const BoxD& src)
 {
-  self.mapPoints((PointD*)&dst, (const PointD*)&src, 2);
+  uint32_t transformType = self.getType();
 
-  if (dst.x0 > dst.x1) swap(dst.x0, dst.x1);
-  if (dst.y0 > dst.y1) swap(dst.y0, dst.y1);
+  if (transformType <= TRANSFORM_TYPE_SCALING)
+  {
+    _g2d.transformd.mapPointsD[transformType](self, (PointD*)&dst, (const PointD*)&src, 2);
+
+    if (dst.x0 > dst.x1) swap(dst.x0, dst.x1);
+    if (dst.y0 > dst.y1) swap(dst.y0, dst.y1);
+  }
+  else
+  {
+    PointD pts[4] =
+    { 
+      PointD(src.x0, src.y0),
+      PointD(src.x1, src.y0),
+      PointD(src.x1, src.y1),
+      PointD(src.x0, src.y1)
+    };
+
+    _g2d.transformd.mapPointsD[transformType](self, pts, pts, 4);
+
+    dst.x0 = Math::min(pts[0].x, pts[1].x, pts[2].x, pts[3].x);
+    dst.y0 = Math::min(pts[0].y, pts[1].y, pts[2].y, pts[3].y);
+
+    dst.x1 = Math::max(pts[0].x, pts[1].x, pts[2].x, pts[3].x);
+    dst.y1 = Math::max(pts[0].y, pts[1].y, pts[2].y, pts[3].y);
+  }
 }
 
 // ============================================================================

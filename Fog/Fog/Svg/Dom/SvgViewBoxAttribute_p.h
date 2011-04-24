@@ -4,13 +4,16 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_SVG_DOM_SVGVIEWELEMENT_P_H
-#define _FOG_SVG_DOM_SVGVIEWELEMENT_P_H
+#ifndef _FOG_SVG_DOM_SVGVIEWBOXATTRIBUTE_P_H
+#define _FOG_SVG_DOM_SVGVIEWBOXATTRIBUTE_P_H
 
 // [Dependencies]
-#include <Fog/Svg/Dom/SvgCoordAttribute_p.h>
-#include <Fog/Svg/Dom/SvgStyledElement_p.h>
-#include <Fog/Svg/Dom/SvgViewBoxAttribute_p.h>
+#include <Fog/G2d/Geometry/Box.h>
+#include <Fog/G2d/Geometry/Rect.h>
+#include <Fog/Xml/Dom/XmlAttribute.h>
+#include <Fog/Xml/Dom/XmlElement.h>
+#include <Fog/Svg/Global/Constants.h>
+#include <Fog/Svg/Tools/SvgCoord.h>
 
 namespace Fog {
 
@@ -18,42 +21,41 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::SvgRootElement]
+// [Fog::SvgCoordAttribute]
 // ============================================================================
 
-struct FOG_NO_EXPORT SvgViewElement : public SvgStyledElement
+struct FOG_NO_EXPORT SvgViewBoxAttribute : public XmlAttribute
 {
-  typedef SvgStyledElement base;
-
+  typedef XmlAttribute base;
+ 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  SvgViewElement();
-  virtual ~SvgViewElement();
+  SvgViewBoxAttribute(XmlElement* element, const ManagedString& name, int offset);
+  virtual ~SvgViewBoxAttribute();
 
   // --------------------------------------------------------------------------
-  // [SVG Attributes]
+  // [Methods]
   // --------------------------------------------------------------------------
 
-  virtual XmlAttribute* _createAttribute(const ManagedString& name) const;
+  virtual err_t setValue(const String& value);
 
   // --------------------------------------------------------------------------
-  // [SVG Rendering]
+  // [Box]
   // --------------------------------------------------------------------------
 
-  virtual err_t onRenderShape(SvgRenderContext* context) const;
-  virtual err_t onCalcBoundingBox(RectF* box) const;
+  FOG_INLINE const BoxF& getBox() const { return _box; }
 
   // --------------------------------------------------------------------------
-  // [SVG Embedded Attributes]
+  // [Members]
   // --------------------------------------------------------------------------
 
-  SvgViewBoxAttribute a_viewBox;
-  // TODO: PreserveAspectRatio.
+protected:
+  BoxF _box;
 
 private:
-  FOG_DISABLE_COPY(SvgViewElement)
+  FOG_DISABLE_COPY(SvgViewBoxAttribute)
 };
 
 //! @}
@@ -61,4 +63,4 @@ private:
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_SVG_DOM_SVGVIEWELEMENT_P_H
+#endif // _FOG_SVG_DOM_SVGVIEWBOXATTRIBUTE_P_H

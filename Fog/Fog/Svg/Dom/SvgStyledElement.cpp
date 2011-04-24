@@ -100,7 +100,7 @@ SvgStyledElement::SvgStyledElement(const ManagedString& tagName, uint32_t svgTyp
 
 SvgStyledElement::~SvgStyledElement()
 {
-  // Class that inherits us must destroy all attributes (a_style must be 
+  // Class that inherits us must destroy all attributes (a_style must be
   // removed from _attributes too).
   FOG_ASSERT(_attributes.isEmpty());
 }

@@ -202,7 +202,7 @@ uint64_t OS::getAmountOfPhysicalMemory()
     FOG_ASSERT(0);
     return 0;
   }
-  
+
   return static_cast<uint64_t>(hostinfo.max_mem);
 #else
   long pages = sysconf(_SC_PHYS_PAGES);
@@ -272,7 +272,7 @@ err_t OS::getEnv(const String& name, String& value)
   if ((err = TextCodec::local8().appendFromUnicode(name8, name))) return err;
 
   const char* e = getenv(name8.getData());
-  if (e) 
+  if (e)
   {
     return TextCodec::local8().toUnicode(value, e);
   }
@@ -287,7 +287,7 @@ err_t OS::getEnv(const String& name, String& value)
 err_t OS::setEnv(const String& name, const String& value)
 {
 #if defined(FOG_OS_WINDOWS)
-  if (SetEnvironmentVariableW(reinterpret_cast<const wchar_t*>(name.getData()), 
+  if (SetEnvironmentVariableW(reinterpret_cast<const wchar_t*>(name.getData()),
     reinterpret_cast<const wchar_t*>(value.getData())))
   {
     return ERR_OK;

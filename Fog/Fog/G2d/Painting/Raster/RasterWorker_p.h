@@ -31,7 +31,7 @@ namespace Fog {
 //! @internal
 //!
 //! @brief This is a @c Task created per painter thread that contains all variables
-//! needed to process painter commands in parallel. The condition variable is 
+//! needed to process painter commands in parallel. The condition variable is
 //! shared across all painter threads so only one signal is needed to wake them all.
 struct FOG_NO_EXPORT RasterWorker : public Task
 {
@@ -114,7 +114,7 @@ struct FOG_NO_EXPORT RasterWorkerManager
 
   //! @brief The count of workers used by the worker manager (0 initial).
   uint numWorkers;
-  //! @brief The count of the maximum workers which can be created/used by the 
+  //! @brief The count of the maximum workers which can be created/used by the
   //! worker manager.
   uint maxWorkers;
 

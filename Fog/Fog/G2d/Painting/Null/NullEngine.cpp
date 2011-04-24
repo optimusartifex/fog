@@ -58,7 +58,7 @@ struct FOG_NO_EXPORT MyPainterImpl
   // --------------------------------------------------------------------------
   // [User Params]
   // --------------------------------------------------------------------------
-  
+
   static err_t FOG_CDECL getUserParams(const Painter& self, Region& region, PointI& origin);
   static err_t FOG_CDECL setUserParams(Painter& self, const Region& region, const PointI& origin);
   static err_t FOG_CDECL resetUserParams(Painter& self);
@@ -191,11 +191,11 @@ struct FOG_NO_EXPORT MyPainterImpl
   static err_t FOG_CDECL blitImageAtI(Painter& self, const PointI& p, const Image& i, const RectI* ir);
   static err_t FOG_CDECL blitImageAtF(Painter& self, const PointF& p, const Image& i, const RectI* ir);
   static err_t FOG_CDECL blitImageAtD(Painter& self, const PointD& p, const Image& i, const RectI* ir);
- 
+
   static err_t FOG_CDECL blitImageInI(Painter& self, const RectI& r, const Image& i, const RectI* ir);
   static err_t FOG_CDECL blitImageInF(Painter& self, const RectF& r, const Image& i, const RectI* ir);
   static err_t FOG_CDECL blitImageInD(Painter& self, const RectD& r, const Image& i, const RectI* ir);
- 
+
   static err_t FOG_CDECL blitImageMaskedAtI(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
   static err_t FOG_CDECL blitImageMaskedAtF(Painter& self, const PointF& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
   static err_t FOG_CDECL blitImageMaskedAtD(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
@@ -295,7 +295,7 @@ err_t FOG_CDECL MyPainterImpl::resetMetaParams(Painter& self)
 // ============================================================================
 // [Fog::MyPainterImpl - User Params]
 // ============================================================================
-  
+
 err_t FOG_CDECL MyPainterImpl::getUserParams(const Painter& self, Region& region, PointI& origin)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
@@ -333,7 +333,7 @@ err_t FOG_CDECL MyPainterImpl::setParameter(Painter& self, uint32_t parameterId,
 err_t FOG_CDECL MyPainterImpl::resetParameter(Painter& self, uint32_t parameterId)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
-  return ERR_RT_NOT_IMPLEMENTED; 
+  return ERR_RT_NOT_IMPLEMENTED;
 }
 
 // ============================================================================
@@ -751,7 +751,7 @@ err_t FOG_CDECL MyPainterImpl::blitImageAtD(Painter& self, const PointD& p, cons
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
- 
+
 err_t FOG_CDECL MyPainterImpl::blitImageInI(Painter& self, const RectI& r, const Image& i, const RectI* ir)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
@@ -769,7 +769,7 @@ err_t FOG_CDECL MyPainterImpl::blitImageInD(Painter& self, const RectD& r, const
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
- 
+
 err_t FOG_CDECL MyPainterImpl::blitImageMaskedAtI(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
@@ -1263,7 +1263,7 @@ struct FOG_NO_EXPORT NullPainterImpl
   // --------------------------------------------------------------------------
   // [User Params]
   // --------------------------------------------------------------------------
-  
+
   static err_t FOG_CDECL getUserParams(const Painter& self, Region& region, PointI& origin);
   static err_t FOG_CDECL setUserParams(Painter& self, const Region& region, const PointI& origin);
   static err_t FOG_CDECL resetUserParams(Painter& self);
@@ -1399,7 +1399,7 @@ err_t FOG_CDECL NullPainterImpl::resetMetaParams(Painter& self)
 // ============================================================================
 // [Fog::NullPainterImpl - User Params]
 // ============================================================================
-  
+
 err_t FOG_CDECL NullPainterImpl::getUserParams(const Painter& self, Region& region, PointI& origin)
 {
   return ERR_RT_NOT_IMPLEMENTED;
@@ -1479,7 +1479,7 @@ err_t FOG_CDECL NullPainterImpl::setParameter(Painter& self, uint32_t parameterI
 
 err_t FOG_CDECL NullPainterImpl::resetParameter(Painter& self, uint32_t parameterId)
 {
-  return ERR_RT_INVALID_STATE; 
+  return ERR_RT_INVALID_STATE;
 }
 
 // ============================================================================

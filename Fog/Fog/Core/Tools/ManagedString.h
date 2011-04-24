@@ -31,7 +31,7 @@ struct ManagedStringCache;
 //!
 //! Managed strings are used in Fog library mainly in hash tables and in areas
 //! where string content will be probably shared across many string instances.
-//! The string data for all equal string are shared and it's guaranted that 
+//! The string data for all equal string are shared and it's guaranted that
 //! comparing pointer to data is comparing for string equality. So it's very
 //! fast to test whether two managed strings are equal or not. Another extension
 //! is that string hash code is calculated when creating managed string, so
@@ -57,7 +57,7 @@ struct FOG_API ManagedString
   {
     // [Construction / Destruction]
 
-    FOG_INLINE Node(const String& s) : 
+    FOG_INLINE Node(const String& s) :
       string(s),
       next(NULL)
     {

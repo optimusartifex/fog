@@ -62,7 +62,7 @@ static err_t _G2d_ImageFormatDescription_detectIntegerFormatValues(ImageFormatDe
   }
 
   // Overlapped components?
-  if ((self->_aMask & self->_rMask) != 0 || 
+  if ((self->_aMask & self->_rMask) != 0 ||
       (self->_gMask & self->_bMask) != 0 ||
       ((self->_aMask | self->_rMask) & (self->_gMask | self->_bMask)) != 0)
   {
@@ -143,13 +143,13 @@ static err_t _G2d_ImageFormatDescription_detectIntegerFormatValues(ImageFormatDe
       uint64_t bm = self->_bMask;
 
       self->_hasAlignedComponents =
-        (rm == FOG_UINT64_C(0xFFFF000000000000) || rm == FOG_UINT64_C(0x0000FFFF00000000) || 
+        (rm == FOG_UINT64_C(0xFFFF000000000000) || rm == FOG_UINT64_C(0x0000FFFF00000000) ||
          rm == FOG_UINT64_C(0x00000000FFFF0000) || rm == FOG_UINT64_C(0x000000000000FFFF)  ) &&
-        (gm == FOG_UINT64_C(0xFFFF000000000000) || gm == FOG_UINT64_C(0x0000FFFF00000000) || 
+        (gm == FOG_UINT64_C(0xFFFF000000000000) || gm == FOG_UINT64_C(0x0000FFFF00000000) ||
          gm == FOG_UINT64_C(0x00000000FFFF0000) || gm == FOG_UINT64_C(0x000000000000FFFF)  ) &&
-        (bm == FOG_UINT64_C(0xFFFF000000000000) || bm == FOG_UINT64_C(0x0000FFFF00000000) || 
+        (bm == FOG_UINT64_C(0xFFFF000000000000) || bm == FOG_UINT64_C(0x0000FFFF00000000) ||
          bm == FOG_UINT64_C(0x00000000FFFF0000) || bm == FOG_UINT64_C(0x000000000000FFFF)  ) &&
-        (am == FOG_UINT64_C(0xFFFF000000000000) || am == FOG_UINT64_C(0x0000FFFF00000000) || 
+        (am == FOG_UINT64_C(0xFFFF000000000000) || am == FOG_UINT64_C(0x0000FFFF00000000) ||
          am == FOG_UINT64_C(0x00000000FFFF0000) || am == FOG_UINT64_C(0x000000000000FFFF) || am == 0);
       break;
     }
@@ -160,8 +160,8 @@ static err_t _G2d_ImageFormatDescription_detectIntegerFormatValues(ImageFormatDe
     }
   }
 
-  // Try to avoid BSwap when using 24-bit and 32-bit pixel formats. Note that 
-  // this technique can't be used for 48-bit and 64-bit formats, because it 
+  // Try to avoid BSwap when using 24-bit and 32-bit pixel formats. Note that
+  // this technique can't be used for 48-bit and 64-bit formats, because it
   // didn't solve the byte-swapping of individual components.
   if (self->_depth == 24 && self->_isByteSwapped && self->_hasAlignedComponents)
   {
@@ -193,7 +193,7 @@ static err_t _G2d_ImageFormatDescription_detectIntegerFormatValues(ImageFormatDe
       // simply skip non-interesting parts of mask by using these conditions.
       if ((mask & FOG_UINT64_C(0x00FFFFFF)) == 0) { mask >>= 24; pos += 24; }
       if ((mask & FOG_UINT64_C(0x0000FFFF)) == 0) { mask >>= 16; pos += 16; }
-      if ((mask & FOG_UINT64_C(0x000000FF)) == 0) { mask >>=  8; pos +=  8; } 
+      if ((mask & FOG_UINT64_C(0x000000FF)) == 0) { mask >>=  8; pos +=  8; }
 
       // Max 16-bits per mask.
       if (mask > 0xFFFF) goto _Fail;
@@ -243,8 +243,8 @@ static uint32_t FOG_CDECL _G2d_ImageFormatDescription_getCompatibleFormat(
   {
     const ImageFormatDescription* f = &_G2d_ImageFormatDescription_list[i];
 
-    if (self->_aSize == f->_aSize && 
-        self->_rSize == f->_rSize && 
+    if (self->_aSize == f->_aSize &&
+        self->_rSize == f->_rSize &&
         self->_gSize == f->_bSize &&
         self->_bSize == f->_bSize &&
         self->_isPremultiplied == f->_isPremultiplied)
@@ -261,7 +261,7 @@ static uint32_t FOG_CDECL _G2d_ImageFormatDescription_getCompatibleFormat(
   {
     const ImageFormatDescription* f = &_G2d_ImageFormatDescription_list[i];
 
-    if (self->_isPremultiplied == f->_isPremultiplied && 
+    if (self->_isPremultiplied == f->_isPremultiplied &&
         (f->_aSize > 0) == (self->_aSize > 0) &&
         f->_aSize >= self->_aSize &&
         f->_rSize >= self->_rSize &&
@@ -271,7 +271,7 @@ static uint32_t FOG_CDECL _G2d_ImageFormatDescription_getCompatibleFormat(
       int fscore = f->_aSize - self->_aSize + f->_rSize - self->_rSize +
                    f->_gSize - self->_gSize + f->_bSize - self->_bSize ;
 
-      if ((best == NULL) || 
+      if ((best == NULL) ||
           (score > fscore) ||
           (score == fscore && f->_depth < best->_depth))
       {
@@ -388,7 +388,7 @@ static err_t FOG_CDECL _G2d_ImageFormatDescription_createArgb(
 }
 
 // ${IMAGE_FORMAT:BEGIN}
-const ImageFormatDescription _G2d_ImageFormatDescription_list[IMAGE_FORMAT_COUNT + 1] = 
+const ImageFormatDescription _G2d_ImageFormatDescription_list[IMAGE_FORMAT_COUNT + 1] =
 {
   //                        |Image Format           |Dpt|P|A|F| Position  |   Size    |
   __FOG_IMAGE_FORMAT_INTEGER(IMAGE_FORMAT_PRGB32    , 32,1,1,0,24,16, 8, 0, 8, 8, 8, 8),
@@ -408,7 +408,7 @@ const ImageFormatDescription _G2d_ImageFormatDescription_list[IMAGE_FORMAT_COUNT
     IMAGE_FORMAT_NULL,
     0,
 
-    0, 
+    0,
     IMAGE_PRECISION_BYTE,
     IMAGE_COMPONENT_NONE,
 

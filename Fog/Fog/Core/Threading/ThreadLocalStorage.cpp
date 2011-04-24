@@ -228,7 +228,7 @@ PIMAGE_TLS_CALLBACK p_thread_callback = OnThreadExit;
 #if defined(FOG_OS_POSIX)
 // [Fog::ThreadLocalStorage::Slot]
 
-ThreadLocalStorage::Slot::Slot(TLSDestructorFunc destructor) : 
+ThreadLocalStorage::Slot::Slot(TLSDestructorFunc destructor) :
   _initialized(false)
 {
   initialize(destructor);

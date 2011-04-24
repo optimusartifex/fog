@@ -401,7 +401,7 @@ bool XmlElement::hasAttribute(const String& name) const
 {
   sysuint_t i, len = _attributes.getLength();
   if (!len) return false;
-  
+
   ManagedString managedName;
   if (managedName.setIfManaged(name) != ERR_OK) return false;
 

@@ -231,7 +231,7 @@ void GuiEngine::changeMouseStatus(Widget* w, const PointI& pos)
     uint32_t hoverChange;;
 
     hoverChange = (!!_mouseStatus.hover) |
-                  ((!(pos.getX() < 0 || 
+                  ((!(pos.getX() < 0 ||
                       pos.getY() < 0 ||
                       pos.getX() >= w->_widgetGeometry.w ||
                       pos.getY() >= w->_widgetGeometry.h)) << 1);
@@ -610,7 +610,7 @@ void GuiEngine::widgetDestroyed(Widget* w)
 // [Fog::GuiEngine - Update]
 // ============================================================================
 
-// Working structure for parent and child, also it's record in stack for 
+// Working structure for parent and child, also it's record in stack for
 // traversing in widget-tree.
 struct UpdateRec
 {
@@ -700,7 +700,7 @@ void GuiEngine::doUpdateWindow(GuiWindow* window)
   Widget* widget = window->_widget;
 
   // Hidden windows won't be updated.
-  if (!window->_visible) 
+  if (!window->_visible)
   {
     widget->_uflags = 0;
     return;
@@ -1110,7 +1110,7 @@ end:
 
 void GuiEngine::_onButtonRepeatTimeOut(TimerEvent* e)
 {
-  if (_systemMouseStatus.uiWindow == NULL) 
+  if (_systemMouseStatus.uiWindow == NULL)
   {
     e->getTimer()->stop();
   }
@@ -1173,7 +1173,7 @@ GuiWindow* GuiWindow::getModalWindow()
 {
   if (getOwner())
   {
-    // Normally this would be this. But maybe we need the 
+    // Normally this would be this. But maybe we need the
     // owner-variable for other tasks, too!
     return getOwner()->_modal;
   }
@@ -1289,7 +1289,7 @@ __repeat:
     for (it.toEnd(); it.isValid(); it.toPrevious())
     {
       Widget* current = fog_object_cast<Widget*>(it.value());
-      if (current && 
+      if (current &&
           current->getVisibility() >= WIDGET_VISIBLE &&
           current->_widgetGeometry.contains(p))
       {
@@ -1410,7 +1410,7 @@ void GuiWindow::onMouseRelease(uint32_t button)
     e._position.y < w->getHeight());
   w->sendEvent(&e);
 
-  // Send click event only if user did it (if mouse release is outside the 
+  // Send click event only if user did it (if mouse release is outside the
   // widget then used probably don't want to do the action).
   if (!e._isOutside)
   {
@@ -1579,7 +1579,7 @@ void GuiWindow::closePopUps()
   {
     Widget* widget = it.value();
     if (widget) widget->hide();
-  } 
+  }
 
   _popup.reset();
 }

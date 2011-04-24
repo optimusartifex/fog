@@ -112,7 +112,7 @@ struct FOG_NO_EXPORT IcoDecoder : public ImageDecoder
   virtual err_t readImage(Image& image);
 
 protected:
-  // For determining offset/size of "frames" LE numbers are already converted 
+  // For determining offset/size of "frames" LE numbers are already converted
   // to BE numbers on BE systems.
   IcoEntry *_framesInfo;
 };

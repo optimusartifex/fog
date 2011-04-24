@@ -23,7 +23,7 @@ namespace Fog {
 //! @brief Class used to get information about colors in an image.
 //!
 //! It's designed for tasks where it's needed or optional to reduce color
-//! depth, so this class can calculate count of colors and generate palette 
+//! depth, so this class can calculate count of colors and generate palette
 //! for you.
 //!
 //! If count of colors is larger than 256, operation is stopped and count

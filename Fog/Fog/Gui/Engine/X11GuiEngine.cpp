@@ -958,7 +958,7 @@ X11GuiWindow::~X11GuiWindow()
 
 err_t X11GuiWindow::create(uint32_t createFlags)
 {
-  if (_handle) 
+  if (_handle)
     return ERR_OK;
 
   X11GuiEngine* engine = GUI_ENGINE();
@@ -1420,7 +1420,7 @@ void X11GuiWindow::onX11Event(XEvent* xe)
       _xflags |= XFlag_Configured;
 
       // Don't process old configure events.
-      while (engine->pXCheckTypedWindowEvent(engine->getDisplay(), xe->xany.window, XConfigureNotify, xe)) 
+      while (engine->pXCheckTypedWindowEvent(engine->getDisplay(), xe->xany.window, XConfigureNotify, xe))
         continue;
 
       RectI windowRect(
@@ -1441,7 +1441,7 @@ void X11GuiWindow::onX11Event(XEvent* xe)
     case XFocusIn:
       onFocus(true);
       break;
-    
+
     case XFocusOut:
       onFocus(false);
       break;

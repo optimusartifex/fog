@@ -49,7 +49,7 @@ struct AtomicInt32
     }
     return value == compar;
   }
-  
+
   static FOG_INLINE int32_t get(const int32_t* atomic)
   {
     return (*(volatile int32_t *)atomic);
@@ -62,7 +62,7 @@ struct AtomicInt32
       lock inc dword ptr[ecx]
     }
   }
-  
+
   static FOG_INLINE void dec(int32_t* atomic)
   {
     __asm {
@@ -70,7 +70,7 @@ struct AtomicInt32
       lock dec dword ptr[ecx]
     }
   }
-  
+
   static FOG_INLINE void add(int32_t* atomic, int32_t value)
   {
     __asm {
@@ -79,7 +79,7 @@ struct AtomicInt32
       lock add dword ptr[ecx], edx
     }
   }
-  
+
   static FOG_INLINE void sub(int32_t* atomic, int32_t value)
   {
     __asm {
@@ -88,7 +88,7 @@ struct AtomicInt32
       lock sub dword ptr[ecx], edx
     }
   }
-  
+
   static FOG_INLINE int32_t addXchg(int32_t* atomic, int32_t value)
   {
     __asm {
@@ -99,13 +99,13 @@ struct AtomicInt32
     }
     return value;
   }
-  
+
   static FOG_INLINE int32_t subXchg(int32_t* atomic, int32_t value)
   {
     value = -value;
     return addXchg(atomic, value);
   }
-  
+
   static FOG_INLINE bool deref(int32_t* atomic)
   {
     char result;

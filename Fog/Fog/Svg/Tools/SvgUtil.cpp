@@ -460,7 +460,7 @@ err_t parsePath(PathF& dst, const String& str)
     else
     {
       command = strCur->ch();
-      if (++strCur == strEnd) 
+      if (++strCur == strEnd)
       {
         if (command == 'Z' || command == 'z') goto _Close;
         goto _Bail;
@@ -669,7 +669,7 @@ _MoveTo:
       // [Close]
       // ----------------------------------------------------------------------
 
-      case 'Z': 
+      case 'Z':
       case 'z':
 _Close:
         err = dst.close();
@@ -707,7 +707,7 @@ err_t serializeColor(String& dst, const Color& color)
       if (argb32.getAlpha() != 0xFF)
       {
         FOG_RETURN_ON_ERROR( dst.append(Char('#')) );
-        FOG_RETURN_ON_ERROR( dst.appendInt(argb32.getPacked32() & 0x00FFFFFF, 16, FormatFlags(6, 6)) ); 
+        FOG_RETURN_ON_ERROR( dst.appendInt(argb32.getPacked32() & 0x00FFFFFF, 16, FormatFlags(6, 6)) );
       }
       else
       {

@@ -51,7 +51,7 @@ struct FOG_API MacFontEngine : public FontEngine
 
   virtual FontFace* createFace(
     const String& family,
-    float size, 
+    float size,
     const FontOptions& options,
     const TransformF& matrix);
 
@@ -107,7 +107,7 @@ struct FOG_API MacFontFace : public FontFace
 
   //! @brief Link (reference counted) to the master font.
   //!
-  //! Master font is font with the same family that contains many useful 
+  //! Master font is font with the same family that contains many useful
   //! information about the font, font options, font metrics and kerning.
   MacFontMaster* master;
 
@@ -118,7 +118,7 @@ struct FOG_API MacFontFace : public FontFace
 
 private:
   FOG_DISABLE_COPY(MacFontFace)
-  
+
   ScopedAutoreleasePool pool;
 };
 

@@ -727,8 +727,8 @@ static err_t _G2d_PathT_polyToRel(typename PathT<Number>::T& self, const typenam
 
 template<typename Number>
 static err_t _G2d_PathT_quadTo(
-  typename PathT<Number>::T& self, 
-  const typename PointT<Number>::T& pt1, 
+  typename PathT<Number>::T& self,
+  const typename PointT<Number>::T& pt1,
   const typename PointT<Number>::T& pt2)
 {
   PATH_ADD_VERTEX_BEGIN(Number, 2)
@@ -745,8 +745,8 @@ static err_t _G2d_PathT_quadTo(
 
 template<typename Number>
 static err_t _G2d_PathT_quadToRel(
-  typename PathT<Number>::T& self, 
-  const typename PointT<Number>::T& pt1, 
+  typename PathT<Number>::T& self,
+  const typename PointT<Number>::T& pt1,
   const typename PointT<Number>::T& pt2)
 {
   PATH_ADD_VERTEX_BEGIN(Number, 2)
@@ -765,7 +765,7 @@ static err_t _G2d_PathT_quadToRel(
 
 template<typename Number>
 static err_t _G2d_PathT_smoothQuadTo(
-  typename PathT<Number>::T& self, 
+  typename PathT<Number>::T& self,
   const typename PointT<Number>::T& pt2)
 {
   PATH_ADD_VERTEX_BEGIN(Number, 2)
@@ -790,7 +790,7 @@ static err_t _G2d_PathT_smoothQuadTo(
 
 template<typename Number>
 static err_t _G2d_PathT_smoothQuadToRel(
-  typename PathT<Number>::T& self, 
+  typename PathT<Number>::T& self,
   const typename PointT<Number>::T& pt2)
 {
   PATH_ADD_VERTEX_BEGIN(Number, 2)
@@ -819,9 +819,9 @@ static err_t _G2d_PathT_smoothQuadToRel(
 
 template<typename Number>
 static err_t _G2d_PathT_cubicTo(
-  typename PathT<Number>::T& self, 
-  const typename PointT<Number>::T& pt1, 
-  const typename PointT<Number>::T& pt2, 
+  typename PathT<Number>::T& self,
+  const typename PointT<Number>::T& pt1,
+  const typename PointT<Number>::T& pt2,
   const typename PointT<Number>::T& pt3)
 {
   PATH_ADD_VERTEX_BEGIN(Number, 3)
@@ -840,9 +840,9 @@ static err_t _G2d_PathT_cubicTo(
 
 template<typename Number>
 static err_t _G2d_PathT_cubicToRel(
-  typename PathT<Number>::T& self, 
-  const typename PointT<Number>::T& pt1, 
-  const typename PointT<Number>::T& pt2, 
+  typename PathT<Number>::T& self,
+  const typename PointT<Number>::T& pt1,
+  const typename PointT<Number>::T& pt2,
   const typename PointT<Number>::T& pt3)
 {
   PATH_ADD_VERTEX_BEGIN(Number, 3)
@@ -923,9 +923,9 @@ static err_t _G2d_PathT_smoothCubicToRel(
 
 template<typename Number>
 static err_t _G2d_PathT_arcTo(
-  typename PathT<Number>::T& self, 
-  const typename PointT<Number>::T& cp, 
-  const typename PointT<Number>::T& rp, 
+  typename PathT<Number>::T& self,
+  const typename PointT<Number>::T& cp,
+  const typename PointT<Number>::T& rp,
   Number start, Number sweep, bool startPath)
 {
   start = Math::mod(start, (Number)(2.0 * MATH_PI));
@@ -1053,9 +1053,9 @@ static err_t _G2d_PathT_arcTo(
 
 template<typename Number>
 static err_t _G2d_PathT_arcToRel(
-  typename PathT<Number>::T& self, 
-  const typename PointT<Number>::T& cp, 
-  const typename PointT<Number>::T& r, 
+  typename PathT<Number>::T& self,
+  const typename PointT<Number>::T& cp,
+  const typename PointT<Number>::T& r,
   Number start, Number sweep, bool startPath)
 {
   typename PointT<Number>::T tr;
@@ -1066,9 +1066,9 @@ static err_t _G2d_PathT_arcToRel(
 
 template<typename Number>
 static err_t _G2d_PathT_svgArcTo(
-  typename PathT<Number>::T& self, 
-  const typename PointT<Number>::T& rp, 
-  Number angle, bool largeArcFlag, bool sweepFlag, 
+  typename PathT<Number>::T& self,
+  const typename PointT<Number>::T& rp,
+  Number angle, bool largeArcFlag, bool sweepFlag,
   const typename PointT<Number>::T& p2)
 {
   // Mark current length (will be position where the first bezier would start).
@@ -1117,7 +1117,7 @@ static err_t _G2d_PathT_svgArcTo(
 
   // Calculate (cx1, cy1).
   Number sign = (largeArcFlag == sweepFlag) ? -Number(1.0) : Number(1.0);
-  Number sq   = (rx_2 * ry_2  - rx_2 * p1y_2 - ry_2 * p1x_2) / 
+  Number sq   = (rx_2 * ry_2  - rx_2 * p1y_2 - ry_2 * p1x_2) /
                (rx_2 * p1y_2 + ry_2 * p1x_2);
   Number coef = sign * (sq <= Number(0.0) ? Number(0.0) : Math::sqrt(sq));
 
@@ -1194,9 +1194,9 @@ static err_t _G2d_PathT_svgArcTo(
 
 template<typename Number>
 static err_t _G2d_PathT_svgArcToRel(
-  typename PathT<Number>::T& self, 
-  const typename PointT<Number>::T& rp, 
-  Number angle, bool largeArcFlag, bool sweepFlag, 
+  typename PathT<Number>::T& self,
+  const typename PointT<Number>::T& rp,
+  Number angle, bool largeArcFlag, bool sweepFlag,
   const typename PointT<Number>::T& pt)
 {
   typename PointT<Number>::T last;
@@ -1653,7 +1653,7 @@ static err_t _G2d_PathT_polygonT(typename PathT<Number>::T& self, const typename
     for (i = 1; i < count; i++, pts--) vertices[i] = pts[0];
   }
 
-  vertices[count].set(Math::getQNanT<Number>(), 
+  vertices[count].set(Math::getQNanT<Number>(),
                       Math::getQNanT<Number>());
 
   // Bounding box is no longer valid.
@@ -1671,7 +1671,7 @@ static err_t _G2d_PathT_polygonT(typename PathT<Number>::T& self, const typename
 template<typename Number>
 static err_t _G2d_PathT_shape(
   typename PathT<Number>::T& self,
-  uint32_t shapeType, const void* shapeData, uint32_t direction, 
+  uint32_t shapeType, const void* shapeData, uint32_t direction,
   const typename TransformT<Number>::T* tr)
 {
   sysuint_t len = self._d->length;
@@ -2432,7 +2432,7 @@ static err_t _G2d_PathT_flipY(
 
 template<typename Number>
 static err_t _G2d_PathT_doFlatten(
-  typename PathT<Number>::T& dst, 
+  typename PathT<Number>::T& dst,
   const uint8_t* commands, const typename PointT<Number>::T* vertices, sysuint_t length,
   const typename PathFlattenParamsT<Number>::T& params)
 {

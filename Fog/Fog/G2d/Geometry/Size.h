@@ -89,7 +89,7 @@ struct SizeI
   {
     return (w > 0) & (h > 0);
   }
-  
+
   // --------------------------------------------------------------------------
   // [Equality]
   // --------------------------------------------------------------------------
@@ -98,7 +98,7 @@ struct SizeI
   {
     return (w == other.w) & (h == other.h);
   }
-  
+
   FOG_INLINE bool eq(int sw, int sh) const
   {
     return (w == sw) && (h == sh);
@@ -448,7 +448,7 @@ struct SizeD
   {
     w = 0.0;
     h = 0.0;
-    return *this; 
+    return *this;
   }
 
   // --------------------------------------------------------------------------
@@ -468,7 +468,7 @@ struct SizeD
   {
     return (w == other.w) & (h == other.h);
   }
-  
+
   FOG_INLINE bool eq(double sw, double sh) const
   {
     return (w == sw) & (h == sh);

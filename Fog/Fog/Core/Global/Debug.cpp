@@ -112,7 +112,7 @@ void Debug::failFunc(const char* className, const char* methodName, const char* 
 
 #if defined(FOG_OS_WINDOWS)
 // When a FogApp is build using WIN32, there is no standard input/output. So
-// we can show a message-box before the application ends. This can help to 
+// we can show a message-box before the application ends. This can help to
 // solve some problems.
 static void WinAssertionFailure(const char* fileName, int line, const char* msg)
 {

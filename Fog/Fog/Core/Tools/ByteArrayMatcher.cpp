@@ -144,7 +144,7 @@ Range ByteArrayMatcher::match(const char* str, sysuint_t slen, uint cs, const Ra
   // Simple 'Char' search.
   if (patternLength == 1)
   {
-    sysuint_t i = StringUtil::indexOf(reinterpret_cast<const char*>(strCur), 
+    sysuint_t i = StringUtil::indexOf(reinterpret_cast<const char*>(strCur),
       range.getLengthNoCheck(), (char)patternStr[0], cs);
 
     if (i != INVALID_INDEX)

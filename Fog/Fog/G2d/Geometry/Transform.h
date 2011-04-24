@@ -240,7 +240,7 @@ struct FOG_NO_EXPORT TransformF
 
   //! @brief Create line segment matrix.
   //!
-  //! Rotate, scale and translate, associating 0 to @a dist with line segment 
+  //! Rotate, scale and translate, associating 0 to @a dist with line segment
   //! @a x0, @a y0, @a x1 and @a y1.
   static FOG_INLINE TransformF fromLineSegment(float x0, float y0, float x1, float y1, float dist)
   {
@@ -250,7 +250,7 @@ struct FOG_NO_EXPORT TransformF
     return matrix;
   }
 
-  //! @brief Create reflection matrix. 
+  //! @brief Create reflection matrix.
   static FOG_INLINE TransformF fromReflection(float u)
   {
     TransformF matrix(UNINITIALIZED);
@@ -258,7 +258,7 @@ struct FOG_NO_EXPORT TransformF
     return matrix;
   }
 
-  //! @brief Create reflection matrix. 
+  //! @brief Create reflection matrix.
   static FOG_INLINE TransformF fromReflection(float x, float y)
   {
     TransformF matrix(UNINITIALIZED);
@@ -267,7 +267,7 @@ struct FOG_NO_EXPORT TransformF
     return matrix;
   }
 
-  //! @brief Create reflection matrix. 
+  //! @brief Create reflection matrix.
   static FOG_INLINE TransformF fromReflection(const PointF& p)
   {
     TransformF matrix(UNINITIALIZED);
@@ -275,9 +275,9 @@ struct FOG_NO_EXPORT TransformF
     return matrix;
   }
 
-  //! @brief Create reflection-unit matrix. 
+  //! @brief Create reflection-unit matrix.
   //!
-  //! Reflect coordinates across the line through the origin containing 
+  //! Reflect coordinates across the line through the origin containing
   //! the unit vector (ux, uy).
   //!
   //! Contributed by John Horigan
@@ -289,7 +289,7 @@ struct FOG_NO_EXPORT TransformF
     return matrix;
   }
 
-  //! @brief Create reflection-unit matrix. 
+  //! @brief Create reflection-unit matrix.
   static FOG_INLINE TransformF fromReflectionUnit(const PointF& u)
   {
     TransformF matrix(UNINITIALIZED);
@@ -626,7 +626,7 @@ struct FOG_NO_EXPORT TransformF
 
   //! @brief Create line segment *this.
   //!
-  //! Rotate, scale and translate, associating 0 to @a dist with line segment 
+  //! Rotate, scale and translate, associating 0 to @a dist with line segment
   //! @a x0, @a y0, @a x1 and @a y1.
   FOG_INLINE err_t setLineSegment(float x0, float y0, float x1, float y1, float dist)
   {
@@ -634,28 +634,28 @@ struct FOG_NO_EXPORT TransformF
     return _g2d.transformf.create(*this, TRANSFORM_CREATE_LINE_SEGMENT, params);
   }
 
-  //! @brief Create reflection *this. 
+  //! @brief Create reflection *this.
   FOG_INLINE err_t setReflection(float u)
   {
     return _g2d.transformf.create(*this, TRANSFORM_CREATE_REFLECTION_U, &u);
   }
 
-  //! @brief Create reflection *this. 
+  //! @brief Create reflection *this.
   FOG_INLINE err_t setReflection(float x, float y)
   {
     float params[2] = { x, y };
     return _g2d.transformf.create(*this, TRANSFORM_CREATE_REFLECTION_XY, params);
   }
 
-  //! @brief Create reflection *this. 
+  //! @brief Create reflection *this.
   FOG_INLINE err_t setReflection(const PointF& p)
   {
     return _g2d.transformf.create(*this, TRANSFORM_CREATE_REFLECTION_XY, &p);
   }
 
-  //! @brief Create reflection-unit *this. 
+  //! @brief Create reflection-unit *this.
   //!
-  //! Reflect coordinates across the line through the origin containing 
+  //! Reflect coordinates across the line through the origin containing
   //! the unit vector (ux, uy).
   //!
   //! Contributed by John Horigan
@@ -665,7 +665,7 @@ struct FOG_NO_EXPORT TransformF
     return _g2d.transformf.create(*this, TRANSFORM_CREATE_REFLECTION_UNIT, params);
   }
 
-  //! @brief Create reflection-unit *this. 
+  //! @brief Create reflection-unit *this.
   FOG_INLINE err_t setReflectionUnit(const PointF& u)
   {
     return _g2d.transformf.create(*this, TRANSFORM_CREATE_REFLECTION_UNIT, &u);
@@ -1011,7 +1011,7 @@ struct FOG_NO_EXPORT TransformF
   {
     _g2d.transformf.mapPointsF[getType()](*this, pts, pts, count);
   }
-  
+
   FOG_INLINE void mapPoints(PointF* dst, const PointF* src, sysuint_t count) const
   {
     _g2d.transformf.mapPointsF[getType()](*this, dst, src, count);
@@ -1022,7 +1022,7 @@ struct FOG_NO_EXPORT TransformF
     FOG_ASSERT(_type < TRANSFORM_TYPE_COUNT);
     _g2d.transformf.mapPointsF[_type](*this, pts, pts, count);
   }
-  
+
   FOG_INLINE void _mapPoints(PointF* dst, const PointF* src, sysuint_t count) const
   {
     FOG_ASSERT(_type < TRANSFORM_TYPE_COUNT);
@@ -1036,7 +1036,7 @@ struct FOG_NO_EXPORT TransformF
 
   FOG_INLINE void mapBox(BoxF& dst, const BoxF& src) const
   {
-    _g2d.transformf.mapBoxF(*this, dst, src); 
+    _g2d.transformf.mapBoxF(*this, dst, src);
   }
 
   FOG_INLINE void mapVector(PointF& pt) const
@@ -1411,7 +1411,7 @@ struct FOG_NO_EXPORT TransformD
 
   //! @brief Create line segment matrix.
   //!
-  //! Rotate, scale and translate, associating 0 to @a dist with line segment 
+  //! Rotate, scale and translate, associating 0 to @a dist with line segment
   //! @a x0, @a y0, @a x1 and @a y1.
   static FOG_INLINE TransformD fromLineSegment(double x0, double y0, double x1, double y1, double dist)
   {
@@ -1421,7 +1421,7 @@ struct FOG_NO_EXPORT TransformD
     return matrix;
   }
 
-  //! @brief Create reflection matrix. 
+  //! @brief Create reflection matrix.
   static FOG_INLINE TransformD fromReflection(double u)
   {
     TransformD matrix(UNINITIALIZED);
@@ -1429,7 +1429,7 @@ struct FOG_NO_EXPORT TransformD
     return matrix;
   }
 
-  //! @brief Create reflection matrix. 
+  //! @brief Create reflection matrix.
   static FOG_INLINE TransformD fromReflection(double x, double y)
   {
     TransformD matrix(UNINITIALIZED);
@@ -1438,7 +1438,7 @@ struct FOG_NO_EXPORT TransformD
     return matrix;
   }
 
-  //! @brief Create reflection matrix. 
+  //! @brief Create reflection matrix.
   static FOG_INLINE TransformD fromReflection(const PointD& p)
   {
     TransformD matrix(UNINITIALIZED);
@@ -1446,9 +1446,9 @@ struct FOG_NO_EXPORT TransformD
     return matrix;
   }
 
-  //! @brief Create reflection-unit matrix. 
+  //! @brief Create reflection-unit matrix.
   //!
-  //! Reflect coordinates across the line through the origin containing 
+  //! Reflect coordinates across the line through the origin containing
   //! the unit vector (ux, uy).
   //!
   //! Contributed by John Horigan
@@ -1460,7 +1460,7 @@ struct FOG_NO_EXPORT TransformD
     return matrix;
   }
 
-  //! @brief Create reflection-unit matrix. 
+  //! @brief Create reflection-unit matrix.
   static FOG_INLINE TransformD fromReflectionUnit(const PointD& u)
   {
     TransformD matrix(UNINITIALIZED);
@@ -1811,7 +1811,7 @@ struct FOG_NO_EXPORT TransformD
 
   //! @brief Create line segment *this.
   //!
-  //! Rotate, scale and translate, associating 0 to @a dist with line segment 
+  //! Rotate, scale and translate, associating 0 to @a dist with line segment
   //! @a x0, @a y0, @a x1 and @a y1.
   FOG_INLINE err_t setLineSegment(double x0, double y0, double x1, double y1, double dist)
   {
@@ -1819,28 +1819,28 @@ struct FOG_NO_EXPORT TransformD
     return _g2d.transformd.create(*this, TRANSFORM_CREATE_LINE_SEGMENT, params);
   }
 
-  //! @brief Create reflection *this. 
+  //! @brief Create reflection *this.
   FOG_INLINE err_t setReflection(double u)
   {
     return _g2d.transformd.create(*this, TRANSFORM_CREATE_REFLECTION_U, &u);
   }
 
-  //! @brief Create reflection *this. 
+  //! @brief Create reflection *this.
   FOG_INLINE err_t setReflection(double x, double y)
   {
     double params[2] = { x, y };
     return _g2d.transformd.create(*this, TRANSFORM_CREATE_REFLECTION_XY, params);
   }
 
-  //! @brief Create reflection *this. 
+  //! @brief Create reflection *this.
   FOG_INLINE err_t setReflection(const PointD& p)
   {
     return _g2d.transformd.create(*this, TRANSFORM_CREATE_REFLECTION_XY, &p);
   }
 
-  //! @brief Create reflection-unit *this. 
+  //! @brief Create reflection-unit *this.
   //!
-  //! Reflect coordinates across the line through the origin containing 
+  //! Reflect coordinates across the line through the origin containing
   //! the unit vector (ux, uy).
   //!
   //! Contributed by John Horigan
@@ -1850,7 +1850,7 @@ struct FOG_NO_EXPORT TransformD
     return _g2d.transformd.create(*this, TRANSFORM_CREATE_REFLECTION_UNIT, params);
   }
 
-  //! @brief Create reflection-unit *this. 
+  //! @brief Create reflection-unit *this.
   FOG_INLINE err_t setReflectionUnit(const PointD& u)
   {
     return _g2d.transformd.create(*this, TRANSFORM_CREATE_REFLECTION_UNIT, &u);
@@ -2201,7 +2201,7 @@ struct FOG_NO_EXPORT TransformD
     FOG_ASSERT(_type < TRANSFORM_TYPE_COUNT);
     _g2d.transformd.mapPointsD[_type](*this, pts, pts, count);
   }
-  
+
   FOG_INLINE void _mapPoints(PointD* dst, const PointD* src, sysuint_t count) const
   {
     FOG_ASSERT(_type < TRANSFORM_TYPE_COUNT);
@@ -2215,7 +2215,7 @@ struct FOG_NO_EXPORT TransformD
 
   FOG_INLINE void mapBox(BoxD& dst, const BoxD& src) const
   {
-    _g2d.transformd.mapBoxD(*this, dst, src); 
+    _g2d.transformd.mapBoxD(*this, dst, src);
   }
 
   FOG_INLINE void mapVector(PointD& pt) const

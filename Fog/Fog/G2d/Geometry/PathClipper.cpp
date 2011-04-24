@@ -73,7 +73,7 @@ namespace Fog {
 // slope = dx / dy
 //
 // To intersect with clip box axis (cx or cy), use:
-// 
+//
 //   _x = cx
 //   _y = p0.y + (cx - p0.x) * dy / dx
 //
@@ -403,7 +403,7 @@ static err_t FOG_CDECL _G2d_PathClipperT_continueRaw(
   goto _DetectLoopDo;
 
 _DetectLoop:
-  // Record the current position in the source path so the unchanged vertices 
+  // Record the current position in the source path so the unchanged vertices
   // can be later copied into the destination path.
   unchangedCmd = srcCmd;
 
@@ -514,7 +514,7 @@ _ClipLoop:
     if ((dstIndex = dst._add(copyLength)) == INVALID_INDEX) goto _OutOfMemory;
 
     Memory::copy(dst.getVerticesX() + dstIndex, srcPts - copyLength, copyLength * sizeof(typename PointT<Number>::T));
-    Memory::copy(dst.getCommandsX() + dstIndex, srcCmd - copyLength, copyLength); 
+    Memory::copy(dst.getCommandsX() + dstIndex, srcCmd - copyLength, copyLength);
   }
 
   if (i)
@@ -659,7 +659,7 @@ _ClipLoopDo:
 
           // Initialize coordinates.
           lf = previousFlags;uf = currentFlags;
-          lx = srcPts[-1].x; ux = srcPts[0].x; 
+          lx = srcPts[-1].x; ux = srcPts[0].x;
           ly = srcPts[-1].y; uy = srcPts[0].y;
 
           i--;
@@ -973,7 +973,7 @@ _ClipLineCmd_Done:
 
               // Do not process the same t-value again.
               if (tVal == tCut) continue;
-  
+
               // Calculate the point position.
               switch (tSide)
               {
@@ -994,36 +994,36 @@ _ClipLineCmd_Done:
                   tp.x = clipBox.x0;
                   tp.y = clipBox.y0;
                   break;
-                
+
                 case CLIP_SIDE_RT:
                   tp.x = clipBox.x1;
                   tp.y = clipBox.y0;
                   break;
-                
+
                 case CLIP_SIDE_TOP:
                   tp.y = clipBox.y0;
                   goto _ClipQuadCmd_EvaluateX;
-                
+
                 case CLIP_SIDE_LB:
                   tp.x = clipBox.x0;
                   tp.y = clipBox.y1;
                   break;
-                
+
                 case CLIP_SIDE_RB:
                   tp.x = clipBox.x1;
                   tp.y = clipBox.y1;
                   break;
-                
+
                 case CLIP_SIDE_BOTTOM:
                   tp.y = clipBox.y1;
 _ClipQuadCmd_EvaluateX:
                   tp.x = ax * Math::pow2(tVal) + bx * tVal + cx;
                   break;
-                
+
                 case CLIP_SIDE_RIGHT:
                   tp.x = clipBox.x1;
                   goto _ClipQuadCmd_EvaluateY;
-                
+
                 case CLIP_SIDE_LEFT:
                   tp.x = clipBox.x0;
 _ClipQuadCmd_EvaluateY:
@@ -1080,7 +1080,7 @@ _ClipQuadCmd_EvaluateY:
 
 #if defined(FOG_DEBUG)
                   {
-                    typename BoxT<Number>::T curveBoundingBox = 
+                    typename BoxT<Number>::T curveBoundingBox =
                       QuadCurveT<Number>::T::getBoundingBox(dstPts - 3);
                     FOG_ASSERT(clipBox.subsumes(curveBoundingBox));
                   }
@@ -1239,7 +1239,7 @@ _ClipQuadCmd_EvaluateY:
 
               // Do not process the same t-value again.
               if (tVal == tCut) continue;
-  
+
               // Calculate the point position.
               switch (tSide)
               {
@@ -1260,36 +1260,36 @@ _ClipQuadCmd_EvaluateY:
                   tp.x = clipBox.x0;
                   tp.y = clipBox.y0;
                   break;
-                
+
                 case CLIP_SIDE_RT:
                   tp.x = clipBox.x1;
                   tp.y = clipBox.y0;
                   break;
-                
+
                 case CLIP_SIDE_TOP:
                   tp.y = clipBox.y0;
                   goto _ClipCubicCmd_EvaluateX;
-                
+
                 case CLIP_SIDE_LB:
                   tp.x = clipBox.x0;
                   tp.y = clipBox.y1;
                   break;
-                
+
                 case CLIP_SIDE_RB:
                   tp.x = clipBox.x1;
                   tp.y = clipBox.y1;
                   break;
-                
+
                 case CLIP_SIDE_BOTTOM:
                   tp.y = clipBox.y1;
 _ClipCubicCmd_EvaluateX:
                   tp.x = ax * Math::pow3(tVal) + bx * Math::pow2(tVal) + cx * tVal + dx;
                   break;
-                
+
                 case CLIP_SIDE_RIGHT:
                   tp.x = clipBox.x1;
                   goto _ClipCubicCmd_EvaluateY;
-                
+
                 case CLIP_SIDE_LEFT:
                   tp.x = clipBox.x0;
 _ClipCubicCmd_EvaluateY:
@@ -1354,7 +1354,7 @@ _ClipCubicCmd_EvaluateY:
 
 #if defined(FOG_DEBUG)
                   {
-                    typename BoxT<Number>::T curveBoundingBox = 
+                    typename BoxT<Number>::T curveBoundingBox =
                       CubicCurveT<Number>::T::getBoundingBox(dstPts - 4);
                     FOG_ASSERT(clipBox.subsumes(curveBoundingBox));
                   }
@@ -1398,7 +1398,7 @@ _ClipCubicCmd_EvaluateY:
             initialFlags = NO_INITIAL_FLAGS;
             goto _ClipLineCmd;
           }
-          
+
           dstPts[0] = srcPts[0];
           dstCmd[0] = PATH_CMD_CLOSE;
 
@@ -1453,8 +1453,8 @@ _Invalid:
 
 template<typename Number>
 static err_t FOG_CDECL _G2d_PathClipperT_clipPath(
-  typename PathClipperT<Number>::T& self, 
-  typename PathT<Number>::T& dst, const typename PathT<Number>::T& src, const 
+  typename PathClipperT<Number>::T& self,
+  typename PathT<Number>::T& dst, const typename PathT<Number>::T& src, const
   typename TransformT<Number>::T* tr)
 {
   self._lastIndex = INVALID_INDEX;

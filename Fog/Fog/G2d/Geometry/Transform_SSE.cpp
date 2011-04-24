@@ -501,7 +501,7 @@ static void FOG_CDECL _G2d_TransformF_mapPointsF_Projection_SSE(const TransformF
     Face::m128fMulSS(tmp01, tmp01, m_12_12_12_12);
     Face::m128fAddSS(rcp01, rcp01, m_22_22_22_22);
     Face::m128fAddSS(rcp01, rcp01, tmp01);
- 
+
     Face::m128fEpsilonSS(rcp01, rcp01);
     Face::m128fRcpSS(rcp01, rcp01);
     Face::m128fExtendSS(rcp01, rcp01);

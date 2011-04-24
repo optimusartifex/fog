@@ -207,7 +207,7 @@ struct FOG_API WidgetOpacityAnimation : public WidgetAnimation
 
   virtual void onStart() {
     if (_widget) {
-      _widget->setTransparency(getDirection() == ANIMATION_FORWARD? _startOpacity : _endOpacity);     
+      _widget->setTransparency(getDirection() == ANIMATION_FORWARD? _startOpacity : _endOpacity);
     }
 
     //will show Widget if the flag is set.
@@ -217,7 +217,7 @@ struct FOG_API WidgetOpacityAnimation : public WidgetAnimation
   virtual void onStep(AnimationEvent* e) {
     float opacity = _startOpacity + (_endOpacity - _startOpacity) * _position;
     if (_widget) {
-      _widget->setTransparency(opacity);        
+      _widget->setTransparency(opacity);
     }
   }
 
@@ -254,14 +254,14 @@ struct FOG_API WidgetPositionAnimation : public WidgetAnimation
 
   virtual void onStart() {
     if (_widget) {
-      _widget->setPosition(getDirection() == ANIMATION_FORWARD? _start : _end);        
+      _widget->setPosition(getDirection() == ANIMATION_FORWARD? _start : _end);
     }
 
     //will show Widget if the flag is set.
     WidgetAnimation::onStart();
   }
 
-  virtual void onStep(AnimationEvent* e) {    
+  virtual void onStep(AnimationEvent* e) {
     if (_widget) {
       PointI p;
 
@@ -301,14 +301,14 @@ struct FOG_API WidgetSizeAnimation : public WidgetAnimation
 
   virtual void onStart() {
     if (_widget) {
-      _widget->setSize(getDirection() == ANIMATION_FORWARD? _start : _end);        
+      _widget->setSize(getDirection() == ANIMATION_FORWARD? _start : _end);
     }
 
     //will show Widget if the flag is set.
     WidgetAnimation::onStart();
   }
 
-  virtual void onStep(AnimationEvent* e) {    
+  virtual void onStep(AnimationEvent* e) {
     if (_widget) {
       SizeI p;
 
@@ -348,14 +348,14 @@ struct FOG_API WidgetGeometryAnimation : public WidgetAnimation
 
   virtual void onStart() {
     if (_widget) {
-      _widget->setGeometry(getDirection() == ANIMATION_FORWARD? _start : _end);        
+      _widget->setGeometry(getDirection() == ANIMATION_FORWARD? _start : _end);
     }
 
     //will show Widget if the flag is set.
     WidgetAnimation::onStart();
   }
 
-  virtual void onStep(AnimationEvent* e) {    
+  virtual void onStep(AnimationEvent* e) {
     if (_widget) {
       RectI p;
 

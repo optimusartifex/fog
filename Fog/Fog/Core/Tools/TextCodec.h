@@ -26,7 +26,7 @@ namespace Fog {
 //!
 //! Text codec class provides easy way to encode or decode unicode text to various
 //! encodings. Input and output class is usually String in combination with ByteArray.
-//! 
+//!
 //! Default text codec created by empty constructor is always @c Null.
 //!
 //! Text codec contains built-in codecs:
@@ -220,7 +220,7 @@ struct FOG_API TextCodec
   // --------------------------------------------------------------------------
 
   //! @brief 8 bit text codecs table.
-  //! 
+  //!
   //! This table is used to convert text from 8 bit encoding to / from
   //! unicode encoding like UTF8, UTF16 and UTF32.
   struct FOG_NO_EXPORT Page8
@@ -252,7 +252,7 @@ struct FOG_API TextCodec
     uint32_t count;
 
     //! @brief @c true if BOM is initialized.
-    //! 
+    //!
     //! For UTF-8, UTF-16 and UTF-32 codecs.
     bool bomInitialized;
 

@@ -151,7 +151,7 @@ protected:
   //! @brief ImagePalette if reading / writing 8 bit or less images.
   //!
   //! This is image palette that can be contained in loaded image, but it's
-  //! not needed if it's supported to load image into the different image 
+  //! not needed if it's supported to load image into the different image
   //! format.
   ImagePalette _palette;
   //! @brief Comment.

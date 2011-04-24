@@ -48,7 +48,7 @@ static uint _G2d_ColorStopList_validate(const ColorStop* stops, sysuint_t length
 
 static void _G2d_ColorStopList_sort(ColorStop* stops, sysuint_t length)
 {
-  // Insertion sort is used, because the order of stops with the same offset 
+  // Insertion sort is used, because the order of stops with the same offset
   // must be preserved (see qsort/isort documentation for differences).
   ColorStop* i = stops + 1;
   ColorStop* j = stops;
@@ -71,7 +71,7 @@ static void _G2d_ColorStopList_sort(ColorStop* stops, sysuint_t length)
 // [Fog::ColorStopList - Construction / Destruction]
 // ============================================================================
 
-ColorStopList::ColorStopList() : 
+ColorStopList::ColorStopList() :
   _d(_dnull->ref())
 {
 }

@@ -29,8 +29,8 @@ struct Thread;
 
 //! @brief Thread pool can be used get/release threads in very efficient way.
 //!
-//! Instead of creating / destroying each thread the thread pool can store 
-//! all threads for their efficient reuse. Using thread pool significantly 
+//! Instead of creating / destroying each thread the thread pool can store
+//! all threads for their efficient reuse. Using thread pool significantly
 //! reduces overhead caused by operating-system calls.
 //!
 //! Default thread pool used for example by:

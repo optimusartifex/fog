@@ -78,7 +78,7 @@ struct FOG_NO_EXPORT ColorUtil
 
     Face::m128iStore4(&argb32.p32, xmm0);
 #else
-    argb32.u32 = 
+    argb32.u32 =
       ((uint32_t)((int)(argbf[0] * (255.0f)) ) << ARGB32_ASHIFT) |
       ((uint32_t)((int)(argbf[1] * (255.0f)) ) << ARGB32_RSHIFT) |
       ((uint32_t)((int)(argbf[2] * (255.0f)) ) << ARGB32_GSHIFT) |
@@ -136,7 +136,7 @@ struct FOG_NO_EXPORT ColorUtil
 
     Face::m128iStore8(&argb64.p64, xmm0);
 #else
-    argb64.u64 = 
+    argb64.u64 =
       ((uint64_t)((int)(argbf[0] * (65535.0f)) ) << ARGB64_ASHIFT) |
       ((uint64_t)((int)(argbf[1] * (65535.0f)) ) << ARGB64_RSHIFT) |
       ((uint64_t)((int)(argbf[2] * (65535.0f)) ) << ARGB64_GSHIFT) |

@@ -81,7 +81,7 @@ struct FOG_NO_EXPORT PGradientRadial
 
     FOG_RETURN_ON_ERROR(PGradientBase::create(ctx, dstFormat, clipBox, spread, stops));
     int tableLength = ctx->_d.gradient.base.len;
-    
+
     // TODO:
     uint32_t srcFormat = IMAGE_FORMAT_PRGB32;
 
@@ -160,8 +160,8 @@ struct FOG_NO_EXPORT PGradientRadial
 
     if (inv.getType() <= TRANSFORM_TYPE_AFFINE)
     {
-      // The x and y variables increase linearly, this means that we can use 
-      // double differentiation to get delta (d) and delta-of-delta (dd). We 
+      // The x and y variables increase linearly, this means that we can use
+      // double differentiation to get delta (d) and delta-of-delta (dd). We
       // first separate the equation into three ones:
       //
       //    D1 = x^2 * C1
@@ -282,11 +282,11 @@ struct FOG_NO_EXPORT PGradientRadial
       double px    = _x * ctx->_d.gradient.radial.simple.xx + fetcher->_d.gradient.radial.simple.px;
       double py    = _x * ctx->_d.gradient.radial.simple.xy + fetcher->_d.gradient.radial.simple.py;
 
-      double b     = ctx->_d.gradient.radial.simple.fx * px + 
+      double b     = ctx->_d.gradient.radial.simple.fx * px +
                      ctx->_d.gradient.radial.simple.fy * py;
       double b_d   = ctx->_d.gradient.radial.simple.b_d;
 
-      double d     = ctx->_d.gradient.radial.simple.r2mfyfy * px * px + 
+      double d     = ctx->_d.gradient.radial.simple.r2mfyfy * px * px +
                      ctx->_d.gradient.radial.simple.r2mfxfx * py * py +
                      ctx->_d.gradient.radial.simple._2_fxfy * px * py;
       double d_d   = ctx->_d.gradient.radial.simple.d_d +
@@ -331,7 +331,7 @@ struct FOG_NO_EXPORT PGradientRadial
 
       double _x = (double)x;
       double pz = _x * ctx->_d.gradient.radial.proj.xz + fetcher->_d.gradient.radial.proj.pz;
-      double pzRecip = 1.0 / pz; 
+      double pzRecip = 1.0 / pz;
 
       double px = _x * ctx->_d.gradient.radial.proj.xx + fetcher->_d.gradient.radial.proj.px;
       double py = _x * ctx->_d.gradient.radial.proj.xy + fetcher->_d.gradient.radial.proj.py;
@@ -346,9 +346,9 @@ struct FOG_NO_EXPORT PGradientRadial
         px += ctx->_d.gradient.radial.proj.xx;
         py += ctx->_d.gradient.radial.proj.xy;
 
-        double b = ctx->_d.gradient.radial.proj.fx * rx + 
+        double b = ctx->_d.gradient.radial.proj.fx * rx +
                    ctx->_d.gradient.radial.proj.fy * ry;
-        double d = ctx->_d.gradient.radial.proj.r2mfyfy * rx * rx + 
+        double d = ctx->_d.gradient.radial.proj.r2mfyfy * rx * rx +
                    ctx->_d.gradient.radial.proj.r2mfxfx * ry * ry +
                    ctx->_d.gradient.radial.proj._2_fxfy * rx * ry;
 

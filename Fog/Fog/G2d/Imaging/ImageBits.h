@@ -69,7 +69,7 @@ struct FOG_NO_EXPORT ImageBits
   FOG_INLINE bool isValid() const
   {
     return data != NULL &&
-           size.isValid() && 
+           size.isValid() &&
            format != IMAGE_FORMAT_NULL &&
            format < IMAGE_FORMAT_COUNT;
   }

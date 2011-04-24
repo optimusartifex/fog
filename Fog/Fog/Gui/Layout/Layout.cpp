@@ -31,7 +31,7 @@ namespace Fog {
 // [Fog::Layout]
 // ============================================================================
 
-Layout::Layout() : 
+Layout::Layout() :
   _parentItem(0),
   _flexcount(0),
   _spacing(0),
@@ -40,7 +40,7 @@ Layout::Layout() :
   _enabled(1),
   _nextactivate(0)
 {
-  _objectFlags |= OBJECT_FLAG_IS_LAYOUT;  
+  _objectFlags |= OBJECT_FLAG_IS_LAYOUT;
 }
 
 Layout::Layout(Widget* parent, Layout* parentLayout) :
@@ -76,12 +76,12 @@ Layout::Layout(Widget* parent, Layout* parentLayout) :
   }
 }
 
-Layout::~Layout() 
+Layout::~Layout()
 {
   FOG_ASSERT(_nextactivate == NULL);
 
   while(_children.getLength())
-  {    
+  {
     remove(_children.at(0));
   }
 }
@@ -231,7 +231,7 @@ int Layout::getSpacing() const
     }
 
     return 0;
-  }  
+  }
 }
 
 void Layout::setSpacing(int spacing)
@@ -321,7 +321,7 @@ void Layout::remove(LayoutItem* item)
 }
 
 bool Layout::removeAllWidgets(LayoutItem* layout, Widget* w)
-{  
+{
   if (!layout->_withinLayout)
     return false;
 
@@ -343,8 +343,8 @@ bool Layout::removeAllWidgets(LayoutItem* layout, Widget* w)
     else if (removeAllWidgets(iitem, w))
     {
       return true;
-    } 
-  }  
+    }
+  }
 
   return false;
 }
@@ -367,8 +367,8 @@ void Layout::reparentChildWidgets(Widget* widget)
   }
 }
 
-int Layout::addChild(LayoutItem* item) 
-{  
+int Layout::addChild(LayoutItem* item)
+{
   if (item->isWidget())
   {
     Widget* widget = static_cast<Widget*>(item);
@@ -376,8 +376,8 @@ int Layout::addChild(LayoutItem* item)
     Widget* parentLayout = this->getParentWidget();
     Widget* parentWidget = widget->getParentWidget();
 
-    if (parentWidget != NULL && 
-        parentWidget->getLayout() != NULL && 
+    if (parentWidget != NULL &&
+        parentWidget->getLayout() != NULL &&
         item->_withinLayout)
     {
       if (removeAllWidgets(parentWidget->getLayout(), widget))
@@ -386,8 +386,8 @@ int Layout::addChild(LayoutItem* item)
       }
     }
 
-    if (parentWidget != NULL && 
-        parentLayout != NULL && 
+    if (parentWidget != NULL &&
+        parentLayout != NULL &&
         parentWidget != parentLayout)
     {
       widget->setParent(parentLayout);
@@ -423,7 +423,7 @@ int Layout::addChildLayout(Layout* l)
     l->reparentChildWidgets(mw);
   }
 
-  l->_parentItem = this;  
+  l->_parentItem = this;
   l->_toplevel = 0;
   l->_withinLayout = this;
 
@@ -514,13 +514,13 @@ bool Layout::activate()
   bool hasH = parentwidget->hasMinimumHeight();
   bool hasW = parentwidget->hasMinimumWidth();
   bool calc = (!hasH || !hasW);
-  
+
   if (parentwidget->hasGuiWindow())
   {
     SizeI ms = getTotalMinimumSize();
     if (calc)
     {
-      if (hasW) ms.setWidth(parentwidget->getMinimumSize().getWidth());      
+      if (hasW) ms.setWidth(parentwidget->getMinimumSize().getWidth());
       if (hasH) ms.setHeight(parentwidget->getMinimumSize().getHeight());
     }
 
@@ -542,7 +542,7 @@ bool Layout::activate()
     if (!hasW) ms.setWidth(0);
     parentwidget->setMinimumSize(ms);
   }
-  
+
   callSetGeometry(parentwidget->getSize());
   _activated = 1;
   return true;

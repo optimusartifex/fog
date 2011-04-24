@@ -303,7 +303,7 @@ struct FOG_NO_EXPORT BmpDecoder : public ImageDecoder
   // How many bytes to skip to get the bitmap data.
   uint32_t bmpSkipBytes;
 
-  //! @brief Used by the IcoDecoder to skip uninteresing part 
+  //! @brief Used by the IcoDecoder to skip uninteresing part
   int _skipFileHeader;
 };
 

@@ -24,18 +24,18 @@ class NSString;
 namespace Fog {
 
 //! @brief ScopedAutoreleasePool allocates an NSAutoreleasePool on instatiation and
-//! releases it on destruction. 
+//! releases it on destruction.
 struct ScopedAutoreleasePool
 {
   ScopedAutoreleasePool();
   ~ScopedAutoreleasePool();
-  
-  //! @brief Get cleaned up and start new. 
+
+  //! @brief Get cleaned up and start new.
   void recycle();
 
 private:
   FOG_DISABLE_COPY(ScopedAutoreleasePool)
-  
+
   NSAutoreleasePool* _pool;
 };
 

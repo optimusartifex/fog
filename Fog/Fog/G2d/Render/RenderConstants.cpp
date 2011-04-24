@@ -165,7 +165,7 @@ const RenderCompatibleFormat _g2d_render_compatibleFormat[IMAGE_FORMAT_COUNT][IM
   // [I8]
   // --------------------------------------------------------------------------
 
-  { 
+  {
     /* I8        <- PRGB32    */ { IMAGE_FORMAT_NULL     , IMAGE_FORMAT_NULL     , RENDER_VBLIT_INVALID         , 0 },
     /* I8        <- XRGB32    */ { IMAGE_FORMAT_NULL     , IMAGE_FORMAT_NULL     , RENDER_VBLIT_INVALID         , 0 },
     /* I8        <- RGB24     */ { IMAGE_FORMAT_NULL     , IMAGE_FORMAT_NULL     , RENDER_VBLIT_INVALID         , 0 },
@@ -180,7 +180,7 @@ const RenderCompatibleFormat _g2d_render_compatibleFormat[IMAGE_FORMAT_COUNT][IM
   // [PRGB64]
   // --------------------------------------------------------------------------
 
-  { 
+  {
     /* PRGB64    <- PRGB32    */ { IMAGE_FORMAT_PRGB64   , IMAGE_FORMAT_PRGB32   , RENDER_VBLIT_PRGB64_VS_PRGB32, 0 },
     /* PRGB64    <- XRGB32    */ { IMAGE_FORMAT_PRGB64   , IMAGE_FORMAT_RGB48    , RENDER_VBLIT_PRGB64_VS_RGB48 , 0 },
     /* PRGB64    <- RGB24     */ { IMAGE_FORMAT_PRGB64   , IMAGE_FORMAT_RGB48    , RENDER_VBLIT_PRGB64_VS_RGB48 , 0 },
@@ -195,7 +195,7 @@ const RenderCompatibleFormat _g2d_render_compatibleFormat[IMAGE_FORMAT_COUNT][IM
   // [RGB48]
   // --------------------------------------------------------------------------
 
-  { 
+  {
     /* RGB48     <- PRGB32    */ { IMAGE_FORMAT_RGB48    , IMAGE_FORMAT_PRGB32   , RENDER_VBLIT_PRGB64_VS_PRGB32 , 0 },
     /* RGB48     <- XRGB32    */ { IMAGE_FORMAT_RGB48    , IMAGE_FORMAT_RGB48    , RENDER_VBLIT_PRGB64_VS_RGB48  , 0 },
     /* RGB48     <- RGB24     */ { IMAGE_FORMAT_RGB48    , IMAGE_FORMAT_RGB48    , RENDER_VBLIT_PRGB64_VS_RGB48  , 0 },
@@ -210,7 +210,7 @@ const RenderCompatibleFormat _g2d_render_compatibleFormat[IMAGE_FORMAT_COUNT][IM
   // [A16]
   // --------------------------------------------------------------------------
 
-  { 
+  {
     /* A16       <- PRGB32    */ { IMAGE_FORMAT_A16      , IMAGE_FORMAT_A8       , RENDER_VBLIT_A16_VS_A8        , 0 },
     /* A16       <- XRGB32    */ { IMAGE_FORMAT_A16      , IMAGE_FORMAT_A8       , RENDER_VBLIT_A16_VS_A8        , 0 },
     /* A16       <- RGB24     */ { IMAGE_FORMAT_A16      , IMAGE_FORMAT_A8       , RENDER_VBLIT_A16_VS_A8        , 0 },

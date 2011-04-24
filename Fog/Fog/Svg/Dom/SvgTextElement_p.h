@@ -52,7 +52,7 @@ struct FOG_NO_EXPORT SvgTextElement : public SvgStyledElement
   SvgCoordAttribute a_y;
 
   // TODO: Ignored.
-  SvgCoordAttribute a_dx; 
+  SvgCoordAttribute a_dx;
   // TODO: Ignored.
   SvgCoordAttribute a_dy;
   // TODO: Ignored.

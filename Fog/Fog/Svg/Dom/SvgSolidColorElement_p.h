@@ -47,7 +47,7 @@ struct FOG_NO_EXPORT SvgSolidColorElement : public SvgStyledElement
   // --------------------------------------------------------------------------
 
   // NONE
-  
+
 private:
   FOG_DISABLE_COPY(SvgSolidColorElement)
 };

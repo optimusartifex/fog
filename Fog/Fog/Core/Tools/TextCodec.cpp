@@ -837,7 +837,7 @@ struct FOG_NO_EXPORT _8BitCodec : public TextCodec::Engine
 };
 
 _8BitCodec::_8BitCodec(
-  uint32_t code, uint32_t flags, const char* mime, const Page8* page8) 
+  uint32_t code, uint32_t flags, const char* mime, const Page8* page8)
     : TextCodec::Engine(code, flags, mime, page8)
 {
 }
@@ -1200,7 +1200,7 @@ err_t UTF8Codec::appendToUnicode(String& dst, const void* src, sysuint_t size, S
 
   sysuint_t initSize = dst.getLength();
   sysuint_t growSize = size + 1;
- 
+
   err_t err = dst.reserve(growSize);
   if (FOG_IS_ERROR(err)) return err;
 
@@ -1208,7 +1208,7 @@ err_t UTF8Codec::appendToUnicode(String& dst, const void* src, sysuint_t size, S
 
   // Characters
   uint32_t uc;
- 
+
   if (state && (oldStateSize = state->count))
   {
     const uint8_t* bufPtr = reinterpret_cast<uint8_t*>(state->buffer);
@@ -1228,18 +1228,18 @@ err_t UTF8Codec::appendToUnicode(String& dst, const void* src, sysuint_t size, S
     GET_UTF8_CHAR(bufPtr);
     goto _Code;
   }
- 
+
 _Loop:
   for (;;)
   {
     uc = *srcCur;
     utf8Size = utf8LengthTable[uc];
-   
+
     // Incomplete Input
     if (FOG_UNLIKELY((sysuint_t)(srcEnd - srcCur) < utf8Size)) goto _InputTruncated;
 
     GET_UTF8_CHAR(srcCur);
-   
+
 _Code:
     if (uc >= 0x10000U && uc <= UNICODE_LAST)
     {
@@ -1255,13 +1255,13 @@ _Code:
     {
       *dstCur++ = (uint16_t)uc;
     }
-   
+
 _Continue:
     srcCur += utf8Size;
     if (srcCur == srcEnd) break;
   }
   goto _End;
- 
+
 _InputTruncated:
   // Different behavior if state is set or not.
   if (state)
@@ -2326,7 +2326,7 @@ FOG_NO_EXPORT void _core_textcodec_init(void)
   // Initialize ASCII text codec.
   fog_new_p(&addr[TextCodec::BuiltInAscii])
     TextCodec(TextCodec::fromCode(TextCodec::ISO8859_1));
-  
+
   // Initialize local 8-bit text codec. On any problem the ASCII codec is used.
   fog_new_p(&addr[TextCodec::BuiltInLocal])
     TextCodec(TextCodec::fromMime(getCodeset()));
@@ -2336,11 +2336,11 @@ FOG_NO_EXPORT void _core_textcodec_init(void)
   // Initialize UTF-8 text codec.
   fog_new_p(&addr[TextCodec::BuiltInUTF8])
     TextCodec(TextCodec::fromCode(TextCodec::UTF8));
-  
+
   // Initialize UTF-16 text codec.
   fog_new_p(&addr[TextCodec::BuiltInUTF16])
     TextCodec(TextCodec::fromCode(TextCodec::UTF16));
-  
+
   // Initialize UTF-32 text codec.
   fog_new_p(&addr[TextCodec::BuiltInUTF32])
     TextCodec(TextCodec::fromCode(TextCodec::UTF32));

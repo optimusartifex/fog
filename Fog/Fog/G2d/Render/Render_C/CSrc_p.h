@@ -387,10 +387,10 @@ _ARGB32_Glyph_Fill:
 
       Face::p32Load1b(msk0p, msk);
       if (msk0p == 0x00) goto _A8_Glyph_Skip;
-      
+
       Face::p32Load4aNative(src0p, pal + src[0]);
       if (msk0p == 0xFF) goto _A8_Glyph_Fill;
-      
+
       DstF::p32LoadPRGB32(dst0p, dst);
       Face::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
 
@@ -398,7 +398,7 @@ _ARGB32_Glyph_Fill:
         Face::p32Lerp256PBB_SBW(src0p, src0p, dst0p, msk0p);
       else
         Face::p32Lerp256PBB_SBW_10Z2(src0p, src0p, dst0p, msk0p);
-      
+
 _A8_Glyph_Fill:
       if (DstF::HAS_ALPHA)
         DstF::p32StorePRGB32(dst, src0p);
@@ -627,7 +627,7 @@ _ARGB32_Glyph_Skip:
 
       Face::p32Load1b(msk0p, msk);
       if (msk0p == 0x00) goto _A8_Glyph_Skip;
-      
+
       Face::p32Load8aNative(src0p_10, src0p_32, src);
       if (DstF::HAS_ALPHA)
         Face::p32PRGB32FromPRGB64_1032(src0p_10, src0p_10, src0p_32);
@@ -635,7 +635,7 @@ _ARGB32_Glyph_Skip:
         Face::p32ZRGB32FromPRGB64_1032(src0p_10, src0p_10, src0p_32);
 
       if (msk0p == 0xFF) goto _A8_Glyph_Fill;
-      
+
       DstF::p32LoadPRGB32(dst0p, dst);
       Face::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
 
@@ -643,7 +643,7 @@ _ARGB32_Glyph_Skip:
         Face::p32Lerp256PBB_SBW(src0p_10, src0p_10, dst0p, msk0p);
       else
         Face::p32Lerp256PBB_SBW_10Z2(src0p_10, src0p_10, dst0p, msk0p);
-      
+
 _A8_Glyph_Fill:
       if (DstF::HAS_ALPHA)
         DstF::p32StorePRGB32(dst, src0p_10);
@@ -887,13 +887,13 @@ _ARGB32_Glyph_Skip:
 
       Face::p32Load1b(msk0p, msk);
       if (msk0p == 0x00) goto _A8_Glyph_Skip;
-      
+
       if (DstF::HAS_ALPHA)
         Face::p32RGB48LoadToFRGB32(src0p, src);
       else
         Face::p32RGB48LoadToZRGB32(src0p, src);
       if (msk0p == 0xFF) goto _A8_Glyph_Fill;
-      
+
       if (DstF::HAS_ALPHA)
       {
         DstF::p32LoadPRGB32(dst0p, dst);
@@ -906,7 +906,7 @@ _ARGB32_Glyph_Skip:
         Face::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
         Face::p32Lerp256PBB_SBW_10Z2(src0p, src0p, dst0p, msk0p);
       }
-      
+
 _A8_Glyph_Fill:
       if (DstF::HAS_ALPHA)
         DstF::p32StorePRGB32(dst, src0p);
@@ -1601,7 +1601,7 @@ _ARGB32_Glyph_Skip:
     BLIT_LOOP_32x4_MAIN_BEGIN(C_Opaque)
       Face::p64 src0p;
       Face::p64 src1p;
-      
+
       Face::p64Load8aNative(src0p, src + 0);
       Face::p64Load8aNative(src1p, src + 8);
 
@@ -1677,7 +1677,7 @@ _A8_Glyph_Skip:
       Face::p32 dst0p;
       Face::p32 src0p;
       Face::p32 msk0p;
-        
+
       Face::p32Load4aNative(dst0p, dst);
       Face::p32Load4aNative(src0p, src);
       Face::p32Load2aNative(msk0p, msk);
@@ -1974,7 +1974,7 @@ _A8_Glyph_Skip:
       Face::p32 dst0p;
       Face::p32 src0p;
       Face::p32 msk0p;
-        
+
       Face::p32Load4aNative(dst0p, dst);
       Face::p32Load3bNative(src0p, src);
       Face::p32Load2aNative(msk0p, msk);
@@ -2185,7 +2185,7 @@ _A8_Glyph_Skip:
       Face::p32 dst0p;
       Face::p32 src0p;
       Face::p32 msk0p;
-        
+
       Face::p32Load4aNative(dst0p, dst);
       Face::p32Load4aNative(src0p, src);
       Face::p32Load2aNative(msk0p, msk);
@@ -2614,7 +2614,7 @@ _A8_Glyph_Skip:
         Face::p32 dst0p;
         Face::p32 src0p;
         Face::p32 msk0p;
-        
+
         Face::p32Load4aNative(dst0p, dst);
         Face::p32Load4aNative(src0p, src);
         Face::p32Load2aNative(msk0p, msk);
@@ -2684,7 +2684,7 @@ _ARGB32_Glyph_Skip:
     Face::p32 sro0p_packed_2;
 
     Face::p32Copy(sro0p, src->prgb32.p32);
-    Face::p32RGB24QuadFromXRGB32Solid(sro0p_packed_0, sro0p_packed_1, sro0p_packed_2, sro0p); 
+    Face::p32RGB24QuadFromXRGB32Solid(sro0p_packed_0, sro0p_packed_1, sro0p_packed_2, sro0p);
 
     BLIT_LOOP_24x4_SMALL_BEGIN(C_Opaque)
       Face::p32Store3bNative(dst, sro0p);

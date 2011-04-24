@@ -606,7 +606,7 @@ FOG_INIT_DECLARE err_t initFTFontEngine(void)
   // Initialize custom translator definitions if FontConfig failed to load or
   // if it's not supported (compiled).
 #if defined(FOG_HAVE_FONTCONFIG)
-  if (!_fontConfigLib->ok) 
+  if (!_fontConfigLib->ok)
   {
 #endif // FOG_HAVE_FONTCONFIG
 
@@ -641,12 +641,12 @@ struct FOG_NO_EXPORT FTFontFile
   // [Construction / Destruction]
   FTFontFile(const String& fileName, const String& family);
   ~FTFontFile();
-  
+
   // [Reference Counting]
 
   FTFontFile* ref();
   void deref();
-  
+
   // [Use / Unuse]
 
   // use() and unuse() are public methods that's used by engine.
@@ -659,7 +659,7 @@ struct FOG_NO_EXPORT FTFontFile
   void unload();
 
   FOG_INLINE bool isLoaded() const;
-  
+
   // [Setup]
 
   bool setupSize(uint32_t size);
@@ -729,7 +729,7 @@ FontFace* FTFontEngine::createDefaultFace()
   int size = 12;
 
   memset(&options, 0, sizeof(FontOptions));
-  
+
   FontFace* face = NULL;
 
 #if defined(FOG_HAVE_FONTCONFIG)
@@ -764,7 +764,7 @@ FontFace* FTFontEngine::createDefaultFace()
 
 FontFace* FTFontEngine::createFace(
   const String& family, float size,
-  const FontOptions& options, 
+  const FontOptions& options,
   const TransformF& matrix)
 {
   // Bail if FreeType library is not loaded.

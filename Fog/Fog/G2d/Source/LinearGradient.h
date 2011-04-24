@@ -42,7 +42,7 @@ struct FOG_NO_EXPORT LinearGradientF : public GradientF
   FOG_INLINE LinearGradientF(const LinearGradientF& other);
   explicit FOG_INLINE LinearGradientF(const LinearGradientD& other);
 
-  FOG_INLINE LinearGradientF(const PointF& start, const PointF& end) : 
+  FOG_INLINE LinearGradientF(const PointF& start, const PointF& end) :
     GradientF(GRADIENT_TYPE_LINEAR)
   {
     _pts[0] = start;
@@ -92,7 +92,7 @@ struct FOG_NO_EXPORT LinearGradientD : public GradientD
   FOG_INLINE LinearGradientD(const LinearGradientF& other);
   explicit FOG_INLINE LinearGradientD(const LinearGradientD& other);
 
-  FOG_INLINE LinearGradientD(const PointD& start, const PointD& end) : 
+  FOG_INLINE LinearGradientD(const PointD& start, const PointD& end) :
     GradientD(GRADIENT_TYPE_LINEAR)
   {
     _pts[0] = start;

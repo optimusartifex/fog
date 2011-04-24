@@ -142,7 +142,7 @@ int FlowLayout::doLayout(const RectI &rect, bool testOnly) const
       lineHeight = 0;
     }
 
-    if (!testOnly) 
+    if (!testOnly)
     {
       RectI rect;
       SizeI tmp = item->getLayoutSizeHint();

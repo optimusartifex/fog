@@ -42,7 +42,7 @@ enum { SPAN_C_THRESHOLD = 4 };
 //! incorrectly.
 //!
 //! Note that you can base another class on @c Span to extend its
-//! functionality. The core idea is that @c Span is used across the API so you 
+//! functionality. The core idea is that @c Span is used across the API so you
 //! don't need to define more classes to work with spans.
 //!
 //! @sa @c Span8.

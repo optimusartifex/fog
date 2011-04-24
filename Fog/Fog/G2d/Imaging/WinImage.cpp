@@ -105,7 +105,7 @@ HDC WinDibImageData::getDC()
     hDC = NULL;
     goto failed;
   }
-  
+
   locked++;
 
 failed:

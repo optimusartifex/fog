@@ -444,7 +444,7 @@ void RasterPainterEngine::CTX_SYMBOL(_doPaintBoxes)(
 
       // FastPath: Do not copy pattern to extra buffer if compositing operator
       // is COMPOSITE_SRC. We need to match pattern pixel format and make sure
-      // that operator is COMPOSITE_SRC or COMPOSITE_SRC_OVER (in case that 
+      // that operator is COMPOSITE_SRC or COMPOSITE_SRC_OVER (in case that
       // pattern has no alpha-channel).
       if (alpha == 0xFF && isRawOpaqueBlit(format, pctx->format, ctx->ops.op))
       {

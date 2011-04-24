@@ -251,7 +251,7 @@ struct FOG_NO_EXPORT PGradientRectangular
 
       double _x = (double)x;
       double pz = _x * ctx->_d.gradient.rectangular.proj.xz + fetcher->_d.gradient.rectangular.proj.pz;
-      double pzRecip = 1.0 / pz; 
+      double pzRecip = 1.0 / pz;
 
       double px = _x * dx + fetcher->_d.gradient.rectangular.proj.px;
       double py = _x * dy + fetcher->_d.gradient.rectangular.proj.py;

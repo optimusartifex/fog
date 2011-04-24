@@ -42,7 +42,7 @@ struct FOG_NO_EXPORT ConicalGradientF : public GradientF
   FOG_INLINE ConicalGradientF(const ConicalGradientF& other);
   explicit FOG_INLINE ConicalGradientF(const ConicalGradientD& other);
 
-  FOG_INLINE ConicalGradientF(const PointF& center, float angle) : 
+  FOG_INLINE ConicalGradientF(const PointF& center, float angle) :
     GradientF(GRADIENT_TYPE_CONICAL)
   {
     _pts[0] = center;
@@ -92,7 +92,7 @@ struct FOG_NO_EXPORT ConicalGradientD : public GradientD
   FOG_INLINE ConicalGradientD(const ConicalGradientF& other);
   explicit FOG_INLINE ConicalGradientD(const ConicalGradientD& other);
 
-  FOG_INLINE ConicalGradientD(const PointD& center, double angle) : 
+  FOG_INLINE ConicalGradientD(const PointD& center, double angle) :
     GradientD(GRADIENT_TYPE_CONICAL)
   {
     _pts[0] = center;

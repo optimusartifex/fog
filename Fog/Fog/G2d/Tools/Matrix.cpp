@@ -173,7 +173,7 @@ err_t MatrixF::fill(const RectI& rect, float val)
 
   int width = _d->size.w;
   float* p = &_d->data[y0 * width + x0];
-  
+
   int x, y;
   int fillw = x1 - x0;
   int fillh = y1 - y0;
@@ -216,7 +216,7 @@ MatrixDataF* MatrixF::_dalloc(const SizeI& size)
 }
 
 void MatrixF::_dcopy(
-  MatrixDataF* dst, int dstX, int dstY, 
+  MatrixDataF* dst, int dstX, int dstY,
   MatrixDataF* src, int srcX, int srcY, int w, int h)
 {
   int x, y;

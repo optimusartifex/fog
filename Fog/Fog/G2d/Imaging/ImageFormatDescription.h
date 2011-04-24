@@ -109,10 +109,10 @@ struct FOG_NO_EXPORT ImageFormatDescription
   //!
   //! This method is designed to setup the integer based pixel format.
   FOG_INLINE err_t createArgb(
-    uint32_t depth, uint32_t flags, 
+    uint32_t depth, uint32_t flags,
     uint64_t aMask, uint64_t rMask, uint64_t gMask, uint64_t bMask)
   {
-    return _g2d.imageformatdescription.createArgb(this, 
+    return _g2d.imageformatdescription.createArgb(this,
       depth, flags, aMask, rMask, gMask, bMask);
   }
 
@@ -132,7 +132,7 @@ struct FOG_NO_EXPORT ImageFormatDescription
 
   FOG_INLINE bool operator==(const ImageFormatDescription& other) const
   {
-    // Small optimization useful when comparing a list of image format 
+    // Small optimization useful when comparing a list of image format
     // descriptions in a loop. If both formats are equal and built-in then
     // we can simply return true.
     if (_format != other._format) return false;

@@ -27,9 +27,9 @@ namespace Fog {
 //! @brief Locale.
 //!
 //! Locales are useful when translating numbers or floats from / to strings.
-//! In some cases there are needed that numbers and strings are converted to 
-//! user native locale, this happen in GUI input components, but in some 
-//! situations there is needed to use exactly one locale. For example 
+//! In some cases there are needed that numbers and strings are converted to
+//! user native locale, this happen in GUI input components, but in some
+//! situations there is needed to use exactly one locale. For example
 //! configuration files or platform indenpendent documents should use POSIX
 //! locale only.
 //!
@@ -93,7 +93,7 @@ struct FOG_API Locale
   err_t _detach();
   //! @copydoc Doxygen::Implicit::reset().
   void reset();
-  
+
   // [Flags]
 
   FOG_INLINE bool isNull() const { return _d == _dnull.instancep(); }

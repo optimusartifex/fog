@@ -99,7 +99,7 @@ If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
 
   # -fmerge-all-constants / -fno-keep-static-consts
   #
-  # Decrease code size by merging all constants (standard violation) and 
+  # Decrease code size by merging all constants (standard violation) and
   # removing unused ones. It's against standard so it must be turned-on
   # explicitly.
   If (${FOG_CC_HAS_FMERGE_ALL_CONSTANTS})
@@ -619,7 +619,7 @@ Set(FOG_CORE_TOOLS_HEADERS
 
 # [Fog/Core/Win]
 If(FOG_OS_WINDOWS)
-  Set(FOG_CORE_WIN_SOURCES 
+  Set(FOG_CORE_WIN_SOURCES
     Fog/Core/Win/WinCom.cpp
     Fog/Core/Win/WinComStream.cpp
     Fog/Core/Win/WinGdipLibrary.cpp
@@ -637,7 +637,7 @@ EndIf()
 
 # [Fog/Core/Mac]
 If(FOG_OS_MAC)
-  Set(FOG_CORE_MAC_SOURCES 
+  Set(FOG_CORE_MAC_SOURCES
     Fog/Core/Mac/MacUtil.mm
   )
   Set(FOG_CORE_MAC_HEADERS
@@ -797,7 +797,7 @@ Set_Source_Files_Properties(
 )
 
 If(FOG_OPTIMIZE_3DNOW)
-  List(APPEND FOG_G2D_GEOMETRY_SOURCES 
+  List(APPEND FOG_G2D_GEOMETRY_SOURCES
     Fog/G2d/Geometry/Transform_3dNow.cpp
   )
   Set_Source_Files_Properties(
@@ -1013,7 +1013,7 @@ Set(FOG_G2D_RENDER_SOURCES
 )
 
 If(FOG_OPTIMIZE_MMX)
-  List(APPEND FOG_G2D_RENDER_SOURCES 
+  List(APPEND FOG_G2D_RENDER_SOURCES
     Fog/G2d/Render/RenderInit_MMX.cpp
   )
   Set_Source_Files_Properties(
@@ -1023,7 +1023,7 @@ If(FOG_OPTIMIZE_MMX)
 EndIf(FOG_OPTIMIZE_MMX)
 
 If(FOG_OPTIMIZE_3DNOW)
-  List(APPEND FOG_G2D_RENDER_SOURCES 
+  List(APPEND FOG_G2D_RENDER_SOURCES
     Fog/G2d/Render/RenderInit_MMX3dNow.cpp
   )
   Set_Source_Files_Properties(
@@ -1194,7 +1194,7 @@ Set_Source_Files_Properties(
 
 # [Fog/G2d/Mac]
 If(FOG_OS_MAC)
-  Set(FOG_G2D_MAC_SOURCES 
+  Set(FOG_G2D_MAC_SOURCES
     Fog/G2d/Mac/MacUtil.mm
   )
   Set(FOG_G2D_MAC_HEADERS
@@ -1289,11 +1289,11 @@ Set(FOG_GUI_ENGINE_HEADERS
   Fog/Gui/Engine/GuiEngine.h
 )
 
-Set(FOG_GUI_ENGINE_MAC_SOURCES 
+Set(FOG_GUI_ENGINE_MAC_SOURCES
   Fog/Gui/Engine/MacGuiEngine.mm
 )
 
-Set(FOG_GUI_ENGINE_MAC_HEADERS 
+Set(FOG_GUI_ENGINE_MAC_HEADERS
   Fog/Gui/Engine/MacGuiEngine.h
 )
 

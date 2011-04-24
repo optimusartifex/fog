@@ -86,7 +86,7 @@ struct FOG_API ImageCodecProvider
 
   //! @brief Create image decoder / encoder.
   //!
-  //! @param codecType Requested codec type, valid values are only 
+  //! @param codecType Requested codec type, valid values are only
   //!        @c IMAGE_CODEC_ENCODER or @c IMAGE_CODEC_DECODER.
   //! @param device Where to store pointer to the created device.
   virtual err_t createCodec(uint32_t codecType, ImageCodec** codec) const = 0;
@@ -125,7 +125,7 @@ struct FOG_API ImageCodecProvider
   //! @brief Create decoder for a file called @a fileName.
   //!
   //! This method is higher-level. It matches image extension, then tries to find
-  //! suitable decoder device. It opens the file @a fileName and assigns the 
+  //! suitable decoder device. It opens the file @a fileName and assigns the
   //! stream into the created decoder device on success.
   static err_t createDecoderForFile(const String& fileName, ImageDecoder** codec);
 
@@ -145,7 +145,7 @@ protected:
 
   //! @brief Image stream type (see @c IMAGE_STREAM_TYPE).
   uint32_t _streamType;
-  
+
   //! @brief Image provider name (for example "BMP", "PNG", "PNG[GDI+]", ...).
   String _name;
 

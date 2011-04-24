@@ -45,7 +45,7 @@
  *****************************************************************************/
 
 // The GIFLIB distribution is Copyright (c) 1997  Eric S. Raymond
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
@@ -407,7 +407,7 @@ static void FreeMapObject(ColorMapObject * Object)
   }
 }
 
-// Compute the union of two given color maps and return it.  If result can't 
+// Compute the union of two given color maps and return it.  If result can't
 // fit into 256 colors, NULL is returned, the allocated union otherwise.
 // ColorIn1 is copied as is to ColorUnion, while colors from ColorIn2 are
 // copied iff they didn't exist before.  ColorTransIn2 maps the old
@@ -420,7 +420,7 @@ static ColorMapObject *UnionColorMap(
   int i, j, CrntSlot, RoundUpTo, NewBitSize;
   ColorMapObject *ColorUnion;
 
-  /* 
+  /*
    * Allocate table which will hold the result for sure.
    */
   ColorUnion = MakeMapObject(Fog::Math::max(ColorIn1->ColorCount,
@@ -436,7 +436,7 @@ static ColorMapObject *UnionColorMap(
     ColorUnion->Colors[i] = ColorIn1->Colors[i];
   CrntSlot = ColorIn1->ColorCount;
 
-  /* 
+  /*
    * Potentially obnoxious hack:
    *
    * Back CrntSlot down past all contiguous {0, 0, 0} slots at the end
@@ -456,7 +456,7 @@ static ColorMapObject *UnionColorMap(
      * ColorIn1->ColorCount?
      */
     for (j = 0; j < ColorIn1->ColorCount; j++)
-      if (memcmp (&ColorIn1->Colors[j], &ColorIn2->Colors[i], 
+      if (memcmp (&ColorIn1->Colors[j], &ColorIn2->Colors[i],
             sizeof(GifColorType)) == 0)
         break;
 
@@ -482,7 +482,7 @@ static ColorMapObject *UnionColorMap(
   {
     GifColorType *Map = ColorUnion->Colors;
 
-    /* 
+    /*
      * Zero out slots up to next power of 2.
      * We know these slots exist because of the way ColorUnion's
      * start dimension was computed.
@@ -608,7 +608,7 @@ static void FreeLastSavedImage(GifFileType *GifFile)
    */
 }
 
-// Append an image block to the SavedImages array  
+// Append an image block to the SavedImages array
 static SavedImage *MakeSavedImage(GifFileType * GifFile, const SavedImage * CopyFrom)
 {
   SavedImage *sp;
@@ -966,7 +966,7 @@ static int DGifGetImageDesc(GifFileType * GifFile)
     sp->ImageDesc.ColorMap = MakeMapObject(
       GifFile->Image.ColorMap->ColorCount,
       GifFile->Image.ColorMap->Colors);
-    
+
     if (sp->ImageDesc.ColorMap == NULL)
     {
       _GifError = D_GIF_ERR_NOT_ENOUGH_MEM;
@@ -1583,7 +1583,7 @@ static int DGifSlurp(GifFileType * GifFile)
 
         if (sp->RasterBits == NULL) return GIF_ERROR;
         if (DGifGetLine(GifFile, sp->RasterBits, ImageSize) == GIF_ERROR) return (GIF_ERROR);
-        
+
         if (temp_save.ExtensionBlocks)
         {
           sp->ExtensionBlocks = temp_save.ExtensionBlocks;
@@ -1601,7 +1601,7 @@ static int DGifSlurp(GifFileType * GifFile)
 
       case EXTENSION_RECORD_TYPE:
         if (DGifGetExtension(GifFile, &temp_save.Function, &ExtData) == GIF_ERROR) return (GIF_ERROR);
-        
+
         while (ExtData != NULL)
         {
           /* Create an extension block with our data */
@@ -2045,7 +2045,7 @@ static int EGifPutExtensionNext(GifFileType * GifFile, int ExtCode, int ExtLen, 
 /******************************************************************************
  * Put a last extension block (see GIF manual) into gif file.
  *****************************************************************************/
-static int EGifPutExtensionLast(GifFileType * GifFile, int ExtCode, int ExtLen, const void* Extension) 
+static int EGifPutExtensionLast(GifFileType * GifFile, int ExtCode, int ExtLen, const void* Extension)
 {
   uint8_t Buf;
 
@@ -2293,7 +2293,7 @@ static int EGifCompressLine(GifFileType * GifFile, GifPixelType * Line, int Line
   while (i < LineLen)
   {
     Pixel = Line[i++];  /* Get next pixel from stream. */
-    /* Form a new unique key to search hash table for the code combines 
+    /* Form a new unique key to search hash table for the code combines
      * CrntCode as Prefix string with Pixel as postfix char.
      */
     NewKey = (((uint32_t) CrntCode) << 8) + Pixel;
@@ -2702,8 +2702,8 @@ void GifDecoder::reset()
 
 bool GifDecoder::openGif()
 {
-  return 
-    (_context != NULL) || 
+  return
+    (_context != NULL) ||
     (getStream().isOpen() && (_context = DGifOpen(&_stream)) != NULL);
 }
 

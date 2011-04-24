@@ -28,8 +28,8 @@ struct XmlElement;
 //! @brief SVG visitor.
 //!
 //! SVG visitor is interface which can be used to do customized SVG rendering
-//! and hit-testing. If used, it can be used to inform visitor which SVG element 
-//! will be visited (rendered or hit-tested) and possibility to control it 
+//! and hit-testing. If used, it can be used to inform visitor which SVG element
+//! will be visited (rendered or hit-tested) and possibility to control it
 //! (enable / disable).
 struct FOG_API SvgVisitor
 {

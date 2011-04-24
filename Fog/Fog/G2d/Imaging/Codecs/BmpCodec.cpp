@@ -27,7 +27,7 @@
 FOG_IMPLEMENT_OBJECT(Fog::BmpDecoder)
 FOG_IMPLEMENT_OBJECT(Fog::BmpEncoder)
 
-namespace Fog { 
+namespace Fog {
 
 // ============================================================================
 // [Fog::BmpCodecProvider]
@@ -357,8 +357,8 @@ err_t BmpDecoder::readHeader()
     case 16:
     {
       _headerResult = bmpFormat.createArgb(16,
-        FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN 
-          ? IMAGE_FD_NONE 
+        FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
+          ? IMAGE_FD_NONE
           : IMAGE_FD_IS_BYTESWAPPED,
         0, 0x7C00, 0x03E0, 0x001F);
       break;
@@ -367,7 +367,7 @@ err_t BmpDecoder::readHeader()
     // Setup 24-bit RGB.
     case 24:
     {
-      _headerResult = bmpFormat.createArgb(24, 
+      _headerResult = bmpFormat.createArgb(24,
         FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
           ? IMAGE_FD_NONE
           : IMAGE_FD_IS_BYTESWAPPED,
@@ -381,11 +381,11 @@ err_t BmpDecoder::readHeader()
       if (bmpDataHeader.headerSize > BMP_HEADER_SIZE_WIN_V3)
       {
         _headerResult = bmpFormat.createArgb(32,
-          FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN 
+          FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
             ? IMAGE_FD_IS_PREMULTIPLIED
             : IMAGE_FD_IS_PREMULTIPLIED | IMAGE_FD_IS_BYTESWAPPED,
           (bmpCompression != BMP_BI_BITFIELDS) ? bmpDataHeader.winv4.aMask : 0,
-          bmpDataHeader.winv4.rMask, 
+          bmpDataHeader.winv4.rMask,
           bmpDataHeader.winv4.gMask,
           bmpDataHeader.winv4.bMask);
       }
@@ -402,12 +402,12 @@ err_t BmpDecoder::readHeader()
   }
 
   // Load bitfields.
-  if (bmpDataHeader.headerSize == BMP_HEADER_SIZE_WIN_V3 && 
-      bmpCompression == BMP_BI_BITFIELDS && 
+  if (bmpDataHeader.headerSize == BMP_HEADER_SIZE_WIN_V3 &&
+      bmpCompression == BMP_BI_BITFIELDS &&
       (_depth == 16 || _depth == 32))
   {
     uint32_t bitFieldMask[3];
-    if (_stream.read(bitFieldMask, 12) != 12) 
+    if (_stream.read(bitFieldMask, 12) != 12)
       return (_headerResult = ERR_IMAGE_TRUNCATED);
 
     bmpSkipBytes = (bmpSkipBytes < 12) ? 0 : bmpSkipBytes - 12;
@@ -415,7 +415,7 @@ err_t BmpDecoder::readHeader()
     bitFieldMask[1] = Memory::bswap32le(bitFieldMask[1]);
     bitFieldMask[2] = Memory::bswap32le(bitFieldMask[2]);
 
-    // The bits in the pixel are ordered from most significant to least 
+    // The bits in the pixel are ordered from most significant to least
     // significant bits. The ImageConverter expects the opposite ordering.
     if (_depth == 16)
     {
@@ -686,7 +686,7 @@ _Rle8Start:
         i = Math::min<uint32_t>(b0, (uint32_t)_size.w - x);
         while (i--) *pixelsCur++ = b1;
       }
-      else 
+      else
       {
         // b1 = Chunk type.
         switch (b1)
@@ -696,7 +696,7 @@ _Rle8Start:
           case BMP_RLE_MOVE:
             if (rleCur + 2 > rleEnd) goto _Truncated;
             x += *rleCur++;
-            y += *rleCur++; 
+            y += *rleCur++;
             goto _Rle8Start;
           // FILL BITS (b1 == length).
           default:
@@ -896,7 +896,7 @@ err_t BmpEncoder::writeImage(const Image& image)
       bmpDataHeader.winv4.aMask = 0xFF000000;
 
       err = converter.create(
-        ImageFormatDescription::fromArgb(32, 
+        ImageFormatDescription::fromArgb(32,
           FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
             ? IMAGE_FD_IS_PREMULTIPLIED
             : IMAGE_FD_IS_PREMULTIPLIED | IMAGE_FD_IS_BYTESWAPPED,

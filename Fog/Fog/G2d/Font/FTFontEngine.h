@@ -74,8 +74,8 @@ struct FOG_API FTFontEngine : public FontEngine
   virtual FontFace* createDefaultFace();
 
   virtual FontFace* createFace(
-    const String& family, float size, 
-    const FontOptions& options, 
+    const String& family, float size,
+    const FontOptions& options,
     const TransformF& matrix);
 
   virtual List<String> getDefaultFontDirectories();

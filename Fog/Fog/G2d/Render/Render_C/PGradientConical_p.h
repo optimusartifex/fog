@@ -70,7 +70,7 @@ struct FOG_NO_EXPORT PGradientConical
 
     double angle = Math::repeat(gradient._pts[1].x * (1.0 / (2.0 * MATH_PI)), 1.0);
 
-    // There is no such concept like conical gradient using perspective 
+    // There is no such concept like conical gradient using perspective
     // transform, because the function atan2(y/w, x/w) can be simplified to
     // atan2(y, x), later to atan(y/x). This allows to completely remove the
     // projection part of the transform.

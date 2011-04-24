@@ -96,7 +96,7 @@ struct FOG_NO_EXPORT Lock
   // --------------------------------------------------------------------------
 
   FOG_INLINE void lock()
-  { 
+  {
 #if defined(FOG_OS_WINDOWS)
     EnterCriticalSection(&_handle);
 #endif // FOG_OS_WINDOWS
@@ -144,9 +144,9 @@ private:
 
 //! @brief Auto @c Lock locker.
 //!
-//! Locker is simple template class that locks a critical section or mutex 
-//! and unlocks it when instance of class is destroyed. It's designed to 
-//! simplify code where we need to lock mutex on begin of function and 
+//! Locker is simple template class that locks a critical section or mutex
+//! and unlocks it when instance of class is destroyed. It's designed to
+//! simplify code where we need to lock mutex on begin of function and
 //! unlock it on end. So, if we create a static instance of @c Fog::AutoLock,
 //! C++ compiler will call destructor (unlock) for us at end of scope.
 //!

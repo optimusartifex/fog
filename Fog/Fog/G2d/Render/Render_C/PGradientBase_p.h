@@ -245,7 +245,7 @@ struct FOG_NO_EXPORT PGradientBase
     }
     else if (len == 3)
     {
-      return (stops.getAt(0).getOffset() == 0.0f && 
+      return (stops.getAt(0).getOffset() == 0.0f &&
               stops.getAt(1).getOffset() == 0.5f &&
               stops.getAt(2).getOffset() == 1.0f) ? 256 : 512;
     }

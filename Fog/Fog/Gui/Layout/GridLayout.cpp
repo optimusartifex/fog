@@ -198,7 +198,7 @@ void GridLayout::onRemove(LayoutItem* item)
         iter = prop->_rowspannext;
       }
     }
-  }    
+  }
 }
 
 void GridLayout::addItem(LayoutItem* item, int row, int column, int rowSpan, int columnSpan, uint32_t alignment)
@@ -324,7 +324,7 @@ LayoutItem* GridLayout::takeCellItem(int row, int column)
 
   Row* r = _rows.at(row);
 
-  if ((uint)column >= r->_cols.getLength()) 
+  if ((uint)column >= r->_cols.getLength())
     return 0;
 
   return r->_cols.take(column);
@@ -339,7 +339,7 @@ LayoutItem* GridLayout::getCellItem(int row, int column) const
 
   Row* r = _rows.at(row);
 
-  if ((uint)column >= r->_cols.getLength()) 
+  if ((uint)column >= r->_cols.getLength())
     return 0;
 
   return r->_cols.at(column);
@@ -456,7 +456,7 @@ void GridLayout::calculateRowHeights(int& minHeight, int& hintHeight)
   _cacheHintHeight = 0;
 
   _rowflexibles = 0;
-  
+
   for (int crow = 0; crow < (sysint_t)_rows.getLength(); ++crow)
   {
      Row* row = _rows.at(crow);
@@ -478,13 +478,13 @@ void GridLayout::calculateRowHeights(int& minHeight, int& hintHeight)
 }
 
 void GridLayout::calculateColumnFlexOffsets(int availWidth)
-{    
+{
   int hintwidth = getLayoutSizeHint().getWidth();
   int diff = availWidth - hintwidth;
 
   if (diff == 0)
     return;
-  
+
   if (_colflexibles)
     LayoutUtil::calculateFlexOffsets(_colflexibles, availWidth, hintwidth);
 }
@@ -548,7 +548,7 @@ int GridLayout::calculateSpanHeight(int crow, LayoutItem* item) const
   {
     Row* row = _rows.at(crow+i);
     // Update if flex was calculated for this row.
-    height += updateRowFlexHeight(row);      
+    height += updateRowFlexHeight(row);
   }
 
   return height;
@@ -577,7 +577,7 @@ void GridLayout::setLayoutGeometry(const RectI& rect)
     Column* column = _cols.at(col);
     int curtop = top;
 
-    //int x = updateColumnFlexWidth(column); 
+    //int x = updateColumnFlexWidth(column);
     int width = updateColumnFlexWidth(column);
 
     for (int crow=0; crow<maxRowIndex; ++crow)
@@ -588,7 +588,7 @@ void GridLayout::setLayoutGeometry(const RectI& rect)
       // LAYOUT TODO:
       // int y = updateRowFlexHeight(row);
       int height = updateRowFlexHeight(row);
-      
+
       if (!item)
       {
         // Ignore empty cells.
@@ -599,7 +599,7 @@ void GridLayout::setLayoutGeometry(const RectI& rect)
       LayoutProperties* widgetProps = static_cast<LayoutProperties*>(item->_layoutdata);
       if (!isItemOrigin(item, row, column))
       {
-        // Ignore cells, which have cell spanning but are not the origin of 
+        // Ignore cells, which have cell spanning but are not the origin of
         // the item.
         curtop += height + _vspacing;
         continue;

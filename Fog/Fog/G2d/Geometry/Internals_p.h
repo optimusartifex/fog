@@ -35,7 +35,7 @@ namespace Fog {
     \
     _BX_ = _Number_(2.0) * (_Pts_[1].x - _Pts_[0].x); \
     _BY_ = _Number_(2.0) * (_Pts_[1].y - _Pts_[0].y); \
-  FOG_MACRO_END 
+  FOG_MACRO_END
 
 // Calculate the quadratic bezier curve coefficients at (t).
 //
@@ -83,7 +83,7 @@ namespace Fog {
     \
     _CX_ = _Number_(3.0) * (_Pts_[1].x - _Pts_[0].x); \
     _CY_ = _Number_(3.0) * (_Pts_[1].y - _Pts_[0].y); \
-  FOG_MACRO_END 
+  FOG_MACRO_END
 
 // Calculate the cubic bezier curve coefficients at (t).
 //

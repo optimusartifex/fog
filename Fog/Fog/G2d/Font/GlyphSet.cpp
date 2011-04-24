@@ -110,7 +110,7 @@ err_t GlyphSet::grow(sysuint_t by)
 
   if (_d->refCount.get() > 1)
   {
-    sysuint_t optimalCapacity = 
+    sysuint_t optimalCapacity =
       Util::getGrowCapacity(sizeof(Data), sizeof(Glyph), before, after);
 
     Data* newd = Data::alloc(optimalCapacity);
@@ -126,7 +126,7 @@ err_t GlyphSet::grow(sysuint_t by)
   }
   else if (_d->capacity < after)
   {
-    sysuint_t optimalCapacity = 
+    sysuint_t optimalCapacity =
       Util::getGrowCapacity(sizeof(Data), sizeof(Glyph), before, after);
 
     Data* newd = Data::realloc(_d, optimalCapacity);

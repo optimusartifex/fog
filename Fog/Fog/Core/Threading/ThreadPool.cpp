@@ -115,7 +115,7 @@ err_t ThreadPool::getThreads(Thread** threads, sysuint_t count, int workId)
       {
         PoolEntry* cur = _unusedThreads;
         PoolEntry* prev = NULL;
-      
+
         while (cur)
         {
           if (cur->workId == workId)
@@ -132,7 +132,7 @@ err_t ThreadPool::getThreads(Thread** threads, sysuint_t count, int workId)
           cur = cur->next;
         }
       }
-    
+
       if (pe == NULL)
       {
         pe = _unusedThreads;

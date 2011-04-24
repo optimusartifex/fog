@@ -16,7 +16,7 @@
 
 namespace Fog {
 
-//! @brief A container for a list of listeners. 
+//! @brief A container for a list of listeners.
 //!
 //! Unlike a normal STL vector or list, this container can be modified during
 //! iteration without invalidating the iterator. So, it safely handles the

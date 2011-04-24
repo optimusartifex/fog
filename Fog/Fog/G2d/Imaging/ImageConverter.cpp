@@ -132,9 +132,9 @@ err_t ImageConverter::create(
     uint32_t depth = df.getDepth();
     uint32_t cantDither = 0;
 
-    // Turn off dithering if the destination format has greater or equal bits 
+    // Turn off dithering if the destination format has greater or equal bits
     // per component.
-    if ((df.getASize() == 0) || 
+    if ((df.getASize() == 0) ||
         (df.getASize() >= sf.getASize())) cantDither++;
     if ((df.getRSize() == 0) ||
         (df.getRSize() >= sf.getRSize() &&

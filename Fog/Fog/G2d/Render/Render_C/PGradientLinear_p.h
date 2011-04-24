@@ -60,7 +60,7 @@ struct FOG_NO_EXPORT PGradientLinear
     double pd_dist = Math::sqrt(pd_x2y2);
 
     // If there is no such distance between the start and end point then the
-    // color of the last color-stop is used. This is used for compatibility 
+    // color of the last color-stop is used. This is used for compatibility
     // with SVG.
     if (pd_dist < MATH_EPSILON_F)
     {
@@ -408,7 +408,7 @@ _End:
         {
           do {
             ((uint32_t*)dst)[0] = table[(uint)(pos >> 16)];
-            if ((pos += xx) >= len) { 
+            if ((pos += xx) >= len) {
               pos = len2 - pos;
               xx = -xx;
               goto _Backward;

@@ -40,7 +40,7 @@ struct FOG_API RegionData
   static RegionData* adopt(void* address, sysuint_t capacity);
   static RegionData* adopt(void* address, sysuint_t capacity, const BoxI& r);
   static RegionData* adopt(void* address, sysuint_t capacity, const BoxI* extents, const BoxI* rects, sysuint_t count);
-  
+
   static RegionData* create(sysuint_t capacity);
   static RegionData* create(sysuint_t capacity, const BoxI* extents, const BoxI* rects, sysuint_t count);
 
@@ -54,7 +54,7 @@ struct FOG_API RegionData
   //! @brief String data flags.
   enum Flags
   {
-    //! @brief String data are created on the heap. 
+    //! @brief String data are created on the heap.
     //!
     //! Object is created by function like @c Fog::Memory::alloc() or by
     //! @c new operator. It this flag is not set, you can't delete object from
@@ -63,8 +63,8 @@ struct FOG_API RegionData
 
     //! @brief String data are shareable.
     //!
-    //! Object can be directly referenced by internal method @c ref(). 
-    //! Sharable data are usually created on the heap and together 
+    //! Object can be directly referenced by internal method @c ref().
+    //! Sharable data are usually created on the heap and together
     //! with this flag is set also @c IsDynamic, but it isn't prerequisite.
     IsSharable = (1U << 1),
 
@@ -163,7 +163,7 @@ struct FOG_API Region
   FOG_INLINE BoxI* getDataX()
   {
     FOG_ASSERT_X(isDetached(), "Fog::Region::getDataX() - Called on non-detached object");
-    return _d->rects; 
+    return _d->rects;
   }
 
   // --------------------------------------------------------------------------
@@ -217,7 +217,7 @@ struct FOG_API Region
   err_t set(const Region& r);
   err_t set(const RectI& r);
   err_t set(const BoxI& r);
-  
+
   //! @brief Creates a deep copy instead of reference.
   //!
   //! This function is used internally to optimize computing where we know
@@ -348,7 +348,7 @@ struct TemporaryRegion : public Region
     Region(RegionData::adopt((void*)&_storage, N, &other._d->extents, other._d->rects, other._d->length))
   {
   }
-  
+
   FOG_INLINE TemporaryRegion(const Region& other) :
     Region(RegionData::adopt((void*)&_storage, N, &other._d->extents, other._d->rects, other._d->length))
   {

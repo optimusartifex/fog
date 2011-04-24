@@ -20,7 +20,7 @@ namespace Fog {
 // [Fog::Composite]
 // ============================================================================
 
-Composite::Composite(uint32_t createFlags) : 
+Composite::Composite(uint32_t createFlags) :
   Widget(createFlags)
 {
 }

@@ -707,7 +707,7 @@ err_t ListPrivate_::c_reserveoptimal(ListUntyped* self, const SequenceInfoVTable
 
   if (leftCapacity < left || rightCapacity < right)
   {
-    // Data will be reallocated and we want to create optimal startIndex 
+    // Data will be reallocated and we want to create optimal startIndex
     // and endIndex variables.
     //
     // There are some situations that Lists are used like Vectors only
@@ -743,10 +743,10 @@ err_t ListPrivate_::c_reserveoptimal(ListUntyped* self, const SequenceInfoVTable
       if (length >= after) return ERR_RT_OUT_OF_MEMORY;
     }
     */
-    
+
     sysuint_t optimal = Util::getGrowCapacity(sizeof(ListData), typeSize, d->length, after);
     sysuint_t distribute = optimal - length - left - right;
-    
+
     if (oldLeft > oldRight)
       left += distribute;
     else

@@ -57,7 +57,7 @@ struct AtomicInt32
     );
     return (bool)result;
   }
-  
+
   static FOG_INLINE int32_t get(const int32_t* atomic)
   {
     int32_t result;
@@ -79,7 +79,7 @@ struct AtomicInt32
         : "m" (*atomic)
     );
   }
-  
+
   static FOG_INLINE void dec(int32_t* atomic)
   {
     __asm__ __volatile__
@@ -89,7 +89,7 @@ struct AtomicInt32
         : "m" (*atomic)
     );
   }
-  
+
   static FOG_INLINE void add(int32_t* atomic, int32_t value)
   {
     __asm__ __volatile__
@@ -99,7 +99,7 @@ struct AtomicInt32
         : "ir" (value), "m" (*atomic)
     );
   }
-  
+
   static FOG_INLINE void sub(int32_t* atomic, int32_t value)
   {
     __asm__ __volatile__
@@ -109,7 +109,7 @@ struct AtomicInt32
         : "ir" (value), "m" (*atomic)
     );
   }
-  
+
   static FOG_INLINE int32_t addXchg(int32_t* atomic, int32_t value)
   {
     int32_t result;
@@ -121,7 +121,7 @@ struct AtomicInt32
     );
     return result;
   }
-  
+
   static FOG_INLINE int32_t subXchg(int32_t* atomic, int32_t value)
   {
     int32_t result;
@@ -133,11 +133,11 @@ struct AtomicInt32
     );
     return result;
   }
-  
+
   static FOG_INLINE bool deref(int32_t* atomic)
   {
     char result;
-    
+
     __asm__ __volatile__
     (
       "lock decl %0\n"
@@ -173,7 +173,7 @@ struct AtomicInt64
         : "ir" (value), "m" (*atomic)
     );
   }
-  
+
   static FOG_INLINE int64_t setXchg(int64_t* atomic, int64_t value)
   {
     __asm__ __volatile__
@@ -185,7 +185,7 @@ struct AtomicInt64
     );
     return value;
   }
-  
+
   static FOG_INLINE bool cmpXchg(int64_t* atomic, int64_t compar, int64_t value)
   {
     unsigned char result;
@@ -199,7 +199,7 @@ struct AtomicInt64
     );
     return (bool)result;
   }
-  
+
   static FOG_INLINE int64_t get(const int64_t* atomic)
   {
     int64_t result;
@@ -211,7 +211,7 @@ struct AtomicInt64
     );
     return result;
   }
-  
+
   static FOG_INLINE void inc(int64_t* atomic)
   {
     __asm__ __volatile__
@@ -221,7 +221,7 @@ struct AtomicInt64
         : "m" (*atomic)
     );
   }
-  
+
   static FOG_INLINE void dec(int64_t* atomic)
   {
     __asm__ __volatile__
@@ -231,7 +231,7 @@ struct AtomicInt64
         : "m" (*atomic)
     );
   }
-  
+
   static FOG_INLINE void add(int64_t* atomic, int64_t value)
   {
     __asm__ __volatile__
@@ -241,7 +241,7 @@ struct AtomicInt64
         : "ir" (value), "m" (*atomic)
     );
   }
-  
+
   static FOG_INLINE void sub(int64_t* atomic, int64_t value)
   {
     __asm__ __volatile__
@@ -251,7 +251,7 @@ struct AtomicInt64
         : "ir" (value), "m" (*atomic)
     );
   }
-  
+
   static FOG_INLINE int64_t addXchg(int64_t* atomic, int64_t value)
   {
     int64_t result;
@@ -263,7 +263,7 @@ struct AtomicInt64
     );
     return result;
   }
-  
+
   static FOG_INLINE int64_t subXchg(int64_t* atomic, int64_t value)
   {
     int64_t result;
@@ -275,11 +275,11 @@ struct AtomicInt64
     );
     return result;
   }
-  
+
   static FOG_INLINE bool deref(int64_t* atomic)
   {
     char result;
-    
+
     __asm__ __volatile__
     (
       "lock decq %0\n"

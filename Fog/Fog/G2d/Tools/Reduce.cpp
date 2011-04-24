@@ -199,7 +199,7 @@ bool Reduce::analyze(const Image& image, bool discardAlphaChannel)
         for (uint32_t i = 0; i < _count; i++) pal[i] = srcPal[_entities[i].key];
         break;
       }
-      
+
       default:
         goto _Fail;
     }

@@ -27,7 +27,7 @@
 #if defined(FOG_HAVE_STDARG_H)
 # include <stdarg.h>
 #endif // FOG_HAVE_STDARG_H
- 
+
 #if defined(FOG_HARDCODE_MMX)
 # include <Fog/Core/Cpu/Intrin_MMX.h>
 #endif // FOG_HARDCODE_MMX

@@ -346,7 +346,7 @@ _MoveTo:
     else if (PathCmd::isQuadOrCubicTo(cmd))
     {
       rasterizer->_temporaryPathF.clear();
-      if (PathCmd::isQuadTo(cmd)) 
+      if (PathCmd::isQuadTo(cmd))
       {
         FOG_ASSERT(commands + 2 <= end);
 
@@ -386,7 +386,7 @@ _PolyLine:
 
         x0 = x1;
         y0 = y1;
-          
+
         polyPoints++;
       } while (--polyLength);
 
@@ -505,7 +505,7 @@ _MoveTo:
     else if (PathCmd::isQuadOrCubicTo(cmd))
     {
       rasterizer->_temporaryPathD.clear();
-      if (PathCmd::isQuadTo(cmd)) 
+      if (PathCmd::isQuadTo(cmd))
       {
         FOG_ASSERT(commands + 2 <= end);
         err_t err = reinterpret_cast<const QuadCurveD*>(vertices - 1)->flatten(rasterizer->_temporaryPathD, PATH_CMD_LINE_TO, flatness);
@@ -544,7 +544,7 @@ _PolyLine:
 
         x0 = x1;
         y0 = y1;
-          
+
         polyPoints++;
       } while (--polyLength);
 
@@ -602,7 +602,7 @@ void Rasterizer8::addRect(const RectD& rect)
 
 void Rasterizer8::addBox(const BoxF& box)
 {
-  // Initial addBox(). Try to add rectangle to the data section and to 
+  // Initial addBox(). Try to add rectangle to the data section and to
   // initialize shape to the RASTERIZER_SHAPE_RECT.
   if (_shape == SHAPE_TYPE_NONE)
   {
@@ -638,7 +638,7 @@ void Rasterizer8::addBox(const BoxF& box)
 
 void Rasterizer8::addBox(const BoxD& box)
 {
-  // Initial addBox(). Try to add rectangle to the data section and to 
+  // Initial addBox(). Try to add rectangle to the data section and to
   // initialize shape to the RASTERIZER_SHAPE_RECT.
   if (_shape == SHAPE_TYPE_NONE)
   {
@@ -1241,7 +1241,7 @@ template<typename CELL>
 static FOG_INLINE void qsortCells(CELL* start, uint32_t num)
 {
   CELL*  stack[80];
-  CELL** top; 
+  CELL** top;
   CELL*  limit;
   CELL*  base;
 
@@ -1923,7 +1923,7 @@ _Continue:
         case SPAN_AX_GLYPH:
         {
           Face::p32 m;
-          
+
           Face::p32Load1b(m, clipMask + x);
           Face::p32MulDiv256SBW(m, m, alpha);
 
@@ -1973,7 +1973,7 @@ _Continue:
         case SPAN_AX_EXTRA:
         {
           Face::p32 m;
-          
+
           Face::p32Load2aNative(m, clipMask + x * 2);
           Face::p32MulDiv256SBW(m, m, alpha);
 

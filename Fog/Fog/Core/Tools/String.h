@@ -227,7 +227,7 @@ struct FOG_API String
 
   FOG_INLINE void finishDataX(Char* end)
   {
-    FOG_ASSERT_X(isDetached(), 
+    FOG_ASSERT_X(isDetached(),
       "Fog::ByteArray::finishDataX() - Called on non-detached object.");
     FOG_ASSERT_X(end <= _d->data + _d->capacity,
       "Fog::ByteArray::finishDataX() - Buffer overflow.");

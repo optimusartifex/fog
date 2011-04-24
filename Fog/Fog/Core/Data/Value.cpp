@@ -84,7 +84,7 @@ struct FOG_NO_EXPORT NullValueData : public ValueData
   virtual err_t setValue(void* val);
 };
 
-NullValueData::NullValueData() : 
+NullValueData::NullValueData() :
   ValueData(VALUE_TYPE_NULL)
 {
 }
@@ -141,7 +141,7 @@ struct FOG_NO_EXPORT IntegerValueData : public ValueData
   virtual err_t setValue(void* val);
 };
 
-IntegerValueData::IntegerValueData(int64_t content) : 
+IntegerValueData::IntegerValueData(int64_t content) :
   ValueData(VALUE_TYPE_INTEGER)
 {
   i64 = content;
@@ -213,7 +213,7 @@ struct FOG_NO_EXPORT DoubleValueData : public ValueData
   virtual err_t setValue(void* val);
 };
 
-DoubleValueData::DoubleValueData(double content) : 
+DoubleValueData::DoubleValueData(double content) :
   ValueData(VALUE_TYPE_DOUBLE)
 {
   d = content;
@@ -301,7 +301,7 @@ struct FOG_NO_EXPORT StringValueData : public ValueData
   FOG_INLINE String* str() const { return (String*)raw; }
 };
 
-StringValueData::StringValueData(const String& content) : 
+StringValueData::StringValueData(const String& content) :
   ValueData(VALUE_TYPE_STRING)
 {
   fog_new_p(str()) String(content);
@@ -309,7 +309,7 @@ StringValueData::StringValueData(const String& content) :
 
 StringValueData::~StringValueData()
 {
-  str()->~String();  
+  str()->~String();
 }
 
 err_t StringValueData::clone(void* dst) const
@@ -473,7 +473,7 @@ err_t Value::setInt64(int64_t val)
     void* p = ValueData::allogetData();
     if (FOG_IS_NULL(p)) return ERR_RT_OUT_OF_MEMORY;
 
-    atomicPtrXchg(&_d, 
+    atomicPtrXchg(&_d,
       reinterpret_cast<ValueData*>(fog_new_p(p) IntegerValueData(val)))->deref();
   }
   return ERR_OK;

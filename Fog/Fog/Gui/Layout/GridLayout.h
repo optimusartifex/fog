@@ -32,7 +32,7 @@ struct FOG_API GridLayout : public Layout
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  GridLayout(Widget* parent=0, int row=-1, int colums=-1);    
+  GridLayout(Widget* parent=0, int row=-1, int colums=-1);
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -87,7 +87,7 @@ struct FOG_API GridLayout : public Layout
     }
 
     void calculateWidth();
- 
+
     void initFlex(Column* flexibles)
     {
       LayoutProperties* widgetProps = static_cast<LayoutProperties*>(_layoutdata);

@@ -100,8 +100,8 @@ struct FOG_NO_EXPORT RenderConverterMulti
   //! @brief How many pixels in chunk to process.
   //!
   //! @note This is very important, becuase the multi-pass converter does not
-  //! know about the middle pixel format. It has @c RENDER_CONVERTER_BUFFER_SIZE 
-  //! bytes reserved on the stack for conversion and the 'step' * bytesPerPixel 
+  //! know about the middle pixel format. It has @c RENDER_CONVERTER_BUFFER_SIZE
+  //! bytes reserved on the stack for conversion and the 'step' * bytesPerPixel
   //! must fit into that buffer. This member should prevent calculating the step
   //! again and again by the multi-pass blitter.
   int step;
@@ -177,9 +177,9 @@ struct FOG_NO_EXPORT RenderPatternContext
   }
 
   FOG_INLINE void _initFuncs(
-    RenderPatternPrepareFn prepare, 
-    RenderPatternFetchFn fetch, 
-    RenderPatternSkipFn skip, 
+    RenderPatternPrepareFn prepare,
+    RenderPatternFetchFn fetch,
+    RenderPatternSkipFn skip,
     RenderPatternDestroyFn destroy)
   {
     _prepare = prepare;
@@ -381,7 +381,7 @@ struct FOG_NO_EXPORT RenderPatternContext
       double xx, xy;
       double yx, yy;
       double tx, ty;
-      
+
       double r2mfxfx;
       double r2mfyfy;
       double _2_fxfy;

@@ -56,7 +56,7 @@ struct FOG_NO_EXPORT FontOptions
     _created();
     reset();
   }
-  
+
   FOG_INLINE FontOptions(
     uint8_t weight,
     uint8_t style,
@@ -72,7 +72,7 @@ struct FOG_NO_EXPORT FontOptions
     _kerning = kerning;
     _hinting = hinting;
   }
-  
+
   FOG_INLINE FontOptions(const FontOptions& other)
   {
     _created();
@@ -88,11 +88,11 @@ struct FOG_NO_EXPORT FontOptions
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE uint32_t getWeight() const { return _weight; } 
-  FOG_INLINE uint32_t getStyle() const { return _style; } 
-  FOG_INLINE uint32_t getDecoration() const { return _decoration; } 
-  FOG_INLINE uint32_t getKerning() const { return _kerning; } 
-  FOG_INLINE uint32_t getHinting() const { return _hinting; } 
+  FOG_INLINE uint32_t getWeight() const { return _weight; }
+  FOG_INLINE uint32_t getStyle() const { return _style; }
+  FOG_INLINE uint32_t getDecoration() const { return _decoration; }
+  FOG_INLINE uint32_t getKerning() const { return _kerning; }
+  FOG_INLINE uint32_t getHinting() const { return _hinting; }
 
   FOG_INLINE void setWeight(uint32_t weight) { _weight = (uint8_t)weight; }
   FOG_INLINE void setStyle(uint32_t style) { _style = (uint8_t)style; }

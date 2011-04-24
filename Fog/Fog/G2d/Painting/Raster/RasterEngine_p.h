@@ -43,7 +43,7 @@ namespace Fog {
 
 //! @internal
 //!
-//! @brief @c RasterPainterEngine VTable struct. 
+//! @brief @c RasterPainterEngine VTable struct.
 //!
 //! Currently there are no more members, but in future there could be.
 struct FOG_NO_EXPORT RasterPainterVTable : public PainterVTable {};
@@ -147,7 +147,7 @@ struct FOG_NO_EXPORT RasterPainterEngine : public PainterEngine
 
   //! @brief 'Saved-State' flags.
   //!
-  //! Which states was saved to the last @c RasterState instance. If there is 
+  //! Which states was saved to the last @c RasterState instance. If there is
   //! no such instance (the initial state) all bits are set to logical ones.
   uint8_t savedStateFlags;
 
@@ -190,8 +190,8 @@ struct FOG_NO_EXPORT RasterPainterEngine : public PainterEngine
   //! @brief The core translation point in pixels (negated coreOrigin).
   PointI coreTranslationI;
 
-  //! @brief The final translation point in pixels, available if the core 
-  //! transformation matrix is @c TRANSFORM_TYPE_IDENTITY or 
+  //! @brief The final translation point in pixels, available if the core
+  //! transformation matrix is @c TRANSFORM_TYPE_IDENTITY or
   //! @c TRANSFORM_TYPE_TRANSLATION and the values of the final transformation
   //! matrix are integrals.
   struct

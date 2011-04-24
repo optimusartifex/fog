@@ -78,7 +78,7 @@ static SizeI calculateMaximumSizeHelper(const SizeI& sizeHint, const SizeI& minS
 // [Fog::LayoutItem]
 // ============================================================================
 
-LayoutItem::LayoutItem(uint32_t alignment) : 
+LayoutItem::LayoutItem(uint32_t alignment) :
   _layoutdata(0),
   _contentmargin(0),
   _withinLayout(0),
@@ -88,7 +88,7 @@ LayoutItem::LayoutItem(uint32_t alignment) :
 {
 }
 
-LayoutItem::~LayoutItem() 
+LayoutItem::~LayoutItem()
 {
 }
 
@@ -204,7 +204,7 @@ const LayoutHint& LayoutItem::getLayoutHint() const
   return _cache;
 }
 
-SizeI LayoutItem::calculateMaximumSize() const 
+SizeI LayoutItem::calculateMaximumSize() const
 {
   FOG_ASSERT(this->isWidget());
   const Widget *w = (Widget *)this;

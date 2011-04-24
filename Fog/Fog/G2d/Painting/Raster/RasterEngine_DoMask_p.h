@@ -315,7 +315,7 @@ void RasterPainterEngine::CTX_SYMBOL(_doMaskBoxes)(
             Span8 baseSpan;
             Span8* curOutSpan = ctx->getClipSpan(y0);
 
-            // If span is not null and it's owned then we need to free it. 
+            // If span is not null and it's owned then we need to free it.
             if (curOutSpan != NULL && RASTER_CLIP_SPAN_IS_OWNED(curOutSpan))
             {
               ctx->freeChainedSpans(curOutSpan);
@@ -429,7 +429,7 @@ intersectOwnedAgain:
                 // Process all spans that fits into the current box (curInBox).
                 if (curInSpan->getX1() <= maxX)
                 {
-                  // If the curInSpan is CMask then we can reuse it. We can 
+                  // If the curInSpan is CMask then we can reuse it. We can
                   // also reuse overlapped spans.
                   if (curInSpan->isConst() || curInSpan->getX0() >= minX)
                   {
@@ -456,7 +456,7 @@ intersectOwnedAgain:
                     NEXT_CUR_SPAN_AND_FREE_VSPAN(intersectDone)
                   }
 
-                  // Merge each next span. We are sure here that each span in 
+                  // Merge each next span. We are sure here that each span in
                   // the loop is overlapped (so we don't need to modify it).
                   curOutSpan->setNext(curInSpan);
                   while (curInSpan->getX1() <= maxX)
@@ -471,7 +471,7 @@ intersectOwnedAgain:
 
                 // We have two choices here:
                 //
-                // 1. Next box not overlaps with current span or it is the last 
+                // 1. Next box not overlaps with current span or it is the last
                 //    one (the easiest case).
                 if (curInBox + 1 == endInBand || curInBox[1].x0 > curInSpan->getX1())
                 {
@@ -484,7 +484,7 @@ intersectOwnedAgain:
                     goto intersectOwnedRepeatBox;
                   }
 
-                  // If the curInSpan is CMask then we can reuse it. We can 
+                  // If the curInSpan is CMask then we can reuse it. We can
                   // also reuse overlapped spans.
                   if (curInSpan->isConst() || curInSpan->getX0() >= minX)
                   {
@@ -506,7 +506,7 @@ intersectOwnedAgain:
                   else if (curInSpan->getX0() == minX)
                   {
                     // Hacky, we will adjust the size of span, because we don't
-                    // need to modify mask pointer. So the span type remains 
+                    // need to modify mask pointer. So the span type remains
                     // (it's EmbeddedVSpan), but the length (x1) will be decreased.
                     ADD_CUR_SPAN()
                     curOutSpan->setX1(maxX);

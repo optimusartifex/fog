@@ -22,7 +22,7 @@ namespace Fog {
 
 sysuint_t Util::getGrowCapacity(sysuint_t headerSize, sysuint_t elementSize, sysuint_t before, sysuint_t after)
 {
-  // Threshold for excessive growing. If size of data in memory is larger 
+  // Threshold for excessive growing. If size of data in memory is larger
   // than the threshold, grow will be constant instead of excessive.
   const sysuint_t minThreshold = 128;
   const sysuint_t maxThreshold = 1024 * 1024 * 8;

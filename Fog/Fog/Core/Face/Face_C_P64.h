@@ -90,7 +90,7 @@ static FOG_INLINE void p64Load6aNative(p64& dst0, const void* srcp)
 {
   const uint8_t* src8 = reinterpret_cast<const uint8_t*>(srcp);
 
-  dst0 = _FOG_FACE_COMBINE_2( (uint64_t)( ((const uint32_t*)(src8 + 0))[0] ), 
+  dst0 = _FOG_FACE_COMBINE_2( (uint64_t)( ((const uint32_t*)(src8 + 0))[0] ),
                               (uint64_t)( ((const uint16_t*)(src8 + 4))[0] ) << 32);
 }
 
@@ -98,7 +98,7 @@ static FOG_INLINE void p64Load6uNative(p64& dst0, const void* srcp)
 {
   const uint8_t* src8 = reinterpret_cast<const uint8_t*>(srcp);
 
-  dst0 = _FOG_FACE_COMBINE_2( (uint64_t)( ((const uint32_t*)(src8 + 0))[0] ), 
+  dst0 = _FOG_FACE_COMBINE_2( (uint64_t)( ((const uint32_t*)(src8 + 0))[0] ),
                               (uint64_t)( ((const uint16_t*)(src8 + 4))[0] ) << 32);
 }
 
@@ -106,7 +106,7 @@ static FOG_INLINE void p64Load6aSwap(p64& dst0, const void* srcp)
 {
   const uint8_t* src8 = reinterpret_cast<const uint8_t*>(srcp);
 
-  dst0 = _FOG_FACE_COMBINE_2( (uint64_t)( ((const uint32_t*)(src8 + 0))[0] ), 
+  dst0 = _FOG_FACE_COMBINE_2( (uint64_t)( ((const uint32_t*)(src8 + 0))[0] ),
                               (uint64_t)( ((const uint16_t*)(src8 + 4))[0] ) << 32);
   dst0 = Memory::bswap64(dst0) >> 16;
 }
@@ -115,7 +115,7 @@ static FOG_INLINE void p64Load6uSwap(p64& dst0, const void* srcp)
 {
   const uint8_t* src8 = reinterpret_cast<const uint8_t*>(srcp);
 
-  dst0 = _FOG_FACE_COMBINE_2( (uint64_t)( ((const uint32_t*)(src8 + 0))[0] ), 
+  dst0 = _FOG_FACE_COMBINE_2( (uint64_t)( ((const uint32_t*)(src8 + 0))[0] ),
                               (uint64_t)( ((const uint16_t*)(src8 + 4))[0] ) << 32);
   dst0 = Memory::bswap64(dst0) >> 16;
 }
@@ -160,7 +160,7 @@ static FOG_INLINE void p64Load6aNative(p64& dst0, const void* srcp)
 {
   const uint8_t* src8 = reinterpret_cast<const uint8_t*>(srcp);
 
-  dst0 = _FOG_FACE_COMBINE_2( (uint64_t)( ((const uint16_t*)(src8 + 0))[0] ) << 32, 
+  dst0 = _FOG_FACE_COMBINE_2( (uint64_t)( ((const uint16_t*)(src8 + 0))[0] ) << 32,
                               (uint64_t)( ((const uint32_t*)(src8 + 2))[0] ) );
 }
 
@@ -168,7 +168,7 @@ static FOG_INLINE void p64Load6uNative(p64& dst0, const void* srcp)
 {
   const uint8_t* src8 = reinterpret_cast<const uint8_t*>(srcp);
 
-  dst0 = _FOG_FACE_COMBINE_2( (uint64_t)( ((const uint16_t*)(src8 + 0))[0] ) << 32, 
+  dst0 = _FOG_FACE_COMBINE_2( (uint64_t)( ((const uint16_t*)(src8 + 0))[0] ) << 32,
                               (uint64_t)( ((const uint32_t*)(src8 + 2))[0] ) );
 }
 
@@ -176,7 +176,7 @@ static FOG_INLINE void p64Load6aSwap(p64& dst0, const void* srcp)
 {
   const uint8_t* src8 = reinterpret_cast<const uint8_t*>(srcp);
 
-  dst0 = _FOG_FACE_COMBINE_2( (uint64_t)( ((const uint16_t*)(src8 + 0))[0] ) << 32, 
+  dst0 = _FOG_FACE_COMBINE_2( (uint64_t)( ((const uint16_t*)(src8 + 0))[0] ) << 32,
                               (uint64_t)( ((const uint32_t*)(src8 + 2))[0] ) );
   dst0 = Memory::bswap64(dst0) >> 16;
 }
@@ -185,7 +185,7 @@ static FOG_INLINE void p64Load6uSwap(p64& dst0, const void* srcp)
 {
   const uint8_t* src8 = reinterpret_cast<const uint8_t*>(srcp);
 
-  dst0 = _FOG_FACE_COMBINE_2( (uint64_t)( ((const uint16_t*)(src8 + 0))[0] ) << 32, 
+  dst0 = _FOG_FACE_COMBINE_2( (uint64_t)( ((const uint16_t*)(src8 + 0))[0] ) << 32,
                               (uint64_t)( ((const uint32_t*)(src8 + 2))[0] ) );
   dst0 = Memory::bswap64(dst0) >> 16;
 }
@@ -989,7 +989,7 @@ static FOG_INLINE void p64Combine(
 //! dst1.u32[0] = x1.u32[0] +| y1.u32[0]
 //! @endverbatim
 static FOG_INLINE void p64Combine_2x(
-  p64& dst0, const p64& x0, const p64& y0, 
+  p64& dst0, const p64& x0, const p64& y0,
   p64& dst1, const p64& x1, const p64& y1)
 {
 #if defined(FOG_FACE_P64_IS_TYPE)
@@ -1021,7 +1021,7 @@ static FOG_INLINE void p64And(
 //! dst1.u32[0] = x1.u32[0] & y1.u32[0]
 //! @endverbatim
 static FOG_INLINE void p64And_2x(
-  p64& dst0, const p64& x0, const p64& y0, 
+  p64& dst0, const p64& x0, const p64& y0,
   p64& dst1, const p64& x1, const p64& y1)
 {
   _FOG_FACE_64BIT_OP(dst0, x0, y0, &);
@@ -1048,7 +1048,7 @@ static FOG_INLINE void p64Or(
 //! dst1.u32[1] = x1.u32[1] | y1.u32[1]
 //! @endverbatim
 static FOG_INLINE void p64Or_2x(
-  p64& dst0, const p64& x0, const p64& y0, 
+  p64& dst0, const p64& x0, const p64& y0,
   p64& dst1, const p64& x1, const p64& y1)
 {
   _FOG_FACE_64BIT_OP(dst0, x0, y0, |);
@@ -1076,7 +1076,7 @@ static FOG_INLINE void p64Xor(
 //! dst1.u32[1] = x1.u32[1] ^ y1.u32[1]
 //! @endverbatim
 static FOG_INLINE void p64Xor_2x(
-  p64& dst0, const p64& x0, const p64& y0, 
+  p64& dst0, const p64& x0, const p64& y0,
   p64& dst1, const p64& x1, const p64& y1)
 {
   _FOG_FACE_64BIT_OP(dst0, x0, y0, ^);
@@ -1109,7 +1109,7 @@ static FOG_INLINE void p64Neg(
 //! dst1.u32[1] = ~x1.u32[1]
 //! @endverbatim
 static FOG_INLINE void p64Neg_2x(
-  p64& dst0, const p64& x0, 
+  p64& dst0, const p64& x0,
   p64& dst1, const p64& x1)
 {
 #if defined(FOG_FACE_P64_IS_TYPE)
@@ -1143,7 +1143,7 @@ static FOG_INLINE void p64Add(
 //! dst1.u32[1] = x1.u32[1] + y1.u32[1]
 //! @endverbatim
 static FOG_INLINE void p64Add_2x(
-  p64& dst0, const p64& x0, const p64& y0, 
+  p64& dst0, const p64& x0, const p64& y0,
   p64& dst1, const p64& x1, const p64& y1)
 {
   _FOG_FACE_U64(dst0) = _FOG_FACE_U64(x0) + _FOG_FACE_U64(y0);
@@ -1193,7 +1193,7 @@ static FOG_INLINE void p64Mul(
 //! dst1.u64[0] = x1.u64[0] * y1.u64[0]
 //! @endverbatim
 static FOG_INLINE void p64Mul_2x(
-  p64& dst0, const p64& x0, const p64& y0, 
+  p64& dst0, const p64& x0, const p64& y0,
   p64& dst1, const p64& x1, const p64& y1)
 {
   _FOG_FACE_U64(dst0) = _FOG_FACE_U64(x0) * _FOG_FACE_U64(y0);
@@ -1218,7 +1218,7 @@ static FOG_INLINE void p64Div(
 //! dst1.u64[0] = x1.u64[0] / y1.u64[0]
 //! @endverbatim
 static FOG_INLINE void p64Div_2x(
-  p64& dst0, const p64& x0, const p64& y0, 
+  p64& dst0, const p64& x0, const p64& y0,
   p64& dst1, const p64& x1, const p64& y1)
 {
   _FOG_FACE_U64(dst0) = _FOG_FACE_U64(x0) / _FOG_FACE_U64(y0);
@@ -1427,7 +1427,7 @@ static FOG_INLINE void p64ExpandPBWFromPBW0(
 //! dst1.u16[1] = x1.u16[0]
 //! @endverbatim
 static FOG_INLINE void p64ExpandPBWFromPBW0_2x(
-  p64& dst0, const p64& x0, 
+  p64& dst0, const p64& x0,
   p64& dst1, const p64& x1)
 {
   p64ExpandPBWFromPBW0(dst0, x0);
@@ -1475,7 +1475,7 @@ static FOG_INLINE void p64ExpandPBWFromPBW1(
 //! dst1.u16[1] = x1.u16[1]
 //! @endverbatim
 static FOG_INLINE void p64ExpandPBWFromPBW1_2x(
-  p64& dst0, const p64& x0, 
+  p64& dst0, const p64& x0,
   p64& dst1, const p64& x1)
 {
   p64ExpandPBWFromPBW1(dst0, x0);
@@ -1550,7 +1550,7 @@ static FOG_INLINE void p64LShift(
 }
 
 static FOG_INLINE void p64LShift_2x(
-  p64& dst0, const p64& x0, uint32_t s0, 
+  p64& dst0, const p64& x0, uint32_t s0,
   p64& dst1, const p64& x1, uint32_t s1)
 {
   p64LShift(dst0, x0, s0);
@@ -1603,7 +1603,7 @@ static FOG_INLINE void p64LShiftBy1(
 }
 
 static FOG_INLINE void p64LShiftBy1_2x(
-  p64& dst0, const p64& x0, 
+  p64& dst0, const p64& x0,
   p64& dst1, const p64& x1)
 {
   p64LShiftBy1(dst0, x0);
@@ -1622,7 +1622,7 @@ static FOG_INLINE void p64LShiftBy1PBW0(
 }
 
 static FOG_INLINE void p64LShiftBy1PBW0_2x(
-  p64& dst0, const p64& x0, 
+  p64& dst0, const p64& x0,
   p64& dst1, const p64& x1)
 {
   p64LShiftBy1PBW0(dst0, x0);
@@ -1641,7 +1641,7 @@ static FOG_INLINE void p64LShiftBy1PBW1(
 }
 
 static FOG_INLINE void p64LShiftBy1PBW1_2x(
-  p64& dst0, const p64& x0, 
+  p64& dst0, const p64& x0,
   p64& dst1, const p64& x1)
 {
   p64LShiftBy1PBW1(dst0, x0);
@@ -1660,7 +1660,7 @@ static FOG_INLINE void p64LShiftBy1PBW2(
 }
 
 static FOG_INLINE void p64LShiftBy1PBW2_2x(
-  p64& dst0, const p64& x0, 
+  p64& dst0, const p64& x0,
   p64& dst1, const p64& x1)
 {
   p64LShiftBy1PBW2(dst0, x0);
@@ -1679,7 +1679,7 @@ static FOG_INLINE void p64LShiftBy1PBW3(
 }
 
 static FOG_INLINE void p64LShiftBy1PBW3_2x(
-  p64& dst0, const p64& x0, 
+  p64& dst0, const p64& x0,
   p64& dst1, const p64& x1)
 {
   p64LShiftBy1PBW3(dst0, x0);
@@ -1719,7 +1719,7 @@ static FOG_INLINE void p64RShiftTruncatePBW(
 }
 
 static FOG_INLINE void p64RShiftTruncatePBW_2x(
-  p64& dst0, const p64& x0, uint32_t s0, 
+  p64& dst0, const p64& x0, uint32_t s0,
   p64& dst1, const p64& x1, uint32_t s1)
 {
   p64RShiftTruncatePBW(dst0, x0, s0);
@@ -1749,7 +1749,7 @@ static FOG_INLINE void p64Negate255SBW(
 //! dst1.u16[0] = 255 - x1.u16[0]
 //! @endverbatim
 static FOG_INLINE void p64Negate255SBW_2x(
-  p64& dst0, const p64& x0, 
+  p64& dst0, const p64& x0,
   p64& dst1, const p64& x1)
 {
   p64Negate255SBW(dst0, x0);
@@ -1775,7 +1775,7 @@ static FOG_INLINE void p64Negate256SBW(
 //! dst1.u16[0] = 256 - x1.u16[0]
 //! @endverbatim
 static FOG_INLINE void p64Negate256SBW_2x(
-  p64& dst0, const p64& x0, 
+  p64& dst0, const p64& x0,
   p64& dst1, const p64& x1)
 {
   p64Negate256SBW(dst0, x0);
@@ -1810,7 +1810,7 @@ static FOG_INLINE void p64Negate255PBB(
 //! dst1.u8[3] = 255 - x1.u8[3]
 //! @endverbatim
 static FOG_INLINE void p64Negate255PBB_2x(
-  p64& dst0, const p64& x0, 
+  p64& dst0, const p64& x0,
   p64& dst1, const p64& x1)
 {
   p64Negate255PBB(dst0, x0);
@@ -1839,7 +1839,7 @@ static FOG_INLINE void p64Negate255PBW(
 //! dst1.u16[1] = 255 - x1.u16[1]
 //! @endverbatim
 static FOG_INLINE void p64Negate255PBW_2x(
-  p64& dst0, const p64& x0, 
+  p64& dst0, const p64& x0,
   p64& dst1, const p64& x1)
 {
   p64Negate255PBW(dst0, x0);
@@ -1868,7 +1868,7 @@ static FOG_INLINE void p64Negate256PBW(
 //! dst1.u16[1] = 256 - x1.u16[1]
 //! @endverbatim
 static FOG_INLINE void p64Negate256PBW_2x(
-  p64& dst0, const p64& x0, 
+  p64& dst0, const p64& x0,
   p64& dst1, const p64& x1)
 {
   p64Negate256PBW(dst0, x0);
@@ -1887,7 +1887,7 @@ static FOG_INLINE void p64Negate255PBW0(
 }
 
 static FOG_INLINE void p64Negate255PBW0_2x(
-  p64& dst0, const p64& x0, 
+  p64& dst0, const p64& x0,
   p64& dst1, const p64& x1)
 {
   p64Negate255PBW0(dst0, x0);
@@ -1906,7 +1906,7 @@ static FOG_INLINE void p64Negate255PBW1(
 }
 
 static FOG_INLINE void p64Negate255PBW1_2x(
-  p64& dst0, const p64& x0, 
+  p64& dst0, const p64& x0,
   p64& dst1, const p64& x1)
 {
   p64Negate255PBW1(dst0, x0);
@@ -1925,7 +1925,7 @@ static FOG_INLINE void p64Negate255PBW2(
 }
 
 static FOG_INLINE void p64Negate255PBW2_2x(
-  p64& dst0, const p64& x0, 
+  p64& dst0, const p64& x0,
   p64& dst1, const p64& x1)
 {
   p64Negate255PBW2(dst0, x0);
@@ -1944,7 +1944,7 @@ static FOG_INLINE void p64Negate255PBW3(
 }
 
 static FOG_INLINE void p64Negate255PBW3_2x(
-  p64& dst0, const p64& x0, 
+  p64& dst0, const p64& x0,
   p64& dst1, const p64& x1)
 {
   p64Negate255PBW3(dst0, x0);
@@ -2304,7 +2304,7 @@ static FOG_INLINE void p64Saturate255SBW(
 #endif // FOG_FACE_P64_IS_TYPE
 }
 
-//! @brief Saturate @a dst0. Can be used after two BYTEs were added and 
+//! @brief Saturate @a dst0. Can be used after two BYTEs were added and
 //! resulting value may be larger than BYTE.
 //!
 //! @verbatim
@@ -2342,14 +2342,14 @@ static FOG_INLINE void p64Saturate255PBW(
 //! dst1 = min(dst1, 255)
 //! @endverbatim
 static FOG_INLINE void p64Saturate255PBW_2x(
-  p64& dst0, const p64& x0, 
+  p64& dst0, const p64& x0,
   p64& dst1, const p64& x1)
 {
   p64Saturate255PBW(dst0, x0);
   p64Saturate255PBW(dst1, x1);
 }
 
-//! @brief Saturate @a dst0. Can be used after two BYTEs were added and 
+//! @brief Saturate @a dst0. Can be used after two BYTEs were added and
 //! resulting value may be larger than BYTE.
 //!
 //! @verbatim
@@ -2379,7 +2379,7 @@ static FOG_INLINE void p64Saturate511PBW(
 //! dst1 = min(dst1, 511)
 //! @endverbatim
 static FOG_INLINE void p64Saturate511PBW_2x(
-  p64& dst0, const p64& x0, 
+  p64& dst0, const p64& x0,
   p64& dst1, const p64& x1)
 {
   p64Saturate511PBW(dst0, x0);
@@ -2399,7 +2399,7 @@ static FOG_INLINE void p64AddPBW_SBW(
 }
 
 static FOG_INLINE void p64AddPBW_SBW_2x(
-  p64& dst0, const p64& x0, 
+  p64& dst0, const p64& x0,
   p64& dst1, const p64& x1, const p64& u01)
 {
   p64 t01;
@@ -2408,7 +2408,7 @@ static FOG_INLINE void p64AddPBW_SBW_2x(
 }
 
 static FOG_INLINE void p64AddPBW_SBW_2x(
-  p64& dst0, const p64& x0, const p64& u0, 
+  p64& dst0, const p64& x0, const p64& u0,
   p64& dst1, const p64& x1, const p64& u1)
 {
   p64 t0, t1;
@@ -2481,7 +2481,7 @@ static FOG_INLINE void p64Addus255PBW(
 }
 
 static FOG_INLINE void p64Addus255PBW_2x(
-  p64& dst0, const p64& x0, const p64& y0, 
+  p64& dst0, const p64& x0, const p64& y0,
   p64& dst1, const p64& x1, const p64& y1)
 {
   p64Add_2x(dst0, x0, y0, dst1, x1, y1);
@@ -2497,7 +2497,7 @@ static FOG_INLINE void p64Addus255PBW_SBW(
 }
 
 static FOG_INLINE void p64Addus255PBW_SBW_2x(
-  p64& dst0, const p64& x0, const p64& u0, 
+  p64& dst0, const p64& x0, const p64& u0,
   p64& dst1, const p64& x1, const p64& u1)
 {
   p64 t0, t1;
@@ -2519,7 +2519,7 @@ static FOG_INLINE void p64SubPBW_SBW(
 }
 
 static FOG_INLINE void p64SubPBW_SBW_2x(
-  p64& dst0, const p64& x0, 
+  p64& dst0, const p64& x0,
   p64& dst1, const p64& x1, const p64& u01)
 {
   p64 t01;
@@ -2528,7 +2528,7 @@ static FOG_INLINE void p64SubPBW_SBW_2x(
 }
 
 static FOG_INLINE void p64SubPBW_SBW_2x(
-  p64& dst0, const p64& x0, const p64& u0, 
+  p64& dst0, const p64& x0, const p64& u0,
   p64& dst1, const p64& x1, const p64& u1)
 {
   p64 t0, t1;
@@ -2547,7 +2547,7 @@ static FOG_INLINE void p64Subus255PBW(
 }
 
 static FOG_INLINE void p64Subus255PBW_2x(
-  p64& dst0, const p64& x0, const p64& y0, 
+  p64& dst0, const p64& x0, const p64& y0,
   p64& dst1, const p64& x1, const p64& y1)
 {
   p64Negate255PBW_2x(dst0, x0, dst1, x1);
@@ -2592,7 +2592,7 @@ static FOG_INLINE void p64Subus255PBW_SBW(
 }
 
 static FOG_INLINE void p64Subus255PBW_SBW_2x(
-  p64& dst0, const p64& x0, const p64& u0, 
+  p64& dst0, const p64& x0, const p64& u0,
   p64& dst1, const p64& x1, const p64& u1)
 {
   p64 t0, t1;
@@ -2637,7 +2637,7 @@ static FOG_INLINE void p64AddSub(
 }
 
 static FOG_INLINE void p64AddSub_2x(
-  p64& dst0, const p64& x0, const p64& y0, const p64& z0, 
+  p64& dst0, const p64& x0, const p64& y0, const p64& z0,
   p64& dst1, const p64& x1, const p64& y1, const p64& z1)
 {
   p64AddSub(dst0, x0, y0, z0);
@@ -3145,7 +3145,7 @@ static FOG_INLINE void p64MulDiv255PBW(
   uint64_t ym = y0;
   uint64_t t0;
   uint64_t t1;
- 
+
   t0 = (x0 & FOG_UINT64_C(0x00000000000000FF)) * (ym & 0xFFU); ym >>= 16;
   t1 = (x0 & FOG_UINT64_C(0x0000000000FF0000)) * (ym & 0xFFU); ym >>= 16;
   t0 = _FOG_FACE_COMBINE_2(t0, t1);
@@ -3200,7 +3200,7 @@ static FOG_INLINE void p64MulDiv256PBW(
   uint64_t ym = y0;
   uint64_t t0;
   uint64_t t1;
- 
+
   t0 = (x0 & FOG_UINT64_C(0x00000000000000FF)) * (ym & 0xFFU); ym >>= 16;
   t1 = (x0 & FOG_UINT64_C(0x0000000000FF0000)) * (ym & 0xFFU); ym >>= 16;
   t0 = _FOG_FACE_COMBINE_2(t0, t1);

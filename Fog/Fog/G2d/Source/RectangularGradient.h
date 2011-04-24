@@ -43,7 +43,7 @@ struct FOG_NO_EXPORT RectangularGradientF : public GradientF
   explicit FOG_INLINE RectangularGradientF(const RectangularGradientD& other);
 
   FOG_INLINE RectangularGradientF(
-    const PointF& first, const PointF& second, const PointF& focal) : 
+    const PointF& first, const PointF& second, const PointF& focal) :
     GradientF(GRADIENT_TYPE_RECTANGULAR)
   {
     _pts[0] = first;
@@ -97,7 +97,7 @@ struct FOG_NO_EXPORT RectangularGradientD : public GradientD
   explicit FOG_INLINE RectangularGradientD(const RectangularGradientD& other);
 
   FOG_INLINE RectangularGradientD(
-    const PointD& first, const PointD& second, const PointD& focal) : 
+    const PointD& first, const PointD& second, const PointD& focal) :
     GradientD(GRADIENT_TYPE_RECTANGULAR)
   {
     _pts[0] = first;

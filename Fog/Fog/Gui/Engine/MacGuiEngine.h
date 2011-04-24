@@ -20,8 +20,8 @@
 #ifdef __OBJC__
 @class NSEvent;
 @class NSRunLoop;
-@class FogView;          		// see MacGuiEngine.mm
-@class FogWindow;        		// see MacGuiEngine.mm
+@class FogView;              // see MacGuiEngine.mm
+@class FogWindow;            // see MacGuiEngine.mm
 #else
 class NSEvent;
 class NSRunLoop;
@@ -116,10 +116,10 @@ struct FOG_API MacGuiWindow : public GuiWindow
 
   virtual err_t setSizeGranularity(const PointI& pt);
   virtual err_t getSizeGranularity(PointI& pt);
-  
+
   virtual err_t worldToClient(PointI* coords);
   virtual err_t clientToWorld(PointI* coords);
-  
+
   virtual void setOwner(GuiWindow* owner);
   virtual void releaseOwner();
 
@@ -133,7 +133,7 @@ struct FOG_API MacGuiWindow : public GuiWindow
   virtual void moveToBottom(GuiWindow* w=0);
 
   virtual void setTransparency(float val);
-  
+
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------

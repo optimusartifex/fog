@@ -136,7 +136,7 @@ void ThreadEvent::signal()
   {
     _signaled = true;
     if (_manualReset)
-      _cvar.broadcast(); 
+      _cvar.broadcast();
     else
       _cvar.signal();
   }

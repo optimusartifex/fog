@@ -92,7 +92,7 @@ static void _copyRectsExtents(BoxI* dest, const BoxI* src, sysuint_t length, Box
   int extentsX1 = src[length-1].x1;
   int extentsY1 = src[length-1].y1;
 
-  for (sysuint_t i = length; i; i--, dest++, src++) 
+  for (sysuint_t i = length; i; i--, dest++, src++)
   {
     if (extentsX0 > src->x0) extentsX0 = src->x0;
     if (extentsX1 < src->x1) extentsX1 = src->x1;
@@ -143,7 +143,7 @@ static RegionData* _reallocRegion(RegionData* d, sysuint_t capacity)
 RegionData* RegionData::adopt(void* address, sysuint_t capacity)
 {
   RegionData* d = (RegionData*)address;
-  
+
   d->refCount.init(1);
   d->flags = IsStrong;
   d->capacity = capacity;
@@ -158,7 +158,7 @@ RegionData* RegionData::adopt(void* address, sysuint_t capacity, const BoxI& r)
   if (!r.isValid() || capacity == 0) return adopt(address, capacity);
 
   RegionData* d = (RegionData*)address;
-  
+
   d->refCount.init(1);
   d->flags = IsStrong;
   d->capacity = capacity;
@@ -183,12 +183,12 @@ RegionData* RegionData::adopt(void* address, sysuint_t capacity, const BoxI* ext
   if (capacity < length) create(length, extents, rects, length);
 
   RegionData* d = (RegionData*)address;
-  
+
   d->refCount.init(1);
   d->flags = IsStrong;
   d->capacity = capacity;
   d->length = length;
-  
+
   if (extents)
   {
     d->extents = *extents;
@@ -431,7 +431,7 @@ static err_t _unitePrivate(Region* dest, const BoxI* src1, sysuint_t count1, con
   }
 
   destBegin = destCur;
-  
+
   // Initialize ybot and ytop.
   // In the upcoming loop, ybot and ytop serve different functions depending
   // on whether the band being handled is an overlapping or non-overlapping
@@ -709,7 +709,7 @@ static err_t _intersectPrivate(Region* dest, const BoxI* src1, sysuint_t count1,
 
     // This algorithm proceeds one source-band (as opposed to a destination
     // band, which is determined by where the two regions intersect) at a time.
-    // src1BandEnd and src2BandEnd serve to mark the rectangle after the last 
+    // src1BandEnd and src2BandEnd serve to mark the rectangle after the last
     // one in the current band for their respective regions.
     src1BandEnd = src1;
     src2BandEnd = src2;
@@ -1107,7 +1107,7 @@ static err_t _appendPrivate(Region* dest, const BoxI* src, sysuint_t length, con
       {
         destBand1Begin = destBand2Begin - 1;
         while (destBand1Begin != destBegin && destBand1Begin[-1].y1 == y) destBand1Begin--;
-        
+
         sysuint_t index1 = (sysuint_t)(destBand2Begin - destBand1Begin);
         sysuint_t index2 = (sysuint_t)(destCur - destBand2Begin);
 
@@ -1259,11 +1259,11 @@ uint32_t Region::getType() const
 {
   sysuint_t len = _d->length;
 
-  // If t < 2 then it can be 0 or 1, which means REGION_TYPE_EMPTY or 
+  // If t < 2 then it can be 0 or 1, which means REGION_TYPE_EMPTY or
   // REGION_TYPE_SIMPLE, respectively.
   return isInfinite()
     ? REGION_TYPE_INFINITE
-    : len < 2 
+    : len < 2
       ? (uint32_t)len
       : REGION_TYPE_COMPLEX;
 }
@@ -1734,9 +1734,9 @@ err_t Region::combine(const Region& r, uint32_t combineOp)
         return ERR_REGION_INFINITE;
       }
 
-      if (td == rd) 
+      if (td == rd)
         clear();
-      else if (td->length == 0 || rd->length == 0 || !td->extents.overlaps(rd->extents)) 
+      else if (td->length == 0 || rd->length == 0 || !td->extents.overlaps(rd->extents))
         ;
       else
         return _subtractPrivate(this, td->rects, td->length, rd->rects, rd->length, true);
@@ -1770,7 +1770,7 @@ err_t Region::combine(const BoxI& r, uint32_t combineOp)
     {
       if (td == _dinfinite.instancep()) return set(r);
 
-      if (td->length == 0 || !r.isValid() || !td->extents.overlaps(r)) 
+      if (td->length == 0 || !r.isValid() || !td->extents.overlaps(r))
       {
         clear();
         return ERR_OK;
@@ -1977,7 +1977,7 @@ err_t Region::combine(Region& dest, const Region& src1, const Region& src2, uint
       // Trivial rejects.
       if (FOG_UNLIKELY(src1d == src2d))
         err = dest.set(src1);
-      else if (FOG_UNLIKELY(src1d->length == 0 || src2d->length == 0 || !src1d->extents.overlaps(src2d->extents))) 
+      else if (FOG_UNLIKELY(src1d->length == 0 || src2d->length == 0 || !src1d->extents.overlaps(src2d->extents)))
         dest.clear();
       else
         err = _intersectPrivate(&dest, src1d->rects, src1d->length, src2d->rects, src2d->length, destd == src1d || destd == src2d);
@@ -2053,9 +2053,9 @@ err_t Region::combine(Region& dest, const Region& src1, const Region& src2, uint
       }
 
       // Trivial rejects.
-      if (src1d == src2d || src1d->length == 0) 
+      if (src1d == src2d || src1d->length == 0)
         dest.clear();
-      else if (src2d->length == 0 || !src1d->extents.overlaps(src2d->extents)) 
+      else if (src2d->length == 0 || !src1d->extents.overlaps(src2d->extents))
         err = dest.set(src1);
       else
         err = _subtractPrivate(&dest, src1d->rects, src1d->length, src2d->rects, src2d->length, destd == src1d || destd == src2d);
@@ -2099,7 +2099,7 @@ err_t Region::translate(Region& dest, const Region& src, const PointI& pt)
   BoxI* dest_r;
   BoxI* src_r;
 
-  if (src_d->length == 0) 
+  if (src_d->length == 0)
   {
     dest.clear();
   }
@@ -2114,7 +2114,7 @@ err_t Region::translate(Region& dest, const Region& src, const PointI& pt)
     err_t err = dest.prepare(src_d->length);
     if (FOG_IS_ERROR(err)) return err;
 
-    dest_d = dest._d; 
+    dest_d = dest._d;
 
     dest_d->extents.set(src_d->extents.x0 + x, src_d->extents.y0 + y,
                         src_d->extents.x1 + x, src_d->extents.y1 + y);
@@ -2123,7 +2123,7 @@ err_t Region::translate(Region& dest, const Region& src, const PointI& pt)
     dest_r = dest_d->rects;
     src_r = src_d->rects;
 
-    for (i = dest_d->length; i; i--, dest_r++) 
+    for (i = dest_d->length; i; i--, dest_r++)
     {
       dest_r->set(src_r->x0 + x, src_r->y0 + y, src_r->x1 + x, src_r->y1 + y);
     }
@@ -2189,7 +2189,7 @@ err_t Region::intersectAndClip(Region& dst, const Region& src1Region, const Regi
   int clipX1 = clip.x1;
   int clipY1 = clip.y1;
 
-  bool memOverlap = (&dst == &src1Region) | 
+  bool memOverlap = (&dst == &src1Region) |
                     (&dst == &src2Region) ;
 
   BoxI* destBegin;                      // Destination begin.
@@ -2414,7 +2414,7 @@ err_t Region::translateAndClip(Region& dst, const Region& src1Region, const Poin
 
   RegionData* newd = NULL;
 
-  if (&dst == &src1Region) 
+  if (&dst == &src1Region)
   {
     if (dst.getRefCount() == 1)
     {

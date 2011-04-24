@@ -312,14 +312,14 @@ enum RENDER_FETCH
 
   //! @brief Pattern fetcher can use only provided buffer to fetch the data to.
   //!
-  //! This mode is opposite to @c RENDER_FETCH_REFERENCE. It tells to 
+  //! This mode is opposite to @c RENDER_FETCH_REFERENCE. It tells to
   //! fetcher to always use the provided buffer for all fetches. If shaders are
   //! used then these data will be overwritten so it's important to tell this
   //! fact to fetcher.
   //!
-  //! This mode can be also used when using @c COMPOSITE_SRC and fetcher is not 
-  //! called using temporary buffer, but the target image buffer. This means 
-  //! that pattern fetcher will fetch data into the target buffer and no 
+  //! This mode can be also used when using @c COMPOSITE_SRC and fetcher is not
+  //! called using temporary buffer, but the target image buffer. This means
+  //! that pattern fetcher will fetch data into the target buffer and no
   //! another copy is needed (optimization).
   RENDER_FETCH_COPY = 1
 };
@@ -331,8 +331,8 @@ enum RENDER_FETCH
 //! @internal
 //!
 //! @brief Compositing operator characteristics used by Fog::Render.
-//! 
-//! The compositing operator characteristics are used internally by 
+//!
+//! The compositing operator characteristics are used internally by
 //! the @c RasterPainterEngine and compositing templates in Fog::Render module.
 enum RENDER_COMBINE
 {

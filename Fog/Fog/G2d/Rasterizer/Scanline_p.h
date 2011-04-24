@@ -167,7 +167,7 @@ struct FOG_NO_EXPORT Scanline
   //! @brief Zone memory allocator used to alloc span instances.
   ZoneMemoryAllocator _spanAllocator;
 
-  //! @brief First span that is never part of returned spans (it's used 
+  //! @brief First span that is never part of returned spans (it's used
   //! internally). Returned span by @c getSpans() is always get using
   //! <code>_spanFirst->getNext()</code>.
   Span _spanFirst;
@@ -202,7 +202,7 @@ private:
 //! @brief The scanline container for 8-bit per component spans.
 //!
 //! The @c Scanline8 is class that is able to produce list of the
-//! @c Span8 instances applicable as a mask when using low-level render 
+//! @c Span8 instances applicable as a mask when using low-level render
 //! functions.
 struct FOG_NO_EXPORT Scanline8 : public Scanline
 {
@@ -348,12 +348,12 @@ _Link:
   }
 
   //! @brief Add a single value into the current A8-Glyph span sequence.
-  //! 
+  //!
   //! You need to call @c newA8Glyph() or @c lnkA8Glyph() before the @c valA8Glyph() is used.
   FOG_INLINE void valA8Glyph(uint32_t m)
   {
     // Detect an invalid span.
-    FOG_ASSERT(getCurrent()->getType() == SPAN_A8_GLYPH || 
+    FOG_ASSERT(getCurrent()->getType() == SPAN_A8_GLYPH ||
                getCurrent()->getType() == SPAN_AX_GLYPH);
     // Detect buffer overflow.
     FOG_ASSERT(_maskCurrent < _maskData + _maskCapacity);
@@ -366,7 +366,7 @@ _Link:
   FOG_INLINE void endA8Glyph()
   {
     // Detect an invalid span.
-    FOG_ASSERT(getCurrent()->getType() == SPAN_A8_GLYPH || 
+    FOG_ASSERT(getCurrent()->getType() == SPAN_A8_GLYPH ||
                getCurrent()->getType() == SPAN_AX_GLYPH);
 
     getCurrent()->setX1(getCurrent()->getX0() + (int)(sysint_t)(_maskCurrent - (uint8_t*)getCurrent()->getGenericMask()));
@@ -376,7 +376,7 @@ _Link:
   FOG_INLINE void endA8Glyph(int x1)
   {
     // Detect an invalid span.
-    FOG_ASSERT(getCurrent()->getType() == SPAN_A8_GLYPH || 
+    FOG_ASSERT(getCurrent()->getType() == SPAN_A8_GLYPH ||
                getCurrent()->getType() == SPAN_AX_GLYPH);
     // Detect an invalid range.
     FOG_ASSERT(getCurrent()->getX0() < x1);
@@ -448,7 +448,7 @@ _Link:
   }
 
   //! @brief Add a single value into the current A8-Extra sequence.
-  //! 
+  //!
   //! You need to call @c newA8Extra() or @c lnkA8Extra() before the @c valA8Extra() is used.
   FOG_INLINE void valA8Extra(uint32_t m)
   {
@@ -548,7 +548,7 @@ _Link:
   FOG_INLINE void valARGB32Glyph(uint32_t m)
   {
     // Detect an invalid span.
-    FOG_ASSERT(getCurrent()->getType() == SPAN_ARGB32_GLYPH || 
+    FOG_ASSERT(getCurrent()->getType() == SPAN_ARGB32_GLYPH ||
                getCurrent()->getType() == SPAN_ARGBXX_GLYPH);
     // Detect buffer overflow.
     FOG_ASSERT(_maskCurrent < _maskData + _maskCapacity);
@@ -560,7 +560,7 @@ _Link:
   FOG_INLINE void endARGB32Glyph()
   {
     // Detect an invalid span.
-    FOG_ASSERT(getCurrent()->getType() == SPAN_ARGB32_GLYPH || 
+    FOG_ASSERT(getCurrent()->getType() == SPAN_ARGB32_GLYPH ||
                getCurrent()->getType() == SPAN_ARGBXX_GLYPH);
 
     getCurrent()->setX1(getCurrent()->getX0() + (int)(sysint_t)(_maskCurrent - (uint8_t*)getCurrent()->getGenericMask()) / 4);
@@ -570,7 +570,7 @@ _Link:
   FOG_INLINE void endARGB32Glyph(int x1)
   {
     // Detect an invalid span.
-    FOG_ASSERT(getCurrent()->getType() == SPAN_ARGB32_GLYPH || 
+    FOG_ASSERT(getCurrent()->getType() == SPAN_ARGB32_GLYPH ||
                getCurrent()->getType() == SPAN_ARGBXX_GLYPH);
     // Detect an invalid range.
     FOG_ASSERT(getCurrent()->getX0() < x1);

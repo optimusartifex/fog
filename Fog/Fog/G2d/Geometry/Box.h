@@ -61,7 +61,7 @@ struct BoxI
   {
   }
 
-  explicit FOG_INLINE BoxI(const RectI& other) : 
+  explicit FOG_INLINE BoxI(const RectI& other) :
     x0(other.x), y0(other.y), x1(other.x + other.w), y1(other.y + other.h)
   {
   }
@@ -84,16 +84,16 @@ struct BoxI
   FOG_INLINE SizeI getSize() const { return SizeI(x1 - x0, y1 - y0); }
 
   FOG_INLINE BoxI& set(const BoxI &other)
-  { 
+  {
     Memory::copy_t<BoxI>(this, &other);
     return *this;
   }
-  
+
   FOG_INLINE BoxI& set(int px0, int py0, int px1, int py1)
-  { 
-    x0 = px0; 
-    y0 = py0; 
-    x1 = px1; 
+  {
+    x0 = px0;
+    y0 = py0;
+    x1 = px1;
     y1 = py1;
 
     return *this;
@@ -124,7 +124,7 @@ struct BoxI
   // --------------------------------------------------------------------------
 
   FOG_INLINE BoxI& translate(int px, int py)
-  { 
+  {
     x0 += px;
     y0 += py;
     x1 += px;
@@ -133,7 +133,7 @@ struct BoxI
   }
 
   FOG_INLINE BoxI& translate(const PointI& p)
-  { 
+  {
     x0 += p.x;
     y0 += p.y;
     x1 += p.x;
@@ -221,7 +221,7 @@ struct BoxI
     y0 += n;
     x1 -= n;
     y1 -= n;
-    
+
     return *this;
   }
 
@@ -347,7 +347,7 @@ struct BoxF
   {
   }
 
-  explicit FOG_INLINE BoxF(const RectI& other) : 
+  explicit FOG_INLINE BoxF(const RectI& other) :
     x0((float)other.x),
     y0((float)other.y),
     x1((float)(other.x + other.w)),
@@ -355,7 +355,7 @@ struct BoxF
   {
   }
 
-  explicit FOG_INLINE BoxF(const RectF& other) : 
+  explicit FOG_INLINE BoxF(const RectF& other) :
     x0(other.x),
     y0(other.y),
     x1(other.x + other.w),
@@ -388,16 +388,16 @@ struct BoxF
   }
 
   FOG_INLINE BoxF& set(const BoxF& other)
-  { 
+  {
     Memory::copy_t<BoxF>(this, &other);
     return *this;
   }
-  
+
   FOG_INLINE BoxF& set(float px0, float py0, float px1, float py1)
-  { 
-    x0 = px0; 
-    y0 = py0; 
-    x1 = px1; 
+  {
+    x0 = px0;
+    y0 = py0;
+    x1 = px1;
     y1 = py1;
 
     return *this;
@@ -431,7 +431,7 @@ struct BoxF
   // --------------------------------------------------------------------------
 
   FOG_INLINE BoxF& translate(float px, float py)
-  { 
+  {
     x0 += px;
     y0 += py;
     x1 += px;
@@ -440,7 +440,7 @@ struct BoxF
   }
 
   FOG_INLINE BoxF& translate(const PointF& p)
-  { 
+  {
     x0 += p.x;
     y0 += p.y;
     x1 += p.x;
@@ -528,7 +528,7 @@ struct BoxF
     y0 += n;
     x1 -= n;
     y1 -= n;
-    
+
     return *this;
   }
 
@@ -641,17 +641,17 @@ struct FOG_NO_EXPORT BoxD
   {
   }
 
-  explicit FOG_INLINE BoxD(const RectD& other) : 
+  explicit FOG_INLINE BoxD(const RectD& other) :
     x0(other.x), y0(other.y), x1(other.x + other.w), y1(other.y + other.h)
   {
   }
 
-  explicit FOG_INLINE BoxD(const RectF& other) : 
+  explicit FOG_INLINE BoxD(const RectF& other) :
     x0(other.x), y0(other.y), x1(other.x + other.w), y1(other.y + other.h)
   {
   }
 
-  explicit FOG_INLINE BoxD(const RectI& other) : 
+  explicit FOG_INLINE BoxD(const RectI& other) :
     x0(other.x), y0(other.y), x1(other.x + other.w), y1(other.y + other.h)
   {
   }
@@ -674,13 +674,13 @@ struct FOG_NO_EXPORT BoxD
   FOG_INLINE SizeD getSize() const { return SizeD(x1 - x0, y1 - y0); }
 
   FOG_INLINE BoxD& set(const BoxD &other)
-  { 
+  {
     Memory::copy_t<BoxD>(this, &other);
     return *this;
   }
-  
+
   FOG_INLINE BoxD& set(const BoxF &other)
-  { 
+  {
     x0 = other.x0;
     y0 = other.y0;
     x1 = other.x1;
@@ -689,7 +689,7 @@ struct FOG_NO_EXPORT BoxD
   }
 
   FOG_INLINE BoxD& set(const BoxI &other)
-  { 
+  {
     x0 = other.x0;
     y0 = other.y0;
     x1 = other.x1;
@@ -698,10 +698,10 @@ struct FOG_NO_EXPORT BoxD
   }
 
   FOG_INLINE BoxD& set(double px0, double py0, double px1, double py1)
-  { 
-    x0 = px0; 
-    y0 = py0; 
-    x1 = px1; 
+  {
+    x0 = px0;
+    y0 = py0;
+    x1 = px1;
     y1 = py1;
 
     return *this;
@@ -735,7 +735,7 @@ struct FOG_NO_EXPORT BoxD
   // --------------------------------------------------------------------------
 
   FOG_INLINE BoxD& translate(double px, double py)
-  { 
+  {
     x0 += px;
     y0 += py;
     x1 += px;
@@ -744,7 +744,7 @@ struct FOG_NO_EXPORT BoxD
   }
 
   FOG_INLINE BoxD& translate(const PointD& p)
-  { 
+  {
     x0 += p.x;
     y0 += p.y;
     x1 += p.x;
@@ -753,7 +753,7 @@ struct FOG_NO_EXPORT BoxD
   }
 
   FOG_INLINE BoxD& translate(const PointI& p)
-  { 
+  {
     x0 += p.x;
     y0 += p.y;
     x1 += p.x;
@@ -859,7 +859,7 @@ struct FOG_NO_EXPORT BoxD
     y0 += n;
     x1 -= n;
     y1 -= n;
-    
+
     return *this;
   }
 

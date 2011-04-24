@@ -27,7 +27,7 @@ namespace Fog {
 struct FOG_NO_EXPORT SvgViewBoxAttribute : public XmlAttribute
 {
   typedef XmlAttribute base;
- 
+
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------

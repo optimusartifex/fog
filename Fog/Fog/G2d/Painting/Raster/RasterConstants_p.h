@@ -83,7 +83,7 @@ enum RASTER_CALC_STATUS
   RASTER_CALC_STATUS_WAIT = 0,
   //! @brief The calculation is done and ready to use.
   RASTER_CALC_STATUS_DONE = 1,
-  //! @brief The calculation evaluation produced no result, depending command 
+  //! @brief The calculation evaluation produced no result, depending command
   //! should be skipped.
   RASTER_CALC_STATUS_SKIP = 2
 };
@@ -120,7 +120,7 @@ enum RASTER_INTEGRAL_TRANSFORM
 
 //! @internal
 //!
-//! @brief Painter state flags used by @c RasterPainterEngine::save() and 
+//! @brief Painter state flags used by @c RasterPainterEngine::save() and
 //! @c RasterPainterEngine::restore().
 enum RASTER_STATE
 {
@@ -135,7 +135,7 @@ enum RASTER_STATE
   RASTER_STATE_CLIPPING = 0x00000008,
 
   //! @brief All states, used internally.
-  RASTER_STATE_ALL = 
+  RASTER_STATE_ALL =
     RASTER_STATE_SOURCE    |
     RASTER_STATE_STROKE    |
     RASTER_STATE_TRANSFORM |
@@ -146,7 +146,7 @@ enum RASTER_STATE
 // [Fog::RASTER_CLIP]
 // ============================================================================
 
-// These constants are used by the C++ preprocessor inside the "Render Section". 
+// These constants are used by the C++ preprocessor inside the "Render Section".
 // They must be defined by "#define" keyword.
 #define _RASTER_CLIP_NULL 0
 #define _RASTER_CLIP_BOX 1
@@ -248,7 +248,7 @@ enum RASTER_MASTER_FLAGS
   //! @brief The global opacity is zero or very close.
   RASTER_NO_PAINT_OPACITY = 0x00000080,
 
-  //! @brief Some of the stroke parameters contains degenerated value (for 
+  //! @brief Some of the stroke parameters contains degenerated value (for
   //! example line-width set to zero).
   RASTER_NO_PAINT_STROKE = 0x00001000,
 

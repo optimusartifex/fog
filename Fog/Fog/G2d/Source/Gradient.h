@@ -83,7 +83,7 @@ struct FOG_API GradientF
   FOG_INLINE err_t setStops(const List<ColorStop>& stops) { return _stops.setList(stops); }
   FOG_INLINE err_t setStops(const ColorStop* stops, sysuint_t length) { return _stops.setList(stops, length); }
   FOG_INLINE void resetStops() { _stops.clear(); }
- 
+
   FOG_INLINE err_t addStop(const ColorStop& stop) { return _stops.add(stop); }
 
   FOG_INLINE err_t removeStop(float offset) { return _stops.remove(offset); }
@@ -206,7 +206,7 @@ struct FOG_API GradientD
   FOG_INLINE err_t setStops(const List<ColorStop>& stops) { return _stops.setList(stops); }
   FOG_INLINE err_t setStops(const ColorStop* stops, sysuint_t length) { return _stops.setList(stops, length); }
   FOG_INLINE void resetStops() { _stops.clear(); }
- 
+
   FOG_INLINE err_t addStop(const ColorStop& stop) { return _stops.add(stop); }
 
   FOG_INLINE err_t removeStop(float offset) { return _stops.remove(offset); }

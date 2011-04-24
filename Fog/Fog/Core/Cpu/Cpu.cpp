@@ -166,7 +166,7 @@ static void detectCpu(Cpu* i)
   if (out.edx & 0x04000000U) i->features |= CPU_FEATURE_SSE | CPU_FEATURE_SSE2;
   if (out.edx & 0x10000000U) i->features |= CPU_FEATURE_MULTITHREADING;
 
-  if (strcmp(i->vendor, "AuthenticAMD") == 0 && 
+  if (strcmp(i->vendor, "AuthenticAMD") == 0 &&
       (out.edx & 0x10000000U))
   {
     // AMD sets Multithreading to ON if it has more cores.
@@ -177,12 +177,12 @@ static void detectCpu(Cpu* i)
   //
   // Opteron Rev E has a bug in which on very rare occasions a locked
   // instruction doesn't act as a read-acquire barrier if followed by a
-  // non-locked read-modify-write instruction.  Rev F has this bug in 
+  // non-locked read-modify-write instruction.  Rev F has this bug in
   // pre-release versions, but not in versions released to customers,
   // so we test only for Rev E, which is family 15, model 32..63 inclusive.
 
-  if (strcmp(i->vendor, "AuthenticAMD") == 0 && 
-      i->family == 15 && i->model >= 32 && i->model <= 63) 
+  if (strcmp(i->vendor, "AuthenticAMD") == 0 &&
+      i->family == 15 && i->model >= 32 && i->model <= 63)
   {
     i->bugs |= CPU_BUG_AMD_LOCK_MB;
   }

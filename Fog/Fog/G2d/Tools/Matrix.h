@@ -176,7 +176,7 @@ struct FOG_API MatrixF
 
   static MatrixDataF* _dalloc(const SizeI& size);
   static void _dcopy(
-    MatrixDataF* dst, int dstX, int dstY, 
+    MatrixDataF* dst, int dstX, int dstY,
     MatrixDataF* src, int srcX, int srcY, int w, int h);
 
   // --------------------------------------------------------------------------

@@ -72,7 +72,7 @@
 #define FOG_ASSUME(_Expression_) FOG_NOP
 #define FOG_ASSERT_NOT_REACHED(_Expression_) FOG_NOP
 
-#endif 
+#endif
 
 #endif // FOG_DEBUG
 

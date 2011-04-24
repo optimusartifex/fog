@@ -69,7 +69,7 @@ struct FOG_API Library
   // text codecs from Fog::String <=> ASCII string. Only reason is
   // performance, nothing more.
 
-  //! @brief Returns a symbol @a symbolName from opened library. 
+  //! @brief Returns a symbol @a symbolName from opened library.
   //!
   //! Return value can be @c NULL if symbol is not found or library is
   //! not open.

@@ -38,7 +38,7 @@ struct FOG_NO_EXPORT TextRectI
   {
   }
 
-  FOG_INLINE TextRectI(_Uninitialized) : 
+  FOG_INLINE TextRectI(_Uninitialized) :
     _rect(UNINITIALIZED)
   {
   }
@@ -95,7 +95,7 @@ struct FOG_NO_EXPORT TextRectF
   {
   }
 
-  FOG_INLINE TextRectF(_Uninitialized) : 
+  FOG_INLINE TextRectF(_Uninitialized) :
     _rect(UNINITIALIZED)
   {
   }
@@ -152,7 +152,7 @@ struct FOG_NO_EXPORT TextRectD
   {
   }
 
-  FOG_INLINE TextRectD(_Uninitialized) : 
+  FOG_INLINE TextRectD(_Uninitialized) :
     _rect(UNINITIALIZED)
   {
   }

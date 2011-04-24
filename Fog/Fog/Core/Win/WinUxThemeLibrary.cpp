@@ -90,7 +90,7 @@ err_t WinUxThemeLibrary::_init()
   const char* badSymbol;
 
   // Load standard introduced by WinXP (initial).
-  if (dll.getSymbols(xp_addr, xp_symbols, FOG_ARRAY_SIZE(xp_symbols), 
+  if (dll.getSymbols(xp_addr, xp_symbols, FOG_ARRAY_SIZE(xp_symbols),
     NUM_XP_SYMBOLS, (char**)&badSymbol) != NUM_XP_SYMBOLS)
   {
     // Some symbol failed to load? Inform about it.

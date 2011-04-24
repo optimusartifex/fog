@@ -94,19 +94,19 @@ extern FOG_API RasterFuncs _raster;
 //!
 //! @brief Raster painter engine command.
 //!
-//! Command is action that is executed by each painter's thread. To make sure 
-//! that threads are working with own data the @c run() method must use per 
+//! Command is action that is executed by each painter's thread. To make sure
+//! that threads are working with own data the @c run() method must use per
 //! thread context (@c RasterContext class).
 //!
 //! Commands are executed in FIFO (first-in, first-out) order for each thread,
 //! but threads are not synchronized. This means that threads may process
 //! different commands in parallel, but commands order per thread is preserved.
 //!
-//! Command can depend to calculation (@c RasterCalc class). If calculation 
-//! is not @c NULL and calculation status is @c RASTER_CALC_STATUS_WAIT then 
-//! thread can't process the command until the status is set into 
-//! @c RASTER_CALC_STATUS_READY or @c RASTER_CALC_STATUS_SKIP (that means skip 
-//! this command). Instead of waiting the worker can work on different 
+//! Command can depend to calculation (@c RasterCalc class). If calculation
+//! is not @c NULL and calculation status is @c RASTER_CALC_STATUS_WAIT then
+//! thread can't process the command until the status is set into
+//! @c RASTER_CALC_STATUS_READY or @c RASTER_CALC_STATUS_SKIP (that means skip
+//! this command). Instead of waiting the worker can work on different
 //! calculation, see @c RasterWorker::run() implementation. Notice that
 //! calculation status is set by @c RasterCalc if used.
 //!

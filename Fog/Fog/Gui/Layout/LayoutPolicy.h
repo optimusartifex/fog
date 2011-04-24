@@ -91,7 +91,7 @@ struct FOG_NO_EXPORT LayoutPolicy
   {
     struct
     {
-      uint32_t _policy : 8;  
+      uint32_t _policy : 8;
       uint32_t _horizontalStretch : 8;
       uint32_t _verticalStretch : 8;
 

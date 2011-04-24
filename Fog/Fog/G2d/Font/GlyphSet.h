@@ -58,7 +58,7 @@ struct FOG_API GlyphSet
     //! @brief String data flags.
     enum
     {
-      //! @brief Data are created on the heap. 
+      //! @brief Data are created on the heap.
       //!
       //! Object is created by function like @c Fog::Memory::alloc() or by
       //! @c new operator. It this flag is not set, you can't delete object from
@@ -67,8 +67,8 @@ struct FOG_API GlyphSet
 
       //! @brief Data are shareable.
       //!
-      //! Object can be directly referenced by internal method @c ref(). 
-      //! Sharable data are usually created on the heap and together 
+      //! Object can be directly referenced by internal method @c ref().
+      //! Sharable data are usually created on the heap and together
       //! with this flag is set also @c IsDynamic, but it isn't prerequisite.
       IsSharable = (1U << 1)
     };
@@ -163,7 +163,7 @@ struct FOG_API GlyphSet
     return ERR_OK;
   }
 
-  //! @brief Add glyph to glyph set 
+  //! @brief Add glyph to glyph set
   FOG_INLINE void _add(GlyphData* gd)
   {
     FOG_ASSERT(_d->length < _d->capacity);
@@ -202,7 +202,7 @@ struct TemporaryGlyphSet : public GlyphSet
   FOG_INLINE ~TemporaryGlyphSet() {}
 
 private:
-  FOG_INLINE TemporaryGlyphSet(const GlyphSet& other) : 
+  FOG_INLINE TemporaryGlyphSet(const GlyphSet& other) :
     GlyphSet(other._d->ref()) {}
   FOG_INLINE TemporaryGlyphSet(const TemporaryGlyphSet<N>& other) :
     GlyphSet(other._d->ref()) {}

@@ -33,7 +33,7 @@ namespace Fog {
 //!
 //! In short: Each memory block has information about used memory, increased by
 //! @c BlockMemoryAllocator::alloc() and decreased by @c BlockMemoryAllocator::free().
-//! When the number is decreased to zero then the block is free and will be 
+//! When the number is decreased to zero then the block is free and will be
 //! reused. The goal of this algorithm is to provide fast memory alloc/free,
 //! but do not eat too much memory (reuse it).
 //!
@@ -57,7 +57,7 @@ struct FOG_NO_EXPORT BlockMemoryAllocator
   // [Constants]
   // --------------------------------------------------------------------------
 
-  //! @brief Size of one block (decreased by some value to always fit in 
+  //! @brief Size of one block (decreased by some value to always fit in
   //! one/two pages). 96 bytes reserved for @c ::malloc() data and our
   //! @c Block data.
   enum { BLOCK_SIZE = 8080 };

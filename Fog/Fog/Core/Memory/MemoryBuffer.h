@@ -46,7 +46,7 @@ struct FOG_API MemoryBuffer
 
   //! @brief Create a @c MemoryManager instance, using default memory manager
   //! and no embedded buffer.
-  FOG_INLINE MemoryBuffer() : 
+  FOG_INLINE MemoryBuffer() :
     _memoryManager(Memory::getDefaultManager()),
     _memoryBuffer(NULL),
     _memorySize(0),

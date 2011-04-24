@@ -39,7 +39,7 @@ protected:
 
   FOG_INLINE BorderEffect(uint32_t extendType, const Color& extendColor) :
     _extendType(extendType),
-    _extendColor(extendColor) 
+    _extendColor(extendColor)
   {
   }
 

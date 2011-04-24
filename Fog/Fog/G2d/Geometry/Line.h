@@ -79,7 +79,7 @@ struct FOG_NO_EXPORT LineF
   FOG_INLINE void setLine(const LineF& line) { p[0] = line.p[0]; p[1] = line.p[1]; }
   FOG_INLINE void setLine(const PointF& pt0, const PointF& pt1) { p[0] = pt0; p[1] = pt1; }
   FOG_INLINE void setLine(float x0, float y0, float x1, float y1) { p[0].set(x0, y0); p[1].set(x1, y1); }
-  
+
   // --------------------------------------------------------------------------
   // [Reset]
   // --------------------------------------------------------------------------

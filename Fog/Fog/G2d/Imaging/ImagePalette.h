@@ -88,7 +88,7 @@ struct FOG_API ImagePalette
   //! @brief Returns a const pointer to the palette data in PRGB32 format.
   FOG_INLINE const Argb32* getData() const { return _d->data; }
 
-  //! @brief Returns a mutable pointer to the palette data in PRGB32 format 
+  //! @brief Returns a mutable pointer to the palette data in PRGB32 format
   //! without calling detach().
   FOG_INLINE Argb32* getDataX()
   {
@@ -114,7 +114,7 @@ struct FOG_API ImagePalette
   // --------------------------------------------------------------------------
 
   FOG_INLINE Argb32 getAt(sysuint_t index) const
-  { 
+  {
     FOG_ASSERT_X(index < 256, "Fog::ImagePalette::at() - Index out of range.");
     return _d->data[index];
   }

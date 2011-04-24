@@ -15,11 +15,11 @@
 // [Fog::Core - MMX-Ext - Fixes]
 // ============================================================================
 
-// Include some MMX instructions when building only using pure MMX (no SSE) 
-// or MMX+3dNow known as MMX extended instructions. Mainly used by specialized 
+// Include some MMX instructions when building only using pure MMX (no SSE)
+// or MMX+3dNow known as MMX extended instructions. Mainly used by specialized
 // MMX+3dNow optimizations where without SSE.
 //
-// These MMX extensions are always declared by xmmintrin.h, but it can be 
+// These MMX extensions are always declared by xmmintrin.h, but it can be
 // only declared when SSE is enabled when using GCC.
 #if defined(FOG_CC_GNU)
 

@@ -20,7 +20,7 @@ namespace Fog {
 // [Fog::ButtonBase]
 // ============================================================================
 
-ButtonBase::ButtonBase() : 
+ButtonBase::ButtonBase() :
   Widget(),
   _checked(CHECKED_OFF),
   _isMouseOver(false),

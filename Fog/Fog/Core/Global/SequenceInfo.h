@@ -93,7 +93,7 @@ struct SequenceInfo_TypeCopy
 // Primitive types.
 
 template<typename T>
-struct SequenceInfo_Primitive : 
+struct SequenceInfo_Primitive :
   public SequenceInfo_NoInitFree,
   public SequenceInfo_MemMove<sizeof(T)>,
   public SequenceInfo_MemCopy<sizeof(T)>
@@ -155,7 +155,7 @@ struct SequenceInfoVTable
   //!
   //! Copies data from one location to another, locations can't overlap.
   //! New class instance is created by this function, but old instance
-  //! is not freed!. Use move() function to move data or copy combined 
+  //! is not freed!. Use move() function to move data or copy combined
   //! with free() function.
   CopyFn copy;
 };

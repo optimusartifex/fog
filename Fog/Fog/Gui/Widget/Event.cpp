@@ -19,7 +19,7 @@ namespace Fog {
 // ============================================================================
 
 LayoutEvent::LayoutEvent(uint32_t code) :
-  Event(code) 
+  Event(code)
 {
 }
 
@@ -32,7 +32,7 @@ LayoutEvent::~LayoutEvent()
 // ============================================================================
 
 StateEvent::StateEvent(uint32_t code) :
-  Event(code) 
+  Event(code)
 {
 }
 
@@ -45,7 +45,7 @@ StateEvent::~StateEvent()
 // ============================================================================
 
 VisibilityEvent::VisibilityEvent(uint32_t code) :
-  Event(code) 
+  Event(code)
 {
 }
 
@@ -57,7 +57,7 @@ VisibilityEvent::~VisibilityEvent()
 // [Fog::GeometryEvent]
 // ============================================================================
 
-GeometryEvent::GeometryEvent() : 
+GeometryEvent::GeometryEvent() :
   Event(EVENT_GEOMETRY),
   _widgetGeometry(0, 0, 0, 0),
   _clientGeometry(0, 0, 0, 0),
@@ -88,7 +88,7 @@ OriginEvent::~OriginEvent()
 // ============================================================================
 
 FocusEvent::FocusEvent(uint32_t code, uint32_t reason) :
-  Event(code), _reason(reason) 
+  Event(code), _reason(reason)
 {
 }
 
@@ -118,7 +118,7 @@ KeyEvent::~KeyEvent()
 // [Fog::MouseEvent]
 // ============================================================================
 
-MouseEvent::MouseEvent(uint32_t code) : 
+MouseEvent::MouseEvent(uint32_t code) :
   Event(code),
   _button(0),
   _modifiers(0),
@@ -136,7 +136,7 @@ MouseEvent::~MouseEvent()
 // [Fog::SelectionEvent]
 // ============================================================================
 
-SelectionEvent::SelectionEvent(uint32_t code) : 
+SelectionEvent::SelectionEvent(uint32_t code) :
   Event(code)
 {
 }
@@ -149,7 +149,7 @@ SelectionEvent::~SelectionEvent()
 // [Fog::PaintEvent]
 // ============================================================================
 
-PaintEvent::PaintEvent(uint32_t code) : 
+PaintEvent::PaintEvent(uint32_t code) :
   Event(code),
   _painter(NULL)
 {
@@ -163,7 +163,7 @@ PaintEvent::~PaintEvent()
 // [Fog::CloseEvent]
 // ============================================================================
 
-CloseEvent::CloseEvent() : 
+CloseEvent::CloseEvent() :
   Event(EVENT_CLOSE)
 {
 }
@@ -176,7 +176,7 @@ CloseEvent::~CloseEvent()
 // [Fog::CheckEvent]
 // ============================================================================
 
-CheckEvent::CheckEvent(uint32_t code) : 
+CheckEvent::CheckEvent(uint32_t code) :
   Event(code),
   _status(code == EVENT_CHECK)
 {
@@ -190,7 +190,7 @@ CheckEvent::~CheckEvent()
 // [Fog::ThemeEvent]
 // ============================================================================
 
-ThemeEvent::ThemeEvent(uint32_t code) : 
+ThemeEvent::ThemeEvent(uint32_t code) :
   Event(code)
 {
 }
@@ -199,7 +199,7 @@ ThemeEvent::~ThemeEvent()
 {
 }
 
-AnimationEvent::AnimationEvent(uint32_t code) : 
+AnimationEvent::AnimationEvent(uint32_t code) :
   Event(code)
 {
 }

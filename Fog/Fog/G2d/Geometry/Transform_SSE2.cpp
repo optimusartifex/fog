@@ -215,7 +215,7 @@ static void FOG_CDECL _G2d_TransformD_mapPointsD_Scaling_SSE2(const TransformD& 
     for (i = length & 3; i; i--, dst++, src++)
     {
       __m128d src0;
-      
+
       Face::m128dLoad16a(src0, &src[0].x);
       Face::m128dMulPD(src0, src0, m_00_11);
       Face::m128dAddPD(src0, src0, m_20_21);
@@ -252,7 +252,7 @@ static void FOG_CDECL _G2d_TransformD_mapPointsD_Scaling_SSE2(const TransformD& 
     for (i = length & 3; i; i--, dst++, src++)
     {
       __m128d src0;
-      
+
       Face::m128dLoad16u(src0, &src[0].x);
       Face::m128dMulPD(src0, src0, m_00_11);
       Face::m128dAddPD(src0, src0, m_20_21);
@@ -364,7 +364,7 @@ static void FOG_CDECL _G2d_TransformD_mapPointsD_Affine_SSE2(const TransformD& s
 
     Face::m128dLoad16u(src0, &src[0].x);
     Face::m128dSwapPD(rev0, src0);
-    
+
     Face::m128dMulPD(src0, src0, m_00_11);
     Face::m128dMulPD(rev0, rev0, m_10_01);
     Face::m128dAddPD(src0, src0, m_20_21);
@@ -503,7 +503,7 @@ static void FOG_CDECL _G2d_TransformD_mapVectorD_SSE2(const TransformD& self, Po
   {
     __m128d rcp0 = _mm_setr_pd(self._02, self._12);
     __m128d rcpX;
-      
+
     rcp0 = _mm_mul_pd(rcp0, src0);
     rcpX = _mm_shuffle_pd(rcp0, rcp0, _MM_SHUFFLE2(0, 1));
 

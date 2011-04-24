@@ -44,8 +44,8 @@ union FOG_NO_EXPORT CpuId
 //! @brief Information about CPU features.
 //!
 //! Easy way to read CPU features. CPU is detected in startup time, so this class
-//! has method only to read the detected state. Use @c Cpu::features to 
-//! retrieve information about your CPU and @c use Cpu::Features enumeration 
+//! has method only to read the detected state. Use @c Cpu::features to
+//! retrieve information about your CPU and @c use Cpu::Features enumeration
 //! to get interesting features for you.
 //!
 //! Small example how to check for SSE2 support.

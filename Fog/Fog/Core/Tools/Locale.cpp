@@ -133,7 +133,7 @@ bool Locale::set(const String& name)
     _d->name = name;
     _setLConv(_d, localeconv());
   }
-  else 
+  else
   {
     reset();
   }

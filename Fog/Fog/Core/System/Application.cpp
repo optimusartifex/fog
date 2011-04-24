@@ -95,7 +95,7 @@ static void parseWinCmdLine(const String& cmdLine, List<String>& dst)
       if (cur->isSpace()) cur++;
       else break;
     }
-    
+
     // Zero character means end.
     if (cur->ch() == 0) goto end;
 
@@ -131,8 +131,8 @@ static void parseWinCmdLine(const String& cmdLine, List<String>& dst)
       // Escape sequence.
       if (c == Char('\\'))
       {
-        if (cur < end - 1 && (cur[1] == Char('\"') || 
-                              cur[1] == Char('\'') || 
+        if (cur < end - 1 && (cur[1] == Char('\"') ||
+                              cur[1] == Char('\'') ||
                               cur[1] == Char(' ')) )
         {
           cur++;
@@ -284,7 +284,7 @@ void Application::_init(const String& type)
 
 Application::~Application()
 {
-  // We will unload library here, not by UIEngine destructor, because 
+  // We will unload library here, not by UIEngine destructor, because
   // EventLoop may be also created by UIEngine.
   Library uiToClose;
 

@@ -118,7 +118,7 @@ struct FOG_API SvgRenderContext
     return _visitor != NULL;
   }
 
-  FOG_INLINE SvgVisitor* getVisitor() const 
+  FOG_INLINE SvgVisitor* getVisitor() const
   {
     return _visitor;
   }
@@ -249,7 +249,7 @@ struct FOG_API SvgRenderContext
 
   FOG_INLINE float getDpi() const
   {
-    return _dpi; 
+    return _dpi;
   }
 
   void setDpi(float dpi);

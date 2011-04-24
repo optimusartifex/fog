@@ -50,10 +50,10 @@ struct FOG_API Thread
   // [Handle]
   // --------------------------------------------------------------------------
 
-  // Fog::Thread::Handle should not be assumed to be a numeric type, 
-  // since the standard intends to allow pthread_t to be a structure. This 
-  // means you should not initialize it to a value, like 0.  If it's a member 
-  // variable, the constructor can safely "value initialize" using () in the 
+  // Fog::Thread::Handle should not be assumed to be a numeric type,
+  // since the standard intends to allow pthread_t to be a structure. This
+  // means you should not initialize it to a value, like 0.  If it's a member
+  // variable, the constructor can safely "value initialize" using () in the
   // initializer list.
 
 #if defined(FOG_OS_WINDOWS)
@@ -250,7 +250,7 @@ protected:
     //! @brief Used to synchronize thread startup.
     ThreadEvent event;
 
-    StartupData(const String& eventLoopType) : 
+    StartupData(const String& eventLoopType) :
       eventLoopType(eventLoopType),
       event(false, false)
     {

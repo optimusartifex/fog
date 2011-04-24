@@ -28,7 +28,7 @@ struct FOG_NO_EXPORT BlurEffect : public BorderEffect
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE BlurEffect() : 
+  FOG_INLINE BlurEffect() :
     BorderEffect(),
     _blurType(BLUR_FX_DEFAULT),
     _hRadius(1.0f),
@@ -36,7 +36,7 @@ struct FOG_NO_EXPORT BlurEffect : public BorderEffect
   {
   }
 
-  FOG_INLINE BlurEffect(const BlurEffect& other) : 
+  FOG_INLINE BlurEffect(const BlurEffect& other) :
     BorderEffect(other._extendType, other._extendColor),
     _blurType(other._blurType),
     _hRadius(other._hRadius),

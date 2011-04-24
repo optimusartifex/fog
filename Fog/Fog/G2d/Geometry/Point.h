@@ -43,7 +43,7 @@ struct FOG_NO_EXPORT PointI
 
   FOG_INLINE PointI() {}
   FOG_INLINE PointI(_Uninitialized) {}
-  
+
   FOG_INLINE PointI(int px, int py) : x(px), y(py) {}
 
   FOG_INLINE PointI(const PointI& other)
@@ -60,14 +60,14 @@ struct FOG_NO_EXPORT PointI
   FOG_INLINE int getY() const { return y; }
 
   FOG_INLINE PointI& set(const PointI& other)
-  { 
+  {
     x = other.x;
     y = other.y;
     return *this;
   }
 
   FOG_INLINE PointI& set(int px, int py)
-  { 
+  {
     x = px;
     y = py;
     return *this;
@@ -81,9 +81,9 @@ struct FOG_NO_EXPORT PointI
   // --------------------------------------------------------------------------
 
   FOG_INLINE PointI& reset()
-  { 
-    x = 0; 
-    y = 0; 
+  {
+    x = 0;
+    y = 0;
     return *this;
   }
 
@@ -449,8 +449,8 @@ struct PointD
     return *this;
   }
 
-  FOG_INLINE PointD& set(double px, double py) 
-  { 
+  FOG_INLINE PointD& set(double px, double py)
+  {
     x = px;
     y = py;
     return *this;
@@ -470,7 +470,7 @@ struct PointD
   // --------------------------------------------------------------------------
 
   FOG_INLINE PointD& reset()
-  { 
+  {
     x = 0.0;
     y = 0.0;
     return *this;
@@ -586,7 +586,7 @@ struct PointD
   FOG_INLINE PointD& operator+=(const PointI& other) { x += (double)other.x; y += (double)other.y; return *this; }
   FOG_INLINE PointD& operator+=(const PointF& other) { x += (double)other.x; y += (double)other.y; return *this; }
   FOG_INLINE PointD& operator+=(const PointD& other) { x += other.x; y += other.y; return *this; }
-  
+
   FOG_INLINE PointD& operator-=(const PointI& other) { x -= (double)other.x; y -= (double)other.y; return *this; }
   FOG_INLINE PointD& operator-=(const PointF& other) { x -= (double)other.x; y -= (double)other.y; return *this; }
   FOG_INLINE PointD& operator-=(const PointD& other) { x -= other.x; y -= other.y; return *this; }

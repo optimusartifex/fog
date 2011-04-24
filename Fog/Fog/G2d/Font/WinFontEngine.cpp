@@ -66,7 +66,7 @@ static FOG_INLINE FIXED FloatToFIXED(const float& d)
 }
 
 // Identity matrix.
-// 
+//
 // It seems that this matrix must be always passed to GetGlyphOutlineW function.
 static const MAT2 mat2identity =
 {
@@ -87,7 +87,7 @@ static err_t decompose_win32_glyph_outline(const uint8_t* gbuf, uint size, bool 
 
   do {
     const TTPOLYGONHEADER* th = (TTPOLYGONHEADER*)cur_glyph;
-    
+
     const uint8_t* end_poly = cur_glyph + th->cb;
     const uint8_t* cur_poly = cur_glyph + sizeof(TTPOLYGONHEADER);
 
@@ -101,7 +101,7 @@ static err_t decompose_win32_glyph_outline(const uint8_t* gbuf, uint size, bool 
     while (cur_poly < end_poly)
     {
       const TTPOLYCURVE* pc = (const TTPOLYCURVE*)cur_poly;
-      
+
       if (pc->wType == TT_PRIM_LINE)
       {
         int i;
@@ -113,7 +113,7 @@ static err_t decompose_win32_glyph_outline(const uint8_t* gbuf, uint size, bool 
           path.lineTo(PointD(x, y));
         }
       }
-      
+
       if (pc->wType == TT_PRIM_QSPLINE)
       {
         // Walk through points in spline.
@@ -130,7 +130,7 @@ static err_t decompose_win32_glyph_outline(const uint8_t* gbuf, uint size, bool 
             *(int*)&pnt_c.x = (*(int*)&pnt_b.x + *(int*)&pnt_c.x) / 2;
             *(int*)&pnt_c.y = (*(int*)&pnt_b.y + *(int*)&pnt_c.y) / 2;
           }
-          
+
           double x2, y2;
           x  = FIXEDToDouble(pnt_b.x);
           y  = FIXEDToDouble(pnt_b.y);
@@ -182,11 +182,11 @@ WinFontEngine::~WinFontEngine()
 static int CALLBACK enumFontCb(CONST LOGFONTW* lplf, CONST TEXTMETRICW* lpntm, DWORD fontType, LPARAM lParam)
 {
   WinEnumFontStruct* efs = (WinEnumFontStruct*)lParam;
-  const WCHAR* lfFaceName = lplf->lfFaceName; 
+  const WCHAR* lfFaceName = lplf->lfFaceName;
 
   // Some rejects, I dislike '@'.
   if (lfFaceName[0] == L'@') return 1;
-  
+
   // Windows will send us more fonts that we want, but usually
   // equal fonts are sent together, so we will simply copy this
   // font to buffer and compare it with previous. If this will
@@ -205,7 +205,7 @@ static int CALLBACK enumFontCb(CONST LOGFONTW* lplf, CONST TEXTMETRICW* lpntm, D
   name.set(reinterpret_cast<const Char*>(lfFaceName));
 
   if (!efs->fonts->contains(name)) efs->fonts->append(name);
-  
+
   // Return 1 to continue listing.
   return 1;
 }
@@ -244,7 +244,7 @@ FontFace* WinFontEngine::createDefaultFace()
 
 FontFace* WinFontEngine::createFace(
   const String& family,
-  float size, 
+  float size,
   const FontOptions& options,
   const TransformF& transform)
 {
@@ -524,7 +524,7 @@ GlyphData* WinFontFace::renderGlyph(HDC hdc, uint32_t uc)
   int stride = (gm.gmBlackBoxX + 3) & ~3;
   int bmWidth = gm.gmBlackBoxX;
   int bmHeight = dataSize / stride;
-     
+
   // Alloc image for glyph.
   if (glyphd->bitmap.create(SizeI(bmWidth, bmHeight), IMAGE_FORMAT_A8) != ERR_OK)
   {

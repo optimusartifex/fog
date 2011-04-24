@@ -369,7 +369,7 @@ public:
     return _us >= other._us;
   }
 
-  FOG_INLINE int64_t us() const 
+  FOG_INLINE int64_t us() const
   {
     return _us;
   }

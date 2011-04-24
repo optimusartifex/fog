@@ -83,7 +83,7 @@ err_t MapFile::map(const String& fileName, bool loadOnFail)
   // Get size of file (if size is too large -> fail)
   szLow = GetFileSize(hFile, &szHigh);
 #if FOG_ARCH_BITS == 32
-  if (szHigh) 
+  if (szHigh)
   {
     CloseHandle(hFile);
     return ERR_IO_FILE_TOO_BIG;

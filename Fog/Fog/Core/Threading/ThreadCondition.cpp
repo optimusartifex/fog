@@ -199,8 +199,8 @@ use a complex and relatively low efficiency container when a doubly linked list
 provided O(1) performance in all required operations.  Since other operations
 to provide performance-and/or-fairness required queue (FIFO) and list (LIFO)
 containers, I would also have needed to use an STL list/queue as well as an STL
-map.  In the end I decided it would be "fun" to just do it right, and I put 
-so many assertions into the container class that it is trivial to code review 
+map.  In the end I decided it would be "fun" to just do it right, and I put
+so many assertions into the container class that it is trivial to code review
 and validate its correctness.
 */
 
@@ -263,7 +263,7 @@ void ThreadCondition::timedWait(const TimeDelta& maxTime)
 
   {
     // Release caller's lock
-    AutoUnlock autoUnlock(_userLock);  
+    AutoUnlock autoUnlock(_userLock);
     WaitForSingleObject(handle, static_cast<DWORD>(maxTime.inMilliseconds()));
     // Minimize spurious signal creation window by recycling asap.
     AutoLock locked(_internalLock);

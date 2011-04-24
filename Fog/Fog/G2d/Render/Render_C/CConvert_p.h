@@ -28,7 +28,7 @@ struct FOG_NO_EXPORT CConvert
     uint32_t dfMaxBpc = Math::max<int>(df.getASize(), df.getRSize(), df.getGSize(), df.getBSize());
     uint32_t sfMaxBpc = Math::max<int>(sf.getASize(), sf.getRSize(), sf.getGSize(), sf.getBSize());
 
-    uint32_t keepColorSpace = ( (df.isPremultiplied() == sf.isPremultiplied()) || 
+    uint32_t keepColorSpace = ( (df.isPremultiplied() == sf.isPremultiplied()) ||
                                 (df.isPremultiplied() && sf.getASize() == 0  ) ||
                                 (sf.isPremultiplied() && df.getASize() == 0  ) );
     uint32_t premultiply    = ( !keepColorSpace && df.isPremultiplied() );
@@ -96,7 +96,7 @@ struct FOG_NO_EXPORT CConvert
     {
       if (!keepColorSpace)
       {
-        multi->middleware = premultiply ? _g2d_render.convert.prgb32_from_argb32 
+        multi->middleware = premultiply ? _g2d_render.convert.prgb32_from_argb32
                                         : _g2d_render.convert.argb32_from_prgb32;
       }
 
@@ -184,7 +184,7 @@ struct FOG_NO_EXPORT CConvert
     {
       if (!keepColorSpace)
       {
-        multi->middleware = premultiply 
+        multi->middleware = premultiply
           ? _g2d_render.convert.prgb64_from_argb64
           : _g2d_render.convert.argb64_from_prgb64;
       }
@@ -337,7 +337,7 @@ struct FOG_NO_EXPORT CConvert
           return RENDER_CONVERTER_DIB_ARGB32_DIB + d.isByteSwapped();
 
       case 48:
-        if (d.getAMask64() == 0 && d.getRMask64() == FOG_UINT64_C(0x0000FFFF00000000) && 
+        if (d.getAMask64() == 0 && d.getRMask64() == FOG_UINT64_C(0x0000FFFF00000000) &&
                                    d.getGMask64() == FOG_UINT64_C(0x00000000FFFF0000) &&
                                    d.getBMask32() == FOG_UINT64_C(0x000000000000FFFF))
           return RENDER_CONVERTER_DIB_RGB48_161616 + d.isByteSwapped();
@@ -347,8 +347,8 @@ struct FOG_NO_EXPORT CConvert
           return RENDER_CONVERTER_DIB_ARGB48_DIB + d.isByteSwapped();
 
       case 64:
-        if (d.getAMask64() == FOG_UINT64_C(0xFFFF000000000000) && 
-            d.getRMask64() == FOG_UINT64_C(0x0000FFFF00000000) && 
+        if (d.getAMask64() == FOG_UINT64_C(0xFFFF000000000000) &&
+            d.getRMask64() == FOG_UINT64_C(0x0000FFFF00000000) &&
             d.getGMask64() == FOG_UINT64_C(0x00000000FFFF0000) &&
             d.getBMask32() == FOG_UINT64_C(0x000000000000FFFF))
           return RENDER_CONVERTER_DIB_ARGB64_16161616 + d.isByteSwapped();
@@ -396,7 +396,7 @@ struct FOG_NO_EXPORT CConvert
       dst += multi->dstAdvance;
       src += multi->srcAdvance;
       passClosure.ditherOrigin.x += step;
-    } 
+    }
   }
 
   static void FOG_FASTCALL pass_one_postprocess(
@@ -455,7 +455,7 @@ struct FOG_NO_EXPORT CConvert
       dst += multi->dstAdvance;
       src += multi->srcAdvance;
       passClosure.ditherOrigin.x += step;
-    } 
+    }
   }
 
   // ==========================================================================
@@ -971,11 +971,11 @@ struct FOG_NO_EXPORT CConvert
       Face::p32 pix0b;
 
       Face::p64Load6aNative(pix0p, dst);
-      
+
       pix0r = (((uint32_t)( Face::u64FromP64(pix0p) >> d->rShift ) * d->rScale )      ) & 0x00FF0000;
       pix0g = (((uint32_t)( Face::u64FromP64(pix0p) >> d->gShift ) * d->gScale ) >>  8) & 0x0000FF00;
       pix0b = (((uint32_t)( Face::u64FromP64(pix0p) >> d->bShift ) * d->bScale ) >> 16);
-      
+
       Face::p32Store4aNative(dst, _FOG_FACE_COMBINE_4(0xFF000000, pix0r, pix0g, pix0b));
 
       dst += 4;
@@ -995,11 +995,11 @@ struct FOG_NO_EXPORT CConvert
       Face::p32 pix0b;
 
       Face::p64Load6aSwap(pix0p, dst);
-      
+
       pix0r = (((uint32_t)( Face::u64FromP64(pix0p) >> d->rShift ) * d->rScale )      ) & 0x00FF0000;
       pix0g = (((uint32_t)( Face::u64FromP64(pix0p) >> d->gShift ) * d->gScale ) >>  8) & 0x0000FF00;
       pix0b = (((uint32_t)( Face::u64FromP64(pix0p) >> d->bShift ) * d->bScale ) >> 16);
-      
+
       Face::p32Store4aNative(dst, _FOG_FACE_COMBINE_4(0xFF000000, pix0r, pix0g, pix0b));
 
       dst += 4;

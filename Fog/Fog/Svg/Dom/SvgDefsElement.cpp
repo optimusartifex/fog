@@ -18,7 +18,7 @@ namespace Fog {
 // [Fog::SvgDefsElement]
 // ============================================================================
 
-SvgDefsElement::SvgDefsElement() : 
+SvgDefsElement::SvgDefsElement() :
   SvgElement(fog_strings->getString(STR_SVG_ELEMENT_defs), SVG_ELEMENT_DEFS)
 {
 }

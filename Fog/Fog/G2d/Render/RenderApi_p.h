@@ -337,7 +337,7 @@ struct FOG_NO_EXPORT G2dRenderApi
   FOG_INLINE const CompositeCoreFuncs* getCompositeCoreFuncs(uint32_t format, uint32_t op) const
   {
     FOG_ASSERT(format < IMAGE_FORMAT_COUNT);
-    FOG_ASSERT(op >= RENDER_COMPOSITE_CORE_START && 
+    FOG_ASSERT(op >= RENDER_COMPOSITE_CORE_START &&
                op <  RENDER_COMPOSITE_CORE_START + RENDER_COMPOSITE_CORE_COUNT);
 
     return &compositeCore[format][op];
@@ -350,7 +350,7 @@ struct FOG_NO_EXPORT G2dRenderApi
   FOG_INLINE const CompositeExtFuncs* getCompositeExtFuncs(uint32_t format, uint32_t op) const
   {
     FOG_ASSERT(format < IMAGE_FORMAT_COUNT);
-    FOG_ASSERT(op >= RENDER_COMPOSITE_EXT_START && 
+    FOG_ASSERT(op >= RENDER_COMPOSITE_EXT_START &&
                op <  RENDER_COMPOSITE_EXT_START + RENDER_COMPOSITE_EXT_COUNT);
 
     return &compositeExt[format][op - RENDER_COMPOSITE_EXT_START];

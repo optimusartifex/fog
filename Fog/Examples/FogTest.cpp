@@ -113,6 +113,11 @@ void MyWindow::onKey(KeyEvent* e)
       case KEY_LEFT : _subx -= 0.2f; update(WIDGET_UPDATE_ALL); break;
       case KEY_RIGHT: _subx += 0.2f; update(WIDGET_UPDATE_ALL); break;
 
+      case KEY_U: _suby -= 10.0f; update(WIDGET_UPDATE_ALL); break;
+      case KEY_J: _suby += 10.0f; update(WIDGET_UPDATE_ALL); break;
+      case KEY_H: _subx -= 10.0f; update(WIDGET_UPDATE_ALL); break;
+      case KEY_K: _subx += 10.0f; update(WIDGET_UPDATE_ALL); break;
+
       case KEY_Q: _rotate -= 0.05f; update(WIDGET_UPDATE_ALL); break;
       case KEY_W: _rotate += 0.05f; update(WIDGET_UPDATE_ALL); break;
 
@@ -190,13 +195,13 @@ void MyWindow::onPaint(PaintEvent* e)
 
   //p->fillCircle(CircleF(PointF(310.0f, 310.0f), 300.0f));
   //p->fillBox(BoxI(50, 50, 450, 450));
-  
+
   p->setCompositingOperator(COMPOSITE_SRC_OVER);
   p->setSource(Argb32(0x80FFFFFF));
-  //p->drawBox(BoxI(100, 100, 400, 400)); 
+  //p->drawBox(BoxI(100, 100, 400, 400));
 
   //p->setOpacity(0.5f);
-  {
+  /*{
     //ConicalGradientF gr(PointF(200, 200), MATH_PI);
     //gr.setStops(linear.getStops());
     //p->setSource(gr);
@@ -207,7 +212,7 @@ void MyWindow::onPaint(PaintEvent* e)
     p->setSource(gr);
   }
 
-  p->clear();
+  p->clear();*/
   //p->setSource(radial);
   //p->setSource(Texture(i[0], TEXTURE_TILE_CLAMP, Color(Argb32(0xFFFF0000))));
   //p->fillBox(BoxF(0.0f, 0.0f, 400.0f, 400.0f));
@@ -217,7 +222,13 @@ void MyWindow::onPaint(PaintEvent* e)
   //p->drawBox(BoxF(0.0f, 0.0f, 400.0f, 400.0f));
   //p->fillCircle(CircleF(PointF(200, 200), 100.0f));
 
-  p->blitImage(PointI(100, 100), i[0]);
+  //p->scale(PointF(2.0f, 2.0f));
+  //p->blitImage(PointI(100, 100), i[0]);
+  //p->setSource(Argb32(0xFF000000));
+  //p->fillRect(RectI(100, 100, 300, 300));
+
+  //p->blitImage(RectI(100, 100, 100, 100), i[0]);
+
 
   /*
   p->fillRect(RectI(10, 10, 200, 200));
@@ -239,7 +250,7 @@ void MyWindow::onPaint(PaintEvent* e)
     p->clipRegion(CLIP_OP_REPLACE, region);
   }
   */
-  
+
   PathF path;
   PathF clip;
 
@@ -249,6 +260,8 @@ void MyWindow::onPaint(PaintEvent* e)
   path.circle(CircleF(PointF(240.0f, 240.0f), 115.0f), PATH_DIRECTION_CW);
   path.ellipse(EllipseF(PointF(320.0f, 320.0f), PointF(115.0f, 50.0f)), PATH_DIRECTION_CCW);
   path._modifiedBoundingBox();
+
+
   //path.moveTo(PointF(200.0f, 100.0f));
   //path.cubicTo(PointF(400.0f, 250.0f),
   //  PointF(440.0f, 220.0f), PointF(200.0f, 400.0f));

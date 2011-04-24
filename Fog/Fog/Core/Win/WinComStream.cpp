@@ -27,7 +27,7 @@ namespace Fog {
 // filled pStatstg->cbSize, but nothing else. We are using IStream to
 // provide streaming for Gdi+ and it expects that all members are clear.
 
-WinComStream::WinComStream(Stream& stream) : 
+WinComStream::WinComStream(Stream& stream) :
   _stream(stream),
   _refCount(1)
 {
@@ -46,19 +46,19 @@ HRESULT STDMETHODCALLTYPE WinComStream::QueryInterface(REFIID iid, void** ppvObj
     *ppvObject = static_cast<IStream*>(this);
     AddRef();
     return S_OK;
-  } 
+  }
   else
   {
     return E_NOINTERFACE;
   }
 }
 
-ULONG STDMETHODCALLTYPE WinComStream::AddRef(void) 
-{ 
-  return (ULONG)InterlockedIncrement(&_refCount); 
+ULONG STDMETHODCALLTYPE WinComStream::AddRef(void)
+{
+  return (ULONG)InterlockedIncrement(&_refCount);
 }
 
-ULONG STDMETHODCALLTYPE WinComStream::Release(void) 
+ULONG STDMETHODCALLTYPE WinComStream::Release(void)
 {
   ULONG res = (ULONG)InterlockedDecrement(&_refCount);
   if (res == 0) fog_delete(this);
@@ -101,33 +101,33 @@ HRESULT STDMETHODCALLTYPE WinComStream::SetSize(ULARGE_INTEGER libNewSize)
 HRESULT STDMETHODCALLTYPE WinComStream::CopyTo(IStream* pstm, ULARGE_INTEGER cb, ULARGE_INTEGER* pcbRead, ULARGE_INTEGER* pcbWritten)
 {
   // TODO.
-  return E_NOTIMPL;   
+  return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE WinComStream::Commit(DWORD grfCommitFlags)
-{ 
-  return E_NOTIMPL;   
+{
+  return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE WinComStream::Revert(void)
-{ 
-  return E_NOTIMPL;   
+{
+  return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE WinComStream::LockRegion(ULARGE_INTEGER libOffset, ULARGE_INTEGER cb, DWORD dwLockType)
-{ 
-  return E_NOTIMPL;   
+{
+  return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE WinComStream::UnlockRegion(ULARGE_INTEGER libOffset, ULARGE_INTEGER cb, DWORD dwLockType)
-{ 
-  return E_NOTIMPL;   
+{
+  return E_NOTIMPL;
 }
 
-HRESULT STDMETHODCALLTYPE WinComStream::Clone(IStream** ppstm)                                  
-{ 
+HRESULT STDMETHODCALLTYPE WinComStream::Clone(IStream** ppstm)
+{
   // TODO.
-  return E_NOTIMPL;   
+  return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE WinComStream::Seek(LARGE_INTEGER liDistanceToMove, DWORD dwOrigin, ULARGE_INTEGER* lpNewFilePointer)
@@ -148,7 +148,7 @@ HRESULT STDMETHODCALLTYPE WinComStream::Seek(LARGE_INTEGER liDistanceToMove, DWO
   }
 }
 
-HRESULT STDMETHODCALLTYPE WinComStream::Stat(STATSTG* pStatstg, DWORD grfStatFlag) 
+HRESULT STDMETHODCALLTYPE WinComStream::Stat(STATSTG* pStatstg, DWORD grfStatFlag)
 {
   ZeroMemory(pStatstg, sizeof(*pStatstg));
   _stream.getSize((int64_t*)&pStatstg->cbSize);

@@ -1,6 +1,6 @@
 // [Fog-Core]
 //
-// [License] 
+// [License]
 // MIT, See COPYING file in package
 
 // [Guard]
@@ -47,9 +47,9 @@
 // [Byte Order]
 // ============================================================================
 
-//! @brief Target byteorder, can be: 
+//! @brief Target byteorder, can be:
 //!   - @c FOG_LITTLE_ENDIAN,
-//!   - @c FOG_BIG_ENDIAN. 
+//!   - @c FOG_BIG_ENDIAN.
 #define FOG_BYTE_ORDER ${FOG_BYTE_ORDER}
 
 // ============================================================================

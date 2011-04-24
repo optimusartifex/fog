@@ -71,19 +71,19 @@ struct FOG_API Layout : public LayoutItem
   // [Margin]
   // --------------------------------------------------------------------------
 
-  virtual int calcMargin(int margin, uint32_t location) const;  
+  virtual int calcMargin(int margin, uint32_t location) const;
   RectI getContentsRect() const;
 
   //helper method
   void calcContentMargins(int& side, int& top) const;
-  
+
   // --------------------------------------------------------------------------
   // [Spacing]
   // --------------------------------------------------------------------------
 
   virtual int getSpacing() const;
   virtual void setSpacing(int spacing);
-  
+
   // --------------------------------------------------------------------------
   // [Expanding Directions]
   // --------------------------------------------------------------------------
@@ -123,19 +123,19 @@ struct FOG_API Layout : public LayoutItem
   // [Alignment]
   // --------------------------------------------------------------------------
 
-  bool setLayoutAlignment(LayoutItem* item, uint32_t alignment);    
+  bool setLayoutAlignment(LayoutItem* item, uint32_t alignment);
 
   // --------------------------------------------------------------------------
   // [Update And Activation Of Layout]
-  // --------------------------------------------------------------------------  
+  // --------------------------------------------------------------------------
 
-  void update();    
+  void update();
   bool activate();
   void invalidActivateAll(bool activate = true);
 
   // --------------------------------------------------------------------------
   // [Flex support]
-  // -------------------------------------------------------------------------- 
+  // --------------------------------------------------------------------------
 
   FOG_INLINE void addFlexItem() { ++_flexcount; }
   FOG_INLINE void removeFlexItem() { --_flexcount; }
@@ -143,17 +143,17 @@ struct FOG_API Layout : public LayoutItem
 
   // --------------------------------------------------------------------------
   // [Event Handler]
-  // --------------------------------------------------------------------------  
-  
+  // --------------------------------------------------------------------------
+
   virtual void onLayout(LayoutEvent* e);
 
   FOG_EVENT_BEGIN()
-    FOG_EVENT_DEF(EVENT_LAYOUT_REQUEST     , onLayout          , LayoutEvent    , OVERRIDE)    
+    FOG_EVENT_DEF(EVENT_LAYOUT_REQUEST     , onLayout          , LayoutEvent    , OVERRIDE)
   FOG_EVENT_END()
 
   // --------------------------------------------------------------------------
   // [Members]
-  // --------------------------------------------------------------------------  
+  // --------------------------------------------------------------------------
 
   //! @brief Parent item (Widget or Layout) of this Layout.
   LayoutItem* _parentItem;
@@ -162,18 +162,18 @@ struct FOG_API Layout : public LayoutItem
 
   //! @brief Size constraint
   //! LAYOUT TODO: Not implemented).
-  uint32_t _constraint;   
+  uint32_t _constraint;
 
   //! @brief To easy know whether we have flex item within layout.
   int _flexcount;
 
   //! @brief Max widget size.
   int _spacing : 24;
-  uint _toplevel : 1;  
+  uint _toplevel : 1;
   uint _activated : 1;
   uint _enabled : 1;
   //uint _invalidated : 1;
-  uint _unused : 5; 
+  uint _unused : 5;
 
   Layout* _nextactivate;
 
@@ -191,8 +191,8 @@ protected:
 
   FOG_INLINE int getLength() const
   { return (int)(uint)_children.getLength(); }
-  
-  int addChild(LayoutItem* item);  
+
+  int addChild(LayoutItem* item);
 
   int indexOf(LayoutItem*) const;
   void remove(LayoutItem* item);
@@ -202,7 +202,7 @@ protected:
   void reparentChildWidgets(Widget* mw);
   static bool removeAllWidgets(LayoutItem* li, Widget* w);
 
-private:  
+private:
   int addChildLayout(Layout* l);
 
   FOG_DISABLE_COPY(Layout)

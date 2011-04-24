@@ -28,7 +28,7 @@ struct XmlElement;
 
 //! @internal
 //!
-//! @brief Hash table to store elemens ID used by the @c XmlDocument. Do not 
+//! @brief Hash table to store elemens ID used by the @c XmlDocument. Do not
 //! use directly.
 struct FOG_API XmlIdManager
 {

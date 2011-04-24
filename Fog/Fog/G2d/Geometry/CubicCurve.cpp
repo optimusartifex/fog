@@ -101,10 +101,10 @@ static void FOG_CDECL _G2d_CubicCurveT_getExtrema(const typename PointT<Number>:
 // ============================================================================
 
 // Add polyline length if close enough.
-static void _G2d_CubicCurveX_addIfClose(const PointD* self, double *length, double error) 
+static void _G2d_CubicCurveX_addIfClose(const PointD* self, double *length, double error)
 {
   PointD left[4], right[4];
-  double arclen   = Math2d::distEuclidean(self[0], self[1]) + 
+  double arclen   = Math2d::distEuclidean(self[0], self[1]) +
                     Math2d::distEuclidean(self[1], self[2]) +
                     Math2d::distEuclidean(self[2], self[3]);
   double chordlen = Math2d::distEuclidean(self[0], self[3]);

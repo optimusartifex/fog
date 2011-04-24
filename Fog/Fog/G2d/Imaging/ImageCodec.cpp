@@ -94,7 +94,7 @@ void ImageCodec::updateProgress(uint32_t y, uint32_t height)
 // [Fog::ImageCodec - Image Size]
 // ============================================================================
 
-bool ImageCodec::checkImageSize() const 
+bool ImageCodec::checkImageSize() const
 {
   return ((_size.w > 0) & (_size.w <= IMAGE_MAX_WIDTH ) &
           (_size.h > 0) & (_size.h <= IMAGE_MAX_HEIGHT) );

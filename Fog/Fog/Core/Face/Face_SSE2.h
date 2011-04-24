@@ -698,7 +698,7 @@ static FOG_INLINE void m128dEpsilonPD(m128d& dst, const m128d& a)
 // [Fog::Face - SSE2 - MoveMask]
 // ============================================================================
 
-//! @brief Create a 16-bit mask from the most significant bits of the 16 signed 
+//! @brief Create a 16-bit mask from the most significant bits of the 16 signed
 //! or unsigned 8-bit integers in a and zero extend the upper bits.
 static FOG_INLINE void m128iMoveMask8(int& dst, const m128i& a)
 {

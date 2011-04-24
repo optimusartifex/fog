@@ -833,7 +833,7 @@ err_t String::appendUtf8(const char* str, sysuint_t length)
 {
   if (length == DETECT_LENGTH) length = StringUtil::len(str);
   if (length == 0) return ERR_OK;
-  
+
   sysuint_t i = length;
 
   err_t err;
@@ -1101,7 +1101,7 @@ __exponentialForm:
     *dest++ = zero + Char(*bufCur++);
     if ((fmt & FORMAT_ALTERNATE_FORM) != 0 || precision > 0)
     {
-      if (bufCur != bufEnd || doubleForm == DF_EXPONENT) 
+      if (bufCur != bufEnd || doubleForm == DF_EXPONENT)
         *dest++ = l.getChar(LOCALE_CHAR_DECIMAL_POINT);
     }
 

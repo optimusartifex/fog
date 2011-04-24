@@ -7,8 +7,8 @@ Introduction
 ============
 
 Fog library is library for cross-platform development in C++ language. Main goal
-of the Fog library is to provide very fast and accurate graphics output on all 
-supported operating systems and architectures. Currently Fog is not only graphics 
+of the Fog library is to provide very fast and accurate graphics output on all
+supported operating systems and architectures. Currently Fog is not only graphics
 library, it contains many other classes related to cross-platform development, but
 many classes are related to 2d graphics.
 

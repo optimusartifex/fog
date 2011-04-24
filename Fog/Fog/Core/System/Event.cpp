@@ -55,7 +55,7 @@ void Event::run()
   }
 }
 
-Event* Event::clone() const 
+Event* Event::clone() const
 {
   return ( fog_new Event(getCode(), getFlags()) )->_cloned(getReceiver());
 }
@@ -116,7 +116,7 @@ Event* ChildEvent::clone() const
 // [Fog::TimerEvent]
 // ============================================================================
 
-TimerEvent::TimerEvent(Timer* timer) : 
+TimerEvent::TimerEvent(Timer* timer) :
   Event(EVENT_TIMER),
   _timer(timer)
 {
@@ -146,7 +146,7 @@ PropertyEvent::~PropertyEvent()
 }
 
 Event* PropertyEvent::clone() const
-{ 
+{
   return ( fog_new PropertyEvent(getName()) )->_cloned(getReceiver());
 }
 

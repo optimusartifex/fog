@@ -124,7 +124,7 @@ private:
   Event* _next;
 
 protected:
-  //! @brief Receiver was deleted. 
+  //! @brief Receiver was deleted.
   //!
   //! If this flag is true, the event will be discarded instead of dispatched.
   //! This flag is set by receiver object destructor.

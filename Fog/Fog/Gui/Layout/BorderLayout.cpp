@@ -46,7 +46,7 @@ void BorderLayout::addItem(LayoutItem *item, uint32_t edge, int flex)
 
   if (edge & LAYOUT_EDGE_Y_MASK)
   {
-    _y.append(item);        
+    _y.append(item);
   }
   else if (edge & LAYOUT_EDGE_X_MASK)
   {
@@ -163,7 +163,7 @@ void BorderLayout::calculateLayoutHint(LayoutHint& hint)
         prop->_flex = (float)prop->getFlex();
         prop->_hint = hint.getSizeHint().getHeight();
         prop->_min = hint.getMinimumSize().getHeight();
-        prop->_max = hint.getMaximumSize().getHeight();          
+        prop->_max = hint.getMaximumSize().getHeight();
 
         prop->_next = _verticalflex;
         _verticalflex = item;
@@ -204,7 +204,7 @@ void BorderLayout::calculateLayoutHint(LayoutHint& hint)
   int height = Math::max(heightX, heightY) + spacingSumY + marginY;
 
   hint._minimumSize.set(minWidth, minHeight);
-  hint._sizeHint.set(width, height);    
+  hint._sizeHint.set(width, height);
 }
 
 #define CLEAN(VAR, MIN, MAX) VAR = VAR < MIN ? MIN : ( VAR > MAX ? MAX : VAR)
@@ -213,7 +213,7 @@ void BorderLayout::setLayoutGeometry(const RectI& rect)
 {
   int availWidth = rect.getWidth();
   int availHeight = rect.getHeight();
-  
+
   // Do not allow to overlap.
   if (availHeight < getLayoutSizeHint().getHeight())
   {
@@ -250,7 +250,7 @@ void BorderLayout::setLayoutGeometry(const RectI& rect)
       //it differently
       continue;
     }
-    
+
     const LayoutHint& hint = item->getLayoutHint();
     LayoutData* prop = item->getLayoutData<LayoutData>();
 
@@ -266,7 +266,7 @@ void BorderLayout::setLayoutGeometry(const RectI& rect)
     {
       // NORTH or SOUTH.
       width = availWidth - marginX;
-      CLEAN(width, hint.getMinimumSize().getWidth(), hint.getMaximumSize().getWidth());        
+      CLEAN(width, hint.getMinimumSize().getWidth(), hint.getMaximumSize().getWidth());
 
       if (prop->_offset != 0)
       {
@@ -292,7 +292,7 @@ void BorderLayout::setLayoutGeometry(const RectI& rect)
     else if (prop->_edge & LAYOUT_EDGE_X_MASK)
     {
       height = availHeight - marginY;
-      CLEAN(height, hint.getMinimumSize().getHeight(), hint.getMaximumSize().getHeight()); 
+      CLEAN(height, hint.getMinimumSize().getHeight(), hint.getMaximumSize().getHeight());
 
       if (prop->_offset != 0)
       {
@@ -301,7 +301,7 @@ void BorderLayout::setLayoutGeometry(const RectI& rect)
       }
 
       // Update available width
-      int used = width + marginX + spacingX;        
+      int used = width + marginX + spacingX;
 
       // Update coordinates, for next child
       if (prop->_edge == LAYOUT_EDGE_WEST)

@@ -24,7 +24,7 @@ struct FOG_NO_EXPORT CBase
   // [MemFill - 32]
   // ==========================================================================
 
-  struct FOG_NO_EXPORT MemFill32Context 
+  struct FOG_NO_EXPORT MemFill32Context
   {
     FOG_INLINE void init(uint32_t pattern)
     {

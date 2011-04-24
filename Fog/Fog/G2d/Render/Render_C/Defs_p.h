@@ -76,7 +76,7 @@
 //
 //    -------------------------------------------------------------------------
 //
-//    C_BLIT_SPAN8_A8_GLYPH() 
+//    C_BLIT_SPAN8_A8_GLYPH()
 //    {
 //      'dst'  - The destination pointer.
 //      'msk'  - The a8-mask pointer.
@@ -296,7 +296,7 @@
 // ============================================================================
 
 // These macros were designed to simplify blit functions. The idea is very simple.
-// There are usually three loops per highly optimized blitter. The first loop 
+// There are usually three loops per highly optimized blitter. The first loop
 // aligns the destination buffer, usually to 16 bytes (for SSE2 processing).
 // The second loop (main loop) processes more pixels per iteration (for example
 // 4 ARGB pixels, 8 ARGB pixels, 16 A8 pixels, ...). The third loop is similar
@@ -1283,7 +1283,7 @@ _##_Group_##_End: \
 //   // Begin of span-loop.
 //   P_FETCH_SPAN8_BEGIN()
 //
-//     // Here you must decide if you pass your own buffer to span (only 
+//     // Here you must decide if you pass your own buffer to span (only
 //     // possible if mode is @c RENDER_FETCH_REFERENCE). To set current
 //     // buffer, use:
 //
@@ -1294,7 +1294,7 @@ _##_Group_##_End: \
 //     P_FETCH_SPAN8_SET_CUSTOM(yourCustomBuffer)
 //
 //     // If you used custom buffer you finished with this span, otherwise use
-//     // 'dst' pointer (and increment it after each fetcher pixel). For 
+//     // 'dst' pointer (and increment it after each fetcher pixel). For
 //     // example:
 //
 //     do {

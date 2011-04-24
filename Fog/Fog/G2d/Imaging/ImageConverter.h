@@ -219,7 +219,7 @@ struct FOG_API ImageConverter
   {
     return _d->dstFormatDescription;
   }
-  
+
   //! @brief Get the source image format description.
   FOG_INLINE const ImageFormatDescription& getSourceFormatDescription() const
   {

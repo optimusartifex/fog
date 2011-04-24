@@ -209,8 +209,8 @@ static FOG_INLINE void zero_16(void* dst)
   __m128i zero = _mm_setzero_si128();
   _mm_storeu_si128(&((__m128i *)dst)[0], zero);
 #else
-  zero_8((uint8_t*)(dst) + 0); 
-  zero_8((uint8_t*)(dst) + 8); 
+  zero_8((uint8_t*)(dst) + 0);
+  zero_8((uint8_t*)(dst) + 8);
 #endif
 }
 
@@ -221,8 +221,8 @@ static FOG_INLINE void zero_32(void* dst)
   _mm_storeu_si128((__m128i *)(dst) + 0, zero);
   _mm_storeu_si128((__m128i *)(dst) + 1, zero);
 #else
-  zero_16((uint8_t*)(dst) +  0); 
-  zero_16((uint8_t*)(dst) + 16); 
+  zero_16((uint8_t*)(dst) +  0);
+  zero_16((uint8_t*)(dst) + 16);
 #endif
 }
 
@@ -300,7 +300,7 @@ static FOG_INLINE bool eq_8(const void* a, const void* b)
 #else
   return (((uint32_t *)a)[0] == ((uint32_t *)b)[0]) &
          (((uint32_t *)a)[1] == ((uint32_t *)b)[1]) ;
-#endif 
+#endif
 }
 
 static FOG_INLINE bool eq_16(const void* a, const void* b)
@@ -319,7 +319,7 @@ static FOG_INLINE bool eq_16(const void* a, const void* b)
          (((uint32_t *)a)[1] == ((uint32_t *)b)[1]) &
          (((uint32_t *)a)[2] == ((uint32_t *)b)[2]) &
          (((uint32_t *)a)[3] == ((uint32_t *)b)[3]) ;
-#endif 
+#endif
 }
 
 static FOG_INLINE bool eq_32(const void* a, const void* b)

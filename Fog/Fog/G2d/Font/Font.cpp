@@ -210,7 +210,7 @@ err_t Font_Local::putFaceToCache(FontFace* face)
   AutoLock locked(lock);
   err_t err = faceCache.put(
     FontFaceEntry(
-      face->family, 
+      face->family,
       face->metrics.getSize(),
       face->options,
       face->transform),
@@ -668,7 +668,7 @@ FOG_NO_EXPORT void _g2d_font_init(void)
   return;
 
 _Fail:
-  Debug::dbgFunc("Fog::Font", "init", 
+  Debug::dbgFunc("Fog::Font", "init",
     "Error when creating a default font face, setting to null.\n");
 }
 

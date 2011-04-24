@@ -89,7 +89,7 @@ FOG_NO_EXPORT void _g2d_render_init_c(void)
     // Premultiply / Demultiply.
     RENDER_INIT(prgb32_from_argb32, (ImageConverterBlitLineFn)Render_C::CConvert::prgb32_from_argb32);
     RENDER_INIT(argb32_from_prgb32, (ImageConverterBlitLineFn)Render_C::CConvert::argb32_from_prgb32);
- 
+
     // A8 Destination.
     RENDER_POST(a8_from_dib     [RENDER_CONVERTER_DIB_A8                 ]);
     RENDER_POST(a8_from_dib     [RENDER_CONVERTER_DIB_A16                ]);
@@ -123,7 +123,7 @@ FOG_NO_EXPORT void _g2d_render_init_c(void)
     RENDER_INIT(argb32_from_dib [RENDER_CONVERTER_DIB_RGB48_161616_BS    ], Render_C::CConvert::argb32_native_from_rgb48_161616_bs);
     RENDER_INIT(argb32_from_dib [RENDER_CONVERTER_DIB_RGB48_DIB          ], Render_C::CConvert::argb32_native_from_rgb48_dib);
     RENDER_INIT(argb32_from_dib [RENDER_CONVERTER_DIB_RGB48_DIB_BS       ], Render_C::CConvert::argb32_native_from_rgb48_dib_bs);
-  
+
     RENDER_INIT(argb32_from_dib [RENDER_CONVERTER_DIB_ARGB16_4444        ], Render_C::CConvert::argb32_native_from_argb16_4444);
     RENDER_INIT(argb32_from_dib [RENDER_CONVERTER_DIB_ARGB16_4444_BS     ], Render_C::CConvert::argb32_native_from_argb16_4444_bs);
     RENDER_INIT(argb32_from_dib [RENDER_CONVERTER_DIB_ARGB16_DIB         ], Render_C::CConvert::argb32_native_from_argb16_dib);
@@ -272,7 +272,7 @@ FOG_NO_EXPORT void _g2d_render_init_c(void)
     RENDER_POST(vblit_span[IMAGE_FORMAT_RGB48    ]);
   //RENDER_INIT(vblit_span[IMAGE_FORMAT_A16      ], Render_C::CSrc::prgb32_vblit_a16_span);
   }
-  
+
   // --------------------------------------------------------------------------
   // [Render - Composite - SrcOver - XRGB32]
   // --------------------------------------------------------------------------
@@ -304,7 +304,7 @@ FOG_NO_EXPORT void _g2d_render_init_c(void)
     RENDER_POST(vblit_span[IMAGE_FORMAT_RGB48    ]);
   //RENDER_INIT(vblit_span[IMAGE_FORMAT_A16      ], Render_C::CSrc::prgb32_vblit_a16_span);
   }
-  
+
   // --------------------------------------------------------------------------
   // [Render - Composite - Clear]
   // --------------------------------------------------------------------------
@@ -333,7 +333,7 @@ FOG_NO_EXPORT void _g2d_render_init_c(void)
     solid.fetch[IMAGE_FORMAT_RGB48 ] = Render_C::Helpers::p_solid_fetch_rgb48;
     solid.fetch[IMAGE_FORMAT_A16   ] = Render_C::Helpers::p_solid_fetch_a16;
   }
-#endif 
+#endif
 
   // --------------------------------------------------------------------------
   // [Render - Gradient - Interpolate]
@@ -346,7 +346,7 @@ FOG_NO_EXPORT void _g2d_render_init_c(void)
     gradient.interpolate[IMAGE_FORMAT_PRGB32] = Render_C::PGradientBase::interpolate_prgb32;
     gradient.interpolate[IMAGE_FORMAT_XRGB32] = Render_C::PGradientBase::interpolate_prgb32;
   }
-#endif 
+#endif
 
   // --------------------------------------------------------------------------
   // [Render - Gradient - Linear]

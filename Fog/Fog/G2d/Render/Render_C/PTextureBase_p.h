@@ -66,7 +66,7 @@ struct FOG_NO_EXPORT PTextureBase
 
     // Initialize base variables, including shallow copy of a given image.
     ctx->_d.texture.base.texture.initCustom1(srcImage);
-    ctx->_d.texture.base.pixels = srcImage.getFirst() + 
+    ctx->_d.texture.base.pixels = srcImage.getFirst() +
                                   (sysint_t)srcFragment.y * srcStride +
                                   (sysint_t)srcFragment.x * srcBPP;
 
@@ -471,7 +471,7 @@ _Has16BPC:
     double s = (double)step;
 
     fetcher->_d.texture.affine.px = Math::repeat(
-      fetcher->_d.texture.affine.px + fetcher->_d.texture.affine.dx * s, 
+      fetcher->_d.texture.affine.px + fetcher->_d.texture.affine.dx * s,
       fetcher->_ctx->_d.texture.affine.mx);
     fetcher->_d.texture.affine.py = Math::repeat(
       fetcher->_d.texture.affine.py + fetcher->_d.texture.affine.dy * s,
@@ -523,7 +523,7 @@ struct FOG_NO_EXPORT PTextureAccessor_PRGB32_From_PRGB32 : public PTextureAccess
 
   FOG_INLINE void interpolateRaw_2(Pixel& dst, const Pixel& c0, uint w0, const Pixel& c1, uint w1)
   { P_INTERPOLATE_C_32_2(dst, c0, w0, c1, w1); }
-  
+
   FOG_INLINE void interpolateRaw_4(Pixel& dst, const Pixel& c0, uint w0, const Pixel& c1, uint w1, const Pixel& c2, uint w2, const Pixel& c3, uint w3)
   { P_INTERPOLATE_C_32_4(dst, c0, w0, c1, w1, c2, w2, c3, w3); }
 
@@ -544,7 +544,7 @@ struct FOG_NO_EXPORT PTextureAccessor_PRGB32_From_XRGB32 : public PTextureAccess
 
   FOG_INLINE void interpolateRaw_2(Pixel& dst, const Pixel& c0, uint w0, const Pixel& c1, uint w1)
   { P_INTERPOLATE_C_32_2(dst, c0, w0, c1, w1); }
-  
+
   FOG_INLINE void interpolateRaw_4(Pixel& dst, const Pixel& c0, uint w0, const Pixel& c1, uint w1, const Pixel& c2, uint w2, const Pixel& c3, uint w3)
   { P_INTERPOLATE_C_32_4(dst, c0, w0, c1, w1, c2, w2, c3, w3); }
 
@@ -586,7 +586,7 @@ struct FOG_NO_EXPORT PTextureAccessor_PRGB32_From_A8 : public PTextureAccessor_P
 
   FOG_INLINE void interpolateRaw_2(Pixel& dst, const Pixel& c0, uint w0, const Pixel& c1, uint w1)
   { dst = (c0 * w0 + c1 * w1) >> 8; }
-  
+
   FOG_INLINE void interpolateRaw_4(Pixel& dst, const Pixel& c0, uint w0, const Pixel& c1, uint w1, const Pixel& c2, uint w2, const Pixel& c3, uint w3)
   { dst = (c0 * w0 + c1 * w1 + c2 * w2 + c3 * w3) >> 8; }
 
@@ -607,7 +607,7 @@ struct FOG_NO_EXPORT PTextureAccessor_PRGB32_From_I8 : public PTextureAccessor_P
 
   FOG_INLINE void interpolateRaw_2(Pixel& dst, const Pixel& c0, uint w0, const Pixel& c1, uint w1)
   { P_INTERPOLATE_C_32_2(dst, c0, w0, c1, w1); }
-  
+
   FOG_INLINE void interpolateRaw_4(Pixel& dst, const Pixel& c0, uint w0, const Pixel& c1, uint w1, const Pixel& c2, uint w2, const Pixel& c3, uint w3)
   { P_INTERPOLATE_C_32_4(dst, c0, w0, c1, w1, c2, w2, c3, w3); }
 

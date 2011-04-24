@@ -24,7 +24,7 @@ namespace Fog {
 //! @internal
 //!
 //! @brief Memory allocator designed to fast alloc memory that will be freed
-//! in one step (used by raster paint engine and scanline container for 
+//! in one step (used by raster paint engine and scanline container for
 //! temporary objects).
 //!
 //! This is hackery for performance. Concept is that objects created by
@@ -32,10 +32,10 @@ namespace Fog {
 //! these objects are the same as the lifetime of the @c ZoneMemoryAllocator
 //! itself. Optionally it's possible to call @c record() and @c revert() methods
 //! that can be used to record current allocation position and to revert
-//! it back. This is used by clip-span engine to reuse memory used by the 
+//! it back. This is used by clip-span engine to reuse memory used by the
 //! clip state that was restored (data not needed anymore).
 //!
-//! This class was stripped from AsmJit, and little modified for clip-span 
+//! This class was stripped from AsmJit, and little modified for clip-span
 //! allocator:
 //!   http://code.google.com/p/asmjit/
 struct FOG_NO_EXPORT ZoneMemoryAllocator
@@ -162,7 +162,7 @@ struct FOG_NO_EXPORT ZoneMemoryAllocator
   //! return memory chunk allocated using the first chunk.
   void reset();
 
-  //! @brief Free all chunks, except the first one that must be always 
+  //! @brief Free all chunks, except the first one that must be always
   //! available.
   void free();
 

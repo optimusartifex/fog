@@ -310,7 +310,7 @@ void EventLoop::_destroyed()
   // Clean up any unprocessed tasks, but take care: deleting a task could
   // result in the addition of more tasks. We set a limit on the number of
   // times we will allow a deleted task to generate more tasks. Normally,
-  // we should only pass through this loop once or twice. If we end up 
+  // we should only pass through this loop once or twice. If we end up
   // hitting the loop limit, then it is probably due to one task that is
   // being stubborn. Inspect the queues to see who is left.
   bool didWork;
@@ -406,7 +406,7 @@ void DefaultEventLoop::_scheduleDelayedWork(const Time& delayedWorkTime)
 
 static const WCHAR EVENT_LOOP_WND_CLASS[] = L"Fog::WinEventLoop";
 
-// Message sent to get an additional time slice for pumping (processing) 
+// Message sent to get an additional time slice for pumping (processing)
 // another task (a series of such messages creates a continuous task pump).
 static const int EVENT_LOOP_WM_HAVE_WORK = WM_USER + 1;
 
@@ -421,7 +421,7 @@ static const int EVENT_LOOP_MAX_WAIT_OBJECTS = MAXIMUM_WAIT_OBJECTS;
 // [Fog::WinEventLoop]
 // ============================================================================
 
-WinEventLoop::WinEventLoop(const String& type) : 
+WinEventLoop::WinEventLoop(const String& type) :
   EventLoop(type),
   _haveWork(0)
 {
@@ -603,7 +603,7 @@ void WinEventLoop::_waitForWork()
     // The WaitMessage call below is a workaround to give the child window
     // sometime to process its input messages.
 
-    // Here was bug that dalayed NC messages. Thank guys from #chromium-dev 
+    // Here was bug that dalayed NC messages. Thank guys from #chromium-dev
     // for help with catching it. The problem is that QS_MOUSE will return
     // true also for NC messages, so there should be two PeekMessage() calls,
     // first for standard messages and second for NC messages.
@@ -619,7 +619,7 @@ void WinEventLoop::_waitForWork()
     {
       WaitMessage();
     }
-    
+
     return;
   }
 
@@ -730,9 +730,9 @@ bool WinEventLoop::_processPumpReplacementMessage()
   // to peek and process a replacement message, such as a WM_PAINT or WM_TIMER.
   // The goal is to make the EVENT_LOOP_WM_HAVE_WORK as non-intrusive as
   // possible, even though a continuous stream of such messages are posted. This
-  // method carefully peeks a message while there is no chance for a 
+  // method carefully peeks a message while there is no chance for a
   // EVENT_LOOP_WM_HAVE_WORK to be pending, then resets the _haveWork flag
-  // (allowing a replacement EVENT_LOOP_WM_HAVE_WORK to possibly be posted), and 
+  // (allowing a replacement EVENT_LOOP_WM_HAVE_WORK to possibly be posted), and
   // finally dispatches that peeked replacement.
   //
   // Note that the re-post of EVENT_LOOP_WM_HAVE_WORK may be asynchronous to
@@ -751,7 +751,7 @@ bool WinEventLoop::_processPumpReplacementMessage()
 
   // TODO(darin,jar): There is risk of being lost in a sub-loop within the call
   // to processMessageHelper(), which could result in no longer getting a
-  // EVENT_LOOP_WM_HAVE_WORK message until the next out-of-band call to 
+  // EVENT_LOOP_WM_HAVE_WORK message until the next out-of-band call to
   // _scheduleWork().
 
   return have_message && _processMessageHelper(msg);
@@ -819,7 +819,7 @@ void EventLoop::quit()
   {
     _state->quitReceived = true;
 
-    // FIXME: I'm added this, because if there is timer that is very cpu 
+    // FIXME: I'm added this, because if there is timer that is very cpu
     // intensive then pump never quits.
     _pump->quit();
   }

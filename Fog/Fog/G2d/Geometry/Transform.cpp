@@ -30,7 +30,7 @@ static bool _G2d_TransformF_squareToQuad(TransformF& self, const PointF* p)
   float dy = p[0].y - p[1].y + p[2].y - p[3].y;
 
   if (dx == 0.0f && dy == 0.0f)
-  {   
+  {
     // Affine case (parallelogram).
     self._setData(TRANSFORM_TYPE_AFFINE | TRANSFORM_TYPE_DIRTY,
       p[1].x - p[0].x, p[1].y - p[0].y, 0.0f,
@@ -83,7 +83,7 @@ static bool _G2d_TransformD_squareToQuad(TransformD& self, const PointD* p)
   double dy = p[0].y - p[1].y + p[2].y - p[3].y;
 
   if (dx == 0.0 && dy == 0.0)
-  {   
+  {
     // Affine case (parallelogram).
     self._setData(TRANSFORM_TYPE_AFFINE | TRANSFORM_TYPE_DIRTY,
       p[1].x - p[0].x, p[1].y - p[0].y, 0.0,
@@ -322,7 +322,7 @@ createReflectionUnit:
     // ------------------------------------------------------------------------
     // [Parallelogram-To-Parallelogram]
     //
-    // Transform a parallelogram to another one. Dst/src are tree points that 
+    // Transform a parallelogram to another one. Dst/src are tree points that
     // identify three corners of the parallelograms assuming implicit fourth point.
     //
     // Coordinates are:
@@ -574,7 +574,7 @@ createReflectionUnit:
     // ------------------------------------------------------------------------
     // [Parallelogram-To-Parallelogram]
     //
-    // Transform a parallelogram to another one. Dst/src are tree points that 
+    // Transform a parallelogram to another one. Dst/src are tree points that
     // identify three corners of the parallelograms assuming implicit fourth point.
     //
     // Coordinates are:
@@ -652,7 +652,7 @@ static uint32_t FOG_CDECL _G2d_TransformF_update(const TransformF& self)
     //   [. . 0]
     //   [. . 1]
     case TRANSFORM_TYPE_PROJECTION:
-      if (!Math::isFuzzyZero(self._02) || 
+      if (!Math::isFuzzyZero(self._02) ||
           !Math::isFuzzyZero(self._12) ||
           !Math::isFuzzyEq(self._22, 1.0f))
       {
@@ -672,7 +672,7 @@ static uint32_t FOG_CDECL _G2d_TransformF_update(const TransformF& self)
       {
         float d = self._00 * self._01 + self._10 * self._11 ;
 
-        type = Math::isFuzzyZero(d) 
+        type = Math::isFuzzyZero(d)
           ? TRANSFORM_TYPE_ROTATION
           : TRANSFORM_TYPE_AFFINE;
         break;
@@ -697,7 +697,7 @@ static uint32_t FOG_CDECL _G2d_TransformF_update(const TransformF& self)
     //   [. . .]
     //   [0 0 .]
     case TRANSFORM_TYPE_TRANSLATION:
-      if (!Math::isFuzzyZero(self._20) || 
+      if (!Math::isFuzzyZero(self._20) ||
           !Math::isFuzzyZero(self._21))
       {
         type = TRANSFORM_TYPE_TRANSLATION;
@@ -729,7 +729,7 @@ static uint32_t FOG_CDECL _G2d_TransformD_update(const TransformD& self)
     //   [. . 0]
     //   [. . 1]
     case TRANSFORM_TYPE_PROJECTION:
-      if (!Math::isFuzzyZero(self._02) || 
+      if (!Math::isFuzzyZero(self._02) ||
           !Math::isFuzzyZero(self._12) ||
           !Math::isFuzzyEq(self._22, 1.0))
       {
@@ -749,7 +749,7 @@ static uint32_t FOG_CDECL _G2d_TransformD_update(const TransformD& self)
       {
         double d = self._00 * self._01 + self._10 * self._11;
 
-        type = Math::isFuzzyZero(d) 
+        type = Math::isFuzzyZero(d)
           ? TRANSFORM_TYPE_ROTATION
           : TRANSFORM_TYPE_AFFINE;
         break;
@@ -774,7 +774,7 @@ static uint32_t FOG_CDECL _G2d_TransformD_update(const TransformD& self)
     //   [. . .]
     //   [0 0 .]
     case TRANSFORM_TYPE_TRANSLATION:
-      if (!Math::isFuzzyZero(self._20) || 
+      if (!Math::isFuzzyZero(self._20) ||
           !Math::isFuzzyZero(self._21))
       {
         type = TRANSFORM_TYPE_TRANSLATION;
@@ -925,7 +925,7 @@ static err_t FOG_CDECL _G2d_TransformF_transform(TransformF& self, uint32_t opTy
           self._11 *= y;
 
           self._type = Math::max<uint32_t>(
-            self._type             | TRANSFORM_TYPE_DIRTY, 
+            self._type             | TRANSFORM_TYPE_DIRTY,
             TRANSFORM_TYPE_SCALING | TRANSFORM_TYPE_DIRTY);
           break;
         }
@@ -1652,7 +1652,7 @@ static err_t FOG_CDECL _G2d_TransformD_transform(TransformD& self, uint32_t opTy
           self._11 *= y;
 
           self._type = Math::max<uint32_t>(
-            self._type             | TRANSFORM_TYPE_DIRTY, 
+            self._type             | TRANSFORM_TYPE_DIRTY,
             TRANSFORM_TYPE_SCALING | TRANSFORM_TYPE_DIRTY);
           break;
         }
@@ -2443,7 +2443,7 @@ static void FOG_CDECL _G2d_TransformD_multiply(TransformD& dst, const TransformD
 
 static bool FOG_CDECL _G2d_TransformF_invert(TransformF& self, const TransformF& a)
 {
-  // Inverted matrix should be as accurate as possible so the 'double' 
+  // Inverted matrix should be as accurate as possible so the 'double'
   // type is used for calculations.
   switch (a.getType())
   {
@@ -2476,7 +2476,7 @@ static bool FOG_CDECL _G2d_TransformF_invert(TransformF& self, const TransformF&
         (float)inv00,
         0.0f,
         0.0f,
-        
+
         0.0f,
         (float)inv11,
         0.0f,
@@ -2491,7 +2491,7 @@ static bool FOG_CDECL _G2d_TransformF_invert(TransformF& self, const TransformF&
     case TRANSFORM_TYPE_ROTATION:
     case TRANSFORM_TYPE_AFFINE:
     {
-      // Inverted matrix should be as accurate as possible so the 'double' 
+      // Inverted matrix should be as accurate as possible so the 'double'
       // type is used instead of 'float' here.
       double d = ((double)a._00 * (double)a._11 - (double)a._01 * (double)a._10);
       if (Math::isFuzzyZero(d)) goto nonInvertible;
@@ -2515,13 +2515,13 @@ static bool FOG_CDECL _G2d_TransformF_invert(TransformF& self, const TransformF&
 
     case TRANSFORM_TYPE_PROJECTION:
     {
-      // Inverted matrix should be as accurate as possible so the 'double' 
+      // Inverted matrix should be as accurate as possible so the 'double'
       // type is used instead of 'float' here.
       double d0 = (double)a._11 * (double)a._22 - (double)a._12 * (double)a._21;
       double d1 = (double)a._02 * (double)a._21 - (double)a._01 * (double)a._22;
       double d2 = (double)a._01 * (double)a._12 - (double)a._02 * (double)a._11;
 
-      double d = (double)a._00 * d0 + 
+      double d = (double)a._00 * d0 +
                  (double)a._10 * d1 +
                  (double)a._20 * d2;
       if (Math::isFuzzyZero(d)) goto nonInvertible;
@@ -2548,7 +2548,7 @@ static bool FOG_CDECL _G2d_TransformF_invert(TransformF& self, const TransformF&
   }
 
 nonInvertible:
-  self._setData(TRANSFORM_TYPE_PROJECTION, 
+  self._setData(TRANSFORM_TYPE_PROJECTION,
     0.0f, 0.0f, 0.0f,
     0.0f, 0.0f, 0.0f,
     0.0f, 0.0f, 0.0f);
@@ -2595,7 +2595,7 @@ static bool FOG_CDECL _G2d_TransformD_invert(TransformD& self, const TransformD&
     case TRANSFORM_TYPE_ROTATION:
     case TRANSFORM_TYPE_AFFINE:
     {
-      // Inverted matrix should be as accurate as possible so the 'double' 
+      // Inverted matrix should be as accurate as possible so the 'double'
       // type is used instead of 'float' here.
       double d = (a._00 * a._11 - a._01 * a._10);
       if (Math::isFuzzyZero(d)) goto nonInvertible;
@@ -2648,7 +2648,7 @@ static bool FOG_CDECL _G2d_TransformD_invert(TransformD& self, const TransformD&
   }
 
 nonInvertible:
-  self._setData(TRANSFORM_TYPE_PROJECTION, 
+  self._setData(TRANSFORM_TYPE_PROJECTION,
     0.0, 0.0, 0.0,
     0.0, 0.0, 0.0,
     0.0, 0.0, 0.0);
@@ -3004,7 +3004,7 @@ static void FOG_CDECL _G2d_TransformF_mapBoxF(const TransformF& self, BoxF& dst,
   else
   {
     PointF pts[4] =
-    { 
+    {
       PointF(src.x0, src.y0),
       PointF(src.x1, src.y0),
       PointF(src.x1, src.y1),
@@ -3035,7 +3035,7 @@ static void FOG_CDECL _G2d_TransformD_mapBoxD(const TransformD& self, BoxD& dst,
   else
   {
     PointD pts[4] =
-    { 
+    {
       PointD(src.x0, src.y0),
       PointD(src.x1, src.y0),
       PointD(src.x1, src.y1),
@@ -3129,8 +3129,8 @@ static void FOG_CDECL _G2d_TransformD_mapVectorD(const TransformD& self, PointD&
 // ============================================================================
 
 // Notes from AntiGrain about absolute scaling:
-//   Used to calculate scaling coefficients in image resampling. When there is 
-//   considerable shear this method gives us much better estimation than just 
+//   Used to calculate scaling coefficients in image resampling. When there is
+//   considerable shear this method gives us much better estimation than just
 //   sx, sy.
 
 static PointF FOG_CDECL _G2d_TransformF_getScaling(const TransformF& self, bool absolute)

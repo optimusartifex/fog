@@ -135,12 +135,12 @@ void ImageData::paletteModified(const Range& range)
 // [Fog::Image - Construction / Destruction]
 // ============================================================================
 
-Image::Image() : 
+Image::Image() :
   _d(_dnull->refAlways())
 {
 }
 
-Image::Image(const Image& other) : 
+Image::Image(const Image& other) :
   _d(other._d->ref())
 {
   if (FOG_UNLIKELY(_d == NULL)) _d = _dnull->refAlways();
@@ -362,7 +362,7 @@ err_t Image::set(const Image& other, const RectI& area)
 
   if (x0 >= x1 || y0 >= y1)
     return ERR_RT_INVALID_ARGUMENT;
-  if (x0 == 0 && y0 == 0 && x1 == getWidth() && y1 == getHeight()) 
+  if (x0 == 0 && y0 == 0 && x1 == getWidth() && y1 == getHeight())
     return set(other);
 
   int w = x1 - x0;
@@ -1453,7 +1453,7 @@ static err_t applyImageFilter(Image& im, const BoxI& box, const ImageFxFilter& f
   // Demultiply if needed.
   if (imgf == IMAGE_FORMAT_PRGB32 && (filterCharacteristics & IMAGE_EFFECT_CHAR_SUPPORTS_PRGB32) == 0)
   {
-    RenderVBlitLineFn vblit_line = 
+    RenderVBlitLineFn vblit_line =
       rasterFuncs.dib.convert[IMAGE_FORMAT_ARGB32][IMAGE_FORMAT_PRGB32];
     for (int y = h; y; y--, imCur += imStride) vblit_line(imCur, imCur, w, NULL);
 
@@ -1504,7 +1504,7 @@ static err_t applyImageFilter(Image& im, const BoxI& box, const ImageFxFilter& f
   // Premultiply if demultiplied.
   if (imgf == IMAGE_FORMAT_PRGB32 && (filterCharacteristics & IMAGE_EFFECT_CHAR_SUPPORTS_PRGB32) == 0)
   {
-    RenderVBlitLineFn vblit_line = 
+    RenderVBlitLineFn vblit_line =
       rasterFuncs.dib.convert[IMAGE_FORMAT_PRGB32][IMAGE_FORMAT_ARGB32];
     for (int y = h; y; y--, imCur += imStride) vblit_line(imCur, imCur, w, NULL);
   }
@@ -1536,7 +1536,7 @@ err_t Image::filter(const ImageFxFilter& f, const RectI* area)
 #if 0
 err_t Image::filter(
   const ImageFx& fx,
-  Image& dst, PointI* dstOffset, 
+  Image& dst, PointI* dstOffset,
   const Image& src, const RectI* srcFragment)
 {
   ImageFxFilter fxFilter;
@@ -1547,7 +1547,7 @@ err_t Image::filter(
 
 err_t Image::filter(
   const ImageFxFilter& fxFilter,
-  Image& dst, PointI* dstOffset, 
+  Image& dst, PointI* dstOffset,
   const Image& src, const RectI* srcFragment)
 {
   // TODO:
@@ -1824,11 +1824,11 @@ static err_t _G2d_Image_blitImage(
     else
     {
       uint32_t compat  = RenderUtil::getCompatFormat(dstFormat, srcFormat);
-      uint32_t vBlitId = RenderUtil::getCompatVBlitId(dstFormat, srcFormat); 
+      uint32_t vBlitId = RenderUtil::getCompatVBlitId(dstFormat, srcFormat);
 
       blitLine = _g2d_render.getCompositeExtFuncs(dstFormat, compositingOperator)->vblit_line[compat];
 
-      if (compat != srcFormat) 
+      if (compat != srcFormat)
       {
         converter = _g2d_render.getCompositeCoreFuncs(compat, COMPOSITE_SRC)->vblit_line[srcFormat];
 
@@ -1874,11 +1874,11 @@ static err_t _G2d_Image_blitImage(
     else
     {
       uint32_t compat  = RenderUtil::getCompatFormat(dstFormat, srcFormat);
-      uint32_t vBlitId = RenderUtil::getCompatVBlitId(dstFormat, srcFormat); 
+      uint32_t vBlitId = RenderUtil::getCompatVBlitId(dstFormat, srcFormat);
 
       blitLine = _g2d_render.getCompositeExtFuncs(dstFormat, compositingOperator)->vblit_span[compat];
 
-      if (compat != srcFormat) 
+      if (compat != srcFormat)
       {
         converter = _g2d_render.getCompositeCoreFuncs(compat, COMPOSITE_SRC)->vblit_line[srcFormat];
 
@@ -2090,7 +2090,7 @@ err_t Image::glyphFromPath(Image& glyph, PointI& offset, const PathD& path, uint
     case IMAGE_PRECISION_BYTE:
     {
       Rasterizer8 rasterizer;
-      
+
       rasterizer.setSceneBox(BoxI(x0, y0, x1, y1));
       rasterizer.addPath(path);
       rasterizer.finalize();
@@ -2192,11 +2192,11 @@ HBITMAP Image::toWinBitmap() const
   ImageData* d = _d;
   if (d->size.w == 0 || d->size.h == 0) return NULL;
 
-  // If the image format is XRGB32 or PRGB32 then it's very easy, we just 
+  // If the image format is XRGB32 or PRGB32 then it's very easy, we just
   // create DIBSECTION and copy bits there. If the image format is ARGB32
-  // then we need to premultiply the output. Lastly, if the image format 
+  // then we need to premultiply the output. Lastly, if the image format
   // is A8/I8 then we create 32-bit DIBSECTION and copy there the alphas,
-  // this image will be still usable when using functions like AlphaBlend(). 
+  // this image will be still usable when using functions like AlphaBlend().
 
   uint8_t* dstBits = NULL;
   sysint_t dstStride = 0;
@@ -2218,7 +2218,7 @@ HBITMAP Image::toWinBitmap() const
       dstFormat = d->format;
       break;
 
-    // There is no such concept like Alpha-only image in Windows GDI. So we 
+    // There is no such concept like Alpha-only image in Windows GDI. So we
     // treat this kind of image as premultiplied RGB. It's waste, but I have
     // no idea how to improve it.
     case IMAGE_FORMAT_A8:
@@ -2449,7 +2449,7 @@ err_t Image::writeToFile(const String& fileName) const
 {
   Stream stream;
 
-  err_t err = stream.openFile(fileName, 
+  err_t err = stream.openFile(fileName,
     STREAM_OPEN_WRITE       |
     STREAM_OPEN_CREATE      |
     STREAM_OPEN_CREATE_PATH |
@@ -2472,7 +2472,7 @@ err_t Image::writeToStream(Stream& stream, const String& extension) const
   if (provider != NULL)
   {
     ImageEncoder* encoder = NULL;
-    err_t err = provider->createCodec(IMAGE_CODEC_ENCODER, 
+    err_t err = provider->createCodec(IMAGE_CODEC_ENCODER,
       reinterpret_cast<ImageCodec**>(&encoder));
     if (FOG_IS_ERROR(err)) return err;
 

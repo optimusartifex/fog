@@ -204,7 +204,7 @@ struct FOG_API GuiEngine : public Object
 
   virtual void clearSystemMouseStatus();
 
-  virtual bool startButtonRepeat(uint32_t button, 
+  virtual bool startButtonRepeat(uint32_t button,
     bool reset, TimeDelta delay, TimeDelta interval);
   virtual bool stopButtonRepeat(uint32_t button);
   virtual void clearButtonRepeat();
@@ -247,7 +247,7 @@ struct FOG_API GuiEngine : public Object
   //! @brief Runs updating. Do not use directly, use @c update() or you get into troubles.
   virtual void doUpdate();
 
-  //! @brief Runs updating to specific window. This is internally done by 
+  //! @brief Runs updating to specific window. This is internally done by
   //! @c doUpdate() for all needed windows.
   virtual void doUpdateWindow(GuiWindow* window);
 
@@ -317,7 +317,7 @@ struct FOG_API GuiEngine : public Object
 
   //! @brief Circular list of dirty windows.
   List<GuiWindow*> _dirtyList;
-  
+
   //! @brief Display information.
   DisplayInfo _displayInfo;
   //! @brief ImagePalette information.
@@ -443,7 +443,7 @@ struct FOG_API GuiWindow : public Object
   // --------------------------------------------------------------------------
   // [Modal]
   // --------------------------------------------------------------------------
-  
+
   //! @brief makes the GuiWindow to be shown as Modal window in front of this window
   virtual void startModalWindow(GuiWindow* w);
   //! @brief The modal GuiWindow is being closed, so the modality should be removed
@@ -493,7 +493,7 @@ struct FOG_API GuiWindow : public Object
   // Releases the owner from the child window and makes sure the owner will
   // get the focus.
   virtual void releaseOwner() = 0;
-  
+
   virtual void setTransparency(float val) = 0;
 
   // --------------------------------------------------------------------------
@@ -524,7 +524,7 @@ struct FOG_API GuiWindow : public Object
   //! @brief Backing store.
   GuiBackBuffer* _backingStore;
 
-  //TODO: use bitset here 
+  //TODO: use bitset here
 
   //! @brief Whether window is enabled.
   bool _enabled;

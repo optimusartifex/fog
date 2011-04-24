@@ -42,7 +42,7 @@ struct FOG_NO_EXPORT PathClipperF
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE PathClipperF(const BoxF& clipBox) : 
+  FOG_INLINE PathClipperF(const BoxF& clipBox) :
     _clipBox(clipBox),
     _lastMoveTo(Math::getQNanF(), Math::getQNanF()),
     _lastIndex(INVALID_INDEX)
@@ -103,7 +103,7 @@ struct FOG_NO_EXPORT PathClipperF
     return _g2d.pathclipperf.initPath(*this, src);
   }
 
-  //! @brief Continue with the clipping using the info collected by 
+  //! @brief Continue with the clipping using the info collected by
   //! @c initPath() method. The path @a src must be the same as used by
   //! @c initPath() method.
   //!
@@ -168,7 +168,7 @@ struct FOG_NO_EXPORT PathClipperD
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE PathClipperD(const BoxD& clipBox) : 
+  FOG_INLINE PathClipperD(const BoxD& clipBox) :
     _clipBox(clipBox),
     _lastMoveTo(Math::getQNanD(), Math::getQNanD()),
     _lastIndex(INVALID_INDEX)
@@ -229,7 +229,7 @@ struct FOG_NO_EXPORT PathClipperD
     return _g2d.pathclipperd.initPath(*this, src);
   }
 
-  //! @brief Continue with the clipping using the info collected by 
+  //! @brief Continue with the clipping using the info collected by
   //! @c initPath() method. The path @a src must be the same as used by
   //! @c initPath() method.
   //!

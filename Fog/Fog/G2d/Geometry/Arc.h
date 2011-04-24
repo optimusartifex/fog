@@ -53,7 +53,7 @@ struct FOG_NO_EXPORT ArcF
     start = other.start;
     sweep = other.sweep;
   }
-  
+
   FOG_INLINE ArcF(const PointF& cp, float rad, float start_, float sweep_)
   {
     setEllipse(cp, rad);
@@ -223,7 +223,7 @@ struct FOG_NO_EXPORT ArcD
     start = other.start;
     sweep = other.sweep;
   }
-  
+
   FOG_INLINE ArcD(const PointD& cp, double rad, double start_, double sweep_)
   {
     setEllipse(cp, rad);

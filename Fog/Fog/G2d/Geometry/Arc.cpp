@@ -55,7 +55,7 @@ static void FOG_CDECL _G2d_ArcT_getBoundingRect(const typename ArcT<Number>::T* 
 
     Math::sincos(end, &py, &px);
     if (minx > px) minx = px;
-    if (miny > py) miny = py; 
+    if (miny > py) miny = py;
     if (maxx < px) maxx = px;
     if (maxy < py) maxy = py;
 

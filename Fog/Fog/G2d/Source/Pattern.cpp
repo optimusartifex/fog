@@ -331,7 +331,7 @@ err_t PatternF::setTexture(const Texture& texture)
 
 err_t PatternF::_getGradientF(uint32_t gradientType, GradientF& gr) const
 {
-  if ((_d->type != PATTERN_TYPE_GRADIENT) || 
+  if ((_d->type != PATTERN_TYPE_GRADIENT) ||
       (_d->gradient->getGradientType() != gradientType && gradientType != 0xFFFFFFFF))
   {
     gr.reset();
@@ -345,7 +345,7 @@ err_t PatternF::_getGradientF(uint32_t gradientType, GradientF& gr) const
 
 err_t PatternF::_getGradientD(uint32_t gradientType, GradientD& gr) const
 {
-  if ((_d->type != PATTERN_TYPE_GRADIENT) || 
+  if ((_d->type != PATTERN_TYPE_GRADIENT) ||
       (_d->gradient->getGradientType() != gradientType && gradientType != 0xFFFFFFFF))
   {
     gr.reset();
@@ -738,7 +738,7 @@ err_t PatternD::setTexture(const Texture& texture)
 
 err_t PatternD::_getGradientF(uint32_t gradientType, GradientF& gr) const
 {
-  if ((_d->type != PATTERN_TYPE_GRADIENT) || 
+  if ((_d->type != PATTERN_TYPE_GRADIENT) ||
       (_d->gradient->getGradientType() != gradientType && gradientType != 0xFFFFFFFF))
   {
     gr.reset();
@@ -752,7 +752,7 @@ err_t PatternD::_getGradientF(uint32_t gradientType, GradientF& gr) const
 
 err_t PatternD::_getGradientD(uint32_t gradientType, GradientD& gr) const
 {
-  if ((_d->type != PATTERN_TYPE_GRADIENT) || 
+  if ((_d->type != PATTERN_TYPE_GRADIENT) ||
       (_d->gradient->getGradientType() != gradientType && gradientType != 0xFFFFFFFF))
   {
     gr.reset();

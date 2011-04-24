@@ -101,12 +101,12 @@ struct FOG_NO_EXPORT Margin
     this->right  = horizontal;
     this->bottom = vertical;
     this->left   = horizontal;
-    
+
     return *this;
   }
 
   FOG_INLINE Margin& setMargin(int top, int right, int bottom, int left)
-  { 
+  {
     this->top    = top;
     this->right  = right;
     this->bottom = bottom;
@@ -137,7 +137,7 @@ struct FOG_NO_EXPORT Margin
 
   FOG_INLINE bool eq(int all) const
   {
-    return (this->top    == all) & 
+    return (this->top    == all) &
            (this->right  == all) &
            (this->bottom == all) &
            (this->left   == all) ;
@@ -145,7 +145,7 @@ struct FOG_NO_EXPORT Margin
 
   FOG_INLINE bool eq(int vertical, int horizontal) const
   {
-    return (this->top    == vertical  ) & 
+    return (this->top    == vertical  ) &
            (this->right  == horizontal) &
            (this->bottom == vertical  ) &
            (this->left   == horizontal) ;
@@ -153,7 +153,7 @@ struct FOG_NO_EXPORT Margin
 
   FOG_INLINE bool eq(int top, int right, int bottom, int left) const
   {
-    return (this->top    == top   ) & 
+    return (this->top    == top   ) &
            (this->right  == right ) &
            (this->bottom == bottom) &
            (this->left   == left  ) ;

@@ -33,7 +33,7 @@ enum CONTAINER_FLAG
   //!
   //! There are some templates that allows to allocate data for these containers
   //! on the stack (for better multithreading / temporary objects performance).
-  //! If this flag is set then data were allocated using static memory 
+  //! If this flag is set then data were allocated using static memory
   //! allocator.
   //!
   //! @note If container contains other data then this flag is related to
@@ -389,7 +389,7 @@ enum TYPEINFO_TYPE
   //! can be moved in memory.
   TYPEINFO_MOVABLE = 1,
 
-  //! @brief Class data type. 
+  //! @brief Class data type.
   //!
   //! Means that class cannot be moved to another location.
   TYPEINFO_CLASS = 2

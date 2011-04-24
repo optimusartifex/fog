@@ -26,7 +26,7 @@ namespace Fog {
 
 struct FOG_NO_EXPORT TimerTask : public Task
 {
-  TimerTask(Timer* timer) : 
+  TimerTask(Timer* timer) :
     timer(timer)
   {
   }
@@ -38,7 +38,7 @@ struct FOG_NO_EXPORT TimerTask : public Task
       // First send events.
       TimerEvent e(timer);
       timer->sendEvent(&e);
-      
+
       // Repeat?
       if (timer)
       {

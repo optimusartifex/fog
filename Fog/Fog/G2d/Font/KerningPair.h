@@ -36,7 +36,7 @@ struct KerningPairI
 
 //! @brief Kerning pair used if font uses non-quantized floating point metrics.
 //!
-//! Floating kerning pairs are shared for all font sizes. To get demanded 
+//! Floating kerning pairs are shared for all font sizes. To get demanded
 //! value use Font::getKerningScale() value.
 #include <Fog/Core/Pack/PackByte.h>
 struct KerningPairF

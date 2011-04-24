@@ -17,7 +17,7 @@
 FOG_CAPI_EXTERN void _fog_init(void);
 FOG_CAPI_EXTERN void _fog_fini(void);
 
-// C++ hack to initialize the Fog library statically. It's just needed to 
+// C++ hack to initialize the Fog library statically. It's just needed to
 // touch this symbol from the code that consumes this library.
 #if defined(FOG_BUILD_STATIC)
 FOG_CAPI_EXTERN void _fog_init_static(void);

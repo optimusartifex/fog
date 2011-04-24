@@ -17,7 +17,7 @@ namespace Fog {
 // [Fog::GradientF]
 // ============================================================================
 
-GradientF::GradientF(uint32_t gradientType) : 
+GradientF::GradientF(uint32_t gradientType) :
   _gradientType(gradientType),
   _gradientSpread(GRADIENT_SPREAD_DEFAULT)
 {
@@ -26,7 +26,7 @@ GradientF::GradientF(uint32_t gradientType) :
   _pts[2].reset();
 }
 
-GradientF::GradientF(const GradientF& other) : 
+GradientF::GradientF(const GradientF& other) :
   _gradientType(other._gradientType),
   _gradientSpread(other._gradientSpread),
   _stops(other._stops)
@@ -91,7 +91,7 @@ void GradientF::reset()
 // [Fog::GradientD]
 // ============================================================================
 
-GradientD::GradientD(uint32_t gradientType) : 
+GradientD::GradientD(uint32_t gradientType) :
   _gradientType(gradientType),
   _gradientSpread(GRADIENT_SPREAD_DEFAULT)
 {
@@ -100,7 +100,7 @@ GradientD::GradientD(uint32_t gradientType) :
   _pts[2].reset();
 }
 
-GradientD::GradientD(const GradientF& other) : 
+GradientD::GradientD(const GradientF& other) :
   _gradientType(other._gradientType),
   _gradientSpread(other._gradientSpread),
   _stops(other._stops)
@@ -110,7 +110,7 @@ GradientD::GradientD(const GradientF& other) :
   _pts[2] = other._pts[2];
 }
 
-GradientD::GradientD(const GradientD& other) : 
+GradientD::GradientD(const GradientD& other) :
   _gradientType(other._gradientType),
   _gradientSpread(other._gradientSpread),
   _stops(other._stops)

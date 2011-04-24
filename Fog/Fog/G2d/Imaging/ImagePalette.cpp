@@ -111,7 +111,7 @@ err_t ImagePalette::setData(const Range& range, const Argb32* entries)
   {
     ImagePaletteData* newd = ImagePalette_dalloc();
     if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
-    
+
     Memory::copy(newd->data, _d->data, sizeof(Argb32) * 256);
     atomicPtrXchg(&_d, newd)->deref();
   }
@@ -264,7 +264,7 @@ bool ImagePalette::isGreyscale(const Argb32* data, sysuint_t count)
 
   for (i = 0; i < count; i++)
   {
-    if (data[i].getRed  () != data[i].getGreen() || 
+    if (data[i].getRed  () != data[i].getGreen() ||
         data[i].getGreen() != data[i].getBlue () )
     {
       break;

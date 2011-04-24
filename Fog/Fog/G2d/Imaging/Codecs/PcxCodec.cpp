@@ -126,7 +126,7 @@ static uint _PcxStrNLen(const uint8_t* str, uint maxlen)
 // Returns 0 on success, otherwise an error code.
 static err_t _PcxDecodeScanline(
   uint8_t* dst,
-  const uint8_t** src, const uint8_t* end, 
+  const uint8_t** src, const uint8_t* end,
   uint32_t length, uint32_t ignore, uint32_t increment)
 {
   err_t err = ERR_IMAGE_TRUNCATED;
@@ -135,7 +135,7 @@ static err_t _PcxDecodeScanline(
   uint left = length;
 
   // Decode RLE scanline and write it to 'dst'.
-  while (left) 
+  while (left)
   {
     if (cur == end) goto _Fail;
     uint8_t b = *cur++;
@@ -148,7 +148,7 @@ static err_t _PcxDecodeScanline(
       if (cur == end) goto _Fail;
       b = *cur++;
 
-      if (left < count) 
+      if (left < count)
       {
         extra = count - left;
         count = left;
@@ -156,7 +156,7 @@ static err_t _PcxDecodeScanline(
 
       left -= count;
 
-      while (count--) 
+      while (count--)
       {
         *dst = b;
         dst += increment;
@@ -283,7 +283,7 @@ static bool _PcxEncodeScanline(
       bufferPtr[-1]++;
     }*/
     // Or just add zero byte.
-    /*else*/ 
+    /*else*/
     {
       *bufferPtr++ = 0;
     }
@@ -537,7 +537,7 @@ err_t PcxDecoder::readImage(Image& image)
 
         for (x = 0; x != (uint32_t)_size.w; x++)
         {
-          if ((x & 7) == 0) 
+          if ((x & 7) == 0)
             b = *mem++;
           else
             b <<= 1;
@@ -656,7 +656,7 @@ err_t PcxDecoder::readImage(Image& image)
       // Find 0x0C marker.
       while (dataCur != dataEnd)
       {
-        if (*dataCur++ == 0x0C) 
+        if (*dataCur++ == 0x0C)
         {
           infoSecPalette = true;
           break;
@@ -696,7 +696,7 @@ err_t PcxDecoder::readImage(Image& image)
     // Read primary or secondary palette (from PCX header or end of file)
     if (palRead)
     {
-      for (x = 0; x < palLength; x++, dataCur += 3) 
+      for (x = 0; x < palLength; x++, dataCur += 3)
       {
         palData[x] = Argb32(0xFF, dataCur[0], dataCur[1], dataCur[2]);
       }

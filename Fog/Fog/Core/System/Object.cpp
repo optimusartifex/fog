@@ -82,7 +82,7 @@ void Object::destroyLater()
 {
   if (!(_objectFlags & OBJECT_FLAG_DESTROY_LATER))
   {
-    if (!getHomeThread()) 
+    if (!getHomeThread())
     {
       Debug::dbgFunc("Fog::Object", "destroyLater", "Can't post DELETE_LATER event, because object thread has no event loop.\n");
       return;
@@ -120,7 +120,7 @@ const MetaClass* Object::_getStaticMetaClassRace(MetaClass** p)
   while (AtomicCore<sysuint_t>::get((sysuint_t*)p) == 0)
   {
     // Yield is not optimal, but this should really rarely happen and if we
-    // had the luck then there is 100% probability that it will not happen 
+    // had the luck then there is 100% probability that it will not happen
     // again.
     Thread::_yield();
   }
@@ -161,13 +161,13 @@ void Object::setObjectName(const String& objectName)
 err_t Object::setParent(Object* parent)
 {
   // If our parent is a given parent then do nothing, it's not error.
-  if (_parent == parent) 
+  if (_parent == parent)
   {
     return ERR_OK;
   }
 
   // If we have a parent then it's needed to break the hierarchy first.
-  if (_parent != NULL) 
+  if (_parent != NULL)
   {
     FOG_RETURN_ON_ERROR(_parent->removeChild(this));
   }
@@ -470,7 +470,7 @@ bool Object::_removeListener(uint32_t code, Object* listener, const void* del, u
         _forwardConnection.remove(code);
 
       if (listener) listener->_backwardConnection.remove(conn);
-      
+
       fog_delete(conn);
       return true;
     }
@@ -654,7 +654,7 @@ FOG_CAPI_DECLARE void* fog_object_cast_helper(Fog::Object* self, const Fog::Meta
     // so pointers comparision is the best way here.
     if (selfMetaClass == targetMetaClass)
       return (void*)self;
-    
+
     // Not match? Try base meta class, again and again until there is no
     // base class (Fog::Object is root).
   } while ((selfMetaClass = selfMetaClass->base) != NULL);

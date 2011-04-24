@@ -72,7 +72,7 @@ struct FOG_API BoxLayout : public Layout
   void addItem(LayoutItem *item, int flex = -1);
   virtual uint32_t getLayoutExpandingDirections() const;
 
-  FOG_INLINE uint32_t getDirection() const { return _direction; }   
+  FOG_INLINE uint32_t getDirection() const { return _direction; }
   FOG_INLINE void setDirection(uint32_t d) { _direction = d; }
 
   // --------------------------------------------------------------------------
@@ -82,12 +82,12 @@ struct FOG_API BoxLayout : public Layout
 protected:
   FOG_INLINE bool isForward() const { return _direction == 0; }
 
-  virtual void setLayoutGeometry(const RectI &rect);    
+  virtual void setLayoutGeometry(const RectI &rect);
   virtual int doLayout(const RectI &rect) = 0;
 
   int calculateHorizontalGaps(bool collapse = true);
   int calculateVerticalGaps(bool collapse = true);
-  
+
   LayoutItem* _flexibles;
   uint32_t _allocated : 31;
 

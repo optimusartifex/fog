@@ -23,7 +23,7 @@ namespace Fog {
 //! @brief Base class for all layouts.
 struct FOG_API BorderLayout : public Layout
 {
-  FOG_DECLARE_OBJECT(BorderLayout, Layout)    
+  FOG_DECLARE_OBJECT(BorderLayout, Layout)
 
   BorderLayout(Widget* parent=0);
   virtual ~BorderLayout();

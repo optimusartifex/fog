@@ -378,8 +378,8 @@ private:
 //!
 //! The basic structure of the extension (refered to as a sub-loop) is that a
 //! special message, EVENT_LOOP_WM_HAVE_WORK, is repeatedly injected into the
-//! Windows Message queue. Each time the EVENT_LOOP_WM_HAVE_WORK message is 
-//! peeked, checks are made for an extended set of events, including the 
+//! Windows Message queue. Each time the EVENT_LOOP_WM_HAVE_WORK message is
+//! peeked, checks are made for an extended set of events, including the
 //! availability of tasks to run.
 //!
 //! After running a task, the special message EVENT_LOOP_WM_HAVE_WORK is again
@@ -411,9 +411,9 @@ struct FOG_API WinEventLoop : public EventLoop
   WinEventLoop(const String& type);
   virtual ~WinEventLoop();
 
-  //! @brief Applications can call this to encourage us to process all pending 
-  //! WM_PAINT messages. This method will process all paint messages the 
-  //! Windows Message queue can provide, up to some fixed number (to avoid any 
+  //! @brief Applications can call this to encourage us to process all pending
+  //! WM_PAINT messages. This method will process all paint messages the
+  //! Windows Message queue can provide, up to some fixed number (to avoid any
   //! infinite loops).
   void pumpOutPendingPaintMessages();
 
@@ -441,7 +441,7 @@ protected:
   //! @brief The time at which delayed work should run.
   Time _delayedWorkTime;
 
-  //! @brief A boolean value used to indicate if there is a kMsgDoWork message 
+  //! @brief A boolean value used to indicate if there is a kMsgDoWork message
   //! pending in the Windows Message queue.  There is at most one such message,
   //! and it can drive execution of tasks when a native message pump is running.
   LONG _haveWork;

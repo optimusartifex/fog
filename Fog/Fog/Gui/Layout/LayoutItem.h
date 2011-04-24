@@ -113,7 +113,7 @@ private: \
 
 #define FOG_INIT_PERCENT_WIDTH_PROPERTY() \
   _width = 1.f;
-       
+
 #define FOG_DECLARE_PERCENT_SIZE_PROPERTY() \
   FOG_DECLARE_PERCENT_HEIGHT_PROPERTY() \
   FOG_DECLARE_PERCENT_WIDTH_PROPERTY()
@@ -213,7 +213,7 @@ struct FOG_API LayoutItem : public Object
   // [Visibility]
   // --------------------------------------------------------------------------
 
-  virtual bool isEmpty() const = 0;  
+  virtual bool isEmpty() const = 0;
 
   // --------------------------------------------------------------------------
   // [Cache Handling]
@@ -240,12 +240,12 @@ struct FOG_API LayoutItem : public Object
   // --------------------------------------------------------------------------
   // [Flex variable support]
   // --------------------------------------------------------------------------
-  
+
   void removeLayoutStruct();
 
   // --------------------------------------------------------------------------
   // [Members]
-  // -------------------------------------------------------------------------- 
+  // --------------------------------------------------------------------------
 
   template<typename T>
   FOG_INLINE typename T::PropertyType* getLayoutProperties()
@@ -268,7 +268,7 @@ struct FOG_API LayoutItem : public Object
 
   struct FlexLayoutData : public LayoutData
   {
-    FlexLayoutData() : 
+    FlexLayoutData() :
       _min(0),
       _max(0),
       _hint(0),
@@ -307,7 +307,7 @@ struct FOG_API LayoutItem : public Object
     }
 
     FOG_INLINE void prepare() { _potential = -INT_MAX; }
-  };  
+  };
 
   LayoutData* _layoutdata;
 
@@ -316,10 +316,10 @@ struct FOG_API LayoutItem : public Object
   //! @brief Layout hint cache.
   LayoutHint _cache;
   //! @brief For fast identification of Layout, where this Item is inserted.
-  //! 
+  //!
   //! Maybe also used for layout pointer in widget.
-  Layout* _withinLayout; 
-  
+  Layout* _withinLayout;
+
   uint32_t _alignment : 2;
   //! @brief Layout hint is dirty -> call calculateLayoutHint() next time.
   uint32_t _dirty : 1;

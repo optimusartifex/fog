@@ -375,7 +375,7 @@ GdiPlusCodecProvider::~GdiPlusCodecProvider()
 uint32_t GdiPlusCodecProvider::checkSignature(const void* mem, sysuint_t length) const
 {
   // Note: GdiPlus proxy provider uses 14 as a base score. This
-  // is by one less than all other providers based on external 
+  // is by one less than all other providers based on external
   // libraries (libpng, libjpeg, libtiff) and reason is that when
   // these external libraries are available they are used instead.
   if (!mem || length == 0) return 0;
@@ -467,7 +467,7 @@ void GdiPlusDecoder::attachStream(Stream& stream)
 
 void GdiPlusDecoder::detachStream()
 {
-  if (_gpImage) 
+  if (_gpImage)
   {
     _gdiPlusLibrary->pGdipDisposeImage(_gpImage);
     _gpImage = NULL;
@@ -546,7 +546,7 @@ err_t GdiPlusDecoder::readImage(Image& image)
   // Create GpBitmap that will share raster data with our image.
   status = _gdiPlusLibrary->pGdipCreateBitmapFromScan0(
     (INT)image.getWidth(),
-    (INT)image.getHeight(), 
+    (INT)image.getHeight(),
     (INT)image.getStride(),
     GdiPlus_gpFormatFromFogFormat(image.getFormat()),
     (BYTE*)image.getDataX(),

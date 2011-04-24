@@ -181,13 +181,13 @@ struct FOG_API KeyEvent : public Event
 
   //! @brief Returns key code. See @c KEY_CODE enum for possible ones.
   FOG_INLINE uint32_t getKey() const { return _key; }
-  
+
   //! @brief Returns modifiers. See @c MODIFIER_CODE enum for possible ones.
   FOG_INLINE uint32_t getModifiers() const { return _modifiers; }
-  
+
   //! @brief Returns key code that depends to windowing system.
   FOG_INLINE uint32_t getSystemCode() const { return _systemCode; }
-  
+
   //! @brief Returns key code translated to unicode character, can be zero if it's not possible to translate it.
   FOG_INLINE Char getUnicode() const { return _unicode; }
 
@@ -233,7 +233,7 @@ struct FOG_API MouseEvent : public Event
   //! @brief Returns modifierd.
   FOG_INLINE uint32_t getModifiers() const { return _modifiers; }
 
-  //! @brief Returns mouse position relative to client or non-client 
+  //! @brief Returns mouse position relative to client or non-client
   //! area (depends to event type).
   FOG_INLINE const PointI& getPosition() const { return _position; }
 
@@ -247,7 +247,7 @@ struct FOG_API MouseEvent : public Event
   // [Members]
   // --------------------------------------------------------------------------
 
-  //! @brief Mouse button that was pressed or released. 
+  //! @brief Mouse button that was pressed or released.
   //!
   //! Enter, leave and motion events not using this member, so it's (uint32_t)-1.
   uint32_t _button;

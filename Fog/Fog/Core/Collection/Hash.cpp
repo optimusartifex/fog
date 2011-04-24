@@ -27,7 +27,7 @@ Static<UnorderedAbstract::Data> UnorderedAbstract::_dnull;
 
 UnorderedAbstract::Data* UnorderedAbstract::_allocData(sysuint_t capacity)
 {
-  sysuint_t dsize = 
+  sysuint_t dsize =
     sizeof(Data) - sizeof(void*) + capacity * sizeof(void**);
 
   Data* d = (Data*)Memory::calloc(dsize);
@@ -96,7 +96,7 @@ bool UnorderedAbstract::_rehash(sysuint_t bc)
 
   old->refCount.dec();
   if (old != _dnull.instancep()) _freeData(old);
-  
+
   return true;
 }
 
@@ -167,7 +167,7 @@ UnorderedAbstract::Node* UnorderedAbstract::_Iterator::_removeCurrent()
 
   // Find node to remove. We need 'prev' pointer to remove it from chains.
   while (n != node)
-  { 
+  {
     prev = node;
     node = node->next;
     // Can't go out of range, becuase we know node bucked index.

@@ -50,14 +50,14 @@ void AnimationDispatcher::addAnimation(Animation* a)
     _timer.start();
   }
 
-  //To set up start parameter, or should we call this on first time event 
+  //To set up start parameter, or should we call this on first time event
   //or maybe on construction?
   a->onStart();
 }
 
 void AnimationDispatcher::removeAnimation(Animation* e)
 {
-  _finished.append(e);  
+  _finished.append(e);
   --_count;
 
   if (_count == 0)
@@ -71,7 +71,7 @@ void AnimationDispatcher::onTimer(TimerEvent* e)
   // Notify all registered handlers.
   sendEvent(e);
 
-  // TODO: Or directly call doUpdate() ??  
+  // TODO: Or directly call doUpdate() ??
 
   while (_finished.getLength() > 0)
   {
@@ -89,7 +89,7 @@ void AnimationDispatcher::onTimer(TimerEvent* e)
 // [Fog::Animation]
 // ============================================================================
 
-Animation::Animation(uint32_t t) : 
+Animation::Animation(uint32_t t) :
   _position(0.0f),
   _step(10),
   _duration(TimeDelta::fromMilliseconds(200)),

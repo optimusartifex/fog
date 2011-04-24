@@ -36,7 +36,7 @@ struct AtomicInt32
   {
     return __sync_bool_compare_and_swap(atomic, compar, value);
   }
- 
+
   static FOG_INLINE int32_t get(const int32_t* atomic)
   {
     // There's no __sync_* method which could be used here.
@@ -54,37 +54,37 @@ struct AtomicInt32
   {
     __sync_fetch_and_add(atomic, 1);
   }
- 
+
   static FOG_INLINE void dec(int32_t* atomic)
   {
     __sync_fetch_and_sub(atomic, 1);
   }
- 
+
   static FOG_INLINE void add(int32_t* atomic, int32_t value)
   {
     __sync_fetch_and_add(atomic, value);
   }
- 
+
   static FOG_INLINE void sub(int32_t* atomic, int32_t value)
   {
     __sync_fetch_and_sub(atomic, value);
   }
- 
+
   static FOG_INLINE int32_t addXchg(int32_t* atomic, int32_t value)
   {
     return __sync_fetch_and_add(atomic, value);
   }
- 
+
   static FOG_INLINE int32_t subXchg(int32_t* atomic, int32_t value)
   {
     return __sync_fetch_and_sub(atomic, value);
   }
- 
+
   static FOG_INLINE bool deref(int32_t* atomic)
   {
-    // There's no __sync_* method, so we leave the x86(_64) version. 
+    // There's no __sync_* method, so we leave the x86(_64) version.
     char result;
-   
+
     __asm__ __volatile__
     (
       "lock; decl %0\n"
@@ -115,17 +115,17 @@ struct AtomicInt64
   {
     __sync_lock_test_and_set(atomic, value);
   }
- 
+
   static FOG_INLINE int64_t setXchg(int64_t* atomic, int64_t value)
   {
     return __sync_lock_test_and_set(atomic, value);
   }
- 
+
   static FOG_INLINE bool cmpXchg(int64_t* atomic, int64_t compar, int64_t value)
   {
     return __sync_bool_compare_and_swap(atomic, compar, value);
   }
- 
+
   static FOG_INLINE int64_t get(const int64_t* atomic)
   {
     // There's no __sync_* method which could be used here.
@@ -138,41 +138,41 @@ struct AtomicInt64
     );
     return result;
   }
- 
+
   static FOG_INLINE void inc(int64_t* atomic)
   {
     __sync_fetch_and_add(atomic, 1);
   }
- 
+
   static FOG_INLINE void dec(int64_t* atomic)
   {
     __sync_fetch_and_add(atomic, 1);
   }
- 
+
   static FOG_INLINE void add(int64_t* atomic, int64_t value)
   {
     __sync_fetch_and_add(atomic, value);
   }
- 
+
   static FOG_INLINE void sub(int64_t* atomic, int64_t value)
   {
     __sync_fetch_and_sub(atomic, value);
   }
- 
+
   static FOG_INLINE int64_t addXchg(int64_t* atomic, int64_t value)
   {
     return __sync_fetch_and_add(atomic, value);
   }
- 
+
   static FOG_INLINE int64_t subXchg(int64_t* atomic, int64_t value)
   {
     return __sync_fetch_and_sub(atomic, value);
   }
- 
+
   static FOG_INLINE bool deref(int64_t* atomic)
   {
     char result;
-   
+
     __asm__ __volatile__
     (
       "lock; decq %0\n"

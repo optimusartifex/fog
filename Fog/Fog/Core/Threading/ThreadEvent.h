@@ -38,7 +38,7 @@ struct TimeDelta;
 // [Fog::ThreadEvent]
 // ============================================================================
 
-//! @brief A ThreadEvent can be a useful thread synchronization tool when you 
+//! @brief A ThreadEvent can be a useful thread synchronization tool when you
 //! want to allow one thread to wait for another thread to finish some work.
 //!
 //! Use a ThreadEvent when you would otherwise use a Lock+ThreadCondition to

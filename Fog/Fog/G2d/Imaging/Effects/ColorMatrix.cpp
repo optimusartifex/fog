@@ -375,7 +375,7 @@ static void dumpColorMatrix(const ColorMatrix& cm)
 {
   for (int i = 0; i < 5; i++)
   {
-    printf("%.10gf, %.10gf, %.10gf, %.10gf, %.10gf,\n", 
+    printf("%.10gf, %.10gf, %.10gf, %.10gf, %.10gf,\n",
       cm.m[i][0],
       cm.m[i][1],
       cm.m[i][2],

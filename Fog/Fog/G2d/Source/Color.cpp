@@ -120,7 +120,7 @@ static void FOG_CDECL _G2d_Color_argbf_from_ahslf(float* dst, const float* src)
   dst[0] = a;
 
   // Handle the achromatic case and zero lightness.
-  if (FOG_UNLIKELY(Math::isFuzzyZero(s)) || 
+  if (FOG_UNLIKELY(Math::isFuzzyZero(s)) ||
       FOG_UNLIKELY(Math::isFuzzyZero(l)))
   {
     dst[1] = l;
@@ -149,7 +149,7 @@ static void FOG_CDECL _G2d_Color_argbf_from_ahslf(float* dst, const float* src)
 
   q = (l < 0.5f) ? l * (1.0f + s) : l + s - l * s;
   p = 2.0f * l - q;
-  
+
   // Cache this computation.
   t = (q - p) * 6.0f;
 
@@ -249,7 +249,7 @@ static void FOG_CDECL _G2d_Color_ahsvf_from_ahslf(float* dst, const float* src)
     l += s;
     s *= 2.0f;
 
-    dst[2] = s / l; 
+    dst[2] = s / l;
     dst[3] = l;
   }
 }
@@ -746,7 +746,7 @@ static err_t FOG_CDECL _G2d_Color_adjust(Color& self, uint32_t adjustOp, float p
       param = Math::positiveFraction(d[1] + param);
       break;
     }
-  
+
     default:
       return ERR_RT_INVALID_ARGUMENT;
   }
@@ -984,7 +984,7 @@ static const ColorName* _G2d_Color_find(const Stub8& key)
       if (c0 != c1) break;
 
       if (++i < keyLength) continue;
-      
+
       c0 = (uint8_t)cur->name[i];
       c1 = 0;
 
@@ -1176,7 +1176,7 @@ _ParseRrbOrHsv:
           // Skip whitespaces.
           while (Byte::isSpace(*sCur)) { if (++sCur == sEnd) goto _Fail; }
 
-          // Parse number. It's against standard, but some SVG generators emit 
+          // Parse number. It's against standard, but some SVG generators emit
           // number in floating point, including 'dot' and some numbers behind.
           if ((StringUtil::atof((const char*)sCur, (sysuint_t)(sEnd - sCur), &val, '.', &valEnd, &pf) != ERR_OK) ||
               (pf & (StringUtil::PARSED_EXPONENT)) != 0)
@@ -1507,7 +1507,7 @@ _ParseRrbOrHsv:
           // Skip whitespaces.
           while (sCur->isSpace()) { if (++sCur == sEnd) goto _Fail; }
 
-          // Parse number. It's against standard, but some SVG generators emit 
+          // Parse number. It's against standard, but some SVG generators emit
           // number in floating point, including 'dot' and some numbers behind.
           if ((StringUtil::atof(sCur, (sysuint_t)(sEnd - sCur), &val, Char('.'), &valEnd, &pf) != ERR_OK) ||
               (pf & (StringUtil::PARSED_EXPONENT)) != 0)

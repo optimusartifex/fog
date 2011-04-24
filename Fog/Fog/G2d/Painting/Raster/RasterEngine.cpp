@@ -121,7 +121,7 @@ struct RasterPainterImpl_
   // --------------------------------------------------------------------------
   // [User Params]
   // --------------------------------------------------------------------------
-  
+
   static err_t FOG_CDECL getUserParams(const Painter& self, Region& region, PointI& origin);
   static err_t FOG_CDECL setUserParams(Painter& self, const Region& region, const PointI& origin);
   static err_t FOG_CDECL resetUserParams(Painter& self);
@@ -296,7 +296,7 @@ err_t FOG_CDECL RasterPainterImpl_::resetMetaParams(Painter& self)
 // ============================================================================
 // [Fog::RasterPainterImpl_ - User Params]
 // ============================================================================
-  
+
 err_t FOG_CDECL RasterPainterImpl_::getUserParams(const Painter& self, Region& region, PointI& origin)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
@@ -397,7 +397,7 @@ err_t FOG_CDECL RasterPainterImpl_::getParameter(const Painter& self, uint32_t p
     case PAINTER_PARAMETER_PARAMS_F:
     {
       PaintParamsF& params = VALUE_M(PaintParamsF);
-      
+
       params._hints = engine->ctx.paintHints;
       params._opacity = engine->opacityF;
 
@@ -1932,7 +1932,7 @@ err_t FOG_CDECL RasterPainterImpl_::setSourceAbstract(Painter& self, uint32_t so
       engine->source.gradient.initCustom1(gradient);
       engine->ctx.pc = NULL;
 
-      if (tr) 
+      if (tr)
       {
         engine->source.transform.instance() = *reinterpret_cast<const TransformF*>(tr);
         goto _HasTransform;
@@ -2715,7 +2715,7 @@ err_t RasterPainterImpl_::createPatternContext(RasterPainterEngine* engine)
 
   engine->ctx.pc = pc;
 
-  // Set reference count to 1 and initialize the context state to UNINITIALIZED. 
+  // Set reference count to 1 and initialize the context state to UNINITIALIZED.
   // It's important to mark context as uninitialized, because there are asserts
   // inside pattern-context initializers and leaving the pattern-context state
   // as is might cause crash in debug-mode.
@@ -2726,7 +2726,7 @@ err_t RasterPainterImpl_::createPatternContext(RasterPainterEngine* engine)
   {
     case PATTERN_TYPE_TEXTURE:
     {
-      err = _g2d_render.texture.create(pc, 
+      err = _g2d_render.texture.create(pc,
         engine->ctx.layer.primaryFormat,
         engine->coreClipBox,
         engine->source.texture->getImage(),
@@ -2737,11 +2737,11 @@ err_t RasterPainterImpl_::createPatternContext(RasterPainterEngine* engine)
         engine->ctx.paintHints.imageQuality);
       break;
     }
-    
+
     case PATTERN_TYPE_GRADIENT:
     {
       uint32_t gradientType = engine->source.gradient->getGradientType();
-      err = _g2d_render.gradient.create[gradientType](pc, 
+      err = _g2d_render.gradient.create[gradientType](pc,
         engine->ctx.layer.primaryFormat,
         engine->coreClipBox,
         engine->source.gradient.instance(),
@@ -2761,7 +2761,7 @@ err_t RasterPainterImpl_::createPatternContext(RasterPainterEngine* engine)
 
     engine->ctx.pc = NULL;
   }
-  
+
   return err;
 }
 
@@ -3729,7 +3729,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectD(Painter& self, const RectD& 
     return ERR_OK;
 }
 
-// TODO: It's easy to clip rectangles, so clip them here and call 
+// TODO: It's easy to clip rectangles, so clip them here and call
 // doFillNormalizedPath() instead.
 
 template<int _MODE>
@@ -4040,7 +4040,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRegion(Painter& self, const Region
     iH = _ImageFragment_->h; \
     if (iW == 0 || iH == 0) return ERR_OK; \
   }
- 
+
 template<int _MODE>
 err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtI(Painter& self, const PointI& p, const Image& i, const RectI* ir)
 {
@@ -4137,7 +4137,7 @@ _Scaling:
       FOG_ASSERT_NOT_REACHED();
   }
 }
- 
+
 template<int _MODE>
 err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtF(Painter& self, const PointF& p, const Image& i, const RectI* ir)
 {
@@ -4155,7 +4155,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtF(Painter& self, const Poin
     case TRANSFORM_TYPE_IDENTITY:
     case TRANSFORM_TYPE_TRANSLATION:
     {
-      PointD t(double(p.x) + engine->finalTransform._20, 
+      PointD t(double(p.x) + engine->finalTransform._20,
                double(p.y) + engine->finalTransform._21);
 
       Fixed48x16 x48x16 = Math::fixed48x16FromFloat(t.x);
@@ -4224,7 +4224,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtF(Painter& self, const Poin
     }
   }
 }
- 
+
 template<int _MODE>
 err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtD(Painter& self, const PointD& p, const Image& i, const RectI* ir)
 {
@@ -4242,7 +4242,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtD(Painter& self, const Poin
     case TRANSFORM_TYPE_IDENTITY:
     case TRANSFORM_TYPE_TRANSLATION:
     {
-      PointD t(double(p.x) + engine->finalTransform._20, 
+      PointD t(double(p.x) + engine->finalTransform._20,
                double(p.y) + engine->finalTransform._21);
 
       Fixed48x16 x48x16 = Math::fixed48x16FromFloat(t.x);
@@ -4425,7 +4425,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageMaskedAtF(Painter& self, cons
 
   return ERR_RT_NOT_IMPLEMENTED;
 }
- 
+
 template<int _MODE>
 err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageMaskedAtD(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
 {
@@ -4441,7 +4441,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageMaskedInI(Painter& self, cons
 
   return ERR_RT_NOT_IMPLEMENTED;
 }
- 
+
 template<int _MODE>
 err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageMaskedInF(Painter& self, const RectF& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
 {
@@ -4449,14 +4449,14 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageMaskedInF(Painter& self, cons
 
   return ERR_RT_NOT_IMPLEMENTED;
 }
- 
+
 template<int _MODE>
 err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageMaskedInD(Painter& self, const RectD& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
 
   return ERR_RT_NOT_IMPLEMENTED;
-} 
+}
 
 // ============================================================================
 // [Fog::RasterPainterImpl<> - Clip]
@@ -4469,7 +4469,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::clipRectI(Painter& self, uint32_t clip
 
   return ERR_RT_NOT_IMPLEMENTED;
 }
- 
+
 template<int _MODE>
 err_t FOG_CDECL RasterPainterImpl<_MODE>::clipRectF(Painter& self, uint32_t clipOp, const RectF& r)
 {
@@ -4477,7 +4477,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::clipRectF(Painter& self, uint32_t clip
 
   return ERR_RT_NOT_IMPLEMENTED;
 }
- 
+
 template<int _MODE>
 err_t FOG_CDECL RasterPainterImpl<_MODE>::clipRectD(Painter& self, uint32_t clipOp, const RectD& r)
 {
@@ -4493,7 +4493,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::clipRectsI(Painter& self, uint32_t cli
 
   return ERR_RT_NOT_IMPLEMENTED;
 }
- 
+
 template<int _MODE>
 err_t FOG_CDECL RasterPainterImpl<_MODE>::clipRectsF(Painter& self, uint32_t clipOp, const RectF* r, sysuint_t count)
 {
@@ -4501,7 +4501,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::clipRectsF(Painter& self, uint32_t cli
 
   return ERR_RT_NOT_IMPLEMENTED;
 }
- 
+
 template<int _MODE>
 err_t FOG_CDECL RasterPainterImpl<_MODE>::clipRectsD(Painter& self, uint32_t clipOp, const RectD* r, sysuint_t count)
 {
@@ -4517,7 +4517,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::clipPolygonI(Painter& self, uint32_t c
 
   return ERR_RT_NOT_IMPLEMENTED;
 }
- 
+
 template<int _MODE>
 err_t FOG_CDECL RasterPainterImpl<_MODE>::clipPolygonF(Painter& self, uint32_t clipOp, const PointF* p, sysuint_t count)
 {
@@ -4525,7 +4525,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::clipPolygonF(Painter& self, uint32_t c
 
   return ERR_RT_NOT_IMPLEMENTED;
 }
- 
+
 template<int _MODE>
 err_t FOG_CDECL RasterPainterImpl<_MODE>::clipPolygonD(Painter& self, uint32_t clipOp, const PointD* p, sysuint_t count)
 {
@@ -4541,7 +4541,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::clipShapeF(Painter& self, uint32_t cli
 
   return ERR_RT_NOT_IMPLEMENTED;
 }
- 
+
 template<int _MODE>
 err_t FOG_CDECL RasterPainterImpl<_MODE>::clipShapeD(Painter& self, uint32_t clipOp, uint32_t shapeType, const void* shapeData)
 {
@@ -4573,7 +4573,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::clipTextAtI(Painter& self, uint32_t cl
 
   return ERR_RT_NOT_IMPLEMENTED;
 }
- 
+
 template<int _MODE>
 err_t FOG_CDECL RasterPainterImpl<_MODE>::clipTextAtF(Painter& self, uint32_t clipOp, const PointF& p, const String& text, const Font& font, const RectF* clip)
 {
@@ -4581,7 +4581,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::clipTextAtF(Painter& self, uint32_t cl
 
   return ERR_RT_NOT_IMPLEMENTED;
 }
- 
+
 template<int _MODE>
 err_t FOG_CDECL RasterPainterImpl<_MODE>::clipTextAtD(Painter& self, uint32_t clipOp, const PointD& p, const String& text, const Font& font, const RectD* clip)
 {
@@ -4597,7 +4597,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::clipTextInI(Painter& self, uint32_t cl
 
   return ERR_RT_NOT_IMPLEMENTED;
 }
- 
+
 template<int _MODE>
 err_t FOG_CDECL RasterPainterImpl<_MODE>::clipTextInF(Painter& self, uint32_t clipOp, const TextRectF& r, const String& text, const Font& font, const RectF* clip)
 {
@@ -4605,7 +4605,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::clipTextInF(Painter& self, uint32_t cl
 
   return ERR_RT_NOT_IMPLEMENTED;
 }
- 
+
 template<int _MODE>
 err_t FOG_CDECL RasterPainterImpl<_MODE>::clipTextInD(Painter& self, uint32_t clipOp, const TextRectD& r, const String& text, const Font& font, const RectD* clip)
 {
@@ -4668,7 +4668,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::clipRegion(Painter& self, uint32_t cli
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
 
   return ERR_RT_NOT_IMPLEMENTED;
-} 
+}
 
 template<int _MODE>
 err_t FOG_CDECL RasterPainterImpl<_MODE>::resetClip(Painter& self)
@@ -4964,7 +4964,7 @@ err_t RasterPainterImpl<_MODE>::doBlitNormalizedTransformedImageI(RasterPainterE
     RenderPatternContext pc;
 
     FOG_RETURN_ON_ERROR(
-      _g2d_render.texture.create(&pc, 
+      _g2d_render.texture.create(&pc,
         engine->ctx.layer.primaryFormat,
         engine->coreClipBox,
         srcImage, srcFragment,
@@ -5000,7 +5000,7 @@ err_t RasterPainterImpl<_MODE>::doBlitNormalizedTransformedImageD(RasterPainterE
     RenderPatternContext pc;
 
     FOG_RETURN_ON_ERROR(
-      _g2d_render.texture.create(&pc, 
+      _g2d_render.texture.create(&pc,
         engine->ctx.layer.primaryFormat,
         engine->coreClipBox,
         srcImage, srcFragment,
@@ -5042,7 +5042,7 @@ err_t RasterPainterImpl<_MODE>::doBlitUntransformedImageD(
     if (srcTransform.getType() <= TRANSFORM_TYPE_SCALING)
     {
       FOG_RETURN_ON_ERROR(
-        _g2d_render.texture.create(&pc, 
+        _g2d_render.texture.create(&pc,
           engine->ctx.layer.primaryFormat,
           engine->coreClipBox,
           srcImage, srcFragment,
@@ -5055,7 +5055,7 @@ err_t RasterPainterImpl<_MODE>::doBlitUntransformedImageD(
     else
     {
       FOG_RETURN_ON_ERROR(
-        _g2d_render.texture.create(&pc, 
+        _g2d_render.texture.create(&pc,
           engine->ctx.layer.primaryFormat,
           engine->coreClipBox,
           srcImage, srcFragment,
@@ -5154,7 +5154,7 @@ err_t RasterPainterEngine::init(const ImageBits& imageBits, ImageData* imaged, u
   ctx.layer.size = imageBits.size;
   ctx.layer.stride = imageBits.stride;
   ctx.layer.primaryFormat = imageBits.format;
-  
+
   RasterPainterImpl_::setupLayer(this);
   FOG_RETURN_ON_ERROR(ctx._initPrecision(ctx.layer.precision));
 
@@ -5223,7 +5223,7 @@ static err_t _G2d_RasterPainterEngine_prepareToImage(ImageBits& imageBits, Image
   if (rect)
   {
     imageBits.size.set(rect->w, rect->h);
-    imageBits.data += rect->h * imageBits.stride + 
+    imageBits.data += rect->h * imageBits.stride +
                       rect->w * image.getBytesPerPixel();
   }
 

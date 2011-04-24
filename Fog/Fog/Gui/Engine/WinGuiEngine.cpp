@@ -45,11 +45,11 @@
 #ifndef MSH_SCROLL_LINES
 # define MSH_SCROLL_LINES L"MSH_SCROLL_LINES_MSG"
 #endif
-                                
-#ifndef WHEEL_PAGESCROLL  
+
+#ifndef WHEEL_PAGESCROLL
 // MSH_SCROLL_LINES returns number of lines to scroll
 # define WHEEL_PAGESCROLL (UINT_MAX)
-#endif 
+#endif
 
 #ifndef SPI_SETWHEELSCROLLLINES
 # define SPI_SETWHEELSCROLLLINES 105
@@ -93,11 +93,11 @@ static void hwndGetRect(HWND handle, RectI* out)
 
 static LRESULT CALLBACK hwndWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-  WinGuiWindow* guiWindow = 
+  WinGuiWindow* guiWindow =
     reinterpret_cast<WinGuiWindow*>(
       GUI_ENGINE()->getWindowFromHandle((void*)hwnd));
 
-  if (guiWindow) 
+  if (guiWindow)
   {
     return guiWindow->onWinMsg(hwnd, message, wParam, lParam);
   }
@@ -313,7 +313,7 @@ void WinGuiEngine::minimize(GuiWindow* w)
 
 void WinGuiEngine::maximize(GuiWindow* w)
 {
-  w->getWidget()->show(WIDGET_VISIBLE_MAXIMIZED);  
+  w->getWidget()->show(WIDGET_VISIBLE_MAXIMIZED);
 }
 
 // ============================================================================
@@ -434,7 +434,7 @@ void WinGuiEngine::doBlitWindow(GuiWindow* window, const BoxI* rects, sysuint_t 
     }
   }
   else
-  {    
+  {
     back->blitRects(hdc, rects, count);
   }
 
@@ -470,12 +470,12 @@ uint32_t WinGuiEngine::winKeyToModifier(WPARAM* wParam, LPARAM lParam)
       if ((_keyboardStatus.modifiers & MODIFIER_LEFT_SHIFT) != 0 && !(GetKeyState(VK_LSHIFT) & 0x8000))
       {
         *wParam = VK_LSHIFT;
-      } 
+      }
       else if ((_keyboardStatus.modifiers & MODIFIER_RIGHT_SHIFT) != 0 && !(GetKeyState(VK_RSHIFT) & 0x8000))
       {
         *wParam = VK_RSHIFT;
-      } 
-      else 
+      }
+      else
       {
         // Win9x
         int sc = HIWORD(lParam) & 0xFF;
@@ -553,9 +553,9 @@ uint32_t WinGuiEngine::winKeyToFogKey(WPARAM vk, UINT scancode)
 {
   uint32_t key;
 
-  if ((vk == VK_RETURN) && (scancode & 0x100)) 
+  if ((vk == VK_RETURN) && (scancode & 0x100))
     key = KEY_KP_ENTER;
-  else 
+  else
     key = _winKeymap.vk[vk];
 
   return key;
@@ -755,7 +755,7 @@ const char* WinGuiEngine::msgToStr(uint message)
 // [Fog::WinGuiWindow]
 // ============================================================================
 
-WinGuiWindow::WinGuiWindow(Widget* widget) : 
+WinGuiWindow::WinGuiWindow(Widget* widget) :
   GuiWindow(widget)
 {
   // TODO: Not looks good, better way how to check for this.
@@ -778,7 +778,7 @@ void WinGuiWindow::moveToTop(GuiWindow* w)
   HWND top = HWND_TOP;
   if (w) top = (HWND)w->getHandle();
 
-  SetWindowPos((HWND)getHandle(), top, 0, 0, 0, 0, 
+  SetWindowPos((HWND)getHandle(), top, 0, 0, 0, 0,
     SWP_NOMOVE |
     SWP_NOSIZE |
     SWP_NOACTIVATE |
@@ -873,14 +873,14 @@ void WinGuiWindow::setTransparency(float val)
   }
 }
 
-void WinGuiWindow::calculateStyleFlags(uint32_t flags, DWORD& style, DWORD& exstyle) 
+void WinGuiWindow::calculateStyleFlags(uint32_t flags, DWORD& style, DWORD& exstyle)
 {
-  if (flags & WINDOW_FRAMELESS) 
+  if (flags & WINDOW_FRAMELESS)
   {
     style = WS_POPUP;
     exstyle = WS_EX_APPWINDOW;
   }
-  else if (flags & WINDOW_POPUP) 
+  else if (flags & WINDOW_POPUP)
   {
     style = WS_POPUP;
     exstyle = WS_EX_TOPMOST|WS_EX_APPWINDOW;
@@ -891,17 +891,17 @@ void WinGuiWindow::calculateStyleFlags(uint32_t flags, DWORD& style, DWORD& exst
     }
     return;
   }
-  else if (flags & WINDOW_NATIVE) 
+  else if (flags & WINDOW_NATIVE)
   {
     style = WS_OVERLAPPED | WS_CAPTION;
     exstyle = WS_EX_WINDOWEDGE;
   }
-  else if (flags & WINDOW_TOOL) 
+  else if (flags & WINDOW_TOOL)
   {
     style = WS_OVERLAPPED | WS_CAPTION;
     exstyle = WS_EX_TOOLWINDOW;
   }
-  else if (flags & WINDOW_DIALOG) 
+  else if (flags & WINDOW_DIALOG)
   {
     style = WS_OVERLAPPED | WS_CAPTION | WS_DLGFRAME;
     //Dialog is always on top
@@ -930,7 +930,7 @@ void WinGuiWindow::calculateStyleFlags(uint32_t flags, DWORD& style, DWORD& exst
     }
     else
     {
-      style |=WS_THICKFRAME;      
+      style |=WS_THICKFRAME;
     }
 
     //A Context-helpbutton is only visible if no min/max button are defined
@@ -1046,7 +1046,7 @@ err_t WinGuiWindow::create(uint32_t flags)
       reinterpret_cast<WinGuiBackBuffer*>(_backingStore)->_clear();
 
       if (b)
-      {    
+      {
         SetWindowLong((HWND)_handle,GWL_EXSTYLE, exstyle &~WS_EX_LAYERED);
         dwStyleEx |= WS_EX_LAYERED;
       }
@@ -1055,10 +1055,10 @@ err_t WinGuiWindow::create(uint32_t flags)
     // It's much easier to first remove all possible flags and then create
     // a complete new flag and or it with the clean old one.
     style &=~ (WS_OVERLAPPED | WS_CAPTION | WS_POPUP | WS_SYSMENU | WS_DLGFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | CS_NOCLOSE | WS_THICKFRAME | WS_BORDER);
-    
+
     SetWindowLong((HWND)_handle, GWL_STYLE, style | dwStyle);
     SetWindowLong((HWND)_handle, GWL_EXSTYLE, dwStyleEx);
-    
+
     doSystemMenu(flags);
 
     getWidget()->setTransparency(getWidget()->getTransparency());
@@ -1068,7 +1068,7 @@ err_t WinGuiWindow::create(uint32_t flags)
       // Allow repaint again!
       SendMessage((HWND)_handle, WM_SETREDRAW, (WPARAM) TRUE, (LPARAM) 0);
       UpdateWindow((HWND)_handle);
-    
+
       SetWindowPos((HWND)_handle, 0,0,0,0,0, SWP_FRAMECHANGED | SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER);
       RedrawWindow((HWND)_handle,0,0, RDW_ERASE | RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_UPDATENOW);
     }
@@ -1114,7 +1114,7 @@ err_t WinGuiWindow::create(uint32_t flags)
 
   if (b)
   {
-    dwStyleEx |= WS_EX_LAYERED; 
+    dwStyleEx |= WS_EX_LAYERED;
   }
 
   reinterpret_cast<WinGuiBackBuffer*>(_backingStore)->_prgb = b;
@@ -1188,7 +1188,7 @@ err_t WinGuiWindow::disable()
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
-  if (_enabled) 
+  if (_enabled)
   {
     EnableWindow((HWND)_handle, FALSE);
     //_enabled = false;
@@ -1199,20 +1199,20 @@ err_t WinGuiWindow::disable()
 err_t WinGuiWindow::show(uint32_t state)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
-  if (state == WIDGET_VISIBLE) 
-  {    
+  if (state == WIDGET_VISIBLE)
+  {
     if (!IsWindowVisible((HWND)_handle))
     {
       ShowWindow((HWND)_handle, SW_SHOW);
     }
-  } 
-  else if (state == WIDGET_VISIBLE_RESTORE) 
+  }
+  else if (state == WIDGET_VISIBLE_RESTORE)
   {
     ShowWindow((HWND)_handle, SW_RESTORE);
   }
   else if (state == WIDGET_VISIBLE_MAXIMIZED)
-  {            
-    if (!IsZoomed((HWND)_handle)) 
+  {
+    if (!IsZoomed((HWND)_handle))
     {
       bool pos =  !IsWindowVisible((HWND)_handle);
 
@@ -1220,18 +1220,18 @@ err_t WinGuiWindow::show(uint32_t state)
 
       if (pos)
       {
-        SendMessage((HWND)_handle,WM_USER,0,0);        
+        SendMessage((HWND)_handle,WM_USER,0,0);
       }
     }
   }
   else if (state == WIDGET_VISIBLE_MINIMIZED)
   {
-    if (!IsIconic((HWND)_handle)) 
+    if (!IsIconic((HWND)_handle))
     {
       ShowWindow((HWND)_handle, SW_SHOWMINIMIZED);
     }
   }
-  else if (state == WIDGET_VISIBLE_FULLSCREEN) 
+  else if (state == WIDGET_VISIBLE_FULLSCREEN)
   {
     if (!IsWindowVisible((HWND)_handle))
     {
@@ -1246,7 +1246,7 @@ err_t WinGuiWindow::hide()
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
-  if (IsWindowVisible((HWND)_handle)) 
+  if (IsWindowVisible((HWND)_handle))
   {
     ShowWindow((HWND)_handle, SW_HIDE);
   }
@@ -1290,7 +1290,7 @@ err_t WinGuiWindow::setGeometry(const RectI& geometry)
 
   if (_windowRect != geometry)
   {
-    MoveWindow((HWND)_handle, 
+    MoveWindow((HWND)_handle,
       geometry.getX(),
       geometry.getY(),
       geometry.getWidth(),
@@ -1372,7 +1372,7 @@ err_t WinGuiWindow::clientToWorld(PointI* coords)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
-  return ClientToScreen((HWND)_handle, (POINT *)coords) 
+  return ClientToScreen((HWND)_handle, (POINT *)coords)
     ? (err_t)ERR_OK
     : (err_t)ERR_GUI_CANT_TRANSLETE_COORDINATES;
 }
@@ -1427,7 +1427,7 @@ LRESULT WinGuiWindow::KeyboardMessageHelper(HWND hwnd, UINT message, WPARAM wPar
   WinGuiEngine* guiEngine = GUI_ENGINE();
   //Keyboard messages
   switch (message)
-  { 
+  {
   case WM_SYSKEYDOWN:
   case WM_KEYDOWN:
     {
@@ -1463,7 +1463,7 @@ LRESULT WinGuiWindow::MouseMessageHelper(HWND hwnd, UINT message, WPARAM wParam,
   WinGuiEngine* guiEngine = GUI_ENGINE();
 
   switch (message)
-  { 
+  {
     case WM_MOUSEHOVER:
     case WM_MOUSEMOVE:
     {
@@ -1531,7 +1531,7 @@ LRESULT WinGuiWindow::MouseMessageHelper(HWND hwnd, UINT message, WPARAM wParam,
       {
         onMouseWheel(WHEEL_UP);
       }
-      return 0;  
+      return 0;
     }
   }
 
@@ -1544,7 +1544,7 @@ LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
   WinGuiEngine* guiEngine = GUI_ENGINE();
   //TODO:check GuiEngine for modal widget!
   GuiWindow* curmodal = isModal() ? this : 0;
-  //bool allowinput = !curmodal || ((HWND)curmodal->getHandle() == hwnd);  
+  //bool allowinput = !curmodal || ((HWND)curmodal->getHandle() == hwnd);
 
   if (message >= WM_NCCREATE && message <= WM_NCXBUTTONDBLCLK)
   {
@@ -1610,8 +1610,8 @@ LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
         }
 
         if (!getWidget()->isDragAble())
-        {          
-          if (command == SC_MOVE) 
+        {
+          if (command == SC_MOVE)
           {
             //do not allow to move
             return 0;
@@ -1656,16 +1656,16 @@ LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
         }
 
         if (IsIconic(hwnd) && (pos->flags & SWP_FRAMECHANGED))
-        {        
+        {
           //window_minimized
           onVisibility(WIDGET_VISIBLE_MINIMIZED);
-          //no configuration change needed! 
+          //no configuration change needed!
           return 0;
         }
         else if (IsZoomed(hwnd) && (pos->flags & SWP_FRAMECHANGED))
         {
           //window_maximized
-          onVisibility(WIDGET_VISIBLE_MAXIMIZED);        
+          onVisibility(WIDGET_VISIBLE_MAXIMIZED);
         }
         else
         {
@@ -1675,7 +1675,7 @@ LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
             if (!curmodal)
             {
               //only for the case of minimized modal widgets we need
-              //a pointer to last modal window on stack to be able 
+              //a pointer to last modal window on stack to be able
               //to show all modal widgets on 'restore' again (single linked list)
               curmodal = getLastModalWindow();
             }
@@ -1727,8 +1727,8 @@ LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
         if (!_isDirty)
         {
           BitBlt(
-            hdc, 0, 0, rect.right-rect.left, rect.bottom-rect.top, 
-            reinterpret_cast<WinGuiBackBuffer*>(_backingStore)->getHdc(), 0, 0, 
+            hdc, 0, 0, rect.right-rect.left, rect.bottom-rect.top,
+            reinterpret_cast<WinGuiBackBuffer*>(_backingStore)->getHdc(), 0, 0,
             SRCCOPY);
         }
         else
@@ -1753,12 +1753,12 @@ LRESULT WinGuiWindow::onWinMsg(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
       default:
         if (message == GUI_ENGINE()->uMSH_MOUSEWHEEL)
         {
-          if ((int)wParam < 0) 
+          if ((int)wParam < 0)
           {
             onMouseWheel(WHEEL_DOWN);
             return 0;
           }
-          else 
+          else
           {
             onMouseWheel(WHEEL_UP);
             return 0;
@@ -1874,7 +1874,7 @@ bool WinGuiBackBuffer::resize(int width, int height, bool cache)
 
     _primaryPixels = NULL;
     _hBitmap = CreateDIBSection(NULL, &bmi, DIB_RGB_COLORS, (void**)&_primaryPixels, NULL, 0);
-    if (_hBitmap == NULL) 
+    if (_hBitmap == NULL)
     {
       Debug::dbgFunc("Fog::WinGuiBackBuffer", "resize", "CreateDIBSection() failed, request size=%dx%d, WinError=%u.\n", targetWidth, targetHeight, GetLastError());
       DeleteDC(_hdc);
@@ -1906,7 +1906,7 @@ bool WinGuiBackBuffer::resize(int width, int height, bool cache)
     _createdTime = TimeTicks::now();
     if (_prgb)
     {
-      _expireTime = _createdTime + TimeDelta::fromDays(1);      
+      _expireTime = _createdTime + TimeDelta::fromDays(1);
     }
     else
     {
@@ -1950,7 +1950,7 @@ void WinGuiBackBuffer::blitRects(HDC target, const BoxI* rects, sysuint_t count)
         int y = rects[i].getY();
         int w = rects[i].getWidth();
         int h = rects[i].getHeight();
-        
+
         BitBlt(target, x, y, w, h, _hdc, x, y, SRCCOPY);
       }
       break;

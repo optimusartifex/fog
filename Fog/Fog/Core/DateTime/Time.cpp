@@ -150,12 +150,12 @@ Time Time::LocalMidnight() const
 {
   Exploded exploded;
   localExplode(&exploded);
-  
+
   exploded.hour = 0;
   exploded.minute = 0;
   exploded.second = 0;
   exploded.millisecond = 0;
-  
+
   return fromLocalExploded(exploded);
 }
 
@@ -181,8 +181,8 @@ Time Time::LocalMidnight() const
 // applications on the system.  By default, precision is only 15.5ms.
 // Unfortunately, we don't want to call timeBeginPeriod because we don't
 // want to affect other applications.  Further, on mobile platforms, use of
-// faster multimedia timers can hurt battery life.  See the intel 
-// article about this here: 
+// faster multimedia timers can hurt battery life.  See the intel
+// article about this here:
 // http://softwarecommunity.intel.com/articles/eng/1086.htm
 //
 // To work around all this, we're going to generally use timeGetTime().  We
@@ -391,9 +391,9 @@ static DWORD (*tickFunction)(void) = &timeGetTimeWrapper;
 class NowSingleton
 {
 public:
-  NowSingleton() : 
+  NowSingleton() :
     _rollover(TimeDelta::fromMilliseconds(0)),
-    _lastSeen(0), 
+    _lastSeen(0),
     _hiResClockEnabled(false)
   {
     useHiResClock(true);
@@ -471,7 +471,7 @@ static Lazy<NowSingleton> nowSingleton;
 class HighResNowSingleton
 {
 public:
-  HighResNowSingleton() : 
+  HighResNowSingleton() :
     _ticksPerMicrosecond(0.0),
     _skew(0)
   {
@@ -523,7 +523,7 @@ private:
     if (!::QueryPerformanceFrequency(&ticks_per_sec))
       return;  // Broken, we don't guarantee this function works.
 
-    _ticksPerMicrosecond = 
+    _ticksPerMicrosecond =
       static_cast<float>(ticks_per_sec.QuadPart) /
       static_cast<float>(Time::MicrosecondsPerSecond);
 

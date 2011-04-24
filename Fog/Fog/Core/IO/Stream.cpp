@@ -207,7 +207,7 @@ err_t HANDLEStreamDevice::openFile(const String& _fileName, uint32_t openFlags, 
   DWORD dwCreationDisposition = 0;
   DWORD dwFlags = 0;
 
-  uint32_t createPathFlags = 
+  uint32_t createPathFlags =
     STREAM_OPEN_CREATE     |
     STREAM_OPEN_CREATE_PATH|
     STREAM_OPEN_WRITE      ;
@@ -639,7 +639,7 @@ MemoryStreamDevice::MemoryStreamDevice(
   cur = data;
   end = data + size;
 
-  flags |= 
+  flags |=
     STREAM_IS_OPEN     |
     STREAM_IS_SEEKABLE |
     STREAM_IS_MEMORY   |
@@ -985,7 +985,7 @@ err_t Stream::openFile(const String& fileName, uint32_t openFlags)
   static uint32_t CREATE_PATH_FLAGS =
     STREAM_OPEN_CREATE | STREAM_OPEN_CREATE_PATH | STREAM_OPEN_WRITE;
 
-  // If we are opening new file, we will close previous. This means that if 
+  // If we are opening new file, we will close previous. This means that if
   // open fail, we end at neutral state (null stream).
   close();
 

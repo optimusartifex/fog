@@ -102,7 +102,7 @@ struct FOG_NO_EXPORT CClear
       BLIT_LOOP_32x1_BEGIN(A8_Glyph)
         Face::p32 dst0p;
         Face::p32 msk0p;
-        
+
         Face::p32Load1b(msk0p, msk);
 
         if (msk0p == 0x00) goto _A8_Glyph_Skip;
@@ -157,7 +157,7 @@ _A8_Glyph_Skip:
       BLIT_LOOP_32x1_BEGIN(ARGB32_Glyph)
         Face::p32 dst0p;
         Face::p32 msk0p_20, msk0p_31;
-        
+
         Face::p32Load4aNative(msk0p_20, msk);
 
         if (msk0p_20 == 0x00000000) goto _ARGB32_Glyph_Skip;
@@ -270,7 +270,7 @@ _ARGB32_Glyph_Skip:
       BLIT_LOOP_32x1_BEGIN(A8_Glyph)
         Face::p32 dst0p;
         Face::p32 msk0p;
-        
+
         Face::p32Load1b(msk0p, msk);
 
         if (msk0p == 0x00) goto _A8_Glyph_Skip;
@@ -326,7 +326,7 @@ _A8_Glyph_Skip:
       BLIT_LOOP_32x1_BEGIN(ARGB32_Glyph)
         Face::p32 dst0p;
         Face::p32 msk0p_20, msk0p_31;
-        
+
         Face::p32Load4aNative(msk0p_20, msk);
 
         if (msk0p_20 == 0x00000000) goto _ARGB32_Glyph_Skip;
@@ -462,7 +462,7 @@ _ARGB32_Glyph_Skip:
       BLIT_LOOP_24x1_BEGIN(A8_Glyph)
         Face::p32 dst0p;
         Face::p32 msk0p;
-        
+
         Face::p32Load1b(msk0p, msk);
         if (msk0p == 0x00) goto _A8_Glyph_Skip;
         Face::p32Negate255SBW(msk0p, msk0p);
@@ -516,7 +516,7 @@ _A8_Glyph_Skip:
       BLIT_LOOP_24x1_BEGIN(ARGB32_Glyph)
         Face::p32 dst0p;
         Face::p32 msk0p_20, msk0p_31;
-        
+
         Face::p32Load4aNative(msk0p_20, msk);
 
         if (msk0p_20 == 0x00000000) goto _ARGB32_Glyph_Skip;
@@ -653,7 +653,7 @@ _ARGB32_Glyph_Skip:
       BLIT_LOOP_8x1_BEGIN(A8_Glyph)
         Face::p32 dst0p;
         Face::p32 msk0p;
-        
+
         Face::p32Load1b(dst0p, dst);
         Face::p32Load1b(msk0p, msk);
         Face::p32Negate255SBW(msk0p, msk0p);
@@ -677,7 +677,7 @@ _ARGB32_Glyph_Skip:
       BLIT_LOOP_8x1_BEGIN(A8_Extra)
         Face::p32 dst0p;
         Face::p32 msk0p;
-        
+
         Face::p32Load1b(dst0p, dst);
         Face::p32Load2aNative(msk0p, msk);
         Face::p32Negate256SBW(msk0p, msk0p);
@@ -700,7 +700,7 @@ _ARGB32_Glyph_Skip:
       BLIT_LOOP_8x1_BEGIN(ARGB32_Glyph)
         Face::p32 dst0p;
         Face::p32 msk0p;
-        
+
         Face::p32Load1b(dst0p, dst);
         Face::p32Load4aNative(msk0p, msk);
         Face::p32RShift(msk0p, msk0p, 24);

@@ -21,9 +21,9 @@
 //!
 //! @section Main_Page_Intro Introduction
 //!
-//! Fog library is high performance library written in C++  language that 
-//! abstracts operating system dependencies and enables multi platform 
-//! development through single source compatibility. This library was created 
+//! Fog library is high performance library written in C++  language that
+//! abstracts operating system dependencies and enables multi platform
+//! development through single source compatibility. This library was created
 //! as an abstraction layer between Windows and Unix like operating systems.
 
 // ============================================================================
@@ -94,7 +94,7 @@
 //! performance critical code using SSE2.
 //!
 //! List of hardcoding macros:
-//! 
+//!
 //! - @ref FOG_HARDCODE_MMX.
 //! - @ref FOG_HARDCODE_MMX2.
 //! - @ref FOG_HARDCODE_SSE.
@@ -125,7 +125,7 @@
 //!
 //! @section Fog_Core_Compiler_PCE Predicting conditional expressions
 //!
-//! Macros that can help to optimize the code using compiler specific 
+//! Macros that can help to optimize the code using compiler specific
 //! decorators to tell compiler expected result of the expression.
 //!
 //! List of macros:
@@ -133,7 +133,7 @@
 //! - @ref FOG_LIKELY.
 //! - @ref FOG_UNLIKELY.
 //!
-//! @note Currently only when compiling by gcc these macros are used, when 
+//! @note Currently only when compiling by gcc these macros are used, when
 //! compiling for example by MSVC there is no such functionality (when using
 //! this compiler try to use profile based optimizations instead).
 
@@ -294,7 +294,7 @@ struct Implicit
   //! and deep copy will be used instead.
   //!
   //! This flag is set only by template versions of original objects.
-  //! For example @c Fog::TemporaryString<> templates sets this flag to 
+  //! For example @c Fog::TemporaryString<> templates sets this flag to
   //! true, but @c Fog::String family classes never set this flag.
   bool isStrong() const;
 };

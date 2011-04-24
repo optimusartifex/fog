@@ -86,11 +86,11 @@ struct RectI
   FOG_INLINE const SizeI& getSize() const { return *(const SizeI *)(const void*)(&w); }
 
   FOG_INLINE RectI& set(int rx, int ry, int rw, int rh)
-  { 
-    x = rx; 
-    y = ry; 
-    w = rw; 
-    h = rh; 
+  {
+    x = rx;
+    y = ry;
+    w = rw;
+    h = rh;
 
     return *this;
   }
@@ -190,7 +190,7 @@ struct RectI
   //! @return @c true if point is in rectangle.
   FOG_INLINE bool contains(int px, int py) const
   {
-    return ((px >= getX0()) & (py >= getY0()) & 
+    return ((px >= getX0()) & (py >= getY0()) &
             (px <  getX1()) & (py <  getY1()) );
   }
 
@@ -200,7 +200,7 @@ struct RectI
   //! @return @c true if point is in rectangle.
   FOG_INLINE bool contains(const PointI& pt) const
   {
-    return ((pt.x >= getX0()) & (pt.y >= getY0()) & 
+    return ((pt.x >= getX0()) & (pt.y >= getY0()) &
             (pt.x <  getX1()) & (pt.y <  getY1()) );
   }
 
@@ -243,7 +243,7 @@ struct RectI
     n <<= 1;
     w -= n;
     h -= n;
-    
+
     return *this;
   }
 
@@ -843,7 +843,7 @@ struct RectD
   // [reset]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE RectD& reset() 
+  FOG_INLINE RectD& reset()
   {
     x = 0.0;
     y = 0.0;

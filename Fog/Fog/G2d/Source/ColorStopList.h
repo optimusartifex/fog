@@ -69,7 +69,7 @@ struct FOG_NO_EXPORT ColorStopListData
 
   static FOG_INLINE sysuint_t sizeFor(sysuint_t capacity)
   {
-    return sizeof(ColorStopListData) - sizeof(ColorStop) + 
+    return sizeof(ColorStopListData) - sizeof(ColorStop) +
       capacity * sizeof(ColorStop);
   }
 

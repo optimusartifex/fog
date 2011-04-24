@@ -274,7 +274,7 @@ enum LAYOUT_POLICY_FLAGS
   LAYOUT_WIDTH_SHIFT = 0,
 
   LAYOUT_HEIGHT_MASK = 0xF0,
-  LAYOUT_HEIGHT_SHIFT = 4,  
+  LAYOUT_HEIGHT_SHIFT = 4,
 
   LAYOUT_EXPANDING_WIDTH = (0x1 << LAYOUT_WIDTH_SHIFT),
   LAYOUT_SHRINKING_WIDTH = (0x2 << LAYOUT_WIDTH_SHIFT),
@@ -300,43 +300,43 @@ enum LAYOUT_POLICY
   LAYOUT_POLICY_WIDTH_MINIMUM = LAYOUT_EXPANDING_WIDTH,
   LAYOUT_POLICY_WIDTH_MAXIMUM = LAYOUT_SHRINKING_WIDTH,
 
-  LAYOUT_POLICY_WIDTH_PREFERRED = 
+  LAYOUT_POLICY_WIDTH_PREFERRED =
     LAYOUT_GROWING_WIDTH |
     LAYOUT_SHRINKING_WIDTH,
 
-  LAYOUT_POLICY_WIDTH_MINIMUM_EXPANDING = 
+  LAYOUT_POLICY_WIDTH_MINIMUM_EXPANDING =
     LAYOUT_GROWING_WIDTH |
     LAYOUT_EXPANDING_WIDTH,
 
-  LAYOUT_POLICY_WIDTH_EXPANDING = 
+  LAYOUT_POLICY_WIDTH_EXPANDING =
     LAYOUT_GROWING_WIDTH |
-    LAYOUT_EXPANDING_WIDTH | 
+    LAYOUT_EXPANDING_WIDTH |
     LAYOUT_SHRINKING_WIDTH,
 
-  LAYOUT_POLICY_WIDTH_IGNORED = 
-    LAYOUT_GROWING_WIDTH | 
-    LAYOUT_IGNORE_WIDTH | 
+  LAYOUT_POLICY_WIDTH_IGNORED =
+    LAYOUT_GROWING_WIDTH |
+    LAYOUT_IGNORE_WIDTH |
     LAYOUT_SHRINKING_WIDTH,
 
   LAYOUT_POLICY_HEIGHT_MINIMUM = LAYOUT_EXPANDING_HEIGHT,
   LAYOUT_POLICY_HEIGHT_MAXIMUM = LAYOUT_SHRINKING_HEIGHT,
 
-  LAYOUT_POLICY_HEIGHT_PREFERRED = 
-    LAYOUT_GROWING_HEIGHT | 
+  LAYOUT_POLICY_HEIGHT_PREFERRED =
+    LAYOUT_GROWING_HEIGHT |
     LAYOUT_SHRINKING_HEIGHT,
 
-  LAYOUT_POLICY_HEIGHT_MINIMUM_EXPANDING = 
-    LAYOUT_GROWING_HEIGHT | 
+  LAYOUT_POLICY_HEIGHT_MINIMUM_EXPANDING =
+    LAYOUT_GROWING_HEIGHT |
     LAYOUT_EXPANDING_HEIGHT,
 
-  LAYOUT_POLICY_HEIGHT_EXPANDING = 
-    LAYOUT_GROWING_HEIGHT | 
-    LAYOUT_EXPANDING_HEIGHT | 
+  LAYOUT_POLICY_HEIGHT_EXPANDING =
+    LAYOUT_GROWING_HEIGHT |
+    LAYOUT_EXPANDING_HEIGHT |
     LAYOUT_SHRINKING_HEIGHT,
 
-  LAYOUT_POLICY_HEIGHT_IGNORED = 
-    LAYOUT_GROWING_HEIGHT | 
-    LAYOUT_IGNORE_HEIGHT | 
+  LAYOUT_POLICY_HEIGHT_IGNORED =
+    LAYOUT_GROWING_HEIGHT |
+    LAYOUT_IGNORE_HEIGHT |
     LAYOUT_SHRINKING_HEIGHT
 };
 
@@ -374,7 +374,7 @@ enum WINDOW_FLAGS
   // [Window Type]
   // --------------------------------------------------------------------------
 
-  //! @brief Flag to indicate the maximum of window types 
+  //! @brief Flag to indicate the maximum of window types
   //! (needed for fast identification of TopLevel-Windows)
   WINDOW_TYPE_MASK = 0x000000FF,
 
@@ -390,7 +390,7 @@ enum WINDOW_FLAGS
   //! @brief Create tool window instead of normal one.
   //!
   //! A tool window is often a small window with a smaller than usual
-  //! title bar and decoration   
+  //! title bar and decoration
   WINDOW_TOOL = (1 << 2),
 
   //! @brief Create popup like window instead of normal one.
@@ -401,7 +401,7 @@ enum WINDOW_FLAGS
 
   //! @brief Create a window without frame and decoration
   //!
-  //! The window will not have a decoration at all, this will complete 
+  //! The window will not have a decoration at all, this will complete
   //! overwrite the window frame flag.
   WINDOW_FRAMELESS = (1 << 4),
 
@@ -409,7 +409,7 @@ enum WINDOW_FLAGS
   //! screen
   //!
   //! This flag overwrites all other window-types
-  WINDOW_FULLSCREEN = (1 << 5),  
+  WINDOW_FULLSCREEN = (1 << 5),
 
   // --------------------------------------------------------------------------
   // [Window Hints]
@@ -431,7 +431,7 @@ enum WINDOW_FLAGS
 
   //! @brief Marks the window to stay TopMost of the other windows
   //!
-  //! The window will be on top of the whole system   
+  //! The window will be on top of the whole system
   WINDOW_ALWAYS_ON_TOP = (1 << 11),
 
   //! @brief Marks if the Window should have no system menu
@@ -770,7 +770,7 @@ enum ALIGNMENT
   ALIGNMENT_LEFT = 0x001,
   //! @brief Aligns with the right edge.
   ALIGNMENT_RIGHT = 0x002,
-  //! @brief Centers horizontally in the available space. 
+  //! @brief Centers horizontally in the available space.
   ALIGNMENT_HCENTER = 0x004,
   //! @brief Justifies the text in the available space.
   ALIGNMENT_JUSTIFY = 0x008,
@@ -793,15 +793,15 @@ enum ALIGNMENT
   //! @brief Synonym for ALIGNMENT_RIGHT.
   ALIGNMENT_TRAILING = ALIGNMENT_RIGHT,
 
-  ALIGNMENT_HORIZONTAL_MASK = 
-    ALIGNMENT_LEFT | 
-    ALIGNMENT_RIGHT | 
-    ALIGNMENT_HCENTER | 
+  ALIGNMENT_HORIZONTAL_MASK =
+    ALIGNMENT_LEFT |
+    ALIGNMENT_RIGHT |
+    ALIGNMENT_HCENTER |
     ALIGNMENT_JUSTIFY, // | ALIGNMENT_ABSOLUTE
 
-  ALIGNMENT_VERTICAL_MASK = 
-    ALIGNMENT_TOP | 
-    ALIGNMENT_BOTTOM | 
+  ALIGNMENT_VERTICAL_MASK =
+    ALIGNMENT_TOP |
+    ALIGNMENT_BOTTOM |
     ALIGNMENT_VCENTER
 };
 
@@ -878,7 +878,7 @@ enum ANIMATION_FLAGS
   ANIMATION_WIDGET_DESTROY_ON_END = (1 << 3),
   //! @brief marks that the positions are relative to parent.
   ANIMATION_WIDGET_RELATIV_TO_PARENT = (1 << 4),
-  
+
   //! @brief identifies where the widget is relative to parent.
   ANIMATION_WIDGET_ORIENTATION_TOP = (1 << 5),
   ANIMATION_WIDGET_ORIENTATION_BOTTOM = (1 << 6),

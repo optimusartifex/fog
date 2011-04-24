@@ -22,14 +22,14 @@ namespace Fog {
 // ============================================================================
 
 //! @brief This template is for fast routines that need to use memory
-//! preferably allocated on the stack. Maximum size of memory allocated 
+//! preferably allocated on the stack. Maximum size of memory allocated
 //! on the stack is @a N.
 //!
 //! If N is zero, the heap memory is used.
 //!
-//! This class is used internaly in Fog/Core and all upper libraries to simplify 
-//! some code, because there are situations where we need to alloc memory by 
-//! alloca(), but if the amount of requested memory is too big, it's better 
+//! This class is used internaly in Fog/Core and all upper libraries to simplify
+//! some code, because there are situations where we need to alloc memory by
+//! alloca(), but if the amount of requested memory is too big, it's better
 //! to use memory on the heap.
 //!
 //! @c alloc() member can be called only once. Memory allocated on the heap is

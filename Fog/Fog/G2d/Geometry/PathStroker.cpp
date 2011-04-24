@@ -458,7 +458,7 @@ err_t PathStrokerContextT<Number>::calcMiter(
     // This condition determines whether the next line segments continues
     // the previous one or goes back.
     typename PointT<Number>::T vt(v1.x + dx1, v1.y - dy1);
-    
+
     if ((Math2d::crossProduct(v0, v1, vt) < 0.0) ==
         (Math2d::crossProduct(v1, v2, vt) < 0.0))
     {
@@ -891,7 +891,7 @@ err_t PathStrokerContextT<Number>::strokePathFigure(const typename PointT<Number
 
     // FirstI is first point. When first and last points are equal, we need to
     // mask the second one as first.
-    // 
+    //
     // Examine two paths:
     //
     // - [100, 100] -> [300, 300] -> [100, 300] -> CLOSE
@@ -900,7 +900,7 @@ err_t PathStrokerContextT<Number>::strokePathFigure(const typename PointT<Number
     //   close end-point is not shared with first vertex.
     //
     // - [100, 100] -> [300, 300] -> [100, 300] -> [100, 100] -> CLOSE
-    // 
+    //
     //   The firstI will be one. Path is self-closing, but unfortunatelly the
     //   closing point vertex is already there (fourth command).
     //
@@ -1142,8 +1142,8 @@ _Pen2Done:
     dst._d->length = finalLength;
     FOG_ASSERT(finalLength <= dst._d->capacity);
 
-    // Fix path adding PATH_CMD_MOVE_TO/CLOSE commands at begin of each 
-    // outline and filling rest by PATH_CMD_LINE_TO. This allowed us to 
+    // Fix path adding PATH_CMD_MOVE_TO/CLOSE commands at begin of each
+    // outline and filling rest by PATH_CMD_LINE_TO. This allowed us to
     // simplify ADD_VERTEX() macro.
     uint8_t* dstCommands = const_cast<uint8_t*>(dst.getCommands());
 
@@ -1234,7 +1234,7 @@ void PathStrokerF::_update()
 
 err_t PathStrokerF::strokeShape(
   PathF& dst,
-  uint32_t shapeType, const void* shapeData, 
+  uint32_t shapeType, const void* shapeData,
   const TransformF* tr, const BoxF* clipBox) const
 {
   update();

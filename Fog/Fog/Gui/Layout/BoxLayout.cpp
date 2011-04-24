@@ -111,7 +111,7 @@ int BoxLayout::calculateVerticalGaps(bool collapse)
 
   if (collapse)
   {
-    for (int i = 1; i < (sysint_t)_children.getLength(); i++) 
+    for (int i = 1; i < (sysint_t)_children.getLength(); i++)
     {
       gaps += LayoutUtil::collapseMargins(spacing, _children.at(i-1)->getContentBottomMargin(), _children.at(i)->getContentTopMargin());
     }
@@ -119,7 +119,7 @@ int BoxLayout::calculateVerticalGaps(bool collapse)
   }
   else
   {
-    for (int i = 1; i < (sysint_t)_children.getLength(); i++) 
+    for (int i = 1; i < (sysint_t)_children.getLength(); i++)
     {
       LayoutItem* item = _children.at(i);
       gaps += item->getContentTopMargin() + item->getContentBottomMargin();
@@ -188,7 +188,7 @@ void HBoxLayout::calculateLayoutHint(LayoutHint& hint)
 
     int whint = hint.getWidth();
     if (data->hasFlex())
-    {        
+    {
       data->_min = item->getLayoutMinimumSize().getWidth();
       data->_max = item->getLayoutMaximumSize().getWidth();
       data->_hint = whint;
@@ -211,7 +211,7 @@ void HBoxLayout::calculateLayoutHint(LayoutHint& hint)
 }
 
 int HBoxLayout::doLayout(const RectI &rect)
-{    
+{
   if (!rect.isValid())
     return 0;
 
@@ -219,7 +219,7 @@ int HBoxLayout::doLayout(const RectI &rect)
   int availHeight = rect.getHeight();
 
   // Support for Margin of Layout.
-  int gaps = getContentLeftMargin() + calculateHorizontalGaps(true) + getContentRightMargin();    
+  int gaps = getContentLeftMargin() + calculateHorizontalGaps(true) + getContentRightMargin();
   int allocatedWidth = gaps + _allocated;
 
   if (_flexibles && allocatedWidth != availWidth)
@@ -228,7 +228,7 @@ int HBoxLayout::doLayout(const RectI &rect)
   }
 
   int top, height, marginTop, marginBottom;
-  int marginRight = -INT_MAX;    
+  int marginRight = -INT_MAX;
   int spacing = getSpacing();
 
   // Render children and separators.
@@ -249,7 +249,7 @@ int HBoxLayout::doLayout(const RectI &rect)
 
   while (i != len)
   {
-    if (forward) 
+    if (forward)
       i++;
     else
       i--;
@@ -352,10 +352,10 @@ void VBoxLayout::calculateLayoutHint(LayoutHint& hint)
     {
       minWidth = min.getWidth() + margin;
     }
-    
+
     int hinth = hint.getHeight();
     if (prop->hasFlex())
-    {        
+    {
       prop->_min = item->getLayoutMinimumSize().getHeight();
       prop->_max = item->getLayoutMaximumSize().getHeight();
       prop->_hint = hinth;
@@ -392,13 +392,13 @@ int VBoxLayout::doLayout(const RectI &rect)
   }
 
   int left, height, marginLeft, marginRight;
-  int marginBottom = -INT_MAX;    
+  int marginBottom = -INT_MAX;
   int spacing = getSpacing();
 
   // Render children and separators.
   bool forward = isForward();
 
-  int i = -1;    
+  int i = -1;
   int len = getLength() - 1;
   int start = 0;
 
@@ -414,7 +414,7 @@ int VBoxLayout::doLayout(const RectI &rect)
   while (i != len)
   {
     if (forward)
-      i++; 
+      i++;
     else
       i--;
 

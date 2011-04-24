@@ -18,7 +18,7 @@ ImageEffect::ImageEffect()
   _d = _dnull->ref();
 }
 
-ImageEffect::ImageEffect(const ImageEffect& other) : 
+ImageEffect::ImageEffect(const ImageEffect& other) :
   _d(other._d->ref())
 {
 }

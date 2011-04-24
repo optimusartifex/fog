@@ -28,14 +28,14 @@ typedef int (*CompareEx)(const void* self, const void* a, const void* b);
 // [Fog::Algorithms::QSortCore<>]
 // ============================================================================
 
-template<typename T> 
+template<typename T>
 struct QSortCore : public T
 {
   FOG_INLINE uint8_t* _med3(uint8_t* a, uint8_t* b, uint8_t* c);
   FOG_NO_INLINE void _sort(uint8_t* base, sysuint_t nmemb);
 };
 
-template<typename T> 
+template<typename T>
 uint8_t* QSortCore<T>::_med3(uint8_t* a, uint8_t* b, uint8_t* c)
 {
   int cmp_ab = T::_compare(a, b);
@@ -45,15 +45,15 @@ uint8_t* QSortCore<T>::_med3(uint8_t* a, uint8_t* b, uint8_t* c)
                     : (cmp_bc > 0 ? b : (T::_compare(a, c) < 0 ? a : c));
 }
 
-template<typename T> 
+template<typename T>
 void QSortCore<T>::_sort(uint8_t* base, sysuint_t nmemb)
 {
   uint8_t* pa; uint8_t* pb; uint8_t* pc; uint8_t* pd;
   uint8_t* pl; uint8_t* pm; uint8_t* pn;
- 
+
   sysint_t d, r;
   uint swapFlag;
- 
+
 _Repeat:
   swapFlag = 0;
 
@@ -65,7 +65,7 @@ _Repeat:
         T::_swap(pl, pl - T::_size);
     return;
   }
- 
+
   pm = base + (nmemb >> 1) * T::_size;
   if (nmemb > 7)
   {
@@ -80,12 +80,12 @@ _Repeat:
     }
     pm = _med3(pl, pm, pn);
   }
- 
+
   T::_swap(base, pm);
- 
+
   pa = pb = base + T::_size;
   pc = pd = base + (nmemb - 1) * T::_size;
- 
+
   for (;;)
   {
     while (pb <= pc && (r = T::_compare(pb, base)) <= 0)
@@ -98,7 +98,7 @@ _Repeat:
       }
       pb += T::_size;
     }
-   
+
     while (pb <= pc && (r = T::_compare(pc, base)) >= 0)
     {
       if (r == 0)
@@ -110,25 +110,25 @@ _Repeat:
       pc -= T::_size;
     }
     if (pb > pc) break;
-   
+
     swapFlag = 1;
     T::_swap(pb, pc);
     pb += T::_size;
     pc -= T::_size;
   }
- 
+
   if (swapFlag)
   {
     uint8_t* swpA;
     uint8_t* swpB;
-   
+
     pn = base + nmemb * T::_size;
-   
+
     // Step 1.
     r = Math::min((sysuint_t)(pa - base), (sysuint_t)(pb - pa));
     swpA = base;
     swpB = pb - r;
-   
+
     for (;;)
     {
       while (r > 0)
@@ -138,22 +138,22 @@ _Repeat:
         swpB += T::_size;
         r -= T::_size;
       }
-     
+
       if (swapFlag == 0) break;
       swapFlag--;
-     
+
       // Step 2.
       r = Math::min((sysint_t)(pd - pc), (sysint_t)(pn - pd) - (sysint_t)T::_size);
       swpA = pb;
       swpB = pn - r;
     }
-   
+
     if ((r = (sysuint_t)(pb - pa) > T::_size))
     {
       // Recurse.
       _sort(base, (sysuint_t)r / T::_size);
     }
-   
+
     if ((r = (sysuint_t)(pd - pc) > T::_size))
     {
       // Iterate.
@@ -190,7 +190,7 @@ struct QSortType
   {
     T* a = reinterpret_cast<T*>(_a);
     T* b = reinterpret_cast<T*>(_b);
-    
+
     T t(*a);
     *a = *b;
     *b = t;
@@ -203,13 +203,13 @@ struct QSortType
 // [Fog::Algorithms::BSearchCore<>]
 // ============================================================================
 
-template<typename T> 
+template<typename T>
 struct BSearchCore : public T
 {
   FOG_NO_INLINE const uint8_t* _search(const uint8_t* base, sysuint_t nmemb, const uint8_t* key);
 };
 
-template<typename T> 
+template<typename T>
 const uint8_t* BSearchCore<T>::_search(const uint8_t* base, sysuint_t nmemb, const uint8_t* key)
 {
   sysuint_t lim;
@@ -297,7 +297,7 @@ const T* bsearch_t(const T* base, sysuint_t nmemb, const T* key)
   BSearchCore< BSearchType<T> > context;
 
   return context._search(
-    reinterpret_cast<const uint8_t*>(base), nmemb, 
+    reinterpret_cast<const uint8_t*>(base), nmemb,
     reinterpret_cast<const uint8_t*>(key));
 }
 

@@ -35,7 +35,7 @@ struct EventLoop;
 struct FOG_API Timer : public Object
 {
   FOG_DECLARE_OBJECT(Timer, Object)
-    
+
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------

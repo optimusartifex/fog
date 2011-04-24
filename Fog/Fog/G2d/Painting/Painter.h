@@ -40,8 +40,8 @@ struct ImageBits;
 //! @section Beginning and finalizing.
 //!
 //! To start painting to an image or raw memory buffer use @c Painter constructor
-//! or call @c begin() method with your raw buffer or @c Image instance. After 
-//! you called @c begin() method that succeeded (check if return value is 
+//! or call @c begin() method with your raw buffer or @c Image instance. After
+//! you called @c begin() method that succeeded (check if return value is
 //! @c Fog::ERR_OK) you can start painting. If you no longer need painter
 //! instance delete it (by @c delete operator or static destructor) or call
 //! @c end() method.
@@ -53,7 +53,7 @@ struct ImageBits;
 //! @section Meta and user regions, clipping.
 //!
 //! Painter supports two indenpendent region and origin information that can
-//! be used to affect painter origin and clipping. First region and origin 
+//! be used to affect painter origin and clipping. First region and origin
 //! information are stored as meta region and meta origin. These variables
 //! shouldn't be changed during rendering and are used usually by windowing
 //! system to set correct origin and window clipping. If you are using Fog-Gui
@@ -63,9 +63,9 @@ struct ImageBits;
 //! you are forced to use it in all your painting code. Reseting these regions
 //! will also reset all clipping and painter states. To set meta region and
 //! origin use ... .
-//! 
+//!
 //! Second region and origin information are stored as user region and user
-//! origin. These variables are designed to be changeable by user during 
+//! origin. These variables are designed to be changeable by user during
 //! rendering, so use them if it's useable for you.
 //!
 //! Origin and region clipping is pixel based and it's not affected by affine
@@ -74,7 +74,7 @@ struct ImageBits;
 //! @section Transformations.
 //!
 //! TODO
-struct FOG_NO_EXPORT Painter 
+struct FOG_NO_EXPORT Painter
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -133,9 +133,9 @@ struct FOG_NO_EXPORT Painter
 
   //! @brief Begin painting into the @a image.
   //!
-  //! Always call @c Painter::end() or destroy painter before you try to 
+  //! Always call @c Painter::end() or destroy painter before you try to
   //! destroy or work with image. If you want to use the image you provided,
-  //! but you want to continue paniting on it then call @c Painter::flush() 
+  //! but you want to continue paniting on it then call @c Painter::flush()
   //! with @c PAINTER_FLUSH_SYNC flag to make content in the image ready.
   FOG_INLINE err_t begin(Image& image, uint32_t initFlags = NO_FLAGS)
   {
@@ -163,7 +163,7 @@ struct FOG_NO_EXPORT Painter
     return _g2d.painter.beginIBits(*this, imageBits, &rect, initFlags);
   }
 
-  //! @brief Wait for completition of all painter commands, unlock the 
+  //! @brief Wait for completition of all painter commands, unlock the
   //! destination image and destroy the associated painter engine.
   FOG_INLINE err_t end()
   {
@@ -174,7 +174,7 @@ struct FOG_NO_EXPORT Painter
   // [SwitchTo]
   // --------------------------------------------------------------------------
 
-  //! @brief Finish painting and switch the destination image to @a image, 
+  //! @brief Finish painting and switch the destination image to @a image,
   //! keeping the painter engine configuration as is.
   //!
   //! @note Calling switchTo() will destroy all layers and saved states, it's
@@ -190,7 +190,7 @@ struct FOG_NO_EXPORT Painter
     return _g2d.painter.switchToImage(*this, image, &rect);
   }
 
-  //! @brief Finish painting and switch the destination image to @a raw buffer, 
+  //! @brief Finish painting and switch the destination image to @a raw buffer,
   //! keeping the painter engine configuration as is.
   //!
   //! @note Calling switchTo() will destroy all layers and saved states, it's
@@ -923,7 +923,7 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t setSource(const GradientD& val)
   {
     return _vtable->setSourceAbstract(*this, PAINTER_SOURCE_GRADIENT_D, &val, NULL);
-  
+
  }
   //! @brief Set the painter source to a transformed @c GradientF @a val.
   FOG_INLINE err_t setSource(const GradientF& val, const TransformF& tr)

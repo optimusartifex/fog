@@ -98,7 +98,7 @@ _Start:
     XmlElement* e;
     String link = root->_getAttribute(fog_strings->getString(STR_SVG_ATTRIBUTE_xlink_href));
 
-    if ((!link.isEmpty() && link.getAt(0) == Char('#')) && 
+    if ((!link.isEmpty() && link.getAt(0) == Char('#')) &&
         (e = root->getDocument()->getElementById(Utf16(link.getData() + 1, link.getLength() - 1))))
     {
       root = e;

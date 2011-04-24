@@ -110,7 +110,7 @@ static FOG_INLINE void p32Store3bSwap(void* dstp, const p32& src0)
 // [00 11 22 33]
 // [LO LO HI HI]
 
-// [00 11 22 33] 
+// [00 11 22 33]
 // [LO LO HI HI]
 
 static FOG_INLINE void p32Load8aNative(p32& dst0Lo, p32& dst0Hi, const void* srcp)
@@ -423,7 +423,7 @@ static FOG_INLINE void p32Combine(
 //! dst1.u32[0] = x1.u32[0] +| y1.u32[0]
 //! @endverbatim
 static FOG_INLINE void p32Combine_2x(
-  p32& dst0, const p32& x0, const p32& y0, 
+  p32& dst0, const p32& x0, const p32& y0,
   p32& dst1, const p32& x1, const p32& y1)
 {
   uint32_t t0 = _FOG_FACE_COMBINE_2(x0, y0);
@@ -451,7 +451,7 @@ static FOG_INLINE void p32And(
 //! dst1.u32[0] = x1.u32[0] & y1.u32[0]
 //! @endverbatim
 static FOG_INLINE void p32And_2x(
-  p32& dst0, const p32& x0, const p32& y0, 
+  p32& dst0, const p32& x0, const p32& y0,
   p32& dst1, const p32& x1, const p32& y1)
 {
   uint32_t t0 = x0 & y0;
@@ -479,7 +479,7 @@ static FOG_INLINE void p32Or(
 //! dst1.u32[0] = x1.u32[0] | y1.u32[0]
 //! @endverbatim
 static FOG_INLINE void p32Or_2x(
-  p32& dst0, const p32& x0, const p32& y0, 
+  p32& dst0, const p32& x0, const p32& y0,
   p32& dst1, const p32& x1, const p32& y1)
 {
   uint32_t t0 = x0 | y0;
@@ -507,7 +507,7 @@ static FOG_INLINE void p32Xor(
 //! dst1.u32[0] = x1.u32[0] ^ y1.u32[0]
 //! @endverbatim
 static FOG_INLINE void p32Xor_2x(
-  p32& dst0, const p32& x0, const p32& y0, 
+  p32& dst0, const p32& x0, const p32& y0,
   p32& dst1, const p32& x1, const p32& y1)
 {
   uint32_t t0 = x0 ^ y0;
@@ -535,7 +535,7 @@ static FOG_INLINE void p32Neg(
 //! dst1.u32[0] = ~x1.u32[0]
 //! @endverbatim
 static FOG_INLINE void p32Neg_2x(
-  p32& dst0, const p32& x0, 
+  p32& dst0, const p32& x0,
   p32& dst1, const p32& x1)
 {
   uint32_t t0 = ~x0;
@@ -563,7 +563,7 @@ static FOG_INLINE void p32Add(
 //! dst1.u32[0] = x1.u32[0] + y1.u32[0]
 //! @endverbatim
 static FOG_INLINE void p32Add_2x(
-  p32& dst0, const p32& x0, const p32& y0, 
+  p32& dst0, const p32& x0, const p32& y0,
   p32& dst1, const p32& x1, const p32& y1)
 {
   uint32_t t0 = x0 + y0;
@@ -619,7 +619,7 @@ static FOG_INLINE void p32Mul(
 //! dst1.u32[0] = x1.u32[0] * y1.u32[0]
 //! @endverbatim
 static FOG_INLINE void p32Mul_2x(
-  p32& dst0, const p32& x0, const p32& y0, 
+  p32& dst0, const p32& x0, const p32& y0,
   p32& dst1, const p32& x1, const p32& y1)
 {
   uint32_t t0 = x0 * y0;
@@ -647,7 +647,7 @@ static FOG_INLINE void p32Div(
 //! dst1.u32[0] = x1.u32[0] / y1.u32[0]
 //! @endverbatim
 static FOG_INLINE void p32Div_2x(
-  p32& dst0, const p32& x0, const p32& y0, 
+  p32& dst0, const p32& x0, const p32& y0,
   p32& dst1, const p32& x1, const p32& y1)
 {
   dst0 = x0 / y0;
@@ -820,7 +820,7 @@ static FOG_INLINE void p32ExpandPBWFromPBW0(
 //! dst1.u16[1] = x1.u16[0]
 //! @endverbatim
 static FOG_INLINE void p32ExpandPBWFromPBW0_2x(
-  p32& dst0, const p32& x0, 
+  p32& dst0, const p32& x0,
   p32& dst1, const p32& x1)
 {
   p32ExpandPBWFromPBW0(dst0, x0);
@@ -852,7 +852,7 @@ static FOG_INLINE void p32ExpandPBWFromPBW1(
 //! dst1.u16[1] = x1.u16[1]
 //! @endverbatim
 static FOG_INLINE void p32ExpandPBWFromPBW1_2x(
-  p32& dst0, const p32& x0, 
+  p32& dst0, const p32& x0,
   p32& dst1, const p32& x1)
 {
   p32ExpandPBWFromPBW1(dst0, x0);
@@ -870,7 +870,7 @@ static FOG_INLINE void p32LShift(
 }
 
 static FOG_INLINE void p32LShift_2x(
-  p32& dst0, const p32& x0, uint32_t s0, 
+  p32& dst0, const p32& x0, uint32_t s0,
   p32& dst1, const p32& x1, uint32_t s1)
 {
   dst0 = x0 << s0;
@@ -907,7 +907,7 @@ static FOG_INLINE void p32LShiftBy1(
 }
 
 static FOG_INLINE void p32LShiftBy1_2x(
-  p32& dst0, const p32& x0, 
+  p32& dst0, const p32& x0,
   p32& dst1, const p32& x1)
 {
 #if defined(FOG_FACE_HAS_FAST_ADD)
@@ -926,7 +926,7 @@ static FOG_INLINE void p32LShiftBy1PBW0(
 }
 
 static FOG_INLINE void p32LShiftBy1PBW0_2x(
-  p32& dst0, const p32& x0, 
+  p32& dst0, const p32& x0,
   p32& dst1, const p32& x1)
 {
   dst0 = x0 + (x0 & 0x000000FFU);
@@ -940,7 +940,7 @@ static FOG_INLINE void p32LShiftBy1PBW1(
 }
 
 static FOG_INLINE void p32LShiftBy1PBW1_2x(
-  p32& dst0, const p32& x0, 
+  p32& dst0, const p32& x0,
   p32& dst1, const p32& x1)
 {
   dst0 = x0 + (x0 & 0x00FF0000U);
@@ -970,7 +970,7 @@ static FOG_INLINE void p32RShiftTruncatePBW(
 }
 
 static FOG_INLINE void p32RShiftTruncatePBW_2x(
-  p32& dst0, const p32& x0, uint32_t s0, 
+  p32& dst0, const p32& x0, uint32_t s0,
   p32& dst1, const p32& x1, uint32_t s1)
 {
   FOG_ASSERT(s0 <= 8);
@@ -998,7 +998,7 @@ static FOG_INLINE void p32Negate255SBW(
 //! dst1.u16[0] = 255 - x1.u16[0]
 //! @endverbatim
 static FOG_INLINE void p32Negate255SBW_2x(
-  p32& dst0, const p32& x0, 
+  p32& dst0, const p32& x0,
   p32& dst1, const p32& x1)
 {
   p32Negate255SBW(dst0, x0);
@@ -1019,7 +1019,7 @@ static FOG_INLINE void p32Negate256SBW(
 //! dst1.u16[0] = 256 - x1.u16[0]
 //! @endverbatim
 static FOG_INLINE void p32Negate256SBW_2x(
-  p32& dst0, const p32& x0, 
+  p32& dst0, const p32& x0,
   p32& dst1, const p32& x1)
 {
   p32Negate256SBW(dst0, x0);
@@ -1049,7 +1049,7 @@ static FOG_INLINE void p32Negate255PBB(
 //! dst1.u8[3] = 255 - x1.u8[3]
 //! @endverbatim
 static FOG_INLINE void p32Negate255PBB_2x(
-  p32& dst0, const p32& x0, 
+  p32& dst0, const p32& x0,
   p32& dst1, const p32& x1)
 {
   dst0 = ~x0;
@@ -1073,7 +1073,7 @@ static FOG_INLINE void p32Negate255PBW(
 //! dst1.u16[1] = 255 - x1.u16[1]
 //! @endverbatim
 static FOG_INLINE void p32Negate255PBW_2x(
-  p32& dst0, const p32& x0, 
+  p32& dst0, const p32& x0,
   p32& dst1, const p32& x1)
 {
   p32Negate255PBW(dst0, x0);
@@ -1097,7 +1097,7 @@ static FOG_INLINE void p32Negate256PBW(
 //! dst1.u16[1] = 256 - x1.u16[1]
 //! @endverbatim
 static FOG_INLINE void p32Negate256PBW_2x(
-  p32& dst0, const p32& x0, 
+  p32& dst0, const p32& x0,
   p32& dst1, const p32& x1)
 {
   dst0 = 0x01000100U - x0;
@@ -1111,7 +1111,7 @@ static FOG_INLINE void p32Negate255PBW0(
 }
 
 static FOG_INLINE void p32Negate255PBW0_2x(
-  p32& dst0, const p32& x0, 
+  p32& dst0, const p32& x0,
   p32& dst1, const p32& x1)
 {
   dst0 = x0 ^ 0x000000FFU;
@@ -1125,7 +1125,7 @@ static FOG_INLINE void p32Negate255PBW1(
 }
 
 static FOG_INLINE void p32Negate255PBW1_2x(
-  p32& dst0, const p32& x0, 
+  p32& dst0, const p32& x0,
   p32& dst1, const p32& x1)
 {
   dst0 = x0 ^ 0x00FF0000U;
@@ -1315,7 +1315,7 @@ static FOG_INLINE void p32Saturate255SBW(
 #endif
 }
 
-//! @brief Saturate @a dst0. Can be used after two BYTEs were added and 
+//! @brief Saturate @a dst0. Can be used after two BYTEs were added and
 //! resulting value may be larger than BYTE.
 //!
 //! @verbatim
@@ -1342,14 +1342,14 @@ static FOG_INLINE void p32Saturate255PBW(
 //! dst1 = min(dst1, 255)
 //! @endverbatim
 static FOG_INLINE void p32Saturate255PBW_2x(
-  p32& dst0, const p32& x0, 
+  p32& dst0, const p32& x0,
   p32& dst1, const p32& x1)
 {
   p32Saturate255PBW(dst0, x0);
   p32Saturate255PBW(dst1, x1);
 }
 
-//! @brief Saturate @a dst0. Can be used after two BYTEs were added and 
+//! @brief Saturate @a dst0. Can be used after two BYTEs were added and
 //! resulting value may be larger than BYTE.
 //!
 //! @verbatim
@@ -1369,7 +1369,7 @@ static FOG_INLINE void p32Saturate511PBW(
 //! dst1 = min(dst1, 511)
 //! @endverbatim
 static FOG_INLINE void p32Saturate511PBW_2x(
-  p32& dst0, const p32& x0, 
+  p32& dst0, const p32& x0,
   p32& dst1, const p32& x1)
 {
   p32Saturate511PBW(dst0, x0);
@@ -1389,7 +1389,7 @@ static FOG_INLINE void p32AddPBW_SBW(
 }
 
 static FOG_INLINE void p32AddPBW_SBW_2x(
-  p32& dst0, const p32& x0, 
+  p32& dst0, const p32& x0,
   p32& dst1, const p32& x1, const p32& u01)
 {
   p32 t01;
@@ -1398,7 +1398,7 @@ static FOG_INLINE void p32AddPBW_SBW_2x(
 }
 
 static FOG_INLINE void p32AddPBW_SBW_2x(
-  p32& dst0, const p32& x0, const p32& u0, 
+  p32& dst0, const p32& x0, const p32& u0,
   p32& dst1, const p32& x1, const p32& u1)
 {
   p32 t0, t1;
@@ -1451,7 +1451,7 @@ static FOG_INLINE void p32Addus255PBW(
 }
 
 static FOG_INLINE void p32Addus255PBW_2x(
-  p32& dst0, const p32& x0, const p32& y0, 
+  p32& dst0, const p32& x0, const p32& y0,
   p32& dst1, const p32& x1, const p32& y1)
 {
   p32Add_2x(dst0, x0, y0, dst1, x1, y1);
@@ -1467,7 +1467,7 @@ static FOG_INLINE void p32Addus255PBW_SBW(
 }
 
 static FOG_INLINE void p32Addus255PBW_SBW_2x(
-  p32& dst0, const p32& x0, const p32& u0, 
+  p32& dst0, const p32& x0, const p32& u0,
   p32& dst1, const p32& x1, const p32& u1)
 {
   p32 t0, t1;
@@ -1489,7 +1489,7 @@ static FOG_INLINE void p32SubPBW_SBW(
 }
 
 static FOG_INLINE void p32SubPBW_SBW_2x(
-  p32& dst0, const p32& x0, 
+  p32& dst0, const p32& x0,
   p32& dst1, const p32& x1, const p32& u01)
 {
   p32 t01;
@@ -1498,7 +1498,7 @@ static FOG_INLINE void p32SubPBW_SBW_2x(
 }
 
 static FOG_INLINE void p32SubPBW_SBW_2x(
-  p32& dst0, const p32& x0, const p32& u0, 
+  p32& dst0, const p32& x0, const p32& u0,
   p32& dst1, const p32& x1, const p32& u1)
 {
   p32 t0, t1;
@@ -1517,7 +1517,7 @@ static FOG_INLINE void p32Subus255PBW(
 }
 
 static FOG_INLINE void p32Subus255PBW_2x(
-  p32& dst0, const p32& x0, const p32& y0, 
+  p32& dst0, const p32& x0, const p32& y0,
   p32& dst1, const p32& x1, const p32& y1)
 {
   p32Negate255PBW_2x(dst0, x0, dst1, x1);
@@ -1547,7 +1547,7 @@ static FOG_INLINE void p32Subus255PBW_SBW(
 }
 
 static FOG_INLINE void p32Subus255PBW_SBW_2x(
-  p32& dst0, const p32& x0, const p32& u0, 
+  p32& dst0, const p32& x0, const p32& u0,
   p32& dst1, const p32& x1, const p32& u1)
 {
   p32 t0, t1;
@@ -1578,7 +1578,7 @@ static FOG_INLINE void p32AddSub(
 //! dst1.u32[0] = x1.u32[0] + y1.u32[0] - z1.u32[0]
 //! @endverbatim
 static FOG_INLINE void p32AddSub_2x(
-  p32& dst0, const p32& x0, const p32& y0, const p32& z0, 
+  p32& dst0, const p32& x0, const p32& y0, const p32& z0,
   p32& dst1, const p32& x1, const p32& y1, const p32& z1)
 {
   uint32_t t0 = x0 + y0 - z0;
@@ -2099,7 +2099,7 @@ static FOG_INLINE void p32MulDiv256PBB_PBW_20Z1(
   uint32_t t1 = (xm & 0xFFU) * y0_31; xm >>= 8;
   uint32_t t2 = (xm        ) * y0_20;
 
-  dst0 = _FOG_FACE_COMBINE_3(((t0 >>  8) & 0x000000FFU), 
+  dst0 = _FOG_FACE_COMBINE_3(((t0 >>  8) & 0x000000FFU),
                              ((t1      ) & 0x0000FF00U),
                              ((t2      ) & 0x00FF0000U));
 }
@@ -2205,7 +2205,7 @@ static FOG_INLINE void p32MulDiv255PBW_2x(
 {
   uint32_t t0 = ((x0 & 0x000000FFU) * (y0 & 0x000000FFU)) | ((x0 & 0x00FF0000U) * (y0 >> 16));
   uint32_t t1 = ((x1 & 0x000000FFU) * (y1 & 0x000000FFU)) | ((x1 & 0x00FF0000U) * (y1 >> 16));
-  
+
   dst0 = ((t0 + ((t0 >> 8) & 0x00FF00FFU) + 0x00800080U) >> 8) & 0x00FF00FFU;
   dst1 = ((t1 + ((t1 >> 8) & 0x00FF00FFU) + 0x00800080U) >> 8) & 0x00FF00FFU;
 }
@@ -2588,7 +2588,7 @@ static FOG_INLINE void p32MulDiv256PBW_Addus255PBW_2x(
 // ============================================================================
 
 //! @brief Scalar interpolate at interval [0, 255].
-//! 
+//!
 //! @verbatim
 //! dst0 = ( (x0 * z0) + (y0 * (255 - z0)) ) / 255
 //! @endverbatim
@@ -2600,7 +2600,7 @@ static FOG_INLINE void p32Lerp255SBW(
 }
 
 //! @brief Scalar interpolate at interval [0, 255].
-//! 
+//!
 //! @verbatim
 //! dst0 = ( (x0 * z0) + (y0 * w0) ) / 255
 //! @endverbatim

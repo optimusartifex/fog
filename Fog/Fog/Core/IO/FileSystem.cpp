@@ -95,7 +95,7 @@ uint32_t FileSystem::testFile(const String& fileName, uint32_t flags)
     {
       WIN32_FIND_DATAW fd;
       HANDLE r;
-      
+
       r = FindFirstFileW(reinterpret_cast<const wchar_t*>(fileNameW.getData()), &fd);
       if (r != INVALID_HANDLE_VALUE)
       {

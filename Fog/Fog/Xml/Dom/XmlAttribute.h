@@ -72,7 +72,7 @@ protected:
 
   //! @brief Attribute offset in @c XmlElement (relative to @c XmlElement).
   //!
-  //! If the attribute is not embedded in the element, the @c _offset value 
+  //! If the attribute is not embedded in the element, the @c _offset value
   //! is set to -1.
   int _offset;
 

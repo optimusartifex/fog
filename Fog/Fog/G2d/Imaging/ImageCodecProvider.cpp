@@ -115,7 +115,7 @@ err_t ImageCodecProvider::addProvider(uint32_t codecType, ImageCodecProvider* pr
   err_t err = ERR_OK;
   AutoLock locked(_g2d_imagecodecprovider_local->lock);
 
-  if ((codecType & IMAGE_CODEC_DECODER) && 
+  if ((codecType & IMAGE_CODEC_DECODER) &&
       (_g2d_imagecodecprovider_local->decoderProviders.indexOf(provider) == INVALID_INDEX))
   {
     err |= _g2d_imagecodecprovider_local->decoderProviders.append(provider);
@@ -123,7 +123,7 @@ err_t ImageCodecProvider::addProvider(uint32_t codecType, ImageCodecProvider* pr
     provider->ref();
   }
 
-  if ((codecType & IMAGE_CODEC_ENCODER) && 
+  if ((codecType & IMAGE_CODEC_ENCODER) &&
       (_g2d_imagecodecprovider_local->encoderProviders.indexOf(provider) == INVALID_INDEX))
   {
     err |= _g2d_imagecodecprovider_local->encoderProviders.append(provider);
@@ -144,7 +144,7 @@ err_t ImageCodecProvider::removeProvider(uint32_t codecType, ImageCodecProvider*
   sysuint_t index;
   AutoLock locked(_g2d_imagecodecprovider_local->lock);
 
-  if ((codecType & IMAGE_CODEC_DECODER) && 
+  if ((codecType & IMAGE_CODEC_DECODER) &&
       (index = _g2d_imagecodecprovider_local->decoderProviders.indexOf(provider)) != INVALID_INDEX)
   {
     err |= _g2d_imagecodecprovider_local->decoderProviders.removeAt(index);
@@ -152,7 +152,7 @@ err_t ImageCodecProvider::removeProvider(uint32_t codecType, ImageCodecProvider*
     provider->deref();
   }
 
-  if ((codecType & IMAGE_CODEC_ENCODER) && 
+  if ((codecType & IMAGE_CODEC_ENCODER) &&
       (index = _g2d_imagecodecprovider_local->encoderProviders.indexOf(provider)) != INVALID_INDEX)
   {
     err |= _g2d_imagecodecprovider_local->encoderProviders.removeAt(index);
@@ -257,7 +257,7 @@ static err_t createImageCodecByName(uint32_t codecType, const String& name, Imag
   ImageCodecProvider* provider = ImageCodecProvider::getProviderByName(codecType, name);
 
   err = (!provider)
-    ? (codecType == IMAGE_CODEC_DECODER 
+    ? (codecType == IMAGE_CODEC_DECODER
       ? ERR_IMAGE_NO_DECODER
       : ERR_IMAGE_NO_ENCODER)
     : provider->createCodec(codecType, codec);
@@ -285,7 +285,7 @@ static err_t createImageCodecByExtension(uint32_t codecType, const String& exten
   ImageCodecProvider* provider = ImageCodecProvider::getProviderByExtension(codecType, extension);
 
   err = (!provider)
-    ? (codecType == IMAGE_CODEC_DECODER 
+    ? (codecType == IMAGE_CODEC_DECODER
       ? ERR_IMAGE_NO_DECODER
       : ERR_IMAGE_NO_ENCODER)
     : provider->createCodec(codecType, codec);

@@ -373,7 +373,7 @@ fail:
                 gg += G_VAL(pix) * INV_XAP;
                 bb += B_VAL(pix) * INV_XAP;
                 aa += A_VAL(pix) * INV_XAP;
-                
+
                 r = ((rr * YAP) + (r * INV_YAP)) >> 16;
                 g = ((gg * YAP) + (g * INV_YAP)) >> 16;
                 b = ((bb * YAP) + (b * INV_YAP)) >> 16;
@@ -390,12 +390,12 @@ fail:
                 b = B_VAL(pix) * INV_YAP;
                 a = A_VAL(pix) * INV_YAP;
 
-                pix += sow;              
+                pix += sow;
                 r += R_VAL(pix) * YAP;
                 g += G_VAL(pix) * YAP;
                 b += B_VAL(pix) * YAP;
                 a += A_VAL(pix) * YAP;
-                
+
                 r >>= 8;
                 g >>= 8;
                 b >>= 8;
@@ -426,7 +426,7 @@ fail:
                 g += G_VAL(pix) * XAP;
                 b += B_VAL(pix) * XAP;
                 a += A_VAL(pix) * XAP;
-                
+
                 r >>= 8;
                 g >>= 8;
                 b >>= 8;
@@ -461,7 +461,7 @@ fail:
             g = (G_VAL(pix) * yap) >> 10;
             b = (B_VAL(pix) * yap) >> 10;
             a = (A_VAL(pix) * yap) >> 10;
-            
+
             for (j = (1 << 14) - yap; j > Cy; j -= Cy)
             {
               pix += sow;
@@ -470,7 +470,7 @@ fail:
               b += (B_VAL(pix) * Cy) >> 10;
               a += (A_VAL(pix) * Cy) >> 10;
             }
-            
+
             if (j > 0)
             {
               pix += sow;
@@ -487,7 +487,7 @@ fail:
               gg = (G_VAL(pix) * yap) >> 10;
               bb = (B_VAL(pix) * yap) >> 10;
               aa = (A_VAL(pix) * yap) >> 10;
-              
+
               for (j = (1 << 14) - yap; j > Cy; j -= Cy)
               {
                 pix += sow;
@@ -554,7 +554,7 @@ fail:
               b += (B_VAL(pix) * Cx) >> 10;
               a += (A_VAL(pix) * Cx) >> 10;
             }
-            
+
             if (j > 0)
             {
               pix++;
@@ -567,7 +567,7 @@ fail:
             if (YAP > 0)
             {
               pix = ypoints[y] + xpoints[x] + sow;
-              
+
               rr = (R_VAL(pix) * xap) >> 10;
               gg = (G_VAL(pix) * xap) >> 10;
               bb = (B_VAL(pix) * xap) >> 10;
@@ -631,14 +631,14 @@ fail:
             sptr = ypoints[y] + xpoints[x];
             pix = sptr;
             sptr += sow;
-            
+
             rx = (R_VAL(pix) * xap) >> 9;
             gx = (G_VAL(pix) * xap) >> 9;
             bx = (B_VAL(pix) * xap) >> 9;
             ax = (A_VAL(pix) * xap) >> 9;
-            
+
             pix++;
-            
+
             for (i = (1 << 14) - xap; i > Cx; i -= Cx)
             {
               rx += (R_VAL(pix) * Cx) >> 9;
@@ -647,7 +647,7 @@ fail:
               ax += (A_VAL(pix) * Cx) >> 9;
               pix++;
             }
-            
+
             if (i > 0)
             {
               rx += (R_VAL(pix) * i) >> 9;
@@ -670,7 +670,7 @@ fail:
               bx = (B_VAL(pix) * xap) >> 9;
               ax = (A_VAL(pix) * xap) >> 9;
               pix++;
-              
+
               for (i = (1 << 14) - xap; i > Cx; i -= Cx)
               {
                 rx += (R_VAL(pix) * Cx) >> 9;
@@ -679,7 +679,7 @@ fail:
                 ax += (A_VAL(pix) * Cx) >> 9;
                 pix++;
               }
-              
+
               if (i > 0)
               {
                 rx += (R_VAL(pix) * i) >> 9;
@@ -702,7 +702,7 @@ fail:
               bx = (B_VAL(pix) * xap) >> 9;
               ax = (A_VAL(pix) * xap) >> 9;
               pix++;
-              
+
               for (i = (1 << 14) - xap; i > Cx; i -= Cx)
               {
                 rx += (R_VAL(pix) * Cx) >> 9;
@@ -711,7 +711,7 @@ fail:
                 ax += (A_VAL(pix) * Cx) >> 9;
                 pix++;
               }
-              
+
               if (i > 0)
               {
                 rx += (R_VAL(pix) * i) >> 9;

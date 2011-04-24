@@ -32,7 +32,7 @@ struct FOG_API FlowLayout : public Layout
   FlowLayout(Widget *parent, int margin = -1, int hSpacing = -1, int vSpacing = -1);
   FlowLayout(int margin = -1, int hSpacing = -1, int vSpacing = -1);
   virtual ~FlowLayout();
-  
+
   // --------------------------------------------------------------------------
   // [Accessors]
   // --------------------------------------------------------------------------

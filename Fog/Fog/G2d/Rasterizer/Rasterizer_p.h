@@ -69,9 +69,9 @@ enum RASTERIZER_SHAPE
 //!
 //! Scanline polygon rasterizer.
 //!
-//! Polygon rasterizer that is used to render filled polygons with 
-//! high-quality Anti-Aliasing. Internally, by default, the class uses 
-//! integer coordinates in format 24.8, i.e. 24 bits for integer part 
+//! Polygon rasterizer that is used to render filled polygons with
+//! high-quality Anti-Aliasing. Internally, by default, the class uses
+//! integer coordinates in format 24.8, i.e. 24 bits for integer part
 //! and 8 bits for fractional. This class can be used in the following way:
 //!
 //! 1. Reset/setup rasterizer:
@@ -102,13 +102,13 @@ enum RASTERIZER_SHAPE
 //!    either the number of vertices nor coincidence of their coordinates, but
 //!    in the worst case it just won't draw anything.
 //!
-//!    The orger of the vertices (clockwise or counterclockwise) 
+//!    The orger of the vertices (clockwise or counterclockwise)
 //!    is important when using the non-zero filling rule (@c FILL_RULE_NON_ZERO).
 //!    In this case the vertex order of all the contours must be the same
 //!    if you want your intersecting polygons to be without "holes".
-//!    You actually can use different vertices order. If the contours do not 
-//!    intersect each other the order is not important anyway. If they do, 
-//!    contours with the same vertex order will be rendered without "holes" 
+//!    You actually can use different vertices order. If the contours do not
+//!    intersect each other the order is not important anyway. If they do,
+//!    contours with the same vertex order will be rendered without "holes"
 //!    while the intersecting contours with different orders will have "holes".
 //!
 //! 4. Finalize rasterizer:
@@ -121,7 +121,7 @@ enum RASTERIZER_SHAPE
 //!    @c sweepScanline() - Sweep scanline to scanline container. This scanline
 //!    can be passed to renderer or clipper.
 //!
-//! Analytic rasterizer can be used in multi-threaded environment. The 
+//! Analytic rasterizer can be used in multi-threaded environment. The
 //! sweepScanline() method is thread-safe and is normally called by more
 //! threads if multi-threaded rendering is active.
 //!
@@ -132,7 +132,7 @@ enum RASTERIZER_SHAPE
 //!   Cover - a value at interval -256 to 256. This means that 10-bits are
 //!           enough to store the value.
 //!   Area  - a value at interval -(511<<8) to (511<<8). This value is Cover
-//!           multiplied by Weight in range (0-511). This member can be 
+//!           multiplied by Weight in range (0-511). This member can be
 //!           effectively compressed into 9-bits by using only the weight
 //!           and doing multiplication in sweepScanline(). This is how Fog
 //!           rasterizer works!
@@ -155,7 +155,7 @@ enum RASTERIZER_SHAPE
 //! if you need the real number you need to shift it to left by 8-bits.
 //!
 //!
-//! The analytic rasterizer idea and first implementation was based on 
+//! The analytic rasterizer idea and first implementation was based on
 //! AntiGrain, which is based on freetype2, which is based on libart?
 //! Here is the original license:
 //!
@@ -163,8 +163,8 @@ enum RASTERIZER_SHAPE
 //! Anti-Grain Geometry - Version 2.4
 //! Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
 //!
-//! Permission to copy, use, modify, sell and distribute this software 
-//! is granted provided this copyright notice appears in all copies. 
+//! Permission to copy, use, modify, sell and distribute this software
+//! is granted provided this copyright notice appears in all copies.
 //! This software is provided "as is" without express or implied
 //! warranty, and with no claim as to its suitability for any purpose.
 //! @endverbatim

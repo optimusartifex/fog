@@ -264,7 +264,7 @@ struct FOG_NO_EXPORT PTextureAffine
 
               uint32_t wx = (uint)(px >> 8) & 0xFF;
 
-              accessor.interpolateRaw_4(pix_x0y0, 
+              accessor.interpolateRaw_4(pix_x0y0,
                 pix_x0y0, ((0x100 - wx) * (inv_wy)) >> 8,
                 pix_x1y0, ((wx        ) * (inv_wy)) >> 8,
                 pix_x0y1, ((0x100 - wx) * (wy    )) >> 8,
@@ -336,7 +336,7 @@ struct FOG_NO_EXPORT PTextureAffine
               uint32_t wx = (uint)(px >> 8) & 0xFF;
               uint32_t wy = (uint)(py >> 8) & 0xFF;
 
-              accessor.interpolateRaw_4(pix_x0y0, 
+              accessor.interpolateRaw_4(pix_x0y0,
                 pix_x0y0, ((0x100 - wx) * (0x100 - wy)) >> 8,
                 pix_x1y0, ((wx        ) * (0x100 - wy)) >> 8,
                 pix_x0y1, ((0x100 - wx) * (wy        )) >> 8,
@@ -410,7 +410,7 @@ struct FOG_NO_EXPORT PTextureAffine
           uint32_t wx = Math::fixed24x8FromFloat(px) & 0xFF;
           uint32_t wy = Math::fixed24x8FromFloat(py) & 0xFF;
 
-          accessor.interpolateRaw_4(pix_x0y0, 
+          accessor.interpolateRaw_4(pix_x0y0,
             pix_x0y0, ((0x100 - wx) * (0x100 - wy)) >> 8,
             pix_x1y0, ((wx        ) * (0x100 - wy)) >> 8,
             pix_x0y1, ((0x100 - wx) * (wy        )) >> 8,
@@ -693,7 +693,7 @@ struct FOG_NO_EXPORT PTextureAffine
 
               uint32_t wx = (uint)(px >> 8) & 0xFF;
 
-              accessor.interpolateRaw_4(pix_x0y0, 
+              accessor.interpolateRaw_4(pix_x0y0,
                 pix_x0y0, ((0x100 - wx) * (inv_wy)) >> 8,
                 pix_x1y0, ((wx        ) * (inv_wy)) >> 8,
                 pix_x0y1, ((0x100 - wx) * (wy    )) >> 8,
@@ -751,7 +751,7 @@ struct FOG_NO_EXPORT PTextureAffine
               uint32_t wx = (uint)(px >> 8) & 0xFF;
               uint32_t wy = (uint)(py >> 8) & 0xFF;
 
-              accessor.interpolateRaw_4(pix_x0y0, 
+              accessor.interpolateRaw_4(pix_x0y0,
                 pix_x0y0, ((0x100 - wx) * (0x100 - wy)) >> 8,
                 pix_x1y0, ((wx        ) * (0x100 - wy)) >> 8,
                 pix_x0y1, ((0x100 - wx) * (wy        )) >> 8,
@@ -775,7 +775,7 @@ struct FOG_NO_EXPORT PTextureAffine
         P_FETCH_SPAN8_END()
       }
     }
-    
+
     // ------------------------------------------------------------------------
     // [Loop - Float]
     // ------------------------------------------------------------------------
@@ -819,7 +819,7 @@ struct FOG_NO_EXPORT PTextureAffine
           uint32_t wx = (uint)Math::fixed24x8FromFloat(px) & 0xFF;
           uint32_t wy = (uint)Math::fixed24x8FromFloat(py) & 0xFF;
 
-          accessor.interpolateRaw_4(pix_x0y0, 
+          accessor.interpolateRaw_4(pix_x0y0,
             pix_x0y0, ((0x100 - wx) * (0x100 - wy)) >> 8,
             pix_x1y0, ((wx        ) * (0x100 - wy)) >> 8,
             pix_x0y1, ((0x100 - wx) * (wy        )) >> 8,
@@ -1121,7 +1121,7 @@ struct FOG_NO_EXPORT PTextureAffine
 
               uint32_t wx = (uint)(px >> 8) & 0xFF;
 
-              accessor.interpolateRaw_4(pix_x0y0, 
+              accessor.interpolateRaw_4(pix_x0y0,
                 pix_x0y0, ((0x100 - wx) * (inv_wy)) >> 8,
                 pix_x1y0, ((wx        ) * (inv_wy)) >> 8,
                 pix_x0y1, ((0x100 - wx) * (wy    )) >> 8,
@@ -1178,7 +1178,7 @@ struct FOG_NO_EXPORT PTextureAffine
               uint32_t wx = (uint)(px >> 8) & 0xFF;
               uint32_t wy = (uint)(py >> 8) & 0xFF;
 
-              accessor.interpolateRaw_4(pix_x0y0, 
+              accessor.interpolateRaw_4(pix_x0y0,
                 pix_x0y0, ((0x100 - wx) * (0x100 - wy)) >> 8,
                 pix_x1y0, ((wx        ) * (0x100 - wy)) >> 8,
                 pix_x0y1, ((0x100 - wx) * (wy        )) >> 8,
@@ -1202,7 +1202,7 @@ struct FOG_NO_EXPORT PTextureAffine
         P_FETCH_SPAN8_END()
       }
     }
-    
+
     // ------------------------------------------------------------------------
     // [Loop - Float]
     // ------------------------------------------------------------------------
@@ -1245,7 +1245,7 @@ struct FOG_NO_EXPORT PTextureAffine
           uint32_t wx = (uint)Math::fixed24x8FromFloat(px) & 0xFF;
           uint32_t wy = (uint)Math::fixed24x8FromFloat(py) & 0xFF;
 
-          accessor.interpolateRaw_4(pix_x0y0, 
+          accessor.interpolateRaw_4(pix_x0y0,
             pix_x0y0, ((0x100 - wx) * (0x100 - wy)) >> 8,
             pix_x1y0, ((wx        ) * (0x100 - wy)) >> 8,
             pix_x0y1, ((0x100 - wx) * (wy        )) >> 8,
@@ -1545,7 +1545,7 @@ _FetchEnd:
                 accessor.fetchRaw(pix_x0y1, srcLine1 + (uint)px0 * Accessor::SRC_BPP);
                 accessor.fetchRaw(pix_x1y1, srcLine1 + (uint)px0 * Accessor::SRC_BPP + Accessor::SRC_BPP);
 
-                accessor.interpolateRaw_4(pix_x0y0, 
+                accessor.interpolateRaw_4(pix_x0y0,
                   pix_x0y0, ((0x100 - wx) * (inv_wy)) >> 8,
                   pix_x1y0, ((wx        ) * (inv_wy)) >> 8,
                   pix_x0y1, ((0x100 - wx) * (wy    )) >> 8,
@@ -1573,7 +1573,7 @@ _FetchEnd:
                   pix_x1y1 = clamp;
 
 _FixedScaleInterpolate:
-                  accessor.interpolateNorm_4(pix_x0y0, 
+                  accessor.interpolateNorm_4(pix_x0y0,
                     pix_x0y0, ((0x100 - wx) * (inv_wy)) >> 8,
                     pix_x1y0, ((wx        ) * (inv_wy)) >> 8,
                     pix_x0y1, ((0x100 - wx) * (wy    )) >> 8,
@@ -1633,7 +1633,7 @@ _FixedScaleInterpolate:
                 accessor.fetchRaw(pix_x0y1, srcLine);
                 accessor.fetchRaw(pix_x1y1, srcLine + Accessor::SRC_BPP);
 
-                accessor.interpolateRaw_4(pix_x0y0, 
+                accessor.interpolateRaw_4(pix_x0y0,
                   pix_x0y0, ((0x100 - wx) * (0x100 - wy)) >> 8,
                   pix_x1y0, ((wx        ) * (0x100 - wy)) >> 8,
                   pix_x0y1, ((0x100 - wx) * (wy        )) >> 8,
@@ -1661,7 +1661,7 @@ _FixedScaleInterpolate:
                   if ((uint)px0 <= (uint)tw && (uint)py1 <= (uint)th) accessor.fetchNorm(pix_x0y1, srcLine1 + px0 * Accessor::SRC_BPP);
                   if ((uint)px1 <= (uint)tw && (uint)py1 <= (uint)th) accessor.fetchNorm(pix_x1y1, srcLine1 + px1 * Accessor::SRC_BPP);
 
-                  accessor.interpolateNorm_4(pix_x0y0, 
+                  accessor.interpolateNorm_4(pix_x0y0,
                     pix_x0y0, ((0x100 - wx) * (0x100 - wy)) >> 8,
                     pix_x1y0, ((wx        ) * (0x100 - wy)) >> 8,
                     pix_x0y1, ((0x100 - wx) * (wy        )) >> 8,
@@ -1719,7 +1719,7 @@ _FixedScaleInterpolate:
             uint32_t wx = Math::fixed24x8FromFloat(px) & 0xFF;
             uint32_t wy = Math::fixed24x8FromFloat(py) & 0xFF;
 
-            accessor.interpolateRaw_4(pix_x0y0, 
+            accessor.interpolateRaw_4(pix_x0y0,
               pix_x0y0, ((0x100 - wx) * (0x100 - wy)) >> 8,
               pix_x1y0, ((wx        ) * (0x100 - wy)) >> 8,
               pix_x0y1, ((0x100 - wx) * (wy        )) >> 8,
@@ -1750,7 +1750,7 @@ _FixedScaleInterpolate:
               if ((uint)px0 <= (uint)tw && (uint)py1 <= (uint)th) accessor.fetchNorm(pix_x0y1, srcLine1 + px0 * Accessor::SRC_BPP);
               if ((uint)px1 <= (uint)tw && (uint)py1 <= (uint)th) accessor.fetchNorm(pix_x1y1, srcLine1 + px1 * Accessor::SRC_BPP);
 
-              accessor.interpolateNorm_4(pix_x0y0, 
+              accessor.interpolateNorm_4(pix_x0y0,
                 pix_x0y0, ((0x100 - wx) * (0x100 - wy)) >> 8,
                 pix_x1y0, ((wx        ) * (0x100 - wy)) >> 8,
                 pix_x0y1, ((0x100 - wx) * (wy        )) >> 8,

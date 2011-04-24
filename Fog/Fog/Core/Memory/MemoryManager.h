@@ -32,7 +32,7 @@ namespace Fog {
 //! Unlike @c BlockMemoryAllocator or @c ZoneMemoryAllocator, @c MemoryManager
 //! is designed to replace malloc()/free() calls. It not allows to automatically
 //! free memory in destructor. It's error if you allocate memory using
-//! @c MemoryManager that is not freed when the @c MemoryManager instance is 
+//! @c MemoryManager that is not freed when the @c MemoryManager instance is
 //! destroyed.
 struct FOG_API MemoryManager
 {
@@ -70,7 +70,7 @@ struct FOG_API MemoryManager
   //! @param ptr Pointer to memory location to free. It must be valid, NULL
   //! is not allowed!
   //! @param size Size of the memory block passed through @a ptr. It must be
-  //! value passed/returned by @c alloc() method. Although some memory 
+  //! value passed/returned by @c alloc() method. Although some memory
   //! allocators allow this to be any value it's mistake!
   virtual void free(void* ptr, sysuint_t size) = 0;
 

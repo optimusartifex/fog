@@ -112,7 +112,7 @@ struct FOG_API ImageData
   //! @brief Image size.
   SizeI size;
 
-  //! @brief Data pointer that points to raw memory received from the image 
+  //! @brief Data pointer that points to raw memory received from the image
   //! device.
   uint8_t* data;
   //! @brief Base pointer to scanline, in most cases it's equal to @c data.
@@ -264,7 +264,7 @@ struct FOG_API Image
 
   //! @brief Get image handle.
   //!
-  //! This method can be used to retrieve handle of the original image that 
+  //! This method can be used to retrieve handle of the original image that
   //! manages the image buffer. This image can be for example Windows DIB
   //! Section (see @c IMAGE_BUFFER enumeration).
   FOG_INLINE void* getHandle() { return _d->getHandle(); }
@@ -412,12 +412,12 @@ struct FOG_API Image
 #if 0
   static err_t filter(
     const ImageFx& fx,
-    Image& dst, PointI* dstOffset, 
+    Image& dst, PointI* dstOffset,
     const Image& src, const RectI* srcFragment);
 
   static err_t filter(
     const ImageFxFilter& fxFilter,
-    Image& dst, PointI* dstOffset, 
+    Image& dst, PointI* dstOffset,
     const Image& src, const RectI* srcFragment);
 
   Image filtered(const ImageFx& fx, const RectI* srcFragment);
@@ -437,7 +437,7 @@ struct FOG_API Image
 
   err_t clear(const Color& color);
 
-  err_t fillRect(const RectI& r, const Color& color, 
+  err_t fillRect(const RectI& r, const Color& color,
     uint32_t compositingOperator = COMPOSITE_SRC_OVER, float opacity = 1.0f);
 
   // --------------------------------------------------------------------------
@@ -469,14 +469,14 @@ struct FOG_API Image
 
   //! @brief Check if point at a given coordinates @a x and @a y is in image.
   FOG_INLINE bool hasPoint(int x, int y) const
-  { 
-    return (uint)x < (uint)getWidth() && (uint)y < (uint)getHeight(); 
+  {
+    return (uint)x < (uint)getWidth() && (uint)y < (uint)getHeight();
   }
-  
+
   //! @brief Check if point at a given coordinates @a at is in image.
   FOG_INLINE bool hasPoint(const PointI& pt) const
-  { 
-    return (uint)pt.x < (uint)getWidth() && (uint)pt.y < (uint)getHeight(); 
+  {
+    return (uint)pt.x < (uint)getWidth() && (uint)pt.y < (uint)getHeight();
   }
 
   static err_t glyphFromPath(Image& glyph, PointI& offset, const PathD& path, uint32_t precision);

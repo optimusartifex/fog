@@ -562,7 +562,7 @@ int Widget::getLayoutHeightForWidth(int width) const
   if (!_layout)
     ret = getHeightForWidth(width);
   else
-    ret = _layout->getTotalHeightForWidth(width);    
+    ret = _layout->getTotalHeightForWidth(width);
 
   ret = Math::min(ret, getMaximumHeight());
   ret = Math::max(ret, getMinimumHeight());
@@ -572,7 +572,7 @@ int Widget::getLayoutHeightForWidth(int width) const
 }
 
 uint32_t Widget::getLayoutExpandingDirections() const
-{    
+{
   if (isEmpty())
     return 0;
 
@@ -602,7 +602,7 @@ void Widget::setLayoutGeometry(const RectI& rect)
     return;
 
   // LAYOUT TODO: widget margin.
-  RectI r = rect;  
+  RectI r = rect;
 
   // Make sure the widget will never be bigger than maximum size.
   SizeI s = r.getSize().boundedTo(getLayoutMaximumSize());
@@ -625,8 +625,8 @@ void Widget::setLayoutGeometry(const RectI& rect)
     }
 
     // LAYOUT TODO: margins!
-    //pref += widgetRectSurplus; 
-    
+    //pref += widgetRectSurplus;
+
     if (alignment & ALIGNMENT_HORIZONTAL_MASK)
     {
       // If preferred size is possible then use it, otherwise use
@@ -645,7 +645,7 @@ void Widget::setLayoutGeometry(const RectI& rect)
 
   //TODO: support for right2left layouts!
 
-  //If no alignment is set, set it to the std. alignment -> left  
+  //If no alignment is set, set it to the std. alignment -> left
   if (!(alignment & ALIGNMENT_HORIZONTAL_MASK))
   {
     alignment |= ALIGNMENT_LEFT;
@@ -675,7 +675,7 @@ void Widget::setLayoutGeometry(const RectI& rect)
   // We don't need to use setGeometry(), because the Layout is only activated
   // during update process.
   RectI geometry(x, y, s.getWidth(), s.getHeight());
-  
+
   if (_guiWindow)
   {
     //Do we really provide LayoutManager for Native Windows?
@@ -770,7 +770,7 @@ bool Widget::checkMinimumSize(int w, int h)
 {
   int set = 0;
   if (w >= 0) set |=MAX_WIDTH_IS_SET;
-  if (h >= 0) set |=MAX_HEIGHT_IS_SET; 
+  if (h >= 0) set |=MAX_HEIGHT_IS_SET;
 
   w = Math::min<int>(w,WIDGET_MAX_SIZE);
   w = Math::max<int>(w,0);
@@ -791,7 +791,7 @@ bool Widget::checkMaximumSize(int w, int h)
 {
   int set = 0;
   if (w >= 0) set |=MAX_WIDTH_IS_SET;
-  if (h >= 0) set |=MAX_HEIGHT_IS_SET; 
+  if (h >= 0) set |=MAX_HEIGHT_IS_SET;
 
   w = Math::min<int>(w,WIDGET_MAX_SIZE);
   w = Math::max<int>(w,0);
@@ -825,7 +825,7 @@ void Widget::setMinimumSize(const SizeI& minSize)
   SizeI size(getMinimumWidth(),getMinimumHeight());
 
   invalidateLayout();
-  
+
   if (_widgetGeometry.getWidth() < size.getWidth() || _widgetGeometry.getHeight() < size.getHeight())
   {
     resize(size);
@@ -989,7 +989,7 @@ void Widget::setTransparency(float val)
   {
     val = 1.0f;
   }
-  
+
   if (_guiWindow)
   {
     //some window manager need a flag to be set (e.g. windows)
@@ -1018,7 +1018,7 @@ void Widget::showModal(GuiWindow* owner)
     {
       _guiWindow->setModal(MODAL_APPLICATION);
     }
-  
+
     setVisible(WIDGET_VISIBLE);
   }
 }
@@ -1027,11 +1027,11 @@ void Widget::showModal(GuiWindow* owner)
 // [Fog::Widget - Window Style]
 // ============================================================================
 
-void Widget::setWindowFlags(uint32_t flags) 
+void Widget::setWindowFlags(uint32_t flags)
 {
   if (flags == _windowFlags) return;
 
-  if (_guiWindow) 
+  if (_guiWindow)
   {
     if (_visibility == WIDGET_VISIBLE_FULLSCREEN)
     {
@@ -1050,7 +1050,7 @@ void Widget::setWindowFlags(uint32_t flags)
   //setTransparency(_transparency);
 }
 
-void Widget::setWindowHints(uint32_t flags) 
+void Widget::setWindowHints(uint32_t flags)
 {
   if (flags == getWindowHints()) return;
 
@@ -1065,11 +1065,11 @@ void Widget::changeFlag(uint32_t flag, bool set, bool update)
 {
   uint32_t flags = _windowFlags;
 
-  if (set) 
+  if (set)
   {
     flags |= flag;
   }
-  else 
+  else
   {
     flags &= ~flag;
   }
@@ -1077,14 +1077,14 @@ void Widget::changeFlag(uint32_t flag, bool set, bool update)
   setWindowFlags(flags);
 }
 
-void Widget::setDragAble(bool drag, bool update) 
+void Widget::setDragAble(bool drag, bool update)
 {
   if (drag == isDragAble()) return;
 
   changeFlag(WINDOW_DRAGABLE, drag, update);
 }
 
-void Widget::setResizeAble(bool resize, bool update) 
+void Widget::setResizeAble(bool resize, bool update)
 {
   if (resize == isResizeAble()) return;
 

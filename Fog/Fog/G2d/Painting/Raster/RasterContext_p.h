@@ -302,7 +302,7 @@ struct FOG_NO_EXPORT RasterContext
 
   //! @brief Clip box and clipper instance (float).
   PathClipperF finalClipperF;
-  //! @brief Clip box and clipper instance (double). 
+  //! @brief Clip box and clipper instance (double).
   PathClipperD finalClipperD;
 
   //! @brief Clip region.

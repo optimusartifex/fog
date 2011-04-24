@@ -57,7 +57,7 @@ struct AtomicCore
   {
     __Backend::set((__BackendType*)atomic, (__BackendType)value);
   }
-  
+
   static FOG_INLINE T setXchg(T* atomic, T value)
   {
     return (T)__Backend::setXchg((__BackendType*)atomic, (__BackendType)value);
@@ -67,7 +67,7 @@ struct AtomicCore
   {
     return __Backend::cmpXchg((__BackendType*)atomic, (__BackendType)compar, (__BackendType)value);
   }
-  
+
   static FOG_INLINE T get(const T* atomic)
   {
     return (T)__Backend::get((const __BackendType*)atomic);
@@ -77,32 +77,32 @@ struct AtomicCore
   {
     __Backend::inc((__BackendType*)atomic);
   }
-  
+
   static FOG_INLINE void dec(T* atomic)
   {
     __Backend::dec((__BackendType*)atomic);
   }
-  
+
   static FOG_INLINE void add(T* atomic, T value)
   {
     __Backend::add((__BackendType*)atomic, (__BackendType)value);
   }
-  
+
   static FOG_INLINE void sub(T* atomic, T value)
   {
     __Backend::sub((__BackendType*)atomic, (__BackendType)value);
   }
-  
+
   static FOG_INLINE T addXchg(T* atomic, T value)
   {
     return (T)__Backend::addXchg((__BackendType*)atomic, (__BackendType)value);
   }
-  
+
   static FOG_INLINE T subXchg(T* atomic, T value)
   {
     return (T)__Backend::subXchg((__BackendType*)atomic, (__BackendType)value);
   }
-  
+
   static FOG_INLINE bool deref(T* atomic)
   {
     return __Backend::deref((__BackendType*)atomic);

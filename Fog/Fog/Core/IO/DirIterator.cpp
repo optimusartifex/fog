@@ -125,7 +125,7 @@ bool DirIterator::read(DirEntry& dirEntry)
 _Next:
     if (!::FindNextFileW(_handle, &dirEntry._winFindData)) return false;
   }
-  else 
+  else
   {
     memcpy(&dirEntry._winFindData, &_winFindData, sizeof(WIN32_FIND_DATAW));
   }
@@ -133,7 +133,7 @@ _Next:
   _position++;
 
   // We have valid file entry in dirEntry._winFindData.
-  if (dirEntry._winFindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) 
+  if (dirEntry._winFindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
   {
     dirEntry._type = DirEntry::TYPE_DIRECTORY;
 

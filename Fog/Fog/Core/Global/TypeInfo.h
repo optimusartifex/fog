@@ -96,7 +96,7 @@ struct TypeInfo<T*>
 
 // I first seen following hackery in Qt / Boost. This is very
 // smart method how to get whether type is pointer or not. To
-// make this working following dummy function and it's 
+// make this working following dummy function and it's
 // specialization is needed.
 //
 // It's easy. It's needed to use sizeof() to determine the size
@@ -216,7 +216,7 @@ template<typename Base, typename A1>
 struct TypeToType1 { typedef Base< TypeToType<A1>::Self > Self; };
 */
 
-//! @brief Use this macro to declare @c Fog::TypeInfo. 
+//! @brief Use this macro to declare @c Fog::TypeInfo.
 //!
 //! @c Fog::TypeInfo is template to resolve type at compile time. It's
 //! used in template specializations

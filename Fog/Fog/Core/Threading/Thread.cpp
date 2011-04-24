@@ -163,7 +163,7 @@ static void* threadFunc(void* closure)
   Thread* thread = static_cast<Thread*>(closure);
   thread_tls.instance().set(thread);
 
-  thread->main(); 
+  thread->main();
   thread->finished();
   return NULL;
 }
@@ -241,7 +241,7 @@ Thread* Thread::getCurrent()
   return thread_tls.instance().get();
 }
 
-Thread::Thread(const String& name) : 
+Thread::Thread(const String& name) :
   _handle(0),
   _id(0),
   _name(name),

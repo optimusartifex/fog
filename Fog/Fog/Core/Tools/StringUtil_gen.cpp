@@ -560,7 +560,7 @@ static const CHAR_TYPE* hexnan(DTOA_U *rvp, const CHAR_TYPE* s, const CHAR_TYPE*
     c = *s; s++;
     if (c < 256 && asciiMap[c] < 16)
       c = asciiMap[c];
-    else if (c <= ' ') 
+    else if (c <= ' ')
     {
       if (udx0 && havedig)
       {
@@ -725,7 +725,7 @@ err_t atod(const CHAR_TYPE* str, sysuint_t length, double* dst, CHAR_TYPE decima
     {
       for (;;)
       {
-        if (c == '0') 
+        if (c == '0')
         {
           nz++;
           if (++s == send) goto dig_done;
@@ -742,7 +742,7 @@ err_t atod(const CHAR_TYPE* str, sysuint_t length, double* dst, CHAR_TYPE decima
         goto dig_done;
       }
     }
-    
+
     for(; c >= '0' && c <= '9'; )
     {
  have_dig:
@@ -847,7 +847,7 @@ exp_done:
       {
         s += 3;
         if ((sysuint_t)(send - s) >= 5 && eq(s, "inity", 5, CASE_INSENSITIVE)) s += 5;
-        
+
         rv.i[DTOA_DWORD_0] = 0x7FF00000;
         rv.i[DTOA_DWORD_1] = 0;
         goto ret;

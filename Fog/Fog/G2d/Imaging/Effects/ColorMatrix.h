@@ -38,7 +38,7 @@ struct Argb32;
 //! graphics input and output to color matrix is an ARGB color entity.
 //!
 //! The ColorMatrix class was based on AggOO by Dratek Software. The original
-//! code was relicensed to the MIT license used by the Fog-Framework. The 
+//! code was relicensed to the MIT license used by the Fog-Framework. The
 //! original author Chad M. Draper agreed with relicensing.
 struct FOG_API ColorMatrix
 {
@@ -414,7 +414,7 @@ struct FOG_API ColorMatrix
 
 private:
   //! @brief Rotate the matrix about a color axis.
-  //! @note The color of the axis is unchanged, while the others are rotated 
+  //! @note The color of the axis is unchanged, while the others are rotated
   //! in color space.
   ColorMatrix& _rotateColor(float phi, int x, int y, uint32_t order = MATRIX_ORDER_PREPEND);
 

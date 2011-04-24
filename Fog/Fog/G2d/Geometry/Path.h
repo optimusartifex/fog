@@ -57,7 +57,7 @@ struct FOG_NO_EXPORT PathCmd
   static FOG_INLINE bool isQuadTo(uint8_t cmd) { return (cmd == PATH_CMD_QUAD_TO); }
   //! @brief Get whether the path command is 'cubic-to'.
   static FOG_INLINE bool isCubicTo(uint8_t cmd) { return (cmd == PATH_CMD_CUBIC_TO); }
-  //! @brief Get whether the path command is data related to @c PATH_CMD_QUAD_TO 
+  //! @brief Get whether the path command is data related to @c PATH_CMD_QUAD_TO
   //! or @c PATH_CMD_CUBIC_TO.
   static FOG_INLINE bool isData(uint8_t cmd) { return (cmd == PATH_CMD_DATA); }
   //! @brief Get whether the path command is 'close'.
@@ -411,8 +411,8 @@ struct FOG_NO_EXPORT PathF
 
   //! @brief Move to @a pt0 (relative).
   FOG_INLINE err_t moveToRel(const PointF& pt0)
-  { 
-    return _g2d.pathf.moveToRel(*this, pt0); 
+  {
+    return _g2d.pathf.moveToRel(*this, pt0);
   }
 
   // --------------------------------------------------------------------------
@@ -420,39 +420,39 @@ struct FOG_NO_EXPORT PathF
   // --------------------------------------------------------------------------
 
   //! @brief Line to @a pt1 (absolute).
-  FOG_INLINE err_t lineTo(const PointF& pt1) 
+  FOG_INLINE err_t lineTo(const PointF& pt1)
   {
-    return _g2d.pathf.lineTo(*this, pt1); 
+    return _g2d.pathf.lineTo(*this, pt1);
   }
 
   //! @brief Line to @a pt1 (relative).
-  FOG_INLINE err_t lineToRel(const PointF& pt1) 
-  { 
-    return _g2d.pathf.lineToRel(*this, pt1); 
+  FOG_INLINE err_t lineToRel(const PointF& pt1)
+  {
+    return _g2d.pathf.lineToRel(*this, pt1);
   }
 
   //! @brief Horizontal line to @a x (absolute).
-  FOG_INLINE err_t hlineTo(float x) 
-  { 
-    return _g2d.pathf.hlineTo(*this, x); 
+  FOG_INLINE err_t hlineTo(float x)
+  {
+    return _g2d.pathf.hlineTo(*this, x);
   }
 
   //! @brief Horizontal line to @a x (relative).
-  FOG_INLINE err_t hlineToRel(float x) 
-  { 
-    return _g2d.pathf.hlineToRel(*this, x); 
+  FOG_INLINE err_t hlineToRel(float x)
+  {
+    return _g2d.pathf.hlineToRel(*this, x);
   }
 
   //! @brief Horizontal line to @a y (absolute).
-  FOG_INLINE err_t vlineTo(float y) 
-  { 
-    return _g2d.pathf.vlineTo(*this, y); 
+  FOG_INLINE err_t vlineTo(float y)
+  {
+    return _g2d.pathf.vlineTo(*this, y);
   }
 
   //! @brief Horizontal line to @a y (relative).
-  FOG_INLINE err_t vlineToRel(float y) 
-  { 
-    return _g2d.pathf.vlineToRel(*this, y); 
+  FOG_INLINE err_t vlineToRel(float y)
+  {
+    return _g2d.pathf.vlineToRel(*this, y);
   }
 
   // --------------------------------------------------------------------------
@@ -662,122 +662,122 @@ struct FOG_NO_EXPORT PathF
   //! @brief Add a shape object to the path.
   FOG_INLINE err_t shape(const ShapeF& object, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _shape(object.getType(), object.getData(), direction, NULL); 
+    return _shape(object.getType(), object.getData(), direction, NULL);
   }
-  
+
   //! @overload
   FOG_INLINE err_t shape(const ShapeF& object, uint32_t direction, const TransformF& tr)
-  { 
-    return _shape(object.getType(), object.getData(), direction, &tr); 
+  {
+    return _shape(object.getType(), object.getData(), direction, &tr);
   }
 
   //! @brief Add an unclosed line to the path.
   FOG_INLINE err_t line(const LineF& object, uint32_t direction = PATH_DIRECTION_CW)
-  { 
-    return _shape(SHAPE_TYPE_LINE, &object, direction, NULL); 
+  {
+    return _shape(SHAPE_TYPE_LINE, &object, direction, NULL);
   }
-  
+
   //! @overload
   FOG_INLINE err_t line(const LineF& object, uint32_t direction, const TransformF& tr)
-  { 
-    return _shape(SHAPE_TYPE_LINE, &object, direction, &tr); 
+  {
+    return _shape(SHAPE_TYPE_LINE, &object, direction, &tr);
   }
 
   //! @brief Add an unclosed quadratic bézier curve to the path.
   FOG_INLINE err_t quad(const QuadCurveF& object, uint32_t direction = PATH_DIRECTION_CW)
-  { 
-    return _shape(SHAPE_TYPE_QUAD, &object, direction, NULL); 
+  {
+    return _shape(SHAPE_TYPE_QUAD, &object, direction, NULL);
   }
-  
+
   //! @overload
   FOG_INLINE err_t quad(const QuadCurveF& object, uint32_t direction, const TransformF& tr)
-  { 
-    return _shape(SHAPE_TYPE_QUAD, &object, direction, &tr); 
+  {
+    return _shape(SHAPE_TYPE_QUAD, &object, direction, &tr);
   }
 
   //! @brief Add an unclosed cubic bézier curve to the path.
   FOG_INLINE err_t cubic(const QuadCurveF& object, uint32_t direction = PATH_DIRECTION_CW)
-  { 
-    return _shape(SHAPE_TYPE_CUBIC, &object, direction, NULL); 
+  {
+    return _shape(SHAPE_TYPE_CUBIC, &object, direction, NULL);
   }
-  
+
   //! @overload
   FOG_INLINE err_t cubic(const QuadCurveF& object, uint32_t direction, const TransformF& tr)
-  { 
-    return _shape(SHAPE_TYPE_CUBIC, &object, direction, &tr); 
+  {
+    return _shape(SHAPE_TYPE_CUBIC, &object, direction, &tr);
   }
 
   //! @brief Add an unclosed arc to the path.
   FOG_INLINE err_t arc(const ArcF& object, uint32_t direction = PATH_DIRECTION_CW)
-  { 
-    return _shape(SHAPE_TYPE_ARC, &object, direction, NULL); 
+  {
+    return _shape(SHAPE_TYPE_ARC, &object, direction, NULL);
   }
-  
+
   //! @overload
   FOG_INLINE err_t arc(const ArcF& object, uint32_t direction, const TransformF& tr)
-  { 
-    return _shape(SHAPE_TYPE_ARC, &object, direction, &tr); 
+  {
+    return _shape(SHAPE_TYPE_ARC, &object, direction, &tr);
   }
 
   //! @brief Add a closed rounded ractangle to the path.
   FOG_INLINE err_t round(const RoundF& object, uint32_t direction = PATH_DIRECTION_CW)
-  { 
-    return _shape(SHAPE_TYPE_ROUND, &object, direction, NULL); 
+  {
+    return _shape(SHAPE_TYPE_ROUND, &object, direction, NULL);
   }
-  
+
   //! @overload
   FOG_INLINE err_t round(const RoundF& object, uint32_t direction, const TransformF& tr)
-  { 
-    return _shape(SHAPE_TYPE_ROUND, &object, direction, &tr); 
+  {
+    return _shape(SHAPE_TYPE_ROUND, &object, direction, &tr);
   }
 
   //! @brief Add a closed circle to the path.
   FOG_INLINE err_t circle(const CircleF& object, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _shape(SHAPE_TYPE_CIRCLE, &object, direction, NULL); 
+    return _shape(SHAPE_TYPE_CIRCLE, &object, direction, NULL);
   }
-  
+
   //! @overload
   FOG_INLINE err_t circle(const CircleF& object, uint32_t direction, const TransformF& tr)
-  { 
-    return _shape(SHAPE_TYPE_CIRCLE, &object, direction, &tr); 
+  {
+    return _shape(SHAPE_TYPE_CIRCLE, &object, direction, &tr);
   }
 
   //! @brief Add a closed ellipse to the path.
   FOG_INLINE err_t ellipse(const EllipseF& object, uint32_t direction = PATH_DIRECTION_CW)
-  { 
-    return _shape(SHAPE_TYPE_ELLIPSE, &object, direction, NULL); 
+  {
+    return _shape(SHAPE_TYPE_ELLIPSE, &object, direction, NULL);
   }
-  
+
   //! @overload
   FOG_INLINE err_t ellipse(const EllipseF& object, uint32_t direction, const TransformF& tr)
-  { 
-    return _shape(SHAPE_TYPE_ELLIPSE, &object, direction, &tr); 
+  {
+    return _shape(SHAPE_TYPE_ELLIPSE, &object, direction, &tr);
   }
 
   //! @brief Add a closed chord to the path.
   FOG_INLINE err_t chord(const ArcF& object, uint32_t direction = PATH_DIRECTION_CW)
-  { 
-    return _shape(SHAPE_TYPE_CHORD, &object, direction, NULL); 
-  } 
-  
+  {
+    return _shape(SHAPE_TYPE_CHORD, &object, direction, NULL);
+  }
+
   //! @overload
   FOG_INLINE err_t chord(const ArcF& object, uint32_t direction, const TransformF& tr)
-  { 
-    return _shape(SHAPE_TYPE_CHORD, &object, direction, &tr); 
-  } 
+  {
+    return _shape(SHAPE_TYPE_CHORD, &object, direction, &tr);
+  }
 
   //! @brief Add a closed pie to the path.
   FOG_INLINE err_t pie(const ArcF& object, uint32_t direction = PATH_DIRECTION_CW)
-  { 
-    return _shape(SHAPE_TYPE_PIE, &object, direction, NULL); 
-  } 
-  
+  {
+    return _shape(SHAPE_TYPE_PIE, &object, direction, NULL);
+  }
+
   //! @overload
   FOG_INLINE err_t pie(const ArcF& object, uint32_t direction, const TransformF& tr)
-  { 
-    return _shape(SHAPE_TYPE_PIE, &object, direction, &tr); 
-  } 
+  {
+    return _shape(SHAPE_TYPE_PIE, &object, direction, &tr);
+  }
 
   // --------------------------------------------------------------------------
   // [Path]
@@ -942,7 +942,7 @@ struct FOG_NO_EXPORT PathF
   //!
   //! This method must be called after path was manually changed to ensure that
   //! the flatness is not set to incorrect type.
-  FOG_INLINE void _modifiedPathType() 
+  FOG_INLINE void _modifiedPathType()
   {
     FOG_ASSERT(isDetached());
     _d->flat = 0x2;
@@ -1133,8 +1133,8 @@ struct FOG_API PathD
 
   //! @brief Move to @a pt0 (relative).
   FOG_INLINE err_t moveToRel(const PointD& pt0)
-  { 
-    return _g2d.pathd.moveToRel(*this, pt0); 
+  {
+    return _g2d.pathd.moveToRel(*this, pt0);
   }
 
   // --------------------------------------------------------------------------
@@ -1142,39 +1142,39 @@ struct FOG_API PathD
   // --------------------------------------------------------------------------
 
   //! @brief Line to @a pt1 (absolute).
-  FOG_INLINE err_t lineTo(const PointD& pt1) 
+  FOG_INLINE err_t lineTo(const PointD& pt1)
   {
-    return _g2d.pathd.lineTo(*this, pt1); 
+    return _g2d.pathd.lineTo(*this, pt1);
   }
 
   //! @brief Line to @a pt1 (relative).
-  FOG_INLINE err_t lineToRel(const PointD& pt1) 
-  { 
-    return _g2d.pathd.lineToRel(*this, pt1); 
+  FOG_INLINE err_t lineToRel(const PointD& pt1)
+  {
+    return _g2d.pathd.lineToRel(*this, pt1);
   }
 
   //! @brief Horizontal line to @a x (absolute).
-  FOG_INLINE err_t hlineTo(double x) 
-  { 
-    return _g2d.pathd.hlineTo(*this, x); 
+  FOG_INLINE err_t hlineTo(double x)
+  {
+    return _g2d.pathd.hlineTo(*this, x);
   }
 
   //! @brief Horizontal line to @a x (relative).
-  FOG_INLINE err_t hlineToRel(double x) 
-  { 
-    return _g2d.pathd.hlineToRel(*this, x); 
+  FOG_INLINE err_t hlineToRel(double x)
+  {
+    return _g2d.pathd.hlineToRel(*this, x);
   }
 
   //! @brief Horizontal line to @a y (absolute).
-  FOG_INLINE err_t vlineTo(double y) 
-  { 
-    return _g2d.pathd.vlineTo(*this, y); 
+  FOG_INLINE err_t vlineTo(double y)
+  {
+    return _g2d.pathd.vlineTo(*this, y);
   }
 
   //! @brief Horizontal line to @a y (relative).
-  FOG_INLINE err_t vlineToRel(double y) 
-  { 
-    return _g2d.pathd.vlineToRel(*this, y); 
+  FOG_INLINE err_t vlineToRel(double y)
+  {
+    return _g2d.pathd.vlineToRel(*this, y);
   }
 
   // --------------------------------------------------------------------------
@@ -1408,122 +1408,122 @@ struct FOG_API PathD
   //! @brief Add a shape object to the path.
   FOG_INLINE err_t shape(const ShapeD& object, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _shape(object.getType(), object.getData(), direction, NULL); 
+    return _shape(object.getType(), object.getData(), direction, NULL);
   }
-  
+
   //! @overload
   FOG_INLINE err_t shape(const ShapeD& object, uint32_t direction, const TransformD& tr)
-  { 
-    return _shape(object.getType(), object.getData(), direction, &tr); 
+  {
+    return _shape(object.getType(), object.getData(), direction, &tr);
   }
 
   //! @brief Add an unclosed line to the path.
   FOG_INLINE err_t line(const LineD& object, uint32_t direction = PATH_DIRECTION_CW)
-  { 
-    return _shape(SHAPE_TYPE_LINE, &object, direction, NULL); 
+  {
+    return _shape(SHAPE_TYPE_LINE, &object, direction, NULL);
   }
-  
+
   //! @overload
   FOG_INLINE err_t line(const LineD& object, uint32_t direction, const TransformD& tr)
-  { 
-    return _shape(SHAPE_TYPE_LINE, &object, direction, &tr); 
+  {
+    return _shape(SHAPE_TYPE_LINE, &object, direction, &tr);
   }
 
   //! @brief Add an unclosed quadratic bézier curve to the path.
   FOG_INLINE err_t quad(const QuadCurveF& object, uint32_t direction = PATH_DIRECTION_CW)
-  { 
-    return _shape(SHAPE_TYPE_QUAD, &object, direction, NULL); 
+  {
+    return _shape(SHAPE_TYPE_QUAD, &object, direction, NULL);
   }
-  
+
   //! @overload
   FOG_INLINE err_t quad(const QuadCurveF& object, uint32_t direction, const TransformD& tr)
-  { 
-    return _shape(SHAPE_TYPE_QUAD, &object, direction, &tr); 
+  {
+    return _shape(SHAPE_TYPE_QUAD, &object, direction, &tr);
   }
 
   //! @brief Add an unclosed cubic bézier curve to the path.
   FOG_INLINE err_t cubic(const QuadCurveF& object, uint32_t direction = PATH_DIRECTION_CW)
-  { 
-    return _shape(SHAPE_TYPE_CUBIC, &object, direction, NULL); 
+  {
+    return _shape(SHAPE_TYPE_CUBIC, &object, direction, NULL);
   }
-  
+
   //! @overload
   FOG_INLINE err_t cubic(const QuadCurveF& object, uint32_t direction, const TransformD& tr)
-  { 
-    return _shape(SHAPE_TYPE_CUBIC, &object, direction, &tr); 
+  {
+    return _shape(SHAPE_TYPE_CUBIC, &object, direction, &tr);
   }
 
   //! @brief Add an unclosed arc to the path.
   FOG_INLINE err_t arc(const ArcF& object, uint32_t direction = PATH_DIRECTION_CW)
-  { 
-    return _shape(SHAPE_TYPE_ARC, &object, direction, NULL); 
+  {
+    return _shape(SHAPE_TYPE_ARC, &object, direction, NULL);
   }
-  
+
   //! @overload
   FOG_INLINE err_t arc(const ArcF& object, uint32_t direction, const TransformD& tr)
-  { 
-    return _shape(SHAPE_TYPE_ARC, &object, direction, &tr); 
+  {
+    return _shape(SHAPE_TYPE_ARC, &object, direction, &tr);
   }
 
   //! @brief Add a closed rounded ractangle to the path.
   FOG_INLINE err_t round(const RoundF& object, uint32_t direction = PATH_DIRECTION_CW)
-  { 
-    return _shape(SHAPE_TYPE_ROUND, &object, direction, NULL); 
+  {
+    return _shape(SHAPE_TYPE_ROUND, &object, direction, NULL);
   }
-  
+
   //! @overload
   FOG_INLINE err_t round(const RoundF& object, uint32_t direction, const TransformD& tr)
-  { 
-    return _shape(SHAPE_TYPE_ROUND, &object, direction, &tr); 
+  {
+    return _shape(SHAPE_TYPE_ROUND, &object, direction, &tr);
   }
 
   //! @brief Add a closed circle to the path.
   FOG_INLINE err_t circle(const CircleD& object, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _shape(SHAPE_TYPE_CIRCLE, &object, direction, NULL); 
+    return _shape(SHAPE_TYPE_CIRCLE, &object, direction, NULL);
   }
-  
+
   //! @overload
   FOG_INLINE err_t circle(const CircleD& object, uint32_t direction, const TransformD& tr)
-  { 
-    return _shape(SHAPE_TYPE_CIRCLE, &object, direction, &tr); 
+  {
+    return _shape(SHAPE_TYPE_CIRCLE, &object, direction, &tr);
   }
 
   //! @brief Add a closed ellipse to the path.
   FOG_INLINE err_t ellipse(const EllipseD& object, uint32_t direction = PATH_DIRECTION_CW)
-  { 
-    return _shape(SHAPE_TYPE_ELLIPSE, &object, direction, NULL); 
+  {
+    return _shape(SHAPE_TYPE_ELLIPSE, &object, direction, NULL);
   }
-  
+
   //! @overload
   FOG_INLINE err_t ellipse(const EllipseD& object, uint32_t direction, const TransformD& tr)
-  { 
-    return _shape(SHAPE_TYPE_ELLIPSE, &object, direction, &tr); 
+  {
+    return _shape(SHAPE_TYPE_ELLIPSE, &object, direction, &tr);
   }
 
   //! @brief Add a closed chord to the path.
   FOG_INLINE err_t chord(const ArcF& object, uint32_t direction = PATH_DIRECTION_CW)
-  { 
-    return _shape(SHAPE_TYPE_CHORD, &object, direction, NULL); 
-  } 
-  
+  {
+    return _shape(SHAPE_TYPE_CHORD, &object, direction, NULL);
+  }
+
   //! @overload
   FOG_INLINE err_t chord(const ArcF& object, uint32_t direction, const TransformD& tr)
-  { 
-    return _shape(SHAPE_TYPE_CHORD, &object, direction, &tr); 
-  } 
+  {
+    return _shape(SHAPE_TYPE_CHORD, &object, direction, &tr);
+  }
 
   //! @brief Add a closed pie to the path.
   FOG_INLINE err_t pie(const ArcF& object, uint32_t direction = PATH_DIRECTION_CW)
-  { 
-    return _shape(SHAPE_TYPE_PIE, &object, direction, NULL); 
-  } 
-  
+  {
+    return _shape(SHAPE_TYPE_PIE, &object, direction, NULL);
+  }
+
   //! @overload
   FOG_INLINE err_t pie(const ArcF& object, uint32_t direction, const TransformD& tr)
-  { 
-    return _shape(SHAPE_TYPE_PIE, &object, direction, &tr); 
-  } 
+  {
+    return _shape(SHAPE_TYPE_PIE, &object, direction, &tr);
+  }
 
   // --------------------------------------------------------------------------
   // [Path]
@@ -1688,7 +1688,7 @@ struct FOG_API PathD
   //!
   //! This method must be called after path was manually changed to ensure that
   //! the flatness is not set to incorrect type.
-  FOG_INLINE void _modifiedPathType() 
+  FOG_INLINE void _modifiedPathType()
   {
     FOG_ASSERT(isDetached());
     _d->flat = 0x2;

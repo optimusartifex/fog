@@ -269,9 +269,9 @@ enum COMPOSITE_OP
 {
   //! @brief The source is copied to the destination.
   //!
-  //! The source pixel is copied to destination pixel. If destination pixel 
-  //! format not supports alpha channel, the source alpha value is ignored. 
-  //! If there is alpha channel mask the composition is done using LERP 
+  //! The source pixel is copied to destination pixel. If destination pixel
+  //! format not supports alpha channel, the source alpha value is ignored.
+  //! If there is alpha channel mask the composition is done using LERP
   //! operator.
   //!
   //! @verbatim
@@ -296,7 +296,7 @@ enum COMPOSITE_OP
   COMPOSITE_SRC_OVER = 1,
 
   //! @brief The part of the source lying inside of the destination replaces
-  //! the destination. 
+  //! the destination.
   //!
   //! @verbatim
   //! Formulas for PRGB(dst), PRGB(src) colorspaces (SRC_IN):
@@ -306,7 +306,7 @@ enum COMPOSITE_OP
   COMPOSITE_SRC_IN = 2,
 
   //! @brief The part of the source lying outside of the destination replaces
-  //! the destination. 
+  //! the destination.
   //!
   //! @verbatim
   //! Formulas for PRGB(dst), PRGB(src) colorspaces (SRC_OUT):
@@ -316,12 +316,12 @@ enum COMPOSITE_OP
   COMPOSITE_SRC_OUT = 3,
 
   //! @brief The part of the source lying inside of the destination is
-  //! composited onto the destination. 
+  //! composited onto the destination.
   //!
   //! @verbatim
   //! Formulas for PRGB(dst), PRGB(src) colorspaces (SRC_ATOP):
   //!   Dca' = Sca.Da + Dca.(1 - Sa)
-  //!   Da'  = Sa.Da + Da.(1 - Sa) 
+  //!   Da'  = Sa.Da + Da.(1 - Sa)
   //!        = Sa.Da + Da - Da.Sa
   //!        = Da
   //! @endverbatim
@@ -338,8 +338,8 @@ enum COMPOSITE_OP
   //! @endverbatim
   COMPOSITE_DST = 5,
 
-  //! @brief The destination is composited over the source and the result 
-  //! replaces the destination. 
+  //! @brief The destination is composited over the source and the result
+  //! replaces the destination.
   //!
   //! @verbatim
   //! Formulas for PRGB(dst), PRGB(src) colorspaces (DST_OVER):
@@ -352,7 +352,7 @@ enum COMPOSITE_OP
   COMPOSITE_DST_OVER = 6,
 
   //! @brief The part of the destination lying inside of the source replaces
-  //! the destination. 
+  //! the destination.
   //!
   //! @verbatim
   //! Formulas for PRGB(dst), PRGB(src) colorspaces (DST_IN):
@@ -362,7 +362,7 @@ enum COMPOSITE_OP
   COMPOSITE_DST_IN = 7,
 
   //! @brief The part of the destination lying outside of the source replaces
-  //! the destination. 
+  //! the destination.
   //!
   //! @verbatim
   //! Formulas for PRGB(dst), PRGB(src) colorspaces (DST_OUT):
@@ -371,8 +371,8 @@ enum COMPOSITE_OP
   //! @endverbatim
   COMPOSITE_DST_OUT = 8,
 
-  //! @brief The part of the destination lying inside of the source is 
-  //! composited over the source and replaces the destination. 
+  //! @brief The part of the destination lying inside of the source is
+  //! composited over the source and replaces the destination.
   //!
   //! @verbatim
   //! Formulas for PRGB(dst), PRGB(src) colorspaces (DST_ATOP):
@@ -383,7 +383,7 @@ enum COMPOSITE_OP
   //! @endverbatim
   COMPOSITE_DST_ATOP = 9,
 
-  //! @brief The part of the source that lies outside of the destination is 
+  //! @brief The part of the source that lies outside of the destination is
   //! combined with the part of the destination that lies outside of the source.
   //!
   //! @verbatim
@@ -414,7 +414,7 @@ enum COMPOSITE_OP
   //! @endverbatim
   COMPOSITE_ADD = 12,
 
-  //! @brief The source is subtracted from the destination and replaces 
+  //! @brief The source is subtracted from the destination and replaces
   //! the destination.
   //!
   //! @verbatim
@@ -425,10 +425,10 @@ enum COMPOSITE_OP
   //! @endverbatim
   COMPOSITE_SUBTRACT = 13,
 
-  //! @brief The source is multiplied by the destination and replaces 
+  //! @brief The source is multiplied by the destination and replaces
   //! the destination.
   //!
-  //! The resultant color is always at least as dark as either of the two 
+  //! The resultant color is always at least as dark as either of the two
   //! constituent colors. Multiplying any color with black produces black.
   //! Multiplying any color with white leaves the original color unchanged.
   //!
@@ -439,7 +439,7 @@ enum COMPOSITE_OP
   //! @endverbatim
   COMPOSITE_MULTIPLY = 14,
 
-  //! @brief The source and destination are complemented and then multiplied 
+  //! @brief The source and destination are complemented and then multiplied
   //! and then replace the destination.
   //!
   //! @verbatim
@@ -449,20 +449,20 @@ enum COMPOSITE_OP
   //! @endverbatim
   COMPOSITE_SCREEN = 15,
 
-  //! @brief Multiplies or screens the colors, dependent on the destination 
+  //! @brief Multiplies or screens the colors, dependent on the destination
   //! color.
   //!
   //! Source colors overlay the destination whilst preserving its highlights
-  //! and shadows. The destination color is not replaced, but is mixed with 
-  //! the source color to reflect the lightness or darkness of the destination. 
+  //! and shadows. The destination color is not replaced, but is mixed with
+  //! the source color to reflect the lightness or darkness of the destination.
   //!
   //! Formulas for PRGB(dst), PRGB(src) colorspaces (OVERLAY):
   //!
   //! @verbatim
   //! Tca = Sca.(1 - Da) + Dca.(1 - Sa)
-  //! Ta  = Sa .(1 - Da) + Da .(1 - Sa) 
+  //! Ta  = Sa .(1 - Da) + Da .(1 - Sa)
   //!
-  //! if (2.Dca < Da) 
+  //! if (2.Dca < Da)
   //!   Dca' = 2.Sca.Dca + Tca
   //!   Da'  = Sa.Da     + Ta
   //!        = Sa + Da - Sa.Da
@@ -475,7 +475,7 @@ enum COMPOSITE_OP
 
   //! @brief Selects the darker of the destination and source colors.
   //!
-  //! The destination is replaced with the source when the source is 
+  //! The destination is replaced with the source when the source is
   //! darker, otherwise it is left unchanged.
   //!
   //! @verbatim
@@ -489,7 +489,7 @@ enum COMPOSITE_OP
 
   //! @brief Selects the lighter of the destination and source colors.
   //!
-  //! The destination is replaced with the source when the source is 
+  //! The destination is replaced with the source when the source is
   //! lighter, otherwise it is left unchanged.
   //!
   //! @verbatim
@@ -501,35 +501,35 @@ enum COMPOSITE_OP
   //! @endverbatim
   COMPOSITE_LIGHTEN = 18,
 
-  //! @brief Brightens the destination color to reflect the source color. 
+  //! @brief Brightens the destination color to reflect the source color.
   //!
-  //! Painting with black produces no change. 
+  //! Painting with black produces no change.
   //!
   //! @verbatim
   //! Formulas for PRGB(dst), PRGB(src) colorspaces (COLOR_DODGE):
   //!
   //! if (Sca.Da + Dca.Sa >= Sa.Da)
   //!   Dca' = Sa.Da + Sca.(1 - Da) + Dca.(1 - Sa)
-  //!   Da'  = Sa + Da - Sa.Da 
+  //!   Da'  = Sa + Da - Sa.Da
   //! else
   //!   Dca' = Dca.Sa / (1 - Sca / Sa) + Sca.(1 - Da) + Dca.(1 - Sa)
   //!   Dca' = [Dca.(Sa - Sca.(1 - Sa)) + Sca((Sa - Sca).(1 - Da))] / [Sa - Sca]
-  //!   Da'  = Sa + Da - Sa.Da 
+  //!   Da'  = Sa + Da - Sa.Da
   //! @endverbatim
   COMPOSITE_COLOR_DODGE = 19,
 
-  //! @brief Darkens the destination color to reflect the source color. 
-  //! Painting with white produces no change. 
+  //! @brief Darkens the destination color to reflect the source color.
+  //! Painting with white produces no change.
   //!
   //! @verbatim
   //! Formulas for PRGB(dst), PRGB(src) colorspaces (COLOR_BURN):
   //!
   //! if (Sca.Da + Dca.Sa <= Sa.Da)
   //!   Dca' = Sca.(1 - Da) + Dca.(1 - Sa)
-  //!   Da'  = Sa + Da - Sa.Da 
+  //!   Da'  = Sa + Da - Sa.Da
   //! else
   //!   Dca' = Sa.(Sca.Da + Dca.Sa - Sa.Da)/Sca + Sca.(1 - Da) + Dca.(1 - Sa)
-  //!   Da'  = Sa + Da - Sa.Da 
+  //!   Da'  = Sa + Da - Sa.Da
   //! @endverbatim
   COMPOSITE_COLOR_BURN = 20,
 
@@ -539,8 +539,8 @@ enum COMPOSITE_OP
   //! the source color is darker than 0.5, the destination is darkened, as if
   //! it were burned in. The degree of darkening or lightening is proportional
   //! to the difference between the source color and 0.5. If it is equal to 0.5,
-  //! the destination is unchanged. Painting with pure black or white produces 
-  //! a distinctly darker or lighter area, but does not result in pure black or 
+  //! the destination is unchanged. Painting with pure black or white produces
+  //! a distinctly darker or lighter area, but does not result in pure black or
   //! white.
   //!
   //! @verbatim
@@ -559,10 +559,10 @@ enum COMPOSITE_OP
   COMPOSITE_SOFT_LIGHT = 21,
 
   //! @brief Multiplies or screens the colors, dependent on the source color value.
-  //! 
+  //!
   //! If the source color is lighter than 0.5, the destination is lightened as
   //! if it were screened. If the source color is darker than 0.5, the destination
-  //! is darkened, as if it were multiplied. The degree of lightening or darkening 
+  //! is darkened, as if it were multiplied. The degree of lightening or darkening
   //! is proportional to the difference between the source color and 0.5. If it is
   //! equal to 0.5 the destination is unchanged. Painting with pure black or white
   //! produces black or white.
@@ -579,10 +579,10 @@ enum COMPOSITE_OP
   //! @endverbatim
   COMPOSITE_HARD_LIGHT = 22,
 
-  //! @brief Subtracts the darker of the two constituent colors from the 
+  //! @brief Subtracts the darker of the two constituent colors from the
   //! lighter.
   //!
-  //! Painting with white inverts the destination color. Painting with 
+  //! Painting with white inverts the destination color. Painting with
   //! black produces no change.
   //!
   //! @verbatim
@@ -598,7 +598,7 @@ enum COMPOSITE_OP
   //! @brief Produces an effect similar to that of 'difference', but appears
   //! as lower contrast.
   //!
-  //! Painting with white inverts the destination color. Painting with black 
+  //! Painting with white inverts the destination color. Painting with black
   //! produces no change.
   //!
   //! @verbatim
@@ -634,7 +634,7 @@ enum COMPOSITE_OP
 // [Fog::CLIP_OP]
 // ============================================================================
 
-//! @brief Clip operation used by @c Painter::clip() and PainterEngine::clip() 
+//! @brief Clip operation used by @c Painter::clip() and PainterEngine::clip()
 //! methods.
 enum CLIP_OP
 {
@@ -686,7 +686,7 @@ enum COLOR_MODEL
   // [Private]
   // --------------------------------------------------------------------------
 
-  // Used internally by the Fog::Color conversion classes, reserved one color 
+  // Used internally by the Fog::Color conversion classes, reserved one color
   // model for the future binary compatibility.
 
   //! @internal
@@ -758,7 +758,7 @@ enum COLOR_MIX_ALPHA
   //! @brief Preserve the destination alpha and do not use the source alpha.
   COLOR_MIX_ALPHA_IGNORE = 0,
 
-  //! @brief Preserve the destination alpha and multiply the source alpha with 
+  //! @brief Preserve the destination alpha and multiply the source alpha with
   //! the mask.
   COLOR_MIX_ALPHA_MASK = 1,
 
@@ -870,7 +870,7 @@ enum FONT_FACE_FLAGS
   //! can be stored in cache for later reuse.
   FONT_FACE_CACHED = 0x00000001,
 
-  //! @brief Font face contains glyphs (raster images) that should be use to 
+  //! @brief Font face contains glyphs (raster images) that should be use to
   //! render the font on raster devices if not using transformations / scaling.
   //!
   //! @note Each font face supports glyphs.
@@ -987,10 +987,10 @@ enum GEOMETRIC_PRECISION
   //! @brief Standard geometric precision (default).
   //!
   //! Standard geometric precision uses single-precision or double-precision
-  //! floating points. The usage of single-precision floating points is 
-  //! determined by input parameters. For example if shape that is being 
-  //! painted is given in single-precision floating point vectors, then 
-  //! single-precision floating point operations will be used to do the 
+  //! floating points. The usage of single-precision floating points is
+  //! determined by input parameters. For example if shape that is being
+  //! painted is given in single-precision floating point vectors, then
+  //! single-precision floating point operations will be used to do the
   //! transformations, clipping and final painting.
   GEOMETRIC_PRECISION_NORMAL = 0,
 
@@ -1302,13 +1302,13 @@ enum IMAGE_DATA_FLAGS
   //! @note This flag is compatible to standard Fog-Core data flags.
   IMAGE_DATA_STATIC = CONTAINER_FLAG_STATIC,
 
-  //! @brief Image instance is shareable (creating weak copy when 
+  //! @brief Image instance is shareable (creating weak copy when
   //! assigned to other image instance).
   //!
   //! @note This flag is compatible to standard Fog-Core data flags.
   IMAGE_DATA_PRIVATE = CONTAINER_FLAG_PRIVATE,
 
-  //! @brief Keep alive this instance when assigning other image into it, 
+  //! @brief Keep alive this instance when assigning other image into it,
   //! creating deep copy instead of weak-reference.
   //!
   //! @note This flag is compatible to standard Fog-Core data flags.
@@ -1324,7 +1324,7 @@ enum IMAGE_DATA_FLAGS
 
   //! @brief Image is reversed (from bottom-to-top).
   //!
-  //! @note This flag should be set only when adopting other image or 
+  //! @note This flag should be set only when adopting other image or
   //! DIBSECTION (Windows only). Fog itselt shouldn't create reversed images.
   IMAGE_DATA_REVERSED = 0x10
 };
@@ -1463,8 +1463,8 @@ enum BLUR_FX_TYPE
 {
   //! @brief The linear-blur effect (default).
   //!
-  //! The Linear-blur effect quality is between box-blur and gaussian-blur. 
-  //! The result and performance of this effect is optimal for the most 
+  //! The Linear-blur effect quality is between box-blur and gaussian-blur.
+  //! The result and performance of this effect is optimal for the most
   //! operations.
   BLUR_FX_LINEAR = 0,
 
@@ -1726,8 +1726,8 @@ enum PAINTER_INIT
   PAINTER_INIT_CLEAR = 0x00000001,
 
   //! @brief Initialize multithreading if it makes sense.
-  //! 
-  //! If this option is true, painter first check if image size is not too 
+  //!
+  //! If this option is true, painter first check if image size is not too
   //! small (painting to small images are singlethreaded by default). Then
   //! CPU detection is used to check if machine contains more CPUs or cores.
   PAINTER_INIT_MT = 0x00000002
@@ -1817,7 +1817,7 @@ enum PAINTER_PARAMETER
   //! degrading their visual quality.
   //!
   //! @note The quality of rendered lines must be related to antialiasing quality.
-  //! This means that using fast-lines flag never turns antialiasing off, only 
+  //! This means that using fast-lines flag never turns antialiasing off, only
   //! the mask computation can be simplified.
   PAINTER_PARAMETER_FAST_LINE_I = 15,
 
@@ -2257,7 +2257,7 @@ enum ERR_GRAPHICS_ENUM
 
   //! @brief Image format is invalid.
   ERR_IMAGE_INVALID_FORMAT,
-  
+
   // TODO: Remove
   ERR_IMAGE_UNSUPPORTED_FORMAT,
 
@@ -2326,7 +2326,7 @@ enum ERR_GRAPHICS_ENUM
   //! @sa @c Painter::setEngine().
   ERR_PAINTER_NOT_ALLOWED,
 
-  //! @brief There is not state to restore, might be caused by 
+  //! @brief There is not state to restore, might be caused by
   //! @ref Painter::restore().
   ERR_PAINTER_NO_STATE_TO_RESTORE,
 
@@ -2348,7 +2348,7 @@ enum ERR_GRAPHICS_ENUM
   //! is not a vertex.
   ERR_PATH_NO_RELATIVE,
 
-  //! @brief Can't stroke path that contains only one vertex (probably 
+  //! @brief Can't stroke path that contains only one vertex (probably
   //! @c PATH_CMD_MOVE_TO).
   ERR_PATH_CANT_STROKE,
 

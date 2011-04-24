@@ -100,14 +100,14 @@ struct FOG_NO_EXPORT Color : public ColorBase
 
   FOG_INLINE void setModel(uint32_t model)
   {
-    _g2d.color.setModel(*this, model); 
+    _g2d.color.setModel(*this, model);
   }
 
   FOG_INLINE uint32_t getHints() const
   {
     return _hints;
   }
-  
+
   FOG_INLINE float getAlpha() const
   {
     return _data[0];

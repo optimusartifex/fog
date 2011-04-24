@@ -72,7 +72,7 @@ err_t SvgPatternElement::onApplyPattern(SvgRenderContext* context, SvgElement* o
   if (w == 0 || h == 0) return ERR_OK;
 
   Image image;
-  FOG_RETURN_ON_ERROR(image.create(SizeI(w, h), IMAGE_FORMAT_PRGB32));  
+  FOG_RETURN_ON_ERROR(image.create(SizeI(w, h), IMAGE_FORMAT_PRGB32));
 
   Painter painter(image);
 

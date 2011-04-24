@@ -319,7 +319,7 @@ static FOG_INLINE void p32ZRGB32FromARGB64_2031(
 static FOG_INLINE void p32ZRGB32FromPRGB64_1032(
   p32& dst0, const p32& x0_10, const p32& x0_32)
 {
-  dst0 = _FOG_FACE_COMBINE_3((x0_10 >>  8) & 0x000000FFU, 
+  dst0 = _FOG_FACE_COMBINE_3((x0_10 >>  8) & 0x000000FFU,
                              (x0_10 >> 16) & 0x0000FF00U,
                              (x0_32 <<  8) & 0x00FF0000U);
 }
@@ -327,7 +327,7 @@ static FOG_INLINE void p32ZRGB32FromPRGB64_1032(
 static FOG_INLINE void p32ZRGB32FromPRGB64_2031(
   p32& dst0, const p32& x0_20, const p32& x0_31)
 {
-  dst0 = _FOG_FACE_COMBINE_2((x0_20 >>  8) & 0x00FF00FFU, 
+  dst0 = _FOG_FACE_COMBINE_2((x0_20 >>  8) & 0x00FF00FFU,
                              (x0_31      ) & 0x0000FF00U);
 }
 
@@ -463,7 +463,7 @@ static FOG_INLINE void p32ARGB32FromARGB16_4444_bs(
 static FOG_INLINE void p32ARGB32FromARGB64_1032(
   p32& dst0, const p32& x0_10, const p32& x0_32)
 {
-  dst0 = _FOG_FACE_COMBINE_4((x0_10 >>  8) & 0x000000FFU, 
+  dst0 = _FOG_FACE_COMBINE_4((x0_10 >>  8) & 0x000000FFU,
                              (x0_10 >> 16) & 0x0000FF00U,
                              (x0_32 <<  8) & 0x00FF0000U,
                              (x0_32      ) & 0xFF000000U);
@@ -472,7 +472,7 @@ static FOG_INLINE void p32ARGB32FromARGB64_1032(
 static FOG_INLINE void p32ARGB32FromARGB64_2031(
   p32& dst0, const p32& x0_20, const p32& x0_31)
 {
-  dst0 = _FOG_FACE_COMBINE_2((x0_20 >>  8) & 0x00FF00FFU, 
+  dst0 = _FOG_FACE_COMBINE_2((x0_20 >>  8) & 0x00FF00FFU,
                              (x0_31      ) & 0xFF00FF00U);
 }
 
@@ -503,7 +503,7 @@ static FOG_INLINE void p32ARGB32FromPRGB64_1032(
   p32 xg = (x0_10    >> 16) * recip;
   p32 xb = (x0_10 & 0xFFFF) * recip;
 
-  dst0 = _FOG_FACE_COMBINE_4((xa << 24), 
+  dst0 = _FOG_FACE_COMBINE_4((xa << 24),
                              (xr >>  8) & 0x00FF0000U,
                              (xg >> 16) & 0x0000FF00U,
                              (xb >> 24));
@@ -519,7 +519,7 @@ static FOG_INLINE void p32ARGB32FromPRGB64_2031(
   p32 xg = (x0_31 & 0xFFFF) * recip;
   p32 xb = (x0_20 & 0xFFFF) * recip;
 
-  dst0 = _FOG_FACE_COMBINE_4((xa << 24), 
+  dst0 = _FOG_FACE_COMBINE_4((xa << 24),
                              (xr >>  8) & 0x00FF0000U,
                              (xg >> 16) & 0x0000FF00U,
                              (xb >> 24));
@@ -749,7 +749,7 @@ static FOG_INLINE void p32RGB24QuadFromXRGB32Solid(
 }
 
 static FOG_INLINE void p32RGB24QuadFromXRGB32Quad(
-  p32& dst0, p32& dst1, p32& dst2, 
+  p32& dst0, p32& dst1, p32& dst2,
   const p32& x0, const p32& x1, const p32& x2, const p32& x3)
 {
   uint32_t t0 = x0;
@@ -1488,7 +1488,7 @@ static FOG_INLINE void p64ARGB64FromPRGB64(p64& dst0, const p64& x0)
   p64 xa = dst0 >> 48;
   if (xa == 0) return;
 
-  dst0 = _FOG_FACE_COMBINE_4( 
+  dst0 = _FOG_FACE_COMBINE_4(
     ((dst0 & FOG_UINT64_C(0x0000FFFF00000000)) / xa) & FOG_UINT64_C(0x0000FFFF00000000),
     ((dst0 & FOG_UINT64_C(0x00000000FFFF0000)) / xa) & FOG_UINT64_C(0x00000000FFFF0000),
     ((dst0 & FOG_UINT64_C(0x000000000000FFFF)) / xa), xa << 48);

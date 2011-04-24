@@ -59,7 +59,7 @@ FOG_CAPI_EXTERN void* fog_object_cast_string(Fog::Object* self, const char* clas
 
 //!
 //! @brief This macro should be used for each class declaration that inherits
-//! from @c Fog::Object class to use object dynamic features. 
+//! from @c Fog::Object class to use object dynamic features.
 //!
 //! This macro creates needed virtual methods and it's used together with
 //! @c FOG_IMPLEMENT_OBJECT, see example:
@@ -200,7 +200,7 @@ public: \
     switch (e->getCode()) \
     {
 
-//! @brief Add event into event handled declared by 
+//! @brief Add event into event handled declared by
 //! @c FOG_EVENT_BEGIN() macro.
 //!
 //! @param __event_code__ Event code, see event codes.
@@ -208,8 +208,8 @@ public: \
 //! @param __event_handler__ Event handler method (expression without parenthesis).
 //! @param __event_type__ Event type, use @c override or @c cascade.
 //!
-//! Event type should be @c Override, because event handlers are usually 
-//! virtual methods and these methods are more elegant than declaring 
+//! Event type should be @c Override, because event handlers are usually
+//! virtual methods and these methods are more elegant than declaring
 //! them by other way.
 #define FOG_EVENT_DEF(_EventCode__, _EventHandler_, _EventClass_, _EventBehavior_) \
       case _EventCode__: \
@@ -299,7 +299,7 @@ struct FOG_NO_EXPORT MetaClass
   //! not.
   const MetaClass* base;
 
-  //! @brief Object class name. 
+  //! @brief Object class name.
   const char* name;
 
   //! @brief Object class name hash.
@@ -310,7 +310,7 @@ struct FOG_NO_EXPORT MetaClass
 // [Fog::Object]
 // ============================================================================
 
-// TODO: This needs cleanup, moving bad code out, creating proper object 
+// TODO: This needs cleanup, moving bad code out, creating proper object
 // connection system, threads management, etc...
 
 //! @brief Basic object type used for complex objects in Fog.
@@ -354,7 +354,7 @@ struct FOG_API Object
 
   //! @brief Post destroy later task.
   //!
-  //! Use this method to destroy the object instance from the heap later. 
+  //! Use this method to destroy the object instance from the heap later.
   //! Common usage is to destroy instance where you are handling the event
   //! right now (because you can't delete object that is being processed).
   void destroyLater();
@@ -567,7 +567,7 @@ struct FOG_API Object
   uint removeListener(Object* receiver);
   uint removeAllListeners();
 
-  //! @brief Post event @a e that will be processed by object's thread event loop. 
+  //! @brief Post event @a e that will be processed by object's thread event loop.
   //!
   //! Posted event will be sent by main loop by @c sendEvent() method.
   void postEvent(Event* e);
@@ -613,7 +613,7 @@ protected:
   //! Object id is not unique and you can't get global object by it's
   //! id. But it can help you identifying your objects by very fast
   //! way and ability to use C/C++ switch() statement.
-  //! 
+  //!
   //! @sa _objectName.
   uint32_t _objectId;
 
@@ -630,7 +630,7 @@ protected:
 
   //! @brief The forward connection between us and other objects.
   //!
-  //! Contains event id and object connection pair for each object that is 
+  //! Contains event id and object connection pair for each object that is
   //! listening us.
   //!
   //! @note Access to this structure must be always locked by @c Object::_internalLock.
@@ -641,7 +641,7 @@ protected:
   //! Contains list of object connections, but in backward direction - list
   //! of connections we listen to.
   //!
-  //! If object is listening itself then @c _objectConnection and 
+  //! If object is listening itself then @c _objectConnection and
   //! @c _objectBackReference can contain the same connection.
   //!
   //! @note Access to this structure must be always locked by @c Object::_internalLock.
@@ -649,13 +649,13 @@ protected:
 
   //! @brief Object home thread.
   //!
-  //! NULL if object is created on anonymous thread. In this case an event 
-  //! system is unusable for the @ref Object instance and event invocation 
+  //! NULL if object is created on anonymous thread. In this case an event
+  //! system is unusable for the @ref Object instance and event invocation
   //! means to log warning message and returning an error condition.
   Thread* _homeThread;
 
   //! @brief Link to last pending event or @c NULL if there are no pending events.
-  //! 
+  //!
   //! @note Access to this structure must be always locked by @c Object::_internalLock.
   Event* _events;
 

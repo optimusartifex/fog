@@ -32,7 +32,7 @@ static FOG_INLINE double mycbrt(double x)
 // ============================================================================
 
 // I found one message on stackoverflow forum which noted that the standard
-// equation to solve the quadratic function may be inaccurate. It's 
+// equation to solve the quadratic function may be inaccurate. It's
 // completely correct so I kept the message also here for developers who
 // want to better understand the problem.
 //
@@ -116,18 +116,18 @@ static int FOG_CDECL _G2d_MathT_solveCubicFunction(Number* dst, const Number* sr
   double a = (double)src[1] / _norm;
   double b = (double)src[2] / _norm;
   double c = (double)src[3] / _norm;
-  
+
   // Substitute x = y - A/3 to eliminate quadric term:
   //
   //   x^3 + px + q = 0
-  double sa = a * a;  
-  double p = (1.0 / 3.0) * ((-1.0 /  3.0) * sa + b);  
-  double q = (1.0 / 2.0) * (( 2.0 / 27.0) * sa * a - (1.0 / 3.0) * a * b + c);  
-  
+  double sa = a * a;
+  double p = (1.0 / 3.0) * ((-1.0 /  3.0) * sa + b);
+  double q = (1.0 / 2.0) * (( 2.0 / 27.0) * sa * a - (1.0 / 3.0) * a * b + c);
+
   // Use Cardano's formula.
   double p3 = p * p * p;
   double d = q * q + p3;
-  
+
   // Resubstitution constant.
   double sub = -(1.0 / 3.0) * a;
 
@@ -154,10 +154,10 @@ static int FOG_CDECL _G2d_MathT_solveCubicFunction(Number* dst, const Number* sr
   }
   // Three real solutions.
   else if (d < 0.0)
-  {  
+  {
     double phi = (1.0 / 3.0) * Math::acos(-q / Math::sqrt(-p3));
     double t = 2.0 * sqrt(-p);
-  
+
     dst[0] = (Number)(sub + t * Math::cos(phi)                   );
     dst[1] = (Number)(sub - t * Math::cos(phi + (MATH_PI / 3.0)) );
     dst[2] = (Number)(sub - t * Math::cos(phi - (MATH_PI / 3.0)) );
@@ -174,10 +174,10 @@ static int FOG_CDECL _G2d_MathT_solveCubicFunction(Number* dst, const Number* sr
     double sqrt_d = sqrt(d);
     double u =  mycbrt(sqrt_d - q);
     double v = -mycbrt(sqrt_d + q);
-  
+
     dst[0] = (Number)(sub + u + v);
     return 1;
-  }  
+  }
 }
 
 // ============================================================================

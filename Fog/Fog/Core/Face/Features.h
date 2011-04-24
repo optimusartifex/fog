@@ -40,7 +40,7 @@ namespace Face {
 
 //! @def FOG_FACE_HAS_64BIT
 //!
-//! @brief Whether to use 64-bit instructions in 32-bit BYTE manipulation 
+//! @brief Whether to use 64-bit instructions in 32-bit BYTE manipulation
 //! functions.
 //!
 //! This is always enabled whe using 64-bit target platform. The use-case of
@@ -68,12 +68,12 @@ namespace Face {
 
 //! @def FOG_FACE_HAS_CMOV
 //!
-//! @brief Whether to use conditional instruction (if) instead of bit 
+//! @brief Whether to use conditional instruction (if) instead of bit
 //! manipulation.
 //!
-//! Enabling this may improve or decrease the performance of code depending on 
-//! compiler and target platform. If you are sure that your compiler can 
-//! generate good code (using cmov on x86 platform) then it's good to define 
+//! Enabling this may improve or decrease the performance of code depending on
+//! compiler and target platform. If you are sure that your compiler can
+//! generate good code (using cmov on x86 platform) then it's good to define
 //! it (target code will be smaller and faster).
 
 #if defined(FOG_ARCH_X86) || \

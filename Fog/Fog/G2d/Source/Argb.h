@@ -241,7 +241,7 @@ struct FOG_NO_EXPORT Argb32 : public ArgbBase32
     _g2d.color.convert[_COLOR_MODEL_ARGB32][COLOR_MODEL_ACMYK](this, &acmykf);
   }
 
-  //! @brief Set all values to @a a, @a c, @a m, @a y, and @a k (converting from 
+  //! @brief Set all values to @a a, @a c, @a m, @a y, and @a k (converting from
   //! the ACMYK color format).
   FOG_INLINE void setAcmykF(float a, float c, float m, float y, float k)
   {
@@ -869,7 +869,7 @@ struct FOG_NO_EXPORT ArgbF : public ArgbBaseF
   }
 
   //! @brief Convert color to @c ArgbF (convenience).
-  FOG_INLINE ArgbF getArgbF() const 
+  FOG_INLINE ArgbF getArgbF() const
   {
     return ArgbF(*this);
   }

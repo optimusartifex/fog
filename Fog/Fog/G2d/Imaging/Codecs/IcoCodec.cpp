@@ -24,7 +24,7 @@
 
 FOG_IMPLEMENT_OBJECT(Fog::IcoDecoder)
 
-namespace Fog { 
+namespace Fog {
 
 // ============================================================================
 // [Fog::IcoCodecProvider]
@@ -55,13 +55,13 @@ uint32_t IcoCodecProvider::checkSignature(const void* mem, sysuint_t length) con
   if (!mem || length < sizeof(IcoHeader)) return 0;
 
   const uint8_t* m = (const uint8_t*)mem;
-  
+
   if (*(const uint16_t*)m != 0x0000) return 0;
   if (Memory::bswap16le(*(const uint16_t*)(m+2)) != 0x0001) return 0;
-  
+
   sysuint_t remaining = length - sizeof(IcoHeader);
   uint16_t count = Memory::bswap16le(*(const uint16_t*)(m+4));
-    
+
   if (remaining < sizeof(IcoEntry) || count == 0)
   {
     // We cannot be much sure, because ICO files have no signature
@@ -77,9 +77,9 @@ uint32_t IcoCodecProvider::checkSignature(const void* mem, sysuint_t length) con
   {
     fSize = Memory::bswap32le(entry->size);
     fOffset = Memory::bswap32le(entry->offset);
-    
+
     if (fOffset < minOffset || fSize == 0) return 0;
-    
+
     ++entriesAvail;
     remaining -= sizeof(IcoEntry);
     ++entry;
@@ -133,7 +133,7 @@ IcoDecoder::~IcoDecoder()
 void IcoDecoder::reset()
 {
   ImageDecoder::reset();
-  
+
   if (_framesInfo) Memory::free(_framesInfo);
 
   _framesInfo = NULL;
@@ -182,7 +182,7 @@ err_t IcoDecoder::readHeader()
     }
 
     sysuint_t memSize = _framesCount * sizeof(IcoEntry);
-    
+
     _framesInfo = (IcoEntry*)Memory::alloc(memSize);
     if (_framesInfo == NULL)
     {
@@ -196,11 +196,11 @@ err_t IcoDecoder::readHeader()
       _framesCount = 0;
       return (_headerResult = ERR_IMAGE_TRUNCATED);
     }
-    
+
     // _currentOffset is now currently minimal allowed offset for a frame.
     int64_t _currentOffset = sizeof(IcoHeader) + memSize;
     IcoEntry *currentEntry = _framesInfo;
-    
+
     for (sysuint_t i = 0; i < _framesCount; ++i, ++currentEntry)
     {
 #if FOG_BYTE_ORDER == FOG_BIG_ENDIAN
@@ -209,7 +209,7 @@ err_t IcoDecoder::readHeader()
       currentEntry->size        = Memory::bswap32le(currentEntry->size);
       currentEntry->offset      = Memory::bswap32le(currentEntry->offset);
 #endif
-      
+
       if (currentEntry->offset < _currentOffset || currentEntry->size == 0)
       {
         Memory::free(_framesInfo);

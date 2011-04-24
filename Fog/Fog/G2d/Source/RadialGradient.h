@@ -42,7 +42,7 @@ struct FOG_NO_EXPORT RadialGradientF : public GradientF
   FOG_INLINE RadialGradientF(const RadialGradientF& other);
   explicit FOG_INLINE RadialGradientF(const RadialGradientD& other);
 
-  FOG_INLINE RadialGradientF(const PointF& center, const PointF& focal, float rad) : 
+  FOG_INLINE RadialGradientF(const PointF& center, const PointF& focal, float rad) :
     GradientF(GRADIENT_TYPE_RADIAL)
   {
     _pts[0] = center;
@@ -50,7 +50,7 @@ struct FOG_NO_EXPORT RadialGradientF : public GradientF
     _pts[2].set(rad, rad);
   }
 
-  FOG_INLINE RadialGradientF(const PointF& center, const PointF& focal, const PointF& rad) : 
+  FOG_INLINE RadialGradientF(const PointF& center, const PointF& focal, const PointF& rad) :
     GradientF(GRADIENT_TYPE_RADIAL)
   {
     _pts[0] = center;
@@ -105,7 +105,7 @@ struct FOG_NO_EXPORT RadialGradientD : public GradientD
   FOG_INLINE RadialGradientD(const RadialGradientF& other);
   explicit FOG_INLINE RadialGradientD(const RadialGradientD& other);
 
-  FOG_INLINE RadialGradientD(const PointD& center, const PointD& focal, double rad) : 
+  FOG_INLINE RadialGradientD(const PointD& center, const PointD& focal, double rad) :
     GradientD(GRADIENT_TYPE_RADIAL)
   {
     _pts[0] = center;
@@ -113,7 +113,7 @@ struct FOG_NO_EXPORT RadialGradientD : public GradientD
     _pts[2].set(rad, rad);
   }
 
-  FOG_INLINE RadialGradientD(const PointD& center, const PointD& focal, const PointD& rad) : 
+  FOG_INLINE RadialGradientD(const PointD& center, const PointD& focal, const PointD& rad) :
     GradientD(GRADIENT_TYPE_RADIAL)
   {
     _pts[0] = center;

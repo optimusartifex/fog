@@ -174,7 +174,7 @@ public:
 
   //! @brief Get whether the current node has child nodes.
   FOG_INLINE bool hasChildNodes() const { return _firstChild != NULL; }
- 
+
   List<XmlElement*> childNodesByTagName(const String& tagName) const;
 
   FOG_INLINE XmlElement* firstChildByTagName(const String& tagName) const

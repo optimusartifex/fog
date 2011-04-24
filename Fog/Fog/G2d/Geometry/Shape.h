@@ -50,7 +50,7 @@
 //   - F - All members as 32-bit floats   - float.
 //   - D - All members as 64-bit floats   - double.
 //
-// Each datatype contains implicit conversion from less-precision and 
+// Each datatype contains implicit conversion from less-precision and
 // high-precision types. These structures are very simple so the members
 // are not prefixed with underscore and all members are public.
 

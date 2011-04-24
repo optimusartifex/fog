@@ -168,7 +168,7 @@ struct FOG_NO_EXPORT Helpers
       case IMAGE_FORMAT_XRGB32:
       case IMAGE_FORMAT_RGB24:
       {
-        if (Face::p32PRGB32IsAlphaFF(solid.prgb32.p32)) 
+        if (Face::p32PRGB32IsAlphaFF(solid.prgb32.p32))
         {
           ctx->_srcFormat = IMAGE_FORMAT_XRGB32;
           ctx->_srcBPP = 4;
@@ -191,7 +191,7 @@ struct FOG_NO_EXPORT Helpers
       case IMAGE_FORMAT_PRGB64:
       case IMAGE_FORMAT_RGB48:
       {
-        if (Face::p64PRGB64IsAlphaFFFF(solid.prgb64.p64)) 
+        if (Face::p64PRGB64IsAlphaFFFF(solid.prgb64.p64))
         {
           ctx->_srcFormat = IMAGE_FORMAT_RGB48;
           ctx->_srcBPP = 6;
@@ -254,7 +254,7 @@ struct FOG_NO_EXPORT Helpers
     if (mode == RENDER_FETCH_REFERENCE)
     {
       // If the buffer will not be modified then we can fetch only width needed
-      // by the largest span here. If there is only one span then this is 
+      // by the largest span here. If there is only one span then this is
       // without effect, if there are many small spans then we can save some
       // CPU cycles.
       sysint_t filledWidth = 0;

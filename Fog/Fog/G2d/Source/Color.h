@@ -8,7 +8,6 @@
 #define _FOG_G2D_SOURCE_COLOR_H
 
 // [Dependencies]
-#include <Fog/Core/Face/Face_C_G2d.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Memory.h>
@@ -18,6 +17,7 @@
 #include <Fog/Core/Global/Uninitialized.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Stub.h>
+#include <Fog/G2d/Face/Face_Raster_C.h>
 #include <Fog/G2d/Global/Api.h>
 #include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Source/Acmyk.h>

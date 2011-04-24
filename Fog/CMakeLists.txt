@@ -383,23 +383,16 @@ Set(FOG_CORE_FACE_HEADERS
   Fog/Core/Face/Face_3dNowExt.h
   Fog/Core/Face/Face_C.h
   Fog/Core/Face/Face_C_F32.h
-  Fog/Core/Face/Face_C_G2d.h
   Fog/Core/Face/Face_C_P32.h
   Fog/Core/Face/Face_C_P64.h
   Fog/Core/Face/Face_C_Types.h
   Fog/Core/Face/Face_Constants.h
   Fog/Core/Face/Face_MMX.h
-  Fog/Core/Face/Face_MMX_G2d.h
   Fog/Core/Face/Face_MMXExt.h
-  Fog/Core/Face/Face_MMXExt_G2d.h
   Fog/Core/Face/Face_SSE.h
-  Fog/Core/Face/Face_SSE_G2d.h
   Fog/Core/Face/Face_SSE2.h
-  Fog/Core/Face/Face_SSE2_G2d.h
   Fog/Core/Face/Face_SSE3.h
-  Fog/Core/Face/Face_SSE3_G2d.h
   Fog/Core/Face/Face_SSSE3.h
-  Fog/Core/Face/Face_SSSE3_G2d.h
   Fog/Core/Face/Features.h
 )
 
@@ -683,6 +676,20 @@ Set(FOG_G2D_LIB_SOURCES
 
 Set(FOG_G2D_LIB_HEADERS
   Fog/G2d.h
+)
+
+# [Fog/G2d/Face]
+Set(FOG_G2D_FACE_SOURCES
+)
+
+Set(FOG_G2D_FACE_HEADERS
+  Fog/G2d/Face/Face_Raster_C.h
+  Fog/G2d/Face/Face_Raster_MMX.h
+  Fog/G2d/Face/Face_Raster_MMXExt.h
+  Fog/G2d/Face/Face_Raster_SSE.h
+  Fog/G2d/Face/Face_Raster_SSE2.h
+  Fog/G2d/Face/Face_Raster_SSE3.h
+  Fog/G2d/Face/Face_Raster_SSSE3.h
 )
 
 # [Fog/G2d/Font]
@@ -1020,7 +1027,7 @@ If(FOG_OPTIMIZE_MMX)
     Fog/G2d/Render/RenderInit_MMX.cpp
     PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_MMX}"
   )
-EndIf(FOG_OPTIMIZE_MMX)
+EndIf()
 
 If(FOG_OPTIMIZE_3DNOW)
   List(APPEND FOG_G2D_RENDER_SOURCES
@@ -1030,7 +1037,7 @@ If(FOG_OPTIMIZE_3DNOW)
     Fog/G2d/Render/RenderInit_MMX3dNow.cpp
     PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_3DNOW}"
   )
-EndIf(FOG_OPTIMIZE_3DNOW)
+EndIf()
 
 If(FOG_OPTIMIZE_SSE)
   List(APPEND FOG_G2D_RENDER_SOURCES
@@ -1040,7 +1047,7 @@ If(FOG_OPTIMIZE_SSE)
     Fog/G2d/Render/RenderInit_MMXSSE.cpp
     PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_SSE}"
   )
-EndIf(FOG_OPTIMIZE_SSE)
+EndIf()
 
 If(FOG_OPTIMIZE_SSE2)
   List(APPEND FOG_G2D_RENDER_SOURCES
@@ -1050,7 +1057,7 @@ If(FOG_OPTIMIZE_SSE2)
     Fog/G2d/Render/RenderInit_SSE2.cpp
     PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_SSE2}"
   )
-EndIf(FOG_OPTIMIZE_SSE2)
+EndIf()
 
 If(FOG_OPTIMIZE_SSSE3)
   List(APPEND FOG_G2D_RENDER_SOURCES
@@ -1060,7 +1067,7 @@ If(FOG_OPTIMIZE_SSSE3)
     Fog/G2d/Render/RenderInit_SSSE3.cpp
     PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_SSSE3}"
   )
-EndIf(FOG_OPTIMIZE_SSSE3)
+EndIf()
 
 Set(FOG_G2D_RENDER_HEADERS
   Fog/G2d/Render/RenderApi_p.h
@@ -1133,7 +1140,7 @@ If(FOG_OPTIMIZE_SSE2)
     Fog/G2d/Source/Color_SSE2.cpp
     PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_SSE2}"
   )
-EndIf(FOG_OPTIMIZE_SSE2)
+EndIf()
 
 Set(FOG_G2D_SOURCE_HEADERS
   Fog/G2d/Source/Acmyk.h
@@ -1204,6 +1211,7 @@ EndIf()
 
 # Source groups.
 Source_Group("G2d"                  FILES ${FOG_G2D_LIB_SOURCES}              ${FOG_G2D_LIB_HEADERS}             )
+Source_Group("G2d/Face"             FILES ${FOG_G2D_FACE_SOURCES}             ${FOG_G2D_FACE_HEADERS}            )
 Source_Group("G2d/Font"             FILES ${FOG_G2D_FONT_SOURCES}             ${FOG_G2D_FONT_HEADERS}            )
 Source_Group("G2d/Geometry"         FILES ${FOG_G2D_GEOMETRY_SOURCES}         ${FOG_G2D_GEOMETRY_HEADERS}        )
 Source_Group("G2d/Global"           FILES ${FOG_G2D_GLOBAL_SOURCES}           ${FOG_G2D_GLOBAL_HEADERS}          )
@@ -1658,6 +1666,7 @@ Set(FOG_ALL_SOURCES
   ${FOG_CORE_TOOLS_SOURCES}
   # Fog/G2d.
   ${FOG_G2D_LIB_SOURCES}
+  ${FOG_G2D_FACE_SOURCES}
   ${FOG_G2D_FONT_SOURCES}
   ${FOG_G2D_GEOMETRY_SOURCES}
   ${FOG_G2D_GLOBAL_SOURCES}
@@ -1717,6 +1726,7 @@ Set(FOG_ALL_HEADERS
   ${FOG_CORE_TOOLS_HEADERS}
   # Fog/G2d.
   ${FOG_G2D_LIB_HEADERS}
+  ${FOG_G2D_FACE_HEADERS}
   ${FOG_G2D_FONT_HEADERS}
   ${FOG_G2D_GEOMETRY_HEADERS}
   ${FOG_G2D_GLOBAL_HEADERS}

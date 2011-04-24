@@ -302,13 +302,13 @@ struct FOG_NO_EXPORT PainterVTable
   typedef err_t (FOG_CDECL *BlitImageInF)(Painter& self, const RectF& r, const Image& i, const RectI* ir);
   typedef err_t (FOG_CDECL *BlitImageInD)(Painter& self, const RectD& r, const Image& i, const RectI* ir);
 
-  typedef err_t (FOG_CDECL *BlitImageMaskedAtI)(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
-  typedef err_t (FOG_CDECL *BlitImageMaskedAtF)(Painter& self, const PointF& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
-  typedef err_t (FOG_CDECL *BlitImageMaskedAtD)(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
+  typedef err_t (FOG_CDECL *BlitMaskedImageAtI)(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
+  typedef err_t (FOG_CDECL *BlitMaskedImageAtF)(Painter& self, const PointF& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
+  typedef err_t (FOG_CDECL *BlitMaskedImageAtD)(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
 
-  typedef err_t (FOG_CDECL *BlitImageMaskedInI)(Painter& self, const RectI& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
-  typedef err_t (FOG_CDECL *BlitImageMaskedInF)(Painter& self, const RectF& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
-  typedef err_t (FOG_CDECL *BlitImageMaskedInD)(Painter& self, const RectD& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
+  typedef err_t (FOG_CDECL *BlitMaskedImageInI)(Painter& self, const RectI& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
+  typedef err_t (FOG_CDECL *BlitMaskedImageInF)(Painter& self, const RectF& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
+  typedef err_t (FOG_CDECL *BlitMaskedImageInD)(Painter& self, const RectD& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
 
   // --------------------------------------------------------------------------
   // [Blit - Funcs]
@@ -322,13 +322,13 @@ struct FOG_NO_EXPORT PainterVTable
   BlitImageInF blitImageInF;
   BlitImageInD blitImageInD;
 
-  BlitImageMaskedAtI blitImageMaskedAtI;
-  BlitImageMaskedAtF blitImageMaskedAtF;
-  BlitImageMaskedAtD blitImageMaskedAtD;
+  BlitMaskedImageAtI blitMaskedImageAtI;
+  BlitMaskedImageAtF blitMaskedImageAtF;
+  BlitMaskedImageAtD blitMaskedImageAtD;
 
-  BlitImageMaskedInI blitImageMaskedInI;
-  BlitImageMaskedInF blitImageMaskedInF;
-  BlitImageMaskedInD blitImageMaskedInD;
+  BlitMaskedImageInI blitMaskedImageInI;
+  BlitMaskedImageInF blitMaskedImageInF;
+  BlitMaskedImageInD blitMaskedImageInD;
 
   // --------------------------------------------------------------------------
   // [Clip - Types]

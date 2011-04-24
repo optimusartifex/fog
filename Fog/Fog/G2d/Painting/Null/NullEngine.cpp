@@ -196,13 +196,13 @@ struct FOG_NO_EXPORT MyPainterImpl
   static err_t FOG_CDECL blitImageInF(Painter& self, const RectF& r, const Image& i, const RectI* ir);
   static err_t FOG_CDECL blitImageInD(Painter& self, const RectD& r, const Image& i, const RectI* ir);
 
-  static err_t FOG_CDECL blitImageMaskedAtI(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
-  static err_t FOG_CDECL blitImageMaskedAtF(Painter& self, const PointF& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
-  static err_t FOG_CDECL blitImageMaskedAtD(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
+  static err_t FOG_CDECL blitMaskedImageAtI(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
+  static err_t FOG_CDECL blitMaskedImageAtF(Painter& self, const PointF& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
+  static err_t FOG_CDECL blitMaskedImageAtD(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
 
-  static err_t FOG_CDECL blitImageMaskedInI(Painter& self, const RectI& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
-  static err_t FOG_CDECL blitImageMaskedInF(Painter& self, const RectF& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
-  static err_t FOG_CDECL blitImageMaskedInD(Painter& self, const RectD& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
+  static err_t FOG_CDECL blitMaskedImageInI(Painter& self, const RectI& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
+  static err_t FOG_CDECL blitMaskedImageInF(Painter& self, const RectF& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
+  static err_t FOG_CDECL blitMaskedImageInD(Painter& self, const RectD& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
 
   // --------------------------------------------------------------------------
   // [Clip]
@@ -770,37 +770,37 @@ err_t FOG_CDECL MyPainterImpl::blitImageInD(Painter& self, const RectD& r, const
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::blitImageMaskedAtI(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
+err_t FOG_CDECL MyPainterImpl::blitMaskedImageAtI(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::blitImageMaskedAtF(Painter& self, const PointF& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
+err_t FOG_CDECL MyPainterImpl::blitMaskedImageAtF(Painter& self, const PointF& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::blitImageMaskedAtD(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
+err_t FOG_CDECL MyPainterImpl::blitMaskedImageAtD(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::blitImageMaskedInI(Painter& self, const RectI& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
+err_t FOG_CDECL MyPainterImpl::blitMaskedImageInI(Painter& self, const RectI& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::blitImageMaskedInF(Painter& self, const RectF& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
+err_t FOG_CDECL MyPainterImpl::blitMaskedImageInF(Painter& self, const RectF& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::blitImageMaskedInD(Painter& self, const RectD& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
+err_t FOG_CDECL MyPainterImpl::blitMaskedImageInD(Painter& self, const RectD& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
 {
   MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
@@ -1162,13 +1162,13 @@ static void _g2d_painter_init_my()
   v.blitImageInF = MyPainterImpl::blitImageInF;
   v.blitImageInD = MyPainterImpl::blitImageInD;
 
-  v.blitImageMaskedAtI = MyPainterImpl::blitImageMaskedAtI;
-  v.blitImageMaskedAtF = MyPainterImpl::blitImageMaskedAtF;
-  v.blitImageMaskedAtD = MyPainterImpl::blitImageMaskedAtD;
+  v.blitMaskedImageAtI = MyPainterImpl::blitMaskedImageAtI;
+  v.blitMaskedImageAtF = MyPainterImpl::blitMaskedImageAtF;
+  v.blitMaskedImageAtD = MyPainterImpl::blitMaskedImageAtD;
 
-  v.blitImageMaskedInI = MyPainterImpl::blitImageMaskedInI;
-  v.blitImageMaskedInF = MyPainterImpl::blitImageMaskedInF;
-  v.blitImageMaskedInD = MyPainterImpl::blitImageMaskedInD;
+  v.blitMaskedImageInI = MyPainterImpl::blitMaskedImageInI;
+  v.blitMaskedImageInF = MyPainterImpl::blitMaskedImageInF;
+  v.blitMaskedImageInD = MyPainterImpl::blitMaskedImageInD;
 
   // --------------------------------------------------------------------------
   // [Clip]
@@ -1338,7 +1338,7 @@ struct FOG_NO_EXPORT NullPainterImpl
   // --------------------------------------------------------------------------
 
   static err_t FOG_CDECL blitImage(Painter& self, const Any& p, const Image& i, const Any* ir);
-  static err_t FOG_CDECL blitImageMasked(Painter& self, const Any& p, const Image& i, const Image& m, const Any* ir, const Any* mr);
+  static err_t FOG_CDECL blitMaskedImage(Painter& self, const Any& p, const Image& i, const Image& m, const Any* ir, const Any* mr);
 
   // --------------------------------------------------------------------------
   // [Clip]
@@ -1646,7 +1646,7 @@ err_t FOG_CDECL NullPainterImpl::blitImage(Painter& self, const Any& p, const Im
   return ERR_RT_INVALID_STATE;
 }
 
-err_t FOG_CDECL NullPainterImpl::blitImageMasked(Painter& self, const Any& p, const Image& i, const Image& m, const Any* ir, const Any* mr)
+err_t FOG_CDECL NullPainterImpl::blitMaskedImage(Painter& self, const Any& p, const Image& i, const Image& m, const Any* ir, const Any* mr)
 {
   return ERR_RT_INVALID_STATE;
 }
@@ -1900,13 +1900,13 @@ FOG_NO_EXPORT void _g2d_painter_init_null()
   v.blitImageInF = (PainterVTable::BlitImageInF)NullPainterImpl::blitImage;
   v.blitImageInD = (PainterVTable::BlitImageInD)NullPainterImpl::blitImage;
 
-  v.blitImageMaskedAtI = (PainterVTable::BlitImageMaskedAtI)NullPainterImpl::blitImageMasked;
-  v.blitImageMaskedAtF = (PainterVTable::BlitImageMaskedAtF)NullPainterImpl::blitImageMasked;
-  v.blitImageMaskedAtD = (PainterVTable::BlitImageMaskedAtD)NullPainterImpl::blitImageMasked;
+  v.blitMaskedImageAtI = (PainterVTable::BlitMaskedImageAtI)NullPainterImpl::blitMaskedImage;
+  v.blitMaskedImageAtF = (PainterVTable::BlitMaskedImageAtF)NullPainterImpl::blitMaskedImage;
+  v.blitMaskedImageAtD = (PainterVTable::BlitMaskedImageAtD)NullPainterImpl::blitMaskedImage;
 
-  v.blitImageMaskedInI = (PainterVTable::BlitImageMaskedInI)NullPainterImpl::blitImageMasked;
-  v.blitImageMaskedInF = (PainterVTable::BlitImageMaskedInF)NullPainterImpl::blitImageMasked;
-  v.blitImageMaskedInD = (PainterVTable::BlitImageMaskedInD)NullPainterImpl::blitImageMasked;
+  v.blitMaskedImageInI = (PainterVTable::BlitMaskedImageInI)NullPainterImpl::blitMaskedImage;
+  v.blitMaskedImageInF = (PainterVTable::BlitMaskedImageInF)NullPainterImpl::blitMaskedImage;
+  v.blitMaskedImageInD = (PainterVTable::BlitMaskedImageInD)NullPainterImpl::blitMaskedImage;
 
   // --------------------------------------------------------------------------
   // [Clip]

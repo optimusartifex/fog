@@ -3112,13 +3112,13 @@ struct RasterPainterImpl : public RasterPainterImpl_
   static err_t FOG_CDECL blitImageInF(Painter& self, const RectF& r, const Image& i, const RectI* ir);
   static err_t FOG_CDECL blitImageInD(Painter& self, const RectD& r, const Image& i, const RectI* ir);
 
-  static err_t FOG_CDECL blitImageMaskedAtI(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
-  static err_t FOG_CDECL blitImageMaskedAtF(Painter& self, const PointF& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
-  static err_t FOG_CDECL blitImageMaskedAtD(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
+  static err_t FOG_CDECL blitMaskedImageAtI(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
+  static err_t FOG_CDECL blitMaskedImageAtF(Painter& self, const PointF& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
+  static err_t FOG_CDECL blitMaskedImageAtD(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
 
-  static err_t FOG_CDECL blitImageMaskedInI(Painter& self, const RectI& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
-  static err_t FOG_CDECL blitImageMaskedInF(Painter& self, const RectF& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
-  static err_t FOG_CDECL blitImageMaskedInD(Painter& self, const RectD& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
+  static err_t FOG_CDECL blitMaskedImageInI(Painter& self, const RectI& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
+  static err_t FOG_CDECL blitMaskedImageInF(Painter& self, const RectF& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
+  static err_t FOG_CDECL blitMaskedImageInD(Painter& self, const RectD& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr);
 
   // --------------------------------------------------------------------------
   // [Clip]
@@ -3376,13 +3376,13 @@ void RasterPainterImpl<_MODE>::initVTable(RasterPainterVTable& v)
   v.blitImageInF = blitImageInF;
   v.blitImageInD = blitImageInD;
 
-  v.blitImageMaskedAtI = blitImageMaskedAtI;
-  v.blitImageMaskedAtF = blitImageMaskedAtF;
-  v.blitImageMaskedAtD = blitImageMaskedAtD;
+  v.blitMaskedImageAtI = blitMaskedImageAtI;
+  v.blitMaskedImageAtF = blitMaskedImageAtF;
+  v.blitMaskedImageAtD = blitMaskedImageAtD;
 
-  v.blitImageMaskedInI = blitImageMaskedInI;
-  v.blitImageMaskedInF = blitImageMaskedInF;
-  v.blitImageMaskedInD = blitImageMaskedInD;
+  v.blitMaskedImageInI = blitMaskedImageInI;
+  v.blitMaskedImageInF = blitMaskedImageInF;
+  v.blitMaskedImageInD = blitMaskedImageInD;
 
   // --------------------------------------------------------------------------
   // [Clip]
@@ -4411,7 +4411,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageInD(Painter& self, const Rect
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageMaskedAtI(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageAtI(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
 
@@ -4419,7 +4419,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageMaskedAtI(Painter& self, cons
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageMaskedAtF(Painter& self, const PointF& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageAtF(Painter& self, const PointF& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
 
@@ -4427,7 +4427,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageMaskedAtF(Painter& self, cons
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageMaskedAtD(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageAtD(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
 
@@ -4435,7 +4435,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageMaskedAtD(Painter& self, cons
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageMaskedInI(Painter& self, const RectI& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageInI(Painter& self, const RectI& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
 
@@ -4443,7 +4443,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageMaskedInI(Painter& self, cons
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageMaskedInF(Painter& self, const RectF& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageInF(Painter& self, const RectF& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
 
@@ -4451,7 +4451,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageMaskedInF(Painter& self, cons
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageMaskedInD(Painter& self, const RectD& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageInD(Painter& self, const RectD& r, const Image& i, const Image& m, const RectI* ir, const RectI* mr)
 {
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
 

@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_FACE_FACE_C_G2D_H
-#define _FOG_CORE_FACE_FACE_C_G2D_H
+#ifndef _FOG_G2D_FACE_FACE_RASTER_C_H
+#define _FOG_G2D_FACE_FACE_RASTER_C_H
 
 // [Dependencies]
 #include <Fog/Core/Face/Face_C.h>
@@ -1706,4 +1706,4 @@ static FOG_INLINE void p64PRGB64FromARGB64_1032(
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_CORE_FACE_FACE_C_G2D_H
+#endif // _FOG_G2D_FACE_FACE_RASTER_C_H

@@ -1274,21 +1274,21 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t blitImage(const RectF& r, const Image& i, const RectI& ir) { return _vtable->blitImageInF(*this, r, i, &ir); }
   FOG_INLINE err_t blitImage(const RectD& r, const Image& i, const RectI& ir) { return _vtable->blitImageInD(*this, r, i, &ir); }
 
-  FOG_INLINE err_t blitImage(const PointI& p, const Image& i, const Image& m) { return _vtable->blitImageMaskedAtI(*this, p, i, m, NULL, NULL); }
-  FOG_INLINE err_t blitImage(const PointF& p, const Image& i, const Image& m) { return _vtable->blitImageMaskedAtF(*this, p, i, m, NULL, NULL); }
-  FOG_INLINE err_t blitImage(const PointD& p, const Image& i, const Image& m) { return _vtable->blitImageMaskedAtD(*this, p, i, m, NULL, NULL); }
+  FOG_INLINE err_t blitMaskedImage(const PointI& p, const Image& i, const Image& m) { return _vtable->blitMaskedImageAtI(*this, p, i, m, NULL, NULL); }
+  FOG_INLINE err_t blitMaskedImage(const PointF& p, const Image& i, const Image& m) { return _vtable->blitMaskedImageAtF(*this, p, i, m, NULL, NULL); }
+  FOG_INLINE err_t blitMaskedImage(const PointD& p, const Image& i, const Image& m) { return _vtable->blitMaskedImageAtD(*this, p, i, m, NULL, NULL); }
 
-  FOG_INLINE err_t blitImage(const PointI& p, const Image& i, const Image& m, const RectI& ir, const RectI& mr) { return _vtable->blitImageMaskedAtI(*this, p, i, m, &ir, &mr); }
-  FOG_INLINE err_t blitImage(const PointF& p, const Image& i, const Image& m, const RectI& ir, const RectI& mr) { return _vtable->blitImageMaskedAtF(*this, p, i, m, &ir, &mr); }
-  FOG_INLINE err_t blitImage(const PointD& p, const Image& i, const Image& m, const RectI& ir, const RectI& mr) { return _vtable->blitImageMaskedAtD(*this, p, i, m, &ir, &mr); }
+  FOG_INLINE err_t blitMaskedImage(const PointI& p, const Image& i, const Image& m, const RectI& ir, const RectI& mr) { return _vtable->blitMaskedImageAtI(*this, p, i, m, &ir, &mr); }
+  FOG_INLINE err_t blitMaskedImage(const PointF& p, const Image& i, const Image& m, const RectI& ir, const RectI& mr) { return _vtable->blitMaskedImageAtF(*this, p, i, m, &ir, &mr); }
+  FOG_INLINE err_t blitMaskedImage(const PointD& p, const Image& i, const Image& m, const RectI& ir, const RectI& mr) { return _vtable->blitMaskedImageAtD(*this, p, i, m, &ir, &mr); }
 
-  FOG_INLINE err_t blitImage(const RectI& r, const Image& i, const Image& m) { return _vtable->blitImageMaskedInI(*this, r, i, m, NULL, NULL); }
-  FOG_INLINE err_t blitImage(const RectF& r, const Image& i, const Image& m) { return _vtable->blitImageMaskedInF(*this, r, i, m, NULL, NULL); }
-  FOG_INLINE err_t blitImage(const RectD& r, const Image& i, const Image& m) { return _vtable->blitImageMaskedInD(*this, r, i, m, NULL, NULL); }
+  FOG_INLINE err_t blitMaskedImage(const RectI& r, const Image& i, const Image& m) { return _vtable->blitMaskedImageInI(*this, r, i, m, NULL, NULL); }
+  FOG_INLINE err_t blitMaskedImage(const RectF& r, const Image& i, const Image& m) { return _vtable->blitMaskedImageInF(*this, r, i, m, NULL, NULL); }
+  FOG_INLINE err_t blitMaskedImage(const RectD& r, const Image& i, const Image& m) { return _vtable->blitMaskedImageInD(*this, r, i, m, NULL, NULL); }
 
-  FOG_INLINE err_t blitImage(const RectI& r, const Image& i, const Image& m, const RectI& ir, const RectI& mr) { return _vtable->blitImageMaskedInI(*this, r, i, m, &ir, &mr); }
-  FOG_INLINE err_t blitImage(const RectF& r, const Image& i, const Image& m, const RectI& ir, const RectI& mr) { return _vtable->blitImageMaskedInF(*this, r, i, m, &ir, &mr); }
-  FOG_INLINE err_t blitImage(const RectD& r, const Image& i, const Image& m, const RectI& ir, const RectI& mr) { return _vtable->blitImageMaskedInD(*this, r, i, m, &ir, &mr); }
+  FOG_INLINE err_t blitMaskedImage(const RectI& r, const Image& i, const Image& m, const RectI& ir, const RectI& mr) { return _vtable->blitMaskedImageInI(*this, r, i, m, &ir, &mr); }
+  FOG_INLINE err_t blitMaskedImage(const RectF& r, const Image& i, const Image& m, const RectI& ir, const RectI& mr) { return _vtable->blitMaskedImageInF(*this, r, i, m, &ir, &mr); }
+  FOG_INLINE err_t blitMaskedImage(const RectD& r, const Image& i, const Image& m, const RectI& ir, const RectI& mr) { return _vtable->blitMaskedImageInD(*this, r, i, m, &ir, &mr); }
 
   // --------------------------------------------------------------------------
   // [Clip]

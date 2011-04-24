@@ -12,7 +12,6 @@
 #include <Fog/Core/Collection/PBuffer.h>
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Face/Face_C.h>
-#include <Fog/Core/Face/Face_C_G2d.h>
 #include <Fog/Core/IO/FileSystem.h>
 #include <Fog/Core/IO/MapFile.h>
 #include <Fog/Core/Math/FloatBits.h>
@@ -20,6 +19,7 @@
 #include <Fog/Core/Memory/BSwap.h>
 #include <Fog/Core/Memory/Memory.h>
 #include <Fog/Core/Memory/MemoryBuffer.h>
+#include <Fog/G2d/Face/Face_Raster_C.h>
 #include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Global/Init_G2d_p.h>
 #include <Fog/G2d/Imaging/Image.h>

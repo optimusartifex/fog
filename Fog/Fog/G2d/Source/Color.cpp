@@ -12,7 +12,6 @@
 #include <Fog/Core/Cpu/Cpu.h>
 #include <Fog/Core/Cpu/Initializer.h>
 #include <Fog/Core/Face/Face_C.h>
-#include <Fog/Core/Face/Face_C_G2d.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Global/Constants.h>
@@ -21,6 +20,7 @@
 #include <Fog/Core/Tools/Char.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringUtil.h>
+#include <Fog/G2d/Face/Face_Raster_C.h>
 #include <Fog/G2d/Global/Api.h>
 #include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Source/Color.h>

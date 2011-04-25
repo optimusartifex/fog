@@ -1243,5 +1243,10 @@ FOG_DECLARE_TYPEINFO(Fog::RectD, Fog::TYPEINFO_PRIMITIVE)
 FOG_DECLARE_FUZZY(Fog::RectF, Math::feqv((const float *)&a, (const float *)&b, 4))
 FOG_DECLARE_FUZZY(Fog::RectD, Math::feqv((const double*)&a, (const double*)&b, 4))
 
+// Prevent the warning about the used functions, which weren't defined (GCC).
+#if !defined(_FOG_G2D_GEOMETRY_BOX_H)
+#include <Fog/G2d/Geometry/Box.h>
+#endif // !_FOG_G2D_GEOMETRY_BOX_H
+
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_RECT_H

@@ -1075,7 +1075,7 @@ err_t X11GuiWindow::create(uint32_t createFlags)
     XWindowAttributes wa;
     engine->pXGetWindowAttributes(display, (XID)getHandle(), &wa);
 
-    _windowRect.set(wa.x, wa.y, (int)wa.width, (int)wa.height);
+    _windowRect.setRect(wa.x, wa.y, (int)wa.width, (int)wa.height);
   }
 
   // Create X input context.

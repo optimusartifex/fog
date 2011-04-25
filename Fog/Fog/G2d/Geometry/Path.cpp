@@ -2028,6 +2028,7 @@ _ShapeRect:
         boundingBoxDirty = false;
       }
 
+      self._d->flat = 0;
       self._d->boundingBoxDirty = boundingBoxDirty;
       break;
     }

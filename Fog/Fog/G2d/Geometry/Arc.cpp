@@ -17,7 +17,7 @@
 namespace Fog {
 
 // ============================================================================
-// [Fog::Arc - GetBoundingRect]
+// [Fog::Arc - GetBoundingBox]
 // ============================================================================
 
 template<typename Number>
@@ -28,7 +28,7 @@ static void FOG_CDECL _G2d_ArcT_getBoundingBox(const typename ArcT<Number>::T* s
   Number start = self->start;
   Number sweep = self->sweep;
 
-  // Orientation is not important, let's normalize arc to start -> start + sweep
+  // Orientation is not important, let's normalize arc to start -> start + sweep.
   if (sweep < Number(0.0))
   {
     start += sweep;

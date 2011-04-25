@@ -68,6 +68,15 @@ struct FOG_NO_EXPORT PieF : ArcF
     _g2d.arcf.getBoundingBox(this, &result, true);
     return RectF(result);
   }
+
+  // --------------------------------------------------------------------------
+  // [HitTest]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool hitTest(const PointF& pt)
+  {
+    return _g2d.pief.hitTest(this, &pt);
+  }
 };
 
 // ============================================================================
@@ -108,6 +117,15 @@ struct FOG_NO_EXPORT PieD : ArcD
     BoxD result;
     _g2d.arcd.getBoundingBox(this, &result, true);
     return RectD(result);
+  }
+
+  // --------------------------------------------------------------------------
+  // [HitTest]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool hitTest(const PointD& pt)
+  {
+    return _g2d.pied.hitTest(this, &pt);
   }
 };
 

@@ -1291,7 +1291,7 @@ __repeat:
       Widget* current = fog_object_cast<Widget*>(it.value());
       if (current &&
           current->getVisibility() >= WIDGET_VISIBLE &&
-          current->_widgetGeometry.contains(p))
+          current->_widgetGeometry.hitTest(p))
       {
         w = current;
         p -= w->getPosition();

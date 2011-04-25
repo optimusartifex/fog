@@ -50,6 +50,15 @@ struct FOG_NO_EXPORT ChordF : ArcF
   FOG_INLINE ChordF(const BoxF& r, float start_, float sweep_) : ArcF(r, start_, sweep_) {}
 
   explicit FOG_INLINE ChordF(const ArcD& other) : ArcF(other) {}
+
+  // --------------------------------------------------------------------------
+  // [HitTest]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool hitTest(const PointF& pt)
+  {
+    return _g2d.chordf.hitTest(this, &pt);
+  }
 };
 
 // ============================================================================
@@ -73,6 +82,15 @@ struct FOG_NO_EXPORT ChordD : ArcD
   FOG_INLINE ChordD(const BoxD& r, double start_, double sweep_) : ArcD(r, start_, sweep_) {}
 
   explicit FOG_INLINE ChordD(const ArcF& other) : ArcD(other) {}
+
+  // --------------------------------------------------------------------------
+  // [HitTest]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool hitTest(const PointD& pt)
+  {
+    return _g2d.chordd.hitTest(this, &pt);
+  }
 };
 
 // ============================================================================

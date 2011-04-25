@@ -28,8 +28,14 @@ FOG_NO_EXPORT void _g2d_glyphset_fini(void);
 
 // [Fog/G2d/Geometry]
 FOG_NO_EXPORT void _g2d_arc_init(void);
-FOG_NO_EXPORT void _g2d_cubiccurve_init(void);
+FOG_NO_EXPORT void _g2d_circle_init(void);
+FOG_NO_EXPORT void _g2d_ellipse_init(void);
+FOG_NO_EXPORT void _g2d_chord_init(void);
+FOG_NO_EXPORT void _g2d_pie_init(void);
+FOG_NO_EXPORT void _g2d_round_init(void);
 FOG_NO_EXPORT void _g2d_line_init(void);
+
+FOG_NO_EXPORT void _g2d_cubiccurve_init(void);
 FOG_NO_EXPORT void _g2d_quadcurve_init(void);
 
 FOG_NO_EXPORT void _g2d_path_init(void);

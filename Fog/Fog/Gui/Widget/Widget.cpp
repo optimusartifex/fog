@@ -443,7 +443,7 @@ _Repeat:
     for (it.toEnd(); it.isValid(); it.toPrevious())
     {
       Widget* widget = fog_object_cast<Widget*>(it.value());
-      if (widget && widget->_widgetGeometry.contains(pt))
+      if (widget && widget->_widgetGeometry.hitTest(pt))
       {
         current = widget;
         if (!recursive) break;

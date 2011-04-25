@@ -21,7 +21,13 @@ FOG_NO_EXPORT void _g2d_init(void)
 {
   // [Fog/G2d/Geometry]
   _g2d_arc_init();
+  _g2d_circle_init();
+  _g2d_ellipse_init();
+  _g2d_chord_init();
+  _g2d_pie_init();
+  _g2d_round_init();
   _g2d_line_init();
+
   _g2d_quadcurve_init();
   _g2d_cubiccurve_init();
 

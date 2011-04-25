@@ -28,9 +28,18 @@ struct BoxI;
 struct BoxF;
 struct BoxD;
 
+struct ChordF;
+struct ChordD;
+
+struct CircleF;
+struct CircleD;
+
 struct Color;
 struct ColorLutFx;
 struct ColorLutTable;
+
+struct EllipseF;
+struct EllipseD;
 
 struct Image;
 struct ImageBits;
@@ -48,6 +57,9 @@ struct PathFlattenParamsD;
 struct PathClipperF;
 struct PathClipperD;
 
+struct PieF;
+struct PieD;
+
 struct PointI;
 struct PointF;
 struct PointD;
@@ -57,6 +69,9 @@ struct RectF;
 struct RectD;
 
 struct Region;
+
+struct RoundF;
+struct RoundD;
 
 struct TransformF;
 struct TransformD;
@@ -92,6 +107,91 @@ struct _G2dApi
   {
     ArcD_GetBoundingBox getBoundingBox;
   } arcd;
+
+  // --------------------------------------------------------------------------
+  // [Circle]
+  // --------------------------------------------------------------------------
+
+  typedef bool (FOG_CDECL *CircleF_HitTest)(const CircleF* self, const PointF* pt);
+  typedef bool (FOG_CDECL *CircleD_HitTest)(const CircleD* self, const PointD* pt);
+
+  struct _FuncsCircleF
+  {
+    CircleF_HitTest hitTest;
+  } circlef;
+
+  struct _FuncsCircleD
+  {
+    CircleD_HitTest hitTest;
+  } circled;
+
+  // --------------------------------------------------------------------------
+  // [Ellipse]
+  // --------------------------------------------------------------------------
+
+  typedef bool (FOG_CDECL *EllipseF_HitTest)(const EllipseF* self, const PointF* pt);
+  typedef bool (FOG_CDECL *EllipseD_HitTest)(const EllipseD* self, const PointD* pt);
+
+  struct _FuncsEllipseF
+  {
+    EllipseF_HitTest hitTest;
+  } ellipsef;
+
+  struct _FuncsEllipseD
+  {
+    EllipseD_HitTest hitTest;
+  } ellipsed;
+
+  // --------------------------------------------------------------------------
+  // [Chord]
+  // --------------------------------------------------------------------------
+
+  typedef bool (FOG_CDECL *ChordF_HitTest)(const ChordF* self, const PointF* pt);
+  typedef bool (FOG_CDECL *ChordD_HitTest)(const ChordD* self, const PointD* pt);
+
+  struct _FuncsChordF
+  {
+    ChordF_HitTest hitTest;
+  } chordf;
+
+  struct _FuncsChordD
+  {
+    ChordD_HitTest hitTest;
+  } chordd;
+
+  // --------------------------------------------------------------------------
+  // [Pie]
+  // --------------------------------------------------------------------------
+
+  typedef bool (FOG_CDECL *PieF_HitTest)(const PieF* self, const PointF* pt);
+  typedef bool (FOG_CDECL *PieD_HitTest)(const PieD* self, const PointD* pt);
+
+  struct _FuncsPieF
+  {
+    PieF_HitTest hitTest;
+  } pief;
+
+  struct _FuncsPieD
+  {
+    PieD_HitTest hitTest;
+  } pied;
+
+  // --------------------------------------------------------------------------
+  // [Round]
+  // --------------------------------------------------------------------------
+
+  typedef bool (FOG_CDECL *RoundF_HitTest)(const RoundF* self, const PointF* pt);
+  typedef bool (FOG_CDECL *RoundD_HitTest)(const RoundD* self, const PointD* pt);
+
+  struct _FuncsRoundF
+  {
+    RoundF_HitTest hitTest;
+  } roundf;
+
+  struct _FuncsRoundD
+  {
+    RoundD_HitTest hitTest;
+  } roundd;
 
   // --------------------------------------------------------------------------
   // [Line]

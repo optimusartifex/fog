@@ -173,22 +173,22 @@ struct BoxI
   // [HitTest]
   // --------------------------------------------------------------------------
 
-  //! @brief Returns @c true if given point is in rectangle.
+  //! @brief Get whether the point [@a px, @a py] is in the box.
   //! @brief x Point x coordinate.
   //! @brief y Point y coordinate.
-  //! @return @c true if point is in rectangle.
-  FOG_INLINE bool contains(int px, int py) const
+  //! @return @c true if point is in box.
+  FOG_INLINE bool hitTest(int px, int py) const
   {
     return ((px >= x0) & (py >= y0) & (px < x1) & (py < y1));
   }
 
-  //! @brief Returns @c true if given point @a p is in rectangle.
+  //! @brief Get whether the point @a pt is in the box.
   //! @brief x Point x coordinate.
   //! @brief y Point y coordinate.
-  //! @return @c true if point is in rectangle.
-  FOG_INLINE bool contains(const PointI& p) const
+  //! @return @c true if point is in box.
+  FOG_INLINE bool hitTest(const PointI& pt) const
   {
-    return ((p.x >= x0) & (p.y >= y0) & (p.x < x1) & (p.y < y1));
+    return ((pt.x >= x0) & (pt.y >= y0) & (pt.x < x1) & (pt.y < y1));
   }
 
   // --------------------------------------------------------------------------
@@ -493,22 +493,22 @@ struct BoxF
   // [HitTest]
   // --------------------------------------------------------------------------
 
-  //! @brief Returns @c true if given point is in rectangle.
+  //! @brief Get whether the point @a [@a px, @a py] is in the box.
   //! @brief x Point x coordinate.
   //! @brief y Point y coordinate.
   //! @return @c true if point is in rectangle.
-  FOG_INLINE bool contains(float px, float py) const
+  FOG_INLINE bool hitTest(float px, float py) const
   {
     return ((px >= x0) & (py >= y0) & (px < x1) & (py < y1));
   }
 
-  //! @brief Returns @c true if given point @a p is in rectangle.
+  //! @brief Get whether the point @a pt is in the box.
   //! @brief x Point x coordinate.
   //! @brief y Point y coordinate.
   //! @return @c true if point is in rectangle.
-  FOG_INLINE bool contains(const PointF& p) const
+  FOG_INLINE bool hitTest(const PointF& pt) const
   {
-    return ((p.x >= x0) & (p.y >= y0) & (p.x < x1) & (p.y < y1));
+    return ((pt.x >= x0) & (pt.y >= y0) & (pt.x < x1) & (pt.y < y1));
   }
 
   // --------------------------------------------------------------------------
@@ -819,38 +819,38 @@ struct FOG_NO_EXPORT BoxD
   // [HitTest]
   // --------------------------------------------------------------------------
 
-  //! @brief Returns @c true if given point is in rectangle.
+  //! @brief Get whether the point [@a px, @a py] is in the box.
   //! @brief x Point x coordinate.
   //! @brief y Point y coordinate.
   //! @return @c true if point is in rectangle.
-  FOG_INLINE bool contains(double px, double py) const
+  FOG_INLINE bool hitTest(double px, double py) const
   {
     return ((px >= x0) & (py >= y0) & (px < x1) & (py < y1));
   }
 
-  //! @brief Returns @c true if given point @a p is in rectangle.
+  //! @brief Get whether the point @a pt is in the box.
   //! @brief x Point x coordinate.
   //! @brief y Point y coordinate.
   //! @return @c true if point is in rectangle.
-  FOG_INLINE bool contains(const PointD& p) const
+  FOG_INLINE bool hitTest(const PointD& pt) const
   {
-    return ((p.x >= x0) & (p.y >= y0) & (p.x < x1) & (p.y < y1));
+    return ((pt.x >= x0) & (pt.y >= y0) & (pt.x < x1) & (pt.y < y1));
   }
 
   //! @overload
-  FOG_INLINE bool contains(const PointF& p) const
+  FOG_INLINE bool hitTest(const PointF& pt) const
   {
-    double px = p.x;
-    double py = p.y;
+    double px = pt.x;
+    double py = pt.y;
 
     return ((px >= x0) & (py >= y0) & (px < x1) & (py < y1));
   }
 
   //! @overload
-  FOG_INLINE bool contains(const PointI& p) const
+  FOG_INLINE bool hitTest(const PointI& pt) const
   {
-    double px = p.x;
-    double py = p.y;
+    double px = pt.x;
+    double py = pt.y;
 
     return ((px >= x0) & (py >= y0) & (px < x1) & (py < y1));
   }

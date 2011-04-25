@@ -209,7 +209,7 @@ struct RectI
   //! @brief x Point x coordinate.
   //! @brief y Point y coordinate.
   //! @return @c true if point is in rectangle.
-  FOG_INLINE bool contains(int px, int py) const
+  FOG_INLINE bool hitTest(int px, int py) const
   {
     return ((px >= getX0()) & (py >= getY0()) &
             (px <  getX1()) & (py <  getY1()) );
@@ -219,7 +219,7 @@ struct RectI
   //! @brief x Point x coordinate.
   //! @brief y Point y coordinate.
   //! @return @c true if point is in rectangle.
-  FOG_INLINE bool contains(const PointI& pt) const
+  FOG_INLINE bool hitTest(const PointI& pt) const
   {
     return ((pt.x >= getX0()) & (pt.y >= getY0()) &
             (pt.x <  getX1()) & (pt.y <  getY1()) );
@@ -660,7 +660,7 @@ struct RectF
   //! @brief x Point x coordinate.
   //! @brief y Point y coordinate.
   //! @return @c true if point is in rectangle.
-  FOG_INLINE bool contains(float px, float py) const
+  FOG_INLINE bool hitTest(float px, float py) const
   {
     float ix = px - x;
     float iy = py - y;
@@ -671,7 +671,7 @@ struct RectF
   //! @brief Get whether the point is in the rectangle.
   //! @brief pt Point coordinates.
   //! @return @c true if point is in rectangle.
-  FOG_INLINE bool contains(const PointF& other) const
+  FOG_INLINE bool hitTest(const PointF& other) const
   {
     float ix = other.x - x;
     float iy = other.y - y;
@@ -1118,7 +1118,7 @@ struct RectD
   //! @brief x Point x coordinate.
   //! @brief y Point y coordinate.
   //! @return @c true if point is in rectangle.
-  FOG_INLINE bool contains(double px, double py) const
+  FOG_INLINE bool hitTest(double px, double py) const
   {
     double ix = px - x;
     double iy = py - y;
@@ -1129,7 +1129,7 @@ struct RectD
   //! @brief Get whether the point is in the rectangle.
   //! @brief pt Point coordinates.
   //! @return @c true if point is in rectangle.
-  FOG_INLINE bool contains(const PointD& other) const
+  FOG_INLINE bool hitTest(const PointD& other) const
   {
     double ix = other.x - x;
     double iy = other.y - y;

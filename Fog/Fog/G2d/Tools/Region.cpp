@@ -1398,7 +1398,7 @@ uint32_t Region::hitTest(const PointI& pt) const
   if (!length) return REGION_HIT_OUT;
 
   // Check if point position is in extents, if not -> Out.
-  if (!(d->extents.contains(pt))) return REGION_HIT_OUT;
+  if (!(d->extents.hitTest(pt))) return REGION_HIT_OUT;
   if (length == 1) return REGION_HIT_IN;
 
   // Binary search for matching position.

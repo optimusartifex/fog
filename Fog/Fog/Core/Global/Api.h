@@ -31,19 +31,29 @@ struct FOG_NO_EXPORT _CoreApi
   typedef int (FOG_CDECL* MathF_SolveQuadraticFunction)(float* dst, const float* src);
   typedef int (FOG_CDECL* MathD_SolveQuadraticFunction)(double* dst, const double* src);
 
+  typedef int (FOG_CDECL* MathF_SolveQuadraticFunctionAt)(float* dst, const float* src, float tMin, float tMax);
+  typedef int (FOG_CDECL* MathD_SolveQuadraticFunctionAt)(double* dst, const double* src, double tMin, double tMax);
+
   typedef int (FOG_CDECL* MathF_SolveCubicFunction)(float* dst, const float* src);
   typedef int (FOG_CDECL* MathD_SolveCubicFunction)(double* dst, const double* src);
+
+  typedef int (FOG_CDECL* MathF_SolveCubicFunctionAt)(float* dst, const float* src, float tMin, float tMax);
+  typedef int (FOG_CDECL* MathD_SolveCubicFunctionAt)(double* dst, const double* src, double tMin, double tMax);
 
   struct FOG_NO_EXPORT _FuncsMathF
   {
     MathF_SolveQuadraticFunction solveQuadraticFunction;
+    MathF_SolveQuadraticFunctionAt solveQuadraticFunctionAt;
     MathF_SolveCubicFunction solveCubicFunction;
+    MathF_SolveCubicFunctionAt solveCubicFunctionAt;
   } mathf;
 
   struct FOG_NO_EXPORT _FuncsMathD
   {
     MathD_SolveQuadraticFunction solveQuadraticFunction;
+    MathD_SolveQuadraticFunctionAt solveQuadraticFunctionAt;
     MathD_SolveCubicFunction solveCubicFunction;
+    MathD_SolveCubicFunctionAt solveCubicFunctionAt;
   } mathd;
 
   // --------------------------------------------------------------------------

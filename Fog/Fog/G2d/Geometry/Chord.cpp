@@ -82,7 +82,7 @@ static bool FOG_CDECL _G2d_ChordT_hitTest(const typename ChordT<Number>::T* self
   if (onRight)
     return x >= lx;
   else
-    return x <= lx;
+    return x < lx;
 }
 
 // ============================================================================

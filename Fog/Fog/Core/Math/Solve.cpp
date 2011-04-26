@@ -97,6 +97,58 @@ static int FOG_CDECL _G2d_MathT_solveQuadraticFunction(Number* dst, const Number
   }
 }
 
+template<typename Number>
+static int FOG_CDECL _G2d_MathT_solveQuadraticFunctionAt(Number* dst, const Number* src, Number tMin, Number tMax)
+{
+  double a = (double)src[0];
+  double b = (double)src[1];
+  double c = (double)src[2];
+
+  Number r0, r1;
+
+  // Catch the A and B near zero.
+  if (Math::isFuzzyZero(a))
+  {
+    // A~=0 && B~=0.
+    if (Math::isFuzzyZero(b)) return 0;
+
+    r0 = (Number)(-c / b);
+    goto _OneRoot;
+  }
+
+  // The proposed solution.
+  double d = b * b - 4.0 * a * c;
+  if (d < 0.0) return 0;
+
+  if (Math::isFuzzyPositiveZero(d))
+  {
+    r0 = (Number)(-b / (2.0 * a));
+    goto _OneRoot;
+  }
+  else
+  {
+    double s = Math::sqrt(d);
+    double q = -0.5 * (b + ((b < 0.0) ? -s : s));
+
+    r0 = (Number)(q / a);
+    r1 = (Number)(c / q);
+    if (r0 > r1) swap(r0, r1);
+
+    if (r1 < tMin || r1 > tMax) goto _OneRoot;
+    if (r0 < tMin || r0 > tMax) { r0 = r1; goto _OneRoot; }
+
+    dst[0] = r0;
+    dst[1] = r1;
+    return 2;
+  }
+
+_OneRoot:
+  if (r0 < tMin || r0 > tMax) return 0;
+
+  dst[0] = r0;
+  return 1;
+}
+
 // ============================================================================
 // [Fog::Numeric - SolveCubicFunction]
 // ============================================================================
@@ -108,8 +160,6 @@ template<typename Number>
 static int FOG_CDECL _G2d_MathT_solveCubicFunction(Number* dst, const Number* src)
 {
   if (Math::isFuzzyZero(src[0])) return Math::solveQuadraticFunction(dst, src + 1);
-
-  int roots;
 
   // Convert to a normal form: x^3 + Ax^2 + Bx + C == 0.
   double _norm = (double)src[0];
@@ -145,7 +195,6 @@ static int FOG_CDECL _G2d_MathT_solveCubicFunction(Number* dst, const Number* sr
       double u = mycbrt(-q);
       dst[0] = (Number)(sub + 2.0 * u);
       dst[1] = (Number)(sub - u      );
-      roots = 2;
 
       // Sort.
       if (dst[0] > dst[1]) swap(dst[0], dst[1]);
@@ -180,6 +229,22 @@ static int FOG_CDECL _G2d_MathT_solveCubicFunction(Number* dst, const Number* sr
   }
 }
 
+template<typename Number>
+static int FOG_CDECL _G2d_MathT_solveCubicFunctionAt(Number* dst, const Number* src, Number tMin, Number tMax)
+{
+  Number tmp[3];
+  int roots = _G2d_MathT_solveCubicFunction(tmp, src);
+  int interestingRoots = 0;
+
+  for (int i = 0; i < roots; i++)
+  {
+    if (tmp[i] < tMin || tmp[i] > tMax) continue;
+    dst[interestingRoots++] = tmp[i];
+  }
+
+  return interestingRoots;
+}
+
 // ============================================================================
 // [Fog::Core - Library Initializers]
 // ============================================================================
@@ -187,10 +252,14 @@ static int FOG_CDECL _G2d_MathT_solveCubicFunction(Number* dst, const Number* sr
 FOG_NO_EXPORT void _core_math_init_solve(void)
 {
   _core.mathf.solveQuadraticFunction = _G2d_MathT_solveQuadraticFunction<float>;
+  _core.mathf.solveQuadraticFunctionAt = _G2d_MathT_solveQuadraticFunctionAt<float>;
   _core.mathf.solveCubicFunction = _G2d_MathT_solveCubicFunction<float>;
+  _core.mathf.solveCubicFunctionAt = _G2d_MathT_solveCubicFunctionAt<float>;
 
   _core.mathd.solveQuadraticFunction = _G2d_MathT_solveQuadraticFunction<double>;
+  _core.mathd.solveQuadraticFunctionAt = _G2d_MathT_solveQuadraticFunctionAt<double>;
   _core.mathd.solveCubicFunction = _G2d_MathT_solveCubicFunction<double>;
+  _core.mathd.solveCubicFunctionAt = _G2d_MathT_solveCubicFunctionAt<double>;
 }
 
 } // Fog namespace

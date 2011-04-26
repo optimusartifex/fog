@@ -418,6 +418,9 @@ struct _G2dApi
   typedef err_t (FOG_CDECL *PathF_AppendTransformedPath)(PathF& self, const PathF& path, const TransformF& tr, const Range* range);
   typedef err_t (FOG_CDECL *PathD_AppendTransformedPath)(PathD& self, const PathD& path, const TransformD& tr, const Range* range);
 
+  typedef bool (FOG_CDECL *PathF_HitTest)(const PathF& self, const PointF& pt, uint32_t fillRule);
+  typedef bool (FOG_CDECL *PathD_HitTest)(const PathD& self, const PointD& pt, uint32_t fillRule);
+
   typedef err_t (FOG_CDECL *PathF_Translate)(PathF& self, const PointF& pt, const Range* range);
   typedef err_t (FOG_CDECL *PathD_Translate)(PathD& self, const PointD& pt, const Range* range);
 
@@ -498,6 +501,7 @@ struct _G2dApi
     PathF_AppendPath appendPath;
     PathF_AppendTranslatedPath appendTranslatedPath;
     PathF_AppendTransformedPath appendTransformedPath;
+    PathF_HitTest hitTest;
     PathF_Translate translate;
     PathF_Transform transform;
     PathF_FitTo fitTo;
@@ -568,6 +572,7 @@ struct _G2dApi
     PathD_AppendPath appendPath;
     PathD_AppendTranslatedPath appendTranslatedPath;
     PathD_AppendTransformedPath appendTransformedPath;
+    PathD_HitTest hitTest;
     PathD_Translate translate;
     PathD_Transform transform;
     PathD_FitTo fitTo;

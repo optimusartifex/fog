@@ -820,7 +820,7 @@ struct FOG_NO_EXPORT PathF
   }
 
   // --------------------------------------------------------------------------
-  // [BoundingRect]
+  // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
 
   FOG_INLINE void _updateBoundingBox() const
@@ -833,16 +833,25 @@ struct FOG_NO_EXPORT PathF
     return (bool)_d->boundingBoxDirty;
   }
 
+  FOG_INLINE BoxF getBoundingBox() const
+  {
+    if (_d->boundingBoxDirty) _updateBoundingBox();
+    return _d->boundingBox;
+  }
+
   FOG_INLINE RectF getBoundingRect() const
   {
     if (_d->boundingBoxDirty) _updateBoundingBox();
     return RectF(_d->boundingBox);
   }
 
-  FOG_INLINE BoxF getBoundingBox() const
+  // --------------------------------------------------------------------------
+  // [HitTest]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool hitTest(const PointF& pt, uint32_t fillRule) const
   {
-    if (_d->boundingBoxDirty) _updateBoundingBox();
-    return _d->boundingBox;
+    return _g2d.pathf.hitTest(*this, pt, fillRule);
   }
 
   // --------------------------------------------------------------------------
@@ -1566,7 +1575,7 @@ struct FOG_API PathD
   }
 
   // --------------------------------------------------------------------------
-  // [BoundingRect]
+  // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
 
   FOG_INLINE void _updateBoundingBox() const
@@ -1579,16 +1588,25 @@ struct FOG_API PathD
     return (bool)_d->boundingBoxDirty;
   }
 
+  FOG_INLINE BoxD getBoundingBox() const
+  {
+    if (_d->boundingBoxDirty) _updateBoundingBox();
+    return _d->boundingBox;
+  }
+
   FOG_INLINE RectD getBoundingRect() const
   {
     if (_d->boundingBoxDirty) _updateBoundingBox();
     return RectD(_d->boundingBox);
   }
 
-  FOG_INLINE BoxD getBoundingBox() const
+  // --------------------------------------------------------------------------
+  // [HitTest]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool hitTest(const PointD& pt, uint32_t fillRule) const
   {
-    if (_d->boundingBoxDirty) _updateBoundingBox();
-    return _d->boundingBox;
+    return _g2d.pathd.hitTest(*this, pt, fillRule);
   }
 
   // --------------------------------------------------------------------------

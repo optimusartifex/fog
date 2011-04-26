@@ -44,6 +44,16 @@ static FOG_INLINE int solveQuadraticFunction(double* dst, const double* src)
   return _core.mathd.solveQuadraticFunction(dst, src);
 }
 
+static FOG_INLINE int solveQuadraticFunctionAt(float* dst, const float* src, float tMin, float tMax)
+{
+  return _core.mathf.solveQuadraticFunctionAt(dst, src, tMin, tMax);
+}
+
+static FOG_INLINE int solveQuadraticFunctionAt(double* dst, const double* src, double tMin, double tMax)
+{
+  return _core.mathd.solveQuadraticFunctionAt(dst, src, tMin, tMax);
+}
+
 // ============================================================================
 // [Fog::Math - SolveCubicFunction]
 // ============================================================================
@@ -69,6 +79,16 @@ static FOG_INLINE int solveCubicFunction(float* dst, const float* src)
 static FOG_INLINE int solveCubicFunction(double* dst, const double* src)
 {
   return _core.mathd.solveCubicFunction(dst, src);
+}
+
+static FOG_INLINE int solveCubicFunctionAt(float* dst, const float* src, float tMin, float tMax)
+{
+  return _core.mathf.solveCubicFunctionAt(dst, src, tMin, tMax);
+}
+
+static FOG_INLINE int solveCubicFunctionAt(double* dst, const double* src, double tMin, double tMax)
+{
+  return _core.mathd.solveCubicFunctionAt(dst, src, tMin, tMax);
 }
 
 //! @}

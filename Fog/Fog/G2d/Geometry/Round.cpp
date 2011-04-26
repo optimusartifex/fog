@@ -33,7 +33,7 @@ static bool FOG_CDECL _G2d_RoundT_hitTest(const typename RoundT<Number>::T* self
   Number ry = Math::abs(self->radius.y);
 
   // Hit-test the bounding box.
-  if (x < Number(0.0) || y < Number(0.0) || x > w || y > h) return false;
+  if (x < Number(0.0) || y < Number(0.0) || x >= w || y >= h) return false;
 
   // Normalize rx/ry.
   rx = Math::min(rx, w * Number(2.0));

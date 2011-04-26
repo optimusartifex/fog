@@ -13,6 +13,7 @@
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
+#include <Fog/Core/Math/Solve.h>
 #include <Fog/Core/Memory/Memory.h>
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Global/Swap.h>
@@ -2200,6 +2201,376 @@ static err_t _G2d_PathT_appendTranslatedPathT(
 }
 
 // ============================================================================
+// [Fog::Path - HitTest]
+// ============================================================================
+
+template<typename Number>
+static bool _G2d_PathT_hitTest(
+  const typename PathT<Number>::T& self,
+  const typename PointT<Number>::T& pt, uint32_t fillRule)
+{
+  sysuint_t i = self.getLength();
+  if (i == 0) return false;
+
+  const typename PointT<Number>::T* pts = self.getVertices();
+  const uint8_t* cmd = self.getCommands();
+
+  int windingNumber = 0;
+
+  typename PointT<Number>::T start;
+  bool hasMoveTo = false;
+
+  Number px = pt.x;
+  Number py = pt.y;
+
+  Number x0, y0;
+  Number x1, y1;
+
+  do {
+    switch (cmd[0])
+    {
+      // ----------------------------------------------------------------------
+      // [Move-To]
+      // ----------------------------------------------------------------------
+
+      case PATH_CMD_MOVE_TO:
+      {
+        if (hasMoveTo)
+        {
+          x0 = pts[-1].x;
+          y0 = pts[-1].y;
+          x1 = start.x;
+          y1 = start.y;
+
+          hasMoveTo = false;
+          goto _DoLine;
+        }
+
+        start = pts[0];
+
+        pts++;
+        cmd++;
+        i--;
+
+        hasMoveTo = true;
+        break;
+      }
+
+      // ----------------------------------------------------------------------
+      // [Line-To]
+      // ----------------------------------------------------------------------
+
+      case PATH_CMD_LINE_TO:
+      {
+        if (FOG_UNLIKELY(!hasMoveTo)) goto _Invalid;
+
+        x0 = pts[-1].x;
+        y0 = pts[-1].y;
+        x1 = pts[0].x;
+        y1 = pts[0].y;
+
+        pts++;
+        cmd++;
+        i--;
+
+_DoLine:
+        {
+          Number dx = x1 - x0;
+          Number dy = y1 - y0;
+
+          if (dy > Number(0.0))
+          {
+            if (py >= y0 && py < y1)
+            {
+              Number ix = x0 + (py - y0) * dx / dy;
+              windingNumber += (px >= ix);
+            }
+          }
+          else if (dy < Number(0.0))
+          {
+            if (py >= y1 && py < y0)
+            {
+              Number ix = x0 + (py - y0) * dx / dy;
+              windingNumber -= (px >= ix);
+            }
+          }
+        }
+        break;
+      }
+
+      // ----------------------------------------------------------------------
+      // [Quad-To]
+      // ----------------------------------------------------------------------
+
+      case PATH_CMD_QUAD_TO:
+      {
+        const typename PointT<Number>::T* p = pts - 1;
+
+        if (FOG_UNLIKELY(!hasMoveTo)) goto _Invalid;
+        if (FOG_UNLIKELY(i < 2)) goto _Invalid;
+
+        Number minY = Math::min(p[0].y, p[1].y, p[2].y);
+        Number maxY = Math::max(p[0].y, p[1].y, p[2].y);
+
+        pts += 2;
+        cmd += 2;
+        i   -= 2;
+
+        if (py >= minY && py <= maxY)
+        {
+          bool degenerated = 
+            Math::isFuzzyEq(p[0].y, p[1].y) && 
+            Math::isFuzzyEq(p[1].y, p[2].y) ;
+
+          if (degenerated)
+          {
+            x0 = p[0].x;
+            y0 = p[0].y;
+            x1 = p[2].x;
+            y1 = p[2].y;
+            goto _DoLine;
+          }
+
+          if (!degenerated)
+          {
+            // Subdivide curve to curve-spline separated at Y-extrama.
+            typename PointT<Number>::T left[3];
+            typename PointT<Number>::T rght[3];
+
+            Number tExtrema[2];
+            Number tCut = Number(0.0);
+
+            tExtrema[0] = (p[0].y - p[1].y) / (p[0].y - Number(2.0) * p[1].y + p[2].y);
+
+            int tIndex;
+            int tLength = tExtrema[0] > Number(0.0) && tExtrema[0] < Number(1.0);
+
+            tExtrema[tLength++] = Number(1.0);
+
+            rght[0] = p[0];
+            rght[1] = p[1];
+            rght[2] = p[2];
+
+            for (tIndex = 0; tIndex < tLength; tIndex++)
+            {
+              Number tVal = tExtrema[tIndex];
+              if (tVal == tCut) continue;
+
+              if (tVal == Number(1.0))
+              {
+                left[0] = rght[0];
+                left[1] = rght[1];
+                left[2] = rght[2];
+              }
+              else
+              {
+                QuadCurveT<Number>::T::splitAt(rght, left, rght, tCut == Number(0.0) ? tVal : (tVal - tCut) / (Number(1.0) - tCut));
+              }
+
+              minY = Math::min(left[0].y, left[2].y);
+              maxY = Math::max(left[0].y, left[2].y);
+
+              if (py >= minY && py < maxY)
+              {
+                Number ax, ay, bx, by, cx, cy;
+                _FOG_QUAD_EXTRACT_PARAMETERS(Number, ax, ay, bx, by, cx, cy, left);
+
+                Number func[3];
+                func[0] = ay;
+                func[1] = by;
+                func[2] = cy - py;
+
+                int direction = 0;
+                if (left[0].y < left[2].y)
+                  direction = 1;
+                else if (left[0].y > left[2].y)
+                  direction = -1;
+
+                // It should be only possible to have zero/one solution.
+                Number ti[2];
+                Number ix;
+
+                if (Math::solveQuadraticFunctionAt(ti, func, Number(0.0), Number(1.0)) >= 1)
+                  ix = ax * Math::pow2(ti[0]) + bx * ti[0] + cx;
+                else if (py - minY < maxY - py)
+                  ix = p[0].x;
+                else
+                  ix = p[2].x;
+                
+                if (px >= ix) windingNumber += direction;
+              }
+
+              tCut = tVal;
+            }
+          }
+        }
+        break;
+      }
+
+      // ----------------------------------------------------------------------
+      // [Cubic-To]
+      // ----------------------------------------------------------------------
+
+      case PATH_CMD_CUBIC_TO:
+      {
+        const typename PointT<Number>::T* p = pts - 1;
+
+        if (FOG_UNLIKELY(!hasMoveTo)) goto _Invalid;
+        if (FOG_UNLIKELY(i < 3)) goto _Invalid;
+
+        Number minY = Math::min(p[0].y, p[1].y, p[2].y, p[3].y);
+        Number maxY = Math::max(p[0].y, p[1].y, p[2].y, p[3].y);
+
+        pts += 3;
+        cmd += 3;
+        i   -= 3;
+
+        if (py >= minY && py <= maxY)
+        {
+          bool degenerated = 
+            Math::isFuzzyEq(p[0].y, p[1].y) && 
+            Math::isFuzzyEq(p[1].y, p[2].y) &&
+            Math::isFuzzyEq(p[2].y, p[3].y) ;
+
+          if (degenerated)
+          {
+            x0 = p[0].x;
+            y0 = p[0].y;
+            x1 = p[3].x;
+            y1 = p[3].y;
+            goto _DoLine;
+          }
+
+          if (!degenerated)
+          {
+            // Subdivide curve to curve-spline separated at Y-extrama.
+            typename PointT<Number>::T left[4];
+            typename PointT<Number>::T rght[4];
+
+            Number func[4];
+            func[0] = Number(3.0) * (-p[0].y + Number(3.0) * (p[1].y - p[2].y) + p[3].y);
+            func[1] = Number(6.0) * ( p[0].y - Number(2.0) *  p[1].y + p[2].y          );
+            func[2] = Number(3.0) * (-p[0].y +                p[1].y                   );
+
+            Number tExtrema[3];
+            Number tCut = Number(0.0);
+
+            int tIndex;
+            int tLength;
+
+            tLength = Math::solveQuadraticFunctionAt(tExtrema, func, 0.0, 1.0);
+            tExtrema[tLength++] = Number(1.0);
+
+            rght[0] = p[0];
+            rght[1] = p[1];
+            rght[2] = p[2];
+            rght[3] = p[3];
+
+            for (tIndex = 0; tIndex < tLength; tIndex++)
+            {
+              Number tVal = tExtrema[tIndex];
+              if (tVal == tCut) continue;
+
+              if (tVal == Number(1.0))
+              {
+                left[0] = rght[0];
+                left[1] = rght[1];
+                left[2] = rght[2];
+                left[3] = rght[3];
+              }
+              else
+              {
+                CubicCurveT<Number>::T::splitAt(rght, left, rght, tCut == Number(0.0) ? tVal : (tVal - tCut) / (Number(1.0) - tCut));
+              }
+
+              minY = Math::min(left[0].y, left[3].y);
+              maxY = Math::max(left[0].y, left[3].y);
+
+              if (py >= minY && py < maxY)
+              {
+                Number ax, ay, bx, by, cx, cy, dx, dy;
+                _FOG_CUBIC_EXTRACT_PARAMETERS(Number, ax, ay, bx, by, cx, cy, dx, dy, left);
+
+                func[0] = ay;
+                func[1] = by;
+                func[2] = cy;
+                func[3] = dy - py;
+
+                int direction = 0;
+                if (left[0].y < left[3].y)
+                  direction = 1;
+                else if (left[0].y > left[3].y)
+                  direction = -1;
+
+                // It should be only possible to have zero/one solution.
+                Number ti[3];
+                Number ix;
+
+                if (Math::solveCubicFunctionAt(ti, func, Number(0.0), Number(1.0)) >= 1)
+                  ix = ax * Math::pow3(ti[0]) + bx * Math::pow2(ti[0]) + cx * ti[0] + dx;
+                else if (py - minY < maxY - py)
+                  ix = p[0].x;
+                else
+                  ix = p[3].x;
+                
+                if (px >= ix) windingNumber += direction;
+              }
+
+              tCut = tVal;
+            }
+          }
+        }
+        break;
+      }
+
+      // ----------------------------------------------------------------------
+      // [Close-To]
+      // ----------------------------------------------------------------------
+
+      case PATH_CMD_CLOSE:
+      {
+        if (hasMoveTo)
+        {
+          x0 = pts[-1].x;
+          y0 = pts[-1].y;
+          x1 = start.x;
+          y1 = start.y;
+
+          hasMoveTo = false;
+          goto _DoLine;
+        }
+
+        pts++;
+        cmd++;
+        i--;
+        break;
+      }
+
+      default:
+        FOG_ASSERT_NOT_REACHED();
+    }
+  } while (i);
+
+  // Close the path.
+  if (hasMoveTo)
+  {
+    x0 = pts[-1].x;
+    y0 = pts[-1].y;
+    x1 = start.x;
+    y1 = start.y;
+
+    hasMoveTo = false;
+    goto _DoLine;
+  }
+
+  if (fillRule == FILL_RULE_EVEN_ODD) windingNumber &= 1;
+  return windingNumber != 0;
+
+_Invalid:
+  return false;
+}
+
+// ============================================================================
 // [Fog::Path - Transform]
 // ============================================================================
 
@@ -2745,6 +3116,7 @@ FOG_NO_EXPORT void _g2d_path_init(void)
   _g2d.pathf.appendPath = _G2d_PathT_appendPathT<float, float>;
   _g2d.pathf.appendTranslatedPath = _G2d_PathT_appendTranslatedPathT<float>;
   _g2d.pathf.appendTransformedPath = _G2d_PathT_appendTransformedPathT<float>;
+  _g2d.pathf.hitTest = _G2d_PathT_hitTest<float>;
   _g2d.pathf.translate = _G2d_PathT_translate<float>;
   _g2d.pathf.transform = _G2d_PathT_transform<float>;
   _g2d.pathf.fitTo = _G2d_PathT_fitTo<float>;
@@ -2812,6 +3184,7 @@ FOG_NO_EXPORT void _g2d_path_init(void)
   _g2d.pathd.appendPath = _G2d_PathT_appendPathT<double, double>;
   _g2d.pathd.appendTranslatedPath = _G2d_PathT_appendTranslatedPathT<double>;
   _g2d.pathd.appendTransformedPath = _G2d_PathT_appendTransformedPathT<double>;
+  _g2d.pathd.hitTest = _G2d_PathT_hitTest<double>;
   _g2d.pathd.translate = _G2d_PathT_translate<double>;
   _g2d.pathd.transform = _G2d_PathT_transform<double>;
   _g2d.pathd.fitTo = _G2d_PathT_fitTo<double>;

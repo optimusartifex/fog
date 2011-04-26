@@ -163,13 +163,13 @@ void MyWindow::onPaint(PaintEvent* e)
 
   p->save();
   p->setCompositingOperator(COMPOSITE_SRC);
-
+  /*
   p->translate(PointF(200, 200));
   p->rotate(_rotate);
   p->skew(PointF(_shearX, _shearY));
   p->translate(PointF(_subx, _suby));
   p->translate(PointF(-200, -200));
-
+  */
   // Clear everything to white.
   p->setSource(Argb32(0xFFFFFFFF));
   p->fillAll();
@@ -229,6 +229,41 @@ void MyWindow::onPaint(PaintEvent* e)
 
   //p->blitImage(RectI(100, 100, 100, 100), i[0]);
 
+  {
+    PathF path;
+
+    path.moveTo(PointF(300, 300));
+    //path.circle(CircleF(PointF(240.0f, 240.0f), 115.0f), PATH_DIRECTION_CW);
+    //path.ellipse(EllipseF(PointF(320.0f, 320.0f), PointF(115.0f, 50.0f)), PATH_DIRECTION_CCW);
+
+    srand(1);
+    for (sysuint_t i = 0; i < 20; i++)
+    {
+      path.cubicTo(
+        PointF(100 + rand() % 500, 100 + rand() % 500),
+        PointF(100 + rand() % 500, 100 + rand() % 500),
+        PointF(100 + rand() % 500, 100 + rand() % 500)
+      );
+      path.quadTo(
+        PointF(100 + rand() % 500, 100 + rand() % 500),
+        PointF(100 + rand() % 500, 100 + rand() % 500)
+      );
+    }
+    /*
+    for (sysuint_t i = 0; i < 40; i++)
+    {
+      if (i == 0)
+        path.moveTo(PointF(100 + rand() % 400, 100 + rand() % 400));
+      else
+        path.lineTo(PointF(100 + rand() % 400, 100 + rand() % 400));
+    }
+    */
+
+    p->setSource(Argb32(path.hitTest(_lastMousePoint, FILL_RULE_EVEN_ODD) ? 0xFFFF0000 : 0xFF000000));
+    //p->setSource(Argb32(path.hitTest(PointF(_lastMousePoint.x + 0.01f, _lastMousePoint.y + 0.01f), FILL_RULE_EVEN_ODD) ? 0xFFFF0000 : 0xFF000000));
+    p->setFillRule(FILL_RULE_EVEN_ODD);
+    p->fillPath(path);
+  }
 
   /*
   p->fillRect(RectI(10, 10, 200, 200));
@@ -251,15 +286,15 @@ void MyWindow::onPaint(PaintEvent* e)
   }
   */
 
-  PathF path;
-  PathF clip;
+  //PathF path;
+  //PathF clip;
 
-  static int seedNum = 13;
-  srand(seedNum++);
+  //static int seedNum = 13;
+  //srand(seedNum++);
 
-  path.circle(CircleF(PointF(240.0f, 240.0f), 115.0f), PATH_DIRECTION_CW);
-  path.ellipse(EllipseF(PointF(320.0f, 320.0f), PointF(115.0f, 50.0f)), PATH_DIRECTION_CCW);
-  path._modifiedBoundingBox();
+  //path.circle(CircleF(PointF(240.0f, 240.0f), 115.0f), PATH_DIRECTION_CW);
+  //path.ellipse(EllipseF(PointF(320.0f, 320.0f), PointF(115.0f, 50.0f)), PATH_DIRECTION_CCW);
+  //path._modifiedBoundingBox();
 
 
   //path.moveTo(PointF(200.0f, 100.0f));
@@ -270,7 +305,7 @@ void MyWindow::onPaint(PaintEvent* e)
   //path.lineTo(PointF(222.0f, 240.0f));
   //path.lineTo(PointF(492.0f, 16.0f));
   // path.moveTo(PointF(100.0f, 100.0f));
-
+  /*
   path.moveTo(PointF(200, 200));
   for (int i = 0; i < 300; i++)
   {
@@ -281,6 +316,7 @@ void MyWindow::onPaint(PaintEvent* e)
     path.ellipse(EllipseF(p1, p2));
     //path.cubicTo(p1, p2, p3);
   }
+  */
 
 /*
   path.moveTo(PointF(200.0f, 100.0f));
@@ -291,7 +327,7 @@ void MyWindow::onPaint(PaintEvent* e)
   path.lineTo(PointF(150.0f, 220.0f));
 */
 
-  p->fillPath(path);
+  //p->fillPath(path);
   /*
   PathClipperF clipper(RectF(150.0f, 150.0f, 200.0f, 200.0f));
   clipper.clipPath(clip, path);

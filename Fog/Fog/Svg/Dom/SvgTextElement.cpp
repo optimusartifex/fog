@@ -49,31 +49,59 @@ XmlAttribute* SvgTextElement::_createAttribute(const ManagedString& name) const
 err_t SvgTextElement::onRenderShape(SvgRenderContext* context) const
 {
   err_t err = ERR_OK;
-  XmlElement* e;
+  SvgVisitor* visitor = context->getVisitor();
 
+  XmlElement* e;
   float x = a_x.isAssigned() ? a_x.getCoordValue() : 0.0f;
   float y = a_y.isAssigned() ? a_y.getCoordValue() : 0.0f;
 
   context->_textCursor.set(x, y);
 
-  for (e = getFirstChild(); e; e = e->getNextSibling())
+  if (visitor == NULL)
   {
-    // TODO: Needed?
-    //if (e->isSvgElement() && reinterpret_cast<SvgElement*>(e)->getVisible())
-    //{
-    //  err = reinterpret_cast<SvgElement*>(e)->onRender(context);
-    //  if (FOG_IS_ERROR(err)) break;
-    //}
-    if (e->isText())
+    for (e = getFirstChild(); e; e = e->getNextSibling())
     {
-      String text = e->getTextContent();
-      text.simplify();
+      if (e->isSvgElement() && reinterpret_cast<SvgElement*>(e)->getVisible())
+      {
+        err = reinterpret_cast<SvgElement*>(e)->onRender(context);
+        if (FOG_IS_ERROR(err)) break;
+      }
+      if (e->isText())
+      {
+        String text = e->getTextContent();
+        text.simplify();
 
-      // TODO: Not optimal, just initial support for text rendering.
-      PathD path;
-      context->_font.getOutline(text, path);
-      path.translate(PointD(x, y));
-      context->drawPath(path);
+        // TODO: Not optimal, just initial support for text rendering.
+        PathD path;
+        context->_font.getOutline(text, path);
+        path.translate(PointD(x, y));
+        context->drawPath(path);
+      }
+    }
+  }
+  else
+  {
+    for (e = getFirstChild(); e; e = e->getNextSibling())
+    {
+      if (e->isSvgElement() && reinterpret_cast<SvgElement*>(e)->getVisible() && visitor->canVisit(e))
+      {
+        visitor->onBegin(e);
+        err = reinterpret_cast<SvgElement*>(e)->onRender(context);
+        visitor->onEnd(e);
+
+        if (FOG_IS_ERROR(err)) break;
+      }
+      if (e->isText())
+      {
+        String text = e->getTextContent();
+        text.simplify();
+
+        // TODO: Not optimal, just initial support for text rendering.
+        PathD path;
+        context->_font.getOutline(text, path);
+        path.translate(PointD(x, y));
+        context->drawPath(path);
+      }
     }
   }
 

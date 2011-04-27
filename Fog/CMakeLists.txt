@@ -458,6 +458,7 @@ Set(FOG_CORE_MATH_SOURCES
   Fog/Core/Math/FloatControl.h
   Fog/Core/Math/Fuzzy.h
   Fog/Core/Math/Math.h
+  Fog/Core/Math/MathVec.h
   Fog/Core/Math/Solve.h
 )
 
@@ -465,6 +466,7 @@ Set(FOG_CORE_MATH_HEADERS
   Fog/Core/Math/Fixed.cpp
   Fog/Core/Math/Fuzzy.cpp
   Fog/Core/Math/Math.cpp
+  Fog/Core/Math/MathVec.cpp
   Fog/Core/Math/Solve.cpp
 )
 

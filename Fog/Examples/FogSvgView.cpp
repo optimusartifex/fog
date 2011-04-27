@@ -202,7 +202,7 @@ FOG_GUI_MAIN()
     //fileName = Ascii8("/my/upload/img/svg/map-krasnaya-plyana.svg");
     //fileName = Ascii8("/my/upload/img/svg/Map_Multilayer_Scaled.svg");
     //fileName = Ascii8("C:/my/svg/map-krasnaya-plyana.svg");
-    fileName = Ascii8("C:/my/svg/map-imeretinka.svg");
+    //fileName = Ascii8("C:/my/svg/map-imeretinka.svg");
     //fileName = Ascii8("C:/my/svg/Map_Multilayer_Scaled.svg");
     //fileName = Ascii8("C:/my/svg/froggy.svg");
     //fileName = Ascii8("C:/my/svg/fire_engine.svg");
@@ -222,25 +222,19 @@ FOG_GUI_MAIN()
     //fileName = Ascii8("C:/my/svg/paint-fill-BE-01.svg");
 
     //fileName = Ascii8("C:/my/svg/jean_victor_balin_check.svg");
+    fileName = Ascii8("C:/my/svg/PatternTest.svg");
   }
 
   MyWindow window;
   window.error = window.svg.readFromFile(fileName);
 
   int w = 0, h = 0;
-  XmlElement* root = window.svg.getDocumentRoot();
+  SizeF size = window.svg.getDocumentSize();
 
-  // TODO: There is no API to get SVG width/height.
-  if (root)
-  {
-    root->getAttribute(Ascii8("width")).atoi32(&w);
-    root->getAttribute(Ascii8("height")).atoi32(&h);
-  }
+  if (size.w < 800) size.w = 800;
+  if (size.h < 500) size.h = 500;
 
-  if (w < 800) w = 800;
-  if (h < 500) h = 500;
-
-  window.setSize(SizeI(w, h));
+  window.setSize(SizeI((int)size.w, (int)size.h));
   window.show();
   window.addListener(EVENT_CLOSE, &app, &Application::quit);
 

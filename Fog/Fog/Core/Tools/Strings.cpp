@@ -145,6 +145,7 @@ static const char fog_strings_data[] =
   "height\0"
   "lengthAdjust\0"
   "offset\0"
+  "patternTransform\0"
   "patternUnits\0"
   "points\0"
   "preserveAspectRatio\0"

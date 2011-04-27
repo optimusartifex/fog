@@ -11,7 +11,7 @@
 // [Dependencies]
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/Init_Core_p.h>
-#include <Fog/Core/Math/Math.h>
+#include <Fog/Core/Math/MathVec.h>
 
 namespace Fog {
 
@@ -19,17 +19,24 @@ namespace Fog {
 // [Fog::Math]
 // ============================================================================
 
-namespace Math {
-} // Math namespace
+static void FOG_CDECL _Core_MathVec_vFloatFromDouble(float* dst, const double* src, sysuint_t length)
+{
+  for (sysuint_t i = 0; i < length; i++) dst[i] = float(src[i]);
+}
+
+static void FOG_CDECL _Core_MathVec_vDoubleFromFloat(double* dst, const float* src, sysuint_t length)
+{
+  for (sysuint_t i = 0; i < length; i++) dst[i] = double(src[i]);
+}
 
 // ============================================================================
 // [Fog::Core - Library Initializers]
 // ============================================================================
 
-FOG_NO_EXPORT void _core_math_init(void)
+FOG_NO_EXPORT void _core_math_init_vec(void)
 {
-  _core_math_init_vec();
-  _core_math_init_solve();
+  _core.mathf.vFloatFromDouble = _Core_MathVec_vFloatFromDouble;
+  _core.mathd.vDoubleFromFloat = _Core_MathVec_vDoubleFromFloat;
 }
 
 } // Fog namespace

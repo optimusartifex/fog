@@ -45,9 +45,9 @@ err_t SvgCircleElement::onRenderShape(SvgRenderContext* context) const
 {
   if (a_r.isAssigned())
   {
-    float cx = a_cx.isAssigned() ? a_cx.getCoordValue() : 0.0f;
-    float cy = a_cy.isAssigned() ? a_cy.getCoordValue() : 0.0f;
-    float r = Math::abs(a_r.getCoord().value);
+    float cx = a_cx.isAssigned() ? a_cx.getCoordComputed() : 0.0f;
+    float cy = a_cy.isAssigned() ? a_cy.getCoordComputed() : 0.0f;
+    float r = Math::abs(a_r.getCoordComputed());
 
     if (r <= 0.0f) return ERR_OK;
 
@@ -64,9 +64,9 @@ err_t SvgCircleElement::onCalcBoundingBox(RectF* box) const
 {
   if (a_r.isAssigned())
   {
-    float cx = a_cx.isAssigned() ? a_cx.getCoordValue() : 0.0f;
-    float cy = a_cy.isAssigned() ? a_cy.getCoordValue() : 0.0f;
-    float r = Math::abs(a_r.getCoord().value);
+    float cx = a_cx.isAssigned() ? a_cx.getCoordComputed() : 0.0f;
+    float cy = a_cy.isAssigned() ? a_cy.getCoordComputed() : 0.0f;
+    float r = Math::abs(a_r.getCoordComputed());
 
     if (r <= 0.0f) goto _Fail;
 

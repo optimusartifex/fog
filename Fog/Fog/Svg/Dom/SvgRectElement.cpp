@@ -51,15 +51,15 @@ err_t SvgRectElement::onRenderShape(SvgRenderContext* context) const
 {
   if (a_width.isAssigned() && a_height.isAssigned())
   {
-    float rw = a_width.getCoordValue();
-    float rh = a_height.getCoordValue();
+    float rw = a_width.getCoordComputed();
+    float rh = a_height.getCoordComputed();
     if (rw <= 0.0f || rh <= 0.0f) goto _Fail;
 
-    float rx = a_x.isAssigned() ? a_x.getCoordValue() : 0.0f;
-    float ry = a_y.isAssigned() ? a_y.getCoordValue() : 0.0f;
+    float rx = a_x.isAssigned() ? a_x.getCoordComputed() : 0.0f;
+    float ry = a_y.isAssigned() ? a_y.getCoordComputed() : 0.0f;
 
-    float radx = a_rx.isAssigned() ? a_rx.getCoordValue() : 0.0f;
-    float rady = a_ry.isAssigned() ? a_ry.getCoordValue() : 0.0f;
+    float radx = a_rx.isAssigned() ? a_rx.getCoordComputed() : 0.0f;
+    float rady = a_ry.isAssigned() ? a_ry.getCoordComputed() : 0.0f;
 
     if (!a_rx.isAssigned() && a_ry.isAssigned()) radx = rady;
     if (!a_ry.isAssigned() && a_rx.isAssigned()) rady = radx;
@@ -78,12 +78,12 @@ err_t SvgRectElement::onCalcBoundingBox(RectF* box) const
 {
   if (a_width.isAssigned() && a_height.isAssigned())
   {
-    float rw = a_width.getCoordValue();
-    float rh = a_height.getCoordValue();
+    float rw = a_width.getCoordComputed();
+    float rh = a_height.getCoordComputed();
     if (rw < 0.0f || rh < 0.0f) goto _Fail;
 
-    float rx = a_x.isAssigned() ? a_x.getCoordValue() : 0.0f;
-    float ry = a_y.isAssigned() ? a_y.getCoordValue() : 0.0f;
+    float rx = a_x.isAssigned() ? a_x.getCoordComputed() : 0.0f;
+    float ry = a_y.isAssigned() ? a_y.getCoordComputed() : 0.0f;
 
     box->setRect(rx, ry, rw, rh);
     return ERR_OK;

@@ -49,6 +49,7 @@ FOG_NO_EXPORT void _core_library_fini(void);
 // [Fog/Core/Math]
 FOG_NO_EXPORT void _core_math_init(void);
 FOG_NO_EXPORT void _core_math_init_solve(void);
+FOG_NO_EXPORT void _core_math_init_vec(void);
 
 // [Fog/Core/Memory]
 FOG_NO_EXPORT void _core_memory_init(void);

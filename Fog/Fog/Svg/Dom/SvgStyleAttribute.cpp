@@ -69,11 +69,11 @@ SvgStyleAttribute::SvgStyleAttribute(XmlElement* element, const ManagedString& n
   _strokeOpacity(0.0),
   _stopOpacity(0.0),
 
-  _strokeDashOffset(0.0, SVG_UNIT_PX),
-  _strokeMiterLimit(0.0, SVG_UNIT_PX),
-  _strokeWidth(0.0, SVG_UNIT_PX),
-  _fontSize(0.0, SVG_UNIT_PX),
-  _letterSpacing(0.0, SVG_UNIT_PX)
+  _strokeDashOffset(0.0, COORD_UNIT_PX),
+  _strokeMiterLimit(0.0, COORD_UNIT_PX),
+  _strokeWidth(0.0, COORD_UNIT_PX),
+  _fontSize(0.0, COORD_UNIT_PX),
+  _letterSpacing(0.0, COORD_UNIT_PX)
 {
 }
 
@@ -375,14 +375,12 @@ err_t SvgStyleAttribute::setStyle(int styleId, const String& value)
       break;
 
     case SVG_STYLE_FONT_SIZE:
-      SvgUtil::parseCoord(_fontSize, value);
-      if (_fontSize.unit == SVG_UNIT_INVALID)
+      if (SvgUtil::parseCoord(_fontSize, value) != ERR_OK)
         err = ERR_SVG_INVALID_STYLE_VALUE;
       break;
 
     case SVG_STYLE_LETTER_SPACING:
-      SvgUtil::parseCoord(_letterSpacing, value);
-      if (_letterSpacing.unit == SVG_UNIT_INVALID)
+      if (SvgUtil::parseCoord(_letterSpacing, value) != ERR_OK)
         err = ERR_SVG_INVALID_STYLE_VALUE;
       break;
 
@@ -426,8 +424,7 @@ err_t SvgStyleAttribute::setStyle(int styleId, const String& value)
       break;
 
     case SVG_STYLE_STROKE_DASH_OFFSET:
-      SvgUtil::parseCoord(_strokeDashOffset, value);
-      if (_strokeDashOffset.unit == SVG_UNIT_INVALID)
+      if (SvgUtil::parseCoord(_strokeDashOffset, value) != ERR_OK)
         err = ERR_SVG_INVALID_STYLE_VALUE;
       break;
 
@@ -448,8 +445,7 @@ err_t SvgStyleAttribute::setStyle(int styleId, const String& value)
       break;
 
     case SVG_STYLE_STROKE_MITER_LIMIT:
-      SvgUtil::parseCoord(_strokeMiterLimit, value);
-      if (_strokeMiterLimit.unit == SVG_UNIT_INVALID)
+      if (SvgUtil::parseCoord(_strokeMiterLimit, value) != ERR_OK)
         err = ERR_SVG_INVALID_STYLE_VALUE;
       break;
 
@@ -458,8 +454,7 @@ err_t SvgStyleAttribute::setStyle(int styleId, const String& value)
       break;
 
     case SVG_STYLE_STROKE_WIDTH:
-      SvgUtil::parseCoord(_strokeWidth, value);
-      if (_strokeWidth.unit == SVG_UNIT_INVALID)
+      if (SvgUtil::parseCoord(_strokeWidth, value) != ERR_OK)
         err = ERR_SVG_INVALID_STYLE_VALUE;
       break;
 

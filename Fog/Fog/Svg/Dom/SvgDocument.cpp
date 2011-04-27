@@ -53,7 +53,8 @@ namespace Fog {
 // [Fog::SvgDocument]
 // ============================================================================
 
-SvgDocument::SvgDocument()
+SvgDocument::SvgDocument() :
+  _dpi(72.0f)
 {
   _type |= SVG_ELEMENT_MASK;
 }
@@ -117,6 +118,22 @@ XmlElement* SvgDocument::createElementStatic(const ManagedString& tagName)
 err_t SvgDocument::onRender(SvgRenderContext* context) const
 {
   return SvgElement::_walkAndRender(this, context);
+}
+
+err_t SvgDocument::setDpi(float dpi)
+{
+  return _dpi.setDpi(dpi);
+}
+
+SizeF SvgDocument::getDocumentSize() const
+{
+  SizeF size(0.0f, 0.0f);
+  XmlElement* e = getDocumentRoot();
+
+  if (e->isSvg() && reinterpret_cast<SvgElement*>(e)->getSvgType() == SVG_ELEMENT_SVG)
+    size = reinterpret_cast<SvgRootElement*>(e)->getRootSize();
+
+  return size;
 }
 
 err_t SvgDocument::render(Painter* painter, SvgVisitor* visitor) const

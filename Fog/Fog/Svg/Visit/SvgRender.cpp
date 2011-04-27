@@ -23,7 +23,6 @@ SvgRenderContext::SvgRenderContext(Painter* painter, SvgVisitor* visitor) :
   _opacity = 1.0f;
 
   _textCursor.reset();
-  setDpi(90.0f);
 
   _painter->save();
   _painter->setCompositingOperator(COMPOSITE_SRC_OVER);
@@ -34,24 +33,6 @@ SvgRenderContext::SvgRenderContext(Painter* painter, SvgVisitor* visitor) :
 SvgRenderContext::~SvgRenderContext()
 {
   _painter->restore();
-}
-
-void SvgRenderContext::setDpi(float dpi)
-{
-  _dpi = dpi;
-
-  _translateCoordData[SVG_UNIT_NONE] = 1.0f;
-  _translateCoordData[SVG_UNIT_PERCENT] = 1.0f;
-
-  // SVG TODO: Em and Ex units.
-  _translateCoordData[SVG_UNIT_CM] = dpi * 0.3937007777777778f;
-  _translateCoordData[SVG_UNIT_EM] = 1.0f;
-  _translateCoordData[SVG_UNIT_EX] = 1.0f;
-  _translateCoordData[SVG_UNIT_IN] = dpi;
-  _translateCoordData[SVG_UNIT_MM] = dpi * 0.0393700777777778f;
-  _translateCoordData[SVG_UNIT_PC] = dpi * 0.1666666666666667f;
-  _translateCoordData[SVG_UNIT_PT] = dpi * 0.0138888888888889f;
-  _translateCoordData[SVG_UNIT_PX] = 1.0f;
 }
 
 bool SvgRenderContext::setupFill()

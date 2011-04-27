@@ -9,6 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Config/Config.h>
+#include <Fog/Core/Global/Api.h>
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/FloatBits.h>
@@ -249,7 +250,8 @@ _FOG_MATH_DECLARE_VARIANT_TEMPLATE(getNInf)
 
 static FOG_INLINE bool isFinite(float x)
 {
-#if defined (FOG_CC_GNU)
+  // TODO: There is some mac problem, fix it.
+#if defined (FOG_CC_GNU) && !defined(FOG_OS_MAC)
   return __builtin_finitef(x);
 #elif defined (FOG_CC_MSC)
   return _finite(x);

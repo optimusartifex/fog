@@ -54,27 +54,6 @@ enum SVG_ELEMENT_TYPE
 };
 
 // ============================================================================
-// [Fog::SVG_UNIT_TYPE]
-// ============================================================================
-
-// TODO: Deprecated, use DPI_VALUE_TYPE and DPI class.
-enum SVG_UNIT_TYPE
-{
-  SVG_UNIT_NONE = 0,
-  SVG_UNIT_CM,
-  SVG_UNIT_EM,
-  SVG_UNIT_EX,
-  SVG_UNIT_IN,
-  SVG_UNIT_MM,
-  SVG_UNIT_PC,
-  SVG_UNIT_PT,
-  SVG_UNIT_PX,
-  SVG_UNIT_PERCENT,
-
-  SVG_UNIT_INVALID
-};
-
-// ============================================================================
 // [Fog::SVG_PAINT_TYPE]
 // ============================================================================
 

@@ -786,37 +786,37 @@ struct FOG_NO_EXPORT PathF
   //! @brief Add another @a path to the path.
   FOG_INLINE err_t append(const PathF& path)
   {
-    return _g2d.pathf.appendPath(*this, path, NULL);
+    return _g2d.pathf.appendPathF(*this, path, NULL);
   }
 
   //! @brief Add another @a path to the path.
   FOG_INLINE err_t append(const PathF& path, const Range& range)
   {
-    return _g2d.pathf.appendPath(*this, path, &range);
+    return _g2d.pathf.appendPathF(*this, path, &range);
   }
 
   //! @brief Add another @a path (translated by the @a pt) to the path.
   FOG_INLINE err_t appendTranslated(const PathF& path, const PointF& pt)
   {
-    return _g2d.pathf.appendTranslatedPath(*this, path, pt, NULL);
+    return _g2d.pathf.appendTranslatedPathF(*this, path, pt, NULL);
   }
 
   //! @brief Add another @a path (translated by the @a pt) to the path.
   FOG_INLINE err_t appendTranslated(const PathF& path, const PointF& pt, const Range& range)
   {
-    return _g2d.pathf.appendTranslatedPath(*this, path, pt, &range);
+    return _g2d.pathf.appendTranslatedPathF(*this, path, pt, &range);
   }
 
   //! @brief Add another @a path (transformed by the @a tr) to the path.
   FOG_INLINE err_t appendTransformed(const PathF& path, const TransformF& tr)
   {
-    return _g2d.pathf.appendTransformedPath(*this, path, tr, NULL);
+    return _g2d.pathf.appendTransformedPathF(*this, path, tr, NULL);
   }
 
   //! @brief Add another @a path (transformed by the @a tr) to the path.
   FOG_INLINE err_t appendTransformed(const PathF& path, const TransformF& tr, const Range& range)
   {
-    return _g2d.pathf.appendTransformedPath(*this, path, tr, &range);
+    return _g2d.pathf.appendTransformedPathF(*this, path, tr, &range);
   }
 
   // --------------------------------------------------------------------------
@@ -1112,6 +1112,11 @@ struct FOG_API PathD
   FOG_INLINE err_t setPath(const PathD& other)
   {
     return _g2d.pathd.setPathD(*this, other);
+  }
+
+  FOG_INLINE err_t setPath(const PathF& other)
+  {
+    return _g2d.pathd.setPathF(*this, other);
   }
 
   FOG_INLINE err_t setDeep(const PathD& other)
@@ -1541,37 +1546,49 @@ struct FOG_API PathD
   //! @brief Add another @a path to the path.
   FOG_INLINE err_t append(const PathD& path)
   {
-    return _g2d.pathd.appendPath(*this, path, NULL);
+    return _g2d.pathd.appendPathD(*this, path, NULL);
+  }
+
+  //! @brief Add another @a path to the path.
+  FOG_INLINE err_t append(const PathF& path)
+  {
+    return _g2d.pathd.appendPathF(*this, path, NULL);
   }
 
   //! @brief Add another @a path to the path.
   FOG_INLINE err_t append(const PathD& path, const Range& range)
   {
-    return _g2d.pathd.appendPath(*this, path, &range);
+    return _g2d.pathd.appendPathD(*this, path, &range);
+  }
+
+  //! @brief Add another @a path to the path.
+  FOG_INLINE err_t append(const PathF& path, const Range& range)
+  {
+    return _g2d.pathd.appendPathF(*this, path, &range);
   }
 
   //! @brief Add another @a path (translated by the @a pt) to the path.
   FOG_INLINE err_t appendTranslated(const PathD& path, const PointD& pt)
   {
-    return _g2d.pathd.appendTranslatedPath(*this, path, pt, NULL);
+    return _g2d.pathd.appendTranslatedPathD(*this, path, pt, NULL);
   }
 
   //! @brief Add another @a path (translated by the @a pt) to the path.
   FOG_INLINE err_t appendTranslated(const PathD& path, const PointD& pt, const Range& range)
   {
-    return _g2d.pathd.appendTranslatedPath(*this, path, pt, &range);
+    return _g2d.pathd.appendTranslatedPathD(*this, path, pt, &range);
   }
 
   //! @brief Add another @a path (transformed by the @a tr) to the path.
   FOG_INLINE err_t appendTransformed(const PathD& path, const TransformD& tr)
   {
-    return _g2d.pathd.appendTransformedPath(*this, path, tr, NULL);
+    return _g2d.pathd.appendTransformedPathD(*this, path, tr, NULL);
   }
 
   //! @brief Add another @a path (transformed by the @a tr) to the path.
   FOG_INLINE err_t appendTransformed(const PathD& path, const TransformD& tr, const Range& range)
   {
-    return _g2d.pathd.appendTransformedPath(*this, path, tr, &range);
+    return _g2d.pathd.appendTransformedPathD(*this, path, tr, &range);
   }
 
   // --------------------------------------------------------------------------

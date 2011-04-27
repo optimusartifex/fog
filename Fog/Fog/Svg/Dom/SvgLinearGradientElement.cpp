@@ -64,10 +64,10 @@ err_t SvgLinearGradientElement::onApplyPattern(SvgRenderContext* context, SvgEle
     // BoundingBox coordinates.
     RectF bbox = obj->getBoundingRect();
 
-    float x1 = a_x1.isAssigned() ? context->translateCoord(a_x1.getCoord()) : 0.0f;
-    float y1 = a_y1.isAssigned() ? context->translateCoord(a_y1.getCoord()) : 0.0f;
-    float x2 = a_x2.isAssigned() ? context->translateCoord(a_x2.getCoord()) : 1.0f;
-    float y2 = a_y2.isAssigned() ? context->translateCoord(a_y2.getCoord()) : 0.0f;
+    float x1 = a_x1.isAssigned() ? a_x1.getCoordValue() : 0.0f;
+    float y1 = a_y1.isAssigned() ? a_y1.getCoordValue() : 0.0f;
+    float x2 = a_x2.isAssigned() ? a_x2.getCoordValue() : 1.0f;
+    float y2 = a_y2.isAssigned() ? a_y2.getCoordValue() : 0.0f;
 
     tr._type = TRANSFORM_TYPE_SCALING;
     tr._00 = bbox.w;
@@ -81,10 +81,10 @@ err_t SvgLinearGradientElement::onApplyPattern(SvgRenderContext* context, SvgEle
   else if (a_x1.isAssigned() && a_y1.isAssigned() && a_x2.isAssigned() && a_y2.isAssigned())
   {
     // UserSpaceOnUse coordinates.
-    float x1 = context->translateCoord(a_x1.getCoord());
-    float y1 = context->translateCoord(a_y1.getCoord());
-    float x2 = context->translateCoord(a_x2.getCoord());
-    float y2 = context->translateCoord(a_y2.getCoord());
+    float x1 = a_x1.getCoordComputed();
+    float y1 = a_y1.getCoordComputed();
+    float x2 = a_x2.getCoordComputed();
+    float y2 = a_y2.getCoordComputed();
 
     gradient.setStart(PointF(x1, y1));
     gradient.setEnd(PointF(x2, y2));

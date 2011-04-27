@@ -64,11 +64,11 @@ err_t SvgRadialGradientElement::onApplyPattern(SvgRenderContext* context, SvgEle
   {
     RectF bbox = obj->getBoundingRect();
 
-    float cx = a_cx.isAssigned() ? context->translateCoord(a_cx.getCoord()) : 0.5f;
-    float cy = a_cy.isAssigned() ? context->translateCoord(a_cy.getCoord()) : 0.5f;
-    float fx = a_fx.isAssigned() ? context->translateCoord(a_fx.getCoord()) : cx;
-    float fy = a_fy.isAssigned() ? context->translateCoord(a_fy.getCoord()) : cy;
-    float rx = a_r.isAssigned() ? context->translateCoord(a_r.getCoord()) : 0.5f;
+    float cx = a_cx.isAssigned() ? a_cx.getCoordValue() : 0.5f;
+    float cy = a_cy.isAssigned() ? a_cy.getCoordValue() : 0.5f;
+    float fx = a_fx.isAssigned() ? a_fx.getCoordValue() : cx;
+    float fy = a_fy.isAssigned() ? a_fy.getCoordValue() : cy;
+    float rx = a_r.isAssigned() ? a_r.getCoordValue() : 0.5f;
     float ry = rx;
 
     cx = bbox.x + bbox.w * cx;
@@ -84,11 +84,11 @@ err_t SvgRadialGradientElement::onApplyPattern(SvgRenderContext* context, SvgEle
   }
   else if (a_cx.isAssigned() && a_cy.isAssigned() && a_cx.isAssigned() && a_r.isAssigned())
   {
-    float cx = context->translateCoord(a_cx.getCoord());
-    float cy = context->translateCoord(a_cy.getCoord());
-    float fx = a_fx.isAssigned() ? context->translateCoord(a_fx.getCoord()) : cx;
-    float fy = a_fy.isAssigned() ? context->translateCoord(a_fy.getCoord()) : cy;
-    float r  = context->translateCoord(a_r.getCoord());
+    float cx = a_cx.getCoordComputed();
+    float cy = a_cy.getCoordComputed();
+    float fx = a_fx.isAssigned() ? a_fx.getCoordComputed() : cx;
+    float fy = a_fy.isAssigned() ? a_fy.getCoordComputed() : cy;
+    float r  = a_r.getCoordComputed();
 
     gradient.setCenter(PointF(cx, cy));
     gradient.setFocal(PointF(fx, fy));

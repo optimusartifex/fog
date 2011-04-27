@@ -23,7 +23,7 @@ SvgCoordAttribute::SvgCoordAttribute(XmlElement* element, const ManagedString& n
   XmlAttribute(element, name, offset)
 {
   _coord.value = 0.0;
-  _coord.unit = SVG_UNIT_NONE;
+  _coord.unit = COORD_UNIT_PX;
 }
 
 SvgCoordAttribute::~SvgCoordAttribute()

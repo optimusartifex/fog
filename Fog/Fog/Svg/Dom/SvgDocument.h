@@ -8,6 +8,8 @@
 #define _FOG_SVG_DOM_SVGDOCUMENT_H
 
 // [Dependencies]
+#include <Fog/G2d/Geometry/Size.h>
+#include <Fog/G2d/Tools/Dpi.h>
 #include <Fog/Xml/Dom/XmlDocument.h>
 #include <Fog/Svg/Dom/SvgObject.h>
 #include <Fog/Svg/Global/Constants.h>
@@ -65,7 +67,17 @@ struct FOG_API SvgDocument :
   // [SVG Public]
   // --------------------------------------------------------------------------
 
+  FOG_INLINE float getDpi() const { return _dpi.getDpi(); }
+  err_t setDpi(float dpi);
+
+  SizeF getDocumentSize() const;
   err_t render(Painter* painter, SvgVisitor* visitor = NULL) const;
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  Dpi _dpi;
 
 private:
   FOG_DISABLE_COPY(SvgDocument)

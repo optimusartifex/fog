@@ -244,28 +244,6 @@ struct FOG_API SvgRenderContext
   }
 
   // --------------------------------------------------------------------------
-  // [DPI]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE float getDpi() const
-  {
-    return _dpi;
-  }
-
-  void setDpi(float dpi);
-
-  FOG_INLINE float translateCoord(const SvgCoord& coord) const
-  {
-    return translateCoord(coord.value, coord.unit);
-  }
-
-  FOG_INLINE float translateCoord(float val, uint32_t unit) const
-  {
-    FOG_ASSERT(unit < SVG_UNIT_INVALID);
-    return val * _translateCoordData[unit];
-  }
-
-  // --------------------------------------------------------------------------
   // [Draw - Setup]
   // --------------------------------------------------------------------------
 
@@ -380,9 +358,6 @@ struct FOG_API SvgRenderContext
 
   PointF _textCursor;
   Font _font;
-
-  float _dpi;
-  float _translateCoordData[SVG_UNIT_INVALID];
 
 private:
   FOG_DISABLE_COPY(SvgRenderContext)

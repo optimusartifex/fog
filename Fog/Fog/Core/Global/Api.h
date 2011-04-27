@@ -28,6 +28,9 @@ struct FOG_NO_EXPORT _CoreApi
   // [Math]
   // --------------------------------------------------------------------------
 
+  typedef void (FOG_CDECL* MathF_VFloatFromDouble)(float* dst, const double* src, sysuint_t length);
+  typedef void (FOG_CDECL* MathD_VDoubleFromFloat)(double* dst, const float* src, sysuint_t length);
+
   typedef int (FOG_CDECL* MathF_SolveQuadraticFunction)(float* dst, const float* src);
   typedef int (FOG_CDECL* MathD_SolveQuadraticFunction)(double* dst, const double* src);
 
@@ -42,6 +45,8 @@ struct FOG_NO_EXPORT _CoreApi
 
   struct FOG_NO_EXPORT _FuncsMathF
   {
+    MathF_VFloatFromDouble vFloatFromDouble;
+
     MathF_SolveQuadraticFunction solveQuadraticFunction;
     MathF_SolveQuadraticFunctionAt solveQuadraticFunctionAt;
     MathF_SolveCubicFunction solveCubicFunction;
@@ -50,6 +55,8 @@ struct FOG_NO_EXPORT _CoreApi
 
   struct FOG_NO_EXPORT _FuncsMathD
   {
+    MathD_VDoubleFromFloat vDoubleFromFloat;
+
     MathD_SolveQuadraticFunction solveQuadraticFunction;
     MathD_SolveQuadraticFunctionAt solveQuadraticFunctionAt;
     MathD_SolveCubicFunction solveCubicFunction;

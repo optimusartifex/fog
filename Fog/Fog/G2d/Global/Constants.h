@@ -810,6 +810,47 @@ enum COLOR_CHANNEL
 };
 
 // ============================================================================
+// [Fog::COORD_UNIT]
+// ============================================================================
+
+//! @brief Coordinate units that can be used by the @c Dpi and @c Font classes.
+//!
+//! Coordinate units can be used to create display independent graphics, keeping
+//! the coordinates in device independent units and translating them into 
+//! device pixel by Fog-G2d engine.
+enum COORD_UNIT
+{
+  //! @brief No unit (compatible to @c COORD_UNIT_PX).
+  COORD_UNIT_NONE = 0,
+  //! @brief Pixel.
+  COORD_UNIT_PX,
+
+  //! @brief Point, 1 [pt] == 1/72 [in].
+  COORD_UNIT_PT,
+  //! @brief Pica, 1 [pc] == 12 [pt].
+  COORD_UNIT_PC,
+
+  //! @brief Inch, 1 [in] == 2.54 [cm].
+  COORD_UNIT_IN,
+
+  //! @brief Millimeter.
+  COORD_UNIT_MM,
+  //! @brief Centimeter.
+  COORD_UNIT_CM,
+
+  //! @brief Used for coordinates which depends to object bounding box.
+  COORD_UNIT_PERCENT,
+
+  //! @brief The font-size of the relevant font (see @c Font).
+  COORD_UNIT_EM,
+  //! @brief The x-height of the relevant font (see @c Font).
+  COORD_UNIT_EX,
+
+  //! @brief Count of coord units.
+  COORD_UNIT_COUNT
+};
+
+// ============================================================================
 // [Fog::DITHER_TYPE]
 // ============================================================================
 
@@ -817,28 +858,6 @@ enum DITHER_TYPE
 {
   DITHER_TYPE_NONE = 0,
   DITHER_TYPE_PATTERN = 1
-};
-
-// ============================================================================
-// [Fog::DPI_VALUE_TYPE]
-// ============================================================================
-
-// TODO: Rename to UNIT_VALUE
-
-//! @brief Type of values that can be used together by the @c Dpi class.
-enum DPI_VALUE_TYPE
-{
-  DPI_VALUE_CM = 0,
-  DPI_VALUE_EM,
-  DPI_VALUE_EX,
-  DPI_VALUE_IN,
-  DPI_VALUE_MM,
-  DPI_VALUE_PC,
-  DPI_VALUE_PT,
-  DPI_VALUE_PX,
-
-  //! @brief Count of DPI value units.
-  DPI_VALUE_COUNT
 };
 
 // ============================================================================

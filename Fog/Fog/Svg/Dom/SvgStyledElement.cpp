@@ -10,6 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Tools/Strings.h>
+#include <Fog/Svg/Dom/SvgDocument.h>
 #include <Fog/Svg/Dom/SvgStyledElement_p.h>
 #include <Fog/Svg/Visit/SvgRender.h>
 #include <Fog/Xml/Dom/XmlDocument.h>
@@ -147,6 +148,8 @@ err_t SvgStyledElement::onRender(SvgRenderContext* context) const
   // Before render: Apply transformations and setup styles defined by this element.
   if (styleMask != 0 || isTransformed)
   {
+    SvgDocument* doc = reinterpret_cast<SvgDocument*>(getDocument());
+
     if (isTransformed)
     {
       state.saveTransform();
@@ -273,7 +276,8 @@ err_t SvgStyledElement::onRender(SvgRenderContext* context) const
 
       if (styleMask & (1 << SVG_STYLE_STROKE_MITER_LIMIT))
       {
-        float miterLimit = context->translateCoord(a_style._strokeMiterLimit);
+        float miterLimit = doc->_dpi.toDeviceSpace(
+          a_style._strokeMiterLimit.value, a_style._strokeMiterLimit.unit);
         context->setMiterLimit(miterLimit);
       }
 
@@ -284,7 +288,8 @@ err_t SvgStyledElement::onRender(SvgRenderContext* context) const
 
       if (styleMask & (1 << SVG_STYLE_STROKE_WIDTH))
       {
-        float lineWidth = context->translateCoord(a_style._strokeWidth);
+        float lineWidth = doc->_dpi.toDeviceSpace(
+          a_style._strokeWidth.value, a_style._strokeWidth.unit);
         context->setLineWidth(lineWidth);
       }
     }

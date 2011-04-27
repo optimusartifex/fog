@@ -169,6 +169,7 @@ enum STR_ID
   STR_SVG_ATTRIBUTE_height,
   STR_SVG_ATTRIBUTE_lengthAdjust,
   STR_SVG_ATTRIBUTE_offset,
+  STR_SVG_ATTRIBUTE_patternTransform,
   STR_SVG_ATTRIBUTE_patternUnits,
   STR_SVG_ATTRIBUTE_points,
   STR_SVG_ATTRIBUTE_preserveAspectRatio,

@@ -85,8 +85,8 @@ err_t SvgUseElement::onRenderShape(SvgRenderContext* context) const
     float translateX = 0.0f;
     float translateY = 0.0f;
 
-    if (a_x.isAssigned()) translateX = a_x.getCoordValue();
-    if (a_y.isAssigned()) translateY = a_y.getCoordValue();
+    if (a_x.isAssigned()) translateX = a_x.getCoordComputed();
+    if (a_y.isAssigned()) translateY = a_y.getCoordComputed();
 
     if (translateX != 0.0f || translateY != 0.0f)
       context->getPainter()->translate(PointF(translateX, translateY));

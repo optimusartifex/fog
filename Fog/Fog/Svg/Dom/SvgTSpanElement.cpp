@@ -66,8 +66,8 @@ err_t SvgTSpanElement::onRenderShape(SvgRenderContext* context) const
   float x = context->_textCursor.x;
   float y = context->_textCursor.y;
 
-  if (a_dx.isAssigned()) x += a_dx.getCoordValue();
-  if (a_dy.isAssigned()) y += a_dy.getCoordValue();
+  if (a_dx.isAssigned()) x += a_dx.getCoordComputed();
+  if (a_dy.isAssigned()) y += a_dy.getCoordComputed();
 
   String text = getTextContent();
   text.simplify();

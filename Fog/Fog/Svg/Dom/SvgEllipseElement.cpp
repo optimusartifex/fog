@@ -47,10 +47,10 @@ err_t SvgEllipseElement::onRenderShape(SvgRenderContext* context) const
 {
   if (a_rx.isAssigned() && a_ry.isAssigned())
   {
-    float cx = a_cx.isAssigned() ? a_cx.getCoordValue() : 0.0f;
-    float cy = a_cy.isAssigned() ? a_cy.getCoordValue() : 0.0f;
-    float rx = Math::abs(a_rx.getCoordValue());
-    float ry = Math::abs(a_ry.getCoordValue());
+    float cx = a_cx.isAssigned() ? a_cx.getCoordComputed() : 0.0f;
+    float cy = a_cy.isAssigned() ? a_cy.getCoordComputed() : 0.0f;
+    float rx = Math::abs(a_rx.getCoordComputed());
+    float ry = Math::abs(a_ry.getCoordComputed());
 
     if (rx <= 0.0f || ry <= 0.0f) return ERR_OK;
 
@@ -67,11 +67,11 @@ err_t SvgEllipseElement::onCalcBoundingBox(RectF* box) const
 {
   if (a_rx.isAssigned() && a_ry.isAssigned())
   {
-    float cx = a_cx.isAssigned() ? a_cx.getCoordValue() : 0.0f;
-    float cy = a_cy.isAssigned() ? a_cy.getCoordValue() : 0.0f;
+    float cx = a_cx.isAssigned() ? a_cx.getCoordComputed() : 0.0f;
+    float cy = a_cy.isAssigned() ? a_cy.getCoordComputed() : 0.0f;
 
-    float rx = a_rx.getCoordValue();
-    float ry = a_ry.getCoordValue();
+    float rx = a_rx.getCoordComputed();
+    float ry = a_ry.getCoordComputed();
 
     if (rx <= 0.0f || ry <= 0.0f) goto _Fail;
 

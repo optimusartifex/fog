@@ -319,6 +319,7 @@ struct _G2dApi
   typedef void (FOG_CDECL *PathD_Reset)(PathD& self);
 
   typedef err_t (FOG_CDECL *PathF_SetPathF)(PathF& self, const PathF& other);
+  typedef err_t (FOG_CDECL *PathD_SetPathF)(PathD& self, const PathF& other);
   typedef err_t (FOG_CDECL *PathD_SetPathD)(PathD& self, const PathD& other);
 
   typedef err_t (FOG_CDECL *PathF_SetDeepF)(PathF& self, const PathF& other);
@@ -409,14 +410,15 @@ struct _G2dApi
   typedef err_t (FOG_CDECL *PathF_Shape)(PathF& self, uint32_t shapeType, const void* shapeData, uint32_t direction, const TransformF* tr);
   typedef err_t (FOG_CDECL *PathD_Shape)(PathD& self, uint32_t shapeType, const void* shapeData, uint32_t direction, const TransformD* tr);
 
-  typedef err_t (FOG_CDECL *PathF_AppendPath)(PathF& self, const PathF& path, const Range* range);
-  typedef err_t (FOG_CDECL *PathD_AppendPath)(PathD& self, const PathD& path, const Range* range);
+  typedef err_t (FOG_CDECL *PathF_AppendPathF)(PathF& self, const PathF& path, const Range* range);
+  typedef err_t (FOG_CDECL *PathD_AppendPathF)(PathD& self, const PathF& path, const Range* range);
+  typedef err_t (FOG_CDECL *PathD_AppendPathD)(PathD& self, const PathD& path, const Range* range);
 
-  typedef err_t (FOG_CDECL *PathF_AppendTranslatedPath)(PathF& self, const PathF& path, const PointF& pt, const Range* range);
-  typedef err_t (FOG_CDECL *PathD_AppendTranslatedPath)(PathD& self, const PathD& path, const PointD& pt, const Range* range);
+  typedef err_t (FOG_CDECL *PathF_AppendTranslatedPathF)(PathF& self, const PathF& path, const PointF& pt, const Range* range);
+  typedef err_t (FOG_CDECL *PathD_AppendTranslatedPathD)(PathD& self, const PathD& path, const PointD& pt, const Range* range);
 
-  typedef err_t (FOG_CDECL *PathF_AppendTransformedPath)(PathF& self, const PathF& path, const TransformF& tr, const Range* range);
-  typedef err_t (FOG_CDECL *PathD_AppendTransformedPath)(PathD& self, const PathD& path, const TransformD& tr, const Range* range);
+  typedef err_t (FOG_CDECL *PathF_AppendTransformedPathF)(PathF& self, const PathF& path, const TransformF& tr, const Range* range);
+  typedef err_t (FOG_CDECL *PathD_AppendTransformedPathD)(PathD& self, const PathD& path, const TransformD& tr, const Range* range);
 
   typedef bool (FOG_CDECL *PathF_HitTest)(const PathF& self, const PointF& pt, uint32_t fillRule);
   typedef bool (FOG_CDECL *PathD_HitTest)(const PathD& self, const PointD& pt, uint32_t fillRule);
@@ -498,9 +500,9 @@ struct _G2dApi
     PathF_PolygonI polygonI;
     PathF_PolygonF polygonF;
     PathF_Shape shape;
-    PathF_AppendPath appendPath;
-    PathF_AppendTranslatedPath appendTranslatedPath;
-    PathF_AppendTransformedPath appendTransformedPath;
+    PathF_AppendPathF appendPathF;
+    PathF_AppendTranslatedPathF appendTranslatedPathF;
+    PathF_AppendTransformedPathF appendTransformedPathF;
     PathF_HitTest hitTest;
     PathF_Translate translate;
     PathF_Transform transform;
@@ -526,6 +528,7 @@ struct _G2dApi
     PathD_Clear clear;
     PathD_Reset reset;
     PathD_SetPathD setPathD;
+    PathD_SetPathF setPathF;
     PathD_SetDeepD setDeepD;
     PathD_GetSubpathRange getSubpathRange;
     PathD_MoveTo moveTo;
@@ -569,9 +572,10 @@ struct _G2dApi
     PathD_PolygonI polygonI;
     PathD_PolygonD polygonD;
     PathD_Shape shape;
-    PathD_AppendPath appendPath;
-    PathD_AppendTranslatedPath appendTranslatedPath;
-    PathD_AppendTransformedPath appendTransformedPath;
+    PathD_AppendPathF appendPathF;
+    PathD_AppendPathD appendPathD;
+    PathD_AppendTranslatedPathD appendTranslatedPathD;
+    PathD_AppendTransformedPathD appendTransformedPathD;
     PathD_HitTest hitTest;
     PathD_Translate translate;
     PathD_Transform transform;

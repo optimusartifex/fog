@@ -49,8 +49,8 @@ struct FOG_NO_EXPORT SvgTransformAttribute : public XmlAttribute
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
-protected:
 
+protected:
   TransformF _transform;
   bool _isValid;
 

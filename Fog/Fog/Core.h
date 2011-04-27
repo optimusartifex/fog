@@ -345,6 +345,7 @@ struct Implicit
 #include <Fog/Core/Math/FloatBits.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
+#include <Fog/Core/Math/MathVec.h>
 #include <Fog/Core/Math/Solve.h>
 #include <Fog/Core/Memory/BSwap.h>
 #include <Fog/Core/Memory/Memory.h>

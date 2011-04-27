@@ -45,10 +45,10 @@ XmlAttribute* SvgLineElement::_createAttribute(const ManagedString& name) const
 
 err_t SvgLineElement::onRenderShape(SvgRenderContext* context) const
 {
-  float x1 = a_x1.isAssigned() ? a_x1.getCoordValue() : 0.0f;
-  float y1 = a_y1.isAssigned() ? a_y1.getCoordValue() : 0.0f;
-  float x2 = a_x2.isAssigned() ? a_x2.getCoordValue() : 0.0f;
-  float y2 = a_y2.isAssigned() ? a_y2.getCoordValue() : 0.0f;
+  float x1 = a_x1.isAssigned() ? a_x1.getCoordComputed() : 0.0f;
+  float y1 = a_y1.isAssigned() ? a_y1.getCoordComputed() : 0.0f;
+  float x2 = a_x2.isAssigned() ? a_x2.getCoordComputed() : 0.0f;
+  float y2 = a_y2.isAssigned() ? a_y2.getCoordComputed() : 0.0f;
 
   context->drawLine(LineF(PointF(x1, y1), PointF(x2, y2)));
   return ERR_OK;
@@ -56,10 +56,10 @@ err_t SvgLineElement::onRenderShape(SvgRenderContext* context) const
 
 err_t SvgLineElement::onCalcBoundingBox(RectF* box) const
 {
-  float x1 = a_x1.isAssigned() ? a_x1.getCoordValue() : 0.0f;
-  float y1 = a_y1.isAssigned() ? a_y1.getCoordValue() : 0.0f;
-  float x2 = a_x2.isAssigned() ? a_x2.getCoordValue() : 0.0f;
-  float y2 = a_y2.isAssigned() ? a_y2.getCoordValue() : 0.0f;
+  float x1 = a_x1.isAssigned() ? a_x1.getCoordComputed() : 0.0f;
+  float y1 = a_y1.isAssigned() ? a_y1.getCoordComputed() : 0.0f;
+  float x2 = a_x2.isAssigned() ? a_x2.getCoordComputed() : 0.0f;
+  float y2 = a_y2.isAssigned() ? a_y2.getCoordComputed() : 0.0f;
 
   float x = (x1 < x2) ? x1 : x2;
   float y = (y1 < y2) ? y1 : y2;

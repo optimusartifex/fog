@@ -20,7 +20,7 @@ namespace Fog {
 // [Fog::Dpi]
 // ============================================================================
 
-//! @brief DPI conversion.
+//! @brief DPI value and converter.
 struct FOG_API Dpi
 {
   // --------------------------------------------------------------------------
@@ -29,28 +29,60 @@ struct FOG_API Dpi
 
   Dpi();
   Dpi(const Dpi& other);
+  explicit Dpi(float dpi);
   ~Dpi();
 
   // --------------------------------------------------------------------------
-  // [Methods]
+  // [Accessors]
   // --------------------------------------------------------------------------
 
   FOG_INLINE float getDpi() const
   {
-    return _data[DPI_VALUE_IN];
+    return _data[COORD_UNIT_IN];
   }
 
-  FOG_INLINE float getValue(uint32_t valueType)
+  FOG_INLINE float getValue(uint32_t coordUnit)
   {
-    FOG_ASSERT(valueType < DPI_VALUE_COUNT);
-    return _data[valueType];
+    FOG_ASSERT(valueType < COORD_UNIT_COUNT);
+    return _data[coordUnit];
   }
 
+  err_t setDpi(float dpi);
   err_t setDpi(float dpi, float em, float ex);
+
+  FOG_INLINE void setEmEx(float em, float ex)
+  {
+    _data[COORD_UNIT_EM] = em;
+    _data[COORD_UNIT_EX] = ex;
+  }
+
+  FOG_INLINE void resetEmEx()
+  {
+    _data[COORD_UNIT_EM] = _data[COORD_UNIT_PC];
+    _data[COORD_UNIT_EX] = _data[COORD_UNIT_PC];
+  }
+
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
   void reset();
 
-  float toDeviceSpace(float value, uint32_t valueType) const;
-  float fromDeviceSpace(float value, uint32_t valueType) const;
+  // --------------------------------------------------------------------------
+  // [Conversion]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE float toDeviceSpace(float value, uint32_t coordUnit) const
+  {
+    FOG_ASSERT(coordUnit < COORD_UNIT_COUNT);
+    return value * _data[coordUnit];
+  }
+
+  FOG_INLINE float fromDeviceSpace(float value, uint32_t coordUnit) const
+  {
+    FOG_ASSERT(coordUnit < COORD_UNIT_COUNT);
+    return value / _data[coordUnit];
+  }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
@@ -63,7 +95,7 @@ struct FOG_API Dpi
   // --------------------------------------------------------------------------
 
   //! @brief DPI translator data.
-  float _data[DPI_VALUE_COUNT];
+  float _data[COORD_UNIT_COUNT];
 };
 
 //! @}

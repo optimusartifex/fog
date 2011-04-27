@@ -10,6 +10,7 @@
 // [Dependencies]
 #include <Fog/Xml/Dom/XmlAttribute.h>
 #include <Fog/Xml/Dom/XmlElement.h>
+#include <Fog/Svg/Dom/SvgDocument.h>
 #include <Fog/Svg/Global/Constants.h>
 #include <Fog/Svg/Tools/SvgCoord.h>
 
@@ -46,6 +47,12 @@ struct FOG_NO_EXPORT SvgCoordAttribute : public XmlAttribute
   FOG_INLINE const SvgCoord& getCoord() const { return _coord; }
   FOG_INLINE float getCoordValue() const { return _coord.value; };
   FOG_INLINE uint32_t getCoordUnit() const { return _coord.unit; };
+
+  FOG_INLINE float getCoordComputed() const
+  {
+    SvgDocument* doc = reinterpret_cast<SvgDocument*>(_element->getDocument());
+    return doc->_dpi.toDeviceSpace(_coord.value, _coord.unit);
+  }
 
   // --------------------------------------------------------------------------
   // [Members]

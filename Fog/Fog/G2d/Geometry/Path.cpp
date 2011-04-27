@@ -13,6 +13,7 @@
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
+#include <Fog/Core/Math/MathVec.h>
 #include <Fog/Core/Math/Solve.h>
 #include <Fog/Core/Memory/Memory.h>
 #include <Fog/Core/Global/Assert.h>
@@ -55,12 +56,7 @@ FOG_INLINE PathDataD* _G2d_PathT_getDNull<double>() { return &_G2d_PathD_dnull; 
 template<typename Number>
 static FOG_INLINE sysuint_t _G2d_PathT_getDataSize(sysuint_t capacity)
 {
-  sysuint_t s = sizeof(typename PathDataT<Number>::T);
-
-  s += capacity * sizeof(uint8_t);
-  s += capacity * sizeof(typename PointT<Number>::T);
-
-  return s;
+  return sizeof(typename PathDataT<Number>::T) + capacity * (sizeof(typename PointT<Number>::T) + 1);
 }
 
 template<typename Number>
@@ -68,7 +64,7 @@ static FOG_INLINE void _G2d_PathT_updateDataPointers(
   typename PathDataT<Number>::T* d, sysuint_t capacity)
 {
   d->vertices = reinterpret_cast<typename PointT<Number>::T*>(
-    d->commands + (((capacity + 15) & ~15) * sizeof(uint8_t))
+    d->commands + ((capacity + 15) & ~15)
   );
 }
 
@@ -198,7 +194,7 @@ static typename PathDataT<Number>::T* _G2d_PathT_drealloc(typename PathDataT<Num
   newd->boundingBox = d->boundingBox;
 
   _G2d_PathT_updateDataPointers<Number>(newd, capacity);
-  Memory::copy(newd->commands, d->commands, length * sizeof(uint8_t));
+  Memory::copy(newd->commands, d->commands, length);
   Memory::copy(newd->vertices, d->vertices, length * sizeof(typename PointT<Number>::T));
 
   d->deref();
@@ -219,7 +215,7 @@ static typename PathDataT<Number>::T* _G2d_PathT_dcopy(const typename PathDataT<
   newd->boundingBoxDirty = d->boundingBoxDirty;
   newd->boundingBox = d->boundingBox;
 
-  Memory::copy(newd->commands, d->commands, length * sizeof(uint8_t));
+  Memory::copy(newd->commands, d->commands, length);
   Memory::copy(newd->vertices, d->vertices, length * sizeof(typename PointT<Number>::T));
 
   return newd;
@@ -279,7 +275,7 @@ static err_t _G2d_PathT_reserve(typename PathT<Number>::T& self, sysuint_t capac
   newd->boundingBoxDirty = self._d->boundingBoxDirty;
   newd->boundingBox = self._d->boundingBox;
 
-  Memory::copy(newd->commands, self._d->commands, length * sizeof(uint8_t));
+  Memory::copy(newd->commands, self._d->commands, length);
   Memory::copy(newd->vertices, self._d->vertices, length * sizeof(typename PointT<Number>::T));
 
   atomicPtrXchg(&self._d, newd)->deref();
@@ -331,7 +327,7 @@ static sysuint_t _G2d_PathT_add(typename PathT<Number>::T& self, sysuint_t count
     newd->boundingBoxDirty = self._d->boundingBoxDirty;
     newd->boundingBox = self._d->boundingBox;
 
-    Memory::copy(newd->commands, self._d->commands, length * sizeof(uint8_t));
+    Memory::copy(newd->commands, self._d->commands, length);
     Memory::copy(newd->vertices, self._d->vertices, length * sizeof(typename PointT<Number>::T));
 
     atomicPtrXchg(&self._d, newd)->deref();
@@ -534,29 +530,40 @@ static err_t _G2d_PathT_setPathT(typename PathT<Number>::T& self, const typename
   return ERR_OK;
 }
 
-template<typename Number>
-static err_t _G2d_PathT_setDeepT(typename PathT<Number>::T& self, const typename PathT<Number>::T& other)
+template<typename Number, typename Param>
+static err_t _G2d_PathT_setDeepT(typename PathT<Number>::T& self, const typename PathT<Param>::T& other)
 {
   typename PathDataT<Number>::T* self_d = self._d;
-  typename PathDataT<Number>::T* other_d = other._d;
+  typename PathDataT<Param>::T* other_d = other._d;
 
-  if (self_d == other_d) return ERR_OK;
-  if (other_d->length == 0) { self.clear(); return ERR_OK; }
+  if (sizeof(Number) == sizeof(Param) && (void*)self_d == (void*)other_d)
+    return ERR_OK;
+
+  if (other_d->length == 0)
+  {
+    self.clear();
+    return ERR_OK;
+  }
 
   err_t err = self.reserve(other_d->length);
-  if (FOG_IS_ERROR(err)) { self.clear(); return ERR_RT_OUT_OF_MEMORY; }
+  if (FOG_IS_ERROR(err))
+  {
+    self.clear();
+    return ERR_RT_OUT_OF_MEMORY;
+  }
 
   self_d = self._d;
   sysuint_t length = other_d->length;
 
   self_d->length = length;
-
   self_d->flat = other_d->flat;
   self_d->boundingBoxDirty = other_d->boundingBoxDirty;
   self_d->boundingBox = other_d->boundingBox;
 
-  Memory::copy(self_d->commands, other_d->commands, length * sizeof(uint8_t));
-  Memory::copy(self_d->vertices, other_d->vertices, length * sizeof(typename PointT<Number>::T));
+  Memory::copy(self_d->commands, other_d->commands, length);
+  Math::vConvertFloat<Number, Param>(
+    reinterpret_cast<Number*>(self_d->vertices), 
+    reinterpret_cast<const Param*>(other_d->vertices), length * 2);
 
   return ERR_OK;
 }
@@ -2100,16 +2107,10 @@ static err_t _G2d_PathT_appendPathT(
   sysuint_t pos = self._add(srcLen);
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
-  Memory::copy(self._d->commands + pos, path._d->commands + srcPos, srcLen * sizeof(uint8_t));
-
-  if (sizeof(Number) == sizeof(Param))
-  {
-    Memory::copy(self._d->vertices + pos, path._d->vertices + srcPos, srcLen * sizeof(typename PointT<Number>::T));
-  }
-  else
-  {
-    for (sysuint_t i = 0; i < srcLen; i++) self._d->vertices[pos + i] = path._d->vertices[srcPos + i];
-  }
+  Memory::copy(self._d->commands + pos, path._d->commands + srcPos, srcLen);
+  Math::vConvertFloat<Number, Param>(
+    reinterpret_cast<Number*>(self._d->vertices + pos), 
+    reinterpret_cast<const Param*>(path._d->vertices + srcPos), srcLen * 2);
 
   if (range == NULL && !(self._d->boundingBoxDirty | path._d->boundingBoxDirty))
   {
@@ -2160,7 +2161,7 @@ static err_t _G2d_PathT_appendTransformedPathT(
   sysuint_t pos = self._add(srcLen);
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
-  Memory::copy(self._d->commands + pos, path._d->commands + srcPos, srcLen * sizeof(uint8_t));
+  Memory::copy(self._d->commands + pos, path._d->commands + srcPos, srcLen);
   tr.mapPoints(self._d->vertices + pos, path._d->vertices + srcPos, srcLen);
 
   if (range == NULL && tr._type <= TRANSFORM_TYPE_SCALING && !(self._d->boundingBoxDirty | path._d->boundingBoxDirty))
@@ -2331,77 +2332,74 @@ _DoLine:
             goto _DoLine;
           }
 
-          if (!degenerated)
+          // Subdivide curve to curve-spline separated at Y-extrama.
+          typename PointT<Number>::T left[3];
+          typename PointT<Number>::T rght[3];
+
+          Number tExtrema[2];
+          Number tCut = Number(0.0);
+
+          tExtrema[0] = (p[0].y - p[1].y) / (p[0].y - Number(2.0) * p[1].y + p[2].y);
+
+          int tIndex;
+          int tLength = tExtrema[0] > Number(0.0) && tExtrema[0] < Number(1.0);
+
+          tExtrema[tLength++] = Number(1.0);
+
+          rght[0] = p[0];
+          rght[1] = p[1];
+          rght[2] = p[2];
+
+          for (tIndex = 0; tIndex < tLength; tIndex++)
           {
-            // Subdivide curve to curve-spline separated at Y-extrama.
-            typename PointT<Number>::T left[3];
-            typename PointT<Number>::T rght[3];
+            Number tVal = tExtrema[tIndex];
+            if (tVal == tCut) continue;
 
-            Number tExtrema[2];
-            Number tCut = Number(0.0);
-
-            tExtrema[0] = (p[0].y - p[1].y) / (p[0].y - Number(2.0) * p[1].y + p[2].y);
-
-            int tIndex;
-            int tLength = tExtrema[0] > Number(0.0) && tExtrema[0] < Number(1.0);
-
-            tExtrema[tLength++] = Number(1.0);
-
-            rght[0] = p[0];
-            rght[1] = p[1];
-            rght[2] = p[2];
-
-            for (tIndex = 0; tIndex < tLength; tIndex++)
+            if (tVal == Number(1.0))
             {
-              Number tVal = tExtrema[tIndex];
-              if (tVal == tCut) continue;
-
-              if (tVal == Number(1.0))
-              {
-                left[0] = rght[0];
-                left[1] = rght[1];
-                left[2] = rght[2];
-              }
-              else
-              {
-                QuadCurveT<Number>::T::splitAt(rght, left, rght, tCut == Number(0.0) ? tVal : (tVal - tCut) / (Number(1.0) - tCut));
-              }
-
-              minY = Math::min(left[0].y, left[2].y);
-              maxY = Math::max(left[0].y, left[2].y);
-
-              if (py >= minY && py < maxY)
-              {
-                Number ax, ay, bx, by, cx, cy;
-                _FOG_QUAD_EXTRACT_PARAMETERS(Number, ax, ay, bx, by, cx, cy, left);
-
-                Number func[3];
-                func[0] = ay;
-                func[1] = by;
-                func[2] = cy - py;
-
-                int direction = 0;
-                if (left[0].y < left[2].y)
-                  direction = 1;
-                else if (left[0].y > left[2].y)
-                  direction = -1;
-
-                // It should be only possible to have zero/one solution.
-                Number ti[2];
-                Number ix;
-
-                if (Math::solveQuadraticFunctionAt(ti, func, Number(0.0), Number(1.0)) >= 1)
-                  ix = ax * Math::pow2(ti[0]) + bx * ti[0] + cx;
-                else if (py - minY < maxY - py)
-                  ix = p[0].x;
-                else
-                  ix = p[2].x;
-                
-                if (px >= ix) windingNumber += direction;
-              }
-
-              tCut = tVal;
+              left[0] = rght[0];
+              left[1] = rght[1];
+              left[2] = rght[2];
             }
+            else
+            {
+              QuadCurveT<Number>::T::splitAt(rght, left, rght, tCut == Number(0.0) ? tVal : (tVal - tCut) / (Number(1.0) - tCut));
+            }
+
+            minY = Math::min(left[0].y, left[2].y);
+            maxY = Math::max(left[0].y, left[2].y);
+
+            if (py >= minY && py < maxY)
+            {
+              Number ax, ay, bx, by, cx, cy;
+              _FOG_QUAD_EXTRACT_PARAMETERS(Number, ax, ay, bx, by, cx, cy, left);
+
+              Number func[3];
+              func[0] = ay;
+              func[1] = by;
+              func[2] = cy - py;
+
+              int direction = 0;
+              if (left[0].y < left[2].y)
+                direction = 1;
+              else if (left[0].y > left[2].y)
+                direction = -1;
+
+              // It should be only possible to have zero/one solution.
+              Number ti[2];
+              Number ix;
+
+              if (Math::solveQuadraticFunctionAt(ti, func, Number(0.0), Number(1.0)) >= 1)
+                ix = ax * Math::pow2(ti[0]) + bx * ti[0] + cx;
+              else if (py - minY < maxY - py)
+                ix = p[0].x;
+              else
+                ix = p[2].x;
+                
+              if (px >= ix) windingNumber += direction;
+            }
+
+            tCut = tVal;
           }
         }
         break;
@@ -2441,83 +2439,80 @@ _DoLine:
             goto _DoLine;
           }
 
-          if (!degenerated)
+          // Subdivide curve to curve-spline separated at Y-extrama.
+          typename PointT<Number>::T left[4];
+          typename PointT<Number>::T rght[4];
+
+          Number func[4];
+          func[0] = Number(3.0) * (-p[0].y + Number(3.0) * (p[1].y - p[2].y) + p[3].y);
+          func[1] = Number(6.0) * ( p[0].y - Number(2.0) *  p[1].y + p[2].y          );
+          func[2] = Number(3.0) * (-p[0].y +                p[1].y                   );
+
+          Number tExtrema[3];
+          Number tCut = Number(0.0);
+
+          int tIndex;
+          int tLength;
+
+          tLength = Math::solveQuadraticFunctionAt(tExtrema, func, 0.0, 1.0);
+          tExtrema[tLength++] = Number(1.0);
+
+          rght[0] = p[0];
+          rght[1] = p[1];
+          rght[2] = p[2];
+          rght[3] = p[3];
+
+          for (tIndex = 0; tIndex < tLength; tIndex++)
           {
-            // Subdivide curve to curve-spline separated at Y-extrama.
-            typename PointT<Number>::T left[4];
-            typename PointT<Number>::T rght[4];
+            Number tVal = tExtrema[tIndex];
+            if (tVal == tCut) continue;
 
-            Number func[4];
-            func[0] = Number(3.0) * (-p[0].y + Number(3.0) * (p[1].y - p[2].y) + p[3].y);
-            func[1] = Number(6.0) * ( p[0].y - Number(2.0) *  p[1].y + p[2].y          );
-            func[2] = Number(3.0) * (-p[0].y +                p[1].y                   );
-
-            Number tExtrema[3];
-            Number tCut = Number(0.0);
-
-            int tIndex;
-            int tLength;
-
-            tLength = Math::solveQuadraticFunctionAt(tExtrema, func, 0.0, 1.0);
-            tExtrema[tLength++] = Number(1.0);
-
-            rght[0] = p[0];
-            rght[1] = p[1];
-            rght[2] = p[2];
-            rght[3] = p[3];
-
-            for (tIndex = 0; tIndex < tLength; tIndex++)
+            if (tVal == Number(1.0))
             {
-              Number tVal = tExtrema[tIndex];
-              if (tVal == tCut) continue;
-
-              if (tVal == Number(1.0))
-              {
-                left[0] = rght[0];
-                left[1] = rght[1];
-                left[2] = rght[2];
-                left[3] = rght[3];
-              }
-              else
-              {
-                CubicCurveT<Number>::T::splitAt(rght, left, rght, tCut == Number(0.0) ? tVal : (tVal - tCut) / (Number(1.0) - tCut));
-              }
-
-              minY = Math::min(left[0].y, left[3].y);
-              maxY = Math::max(left[0].y, left[3].y);
-
-              if (py >= minY && py < maxY)
-              {
-                Number ax, ay, bx, by, cx, cy, dx, dy;
-                _FOG_CUBIC_EXTRACT_PARAMETERS(Number, ax, ay, bx, by, cx, cy, dx, dy, left);
-
-                func[0] = ay;
-                func[1] = by;
-                func[2] = cy;
-                func[3] = dy - py;
-
-                int direction = 0;
-                if (left[0].y < left[3].y)
-                  direction = 1;
-                else if (left[0].y > left[3].y)
-                  direction = -1;
-
-                // It should be only possible to have zero/one solution.
-                Number ti[3];
-                Number ix;
-
-                if (Math::solveCubicFunctionAt(ti, func, Number(0.0), Number(1.0)) >= 1)
-                  ix = ax * Math::pow3(ti[0]) + bx * Math::pow2(ti[0]) + cx * ti[0] + dx;
-                else if (py - minY < maxY - py)
-                  ix = p[0].x;
-                else
-                  ix = p[3].x;
-                
-                if (px >= ix) windingNumber += direction;
-              }
-
-              tCut = tVal;
+              left[0] = rght[0];
+              left[1] = rght[1];
+              left[2] = rght[2];
+              left[3] = rght[3];
             }
+            else
+            {
+              CubicCurveT<Number>::T::splitAt(rght, left, rght, tCut == Number(0.0) ? tVal : (tVal - tCut) / (Number(1.0) - tCut));
+            }
+
+            minY = Math::min(left[0].y, left[3].y);
+            maxY = Math::max(left[0].y, left[3].y);
+
+            if (py >= minY && py < maxY)
+            {
+              Number ax, ay, bx, by, cx, cy, dx, dy;
+              _FOG_CUBIC_EXTRACT_PARAMETERS(Number, ax, ay, bx, by, cx, cy, dx, dy, left);
+
+              func[0] = ay;
+              func[1] = by;
+              func[2] = cy;
+              func[3] = dy - py;
+
+              int direction = 0;
+              if (left[0].y < left[3].y)
+                direction = 1;
+              else if (left[0].y > left[3].y)
+                direction = -1;
+
+              // It should be only possible to have zero/one solution.
+              Number ti[3];
+              Number ix;
+
+              if (Math::solveCubicFunctionAt(ti, func, Number(0.0), Number(1.0)) >= 1)
+                ix = ax * Math::pow3(ti[0]) + bx * Math::pow2(ti[0]) + cx * ti[0] + dx;
+              else if (py - minY < maxY - py)
+                ix = p[0].x;
+              else
+                ix = p[3].x;
+                
+              if (px >= ix) windingNumber += direction;
+            }
+
+            tCut = tVal;
           }
         }
         break;
@@ -2855,7 +2850,7 @@ static err_t _G2d_PathT_doFlatten(
         sysuint_t pos = dst._add(i);
         if (pos == INVALID_INDEX) goto _OutOfMemory;
 
-        memcpy(dst._d->commands + pos, commands, i * sizeof(uint8_t));
+        memcpy(dst._d->commands + pos, commands, i);
         memcpy(dst._d->vertices + pos, vertices, i * sizeof(typename PointT<Number>::T ));
       }
 
@@ -2925,7 +2920,7 @@ static err_t _G2d_PathT_doFlatten(
         sysuint_t pos = dst._add(i);
         if (pos == INVALID_INDEX) goto _OutOfMemory;
 
-        memcpy(dst._d->commands + pos, commands, i * sizeof(uint8_t));
+        memcpy(dst._d->commands + pos, commands, i);
         tr->_mapPoints(dst._d->vertices + pos, vertices, i);
       }
 
@@ -3052,7 +3047,7 @@ static bool _G2d_PathT_eq(const typename PathT<Number>::T& _a, const typename Pa
   sysuint_t length = a->length;
   if (length != b->length) return false;
 
-  return memcmp(a->commands, b->commands, length * sizeof(uint8_t)) == 0 &&
+  return memcmp(a->commands, b->commands, length) == 0 &&
          memcmp(a->vertices, b->vertices, length * sizeof(typename PointT<Number>::T )) == 0 ;
 }
 
@@ -3074,7 +3069,7 @@ FOG_NO_EXPORT void _g2d_path_init(void)
   _g2d.pathf.clear = _G2d_PathT_clear<float>;
   _g2d.pathf.reset = _G2d_PathT_reset<float>;
   _g2d.pathf.setPathF = _G2d_PathT_setPathT<float>;
-  _g2d.pathf.setDeepF = _G2d_PathT_setDeepT<float>;
+  _g2d.pathf.setDeepF = _G2d_PathT_setDeepT<float, float>;
   _g2d.pathf.getSubpathRange = _G2d_PathT_getSubpathRange<float>;
   _g2d.pathf.moveTo = _G2d_PathT_moveTo<float>;
   _g2d.pathf.moveToRel = _G2d_PathT_moveToRel<float>;
@@ -3113,9 +3108,9 @@ FOG_NO_EXPORT void _g2d_path_init(void)
   _g2d.pathf.polygonI = _G2d_PathT_polygonI<float>;
   _g2d.pathf.polygonF = _G2d_PathT_polygonT<float>;
   _g2d.pathf.shape = _G2d_PathT_shape<float>;
-  _g2d.pathf.appendPath = _G2d_PathT_appendPathT<float, float>;
-  _g2d.pathf.appendTranslatedPath = _G2d_PathT_appendTranslatedPathT<float>;
-  _g2d.pathf.appendTransformedPath = _G2d_PathT_appendTransformedPathT<float>;
+  _g2d.pathf.appendPathF = _G2d_PathT_appendPathT<float, float>;
+  _g2d.pathf.appendTranslatedPathF = _G2d_PathT_appendTranslatedPathT<float>;
+  _g2d.pathf.appendTransformedPathF = _G2d_PathT_appendTransformedPathT<float>;
   _g2d.pathf.hitTest = _G2d_PathT_hitTest<float>;
   _g2d.pathf.translate = _G2d_PathT_translate<float>;
   _g2d.pathf.transform = _G2d_PathT_transform<float>;
@@ -3138,7 +3133,8 @@ FOG_NO_EXPORT void _g2d_path_init(void)
   _g2d.pathd.clear = _G2d_PathT_clear<double>;
   _g2d.pathd.reset = _G2d_PathT_reset<double>;
   _g2d.pathd.setPathD = _G2d_PathT_setPathT<double>;
-  _g2d.pathd.setDeepD = _G2d_PathT_setDeepT<double>;
+  _g2d.pathd.setPathF = _G2d_PathT_setDeepT<double, float>;
+  _g2d.pathd.setDeepD = _G2d_PathT_setDeepT<double, double>;
   _g2d.pathd.getSubpathRange = _G2d_PathT_getSubpathRange<double>;
   _g2d.pathd.moveTo = _G2d_PathT_moveTo<double>;
   _g2d.pathd.moveToRel = _G2d_PathT_moveToRel<double>;
@@ -3181,9 +3177,10 @@ FOG_NO_EXPORT void _g2d_path_init(void)
   _g2d.pathd.polygonI = _G2d_PathT_polygonI<double>;
   _g2d.pathd.polygonD = _G2d_PathT_polygonT<double>;
   _g2d.pathd.shape = _G2d_PathT_shape<double>;
-  _g2d.pathd.appendPath = _G2d_PathT_appendPathT<double, double>;
-  _g2d.pathd.appendTranslatedPath = _G2d_PathT_appendTranslatedPathT<double>;
-  _g2d.pathd.appendTransformedPath = _G2d_PathT_appendTransformedPathT<double>;
+  _g2d.pathd.appendPathD = _G2d_PathT_appendPathT<double, double>;
+  _g2d.pathd.appendPathF = _G2d_PathT_appendPathT<double, float>;
+  _g2d.pathd.appendTranslatedPathD = _G2d_PathT_appendTranslatedPathT<double>;
+  _g2d.pathd.appendTransformedPathD = _G2d_PathT_appendTransformedPathT<double>;
   _g2d.pathd.hitTest = _G2d_PathT_hitTest<double>;
   _g2d.pathd.translate = _G2d_PathT_translate<double>;
   _g2d.pathd.transform = _G2d_PathT_transform<double>;

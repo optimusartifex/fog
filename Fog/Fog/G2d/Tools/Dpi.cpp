@@ -17,23 +17,42 @@
 namespace Fog {
 
 // ============================================================================
-// [Fog::Glyph]
+// [Fog::Dpi - Helpers]
 // ============================================================================
 
-static inline void _setupDpi(float* data, float dpi, float em, float ex)
+static inline void _G2d_Dpi_setup(float* data, float dpi, float em, float ex)
 {
-  data[DPI_VALUE_CM] = dpi * 0.393700777778f;
-  data[DPI_VALUE_EM] = em;
-  data[DPI_VALUE_EX] = ex;
-  data[DPI_VALUE_MM] = dpi * 0.039370077778f;
-  data[DPI_VALUE_PC] = dpi * 0.166666666667f;
-  data[DPI_VALUE_PT] = dpi * 0.013888888889f;
-  data[DPI_VALUE_PX] = 1.0f;
+  data[COORD_UNIT_NONE] = 1.0f;
+  data[COORD_UNIT_PX] = 1.0f;
+
+  data[COORD_UNIT_PT] = dpi * 0.013888888889f;
+  data[COORD_UNIT_PC] = dpi * 0.166666666667f;
+
+  data[COORD_UNIT_IN] = dpi;
+  data[COORD_UNIT_MM] = dpi * 0.039370077778f;
+  data[COORD_UNIT_CM] = dpi * 0.393700777778f;
+
+  data[COORD_UNIT_PERCENT] = 1.0f;
+
+  data[COORD_UNIT_EM] = em;
+  data[COORD_UNIT_EX] = ex;
 }
+
+// ============================================================================
+// [Fog::Dpi - Construction / Destruction]
+// ============================================================================
 
 Dpi::Dpi()
 {
   reset();
+}
+
+Dpi::Dpi(float dpi)
+{
+  if (dpi <= 0.0f) { reset(); return; }
+
+  _G2d_Dpi_setup(_data, dpi, 0.0f, 0.0f);
+  resetEmEx();
 }
 
 Dpi::Dpi(const Dpi& other)
@@ -45,32 +64,40 @@ Dpi::~Dpi()
 {
 }
 
-err_t Dpi::setDpi(float dpi, float em, float ex)
-{
-  if (dpi <= 0.0f || em <= 0.0f || ex <= 0.0f) return ERR_RT_INVALID_ARGUMENT;
-  _setupDpi(_data, dpi, em, ex);
+// ============================================================================
+// [Fog::Dpi - Accessors]
+// ============================================================================
 
+err_t Dpi::setDpi(float dpi)
+{
+  if (dpi <= 0.0f) return ERR_RT_INVALID_ARGUMENT;
+  _G2d_Dpi_setup(_data, dpi, 0.0f, 0.0f);
+
+  resetEmEx();
   return ERR_OK;
 }
 
+err_t Dpi::setDpi(float dpi, float em, float ex)
+{
+  if (dpi <= 0.0f) return ERR_RT_INVALID_ARGUMENT;
+  _G2d_Dpi_setup(_data, dpi, em, ex);
+
+  if (em <= 0.0f || ex <= 0.0f) resetEmEx();
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::Dpi - Reset]
+// ============================================================================
+
 void Dpi::reset()
 {
-  _setupDpi(_data, 72.0f, 12.0f, 6.0f);
+  _G2d_Dpi_setup(_data, 72.0f, 12.0f, 6.0f);
 }
 
-float Dpi::toDeviceSpace(float value, uint32_t valueType) const
-{
-  if (FOG_UNLIKELY((uint32_t)valueType >= DPI_VALUE_COUNT)) return 0.0f;
-
-  return value * _data[valueType];
-}
-
-float Dpi::fromDeviceSpace(float value, uint32_t valueType) const
-{
-  if (FOG_UNLIKELY((uint32_t)valueType >= DPI_VALUE_COUNT)) return 0.0f;
-
-  return value / _data[valueType];
-}
+// ============================================================================
+// [Fog::Dpi - Operator Overload]
+// ============================================================================
 
 Dpi& Dpi::operator=(const Dpi& other)
 {

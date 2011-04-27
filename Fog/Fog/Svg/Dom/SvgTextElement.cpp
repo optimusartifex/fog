@@ -52,8 +52,8 @@ err_t SvgTextElement::onRenderShape(SvgRenderContext* context) const
   SvgVisitor* visitor = context->getVisitor();
 
   XmlElement* e;
-  float x = a_x.isAssigned() ? a_x.getCoordValue() : 0.0f;
-  float y = a_y.isAssigned() ? a_y.getCoordValue() : 0.0f;
+  float x = a_x.isAssigned() ? a_x.getCoordComputed() : 0.0f;
+  float y = a_y.isAssigned() ? a_y.getCoordComputed() : 0.0f;
 
   context->_textCursor.set(x, y);
 

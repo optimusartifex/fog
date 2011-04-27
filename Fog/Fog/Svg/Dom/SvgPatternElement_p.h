@@ -8,9 +8,12 @@
 #define _FOG_SVG_DOM_SVGPATTERNELEMENT_P_H
 
 // [Dependencies]
+#include <Fog/G2d/Source/Pattern.h>
 #include <Fog/Svg/Dom/SvgCoordAttribute_p.h>
 #include <Fog/Svg/Dom/SvgElement.h>
 #include <Fog/Svg/Dom/SvgEnumAttribute_p.h>
+#include <Fog/Svg/Dom/SvgTransformAttribute_p.h>
+#include <Fog/Svg/Dom/SvgViewBoxAttribute_p.h>
 
 namespace Fog {
 
@@ -45,6 +48,8 @@ struct FOG_NO_EXPORT SvgPatternElement : public SvgElement
   virtual err_t onRender(SvgRenderContext* context) const;
   virtual err_t onApplyPattern(SvgRenderContext* context, SvgElement* obj, int paintType) const;
 
+  err_t _createPattern(PatternF& pattern, SvgElement* obj) const;
+
   // --------------------------------------------------------------------------
   // [SVG Embedded Attributes]
   // --------------------------------------------------------------------------
@@ -54,6 +59,8 @@ struct FOG_NO_EXPORT SvgPatternElement : public SvgElement
   SvgCoordAttribute a_width;
   SvgCoordAttribute a_height;
   SvgEnumAttribute a_patternUnits;
+  SvgTransformAttribute a_patternTransform;
+  SvgViewBoxAttribute a_viewBox;
 
 private:
   FOG_DISABLE_COPY(SvgPatternElement)

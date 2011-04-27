@@ -45,6 +45,30 @@ XmlAttribute* SvgRootElement::_createAttribute(const ManagedString& name) const
   return base::_createAttribute(name);
 }
 
+err_t SvgRootElement::onRender(SvgRenderContext* context) const
+{
+  if (a_viewBox.isAssigned() && a_viewBox.isValid())
+  {
+    SvgRenderState state(context);
+    state.saveTransform();
+
+    SizeF size = getRootSize();
+    BoxF box = a_viewBox.getBox();
+
+    TransformF tr(
+      size.w / box.getWidth(), 0.0f,
+      0.0f, size.h / box.getHeight(),
+      box.x0, box.y0);
+    context->getPainter()->transform(tr);
+
+    return base::onRender(context);
+  }
+  else
+  {
+    return base::onRender(context);
+  }
+}
+
 err_t SvgRootElement::onRenderShape(SvgRenderContext* context) const
 {
   return _walkAndRender(this, context);
@@ -54,6 +78,30 @@ err_t SvgRootElement::onCalcBoundingBox(RectF* box) const
 {
   // TODO:
   return ERR_RT_NOT_IMPLEMENTED;
+}
+
+SizeF SvgRootElement::getRootSize() const
+{
+  SizeF size(0.0f, 0.0f);
+
+  // Width/Height of document are assigned.
+  if (a_width.isAssigned() && a_height.isAssigned())
+  {
+    float w = a_width.getCoordComputed();
+    float h = a_height.getCoordComputed();
+
+    size.set(w, h);
+  }
+
+  // If size is not specified of value is invalid, initialize it to
+  // safe values.
+  if (size.w <= 0.0f || size.h <= 0.0f)
+  {
+    size.w = 128.0f;
+    size.h = 128.0f;
+  }
+
+  return size;
 }
 
 } // Fog namespace

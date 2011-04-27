@@ -42,8 +42,11 @@ struct FOG_NO_EXPORT SvgRootElement : public SvgStyledElement
   // [SVG Rendering]
   // --------------------------------------------------------------------------
 
+  virtual err_t onRender(SvgRenderContext* context) const;
   virtual err_t onRenderShape(SvgRenderContext* context) const;
   virtual err_t onCalcBoundingBox(RectF* box) const;
+
+  SizeF getRootSize() const;
 
   // --------------------------------------------------------------------------
   // [SVG Embedded Attributes]

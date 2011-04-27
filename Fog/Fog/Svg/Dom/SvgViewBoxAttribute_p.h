@@ -46,6 +46,7 @@ struct FOG_NO_EXPORT SvgViewBoxAttribute : public XmlAttribute
   // --------------------------------------------------------------------------
 
   FOG_INLINE const BoxF& getBox() const { return _box; }
+  FOG_INLINE bool isValid() const { return _isValid; }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -53,6 +54,7 @@ struct FOG_NO_EXPORT SvgViewBoxAttribute : public XmlAttribute
 
 protected:
   BoxF _box;
+  bool _isValid;
 
 private:
   FOG_DISABLE_COPY(SvgViewBoxAttribute)

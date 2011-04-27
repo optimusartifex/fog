@@ -666,7 +666,7 @@ void MacGuiBackBuffer::updateRects(FogView* view, const BoxI* rects, sysuint_t c
 
   for (sysint_t i=0; i<count; ++i)
   {
-    [view drawRect: toNSRect(rects[i].toRectF())];
+    [view drawRect: toNSRect(RectF(rects[i]))];
   }
 }
 

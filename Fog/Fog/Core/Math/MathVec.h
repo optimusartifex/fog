@@ -43,13 +43,13 @@ static FOG_INLINE void vConvertFloat(DstNumber* dst, const SrcNumber* src, sysui
 }
 
 template<>
-static FOG_INLINE void vConvertFloat<double, float>(double* dst, const float* src, sysuint_t length)
+FOG_INLINE void vConvertFloat<double, float>(double* dst, const float* src, sysuint_t length)
 {
   _core.mathd.vDoubleFromFloat(dst, src, length);
 }
 
 template<>
-static FOG_INLINE void vConvertFloat<float, double>(float* dst, const double* src, sysuint_t length)
+FOG_INLINE void vConvertFloat<float, double>(float* dst, const double* src, sysuint_t length)
 {
   _core.mathf.vFloatFromDouble(dst, src, length);
 }

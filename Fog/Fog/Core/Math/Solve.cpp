@@ -103,6 +103,7 @@ static int FOG_CDECL _G2d_MathT_solveQuadraticFunctionAt(Number* dst, const Numb
   double a = (double)src[0];
   double b = (double)src[1];
   double c = (double)src[2];
+  double d;
 
   Number r0, r1;
 
@@ -117,7 +118,7 @@ static int FOG_CDECL _G2d_MathT_solveQuadraticFunctionAt(Number* dst, const Numb
   }
 
   // The proposed solution.
-  double d = b * b - 4.0 * a * c;
+  d = b * b - 4.0 * a * c;
   if (d < 0.0) return 0;
 
   if (Math::isFuzzyPositiveZero(d))

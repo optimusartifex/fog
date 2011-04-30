@@ -43,7 +43,7 @@ struct FOG_API Dpi
 
   FOG_INLINE float getValue(uint32_t coordUnit)
   {
-    FOG_ASSERT(valueType < COORD_UNIT_COUNT);
+    FOG_ASSERT(coordUnit < COORD_UNIT_COUNT);
     return _data[coordUnit];
   }
 

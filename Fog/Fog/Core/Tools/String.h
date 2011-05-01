@@ -146,6 +146,7 @@ struct FOG_API String
   String(const Char* str, sysuint_t length);
 
   String(const Ascii8& str);
+  String(const Utf8& str);
   String(const Utf16& str);
 
   explicit FOG_INLINE String(Data* d) : _d(d) {}

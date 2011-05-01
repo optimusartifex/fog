@@ -106,6 +106,12 @@ String::String(const Ascii8& str)
   if (FOG_IS_NULL(_d)) _d = _dnull->refAlways();
 }
 
+String::String(const Utf8& str)
+{
+  _d = _dnull->refAlways();
+  appendUtf8(str.getData(), str.getComputedLength());
+}
+
 String::String(const Utf16& str)
 {
   _d = _dnull->refAlways();

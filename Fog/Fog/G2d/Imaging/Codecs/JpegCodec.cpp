@@ -405,7 +405,7 @@ err_t JpegDecoder::readImage(Image& image)
     return ERR_IMAGE_LIBJPEG_ERROR;
   }
 
-  jpeg.create_decompress(&cinfo, /* version */ 62, sizeof(struct jpeg_decompress_struct));
+  jpeg.create_decompress(&cinfo, JPEG_LIB_VERSION, sizeof(struct jpeg_decompress_struct));
 
   cinfo.src = (struct jpeg_source_mgr *)&srcmgr;
   srcmgr.pub.init_source = MyJpegInitSource;

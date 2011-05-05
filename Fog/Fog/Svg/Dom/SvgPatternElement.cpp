@@ -120,7 +120,7 @@ err_t SvgPatternElement::_createPattern(PatternF& pattern, SvgElement* obj) cons
         TransformF tr(
           float(w) / box.getWidth(), 0.0f,
           0.0f, float(h) / box.getHeight(),
-          box.x0, box.y0);
+          -box.x0, -box.y0);
         painter.setTransform(tr);
       }
     }

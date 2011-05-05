@@ -58,7 +58,7 @@ err_t SvgRootElement::onRender(SvgRenderContext* context) const
     TransformF tr(
       size.w / box.getWidth(), 0.0f,
       0.0f, size.h / box.getHeight(),
-      box.x0, box.y0);
+      -box.x0, -box.y0);
     context->getPainter()->transform(tr);
 
     return base::onRender(context);

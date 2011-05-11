@@ -191,7 +191,7 @@ void MyWindow::onPaint(PaintEvent* e)
   //p->transform(perspective);
 
   //p->setSource(radial);
-  //p->clear();
+  //p->fillAll();
 
   //p->fillCircle(CircleF(PointF(310.0f, 310.0f), 300.0f));
   //p->fillBox(BoxI(50, 50, 450, 450));
@@ -212,7 +212,7 @@ void MyWindow::onPaint(PaintEvent* e)
     p->setSource(gr);
   }
 
-  p->clear();*/
+  p->fillAll();*/
   //p->setSource(radial);
   //p->setSource(Texture(i[0], TEXTURE_TILE_CLAMP, Color(Argb32(0xFFFF0000))));
   //p->fillBox(BoxF(0.0f, 0.0f, 400.0f, 400.0f));

@@ -200,14 +200,8 @@ private:
   FOG_INLINE static void runIdleWorkSource(void* info) { static_cast<MacEventLoopBase*>(info)->runIdleWork(); }
   bool runIdleWork();
 
-  // The thread's run loop.
+  // @brief The thread's run loop.
   CFRunLoopRef _runLoop;
-
-  // The time that _delayedWorkTimer is scheduled to fire.  This is tracked
-  // independently of CFRunLoopTimerGetNextFireDate(_delayedWorkTimer)
-  // to be able to reset the timer properly after waking from system sleep.
-  // See PowerStateNotification.
-  CFAbsoluteTime _delayedWorkFireTime;
 
   Time _delayedWorkTime;
 };
@@ -215,8 +209,12 @@ private:
 // @brief Using NSRunLoop
 struct FOG_API MacNonMainEventLoop : public MacEventLoopBase
 {
+  MacNonMainEventLoop();
+  
   virtual void quit();
   virtual void _runInternal();
+  
+  bool keepRunning;
 };
 
 // @brief Using NSApplication

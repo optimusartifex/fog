@@ -10,7 +10,6 @@
 #include <Fog/G2d/Mac/MacUtil.h>
 #include <Fog/Gui/Engine/MacGuiEngine.h>
 #include <Fog/Gui/Widget/Widget.h>
-#include <climits>
 #import <AppKit/AppKit.h>
 #import <Foundation/Foundation.h>
 #import <Cocoa/Cocoa.h>
@@ -355,7 +354,6 @@ err_t MacGuiWindow::create(uint32_t flags)
       ((flags & WINDOW_CLOSE_BUTTON) ? NSClosableWindowMask : 0) |
       ((flags & WINDOW_MINIMIZE) ? NSMiniaturizableWindowMask : 0) |
       ((flags & WINDOW_MAXIMIZE) ? NSResizableWindowMask : 0);
-  
 
   NSRect frame = NSMakeRect(_widget->getX(), _widget->getY(), 500, 500);    
   window = [[FogWindow alloc] init: this
@@ -393,7 +391,6 @@ err_t MacGuiWindow::setPosition(const PointI& pt)
   if (window == nil) return ERR_RT_INVALID_HANDLE;
   
   [window setFrameTopLeftPoint: toNSPoint(pt)];
-
   return ERR_OK;
 }
 
@@ -401,7 +398,9 @@ err_t MacGuiWindow::setSize(const SizeI& size)
 {
   if (window == nil) return ERR_RT_INVALID_HANDLE;
   
-  // TODO
+  [window setFrame: NSMakeRect(_widget->getX(), _widget->getY(), 
+                               size.getWidth(), size.getHeight())
+           display: YES];
   return ERR_OK;
 }
 
@@ -617,10 +616,11 @@ bool MacGuiBackBuffer::resize(int width, int height, bool cache)
 
     _buffer.stride = _primaryStride;
     _buffer.data = _primaryPixels;
-    _buffer.size.w = _cachedSize.w = targetWidth;
-    _buffer.size.h = _cachedSize.h = targetHeight;
+    _buffer.size.set(width, height);
     _buffer.format = IMAGE_FORMAT_PRGB32;
-
+    
+    _cachedSize.set(targetWidth, targetHeight);
+    
     // Secondary buffer not used on this platform.
     _secondaryPixels = NULL;
     _secondaryStride = 0;
@@ -677,8 +677,6 @@ void MacGuiBackBuffer::updateRects(FogView* view, const BoxI* rects, sysuint_t c
 MacEventLoopBase::MacEventLoopBase() : 
  EventLoop(Ascii8("Gui.Mac"))
 {
-  _delayedWorkFireTime = DBL_MAX;
-
   _runLoop = CFRunLoopGetCurrent();
   CFRetain(_runLoop);
   
@@ -744,15 +742,13 @@ void MacEventLoopBase::_scheduleDelayedWork(const Time& delayedWorkTime)
   double seconds = now.second + (static_cast<double>((delayedWorkTime.toInternalValue()) % Time::MicrosecondsPerSecond) /
                                                       Time::MicrosecondsPerSecond);
   CFGregorianDate gregorian = { now.year, now.month, now.dayOfMonth, now.hour,now.minute, seconds };
-  _delayedWorkFireTime = CFGregorianDateGetAbsoluteTime(gregorian, NULL);
 
-  CFRunLoopTimerSetNextFireDate(_delayedWorkTimer, _delayedWorkFireTime);
+  CFRunLoopTimerSetNextFireDate(_delayedWorkTimer, CFGregorianDateGetAbsoluteTime(gregorian, NULL));
 }
 
 void MacEventLoopBase::runDelayedWorkTimer(CFRunLoopTimerRef timer, void* info)
 {
   MacEventLoopBase* self = static_cast<MacEventLoopBase*>(info);
-  self->_delayedWorkFireTime = DBL_MAX;
   CFRunLoopSourceSignal(self->_delayedWorkSource);
 }
 
@@ -789,14 +785,20 @@ bool MacEventLoopBase::runIdleWork()
 // [MacNonMainEventLoop]
 // ==============================================================================
 
+MacNonMainEventLoop::MacNonMainEventLoop() :
+ MacEventLoopBase(), keepRunning(true)
+{
+}
+
 void MacNonMainEventLoop::_runInternal()
 {
-  [[NSRunLoop currentMainLoop] run];
+  NSRunLoop* runLoop = [NSRunLoop currentRunLoop];
+  while (keepRunning && [runLoop runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]]) ;
 }
 
 void MacNonMainEventLoop::quit()
 {
-  // TODO
+  keepRunning = false;
 }
 
 // ==============================================================================

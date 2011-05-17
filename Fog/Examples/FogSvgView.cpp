@@ -15,6 +15,9 @@ struct MyWindow : public Window
   MyWindow(uint32_t createFlags = 0);
   virtual ~MyWindow();
 
+  void recalcTransform();
+  void recalcActive();
+
   // [Event Handlers]
   virtual void onMouse(MouseEvent* e);
   virtual void onKey(KeyEvent* e);
@@ -30,6 +33,7 @@ struct MyWindow : public Window
   float rotate;
   float scale;
   PointF translate;
+  TransformF transform;
 
   PointF lastPoint;
   SvgElement* active;
@@ -61,11 +65,59 @@ MyWindow::MyWindow(uint32_t createFlags) :
   lastPoint.reset();
   active = NULL;
 
+  recalcTransform();
+
   setWindowTitle(Ascii8("SvgView"));
 }
 
 MyWindow::~MyWindow()
 {
+}
+
+void MyWindow::recalcTransform()
+{
+  transform.reset();
+
+  SizeF size(getWidth(), getHeight());
+
+  transform.translate(PointF(size.w / 2.0f, size.h / 2.0f));
+  transform.rotate(rotate);
+  transform.translate(PointF(-size.w / 2.0f, -size.h / 2.0f));
+  transform.scale(PointF(scale, scale));
+
+  transform.translate(PointF(100.0f, 100.0f));
+  transform.translate(translate);
+}
+
+void MyWindow::recalcActive()
+{
+  SvgElement* e = NULL;
+
+  List<SvgElement*> elements = svg.hitTest(lastPoint, &transform);
+  if (!elements.isEmpty()) e = elements.top();
+
+  if (active != e)
+  {
+    if (active != NULL)
+    {
+      active->setStyle(Ascii8("stroke"), activeStrokeBackup);
+      active->setStyle(Ascii8("stroke-width"), activeStrokeWidthBackup);
+      active->setStyle(Ascii8("opacity"), activeOpacityBackup);
+    }
+
+    active = e;
+
+    if (active != NULL)
+    {
+      activeStrokeBackup = active->getStyle(Ascii8("stroke"));
+      activeStrokeWidthBackup = active->getStyle(Ascii8("stroke-width"));
+      activeOpacityBackup = active->getStyle(Ascii8("opacity"));
+
+      active->setStyle(Ascii8("stroke"), Ascii8("#FF0000"));
+      active->setStyle(Ascii8("stroke-width"), Ascii8("2.5"));
+      active->setStyle(Ascii8("opacity"), Ascii8("1"));
+    }
+  }
 }
 
 void MyWindow::onMouse(MouseEvent* e)
@@ -75,6 +127,7 @@ void MyWindow::onMouse(MouseEvent* e)
     if (e->getButton() == BUTTON_LEFT)
     {
       lastPoint = e->getPosition();
+      recalcActive();
       update(WIDGET_UPDATE_ALL);
     }
   }
@@ -136,6 +189,8 @@ void MyWindow::onKey(KeyEvent* e)
 void MyWindow::onTimer(TimerEvent* e)
 {
   rotate += 0.008f;
+  recalcTransform();
+
   update(WIDGET_UPDATE_PAINT);
 }
 
@@ -149,78 +204,34 @@ void MyWindow::onPaint(PaintEvent* e)
   p->fillAll();
 
   p->save();
-
-  BoxF activeBBox(0.0f, 0.0f, 0.0f, 0.0f);
-
-  if (1)
-  {
-    SizeF size;
-    p->getSize(size);
-
-    p->translate(PointF(size.w / 2.0f, size.h / 2.0f));
-    p->rotate(rotate);
-    p->translate(PointF(-size.w / 2.0f, -size.h / 2.0f));
-    p->scale(PointF(scale, scale));
-  }
-
-  p->translate(PointF(100.0f, 100.0f));
-  p->translate(translate);
-
-  {
-    TransformF t;
-    p->getTransform(t);
-
-    SvgElement* e = NULL;
-    List<SvgElement*> elements = svg.hitTest(lastPoint, &t);
-    if (!elements.isEmpty()) e = elements.top();
-
-    if (active != e)
-    {
-      if (active != NULL)
-      {
-        active->setStyle(Ascii8("stroke"), activeStrokeBackup);
-        active->setStyle(Ascii8("stroke-width"), activeStrokeWidthBackup);
-        active->setStyle(Ascii8("opacity"), activeOpacityBackup);
-      }
-
-      active = e;
-
-      if (active != NULL)
-      {
-        activeStrokeBackup = active->getStyle(Ascii8("stroke"));
-        activeStrokeWidthBackup = active->getStyle(Ascii8("stroke-width"));
-        activeOpacityBackup = active->getStyle(Ascii8("opacity"));
-
-        active->setStyle(Ascii8("stroke"), Ascii8("#FF0000"));
-        active->setStyle(Ascii8("stroke-width"), Ascii8("2.5"));
-        active->setStyle(Ascii8("opacity"), Ascii8("1"));
-      }
-    }
-
-    if (active)
-    {
-      SvgMeasure ctx;
-
-      ctx.transform(t);
-      ctx.advance(active);
-      ctx.onVisit(active);
-  
-      activeBBox = ctx.getBoundingBox();
-    }
-  }
-
+  p->setTransform(transform);
   svg.render(p);
   p->restore();
 
-  if (activeBBox.isValid())
+  if (active)
   {
-    p->save();
-    p->setSource(Argb32(0xFF0000FF));
-    p->setLineWidth(1.5f);
-    p->setOpacity(0.8f);
-    p->drawBox(activeBBox);
-    p->restore();
+    BoxF activeBBox(0.0f, 0.0f, 0.0f, 0.0f);
+    SvgMeasure ctx;
+
+    ctx.transform(transform);
+    ctx.advance(active);
+    active->onProcess(&ctx);
+    //ctx.onVisit(active);
+
+    activeBBox = ctx.getBoundingBox();
+
+    if (activeBBox.isValid())
+    {
+      p->save();
+      p->setSource(Argb32(0xFF0000FF));
+      p->setLineWidth(1.5f);
+      p->setOpacity(0.8f);
+      p->drawBox(activeBBox);
+      p->restore();
+    }
   }
+
+  // --------------------------------------------------------------------------
 
   p->flush(PAINTER_FLUSH_SYNC);
 

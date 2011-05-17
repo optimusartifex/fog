@@ -50,10 +50,10 @@
   struct _Type_##T {}; \
   \
   template<_T1_ _A1_> \
-  struct _Type_##T<float, _A1_> { typedef typename _Type_##F<_A1_> T; }; \
+  struct _Type_##T<float, _A1_> { typedef _Type_##F<_A1_> T; }; \
   \
   template<_T1_ _A1_> \
-  struct _Type_##T<double, _A1_> { typedef typename _Type_##D<_A1_> T; };
+  struct _Type_##T<double, _A1_> { typedef _Type_##D<_A1_> T; };
 
 #define FOG_DECLARE_TYPEINFO_TEMPLATE1(__symbol__, T1, A1, __typeinfo__) \
 namespace Fog { \

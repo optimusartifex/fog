@@ -1962,32 +1962,37 @@ _Swap:
     case TRANSFORM_TYPE_ROTATION:
     case TRANSFORM_TYPE_AFFINE:
     {
-      NumT x, minX, maxX;
-      NumT y, minY, maxY;
+      NumT x;
+      NumT y;
 
       x = src.x0 * self._00 + src.y0 * self._10;
-      y = src.x0 * self._10 + src.y0 * self._11;
+      y = src.x0 * self._01 + src.y0 * self._11;
 
-      minX = maxX = x;
-      minY = maxY = y;
+      NumT minX = x, maxX = x;
+      NumT minY = y, maxY = y;
 
       x = src.x1 * self._00 + src.y0 * self._10;
-      y = src.x1 * self._10 + src.y0 * self._11;
+      y = src.x1 * self._01 + src.y0 * self._11;
 
       if (minX > x) minX = x; else if (maxX < x) maxX = x;
       if (minY > y) minY = y; else if (maxY < y) maxY = y;
 
       x = src.x1 * self._00 + src.y1 * self._10;
-      y = src.x1 * self._10 + src.y1 * self._11;
+      y = src.x1 * self._01 + src.y1 * self._11;
 
       if (minX > x) minX = x; else if (maxX < x) maxX = x;
       if (minY > y) minY = y; else if (maxY < y) maxY = y;
 
       x = src.x0 * self._00 + src.y1 * self._10;
-      y = src.x0 * self._10 + src.y1 * self._11;
+      y = src.x0 * self._01 + src.y1 * self._11;
 
       if (minX > x) minX = x; else if (maxX < x) maxX = x;
       if (minY > y) minY = y; else if (maxY < y) maxY = y;
+
+      minX += self._20;
+      minY += self._21;
+      maxX += self._20;
+      maxY += self._21;
 
       dst.setBox(minX, minY, maxX, maxY);
       break;

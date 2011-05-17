@@ -48,10 +48,11 @@ XmlAttribute* SvgImageElement::_createAttribute(const ManagedString& name) const
 
 err_t SvgImageElement::onPrepare(SvgVisitor* visitor, SvgGState* state) const
 {
-  // There is only transformation that can be applied to the image.
+  // There is only transformation attribute which can be applied to the image.
   if (a_transform.isAssigned() && a_transform.isValid())
   {
-    if (state) state->saveTransform();
+    if (state && !state->hasState(SvgGState::SAVED_TRANSFORM))
+      state->saveTransform();
     visitor->transform(a_transform.getTransform());
   }
 
@@ -62,8 +63,8 @@ err_t SvgImageElement::onProcess(SvgVisitor* visitor) const
 {
   if (!a_href._embedded || a_href._image.isEmpty()) return ERR_OK;
 
-  float x = a_x.isAssigned() ? a_x.getCoord().value : 0.0f;
-  float y = a_y.isAssigned() ? a_y.getCoord().value : 0.0f;
+  float x = a_x.isAssigned() ? a_x.getCoordComputed() : 0.0f;
+  float y = a_y.isAssigned() ? a_y.getCoordComputed() : 0.0f;
 
   return visitor->onImage((SvgElement*)this, PointF(x, y), a_href._image);
 }

@@ -37,12 +37,13 @@ XmlAttribute* SvgViewElement::_createAttribute(const ManagedString& name) const
   return base::_createAttribute(name);
 }
 
-err_t SvgViewElement::onRenderShape(SvgRenderContext* context) const
+err_t SvgViewElement::onProcess(SvgVisitor* visitor) const
 {
-  return _walkAndRender(this, context);
+  if (!hasChildNodes()) return ERR_OK;
+  return _visitContainer(visitor);
 }
 
-err_t SvgViewElement::onCalcBoundingBox(RectF* box) const
+err_t SvgViewElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
 {
   // TODO:
   return ERR_RT_NOT_IMPLEMENTED;

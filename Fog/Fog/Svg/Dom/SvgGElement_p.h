@@ -31,10 +31,11 @@ struct FOG_NO_EXPORT SvgGElement : public SvgStyledElement
   virtual ~SvgGElement();
 
   // --------------------------------------------------------------------------
-  // [SVG Rendering]
+  // [SVG Interface]
   // --------------------------------------------------------------------------
 
-  virtual err_t onRenderShape(SvgRenderContext* context) const;
+  virtual err_t onProcess(SvgVisitor* visitor) const;
+  virtual err_t onGeometryBoundingBox(BoxF& box, const TransformF* tr) const;
 
 private:
   FOG_DISABLE_COPY(SvgGElement)

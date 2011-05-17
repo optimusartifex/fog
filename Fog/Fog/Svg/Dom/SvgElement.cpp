@@ -23,7 +23,7 @@ namespace Fog {
 SvgElement::SvgElement(const ManagedString& tagName, uint32_t svgType) :
   XmlElement(tagName),
   _svgType(svgType),
-  _boundingRectDirty(true),
+  _boundingBoxDirty(true),
   _visible(true),
   _unused(0)
 {
@@ -49,56 +49,47 @@ XmlAttribute* SvgElement::_createAttribute(const ManagedString& name) const
   return base::_createAttribute(name);
 }
 
-err_t SvgElement::onRender(SvgRenderContext* context) const
+err_t SvgElement::onPrepare(SvgVisitor* visitor, SvgGState* state) const
 {
-  // Default is to render nothing and stop traversing
+  // Should be reimplemented.
   return ERR_OK;
 }
 
-err_t SvgElement::onRenderShape(SvgRenderContext* context) const
+err_t SvgElement::onProcess(SvgVisitor* visitor) const
 {
+  // Should be reimplemented.
   return ERR_OK;
 }
 
-err_t SvgElement::onApplyPattern(SvgRenderContext* context, SvgElement* obj, int paintType) const
+err_t SvgElement::onPattern(SvgVisitor* visitor, SvgElement* obj, uint32_t paintType) const
+{
+  // Should be reimplemented if SvgElement is SvgPattern, SvgLinearGradient or
+  // SvgRadialGradient.
+  return ERR_RT_INVALID_OBJECT;
+}
+
+err_t SvgElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
 {
   return ERR_RT_INVALID_OBJECT;
 }
 
-err_t SvgElement::onCalcBoundingBox(RectF* box) const
+err_t SvgElement::onStrokeBoundingBox(BoxF& box, const PathStrokerParamsF& stroke, const TransformF* tr) const
 {
+  // TODO:
   return ERR_RT_INVALID_OBJECT;
 }
 
-err_t SvgElement::_walkAndRender(const XmlElement* root, SvgRenderContext* context)
+err_t SvgElement::_visitContainer(SvgVisitor* visitor) const
 {
   err_t err = ERR_OK;
   XmlElement* e;
 
-  SvgVisitor* visitor = context->getVisitor();
-  if (visitor == NULL)
+  for (e = getFirstChild(); e; e = e->getNextSibling())
   {
-    for (e = root->getFirstChild(); e; e = e->getNextSibling())
+    if (e->isSvgElement() && reinterpret_cast<SvgElement*>(e)->getVisible())
     {
-      if (e->isSvgElement() && reinterpret_cast<SvgElement*>(e)->getVisible())
-      {
-        err = reinterpret_cast<SvgElement*>(e)->onRender(context);
-        if (FOG_IS_ERROR(err)) break;
-      }
-    }
-  }
-  else
-  {
-    for (e = root->getFirstChild(); e; e = e->getNextSibling())
-    {
-      if (e->isSvgElement() && reinterpret_cast<SvgElement*>(e)->getVisible() && visitor->canVisit(e))
-      {
-        visitor->onBegin(e);
-        err = reinterpret_cast<SvgElement*>(e)->onRender(context);
-        visitor->onEnd(e);
-
-        if (FOG_IS_ERROR(err)) break;
-      }
+      err = visitor->onVisit(reinterpret_cast<SvgElement*>(e));
+      if (FOG_IS_ERROR(err)) break;
     }
   }
 
@@ -115,15 +106,38 @@ err_t SvgElement::setStyle(const String& name, const String& value)
   return ERR_RT_INVALID_OBJECT;
 }
 
-const RectF& SvgElement::getBoundingRect() const
+err_t SvgElement::getBoundingBox(BoxF& box) const
 {
-  if (_boundingRectDirty)
+  if (_boundingBoxDirty)
   {
-    onCalcBoundingBox(&_boundingRect);
-    _boundingRectDirty = false;
+    // TODO:
+    FOG_RETURN_ON_ERROR(onGeometryBoundingBox(_boundingBox, NULL));
+    _boundingBoxDirty = false;
   }
 
-  return _boundingRect;
+  box = _boundingBox;
+  return ERR_OK;
+}
+
+err_t SvgElement::getBoundingBox(BoxF& box, const TransformF* tr) const
+{
+  if (tr == NULL) return getBoundingBox(box);
+
+  switch (tr->getType())
+  {
+    case TRANSFORM_TYPE_IDENTITY:
+      return getBoundingBox(box);
+
+    case TRANSFORM_TYPE_TRANSLATION:
+    case TRANSFORM_TYPE_SCALING:
+    case TRANSFORM_TYPE_SWAP:
+      FOG_RETURN_ON_ERROR(getBoundingBox(box));
+      tr->mapBox(box, box);
+      return ERR_OK;
+
+    default:
+      return onGeometryBoundingBox(box, tr);
+  }
 }
 
 } // Fog namespace

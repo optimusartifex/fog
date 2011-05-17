@@ -46,6 +46,12 @@ struct FOG_NO_EXPORT SvgAbstractGradientElement : public SvgStyledElement
   virtual XmlAttribute* _createAttribute(const ManagedString& name) const;
 
   // --------------------------------------------------------------------------
+  // [SVG Visiting]
+  // --------------------------------------------------------------------------
+
+  virtual err_t onProcess(SvgVisitor* visitor) const;
+
+  // --------------------------------------------------------------------------
   // [Statics]
   // --------------------------------------------------------------------------
 

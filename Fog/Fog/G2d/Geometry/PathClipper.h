@@ -83,7 +83,7 @@ struct FOG_NO_EXPORT PathClipperF
   FOG_INLINE void reset()
   {
     _clipBox.reset();
-    _lastMoveTo.set(Math::getQNanF(), Math::getQNanF());
+    _lastMoveTo.setNaN();
     _lastIndex = INVALID_INDEX;
   }
 
@@ -209,7 +209,7 @@ struct FOG_NO_EXPORT PathClipperD
   FOG_INLINE void reset()
   {
     _clipBox.reset();
-    _lastMoveTo.set(Math::getQNanD(), Math::getQNanD());
+    _lastMoveTo.setNaN();
     _lastIndex = INVALID_INDEX;
   }
 

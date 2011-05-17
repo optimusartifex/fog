@@ -12,6 +12,7 @@
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Svg/Dom/SvgRadialGradientElement_p.h>
 #include <Fog/Svg/Visit/SvgRender.h>
+#include <Fog/Svg/Visit/SvgVisitor.h>
 
 namespace Fog {
 
@@ -45,12 +46,7 @@ XmlAttribute* SvgRadialGradientElement::_createAttribute(const ManagedString& na
   return base::_createAttribute(name);
 }
 
-err_t SvgRadialGradientElement::onRender(SvgRenderContext* context) const
-{
-  return ERR_OK;
-}
-
-err_t SvgRadialGradientElement::onApplyPattern(SvgRenderContext* context, SvgElement* obj, int paintType) const
+err_t SvgRadialGradientElement::onPattern(SvgVisitor* visitor, SvgElement* obj, uint32_t paintType) const
 {
   // SVG TODO: Radial Gradient.
 
@@ -62,7 +58,11 @@ err_t SvgRadialGradientElement::onApplyPattern(SvgRenderContext* context, SvgEle
   // Setup start and end points.
   if (!a_gradientUnits.isAssigned() || a_gradientUnits.getEnumValue() == SVG_OBJECT_BOUNDING_BOX)
   {
-    RectF bbox = obj->getBoundingRect();
+    BoxF bbox;
+    obj->getBoundingBox(bbox);
+
+    float bw = bbox.getWidth();
+    float bh = bbox.getHeight();
 
     float cx = a_cx.isAssigned() ? a_cx.getCoordValue() : 0.5f;
     float cy = a_cy.isAssigned() ? a_cy.getCoordValue() : 0.5f;
@@ -71,33 +71,31 @@ err_t SvgRadialGradientElement::onApplyPattern(SvgRenderContext* context, SvgEle
     float rx = a_r.isAssigned() ? a_r.getCoordValue() : 0.5f;
     float ry = rx;
 
-    cx = bbox.x + bbox.w * cx;
-    cy = bbox.y + bbox.h * cy;
-    fx = bbox.x + bbox.w * fx;
-    fy = bbox.y + bbox.h * fy;
-    rx = bbox.w * rx;
-    ry = bbox.h * ry;
+    cx = bbox.x0 + bw * cx;
+    cy = bbox.y0 + bh * cy;
+    fx = bbox.x0 + bw * fx;
+    fy = bbox.y0 + bh * fy;
+    rx = bw * rx;
+    ry = bh * ry;
 
     gradient.setCenter(PointF(cx, cy));
     gradient.setFocal(PointF(fx, fy));
     gradient.setRadius(PointF(rx, ry));
   }
-  else if (a_cx.isAssigned() && a_cy.isAssigned() && a_cx.isAssigned() && a_r.isAssigned())
+  else 
   {
-    float cx = a_cx.getCoordComputed();
-    float cy = a_cy.getCoordComputed();
+    float cx = a_cx.isAssigned() ? a_cx.getCoordComputed() : 0.5f;
+    float cy = a_cy.isAssigned() ? a_cy.getCoordComputed() : 0.5f;
     float fx = a_fx.isAssigned() ? a_fx.getCoordComputed() : cx;
     float fy = a_fy.isAssigned() ? a_fy.getCoordComputed() : cy;
-    float r  = a_r.getCoordComputed();
+    float rx = a_r.isAssigned() ? a_r.getCoordComputed() : 0.5f;
+    float ry = rx;
+
+    // TODO: Percentages to the current view-port.
 
     gradient.setCenter(PointF(cx, cy));
     gradient.setFocal(PointF(fx, fy));
-    gradient.setRadius(PointF(r, r));
-  }
-  else
-  {
-    // SVG TODO: Is this error?
-    Debug::dbgFunc("Fog::SvgRadialGradient", "onApplyPattern", "Unsupported combination.\n");
+    gradient.setRadius(PointF(rx, ry));
   }
 
   // Add color stops.
@@ -108,9 +106,9 @@ err_t SvgRadialGradientElement::onApplyPattern(SvgRenderContext* context, SvgEle
   if (a_gradientTransform.isAssigned()) pattern.setTransform(a_gradientTransform.getTransform());
 
   if (paintType == SVG_PAINT_FILL)
-    context->setFillPattern(pattern);
+    visitor->setFillPattern(pattern);
   else
-    context->setStrokePattern(pattern);
+    visitor->setStrokePattern(pattern);
 
   return ERR_OK;
 }

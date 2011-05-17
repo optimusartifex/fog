@@ -37,7 +37,7 @@ err_t SvgCoordAttribute::setValue(const String& value)
 
   SvgUtil::parseCoord(_coord, value);
 
-  if (_element) reinterpret_cast<SvgElement*>(_element)->_boundingRectDirty = true;
+  if (_element) reinterpret_cast<SvgElement*>(_element)->_boundingBoxDirty = true;
   return ERR_OK;
 }
 

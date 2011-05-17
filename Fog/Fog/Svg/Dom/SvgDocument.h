@@ -8,10 +8,10 @@
 #define _FOG_SVG_DOM_SVGDOCUMENT_H
 
 // [Dependencies]
+#include <Fog/Core/Collection/List.h>
 #include <Fog/G2d/Geometry/Size.h>
 #include <Fog/G2d/Tools/Dpi.h>
 #include <Fog/Xml/Dom/XmlDocument.h>
-#include <Fog/Svg/Dom/SvgObject.h>
 #include <Fog/Svg/Global/Constants.h>
 
 namespace Fog {
@@ -24,16 +24,14 @@ namespace Fog {
 // ============================================================================
 
 struct Painter;
-struct SvgRenderContext;
+struct SvgElement;
 struct SvgVisitor;
 
 // ============================================================================
 // [Fog::SvgDocument]
 // ============================================================================
 
-struct FOG_API SvgDocument :
-  public XmlDocument,
-  public SvgObject
+struct FOG_API SvgDocument : public XmlDocument
 {
   typedef XmlDocument base;
 
@@ -58,12 +56,6 @@ struct FOG_API SvgDocument :
   static XmlElement* createElementStatic(const ManagedString& tagName);
 
   // --------------------------------------------------------------------------
-  // [SVG Rendering]
-  // --------------------------------------------------------------------------
-
-  virtual err_t onRender(SvgRenderContext* context) const;
-
-  // --------------------------------------------------------------------------
   // [SVG Public]
   // --------------------------------------------------------------------------
 
@@ -71,7 +63,10 @@ struct FOG_API SvgDocument :
   err_t setDpi(float dpi);
 
   SizeF getDocumentSize() const;
-  err_t render(Painter* painter, SvgVisitor* visitor = NULL) const;
+
+  err_t onProcess(SvgVisitor* visitor) const;
+  err_t render(Painter* painter) const;
+  List<SvgElement*> hitTest(const PointF& pt, const TransformF* tr = NULL) const;
 
   // --------------------------------------------------------------------------
   // [Members]

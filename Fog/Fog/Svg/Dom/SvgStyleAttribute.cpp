@@ -317,6 +317,12 @@ err_t SvgStyleAttribute::setStyle(int styleId, const String& value)
   err_t err = ERR_OK;
   int i;
 
+  if (value.isEmpty())
+  {
+    _mask &= ~(1 << styleId);
+    return ERR_OK;
+  }
+
   switch (styleId)
   {
     case SVG_STYLE_CLIP_PATH:

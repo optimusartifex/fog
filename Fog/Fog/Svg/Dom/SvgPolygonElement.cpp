@@ -12,6 +12,7 @@
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Svg/Dom/SvgPolygonElement_p.h>
 #include <Fog/Svg/Visit/SvgRender.h>
+#include <Fog/Svg/Visit/SvgVisitor.h>
 
 namespace Fog {
 
@@ -37,31 +38,24 @@ XmlAttribute* SvgPolygonElement::_createAttribute(const ManagedString& name) con
   return base::_createAttribute(name);
 }
 
-err_t SvgPolygonElement::onRenderShape(SvgRenderContext* context) const
+err_t SvgPolygonElement::onProcess(SvgVisitor* visitor) const
 {
-  if (a_points.isAssigned())
-  {
-    const PathF& path = a_points.getPath();
-    context->drawPath(path);
-    return ERR_OK;
-  }
-  else
-  {
-    return ERR_OK;
-  }
+  if (!a_points.isAssigned()) return ERR_OK;
+
+  const PathF& path = a_points.getPath();
+  return visitor->onPath((SvgElement*)this, path);
 }
 
-err_t SvgPolygonElement::onCalcBoundingBox(RectF* box) const
+err_t SvgPolygonElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
 {
   if (a_points.isAssigned())
   {
     const PathF& path = a_points.getPath();
-    box->setRect(path.getBoundingRect());
-    return ERR_OK;
+    return path._getBoundingBox(box, tr);
   }
   else
   {
-    box->reset();
+    box.reset();
     return ERR_OK;
   }
 }

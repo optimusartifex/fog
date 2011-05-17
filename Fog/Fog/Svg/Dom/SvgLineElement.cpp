@@ -12,6 +12,7 @@
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Svg/Dom/SvgLineElement_p.h>
 #include <Fog/Svg/Visit/SvgRender.h>
+#include <Fog/Svg/Visit/SvgVisitor.h>
 
 namespace Fog {
 
@@ -43,30 +44,29 @@ XmlAttribute* SvgLineElement::_createAttribute(const ManagedString& name) const
   return base::_createAttribute(name);
 }
 
-err_t SvgLineElement::onRenderShape(SvgRenderContext* context) const
+err_t SvgLineElement::onProcess(SvgVisitor* visitor) const
 {
   float x1 = a_x1.isAssigned() ? a_x1.getCoordComputed() : 0.0f;
   float y1 = a_y1.isAssigned() ? a_y1.getCoordComputed() : 0.0f;
   float x2 = a_x2.isAssigned() ? a_x2.getCoordComputed() : 0.0f;
   float y2 = a_y2.isAssigned() ? a_y2.getCoordComputed() : 0.0f;
 
-  context->drawLine(LineF(PointF(x1, y1), PointF(x2, y2)));
-  return ERR_OK;
+  ShapeF shape(LineF(x1, y1, x2, y2));
+  return visitor->onShape((SvgElement*)this, shape);
 }
 
-err_t SvgLineElement::onCalcBoundingBox(RectF* box) const
+err_t SvgLineElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
 {
   float x1 = a_x1.isAssigned() ? a_x1.getCoordComputed() : 0.0f;
   float y1 = a_y1.isAssigned() ? a_y1.getCoordComputed() : 0.0f;
   float x2 = a_x2.isAssigned() ? a_x2.getCoordComputed() : 0.0f;
   float y2 = a_y2.isAssigned() ? a_y2.getCoordComputed() : 0.0f;
 
-  float x = (x1 < x2) ? x1 : x2;
-  float y = (y1 < y2) ? y1 : y2;
-  float w = (x1 < x2) ? x2 - x1 : x1 - x2;
-  float h = (y1 < y2) ? y2 - y1 : y1 - y2;
+  box.setBox(x1, y1, x2, y2);
+  if (tr) tr->mapPoints(reinterpret_cast<PointF*>(&box), reinterpret_cast<PointF*>(&box), 2);
 
-  box->setRect(x, y, w, h);
+  if (box.x0 > box.x1) swap(box.x0, box.x1);
+  if (box.y0 > box.y1) swap(box.y0, box.y1);
   return ERR_OK;
 }
 

@@ -72,10 +72,10 @@ struct FOG_NO_EXPORT LineF
   FOG_INLINE void setAngle(float rad)
   {
     float len = getLength();
-    float aSin, aCos;
+    float as, ac;
 
-    Math::sincos(rad, &aSin, &aCos);
-    p[1].set(p[0].x + aCos * len, p[0].y - aSin * len);
+    Math::sincos(rad, &as, &ac);
+    p[1].set(p[0].x + ac * len, p[0].y - as * len);
   }
 
   FOG_INLINE void setLine(const LineF& line) { p[0] = line.p[0]; p[1] = line.p[1]; }
@@ -207,10 +207,10 @@ struct FOG_NO_EXPORT LineD
   FOG_INLINE void setAngle(double rad)
   {
     double len = getLength();
-    double aSin, aCos;
+    double as, ac;
 
-    Math::sincos(rad, &aSin, &aCos);
-    p[1].set(p[0].x + aCos * len, p[0].y - aSin * len);
+    Math::sincos(rad, &as, &ac);
+    p[1].set(p[0].x + ac * len, p[0].y - as * len);
   }
 
   FOG_INLINE void setLine(const LineD& line) { p[0] = line.p[0]; p[1] = line.p[1]; }

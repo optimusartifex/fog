@@ -64,6 +64,11 @@ XmlAttribute* SvgAbstractGradientElement::_createAttribute(const ManagedString& 
   return base::_createAttribute(name);
 }
 
+err_t SvgAbstractGradientElement::onProcess(SvgVisitor* visitor) const
+{
+  return ERR_OK;
+}
+
 void SvgAbstractGradientElement::_walkAndAddColorStops(XmlElement* root, GradientF& gradient)
 {
   bool stopsParsed = false;

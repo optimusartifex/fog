@@ -55,25 +55,44 @@ struct FOG_NO_EXPORT PieF : ArcF
   // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE BoxF getBoundingBox() const
+  FOG_INLINE err_t getBoundingBox(BoxF& dst) const
   {
-    BoxF result;
-    _g2d.arcf.getBoundingBox(this, &result, true);
-    return result;
+    return PieF::_getBoundingBox(dst, NULL);
   }
 
-  FOG_INLINE RectF getBoundingRect() const
+  FOG_INLINE err_t getBoundingBox(BoxF& dst, const TransformF& tr) const
   {
-    BoxF result;
-    _g2d.arcf.getBoundingBox(this, &result, true);
-    return RectF(result);
+    return PieF::_getBoundingBox(dst, &tr);
+  }
+
+  FOG_INLINE err_t getBoundingRect(RectF& dst) const
+  {
+    return PieF::_getBoundingRect(dst, NULL);
+  }
+
+  FOG_INLINE err_t getBoundingRect(RectF& dst, const TransformF& tr) const
+  {
+    return PieF::_getBoundingRect(dst, &tr);
+  }
+
+  FOG_INLINE err_t _getBoundingBox(BoxF& dst, const TransformF* tr) const
+  {
+    return _g2d.arcf.getBoundingBox(this, &dst, tr, true);
+  }
+
+  FOG_INLINE err_t _getBoundingRect(RectF& dst, const TransformF* tr) const
+  {
+    err_t err = _g2d.arcf.getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr, true);
+    dst.w -= dst.x;
+    dst.h -= dst.y;
+    return err;    
   }
 
   // --------------------------------------------------------------------------
   // [HitTest]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool hitTest(const PointF& pt)
+  FOG_INLINE bool hitTest(const PointF& pt) const
   {
     return _g2d.pief.hitTest(this, &pt);
   }
@@ -105,25 +124,44 @@ struct FOG_NO_EXPORT PieD : ArcD
   // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE BoxD getBoundingBox() const
+  FOG_INLINE err_t getBoundingBox(BoxD& dst) const
   {
-    BoxD result;
-    _g2d.arcd.getBoundingBox(this, &result, true);
-    return result;
+    return PieD::_getBoundingBox(dst, NULL);
   }
 
-  FOG_INLINE RectD getBoundingRect() const
+  FOG_INLINE err_t getBoundingBox(BoxD& dst, const TransformD& tr) const
   {
-    BoxD result;
-    _g2d.arcd.getBoundingBox(this, &result, true);
-    return RectD(result);
+    return PieD::_getBoundingBox(dst, &tr);
+  }
+
+  FOG_INLINE err_t getBoundingRect(RectD& dst) const
+  {
+    return PieD::_getBoundingRect(dst, NULL);
+  }
+
+  FOG_INLINE err_t getBoundingRect(RectD& dst, const TransformD& tr) const
+  {
+    return PieD::_getBoundingRect(dst, &tr);
+  }
+
+  FOG_INLINE err_t _getBoundingBox(BoxD& dst, const TransformD* tr) const
+  {
+    return _g2d.arcd.getBoundingBox(this, &dst, tr, true);
+  }
+
+  FOG_INLINE err_t _getBoundingRect(RectD& dst, const TransformD* tr) const
+  {
+    err_t err = _g2d.arcd.getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr, true);
+    dst.w -= dst.x;
+    dst.h -= dst.y;
+    return err;    
   }
 
   // --------------------------------------------------------------------------
   // [HitTest]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool hitTest(const PointD& pt)
+  FOG_INLINE bool hitTest(const PointD& pt) const
   {
     return _g2d.pied.hitTest(this, &pt);
   }

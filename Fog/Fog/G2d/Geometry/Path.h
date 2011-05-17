@@ -172,6 +172,15 @@ struct FOG_NO_EXPORT PathFlattenParamsD
 struct FOG_NO_EXPORT PathDataF
 {
   // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool hasBoundingBox() const
+  {
+    return (flags & (PATH_DATA_DIRTY_BOUNDING_BOX | PATH_DATA_HAS_BOUNDING_BOX)) == PATH_DATA_HAS_BOUNDING_BOX;
+  }
+
+  // --------------------------------------------------------------------------
   // [Ref / Deref]
   // --------------------------------------------------------------------------
 
@@ -183,7 +192,7 @@ struct FOG_NO_EXPORT PathDataF
 
   FOG_INLINE void deref()
   {
-    if (refCount.deref()) Memory::free(this);
+    if (refCount.deref() && !(flags & PATH_DATA_STATIC)) Memory::free(this);
   }
 
   // --------------------------------------------------------------------------
@@ -192,13 +201,12 @@ struct FOG_NO_EXPORT PathDataF
 
   //! @brief Reference count.
   mutable Atomic<sysuint_t> refCount;
-  //! @brief Whether the path is flat (no curves).
-  uint8_t flat;
-  //! @brief Whether the path bounding box is dirty (must be calculated before
-  //! it can be accessed).
-  uint8_t boundingBoxDirty;
-  //! @brief Reserved for future use.
-  uint8_t reserved[FOG_ARCH_BITS == 32 ? 2 : 6];
+  //! @brief Flags (see @c PATH_DATA).
+  volatile uint32_t flags;
+#if FOG_ARCH_BITS >= 64
+  uint32_t padding;
+#endif // FOG_ARCH_BITS >= 64
+
   //! @brief Path capacity (allocated space for vertices).
   sysuint_t capacity;
   //! @brief Path length (count of vertices used).
@@ -221,6 +229,15 @@ struct FOG_NO_EXPORT PathDataF
 struct FOG_NO_EXPORT PathDataD
 {
   // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool hasBoundingBox() const
+  {
+    return (flags & (PATH_DATA_DIRTY_BOUNDING_BOX | PATH_DATA_HAS_BOUNDING_BOX)) == PATH_DATA_HAS_BOUNDING_BOX;
+  }
+
+  // --------------------------------------------------------------------------
   // [Ref / Deref]
   // --------------------------------------------------------------------------
 
@@ -232,7 +249,7 @@ struct FOG_NO_EXPORT PathDataD
 
   FOG_INLINE void deref()
   {
-    if (refCount.deref()) Memory::free(this);
+    if (refCount.deref() && !(flags & PATH_DATA_STATIC)) Memory::free(this);
   }
 
   // --------------------------------------------------------------------------
@@ -241,13 +258,12 @@ struct FOG_NO_EXPORT PathDataD
 
   //! @brief Reference count.
   mutable Atomic<sysuint_t> refCount;
-  //! @brief Whether the path is flat (no curves).
-  uint8_t flat;
-  //! @brief Whether the path bounding box is dirty (must be calculated before
-  //! it can be accessed).
-  uint8_t boundingBoxDirty;
-  //! @brief Reserved for future use.
-  uint8_t reserved[FOG_ARCH_BITS == 32 ? 2 : 6];
+  //! @brief Flags (see @c PATH_DATA).
+  volatile uint32_t flags;
+#if FOG_ARCH_BITS >= 64
+  uint32_t padding;
+#endif // FOG_ARCH_BITS >= 64
+
   //! @brief Path capacity (allocated space for vertices).
   sysuint_t capacity;
   //! @brief Path length (count of vertices used).
@@ -266,7 +282,7 @@ struct FOG_NO_EXPORT PathDataD
 // [Fog::PathF]
 // ============================================================================
 
-//! @brief Path (float)
+//! @brief Path (float).
 struct FOG_NO_EXPORT PathF
 {
   // --------------------------------------------------------------------------
@@ -345,19 +361,14 @@ struct FOG_NO_EXPORT PathF
     return _g2d.pathf.squeeze(*this);
   }
 
+  FOG_INLINE sysuint_t _prepare(sysuint_t count, uint32_t cntOp)
+  {
+    return _g2d.pathf.prepare(*this, count, cntOp);
+  }
+
   FOG_INLINE sysuint_t _add(sysuint_t count)
   {
     return _g2d.pathf.add(*this, count);
-  }
-
-  //! @brief Get whether the path is flat.
-  //!
-  //! The Path is flat if it has lines only (no curves). To make the path
-  //! flat use the @c flatten() method.
-  FOG_INLINE bool isFlat() const
-  {
-    if (_d->flat >= 2) _g2d.pathf.updateFlat(*this);
-    return (bool)_d->flat;
   }
 
   // --------------------------------------------------------------------------
@@ -654,7 +665,7 @@ struct FOG_NO_EXPORT PathF
   // [Shape]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t _shape(uint32_t shapeType, const void* shapeData, uint32_t direction, const TransformF* tr)
+  FOG_INLINE err_t _shape(uint32_t shapeType, const void* shapeData, uint32_t direction, const TransformF* tr = NULL)
   {
     return _g2d.pathf.shape(*this, shapeType, shapeData, direction, tr);
   }
@@ -820,29 +831,83 @@ struct FOG_NO_EXPORT PathF
   }
 
   // --------------------------------------------------------------------------
+  // [Flat]
+  // --------------------------------------------------------------------------
+
+  //! @brief Get whether the path has quadratic or cubic Bezier curves.
+  FOG_INLINE bool hasCurves() const
+  {
+    if (_d->flags & PATH_DATA_DIRTY_CMD) _g2d.pathf.updateFlat(*this);
+    return (_d->flags & (PATH_DATA_HAS_QUAD_CMD | PATH_DATA_HAS_CUBIC_CMD)) != 0;
+  }
+
+  FOG_INLINE bool hasQuadCurves() const
+  {
+    if (_d->flags & PATH_DATA_DIRTY_CMD) _g2d.pathf.updateFlat(*this);
+    return (_d->flags & PATH_DATA_HAS_QUAD_CMD) != 0;
+  }
+
+  FOG_INLINE bool hasCubicCurves() const
+  {
+    if (_d->flags & PATH_DATA_DIRTY_CMD) _g2d.pathf.updateFlat(*this);
+    return (_d->flags & PATH_DATA_HAS_CUBIC_CMD) != 0;
+  }
+
+  FOG_INLINE err_t flatten(const PathFlattenParamsF& params)
+  {
+    return _g2d.pathf.flatten(*this, *this, params, NULL);
+  }
+
+  static FOG_INLINE err_t flatten(PathF& dst, const PathF& src, const PathFlattenParamsF& params)
+  {
+    return _g2d.pathf.flatten(dst, src, params, NULL);
+  }
+
+  static FOG_INLINE err_t flatten(PathF& dst, const PathF& src, const Range& range, const PathFlattenParamsF& params)
+  {
+    return _g2d.pathf.flatten(dst, src, params, &range);
+  }
+
+  // --------------------------------------------------------------------------
   // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void _updateBoundingBox() const
+  FOG_INLINE bool _hasBoundingBox() const
   {
-    _g2d.pathf.updateBoundingBox(*this);
+    return _d->hasBoundingBox();
   }
 
-  FOG_INLINE bool isBoundingBoxDirty() const
+  FOG_INLINE err_t getBoundingBox(BoxF& dst) const
   {
-    return (bool)_d->boundingBoxDirty;
+    return _getBoundingBox(dst, NULL);
   }
 
-  FOG_INLINE BoxF getBoundingBox() const
+  FOG_INLINE err_t getBoundingBox(BoxF& dst, const TransformF& tr) const
   {
-    if (_d->boundingBoxDirty) _updateBoundingBox();
-    return _d->boundingBox;
+    return _getBoundingBox(dst, &tr);
   }
 
-  FOG_INLINE RectF getBoundingRect() const
+  FOG_INLINE err_t getBoundingRect(RectF& dst) const
   {
-    if (_d->boundingBoxDirty) _updateBoundingBox();
-    return RectF(_d->boundingBox);
+    return _getBoundingRect(dst, NULL);
+  }
+
+  FOG_INLINE err_t getBoundingRect(RectF& dst, const TransformF& tr) const
+  {
+    return _getBoundingRect(dst, &tr);
+  }
+
+  FOG_INLINE err_t _getBoundingBox(BoxF& dst, const TransformF* tr) const
+  {
+    return _g2d.pathf.getBoundingBox(*this, &dst, tr);
+  }
+
+  FOG_INLINE err_t _getBoundingRect(RectF& dst, const TransformF* tr) const
+  {
+    err_t err = _g2d.pathf.getBoundingBox(*this, reinterpret_cast<BoxF*>(&dst), tr);
+    dst.w -= dst.x;
+    dst.h -= dst.y;
+    return err;
   }
 
   // --------------------------------------------------------------------------
@@ -909,25 +974,6 @@ struct FOG_NO_EXPORT PathF
   }
 
   // --------------------------------------------------------------------------
-  // [Flatten]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE err_t flatten(const PathFlattenParamsF& params)
-  {
-    return _g2d.pathf.flatten(*this, *this, params, NULL);
-  }
-
-  static FOG_INLINE err_t flatten(PathF& dst, const PathF& src, const PathFlattenParamsF& params)
-  {
-    return _g2d.pathf.flatten(dst, src, params, NULL);
-  }
-
-  static FOG_INLINE err_t flatten(PathF& dst, const PathF& src, const Range& range, const PathFlattenParamsF& params)
-  {
-    return _g2d.pathf.flatten(dst, src, params, &range);
-  }
-
-  // --------------------------------------------------------------------------
   // [Equality]
   // --------------------------------------------------------------------------
 
@@ -940,48 +986,36 @@ struct FOG_NO_EXPORT PathF
   // [Modified]
   // --------------------------------------------------------------------------
 
+  //! @brief Must be called when the path was modified to invalidate the cached
+  //! bounding-box and the path type.
   FOG_INLINE void _modified()
   {
     FOG_ASSERT(isDetached());
-    _d->flat = 0x2;
-    _d->boundingBoxDirty = true;
+    _d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX | PATH_DATA_DIRTY_CMD;
   }
 
-  //! @brief Invalidate the type of path.
-  //!
-  //! This method must be called after path was manually changed to ensure that
-  //! the flatness is not set to incorrect type.
-  FOG_INLINE void _modifiedPathType()
+  //! @brief Must be called when the path vertex/vertices were manually
+  //! modified, thus bounding-box must be invalidated.
+  FOG_INLINE void _modifiedVertices() const
   {
     FOG_ASSERT(isDetached());
-    _d->flat = 0x2;
+    _d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
   }
 
-  //! @brief Invalidate the path bounding box.
-  //!
-  //! This method must be called after path was manually changed to ensure that
-  //! cached bounding-box will be recalculated when needed.
-  FOG_INLINE void _modifiedBoundingBox() const
+  //! @brief Must be called when the path command/commands were manually
+  //! modified, thus flat-type must be invalidated.
+  FOG_INLINE void _modifiedCommands()
   {
     FOG_ASSERT(isDetached());
-    _d->boundingBoxDirty = true;
+    _d->flags |= PATH_DATA_DIRTY_CMD;
   }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE PathF& operator=(const PathF& other)
-  {
-    setPath(other);
-    return *this;
-  }
-
-  FOG_INLINE PathF& operator+=(const PathF& other)
-  {
-    append(other);
-    return *this;
-  }
+  FOG_INLINE PathF& operator=(const PathF& other) { setPath(other); return *this; }
+  FOG_INLINE PathF& operator+=(const PathF& other) { append(other); return *this; }
 
   FOG_INLINE bool operator==(const PathF& other) const { return  eq(other); }
   FOG_INLINE bool operator!=(const PathF& other) const { return !eq(other); }
@@ -997,7 +1031,7 @@ struct FOG_NO_EXPORT PathF
 // [Fog::PathD]
 // ============================================================================
 
-//! @brief Path (double)
+//! @brief Path (double).
 struct FOG_API PathD
 {
   // --------------------------------------------------------------------------
@@ -1076,19 +1110,14 @@ struct FOG_API PathD
     return _g2d.pathd.squeeze(*this);
   }
 
+  FOG_INLINE sysuint_t _prepare(sysuint_t count, uint32_t cntOp)
+  {
+    return _g2d.pathd.prepare(*this, count, cntOp);
+  }
+
   FOG_INLINE sysuint_t _add(sysuint_t count)
   {
     return _g2d.pathd.add(*this, count);
-  }
-
-  //! @brief Get whether the path is flat.
-  //!
-  //! The Path is flat if it has lines only (no curves). To make the path
-  //! flat use the @c flatten() method.
-  FOG_INLINE bool isFlat() const
-  {
-    if (_d->flat >= 2) _g2d.pathd.updateFlat(*this);
-    return (bool)_d->flat;
   }
 
   // --------------------------------------------------------------------------
@@ -1414,7 +1443,7 @@ struct FOG_API PathD
   // [Shape]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t _shape(uint32_t shapeType, const void* shapeData, uint32_t direction, const TransformD* tr)
+  FOG_INLINE err_t _shape(uint32_t shapeType, const void* shapeData, uint32_t direction, const TransformD* tr = NULL)
   {
     return _g2d.pathd.shape(*this, shapeType, shapeData, direction, tr);
   }
@@ -1444,49 +1473,49 @@ struct FOG_API PathD
   }
 
   //! @brief Add an unclosed quadratic bézier curve to the path.
-  FOG_INLINE err_t quad(const QuadCurveF& object, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t quad(const QuadCurveD& object, uint32_t direction = PATH_DIRECTION_CW)
   {
     return _shape(SHAPE_TYPE_QUAD, &object, direction, NULL);
   }
 
   //! @overload
-  FOG_INLINE err_t quad(const QuadCurveF& object, uint32_t direction, const TransformD& tr)
+  FOG_INLINE err_t quad(const QuadCurveD& object, uint32_t direction, const TransformD& tr)
   {
     return _shape(SHAPE_TYPE_QUAD, &object, direction, &tr);
   }
 
   //! @brief Add an unclosed cubic bézier curve to the path.
-  FOG_INLINE err_t cubic(const QuadCurveF& object, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t cubic(const QuadCurveD& object, uint32_t direction = PATH_DIRECTION_CW)
   {
     return _shape(SHAPE_TYPE_CUBIC, &object, direction, NULL);
   }
 
   //! @overload
-  FOG_INLINE err_t cubic(const QuadCurveF& object, uint32_t direction, const TransformD& tr)
+  FOG_INLINE err_t cubic(const QuadCurveD& object, uint32_t direction, const TransformD& tr)
   {
     return _shape(SHAPE_TYPE_CUBIC, &object, direction, &tr);
   }
 
   //! @brief Add an unclosed arc to the path.
-  FOG_INLINE err_t arc(const ArcF& object, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t arc(const ArcD& object, uint32_t direction = PATH_DIRECTION_CW)
   {
     return _shape(SHAPE_TYPE_ARC, &object, direction, NULL);
   }
 
   //! @overload
-  FOG_INLINE err_t arc(const ArcF& object, uint32_t direction, const TransformD& tr)
+  FOG_INLINE err_t arc(const ArcD& object, uint32_t direction, const TransformD& tr)
   {
     return _shape(SHAPE_TYPE_ARC, &object, direction, &tr);
   }
 
   //! @brief Add a closed rounded ractangle to the path.
-  FOG_INLINE err_t round(const RoundF& object, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t round(const RoundD& object, uint32_t direction = PATH_DIRECTION_CW)
   {
     return _shape(SHAPE_TYPE_ROUND, &object, direction, NULL);
   }
 
   //! @overload
-  FOG_INLINE err_t round(const RoundF& object, uint32_t direction, const TransformD& tr)
+  FOG_INLINE err_t round(const RoundD& object, uint32_t direction, const TransformD& tr)
   {
     return _shape(SHAPE_TYPE_ROUND, &object, direction, &tr);
   }
@@ -1516,25 +1545,25 @@ struct FOG_API PathD
   }
 
   //! @brief Add a closed chord to the path.
-  FOG_INLINE err_t chord(const ArcF& object, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t chord(const ArcD& object, uint32_t direction = PATH_DIRECTION_CW)
   {
     return _shape(SHAPE_TYPE_CHORD, &object, direction, NULL);
   }
 
   //! @overload
-  FOG_INLINE err_t chord(const ArcF& object, uint32_t direction, const TransformD& tr)
+  FOG_INLINE err_t chord(const ArcD& object, uint32_t direction, const TransformD& tr)
   {
     return _shape(SHAPE_TYPE_CHORD, &object, direction, &tr);
   }
 
   //! @brief Add a closed pie to the path.
-  FOG_INLINE err_t pie(const ArcF& object, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t pie(const ArcD& object, uint32_t direction = PATH_DIRECTION_CW)
   {
     return _shape(SHAPE_TYPE_PIE, &object, direction, NULL);
   }
 
   //! @overload
-  FOG_INLINE err_t pie(const ArcF& object, uint32_t direction, const TransformD& tr)
+  FOG_INLINE err_t pie(const ArcD& object, uint32_t direction, const TransformD& tr)
   {
     return _shape(SHAPE_TYPE_PIE, &object, direction, &tr);
   }
@@ -1592,29 +1621,83 @@ struct FOG_API PathD
   }
 
   // --------------------------------------------------------------------------
+  // [Flat]
+  // --------------------------------------------------------------------------
+
+  //! @brief Get whether the path has quadratic or cubic Bezier curves.
+  FOG_INLINE bool hasCurves() const
+  {
+    if (_d->flags & PATH_DATA_DIRTY_CMD) _g2d.pathd.updateFlat(*this);
+    return (_d->flags & (PATH_DATA_HAS_QUAD_CMD | PATH_DATA_HAS_CUBIC_CMD)) != 0;
+  }
+
+  FOG_INLINE bool hasQuadCurves() const
+  {
+    if (_d->flags & PATH_DATA_DIRTY_CMD) _g2d.pathd.updateFlat(*this);
+    return (_d->flags & PATH_DATA_HAS_QUAD_CMD) != 0;
+  }
+
+  FOG_INLINE bool hasCubicCurves() const
+  {
+    if (_d->flags & PATH_DATA_DIRTY_CMD) _g2d.pathd.updateFlat(*this);
+    return (_d->flags & PATH_DATA_HAS_CUBIC_CMD) != 0;
+  }
+
+  FOG_INLINE err_t flatten(const PathFlattenParamsD& params)
+  {
+    return _g2d.pathd.flatten(*this, *this, params, NULL);
+  }
+
+  static FOG_INLINE err_t flatten(PathD& dst, const PathD& src, const PathFlattenParamsD& params)
+  {
+    return _g2d.pathd.flatten(dst, src, params, NULL);
+  }
+
+  static FOG_INLINE err_t flatten(PathD& dst, const PathD& src, const Range& range, const PathFlattenParamsD& params)
+  {
+    return _g2d.pathd.flatten(dst, src, params, &range);
+  }
+
+  // --------------------------------------------------------------------------
   // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void _updateBoundingBox() const
+  FOG_INLINE bool _hasBoundingBox() const
   {
-    _g2d.pathd.updateBoundingBox(*this);
+    return _d->hasBoundingBox();
   }
 
-  FOG_INLINE bool isBoundingBoxDirty() const
+  FOG_INLINE err_t getBoundingBox(BoxD& dst) const
   {
-    return (bool)_d->boundingBoxDirty;
+    return _getBoundingBox(dst, NULL);
   }
 
-  FOG_INLINE BoxD getBoundingBox() const
+  FOG_INLINE err_t getBoundingBox(BoxD& dst, const TransformD& tr) const
   {
-    if (_d->boundingBoxDirty) _updateBoundingBox();
-    return _d->boundingBox;
+    return _getBoundingBox(dst, &tr);
   }
 
-  FOG_INLINE RectD getBoundingRect() const
+  FOG_INLINE err_t getBoundingRect(RectD& dst) const
   {
-    if (_d->boundingBoxDirty) _updateBoundingBox();
-    return RectD(_d->boundingBox);
+    return _getBoundingRect(dst, NULL);
+  }
+
+  FOG_INLINE err_t getBoundingRect(RectD& dst, const TransformD& tr) const
+  {
+    return _getBoundingRect(dst, &tr);
+  }
+
+  FOG_INLINE err_t _getBoundingBox(BoxD& dst, const TransformD* tr) const
+  {
+    return _g2d.pathd.getBoundingBox(*this, &dst, tr);
+  }
+
+  FOG_INLINE err_t _getBoundingRect(RectD& dst, const TransformD* tr) const
+  {
+    err_t err = _g2d.pathd.getBoundingBox(*this, reinterpret_cast<BoxD*>(&dst), tr);
+    dst.w -= dst.x;
+    dst.h -= dst.y;
+    return err;
   }
 
   // --------------------------------------------------------------------------
@@ -1681,25 +1764,6 @@ struct FOG_API PathD
   }
 
   // --------------------------------------------------------------------------
-  // [Flatten]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE err_t flatten(const PathFlattenParamsD& params)
-  {
-    return _g2d.pathd.flatten(*this, *this, params, NULL);
-  }
-
-  static FOG_INLINE err_t flatten(PathD& dst, const PathD& src, const PathFlattenParamsD& params)
-  {
-    return _g2d.pathd.flatten(dst, src, params, NULL);
-  }
-
-  static FOG_INLINE err_t flatten(PathD& dst, const PathD& src, const Range& range, const PathFlattenParamsD& params)
-  {
-    return _g2d.pathd.flatten(dst, src, params, &range);
-  }
-
-  // --------------------------------------------------------------------------
   // [Equality]
   // --------------------------------------------------------------------------
 
@@ -1712,31 +1776,28 @@ struct FOG_API PathD
   // [Modified]
   // --------------------------------------------------------------------------
 
+  //! @brief Must be called when the path was modified to invalidate the cached
+  //! bounding-box and the path type.
   FOG_INLINE void _modified()
   {
     FOG_ASSERT(isDetached());
-    _d->flat = 0x2;
-    _d->boundingBoxDirty = true;
+    _d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX | PATH_DATA_DIRTY_CMD;
   }
 
-  //! @brief Invalidate the type of path.
-  //!
-  //! This method must be called after path was manually changed to ensure that
-  //! the flatness is not set to incorrect type.
-  FOG_INLINE void _modifiedPathType()
+  //! @brief Must be called when the path vertex/vertices were manually
+  //! modified, thus bounding-box must be invalidated.
+  FOG_INLINE void _modifiedVertices() const
   {
     FOG_ASSERT(isDetached());
-    _d->flat = 0x2;
+    _d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
   }
 
-  //! @brief Invalidate the path bounding box.
-  //!
-  //! This method must be called after path was manually changed to ensure that
-  //! cached bounding-box will be recalculated when needed.
-  FOG_INLINE void _modifiedBoundingBox() const
+  //! @brief Must be called when the path command/commands were manually
+  //! modified, thus flat-type must be invalidated.
+  FOG_INLINE void _modifiedCommands()
   {
     FOG_ASSERT(isDetached());
-    _d->boundingBoxDirty = true;
+    _d->flags |= PATH_DATA_DIRTY_CMD;
   }
 
   // --------------------------------------------------------------------------

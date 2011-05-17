@@ -59,32 +59,29 @@ struct FOG_NO_EXPORT PointI
   FOG_INLINE int getX() const { return x; }
   FOG_INLINE int getY() const { return y; }
 
-  FOG_INLINE PointI& set(const PointI& other)
+  FOG_INLINE void set(const PointI& other)
   {
     x = other.x;
     y = other.y;
-    return *this;
   }
 
-  FOG_INLINE PointI& set(int px, int py)
+  FOG_INLINE void set(int px, int py)
   {
     x = px;
     y = py;
-    return *this;
   }
 
-  FOG_INLINE PointI& setX(int px) { x = px; return *this; }
-  FOG_INLINE PointI& setY(int py) { y = py; return *this; }
+  FOG_INLINE void setX(int px) { x = px; }
+  FOG_INLINE void setY(int py) { y = py; }
 
   // --------------------------------------------------------------------------
   // [Reset]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE PointI& reset()
+  FOG_INLINE void reset()
   {
     x = 0;
     y = 0;
-    return *this;
   }
 
   // --------------------------------------------------------------------------
@@ -220,51 +217,48 @@ struct PointF
   FOG_INLINE float getX() const { return x; }
   FOG_INLINE float getY() const { return y; }
 
-  FOG_INLINE PointF& set(const PointI& other)
+  FOG_INLINE void set(const PointI& other)
   {
     x = (float)other.x;
     y = (float)other.y;
-    return *this;
   }
 
-  FOG_INLINE PointF& set(const PointF& other)
+  FOG_INLINE void set(const PointF& other)
   {
     x = other.x;
     y = other.y;
-    return *this;
   }
 
-  FOG_INLINE PointF& set(const PointD& other);
+  FOG_INLINE void set(const PointD& other);
 
-  FOG_INLINE PointF& set(int px, int py)
+  FOG_INLINE void set(int px, int py)
   {
     x = (float)px;
     y = (float)py;
-    return *this;
   }
 
-  FOG_INLINE PointF& set(float px, float py)
+  FOG_INLINE void set(float px, float py)
   {
     x = px;
     y = py;
-    return *this;
   }
 
-  FOG_INLINE PointF& setX(int px) { x = (float)px; return *this; }
-  FOG_INLINE PointF& setY(int py) { y = (float)py; return *this; }
+  FOG_INLINE void setX(int px) { x = (float)px; }
+  FOG_INLINE void setY(int py) { y = (float)py; }
 
-  FOG_INLINE PointF& setX(float px) { x = px; return *this; }
-  FOG_INLINE PointF& setY(float py) { y = py; return *this; }
+  FOG_INLINE void setX(float px) { x = px; }
+  FOG_INLINE void setY(float py) { y = py; }
+
+  FOG_INLINE void setNaN() { x = y = Math::getQNanF(); }
 
   // --------------------------------------------------------------------------
   // [Reset]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE PointF& reset()
+  FOG_INLINE void reset()
   {
     x = 0.0f;
     y = 0.0f;
-    return *this;
   }
 
   // --------------------------------------------------------------------------
@@ -353,9 +347,9 @@ struct PointF
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE PointF& operator=(const PointI& other) { return set(other); }
-  FOG_INLINE PointF& operator=(const PointF& other) { return set(other); }
-  FOG_INLINE PointF& operator=(const PointD& other) { return set(other); }
+  FOG_INLINE PointF& operator=(const PointI& other) { set(other); return *this; }
+  FOG_INLINE PointF& operator=(const PointF& other) { set(other); return *this; }
+  FOG_INLINE PointF& operator=(const PointD& other) { set(other); return *this; }
 
   FOG_INLINE PointF operator+(const PointI& other) const { return PointF(x + (float)other.x, y + (float)other.y); }
   FOG_INLINE PointF operator+(const PointF& other) const { return PointF(x + other.x, y + other.y); }
@@ -442,52 +436,49 @@ struct PointD
   FOG_INLINE double getX() const { return x; }
   FOG_INLINE double getY() const { return y; }
 
-  FOG_INLINE PointD& set(const PointI& other)
+  FOG_INLINE void set(const PointI& other)
   {
     x = (double)other.x;
     y = (double)other.y;
-    return *this;
   }
 
-  FOG_INLINE PointD& set(const PointF& other)
+  FOG_INLINE void set(const PointF& other)
   {
     x = (double)other.x;
     y = (double)other.y;
-    return *this;
   }
 
-  FOG_INLINE PointD& set(const PointD& other)
+  FOG_INLINE void set(const PointD& other)
   {
     x = other.x;
     y = other.y;
-    return *this;
   }
 
-  FOG_INLINE PointD& set(double px, double py)
+  FOG_INLINE void set(double px, double py)
   {
     x = px;
     y = py;
-    return *this;
   }
 
-  FOG_INLINE PointD& setX(int px) { x = (double)px; return *this; }
-  FOG_INLINE PointD& setY(int py) { y = (double)py; return *this; }
+  FOG_INLINE void setX(int px) { x = (double)px; }
+  FOG_INLINE void setY(int py) { y = (double)py; }
 
-  FOG_INLINE PointD& setX(float px) { x = (double)px; return *this; }
-  FOG_INLINE PointD& setY(float py) { y = (double)py; return *this; }
+  FOG_INLINE void setX(float px) { x = (double)px; }
+  FOG_INLINE void setY(float py) { y = (double)py; }
 
-  FOG_INLINE PointD& setX(double px) { x = px; return *this; }
-  FOG_INLINE PointD& setY(double py) { y = py; return *this; }
+  FOG_INLINE void setX(double px) { x = px; }
+  FOG_INLINE void setY(double py) { y = py; }
+
+  FOG_INLINE void setNaN() { x = y = Math::getQNanD(); }
 
   // --------------------------------------------------------------------------
   // [Reset]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE PointD& reset()
+  FOG_INLINE void reset()
   {
     x = 0.0;
     y = 0.0;
-    return *this;
   }
 
   // --------------------------------------------------------------------------
@@ -579,9 +570,9 @@ struct PointD
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE PointD& operator=(const PointI& other) { return set(other); }
-  FOG_INLINE PointD& operator=(const PointF& other) { return set(other); }
-  FOG_INLINE PointD& operator=(const PointD& other) { return set(other); }
+  FOG_INLINE PointD& operator=(const PointI& other) { set(other); return *this; }
+  FOG_INLINE PointD& operator=(const PointF& other) { set(other); return *this; }
+  FOG_INLINE PointD& operator=(const PointD& other) { set(other); return *this; }
 
   FOG_INLINE PointD operator+(const PointI& other) const { return PointD(x + (double)other.x, y + (double)other.y); }
   FOG_INLINE PointD operator+(const PointF& other) const { return PointD(x + (double)other.x, y + (double)other.y); }
@@ -619,9 +610,9 @@ struct PointD
 // [Implemented-Later]
 // ============================================================================
 
-FOG_INLINE PointF& PointF::set(const PointD& other)
+FOG_INLINE void PointF::set(const PointD& other)
 {
-  return set(float(other.x), float(other.y));
+  set(float(other.x), float(other.y));
 }
 
 // ============================================================================

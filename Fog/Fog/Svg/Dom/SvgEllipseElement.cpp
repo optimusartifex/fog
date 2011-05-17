@@ -12,6 +12,7 @@
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Svg/Dom/SvgEllipseElement_p.h>
 #include <Fog/Svg/Visit/SvgRender.h>
+#include <Fog/Svg/Visit/SvgVisitor.h>
 
 namespace Fog {
 
@@ -43,27 +44,26 @@ XmlAttribute* SvgEllipseElement::_createAttribute(const ManagedString& name) con
   return base::_createAttribute(name);
 }
 
-err_t SvgEllipseElement::onRenderShape(SvgRenderContext* context) const
+err_t SvgEllipseElement::onProcess(SvgVisitor* visitor) const
 {
   if (a_rx.isAssigned() && a_ry.isAssigned())
   {
     float cx = a_cx.isAssigned() ? a_cx.getCoordComputed() : 0.0f;
     float cy = a_cy.isAssigned() ? a_cy.getCoordComputed() : 0.0f;
+
     float rx = Math::abs(a_rx.getCoordComputed());
     float ry = Math::abs(a_ry.getCoordComputed());
 
     if (rx <= 0.0f || ry <= 0.0f) return ERR_OK;
 
-    context->drawEllipse(EllipseF(PointF(cx, cy), PointF(rx, ry)));
-    return ERR_OK;
+    ShapeF shape(EllipseF(PointF(cx, cy), PointF(rx, ry)));
+    return visitor->onShape((SvgElement*)this, shape);
   }
-  else
-  {
-    return ERR_OK;
-  }
+
+  return ERR_OK;
 }
 
-err_t SvgEllipseElement::onCalcBoundingBox(RectF* box) const
+err_t SvgEllipseElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
 {
   if (a_rx.isAssigned() && a_ry.isAssigned())
   {
@@ -74,14 +74,12 @@ err_t SvgEllipseElement::onCalcBoundingBox(RectF* box) const
     float ry = a_ry.getCoordComputed();
 
     if (rx <= 0.0f || ry <= 0.0f) goto _Fail;
-
-    box->setRect(cx - rx, cy - ry, rx * 2.0f, ry * 2.0f);
-    return ERR_OK;
+    return EllipseF(PointF(cx, cy), PointF(rx, ry))._getBoundingBox(box, tr);
   }
 
 _Fail:
-  box->reset();
-  return ERR_OK;
+  box.reset();
+  return ERR_GEOMETRY_INVALID;
 }
 
 } // Fog namespace

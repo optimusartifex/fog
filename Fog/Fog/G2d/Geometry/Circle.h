@@ -73,24 +73,37 @@ struct FOG_NO_EXPORT CircleF
   // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE BoxF getBoundingBox() const
+  FOG_INLINE err_t getBoundingBox(BoxF& dst) const
   {
-    float x0 = center.x - radius;
-    float y0 = center.y - radius;
-    float x1 = center.x + radius;
-    float y1 = center.y + radius;
-
-    return BoxF(x0, y0, x1, y1);
+    return _getBoundingBox(dst, NULL);
   }
 
-  FOG_INLINE RectF getBoundingRect() const
+  FOG_INLINE err_t getBoundingBox(BoxF& dst, const TransformF& tr) const
   {
-    float x0 = center.x - radius;
-    float y0 = center.y - radius;
-    float x1 = center.x + radius;
-    float y1 = center.y + radius;
+    return _getBoundingBox(dst, &tr);
+  }
 
-    return RectF(x0, y0, x1 - x0, y1 - y0);
+  FOG_INLINE err_t getBoundingRect(RectF& dst) const
+  {
+    return _getBoundingRect(dst, NULL);
+  }
+
+  FOG_INLINE err_t getBoundingRect(RectF& dst, const TransformF& tr) const
+  {
+    return _getBoundingRect(dst, &tr);
+  }
+
+  FOG_INLINE err_t _getBoundingBox(BoxF& dst, const TransformF* tr) const
+  {
+    return _g2d.circlef.getBoundingBox(this, &dst, tr);
+  }
+
+  FOG_INLINE err_t _getBoundingRect(RectF& dst, const TransformF* tr) const
+  {
+    err_t err = _g2d.circlef.getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr);
+    dst.w -= dst.x;
+    dst.h -= dst.y;
+    return err;    
   }
 
   // --------------------------------------------------------------------------
@@ -109,6 +122,15 @@ struct FOG_NO_EXPORT CircleF
   FOG_INLINE void translate(const PointF& pt)
   {
     center += pt;
+  }
+
+  // --------------------------------------------------------------------------
+  // [ToCSpline]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE uint toCSpline(PointF* dst) const
+  {
+    return _g2d.circlef.toCSpline(this, dst);
   }
 
   // --------------------------------------------------------------------------
@@ -200,24 +222,37 @@ struct FOG_NO_EXPORT CircleD
   // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE BoxD getBoundingBox() const
+  FOG_INLINE err_t getBoundingBox(BoxD& dst) const
   {
-    double x0 = center.x - radius;
-    double y0 = center.y - radius;
-    double x1 = center.x + radius;
-    double y1 = center.y + radius;
-
-    return BoxD(x0, y0, x1, y1);
+    return _getBoundingBox(dst, NULL);
   }
 
-  FOG_INLINE RectD getBoundingRect() const
+  FOG_INLINE err_t getBoundingBox(BoxD& dst, const TransformD& tr) const
   {
-    double x0 = center.x - radius;
-    double y0 = center.y - radius;
-    double x1 = center.x + radius;
-    double y1 = center.y + radius;
+    return _getBoundingBox(dst, &tr);
+  }
 
-    return RectD(x0, y0, x1 - x0, y1 - y0);
+  FOG_INLINE err_t getBoundingRect(RectD& dst) const
+  {
+    return _getBoundingRect(dst, NULL);
+  }
+
+  FOG_INLINE err_t getBoundingRect(RectD& dst, const TransformD& tr) const
+  {
+    return _getBoundingRect(dst, &tr);
+  }
+
+  FOG_INLINE err_t _getBoundingBox(BoxD& dst, const TransformD* tr) const
+  {
+    return _g2d.circled.getBoundingBox(this, &dst, tr);
+  }
+
+  FOG_INLINE err_t _getBoundingRect(RectD& dst, const TransformD* tr) const
+  {
+    err_t err = _g2d.circled.getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr);
+    dst.w -= dst.x;
+    dst.h -= dst.y;
+    return err;    
   }
 
   // --------------------------------------------------------------------------
@@ -236,6 +271,15 @@ struct FOG_NO_EXPORT CircleD
   FOG_INLINE void translate(const PointD& pt)
   {
     center += pt;
+  }
+
+  // --------------------------------------------------------------------------
+  // [ToCSpline]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE uint toCSpline(PointD* dst) const
+  {
+    return _g2d.circled.toCSpline(this, dst);
   }
 
   // --------------------------------------------------------------------------

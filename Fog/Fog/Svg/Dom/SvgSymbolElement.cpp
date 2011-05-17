@@ -12,6 +12,7 @@
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Svg/Dom/SvgSymbolElement_p.h>
 #include <Fog/Svg/Visit/SvgRender.h>
+#include <Fog/Svg/Visit/SvgVisitor.h>
 
 namespace Fog {
 
@@ -20,7 +21,7 @@ namespace Fog {
 // ============================================================================
 
 SvgSymbolElement::SvgSymbolElement() :
-  SvgElement(fog_strings->getString(STR_SVG_ELEMENT_symbol), SVG_ELEMENT_SYMBOL)
+  SvgStyledElement(fog_strings->getString(STR_SVG_ELEMENT_symbol), SVG_ELEMENT_SYMBOL)
 {
 }
 
@@ -29,9 +30,10 @@ SvgSymbolElement::~SvgSymbolElement()
   _removeAttributes();
 }
 
-err_t SvgSymbolElement::onRender(SvgRenderContext* context) const
+err_t SvgSymbolElement::onProcess(SvgVisitor* visitor) const
 {
-  return SvgElement::_walkAndRender(this, context);
+  if (!hasChildNodes()) return ERR_OK;
+  return _visitContainer(visitor);
 }
 
 } // Fog namespace

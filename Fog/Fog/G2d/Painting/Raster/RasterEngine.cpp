@@ -2148,7 +2148,7 @@ err_t FOG_CDECL RasterPainterImpl_::restore(Painter& self)
   RasterPainterEngine* engine = reinterpret_cast<RasterPainterEngine*>(self._engine);
 
   RasterState* state = engine->state;
-  if (FOG_IS_NULL(state)) return ERR_PAINTER_NO_STATE_TO_RESTORE;
+  if (FOG_IS_NULL(state)) return ERR_PAINTER_NO_STATE;
 
   // Get the states which must be restored.
   uint32_t restoreFlags = engine->savedStateFlags;
@@ -2895,6 +2895,8 @@ _Fail:
 
 void RasterPainterImpl_::changedTransform(RasterPainterEngine* engine)
 {
+  engine->masterFlags &= ~RASTER_NO_PAINT_FINAL_TRANSFORM;
+
   engine->ctx.rasterHints.rectToRectTransform = 1;
   engine->ctx.rasterHints.finalTransformF = 0;
 
@@ -2911,26 +2913,25 @@ void RasterPainterImpl_::changedTransform(RasterPainterEngine* engine)
 
   switch (engine->finalTransform.getType())
   {
+    case TRANSFORM_TYPE_DEGENERATE:
+      engine->masterFlags |= RASTER_NO_PAINT_FINAL_TRANSFORM;
+      engine->ctx.rasterHints.rectToRectTransform = 0;
+      return;
+
     case TRANSFORM_TYPE_PROJECTION:
       engine->ctx.rasterHints.rectToRectTransform = 0;
-      break;
+      return;
 
     case TRANSFORM_TYPE_AFFINE:
     case TRANSFORM_TYPE_ROTATION:
-      if ((!Math::isFuzzyZero(engine->finalTransform._00) && !Math::isFuzzyZero(engine->finalTransform._01)) ||
-          (!Math::isFuzzyZero(engine->finalTransform._10) && !Math::isFuzzyZero(engine->finalTransform._11)) )
-      {
-        engine->ctx.rasterHints.rectToRectTransform = 0;
-        break;
-      }
+      engine->ctx.rasterHints.rectToRectTransform = 0;
+      return;
 
-      if (!Math::isFuzzyZero(engine->finalTransform._00)) break;
-      if (!Math::isFuzzyZero(engine->finalTransform._11)) break;
-
+    case TRANSFORM_TYPE_SWAP:
       if (!Math::isFuzzyToInt(engine->finalTransform._01, engine->finalTransformI._sx)) break;
       if (!Math::isFuzzyToInt(engine->finalTransform._10, engine->finalTransformI._sy)) break;
 
-      engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_SCALING;
+      engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_SWAP;
       goto _Translation;
 
     case TRANSFORM_TYPE_SCALING:
@@ -2971,7 +2972,7 @@ bool RasterPainterImpl_::doIntegralTransformAndClip(RasterPainterEngine* engine,
 
   switch (engine->finalTransformI._type)
   {
-    case RASTER_INTEGRAL_TRANSFORM_ROTATION:
+    case RASTER_INTEGRAL_TRANSFORM_SWAP:
       tx += src.y * engine->finalTransformI._sx;
       ty += src.x * engine->finalTransformI._sy;
 
@@ -3614,12 +3615,13 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPathF(Painter& self, const PathF& 
     engine->strokeParams.f.instance() = engine->strokeParams.d.instance();
   }
 
-  engine->ctx.tmpPathF[0].clear();
+  PathF& tmp = engine->ctx.tmpPathF[0];
+  tmp.clear();
 
   PathStrokerF stroker(engine->strokeParams.f.instance());
-  stroker.strokePath(engine->ctx.tmpPathF[0], p);
+  stroker.strokePath(tmp, p);
 
-  return doFillUntransformedPathF(engine, engine->ctx.tmpPathF[0], FILL_RULE_NON_ZERO, true);
+  return doFillUntransformedPathF(engine, tmp, FILL_RULE_NON_ZERO, true);
 }
 
 template<int _MODE>
@@ -3634,12 +3636,13 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPathD(Painter& self, const PathD& 
     engine->strokeParams.d.instance() = engine->strokeParams.f.instance();
   }
 
-  engine->ctx.tmpPathD[0].clear();
+  PathD& tmp = engine->ctx.tmpPathD[0];
+  tmp.clear();
 
   PathStrokerD stroker(engine->strokeParams.d.instance());
-  stroker.strokePath(engine->ctx.tmpPathD[0], p);
+  stroker.strokePath(tmp, p);
 
-  return doFillUntransformedPathD(engine, engine->ctx.tmpPathD[0], FILL_RULE_NON_ZERO, true);
+  return doFillUntransformedPathD(engine, tmp, FILL_RULE_NON_ZERO, true);
 }
 
 // ============================================================================
@@ -4112,7 +4115,7 @@ _Scaling:
       return doBlitNormalizedTransformedImageI(engine, BoxI(dstX, dstY, dstW, dstH), i, RectI(iX, iY, iW, iH), tr);
     }
 
-    case RASTER_INTEGRAL_TRANSFORM_ROTATION:
+    case RASTER_INTEGRAL_TRANSFORM_SWAP:
     {
       d = dstX;
 
@@ -4826,7 +4829,7 @@ err_t RasterPainterImpl<_MODE>::doFillUntransformedPathF(RasterPainterEngine* en
             return ERR_OK;
 
           default:
-            return ERR_PATH_INVALID;
+            return ERR_GEOMETRY_INVALID;
         }
       }
       else
@@ -4885,7 +4888,7 @@ err_t RasterPainterImpl<_MODE>::doFillUntransformedPathD(RasterPainterEngine* en
             return ERR_OK;
 
           default:
-            return ERR_PATH_INVALID;
+            return ERR_GEOMETRY_INVALID;
         }
       }
       else

@@ -13,6 +13,7 @@
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/Debug.h>
+#include <Fog/Core/Global/Internal_Core_p.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Memory.h>
@@ -20,6 +21,7 @@
 #include <Fog/G2d/Geometry/Math2d.h>
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Geometry/PathStroker.h>
+#include <Fog/G2d/Geometry/PathTmp_p.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Transform.h>
 
@@ -57,7 +59,7 @@ err_t _ListDoubleFromListFloat(List<double>& dst, const List<float>& src)
 // [Fog::PathStrokerContextT<> - Declaration]
 // ============================================================================
 
-template<typename Number>
+template<typename NumT>
 struct PathStrokerContextT
 {
   // --------------------------------------------------------------------------
@@ -65,10 +67,10 @@ struct PathStrokerContextT
   // --------------------------------------------------------------------------
 
   FOG_INLINE PathStrokerContextT(
-    const typename PathStrokerT<Number>::T& stroker,
-    typename PathT<Number>::T& dst,
-    const typename TransformT<Number>::T* transform,
-    const typename BoxT<Number>::T* clipBox)
+    const NumT_(PathStroker)& stroker,
+    NumT_(Path)& dst,
+    const NumT_(Transform)* transform,
+    const NumT_(Box)* clipBox)
     :
     stroker(stroker),
     dst(dst),
@@ -89,9 +91,9 @@ struct PathStrokerContextT
   // --------------------------------------------------------------------------
 
   err_t strokeShape(uint32_t shapeType, const void* shapeData);
-  err_t strokePath(const typename PathT<Number>::T& src);
+  err_t strokePath(const NumT_(Path)& src);
 
-  err_t strokePathPrivate(const typename PathT<Number>::T& src);
+  err_t strokePathPrivate(const NumT_(Path)& src);
 
   // --------------------------------------------------------------------------
   // [Prepare / Finalize]
@@ -101,57 +103,57 @@ struct PathStrokerContextT
   err_t _grow();
 
   err_t calcArc(
-    Number x,   Number y,
-    Number dx1, Number dy1,
-    Number dx2, Number dy2);
+    NumT x,   NumT y,
+    NumT dx1, NumT dy1,
+    NumT dx2, NumT dy2);
 
   err_t calcMiter(
-    const typename PointT<Number>::T& v0,
-    const typename PointT<Number>::T& v1,
-    const typename PointT<Number>::T& v2,
-    Number dx1, Number dy1,
-    Number dx2, Number dy2,
+    const NumT_(Point)& v0,
+    const NumT_(Point)& v1,
+    const NumT_(Point)& v2,
+    NumT dx1, NumT dy1,
+    NumT dx2, NumT dy2,
     int lineJoin,
-    Number mlimit,
-    Number dbevel);
+    NumT mlimit,
+    NumT dbevel);
 
   err_t calcCap(
-    const typename PointT<Number>::T& v0,
-    const typename PointT<Number>::T& v1,
-    Number len,
+    const NumT_(Point)& v0,
+    const NumT_(Point)& v1,
+    NumT len,
     uint32_t cap);
 
   err_t calcJoin(
-    const typename PointT<Number>::T& v0,
-    const typename PointT<Number>::T& v1,
-    const typename PointT<Number>::T& v2,
-    Number len1,
-    Number len2);
+    const NumT_(Point)& v0,
+    const NumT_(Point)& v1,
+    const NumT_(Point)& v2,
+    NumT len1,
+    NumT len2);
 
-  err_t strokePathFigure(const typename PointT<Number>::T* src, sysuint_t count, bool outline);
+  err_t strokePathFigure(const NumT_(Point)* src, sysuint_t count, bool outline);
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  const typename PathStrokerT<Number>::T& stroker;
+  const NumT_(PathStroker)& stroker;
 
-  typename PathT<Number>::T& dst;
+  NumT_(Path)& dst;
   sysuint_t dstInitial;
 
-  typename PointT<Number>::T* dstCur;
-  typename PointT<Number>::T* dstEnd;
-  // typename PointT<Number>::T* pts;
+  NumT_(Point)* dstCur;
+  NumT_(Point)* dstEnd;
+  // NumT_(Point)* pts;
   // uint8_t *cmd;
   // sysuint_t remain;
 
-  const typename TransformT<Number>::T* transform;
-  const typename BoxT<Number>::T* clipBox;
+  const NumT_(Transform)* transform;
+  const NumT_(Box)* clipBox;
 
   //! @brief Memory buffer used to store distances.
   PBuffer<1024> buffer;
 
-  Number* distances;
+  NumT* distances;
   sysuint_t distancesAlloc;
 };
 
@@ -159,24 +161,24 @@ struct PathStrokerContextT
 // [Fog::PathStrokerContextT<> - Stroke]
 // ============================================================================
 
-template<typename Number>
-err_t PathStrokerContextT<Number>::strokeShape(uint32_t shapeType, const void* shapeData)
+template<typename NumT>
+err_t PathStrokerContextT<NumT>::strokeShape(uint32_t shapeType, const void* shapeData)
 {
-  typename PathT<Number>::T path;
-  path._shape(shapeType, shapeData, PATH_DIRECTION_CW, NULL);
-  return strokePath(path);
+  NumT_T1(PathTmp, 32) tmp;
+  tmp._shape(shapeType, shapeData, PATH_DIRECTION_CW, NULL);
+  return strokePath(tmp);
 }
 
-template<typename Number>
-err_t PathStrokerContextT<Number>::strokePath(const typename PathT<Number>::T& src)
+template<typename NumT>
+err_t PathStrokerContextT<NumT>::strokePath(const NumT_(Path)& src)
 {
   // We need:
   // - the Path instances have to be different.
   // - source path must be flat.
-  if (&dst == &src || !src.isFlat() || !stroker._transform.isIdentity())
+  if (&dst == &src || src.hasCurves() || !stroker._transform.isIdentity())
   {
-    typename PathT<Number>::T tmp;
-    FOG_RETURN_ON_ERROR(PathT<Number>::T::flatten(tmp, src, stroker._flatness));
+    NumT_T1(PathTmp, 200) tmp;
+    FOG_RETURN_ON_ERROR(NumI_(Path)::flatten(tmp, src, stroker._flatness));
     return strokePathPrivate(tmp);
   }
   else
@@ -185,11 +187,11 @@ err_t PathStrokerContextT<Number>::strokePath(const typename PathT<Number>::T& s
   }
 }
 
-template<typename Number>
-err_t PathStrokerContextT<Number>::strokePathPrivate(const typename PathT<Number>::T& src)
+template<typename NumT>
+err_t PathStrokerContextT<NumT>::strokePathPrivate(const NumT_(Path)& src)
 {
   const uint8_t* commands = src.getCommands();
-  const typename PointT<Number>::T* vertices = src.getVertices();
+  const NumT_(Point)* vertices = src.getVertices();
 
   // Traverse path, find moveTo / lineTo segments and stroke them.
   const uint8_t* subCommand = NULL;
@@ -270,8 +272,8 @@ err_t PathStrokerContextT<Number>::strokePathPrivate(const typename PathT<Number
 #define CUR_INDEX() \
   ( (sysuint_t)(dstCur - dst._d->vertices) )
 
-template<typename Number>
-err_t PathStrokerContextT<Number>::_begin()
+template<typename NumT>
+err_t PathStrokerContextT<NumT>::_begin()
 {
   sysuint_t cap = dst.getCapacity();
   sysuint_t remain = cap - dst.getLength();
@@ -284,7 +286,7 @@ err_t PathStrokerContextT<Number>::_begin()
     FOG_RETURN_ON_ERROR(dst.reserve(cap));
   }
 
-  dstCur = const_cast<typename PointT<Number>::T*>(dst.getVertices());
+  dstCur = const_cast<NumT_(Point)*>(dst.getVertices());
   dstEnd = dstCur;
 
   dstCur += dst.getLength();
@@ -293,8 +295,8 @@ err_t PathStrokerContextT<Number>::_begin()
   return ERR_OK;
 }
 
-template<typename Number>
-err_t PathStrokerContextT<Number>::_grow()
+template<typename NumT>
+err_t PathStrokerContextT<NumT>::_grow()
 {
   sysuint_t len = dst._d->length;
   sysuint_t cap = dst._d->capacity;
@@ -312,7 +314,7 @@ err_t PathStrokerContextT<Number>::_grow()
     return err;
   }
 
-  dstCur = const_cast<typename PointT<Number>::T*>(dst.getVertices());
+  dstCur = const_cast<NumT_(Point)*>(dst.getVertices());
   dstEnd = dstCur;
 
   dstCur += dst.getLength();
@@ -322,28 +324,28 @@ err_t PathStrokerContextT<Number>::_grow()
 };
 
 #if 0
-err_t PathStrokerContextT<Number>::calcArc(
-  Number x,   Number y,
-  Number dx1, Number dy1,
-  Number dx2, Number dy2)
+err_t PathStrokerContextT<NumT>::calcArc(
+  NumT x,   NumT y,
+  NumT dx1, NumT dy1,
+  NumT dx2, NumT dy2)
 {
-  Number a1 = Math::atan2(dy1 * stroker._wSign, dx1 * stroker._wSign);
-  Number a2 = Math::atan2(dy2 * stroker._wSign, dx2 * stroker._wSign);
-  Number da = stroker._da;
+  NumT a1 = Math::atan2(dy1 * stroker._wSign, dx1 * stroker._wSign);
+  NumT a2 = Math::atan2(dy2 * stroker._wSign, dx2 * stroker._wSign);
+  NumT da = stroker._da;
   int i, n;
 
   ADD_VERTEX(x + dx1, y + dy1);
   if (stroker._wSign > 0)
   {
-    if (a1 > a2) a2 += 2.0 * MATH_PI;
+    if (a1 > a2) a2 += MATH_TWO_PI;
     n = int((a2 - a1) / da);
     da = (a2 - a1) / (n + 1);
     a1 += da;
 
     for (i = 0; i < n; i++)
     {
-      Number a1Sin;
-      Number a1Cos;
+      NumT a1Sin;
+      NumT a1Cos;
       Math::sincos(a1, &a1Sin, &a1Cos);
 
       ADD_VERTEX(x + a1Cos * stroker._w, y + a1Sin * stroker._w);
@@ -352,15 +354,15 @@ err_t PathStrokerContextT<Number>::calcArc(
   }
   else
   {
-    if (a1 < a2) a2 -= 2.0 * MATH_PI;
+    if (a1 < a2) a2 -= MATH_TWO_PI;
     n = int((a1 - a2) / da);
     da = (a1 - a2) / (n + 1);
     a1 -= da;
 
     for (i = 0; i < n; i++)
     {
-      Number a1Sin;
-      Number a1Cos;
+      NumT a1Sin;
+      NumT a1Cos;
       Math::sincos(a1, &a1Sin, &a1Cos);
 
       ADD_VERTEX(x + a1Cos * stroker._w, y + a1Sin * stroker._w);
@@ -373,14 +375,14 @@ err_t PathStrokerContextT<Number>::calcArc(
 }
 #endif
 
-template<typename Number>
-err_t PathStrokerContextT<Number>::calcArc(
-  Number x,   Number y,
-  Number dx1, Number dy1,
-  Number dx2, Number dy2)
+template<typename NumT>
+err_t PathStrokerContextT<NumT>::calcArc(
+  NumT x,   NumT y,
+  NumT dx1, NumT dy1,
+  NumT dx2, NumT dy2)
 {
-  Number a1, a2;
-  Number da = stroker._da;
+  NumT a1, a2;
+  NumT da = stroker._da;
   int i, n;
 
   ADD_VERTEX(x + dx1, y + dy1);
@@ -388,14 +390,14 @@ err_t PathStrokerContextT<Number>::calcArc(
   {
     a1 = Math::atan2(dy1, dx1);
     a2 = Math::atan2(dy2, dx2);
-    if (a1 > a2) a2 += Number(2.0 * MATH_PI);
+    if (a1 > a2) a2 += NumT(MATH_TWO_PI);
     n = int((a2 - a1) / da);
   }
   else
   {
     a1 = Math::atan2(-dy1, -dx1);
     a2 = Math::atan2(-dy2, -dx2);
-    if (a1 < a2) a2 -= Number(2.0 * MATH_PI);
+    if (a1 < a2) a2 -= NumT(MATH_TWO_PI);
     n = int((a1 - a2) / da);
   }
 
@@ -404,8 +406,8 @@ err_t PathStrokerContextT<Number>::calcArc(
 
   for (i = 0; i < n; i++)
   {
-    Number a1Sin;
-    Number a1Cos;
+    NumT a1Sin;
+    NumT a1Cos;
     Math::sincos(a1, &a1Sin, &a1Cos);
 
     ADD_VERTEX(x + a1Cos * stroker._w, y + a1Sin * stroker._w);
@@ -416,27 +418,27 @@ err_t PathStrokerContextT<Number>::calcArc(
   return ERR_OK;
 }
 
-template<typename Number>
-err_t PathStrokerContextT<Number>::calcMiter(
-  const typename PointT<Number>::T& v0,
-  const typename PointT<Number>::T& v1,
-  const typename PointT<Number>::T& v2,
-  Number dx1, Number dy1,
-  Number dx2, Number dy2,
+template<typename NumT>
+err_t PathStrokerContextT<NumT>::calcMiter(
+  const NumT_(Point)& v0,
+  const NumT_(Point)& v1,
+  const NumT_(Point)& v2,
+  NumT dx1, NumT dy1,
+  NumT dx2, NumT dy2,
   int lineJoin,
-  Number mlimit,
-  Number dbevel)
+  NumT mlimit,
+  NumT dbevel)
 {
-  typename PointT<Number>::T pi(v1.x, v1.y);
-  Number di = Number(1);
-  Number lim = stroker._wAbs * mlimit;
+  NumT_(Point) pi(v1.x, v1.y);
+  NumT di = NumT(1);
+  NumT lim = stroker._wAbs * mlimit;
   bool intersectionFailed  = true; // Assume the worst
 
   if (Math2d::intersectLine(pi,
-    typename PointT<Number>::T(v0.x + dx1, v0.y - dy1),
-    typename PointT<Number>::T(v1.x + dx1, v1.y - dy1),
-    typename PointT<Number>::T(v1.x + dx2, v1.y - dy2),
-    typename PointT<Number>::T(v2.x + dx2, v2.y - dy2)))
+    NumT_(Point)(v0.x + dx1, v0.y - dy1),
+    NumT_(Point)(v1.x + dx1, v1.y - dy1),
+    NumT_(Point)(v1.x + dx2, v1.y - dy2),
+    NumT_(Point)(v2.x + dx2, v2.y - dy2)))
   {
     // Calculation of the intersection succeeded.
     di = Math::dist(v1.x, v1.y, pi.x, pi.y);
@@ -457,7 +459,7 @@ err_t PathStrokerContextT<Number>::calcMiter(
     //
     // This condition determines whether the next line segments continues
     // the previous one or goes back.
-    typename PointT<Number>::T vt(v1.x + dx1, v1.y - dy1);
+    NumT_(Point) vt(v1.x + dx1, v1.y - dy1);
 
     if ((Math2d::crossProduct(v0, v1, vt) < 0.0) ==
         (Math2d::crossProduct(v1, v2, vt) < 0.0))
@@ -493,10 +495,10 @@ err_t PathStrokerContextT<Number>::calcMiter(
       }
       else
       {
-        Number x1 = v1.x + dx1;
-        Number y1 = v1.y - dy1;
-        Number x2 = v1.x + dx2;
-        Number y2 = v1.y - dy2;
+        NumT x1 = v1.x + dx1;
+        NumT y1 = v1.y - dy1;
+        NumT x2 = v1.x + dx2;
+        NumT y2 = v1.y - dy2;
         di = (lim - dbevel) / (di - dbevel);
         ADD_VERTEX(x1 + (pi.x - x1) * di, y1 + (pi.y - y1) * di);
         ADD_VERTEX(x2 + (pi.x - x2) * di, y2 + (pi.y - y2) * di);
@@ -507,17 +509,17 @@ err_t PathStrokerContextT<Number>::calcMiter(
   return ERR_OK;
 }
 
-template<typename Number>
-err_t PathStrokerContextT<Number>::calcCap(
-  const typename PointT<Number>::T& v0,
-  const typename PointT<Number>::T& v1,
-  Number len,
+template<typename NumT>
+err_t PathStrokerContextT<NumT>::calcCap(
+  const NumT_(Point)& v0,
+  const NumT_(Point)& v1,
+  NumT len,
   uint32_t cap)
 {
-  Number ilen = Number(1.0) / len;
+  NumT ilen = NumT(1.0) / len;
 
-  Number dx1 = (v1.y - v0.y) * ilen;
-  Number dy1 = (v1.x - v0.x) * ilen;
+  NumT dx1 = (v1.y - v0.y) * ilen;
+  NumT dy1 = (v1.x - v0.x) * ilen;
 
   dx1 *= stroker._w;
   dy1 *= stroker._w;
@@ -533,8 +535,8 @@ err_t PathStrokerContextT<Number>::calcCap(
 
     case LINE_CAP_SQUARE:
     {
-      Number dx2 = dy1 * stroker._wSign;
-      Number dy2 = dx1 * stroker._wSign;
+      NumT dx2 = dy1 * stroker._wSign;
+      NumT dy2 = dx1 * stroker._wSign;
 
       ADD_VERTEX(v0.x - dx1 - dx2, v0.y + dy1 - dy2);
       ADD_VERTEX(v0.x + dx1 - dx2, v0.y - dy1 - dy2);
@@ -545,8 +547,8 @@ err_t PathStrokerContextT<Number>::calcCap(
     {
       int i;
       int n = int(MATH_PI / stroker._da);
-      Number da = Number(MATH_PI) / Number(n + 1);
-      Number a1;
+      NumT da = NumT(MATH_PI) / NumT(n + 1);
+      NumT a1;
 
       ADD_VERTEX(v0.x - dx1, v0.y + dy1);
 
@@ -562,8 +564,8 @@ err_t PathStrokerContextT<Number>::calcCap(
 
       for (i = 0; i < n; i++)
       {
-        Number a1_sin;
-        Number a1_cos;
+        NumT a1_sin;
+        NumT a1_cos;
         Math::sincos(a1, &a1_sin, &a1_cos);
 
         ADD_VERTEX(v0.x + a1_cos * stroker._w, v0.y + a1_sin * stroker._w);
@@ -578,14 +580,14 @@ err_t PathStrokerContextT<Number>::calcCap(
     {
       int i;
       int n = int(MATH_PI / stroker._da);
-      Number da = Number(MATH_PI) / Number(n + 1);
-      Number a1;
+      NumT da = NumT(MATH_PI) / NumT(n + 1);
+      NumT a1;
 
-      Number dx2 = dy1 * stroker._wSign;
-      Number dy2 = dx1 * stroker._wSign;
+      NumT dx2 = dy1 * stroker._wSign;
+      NumT dy2 = dx1 * stroker._wSign;
 
-      Number vx = v0.x - dx2;
-      Number vy = v0.y - dy2;
+      NumT vx = v0.x - dx2;
+      NumT vy = v0.y - dy2;
 
       ADD_VERTEX(vx - dx1, vy + dy1);
 
@@ -601,8 +603,8 @@ err_t PathStrokerContextT<Number>::calcCap(
 
       for (i = 0; i < n; i++)
       {
-        Number a1_sin;
-        Number a1_cos;
+        NumT a1_sin;
+        NumT a1_cos;
         Math::sincos(a1, &a1_sin, &a1_cos);
 
         ADD_VERTEX(vx + a1_cos * stroker._w, vy + a1_sin * stroker._w);
@@ -615,8 +617,8 @@ err_t PathStrokerContextT<Number>::calcCap(
 
     case LINE_CAP_TRIANGLE:
     {
-      Number dx2 = dy1 * stroker._wSign;
-      Number dy2 = dx1 * stroker._wSign;
+      NumT dx2 = dy1 * stroker._wSign;
+      NumT dy2 = dx1 * stroker._wSign;
 
       ADD_VERTEX(v0.x - dx1, v0.y + dy1);
       ADD_VERTEX(v0.x - dx2, v0.y - dy2);
@@ -626,8 +628,8 @@ err_t PathStrokerContextT<Number>::calcCap(
 
     case LINE_CAP_TRIANGLE_REVERT:
     {
-      Number dx2 = dy1 * stroker._wSign;
-      Number dy2 = dx1 * stroker._wSign;
+      NumT dx2 = dy1 * stroker._wSign;
+      NumT dy2 = dx1 * stroker._wSign;
 
       ADD_VERTEX(v0.x - dx1 - dx2, v0.y + dy1 - dy2);
       ADD_VERTEX(v0.x, v0.y);
@@ -657,28 +659,28 @@ enum INNER_JOIN
   INNER_JOIN_COUNT = 4
 };
 
-template<typename Number>
-err_t PathStrokerContextT<Number>::calcJoin(
-  const typename PointT<Number>::T& v0,
-  const typename PointT<Number>::T& v1,
-  const typename PointT<Number>::T& v2,
-  Number len1,
-  Number len2)
+template<typename NumT>
+err_t PathStrokerContextT<NumT>::calcJoin(
+  const NumT_(Point)& v0,
+  const NumT_(Point)& v1,
+  const NumT_(Point)& v2,
+  NumT len1,
+  NumT len2)
 {
-  Number wilen1 = (stroker._w / len1);
-  Number wilen2 = (stroker._w / len2);
+  NumT wilen1 = (stroker._w / len1);
+  NumT wilen2 = (stroker._w / len2);
 
-  Number dx1 = (v1.y - v0.y) * wilen1;
-  Number dy1 = (v1.x - v0.x) * wilen1;
-  Number dx2 = (v2.y - v1.y) * wilen2;
-  Number dy2 = (v2.x - v1.x) * wilen2;
+  NumT dx1 = (v1.y - v0.y) * wilen1;
+  NumT dy1 = (v1.x - v0.x) * wilen1;
+  NumT dx2 = (v2.y - v1.y) * wilen2;
+  NumT dy2 = (v2.x - v1.x) * wilen2;
 
-  Number cp = Math2d::crossProduct(v0, v1, v2);
+  NumT cp = Math2d::crossProduct(v0, v1, v2);
 
   if (cp != 0 && (cp > 0) == (stroker._w > 0))
   {
     // Inner join.
-    Number limit = ((len1 < len2) ? len1 : len2) / stroker._wAbs;
+    NumT limit = ((len1 < len2) ? len1 : len2) / stroker._wAbs;
     //if (limit < stroker._params._innerLimit) limit = stroker._params._innerLimit;
 
     //switch (stroker._params._innerJoin)
@@ -728,9 +730,9 @@ err_t PathStrokerContextT<Number>::calcJoin(
 
     // Calculate the distance between v1 and the central point of the bevel
     // line segment.
-    Number dx = (dx1 + dx2) / 2;
-    Number dy = (dy1 + dy2) / 2;
-    Number dbevel = Math::sqrt(dx * dx + dy * dy);
+    NumT dx = (dx1 + dx2) / 2;
+    NumT dy = (dy1 + dy2) / 2;
+    NumT dbevel = Math::sqrt(dx * dx + dy * dy);
     /*
     if (stroker._params.getLineJoin() == LINE_JOIN_ROUND ||
         stroker._params.getLineJoin() == LINE_JOIN_BEVEL)
@@ -754,12 +756,12 @@ err_t PathStrokerContextT<Number>::calcJoin(
       // TODO: ApproxScale used
       if (stroker._flatness * (stroker._wAbs - dbevel) < stroker._wEps)
       {
-        typename PointT<Number>::T pi;
+        NumT_(Point) pi;
         if (Math2d::intersectLine(pi,
-          typename PointT<Number>::T(v0.x + dx1, v0.y - dy1),
-          typename PointT<Number>::T(v1.x + dx1, v1.y - dy1),
-          typename PointT<Number>::T(v1.x + dx2, v1.y - dy2),
-          typename PointT<Number>::T(v2.x + dx2, v2.y - dy2)))
+          NumT_(Point)(v0.x + dx1, v0.y - dy1),
+          NumT_(Point)(v1.x + dx1, v1.y - dy1),
+          NumT_(Point)(v1.x + dx2, v1.y - dy2),
+          NumT_(Point)(v2.x + dx2, v2.y - dy2)))
         {
           ADD_VERTEX(pi.x, pi.y);
         }
@@ -803,15 +805,15 @@ err_t PathStrokerContextT<Number>::calcJoin(
   return ERR_OK;
 }
 
-template<typename Number>
-err_t PathStrokerContextT<Number>::strokePathFigure(const typename PointT<Number>::T* src, sysuint_t count, bool outline)
+template<typename NumT>
+err_t PathStrokerContextT<NumT>::strokePathFigure(const NumT_(Point)* src, sysuint_t count, bool outline)
 {
   // Can't stroke one-vertex array.
   if (count <= 1) return ERR_PATH_CANT_STROKE;
   // To do outline we need at least three vertices.
   if (outline && count <= 2) return ERR_PATH_CANT_STROKE;
 
-  const typename PointT<Number>::T* cur;
+  const NumT_(Point)* cur;
   sysuint_t i;
   sysuint_t moveToPosition0 = dst.getLength();
   sysuint_t moveToPosition1 = INVALID_INDEX;
@@ -830,7 +832,7 @@ err_t PathStrokerContextT<Number>::strokePathFigure(const typename PointT<Number
     if (distances) buffer.reset();
 
     distancesAlloc = (count + 127) & ~127;
-    distances = reinterpret_cast<Number*>(buffer.alloc(count * sizeof(Number)));
+    distances = reinterpret_cast<NumT*>(buffer.alloc(count * sizeof(NumT)));
 
     if (distances == NULL)
     {
@@ -839,20 +841,20 @@ err_t PathStrokerContextT<Number>::strokePathFigure(const typename PointT<Number
     }
   }
 
-  Number *dist;
+  NumT *dist;
 
   for (i = count - 1, cur = src, dist = distances; i; i--, cur++, dist++)
   {
-    Number d = Math::dist(cur[0].x, cur[0].y, cur[1].x, cur[1].y);
-    if (d <= Math2dConst<Number>::getDistanceEpsilon()) d = 0.0;
+    NumT d = Math::dist(cur[0].x, cur[0].y, cur[1].x, cur[1].y);
+    if (d <= Math2dConst<NumT>::getDistanceEpsilon()) d = 0.0;
 
     dist[0] = d;
   }
 
-  const typename PointT<Number>::T* srcEnd = src + count;
+  const NumT_(Point)* srcEnd = src + count;
 
-  typename PointT<Number>::T cp[3]; // Current points.
-  Number cd[3]; // Current distances.
+  NumT_(Point) cp[3]; // Current points.
+  NumT cd[3]; // Current distances.
 
   // If something went wrong.
   // for (i = 0; i < count; i++)
@@ -864,20 +866,20 @@ err_t PathStrokerContextT<Number>::strokePathFigure(const typename PointT<Number
   // [Outline]
   // --------------------------------------------------------------------------
 
-#define IS_DEGENERATED_DIST(__dist__) ((__dist__) <= Math2dConst<Number>::getDistanceEpsilon())
+#define IS_DEGENERATED_DIST(__dist__) ((__dist__) <= Math2dConst<NumT>::getDistanceEpsilon())
 
   if (outline)
   {
     // We need also to calc distance between first and last point.
     {
-      Number d = Math::dist(src[0].x, src[0].y, src[count-1].x, src[count-1].y);
-      if (d <= Math2dConst<Number>::getDistanceEpsilon()) d = 0.0;
+      NumT d = Math::dist(src[0].x, src[0].y, src[count-1].x, src[count-1].y);
+      if (d <= Math2dConst<NumT>::getDistanceEpsilon()) d = 0.0;
 
       distances[count - 1] = d;
     }
 
-    typename PointT<Number>::T fp[2]; // First points.
-    Number fd[2]; // First distances.
+    NumT_(Point) fp[2]; // First points.
+    NumT fd[2]; // First distances.
 
     // ------------------------------------------------------------------------
     // [Outline 1]
@@ -953,7 +955,7 @@ _Outline1Done:
     FOG_RETURN_ON_ERROR( calcJoin(cp[2], fp[0], fp[1], cd[2], fd[0]) );
 
     // Close path (CW).
-    ADD_VERTEX(Math::getQNanT<Number>(), Math::getQNanT<Number>());
+    ADD_VERTEX(Math::getQNanT<NumT>(), Math::getQNanT<NumT>());
 
     // ------------------------------------------------------------------------
     // [Outline 2]
@@ -1011,7 +1013,7 @@ _Outline2Done:
     FOG_RETURN_ON_ERROR( calcJoin(cp[2], fp[0], fp[1], fd[0], fd[1]) );
 
     // Close path (CCW).
-    ADD_VERTEX(Math::getQNanT<Number>(), Math::getQNanT<Number>());
+    ADD_VERTEX(Math::getQNanT<NumT>(), Math::getQNanT<NumT>());
   }
 
   // --------------------------------------------------------------------------
@@ -1133,7 +1135,7 @@ _Pen2Loop:
     }
 _Pen2Done:
     // Close path (CCW).
-    ADD_VERTEX(Math::getQNanT<Number>(), Math::getQNanT<Number>());
+    ADD_VERTEX(Math::getQNanT<NumT>(), Math::getQNanT<NumT>());
   }
 
   {

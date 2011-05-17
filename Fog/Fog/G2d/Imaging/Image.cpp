@@ -86,13 +86,8 @@ ImageData::~ImageData()
 
 ImageData* ImageData::ref() const
 {
-  if (locked)
-    return NULL;
-
-  if (FOG_UNLIKELY((flags & IMAGE_DATA_PRIVATE) != 0))
-    return clone();
-  else
-    return refAlways();
+  if (locked) return NULL;
+  return refAlways();
 }
 
 void ImageData::deref()
@@ -331,15 +326,8 @@ err_t Image::set(const Image& other)
     return ERR_OK;
   }
 
-  if (isKeepAlive() || other.isPrivate())
-  {
-    return setDeep(other);
-  }
-  else
-  {
-    atomicPtrXchg(&_d, other._d->refAlways())->deref();
-    return ERR_OK;
-  }
+  atomicPtrXchg(&_d, other._d->refAlways())->deref();
+  return ERR_OK;
 }
 
 err_t Image::set(const Image& other, const RectI& area)
@@ -2073,8 +2061,12 @@ err_t Image::glyphFromPath(Image& glyph, PointI& offset, const PathD& path, uint
 
   if (FOG_UNLIKELY(precision) >= IMAGE_PRECISION_COUNT) { err = ERR_RT_INVALID_ARGUMENT; goto _Fail; }
 
-  boundingBox = path.getBoundingBox();
-  if (FOG_UNLIKELY(!boundingBox.isValid())) goto _Fail;
+  err = path.getBoundingBox(boundingBox);
+  if (FOG_IS_ERROR(err))
+  {
+    if (err == ERR_GEOMETRY_NONE) err = ERR_OK;
+    goto _Fail;
+  }
 
   x0 = Math::ifloor(boundingBox.getX0());
   y0 = Math::ifloor(boundingBox.getY0());

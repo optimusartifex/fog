@@ -415,6 +415,7 @@ Set(FOG_CORE_GLOBAL_HEADERS
   Fog/Core/Global/Error.h
   Fog/Core/Global/Init.h
   Fog/Core/Global/Init_Core_p.h
+  Fog/Core/Global/Internal_Core_p.h
   Fog/Core/Global/Static.h
   Fog/Core/Global/SequenceInfo.h
   Fog/Core/Global/Swap.h
@@ -584,9 +585,9 @@ Set(FOG_CORE_TOOLS_SOURCES
   Fog/Core/Tools/String.cpp
   Fog/Core/Tools/StringFilter.cpp
   Fog/Core/Tools/StringMatcher.cpp
-  Fog/Core/Tools/Strings.cpp
   Fog/Core/Tools/StringUtil.cpp
   Fog/Core/Tools/StringUtil_gen.cpp
+  Fog/Core/Tools/Strings.cpp
   Fog/Core/Tools/Stub.cpp
   Fog/Core/Tools/TextCodec.cpp
 )
@@ -596,6 +597,7 @@ Set(FOG_CORE_TOOLS_HEADERS
   Fog/Core/Tools/ByteArray.h
   Fog/Core/Tools/ByteArrayFilter.h
   Fog/Core/Tools/ByteArrayMatcher.h
+  Fog/Core/Tools/ByteArrayTmp_p.h
   Fog/Core/Tools/Char.h
   Fog/Core/Tools/CharUtil.h
   Fog/Core/Tools/Format.h
@@ -606,8 +608,9 @@ Set(FOG_CORE_TOOLS_HEADERS
   Fog/Core/Tools/String.h
   Fog/Core/Tools/StringFilter.h
   Fog/Core/Tools/StringMatcher.h
-  Fog/Core/Tools/Strings.h
+  Fog/Core/Tools/StringTmp_p.h
   Fog/Core/Tools/StringUtil.h
+  Fog/Core/Tools/Strings.h
   Fog/Core/Tools/Stub.h
   Fog/Core/Tools/TextCodec.h
 )
@@ -771,6 +774,7 @@ Set(FOG_G2D_GEOMETRY_SOURCES
   Fog/G2d/Geometry/Round.cpp
   Fog/G2d/Geometry/Shape.cpp
   Fog/G2d/Geometry/Size.cpp
+  Fog/G2d/Geometry/Size.cpp
   Fog/G2d/Geometry/Transform.cpp
 )
 
@@ -789,9 +793,11 @@ Set(FOG_G2D_GEOMETRY_HEADERS
   Fog/G2d/Geometry/PathEffect.h
   Fog/G2d/Geometry/PathOnPath.h
   Fog/G2d/Geometry/PathStroker.h
+  Fog/G2d/Geometry/PathTmp_p.h
   Fog/G2d/Geometry/Pie.h
   Fog/G2d/Geometry/Point.h
   Fog/G2d/Geometry/Polygon.h
+  Fog/G2d/Geometry/PolygonTmp_p.h
   Fog/G2d/Geometry/QuadCurve.h
   Fog/G2d/Geometry/Rect.h
   Fog/G2d/Geometry/Round.h
@@ -1194,6 +1200,7 @@ Set(FOG_G2D_TOOLS_HEADERS
   Fog/G2d/Tools/Matrix.h
   Fog/G2d/Tools/Reduce_p.h
   Fog/G2d/Tools/Region.h
+  Fog/G2d/Tools/RegionTmp_p.h
 )
 
 Set_Source_Files_Properties(
@@ -1434,8 +1441,6 @@ Set(FOG_SVG_LIB_HEADERS
 )
 
 Set(FOG_SVG_DOM_SOURCES
-  Fog/Svg/Dom/SvgObject.cpp
-
   Fog/Svg/Dom/SvgCoordAttribute.cpp
   Fog/Svg/Dom/SvgEnumAttribute.cpp
   Fog/Svg/Dom/SvgEnumItem.cpp
@@ -1483,8 +1488,6 @@ Set(FOG_SVG_DOM_SOURCES
 )
 
 Set(FOG_SVG_DOM_HEADERS
-  Fog/Svg/Dom/SvgObject.h
-
   Fog/Svg/Dom/SvgCoordAttribute_p.h
   Fog/Svg/Dom/SvgEnumAttribute_p.h
   Fog/Svg/Dom/SvgEnumItem_p.h
@@ -1542,11 +1545,14 @@ Set(FOG_SVG_GLOBAL_HEADERS
 
 Set(FOG_SVG_VISIT_SOURCES
   Fog/Svg/Visit/SvgHitTest.cpp
+  Fog/Svg/Visit/SvgMeasure.cpp
   Fog/Svg/Visit/SvgRender.cpp
+  Fog/Svg/Visit/SvgVisitor.cpp
 )
 
 Set(FOG_SVG_VISIT_HEADERS
   Fog/Svg/Visit/SvgHitTest.h
+  Fog/Svg/Visit/SvgMeasure.h
   Fog/Svg/Visit/SvgRender.h
   Fog/Svg/Visit/SvgVisitor.h
 )

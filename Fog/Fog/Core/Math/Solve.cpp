@@ -57,8 +57,8 @@ static FOG_INLINE double mycbrt(double x)
 //   q  = -0.5 * (b + sign(b) * sqrt(delta))
 //   x0 = q / a
 //   x1 = c / q
-template<typename Number>
-static int FOG_CDECL _G2d_MathT_solveQuadraticFunction(Number* dst, const Number* src)
+template<typename NumT>
+static int FOG_CDECL _G2d_MathT_solveQuadraticFunction(NumT* dst, const NumT* src)
 {
   double a = (double)src[0];
   double b = (double)src[1];
@@ -70,7 +70,7 @@ static int FOG_CDECL _G2d_MathT_solveQuadraticFunction(Number* dst, const Number
     // A~=0 && B~=0.
     if (Math::isFuzzyZero(b)) return 0;
 
-    dst[0] = (Number)(-c / b);
+    dst[0] = NumT(-c / b);
     return 1;
   }
 
@@ -80,7 +80,7 @@ static int FOG_CDECL _G2d_MathT_solveQuadraticFunction(Number* dst, const Number
 
   if (Math::isFuzzyPositiveZero(d))
   {
-    dst[0] = (Number)(-b / (2.0 * a));
+    dst[0] = NumT(-b / (2.0 * a));
     return 1;
   }
   else
@@ -88,8 +88,8 @@ static int FOG_CDECL _G2d_MathT_solveQuadraticFunction(Number* dst, const Number
     double s = Math::sqrt(d);
     double q = -0.5 * (b + ((b < 0.0) ? -s : s));
 
-    dst[0] = (Number)(q / a);
-    dst[1] = (Number)(c / q);
+    dst[0] = NumT(q / a);
+    dst[1] = NumT(c / q);
 
     // Sort.
     if (dst[0] > dst[1]) swap(dst[0], dst[1]);
@@ -97,15 +97,15 @@ static int FOG_CDECL _G2d_MathT_solveQuadraticFunction(Number* dst, const Number
   }
 }
 
-template<typename Number>
-static int FOG_CDECL _G2d_MathT_solveQuadraticFunctionAt(Number* dst, const Number* src, Number tMin, Number tMax)
+template<typename NumT>
+static int FOG_CDECL _G2d_MathT_solveQuadraticFunctionAt(NumT* dst, const NumT* src, NumT tMin, NumT tMax)
 {
   double a = (double)src[0];
   double b = (double)src[1];
   double c = (double)src[2];
   double d;
 
-  Number r0, r1;
+  NumT r0, r1;
 
   // Catch the A and B near zero.
   if (Math::isFuzzyZero(a))
@@ -113,7 +113,7 @@ static int FOG_CDECL _G2d_MathT_solveQuadraticFunctionAt(Number* dst, const Numb
     // A~=0 && B~=0.
     if (Math::isFuzzyZero(b)) return 0;
 
-    r0 = (Number)(-c / b);
+    r0 = NumT(-c / b);
     goto _OneRoot;
   }
 
@@ -123,7 +123,7 @@ static int FOG_CDECL _G2d_MathT_solveQuadraticFunctionAt(Number* dst, const Numb
 
   if (Math::isFuzzyPositiveZero(d))
   {
-    r0 = (Number)(-b / (2.0 * a));
+    r0 = NumT(-b / (2.0 * a));
     goto _OneRoot;
   }
   else
@@ -131,8 +131,8 @@ static int FOG_CDECL _G2d_MathT_solveQuadraticFunctionAt(Number* dst, const Numb
     double s = Math::sqrt(d);
     double q = -0.5 * (b + ((b < 0.0) ? -s : s));
 
-    r0 = (Number)(q / a);
-    r1 = (Number)(c / q);
+    r0 = NumT(q / a);
+    r1 = NumT(c / q);
     if (r0 > r1) swap(r0, r1);
 
     if (r1 < tMin || r1 > tMax) goto _OneRoot;
@@ -157,8 +157,8 @@ _OneRoot:
 // Roots3And4.c: Graphics Gems, original author Jochen Schwarze (schwarze@isa.de).
 // See also the wiki article at http://en.wikipedia.org/wiki/Cubic_function for
 // other equations.
-template<typename Number>
-static int FOG_CDECL _G2d_MathT_solveCubicFunction(Number* dst, const Number* src)
+template<typename NumT>
+static int FOG_CDECL _G2d_MathT_solveCubicFunction(NumT* dst, const NumT* src)
 {
   if (Math::isFuzzyZero(src[0])) return Math::solveQuadraticFunction(dst, src + 1);
 
@@ -187,15 +187,15 @@ static int FOG_CDECL _G2d_MathT_solveCubicFunction(Number* dst, const Number* sr
     // One triple solution.
     if (Math::isFuzzyZero(q))
     {
-      dst[0] = (Number)(sub);
+      dst[0] = NumT(sub);
       return 1;
     }
     // One single and one double solution.
     else
     {
       double u = mycbrt(-q);
-      dst[0] = (Number)(sub + 2.0 * u);
-      dst[1] = (Number)(sub - u      );
+      dst[0] = NumT(sub + 2.0 * u);
+      dst[1] = NumT(sub - u      );
 
       // Sort.
       if (dst[0] > dst[1]) swap(dst[0], dst[1]);
@@ -208,9 +208,9 @@ static int FOG_CDECL _G2d_MathT_solveCubicFunction(Number* dst, const Number* sr
     double phi = (1.0 / 3.0) * Math::acos(-q / Math::sqrt(-p3));
     double t = 2.0 * sqrt(-p);
 
-    dst[0] = (Number)(sub + t * Math::cos(phi)                   );
-    dst[1] = (Number)(sub - t * Math::cos(phi + (MATH_PI / 3.0)) );
-    dst[2] = (Number)(sub - t * Math::cos(phi - (MATH_PI / 3.0)) );
+    dst[0] = NumT(sub + t * Math::cos(phi                ));
+    dst[1] = NumT(sub - t * Math::cos(phi + MATH_THIRD_PI));
+    dst[2] = NumT(sub - t * Math::cos(phi - MATH_THIRD_PI));
 
     // Sort.
     if (dst[0] > dst[1]) swap(dst[0], dst[1]);
@@ -225,15 +225,15 @@ static int FOG_CDECL _G2d_MathT_solveCubicFunction(Number* dst, const Number* sr
     double u =  mycbrt(sqrt_d - q);
     double v = -mycbrt(sqrt_d + q);
 
-    dst[0] = (Number)(sub + u + v);
+    dst[0] = NumT(sub + u + v);
     return 1;
   }
 }
 
-template<typename Number>
-static int FOG_CDECL _G2d_MathT_solveCubicFunctionAt(Number* dst, const Number* src, Number tMin, Number tMax)
+template<typename NumT>
+static int FOG_CDECL _G2d_MathT_solveCubicFunctionAt(NumT* dst, const NumT* src, NumT tMin, NumT tMax)
 {
-  Number tmp[3];
+  NumT tmp[3];
   int roots = _G2d_MathT_solveCubicFunction(tmp, src);
   int interestingRoots = 0;
 

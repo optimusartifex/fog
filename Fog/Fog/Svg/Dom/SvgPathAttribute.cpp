@@ -33,7 +33,7 @@ err_t SvgPathAttribute::setValue(const String& value)
   FOG_RETURN_ON_ERROR(_value.set(value));
   FOG_RETURN_ON_ERROR(SvgUtil::parsePath(_path, value));
 
-  if (_element) reinterpret_cast<SvgElement*>(_element)->_boundingRectDirty = true;
+  if (_element) reinterpret_cast<SvgElement*>(_element)->_boundingBoxDirty = true;
   return ERR_OK;
 }
 

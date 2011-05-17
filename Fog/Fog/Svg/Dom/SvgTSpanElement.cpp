@@ -12,6 +12,7 @@
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Svg/Dom/SvgTSpanElement_p.h>
 #include <Fog/Svg/Visit/SvgRender.h>
+#include <Fog/Svg/Visit/SvgVisitor.h>
 #include <Fog/Xml/Dom/XmlText.h>
 
 namespace Fog {
@@ -59,12 +60,11 @@ XmlAttribute* SvgTSpanElement::_createAttribute(const ManagedString& name) const
   return base::_createAttribute(name);
 }
 
-err_t SvgTSpanElement::onRenderShape(SvgRenderContext* context) const
+err_t SvgTSpanElement::onProcess(SvgVisitor* visitor) const
 {
   err_t err = ERR_OK;
-
-  float x = context->_textCursor.x;
-  float y = context->_textCursor.y;
+  float x = visitor->_textCursor.x;
+  float y = visitor->_textCursor.y;
 
   if (a_dx.isAssigned()) x += a_dx.getCoordComputed();
   if (a_dy.isAssigned()) y += a_dy.getCoordComputed();
@@ -74,11 +74,13 @@ err_t SvgTSpanElement::onRenderShape(SvgRenderContext* context) const
 
   // TODO: Not optimal, just initial support for text rendering.
   PathD path;
-  context->_font.getOutline(text, path);
-  path.translate(PointD(x, y));
-  context->drawPath(path);
 
-  context->_textCursor.set(x, y);
+  err = visitor->_font.getOutline(text, path);
+  if (FOG_IS_ERROR(err)) return err;
+  path.translate(PointD(x, y));
+
+  err = visitor->onPath((SvgElement*)this, path);
+  visitor->_textCursor.set(x, y);
   return err;
 }
 

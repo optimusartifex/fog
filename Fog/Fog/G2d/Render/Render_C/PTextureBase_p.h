@@ -337,7 +337,6 @@ _Has16BPC:
     // [Projection]
     // ------------------------------------------------------------------------
 
-    FOG_ASSERT(transformType == TRANSFORM_TYPE_PROJECTION);
     {
       // TODO: Not implemented.
       ctx->_fetch = NULL;

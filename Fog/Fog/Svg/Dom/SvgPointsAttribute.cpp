@@ -35,7 +35,7 @@ err_t SvgPointsAttribute::setValue(const String& value)
   FOG_RETURN_ON_ERROR(SvgUtil::parsePoints(_path, value, _closePath));
   if (!_path.isEmpty() && _closePath) _path.close();
 
-  if (_element) reinterpret_cast<SvgElement*>(_element)->_boundingRectDirty = true;
+  if (_element) reinterpret_cast<SvgElement*>(_element)->_boundingBoxDirty = true;
   return ERR_OK;
 }
 } // Fog namespace

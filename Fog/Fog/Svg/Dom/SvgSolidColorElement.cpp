@@ -33,7 +33,7 @@ XmlAttribute* SvgSolidColorElement::_createAttribute(const ManagedString& name) 
   return base::_createAttribute(name);
 }
 
-err_t SvgSolidColorElement::onRender(SvgRenderContext* context) const
+err_t SvgSolidColorElement::onProcess(SvgVisitor* visitor) const
 {
   return ERR_OK;
 }

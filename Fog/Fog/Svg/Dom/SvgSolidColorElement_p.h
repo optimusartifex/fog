@@ -37,10 +37,10 @@ struct FOG_NO_EXPORT SvgSolidColorElement : public SvgStyledElement
   virtual XmlAttribute* _createAttribute(const ManagedString& name) const;
 
   // --------------------------------------------------------------------------
-  // [SVG Rendering]
+  // [SVG Interface]
   // --------------------------------------------------------------------------
 
-  virtual err_t onRender(SvgRenderContext* context) const;
+  virtual err_t onProcess(SvgVisitor* visitor) const;
 
   // --------------------------------------------------------------------------
   // [SVG Embedded Attributes]

@@ -423,11 +423,11 @@ static FOG_INLINE double positiveFraction(double v) { v = mod(v, 1.0); if (v < 0
 // [Fog::Math - Degrees <-> Radians]
 // ============================================================================
 
-static FOG_INLINE float deg2rad(float deg) { return deg * ((float)MATH_PI / 180.0f); }
-static FOG_INLINE float rad2deg(float rad) { return rad * (180.0f / (float)MATH_PI); }
+static FOG_INLINE float deg2rad(float deg) { return deg * float(MATH_RAD_FROM_DEG); }
+static FOG_INLINE float rad2deg(float rad) { return rad * float(MATH_DEG_FROM_RAD); }
 
-static FOG_INLINE double deg2rad(double deg) { return deg * (MATH_PI / 180.0); }
-static FOG_INLINE double rad2deg(double rad) { return rad * (180.0 / MATH_PI); }
+static FOG_INLINE double deg2rad(double deg) { return deg * double(MATH_RAD_FROM_DEG); }
+static FOG_INLINE double rad2deg(double rad) { return rad * double(MATH_DEG_FROM_RAD); }
 
 // ============================================================================
 // [Fog::Math - Trigonometric Functions]
@@ -509,6 +509,9 @@ static FOG_INLINE double asin(double x) { return ::asin(x); }
 
 static FOG_INLINE float acos(float x) { return ::acosf(x); }
 static FOG_INLINE double acos(double x) { return ::acos(x); }
+
+static FOG_INLINE float atan(float x) { return ::atanf(x); }
+static FOG_INLINE double atan(double x) { return ::atan(x); }
 
 static FOG_INLINE float atan2(float x, float y) { return ::atan2f(x, y); }
 static FOG_INLINE double atan2(double x, double y) { return ::atan2(x, y); }

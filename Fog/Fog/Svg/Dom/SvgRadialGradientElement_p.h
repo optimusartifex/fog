@@ -38,11 +38,10 @@ struct FOG_NO_EXPORT SvgRadialGradientElement : public SvgAbstractGradientElemen
   virtual XmlAttribute* _createAttribute(const ManagedString& name) const;
 
   // --------------------------------------------------------------------------
-  // [SVG Rendering]
+  // [SVG Interface]
   // --------------------------------------------------------------------------
 
-  virtual err_t onRender(SvgRenderContext* context) const;
-  virtual err_t onApplyPattern(SvgRenderContext* context, SvgElement* obj, int paintType) const;
+  virtual err_t onPattern(SvgVisitor* visitor, SvgElement* obj, uint32_t paintType) const;
 
   // --------------------------------------------------------------------------
   // [SVG Embedded Attributes]

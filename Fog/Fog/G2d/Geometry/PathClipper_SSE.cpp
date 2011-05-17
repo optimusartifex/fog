@@ -43,7 +43,7 @@ static uint32_t FOG_CDECL _G2d_PathClipperF_initPath_SSE(PathClipperF& self, con
 
   // If path bounding box is not dirty then we can simply use it instead of
   // performing the calculation.
-  if (!src.isBoundingBoxDirty())
+  if (src._hasBoundingBox())
   {
     Face::m128f xmm0;
     Face::m128f xmm1;
@@ -121,9 +121,8 @@ static uint32_t FOG_CDECL _G2d_PathClipperF_initPath_SSE(PathClipperF& self, con
       case PATH_CMD_QUAD_TO:
       {
         Face::m128f xmm1;
-        FOG_ASSERT(i >= 2);
 
-        if (FOG_UNLIKELY(i < 2)) goto _Invalid;
+        FOG_ASSERT(i >= 2);
         if (FOG_UNLIKELY(!hasInitial)) goto _Invalid;
 
         Face::m128fLoad8Hi(xmm0, pts + 2);
@@ -150,9 +149,8 @@ static uint32_t FOG_CDECL _G2d_PathClipperF_initPath_SSE(PathClipperF& self, con
       case PATH_CMD_CUBIC_TO:
       {
         Face::m128f xmm1, xmm2;
-        FOG_ASSERT(i >= 3);
 
-        if (FOG_UNLIKELY(i < 3)) goto _Invalid;
+        FOG_ASSERT(i >= 3);
         if (FOG_UNLIKELY(!hasInitial)) goto _Invalid;
 
         Face::m128fZero(xmm2);

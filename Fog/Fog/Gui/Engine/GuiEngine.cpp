@@ -8,6 +8,8 @@
 #include <Fog/Core/System/Application.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Painting/Painter.h>
+#include <Fog/G2d/Tools/Region.h>
+#include <Fog/G2d/Tools/RegionTmp_p.h>
 #include <Fog/Gui/Engine/GuiEngine.h>
 #include <Fog/Gui/Layout/Layout.h>
 #include <Fog/Gui/Widget/Widget_p.h>
@@ -789,10 +791,10 @@ void GuiEngine::doUpdateWindow(GuiWindow* window)
   // are the most efficient in Region::op(dest, src1, src2) form. So it's safe
   // to use different destination regions. Memory will be copied, but no memory
   // will be allocated that is the goal.
-  //TemporaryRegion<32> rtmp1;
-  //TemporaryRegion<32> rtmp2;
-  //TemporaryRegion<32> rtmp3;
-  //TemporaryRegion<64> blitRegion;
+  //RegionTmp<32> rtmp1;
+  //RegionTmp<32> rtmp2;
+  //RegionTmp<32> rtmp3;
+  //RegionTmp<64> blitRegion;
 
   Region rtmp1;
   Region rtmp2;
@@ -935,7 +937,7 @@ inside:
         if (widget->children().count() > 0 && widget->children().getLength() <= 16)
         {
           rtmp2.set(widgetRec.paintBounds);
-          TemporaryRegion<128> rtmp4;
+          RegionTmp<128> rtmp4;
           List<Widget*>::ConstIterator ci(widget->children());
           int ox = widgetRec.bounds.x1() + widget->origin().x();
           int oy = widgetRec.bounds.y1() + widget->origin().y();

@@ -89,21 +89,44 @@ struct FOG_NO_EXPORT RoundF
   // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE BoxF getBoundingBox() const
+  FOG_INLINE err_t getBoundingBox(BoxF& dst) const
   {
-    return BoxF(rect);
+    return _getBoundingBox(dst, NULL);
   }
 
-  FOG_INLINE RectF getBoundingRect() const
+  FOG_INLINE err_t getBoundingBox(BoxF& dst, const TransformF& tr) const
   {
-    return rect;
+    return _getBoundingBox(dst, &tr);
+  }
+
+  FOG_INLINE err_t getBoundingRect(RectF& dst) const
+  {
+    return _getBoundingRect(dst, NULL);
+  }
+
+  FOG_INLINE err_t getBoundingRect(RectF& dst, const TransformF& tr) const
+  {
+    return _getBoundingRect(dst, &tr);
+  }
+
+  FOG_INLINE err_t _getBoundingBox(BoxF& dst, const TransformF* tr) const
+  {
+    return _g2d.roundf.getBoundingBox(this, &dst, tr);
+  }
+
+  FOG_INLINE err_t _getBoundingRect(RectF& dst, const TransformF* tr) const
+  {
+    err_t err = _g2d.roundf.getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr);
+    dst.w -= dst.x;
+    dst.h -= dst.y;
+    return err;
   }
 
   // --------------------------------------------------------------------------
   // [HitTest]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool hitTest(const PointF& pt)
+  FOG_INLINE bool hitTest(const PointF& pt) const
   {
     return _g2d.roundf.hitTest(this, &pt);
   }
@@ -203,21 +226,44 @@ struct FOG_NO_EXPORT RoundD
   // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE BoxD getBoundingBox() const
+  FOG_INLINE err_t getBoundingBox(BoxD& dst) const
   {
-    return BoxD(rect);
+    return _getBoundingBox(dst, NULL);
   }
 
-  FOG_INLINE RectD getBoundingRect() const
+  FOG_INLINE err_t getBoundingBox(BoxD& dst, const TransformD& tr) const
   {
-    return rect;
+    return _getBoundingBox(dst, &tr);
+  }
+
+  FOG_INLINE err_t getBoundingRect(RectD& dst) const
+  {
+    return _getBoundingRect(dst, NULL);
+  }
+
+  FOG_INLINE err_t getBoundingRect(RectD& dst, const TransformD& tr) const
+  {
+    return _getBoundingRect(dst, &tr);
+  }
+
+  FOG_INLINE err_t _getBoundingBox(BoxD& dst, const TransformD* tr) const
+  {
+    return _g2d.roundd.getBoundingBox(this, &dst, tr);
+  }
+
+  FOG_INLINE err_t _getBoundingRect(RectD& dst, const TransformD* tr) const
+  {
+    err_t err = _g2d.roundd.getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr);
+    dst.w -= dst.x;
+    dst.h -= dst.y;
+    return err;
   }
 
   // --------------------------------------------------------------------------
   // [HitTest]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool hitTest(const PointD& pt)
+  FOG_INLINE bool hitTest(const PointD& pt) const
   {
     return _g2d.roundd.hitTest(this, &pt);
   }

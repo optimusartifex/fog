@@ -73,6 +73,9 @@ struct Region;
 struct RoundF;
 struct RoundD;
 
+struct ShapeF;
+struct ShapeD;
+
 struct TransformF;
 struct TransformD;
 
@@ -95,51 +98,76 @@ struct _G2dApi
   // [Arc]
   // --------------------------------------------------------------------------
 
-  typedef void (FOG_CDECL *ArcF_GetBoundingBox)(const ArcF* self, BoxF* dst, bool includeCenterPoint);
-  typedef void (FOG_CDECL *ArcD_GetBoundingBox)(const ArcD* self, BoxD* dst, bool includeCenterPoint);
+  typedef err_t (FOG_CDECL *ArcF_GetBoundingBox)(const ArcF* self, BoxF* dst, const TransformF* tr, bool includeCenterPoint);
+  typedef err_t (FOG_CDECL *ArcD_GetBoundingBox)(const ArcD* self, BoxD* dst, const TransformD* tr, bool includeCenterPoint);
+
+  typedef uint (FOG_CDECL *ArcF_ToCSpline)(const ArcF* self, PointF* pts);
+  typedef uint (FOG_CDECL *ArcD_ToCSpline)(const ArcD* self, PointD* pts);
 
   struct _FuncsArcF
   {
     ArcF_GetBoundingBox getBoundingBox;
+    ArcF_ToCSpline toCSpline;
   } arcf;
 
   struct _FuncsArcD
   {
     ArcD_GetBoundingBox getBoundingBox;
+    ArcD_ToCSpline toCSpline;
   } arcd;
 
   // --------------------------------------------------------------------------
   // [Circle]
   // --------------------------------------------------------------------------
 
+  typedef err_t (FOG_CDECL *CircleF_GetBoundingBox)(const CircleF* self, BoxF* dst, const TransformF* tr);
+  typedef err_t (FOG_CDECL *CircleD_GetBoundingBox)(const CircleD* self, BoxD* dst, const TransformD* tr);
+
   typedef bool (FOG_CDECL *CircleF_HitTest)(const CircleF* self, const PointF* pt);
   typedef bool (FOG_CDECL *CircleD_HitTest)(const CircleD* self, const PointD* pt);
 
+  typedef uint (FOG_CDECL *CircleF_ToCSpline)(const CircleF* self, PointF* pts);
+  typedef uint (FOG_CDECL *CircleD_ToCSpline)(const CircleD* self, PointD* pts);
+
   struct _FuncsCircleF
   {
+    CircleF_GetBoundingBox getBoundingBox;
     CircleF_HitTest hitTest;
+    CircleF_ToCSpline toCSpline;
   } circlef;
 
   struct _FuncsCircleD
   {
+    CircleD_GetBoundingBox getBoundingBox;
     CircleD_HitTest hitTest;
+    CircleD_ToCSpline toCSpline;
   } circled;
 
   // --------------------------------------------------------------------------
   // [Ellipse]
   // --------------------------------------------------------------------------
 
+  typedef err_t (FOG_CDECL *EllipseF_GetBoundingBox)(const EllipseF* self, BoxF* dst, const TransformF* tr);
+  typedef err_t (FOG_CDECL *EllipseD_GetBoundingBox)(const EllipseD* self, BoxD* dst, const TransformD* tr);
+
   typedef bool (FOG_CDECL *EllipseF_HitTest)(const EllipseF* self, const PointF* pt);
   typedef bool (FOG_CDECL *EllipseD_HitTest)(const EllipseD* self, const PointD* pt);
 
+  typedef uint (FOG_CDECL *EllipseF_ToCSpline)(const EllipseF* self, PointF* pts);
+  typedef uint (FOG_CDECL *EllipseD_ToCSpline)(const EllipseD* self, PointD* pts);
+
   struct _FuncsEllipseF
   {
+    EllipseF_GetBoundingBox getBoundingBox;
     EllipseF_HitTest hitTest;
+    EllipseF_ToCSpline toCSpline;
   } ellipsef;
 
   struct _FuncsEllipseD
   {
+    EllipseD_GetBoundingBox getBoundingBox;
     EllipseD_HitTest hitTest;
+    EllipseD_ToCSpline toCSpline;
   } ellipsed;
 
   // --------------------------------------------------------------------------
@@ -180,16 +208,21 @@ struct _G2dApi
   // [Round]
   // --------------------------------------------------------------------------
 
+  typedef err_t (FOG_CDECL *RoundF_GetBoundingBox)(const RoundF* self, BoxF* dst, const TransformF* tr);
+  typedef err_t (FOG_CDECL *RoundD_GetBoundingBox)(const RoundD* self, BoxD* dst, const TransformD* tr);
+
   typedef bool (FOG_CDECL *RoundF_HitTest)(const RoundF* self, const PointF* pt);
   typedef bool (FOG_CDECL *RoundD_HitTest)(const RoundD* self, const PointD* pt);
 
   struct _FuncsRoundF
   {
+    RoundF_GetBoundingBox getBoundingBox;
     RoundF_HitTest hitTest;
   } roundf;
 
   struct _FuncsRoundD
   {
+    RoundD_GetBoundingBox getBoundingBox;
     RoundD_HitTest hitTest;
   } roundd;
 
@@ -221,8 +254,11 @@ struct _G2dApi
   // [QuadCurve]
   // --------------------------------------------------------------------------
 
-  typedef void (FOG_CDECL *QuadCurveF_GetExtrema)(const PointF* self, BoxF* dstBox);
-  typedef void (FOG_CDECL *QuadCurveD_GetExtrema)(const PointD* self, BoxD* dstBox);
+  typedef err_t (FOG_CDECL *QuadCurveF_GetBoundingBox)(const PointF* self, BoxF* dst);
+  typedef err_t (FOG_CDECL *QuadCurveD_GetBoundingBox)(const PointD* self, BoxD* dst);
+
+  typedef err_t (FOG_CDECL *QuadCurveF_GetSplineBBox)(const PointF* self, sysuint_t length, BoxF* dst);
+  typedef err_t (FOG_CDECL *QuadCurveD_GetSplineBBox)(const PointD* self, sysuint_t length, BoxD* dst);
 
   typedef void (FOG_CDECL *QuadCurveF_GetLength)(const PointF* self, float* length);
   typedef void (FOG_CDECL *QuadCurveD_GetLength)(const PointD* self, double* length);
@@ -232,14 +268,16 @@ struct _G2dApi
 
   struct _FuncsQuadCurveF
   {
-    QuadCurveF_GetExtrema getExtrema;
+    QuadCurveF_GetBoundingBox getBoundingBox;
+    QuadCurveF_GetSplineBBox getSplineBBox;
     QuadCurveF_GetLength getLength;
     QuadCurveF_Flatten flatten;
   } quadcurvef;
 
   struct _FuncsQuadCurveD
   {
-    QuadCurveD_GetExtrema getExtrema;
+    QuadCurveD_GetBoundingBox getBoundingBox;
+    QuadCurveD_GetSplineBBox getSplineBBox;
     QuadCurveD_GetLength getLength;
     QuadCurveD_Flatten flatten;
   } quadcurved;
@@ -248,8 +286,11 @@ struct _G2dApi
   // [CubicCurve]
   // --------------------------------------------------------------------------
 
-  typedef void (FOG_CDECL *CubicCurveF_GetExtrema)(const PointF* self, BoxF* dstBox);
-  typedef void (FOG_CDECL *CubicCurveD_GetExtrema)(const PointD* self, BoxD* dstBox);
+  typedef err_t (FOG_CDECL *CubicCurveF_GetBoundingBox)(const PointF* self, BoxF* dst);
+  typedef err_t (FOG_CDECL *CubicCurveD_GetBoundingBox)(const PointD* self, BoxD* dst);
+
+  typedef err_t (FOG_CDECL *CubicCurveF_GetSplineBBox)(const PointF* self, sysuint_t length, BoxF* dst);
+  typedef err_t (FOG_CDECL *CubicCurveD_GetSplineBBox)(const PointD* self, sysuint_t length, BoxD* dst);
 
   typedef void (FOG_CDECL *CubicCurveF_GetLength)(const PointF* self, float* length);
   typedef void (FOG_CDECL *CubicCurveD_GetLength)(const PointD* self, double* length);
@@ -265,7 +306,8 @@ struct _G2dApi
 
   struct _FuncsCubicCurveF
   {
-    CubicCurveF_GetExtrema getExtrema;
+    CubicCurveF_GetBoundingBox getBoundingBox;
+    CubicCurveF_GetSplineBBox getSplineBBox;
     CubicCurveF_GetLength getLength;
     CubicCurveF_GetInflectionPoints getInflectionPoints;
     CubicCurveF_SimplifyForProcessing simplifyForProcessing;
@@ -274,12 +316,35 @@ struct _G2dApi
 
   struct _FuncsCubicCurveD
   {
-    CubicCurveD_GetExtrema getExtrema;
+    CubicCurveD_GetBoundingBox getBoundingBox;
+    CubicCurveD_GetSplineBBox getSplineBBox;
     CubicCurveD_GetLength getLength;
     CubicCurveD_GetInflectionPoints getInflectionPoints;
     CubicCurveD_SimplifyForProcessing simplifyForProcessing;
     CubicCurveD_Flatten flatten;
   } cubiccurved;
+
+  // --------------------------------------------------------------------------
+  // [Shape]
+  // --------------------------------------------------------------------------
+
+  typedef err_t (FOG_CDECL *ShapeF_GetBoundingBox)(uint32_t shapeType, const void* shapeData, BoxF* dst, const TransformF* transform);
+  typedef err_t (FOG_CDECL *ShapeD_GetBoundingBox)(uint32_t shapeType, const void* shapeData, BoxD* dst, const TransformD* transform);
+
+  typedef bool (FOG_CDECL *ShapeF_HitTest)(uint32_t shapeType, const void* shapeData, const PointF* pt);
+  typedef bool (FOG_CDECL *ShapeD_HitTest)(uint32_t shapeType, const void* shapeData, const PointD* pt);
+
+  struct _FuncsShapeF
+  {
+    ShapeF_GetBoundingBox getBoundingBox;
+    ShapeF_HitTest hitTest;
+  } shapef;
+
+  struct _FuncsShapeD
+  {
+    ShapeD_GetBoundingBox getBoundingBox;
+    ShapeD_HitTest hitTest;
+  } shaped;
 
   // --------------------------------------------------------------------------
   // [Path]
@@ -303,14 +368,14 @@ struct _G2dApi
   typedef void (FOG_CDECL *PathF_Squeeze)(PathF& self);
   typedef void (FOG_CDECL *PathD_Squeeze)(PathD& self);
 
+  typedef sysuint_t (FOG_CDECL *PathF_Prepare)(PathF& self, sysuint_t count, uint32_t cntOp);
+  typedef sysuint_t (FOG_CDECL *PathD_Prepare)(PathD& self, sysuint_t count, uint32_t cntOp);
+
   typedef sysuint_t (FOG_CDECL *PathF_Add)(PathF& self, sysuint_t count);
   typedef sysuint_t (FOG_CDECL *PathD_Add)(PathD& self, sysuint_t count);
 
   typedef void (FOG_CDECL *PathF_UpdateFlat)(const PathF& self);
   typedef void (FOG_CDECL *PathD_UpdateFlat)(const PathD& self);
-
-  typedef void (FOG_CDECL *PathF_UpdateBoundingBox)(const PathF& self);
-  typedef void (FOG_CDECL *PathD_UpdateBoundingBox)(const PathD& self);
 
   typedef void (FOG_CDECL *PathF_Clear)(PathF& self);
   typedef void (FOG_CDECL *PathD_Clear)(PathD& self);
@@ -420,6 +485,9 @@ struct _G2dApi
   typedef err_t (FOG_CDECL *PathF_AppendTransformedPathF)(PathF& self, const PathF& path, const TransformF& tr, const Range* range);
   typedef err_t (FOG_CDECL *PathD_AppendTransformedPathD)(PathD& self, const PathD& path, const TransformD& tr, const Range* range);
 
+  typedef err_t (FOG_CDECL *PathF_GetBoundingBox)(const PathF& self, BoxF* dst, const TransformF* transform);
+  typedef err_t (FOG_CDECL *PathD_GetBoundingBox)(const PathD& self, BoxD* dst, const TransformD* transform);
+
   typedef bool (FOG_CDECL *PathF_HitTest)(const PathF& self, const PointF& pt, uint32_t fillRule);
   typedef bool (FOG_CDECL *PathD_HitTest)(const PathD& self, const PointD& pt, uint32_t fillRule);
 
@@ -455,9 +523,8 @@ struct _G2dApi
     PathF_Detach detach;
     PathF_Reserve reserve;
     PathF_Squeeze squeeze;
+    PathF_Prepare prepare;
     PathF_Add add;
-    PathF_UpdateFlat updateFlat;
-    PathF_UpdateBoundingBox updateBoundingBox;
     PathF_Clear clear;
     PathF_Reset reset;
     PathF_SetPathF setPathF;
@@ -503,6 +570,9 @@ struct _G2dApi
     PathF_AppendPathF appendPathF;
     PathF_AppendTranslatedPathF appendTranslatedPathF;
     PathF_AppendTransformedPathF appendTransformedPathF;
+    PathF_UpdateFlat updateFlat;
+    PathF_Flatten flatten;
+    PathF_GetBoundingBox getBoundingBox;
     PathF_HitTest hitTest;
     PathF_Translate translate;
     PathF_Transform transform;
@@ -510,7 +580,6 @@ struct _G2dApi
     PathF_Scale scale;
     PathF_FlipX flipX;
     PathF_FlipY flipY;
-    PathF_Flatten flatten;
     PathF_Eq eq;
   } pathf;
 
@@ -522,9 +591,8 @@ struct _G2dApi
     PathD_Detach detach;
     PathD_Reserve reserve;
     PathD_Squeeze squeeze;
+    PathD_Prepare prepare;
     PathD_Add add;
-    PathD_UpdateFlat updateFlat;
-    PathD_UpdateBoundingBox updateBoundingBox;
     PathD_Clear clear;
     PathD_Reset reset;
     PathD_SetPathD setPathD;
@@ -576,6 +644,9 @@ struct _G2dApi
     PathD_AppendPathD appendPathD;
     PathD_AppendTranslatedPathD appendTranslatedPathD;
     PathD_AppendTransformedPathD appendTransformedPathD;
+    PathD_UpdateFlat updateFlat;
+    PathD_Flatten flatten;
+    PathD_GetBoundingBox getBoundingBox;
     PathD_HitTest hitTest;
     PathD_Translate translate;
     PathD_Transform transform;
@@ -583,7 +654,6 @@ struct _G2dApi
     PathD_Scale scale;
     PathD_FlipX flipX;
     PathD_FlipY flipY;
-    PathD_Flatten flatten;
     PathD_Eq eq;
   } pathd;
 
@@ -620,21 +690,91 @@ struct _G2dApi
   } pathclipperd;
 
   // --------------------------------------------------------------------------
-  // [Shape]
+  // [Transform]
   // --------------------------------------------------------------------------
 
-  typedef void (FOG_CDECL *ShapeF_GetBoundingBox)(uint32_t shapeType, const void* shapeData, BoxF* dst);
-  typedef void (FOG_CDECL *ShapeD_GetBoundingBox)(uint32_t shapeType, const void* shapeData, BoxD* dst);
+  typedef err_t (FOG_CDECL *TransformF_Create)(TransformF& self, uint32_t createType, const void* params);
+  typedef err_t (FOG_CDECL *TransformD_Create)(TransformD& self, uint32_t createType, const void* params);
 
-  struct _FuncsShapeF
-  {
-    ShapeF_GetBoundingBox getBoundingBox;
-  } shapef;
+  typedef uint32_t (FOG_CDECL *TransformF_Update)(const TransformF& self);
+  typedef uint32_t (FOG_CDECL *TransformD_Update)(const TransformD& self);
 
-  struct _FuncsShapeD
+  typedef err_t (FOG_CDECL *TransformF_Transform)(TransformF& self, uint32_t transformOp, const void* params);
+  typedef err_t (FOG_CDECL *TransformD_Transform)(TransformD& self, uint32_t transformOp, const void* params);
+
+  typedef TransformF (FOG_CDECL *TransformF_Transformed)(const TransformF& self, uint32_t transformOp, const void* params);
+  typedef TransformD (FOG_CDECL *TransformD_Transformed)(const TransformD& self, uint32_t transformOp, const void* params);
+
+  typedef void (FOG_CDECL *TransformF_Multiply)(TransformF& self, const TransformF& a, const TransformF& b);
+  typedef void (FOG_CDECL *TransformD_Multiply)(TransformD& self, const TransformD& a, const TransformD& b);
+
+  typedef bool (FOG_CDECL *TransformF_Invert)(TransformF& self, const TransformF& a);
+  typedef bool (FOG_CDECL *TransformD_Invert)(TransformD& self, const TransformD& a);
+
+  typedef void (FOG_CDECL *TransformF_MapPointF)(const TransformF& self, PointF& dst, const PointF& src);
+  typedef void (FOG_CDECL *TransformD_MapPointD)(const TransformD& self, PointD& dst, const PointD& src);
+
+  typedef void (FOG_CDECL *TransformF_MapPointsF)(const TransformF& self, PointF* dst, const PointF* src, sysuint_t length);
+  typedef void (FOG_CDECL *TransformD_MapPointsD)(const TransformD& self, PointD* dst, const PointD* src, sysuint_t length);
+
+  typedef err_t (FOG_CDECL *TransformF_MapPathF)(const TransformF& self, PathF& dst, const PathF& src, uint32_t cntOp);
+  typedef err_t (FOG_CDECL *TransformD_MapPathD)(const TransformD& self, PathD& dst, const PathD& src, uint32_t cntOp);
+
+  typedef err_t (FOG_CDECL *TransformF_MapPathDataF)(const TransformF& self, PathF& dst, const uint8_t* srcCmd, const PointF* srcPts, sysuint_t length, uint32_t cntOp);
+  typedef err_t (FOG_CDECL *TransformD_MapPathDataD)(const TransformD& self, PathD& dst, const uint8_t* srcCmd, const PointD* srcPts, sysuint_t length, uint32_t cntOp);
+
+  typedef void (FOG_CDECL *TransformF_MapBoxF)(const TransformF& self, BoxF& dst, const BoxF& src);
+  typedef void (FOG_CDECL *TransformD_MapBoxD)(const TransformD& self, BoxD& dst, const BoxD& src);
+
+  typedef void (FOG_CDECL *TransformF_MapVectorF)(const TransformF& self, PointF& dst, const PointF& src);
+  typedef void (FOG_CDECL *TransformD_MapVectorD)(const TransformD& self, PointD& dst, const PointD& src);
+
+  typedef PointF (FOG_CDECL *TransformF_GetScaling)(const TransformF& self, bool absolute);
+  typedef PointD (FOG_CDECL *TransformD_GetScaling)(const TransformD& self, bool absolute);
+
+  typedef float (FOG_CDECL *TransformF_GetRotation)(const TransformF& self);
+  typedef double (FOG_CDECL *TransformD_GetRotation)(const TransformD& self);
+
+  typedef float (FOG_CDECL *TransformF_GetAverageScaling)(const TransformF& self);
+  typedef double (FOG_CDECL *TransformD_GetAverageScaling)(const TransformD& self);
+
+  struct _FuncsTransformF
   {
-    ShapeD_GetBoundingBox getBoundingBox;
-  } shaped;
+    TransformF_Create create;
+    TransformF_Update update;
+    TransformF_Transform transform;
+    TransformF_Transformed transformed;
+    TransformF_Multiply multiply;
+    TransformF_Invert invert;
+    TransformF_MapPointF mapPointF;
+    TransformF_MapPointsF mapPointsF[TRANSFORM_TYPE_COUNT];
+    TransformF_MapPathF mapPathF;
+    TransformF_MapPathDataF mapPathDataF;
+    TransformF_MapBoxF mapBoxF;
+    TransformF_MapVectorF mapVectorF;
+    TransformF_GetScaling getScaling;
+    TransformF_GetRotation getRotation;
+    TransformF_GetAverageScaling getAverageScaling;
+  } transformf;
+
+  struct _FuncsTransformD
+  {
+    TransformD_Create create;
+    TransformD_Update update;
+    TransformD_Transform transform;
+    TransformD_Transformed transformed;
+    TransformD_Multiply multiply;
+    TransformD_Invert invert;
+    TransformD_MapPointD mapPointD;
+    TransformD_MapPointsD mapPointsD[TRANSFORM_TYPE_COUNT];
+    TransformD_MapPathD mapPathD;
+    TransformD_MapPathDataD mapPathDataD;
+    TransformD_MapBoxD mapBoxD;
+    TransformD_MapVectorD mapVectorD;
+    TransformD_GetScaling getScaling;
+    TransformD_GetRotation getRotation;
+    TransformD_GetAverageScaling getAverageScaling;
+  } transformd;
 
   // --------------------------------------------------------------------------
   // [Color]
@@ -714,88 +854,6 @@ struct _G2dApi
     Painter_SwitchToImage switchToImage;
     Painter_SwitchToIBits switchToIBits;
   } painter;
-
-  // --------------------------------------------------------------------------
-  // [Transform]
-  // --------------------------------------------------------------------------
-
-  typedef err_t (FOG_CDECL *TransformF_Create)(TransformF& self, uint32_t createType, const void* params);
-  typedef err_t (FOG_CDECL *TransformD_Create)(TransformD& self, uint32_t createType, const void* params);
-
-  typedef uint32_t (FOG_CDECL *TransformF_Update)(const TransformF& self);
-  typedef uint32_t (FOG_CDECL *TransformD_Update)(const TransformD& self);
-
-  typedef err_t (FOG_CDECL *TransformF_Transform)(TransformF& self, uint32_t transformOp, const void* params);
-  typedef err_t (FOG_CDECL *TransformD_Transform)(TransformD& self, uint32_t transformOp, const void* params);
-
-  typedef TransformF (FOG_CDECL *TransformF_Transformed)(const TransformF& self, uint32_t transformOp, const void* params);
-  typedef TransformD (FOG_CDECL *TransformD_Transformed)(const TransformD& self, uint32_t transformOp, const void* params);
-
-  typedef void (FOG_CDECL *TransformF_Multiply)(TransformF& self, const TransformF& a, const TransformF& b);
-  typedef void (FOG_CDECL *TransformD_Multiply)(TransformD& self, const TransformD& a, const TransformD& b);
-
-  typedef bool (FOG_CDECL *TransformF_Invert)(TransformF& self, const TransformF& a);
-  typedef bool (FOG_CDECL *TransformD_Invert)(TransformD& self, const TransformD& a);
-
-  typedef void (FOG_CDECL *TransformF_MapPointF)(const TransformF& self, PointF& dst, const PointF& src);
-  typedef void (FOG_CDECL *TransformD_MapPointD)(const TransformD& self, PointD& dst, const PointD& src);
-
-  typedef void (FOG_CDECL *TransformF_MapPointsF)(const TransformF& self, PointF* dst, const PointF* src, sysuint_t length);
-  typedef void (FOG_CDECL *TransformD_MapPointsD)(const TransformD& self, PointD* dst, const PointD* src, sysuint_t length);
-
-  typedef err_t (FOG_CDECL *TransformF_MapPathF)(const TransformF& self, PathF& dst, const PathF& src);
-  typedef err_t (FOG_CDECL *TransformD_MapPathD)(const TransformD& self, PathD& dst, const PathD& src);
-
-  typedef void (FOG_CDECL *TransformF_MapBoxF)(const TransformF& self, BoxF& dst, const BoxF& src);
-  typedef void (FOG_CDECL *TransformD_MapBoxD)(const TransformD& self, BoxD& dst, const BoxD& src);
-
-  typedef void (FOG_CDECL *TransformF_MapVectorF)(const TransformF& self, PointF& dst, const PointF& src);
-  typedef void (FOG_CDECL *TransformD_MapVectorD)(const TransformD& self, PointD& dst, const PointD& src);
-
-  typedef PointF (FOG_CDECL *TransformF_GetScaling)(const TransformF& self, bool absolute);
-  typedef PointD (FOG_CDECL *TransformD_GetScaling)(const TransformD& self, bool absolute);
-
-  typedef float (FOG_CDECL *TransformF_GetRotation)(const TransformF& self);
-  typedef double (FOG_CDECL *TransformD_GetRotation)(const TransformD& self);
-
-  typedef float (FOG_CDECL *TransformF_GetAverageScaling)(const TransformF& self);
-  typedef double (FOG_CDECL *TransformD_GetAverageScaling)(const TransformD& self);
-
-  struct _FuncsTransformF
-  {
-    TransformF_Create create;
-    TransformF_Update update;
-    TransformF_Transform transform;
-    TransformF_Transformed transformed;
-    TransformF_Multiply multiply;
-    TransformF_Invert invert;
-    TransformF_MapPointF mapPointF;
-    TransformF_MapPointsF mapPointsF[TRANSFORM_TYPE_COUNT];
-    TransformF_MapPathF mapPathF;
-    TransformF_MapBoxF mapBoxF;
-    TransformF_MapVectorF mapVectorF;
-    TransformF_GetScaling getScaling;
-    TransformF_GetRotation getRotation;
-    TransformF_GetAverageScaling getAverageScaling;
-  } transformf;
-
-  struct _FuncsTransformD
-  {
-    TransformD_Create create;
-    TransformD_Update update;
-    TransformD_Transform transform;
-    TransformD_Transformed transformed;
-    TransformD_Multiply multiply;
-    TransformD_Invert invert;
-    TransformD_MapPointD mapPointD;
-    TransformD_MapPointsD mapPointsD[TRANSFORM_TYPE_COUNT];
-    TransformD_MapPathD mapPathD;
-    TransformD_MapBoxD mapBoxD;
-    TransformD_MapVectorD mapVectorD;
-    TransformD_GetScaling getScaling;
-    TransformD_GetRotation getRotation;
-    TransformD_GetAverageScaling getAverageScaling;
-  } transformd;
 };
 
 extern FOG_API _G2dApi _g2d;

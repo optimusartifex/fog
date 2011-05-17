@@ -36,7 +36,7 @@ XmlAttribute* SvgStopElement::_createAttribute(const ManagedString& name) const
   return base::_createAttribute(name);
 }
 
-err_t SvgStopElement::onRender(SvgRenderContext* context) const
+err_t SvgStopElement::onProcess(SvgVisitor* visitor) const
 {
   return ERR_OK;
 }

@@ -12,6 +12,7 @@
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Svg/Dom/SvgRootElement_p.h>
 #include <Fog/Svg/Visit/SvgRender.h>
+#include <Fog/Svg/Visit/SvgVisitor.h>
 
 namespace Fog {
 
@@ -45,12 +46,11 @@ XmlAttribute* SvgRootElement::_createAttribute(const ManagedString& name) const
   return base::_createAttribute(name);
 }
 
-err_t SvgRootElement::onRender(SvgRenderContext* context) const
+err_t SvgRootElement::onPrepare(SvgVisitor* visitor, SvgGState* state) const
 {
   if (a_viewBox.isAssigned() && a_viewBox.isValid())
   {
-    SvgRenderState state(context);
-    state.saveTransform();
+    if (state) state->saveTransform();
 
     SizeF size = getRootSize();
     BoxF box = a_viewBox.getBox();
@@ -59,22 +59,19 @@ err_t SvgRootElement::onRender(SvgRenderContext* context) const
       size.w / box.getWidth(), 0.0f,
       0.0f, size.h / box.getHeight(),
       -box.x0, -box.y0);
-    context->getPainter()->transform(tr);
+    visitor->transform(tr);
+  }
 
-    return base::onRender(context);
-  }
-  else
-  {
-    return base::onRender(context);
-  }
+  return ERR_OK;
 }
 
-err_t SvgRootElement::onRenderShape(SvgRenderContext* context) const
+err_t SvgRootElement::onProcess(SvgVisitor* visitor) const
 {
-  return _walkAndRender(this, context);
+  if (!hasChildNodes()) return ERR_OK;
+  return _visitContainer(visitor);
 }
 
-err_t SvgRootElement::onCalcBoundingBox(RectF* box) const
+err_t SvgRootElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
 {
   // TODO:
   return ERR_RT_NOT_IMPLEMENTED;

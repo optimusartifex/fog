@@ -8,9 +8,11 @@
 #define _FOG_SVG_DOM_SVGELEMENT_H
 
 // [Dependencies]
+#include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Rect.h>
+#include <Fog/G2d/Geometry/PathStroker.h>
+#include <Fog/G2d/Geometry/Transform.h>
 #include <Fog/Xml/Dom/XmlElement.h>
-#include <Fog/Svg/Dom/SvgObject.h>
 #include <Fog/Svg/Global/Constants.h>
 
 namespace Fog {
@@ -22,15 +24,14 @@ namespace Fog {
 // [Forward Declarations]
 // ============================================================================
 
-struct SvgRenderContext;
+struct SvgGState;
+struct SvgVisitor;
 
 // ============================================================================
 // [Fog::SvgElement]
 // ============================================================================
 
-struct FOG_API SvgElement :
-  public XmlElement,
-  public SvgObject
+struct FOG_API SvgElement : public XmlElement
 {
   typedef XmlElement base;
 
@@ -60,15 +61,17 @@ struct FOG_API SvgElement :
   virtual XmlAttribute* _createAttribute(const ManagedString& name) const;
 
   // --------------------------------------------------------------------------
-  // [SVG Rendering]
+  // [SVG Interface]
   // --------------------------------------------------------------------------
 
-  virtual err_t onRender(SvgRenderContext* context) const;
-  virtual err_t onRenderShape(SvgRenderContext* context) const;
-  virtual err_t onApplyPattern(SvgRenderContext* context, SvgElement* obj, int paintType) const;
-  virtual err_t onCalcBoundingBox(RectF* box) const;
+  virtual err_t onPrepare(SvgVisitor* visitor, SvgGState* state) const;
+  virtual err_t onProcess(SvgVisitor* visitor) const;
+  virtual err_t onPattern(SvgVisitor* visitor, SvgElement* obj, uint32_t paintType) const;
 
-  static err_t _walkAndRender(const XmlElement* root, SvgRenderContext* context);
+  virtual err_t onGeometryBoundingBox(BoxF& box, const TransformF* tr) const;
+  virtual err_t onStrokeBoundingBox(BoxF& box, const PathStrokerParamsF& stroke, const TransformF* tr) const;
+
+  err_t _visitContainer(SvgVisitor* visitor) const;
 
   // --------------------------------------------------------------------------
   // [SVG Styles]
@@ -81,9 +84,10 @@ struct FOG_API SvgElement :
   // [SVG Implementation]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE uint32_t isBoundingRectDirty() const { return _boundingRectDirty; }
+  FOG_INLINE uint32_t isBoundingBoxDirty() const { return _boundingBoxDirty; }
 
-  const RectF& getBoundingRect() const;
+  err_t getBoundingBox(BoxF& box) const;
+  err_t getBoundingBox(BoxF& box, const TransformF* tr) const;
 
   // --------------------------------------------------------------------------
   // [Visible]
@@ -97,13 +101,13 @@ struct FOG_API SvgElement :
   // --------------------------------------------------------------------------
 
   uint8_t _svgType;
-  mutable uint8_t _boundingRectDirty;
+  mutable uint8_t _boundingBoxDirty;
 
   uint8_t _visible;
   uint8_t _unused;
 
 protected:
-  mutable RectF _boundingRect;
+  mutable BoxF _boundingBox;
 
 private:
   FOG_DISABLE_COPY(SvgElement)

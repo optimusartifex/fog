@@ -12,6 +12,7 @@
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Svg/Dom/SvgCircleElement_p.h>
 #include <Fog/Svg/Visit/SvgRender.h>
+#include <Fog/Svg/Visit/SvgVisitor.h>
 
 namespace Fog {
 
@@ -41,7 +42,7 @@ XmlAttribute* SvgCircleElement::_createAttribute(const ManagedString& name) cons
   return base::_createAttribute(name);
 }
 
-err_t SvgCircleElement::onRenderShape(SvgRenderContext* context) const
+err_t SvgCircleElement::onProcess(SvgVisitor* visitor) const
 {
   if (a_r.isAssigned())
   {
@@ -51,16 +52,14 @@ err_t SvgCircleElement::onRenderShape(SvgRenderContext* context) const
 
     if (r <= 0.0f) return ERR_OK;
 
-    context->drawEllipse(EllipseF(PointF(cx, cy), PointF(r, r)));
-    return ERR_OK;
+    ShapeF shape(CircleF(PointF(cx, cy), r));
+    return visitor->onShape((SvgElement*)this, shape);
   }
-  else
-  {
-    return ERR_OK;
-  }
+
+  return ERR_OK;
 }
 
-err_t SvgCircleElement::onCalcBoundingBox(RectF* box) const
+err_t SvgCircleElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
 {
   if (a_r.isAssigned())
   {
@@ -69,13 +68,11 @@ err_t SvgCircleElement::onCalcBoundingBox(RectF* box) const
     float r = Math::abs(a_r.getCoordComputed());
 
     if (r <= 0.0f) goto _Fail;
-
-    box->setRect(cx - r, cy - r, r * 2.0f, r * 2.0f);
-    return ERR_OK;
+    return CircleF(PointF(cx, cy), r)._getBoundingBox(box, tr);
   }
 
 _Fail:
-  box->reset();
+  box.reset();
   return ERR_OK;
 }
 

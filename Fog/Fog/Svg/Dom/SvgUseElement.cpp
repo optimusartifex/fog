@@ -12,6 +12,7 @@
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Svg/Dom/SvgUseElement_p.h>
 #include <Fog/Svg/Visit/SvgRender.h>
+#include <Fog/Svg/Visit/SvgVisitor.h>
 #include <Fog/Xml/Dom/XmlDocument.h>
 
 namespace Fog {
@@ -75,34 +76,39 @@ XmlAttribute* SvgUseElement::_createAttribute(const ManagedString& name) const
   return base::_createAttribute(name);
 }
 
-err_t SvgUseElement::onRenderShape(SvgRenderContext* context) const
+err_t SvgUseElement::onPrepare(SvgVisitor* visitor, SvgGState* state) const
 {
-  String link = _getAttribute(fog_strings->getString(STR_SVG_ATTRIBUTE_xlink_href));
-  XmlElement* ref = getDocument()->getElementById(parseHtmlLinkId(link));
+  float tx = 0.0f;
+  float ty = 0.0f;
 
-  if (ref && ref->isSvgElement())
+  if (a_x.isAssigned()) tx = a_x.getCoordComputed();
+  if (a_y.isAssigned()) ty = a_y.getCoordComputed();
+
+  if (tx != 0.0f || ty != 0.0f)
   {
-    float translateX = 0.0f;
-    float translateY = 0.0f;
-
-    if (a_x.isAssigned()) translateX = a_x.getCoordComputed();
-    if (a_y.isAssigned()) translateY = a_y.getCoordComputed();
-
-    if (translateX != 0.0f || translateY != 0.0f)
-      context->getPainter()->translate(PointF(translateX, translateY));
-
-    reinterpret_cast<SvgElement*>(ref)->onRender(context);
-
-    if (translateX != 0.0f || translateY != 0.0f)
-      context->getPainter()->translate(PointF(-translateX, -translateY));
+    if (state && !state->hasState(SvgGState::SAVED_TRANSFORM)) state->saveTransform();
+    visitor->translate(PointF(tx, ty));
   }
 
   return ERR_OK;
 }
 
-err_t SvgUseElement::onCalcBoundingBox(RectF* box) const
+err_t SvgUseElement::onProcess(SvgVisitor* visitor) const
 {
-  box->reset();
+  err_t err = ERR_OK;
+
+  String link = _getAttribute(fog_strings->getString(STR_SVG_ATTRIBUTE_xlink_href));
+  XmlElement* ref = getDocument()->getElementById(parseHtmlLinkId(link));
+
+  if (ref && ref->isSvgElement())
+    err = visitor->onVisit(reinterpret_cast<SvgElement*>(ref));
+
+  return err;
+}
+
+err_t SvgUseElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
+{
+  box.reset();
   return ERR_OK;
 }
 

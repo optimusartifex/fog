@@ -712,7 +712,7 @@ err_t serializeColor(String& dst, const Color& color)
     {
       Argb32 argb32 = color.getArgb32();
 
-      if (argb32.getAlpha() != 0xFF)
+      if (argb32.getAlpha() == 0xFF)
       {
         FOG_RETURN_ON_ERROR( dst.append(Char('#')) );
         FOG_RETURN_ON_ERROR( dst.appendInt(argb32.getPacked32() & 0x00FFFFFF, 16, FormatFlags(6, 6)) );
@@ -720,7 +720,7 @@ err_t serializeColor(String& dst, const Color& color)
       else
       {
         FOG_RETURN_ON_ERROR(
-          dst.format("rgb(%d, %d, %d, %f)",
+          dst.format("rgba(%d, %d, %d, %f)",
             argb32.getRed(),
             argb32.getGreen(),
             argb32.getBlue(),

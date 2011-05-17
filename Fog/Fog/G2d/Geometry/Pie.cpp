@@ -9,6 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
+#include <Fog/Core/Global/Internal_Core_p.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/Pie.h>
@@ -20,17 +21,17 @@ namespace Fog {
 // [Fog::Pie - HitTest]
 // ============================================================================
 
-template<typename Number>
-static bool FOG_CDECL _G2d_PieT_hitTest(const typename PieT<Number>::T* self, const typename PointT<Number>::T* pt)
+template<typename NumT>
+static bool FOG_CDECL _G2d_PieT_hitTest(const NumT_(Pie)* self, const NumT_(Point)* pt)
 {
-  Number cx = self->center.x;
-  Number cy = self->center.y;
+  NumT cx = self->center.x;
+  NumT cy = self->center.y;
 
-  Number rx = Math::abs(self->radius.x);
-  Number ry = Math::abs(self->radius.y);
+  NumT rx = Math::abs(self->radius.x);
+  NumT ry = Math::abs(self->radius.y);
 
-  Number x = pt->x - cx;
-  Number y = pt->y - cy;
+  NumT x = pt->x - cx;
+  NumT y = pt->y - cy;
 
   // No radius or very close to zero (can't hit-test in such case).
   if (Math::isFuzzyZero(rx) || Math::isFuzzyZero(ry)) return false;
@@ -47,25 +48,25 @@ static bool FOG_CDECL _G2d_PieT_hitTest(const typename PieT<Number>::T* self, co
   }
 
   // Hit-test the ellipse.
-  Number ptDist = Math::pow2(x) + Math::pow2(y);
-  Number maxDist = Math::pow2(rx);
+  NumT ptDist = Math::pow2(x) + Math::pow2(y);
+  NumT maxDist = Math::pow2(rx);
 
   if (ptDist > maxDist) return false;
 
   // Hit-test the rest.
-  typename PointT<Number>::T p0, p1;
+  NumT_(Point) p0, p1;
 
-  Number start = self->start;
-  Number sweep = self->sweep;
+  NumT start = self->start;
+  NumT sweep = self->sweep;
 
   // If sweep is larger than a 2pi then hit-test is always positive.
-  const Number _2pi = Number(2.0 * MATH_PI);
+  const NumT _2pi = NumT(MATH_TWO_PI);
   if (sweep < -_2pi || sweep > _2pi) return true;
 
-  if (sweep < Number(0.0)) { start += sweep; sweep = -sweep; }
+  if (sweep < NumT(0.0)) { start += sweep; sweep = -sweep; }
   if (start <= -_2pi || start >= _2pi) start = Math::mod(start, _2pi);
 
-  Number angle = Math::repeat(Math::atan2(y, x) - start, _2pi);
+  NumT angle = Math::repeat(Math::atan2(y, x) - start, _2pi);
   return angle <= sweep;
 }
 

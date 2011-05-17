@@ -51,18 +51,18 @@ namespace Fog {
     c = t * t; \
   FOG_MACRO_END
 
-#define _FOG_QUAD_MERGE(_Number_, t) \
+#define _FOG_QUAD_MERGE(_Number_, t, _Pts_, _PMin_, _PMax_) \
   FOG_MACRO_BEGIN \
     if (t > _Number_(0.0) && t < _Number_(1.0)) \
     { \
       _FOG_QUAD_COEFF(_Number_, t, a, b, c); \
       \
       typename PointT<_Number_>::T _p( \
-        a * self[0].x + b * self[1].x + c * self[2].x, \
-        a * self[0].y + b * self[1].y + c * self[2].y); \
+        a * _Pts_[0].x + b * _Pts_[1].x + c * _Pts_[2].x, \
+        a * _Pts_[0].y + b * _Pts_[1].y + c * _Pts_[2].y); \
       \
-      if (_p.x < pMin.x) pMin.x = _p.x; else if (_p.x > pMax.x) pMax.x = _p.x; \
-      if (_p.y < pMin.y) pMin.y = _p.y; else if (_p.y > pMax.y) pMax.y = _p.y; \
+      if (_p.x < _PMin_.x) _PMin_.x = _p.x; else if (_p.x > _PMax_.x) _PMax_.x = _p.x; \
+      if (_p.y < _PMin_.y) _PMin_.y = _p.y; else if (_p.y > _PMax_.y) _PMax_.y = _p.y; \
     } \
   FOG_MACRO_END
 
@@ -103,18 +103,18 @@ namespace Fog {
     d = t * t_2; \
   FOG_MACRO_END
 
-#define _FOG_CUBIC_MERGE(_Number_, t) \
+#define _FOG_CUBIC_MERGE(_Number_, t, _Pts_, _PMin_, _PMax_) \
   FOG_MACRO_BEGIN \
     if (t > _Number_(0.0) && t < _Number_(1.0)) \
     { \
       _FOG_CUBIC_COEFF(_Number_, t, a, b, c, d); \
       \
       typename PointT<_Number_>::T _p( \
-        a * self[0].x + b * self[1].x + c * self[2].x + d * self[3].x, \
-        a * self[0].y + b * self[1].y + c * self[2].y + d * self[3].y); \
+        a * _Pts_[0].x + b * _Pts_[1].x + c * _Pts_[2].x + d * _Pts_[3].x, \
+        a * _Pts_[0].y + b * _Pts_[1].y + c * _Pts_[2].y + d * _Pts_[3].y); \
       \
-      if (_p.x < pMin.x) pMin.x = _p.x; else if (_p.x > pMax.x) pMax.x = _p.x; \
-      if (_p.y < pMin.y) pMin.y = _p.y; else if (_p.y > pMax.y) pMax.y = _p.y; \
+      if (_p.x < _PMin_.x) _PMin_.x = _p.x; else if (_p.x > _PMax_.x) _PMax_.x = _p.x; \
+      if (_p.y < _PMin_.y) _PMin_.y = _p.y; else if (_p.y > _PMax_.y) _PMax_.y = _p.y; \
     } \
   FOG_MACRO_END
 
@@ -124,11 +124,13 @@ namespace Fog {
 
 static FOG_INLINE void _G2d_PathT_verifyBoundingBox(const PathF& path)
 {
-  if (path._d->boundingBoxDirty == false)
+  if ((path._d->flags & PATH_DATA_DIRTY_BOUNDING_BOX) == 0)
   {
-    BoxF _bbOld = path._d->boundingBox;
-    path._d->boundingBoxDirty = true;
-    BoxF _bbNew = path.getBoundingBox();
+    BoxF _bbOld, _bbNew;
+    path._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
+
+    _bbOld = path._d->boundingBox;
+    path.getBoundingBox(_bbNew);
 
     // Track the inconsistency when new bounding box is greater than the old one.
     FOG_ASSERT(_bbOld.subsumes(_bbNew));
@@ -137,11 +139,13 @@ static FOG_INLINE void _G2d_PathT_verifyBoundingBox(const PathF& path)
 
 static FOG_INLINE void _G2d_PathT_verifyBoundingBox(const PathD& path)
 {
-  if (path._d->boundingBoxDirty == false)
+  if ((path._d->flags & PATH_DATA_DIRTY_BOUNDING_BOX) == 0)
   {
-    BoxD _bbOld = path._d->boundingBox;
-    path._d->boundingBoxDirty = true;
-    BoxD _bbNew = path.getBoundingBox();
+    BoxD _bbOld, _bbNew;
+    path._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
+
+    _bbOld = path._d->boundingBox;
+    path.getBoundingBox(_bbNew);
 
     // Track the inconsistency when new bounding box is greater than the old one.
     FOG_ASSERT(_bbOld.subsumes(_bbNew));

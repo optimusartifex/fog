@@ -12,6 +12,7 @@
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Svg/Dom/SvgRectElement_p.h>
 #include <Fog/Svg/Visit/SvgRender.h>
+#include <Fog/Svg/Visit/SvgVisitor.h>
 
 namespace Fog {
 
@@ -47,13 +48,13 @@ XmlAttribute* SvgRectElement::_createAttribute(const ManagedString& name) const
   return base::_createAttribute(name);
 }
 
-err_t SvgRectElement::onRenderShape(SvgRenderContext* context) const
+err_t SvgRectElement::onProcess(SvgVisitor* visitor) const
 {
   if (a_width.isAssigned() && a_height.isAssigned())
   {
     float rw = a_width.getCoordComputed();
     float rh = a_height.getCoordComputed();
-    if (rw <= 0.0f || rh <= 0.0f) goto _Fail;
+    if (rw <= 0.0f || rh <= 0.0f) return ERR_GEOMETRY_INVALID;
 
     float rx = a_x.isAssigned() ? a_x.getCoordComputed() : 0.0f;
     float ry = a_y.isAssigned() ? a_y.getCoordComputed() : 0.0f;
@@ -64,17 +65,19 @@ err_t SvgRectElement::onRenderShape(SvgRenderContext* context) const
     if (!a_rx.isAssigned() && a_ry.isAssigned()) radx = rady;
     if (!a_ry.isAssigned() && a_rx.isAssigned()) rady = radx;
 
-    if (radx <= 0.0 || rady <= 0.0)
-      context->drawRect(RectF(rx, ry, rw, rh));
+    ShapeF shape;
+
+    if (radx <= float(0.0) || rady <= float(0.0))
+      shape.setRect(RectF(rx, ry, rw, rh));
     else
-      context->drawRound(RoundF(rx, ry, rw, rh, radx, rady));
+      shape.setRound(RoundF(rx, ry, rw, rh, radx, rady));
+    return visitor->onShape((SvgElement*)this, shape);
   }
 
-_Fail:
   return ERR_OK;
 }
 
-err_t SvgRectElement::onCalcBoundingBox(RectF* box) const
+err_t SvgRectElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
 {
   if (a_width.isAssigned() && a_height.isAssigned())
   {
@@ -85,12 +88,14 @@ err_t SvgRectElement::onCalcBoundingBox(RectF* box) const
     float rx = a_x.isAssigned() ? a_x.getCoordComputed() : 0.0f;
     float ry = a_y.isAssigned() ? a_y.getCoordComputed() : 0.0f;
 
-    box->setRect(rx, ry, rw, rh);
+    box.setRect(rx, ry, rw, rh);
+    if (tr) tr->mapBox(box, box);
+
     return ERR_OK;
   }
 
 _Fail:
-  box->reset();
+  box.reset();
   return ERR_OK;
 }
 

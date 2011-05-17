@@ -141,18 +141,17 @@ struct FOG_NO_EXPORT CubicCurveF
   // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE BoxF getBoundingBox() const
+  FOG_INLINE err_t getBoundingBox(BoxF& dst) const
   {
-    BoxF box;
-    _g2d.cubiccurvef.getExtrema(p, &box);
-    return box;
+    return _g2d.cubiccurvef.getBoundingBox(p, &dst);
   }
 
-  FOG_INLINE RectF getBoundingRect() const
+  FOG_INLINE err_t getBoundingRect(RectF& dst) const
   {
-    BoxF box;
-    _g2d.cubiccurvef.getExtrema(p, &box);
-    return RectF(box);
+    err_t err = _g2d.cubiccurvef.getBoundingBox(p, reinterpret_cast<BoxF*>(&dst));
+    dst.w -= dst.x;
+    dst.h -= dst.y;
+    return err;
   }
 
   // --------------------------------------------------------------------------
@@ -244,18 +243,19 @@ struct FOG_NO_EXPORT CubicCurveF
   // [Statics]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE BoxF getBoundingBox(const CubicCurveF* self)
+  static FOG_INLINE err_t getBoundingBox(const CubicCurveF* self, BoxF* dst)
   {
-    BoxF box(UNINITIALIZED);
-    _g2d.cubiccurvef.getExtrema(self->p, &box);
-    return box;
+    return _g2d.cubiccurvef.getBoundingBox(self->p, dst);
   }
 
-  static FOG_INLINE BoxF getBoundingBox(const PointF* self)
+  static FOG_INLINE err_t getBoundingBox(const PointF* self, BoxF* dst)
   {
-    BoxF box(UNINITIALIZED);
-    _g2d.cubiccurvef.getExtrema(self, &box);
-    return box;
+    return _g2d.cubiccurvef.getBoundingBox(self, dst);
+  }
+
+  static FOG_INLINE err_t getSplineBBox(const PointF* self, sysuint_t length, BoxF* dst)
+  {
+    return _g2d.cubiccurvef.getSplineBBox(self, length, dst);
   }
 
   static FOG_INLINE void getMidPoint(const PointF* self, PointF* dst)
@@ -273,13 +273,14 @@ struct FOG_NO_EXPORT CubicCurveF
     left[0] = self[0];
     left[1] = p01;
 
-    rght[0] = left[3];
-    rght[1] = Math2d::half(p12, p23);
     rght[2] = p23;
     rght[3] = self[3];
 
     left[2] = Math2d::half(p01, p12);
+    rght[1] = Math2d::half(p12, p23);
+
     left[3] = Math2d::half(left[2], rght[1]);
+    rght[0] = left[3];
   }
 
   static FOG_INLINE void splitHalf(const CubicCurveF* self, CubicCurveF* left, CubicCurveF* rght)
@@ -298,14 +299,14 @@ struct FOG_NO_EXPORT CubicCurveF
     left[0] = self[0];
     left[1] = p01;
 
-    rght[1] = Math2d::lerp(p12, p23, t, inv_t);
     rght[2] = p23;
+    rght[3] = self[3];
 
     left[2] = Math2d::lerp(p01, p12, t, inv_t);
-    left[3] = Math2d::lerp(left[2], rght[1], t, inv_t);
+    rght[1] = Math2d::lerp(p12, p23, t, inv_t);
 
+    left[3] = Math2d::lerp(left[2], rght[1], t, inv_t);
     rght[0] = left[3];
-    rght[3] = self[3];
   }
 
   static FOG_INLINE void splitAt(const CubicCurveF* self, CubicCurveF* left, CubicCurveF* rght, float t)
@@ -477,18 +478,17 @@ struct FOG_NO_EXPORT CubicCurveD
   // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE BoxD getBoundingBox() const
+  FOG_INLINE err_t getBoundingBox(BoxD& dst) const
   {
-    BoxD box;
-    _g2d.cubiccurved.getExtrema(p, &box);
-    return box;
+    return _g2d.cubiccurved.getBoundingBox(p, &dst);
   }
 
-  FOG_INLINE RectD getBoundingRect() const
+  FOG_INLINE err_t getBoundingRect(RectD& dst) const
   {
-    BoxD box;
-    _g2d.cubiccurved.getExtrema(p, &box);
-    return RectD(box);
+    err_t err = _g2d.cubiccurved.getBoundingBox(p, reinterpret_cast<BoxD*>(&dst));
+    dst.w -= dst.x;
+    dst.h -= dst.y;
+    return err;
   }
 
   // --------------------------------------------------------------------------
@@ -580,18 +580,19 @@ struct FOG_NO_EXPORT CubicCurveD
   // [Statics]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE BoxD getBoundingBox(const CubicCurveD* self)
+  static FOG_INLINE err_t getBoundingBox(const CubicCurveD* self, BoxD* dst)
   {
-    BoxD box(UNINITIALIZED);
-    _g2d.cubiccurved.getExtrema(self->p, &box);
-    return box;
+    return _g2d.cubiccurved.getBoundingBox(self->p, dst);
   }
 
-  static FOG_INLINE BoxD getBoundingBox(const PointD* self)
+  static FOG_INLINE err_t getBoundingBox(const PointD* self, BoxD* dst)
   {
-    BoxD box(UNINITIALIZED);
-    _g2d.cubiccurved.getExtrema(self, &box);
-    return box;
+    return _g2d.cubiccurved.getBoundingBox(self, dst);
+  }
+
+  static FOG_INLINE err_t getSplineBBox(const PointD* self, sysuint_t length, BoxD* dst)
+  {
+    return _g2d.cubiccurved.getSplineBBox(self, length, dst);
   }
 
   static FOG_INLINE void getMidPoint(const PointD* self, PointD* dst)
@@ -609,13 +610,14 @@ struct FOG_NO_EXPORT CubicCurveD
     left[0] = self[0];
     left[1] = p01;
 
-    rght[0] = left[3];
-    rght[1] = Math2d::half(p12, p23);
     rght[2] = p23;
     rght[3] = self[3];
 
     left[2] = Math2d::half(p01, p12);
+    rght[1] = Math2d::half(p12, p23);
+
     left[3] = Math2d::half(left[2], rght[1]);
+    rght[0] = left[3];
   }
 
   static FOG_INLINE void splitHalf(const CubicCurveD* self, CubicCurveD* left, CubicCurveD* rght)
@@ -634,14 +636,14 @@ struct FOG_NO_EXPORT CubicCurveD
     left[0] = self[0];
     left[1] = p01;
 
-    rght[1] = Math2d::lerp(p12, p23, t, inv_t);
     rght[2] = p23;
+    rght[3] = self[3];
 
     left[2] = Math2d::lerp(p01, p12, t, inv_t);
-    left[3] = Math2d::lerp(left[2], rght[1], t, inv_t);
+    rght[1] = Math2d::lerp(p12, p23, t, inv_t);
 
+    left[3] = Math2d::lerp(left[2], rght[1], t, inv_t);
     rght[0] = left[3];
-    rght[3] = self[3];
   }
 
   static FOG_INLINE void splitAt(const CubicCurveD* self, CubicCurveD* left, CubicCurveD* rght, double t)

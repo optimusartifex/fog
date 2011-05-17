@@ -176,11 +176,11 @@ err_t ByteArray::prepare(sysuint_t capacity)
   return ERR_OK;
 }
 
-char* ByteArray::beginManipulation(sysuint_t max, int outputMode)
+char* ByteArray::beginManipulation(sysuint_t max, uint32_t op)
 {
   Data* d = _d;
 
-  if (outputMode == OUTPUT_MODE_SET)
+  if (op == CONTAINER_OP_REPLACE)
   {
     if (d->refCount.get() == 1 && d->capacity >= max)
     {
@@ -891,7 +891,7 @@ err_t ByteArray::appendDouble(double d, int doubleForm, const FormatFlags& ff)
     i = precision + 16;
     if (decpt > 0) i += (sysuint_t)decpt;
 
-    dest = beginManipulation(i, OUTPUT_MODE_APPEND);
+    dest = beginManipulation(i, CONTAINER_OP_APPEND);
     if (FOG_IS_NULL(dest)) { err = ERR_RT_OUT_OF_MEMORY; goto __ret; }
 
     while (bufCur != bufEnd && decpt > 0) { *dest++ = *bufCur++; decpt--; }
@@ -922,7 +922,7 @@ __exponentialForm:
     if (decpt == 9999) goto __InfOrNaN;
 
     // Reserve some space for number, we need +X.{PRECISION}e+123
-    dest = beginManipulation(precision + 10, OUTPUT_MODE_APPEND);
+    dest = beginManipulation(precision + 10, CONTAINER_OP_APPEND);
     if (FOG_IS_NULL(dest)) { err = ERR_RT_OUT_OF_MEMORY; goto __ret; }
 
     bufCur = out.result;
@@ -988,7 +988,7 @@ __exponentialForm:
     i = precision + 16;
     if (decpt > 0) i += (sysuint_t)decpt;
 
-    dest = beginManipulation(i, OUTPUT_MODE_APPEND);
+    dest = beginManipulation(i, CONTAINER_OP_APPEND);
     if (FOG_IS_NULL(dest)) { err = ERR_RT_OUT_OF_MEMORY; goto __ret; }
 
     save = dest;

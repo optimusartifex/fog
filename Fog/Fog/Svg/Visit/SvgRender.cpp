@@ -9,20 +9,73 @@
 namespace Fog {
 
 // ============================================================================
-// [Fog::SvgRenderContext]
+// [Fog::SvgRender - Helpers]
 // ============================================================================
 
-SvgRenderContext::SvgRenderContext(Painter* painter, SvgVisitor* visitor) :
-  _painter(painter),
-  _visitor(visitor)
+static FOG_INLINE bool _setupFill(SvgRender* visitor)
 {
-  _strokeStyle.type = SVG_SOURCE_NONE;
-  _fillStyle.type = SVG_SOURCE_COLOR;
+  Painter* p = visitor->_painter;
 
-  _fillRule = FILL_RULE_EVEN_ODD;
-  _opacity = 1.0f;
+  switch (visitor->_fillStyle.type)
+  {
+    case SVG_SOURCE_NONE:
+    case SVG_SOURCE_INVALID:
+      break;
 
-  _textCursor.reset();
+    case SVG_SOURCE_COLOR:
+      p->setSource(visitor->_fillStyle.color);
+      goto _FillUsed;
+
+    case SVG_SOURCE_URI:
+      p->setSource(visitor->_fillStyle.pattern);
+_FillUsed:
+      p->setOpacity(visitor->_fillStyle.opacity * visitor->_opacity);
+      p->setFillRule(visitor->_fillRule);
+      return true;
+
+    default:
+      FOG_ASSERT_NOT_REACHED();
+  }
+
+  return false;
+}
+
+static FOG_INLINE bool _setupStroke(SvgRender* visitor)
+{
+  Painter* p = visitor->_painter;
+
+  switch (visitor->_strokeStyle.type)
+  {
+    case SVG_SOURCE_NONE:
+    case SVG_SOURCE_INVALID:
+      break;
+
+    case SVG_SOURCE_COLOR:
+      p->setSource(visitor->_strokeStyle.color);
+      goto _StrokeUsed;
+
+    case SVG_SOURCE_URI:
+      p->setSource(visitor->_strokeStyle.pattern);
+_StrokeUsed:
+      p->setOpacity(visitor->_strokeStyle.opacity * visitor->_opacity);
+      p->setStrokeParams(visitor->_strokeParams);
+      return true;
+
+    default:
+      FOG_ASSERT_NOT_REACHED();
+  }
+
+  return false;
+}
+
+// ============================================================================
+// [Fog::SvgRender - Construction / Destruction]
+// ============================================================================
+
+SvgRender::SvgRender(Painter* painter) :
+  _painter(painter)
+{
+  _visitorType = SVG_VISITOR_RENDER;
 
   _painter->save();
   _painter->setCompositingOperator(COMPOSITE_SRC_OVER);
@@ -30,61 +83,60 @@ SvgRenderContext::SvgRenderContext(Painter* painter, SvgVisitor* visitor) :
   _painter->resetStrokeParams();
 }
 
-SvgRenderContext::~SvgRenderContext()
+SvgRender::~SvgRender()
 {
   _painter->restore();
 }
 
-bool SvgRenderContext::setupFill()
+// ============================================================================
+// [Fog::SvgRender - Interface]
+// ============================================================================
+
+err_t SvgRender::onShape(SvgElement* obj, const ShapeF& shape)
 {
-  switch (_fillStyle.type)
-  {
-    case SVG_SOURCE_NONE:
-    case SVG_SOURCE_INVALID:
-      return false;
+  _painter->save();
+  _painter->transform(_transform);
 
-    case SVG_SOURCE_COLOR:
-      _painter->setSource(_fillStyle.color);
-      goto _FillUsed;
+  if (shape.isClosed() && _setupFill(this)) _painter->fillShape(shape);
+  if (_setupStroke(this)) _painter->drawShape(shape);
 
-    case SVG_SOURCE_URI:
-      _painter->setSource(_fillStyle.pattern);
-_FillUsed:
-      _painter->setOpacity(_fillStyle.opacity * _opacity);
-      _painter->setFillRule(_fillRule);
-      return true;
-
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
-
-  return false;
+  _painter->restore();
+  return ERR_OK;
 }
 
-bool SvgRenderContext::setupStroke()
+err_t SvgRender::onPath(SvgElement* obj, const PathF& path)
 {
-  switch (_strokeStyle.type)
-  {
-    case SVG_SOURCE_NONE:
-    case SVG_SOURCE_INVALID:
-      return false;
+  _painter->save();
+  _painter->transform(_transform);
 
-    case SVG_SOURCE_COLOR:
-      _painter->setSource(_strokeStyle.color);
-      goto _StrokeUsed;
+  if (_setupFill(this)) _painter->fillPath(path);
+  if (_setupStroke(this)) _painter->drawPath(path);
 
-    case SVG_SOURCE_URI:
-      _painter->setSource(_strokeStyle.pattern);
-_StrokeUsed:
-      _painter->setOpacity(_strokeStyle.opacity * _opacity);
-      _painter->setStrokeParams(_strokeParams);
-      return true;
+  _painter->restore();
+  return ERR_OK;
+}
 
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
+err_t SvgRender::onPath(SvgElement* obj, const PathD& path)
+{
+  _painter->save();
+  _painter->transform(_transform);
 
-  return false;
+  if (_setupFill(this)) _painter->fillPath(path);
+  if (_setupStroke(this)) _painter->drawPath(path);
+
+  _painter->restore();
+  return ERR_OK;
+}
+
+err_t SvgRender::onImage(SvgElement* obj, const PointF& pt, const Image& image)
+{
+  _painter->save();
+  _painter->transform(_transform);
+
+  _painter->blitImage(pt, image);
+
+  _painter->restore();
+  return ERR_OK;
 }
 
 } // Fog namespace

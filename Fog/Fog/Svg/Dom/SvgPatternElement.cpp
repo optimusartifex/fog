@@ -14,6 +14,7 @@
 #include <Fog/Svg/Dom/SvgDocument.h>
 #include <Fog/Svg/Dom/SvgPatternElement_p.h>
 #include <Fog/Svg/Visit/SvgRender.h>
+#include <Fog/Svg/Visit/SvgVisitor.h>
 
 namespace Fog {
 
@@ -62,21 +63,20 @@ XmlAttribute* SvgPatternElement::_createAttribute(const ManagedString& name) con
   return base::_createAttribute(name);
 }
 
-err_t SvgPatternElement::onRender(SvgRenderContext* context) const
+err_t SvgPatternElement::onProcess(SvgVisitor* visitor) const
 {
-  // Pattern is not rendered by standard rendering process.
   return ERR_OK;
 }
 
-err_t SvgPatternElement::onApplyPattern(SvgRenderContext* context, SvgElement* obj, int paintType) const
+err_t SvgPatternElement::onPattern(SvgVisitor* visitor, SvgElement* obj, uint32_t paintType) const
 {
   PatternF pattern;
   FOG_RETURN_ON_ERROR(_createPattern(pattern, obj));
 
   if (paintType == SVG_PAINT_FILL)
-    context->setFillPattern(pattern);
+    visitor->setFillPattern(pattern);
   else
-    context->setStrokePattern(pattern);
+    visitor->setStrokePattern(pattern);
   return ERR_OK;
 }
 
@@ -125,8 +125,8 @@ err_t SvgPatternElement::_createPattern(PatternF& pattern, SvgElement* obj) cons
       }
     }
 
-    SvgRenderContext ctx(&painter);
-    SvgElement::_walkAndRender(this, &ctx);
+    SvgRender render(&painter);
+    _visitContainer(&render);
     painter.end();
 
     pattern.setTexture(Texture(image, TEXTURE_TILE_REPEAT));

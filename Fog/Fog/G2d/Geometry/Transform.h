@@ -125,10 +125,12 @@ struct FOG_NO_EXPORT TransformF
   //! @brief Create a copy of @a other matrix.
   FOG_INLINE TransformF(const TransformF& other)
   {
-    _setData(other._type,
-      other._00, other._01, other._02,
-      other._10, other._11, other._12,
-      other._20, other._21, other._22);
+    setTransform(other);
+  }
+
+  explicit FOG_INLINE TransformF(const TransformD& other)
+  {
+    setTransform(other);
   }
 
   FOG_INLINE TransformF(_Uninitialized) {}
@@ -151,7 +153,7 @@ struct FOG_NO_EXPORT TransformF
     float m10, float m11, float m12,
     float m20, float m21, float m22)
   {
-    _setData(TRANSFORM_TYPE_PROJECTION | TRANSFORM_TYPE_DIRTY,
+    _setData(TRANSFORM_TYPE_DEGENERATE | TRANSFORM_TYPE_DIRTY,
       m00, m01, m02,
       m10, m11, m12,
       m20, m21, m22);
@@ -160,7 +162,7 @@ struct FOG_NO_EXPORT TransformF
   //! @brief Create custom matrix from @a data[9].
   explicit FOG_INLINE TransformF(const float* data)
   {
-    _setData(TRANSFORM_TYPE_PROJECTION | TRANSFORM_TYPE_DIRTY,
+    _setData(TRANSFORM_TYPE_DEGENERATE | TRANSFORM_TYPE_DIRTY,
       data[0], data[1], data[2],
       data[3], data[4], data[5],
       data[6], data[7], data[8]);
@@ -494,7 +496,7 @@ struct FOG_NO_EXPORT TransformF
     float m10, float m11, float m12,
     float m20, float m21, float m22)
   {
-    _setData(TRANSFORM_TYPE_PROJECTION | TRANSFORM_TYPE_DIRTY,
+    _setData(TRANSFORM_TYPE_DEGENERATE | TRANSFORM_TYPE_DIRTY,
       m00, m01, m02,
       m10, m11, m12,
       m20, m21, m22);
@@ -502,7 +504,7 @@ struct FOG_NO_EXPORT TransformF
 
   FOG_INLINE void setData(const float* data)
   {
-    _setData(TRANSFORM_TYPE_PROJECTION | TRANSFORM_TYPE_DIRTY,
+    _setData(TRANSFORM_TYPE_DEGENERATE | TRANSFORM_TYPE_DIRTY,
       data[0], data[1], data[2],
       data[3], data[4], data[5],
       data[6], data[7], data[8]);
@@ -524,7 +526,7 @@ struct FOG_NO_EXPORT TransformF
   // [Type]
   // --------------------------------------------------------------------------
 
-  //! @brief Get the type of transform, updating it when needed.
+  //! @brief Get the type of the transform, updating it when needed.
   //!
   //! Type of matrix allows to optimize computation of matrix special cases.
   FOG_INLINE uint32_t getType() const
@@ -536,7 +538,7 @@ struct FOG_NO_EXPORT TransformF
     return type;
   }
 
-  //! @brief Update the type of transform and get it.
+  //! @brief Update the type of the transform and get it.
   FOG_INLINE uint32_t updateType() const
   {
     uint32_t type = _g2d.transformf.update(*this);
@@ -544,10 +546,10 @@ struct FOG_NO_EXPORT TransformF
     return type;
   }
 
-  //! @brief Invalidate the type of transform.
+  //! @brief Invalidate the type of the transform.
   //!
   //! Invalidate must be called after you modified matrix members.
-  FOG_INLINE void invalidate(uint32_t toType = TRANSFORM_TYPE_PROJECTION)
+  FOG_INLINE void invalidate(uint32_t toType = TRANSFORM_TYPE_DEGENERATE)
   {
     _type = toType | TRANSFORM_TYPE_DIRTY;
   }
@@ -845,6 +847,11 @@ struct FOG_NO_EXPORT TransformF
   // [Transform]
   // --------------------------------------------------------------------------
 
+  FOG_INLINE err_t _transform(uint32_t transformOp, const void* params)
+  {
+    return _g2d.transformf.transform(*this, transformOp, params);
+  }
+
   FOG_INLINE err_t translate(const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
     return _g2d.transformf.transform(*this, TRANSFORM_OP_TRANSLATE | (order << 4), &p);
@@ -1029,11 +1036,6 @@ struct FOG_NO_EXPORT TransformF
     _g2d.transformf.mapPointsF[_type](*this, dst, src, count);
   }
 
-  FOG_INLINE err_t mapPath(PathF& dst, const PathF& src) const
-  {
-    return _g2d.transformf.mapPathF(*this, dst, src);
-  }
-
   FOG_INLINE void mapBox(BoxF& dst, const BoxF& src) const
   {
     _g2d.transformf.mapBoxF(*this, dst, src);
@@ -1049,20 +1051,31 @@ struct FOG_NO_EXPORT TransformF
     _g2d.transformf.mapVectorF(*this, dst, src);
   }
 
+  FOG_INLINE err_t mapPath(PathF& dst, const PathF& src, uint32_t cntOp = CONTAINER_OP_REPLACE) const
+  {
+    return _g2d.transformf.mapPathF(*this, dst, src, cntOp);
+  }
+
+  FOG_INLINE err_t mapPathData(PathF& dst, const uint8_t* srcCmd, const PointF* srcPts, sysuint_t srcLength, uint32_t cntOp = CONTAINER_OP_REPLACE) const
+  {
+    return _g2d.transformf.mapPathDataF(*this, dst, srcCmd, srcPts, srcLength, cntOp);
+  }
+
   // --------------------------------------------------------------------------
   // [Auxiliary]
   // --------------------------------------------------------------------------
 
   FOG_INLINE bool isIdentity() const { return getType() == TRANSFORM_TYPE_IDENTITY; }
+  FOG_INLINE bool isTranslation() const { return getType() == TRANSFORM_TYPE_TRANSLATION; }
   FOG_INLINE bool isAffine() const { return getType() <= TRANSFORM_TYPE_AFFINE; }
   FOG_INLINE bool isProjection() const { return getType() >= TRANSFORM_TYPE_PROJECTION; }
 
-  FOG_INLINE bool isDegenerate() const { return !Math::isFuzzyZero(_00) && !Math::isFuzzyZero(_11); }
-  FOG_INLINE bool isInvertible() const { return !Math::isFuzzyZero(getDeterminant()); }
+  FOG_INLINE bool isDegenerate() const { return getType() >= TRANSFORM_TYPE_DEGENERATE; }
+  FOG_INLINE bool isInvertible() const { return getType() != TRANSFORM_TYPE_DEGENERATE; }
 
   FOG_INLINE float getDeterminant() const
   {
-    if (_type <= TRANSFORM_TYPE_AFFINE)
+    if (getType() <= TRANSFORM_TYPE_AFFINE)
     {
       return (_00 * _11 - _01 * _10);
     }
@@ -1084,12 +1097,6 @@ struct FOG_NO_EXPORT TransformF
   //! Basically used to calculate the approximation scale when decomposinting
   //! curves into line segments.
   FOG_INLINE float getAverageScaling() const { return _g2d.transformf.getAverageScaling(*this); }
-
-  // --------------------------------------------------------------------------
-  // [Covert]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE TransformD toTransformD() const;
 
   // --------------------------------------------------------------------------
   // [HashCode]
@@ -1174,7 +1181,7 @@ struct FOG_NO_EXPORT TransformF
     _10 += val; _11 += val; _12 += val;
     _20 += val; _21 += val; _22 += val;
 
-    _type = TRANSFORM_TYPE_PROJECTION | TRANSFORM_TYPE_DIRTY;
+    _type = TRANSFORM_TYPE_DEGENERATE | TRANSFORM_TYPE_DIRTY;
     return *this;
   }
 
@@ -1184,7 +1191,7 @@ struct FOG_NO_EXPORT TransformF
     _10 -= val; _11 -= val; _12 -= val;
     _20 -= val; _21 -= val; _22 -= val;
 
-    _type = TRANSFORM_TYPE_PROJECTION | TRANSFORM_TYPE_DIRTY;
+    _type = TRANSFORM_TYPE_DEGENERATE | TRANSFORM_TYPE_DIRTY;
     return *this;
   }
 
@@ -1194,7 +1201,7 @@ struct FOG_NO_EXPORT TransformF
     _10 *= val; _11 *= val; _12 *= val;
     _20 *= val; _21 *= val; _22 *= val;
 
-    _type = TRANSFORM_TYPE_PROJECTION | TRANSFORM_TYPE_DIRTY;
+    _type = TRANSFORM_TYPE_DEGENERATE | TRANSFORM_TYPE_DIRTY;
     return *this;
   }
 
@@ -1278,19 +1285,13 @@ struct FOG_NO_EXPORT TransformD
   //! @brief Create a copy of @a other matrix.
   FOG_INLINE TransformD(const TransformD& other)
   {
-    _setData(other._type,
-      other._00, other._01, other._02,
-      other._10, other._11, other._12,
-      other._20, other._21, other._22);
+    setTransform(other);
   }
 
   //! @brief Create a copy of @a other matrix.
-  FOG_INLINE TransformD(const TransformF& other)
+  explicit FOG_INLINE TransformD(const TransformF& other)
   {
-    _setData(other._type | TRANSFORM_TYPE_DIRTY,
-      other._00, other._01, other._02,
-      other._10, other._11, other._12,
-      other._20, other._21, other._22);
+    setTransform(other);
   }
 
   FOG_INLINE TransformD(_Uninitialized) {}
@@ -1313,7 +1314,7 @@ struct FOG_NO_EXPORT TransformD
     double m10, double m11, double m12,
     double m20, double m21, double m22)
   {
-    _setData(TRANSFORM_TYPE_PROJECTION | TRANSFORM_TYPE_DIRTY,
+    _setData(TRANSFORM_TYPE_DEGENERATE | TRANSFORM_TYPE_DIRTY,
       m00, m01, m02,
       m10, m11, m12,
       m20, m21, m22);
@@ -1322,7 +1323,7 @@ struct FOG_NO_EXPORT TransformD
   //! @brief Create custom matrix from @a data[9].
   explicit FOG_INLINE TransformD(const double* data)
   {
-    _setData(TRANSFORM_TYPE_PROJECTION | TRANSFORM_TYPE_DIRTY,
+    _setData(TRANSFORM_TYPE_DEGENERATE | TRANSFORM_TYPE_DIRTY,
       data[0], data[1], data[2],
       data[3], data[4], data[5],
       data[6], data[7], data[8]);
@@ -1331,7 +1332,7 @@ struct FOG_NO_EXPORT TransformD
   //! @brief Create custom matrix from @a data[9].
   explicit FOG_INLINE TransformD(const float* data)
   {
-    _setData(TRANSFORM_TYPE_PROJECTION | TRANSFORM_TYPE_DIRTY,
+    _setData(TRANSFORM_TYPE_DEGENERATE | TRANSFORM_TYPE_DIRTY,
       data[0], data[1], data[2],
       data[3], data[4], data[5],
       data[6], data[7], data[8]);
@@ -1665,7 +1666,7 @@ struct FOG_NO_EXPORT TransformD
     double m10, double m11, double m12,
     double m20, double m21, double m22)
   {
-    _setData(TRANSFORM_TYPE_PROJECTION | TRANSFORM_TYPE_DIRTY,
+    _setData(TRANSFORM_TYPE_DEGENERATE | TRANSFORM_TYPE_DIRTY,
       m00, m01, m02,
       m10, m11, m12,
       m20, m21, m22);
@@ -1673,7 +1674,7 @@ struct FOG_NO_EXPORT TransformD
 
   FOG_INLINE void setData(const double* data)
   {
-    _setData(TRANSFORM_TYPE_PROJECTION | TRANSFORM_TYPE_DIRTY,
+    _setData(TRANSFORM_TYPE_DEGENERATE | TRANSFORM_TYPE_DIRTY,
       data[0], data[1], data[2],
       data[3], data[4], data[5],
       data[6], data[7], data[8]);
@@ -1681,7 +1682,7 @@ struct FOG_NO_EXPORT TransformD
 
   FOG_INLINE void setData(const float* data)
   {
-    _setData(TRANSFORM_TYPE_PROJECTION | TRANSFORM_TYPE_DIRTY,
+    _setData(TRANSFORM_TYPE_DEGENERATE | TRANSFORM_TYPE_DIRTY,
       data[0], data[1], data[2],
       data[3], data[4], data[5],
       data[6], data[7], data[8]);
@@ -1703,7 +1704,7 @@ struct FOG_NO_EXPORT TransformD
   // [Type]
   // --------------------------------------------------------------------------
 
-  //! @brief Get the type of transform, updating it when needed.
+  //! @brief Get the type of the transform, updating it when needed.
   //!
   //! Type of matrix allows to optimize computation of matrix special cases.
   FOG_INLINE uint32_t getType() const
@@ -1715,7 +1716,13 @@ struct FOG_NO_EXPORT TransformD
     return type;
   }
 
-  //! @brief Update the type of transform and get it.
+  FOG_INLINE uint32_t _getType() const
+  {
+    FOG_ASSERT(_type < TRANSFORM_TYPE_COUNT);
+    return _type;
+  }
+
+  //! @brief Update the type of the transform and get it.
   FOG_INLINE uint32_t updateType() const
   {
     uint32_t type = _g2d.transformd.update(*this);
@@ -1723,7 +1730,7 @@ struct FOG_NO_EXPORT TransformD
     return type;
   }
 
-  //! @brief Invalidate the type of transform.
+  //! @brief Invalidate the type of the transform.
   //!
   //! Invalidate must be called after you modified matrix members.
   FOG_INLINE void invalidate(uint32_t toType = TRANSFORM_TYPE_PROJECTION)
@@ -1749,6 +1756,15 @@ struct FOG_NO_EXPORT TransformD
   // --------------------------------------------------------------------------
 
   FOG_INLINE err_t setTransform(const TransformD& other)
+  {
+    _setData(other._type,
+      other._00, other._01, other._02,
+      other._10, other._11, other._12,
+      other._20, other._21, other._22);
+    return ERR_OK;
+  }
+
+  FOG_INLINE err_t setTransform(const TransformF& other)
   {
     _setData(other._type,
       other._00, other._01, other._02,
@@ -2030,6 +2046,11 @@ struct FOG_NO_EXPORT TransformD
   // [Transform]
   // --------------------------------------------------------------------------
 
+  FOG_INLINE err_t _transform(uint32_t transformOp, const void* params)
+  {
+    return _g2d.transformd.transform(*this, transformOp, params);
+  }
+
   FOG_INLINE err_t translate(const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
     return _g2d.transformd.transform(*this, TRANSFORM_OP_TRANSLATE | (order << 4), &p);
@@ -2208,9 +2229,14 @@ struct FOG_NO_EXPORT TransformD
     _g2d.transformd.mapPointsD[_type](*this, dst, src, count);
   }
 
-  FOG_INLINE err_t mapPath(PathD& dst, const PathD& src) const
+  FOG_INLINE err_t mapPath(PathD& dst, const PathD& src, uint32_t cntOp = CONTAINER_OP_REPLACE) const
   {
-    return _g2d.transformd.mapPathD(*this, dst, src);
+    return _g2d.transformd.mapPathD(*this, dst, src, cntOp);
+  }
+
+  FOG_INLINE err_t mapPathData(PathD& dst, const uint8_t* srcCmd, const PointD* srcPts, sysuint_t srcLength, uint32_t cntOp = CONTAINER_OP_REPLACE) const
+  {
+    return _g2d.transformd.mapPathDataD(*this, dst, srcCmd, srcPts, srcLength, cntOp);
   }
 
   FOG_INLINE void mapBox(BoxD& dst, const BoxD& src) const
@@ -2233,15 +2259,16 @@ struct FOG_NO_EXPORT TransformD
   // --------------------------------------------------------------------------
 
   FOG_INLINE bool isIdentity() const { return getType() == TRANSFORM_TYPE_IDENTITY; }
+  FOG_INLINE bool isTranslation() const { return getType() == TRANSFORM_TYPE_TRANSLATION; }
+
   FOG_INLINE bool isAffine() const { return getType() <= TRANSFORM_TYPE_AFFINE; }
   FOG_INLINE bool isProjection() const { return getType() >= TRANSFORM_TYPE_PROJECTION; }
-
-  FOG_INLINE bool isDegenerate() const { return !Math::isFuzzyZero(_00) && !Math::isFuzzyZero(_11); }
-  FOG_INLINE bool isInvertible() const { return !Math::isFuzzyZero(getDeterminant()); }
+  FOG_INLINE bool isDegenerate() const { return getType() >= TRANSFORM_TYPE_DEGENERATE; }
+  FOG_INLINE bool isInvertible() const { return getType() != TRANSFORM_TYPE_DEGENERATE; }
 
   FOG_INLINE double getDeterminant() const
   {
-    if (_type <= TRANSFORM_TYPE_AFFINE)
+    if (getType() <= TRANSFORM_TYPE_AFFINE)
     {
       return (_00 * _11 - _01 * _10);
     }
@@ -2265,12 +2292,6 @@ struct FOG_NO_EXPORT TransformD
   FOG_INLINE double getAverageScaling() const { return _g2d.transformd.getAverageScaling(*this); }
 
   // --------------------------------------------------------------------------
-  // [Covert]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE TransformF toTransformF() const;
-
-  // --------------------------------------------------------------------------
   // [HashCode]
   // --------------------------------------------------------------------------
 
@@ -2288,6 +2309,12 @@ struct FOG_NO_EXPORT TransformD
   // --------------------------------------------------------------------------
 
   FOG_INLINE TransformD& operator=(const TransformD& other)
+  {
+    setTransform(other);
+    return *this;
+  }
+
+  FOG_INLINE TransformD& operator=(const TransformF& other)
   {
     setTransform(other);
     return *this;
@@ -2347,7 +2374,7 @@ struct FOG_NO_EXPORT TransformD
     _10 += val; _11 += val; _12 += val;
     _20 += val; _21 += val; _22 += val;
 
-    _type = TRANSFORM_TYPE_PROJECTION | TRANSFORM_TYPE_DIRTY;
+    _type = TRANSFORM_TYPE_DEGENERATE | TRANSFORM_TYPE_DIRTY;
     return *this;
   }
 
@@ -2357,7 +2384,7 @@ struct FOG_NO_EXPORT TransformD
     _10 -= val; _11 -= val; _12 -= val;
     _20 -= val; _21 -= val; _22 -= val;
 
-    _type = TRANSFORM_TYPE_PROJECTION | TRANSFORM_TYPE_DIRTY;
+    _type = TRANSFORM_TYPE_DEGENERATE | TRANSFORM_TYPE_DIRTY;
     return *this;
   }
 
@@ -2367,7 +2394,7 @@ struct FOG_NO_EXPORT TransformD
     _10 *= val; _11 *= val; _12 *= val;
     _20 *= val; _21 *= val; _22 *= val;
 
-    _type = TRANSFORM_TYPE_PROJECTION | TRANSFORM_TYPE_DIRTY;
+    _type = TRANSFORM_TYPE_DEGENERATE | TRANSFORM_TYPE_DIRTY;
     return *this;
   }
 
@@ -2450,32 +2477,12 @@ FOG_INLINE err_t TransformF::setTransform(const TransformD& other)
   return ERR_OK;
 }
 
-TransformD TransformF::toTransformD() const
-{
-  TransformD result(UNINITIALIZED);
-  result._setData(
-    _type,
-    (double)_00, (double)_01, (double)_02,
-    (double)_10, (double)_11, (double)_12,
-    (double)_20, (double)_21, (double)_22);
-  return result;
-}
-
-TransformF TransformD::toTransformF() const
-{
-  TransformF result(UNINITIALIZED);
-  result._setData(
-      _type | TRANSFORM_TYPE_DIRTY,
-    (float)_00, (float)_01, (float)_02,
-    (float)_10, (float)_11, (float)_12,
-    (float)_20, (float)_21, (float)_22);
-  return result;
-}
-
 // ============================================================================
 // [Fog::TransformT<>]
 // ============================================================================
 
+FOG_TYPEVARIANT_DECLARE_F_D(ParallelogramParams)
+FOG_TYPEVARIANT_DECLARE_F_D(QuadToQuadParams)
 FOG_TYPEVARIANT_DECLARE_F_D(Transform)
 
 //! @}

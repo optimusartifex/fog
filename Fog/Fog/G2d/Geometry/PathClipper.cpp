@@ -12,6 +12,7 @@
 #include <Fog/Core/Collection/PBuffer.h>
 #include <Fog/Core/Cpu/Cpu.h>
 #include <Fog/Core/Cpu/Initializer.h>
+#include <Fog/Core/Global/Internal_Core_p.h>
 #include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Math/Solve.h>
@@ -19,6 +20,7 @@
 #include <Fog/G2d/Geometry/Internals_p.h>
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Geometry/PathClipper.h>
+#include <Fog/G2d/Geometry/PathTmp_p.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Geometry/Transform.h>
 #include <Fog/G2d/Global/Api.h>
@@ -86,8 +88,8 @@ namespace Fog {
 // [Fog::PathClipper - Helpers - GetFlags]
 // ============================================================================
 
-template<typename Number>
-static FOG_INLINE uint32_t _G2d_PathClipperT_getFlags(const typename PointT<Number>::T& pt, const typename BoxT<Number>::T& box)
+template<typename NumT>
+static FOG_INLINE uint32_t _G2d_PathClipperT_getFlags(const NumT_(Point)& pt, const NumT_(Box)& box)
 {
   return ((uint32_t)(pt.x < box.x0) << CLIP_SHIFT_X0) | ((uint32_t)(pt.y < box.y0) << CLIP_SHIFT_Y0) |
          ((uint32_t)(pt.x > box.x1) << CLIP_SHIFT_X1) | ((uint32_t)(pt.y > box.y1) << CLIP_SHIFT_Y1) ;
@@ -97,8 +99,8 @@ static FOG_INLINE uint32_t _G2d_PathClipperT_getFlags(const typename PointT<Numb
 // [Fog::PathClipper - Helpers - ClipPoint]
 // ============================================================================
 
-template<typename Number>
-static FOG_INLINE void _G2d_RectCLipperT_clipPoint(typename PointT<Number>::T& pt, const typename BoxT<Number>::T& box)
+template<typename NumT>
+static FOG_INLINE void _G2d_RectCLipperT_clipPoint(NumT_(Point)& pt, const NumT_(Box)& box)
 {
   if (pt.x < box.x0) pt.x = box.x0;
   if (pt.y < box.y0) pt.y = box.y0;
@@ -111,8 +113,8 @@ static FOG_INLINE void _G2d_RectCLipperT_clipPoint(typename PointT<Number>::T& p
 // ============================================================================
 
 // Remove the redundant lines from the given array.
-template<typename Number>
-static FOG_INLINE typename PointT<Number>::T* _G2d_PathClipperT_removeRedundantLines(typename PointT<Number>::T* pts, sysuint_t length)
+template<typename NumT>
+static FOG_INLINE NumT_(Point)* _G2d_PathClipperT_removeRedundantLines(NumT_(Point)* pts, sysuint_t length)
 {
   sysuint_t i = length;
   if (i < 3) return pts + length;
@@ -142,7 +144,7 @@ static FOG_INLINE typename PointT<Number>::T* _G2d_PathClipperT_removeRedundantL
 
 _RemoveLoop:
   {
-    typename PointT<Number>::T* cur = pts--;
+    NumT_(Point)* cur = pts--;
 
     do {
       bool currentX = cur[-1].x == cur[0].x;
@@ -174,14 +176,14 @@ _RemoveLoop:
 // [Fog::PathClipper - Helpers - T]
 // ============================================================================
 
-template<typename Number>
-static FOG_INLINE void keepInterestingTSValues(Number* t, uint32_t* s, int& length)
+template<typename NumT>
+static FOG_INLINE void keepInterestingTSValues(NumT* t, uint32_t* s, int& length)
 {
-  Number* pt = t; uint32_t* st = s;
+  NumT* pt = t; uint32_t* st = s;
 
   for (int i = 0; i < length; i++)
   {
-    if (t[i] <= Number(0.0) || t[i] >= Number(1.0)) continue;
+    if (t[i] <= NumT(0.0) || t[i] >= NumT(1.0)) continue;
     pt[0] = t[i]; pt++;
     st[0] = s[i]; st++;
   }
@@ -189,11 +191,11 @@ static FOG_INLINE void keepInterestingTSValues(Number* t, uint32_t* s, int& leng
   length = (int)(sysint_t)(pt - t);
 }
 
-template<typename Number>
-static FOG_INLINE void sortTSValues(Number* t, uint32_t* s, int length)
+template<typename NumT>
+static FOG_INLINE void sortTSValues(NumT* t, uint32_t* s, int length)
 {
-  Number* tm; uint32_t* sm;
-  Number* tl; uint32_t* sl;
+  NumT* tm; uint32_t* sm;
+  NumT* tl; uint32_t* sl;
 
   for (tm = t + 1, sm = s + 1; tm < t + length; tm++, sm++)
   {
@@ -209,14 +211,14 @@ static FOG_INLINE void sortTSValues(Number* t, uint32_t* s, int length)
 // [Fog::PathClipper - InitPath]
 // ============================================================================
 
-template<typename Number>
-static uint32_t FOG_CDECL _G2d_PathClipperT_initPath(typename PathClipperT<Number>::T& self, const typename PathT<Number>::T& src)
+template<typename NumT>
+static uint32_t FOG_CDECL _G2d_PathClipperT_initPath(NumT_(PathClipper)& self, const NumT_(Path)& src)
 {
   self._lastIndex = INVALID_INDEX;
 
   // If path bounding box is not dirty then we can simply use it instead of
   // performing the calculation.
-  if (!src.isBoundingBoxDirty() && self._clipBox.subsumes(src._d->boundingBox))
+  if (src._d->hasBoundingBox() && self._clipBox.subsumes(src._d->boundingBox))
   {
     _FOG_PATH_VERIFY_BOUNDING_BOX(src);
     return CLIPPER_INIT_ALREADY_CLIPPED;
@@ -224,8 +226,8 @@ static uint32_t FOG_CDECL _G2d_PathClipperT_initPath(typename PathClipperT<Numbe
 
   sysuint_t i = src.getLength();
   const uint8_t* cmd = src.getCommands();
-  const typename PointT<Number>::T* pts = src.getVertices();
-  const typename BoxT<Number>::T& clipBox = self._clipBox;
+  const NumT_(Point)* pts = src.getVertices();
+  const NumT_(Box)& clipBox = self._clipBox;
 
   bool hasInitial = false;
 
@@ -265,8 +267,6 @@ static uint32_t FOG_CDECL _G2d_PathClipperT_initPath(typename PathClipperT<Numbe
 
       case PATH_CMD_QUAD_TO:
         FOG_ASSERT(i >= 2);
-
-        if (FOG_UNLIKELY(i < 2)) goto _Invalid;
         if (FOG_UNLIKELY(!hasInitial)) goto _Invalid;
 
         if (pts[0].x < clipBox.x0 || pts[0].y < clipBox.y0 ||
@@ -288,8 +288,6 @@ static uint32_t FOG_CDECL _G2d_PathClipperT_initPath(typename PathClipperT<Numbe
 
       case PATH_CMD_CUBIC_TO:
         FOG_ASSERT(i >= 3);
-
-        if (FOG_UNLIKELY(i < 3)) goto _Invalid;
         if (FOG_UNLIKELY(!hasInitial)) goto _Invalid;
 
         if (pts[0].x < clipBox.x0 || pts[0].y < clipBox.y0 ||
@@ -338,15 +336,14 @@ _Invalid:
 // ============================================================================
 // [Fog::PathClipper - ContinuePath]
 // ============================================================================
-template<typename Number>
-static err_t FOG_CDECL _G2d_PathClipperT_continuePath(
-  typename PathClipperT<Number>::T& self,
-  typename PathT<Number>::T& dst, const typename PathT<Number>::T& src)
+template<typename NumT>
+static err_t FOG_CDECL _G2d_PathClipperT_continuePath(NumT_(PathClipper)& self,
+  NumT_(Path)& dst, const NumT_(Path)& src)
 {
   // Prevent using the same source and destination.
   if (FOG_UNLIKELY(&dst == &src))
   {
-    typename PathT<Number>::T tmp(src);
+    NumT_(Path) tmp(src);
     return self.continueRaw(dst, tmp.getVertices(), tmp.getCommands(), tmp.getLength());
   }
   else
@@ -355,10 +352,9 @@ static err_t FOG_CDECL _G2d_PathClipperT_continuePath(
   }
 }
 
-template<typename Number>
-static err_t FOG_CDECL _G2d_PathClipperT_continueRaw(
-  typename PathClipperT<Number>::T& self,
-  typename PathT<Number>::T& dst, const typename PointT<Number>::T* srcPts, const uint8_t* srcCmd, sysuint_t srcLength)
+template<typename NumT>
+static err_t FOG_CDECL _G2d_PathClipperT_continueRaw(NumT_(PathClipper)& self,
+  NumT_(Path)& dst, const NumT_(Point)* srcPts, const uint8_t* srcCmd, sysuint_t srcLength)
 {
   sysuint_t i = srcLength;
   if (i == 0) return ERR_OK;
@@ -375,9 +371,9 @@ static err_t FOG_CDECL _G2d_PathClipperT_continueRaw(
     return ERR_RT_INVALID_STATE;
 
   const uint8_t* unchangedCmd = srcCmd;
-  const typename BoxT<Number>::T& clipBox = self._clipBox;
+  const NumT_(Box)& clipBox = self._clipBox;
 
-  typename PointT<Number>::T initialPoint(Number(0.0), Number(0.0));
+  NumT_(Point) initialPoint(NumT(0.0), NumT(0.0));
 
   uint32_t initialFlags = NO_INITIAL_FLAGS;
   uint32_t previousFlags = CLIP_SIDE_NONE;
@@ -421,7 +417,7 @@ _DetectLoopDo:
         if (initialFlags != NO_INITIAL_FLAGS && (initialFlags | previousFlags) != CLIP_SIDE_NONE) goto _ClipLoop;
 
         initialFlags = NO_INITIAL_FLAGS;
-        currentFlags = _G2d_PathClipperT_getFlags<Number>(srcPts[0], clipBox);
+        currentFlags = _G2d_PathClipperT_getFlags<NumT>(srcPts[0], clipBox);
         if (currentFlags != CLIP_SIDE_NONE) goto _ClipLoop;
 
         initialPoint = srcPts[0];
@@ -439,7 +435,7 @@ _DetectLoopDo:
       case PATH_CMD_LINE_TO:
         if (FOG_UNLIKELY(initialFlags == NO_INITIAL_FLAGS)) goto _Invalid;
 
-        currentFlags = _G2d_PathClipperT_getFlags<Number>(srcPts[0], clipBox);
+        currentFlags = _G2d_PathClipperT_getFlags<NumT>(srcPts[0], clipBox);
         if (currentFlags != CLIP_SIDE_NONE) goto _ClipLoop;
 
         i--;
@@ -452,11 +448,11 @@ _DetectLoopDo:
       // ----------------------------------------------------------------------
 
       case PATH_CMD_QUAD_TO:
-        if (FOG_UNLIKELY(i < 2)) goto _Invalid;
+        FOG_ASSERT(i >= 2);
         if (FOG_UNLIKELY(initialFlags == NO_INITIAL_FLAGS)) goto _Invalid;
 
-        currentFlags = _G2d_PathClipperT_getFlags<Number>(srcPts[0], clipBox) |
-                       _G2d_PathClipperT_getFlags<Number>(srcPts[1], clipBox) ;
+        currentFlags = _G2d_PathClipperT_getFlags<NumT>(srcPts[0], clipBox) |
+                       _G2d_PathClipperT_getFlags<NumT>(srcPts[1], clipBox) ;
         if (currentFlags != CLIP_SIDE_NONE) goto _ClipLoop;
 
         i      -= 2;
@@ -469,12 +465,12 @@ _DetectLoopDo:
       // ----------------------------------------------------------------------
 
       case PATH_CMD_CUBIC_TO:
-        if (FOG_UNLIKELY(i < 3)) goto _Invalid;
+        FOG_ASSERT(i >= 3);
         if (FOG_UNLIKELY(initialFlags == NO_INITIAL_FLAGS)) goto _Invalid;
 
-        currentFlags = _G2d_PathClipperT_getFlags<Number>(srcPts[0], clipBox) |
-                       _G2d_PathClipperT_getFlags<Number>(srcPts[1], clipBox) |
-                       _G2d_PathClipperT_getFlags<Number>(srcPts[2], clipBox) ;
+        currentFlags = _G2d_PathClipperT_getFlags<NumT>(srcPts[0], clipBox) |
+                       _G2d_PathClipperT_getFlags<NumT>(srcPts[1], clipBox) |
+                       _G2d_PathClipperT_getFlags<NumT>(srcPts[2], clipBox) ;
         if (currentFlags != CLIP_SIDE_NONE) goto _ClipLoop;
 
         i      -= 3;
@@ -513,19 +509,19 @@ _ClipLoop:
     sysuint_t copyLength = (sysuint_t)(srcCmd - unchangedCmd);
     if ((dstIndex = dst._add(copyLength)) == INVALID_INDEX) goto _OutOfMemory;
 
-    Memory::copy(dst.getVerticesX() + dstIndex, srcPts - copyLength, copyLength * sizeof(typename PointT<Number>::T));
+    Memory::copy(dst.getVerticesX() + dstIndex, srcPts - copyLength, copyLength * sizeof(NumT_(Point)));
     Memory::copy(dst.getCommandsX() + dstIndex, srcCmd - copyLength, copyLength);
   }
 
   if (i)
   {
     uint8_t* dstCmd;
-    typename PointT<Number>::T* dstMark = NULL;
-    typename PointT<Number>::T* dstPts = NULL;
-    typename PointT<Number>::T* dstMax = NULL;
+    NumT_(Point)* dstMark = NULL;
+    NumT_(Point)* dstPts = NULL;
+    NumT_(Point)* dstMax = NULL;
 
-    Number lx, ly;
-    Number ux, uy;
+    NumT lx, ly;
+    NumT ux, uy;
     uint32_t lf;
     uint32_t uf;
 
@@ -535,7 +531,7 @@ _ClipLoop:
 _ClipRealloc:
     // Allocate some space for clipped vertices/commands.
     {
-      const typename PointT<Number>::T* old = dst.getVertices();
+      const NumT_(Point)* old = dst.getVertices();
 
       if (dstPts != NULL)
       {
@@ -611,16 +607,16 @@ _ClipLoopDo:
             }
           }
 
-          currentFlags = _G2d_PathClipperT_getFlags<Number>(srcPts[0], clipBox);
+          currentFlags = _G2d_PathClipperT_getFlags<NumT>(srcPts[0], clipBox);
           initialPoint = srcPts[0];
           initialFlags = currentFlags;
 
-          dstPts = _G2d_PathClipperT_removeRedundantLines<Number>(dstMark, (sysuint_t)(dstPts - dstMark));
+          dstPts = _G2d_PathClipperT_removeRedundantLines<NumT>(dstMark, (sysuint_t)(dstPts - dstMark));
           dstCmd = dst.getCommandsX() + (sysuint_t)(dstPts - dst.getVertices());
 
           dstPts[0] = srcPts[0];
           dstCmd[0] = PATH_CMD_MOVE_TO;
-          _G2d_RectCLipperT_clipPoint<Number>(dstPts[0], clipBox);
+          _G2d_RectCLipperT_clipPoint<NumT>(dstPts[0], clipBox);
           dstPts++;
           dstCmd++;
 
@@ -638,7 +634,7 @@ _ClipLoopDo:
 
         case PATH_CMD_LINE_TO:
         {
-          currentFlags = _G2d_PathClipperT_getFlags<Number>(srcPts[0], clipBox);
+          currentFlags = _G2d_PathClipperT_getFlags<NumT>(srcPts[0], clipBox);
 
           // Fully visible, finish here and jump to detection loop.
           if ((previousFlags | currentFlags) == 0)
@@ -646,7 +642,7 @@ _ClipLoopDo:
             dstPts[0] = srcPts[0];
             dstCmd[0] = PATH_CMD_LINE_TO;
 
-            dstPts = _G2d_PathClipperT_removeRedundantLines<Number>(dstMark, (sysuint_t)(dstPts + 1 - dstMark));
+            dstPts = _G2d_PathClipperT_removeRedundantLines<NumT>(dstMark, (sysuint_t)(dstPts + 1 - dstMark));
             dst._d->length = (sysuint_t)(dstPts - dst.getVertices());
 
             i--;
@@ -672,18 +668,18 @@ _ClipLineCmd:
           {
             dstPts[0].set(ux, uy);
             dstCmd[0] = PATH_CMD_LINE_TO;
-            _G2d_RectCLipperT_clipPoint<Number>(dstPts[0], clipBox);
+            _G2d_RectCLipperT_clipPoint<NumT>(dstPts[0], clipBox);
             dstPts++;
             dstCmd++;
           }
           // Maybe visible.
           else
           {
-            Number dx = ux - lx;
-            Number dy = uy - ly;
+            NumT dx = ux - lx;
+            NumT dy = uy - ly;
 
-            Number cx;
-            Number cy;
+            NumT cx;
+            NumT cy;
 
             switch (lf)
             {
@@ -845,7 +841,7 @@ _ClipLineCmd_LeftRight1:
 _ClipLineCmd_Done:
           if (initialFlags == NO_INITIAL_FLAGS)
           {
-            dstPts = _G2d_PathClipperT_removeRedundantLines<Number>(dstMark, (sysuint_t)(dstPts - dstMark));
+            dstPts = _G2d_PathClipperT_removeRedundantLines<NumT>(dstMark, (sysuint_t)(dstPts - dstMark));
             dstMark = dstPts;
             dstCmd = dst.getCommandsX() + (sysuint_t)(dstPts - dst.getVertices());
           }
@@ -858,17 +854,17 @@ _ClipLineCmd_Done:
 
         case PATH_CMD_QUAD_TO:
         {
-          const typename PointT<Number>::T* p = srcPts - 1;
+          const NumT_(Point)* p = srcPts - 1;
 
-          uint32_t cp1 = _G2d_PathClipperT_getFlags<Number>(p[1], clipBox);
-          currentFlags = _G2d_PathClipperT_getFlags<Number>(p[2], clipBox);
+          uint32_t cp1 = _G2d_PathClipperT_getFlags<NumT>(p[1], clipBox);
+          currentFlags = _G2d_PathClipperT_getFlags<NumT>(p[2], clipBox);
 
           uint32_t sides = previousFlags | cp1 | currentFlags;
 
           // Fully visible, finish here and jump to detection loop.
           if (sides == CLIP_SIDE_NONE)
           {
-            dstPts = _G2d_PathClipperT_removeRedundantLines<Number>(dstMark, (sysuint_t)(dstPts - dstMark));
+            dstPts = _G2d_PathClipperT_removeRedundantLines<NumT>(dstMark, (sysuint_t)(dstPts - dstMark));
             dstCmd = dst.getCommandsX() + (sysuint_t)(dstPts - dst.getVertices());
 
             dstPts[0] = srcPts[0];
@@ -894,18 +890,18 @@ _ClipLineCmd_Done:
           {
             dstPts[0] = srcPts[1];
             dstCmd[0] = PATH_CMD_LINE_TO;
-            _G2d_RectCLipperT_clipPoint<Number>(dstPts[0], clipBox);
+            _G2d_RectCLipperT_clipPoint<NumT>(dstPts[0], clipBox);
             dstPts++;
             dstCmd++;
           }
           // Maybe visible.
           else
           {
-            Number ax, ay, bx, by, cx, cy;
-            _FOG_QUAD_EXTRACT_PARAMETERS(Number, ax, ay, bx, by, cx, cy, p);
+            NumT ax, ay, bx, by, cx, cy;
+            _FOG_QUAD_EXTRACT_PARAMETERS(NumT, ax, ay, bx, by, cx, cy, p);
 
-            Number func[3];
-            Number t[8+1];
+            NumT func[3];
+            NumT t[8+1];
             uint32_t s[8+1];
 
             int tIndex = 0;
@@ -954,18 +950,18 @@ _ClipLineCmd_Done:
             sortTSValues(t, s, tLength);
 
             // Include t=1.
-            t[tLength] = Number(1.0);
+            t[tLength] = NumT(1.0);
             s[tLength] = CLIP_SIDE_NONE;
             tLength++;
 
-            Number tVal;
-            Number tCut = Number(0.0);
+            NumT tVal;
+            NumT tCut = NumT(0.0);
 
             uint32_t tSide = CLIP_SIDE_NONE;
 
             for (tIndex = 0; tIndex < tLength; tIndex++)
             {
-              typename PointT<Number>::T tp(UNINITIALIZED);
+              NumT_(Point) tp(UNINITIALIZED);
               uint32_t tf;
 
               tVal   = t[tIndex];
@@ -978,7 +974,7 @@ _ClipLineCmd_Done:
               switch (tSide)
               {
                 case CLIP_SIDE_NONE:
-                  if (tVal == Number(1.0))
+                  if (tVal == NumT(1.0))
                   {
                     tp.x = p[2].x;
                     tp.y = p[2].y;
@@ -1034,10 +1030,10 @@ _ClipQuadCmd_EvaluateY:
                   FOG_ASSERT_NOT_REACHED();
               }
 
-              if ((tf = _G2d_PathClipperT_getFlags<Number>(tp, clipBox)) != CLIP_SIDE_NONE || previousFlags != CLIP_SIDE_NONE)
+              if ((tf = _G2d_PathClipperT_getFlags<NumT>(tp, clipBox)) != CLIP_SIDE_NONE || previousFlags != CLIP_SIDE_NONE)
               {
                 // The point is clipped-out, emit line.
-                _G2d_RectCLipperT_clipPoint<Number>(tp, clipBox);
+                _G2d_RectCLipperT_clipPoint<NumT>(tp, clipBox);
                 dstPts[0] = tp;
                 dstCmd[0] = PATH_CMD_LINE_TO;
 
@@ -1049,20 +1045,20 @@ _ClipQuadCmd_EvaluateY:
               else
               {
                 // Test whether the curve segment is visible.
-                typename PointT<Number>::T center(UNINITIALIZED);
-                Number tMiddle = tCut + (tVal - tCut) * Number(0.5);
+                NumT_(Point) center(UNINITIALIZED);
+                NumT tMiddle = tCut + (tVal - tCut) * NumT(0.5);
                 center.x = ax * Math::pow2(tMiddle) + bx * tMiddle + cx;
                 center.y = ay * Math::pow2(tMiddle) + by * tMiddle + cy;
 
-                if (_G2d_PathClipperT_getFlags<Number>(center, clipBox) == CLIP_SIDE_NONE)
+                if (_G2d_PathClipperT_getFlags<NumT>(center, clipBox) == CLIP_SIDE_NONE)
                 {
-                  Number dt = (tVal - tCut) * Number(0.5);
+                  NumT dt = (tVal - tCut) * NumT(0.5);
 
-                  dstPts = _G2d_PathClipperT_removeRedundantLines<Number>(dstMark, (sysuint_t)(dstPts - dstMark));
+                  dstPts = _G2d_PathClipperT_removeRedundantLines<NumT>(dstMark, (sysuint_t)(dstPts - dstMark));
                   dstCmd = dst.getCommandsX() + (sysuint_t)(dstPts - dst.getVertices());
 
                   // Derivative: 2a*t + b.
-                  typename PointT<Number>::T cp1(Number(2.0) * ax * tVal + bx, Number(2.0) * ay * tVal + by);
+                  NumT_(Point) cp1(NumT(2.0) * ax * tVal + bx, NumT(2.0) * ay * tVal + by);
 
                   cp1.x *= dt;
                   cp1.y *= dt;
@@ -1107,18 +1103,18 @@ _ClipQuadCmd_EvaluateY:
 
         case PATH_CMD_CUBIC_TO:
         {
-          const typename PointT<Number>::T* p = srcPts - 1;
+          const NumT_(Point)* p = srcPts - 1;
 
-          uint32_t cp1 = _G2d_PathClipperT_getFlags<Number>(p[1], clipBox);
-          uint32_t cp2 = _G2d_PathClipperT_getFlags<Number>(p[2], clipBox);
-          currentFlags = _G2d_PathClipperT_getFlags<Number>(p[3], clipBox);
+          uint32_t cp1 = _G2d_PathClipperT_getFlags<NumT>(p[1], clipBox);
+          uint32_t cp2 = _G2d_PathClipperT_getFlags<NumT>(p[2], clipBox);
+          currentFlags = _G2d_PathClipperT_getFlags<NumT>(p[3], clipBox);
 
           uint32_t sides = previousFlags | cp1 | cp2 | currentFlags;
 
           // Fully visible, finish here and jump to detection loop.
           if (sides == CLIP_SIDE_NONE)
           {
-            dstPts = _G2d_PathClipperT_removeRedundantLines<Number>(dstMark, (sysuint_t)(dstPts - dstMark));
+            dstPts = _G2d_PathClipperT_removeRedundantLines<NumT>(dstMark, (sysuint_t)(dstPts - dstMark));
             dstCmd = dst.getCommandsX() + (sysuint_t)(dstPts - dst.getVertices());
 
             dstPts[0] = srcPts[0];
@@ -1146,18 +1142,18 @@ _ClipQuadCmd_EvaluateY:
           {
             dstPts[0] = srcPts[2];
             dstCmd[0] = PATH_CMD_LINE_TO;
-            _G2d_RectCLipperT_clipPoint<Number>(dstPts[0], clipBox);
+            _G2d_RectCLipperT_clipPoint<NumT>(dstPts[0], clipBox);
             dstPts++;
             dstCmd++;
           }
           // Maybe visible.
           else
           {
-            Number ax, ay, bx, by, cx, cy, dx, dy;
-            _FOG_CUBIC_EXTRACT_PARAMETERS(Number, ax, ay, bx, by, cx, cy, dx, dy, p);
+            NumT ax, ay, bx, by, cx, cy, dx, dy;
+            _FOG_CUBIC_EXTRACT_PARAMETERS(NumT, ax, ay, bx, by, cx, cy, dx, dy, p);
 
-            Number func[4];
-            Number t[12+1];
+            NumT func[4];
+            NumT t[12+1];
             uint32_t s[12+1];
 
             int tIndex = 0;
@@ -1212,18 +1208,18 @@ _ClipQuadCmd_EvaluateY:
             sortTSValues(t, s, tLength);
 
             // Include t=1.
-            t[tLength] = Number(1.0);
+            t[tLength] = NumT(1.0);
             s[tLength] = CLIP_SIDE_NONE;
             tLength++;
 
-            Number tVal;
-            Number tCut = Number(0.0);
+            NumT tVal;
+            NumT tCut = NumT(0.0);
 
             uint32_t tSide = CLIP_SIDE_NONE;
 
             for (tIndex = 0; tIndex < tLength; tIndex++)
             {
-              typename PointT<Number>::T tp(UNINITIALIZED);
+              NumT_(Point) tp(UNINITIALIZED);
               uint32_t tf;
 
               tVal   = t[tIndex];
@@ -1236,7 +1232,7 @@ _ClipQuadCmd_EvaluateY:
               switch (tSide)
               {
                 case CLIP_SIDE_NONE:
-                  if (tVal == Number(1.0))
+                  if (tVal == NumT(1.0))
                   {
                     tp.x = p[3].x;
                     tp.y = p[3].y;
@@ -1292,10 +1288,10 @@ _ClipCubicCmd_EvaluateY:
                   FOG_ASSERT_NOT_REACHED();
               }
 
-              if ((tf = _G2d_PathClipperT_getFlags<Number>(tp, clipBox)) != CLIP_SIDE_NONE || previousFlags != CLIP_SIDE_NONE)
+              if ((tf = _G2d_PathClipperT_getFlags<NumT>(tp, clipBox)) != CLIP_SIDE_NONE || previousFlags != CLIP_SIDE_NONE)
               {
                 // The point is clipped-out, emit line.
-                _G2d_RectCLipperT_clipPoint<Number>(tp, clipBox);
+                _G2d_RectCLipperT_clipPoint<NumT>(tp, clipBox);
                 dstPts[0] = tp;
                 dstCmd[0] = PATH_CMD_LINE_TO;
 
@@ -1307,25 +1303,25 @@ _ClipCubicCmd_EvaluateY:
               else
               {
                 // Test whether the curve segment is visible.
-                typename PointT<Number>::T center(UNINITIALIZED);
-                Number tMiddle = tCut + (tVal - tCut) * Number(0.5);
+                NumT_(Point) center(UNINITIALIZED);
+                NumT tMiddle = tCut + (tVal - tCut) * NumT(0.5);
                 center.x = ax * Math::pow3(tMiddle) + bx * Math::pow2(tMiddle) + cx * tMiddle + dx;
                 center.y = ay * Math::pow3(tMiddle) + by * Math::pow2(tMiddle) + cy * tMiddle + dy;
 
-                if (_G2d_PathClipperT_getFlags<Number>(center, clipBox) == CLIP_SIDE_NONE)
+                if (_G2d_PathClipperT_getFlags<NumT>(center, clipBox) == CLIP_SIDE_NONE)
                 {
-                  Number dt = (tVal - tCut) * Number(1.0 / 3.0);
+                  NumT dt = (tVal - tCut) * NumT(1.0 / 3.0);
 
-                  dstPts = _G2d_PathClipperT_removeRedundantLines<Number>(dstMark, (sysuint_t)(dstPts - dstMark));
+                  dstPts = _G2d_PathClipperT_removeRedundantLines<NumT>(dstMark, (sysuint_t)(dstPts - dstMark));
                   dstCmd = dst.getCommandsX() + (sysuint_t)(dstPts - dst.getVertices());
 
                   // Derivative: 3*a*t^2 + 2*b*t + c.
-                  typename PointT<Number>::T cp1(
-                    Number(3.0) * ax * Math::pow2(tCut) + Number(2.0) * bx * tCut + cx,
-                    Number(3.0) * ay * Math::pow2(tCut) + Number(2.0) * by * tCut + cy);
-                  typename PointT<Number>::T cp2(
-                    Number(3.0) * ax * Math::pow2(tVal) + Number(2.0) * bx * tVal + cx,
-                    Number(3.0) * ay * Math::pow2(tVal) + Number(2.0) * by * tVal + cy);
+                  NumT_(Point) cp1(
+                    NumT(3.0) * ax * Math::pow2(tCut) + NumT(2.0) * bx * tCut + cx,
+                    NumT(3.0) * ay * Math::pow2(tCut) + NumT(2.0) * by * tCut + cy);
+                  NumT_(Point) cp2(
+                    NumT(3.0) * ax * Math::pow2(tVal) + NumT(2.0) * bx * tVal + cx,
+                    NumT(3.0) * ay * Math::pow2(tVal) + NumT(2.0) * by * tVal + cy);
 
                   cp1.x *= dt; cp1.y *= dt;
                   cp2.x *= dt; cp2.y *= dt;
@@ -1413,33 +1409,32 @@ _ClipCubicCmd_EvaluateY:
     }
 
     // Finalize.
-    dstPts = _G2d_PathClipperT_removeRedundantLines<Number>(dstMark, (sysuint_t)(dstPts - dstMark));
+    dstPts = _G2d_PathClipperT_removeRedundantLines<NumT>(dstMark, (sysuint_t)(dstPts - dstMark));
     dst._d->length = (sysuint_t)(dstPts - dst.getVertices());
   }
 
-  dst._d->boundingBoxDirty = true;
+  dst._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX | PATH_DATA_DIRTY_CMD;
   return ERR_OK;
-
-_OutOfMemory:
-  dst._d->length = dstInitialLength;
-  dst._d->boundingBoxDirty = true;
-  return ERR_RT_OUT_OF_MEMORY;
 
 _Invalid:
   dst._d->length = dstInitialLength;
-  dst._d->boundingBoxDirty = true;
-  return ERR_PATH_INVALID;
+  dst._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX | PATH_DATA_DIRTY_CMD;
+  return ERR_GEOMETRY_INVALID;
+
+_OutOfMemory:
+  dst._d->length = dstInitialLength;
+  dst._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX | PATH_DATA_DIRTY_CMD;
+  return ERR_RT_OUT_OF_MEMORY;
 }
 
 // ============================================================================
 // [Fog::PathClipper - ClipPath]
 // ============================================================================
 
-template<typename Number>
-static err_t FOG_CDECL _G2d_PathClipperT_clipPath(
-  typename PathClipperT<Number>::T& self,
-  typename PathT<Number>::T& dst, const typename PathT<Number>::T& src, const
-  typename TransformT<Number>::T* tr)
+template<typename NumT>
+static err_t FOG_CDECL _G2d_PathClipperT_clipPath(NumT_(PathClipper)& self,
+  NumT_(Path)& dst, const NumT_(Path)& src, const
+  NumT_(Transform)* tr)
 {
   self._lastIndex = INVALID_INDEX;
 
@@ -1460,12 +1455,12 @@ static err_t FOG_CDECL _G2d_PathClipperT_clipPath(
     case TRANSFORM_TYPE_TRANSLATION:
     case TRANSFORM_TYPE_SCALING:
     {
-      typename TransformT<Number>::T inv(UNINITIALIZED);
+      NumT_(Transform) inv(UNINITIALIZED);
 
-      if (TransformT<Number>::T::invert(inv, *tr))
+      if (NumI_(Transform)::invert(inv, *tr))
       {
         // Save the clip box and create new.
-        typename BoxT<Number>::T box(self._clipBox);
+        NumT_(Box) box(self._clipBox);
         inv.mapBox(self._clipBox, self._clipBox);
 
         // Clip and transform.
@@ -1480,27 +1475,24 @@ static err_t FOG_CDECL _G2d_PathClipperT_clipPath(
       // ... Fall through ...
     }
 
+    // TODO: Specialize the SWAP/ROTATION/AFFINE case.
+
     default:
     {
       if (&dst == &src)
       {
         // This is an incorrect use.
-        typename PathT<Number>::T tmp;
+        NumT_(Path) tmp;
         FOG_RETURN_ON_ERROR(tr->mapPath(tmp, src));
 
         return self.continuePath(dst, tmp);
       }
       else
       {
-        PBuffer<2048> buffer;
-        sysuint_t length = src.getLength();
+        NumT_T1(PathTmp, 200) tmp;
+        FOG_RETURN_ON_ERROR(tr->mapPath(tmp, src));
 
-        typename PointT<Number>::T* tmp = reinterpret_cast<typename PointT<Number>::T*>(
-          buffer.alloc(length * sizeof(typename PointT<Number>::T)));
-        if (FOG_IS_NULL(tmp)) return ERR_RT_OUT_OF_MEMORY;
-
-        tr->mapPoints(tmp, src.getVertices(), length);
-        return self.continueRaw(dst, tmp, src.getCommands(), length);
+        return self.continueRaw(dst, tmp.getVertices(), tmp.getCommands(), tmp.getLength());
       }
     }
   }

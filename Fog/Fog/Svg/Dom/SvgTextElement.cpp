@@ -12,6 +12,7 @@
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Svg/Dom/SvgTextElement_p.h>
 #include <Fog/Svg/Visit/SvgRender.h>
+#include <Fog/Svg/Visit/SvgVisitor.h>
 #include <Fog/Xml/Dom/XmlText.h>
 
 namespace Fog {
@@ -46,69 +47,42 @@ XmlAttribute* SvgTextElement::_createAttribute(const ManagedString& name) const
   return base::_createAttribute(name);
 }
 
-err_t SvgTextElement::onRenderShape(SvgRenderContext* context) const
+err_t SvgTextElement::onProcess(SvgVisitor* visitor) const
 {
   err_t err = ERR_OK;
-  SvgVisitor* visitor = context->getVisitor();
-
   XmlElement* e;
+
   float x = a_x.isAssigned() ? a_x.getCoordComputed() : 0.0f;
   float y = a_y.isAssigned() ? a_y.getCoordComputed() : 0.0f;
+  visitor->_textCursor.set(x, y);
 
-  context->_textCursor.set(x, y);
-
-  if (visitor == NULL)
+  for (e = getFirstChild(); e; e = e->getNextSibling())
   {
-    for (e = getFirstChild(); e; e = e->getNextSibling())
+    if (e->isSvgElement() && reinterpret_cast<SvgElement*>(e)->getVisible())
     {
-      if (e->isSvgElement() && reinterpret_cast<SvgElement*>(e)->getVisible())
-      {
-        err = reinterpret_cast<SvgElement*>(e)->onRender(context);
-        if (FOG_IS_ERROR(err)) break;
-      }
-      if (e->isText())
-      {
-        String text = e->getTextContent();
-        text.simplify();
-
-        // TODO: Not optimal, just initial support for text rendering.
-        PathD path;
-        context->_font.getOutline(text, path);
-        path.translate(PointD(x, y));
-        context->drawPath(path);
-      }
+      err = visitor->onVisit(reinterpret_cast<SvgElement*>(e));
+      if (FOG_IS_ERROR(err)) break;
     }
-  }
-  else
-  {
-    for (e = getFirstChild(); e; e = e->getNextSibling())
+
+    if (e->isText())
     {
-      if (e->isSvgElement() && reinterpret_cast<SvgElement*>(e)->getVisible() && visitor->canVisit(e))
-      {
-        visitor->onBegin(e);
-        err = reinterpret_cast<SvgElement*>(e)->onRender(context);
-        visitor->onEnd(e);
+      String text = e->getTextContent();
+      text.simplify();
 
-        if (FOG_IS_ERROR(err)) break;
-      }
-      if (e->isText())
-      {
-        String text = e->getTextContent();
-        text.simplify();
+      // TODO: Not optimal, just initial support for text rendering.
+      PathD path;
+      visitor->_font.getOutline(text, path);
+      path.translate(PointD(x, y));
 
-        // TODO: Not optimal, just initial support for text rendering.
-        PathD path;
-        context->_font.getOutline(text, path);
-        path.translate(PointD(x, y));
-        context->drawPath(path);
-      }
+      err = visitor->onPath((SvgElement*)this, path);
+      if (FOG_IS_ERROR(err)) break;
     }
   }
 
   return err;
 }
 
-err_t SvgTextElement::onCalcBoundingBox(RectF* box) const
+err_t SvgTextElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
 {
   // TODO: SVGText bounding box.
   return ERR_RT_NOT_IMPLEMENTED;

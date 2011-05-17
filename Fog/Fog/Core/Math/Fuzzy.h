@@ -54,6 +54,9 @@ namespace Math {
 static FOG_INLINE bool isFuzzyZero(float a, float epsilon = MATH_EPSILON_F) { return abs(a) <= epsilon; }
 static FOG_INLINE bool isFuzzyZero(double a, double epsilon = MATH_EPSILON_D) { return abs(a) <= epsilon; }
 
+static FOG_INLINE bool isFuzzyOne(float a, float epsilon = MATH_EPSILON_F) { return abs(a - 1.0f) <= epsilon; }
+static FOG_INLINE bool isFuzzyOne(double a, double epsilon = MATH_EPSILON_D) { return abs(a - 1.0) <= epsilon; }
+
 static FOG_INLINE bool isFuzzyPositiveZero(float a, float epsilon = MATH_EPSILON_F) { return a <= epsilon; }
 static FOG_INLINE bool isFuzzyPositiveZero(double a, double epsilon = MATH_EPSILON_D) { return a <= epsilon; }
 

@@ -38,11 +38,11 @@ struct FOG_NO_EXPORT SvgCircleElement : public SvgStyledElement
   virtual XmlAttribute* _createAttribute(const ManagedString& name) const;
 
   // --------------------------------------------------------------------------
-  // [SVG Rendering]
+  // [SVG Interface]
   // --------------------------------------------------------------------------
 
-  virtual err_t onRenderShape(SvgRenderContext* context) const;
-  virtual err_t onCalcBoundingBox(RectF* box) const;
+  virtual err_t onProcess(SvgVisitor* visitor) const;
+  virtual err_t onGeometryBoundingBox(BoxF& box, const TransformF* tr) const;
 
   // --------------------------------------------------------------------------
   // [SVG Embedded Attributes]

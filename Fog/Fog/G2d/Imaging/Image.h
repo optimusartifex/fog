@@ -183,11 +183,6 @@ struct FOG_API Image
   FOG_INLINE bool isNull() const { return _d == _dnull.instancep(); }
   //! @copydoc Doxygen::Implicit::isStatic().
   FOG_INLINE bool isStatic() const { return _d->flags & IMAGE_DATA_STATIC; }
-  //! @copydoc Doxygen::Implicit::isPrivate().
-  FOG_INLINE bool isPrivate() const { return _d->flags & IMAGE_DATA_PRIVATE; }
-  //! @copydoc Doxygen::Implicit::isKeepAlive().
-  FOG_INLINE bool isKeepAlive() const { return _d->flags & IMAGE_DATA_KEEP_ALIVE; }
-
   //! @brief Get whether the image is read-only.
   FOG_INLINE bool isReadOnly() const { return _d->flags & IMAGE_DATA_READ_ONLY; }
 

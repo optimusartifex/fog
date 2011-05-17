@@ -46,6 +46,14 @@ static void FOG_CDECL _G2d_TransformD_mapPointD_SSE2(const TransformD& self, Poi
       break;
     }
 
+    case TRANSFORM_TYPE_SWAP:
+    {
+      Face::m128dSwapPD(src0, src0);
+      Face::m128dMulPD(src0, src0, _mm_setr_pd(self._10, self._01));
+      Face::m128dAddPD(src0, src0, m_20_21);
+      break;
+    }
+
     case TRANSFORM_TYPE_ROTATION:
     case TRANSFORM_TYPE_AFFINE:
     {
@@ -86,6 +94,12 @@ static void FOG_CDECL _G2d_TransformD_mapPointD_SSE2(const TransformD& self, Poi
       Face::m128dAddPD(src0, src0, rev0);
 
       Face::m128dMulPD(src0, src0, inv0);
+      break;
+    }
+
+    case TRANSFORM_TYPE_DEGENERATE:
+    {
+      src0 = _mm_setzero_pd();
       break;
     }
 
@@ -255,6 +269,101 @@ static void FOG_CDECL _G2d_TransformD_mapPointsD_Scaling_SSE2(const TransformD& 
 
       Face::m128dLoad16u(src0, &src[0].x);
       Face::m128dMulPD(src0, src0, m_00_11);
+      Face::m128dAddPD(src0, src0, m_20_21);
+      Face::m128dStore16u(&dst[0].x, src0);
+    }
+  }
+}
+
+static void FOG_CDECL _G2d_TransformD_mapPointsD_Swap_SSE2(const TransformD& self, PointD* dst, const PointD* src, sysuint_t length)
+{
+  sysuint_t i;
+
+  __m128d m_20_21 = _mm_loadu_pd(&self._20);
+  __m128d m_01_10 = _mm_setr_pd(self._01, self._10);
+
+  if ((((sysuint_t)dst | (sysuint_t)src) & 0xF) == 0)
+  {
+    for (i = length >> 2; i; i--, dst += 4, src += 4)
+    {
+      __m128d src0, src1, src2, src3;
+
+      Face::m128dLoad16a(src0, &src[0].x);
+      Face::m128dLoad16a(src1, &src[1].x);
+      Face::m128dLoad16a(src2, &src[2].x);
+      Face::m128dLoad16a(src3, &src[3].x);
+
+      Face::m128dSwapPD(src0, src0);
+      Face::m128dSwapPD(src1, src1);
+      Face::m128dSwapPD(src2, src2);
+      Face::m128dSwapPD(src3, src3);
+
+      Face::m128dMulPD(src0, src0, m_01_10);
+      Face::m128dMulPD(src1, src1, m_01_10);
+      Face::m128dMulPD(src2, src2, m_01_10);
+      Face::m128dMulPD(src3, src3, m_01_10);
+
+      Face::m128dAddPD(src0, src0, m_20_21);
+      Face::m128dAddPD(src1, src1, m_20_21);
+      Face::m128dAddPD(src2, src2, m_20_21);
+      Face::m128dAddPD(src3, src3, m_20_21);
+
+      Face::m128dStore16a(&dst[0].x, src0);
+      Face::m128dStore16a(&dst[1].x, src1);
+      Face::m128dStore16a(&dst[2].x, src2);
+      Face::m128dStore16a(&dst[3].x, src3);
+    }
+
+    for (i = length & 3; i; i--, dst++, src++)
+    {
+      __m128d src0;
+
+      Face::m128dLoad16a(src0, &src[0].x);
+      Face::m128dSwapPD(src0, src0);
+      Face::m128dMulPD(src0, src0, m_01_10);
+      Face::m128dAddPD(src0, src0, m_20_21);
+      Face::m128dStore16a(&dst[0].x, src0);
+    }
+  }
+  else
+  {
+    for (i = length >> 2; i; i--, dst += 4, src += 4)
+    {
+      __m128d src0, src1, src2, src3;
+
+      Face::m128dLoad16u(src0, &src[0].x);
+      Face::m128dLoad16u(src1, &src[1].x);
+      Face::m128dLoad16u(src2, &src[2].x);
+      Face::m128dLoad16u(src3, &src[3].x);
+
+      Face::m128dSwapPD(src0, src0);
+      Face::m128dSwapPD(src1, src1);
+      Face::m128dSwapPD(src2, src2);
+      Face::m128dSwapPD(src3, src3);
+
+      Face::m128dMulPD(src0, src0, m_01_10);
+      Face::m128dMulPD(src1, src1, m_01_10);
+      Face::m128dMulPD(src2, src2, m_01_10);
+      Face::m128dMulPD(src3, src3, m_01_10);
+
+      Face::m128dAddPD(src0, src0, m_20_21);
+      Face::m128dAddPD(src1, src1, m_20_21);
+      Face::m128dAddPD(src2, src2, m_20_21);
+      Face::m128dAddPD(src3, src3, m_20_21);
+
+      Face::m128dStore16u(&dst[0].x, src0);
+      Face::m128dStore16u(&dst[1].x, src1);
+      Face::m128dStore16u(&dst[2].x, src2);
+      Face::m128dStore16u(&dst[3].x, src3);
+    }
+
+    for (i = length & 3; i; i--, dst++, src++)
+    {
+      __m128d src0;
+
+      Face::m128dLoad16u(src0, &src[0].x);
+      Face::m128dSwapPD(src0, src0);
+      Face::m128dMulPD(src0, src0, m_01_10);
       Face::m128dAddPD(src0, src0, m_20_21);
       Face::m128dStore16u(&dst[0].x, src0);
     }
@@ -479,6 +588,28 @@ static void FOG_CDECL _G2d_TransformD_mapPointsD_Projection_SSE2(const Transform
   }
 }
 
+static void FOG_CDECL _G2d_TransformD_mapPointsD_Degenerate_SSE2(const TransformD& self, PointD* dst, const PointD* src, sysuint_t length)
+{
+  Face::m128d zero = _mm_setzero_pd();
+  sysuint_t i;
+
+  if (((sysuint_t)dst & 0xF) == 0)
+  {
+    for (i = length; i; i--, dst += 1)
+    {
+      Face::m128dStore16a(dst, zero);
+    }
+  }
+  else
+  {
+    for (i = length; i; i--, dst += 1)
+    {
+      Face::m128dStore8Lo(&dst[0].x, zero);
+      Face::m128dStore8Lo(&dst[0].y, zero);
+    }
+  }
+}
+
 // ============================================================================
 // [Fog::Transform - MapVector]
 // ============================================================================
@@ -493,40 +624,72 @@ static void FOG_CDECL _G2d_TransformD_mapVectorD_SSE2(const TransformD& self, Po
   __m128d m_00_11 = _mm_setr_pd(self._00, self._11);
   __m128d m_10_01 = _mm_setr_pd(self._10, self._01);
 
-  if (selfType < TRANSFORM_TYPE_PROJECTION)
+  switch (selfType)
   {
-    src0 = _mm_mul_pd(src0, m_00_11);
-    rev0 = _mm_mul_pd(rev0, m_10_01);
-    src0 = _mm_add_pd(src0, rev0);
-  }
-  else
-  {
-    __m128d rcp0 = _mm_setr_pd(self._02, self._12);
-    __m128d rcpX;
+    case TRANSFORM_TYPE_IDENTITY:
+    case TRANSFORM_TYPE_TRANSLATION:
+      break;
 
-    rcp0 = _mm_mul_pd(rcp0, src0);
-    rcpX = _mm_shuffle_pd(rcp0, rcp0, _MM_SHUFFLE2(0, 1));
+    case TRANSFORM_TYPE_SCALING:
+    {
+      Face::m128dMulPD(src0, src0, m_00_11);
+      break;
+    }
 
-    src0 = _mm_mul_pd(src0, m_00_11);
-    rev0 = _mm_mul_pd(rev0, m_10_01);
-    src0 = _mm_add_pd(src0, rev0);
+    case TRANSFORM_TYPE_SWAP:
+    {
+      Face::m128dMulPD(src0, rev0, m_10_01);
+      break;
+    }
 
-    rcp0 = _mm_add_pd(rcp0, rcpX);
-    rcp0 = _mm_add_sd(rcp0, _mm_load_sd(&self._22));
-    rcp0 = _mm_loadh_pd(rcp0, &self._22);
+    case TRANSFORM_TYPE_ROTATION:
+    case TRANSFORM_TYPE_AFFINE:
+    {
+      src0 = _mm_mul_pd(src0, m_00_11);
+      rev0 = _mm_mul_pd(rev0, m_10_01);
+      src0 = _mm_add_pd(src0, rev0);
+      break;
+    }
 
-    rcpX = FOG_SSE_GET_CONST_PD(m128d_sgn_mask);
-    rcpX = _mm_and_pd(rcpX, rcp0);
-    rcp0 = _mm_xor_pd(rcp0, rcpX);
-    rcp0 = _mm_max_pd(rcp0, FOG_SSE_GET_CONST_PD(m128d_epsilon));
-    rcp0 = _mm_xor_pd(rcp0, rcpX);
-    rcp0 = _mm_div_pd(FOG_SSE_GET_CONST_PD(m128d_one), rcp0);
+    case TRANSFORM_TYPE_PROJECTION:
+    {
+      __m128d rcp0 = _mm_setr_pd(self._02, self._12);
+      __m128d rcpX;
 
-    rcpX = _mm_loadu_pd(&self._20);
-    src0 = _mm_add_pd(src0, rcpX);
+      rcp0 = _mm_mul_pd(rcp0, src0);
+      rcpX = _mm_shuffle_pd(rcp0, rcp0, _MM_SHUFFLE2(0, 1));
 
-    src0 = _mm_mul_pd(src0, _mm_unpacklo_pd(rcp0, rcp0));
-    src0 = _mm_sub_pd(src0, _mm_mul_pd(rcpX, _mm_unpackhi_pd(rcp0, rcp0)));
+      src0 = _mm_mul_pd(src0, m_00_11);
+      rev0 = _mm_mul_pd(rev0, m_10_01);
+      src0 = _mm_add_pd(src0, rev0);
+
+      rcp0 = _mm_add_pd(rcp0, rcpX);
+      rcp0 = _mm_add_sd(rcp0, _mm_load_sd(&self._22));
+      rcp0 = _mm_loadh_pd(rcp0, &self._22);
+
+      rcpX = FOG_SSE_GET_CONST_PD(m128d_sgn_mask);
+      rcpX = _mm_and_pd(rcpX, rcp0);
+      rcp0 = _mm_xor_pd(rcp0, rcpX);
+      rcp0 = _mm_max_pd(rcp0, FOG_SSE_GET_CONST_PD(m128d_epsilon));
+      rcp0 = _mm_xor_pd(rcp0, rcpX);
+      rcp0 = _mm_div_pd(FOG_SSE_GET_CONST_PD(m128d_one), rcp0);
+
+      rcpX = _mm_loadu_pd(&self._20);
+      src0 = _mm_add_pd(src0, rcpX);
+
+      src0 = _mm_mul_pd(src0, _mm_unpacklo_pd(rcp0, rcp0));
+      src0 = _mm_sub_pd(src0, _mm_mul_pd(rcpX, _mm_unpackhi_pd(rcp0, rcp0)));
+      break;
+    }
+
+    case TRANSFORM_TYPE_DEGENERATE:
+    {
+      src0 = _mm_setzero_pd();
+      break;
+    }
+
+    default:
+      FOG_ASSERT_NOT_REACHED();
   }
 
   Face::m128dStore16u(&dst, src0);
@@ -544,9 +707,11 @@ FOG_NO_EXPORT void _g2d_transform_init_sse2(void)
   _g2d.transformd.mapPointsD[TRANSFORM_TYPE_IDENTITY   ] = _G2d_TransformD_mapPointsD_Identity_SSE2;
   _g2d.transformd.mapPointsD[TRANSFORM_TYPE_TRANSLATION] = _G2d_TransformD_mapPointsD_Translation_SSE2;
   _g2d.transformd.mapPointsD[TRANSFORM_TYPE_SCALING    ] = _G2d_TransformD_mapPointsD_Scaling_SSE2;
+  _g2d.transformd.mapPointsD[TRANSFORM_TYPE_SWAP       ] = _G2d_TransformD_mapPointsD_Swap_SSE2;
   _g2d.transformd.mapPointsD[TRANSFORM_TYPE_ROTATION   ] = _G2d_TransformD_mapPointsD_Affine_SSE2;
   _g2d.transformd.mapPointsD[TRANSFORM_TYPE_AFFINE     ] = _G2d_TransformD_mapPointsD_Affine_SSE2;
   _g2d.transformd.mapPointsD[TRANSFORM_TYPE_PROJECTION ] = _G2d_TransformD_mapPointsD_Projection_SSE2;
+  _g2d.transformd.mapPointsD[TRANSFORM_TYPE_DEGENERATE ] = _G2d_TransformD_mapPointsD_Degenerate_SSE2;
 }
 
 } // Fog namespace

@@ -10,6 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/Algorithms.h>
+#include <Fog/Core/Global/Internal_Core_p.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Math/Solve.h>
@@ -32,24 +33,24 @@ namespace Fog {
 // ============================================================================
 
 // ============================================================================
-// [Fog::CubicCurve - GetExtrema]
+// [Fog::CubicCurve - GetBoundingBox]
 // ============================================================================
 
-template<typename Number>
-static void FOG_CDECL _G2d_CubicCurveT_getExtrema(const typename PointT<Number>::T* self, typename BoxT<Number>::T* dstBox)
+template<typename NumT>
+static err_t FOG_CDECL _G2d_CubicCurveT_getBoundingBox(const NumT_(Point)* self, NumT_(Box)* dst)
 {
   // Init pMin/pMax - self[0].
-  typename PointT<Number>::T pMin = self[0];
-  typename PointT<Number>::T pMax = self[0];
+  NumT_(Point) pMin = self[0];
+  NumT_(Point) pMax = self[0];
 
   // Merge end point - self[3].
   if (self[3].x < pMin.x) pMin.x = self[3].x; else if (self[3].x > pMax.x) pMax.x = self[3].x;
   if (self[3].y < pMin.y) pMin.y = self[3].y; else if (self[3].y > pMax.y) pMax.y = self[3].y;
 
   // X extrema.
-  Number a = Number(3.0) * (-self[0].x + Number(3.0) * (self[1].x - self[2].x) + self[3].x);
-  Number b = Number(6.0) * ( self[0].x - Number(2.0) *  self[1].x + self[2].x             );
-  Number c = Number(3.0) * (-self[0].x +                self[1].x                         );
+  NumT a = NumT(3.0) * (-self[0].x + NumT(3.0) * (self[1].x - self[2].x) + self[3].x);
+  NumT b = NumT(6.0) * ( self[0].x - NumT(2.0) *  self[1].x + self[2].x             );
+  NumT c = NumT(3.0) * (-self[0].x +                self[1].x                         );
 
   for (int i = 0;;)
   {
@@ -60,42 +61,127 @@ static void FOG_CDECL _G2d_CubicCurveT_getExtrema(const typename PointT<Number>:
       if (!Math::isFuzzyZero(b))
       {
         // Simple case (t = -c / b).
-        Number t0 = -c / b;
-        Number d;
+        NumT t0 = -c / b;
+        NumT d;
 
-        _FOG_CUBIC_MERGE(Number, t0);
+        _FOG_CUBIC_MERGE(NumT, t0, self, pMin, pMax);
       }
     }
     else
     {
       // Calculate roots (t = b^2 - 4ac).
-      Number t = b * b - Number(4.0) * a * c;
-      if (t > Number(0.0))
+      NumT t = b * b - NumT(4.0) * a * c;
+      if (t > NumT(0.0))
       {
-        Number s = Math::sqrt(t);
-        Number q = -Number(0.5) * (b + ((b < Number(0.0)) ? -s : s));
+        NumT s = Math::sqrt(t);
+        NumT q = -NumT(0.5) * (b + ((b < NumT(0.0)) ? -s : s));
 
-        Number t0 = q / a;
-        Number t1 = c / q;
+        NumT t0 = q / a;
+        NumT t1 = c / q;
 
-        Number d;
+        NumT d;
 
-        _FOG_CUBIC_MERGE(Number, t0);
-        _FOG_CUBIC_MERGE(Number, t1);
+        _FOG_CUBIC_MERGE(NumT, t0, self, pMin, pMax);
+        _FOG_CUBIC_MERGE(NumT, t1, self, pMin, pMax);
       }
     }
 
     if (++i == 2) break;
 
     // Y extrema.
-    a = Number(3.0) * (-self[0].y + Number(3.0) * (self[1].y - self[2].y) + self[3].y);
-    b = Number(6.0) * ( self[0].y - Number(2.0) *  self[1].y + self[2].y             );
-    c = Number(3.0) * (-self[0].y +                self[1].y                         );
+    a = NumT(3.0) * (-self[0].y + NumT(3.0) * (self[1].y - self[2].y) + self[3].y);
+    b = NumT(6.0) * ( self[0].y - NumT(2.0) *  self[1].y + self[2].y             );
+    c = NumT(3.0) * (-self[0].y +                self[1].y                         );
   }
 
-  dstBox->setBox(pMin.x, pMin.y, pMax.x, pMax.y);
+  dst->setBox(pMin.x, pMin.y, pMax.x, pMax.y);
+  return ERR_OK;
 }
 
+// ============================================================================
+// [Fog::CubicCurve - GetSplineBBox]
+// ============================================================================
+
+template<typename NumT>
+static err_t FOG_CDECL _G2d_CubicCurveT_getSplineBBox(const NumT_(Point)* self, sysuint_t length, NumT_(Box)* dst)
+{
+  sysuint_t i;
+
+  if (length < 4) return ERR_RT_INVALID_ARGUMENT;
+  FOG_ASSERT((length - 1) % 3 == 0);
+
+  // Init pMin/pMax - self[0].
+  NumT_(Point) pMin = self[0];
+  NumT_(Point) pMax = self[0];
+
+  // Merge start/end points.
+  for (i = 3; i < length; i += 3)
+  {
+    const NumT_(Point)* curve = &self[i];
+
+    if (curve[0].x < pMin.x) pMin.x = curve[0].x; else if (curve[0].x > pMax.x) pMax.x = curve[0].x;
+    if (curve[0].y < pMin.y) pMin.y = curve[0].y; else if (curve[0].y > pMax.y) pMax.y = curve[0].y;
+  }
+
+  // Merge extremas.
+  for (i = 0; i < length; i += 3)
+  {
+    const NumT_(Point)* curve = &self[i];
+
+    if (curve[1].x < pMin.x || curve[1].y < pMin.y || curve[1].x > pMax.x || curve[1].y > pMax.y ||
+        curve[2].x < pMin.x || curve[2].y < pMin.y || curve[2].x > pMax.x || curve[2].y > pMax.y)
+    {
+      NumT a = NumT(3.0) * (-curve[0].x + NumT(3.0) * (curve[1].x - curve[2].x) + curve[3].x);
+      NumT b = NumT(6.0) * ( curve[0].x - NumT(2.0) *  curve[1].x + curve[2].x              );
+      NumT c = NumT(3.0) * (-curve[0].x +              curve[1].x                           );
+
+      for (int j = 0;;)
+      {
+        // Catch the A and B near zero.
+        if (Math::isFuzzyZero(a))
+        {
+          // A~=0 && B~=0.
+          if (!Math::isFuzzyZero(b))
+          {
+            // Simple case (t = -c / b).
+            NumT t0 = -c / b;
+            NumT d;
+
+            _FOG_CUBIC_MERGE(NumT, t0, curve, pMin, pMax);
+          }
+        }
+        else
+        {
+          // Calculate roots (t = b^2 - 4ac).
+          NumT t = b * b - NumT(4.0) * a * c;
+          if (t > NumT(0.0))
+          {
+            NumT s = Math::sqrt(t);
+            NumT q = -NumT(0.5) * (b + ((b < NumT(0.0)) ? -s : s));
+
+            NumT t0 = q / a;
+            NumT t1 = c / q;
+
+            NumT d;
+
+            _FOG_CUBIC_MERGE(NumT, t0, curve, pMin, pMax);
+            _FOG_CUBIC_MERGE(NumT, t1, curve, pMin, pMax);
+          }
+        }
+
+        if (++j == 2) break;
+
+        // Y extrema.
+        a = NumT(3.0) * (-curve[0].y + NumT(3.0) * (curve[1].y - curve[2].y) + curve[3].y);
+        b = NumT(6.0) * ( curve[0].y - NumT(2.0) *  curve[1].y + curve[2].y              );
+        c = NumT(3.0) * (-curve[0].y +              curve[1].y                           );
+      }
+    }
+  }
+
+  dst->setBox(pMin.x, pMin.y, pMax.x, pMax.y);
+  return ERR_OK;
+}
 // ============================================================================
 // [Fog::CubicCurve - GetLength]
 // ============================================================================
@@ -159,19 +245,19 @@ static void FOG_CDECL _G2d_CubicCurveD_getLength(const PointD* self, double* len
 //
 // Value = A * t^3 + b * t^2 + C * t + D
 
-template<typename Number>
-static int FOG_CDECL _G2d_CubicCurveT_getInflectionPoints(const typename PointT<Number>::T* self, Number* t)
+template<typename NumT>
+static int FOG_CDECL _G2d_CubicCurveT_getInflectionPoints(const NumT_(Point)* self, NumT* t)
 {
   // Extract the parameters.
-  Number ax, ay, bx, by, cx, cy, dx, dy;
-  _FOG_CUBIC_EXTRACT_PARAMETERS(Number, ax, ay, bx, by, cx, cy, dx, dy, self);
+  NumT ax, ay, bx, by, cx, cy, dx, dy;
+  _FOG_CUBIC_EXTRACT_PARAMETERS(NumT, ax, ay, bx, by, cx, cy, dx, dy, self);
 
   // Solve the quadratic function.
-  Number q[3];
+  NumT q[3];
 
-  q[0] = Number(6.0) * (ay * bx - ax * by);
-  q[1] = Number(6.0) * (ay * cx - ax * cy);
-  q[2] = Number(2.0) * (by * cx - bx * cy);
+  q[0] = NumT(6.0) * (ay * bx - ax * by);
+  q[1] = NumT(6.0) * (ay * cx - ax * cy);
+  q[2] = NumT(2.0) * (by * cx - bx * cy);
 
   return Math::solveQuadraticFunction(t, q);
 }
@@ -187,15 +273,15 @@ static int FOG_CDECL _G2d_CubicCurveT_getInflectionPoints(const typename PointT<
 // step to accomplish requirements for flattening using parabolic method or
 // stroking.
 
-template<typename Number>
-static int FOG_CDECL _G2d_CubicCurveT_simplifyForProcessing(const typename PointT<Number>::T* self,typename  PointT<Number>::T* pts, Number flatness)
+template<typename NumT>
+static int FOG_CDECL _G2d_CubicCurveT_simplifyForProcessing(const NumT_(Point)* self, NumT_(Point)* pts, NumT flatness)
 {
   // Extract the parameters.
-  Number ax, ay, bx, by, cx, cy, dx, dy;
-  _FOG_CUBIC_EXTRACT_PARAMETERS(Number, ax, ay, bx, by, cx, cy, dx, dy, self);
+  NumT ax, ay, bx, by, cx, cy, dx, dy;
+  _FOG_CUBIC_EXTRACT_PARAMETERS(NumT, ax, ay, bx, by, cx, cy, dx, dy, self);
 
-  Number q[3];
-  Number t[3];
+  NumT q[3];
+  NumT t[3];
 
   q[0] = (ay * bx - ax * by); // Qa
   q[1] = (ay * cx - ax * cy); // Qb
@@ -203,12 +289,12 @@ static int FOG_CDECL _G2d_CubicCurveT_simplifyForProcessing(const typename Point
 
   // tCusp = -0.5 * ((ay*cx - ax*cy) / (ay*bx - ax*by)).
   // tCusp = -0.5 * (Qb / Qa)
-  Number tCusp = -Number(0.5) * (q[1] / q[0]);
+  NumT tCusp = -NumT(0.5) * (q[1] / q[0]);
 
   // Solve the quadratic function, needed to find the inflection points.
-  q[0] *= Number(6.0);
-  q[1] *= Number(6.0);
-  q[2] *= Number(2.0);
+  q[0] *= NumT(6.0);
+  q[1] *= NumT(6.0);
+  q[2] *= NumT(2.0);
 
   switch (Math::solveQuadraticFunction(t, q))
   {
@@ -216,19 +302,19 @@ static int FOG_CDECL _G2d_CubicCurveT_simplifyForProcessing(const typename Point
     case 2:
       {
         t[2] = tCusp;
-        Algorithms::isort_t<Number>(t, 3);
+        Algorithms::isort_t<NumT>(t, 3);
 
         // Now split the curve into b-spline and return the count of curves.
-        const typename PointT<Number>::T* bPtr = self;
-        typename PointT<Number>::T bTmp[4];
+        const NumT_(Point)* bPtr = self;
+        NumT_(Point) bTmp[4];
 
         int count = 0;
-        Number cut = Number(0.0);
+        NumT cut = NumT(0.0);
 
         for (int i = 0; i < 3; i++)
         {
-          if (t[i] <= Number(0.0) || t[i] >= Number(1.0)) continue;
-          CubicCurveT<Number>::T::splitAt(bPtr, pts, bTmp, cut == Number(0.0) ? t[i] : (t[i] - cut) / (Number(1.0) - cut));
+          if (t[i] <= NumT(0.0) || t[i] >= NumT(1.0)) continue;
+          NumI_(CubicCurve)::splitAt(bPtr, pts, bTmp, cut == NumT(0.0) ? t[i] : (t[i] - cut) / (NumT(1.0) - cut));
           bPtr = pts;
 
           cut = t[i];
@@ -246,9 +332,9 @@ static int FOG_CDECL _G2d_CubicCurveT_simplifyForProcessing(const typename Point
 
     // One inflection point, subdivide at t[0].
     case 1:
-      if (t[0] <= Number(0.0) || t[0] >= Number(1.0)) goto _NoInflection;
+      if (t[0] <= NumT(0.0) || t[0] >= NumT(1.0)) goto _NoInflection;
 
-      CubicCurveT<Number>::T::splitAt(self, pts, pts + 3, t[0]);
+      NumI_(CubicCurve)::splitAt(self, pts, pts + 3, t[0]);
       return 2;
 
     // No inflection points. The given Bezier curve doesn't need to be simplified.
@@ -278,31 +364,31 @@ _NoInflection:
     curVertex++; \
   FOG_MACRO_END
 
-template<typename Number>
+template<typename NumT>
 static err_t FOG_CDECL _G2d_CubicCurveT_flatten(
-  const typename PointT<Number>::T* self,
-  typename PathT<Number>::T& dst,
+  const NumT_(Point)* self,
+  NumT_(Path)& dst,
   uint8_t initialCommand,
-  Number flatness)
+  NumT flatness)
 {
-  Number distanceToleranceSquare = Math::pow2(flatness);
-  Number x0 = self[0].x;
-  Number y0 = self[0].y;
-  Number x1 = self[1].x;
-  Number y1 = self[1].y;
-  Number x2 = self[2].x;
-  Number y2 = self[2].y;
-  Number x3 = self[3].x;
-  Number y3 = self[3].y;
+  NumT distanceToleranceSquare = Math::pow2(flatness);
+  NumT x0 = self[0].x;
+  NumT y0 = self[0].y;
+  NumT x1 = self[1].x;
+  NumT y1 = self[1].y;
+  NumT x2 = self[2].x;
+  NumT y2 = self[2].y;
+  NumT x3 = self[3].x;
+  NumT y3 = self[3].y;
 
   sysuint_t initialLength = dst._d->length;
   sysuint_t level = 0;
 
-  typename PointT<Number>::T* curVertex;
-  typename PointT<Number>::T* endVertex;
+  NumT_(Point)* curVertex;
+  NumT_(Point)* endVertex;
 
-  typename PointT<Number>::T _stack[CUBIC_CURVE_APPROXIMATE_RECURSION_LIMIT * 4];
-  typename PointT<Number>::T* stack = _stack;
+  NumT_(Point) _stack[CUBIC_CURVE_APPROXIMATE_RECURSION_LIMIT * 4];
+  NumT_(Point)* stack = _stack;
 
 _Realloc:
   {
@@ -329,29 +415,29 @@ _Realloc:
     }
 
     // Calculate all the mid-points of the line segments.
-    Number x01   = (x0 + x1) * Number(0.5);
-    Number y01   = (y0 + y1) * Number(0.5);
-    Number x12   = (x1 + x2) * Number(0.5);
-    Number y12   = (y1 + y2) * Number(0.5);
-    Number x23   = (x2 + x3) * Number(0.5);
-    Number y23   = (y2 + y3) * Number(0.5);
-    Number x012  = (x01 + x12) * Number(0.5);
-    Number y012  = (y01 + y12) * Number(0.5);
-    Number x123  = (x12 + x23) * Number(0.5);
-    Number y123  = (y12 + y23) * Number(0.5);
-    Number x0123 = (x012 + x123) * Number(0.5);
-    Number y0123 = (y012 + y123) * Number(0.5);
+    NumT x01   = (x0 + x1) * NumT(0.5);
+    NumT y01   = (y0 + y1) * NumT(0.5);
+    NumT x12   = (x1 + x2) * NumT(0.5);
+    NumT y12   = (y1 + y2) * NumT(0.5);
+    NumT x23   = (x2 + x3) * NumT(0.5);
+    NumT y23   = (y2 + y3) * NumT(0.5);
+    NumT x012  = (x01 + x12) * NumT(0.5);
+    NumT y012  = (y01 + y12) * NumT(0.5);
+    NumT x123  = (x12 + x23) * NumT(0.5);
+    NumT y123  = (y12 + y23) * NumT(0.5);
+    NumT x0123 = (x012 + x123) * NumT(0.5);
+    NumT y0123 = (y012 + y123) * NumT(0.5);
 
     // Try to approximate the full cubic curve by a single straight line.
-    Number dx = x3 - x0;
-    Number dy = y3 - y0;
+    NumT dx = x3 - x0;
+    NumT dy = y3 - y0;
 
-    Number d2 = Math::abs(((x1 - x3) * dy - (y1 - y3) * dx));
-    Number d3 = Math::abs(((x2 - x3) * dy - (y2 - y3) * dx));
-    Number da1, da2, k;
+    NumT d2 = Math::abs(((x1 - x3) * dy - (y1 - y3) * dx));
+    NumT d3 = Math::abs(((x2 - x3) * dy - (y2 - y3) * dx));
+    NumT da1, da2, k;
 
-    switch ((int(d2 > Math2dConst<Number>::getCollinearityEpsilon()) << 1) +
-             int(d3 > Math2dConst<Number>::getCollinearityEpsilon()))
+    switch ((int(d2 > Math2dConst<NumT>::getCollinearityEpsilon()) << 1) +
+             int(d3 > Math2dConst<NumT>::getCollinearityEpsilon()))
     {
       // All collinear OR p0 == p3.
       case 0:
@@ -363,7 +449,7 @@ _Realloc:
         }
         else
         {
-          k   = Number(1.0) / k;
+          k   = NumT(1.0) / k;
           da1 = x1 - x0;
           da2 = y1 - y0;
           d2  = k * (da1 * dx + da2 * dy);
@@ -520,7 +606,7 @@ _Ret:
 _InvalidNumber:
   // Purge dst length to its initial state.
   if (dst._d->length != initialLength) dst._d->length = initialLength;
-  return ERR_PATH_INVALID;
+  return ERR_GEOMETRY_INVALID;
 }
 
 // ============================================================================
@@ -529,17 +615,23 @@ _InvalidNumber:
 
 FOG_NO_EXPORT void _g2d_cubiccurve_init(void)
 {
-  _g2d.cubiccurvef.getExtrema            = _G2d_CubicCurveT_getExtrema<float>;
-  _g2d.cubiccurvef.getLength             = _G2d_CubicCurveF_getLength;
-  _g2d.cubiccurvef.getInflectionPoints   = _G2d_CubicCurveT_getInflectionPoints<float>;
-  _g2d.cubiccurvef.simplifyForProcessing = _G2d_CubicCurveT_simplifyForProcessing<float>;
-  _g2d.cubiccurvef.flatten               = _G2d_CubicCurveT_flatten<float>;
+  _g2d.cubiccurvef.getBoundingBox = _G2d_CubicCurveT_getBoundingBox<float>;
+  _g2d.cubiccurved.getBoundingBox = _G2d_CubicCurveT_getBoundingBox<double>;
 
-  _g2d.cubiccurved.getExtrema            = _G2d_CubicCurveT_getExtrema<double>;
-  _g2d.cubiccurved.getLength             = _G2d_CubicCurveD_getLength;
-  _g2d.cubiccurved.getInflectionPoints   = _G2d_CubicCurveT_getInflectionPoints<double>;
+  _g2d.cubiccurvef.getSplineBBox = _G2d_CubicCurveT_getSplineBBox<float>;
+  _g2d.cubiccurved.getSplineBBox = _G2d_CubicCurveT_getSplineBBox<double>;
+
+  _g2d.cubiccurvef.getLength = _G2d_CubicCurveF_getLength;
+  _g2d.cubiccurved.getLength = _G2d_CubicCurveD_getLength;
+
+  _g2d.cubiccurvef.getInflectionPoints = _G2d_CubicCurveT_getInflectionPoints<float>;
+  _g2d.cubiccurved.getInflectionPoints = _G2d_CubicCurveT_getInflectionPoints<double>;
+
+  _g2d.cubiccurvef.simplifyForProcessing = _G2d_CubicCurveT_simplifyForProcessing<float>;
   _g2d.cubiccurved.simplifyForProcessing = _G2d_CubicCurveT_simplifyForProcessing<double>;
-  _g2d.cubiccurved.flatten               = _G2d_CubicCurveT_flatten<double>;
+
+  _g2d.cubiccurvef.flatten = _G2d_CubicCurveT_flatten<float>;
+  _g2d.cubiccurved.flatten = _G2d_CubicCurveT_flatten<double>;
 }
 
 } // Fog namespace

@@ -16,46 +16,47 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::CREATE_SHARABLE]
-// ============================================================================
-
-// TODO ###: REMOVE
-enum _CREATE_SHAREABLE { CREATE_SHAREABLE = 0 };
-
-// ============================================================================
-// [Fog::CONTAINER_FLAG]
+// [Fog::CONTAINER_DATA]
 // ============================================================================
 
 //! @brief Container data flags, used by many Fog-Framework classes.
-enum CONTAINER_FLAG
+enum CONTAINER_DATA
 {
-  //! @brief Data allocated by the container are static.
+  //! @brief Container data is adopted from other container / custom memory
+  //! location. 
   //!
-  //! There are some templates that allows to allocate data for these containers
-  //! on the stack (for better multithreading / temporary objects performance).
-  //! If this flag is set then data were allocated using static memory
-  //! allocator.
-  //!
-  //! @note If container contains other data then this flag is related to
-  //! the memory used to allocate the container data structure, not the data
-  //! pointer in data structure.
-  CONTAINER_FLAG_STATIC = 0x01,
+  //! There are some templates that allows to allocate some container data
+  //! structures on the stack (for better performance). There are also 
+  //! containers which allows to adopt another data pointer to be used with
+  //! the container instance (for example @c Image class).
+  CONTAINER_DATA_STATIC = 0x01,
+
+  //! @brief Container data is read-only.
+  CONTAINER_DATA_READ_ONLY = 0x02,
+
+  // TODO: REMOVE.
 
   //! @brief Data allocated by the container are private. Private data can't
   //! be weak-referenced so any time the reference is requested the deep-copy
   //! is created.
-  CONTAINER_FLAG_PRIVATE = 0x02,
+  CONTAINER_DATA_PRIVATE = 0x08
+};
 
-  // TODO: Better name, refactor...
+// ============================================================================
+// [Fog::CONTAINER_OP]
+// ============================================================================
 
-  //! @brief Keep alive this instance copying all data to it when assigning
-  //! other instance. This flag prevents weak-copy of other instance that is
-  //! being assigned into the container. All template based containers that
-  //! uses static allocation set this flag.
-  CONTAINER_FLAG_KEEP_ALIVE = 0x04,
-
-  //! @brief Data is read-only.
-  CONTAINER_FLAG_READ_ONLY = 0x08,
+//! @brief Container operation.
+//!
+//! Container operation is useful when working with two containers (same or
+//! different type). The operation can be transformation of data in the source
+//! container to target container. Sometimes it's useful
+enum CONTAINER_OP
+{
+  //! @brief Replace operation.
+  CONTAINER_OP_REPLACE = 0,
+  //! @brief Append operation.
+  CONTAINER_OP_APPEND = 1
 };
 
 // ============================================================================
@@ -218,19 +219,10 @@ enum CASE_SENSITIVITY
 };
 
 // ============================================================================
-// [Fog::OUTPUT_MODE]
-// ============================================================================
-
-enum OUTPUT_MODE
-{
-  OUTPUT_MODE_SET = 0,
-  OUTPUT_MODE_APPEND = 1
-};
-
-// ============================================================================
 // [Fog::OUTPUT_CASE]
 // ============================================================================
 
+// TODO: Refactor, this name is not good, should be connected with text/string.
 enum OUTPUT_CASE
 {
   OUTPUT_CASE_LOWER = 0,
@@ -285,11 +277,11 @@ enum DOUBLE_FORM
 };
 
 // ============================================================================
-// [Fog::LIBRARY_OPEN_MODE]
+// [Fog::LIBRARY_OPEN]
 // ============================================================================
 
 //! @brief Library open flags used in @c Library::open().
-enum LIBRARY_OPEN_MODE
+enum LIBRARY_OPEN
 {
   //! @brief Don't use any flags.
   LIBRARY_OPEN_NO_FLAGS = 0,

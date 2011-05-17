@@ -146,6 +146,7 @@ struct FOG_NO_EXPORT ShapeF
   // --------------------------------------------------------------------------
 
   FOG_INLINE uint32_t getType() const { return _type; }
+  FOG_INLINE bool isClosed() const { return _type >= SHAPE_TYPE_RECT; }
 
   // --------------------------------------------------------------------------
   // [Accessors - Data]
@@ -209,18 +210,46 @@ struct FOG_NO_EXPORT ShapeF
   // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE BoxF getBoundingBox() const
+  FOG_INLINE err_t getBoundingBox(BoxF& dst) const
   {
-    BoxF result(UNINITIALIZED);
-    _g2d.shapef.getBoundingBox(_type, &_data, &result);
-    return result;
+    return _getBoundingBox(dst, NULL);
   }
 
-  FOG_INLINE RectF getBoundingRect() const
+  FOG_INLINE err_t getBoundingBox(BoxF& dst, const TransformF& tr) const
   {
-    BoxF result(UNINITIALIZED);
-    _g2d.shapef.getBoundingBox(_type, &_data, &result);
-    return RectF(result);
+    return _getBoundingBox(dst, &tr);
+  }
+
+  FOG_INLINE err_t getBoundingRect(RectF& dst) const
+  {
+    return _getBoundingRect(dst, NULL);
+  }
+
+  FOG_INLINE err_t getBoundingRect(RectF& dst, const TransformF& tr) const
+  {
+    return _getBoundingRect(dst, &tr);
+  }
+
+  FOG_INLINE err_t _getBoundingBox(BoxF& dst, const TransformF* tr) const
+  {
+    return _g2d.shapef.getBoundingBox(_type, &_data, &dst, tr);
+  }
+
+  FOG_INLINE err_t _getBoundingRect(RectF& dst, const TransformF* tr) const
+  {
+    err_t err = _g2d.shapef.getBoundingBox(_type, &_data, reinterpret_cast<BoxF*>(&dst), tr);
+    dst.w -= dst.x;
+    dst.h -= dst.y;
+    return err;
+  }
+
+  // --------------------------------------------------------------------------
+  // [HitTest]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool hitTest(const PointF& pt) const
+  {
+    return _g2d.shapef.hitTest(_type, &_data, &pt);
   }
 
   // --------------------------------------------------------------------------
@@ -275,6 +304,7 @@ struct FOG_NO_EXPORT ShapeD
   // --------------------------------------------------------------------------
 
   FOG_INLINE uint32_t getType() const { return _type; }
+  FOG_INLINE bool isClosed() const { return _type >= SHAPE_TYPE_RECT; }
 
   // --------------------------------------------------------------------------
   // [Accessors - Data]
@@ -339,18 +369,46 @@ struct FOG_NO_EXPORT ShapeD
   // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE BoxD getBoundingBox() const
+  FOG_INLINE err_t getBoundingBox(BoxD& dst) const
   {
-    BoxD result(UNINITIALIZED);
-    _g2d.shaped.getBoundingBox(_type, &_data, &result);
-    return result;
+    return _getBoundingBox(dst, NULL);
   }
 
-  FOG_INLINE RectD getBoundingRect() const
+  FOG_INLINE err_t getBoundingBox(BoxD& dst, const TransformD& tr) const
   {
-    BoxD result(UNINITIALIZED);
-    _g2d.shaped.getBoundingBox(_type, &_data, &result);
-    return RectD(result);
+    return _getBoundingBox(dst, &tr);
+  }
+
+  FOG_INLINE err_t getBoundingRect(RectD& dst) const
+  {
+    return _getBoundingRect(dst, NULL);
+  }
+
+  FOG_INLINE err_t getBoundingRect(RectD& dst, const TransformD& tr) const
+  {
+    return _getBoundingRect(dst, &tr);
+  }
+
+  FOG_INLINE err_t _getBoundingBox(BoxD& dst, const TransformD* tr) const
+  {
+    return _g2d.shaped.getBoundingBox(_type, &_data, &dst, tr);
+  }
+
+  FOG_INLINE err_t _getBoundingRect(RectD& dst, const TransformD* tr) const
+  {
+    err_t err = _g2d.shaped.getBoundingBox(_type, &_data, reinterpret_cast<BoxD*>(&dst), tr);
+    dst.w -= dst.x;
+    dst.h -= dst.y;
+    return err;
+  }
+
+  // --------------------------------------------------------------------------
+  // [HitTest]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool hitTest(const PointD& pt) const
+  {
+    return _g2d.shaped.hitTest(_type, &_data, &pt);
   }
 
   // --------------------------------------------------------------------------

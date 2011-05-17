@@ -3185,12 +3185,12 @@ ret:
 // [Fog::StringUtil - Hex / Base64]
 // ============================================================================
 
-err_t fromHex(ByteArray& dst, const ByteArray& src, int outputMode)
+err_t fromHex(ByteArray& dst, const ByteArray& src, uint32_t cntOp)
 {
   sysuint_t srcLength = src.getLength();
   sysuint_t growBy = (srcLength >> 1) + (srcLength & 1);
 
-  uint8_t* dstCur = reinterpret_cast<uint8_t*>(dst.beginManipulation(growBy, outputMode));
+  uint8_t* dstCur = reinterpret_cast<uint8_t*>(dst.beginManipulation(growBy, cntOp));
   if (FOG_IS_NULL(dstCur)) return ERR_RT_OUT_OF_MEMORY;
   const uint8_t* srcCur = reinterpret_cast<const uint8_t*>(src.getData());
 
@@ -3225,13 +3225,13 @@ err_t fromHex(ByteArray& dst, const ByteArray& src, int outputMode)
   return ERR_OK;
 }
 
-err_t toHex(ByteArray& dst, const ByteArray& src, int outputMode, int outputCase)
+err_t toHex(ByteArray& dst, const ByteArray& src, uint32_t cntOp, int outputCase)
 {
   sysuint_t srcLength = src.getLength();
   sysuint_t growBy = srcLength << 1;
   if (growBy < srcLength) return ERR_RT_OUT_OF_MEMORY;
 
-  uint8_t* dstCur = reinterpret_cast<uint8_t*>(dst.beginManipulation(growBy, outputMode));
+  uint8_t* dstCur = reinterpret_cast<uint8_t*>(dst.beginManipulation(growBy, cntOp));
   if (FOG_IS_NULL(dstCur)) return ERR_RT_OUT_OF_MEMORY;
   const uint8_t* srcCur = reinterpret_cast<const uint8_t*>(src.getData());
 
@@ -3265,30 +3265,30 @@ err_t toHex(ByteArray& dst, const ByteArray& src, int outputMode, int outputCase
   return ERR_OK;
 }
 
-err_t fromBase64(ByteArray& dst, const ByteArray& src, int outputMode)
+err_t fromBase64(ByteArray& dst, const ByteArray& src, uint32_t cntOp)
 {
   if (&dst == &src)
   {
     ByteArray copy(src);
-    return fromBase64(dst, copy.getData(), copy.getLength(), outputMode);
+    return fromBase64(dst, copy.getData(), copy.getLength(), cntOp);
   }
   else
   {
-    return fromBase64(dst, src.getData(), src.getLength(), outputMode);
+    return fromBase64(dst, src.getData(), src.getLength(), cntOp);
   }
 }
 
-err_t fromBase64(ByteArray& dst, const String& src, int outputMode)
+err_t fromBase64(ByteArray& dst, const String& src, uint32_t cntOp)
 {
-  return fromBase64(dst, src.getData(), src.getLength(), outputMode);
+  return fromBase64(dst, src.getData(), src.getLength(), cntOp);
 }
 
-err_t fromBase64(ByteArray& dst, const char* src, sysuint_t srcLength, int outputMode)
+err_t fromBase64(ByteArray& dst, const char* src, sysuint_t srcLength, uint32_t cntOp)
 {
   if (srcLength == DETECT_LENGTH) srcLength = len(src);
   sysuint_t growBy = (srcLength / 4) * 3 + 3;
 
-  uint8_t* dstCur = reinterpret_cast<uint8_t*>(dst.beginManipulation(growBy, outputMode));
+  uint8_t* dstCur = reinterpret_cast<uint8_t*>(dst.beginManipulation(growBy, cntOp));
   if (FOG_IS_NULL(dstCur)) return ERR_RT_OUT_OF_MEMORY;
   const uint8_t* srcCur = reinterpret_cast<const uint8_t*>(src);
 
@@ -3329,12 +3329,12 @@ err_t fromBase64(ByteArray& dst, const char* src, sysuint_t srcLength, int outpu
   return ERR_OK;
 }
 
-err_t fromBase64(ByteArray& dst, const Char* src, sysuint_t srcLength, int outputMode)
+err_t fromBase64(ByteArray& dst, const Char* src, sysuint_t srcLength, uint32_t cntOp)
 {
   if (srcLength == DETECT_LENGTH) srcLength = len(src);
   sysuint_t growBy = (srcLength / 4) * 3 + 3;
 
-  uint8_t* dstCur = reinterpret_cast<uint8_t*>(dst.beginManipulation(growBy, outputMode));
+  uint8_t* dstCur = reinterpret_cast<uint8_t*>(dst.beginManipulation(growBy, cntOp));
   if (FOG_IS_NULL(dstCur)) return ERR_RT_OUT_OF_MEMORY;
   const Char* srcCur = src;
 
@@ -3379,32 +3379,32 @@ static const char base64table[] =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 static const char pad = '=';
 
-err_t toBase64(ByteArray& dst, const ByteArray& src, int outputMode)
+err_t toBase64(ByteArray& dst, const ByteArray& src, uint32_t cntOp)
 {
   if (&dst == &src)
   {
     ByteArray copy(src);
-    return toBase64(dst, copy.getData(), copy.getLength(), outputMode);
+    return toBase64(dst, copy.getData(), copy.getLength(), cntOp);
   }
   else
   {
-    return toBase64(dst, src.getData(), src.getLength(), outputMode);
+    return toBase64(dst, src.getData(), src.getLength(), cntOp);
   }
 }
 
-err_t toBase64(String& dst, const ByteArray& src, int outputMode)
+err_t toBase64(String& dst, const ByteArray& src, uint32_t cntOp)
 {
-  return toBase64(dst, src.getData(), src.getLength(), outputMode);
+  return toBase64(dst, src.getData(), src.getLength(), cntOp);
 }
 
-err_t toBase64(ByteArray& dst, const char* src, sysuint_t srcLength, int outputMode)
+err_t toBase64(ByteArray& dst, const char* src, sysuint_t srcLength, uint32_t cntOp)
 {
   if (srcLength == DETECT_LENGTH) srcLength = len(src);
 
   sysuint_t growBy = (sysuint_t)( ((uint64_t)srcLength * 4) / 3 + 3 );
   if (growBy < srcLength) return ERR_RT_OUT_OF_MEMORY;
 
-  char* dstCur = dst.beginManipulation(growBy, outputMode);
+  char* dstCur = dst.beginManipulation(growBy, cntOp);
   if (FOG_IS_NULL(dstCur)) return ERR_RT_OUT_OF_MEMORY;
   const uint8_t* srcCur = reinterpret_cast<const uint8_t*>(src);
 
@@ -3449,14 +3449,14 @@ err_t toBase64(ByteArray& dst, const char* src, sysuint_t srcLength, int outputM
   return ERR_OK;
 }
 
-err_t toBase64(String& dst, const char* src, sysuint_t srcLength, int outputMode)
+err_t toBase64(String& dst, const char* src, sysuint_t srcLength, uint32_t cntOp)
 {
   if (srcLength == DETECT_LENGTH) srcLength = len(src);
 
   sysuint_t growBy = (sysuint_t)( ((uint64_t)srcLength * 4) / 3 + 3 );
   if (growBy < srcLength) return ERR_RT_OUT_OF_MEMORY;
 
-  Char* dstCur = dst.beginManipulation(growBy, outputMode);
+  Char* dstCur = dst.beginManipulation(growBy, cntOp);
   if (FOG_IS_NULL(dstCur)) return ERR_RT_OUT_OF_MEMORY;
   const uint8_t* srcCur = reinterpret_cast<const uint8_t*>(src);
 

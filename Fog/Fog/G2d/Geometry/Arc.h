@@ -144,18 +144,37 @@ struct FOG_NO_EXPORT ArcF
   // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE BoxF getBoundingBox() const
+  FOG_INLINE err_t getBoundingBox(BoxF& dst) const
   {
-    BoxF result;
-    _g2d.arcf.getBoundingBox(this, &result, false);
-    return result;
+    return _getBoundingBox(dst, NULL);
   }
 
-  FOG_INLINE RectF getBoundingRect() const
+  FOG_INLINE err_t getBoundingBox(BoxF& dst, const TransformF& tr) const
   {
-    BoxF result;
-    _g2d.arcf.getBoundingBox(this, &result, false);
-    return RectF(result);
+    return _getBoundingBox(dst, &tr);
+  }
+
+  FOG_INLINE err_t getBoundingRect(RectF& dst) const
+  {
+    return _getBoundingRect(dst, NULL);
+  }
+
+  FOG_INLINE err_t getBoundingRect(RectF& dst, const TransformF& tr) const
+  {
+    return _getBoundingRect(dst, &tr);
+  }
+
+  FOG_INLINE err_t _getBoundingBox(BoxF& dst, const TransformF* tr) const
+  {
+    return _g2d.arcf.getBoundingBox(this, &dst, tr, false);
+  }
+
+  FOG_INLINE err_t _getBoundingRect(RectF& dst, const TransformF* tr) const
+  {
+    err_t err = _g2d.arcf.getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr, false);
+    dst.w -= dst.x;
+    dst.h -= dst.y;
+    return err;    
   }
 
   // --------------------------------------------------------------------------
@@ -165,6 +184,15 @@ struct FOG_NO_EXPORT ArcF
   FOG_INLINE void translate(const PointF& pt)
   {
     center += pt;
+  }
+
+  // --------------------------------------------------------------------------
+  // [ToCSpline]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE uint toCSpline(PointF* dst) const
+  {
+    return _g2d.arcf.toCSpline(this, dst);
   }
 
   // --------------------------------------------------------------------------
@@ -316,18 +344,37 @@ struct FOG_NO_EXPORT ArcD
   // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE BoxD getBoundingBox() const
+  FOG_INLINE err_t getBoundingBox(BoxD& dst) const
   {
-    BoxD result;
-    _g2d.arcd.getBoundingBox(this, &result, false);
-    return result;
+    return _getBoundingBox(dst, NULL);
   }
 
-  FOG_INLINE RectD getBoundingRect() const
+  FOG_INLINE err_t getBoundingBox(BoxD& dst, const TransformD& tr) const
   {
-    BoxD result;
-    _g2d.arcd.getBoundingBox(this, &result, false);
-    return RectD(result);
+    return _getBoundingBox(dst, &tr);
+  }
+
+  FOG_INLINE err_t getBoundingRect(RectD& dst) const
+  {
+    return _getBoundingRect(dst, NULL);
+  }
+
+  FOG_INLINE err_t getBoundingRect(RectD& dst, const TransformD& tr) const
+  {
+    return _getBoundingRect(dst, &tr);
+  }
+
+  FOG_INLINE err_t _getBoundingBox(BoxD& dst, const TransformD* tr) const
+  {
+    return _g2d.arcd.getBoundingBox(this, &dst, tr, false);
+  }
+
+  FOG_INLINE err_t _getBoundingRect(RectD& dst, const TransformD* tr) const
+  {
+    err_t err = _g2d.arcd.getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr, false);
+    dst.w -= dst.x;
+    dst.h -= dst.y;
+    return err;    
   }
 
   // --------------------------------------------------------------------------
@@ -337,6 +384,15 @@ struct FOG_NO_EXPORT ArcD
   FOG_INLINE void translate(const PointD& pt)
   {
     center += pt;
+  }
+
+  // --------------------------------------------------------------------------
+  // [ToCSpline]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE uint toCSpline(PointD* dst) const
+  {
+    return _g2d.arcd.toCSpline(this, dst);
   }
 
   // --------------------------------------------------------------------------

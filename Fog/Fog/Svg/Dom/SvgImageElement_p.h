@@ -39,11 +39,11 @@ struct FOG_NO_EXPORT SvgImageElement : public SvgStyledElement
   virtual XmlAttribute* _createAttribute(const ManagedString& name) const;
 
   // --------------------------------------------------------------------------
-  // [SVG Rendering]
+  // [SVG Interface]
   // --------------------------------------------------------------------------
 
-  virtual err_t onRender(SvgRenderContext* context) const;
-  virtual err_t onRenderShape(SvgRenderContext* context) const;
+  virtual err_t onPrepare(SvgVisitor* visitor, SvgGState* state) const;
+  virtual err_t onProcess(SvgVisitor* visitor) const;
 
   // --------------------------------------------------------------------------
   // [SVG Embedded Attributes]

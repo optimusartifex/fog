@@ -115,11 +115,6 @@ XmlElement* SvgDocument::createElementStatic(const ManagedString& tagName)
   return XmlDocument::createElementStatic(tagName);
 }
 
-err_t SvgDocument::onRender(SvgRenderContext* context) const
-{
-  return SvgElement::_walkAndRender(this, context);
-}
-
 err_t SvgDocument::setDpi(float dpi)
 {
   return _dpi.setDpi(dpi);
@@ -136,10 +131,27 @@ SizeF SvgDocument::getDocumentSize() const
   return size;
 }
 
-err_t SvgDocument::render(Painter* painter, SvgVisitor* visitor) const
+err_t SvgDocument::onProcess(SvgVisitor* visitor) const
 {
-  SvgRenderContext ctx(painter, visitor);
-  return onRender(&ctx);
+  XmlElement* root = getDocumentRoot();
+  if (!root->isSvgElement()) return ERR_OK;
+
+  return visitor->onVisit(reinterpret_cast<SvgElement*>(root));
+}
+
+err_t SvgDocument::render(Painter* painter) const
+{
+  SvgRender ctx(painter);
+  return onProcess(&ctx);
+}
+
+List<SvgElement*> SvgDocument::hitTest(const PointF& pt, const TransformF* tr) const
+{
+  SvgHitTest ctx(pt);
+  if (tr) ctx.setTransform(*tr);
+
+  onProcess(&ctx);
+  return ctx._result;
 }
 
 } // Fog namespace

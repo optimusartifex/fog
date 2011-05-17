@@ -199,7 +199,7 @@ struct FOG_API String
   FOG_INLINE bool isEmpty() const { return _d->length == 0; }
 
   err_t prepare(sysuint_t capacity);
-  Char* beginManipulation(sysuint_t max, int outputMode);
+  Char* beginManipulation(sysuint_t max, uint32_t op);
 
   err_t reserve(sysuint_t to);
   err_t resize(sysuint_t to);
@@ -647,13 +647,6 @@ struct TemporaryString : public String
   FOG_INLINE TemporaryString(const Char* str) :
     String(Data::adopt((void*)&_storage, N, str, DETECT_LENGTH))
   {
-  }
-
-  // safe shareable TemporaryString creation
-  FOG_INLINE TemporaryString(_CREATE_SHAREABLE) :
-    String(Data::adopt((void*)&_storage, N))
-  {
-    _d->flags |= Data::IsSharable;
   }
 
   // --------------------------------------------------------------------------

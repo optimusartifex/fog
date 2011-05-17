@@ -28,12 +28,17 @@ SvgGElement::~SvgGElement()
   _removeAttributes();
 }
 
-err_t SvgGElement::onRenderShape(SvgRenderContext* context) const
+err_t SvgGElement::onProcess(SvgVisitor* visitor) const
 {
-  if (hasChildNodes())
-    return _walkAndRender(this, context);
-  else
-    return ERR_OK;
+  if (!hasChildNodes()) return ERR_OK;
+  return _visitContainer(visitor);
+}
+
+err_t SvgGElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
+{
+  if (!hasChildNodes()) { box.reset(); return ERR_GEOMETRY_NONE; }
+
+  // return _walkAndMergeBBox(this
 }
 
 } // Fog namespace

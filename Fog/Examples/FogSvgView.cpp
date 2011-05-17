@@ -16,6 +16,7 @@ struct MyWindow : public Window
   virtual ~MyWindow();
 
   // [Event Handlers]
+  virtual void onMouse(MouseEvent* e);
   virtual void onKey(KeyEvent* e);
   virtual void onTimer(TimerEvent* e);
   virtual void onPaint(PaintEvent* e);
@@ -29,6 +30,13 @@ struct MyWindow : public Window
   float rotate;
   float scale;
   PointF translate;
+
+  PointF lastPoint;
+  SvgElement* active;
+
+  String activeStrokeBackup;
+  String activeStrokeWidthBackup;
+  String activeOpacityBackup;
 
   Time fpsTime;
 
@@ -50,11 +58,28 @@ MyWindow::MyWindow(uint32_t createFlags) :
   scale = 1.0f;
   translate.reset();
 
+  lastPoint.reset();
+  active = NULL;
+
   setWindowTitle(Ascii8("SvgView"));
 }
 
 MyWindow::~MyWindow()
 {
+}
+
+void MyWindow::onMouse(MouseEvent* e)
+{
+  if (e->getCode() == EVENT_MOUSE_PRESS)
+  {
+    if (e->getButton() == BUTTON_LEFT)
+    {
+      lastPoint = e->getPosition();
+      update(WIDGET_UPDATE_ALL);
+    }
+  }
+
+  base::onMouse(e);
 }
 
 void MyWindow::onKey(KeyEvent* e)
@@ -110,7 +135,7 @@ void MyWindow::onKey(KeyEvent* e)
 
 void MyWindow::onTimer(TimerEvent* e)
 {
-  rotate += 0.005f;
+  rotate += 0.008f;
   update(WIDGET_UPDATE_PAINT);
 }
 
@@ -124,6 +149,8 @@ void MyWindow::onPaint(PaintEvent* e)
   p->fillAll();
 
   p->save();
+
+  BoxF activeBBox(0.0f, 0.0f, 0.0f, 0.0f);
 
   if (1)
   {
@@ -139,9 +166,61 @@ void MyWindow::onPaint(PaintEvent* e)
   p->translate(PointF(100.0f, 100.0f));
   p->translate(translate);
 
-  svg.render(p);
+  {
+    TransformF t;
+    p->getTransform(t);
 
+    SvgElement* e = NULL;
+    List<SvgElement*> elements = svg.hitTest(lastPoint, &t);
+    if (!elements.isEmpty()) e = elements.top();
+
+    if (active != e)
+    {
+      if (active != NULL)
+      {
+        active->setStyle(Ascii8("stroke"), activeStrokeBackup);
+        active->setStyle(Ascii8("stroke-width"), activeStrokeWidthBackup);
+        active->setStyle(Ascii8("opacity"), activeOpacityBackup);
+      }
+
+      active = e;
+
+      if (active != NULL)
+      {
+        activeStrokeBackup = active->getStyle(Ascii8("stroke"));
+        activeStrokeWidthBackup = active->getStyle(Ascii8("stroke-width"));
+        activeOpacityBackup = active->getStyle(Ascii8("opacity"));
+
+        active->setStyle(Ascii8("stroke"), Ascii8("#FF0000"));
+        active->setStyle(Ascii8("stroke-width"), Ascii8("2.5"));
+        active->setStyle(Ascii8("opacity"), Ascii8("1"));
+      }
+    }
+
+    if (active)
+    {
+      SvgMeasure ctx;
+
+      ctx.transform(t);
+      ctx.advance(active);
+      ctx.onVisit(active);
+  
+      activeBBox = ctx.getBoundingBox();
+    }
+  }
+
+  svg.render(p);
   p->restore();
+
+  if (activeBBox.isValid())
+  {
+    p->save();
+    p->setSource(Argb32(0xFF0000FF));
+    p->setLineWidth(1.5f);
+    p->setOpacity(0.8f);
+    p->drawBox(activeBBox);
+    p->restore();
+  }
 
   p->flush(PAINTER_FLUSH_SYNC);
 
@@ -212,7 +291,7 @@ FOG_GUI_MAIN()
 
     //fileName = Ascii8("C:/my/svg/ISO_12233-reschart.svg");
     //fileName = Ascii8("C:/my/svg/lorem_ipsum_compound.svg");
-    //fileName = Ascii8("C:/my/svg/tiger.svg");
+    fileName = Ascii8("C:/my/svg/tiger.svg");
     //fileName = Ascii8("C:/my/svg/lion.svg");
     //fileName = Ascii8("C:/my/svg/Minimap_fixed.svg");
     //fileName = Ascii8("C:/my/svg/path-lines-BE-01.svg");
@@ -222,15 +301,13 @@ FOG_GUI_MAIN()
     //fileName = Ascii8("C:/my/svg/paint-fill-BE-01.svg");
 
     //fileName = Ascii8("C:/my/svg/jean_victor_balin_check.svg");
-    fileName = Ascii8("C:/my/svg/PatternTest.svg");
+    //fileName = Ascii8("C:/my/svg/PatternTest.svg");
   }
 
   MyWindow window;
   window.error = window.svg.readFromFile(fileName);
 
-  int w = 0, h = 0;
   SizeF size = window.svg.getDocumentSize();
-
   if (size.w < 800) size.w = 800;
   if (size.h < 500) size.h = 500;
 

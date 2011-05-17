@@ -9,6 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
+#include <Fog/Core/Global/Internal_Core_p.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/Internals_p.h>
@@ -30,29 +31,77 @@ namespace Fog {
 // ============================================================================
 
 // ============================================================================
-// [Fog::QuadCurve - GetExtrema]
+// [Fog::QuadCurve - GetBoundingBox]
 // ============================================================================
 
-template<typename Number>
-static void FOG_CDECL _G2d_QuadCurveT_getExtrema(const typename PointT<Number>::T* self, typename BoxT<Number>::T* dstBox)
+template<typename NumT>
+static err_t FOG_CDECL _G2d_QuadCurveT_getBoundingBox(const NumT_(Point)* self, NumT_(Box)* dst)
 {
   // Init pMin/pMax - self[0].
-  typename PointT<Number>::T pMin = self[0];
-  typename PointT<Number>::T pMax = self[0];
+  NumT_(Point) pMin = self[0];
+  NumT_(Point) pMax = self[0];
 
   // Merge end point - self[2].
   if (self[2].x < pMin.x) pMin.x = self[2].x; else if (self[2].x > pMax.x) pMax.x = self[2].x;
   if (self[2].y < pMin.y) pMin.y = self[2].y; else if (self[2].y > pMax.y) pMax.y = self[2].y;
 
   // X/Y extrema.
-  Number t0 = (self[0].x - self[1].x) / (self[0].x - Number(2.0) * self[1].x + self[2].x);
-  Number t1 = (self[0].y - self[1].y) / (self[0].y - Number(2.0) * self[1].y + self[2].y);
+  NumT t0 = (self[0].x - self[1].x) / (self[0].x - NumT(2.0) * self[1].x + self[2].x);
+  NumT t1 = (self[0].y - self[1].y) / (self[0].y - NumT(2.0) * self[1].y + self[2].y);
 
-  Number a, b, c;
-  _FOG_QUAD_MERGE(Number, t0);
-  _FOG_QUAD_MERGE(Number, t1);
+  NumT a, b, c;
+  _FOG_QUAD_MERGE(NumT, t0, self, pMin, pMax);
+  _FOG_QUAD_MERGE(NumT, t1, self, pMin, pMax);
 
-  dstBox->setBox(pMin.x, pMin.y, pMax.x, pMax.y);
+  dst->setBox(pMin.x, pMin.y, pMax.x, pMax.y);
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::QuadCurve - GetSplineBBox]
+// ============================================================================
+
+template<typename NumT>
+static err_t FOG_CDECL _G2d_QuadCurveT_getSplineBBox(const NumT_(Point)* self, sysuint_t length, NumT_(Box)* dst)
+{
+  sysuint_t i;
+
+  if (length < 3) return ERR_RT_INVALID_ARGUMENT;
+  FOG_ASSERT((length - 1) % 2 == 0);
+
+  // Init pMin/pMax - self[0].
+  NumT_(Point) pMin = self[0];
+  NumT_(Point) pMax = self[0];
+
+  // Merge start/end points.
+  for (i = 2; i < length; i += 2)
+  {
+    const NumT_(Point)* curve = &self[i];
+
+    if (curve[0].x < pMin.x) pMin.x = curve[0].x; else if (curve[0].x > pMax.x) pMax.x = curve[0].x;
+    if (curve[0].y < pMin.y) pMin.y = curve[0].y; else if (curve[0].y > pMax.y) pMax.y = curve[0].y;
+  }
+
+  // Merge extremas.
+  for (i = 0; i < length; i += 2)
+  {
+    const NumT_(Point)* curve = &self[i];
+    NumT cx = curve[1].x;
+    NumT cy = curve[1].y;
+
+    if (cx < pMin.x || cy < pMin.y || cx > pMax.x || cy > pMax.y)
+    {
+      NumT t0 = (curve[0].x - curve[1].x) / (curve[0].x - NumT(2.0) * curve[1].x + curve[2].x);
+      NumT t1 = (curve[0].y - curve[1].y) / (curve[0].y - NumT(2.0) * curve[1].y + curve[2].y);
+
+      NumT a, b, c;
+      _FOG_QUAD_MERGE(NumT, t0, curve, pMin, pMax);
+      _FOG_QUAD_MERGE(NumT, t1, curve, pMin, pMax);
+    }
+  }
+
+  dst->setBox(pMin.x, pMin.y, pMax.x, pMax.y);
+  return ERR_OK;
 }
 
 // ============================================================================
@@ -89,11 +138,11 @@ static double _G2d_QuadCurveT_getLength_private(
                                        / (8.0 * Sa * a);
 }
 
-template<typename Number>
-static void FOG_CDECL _G2d_QuadCurveT_getLength(const typename PointT<Number>::T* self, Number* length)
+template<typename NumT>
+static void FOG_CDECL _G2d_QuadCurveT_getLength(const NumT_(Point)* self, NumT* length)
 {
   // Always using 'double' to get maximum precision.
-  *length = (Number)_G2d_QuadCurveT_getLength_private(
+  *length = (NumT)_G2d_QuadCurveT_getLength_private(
     self[0].x, self[0].y,
     self[1].x, self[1].y,
     self[2].x, self[2].y);
@@ -112,29 +161,29 @@ static void FOG_CDECL _G2d_QuadCurveT_getLength(const typename PointT<Number>::T
     curVertex++; \
   } while(0)
 
-template<typename Number>
+template<typename NumT>
 static err_t FOG_CDECL _G2d_QuadCurveT_flatten(
-  const typename PointT<Number>::T* self,
-  typename PathT<Number>::T& dst,
+  const NumT_(Point)* self,
+  NumT_(Path)& dst,
   uint8_t initialCommand,
-  Number flatness)
+  NumT flatness)
 {
-  Number distanceToleranceSquare = Math::pow2(flatness);
-  Number x0 = self[0].x;
-  Number y0 = self[0].y;
-  Number x1 = self[1].x;
-  Number y1 = self[1].y;
-  Number x2 = self[2].x;
-  Number y2 = self[2].y;
+  NumT distanceToleranceSquare = Math::pow2(flatness);
+  NumT x0 = self[0].x;
+  NumT y0 = self[0].y;
+  NumT x1 = self[1].x;
+  NumT y1 = self[1].y;
+  NumT x2 = self[2].x;
+  NumT y2 = self[2].y;
 
   sysuint_t initialLength = dst._d->length;
   sysuint_t level = 0;
 
-  typename PointT<Number>::T* curVertex;
-  typename PointT<Number>::T* endVertex;
+  NumT_(Point)* curVertex;
+  NumT_(Point)* endVertex;
 
-  typename PointT<Number>::T _stack[QUAD_CURVE_APPROXIMATE_RECURSION_LIMIT * 3];
-  typename PointT<Number>::T* stack = _stack;
+  NumT_(Point) _stack[QUAD_CURVE_APPROXIMATE_RECURSION_LIMIT * 3];
+  NumT_(Point)* stack = _stack;
 
 _Realloc:
   {
@@ -160,19 +209,19 @@ _Realloc:
     }
 
     // Calculate all the mid-points of the line segments.
-    Number x01   = (x0 + x1) * Number(0.5);
-    Number y01   = (y0 + y1) * Number(0.5);
-    Number x12   = (x1 + x2) * Number(0.5);
-    Number y12   = (y1 + y2) * Number(0.5);
-    Number x012  = (x01 + x12) * Number(0.5);
-    Number y012  = (y01 + y12) * Number(0.5);
+    NumT x01   = (x0 + x1) * NumT(0.5);
+    NumT y01   = (y0 + y1) * NumT(0.5);
+    NumT x12   = (x1 + x2) * NumT(0.5);
+    NumT y12   = (y1 + y2) * NumT(0.5);
+    NumT x012  = (x01 + x12) * NumT(0.5);
+    NumT y012  = (y01 + y12) * NumT(0.5);
 
-    Number dx = x2 - x0;
-    Number dy = y2 - y0;
-    Number d = Math::abs(((x1 - x2) * dy - (y1 - y2) * dx));
-    Number da;
+    NumT dx = x2 - x0;
+    NumT dy = y2 - y0;
+    NumT d = Math::abs(((x1 - x2) * dy - (y1 - y2) * dx));
+    NumT da;
 
-    if (d > Math2dConst<Number>::getCollinearityEpsilon())
+    if (d > Math2dConst<NumT>::getCollinearityEpsilon())
     {
       // Regular case.
       if (d * d <= distanceToleranceSquare * (dx*dx + dy*dy))
@@ -291,7 +340,7 @@ _Ret:
 _InvalidNumber:
   // Purge dst length to its initial state.
   if (dst._d->length != initialLength) dst._d->length = initialLength;
-  return ERR_PATH_INVALID;
+  return ERR_GEOMETRY_INVALID;
 }
 
 // ============================================================================
@@ -300,13 +349,17 @@ _InvalidNumber:
 
 FOG_NO_EXPORT void _g2d_quadcurve_init(void)
 {
-  _g2d.quadcurvef.getExtrema  = _G2d_QuadCurveT_getExtrema<float>;
-  _g2d.quadcurvef.getLength   = _G2d_QuadCurveT_getLength<float>;
-  _g2d.quadcurvef.flatten     = _G2d_QuadCurveT_flatten<float>;
+  _g2d.quadcurvef.getBoundingBox = _G2d_QuadCurveT_getBoundingBox<float>;
+  _g2d.quadcurved.getBoundingBox = _G2d_QuadCurveT_getBoundingBox<double>;
 
-  _g2d.quadcurved.getExtrema  = _G2d_QuadCurveT_getExtrema<double>;
-  _g2d.quadcurved.getLength   = _G2d_QuadCurveT_getLength<double>;
-  _g2d.quadcurved.flatten     = _G2d_QuadCurveT_flatten<double>;
+  _g2d.quadcurvef.getSplineBBox = _G2d_QuadCurveT_getSplineBBox<float>;
+  _g2d.quadcurved.getSplineBBox = _G2d_QuadCurveT_getSplineBBox<double>;
+
+  _g2d.quadcurvef.getLength = _G2d_QuadCurveT_getLength<float>;
+  _g2d.quadcurved.getLength = _G2d_QuadCurveT_getLength<double>;
+
+  _g2d.quadcurvef.flatten = _G2d_QuadCurveT_flatten<float>;
+  _g2d.quadcurved.flatten = _G2d_QuadCurveT_flatten<double>;
 }
 
 } // Fog namespace

@@ -37,7 +37,7 @@ err_t SvgViewBoxAttribute::setValue(const String& value)
   SvgUtil::parseViewBox(_box, value);
   _isValid = _box.isValid();
 
-  if (_element) reinterpret_cast<SvgElement*>(_element)->_boundingRectDirty = true;
+  if (_element) reinterpret_cast<SvgElement*>(_element)->_boundingBoxDirty = true;
   return ERR_OK;
 }
 

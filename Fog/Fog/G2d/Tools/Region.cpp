@@ -19,6 +19,7 @@
 #include <Fog/G2d/Global/Init_G2d_p.h>
 #include <Fog/G2d/Rasterizer/Rasterizer_p.h>
 #include <Fog/G2d/Tools/Region.h>
+#include <Fog/G2d/Tools/RegionTmp_p.h>
 
 /************************************************************************
 
@@ -2033,8 +2034,8 @@ err_t Region::combine(Region& dest, const Region& src1, const Region& src2, uint
         return ERR_REGION_INFINITE;
       }
 
-      TemporaryRegion<REGION_STACK_SIZE> r1;
-      TemporaryRegion<REGION_STACK_SIZE> r2;
+      RegionTmp<REGION_STACK_SIZE> r1;
+      RegionTmp<REGION_STACK_SIZE> r2;
 
       FOG_RETURN_ON_ERROR(combine(r1, src1, src2, REGION_OP_SUBTRACT));
       FOG_RETURN_ON_ERROR(combine(r2, src2, src1, REGION_OP_SUBTRACT));
@@ -2070,17 +2071,17 @@ err_t Region::combine(Region& dest, const Region& src1, const Region& src2, uint
 
 err_t Region::combine(Region& dst, const Region& src1, const BoxI& src2, uint32_t combineOp)
 {
-  return combine(dst, src1, TemporaryRegion<1>(src2), combineOp);
+  return combine(dst, src1, RegionTmp<1>(src2), combineOp);
 }
 
 err_t Region::combine(Region& dst, const BoxI& src1, const Region& src2, uint32_t combineOp)
 {
-  return combine(dst, TemporaryRegion<1>(src1), src2, combineOp);
+  return combine(dst, RegionTmp<1>(src1), src2, combineOp);
 }
 
 err_t Region::combine(Region& dst, const BoxI& src1, const BoxI& src2, uint32_t combineOp)
 {
-  return combine(dst, TemporaryRegion<1>(src1), TemporaryRegion<1>(src2), combineOp);
+  return combine(dst, RegionTmp<1>(src1), RegionTmp<1>(src2), combineOp);
 }
 
 err_t Region::translate(Region& dest, const Region& src, const PointI& pt)
@@ -2142,8 +2143,8 @@ err_t Region::shrink(Region& dest, const Region& src, const PointI& pt)
   err_t err = dest.setDeep(src);
   if (FOG_IS_ERROR(err)) return err;
 
-  TemporaryRegion<REGION_STACK_SIZE> s;
-  TemporaryRegion<REGION_STACK_SIZE> t;
+  RegionTmp<REGION_STACK_SIZE> s;
+  RegionTmp<REGION_STACK_SIZE> t;
   bool grow;
 
   if (x) { if ((grow = (x < 0))) { x = -x; } err = _compress(dest, s, t, uint(x) * 2, true , grow); if (FOG_IS_ERROR(err)) return err; }
@@ -2157,8 +2158,8 @@ err_t Region::frame(Region& dest, const Region& src, const PointI& pt)
   if (src.isInfinite()) return dest.set(src);
 
   // In cases that dest == src, we need to backup src.
-  TemporaryRegion<REGION_STACK_SIZE> r1;
-  TemporaryRegion<REGION_STACK_SIZE> r2;
+  RegionTmp<REGION_STACK_SIZE> r1;
+  RegionTmp<REGION_STACK_SIZE> r2;
 
   FOG_RETURN_ON_ERROR(translate(r2, src, PointI(-pt.getX(), 0)));
   FOG_RETURN_ON_ERROR(translate(r1, src, PointI( pt.getX(), 0)));

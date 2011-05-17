@@ -229,6 +229,106 @@ static void FOG_CDECL _G2d_TransformF_mapPointsF_Scaling_SSE(const TransformF& s
   }
 }
 
+static void FOG_CDECL _G2d_TransformF_mapPointsF_Swap_SSE(const TransformF& self, PointF* dst, const PointF* src, sysuint_t length)
+{
+  sysuint_t i;
+
+  Face::m128f m_01_10_01_10 = _mm_setr_ps(self._01, self._10, self._01, self._10);
+  Face::m128f m_20_21_20_21 = _mm_setr_ps(self._20, self._21, self._20, self._21);
+
+  if (((sysuint_t)dst & 0xF) != 0)
+  {
+    Face::m128f src0;
+
+    Face::m128fZero(src0);
+    if (length == 0) return;
+
+    Face::m128fLoad8Lo(src0, src);
+    Face::m128fSwapXY(src0, src0);
+    Face::m128fMulPS(src0, src0, m_01_10_01_10);
+    Face::m128fAddPS(src0, src0, m_20_21_20_21);
+    Face::m128fStore8Lo(dst, src0);
+
+    dst += 1;
+    src += 1;
+    length--;
+  }
+
+  if ((((sysuint_t)dst | (sysuint_t)src) & 0xF) == 0)
+  {
+    for (i = length >> 3; i; i--, dst += 8, src += 8)
+    {
+      Face::m128f src01, src23;
+      Face::m128f src45, src67;
+
+      Face::m128fLoad16a(src01, src + 0);
+      Face::m128fLoad16a(src23, src + 2);
+      Face::m128fLoad16a(src45, src + 4);
+      Face::m128fLoad16a(src67, src + 6);
+
+      Face::m128fSwapXY(src01, src01);
+      Face::m128fSwapXY(src23, src23);
+
+      Face::m128fMulPS(src01, src01, m_01_10_01_10);
+      Face::m128fMulPS(src23, src23, m_01_10_01_10);
+
+      Face::m128fSwapXY(src45, src45);
+      Face::m128fSwapXY(src67, src67);
+
+      Face::m128fMulPS(src45, src45, m_01_10_01_10);
+      Face::m128fMulPS(src67, src67, m_01_10_01_10);
+
+      Face::m128fAddPS(src01, src01, m_20_21_20_21);
+      Face::m128fAddPS(src23, src23, m_20_21_20_21);
+      Face::m128fAddPS(src45, src45, m_20_21_20_21);
+      Face::m128fAddPS(src67, src67, m_20_21_20_21);
+
+      Face::m128fStore16a(dst + 0, src01);
+      Face::m128fStore16a(dst + 2, src23);
+      Face::m128fStore16a(dst + 4, src45);
+      Face::m128fStore16a(dst + 6, src67);
+    }
+
+    length &= 7;
+
+    for (i = length >> 1; i; i--, dst += 2, src += 2)
+    {
+      Face::m128f src01;
+
+      Face::m128fLoad16a(src01, src + 0);
+      Face::m128fSwapXY(src01, src01);
+      Face::m128fMulPS(src01, src01, m_01_10_01_10);
+      Face::m128fAddPS(src01, src01, m_20_21_20_21);
+      Face::m128fStore16a(dst + 0, src01);
+    }
+  }
+  else
+  {
+    for (i = length >> 1; i; i--, dst += 2, src += 2)
+    {
+      Face::m128f src01;
+
+      Face::m128fLoad16u(src01, src + 0);
+      Face::m128fSwapXY(src01, src01);
+      Face::m128fMulPS(src01, src01, m_01_10_01_10);
+      Face::m128fAddPS(src01, src01, m_20_21_20_21);
+      Face::m128fStore16u(dst + 0, src01);
+    }
+  }
+
+  if (length & 1)
+  {
+    Face::m128f src0;
+
+    Face::m128fZero(src0);
+    Face::m128fLoad8Lo(src0, src);
+    Face::m128fSwapXY(src0, src0);
+    Face::m128fMulPS(src0, src0, m_01_10_01_10);
+    Face::m128fAddPS(src0, src0, m_20_21_20_21);
+    Face::m128fStore8Lo(dst, src0);
+  }
+}
+
 static void FOG_CDECL _G2d_TransformF_mapPointsF_Affine_SSE(const TransformF& self, PointF* dst, const PointF* src, sysuint_t length)
 {
   sysuint_t i;
@@ -517,6 +617,42 @@ static void FOG_CDECL _G2d_TransformF_mapPointsF_Projection_SSE(const TransformF
   }
 }
 
+static void FOG_CDECL _G2d_TransformF_mapPointsF_Degenerate_SSE(const TransformF& self, PointF* dst, const PointF* src, sysuint_t length)
+{
+  sysuint_t i;
+
+  Face::m128f zero;
+  Face::m128fZero(zero);
+
+  if (((sysuint_t)dst & 0xF) == 0)
+  {
+    for (i = length >> 2; i; i--, dst += 4)
+    {
+      Face::m128fStore16a(dst + 0, zero);
+      Face::m128fStore16a(dst + 2, zero);
+    }
+
+    length &= 3;
+
+    for (i = length >> 1; i; i--, dst += 2)
+    {
+      Face::m128fStore16a(dst, zero);
+    }
+
+    if (length & 1)
+    {
+      Face::m128fStore8Lo(dst, zero);
+    }
+  }
+  else
+  {
+    for (i = length; i; i--, dst += 1)
+    {
+      Face::m128fStore8Lo(dst, zero);
+    }
+  }
+}
+
 // ============================================================================
 // [Fog::G2d - Library Initializers]
 // ============================================================================
@@ -526,9 +662,11 @@ FOG_NO_EXPORT void _g2d_transform_init_sse(void)
   _g2d.transformf.mapPointsF[TRANSFORM_TYPE_IDENTITY   ] = _G2d_TransformF_mapPointsF_Identity_SSE;
   _g2d.transformf.mapPointsF[TRANSFORM_TYPE_TRANSLATION] = _G2d_TransformF_mapPointsF_Translation_SSE;
   _g2d.transformf.mapPointsF[TRANSFORM_TYPE_SCALING    ] = _G2d_TransformF_mapPointsF_Scaling_SSE;
+  _g2d.transformf.mapPointsF[TRANSFORM_TYPE_SWAP       ] = _G2d_TransformF_mapPointsF_Swap_SSE;
   _g2d.transformf.mapPointsF[TRANSFORM_TYPE_ROTATION   ] = _G2d_TransformF_mapPointsF_Affine_SSE;
   _g2d.transformf.mapPointsF[TRANSFORM_TYPE_AFFINE     ] = _G2d_TransformF_mapPointsF_Affine_SSE;
   _g2d.transformf.mapPointsF[TRANSFORM_TYPE_PROJECTION ] = _G2d_TransformF_mapPointsF_Projection_SSE;
+  _g2d.transformf.mapPointsF[TRANSFORM_TYPE_DEGENERATE ] = _G2d_TransformF_mapPointsF_Degenerate_SSE;
 }
 
 } // Fog namespace

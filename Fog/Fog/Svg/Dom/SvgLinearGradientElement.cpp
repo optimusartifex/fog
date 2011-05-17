@@ -12,6 +12,7 @@
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Svg/Dom/SvgLinearGradientElement_p.h>
 #include <Fog/Svg/Visit/SvgRender.h>
+#include <Fog/Svg/Visit/SvgVisitor.h>
 
 namespace Fog {
 
@@ -43,15 +44,8 @@ XmlAttribute* SvgLinearGradientElement::_createAttribute(const ManagedString& na
   return base::_createAttribute(name);
 }
 
-err_t SvgLinearGradientElement::onRender(SvgRenderContext* context) const
+err_t SvgLinearGradientElement::onPattern(SvgVisitor* visitor, SvgElement* obj, uint32_t paintType) const
 {
-  return ERR_OK;
-}
-
-err_t SvgLinearGradientElement::onApplyPattern(SvgRenderContext* context, SvgElement* obj, int paintType) const
-{
-  // SVG TODO: Linear Gradient.
-
   LinearGradientF gradient;
   TransformF tr;
 
@@ -61,8 +55,9 @@ err_t SvgLinearGradientElement::onApplyPattern(SvgRenderContext* context, SvgEle
   // Setup start and end points.
   if (!a_gradientUnits.isAssigned() || a_gradientUnits.getEnumValue() == SVG_OBJECT_BOUNDING_BOX)
   {
-    // BoundingBox coordinates.
-    RectF bbox = obj->getBoundingRect();
+    // "objectBoundingBox".
+    BoxF bbox;
+    obj->getBoundingBox(bbox);
 
     float x1 = a_x1.isAssigned() ? a_x1.getCoordValue() : 0.0f;
     float y1 = a_y1.isAssigned() ? a_y1.getCoordValue() : 0.0f;
@@ -70,29 +65,30 @@ err_t SvgLinearGradientElement::onApplyPattern(SvgRenderContext* context, SvgEle
     float y2 = a_y2.isAssigned() ? a_y2.getCoordValue() : 0.0f;
 
     tr._type = TRANSFORM_TYPE_SCALING;
-    tr._00 = bbox.w;
-    tr._11 = bbox.h;
-    tr._20 = bbox.x;
-    tr._21 = bbox.y;
+    tr._00 = bbox.getWidth();
+    tr._11 = bbox.getHeight();
+    tr._20 = bbox.getX();
+    tr._21 = bbox.getY();
 
     gradient.setStart(PointF(x1, y1));
     gradient.setEnd(PointF(x2, y2));
   }
-  else if (a_x1.isAssigned() && a_y1.isAssigned() && a_x2.isAssigned() && a_y2.isAssigned())
+  else 
   {
-    // UserSpaceOnUse coordinates.
-    float x1 = a_x1.getCoordComputed();
-    float y1 = a_y1.getCoordComputed();
-    float x2 = a_x2.getCoordComputed();
-    float y2 = a_y2.getCoordComputed();
+    // "userSpaceOnUse".
+    float x1 = a_x1.isAssigned() ? a_x1.getCoordComputed() : 0.0f;
+    float y1 = a_y1.isAssigned() ? a_y1.getCoordComputed() : 0.0f;
+    float x2 = a_x2.isAssigned() ? a_x2.getCoordComputed() : 1.0f;
+    float y2 = a_y2.isAssigned() ? a_y2.getCoordComputed() : 0.0f;
+
+    // TODO: Percentages to the current view-port.
+    // if (!a_x1.isAssigned() || a_x1.getCoordUnit() == COORD_UNIT_PERCENT)
+    // if (!a_y1.isAssigned() || a_y1.getCoordUnit() == COORD_UNIT_PERCENT)
+    // if (!a_x2.isAssigned() || a_x2.getCoordUnit() == COORD_UNIT_PERCENT)
+    // if (!a_y2.isAssigned() || a_y2.getCoordUnit() == COORD_UNIT_PERCENT)
 
     gradient.setStart(PointF(x1, y1));
     gradient.setEnd(PointF(x2, y2));
-  }
-  else
-  {
-    // SVG TODO: Is this error?
-    Debug::dbgFunc("Fog::SvgLinearGradient", "onApplyPattern", "Unsupported combination.\n");
   }
 
   // Add color stops.
@@ -106,9 +102,9 @@ err_t SvgLinearGradientElement::onApplyPattern(SvgRenderContext* context, SvgEle
   pattern.setTransform(tr);
 
   if (paintType == SVG_PAINT_FILL)
-    context->setFillPattern(pattern);
+    visitor->setFillPattern(pattern);
   else
-    context->setStrokePattern(pattern);
+    visitor->setStrokePattern(pattern);
 
   return ERR_OK;
 }

@@ -191,7 +191,7 @@ struct FOG_API ByteArray
   FOG_INLINE bool isEmpty() const { return _d->length == 0; }
 
   err_t prepare(sysuint_t capacity);
-  char* beginManipulation(sysuint_t max, int outputMode);
+  char* beginManipulation(sysuint_t max, uint32_t op);
 
   err_t reserve(sysuint_t to);
   err_t resize(sysuint_t to);
@@ -595,13 +595,6 @@ struct TemporaryByteArray : public ByteArray
   FOG_INLINE TemporaryByteArray(const TemporaryByteArray<N>& other) :
     ByteArray(Data::adopt((void*)&_storage, N, other.getData(), other.getLength()))
   {
-  }
-
-  // Safe shareable TemporaryByteArray creation.
-  FOG_INLINE TemporaryByteArray(_CREATE_SHAREABLE) :
-    ByteArray(Data::adopt((void*)&_storage, N))
-  {
-    _d->flags |= Data::IsSharable;
   }
 
   // --------------------------------------------------------------------------

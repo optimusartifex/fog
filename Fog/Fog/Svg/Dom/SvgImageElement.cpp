@@ -12,6 +12,7 @@
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Svg/Dom/SvgImageElement_p.h>
 #include <Fog/Svg/Visit/SvgRender.h>
+#include <Fog/Svg/Visit/SvgVisitor.h>
 
 namespace Fog {
 
@@ -45,45 +46,26 @@ XmlAttribute* SvgImageElement::_createAttribute(const ManagedString& name) const
   return base::_createAttribute(name);
 }
 
-err_t SvgImageElement::onRender(SvgRenderContext* context) const
+err_t SvgImageElement::onPrepare(SvgVisitor* visitor, SvgGState* state) const
 {
-  err_t err = ERR_OK;
-  bool isTransformed = a_transform.isAssigned() & a_transform.isValid();
-
   // There is only transformation that can be applied to the image.
-  if (isTransformed)
+  if (a_transform.isAssigned() && a_transform.isValid())
   {
-    context->getPainter()->save();
-    context->getPainter()->transform(a_transform.getTransform());
+    if (state) state->saveTransform();
+    visitor->transform(a_transform.getTransform());
   }
 
-  // Render image.
-  err = onRenderShape(context);
-
-  // Restore the transform if used.
-  if (isTransformed)
-  {
-    context->getPainter()->restore();
-  }
-
-  return err;
+  return ERR_OK;
 }
 
-err_t SvgImageElement::onRenderShape(SvgRenderContext* context) const
+err_t SvgImageElement::onProcess(SvgVisitor* visitor) const
 {
-  if (a_href._embedded)
-  {
-    float x = a_x.isAssigned() ? a_x.getCoord().value : 0.0f;
-    float y = a_y.isAssigned() ? a_y.getCoord().value : 0.0f;
+  if (!a_href._embedded || a_href._image.isEmpty()) return ERR_OK;
 
-    context->blitImage(PointF(x, y), a_href._image);
-    return ERR_OK;
-  }
-  else
-  {
-    // TODO: Error code?
-    return ERR_OK;
-  }
+  float x = a_x.isAssigned() ? a_x.getCoord().value : 0.0f;
+  float y = a_y.isAssigned() ? a_y.getCoord().value : 0.0f;
+
+  return visitor->onImage((SvgElement*)this, PointF(x, y), a_href._image);
 }
 
 } // Fog namespace

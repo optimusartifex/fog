@@ -22,12 +22,15 @@ namespace Fog {
 // ============================================================================
 
 //! @brief Fog 2d math constants which might be used within templates.
-template<typename Number>
+template<typename NumT>
 struct Math2dConst {};
 
 template<>
 struct Math2dConst<float>
 {
+  //! @brief Get math epsilon (float).
+  static FOG_INLINE float getMathEpsilon() { return MATH_EPSILON_F; }
+
   //! @brief Get default flatness (float).
   static FOG_INLINE float getDefaultFlatness() { return 0.20f; }
 
@@ -40,12 +43,15 @@ struct Math2dConst<float>
   static FOG_INLINE float getDistanceEpsilon() { return 1.0e-6f; }
 
   //! @brief Get epsilon used to prevent from adding degenerate curves (float).
-  static FOG_INLINE float getAngleEpsilon() { return 1e-4f; }
+  static FOG_INLINE float getAngleEpsilon() { return MATH_EPSILON_F; }
 };
 
 template<>
 struct Math2dConst<double>
 {
+  //! @brief Get math epsilon (double).
+  static FOG_INLINE double getMathEpsilon() { return MATH_EPSILON_D; }
+
   //! @brief Get default flatness (double).
   static FOG_INLINE double getDefaultFlatness() { return 0.20; }
 
@@ -57,8 +63,9 @@ struct Math2dConst<double>
   //! @brief Get coinciding points maximal distance (double).
   static FOG_INLINE double getDistanceEpsilon() { return 1.0e-14; }
 
+  //! TODO: DEPRECATED, remove getAngleEpsilon.
   //! @brief Get epsilon used to prevent from adding degenerate curves (double).
-  static FOG_INLINE double getAngleEpsilon() { return 1e-8; }
+  static FOG_INLINE double getAngleEpsilon() { return MATH_EPSILON_D; }
 };
 
 // ============================================================================

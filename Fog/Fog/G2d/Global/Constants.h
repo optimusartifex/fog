@@ -1313,29 +1313,12 @@ enum IMAGE_DATA_FLAGS
   // [Core Flags]
   // --------------------------------------------------------------------------
 
-  // TODO: Use standard documentation.
-
-  //! @brief Image data instance allocated using dynamic memory. This flag is
-  //! the default and currently only the null image data has this flag unset.
-  //!
-  //! @note This flag is compatible to standard Fog-Core data flags.
-  IMAGE_DATA_STATIC = CONTAINER_FLAG_STATIC,
-
-  //! @brief Image instance is shareable (creating weak copy when
-  //! assigned to other image instance).
-  //!
-  //! @note This flag is compatible to standard Fog-Core data flags.
-  IMAGE_DATA_PRIVATE = CONTAINER_FLAG_PRIVATE,
-
-  //! @brief Keep alive this instance when assigning other image into it,
-  //! creating deep copy instead of weak-reference.
-  //!
-  //! @note This flag is compatible to standard Fog-Core data flags.
-  IMAGE_DATA_KEEP_ALIVE = CONTAINER_FLAG_KEEP_ALIVE,
+  //! @brief Image data was adopted.
+  IMAGE_DATA_STATIC = CONTAINER_DATA_STATIC,
 
   //! @brief Image is read-only. Fog must create a copy when write operation
   //! is performed (creating @c Painter instance, locking pixels, etc...)
-  IMAGE_DATA_READ_ONLY = CONTAINER_FLAG_READ_ONLY,
+  IMAGE_DATA_READ_ONLY = CONTAINER_DATA_READ_ONLY,
 
   // --------------------------------------------------------------------------
   // [Extended Flags]
@@ -1927,6 +1910,29 @@ enum PATH_CMD
 };
 
 // ============================================================================
+// [Fog::PATH_DATA]
+// ============================================================================
+
+enum PATH_DATA
+{
+  PATH_DATA_STATIC = CONTAINER_DATA_STATIC,
+
+  PATH_DATA_DIRTY_BOUNDING_BOX = 0x0010,
+  PATH_DATA_DIRTY_CMD = 0x0020,
+
+  PATH_DATA_HAS_BOUNDING_BOX = 0x0040,
+  PATH_DATA_HAS_QUAD_CMD = 0x0080,
+  PATH_DATA_HAS_CUBIC_CMD = 0x0100,
+
+  PATH_DATA_OWN_FLAGS = 
+    PATH_DATA_DIRTY_BOUNDING_BOX | 
+    PATH_DATA_DIRTY_CMD          |
+    PATH_DATA_HAS_BOUNDING_BOX   |
+    PATH_DATA_HAS_QUAD_CMD       |
+    PATH_DATA_HAS_CUBIC_CMD
+};
+
+// ============================================================================
 // [Fog::PATH_DIRECTION]
 // ============================================================================
 
@@ -2229,21 +2235,25 @@ enum TRANSFORM_OP
 //! @brief Type of transform.
 enum TRANSFORM_TYPE
 {
-  //! @brief Matrix is identity (all zeros, 1 at diagonals).
+  //! @brief Transform type is identity (all zeros, 1 at diagonals).
   TRANSFORM_TYPE_IDENTITY = 0,
-  //! @brief Matrix is translation (_20, _21 elements).
+  //! @brief Transform type is translation (_20, _21 elements are used).
   TRANSFORM_TYPE_TRANSLATION = 1,
-  //! @brief Matrix is scaling (_00, _11, _20, _21 elements).
+  //! @brief Transform type is scaling (_00, _11, _20, _21 elements are used).
   TRANSFORM_TYPE_SCALING = 2,
-  //! @brief Matrix is rotation (affine part is used).
-  TRANSFORM_TYPE_ROTATION = 3,
-  //! @brief Matrix is affine.
-  TRANSFORM_TYPE_AFFINE = 4,
-  //! @brief Matrix is projection.
-  TRANSFORM_TYPE_PROJECTION = 5,
+  //! @brief Transform type is swap (_01, _10, _20, _21 elements are used).
+  TRANSFORM_TYPE_SWAP = 3,
+  //! @brief Transform type is rotation (affine part is used).
+  TRANSFORM_TYPE_ROTATION = 4,
+  //! @brief Transform type is affine.
+  TRANSFORM_TYPE_AFFINE = 5,
+  //! @brief Transform type is projection.
+  TRANSFORM_TYPE_PROJECTION = 6,
+  //! @brief Transform type is degenerate (same as projection, but degenerated).
+  TRANSFORM_TYPE_DEGENERATE = 7,
 
-  //! @brief Count of matrix types (for asserts, ...).
-  TRANSFORM_TYPE_COUNT = 6,
+  //! @brief Count of transform types (for asserts, ...).
+  TRANSFORM_TYPE_COUNT = 8,
 
   //! @brief Matrix is dirty.
   TRANSFORM_TYPE_DIRTY = 0x8
@@ -2300,7 +2310,7 @@ enum ERR_GRAPHICS_ENUM
   ERR_IMAGE_LIBPNG_NOT_LOADED,
   ERR_IMAGE_LIBPNG_ERROR,
 
-  //! @brief Failed to load Gdi+ library under Windows.
+  //! @brief Failed to load Gdi+ library (Windows).
   ERR_IMAGE_GDIPLUS_NOT_LOADED,
 
   //! @brief Call to Gdi+ library failed and resulting error can't be
@@ -2322,6 +2332,38 @@ enum ERR_GRAPHICS_ENUM
 
   ERR_FONT_FREETYPE_NOT_LOADED,
   ERR_FONT_FREETYPE_INIT_FAILED,
+
+  // --------------------------------------------------------------------------
+  // [Geometry]
+  // --------------------------------------------------------------------------
+
+  //! @brief No shape to work with.
+  //!
+  //! This may happen when some method is requested on an empty path or shape
+  //! that is @c SHAPE_TYPE_NONE. If this error is returned then the output
+  //! of the functions shouldn't be considered as correct. For example the
+  //! bounding-box of shape which is invalid will be [0, 0, 0, 0], but it
+  //! shouldn't be used/merged or analyzed, because the shape doesn't exist.
+  ERR_GEOMETRY_NONE,
+
+  //! @brief Invalid shape.
+  //!
+  //! This may happen if @c PathF or @c PathD contains invalid data (although
+  //! this might be considered as the run-time error) or if some basic shape
+  //! is incorrectly given (for example if @c RectF or @c RectD with or height
+  //! is negative).
+  ERR_GEOMETRY_INVALID,
+  
+  //! @brief The transform to be used is degenerated.
+  //!
+  //! The degenerated transform can't be used in geometry, because the result
+  //! is simply nothing - for example rectange might degenerate to rectangle
+  //! with zero width or height and it won't be painted. To prevent errors
+  //! caused by degenerate transform use @c TransformF::isDegenerate() and
+  //! @c TransformD::isDegenerate().
+  //!
+  //! @note This error is always related to trasnform.
+  ERR_GEOMETRY_DEGENERATE,
 
   // --------------------------------------------------------------------------
   // [Painter]
@@ -2347,14 +2389,13 @@ enum ERR_GRAPHICS_ENUM
 
   //! @brief There is not state to restore, might be caused by
   //! @ref Painter::restore().
-  ERR_PAINTER_NO_STATE_TO_RESTORE,
+  ERR_PAINTER_NO_STATE,
 
   // --------------------------------------------------------------------------
   // [Path]
   // --------------------------------------------------------------------------
 
-  //! @brief Path is invalid (contains invalid data sequence).
-  ERR_PATH_INVALID,
+  // TODO: Merge with ERR_GEOMETRY section.
 
   //! @brief It is required that a previous path command is a vertex,
   //!

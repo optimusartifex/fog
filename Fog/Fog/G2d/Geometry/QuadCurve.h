@@ -86,21 +86,20 @@ struct FOG_NO_EXPORT QuadCurveF
   FOG_INLINE void reset() { p[0].reset(); p[1].reset(); p[2].reset(); }
 
   // --------------------------------------------------------------------------
-  // [BoundingRect]
+  // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE RectF getBoundingRect() const
+  FOG_INLINE err_t getBoundingBox(BoxF& dst) const
   {
-    BoxF box;
-    _g2d.quadcurvef.getExtrema(p, &box);
-    return RectF(box);
+    return _g2d.quadcurvef.getBoundingBox(p, &dst);
   }
 
-  FOG_INLINE BoxF getBoundingBox() const
+  FOG_INLINE err_t getBoundingRect(RectF& dst) const
   {
-    BoxF box;
-    _g2d.quadcurvef.getExtrema(p, &box);
-    return box;
+    err_t err = _g2d.quadcurvef.getBoundingBox(p, reinterpret_cast<BoxF*>(&dst));
+    dst.w -= dst.x;
+    dst.h -= dst.y;
+    return err;
   }
 
   // --------------------------------------------------------------------------
@@ -151,18 +150,19 @@ struct FOG_NO_EXPORT QuadCurveF
   // [Statics]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE BoxF getBoundingBox(const CubicCurveF* self)
+  static FOG_INLINE err_t getBoundingBox(const QuadCurveF* self, BoxF* dst)
   {
-    BoxF box(UNINITIALIZED);
-    _g2d.quadcurvef.getExtrema(self->p, &box);
-    return box;
+    return _g2d.quadcurvef.getBoundingBox(self->p, dst);
   }
 
-  static FOG_INLINE BoxF getBoundingBox(const PointF* self)
+  static FOG_INLINE err_t getBoundingBox(const PointF* self, BoxF* dst)
   {
-    BoxF box(UNINITIALIZED);
-    _g2d.quadcurvef.getExtrema(self, &box);
-    return box;
+    return _g2d.quadcurvef.getBoundingBox(self, dst);
+  }
+
+  static FOG_INLINE err_t getSplineBBox(const PointF* self, sysuint_t length, BoxF* dst)
+  {
+    return _g2d.quadcurvef.getSplineBBox(self, length, dst);
   }
 
   static FOG_INLINE void splitHalf(const PointF* self, PointF* left, PointF* rght)
@@ -276,21 +276,20 @@ struct FOG_NO_EXPORT QuadCurveD
   FOG_INLINE void reset() { p[0].reset(); p[1].reset(); p[2].reset(); }
 
   // --------------------------------------------------------------------------
-  // [BoundingRect]
+  // [BoundingBox / BoundingRect]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE RectD getBoundingRect() const
+  FOG_INLINE err_t getBoundingBox(BoxD& dst) const
   {
-    BoxD box;
-    _g2d.quadcurved.getExtrema(p, &box);
-    return RectD(box);
+    return _g2d.quadcurved.getBoundingBox(p, &dst);
   }
 
-  FOG_INLINE BoxD getBoundingBox() const
+  FOG_INLINE err_t getBoundingRect(RectD& dst) const
   {
-    BoxD box;
-    _g2d.quadcurved.getExtrema(p, &box);
-    return box;
+    err_t err = _g2d.quadcurved.getBoundingBox(p, reinterpret_cast<BoxD*>(&dst));
+    dst.w -= dst.x;
+    dst.h -= dst.y;
+    return err;
   }
 
   // --------------------------------------------------------------------------
@@ -341,18 +340,19 @@ struct FOG_NO_EXPORT QuadCurveD
   // [Statics]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE BoxD getBoundingBox(const CubicCurveD* self)
+  static FOG_INLINE err_t getBoundingBox(const QuadCurveD* self, BoxD* dst)
   {
-    BoxD box(UNINITIALIZED);
-    _g2d.quadcurved.getExtrema(self->p, &box);
-    return box;
+    return _g2d.quadcurved.getBoundingBox(self->p, dst);
   }
 
-  static FOG_INLINE BoxD getBoundingBox(const PointD* self)
+  static FOG_INLINE err_t getBoundingBox(const PointD* self, BoxD* dst)
   {
-    BoxD box(UNINITIALIZED);
-    _g2d.quadcurved.getExtrema(self, &box);
-    return box;
+    return _g2d.quadcurved.getBoundingBox(self, dst);
+  }
+
+  static FOG_INLINE err_t getSplineBBox(const PointD* self, sysuint_t length, BoxD* dst)
+  {
+    return _g2d.quadcurved.getSplineBBox(self, length, dst);
   }
 
   static FOG_INLINE void splitHalf(const PointD* self, PointD* left, PointD* rght)

@@ -55,7 +55,7 @@ struct FOG_NO_EXPORT ChordF : ArcF
   // [HitTest]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool hitTest(const PointF& pt)
+  FOG_INLINE bool hitTest(const PointF& pt) const
   {
     return _g2d.chordf.hitTest(this, &pt);
   }
@@ -87,7 +87,7 @@ struct FOG_NO_EXPORT ChordD : ArcD
   // [HitTest]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool hitTest(const PointD& pt)
+  FOG_INLINE bool hitTest(const PointD& pt) const
   {
     return _g2d.chordd.hitTest(this, &pt);
   }

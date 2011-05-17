@@ -28,10 +28,9 @@ SvgDefsElement::~SvgDefsElement()
   _removeAttributes();
 }
 
-err_t SvgDefsElement::onRender(SvgRenderContext* context) const
+err_t SvgDefsElement::onProcess(SvgVisitor* visitor) const
 {
-  // <defs> section is used only to define shared resources or gradients.
-  // Don't go inside.
+  // <defs> section is used only to define shared resources. Don't go inside.
   return ERR_OK;
 }
 

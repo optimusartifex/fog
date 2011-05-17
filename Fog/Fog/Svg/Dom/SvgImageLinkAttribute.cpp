@@ -43,7 +43,7 @@ String SvgImageLinkAttribute::getValue() const
     err |= memio.openBuffer();
 
     _image.writeToStream(memio, Ascii8("png"));
-    err |= StringUtil::toBase64(dst, memio.getBuffer(), OUTPUT_MODE_APPEND);
+    err |= StringUtil::toBase64(dst, memio.getBuffer(), CONTAINER_OP_APPEND);
 
     if (FOG_IS_ERROR(err)) dst.reset();
     return dst;
@@ -117,7 +117,7 @@ err_t SvgImageLinkAttribute::setValue(const String& value)
   }
 
   err = _value.set(value);
-  if (_element) reinterpret_cast<SvgElement*>(_element)->_boundingRectDirty = true;
+  if (_element) reinterpret_cast<SvgElement*>(_element)->_boundingBoxDirty = true;
   return err;
 }
 

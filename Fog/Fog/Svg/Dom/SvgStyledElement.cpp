@@ -13,6 +13,7 @@
 #include <Fog/Svg/Dom/SvgDocument.h>
 #include <Fog/Svg/Dom/SvgStyledElement_p.h>
 #include <Fog/Svg/Visit/SvgRender.h>
+#include <Fog/Svg/Visit/SvgVisitor.h>
 #include <Fog/Xml/Dom/XmlDocument.h>
 
 // Disable the MSC specific warning.
@@ -137,46 +138,43 @@ err_t SvgStyledElement::_removeAttribute(const ManagedString& name)
   return base::_removeAttribute(name);
 }
 
-err_t SvgStyledElement::onRender(SvgRenderContext* context) const
+err_t SvgStyledElement::onPrepare(SvgVisitor* visitor, SvgGState* state) const
 {
-  SvgRenderState state(context);
-  err_t err = ERR_OK;
-
+  // Apply transformations and setup styles defined by this element.
   uint32_t styleMask = a_style.getMask();
   bool isTransformed = a_transform.isAssigned() & a_transform.isValid();
 
-  // Before render: Apply transformations and setup styles defined by this element.
   if (styleMask != 0 || isTransformed)
   {
     SvgDocument* doc = reinterpret_cast<SvgDocument*>(getDocument());
 
     if (isTransformed)
     {
-      state.saveTransform();
-      context->getPainter()->transform(a_transform.getTransform());
+      if (state) state->saveTransform();
+      visitor->transform(a_transform.getTransform());
     }
 
     // Setup global parameters.
     if (styleMask & ((1 << SVG_STYLE_OPACITY)))
     {
-      state.saveGlobal();
-      context->setOpacity(a_style._opacity);
+      if (state) state->saveGlobal();
+      visitor->setOpacity(a_style._opacity);
     }
 
     // Setup font parameters.
     if (styleMask & ((1 << SVG_STYLE_FONT_FAMILY) |
                      (1 << SVG_STYLE_FONT_SIZE  )))
     {
-      state.saveFont();
+      if (state) state->saveFont();
 
       if (styleMask & (1 << SVG_STYLE_FONT_FAMILY))
       {
-        context->_font.setFamily(a_style._fontFamily);
+        visitor->_font.setFamily(a_style._fontFamily);
       }
 
       if (styleMask & (1 << SVG_STYLE_FONT_SIZE))
       {
-        context->_font.setSize(a_style._fontSize.value);
+        visitor->_font.setSize(a_style._fontSize.value);
       }
     }
 
@@ -185,7 +183,7 @@ err_t SvgStyledElement::onRender(SvgRenderContext* context) const
                      (1 << SVG_STYLE_FILL_OPACITY       ) |
                      (1 << SVG_STYLE_FILL_RULE          )))
     {
-      state.saveFill();
+      if (state) state->saveFill();
 
       if (styleMask & (1 << SVG_STYLE_FILL))
       {
@@ -194,12 +192,12 @@ err_t SvgStyledElement::onRender(SvgRenderContext* context) const
           case SVG_SOURCE_NONE:
           case SVG_SOURCE_INVALID:
           {
-            context->setFillNone();
+            visitor->setFillNone();
             break;
           }
           case SVG_SOURCE_COLOR:
           {
-            context->setFillColor(a_style._fillColor);
+            visitor->setFillColor(a_style._fillColor);
             break;
           }
           case SVG_SOURCE_URI:
@@ -207,7 +205,7 @@ err_t SvgStyledElement::onRender(SvgRenderContext* context) const
             XmlElement* r = getDocument()->getElementById(parseCssLinkId(a_style._fillUri));
             if (r && r->isSvg())
             {
-              reinterpret_cast<SvgElement*>(r)->onApplyPattern(context, const_cast<SvgStyledElement*>(this), SVG_PAINT_FILL);
+              reinterpret_cast<SvgElement*>(r)->onPattern(visitor, const_cast<SvgStyledElement*>(this), SVG_PAINT_FILL);
             }
             break;
           }
@@ -216,12 +214,12 @@ err_t SvgStyledElement::onRender(SvgRenderContext* context) const
 
       if (styleMask & (1 << SVG_STYLE_FILL_OPACITY))
       {
-        context->setFillOpacity(a_style._fillOpacity);
+        visitor->setFillOpacity(a_style._fillOpacity);
       }
 
       if (styleMask & (1 << SVG_STYLE_FILL_RULE))
       {
-        context->setFillRule(a_style._fillRule);
+        visitor->setFillRule(a_style._fillRule);
       }
     }
 
@@ -235,7 +233,7 @@ err_t SvgStyledElement::onRender(SvgRenderContext* context) const
                      (1 << SVG_STYLE_STROKE_OPACITY     ) |
                      (1 << SVG_STYLE_STROKE_WIDTH       )))
     {
-      state.saveStroke();
+      if (state) state->saveStroke();
 
       if (styleMask & (1 << SVG_STYLE_STROKE))
       {
@@ -244,12 +242,12 @@ err_t SvgStyledElement::onRender(SvgRenderContext* context) const
           case SVG_SOURCE_NONE:
           case SVG_SOURCE_INVALID:
           {
-            context->setStrokeNone();
+            visitor->setStrokeNone();
             break;
           }
           case SVG_SOURCE_COLOR:
           {
-            context->setStrokeColor(a_style._strokeColor);
+            visitor->setStrokeColor(a_style._strokeColor);
             break;
           }
           case SVG_SOURCE_URI:
@@ -257,7 +255,7 @@ err_t SvgStyledElement::onRender(SvgRenderContext* context) const
             XmlElement* r = getDocument()->getElementById(parseCssLinkId(a_style._strokeUri));
             if (r && r->isSvg())
             {
-              reinterpret_cast<SvgElement*>(r)->onApplyPattern(context, const_cast<SvgStyledElement*>(this), SVG_PAINT_STROKE);
+              reinterpret_cast<SvgElement*>(r)->onPattern(visitor, const_cast<SvgStyledElement*>(this), SVG_PAINT_STROKE);
             }
             break;
           }
@@ -266,41 +264,36 @@ err_t SvgStyledElement::onRender(SvgRenderContext* context) const
 
       if (styleMask & (1 << SVG_STYLE_STROKE_LINE_CAP))
       {
-        context->setLineCaps(a_style._strokeLineCap);
+        visitor->setLineCaps(a_style._strokeLineCap);
       }
 
       if (styleMask & (1 << SVG_STYLE_STROKE_LINE_JOIN))
       {
-        context->setLineJoin(a_style._strokeLineJoin);
+        visitor->setLineJoin(a_style._strokeLineJoin);
       }
 
       if (styleMask & (1 << SVG_STYLE_STROKE_MITER_LIMIT))
       {
         float miterLimit = doc->_dpi.toDeviceSpace(
           a_style._strokeMiterLimit.value, a_style._strokeMiterLimit.unit);
-        context->setMiterLimit(miterLimit);
+        visitor->setMiterLimit(miterLimit);
       }
 
       if (styleMask & (1 << SVG_STYLE_STROKE_OPACITY))
       {
-        context->setStrokeOpacity(a_style._strokeOpacity);
+        visitor->setStrokeOpacity(a_style._strokeOpacity);
       }
 
       if (styleMask & (1 << SVG_STYLE_STROKE_WIDTH))
       {
         float lineWidth = doc->_dpi.toDeviceSpace(
           a_style._strokeWidth.value, a_style._strokeWidth.unit);
-        context->setLineWidth(lineWidth);
+        visitor->setLineWidth(lineWidth);
       }
     }
   }
 
-  // Actual render: object or children (depends to Svg type).
-  err = onRenderShape(context);
-
-  // After render: SvgContextBackup destructor will restore SvgContext state
-  // if modified.
-  return err;
+  return ERR_OK;
 }
 
 String SvgStyledElement::getStyle(const String& name) const

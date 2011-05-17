@@ -68,7 +68,7 @@ struct FOG_NO_EXPORT PGradientConical
     // TODO:
     uint32_t srcFormat = IMAGE_FORMAT_PRGB32;
 
-    double angle = Math::repeat(gradient._pts[1].x * (1.0 / (2.0 * MATH_PI)), 1.0);
+    double angle = Math::repeat(gradient._pts[1].x * MATH_1_DIV_TWO_PI, 1.0);
 
     // There is no such concept like conical gradient using perspective
     // transform, because the function atan2(y/w, x/w) can be simplified to
@@ -87,7 +87,7 @@ struct FOG_NO_EXPORT PGradientConical
     ctx->_d.gradient.conical.shared.ty = inv._21 + 0.5 * (inv._01 + inv._11); // Center.
 
     ctx->_d.gradient.conical.shared.offset = (double)tableLength * (2.0 - angle);
-    ctx->_d.gradient.conical.shared.scale = (double)(tableLength - 1) / (2.0 * MATH_PI);
+    ctx->_d.gradient.conical.shared.scale = (double)(tableLength - 1) / (MATH_TWO_PI);
 
     ctx->_prepare = prepare_simple;
     ctx->_destroy = PGradientBase::destroy;

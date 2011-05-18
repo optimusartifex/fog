@@ -43,21 +43,22 @@ err_t SvgVisitor::advance(SvgElement* obj)
   List<SvgElement*> elements;
   XmlElement* doc = obj->getDocument();
 
-  do {
+  for (;;)
+  {
     XmlElement* parent = obj->getParent();
     elements.append(obj);
-    if (parent == doc) break;
+    if (parent == doc || parent == NULL) break;
 
     if (!parent->isSvgElement())
       return ERR_RT_INVALID_STATE;
 
     obj = reinterpret_cast<SvgElement*>(parent);
-  } while (obj != NULL);
+  }
 
   sysuint_t i, len = elements.getLength();
   for (i = 0; i < len; i++)
   {
-    obj = elements.at(i);
+    obj = elements.at(len - 1 - i);
     FOG_RETURN_ON_ERROR(obj->onPrepare(this, NULL));
   }
 

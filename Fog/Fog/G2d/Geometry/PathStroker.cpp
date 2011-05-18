@@ -843,6 +843,15 @@ err_t PathStrokerContextT<NumT>::strokePathFigure(const NumT_(Point)* src, sysui
 
   NumT *dist;
 
+  for (i = 0; i < count - 1; i++)
+  {
+    NumT d = Math::dist(src[i].x, src[i].y, src[i + 1].x, src[i + 1].y);
+    if (d <= Math2dConst<NumT>::getDistanceEpsilon()) d = 0.0;
+
+    distances[i] = d;
+  }
+
+/*
   for (i = count - 1, cur = src, dist = distances; i; i--, cur++, dist++)
   {
     NumT d = Math::dist(cur[0].x, cur[0].y, cur[1].x, cur[1].y);
@@ -850,11 +859,11 @@ err_t PathStrokerContextT<NumT>::strokePathFigure(const NumT_(Point)* src, sysui
 
     dist[0] = d;
   }
-
+*/
   const NumT_(Point)* srcEnd = src + count;
 
   NumT_(Point) cp[3]; // Current points.
-  NumT cd[3]; // Current distances.
+  NumT cd[3];         // Current distances.
 
   // If something went wrong.
   // for (i = 0; i < count; i++)
@@ -872,7 +881,7 @@ err_t PathStrokerContextT<NumT>::strokePathFigure(const NumT_(Point)* src, sysui
   {
     // We need also to calc distance between first and last point.
     {
-      NumT d = Math::dist(src[0].x, src[0].y, src[count-1].x, src[count-1].y);
+      NumT d = Math::dist(src[count - 1].x, src[count - 1].y, src[0].x, src[0].y);
       if (d <= Math2dConst<NumT>::getDistanceEpsilon()) d = 0.0;
 
       distances[count - 1] = d;
@@ -970,13 +979,13 @@ _Outline1Done:
     i = 0;
     firstI = 0;
     cp[i] = src[0];
-    cd[i] = dist[0];
-    if (cd[i] != 0.0) { i++; firstI++; }
+    cd[i] = distances[0];
+    if (cd[i] != NumT(0.0)) { i++; firstI++; }
 
     do {
       cp[i] = *--cur;
       cd[i] = *--dist;
-      if (FOG_LIKELY(cd[i] != 0.0)) i++;
+      if (FOG_LIKELY(cd[i] != NumT(0.0))) i++;
     } while (i < 3);
 
     // Save two first points and distances (we need them to finish the outline).

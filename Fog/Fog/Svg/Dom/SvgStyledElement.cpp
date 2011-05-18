@@ -150,7 +150,8 @@ err_t SvgStyledElement::onPrepare(SvgVisitor* visitor, SvgGState* state) const
 
     if (isTransformed)
     {
-      if (state) state->saveTransform();
+      if (state && !state->hasState(SvgGState::SAVED_TRANSFORM))
+        state->saveTransform();
       visitor->transform(a_transform.getTransform());
     }
 

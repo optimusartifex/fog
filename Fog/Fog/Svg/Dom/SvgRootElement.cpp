@@ -62,7 +62,7 @@ err_t SvgRootElement::onPrepare(SvgVisitor* visitor, SvgGState* state) const
     visitor->transform(tr);
   }
 
-  return ERR_OK;
+  return base::onPrepare(visitor, state);
 }
 
 err_t SvgRootElement::onProcess(SvgVisitor* visitor) const

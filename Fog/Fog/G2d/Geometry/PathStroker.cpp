@@ -832,7 +832,7 @@ err_t PathStrokerContextT<NumT>::strokePathFigure(const NumT_(Point)* src, sysui
     if (distances) buffer.reset();
 
     distancesAlloc = (count + 127) & ~127;
-    distances = reinterpret_cast<NumT*>(buffer.alloc(count * sizeof(NumT)));
+    distances = reinterpret_cast<NumT*>(buffer.alloc(distancesAlloc * sizeof(NumT)));
 
     if (distances == NULL)
     {
@@ -846,7 +846,7 @@ err_t PathStrokerContextT<NumT>::strokePathFigure(const NumT_(Point)* src, sysui
   for (i = 0; i < count - 1; i++)
   {
     NumT d = Math::dist(src[i].x, src[i].y, src[i + 1].x, src[i + 1].y);
-    if (d <= Math2dConst<NumT>::getDistanceEpsilon()) d = 0.0;
+    if (d <= Math2dConst<NumT>::getDistanceEpsilon()) d = NumT(0.0);
 
     distances[i] = d;
   }
@@ -882,7 +882,7 @@ err_t PathStrokerContextT<NumT>::strokePathFigure(const NumT_(Point)* src, sysui
     // We need also to calc distance between first and last point.
     {
       NumT d = Math::dist(src[count - 1].x, src[count - 1].y, src[0].x, src[0].y);
-      if (d <= Math2dConst<NumT>::getDistanceEpsilon()) d = 0.0;
+      if (d <= Math2dConst<NumT>::getDistanceEpsilon()) d = NumT(0.0);
 
       distances[count - 1] = d;
     }
@@ -1004,7 +1004,7 @@ _Outline1Done:
         if (cur == src) goto _Outline2Done;
         cur--;
         dist--;
-      } while (FOG_UNLIKELY(dist[0] == 0.0));
+      } while (FOG_UNLIKELY(dist[0] == NumT(0.0)));
 
       cp[0] = cp[1];
       cd[0] = cd[1];
@@ -1048,7 +1048,7 @@ _Outline2Done:
 
       cp[i] = *cur++;
       cd[i] = *dist++;
-      if (FOG_LIKELY(cd[i] != 0.0)) i++;
+      if (FOG_LIKELY(cd[i] != NumT(0.0))) i++;
     } while (i < 2);
 
     // Start cap.
@@ -1056,7 +1056,7 @@ _Outline2Done:
 
     // Make the outline.
     if (cur == srcEnd) goto _Pen1Done;
-    while (FOG_UNLIKELY(dist[0] == 0.0))
+    while (FOG_UNLIKELY(dist[0] == NumT(0.0)))
     {
       dist++;
       if (++cur == srcEnd) goto _Pen1Done;
@@ -1079,7 +1079,7 @@ _Pen1Loop:
       FOG_RETURN_ON_ERROR( calcJoin(cp[0], cp[1], cp[2], cd[0], cd[1]) );
       if (cur == srcEnd) goto _Pen1Done;
 
-      while (FOG_UNLIKELY(dist[0] == 0.0))
+      while (FOG_UNLIKELY(dist[0] == NumT(0.0)))
       {
         dist++;
         if (++cur == srcEnd) goto _Pen1Done;
@@ -1099,7 +1099,7 @@ _Pen1Done:
     do {
       cp[i] = *--cur;
       cd[i] = *--dist;
-      if (FOG_LIKELY(cd[i] != 0.0)) i++;
+      if (FOG_LIKELY(cd[i] != NumT(0.0))) i++;
     } while (i < 2);
 
     // End cap.
@@ -1111,7 +1111,7 @@ _Pen1Done:
     cur--;
     dist--;
 
-    while (FOG_UNLIKELY(dist[0] == 0.0))
+    while (FOG_UNLIKELY(dist[0] == NumT(0.0)))
     {
       if (cur == src) goto _Pen2Done;
 
@@ -1128,7 +1128,7 @@ _Pen1Done:
 
         cur--;
         dist--;
-      } while (FOG_UNLIKELY(dist[0] == 0.0));
+      } while (FOG_UNLIKELY(dist[0] == NumT(0.0)));
 
       cp[0] = cp[1];
       cd[0] = cd[1];
@@ -1148,7 +1148,7 @@ _Pen2Done:
   }
 
   {
-    // Fix length of path.
+    // Fix the length of the path.
     sysuint_t finalLength = CUR_INDEX();
     dst._d->length = finalLength;
     FOG_ASSERT(finalLength <= dst._d->capacity);

@@ -104,15 +104,15 @@ static err_t _G2d_MacFontFace_renderGlyphOutline(MacFontFace* self,
     switch (cmd)
     {
       case NSMoveToBezierPathElement:
-        dst.moveTo(NumT_(Point)(pts[0].x, -pts[0].y));
+        dst.moveTo(NumT_(Point)((float)pts[0].x, (float)-pts[0].y));
         break;
       case NSLineToBezierPathElement:
-        dst.lineTo(NumT_(Point)(pts[0].x, -pts[0].y));
+        dst.lineTo(NumT_(Point)((float)pts[0].x, (float)-pts[0].y));
         break;
       case NSCurveToBezierPathElement:
-        dst.cubicTo(NumT_(Point)(pts[0].x, -pts[0].y),
-                    NumT_(Point)(pts[1].x, -pts[1].y),
-                    NumT_(Point)(pts[2].x, -pts[2].y));
+        dst.cubicTo(NumT_(Point)((float)pts[0].x, (float)-pts[0].y),
+                    NumT_(Point)((float)pts[1].x, (float)-pts[1].y),
+                    NumT_(Point)((float)pts[2].x, (float)-pts[2].y));
         break;
       case NSClosePathBezierPathElement:
         dst.close();

@@ -189,17 +189,21 @@ private:
   CFRunLoopTimerRef _delayedWorkTimer;
   static void runDelayedWorkTimer(CFRunLoopTimerRef timer, void* info);
 
+  // [Work Source]
   CFRunLoopSourceRef _workSource;
-  FOG_INLINE static void runWorkSource(void* info) { static_cast<MacEventLoopBase*>(info)->runWork(); }
-  bool runWork();
-
   CFRunLoopSourceRef _delayedWorkSource;
-  FOG_INLINE static void runDelayedWorkSource(void* info) { static_cast<MacEventLoopBase*>(info)->runDelayedWork(); }
-  bool runDelayedWork();
-
   CFRunLoopSourceRef _idleWorkSource;
-  FOG_INLINE static void runIdleWorkSource(void* info) { static_cast<MacEventLoopBase*>(info)->runIdleWork(); }
+
+  // [Work Run]
+  bool runWork();
+  bool runDelayedWork();
   bool runIdleWork();
+  
+  // [Work Helpers]
+  FOG_INLINE static void runWorkSource(void* info) { static_cast<MacEventLoopBase*>(info)->runWork(); }
+  FOG_INLINE static void runDelayedWorkSource(void* info) { static_cast<MacEventLoopBase*>(info)->runDelayedWork(); }
+  FOG_INLINE static void runIdleWorkSource(void* info) { static_cast<MacEventLoopBase*>(info)->runIdleWork(); }
+
 
   // @brief The thread's run loop.
   CFRunLoopRef _runLoop;

@@ -159,7 +159,7 @@ FOG_IMPLEMENT_OBJECT(Fog::MacGuiWindow)
 
 - (FogView*)contentView
 {
-	return (FogView*)[super contentView];
+  return (FogView*)[super contentView];
 }
 
 @end
@@ -301,7 +301,9 @@ void MacGuiEngine::updateDisplayInfo()
   _displayInfo.width = screenRect.size.width;
   _displayInfo.height = screenRect.size.height;
   //display->is16bitSwapped = ?
-  //display->[r,g,b]Mask = ?
+  _displayInfo.rMask = 0x00FF0000;
+  _displayInfo.gMask = 0x0000FF00;
+  _displayInfo.bMask = 0x000000FF;
 }
 
 GuiWindow* MacGuiEngine::createGuiWindow(Widget* widget)
@@ -400,7 +402,7 @@ err_t MacGuiWindow::setSize(const SizeI& size)
   
   [window setFrame: NSMakeRect(_widget->getX(), _widget->getY(), 
                                size.getWidth(), size.getHeight())
-           display: YES];
+           display: NO];
   return ERR_OK;
 }
 
@@ -409,7 +411,7 @@ err_t MacGuiWindow::setGeometry(const RectI& geometry)
   if (window == nil) return ERR_RT_INVALID_HANDLE;
   if (!geometry.isValid()) return ERR_RT_INVALID_ARGUMENT;
   
-  [window setFrame: toNSRect(geometry) display: YES];
+  [window setFrame: toNSRect(geometry) display: NO];
 
   return ERR_OK;
 } 
@@ -476,12 +478,16 @@ err_t MacGuiWindow::hide()
 
 void MacGuiWindow::moveToTop(GuiWindow* w)
 {
-  // TODO
+  if (window == nil || w == NULL) return;
+  
+  [window orderWindow:NSWindowAbove relativeTo:[static_cast<MacGuiWindow*>(w)->window windowNumber]];
 }
 
 void MacGuiWindow::moveToBottom(GuiWindow* w)
 {
-  // TODO
+  if (window == nil || w == NULL) return;
+  
+  [window orderWindow:NSWindowBelow relativeTo:[static_cast<MacGuiWindow*>(w)->window windowNumber]];
 }
 
 void MacGuiWindow::setTransparency(float val)
@@ -534,6 +540,7 @@ void MacGuiWindow::setOwner(GuiWindow* owner)
 {
   if (window == nil) return;
 
+  _owner = owner;
   [window setParentWindow: static_cast<MacGuiWindow*>(owner)->window];
 }
 
@@ -643,12 +650,12 @@ void MacGuiBackBuffer::updateRects(FogView* view, const BoxI* rects, sysuint_t c
   
   CGImageRef image = CGImageCreate(_buffer.size.w, _buffer.size.h, // size 
                                    8, 32, _buffer.stride, // bits/component, bits/pixel, bytes/line
-                                    CGColorSpaceCreateDeviceRGB(), // colorspace
-                                    0, // bitmap info
-                                    provider,
-                                    NULL,
-                                    false,
-                                    kCGRenderingIntentDefault);
+                                   CGColorSpaceCreateDeviceRGB(), // colorspace
+                                   0, // bitmap info
+                                   provider,
+                                   NULL,
+                                   false,
+                                   kCGRenderingIntentDefault);
   
   if (view.image) CGImageRelease(view.image);
   view.image = image;
@@ -676,16 +683,16 @@ MacEventLoopBase::MacEventLoopBase() :
   
   // Set a repeating timer with a preposterous firing time and interval.  The
   // timer will effectively never fire as-is.  The firing time will be adjusted
-  // as needed when ScheduleDelayedWork is called.
+  // as needed when _scheduleDelayedWork is called.
   CFRunLoopTimerContext timerContext = CFRunLoopTimerContext();
   timerContext.info = this;
-  _delayedWorkTimer = CFRunLoopTimerCreate(NULL,       // allocator
-                                             DBL_MAX,  // fire time
-                                             DBL_MAX,  // interval
-                                             0,        // flags
-                                             0,        // priority
-                                             runDelayedWorkTimer,
-                                             &timerContext);
+  _delayedWorkTimer = CFRunLoopTimerCreate(NULL,    // allocator
+                                           DBL_MAX,  // fire time
+                                           DBL_MAX,  // interval
+                                           0,        // flags
+                                           0,        // priority
+                                           runDelayedWorkTimer,
+                                           &timerContext);
   CFRunLoopAddTimer(_runLoop, _delayedWorkTimer, kCFRunLoopCommonModes);
   
   // run work has 1st priority

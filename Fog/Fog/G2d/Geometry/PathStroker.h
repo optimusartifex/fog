@@ -9,6 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Static.h>
 #include <Fog/Core/Global/TypeInfo.h>
 #include <Fog/Core/Global/TypeVariant.h>
@@ -351,7 +352,7 @@ struct FOG_API PathStrokerF
   int _wSign;
 
 private:
-  FOG_DISABLE_COPY(PathStrokerF)
+  _FOG_CLASS_NO_COPY(PathStrokerF)
 };
 
 // ============================================================================
@@ -445,7 +446,7 @@ struct FOG_API PathStrokerD
   int _wSign;
 
 private:
-  FOG_DISABLE_COPY(PathStrokerD)
+  _FOG_CLASS_NO_COPY(PathStrokerD)
 };
 
 // ============================================================================
@@ -519,13 +520,13 @@ FOG_TYPEVARIANT_DECLARE_F_D(PathStroker)
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::PathStrokerHints, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::PathStrokerHints, Fog::TYPEINFO_PRIMITIVE)
 
-FOG_DECLARE_TYPEINFO(Fog::PathStrokerParamsF, Fog::TYPEINFO_MOVABLE)
-FOG_DECLARE_TYPEINFO(Fog::PathStrokerParamsD, Fog::TYPEINFO_MOVABLE)
+_FOG_TYPEINFO_DECLARE(Fog::PathStrokerParamsF, Fog::TYPEINFO_MOVABLE)
+_FOG_TYPEINFO_DECLARE(Fog::PathStrokerParamsD, Fog::TYPEINFO_MOVABLE)
 
-FOG_DECLARE_TYPEINFO(Fog::PathStrokerF, Fog::TYPEINFO_MOVABLE)
-FOG_DECLARE_TYPEINFO(Fog::PathStrokerD, Fog::TYPEINFO_MOVABLE)
+_FOG_TYPEINFO_DECLARE(Fog::PathStrokerF, Fog::TYPEINFO_MOVABLE)
+_FOG_TYPEINFO_DECLARE(Fog::PathStrokerD, Fog::TYPEINFO_MOVABLE)
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_STROKER_H

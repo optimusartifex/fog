@@ -103,7 +103,7 @@ struct FOG_NO_EXPORT CircleF
     err_t err = _g2d.circlef.getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr);
     dst.w -= dst.x;
     dst.h -= dst.y;
-    return err;    
+    return err;
   }
 
   // --------------------------------------------------------------------------
@@ -181,12 +181,12 @@ struct FOG_NO_EXPORT CircleD
   {
   }
 
-  FOG_INLINE CircleD(const CircleD& other) : 
+  FOG_INLINE CircleD(const CircleD& other) :
     center(other.center),
     radius(other.radius)
   {
   }
-  
+
   FOG_INLINE CircleD(const PointD& cp, double r) :
     center(cp),
     radius(r)
@@ -252,7 +252,7 @@ struct FOG_NO_EXPORT CircleD
     err_t err = _g2d.circled.getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr);
     dst.w -= dst.x;
     dst.h -= dst.y;
-    return err;    
+    return err;
   }
 
   // --------------------------------------------------------------------------
@@ -334,15 +334,15 @@ FOG_TYPEVARIANT_DECLARE_F_D(Circle)
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::CircleF, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::CircleD, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::CircleF, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::CircleD, Fog::TYPEINFO_PRIMITIVE)
 
 // ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_DECLARE_FUZZY(Fog::CircleF, Math::feqv((const float *)&a, (const float *)&b, 3))
-FOG_DECLARE_FUZZY(Fog::CircleD, Math::feqv((const double*)&a, (const double*)&b, 3))
+FOG_FUZZY_DECLARE(Fog::CircleF, Math::feqv((const float *)&a, (const float *)&b, 3))
+FOG_FUZZY_DECLARE(Fog::CircleD, Math::feqv((const double*)&a, (const double*)&b, 3))
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_CIRCLE_H

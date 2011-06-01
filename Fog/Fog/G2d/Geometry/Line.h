@@ -80,7 +80,7 @@ struct FOG_NO_EXPORT LineF
 
   FOG_INLINE void setLine(const LineF& line) { p[0] = line.p[0]; p[1] = line.p[1]; }
   FOG_INLINE void setLine(const LineD& line);
-  
+
   FOG_INLINE void setLine(const PointF& pt0, const PointF& pt1) { p[0] = pt0; p[1] = pt1; }
   FOG_INLINE void setLine(float x0, float y0, float x1, float y1) { p[0].set(x0, y0); p[1].set(x1, y1); }
 
@@ -326,15 +326,15 @@ FOG_TYPEVARIANT_DECLARE_F_D(Line)
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::LineF, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::LineD, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::LineF, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::LineD, Fog::TYPEINFO_PRIMITIVE)
 
 // ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_DECLARE_FUZZY(Fog::LineF, Math::feqv((const float *)&a, (const float *)&b, 4))
-FOG_DECLARE_FUZZY(Fog::LineD, Math::feqv((const double*)&a, (const double*)&b, 4))
+FOG_FUZZY_DECLARE(Fog::LineF, Math::feqv((const float *)&a, (const float *)&b, 4))
+FOG_FUZZY_DECLARE(Fog::LineD, Math::feqv((const double*)&a, (const double*)&b, 4))
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_LINE_H

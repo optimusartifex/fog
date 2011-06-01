@@ -8,6 +8,7 @@
 #define _FOG_XML_DOM_XMLCDATA_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Xml/Global/Constants.h>
 #include <Fog/Xml/Dom/XmlNoText.h>
 
@@ -56,7 +57,7 @@ private:
   friend struct XmlElement;
   friend struct XmlDocument;
 
-  FOG_DISABLE_COPY(XmlCDATA)
+  _FOG_CLASS_NO_COPY(XmlCDATA)
 };
 
 //! @}

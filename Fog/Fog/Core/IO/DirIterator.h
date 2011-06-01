@@ -8,6 +8,7 @@
 #define _FOG_CORE_IO_DIRITERATOR_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/IO/DirEntry.h>
 #include <Fog/Core/Tools/ByteArray.h>
 
@@ -117,7 +118,7 @@ private:
   bool _skipDots;
 
 private:
-  FOG_DISABLE_COPY(DirIterator)
+  _FOG_CLASS_NO_COPY(DirIterator)
 };
 
 //! @}

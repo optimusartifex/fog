@@ -8,6 +8,7 @@
 #define _FOG_SVG_DOM_SVGTSPANELEMENT_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Svg/Dom/SvgCoordAttribute_p.h>
 #include <Fog/Svg/Dom/SvgEnumAttribute_p.h>
 #include <Fog/Svg/Dom/SvgStyledElement_p.h>
@@ -42,6 +43,7 @@ struct FOG_NO_EXPORT SvgTSpanElement : public SvgStyledElement
   // [SVG Interface]
   // --------------------------------------------------------------------------
 
+  virtual err_t onPrepare(SvgVisitor* visitor, SvgGState* state) const;
   virtual err_t onProcess(SvgVisitor* visitor) const;
 
   // --------------------------------------------------------------------------
@@ -61,7 +63,7 @@ struct FOG_NO_EXPORT SvgTSpanElement : public SvgStyledElement
   SvgEnumAttribute a_lengthAdjust;
 
 private:
-  FOG_DISABLE_COPY(SvgTSpanElement)
+  _FOG_CLASS_NO_COPY(SvgTSpanElement)
 };
 
 //! @}

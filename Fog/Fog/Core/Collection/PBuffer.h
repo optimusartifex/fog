@@ -9,6 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Memory/Memory.h>
 
@@ -111,7 +112,7 @@ protected:
   uint8_t _storage[N];
 
 private:
-  FOG_DISABLE_COPY(PBuffer)
+  _FOG_CLASS_NO_COPY(PBuffer)
 };
 
 //! @}

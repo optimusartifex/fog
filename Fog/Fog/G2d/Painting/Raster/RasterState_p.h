@@ -8,7 +8,7 @@
 #define _FOG_G2D_PAINTING_RASTER_RASTERSTATE_P_H
 
 // [Dependencies]
-#include <Fog/G2d/Painting/PainterParams.h>
+#include <Fog/G2d/Painting/PaintParams.h>
 #include <Fog/G2d/Painting/Raster/RasterConstants_p.h>
 #include <Fog/G2d/Painting/Raster/RasterStructs_p.h>
 #include <Fog/G2d/Render/RenderStructs_p.h>
@@ -34,7 +34,7 @@ struct FOG_NO_EXPORT RasterState
   //! @brief The previous state.
   RasterState* prevState;
 
-  //! @brief RasterPainterEngine::masterFlags copy.
+  //! @brief RasterPaintEngine::masterFlags copy.
   uint32_t prevMasterFlags;
 
   // --------------------------------------------------------------------------
@@ -43,7 +43,7 @@ struct FOG_NO_EXPORT RasterState
 
   //! @brief Layer id.
   //!
-  //! Used internally to detect if @c PainterEngine::release() is not changing
+  //! Used internally to detect if @c PaintEngine::release() is not changing
   //! the state of different layer.
   uint32_t layerId;
 
@@ -54,9 +54,9 @@ struct FOG_NO_EXPORT RasterState
   // [Always Saved / Restored]
   // ------------------------------------------------------------------------
 
-  //! @brief RasterPainterEngine::paintHints copy.
+  //! @brief RasterPaintEngine::paintHints copy.
   PaintHints paintHints;
-  //! @brief RasterPainterEngine::rasterHints copy.
+  //! @brief RasterPaintEngine::rasterHints copy.
   RasterHints rasterHints;
 
   //! @brief The original opacity (float).
@@ -68,7 +68,7 @@ struct FOG_NO_EXPORT RasterState
 
   //! @brief Source type (see @ref PATTERN_TYPE).
   uint8_t sourceType;
-  //! @brief RasterPainterEngine::masterSave copy.
+  //! @brief RasterPaintEngine::masterSave copy.
   uint8_t savedStateFlags;
   //! @brief The strokeParams[F|D] precision.
   uint8_t strokeParamsPrecision;

@@ -125,7 +125,7 @@ bool Locale::set(const String& name)
   char lcNameA[512];
   if (!StringUtil::unicodeToLatin1(lcNameA, name.getData(), name.getLength())) return false;
 
-  TemporaryByteArray<128> savedLocale(Stub8(setlocale(LC_ALL, NULL)));
+  ByteArrayTmp<128> savedLocale(Stub8(setlocale(LC_ALL, NULL)));
 
   if (setlocale(LC_ALL, lcNameA))
   {

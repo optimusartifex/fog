@@ -8,6 +8,7 @@
 #define _FOG_SVG_VISIT_SVGRENDER_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
 
 namespace Fog {
@@ -44,10 +45,6 @@ struct FOG_API SvgRender : public SvgVisitor
 
   virtual err_t onShape(SvgElement* obj, const ShapeF& shape);
   virtual err_t onPath(SvgElement* obj, const PathF& path);
-
-  // TODO: Remove
-  virtual err_t onPath(SvgElement* obj, const PathD& path);
-
   virtual err_t onImage(SvgElement* obj, const PointF& pt, const Image& image);
 
   // --------------------------------------------------------------------------
@@ -57,7 +54,7 @@ struct FOG_API SvgRender : public SvgVisitor
   Painter* _painter;
 
 private:
-  FOG_DISABLE_COPY(SvgRender)
+  _FOG_CLASS_NO_COPY(SvgRender)
 };
 
 //! @}

@@ -1257,7 +1257,6 @@ struct FOG_NO_EXPORT TransformF
   union
   {
     float _data[9];
-    float _m[3][3];
     struct { float _00, _01, _02, _10, _11, _12, _20, _21, _22; };
   };
 };
@@ -2212,6 +2211,11 @@ struct FOG_NO_EXPORT TransformD
     _g2d.transformd.mapPointsD[getType()](*this, pts, pts, count);
   }
 
+  FOG_INLINE void mapPoints(PointD* dst, const PointF* src, sysuint_t count) const
+  {
+    _g2d.transformd.mapPointsF[getType()](*this, dst, src, count);
+  }
+
   FOG_INLINE void mapPoints(PointD* dst, const PointD* src, sysuint_t count) const
   {
     _g2d.transformd.mapPointsD[getType()](*this, dst, src, count);
@@ -2223,15 +2227,31 @@ struct FOG_NO_EXPORT TransformD
     _g2d.transformd.mapPointsD[_type](*this, pts, pts, count);
   }
 
+  FOG_INLINE void _mapPoints(PointD* dst, const PointF* src, sysuint_t count) const
+  {
+    FOG_ASSERT(_type < TRANSFORM_TYPE_COUNT);
+    _g2d.transformd.mapPointsF[_type](*this, dst, src, count);
+  }
+
   FOG_INLINE void _mapPoints(PointD* dst, const PointD* src, sysuint_t count) const
   {
     FOG_ASSERT(_type < TRANSFORM_TYPE_COUNT);
     _g2d.transformd.mapPointsD[_type](*this, dst, src, count);
   }
 
+  FOG_INLINE err_t mapPath(PathD& dst, const PathF& src, uint32_t cntOp = CONTAINER_OP_REPLACE) const
+  {
+    return _g2d.transformd.mapPathF(*this, dst, src, cntOp);
+  }
+
   FOG_INLINE err_t mapPath(PathD& dst, const PathD& src, uint32_t cntOp = CONTAINER_OP_REPLACE) const
   {
     return _g2d.transformd.mapPathD(*this, dst, src, cntOp);
+  }
+
+  FOG_INLINE err_t mapPathData(PathD& dst, const uint8_t* srcCmd, const PointF* srcPts, sysuint_t srcLength, uint32_t cntOp = CONTAINER_OP_REPLACE) const
+  {
+    return _g2d.transformd.mapPathDataF(*this, dst, srcCmd, srcPts, srcLength, cntOp);
   }
 
   FOG_INLINE err_t mapPathData(PathD& dst, const uint8_t* srcCmd, const PointD* srcPts, sysuint_t srcLength, uint32_t cntOp = CONTAINER_OP_REPLACE) const
@@ -2450,7 +2470,6 @@ struct FOG_NO_EXPORT TransformD
   union
   {
     double _data[9];
-    double _m[3][3];
     struct { double _00, _01, _02, _10, _11, _12, _20, _21, _22; };
   };
 };
@@ -2493,8 +2512,8 @@ FOG_TYPEVARIANT_DECLARE_F_D(Transform)
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::TransformF, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::TransformD, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::TransformF, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::TransformD, Fog::TYPEINFO_PRIMITIVE)
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_TRANSFORM_H

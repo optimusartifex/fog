@@ -39,10 +39,10 @@
 namespace Fog {
 
 // ============================================================================
-// [Fog::RasterPainterEngine - Renderers - Clipping - DoMaskConvert]
+// [Fog::RasterPaintEngine - Renderers - Clipping - DoMaskConvert]
 // ============================================================================
 
-void RasterPainterEngine::CTX_SYMBOL(_doMaskConvert)(
+void RasterPaintEngine::CTX_SYMBOL(_doMaskConvert)(
   RasterContext* ctx, const BoxI* box, sysuint_t count)
 {
   // Can't be called with empty region.
@@ -105,10 +105,10 @@ void RasterPainterEngine::CTX_SYMBOL(_doMaskConvert)(
 }
 
 // ============================================================================
-// [Fog::RasterPainterEngine - Renderers - Clipping - DoMaskBoxes]
+// [Fog::RasterPaintEngine - Renderers - Clipping - DoMaskBoxes]
 // ============================================================================
 
-void RasterPainterEngine::CTX_SYMBOL(_doMaskBoxes)(
+void RasterPaintEngine::CTX_SYMBOL(_doMaskBoxes)(
   RasterContext* ctx, const BoxI* box, sysuint_t count, uint32_t clipOp)
 {
   // Can't be called with empty region.
@@ -704,10 +704,10 @@ intersectNop:
 }
 
 // ============================================================================
-// [Fog::RasterPainterEngine - Renderers - Clipping - DoMaskPath]
+// [Fog::RasterPaintEngine - Renderers - Clipping - DoMaskPath]
 // ============================================================================
 
-void RasterPainterEngine::CTX_SYMBOL(_doMaskPath)(
+void RasterPaintEngine::CTX_SYMBOL(_doMaskPath)(
   RasterContext* ctx, Rasterizer8* ras, uint32_t clipOp)
 {
   int y = ras->getBoundingBox().y0;

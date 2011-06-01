@@ -251,9 +251,6 @@ _Has16BPC:
 
     if (transformType <= TRANSFORM_TYPE_AFFINE)
     {
-      int tw = ctx->_d.texture.base.w;
-      int th = ctx->_d.texture.base.h;
-
       // Offset values 'tx' added in-place by fetch(), 'ty' added by prepare().
       // Input values are centered to (0.5, 0.5) and then translated back to (0, 0).
       ctx->_d.texture.affine.tx = 0.5 * (inv._00 + inv._10) + inv._20 - 0.5;

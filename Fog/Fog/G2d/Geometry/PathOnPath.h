@@ -9,6 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Geometry/PathEffect.h>
 #include <Fog/G2d/Geometry/Point.h>
@@ -47,7 +48,7 @@ protected:
   double _baseLength;
 
 private:
-  FOG_DISABLE_COPY(PathOnPath)
+  _FOG_CLASS_NO_COPY(PathOnPath)
 };
 
 //! @}
@@ -58,7 +59,7 @@ private:
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::PathOnPath, Fog::TYPEINFO_MOVABLE)
+_FOG_TYPEINFO_DECLARE(Fog::PathOnPath, Fog::TYPEINFO_MOVABLE)
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_PATHONPATH_H

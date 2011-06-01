@@ -23,10 +23,10 @@ namespace Fog {
 enum CONTAINER_DATA
 {
   //! @brief Container data is adopted from other container / custom memory
-  //! location. 
+  //! location.
   //!
   //! There are some templates that allows to allocate some container data
-  //! structures on the stack (for better performance). There are also 
+  //! structures on the stack (for better performance). There are also
   //! containers which allows to adopt another data pointer to be used with
   //! the container instance (for example @c Image class).
   CONTAINER_DATA_STATIC = 0x01,
@@ -219,6 +219,20 @@ enum CASE_SENSITIVITY
 };
 
 // ============================================================================
+// [Fog::MATH_INTEGRATION_METHOD]
+// ============================================================================
+
+//! @brief Type of integration methods implemented by Fog::Math::integrate().
+enum MATH_INTEGRATION_METHOD
+{
+  //! @brief Gauss-Legendre numerical integration.
+  MATH_INTEGRATION_METHOD_GAUSS = 0,
+
+  //! @brief Count of integration methods.
+  MATH_INTEGRATION_METHOD_COUNT = 1
+};
+
+// ============================================================================
 // [Fog::OUTPUT_CASE]
 // ============================================================================
 
@@ -366,7 +380,7 @@ enum VALUE_TYPE
 // [Fog::TYPEINFO_TYPE]
 // ============================================================================
 
-//! @brief Types for @c Fog::TypeInfo, use together with @c FOG_DECLARE_TYPEINFO
+//! @brief Types for @c Fog::TypeInfo, use together with @c _FOG_TYPEINFO_DECLARE
 //! macro.
 enum TYPEINFO_TYPE
 {
@@ -391,8 +405,8 @@ enum TYPEINFO_TYPE
 // [Fog::TYPEINFO_FLAGS]
 // ============================================================================
 
-//! @brief Additional flags for @c FOG_DECLARE_TYPEINFO. All flags are initially
-//! unsed when used @c FOG_DECLARE_TYPEINFO to declare information about a type.
+//! @brief Additional flags for @c _FOG_TYPEINFO_DECLARE. All flags are initially
+//! unsed when used @c _FOG_TYPEINFO_DECLARE to declare information about a type.
 enum TYPEINFO_FLAGS
 {
   TYPEINFO_IS_POD_TYPE    = 0x00000100,

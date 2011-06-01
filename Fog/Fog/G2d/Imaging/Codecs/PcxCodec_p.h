@@ -152,7 +152,7 @@ struct FOG_NO_EXPORT PcxEncoder : public ImageEncoder
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::PcxHeader, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::PcxHeader, Fog::TYPEINFO_PRIMITIVE)
 
 // [Guard]
 #endif // _FOG_G2D_IMAGING_CODECS_PCXCODEC_P_H

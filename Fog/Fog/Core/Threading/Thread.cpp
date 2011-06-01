@@ -119,7 +119,7 @@ void Thread::_setName(const String& name)
   // there isn't a debugger, we are just needlessly throwing an exception.
   if (!::IsDebuggerPresent()) return;
 
-  TemporaryByteArray<256> t;
+  ByteArrayTmp<256> t;
   TextCodec::local8().appendFromUnicode(t, name);
 
   THREADNAME_INFO info;

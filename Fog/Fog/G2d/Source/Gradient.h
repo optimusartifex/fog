@@ -91,7 +91,7 @@ struct FOG_API GradientF
 
   FOG_INLINE err_t removeStopAt(sysuint_t index) { return _stops.removeAt(index); }
   FOG_INLINE err_t removeStopAt(const Range& range) { return _stops.removeAt(range); }
-  FOG_INLINE err_t removeStopAt(const RangeF& range) { return _stops.removeAt(range); }
+  FOG_INLINE err_t removeStopAt(const IntervalF& interval) { return _stops.removeAt(interval); }
 
   // --------------------------------------------------------------------------
   // [Abstract]
@@ -214,7 +214,7 @@ struct FOG_API GradientD
 
   FOG_INLINE err_t removeStopAt(sysuint_t index) { return _stops.removeAt(index); }
   FOG_INLINE err_t removeStopAt(const Range& range) { return _stops.removeAt(range); }
-  FOG_INLINE err_t removeStopAt(const RangeF& range) { return _stops.removeAt(range); }
+  FOG_INLINE err_t removeStopAt(const IntervalF& interval) { return _stops.removeAt(interval); }
 
   // --------------------------------------------------------------------------
   // [Abstract]
@@ -290,8 +290,8 @@ FOG_TYPEVARIANT_DECLARE_F_D(Gradient)
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::GradientF, Fog::TYPEINFO_MOVABLE)
-FOG_DECLARE_TYPEINFO(Fog::GradientD, Fog::TYPEINFO_MOVABLE)
+_FOG_TYPEINFO_DECLARE(Fog::GradientF, Fog::TYPEINFO_MOVABLE)
+_FOG_TYPEINFO_DECLARE(Fog::GradientD, Fog::TYPEINFO_MOVABLE)
 
 // [Guard]
 #endif // _FOG_G2D_SOURCE_GRADIENT_H

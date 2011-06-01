@@ -8,6 +8,7 @@
 #define _FOG_SVG_DOM_SVGELEMENT_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Geometry/PathStroker.h>
@@ -110,7 +111,7 @@ protected:
   mutable BoxF _boundingBox;
 
 private:
-  FOG_DISABLE_COPY(SvgElement)
+  _FOG_CLASS_NO_COPY(SvgElement)
 };
 
 //! @}

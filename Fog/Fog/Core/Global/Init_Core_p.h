@@ -1,4 +1,4 @@
-// [Fog-G2d]
+// [Fog-Core]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -48,6 +48,7 @@ FOG_NO_EXPORT void _core_library_fini(void);
 
 // [Fog/Core/Math]
 FOG_NO_EXPORT void _core_math_init(void);
+FOG_NO_EXPORT void _core_math_init_integrate(void);
 FOG_NO_EXPORT void _core_math_init_solve(void);
 FOG_NO_EXPORT void _core_math_init_vec(void);
 

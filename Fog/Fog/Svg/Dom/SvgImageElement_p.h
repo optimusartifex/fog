@@ -8,6 +8,7 @@
 #define _FOG_SVG_DOM_SVGIMAGEELEMENT_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Svg/Dom/SvgCoordAttribute_p.h>
 #include <Fog/Svg/Dom/SvgImageLinkAttribute_p.h>
 #include <Fog/Svg/Dom/SvgStyledElement_p.h>
@@ -56,7 +57,7 @@ struct FOG_NO_EXPORT SvgImageElement : public SvgStyledElement
   SvgImageLinkAttribute a_href;
 
 private:
-  FOG_DISABLE_COPY(SvgImageElement)
+  _FOG_CLASS_NO_COPY(SvgImageElement)
 };
 
 //! @}

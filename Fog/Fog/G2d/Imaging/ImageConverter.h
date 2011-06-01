@@ -8,7 +8,10 @@
 #define _FOG_G2D_IMAGING_IMAGECONVERTER_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Swap.h>
+#include <Fog/Core/Global/TypeInfo.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Global/Constants.h>
@@ -241,7 +244,7 @@ struct FOG_API ImageConverter
   // [Members]
   // --------------------------------------------------------------------------
 
-  FOG_DECLARE_D(ImageConverterData)
+  _FOG_CLASS_D(ImageConverterData)
 };
 
 //! @}
@@ -252,9 +255,15 @@ struct FOG_API ImageConverter
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::ImageConverter, Fog::TYPEINFO_MOVABLE)
-FOG_DECLARE_TYPEINFO(Fog::ImageConverterClosure, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::ImageDither8Params, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::ImageConverter, Fog::TYPEINFO_MOVABLE)
+_FOG_TYPEINFO_DECLARE(Fog::ImageConverterClosure, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::ImageDither8Params, Fog::TYPEINFO_PRIMITIVE)
+
+// ============================================================================
+// [Fog::Swap]
+// ============================================================================
+
+_FOG_SWAP_D(Fog::ImageConverter)
 
 // [Guard]
 #endif // _FOG_G2D_IMAGING_IMAGECONVERTER_H

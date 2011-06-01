@@ -78,33 +78,6 @@ err_t SvgHitTest::onPath(SvgElement* obj, const PathF& path)
   return ERR_OK;
 }
 
-err_t SvgHitTest::onPath(SvgElement* obj, const PathD& path)
-{
-  TransformD inv(_transform);
-  if (!inv.invert()) return ERR_OK;
-
-  PointD p(_point);
-  inv.mapPoint(p, p);
-
-  if (_fillStyle.isPaintable())
-  {
-    if (path.hitTest(p, _fillRule)) return _result.append(obj);
-  }
-
-  // TODO:
-  if (_strokeStyle.isPaintable())
-  {
-    PathStrokerParamsD params;
-    params = _strokeParams;
-    PathStrokerD stroker(params);
-    PathD tmp;
-    stroker.strokePath(tmp, path);
-    if (tmp.hitTest(p, FILL_RULE_NON_ZERO)) return _result.append(obj);
-  }
-
-  return ERR_OK;
-}
-
 err_t SvgHitTest::onImage(SvgElement* obj, const PointF& pt, const Image& image)
 {
   if (_transformDirty)

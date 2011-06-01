@@ -9,6 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
 
 namespace Fog {
@@ -52,10 +53,6 @@ struct FOG_API SvgHitTest : public SvgVisitor
 
   virtual err_t onShape(SvgElement* obj, const ShapeF& shape);
   virtual err_t onPath(SvgElement* obj, const PathF& path);
-
-  // TODO: Remove
-  virtual err_t onPath(SvgElement* obj, const PathD& path);
-
   virtual err_t onImage(SvgElement* obj, const PointF& pt, const Image& image);
 
   // --------------------------------------------------------------------------
@@ -71,7 +68,7 @@ struct FOG_API SvgHitTest : public SvgVisitor
   PathF _pathTmp;
 
 private:
-  FOG_DISABLE_COPY(SvgHitTest)
+  _FOG_CLASS_NO_COPY(SvgHitTest)
 };
 
 //! @}

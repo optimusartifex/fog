@@ -163,7 +163,7 @@ void MyWindow::onPaint(PaintEvent* e)
 
   p->setSource(Argb32(0xFFFFFFFF));
   p->fillAll();
- 
+
   PieD pie(PointD(0, 0), PointD(200, 200), 0.0, MATH_ONE_HALF_PI);
   BoxD box;
 
@@ -189,14 +189,6 @@ void MyWindow::onPaint(PaintEvent* e)
   linear.setStart(PointF(0, -200));
   linear.setEnd(PointF(0, 200));
   p->setSource(linear);
-
-  /*
-  PathD ppp;
-  ppp.pie(pie);
-  ppp.flatten(PathFlattenParamsD());
-  p->fillPath(ppp);
-  */
-
   p->fillPie(pie);
 
   p->setSource(Argb32(0xFF00FFFF));
@@ -210,7 +202,7 @@ void MyWindow::onPaint(PaintEvent* e)
     p->setSource(Argb32(0xFF000000));
     p->drawBox(box);
   }
- 
+
   // --------------------------------------------------------------------------
   Time lastTime = Time::now();
 
@@ -230,6 +222,14 @@ void MyWindow::onPaint(PaintEvent* e)
 
   String text;
   text.format("FPS: %g, Time: %g", fps, frameDelta.inMillisecondsF());
+
+  {
+    PathF path;
+    Font font = getFont();
+    font.getTextOutline(path, PointF(30, 30), text);
+    p->fillPath(path);
+  }
+
   setWindowTitle(text);
 }
 

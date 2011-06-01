@@ -266,7 +266,7 @@ err_t OS::getEnv(const String& name, String& value)
 #endif // FOG_OS_WINDOWS
 
 #if defined(FOG_OS_POSIX)
-  TemporaryByteArray<TEMPORARY_LENGTH> name8;
+  ByteArrayTmp<TEMPORARY_LENGTH> name8;
 
   err_t err;
   if ((err = TextCodec::local8().appendFromUnicode(name8, name))) return err;
@@ -299,8 +299,8 @@ err_t OS::setEnv(const String& name, const String& value)
 #endif
 
 #if defined(FOG_OS_POSIX)
-  TemporaryByteArray<TEMPORARY_LENGTH> name8;
-  TemporaryByteArray<TEMPORARY_LENGTH> value8;
+  ByteArrayTmp<TEMPORARY_LENGTH> name8;
+  ByteArrayTmp<TEMPORARY_LENGTH> value8;
 
   err_t err;
   int result;

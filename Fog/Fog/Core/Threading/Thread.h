@@ -12,6 +12,7 @@
 #define _FOG_CORE_THREADING_THREAD_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/System/EventLoop.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Threading/ThreadEvent.h>
@@ -272,7 +273,7 @@ protected:
 private:
   friend struct Application;
 
-  FOG_DISABLE_COPY(Thread)
+  _FOG_CLASS_NO_COPY(Thread)
 };
 
 //! @}

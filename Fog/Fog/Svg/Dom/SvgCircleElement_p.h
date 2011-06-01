@@ -8,6 +8,7 @@
 #define _FOG_SVG_DOM_SVGCIRCLEELEMENT_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Svg/Dom/SvgCoordAttribute_p.h>
 #include <Fog/Svg/Dom/SvgStyledElement_p.h>
 
@@ -53,7 +54,7 @@ struct FOG_NO_EXPORT SvgCircleElement : public SvgStyledElement
   SvgCoordAttribute a_r;
 
 private:
-  FOG_DISABLE_COPY(SvgCircleElement)
+  _FOG_CLASS_NO_COPY(SvgCircleElement)
 };
 
 //! @}

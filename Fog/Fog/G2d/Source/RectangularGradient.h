@@ -162,8 +162,8 @@ FOG_TYPEVARIANT_DECLARE_F_D(RectangularGradient)
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::RectangularGradientF, Fog::TYPEINFO_MOVABLE)
-FOG_DECLARE_TYPEINFO(Fog::RectangularGradientD, Fog::TYPEINFO_MOVABLE)
+_FOG_TYPEINFO_DECLARE(Fog::RectangularGradientF, Fog::TYPEINFO_MOVABLE)
+_FOG_TYPEINFO_DECLARE(Fog::RectangularGradientD, Fog::TYPEINFO_MOVABLE)
 
 // [Guard]
 #endif // _FOG_G2D_SOURCE_RECTANGULARGRADIENT_H

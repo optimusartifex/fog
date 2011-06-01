@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_TEXTRECT_H
-#define _FOG_G2D_TEXTRECT_H
+#ifndef _FOG_G2D_TEXT_TEXTRECT_H
+#define _FOG_G2D_TEXT_TEXTRECT_H
 
 // [Dependencies]
 #include <Fog/Core/Global/TypeInfo.h>
@@ -30,27 +30,27 @@ struct TextRectD;
 // [Fog::TextRectI]
 // ============================================================================
 
-struct FOG_NO_EXPORT TextRectI
+struct FOG_NO_EXPORT TextRectI : public RectI
 {
   FOG_INLINE TextRectI() :
-    _rect(0, 0, 0, 0),
+    RectI(0, 0, 0, 0),
     _alignment(NO_FLAGS)
   {
   }
 
   FOG_INLINE TextRectI(_Uninitialized) :
-    _rect(UNINITIALIZED)
+    RectI(UNINITIALIZED)
   {
   }
 
   FOG_INLINE TextRectI(int rx, int ry, int rw, int rh, uint32_t alignment) :
-    _rect(rx, ry, rw, rh),
+    RectI(rx, ry, rw, rh),
     _alignment(alignment)
   {
   }
 
   FOG_INLINE TextRectI(const RectI& rect, uint32_t alignment) :
-    _rect(rect),
+    RectI(rect),
     _alignment(alignment)
   {
   }
@@ -59,27 +59,21 @@ struct FOG_NO_EXPORT TextRectI
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const RectI& getRect() const { return _rect; }
   FOG_INLINE uint32_t getAlignment() const { return _alignment; }
-
-  FOG_INLINE void setRect(const RectI& rect) { _rect = rect; }
   FOG_INLINE void setAlignment(uint32_t alignment) { _alignment = alignment; }
 
   // --------------------------------------------------------------------------
   // [Reset]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void reset()
-  {
-    _rect.reset();
-    _alignment = NO_FLAGS;
-  }
+  FOG_INLINE void reset() { resetRect(); resetAlignment(); }
+  FOG_INLINE void resetRect() { RectI::reset(); }
+  FOG_INLINE void resetAlignment() { _alignment = NO_FLAGS; }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  RectI _rect;
   uint32_t _alignment;
 };
 
@@ -87,27 +81,27 @@ struct FOG_NO_EXPORT TextRectI
 // [Fog::TextRectF]
 // ============================================================================
 
-struct FOG_NO_EXPORT TextRectF
+struct FOG_NO_EXPORT TextRectF : public RectF
 {
   FOG_INLINE TextRectF() :
-    _rect(0.0f, 0.0f, 0.0f, 0.0f),
+    RectF(0.0f, 0.0f, 0.0f, 0.0f),
     _alignment(NO_FLAGS)
   {
   }
 
   FOG_INLINE TextRectF(_Uninitialized) :
-    _rect(UNINITIALIZED)
+    RectF(UNINITIALIZED)
   {
   }
 
   FOG_INLINE TextRectF(float rx, float ry, float rw, float rh, uint32_t alignment) :
-    _rect(rx, ry, rw, rh),
+    RectF(rx, ry, rw, rh),
     _alignment(alignment)
   {
   }
 
   FOG_INLINE TextRectF(const RectF& rect, uint32_t alignment) :
-    _rect(rect),
+    RectF(rect),
     _alignment(alignment)
   {
   }
@@ -116,27 +110,21 @@ struct FOG_NO_EXPORT TextRectF
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const RectF& getRect() const { return _rect; }
   FOG_INLINE uint32_t getAlignment() const { return _alignment; }
-
-  FOG_INLINE void setRect(const RectF& rect) { _rect = rect; }
   FOG_INLINE void setAlignment(uint32_t alignment) { _alignment = alignment; }
 
   // --------------------------------------------------------------------------
   // [Reset]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void reset()
-  {
-    _rect.reset();
-    _alignment = NO_FLAGS;
-  }
+  FOG_INLINE void reset() { resetRect(); resetAlignment(); }
+  FOG_INLINE void resetRect() { RectF::reset(); }
+  FOG_INLINE void resetAlignment() { _alignment = NO_FLAGS; }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  RectF _rect;
   uint32_t _alignment;
 };
 
@@ -144,27 +132,27 @@ struct FOG_NO_EXPORT TextRectF
 // [Fog::TextRectD]
 // ============================================================================
 
-struct FOG_NO_EXPORT TextRectD
+struct FOG_NO_EXPORT TextRectD : public RectD
 {
   FOG_INLINE TextRectD() :
-    _rect(0.0f, 0.0f, 0.0f, 0.0f),
+    RectD(0.0, 0.0, 0.0, 0.0),
     _alignment(NO_FLAGS)
   {
   }
 
   FOG_INLINE TextRectD(_Uninitialized) :
-    _rect(UNINITIALIZED)
+    RectD(UNINITIALIZED)
   {
   }
 
   FOG_INLINE TextRectD(double rx, double ry, double rw, double rh, uint32_t alignment) :
-    _rect(rx, ry, rw, rh),
+    RectD(rx, ry, rw, rh),
     _alignment(alignment)
   {
   }
 
   FOG_INLINE TextRectD(const RectD& rect, uint32_t alignment) :
-    _rect(rect),
+    RectD(rect),
     _alignment(alignment)
   {
   }
@@ -173,27 +161,21 @@ struct FOG_NO_EXPORT TextRectD
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const RectD& getRect() const { return _rect; }
   FOG_INLINE uint32_t getAlignment() const { return _alignment; }
-
-  FOG_INLINE void setRect(const RectD& rect) { _rect = rect; }
   FOG_INLINE void setAlignment(uint32_t alignment) { _alignment = alignment; }
 
   // --------------------------------------------------------------------------
   // [Reset]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void reset()
-  {
-    _rect.reset();
-    _alignment = NO_FLAGS;
-  }
+  FOG_INLINE void reset() { resetRect(); resetAlignment(); }
+  FOG_INLINE void resetRect() { RectD::reset(); }
+  FOG_INLINE void resetAlignment() { _alignment = NO_FLAGS; }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  RectD _rect;
   uint32_t _alignment;
 };
 
@@ -211,9 +193,9 @@ FOG_TYPEVARIANT_DECLARE_F_D(TextRect)
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::TextRectI, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::TextRectF, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::TextRectD, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::TextRectI, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::TextRectF, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::TextRectD, Fog::TYPEINFO_PRIMITIVE)
 
 // [Guard]
-#endif // _FOG_G2D_TEXTRECT_H
+#endif // _FOG_G2D_TEXT_TEXTRECT_H

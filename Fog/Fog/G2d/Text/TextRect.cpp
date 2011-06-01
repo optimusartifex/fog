@@ -10,6 +10,3 @@
 
 // [Dependencies]
 #include <Fog/G2d/Text/TextRect.h>
-
-namespace Fog {
-} // Fog namespace

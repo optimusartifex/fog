@@ -233,13 +233,13 @@ struct FOG_NO_EXPORT AhslF : public AhslBaseF
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::AhslF, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::AhslF, Fog::TYPEINFO_PRIMITIVE)
 
 // ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_DECLARE_FUZZY(Fog::AhslF, Math::feqv(a.data, b.data, 4))
+FOG_FUZZY_DECLARE(Fog::AhslF, Math::feqv(a.data, b.data, 4))
 
 // [Guard]
 #endif // _FOG_G2D_SOURCE_AHSL_H

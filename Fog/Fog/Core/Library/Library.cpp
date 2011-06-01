@@ -57,7 +57,7 @@ static Static<Library_Local> _core_library_local;
 
 static err_t systemOpenLibrary(const String& fileName, void** handle)
 {
-  TemporaryString<TEMPORARY_LENGTH> fileNameW;
+  StringTmp<TEMPORARY_LENGTH> fileNameW;
   err_t err;
 
   if ((err = fileNameW.set(fileName)) || (err = fileNameW.slashesToWin()))
@@ -93,7 +93,7 @@ static err_t systemOpenLibrary(const String& fileName, void** handle)
 {
   err_t err;
 
-  TemporaryByteArray<TEMPORARY_LENGTH> fileName8;
+  ByteArrayTmp<TEMPORARY_LENGTH> fileName8;
   if ((err = TextCodec::local8().appendFromUnicode(fileName8, fileName))) return err;
 
   void* h = (void*)::dlopen(fileName8.getData(), RTLD_NOW);
@@ -184,7 +184,7 @@ err_t Library::open(const String& _fileName, uint32_t openFlags)
   err_t err;
   err_t libOpenError = ERR_LIBRARY_LOAD_FAILED;
 
-  TemporaryString<TEMPORARY_LENGTH> fileName;
+  StringTmp<TEMPORARY_LENGTH> fileName;
   List<String> extensions = _core_library_local->extensions;
 
   for (sysuint_t i = 0; i < extensions.getLength(); i++)
@@ -232,8 +232,8 @@ err_t Library::openPlugin(const String& category, const String& fileName)
   err_t err;
   err_t libOpenError = ERR_LIBRARY_LOAD_FAILED;
 
-  TemporaryString<TEMPORARY_LENGTH> relative;
-  TemporaryString<TEMPORARY_LENGTH> absolute;
+  StringTmp<TEMPORARY_LENGTH> relative;
+  StringTmp<TEMPORARY_LENGTH> absolute;
 
   List<String> extensions = _core_library_local->extensions;
 
@@ -279,7 +279,7 @@ void* Library::getSymbol(const char* symbolName)
 
 void* Library::getSymbol(const String& symbolName)
 {
-  TemporaryByteArray<TEMPORARY_LENGTH> symb8;
+  ByteArrayTmp<TEMPORARY_LENGTH> symb8;
   TextCodec::utf8().fromUnicode(symb8, symbolName);
   return systemLoadSymbol(_d->handle, symb8.getData());
 }

@@ -174,7 +174,7 @@ struct FOG_NO_EXPORT ArcF
     err_t err = _g2d.arcf.getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr, false);
     dst.w -= dst.x;
     dst.h -= dst.y;
-    return err;    
+    return err;
   }
 
   // --------------------------------------------------------------------------
@@ -374,7 +374,7 @@ struct FOG_NO_EXPORT ArcD
     err_t err = _g2d.arcd.getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr, false);
     dst.w -= dst.x;
     dst.h -= dst.y;
-    return err;    
+    return err;
   }
 
   // --------------------------------------------------------------------------
@@ -451,15 +451,15 @@ FOG_TYPEVARIANT_DECLARE_F_D(Arc)
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::ArcF, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::ArcD, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::ArcF, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::ArcD, Fog::TYPEINFO_PRIMITIVE)
 
 // ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_DECLARE_FUZZY(Fog::ArcF, Math::feqv((const float *)&a, (const float *)&b, 6))
-FOG_DECLARE_FUZZY(Fog::ArcD, Math::feqv((const double*)&a, (const double*)&b, 6))
+FOG_FUZZY_DECLARE(Fog::ArcF, Math::feqv((const float *)&a, (const float *)&b, 6))
+FOG_FUZZY_DECLARE(Fog::ArcD, Math::feqv((const double*)&a, (const double*)&b, 6))
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_ARC_H

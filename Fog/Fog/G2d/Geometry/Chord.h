@@ -107,15 +107,15 @@ FOG_TYPEVARIANT_DECLARE_F_D(Chord)
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::ChordF, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::ChordD, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::ChordF, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::ChordD, Fog::TYPEINFO_PRIMITIVE)
 
 // ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_DECLARE_FUZZY(Fog::ChordF, Fuzzy<ArcF>::eq(a, b))
-FOG_DECLARE_FUZZY(Fog::ChordD, Fuzzy<ArcD>::eq(a, b))
+FOG_FUZZY_DECLARE(Fog::ChordF, Fuzzy<ArcF>::eq(a, b))
+FOG_FUZZY_DECLARE(Fog::ChordD, Fuzzy<ArcD>::eq(a, b))
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_CHORD_H

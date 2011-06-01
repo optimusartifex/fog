@@ -8,6 +8,8 @@
 #define _FOG_CORE_TOOLS_TEXTCODEC_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Global/TypeInfo.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Tools/Char.h>
@@ -310,7 +312,7 @@ struct FOG_API TextCodec
     virtual err_t appendFromUnicode(ByteArray& dst, const Char* src, sysuint_t length, Replacer replacer, State* state) const = 0;
     virtual err_t appendToUnicode(String& dst, const void* src, sysuint_t size, State* state) const = 0;
 
-    // [Implicit Sharing]
+    // [Sharing]
 
     FOG_INLINE Engine* ref() const { refCount.inc(); return (Engine*)this; }
     FOG_INLINE void deref() { if (refCount.deref()) fog_delete(this); }
@@ -341,7 +343,7 @@ struct FOG_API TextCodec
     const Page8* page8;
 
   private:
-    FOG_DISABLE_COPY(Engine)
+    _FOG_CLASS_NO_COPY(Engine)
   };
 
   // --------------------------------------------------------------------------
@@ -363,7 +365,7 @@ struct FOG_API TextCodec
   static TextCodec fromBom(const void* data, sysuint_t length);
 
   // --------------------------------------------------------------------------
-  // [Implicit Sharing]
+  // [Sharing]
   // --------------------------------------------------------------------------
 
   //! @copydoc Doxygen::Implicit::getRefCount().
@@ -461,7 +463,7 @@ struct FOG_API TextCodec
   // [Members]
   // --------------------------------------------------------------------------
 
-  FOG_DECLARE_D(Engine)
+  _FOG_CLASS_D(Engine)
 };
 
 //! @}
@@ -472,8 +474,14 @@ struct FOG_API TextCodec
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::TextCodec, Fog::TYPEINFO_MOVABLE)
-FOG_DECLARE_TYPEINFO(Fog::TextCodec::State, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::TextCodec, Fog::TYPEINFO_MOVABLE)
+_FOG_TYPEINFO_DECLARE(Fog::TextCodec::State, Fog::TYPEINFO_PRIMITIVE)
+
+// ============================================================================
+// [Fog::Swap]
+// ============================================================================
+
+_FOG_SWAP_D(Fog::TextCodec)
 
 // [Guard]
 #endif // _FOG_CORE_TOOLS_TEXTCODEC_H

@@ -9,6 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Memory/Memory.h>
 #include <Fog/Core/Memory/MemoryManager.h>
 #include <Fog/Core/Threading/Atomic.h>
@@ -134,7 +135,7 @@ protected:
   sysuint_t _embeddedSize;
 
 private:
-  FOG_DISABLE_COPY(MemoryBuffer)
+  _FOG_CLASS_NO_COPY(MemoryBuffer)
 };
 
 //! @}

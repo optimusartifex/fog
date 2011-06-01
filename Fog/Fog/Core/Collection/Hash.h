@@ -11,9 +11,11 @@
 #include <Fog/Core/Collection/HashUtil.h>
 #include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/SequenceInfo.h>
 #include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Global/TypeInfo.h>
 #include <Fog/Core/Memory/Memory.h>
 #include <Fog/Core/Threading/Atomic.h>
@@ -78,7 +80,7 @@ struct FOG_API UnorderedAbstract
   static Static<Data> _dnull;
 
   // --------------------------------------------------------------------------
-  // [Implicit Sharing]
+  // [Sharing]
   // --------------------------------------------------------------------------
 
   FOG_INLINE sysuint_t getRefCount() const { return _d->refCount.get(); }
@@ -139,7 +141,7 @@ struct FOG_API UnorderedAbstract
   // [Members]
   // --------------------------------------------------------------------------
 
-  FOG_DECLARE_D(Data)
+  _FOG_CLASS_D(Data)
 };
 
 // ============================================================================
@@ -219,7 +221,7 @@ struct UnorderedHash : public UnorderedAbstract
   ~UnorderedHash();
 
   // --------------------------------------------------------------------------
-  // [Implicit Sharing]
+  // [Sharing]
   // --------------------------------------------------------------------------
 
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
@@ -668,7 +670,7 @@ struct UnorderedSet : public UnorderedAbstract
   ~UnorderedSet() { ((Data*)_d)->deref(); }
 
   // --------------------------------------------------------------------------
-  // [Implicit Sharing]
+  // [Sharing]
   // --------------------------------------------------------------------------
 
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
@@ -927,14 +929,21 @@ List<KeyType> UnorderedSet<KeyType>::keys() const
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO_TEMPLATE2(Fog::UnorderedHash,
+_FOG_TYPEINFO_DECLARE_T2(Fog::UnorderedHash,
   typename, KeyType,
   typename, ValueType,
   Fog::TYPEINFO_MOVABLE)
 
-FOG_DECLARE_TYPEINFO_TEMPLATE1(Fog::UnorderedSet,
+_FOG_TYPEINFO_DECLARE_T1(Fog::UnorderedSet,
   typename, KeyType,
   Fog::TYPEINFO_MOVABLE)
+
+// ============================================================================
+// [Fog::Swap]
+// ============================================================================
+
+_FOG_SWAP_D_TEMPLATE2(Fog::UnorderedHash, typename, Key, typename, Value)
+_FOG_SWAP_D_TEMPLATE1(Fog::UnorderedSet, typename, Key)
 
 // [Guard]
 #endif // _FOG_CORE_COLLECTION_HASH_H

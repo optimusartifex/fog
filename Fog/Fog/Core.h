@@ -154,11 +154,6 @@
 
 
 
-//! @defgroup Fog_Core_Environment Environment and operating system related classes
-//! @ingroup Fog_Core_Public
-
-
-
 //! @defgroup Fog_Core_Language Language (C++) compile-time information and tools
 //! @ingroup Fog_Core_Public
 
@@ -184,7 +179,12 @@
 
 
 
-//! @defgroup Fog_Core_Streaming Filesystem and streams
+//! @defgroup Fog_Core_OS Operating system and application environment classes
+//! @ingroup Fog_Core_Public
+
+
+
+//! @defgroup Fog_Core_IO Filesystem and streams
 //! @ingroup Fog_Core_Public
 
 
@@ -224,7 +224,7 @@ namespace Doxygen {
 //! @brief Not real structure, used only for doxygen.
 struct Implicit
 {
-  // [Implicit Sharing]
+  // [Sharing]
 
   //! @brief Returns reference count of object data.
   sysuint_t getRefCount() const;
@@ -294,7 +294,7 @@ struct Implicit
   //! and deep copy will be used instead.
   //!
   //! This flag is set only by template versions of original objects.
-  //! For example @c Fog::TemporaryString<> templates sets this flag to
+  //! For example @c Fog::StringTmp<> templates sets this flag to
   //! true, but @c Fog::String family classes never set this flag.
   bool isStrong() const;
 };
@@ -326,6 +326,7 @@ struct Implicit
 #include <Fog/Core/DateTime/TimeTicks.h>
 #include <Fog/Core/Global/Api.h>
 #include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/Error.h>
 #include <Fog/Core/Global/Init.h>
@@ -343,7 +344,10 @@ struct Implicit
 #include <Fog/Core/Library/Library.h>
 #include <Fog/Core/Math/Fixed.h>
 #include <Fog/Core/Math/FloatBits.h>
+#include <Fog/Core/Math/Function.h>
 #include <Fog/Core/Math/Fuzzy.h>
+#include <Fog/Core/Math/Integrate.h>
+#include <Fog/Core/Math/Interval.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Math/MathVec.h>
 #include <Fog/Core/Math/Solve.h>
@@ -385,6 +389,8 @@ struct Implicit
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Core/Tools/Stub.h>
 #include <Fog/Core/Tools/TextCodec.h>
+#include <Fog/Core/Tools/TextIterator.h>
+#include <Fog/Core/Tools/Unicode.h>
 
 // [Guard]
 #endif // _FOG_CORE_H

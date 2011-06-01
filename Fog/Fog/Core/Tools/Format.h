@@ -52,7 +52,7 @@ struct FOG_NO_EXPORT FormatFlags
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::FormatFlags, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::FormatFlags, Fog::TYPEINFO_PRIMITIVE)
 
 // [Guard]
 #endif // _FOG_CORE_TOOLS_FORMAT_H

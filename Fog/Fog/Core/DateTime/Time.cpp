@@ -16,6 +16,7 @@
 #include <Fog/Core/Cpu/Cpu.h>
 #include <Fog/Core/DateTime/Time.h>
 #include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Tools/Lazy.h>
 #include <Fog/Core/Threading/Lock.h>
 
@@ -435,7 +436,7 @@ private:
   DWORD _lastSeen;       // The last timeGetTime value we saw, to detect rollover.
   bool _hiResClockEnabled;
 
-  FOG_DISABLE_COPY(NowSingleton)
+  _FOG_CLASS_NO_COPY(NowSingleton)
 };
 
 static Lazy<NowSingleton> nowSingleton;
@@ -549,7 +550,7 @@ private:
   float _ticksPerMicrosecond;  // 0 indicates QPF failed and we're broken.
   int64_t _skew;  // Skew between lo-res and hi-res clocks (for debugging).
 
-  FOG_DISABLE_COPY(HighResNowSingleton)
+  _FOG_CLASS_NO_COPY(HighResNowSingleton)
 };
 
 static Lazy<HighResNowSingleton> highResNowSingleton;

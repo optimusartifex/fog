@@ -9,6 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Config/Config.h>
+#include <Fog/Core/Global/Class.h>
 
 namespace Fog {
 
@@ -34,7 +35,7 @@ protected:
   bool _destroyOnFinish;
 
 private:
-  FOG_DISABLE_COPY(Task)
+  _FOG_CLASS_NO_COPY(Task)
 };
 
 // ============================================================================

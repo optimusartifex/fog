@@ -13,6 +13,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
+#include <Fog/Core/Global/Class.h>
 
 namespace Fog {
 
@@ -39,7 +40,7 @@ protected:
   mutable sysuint_t _notifyDepth;
 
 private:
-  FOG_DISABLE_COPY(ListenerListBase)
+  _FOG_CLASS_NO_COPY(ListenerListBase)
 };
 
 template <typename ListenerType>
@@ -86,7 +87,7 @@ struct ListenerList : public ListenerListBase
 //private:
 //  friend struct ListenerList<ListenerType>::Scope;
 
-  FOG_DISABLE_COPY(ListenerList)
+  _FOG_CLASS_NO_COPY(ListenerList)
 };
 
 #define FOG_LISTENER_FOR_EACH(ListenerType, _listenerList, _func) \

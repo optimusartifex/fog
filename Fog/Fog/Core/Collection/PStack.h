@@ -9,6 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Memory/Memory.h>
 
@@ -134,7 +135,7 @@ protected:
   Node _first;
 
 private:
-  FOG_DISABLE_COPY(PStack)
+  _FOG_CLASS_NO_COPY(PStack)
 };
 
 //! @}

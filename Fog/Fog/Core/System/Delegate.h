@@ -2148,15 +2148,15 @@ Delegate8<Param1, Param2, Param3, Param4, Param5, Param6, Param7, Param8, FASTDL
 } // Fog namespace
 
 // [Fog::TypeInfo<>]
-FOG_DECLARE_TYPEINFO_TEMPLATE1(Fog::Delegate0, class, RET, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO_TEMPLATE2(Fog::Delegate1, class, T0, class, RET, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO_TEMPLATE3(Fog::Delegate2, class, T0, class, T1, class, RET, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO_TEMPLATE4(Fog::Delegate3, class, T0, class, T1, class, T2, class, RET, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO_TEMPLATE5(Fog::Delegate4, class, T0, class, T1, class, T2, class, T3, class, RET, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO_TEMPLATE6(Fog::Delegate5, class, T0, class, T1, class, T2, class, T3, class, T4, class, RET, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO_TEMPLATE7(Fog::Delegate6, class, T0, class, T1, class, T2, class, T3, class, T4, class, T5, class, RET, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO_TEMPLATE8(Fog::Delegate7, class, T0, class, T1, class, T2, class, T3, class, T4, class, T5, class, T6, class, RET, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO_TEMPLATE9(Fog::Delegate8, class, T0, class, T1, class, T2, class, T3, class, T4, class, T5, class, T6, class, T7, class, RET, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE_T1(Fog::Delegate0, class, RET, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE_T2(Fog::Delegate1, class, T0, class, RET, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE_T3(Fog::Delegate2, class, T0, class, T1, class, RET, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE_T4(Fog::Delegate3, class, T0, class, T1, class, T2, class, RET, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE_T5(Fog::Delegate4, class, T0, class, T1, class, T2, class, T3, class, RET, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE_T6(Fog::Delegate5, class, T0, class, T1, class, T2, class, T3, class, T4, class, RET, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE_T7(Fog::Delegate6, class, T0, class, T1, class, T2, class, T3, class, T4, class, T5, class, RET, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE_T8(Fog::Delegate7, class, T0, class, T1, class, T2, class, T3, class, T4, class, T5, class, T6, class, RET, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE_T9(Fog::Delegate8, class, T0, class, T1, class, T2, class, T3, class, T4, class, T5, class, T6, class, T7, class, RET, Fog::TYPEINFO_PRIMITIVE)
 
 #endif // FOG_DOXYGEN
 

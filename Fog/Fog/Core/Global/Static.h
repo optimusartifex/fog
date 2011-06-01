@@ -28,27 +28,26 @@ namespace Fog {
 //! @verbatim
 //! Fog::Static<Fog::Mutex> mutex;
 //!
-//! // initialize class, call new Mutex
+//! // Initialize instance, calls Mutex constructor internally.
 //! mutex.init();
 //!
-//! // do something, use -> operator or instance() method
+//! // Do something, use -> operator or instance() method.
 //! mutex->lock();
 //! mutex->unlock();
 //!
 //! mutex.instance().lock();
 //! mutex.instance().unlock();
 //!
-//! // destroy class, call delete Mutex
+//! // Destroy instance, calls Mutex destructor internally.
 //! mutex.destroy();
 //! @endverbatim
 //!
-//! This template is very effective, because the memory is not allocated on the
+//! This template is very efficient, because the memory is not allocated on the
 //! heap, instead stack based allocation is used together with placement @c new
 //! and @c delete operators.
 template<typename Type>
 struct Static
 {
-public:
   //! @brief Initializer (calls placement @c new operator).
   FOG_INLINE void init() { fog_new_p(reinterpret_cast<void*>(_storage)) Type; }
   //! @brief Initializer with copy assignment (calls placement @c new operator).

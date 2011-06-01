@@ -20,16 +20,16 @@ namespace Fog {
 FOG_NO_EXPORT void _g2d_init(void)
 {
   // [Fog/G2d/Geometry]
+  _g2d_line_init();
+  _g2d_qbezier_init();
+  _g2d_cbezier_init();
   _g2d_arc_init();
   _g2d_circle_init();
   _g2d_ellipse_init();
   _g2d_chord_init();
   _g2d_pie_init();
   _g2d_round_init();
-  _g2d_line_init();
-
-  _g2d_quadcurve_init();
-  _g2d_cubiccurve_init();
+  _g2d_triangle_init();
 
   _g2d_path_init();
   _g2d_shape_init();
@@ -47,47 +47,49 @@ FOG_NO_EXPORT void _g2d_init(void)
 
   // [Fog/G2d/Imaging]
   _g2d_imagepalette_init();
-  _g2d_imageeffect_init();
   _g2d_imageformatdescription_init();
   _g2d_image_init();
   _g2d_imageconverter_init();
   _g2d_imagecodecprovider_init();
+  _g2d_imageeffect_init();
 
   // [Fog/G2d/Tools]
   _g2d_region_init();
   _g2d_genericmatrix_init();
 
-  // [Fog/G2d/Font]
-  _g2d_glyph_init();
-  _g2d_glyphset_init();
-  _g2d_font_init();
-
   // [Fog/G2d/Painter]
+  _g2d_paintdeviceinfo_init();
   _g2d_painter_init_null();
   _g2d_painter_init_raster();
+
+  // [Fog/G2d/Text]
+  _g2d_glyphbitmap_init();
+  _g2d_glyphoutline_init();
+  _g2d_fontmanager_init();
 }
 
 FOG_NO_EXPORT void _g2d_fini(void)
 {
+  // [Fog/G2d/Text]
+  _g2d_fontmanager_fini();
+  _g2d_glyphoutline_fini();
+  _g2d_glyphbitmap_fini();
+
   // [Fog/G2d/Painter]
   _g2d_painter_fini_raster();
   _g2d_painter_fini_null();
-
-  // [Fog/G2d/Font]
-  _g2d_font_fini();
-  _g2d_glyphset_fini();
-  _g2d_glyph_fini();
+  _g2d_paintdeviceinfo_fini();
 
   // [Fog/G2d/Tools]
   _g2d_genericmatrix_fini();
   _g2d_region_fini();
 
   // [Fog/G2d/Imaging]
+  _g2d_imageeffect_fini();
   _g2d_imagecodecprovider_fini();
   _g2d_imageconverter_fini();
   _g2d_image_fini();
   _g2d_imageformatdescription_fini();
-  _g2d_imageeffect_fini();
   _g2d_imagepalette_fini();
 
   // [Fog/G2d/Source]

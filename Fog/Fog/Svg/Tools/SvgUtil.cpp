@@ -256,8 +256,8 @@ _End:
 // [Fog::SvgUtil - Parse - Coord]
 // ============================================================================
 
-// ${COORD_UNIT:BEGIN}
-static const char svgUnitNames[] = 
+// ${UNIT:BEGIN}
+static const char svgUnitNames[] =
   "\0\0"
   "px"
   "pt"
@@ -268,12 +268,12 @@ static const char svgUnitNames[] =
   "\0\0"
   "em"
   "ex";
-// ${COORD_UNIT:END}
+// ${UNIT:END}
 
 err_t parseCoord(SvgCoord& coord, const String& str)
 {
   float d = 0.0f;
-  uint32_t unit = COORD_UNIT_PX;
+  uint32_t unit = UNIT_PX;
 
   sysuint_t end;
   err_t err = str.atof(&d, NULL, &end);
@@ -287,12 +287,12 @@ err_t parseCoord(SvgCoord& coord, const String& str)
 
       if (spec.getLength() == 1)
       {
-        if (spec[0] == Char('%')) unit = COORD_UNIT_PERCENT;
+        if (spec[0] == Char('%')) unit = UNIT_PERCENTAGE;
       }
       else if (spec.getLength() == 2)
       {
         const char* units = svgUnitNames;
-        for (uint32_t u = 0; u < COORD_UNIT_COUNT; u++, units += 2)
+        for (uint32_t u = 0; u < UNIT_COUNT; u++, units += 2)
         {
           if (spec.getData()[0] == units[0] && spec.getData()[1] == units[1])
           {
@@ -304,7 +304,7 @@ err_t parseCoord(SvgCoord& coord, const String& str)
     }
   }
 
-  if (unit == COORD_UNIT_PERCENT) d *= 0.01f;
+  if (unit == UNIT_PERCENTAGE) d *= 0.01f;
 
   coord.value = (float)d;
   coord.unit = unit;
@@ -768,12 +768,12 @@ err_t serializeCoord(String& dst, const SvgCoord& coord)
 {
   float val = coord.value;
 
-  if (coord.unit == COORD_UNIT_PERCENT) val *= 100.0f;
+  if (coord.unit == UNIT_PERCENTAGE) val *= 100.0f;
   FOG_RETURN_ON_ERROR(dst.appendDouble(coord.value));
 
-  if (coord.unit < COORD_UNIT_COUNT && svgUnitNames[coord.unit * 2] != '\0')
+  if (coord.unit < UNIT_COUNT && svgUnitNames[coord.unit * 2] != '\0')
     FOG_RETURN_ON_ERROR(dst.append(Ascii8(&svgUnitNames[coord.unit * 2], 2)));
-  else if (coord.unit == COORD_UNIT_PERCENT)
+  else if (coord.unit == UNIT_PERCENTAGE)
     FOG_RETURN_ON_ERROR(dst.append(Char('%')));
 
   return ERR_OK;

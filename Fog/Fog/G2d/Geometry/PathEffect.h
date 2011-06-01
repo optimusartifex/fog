@@ -8,6 +8,7 @@
 #define _FOG_G2D_GEOMETRY_PATHEFFECT_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/G2d/Geometry/Path.h>
 
 namespace Fog {
@@ -28,7 +29,7 @@ struct FOG_API PathEffect
   virtual err_t process(PathD& dst, const PathD& src) const = 0;
 
 private:
-  FOG_DISABLE_COPY(PathEffect)
+  _FOG_CLASS_NO_COPY(PathEffect)
 };
 
 //! @}

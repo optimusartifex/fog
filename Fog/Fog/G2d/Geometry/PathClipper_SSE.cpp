@@ -70,7 +70,6 @@ static uint32_t FOG_CDECL _G2d_PathClipperF_initPath_SSE(PathClipperF& self, con
   sysuint_t i = src.getLength();
   const uint8_t* cmd = src.getCommands();
   const PointF* pts = src.getVertices();
-  const BoxF& clipBox = self._clipBox;
 
   bool hasInitial = false;
 

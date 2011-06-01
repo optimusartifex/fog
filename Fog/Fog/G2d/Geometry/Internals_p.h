@@ -124,10 +124,10 @@ namespace Fog {
 
 static FOG_INLINE void _G2d_PathT_verifyBoundingBox(const PathF& path)
 {
-  if ((path._d->flags & PATH_DATA_DIRTY_BOUNDING_BOX) == 0)
+  if ((path._d->flags & PATH_DATA_DIRTY_BBOX) == 0)
   {
     BoxF _bbOld, _bbNew;
-    path._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
+    path._d->flags |= PATH_DATA_DIRTY_BBOX;
 
     _bbOld = path._d->boundingBox;
     path.getBoundingBox(_bbNew);
@@ -139,10 +139,10 @@ static FOG_INLINE void _G2d_PathT_verifyBoundingBox(const PathF& path)
 
 static FOG_INLINE void _G2d_PathT_verifyBoundingBox(const PathD& path)
 {
-  if ((path._d->flags & PATH_DATA_DIRTY_BOUNDING_BOX) == 0)
+  if ((path._d->flags & PATH_DATA_DIRTY_BBOX) == 0)
   {
     BoxD _bbOld, _bbNew;
-    path._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
+    path._d->flags |= PATH_DATA_DIRTY_BBOX;
 
     _bbOld = path._d->boundingBox;
     path.getBoundingBox(_bbNew);

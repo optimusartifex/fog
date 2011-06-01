@@ -8,6 +8,7 @@
 #define _FOG_GUI_LAYOUT_LAYOUT_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/System/Object.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Geometry/Size.h>
@@ -205,7 +206,7 @@ protected:
 private:
   int addChildLayout(Layout* l);
 
-  FOG_DISABLE_COPY(Layout)
+  _FOG_CLASS_NO_COPY(Layout)
 };
 
 //! @}

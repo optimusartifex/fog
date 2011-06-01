@@ -10,6 +10,7 @@
 // [Dependencies]
 #include <Fog/Core/Global/Api.h>
 #include <Fog/Core/Math/Constants.h>
+#include <Fog/Core/Math/Interval.h>
 #include <Fog/Core/Math/Math.h>
 
 namespace Fog {
@@ -44,14 +45,14 @@ static FOG_INLINE int solveQuadraticFunction(double* dst, const double* src)
   return _core.mathd.solveQuadraticFunction(dst, src);
 }
 
-static FOG_INLINE int solveQuadraticFunctionAt(float* dst, const float* src, float tMin, float tMax)
+static FOG_INLINE int solveQuadraticFunction(float* dst, const float* src, const IntervalF& interval)
 {
-  return _core.mathf.solveQuadraticFunctionAt(dst, src, tMin, tMax);
+  return _core.mathf.solveQuadraticFunctionAt(dst, src, interval);
 }
 
-static FOG_INLINE int solveQuadraticFunctionAt(double* dst, const double* src, double tMin, double tMax)
+static FOG_INLINE int solveQuadraticFunction(double* dst, const double* src, const IntervalD& interval)
 {
-  return _core.mathd.solveQuadraticFunctionAt(dst, src, tMin, tMax);
+  return _core.mathd.solveQuadraticFunctionAt(dst, src, interval);
 }
 
 // ============================================================================
@@ -81,14 +82,14 @@ static FOG_INLINE int solveCubicFunction(double* dst, const double* src)
   return _core.mathd.solveCubicFunction(dst, src);
 }
 
-static FOG_INLINE int solveCubicFunctionAt(float* dst, const float* src, float tMin, float tMax)
+static FOG_INLINE int solveCubicFunction(float* dst, const float* src, const IntervalF& interval)
 {
-  return _core.mathf.solveCubicFunctionAt(dst, src, tMin, tMax);
+  return _core.mathf.solveCubicFunctionAt(dst, src, interval);
 }
 
-static FOG_INLINE int solveCubicFunctionAt(double* dst, const double* src, double tMin, double tMax)
+static FOG_INLINE int solveCubicFunction(double* dst, const double* src, const IntervalD& interval)
 {
-  return _core.mathd.solveCubicFunctionAt(dst, src, tMin, tMax);
+  return _core.mathd.solveCubicFunctionAt(dst, src, interval);
 }
 
 //! @}

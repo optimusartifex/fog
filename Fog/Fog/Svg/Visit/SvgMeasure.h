@@ -8,6 +8,7 @@
 #define _FOG_SVG_VISIT_SVGMEASURE_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
 
@@ -65,10 +66,6 @@ struct FOG_API SvgMeasure : public SvgVisitor
 
   virtual err_t onShape(SvgElement* obj, const ShapeF& shape);
   virtual err_t onPath(SvgElement* obj, const PathF& path);
-
-  // TODO: Remove
-  virtual err_t onPath(SvgElement* obj, const PathD& path);
-
   virtual err_t onImage(SvgElement* obj, const PointF& pt, const Image& image);
 
   // --------------------------------------------------------------------------
@@ -81,7 +78,7 @@ struct FOG_API SvgMeasure : public SvgVisitor
   PathF _pathTmp;
 
 private:
-  FOG_DISABLE_COPY(SvgMeasure)
+  _FOG_CLASS_NO_COPY(SvgMeasure)
 };
 
 //! @}

@@ -9,7 +9,10 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Swap.h>
+#include <Fog/Core/Global/TypeInfo.h>
 #include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/System/Delegate.h>
 #include <Fog/Core/Threading/Atomic.h>
@@ -131,7 +134,7 @@ struct FOG_API ImageData
   uint8_t buffer[8];
 
 private:
-  FOG_DISABLE_COPY(ImageData)
+  _FOG_CLASS_NO_COPY(ImageData)
 };
 
 // ============================================================================
@@ -152,7 +155,7 @@ struct FOG_API Image
   ~Image();
 
   // --------------------------------------------------------------------------
-  // [Implicit Sharing]
+  // [Sharing]
   // --------------------------------------------------------------------------
 
   //! @copydoc Doxygen::Implicit::getRefCount().
@@ -563,7 +566,7 @@ struct FOG_API Image
   // [Members]
   // --------------------------------------------------------------------------
 
-  FOG_DECLARE_D(ImageData)
+  _FOG_CLASS_D(ImageData)
 };
 
 //! @}
@@ -574,7 +577,13 @@ struct FOG_API Image
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::Image, Fog::TYPEINFO_MOVABLE)
+_FOG_TYPEINFO_DECLARE(Fog::Image, Fog::TYPEINFO_MOVABLE)
+
+// ============================================================================
+// [Fog::Swap]
+// ============================================================================
+
+_FOG_SWAP_D(Fog::Image)
 
 // [Guard]
 #endif // _FOG_G2D_IMAGING_IMAGE_H

@@ -46,7 +46,7 @@ struct ImageBits;
 struct ImageFormatDescription;
 
 struct Painter;
-struct PainterEngine;
+struct PaintEngine;
 
 struct PathF;
 struct PathD;
@@ -94,6 +94,104 @@ struct Utf16;
 //! @brief Fog/G2d API.
 struct _G2dApi
 {
+  // --------------------------------------------------------------------------
+  // [Line]
+  // --------------------------------------------------------------------------
+
+  typedef uint32_t (FOG_CDECL *LineF_Intersect)(
+    PointF* dst,
+    const PointF* lineA,
+    const PointF* lineB);
+
+  typedef uint32_t (FOG_CDECL *LineD_Intersect)(
+    PointD* dst,
+    const PointD* lineA,
+    const PointD* lineB);
+
+  struct _FuncsLineF
+  {
+    LineF_Intersect intersect;
+  } linef;
+
+  struct _FuncsLineD
+  {
+    LineD_Intersect intersect;
+  } lined;
+
+  // --------------------------------------------------------------------------
+  // [QBezier]
+  // --------------------------------------------------------------------------
+
+  typedef err_t (FOG_CDECL *QBezierF_GetBoundingBox)(const PointF* self, BoxF* dst);
+  typedef err_t (FOG_CDECL *QBezierD_GetBoundingBox)(const PointD* self, BoxD* dst);
+
+  typedef err_t (FOG_CDECL *QBezierF_GetSplineBBox)(const PointF* self, sysuint_t length, BoxF* dst);
+  typedef err_t (FOG_CDECL *QBezierD_GetSplineBBox)(const PointD* self, sysuint_t length, BoxD* dst);
+
+  typedef void (FOG_CDECL *QBezierF_GetLength)(const PointF* self, float* length);
+  typedef void (FOG_CDECL *QBezierD_GetLength)(const PointD* self, double* length);
+
+  typedef err_t (FOG_CDECL *QBezierF_Flatten)(const PointF* self, PathF& dst, uint8_t initialCommand, float flatness);
+  typedef err_t (FOG_CDECL *QBezierD_Flatten)(const PointD* self, PathD& dst, uint8_t initialCommand, double flatness);
+
+  struct _FuncsQBezierF
+  {
+    QBezierF_GetBoundingBox getBoundingBox;
+    QBezierF_GetSplineBBox getSplineBBox;
+    QBezierF_GetLength getLength;
+    QBezierF_Flatten flatten;
+  } quadcurvef;
+
+  struct _FuncsQBezierD
+  {
+    QBezierD_GetBoundingBox getBoundingBox;
+    QBezierD_GetSplineBBox getSplineBBox;
+    QBezierD_GetLength getLength;
+    QBezierD_Flatten flatten;
+  } quadcurved;
+
+  // --------------------------------------------------------------------------
+  // [CBezier]
+  // --------------------------------------------------------------------------
+
+  typedef err_t (FOG_CDECL *CBezierF_GetBoundingBox)(const PointF* self, BoxF* dst);
+  typedef err_t (FOG_CDECL *CBezierD_GetBoundingBox)(const PointD* self, BoxD* dst);
+
+  typedef err_t (FOG_CDECL *CBezierF_GetSplineBBox)(const PointF* self, sysuint_t length, BoxF* dst);
+  typedef err_t (FOG_CDECL *CBezierD_GetSplineBBox)(const PointD* self, sysuint_t length, BoxD* dst);
+
+  typedef void (FOG_CDECL *CBezierF_GetLength)(const PointF* self, float* length);
+  typedef void (FOG_CDECL *CBezierD_GetLength)(const PointD* self, double* length);
+
+  typedef int (FOG_CDECL *CBezierF_GetInflectionPoints)(const PointF* self, float*  t);
+  typedef int (FOG_CDECL *CBezierD_GetInflectionPoints)(const PointD* self, double* t);
+
+  typedef int (FOG_CDECL *CBezierF_SimplifyForProcessing)(const PointF* self, PointF* pts, float flatness);
+  typedef int (FOG_CDECL *CBezierD_SimplifyForProcessing)(const PointD* self, PointD* pts, double flatness);
+
+  typedef err_t (FOG_CDECL *CBezierF_Flatten)(const PointF* self, PathF& dst, uint8_t initialCommand, float flatness);
+  typedef err_t (FOG_CDECL *CBezierD_Flatten)(const PointD* self, PathD& dst, uint8_t initialCommand, double flatness);
+
+  struct _FuncsCBezierF
+  {
+    CBezierF_GetBoundingBox getBoundingBox;
+    CBezierF_GetSplineBBox getSplineBBox;
+    CBezierF_GetLength getLength;
+    CBezierF_GetInflectionPoints getInflectionPoints;
+    CBezierF_SimplifyForProcessing simplifyForProcessing;
+    CBezierF_Flatten flatten;
+  } cubiccurvef;
+
+  struct _FuncsCBezierD
+  {
+    CBezierD_GetBoundingBox getBoundingBox;
+    CBezierD_GetSplineBBox getSplineBBox;
+    CBezierD_GetLength getLength;
+    CBezierD_GetInflectionPoints getInflectionPoints;
+    CBezierD_SimplifyForProcessing simplifyForProcessing;
+    CBezierD_Flatten flatten;
+  } cubiccurved;
+
   // --------------------------------------------------------------------------
   // [Arc]
   // --------------------------------------------------------------------------
@@ -227,102 +325,26 @@ struct _G2dApi
   } roundd;
 
   // --------------------------------------------------------------------------
-  // [Line]
+  // [Triangle]
   // --------------------------------------------------------------------------
 
-  typedef uint32_t (FOG_CDECL *LineF_Intersect)(
-    PointF* dst,
-    const PointF* lineA,
-    const PointF* lineB);
+  typedef err_t (FOG_CDECL *TriangleF_GetBoundingBox)(const PointF* self, BoxF* dst, const TransformF* tr);
+  typedef err_t (FOG_CDECL *TriangleD_GetBoundingBox)(const PointD* self, BoxD* dst, const TransformD* tr);
 
-  typedef uint32_t (FOG_CDECL *LineD_Intersect)(
-    PointD* dst,
-    const PointD* lineA,
-    const PointD* lineB);
+  typedef bool (FOG_CDECL *TriangleF_HitTest)(const PointF* self, const PointF* pt);
+  typedef bool (FOG_CDECL *TriangleD_HitTest)(const PointD* self, const PointD* pt);
 
-  struct _FuncsLineF
+  struct _FuncsTriangleF
   {
-    LineF_Intersect intersect;
-  } linef;
+    TriangleF_GetBoundingBox getBoundingBox;
+    TriangleF_HitTest hitTest;
+  } trianglef;
 
-  struct _FuncsLineD
+  struct _FuncsTriangleD
   {
-    LineD_Intersect intersect;
-  } lined;
-
-  // --------------------------------------------------------------------------
-  // [QuadCurve]
-  // --------------------------------------------------------------------------
-
-  typedef err_t (FOG_CDECL *QuadCurveF_GetBoundingBox)(const PointF* self, BoxF* dst);
-  typedef err_t (FOG_CDECL *QuadCurveD_GetBoundingBox)(const PointD* self, BoxD* dst);
-
-  typedef err_t (FOG_CDECL *QuadCurveF_GetSplineBBox)(const PointF* self, sysuint_t length, BoxF* dst);
-  typedef err_t (FOG_CDECL *QuadCurveD_GetSplineBBox)(const PointD* self, sysuint_t length, BoxD* dst);
-
-  typedef void (FOG_CDECL *QuadCurveF_GetLength)(const PointF* self, float* length);
-  typedef void (FOG_CDECL *QuadCurveD_GetLength)(const PointD* self, double* length);
-
-  typedef err_t (FOG_CDECL *QuadCurveF_Flatten)(const PointF* self, PathF& dst, uint8_t initialCommand, float flatness);
-  typedef err_t (FOG_CDECL *QuadCurveD_Flatten)(const PointD* self, PathD& dst, uint8_t initialCommand, double flatness);
-
-  struct _FuncsQuadCurveF
-  {
-    QuadCurveF_GetBoundingBox getBoundingBox;
-    QuadCurveF_GetSplineBBox getSplineBBox;
-    QuadCurveF_GetLength getLength;
-    QuadCurveF_Flatten flatten;
-  } quadcurvef;
-
-  struct _FuncsQuadCurveD
-  {
-    QuadCurveD_GetBoundingBox getBoundingBox;
-    QuadCurveD_GetSplineBBox getSplineBBox;
-    QuadCurveD_GetLength getLength;
-    QuadCurveD_Flatten flatten;
-  } quadcurved;
-
-  // --------------------------------------------------------------------------
-  // [CubicCurve]
-  // --------------------------------------------------------------------------
-
-  typedef err_t (FOG_CDECL *CubicCurveF_GetBoundingBox)(const PointF* self, BoxF* dst);
-  typedef err_t (FOG_CDECL *CubicCurveD_GetBoundingBox)(const PointD* self, BoxD* dst);
-
-  typedef err_t (FOG_CDECL *CubicCurveF_GetSplineBBox)(const PointF* self, sysuint_t length, BoxF* dst);
-  typedef err_t (FOG_CDECL *CubicCurveD_GetSplineBBox)(const PointD* self, sysuint_t length, BoxD* dst);
-
-  typedef void (FOG_CDECL *CubicCurveF_GetLength)(const PointF* self, float* length);
-  typedef void (FOG_CDECL *CubicCurveD_GetLength)(const PointD* self, double* length);
-
-  typedef int (FOG_CDECL *CubicCurveF_GetInflectionPoints)(const PointF* self, float*  t);
-  typedef int (FOG_CDECL *CubicCurveD_GetInflectionPoints)(const PointD* self, double* t);
-
-  typedef int (FOG_CDECL *CubicCurveF_SimplifyForProcessing)(const PointF* self, PointF* pts, float flatness);
-  typedef int (FOG_CDECL *CubicCurveD_SimplifyForProcessing)(const PointD* self, PointD* pts, double flatness);
-
-  typedef err_t (FOG_CDECL *CubicCurveF_Flatten)(const PointF* self, PathF& dst, uint8_t initialCommand, float flatness);
-  typedef err_t (FOG_CDECL *CubicCurveD_Flatten)(const PointD* self, PathD& dst, uint8_t initialCommand, double flatness);
-
-  struct _FuncsCubicCurveF
-  {
-    CubicCurveF_GetBoundingBox getBoundingBox;
-    CubicCurveF_GetSplineBBox getSplineBBox;
-    CubicCurveF_GetLength getLength;
-    CubicCurveF_GetInflectionPoints getInflectionPoints;
-    CubicCurveF_SimplifyForProcessing simplifyForProcessing;
-    CubicCurveF_Flatten flatten;
-  } cubiccurvef;
-
-  struct _FuncsCubicCurveD
-  {
-    CubicCurveD_GetBoundingBox getBoundingBox;
-    CubicCurveD_GetSplineBBox getSplineBBox;
-    CubicCurveD_GetLength getLength;
-    CubicCurveD_GetInflectionPoints getInflectionPoints;
-    CubicCurveD_SimplifyForProcessing simplifyForProcessing;
-    CubicCurveD_Flatten flatten;
-  } cubiccurved;
+    TriangleD_GetBoundingBox getBoundingBox;
+    TriangleD_HitTest hitTest;
+  } triangled;
 
   // --------------------------------------------------------------------------
   // [Shape]
@@ -480,9 +502,11 @@ struct _G2dApi
   typedef err_t (FOG_CDECL *PathD_AppendPathD)(PathD& self, const PathD& path, const Range* range);
 
   typedef err_t (FOG_CDECL *PathF_AppendTranslatedPathF)(PathF& self, const PathF& path, const PointF& pt, const Range* range);
+  typedef err_t (FOG_CDECL *PathD_AppendTranslatedPathF)(PathD& self, const PathF& path, const PointD& pt, const Range* range);
   typedef err_t (FOG_CDECL *PathD_AppendTranslatedPathD)(PathD& self, const PathD& path, const PointD& pt, const Range* range);
 
   typedef err_t (FOG_CDECL *PathF_AppendTransformedPathF)(PathF& self, const PathF& path, const TransformF& tr, const Range* range);
+  typedef err_t (FOG_CDECL *PathD_AppendTransformedPathF)(PathD& self, const PathF& path, const TransformD& tr, const Range* range);
   typedef err_t (FOG_CDECL *PathD_AppendTransformedPathD)(PathD& self, const PathD& path, const TransformD& tr, const Range* range);
 
   typedef err_t (FOG_CDECL *PathF_GetBoundingBox)(const PathF& self, BoxF* dst, const TransformF* transform);
@@ -642,7 +666,9 @@ struct _G2dApi
     PathD_Shape shape;
     PathD_AppendPathF appendPathF;
     PathD_AppendPathD appendPathD;
+    PathD_AppendTranslatedPathF appendTranslatedPathF;
     PathD_AppendTranslatedPathD appendTranslatedPathD;
+    PathD_AppendTransformedPathF appendTransformedPathF;
     PathD_AppendTransformedPathD appendTransformedPathD;
     PathD_UpdateFlat updateFlat;
     PathD_Flatten flatten;
@@ -715,12 +741,15 @@ struct _G2dApi
   typedef void (FOG_CDECL *TransformD_MapPointD)(const TransformD& self, PointD& dst, const PointD& src);
 
   typedef void (FOG_CDECL *TransformF_MapPointsF)(const TransformF& self, PointF* dst, const PointF* src, sysuint_t length);
+  typedef void (FOG_CDECL *TransformD_MapPointsF)(const TransformD& self, PointD* dst, const PointF* src, sysuint_t length);
   typedef void (FOG_CDECL *TransformD_MapPointsD)(const TransformD& self, PointD* dst, const PointD* src, sysuint_t length);
 
   typedef err_t (FOG_CDECL *TransformF_MapPathF)(const TransformF& self, PathF& dst, const PathF& src, uint32_t cntOp);
+  typedef err_t (FOG_CDECL *TransformD_MapPathF)(const TransformD& self, PathD& dst, const PathF& src, uint32_t cntOp);
   typedef err_t (FOG_CDECL *TransformD_MapPathD)(const TransformD& self, PathD& dst, const PathD& src, uint32_t cntOp);
 
   typedef err_t (FOG_CDECL *TransformF_MapPathDataF)(const TransformF& self, PathF& dst, const uint8_t* srcCmd, const PointF* srcPts, sysuint_t length, uint32_t cntOp);
+  typedef err_t (FOG_CDECL *TransformD_MapPathDataF)(const TransformD& self, PathD& dst, const uint8_t* srcCmd, const PointF* srcPts, sysuint_t length, uint32_t cntOp);
   typedef err_t (FOG_CDECL *TransformD_MapPathDataD)(const TransformD& self, PathD& dst, const uint8_t* srcCmd, const PointD* srcPts, sysuint_t length, uint32_t cntOp);
 
   typedef void (FOG_CDECL *TransformF_MapBoxF)(const TransformF& self, BoxF& dst, const BoxF& src);
@@ -766,8 +795,11 @@ struct _G2dApi
     TransformD_Multiply multiply;
     TransformD_Invert invert;
     TransformD_MapPointD mapPointD;
+    TransformD_MapPointsF mapPointsF[TRANSFORM_TYPE_COUNT];
     TransformD_MapPointsD mapPointsD[TRANSFORM_TYPE_COUNT];
+    TransformD_MapPathF mapPathF;
     TransformD_MapPathD mapPathD;
+    TransformD_MapPathDataF mapPathDataF;
     TransformD_MapPathDataD mapPathDataD;
     TransformD_MapBoxD mapBoxD;
     TransformD_MapVectorD mapVectorD;
@@ -838,7 +870,7 @@ struct _G2dApi
   // [Painter]
   // --------------------------------------------------------------------------
 
-  typedef PainterEngine* (FOG_CDECL *Painter_GetNullEngine)();
+  typedef PaintEngine* (FOG_CDECL *Painter_GetNullEngine)();
 
   typedef err_t (FOG_CDECL *Painter_BeginImage)(Painter& self, Image& image, const RectI* rect, uint32_t initFlags);
   typedef err_t (FOG_CDECL *Painter_BeginIBits)(Painter& self, const ImageBits& imageBits, const RectI* rect, uint32_t initFlags);

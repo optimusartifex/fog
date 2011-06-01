@@ -154,8 +154,8 @@ FOG_TYPEVARIANT_DECLARE_F_D(ConicalGradient)
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::ConicalGradientF, Fog::TYPEINFO_MOVABLE)
-FOG_DECLARE_TYPEINFO(Fog::ConicalGradientD, Fog::TYPEINFO_MOVABLE)
+_FOG_TYPEINFO_DECLARE(Fog::ConicalGradientF, Fog::TYPEINFO_MOVABLE)
+_FOG_TYPEINFO_DECLARE(Fog::ConicalGradientD, Fog::TYPEINFO_MOVABLE)
 
 // [Guard]
 #endif // _FOG_G2D_SOURCE_CONICALGRADIENT_H

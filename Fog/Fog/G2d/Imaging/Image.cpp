@@ -753,7 +753,6 @@ err_t Image::setPalette(const Range& range, const Argb32* pal)
 uint32_t Image::getAlphaDistribution() const
 {
   uint32_t result;
-  const ImageFormatDescription& desc = getFormatDescription();
 
   ColorAnalyzer::AnalyzerFn analyzer = NULL;
   int aPos = 0;
@@ -2448,7 +2447,7 @@ err_t Image::writeToFile(const String& fileName) const
     STREAM_OPEN_TRUNCATE    );
   if (FOG_IS_ERROR(err)) return err;
 
-  TemporaryString<16> extension;
+  StringTmp<16> extension;
   if ((err = FileSystem::extractExtension(extension, fileName)) || (err = extension.lower()))
   {
     return err;

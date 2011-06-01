@@ -8,6 +8,7 @@
 #define _FOG_SVG_DOM_SVGTRANSFORMATTRIBUTE_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/G2d/Geometry/Transform.h>
 #include <Fog/Xml/Dom/XmlAttribute.h>
 #include <Fog/Xml/Dom/XmlElement.h>
@@ -55,7 +56,7 @@ protected:
   bool _isValid;
 
 private:
-  FOG_DISABLE_COPY(SvgTransformAttribute)
+  _FOG_CLASS_NO_COPY(SvgTransformAttribute)
 };
 
 //! @}

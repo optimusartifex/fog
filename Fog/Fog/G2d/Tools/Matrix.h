@@ -9,8 +9,10 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Memory/Memory.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/G2d/Geometry/Rect.h>
@@ -47,11 +49,11 @@ struct FOG_NO_EXPORT MatrixDataF
   // [Members]
   // --------------------------------------------------------------------------
 
-  //! @brief The reference count.
+  //! @brief Reference count.
   mutable Atomic<sysuint_t> refCount;
-  //! @brief The matrix size.
+  //! @brief Size.
   SizeI size;
-  //! @brief The matrix elements.
+  //! @brief Elements.
   float data[1];
 };
 
@@ -80,11 +82,11 @@ struct FOG_NO_EXPORT MatrixDataD
   // [Members]
   // --------------------------------------------------------------------------
 
-  //! @brief The reference count.
+  //! @brief Reference count.
   mutable Atomic<sysuint_t> refCount;
-  //! @brief The matrix size.
+  //! @brief Size.
   SizeI size;
-  //! @brief The matrix elements.
+  //! @brief Elements.
   double data[1];
 };
 
@@ -92,7 +94,7 @@ struct FOG_NO_EXPORT MatrixDataD
 // [Fog::MatrixF]
 // ============================================================================
 
-//! @brief Convolution matrix.
+//! @brief Matrix (float).
 struct FOG_API MatrixF
 {
   // --------------------------------------------------------------------------
@@ -106,7 +108,7 @@ struct FOG_API MatrixF
   ~MatrixF();
 
   // --------------------------------------------------------------------------
-  // [Implicit Sharing]
+  // [Sharing]
   // --------------------------------------------------------------------------
 
   FOG_INLINE sysuint_t getRefCount() const { return _d->refCount.get(); }
@@ -183,7 +185,7 @@ struct FOG_API MatrixF
   // [Members]
   // --------------------------------------------------------------------------
 
-  FOG_DECLARE_D(MatrixDataF)
+  _FOG_CLASS_D(MatrixDataF)
 };
 
 //! @}
@@ -194,8 +196,15 @@ struct FOG_API MatrixF
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::MatrixF, Fog::TYPEINFO_MOVABLE)
-//FOG_DECLARE_TYPEINFO(Fog::MatrixD, Fog::TYPEINFO_MOVABLE)
+_FOG_TYPEINFO_DECLARE(Fog::MatrixF, Fog::TYPEINFO_MOVABLE)
+//_FOG_TYPEINFO_DECLARE(Fog::MatrixD, Fog::TYPEINFO_MOVABLE)
+
+// ============================================================================
+// [Fog::Swap]
+// ============================================================================
+
+_FOG_SWAP_D(Fog::MatrixF)
+//_FOG_SWAP_D(Fog::MatrixD)
 
 // [Guard]
 #endif // _FOG_G2D_TOOLS_MATRIX_H

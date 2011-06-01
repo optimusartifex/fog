@@ -37,7 +37,7 @@ RasterWorker::~RasterWorker()
 
 void RasterWorker::run()
 {
-  RasterPainterEngine* engine = ctx.engine;
+  RasterPaintEngine* engine = ctx.engine;
   RasterWorkerManager* wm = engine->wm;
 
 #if defined(FOG_DEBUG_RASTER_SYNC)
@@ -205,7 +205,7 @@ skipCommands:
 
 void RasterWorker::destroy()
 {
-  RasterPainterEngine* engine = ctx.engine;
+  RasterPaintEngine* engine = ctx.engine;
   RasterWorkerManager* wm = engine->wm;
 
 #if defined(FOG_DEBUG_RASTER_SYNC)

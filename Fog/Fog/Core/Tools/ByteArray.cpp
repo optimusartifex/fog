@@ -457,6 +457,7 @@ skip:
   return d->data + index;
 }
 
+// TODO: Not used
 static char* _prepareReplace(ByteArray* self, sysuint_t index, sysuint_t range, sysuint_t replacementLength)
 {
   ByteArray::Data* d = self->_d;
@@ -2427,7 +2428,7 @@ List<ByteArray> ByteArray::split(const ByteArrayFilter& filter, uint splitBehavi
 
 ByteArray ByteArray::join(const List<ByteArray>& seq, const char separator)
 {
-  TemporaryByteArray<1> sept(separator);
+  ByteArrayTmp<1> sept(separator);
   return join(seq, sept);
 }
 

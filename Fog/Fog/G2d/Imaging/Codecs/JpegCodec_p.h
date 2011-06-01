@@ -11,6 +11,7 @@
 #if defined FOG_HAVE_LIBJPEG
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Library/Library.h>
@@ -74,7 +75,7 @@ struct FOG_NO_EXPORT JpegLibrary
   volatile err_t err;
 
 private:
-  FOG_DISABLE_COPY(JpegLibrary)
+  _FOG_CLASS_NO_COPY(JpegLibrary)
 };
 
 // ===========================================================================

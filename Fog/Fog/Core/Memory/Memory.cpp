@@ -78,13 +78,6 @@ static void* FOG_CDECL _Core_Memory_realloc(void* addr, sysuint_t size)
   return anew;
 }
 
-static void* FOG_CDECL _Core_Memory_reallocOrFree(void* addr, sysuint_t size)
-{
-  void* anew = Memory::realloc(addr, size);
-  if (FOG_IS_NULL(anew) && size > 0) Memory::free(addr);
-  return anew;
-}
-
 static void FOG_CDECL _Core_Memory_free(void* addr)
 {
   ::free(addr);
@@ -184,11 +177,10 @@ FOG_NO_EXPORT void _core_memory_init(void)
 {
   _core_default_memory_manager.init();
 
-  _core.memory.alloc = _Core_Memory_alloc;
-  _core.memory.calloc = _Core_Memory_calloc;
-  _core.memory.realloc = _Core_Memory_realloc;
-  _core.memory.reallocOrFree = _Core_Memory_reallocOrFree;
-  _core.memory.free = _Core_Memory_free;
+  _core.memory._m_alloc = _Core_Memory_alloc;
+  _core.memory._m_calloc = _Core_Memory_calloc;
+  _core.memory._m_realloc = _Core_Memory_realloc;
+  _core.memory._m_free = _Core_Memory_free;
 
   _core.memory.cleanup = _Core_Memory_cleanup;
   _core.memory.registerCleanupHandler = _Core_Memory_registerCleanupHandler;

@@ -350,7 +350,7 @@ _MoveTo:
       {
         FOG_ASSERT(commands + 2 <= end);
 
-        err_t err = reinterpret_cast<const QuadCurveF*>(vertices - 1)->flatten(rasterizer->_temporaryPathF, PATH_CMD_LINE_TO, flatness);
+        err_t err = reinterpret_cast<const QBezierF*>(vertices - 1)->flatten(rasterizer->_temporaryPathF, PATH_CMD_LINE_TO, flatness);
         if (FOG_IS_ERROR(err)) return;
 
         commands += 2;
@@ -359,7 +359,7 @@ _MoveTo:
       else
       {
         FOG_ASSERT(commands + 3 <= end);
-        err_t err = reinterpret_cast<const CubicCurveF*>(vertices - 1)->flatten(rasterizer->_temporaryPathF, PATH_CMD_LINE_TO, flatness);
+        err_t err = reinterpret_cast<const CBezierF*>(vertices - 1)->flatten(rasterizer->_temporaryPathF, PATH_CMD_LINE_TO, flatness);
         if (FOG_IS_ERROR(err)) return;
 
         commands += 3;
@@ -508,7 +508,7 @@ _MoveTo:
       if (PathCmd::isQuadTo(cmd))
       {
         FOG_ASSERT(commands + 2 <= end);
-        err_t err = reinterpret_cast<const QuadCurveD*>(vertices - 1)->flatten(rasterizer->_temporaryPathD, PATH_CMD_LINE_TO, flatness);
+        err_t err = reinterpret_cast<const QBezierD*>(vertices - 1)->flatten(rasterizer->_temporaryPathD, PATH_CMD_LINE_TO, flatness);
         if (FOG_IS_ERROR(err)) return;
 
         commands += 2;
@@ -517,7 +517,7 @@ _MoveTo:
       else
       {
         FOG_ASSERT(commands + 3 <= end);
-        err_t err = reinterpret_cast<const CubicCurveD*>(vertices - 1)->flatten(rasterizer->_temporaryPathD, PATH_CMD_LINE_TO, flatness);
+        err_t err = reinterpret_cast<const CBezierD*>(vertices - 1)->flatten(rasterizer->_temporaryPathD, PATH_CMD_LINE_TO, flatness);
         if (FOG_IS_ERROR(err)) return;
 
         commands += 3;

@@ -26,12 +26,12 @@ struct FOG_NO_EXPORT RasterFuncs
 {
   struct FOG_NO_EXPORT _EngineFuncs
   {
-    typedef void (FOG_FASTCALL *DoRectI)(RasterPainterEngine* self, const BoxI& box);
-    typedef void (FOG_FASTCALL *DoRectF)(RasterPainterEngine* self, const BoxF& box);
-    typedef void (FOG_FASTCALL *DoRectD)(RasterPainterEngine* self, const BoxD& box);
+    typedef void (FOG_FASTCALL *DoRectI)(RasterPaintEngine* self, const BoxI& box);
+    typedef void (FOG_FASTCALL *DoRectF)(RasterPaintEngine* self, const BoxF& box);
+    typedef void (FOG_FASTCALL *DoRectD)(RasterPaintEngine* self, const BoxD& box);
 
-    typedef void (FOG_FASTCALL *DoPathF)(RasterPainterEngine* self, const PathF& path);
-    typedef void (FOG_FASTCALL *DoPathD)(RasterPainterEngine* self, const PathD& path);
+    typedef void (FOG_FASTCALL *DoPathF)(RasterPaintEngine* self, const PathF& path);
+    typedef void (FOG_FASTCALL *DoPathD)(RasterPaintEngine* self, const PathD& path);
 
     // --------------------------------------------------------------------------
     // [Fill]

@@ -1,4 +1,4 @@
-// [Fog-G2d]
+// [Fog-Svg]
 //
 // [License]
 // MIT, See COPYING file in package

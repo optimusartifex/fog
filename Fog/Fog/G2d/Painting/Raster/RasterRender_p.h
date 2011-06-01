@@ -52,7 +52,7 @@ struct FOG_NO_EXPORT RasterRenderVTable
 
 //! @internal
 //!
-//! @brief @c RasterPainterEngine VTable instances.
+//! @brief @c RasterPaintEngine VTable instances.
 //!
 //! For performance reasons there are vtable for these combinations:
 //!

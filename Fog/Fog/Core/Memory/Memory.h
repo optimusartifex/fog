@@ -102,27 +102,22 @@ FOG_API MemoryManager* getDefaultManager();
 
 static FOG_INLINE void* alloc(sysuint_t size)
 {
-  return _core.memory.alloc(size);
+  return _core.memory._m_alloc(size);
 }
 
 static FOG_INLINE void* calloc(sysuint_t size)
 {
-  return _core.memory.calloc(size);
+  return _core.memory._m_calloc(size);
 }
 
 static FOG_INLINE void* realloc(void* addr, sysuint_t size)
 {
-  return _core.memory.realloc(addr, size);
-}
-
-static FOG_INLINE void* reallocOrFree(void* addr, sysuint_t size)
-{
-  return _core.memory.reallocOrFree(addr, size);
+  return _core.memory._m_realloc(addr, size);
 }
 
 static FOG_INLINE void free(void* addr)
 {
-  return _core.memory.free(addr);
+  return _core.memory._m_free(addr);
 }
 
 // ============================================================================

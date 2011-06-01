@@ -8,6 +8,7 @@
 #define _FOG_SVG_DOM_SVGOFFSETATTRIBUTE_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Xml/Dom/XmlAttribute.h>
 #include <Fog/Xml/Dom/XmlElement.h>
 #include <Fog/Svg/Global/Constants.h>
@@ -52,7 +53,7 @@ protected:
   float _offset;
 
 private:
-  FOG_DISABLE_COPY(SvgOffsetAttribute)
+  _FOG_CLASS_NO_COPY(SvgOffsetAttribute)
 };
 
 //! @}

@@ -8,6 +8,7 @@
 #define _FOG_SVG_DOM_SVGLINEARGRADIENTELEMENT_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Svg/Dom/SvgAbstractGradientElement_p.h>
 #include <Fog/Svg/Dom/SvgCoordAttribute_p.h>
 
@@ -53,7 +54,7 @@ struct FOG_NO_EXPORT SvgLinearGradientElement : public SvgAbstractGradientElemen
   SvgCoordAttribute a_y2;
 
 private:
-  FOG_DISABLE_COPY(SvgLinearGradientElement)
+  _FOG_CLASS_NO_COPY(SvgLinearGradientElement)
 };
 
 //! @}

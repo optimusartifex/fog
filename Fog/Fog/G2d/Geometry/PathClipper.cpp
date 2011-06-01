@@ -1413,17 +1413,17 @@ _ClipCubicCmd_EvaluateY:
     dst._d->length = (sysuint_t)(dstPts - dst.getVertices());
   }
 
-  dst._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX | PATH_DATA_DIRTY_CMD;
+  dst._d->flags |= PATH_DATA_DIRTY_BBOX | PATH_DATA_DIRTY_CMD;
   return ERR_OK;
 
 _Invalid:
   dst._d->length = dstInitialLength;
-  dst._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX | PATH_DATA_DIRTY_CMD;
+  dst._d->flags |= PATH_DATA_DIRTY_BBOX | PATH_DATA_DIRTY_CMD;
   return ERR_GEOMETRY_INVALID;
 
 _OutOfMemory:
   dst._d->length = dstInitialLength;
-  dst._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX | PATH_DATA_DIRTY_CMD;
+  dst._d->flags |= PATH_DATA_DIRTY_BBOX | PATH_DATA_DIRTY_CMD;
   return ERR_RT_OUT_OF_MEMORY;
 }
 

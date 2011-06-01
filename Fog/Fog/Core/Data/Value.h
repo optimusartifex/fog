@@ -8,6 +8,8 @@
 #define _FOG_CORE_DATA_VALUE_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Global/TypeInfo.h>
 #include <Fog/Core/Memory/Memory.h>
 #include <Fog/Core/Threading/Atomic.h>
@@ -72,7 +74,7 @@ struct FOG_API ValueData
   void* ptr;
 
 private:
-  FOG_DISABLE_COPY(ValueData)
+  _FOG_CLASS_NO_COPY(ValueData)
 };
 
 // ============================================================================
@@ -103,7 +105,7 @@ struct FOG_API Value
   static Value fromWinLastError();
 #endif // FOG_OS_WINDOWS
 
-  // [Implicit Sharing]
+  // [Sharing]
 
   //! @copydoc Doxygen::Implicit::getRefCount().
   FOG_INLINE sysuint_t getRefCount() const { return _d->refCount.get(); }
@@ -138,7 +140,7 @@ struct FOG_API Value
 
   // [Members]
 
-  FOG_DECLARE_D(ValueData)
+  _FOG_CLASS_D(ValueData)
 };
 
 //! @}
@@ -149,7 +151,13 @@ struct FOG_API Value
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::Value, Fog::TYPEINFO_MOVABLE)
+_FOG_TYPEINFO_DECLARE(Fog::Value, Fog::TYPEINFO_MOVABLE)
+
+// ============================================================================
+// [Fog::Swap]
+// ============================================================================
+
+_FOG_SWAP_D(Fog::Value)
 
 // [Guard]
 #endif // _FOG_CORE_DATA_VALUE_H

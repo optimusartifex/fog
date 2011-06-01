@@ -8,6 +8,7 @@
 #define _FOG_G2D_PAINTING_RASTER_RASTERCONTEXT_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Memory/MemoryBuffer.h>
 #include <Fog/G2d/Geometry/PathClipper.h>
 #include <Fog/G2d/Geometry/PathStroker.h>
@@ -15,7 +16,7 @@
 #include <Fog/G2d/Geometry/Transform.h>
 #include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Imaging/Image.h>
-#include <Fog/G2d/Painting/PainterParams.h>
+#include <Fog/G2d/Painting/PaintParams.h>
 #include <Fog/G2d/Painting/Raster/RasterFuncs_p.h>
 #include <Fog/G2d/Painting/Raster/RasterRender_p.h>
 #include <Fog/G2d/Painting/Raster/RasterStructs_p.h>
@@ -204,7 +205,7 @@ struct FOG_NO_EXPORT RasterContext
   // --------------------------------------------------------------------------
 
   //! @brief Owner of this context.
-  RasterPainterEngine* engine;
+  RasterPaintEngine* engine;
 
   //! @brief Renderer table.
   const RasterRenderVTable* renderer;
@@ -354,7 +355,7 @@ struct FOG_NO_EXPORT RasterContext
   PathD tmpPathD[3];
 
 private:
-  FOG_DISABLE_COPY(RasterContext)
+  _FOG_CLASS_NO_COPY(RasterContext)
 };
 
 //! @}

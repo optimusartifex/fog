@@ -365,33 +365,24 @@ err_t ColorStopList::removeAt(const Range& range)
   }
 }
 
-err_t ColorStopList::removeAt(const RangeF& range)
+err_t ColorStopList::removeAt(const IntervalF& interval)
 {
-  if (!range.isValid()) return ERR_RT_INVALID_ARGUMENT;
+  if (!interval.isValid()) return ERR_RT_INVALID_ARGUMENT;
 
   sysuint_t len = _d->length;
   if (len == 0) return ERR_OK;
 
   const ColorStop* stops = _d->data;
-  float startOffset = range.getStart();
-  float endOffset = range.getEnd();
+  float min = interval.getMin();
+  float max = interval.getMax();
 
-  sysuint_t startIndex;
-  sysuint_t endIndex;
+  // Find the min/max index.
+  sysuint_t minI, maxI;
 
-  // Find the start index.
-  for (startIndex = 0; startIndex < len; startIndex++)
-  {
-    if (stops[startIndex].getOffset() >= startOffset) break;
-  }
+  for (minI =    0; minI < len; minI++) { if (stops[minI].getOffset() >= min) break; }
+  for (maxI = minI; maxI < len; maxI++) { if (stops[maxI].getOffset() >  max) break; }
 
-  // Find the end index.
-  for (endIndex = startIndex; endIndex < len; endIndex++)
-  {
-    if (stops[endIndex].getOffset() > endOffset) break;
-  }
-
-  return (startIndex < endIndex) ? removeAt(Range(startIndex, endIndex)) : ERR_OK;
+  return (minI < maxI) ? removeAt(Range(minI, maxI)) : ERR_OK;
 }
 
 sysuint_t ColorStopList::indexOf(float offset) const

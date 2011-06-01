@@ -13,98 +13,192 @@
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Memory.h>
+#include <Fog/Core/Tools/TextChunk.h>
+#include <Fog/Core/Tools/TextIterator.h>
 #include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Text/TextLayout.h>
 
 namespace Fog {
 
-TextLayout::TextLayout()
-{
-}
+// ============================================================================
+// [Fog::TextLayout - Construction / Destruction]
+// ============================================================================
 
-TextLayout::TextLayout(const String& text) :
-  _text(text),
-  _multiLine(false)
+TextLayout::TextLayout() :
+  _deviceInfo(),
+  _font(),
+  _textChunk(),
+  _isMultiLine(false)
 {
-  _update();
 }
 
 TextLayout::TextLayout(const TextLayout& other) :
-  _text(other._text),
+  _deviceInfo(other._deviceInfo),
+  _font(other._font),
+  _textChunk(other._textChunk),
   _lines(other._lines),
-  _multiLine(other._multiLine)
+  _isMultiLine(other._isMultiLine)
 {
-
 }
 
 TextLayout::~TextLayout()
 {
 }
 
+// ============================================================================
+// [Fog::TextLayout - Accessors]
+// ============================================================================
+
+err_t TextLayout::setDeviceInfo(const PaintDeviceInfo& deviceInfo)
+{
+  _deviceInfo = deviceInfo;
+  _updatePhysicalFont();
+  return _updateLayout();
+}
+
+err_t TextLayout::setDeviceInfoAndFont(const PaintDeviceInfo& deviceInfo, const Font& font)
+{
+  _deviceInfo = deviceInfo;
+  _font = font;
+  _updatePhysicalFont();
+  return _updateLayout();
+}
+
+err_t TextLayout::setFont(const Font& font)
+{
+  _font = font;
+  _updatePhysicalFont();
+  return _updateLayout();
+}
+
+err_t TextLayout::setText(const TextChunk& textChunk)
+{
+  _textChunk = textChunk;
+  return _updateLayout();
+}
+
+err_t TextLayout::setText(const String& textString)
+{
+  _textChunk.setText(textString);
+  return _updateLayout();
+}
+
+// ============================================================================
+// [Fog::TextLayout - Clear / Reset]
+// ============================================================================
+
+void TextLayout::clear()
+{
+  _font.reset();
+  _textChunk.reset();
+  _lines.clear();
+  _isMultiLine = false;
+}
+
 void TextLayout::reset()
 {
-  _text.clear();
-  _lines.clear();
-  _multiLine = false;
+  _font.reset();
+  _textChunk.reset();
+  _lines.reset();
+  _isMultiLine = false;
 }
 
-err_t TextLayout::setText(const String& text)
+// ============================================================================
+// [Fog::TextLayout - Update]
+// ============================================================================
+
+err_t TextLayout::_updatePhysicalFont()
 {
-  err_t err;
-  if ((err = _text.set(text))) return err;
-  if ((err = _update())) return err;
-
-  return ERR_OK;
+  if (_font.isPhysical())
+  {
+    _physicalFont = _font;
+    return ERR_OK;
+  }
+  else
+  {
+    return _deviceInfo.makePhysicalFont(_physicalFont, _font);
+  }
 }
 
-TextLayout& TextLayout::operator=(const TextLayout& other)
-{
-  _text = other._text;
-  _lines = other._lines;
-  _multiLine = other._multiLine;
-
-  return *this;
-}
-
-err_t TextLayout::_update()
+err_t TextLayout::_updateLayout()
 {
   err_t err = ERR_OK;
+  Range range = _textChunk.getRange();
 
-  const Char* beg = _text.getData();
-  const Char* cur = beg;
-  const Char* end = cur + _text.getLength();
+  const Char* beg = _textChunk.getText().getData();
+  const Char* cur = beg + range.getStart();
+  const Char* end = beg + range.getEnd();
 
-  bool multiLine = false;
-
+  const Char* startLine = cur;
   _lines.clear();
 
   do {
-    Char c = *cur++;
-    if (c == Char('\n'))
-    {
-      // If this is first row separator append also first line.
-      if (multiLine == false)
-      {
-        _lines.append(0);
-        multiLine = true;
+    Char c = cur[0];
+    cur++;
 
-        // Discard '\r'.
-        if (cur != end && *cur == Char('\r')) cur++;
+    if (c.ch() < 32)
+    {
+      const Char* endLine = NULL;
+
+      if (c == Char('\n'))
+      {
+        // Eat \n[\r].
+        endLine = cur;
+        if (cur != end && cur[1] == Char('\r')) cur++;
       }
-      if ((err = _lines.append((sysuint_t)(cur - beg)))) goto _End;
+      else if (c == Char('\r'))
+      {
+        // Eat \r[\n].
+        endLine = cur;
+        if (cur != end && cur[1] == Char('\n')) cur++;
+      }
+
+      if (endLine)
+      {
+        range.setRange((sysuint_t)(startLine - beg),
+                       (sysuint_t)(endLine   - beg));
+
+        err = _lines.append(range);
+        if (FOG_IS_ERROR(err)) goto _End;
+      }
+
+      startLine = cur;
     }
   } while (cur != end);
 
-  _multiLine = multiLine;
+  // Add the last line (without \n or \r). If there is only this line then
+  // _lines will contain only one element and _isMultiLine will be set to
+  // false.
+  range.setRange((sysuint_t)(startLine - beg),
+                 (sysuint_t)(cur       - beg));
+
+  err = _lines.append(range);
+  if (FOG_IS_ERROR(err)) goto _End;
+
+  _isMultiLine = _lines.getLength() > 1;
 
 _End:
   if (FOG_IS_ERROR(err))
   {
     _lines.clear();
-    _multiLine = false;
+    _isMultiLine = false;
   }
 
   return err;
+}
+
+// ============================================================================
+// [Fog::TextLayout - Operator Overload]
+// ============================================================================
+
+TextLayout& TextLayout::operator=(const TextLayout& other)
+{
+  _font = other._font;
+  _textChunk = other._textChunk;
+  _lines = other._lines;
+  _isMultiLine = other._isMultiLine;
+
+  return *this;
 }
 
 } // Fog namespace

@@ -8,6 +8,7 @@
 #define _FOG_SVG_VISIT_SVGVISITOR_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Static.h>
 #include <Fog/G2d/Geometry/Circle.h>
 #include <Fog/G2d/Geometry/Ellipse.h>
@@ -16,9 +17,9 @@
 #include <Fog/G2d/Geometry/PathStroker.h>
 #include <Fog/G2d/Geometry/Round.h>
 #include <Fog/G2d/Geometry/Shape.h>
-#include <Fog/G2d/Font/Font.h>
 #include <Fog/G2d/Painting/Painter.h>
 #include <Fog/G2d/Source/Pattern.h>
+#include <Fog/G2d/Text/Font.h>
 #include <Fog/Svg/Global/Constants.h>
 #include <Fog/Svg/Tools/SvgCoord.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
@@ -270,10 +271,6 @@ struct FOG_API SvgVisitor
 
   virtual err_t onShape(SvgElement* obj, const ShapeF& shape) = 0;
   virtual err_t onPath(SvgElement* obj, const PathF& path) = 0;
-
-  // TODO: Remove
-  virtual err_t onPath(SvgElement* obj, const PathD& path) = 0;
-
   virtual err_t onImage(SvgElement* obj, const PointF& pt, const Image& image) = 0;
 
   // --------------------------------------------------------------------------
@@ -296,7 +293,7 @@ struct FOG_API SvgVisitor
   Font _font;
 
 private:
-  FOG_DISABLE_COPY(SvgVisitor)
+  _FOG_CLASS_NO_COPY(SvgVisitor)
 };
 
 // ============================================================================
@@ -372,12 +369,14 @@ struct FOG_NO_EXPORT SvgGState
   FOG_INLINE void saveGlobal()
   {
     _opacity = _visitor->getOpacity();
+    _cursor = _visitor->_textCursor;
     _flags |= SAVED_GLOBAL;
   }
 
   FOG_INLINE void restoreGlobal()
   {
     _visitor->_opacity = _opacity;
+    _visitor->_textCursor = _cursor;
   }
 
   // --------------------------------------------------------------------------
@@ -452,9 +451,10 @@ struct FOG_NO_EXPORT SvgGState
 
   Static<Font> _font;
   float _opacity;
+  PointF _cursor;
 
 private:
-  FOG_DISABLE_COPY(SvgGState)
+  _FOG_CLASS_NO_COPY(SvgGState)
 };
 
 //! @}

@@ -10,6 +10,7 @@
 // [Dependencies]
 #include <Fog/Core/Collection/Hash.h>
 #include <Fog/Core/Collection/List.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/Range.h>
 #include <Fog/Core/Tools/String.h>
@@ -121,7 +122,7 @@ private:
   friend struct XmlIdAttribute;
   friend struct XmlElement;
 
-  FOG_DISABLE_COPY(XmlDocument)
+  _FOG_CLASS_NO_COPY(XmlDocument)
 };
 
 //! @}

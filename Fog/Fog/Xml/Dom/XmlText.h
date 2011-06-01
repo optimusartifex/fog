@@ -8,6 +8,7 @@
 #define _FOG_XML_DOM_XMLTEXT_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Xml/Dom/XmlElement.h>
 
 namespace Fog {
@@ -68,7 +69,7 @@ private:
   friend struct XmlElement;
   friend struct XmlDocument;
 
-  FOG_DISABLE_COPY(XmlText)
+  _FOG_CLASS_NO_COPY(XmlText)
 };
 
 //! @}

@@ -11,14 +11,15 @@
 #include <Fog/Core/Collection/Hash.h>
 #include <Fog/Core/Collection/List.h>
 #include <Fog/Core/DateTime/Time.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Threading/Thread.h>
 #include <Fog/Core/System/Event.h>
 #include <Fog/Core/System/Object.h>
-#include <Fog/G2d/Font/Font.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Painting/Painter.h>
+#include <Fog/G2d/Text/Font.h>
 #include <Fog/Gui/Global/Constants.h>
 #include <Fog/Gui/Layout/LayoutItem.h>
 #include <Fog/Gui/Layout/LayoutHint.h>
@@ -813,7 +814,7 @@ private:
   friend struct GuiWindow;
   friend struct Window;
 
-  FOG_DISABLE_COPY(Widget)
+  _FOG_CLASS_NO_COPY(Widget)
 };
 
 //! @}

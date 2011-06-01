@@ -8,6 +8,7 @@
 #define _FOG_SVG_DOM_SVGPATHATTRIBUTE_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/Xml/Dom/XmlAttribute.h>
 #include <Fog/Xml/Dom/XmlElement.h>
@@ -53,7 +54,7 @@ protected:
   PathF _path;
 
 private:
-  FOG_DISABLE_COPY(SvgPathAttribute)
+  _FOG_CLASS_NO_COPY(SvgPathAttribute)
 };
 
 //! @}

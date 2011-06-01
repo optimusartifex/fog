@@ -8,6 +8,7 @@
 #define _FOG_CORE_SYSTEM_APPLICATION_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/System/Object.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Gui/Animation/Animation.h>
@@ -160,7 +161,7 @@ protected:
   static Application* _instance;
 
 private:
-  FOG_DISABLE_COPY(Application)
+  _FOG_CLASS_NO_COPY(Application)
 };
 
 //! @}

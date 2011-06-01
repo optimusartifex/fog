@@ -9,6 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Class.h>
 
 namespace Fog {
 
@@ -75,7 +76,7 @@ struct FOG_API MemoryManager
   virtual void free(void* ptr, sysuint_t size) = 0;
 
 private:
-  FOG_DISABLE_COPY(MemoryManager)
+  _FOG_CLASS_NO_COPY(MemoryManager)
 };
 
 //! @}

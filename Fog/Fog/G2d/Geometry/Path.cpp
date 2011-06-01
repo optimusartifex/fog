@@ -136,7 +136,7 @@ static NumT_(PathData)* _G2d_PathT_dalloc(sysuint_t capacity)
   if (FOG_IS_NULL(newd)) return NULL;
 
   newd->refCount.init(1);
-  newd->flags = PATH_DATA_DIRTY_BOUNDING_BOX | PATH_DATA_DIRTY_CMD;
+  newd->flags = PATH_DATA_DIRTY_BBOX | PATH_DATA_DIRTY_CMD;
 #if FOG_ARCH_BITS >= 64
   newd->padding = 0;
 #endif // FOG_ARCH_BITS >= 64
@@ -411,7 +411,7 @@ static err_t _G2d_PathT_setDeepT(NumT_(Path)& self, const SrcT_(Path)& other)
 
   Memory::copy(self_d->commands, other_d->commands, length);
   Math::vConvertFloat<NumT, SrcT>(
-    reinterpret_cast<NumT*>(self_d->vertices), 
+    reinterpret_cast<NumT*>(self_d->vertices),
     reinterpret_cast<const SrcT*>(other_d->vertices), length * 2);
 
   return ERR_OK;
@@ -456,7 +456,7 @@ static err_t _G2d_PathT_moveTo(NumT_(Path)& self, const NumT_(Point)& pt0)
 
   commands[0] = PATH_CMD_MOVE_TO;
   vertices[0] = pt0;
-  self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
+  self._d->flags |= PATH_DATA_DIRTY_BBOX;
 
   return ERR_OK;
 }
@@ -480,7 +480,7 @@ static err_t _G2d_PathT_lineTo(NumT_(Path)& self, const NumT_(Point)& pt1)
   PATH_ADD_VERTEX_BEGIN(NumT, 1)
     commands[0] = PATH_CMD_LINE_TO;
     vertices[0] = pt1;
-    self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
+    self._d->flags |= PATH_DATA_DIRTY_BBOX;
   PATH_ADD_VERTEX_END()
 }
 
@@ -492,7 +492,7 @@ static err_t _G2d_PathT_lineToRel(NumT_(Path)& self, const NumT_(Point)& pt1)
 
     commands[0] = PATH_CMD_LINE_TO;
     vertices[0] = pt1 + tr;
-    self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
+    self._d->flags |= PATH_DATA_DIRTY_BBOX;
   PATH_ADD_VERTEX_END()
 }
 
@@ -502,7 +502,7 @@ static err_t _G2d_PathT_hlineTo(NumT_(Path)& self, NumT x)
   PATH_ADD_VERTEX_BEGIN(NumT, 1)
     commands[0] = PATH_CMD_LINE_TO;
     vertices[0].set(x, vertices[-1].y);
-    self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
+    self._d->flags |= PATH_DATA_DIRTY_BBOX;
   PATH_ADD_VERTEX_END()
 }
 
@@ -512,7 +512,7 @@ static err_t _G2d_PathT_hlineToRel(NumT_(Path)& self, NumT x)
   PATH_ADD_VERTEX_BEGIN(NumT, 1)
     commands[0] = PATH_CMD_LINE_TO;
     vertices[0].set(x + vertices[-1].x, vertices[-1].y);
-    self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
+    self._d->flags |= PATH_DATA_DIRTY_BBOX;
   PATH_ADD_VERTEX_END()
 }
 
@@ -522,7 +522,7 @@ static err_t _G2d_PathT_vlineTo(NumT_(Path)& self, NumT y)
   PATH_ADD_VERTEX_BEGIN(NumT, 1)
     commands[0] = PATH_CMD_LINE_TO;
     vertices[0].set(vertices[-1].x, y);
-    self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
+    self._d->flags |= PATH_DATA_DIRTY_BBOX;
   PATH_ADD_VERTEX_END()
 }
 
@@ -532,7 +532,7 @@ static err_t _G2d_PathT_vlineToRel(NumT_(Path)& self, NumT y)
   PATH_ADD_VERTEX_BEGIN(NumT, 1)
     commands[0] = PATH_CMD_LINE_TO;
     vertices[0].set(vertices[-1].x, y + vertices[-1].y);
-    self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
+    self._d->flags |= PATH_DATA_DIRTY_BBOX;
   PATH_ADD_VERTEX_END()
 }
 
@@ -551,7 +551,7 @@ static err_t _G2d_PathT_polyTo(NumT_(Path)& self, const NumT_(Point)* pts, sysui
 
     for (i = 0; i < count; i++) commands[i] = PATH_CMD_LINE_TO;
     for (i = 0; i < count; i++) vertices[i] = pts[i];
-    self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
+    self._d->flags |= PATH_DATA_DIRTY_BBOX;
   PATH_ADD_VERTEX_END()
 }
 
@@ -567,7 +567,7 @@ static err_t _G2d_PathT_polyToRel(NumT_(Path)& self, const NumT_(Point)* pts, sy
 
     for (i = 0; i < count; i++) commands[i] = PATH_CMD_LINE_TO;
     for (i = 0; i < count; i++) vertices[i] = pts[i] + tr;
-    self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
+    self._d->flags |= PATH_DATA_DIRTY_BBOX;
   PATH_ADD_VERTEX_END()
 }
 
@@ -587,7 +587,7 @@ static err_t _G2d_PathT_quadTo(
 
     vertices[0] = pt1;
     vertices[1] = pt2;
-    self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX | PATH_DATA_HAS_QUAD_CMD;
+    self._d->flags |= PATH_DATA_DIRTY_BBOX | PATH_DATA_HAS_QBEZIER;
   PATH_ADD_VERTEX_END()
 }
 
@@ -605,7 +605,7 @@ static err_t _G2d_PathT_quadToRel(
 
     vertices[0] = pt1 + tr;
     vertices[1] = pt2 + tr;
-    self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX | PATH_DATA_HAS_QUAD_CMD;
+    self._d->flags |= PATH_DATA_DIRTY_BBOX | PATH_DATA_HAS_QBEZIER;
   PATH_ADD_VERTEX_END()
 }
 
@@ -628,7 +628,7 @@ static err_t _G2d_PathT_smoothQuadTo(
 
     vertices[0] = pt1;
     vertices[1] = pt2;
-    self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX | PATH_DATA_HAS_QUAD_CMD;
+    self._d->flags |= PATH_DATA_DIRTY_BBOX | PATH_DATA_HAS_QBEZIER;
   PATH_ADD_VERTEX_END()
 }
 
@@ -651,7 +651,7 @@ static err_t _G2d_PathT_smoothQuadToRel(
     }
 
     vertices[0] = pt1;
-    self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX | PATH_DATA_HAS_QUAD_CMD;
+    self._d->flags |= PATH_DATA_DIRTY_BBOX | PATH_DATA_HAS_QBEZIER;
   PATH_ADD_VERTEX_END()
 }
 
@@ -674,7 +674,7 @@ static err_t _G2d_PathT_cubicTo(
     vertices[0] = pt1;
     vertices[1] = pt2;
     vertices[2] = pt3;
-    self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX | PATH_DATA_HAS_CUBIC_CMD;
+    self._d->flags |= PATH_DATA_DIRTY_BBOX | PATH_DATA_HAS_CBEZIER;
   PATH_ADD_VERTEX_END()
 }
 
@@ -695,7 +695,7 @@ static err_t _G2d_PathT_cubicToRel(
     vertices[0] = pt1 + tr;
     vertices[1] = pt2 + tr;
     vertices[2] = pt3 + tr;
-    self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX | PATH_DATA_HAS_CUBIC_CMD;
+    self._d->flags |= PATH_DATA_DIRTY_BBOX | PATH_DATA_HAS_CBEZIER;
   PATH_ADD_VERTEX_END()
 }
 
@@ -721,7 +721,7 @@ static err_t _G2d_PathT_smoothCubicTo(
     vertices[0] = pt1;
     vertices[1] = pt2;
     vertices[2] = pt3;
-    self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX | PATH_DATA_HAS_CUBIC_CMD;
+    self._d->flags |= PATH_DATA_DIRTY_BBOX | PATH_DATA_HAS_CBEZIER;
   PATH_ADD_VERTEX_END()
 }
 
@@ -747,7 +747,7 @@ static err_t _G2d_PathT_smoothCubicToRel(
     }
 
     vertices[0] = pt1;
-    self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX | PATH_DATA_HAS_CUBIC_CMD;
+    self._d->flags |= PATH_DATA_DIRTY_BBOX | PATH_DATA_HAS_CBEZIER;
   PATH_ADD_VERTEX_END()
 }
 
@@ -798,7 +798,7 @@ static err_t _G2d_PathT_arcTo(
     commands[0] = PATH_CMD_LINE_TO;
     vertices[0].set(cp.x + rp.x * ac, cp.y + rp.y * as);
 
-    self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
+    self._d->flags |= PATH_DATA_DIRTY_BBOX;
   }
   else
   {
@@ -814,7 +814,7 @@ static err_t _G2d_PathT_arcTo(
     for (uint i = 1; i < len; i++) commands[i] = PATH_CMD_CUBIC_TO;
 
     self._d->length = pos + len;
-    self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX | PATH_DATA_HAS_CUBIC_CMD;
+    self._d->flags |= PATH_DATA_DIRTY_BBOX | PATH_DATA_HAS_CBEZIER;
   }
 
   return ERR_OK;
@@ -955,7 +955,7 @@ static err_t _G2d_PathT_svgArcTo(
   }
 
   // Bounding box is no longer valid.
-  self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
+  self._d->flags |= PATH_DATA_DIRTY_BBOX;
   return ERR_OK;
 }
 
@@ -1159,7 +1159,7 @@ static err_t _G2d_PathT_boxesT(
     commands[4] = PATH_CMD_CLOSE;
   }
 
-  self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
+  self._d->flags |= PATH_DATA_DIRTY_BBOX;
   self._d->length = (sysuint_t)(commands - self._d->commands);
 
   return ERR_OK;
@@ -1233,7 +1233,7 @@ static err_t _G2d_PathT_rectsT(
     commands[4] = PATH_CMD_CLOSE;
   }
 
-  self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
+  self._d->flags |= PATH_DATA_DIRTY_BBOX;
   self._d->length = (sysuint_t)(commands - self._d->commands);
 
   return ERR_OK;
@@ -1279,7 +1279,7 @@ static err_t _G2d_PathT_polylineI(NumT_(Path)& self, const PointI* pts, sysuint_
     for (i = 0; i < count; i++, pts--) vertices[i] = pts[0];
   }
 
-  self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
+  self._d->flags |= PATH_DATA_DIRTY_BBOX;
   return ERR_OK;
 }
 
@@ -1309,7 +1309,7 @@ static err_t _G2d_PathT_polylineT(NumT_(Path)& self, const NumT_(Point)* pts, sy
     for (i = 0; i < count; i++, pts--) vertices[i] = pts[0];
   }
 
-  self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
+  self._d->flags |= PATH_DATA_DIRTY_BBOX;
   return ERR_OK;
 }
 
@@ -1342,7 +1342,7 @@ static err_t _G2d_PathT_polygonI(NumT_(Path)& self, const PointI* pts, sysuint_t
   }
   vertices[count].setNaN();
 
-  self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
+  self._d->flags |= PATH_DATA_DIRTY_BBOX;
   return ERR_OK;
 }
 
@@ -1375,7 +1375,7 @@ static err_t _G2d_PathT_polygonT(NumT_(Path)& self, const NumT_(Point)* pts, sys
   }
   vertices[count].setNaN();
 
-  self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
+  self._d->flags |= PATH_DATA_DIRTY_BBOX;
   return ERR_OK;
 }
 
@@ -1384,19 +1384,20 @@ static err_t _G2d_PathT_polygonT(NumT_(Path)& self, const NumT_(Point)* pts, sys
 // ============================================================================
 
 // ${SHAPE_TYPE:BEGIN}
-static const uint8_t _G2d_PathT_shapeSize[] = 
+static const uint8_t _G2d_PathT_shapeSize[] =
 {
   /* 00: SHAPE_TYPE_NONE    */ 0,
   /* 01: SHAPE_TYPE_LINE    */ 2,
-  /* 02: SHAPE_TYPE_QUAD    */ 3,
-  /* 03: SHAPE_TYPE_CUBIC   */ 4,
+  /* 02: SHAPE_TYPE_QBEZIER */ 3,
+  /* 03: SHAPE_TYPE_CBEZIER */ 4,
   /* 04: SHAPE_TYPE_ARC     */ 13,
   /* 05: SHAPE_TYPE_RECT    */ 5,
   /* 06: SHAPE_TYPE_ROUND   */ 18,
   /* 07: SHAPE_TYPE_CIRCLE  */ 14,
   /* 08: SHAPE_TYPE_ELLIPSE */ 14,
   /* 09: SHAPE_TYPE_CHORD   */ 20,
-  /* 10: SHAPE_TYPE_PIE     */ 20
+  /* 10: SHAPE_TYPE_PIE     */ 20,
+  /* 11: SHAPE_TYPE_TRIANGLE*/ 4
 };
 // ${SHAPE_TYPE:END}
 
@@ -1428,7 +1429,7 @@ static err_t _G2d_PathT_shape(
 
   err_t err = ERR_OK;
 
-  bool combBBox = transformType <= TRANSFORM_TYPE_SWAP && (self._d->flags & PATH_DATA_DIRTY_BOUNDING_BOX) == 0;
+  bool combBBox = transformType <= TRANSFORM_TYPE_SWAP && (self._d->flags & PATH_DATA_DIRTY_BBOX) == 0;
   NumT_(Box) shapeBBox(UNINITIALIZED);
 
   switch (shapeType)
@@ -1473,9 +1474,9 @@ static err_t _G2d_PathT_shape(
       break;
     }
 
-    case SHAPE_TYPE_QUAD:
+    case SHAPE_TYPE_QBEZIER:
     {
-      const NumT_(QuadCurve)* shape = reinterpret_cast<const NumT_(QuadCurve)*>(shapeData);
+      const NumT_(QBezier)* shape = reinterpret_cast<const NumT_(QBezier)*>(shapeData);
 
       dstCmd[0] = PATH_CMD_MOVE_TO;
       dstCmd[1] = PATH_CMD_QUAD_TO;
@@ -1494,14 +1495,14 @@ static err_t _G2d_PathT_shape(
         dstPts[2] = shape->p[0];
       }
 
-      self._d->flags |= PATH_DATA_HAS_QUAD_CMD;
+      self._d->flags |= PATH_DATA_HAS_QBEZIER;
       combBBox = false;
       break;
     }
 
-    case SHAPE_TYPE_CUBIC:
+    case SHAPE_TYPE_CBEZIER:
     {
-      const NumT_(CubicCurve)* shape = reinterpret_cast<const NumT_(CubicCurve)*>(shapeData);
+      const NumT_(CBezier)* shape = reinterpret_cast<const NumT_(CBezier)*>(shapeData);
 
       dstCmd[0] = PATH_CMD_MOVE_TO;
       dstCmd[1] = PATH_CMD_CUBIC_TO;
@@ -1523,7 +1524,7 @@ static err_t _G2d_PathT_shape(
         dstPts[3] = shape->p[0];
       }
 
-      self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX | PATH_DATA_HAS_CUBIC_CMD;
+      self._d->flags |= PATH_DATA_DIRTY_BBOX | PATH_DATA_HAS_CBEZIER;
 
       combBBox = false;
       break;
@@ -1547,7 +1548,7 @@ static err_t _G2d_PathT_shape(
       dstCmd[0] = PATH_CMD_MOVE_TO;
       for (uint i = 1; i < len; i++) dstCmd[i] = PATH_CMD_CUBIC_TO;
 
-      self._d->flags |= PATH_DATA_HAS_CUBIC_CMD;
+      self._d->flags |= PATH_DATA_HAS_CBEZIER;
       self._d->length = pos + len;
       combBBox = false;
       break;
@@ -1738,7 +1739,7 @@ _ShapeRect:
         shapeBBox.y1 = y1;
       }
 
-      self._d->flags |= PATH_DATA_HAS_CUBIC_CMD;
+      self._d->flags |= PATH_DATA_HAS_CBEZIER;
       break;
     }
 
@@ -1810,7 +1811,7 @@ _ShapeRect:
         shapeBBox.y1 = c.y + ry;
       }
 
-      self._d->flags |= PATH_DATA_HAS_CUBIC_CMD;
+      self._d->flags |= PATH_DATA_HAS_CBEZIER;
       break;
     }
 
@@ -1848,8 +1849,26 @@ _ShapeRect:
       dstCmd += len + 1;
       dstPts += len + 1;
 
-      self._d->flags |= PATH_DATA_HAS_CUBIC_CMD;
+      self._d->flags |= PATH_DATA_HAS_CBEZIER;
       self._d->length = (sysuint_t)(dstCmd - self._d->commands);
+      combBBox = false;
+      break;
+    }
+
+    case SHAPE_TYPE_TRIANGLE:
+    {
+      const NumT_(Triangle)* shape = reinterpret_cast<const NumT_(Triangle)*>(shapeData);
+
+      dstCmd[0] = PATH_CMD_MOVE_TO;
+      dstCmd[1] = PATH_CMD_LINE_TO;
+      dstCmd[2] = PATH_CMD_LINE_TO;
+      dstCmd[3] = PATH_CMD_CLOSE;
+
+      dstPts[0].set(shape->p[0]);
+      dstPts[1].set(shape->p[1]);
+      dstPts[2].set(shape->p[2]);
+      dstPts[3].setNaN();
+
       combBBox = false;
       break;
     }
@@ -1866,14 +1885,14 @@ _ShapeRect:
 
   if (combBBox)
   {
-    if (self._d->flags & PATH_DATA_HAS_BOUNDING_BOX)
+    if (self._d->flags & PATH_DATA_HAS_BBOX)
       NumI_(Box)::bound(self._d->boundingBox, self._d->boundingBox, shapeBBox);
     else
       self._d->boundingBox = shapeBBox;
   }
   else
   {
-    self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
+    self._d->flags |= PATH_DATA_DIRTY_BBOX;
   }
 
   _FOG_PATH_VERIFY_BOUNDING_BOX(self);
@@ -1912,11 +1931,11 @@ static err_t _G2d_PathT_appendPathT(
 
   Memory::copy(self._d->commands + pos, path._d->commands + srcPos, srcLen);
   Math::vConvertFloat<NumT, SrcT>(
-    reinterpret_cast<NumT*>(self._d->vertices + pos), 
+    reinterpret_cast<NumT*>(self._d->vertices + pos),
     reinterpret_cast<const SrcT*>(path._d->vertices + srcPos), srcLen * 2);
 
-  if (range == NULL && 
-      ((self._d->flags | path._d->flags) & PATH_DATA_DIRTY_BOUNDING_BOX) == 0)
+  if (range == NULL &&
+      ((self._d->flags | path._d->flags) & PATH_DATA_DIRTY_BBOX) == 0)
   {
     NumT x, y;
 
@@ -1932,21 +1951,21 @@ static err_t _G2d_PathT_appendPathT(
     if (x > self._d->boundingBox.x1) self._d->boundingBox.x1 = x;
     if (y > self._d->boundingBox.y1) self._d->boundingBox.y1 = y;
 
-    self._d->flags |= (path._d->flags & (PATH_DATA_DIRTY_CMD | PATH_DATA_HAS_QUAD_CMD | PATH_DATA_HAS_CUBIC_CMD));
+    self._d->flags |= (path._d->flags & (PATH_DATA_DIRTY_CMD | PATH_DATA_HAS_QBEZIER | PATH_DATA_HAS_CBEZIER));
   }
   else
   {
-    self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX | 
-                      (path._d->flags & (PATH_DATA_DIRTY_CMD | PATH_DATA_HAS_QUAD_CMD | PATH_DATA_HAS_CUBIC_CMD));
+    self._d->flags |= PATH_DATA_DIRTY_BBOX |
+                      (path._d->flags & (PATH_DATA_DIRTY_CMD | PATH_DATA_HAS_QBEZIER | PATH_DATA_HAS_CBEZIER));
   }
 
   return ERR_OK;
 }
 
-template<typename NumT>
+template<typename NumT, typename SrcT>
 static err_t _G2d_PathT_appendTransformedPathT(
   NumT_(Path)& self,
-  const NumT_(Path)& path,
+  const SrcT_(Path)& path,
   const NumT_(Transform)& tr,
   const Range* range)
 {
@@ -1973,10 +1992,10 @@ static err_t _G2d_PathT_appendTransformedPathT(
     tr._mapPoints(self._d->vertices + pos, path._d->vertices + srcPos, srcLen);
 
     if (srcPos == 0 && srcLen == path._d->length && transformType <= TRANSFORM_TYPE_SWAP &&
-        ((self._d->flags | path._d->flags) & PATH_DATA_DIRTY_BOUNDING_BOX) == 0)
+        ((self._d->flags | path._d->flags) & PATH_DATA_DIRTY_BBOX) == 0)
     {
-      NumT_(Box) box;
-      tr.mapBox(box, path._d->boundingBox);
+      NumT_(Box) box(path._d->boundingBox);
+      tr.mapBox(box, box);
 
       if (box.x0 < self._d->boundingBox.x0) self._d->boundingBox.x0 = box.x0;
       if (box.y0 < self._d->boundingBox.y0) self._d->boundingBox.y0 = box.y0;
@@ -1984,12 +2003,12 @@ static err_t _G2d_PathT_appendTransformedPathT(
       if (box.x1 > self._d->boundingBox.x1) self._d->boundingBox.x1 = box.x1;
       if (box.y1 > self._d->boundingBox.y1) self._d->boundingBox.y1 = box.y1;
 
-      self._d->flags |= (path._d->flags & (PATH_DATA_DIRTY_CMD | PATH_DATA_HAS_QUAD_CMD | PATH_DATA_HAS_CUBIC_CMD));
+      self._d->flags |= (path._d->flags & (PATH_DATA_DIRTY_CMD | PATH_DATA_HAS_QBEZIER | PATH_DATA_HAS_CBEZIER));
     }
     else
     {
-      self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX |
-                        (path._d->flags & (PATH_DATA_DIRTY_CMD | PATH_DATA_HAS_QUAD_CMD | PATH_DATA_HAS_CUBIC_CMD));
+      self._d->flags |= PATH_DATA_DIRTY_BBOX |
+                        (path._d->flags & (PATH_DATA_DIRTY_CMD | PATH_DATA_HAS_QBEZIER | PATH_DATA_HAS_CBEZIER));
     }
     return ERR_OK;
   }
@@ -1998,9 +2017,9 @@ static err_t _G2d_PathT_appendTransformedPathT(
     if (transformType == TRANSFORM_TYPE_DEGENERATE)
       return ERR_GEOMETRY_DEGENERATE;
 
-    if (&self == &path)
+    if (sizeof(NumT) == sizeof(SrcT) && (void*)&self == (void*)&path)
     {
-      NumT_(Path) tmp(path);
+      SrcT_(Path) tmp(path);
       return tr.mapPathData(self, tmp.getCommands() + srcPos, tmp.getVertices() + srcPos, srcLen, CONTAINER_OP_APPEND);
     }
     else
@@ -2010,10 +2029,10 @@ static err_t _G2d_PathT_appendTransformedPathT(
   }
 }
 
-template<typename NumT>
+template<typename NumT, typename SrcT>
 static err_t _G2d_PathT_appendTranslatedPathT(
   NumT_(Path)& self,
-  const NumT_(Path)& path,
+  const SrcT_(Path)& path,
   const NumT_(Point)& pt,
   const Range* range)
 {
@@ -2023,7 +2042,7 @@ static err_t _G2d_PathT_appendTranslatedPathT(
   tr._20 = pt.x;
   tr._21 = pt.y;
 
-  return _G2d_PathT_appendTransformedPathT<NumT>(self, path, tr, range);
+  return _G2d_PathT_appendTransformedPathT<NumT, SrcT>(self, path, tr, range);
 }
 
 // ============================================================================
@@ -2047,16 +2066,16 @@ static void _G2d_PathT_updateFlat(const NumT_(Path)& self)
     {
       if (c == PATH_CMD_QUAD_TO)
       {
-        flags |= PATH_DATA_HAS_QUAD_CMD;
+        flags |= PATH_DATA_HAS_QBEZIER;
         i += 2;
       }
       else
       {
-        flags |= PATH_DATA_HAS_CUBIC_CMD;
+        flags |= PATH_DATA_HAS_CBEZIER;
         i += 3;
       }
 
-      if (flags == (PATH_DATA_HAS_QUAD_CMD | PATH_DATA_HAS_CUBIC_CMD)) break;
+      if (flags == (PATH_DATA_HAS_QBEZIER | PATH_DATA_HAS_CBEZIER)) break;
       continue;
     }
 
@@ -2064,8 +2083,8 @@ static void _G2d_PathT_updateFlat(const NumT_(Path)& self)
   }
 
   self._d->flags = (self._d->flags & ~(PATH_DATA_DIRTY_CMD     |
-                                       PATH_DATA_HAS_QUAD_CMD  |
-                                       PATH_DATA_HAS_CUBIC_CMD )) | flags;
+                                       PATH_DATA_HAS_QBEZIER  |
+                                       PATH_DATA_HAS_CBEZIER )) | flags;
 }
 
 // TODO: Path, not perspecive correct assumptions.
@@ -2097,7 +2116,7 @@ static err_t _G2d_PathT_doFlatten(
   FOG_RETURN_ON_ERROR(dst.reserve(predict));
 
   // Set destination path as flat (no quad/cubic curves).
-  dst._d->flags &= ~(PATH_DATA_DIRTY_CMD | PATH_DATA_HAS_QUAD_CMD | PATH_DATA_HAS_CUBIC_CMD);
+  dst._d->flags &= ~(PATH_DATA_DIRTY_CMD | PATH_DATA_HAS_QBEZIER | PATH_DATA_HAS_CBEZIER);
 
   if (tr == NULL || tr->getType() == TRANSFORM_TYPE_IDENTITY)
   {
@@ -2145,14 +2164,14 @@ static err_t _G2d_PathT_doFlatten(
         {
           if ((i += 2) > srcLength) goto _InvalidState;
 
-          err = NumI_(QuadCurve)::flatten(srcPts + i - 3, dst, PATH_CMD_LINE_TO, flatness);
+          err = NumI_(QBezier)::flatten(srcPts + i - 3, dst, PATH_CMD_LINE_TO, flatness);
           if (FOG_IS_ERROR(err)) goto _Fail;
         }
         else if (PathCmd::isCubicTo(c))
         {
           if ((i += 3) > srcLength) goto _InvalidState;
 
-          err = NumI_(CubicCurve)::flatten(srcPts + i - 4, dst, PATH_CMD_LINE_TO, flatness);
+          err = NumI_(CBezier)::flatten(srcPts + i - 4, dst, PATH_CMD_LINE_TO, flatness);
           if (FOG_IS_ERROR(err)) goto _Fail;
         }
         else
@@ -2221,7 +2240,7 @@ static err_t _G2d_PathT_doFlatten(
           if ((i += 2) > srcLength) goto _InvalidState;
 
           tr->_mapPoints(pts, srcPts + i - 3, 3);
-          err = NumI_(QuadCurve)::flatten(pts, dst, PATH_CMD_LINE_TO, flatness);
+          err = NumI_(QBezier)::flatten(pts, dst, PATH_CMD_LINE_TO, flatness);
           if (FOG_IS_ERROR(err)) goto _Fail;
         }
         else if (PathCmd::isCubicTo(c))
@@ -2229,7 +2248,7 @@ static err_t _G2d_PathT_doFlatten(
           if ((i += 3) > srcLength) goto _InvalidState;
 
           tr->_mapPoints(pts, srcPts + i - 4, 4);
-          err = NumI_(CubicCurve)::flatten(pts,dst, PATH_CMD_LINE_TO, flatness);
+          err = NumI_(CBezier)::flatten(pts,dst, PATH_CMD_LINE_TO, flatness);
           if (FOG_IS_ERROR(err)) goto _Fail;
         }
         else
@@ -2319,7 +2338,7 @@ static err_t _G2d_PathT_flatten(
 // ============================================================================
 
 template<typename NumT>
-static err_t FOG_CDECL _G2d_PathT_getBoundingBox(const NumT_(Path)& self, 
+static err_t FOG_CDECL _G2d_PathT_getBoundingBox(const NumT_(Path)& self,
   NumT_(Box)* dst,
   const NumT_(Transform)* transform)
 {
@@ -2467,7 +2486,7 @@ _Update_Repeat:
                 pts[0].x < box.x1 && pts[0].y < box.y1 ))
           {
             NumT_(Box) e;
-            if (NumI_(QuadCurve)::getBoundingBox(pts - 1, &e) == ERR_OK) 
+            if (NumI_(QBezier)::getBoundingBox(pts - 1, &e) == ERR_OK)
             {
               if (e.x0 < box.x0) box.x0 = e.x0;
               if (e.y0 < box.y0) box.y0 = e.y0;
@@ -2496,7 +2515,7 @@ _Update_Repeat:
                 pts[0].y < box.y1 && pts[1].y < box.y1 ))
           {
             NumT_(Box) e;
-            if (NumI_(CubicCurve)::getBoundingBox(pts - 1, &e) == ERR_OK)
+            if (NumI_(CBezier)::getBoundingBox(pts - 1, &e) == ERR_OK)
             {
               if (e.x0 < box.x0) box.x0 = e.x0;
               if (e.y0 < box.y0) box.y0 = e.y0;
@@ -2524,7 +2543,7 @@ _Update_Repeat:
 
     if (isFirst) goto _Empty;
 
-    self._d->flags |= PATH_DATA_HAS_BOUNDING_BOX;
+    self._d->flags |= PATH_DATA_HAS_BBOX;
     self._d->boundingBox = box;
 
     switch (transformType)
@@ -2653,7 +2672,7 @@ _Affine_Repeat:
           if (pta[1].x < box.x0 || pta[1].y < box.y0 || pta[1].x > box.x1 || pta[1].y > box.y1)
           {
             NumT_(Box) e;
-            if (NumI_(QuadCurve)::getBoundingBox(pta, &e) == ERR_OK) 
+            if (NumI_(QBezier)::getBoundingBox(pta, &e) == ERR_OK)
             {
               if (e.x0 < box.x0) box.x0 = e.x0;
               if (e.y0 < box.y0) box.y0 = e.y0;
@@ -2687,7 +2706,7 @@ _Affine_Repeat:
               pta[2].x < box.x0 || pta[2].y < box.y0 || pta[2].x > box.x1 || pta[2].y > box.y1)
           {
             NumT_(Box) e;
-            if (NumI_(CubicCurve)::getBoundingBox(pta, &e) == ERR_OK)
+            if (NumI_(CBezier)::getBoundingBox(pta, &e) == ERR_OK)
             {
               if (e.x0 < box.x0) box.x0 = e.x0;
               if (e.y0 < box.y0) box.y0 = e.y0;
@@ -2863,7 +2882,7 @@ _DoLine:
         if (py >= minY && py <= maxY)
         {
           bool degenerated =
-            Math::isFuzzyEq(p[0].y, p[1].y) && 
+            Math::isFuzzyEq(p[0].y, p[1].y) &&
             Math::isFuzzyEq(p[1].y, p[2].y) ;
 
           if (degenerated)
@@ -2906,7 +2925,7 @@ _DoLine:
             }
             else
             {
-              NumI_(QuadCurve)::splitAt(rght, left, rght, tCut == NumT(0.0) ? tVal : (tVal - tCut) / (NumT(1.0) - tCut));
+              NumI_(QBezier)::splitAt(rght, left, rght, tCut == NumT(0.0) ? tVal : (tVal - tCut) / (NumT(1.0) - tCut));
             }
 
             minY = Math::min(left[0].y, left[2].y);
@@ -2932,13 +2951,13 @@ _DoLine:
               NumT ti[2];
               NumT ix;
 
-              if (Math::solveQuadraticFunctionAt(ti, func, NumT(0.0), NumT(1.0)) >= 1)
+              if (Math::solveQuadraticFunction(ti, func, NumT_(Interval)(NumT(0.0), NumT(1.0))) >= 1)
                 ix = ax * Math::pow2(ti[0]) + bx * ti[0] + cx;
               else if (py - minY < maxY - py)
                 ix = p[0].x;
               else
                 ix = p[2].x;
-                
+
               if (px >= ix) windingNumber += direction;
             }
 
@@ -2969,8 +2988,8 @@ _DoLine:
 
         if (py >= minY && py <= maxY)
         {
-          bool degenerated = 
-            Math::isFuzzyEq(p[0].y, p[1].y) && 
+          bool degenerated =
+            Math::isFuzzyEq(p[0].y, p[1].y) &&
             Math::isFuzzyEq(p[1].y, p[2].y) &&
             Math::isFuzzyEq(p[2].y, p[3].y) ;
 
@@ -2998,7 +3017,7 @@ _DoLine:
           int tIndex;
           int tLength;
 
-          tLength = Math::solveQuadraticFunctionAt(tExtrema, func, 0.0, 1.0);
+          tLength = Math::solveQuadraticFunction(tExtrema, func, NumT_(Interval)(NumT(0.0), NumT(1.0)));
           tExtrema[tLength++] = NumT(1.0);
 
           rght[0] = p[0];
@@ -3020,7 +3039,7 @@ _DoLine:
             }
             else
             {
-              NumI_(CubicCurve)::splitAt(rght, left, rght, tCut == NumT(0.0) ? tVal : (tVal - tCut) / (NumT(1.0) - tCut));
+              NumI_(CBezier)::splitAt(rght, left, rght, tCut == NumT(0.0) ? tVal : (tVal - tCut) / (NumT(1.0) - tCut));
             }
 
             minY = Math::min(left[0].y, left[3].y);
@@ -3046,13 +3065,13 @@ _DoLine:
               NumT ti[3];
               NumT ix;
 
-              if (Math::solveCubicFunctionAt(ti, func, NumT(0.0), NumT(1.0)) >= 1)
+              if (Math::solveCubicFunction(ti, func, NumT_(Interval)(NumT(0.0), NumT(1.0))) >= 1)
                 ix = ax * Math::pow3(ti[0]) + bx * Math::pow2(ti[0]) + cx * ti[0] + dx;
               else if (py - minY < maxY - py)
                 ix = p[0].x;
               else
                 ix = p[3].x;
-                
+
               if (px >= ix) windingNumber += direction;
             }
 
@@ -3135,7 +3154,7 @@ static err_t _G2d_PathT_transform(
       FOG_RETURN_ON_ERROR(self.detach());
       tr._mapPoints(self._d->vertices, self._d->vertices, self._d->length);
 
-      self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
+      self._d->flags |= PATH_DATA_DIRTY_BBOX;
       return ERR_OK;
     }
     else
@@ -3150,7 +3169,7 @@ static err_t _G2d_PathT_transform(
       FOG_RETURN_ON_ERROR(self.detach());
       tr._mapPoints(self._d->vertices + start, self._d->vertices + start, end - start);
 
-      self._d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
+      self._d->flags |= PATH_DATA_DIRTY_BBOX;
       return ERR_OK;
     }
   }
@@ -3477,8 +3496,8 @@ FOG_NO_EXPORT void _g2d_path_init(void)
   _g2d.pathf.polygonF = _G2d_PathT_polygonT<float>;
   _g2d.pathf.shape = _G2d_PathT_shape<float>;
   _g2d.pathf.appendPathF = _G2d_PathT_appendPathT<float, float>;
-  _g2d.pathf.appendTranslatedPathF = _G2d_PathT_appendTranslatedPathT<float>;
-  _g2d.pathf.appendTransformedPathF = _G2d_PathT_appendTransformedPathT<float>;
+  _g2d.pathf.appendTranslatedPathF = _G2d_PathT_appendTranslatedPathT<float, float>;
+  _g2d.pathf.appendTransformedPathF = _G2d_PathT_appendTransformedPathT<float, float>;
   _g2d.pathf.updateFlat = _G2d_PathT_updateFlat<float>;
   _g2d.pathf.flatten = _G2d_PathT_flatten<float>;
   _g2d.pathf.getBoundingBox = _G2d_PathT_getBoundingBox<float>;
@@ -3546,10 +3565,12 @@ FOG_NO_EXPORT void _g2d_path_init(void)
   _g2d.pathd.polygonI = _G2d_PathT_polygonI<double>;
   _g2d.pathd.polygonD = _G2d_PathT_polygonT<double>;
   _g2d.pathd.shape = _G2d_PathT_shape<double>;
-  _g2d.pathd.appendPathD = _G2d_PathT_appendPathT<double, double>;
   _g2d.pathd.appendPathF = _G2d_PathT_appendPathT<double, float>;
-  _g2d.pathd.appendTranslatedPathD = _G2d_PathT_appendTranslatedPathT<double>;
-  _g2d.pathd.appendTransformedPathD = _G2d_PathT_appendTransformedPathT<double>;
+  _g2d.pathd.appendPathD = _G2d_PathT_appendPathT<double, double>;
+  _g2d.pathd.appendTranslatedPathF = _G2d_PathT_appendTranslatedPathT<double, float>;
+  _g2d.pathd.appendTranslatedPathD = _G2d_PathT_appendTranslatedPathT<double, double>;
+  _g2d.pathd.appendTransformedPathF = _G2d_PathT_appendTransformedPathT<double, float>;
+  _g2d.pathd.appendTransformedPathD = _G2d_PathT_appendTransformedPathT<double, double>;
   _g2d.pathd.updateFlat = _G2d_PathT_updateFlat<double>;
   _g2d.pathd.flatten = _G2d_PathT_flatten<double>;
   _g2d.pathd.getBoundingBox = _G2d_PathT_getBoundingBox<double>;

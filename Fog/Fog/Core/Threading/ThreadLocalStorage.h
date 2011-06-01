@@ -13,6 +13,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/TypeInfo.h>
 #include <Fog/Core/Global/Uninitialized.h>
@@ -135,7 +136,7 @@ public:
     bool _initialized;
     SlotType _slot;
 
-    FOG_DISABLE_COPY(Slot)
+    _FOG_CLASS_NO_COPY(Slot)
   };
 
 #if defined(FOG_OS_WINDOWS)
@@ -160,7 +161,7 @@ private:
 #endif  // FOG_OS_WINDOWS
 
 private:
-  FOG_DISABLE_COPY(ThreadLocalStorage)
+  _FOG_CLASS_NO_COPY(ThreadLocalStorage)
 };
 
 template <typename T>
@@ -192,7 +193,7 @@ private:
 
   SlotType _slot;
 
-  FOG_DISABLE_COPY(ThreadLocalPointer<T>)
+  _FOG_CLASS_NO_COPY(ThreadLocalPointer<T>)
 };
 
 struct FOG_NO_EXPORT ThreadLocalBoolean
@@ -213,7 +214,7 @@ struct FOG_NO_EXPORT ThreadLocalBoolean
 private:
   ThreadLocalPointer<void> _tlp;
 
-  FOG_DISABLE_COPY(ThreadLocalBoolean)
+  _FOG_CLASS_NO_COPY(ThreadLocalBoolean)
 };
 
 //! @}

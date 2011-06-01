@@ -1241,7 +1241,7 @@ _Loop:
     GET_UTF8_CHAR(srcCur);
 
 _Code:
-    if (uc >= 0x10000U && uc <= UNICODE_LAST)
+    if (uc >= 0x10000U && uc <= UNICHAR_MAX)
     {
       Char::toSurrogatePair(uc, &dstCur[0]._ch, &dstCur[1]._ch);
       dstCur += 2;
@@ -1863,14 +1863,14 @@ _Loop:
     if (isByteSwapped) uc = Memory::bswap32(uc);
 
 _ProcessChar:
-    if (uc > UNICODE_LAST || (uc <= 0xFFFF && Char::isSurrogatePair((uint16_t)uc)))
+    if (uc > UNICHAR_MAX || (uc <= 0xFFFF && Char::isSurrogatePair((uint16_t)uc)))
     {
       err = ERR_STRING_INVALID_CHAR;
       goto _End;
     }
 
     // BOM support.
-    if (uc == UTF32_BOM_Swapped)
+    if (uc == UTF32_BOM_SWAPPED)
     {
       isByteSwapped = !isByteSwapped;
     }

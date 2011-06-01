@@ -11,7 +11,6 @@
 // [Dependencies]
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Svg/Dom/SvgLinearGradientElement_p.h>
-#include <Fog/Svg/Visit/SvgRender.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
 
 namespace Fog {
@@ -73,7 +72,7 @@ err_t SvgLinearGradientElement::onPattern(SvgVisitor* visitor, SvgElement* obj, 
     gradient.setStart(PointF(x1, y1));
     gradient.setEnd(PointF(x2, y2));
   }
-  else 
+  else
   {
     // "userSpaceOnUse".
     float x1 = a_x1.isAssigned() ? a_x1.getCoordComputed() : 0.0f;

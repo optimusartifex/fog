@@ -8,6 +8,7 @@
 #define _FOG_XML_DOM_XMLATTRIBUTE_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Xml/Global/Constants.h>
@@ -79,7 +80,7 @@ protected:
 private:
   friend struct XmlElement;
 
-  FOG_DISABLE_COPY(XmlAttribute)
+  _FOG_CLASS_NO_COPY(XmlAttribute)
 };
 
 //! @}

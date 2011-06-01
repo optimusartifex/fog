@@ -13,7 +13,7 @@
 #include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/G2d/Geometry/CubicCurve.h>
+#include <Fog/G2d/Geometry/CBezier.h>
 #include <Fog/G2d/Geometry/Ellipse.h>
 #include <Fog/G2d/Geometry/PathTmp_p.h>
 #include <Fog/G2d/Geometry/Transform.h>

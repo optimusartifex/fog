@@ -8,6 +8,7 @@
 #define _FOG_SVG_DOM_SVGSTOPELEMENT_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Svg/Dom/SvgOffsetAttribute_p.h>
 #include <Fog/Svg/Dom/SvgStyledElement_p.h>
 
@@ -50,7 +51,7 @@ struct FOG_NO_EXPORT SvgStopElement : public SvgStyledElement
   SvgOffsetAttribute a_offset;
 
 private:
-  FOG_DISABLE_COPY(SvgStopElement)
+  _FOG_CLASS_NO_COPY(SvgStopElement)
 };
 
 //! @}

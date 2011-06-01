@@ -19,8 +19,15 @@ TAB_REPLACEMENT = "  "
 
 for root, dirs, files in os.walk("../"):
   for f in files:
+    path = os.path.join(root, f)
+
+    # Remove the stupid "._" files created by MAC.
+    if (len(f) > 2 and f[0] == u'.' and f[1] == u'_') or file == u".DS_Store":
+      print "Removing file: " + path
+      os.remove(path)
+      continue
+
     if f.lower().endswith(".cpp") or f.lower().endswith(".h") or f.lower().endswith(".cmake") or f.lower().endswith(".txt"):
-      path = os.path.join(root, f)
 
       fh = open(path, "rb")
       data = fh.read()

@@ -13,6 +13,7 @@
 #endif // FOG_OS_WINDOWS
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/Static.h>
 #include <Fog/Core/IO/Stream.h>
@@ -287,7 +288,7 @@ struct FOG_NO_EXPORT WinGdiPlusLibrary
   ULONG_PTR gdiplusToken;
 
 private:
-  FOG_DISABLE_COPY(WinGdiPlusLibrary)
+  _FOG_CLASS_NO_COPY(WinGdiPlusLibrary)
 };
 
 // ============================================================================

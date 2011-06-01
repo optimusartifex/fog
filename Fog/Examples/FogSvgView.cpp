@@ -256,13 +256,17 @@ void MyWindow::onPaint(PaintEvent* e)
   setWindowTitle(text);
 
   p->resetTransform();
+
+  for (int i = 0; i < 2; i++)
   {
-    PathD path;
+    PathF path;
     Font font = getFont();
-    font.setSize(25);
-    font.getOutline(text, path);
+
+    font.setKerning(i);
+
+    font.setHeight(25, UNIT_PX);
+    font.getTextOutline(path, PointF(30, 30 + i * 30), text);
     p->setSource(Argb32(0xFFFF0000));
-    path.translate(PointD(30, 30));
     p->fillPath(path);
   }
 
@@ -297,12 +301,12 @@ FOG_GUI_MAIN()
     //fileName = Ascii8("C:/my/svg/froggy.svg");
     //fileName = Ascii8("C:/my/svg/fire_engine.svg");
     //fileName = Ascii8("C:/my/svg/tommek_Car.svg");
-    //fileName = Ascii8("C:/my/svg/TestFOGFeatures.svg");
+    fileName = Ascii8("C:/my/svg/TestFOGFeatures.svg");
     //fileName = Ascii8("C:/My/svg/linear3.svg");
 
     //fileName = Ascii8("C:/my/svg/ISO_12233-reschart.svg");
     //fileName = Ascii8("C:/my/svg/lorem_ipsum_compound.svg");
-    fileName = Ascii8("C:/my/svg/tiger.svg");
+    //fileName = Ascii8("C:/my/svg/tiger.svg");
     //fileName = Ascii8("C:/my/svg/lion.svg");
     //fileName = Ascii8("C:/my/svg/Minimap_fixed.svg");
     //fileName = Ascii8("C:/my/svg/path-lines-BE-01.svg");

@@ -9,8 +9,9 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/Global/TypeInfo.h>
 #include <Fog/Core/Threading/Atomic.h>
 
 #if defined(FOG_OS_WINDOWS)
@@ -27,7 +28,7 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Forward Declaration]
+// [Forward Declarations]
 // ============================================================================
 
 struct TimeDelta;
@@ -161,7 +162,7 @@ private:
     CVEvent* _next;
     CVEvent* _prev;
 
-    FOG_DISABLE_COPY(CVEvent)
+    _FOG_CLASS_NO_COPY(CVEvent)
   };
 
   //! @brief States
@@ -198,7 +199,7 @@ private:
   pthread_mutex_t* _userMutex;
 #endif // FOG_OS_POSIX
 
-  FOG_DISABLE_COPY(ThreadCondition)
+  _FOG_CLASS_NO_COPY(ThreadCondition)
 };
 
 //! @}

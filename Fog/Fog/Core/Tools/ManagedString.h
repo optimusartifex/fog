@@ -8,6 +8,7 @@
 #define _FOG_CORE_TOOLS_MANAGEDSTRING_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/TypeInfo.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Tools/String.h>
@@ -100,7 +101,7 @@ struct FOG_API ManagedString
     Node* next;
 
   private:
-    FOG_DISABLE_COPY(Node)
+    _FOG_CLASS_NO_COPY(Node)
   };
 
   // [Construction / Destruction]
@@ -218,7 +219,7 @@ struct FOG_API ManagedString
 
 } // Fog namespace
 
-FOG_DECLARE_TYPEINFO(Fog::ManagedString, Fog::TYPEINFO_MOVABLE)
+_FOG_TYPEINFO_DECLARE(Fog::ManagedString, Fog::TYPEINFO_MOVABLE)
 
 // [Guard]
 #endif // _FOG_CORE_TOOLS_MANAGEDSTRING_H

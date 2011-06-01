@@ -8,6 +8,7 @@
 #define _FOG_CORE_THREADING_THREADPOOL_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Threading/Thread.h>
@@ -34,7 +35,7 @@ struct Thread;
 //! reduces overhead caused by operating-system calls.
 //!
 //! Default thread pool used for example by:
-//! - @c RasterPainterEngine.
+//! - @c RasterPaintEngine.
 //!
 //! All methods in @c ThreadPool are thread safe.
 struct FOG_API ThreadPool
@@ -128,7 +129,7 @@ public:
   PoolEntry* _unusedThreads;
 
 private:
-  FOG_DISABLE_COPY(ThreadPool)
+  _FOG_CLASS_NO_COPY(ThreadPool)
 };
 
 //! @}

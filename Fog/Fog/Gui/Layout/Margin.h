@@ -189,7 +189,7 @@ struct FOG_NO_EXPORT Margin
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::Margin, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::Margin, Fog::TYPEINFO_PRIMITIVE)
 
 // [Guard]
 #endif // _FOG_GUI_LAYOUT_MARGIN_H

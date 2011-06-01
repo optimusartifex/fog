@@ -8,6 +8,7 @@
 #define _FOG_SVG_DOM_SVGCOORDATTRIBUTE_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Xml/Dom/XmlAttribute.h>
 #include <Fog/Xml/Dom/XmlElement.h>
 #include <Fog/Svg/Dom/SvgDocument.h>
@@ -62,7 +63,7 @@ protected:
   SvgCoord _coord;
 
 private:
-  FOG_DISABLE_COPY(SvgCoordAttribute)
+  _FOG_CLASS_NO_COPY(SvgCoordAttribute)
 };
 
 //! @}

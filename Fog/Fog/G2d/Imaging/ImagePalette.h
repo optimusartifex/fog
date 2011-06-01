@@ -8,7 +8,9 @@
 #define _FOG_G2D_IMAGING_IMAGEPALETTE_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Swap.h>
+#include <Fog/Core/Global/TypeInfo.h>
 #include <Fog/Core/Memory/Memory.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Tools/Range.h>
@@ -157,12 +159,24 @@ struct FOG_API ImagePalette
   // [Members]
   // --------------------------------------------------------------------------
 
-  FOG_DECLARE_D(ImagePaletteData);
+  _FOG_CLASS_D(ImagePaletteData);
 };
 
 //! @}
 
 } // Fog namespace
+
+// ============================================================================
+// [Fog::TypeInfo<>]
+// ============================================================================
+
+_FOG_TYPEINFO_DECLARE(Fog::ImagePalette, Fog::TYPEINFO_MOVABLE)
+
+// ============================================================================
+// [Fog::Swap]
+// ============================================================================
+
+_FOG_SWAP_D(Fog::ImagePalette)
 
 // [Guard]
 #endif // _FOG_G2D_IMAGING_IMAGEPALETTE_H

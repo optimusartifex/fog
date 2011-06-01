@@ -1060,16 +1060,16 @@ FOG_TYPEVARIANT_DECLARE_F_D_I(Box)
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::BoxI, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::BoxF, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::BoxD, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::BoxI, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::BoxF, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::BoxD, Fog::TYPEINFO_PRIMITIVE)
 
 // ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_DECLARE_FUZZY(Fog::BoxF, Math::feqv((const float *)&a, (const float *)&b, 4))
-FOG_DECLARE_FUZZY(Fog::BoxD, Math::feqv((const double*)&a, (const double*)&b, 4))
+FOG_FUZZY_DECLARE(Fog::BoxF, Math::feqv((const float *)&a, (const float *)&b, 4))
+FOG_FUZZY_DECLARE(Fog::BoxD, Math::feqv((const double*)&a, (const double*)&b, 4))
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_BOX_H

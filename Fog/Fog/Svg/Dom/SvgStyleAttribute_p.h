@@ -8,6 +8,7 @@
 #define _FOG_SVG_DOM_SVGSTYLEATTRIBUTE_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Source/Color.h>
@@ -100,7 +101,7 @@ struct FOG_NO_EXPORT SvgStyleAttribute : public XmlAttribute
   String _fontFamily;
 
 private:
-  FOG_DISABLE_COPY(SvgStyleAttribute)
+  _FOG_CLASS_NO_COPY(SvgStyleAttribute)
 };
 #include <Fog/Core/Pack/PackRestore.h>
 

@@ -8,6 +8,7 @@
 #define _FOG_SVG_DOM_SVGROOTELEMENT_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Svg/Dom/SvgCoordAttribute_p.h>
 #include <Fog/Svg/Dom/SvgStyledElement_p.h>
 #include <Fog/Svg/Dom/SvgViewBoxAttribute_p.h>
@@ -63,7 +64,7 @@ struct FOG_NO_EXPORT SvgRootElement : public SvgStyledElement
   // TODO: PreserveAspectRatio.
 
 private:
-  FOG_DISABLE_COPY(SvgRootElement)
+  _FOG_CLASS_NO_COPY(SvgRootElement)
 };
 
 //! @}

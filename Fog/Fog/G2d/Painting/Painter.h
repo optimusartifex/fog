@@ -9,10 +9,11 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/G2d/Global/Api.h>
 #include <Fog/G2d/Imaging/Image.h>
-#include <Fog/G2d/Painting/PainterEngine.h>
-#include <Fog/G2d/Painting/PainterParams.h>
+#include <Fog/G2d/Painting/PaintEngine.h>
+#include <Fog/G2d/Painting/PaintParams.h>
 
 namespace Fog {
 
@@ -289,10 +290,10 @@ struct FOG_NO_EXPORT Painter
     return _vtable->getParameter(*this, PAINTER_PARAMETER_FORMAT_I, &val);
   }
 
-  //! @brief Get the painter-engine type (see @c PAINTER_TYPE).
-  FOG_INLINE err_t getEngine(uint32_t& val) const
+  //! @brief Get the painter-engine type (see @c PAINT_DEVICE).
+  FOG_INLINE err_t getDeviceId(uint32_t& val) const
   {
-    return _vtable->getParameter(*this, PAINTER_PARAMETER_ENGINE_I, &val);
+    return _vtable->getParameter(*this, PAINTER_PARAMETER_DEVICE_I, &val);
   }
 
   // --------------------------------------------------------------------------
@@ -328,31 +329,31 @@ struct FOG_NO_EXPORT Painter
   // --------------------------------------------------------------------------
 
   //! @brief Get the paint parameters (float).
-  FOG_INLINE err_t getsetPainterParams(PaintParamsF& val) const
+  FOG_INLINE err_t getPaintParams(PaintParamsF& val) const
   {
     return _vtable->getParameter(*this, PAINTER_PARAMETER_PARAMS_F, &val);
   }
 
   //! @brief Get the paint parameters (double).
-  FOG_INLINE err_t getsetPainterParams(PaintParamsD& val) const
+  FOG_INLINE err_t getPaintParams(PaintParamsD& val) const
   {
     return _vtable->getParameter(*this, PAINTER_PARAMETER_PARAMS_D, &val);
   }
 
   //! @brief Set the paint parameters (float).
-  FOG_INLINE err_t setsetPainterParams(const PaintParamsF& val)
+  FOG_INLINE err_t setPaintParams(const PaintParamsF& val)
   {
     return _vtable->setParameter(*this, PAINTER_PARAMETER_PARAMS_F, &val);
   }
 
   //! @brief Set the paint parameters (double).
-  FOG_INLINE err_t setsetPainterParams(const PaintParamsD& val)
+  FOG_INLINE err_t setPaintParams(const PaintParamsD& val)
   {
     return _vtable->setParameter(*this, PAINTER_PARAMETER_PARAMS_D, &val);
   }
 
   //! @brief Reset the paint parameters.
-  FOG_INLINE err_t resetsetPainterParams()
+  FOG_INLINE err_t resetPaintParams()
   {
     return _vtable->resetParameter(*this, PAINTER_PARAMETER_PARAMS_F);
   }
@@ -402,25 +403,25 @@ struct FOG_NO_EXPORT Painter
   }
 
   // --------------------------------------------------------------------------
-  // [Parameters - Paint Hints - Antialiasing Quality]
+  // [Parameters - Paint Hints - Render Quality]
   // --------------------------------------------------------------------------
 
-  //! @brief Get the anti-aliasing hint (see @c ANTIALIASING_QUALITY).
-  FOG_INLINE err_t getAntialiasingQuality(uint32_t& val) const
+  //! @brief Get the render-quality hint (see @c RENDER_QUALITY).
+  FOG_INLINE err_t getRenderQuality(uint32_t& val) const
   {
-    return _vtable->getParameter(*this, PAINTER_PARAMETER_ANTIALIASING_QUALITY_I, &val);
+    return _vtable->getParameter(*this, PAINTER_PARAMETER_RENDER_QUALITY_I, &val);
   }
 
-  //! @brief Set the anti-aliasing hint (see @c ANTIALIASING_QUALITY).
-  FOG_INLINE err_t setAntialiasingQuality(uint32_t val)
+  //! @brief Set the render-quality hint (see @c RENDER_QUALITY).
+  FOG_INLINE err_t setRenderQuality(uint32_t val)
   {
-    return _vtable->setParameter(*this, PAINTER_PARAMETER_ANTIALIASING_QUALITY_I, &val);
+    return _vtable->setParameter(*this, PAINTER_PARAMETER_RENDER_QUALITY_I, &val);
   }
 
-  //! @brief Reset the anti-aliasing hint.
-  FOG_INLINE err_t resetAntialiasingQuality()
+  //! @brief Reset the render-quality hint.
+  FOG_INLINE err_t resetRenderQuality()
   {
-    return _vtable->resetParameter(*this, PAINTER_PARAMETER_ANTIALIASING_QUALITY_I);
+    return _vtable->resetParameter(*this, PAINTER_PARAMETER_RENDER_QUALITY_I);
   }
 
   // --------------------------------------------------------------------------
@@ -1090,27 +1091,27 @@ struct FOG_NO_EXPORT Painter
   // --------------------------------------------------------------------------
 
   //! @brief Convert the world coordinate into the screen coordinates.
-  FOG_INLINE err_t worldToScreen(PointF& p) const
+  FOG_INLINE err_t mapUserToDevice(PointF& p) const
   {
-    return _vtable->mapPointF(*this, PAINTER_MAP_WORLD_TO_SCREEN, p);
+    return _vtable->mapPointF(*this, PAINTER_MAP_USER_TO_DEVICE, p);
   };
 
   //! @overload
-  FOG_INLINE err_t worldToScreen(PointD& p) const
+  FOG_INLINE err_t mapUserToDevice(PointD& p) const
   {
-    return _vtable->mapPointD(*this, PAINTER_MAP_WORLD_TO_SCREEN, p);
+    return _vtable->mapPointD(*this, PAINTER_MAP_USER_TO_DEVICE, p);
   };
 
   //! @brief Convert the screen coordinate into the world coordinates.
-  FOG_INLINE err_t screenToWorld(PointF& p) const
+  FOG_INLINE err_t mapDeviceToUser(PointF& p) const
   {
-    return _vtable->mapPointF(*this, PAINTER_MAP_SCREEN_TO_WORLD, p);
+    return _vtable->mapPointF(*this, PAINTER_MAP_DEVICE_TO_USER, p);
   };
 
   //! @overload
-  FOG_INLINE err_t screenToWorld(PointD& p) const
+  FOG_INLINE err_t mapDeviceToUser(PointD& p) const
   {
-    return _vtable->mapPointD(*this, PAINTER_MAP_SCREEN_TO_WORLD, p);
+    return _vtable->mapPointD(*this, PAINTER_MAP_DEVICE_TO_USER, p);
   };
 
   // --------------------------------------------------------------------------
@@ -1139,17 +1140,14 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t drawLine(const PointF& p0, const PointF& p1) { return drawLine(LineF(p0, p1)); }
   FOG_INLINE err_t drawLine(const PointD& p0, const PointD& p1) { return drawLine(LineD(p0, p1)); }
 
-  FOG_INLINE err_t drawQuad(const QuadCurveF& quad) { return _vtable->drawShapeF(*this, SHAPE_TYPE_QUAD, &quad); }
-  FOG_INLINE err_t drawQuad(const QuadCurveD& quad) { return _vtable->drawShapeD(*this, SHAPE_TYPE_QUAD, &quad); }
+  FOG_INLINE err_t drawQBezier(const QBezierF& quad) { return _vtable->drawShapeF(*this, SHAPE_TYPE_QBEZIER, &quad); }
+  FOG_INLINE err_t drawQBezier(const QBezierD& quad) { return _vtable->drawShapeD(*this, SHAPE_TYPE_QBEZIER, &quad); }
 
-  FOG_INLINE err_t drawCubic(const CubicCurveF& cubic) { return _vtable->drawShapeF(*this, SHAPE_TYPE_CUBIC, &cubic); }
-  FOG_INLINE err_t drawCubic(const CubicCurveD& cubic) { return _vtable->drawShapeD(*this, SHAPE_TYPE_CUBIC, &cubic); }
+  FOG_INLINE err_t drawCBezier(const CBezierF& cubic) { return _vtable->drawShapeF(*this, SHAPE_TYPE_CBEZIER, &cubic); }
+  FOG_INLINE err_t drawCBezier(const CBezierD& cubic) { return _vtable->drawShapeD(*this, SHAPE_TYPE_CBEZIER, &cubic); }
 
   FOG_INLINE err_t drawArc(const ArcF& arc) { return _vtable->drawShapeF(*this, SHAPE_TYPE_ARC, &arc); }
   FOG_INLINE err_t drawArc(const ArcD& arc) { return _vtable->drawShapeD(*this, SHAPE_TYPE_ARC, &arc); }
-
-  FOG_INLINE err_t drawRound(const RoundF& round) { return _vtable->drawShapeF(*this, SHAPE_TYPE_ROUND, &round); }
-  FOG_INLINE err_t drawRound(const RoundD& round) { return _vtable->drawShapeD(*this, SHAPE_TYPE_ROUND, &round); }
 
   FOG_INLINE err_t drawCircle(const CircleF& circle) { return _vtable->drawShapeF(*this, SHAPE_TYPE_CIRCLE, &circle); }
   FOG_INLINE err_t drawCircle(const CircleD& circle) { return _vtable->drawShapeD(*this, SHAPE_TYPE_CIRCLE, &circle); }
@@ -1157,11 +1155,17 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t drawEllipse(const EllipseF& ellipse) { return _vtable->drawShapeF(*this, SHAPE_TYPE_ELLIPSE, &ellipse); }
   FOG_INLINE err_t drawEllipse(const EllipseD& ellipse) { return _vtable->drawShapeD(*this, SHAPE_TYPE_ELLIPSE, &ellipse); }
 
+  FOG_INLINE err_t drawRound(const RoundF& round) { return _vtable->drawShapeF(*this, SHAPE_TYPE_ROUND, &round); }
+  FOG_INLINE err_t drawRound(const RoundD& round) { return _vtable->drawShapeD(*this, SHAPE_TYPE_ROUND, &round); }
+
   FOG_INLINE err_t drawChord(const ArcF& chord) { return _vtable->drawShapeF(*this, SHAPE_TYPE_CHORD, &chord); }
   FOG_INLINE err_t drawChord(const ArcD& chord) { return _vtable->drawShapeD(*this, SHAPE_TYPE_CHORD, &chord); }
 
   FOG_INLINE err_t drawPie(const ArcF& pie) { return _vtable->drawShapeF(*this, SHAPE_TYPE_PIE, &pie); }
   FOG_INLINE err_t drawPie(const ArcD& pie) { return _vtable->drawShapeD(*this, SHAPE_TYPE_PIE, &pie); }
+
+  FOG_INLINE err_t drawTriangle(const TriangleF& triangle) { return _vtable->drawShapeF(*this, SHAPE_TYPE_TRIANGLE, &triangle); }
+  FOG_INLINE err_t drawTriangle(const TriangleD& triangle) { return _vtable->drawShapeD(*this, SHAPE_TYPE_TRIANGLE, &triangle); }
 
   FOG_INLINE err_t drawShape(const ShapeF& shape) { return _vtable->drawShapeF(*this, shape.getType(), shape.getData()); }
   FOG_INLINE err_t drawShape(const ShapeD& shape) { return _vtable->drawShapeD(*this, shape.getType(), shape.getData()); }
@@ -1191,17 +1195,14 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t fillPolygon(const PointF* p, sysuint_t count) { return _vtable->fillPolygonF(*this, p, count); }
   FOG_INLINE err_t fillPolygon(const PointD* p, sysuint_t count) { return _vtable->fillPolygonD(*this, p, count); }
 
-  FOG_INLINE err_t fillQuad(const QuadCurveF& quad) { return _vtable->fillShapeF(*this, SHAPE_TYPE_QUAD, &quad); }
-  FOG_INLINE err_t fillQuad(const QuadCurveD& quad) { return _vtable->fillShapeD(*this, SHAPE_TYPE_QUAD, &quad); }
+  FOG_INLINE err_t fillQBezier(const QBezierF& quad) { return _vtable->fillShapeF(*this, SHAPE_TYPE_QBEZIER, &quad); }
+  FOG_INLINE err_t fillQBezier(const QBezierD& quad) { return _vtable->fillShapeD(*this, SHAPE_TYPE_QBEZIER, &quad); }
 
-  FOG_INLINE err_t fillCubic(const CubicCurveF& cubic) { return _vtable->fillShapeF(*this, SHAPE_TYPE_CUBIC, &cubic); }
-  FOG_INLINE err_t fillCubic(const CubicCurveD& cubic) { return _vtable->fillShapeD(*this, SHAPE_TYPE_CUBIC, &cubic); }
+  FOG_INLINE err_t fillCBezier(const CBezierF& cubic) { return _vtable->fillShapeF(*this, SHAPE_TYPE_CBEZIER, &cubic); }
+  FOG_INLINE err_t fillCBezier(const CBezierD& cubic) { return _vtable->fillShapeD(*this, SHAPE_TYPE_CBEZIER, &cubic); }
 
   FOG_INLINE err_t fillArc(const ArcF& arc) { return _vtable->fillShapeF(*this, SHAPE_TYPE_ARC, &arc); }
   FOG_INLINE err_t fillArc(const ArcD& arc) { return _vtable->fillShapeD(*this, SHAPE_TYPE_ARC, &arc); }
-
-  FOG_INLINE err_t fillRound(const RoundF& round) { return _vtable->fillShapeF(*this, SHAPE_TYPE_ROUND, &round); }
-  FOG_INLINE err_t fillRound(const RoundD& round) { return _vtable->fillShapeD(*this, SHAPE_TYPE_ROUND, &round); }
 
   FOG_INLINE err_t fillCircle(const CircleF& circle) { return _vtable->fillShapeF(*this, SHAPE_TYPE_CIRCLE, &circle); }
   FOG_INLINE err_t fillCircle(const CircleD& circle) { return _vtable->fillShapeD(*this, SHAPE_TYPE_CIRCLE, &circle); }
@@ -1209,11 +1210,17 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t fillEllipse(const EllipseF& ellipse) { return _vtable->fillShapeF(*this, SHAPE_TYPE_ELLIPSE, &ellipse); }
   FOG_INLINE err_t fillEllipse(const EllipseD& ellipse) { return _vtable->fillShapeD(*this, SHAPE_TYPE_ELLIPSE, &ellipse); }
 
+  FOG_INLINE err_t fillRound(const RoundF& round) { return _vtable->fillShapeF(*this, SHAPE_TYPE_ROUND, &round); }
+  FOG_INLINE err_t fillRound(const RoundD& round) { return _vtable->fillShapeD(*this, SHAPE_TYPE_ROUND, &round); }
+
   FOG_INLINE err_t fillChord(const ArcF& chord) { return _vtable->fillShapeF(*this, SHAPE_TYPE_CHORD, &chord); }
   FOG_INLINE err_t fillChord(const ArcD& chord) { return _vtable->fillShapeD(*this, SHAPE_TYPE_CHORD, &chord); }
 
   FOG_INLINE err_t fillPie(const ArcF& pie) { return _vtable->fillShapeF(*this, SHAPE_TYPE_PIE, &pie); }
   FOG_INLINE err_t fillPie(const ArcD& pie) { return _vtable->fillShapeD(*this, SHAPE_TYPE_PIE, &pie); }
+
+  FOG_INLINE err_t fillTriangle(const TriangleF& triangle) { return _vtable->fillShapeF(*this, SHAPE_TYPE_TRIANGLE, &triangle); }
+  FOG_INLINE err_t fillTriangle(const TriangleD& triangle) { return _vtable->fillShapeD(*this, SHAPE_TYPE_TRIANGLE, &triangle); }
 
   FOG_INLINE err_t fillShape(const ShapeF& shape) { return _vtable->fillShapeF(*this, shape.getType(), shape.getData()); }
   FOG_INLINE err_t fillShape(const ShapeD& shape) { return _vtable->fillShapeD(*this, shape.getType(), shape.getData()); }
@@ -1306,17 +1313,14 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t clipLine(uint32_t clipOp, const LineF& line) { return _vtable->clipShapeF(*this, clipOp, SHAPE_TYPE_LINE, &line); }
   FOG_INLINE err_t clipLine(uint32_t clipOp, const LineD& line) { return _vtable->clipShapeD(*this, clipOp, SHAPE_TYPE_LINE, &line); }
 
-  FOG_INLINE err_t clipQuad(uint32_t clipOp, const QuadCurveF& quad) { return _vtable->clipShapeF(*this, clipOp, SHAPE_TYPE_QUAD, &quad); }
-  FOG_INLINE err_t clipQuad(uint32_t clipOp, const QuadCurveD& quad) { return _vtable->clipShapeD(*this, clipOp, SHAPE_TYPE_QUAD, &quad); }
+  FOG_INLINE err_t clipQBezier(uint32_t clipOp, const QBezierF& quad) { return _vtable->clipShapeF(*this, clipOp, SHAPE_TYPE_QBEZIER, &quad); }
+  FOG_INLINE err_t clipQBezier(uint32_t clipOp, const QBezierD& quad) { return _vtable->clipShapeD(*this, clipOp, SHAPE_TYPE_QBEZIER, &quad); }
 
-  FOG_INLINE err_t clipCubic(uint32_t clipOp, const CubicCurveF& cubic) { return _vtable->clipShapeF(*this, clipOp, SHAPE_TYPE_CUBIC, &cubic); }
-  FOG_INLINE err_t clipCubic(uint32_t clipOp, const CubicCurveD& cubic) { return _vtable->clipShapeD(*this, clipOp, SHAPE_TYPE_CUBIC, &cubic); }
+  FOG_INLINE err_t clipCBezier(uint32_t clipOp, const CBezierF& cubic) { return _vtable->clipShapeF(*this, clipOp, SHAPE_TYPE_CBEZIER, &cubic); }
+  FOG_INLINE err_t clipCBezier(uint32_t clipOp, const CBezierD& cubic) { return _vtable->clipShapeD(*this, clipOp, SHAPE_TYPE_CBEZIER, &cubic); }
 
   FOG_INLINE err_t clipArc(uint32_t clipOp, const ArcF& arc) { return _vtable->clipShapeF(*this, clipOp, SHAPE_TYPE_ARC, &arc); }
   FOG_INLINE err_t clipArc(uint32_t clipOp, const ArcD& arc) { return _vtable->clipShapeD(*this, clipOp, SHAPE_TYPE_ARC, &arc); }
-
-  FOG_INLINE err_t clipRound(uint32_t clipOp, const RoundF& round) { return _vtable->clipShapeF(*this, clipOp, SHAPE_TYPE_ROUND, &round); }
-  FOG_INLINE err_t clipRound(uint32_t clipOp, const RoundD& round) { return _vtable->clipShapeD(*this, clipOp, SHAPE_TYPE_ROUND, &round); }
 
   FOG_INLINE err_t clipCircle(uint32_t clipOp, const CircleF& circle) { return _vtable->clipShapeF(*this, clipOp, SHAPE_TYPE_CIRCLE, &circle); }
   FOG_INLINE err_t clipCircle(uint32_t clipOp, const CircleD& circle) { return _vtable->clipShapeD(*this, clipOp, SHAPE_TYPE_CIRCLE, &circle); }
@@ -1324,11 +1328,17 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t clipEllipse(uint32_t clipOp, const EllipseF& ellipse) { return _vtable->clipShapeF(*this, clipOp, SHAPE_TYPE_ELLIPSE, &ellipse); }
   FOG_INLINE err_t clipEllipse(uint32_t clipOp, const EllipseD& ellipse) { return _vtable->clipShapeD(*this, clipOp, SHAPE_TYPE_ELLIPSE, &ellipse); }
 
+  FOG_INLINE err_t clipRound(uint32_t clipOp, const RoundF& round) { return _vtable->clipShapeF(*this, clipOp, SHAPE_TYPE_ROUND, &round); }
+  FOG_INLINE err_t clipRound(uint32_t clipOp, const RoundD& round) { return _vtable->clipShapeD(*this, clipOp, SHAPE_TYPE_ROUND, &round); }
+
   FOG_INLINE err_t clipChord(uint32_t clipOp, const ArcF& chord) { return _vtable->clipShapeF(*this, clipOp, SHAPE_TYPE_CHORD, &chord); }
   FOG_INLINE err_t clipChord(uint32_t clipOp, const ArcD& chord) { return _vtable->clipShapeD(*this, clipOp, SHAPE_TYPE_CHORD, &chord); }
 
   FOG_INLINE err_t clipPie(uint32_t clipOp, const ArcF& pie) { return _vtable->clipShapeF(*this, clipOp, SHAPE_TYPE_PIE, &pie); }
   FOG_INLINE err_t clipPie(uint32_t clipOp, const ArcD& pie) { return _vtable->clipShapeD(*this, clipOp, SHAPE_TYPE_PIE, &pie); }
+
+  FOG_INLINE err_t clipTriangle(uint32_t clipOp, const TriangleF& triangle) { return _vtable->clipShapeF(*this, clipOp, SHAPE_TYPE_TRIANGLE, &triangle); }
+  FOG_INLINE err_t clipTriangle(uint32_t clipOp, const TriangleD& triangle) { return _vtable->clipShapeD(*this, clipOp, SHAPE_TYPE_TRIANGLE, &triangle); }
 
   FOG_INLINE err_t clipShape(uint32_t clipOp, const ShapeF& shape) { return _vtable->clipShapeF(*this, clipOp, shape.getType(), shape.getData()); }
   FOG_INLINE err_t clipShape(uint32_t clipOp, const ShapeD& shape) { return _vtable->clipShapeD(*this, clipOp, shape.getType(), shape.getData()); }
@@ -1384,10 +1394,10 @@ struct FOG_NO_EXPORT Painter
   const PainterVTable* _vtable;
 
   //! @brief The painter engine.
-  PainterEngine* _engine;
+  PaintEngine* _engine;
 
 private:
-  FOG_DISABLE_COPY(Painter);
+  _FOG_CLASS_NO_COPY(Painter);
 };
 
 //! @}

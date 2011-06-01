@@ -207,7 +207,7 @@ static err_t atou64_priv(const CHAR_TYPE* str, sysuint_t length, uint64_t* dst, 
     if (str == end) goto truncated;
   }
 
-  if (base < 2U || base > 36U)
+  if (base < 2 || base > 36)
   {
     base = 10;
 

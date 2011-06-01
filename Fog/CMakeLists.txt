@@ -410,6 +410,7 @@ Set(FOG_CORE_GLOBAL_SOURCES
 Set(FOG_CORE_GLOBAL_HEADERS
   Fog/Core/Global/Api.h
   Fog/Core/Global/Assert.h
+  Fog/Core/Global/Class.h
   Fog/Core/Global/Constants.h
   Fog/Core/Global/Debug.h
   Fog/Core/Global/Error.h
@@ -452,23 +453,28 @@ Set(FOG_CORE_LIBRARY_HEADERS
 
 # [Fog/Core/Math]
 Set(FOG_CORE_MATH_SOURCES
+  Fog/Core/Math/Fixed.cpp
+  Fog/Core/Math/Function.cpp
+  Fog/Core/Math/Fuzzy.cpp
+  Fog/Core/Math/Integrate.cpp
+  Fog/Core/Math/Math.cpp
+  Fog/Core/Math/MathVec.cpp
+  Fog/Core/Math/Solve.cpp
+)
+
+Set(FOG_CORE_MATH_HEADERS
   Fog/Core/Math/Cleanup.h
   Fog/Core/Math/Constants.h
   Fog/Core/Math/Fixed.h
   Fog/Core/Math/FloatBits.h
   Fog/Core/Math/FloatControl.h
+  Fog/Core/Math/Function.h
   Fog/Core/Math/Fuzzy.h
+  Fog/Core/Math/Integrate.h
+  Fog/Core/Math/Interval.h
   Fog/Core/Math/Math.h
   Fog/Core/Math/MathVec.h
   Fog/Core/Math/Solve.h
-)
-
-Set(FOG_CORE_MATH_HEADERS
-  Fog/Core/Math/Fixed.cpp
-  Fog/Core/Math/Fuzzy.cpp
-  Fog/Core/Math/Math.cpp
-  Fog/Core/Math/MathVec.cpp
-  Fog/Core/Math/Solve.cpp
 )
 
 # [Fog/Core/Memory]
@@ -589,7 +595,10 @@ Set(FOG_CORE_TOOLS_SOURCES
   Fog/Core/Tools/StringUtil_gen.cpp
   Fog/Core/Tools/Strings.cpp
   Fog/Core/Tools/Stub.cpp
+  Fog/Core/Tools/TextChunk.cpp
   Fog/Core/Tools/TextCodec.cpp
+  Fog/Core/Tools/TextIterator.cpp
+  Fog/Core/Tools/Unicode.cpp
 )
 
 Set(FOG_CORE_TOOLS_HEADERS
@@ -612,7 +621,10 @@ Set(FOG_CORE_TOOLS_HEADERS
   Fog/Core/Tools/StringUtil.h
   Fog/Core/Tools/Strings.h
   Fog/Core/Tools/Stub.h
+  Fog/Core/Tools/TextChunk.h
   Fog/Core/Tools/TextCodec.h
+  Fog/Core/Tools/TextIterator.h
+  Fog/Core/Tools/Unicode.h
 )
 
 # [Fog/Core/Win]
@@ -636,10 +648,13 @@ EndIf()
 # [Fog/Core/Mac]
 If(FOG_OS_MAC)
   Set(FOG_CORE_MAC_SOURCES
-    Fog/Core/Mac/MacUtil.mm
+    Fog/Core/Mac/MacScopedAutoReleasePool.mm
+    Fog/Core/Mac/MacUtil_Core.mm
   )
   Set(FOG_CORE_MAC_HEADERS
-    Fog/Core/Mac/MacUtil.h
+    Fog/Core/Mac/MacDefs.h
+    Fog/Core/Mac/MacScopedAutoReleasePool.h
+    Fog/Core/Mac/MacUtil_Core.h
   )
 EndIf()
 
@@ -697,67 +712,13 @@ Set(FOG_G2D_FACE_HEADERS
   Fog/G2d/Face/Face_Raster_SSSE3.h
 )
 
-# [Fog/G2d/Font]
-Set(FOG_G2D_FONT_SOURCES
-  Fog/G2d/Font/Font.cpp
-  Fog/G2d/Font/FTFontEngine.cpp
-  Fog/G2d/Font/Glyph.cpp
-  Fog/G2d/Font/GlyphCache.cpp
-  Fog/G2d/Font/GlyphSet.cpp
-  Fog/G2d/Font/KerningPair.cpp
-  Fog/G2d/Font/NullFontEngine.cpp
-)
-
-Set(FOG_G2D_FONT_HEADERS
-  Fog/G2d/Font/Font.h
-  Fog/G2d/Font/FTFontEngine.h
-  Fog/G2d/Font/Glyph.h
-  Fog/G2d/Font/GlyphCache.h
-  Fog/G2d/Font/GlyphSet.h
-  Fog/G2d/Font/KerningPair.h
-  Fog/G2d/Font/NullFontEngine_p.h
-)
-
-If(FOG_OS_WINDOWS)
-  Set(FOG_FONT_WINDOWS TRUE)
-ElseIf(FOG_OS_MAC)
-  Set(FOG_FONT_MAC TRUE)
-Else()
-  Find_File(HAVE_FREETYPE freetype-config)
-  If(HAVE_FREETYPE)
-    Exec_Program(freetype-config ARGS --cflags OUTPUT_VARIABLE FREETYPE_CONFIG_OUT RETURN_VALUE FREETYPE_CONFIG_RET)
-    Set(FOG_FONT_FREETYPE TRUE)
-  EndIf()
-
-  If(NOT FOG_HAVE_FONTCONFIG)
-    Check_Include_Files(fontconfig/fontconfig.h FOG_HAVE_FONTCONFIG)
-  EndIf()
-EndIf()
-
-If(FOG_FONT_WINDOWS)
-  List(APPEND FOG_G2D_FONT_SOURCES Fog/G2d/Font/WinFontEngine.cpp)
-  List(APPEND FOG_G2D_FONT_HEADERS Fog/G2d/Font/WinFontEngine.h)
-EndIf()
-
-If(FOG_FONT_FREETYPE)
-  Set_Source_Files_Properties(
-    Fog/G2d/Font/FTFontEngine.cpp
-    PROPERTIES COMPILE_FLAGS "${FREETYPE_CONFIG_OUT}"
-  )
-EndIf()
-
-If(FOG_FONT_MAC)
-  List(APPEND FOG_G2D_FONT_SOURCES Fog/G2d/Font/MacFontEngine.mm)
-  List(APPEND FOG_G2D_FONT_HEADERS Fog/G2d/Font/MacFontEngine.h)
-EndIf()
-
 # [Fog/G2d/Geometry]
 Set(FOG_G2D_GEOMETRY_SOURCES
   Fog/G2d/Geometry/Arc.cpp
   Fog/G2d/Geometry/Box.cpp
+  Fog/G2d/Geometry/CBezier.cpp
   Fog/G2d/Geometry/Chord.cpp
   Fog/G2d/Geometry/Circle.cpp
-  Fog/G2d/Geometry/CubicCurve.cpp
   Fog/G2d/Geometry/Ellipse.cpp
   Fog/G2d/Geometry/Line.cpp
   Fog/G2d/Geometry/Math2d.cpp
@@ -769,21 +730,22 @@ Set(FOG_G2D_GEOMETRY_SOURCES
   Fog/G2d/Geometry/Pie.cpp
   Fog/G2d/Geometry/Point.cpp
   Fog/G2d/Geometry/Polygon.cpp
-  Fog/G2d/Geometry/QuadCurve.cpp
+  Fog/G2d/Geometry/QBezier.cpp
   Fog/G2d/Geometry/Rect.cpp
   Fog/G2d/Geometry/Round.cpp
   Fog/G2d/Geometry/Shape.cpp
   Fog/G2d/Geometry/Size.cpp
   Fog/G2d/Geometry/Size.cpp
   Fog/G2d/Geometry/Transform.cpp
+  Fog/G2d/Geometry/Triangle.cpp
 )
 
 Set(FOG_G2D_GEOMETRY_HEADERS
   Fog/G2d/Geometry/Arc.h
   Fog/G2d/Geometry/Box.h
+  Fog/G2d/Geometry/CBezier.h
   Fog/G2d/Geometry/Chord.h
   Fog/G2d/Geometry/Circle.h
-  Fog/G2d/Geometry/CubicCurve.h
   Fog/G2d/Geometry/Ellipse.h
   Fog/G2d/Geometry/Internals_p.h
   Fog/G2d/Geometry/Line.h
@@ -798,12 +760,13 @@ Set(FOG_G2D_GEOMETRY_HEADERS
   Fog/G2d/Geometry/Point.h
   Fog/G2d/Geometry/Polygon.h
   Fog/G2d/Geometry/PolygonTmp_p.h
-  Fog/G2d/Geometry/QuadCurve.h
+  Fog/G2d/Geometry/QBezier.h
   Fog/G2d/Geometry/Rect.h
   Fog/G2d/Geometry/Round.h
   Fog/G2d/Geometry/Shape.h
   Fog/G2d/Geometry/Size.h
   Fog/G2d/Geometry/Transform.h
+  Fog/G2d/Geometry/Triangle.h
 )
 
 Set_Source_Files_Properties(
@@ -948,17 +911,21 @@ Set_Source_Files_Properties(
 
 # [Fog/G2d/Painting]
 Set(FOG_G2D_PAINTING_SOURCES
+  Fog/G2d/Painting/PaintDevice.cpp
+  Fog/G2d/Painting/PaintDeviceInfo.cpp
+  Fog/G2d/Painting/PaintEngine.cpp
+  Fog/G2d/Painting/PaintParams.cpp
+  Fog/G2d/Painting/PaintUtil.cpp
   Fog/G2d/Painting/Painter.cpp
-  Fog/G2d/Painting/PainterEngine.cpp
-  Fog/G2d/Painting/PainterParams.cpp
-  Fog/G2d/Painting/PainterUtil.cpp
 )
 
 Set(FOG_G2D_PAINTING_HEADERS
+  Fog/G2d/Painting/PaintDevice.h
+  Fog/G2d/Painting/PaintDeviceInfo.h
+  Fog/G2d/Painting/PaintEngine.h
+  Fog/G2d/Painting/PaintParams.h
+  Fog/G2d/Painting/PaintUtil.h
   Fog/G2d/Painting/Painter.h
-  Fog/G2d/Painting/PainterEngine.h
-  Fog/G2d/Painting/PainterParams.h
-  Fog/G2d/Painting/PainterUtil.h
 )
 
 Set(FOG_G2D_PAINTING_NULL_SOURCES
@@ -1172,16 +1139,99 @@ Set(FOG_G2D_SOURCE_HEADERS
 
 # [Fog/G2d/Text]
 Set(FOG_G2D_TEXT_SOURCES
-  Fog/G2d/Text/TextIterator.cpp
+  Fog/G2d/Text/Font.cpp
+  Fog/G2d/Text/FontFace.cpp
+  Fog/G2d/Text/FontFaceCache.cpp
+  Fog/G2d/Text/FontKerning.cpp
+  Fog/G2d/Text/FontManager.cpp
+  Fog/G2d/Text/FontProvider.cpp
+  Fog/G2d/Text/GlyphBitmap.cpp
+  Fog/G2d/Text/GlyphBitmapCache.cpp
+  Fog/G2d/Text/GlyphOutline.cpp
+  Fog/G2d/Text/GlyphOutlineCache.cpp
+  Fog/G2d/Text/NullFontFace.cpp
+  Fog/G2d/Text/TextExtents.cpp
   Fog/G2d/Text/TextLayout.cpp
   Fog/G2d/Text/TextRect.cpp
 )
 
 Set(FOG_G2D_TEXT_HEADERS
-  Fog/G2d/Text/TextIterator.h
+  Fog/G2d/Text/Font.h
+  Fog/G2d/Text/FontFace.h
+  Fog/G2d/Text/FontFaceCache.h
+  Fog/G2d/Text/FontHints.h
+  Fog/G2d/Text/FontKerning.h
+  Fog/G2d/Text/FontManager.h
+  Fog/G2d/Text/FontMetrics.h
+  Fog/G2d/Text/FontProvider.h
+  Fog/G2d/Text/GlyphBitmap.h
+  Fog/G2d/Text/GlyphBitmapCache.h
+  Fog/G2d/Text/GlyphMetrics.h
+  Fog/G2d/Text/GlyphOutline.h
+  Fog/G2d/Text/GlyphOutlineCache.h
+  Fog/G2d/Text/NullFontFace_p.h
+  Fog/G2d/Text/TextExtents.h
+  Fog/G2d/Text/TextHints.h
   Fog/G2d/Text/TextLayout.h
   Fog/G2d/Text/TextRect.h
 )
+
+If(FOG_OS_WINDOWS)
+  Set(FOG_FONT_WINDOWS TRUE)
+ElseIf(FOG_OS_MAC)
+  Set(FOG_FONT_MAC TRUE)
+Else()
+  Find_File(HAVE_FREETYPE freetype-config)
+  If(HAVE_FREETYPE)
+    Exec_Program(freetype-config ARGS --cflags OUTPUT_VARIABLE FREETYPE_CONFIG_OUT RETURN_VALUE FREETYPE_CONFIG_RET)
+    Set(FOG_FONT_FREETYPE TRUE)
+  EndIf()
+
+  If(NOT FOG_HAVE_FONTCONFIG)
+    Check_Include_Files(fontconfig/fontconfig.h FOG_HAVE_FONTCONFIG)
+  EndIf()
+EndIf()
+
+If(FOG_FONT_WINDOWS)
+  List(APPEND FOG_G2D_TEXT_SOURCES
+    Fog/G2d/Text/WinFontFace.cpp
+    Fog/G2d/Text/WinFontProvider.cpp
+    Fog/G2d/Text/WinFontUtil.cpp
+  )
+  List(APPEND FOG_G2D_TEXT_HEADERS
+    Fog/G2d/Text/WinFontFace.h
+    Fog/G2d/Text/WinFontProvider.h
+    Fog/G2d/Text/WinFontUtil_p.h
+  )
+EndIf()
+
+If(FOG_FONT_FREETYPE)
+  List(APPEND FOG_G2D_TEXT_SOURCES
+    Fog/G2d/Text/FTFontFace.cpp
+    Fog/G2d/Text/FTFontProvider.cpp
+  )
+  List(APPEND FOG_G2D_TEXT_HEADERS
+    Fog/G2d/Text/FTFontFace.h
+    Fog/G2d/Text/FTFontProvider.h
+  )
+
+  Set_Source_Files_Properties(
+    Fog/G2d/Text/FTFontFace.cpp
+    Fog/G2d/Text/FTFontProvider.cpp
+    PROPERTIES COMPILE_FLAGS "${FREETYPE_CONFIG_OUT}"
+  )
+EndIf()
+
+If(FOG_FONT_MAC)
+  List(APPEND FOG_G2D_TEXT_SOURCES
+    Fog/G2d/Text/MacFontFace.mm
+    Fog/G2d/Text/MacFontProvider.mm
+  )
+  List(APPEND FOG_G2D_TEXT_HEADERS
+    Fog/G2d/Text/MacFontFace.h
+    Fog/G2d/Text/MacFontProvider.h
+  )
+EndIf()
 
 # [Fog/G2d/Tools]
 Set(FOG_G2D_TOOLS_SOURCES
@@ -1221,7 +1271,6 @@ EndIf()
 # Source groups.
 Source_Group("G2d"                  FILES ${FOG_G2D_LIB_SOURCES}              ${FOG_G2D_LIB_HEADERS}             )
 Source_Group("G2d/Face"             FILES ${FOG_G2D_FACE_SOURCES}             ${FOG_G2D_FACE_HEADERS}            )
-Source_Group("G2d/Font"             FILES ${FOG_G2D_FONT_SOURCES}             ${FOG_G2D_FONT_HEADERS}            )
 Source_Group("G2d/Geometry"         FILES ${FOG_G2D_GEOMETRY_SOURCES}         ${FOG_G2D_GEOMETRY_HEADERS}        )
 Source_Group("G2d/Global"           FILES ${FOG_G2D_GLOBAL_SOURCES}           ${FOG_G2D_GLOBAL_HEADERS}          )
 Source_Group("G2d/Imaging"          FILES ${FOG_G2D_IMAGING_SOURCES}          ${FOG_G2D_IMAGING_HEADERS}         )
@@ -1675,7 +1724,6 @@ Set(FOG_ALL_SOURCES
   # Fog/G2d.
   ${FOG_G2D_LIB_SOURCES}
   ${FOG_G2D_FACE_SOURCES}
-  ${FOG_G2D_FONT_SOURCES}
   ${FOG_G2D_GEOMETRY_SOURCES}
   ${FOG_G2D_GLOBAL_SOURCES}
   ${FOG_G2D_IMAGING_SOURCES}
@@ -1735,7 +1783,6 @@ Set(FOG_ALL_HEADERS
   # Fog/G2d.
   ${FOG_G2D_LIB_HEADERS}
   ${FOG_G2D_FACE_HEADERS}
-  ${FOG_G2D_FONT_HEADERS}
   ${FOG_G2D_GEOMETRY_HEADERS}
   ${FOG_G2D_GLOBAL_HEADERS}
   ${FOG_G2D_IMAGING_HEADERS}

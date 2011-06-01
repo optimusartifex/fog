@@ -21,7 +21,7 @@
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Geometry/Size.h>
 #include <Fog/G2d/Imaging/Image.h>
-#include <Fog/G2d/Painting/PainterEngine.h>
+#include <Fog/G2d/Painting/PaintEngine.h>
 #include <Fog/G2d/Painting/Raster/RasterConstants_p.h>
 #include <Fog/G2d/Painting/Raster/RasterFuncs_p.h>
 #include <Fog/G2d/Painting/Raster/RasterState_p.h>
@@ -43,36 +43,36 @@ namespace Fog {
 
 //! @internal
 //!
-//! @brief @c RasterPainterEngine VTable struct.
+//! @brief @c RasterPaintEngine VTable struct.
 //!
 //! Currently there are no more members, but in future there could be.
 struct FOG_NO_EXPORT RasterPainterVTable : public PainterVTable {};
 
 //! @internal
 //!
-//! @brief @c RasterPainterEngine VTable instances.
+//! @brief @c RasterPaintEngine VTable instances.
 //!
 //! For performance reasons there are vtable for these combinations:
 //!
 //!   1. Threading model - ST(Singlethreaded) and MT(Multithreaded).
 //!   2. Precision - BYTE, WORD and FLOAT.
-extern RasterPainterVTable _G2d_RasterPainterEngine_vtable[RASTER_MODE_COUNT];
+extern RasterPainterVTable _G2d_RasterPaintEngine_vtable[RASTER_MODE_COUNT];
 
 // ============================================================================
-// [Fog::RasterPainterEngine]
+// [Fog::RasterPaintEngine]
 // ============================================================================
 
 //! @internal
 //!
 //! @brief Raster engine.
-struct FOG_NO_EXPORT RasterPainterEngine : public PainterEngine
+struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  RasterPainterEngine();
-  ~RasterPainterEngine();
+  RasterPaintEngine();
+  ~RasterPaintEngine();
 
   // --------------------------------------------------------------------------
   // [Initialization]

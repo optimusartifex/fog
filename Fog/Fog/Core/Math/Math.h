@@ -22,6 +22,47 @@
 
 #include <Fog/Core/Math/Cleanup.h>
 
+// I experienced that some platforms has no support for single precision
+// floating point functions like isFinite(), isInfinite(), isNaN(), etc...
+//
+// If compiler supports these functions then these macros are defined to
+// the function names. In case that compiler doesn't support the functions,
+// macro is not defined, thus the special code is generated.
+//
+// Macros Listing:
+//
+//   #define _FOG_MATH_IS_FINITE_F
+//   #define _FOG_MATH_IS_FINITE_D
+//
+//   #define _FOG_MATH_IS_INFINITE_F
+//   #define _FOG_MATH_IS_INFINITE_D
+//
+//   #define _FOG_MATH_IS_NAN_F
+//   #define _FOG_MATH_IS_NAN_D
+
+#if defined(FOG_CC_MSC)
+# define _FOG_MATH_IS_FINITE_D(_Value_) _finite(_Value_)
+# define _FOG_MATH_IS_NAN_D(_Value_) _isnan(_Value_)
+#endif // FOG_CC_MSC
+
+#if defined(FOG_CC_GNU) && !defined(FOG_OS_MAC)
+# define _FOG_MATH_GET_SNAN_F() __builtin_nansf("")
+# define _FOG_MATH_GET_SNAN_D() __builtin_nans("")
+# define _FOG_MATH_GET_QNAN_F() __builtin_nanf("")
+# define _FOG_MATH_GET_QNAN_D() __builtin_nan("")
+# define _FOG_MATH_GET_PINF_F() __builtin_inff()
+# define _FOG_MATH_GET_PINF_D() __builtin_inf()
+# define _FOG_MATH_GET_NINF_F() ( -__builtin_inff() )
+# define _FOG_MATH_GET_NINF_D() ( -__builtin_inf() )
+
+# define _FOG_MATH_IS_FINITE_F(_Value_) __builtin_finitef(_Value_)
+# define _FOG_MATH_IS_FINITE_D(_Value_) __builtin_finite(_Value_)
+# define _FOG_MATH_IS_INFINITE_F(_Value_) __builtin_isinff(_Value_)
+# define _FOG_MATH_IS_INFINITE_D(_Value_) __builtin_isinf(_Value_)
+# define _FOG_MATH_IS_NAN_F(_Value_) __builtin_isnanf(_Value_)
+# define _FOG_MATH_IS_NAN_D(_Value_) __builtin_isnan(_Value_)
+#endif // FOG_CC_GNU
+
 namespace Fog {
 namespace Math {
 
@@ -164,81 +205,81 @@ FOG_INLINE double abs(const double& a)
 
 static FOG_INLINE float getSNanF()
 {
-#if defined(FOG_CC_GNU)
-  return __builtin_nanf("");
+#if defined(_FOG_MATH_GET_SNAN_F)
+  return _FOG_MATH_GET_SNAN_F();
 #else
-  _FOG_MATH_DECLARE_CONST_F(_const_signaling_nan_f, 0x8F, 0xFF, 0xFF, 0xFF);
-  return _FOG_MATH_GET_CONST_F(_const_signaling_nan_f);
-#endif
+  _FOG_MATH_DECLARE_CONST_F(_const_snan_f, 0x8F, 0xFF, 0xFF, 0xFF);
+  return _FOG_MATH_GET_CONST_F(_const_snan_f);
+#endif // _FOG_MATH_GET_SNAN_F
 }
 
 static FOG_INLINE double getSNanD()
 {
-#if defined(FOG_CC_GNU)
-  return __builtin_nan("");
+#if defined(_FOG_MATH_GET_SNAN_D)
+  return _FOG_MATH_GET_SNAN_D();
 #else
-  _FOG_MATH_DECLARE_CONST_D(_const_signaling_nan_d, 0x8F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF);
-  return _FOG_MATH_GET_CONST_D(_const_signaling_nan_d);
-#endif
+  _FOG_MATH_DECLARE_CONST_D(_const_snan_d, 0x8F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF);
+  return _FOG_MATH_GET_CONST_D(_const_snan_d);
+#endif // _FOG_MATH_GET_SNAN_D
 }
 
 static FOG_INLINE float getQNanF()
 {
-#if defined(FOG_CC_GNU)
-  return -__builtin_nanf("");
+#if defined(_FOG_MATH_GET_QNAN_F)
+  return _FOG_MATH_GET_QNAN_F();
 #else
-  _FOG_MATH_DECLARE_CONST_F(_const_quiet_nan_f, 0xFF, 0xFF, 0xFF, 0xFF);
-  return _FOG_MATH_GET_CONST_F(_const_quiet_nan_f);
-#endif
+  _FOG_MATH_DECLARE_CONST_F(_const_qnan_f, 0xFF, 0xFF, 0xFF, 0xFF);
+  return _FOG_MATH_GET_CONST_F(_const_qnan_f);
+#endif // _FOG_MATH_GET_QNAN_F
 }
 
 static FOG_INLINE double getQNanD()
 {
-#if defined(FOG_CC_GNU)
-  return -__builtin_nan("");
+#if defined(_FOG_MATH_GET_QNAN_D)
+  return _FOG_MATH_GET_QNAN_D();
 #else
-  _FOG_MATH_DECLARE_CONST_D(_const_quiet_nan_d, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF);
-  return _FOG_MATH_GET_CONST_D(_const_quiet_nan_d);
-#endif
+  _FOG_MATH_DECLARE_CONST_D(_const_qnan_d, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF);
+  return _FOG_MATH_GET_CONST_D(_const_qnan_d);
+#endif // _FOG_MATH_GET_QNAN_D
 }
 
 static FOG_INLINE float getPInfF()
 {
-#if defined(FOG_CC_GNU)
-  return __builtin_inff();
+#if defined(_FOG_MATH_GET_PINF_F)
+  return _FOG_MATH_GET_PINF_F();
 #else
-  _FOG_MATH_DECLARE_CONST_F(_const_positive_inf_f, 0x7F, 0x80, 0x00, 0x00);
-  return _FOG_MATH_GET_CONST_F(_const_positive_inf_f);
+  _FOG_MATH_DECLARE_CONST_F(_const_pinf_f, 0x7F, 0x80, 0x00, 0x00);
+  return _FOG_MATH_GET_CONST_F(_const_pinf_f);
 #endif
 }
 
 static FOG_INLINE double getPInfD()
 {
-#if defined(FOG_CC_GNU)
-  return __builtin_inf();
+#if defined(_FOG_MATH_GET_PINF_D)
+  return _FOG_MATH_GET_PINF_D();
 #else
-  _FOG_MATH_DECLARE_CONST_D(_const_positive_inf_d, 0x7F, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-  return _FOG_MATH_GET_CONST_D(_const_positive_inf_d);
+  _FOG_MATH_DECLARE_CONST_D(_const_pinf_d, 0x7F, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+  return _FOG_MATH_GET_CONST_D(_const_pinf_d);
 #endif
 }
 
 static FOG_INLINE float getNInfF()
 {
-#if defined(FOG_CC_GNU)
-  return -__builtin_inff();
+#if defined(_FOG_MATH_GET_NINF_F)
+  return _FOG_MATH_GET_NINF_F();
 #else
-  _FOG_MATH_DECLARE_CONST_F(_const_negative_inf_f, 0xFF, 0x80, 0x00, 0x00);
-  return _FOG_MATH_GET_CONST_F(_const_negative_inf_f);
+  _FOG_MATH_DECLARE_CONST_F(_const_ninf_f, 0xFF, 0x80, 0x00, 0x00);
+  return _FOG_MATH_GET_CONST_F(_const_ninf_f);
 #endif
 }
 
 static FOG_INLINE double getNInfD()
 {
-#if defined(FOG_CC_GNU)
-  return -__builtin_inf();
+#if defined(_FOG_MATH_GET_NINF_D)
+  return _FOG_MATH_GET_NINF_D();
 #else
-  _FOG_MATH_DECLARE_CONST_D(_const_negative_inf_d, 0xFF, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-  return _FOG_MATH_GET_CONST_D(_const_negative_inf_d);
+  _FOG_MATH_DECLARE_CONST_D(_const_ninf_d, 0xFF, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+  return _FOG_MATH_GET_CONST_D(_const_ninf_d);
 #endif
 }
 
@@ -250,63 +291,64 @@ _FOG_MATH_DECLARE_VARIANT_TEMPLATE(getNInf)
 
 static FOG_INLINE bool isFinite(float x)
 {
-  // TODO: There is some mac problem, fix it.
-#if defined (FOG_CC_GNU) && !defined(FOG_OS_MAC)
-  return __builtin_finitef(x);
-#elif defined (FOG_CC_MSC)
-  return _finite(x);
+#if defined(_FOG_MATH_IS_FINITE_F)
+  return _FOG_MATH_IS_FINITE_F(x);
 #else
-  return finitef(x);
-#endif
+  FloatBits bits;
+  bits.f = x;
+  return (bits.u32 & 0x7F800000U) != 0x7F800000U;
+#endif // _FOG_MATH_IS_FINITE_F
 }
 
 static FOG_INLINE bool isFinite(double x)
 {
-#if defined (FOG_CC_MSC)
-  return _finite(x);
+#if defined(_FOG_MATH_IS_FINITE_D)
+  return _FOG_MATH_IS_FINITE_D(x);
 #else
-  return finite(x);
-#endif
+  DoubleBits bits;
+  bits.d = x;
+  return (bits.u32Hi & 0x7FF00000U) != 0x7FF00000U;
+#endif // _FOG_MATH_IS_FINITE_D
 }
 
 static FOG_INLINE bool isInfinite(float x)
 {
-#if defined (FOG_CC_GNU)
-  return __builtin_isinff(x);
-#elif defined (FOG_CC_MSC)
-  return (_fpclass(x) & (_FPCLASS_NINF | _FPCLASS_PINF)) != 0;
+#if defined(_FOG_MATH_IS_INFINITE_F)
+  return _FOG_MATH_IS_INFINITE_F(x);
 #else
-  return isinff(x);
-#endif
+  FloatBits bits;
+  bits.f = x;
+  return (bits.u32 & 0x7F800000U) == 0x7F800000U;
+#endif // _FOG_MATH_IS_INFINITE_F
 }
 
 static FOG_INLINE bool isInfinite(double x)
 {
-#if defined (FOG_CC_MSC)
-  return (_fpclass(x) & (_FPCLASS_NINF | _FPCLASS_PINF)) != 0;
+#if defined(_FOG_MATH_IS_INFINITE_D)
+  return _FOG_MATH_IS_INFINITE_D(x);
 #else
-  return isinf(x);
-#endif
+  DoubleBits bits;
+  bits.d = x;
+  return (bits.u32Hi & 0x7FF00000U) == 0x7FF00000U;
+#endif // _FOG_MATH_IS_INFINITE_D
 }
 
 static FOG_INLINE bool isNaN(float x)
 {
-#if defined (FOG_CC_GNU)
-  return __builtin_isnanf(x);
-#elif defined (FOG_CC_MSC)
-  return _isnan(x);
+#if defined(_FOG_MATH_IS_NAN_F)
+  return _FOG_MATH_IS_NAN_F(x);
 #else
-  return isnanf(x);
-#endif
+  return !(x == x);
+#endif // _FOG_MATH_IS_NAN_F
 }
 
 static FOG_INLINE bool isNaN(double x)
 {
-#if defined (FOG_CC_MSC)
-  return _isnan(x);
+#if defined(_FOG_MATH_IS_NAN_D)
+  return _FOG_MATH_IS_NAN_D(x);
 #else
-  return isnan(x);
-#endif
+  return !(x == x);
+#endif // _FOG_MATH_IS_NAN_D
 }
 
 // Clean-up.
@@ -549,6 +591,9 @@ static FOG_INLINE double pow2(double x) { return x * x; }
 
 static FOG_INLINE float pow3(float x) { return x * x * x; }
 static FOG_INLINE double pow3(double x) { return x * x * x; }
+
+static FOG_INLINE float pow4(float x) { float x2 = x * x; return x2 * x2; }
+static FOG_INLINE double pow4(double x) { double x2 = x * x; return x2 * x2; }
 
 // ============================================================================
 // [Fog::Math - Log]

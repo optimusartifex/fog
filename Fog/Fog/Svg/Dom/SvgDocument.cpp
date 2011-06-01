@@ -43,9 +43,9 @@
 #include <Fog/Svg/Dom/SvgTSpanElement_p.h>
 #include <Fog/Svg/Dom/SvgUseElement_p.h>
 #include <Fog/Svg/Dom/SvgViewElement_p.h>
-
 #include <Fog/Svg/Visit/SvgHitTest.h>
 #include <Fog/Svg/Visit/SvgRender.h>
+#include <Fog/Svg/Visit/SvgVisitor.h>
 
 namespace Fog {
 
@@ -88,6 +88,7 @@ XmlElement* SvgDocument::createElement(const ManagedString& tagName)
 
 XmlElement* SvgDocument::createElementStatic(const ManagedString& tagName)
 {
+  if (tagName == fog_strings->getString(STR_SVG_ELEMENT_a             )) return fog_new SvgAElement();
   if (tagName == fog_strings->getString(STR_SVG_ELEMENT_circle        )) return fog_new SvgCircleElement();
   if (tagName == fog_strings->getString(STR_SVG_ELEMENT_defs          )) return fog_new SvgDefsElement();
   if (tagName == fog_strings->getString(STR_SVG_ELEMENT_ellipse       )) return fog_new SvgEllipseElement();

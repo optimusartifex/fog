@@ -8,6 +8,7 @@
 #define _FOG_SVG_DOM_SVGABSTRACTGRADIENTELEMENT_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Svg/Dom/SvgEnumAttribute_p.h>
 #include <Fog/Svg/Dom/SvgStyledElement_p.h>
 #include <Fog/Svg/Dom/SvgTransformAttribute_p.h>
@@ -66,7 +67,7 @@ struct FOG_NO_EXPORT SvgAbstractGradientElement : public SvgStyledElement
   SvgTransformAttribute a_gradientTransform;
 
 private:
-  FOG_DISABLE_COPY(SvgAbstractGradientElement)
+  _FOG_CLASS_NO_COPY(SvgAbstractGradientElement)
 };
 
 //! @}

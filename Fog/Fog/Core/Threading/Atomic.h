@@ -152,7 +152,7 @@ static FOG_INLINE T* atomicPtrXchg(T** atomic, T* value)
 // ============================================================================
 
 #include <Fog/Core/Global/TypeInfo.h>
-FOG_DECLARE_TYPEINFO_TEMPLATE1(Fog::Atomic, typename, T, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE_T1(Fog::Atomic, typename, T, Fog::TYPEINFO_PRIMITIVE)
 
 // [Guard]
 #endif // _FOG_CORE_THREADING_ATOMIC_H

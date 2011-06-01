@@ -8,6 +8,7 @@
 #define _FOG_SVG_DOM_SVGPOLYLINEELEMENT_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Svg/Dom/SvgPointsAttribute_p.h>
 #include <Fog/Svg/Dom/SvgStyledElement_p.h>
 
@@ -51,7 +52,7 @@ struct FOG_NO_EXPORT SvgPolylineElement : public SvgStyledElement
   SvgPointsAttribute a_points;
 
 private:
-  FOG_DISABLE_COPY(SvgPolylineElement)
+  _FOG_CLASS_NO_COPY(SvgPolylineElement)
 };
 
 //! @}

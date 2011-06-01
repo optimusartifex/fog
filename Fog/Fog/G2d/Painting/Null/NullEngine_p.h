@@ -8,7 +8,7 @@
 #define _FOG_G2D_PAINTING_NULL_NULLENGINE_P_H
 
 // [Dependencies]
-#include <Fog/G2d/Painting/PainterEngine.h>
+#include <Fog/G2d/Painting/PaintEngine.h>
 
 namespace Fog {
 
@@ -24,7 +24,7 @@ struct FOG_NO_EXPORT NullPainterVTable : public PainterVTable
 };
 
 // ============================================================================
-// [Fog::NullPainterEngine]
+// [Fog::NullPaintEngine]
 // ============================================================================
 
 //! @internal
@@ -32,7 +32,7 @@ struct FOG_NO_EXPORT NullPainterVTable : public PainterVTable
 //! @brief The null painter engine (does nothing).
 //!
 //! The nearly all methods result in @ref ERR_RT_INVALID_STATE error code.
-struct FOG_NO_EXPORT NullPainterEngine : public PainterEngine {};
+struct FOG_NO_EXPORT NullPaintEngine : public PaintEngine {};
 
 //! @}
 

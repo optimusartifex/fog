@@ -9,8 +9,10 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Global/TypeInfo.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Tools/Format.h>
@@ -146,7 +148,7 @@ struct FOG_API ByteArray
   ~ByteArray();
 
   // --------------------------------------------------------------------------
-  // [Implicit Sharing]
+  // [Sharing]
   // --------------------------------------------------------------------------
 
   //! @copydoc Doxygen::Implicit::getRefCount().
@@ -542,15 +544,15 @@ struct FOG_API ByteArray
   // [Members]
   // --------------------------------------------------------------------------
 
-  FOG_DECLARE_D(Data)
+  _FOG_CLASS_D(Data)
 };
 
 // ============================================================================
-// [Fog::TemporaryByteArray<N>]
+// [Fog::ByteArrayTmp<N>]
 // ============================================================================
 
 template<sysuint_t N>
-struct TemporaryByteArray : public ByteArray
+struct ByteArrayTmp : public ByteArray
 {
   // --------------------------------------------------------------------------
   // [Temporary Storage]
@@ -567,32 +569,32 @@ struct TemporaryByteArray : public ByteArray
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE TemporaryByteArray() :
+  FOG_INLINE ByteArrayTmp() :
     ByteArray(Data::adopt((void*)&_storage, N))
   {
   }
 
-  FOG_INLINE TemporaryByteArray(const char ch) :
+  FOG_INLINE ByteArrayTmp(const char ch) :
     ByteArray(Data::adopt((void*)&_storage, N, &ch, 1))
   {
   }
 
-  FOG_INLINE TemporaryByteArray(const Stub8& str) :
+  FOG_INLINE ByteArrayTmp(const Stub8& str) :
     ByteArray(Data::adopt((void*)&_storage, N, str.getData(), str.getLength()))
   {
   }
 
-  FOG_INLINE TemporaryByteArray(const char* str) :
+  FOG_INLINE ByteArrayTmp(const char* str) :
     ByteArray(Data::adopt((void*)&_storage, N, str, DETECT_LENGTH))
   {
   }
 
-  FOG_INLINE TemporaryByteArray(const ByteArray& other) :
+  FOG_INLINE ByteArrayTmp(const ByteArray& other) :
     ByteArray(Data::adopt((void*)&_storage, N, other.getData(), other.getLength()))
   {
   }
 
-  FOG_INLINE TemporaryByteArray(const TemporaryByteArray<N>& other) :
+  FOG_INLINE ByteArrayTmp(const ByteArrayTmp<N>& other) :
     ByteArray(Data::adopt((void*)&_storage, N, other.getData(), other.getLength()))
   {
   }
@@ -616,11 +618,11 @@ struct TemporaryByteArray : public ByteArray
   // These overloads are needed to succesfully use this template (or implicit
   // conversion will break template and new string will be allocated).
 
-  FOG_INLINE TemporaryByteArray<N>& operator=(char ch) { set(ch); return *this; }
-  FOG_INLINE TemporaryByteArray<N>& operator=(const Stub8& str) { set(str); return *this; }
-  FOG_INLINE TemporaryByteArray<N>& operator=(const char* str) { set(str); return *this; }
-  FOG_INLINE TemporaryByteArray<N>& operator=(const ByteArray& other) { set(other); return *this; }
-  FOG_INLINE TemporaryByteArray<N>& operator=(const TemporaryByteArray<N>& other) { set(other); return *this; }
+  FOG_INLINE ByteArrayTmp<N>& operator=(char ch) { set(ch); return *this; }
+  FOG_INLINE ByteArrayTmp<N>& operator=(const Stub8& str) { set(str); return *this; }
+  FOG_INLINE ByteArrayTmp<N>& operator=(const char* str) { set(str); return *this; }
+  FOG_INLINE ByteArrayTmp<N>& operator=(const ByteArray& other) { set(other); return *this; }
+  FOG_INLINE ByteArrayTmp<N>& operator=(const ByteArrayTmp<N>& other) { set(other); return *this; }
 };
 
 //! @}
@@ -686,7 +688,13 @@ static FOG_INLINE bool operator> (const char* a, const Fog::ByteArray& b) { retu
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::ByteArray, Fog::TYPEINFO_MOVABLE | Fog::TYPEINFO_HAS_COMPARE | Fog::TYPEINFO_HAS_EQ)
+_FOG_TYPEINFO_DECLARE(Fog::ByteArray, Fog::TYPEINFO_MOVABLE | Fog::TYPEINFO_HAS_COMPARE | Fog::TYPEINFO_HAS_EQ)
+
+// ============================================================================
+// [Fog::Swap]
+// ============================================================================
+
+_FOG_SWAP_D(Fog::ByteArray)
 
 // [Guard]
 #endif // _FOG_CORE_TOOLS_BYTEARRAY_H

@@ -13,7 +13,8 @@
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/Gui/Global/Constants.h>
 #include <Fog/Gui/Engine/GuiEngine.h>
-#include <Fog/Core/Mac/MacUtil.h>
+#include <Fog/Core/Mac/MacScopedAutoReleasePool.h>
+#include <Fog/Core/Mac/MacUtil_Core.h>
 
 #include <CoreFoundation/CoreFoundation.h>
 
@@ -71,7 +72,7 @@ struct FOG_API MacGuiEngine : public GuiEngine
   virtual void minimize(GuiWindow*);
   virtual void maximize(GuiWindow*);
 
-  ScopedAutoreleasePool pool;
+  MacScopedAutoReleasePool pool;
 };
 
 // ============================================================================
@@ -210,10 +211,10 @@ private:
 struct FOG_API MacNonMainEventLoop : public MacEventLoopBase
 {
   MacNonMainEventLoop();
-  
+
   virtual void quit();
   virtual void _runInternal();
-  
+
   bool keepRunning;
 };
 

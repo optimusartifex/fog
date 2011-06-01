@@ -85,7 +85,7 @@ struct FOG_NO_EXPORT PieF : ArcF
     err_t err = _g2d.arcf.getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr, true);
     dst.w -= dst.x;
     dst.h -= dst.y;
-    return err;    
+    return err;
   }
 
   // --------------------------------------------------------------------------
@@ -154,7 +154,7 @@ struct FOG_NO_EXPORT PieD : ArcD
     err_t err = _g2d.arcd.getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr, true);
     dst.w -= dst.x;
     dst.h -= dst.y;
-    return err;    
+    return err;
   }
 
   // --------------------------------------------------------------------------
@@ -181,15 +181,15 @@ FOG_TYPEVARIANT_DECLARE_F_D(Pie)
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::PieF, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::PieD, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::PieF, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::PieD, Fog::TYPEINFO_PRIMITIVE)
 
 // ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_DECLARE_FUZZY(Fog::PieF, Fuzzy<ArcF>::eq(a, b))
-FOG_DECLARE_FUZZY(Fog::PieD, Fuzzy<ArcD>::eq(a, b))
+FOG_FUZZY_DECLARE(Fog::PieF, Fuzzy<ArcF>::eq(a, b))
+FOG_FUZZY_DECLARE(Fog::PieD, Fuzzy<ArcD>::eq(a, b))
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_PIE_H

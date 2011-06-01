@@ -11,6 +11,7 @@
 #include <Fog/Core/Collection/Hash.h>
 #include <Fog/Core/Collection/HashUtil.h>
 #include <Fog/Core/Collection/List.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/Static.h>
 #include <Fog/Core/System/Delegate.h>
@@ -109,11 +110,11 @@ public: \
   /* ----------------------------------------------------------------------- */ \
   \
   /*! @brief Self type of class. */ \
-  typedef _SelfType_ __selftype__; \
+  typedef _SelfType_ _Self; \
   /*! @brief Base type of class. */ \
-  typedef _BaseType_ __basetype__; \
+  typedef _BaseType_ _Base; \
   /*! @brief Base type of class. */ \
-  typedef __basetype__ base; \
+  typedef _Base base; \
   \
   /* ----------------------------------------------------------------------- */ \
   /* [Meta Class]                                                            */ \
@@ -673,7 +674,7 @@ private:
 
   friend struct Event;
 
-  FOG_DISABLE_COPY(Object)
+  _FOG_CLASS_NO_COPY(Object)
 };
 
 //! @}
@@ -720,7 +721,7 @@ FOG_INLINE const Fog::Layout* fog_object_cast(const Fog::Object* object)
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::ObjectConnection, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::ObjectConnection, Fog::TYPEINFO_PRIMITIVE)
 
 // [Guard]
 #endif // _FOG_CORE_SYSTEM_OBJECT_H

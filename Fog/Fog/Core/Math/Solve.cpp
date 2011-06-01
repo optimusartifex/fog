@@ -10,6 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Init_Core_p.h>
+#include <Fog/Core/Global/Internal_Core_p.h>
 #include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
@@ -18,7 +19,7 @@
 namespace Fog {
 
 // ============================================================================
-// [Fog::Numeric - Helpers]
+// [Fog::Solve - Helpers]
 // ============================================================================
 
 static FOG_INLINE double mycbrt(double x)
@@ -28,7 +29,7 @@ static FOG_INLINE double mycbrt(double x)
 }
 
 // ============================================================================
-// [Fog::Numeric - SolveQuadraticFunction]
+// [Fog::Solve - SolveQuadraticFunction]
 // ============================================================================
 
 // I found one message on stackoverflow forum which noted that the standard
@@ -98,7 +99,7 @@ static int FOG_CDECL _G2d_MathT_solveQuadraticFunction(NumT* dst, const NumT* sr
 }
 
 template<typename NumT>
-static int FOG_CDECL _G2d_MathT_solveQuadraticFunctionAt(NumT* dst, const NumT* src, NumT tMin, NumT tMax)
+static int FOG_CDECL _G2d_MathT_solveQuadraticFunctionAt(NumT* dst, const NumT* src, const NumT_(Interval)& interval)
 {
   double a = (double)src[0];
   double b = (double)src[1];
@@ -106,6 +107,9 @@ static int FOG_CDECL _G2d_MathT_solveQuadraticFunctionAt(NumT* dst, const NumT* 
   double d;
 
   NumT r0, r1;
+
+  NumT tMin = interval.getMin();
+  NumT tMax = interval.getMax();
 
   // Catch the A and B near zero.
   if (Math::isFuzzyZero(a))
@@ -151,7 +155,7 @@ _OneRoot:
 }
 
 // ============================================================================
-// [Fog::Numeric - SolveCubicFunction]
+// [Fog::Solve - SolveCubicFunction]
 // ============================================================================
 
 // Roots3And4.c: Graphics Gems, original author Jochen Schwarze (schwarze@isa.de).
@@ -231,11 +235,14 @@ static int FOG_CDECL _G2d_MathT_solveCubicFunction(NumT* dst, const NumT* src)
 }
 
 template<typename NumT>
-static int FOG_CDECL _G2d_MathT_solveCubicFunctionAt(NumT* dst, const NumT* src, NumT tMin, NumT tMax)
+static int FOG_CDECL _G2d_MathT_solveCubicFunctionAt(NumT* dst, const NumT* src, const NumT_(Interval)& interval)
 {
   NumT tmp[3];
   int roots = _G2d_MathT_solveCubicFunction(tmp, src);
   int interestingRoots = 0;
+
+  NumT tMin = interval.getMin();
+  NumT tMax = interval.getMax();
 
   for (int i = 0; i < roots; i++)
   {

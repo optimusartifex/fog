@@ -8,6 +8,7 @@
 #define _FOG_SVG_DOM_SVGENUMATTRIBUTE_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Xml/Dom/XmlAttribute.h>
 #include <Fog/Xml/Dom/XmlElement.h>
 #include <Fog/Svg/Dom/SvgEnumItem_p.h>
@@ -54,7 +55,7 @@ protected:
   int _enumValue;
 
 private:
-  FOG_DISABLE_COPY(SvgEnumAttribute)
+  _FOG_CLASS_NO_COPY(SvgEnumAttribute)
 };
 //! @}
 

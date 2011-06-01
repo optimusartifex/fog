@@ -8,9 +8,11 @@
 #define _FOG_G2D_SOURCE_PATTERN_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Global/TypeInfo.h>
 #include <Fog/Core/Global/TypeVariant.h>
-#include <Fog/Core/Global/Static.h>
 #include <Fog/Core/Memory/Memory.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
@@ -82,10 +84,10 @@ struct FOG_NO_EXPORT PatternDataF
   // [Members]
   // --------------------------------------------------------------------------
 
-  //! @brief The reference count.
+  //! @brief Reference count.
   mutable Atomic<sysuint_t> refCount;
 
-  //! @brief The pattern type.
+  //! @brief Pattern type.
   uint32_t type;
 
   union
@@ -144,10 +146,10 @@ struct FOG_NO_EXPORT PatternDataD
   // [Members]
   // --------------------------------------------------------------------------
 
-  //! @brief The reference count.
+  //! @brief Reference count.
   mutable Atomic<sysuint_t> refCount;
 
-  //! @brief The pattern type.
+  //! @brief Pattern type.
   uint32_t type;
 
   union
@@ -367,7 +369,7 @@ struct FOG_API PatternF
   // [Members]
   // --------------------------------------------------------------------------
 
-  FOG_DECLARE_D(PatternDataF)
+  _FOG_CLASS_D(PatternDataF)
 };
 
 // ============================================================================
@@ -572,7 +574,7 @@ struct FOG_API PatternD
   // [Members]
   // --------------------------------------------------------------------------
 
-  FOG_DECLARE_D(PatternDataD)
+  _FOG_CLASS_D(PatternDataD)
 };
 
 // ============================================================================
@@ -589,8 +591,15 @@ FOG_TYPEVARIANT_DECLARE_F_D(Pattern)
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::PatternF, Fog::TYPEINFO_MOVABLE)
-FOG_DECLARE_TYPEINFO(Fog::PatternD, Fog::TYPEINFO_MOVABLE)
+_FOG_TYPEINFO_DECLARE(Fog::PatternF, Fog::TYPEINFO_MOVABLE)
+_FOG_TYPEINFO_DECLARE(Fog::PatternD, Fog::TYPEINFO_MOVABLE)
+
+// ============================================================================
+// [Fog::Swap]
+// ============================================================================
+
+_FOG_SWAP_D(Fog::PatternF)
+_FOG_SWAP_D(Fog::PatternD)
 
 // [Guard]
 #endif // _FOG_G2D_SOURCE_PATTERN_H

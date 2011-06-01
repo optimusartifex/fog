@@ -678,12 +678,12 @@ struct FOG_API GuiBackBuffer
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::GuiEngine::DisplayInfo, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::GuiEngine::PaletteInfo, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::GuiEngine::CaretStatus, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::GuiEngine::MouseStatus, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::GuiEngine::SystemMouseStatus, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::GuiEngine::KeyboardStatus, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::GuiEngine::DisplayInfo, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::GuiEngine::PaletteInfo, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::GuiEngine::CaretStatus, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::GuiEngine::MouseStatus, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::GuiEngine::SystemMouseStatus, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::GuiEngine::KeyboardStatus, Fog::TYPEINFO_PRIMITIVE)
 
 // [Guard]
 #endif // _FOG_GUI_ENGINE_GUIENGINE_H

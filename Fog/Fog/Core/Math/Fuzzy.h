@@ -28,7 +28,7 @@ struct Fuzzy {};
 // [Fog::Fuzzy<> - Macros]
 // ============================================================================
 
-#define FOG_DECLARE_FUZZY(_Symbol_, _Code_) \
+#define FOG_FUZZY_DECLARE(_Symbol_, _Code_) \
 namespace Fog { \
   template <> \
   struct Fuzzy < _Symbol_ > \
@@ -114,8 +114,8 @@ static FOG_INLINE bool feqv(const double* a, const double* b, sysuint_t length, 
 // [Fog::Fuzzy<> - Specialization]
 // ============================================================================
 
-FOG_DECLARE_FUZZY(float, Math::isFuzzyEq(a, b))
-FOG_DECLARE_FUZZY(double, Math::isFuzzyEq(a, b))
+FOG_FUZZY_DECLARE(float, Math::isFuzzyEq(a, b))
+FOG_FUZZY_DECLARE(double, Math::isFuzzyEq(a, b))
 
 // [Guard]
 #endif // _FOG_CORE_MATH_FUZZY_H

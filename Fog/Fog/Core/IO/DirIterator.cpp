@@ -63,8 +63,8 @@ err_t DirIterator::open(const String& path)
 {
   if (_handle) close();
 
-  TemporaryString<TEMPORARY_LENGTH> pathAbs;
-  TemporaryString<TEMPORARY_LENGTH> t;
+  StringTmp<TEMPORARY_LENGTH> pathAbs;
+  StringTmp<TEMPORARY_LENGTH> t;
 
   err_t err;
 
@@ -171,7 +171,7 @@ err_t DirIterator::rewind()
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
-  TemporaryString<TEMPORARY_LENGTH> t;
+  StringTmp<TEMPORARY_LENGTH> t;
 
   err_t err;
 
@@ -240,8 +240,8 @@ err_t DirIterator::open(const String& path)
 {
   close();
 
-  TemporaryString<TEMPORARY_LENGTH> pathAbs;
-  TemporaryByteArray<TEMPORARY_LENGTH> t;
+  StringTmp<TEMPORARY_LENGTH> pathAbs;
+  ByteArrayTmp<TEMPORARY_LENGTH> t;
 
   // Get max size of file name in this directory + fallback.
   long direntSize = pathconf(t.getData(), _PC_NAME_MAX);

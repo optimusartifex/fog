@@ -613,16 +613,16 @@ FOG_TYPEVARIANT_DECLARE_F_D_I(Size)
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::SizeI, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::SizeF, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::SizeD, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::SizeI, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::SizeF, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::SizeD, Fog::TYPEINFO_PRIMITIVE)
 
 // ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_DECLARE_FUZZY(Fog::SizeF, Math::isFuzzyEq(a.w, b.w) && Math::isFuzzyEq(a.h, b.h))
-FOG_DECLARE_FUZZY(Fog::SizeD, Math::isFuzzyEq(a.w, b.w) && Math::isFuzzyEq(a.h, b.h))
+FOG_FUZZY_DECLARE(Fog::SizeF, Math::isFuzzyEq(a.w, b.w) && Math::isFuzzyEq(a.h, b.h))
+FOG_FUZZY_DECLARE(Fog::SizeD, Math::isFuzzyEq(a.w, b.w) && Math::isFuzzyEq(a.h, b.h))
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_SIZE_H

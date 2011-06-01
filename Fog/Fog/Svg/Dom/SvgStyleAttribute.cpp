@@ -69,11 +69,11 @@ SvgStyleAttribute::SvgStyleAttribute(XmlElement* element, const ManagedString& n
   _strokeOpacity(0.0),
   _stopOpacity(0.0),
 
-  _strokeDashOffset(0.0, COORD_UNIT_PX),
-  _strokeMiterLimit(0.0, COORD_UNIT_PX),
-  _strokeWidth(0.0, COORD_UNIT_PX),
-  _fontSize(0.0, COORD_UNIT_PX),
-  _letterSpacing(0.0, COORD_UNIT_PX)
+  _strokeDashOffset(0.0, UNIT_PX),
+  _strokeMiterLimit(0.0, UNIT_PX),
+  _strokeWidth(0.0, UNIT_PX),
+  _fontSize(0.0, UNIT_PX),
+  _letterSpacing(0.0, UNIT_PX)
 {
 }
 

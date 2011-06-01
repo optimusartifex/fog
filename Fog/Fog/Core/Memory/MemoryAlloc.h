@@ -54,11 +54,6 @@ static FOG_INLINE void* realloc(void* addr, sysuint_t size)
   return _core.memory.realloc(addr, size);
 }
 
-static FOG_INLINE void* reallocOrFree(void* addr, sysuint_t size)
-{
-  return _core.memory.reallocOrFree(addr, size);
-}
-
 static FOG_INLINE void free(void* addr)
 {
   return _core.memory.free(addr);

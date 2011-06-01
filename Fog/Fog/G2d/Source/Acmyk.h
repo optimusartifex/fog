@@ -236,13 +236,13 @@ struct FOG_NO_EXPORT AcmykF : public AcmykBaseF
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::AcmykF, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::AcmykF, Fog::TYPEINFO_PRIMITIVE)
 
 // ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_DECLARE_FUZZY(Fog::AcmykF, Math::feqv(a.data, b.data, 5))
+FOG_FUZZY_DECLARE(Fog::AcmykF, Math::feqv(a.data, b.data, 5))
 
 // [Guard]
 #endif // _FOG_G2D_SOURCE_ACMYK_H

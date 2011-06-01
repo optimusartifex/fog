@@ -8,6 +8,7 @@
 #define _FOG_SVG_DOM_SVGPOINTSATTRIBUTE_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/Xml/Dom/XmlAttribute.h>
 #include <Fog/Xml/Dom/XmlElement.h>
@@ -54,7 +55,7 @@ protected:
   bool _closePath;
 
 private:
-  FOG_DISABLE_COPY(SvgPointsAttribute)
+  _FOG_CLASS_NO_COPY(SvgPointsAttribute)
 };
 //! @}
 

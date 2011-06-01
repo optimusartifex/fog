@@ -14,15 +14,16 @@
 #include <Fog/Core/Global/TypeVariant.h>
 #include <Fog/Core/Global/Uninitialized.h>
 #include <Fog/G2d/Geometry/Arc.h>
+#include <Fog/G2d/Geometry/CBezier.h>
 #include <Fog/G2d/Geometry/Chord.h>
 #include <Fog/G2d/Geometry/Circle.h>
-#include <Fog/G2d/Geometry/CubicCurve.h>
 #include <Fog/G2d/Geometry/Ellipse.h>
 #include <Fog/G2d/Geometry/Line.h>
 #include <Fog/G2d/Geometry/Pie.h>
-#include <Fog/G2d/Geometry/QuadCurve.h>
+#include <Fog/G2d/Geometry/QBezier.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Geometry/Round.h>
+#include <Fog/G2d/Geometry/Triangle.h>
 #include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Global/Api.h>
 
@@ -32,8 +33,8 @@
 //   - Size       - [w , h ].
 //
 //   - Line       - [x0, y0] -> [x1, y1].
-//   - QuadCurve  - [x0, y0], [x1, y1], [x2, y2] - Quadric Bezier curve.
-//   - CubicCurve - [x0, y0], [x1, y1], [x2, y2], [x3, y3] - Cubic Bezier curve.
+//   - QBezier    - [x0, y0], [x1, y1], [x2, y2] - Quadric Bezier curve.
+//   - CBezier    - [x0, y0], [x1, y1], [x2, y2], [x3, y3] - Cubic Bezier curve.
 //
 //   - Box        - [x0, y0] -> [x1, y1].
 //   - Rect       - [x , y ] -> [w , h ].
@@ -44,6 +45,7 @@
 //   - Arc        - [cx, cy] && [rx, ry] && angle and sweep.
 //   - Chord      - [cx, cy] && [rx, ry] && angle and sweep.
 //   - Pie        - [cx, cy] && [rx, ry] && angle and sweep.
+//   - Triangle   - [x0, y0] -> [x1, y1] -> [x2, y2]
 //
 // The implementation for several data-types exists:
 //   - I - All members as 32-bit integers - int.
@@ -70,8 +72,8 @@ union ShapeDataF
   // --------------------------------------------------------------------------
 
   Static<LineF> line;
-  Static<QuadCurveF> quad;
-  Static<CubicCurveF> cubic;
+  Static<QBezierF> qbezier;
+  Static<CBezierF> cbezier;
   Static<ArcF> arc;
 
   // --------------------------------------------------------------------------
@@ -84,6 +86,7 @@ union ShapeDataF
   Static<EllipseF> ellipse;
   Static<ChordF> chord;
   Static<PieF> pie;
+  Static<TriangleF> triangle;
 };
 
 // ============================================================================
@@ -97,8 +100,8 @@ union ShapeDataD
   // --------------------------------------------------------------------------
 
   Static<LineD> line;
-  Static<QuadCurveD> quad;
-  Static<CubicCurveD> cubic;
+  Static<QBezierD> qbezier;
+  Static<CBezierD> cbezier;
   Static<ArcD> arc;
 
   // --------------------------------------------------------------------------
@@ -111,6 +114,7 @@ union ShapeDataD
   Static<EllipseD> ellipse;
   Static<ChordD> chord;
   Static<PieD> pie;
+  Static<TriangleD> triangle;
 };
 
 // ============================================================================
@@ -129,8 +133,8 @@ struct FOG_NO_EXPORT ShapeF
   FOG_INLINE ShapeF(_Uninitialized) {}
 
   explicit FOG_INLINE ShapeF(const LineF& line) { _type = SHAPE_TYPE_LINE; _data.line.instance() = line; }
-  explicit FOG_INLINE ShapeF(const QuadCurveF& quad) { _type = SHAPE_TYPE_QUAD; _data.quad.instance() = quad; }
-  explicit FOG_INLINE ShapeF(const CubicCurveF& cubic) { _type = SHAPE_TYPE_CUBIC; _data.cubic.instance() = cubic; }
+  explicit FOG_INLINE ShapeF(const QBezierF& qbezier) { _type = SHAPE_TYPE_QBEZIER; _data.qbezier.instance() = qbezier; }
+  explicit FOG_INLINE ShapeF(const CBezierF& cbezier) { _type = SHAPE_TYPE_CBEZIER; _data.cbezier.instance() = cbezier; }
   explicit FOG_INLINE ShapeF(const ArcF& arc) { _type = SHAPE_TYPE_ARC; _data.arc.instance() = arc; }
 
   explicit FOG_INLINE ShapeF(const BoxF& box) { _type = SHAPE_TYPE_RECT; _data.rect.instance() = box; }
@@ -140,6 +144,7 @@ struct FOG_NO_EXPORT ShapeF
   explicit FOG_INLINE ShapeF(const EllipseF& ellipse) { _type = SHAPE_TYPE_ELLIPSE; _data.ellipse.instance() = ellipse; }
   explicit FOG_INLINE ShapeF(const ChordF& chord) { _type = SHAPE_TYPE_CHORD; _data.chord.instance() = chord; }
   explicit FOG_INLINE ShapeF(const PieF& pie) { _type = SHAPE_TYPE_PIE; _data.pie.instance() = pie; }
+  explicit FOG_INLINE ShapeF(const TriangleF& triangle) { _type = SHAPE_TYPE_TRIANGLE; _data.triangle.instance() = triangle; }
 
   // --------------------------------------------------------------------------
   // [Accessors - Type]
@@ -162,18 +167,18 @@ struct FOG_NO_EXPORT ShapeF
   FOG_INLINE LineF& getLine() { return _data.line.instance(); }
   FOG_INLINE const LineF& getLine() const { return _data.line.instance(); }
 
-  FOG_INLINE QuadCurveF& getQuad() { return _data.quad.instance(); }
-  FOG_INLINE const QuadCurveF& getQuad() const { return _data.quad.instance(); }
+  FOG_INLINE QBezierF& getQBezier() { return _data.qbezier.instance(); }
+  FOG_INLINE const QBezierF& getQBezier() const { return _data.qbezier.instance(); }
 
-  FOG_INLINE CubicCurveF& getCubic() { return _data.cubic.instance(); }
-  FOG_INLINE const CubicCurveF& getCubic() const { return _data.cubic.instance(); }
+  FOG_INLINE CBezierF& getCBezier() { return _data.cbezier.instance(); }
+  FOG_INLINE const CBezierF& getCBezier() const { return _data.cbezier.instance(); }
 
   FOG_INLINE ArcF& getArc() { return _data.arc.instance(); }
   FOG_INLINE const ArcF& getArc() const { return _data.arc.instance(); }
 
   FOG_INLINE void setLine(const LineF& line) { _type = SHAPE_TYPE_LINE; _data.line.instance() = line; }
-  FOG_INLINE void setQuad(const QuadCurveF& quad) { _type = SHAPE_TYPE_LINE; _data.quad.instance() = quad; }
-  FOG_INLINE void setCubic(const CubicCurveF& cubic) { _type = SHAPE_TYPE_LINE; _data.cubic.instance() = cubic; }
+  FOG_INLINE void setQBezier(const QBezierF& quad) { _type = SHAPE_TYPE_LINE; _data.qbezier.instance() = quad; }
+  FOG_INLINE void setCBezier(const CBezierF& cubic) { _type = SHAPE_TYPE_LINE; _data.cbezier.instance() = cubic; }
   FOG_INLINE void setArc(const ArcF& arc) { _type = SHAPE_TYPE_ARC; _data.arc.instance() = arc; }
 
   // --------------------------------------------------------------------------
@@ -198,6 +203,9 @@ struct FOG_NO_EXPORT ShapeF
   FOG_INLINE PieF& getPie() { return _data.pie.instance(); }
   FOG_INLINE const PieF& getPie() const { return _data.pie.instance(); }
 
+  FOG_INLINE TriangleF& getTriangle() { return _data.triangle.instance(); }
+  FOG_INLINE const TriangleF& getTriangle() const { return _data.triangle.instance(); }
+
   FOG_INLINE void setBox(const BoxF& box) { _type = SHAPE_TYPE_RECT; _data.rect.instance() = box; }
   FOG_INLINE void setRect(const RectF& rect) { _type = SHAPE_TYPE_RECT; _data.rect.instance() = rect; }
   FOG_INLINE void setRound(const RoundF& round) { _type = SHAPE_TYPE_ROUND; _data.round.instance() = round; }
@@ -205,6 +213,7 @@ struct FOG_NO_EXPORT ShapeF
   FOG_INLINE void setEllipse(const EllipseF& ellipse) { _type = SHAPE_TYPE_ELLIPSE; _data.ellipse.instance() = ellipse; }
   FOG_INLINE void setChord(const ChordF& chord) { _type = SHAPE_TYPE_CHORD; _data.chord.instance() = chord; }
   FOG_INLINE void setPie(const PieF& pie) { _type = SHAPE_TYPE_PIE; _data.pie.instance() = pie; }
+  FOG_INLINE void setTriangle(const TriangleF& triangle) { _type = SHAPE_TYPE_TRIANGLE; _data.triangle.instance() = triangle; }
 
   // --------------------------------------------------------------------------
   // [BoundingBox / BoundingRect]
@@ -287,8 +296,8 @@ struct FOG_NO_EXPORT ShapeD
   FOG_INLINE ShapeD(_Uninitialized) {}
 
   explicit FOG_INLINE ShapeD(const LineD& line) { _type = SHAPE_TYPE_LINE; _data.line.instance() = line; }
-  explicit FOG_INLINE ShapeD(const QuadCurveD& quad) { _type = SHAPE_TYPE_LINE; _data.quad.instance() = quad; }
-  explicit FOG_INLINE ShapeD(const CubicCurveD& cubic) { _type = SHAPE_TYPE_LINE; _data.cubic.instance() = cubic; }
+  explicit FOG_INLINE ShapeD(const QBezierD& quad) { _type = SHAPE_TYPE_LINE; _data.qbezier.instance() = quad; }
+  explicit FOG_INLINE ShapeD(const CBezierD& cubic) { _type = SHAPE_TYPE_LINE; _data.cbezier.instance() = cubic; }
   explicit FOG_INLINE ShapeD(const ArcD& arc) { _type = SHAPE_TYPE_ARC; _data.arc.instance() = arc; }
 
   explicit FOG_INLINE ShapeD(const BoxD& box) { _type = SHAPE_TYPE_RECT; _data.rect.instance() = box; }
@@ -298,6 +307,7 @@ struct FOG_NO_EXPORT ShapeD
   explicit FOG_INLINE ShapeD(const EllipseD& ellipse) { _type = SHAPE_TYPE_ELLIPSE; _data.ellipse.instance() = ellipse; }
   explicit FOG_INLINE ShapeD(const ChordD& chord) { _type = SHAPE_TYPE_CHORD; _data.chord.instance() = chord; }
   explicit FOG_INLINE ShapeD(const PieD& pie) { _type = SHAPE_TYPE_PIE; _data.pie.instance() = pie; }
+  explicit FOG_INLINE ShapeD(const TriangleD& triangle) { _type = SHAPE_TYPE_TRIANGLE; _data.triangle.instance() = triangle; }
 
   // --------------------------------------------------------------------------
   // [Accessors - Type]
@@ -320,18 +330,18 @@ struct FOG_NO_EXPORT ShapeD
   FOG_INLINE LineD& getLine() { return _data.line.instance(); }
   FOG_INLINE const LineD& getLine() const { return _data.line.instance(); }
 
-  FOG_INLINE QuadCurveD& getQuad() { return _data.quad.instance(); }
-  FOG_INLINE const QuadCurveD& getQuad() const { return _data.quad.instance(); }
+  FOG_INLINE QBezierD& getQBezier() { return _data.qbezier.instance(); }
+  FOG_INLINE const QBezierD& getQBezier() const { return _data.qbezier.instance(); }
 
-  FOG_INLINE CubicCurveD& getCubic() { return _data.cubic.instance(); }
-  FOG_INLINE const CubicCurveD& getCubic() const { return _data.cubic.instance(); }
+  FOG_INLINE CBezierD& getCBezier() { return _data.cbezier.instance(); }
+  FOG_INLINE const CBezierD& getCBezier() const { return _data.cbezier.instance(); }
 
   FOG_INLINE ArcD& getArc() { return _data.arc.instance(); }
   FOG_INLINE const ArcD& getArc() const { return _data.arc.instance(); }
 
   FOG_INLINE void setLine(const LineD& line) { _type = SHAPE_TYPE_LINE; _data.line.instance() = line; }
-  FOG_INLINE void setQuad(const QuadCurveD& quad) { _type = SHAPE_TYPE_LINE; _data.quad.instance() = quad; }
-  FOG_INLINE void setCubic(const CubicCurveD& cubic) { _type = SHAPE_TYPE_LINE; _data.cubic.instance() = cubic; }
+  FOG_INLINE void setQBezier(const QBezierD& quad) { _type = SHAPE_TYPE_QBEZIER; _data.qbezier.instance() = quad; }
+  FOG_INLINE void setCBezier(const CBezierD& cubic) { _type = SHAPE_TYPE_CBEZIER; _data.cbezier.instance() = cubic; }
   FOG_INLINE void setArc(const ArcD& arc) { _type = SHAPE_TYPE_ARC; _data.arc.instance() = arc; }
 
   // --------------------------------------------------------------------------
@@ -356,6 +366,9 @@ struct FOG_NO_EXPORT ShapeD
   FOG_INLINE PieD& getPie() { return _data.pie.instance(); }
   FOG_INLINE const PieD& getPie() const { return _data.pie.instance(); }
 
+  FOG_INLINE TriangleD& getTriangle() { return _data.triangle.instance(); }
+  FOG_INLINE const TriangleD& getTriangle() const { return _data.triangle.instance(); }
+
   FOG_INLINE void setBox(const BoxD& box) { _type = SHAPE_TYPE_RECT; _data.rect.instance() = box; }
   FOG_INLINE void setRect(const RectD& rect) { _type = SHAPE_TYPE_RECT; _data.rect.instance() = rect; }
   FOG_INLINE void setRound(const RoundD& round) { _type = SHAPE_TYPE_ROUND; _data.round.instance() = round; }
@@ -364,6 +377,7 @@ struct FOG_NO_EXPORT ShapeD
   FOG_INLINE void setEllipse(const EllipseD& ellipse) { _type = SHAPE_TYPE_ELLIPSE; _data.ellipse.instance() = ellipse; }
   FOG_INLINE void setChord(const ChordD& chord) { _type = SHAPE_TYPE_CHORD; _data.chord.instance() = chord; }
   FOG_INLINE void setPie(const PieD& pie) { _type = SHAPE_TYPE_PIE; _data.pie.instance() = pie; }
+  FOG_INLINE void setTriangle(const TriangleD& triangle) { _type = SHAPE_TYPE_TRIANGLE; _data.triangle.instance() = triangle; }
 
   // --------------------------------------------------------------------------
   // [BoundingBox / BoundingRect]

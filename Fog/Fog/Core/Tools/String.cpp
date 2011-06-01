@@ -466,6 +466,7 @@ skip:
   return d->data + index;
 }
 
+// TODO: Not used.
 static Char* _prepareReplace(String* self, sysuint_t index, sysuint_t range, sysuint_t replacementLength)
 {
   String::Data* d = self->_d;
@@ -889,7 +890,7 @@ err_t String::appendUtf8(const char* str, sysuint_t length)
         goto end;
     }
 
-    if (uc >= 0x10000U && uc <= UNICODE_LAST)
+    if (uc >= 0x10000U && uc <= UNICHAR_MAX)
     {
       Char::toSurrogatePair(uc, &dstCur[0]._ch, &dstCur[1]._ch);
       dstCur += 2;
@@ -934,7 +935,7 @@ reallocBuffer:
   {
     uint32_t uc = *str;
 
-    if (uc >= 0x10000U && uc <= UNICODE_LAST)
+    if (uc >= 0x10000U && uc <= UNICHAR_MAX)
     {
       Char::toSurrogatePair(uc, &dstCur[0]._ch, &dstCur[1]._ch);
       dstCur += 2;
@@ -1522,7 +1523,7 @@ ffUnsigned:
           else
           {
             // 8-bit string (char*).
-            TemporaryString<TEMPORARY_LENGTH> str;
+            StringTmp<TEMPORARY_LENGTH> str;
 
             const char* s = va_arg(ap, const char*);
             sysuint_t slen = (precision != NO_PRECISION)
@@ -2618,7 +2619,7 @@ List<String> String::split(const StringFilter& filter, uint splitBehavior, uint 
 
 String String::join(const List<String>& seq, const Char separator)
 {
-  TemporaryString<1> sept(separator);
+  StringTmp<1> sept(separator);
   return join(seq, sept);
 }
 

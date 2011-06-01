@@ -8,6 +8,7 @@
 #define _FOG_SVG_DOM_SVGIMAGELINKATTRIBUTE_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/Xml/Dom/XmlAttribute.h>
 #include <Fog/Xml/Dom/XmlElement.h>
@@ -58,7 +59,7 @@ protected:
 private:
   friend struct SvgImageElement;
 
-  FOG_DISABLE_COPY(SvgImageLinkAttribute)
+  _FOG_CLASS_NO_COPY(SvgImageLinkAttribute)
 };
 
 //! @}

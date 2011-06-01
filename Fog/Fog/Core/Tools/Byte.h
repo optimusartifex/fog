@@ -161,7 +161,7 @@ __FOG_BYTE_MAKE_ARITH_OVERLOAD(const Fog::Byte& a, a._ch, uint8_t b, b)
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::Byte, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::Byte, Fog::TYPEINFO_PRIMITIVE)
 
 // [Guard]
 #endif // _FOG_CORE_TOOLS_BYTE_H

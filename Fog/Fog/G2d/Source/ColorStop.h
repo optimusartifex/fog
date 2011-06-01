@@ -133,13 +133,13 @@ struct FOG_NO_EXPORT ColorStop
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::ColorStop, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::ColorStop, Fog::TYPEINFO_PRIMITIVE)
 
 // ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_DECLARE_FUZZY(Fog::ColorStop,
+FOG_FUZZY_DECLARE(Fog::ColorStop,
   Math::isFuzzyEq(a._offset, b._offset) &&
   Fuzzy<Color>::eq(a._color, b._color))
 

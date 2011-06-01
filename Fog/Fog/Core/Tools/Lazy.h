@@ -8,6 +8,7 @@
 #define _FOG_CORE_TOOLS_LAZY_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/Uninitialized.h>
 #include <Fog/Core/Threading/Atomic.h>
@@ -52,7 +53,7 @@ protected:
   void* _ptr;
 
 private:
-  FOG_DISABLE_COPY(LazyBase)
+  _FOG_CLASS_NO_COPY(LazyBase)
 };
 
 // ============================================================================

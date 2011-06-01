@@ -8,6 +8,7 @@
 #define _FOG_SVG_DOM_SVGELLIPSEELEMENT_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Svg/Dom/SvgCoordAttribute_p.h>
 #include <Fog/Svg/Dom/SvgStyledElement_p.h>
 
@@ -54,7 +55,7 @@ struct FOG_NO_EXPORT SvgEllipseElement : public SvgStyledElement
   SvgCoordAttribute a_ry;
 
 private:
-  FOG_DISABLE_COPY(SvgEllipseElement)
+  _FOG_CLASS_NO_COPY(SvgEllipseElement)
 };
 
 //! @}

@@ -112,6 +112,13 @@ static FOG_INLINE void m128dLoad8(m128d& dst0, const SrcT* srcp)
 }
 
 template<typename SrcT>
+static FOG_INLINE void m128dLoad8CvtFrom2xPS(m128d& dst0, const SrcT* srcp)
+{
+  dst0 = _mm_load_sd(reinterpret_cast<const double*>(srcp));
+  dst0 = _mm_cvtps_pd(_mm_castpd_ps(dst0));
+}
+
+template<typename SrcT>
 static FOG_INLINE void m128dLoad8Lo(m128d& dst0, const SrcT* srcp)
 {
   dst0 = _mm_loadl_pd(dst0, reinterpret_cast<const double*>(srcp));
@@ -239,9 +246,19 @@ static FOG_INLINE void m128fCvtPSFromPI32(m128f& dst0, const m128i& src0)
   dst0 = _mm_cvtepi32_ps(src0);
 }
 
+static FOG_INLINE void m128fCvtPSFromPD(m128f& dst0, const m128d& src0)
+{
+  dst0 = _mm_cvtpd_ps(src0);
+}
+
 static FOG_INLINE void m128dCvtPDFromPI32(m128d& dst0, const m128i& src0)
 {
   dst0 = _mm_cvtepi32_pd(src0);
+}
+
+static FOG_INLINE void m128dCvtPDFromPS(m128d& dst0, const m128f& src0)
+{
+  dst0 = _mm_cvtps_pd(src0);
 }
 
 static FOG_INLINE void m128iCvtPI32FromPS(m128i& dst0, const m128f& src0)

@@ -44,14 +44,14 @@
 namespace Fog {
 
 // ============================================================================
-// [Fog::RasterPainterEngine - Renderers - Painting - DoPaintBoxes]
+// [Fog::RasterPaintEngine - Renderers - Painting - DoPaintBoxes]
 // ============================================================================
 
 // Fill rectangles aligned to a pixel grid.
 //
 // Input data characteristics:
 // - Already clipped to SIMPLE or COMPLEX clip region.
-void RasterPainterEngine::CTX_SYMBOL(_doPaintBoxes)(
+void RasterPaintEngine::CTX_SYMBOL(_doPaintBoxes)(
   RasterContext* ctx, const BoxI* box, sysuint_t count)
 {
   FOG_ASSERT(ctx->finalClipType != RASTER_CLIP_NULL);
@@ -799,7 +799,7 @@ NAME##_End: \
 }
 
 // ============================================================================
-// [Fog::RasterPainterEngine - Renderers - Painting - DoPaintImage]
+// [Fog::RasterPaintEngine - Renderers - Painting - DoPaintImage]
 // ============================================================================
 
 // Blit image aligned to a pixel grid.
@@ -807,7 +807,7 @@ NAME##_End: \
 // Input data characteristics:
 // - Already clipped to SIMPLE clip rectangle. If clip region is COMPLEX,
 //   additional clipping must be performed by callee (here).
-void RasterPainterEngine::CTX_SYMBOL(_doPaintImage)(
+void RasterPaintEngine::CTX_SYMBOL(_doPaintImage)(
   RasterContext* ctx, const RectI& dst, const Image& image, const RectI& src)
 {
   FOG_ASSERT(ctx->finalClipType != RASTER_CLIP_NULL);
@@ -1589,12 +1589,12 @@ NAME##_End: \
 }
 
 // ============================================================================
-// [Fog::RasterPainterEngine - Renderers - Painting - DoPaintGlyphSet]
+// [Fog::RasterPaintEngine - Renderers - Painting - DoPaintGlyphSet]
 // ============================================================================
 
 // TODO: Hardcoded to A8 glyph format.
 // TODO: Region and mask clipping not implemented yet.
-void RasterPainterEngine::CTX_SYMBOL(_doPaintGlyphSet)(
+void RasterPaintEngine::CTX_SYMBOL(_doPaintGlyphSet)(
   RasterContext* ctx, const PointI& pt, const GlyphSet& glyphSet, const BoxI& boundingBox)
 {
   FOG_ASSERT(ctx->finalClipType != RASTER_CLIP_NULL);
@@ -1756,10 +1756,10 @@ void RasterPainterEngine::CTX_SYMBOL(_doPaintGlyphSet)(
 }
 
 // ============================================================================
-// [Fog::RasterPainterEngine - Renderers - Painting - DoPaintPath]
+// [Fog::RasterPaintEngine - Renderers - Painting - DoPaintPath]
 // ============================================================================
 
-void RasterPainterEngine::CTX_SYMBOL(_doPaintPath)(
+void RasterPaintEngine::CTX_SYMBOL(_doPaintPath)(
   RasterContext* ctx, Rasterizer8* ras)
 {
   FOG_ASSERT(ctx->finalClipType != RASTER_CLIP_NULL);

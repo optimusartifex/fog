@@ -17,26 +17,6 @@
 //! @addtogroup Fog_Core_Macros
 //! @{
 
-//! @brief Creates @c __selftype__ typedef in class thats for callbacks and references
-//!
-//! @sa @c FOG_DECLARE_D
-#define FOG_DECLARE_SELFTYPE(_SelfType_) \
-  typedef _SelfType_ __selftype__;
-
-//! @brief Creates @c __dtype__ typedef and @c d member in class
-//!
-//! @sa @c FOG_DECLARE_SELFTYPE, @c FOG_DECLARE_D_METHODS
-#define FOG_DECLARE_D(_DType_) \
-  typedef _DType_ __dtype__; \
-  \
-  __dtype__* _d;
-
-//! @brief Use this macro to generate empty copy constructor and empty copy operator.
-//! Use in 'private' section.
-#define FOG_DISABLE_COPY(_SelfType_) \
-  FOG_INLINE FOG_NO_EXPORT _SelfType_(const _SelfType_& other); \
-  FOG_INLINE FOG_NO_EXPORT _SelfType_& operator=(const _SelfType_& other);
-
 //! @brief Some systems hasn't defined @c offsetof keyword, but FOG_OFFSET_OF
 //! is always defined and it's possible to use it to get offset from a class
 //! member (only single inheritance is allowed).

@@ -9,6 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/G2d/Geometry/Size.h>
 #include <Fog/G2d/Tools/Dpi.h>
 #include <Fog/Xml/Dom/XmlDocument.h>
@@ -75,7 +76,7 @@ struct FOG_API SvgDocument : public XmlDocument
   Dpi _dpi;
 
 private:
-  FOG_DISABLE_COPY(SvgDocument)
+  _FOG_CLASS_NO_COPY(SvgDocument)
 };
 
 //! @}

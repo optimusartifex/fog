@@ -16,27 +16,18 @@ namespace Fog {
 FOG_NO_EXPORT void _g2d_init(void);
 FOG_NO_EXPORT void _g2d_fini(void);
 
-// [Fog/G2d/Font]
-FOG_NO_EXPORT void _g2d_font_init(void);
-FOG_NO_EXPORT void _g2d_font_fini(void);
-
-FOG_NO_EXPORT void _g2d_glyph_init(void);
-FOG_NO_EXPORT void _g2d_glyph_fini(void);
-
-FOG_NO_EXPORT void _g2d_glyphset_init(void);
-FOG_NO_EXPORT void _g2d_glyphset_fini(void);
-
 // [Fog/G2d/Geometry]
+FOG_NO_EXPORT void _g2d_line_init(void);
+FOG_NO_EXPORT void _g2d_qbezier_init(void);
+FOG_NO_EXPORT void _g2d_cbezier_init(void);
 FOG_NO_EXPORT void _g2d_arc_init(void);
+
+FOG_NO_EXPORT void _g2d_triangle_init(void);
 FOG_NO_EXPORT void _g2d_circle_init(void);
 FOG_NO_EXPORT void _g2d_ellipse_init(void);
 FOG_NO_EXPORT void _g2d_chord_init(void);
 FOG_NO_EXPORT void _g2d_pie_init(void);
 FOG_NO_EXPORT void _g2d_round_init(void);
-FOG_NO_EXPORT void _g2d_line_init(void);
-
-FOG_NO_EXPORT void _g2d_cubiccurve_init(void);
-FOG_NO_EXPORT void _g2d_quadcurve_init(void);
 
 FOG_NO_EXPORT void _g2d_path_init(void);
 FOG_NO_EXPORT void _g2d_path_fini(void);
@@ -67,6 +58,9 @@ FOG_NO_EXPORT void _g2d_imagecodecprovider_init(void);
 FOG_NO_EXPORT void _g2d_imagecodecprovider_fini(void);
 
 // [Fog/G2d/Painting]
+FOG_NO_EXPORT void _g2d_paintdeviceinfo_init(void);
+FOG_NO_EXPORT void _g2d_paintdeviceinfo_fini(void);
+
 FOG_NO_EXPORT void _g2d_painter_init_null(void);
 FOG_NO_EXPORT void _g2d_painter_fini_null(void);
 
@@ -92,6 +86,16 @@ FOG_NO_EXPORT void _g2d_genericmatrix_fini(void);
 
 FOG_NO_EXPORT void _g2d_region_init(void);
 FOG_NO_EXPORT void _g2d_region_fini(void);
+
+// [Fog/G2d/Text]
+FOG_NO_EXPORT void _g2d_glyphbitmap_init(void);
+FOG_NO_EXPORT void _g2d_glyphbitmap_fini(void);
+
+FOG_NO_EXPORT void _g2d_glyphoutline_init(void);
+FOG_NO_EXPORT void _g2d_glyphoutline_fini(void);
+
+FOG_NO_EXPORT void _g2d_fontmanager_init(void);
+FOG_NO_EXPORT void _g2d_fontmanager_fini(void);
 
 } // Fog namespace
 

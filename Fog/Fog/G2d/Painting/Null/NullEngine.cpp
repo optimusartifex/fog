@@ -25,13 +25,13 @@ struct FOG_NO_EXPORT MyPainterVTable : public PainterVTable
 {
 };
 
-static PainterVTable _G2d_MyPainterEngine_vtable;
+static PainterVTable _G2d_MyPaintEngine_vtable;
 
 // ============================================================================
-// [Fog::MyPainterEngine]
+// [Fog::MyPaintEngine]
 // ============================================================================
 
-struct FOG_NO_EXPORT MyPainterEngine : public PainterEngine
+struct FOG_NO_EXPORT MyPaintEngine : public PaintEngine
 {
 };
 
@@ -262,7 +262,7 @@ struct FOG_NO_EXPORT MyPainterImpl
 
 err_t FOG_CDECL MyPainterImpl::release(Painter& self)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
@@ -272,19 +272,19 @@ err_t FOG_CDECL MyPainterImpl::release(Painter& self)
 
 err_t FOG_CDECL MyPainterImpl::getMetaParams(const Painter& self, Region& region, PointI& origin)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::setMetaParams(Painter& self, const Region& region, const PointI& origin)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::resetMetaParams(Painter& self)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
@@ -294,19 +294,19 @@ err_t FOG_CDECL MyPainterImpl::resetMetaParams(Painter& self)
 
 err_t FOG_CDECL MyPainterImpl::getUserParams(const Painter& self, Region& region, PointI& origin)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::setUserParams(Painter& self, const Region& region, const PointI& origin)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::resetUserParams(Painter& self)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
@@ -316,19 +316,19 @@ err_t FOG_CDECL MyPainterImpl::resetUserParams(Painter& self)
 
 err_t FOG_CDECL MyPainterImpl::getParameter(const Painter& self, uint32_t parameterId, void* value)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::setParameter(Painter& self, uint32_t parameterId, const void* value)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::resetParameter(Painter& self, uint32_t parameterId)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
@@ -338,61 +338,61 @@ err_t FOG_CDECL MyPainterImpl::resetParameter(Painter& self, uint32_t parameterI
 
 err_t FOG_CDECL MyPainterImpl::getSourceType(const Painter& self, uint32_t& val)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::getSourceColor(const Painter& self, Color& color)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::getSourcePatternF(const Painter& self, PatternF& pattern)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::getSourcePatternD(const Painter& self, PatternD& pattern)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::setSourceArgb32(Painter& self, uint32_t argb32)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::setSourceArgb64(Painter& self, const Argb64& argb64)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::setSourceColor(Painter& self, const Color& color)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::setSourcePatternF(Painter& self, const PatternF& pattern)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::setSourcePatternD(Painter& self, const PatternD& pattern)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::setSourceAbstract(Painter& self, uint32_t sourceId, const void* value, const void* tr)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
@@ -402,43 +402,43 @@ err_t FOG_CDECL MyPainterImpl::setSourceAbstract(Painter& self, uint32_t sourceI
 
 err_t FOG_CDECL MyPainterImpl::getTransformF(const Painter& self, TransformF& tr)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::getTransformD(const Painter& self, TransformD& tr)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::setTransformF(Painter& self, const TransformF& tr)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::setTransformD(Painter& self, const TransformD& tr)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::applyTransformF(Painter& self, uint32_t transformOp, const void* params)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::applyTransformD(Painter& self, uint32_t transformOp, const void* params)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::resetTransform(Painter& self)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
@@ -448,13 +448,13 @@ err_t FOG_CDECL MyPainterImpl::resetTransform(Painter& self)
 
 err_t FOG_CDECL MyPainterImpl::save(Painter& self)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::restore(Painter& self)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
@@ -464,13 +464,13 @@ err_t FOG_CDECL MyPainterImpl::restore(Painter& self)
 
 err_t FOG_CDECL MyPainterImpl::mapPointF(const Painter& self, uint32_t mapOp, PointF& pt)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::mapPointD(const Painter& self, uint32_t mapOp, PointD& pt)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
@@ -480,79 +480,79 @@ err_t FOG_CDECL MyPainterImpl::mapPointD(const Painter& self, uint32_t mapOp, Po
 
 err_t FOG_CDECL MyPainterImpl::drawRectI(Painter& self, const RectI& r)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::drawRectF(Painter& self, const RectF& r)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::drawRectD(Painter& self, const RectD& r)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::drawPolylineI(Painter& self, const PointI* p, sysuint_t count)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::drawPolylineF(Painter& self, const PointF* p, sysuint_t count)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::drawPolylineD(Painter& self, const PointD* p, sysuint_t count)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::drawPolygonI(Painter& self, const PointI* p, sysuint_t count)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::drawPolygonF(Painter& self, const PointF* p, sysuint_t count)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::drawPolygonD(Painter& self, const PointD* p, sysuint_t count)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::drawShapeF(Painter& self, uint32_t shapeType, const void* shapeData)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::drawShapeD(Painter& self, uint32_t shapeType, const void* shapeData)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::drawPathF(Painter& self, const PathF& p)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::drawPathD(Painter& self, const PathD& p)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
@@ -562,163 +562,163 @@ err_t FOG_CDECL MyPainterImpl::drawPathD(Painter& self, const PathD& p)
 
 err_t FOG_CDECL MyPainterImpl::fillAll(Painter& self)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::fillRectI(Painter& self, const RectI& r)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::fillRectF(Painter& self, const RectF& r)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::fillRectD(Painter& self, const RectD& r)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::fillRectsI(Painter& self, const RectI* r, sysuint_t count)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::fillRectsF(Painter& self, const RectF* r, sysuint_t count)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::fillRectsD(Painter& self, const RectD* r, sysuint_t count)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::fillPolygonI(Painter& self, const PointI* p, sysuint_t count)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::fillPolygonF(Painter& self, const PointF* p, sysuint_t count)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::fillPolygonD(Painter& self, const PointD* p, sysuint_t count)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::fillShapeF(Painter& self, uint32_t shapeType, const void* shapeData)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::fillShapeD(Painter& self, uint32_t shapeType, const void* shapeData)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::fillPathF(Painter& self, const PathF& p)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::fillPathD(Painter& self, const PathD& p)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::fillTextAtI(Painter& self, const PointI& p, const String& text, const Font& font, const RectI* clip)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::fillTextAtF(Painter& self, const PointF& p, const String& text, const Font& font, const RectF* clip)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::fillTextAtD(Painter& self, const PointD& p, const String& text, const Font& font, const RectD* clip)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::fillTextInI(Painter& self, const TextRectI& r, const String& text, const Font& font, const RectI* clip)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::fillTextInF(Painter& self, const TextRectF& r, const String& text, const Font& font, const RectF* clip)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::fillTextInD(Painter& self, const TextRectD& r, const String& text, const Font& font, const RectD* clip)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::fillMaskAtI(Painter& self, const PointI& p, const Image& m, const RectI* mFragment)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::fillMaskAtF(Painter& self, const PointF& p, const Image& m, const RectI* mFragment)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::fillMaskAtD(Painter& self, const PointD& p, const Image& m, const RectI* mFragment)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::fillMaskInI(Painter& self, const RectI& r, const Image& m, const RectI* mFragment)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::fillMaskInF(Painter& self, const RectF& r, const Image& m, const RectI* mFragment)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::fillMaskInD(Painter& self, const RectD& r, const Image& m, const RectI* mFragment)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::fillRegion(Painter& self, const Region& r)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
@@ -728,73 +728,73 @@ err_t FOG_CDECL MyPainterImpl::fillRegion(Painter& self, const Region& r)
 
 err_t FOG_CDECL MyPainterImpl::blitImageAtI(Painter& self, const PointI& p, const Image& i, const RectI* iFragment)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::blitImageAtF(Painter& self, const PointF& p, const Image& i, const RectI* iFragment)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::blitImageAtD(Painter& self, const PointD& p, const Image& i, const RectI* iFragment)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::blitImageInI(Painter& self, const RectI& r, const Image& i, const RectI* iFragment)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::blitImageInF(Painter& self, const RectF& r, const Image& i, const RectI* iFragment)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::blitImageInD(Painter& self, const RectD& r, const Image& i, const RectI* iFragment)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::blitMaskedImageAtI(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::blitMaskedImageAtF(Painter& self, const PointF& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::blitMaskedImageAtD(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::blitMaskedImageInI(Painter& self, const RectI& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::blitMaskedImageInF(Painter& self, const RectF& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::blitMaskedImageInD(Painter& self, const RectD& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
@@ -804,163 +804,163 @@ err_t FOG_CDECL MyPainterImpl::blitMaskedImageInD(Painter& self, const RectD& r,
 
 err_t FOG_CDECL MyPainterImpl::clipRectI(Painter& self, uint32_t clipOp, const RectI& r)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::clipRectF(Painter& self, uint32_t clipOp, const RectF& r)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::clipRectD(Painter& self, uint32_t clipOp, const RectD& r)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::clipRectsI(Painter& self, uint32_t clipOp, const RectI* r, sysuint_t count)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::clipRectsF(Painter& self, uint32_t clipOp, const RectF* r, sysuint_t count)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::clipRectsD(Painter& self, uint32_t clipOp, const RectD* r, sysuint_t count)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::clipPolygonI(Painter& self, uint32_t clipOp, const PointI* p, sysuint_t count)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::clipPolygonF(Painter& self, uint32_t clipOp, const PointF* p, sysuint_t count)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::clipPolygonD(Painter& self, uint32_t clipOp, const PointD* p, sysuint_t count)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::clipShapeF(Painter& self, uint32_t clipOp, uint32_t shapeType, const void* shapeData)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::clipShapeD(Painter& self, uint32_t clipOp, uint32_t shapeType, const void* shapeData)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::clipPathF(Painter& self, uint32_t clipOp, const PathF& p)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::clipPathD(Painter& self, uint32_t clipOp, const PathD& p)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::clipTextAtI(Painter& self, uint32_t clipOp, const PointI& p, const String& text, const Font& font, const RectI* clip)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::clipTextAtF(Painter& self, uint32_t clipOp, const PointF& p, const String& text, const Font& font, const RectF* clip)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::clipTextAtD(Painter& self, uint32_t clipOp, const PointD& p, const String& text, const Font& font, const RectD* clip)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::clipTextInI(Painter& self, uint32_t clipOp, const TextRectI& r, const String& text, const Font& font, const RectI* clip)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::clipTextInF(Painter& self, uint32_t clipOp, const TextRectF& r, const String& text, const Font& font, const RectF* clip)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::clipTextInD(Painter& self, uint32_t clipOp, const TextRectD& r, const String& text, const Font& font, const RectD* clip)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::clipMaskAtI(Painter& self, uint32_t clipOp, const PointI& p, const Image& m, const RectI* mFragment)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::clipMaskAtF(Painter& self, uint32_t clipOp, const PointF& p, const Image& m, const RectI* mFragment)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::clipMaskAtD(Painter& self, uint32_t clipOp, const PointD& p, const Image& m, const RectI* mFragment)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::clipMaskInI(Painter& self, uint32_t clipOp, const RectI& r, const Image& m, const RectI* mFragment)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::clipMaskInF(Painter& self, uint32_t clipOp, const RectF& r, const Image& m, const RectI* mFragment)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::clipMaskInD(Painter& self, uint32_t clipOp, const RectD& r, const Image& m, const RectI* mFragment)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::clipRegion(Painter& self, uint32_t clipOp, const Region& r)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::resetClip(Painter& self)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
@@ -970,13 +970,13 @@ err_t FOG_CDECL MyPainterImpl::resetClip(Painter& self)
 
 err_t FOG_CDECL MyPainterImpl::beginLayer(Painter& self)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t FOG_CDECL MyPainterImpl::endLayer(Painter& self)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
@@ -986,7 +986,7 @@ err_t FOG_CDECL MyPainterImpl::endLayer(Painter& self)
 
 err_t FOG_CDECL MyPainterImpl::flush(Painter& self, uint32_t flags)
 {
-  MyPainterEngine* engine = reinterpret_cast<MyPainterEngine*>(self._engine);
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
@@ -996,7 +996,7 @@ err_t FOG_CDECL MyPainterImpl::flush(Painter& self, uint32_t flags)
 
 static void _g2d_painter_init_my()
 {
-  PainterVTable& v = _G2d_MyPainterEngine_vtable;
+  PainterVTable& v = _G2d_MyPaintEngine_vtable;
 
   // --------------------------------------------------------------------------
   // [AddRef / Release]
@@ -1224,7 +1224,7 @@ static void _g2d_painter_fini_my()
 // [Fog::NullPainterVTable]
 // ============================================================================
 
-static PainterVTable _G2d_NullPainterEngine_vtable;
+static PainterVTable _G2d_NullPaintEngine_vtable;
 
 // ============================================================================
 // [Fog::NullPainterImpl]
@@ -1431,9 +1431,9 @@ err_t FOG_CDECL NullPainterImpl::getParameter(const Painter& self, uint32_t para
       return ERR_OK;
     }
 
-    case PAINTER_PARAMETER_ENGINE_I:
+    case PAINTER_PARAMETER_DEVICE_I:
     {
-      *reinterpret_cast<uint32_t*>(value) = PAINTER_TYPE_NULL;
+      *reinterpret_cast<uint32_t*>(value) = PAINT_DEVICE_NULL;
       return ERR_OK;
     }
 
@@ -1704,14 +1704,14 @@ err_t FOG_CDECL NullPainterImpl::flush(Painter& self, uint32_t flags)
 }
 
 // ============================================================================
-// [Fog::NullPainterEngine - Statics]
+// [Fog::NullPaintEngine - Statics]
 // ============================================================================
 
-static NullPainterEngine _G2d_NullPainterEngine_instance;
+static NullPaintEngine _G2d_NullPaintEngine_instance;
 
-static PainterEngine* FOG_CDECL _G2d_NullPainterEngine_getNullEngine()
+static PaintEngine* FOG_CDECL _G2d_NullPaintEngine_getNullEngine()
 {
-  return &_G2d_NullPainterEngine_instance;
+  return &_G2d_NullPaintEngine_instance;
 }
 
 // ============================================================================
@@ -1720,9 +1720,9 @@ static PainterEngine* FOG_CDECL _G2d_NullPainterEngine_getNullEngine()
 
 FOG_NO_EXPORT void _g2d_painter_init_null()
 {
-  _g2d.painter.getNullEngine = _G2d_NullPainterEngine_getNullEngine;
+  _g2d.painter.getNullEngine = _G2d_NullPaintEngine_getNullEngine;
 
-  PainterVTable& v = _G2d_NullPainterEngine_vtable;
+  PainterVTable& v = _G2d_NullPaintEngine_vtable;
 
   // --------------------------------------------------------------------------
   // [AddRef / Release]
@@ -1940,10 +1940,10 @@ FOG_NO_EXPORT void _g2d_painter_init_null()
   v.flush = NullPainterImpl::flush;
 
   // --------------------------------------------------------------------------
-  // [NullPainterEngine]
+  // [NullPaintEngine]
   // --------------------------------------------------------------------------
 
-  _G2d_NullPainterEngine_instance.vtable = &_G2d_NullPainterEngine_vtable;
+  _G2d_NullPaintEngine_instance.vtable = &_G2d_NullPaintEngine_vtable;
 }
 
 FOG_NO_EXPORT void _g2d_painter_fini_null()

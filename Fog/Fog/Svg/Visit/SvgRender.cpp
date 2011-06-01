@@ -116,18 +116,6 @@ err_t SvgRender::onPath(SvgElement* obj, const PathF& path)
   return ERR_OK;
 }
 
-err_t SvgRender::onPath(SvgElement* obj, const PathD& path)
-{
-  _painter->save();
-  _painter->transform(_transform);
-
-  if (_setupFill(this)) _painter->fillPath(path);
-  if (_setupStroke(this)) _painter->drawPath(path);
-
-  _painter->restore();
-  return ERR_OK;
-}
-
 err_t SvgRender::onImage(SvgElement* obj, const PointF& pt, const Image& image)
 {
   _painter->save();

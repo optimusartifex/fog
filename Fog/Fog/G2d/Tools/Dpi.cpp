@@ -22,20 +22,20 @@ namespace Fog {
 
 static inline void _G2d_Dpi_setup(float* data, float dpi, float em, float ex)
 {
-  data[COORD_UNIT_NONE] = 1.0f;
-  data[COORD_UNIT_PX] = 1.0f;
+  data[UNIT_NONE] = 1.0f;
+  data[UNIT_PX] = 1.0f;
 
-  data[COORD_UNIT_PT] = dpi * 0.013888888889f;
-  data[COORD_UNIT_PC] = dpi * 0.166666666667f;
+  data[UNIT_PT] = dpi * 0.013888888889f;
+  data[UNIT_PC] = dpi * 0.166666666667f;
 
-  data[COORD_UNIT_IN] = dpi;
-  data[COORD_UNIT_MM] = dpi * 0.039370077778f;
-  data[COORD_UNIT_CM] = dpi * 0.393700777778f;
+  data[UNIT_IN] = dpi;
+  data[UNIT_MM] = dpi * 0.039370077778f;
+  data[UNIT_CM] = dpi * 0.393700777778f;
 
-  data[COORD_UNIT_PERCENT] = 1.0f;
+  data[UNIT_PERCENTAGE] = 1.0f;
 
-  data[COORD_UNIT_EM] = em;
-  data[COORD_UNIT_EX] = ex;
+  data[UNIT_EM] = em;
+  data[UNIT_EX] = ex;
 }
 
 // ============================================================================

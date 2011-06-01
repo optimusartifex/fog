@@ -8,6 +8,7 @@
 #define _FOG_SVG_DOM_SVGSOLIDCOLORELEMENT_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Svg/Dom/SvgStyledElement_p.h>
 
 namespace Fog {
@@ -49,7 +50,7 @@ struct FOG_NO_EXPORT SvgSolidColorElement : public SvgStyledElement
   // NONE
 
 private:
-  FOG_DISABLE_COPY(SvgSolidColorElement)
+  _FOG_CLASS_NO_COPY(SvgSolidColorElement)
 };
 
 //! @}

@@ -11,8 +11,6 @@
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Global/Static.h>
 #include <Fog/Core/Threading/Atomic.h>
-#include <Fog/G2d/Font/Glyph.h>
-#include <Fog/G2d/Font/GlyphSet.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Geometry/PathStroker.h>
@@ -50,7 +48,7 @@ struct RasterContextF;
 
 union RasterHints;
 struct RasterLayer;
-struct RasterPainterEngine;
+struct RasterPaintEngine;
 struct RasterState;
 struct RasterWorker;
 struct RasterWorkerManager;

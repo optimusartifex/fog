@@ -9,11 +9,15 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Global/TypeInfo.h>
 #include <Fog/Core/Memory/Memory.h>
 #include <Fog/Core/Threading/Atomic.h>
+#include <Fog/Core/Math/Interval.h>
 #include <Fog/Core/Math/Fuzzy.h>
+#include <Fog/Core/Tools/Range.h>
 #include <Fog/G2d/Source/Color.h>
 #include <Fog/G2d/Source/ColorStop.h>
 
@@ -163,7 +167,7 @@ struct FOG_API ColorStopList
 
   err_t removeAt(sysuint_t index);
   err_t removeAt(const Range& range);
-  err_t removeAt(const RangeF& range);
+  err_t removeAt(const IntervalF& interval);
 
   sysuint_t indexOf(float offset) const;
 
@@ -185,7 +189,7 @@ struct FOG_API ColorStopList
   // [Members]
   // --------------------------------------------------------------------------
 
-  FOG_DECLARE_D(ColorStopListData)
+  _FOG_CLASS_D(ColorStopListData)
 };
 
 //! @}
@@ -196,7 +200,13 @@ struct FOG_API ColorStopList
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::ColorStopList, Fog::TYPEINFO_MOVABLE)
+_FOG_TYPEINFO_DECLARE(Fog::ColorStopList, Fog::TYPEINFO_MOVABLE)
+
+// ============================================================================
+// [Fog::Swap]
+// ============================================================================
+
+_FOG_SWAP_D(Fog::ColorStopList)
 
 // [Guard]
 #endif // _FOG_G2D_SOURCE_COLORSTOPLIST_H

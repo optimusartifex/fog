@@ -11,7 +11,6 @@
 // [Dependencies]
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Svg/Dom/SvgUseElement_p.h>
-#include <Fog/Svg/Visit/SvgRender.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
 #include <Fog/Xml/Dom/XmlDocument.h>
 

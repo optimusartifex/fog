@@ -8,6 +8,7 @@
 #define _FOG_G2D_RASTERIZER_RASTERIZER_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Math/Fixed.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Point.h>
@@ -156,7 +157,7 @@ enum RASTERIZER_SHAPE
 //!
 //!
 //! The analytic rasterizer idea and first implementation was based on
-//! AntiGrain, which is based on freetype2, which is based on libart?
+//! Anti-Grain, which is based on freetype2, which is based on libart?
 //! Here is the original license:
 //!
 //! @verbatim
@@ -733,7 +734,7 @@ struct FOG_NO_EXPORT Rasterizer8
   PathD _temporaryPathD;
 
 private:
-  FOG_DISABLE_COPY(Rasterizer8)
+  _FOG_CLASS_NO_COPY(Rasterizer8)
 };
 
 //! @}

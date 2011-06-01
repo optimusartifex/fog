@@ -1773,7 +1773,6 @@ _FixedScaleInterpolate:
     // [Solid]
     // ------------------------------------------------------------------------
 
-_FetchSolid:
     P_FETCH_SPAN8_BEGIN()
       P_FETCH_SPAN8_SET_CURRENT()
       dst = accessor.fill(dst, clamp, w);

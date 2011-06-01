@@ -9,8 +9,9 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/Global/TypeInfo.h>
 #include <Fog/Core/Threading/Atomic.h>
 
 #if defined(FOG_OS_WINDOWS)
@@ -97,7 +98,7 @@ private:
   bool _manualReset;
 #endif // FOG_OS_POSIX
 
-  FOG_DISABLE_COPY(ThreadEvent)
+  _FOG_CLASS_NO_COPY(ThreadEvent)
 };
 
 //! @}

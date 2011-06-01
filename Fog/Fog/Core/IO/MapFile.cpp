@@ -207,7 +207,7 @@ err_t MapFile::map(const String& fileName, bool loadOnFail)
 
   err_t err;
 
-  TemporaryByteArray<TEMPORARY_LENGTH> fileName8;
+  ByteArrayTmp<TEMPORARY_LENGTH> fileName8;
   if ((err = TextCodec::local8().appendFromUnicode(fileName8, fileName))) return err;
 
   int fd = open(fileName8.getData(), O_RDONLY);

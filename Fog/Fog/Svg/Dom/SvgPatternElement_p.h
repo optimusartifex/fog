@@ -8,6 +8,7 @@
 #define _FOG_SVG_DOM_SVGPATTERNELEMENT_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/G2d/Source/Pattern.h>
 #include <Fog/Svg/Dom/SvgCoordAttribute_p.h>
 #include <Fog/Svg/Dom/SvgElement.h>
@@ -63,7 +64,7 @@ struct FOG_NO_EXPORT SvgPatternElement : public SvgElement
   SvgViewBoxAttribute a_viewBox;
 
 private:
-  FOG_DISABLE_COPY(SvgPatternElement)
+  _FOG_CLASS_NO_COPY(SvgPatternElement)
 };
 
 //! @}

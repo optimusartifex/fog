@@ -139,7 +139,7 @@ struct TypeInfo
 
 #endif // FOG_CC_HAVE_PARTIAL_TEMPLATE_SPECIALIZATION
 
-//! @brief Inherited by all types declared using @c FOG_DECLARE_TYPEINFO().
+//! @brief Inherited by all types declared using @c _FOG_TYPEINFO_DECLARE().
 template<typename T, uint __TypeInfo__>
 struct TypeInfo_Wrapper
 {
@@ -187,25 +187,25 @@ struct TypeCmp
 };
 
 // Some overloads to optimize performance.
-#define __FOG_DECLARE_TYPECMP_INT(TYPE) \
+#define ___FOG_TYPECMP_DECLAREINT(TYPE) \
 template<> \
 struct TypeCmp<TYPE> \
 { \
   static FOG_INLINE int compare(const TYPE* a, const TYPE* b) { return *a - *b; } \
 };
 
-__FOG_DECLARE_TYPECMP_INT(int8_t)
-__FOG_DECLARE_TYPECMP_INT(int16_t)
-__FOG_DECLARE_TYPECMP_INT(int32_t)
+___FOG_TYPECMP_DECLAREINT(int8_t)
+___FOG_TYPECMP_DECLAREINT(int16_t)
+___FOG_TYPECMP_DECLAREINT(int32_t)
 
-#undef __FOG_DECLARE_TYPECMP_INT
+#undef ___FOG_TYPECMP_DECLAREINT
 
-//! @brief Inherited by all types declared using @c FOG_DECLARE_TYPECMP().
+//! @brief Inherited by all types declared using @c _FOG_TYPECMP_DECLARE().
 template<typename T>
 struct TypeCmp_Wrapper : public T {};
 
 // ===========================================================================
-// [FOG_DECLARE_TYPEINFO()]
+// [_FOG_TYPEINFO_DECLARE()]
 // ===========================================================================
 
 /*
@@ -220,140 +220,140 @@ struct TypeToType1 { typedef Base< TypeToType<A1>::Self > Self; };
 //!
 //! @c Fog::TypeInfo is template to resolve type at compile time. It's
 //! used in template specializations
-#define FOG_DECLARE_TYPEINFO(__symbol__, __typeinfo__) \
+#define _FOG_TYPEINFO_DECLARE(_Symbol_, _TypeInfo_) \
 namespace Fog { \
 template <> \
-struct TypeInfo <__symbol__> : public TypeInfo_Wrapper< __symbol__, __typeinfo__ > {}; \
+struct TypeInfo < ::_Symbol_ > : public TypeInfo_Wrapper< ::_Symbol_, _TypeInfo_ > {}; \
 }
 
-#define FOG_DECLARE_TYPEINFO_TEMPLATE1(__symbol__, T1, A1, __typeinfo__) \
+#define _FOG_TYPEINFO_DECLARE_T1(_Symbol_, T1, A1, _TypeInfo_) \
 namespace Fog { \
 template <T1 A1> \
-struct TypeInfo < __symbol__<A1> > : public TypeInfo_Wrapper< __symbol__<A1>, __typeinfo__ > {}; \
+struct TypeInfo < ::_Symbol_<A1> > : public TypeInfo_Wrapper< ::_Symbol_<A1>, _TypeInfo_ > {}; \
 }
 
-#define FOG_DECLARE_TYPEINFO_TEMPLATE2(__symbol__, T1, A1, T2, A2, __typeinfo__) \
+#define _FOG_TYPEINFO_DECLARE_T2(_Symbol_, T1, A1, T2, A2, _TypeInfo_) \
 namespace Fog { \
 template <T1 A1, T2 A2> \
-struct TypeInfo < __symbol__<A1, A2> > : public TypeInfo_Wrapper< __symbol__<A1, A2>, __typeinfo__ > {}; \
+struct TypeInfo < ::_Symbol_<A1, A2> > : public TypeInfo_Wrapper< ::_Symbol_<A1, A2>, _TypeInfo_ > {}; \
 }
 
-#define FOG_DECLARE_TYPEINFO_TEMPLATE3(__symbol__, T1, A1, T2, A2, T3, A3, __typeinfo__) \
+#define _FOG_TYPEINFO_DECLARE_T3(_Symbol_, T1, A1, T2, A2, T3, A3, _TypeInfo_) \
 namespace Fog { \
 template <T1 A1, T2 A2, T3 A3> \
-struct TypeInfo < __symbol__<A1, A2, A3> > : public TypeInfo_Wrapper< __symbol__<A1, A2, A3>, __typeinfo__ > {}; \
+struct TypeInfo < ::_Symbol_<A1, A2, A3> > : public TypeInfo_Wrapper< ::_Symbol_<A1, A2, A3>, _TypeInfo_ > {}; \
 }
 
-#define FOG_DECLARE_TYPEINFO_TEMPLATE4(__symbol__, T1, A1, T2, A2, T3, A3, T4, A4, __typeinfo__) \
+#define _FOG_TYPEINFO_DECLARE_T4(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4, _TypeInfo_) \
 namespace Fog { \
 template <T1 A1, T2 A2, T3 A3, T4 A4> \
-struct TypeInfo < __symbol__<A1, A2, A3, A4> > : public TypeInfo_Wrapper< __symbol__<A1, A2, A3, A4>, __typeinfo__ > {}; \
+struct TypeInfo < ::_Symbol_<A1, A2, A3, A4> > : public TypeInfo_Wrapper< ::_Symbol_<A1, A2, A3, A4>, _TypeInfo_ > {}; \
 }
 
-#define FOG_DECLARE_TYPEINFO_TEMPLATE5(__symbol__, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, __typeinfo__) \
+#define _FOG_TYPEINFO_DECLARE_T5(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, _TypeInfo_) \
 namespace Fog { \
 template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5> \
-struct TypeInfo < __symbol__<A1, A2, A3, A4, A5> > : public TypeInfo_Wrapper< __symbol__<A1, A2, A3, A4, A5>, __typeinfo__ > {}; \
+struct TypeInfo < ::_Symbol_<A1, A2, A3, A4, A5> > : public TypeInfo_Wrapper< ::_Symbol_<A1, A2, A3, A4, A5>, _TypeInfo_ > {}; \
 }
 
-#define FOG_DECLARE_TYPEINFO_TEMPLATE6(__symbol__, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, __typeinfo__) \
+#define _FOG_TYPEINFO_DECLARE_T6(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, _TypeInfo_) \
 namespace Fog { \
 template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5, T6 A6> \
-struct TypeInfo < __symbol__<A1, A2, A3, A4, A5, A6> > : public TypeInfo_Wrapper< __symbol__<A1, A2, A3, A4, A5, A6>, __typeinfo__ > {}; \
+struct TypeInfo < ::_Symbol_<A1, A2, A3, A4, A5, A6> > : public TypeInfo_Wrapper< ::_Symbol_<A1, A2, A3, A4, A5, A6>, _TypeInfo_ > {}; \
 }
 
-#define FOG_DECLARE_TYPEINFO_TEMPLATE7(__symbol__, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7, __typeinfo__) \
+#define _FOG_TYPEINFO_DECLARE_T7(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7, _TypeInfo_) \
 namespace Fog { \
 template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5, T6 A6, T7 A7> \
-struct TypeInfo < __symbol__<A1, A2, A3, A4, A5, A6, A7> > : public TypeInfo_Wrapper< __symbol__<A1, A2, A3, A4, A5, A6, A7>, __typeinfo__ > {}; \
+struct TypeInfo < ::_Symbol_<A1, A2, A3, A4, A5, A6, A7> > : public TypeInfo_Wrapper< ::_Symbol_<A1, A2, A3, A4, A5, A6, A7>, _TypeInfo_ > {}; \
 }
 
-#define FOG_DECLARE_TYPEINFO_TEMPLATE8(__symbol__, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7, T8, A8, __typeinfo__) \
+#define _FOG_TYPEINFO_DECLARE_T8(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7, T8, A8, _TypeInfo_) \
 namespace Fog { \
 template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5, T6 A6, T7 A7, T8 A8> \
-struct TypeInfo < __symbol__<A1, A2, A3, A4, A5, A6, A7, A8> > : public TypeInfo_Wrapper< __symbol__<A1, A2, A3, A4, A5, A6, A7, A8>, __typeinfo__ > {}; \
+struct TypeInfo < ::_Symbol_<A1, A2, A3, A4, A5, A6, A7, A8> > : public TypeInfo_Wrapper< ::_Symbol_<A1, A2, A3, A4, A5, A6, A7, A8>, _TypeInfo_ > {}; \
 }
 
-#define FOG_DECLARE_TYPEINFO_TEMPLATE9(__symbol__, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7, T8, A8, T9, A9, __typeinfo__) \
+#define _FOG_TYPEINFO_DECLARE_T9(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7, T8, A8, T9, A9, _TypeInfo_) \
 namespace Fog { \
 template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5, T6 A6, T7 A7, T8 A8, T9 A9> \
-struct TypeInfo < __symbol__<A1, A2, A3, A4, A5, A6, A7, A8, A9> > : public TypeInfo_Wrapper< __symbol__<A1, A2, A3, A4, A5, A6, A7, A8, A9>, __typeinfo__ > {}; \
+struct TypeInfo < ::_Symbol_<A1, A2, A3, A4, A5, A6, A7, A8, A9> > : public TypeInfo_Wrapper< ::_Symbol_<A1, A2, A3, A4, A5, A6, A7, A8, A9>, _TypeInfo_ > {}; \
 }
 
-#define FOG_DECLARE_TYPEINFO_TEMPLATE10(__symbol__, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7, T8, A8, T9, A9, T10, A10, __typeinfo__) \
+#define _FOG_TYPEINFO_DECLARE_T10(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7, T8, A8, T9, A9, T10, A10, _TypeInfo_) \
 namespace Fog { \
 template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5, T6 A6, T7 A7, T8 A8, T9 A9, T10 A10> \
-struct TypeInfo < __symbol__<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10> > : public TypeInfo_Wrapper< __symbol__<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>, __typeinfo__ > {}; \
+struct TypeInfo < ::_Symbol_<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10> > : public TypeInfo_Wrapper< ::_Symbol_<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>, _TypeInfo_ > {}; \
 }
 
 // ===========================================================================
-// [FOG_DECLARE_TYPECMP()]
+// [_FOG_TYPECMP_DECLARE()]
 // ===========================================================================
 
-#define FOG_DECLARE_TYPECMP(__symbol__) \
+#define _FOG_TYPECMP_DECLARE(_Symbol_) \
 namespace Fog { \
 template <> \
-struct TypeCmp <__symbol__> : public TypeCmp_Wrapper< __symbol__ > {}; \
+struct TypeCmp <_Symbol_> : public TypeCmp_Wrapper< _Symbol_ > {}; \
 }
 
-#define FOG_DECLARE_TYPECMP_TEMPLATE1(__symbol__, T1, A1) \
+#define _FOG_TYPECMP_DECLARE_TEMPLATE1(_Symbol_, T1, A1) \
 namespace Fog { \
 template <T1 A1> \
-struct TypeCmp < __symbol__<A1> > : public TypeCmp_Wrapper< __symbol__<A1> > {}; \
+struct TypeCmp < _Symbol_<A1> > : public TypeCmp_Wrapper< _Symbol_<A1> > {}; \
 }
 
-#define FOG_DECLARE_TYPECMP_TEMPLATE2(__symbol__, T1, A1, T2, A2) \
+#define _FOG_TYPECMP_DECLARE_TEMPLATE2(_Symbol_, T1, A1, T2, A2) \
 namespace Fog { \
 template <T1 A1, T2 A2> \
-struct TypeCmp < __symbol__<A1, A2> > : public TypeCmp_Wrapper< __symbol__<A1, A2> > {}; \
+struct TypeCmp < _Symbol_<A1, A2> > : public TypeCmp_Wrapper< _Symbol_<A1, A2> > {}; \
 }
 
-#define FOG_DECLARE_TYPECMP_TEMPLATE3(__symbol__, T1, A1, T2, A2, T3, A3) \
+#define _FOG_TYPECMP_DECLARE_TEMPLATE3(_Symbol_, T1, A1, T2, A2, T3, A3) \
 namespace Fog { \
 template <T1 A1, T2 A2, T3 A3> \
-struct TypeCmp < __symbol__<A1, A2, A3> > : public TypeCmp_Wrapper< __symbol__<A1, A2, A3> > {}; \
+struct TypeCmp < _Symbol_<A1, A2, A3> > : public TypeCmp_Wrapper< _Symbol_<A1, A2, A3> > {}; \
 }
 
-#define FOG_DECLARE_TYPECMP_TEMPLATE4(__symbol__, T1, A1, T2, A2, T3, A3, T4, A4) \
+#define _FOG_TYPECMP_DECLARE_TEMPLATE4(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4) \
 namespace Fog { \
 template <T1 A1, T2 A2, T3 A3, T4 A4> \
-struct TypeCmp < __symbol__<A1, A2, A3, A4> > : public TypeCmp_Wrapper< __symbol__<A1, A2, A3, A4> > {}; \
+struct TypeCmp < _Symbol_<A1, A2, A3, A4> > : public TypeCmp_Wrapper< _Symbol_<A1, A2, A3, A4> > {}; \
 }
 
-#define FOG_DECLARE_TYPECMP_TEMPLATE5(__symbol__, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5) \
+#define _FOG_TYPECMP_DECLARE_TEMPLATE5(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5) \
 namespace Fog { \
 template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5> \
-struct TypeCmp < __symbol__<A1, A2, A3, A4, A5> > : public TypeCmp_Wrapper< __symbol__<A1, A2, A3, A4, A5> > {}; \
+struct TypeCmp < _Symbol_<A1, A2, A3, A4, A5> > : public TypeCmp_Wrapper< _Symbol_<A1, A2, A3, A4, A5> > {}; \
 }
 
-#define FOG_DECLARE_TYPECMP_TEMPLATE6(__symbol__, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6) \
+#define _FOG_TYPECMP_DECLARE_TEMPLATE6(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6) \
 namespace Fog { \
 template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5, T6 A6> \
-struct TypeCmp < __symbol__<A1, A2, A3, A4, A5, A6> > : public TypeCmp_Wrapper< __symbol__<A1, A2, A3, A4, A5, A6> > {}; \
+struct TypeCmp < _Symbol_<A1, A2, A3, A4, A5, A6> > : public TypeCmp_Wrapper< _Symbol_<A1, A2, A3, A4, A5, A6> > {}; \
 }
 
-#define FOG_DECLARE_TYPECMP_TEMPLATE7(__symbol__, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7) \
+#define _FOG_TYPECMP_DECLARE_TEMPLATE7(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7) \
 namespace Fog { \
 template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5, T6 A6, T7 A7> \
-struct TypeCmp < __symbol__<A1, A2, A3, A4, A5, A6, A7> > : public TypeCmp_Wrapper< __symbol__<A1, A2, A3, A4, A5, A6, A7> > {}; \
+struct TypeCmp < _Symbol_<A1, A2, A3, A4, A5, A6, A7> > : public TypeCmp_Wrapper< _Symbol_<A1, A2, A3, A4, A5, A6, A7> > {}; \
 }
 
-#define FOG_DECLARE_TYPECMP_TEMPLATE8(__symbol__, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7, T8, A8) \
+#define _FOG_TYPECMP_DECLARE_TEMPLATE8(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7, T8, A8) \
 namespace Fog { \
 template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5, T6 A6, T7 A7, T8 A8> \
-struct TypeCmp < __symbol__<A1, A2, A3, A4, A5, A6, A7, A8> > : public TypeCmp_Wrapper< __symbol__<A1, A2, A3, A4, A5, A6, A7, A8> > {}; \
+struct TypeCmp < _Symbol_<A1, A2, A3, A4, A5, A6, A7, A8> > : public TypeCmp_Wrapper< _Symbol_<A1, A2, A3, A4, A5, A6, A7, A8> > {}; \
 }
 
-#define FOG_DECLARE_TYPECMP_TEMPLATE9(__symbol__, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7, T8, A8, T9, A9) \
+#define _FOG_TYPECMP_DECLARE_TEMPLATE9(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7, T8, A8, T9, A9) \
 namespace Fog { \
 template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5, T6 A6, T7 A7, T8 A8, T9 A9> \
-struct TypeCmp < __symbol__<A1, A2, A3, A4, A5, A6, A7, A8, A9> > : public TypeCmp_Wrapper< __symbol__<A1, A2, A3, A4, A5, A6, A7, A8, A9> > {}; \
+struct TypeCmp < _Symbol_<A1, A2, A3, A4, A5, A6, A7, A8, A9> > : public TypeCmp_Wrapper< _Symbol_<A1, A2, A3, A4, A5, A6, A7, A8, A9> > {}; \
 }
 
-#define FOG_DECLARE_TYPECMP_TEMPLATE10(__symbol__, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7, T8, A8, T9, A9, T10, A10) \
+#define _FOG_TYPECMP_DECLARE_TEMPLATE10(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7, T8, A8, T9, A9, T10, A10) \
 namespace Fog { \
 template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5, T6 A6, T7 A7, T8 A8, T9 A9, T10 A10> \
-struct TypeCmp < __symbol__<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10> > : public TypeCmp_Wrapper< __symbol__<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10> > {}; \
+struct TypeCmp < _Symbol_<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10> > : public TypeCmp_Wrapper< _Symbol_<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10> > {}; \
 }
 
 //! @}
@@ -361,30 +361,36 @@ struct TypeCmp < __symbol__<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10> > : public 
 } // Fog namespace
 
 // ===========================================================================
-// [Fog::TypeInfo - Built-In]
+// [Fog::TypeInfo<> - C++ Types]
 // ===========================================================================
 
-FOG_DECLARE_TYPEINFO(int8_t  , Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
-FOG_DECLARE_TYPEINFO(uint8_t , Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
-FOG_DECLARE_TYPEINFO(int16_t , Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
-FOG_DECLARE_TYPEINFO(uint16_t, Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
-FOG_DECLARE_TYPEINFO(int32_t , Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
-FOG_DECLARE_TYPEINFO(uint32_t, Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
-FOG_DECLARE_TYPEINFO(int64_t , Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
-FOG_DECLARE_TYPEINFO(uint64_t, Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
+#define _FOG_TYPEINFO_DECLARE_POD(_Symbol_, _TypeInfo_) \
+namespace Fog { \
+template <> \
+struct TypeInfo < _Symbol_ > : public TypeInfo_Wrapper< _Symbol_, _TypeInfo_ > {}; \
+}
 
-FOG_DECLARE_TYPEINFO(float   , Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE | Fog::TYPEINFO_IS_FLOAT_TYPE)
-FOG_DECLARE_TYPEINFO(double  , Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE | Fog::TYPEINFO_IS_FLOAT_TYPE | Fog::TYPEINFO_IS_DOUBLE_TYPE)
+_FOG_TYPEINFO_DECLARE_POD(int8_t  , Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
+_FOG_TYPEINFO_DECLARE_POD(uint8_t , Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
+_FOG_TYPEINFO_DECLARE_POD(int16_t , Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
+_FOG_TYPEINFO_DECLARE_POD(uint16_t, Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
+_FOG_TYPEINFO_DECLARE_POD(int32_t , Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
+_FOG_TYPEINFO_DECLARE_POD(uint32_t, Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
+_FOG_TYPEINFO_DECLARE_POD(int64_t , Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
+_FOG_TYPEINFO_DECLARE_POD(uint64_t, Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
+
+_FOG_TYPEINFO_DECLARE_POD(float   , Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE | Fog::TYPEINFO_IS_FLOAT_TYPE)
+_FOG_TYPEINFO_DECLARE_POD(double  , Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE | Fog::TYPEINFO_IS_FLOAT_TYPE | Fog::TYPEINFO_IS_DOUBLE_TYPE)
 
 #if !defined(FOG_CC_MSC) && !defined(FOG_CC_BORLAND)
 // char is same as int8_t or uint8_t for borland compiler
-FOG_DECLARE_TYPEINFO(char, Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
+_FOG_TYPEINFO_DECLARE_POD(char    , Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
 #endif // FOG_CC_BORLAND
 
 // TODO: long and ulong checking
 #if !(defined(FOG_CC_GNU) && FOG_ARCH_BITS == 64) && !defined(FOG_CC_CLANG)
-FOG_DECLARE_TYPEINFO(long, Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
-FOG_DECLARE_TYPEINFO(ulong, Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
+_FOG_TYPEINFO_DECLARE_POD(long    , Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
+_FOG_TYPEINFO_DECLARE_POD(ulong   , Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
 #endif // long / ulong
 
 // TODO: wchar_t

@@ -115,7 +115,7 @@ err_t RasterContext::_initPrecision(uint32_t precision)
     {
       case IMAGE_PRECISION_BYTE:
         fullOpacityValueU = 0x100;
-        fullOpacityValueF = (float)(0x100 << 8);
+        fullOpacityValueF = (float)(0x100 << 4);
         rasterizer8.init();
         scanline8.init();
         scanlineExt8.initCustom1((uint32_t)sizeof(SpanExt8));
@@ -123,7 +123,7 @@ err_t RasterContext::_initPrecision(uint32_t precision)
 
       case IMAGE_PRECISION_WORD:
         fullOpacityValueU = 0x10000;
-        fullOpacityValueF = (float)(0x10000 << 8);
+        fullOpacityValueF = (float)(0x10000 << 4);
         // TODO: 16-bit rasterizer.
         // rasterizer16.init();
         // scanline16.init();
@@ -160,7 +160,7 @@ err_t RasterContext::_initPrecision(uint32_t precision)
 
 void RasterContext::_reset()
 {
-  // TODO
+  // TODO: Not used.
 }
 
 // ============================================================================

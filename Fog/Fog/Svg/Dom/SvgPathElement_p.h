@@ -8,6 +8,7 @@
 #define _FOG_SVG_DOM_SVGPATHELEMENT_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Svg/Dom/SvgPathAttribute_p.h>
 #include <Fog/Svg/Dom/SvgStyledElement_p.h>
 
@@ -51,7 +52,7 @@ struct FOG_NO_EXPORT SvgPathElement : public SvgStyledElement
   SvgPathAttribute a_d;
 
 private:
-  FOG_DISABLE_COPY(SvgPathElement)
+  _FOG_CLASS_NO_COPY(SvgPathElement)
 };
 
 //! @}

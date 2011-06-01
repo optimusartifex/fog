@@ -9,6 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Tools/String.h>
 
 namespace Fog {
@@ -38,7 +39,7 @@ struct FOG_API StringFilter
   virtual Range match(const Char* str, sysuint_t slen, uint cs, const Range& range) const = 0;
 
 private:
-  FOG_DISABLE_COPY(StringFilter)
+  _FOG_CLASS_NO_COPY(StringFilter)
 };
 
 //! @}

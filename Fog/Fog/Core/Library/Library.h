@@ -9,8 +9,10 @@
 
 // [Dependencies]
 #include <Fog/Core/Config/Config.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Global/TypeInfo.h>
 #include <Fog/Core/Tools/String.h>
 
@@ -47,7 +49,7 @@ struct FOG_API Library
   Library(const String& fileName, uint32_t openFlags = LIBRARY_OPEN_DEFAULT);
   ~Library();
 
-  // [Implicit Sharing]
+  // [Sharing]
 
   //! @copydoc Doxygen::Implicit::getRefCount().
   FOG_INLINE sysuint_t getRefCount() const { return _d->refCount.get(); }
@@ -117,7 +119,7 @@ struct FOG_API Library
 
   // [Members]
 
-  FOG_DECLARE_D(LibraryData)
+  _FOG_CLASS_D(LibraryData)
 };
 
 // ============================================================================
@@ -182,7 +184,13 @@ static _Library_##Interface _Library_##Instance;
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::Library, Fog::TYPEINFO_MOVABLE)
+_FOG_TYPEINFO_DECLARE(Fog::Library, Fog::TYPEINFO_MOVABLE)
+
+// ============================================================================
+// [Fog::Swap]
+// ============================================================================
+
+_FOG_SWAP_D(Fog::Library)
 
 // [Guard]
 #endif // _FOG_CORE_LIBRARY_LIBRARY_H

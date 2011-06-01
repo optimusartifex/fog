@@ -9,6 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/G2d/Global/Constants.h>
 
@@ -153,7 +154,7 @@ protected:
   List<String> _imageExtensions;
 
 private:
-  FOG_DISABLE_COPY(ImageCodecProvider)
+  _FOG_CLASS_NO_COPY(ImageCodecProvider)
 };
 
 //! @}

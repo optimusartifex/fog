@@ -120,8 +120,8 @@ enum RASTER_INTEGRAL_TRANSFORM
 
 //! @internal
 //!
-//! @brief Painter state flags used by @c RasterPainterEngine::save() and
-//! @c RasterPainterEngine::restore().
+//! @brief Painter state flags used by @c RasterPaintEngine::save() and
+//! @c RasterPaintEngine::restore().
 enum RASTER_STATE
 {
   //! @brief Source.

@@ -9,8 +9,8 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
+#include <Fog/G2d/Painting/PaintUtil.h>
 #include <Fog/G2d/Painting/Painter.h>
-#include <Fog/G2d/Painting/PainterUtil.h>
 #include <Fog/G2d/Text/TextRect.h>
 #include <Fog/Gui/Widget/CheckBox.h>
 

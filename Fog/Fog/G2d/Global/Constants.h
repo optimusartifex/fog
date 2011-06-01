@@ -36,42 +36,6 @@ enum ALPHA_DISTRIBUTION
 };
 
 // ============================================================================
-// [Fog::ANTIALIASING_QUALITY]
-// ============================================================================
-
-//! @brief Anti-aliasing quality.
-enum ANTIALIASING_QUALITY
-{
-  //! @brief No anti-aliasing.
-  ANTIALIASING_QUALITY_NONE = 0,
-
-  //! @brief Low quality anti-aliasing.
-  ANTIALIASING_QUALITY_LOW = 1,
-  //! @brief Middle quality anti-aliasing.
-  ANTIALIASING_QUALITY_NORMAL = 2,
-  //! @brief High quality anti-aliasing.
-  ANTIALIASING_QUALITY_HIGH = 3,
-
-  //! @brief Vertically oriented LCD anti-aliasing (RGB order).
-  ANTIALIASING_QUALITY_LCD_VRGB = 4,
-
-  //! @brief Vertically oriented LCD anti-aliasing (BGR order).
-  ANTIALIASING_QUALITY_LCD_VBGR = 5,
-
-  //! @brief Horizontally oriented LCD anti-aliasing (RGB order).
-  ANTIALIASING_QUALITY_LCD_HRGB = 6,
-
-  //! @brief Horizontally oriented LCD anti-aliasing (BGR order).
-  ANTIALIASING_QUALITY_LCD_HBGR = 7,
-
-  //! @brief Count of anti-aliasing quality settings (for error checking).
-  ANTIALIASING_QUALITY_COUNT = 8,
-
-  //! @brief Default anti-aliasing quality (synonym to @c ANTIALIASING_QUALITY_NORMAL)
-  ANTIALIASING_QUALITY_DEFAULT = ANTIALIASING_QUALITY_NORMAL
-};
-
-// ============================================================================
 // [Fog::ARGB32_POS]
 // ============================================================================
 
@@ -634,7 +598,7 @@ enum COMPOSITE_OP
 // [Fog::CLIP_OP]
 // ============================================================================
 
-//! @brief Clip operation used by @c Painter::clip() and PainterEngine::clip()
+//! @brief Clip operation used by @c Painter::clip() and PaintEngine::clip()
 //! methods.
 enum CLIP_OP
 {
@@ -810,44 +774,44 @@ enum COLOR_CHANNEL
 };
 
 // ============================================================================
-// [Fog::COORD_UNIT]
+// [Fog::UNIT]
 // ============================================================================
 
 //! @brief Coordinate units that can be used by the @c Dpi and @c Font classes.
 //!
 //! Coordinate units can be used to create display independent graphics, keeping
-//! the coordinates in device independent units and translating them into 
+//! the coordinates in device independent units and translating them into
 //! device pixel by Fog-G2d engine.
-enum COORD_UNIT
+enum UNIT
 {
-  //! @brief No unit (compatible to @c COORD_UNIT_PX).
-  COORD_UNIT_NONE = 0,
+  //! @brief No unit (compatible to @c UNIT_PX).
+  UNIT_NONE = 0,
   //! @brief Pixel.
-  COORD_UNIT_PX,
+  UNIT_PX,
 
   //! @brief Point, 1 [pt] == 1/72 [in].
-  COORD_UNIT_PT,
+  UNIT_PT,
   //! @brief Pica, 1 [pc] == 12 [pt].
-  COORD_UNIT_PC,
+  UNIT_PC,
 
   //! @brief Inch, 1 [in] == 2.54 [cm].
-  COORD_UNIT_IN,
+  UNIT_IN,
 
   //! @brief Millimeter.
-  COORD_UNIT_MM,
+  UNIT_MM,
   //! @brief Centimeter.
-  COORD_UNIT_CM,
+  UNIT_CM,
 
   //! @brief Used for coordinates which depends to object bounding box.
-  COORD_UNIT_PERCENT,
+  UNIT_PERCENTAGE,
 
   //! @brief The font-size of the relevant font (see @c Font).
-  COORD_UNIT_EM,
+  UNIT_EM,
   //! @brief The x-height of the relevant font (see @c Font).
-  COORD_UNIT_EX,
+  UNIT_EX,
 
   //! @brief Count of coord units.
-  COORD_UNIT_COUNT
+  UNIT_COUNT
 };
 
 // ============================================================================
@@ -860,61 +824,442 @@ enum DITHER_TYPE
   DITHER_TYPE_PATTERN = 1
 };
 
+
+
+
+
+
+
+
+
+
+// TODO: Text/Font - complete.
+
 // ============================================================================
-// [Fog::FONT_FACE_TYPE]
+// [Fog::FONT_ALIGN_MODE]
 // ============================================================================
 
-//! @brief Type of font face (which engine created the font face instance).
-enum FONT_FACE_TYPE
+enum FONT_ALIGN_MODE
 {
-  //! @brief None face (this is dummy face that does nothing, created in case
-  //! that something failed).
-  FONT_FACE_NONE = 0,
-  //! @brief Windows font face - HFONT.
-  FONT_FACE_WINDOWS = 1,
-  //! @brief FreeType font face - FtFace.
-  FONT_FACE_FREETYPE = 2,
-  //! @brief Mac font face.
-  FONT_FACE_MAC = 3
+  FONT_ALIGN_MODE_NONE = 0x00,
+  FONT_ALIGN_MODE_X = 0x01,
+  FONT_ALIGN_MODE_Y = 0x02,
+  FONT_ALIGN_MODE_XY = 0x03,
+  FONT_ALIGN_MODE_HEIGHT = 0x04,
+
+  FONT_ALIGN_MODE_DETECT = 0xFF
 };
 
 // ============================================================================
-// [Fog::FONT_FACE_FLAGS]
+// [Fog::FONT_DATA]
 // ============================================================================
 
-//! @brief Font face flags.
-enum FONT_FACE_FLAGS
+enum FONT_DATA
 {
-  //! @brief Font face is cached. This means that font glyphs and outlines
-  //! can be stored in cache for later reuse.
-  FONT_FACE_CACHED = 0x00000001,
-
-  //! @brief Font face contains glyphs (raster images) that should be use to
-  //! render the font on raster devices if not using transformations / scaling.
+  //! @brief The font properties were resolved - the height is in pixels and
+  //! all properties were successfully detected (hinting).
   //!
-  //! @note Each font face supports glyphs.
-  FONT_FACE_GLYPHS = 0x00000002,
+  //! Physical font can be used by the layout manager and the result matches
+  //! the device pixels and other requirements to layout the font-glyphs
+  //! correctly (for example using quantized hinting and kerning).
+  FONT_DATA_IS_PHYSICAL = 0x01,
 
-  //! @brief Font face contains outlines (vectors). Text can be converted to
-  //! path and then rendered.
-  FONT_FACE_OUTLINES = 0x00000004,
+  //! @brief The size of font-face is aligned.
+  FONT_DATA_IS_ALIGNED = 0x02,
 
-  //! @brief Font contains kerning.
-  FONT_FACE_KERNING = 0x00000008,
+  //! @brief The font properties contains custom letter-spacing.
+  FONT_DATA_HAS_LETTER_SPACING = 0x04,
 
-  //! @brief Whether the font matrics were quantized.
-  FONT_FACE_QUANTIZED_METRICS = 0x00000010
+  //! @brief The font properties contains custom word-spacing.
+  FONT_DATA_HAS_WORD_SPACING = 0x08,
+
+  //! @brief The font properties contains user transform.
+  FONT_DATA_HAS_TRANSFORM = 0x10
 };
 
 // ============================================================================
-// [Fog::FONT_STYLE_TYPE]
+// [Fog::FONT_DECORATION]
 // ============================================================================
 
-enum FONT_STYLE_TYPE
+enum FONT_DECORATION
 {
+  FONT_DECORATION_NONE = 0x00,
+  FONT_DECORATION_UNDERLINE = 0x01,
+  FONT_DECORATION_STRIKE_THROUGH = 0x02
+};
+
+// ============================================================================
+// [Fog::FONT_FEATURE]
+// ============================================================================
+
+enum FONT_FEATURE
+{
+  //! @brief Font contains raster-based glyphs.
+  //!
+  //! @note May be combined with @c FONT_FEATURE_OUTLINE.
+  FONT_FEATURE_RASTER = 0x00000001,
+
+  //! @brief Font contains outlined glyphs.
+  //!
+  //! @note May be combined with @c FONT_FEATURE_RASTER.
+  FONT_FEATURE_OUTLINE = 0x00000002,
+
+  //! @brief Font supports kerning.
+  FONT_FEATURE_KERNING = 0x00000004,
+
+  //! @brief Font supports hinting.
+  FONT_FEATURE_HINTING = 0x00000008,
+
+  //! @brief Font supports LCD quality of rendering.
+  FONT_FEATURE_LCD_QUALITY = 0x00000010
+};
+
+// ============================================================================
+// [Fog::FONT_FACE]
+// ============================================================================
+
+//! @brief Type of font-face.
+enum FONT_FACE
+{
+  //! @brief Null font-face (dummy face that is used if something failed or on-demand).
+  FONT_FACE_NULL = 0,
+  //! @brief Windows font-face (HFONT instance).
+  FONT_FACE_WINDOWS = 1,
+  //! @brief Mac font-face.
+  FONT_FACE_MAC = 2,
+  //! @brief Freetype font-face (FT_Face).
+  FONT_FACE_FREETYPE = 3,
+
+  //! @brief Count of font-faces.
+  FONT_FACE_COUNT = 4
+};
+
+// ============================================================================
+// [Fog::FONT_FAMILY]
+// ============================================================================
+
+//! @brief Standard font family IDs (defined by CSS).
+enum FONT_FAMILY
+{
+  //! @brief "serif" font.
+  //!
+  //! Glyphs of serif fonts, as the term is used in CSS, tend to have finishing
+  //! strokes, flared or tapering ends, or have actual serifed endings (including
+  //! slab serifs). Serif fonts are typically proportionately-spaced. They often
+  //! display a greater variation between thick and thin strokes than fonts from
+  //! the "sans-serif" generic font family. CSS uses the term "serif" to apply to
+  //! a font for any script, although other names may be more familiar for
+  //! particular scripts, such as Mincho (Japanese), Sung or Song (Chinese),
+  //! Totum or Kodig (Korean). Any font that is so described may be used to
+  //! represent the generic "serif" family.
+  //!
+  //! Latin fonts
+  //!   - Times New Roman,
+  //!   - Bodoni, Garamond,
+  //!   - Minion Web,
+  //!   - ITC Stone Serif,
+  //!   - MS Georgia,
+  //!   - Bitstream Cyberbit.
+  //!
+  //! Greek fonts
+  //!   - Bitstream Cyberbit.
+  //!
+  //! Cyrillic fonts
+  //!   - Adobe Minion Cyrillic,
+  //!   - Excelsior Cyrillic Upright,
+  //!   - Monotype Albion 70,
+  //!   - Bitstream Cyberbit,
+  //!   - ER Bukinist.
+  //!
+  //! Hebrew fonts
+  //!   - New Peninim,
+  //!   - Raanana,
+  //!   - Bitstream Cyberbit.
+  //!
+  //! Japanese fonts
+  //!   - Ryumin Light-KL,
+  //!   - Kyokasho ICA,
+  //!   - Futo Min A101.
+  //!
+  //! Arabic fonts
+  //!   - Bitstream Cyberbit.
+  FONT_FAMILY_SERIF = 0,
+
+  //! @brief "sans-serif" font.
+  //!
+  //! Glyphs in sans-serif fonts, as the term is used in CSS, tend to have
+  //! stroke endings that are plain - with little or no flaring, cross stroke,
+  //! or other ornamentation. Sans-serif fonts are typically proportionately-
+  //! spaced. They often have little variation between thick and thin strokes,
+  //! compared to fonts from the "serif" family. CSS uses the term 'sans-serif'
+  //! to apply to a font for any script, although other names may be more
+  //! familiar for particular scripts, such as Gothic (Japanese), Kai (Chinese),
+  //! or Pathang (Korean). Any font that is so described may be used to
+  //! represent the generic ?sans-serif" family.
+  //!
+  //! Latin fonts:
+  //!   - MS Trebuchet,
+  //!   - ITC Avant Garde Gothic,
+  //!   - MS Arial,
+  //!   - MS Verdana,
+  //!   - Univers,
+  //!   - Futura,
+  //!   - ITC Stone Sans,
+  //!   - Gill Sans,
+  //!   - Akzidenz Grotesk,
+  //!   - Helvetica.
+  //!
+  //! Greek fonts
+  //!   - Attika,
+  //!   - Typiko New Era,
+  //!   - MS Tahoma,
+  //!   - Monotype Gill Sans 571,
+  //!   - Helvetica Greek.
+  //!
+  //! Cyrillic fonts
+  //!   - Helvetica Cyrillic,
+  //!   - ER Univers,
+  //!   - Lucida Sans Unicode,
+  //!   - Bastion.
+  //!
+  //! Hebrew fonts
+  //!   - Arial Hebrew,
+  //!   - MS Tahoma.
+  //!
+  //! Japanese fonts
+  //!   - Shin Go,
+  //!   - Heisei Kaku Gothic W5.
+  //!
+  //! Arabic fonts
+  //!   - MS Tahoma.
+  FONT_FAMILY_SANS_SERIF = 1,
+
+  //! @brief "cursive" font.
+  //!
+  //! Glyphs in cursive fonts, as the term is used in CSS, generally have either
+  //! joining strokes or other cursive characteristics beyond those of italic
+  //! typefaces. The glyphs are partially or completely connected, and the
+  //! result looks more like handwritten pen or brush writing than printed
+  //! letterwork. Fonts for some scripts, such as Arabic, are almost always
+  //! cursive. CSS uses the term 'cursive' to apply to a font for any script,
+  //! although other names such as Chancery, Brush, Swing and Script are also
+  //! used in font names.
+  //!
+  //! Latin fonts:
+  //!   - Caflisch Script,
+  //!   - Adobe Poetica,
+  //!   - Sanvito,
+  //!   - Ex Ponto,
+  //!   - Snell Roundhand,
+  //!   - Zapf-Chancery.
+  //!
+  //! Cyrillic fonts:
+  //!   - ER Architekt.
+  //!
+  //! Hebrew fonts:
+  //!   - Corsiva.
+  //!
+  //! Arabic fonts:
+  //!   - DecoType Naskh,
+  //!   - Monotype Urdu 507.
+  FONT_FAMILY_CUSRIVE = 2,
+
+  //! @brief "fantasy" font.
+  //!
+  //! Fantasy fonts, as used in CSS, are primarily decorative while still
+  //! containing representations of characters (as opposed to Pi or Picture
+  //! fonts, which do not represent characters).
+  //!
+  //! Latin fonts:
+  //! - Alpha Geometrique,
+  //! - Critter,
+  //! - Cottonwood,
+  //! - FB Reactor,
+  //! - Studz.
+  FONT_FAMILY_FANTASY = 3,
+
+  //! @brief "monospace" font.
+  //!
+  //! The sole criterion of a monospace font is that all glyphs have the same
+  //! fixed width. (This can make some scripts, such as Arabic, look most
+  //! peculiar.) The effect is similar to a manual typewriter, and is often
+  //! used to set samples of computer code.
+  //!
+  //! Latin fonts:
+  //!   - Courier,
+  //!   - Courier New,
+  //!   - Lucida Console,
+  //!   - Monaco.
+  //!
+  //! Greek fonts:
+  //!   - MS Courier New,
+  //!   - Everson Mono.
+  //!
+  //! Cyrillic fonts:
+  //!   - ER Kurier, Everson Mono.
+  //!
+  //! Japanese fonts:
+  //!   - Osaka Monospaced.
+  FONT_FAMILY_MONOSPACE = 4,
+
+  //! @brief Count of font-family IDs.
+  FONT_FAMILY_COUNT = 5,
+
+  //! @brief Unknown font (not categorized family).
+  FONT_FAMILY_UNKNOWN = 0xFF
+};
+
+// ============================================================================
+// [Fog::FONT_HINTING]
+// ============================================================================
+
+//! @brief Font-hinting mode.
+enum FONT_HINTING
+{
+  //! @brief Font-hinting is disabled.
+  FONT_HINTING_DISABLED = 0,
+  //! @brief Font-hinting is enabled.
+  FONT_HINTING_ENABLED = 1,
+
+  //! @brief Detect font-hinting.
+  FONT_HINTING_DETECT = 0xFF
+};
+
+// ============================================================================
+// [Fog::FONT_KERNING]
+// ============================================================================
+
+//! @brief Font-kerning mode.
+enum FONT_KERNING
+{
+  //! @brief Disable the use of kerning.
+  FONT_KERNING_DISABLED = 0,
+  //! @brief Enable the use of kerning (default).
+  FONT_KERNING_ENABLED = 1,
+
+  //! @brief Detect font-kerning.
+  FONT_KERNING_DETECT = 0xFF
+};
+
+// ============================================================================
+// [Fog::FONT_ORDER]
+// ============================================================================
+
+//! @brief Font-provider order.
+enum FONT_ORDER
+{
+  //! @brief Prepend the provider (add it as the first, taking the highest
+  //! relevance).
+  FONT_ORDER_FIRST = 0,
+
+  //! @brief Append the provider (add it as the last item, taking the lowest
+  //! relevance).
+  FONT_ORDER_LAST = 1
+};
+
+// ============================================================================
+// [Fog::FONT_PROVIDER]
+// ============================================================================
+
+//! @brief Font-provider IDs.
+enum FONT_PROVIDER
+{
+  //! @brief Null font-provider (only for compatibility with @c FONT_FACE, never created).
+  FONT_PROVIDER_NULL = 0,
+  //! @brief Windows font-provider.
+  FONT_PROVIDER_WINDOWS = 1,
+  //! @brief Mac font-provider.
+  FONT_PROVIDER_MAC = 2,
+  //! @brief Freetype font-provider which use fontconfig.
+  FONT_PROVIDER_FT_FONTCONFIG = 3,
+  //! @brief Freetype font-provider which use own, minimalist provider.
+  FONT_PROVIDER_FT_MINIMALIST = 4,
+  //! @brief Freetype font-provider (including fontconfig support if available).
+  //! @brief Custom font-provider (SVG/CSS/Others...).
+  FONT_PROVIDER_CUSTOM = 5,
+
+  //! @brief Count of font-providers.
+  FONT_PROVIDER_COUNT = 6
+};
+
+// ============================================================================
+// [Fog::FONT_QUALITY]
+// ============================================================================
+
+//! @brief Font quality.
+enum FONT_QUALITY
+{
+  //! @brief No antialiasing.
+  FONT_QUALITY_ALIASED = 0,
+  //! @brief Grey antialiasing.
+  FONT_QUALITY_GREY = 1,
+  //! @brief LCD subpixel antialiasing (only enabled for the LCD output device).
+  FONT_QUALITY_LCD = 2,
+
+  //! @brief Use default font quality.
+  FONT_QUALITY_DETECT = 0xFF,
+  //! @brief Count of font-quality options.
+  FONT_QUALITY_COUNT = 3
+};
+
+// ============================================================================
+// [Fog::FONT_SPACING_MODE]
+// ============================================================================
+
+//! @brief Font spacing mode.
+enum FONT_SPACING_MODE
+{
+  //! @brief Spacing is percentage (in Fog 0.0 to 1.0, inclusive) of the glyph
+  //! spacing.
+  FONT_SPACING_MODE_PERCENTAGE = 0,
+
+  //! @brief Spacing is absolute, in font units.
+  FONT_SPACING_MODE_ABSOLUTE = 1,
+
+  //! @brief Count of font spacing modes.
+  FONT_SPACING_MODE_COUNT = 2
+};
+
+// ============================================================================
+// [Fog::FONT_STYLE]
+// ============================================================================
+
+//! @brief Font style.
+enum FONT_STYLE
+{
+  //! @brief Normal style.
   FONT_STYLE_NORMAL = 0,
-  FONT_STYLE_ITALIC = 1,
-  FONT_STYLE_OBLIQUE = 2
+
+  //! @brief Oblique (slanted, sloped) style.
+  //!
+  //! Form of type that slants slightly to the right, using shearing transform
+  //! of original glyph-set.
+  FONT_STYLE_OBLIQUE = 1,
+
+  //! @brief Italic style.
+  //!
+  //! Form of type that slants slightly to the right, using different glyph-set.
+  //! If glyph-set for italic is not available, the @c FONT_STYLE_OBLIQUE is
+  //! used instead.
+  FONT_STYLE_ITALIC = 2,
+
+  //! @brief Count of font styles.
+  FONT_STYLE_COUNT = 3
+};
+
+// ============================================================================
+// [Fog::FONT_VARIANT]
+// ============================================================================
+
+//! @brief Font variant.
+enum FONT_VARIANT
+{
+  //! @brief Normal font-variant.
+  FONT_VARIANT_NORMAL = 0,
+  //! @brief Small letters are capitalized, but their size is lowered.
+  FONT_VARIANT_SMALL_CAPS = 1,
+
+  FONT_VARIANT_COUNT = 2
 };
 
 // ============================================================================
@@ -944,39 +1289,24 @@ enum FONT_WEIGHT
   FONT_WEIGHT_BLACK      = FONT_WEIGHT_900
 };
 
-// ============================================================================
-// [Fog::FONT_DECORATION_FLAGS]
-// ============================================================================
 
-enum FONT_DECORATION_FLAGS
-{
-  FONT_DECORATION_NONE = 0x00,
-  FONT_DECORATION_UNDERLINE = 0x01,
-  FONT_DECORATION_STRIKE_THROUGH = 0x02
-};
 
-// ============================================================================
-// [Fog::FONT_KERNING_TYPE]
-// ============================================================================
 
-enum FONT_KERNING_TYPE
-{
-  FONT_KERNING_NONE = 0x00,
-  FONT_KERNING_ENABLED = 0x01,
-  FONT_KERNING_DEFAULT = 0xFF
-};
 
-// ============================================================================
-// [Fog::FONT_HINTING_TYPE]
-// ============================================================================
 
-enum FONT_HINTING_TYPE
-{
-  FONT_HINTING_NONE = 0x00,
-  FONT_HINTING_ENABLED = 0x01,
-  FONT_HINTING_METRICS = 0x02,
-  FONT_HINTING_DEFAULT = 0xFF
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // ============================================================================
 // [Fog::FILL_RULE]
@@ -1042,6 +1372,26 @@ enum GRADIENT_QUALITY
   GRADIENT_QUALITY_DEFAULT = GRADIENT_QUALITY_NORMAL,
   //! @brief Count of interpolation quality options.
   GRADIENT_QUALITY_COUNT = 2
+};
+
+// ============================================================================
+// [Fog::GRADIENT_SPREAD]
+// ============================================================================
+
+//! @brief Spread type.
+enum GRADIENT_SPREAD
+{
+  //! @brief Pad spread (area outside the shape continues using border color).
+  GRADIENT_SPREAD_PAD = 0,
+  //! @brief Releat spread (pattern is repeated).
+  GRADIENT_SPREAD_REPEAT = 1,
+  //! @brief Reflect spread (pattern is reflected and then repeated).
+  GRADIENT_SPREAD_REFLECT = 2,
+
+  //! @brief Default spread.
+  GRADIENT_SPREAD_DEFAULT = GRADIENT_SPREAD_PAD,
+  //! @brief Count of spread types.
+  GRADIENT_SPREAD_COUNT = 3
 };
 
 // ============================================================================
@@ -1610,8 +1960,30 @@ enum IMAGE_QUALITY
   IMAGE_QUALITY_BICUBIC = 3,
   IMAGE_QUALITY_BICUBIC_HQ = 4,
 
-  IMAGE_QUALITY_COUNT = 5,
-  IMAGE_QUALITY_DEFAULT = IMAGE_QUALITY_BILINEAR
+  IMAGE_QUALITY_DEFAULT = IMAGE_QUALITY_BILINEAR,
+  IMAGE_QUALITY_COUNT = 5
+};
+
+// ============================================================================
+// [Fog::LCD_ORDER]
+// ============================================================================
+
+//! @brief Order of RGB components of LCD display.
+enum LCD_ORDER
+{
+  //! @brief Order is unknown or the device is not the LCD display.
+  LCD_ORDER_NONE = 0,
+  //! @brief Horizontal R-G-B order.
+  LCD_ORDER_HRGB = 1,
+  //! @brief Horizontal B-G-R order.
+  LCD_ORDER_HBGR = 2,
+  //! @brief Vertical R-G-B order.
+  LCD_ORDER_VRGB = 3,
+  //! @brief Vertical B-G-R order.
+  LCD_ORDER_VBGR = 4,
+
+  //! @brief Count of LCD order options.
+  LCD_ORDER_COUNT = 5
 };
 
 // ============================================================================
@@ -1722,9 +2094,9 @@ enum PAINTER_INIT
   //! Using this flag can lead to very optimized painting and it's generally
   //! faster than setting painter to @c COMPOSITE_SRC and clearing the content
   //! by using @c Painter::fillAll() or @c Painter::fillRect() methods. This
-  //! method is efficient, because painter will mark image region as transparent
-  //! and then use that information to perform copy operator to the
-  //! span that hasn't been initialized yet.
+  //! method is efficient, because the painter can mark an image region as
+  //! transparent and then use that hint to perform fast source-copy
+  //! compositing on that region, instead of doing regular composition.
   PAINTER_INIT_CLEAR = 0x00000001,
 
   //! @brief Initialize multithreading if it makes sense.
@@ -1742,25 +2114,32 @@ enum PAINTER_INIT
 //! @brief Painter point options.
 enum PAINTER_MAP
 {
-  PAINTER_MAP_WORLD_TO_SCREEN = 0,
-  PAINTER_MAP_SCREEN_TO_WORLD = 1,
+  //! @brief Map user coordinates to device coordinates.
+  PAINTER_MAP_USER_TO_DEVICE = 0,
+  //! @brief Map device coordinates to user coordinates.
+  PAINTER_MAP_DEVICE_TO_USER = 1,
 
-  //! @brief Count of map options.
+  //! @brief Count of map operations.
   PAINTER_MAP_COUNT = 2
 };
 
 // ============================================================================
-// [Fog::PAINTER_TYPE]
+// [Fog::PAINT_DEVICE
 // ============================================================================
 
-//! @brief The type of painter.
-enum PAINTER_TYPE
+//! @brief Type of the paint-device.
+enum PAINT_DEVICE
 {
-  //! @brief The null painter type (painter is not initialized or invalid).
-  PAINTER_TYPE_NULL = 0,
+  //! @brief Null paint-device (not initialized or invalid).
+  PAINT_DEVICE_NULL = 0,
+  //! @brief Same as @c PAINT_DEVICE_NULL.
+  PAINT_DEVICE_UNKNOWN = 0,
 
-  //! @brief The raster painter type.
-  PAINTER_TYPE_RASTER = 1
+  //! @brief Raster paint-device.
+  PAINT_DEVICE_RASTER = 1,
+
+  //! @brief Count of paint-device IDs.
+  PAINT_DEVICE_COUNT = 2
 };
 
 // ============================================================================
@@ -1778,7 +2157,7 @@ enum PAINTER_PARAMETER
   PAINTER_PARAMETER_SIZE_D = 2,
 
   PAINTER_PARAMETER_FORMAT_I = 3,
-  PAINTER_PARAMETER_ENGINE_I = 4,
+  PAINTER_PARAMETER_DEVICE_I = 4,
 
   // --------------------------------------------------------------------------
   // [Multithreading]
@@ -1803,8 +2182,8 @@ enum PAINTER_PARAMETER
   //! @brief Compositing operator.
   PAINTER_PARAMETER_COMPOSITING_OPERATOR_I = 10,
 
-  //! @brief Antialiasing quality, see @c ANTIALIASING_QUALITY.
-  PAINTER_PARAMETER_ANTIALIASING_QUALITY_I = 11,
+  //! @brief Render quality, see @c RENDER_QUALITY.
+  PAINTER_PARAMETER_RENDER_QUALITY_I = 11,
 
   //! @brief Image interpolation quality, see @c IMAGE_QUALITY.
   PAINTER_PARAMETER_IMAGE_QUALITY_I = 12,
@@ -1917,19 +2296,19 @@ enum PATH_DATA
 {
   PATH_DATA_STATIC = CONTAINER_DATA_STATIC,
 
-  PATH_DATA_DIRTY_BOUNDING_BOX = 0x0010,
+  PATH_DATA_DIRTY_BBOX = 0x0010,
   PATH_DATA_DIRTY_CMD = 0x0020,
 
-  PATH_DATA_HAS_BOUNDING_BOX = 0x0040,
-  PATH_DATA_HAS_QUAD_CMD = 0x0080,
-  PATH_DATA_HAS_CUBIC_CMD = 0x0100,
+  PATH_DATA_HAS_BBOX = 0x0040,
+  PATH_DATA_HAS_QBEZIER = 0x0080,
+  PATH_DATA_HAS_CBEZIER = 0x0100,
 
-  PATH_DATA_OWN_FLAGS = 
-    PATH_DATA_DIRTY_BOUNDING_BOX | 
-    PATH_DATA_DIRTY_CMD          |
-    PATH_DATA_HAS_BOUNDING_BOX   |
-    PATH_DATA_HAS_QUAD_CMD       |
-    PATH_DATA_HAS_CUBIC_CMD
+  PATH_DATA_OWN_FLAGS =
+    PATH_DATA_DIRTY_BBOX  |
+    PATH_DATA_DIRTY_CMD   |
+    PATH_DATA_HAS_BBOX    |
+    PATH_DATA_HAS_QBEZIER |
+    PATH_DATA_HAS_CBEZIER
 };
 
 // ============================================================================
@@ -1998,7 +2377,7 @@ enum REGION_OP
   REGION_OP_SUBTRACT = 4,
 
   //! @brief Count of region operators.
-  REGION_OP_COUNT
+  REGION_OP_COUNT = 5
 };
 
 // ============================================================================
@@ -2022,6 +2401,66 @@ enum REGION_TYPE
 };
 
 // ============================================================================
+// [Fog::RENDER_QUALITY]
+// ============================================================================
+
+//! @brief Render quality.
+enum RENDER_QUALITY
+{
+  //! @brief Aliased (disabled antialiasing).
+  RENDER_QUALITY_ALIASED = 0,
+
+  //! @brief Use at least 4 shades of grey for antialiasing.
+  //!
+  //! This is only recommendation for paint-engine. It can use higher render
+  //! quality if this option is not supported.
+  RENDER_QUALITY_GREY_4 = 1,
+
+  //! @brief Use at least 8 shades of grey for antialiasing.
+  //!
+  //! This is only recommendation for paint-engine. It can use higher or lower
+  //! render quality if this option is not supported.
+  RENDER_QUALITY_GREY_8 = 2,
+
+  //! @brief Use at least 16 shades of grey for antialiasing.
+  //!
+  //! This is only recommendation for paint-engine. It can use higher or lower
+  //! render quality if this option is not supported.
+  RENDER_QUALITY_GREY_16 = 3,
+
+  //! @brief Use at least 32 shades of grey for antialiasing.
+  //!
+  //! This is only recommendation for paint-engine. It can use higher or lower
+  //! render quality if this option is not supported.
+  RENDER_QUALITY_GREY_32 = 4,
+
+  //! @brief Use at least 64 shades of grey for antialiasing.
+  //!
+  //! This is only recommendation for paint-engine. It can use higher or lower
+  //! render quality if this option is not supported.
+  RENDER_QUALITY_GREY_64 = 5,
+
+  //! @brief Use at least 256 shades of grey for antialiasing when rendering
+  //! for 8-bit target and 65536 shades of grey when rendering for 16-bit
+  //! target.
+  //!
+  //! This is only recommendation for paint-engine. It can use higher or lower
+  //! render quality if this option is not supported.
+  RENDER_QUALITY_GREY_HQ = 6,
+
+  //! @brief LCD subpixel antialiasing.
+  //!
+  //! This type of antialiasing is usually only implemented for font rendering.
+  RENDER_QUALITY_LCD = 7,
+
+  //! @brief Count of render quality settings (for error checking).
+  RENDER_QUALITY_COUNT = 8,
+
+  //! @brief Default rendering quality (synonym to @c RENDER_QUALITY_GREY_16).
+  RENDER_QUALITY_DEFAULT = RENDER_QUALITY_GREY_16
+};
+
+// ============================================================================
 // [Fog::SHAPE_TYPE]
 // ============================================================================
 
@@ -2035,8 +2474,8 @@ enum SHAPE_TYPE
   // --------------------------------------------------------------------------
 
   SHAPE_TYPE_LINE = 1,
-  SHAPE_TYPE_QUAD = 2,
-  SHAPE_TYPE_CUBIC = 3,
+  SHAPE_TYPE_QBEZIER = 2,
+  SHAPE_TYPE_CBEZIER = 3,
   SHAPE_TYPE_ARC = 4,
 
   // --------------------------------------------------------------------------
@@ -2049,32 +2488,13 @@ enum SHAPE_TYPE
   SHAPE_TYPE_ELLIPSE = 8,
   SHAPE_TYPE_CHORD = 9,
   SHAPE_TYPE_PIE = 10,
+  SHAPE_TYPE_TRIANGLE = 11,
 
   // --------------------------------------------------------------------------
   // [Count]
   // --------------------------------------------------------------------------
 
-  SHAPE_TYPE_COUNT = 11
-};
-
-// ============================================================================
-// [Fog::SPREAD]
-// ============================================================================
-
-//! @brief Spread type.
-enum SPREAD
-{
-  //! @brief Pad spread (area outside the shape continues using border color).
-  GRADIENT_SPREAD_PAD = 0,
-  //! @brief Releat spread (pattern is repeated).
-  GRADIENT_SPREAD_REPEAT = 1,
-  //! @brief Reflect spread (pattern is reflected and then repeated).
-  GRADIENT_SPREAD_REFLECT = 2,
-
-  //! @brief Default spread.
-  GRADIENT_SPREAD_DEFAULT = GRADIENT_SPREAD_PAD,
-  //! @brief Count of spread types.
-  GRADIENT_SPREAD_COUNT = 3
+  SHAPE_TYPE_COUNT = 12
 };
 
 // ============================================================================
@@ -2333,6 +2753,8 @@ enum ERR_GRAPHICS_ENUM
   ERR_FONT_FREETYPE_NOT_LOADED,
   ERR_FONT_FREETYPE_INIT_FAILED,
 
+  ERR_FONT_INTERNAL,
+
   // --------------------------------------------------------------------------
   // [Geometry]
   // --------------------------------------------------------------------------
@@ -2353,7 +2775,7 @@ enum ERR_GRAPHICS_ENUM
   //! is incorrectly given (for example if @c RectF or @c RectD with or height
   //! is negative).
   ERR_GEOMETRY_INVALID,
-  
+
   //! @brief The transform to be used is degenerated.
   //!
   //! The degenerated transform can't be used in geometry, because the result
@@ -2364,6 +2786,9 @@ enum ERR_GRAPHICS_ENUM
   //!
   //! @note This error is always related to trasnform.
   ERR_GEOMETRY_DEGENERATE,
+
+  //! @brief Can't stroke the path or shape.
+  ERR_GEOMETRY_CANT_STROKE,
 
   // --------------------------------------------------------------------------
   // [Painter]
@@ -2407,10 +2832,6 @@ enum ERR_GRAPHICS_ENUM
   //! @brief The relative command can't be added, because the previous command
   //! is not a vertex.
   ERR_PATH_NO_RELATIVE,
-
-  //! @brief Can't stroke path that contains only one vertex (probably
-  //! @c PATH_CMD_MOVE_TO).
-  ERR_PATH_CANT_STROKE,
 
   // --------------------------------------------------------------------------
   // [Region]

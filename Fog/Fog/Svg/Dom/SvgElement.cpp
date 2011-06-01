@@ -11,7 +11,6 @@
 // [Dependencies]
 #include <Fog/Svg/Dom/SvgDocument.h>
 #include <Fog/Svg/Dom/SvgElement.h>
-#include <Fog/Svg/Visit/SvgRender.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
 
 namespace Fog {

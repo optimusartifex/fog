@@ -329,15 +329,15 @@ FOG_TYPEVARIANT_DECLARE_F_D(Round)
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::RoundF, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::RoundD, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::RoundF, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::RoundD, Fog::TYPEINFO_PRIMITIVE)
 
 // ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_DECLARE_FUZZY(Fog::RoundF, Math::feqv((const float *)&a, (const float *)&b, 6))
-FOG_DECLARE_FUZZY(Fog::RoundD, Math::feqv((const double*)&a, (const double*)&b, 6))
+FOG_FUZZY_DECLARE(Fog::RoundF, Math::feqv((const float *)&a, (const float *)&b, 6))
+FOG_FUZZY_DECLARE(Fog::RoundD, Math::feqv((const double*)&a, (const double*)&b, 6))
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_ROUND_H

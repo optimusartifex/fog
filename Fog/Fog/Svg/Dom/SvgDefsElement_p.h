@@ -8,6 +8,7 @@
 #define _FOG_SVG_DOM_SVGDEFSELEMENT_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Svg/Dom/SvgElement.h>
 
 namespace Fog {
@@ -37,7 +38,7 @@ struct FOG_NO_EXPORT SvgDefsElement : public SvgElement
   virtual err_t onProcess(SvgVisitor* visitor) const;
 
 private:
-  FOG_DISABLE_COPY(SvgDefsElement)
+  _FOG_CLASS_NO_COPY(SvgDefsElement)
 };
 
 //! @}

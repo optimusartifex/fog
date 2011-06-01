@@ -39,7 +39,7 @@ struct FOG_NO_EXPORT PathTmpF : public PathF
   FOG_INLINE PathTmpF(const PathTmpF<N>& other) : PathF(_dadopt(_storage)) { setDeep(other); }
   FOG_INLINE PathTmpF(const PathF& other) : PathF(_dadopt(_storage)) { setDeep(other); }
 
-  FOG_INLINE ~PathTmpF() 
+  FOG_INLINE ~PathTmpF()
   {
     FOG_ASSERT( (_d == &_storage.d && _storage.d.refCount.get() == 1) ||
                 (_d != &_storage.d && _storage.d.refCount.get() == 0) );

@@ -72,7 +72,7 @@ uint32_t FileSystem::testFile(const String& fileName, uint32_t flags)
 {
   if (flags == 0) return 0;
 
-  TemporaryString<TEMPORARY_LENGTH> fileNameW;
+  StringTmp<TEMPORARY_LENGTH> fileNameW;
   err_t err;
   if ((err = fileNameW.set(fileName)) || (err = fileNameW.slashesToWin())) return 0;
 
@@ -116,7 +116,7 @@ uint32_t FileSystem::testFile(const String& fileName, uint32_t flags)
     // IsExecutable and CanExecute
     if ((flags & (FileSystem::IS_EXECUTABLE | FileSystem::CAN_EXECUTE)) != 0)
     {
-      TemporaryString<16> ext;
+      StringTmp<16> ext;
       extractExtension(ext, fileName);
 
       const Char* extStr = ext.getData();
@@ -146,7 +146,7 @@ bool FileSystem::findFile(const List<String>& paths, const String& fileName, Str
   List<String>::ConstIterator it(_paths);
 
   WIN32_FILE_ATTRIBUTE_DATA fi;
-  TemporaryString<TEMPORARY_LENGTH> path;
+  StringTmp<TEMPORARY_LENGTH> path;
 
   for (it.toStart(); it.isValid(); it.toNext())
   {
@@ -184,7 +184,7 @@ static uint createDirectoryHelper(const Char* path, sysuint_t len)
     return ERR_IO_DIR_ALREADY_EXISTS;
   }
 
-  TemporaryString<TEMPORARY_LENGTH> pathW;
+  StringTmp<TEMPORARY_LENGTH> pathW;
   if ((err = pathW.set(path, len)) || (err = pathW.slashesToWin())) return err;
 
   if (!CreateDirectoryW(reinterpret_cast<const wchar_t*>(pathW.getData()), NULL))
@@ -206,7 +206,7 @@ err_t FileSystem::createDirectory(const String& dir, bool recursive)
   if (dir.isEmpty()) return ERR_RT_INVALID_ARGUMENT;
 
   err_t err;
-  TemporaryString<TEMPORARY_LENGTH> dirAbs;
+  StringTmp<TEMPORARY_LENGTH> dirAbs;
 
   if ( (err = toAbsolutePath(dirAbs, String(), dir)) ) return err;
   if (!recursive) return createDirectoryHelper(dirAbs.getData(), dirAbs.getLength());
@@ -234,7 +234,7 @@ err_t FileSystem::createDirectory(const String& dir, bool recursive)
 err_t FileSystem::deleteDirectory(const String& path)
 {
   err_t err;
-  TemporaryString<TEMPORARY_LENGTH> pathW;
+  StringTmp<TEMPORARY_LENGTH> pathW;
 
   if ((err = pathW.set(path)) ||
       (err = pathW.slashesToWin()))
@@ -252,7 +252,7 @@ err_t FileSystem::deleteDirectory(const String& path)
 #if defined(FOG_OS_POSIX)
 int FileSystem::stat(const String& fileName, struct stat* s)
 {
-  TemporaryByteArray<TEMPORARY_LENGTH> t;
+  ByteArrayTmp<TEMPORARY_LENGTH> t;
   TextCodec::local8().appendFromUnicode(t, fileName);
   return ::stat(t.getData(), s);
 }
@@ -324,8 +324,8 @@ bool FileSystem::findFile(const List<String>& paths, const String& fileName, Str
 
   struct stat s;
 
-  TemporaryByteArray<TEMPORARY_LENGTH> path8;
-  TemporaryByteArray<TEMPORARY_LENGTH> fileName8;
+  ByteArrayTmp<TEMPORARY_LENGTH> path8;
+  ByteArrayTmp<TEMPORARY_LENGTH> fileName8;
 
   // Encode fileName here to avoid encoding in loop.
   TextCodec::local8().appendFromUnicode(fileName8, fileName);
@@ -354,7 +354,7 @@ static err_t createDirectoryHelper(const Char* path, sysuint_t len)
 {
   if (len == 1 && path[0] == '/') return ERR_IO_DIR_ALREADY_EXISTS;
 
-  TemporaryByteArray<TEMPORARY_LENGTH> path8;
+  ByteArrayTmp<TEMPORARY_LENGTH> path8;
   err_t err;
 
   if ((err = TextCodec::local8().appendFromUnicode(path8, path, len))) return err;
@@ -372,7 +372,7 @@ err_t FileSystem::createDirectory(const String& dir, bool recursive)
   if (!recursive) return createDirectoryHelper(dir.getData(), dir.getLength());
 
   err_t err;
-  TemporaryString<TEMPORARY_LENGTH> dirAbs;
+  StringTmp<TEMPORARY_LENGTH> dirAbs;
   if ( (err = toAbsolutePath(dirAbs, String(), dir)) ) return err;
 
   // FileSystem::toAbsolutePath() always normalize dir to '/', we can imagine
@@ -400,7 +400,7 @@ err_t FileSystem::createDirectory(const String& dir, bool recursive)
 err_t FileSystem::deleteDirectory(const String& dir)
 {
   err_t err;
-  TemporaryByteArray<TEMPORARY_LENGTH> dir8;
+  ByteArrayTmp<TEMPORARY_LENGTH> dir8;
 
   if ((err = TextCodec::local8().appendFromUnicode(dir8, dir))) return err;
 
@@ -610,7 +610,7 @@ err_t FileSystem::toAbsolutePath(String& dst, const String& base, const String& 
     err_t err;
     if (base.isEmpty())
     {
-      TemporaryString<TEMPORARY_LENGTH> working;
+      StringTmp<TEMPORARY_LENGTH> working;
       if ( (err = Application::getWorkingDirectory(working)) ) return err;
       if ( (err = FileSystem::joinPath(dst, working, path)) ) return err;
     }
@@ -800,7 +800,7 @@ bool FileSystem::testLocalName(const String& path)
 #else
   if (TextCodec::local8().isUnicode()) return true;
 
-  TemporaryByteArray<TEMPORARY_LENGTH> path8;
+  ByteArrayTmp<TEMPORARY_LENGTH> path8;
   return TextCodec::local8().appendFromUnicode(path8, path) == ERR_OK;
 #endif
 }

@@ -11,6 +11,7 @@
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Global/TypeInfo.h>
 #include <Fog/Core/Memory/Memory.h>
+#include <Fog/Core/Tools/Unicode.h>
 
 namespace Fog {
 
@@ -35,91 +36,43 @@ extern FOG_API uint32_t unicodeCombine(uint32_t uc, uint32_t comb);
 //! @brief UTF-8 Length table.
 //!
 //! From UTF-8 to Unicode UCS-4:
+//!
 //! Let's take a UTF-8 byte sequence. The first byte in a new sequence will tell
 //! us how long the sequence is. Let's call the subsequent decimal bytes z y x w v u.
-//! - If z is between and including 0 - 127, then there is 1 byte z.
-//!   The decimal Unicode value ud = the value of z.
-//! - If z is between and including 192 - 223, then there are 2 bytes z y;
-//!   ud = (z-192)*64 + (y-128)
-//! - If z is between and including 224 - 239, then there are 3 bytes z y x;
-//!   ud = (z-224)*4096 + (y-128)*64 + (x-128)
-//! - If z is between and including 240 - 247, then there are 4 bytes z y x w;
-//!   ud = (z-240)*262144 + (y-128)*4096 + (x-128)*64 + (w-128)
-//! - If z is between and including 248 - 251, then there are 5 bytes z y x w v;
-//!   ud = (z-248)*16777216 + (y-128)*262144 + (x-128)*4096 + (w-128)*64 + (v-128)
-//! - If z is 252 or 253, then there are 6 bytes z y x w v u;
-//!   ud = (z-252)*1073741824 + (y-128)*16777216 + (x-128)*262144 + (w-128)*4096 + (v-128)*64 + (u-128)
-//! - If z = 254 or 255 then there is something wrong!
+//!
+//!   - If z is between and including 0 - 127, then there is 1 byte z.
+//!     The decimal Unicode value ud = the value of z.
+//!   - If z is between and including 192 - 223, then there are 2 bytes z y;
+//!     ud = (z-192)*64 + (y-128)
+//!   - If z is between and including 224 - 239, then there are 3 bytes z y x;
+//!     ud = (z-224)*4096 + (y-128)*64 + (x-128)
+//!   - If z is between and including 240 - 247, then there are 4 bytes z y x w;
+//!     ud = (z-240)*262144 + (y-128)*4096 + (x-128)*64 + (w-128)
+//!   - If z is between and including 248 - 251, then there are 5 bytes z y x w v;
+//!     ud = (z-248)*16777216 + (y-128)*262144 + (x-128)*4096 + (w-128)*64 + (v-128)
+//!   - If z is 252 or 253, then there are 6 bytes z y x w v u;
+//!     ud = (z-252)*1073741824 + (y-128)*16777216 + (x-128)*262144 + (w-128)*4096 + (v-128)*64 + (u-128)
+//!   - If z = 254 or 255 then there is something wrong!
 //!
 //! The table looks like this:
-//!   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-//!   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-//!   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-//!   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-//!   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-//!   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-//!   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-//!   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-//!   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-//!   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-//!   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-//!   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-//!   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-//!   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-//!   3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-//!   4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0
-//! - Zeros are invalid UTF-8 characters
+//!   - 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+//!     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+//!     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+//!     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+//!     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+//!     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+//!     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+//!     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+//!     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+//!     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+//!     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+//!     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+//!     2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+//!     2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+//!     3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+//!     4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0
+//!   - Zeros are invalid UTF-8 characters
 extern FOG_API const uint8_t utf8LengthTable[256];
-
-// ============================================================================
-// [Unicode Constants]
-// ============================================================================
-
-enum UNICODE_CHARS
-{
-  // UTF-16
-
-  UTF16_BOM = 0xFEFF,
-  UTF16_BOM_Swapped = 0xFFFE,
-
-  // Leading (high) surrogates are from 0xD800 - 0xDBFF.
-
-  //! @brief Leading (high) surrogate minimum (0xD800)
-  UTF16_LEAD_SURROGATE_MIN = 0xD800U,
-  //! @brief Leading (high) surrogate maximum (0xDBFF)
-  UTF16_LEAD_SURROGATE_MAX = 0xDBFFU,
-
-  UTF16_LEAD_SURROGATE_BASE = 0xD800U,
-  UTF16_LEAD_SURROGATE_MASK = 0xFC00U,
-
-  // Trailing (low) surrogates are from 0xDC00 - 0xDFFF.
-
-  //! @brief Trailing (low) surrogate minimum (0xDC00)
-  UTF16_TRAIL_SURROGATE_MIN = 0xDC00U,
-  //! @brief Trailing (low) surrogate maximum (0xDFFF)
-  UTF16_TRAIL_SURROGATE_MAX = 0xDFFFU,
-
-  UTF16_TRAIL_SURROGATE_MASK = 0xFC00U,
-  UTF16_TRAIL_SURROGATE_BASE = 0xDC00U,
-
-  UTF16_SURROGATE_PAIR_BASE = 0xD800U,
-  UTF16_SURROGATE_PAIR_MASK = 0xF800U,
-
-  // Offsets.
-
-  UTF16_LEAD_SURROGATE_OFFSET = UTF16_LEAD_SURROGATE_MIN - (0x10000U >> 10),
-  UTF16_SURROGATE_OFFSET  = 0x10000U - (UTF16_LEAD_SURROGATE_MIN << 10) - UTF16_TRAIL_SURROGATE_MIN,
-
-  // UTF-32.
-
-  UTF32_BOM = 0x0000FEFF,
-  UTF32_BOM_Swapped = 0x0000FEFF,
-
-  // Unicode.
-
-  //! @brief Maximum valid value for a Unicode code point
-  UNICODE_LAST = 0x0010FFFFU
-};
 
 // ============================================================================
 // [Fog::CharUtil]

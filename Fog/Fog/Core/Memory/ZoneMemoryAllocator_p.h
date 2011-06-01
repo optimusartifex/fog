@@ -9,6 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Memory/Memory.h>
 #include <Fog/Core/Threading/Atomic.h>
 
@@ -195,7 +196,7 @@ protected:
   sysuint_t _chunkSize;
 
 private:
-  FOG_DISABLE_COPY(ZoneMemoryAllocator)
+  _FOG_CLASS_NO_COPY(ZoneMemoryAllocator)
 };
 
 //! @}

@@ -105,7 +105,7 @@ struct FOG_NO_EXPORT BlurEffect : public BorderEffect
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::BlurEffect, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::BlurEffect, Fog::TYPEINFO_PRIMITIVE)
 
 // [Guard]
 #endif // _FOG_G2D_IMAGING_EFFECTS_BLUREFFECT_H

@@ -14,6 +14,7 @@
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
 #include <Fog/Core/DateTime/Time.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/System/ListenerList.h>
 #include <Fog/Core/System/Task.h>
 #include <Fog/Core/Threading/Lock.h>
@@ -31,7 +32,7 @@ struct EventLoopPendingTask;
 
 }
 
-FOG_DECLARE_TYPEINFO(Fog::EventLoopPendingTask, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::EventLoopPendingTask, Fog::TYPEINFO_PRIMITIVE)
 
 namespace Fog {
 
@@ -326,7 +327,7 @@ protected:
 private:
   friend struct EventLoopAutoRunState;
 
-  FOG_DISABLE_COPY(EventLoop)
+  _FOG_CLASS_NO_COPY(EventLoop)
 };
 
 // ============================================================================
@@ -353,7 +354,7 @@ protected:
   Time _delayedWorkTime;
 
 private:
-  FOG_DISABLE_COPY(DefaultEventLoop)
+  _FOG_CLASS_NO_COPY(DefaultEventLoop)
 };
 
 // ============================================================================

@@ -8,6 +8,7 @@
 #define _FOG_SVG_DOM_SVGSTYLEDELEMENT_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Svg/Dom/SvgElement.h>
 #include <Fog/Svg/Dom/SvgStyleAttribute_p.h>
 #include <Fog/Svg/Dom/SvgTransformAttribute_p.h>
@@ -63,7 +64,7 @@ struct FOG_NO_EXPORT SvgStyledElement : public SvgElement
   SvgTransformAttribute a_transform;
 
 private:
-  FOG_DISABLE_COPY(SvgStyledElement)
+  _FOG_CLASS_NO_COPY(SvgStyledElement)
 };
 
 //! @}

@@ -9,6 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Data/Value.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Static.h>
 #include <Fog/Core/IO/FileSystem.h>
 #include <Fog/Core/Threading/Atomic.h>
@@ -118,7 +119,7 @@ private:
   int _state;
 
 private:
-  FOG_DISABLE_COPY(MapFile)
+  _FOG_CLASS_NO_COPY(MapFile)
 };
 
 //! @}

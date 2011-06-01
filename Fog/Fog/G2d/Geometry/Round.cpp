@@ -12,7 +12,7 @@
 #include <Fog/Core/Global/Internal_Core_p.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/G2d/Geometry/CubicCurve.h>
+#include <Fog/G2d/Geometry/CBezier.h>
 #include <Fog/G2d/Geometry/Round.h>
 #include <Fog/G2d/Geometry/Transform.h>
 #include <Fog/G2d/Global/Init_G2d_p.h>

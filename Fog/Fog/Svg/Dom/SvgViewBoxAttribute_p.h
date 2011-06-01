@@ -8,6 +8,7 @@
 #define _FOG_SVG_DOM_SVGVIEWBOXATTRIBUTE_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/Xml/Dom/XmlAttribute.h>
@@ -57,7 +58,7 @@ protected:
   bool _isValid;
 
 private:
-  FOG_DISABLE_COPY(SvgViewBoxAttribute)
+  _FOG_CLASS_NO_COPY(SvgViewBoxAttribute)
 };
 
 //! @}

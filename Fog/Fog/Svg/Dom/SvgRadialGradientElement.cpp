@@ -11,7 +11,6 @@
 // [Dependencies]
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Svg/Dom/SvgRadialGradientElement_p.h>
-#include <Fog/Svg/Visit/SvgRender.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
 
 namespace Fog {
@@ -82,7 +81,7 @@ err_t SvgRadialGradientElement::onPattern(SvgVisitor* visitor, SvgElement* obj, 
     gradient.setFocal(PointF(fx, fy));
     gradient.setRadius(PointF(rx, ry));
   }
-  else 
+  else
   {
     float cx = a_cx.isAssigned() ? a_cx.getCoordComputed() : 0.5f;
     float cy = a_cy.isAssigned() ? a_cy.getCoordComputed() : 0.5f;

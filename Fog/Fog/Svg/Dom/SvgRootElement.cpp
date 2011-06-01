@@ -11,7 +11,6 @@
 // [Dependencies]
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Svg/Dom/SvgRootElement_p.h>
-#include <Fog/Svg/Visit/SvgRender.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
 
 namespace Fog {
@@ -86,6 +85,20 @@ SizeF SvgRootElement::getRootSize() const
   {
     float w = a_width.getCoordComputed();
     float h = a_height.getCoordComputed();
+
+    if (a_width.getCoordUnit() == UNIT_PERCENTAGE || a_height.getCoordUnit() == UNIT_PERCENTAGE)
+    {
+      if (a_viewBox.isAssigned() && a_viewBox.isValid())
+      {
+        w = a_viewBox.getBox().getWidth();
+        h = a_viewBox.getBox().getHeight();
+      }
+      else
+      {
+        w = 0.0f;
+        h = 0.0f;
+      }
+    }
 
     size.set(w, h);
   }

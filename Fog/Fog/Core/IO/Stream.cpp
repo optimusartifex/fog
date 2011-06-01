@@ -466,7 +466,7 @@ err_t FdStreamDevice::openFile(const String& fileName, uint32_t openFlags, Strea
 
   // Convert path to local file system string.
   err_t err;
-  TemporaryByteArray<TEMPORARY_LENGTH> fileName8;
+  ByteArrayTmp<TEMPORARY_LENGTH> fileName8;
 
   if ((err = TextCodec::local8().appendFromUnicode(fileName8, fileName))) return err;
 
@@ -997,7 +997,7 @@ err_t Stream::openFile(const String& fileName, uint32_t openFlags)
   // Create path if asked for.
   if ((openFlags & CREATE_PATH_FLAGS) == CREATE_PATH_FLAGS)
   {
-    TemporaryString<TEMPORARY_LENGTH> dirName;
+    StringTmp<TEMPORARY_LENGTH> dirName;
     if ((err = FileSystem::extractDirectory(dirName, fileName))) return err;
 
     if (!dirName.isEmpty() && dirName != Ascii8("."))

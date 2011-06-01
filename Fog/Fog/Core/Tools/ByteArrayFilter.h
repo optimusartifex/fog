@@ -9,6 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Tools/ByteArray.h>
 
 namespace Fog {
@@ -39,7 +40,7 @@ struct FOG_API ByteArrayFilter
   virtual Range match(const char* str, sysuint_t slen, uint cs, const Range& range) const = 0;
 
 private:
-  FOG_DISABLE_COPY(ByteArrayFilter)
+  _FOG_CLASS_NO_COPY(ByteArrayFilter)
 };
 
 //! @}

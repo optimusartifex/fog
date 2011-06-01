@@ -175,7 +175,7 @@ err_t PathStrokerContextT<NumT>::strokePath(const NumT_(Path)& src)
   // We need:
   // - the Path instances have to be different.
   // - source path must be flat.
-  if (&dst == &src || src.hasCurves() || !stroker._transform.isIdentity())
+  if (&dst == &src || src.hasBeziers() || !stroker._transform.isIdentity())
   {
     NumT_T1(PathTmp, 200) tmp;
     FOG_RETURN_ON_ERROR(NumI_(Path)::flatten(tmp, src, stroker._flatness));
@@ -680,7 +680,7 @@ err_t PathStrokerContextT<NumT>::calcJoin(
   if (cp != 0 && (cp > 0) == (stroker._w > 0))
   {
     // Inner join.
-    NumT limit = ((len1 < len2) ? len1 : len2) / stroker._wAbs;
+    // NumT limit = ((len1 < len2) ? len1 : len2) / stroker._wAbs;
     //if (limit < stroker._params._innerLimit) limit = stroker._params._innerLimit;
 
     //switch (stroker._params._innerJoin)
@@ -809,9 +809,9 @@ template<typename NumT>
 err_t PathStrokerContextT<NumT>::strokePathFigure(const NumT_(Point)* src, sysuint_t count, bool outline)
 {
   // Can't stroke one-vertex array.
-  if (count <= 1) return ERR_PATH_CANT_STROKE;
+  if (count <= 1) return ERR_GEOMETRY_CANT_STROKE;
   // To do outline we need at least three vertices.
-  if (outline && count <= 2) return ERR_PATH_CANT_STROKE;
+  if (outline && count <= 2) return ERR_GEOMETRY_CANT_STROKE;
 
   const NumT_(Point)* cur;
   sysuint_t i;
@@ -922,7 +922,7 @@ err_t PathStrokerContextT<NumT>::strokePathFigure(const NumT_(Point)* src, sysui
     if (FOG_LIKELY(!IS_DEGENERATED_DIST(cd[i]))) { i++; firstI++; }
 
     do {
-      if (FOG_UNLIKELY(cur == srcEnd)) return ERR_PATH_CANT_STROKE;
+      if (FOG_UNLIKELY(cur == srcEnd)) return ERR_GEOMETRY_CANT_STROKE;
 
       cp[i] = *cur++;
       cd[i] = *dist++;
@@ -1044,7 +1044,7 @@ _Outline2Done:
     i = 0;
 
     do {
-      if (FOG_UNLIKELY(cur == srcEnd)) return ERR_PATH_CANT_STROKE;
+      if (FOG_UNLIKELY(cur == srcEnd)) return ERR_GEOMETRY_CANT_STROKE;
 
       cp[i] = *cur++;
       cd[i] = *dist++;

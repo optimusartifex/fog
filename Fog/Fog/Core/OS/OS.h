@@ -20,7 +20,7 @@ namespace Fog {
 //! @brief Contains useful functions for getting system information.
 namespace OS {
 
-//! @addtogroup Fog_Core_Environment
+//! @addtogroup Fog_Core_OS
 //! @{
 
 //! @brief Get the name of the host operating system.

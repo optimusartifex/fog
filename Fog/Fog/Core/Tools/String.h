@@ -9,8 +9,10 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Global/TypeInfo.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Tools/Char.h>
@@ -154,7 +156,7 @@ struct FOG_API String
   ~String();
 
   // --------------------------------------------------------------------------
-  // [Implicit Sharing]
+  // [Sharing]
   // --------------------------------------------------------------------------
 
   //! @copydoc Doxygen::Implicit::getRefCount().
@@ -589,15 +591,15 @@ struct FOG_API String
   // [Members]
   // --------------------------------------------------------------------------
 
-  FOG_DECLARE_D(Data)
+  _FOG_CLASS_D(Data)
 };
 
 // ============================================================================
-// [Fog::TemporaryString<N>]
+// [Fog::StringTmp<N>]
 // ============================================================================
 
 template<sysuint_t N>
-struct TemporaryString : public String
+struct StringTmp : public String
 {
   // --------------------------------------------------------------------------
   // [Temporary Storage]
@@ -614,37 +616,37 @@ struct TemporaryString : public String
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE TemporaryString() :
+  FOG_INLINE StringTmp() :
     String(Data::adopt((void*)&_storage, N))
   {
   }
 
-  FOG_INLINE TemporaryString(Char ch) :
+  FOG_INLINE StringTmp(Char ch) :
     String(Data::adopt((void*)&_storage, N, &ch, 1))
   {
   }
 
-  FOG_INLINE TemporaryString(const Ascii8& str) :
+  FOG_INLINE StringTmp(const Ascii8& str) :
     String(Data::adopt((void*)&_storage, N, str.getData(), str.getLength()))
   {
   }
 
-  FOG_INLINE TemporaryString(const Utf16& str) :
+  FOG_INLINE StringTmp(const Utf16& str) :
     String(Data::adopt((void*)&_storage, N, str.getData(), str.getLength()))
   {
   }
 
-  FOG_INLINE TemporaryString(const String& other) :
+  FOG_INLINE StringTmp(const String& other) :
     String(Data::adopt((void*)&_storage, N, other.getData(), other.getLength()))
   {
   }
 
-  FOG_INLINE TemporaryString(const TemporaryString<N>& other) :
+  FOG_INLINE StringTmp(const StringTmp<N>& other) :
     String(Data::adopt((void*)&_storage, N, other.getData(), other.getLength()))
   {
   }
 
-  FOG_INLINE TemporaryString(const Char* str) :
+  FOG_INLINE StringTmp(const Char* str) :
     String(Data::adopt((void*)&_storage, N, str, DETECT_LENGTH))
   {
   }
@@ -668,12 +670,12 @@ struct TemporaryString : public String
   // These overloads are needed to succesfully use this template (or implicit
   // conversion will break template and new string will be allocated).
 
-  FOG_INLINE TemporaryString<N>& operator=(Char ch) { set(ch); return *this; }
-  FOG_INLINE TemporaryString<N>& operator=(const Ascii8& str) { set(str); return *this; }
-  FOG_INLINE TemporaryString<N>& operator=(const Utf16& str) { set(str); return *this; }
-  FOG_INLINE TemporaryString<N>& operator=(const String& other) { set(other); return *this; }
-  FOG_INLINE TemporaryString<N>& operator=(const TemporaryString<N>& other) { set(other); return *this; }
-  FOG_INLINE TemporaryString<N>& operator=(const Char* str) { set(str); return *this; }
+  FOG_INLINE StringTmp<N>& operator=(Char ch) { set(ch); return *this; }
+  FOG_INLINE StringTmp<N>& operator=(const Ascii8& str) { set(str); return *this; }
+  FOG_INLINE StringTmp<N>& operator=(const Utf16& str) { set(str); return *this; }
+  FOG_INLINE StringTmp<N>& operator=(const String& other) { set(other); return *this; }
+  FOG_INLINE StringTmp<N>& operator=(const StringTmp<N>& other) { set(other); return *this; }
+  FOG_INLINE StringTmp<N>& operator=(const Char* str) { set(str); return *this; }
 };
 
 } // Fog namespace
@@ -734,7 +736,13 @@ static FOG_INLINE bool operator> (const Fog::Utf16& a, const Fog::String& b) { r
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::String, Fog::TYPEINFO_MOVABLE | Fog::TYPEINFO_HAS_COMPARE | Fog::TYPEINFO_HAS_EQ)
+_FOG_TYPEINFO_DECLARE(Fog::String, Fog::TYPEINFO_MOVABLE | Fog::TYPEINFO_HAS_COMPARE | Fog::TYPEINFO_HAS_EQ)
+
+// ============================================================================
+// [Fog::Swap]
+// ============================================================================
+
+_FOG_SWAP_D(Fog::String)
 
 // [Guard]
 #endif // _FOG_CORE_TOOLS_STRING_H

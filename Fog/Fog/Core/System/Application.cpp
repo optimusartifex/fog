@@ -34,12 +34,12 @@
 # include <io.h>
 #elif defined(FOG_OS_MAC)
 # include <Fog/Gui/Engine/MacGuiEngine.h>
-#else
-# include <errno.h>
-# if defined(FOG_HAVE_UNISTD_H)
-#  include <unistd.h>
-# endif // FOG_HAVE_UNISTD_H
 #endif
+
+#if defined(FOG_HAVE_UNISTD_H)
+# include <errno.h>
+# include <unistd.h>
+#endif // FOG_HAVE_UNISTD_H
 
 FOG_IMPLEMENT_OBJECT(Fog::Application)
 
@@ -384,7 +384,7 @@ err_t Application::setWorkingDirectory(const String& _dir)
 err_t Application::getWorkingDirectory(String& dst)
 {
   err_t err;
-  TemporaryByteArray<TEMPORARY_LENGTH> dir8;
+  ByteArrayTmp<TEMPORARY_LENGTH> dir8;
 
   dst.clear();
   for (;;)
@@ -402,7 +402,7 @@ err_t Application::getWorkingDirectory(String& dst)
 err_t Application::setWorkingDirectory(const String& dir)
 {
   err_t err;
-  TemporaryByteArray<TEMPORARY_LENGTH> dir8;
+  ByteArrayTmp<TEMPORARY_LENGTH> dir8;
 
   if ((err = TextCodec::local8().appendFromUnicode(dir8, dir))) return err;
 

@@ -79,4 +79,4 @@
 //! @}
 
 // [Guard]
-#endif // _FOG_CORE_ASSERT_H
+#endif // _FOG_CORE_GLOBAL_ASSERT_H

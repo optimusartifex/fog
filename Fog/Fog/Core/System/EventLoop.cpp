@@ -202,7 +202,7 @@ void EventLoop::_reloadWorkQueue()
     AutoLock locked(_incomingLock);
 
     if (_incomingQueue.isEmpty()) return;
-    _incomingQueue.swapWith(_workQueue);
+    swap(_incomingQueue, _workQueue);
   }
 }
 

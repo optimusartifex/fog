@@ -199,22 +199,22 @@ struct FOG_NO_EXPORT ColorBase
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::ArgbBase32, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::ArgbBase64, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::ArgbBaseF, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::AhsvBaseF, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::AhslBaseF, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::AcmykBaseF, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::ColorBase, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::ArgbBase32, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::ArgbBase64, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::ArgbBaseF, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::AhsvBaseF, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::AhslBaseF, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::AcmykBaseF, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::ColorBase, Fog::TYPEINFO_PRIMITIVE)
 
 // ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_DECLARE_FUZZY(Fog::ArgbBaseF, Math::feqv(a.data, b.data, 4))
-FOG_DECLARE_FUZZY(Fog::AhsvBaseF, Math::feqv(a.data, b.data, 4))
-FOG_DECLARE_FUZZY(Fog::AhslBaseF, Math::feqv(a.data, b.data, 4))
-FOG_DECLARE_FUZZY(Fog::AcmykBaseF, Math::feqv(a.data, b.data, 5))
+FOG_FUZZY_DECLARE(Fog::ArgbBaseF, Math::feqv(a.data, b.data, 4))
+FOG_FUZZY_DECLARE(Fog::AhsvBaseF, Math::feqv(a.data, b.data, 4))
+FOG_FUZZY_DECLARE(Fog::AhslBaseF, Math::feqv(a.data, b.data, 4))
+FOG_FUZZY_DECLARE(Fog::AcmykBaseF, Math::feqv(a.data, b.data, 5))
 
 // [Guard]
 #endif // _FOG_G2D_SOURCE_COLORBASE_H

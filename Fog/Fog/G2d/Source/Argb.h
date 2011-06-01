@@ -1011,15 +1011,15 @@ FOG_INLINE ArgbF Argb64::getArgbF() const
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::Argb32, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::Argb64, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::ArgbF, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::Argb32, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::Argb64, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::ArgbF, Fog::TYPEINFO_PRIMITIVE)
 
 // ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_DECLARE_FUZZY(Fog::ArgbF, Math::feqv(a.data, b.data, 4))
+FOG_FUZZY_DECLARE(Fog::ArgbF, Math::feqv(a.data, b.data, 4))
 
 // [Guard]
 #endif // _FOG_G2D_SOURCE_ARGB_H

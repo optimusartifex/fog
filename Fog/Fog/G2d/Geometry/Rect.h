@@ -424,7 +424,7 @@ struct RectF
     y = pt0.y;
     w = sz.w;
     h = sz.h;
-    return *this;    
+    return *this;
   }
 
   FOG_INLINE RectF& setRect(const PointI& pt0, const SizeI& sz)
@@ -433,7 +433,7 @@ struct RectF
     y = float(pt0.y);
     w = float(sz.w);
     h = float(sz.h);
-    return *this;    
+    return *this;
   }
 
   FOG_INLINE RectF& setRect(float px, float py, float pw, float ph)
@@ -830,7 +830,7 @@ struct RectD
     y = pt0.y;
     w = sz.w;
     h = sz.h;
-    return *this;    
+    return *this;
   }
 
   FOG_INLINE RectD& setRect(const PointF& pt0, const SizeF& sz)
@@ -839,7 +839,7 @@ struct RectD
     y = double(pt0.y);
     w = double(sz.w);
     h = double(sz.h);
-    return *this;    
+    return *this;
   }
 
   FOG_INLINE RectD& setRect(const PointI& pt0, const SizeI& sz)
@@ -848,7 +848,7 @@ struct RectD
     y = double(pt0.y);
     w = double(sz.w);
     h = double(sz.h);
-    return *this;    
+    return *this;
   }
 
   FOG_INLINE RectD& setRect(double px, double py, double pw, double ph)
@@ -1232,16 +1232,16 @@ FOG_TYPEVARIANT_DECLARE_F_D_I(Rect)
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::RectI, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::RectF, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::RectD, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::RectI, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::RectF, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::RectD, Fog::TYPEINFO_PRIMITIVE)
 
 // ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_DECLARE_FUZZY(Fog::RectF, Math::feqv((const float *)&a, (const float *)&b, 4))
-FOG_DECLARE_FUZZY(Fog::RectD, Math::feqv((const double*)&a, (const double*)&b, 4))
+FOG_FUZZY_DECLARE(Fog::RectF, Math::feqv((const float *)&a, (const float *)&b, 4))
+FOG_FUZZY_DECLARE(Fog::RectD, Math::feqv((const double*)&a, (const double*)&b, 4))
 
 // Prevent the warning about the used functions, which weren't defined (GCC).
 #if !defined(_FOG_G2D_GEOMETRY_BOX_H)

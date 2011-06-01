@@ -197,7 +197,7 @@ struct PointF
 
   FOG_INLINE PointF(int px, int py) :
     x(float(px)),
-    y(float(py)) 
+    y(float(py))
   {
   }
 
@@ -629,16 +629,16 @@ FOG_TYPEVARIANT_DECLARE_F_D_I(Point)
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::PointI, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::PointF, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::PointD, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::PointI, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::PointF, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::PointD, Fog::TYPEINFO_PRIMITIVE)
 
 // ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_DECLARE_FUZZY(Fog::PointF, Math::isFuzzyEq(a.x, b.x) && Math::isFuzzyEq(a.y, b.y))
-FOG_DECLARE_FUZZY(Fog::PointD, Math::isFuzzyEq(a.x, b.x) && Math::isFuzzyEq(a.y, b.y))
+FOG_FUZZY_DECLARE(Fog::PointF, Math::isFuzzyEq(a.x, b.x) && Math::isFuzzyEq(a.y, b.y))
+FOG_FUZZY_DECLARE(Fog::PointD, Math::isFuzzyEq(a.x, b.x) && Math::isFuzzyEq(a.y, b.y))
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_POINT_H

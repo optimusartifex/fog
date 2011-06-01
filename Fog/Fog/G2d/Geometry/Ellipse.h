@@ -116,7 +116,7 @@ struct FOG_NO_EXPORT EllipseF
     err_t err = _g2d.ellipsef.getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr);
     dst.w -= dst.x;
     dst.h -= dst.y;
-    return err;    
+    return err;
   }
 
   // --------------------------------------------------------------------------
@@ -255,7 +255,7 @@ struct FOG_NO_EXPORT EllipseD
     err_t err = _g2d.ellipsed.getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr);
     dst.w -= dst.x;
     dst.h -= dst.y;
-    return err;    
+    return err;
   }
 
   // --------------------------------------------------------------------------
@@ -343,15 +343,15 @@ FOG_TYPEVARIANT_DECLARE_F_D(Ellipse)
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::EllipseF, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::EllipseD, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::EllipseF, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::EllipseD, Fog::TYPEINFO_PRIMITIVE)
 
 // ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_DECLARE_FUZZY(Fog::EllipseF, Math::feqv((const float *)&a, (const float *)&b, 4))
-FOG_DECLARE_FUZZY(Fog::EllipseD, Math::feqv((const double*)&a, (const double*)&b, 4))
+FOG_FUZZY_DECLARE(Fog::EllipseF, Math::feqv((const float *)&a, (const float *)&b, 4))
+FOG_FUZZY_DECLARE(Fog::EllipseD, Math::feqv((const double*)&a, (const double*)&b, 4))
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_ELLIPSE_H

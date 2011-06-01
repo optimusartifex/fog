@@ -9,8 +9,10 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Memory/Memory.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/G2d/Global/Constants.h>
@@ -114,7 +116,7 @@ struct FOG_API Region
   ~Region();
 
   // --------------------------------------------------------------------------
-  // [Implicit Sharing]
+  // [Sharing]
   // --------------------------------------------------------------------------
 
   //! @copydoc Doxygen::Implicit::getRefCount().
@@ -321,7 +323,7 @@ struct FOG_API Region
   // [Members]
   // --------------------------------------------------------------------------
 
-  FOG_DECLARE_D(RegionData)
+  _FOG_CLASS_D(RegionData)
 };
 
 //! @}
@@ -350,7 +352,13 @@ FOG_INLINE const Fog::Region operator-(const Fog::Region& src1, const Fog::BoxI&
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::Region, Fog::TYPEINFO_MOVABLE)
+_FOG_TYPEINFO_DECLARE(Fog::Region, Fog::TYPEINFO_MOVABLE)
+
+// ============================================================================
+// [Fog::Swap]
+// ============================================================================
+
+_FOG_SWAP_D(Fog::Region)
 
 // [Guard]
 #endif // _FOG_G2D_TOOLS_REGION_H

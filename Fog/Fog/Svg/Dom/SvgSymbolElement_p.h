@@ -8,6 +8,7 @@
 #define _FOG_SVG_DOM_SVGSYMBOLELEMENT_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Svg/Dom/SvgCoordAttribute_p.h>
 #include <Fog/Svg/Dom/SvgStyledElement_p.h>
 
@@ -42,7 +43,7 @@ struct FOG_NO_EXPORT SvgSymbolElement : public SvgStyledElement
   // --------------------------------------------------------------------------
 
 private:
-  FOG_DISABLE_COPY(SvgSymbolElement)
+  _FOG_CLASS_NO_COPY(SvgSymbolElement)
 };
 
 //! @}

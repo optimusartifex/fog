@@ -9,6 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/DateTime/Time.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/System/Object.h>
 #include <Fog/Core/System/Timer.h>
 #include <Fog/Gui/Global/Constants.h>
@@ -75,7 +76,7 @@ protected:
   List<Animation*> _finished;
 
 private:
-  FOG_DISABLE_COPY(AnimationDispatcher)
+  _FOG_CLASS_NO_COPY(AnimationDispatcher)
 };
 
 // ============================================================================
@@ -141,7 +142,7 @@ protected:
   TimeTicks _endtime;
 
 private:
-  FOG_DISABLE_COPY(Animation)
+  _FOG_CLASS_NO_COPY(Animation)
 };
 
 // ============================================================================

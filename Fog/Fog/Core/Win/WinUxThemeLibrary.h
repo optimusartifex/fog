@@ -1,4 +1,4 @@
-// [Fog-Gui]
+// [Fog-Core]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -11,6 +11,7 @@
 #if defined(FOG_OS_WINDOWS)
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Library/Library.h>
 #include <Fog/Core/System/Object.h>
 #include <Fog/Gui/Global/Constants.h>
@@ -102,7 +103,7 @@ struct FOG_API WinUxThemeLibrary
 private:
   err_t _init();
 
-  FOG_DISABLE_COPY(WinUxThemeLibrary)
+  _FOG_CLASS_NO_COPY(WinUxThemeLibrary)
 };
 
 //! @}

@@ -69,9 +69,6 @@ struct FOG_NO_EXPORT PGradientRectangular
     // TODO:
     uint32_t srcFormat = IMAGE_FORMAT_PRGB32;
 
-    double cx = gradient._pts[0].x;
-    double cy = gradient._pts[0].y;
-
     ctx->_d.gradient.rectangular.shared.xx = inv._00;
     ctx->_d.gradient.rectangular.shared.xy = inv._01;
 
@@ -193,8 +190,6 @@ struct FOG_NO_EXPORT PGradientRectangular
     double px1 = ctx->_d.gradient.rectangular.simple.px1;
     double py1 = ctx->_d.gradient.rectangular.simple.py1;
 
-    int lenMask = ctx->_d.gradient.base.len - 1;
-
     P_FETCH_SPAN8_BEGIN()
       P_FETCH_SPAN8_SET_CURRENT()
 
@@ -243,8 +238,6 @@ struct FOG_NO_EXPORT PGradientRectangular
     double py0 = ctx->_d.gradient.rectangular.proj.py0;
     double px1 = ctx->_d.gradient.rectangular.proj.px1;
     double py1 = ctx->_d.gradient.rectangular.proj.py1;
-
-    int lenMask = ctx->_d.gradient.base.len - 1;
 
     P_FETCH_SPAN8_BEGIN()
       P_FETCH_SPAN8_SET_CURRENT()

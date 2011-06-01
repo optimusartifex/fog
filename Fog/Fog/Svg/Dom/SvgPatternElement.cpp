@@ -135,7 +135,7 @@ err_t SvgPatternElement::_createPattern(PatternF& pattern, SvgElement* obj) cons
     float ty = a_y.isAssigned() ? a_y.getCoordValue() : 0.0f;
     pattern.translate(PointF(tx, ty));
   }
-  
+
 _AssignTransform:
   if (a_patternTransform.isAssigned() && a_patternTransform.isValid())
     pattern.transform(a_patternTransform.getTransform());

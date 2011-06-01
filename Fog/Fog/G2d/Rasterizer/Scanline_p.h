@@ -10,6 +10,7 @@
 // [Dependencies]
 #include <Fog/Core/Face/Face_C.h>
 #include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Memory/ZoneMemoryAllocator_p.h>
 #include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Rasterizer/Span_p.h>
@@ -190,7 +191,7 @@ struct FOG_NO_EXPORT Scanline
   uint32_t _spanSize;
 
 private:
-  FOG_DISABLE_COPY(Scanline)
+  _FOG_CLASS_NO_COPY(Scanline)
 };
 
 // ============================================================================
@@ -614,7 +615,7 @@ _Link:
   */
 
 private:
-  FOG_DISABLE_COPY(Scanline8)
+  _FOG_CLASS_NO_COPY(Scanline8)
 };
 
 // ============================================================================

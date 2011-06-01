@@ -9,6 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/Static.h>
 #include <Fog/Core/Global/TypeInfo.h>
@@ -135,7 +136,7 @@ protected:
 private:
   friend struct ThreadCondition;
 
-  FOG_DISABLE_COPY(Lock)
+  _FOG_CLASS_NO_COPY(Lock)
 };
 
 // ============================================================================
@@ -202,7 +203,7 @@ protected:
   Lock* _target;
 
 private:
-  FOG_DISABLE_COPY(AutoLock)
+  _FOG_CLASS_NO_COPY(AutoLock)
 };
 
 // ============================================================================
@@ -247,7 +248,7 @@ protected:
   Lock* _target;
 
 private:
-  FOG_DISABLE_COPY(AutoUnlock)
+  _FOG_CLASS_NO_COPY(AutoUnlock)
 };
 
 //! @}

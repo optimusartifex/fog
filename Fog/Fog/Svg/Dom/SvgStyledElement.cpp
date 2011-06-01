@@ -12,7 +12,6 @@
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Svg/Dom/SvgDocument.h>
 #include <Fog/Svg/Dom/SvgStyledElement_p.h>
-#include <Fog/Svg/Visit/SvgRender.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
 #include <Fog/Xml/Dom/XmlDocument.h>
 
@@ -168,15 +167,21 @@ err_t SvgStyledElement::onPrepare(SvgVisitor* visitor, SvgGState* state) const
     {
       if (state) state->saveFont();
 
+      String family = visitor->_font.getFamily();
+      float size = visitor->_font.getHeight();
+
       if (styleMask & (1 << SVG_STYLE_FONT_FAMILY))
       {
-        visitor->_font.setFamily(a_style._fontFamily);
+        family = a_style._fontFamily;
       }
 
       if (styleMask & (1 << SVG_STYLE_FONT_SIZE))
       {
-        visitor->_font.setSize(a_style._fontSize.value);
+        size = doc->_dpi.toDeviceSpace(
+          a_style._fontSize.value, a_style._fontSize.unit);
       }
+
+      visitor->_font.create(family, size, UNIT_NONE);
     }
 
     // Setup fill parameters.

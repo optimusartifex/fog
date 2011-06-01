@@ -10,9 +10,11 @@
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Global/TypeInfo.h>
 #include <Fog/Core/Global/TypeVariant.h>
-#include <Fog/Core/Global/Static.h>
 #include <Fog/Core/Global/Uninitialized.h>
 #include <Fog/Core/Memory/Memory.h>
 #include <Fog/Core/Threading/Atomic.h>
@@ -22,6 +24,7 @@
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Geometry/Shape.h>
+#include <Fog/G2d/Geometry/Triangle.h>
 #include <Fog/G2d/Global/Constants.h>
 
 namespace Fog {
@@ -177,7 +180,7 @@ struct FOG_NO_EXPORT PathDataF
 
   FOG_INLINE bool hasBoundingBox() const
   {
-    return (flags & (PATH_DATA_DIRTY_BOUNDING_BOX | PATH_DATA_HAS_BOUNDING_BOX)) == PATH_DATA_HAS_BOUNDING_BOX;
+    return (flags & (PATH_DATA_DIRTY_BBOX | PATH_DATA_HAS_BBOX)) == PATH_DATA_HAS_BBOX;
   }
 
   // --------------------------------------------------------------------------
@@ -234,7 +237,7 @@ struct FOG_NO_EXPORT PathDataD
 
   FOG_INLINE bool hasBoundingBox() const
   {
-    return (flags & (PATH_DATA_DIRTY_BOUNDING_BOX | PATH_DATA_HAS_BOUNDING_BOX)) == PATH_DATA_HAS_BOUNDING_BOX;
+    return (flags & (PATH_DATA_DIRTY_BBOX | PATH_DATA_HAS_BBOX)) == PATH_DATA_HAS_BBOX;
   }
 
   // --------------------------------------------------------------------------
@@ -695,27 +698,27 @@ struct FOG_NO_EXPORT PathF
   }
 
   //! @brief Add an unclosed quadratic bézier curve to the path.
-  FOG_INLINE err_t quad(const QuadCurveF& object, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t qbezier(const QBezierF& object, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _shape(SHAPE_TYPE_QUAD, &object, direction, NULL);
+    return _shape(SHAPE_TYPE_QBEZIER, &object, direction, NULL);
   }
 
   //! @overload
-  FOG_INLINE err_t quad(const QuadCurveF& object, uint32_t direction, const TransformF& tr)
+  FOG_INLINE err_t qbezier(const QBezierF& object, uint32_t direction, const TransformF& tr)
   {
-    return _shape(SHAPE_TYPE_QUAD, &object, direction, &tr);
+    return _shape(SHAPE_TYPE_QBEZIER, &object, direction, &tr);
   }
 
   //! @brief Add an unclosed cubic bézier curve to the path.
-  FOG_INLINE err_t cubic(const QuadCurveF& object, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t cbezier(const QBezierF& object, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _shape(SHAPE_TYPE_CUBIC, &object, direction, NULL);
+    return _shape(SHAPE_TYPE_CBEZIER, &object, direction, NULL);
   }
 
   //! @overload
-  FOG_INLINE err_t cubic(const QuadCurveF& object, uint32_t direction, const TransformF& tr)
+  FOG_INLINE err_t cbezier(const QBezierF& object, uint32_t direction, const TransformF& tr)
   {
-    return _shape(SHAPE_TYPE_CUBIC, &object, direction, &tr);
+    return _shape(SHAPE_TYPE_CBEZIER, &object, direction, &tr);
   }
 
   //! @brief Add an unclosed arc to the path.
@@ -728,18 +731,6 @@ struct FOG_NO_EXPORT PathF
   FOG_INLINE err_t arc(const ArcF& object, uint32_t direction, const TransformF& tr)
   {
     return _shape(SHAPE_TYPE_ARC, &object, direction, &tr);
-  }
-
-  //! @brief Add a closed rounded ractangle to the path.
-  FOG_INLINE err_t round(const RoundF& object, uint32_t direction = PATH_DIRECTION_CW)
-  {
-    return _shape(SHAPE_TYPE_ROUND, &object, direction, NULL);
-  }
-
-  //! @overload
-  FOG_INLINE err_t round(const RoundF& object, uint32_t direction, const TransformF& tr)
-  {
-    return _shape(SHAPE_TYPE_ROUND, &object, direction, &tr);
   }
 
   //! @brief Add a closed circle to the path.
@@ -766,6 +757,18 @@ struct FOG_NO_EXPORT PathF
     return _shape(SHAPE_TYPE_ELLIPSE, &object, direction, &tr);
   }
 
+  //! @brief Add a closed rounded ractangle to the path.
+  FOG_INLINE err_t round(const RoundF& object, uint32_t direction = PATH_DIRECTION_CW)
+  {
+    return _shape(SHAPE_TYPE_ROUND, &object, direction, NULL);
+  }
+
+  //! @overload
+  FOG_INLINE err_t round(const RoundF& object, uint32_t direction, const TransformF& tr)
+  {
+    return _shape(SHAPE_TYPE_ROUND, &object, direction, &tr);
+  }
+
   //! @brief Add a closed chord to the path.
   FOG_INLINE err_t chord(const ArcF& object, uint32_t direction = PATH_DIRECTION_CW)
   {
@@ -788,6 +791,18 @@ struct FOG_NO_EXPORT PathF
   FOG_INLINE err_t pie(const ArcF& object, uint32_t direction, const TransformF& tr)
   {
     return _shape(SHAPE_TYPE_PIE, &object, direction, &tr);
+  }
+
+  //! @brief Add a closed triangle.
+  FOG_INLINE err_t triangle(const TriangleF& object, uint32_t direction = PATH_DIRECTION_CW)
+  {
+    return _shape(SHAPE_TYPE_TRIANGLE, &object, direction, NULL);
+  }
+
+  //! @overload
+  FOG_INLINE err_t triangle(const TriangleF& object, uint32_t direction, const TransformF& tr)
+  {
+    return _shape(SHAPE_TYPE_TRIANGLE, &object, direction, &tr);
   }
 
   // --------------------------------------------------------------------------
@@ -835,22 +850,22 @@ struct FOG_NO_EXPORT PathF
   // --------------------------------------------------------------------------
 
   //! @brief Get whether the path has quadratic or cubic Bezier curves.
-  FOG_INLINE bool hasCurves() const
+  FOG_INLINE bool hasBeziers() const
   {
     if (_d->flags & PATH_DATA_DIRTY_CMD) _g2d.pathf.updateFlat(*this);
-    return (_d->flags & (PATH_DATA_HAS_QUAD_CMD | PATH_DATA_HAS_CUBIC_CMD)) != 0;
+    return (_d->flags & (PATH_DATA_HAS_QBEZIER | PATH_DATA_HAS_CBEZIER)) != 0;
   }
 
-  FOG_INLINE bool hasQuadCurves() const
+  FOG_INLINE bool hasQBeziers() const
   {
     if (_d->flags & PATH_DATA_DIRTY_CMD) _g2d.pathf.updateFlat(*this);
-    return (_d->flags & PATH_DATA_HAS_QUAD_CMD) != 0;
+    return (_d->flags & PATH_DATA_HAS_QBEZIER) != 0;
   }
 
-  FOG_INLINE bool hasCubicCurves() const
+  FOG_INLINE bool hasCBeziers() const
   {
     if (_d->flags & PATH_DATA_DIRTY_CMD) _g2d.pathf.updateFlat(*this);
-    return (_d->flags & PATH_DATA_HAS_CUBIC_CMD) != 0;
+    return (_d->flags & PATH_DATA_HAS_CBEZIER) != 0;
   }
 
   FOG_INLINE err_t flatten(const PathFlattenParamsF& params)
@@ -991,7 +1006,7 @@ struct FOG_NO_EXPORT PathF
   FOG_INLINE void _modified()
   {
     FOG_ASSERT(isDetached());
-    _d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX | PATH_DATA_DIRTY_CMD;
+    _d->flags |= PATH_DATA_DIRTY_BBOX | PATH_DATA_DIRTY_CMD;
   }
 
   //! @brief Must be called when the path vertex/vertices were manually
@@ -999,7 +1014,7 @@ struct FOG_NO_EXPORT PathF
   FOG_INLINE void _modifiedVertices() const
   {
     FOG_ASSERT(isDetached());
-    _d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
+    _d->flags |= PATH_DATA_DIRTY_BBOX;
   }
 
   //! @brief Must be called when the path command/commands were manually
@@ -1024,7 +1039,7 @@ struct FOG_NO_EXPORT PathF
   // [Members]
   // --------------------------------------------------------------------------
 
-  FOG_DECLARE_D(PathDataF)
+  _FOG_CLASS_D(PathDataF)
 };
 
 // ============================================================================
@@ -1473,27 +1488,27 @@ struct FOG_API PathD
   }
 
   //! @brief Add an unclosed quadratic bézier curve to the path.
-  FOG_INLINE err_t quad(const QuadCurveD& object, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t qbezier(const QBezierD& object, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _shape(SHAPE_TYPE_QUAD, &object, direction, NULL);
+    return _shape(SHAPE_TYPE_QBEZIER, &object, direction, NULL);
   }
 
   //! @overload
-  FOG_INLINE err_t quad(const QuadCurveD& object, uint32_t direction, const TransformD& tr)
+  FOG_INLINE err_t qbezier(const QBezierD& object, uint32_t direction, const TransformD& tr)
   {
-    return _shape(SHAPE_TYPE_QUAD, &object, direction, &tr);
+    return _shape(SHAPE_TYPE_QBEZIER, &object, direction, &tr);
   }
 
   //! @brief Add an unclosed cubic bézier curve to the path.
-  FOG_INLINE err_t cubic(const QuadCurveD& object, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t cbezier(const QBezierD& object, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _shape(SHAPE_TYPE_CUBIC, &object, direction, NULL);
+    return _shape(SHAPE_TYPE_CBEZIER, &object, direction, NULL);
   }
 
   //! @overload
-  FOG_INLINE err_t cubic(const QuadCurveD& object, uint32_t direction, const TransformD& tr)
+  FOG_INLINE err_t cbezier(const QBezierD& object, uint32_t direction, const TransformD& tr)
   {
-    return _shape(SHAPE_TYPE_CUBIC, &object, direction, &tr);
+    return _shape(SHAPE_TYPE_CBEZIER, &object, direction, &tr);
   }
 
   //! @brief Add an unclosed arc to the path.
@@ -1506,18 +1521,6 @@ struct FOG_API PathD
   FOG_INLINE err_t arc(const ArcD& object, uint32_t direction, const TransformD& tr)
   {
     return _shape(SHAPE_TYPE_ARC, &object, direction, &tr);
-  }
-
-  //! @brief Add a closed rounded ractangle to the path.
-  FOG_INLINE err_t round(const RoundD& object, uint32_t direction = PATH_DIRECTION_CW)
-  {
-    return _shape(SHAPE_TYPE_ROUND, &object, direction, NULL);
-  }
-
-  //! @overload
-  FOG_INLINE err_t round(const RoundD& object, uint32_t direction, const TransformD& tr)
-  {
-    return _shape(SHAPE_TYPE_ROUND, &object, direction, &tr);
   }
 
   //! @brief Add a closed circle to the path.
@@ -1544,6 +1547,18 @@ struct FOG_API PathD
     return _shape(SHAPE_TYPE_ELLIPSE, &object, direction, &tr);
   }
 
+  //! @brief Add a closed rounded ractangle to the path.
+  FOG_INLINE err_t round(const RoundD& object, uint32_t direction = PATH_DIRECTION_CW)
+  {
+    return _shape(SHAPE_TYPE_ROUND, &object, direction, NULL);
+  }
+
+  //! @overload
+  FOG_INLINE err_t round(const RoundD& object, uint32_t direction, const TransformD& tr)
+  {
+    return _shape(SHAPE_TYPE_ROUND, &object, direction, &tr);
+  }
+
   //! @brief Add a closed chord to the path.
   FOG_INLINE err_t chord(const ArcD& object, uint32_t direction = PATH_DIRECTION_CW)
   {
@@ -1566,6 +1581,18 @@ struct FOG_API PathD
   FOG_INLINE err_t pie(const ArcD& object, uint32_t direction, const TransformD& tr)
   {
     return _shape(SHAPE_TYPE_PIE, &object, direction, &tr);
+  }
+
+  //! @brief Add a closed triangle.
+  FOG_INLINE err_t triangle(const TriangleD& object, uint32_t direction = PATH_DIRECTION_CW)
+  {
+    return _shape(SHAPE_TYPE_TRIANGLE, &object, direction, NULL);
+  }
+
+  //! @overload
+  FOG_INLINE err_t triangle(const TriangleD& object, uint32_t direction, const TransformD& tr)
+  {
+    return _shape(SHAPE_TYPE_TRIANGLE, &object, direction, &tr);
   }
 
   // --------------------------------------------------------------------------
@@ -1597,9 +1624,21 @@ struct FOG_API PathD
   }
 
   //! @brief Add another @a path (translated by the @a pt) to the path.
+  FOG_INLINE err_t appendTranslated(const PathF& path, const PointD& pt)
+  {
+    return _g2d.pathd.appendTranslatedPathF(*this, path, pt, NULL);
+  }
+
+  //! @brief Add another @a path (translated by the @a pt) to the path.
   FOG_INLINE err_t appendTranslated(const PathD& path, const PointD& pt)
   {
     return _g2d.pathd.appendTranslatedPathD(*this, path, pt, NULL);
+  }
+
+  //! @brief Add another @a path (translated by the @a pt) to the path.
+  FOG_INLINE err_t appendTranslated(const PathF& path, const PointD& pt, const Range& range)
+  {
+    return _g2d.pathd.appendTranslatedPathF(*this, path, pt, &range);
   }
 
   //! @brief Add another @a path (translated by the @a pt) to the path.
@@ -1609,9 +1648,21 @@ struct FOG_API PathD
   }
 
   //! @brief Add another @a path (transformed by the @a tr) to the path.
+  FOG_INLINE err_t appendTransformed(const PathF& path, const TransformD& tr)
+  {
+    return _g2d.pathd.appendTransformedPathF(*this, path, tr, NULL);
+  }
+
+  //! @brief Add another @a path (transformed by the @a tr) to the path.
   FOG_INLINE err_t appendTransformed(const PathD& path, const TransformD& tr)
   {
     return _g2d.pathd.appendTransformedPathD(*this, path, tr, NULL);
+  }
+
+  //! @brief Add another @a path (transformed by the @a tr) to the path.
+  FOG_INLINE err_t appendTransformed(const PathF& path, const TransformD& tr, const Range& range)
+  {
+    return _g2d.pathd.appendTransformedPathF(*this, path, tr, &range);
   }
 
   //! @brief Add another @a path (transformed by the @a tr) to the path.
@@ -1625,22 +1676,22 @@ struct FOG_API PathD
   // --------------------------------------------------------------------------
 
   //! @brief Get whether the path has quadratic or cubic Bezier curves.
-  FOG_INLINE bool hasCurves() const
+  FOG_INLINE bool hasBeziers() const
   {
     if (_d->flags & PATH_DATA_DIRTY_CMD) _g2d.pathd.updateFlat(*this);
-    return (_d->flags & (PATH_DATA_HAS_QUAD_CMD | PATH_DATA_HAS_CUBIC_CMD)) != 0;
+    return (_d->flags & (PATH_DATA_HAS_QBEZIER | PATH_DATA_HAS_CBEZIER)) != 0;
   }
 
-  FOG_INLINE bool hasQuadCurves() const
+  FOG_INLINE bool hasQBeziers() const
   {
     if (_d->flags & PATH_DATA_DIRTY_CMD) _g2d.pathd.updateFlat(*this);
-    return (_d->flags & PATH_DATA_HAS_QUAD_CMD) != 0;
+    return (_d->flags & PATH_DATA_HAS_QBEZIER) != 0;
   }
 
-  FOG_INLINE bool hasCubicCurves() const
+  FOG_INLINE bool hasCBeziers() const
   {
     if (_d->flags & PATH_DATA_DIRTY_CMD) _g2d.pathd.updateFlat(*this);
-    return (_d->flags & PATH_DATA_HAS_CUBIC_CMD) != 0;
+    return (_d->flags & PATH_DATA_HAS_CBEZIER) != 0;
   }
 
   FOG_INLINE err_t flatten(const PathFlattenParamsD& params)
@@ -1781,7 +1832,7 @@ struct FOG_API PathD
   FOG_INLINE void _modified()
   {
     FOG_ASSERT(isDetached());
-    _d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX | PATH_DATA_DIRTY_CMD;
+    _d->flags |= PATH_DATA_DIRTY_BBOX | PATH_DATA_DIRTY_CMD;
   }
 
   //! @brief Must be called when the path vertex/vertices were manually
@@ -1789,7 +1840,7 @@ struct FOG_API PathD
   FOG_INLINE void _modifiedVertices() const
   {
     FOG_ASSERT(isDetached());
-    _d->flags |= PATH_DATA_DIRTY_BOUNDING_BOX;
+    _d->flags |= PATH_DATA_DIRTY_BBOX;
   }
 
   //! @brief Must be called when the path command/commands were manually
@@ -1823,7 +1874,7 @@ struct FOG_API PathD
   // [Members]
   // --------------------------------------------------------------------------
 
-  FOG_DECLARE_D(PathDataD)
+  _FOG_CLASS_D(PathDataD)
 };
 
 // ============================================================================
@@ -1842,11 +1893,18 @@ FOG_TYPEVARIANT_DECLARE_F_D(PathFlattenParams)
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::PathF, Fog::TYPEINFO_MOVABLE)
-FOG_DECLARE_TYPEINFO(Fog::PathD, Fog::TYPEINFO_MOVABLE)
+_FOG_TYPEINFO_DECLARE(Fog::PathF, Fog::TYPEINFO_MOVABLE)
+_FOG_TYPEINFO_DECLARE(Fog::PathD, Fog::TYPEINFO_MOVABLE)
 
-FOG_DECLARE_TYPEINFO(Fog::PathFlattenParamsF, Fog::TYPEINFO_PRIMITIVE)
-FOG_DECLARE_TYPEINFO(Fog::PathFlattenParamsD, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::PathFlattenParamsF, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::PathFlattenParamsD, Fog::TYPEINFO_PRIMITIVE)
+
+// ============================================================================
+// [Fog::Swap]
+// ============================================================================
+
+_FOG_SWAP_D(Fog::PathF)
+_FOG_SWAP_D(Fog::PathD)
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_PATH_H

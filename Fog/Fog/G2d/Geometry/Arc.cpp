@@ -14,7 +14,7 @@
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/Arc.h>
-#include <Fog/G2d/Geometry/CubicCurve.h>
+#include <Fog/G2d/Geometry/CBezier.h>
 #include <Fog/G2d/Geometry/Math2d.h>
 #include <Fog/G2d/Geometry/PathTmp_p.h>
 #include <Fog/G2d/Geometry/Transform.h>
@@ -94,17 +94,17 @@ _Identity:
         if (maxX < px) maxX = px;
         if (maxY < py) maxY = py;
 
-        if (NumT(0.0               ) >= start && NumT(0.0               ) <= end) maxX = NumT(1.0); 
-        if (NumT(MATH_TWO_PI       ) >= start && NumT(MATH_TWO_PI       ) <= end) maxX = NumT(1.0); 
+        if (NumT(0.0               ) >= start && NumT(0.0               ) <= end) maxX = NumT(1.0);
+        if (NumT(MATH_TWO_PI       ) >= start && NumT(MATH_TWO_PI       ) <= end) maxX = NumT(1.0);
 
-        if (NumT(MATH_HALF_PI      ) >= start && NumT(MATH_HALF_PI      ) <= end) maxY = NumT(1.0); 
-        if (NumT(MATH_TWO_HALF_PI  ) >= start && NumT(MATH_TWO_HALF_PI  ) <= end) maxY = NumT(1.0); 
+        if (NumT(MATH_HALF_PI      ) >= start && NumT(MATH_HALF_PI      ) <= end) maxY = NumT(1.0);
+        if (NumT(MATH_TWO_HALF_PI  ) >= start && NumT(MATH_TWO_HALF_PI  ) <= end) maxY = NumT(1.0);
 
-        if (NumT(MATH_PI           ) >= start && NumT(MATH_PI           ) <= end) minX =-NumT(1.0); 
-        if (NumT(MATH_THREE_PI     ) >= start && NumT(MATH_THREE_PI     ) <= end) minX =-NumT(1.0); 
+        if (NumT(MATH_PI           ) >= start && NumT(MATH_PI           ) <= end) minX =-NumT(1.0);
+        if (NumT(MATH_THREE_PI     ) >= start && NumT(MATH_THREE_PI     ) <= end) minX =-NumT(1.0);
 
-        if (NumT(MATH_ONE_HALF_PI  ) >= start && NumT(MATH_ONE_HALF_PI  ) <= end) minY =-NumT(1.0); 
-        if (NumT(MATH_THREE_HALF_PI) >= start && NumT(MATH_THREE_HALF_PI) <= end) minY =-NumT(1.0); 
+        if (NumT(MATH_ONE_HALF_PI  ) >= start && NumT(MATH_ONE_HALF_PI  ) <= end) minY =-NumT(1.0);
+        if (NumT(MATH_THREE_HALF_PI) >= start && NumT(MATH_THREE_HALF_PI) <= end) minY =-NumT(1.0);
 
         // Include the enter point if asked to.
         if (includeCenterPoint)
@@ -177,7 +177,7 @@ _Identity:
       if ((t0 >= start && t0 <= end) || t0 + MATH_TWO_PI >= start && t0 + MATH_TWO_PI <= end)
       {
         Math::sincos(t0, &ts, &tc);
-        
+
         ax = rx_xx*tc + ry_yx*ts;
         if (minX > ax) minX = ax;
         if (maxX < ax) maxX = ax;
@@ -190,7 +190,7 @@ _Identity:
       if ((t1 >= start && t1 <= end) || t1 + MATH_TWO_PI >= start && t1 + MATH_TWO_PI <= end)
       {
         Math::sincos(t1, &ts, &tc);
-        
+
         ay = rx_xy*tc + ry_yy*ts;
         if (minY > ay) minY = ay;
         if (maxY < ay) maxY = ay;
@@ -345,7 +345,7 @@ _Skip:
   if (lastSegment < NumT(MATH_HALF_PI - Math2dConst<NumT>::getMathEpsilon()))
   {
     NumT t = lastSegment / NumT(MATH_HALF_PI);
-    NumI_(CubicCurve)::leftAt(&pts[numSegments - 4], &pts[numSegments - 4], t);
+    NumI_(CBezier)::leftAt(&pts[numSegments - 4], &pts[numSegments - 4], t);
   }
 
   for (uint i = 0; i < numSegments; i++)

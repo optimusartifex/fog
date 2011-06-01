@@ -9,6 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Memory/Memory.h>
 #include <Fog/Core/Threading/Atomic.h>
 
@@ -132,7 +133,7 @@ struct FOG_NO_EXPORT BlockMemoryAllocator
   Block* blocks;
 
 private:
-  FOG_DISABLE_COPY(BlockMemoryAllocator)
+  _FOG_CLASS_NO_COPY(BlockMemoryAllocator)
 };
 
 FOG_INLINE void BlockMemoryAllocator::free(void* ptr)

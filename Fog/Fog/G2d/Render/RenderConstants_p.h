@@ -333,7 +333,7 @@ enum RENDER_FETCH
 //! @brief Compositing operator characteristics used by Fog::Render.
 //!
 //! The compositing operator characteristics are used internally by
-//! the @c RasterPainterEngine and compositing templates in Fog::Render module.
+//! the @c RasterPaintEngine and compositing templates in Fog::Render module.
 enum RENDER_COMBINE
 {
   //! @brief Compositing result is affected by destination color components.

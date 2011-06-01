@@ -71,12 +71,6 @@ err_t SvgMeasure::onPath(SvgElement* obj, const PathF& path)
   return ERR_OK;
 }
 
-err_t SvgMeasure::onPath(SvgElement* obj, const PathD& path)
-{
-  // TODO: Will be removed...
-  return ERR_OK;
-}
-
 err_t SvgMeasure::onImage(SvgElement* obj, const PointF& pt, const Image& image)
 {
   BoxF b(pt.x, pt.y, pt.x + (float)image.getWidth(), pt.y + (float)image.getHeight());

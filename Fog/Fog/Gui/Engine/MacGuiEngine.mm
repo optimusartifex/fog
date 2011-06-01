@@ -426,16 +426,16 @@ err_t MacGuiWindow::setTitle(const String& title)
 {
   if (window == nil) return ERR_RT_INVALID_HANDLE;
   
-  [window setTitle: toNSString(title)];
+  NSString* nsTitle = MacUtil::NSFromString(title);
+  [window setTitle: nsTitle];
+
   return ERR_OK;
 }
 
 err_t MacGuiWindow::getTitle(String& title)
 {
   if (window == nil) return ERR_RT_INVALID_HANDLE;
-  
-  title = fromNSString([window title]);
-  return ERR_OK;
+  return MacUtil::StringFromNS(title, [window title]);
 }
 
 err_t MacGuiWindow::setIcon(const Image& icon)
@@ -512,12 +512,9 @@ err_t MacGuiWindow::worldToClient(PointI* coords)
 {
   if (window == nil) return ERR_RT_INVALID_HANDLE;
   
-  for (int i=0; i<sizeof(coords)/sizeof(coords[0]); ++i)
-  {
-    NSPoint clientPt = [window convertScreenToBase: toNSPoint(coords[i])];
-    coords[i].setX(clientPt.x);
-    coords[i].setY(clientPt.y);
-  }
+  NSPoint clientPt = [window convertScreenToBase: toNSPoint(coords[0])];
+  coords[0].setX(clientPt.x);
+  coords[0].setY(clientPt.y);
   
   return ERR_OK;
 }
@@ -526,12 +523,9 @@ err_t MacGuiWindow::clientToWorld(PointI* coords)
 {
   if (window == nil) return ERR_RT_INVALID_HANDLE;
   
-  for (int i=0; i<sizeof(coords)/sizeof(coords[0]); ++i)
-  {
-    NSPoint clientPt = [window convertBaseToScreen: toNSPoint(coords[i])];
-    coords[i].setX(clientPt.x);
-    coords[i].setY(clientPt.y);
-  }
+  NSPoint clientPt = [window convertBaseToScreen: toNSPoint(coords[0])];
+  coords[0].setX(clientPt.x);
+  coords[0].setY(clientPt.y);
 
   return ERR_OK;
 }

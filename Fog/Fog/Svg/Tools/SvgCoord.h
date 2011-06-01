@@ -38,7 +38,7 @@ struct FOG_NO_EXPORT SvgCoord
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::SvgCoord, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::SvgCoord, Fog::TYPEINFO_PRIMITIVE)
 
 // [Guard]
 #endif // _FOG_SVG_TOOLS_SVGCOORD_H

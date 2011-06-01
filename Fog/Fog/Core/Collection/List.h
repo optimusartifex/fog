@@ -10,9 +10,11 @@
 // [Dependencies]
 #include <Fog/Core/Collection/Algorithms.h>
 #include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/SequenceInfo.h>
 #include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Global/TypeInfo.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Memory.h>
@@ -94,7 +96,7 @@ struct FOG_NO_EXPORT ListData
 //! @brief Abstract @c List<T> container, do not use directly.
 struct FOG_NO_EXPORT ListUntyped
 {
-  FOG_DECLARE_D(ListData)
+  _FOG_CLASS_D(ListData)
 };
 
 // ============================================================================
@@ -299,7 +301,7 @@ struct FOG_NO_EXPORT List
   FOG_INLINE ~List() { ListPrivate<T>::deref(_d); }
 
   // --------------------------------------------------------------------------
-  // [Implicit Sharing]
+  // [Sharing]
   // --------------------------------------------------------------------------
 
   //! @copydoc Doxygen::Implicit::getRefCount().
@@ -550,11 +552,6 @@ struct FOG_NO_EXPORT List
     return ERR_OK;
   }
 
-  FOG_INLINE void swapWith(List& other)
-  {
-    other._d = atomicPtrXchg(&_d, other._d);
-  }
-
   FOG_NO_INLINE err_t sort()
   {
     return sort(TypeCmp<T>::compare);
@@ -774,7 +771,7 @@ struct FOG_NO_EXPORT List
   // [Members]
   // --------------------------------------------------------------------------
 
-  FOG_DECLARE_D(ListData)
+  _FOG_CLASS_D(ListData)
 };
 
 //! @}
@@ -785,7 +782,13 @@ struct FOG_NO_EXPORT List
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO_TEMPLATE1(Fog::List, typename, T, Fog::TYPEINFO_MOVABLE)
+_FOG_TYPEINFO_DECLARE_T1(Fog::List, typename, T, Fog::TYPEINFO_MOVABLE)
+
+// ============================================================================
+// [Fog::Swap]
+// ============================================================================
+
+_FOG_SWAP_D_TEMPLATE1(Fog::List, typename, T)
 
 // [Guard]
 #endif // _FOG_CORE_COLLECTION_LIST_H

@@ -1,4 +1,4 @@
-// [Fog-Core]
+// [Fog-Svg]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -11,7 +11,6 @@
 // [Dependencies]
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Svg/Dom/SvgTSpanElement_p.h>
-#include <Fog/Svg/Visit/SvgRender.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
 #include <Fog/Xml/Dom/XmlText.h>
 
@@ -60,9 +59,22 @@ XmlAttribute* SvgTSpanElement::_createAttribute(const ManagedString& name) const
   return base::_createAttribute(name);
 }
 
+err_t SvgTSpanElement::onPrepare(SvgVisitor* visitor, SvgGState* state) const
+{
+  base::onPrepare(visitor, state);
+  if (state && !state->hasState(SvgGState::SAVED_GLOBAL)) state->saveGlobal();
+
+  float x = a_x.isAssigned() ? a_x.getCoordComputed() : 0.0f;
+  float y = a_y.isAssigned() ? a_y.getCoordComputed() : 0.0f;
+  visitor->_textCursor.set(x, y);
+
+  return ERR_OK;
+}
+
 err_t SvgTSpanElement::onProcess(SvgVisitor* visitor) const
 {
   err_t err = ERR_OK;
+
   float x = visitor->_textCursor.x;
   float y = visitor->_textCursor.y;
 
@@ -73,11 +85,10 @@ err_t SvgTSpanElement::onProcess(SvgVisitor* visitor) const
   text.simplify();
 
   // TODO: Not optimal, just initial support for text rendering.
-  PathD path;
+  PathF path;
 
-  err = visitor->_font.getOutline(text, path);
+  err = visitor->_font.getTextOutline(path, PointF(x, y), text);
   if (FOG_IS_ERROR(err)) return err;
-  path.translate(PointD(x, y));
 
   err = visitor->onPath((SvgElement*)this, path);
   visitor->_textCursor.set(x, y);

@@ -8,6 +8,7 @@
 #define _FOG_SVG_DOM_SVGTEXTELEMENT_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Svg/Dom/SvgCoordAttribute_p.h>
 #include <Fog/Svg/Dom/SvgStyledElement_p.h>
 
@@ -41,6 +42,7 @@ struct FOG_NO_EXPORT SvgTextElement : public SvgStyledElement
   // [SVG Interface]
   // --------------------------------------------------------------------------
 
+  virtual err_t onPrepare(SvgVisitor* visitor, SvgGState* state) const;
   virtual err_t onProcess(SvgVisitor* visitor) const;
   virtual err_t onGeometryBoundingBox(BoxF& box, const TransformF* tr) const;
 
@@ -59,7 +61,7 @@ struct FOG_NO_EXPORT SvgTextElement : public SvgStyledElement
   SvgCoordAttribute a_textLength;
 
 private:
-  FOG_DISABLE_COPY(SvgTextElement)
+  _FOG_CLASS_NO_COPY(SvgTextElement)
 };
 
 //! @}

@@ -395,13 +395,13 @@ FOG_INLINE AhslF AcmykF::getAhslF() const
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::Color, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::Color, Fog::TYPEINFO_PRIMITIVE)
 
 // ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_DECLARE_FUZZY(Fog::Color,
+FOG_FUZZY_DECLARE(Fog::Color,
   a._model == b._model &&
   a._hints == b._hints &&
   a._argb32.u32 == b._argb32.u32 &&

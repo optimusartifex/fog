@@ -8,7 +8,9 @@
 #define _FOG_CORE_IO_STREAM_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Global/TypeInfo.h>
 #include <Fog/Core/IO/FileSystem.h>
 #include <Fog/Core/Tools/ByteArray.h>
@@ -37,7 +39,7 @@ struct FOG_API StreamDevice
   virtual ~StreamDevice();
 
   // --------------------------------------------------------------------------
-  // [Implicit Sharing]
+  // [Sharing]
   // --------------------------------------------------------------------------
 
   virtual StreamDevice* ref() const;
@@ -92,7 +94,7 @@ struct FOG_API Stream
   ~Stream();
 
   // --------------------------------------------------------------------------
-  // [Implicit Sharing]
+  // [Sharing]
   // --------------------------------------------------------------------------
 
   FOG_INLINE sysuint_t getRefCount() const { return _d->refCount.get(); }
@@ -193,7 +195,7 @@ struct FOG_API Stream
   // [Members]
   // --------------------------------------------------------------------------
 
-  FOG_DECLARE_D(StreamDevice)
+  _FOG_CLASS_D(StreamDevice)
 };
 
 //! @}
@@ -204,7 +206,13 @@ struct FOG_API Stream
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-FOG_DECLARE_TYPEINFO(Fog::Stream, Fog::TYPEINFO_MOVABLE)
+_FOG_TYPEINFO_DECLARE(Fog::Stream, Fog::TYPEINFO_MOVABLE)
+
+// ============================================================================
+// [Fog::Swap]
+// ============================================================================
+
+_FOG_SWAP_D(Fog::Stream)
 
 // [Guard]
 #endif // _FOG_CORE_STREAM_H

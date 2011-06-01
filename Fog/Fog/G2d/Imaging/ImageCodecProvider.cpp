@@ -214,7 +214,7 @@ ImageCodecProvider* ImageCodecProvider::getProviderByExtension(uint32_t codecTyp
   List<ImageCodecProvider*>::ConstIterator it(providers);
 
   // Convert extension to lower case.
-  TemporaryString<16> e(extension);
+  StringTmp<16> e(extension);
   e.lower();
 
   for (it.toStart(); it.isValid(); it.toNext())

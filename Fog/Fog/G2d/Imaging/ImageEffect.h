@@ -8,7 +8,10 @@
 #define _FOG_G2D_IMAGING_IMAGEEFFECT_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Swap.h>
+#include <Fog/Core/Global/TypeInfo.h>
 #include <Fog/Core/Memory/Memory.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/G2d/Global/Constants.h>
@@ -57,13 +60,13 @@ struct FOG_NO_EXPORT ImageEffectData
   // [Members]
   // --------------------------------------------------------------------------
 
-  //! @brief The reference count.
+  //! @brief Reference count.
   mutable Atomic<sysuint_t> refCount;
 
-  //! @brief The destructor.
+  //! @brief Destructor function.
   ImageEffectDestroyFn destroy;
 
-  //! @brief The effect type.
+  //! @brief Effect type.
   uint32_t type;
 };
 
@@ -120,12 +123,24 @@ struct FOG_API ImageEffect
   // [Members]
   // --------------------------------------------------------------------------
 
-  FOG_DECLARE_D(ImageEffectData)
+  _FOG_CLASS_D(ImageEffectData)
 };
 
 //! @}
 
 } // Fog namespace
+
+// ============================================================================
+// [Fog::TypeInfo<>]
+// ============================================================================
+
+_FOG_TYPEINFO_DECLARE(Fog::ImageEffect, Fog::TYPEINFO_MOVABLE)
+
+// ============================================================================
+// [Fog::Swap]
+// ============================================================================
+
+_FOG_SWAP_D(Fog::ImageEffect)
 
 // [Guard]
 #endif // _FOG_G2D_IMAGING_IMAGEEFFECT_H

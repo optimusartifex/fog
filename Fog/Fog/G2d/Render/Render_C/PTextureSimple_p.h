@@ -864,7 +864,6 @@ _FetchSkip:
 
       if (w) dst = accessor.repeat(dst, tw, w);
 
-_FetchSkip:
       P_FETCH_SPAN8_NEXT()
     P_FETCH_SPAN8_END()
 
@@ -957,7 +956,6 @@ _FetchSkip:
 
       if (w) dst = accessor.repeat(dst, tw, w);
 
-_FetchSkip:
       P_FETCH_SPAN8_NEXT()
     P_FETCH_SPAN8_END()
 
@@ -1312,7 +1310,6 @@ _FetchSkip:
 
       if (w) dst = accessor.repeat(dst, tw2, w);
 
-_FetchSkip:
       P_FETCH_SPAN8_NEXT()
     P_FETCH_SPAN8_END()
 
@@ -1449,7 +1446,6 @@ _FetchSkip:
 
       if (w) dst = accessor.repeat(dst, tw2, w);
 
-_FetchSkip:
       P_FETCH_SPAN8_NEXT()
     P_FETCH_SPAN8_END()
 

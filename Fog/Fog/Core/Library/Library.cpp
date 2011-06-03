@@ -18,7 +18,9 @@
 #include <Fog/Core/Library/Library.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Tools/ByteArray.h>
+#include <Fog/Core/Tools/ByteArrayTmp_p.h>
 #include <Fog/Core/Tools/String.h>
+#include <Fog/Core/Tools/StringTmp_p.h>
 #include <Fog/Core/Tools/TextCodec.h>
 
 // [Platform Specific]
@@ -187,7 +189,7 @@ err_t Library::open(const String& _fileName, uint32_t openFlags)
   StringTmp<TEMPORARY_LENGTH> fileName;
   List<String> extensions = _core_library_local->extensions;
 
-  for (sysuint_t i = 0; i < extensions.getLength(); i++)
+  for (size_t i = 0; i < extensions.getLength(); i++)
   {
     if ( (err = fileName.setDeep(_fileName)) ) goto _Fail;
 
@@ -237,7 +239,7 @@ err_t Library::openPlugin(const String& category, const String& fileName)
 
   List<String> extensions = _core_library_local->extensions;
 
-  for (sysuint_t i = 0; i < extensions.getLength(); i++)
+  for (size_t i = 0; i < extensions.getLength(); i++)
   {
     if ( (err = relative.setDeep(_core_library_local->prefix)) ) goto _Fail;
     if (!category.isEmpty())
@@ -280,13 +282,13 @@ void* Library::getSymbol(const char* symbolName)
 void* Library::getSymbol(const String& symbolName)
 {
   ByteArrayTmp<TEMPORARY_LENGTH> symb8;
-  TextCodec::utf8().fromUnicode(symb8, symbolName);
+  TextCodec::utf8().encode(symb8, symbolName, NULL);
   return systemLoadSymbol(_d->handle, symb8.getData());
 }
 
-sysuint_t Library::getSymbols(void** target, const char* symbols, sysuint_t symbolsLength, sysuint_t symbolsCount, char** fail)
+size_t Library::getSymbols(void** target, const char* symbols, size_t symbolsLength, size_t symbolsCount, char** fail)
 {
-  sysuint_t i;
+  size_t i;
 
   void* address;
   void* handle = _d->handle;

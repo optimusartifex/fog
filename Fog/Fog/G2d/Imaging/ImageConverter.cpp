@@ -245,7 +245,7 @@ void ImageConverter::blitSpan(void* dst, const void* src, int w, const PointI& d
 // [Fog::ImageConverter - Blit Rect]
 // ============================================================================
 
-void ImageConverter::blitRect(void* dst, sysuint_t dstStride, const void* src, sysuint_t srcStride, int w, int h)
+void ImageConverter::blitRect(void* dst, size_t dstStride, const void* src, size_t srcStride, int w, int h)
 {
   FOG_ASSERT(isValid());
 
@@ -262,7 +262,7 @@ void ImageConverter::blitRect(void* dst, sysuint_t dstStride, const void* src, s
   }
 }
 
-void ImageConverter::blitRect(void* dst, sysuint_t dstStride, const void* src, sysuint_t srcStride, int w, int h, const PointI& ditherOrigin)
+void ImageConverter::blitRect(void* dst, size_t dstStride, const void* src, size_t srcStride, int w, int h, const PointI& ditherOrigin)
 {
   FOG_ASSERT(isValid());
 

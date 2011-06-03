@@ -38,7 +38,7 @@ bool ListenerListBase::_add(void* listener)
 
 bool ListenerListBase::_remove(void* listener)
 {
-  sysuint_t i = _listeners.indexOf(listener);
+  size_t i = _listeners.indexOf(listener);
 
   if (i != INVALID_INDEX)
   {
@@ -60,7 +60,7 @@ bool ListenerListBase::_has(void* listener)
 
 void ListenerListBase::_compact() const
 {
-  sysuint_t i = 0;
+  size_t i = 0;
 
   while (i < _listeners.getLength())
   {

@@ -25,31 +25,31 @@ namespace Math {
 // [Fog::Math - Cvt]
 // ============================================================================
 
-static FOG_INLINE void vFloatFromDouble(float* dst, const double* src, sysuint_t length)
+static FOG_INLINE void vFloatFromDouble(float* dst, const double* src, size_t length)
 {
   _core.mathf.vFloatFromDouble(dst, src, length);
 }
 
-static FOG_INLINE void vDoubleFromFloat(double* dst, const float* src, sysuint_t length)
+static FOG_INLINE void vDoubleFromFloat(double* dst, const float* src, size_t length)
 {
   _core.mathd.vDoubleFromFloat(dst, src, length);
 }
 
 template<typename DstNumber, typename SrcNumber>
-static FOG_INLINE void vConvertFloat(DstNumber* dst, const SrcNumber* src, sysuint_t length)
+static FOG_INLINE void vConvertFloat(DstNumber* dst, const SrcNumber* src, size_t length)
 {
   FOG_ASSERT(sizeof(DstNumber) == sizeof(SrcNumber));
   Memory::copy(dst, src, length * sizeof(DstNumber));
 }
 
 template<>
-FOG_INLINE void vConvertFloat<double, float>(double* dst, const float* src, sysuint_t length)
+FOG_INLINE void vConvertFloat<double, float>(double* dst, const float* src, size_t length)
 {
   _core.mathd.vDoubleFromFloat(dst, src, length);
 }
 
 template<>
-FOG_INLINE void vConvertFloat<float, double>(float* dst, const double* src, sysuint_t length)
+FOG_INLINE void vConvertFloat<float, double>(float* dst, const double* src, size_t length)
 {
   _core.mathf.vFloatFromDouble(dst, src, length);
 }

@@ -118,7 +118,7 @@ struct FOG_NO_EXPORT Helpers
 
   static FOG_INLINE uint8_t* p_fill_a8(uint8_t* dst, uint32_t c0, int w)
   {
-    memset(dst, (int)c0, (sysuint_t)w);
+    memset(dst, (int)c0, (size_t)w);
     return dst + w;
   }
 

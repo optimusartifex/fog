@@ -301,7 +301,7 @@ FOG_GUI_MAIN()
     //fileName = Ascii8("C:/my/svg/froggy.svg");
     //fileName = Ascii8("C:/my/svg/fire_engine.svg");
     //fileName = Ascii8("C:/my/svg/tommek_Car.svg");
-    fileName = Ascii8("C:/my/svg/TestFOGFeatures.svg");
+    //fileName = Ascii8("C:/my/svg/TestFOGFeatures.svg");
     //fileName = Ascii8("C:/My/svg/linear3.svg");
 
     //fileName = Ascii8("C:/my/svg/ISO_12233-reschart.svg");
@@ -317,6 +317,7 @@ FOG_GUI_MAIN()
 
     //fileName = Ascii8("C:/my/svg/jean_victor_balin_check.svg");
     //fileName = Ascii8("C:/my/svg/PatternTest.svg");
+    fileName = Ascii8("C:/my/svg/Denis - map_v.0.2.svg");
   }
 
   MyWindow window;

@@ -63,7 +63,7 @@ struct FOG_GUIENGINE_X11_API X11GuiEngine : public GuiEngine
   // --------------------------------------------------------------------------
 
   virtual void doUpdate();
-  virtual void doBlitWindow(GuiWindow* window, const BoxI* rects, sysuint_t count);
+  virtual void doBlitWindow(GuiWindow* window, const BoxI* rects, size_t count);
 
   // --------------------------------------------------------------------------
   // [GuiWindow]
@@ -542,9 +542,9 @@ struct FOG_GUIENGINE_X11_API X11GuiBackBuffer : public GuiBackBuffer
 
   virtual bool resize(int width, int height, bool cache);
   virtual void destroy();
-  virtual void updateRects(const BoxI* rects, sysuint_t count);
+  virtual void updateRects(const BoxI* rects, size_t count);
 
-  void blitRects(XID target, const BoxI* rects, sysuint_t count);
+  void blitRects(XID target, const BoxI* rects, size_t count);
 
   FOG_INLINE Pixmap getPixmap() const { return _pixmap; }
   FOG_INLINE XImage* getXImage() const { return _ximage; }

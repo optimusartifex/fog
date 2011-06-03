@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_TOOLS_LAZY_H
-#define _FOG_CORE_TOOLS_LAZY_H
+#ifndef _FOG_CORE_THREADING_LAZY_H
+#define _FOG_CORE_THREADING_LAZY_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Class.h>
@@ -15,7 +15,7 @@
 
 namespace Fog {
 
-//! @addtogroup Fog_Core_Tools
+//! @addtogroup Fog_Core_Threading
 //! @{
 
 // ============================================================================
@@ -67,10 +67,14 @@ struct Lazy : public LazyBase
 {
   //! @brief Constructor, will create class without creating the instance, you
   //! must call @c get() to create it.
-  FOG_INLINE Lazy() {}
+  FOG_INLINE Lazy()
+  {
+  }
 
   //! @brief Constructor used by the library (internal).
-  FOG_INLINE Lazy(_Uninitialized x) : LazyBase(UNINITIALIZED) {}
+  FOG_INLINE Lazy(_Uninitialized x) : LazyBase(UNINITIALIZED)
+  {
+  }
 
   //! @brief Destructor, will destroy the lazy instance.
   virtual ~Lazy()
@@ -81,13 +85,22 @@ struct Lazy : public LazyBase
   }
 
   //! @brief Get or create the lazy instance.
-  FOG_INLINE T* get() { return reinterpret_cast<T*>(LazyBase::_get()); }
+  FOG_INLINE T* get()
+  {
+    return reinterpret_cast<T*>(LazyBase::_get());
+  }
 
   //! @brief Get or create the lazy instance (overloaded operator for convenience).
-  FOG_INLINE T* operator->() { return get(); }
+  FOG_INLINE T* operator->()
+  {
+    return get();
+  }
 
 protected:
-  virtual void* _create() { return fog_new T(); }
+  virtual void* _create()
+  {
+    return fog_new T();
+  }
 };
 
 // @}
@@ -95,4 +108,4 @@ protected:
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_CORE_TOOLS_LAZY_H
+#endif // _FOG_CORE_THREADING_LAZY_H

@@ -38,7 +38,7 @@ struct FOG_NO_EXPORT Range
   FOG_INLINE Range(_Uninitialized) {}
 
   //! @brief Create a range from @a start to @a end.
-  explicit FOG_INLINE Range(sysuint_t start, sysuint_t end = DETECT_LENGTH) :
+  explicit FOG_INLINE Range(size_t start, size_t end = DETECT_LENGTH) :
     _start(start),
     _end(end)
   {
@@ -56,14 +56,14 @@ struct FOG_NO_EXPORT Range
   // --------------------------------------------------------------------------
 
   //! @brief Get start position.
-  FOG_INLINE sysuint_t getStart() const { return _start; }
+  FOG_INLINE size_t getStart() const { return _start; }
   //! @brief Get end position.
-  FOG_INLINE sysuint_t getEnd() const { return _end; }
+  FOG_INLINE size_t getEnd() const { return _end; }
 
   //! @brief Calculate range length.
   //!
   //! @note If end is smaller than start then 0 is returned.
-  FOG_INLINE sysuint_t getLength() const
+  FOG_INLINE size_t getLength() const
   {
     return (_end > _start) ? _end - _start : 0;
   }
@@ -73,19 +73,19 @@ struct FOG_NO_EXPORT Range
   //! This function is used internally in places where we know that the length
   //! is zero or larger. There is assertion so if this method is used inproperly
   //! then assertion-failure is shown.
-  FOG_INLINE sysuint_t getLengthNoCheck() const
+  FOG_INLINE size_t getLengthNoCheck() const
   {
     FOG_ASSERT(_start <= _end);
     return _end - _start;
   }
 
   //! @brief Set start position.
-  FOG_INLINE void setStart(sysuint_t start) { _start = start; }
+  FOG_INLINE void setStart(size_t start) { _start = start; }
   //! @brief Set end position.
-  FOG_INLINE void setEnd(sysuint_t end) { _end = end; }
+  FOG_INLINE void setEnd(size_t end) { _end = end; }
 
   //! @brief Set both start and end position.
-  FOG_INLINE void setRange(sysuint_t start, sysuint_t end)
+  FOG_INLINE void setRange(size_t start, size_t end)
   {
     _start = start;
     _end = end;
@@ -119,8 +119,8 @@ struct FOG_NO_EXPORT Range
   // [Members]
   // --------------------------------------------------------------------------
 
-  sysuint_t _start;
-  sysuint_t _end;
+  size_t _start;
+  size_t _end;
 };
 
 //! @}

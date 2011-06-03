@@ -37,39 +37,39 @@ protected:
 
   // These are marked mutable to facilitate having NotifyAll be const.
   mutable List<void*> _listeners;
-  mutable sysuint_t _notifyDepth;
+  mutable size_t _notifyDepth;
 
 private:
   _FOG_CLASS_NO_COPY(ListenerListBase)
 };
 
-template <typename ListenerType>
+template <typename ListenerT>
 struct ListenerList : public ListenerListBase
 {
   FOG_INLINE ListenerList() {}
   FOG_INLINE ~ListenerList() {}
 
-  FOG_INLINE const List<ListenerType*>& getList() const
-  { return reinterpret_cast<const List<ListenerType*>&>(_listeners); }
+  FOG_INLINE const List<ListenerT*>& getList() const
+  { return reinterpret_cast<const List<ListenerT*>&>(_listeners); }
 
-  FOG_INLINE sysuint_t getLength() const
+  FOG_INLINE size_t getLength() const
   { return _listeners.getLength(); }
 
-  FOG_INLINE ListenerType* _at(sysuint_t index) const
-  { return reinterpret_cast<ListenerType*>(_listeners.at(index)); }
+  FOG_INLINE ListenerT* _at(size_t index) const
+  { return reinterpret_cast<ListenerT*>(_listeners.at(index)); }
 
   //! @brief Add an listener to the list.
-  FOG_INLINE bool add(ListenerType* listener)
+  FOG_INLINE bool add(ListenerT* listener)
   { return ListenerListBase::_add(static_cast<void*>(listener)); }
 
   //! @brief  Remove an listener from the list.
-  FOG_INLINE bool remove(ListenerType* listener)
+  FOG_INLINE bool remove(ListenerT* listener)
   { return ListenerListBase::_remove(static_cast<void*>(listener)); }
 
   //! @brief Scope, used by @c FOG_LISTENER_FOR_EACH() macro defined below.
   struct Scope
   {
-    FOG_INLINE Scope(const ListenerList<ListenerType>& listenerList) :
+    FOG_INLINE Scope(const ListenerList<ListenerT>& listenerList) :
       _list(listenerList)
     {
       _list._notifyDepth++;
@@ -81,23 +81,23 @@ struct ListenerList : public ListenerListBase
     }
 
   //private:
-    const ListenerList<ListenerType>& _list;
+    const ListenerList<ListenerT>& _list;
   };
 
 //private:
-//  friend struct ListenerList<ListenerType>::Scope;
+//  friend struct ListenerList<ListenerT>::Scope;
 
   _FOG_CLASS_NO_COPY(ListenerList)
 };
 
-#define FOG_LISTENER_FOR_EACH(ListenerType, _listenerList, _func) \
+#define FOG_LISTENER_FOR_EACH(ListenerT, _listenerList, _func) \
   FOG_MACRO_BEGIN \
-    sysuint_t __for_each_index = 0; \
-    sysuint_t __for_each_length = (_listenerList).getList().getLength(); \
+    size_t __for_each_index = 0; \
+    size_t __for_each_length = (_listenerList).getList().getLength(); \
     \
     for (__for_each_index = 0; __for_each_index < __for_each_length; __for_each_index++) \
     { \
-      ListenerType* __for_each_listener = _listenerList.getList().at(__for_each_index); \
+      ListenerT* __for_each_listener = _listenerList.getList().at(__for_each_index); \
       if (__for_each_listener) __for_each_listener->_func; \
     } \
   FOG_MACRO_END

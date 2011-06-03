@@ -47,7 +47,7 @@ struct FOG_NO_EXPORT ZoneMemoryAllocator
 
   //! @brief Create a new instance of zone allocator.
   //! @param chunkSize Default size for one zone chunk.
-  ZoneMemoryAllocator(sysuint_t chunkSize);
+  ZoneMemoryAllocator(size_t chunkSize);
 
   //! @brief Destroy the zone allocator instance.
   ~ZoneMemoryAllocator();
@@ -128,7 +128,7 @@ struct FOG_NO_EXPORT ZoneMemoryAllocator
   //!   // alternative is to call @c zone.free().
   //! }
   //! @endcode
-  FOG_INLINE void* alloc(sysuint_t size)
+  FOG_INLINE void* alloc(size_t size)
   {
     // Chunks must be valid pointer if we are here.
     FOG_ASSERT(_current != NULL);
@@ -149,7 +149,7 @@ struct FOG_NO_EXPORT ZoneMemoryAllocator
   //! There is no reason to inline this method, because the @c alloc() is
   //! sufficient (if we need to call libc malloc then the cost of calling
   //! @c _alloc() is zero).
-  void* _alloc(sysuint_t size);
+  void* _alloc(size_t size);
 
   //! @brief Record current state.
   Record* record();
@@ -193,7 +193,7 @@ protected:
   Chunk* _current;
 
   //! @brief One chunk size.
-  sysuint_t _chunkSize;
+  size_t _chunkSize;
 
 private:
   _FOG_CLASS_NO_COPY(ZoneMemoryAllocator)

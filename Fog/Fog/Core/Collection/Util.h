@@ -21,7 +21,7 @@ namespace Util {
 // [Fog::Util]
 // ============================================================================
 
-sysuint_t getGrowCapacity(sysuint_t headerSize, sysuint_t elementSize, sysuint_t before, sysuint_t after);
+size_t getGrowCapacity(size_t headerSize, size_t elementSize, size_t before, size_t after);
 
 //! @}
 

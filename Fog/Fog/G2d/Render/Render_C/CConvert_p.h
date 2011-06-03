@@ -465,7 +465,7 @@ struct FOG_NO_EXPORT CConvert
   static void FOG_FASTCALL copy_8(
     uint8_t* dst, const uint8_t* src, int w, const RenderClosure* closure)
   {
-    while ( ((sysuint_t)dst & (sizeof(sysuint_t) - 1)) )
+    while ( ((size_t)dst & (sizeof(size_t) - 1)) )
     {
       Memory::copy_1(dst, src);
       dst += 1;
@@ -511,7 +511,7 @@ struct FOG_NO_EXPORT CConvert
   static void FOG_FASTCALL copy_16(
     uint8_t* dst, const uint8_t* src, int w, const RenderClosure* closure)
   {
-    while ( ((sysuint_t)dst & (sizeof(sysuint_t) - 1)) )
+    while ( ((size_t)dst & (sizeof(size_t) - 1)) )
     {
       Memory::copy_2(dst, src);
       dst += 2;
@@ -559,7 +559,7 @@ struct FOG_NO_EXPORT CConvert
   {
     w *= 3;
 
-    while ( ((sysuint_t)dst & (sizeof(sysuint_t) - 1)) )
+    while ( ((size_t)dst & (sizeof(size_t) - 1)) )
     {
       Memory::copy_1(dst, src);
       dst += 1;
@@ -607,7 +607,7 @@ struct FOG_NO_EXPORT CConvert
   {
 #if FOG_ARCH_BITS >= 64
     // Align to 64-bits when running on 64-bit mode.
-    if ((sysuint_t)dst & 0x7)
+    if ((size_t)dst & 0x7)
     {
       Memory::copy_4(dst, src);
       dst += 4;
@@ -651,7 +651,7 @@ struct FOG_NO_EXPORT CConvert
   {
     w *= 3;
 
-    while ( ((sysuint_t)dst & (sizeof(sysuint_t) - 1)) )
+    while ( ((size_t)dst & (sizeof(size_t) - 1)) )
     {
       Memory::copy_2(dst, src);
       dst += 2;
@@ -1941,7 +1941,7 @@ struct FOG_NO_EXPORT DibC
     do {
       int i = w;
 
-      while (((sysuint_t)dst & 0x3) && i)
+      while (((size_t)dst & 0x3) && i)
       {
         dst[0] = (uint8_t)src0;
         dst++;
@@ -2185,7 +2185,7 @@ struct FOG_NO_EXPORT DibC
   {
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
     // Align.
-    while (w && (sysuint_t)dst & 0x3)
+    while (w && (size_t)dst & 0x3)
     {
       uint32_t s0 = ((const uint32_t*)src)[0];
 
@@ -2239,7 +2239,7 @@ struct FOG_NO_EXPORT DibC
   {
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
     // Align.
-    while (w && (sysuint_t)dst & 0x3)
+    while (w && (size_t)dst & 0x3)
     {
       uint32_t s0 = ColorUtil::premultiply(((const uint32_t*)src)[0]);
 
@@ -2295,7 +2295,7 @@ struct FOG_NO_EXPORT DibC
 
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
     // Align.
-    while (w && (sysuint_t)dst & 0x3)
+    while (w && (size_t)dst & 0x3)
     {
       uint32_t s0 = srcPal[src[0]];
 

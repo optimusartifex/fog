@@ -53,24 +53,24 @@ struct FOG_NO_EXPORT XmlEntity
   static FOG_INLINE const Pair* pairs() { return _pairs; }
 
   //! @brief Get count of entity pairs returned by @c pairs() method.
-  static FOG_INLINE sysuint_t pairsCount() { return _pairsCount; }
+  static FOG_INLINE size_t pairsCount() { return _pairsCount; }
 
   //! @brief Decode named entity into unicode character.
-  static Char decode(const char* entityName, sysuint_t entityLength = DETECT_LENGTH);
+  static Char decode(const char* entityName, size_t entityLength = DETECT_LENGTH);
   //! @overload.
   static FOG_INLINE Char decode(const ByteArray& entityName) { return decode(entityName.getData(), entityName.getLength()); }
 
   //! @brief Decode named entity into unicode character.
-  static Char decode(const Char* entityName, sysuint_t entityLength = DETECT_LENGTH);
+  static Char decode(const Char* entityName, size_t entityLength = DETECT_LENGTH);
   //! @overload.
   static FOG_INLINE Char decode(const String& entityName) { return decode(entityName.getData(), entityName.getLength()); }
 
   //! @brief Encode unicode character into named entity.
   //! @note Length of @a dest must be at least 16 characters.
-  static sysuint_t encode(char* dst, Char ch);
+  static size_t encode(char* dst, Char ch);
 
   static const Pair* _pairs;
-  static sysuint_t _pairsCount;
+  static size_t _pairsCount;
 };
 
 //! @}

@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/PBuffer.h>
+#include <Fog/Core/Collection/BufferP.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Math/Math.h>
@@ -54,7 +54,7 @@ BmpCodecProvider::~BmpCodecProvider()
 {
 }
 
-uint32_t BmpCodecProvider::checkSignature(const void* mem, sysuint_t length) const
+uint32_t BmpCodecProvider::checkSignature(const void* mem, size_t length) const
 {
   if (!mem || length == 0) return 0;
 
@@ -314,15 +314,15 @@ err_t BmpDecoder::readHeader()
       uint32_t* pal = reinterpret_cast<uint32_t*>(_palette.getDataX());
       uint32_t palSize;
 
-      sysuint_t i;
-      sysuint_t nColors = (bmpFileHeader.imageOffset - headerTotalBytes);
+      size_t i;
+      size_t nColors = (bmpFileHeader.imageOffset - headerTotalBytes);
 
       if (headerSize == BMP_HEADER_SIZE_OS2_V1)
       {
         uint8_t pal24[768];
         uint8_t* pal24Cur = pal24;
 
-        nColors = Math::min<sysuint_t>(nColors / 3, 256);
+        nColors = Math::min<size_t>(nColors / 3, 256);
         palSize = (uint32_t)nColors * 3;
 
         if (_stream.read(pal24, palSize) != palSize)
@@ -335,7 +335,7 @@ err_t BmpDecoder::readHeader()
       }
       else
       {
-        nColors = Math::min<sysuint_t>(nColors / 4, 256);
+        nColors = Math::min<size_t>(nColors / 4, 256);
         palSize = (uint32_t)nColors * 4;
 
         if (_stream.read(pal, palSize) != palSize)
@@ -460,8 +460,8 @@ err_t BmpDecoder::readImage(Image& image)
   uint32_t y = 0;
   uint32_t i;
 
-  PBuffer<512> rawBufferStorage;
-  PBuffer<512> rleBufferStorage;
+  BufferP<512> rawBufferStorage;
+  BufferP<512> rleBufferStorage;
   uint8_t* buffer = (uint8_t *)rawBufferStorage.alloc(bmpStride);
   uint8_t* rleBuffer = NULL;
 
@@ -747,8 +747,8 @@ _Rle8Start:
 
     if (converter.isCopy())
     {
-      sysuint_t readBytes = _size.w * (_depth >> 3);
-      sysuint_t zeroBytes = bmpStride - readBytes;
+      size_t readBytes = _size.w * (_depth >> 3);
+      size_t zeroBytes = bmpStride - readBytes;
 
       for (y = 0; y < (uint32_t)_size.h; y++, pixelsCur -= stride)
       {
@@ -842,7 +842,7 @@ err_t BmpEncoder::writeImage(const Image& image)
 
   BmpFileHeader bmpFileHeader;
   BmpDataHeader bmpDataHeader;
-  PBuffer<1024> bufferLocal;
+  BufferP<1024> bufferLocal;
 
   ImageConverter converter;
   ImageData* d = image._d;

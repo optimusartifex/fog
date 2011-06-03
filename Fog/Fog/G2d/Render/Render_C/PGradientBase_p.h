@@ -26,7 +26,7 @@ struct FOG_NO_EXPORT PGradientBase
   // [Interpolate]
   // ==========================================================================
 
-  static void FOG_FASTCALL interpolate_prgb32(uint8_t* _dst, int _w, const ColorStop* stops, sysuint_t length)
+  static void FOG_FASTCALL interpolate_prgb32(uint8_t* _dst, int _w, const ColorStop* stops, size_t length)
   {
     FOG_ASSUME(length >= 1);
 
@@ -46,7 +46,7 @@ struct FOG_NO_EXPORT PGradientBase
 
     float wf = (float)(_w << 8);
 
-    sysuint_t pos;
+    size_t pos;
     for (pos = 0; pos < length; pos++)
     {
       c1 = stops[pos].getArgb32();
@@ -237,7 +237,7 @@ struct FOG_NO_EXPORT PGradientBase
 
   static int FOG_FASTCALL get_optimal_cache_length(const ColorStopList& stops)
   {
-    sysuint_t len = stops.getLength();
+    size_t len = stops.getLength();
     if (len == 2)
     {
       float diff = stops.getAt(1).getOffset() - stops.getAt(0).getOffset();
@@ -255,7 +255,7 @@ struct FOG_NO_EXPORT PGradientBase
       float maxDiff = 1.0f;
 
       // First get the minimal difference between stops.
-      for (sysuint_t i = 0; i < len; i++)
+      for (size_t i = 0; i < len; i++)
       {
         float oStop = stops.getAt(i).getOffset();
         float oDiff = oStop - oPrev;

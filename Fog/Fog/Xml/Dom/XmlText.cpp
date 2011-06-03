@@ -67,7 +67,7 @@ err_t XmlText::deleteData()
   return ERR_OK;
 }
 
-err_t XmlText::insertData(sysuint_t start, const String& data)
+err_t XmlText::insertData(size_t start, const String& data)
 {
   FOG_ASSERT(getType() == XML_ELEMENT_TEXT);
   return _data.insert(start, data);

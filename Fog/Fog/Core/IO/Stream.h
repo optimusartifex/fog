@@ -52,8 +52,8 @@ struct FOG_API StreamDevice
   virtual int64_t seek(int64_t offset, int whence) = 0;
   virtual int64_t tell() const = 0;
 
-  virtual sysuint_t read(void* buffer, sysuint_t size) = 0;
-  virtual sysuint_t write(const void* buffer, sysuint_t size) = 0;
+  virtual size_t read(void* buffer, size_t size) = 0;
+  virtual size_t write(const void* buffer, size_t size) = 0;
 
   virtual err_t getSize(int64_t* size) = 0;
   virtual err_t setSize(int64_t size) = 0;
@@ -67,7 +67,7 @@ struct FOG_API StreamDevice
   // [Members]
   // --------------------------------------------------------------------------
 
-  mutable Atomic<sysuint_t> refCount;
+  mutable Atomic<size_t> refCount;
   uint32_t flags;
 };
 
@@ -97,7 +97,7 @@ struct FOG_API Stream
   // [Sharing]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE sysuint_t getRefCount() const { return _d->refCount.get(); }
+  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
 
   // --------------------------------------------------------------------------
   // [Flags]
@@ -138,7 +138,7 @@ struct FOG_API Stream
 
   err_t openBuffer();
   err_t openBuffer(const ByteArray& buffer);
-  err_t openBuffer(void* buffer, sysuint_t size, uint32_t openFlags);
+  err_t openBuffer(void* buffer, size_t size, uint32_t openFlags);
 
   // --------------------------------------------------------------------------
   // [Seek / Tell]
@@ -151,12 +151,12 @@ struct FOG_API Stream
   // [Read / Write]
   // --------------------------------------------------------------------------
 
-  sysuint_t read(void* buffer, sysuint_t size);
-  sysuint_t read(ByteArray& dst, sysuint_t size);
-  sysuint_t readAll(ByteArray& dst, sysuint_t maxBytes = 0);
+  size_t read(void* buffer, size_t size);
+  size_t read(ByteArray& dst, size_t size);
+  size_t readAll(ByteArray& dst, size_t maxBytes = 0);
 
-  sysuint_t write(const void* buffer, sysuint_t size);
-  sysuint_t write(const ByteArray& data);
+  size_t write(const void* buffer, size_t size);
+  size_t write(const ByteArray& data);
 
   // --------------------------------------------------------------------------
   // [GetSize, SetSize, Truncate]
@@ -179,7 +179,7 @@ struct FOG_API Stream
   //! @brief Get stream memory buffer. This method works only on memory streams.
   //!
   //! If stream was open by:
-  //!   <core>openBuffer(void* buffer, sysuint_t size, uint32_t openFlags);</core>
+  //!   <core>openBuffer(void* buffer, size_t size, uint32_t openFlags);</core>
   //! buffer will be created for it and data will be copied to this buffer.
   //!
   //! If stream was open by @c ByteArray instance, this method will return it.

@@ -27,7 +27,7 @@ BlockMemoryAllocator::~BlockMemoryAllocator()
   reset();
 }
 
-void* BlockMemoryAllocator::alloc(sysuint_t size)
+void* BlockMemoryAllocator::alloc(size_t size)
 {
   size += sizeof(Header);
 

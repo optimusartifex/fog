@@ -124,13 +124,13 @@ struct FOG_NO_EXPORT MyPainterImpl
   static err_t FOG_CDECL drawRectF(Painter& self, const RectF& r);
   static err_t FOG_CDECL drawRectD(Painter& self, const RectD& r);
 
-  static err_t FOG_CDECL drawPolylineI(Painter& self, const PointI* p, sysuint_t count);
-  static err_t FOG_CDECL drawPolylineF(Painter& self, const PointF* p, sysuint_t count);
-  static err_t FOG_CDECL drawPolylineD(Painter& self, const PointD* p, sysuint_t count);
+  static err_t FOG_CDECL drawPolylineI(Painter& self, const PointI* p, size_t count);
+  static err_t FOG_CDECL drawPolylineF(Painter& self, const PointF* p, size_t count);
+  static err_t FOG_CDECL drawPolylineD(Painter& self, const PointD* p, size_t count);
 
-  static err_t FOG_CDECL drawPolygonI(Painter& self, const PointI* p, sysuint_t count);
-  static err_t FOG_CDECL drawPolygonF(Painter& self, const PointF* p, sysuint_t count);
-  static err_t FOG_CDECL drawPolygonD(Painter& self, const PointD* p, sysuint_t count);
+  static err_t FOG_CDECL drawPolygonI(Painter& self, const PointI* p, size_t count);
+  static err_t FOG_CDECL drawPolygonF(Painter& self, const PointF* p, size_t count);
+  static err_t FOG_CDECL drawPolygonD(Painter& self, const PointD* p, size_t count);
 
   static err_t FOG_CDECL drawShapeF(Painter& self, uint32_t shapeType, const void* shapeData);
   static err_t FOG_CDECL drawShapeD(Painter& self, uint32_t shapeType, const void* shapeData);
@@ -148,13 +148,13 @@ struct FOG_NO_EXPORT MyPainterImpl
   static err_t FOG_CDECL fillRectF(Painter& self, const RectF& r);
   static err_t FOG_CDECL fillRectD(Painter& self, const RectD& r);
 
-  static err_t FOG_CDECL fillRectsI(Painter& self, const RectI* r, sysuint_t count);
-  static err_t FOG_CDECL fillRectsF(Painter& self, const RectF* r, sysuint_t count);
-  static err_t FOG_CDECL fillRectsD(Painter& self, const RectD* r, sysuint_t count);
+  static err_t FOG_CDECL fillRectsI(Painter& self, const RectI* r, size_t count);
+  static err_t FOG_CDECL fillRectsF(Painter& self, const RectF* r, size_t count);
+  static err_t FOG_CDECL fillRectsD(Painter& self, const RectD* r, size_t count);
 
-  static err_t FOG_CDECL fillPolygonI(Painter& self, const PointI* p, sysuint_t count);
-  static err_t FOG_CDECL fillPolygonF(Painter& self, const PointF* p, sysuint_t count);
-  static err_t FOG_CDECL fillPolygonD(Painter& self, const PointD* p, sysuint_t count);
+  static err_t FOG_CDECL fillPolygonI(Painter& self, const PointI* p, size_t count);
+  static err_t FOG_CDECL fillPolygonF(Painter& self, const PointF* p, size_t count);
+  static err_t FOG_CDECL fillPolygonD(Painter& self, const PointD* p, size_t count);
 
   static err_t FOG_CDECL fillShapeF(Painter& self, uint32_t shapeType, const void* shapeData);
   static err_t FOG_CDECL fillShapeD(Painter& self, uint32_t shapeType, const void* shapeData);
@@ -208,13 +208,13 @@ struct FOG_NO_EXPORT MyPainterImpl
   static err_t FOG_CDECL clipRectF(Painter& self, uint32_t clipOp, const RectF& r);
   static err_t FOG_CDECL clipRectD(Painter& self, uint32_t clipOp, const RectD& r);
 
-  static err_t FOG_CDECL clipRectsI(Painter& self, uint32_t clipOp, const RectI* r, sysuint_t count);
-  static err_t FOG_CDECL clipRectsF(Painter& self, uint32_t clipOp, const RectF* r, sysuint_t count);
-  static err_t FOG_CDECL clipRectsD(Painter& self, uint32_t clipOp, const RectD* r, sysuint_t count);
+  static err_t FOG_CDECL clipRectsI(Painter& self, uint32_t clipOp, const RectI* r, size_t count);
+  static err_t FOG_CDECL clipRectsF(Painter& self, uint32_t clipOp, const RectF* r, size_t count);
+  static err_t FOG_CDECL clipRectsD(Painter& self, uint32_t clipOp, const RectD* r, size_t count);
 
-  static err_t FOG_CDECL clipPolygonI(Painter& self, uint32_t clipOp, const PointI* p, sysuint_t count);
-  static err_t FOG_CDECL clipPolygonF(Painter& self, uint32_t clipOp, const PointF* p, sysuint_t count);
-  static err_t FOG_CDECL clipPolygonD(Painter& self, uint32_t clipOp, const PointD* p, sysuint_t count);
+  static err_t FOG_CDECL clipPolygonI(Painter& self, uint32_t clipOp, const PointI* p, size_t count);
+  static err_t FOG_CDECL clipPolygonF(Painter& self, uint32_t clipOp, const PointF* p, size_t count);
+  static err_t FOG_CDECL clipPolygonD(Painter& self, uint32_t clipOp, const PointD* p, size_t count);
 
   static err_t FOG_CDECL clipShapeF(Painter& self, uint32_t clipOp, uint32_t shapeType, const void* shapeData);
   static err_t FOG_CDECL clipShapeD(Painter& self, uint32_t clipOp, uint32_t shapeType, const void* shapeData);
@@ -496,37 +496,37 @@ err_t FOG_CDECL MyPainterImpl::drawRectD(Painter& self, const RectD& r)
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::drawPolylineI(Painter& self, const PointI* p, sysuint_t count)
+err_t FOG_CDECL MyPainterImpl::drawPolylineI(Painter& self, const PointI* p, size_t count)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::drawPolylineF(Painter& self, const PointF* p, sysuint_t count)
+err_t FOG_CDECL MyPainterImpl::drawPolylineF(Painter& self, const PointF* p, size_t count)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::drawPolylineD(Painter& self, const PointD* p, sysuint_t count)
+err_t FOG_CDECL MyPainterImpl::drawPolylineD(Painter& self, const PointD* p, size_t count)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::drawPolygonI(Painter& self, const PointI* p, sysuint_t count)
+err_t FOG_CDECL MyPainterImpl::drawPolygonI(Painter& self, const PointI* p, size_t count)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::drawPolygonF(Painter& self, const PointF* p, sysuint_t count)
+err_t FOG_CDECL MyPainterImpl::drawPolygonF(Painter& self, const PointF* p, size_t count)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::drawPolygonD(Painter& self, const PointD* p, sysuint_t count)
+err_t FOG_CDECL MyPainterImpl::drawPolygonD(Painter& self, const PointD* p, size_t count)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
@@ -584,37 +584,37 @@ err_t FOG_CDECL MyPainterImpl::fillRectD(Painter& self, const RectD& r)
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::fillRectsI(Painter& self, const RectI* r, sysuint_t count)
+err_t FOG_CDECL MyPainterImpl::fillRectsI(Painter& self, const RectI* r, size_t count)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::fillRectsF(Painter& self, const RectF* r, sysuint_t count)
+err_t FOG_CDECL MyPainterImpl::fillRectsF(Painter& self, const RectF* r, size_t count)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::fillRectsD(Painter& self, const RectD* r, sysuint_t count)
+err_t FOG_CDECL MyPainterImpl::fillRectsD(Painter& self, const RectD* r, size_t count)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::fillPolygonI(Painter& self, const PointI* p, sysuint_t count)
+err_t FOG_CDECL MyPainterImpl::fillPolygonI(Painter& self, const PointI* p, size_t count)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::fillPolygonF(Painter& self, const PointF* p, sysuint_t count)
+err_t FOG_CDECL MyPainterImpl::fillPolygonF(Painter& self, const PointF* p, size_t count)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::fillPolygonD(Painter& self, const PointD* p, sysuint_t count)
+err_t FOG_CDECL MyPainterImpl::fillPolygonD(Painter& self, const PointD* p, size_t count)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
@@ -820,37 +820,37 @@ err_t FOG_CDECL MyPainterImpl::clipRectD(Painter& self, uint32_t clipOp, const R
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::clipRectsI(Painter& self, uint32_t clipOp, const RectI* r, sysuint_t count)
+err_t FOG_CDECL MyPainterImpl::clipRectsI(Painter& self, uint32_t clipOp, const RectI* r, size_t count)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::clipRectsF(Painter& self, uint32_t clipOp, const RectF* r, sysuint_t count)
+err_t FOG_CDECL MyPainterImpl::clipRectsF(Painter& self, uint32_t clipOp, const RectF* r, size_t count)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::clipRectsD(Painter& self, uint32_t clipOp, const RectD* r, sysuint_t count)
+err_t FOG_CDECL MyPainterImpl::clipRectsD(Painter& self, uint32_t clipOp, const RectD* r, size_t count)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::clipPolygonI(Painter& self, uint32_t clipOp, const PointI* p, sysuint_t count)
+err_t FOG_CDECL MyPainterImpl::clipPolygonI(Painter& self, uint32_t clipOp, const PointI* p, size_t count)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::clipPolygonF(Painter& self, uint32_t clipOp, const PointF* p, sysuint_t count)
+err_t FOG_CDECL MyPainterImpl::clipPolygonF(Painter& self, uint32_t clipOp, const PointF* p, size_t count)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL MyPainterImpl::clipPolygonD(Painter& self, uint32_t clipOp, const PointD* p, sysuint_t count)
+err_t FOG_CDECL MyPainterImpl::clipPolygonD(Painter& self, uint32_t clipOp, const PointD* p, size_t count)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self._engine);
   return ERR_RT_NOT_IMPLEMENTED;
@@ -1309,8 +1309,8 @@ struct FOG_NO_EXPORT NullPainterImpl
   static err_t FOG_CDECL fillAll(Painter& self);
 
   static err_t FOG_CDECL doRect(Painter& self, const Any& r);
-  static err_t FOG_CDECL doRects(Painter& self, const Any* r, sysuint_t count);
-  static err_t FOG_CDECL doPoly(Painter& self, const Any* p, sysuint_t count);
+  static err_t FOG_CDECL doRects(Painter& self, const Any* r, size_t count);
+  static err_t FOG_CDECL doPoly(Painter& self, const Any* p, size_t count);
   static err_t FOG_CDECL doShape(Painter& self, uint32_t shapeType, const void* shapeData);
   static err_t FOG_CDECL doPath(Painter& self, const Any& p);
   static err_t FOG_CDECL doText(Painter& self, const Any& p, const String& text, const Font& font, const Any* clip);
@@ -1329,8 +1329,8 @@ struct FOG_NO_EXPORT NullPainterImpl
   // --------------------------------------------------------------------------
 
   static err_t FOG_CDECL clipRect(Painter& self, uint32_t clipOp, const Any& r);
-  static err_t FOG_CDECL clipRects(Painter& self, uint32_t clipOp, const Any* r, sysuint_t count);
-  static err_t FOG_CDECL clipPoly(Painter& self, uint32_t clipOp, const Any* p, sysuint_t count);
+  static err_t FOG_CDECL clipRects(Painter& self, uint32_t clipOp, const Any* r, size_t count);
+  static err_t FOG_CDECL clipPoly(Painter& self, uint32_t clipOp, const Any* p, size_t count);
   static err_t FOG_CDECL clipShape(Painter& self, uint32_t clipOp, uint32_t shapeType, const void* shapeData);
   static err_t FOG_CDECL clipPath(Painter& self, uint32_t clipOp, const Any& p);
   static err_t FOG_CDECL clipText(Painter& self, uint32_t clipOp, const Any& p, const String& text, const Font& font, const Any* clip);
@@ -1582,12 +1582,12 @@ err_t FOG_CDECL NullPainterImpl::doRect(Painter& self, const Any& r)
   return ERR_RT_INVALID_STATE;
 }
 
-err_t FOG_CDECL NullPainterImpl::doRects(Painter& self, const Any* r, sysuint_t count)
+err_t FOG_CDECL NullPainterImpl::doRects(Painter& self, const Any* r, size_t count)
 {
   return ERR_RT_INVALID_STATE;
 }
 
-err_t FOG_CDECL NullPainterImpl::doPoly(Painter& self, const Any* p, sysuint_t count)
+err_t FOG_CDECL NullPainterImpl::doPoly(Painter& self, const Any* p, size_t count)
 {
   return ERR_RT_INVALID_STATE;
 }
@@ -1640,12 +1640,12 @@ err_t FOG_CDECL NullPainterImpl::clipRect(Painter& self, uint32_t clipOp, const 
   return ERR_RT_INVALID_STATE;
 }
 
-err_t FOG_CDECL NullPainterImpl::clipRects(Painter& self, uint32_t clipOp, const Any* r, sysuint_t count)
+err_t FOG_CDECL NullPainterImpl::clipRects(Painter& self, uint32_t clipOp, const Any* r, size_t count)
 {
   return ERR_RT_INVALID_STATE;
 }
 
-err_t FOG_CDECL NullPainterImpl::clipPoly(Painter& self, uint32_t clipOp, const Any* p, sysuint_t count)
+err_t FOG_CDECL NullPainterImpl::clipPoly(Painter& self, uint32_t clipOp, const Any* p, size_t count)
 {
   return ERR_RT_INVALID_STATE;
 }

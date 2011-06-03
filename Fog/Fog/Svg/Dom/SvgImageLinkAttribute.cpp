@@ -60,8 +60,8 @@ err_t SvgImageLinkAttribute::setValue(const String& value)
 
   if (value.startsWith(Ascii8("data:")))
   {
-    sysuint_t semicolon = value.indexOf(Char(';'));
-    sysuint_t separator = value.indexOf(Char(','));
+    size_t semicolon = value.indexOf(Char(';'));
+    size_t separator = value.indexOf(Char(','));
 
     if (semicolon != INVALID_INDEX && separator != INVALID_INDEX)
     {

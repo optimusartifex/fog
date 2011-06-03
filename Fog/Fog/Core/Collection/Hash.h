@@ -50,22 +50,22 @@ struct FOG_API UnorderedAbstract
   struct FOG_NO_EXPORT Data
   {
     //! @brief Reference count.
-    mutable Atomic<sysuint_t> refCount;
+    mutable Atomic<size_t> refCount;
 
     //! @brief Count of buckets.
-    sysuint_t capacity;
+    size_t capacity;
     //! @brief Count of nodes.
-    sysuint_t length;
+    size_t length;
 
     //! @brief Count of buckets we will expand to if length exceeds _expandLength.
-    sysuint_t expandCapacity;
+    size_t expandCapacity;
     //! @brief Count of nodes to grow.
-    sysuint_t expandLength;
+    size_t expandLength;
 
     //! @brief Count of buckets we will shrink to if length gets _shinkLength.
-    sysuint_t shrinkCapacity;
+    size_t shrinkCapacity;
     //! @brief Count of nodes to shrink.
-    sysuint_t shrinkLength;
+    size_t shrinkLength;
 
     //! @brief Buckets.
     void* buckets[1];
@@ -83,15 +83,15 @@ struct FOG_API UnorderedAbstract
   // [Sharing]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE sysuint_t getRefCount() const { return _d->refCount.get(); }
-  FOG_INLINE bool isDetached() const { return getRefCount() == 1; }
+  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
+  FOG_INLINE bool isDetached() const { return getReference() == 1; }
 
   // --------------------------------------------------------------------------
   // [Container]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE sysuint_t getCapacity() const { return _d->capacity; }
-  FOG_INLINE sysuint_t getLength() const { return _d->length; }
+  FOG_INLINE size_t getCapacity() const { return _d->capacity; }
+  FOG_INLINE size_t getLength() const { return _d->length; }
   FOG_INLINE bool isEmpty() const { return _d->length == 0; }
 
   // --------------------------------------------------------------------------
@@ -122,20 +122,20 @@ struct FOG_API UnorderedAbstract
   protected:
     UnorderedAbstract* _hash;
     Node* _node;
-    sysuint_t _index;
+    size_t _index;
   };
 
   // --------------------------------------------------------------------------
   // [Helpers]
   // --------------------------------------------------------------------------
 
-  bool _rehash(sysuint_t bc);
+  bool _rehash(size_t bc);
 
-  static Data* _allocData(sysuint_t capacity);
+  static Data* _allocData(size_t capacity);
   static void _freeData(Data* d);
 
-  static sysuint_t _calcExpandCapacity(sysuint_t capacity);
-  static sysuint_t _calcShrinkCapacity(sysuint_t capacity);
+  static size_t _calcExpandCapacity(size_t capacity);
+  static size_t _calcShrinkCapacity(size_t capacity);
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -194,7 +194,7 @@ struct UnorderedHash : public UnorderedAbstract
 
     FOG_NO_INLINE void clear()
     {
-      sysuint_t i, len = capacity;
+      size_t i, len = capacity;
 
       for (i = 0; i < len; i++)
       {
@@ -342,8 +342,8 @@ err_t UnorderedHash<KeyType, ValueType>::_detach(Node* exclude)
   Data* newd = (Data*)_allocData(_d->capacity);
   if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
-  sysuint_t i, len = _d->capacity;
-  sysuint_t bc = newd->capacity;
+  size_t i, len = _d->capacity;
+  size_t bc = newd->capacity;
 
   for (i = 0; i < len; i++)
   {
@@ -563,7 +563,7 @@ template<typename KeyType, typename ValueType>
 List<KeyType> UnorderedHash<KeyType, ValueType>::keys() const
 {
   List<KeyType> result;
-  sysuint_t i, len = _d->capacity;
+  size_t i, len = _d->capacity;
 
   result.reserve(len);
 
@@ -584,7 +584,7 @@ template<typename KeyType, typename ValueType>
 List<KeyType> UnorderedHash<KeyType, ValueType>::keys(const ValueType& value) const
 {
   List<KeyType> result;
-  sysuint_t i, len = _d->capacity;
+  size_t i, len = _d->capacity;
   for (i = 0; i < len; i++)
   {
     Node* node = (Node*)(_d->buckets[i]);
@@ -643,7 +643,7 @@ struct UnorderedSet : public UnorderedAbstract
 
     void clear()
     {
-      sysuint_t i, len = capacity;
+      size_t i, len = capacity;
 
       for (i = 0; i < len; i++)
       {
@@ -754,8 +754,8 @@ err_t UnorderedSet<KeyType>::_detach(Node* exclude)
   Data* newd = (Data*)_allocData(_d->capacity);
   if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
-  sysuint_t i, len = _d->capacity;
-  sysuint_t bc = newd->capacity;
+  size_t i, len = _d->capacity;
+  size_t bc = newd->capacity;
 
   for (i = 0; i < len; i++)
   {
@@ -904,7 +904,7 @@ template<typename KeyType>
 List<KeyType> UnorderedSet<KeyType>::keys() const
 {
   List<KeyType> result;
-  sysuint_t i, len = _d->capacity;
+  size_t i, len = _d->capacity;
 
   result.reserve(len);
 

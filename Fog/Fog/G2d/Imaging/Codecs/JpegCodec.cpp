@@ -13,7 +13,7 @@
 #if defined(FOG_HAVE_LIBJPEG)
 
 // [Dependencies]
-#include <Fog/Core/Collection/PBuffer.h>
+#include <Fog/Core/Collection/BufferP.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/Debug.h>
 #include <Fog/Core/Global/Static.h>
@@ -143,7 +143,7 @@ JpegCodecProvider::~JpegCodecProvider()
 {
 }
 
-uint32_t JpegCodecProvider::checkSignature(const void* mem, sysuint_t length) const
+uint32_t JpegCodecProvider::checkSignature(const void* mem, size_t length) const
 {
   if (!mem || length == 0) return 0;
 
@@ -151,7 +151,7 @@ uint32_t JpegCodecProvider::checkSignature(const void* mem, sysuint_t length) co
   static const uint8_t mimeJPEG[2] = { 0xFF, 0xD8 };
 
   // JPEG check.
-  sysuint_t i = Math::min<sysuint_t>(length, 2);
+  size_t i = Math::min<size_t>(length, 2);
   if (memcmp(mem, mimeJPEG, i) == 0)
     return 15 + ((uint32_t)i * 40);
 
@@ -220,7 +220,7 @@ static FOG_CDECL void MyJpegInitSource(j_decompress_ptr cinfo)
 static FOG_CDECL int MyJpegFillInputBuffer(j_decompress_ptr cinfo)
 {
   MyJpegSourceMgr* src = (MyJpegSourceMgr*)cinfo->src;
-  sysuint_t nbytes;
+  size_t nbytes;
 
   nbytes = src->stream->read(src->buffer, INPUT_BUFFER_SIZE);
   if (nbytes <= 0)
@@ -261,7 +261,7 @@ static FOG_CDECL void MyJpegSkipInputData(j_decompress_ptr cinfo, long num_bytes
   {
     src->stream->seek(num_bytes - remain, STREAM_SEEK_CUR);
 
-    sysuint_t nbytes = src->stream->read(src->buffer, INPUT_BUFFER_SIZE);
+    size_t nbytes = src->stream->read(src->buffer, INPUT_BUFFER_SIZE);
     src->pub.next_input_byte = src->buffer;
     src->pub.bytes_in_buffer = nbytes;
   }
@@ -575,7 +575,7 @@ static int MyJpegEmptyOutputBuffer(j_compress_ptr cinfo)
 static void FOG_CDECL MyJpegTermDestination(j_compress_ptr cinfo)
 {
   MyJpegDestMgr* dest = (MyJpegDestMgr*) cinfo->dest;
-  sysuint_t count = OUTPUT_BUF_SIZE - dest->pub.free_in_buffer;
+  size_t count = OUTPUT_BUF_SIZE - dest->pub.free_in_buffer;
 
   if (count > 0)
   {
@@ -615,7 +615,7 @@ err_t JpegEncoder::writeImage(const Image& image)
   int h = image.getHeight();
 
   ImageConverter converter;
-  PBuffer<4096> buffer;
+  BufferP<4096> buffer;
 
   // This struct contains the JPEG compression parameters and pointers to
   // working space (which is allocated as needed by the JPEG library).

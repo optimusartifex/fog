@@ -16,7 +16,9 @@
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/Init_Core_p.h>
+#include <Fog/Core/Global/Static.h>
 #include <Fog/Core/Tools/ByteArray.h>
+#include <Fog/Core/Tools/ByteArrayTmp_p.h>
 #include <Fog/Core/Tools/Locale.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringUtil.h>
@@ -25,29 +27,28 @@
 #include <wchar.h>
 #include <locale.h>
 
-#if defined(FOG_HAVE_XLOCALE_H) && defined(FOG_HAVE_XLOCALE_H_LOCALECONV_L)
-#include <xlocale.h>
-#endif
-
 namespace Fog {
 
 // ============================================================================
-// [Fog::Locale]
+// [Fog::Locale - Helpers]
 // ============================================================================
 
-Static<Locale::Data> Locale::_dnull;
-Static<Locale::Data> Locale::sharedPosix;
-Static<Locale::Data> Locale::sharedUser;
+static Static<LocaleData> _Locale_dnull;
+static Static<LocaleData> _Locale_dposix;
+static Static<LocaleData> _Locale_duser;
 
-Locale* Locale::_dnullLocale;
-Locale* Locale::sharedPosixLocale;
-Locale* Locale::sharedUserLocale;
+static FOG_INLINE LocaleData* _Locale_ref(LocaleData* d)
+{
+  d->refCount.inc();
+  return d;
+}
 
-static Static<Locale> _dnullL;
-static Static<Locale> sharedPosixL;
-static Static<Locale> sharedUserL;
+static FOG_INLINE void _Locale_deref(LocaleData* d)
+{
+  if (d->refCount.deref()) fog_delete(d);
+}
 
-static void _setDefaults(Locale::Data* d)
+static void _Locale_setDefaults(LocaleData* d)
 {
   d->data[LOCALE_CHAR_DECIMAL_POINT] = '.';
   d->data[LOCALE_CHAR_THOUSANDS_GROUP] = '\0';
@@ -61,96 +62,66 @@ static void _setDefaults(Locale::Data* d)
   d->data[LOCALE_CHAR_RESERVED] = 0;
 }
 
-static void _setLConv(Locale::Data* d, const struct lconv* conv)
+static void _Locale_setLConv(LocaleData* d, const struct lconv* conv)
 {
-  _setDefaults(d);
+  _Locale_setDefaults(d);
+  if (FOG_IS_NULL(conv)) return;
 
-  if (conv)
-  {
-    wchar_t buf[4];
+  wchar_t buf[4];
 
-    if (mbstowcs(buf, conv->decimal_point, 3) == 1) d->data[LOCALE_CHAR_DECIMAL_POINT  ] = (uint32_t)buf[0];
-    if (mbstowcs(buf, conv->thousands_sep, 3) == 1) d->data[LOCALE_CHAR_THOUSANDS_GROUP] = (uint32_t)buf[0];
-    if (mbstowcs(buf, conv->positive_sign, 3) == 1) d->data[LOCALE_CHAR_PLUS           ] = (uint32_t)buf[0];
-    if (mbstowcs(buf, conv->negative_sign, 3) == 1) d->data[LOCALE_CHAR_MINUS          ] = (uint32_t)buf[0];
-  }
+  if (mbstowcs(buf, conv->decimal_point, 3) == 1) d->data[LOCALE_CHAR_DECIMAL_POINT  ] = (uint16_t)buf[0];
+  if (mbstowcs(buf, conv->thousands_sep, 3) == 1) d->data[LOCALE_CHAR_THOUSANDS_GROUP] = (uint16_t)buf[0];
+  if (mbstowcs(buf, conv->positive_sign, 3) == 1) d->data[LOCALE_CHAR_PLUS           ] = (uint16_t)buf[0];
+  if (mbstowcs(buf, conv->negative_sign, 3) == 1) d->data[LOCALE_CHAR_MINUS          ] = (uint16_t)buf[0];
 }
 
 Locale::Locale() :
-  _d(_dnull->ref())
+  _d(_Locale_ref(_Locale_dnull.instancep()))
 {
 }
 
 Locale::Locale(const Locale& other) :
-  _d(other._d->ref())
+  _d(_Locale_ref(other._d))
 {
 }
 
-Locale::Locale(Data* d) :
-  _d(d)
+Locale::Locale(const String& locale) :
+  _d(_Locale_ref(_Locale_dnull.instancep()))
 {
-}
-
-Locale::Locale(const String& name) :
-  _d(_dnull->ref())
-{
-  set(name);
+  create(locale);
 }
 
 Locale::~Locale()
 {
-  _d->deref();
+  _Locale_deref(_d);
 }
+
+// ============================================================================
+// [Fog::Locale - Sharing]
+// ============================================================================
 
 err_t Locale::_detach()
 {
   if (isDetached()) return ERR_OK;
 
-  Data* newd = fog_new Data(*_d);
+  LocaleData* newd = fog_new LocaleData();
   if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
-  atomicPtrXchg(&_d, newd)->deref();
+  newd->refCount.init(1);
+  newd->locale = _d->locale;
+  memcpy(newd->data, _d->data, LOCALE_CHAR_COUNT * sizeof(Char));
+
+  _Locale_deref(atomicPtrXchg(&_d, newd));
   return ERR_OK;
 }
 
-void Locale::reset()
+// ============================================================================
+// [Fog::Locale - Accessors]
+// ============================================================================
+
+err_t Locale::setChar(uint32_t id, Char value)
 {
-  atomicPtrXchg(&_d, _dnull->ref())->deref();
-}
-
-// [Set]
-
-bool Locale::set(const String& name)
-{
-  char lcNameA[512];
-  if (!StringUtil::unicodeToLatin1(lcNameA, name.getData(), name.getLength())) return false;
-
-  ByteArrayTmp<128> savedLocale(Stub8(setlocale(LC_ALL, NULL)));
-
-  if (setlocale(LC_ALL, lcNameA))
-  {
-    detach();
-    _d->name = name;
-    _setLConv(_d, localeconv());
-  }
-  else
-  {
-    reset();
-  }
-
-  setlocale(LC_ALL, savedLocale.getData());
-  return !isNull();
-}
-
-bool Locale::set(const Locale& other)
-{
-  atomicPtrXchg(&_d, other._d->ref())->deref();
-  return true;
-}
-
-err_t Locale::setValue(int id, uint32_t value)
-{
-  if ((uint)id >= (uint)LOCALE_CHAR_INVALID) return ERR_RT_INVALID_ARGUMENT;
+  if (id >= (uint)LOCALE_CHAR_COUNT) return ERR_RT_INVALID_ARGUMENT;
   if (_d->data[id] == value) return ERR_OK;
 
   FOG_RETURN_ON_ERROR(detach());
@@ -160,30 +131,68 @@ err_t Locale::setValue(int id, uint32_t value)
 }
 
 // ============================================================================
-// [Fog::Locale::Data]
+// [Fog::Locale - Create]
 // ============================================================================
 
-Locale::Data::Data()
+err_t Locale::create(const String& locale)
 {
-  refCount.init(1);
-  memset(data, 0, sizeof(uint32_t) * LOCALE_CHAR_INVALID);
+  char localeA[512];
+  if (!StringUtil::unicodeToLatin1(localeA, locale.getData(), locale.getLength())) 
+    return ERR_RT_INVALID_ARGUMENT;
+
+  err_t err = ERR_OK;
+  ByteArrayTmp<128> savedLocale(Stub8(setlocale(LC_ALL, NULL)));
+
+  if (setlocale(LC_ALL, localeA))
+  {
+    err = detach();
+    if (FOG_IS_ERROR(err)) goto _End;
+
+    _d->locale = locale;
+    _Locale_setLConv(_d, localeconv());
+  }
+  else
+  {
+    err = ERR_LOCALE_NOT_MATCHED;
+  }
+
+_End:
+  setlocale(LC_ALL, savedLocale.getData());
+  return err;
 }
 
-Locale::Data::Data(const Data& other) :
-  name(other.name)
+// ============================================================================
+// [Fog::Locale - Reset]
+// ============================================================================
+
+void Locale::reset()
 {
-  refCount.init(1);
-  memcpy(data, other.data, sizeof(uint32_t) * LOCALE_CHAR_INVALID);
+  _Locale_deref(
+    atomicPtrXchg(&_d, _Locale_ref(_Locale_dnull.instancep())));
 }
 
-Locale::Data::~Data()
+// ============================================================================
+// [Fog::Locale - Operator Overload]
+// ============================================================================
+
+Locale& Locale::operator=(const Locale& other)
 {
+  _Locale_deref(
+    atomicPtrXchg(&_d, _Locale_ref(other._d)));
+  return *this;
 }
 
-void Locale::Data::deref()
-{
-  if (refCount.deref()) fog_delete(this);
-}
+// ============================================================================
+// [Fog::Locale - Statics]
+// ============================================================================
+
+Locale* Locale::_dnull;
+Locale* Locale::_dposix;
+Locale* Locale::_duser;
+
+static Static<Locale> _Locale_dnull_instance;
+static Static<Locale> _Locale_dposix_instance;
+static Static<Locale> _Locale_duser_instance;
 
 // ============================================================================
 // [Fog::Core - Library Initializers]
@@ -191,31 +200,39 @@ void Locale::Data::deref()
 
 FOG_NO_EXPORT void _core_locale_init(void)
 {
-  Locale::_dnull.init();
-  Locale::_dnull->name = Ascii8("NULL");
-  _setDefaults(Locale::_dnull.instancep());
+  _Locale_dnull.init();
+  _Locale_dnull->refCount.init(1);
+  _Locale_dnull->locale = Ascii8("NULL");
+  _Locale_setDefaults(_Locale_dnull.instancep());
 
-  Locale::sharedPosix.init();
-  Locale::sharedPosix->name= Ascii8("POSIX");
-  _setDefaults(Locale::sharedPosix.instancep());
+  _Locale_dposix.init();
+  _Locale_dposix->refCount.init(1);
+  _Locale_dposix->locale= Ascii8("POSIX");
+  _Locale_setDefaults(_Locale_dposix.instancep());
 
-  Locale::sharedUser.init();
-  _setLConv(Locale::sharedUser.instancep(), localeconv());
+  _Locale_duser.init();
+  _Locale_duser->refCount.init(1);
+  _Locale_setLConv(_Locale_duser.instancep(), localeconv());
 
-  _dnullL.initCustom1(Locale::_dnull.instancep());
-  sharedPosixL.initCustom1(Locale::sharedPosix.instancep());
-  sharedUserL.initCustom1(Locale::sharedUser.instancep());
+  Locale::_dnull = _Locale_dnull_instance.instancep();
+  Locale::_dnull->_d = _Locale_dnull.instancep();
 
-  Locale::_dnullLocale = _dnullL.instancep();
-  Locale::sharedPosixLocale = sharedPosixL.instancep();
-  Locale::sharedUserLocale = sharedUserL.instancep();
+  Locale::_dposix = _Locale_dposix_instance.instancep();
+  Locale::_dposix->_d = _Locale_dposix.instancep();
+
+  Locale::_duser = _Locale_duser_instance.instancep();
+  Locale::_duser->_d = _Locale_duser.instancep();
 }
 
 FOG_NO_EXPORT void _core_locale_fini(void)
 {
-  Locale::_dnull.destroy();
-  Locale::sharedPosix.destroy();
-  Locale::sharedUser.destroy();
+  Locale::_duser = NULL;
+  Locale::_dposix = NULL;
+  Locale::_dnull = NULL;
+
+  _Locale_duser.destroy();
+  _Locale_dposix.destroy();
+  _Locale_dnull.destroy();
 }
 
 } // Fog namespace

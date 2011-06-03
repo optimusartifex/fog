@@ -51,12 +51,12 @@ static FOG_INLINE int alignToDelta(int y, int offset, int delta)
 
 static FOG_INLINE bool isSolidContext(RenderPatternContext* pc)
 {
-  return (sysuint_t)pc == (sysuint_t)0x1;
+  return (size_t)pc == (size_t)0x1;
 }
 
 static FOG_INLINE bool isPatternContext(RenderPatternContext* pc)
 {
-  return (sysuint_t)pc > (sysuint_t)0x1;
+  return (size_t)pc > (size_t)0x1;
 }
 
 // ============================================================================
@@ -138,13 +138,13 @@ static FOG_INLINE bool canAlignToGrid(BoxI& dst, const RectD& src, double x, dou
 // Get usable span instance from span retrieved from mask. We encode 'owned'
 // bit into pointer itself so it's needed to clear it to access the instance.
 #define RASTER_CLIP_SPAN_GET_USABLE(__span__) \
-  ( (Span8*) ((sysuint_t)(__span__) & ~1) )
+  ( (Span8*) ((size_t)(__span__) & ~1) )
 
 // Get whether a given span instance is 'owned' or not. Owned means that it
 // can be directly manipulated by clipping method. If span is not owned then
 // you must replace the entire clip row with new span list.
 #define RASTER_CLIP_SPAN_IS_OWNED(__span__) \
-  (((sysuint_t)(__span__) & 0x1) == 0)
+  (((size_t)(__span__) & 0x1) == 0)
 
 // Whether a given span instance is VSpan that contains own embedded clip mask.
 #define RASTER_CLIP_IS_EMBEDDED_VSPAN(__span__) \
@@ -173,7 +173,7 @@ static FOG_INLINE bool canAlignToGrid(BoxI& dst, const RectD& src, double x, dou
 //! @brief Get clip type from source region (src).
 static FOG_INLINE uint32_t Raster_getClipType(const Region& src)
 {
-  sysuint_t len = src.getLength();
+  size_t len = src.getLength();
   if (len > 2) len = 2;
   return (uint32_t)len;
 }
@@ -183,13 +183,13 @@ static FOG_INLINE uint32_t Raster_getClipType(const Region& src)
 // Binary search region (YX sorted rectangles) and match the first one that
 // contains a given 'y'. If there is no such region then the next one will be
 // returned
-static FOG_INLINE const BoxI* Raster_bsearchRegion(const BoxI* base, sysuint_t length, int y)
+static FOG_INLINE const BoxI* Raster_bsearchRegion(const BoxI* base, size_t length, int y)
 {
   FOG_ASSERT(base != NULL);
   FOG_ASSERT(length > 0);
 
   const BoxI* r;
-  sysuint_t i;
+  size_t i;
 
   for (i = length; i != 0; i >>= 1)
   {

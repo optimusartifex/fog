@@ -45,8 +45,8 @@ struct FOG_API XmlSaxReader
 
   err_t parseFile(const String& fileName);
   err_t parseStream(Stream& stream);
-  err_t parseMemory(const void* mem, sysuint_t size);
-  err_t parseString(const Char* str, sysuint_t len);
+  err_t parseMemory(const void* mem, size_t size);
+  err_t parseString(const Char* str, size_t len);
 
   FOG_INLINE err_t parseString(const String& str)
   { return parseString(str.getData(), str.getLength()); }
@@ -66,7 +66,7 @@ struct FOG_API XmlSaxReader
   virtual err_t onAddComment(const Utf16& data) = 0;
 
 protected:
-  static TextCodec _detectEncoding(const void* mem, sysuint_t size);
+  static void _detectEncoding(TextCodec& tc, const void* mem, size_t size);
 };
 
 //! @}

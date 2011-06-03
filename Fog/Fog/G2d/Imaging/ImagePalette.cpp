@@ -100,11 +100,11 @@ err_t ImagePalette::setDeep(const ImagePalette& other)
 
 err_t ImagePalette::setData(const Range& range, const Argb32* entries)
 {
-  sysuint_t rstart = range.getStart();
+  size_t rstart = range.getStart();
   if (FOG_UNLIKELY(rstart >= 256)) return ERR_RT_INVALID_ARGUMENT;
 
-  sysuint_t rend = Math::min<sysuint_t>(256, range.getEnd());
-  sysuint_t rlen = rend - rstart;
+  size_t rend = Math::min<size_t>(256, range.getEnd());
+  size_t rlen = rend - rstart;
   if (FOG_UNLIKELY(rlen == 0)) return ERR_OK;
 
   if (!isDetached())
@@ -124,12 +124,12 @@ err_t ImagePalette::setData(const Range& range, const Argb32* entries)
   return ERR_OK;
 }
 
-err_t ImagePalette::setLength(sysuint_t length)
+err_t ImagePalette::setLength(size_t length)
 {
   if (FOG_UNLIKELY(length > 256))
     return ERR_RT_INVALID_ARGUMENT;
 
-  if (FOG_UNLIKELY((sysuint_t)_d->length == length))
+  if (FOG_UNLIKELY((size_t)_d->length == length))
     return ERR_OK;
 
   FOG_RETURN_ON_ERROR(detach());
@@ -258,9 +258,9 @@ _End:
   return ImagePalette(d);
 }
 
-bool ImagePalette::isGreyscale(const Argb32* data, sysuint_t count)
+bool ImagePalette::isGreyscale(const Argb32* data, size_t count)
 {
-  sysuint_t i;
+  size_t i;
 
   for (i = 0; i < count; i++)
   {

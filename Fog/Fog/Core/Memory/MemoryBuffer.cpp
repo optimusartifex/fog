@@ -18,7 +18,7 @@ namespace Fog {
 // [Fog::MemoryBuffer]
 // ============================================================================
 
-uint8_t* MemoryBuffer::_alloc(sysuint_t size)
+uint8_t* MemoryBuffer::_alloc(size_t size)
 {
   FOG_ASSERT(size > _memorySize);
   if (_memoryBuffer != _embeddedBuffer) _memoryManager->free(_memoryBuffer, _memorySize);

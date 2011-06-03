@@ -90,7 +90,7 @@ struct FOG_API XmlDocument : public XmlElement
 
   virtual err_t readFromFile(const String& fileName);
   virtual err_t readFromStream(Stream& stream);
-  virtual err_t readFromMemory(const void* mem, sysuint_t size);
+  virtual err_t readFromMemory(const void* mem, size_t size);
   virtual err_t readFromString(const String& str);
 
   // --------------------------------------------------------------------------
@@ -109,7 +109,7 @@ protected:
   XmlElement* _documentRoot;
 
   //! @brief Hash table that contains all managed strings and reference counts.
-  UnorderedHash<String, sysuint_t> _managedStrings;
+  UnorderedHash<String, size_t> _managedStrings;
 
   //! @brief Hash table that contains all managed IDs.
   XmlIdManager _elementIdsHash;

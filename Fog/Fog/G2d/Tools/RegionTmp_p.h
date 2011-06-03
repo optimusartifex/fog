@@ -19,7 +19,7 @@ namespace Fog {
 // [Fog::RegionTmp<>]
 // ============================================================================
 
-template<sysuint_t N>
+template<size_t N>
 struct RegionTmp : public Region
 {
   struct Storage

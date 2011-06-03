@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/PBuffer.h>
+#include <Fog/Core/Collection/BufferP.h>
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/IO/MapFile.h>
@@ -58,8 +58,8 @@ static err_t registryLookupDir(String& dst, int id)
   const char *reg_path;
   bool tryShellFolders = true;
 
-  PBuffer<1024> bufStorage;
-  PBuffer<1024> expandedStorage;
+  BufferP<1024> bufStorage;
+  BufferP<1024> expandedStorage;
 
   char* buf;
   char* expanded;
@@ -79,11 +79,11 @@ _back:
 
   if (RegQueryValueExA(k, type, NULL, &v_type, NULL, &size ) == ERROR_SUCCESS && size != 0 && (v_type == REG_SZ || v_type == REG_EXPAND_SZ))
   {
-    buf = (char*)bufStorage.alloc((sysuint_t)size);
+    buf = (char*)bufStorage.alloc((size_t)size);
     RegQueryValueExA(k, type, NULL, NULL, (LPBYTE)buf, &size);
     if (*buf)
     {
-      TextCodec::local8().toUnicode(dst, buf);
+      TextCodec::local8().decode(dst, Stub8(buf, size));
       if (v_type == REG_EXPAND_SZ)
       {
         size = ExpandEnvironmentStringsA(buf, NULL, 0);
@@ -93,7 +93,7 @@ _back:
           expanded = (char*)expandedStorage.alloc(size);
 
           ExpandEnvironmentStringsA(buf, expanded, size);
-          if (expanded[0]) TextCodec::local8().toUnicode(dst, expanded);
+          if (expanded[0]) TextCodec::local8().decode(dst, Stub8(expanded, DETECT_LENGTH));
         }
       }
     }
@@ -142,12 +142,12 @@ static err_t getXdgDirectory(String& dst, int id)
   configFile.append(Ascii8("/user-dirs.dirs"));
 
   const char* type = xdgDirectoryNames[id];
-  sysuint_t typeLength = strlen(type);
+  size_t typeLength = strlen(type);
 
   const char* mark;
   const char* end;
   const char* p;
-  sysuint_t remain;
+  size_t remain;
   int relative;
 
   MapFile file;
@@ -163,7 +163,7 @@ static err_t getXdgDirectory(String& dst, int id)
     if (p == end) break;
 
     // We are looking for XDG_SOME_DIR="VALUE".
-    if ((sysuint_t)(end - p) <= typeLength || memcmp(p, type, typeLength) != 0)
+    if ((size_t)(end - p) <= typeLength || memcmp(p, type, typeLength) != 0)
       goto _NextLine;
 
     p += typeLength;
@@ -192,7 +192,7 @@ static err_t getXdgDirectory(String& dst, int id)
     // postprocess it and return. Postprocess means to parse $HOME, maybe also
     // other environment variables?
     relative = false;
-    remain = (sysuint_t)(p - mark);
+    remain = (size_t)(p - mark);
     if (remain == 0) goto _NextLine;
 
     if (remain >= 6 && memcmp(mark, "$HOME/", 6) == 0)

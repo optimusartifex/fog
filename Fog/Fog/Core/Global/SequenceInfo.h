@@ -19,35 +19,35 @@ namespace Fog {
 // helpers
 struct SequenceInfo_NoInitFree
 {
-  static FOG_INLINE void init(void* _dest, sysuint_t count) { FOG_UNUSED(_dest); FOG_UNUSED(count); }
-  static FOG_INLINE void free(void* _dest, sysuint_t count) { FOG_UNUSED(_dest); FOG_UNUSED(count); }
+  static FOG_INLINE void init(void* _dest, size_t count) { FOG_UNUSED(_dest); FOG_UNUSED(count); }
+  static FOG_INLINE void free(void* _dest, size_t count) { FOG_UNUSED(_dest); FOG_UNUSED(count); }
 };
 
-template<sysuint_t N>
+template<size_t N>
 struct SequenceInfo_MemMove
 {
-  static FOG_INLINE void move(void* _dest, const void* _src, sysuint_t count)
+  static FOG_INLINE void move(void* _dest, const void* _src, size_t count)
   { memmove(_dest, _src, N*count); }
 };
 
-template<sysuint_t N>
+template<size_t N>
 struct SequenceInfo_MemCopy
 {
-  static FOG_INLINE void copy(void* _dest, const void* _src, sysuint_t count)
+  static FOG_INLINE void copy(void* _dest, const void* _src, size_t count)
   { memcpy(_dest, _src, N*count); }
 };
 
 template<typename T>
 struct SequenceInfo_TypeInitFree
 {
-  static FOG_NO_INLINE void init(void* _dest, sysuint_t count)
+  static FOG_NO_INLINE void init(void* _dest, size_t count)
   {
     T* dest = (T*)_dest;
     T* end = dest + count;
     while (dest != end) fog_new_p(dest++) T;
   }
 
-  static FOG_NO_INLINE void free(void* _dest, sysuint_t count)
+  static FOG_NO_INLINE void free(void* _dest, size_t count)
   {
     T* dest = (T*)_dest;
     T* end = dest + count;
@@ -58,7 +58,7 @@ struct SequenceInfo_TypeInitFree
 template<typename T>
 struct SequenceInfo_TypeMove
 {
-  static FOG_NO_INLINE void move(void* _dest, const void* _src, sysuint_t count)
+  static FOG_NO_INLINE void move(void* _dest, const void* _src, size_t count)
   {
     T* dest =(T*)_dest;
     T* end = dest;
@@ -81,7 +81,7 @@ struct SequenceInfo_TypeMove
 template<typename T>
 struct SequenceInfo_TypeCopy
 {
-  static FOG_NO_INLINE void copy(void* _dest, const void* _src, sysuint_t count)
+  static FOG_NO_INLINE void copy(void* _dest, const void* _src, size_t count)
   {
     T* dest = (T*)_dest;
     T* end = dest + count;
@@ -129,15 +129,15 @@ struct SequenceInfoVTable
 {
   // [Function Prototypes]
 
-  typedef void (*InitFn)(void* _dest, sysuint_t count);
-  typedef void (*FreeFn)(void* _dest, sysuint_t count);
-  typedef void (*MoveFn)(void* _dest, const void* _src, sysuint_t count);
-  typedef void (*CopyFn)(void* _dest, const void* _src, sysuint_t count);
+  typedef void (*InitFn)(void* _dest, size_t count);
+  typedef void (*FreeFn)(void* _dest, size_t count);
+  typedef void (*MoveFn)(void* _dest, const void* _src, size_t count);
+  typedef void (*CopyFn)(void* _dest, const void* _src, size_t count);
 
   // [Data]
 
   //! @brief Size of T
-  sysuint_t typeSize;
+  size_t typeSize;
 
   //! @brief Init function (constructor of T)
   //!

@@ -8,6 +8,6 @@
 
 namespace Fog {
 
-_CoreApi _core;
+CoreApi _core;
 
 } // Fog namespace

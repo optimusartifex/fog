@@ -55,7 +55,7 @@ err_t SvgVisitor::advance(SvgElement* obj)
     obj = reinterpret_cast<SvgElement*>(parent);
   }
 
-  sysuint_t i, len = elements.getLength();
+  size_t i, len = elements.getLength();
   for (i = 0; i < len; i++)
   {
     obj = elements.at(len - 1 - i);

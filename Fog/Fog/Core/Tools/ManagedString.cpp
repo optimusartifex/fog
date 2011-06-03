@@ -33,7 +33,7 @@ struct FOG_NO_EXPORT ManagedStringLocal
     _capacity(INITIAL_CAPACITY),
     _length(0),
     _expandCapacity(INITIAL_CAPACITY * 2),
-    _expandLength((sysuint_t)(INITIAL_CAPACITY * 0.9)),
+    _expandLength((size_t)(INITIAL_CAPACITY * 0.9)),
     _shrinkCapacity(0),
     _shrinkLength(0),
     _buckets((Node**)Memory::calloc(INITIAL_CAPACITY * sizeof(Node*))),
@@ -135,7 +135,7 @@ struct FOG_NO_EXPORT ManagedStringLocal
     AutoLock locked(_lock);
 
     const Char* sData = _s.getData();
-    sysuint_t sLength = _s.getComputedLength();
+    size_t sLength = _s.getComputedLength();
 
     FOG_ASSERT(sLength != 0);
 
@@ -232,7 +232,7 @@ struct FOG_NO_EXPORT ManagedStringLocal
     AutoLock locked(_lock);
 
     const Char* sData = _s.getData();
-    sysuint_t sLength = _s.getComputedLength();
+    size_t sLength = _s.getComputedLength();
 
     uint32_t hashCode = HashUtil::makeStringHash(sData, sLength);
     uint32_t hashMod = hashCode % _capacity;
@@ -246,13 +246,13 @@ struct FOG_NO_EXPORT ManagedStringLocal
     return NULL;
   }
 
-  FOG_NO_INLINE void _rehash(sysuint_t capacity)
+  FOG_NO_INLINE void _rehash(size_t capacity)
   {
     Node** oldBuckets = _buckets;
     Node** newBuckets = (Node**)Memory::calloc(sizeof(Node*) * capacity);
     if (FOG_IS_NULL(newBuckets)) return;
 
-    sysuint_t i, len = _capacity;
+    size_t i, len = _capacity;
     for (i = 0; i < len; i++)
     {
       Node* node = oldBuckets[i];
@@ -271,10 +271,10 @@ struct FOG_NO_EXPORT ManagedStringLocal
     _capacity = capacity;
 
     _expandCapacity = UnorderedAbstract::_calcExpandCapacity(capacity);
-    _expandLength = (sysuint_t)((sysint_t)_capacity * 0.92);
+    _expandLength = (size_t)((sysint_t)_capacity * 0.92);
 
     _shrinkCapacity = UnorderedAbstract::_calcShrinkCapacity(capacity);
-    _shrinkLength = (sysuint_t)((sysint_t)_shrinkCapacity * 0.70);
+    _shrinkLength = (size_t)((sysint_t)_shrinkCapacity * 0.70);
 
     atomicPtrXchg(&_buckets, newBuckets);
     if (oldBuckets) Memory::free(oldBuckets);
@@ -285,19 +285,19 @@ struct FOG_NO_EXPORT ManagedStringLocal
   mutable Lock _lock;
 
   //! @brief Count of buckets.
-  sysuint_t _capacity;
+  size_t _capacity;
   //! @brief Count of nodes.
-  sysuint_t _length;
+  size_t _length;
 
   //! @brief Count of buckets we will expand to if length exceeds _expandLength.
-  sysuint_t _expandCapacity;
+  size_t _expandCapacity;
   //! @brief Count of nodes to grow.
-  sysuint_t _expandLength;
+  size_t _expandLength;
 
   //! @brief Count of buckeds we will shrink to if length gets _shinkLength.
-  sysuint_t _shrinkCapacity;
+  size_t _shrinkCapacity;
   //! @brief Count of nodes to shrink.
-  sysuint_t _shrinkLength;
+  size_t _shrinkLength;
 
   //! @brief Buckets.
   Node** _buckets;
@@ -413,7 +413,7 @@ err_t ManagedString::setIfManaged(const Utf16& s)
 // [Fog::ManagedString::Cache]
 // ============================================================================
 
-ManagedString::Cache* ManagedString::createCache(const char* strings, sysuint_t length, sysuint_t count, const String& name)
+ManagedString::Cache* ManagedString::createCache(const char* strings, size_t length, size_t count, const String& name)
 {
   if (name.isEmpty()) return NULL;
 
@@ -427,14 +427,14 @@ ManagedString::Cache* ManagedString::createCache(const char* strings, sysuint_t 
   // it here.
   if (count == DETECT_LENGTH) count = StringUtil::countOf(strings, length - 1, '\0', CASE_SENSITIVE);
 
-  sysuint_t alloc =
+  size_t alloc =
     // Fog::ManagedString::Cache structure
     sizeof(Cache) +
     // Fog::ManagedString structure
     sizeof(ManagedString) * count +
-    // Fog::String::Data structure
-    sizeof(String::Data) * count +
-    // Fog::String::Data contains null terminator, so we will decrement it.
+    // Fog::StringData structure
+    sizeof(StringData) * count +
+    // Fog::StringData contains null terminator, subtract it.
     sizeof(Char) * (length - count) +
     // Fog::ManagedString::Node
     sizeof(Node) * count;
@@ -446,17 +446,17 @@ ManagedString::Cache* ManagedString::createCache(const char* strings, sysuint_t 
   Node** pList = self->_data;
   uint8_t* pNodes = reinterpret_cast<uint8_t*>(&self->_data[count]);
   uint8_t* pChars = pNodes + sizeof(ManagedString::Node) * count;
-  sysuint_t counter = 0;
+  size_t counter = 0;
 
   for (;;)
   {
-    if (!*pCur)
+    if (pCur[0] == 0)
     {
-      String::Data* d = (String::Data*)pChars;
-      sysuint_t len = (sysuint_t)(pCur - pBeg);
+      StringData* d = (StringData*)pChars;
+      size_t len = (size_t)(pCur - pBeg);
 
       d->refCount.init(1);
-      d->flags = String::Data::IsSharable;
+      d->flags = NO_FLAGS;
       d->length = len;
       d->capacity = len;
       d->hashCode = 0;
@@ -464,12 +464,12 @@ ManagedString::Cache* ManagedString::createCache(const char* strings, sysuint_t 
 
       *pList++ = managed_local->addNodeNoLock(fog_new_p(pNodes) Node(d));
       pNodes += sizeof(Node);
-      pChars += String::Data::sizeFor(len);
+      pChars += StringData::sizeFor(len);
 
       counter++;
 
       pBeg = ++pCur;
-      if (!*pBeg) break;
+      if (pBeg[0] == 0) break;
     }
     else
       pCur++;

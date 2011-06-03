@@ -9,7 +9,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/PBuffer.h>
 #include <Fog/Core/Cpu/Cpu.h>
 #include <Fog/Core/Cpu/Initializer.h>
 #include <Fog/Core/Global/Internal_Core_p.h>
@@ -114,9 +113,9 @@ static FOG_INLINE void _G2d_RectCLipperT_clipPoint(NumT_(Point)& pt, const NumT_
 
 // Remove the redundant lines from the given array.
 template<typename NumT>
-static FOG_INLINE NumT_(Point)* _G2d_PathClipperT_removeRedundantLines(NumT_(Point)* pts, sysuint_t length)
+static FOG_INLINE NumT_(Point)* _G2d_PathClipperT_removeRedundantLines(NumT_(Point)* pts, size_t length)
 {
-  sysuint_t i = length;
+  size_t i = length;
   if (i < 3) return pts + length;
 
   // Detect Loop.
@@ -224,7 +223,7 @@ static uint32_t FOG_CDECL _G2d_PathClipperT_initPath(NumT_(PathClipper)& self, c
     return CLIPPER_INIT_ALREADY_CLIPPED;
   }
 
-  sysuint_t i = src.getLength();
+  size_t i = src.getLength();
   const uint8_t* cmd = src.getCommands();
   const NumT_(Point)* pts = src.getVertices();
   const NumT_(Box)& clipBox = self._clipBox;
@@ -326,7 +325,7 @@ static uint32_t FOG_CDECL _G2d_PathClipperT_initPath(NumT_(PathClipper)& self, c
   return CLIPPER_INIT_ALREADY_CLIPPED;
 
 _MustClip:
-  self._lastIndex = (sysuint_t)(cmd - src.getCommands());
+  self._lastIndex = (size_t)(cmd - src.getCommands());
   return CLIPPER_INIT_NOT_CLIPPED;
 
 _Invalid:
@@ -354,19 +353,19 @@ static err_t FOG_CDECL _G2d_PathClipperT_continuePath(NumT_(PathClipper)& self,
 
 template<typename NumT>
 static err_t FOG_CDECL _G2d_PathClipperT_continueRaw(NumT_(PathClipper)& self,
-  NumT_(Path)& dst, const NumT_(Point)* srcPts, const uint8_t* srcCmd, sysuint_t srcLength)
+  NumT_(Path)& dst, const NumT_(Point)* srcPts, const uint8_t* srcCmd, size_t srcLength)
 {
-  sysuint_t i = srcLength;
+  size_t i = srcLength;
   if (i == 0) return ERR_OK;
 
-  sysuint_t dstInitialLength = dst.getLength();
-  sysuint_t dstIndex;
+  size_t dstInitialLength = dst.getLength();
+  size_t dstIndex;
 
-  sysuint_t dstCapacity = dstInitialLength + srcLength + 64;
+  size_t dstCapacity = dstInitialLength + srcLength + 64;
   if (dstCapacity < dst.getLength()) return ERR_RT_OVERFLOW;
   FOG_RETURN_ON_ERROR(dst.reserve(dstCapacity));
 
-  sysuint_t startIndex = self._lastIndex;
+  size_t startIndex = self._lastIndex;
   if (startIndex != INVALID_INDEX && startIndex >= i)
     return ERR_RT_INVALID_STATE;
 
@@ -506,7 +505,7 @@ _ClipLoop:
   // Copy the vertices which passed throught detect-loop.
   if (unchangedCmd != srcCmd)
   {
-    sysuint_t copyLength = (sysuint_t)(srcCmd - unchangedCmd);
+    size_t copyLength = (size_t)(srcCmd - unchangedCmd);
     if ((dstIndex = dst._add(copyLength)) == INVALID_INDEX) goto _OutOfMemory;
 
     Memory::copy(dst.getVerticesX() + dstIndex, srcPts - copyLength, copyLength * sizeof(NumT_(Point)));
@@ -535,16 +534,16 @@ _ClipRealloc:
 
       if (dstPts != NULL)
       {
-        dst._d->length = (sysuint_t)(dstPts - old);
+        dst._d->length = (size_t)(dstPts - old);
       }
 
-      sysuint_t need = Math::max<sysuint_t>(i * 2, 256);
-      sysuint_t dstMarkIndex = 0;
+      size_t need = Math::max<size_t>(i * 2, 256);
+      size_t dstMarkIndex = 0;
 
       if (dstMark)
       {
-        dst._d->length = (sysuint_t)(dstPts - old);
-        dstMarkIndex = (sysuint_t)(dstMark - old);
+        dst._d->length = (size_t)(dstPts - old);
+        dstMarkIndex = (size_t)(dstMark - old);
       }
 
       if ((dstIndex = dst._add(need)) == INVALID_INDEX) goto _OutOfMemory;
@@ -611,8 +610,8 @@ _ClipLoopDo:
           initialPoint = srcPts[0];
           initialFlags = currentFlags;
 
-          dstPts = _G2d_PathClipperT_removeRedundantLines<NumT>(dstMark, (sysuint_t)(dstPts - dstMark));
-          dstCmd = dst.getCommandsX() + (sysuint_t)(dstPts - dst.getVertices());
+          dstPts = _G2d_PathClipperT_removeRedundantLines<NumT>(dstMark, (size_t)(dstPts - dstMark));
+          dstCmd = dst.getCommandsX() + (size_t)(dstPts - dst.getVertices());
 
           dstPts[0] = srcPts[0];
           dstCmd[0] = PATH_CMD_MOVE_TO;
@@ -642,8 +641,8 @@ _ClipLoopDo:
             dstPts[0] = srcPts[0];
             dstCmd[0] = PATH_CMD_LINE_TO;
 
-            dstPts = _G2d_PathClipperT_removeRedundantLines<NumT>(dstMark, (sysuint_t)(dstPts + 1 - dstMark));
-            dst._d->length = (sysuint_t)(dstPts - dst.getVertices());
+            dstPts = _G2d_PathClipperT_removeRedundantLines<NumT>(dstMark, (size_t)(dstPts + 1 - dstMark));
+            dst._d->length = (size_t)(dstPts - dst.getVertices());
 
             i--;
             srcPts++;
@@ -841,9 +840,9 @@ _ClipLineCmd_LeftRight1:
 _ClipLineCmd_Done:
           if (initialFlags == NO_INITIAL_FLAGS)
           {
-            dstPts = _G2d_PathClipperT_removeRedundantLines<NumT>(dstMark, (sysuint_t)(dstPts - dstMark));
+            dstPts = _G2d_PathClipperT_removeRedundantLines<NumT>(dstMark, (size_t)(dstPts - dstMark));
             dstMark = dstPts;
-            dstCmd = dst.getCommandsX() + (sysuint_t)(dstPts - dst.getVertices());
+            dstCmd = dst.getCommandsX() + (size_t)(dstPts - dst.getVertices());
           }
           break;
         }
@@ -864,8 +863,8 @@ _ClipLineCmd_Done:
           // Fully visible, finish here and jump to detection loop.
           if (sides == CLIP_SIDE_NONE)
           {
-            dstPts = _G2d_PathClipperT_removeRedundantLines<NumT>(dstMark, (sysuint_t)(dstPts - dstMark));
-            dstCmd = dst.getCommandsX() + (sysuint_t)(dstPts - dst.getVertices());
+            dstPts = _G2d_PathClipperT_removeRedundantLines<NumT>(dstMark, (size_t)(dstPts - dstMark));
+            dstCmd = dst.getCommandsX() + (size_t)(dstPts - dst.getVertices());
 
             dstPts[0] = srcPts[0];
             dstPts[1] = srcPts[1];
@@ -875,7 +874,7 @@ _ClipLineCmd_Done:
             dstCmd += 2;
 
             dstMark = dstPts;
-            dst._d->length = (sysuint_t)(dstPts - dst.getVertices());
+            dst._d->length = (size_t)(dstPts - dst.getVertices());
 
             i -= 2;
             srcPts += 2;
@@ -1054,8 +1053,8 @@ _ClipQuadCmd_EvaluateY:
                 {
                   NumT dt = (tVal - tCut) * NumT(0.5);
 
-                  dstPts = _G2d_PathClipperT_removeRedundantLines<NumT>(dstMark, (sysuint_t)(dstPts - dstMark));
-                  dstCmd = dst.getCommandsX() + (sysuint_t)(dstPts - dst.getVertices());
+                  dstPts = _G2d_PathClipperT_removeRedundantLines<NumT>(dstMark, (size_t)(dstPts - dstMark));
+                  dstCmd = dst.getCommandsX() + (size_t)(dstPts - dst.getVertices());
 
                   // Derivative: 2a*t + b.
                   NumT_(Point) cp1(NumT(2.0) * ax * tVal + bx, NumT(2.0) * ay * tVal + by);
@@ -1114,8 +1113,8 @@ _ClipQuadCmd_EvaluateY:
           // Fully visible, finish here and jump to detection loop.
           if (sides == CLIP_SIDE_NONE)
           {
-            dstPts = _G2d_PathClipperT_removeRedundantLines<NumT>(dstMark, (sysuint_t)(dstPts - dstMark));
-            dstCmd = dst.getCommandsX() + (sysuint_t)(dstPts - dst.getVertices());
+            dstPts = _G2d_PathClipperT_removeRedundantLines<NumT>(dstMark, (size_t)(dstPts - dstMark));
+            dstCmd = dst.getCommandsX() + (size_t)(dstPts - dst.getVertices());
 
             dstPts[0] = srcPts[0];
             dstPts[1] = srcPts[1];
@@ -1127,7 +1126,7 @@ _ClipQuadCmd_EvaluateY:
             dstCmd += 3;
 
             dstMark = dstPts;
-            dst._d->length = (sysuint_t)(dstPts - dst.getVertices());
+            dst._d->length = (size_t)(dstPts - dst.getVertices());
 
             i -= 3;
             srcPts += 3;
@@ -1312,8 +1311,8 @@ _ClipCubicCmd_EvaluateY:
                 {
                   NumT dt = (tVal - tCut) * NumT(1.0 / 3.0);
 
-                  dstPts = _G2d_PathClipperT_removeRedundantLines<NumT>(dstMark, (sysuint_t)(dstPts - dstMark));
-                  dstCmd = dst.getCommandsX() + (sysuint_t)(dstPts - dst.getVertices());
+                  dstPts = _G2d_PathClipperT_removeRedundantLines<NumT>(dstMark, (size_t)(dstPts - dstMark));
+                  dstCmd = dst.getCommandsX() + (size_t)(dstPts - dst.getVertices());
 
                   // Derivative: 3*a*t^2 + 2*b*t + c.
                   NumT_(Point) cp1(
@@ -1409,8 +1408,8 @@ _ClipCubicCmd_EvaluateY:
     }
 
     // Finalize.
-    dstPts = _G2d_PathClipperT_removeRedundantLines<NumT>(dstMark, (sysuint_t)(dstPts - dstMark));
-    dst._d->length = (sysuint_t)(dstPts - dst.getVertices());
+    dstPts = _G2d_PathClipperT_removeRedundantLines<NumT>(dstMark, (size_t)(dstPts - dstMark));
+    dst._d->length = (size_t)(dstPts - dst.getVertices());
   }
 
   dst._d->flags |= PATH_DATA_DIRTY_BBOX | PATH_DATA_DIRTY_CMD;
@@ -1464,7 +1463,7 @@ static err_t FOG_CDECL _G2d_PathClipperT_clipPath(NumT_(PathClipper)& self,
         inv.mapBox(self._clipBox, self._clipBox);
 
         // Clip and transform.
-        sysuint_t dstIndex = dst.getLength();
+        size_t dstIndex = dst.getLength();
         err_t err = self.continuePath(dst, src);
         dst.transform(*tr, Range(dstIndex));
 

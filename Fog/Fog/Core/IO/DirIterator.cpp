@@ -15,6 +15,7 @@
 #include <Fog/Core/IO/FileSystem.h>
 #include <Fog/Core/OS/UserInfo.h>
 #include <Fog/Core/Tools/String.h>
+#include <Fog/Core/Tools/StringTmp_p.h>
 #include <Fog/Core/Tools/StringUtil.h>
 #include <Fog/Core/Tools/TextCodec.h>
 
@@ -251,7 +252,7 @@ err_t DirIterator::open(const String& path)
   direntSize += FOG_OFFSET_OF(struct dirent, d_name) + 1;
 
   // Ugly typecast from long, but there is no better way.
-  _dent = reinterpret_cast<struct dirent*>(Memory::alloc((sysuint_t)direntSize));
+  _dent = reinterpret_cast<struct dirent*>(Memory::alloc((size_t)direntSize));
   if (!_dent) return ERR_RT_OUT_OF_MEMORY;
 
   FOG_RETURN_ON_ERROR(FileSystem::toAbsolutePath(pathAbs, String(), path));
@@ -301,7 +302,7 @@ bool DirIterator::read(DirEntry& dirEntry)
     }
 
     // Get entry name length.
-    sysuint_t nameLength = strlen(name);
+    size_t nameLength = strlen(name);
 
     // Translate entry name to unicode.
     TextCodec::local8().toUnicode(dirEntry._name, name, nameLength);

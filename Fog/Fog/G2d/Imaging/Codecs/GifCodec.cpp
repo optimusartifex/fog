@@ -2619,7 +2619,7 @@ struct GifCodecProvider : public ImageCodecProvider
   GifCodecProvider();
   virtual ~GifCodecProvider();
 
-  virtual uint32_t checkSignature(const void* mem, sysuint_t length) const;
+  virtual uint32_t checkSignature(const void* mem, size_t length) const;
   virtual err_t createCodec(uint32_t codecType, ImageCodec** codec) const;
 };
 
@@ -2644,7 +2644,7 @@ GifCodecProvider::~GifCodecProvider()
 {
 }
 
-uint32_t GifCodecProvider::checkSignature(const void* mem, sysuint_t length) const
+uint32_t GifCodecProvider::checkSignature(const void* mem, size_t length) const
 {
   if (!mem || length < 3) return 0;
 

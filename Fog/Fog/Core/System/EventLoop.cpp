@@ -21,9 +21,9 @@
 #include <Fog/Core/OS/OS.h>
 #include <Fog/Core/System/EventLoop.h>
 #include <Fog/Core/System/Task.h>
+#include <Fog/Core/Threading/Lazy.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Threading/ThreadEvent.h>
-#include <Fog/Core/Tools/Lazy.h>
 #include <Fog/Core/Tools/String.h>
 
 #if defined(FOG_OS_WINDOWS)
@@ -171,7 +171,7 @@ bool EventLoop::_deferOrRunPendingTask(const EventLoopPendingTask& pendingTask)
 
 bool EventLoop::_addToDelayedWorkQueue(const EventLoopPendingTask& pendingTask)
 {
-  sysuint_t i = 0, length = _delayedWorkQueue.getLength();
+  size_t i = 0, length = _delayedWorkQueue.getLength();
   const EventLoopPendingTask* tasks = _delayedWorkQueue.getData();
 
   // TODO: Use binary search.

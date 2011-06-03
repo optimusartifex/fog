@@ -10,8 +10,8 @@
 
 // [Dependencies]
 #include <Fog/Core/Threading/Atomic.h>
+#include <Fog/Core/Threading/Lazy.h>
 #include <Fog/Core/Threading/Thread.h>
-#include <Fog/Core/Tools/Lazy.h>
 
 namespace Fog {
 
@@ -33,10 +33,10 @@ void* LazyBase::_get()
 {
   void* v = AtomicCore<void*>::get(&_ptr);
 
-  // Already created, just return it
+  // Already created, just return it.
   if (v != NULL && v != (void*)STATE_CREATING_NOW) return v;
 
-  // Create instance
+  // Create instance.
   if (AtomicCore<void*>::cmpXchg(&_ptr, (void*)NULL, (void*)STATE_CREATING_NOW))
   {
     v = _create();
@@ -44,8 +44,7 @@ void* LazyBase::_get()
     return v;
   }
 
-  // Race.
-  // This is very rare situation, but it can happen!
+  // Race - rare, but possible!
   while ((v = AtomicCore<void*>::get(&_ptr)) == (void*)STATE_CREATING_NOW)
   {
     Thread::_yield();

@@ -83,7 +83,7 @@ struct FOG_API ImageCodecProvider
   // --------------------------------------------------------------------------
 
   //! @brief Check binary data signature (mime part of data) and return its score.
-  virtual uint32_t checkSignature(const void* data, sysuint_t length) const = 0;
+  virtual uint32_t checkSignature(const void* data, size_t length) const = 0;
 
   //! @brief Create image decoder / encoder.
   //!
@@ -111,7 +111,7 @@ struct FOG_API ImageCodecProvider
   //! @brief Get image provider by file @a extension.
   static ImageCodecProvider* getProviderByExtension(uint32_t codecType, const String& extension);
   //! @brief Get image provider by signature.
-  static ImageCodecProvider* getProviderBySignature(uint32_t codecType, void* mem, sysuint_t len);
+  static ImageCodecProvider* getProviderBySignature(uint32_t codecType, void* mem, size_t len);
 
   //! @brief Create decoder for a given provider @a name.
   static err_t createDecoderByName(const String& name, ImageDecoder** codec);
@@ -139,7 +139,7 @@ struct FOG_API ImageCodecProvider
   // --------------------------------------------------------------------------
 
 protected:
-  mutable Atomic<sysuint_t> _refCount;
+  mutable Atomic<size_t> _refCount;
 
   //! @brief Supported device flags (see @c IMAGE_CODEC_TYPE).
   uint32_t _codecType;

@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/PBuffer.h>
+#include <Fog/Core/Collection/BufferP.h>
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/Debug.h>
@@ -33,7 +33,7 @@ namespace Fog {
 
 err_t _ListFloatFromListDouble(List<float>& dst, const List<double>& src)
 {
-  sysuint_t i, len = src.getLength();
+  size_t i, len = src.getLength();
   FOG_RETURN_ON_ERROR(dst.resize(len));
 
   float* dstData = dst.getDataX();
@@ -45,7 +45,7 @@ err_t _ListFloatFromListDouble(List<float>& dst, const List<double>& src)
 
 err_t _ListDoubleFromListFloat(List<double>& dst, const List<float>& src)
 {
-  sysuint_t i, len = src.getLength();
+  size_t i, len = src.getLength();
   FOG_RETURN_ON_ERROR(dst.resize(len));
 
   double* dstData = dst.getDataX();
@@ -130,7 +130,7 @@ struct PathStrokerContextT
     NumT len1,
     NumT len2);
 
-  err_t strokePathFigure(const NumT_(Point)* src, sysuint_t count, bool outline);
+  err_t strokePathFigure(const NumT_(Point)* src, size_t count, bool outline);
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -139,22 +139,22 @@ struct PathStrokerContextT
   const NumT_(PathStroker)& stroker;
 
   NumT_(Path)& dst;
-  sysuint_t dstInitial;
+  size_t dstInitial;
 
   NumT_(Point)* dstCur;
   NumT_(Point)* dstEnd;
   // NumT_(Point)* pts;
   // uint8_t *cmd;
-  // sysuint_t remain;
+  // size_t remain;
 
   const NumT_(Transform)* transform;
   const NumT_(Box)* clipBox;
 
   //! @brief Memory buffer used to store distances.
-  PBuffer<1024> buffer;
+  BufferP<1024> buffer;
 
   NumT* distances;
-  sysuint_t distancesAlloc;
+  size_t distancesAlloc;
 };
 
 // ============================================================================
@@ -196,7 +196,7 @@ err_t PathStrokerContextT<NumT>::strokePathPrivate(const NumT_(Path)& src)
   // Traverse path, find moveTo / lineTo segments and stroke them.
   const uint8_t* subCommand = NULL;
   const uint8_t* curCommand = commands;
-  sysuint_t remain = src.getLength();
+  size_t remain = src.getLength();
 
   while (remain)
   {
@@ -212,8 +212,8 @@ err_t PathStrokerContextT<NumT>::strokePathPrivate(const NumT_(Path)& src)
       // Send path to stroker if there is something.
       if (FOG_LIKELY(subCommand != NULL && subCommand != curCommand))
       {
-        sysuint_t subStart = (sysuint_t)(subCommand - commands);
-        sysuint_t subLength = (sysuint_t)(curCommand - subCommand);
+        size_t subStart = (size_t)(subCommand - commands);
+        size_t subLength = (size_t)(curCommand - subCommand);
 
         FOG_RETURN_ON_ERROR(
           strokePathFigure(vertices + subStart, subLength, false)
@@ -228,8 +228,8 @@ err_t PathStrokerContextT<NumT>::strokePathPrivate(const NumT_(Path)& src)
       // Send path to stroker if there is something.
       if (FOG_LIKELY(subCommand != NULL))
       {
-        sysuint_t subStart = (sysuint_t)(subCommand - commands);
-        sysuint_t subLength = (sysuint_t)(curCommand - subCommand);
+        size_t subStart = (size_t)(subCommand - commands);
+        size_t subLength = (size_t)(curCommand - subCommand);
 
         FOG_RETURN_ON_ERROR(
           strokePathFigure(vertices + subStart, subLength, true)
@@ -247,8 +247,8 @@ err_t PathStrokerContextT<NumT>::strokePathPrivate(const NumT_(Path)& src)
   // Send path to stroker if there is something (this is the last, unclosed, figure)
   if (subCommand != NULL && subCommand != curCommand)
   {
-    sysuint_t subStart = (sysuint_t)(subCommand - commands);
-    sysuint_t subLength = (sysuint_t)(curCommand - subCommand);
+    size_t subStart = (size_t)(subCommand - commands);
+    size_t subLength = (size_t)(curCommand - subCommand);
 
     FOG_RETURN_ON_ERROR(
       strokePathFigure(vertices + subStart, subLength, false)
@@ -270,13 +270,13 @@ err_t PathStrokerContextT<NumT>::strokePathPrivate(const NumT_(Path)& src)
   } while(0)
 
 #define CUR_INDEX() \
-  ( (sysuint_t)(dstCur - dst._d->vertices) )
+  ( (size_t)(dstCur - dst._d->vertices) )
 
 template<typename NumT>
 err_t PathStrokerContextT<NumT>::_begin()
 {
-  sysuint_t cap = dst.getCapacity();
-  sysuint_t remain = cap - dst.getLength();
+  size_t cap = dst.getCapacity();
+  size_t remain = cap - dst.getLength();
   if (remain < 64 || !dst.isDetached())
   {
     if (cap < 256)
@@ -298,8 +298,8 @@ err_t PathStrokerContextT<NumT>::_begin()
 template<typename NumT>
 err_t PathStrokerContextT<NumT>::_grow()
 {
-  sysuint_t len = dst._d->length;
-  sysuint_t cap = dst._d->capacity;
+  size_t len = dst._d->length;
+  size_t cap = dst._d->capacity;
 
   dst._d->length = cap;
   if (cap < 256)
@@ -806,7 +806,7 @@ err_t PathStrokerContextT<NumT>::calcJoin(
 }
 
 template<typename NumT>
-err_t PathStrokerContextT<NumT>::strokePathFigure(const NumT_(Point)* src, sysuint_t count, bool outline)
+err_t PathStrokerContextT<NumT>::strokePathFigure(const NumT_(Point)* src, size_t count, bool outline)
 {
   // Can't stroke one-vertex array.
   if (count <= 1) return ERR_GEOMETRY_CANT_STROKE;
@@ -814,9 +814,9 @@ err_t PathStrokerContextT<NumT>::strokePathFigure(const NumT_(Point)* src, sysui
   if (outline && count <= 2) return ERR_GEOMETRY_CANT_STROKE;
 
   const NumT_(Point)* cur;
-  sysuint_t i;
-  sysuint_t moveToPosition0 = dst.getLength();
-  sysuint_t moveToPosition1 = INVALID_INDEX;
+  size_t i;
+  size_t moveToPosition0 = dst.getLength();
+  size_t moveToPosition1 = INVALID_INDEX;
 
   FOG_RETURN_ON_ERROR(
     _begin()
@@ -915,7 +915,7 @@ err_t PathStrokerContextT<NumT>::strokePathFigure(const NumT_(Point)* src, sysui
     //   The firstI will be one. Path is self-closing, but unfortunatelly the
     //   closing point vertex is already there (fourth command).
     //
-    sysuint_t firstI = i;
+    size_t firstI = i;
 
     cp[i] = src[count - 1];
     cd[i] = dist[count - 1];
@@ -1149,7 +1149,7 @@ _Pen2Done:
 
   {
     // Fix the length of the path.
-    sysuint_t finalLength = CUR_INDEX();
+    size_t finalLength = CUR_INDEX();
     dst._d->length = finalLength;
     FOG_ASSERT(finalLength <= dst._d->capacity);
 

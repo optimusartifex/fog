@@ -27,7 +27,7 @@ enum COLOR_STOP_LIST_VALIDITY
   COLOR_STOP_LIST_NOT_SORTED = 0x02
 };
 
-static uint _G2d_ColorStopList_validate(const ColorStop* stops, sysuint_t length)
+static uint _G2d_ColorStopList_validate(const ColorStop* stops, size_t length)
 {
   uint result = 0;
   if (length == 0) return result;
@@ -35,7 +35,7 @@ static uint _G2d_ColorStopList_validate(const ColorStop* stops, sysuint_t length
   float pos = stops[0].getOffset();
   if (!Math::isBounded(pos, 0.0f, 1.0f)) result |= COLOR_STOP_LIST_INVALID_OFFSET;
 
-  for (sysuint_t i = 1; i < length; i++)
+  for (size_t i = 1; i < length; i++)
   {
     float cur = stops[i].getOffset();
     if (pos > cur) result |= COLOR_STOP_LIST_NOT_SORTED;
@@ -46,7 +46,7 @@ static uint _G2d_ColorStopList_validate(const ColorStop* stops, sysuint_t length
   return result;
 }
 
-static void _G2d_ColorStopList_sort(ColorStop* stops, sysuint_t length)
+static void _G2d_ColorStopList_sort(ColorStop* stops, size_t length)
 {
   // Insertion sort is used, because the order of stops with the same offset
   // must be preserved (see qsort/isort documentation for differences).
@@ -90,11 +90,11 @@ ColorStopList::~ColorStopList()
 // [Fog::ColorStopList - Data]
 // ============================================================================
 
-err_t ColorStopList::reserve(sysuint_t n)
+err_t ColorStopList::reserve(size_t n)
 {
   if (isDetached() && n > _d->capacity) return ERR_OK;
 
-  sysuint_t length = _d->length;
+  size_t length = _d->length;
   if (n < length) n = length;
 
   ColorStopListData* newd = _dalloc(n);
@@ -116,7 +116,7 @@ err_t ColorStopList::reserve(sysuint_t n)
 
 void ColorStopList::squeeze()
 {
-  sysuint_t length = _d->length;
+  size_t length = _d->length;
   if (length == _d->capacity) return;
 
   ColorStopListData* newd = _dalloc(length);
@@ -165,7 +165,7 @@ void ColorStopList::reset()
 
 bool ColorStopList::isOpaque() const
 {
-  sysuint_t i, length = getLength();
+  size_t i, length = getLength();
   const ColorStop* stops = getList();
 
   for (i = 0; i < length; i++)
@@ -178,7 +178,7 @@ bool ColorStopList::isOpaque() const
 
 bool ColorStopList::isOpaque_ARGB32() const
 {
-  sysuint_t i, length = getLength();
+  size_t i, length = getLength();
   const ColorStop* stops = getList();
 
   for (i = 0; i < length; i++)
@@ -204,7 +204,7 @@ err_t ColorStopList::setList(const List<ColorStop>& stops)
   return setList(stops.getData(), stops.getLength());
 }
 
-err_t ColorStopList::setList(const ColorStop* stops, sysuint_t length)
+err_t ColorStopList::setList(const ColorStop* stops, size_t length)
 {
   if (FOG_UNLIKELY(length == 0)) { clear(); return ERR_OK; }
 
@@ -239,7 +239,7 @@ err_t ColorStopList::add(const ColorStop& stop)
 {
   if (!stop.isValid()) return ERR_RT_INVALID_ARGUMENT;
 
-  sysuint_t i, length = _d->length;
+  size_t i, length = _d->length;
   const ColorStop* stops = _d->data;
 
   for (i = 0; i < length; i++)
@@ -274,12 +274,12 @@ err_t ColorStopList::add(const ColorStop& stop)
 
 err_t ColorStopList::remove(float offset)
 {
-  sysuint_t start = indexOf(offset);
-  sysuint_t length = _d->length;
+  size_t start = indexOf(offset);
+  size_t length = _d->length;
   if (start == INVALID_INDEX) return ERR_RT_INVALID_ARGUMENT;
 
   const ColorStop* stops = _d->data;
-  sysuint_t end = start + 1;
+  size_t end = start + 1;
 
   while (end < length)
   {
@@ -293,7 +293,7 @@ err_t ColorStopList::remove(const ColorStop& stop)
 {
   if (!stop.isValid()) return ERR_RT_INVALID_ARGUMENT;
 
-  sysuint_t i, length = _d->length;
+  size_t i, length = _d->length;
   const ColorStop* stops = _d->data;
 
   for (i = 0; i < length; i++)
@@ -307,9 +307,9 @@ err_t ColorStopList::remove(const ColorStop& stop)
   return ERR_RT_OBJECT_NOT_FOUND;
 }
 
-err_t ColorStopList::removeAt(sysuint_t index)
+err_t ColorStopList::removeAt(size_t index)
 {
-  sysuint_t length = _d->length;
+  size_t length = _d->length;
   if (index >= length) return ERR_RT_INVALID_ARGUMENT;
 
   if (FOG_LIKELY(isDetached()))
@@ -335,14 +335,14 @@ err_t ColorStopList::removeAt(sysuint_t index)
 
 err_t ColorStopList::removeAt(const Range& range)
 {
-  sysuint_t start = range.getStart();
-  sysuint_t end = range.getEnd();
-  sysuint_t length = _d->length;
+  size_t start = range.getStart();
+  size_t end = range.getEnd();
+  size_t length = _d->length;
 
   if (start >= length) return ERR_RT_INVALID_ARGUMENT;
   if (end > length) end = length;
 
-  sysuint_t rlen = end - start;
+  size_t rlen = end - start;
 
   if (FOG_LIKELY(isDetached()))
   {
@@ -369,7 +369,7 @@ err_t ColorStopList::removeAt(const IntervalF& interval)
 {
   if (!interval.isValid()) return ERR_RT_INVALID_ARGUMENT;
 
-  sysuint_t len = _d->length;
+  size_t len = _d->length;
   if (len == 0) return ERR_OK;
 
   const ColorStop* stops = _d->data;
@@ -377,7 +377,7 @@ err_t ColorStopList::removeAt(const IntervalF& interval)
   float max = interval.getMax();
 
   // Find the min/max index.
-  sysuint_t minI, maxI;
+  size_t minI, maxI;
 
   for (minI =    0; minI < len; minI++) { if (stops[minI].getOffset() >= min) break; }
   for (maxI = minI; maxI < len; maxI++) { if (stops[maxI].getOffset() >  max) break; }
@@ -385,9 +385,9 @@ err_t ColorStopList::removeAt(const IntervalF& interval)
   return (minI < maxI) ? removeAt(Range(minI, maxI)) : ERR_OK;
 }
 
-sysuint_t ColorStopList::indexOf(float offset) const
+size_t ColorStopList::indexOf(float offset) const
 {
-  sysuint_t i, length = _d->length;
+  size_t i, length = _d->length;
   const ColorStop* stops = _d->data;
 
   for (i = 0; i < length; i++)
@@ -409,7 +409,7 @@ sysuint_t ColorStopList::indexOf(float offset) const
 
 Static<ColorStopListData> ColorStopList::_dnull;
 
-ColorStopListData* ColorStopList::_dalloc(sysuint_t capacity)
+ColorStopListData* ColorStopList::_dalloc(size_t capacity)
 {
   ColorStopListData* d = reinterpret_cast<ColorStopListData*>(
     Memory::alloc(ColorStopListData::sizeFor(capacity)));

@@ -169,10 +169,10 @@ err_t SvgStyleAttribute::setValue(const String& value)
     // Skip ';'.
     if (strCur != strEnd) strCur++;
 
-    err = styleName.set(styleNameBegin, sysuint_t(styleNameEnd - styleNameBegin));
+    err = styleName.set(styleNameBegin, size_t(styleNameEnd - styleNameBegin));
     if (FOG_IS_ERROR(err)) continue;
 
-    err = styleValue.set(styleValueBegin, sysuint_t(styleValueEnd - styleValueBegin));
+    err = styleValue.set(styleValueBegin, size_t(styleValueEnd - styleValueBegin));
     if (FOG_IS_ERROR(err)) continue;
 
     reinterpret_cast<SvgElement*>(getElement())->setStyle(styleName, styleValue);

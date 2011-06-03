@@ -96,7 +96,7 @@ struct FOG_NO_EXPORT JpegCodecProvider : public ImageCodecProvider
   // [Implementation]
   // --------------------------------------------------------------------------
 
-  virtual uint32_t checkSignature(const void* mem, sysuint_t length) const;
+  virtual uint32_t checkSignature(const void* mem, size_t length) const;
   virtual err_t createCodec(uint32_t codecType, ImageCodec** codec) const;
 
   // --------------------------------------------------------------------------

@@ -33,61 +33,32 @@ struct FOG_API RegionData
 {
   // [Ref / Deref]
 
-  FOG_INLINE RegionData* refAlways() const { refCount.inc(); return const_cast<RegionData*>(this); }
-  FOG_INLINE void derefInline() { if (refCount.deref() && (flags & IsDynamic) != 0) Memory::free(this); }
+  FOG_INLINE RegionData* ref() const { refCount.inc(); return const_cast<RegionData*>(this); }
+  FOG_INLINE void deref() { if (refCount.deref() && (flags & CONTAINER_DATA_STATIC) == 0) Memory::free(this); }
 
-  RegionData* ref() const;
-  void deref();
+  static RegionData* adopt(void* address, size_t capacity);
+  static RegionData* adopt(void* address, size_t capacity, const BoxI& r);
+  static RegionData* adopt(void* address, size_t capacity, const BoxI* extents, const BoxI* rects, size_t count);
 
-  static RegionData* adopt(void* address, sysuint_t capacity);
-  static RegionData* adopt(void* address, sysuint_t capacity, const BoxI& r);
-  static RegionData* adopt(void* address, sysuint_t capacity, const BoxI* extents, const BoxI* rects, sysuint_t count);
-
-  static RegionData* create(sysuint_t capacity);
-  static RegionData* create(sysuint_t capacity, const BoxI* extents, const BoxI* rects, sysuint_t count);
+  static RegionData* create(size_t capacity);
+  static RegionData* create(size_t capacity, const BoxI* extents, const BoxI* rects, size_t count);
 
   static RegionData* copy(const RegionData* other);
 
-  static FOG_INLINE sysuint_t sizeFor(sysuint_t capacity)
+  static FOG_INLINE size_t sizeFor(size_t capacity)
   { return sizeof(RegionData) - sizeof(BoxI) + sizeof(BoxI) * capacity; }
-
-  // [Flags]
-
-  //! @brief String data flags.
-  enum Flags
-  {
-    //! @brief String data are created on the heap.
-    //!
-    //! Object is created by function like @c Fog::Memory::alloc() or by
-    //! @c new operator. It this flag is not set, you can't delete object from
-    //! the heap and object is probabbly only temporary (short life object).
-    IsDynamic = (1U << 0),
-
-    //! @brief String data are shareable.
-    //!
-    //! Object can be directly referenced by internal method @c ref().
-    //! Sharable data are usually created on the heap and together
-    //! with this flag is set also @c IsDynamic, but it isn't prerequisite.
-    IsSharable = (1U << 1),
-
-    //! @brief String data are strong to weak assignments.
-    //!
-    //! This flag means:
-    //!   "Don't assign other data to me, instead, copy them to me!".
-    IsStrong = (1U << 2)
-  };
 
   // [Members]
 
   //! @brief Reference count.
-  mutable Atomic<sysuint_t> refCount;
+  mutable Atomic<size_t> refCount;
   //! @brief Region flags.
   uint32_t flags;
 
   //! @brief Count of preallocated rectangles.
-  sysuint_t capacity;
+  size_t capacity;
   //! @brief Count of used rectangles.
-  sysuint_t length;
+  size_t length;
   //! @brief Region extents.
   BoxI extents;
   //! @brief Region rectangles, always YX sorted.
@@ -119,10 +90,10 @@ struct FOG_API Region
   // [Sharing]
   // --------------------------------------------------------------------------
 
-  //! @copydoc Doxygen::Implicit::getRefCount().
-  FOG_INLINE sysuint_t getRefCount() const { return _d->refCount.get(); }
+  //! @copydoc Doxygen::Implicit::getReference().
+  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
   //! @copydoc Doxygen::Implicit::isDetached().
-  FOG_INLINE bool isDetached() const { return getRefCount() == 1; }
+  FOG_INLINE bool isDetached() const { return getReference() == 1; }
   //! @copydoc Doxygen::Implicit::detach().
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
   //! @copydoc Doxygen::Implicit::_detach().
@@ -145,14 +116,7 @@ struct FOG_API Region
   //! @copydoc Doxygen::Implicit::isNull().
   FOG_INLINE bool isNull() const { return _d == _dnull.instancep(); }
   //! @copydoc Doxygen::Implicit::isDynamic().
-  FOG_INLINE bool isDynamic() const { return (_d->flags & RegionData::IsDynamic) != 0; }
-  //! @copydoc Doxygen::Implicit::isSharable().
-  FOG_INLINE bool isSharable() const { return (_d->flags & RegionData::IsSharable) != 0; }
-  //! @copydoc Doxygen::Implicit::isStrong().
-  FOG_INLINE bool isStrong() const { return (_d->flags & RegionData::IsStrong) != 0; }
-
-  err_t setSharable(bool val);
-  err_t setStrong(bool val);
+  FOG_INLINE bool isStatic() const { return (_d->flags & CONTAINER_DATA_STATIC) != 0; }
 
   // --------------------------------------------------------------------------
   // [Data]
@@ -173,10 +137,10 @@ struct FOG_API Region
   // --------------------------------------------------------------------------
 
   //! @brief Returns capacity of region in rectangles.
-  FOG_INLINE sysuint_t getCapacity() const  { return _d->capacity; }
+  FOG_INLINE size_t getCapacity() const  { return _d->capacity; }
 
   //! @brief Returns count of rectangles in region.
-  FOG_INLINE sysuint_t getLength() const  { return _d->length; }
+  FOG_INLINE size_t getLength() const  { return _d->length; }
 
   //! @brief Returns @c true if region is empty.
   FOG_INLINE bool isEmpty() const  { return _d->length == 0; }
@@ -186,9 +150,9 @@ struct FOG_API Region
 
   //! @brief Reserve @a n rectangles in region and detach it. If retion is
   //! infinite then ERR_RT_INVALID_CONTEXT is returned.
-  err_t reserve(sysuint_t n);
+  err_t reserve(size_t n);
   //! @brief Prepare @a n rectangles in region and clear it.
-  err_t prepare(sysuint_t n);
+  err_t prepare(size_t n);
   //! @brief Squeeze region (allocating memory exactly needed for this object).
   void squeeze();
 
@@ -231,8 +195,8 @@ struct FOG_API Region
   //! @return @c ERR_OK on success, error code on failure.
   err_t setDeep(const Region& r);
 
-  err_t set(const RectI* rects, sysuint_t count);
-  err_t set(const BoxI* rects, sysuint_t count);
+  err_t set(const RectI* rects, size_t count);
+  err_t set(const BoxI* rects, size_t count);
 
   err_t combine(const Region& r, uint32_t combineOp);
   err_t combine(const RectI& r, uint32_t combineOp);

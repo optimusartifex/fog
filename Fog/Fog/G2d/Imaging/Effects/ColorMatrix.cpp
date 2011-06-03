@@ -118,14 +118,14 @@ int ColorMatrix::getType() const
 
 ColorMatrix& ColorMatrix::add(const ColorMatrix& other)
 {
-  for (sysuint_t i = 0; i < 25; i++)
+  for (size_t i = 0; i < 25; i++)
     getData()[i] += other.getData()[i];
   return *this;
 }
 
 ColorMatrix& ColorMatrix::subtract(const ColorMatrix& other)
 {
-  for (sysuint_t i = 0; i < 25; i++)
+  for (size_t i = 0; i < 25; i++)
     getData()[i] -= other.getData()[i];
   return *this;
 }
@@ -178,7 +178,7 @@ ColorMatrix& ColorMatrix::multiply(const ColorMatrix& other, uint32_t order)
 
 ColorMatrix& ColorMatrix::multiply(float scalar)
 {
-  for (sysuint_t i = 0; i < 25; i++)
+  for (size_t i = 0; i < 25; i++)
     getData()[i] *= scalar;
   return *this;
 }
@@ -290,7 +290,7 @@ ColorMatrix& ColorMatrix::rotateHue(float phi)
 
 bool ColorMatrix::eq(const ColorMatrix& other, float epsilon) const
 {
-  for (sysuint_t i = 0; i < 25; i++)
+  for (size_t i = 0; i < 25; i++)
     if (!Math::isFuzzyEq(getData()[i], other.getData()[i], epsilon)) return false;
 
   return true;

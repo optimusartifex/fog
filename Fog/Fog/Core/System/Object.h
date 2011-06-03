@@ -153,7 +153,7 @@ public: \
     /* set to one then it's being initialized by another thread and we must*/ \
     /* wait. All other values means that it's initialized.                 */ \
     \
-    if (Fog::AtomicCore<sysuint_t>::cmpXchg(reinterpret_cast<sysuint_t*>(&_privateMetaClass.name), 0, 1)) \
+    if (Fog::AtomicCore<size_t>::cmpXchg(reinterpret_cast<size_t*>(&_privateMetaClass.name), 0, 1)) \
     { \
       /* Called the first time, we must initialize the meta class right now. */ \
       _privateMetaClass.base = base::getStaticMetaClass(); \
@@ -161,7 +161,7 @@ public: \
       _privateMetaClass.name = _privateClassName; \
       \
       /* Assign meta class to _staticMetaClass pointer. */ \
-      Fog::AtomicCore<sysuint_t>::setXchg((sysuint_t*)(_staticMetaClass), (sysuint_t)(&_privateMetaClass)); \
+      Fog::AtomicCore<size_t>::setXchg((size_t*)(_staticMetaClass), (size_t)(&_privateMetaClass)); \
       \
       /* Everything done. */ \
       return _staticMetaClass; \
@@ -436,7 +436,7 @@ struct FOG_API Object
   //! This method can be overriden to override object hierarchy management. It
   //! can be called throught @c setParent(), @c addChild() or @c removeChild()
   //! methods.
-  virtual err_t _addChild(sysuint_t index, Object* child);
+  virtual err_t _addChild(size_t index, Object* child);
 
   //! @brief Remove a @a child from the specified @a index.
   //!
@@ -446,7 +446,7 @@ struct FOG_API Object
   //! This method can be overriden to override object hierarchy management. It
   //! can be called throught @c setParent(), @c addChild() or @c removeChild()
   //! methods.
-  virtual err_t _removeChild(sysuint_t index, Object* child);
+  virtual err_t _removeChild(size_t index, Object* child);
 
   //! @brief Delete all children.
   //!

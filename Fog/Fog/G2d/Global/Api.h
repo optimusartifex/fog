@@ -125,8 +125,8 @@ struct _G2dApi
   typedef err_t (FOG_CDECL *QBezierF_GetBoundingBox)(const PointF* self, BoxF* dst);
   typedef err_t (FOG_CDECL *QBezierD_GetBoundingBox)(const PointD* self, BoxD* dst);
 
-  typedef err_t (FOG_CDECL *QBezierF_GetSplineBBox)(const PointF* self, sysuint_t length, BoxF* dst);
-  typedef err_t (FOG_CDECL *QBezierD_GetSplineBBox)(const PointD* self, sysuint_t length, BoxD* dst);
+  typedef err_t (FOG_CDECL *QBezierF_GetSplineBBox)(const PointF* self, size_t length, BoxF* dst);
+  typedef err_t (FOG_CDECL *QBezierD_GetSplineBBox)(const PointD* self, size_t length, BoxD* dst);
 
   typedef void (FOG_CDECL *QBezierF_GetLength)(const PointF* self, float* length);
   typedef void (FOG_CDECL *QBezierD_GetLength)(const PointD* self, double* length);
@@ -157,8 +157,8 @@ struct _G2dApi
   typedef err_t (FOG_CDECL *CBezierF_GetBoundingBox)(const PointF* self, BoxF* dst);
   typedef err_t (FOG_CDECL *CBezierD_GetBoundingBox)(const PointD* self, BoxD* dst);
 
-  typedef err_t (FOG_CDECL *CBezierF_GetSplineBBox)(const PointF* self, sysuint_t length, BoxF* dst);
-  typedef err_t (FOG_CDECL *CBezierD_GetSplineBBox)(const PointD* self, sysuint_t length, BoxD* dst);
+  typedef err_t (FOG_CDECL *CBezierF_GetSplineBBox)(const PointF* self, size_t length, BoxF* dst);
+  typedef err_t (FOG_CDECL *CBezierD_GetSplineBBox)(const PointD* self, size_t length, BoxD* dst);
 
   typedef void (FOG_CDECL *CBezierF_GetLength)(const PointF* self, float* length);
   typedef void (FOG_CDECL *CBezierD_GetLength)(const PointD* self, double* length);
@@ -384,17 +384,17 @@ struct _G2dApi
   typedef err_t (FOG_CDECL *PathF_Detach)(PathF& self);
   typedef err_t (FOG_CDECL *PathD_Detach)(PathD& self);
 
-  typedef err_t (FOG_CDECL *PathF_Reserve)(PathF& self, sysuint_t capacity);
-  typedef err_t (FOG_CDECL *PathD_Reserve)(PathD& self, sysuint_t capacity);
+  typedef err_t (FOG_CDECL *PathF_Reserve)(PathF& self, size_t capacity);
+  typedef err_t (FOG_CDECL *PathD_Reserve)(PathD& self, size_t capacity);
 
   typedef void (FOG_CDECL *PathF_Squeeze)(PathF& self);
   typedef void (FOG_CDECL *PathD_Squeeze)(PathD& self);
 
-  typedef sysuint_t (FOG_CDECL *PathF_Prepare)(PathF& self, sysuint_t count, uint32_t cntOp);
-  typedef sysuint_t (FOG_CDECL *PathD_Prepare)(PathD& self, sysuint_t count, uint32_t cntOp);
+  typedef size_t (FOG_CDECL *PathF_Prepare)(PathF& self, size_t count, uint32_t cntOp);
+  typedef size_t (FOG_CDECL *PathD_Prepare)(PathD& self, size_t count, uint32_t cntOp);
 
-  typedef sysuint_t (FOG_CDECL *PathF_Add)(PathF& self, sysuint_t count);
-  typedef sysuint_t (FOG_CDECL *PathD_Add)(PathD& self, sysuint_t count);
+  typedef size_t (FOG_CDECL *PathF_Add)(PathF& self, size_t count);
+  typedef size_t (FOG_CDECL *PathD_Add)(PathD& self, size_t count);
 
   typedef void (FOG_CDECL *PathF_UpdateFlat)(const PathF& self);
   typedef void (FOG_CDECL *PathD_UpdateFlat)(const PathD& self);
@@ -412,8 +412,8 @@ struct _G2dApi
   typedef err_t (FOG_CDECL *PathF_SetDeepF)(PathF& self, const PathF& other);
   typedef err_t (FOG_CDECL *PathD_SetDeepD)(PathD& self, const PathD& other);
 
-  typedef Range (FOG_CDECL *PathF_GetSubpathRange)(const PathF& self, sysuint_t index);
-  typedef Range (FOG_CDECL *PathD_GetSubpathRange)(const PathD& self, sysuint_t index);
+  typedef Range (FOG_CDECL *PathF_GetSubpathRange)(const PathF& self, size_t index);
+  typedef Range (FOG_CDECL *PathD_GetSubpathRange)(const PathD& self, size_t index);
 
   typedef err_t (FOG_CDECL *PathF_MoveTo)(PathF& self, const PointF& pt0);
   typedef err_t (FOG_CDECL *PathD_MoveTo)(PathD& self, const PointD& pt0);
@@ -427,8 +427,8 @@ struct _G2dApi
   typedef err_t (FOG_CDECL *PathF_VLineTo)(PathF& self, float y);
   typedef err_t (FOG_CDECL *PathD_VLineTo)(PathD& self, double y);
 
-  typedef err_t (FOG_CDECL *PathF_PolyTo)(PathF& self, const PointF* pts, sysuint_t count);
-  typedef err_t (FOG_CDECL *PathD_PolyTo)(PathD& self, const PointD* pts, sysuint_t count);
+  typedef err_t (FOG_CDECL *PathF_PolyTo)(PathF& self, const PointF* pts, size_t count);
+  typedef err_t (FOG_CDECL *PathD_PolyTo)(PathD& self, const PointD* pts, size_t count);
 
   typedef err_t (FOG_CDECL *PathF_QuadTo)(PathF& self, const PointF& pt1, const PointF& pt2);
   typedef err_t (FOG_CDECL *PathD_QuadTo)(PathD& self, const PointD& pt1, const PointD& pt2);
@@ -465,34 +465,34 @@ struct _G2dApi
   typedef err_t (FOG_CDECL *PathD_RectF)(PathD& self, const RectF& r, uint32_t direction);
   typedef err_t (FOG_CDECL *PathD_RectD)(PathD& self, const RectD& r, uint32_t direction);
 
-  typedef err_t (FOG_CDECL *PathF_BoxesI)(PathF& self, const BoxI* r, sysuint_t count, uint32_t direction);
-  typedef err_t (FOG_CDECL *PathD_BoxesI)(PathD& self, const BoxI* r, sysuint_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathF_BoxesI)(PathF& self, const BoxI* r, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathD_BoxesI)(PathD& self, const BoxI* r, size_t count, uint32_t direction);
 
-  typedef err_t (FOG_CDECL *PathF_BoxesF)(PathF& self, const BoxF* r, sysuint_t count, uint32_t direction);
-  typedef err_t (FOG_CDECL *PathD_BoxesF)(PathD& self, const BoxF* r, sysuint_t count, uint32_t direction);
-  typedef err_t (FOG_CDECL *PathD_BoxesD)(PathD& self, const BoxD* r, sysuint_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathF_BoxesF)(PathF& self, const BoxF* r, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathD_BoxesF)(PathD& self, const BoxF* r, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathD_BoxesD)(PathD& self, const BoxD* r, size_t count, uint32_t direction);
 
-  typedef err_t (FOG_CDECL *PathF_RectsI)(PathF& self, const RectI* r, sysuint_t count, uint32_t direction);
-  typedef err_t (FOG_CDECL *PathD_RectsI)(PathD& self, const RectI* r, sysuint_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathF_RectsI)(PathF& self, const RectI* r, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathD_RectsI)(PathD& self, const RectI* r, size_t count, uint32_t direction);
 
-  typedef err_t (FOG_CDECL *PathF_RectsF)(PathF& self, const RectF* r, sysuint_t count, uint32_t direction);
-  typedef err_t (FOG_CDECL *PathD_RectsF)(PathD& self, const RectF* r, sysuint_t count, uint32_t direction);
-  typedef err_t (FOG_CDECL *PathD_RectsD)(PathD& self, const RectD* r, sysuint_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathF_RectsF)(PathF& self, const RectF* r, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathD_RectsF)(PathD& self, const RectF* r, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathD_RectsD)(PathD& self, const RectD* r, size_t count, uint32_t direction);
 
   typedef err_t (FOG_CDECL *PathF_Region)(PathF& self, const Region& r, uint32_t direction);
   typedef err_t (FOG_CDECL *PathD_Region)(PathD& self, const Region& r, uint32_t direction);
 
-  typedef err_t (FOG_CDECL *PathF_PolylineI)(PathF& self, const PointI* pts, sysuint_t count, uint32_t direction);
-  typedef err_t (FOG_CDECL *PathD_PolylineI)(PathD& self, const PointI* pts, sysuint_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathF_PolylineI)(PathF& self, const PointI* pts, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathD_PolylineI)(PathD& self, const PointI* pts, size_t count, uint32_t direction);
 
-  typedef err_t (FOG_CDECL *PathF_PolylineF)(PathF& self, const PointF* pts, sysuint_t count, uint32_t direction);
-  typedef err_t (FOG_CDECL *PathD_PolylineD)(PathD& self, const PointD* pts, sysuint_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathF_PolylineF)(PathF& self, const PointF* pts, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathD_PolylineD)(PathD& self, const PointD* pts, size_t count, uint32_t direction);
 
-  typedef err_t (FOG_CDECL *PathF_PolygonI)(PathF& self, const PointI* pts, sysuint_t count, uint32_t direction);
-  typedef err_t (FOG_CDECL *PathD_PolygonI)(PathD& self, const PointI* pts, sysuint_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathF_PolygonI)(PathF& self, const PointI* pts, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathD_PolygonI)(PathD& self, const PointI* pts, size_t count, uint32_t direction);
 
-  typedef err_t (FOG_CDECL *PathF_PolygonF)(PathF& self, const PointF* pts, sysuint_t count, uint32_t direction);
-  typedef err_t (FOG_CDECL *PathD_PolygonD)(PathD& self, const PointD* pts, sysuint_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathF_PolygonF)(PathF& self, const PointF* pts, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathD_PolygonD)(PathD& self, const PointD* pts, size_t count, uint32_t direction);
 
   typedef err_t (FOG_CDECL *PathF_Shape)(PathF& self, uint32_t shapeType, const void* shapeData, uint32_t direction, const TransformF* tr);
   typedef err_t (FOG_CDECL *PathD_Shape)(PathD& self, uint32_t shapeType, const void* shapeData, uint32_t direction, const TransformD* tr);
@@ -693,8 +693,8 @@ struct _G2dApi
   typedef err_t (FOG_CDECL *PathClipperF_ContinuePath)(PathClipperF& self, PathF& dst, const PathF& src);
   typedef err_t (FOG_CDECL *PathClipperD_ContinuePath)(PathClipperD& self, PathD& dst, const PathD& src);
 
-  typedef err_t (FOG_CDECL *PathClipperF_ContinueRaw)(PathClipperF& self, PathF& dst, const PointF* srcPts, const uint8_t* srcCmd, sysuint_t srcLength);
-  typedef err_t (FOG_CDECL *PathClipperD_ContinueRaw)(PathClipperD& self, PathD& dst, const PointD* srcPts, const uint8_t* srcCmd, sysuint_t srcLength);
+  typedef err_t (FOG_CDECL *PathClipperF_ContinueRaw)(PathClipperF& self, PathF& dst, const PointF* srcPts, const uint8_t* srcCmd, size_t srcLength);
+  typedef err_t (FOG_CDECL *PathClipperD_ContinueRaw)(PathClipperD& self, PathD& dst, const PointD* srcPts, const uint8_t* srcCmd, size_t srcLength);
 
   typedef err_t (FOG_CDECL *PathClipperF_ClipPath)(PathClipperF& self, PathF& dst, const PathF& src, const TransformF* tr);
   typedef err_t (FOG_CDECL *PathClipperD_ClipPath)(PathClipperD& self, PathD& dst, const PathD& src, const TransformD* tr);
@@ -740,17 +740,17 @@ struct _G2dApi
   typedef void (FOG_CDECL *TransformF_MapPointF)(const TransformF& self, PointF& dst, const PointF& src);
   typedef void (FOG_CDECL *TransformD_MapPointD)(const TransformD& self, PointD& dst, const PointD& src);
 
-  typedef void (FOG_CDECL *TransformF_MapPointsF)(const TransformF& self, PointF* dst, const PointF* src, sysuint_t length);
-  typedef void (FOG_CDECL *TransformD_MapPointsF)(const TransformD& self, PointD* dst, const PointF* src, sysuint_t length);
-  typedef void (FOG_CDECL *TransformD_MapPointsD)(const TransformD& self, PointD* dst, const PointD* src, sysuint_t length);
+  typedef void (FOG_CDECL *TransformF_MapPointsF)(const TransformF& self, PointF* dst, const PointF* src, size_t length);
+  typedef void (FOG_CDECL *TransformD_MapPointsF)(const TransformD& self, PointD* dst, const PointF* src, size_t length);
+  typedef void (FOG_CDECL *TransformD_MapPointsD)(const TransformD& self, PointD* dst, const PointD* src, size_t length);
 
   typedef err_t (FOG_CDECL *TransformF_MapPathF)(const TransformF& self, PathF& dst, const PathF& src, uint32_t cntOp);
   typedef err_t (FOG_CDECL *TransformD_MapPathF)(const TransformD& self, PathD& dst, const PathF& src, uint32_t cntOp);
   typedef err_t (FOG_CDECL *TransformD_MapPathD)(const TransformD& self, PathD& dst, const PathD& src, uint32_t cntOp);
 
-  typedef err_t (FOG_CDECL *TransformF_MapPathDataF)(const TransformF& self, PathF& dst, const uint8_t* srcCmd, const PointF* srcPts, sysuint_t length, uint32_t cntOp);
-  typedef err_t (FOG_CDECL *TransformD_MapPathDataF)(const TransformD& self, PathD& dst, const uint8_t* srcCmd, const PointF* srcPts, sysuint_t length, uint32_t cntOp);
-  typedef err_t (FOG_CDECL *TransformD_MapPathDataD)(const TransformD& self, PathD& dst, const uint8_t* srcCmd, const PointD* srcPts, sysuint_t length, uint32_t cntOp);
+  typedef err_t (FOG_CDECL *TransformF_MapPathDataF)(const TransformF& self, PathF& dst, const uint8_t* srcCmd, const PointF* srcPts, size_t length, uint32_t cntOp);
+  typedef err_t (FOG_CDECL *TransformD_MapPathDataF)(const TransformD& self, PathD& dst, const uint8_t* srcCmd, const PointF* srcPts, size_t length, uint32_t cntOp);
+  typedef err_t (FOG_CDECL *TransformD_MapPathDataD)(const TransformD& self, PathD& dst, const uint8_t* srcCmd, const PointD* srcPts, size_t length, uint32_t cntOp);
 
   typedef void (FOG_CDECL *TransformF_MapBoxF)(const TransformF& self, BoxF& dst, const BoxF& src);
   typedef void (FOG_CDECL *TransformD_MapBoxD)(const TransformD& self, BoxD& dst, const BoxD& src);

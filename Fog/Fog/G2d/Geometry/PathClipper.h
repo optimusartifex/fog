@@ -74,7 +74,7 @@ struct FOG_NO_EXPORT PathClipperF
   FOG_INLINE const BoxF& getClipBox() const { return _clipBox; }
   FOG_INLINE void setClipBox(const BoxF& clipBox) { _clipBox = clipBox; }
 
-  FOG_INLINE sysuint_t getLastIndex() const { return _lastIndex; }
+  FOG_INLINE size_t getLastIndex() const { return _lastIndex; }
 
   // --------------------------------------------------------------------------
   // [Reset]
@@ -114,7 +114,7 @@ struct FOG_NO_EXPORT PathClipperF
     return _g2d.pathclipperf.continuePath(*this, dst, src);
   }
 
-  FOG_INLINE err_t continueRaw(PathF& dst, const PointF* srcPts, const uint8_t* srcCmd, sysuint_t srcLength)
+  FOG_INLINE err_t continueRaw(PathF& dst, const PointF* srcPts, const uint8_t* srcCmd, size_t srcLength)
   {
     return _g2d.pathclipperf.continueRaw(*this, dst, srcPts, srcCmd, srcLength);
   }
@@ -155,7 +155,7 @@ struct FOG_NO_EXPORT PathClipperF
 
   BoxF _clipBox;
   PointF _lastMoveTo;
-  sysuint_t _lastIndex;
+  size_t _lastIndex;
 };
 
 // ============================================================================
@@ -200,7 +200,7 @@ struct FOG_NO_EXPORT PathClipperD
   FOG_INLINE const BoxD& getClipBox() const { return _clipBox; }
   FOG_INLINE void setClipBox(const BoxD& clipBox) { _clipBox = clipBox; }
 
-  FOG_INLINE sysuint_t getLastIndex() const { return _lastIndex; }
+  FOG_INLINE size_t getLastIndex() const { return _lastIndex; }
 
   // --------------------------------------------------------------------------
   // [Reset]
@@ -240,7 +240,7 @@ struct FOG_NO_EXPORT PathClipperD
     return _g2d.pathclipperd.continuePath(*this, dst, src);
   }
 
-  FOG_INLINE err_t continueRaw(PathD& dst, const PointD* srcPts, const uint8_t* srcCmd, sysuint_t srcLength)
+  FOG_INLINE err_t continueRaw(PathD& dst, const PointD* srcPts, const uint8_t* srcCmd, size_t srcLength)
   {
     return _g2d.pathclipperd.continueRaw(*this, dst, srcPts, srcCmd, srcLength);
   }
@@ -281,7 +281,7 @@ struct FOG_NO_EXPORT PathClipperD
 
   BoxD _clipBox;
   PointD _lastMoveTo;
-  sysuint_t _lastIndex;
+  size_t _lastIndex;
 };
 
 // ============================================================================

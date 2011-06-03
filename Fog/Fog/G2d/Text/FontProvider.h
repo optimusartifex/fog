@@ -71,7 +71,7 @@ struct FOG_API FontProviderData
   // --------------------------------------------------------------------------
 
   //! @brief Reference count.
-  mutable Atomic<sysuint_t> refCount;
+  mutable Atomic<size_t> refCount;
   //! @brief Lock for thread safety.
   Lock lock;
 

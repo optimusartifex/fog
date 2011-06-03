@@ -50,7 +50,7 @@ struct FOG_NO_EXPORT MatrixDataF
   // --------------------------------------------------------------------------
 
   //! @brief Reference count.
-  mutable Atomic<sysuint_t> refCount;
+  mutable Atomic<size_t> refCount;
   //! @brief Size.
   SizeI size;
   //! @brief Elements.
@@ -83,7 +83,7 @@ struct FOG_NO_EXPORT MatrixDataD
   // --------------------------------------------------------------------------
 
   //! @brief Reference count.
-  mutable Atomic<sysuint_t> refCount;
+  mutable Atomic<size_t> refCount;
   //! @brief Size.
   SizeI size;
   //! @brief Elements.
@@ -111,8 +111,8 @@ struct FOG_API MatrixF
   // [Sharing]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE sysuint_t getRefCount() const { return _d->refCount.get(); }
-  FOG_INLINE bool isDetached() const { return getRefCount() == 1; }
+  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
+  FOG_INLINE bool isDetached() const { return getReference() == 1; }
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
 
   err_t _detach();
@@ -138,17 +138,17 @@ struct FOG_API MatrixF
     return _d->data;
   }
 
-  FOG_INLINE const float* getRow(sysuint_t index) const
+  FOG_INLINE const float* getRow(size_t index) const
   {
-    FOG_ASSERT_X(index < (sysuint_t)(uint)_d->size.h, "Fog::MatrixF::getRow() - Index out of range.");
-    return _d->data + (index * (sysuint_t)(uint)_d->size.w);
+    FOG_ASSERT_X(index < (size_t)(uint)_d->size.h, "Fog::MatrixF::getRow() - Index out of range.");
+    return _d->data + (index * (size_t)(uint)_d->size.w);
   }
 
-  FOG_INLINE float* getRowX(sysuint_t index)
+  FOG_INLINE float* getRowX(size_t index)
   {
     FOG_ASSERT_X(isDetached(), "Fog::MatrixF::getRowX() - Called on non-detached object.");
-    FOG_ASSERT_X(index < (sysuint_t)(uint)_d->size.h, "Fog::MatrixF::getRow() - Index out of range.");
-    return _d->data + (index * (sysuint_t)(uint)_d->size.w);
+    FOG_ASSERT_X(index < (size_t)(uint)_d->size.h, "Fog::MatrixF::getRow() - Index out of range.");
+    return _d->data + (index * (size_t)(uint)_d->size.w);
   }
 
   // --------------------------------------------------------------------------

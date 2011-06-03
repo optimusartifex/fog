@@ -46,7 +46,7 @@ struct FOG_NO_EXPORT ImagePaletteData
   // [Members]
   // --------------------------------------------------------------------------
 
-  mutable Atomic<sysuint_t> refCount;
+  mutable Atomic<size_t> refCount;
 
   uint32_t length;
   Argb32 data[256];
@@ -78,10 +78,10 @@ struct FOG_API ImagePalette
   // [Data]
   // --------------------------------------------------------------------------
 
-  //! @copydoc Doxygen::Implicit::getRefCount().
-  FOG_INLINE sysuint_t getRefCount() const { return _d->refCount.get(); }
+  //! @copydoc Doxygen::Implicit::getReference().
+  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
   //! @copydoc Doxygen::Implicit::isDetached().
-  FOG_INLINE bool isDetached() const { return getRefCount() == 1; }
+  FOG_INLINE bool isDetached() const { return getReference() == 1; }
   //! @copydoc Doxygen::Implicit::detach().
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
   //! @copydoc Doxygen::Implicit::_detach().
@@ -107,15 +107,15 @@ struct FOG_API ImagePalette
   err_t setData(const Range& range, const Argb32* entries);
 
   //! @brief Get the palette length.
-  FOG_INLINE sysuint_t getLength() const { return _d->length; }
+  FOG_INLINE size_t getLength() const { return _d->length; }
   //! @brief Set the palette length.
-  err_t setLength(sysuint_t length);
+  err_t setLength(size_t length);
 
   // --------------------------------------------------------------------------
   // [At]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE Argb32 getAt(sysuint_t index) const
+  FOG_INLINE Argb32 getAt(size_t index) const
   {
     FOG_ASSERT_X(index < 256, "Fog::ImagePalette::at() - Index out of range.");
     return _d->data[index];
@@ -153,7 +153,7 @@ struct FOG_API ImagePalette
   static ImagePalette fromGreyscale(uint32_t count);
   static ImagePalette fromCube(uint32_t r, uint32_t g, uint32_t b);
 
-  static bool isGreyscale(const Argb32* data, sysuint_t count);
+  static bool isGreyscale(const Argb32* data, size_t count);
 
   // --------------------------------------------------------------------------
   // [Members]

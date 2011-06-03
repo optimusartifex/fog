@@ -13,7 +13,7 @@
 #if defined(FOG_HAVE_LIBPNG)
 
 // [Dependencies]
-#include <Fog/Core/Collection/PBuffer.h>
+#include <Fog/Core/Collection/BufferP.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/Debug.h>
 #include <Fog/Core/Global/Static.h>
@@ -163,7 +163,7 @@ PngCodecProvider::~PngCodecProvider()
   pngProvider = NULL;
 }
 
-uint32_t PngCodecProvider::checkSignature(const void* mem, sysuint_t length) const
+uint32_t PngCodecProvider::checkSignature(const void* mem, size_t length) const
 {
   if (!mem || length == 0) return 0;
 
@@ -171,7 +171,7 @@ uint32_t PngCodecProvider::checkSignature(const void* mem, sysuint_t length) con
   static const uint8_t mimePNG[8] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
 
   // PNG check.
-  sysuint_t i = Math::min<sysuint_t>(length, 8);
+  size_t i = Math::min<size_t>(length, 8);
   if (memcmp(mem, mimePNG, i) == 0)
     return 15 + ((uint32_t)i * 10);
 
@@ -519,7 +519,7 @@ err_t PngEncoder::writeImage(const Image& image)
   int y;
 
   ImageConverter converter;
-  PBuffer<2048> buffer;
+  BufferP<2048> buffer;
 
   // Step 0: Simple reject.
   if (!w || !h)

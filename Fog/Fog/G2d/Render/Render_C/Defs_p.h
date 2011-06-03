@@ -8,7 +8,7 @@
 #define _FOG_G2D_RENDER_RENDER_C_DEFS_P_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/PBuffer.h>
+#include <Fog/Core/Collection/BufferP.h>
 #include <Fog/Core/Face/Face_C.h>
 #include <Fog/Core/Math/Fixed.h>
 #include <Fog/Core/Math/Math.h>
@@ -118,7 +118,7 @@
     int w = (int)(span->getX1() - x); \
     FOG_ASSUME(w > 0); \
     \
-    dst = dstBase + (sysuint_t)(uint)x * BPP; \
+    dst = dstBase + (size_t)(uint)x * BPP; \
     const uint8_t* _msk = (const uint8_t*)reinterpret_cast<const Span8*>(span)->getGenericMask(); \
     \
     switch (span->getType()) \
@@ -384,19 +384,19 @@ _##_Group_##_End: \
   FOG_ASSUME(w > 0);
 
 #define BLIT_LOOP_8x4_SMALL_BEGIN(_Group_) \
-  if (((sysuint_t)dst & 3) == 0) goto _##_Group_##_SmallSkip; \
+  if (((size_t)dst & 3) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {
 
 #define BLIT_LOOP_8x4_SMALL_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
-    if (((sysuint_t)dst & 3) != 0) continue; \
+    if (((size_t)dst & 3) != 0) continue; \
     break;
 
 #define BLIT_LOOP_8x4_SMALL_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
-    if (((sysuint_t)dst & 3) != 0) continue; \
+    if (((size_t)dst & 3) != 0) continue; \
     break; \
   } \
   \
@@ -433,19 +433,19 @@ _##_Group_##_End: \
   FOG_ASSUME(w > 0);
 
 #define BLIT_LOOP_8x8_SMALL_BEGIN(_Group_) \
-  if (((sysuint_t)dst & 7) == 0) goto _##_Group_##_SmallSkip; \
+  if (((size_t)dst & 7) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {
 
 #define BLIT_LOOP_8x8_SMALL_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
-    if (((sysuint_t)dst & 7) != 0) continue; \
+    if (((size_t)dst & 7) != 0) continue; \
     break;
 
 #define BLIT_LOOP_8x8_SMALL_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
-    if (((sysuint_t)dst & 7) != 0) continue; \
+    if (((size_t)dst & 7) != 0) continue; \
     break; \
   } \
   \
@@ -482,19 +482,19 @@ _##_Group_##_End: \
   FOG_ASSUME(w > 0);
 
 #define BLIT_LOOP_8x16_SMALL_BEGIN(_Group_) \
-  if (((sysuint_t)dst & 15) == 0) goto _##_Group_##_SmallSkip; \
+  if (((size_t)dst & 15) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {
 
 #define BLIT_LOOP_8x16_SMALL_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
-    if (((sysuint_t)dst & 15) != 0) continue; \
+    if (((size_t)dst & 15) != 0) continue; \
     break;
 
 #define BLIT_LOOP_8x16_SMALL_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
-    if (((sysuint_t)dst & 15) != 0) continue; \
+    if (((size_t)dst & 15) != 0) continue; \
     break; \
   } \
   \
@@ -552,7 +552,7 @@ _##_Group_##_End: \
   FOG_ASSUME(w > 0);
 
 #define BLIT_LOOP_16x2_SMALL_BEGIN(_Group_) \
-  if (((sysuint_t)dst & 3) == 0) goto _##_Group_##_SmallSkip; \
+  if (((size_t)dst & 3) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {
@@ -599,19 +599,19 @@ _##_Group_##_End: \
   FOG_ASSUME(w > 0);
 
 #define BLIT_LOOP_16x4_SMALL_BEGIN(_Group_) \
-  if (((sysuint_t)dst & 7) == 0) goto _##_Group_##_SmallSkip; \
+  if (((size_t)dst & 7) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {
 
 #define BLIT_LOOP_16x4_SMALL_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
-    if (((sysuint_t)dst & 7) != 0) continue; \
+    if (((size_t)dst & 7) != 0) continue; \
     break;
 
 #define BLIT_LOOP_16x4_SMALL_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
-    if (((sysuint_t)dst & 7) != 0) continue; \
+    if (((size_t)dst & 7) != 0) continue; \
     break; \
   } \
   \
@@ -648,19 +648,19 @@ _##_Group_##_End: \
   FOG_ASSUME(w > 0);
 
 #define BLIT_LOOP_16x8_SMALL_BEGIN(_Group_) \
-  if (((sysuint_t)dst & 15) == 0) goto _##_Group_##_SmallSkip; \
+  if (((size_t)dst & 15) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {
 
 #define BLIT_LOOP_16x8_SMALL_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
-    if (((sysuint_t)dst & 15) != 0) continue; \
+    if (((size_t)dst & 15) != 0) continue; \
     break;
 
 #define BLIT_LOOP_16x8_SMALL_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
-    if (((sysuint_t)dst & 15) != 0) continue; \
+    if (((size_t)dst & 15) != 0) continue; \
     break; \
   } \
   \
@@ -718,19 +718,19 @@ _##_Group_##_End: \
   FOG_ASSUME(w > 0);
 
 #define BLIT_LOOP_24x4_SMALL_BEGIN(_Group_) \
-  if (((sysuint_t)dst & 3) == 0) goto _##_Group_##_SmallSkip; \
+  if (((size_t)dst & 3) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {
 
 #define BLIT_LOOP_24x4_SMALL_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
-    if (((sysuint_t)dst & 3) != 0) continue; \
+    if (((size_t)dst & 3) != 0) continue; \
     break;
 
 #define BLIT_LOOP_24x4_SMALL_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
-    if (((sysuint_t)dst & 3) != 0) continue; \
+    if (((size_t)dst & 3) != 0) continue; \
     break; \
   } \
   \
@@ -767,19 +767,19 @@ _##_Group_##_End: \
   FOG_ASSUME(w > 0);
 
 #define BLIT_LOOP_24x8_SMALL_BEGIN(_Group_) \
-  if (((sysuint_t)dst & 7) == 0) goto _##_Group_##_SmallSkip; \
+  if (((size_t)dst & 7) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {
 
 #define BLIT_LOOP_24x8_SMALL_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
-    if (((sysuint_t)dst & 7) != 0) continue; \
+    if (((size_t)dst & 7) != 0) continue; \
     break;
 
 #define BLIT_LOOP_24x8_SMALL_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
-    if (((sysuint_t)dst & 7) != 0) continue; \
+    if (((size_t)dst & 7) != 0) continue; \
     break; \
   } \
   \
@@ -844,13 +844,13 @@ _##_Group_##_End: \
   FOG_ASSUME(w > 0);
 
 #define BLIT_LOOP_32x4_SMALL_BEGIN(_Group_) \
-  if (((sysuint_t)dst & 15) == 0) goto _##_Group_##_SmallSkip; \
+  if (((size_t)dst & 15) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {
 
 #define BLIT_LOOP_32x4_SMALL_BEGIN_ALT(_Group_, _PrepareCode_) \
-  if (((sysuint_t)dst & 15) == 0) goto _##_Group_##_SmallSkip; \
+  if (((size_t)dst & 15) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   _PrepareCode_ \
@@ -858,12 +858,12 @@ _##_Group_##_SmallBegin: \
 
 #define BLIT_LOOP_32x4_SMALL_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
-    if (((sysuint_t)dst & 15) != 0) continue; \
+    if (((size_t)dst & 15) != 0) continue; \
     break;
 
 #define BLIT_LOOP_32x4_SMALL_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
-    if (((sysuint_t)dst & 15) != 0) continue; \
+    if (((size_t)dst & 15) != 0) continue; \
     break; \
   } \
   \
@@ -899,7 +899,7 @@ _##_Group_##_End: \
   FOG_ASSUME(w > 0);
 
 #define BLIT_LOOP_32x4_VS_16_SMALL_BEGIN(_Group_) \
-  if (((sysuint_t)src & 3) == 0 && w >= 4) goto _##_Group_##_SmallSkip; \
+  if (((size_t)src & 3) == 0 && w >= 4) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {
@@ -947,19 +947,19 @@ _##_Group_##_End: \
   FOG_ASSUME(w > 0);
 
 #define BLIT_LOOP_32x4_VS_24_SMALL_BEGIN(_Group_) \
-  if (((sysuint_t)src & 3) == 0) goto _##_Group_##_SmallSkip; \
+  if (((size_t)src & 3) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {
 
 #define BLIT_LOOP_32x4_VS_24_SMALL_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
-    if (((sysuint_t)src & 3) != 0) continue; \
+    if (((size_t)src & 3) != 0) continue; \
     break;
 
 #define BLIT_LOOP_32x4_VS_24_SMALL_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
-    if (((sysuint_t)src & 3) != 0) continue; \
+    if (((size_t)src & 3) != 0) continue; \
     break; \
   } \
   \
@@ -995,13 +995,13 @@ _##_Group_##_End: \
   FOG_ASSUME(w > 0);
 
 #define BLIT_LOOP_32x16_ALIGN_BEGIN(_Group_) \
-  if (((sysuint_t)dst & 15) == 0) goto _##_Group_##_SmallSkip; \
+  if (((size_t)dst & 15) == 0) goto _##_Group_##_SmallSkip; \
   \
   do {
 
 #define BLIT_LOOP_32x16_ALIGN_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
-  } while (((sysuint_t)dst & 15) != 0); \
+  } while (((size_t)dst & 15) != 0); \
   \
 _##_Group_##_SmallSkip: \
   ;
@@ -1062,19 +1062,19 @@ _##_Group_##_End: \
   FOG_ASSUME(w > 0);
 
 #define BLIT_LOOP_48x4_SMALL_BEGIN(_Group_) \
-  if (((sysuint_t)dst & 7) == 0) goto _##_Group_##_SmallSkip; \
+  if (((size_t)dst & 7) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {
 
 #define BLIT_LOOP_48x4_SMALL_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
-    if (((sysuint_t)dst & 7) == 0) continue; \
+    if (((size_t)dst & 7) == 0) continue; \
     break;
 
 #define BLIT_LOOP_48x4_SMALL_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
-    if (((sysuint_t)dst & 7) == 0) continue; \
+    if (((size_t)dst & 7) == 0) continue; \
     break; \
   } \
   \
@@ -1111,19 +1111,19 @@ _##_Group_##_End: \
   FOG_ASSUME(w > 0);
 
 #define BLIT_LOOP_48x8_SMALL_BEGIN(_Group_) \
-  if (((sysuint_t)dst & 15) == 0) goto _##_Group_##_SmallSkip; \
+  if (((size_t)dst & 15) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {
 
 #define BLIT_LOOP_48x8_SMALL_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
-    if (((sysuint_t)dst & 15) == 0) continue; \
+    if (((size_t)dst & 15) == 0) continue; \
     break;
 
 #define BLIT_LOOP_48x8_SMALL_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
-    if (((sysuint_t)dst & 15) == 0) continue; \
+    if (((size_t)dst & 15) == 0) continue; \
     break; \
   } \
   \
@@ -1178,7 +1178,7 @@ _##_Group_##_End: \
   FOG_ASSUME(w > 0);
 
 #define BLIT_LOOP_64x2_SMALL_BEGIN(_Group_) \
-  if (((sysuint_t)dst & 15) != 0) \
+  if (((size_t)dst & 15) != 0) \
   { \
 _##_Group_##_SmallBegin: \
 
@@ -1217,7 +1217,7 @@ _##_Group_##_End: \
   FOG_ASSUME(w > 0);
 
 #define BLIT_LOOP_64x4_SMALL_BEGIN(_Group_) \
-  if (((sysuint_t)dst & 15) == 0) goto _##_Group_##_SmallSkip; \
+  if (((size_t)dst & 15) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {

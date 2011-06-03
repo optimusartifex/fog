@@ -51,7 +51,7 @@ namespace Fog {
 
 static void unescapeArgument(String& s)
 {
-  sysuint_t remain = s.getLength();
+  size_t remain = s.getLength();
   if (!remain) return;
 
   Char* beg = s.getDataX();
@@ -72,7 +72,7 @@ static void unescapeArgument(String& s)
     remain--;
   }
 
-  s.resize((sysuint_t)(dst - beg));
+  s.resize((size_t)(dst - beg));
 }
 
 #if defined(FOG_OS_WINDOWS)
@@ -84,7 +84,7 @@ static void parseWinCmdLine(const String& cmdLine, List<String>& dst)
   const Char* mark;
   Char quote;
   bool isEscaped;
-  sysuint_t len;
+  size_t len;
 
   for (;;)
   {
@@ -144,7 +144,7 @@ static void parseWinCmdLine(const String& cmdLine, List<String>& dst)
     }
 
 parsed:
-    len = (sysuint_t)(cur - mark);
+    len = (size_t)(cur - mark);
     if (quote.ch() != 0)
     {
       mark++;
@@ -547,7 +547,7 @@ void _core_application_init_arguments(int argc, const char* argv[])
   for (int i = 0; i < argc; i++)
   {
     String arg;
-    TextCodec::local8().appendToUnicode(arg, argv[i]);
+    TextCodec::local8().decode(arg, Stub8(argv[i], DETECT_LENGTH));
     arguments.append(arg);
   }
 

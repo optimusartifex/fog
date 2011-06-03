@@ -168,7 +168,7 @@ struct FOG_NO_EXPORT RasterDoBoxes : public RasterDoDraw
   // [Members]
   // --------------------------------------------------------------------------
 
-  sysuint_t count;
+  size_t count;
   BoxI boxes[1];
 };
 

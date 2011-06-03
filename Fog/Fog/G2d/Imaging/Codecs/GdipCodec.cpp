@@ -372,7 +372,7 @@ GdiPlusCodecProvider::~GdiPlusCodecProvider()
   if (_gdiPlusRefCount.deref()) _gdiPlusLibrary.destroy();
 }
 
-uint32_t GdiPlusCodecProvider::checkSignature(const void* mem, sysuint_t length) const
+uint32_t GdiPlusCodecProvider::checkSignature(const void* mem, size_t length) const
 {
   // Note: GdiPlus proxy provider uses 14 as a base score. This
   // is by one less than all other providers based on external
@@ -381,7 +381,7 @@ uint32_t GdiPlusCodecProvider::checkSignature(const void* mem, sysuint_t length)
   if (!mem || length == 0) return 0;
 
   uint32_t score = 0;
-  sysuint_t i;
+  size_t i;
 
   // Mime data.
   static const uint8_t mimeJPEG[2]    = { 0xFF, 0xD8 };
@@ -393,17 +393,17 @@ uint32_t GdiPlusCodecProvider::checkSignature(const void* mem, sysuint_t length)
   switch (_streamType)
   {
     case IMAGE_STREAM_JPEG:
-      i = Math::min<sysuint_t>(length, 2);
+      i = Math::min<size_t>(length, 2);
       if (memcmp(mem, mimeJPEG, i) == 0)
         score = Math::max<uint32_t>(score, 14 + ((uint32_t)i * 40));
       break;
     case IMAGE_STREAM_PNG:
-      i = Math::min<sysuint_t>(length, 8);
+      i = Math::min<size_t>(length, 8);
       if (memcmp(mem, mimePNG, i) == 0)
         score = Math::max<uint32_t>(score, 14 + ((uint32_t)i * 10));
       break;
     case IMAGE_STREAM_TIFF:
-      i = Math::min<sysuint_t>(length, 4);
+      i = Math::min<size_t>(length, 4);
       if (memcmp(mem, mimeTIFF_LE, i) == 0 || memcmp(mem, mimeTIFF_BE, i) == 0)
         score = Math::max<uint32_t>(score, 14 + ((uint32_t)i * 20));
       break;

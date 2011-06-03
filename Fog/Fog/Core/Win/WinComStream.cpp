@@ -68,7 +68,7 @@ ULONG STDMETHODCALLTYPE WinComStream::Release(void)
 // ISequentialStream Interface
 HRESULT STDMETHODCALLTYPE WinComStream::Read(void* pv, ULONG cb, ULONG* pcbRead)
 {
-  sysuint_t cbRead = _stream.read(pv, cb);
+  size_t cbRead = _stream.read(pv, cb);
   if (pcbRead) *pcbRead = (ULONG)cbRead;
 
   if (cbRead == cb)
@@ -79,7 +79,7 @@ HRESULT STDMETHODCALLTYPE WinComStream::Read(void* pv, ULONG cb, ULONG* pcbRead)
 
 HRESULT STDMETHODCALLTYPE WinComStream::Write(void const* pv, ULONG cb, ULONG* pcbWritten)
 {
-  sysuint_t cbWritten = _stream.write(pv, cb);
+  size_t cbWritten = _stream.write(pv, cb);
   if (pcbWritten) *pcbWritten = (ULONG)cbWritten;
 
   if (cbWritten == cb)

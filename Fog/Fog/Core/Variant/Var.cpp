@@ -9,19 +9,13 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Data/Value.h>
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/Init_Core_p.h>
 #include <Fog/Core/Memory/Memory.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringUtil.h>
-
-#include <errno.h>
-
-#if defined(FOG_OS_WINDOWS)
-#include <windows.h>
-#endif // FOG_OS_WINDOWS
+#include <Fog/Core/Variant/Var.h>
 
 namespace Fog {
 
@@ -413,22 +407,6 @@ Value Value::fromString(const String& val)
     fog_new_p(ValueData::allogetData())
       StringValueData(val));
 }
-
-Value Value::fromErrno()
-{
-  return Value(
-    fog_new_p(ValueData::allogetData())
-      IntegerValueData(errno));
-}
-
-#if defined(FOG_OS_WINDOWS)
-Value Value::fromWinLastError()
-{
-  return Value(
-    fog_new_p(ValueData::allogetData())
-      IntegerValueData(GetLastError()));
-}
-#endif // FOG_OS_WINDOWS
 
 err_t Value::detach()
 {

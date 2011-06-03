@@ -343,7 +343,7 @@ struct FOG_NO_EXPORT GdiPlusCodecProvider : public ImageCodecProvider
   GdiPlusCodecProvider(uint32_t streamType);
   virtual ~GdiPlusCodecProvider();
 
-  virtual uint32_t checkSignature(const void* mem, sysuint_t length) const;
+  virtual uint32_t checkSignature(const void* mem, size_t length) const;
   virtual err_t createCodec(uint32_t codecType, ImageCodec** codec) const;
 
   const WCHAR* _gdipMime;

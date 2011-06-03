@@ -606,12 +606,12 @@ static RegenerateXmlEntityTable regenerateXmlEntityTable;
 // ============================================================================
 
 const XmlEntity::Pair* XmlEntity::_pairs;
-sysuint_t XmlEntity::_pairsCount;
+size_t XmlEntity::_pairsCount;
 
 template<typename T>
-static FOG_INLINE int _compareEntities(const T* entity, sysuint_t length, const char* entityInTable)
+static FOG_INLINE int _compareEntities(const T* entity, size_t length, const char* entityInTable)
 {
-  sysuint_t i = 0;
+  size_t i = 0;
   while (true)
   {
     // End...
@@ -640,7 +640,7 @@ static FOG_INLINE int _compareEntities(const T* entity, sysuint_t length, const 
 }
 
 template<typename T>
-static FOG_INLINE Char _decode(const T* entityName, sysuint_t entityLength)
+static FOG_INLINE Char _decode(const T* entityName, size_t entityLength)
 {
   if (entityLength == DETECT_LENGTH) entityLength = StringUtil::len(entityName);
   if (entityLength == 0) return Char(0);
@@ -679,8 +679,8 @@ static FOG_INLINE Char _decode(const T* entityName, sysuint_t entityLength)
     const XmlEntity::Pair* base = xmlentity_pairs;
     const XmlEntity::Pair* basep;
 
-    sysuint_t index;
-    sysuint_t count = FOG_ARRAY_SIZE(xmlentity_pairs);
+    size_t index;
+    size_t count = FOG_ARRAY_SIZE(xmlentity_pairs);
 
     for (index = count; index != 0; index >>= 1)
     {
@@ -706,17 +706,17 @@ static FOG_INLINE Char _decode(const T* entityName, sysuint_t entityLength)
   }
 }
 
-Char XmlEntity::decode(const char* entityName, sysuint_t entityLength)
+Char XmlEntity::decode(const char* entityName, size_t entityLength)
 {
   return _decode<char>(entityName, entityLength);
 }
 
-Char XmlEntity::decode(const Char* entityName, sysuint_t entityLength)
+Char XmlEntity::decode(const Char* entityName, size_t entityLength)
 {
   return _decode<Char>(entityName, entityLength);
 }
 
-sysuint_t XmlEntity::encode(char* dst, Char _ch)
+size_t XmlEntity::encode(char* dst, Char _ch)
 {
   // We first try to find named entity, it it fails, we will
   // generate hexadecimal character entity.
@@ -725,8 +725,8 @@ sysuint_t XmlEntity::encode(char* dst, Char _ch)
     const XmlEntity::PairRev* base = xmlentity_pairs_rev;
     const XmlEntity::PairRev* basep;
 
-    sysuint_t index;
-    sysuint_t count = FOG_ARRAY_SIZE(xmlentity_pairs_rev);
+    size_t index;
+    size_t count = FOG_ARRAY_SIZE(xmlentity_pairs_rev);
 
     uint16_t ch = (uint16_t)_ch.ch();
 
@@ -745,7 +745,7 @@ sysuint_t XmlEntity::encode(char* dst, Char _ch)
         *dst++ = ';';
         *dst = '\0';
 
-        return (sysuint_t)(dst - dstBegin);
+        return (size_t)(dst - dstBegin);
       }
       // Larger, move right.
       else if (ch > basep->ch)
@@ -758,9 +758,9 @@ sysuint_t XmlEntity::encode(char* dst, Char _ch)
   }
 
   if (_ch.ch() > 255)
-    return (sysuint_t)sprintf(dst, "&#x%04X;", _ch.ch());
+    return (size_t)sprintf(dst, "&#x%04X;", _ch.ch());
   else
-    return (sysuint_t)sprintf(dst, "&#x%02X;", _ch.ch());
+    return (size_t)sprintf(dst, "&#x%02X;", _ch.ch());
 }
 
 // ============================================================================

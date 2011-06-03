@@ -81,7 +81,7 @@ struct FOG_API GradientF
   FOG_INLINE const ColorStopList& getStops() const { return _stops; }
   FOG_INLINE err_t setStops(const ColorStopList& list) { return _stops.setList(list); }
   FOG_INLINE err_t setStops(const List<ColorStop>& stops) { return _stops.setList(stops); }
-  FOG_INLINE err_t setStops(const ColorStop* stops, sysuint_t length) { return _stops.setList(stops, length); }
+  FOG_INLINE err_t setStops(const ColorStop* stops, size_t length) { return _stops.setList(stops, length); }
   FOG_INLINE void resetStops() { _stops.clear(); }
 
   FOG_INLINE err_t addStop(const ColorStop& stop) { return _stops.add(stop); }
@@ -89,7 +89,7 @@ struct FOG_API GradientF
   FOG_INLINE err_t removeStop(float offset) { return _stops.remove(offset); }
   FOG_INLINE err_t removeStop(const ColorStop& stop) { return _stops.remove(stop); }
 
-  FOG_INLINE err_t removeStopAt(sysuint_t index) { return _stops.removeAt(index); }
+  FOG_INLINE err_t removeStopAt(size_t index) { return _stops.removeAt(index); }
   FOG_INLINE err_t removeStopAt(const Range& range) { return _stops.removeAt(range); }
   FOG_INLINE err_t removeStopAt(const IntervalF& interval) { return _stops.removeAt(interval); }
 
@@ -204,7 +204,7 @@ struct FOG_API GradientD
   FOG_INLINE const ColorStopList& getStops() const { return _stops; }
   FOG_INLINE err_t setStops(const ColorStopList& list) { return _stops.setList(list); }
   FOG_INLINE err_t setStops(const List<ColorStop>& stops) { return _stops.setList(stops); }
-  FOG_INLINE err_t setStops(const ColorStop* stops, sysuint_t length) { return _stops.setList(stops, length); }
+  FOG_INLINE err_t setStops(const ColorStop* stops, size_t length) { return _stops.setList(stops, length); }
   FOG_INLINE void resetStops() { _stops.clear(); }
 
   FOG_INLINE err_t addStop(const ColorStop& stop) { return _stops.add(stop); }
@@ -212,7 +212,7 @@ struct FOG_API GradientD
   FOG_INLINE err_t removeStop(float offset) { return _stops.remove(offset); }
   FOG_INLINE err_t removeStop(const ColorStop& stop) { return _stops.remove(stop); }
 
-  FOG_INLINE err_t removeStopAt(sysuint_t index) { return _stops.removeAt(index); }
+  FOG_INLINE err_t removeStopAt(size_t index) { return _stops.removeAt(index); }
   FOG_INLINE err_t removeStopAt(const Range& range) { return _stops.removeAt(range); }
   FOG_INLINE err_t removeStopAt(const IntervalF& interval) { return _stops.removeAt(interval); }
 

@@ -963,10 +963,10 @@ static uint32_t _G2d_Color_doubleHexToComponent(uint32_t c0, uint32_t c1)
 static const ColorName* _G2d_Color_find(const Stub8& key)
 {
   const ColorName* base = _colorNames;
-  sysuint_t i, lim;
+  size_t i, lim;
 
   const char* keyName = key.getData();
-  sysuint_t keyLength = key.getLength();
+  size_t keyLength = key.getLength();
 
   FOG_ASSERT(keyLength != DETECT_LENGTH);
   if (keyLength == 0) return NULL;
@@ -1032,7 +1032,7 @@ static err_t FOG_CDECL _G2d_Color_parseA(Color& dst, const Stub8& str, uint32_t 
   // [#RGB or #RRGGBB]
   // --------------------------------------------------------------------------
 
-  sysuint_t i, len;
+  size_t i, len;
 
   if ((flags & COLOR_NAME_CSS_HEX) != 0)
   {
@@ -1043,7 +1043,7 @@ static err_t FOG_CDECL _G2d_Color_parseA(Color& dst, const Stub8& str, uint32_t 
       Argb32 argb32(0xFF000000);
 
       sCur++;
-      len = (sysuint_t)(sEnd - sCur);
+      len = (size_t)(sEnd - sCur);
 
       // Try to parse the #RRGGBB string.
       if (len >= 6)
@@ -1103,7 +1103,7 @@ _TryCssHex3:
     float f[4];
     f[0] = 1.0f;
 
-    if ((sysuint_t)(sEnd - sCur) >= 5)
+    if ((size_t)(sEnd - sCur) >= 5)
     {
       keyword[0] = sCur[0];
       keyword[1] = sCur[1];
@@ -1170,7 +1170,7 @@ _ParseRrbOrHsv:
         for (i = 1; i < 4; i++)
         {
           float val;
-          sysuint_t valEnd;
+          size_t valEnd;
           uint32_t pf;
 
           // Skip whitespaces.
@@ -1178,7 +1178,7 @@ _ParseRrbOrHsv:
 
           // Parse number. It's against standard, but some SVG generators emit
           // number in floating point, including 'dot' and some numbers behind.
-          if ((StringUtil::atof((const char*)sCur, (sysuint_t)(sEnd - sCur), &val, '.', &valEnd, &pf) != ERR_OK) ||
+          if ((StringUtil::atof((const char*)sCur, (size_t)(sEnd - sCur), &val, '.', &valEnd, &pf) != ERR_OK) ||
               (pf & (StringUtil::PARSED_EXPONENT)) != 0)
           {
             goto _Fail;
@@ -1238,11 +1238,11 @@ _ParseRrbOrHsv:
 
         if (isAlpha)
         {
-          sysuint_t valEnd;
+          size_t valEnd;
           uint32_t pf;
 
           // Parse float.
-          if ((StringUtil::atof((const char*)sCur, (sysuint_t)(sEnd - sCur), &f[0], '.', &valEnd, &pf) != ERR_OK) ||
+          if ((StringUtil::atof((const char*)sCur, (size_t)(sEnd - sCur), &f[0], '.', &valEnd, &pf) != ERR_OK) ||
               (pf & (StringUtil::PARSED_EXPONENT)) != 0)
           {
             goto _Fail;
@@ -1363,7 +1363,7 @@ static err_t FOG_CDECL _G2d_Color_parseU(Color& dst, const Utf16& str, uint32_t 
   // [#RGB or #RRGGBB]
   // --------------------------------------------------------------------------
 
-  sysuint_t i, len;
+  size_t i, len;
 
   if ((flags & COLOR_NAME_CSS_HEX) != 0)
   {
@@ -1374,7 +1374,7 @@ static err_t FOG_CDECL _G2d_Color_parseU(Color& dst, const Utf16& str, uint32_t 
       Argb32 argb32(0xFF000000);
 
       sCur++;
-      len = (sysuint_t)(sEnd - sCur);
+      len = (size_t)(sEnd - sCur);
 
       // Try to parse the #RRGGBB string.
       if (len >= 6)
@@ -1434,7 +1434,7 @@ _TryCssHex3:
     float f[4];
     f[0] = 1.0f;
 
-    if ((sysuint_t)(sEnd - sCur) >= 5)
+    if ((size_t)(sEnd - sCur) >= 5)
     {
       keyword[0] = sCur[0].ch() < 256 ? (uint8_t)sCur[0].ch() : 0;
       keyword[1] = sCur[1].ch() < 256 ? (uint8_t)sCur[1].ch() : 0;
@@ -1501,7 +1501,7 @@ _ParseRrbOrHsv:
         for (i = 1; i < 4; i++)
         {
           float val;
-          sysuint_t valEnd;
+          size_t valEnd;
           uint32_t pf;
 
           // Skip whitespaces.
@@ -1509,7 +1509,7 @@ _ParseRrbOrHsv:
 
           // Parse number. It's against standard, but some SVG generators emit
           // number in floating point, including 'dot' and some numbers behind.
-          if ((StringUtil::atof(sCur, (sysuint_t)(sEnd - sCur), &val, Char('.'), &valEnd, &pf) != ERR_OK) ||
+          if ((StringUtil::atof(sCur, (size_t)(sEnd - sCur), &val, Char('.'), &valEnd, &pf) != ERR_OK) ||
               (pf & (StringUtil::PARSED_EXPONENT)) != 0)
           {
             goto _Fail;
@@ -1569,11 +1569,11 @@ _ParseRrbOrHsv:
 
         if (isAlpha)
         {
-          sysuint_t valEnd;
+          size_t valEnd;
           uint32_t pf;
 
           // Parse float.
-          if ((StringUtil::atof(sCur, (sysuint_t)(sEnd - sCur), &f[0], Char('.'), &valEnd, &pf) != ERR_OK) ||
+          if ((StringUtil::atof(sCur, (size_t)(sEnd - sCur), &f[0], Char('.'), &valEnd, &pf) != ERR_OK) ||
               (pf & (StringUtil::PARSED_EXPONENT)) != 0)
           {
             goto _Fail;

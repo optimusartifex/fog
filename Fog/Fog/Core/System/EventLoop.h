@@ -52,14 +52,14 @@ struct FOG_NO_EXPORT EventLoopPendingTask
   }
 
   //! @brief Get task.
-  FOG_INLINE Task* getTask() const { return (Task*)((sysuint_t)_task & ~(sysuint_t)1); }
+  FOG_INLINE Task* getTask() const { return (Task*)((size_t)_task & ~(size_t)1); }
   //! @brief Get whether task is nestable.
-  FOG_INLINE bool isNestable() const { return ((sysuint_t)_task & 1) == 1; }
+  FOG_INLINE bool isNestable() const { return ((size_t)_task & 1) == 1; }
   //! @brief Get dispatch time (can be null if it's not delayed task).
   FOG_INLINE const Time& getTime() const { return _time; }
 
   //! @brief Set task and nestable flag.
-  FOG_INLINE void setTask(Task* task, bool nestable) { _task = (Task*)((sysuint_t)task | (sysuint_t)nestable); }
+  FOG_INLINE void setTask(Task* task, bool nestable) { _task = (Task*)((size_t)task | (size_t)nestable); }
 
   //! @brief Set delayed time.
   FOG_INLINE void setTime(const Time& time) { _time = time; }

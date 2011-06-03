@@ -12,37 +12,7 @@
 #define _FOG_SVG_H
 
 // ============================================================================
-// [Fog-Svg Documentation]
-// ============================================================================
-
-#if defined(FOG_DOXYGEN)
-//! @defgroup Fog_Svg_Public Fog-Svg
-//!
-//! Public classes and functions related to Fog-Svg library.
-
-
-
-//! @defgroup Fog_Svg_Constants Constants
-//! @ingroup Fog_Svg_Public
-
-
-
-//! @defgroup Fog_Svg_Dom Svg-DOM
-//! @ingroup Fog_Svg_Public
-
-
-
-//! @defgroup Fog_Svg_IO Svg-IO
-//! @ingroup Fog_Svg_Public
-
-
-
-//! @defgroup Fog_Svg_Util Svg utilities
-//! @ingroup Fog_Svg_Public
-#endif // FOG_DOXYGEN
-
-// ============================================================================
-// [Fog-Graphics Include Files]
+// [Fog-Svg]
 // ============================================================================
 
 #include <Fog/Core/Config/Config.h>

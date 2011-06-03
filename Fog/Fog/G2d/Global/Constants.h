@@ -1545,7 +1545,7 @@ enum IMAGE_FD_FLAGS
 //! - Little endian: A0|A1|
 //! - Big endian   : A1|A0|
 //!
-//! @note The terminology used for positions is the same as in the Fog-Face
+//! @note The terminology used for position is the same as in the @c Fog-Face
 //! framework:
 //!
 //! @verbatim

@@ -20,18 +20,18 @@ namespace Fog {
 // [Fog::Util]
 // ============================================================================
 
-sysuint_t Util::getGrowCapacity(sysuint_t headerSize, sysuint_t elementSize, sysuint_t before, sysuint_t after)
+size_t Util::getGrowCapacity(size_t headerSize, size_t elementSize, size_t before, size_t after)
 {
   // Threshold for excessive growing. If size of data in memory is larger
   // than the threshold, grow will be constant instead of excessive.
-  const sysuint_t minThreshold = 128;
-  const sysuint_t maxThreshold = 1024 * 1024 * 8;
+  const size_t minThreshold = 128;
+  const size_t maxThreshold = 1024 * 1024 * 8;
 
   FOG_ASSERT(before < after);
 
-  sysuint_t beforeSize = headerSize + before * elementSize;
-  sysuint_t afterSize = headerSize + after * elementSize;
-  sysuint_t optimal;
+  size_t beforeSize = headerSize + before * elementSize;
+  size_t afterSize = headerSize + after * elementSize;
+  size_t optimal;
 
   if (afterSize < minThreshold)
   {

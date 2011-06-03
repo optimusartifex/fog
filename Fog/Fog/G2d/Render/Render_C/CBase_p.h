@@ -39,7 +39,7 @@ struct FOG_NO_EXPORT CBase
     {
 #if FOG_ARCH_BITS >= 64
       // Align to 64-bits when running on 64-bit mode.
-      if ((sysuint_t)dst & 0x7)
+      if ((size_t)dst & 0x7)
       {
         ((uint32_t*)dst)[0] = (uint32_t)_pattern;
         dst += 4;

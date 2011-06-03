@@ -65,7 +65,7 @@ struct FOG_API MemoryManager
   //! This method should be thread-safe for memory manager which can be used
   //! by different threads. In some cases it's enabled to make this method
   //! reentrant.
-  virtual void* alloc(sysuint_t size, sysuint_t* allocated) = 0;
+  virtual void* alloc(size_t size, size_t* allocated) = 0;
 
   //! @brief Free memory previously allocated by @c alloc() method.
   //! @param ptr Pointer to memory location to free. It must be valid, NULL
@@ -73,7 +73,7 @@ struct FOG_API MemoryManager
   //! @param size Size of the memory block passed through @a ptr. It must be
   //! value passed/returned by @c alloc() method. Although some memory
   //! allocators allow this to be any value it's mistake!
-  virtual void free(void* ptr, sysuint_t size) = 0;
+  virtual void free(void* ptr, size_t size) = 0;
 
 private:
   _FOG_CLASS_NO_COPY(MemoryManager)

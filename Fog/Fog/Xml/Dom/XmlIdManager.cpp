@@ -100,7 +100,7 @@ XmlElement* XmlIdManager::get(const String& id) const
   return NULL;
 }
 
-XmlElement* XmlIdManager::get(const Char* idStr, sysuint_t idLen) const
+XmlElement* XmlIdManager::get(const Char* idStr, size_t idLen) const
 {
   uint32_t hashCode = HashUtil::makeStringHash(idStr, idLen);
   uint32_t hashMod = hashCode % _capacity;
@@ -114,13 +114,13 @@ XmlElement* XmlIdManager::get(const Char* idStr, sysuint_t idLen) const
   return NULL;
 }
 
-void XmlIdManager::_rehash(sysuint_t capacity)
+void XmlIdManager::_rehash(size_t capacity)
 {
   XmlElement** oldBuckets = _buckets;
   XmlElement** newBuckets = (XmlElement**)Memory::calloc(sizeof(XmlElement*) * capacity);
   if (!newBuckets) return;
 
-  sysuint_t i, len = _capacity;
+  size_t i, len = _capacity;
   for (i = 0; i < len; i++)
   {
     XmlElement* node = oldBuckets[i];
@@ -146,10 +146,10 @@ void XmlIdManager::_rehash(sysuint_t capacity)
   _capacity = capacity;
 
   _expandCapacity = UnorderedAbstract::_calcExpandCapacity(capacity);
-  _expandLength = (sysuint_t)((sysint_t)_capacity * 0.92);
+  _expandLength = (size_t)((sysint_t)_capacity * 0.92);
 
   _shrinkCapacity = UnorderedAbstract::_calcShrinkCapacity(capacity);
-  _shrinkLength = (sysuint_t)((sysint_t)_shrinkCapacity * 0.70);
+  _shrinkLength = (size_t)((sysint_t)_shrinkCapacity * 0.70);
 
   atomicPtrXchg(&_buckets, newBuckets);
   if (oldBuckets != _bucketsBuffer) Memory::free(oldBuckets);

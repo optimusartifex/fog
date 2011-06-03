@@ -19,6 +19,7 @@
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/String.h>
+#include <Fog/Core/Tools/StringTmp_p.h>
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Core/Tools/TextCodec.h>
 #include <Fog/G2d/Global/Constants.h>
@@ -141,7 +142,7 @@ err_t ImageCodecProvider::removeProvider(uint32_t codecType, ImageCodecProvider*
     return ERR_RT_INVALID_ARGUMENT;
 
   err_t err = ERR_OK;
-  sysuint_t index;
+  size_t index;
   AutoLock locked(_g2d_imagecodecprovider_local->lock);
 
   if ((codecType & IMAGE_CODEC_DECODER) &&
@@ -225,7 +226,7 @@ ImageCodecProvider* ImageCodecProvider::getProviderByExtension(uint32_t codecTyp
   return NULL;
 }
 
-ImageCodecProvider* ImageCodecProvider::getProviderBySignature(uint32_t codecType, void* mem, sysuint_t len)
+ImageCodecProvider* ImageCodecProvider::getProviderBySignature(uint32_t codecType, void* mem, size_t len)
 {
   if (!mem || len == 0) return NULL;
 
@@ -342,7 +343,7 @@ err_t ImageCodecProvider::createDecoderForStream(Stream& stream, const String& e
 
   // This is default, 128 bytes should be enough for any image file type.
   uint8_t mime[128];
-  sysuint_t readn;
+  size_t readn;
 
   if (!stream.isSeekable()) { err = ERR_IO_CANT_SEEK; goto _End; }
 

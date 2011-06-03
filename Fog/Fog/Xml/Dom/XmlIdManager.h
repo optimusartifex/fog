@@ -46,14 +46,14 @@ struct FOG_API XmlIdManager
   void add(XmlElement* e);
   void remove(XmlElement* e);
   XmlElement* get(const String& id) const;
-  XmlElement* get(const Char* idStr, sysuint_t idLen) const;
+  XmlElement* get(const Char* idStr, size_t idLen) const;
 
   // --------------------------------------------------------------------------
   // [Internal]
   // --------------------------------------------------------------------------
 
 private:
-  void _rehash(sysuint_t capacity);
+  void _rehash(size_t capacity);
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -61,19 +61,19 @@ private:
 
 protected:
   //! @brief Count of buckets.
-  sysuint_t _capacity;
+  size_t _capacity;
   //! @brief Count of nodes.
-  sysuint_t _length;
+  size_t _length;
 
   //! @brief Count of buckets we will expand to if length exceeds _expandLength.
-  sysuint_t _expandCapacity;
+  size_t _expandCapacity;
   //! @brief Count of nodes to grow.
-  sysuint_t _expandLength;
+  size_t _expandLength;
 
   //! @brief Count of buckeds we will shrink to if length gets _shinkLength.
-  sysuint_t _shrinkCapacity;
+  size_t _shrinkCapacity;
   //! @brief Count of nodes to shrink.
-  sysuint_t _shrinkLength;
+  size_t _shrinkLength;
 
   //! @brief Buckets.
   XmlElement** _buckets;

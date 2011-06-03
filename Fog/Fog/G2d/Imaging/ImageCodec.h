@@ -8,7 +8,6 @@
 #define _FOG_G2D_IMAGING_IMAGEDEVICE_H
 
 // [Dependencies]
-#include <Fog/Core/Data/Value.h>
 #include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/System/Object.h>
 #include <Fog/Core/Tools/ByteArray.h>
@@ -16,6 +15,7 @@
 #include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImagePalette.h>
+#include <Fog/Core/Variant/Var.h>
 
 namespace Fog {
 

@@ -372,14 +372,14 @@ struct FOG_API ColorMatrix
 
   //! @brief Overload the [] operator for access to a row. This will enable
   //! access to the elements by using [r][c].
-  FOG_INLINE float* operator[](sysuint_t index)
+  FOG_INLINE float* operator[](size_t index)
   {
     FOG_ASSERT_X(index < 5U, "Fog::ColorMatrix::operator[] - Index out of bounds.");
     return m[index];
   }
 
   //! @overload.
-  FOG_INLINE const float* const operator[](sysuint_t index) const
+  FOG_INLINE const float* const operator[](size_t index) const
   {
     FOG_ASSERT_X(index < 5U, "Fog::ColorMatrix::operator[] - Index out of bounds.");
     return m[index];

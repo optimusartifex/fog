@@ -62,9 +62,9 @@ static err_t FOG_CDECL _G2d_QBezierT_getBoundingBox(const NumT_(Point)* self, Nu
 // ============================================================================
 
 template<typename NumT>
-static err_t FOG_CDECL _G2d_QBezierT_getSplineBBox(const NumT_(Point)* self, sysuint_t length, NumT_(Box)* dst)
+static err_t FOG_CDECL _G2d_QBezierT_getSplineBBox(const NumT_(Point)* self, size_t length, NumT_(Box)* dst)
 {
-  sysuint_t i;
+  size_t i;
 
   if (length < 3) return ERR_RT_INVALID_ARGUMENT;
   FOG_ASSERT((length - 1) % 2 == 0);
@@ -176,8 +176,8 @@ static err_t FOG_CDECL _G2d_QBezierT_flatten(
   NumT x2 = self[2].x;
   NumT y2 = self[2].y;
 
-  sysuint_t initialLength = dst._d->length;
-  sysuint_t level = 0;
+  size_t initialLength = dst._d->length;
+  size_t level = 0;
 
   NumT_(Point)* curVertex;
   NumT_(Point)* endVertex;
@@ -187,7 +187,7 @@ static err_t FOG_CDECL _G2d_QBezierT_flatten(
 
 _Realloc:
   {
-    sysuint_t pos = dst._add(QUAD_CURVE_VERTEX_INITIAL_SIZE);
+    size_t pos = dst._add(QUAD_CURVE_VERTEX_INITIAL_SIZE);
     if (pos == INVALID_INDEX)
     {
       // Purge dst length to its initial state.
@@ -204,7 +204,7 @@ _Realloc:
     // Realloc if needed, but update length if need to do.
     if (curVertex >= endVertex)
     {
-      dst._d->length = (sysuint_t)(curVertex - dst._d->vertices);
+      dst._d->length = (size_t)(curVertex - dst._d->vertices);
       goto _Realloc;
     }
 
@@ -312,7 +312,7 @@ _Ret:
 
   {
     // Update dst length.
-    sysuint_t length = (sysuint_t)(curVertex - dst._d->vertices);
+    size_t length = (size_t)(curVertex - dst._d->vertices);
     dst._d->length = length;
 
     // Make sure we are not out of bounds.
@@ -320,7 +320,7 @@ _Ret:
 
     // Fill initial and LINE_TO commands.
     uint8_t* commands = dst._d->commands + initialLength;
-    sysuint_t i = length - initialLength;
+    size_t i = length - initialLength;
 
     if (i)
     {

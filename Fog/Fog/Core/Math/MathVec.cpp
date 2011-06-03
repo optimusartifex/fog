@@ -19,14 +19,14 @@ namespace Fog {
 // [Fog::Math]
 // ============================================================================
 
-static void FOG_CDECL _Core_MathVec_vFloatFromDouble(float* dst, const double* src, sysuint_t length)
+static void FOG_CDECL _Core_MathVec_vFloatFromDouble(float* dst, const double* src, size_t length)
 {
-  for (sysuint_t i = 0; i < length; i++) dst[i] = float(src[i]);
+  for (size_t i = 0; i < length; i++) dst[i] = float(src[i]);
 }
 
-static void FOG_CDECL _Core_MathVec_vDoubleFromFloat(double* dst, const float* src, sysuint_t length)
+static void FOG_CDECL _Core_MathVec_vDoubleFromFloat(double* dst, const float* src, size_t length)
 {
-  for (sysuint_t i = 0; i < length; i++) dst[i] = double(src[i]);
+  for (size_t i = 0; i < length; i++) dst[i] = double(src[i]);
 }
 
 // ============================================================================

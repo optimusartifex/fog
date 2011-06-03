@@ -20,7 +20,7 @@ namespace Fog {
 // [Fog::AtomicPaddingMemory<>]
 // ============================================================================
 
-template<sysuint_t Size>
+template<size_t Size>
 struct AtomicPaddingMemory
 {
   uint8_t padding[Size];

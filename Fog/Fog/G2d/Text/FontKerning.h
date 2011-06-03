@@ -125,7 +125,7 @@ struct FOG_NO_EXPORT FontKerningTableI
   // [Statics]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE sysuint_t sizeFor(sysuint_t length)
+  static FOG_INLINE size_t sizeFor(size_t length)
   {
     return sizeof(FontKerningTableI) - sizeof(FontKerningPairI) +
       length * sizeof(FontKerningPairI);
@@ -184,7 +184,7 @@ struct FOG_NO_EXPORT FontKerningTableF
   // [Statics]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE sysuint_t sizeFor(sysuint_t length)
+  static FOG_INLINE size_t sizeFor(size_t length)
   {
     return sizeof(FontKerningTableF) - sizeof(FontKerningPairF) +
       length * sizeof(FontKerningPairF);

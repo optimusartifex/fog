@@ -24,7 +24,7 @@ namespace Fog {
 #define FOG_WIDGET_TREE_ITERATOR_EX(__name__, __basewidget__, __conditional__, __before_traverse__, __after_traverse__, __push__, __pop__) \
   if ((__basewidget__)->_children.getLength()) \
   { \
-    ::Fog::PStack<512> stack; \
+    ::Fog::StackP<512> stack; \
     ::Fog::Widget** childCur = (::Fog::Widget** )( __basewidget__->_children.getData() ); \
     ::Fog::Widget** childEnd = childCur + ( __basewidget__->_children.getLength() ); \
     ::Fog::Widget* child; \

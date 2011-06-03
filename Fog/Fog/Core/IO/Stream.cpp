@@ -16,7 +16,9 @@
 #include <Fog/Core/IO/MapFile.h>
 #include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Tools/ByteArray.h>
+#include <Fog/Core/Tools/ByteArrayTmp_p.h>
 #include <Fog/Core/Tools/String.h>
+#include <Fog/Core/Tools/StringTmp_p.h>
 #include <Fog/Core/Tools/TextCodec.h>
 
 #include <stdio.h>
@@ -92,8 +94,8 @@ struct FOG_NO_EXPORT NullStreamDevice : public StreamDevice
   virtual int64_t seek(int64_t offset, int whence);
   virtual int64_t tell() const;
 
-  virtual sysuint_t read(void* buffer, sysuint_t size);
-  virtual sysuint_t write(const void* buffer, sysuint_t size);
+  virtual size_t read(void* buffer, size_t size);
+  virtual size_t write(const void* buffer, size_t size);
 
   virtual err_t getSize(int64_t* size);
   virtual err_t setSize(int64_t size);
@@ -118,12 +120,12 @@ int64_t NullStreamDevice::tell() const
   return -1;
 }
 
-sysuint_t NullStreamDevice::read(void* buffer, sysuint_t size)
+size_t NullStreamDevice::read(void* buffer, size_t size)
 {
   return 0;
 }
 
-sysuint_t NullStreamDevice::write(const void* buffer, sysuint_t size)
+size_t NullStreamDevice::write(const void* buffer, size_t size)
 {
   return 0;
 }
@@ -168,8 +170,8 @@ struct FOG_NO_EXPORT HANDLEStreamDevice : public StreamDevice
   virtual int64_t seek(int64_t offset, int whence);
   virtual int64_t tell() const;
 
-  virtual sysuint_t read(void* buffer, sysuint_t size);
-  virtual sysuint_t write(const void* buffer, sysuint_t size);
+  virtual size_t read(void* buffer, size_t size);
+  virtual size_t write(const void* buffer, size_t size);
 
   virtual err_t getSize(int64_t* size);
   virtual err_t setSize(int64_t size);
@@ -329,14 +331,14 @@ int64_t HANDLEStreamDevice::tell() const
   }
 }
 
-sysuint_t HANDLEStreamDevice::read(void* buffer, sysuint_t size)
+size_t HANDLEStreamDevice::read(void* buffer, size_t size)
 {
   DWORD bytesRead = 0;
 
 #if FOG_ARCH_BITS == 64
   while (size > 0)
   {
-    DWORD size32 = (DWORD)Math::min<sysuint_t>(size, UINT32_MAX);
+    DWORD size32 = (DWORD)Math::min<size_t>(size, UINT32_MAX);
     DWORD rd = 0;
 
     BOOL result = ReadFile(hFile, buffer, size32, &rd, NULL);
@@ -353,14 +355,14 @@ sysuint_t HANDLEStreamDevice::read(void* buffer, sysuint_t size)
   return bytesRead;
 }
 
-sysuint_t HANDLEStreamDevice::write(const void* buffer, sysuint_t size)
+size_t HANDLEStreamDevice::write(const void* buffer, size_t size)
 {
   DWORD bytesWritten = 0;
 
 #if FOG_ARCH_BITS == 64
   while (size > 0)
   {
-    DWORD size32 = (DWORD)Math::min<sysuint_t>(size, UINT32_MAX);
+    DWORD size32 = (DWORD)Math::min<size_t>(size, UINT32_MAX);
     DWORD wr = 0;
 
     BOOL result = WriteFile(hFile, buffer, size32, &wr, NULL);
@@ -430,8 +432,8 @@ struct FOG_NO_EXPORT FdStreamDevice : public StreamDevice
   virtual int64_t seek(int64_t offset, int whence);
   virtual int64_t tell() const;
 
-  virtual sysuint_t read(void* buffer, sysuint_t size);
-  virtual sysuint_t write(const void* buffer, sysuint_t size);
+  virtual size_t read(void* buffer, size_t size);
+  virtual size_t write(const void* buffer, size_t size);
 
   virtual err_t getSize(int64_t* size);
   virtual err_t setSize(int64_t size);
@@ -534,24 +536,24 @@ int64_t FdStreamDevice::tell() const
     return result;
 }
 
-sysuint_t FdStreamDevice::read(void* buffer, sysuint_t size)
+size_t FdStreamDevice::read(void* buffer, size_t size)
 {
   sysint_t n = ::read(fd, buffer, size);
 
   if (n < 0)
-    return (sysuint_t)-1;
+    return (size_t)-1;
   else
-    return (sysuint_t)n;
+    return (size_t)n;
 }
 
-sysuint_t FdStreamDevice::write(const void* buffer, sysuint_t size)
+size_t FdStreamDevice::write(const void* buffer, size_t size)
 {
   sysint_t n = ::write(fd, buffer, size);
 
   if (n < 0)
-    return (sysuint_t)-1;
+    return (size_t)-1;
   else
-    return (sysuint_t)n;
+    return (size_t)n;
 }
 
 err_t FdStreamDevice::getSize(int64_t* size)
@@ -601,13 +603,13 @@ void FdStreamDevice::close()
 struct FOG_NO_EXPORT MemoryStreamDevice : public StreamDevice
 {
   MemoryStreamDevice();
-  MemoryStreamDevice(const void* memory, sysuint_t size, uint32_t fflags);
+  MemoryStreamDevice(const void* memory, size_t size, uint32_t fflags);
 
   virtual int64_t seek(int64_t offset, int whence);
   virtual int64_t tell() const;
 
-  virtual sysuint_t read(void* buffer, sysuint_t size);
-  virtual sysuint_t write(const void* buffer, sysuint_t size);
+  virtual size_t read(void* buffer, size_t size);
+  virtual size_t write(const void* buffer, size_t size);
 
   virtual err_t getSize(int64_t* size);
   virtual err_t setSize(int64_t size);
@@ -618,7 +620,7 @@ struct FOG_NO_EXPORT MemoryStreamDevice : public StreamDevice
   virtual ByteArray getBuffer() const;
 
   uint8_t* data;
-  sysuint_t size;
+  size_t size;
 
   uint8_t* cur;
   uint8_t* end;
@@ -633,7 +635,7 @@ MemoryStreamDevice::MemoryStreamDevice() :
 }
 
 MemoryStreamDevice::MemoryStreamDevice(
-  const void* memory, sysuint_t size, uint32_t fflags) :
+  const void* memory, size_t size, uint32_t fflags) :
     data((uint8_t*)memory), size(size)
 {
   cur = data;
@@ -675,7 +677,7 @@ int64_t MemoryStreamDevice::seek(int64_t offset, int whence)
   }
   else
   {
-    cur = data + (sysuint_t)i;
+    cur = data + (size_t)i;
     return i;
   }
 }
@@ -685,9 +687,9 @@ int64_t MemoryStreamDevice::tell() const
   return (int64_t)(cur - data);
 }
 
-sysuint_t MemoryStreamDevice::read(void* buffer, sysuint_t size)
+size_t MemoryStreamDevice::read(void* buffer, size_t size)
 {
-  sysuint_t remain = (sysuint_t)(end - cur);
+  size_t remain = (size_t)(end - cur);
   if (size > remain) size = remain;
 
   Memory::copy(buffer, cur, size);
@@ -696,11 +698,11 @@ sysuint_t MemoryStreamDevice::read(void* buffer, sysuint_t size)
   return size;
 }
 
-sysuint_t MemoryStreamDevice::write(const void* buffer, sysuint_t size)
+size_t MemoryStreamDevice::write(const void* buffer, size_t size)
 {
   if ((flags & STREAM_IS_WRITABLE) == 0) return 0;
 
-  sysuint_t remain = (sysuint_t)(end - cur);
+  size_t remain = (size_t)(end - cur);
   if (size > remain) size = remain;
 
   Memory::copy(cur, buffer, size);
@@ -751,8 +753,8 @@ struct FOG_NO_EXPORT ByteArrayStreamDevice : public StreamDevice
   virtual int64_t seek(int64_t offset, int whence);
   virtual int64_t tell() const;
 
-  virtual sysuint_t read(void* buffer, sysuint_t size);
-  virtual sysuint_t write(const void* buffer, sysuint_t size);
+  virtual size_t read(void* buffer, size_t size);
+  virtual size_t write(const void* buffer, size_t size);
 
   virtual err_t getSize(int64_t* size);
   virtual err_t setSize(int64_t size);
@@ -763,7 +765,7 @@ struct FOG_NO_EXPORT ByteArrayStreamDevice : public StreamDevice
   virtual ByteArray getBuffer() const;
 
   ByteArray data;
-  sysuint_t pos;
+  size_t pos;
 };
 
 ByteArrayStreamDevice::ByteArrayStreamDevice(ByteArray buffer, uint32_t fflags) :
@@ -778,7 +780,7 @@ ByteArrayStreamDevice::~ByteArrayStreamDevice()
 
 int64_t ByteArrayStreamDevice::seek(int64_t offset, int whence)
 {
-  sysuint_t length = data.getLength();
+  size_t length = data.getLength();
   int64_t i;
 
   switch (whence)
@@ -806,7 +808,7 @@ int64_t ByteArrayStreamDevice::seek(int64_t offset, int whence)
   }
   else
   {
-    pos = (sysuint_t)i;
+    pos = (size_t)i;
     return i;
   }
 }
@@ -816,10 +818,10 @@ int64_t ByteArrayStreamDevice::tell() const
   return (int64_t)pos;
 }
 
-sysuint_t ByteArrayStreamDevice::read(void* buffer, sysuint_t size)
+size_t ByteArrayStreamDevice::read(void* buffer, size_t size)
 {
-  sysuint_t length = data.getLength();
-  sysuint_t remain = (sysuint_t)(length - pos);
+  size_t length = data.getLength();
+  size_t remain = (size_t)(length - pos);
   if (size > remain) size = remain;
 
   Memory::copy(buffer, const_cast<char*>(data.getData() + pos), size);
@@ -828,11 +830,11 @@ sysuint_t ByteArrayStreamDevice::read(void* buffer, sysuint_t size)
   return size;
 }
 
-sysuint_t ByteArrayStreamDevice::write(const void* buffer, sysuint_t size)
+size_t ByteArrayStreamDevice::write(const void* buffer, size_t size)
 {
-  sysuint_t length = data.getLength();
-  sysuint_t overwriteSize = Math::min(length - pos, size);
-  sysuint_t appendSize = size - overwriteSize;
+  size_t length = data.getLength();
+  size_t overwriteSize = Math::min(length - pos, size);
+  size_t appendSize = size - overwriteSize;
 
   if (data.detach() != ERR_OK) return 0;
 
@@ -867,7 +869,7 @@ err_t ByteArrayStreamDevice::setSize(int64_t size)
   if (size < 0) return ERR_RT_INVALID_ARGUMENT;
   if (size >= SYSINT_MAX) return ERR_RT_OUT_OF_MEMORY;
 
-  err_t err = data.resize((sysuint_t)size);
+  err_t err = data.resize((size_t)size);
   if (FOG_IS_ERROR(err)) return err;
 
   return ERR_OK;
@@ -877,7 +879,7 @@ err_t ByteArrayStreamDevice::truncate(int64_t offset)
 {
   if (offset >= (int64_t)data.getLength()) return ERR_OK;
 
-  data.truncate((sysuint_t)offset);
+  data.truncate((size_t)offset);
   if (pos > data.getLength()) pos = data.getLength();
 
   return ERR_OK;
@@ -1102,7 +1104,7 @@ err_t Stream::openBuffer(const ByteArray& buffer)
   return ERR_OK;
 }
 
-err_t Stream::openBuffer(void* buffer, sysuint_t size, uint32_t openFlags)
+err_t Stream::openBuffer(void* buffer, size_t size, uint32_t openFlags)
 {
   close();
   if (buffer == NULL) return ERR_RT_INVALID_ARGUMENT;
@@ -1129,22 +1131,22 @@ int64_t Stream::tell() const
   return _d->tell();
 }
 
-sysuint_t Stream::read(void* buffer, sysuint_t size)
+size_t Stream::read(void* buffer, size_t size)
 {
   return _d->read(buffer, size);
 }
 
-sysuint_t Stream::read(ByteArray& dst, sysuint_t size)
+size_t Stream::read(ByteArray& dst, size_t size)
 {
   err_t err = dst.prepare(size);
   if (FOG_IS_ERROR(err)) return 0;
 
-  sysuint_t n = _d->read((void*)dst.getDataX(), size);
+  size_t n = _d->read((void*)dst.getDataX(), size);
   dst.resize(n);
   return n;
 }
 
-sysuint_t Stream::readAll(ByteArray& dst, sysuint_t maxBytes)
+size_t Stream::readAll(ByteArray& dst, size_t maxBytes)
 {
   dst.clear();
 
@@ -1166,13 +1168,13 @@ _NonSeekable:
 
     for (;;)
     {
-      sysuint_t count = 1024 * 1024; // 1 MB.
-      sysuint_t done;
+      size_t count = 1024 * 1024; // 1 MB.
+      size_t done;
 
-      if ((uint64_t)count > remain) count = (sysuint_t)remain;
+      if ((uint64_t)count > remain) count = (size_t)remain;
 
-      sysuint_t len = dst.getLength();
-      err_t err = dst.reserve(len + (sysuint_t)count);
+      size_t len = dst.getLength();
+      err_t err = dst.reserve(len + (size_t)count);
       if (FOG_IS_ERROR(err)) break;
 
       done = read(dst.getDataX() + len, count);
@@ -1196,20 +1198,20 @@ _NonSeekable:
 #if FOG_ARCH_BITS > 32
     if (remain > (int64_t)(SYSINT_MAX)) return 0;
 #endif // FOG_ARCH_BITS > 32
-    if (dst.reserve((sysuint_t)remain) != ERR_OK) return 0;
+    if (dst.reserve((size_t)remain) != ERR_OK) return 0;
 
-    sysuint_t n = read(dst.getDataX(), (sysuint_t)remain);
+    size_t n = read(dst.getDataX(), (size_t)remain);
     dst.resize(n);
     return n;
   }
 }
 
-sysuint_t Stream::write(const void* buffer, sysuint_t size)
+size_t Stream::write(const void* buffer, size_t size)
 {
   return _d->write(buffer, size);
 }
 
-sysuint_t Stream::write(const ByteArray& data)
+size_t Stream::write(const ByteArray& data)
 {
   return _d->write((const void*)data.getData(), data.getLength());
 }

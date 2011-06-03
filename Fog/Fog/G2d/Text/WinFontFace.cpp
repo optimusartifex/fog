@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/PBuffer.h>
+#include <Fog/Core/Collection/BufferP.h>
 #include <Fog/Core/Global/Internal_Core_p.h>
 #include <Fog/Core/Math/Fixed.h>
 #include <Fog/Core/Math/Math.h>
@@ -110,7 +110,7 @@ struct FOG_NO_EXPORT WinFontContext
   MAT2 mat;
 
   DWORD bufferSize;
-  PBuffer<2048> buffer;
+  BufferP<2048> buffer;
 };
 
 WinFontContext::WinFontContext()
@@ -153,7 +153,7 @@ err_t WinFontContext::prepare(HFONT hFont)
 
 template<typename NumT>
 static err_t _G2d_WinDecomposeTTOutline(NumT_(Path)& path,
-  const uint8_t* glyphBuffer, sysuint_t glyphSize, bool flipY)
+  const uint8_t* glyphBuffer, size_t glyphSize, bool flipY)
 {
   err_t err = ERR_OK;
 

@@ -87,9 +87,9 @@ static FOG_INLINE bool isFuzzyToInt(double a, int& result, double epsilon = MATH
   return isFuzzyEq(a, (double)result, epsilon);
 }
 
-static FOG_INLINE bool feqv(const float* a, const float* b, sysuint_t length, float epsilon = MATH_EPSILON_F)
+static FOG_INLINE bool feqv(const float* a, const float* b, size_t length, float epsilon = MATH_EPSILON_F)
 {
-  for (sysuint_t i = 0; i < length; i++)
+  for (size_t i = 0; i < length; i++)
   {
     if (!isFuzzyEq(a[i], b[i]), epsilon) return false;
   }
@@ -97,9 +97,9 @@ static FOG_INLINE bool feqv(const float* a, const float* b, sysuint_t length, fl
   return true;
 }
 
-static FOG_INLINE bool feqv(const double* a, const double* b, sysuint_t length, double epsilon = MATH_EPSILON_F)
+static FOG_INLINE bool feqv(const double* a, const double* b, size_t length, double epsilon = MATH_EPSILON_F)
 {
-  for (sysuint_t i = 0; i < length; i++)
+  for (size_t i = 0; i < length; i++)
   {
     if (!isFuzzyEq(a[i], b[i]), epsilon) return false;
   }

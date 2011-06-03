@@ -16,13 +16,13 @@ namespace Fog {
 // [Fog::Transform - MapPoint(s)]
 // ============================================================================
 
-static void FOG_CDECL _G2d_TransformF_mapPointsF_Identity_SSE(const TransformF& self, PointF* dst, const PointF* src, sysuint_t length)
+static void FOG_CDECL _G2d_TransformF_mapPointsF_Identity_SSE(const TransformF& self, PointF* dst, const PointF* src, size_t length)
 {
-  sysuint_t i;
+  size_t i;
 
   if (dst == src) return;
 
-  if (((sysuint_t)dst & 0xF) != 0)
+  if (((size_t)dst & 0xF) != 0)
   {
     Face::m128f src0;
     Face::m128fZero(src0);
@@ -36,7 +36,7 @@ static void FOG_CDECL _G2d_TransformF_mapPointsF_Identity_SSE(const TransformF& 
     length--;
   }
 
-  if ((((sysuint_t)dst | (sysuint_t)src) & 0xF) == 0)
+  if ((((size_t)dst | (size_t)src) & 0xF) == 0)
   {
     for (i = length >> 3; i; i--, dst += 8, src += 8)
     {
@@ -63,12 +63,12 @@ static void FOG_CDECL _G2d_TransformF_mapPointsF_Identity_SSE(const TransformF& 
   }
 }
 
-static void FOG_CDECL _G2d_TransformF_mapPointsF_Translation_SSE(const TransformF& self, PointF* dst, const PointF* src, sysuint_t length)
+static void FOG_CDECL _G2d_TransformF_mapPointsF_Translation_SSE(const TransformF& self, PointF* dst, const PointF* src, size_t length)
 {
-  sysuint_t i;
+  size_t i;
   Face::m128f m_20_21_20_21 = _mm_setr_ps(self._20, self._21, self._20, self._21);
 
-  if (((sysuint_t)dst & 0xF) != 0)
+  if (((size_t)dst & 0xF) != 0)
   {
     Face::m128f src0;
     Face::m128fZero(src0);
@@ -83,7 +83,7 @@ static void FOG_CDECL _G2d_TransformF_mapPointsF_Translation_SSE(const Transform
     length--;
   }
 
-  if ((((sysuint_t)dst | (sysuint_t)src) & 0xF) == 0)
+  if ((((size_t)dst | (size_t)src) & 0xF) == 0)
   {
     for (i = length >> 3; i; i--, dst += 8, src += 8)
     {
@@ -140,14 +140,14 @@ static void FOG_CDECL _G2d_TransformF_mapPointsF_Translation_SSE(const Transform
   }
 }
 
-static void FOG_CDECL _G2d_TransformF_mapPointsF_Scaling_SSE(const TransformF& self, PointF* dst, const PointF* src, sysuint_t length)
+static void FOG_CDECL _G2d_TransformF_mapPointsF_Scaling_SSE(const TransformF& self, PointF* dst, const PointF* src, size_t length)
 {
-  sysuint_t i;
+  size_t i;
 
   Face::m128f m_00_11_00_11 = _mm_setr_ps(self._00, self._11, self._00, self._11);
   Face::m128f m_20_21_20_21 = _mm_setr_ps(self._20, self._21, self._20, self._21);
 
-  if (((sysuint_t)dst & 0xF) != 0)
+  if (((size_t)dst & 0xF) != 0)
   {
     Face::m128f src0;
 
@@ -164,7 +164,7 @@ static void FOG_CDECL _G2d_TransformF_mapPointsF_Scaling_SSE(const TransformF& s
     length--;
   }
 
-  if ((((sysuint_t)dst | (sysuint_t)src) & 0xF) == 0)
+  if ((((size_t)dst | (size_t)src) & 0xF) == 0)
   {
     for (i = length >> 3; i; i--, dst += 8, src += 8)
     {
@@ -229,14 +229,14 @@ static void FOG_CDECL _G2d_TransformF_mapPointsF_Scaling_SSE(const TransformF& s
   }
 }
 
-static void FOG_CDECL _G2d_TransformF_mapPointsF_Swap_SSE(const TransformF& self, PointF* dst, const PointF* src, sysuint_t length)
+static void FOG_CDECL _G2d_TransformF_mapPointsF_Swap_SSE(const TransformF& self, PointF* dst, const PointF* src, size_t length)
 {
-  sysuint_t i;
+  size_t i;
 
   Face::m128f m_01_10_01_10 = _mm_setr_ps(self._01, self._10, self._01, self._10);
   Face::m128f m_20_21_20_21 = _mm_setr_ps(self._20, self._21, self._20, self._21);
 
-  if (((sysuint_t)dst & 0xF) != 0)
+  if (((size_t)dst & 0xF) != 0)
   {
     Face::m128f src0;
 
@@ -254,7 +254,7 @@ static void FOG_CDECL _G2d_TransformF_mapPointsF_Swap_SSE(const TransformF& self
     length--;
   }
 
-  if ((((sysuint_t)dst | (sysuint_t)src) & 0xF) == 0)
+  if ((((size_t)dst | (size_t)src) & 0xF) == 0)
   {
     for (i = length >> 3; i; i--, dst += 8, src += 8)
     {
@@ -329,15 +329,15 @@ static void FOG_CDECL _G2d_TransformF_mapPointsF_Swap_SSE(const TransformF& self
   }
 }
 
-static void FOG_CDECL _G2d_TransformF_mapPointsF_Affine_SSE(const TransformF& self, PointF* dst, const PointF* src, sysuint_t length)
+static void FOG_CDECL _G2d_TransformF_mapPointsF_Affine_SSE(const TransformF& self, PointF* dst, const PointF* src, size_t length)
 {
-  sysuint_t i;
+  size_t i;
 
   Face::m128f m_00_11_00_11 = _mm_setr_ps(self._00, self._11, self._00, self._11);
   Face::m128f m_10_01_10_01 = _mm_setr_ps(self._10, self._01, self._10, self._01);
   Face::m128f m_20_21_20_21 = _mm_setr_ps(self._20, self._21, self._20, self._21);
 
-  if (((sysuint_t)dst & 0xF) != 0)
+  if (((size_t)dst & 0xF) != 0)
   {
     Face::m128f src0, tmp0;
 
@@ -360,7 +360,7 @@ static void FOG_CDECL _G2d_TransformF_mapPointsF_Affine_SSE(const TransformF& se
     length--;
   }
 
-  if ((((sysuint_t)dst | (sysuint_t)src) & 0xF) == 0)
+  if ((((size_t)dst | (size_t)src) & 0xF) == 0)
   {
     for (i = length >> 3; i; i--, dst += 8, src += 8)
     {
@@ -461,9 +461,9 @@ static void FOG_CDECL _G2d_TransformF_mapPointsF_Affine_SSE(const TransformF& se
   }
 }
 
-static void FOG_CDECL _G2d_TransformF_mapPointsF_Projection_SSE(const TransformF& self, PointF* dst, const PointF* src, sysuint_t length)
+static void FOG_CDECL _G2d_TransformF_mapPointsF_Projection_SSE(const TransformF& self, PointF* dst, const PointF* src, size_t length)
 {
-  sysuint_t i;
+  size_t i;
 
   Face::m128f m_00_11_00_11 = _mm_setr_ps(self._00, self._11, self._00, self._11);
   Face::m128f m_10_01_10_01 = _mm_setr_ps(self._10, self._01, self._10, self._01);
@@ -473,7 +473,7 @@ static void FOG_CDECL _G2d_TransformF_mapPointsF_Projection_SSE(const TransformF
   Face::m128f m_12_12_12_12 = _mm_set1_ps(self._12);
   Face::m128f m_22_22_22_22 = _mm_set1_ps(self._22);
 
-  if ((((sysuint_t)dst | (sysuint_t)src) & 0xF) == 0)
+  if ((((size_t)dst | (size_t)src) & 0xF) == 0)
   {
     for (i = length >> 2; i; i--, dst += 4, src += 4)
     {
@@ -617,14 +617,14 @@ static void FOG_CDECL _G2d_TransformF_mapPointsF_Projection_SSE(const TransformF
   }
 }
 
-static void FOG_CDECL _G2d_TransformF_mapPointsF_Degenerate_SSE(const TransformF& self, PointF* dst, const PointF* src, sysuint_t length)
+static void FOG_CDECL _G2d_TransformF_mapPointsF_Degenerate_SSE(const TransformF& self, PointF* dst, const PointF* src, size_t length)
 {
-  sysuint_t i;
+  size_t i;
 
   Face::m128f zero;
   Face::m128fZero(zero);
 
-  if (((sysuint_t)dst & 0xF) == 0)
+  if (((size_t)dst & 0xF) == 0)
   {
     for (i = length >> 2; i; i--, dst += 4)
     {

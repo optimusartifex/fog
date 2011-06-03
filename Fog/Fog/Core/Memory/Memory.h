@@ -100,17 +100,17 @@ FOG_API MemoryManager* getDefaultManager();
 // [Fog::Memory - Alloc / Free]
 // ============================================================================
 
-static FOG_INLINE void* alloc(sysuint_t size)
+static FOG_INLINE void* alloc(size_t size)
 {
   return _core.memory._m_alloc(size);
 }
 
-static FOG_INLINE void* calloc(sysuint_t size)
+static FOG_INLINE void* calloc(size_t size)
 {
   return _core.memory._m_calloc(size);
 }
 
-static FOG_INLINE void* realloc(void* addr, sysuint_t size)
+static FOG_INLINE void* realloc(void* addr, size_t size)
 {
   return _core.memory._m_realloc(addr, size);
 }
@@ -143,22 +143,22 @@ static FOG_INLINE err_t unregisterCleanupHandler(MemoryCleanupHandlerFn handler,
 // [Fog::Memory - Ops]
 // ============================================================================
 
-static FOG_INLINE void* copy(void* dst, const void* src, sysuint_t size)
+static FOG_INLINE void* copy(void* dst, const void* src, size_t size)
 {
   return _core.memory.copy(dst, src, size);
 }
 
-static FOG_INLINE void* move(void* dst, const void* src, sysuint_t size)
+static FOG_INLINE void* move(void* dst, const void* src, size_t size)
 {
   return _core.memory.move(dst, src, size);
 }
 
-static FOG_INLINE void* set(void* dst, int c, sysuint_t size)
+static FOG_INLINE void* set(void* dst, int c, size_t size)
 {
   return _core.memory.set(dst, c, size);
 }
 
-static FOG_INLINE void* zero(void* dst, sysuint_t size)
+static FOG_INLINE void* zero(void* dst, size_t size)
 {
   return _core.memory.zero(dst, size);
 }
@@ -167,17 +167,17 @@ static FOG_INLINE void* zero(void* dst, sysuint_t size)
 // [Fog::Memory - Ops (nt)]
 // ============================================================================
 
-static FOG_INLINE void* copy_nt(void* dst, const void* src, sysuint_t size)
+static FOG_INLINE void* copy_nt(void* dst, const void* src, size_t size)
 {
   return _core.memory.copy_nt(dst, src, size);
 }
 
-static FOG_INLINE void* set_nt(void* dst, int c, sysuint_t size)
+static FOG_INLINE void* set_nt(void* dst, int c, size_t size)
 {
   return _core.memory.set_nt(dst, c, size);
 }
 
-static FOG_INLINE void* zero_nt(void* dst, sysuint_t size)
+static FOG_INLINE void* zero_nt(void* dst, size_t size)
 {
   return _core.memory.zero_nt(dst, size);
 }
@@ -186,7 +186,7 @@ static FOG_INLINE void* zero_nt(void* dst, sysuint_t size)
 // [Fog::Memory - Xchg]
 // ============================================================================
 
-static FOG_INLINE void xchg(void* mem0, void* mem1, sysuint_t size)
+static FOG_INLINE void xchg(void* mem0, void* mem1, size_t size)
 {
   _core.memory.xchg(mem0, mem1, size);
 }
@@ -197,7 +197,7 @@ static FOG_INLINE void xchg(void* mem0, void* mem1, sysuint_t size)
 } // Fog namespace
 
 #if !defined(FOG_USE_STDNEW)
-static FOG_INLINE void* _fog_memory_alloc(sysuint_t size) { return Fog::Memory::alloc(size); }
+static FOG_INLINE void* _fog_memory_alloc(size_t size) { return Fog::Memory::alloc(size); }
 static FOG_INLINE void _fog_memory_free(void* addr) { return Fog::Memory::free(addr); }
 #endif
 

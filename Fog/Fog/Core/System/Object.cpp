@@ -12,7 +12,6 @@
 #include <Fog/Core/Collection/Hash.h>
 #include <Fog/Core/Collection/HashUtil.h>
 #include <Fog/Core/Collection/List.h>
-#include <Fog/Core/Data/Value.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/Init_Core_p.h>
 #include <Fog/Core/Global/Static.h>
@@ -25,6 +24,7 @@
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Core/Tools/StringUtil.h>
+#include <Fog/Core/Variant/Var.h>
 
 namespace Fog {
 
@@ -117,7 +117,7 @@ const MetaClass* Object::getStaticMetaClass()
 
 const MetaClass* Object::_getStaticMetaClassRace(MetaClass** p)
 {
-  while (AtomicCore<sysuint_t>::get((sysuint_t*)p) == 0)
+  while (AtomicCore<size_t>::get((size_t*)p) == 0)
   {
     // Yield is not optimal, but this should really rarely happen and if we
     // had the luck then there is 100% probability that it will not happen
@@ -205,7 +205,7 @@ err_t Object::removeChild(Object* child)
   if (child->getParent() != this)
     return ERR_OBJECT_NOT_PART_OF_HIERARCHY;
 
-  sysuint_t index = _children.indexOf(child);
+  size_t index = _children.indexOf(child);
   // It must be here if parent check passed!
   FOG_ASSERT(index != INVALID_INDEX);
 
@@ -213,7 +213,7 @@ err_t Object::removeChild(Object* child)
   return _removeChild(index, child);
 }
 
-err_t Object::_addChild(sysuint_t index, Object* child)
+err_t Object::_addChild(size_t index, Object* child)
 {
   // Index must be valid or equal to children list length (this means append).
   FOG_ASSERT(index <= _children.getLength());
@@ -228,7 +228,7 @@ err_t Object::_addChild(sysuint_t index, Object* child)
   return ERR_OK;
 }
 
-err_t Object::_removeChild(sysuint_t index, Object* child)
+err_t Object::_removeChild(size_t index, Object* child)
 {
   // Index must be valid.
   FOG_ASSERT(index < _children.getLength() && _children.at(index) == child);
@@ -247,7 +247,7 @@ err_t Object::_deleteChildren()
 {
   err_t err = ERR_OK;
 
-  sysuint_t index;
+  size_t index;
   while ((index = _children.getLength()) != 0)
   {
     Object* child = _children.at(--index);

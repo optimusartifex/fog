@@ -80,7 +80,7 @@ struct FOG_NO_EXPORT RasterWorker : public Task
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   //! @brief The current command position.
-  volatile sysuint_t cmdPosition;
+  volatile size_t cmdPosition;
 };
 
 // ============================================================================
@@ -153,22 +153,22 @@ struct FOG_NO_EXPORT RasterWorkerManager
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   //! @brief The count of commands in @c cmdBuffer.
-  Atomic<sysuint_t> cmdCount;
-  AtomicPadding1<sysuint_t> _padding_cmdCount;
+  Atomic<size_t> cmdCount;
+  AtomicPadding1<size_t> _padding_cmdCount;
 
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   //! @brief The count of calculations in @c calcBuffer.
-  Atomic<sysuint_t> calcCount;
-  AtomicPadding1<sysuint_t> _padding_calcCount;
+  Atomic<size_t> calcCount;
+  AtomicPadding1<size_t> _padding_calcCount;
 
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   //! @brief The position of next calculation in @c calcBuffer for processing.
   //!
   //! This number is increased by a worker.
-  Atomic<sysuint_t> calcPosition;
-  AtomicPadding1<sysuint_t> _padding_calcPosition;
+  Atomic<size_t> calcPosition;
+  AtomicPadding1<size_t> _padding_calcPosition;
 
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

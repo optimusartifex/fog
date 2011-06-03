@@ -55,7 +55,7 @@ struct FOG_API XmlText : public XmlElement
   err_t setData(const String& data);
   err_t appendData(const String& data);
   err_t deleteData();
-  err_t insertData(sysuint_t start, const String& data);
+  err_t insertData(size_t start, const String& data);
   err_t replaceData(const Range& range, const String& data);
 
   // --------------------------------------------------------------------------

@@ -8,7 +8,6 @@
 #define _FOG_CORE_IO_MAPFILE_H
 
 // [Dependencies]
-#include <Fog/Core/Data/Value.h>
 #include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Static.h>
 #include <Fog/Core/IO/FileSystem.h>
@@ -63,7 +62,7 @@ struct FOG_API MapFile
   FOG_INLINE const void* getData() const { return _data; }
 
   //! @brief Get mapped file length.
-  FOG_INLINE sysuint_t getLength() const { return _length; }
+  FOG_INLINE size_t getLength() const { return _length; }
 
   // --------------------------------------------------------------------------
   // [OS Specific]
@@ -105,7 +104,7 @@ private:
   String _fileName;
 
   void* _data;
-  sysuint_t _length;
+  size_t _length;
 
 #if defined(FOG_OS_WINDOWS)
   HANDLE _hFileMapping;

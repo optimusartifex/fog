@@ -1529,7 +1529,7 @@ template<typename NumT, typename SrcT>
 static void FOG_CDECL _G2d_TransformT_mapPointsT_Identity(const NumT_(Transform)& self,
   NumT_(Point)* dst,
   const SrcT_(Point)* src,
-  sysuint_t length)
+  size_t length)
 {
   if (sizeof(NumT) == sizeof(SrcT) &&
       reinterpret_cast<void*>(dst) == reinterpret_cast<const void*>(src))
@@ -1538,7 +1538,7 @@ static void FOG_CDECL _G2d_TransformT_mapPointsT_Identity(const NumT_(Transform)
     return;
   }
 
-  for (sysuint_t i = length; i; i--, dst++, src++)
+  for (size_t i = length; i; i--, dst++, src++)
   {
     *dst = *src;
   }
@@ -1548,12 +1548,12 @@ template<typename NumT, typename SrcT>
 static void FOG_CDECL _G2d_TransformT_mapPointsT_Translation(const NumT_(Transform)& self,
   NumT_(Point)* dst,
   const SrcT_(Point)* src,
-  sysuint_t length)
+  size_t length)
 {
   NumT _20 = self._20;
   NumT _21 = self._21;
 
-  for (sysuint_t i = length; i; i--, dst++, src++)
+  for (size_t i = length; i; i--, dst++, src++)
   {
     dst->set(src->x + _20,
              src->y + _21);
@@ -1564,7 +1564,7 @@ template<typename NumT, typename SrcT>
 static void FOG_CDECL _G2d_TransformT_mapPointsT_Scaling(const NumT_(Transform)& self,
   NumT_(Point)* dst,
   const SrcT_(Point)* src,
-  sysuint_t length)
+  size_t length)
 {
   NumT _00 = self._00;
   NumT _11 = self._11;
@@ -1572,7 +1572,7 @@ static void FOG_CDECL _G2d_TransformT_mapPointsT_Scaling(const NumT_(Transform)&
   NumT _20 = self._20;
   NumT _21 = self._21;
 
-  for (sysuint_t i = length; i; i--, dst++, src++)
+  for (size_t i = length; i; i--, dst++, src++)
   {
     dst->set(src->x * _00 + _20,
              src->y * _11 + _21);
@@ -1583,7 +1583,7 @@ template<typename NumT, typename SrcT>
 static void FOG_CDECL _G2d_TransformT_mapPointsT_Swap(const NumT_(Transform)& self,
   NumT_(Point)* dst,
   const SrcT_(Point)* src,
-  sysuint_t length)
+  size_t length)
 {
   NumT _10 = self._10;
   NumT _01 = self._01;
@@ -1591,7 +1591,7 @@ static void FOG_CDECL _G2d_TransformT_mapPointsT_Swap(const NumT_(Transform)& se
   NumT _20 = self._20;
   NumT _21 = self._21;
 
-  for (sysuint_t i = length; i; i--, dst++, src++)
+  for (size_t i = length; i; i--, dst++, src++)
   {
     dst->set(src->y * _10 + _20,
              src->x * _01 + _21);
@@ -1602,7 +1602,7 @@ template<typename NumT, typename SrcT>
 static void FOG_CDECL _G2d_TransformT_mapPointsT_Affine(const NumT_(Transform)& self,
   NumT_(Point)* dst,
   const SrcT_(Point)* src,
-  sysuint_t length)
+  size_t length)
 {
   NumT _00 = self._00;
   NumT _01 = self._01;
@@ -1611,7 +1611,7 @@ static void FOG_CDECL _G2d_TransformT_mapPointsT_Affine(const NumT_(Transform)& 
   NumT _20 = self._20;
   NumT _21 = self._21;
 
-  for (sysuint_t i = length; i; i--, dst++, src++)
+  for (size_t i = length; i; i--, dst++, src++)
   {
     dst->set(src->x * _00 + src->y * _10 + _20,
              src->x * _01 + src->y * _11 + _21);
@@ -1622,7 +1622,7 @@ template<typename NumT, typename SrcT>
 static void FOG_CDECL _G2d_TransformT_mapPointsT_Projection(const NumT_(Transform)& self,
   NumT_(Point)* dst,
   const SrcT_(Point)* src,
-  sysuint_t length)
+  size_t length)
 {
   NumT _00 = self._00;
   NumT _01 = self._01;
@@ -1631,7 +1631,7 @@ static void FOG_CDECL _G2d_TransformT_mapPointsT_Projection(const NumT_(Transfor
   NumT _20 = self._20;
   NumT _21 = self._21;
 
-  for (sysuint_t i = length; i; i--, dst++, src++)
+  for (size_t i = length; i; i--, dst++, src++)
   {
     NumT _w = src->x * self._02 + src->y * self._12 + self._22;
 
@@ -1647,9 +1647,9 @@ template<typename NumT, typename SrcT>
 static void FOG_CDECL _G2d_TransformT_mapPointsT_Degenerate(const NumT_(Transform)& self,
   NumT_(Point)* dst,
   const SrcT_(Point)* src,
-  sysuint_t length)
+  size_t length)
 {
-  for (sysuint_t i = 0; i < length; i++) dst[i].reset();
+  for (size_t i = 0; i < length; i++) dst[i].reset();
 }
 
 // ============================================================================
@@ -1661,7 +1661,7 @@ static err_t FOG_CDECL _G2d_TransformT_mapPathT(const NumT_(Transform)& self,
   NumT_(Path)& dst,
   const SrcT_(Path)& src, uint32_t cntOp)
 {
-  sysuint_t srcLength = src.getLength();
+  size_t srcLength = src.getLength();
   uint32_t selfType = self.getType();
 
   if (selfType < TRANSFORM_TYPE_PROJECTION)
@@ -1679,7 +1679,7 @@ static err_t FOG_CDECL _G2d_TransformT_mapPathT(const NumT_(Transform)& self,
     }
     else
     {
-      sysuint_t pos = dst._add(srcLength);
+      size_t pos = dst._add(srcLength);
       if (FOG_UNLIKELY(pos == INVALID_INDEX)) return ERR_RT_OUT_OF_MEMORY;
 
       self._mapPoints(dst._d->vertices + pos, src._d->vertices, srcLength);
@@ -1711,7 +1711,7 @@ static err_t FOG_CDECL _G2d_TransformT_mapPathT(const NumT_(Transform)& self,
 template<typename NumT, typename SrcT>
 static err_t FOG_CDECL _G2d_TransformT_mapPathDataT(const NumT_(Transform)& self,
   NumT_(Path)& dst,
-  const uint8_t* srcCmd, const SrcT_(Point)* srcPts, sysuint_t srcLength, uint32_t cntOp)
+  const uint8_t* srcCmd, const SrcT_(Point)* srcPts, size_t srcLength, uint32_t cntOp)
 {
   if (FOG_UNLIKELY(srcLength == 0))
   {
@@ -1734,7 +1734,7 @@ static err_t FOG_CDECL _G2d_TransformT_mapPathDataT(const NumT_(Transform)& self
 
   if (transformType != TRANSFORM_TYPE_PROJECTION)
   {
-    sysuint_t pos = dst._prepare(srcLength, cntOp);
+    size_t pos = dst._prepare(srcLength, cntOp);
     if (FOG_UNLIKELY(pos == INVALID_INDEX)) return ERR_RT_OUT_OF_MEMORY;
 
     uint8_t* dstCmd = dst._d->commands + pos;
@@ -1751,13 +1751,13 @@ static err_t FOG_CDECL _G2d_TransformT_mapPathDataT(const NumT_(Transform)& self
     if (srcLength >= SYSUINT_MAX / 4)
       return ERR_RT_OUT_OF_MEMORY;
 
-    sysuint_t pos = dst._prepare(srcLength * 4, cntOp);
+    size_t pos = dst._prepare(srcLength * 4, cntOp);
     if (FOG_UNLIKELY(pos == INVALID_INDEX)) return ERR_RT_OUT_OF_MEMORY;
 
     uint8_t* dstCmd = dst._d->commands + pos;
     NumT_(Point)* dstPts = dst._d->vertices + pos;
 
-    sysuint_t i = srcLength;
+    size_t i = srcLength;
     uint32_t mask = PATH_DATA_DIRTY_BBOX;
     NumT_(Point) spline[20];
 
@@ -1918,7 +1918,7 @@ static err_t FOG_CDECL _G2d_TransformT_mapPathDataT(const NumT_(Transform)& self
       }
     } while (i);
 
-    dst._d->length = (sysuint_t)(dstCmd - dst._d->commands);
+    dst._d->length = (size_t)(dstCmd - dst._d->commands);
     dst._d->flags |= mask;
     return ERR_OK;
 

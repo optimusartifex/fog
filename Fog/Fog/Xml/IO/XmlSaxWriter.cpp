@@ -101,7 +101,7 @@ XmlSaxWriter::~XmlSaxWriter()
 
             a->_prev = attributes;
             a->_next = NULL;
-            a->setName(String(begin, (sysuint_t)(strCur - begin)));
+            a->setName(String(begin, (size_t)(strCur - begin)));
 
             if (attributes) attributes->_next = a;
             attributes = a;
@@ -118,7 +118,7 @@ XmlSaxWriter::~XmlSaxWriter()
             while (strCur != strEnd && *strCur != q) strCur++;
 
             // Copy attribute text to attribute object Text must be decoded
-            decode(attributes->_value, begin, (sysuint_t)(strCur - begin));
+            decode(attributes->_value, begin, (size_t)(strCur - begin));
 
             // Assign last node, but this node can be damaged.
             if (strCur == strEnd)
@@ -200,7 +200,7 @@ XmlSaxWriter::~XmlSaxWriter()
       }
 
       const Char* dataEnd = strCur - 3;
-      addComment(String(dataStart, (sysuint_t)(dataEnd - dataStart)));
+      addComment(String(dataStart, (size_t)(dataEnd - dataStart)));
     }
 
 
@@ -254,7 +254,7 @@ XmlSaxWriter::~XmlSaxWriter()
       else
       {
         const Char* dataEnd = strCur - 3;
-        addPI(String(dataStart, (sysuint_t)(dataEnd - dataStart)));
+        addPI(String(dataStart, (size_t)(dataEnd - dataStart)));
       }
     }
 
@@ -286,7 +286,7 @@ XmlSaxWriter::~XmlSaxWriter()
       tr++;
 
       // Decode Xml text (&..;) to text
-      if (tr - begin) decode(cur->_text, begin, sysuint_t( tr - begin ));
+      if (tr - begin) decode(cur->_text, begin, size_t( tr - begin ));
       skipTagText = true;
     }
   }
@@ -306,7 +306,7 @@ XmlSaxWriter::~XmlSaxWriter()
 
 #if 0
 // Decode xml &entities; into normal unicode text
-void XmlSaxReader::decode(String& dest, const Char* buffer, sysuint_t length)
+void XmlSaxReader::decode(String& dest, const Char* buffer, size_t length)
 {
   // This will probabbly never happen
   if (length == DetectLength) length = String::Raw::len(buffer);
@@ -325,7 +325,7 @@ __begin:
       {
         if (*buffer == ';')
         {
-          Char uc = XmlEntity::decode(begin, sysuint_t( buffer - begin ));
+          Char uc = XmlEntity::decode(begin, size_t( buffer - begin ));
           buffer++;
           if (uc.ch())
           {
@@ -342,7 +342,7 @@ __begin:
       core_stderr_msg("XmlSaxReader", "decode", "End of input in entity");
 __copy:
       {
-        sysuint_t i = sysuint_t( buffer - (--begin) );
+        size_t i = size_t( buffer - (--begin) );
         String::Raw::copy(p, begin, i);
         p += i;
       }
@@ -364,7 +364,7 @@ struct CORE_HIDDEN XmlSaxWriter
   ByteArray _target;   // target encoded buffer
 
   TextCodec _textCodec;
-  TextCodec::State _textState;
+  TextCodecState _textState;
 
   XmlSaxWriter(XmlDocument& doc, Stream& stream) :
     _doc(doc),
@@ -387,9 +387,9 @@ struct CORE_HIDDEN XmlSaxWriter
   inline void writeStr(const String& s) { _textCodec.appendFromUtf32(_target, s, &_textState); }
   inline void writeChar(Char uc) { _textCodec.appendFromUtf32(_target, &uc, sizeof(Char)); }
 
-  inline void writeSpaces(sysuint_t count)
+  inline void writeSpaces(size_t count)
   {
-    sysuint_t i;
+    size_t i;
     for (i = 0; i != count; i++) writeChar(Char(' '));
   }
 

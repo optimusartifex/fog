@@ -97,12 +97,12 @@ err_t ThreadPool::getThread(Thread** threads, int workId)
   return getThreads(threads, 1, workId);
 }
 
-err_t ThreadPool::getThreads(Thread** threads, sysuint_t count, int workId)
+err_t ThreadPool::getThreads(Thread** threads, size_t count, int workId)
 {
   AutoLock locked(_lock);
 
   err_t err = ERR_OK;
-  sysuint_t i;
+  size_t i;
 
   for (i = 0; i < count; i++)
   {
@@ -195,12 +195,12 @@ err_t ThreadPool::releaseThread(Thread* thread, int workId)
   return releaseThreads(&thread, 1, workId);
 }
 
-err_t ThreadPool::releaseThreads(Thread** threads, sysuint_t count, int workId)
+err_t ThreadPool::releaseThreads(Thread** threads, size_t count, int workId)
 {
   AutoLock locked(_lock);
 
   err_t err = ERR_OK;
-  sysuint_t i;
+  size_t i;
 
   for (i = 0; i < count; i++)
   {

@@ -24,6 +24,7 @@
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringFilter.h>
 #include <Fog/Core/Tools/StringMatcher.h>
+#include <Fog/Core/Tools/StringTmp_p.h>
 #include <Fog/Core/Tools/StringUtil.h>
 #include <Fog/Core/Tools/TextCodec.h>
 
@@ -36,7 +37,7 @@ namespace Fog {
 // ============================================================================
 
 static FOG_INLINE bool fitToRange(
-  const String& self, sysuint_t& _start, sysuint_t& _end, const Range& range)
+  const String& self, size_t& _start, size_t& _end, const Range& range)
 {
   _start = range.getStart();
   _end = Math::min(range.getEnd(), self.getLength());
@@ -49,13 +50,13 @@ static FOG_INLINE bool fitToRange(
 
 String::String()
 {
-  _d = _dnull->refAlways();
+  _d = _dnull->ref();
 }
 
-String::String(Char ch, sysuint_t length)
+String::String(Char ch, size_t length)
 {
-  _d = Data::alloc(length);
-  if (FOG_IS_NULL(_d)) { _d = _dnull->refAlways(); return; }
+  _d = StringData::alloc(length);
+  if (FOG_IS_NULL(_d)) { _d = _dnull->ref(); return; }
   if (!length) return;
 
   StringUtil::fill(_d->data, ch, length);
@@ -83,44 +84,44 @@ String::String(const String& other1, const String& other2)
 
 String::String(const Char* str)
 {
-  sysuint_t length = StringUtil::len(str);
+  size_t length = StringUtil::len(str);
 
-  _d = Data::alloc(0, str, length);
-  if (FOG_IS_NULL(_d)) _d = _dnull->refAlways();
+  _d = StringData::alloc(0, str, length);
+  if (FOG_IS_NULL(_d)) _d = _dnull->ref();
 }
 
-String::String(const Char* str, sysuint_t length)
+String::String(const Char* str, size_t length)
 {
   if (length == DETECT_LENGTH) length = StringUtil::len(str);
 
-  _d = Data::alloc(0, str, length);
-  if (FOG_IS_NULL(_d)) _d = _dnull->refAlways();
+  _d = StringData::alloc(0, str, length);
+  if (FOG_IS_NULL(_d)) _d = _dnull->ref();
 }
 
 String::String(const Ascii8& str)
 {
   const char* sData = str.getData();
-  sysuint_t sLength = str.getComputedLength();
+  size_t sLength = str.getComputedLength();
 
-  _d = Data::alloc(0, sData, sLength);
-  if (FOG_IS_NULL(_d)) _d = _dnull->refAlways();
+  _d = StringData::alloc(0, sData, sLength);
+  if (FOG_IS_NULL(_d)) _d = _dnull->ref();
 }
 
 String::String(const Utf8& str)
 {
-  _d = _dnull->refAlways();
+  _d = _dnull->ref();
   appendUtf8(str.getData(), str.getComputedLength());
 }
 
 String::String(const Utf16& str)
 {
-  _d = _dnull->refAlways();
+  _d = _dnull->ref();
   set(str);
 }
 
 String::~String()
 {
-  _d->derefInline();
+  _d->deref();
 }
 
 // ============================================================================
@@ -131,7 +132,7 @@ err_t String::_detach()
 {
   if (isDetached()) return ERR_OK;
 
-  Data* newd = Data::copy(_d);
+  StringData* newd = StringData::copy(_d);
   if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
   atomicPtrXchg(&_d, newd)->deref();
@@ -139,42 +140,12 @@ err_t String::_detach()
 }
 
 // ============================================================================
-// [Fog::String::Flags]
+// [Fog::StringData]
 // ============================================================================
 
-void String::setSharable(bool val)
+err_t String::prepare(size_t capacity)
 {
-  if (isSharable() == val) return;
-
-  // TODO: Return error ?
-  detach();
-
-  if (val)
-    _d->flags |= Data::IsSharable;
-  else
-    _d->flags &= ~Data::IsSharable;
-}
-
-void String::setStrong(bool val)
-{
-  if (isStrong() == val) return;
-
-  // TODO: Return error?
-  detach();
-
-  if (val)
-    _d->flags |= Data::IsStrong;
-  else
-    _d->flags &= ~Data::IsStrong;
-}
-
-// ============================================================================
-// [Fog::String::Data]
-// ============================================================================
-
-err_t String::prepare(sysuint_t capacity)
-{
-  Data* d = _d;
+  StringData* d = _d;
 
   if (d->refCount.get() == 1 && d->capacity >= capacity)
   {
@@ -184,16 +155,16 @@ err_t String::prepare(sysuint_t capacity)
     return ERR_OK;
   }
 
-  d = Data::alloc(capacity);
+  d = StringData::alloc(capacity);
   if (FOG_IS_NULL(d)) return ERR_RT_OUT_OF_MEMORY;
 
   atomicPtrXchg(&_d, d)->deref();
   return ERR_OK;
 }
 
-Char* String::beginManipulation(sysuint_t max, uint32_t op)
+Char* String::beginManipulation(size_t max, uint32_t op)
 {
-  Data* d = _d;
+  StringData* d = _d;
 
   if (op == CONTAINER_OP_REPLACE)
   {
@@ -204,7 +175,7 @@ Char* String::beginManipulation(sysuint_t max, uint32_t op)
       d->data[0] = 0;
       return d->data;
     }
-    d = Data::alloc(max);
+    d = StringData::alloc(max);
     if (FOG_IS_NULL(d)) return NULL;
 
     atomicPtrXchg(&_d, d)->deref();
@@ -212,8 +183,8 @@ Char* String::beginManipulation(sysuint_t max, uint32_t op)
   }
   else
   {
-    sysuint_t length = d->length;
-    sysuint_t newmax = length + max;
+    size_t length = d->length;
+    size_t newmax = length + max;
 
     // Overflow.
     if (length > newmax) return NULL;
@@ -223,10 +194,10 @@ Char* String::beginManipulation(sysuint_t max, uint32_t op)
 
     if (d->refCount.get() > 1)
     {
-      sysuint_t optimalCapacity = Util::getGrowCapacity(
-        sizeof(ByteArray::Data), sizeof(Char), length, newmax);
+      size_t optimalCapacity = Util::getGrowCapacity(
+        sizeof(StringData), sizeof(Char), length, newmax);
 
-      d = Data::alloc(optimalCapacity, d->data, d->length);
+      d = StringData::alloc(optimalCapacity, d->data, d->length);
       if (FOG_IS_NULL(d)) return NULL;
 
       atomicPtrXchg(&_d, d)->deref();
@@ -234,10 +205,10 @@ Char* String::beginManipulation(sysuint_t max, uint32_t op)
     }
     else
     {
-      sysuint_t optimalCapacity = Util::getGrowCapacity(
-        sizeof(ByteArray::Data), sizeof(Char), length, newmax);
+      size_t optimalCapacity = Util::getGrowCapacity(
+        sizeof(StringData), sizeof(Char), length, newmax);
 
-      d = Data::realloc(_d, optimalCapacity);
+      d = StringData::realloc(_d, optimalCapacity);
       if (FOG_IS_NULL(d)) return NULL;
 
       _d = d;
@@ -246,21 +217,21 @@ Char* String::beginManipulation(sysuint_t max, uint32_t op)
   }
 }
 
-err_t String::reserve(sysuint_t to)
+err_t String::reserve(size_t to)
 {
   if (to < _d->length) to = _d->length;
   if (_d->refCount.get() == 1 && _d->capacity >= to) goto done;
 
   if (_d->refCount.get() > 1)
   {
-    Data* newd = Data::alloc(to, _d->data, _d->length);
+    StringData* newd = StringData::alloc(to, _d->data, _d->length);
     if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
     atomicPtrXchg(&_d, newd)->deref();
   }
   else
   {
-    Data* newd = Data::realloc(_d, to);
+    StringData* newd = StringData::realloc(_d, to);
     if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
     _d = newd;
@@ -269,20 +240,20 @@ done:
   return ERR_OK;
 }
 
-err_t String::resize(sysuint_t to)
+err_t String::resize(size_t to)
 {
   if (_d->refCount.get() == 1 && _d->capacity >= to) goto done;
 
   if (_d->refCount.get() > 1)
   {
-    Data* newd = Data::alloc(to, _d->data, to < _d->length ? to : _d->length);
+    StringData* newd = StringData::alloc(to, _d->data, to < _d->length ? to : _d->length);
     if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
     atomicPtrXchg(&_d, newd)->deref();
   }
   else
   {
-    Data* newd = Data::realloc(_d, to);
+    StringData* newd = StringData::realloc(_d, to);
     if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
     _d = newd;
@@ -295,10 +266,10 @@ done:
   return ERR_OK;
 }
 
-err_t String::grow(sysuint_t by)
+err_t String::grow(size_t by)
 {
-  sysuint_t lengthBefore = _d->length;
-  sysuint_t lengthAfter = lengthBefore + by;
+  size_t lengthBefore = _d->length;
+  size_t lengthAfter = lengthBefore + by;
 
   FOG_ASSERT(lengthBefore <= lengthAfter);
 
@@ -306,20 +277,20 @@ err_t String::grow(sysuint_t by)
 
   if (_d->refCount.get() > 1)
   {
-    sysuint_t optimalCapacity = Util::getGrowCapacity(
-      sizeof(String::Data), sizeof(Char), lengthBefore, lengthAfter);
+    size_t optimalCapacity = Util::getGrowCapacity(
+      sizeof(StringData), sizeof(Char), lengthBefore, lengthAfter);
 
-    Data* newd = Data::alloc(optimalCapacity, _d->data, _d->length);
+    StringData* newd = StringData::alloc(optimalCapacity, _d->data, _d->length);
     if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
     atomicPtrXchg(&_d, newd)->deref();
   }
   else
   {
-    sysuint_t optimalCapacity = Util::getGrowCapacity(
-      sizeof(String::Data), sizeof(Char), lengthBefore, lengthAfter);
+    size_t optimalCapacity = Util::getGrowCapacity(
+      sizeof(StringData), sizeof(Char), lengthBefore, lengthAfter);
 
-    Data* newd = Data::realloc(_d, optimalCapacity);
+    StringData* newd = StringData::realloc(_d, optimalCapacity);
     if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
     _d = newd;
@@ -334,15 +305,15 @@ done:
 
 void String::squeeze()
 {
-  sysuint_t i = _d->length;
-  sysuint_t c = _d->capacity;
+  size_t i = _d->length;
+  size_t c = _d->capacity;
 
   // Pad to 16 bytes
   i = (i + 7) & ~7;
 
   if (i < c)
   {
-    Data* newd = Data::alloc(0, _d->data, _d->length);
+    StringData* newd = StringData::alloc(0, _d->data, _d->length);
     if (FOG_IS_NULL(newd)) return;
     atomicPtrXchg(&_d, newd)->deref();
   }
@@ -352,7 +323,7 @@ void String::clear()
 {
   if (_d->refCount.get() > 1)
   {
-    atomicPtrXchg(&_d, _dnull->refAlways())->deref();
+    atomicPtrXchg(&_d, _dnull->ref())->deref();
     return;
   }
 
@@ -363,26 +334,26 @@ void String::clear()
 
 void String::reset()
 {
-  atomicPtrXchg(&_d, _dnull->refAlways())->deref();
+  atomicPtrXchg(&_d, _dnull->ref())->deref();
 }
 
-static Char* _prepareSet(String* self, sysuint_t length)
+static Char* _prepareSet(String* self, size_t length)
 {
-  String::Data* d = self->_d;
+  StringData* d = self->_d;
   if (FOG_UNLIKELY(length == 0)) goto skip;
 
   if (d->refCount.get() > 1)
   {
-    d = String::Data::alloc(length);
+    d = StringData::alloc(length);
     if (FOG_IS_NULL(d)) return NULL;
-    atomicPtrXchg(&self->_d, d)->derefInline();
+    atomicPtrXchg(&self->_d, d)->deref();
   }
   else if (d->capacity < length)
   {
-    sysuint_t optimalCapacity = Util::getGrowCapacity(
-      sizeof(String::Data), sizeof(Char), d->length, length);
+    size_t optimalCapacity = Util::getGrowCapacity(
+      sizeof(StringData), sizeof(Char), d->length, length);
 
-    d = String::Data::realloc(d, optimalCapacity);
+    d = StringData::realloc(d, optimalCapacity);
     if (FOG_IS_NULL(d)) return NULL;
     self->_d = d;
   }
@@ -394,27 +365,27 @@ skip:
   return d->data;
 }
 
-static Char* _prepareAppend(String* self, sysuint_t length)
+static Char* _prepareAppend(String* self, size_t length)
 {
-  String::Data* d = self->_d;
+  StringData* d = self->_d;
 
-  sysuint_t lengthBefore = d->length;
-  sysuint_t lengthAfter = lengthBefore + length;
+  size_t lengthBefore = d->length;
+  size_t lengthAfter = lengthBefore + length;
 
   if (FOG_UNLIKELY(length == 0)) goto skip;
 
   if (d->refCount.get() > 1)
   {
-    d = String::Data::alloc(lengthAfter, d->data, d->length);
+    d = StringData::alloc(lengthAfter, d->data, d->length);
     if (FOG_IS_NULL(d)) return NULL;
-    atomicPtrXchg(&self->_d, d)->derefInline();
+    atomicPtrXchg(&self->_d, d)->deref();
   }
   else if (d->capacity < lengthAfter)
   {
-    sysuint_t optimalCapacity = Util::getGrowCapacity(
-      sizeof(String::Data), sizeof(Char), lengthBefore, lengthAfter);
+    size_t optimalCapacity = Util::getGrowCapacity(
+      sizeof(StringData), sizeof(Char), lengthBefore, lengthAfter);
 
-    d = String::Data::realloc(d, optimalCapacity);
+    d = StringData::realloc(d, optimalCapacity);
     if (FOG_IS_NULL(d)) return NULL;
     self->_d = d;
   }
@@ -426,13 +397,13 @@ skip:
   return d->data + lengthBefore;
 }
 
-static Char* _prepareInsert(String* self, sysuint_t index, sysuint_t length)
+static Char* _prepareInsert(String* self, size_t index, size_t length)
 {
-  String::Data* d = self->_d;
+  StringData* d = self->_d;
 
-  sysuint_t lengthBefore = d->length;
-  sysuint_t lengthAfter = lengthBefore + length;
-  sysuint_t moveBy;
+  size_t lengthBefore = d->length;
+  size_t lengthAfter = lengthBefore + length;
+  size_t moveBy;
 
   if (index > lengthBefore) index = lengthBefore;
   // If data length is zero we can just skip all this machinery.
@@ -442,15 +413,15 @@ static Char* _prepareInsert(String* self, sysuint_t index, sysuint_t length)
 
   if (d->refCount.get() > 1 || d->capacity < lengthAfter)
   {
-    sysuint_t optimalCapacity = Util::getGrowCapacity(
-      sizeof(String::Data), sizeof(Char), lengthBefore, lengthAfter);
+    size_t optimalCapacity = Util::getGrowCapacity(
+      sizeof(StringData), sizeof(Char), lengthBefore, lengthAfter);
 
-    d = String::Data::alloc(optimalCapacity, d->data, index);
+    d = StringData::alloc(optimalCapacity, d->data, index);
     if (FOG_IS_NULL(d)) return NULL;
 
     StringUtil::copy(
       d->data + index + length, self->_d->data + index, moveBy);
-    atomicPtrXchg(&self->_d, d)->derefInline();
+    atomicPtrXchg(&self->_d, d)->deref();
   }
   else
   {
@@ -467,29 +438,29 @@ skip:
 }
 
 // TODO: Not used.
-static Char* _prepareReplace(String* self, sysuint_t index, sysuint_t range, sysuint_t replacementLength)
+static Char* _prepareReplace(String* self, size_t index, size_t range, size_t replacementLength)
 {
-  String::Data* d = self->_d;
+  StringData* d = self->_d;
 
-  sysuint_t lengthBefore = d->length;
+  size_t lengthBefore = d->length;
 
   FOG_ASSERT(index <= lengthBefore);
   if (lengthBefore - index > range) range = lengthBefore - index;
 
-  sysuint_t lengthAfter = lengthBefore - range + replacementLength;
+  size_t lengthAfter = lengthBefore - range + replacementLength;
 
   if (d->refCount.get() > 1 || d->capacity < lengthAfter)
   {
-    sysuint_t optimalCapacity = Util::getGrowCapacity(
-      sizeof(String::Data), sizeof(Char), lengthBefore, lengthAfter);
+    size_t optimalCapacity = Util::getGrowCapacity(
+      sizeof(StringData), sizeof(Char), lengthBefore, lengthAfter);
 
-    d = String::Data::alloc(optimalCapacity, d->data, index);
+    d = StringData::alloc(optimalCapacity, d->data, index);
     if (FOG_IS_NULL(d)) return NULL;
 
     StringUtil::copy(
       d->data + index + replacementLength,
       self->_d->data + index + range, lengthBefore - index - range);
-    atomicPtrXchg(&self->_d, d)->derefInline();
+    atomicPtrXchg(&self->_d, d)->deref();
   }
   else
   {
@@ -508,7 +479,7 @@ static Char* _prepareReplace(String* self, sysuint_t index, sysuint_t range, sys
 // [Fog::String::Set]
 // ============================================================================
 
-err_t String::set(Char ch, sysuint_t length)
+err_t String::set(Char ch, size_t length)
 {
   if (length == DETECT_LENGTH) return ERR_RT_INVALID_ARGUMENT;
 
@@ -522,7 +493,7 @@ err_t String::set(Char ch, sysuint_t length)
 err_t String::set(const Ascii8& str)
 {
   const char* sData = str.getData();
-  sysuint_t sLength = str.getComputedLength();
+  size_t sLength = str.getComputedLength();
 
   Char* p = _prepareSet(this, sLength);
   if (FOG_IS_NULL(p)) return ERR_RT_OUT_OF_MEMORY;
@@ -534,7 +505,7 @@ err_t String::set(const Ascii8& str)
 err_t String::set(const Utf16& str)
 {
   const Char* sData = str.getData();
-  sysuint_t sLength = str.getComputedLength();
+  size_t sLength = str.getComputedLength();
 
   Char* p = _prepareSet(this, sLength);
   if (FOG_IS_NULL(p)) return ERR_RT_OUT_OF_MEMORY;
@@ -545,33 +516,26 @@ err_t String::set(const Utf16& str)
 
 err_t String::set(const String& other)
 {
-  Data* self_d = _d;
-  Data* other_d = other._d;
+  StringData* self_d = _d;
+  StringData* other_d = other._d;
   if (self_d == other_d) return ERR_OK;
 
-  if ((self_d->flags & Data::IsStrong) != 0 || (other_d->flags & Data::IsSharable) == 0)
-  {
-    return setDeep(other);
-  }
-  else
-  {
-    atomicPtrXchg(&_d, other_d->refAlways())->derefInline();
-    return ERR_OK;
-  }
+  atomicPtrXchg(&_d, other_d->ref())->deref();
+  return ERR_OK;
 }
 
-err_t String::set(const void* str, sysuint_t size, const TextCodec& tc)
+err_t String::set(const void* str, size_t size, const TextCodec& tc)
 {
-  return tc.toUnicode(*this, Stub8((const char*)str, size));
+  return tc.decode(*this, Stub8((const char*)str, size), NULL, CONTAINER_OP_REPLACE);
 }
 
-err_t String::setUtf8(const char* s, sysuint_t length)
+err_t String::setUtf8(const char* s, size_t length)
 {
   clear();
   return appendUtf8(s, length);
 }
 
-err_t String::setUtf32(const uint32_t* s, sysuint_t length)
+err_t String::setUtf32(const uint32_t* s, size_t length)
 {
   clear();
   return appendUtf32(s, length);
@@ -579,8 +543,8 @@ err_t String::setUtf32(const uint32_t* s, sysuint_t length)
 
 err_t String::setDeep(const String& other)
 {
-  Data* self_d = _d;
-  Data* other_d = other._d;
+  StringData* self_d = _d;
+  StringData* other_d = other._d;
   if (self_d == other_d) return ERR_OK;
 
   Char* p = _prepareSet(this, other_d->length);
@@ -679,7 +643,7 @@ err_t String::wformat(const String& fmt, Char lex, const List<String>& args)
   return appendWformat(fmt, lex, args.getData(), args.getLength());
 }
 
-err_t String::wformat(const String& fmt, Char lex, const String* args, sysuint_t length)
+err_t String::wformat(const String& fmt, Char lex, const String* args, size_t length)
 {
   clear();
   return appendWformat(fmt, lex, args, length);
@@ -696,8 +660,8 @@ static err_t append_ntoa(String* self, uint64_t n, int base, const FormatFlags& 
   Char prefixBuffer[4];
   Char* prefix = prefixBuffer;
 
-  sysuint_t width = ff.width;
-  sysuint_t precision = ff.precision;
+  size_t width = ff.width;
+  size_t precision = ff.precision;
   uint32_t fmt = ff.flags;
 
   if (out->negative)
@@ -720,8 +684,8 @@ static err_t append_ntoa(String* self, uint64_t n, int base, const FormatFlags& 
     }
   }
 
-  sysuint_t prefixLength = (sysuint_t)(prefix - prefixBuffer);
-  sysuint_t resultLength = out->length;
+  size_t prefixLength = (size_t)(prefix - prefixBuffer);
+  size_t resultLength = out->length;
 
   if (width == NO_WIDTH) width = 0;
   if ((fmt & FORMAT_ZERO_PADDED) &&
@@ -729,9 +693,9 @@ static err_t append_ntoa(String* self, uint64_t n, int base, const FormatFlags& 
       width > prefixLength + resultLength) precision = width - prefixLength;
   if (precision == NO_PRECISION) precision = 0;
 
-  sysuint_t fillLength = (resultLength < precision) ? precision - resultLength : 0;
-  sysuint_t fullLength = prefixLength + resultLength + fillLength;
-  sysuint_t widthLength = (fullLength < width) ? width - fullLength : 0;
+  size_t fillLength = (resultLength < precision) ? precision - resultLength : 0;
+  size_t fullLength = prefixLength + resultLength + fillLength;
+  size_t widthLength = (fullLength < width) ? width - fullLength : 0;
 
   fullLength += widthLength;
 
@@ -753,7 +717,7 @@ static err_t append_ntoa(String* self, uint64_t n, int base, const FormatFlags& 
   if (base == 10 && zero != Char('0'))
   {
     StringUtil::fill(p, zero, fillLength); p += fillLength;
-    for (sysuint_t i = 0; i != resultLength; i++)
+    for (size_t i = 0; i != resultLength; i++)
       p[i] = zero + Char((uint8_t)out->result[i] - (uint8_t)'0');
     p += resultLength;
   }
@@ -783,7 +747,7 @@ static Char* append_exponent(Char* dest, uint exp, Char zero)
   return dest;
 }
 
-err_t String::append(Char ch, sysuint_t length)
+err_t String::append(Char ch, size_t length)
 {
   if (length == DETECT_LENGTH) return ERR_RT_INVALID_ARGUMENT;
 
@@ -797,7 +761,7 @@ err_t String::append(Char ch, sysuint_t length)
 err_t String::append(const Ascii8& str)
 {
   const char* sData = str.getData();
-  sysuint_t sLength = str.getComputedLength();
+  size_t sLength = str.getComputedLength();
 
   Char* p = _prepareAppend(this, sLength);
   if (FOG_IS_NULL(p)) return ERR_RT_OUT_OF_MEMORY;
@@ -809,7 +773,7 @@ err_t String::append(const Ascii8& str)
 err_t String::append(const Utf16& str)
 {
   const Char* sData = str.getData();
-  sysuint_t sLength = str.getComputedLength();
+  size_t sLength = str.getComputedLength();
 
   Char* p = _prepareAppend(this, sLength);
   if (FOG_IS_NULL(p)) return ERR_RT_OUT_OF_MEMORY;
@@ -831,17 +795,17 @@ err_t String::append(const String& _other)
   return ERR_OK;
 }
 
-err_t String::append(const void* str, sysuint_t size, const TextCodec& tc)
+err_t String::append(const void* str, size_t size, const TextCodec& tc)
 {
-  return tc.appendToUnicode(*this, str, size);
+  return tc.decode(*this, Stub8(reinterpret_cast<const char*>(str), size), NULL, CONTAINER_OP_APPEND);
 }
 
-err_t String::appendUtf8(const char* str, sysuint_t length)
+err_t String::appendUtf8(const char* str, size_t length)
 {
   if (length == DETECT_LENGTH) length = StringUtil::len(str);
   if (length == 0) return ERR_OK;
 
-  sysuint_t i = length;
+  size_t i = length;
 
   err_t err;
   if ((err = reserve(getLength() + i))) return err;
@@ -914,12 +878,12 @@ end:
   return err;
 }
 
-err_t String::appendUtf32(const uint32_t* str, sysuint_t length)
+err_t String::appendUtf32(const uint32_t* str, size_t length)
 {
   if (length == DETECT_LENGTH) length = StringUtil::len(str);
   if (length == 0) return ERR_OK;
 
-  sysuint_t i = length;
+  size_t i = length;
   err_t err;
 
   Char* dstCur;
@@ -1025,14 +989,14 @@ err_t String::appendDouble(double d, int doubleForm, const FormatFlags& ff, cons
 
   StringUtil::NTOAOut out;
 
-  sysuint_t width = ff.width;
-  sysuint_t precision = ff.precision;
+  size_t width = ff.width;
+  size_t precision = ff.precision;
   uint32_t fmt = ff.flags;
 
-  sysuint_t beginLength = _d->length;
-  sysuint_t numberLength;
-  sysuint_t i;
-  sysuint_t savedPrecision = precision;
+  size_t beginLength = _d->length;
+  size_t numberLength;
+  size_t i;
+  size_t savedPrecision = precision;
   int decpt;
 
   uint8_t* bufCur;
@@ -1066,7 +1030,7 @@ err_t String::appendDouble(double d, int doubleForm, const FormatFlags& ff, cons
 
     // Reserve some space for number.
     i = precision + 16;
-    if (decpt > 0) i += (sysuint_t)decpt;
+    if (decpt > 0) i += (size_t)decpt;
 
     dest = beginManipulation(i, CONTAINER_OP_APPEND);
     if (FOG_IS_NULL(dest)) { err = ERR_RT_OUT_OF_MEMORY; goto __ret; }
@@ -1165,7 +1129,7 @@ __exponentialForm:
 
     // Reserve some space for number.
     i = precision + 16;
-    if (decpt > 0) i += (sysuint_t)decpt;
+    if (decpt > 0) i += (size_t)decpt;
 
     dest = beginManipulation(i, CONTAINER_OP_APPEND);
     if (FOG_IS_NULL(dest)) { err = ERR_RT_OUT_OF_MEMORY; goto __ret; }
@@ -1200,9 +1164,9 @@ __InfOrNaN:
 __ret:
   // Apply padding.
   numberLength = _d->length - beginLength;
-  if (width != (sysuint_t)-1 && width > numberLength)
+  if (width != (size_t)-1 && width > numberLength)
   {
-    sysuint_t fill = width - numberLength;
+    size_t fill = width - numberLength;
 
     if ((fmt & FORMAT_LEFT_ADJUSTED) == 0)
     {
@@ -1253,7 +1217,7 @@ err_t String::appendVformat(const char* fmt, va_list ap)
 
   const char* fmtBeginChunk = fmt;
   uint32_t c;
-  sysuint_t beginLength = getLength();
+  size_t beginLength = getLength();
 
   for (;;)
   {
@@ -1263,11 +1227,11 @@ err_t String::appendVformat(const char* fmt, va_list ap)
     {
       uint directives = 0;
       uint sizeFlags = 0;
-      sysuint_t fieldWidth = NO_WIDTH;
-      sysuint_t precision = NO_PRECISION;
+      size_t fieldWidth = NO_WIDTH;
+      size_t precision = NO_PRECISION;
       uint base = 10;
 
-      if (fmtBeginChunk != fmt) append(Ascii8(fmtBeginChunk, (sysuint_t)(fmt - fmtBeginChunk)));
+      if (fmtBeginChunk != fmt) append(Ascii8(fmtBeginChunk, (size_t)(fmt - fmtBeginChunk)));
 
       // Parse directives.
       for (;;)
@@ -1295,7 +1259,7 @@ err_t String::appendVformat(const char* fmt, va_list ap)
         int _fieldWidth = va_arg(ap, int);
         if (_fieldWidth < 0) _fieldWidth = 0;
         if (_fieldWidth > 4096) _fieldWidth = 4096;
-        fieldWidth = (sysuint_t)_fieldWidth;
+        fieldWidth = (size_t)_fieldWidth;
       }
 
       // Parse precision.
@@ -1314,7 +1278,7 @@ err_t String::appendVformat(const char* fmt, va_list ap)
           int _precision = va_arg(ap, int);
           if (_precision < 0) _precision = 0;
           if (_precision > 4096) _precision = 4096;
-          precision = (sysuint_t)_precision;
+          precision = (size_t)_precision;
         }
       }
 
@@ -1466,7 +1430,7 @@ ffUnsigned:
           if (precision == NO_PRECISION) precision = 1;
           if (fieldWidth == NO_WIDTH) fieldWidth = 0;
 
-          sysuint_t fill = (fieldWidth > precision) ? fieldWidth - precision : 0;
+          size_t fill = (fieldWidth > precision) ? fieldWidth - precision : 0;
 
           if (fill && (directives & FORMAT_LEFT_ADJUSTED) == 0) append(Char(' '), fill);
           append(Char(va_arg(ap, uint)), precision);
@@ -1490,15 +1454,15 @@ ffUnsigned:
 #if 0
             // UTF-32 string (uint32_t*).
             const uint32_t* s = va_arg(ap, const uint32_t*);
-            sysuint_t slen = (precision != NO_PRECISION)
-              ? (sysuint_t)StringUtil::nlen(s, precision)
-              : (sysuint_t)StringUtil::len(s);
+            size_t slen = (precision != NO_PRECISION)
+              ? (size_t)StringUtil::nlen(s, precision)
+              : (size_t)StringUtil::len(s);
 
             String s16;
             TextCodec::utf32().appendToUnicode(s16, reinterpret_cast<const void*>(s), slen * 4);
 
             slen = s16.getLength();
-            sysuint_t fill = (fieldWidth > slen) ? fieldWidth - slen : 0;
+            size_t fill = (fieldWidth > slen) ? fieldWidth - slen : 0;
 
             if (fill && (directives & FORMAT_LEFT_ADJUSTED) == 0) append(Char(' '), fill);
             append(s16);
@@ -1510,10 +1474,10 @@ ffUnsigned:
 #if 0
             // UTF-16 string (Char*).
             const Char* s = va_arg(ap, const Char*);
-            sysuint_t slen = (precision != NO_PRECISION)
-              ? (sysuint_t)StringUtil::nlen(s, precision)
-              : (sysuint_t)StringUtil::len(s);
-            sysuint_t fill = (fieldWidth > slen) ? fieldWidth - slen : 0;
+            size_t slen = (precision != NO_PRECISION)
+              ? (size_t)StringUtil::nlen(s, precision)
+              : (size_t)StringUtil::len(s);
+            size_t fill = (fieldWidth > slen) ? fieldWidth - slen : 0;
 
             if (fill && (directives & FORMAT_LEFT_ADJUSTED) == 0) append(Char(' '), fill);
             append(s, slen);
@@ -1526,13 +1490,13 @@ ffUnsigned:
             StringTmp<TEMPORARY_LENGTH> str;
 
             const char* s = va_arg(ap, const char*);
-            sysuint_t slen = (precision != NO_PRECISION)
-              ? (sysuint_t)StringUtil::nlen(s, precision)
-              : (sysuint_t)StringUtil::len(s);
+            size_t slen = (precision != NO_PRECISION)
+              ? (size_t)StringUtil::nlen(s, precision)
+              : (size_t)StringUtil::len(s);
 
-            TextCodec::local8().appendToUnicode(str, s, slen);
+            TextCodec::local8().decode(str, Stub8(s, slen), NULL, CONTAINER_OP_APPEND);
             slen = str.getLength();
-            sysuint_t fill = (fieldWidth > slen) ? fieldWidth - slen : 0;
+            size_t fill = (fieldWidth > slen) ? fieldWidth - slen : 0;
 
             if (fill && (directives & FORMAT_LEFT_ADJUSTED) == 0) append(Char(' '), fill);
             append(str);
@@ -1554,7 +1518,7 @@ ffUnsigned:
         case 'n':
         {
           void* pointer = va_arg(ap, void*);
-          sysuint_t n = getLength() - beginLength;
+          size_t n = getLength() - beginLength;
           switch (sizeFlags)
           {
             case ARG_SIZE_M:
@@ -1575,9 +1539,9 @@ ffUnsigned:
           String* string = va_arg(ap, String*);
 
           const Char* s = string->getData();
-          sysuint_t slen = string->getLength();
+          size_t slen = string->getLength();
           if (precision != NO_PRECISION)  slen = Math::min(slen, precision);
-          sysuint_t fill = (fieldWidth > slen) ? fieldWidth - slen : 0;
+          size_t fill = (fieldWidth > slen) ? fieldWidth - slen : 0;
 
           if (fill && (directives & FORMAT_LEFT_ADJUSTED) == 0) append(Char(' '), fill);
           append(Utf16(s, slen));
@@ -1602,7 +1566,7 @@ ffUnsigned:
 end:
     if (c == '\0')
     {
-      if (fmtBeginChunk != fmt) append(Ascii8(fmtBeginChunk, (sysuint_t)(fmt - fmtBeginChunk)));
+      if (fmtBeginChunk != fmt) append(Ascii8(fmtBeginChunk, (size_t)(fmt - fmtBeginChunk)));
       break;
     }
 
@@ -1618,7 +1582,7 @@ err_t String::appendWformat(const String& fmt, Char lex, const List<String>& arg
   return appendWformat(fmt, lex, args.getData(), args.getLength());
 }
 
-err_t String::appendWformat(const String& fmt, Char lex, const String* args, sysuint_t length)
+err_t String::appendWformat(const String& fmt, Char lex, const String* args, size_t length)
 {
   const Char* fmtBeg = fmt.getData();
   const Char* fmtEnd = fmtBeg + fmt.getLength();
@@ -1631,7 +1595,7 @@ err_t String::appendWformat(const String& fmt, Char lex, const String* args, sys
     if (*fmtCur == lex)
     {
       fmtBeg = fmtCur;
-      if ( (err = append(Utf16(fmtBeg, (sysuint_t)(fmtCur - fmtBeg)))) ) goto done;
+      if ( (err = append(Utf16(fmtBeg, (size_t)(fmtCur - fmtBeg)))) ) goto done;
 
       if (++fmtCur != fmtEnd)
       {
@@ -1657,7 +1621,7 @@ err_t String::appendWformat(const String& fmt, Char lex, const String* args, sys
 
   if (fmtCur != fmtBeg)
   {
-    err = append(Utf16(fmtBeg, (sysuint_t)(fmtCur - fmtBeg)));
+    err = append(Utf16(fmtBeg, (size_t)(fmtCur - fmtBeg)));
   }
 
 done:
@@ -1668,7 +1632,7 @@ done:
 // [Fog::String::Prepend]
 // ============================================================================
 
-err_t String::prepend(Char ch, sysuint_t length)
+err_t String::prepend(Char ch, size_t length)
 {
   return insert(0, ch, length);
 }
@@ -1692,7 +1656,7 @@ err_t String::prepend(const String& other)
 // [Fog::String::Insert]
 // ============================================================================
 
-err_t String::insert(sysuint_t index, Char ch, sysuint_t length)
+err_t String::insert(size_t index, Char ch, size_t length)
 {
   if (length == DETECT_LENGTH) return ERR_RT_INVALID_ARGUMENT;
 
@@ -1703,10 +1667,10 @@ err_t String::insert(sysuint_t index, Char ch, sysuint_t length)
   return ERR_OK;
 }
 
-err_t String::insert(sysuint_t index, const Ascii8& str)
+err_t String::insert(size_t index, const Ascii8& str)
 {
   const char* sData = str.getData();
-  sysuint_t sLength = str.getComputedLength();
+  size_t sLength = str.getComputedLength();
 
   Char* p = _prepareInsert(this, index, sLength);
   if (FOG_IS_NULL(p)) return ERR_RT_OUT_OF_MEMORY;
@@ -1715,10 +1679,10 @@ err_t String::insert(sysuint_t index, const Ascii8& str)
   return ERR_OK;
 }
 
-err_t String::insert(sysuint_t index, const Utf16& str)
+err_t String::insert(size_t index, const Utf16& str)
 {
   const Char* sData = str.getData();
-  sysuint_t sLength = str.getComputedLength();
+  size_t sLength = str.getComputedLength();
 
   Char* p = _prepareInsert(this, index, sLength);
   if (FOG_IS_NULL(p)) return ERR_RT_OUT_OF_MEMORY;
@@ -1727,7 +1691,7 @@ err_t String::insert(sysuint_t index, const Utf16& str)
   return ERR_OK;
 }
 
-err_t String::insert(sysuint_t index, const String& _other)
+err_t String::insert(size_t index, const String& _other)
 {
   String other(_other);
 
@@ -1742,18 +1706,18 @@ err_t String::insert(sysuint_t index, const String& _other)
 // [Fog::String - Remove]
 // ============================================================================
 
-sysuint_t String::remove(const Range& range)
+size_t String::remove(const Range& range)
 {
-  sysuint_t rstart, rend;
+  size_t rstart, rend;
   if (!fitToRange(*this, rstart, rend, range)) return 0;
 
-  sysuint_t lenPart1 = rstart;
-  sysuint_t lenPart2 = getLength() - rend;
-  sysuint_t lenAfter = lenPart1 + lenPart2;
+  size_t lenPart1 = rstart;
+  size_t lenPart2 = getLength() - rend;
+  size_t lenAfter = lenPart1 + lenPart2;
 
   if (_d->refCount.get() > 1)
   {
-    Data* newd = Data::alloc(lenAfter);
+    StringData* newd = StringData::alloc(lenAfter);
     if (FOG_IS_NULL(newd)) return 0;
 
     StringUtil::copy(newd->data, _d->data, lenPart1);
@@ -1774,13 +1738,13 @@ sysuint_t String::remove(const Range& range)
   return rend - rstart;
 }
 
-sysuint_t String::remove(Char ch, uint cs, const Range& range)
+size_t String::remove(Char ch, uint cs, const Range& range)
 {
-  sysuint_t rstart, rend;
+  size_t rstart, rend;
   if (!fitToRange(*this, rstart, rend, range)) return 0;
 
-  Data* d = _d;
-  sysuint_t length = d->length;
+  StringData* d = _d;
+  size_t length = d->length;
 
   Char* strBeg = d->data;
   Char* strCur = strBeg + rstart;
@@ -1851,23 +1815,23 @@ caseInsensitiveRemove:
     }
   }
 
-  sysuint_t tail = length - rend;
+  size_t tail = length - rend;
   StringUtil::copy(destCur, strCur, tail);
 
-  sysuint_t after = (sysuint_t)(destCur - d->data) + tail;
+  size_t after = (size_t)(destCur - d->data) + tail;
   d->length = after;
   d->data[after] = 0;
   d->hashCode = 0;
   return length - after;
 }
 
-sysuint_t String::remove(const String& other, uint cs, const Range& range)
+size_t String::remove(const String& other, uint cs, const Range& range)
 {
-  sysuint_t len = other.getLength();
+  size_t len = other.getLength();
   if (len == 0) return 0;
   if (len == 1) return remove(other.getAt(0), cs, range);
 
-  sysuint_t rstart, rend;
+  size_t rstart, rend;
   if (!fitToRange(*this, rstart, rend, range)) return 0;
 
   if (rend - rstart >= 256)
@@ -1886,11 +1850,11 @@ sysuint_t String::remove(const String& other, uint cs, const Range& range)
 
     // Maximal length is 256 and minimal pattern size is 2.
     Range ranges[128];
-    sysuint_t count = 0;
+    size_t count = 0;
 
     for (;;)
     {
-      sysuint_t i = StringUtil::indexOf(aStr + rstart, rend - rstart, bStr, len);
+      size_t i = StringUtil::indexOf(aStr + rstart, rend - rstart, bStr, len);
       if (i == INVALID_INDEX) break;
       rstart += i;
       ranges[count++].setRange(rstart, rstart + len);
@@ -1901,13 +1865,13 @@ sysuint_t String::remove(const String& other, uint cs, const Range& range)
   }
 }
 
-sysuint_t String::remove(const StringFilter& filter, uint cs, const Range& range)
+size_t String::remove(const StringFilter& filter, uint cs, const Range& range)
 {
-  sysuint_t rstart, rend;
+  size_t rstart, rend;
   if (!fitToRange(*this, rstart, rend, range)) return 0;
 
   const Char* str = getData();
-  sysuint_t len = getLength();
+  size_t len = getLength();
 
   List<Range> ranges;
 
@@ -1923,23 +1887,23 @@ sysuint_t String::remove(const StringFilter& filter, uint cs, const Range& range
   return remove(ranges.getData(), ranges.getLength());
 }
 
-sysuint_t String::remove(const Range* range, sysuint_t count)
+size_t String::remove(const Range* range, size_t count)
 {
   if (range == NULL || count == 0) return 0;
 
-  sysuint_t i;
-  sysuint_t len = getLength();
+  size_t i;
+  size_t len = getLength();
 
   if (_d->refCount.get() == 1)
   {
     i = 0;
     Char* s = _d->data;
-    sysuint_t dstPos = range[0].getStart();
-    sysuint_t srcPos = dstPos;
+    size_t dstPos = range[0].getStart();
+    size_t srcPos = dstPos;
 
     do {
       srcPos += range[i].getLengthNoCheck();
-      sysuint_t j = ((++i == count) ? len : range[i].getStart()) - srcPos;
+      size_t j = ((++i == count) ? len : range[i].getStart()) - srcPos;
 
       StringUtil::copy(s + dstPos, s + srcPos, j);
 
@@ -1953,29 +1917,29 @@ sysuint_t String::remove(const Range* range, sysuint_t count)
   }
   else
   {
-    sysuint_t deleteLength = 0;
-    sysuint_t lengthAfter;
+    size_t deleteLength = 0;
+    size_t lengthAfter;
 
     for (i = 0; i < count; i++) deleteLength += range[i].getLengthNoCheck();
     FOG_ASSERT(len >= deleteLength);
 
     lengthAfter = len - deleteLength;
 
-    Data* newd = Data::alloc(lengthAfter);
+    StringData* newd = StringData::alloc(lengthAfter);
     if (FOG_IS_NULL(newd)) return 0;
 
     i = 0;
     Char* dstData = newd->data;
     Char* srgetData = _d->data;
 
-    sysuint_t dstPos = range[0].getStart();
-    sysuint_t srcPos = dstPos;
+    size_t dstPos = range[0].getStart();
+    size_t srcPos = dstPos;
 
     StringUtil::copy(dstData, srgetData, dstPos);
 
     do {
       srcPos += range[i].getLengthNoCheck();
-      sysuint_t j = ((++i == count) ? len : range[i].getStart()) - srcPos;
+      size_t j = ((++i == count) ? len : range[i].getStart()) - srcPos;
 
       StringUtil::copy(dstData + dstPos, srgetData + srcPos, j);
 
@@ -1997,16 +1961,16 @@ sysuint_t String::remove(const Range* range, sysuint_t count)
 
 err_t String::replace(const Range& range, const String& replacement)
 {
-  sysuint_t rstart, rend;
+  size_t rstart, rend;
   if (!fitToRange(*this, rstart, rend, range)) return ERR_OK;
 
   const Char* replacementData = replacement.getData();
-  sysuint_t replacementLength = replacement.getLength();
+  size_t replacementLength = replacement.getLength();
 
   if (_d->refCount.get() == 1 && _d != replacement._d)
   {
-    sysuint_t len = getLength();
-    sysuint_t lenAfter = len - (rend - rstart) + replacementLength;
+    size_t len = getLength();
+    size_t lenAfter = len - (rend - rstart) + replacementLength;
     if (lenAfter < len) return ERR_RT_OVERFLOW;
 
     if (_d->capacity >= lenAfter)
@@ -2030,10 +1994,10 @@ err_t String::replace(const Range& range, const String& replacement)
 
 err_t String::replace(Char before, Char after, uint cs, const Range& range)
 {
-  sysuint_t rstart, rend;
+  size_t rstart, rend;
   if (!fitToRange(*this, rstart, rend, range)) return ERR_OK;
 
-  Data* d = _d;
+  StringData* d = _d;
 
   Char* strCur = d->data;
   Char* strEnd = strCur;
@@ -2054,7 +2018,7 @@ caseSensitive:
 caseSensitiveReplace:
     if (d->refCount.get() > 1)
     {
-      rstart = (sysuint_t)(strCur - d->data);
+      rstart = (size_t)(strCur - d->data);
 
       FOG_RETURN_ON_ERROR(_detach());
       d = _d;
@@ -2089,7 +2053,7 @@ caseSensitiveReplace:
 caseInsensitiveReplace:
     if (d->refCount.get() > 1)
     {
-      rstart = (sysuint_t)(strCur - d->data);
+      rstart = (size_t)(strCur - d->data);
 
       FOG_RETURN_ON_ERROR(_detach());
       d = _d;
@@ -2114,10 +2078,10 @@ caseInsensitiveReplace:
 
 err_t String::replace(const String& before, const String& after,  uint cs, const Range& range)
 {
-  sysuint_t rstart, rend;
+  size_t rstart, rend;
   if (!fitToRange(*this, rstart, rend, range)) return 0;
 
-  sysuint_t len = before.getLength();
+  size_t len = before.getLength();
   if (len == 0) return 0;
 
   if (rend - rstart >= 256)
@@ -2135,11 +2099,11 @@ err_t String::replace(const String& before, const String& after,  uint cs, const
     const Char* bStr = before.getData();
 
     Range ranges[256];
-    sysuint_t count = 0;
+    size_t count = 0;
 
     for (;;)
     {
-      sysuint_t i = StringUtil::indexOf(aStr + rstart, rend - rstart, bStr, len);
+      size_t i = StringUtil::indexOf(aStr + rstart, rend - rstart, bStr, len);
       if (i == INVALID_INDEX) break;
 
       rstart += i;
@@ -2153,11 +2117,11 @@ err_t String::replace(const String& before, const String& after,  uint cs, const
 
 err_t String::replace(const StringFilter& filter, const String& after, uint cs, const Range& range)
 {
-  sysuint_t rstart, rend;
+  size_t rstart, rend;
   if (!fitToRange(*this, rstart, rend, range)) return 0;
 
   const Char* str = getData();
-  sysuint_t len = getLength();
+  size_t len = getLength();
 
   List<Range> ranges;
 
@@ -2173,42 +2137,42 @@ err_t String::replace(const StringFilter& filter, const String& after, uint cs, 
   return replace(ranges.getData(), ranges.getLength(), after.getData(), after.getLength());
 }
 
-err_t String::replace(const Range* m, sysuint_t mcount, const Char* after, sysuint_t alen)
+err_t String::replace(const Range* m, size_t mcount, const Char* after, size_t alen)
 {
-  sysuint_t i;
-  sysuint_t pos = 0;
-  sysuint_t len = getLength();
+  size_t i;
+  size_t pos = 0;
+  size_t len = getLength();
   const Char* cur = getData();
 
   // Get total count of characters we remove.
-  sysuint_t mtotal = 0;
+  size_t mtotal = 0;
   for (i = 0; i < mcount; i++)
   {
-    sysuint_t rstart = m[i].getStart();
-    sysuint_t rend = m[i].getEnd();
+    size_t rstart = m[i].getStart();
+    size_t rend = m[i].getEnd();
     if (rstart >= len || rstart >= rend) return ERR_RT_INVALID_ARGUMENT;
 
     mtotal += rend - rstart;
   }
 
   // Get total count of characters we add.
-  sysuint_t atotal = alen * mcount;
+  size_t atotal = alen * mcount;
 
   // Get target length.
-  sysuint_t lenAfter = len - mtotal + atotal;
+  size_t lenAfter = len - mtotal + atotal;
 
-  Data* newd = Data::alloc(lenAfter);
+  StringData* newd = StringData::alloc(lenAfter);
   if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
   Char* p = newd->data;
-  sysuint_t remain = lenAfter;
-  sysuint_t t;
+  size_t remain = lenAfter;
+  size_t t;
 
   // Serialize
   for (i = 0; i < mcount; i++)
   {
-    sysuint_t mstart = m[i].getStart();
-    sysuint_t mend = m[i].getEnd();
+    size_t mstart = m[i].getStart();
+    size_t mend = m[i].getEnd();
 
     // Begin
     t = mstart - pos;
@@ -2251,7 +2215,7 @@ overflow:
 
 err_t String::lower()
 {
-  Data* d = _d;
+  StringData* d = _d;
 
   Char* strCur = d->data;
   Char* strEnd = strCur + d->length;
@@ -2264,7 +2228,7 @@ err_t String::lower()
 
 modify:
   {
-    sysuint_t n = (sysuint_t)(strCur - d->data);
+    size_t n = (size_t)(strCur - d->data);
 
     FOG_RETURN_ON_ERROR(detach());
     d = _d;
@@ -2283,7 +2247,7 @@ modify:
 
 err_t String::upper()
 {
-  Data* d = _d;
+  StringData* d = _d;
 
   Char* strCur = d->data;
   Char* strEnd = strCur + d->length;
@@ -2296,7 +2260,7 @@ err_t String::upper()
 
 modify:
   {
-    sysuint_t n = (sysuint_t)(strCur - d->data);
+    size_t n = (size_t)(strCur - d->data);
 
     FOG_RETURN_ON_ERROR(detach());
     d = _d;
@@ -2333,8 +2297,8 @@ String String::uppered() const
 
 err_t String::trim()
 {
-  Data* d = _d;
-  sysuint_t len = d->length;
+  StringData* d = _d;
+  size_t len = d->length;
 
   if (!len) return ERR_OK;
 
@@ -2346,10 +2310,10 @@ err_t String::trim()
 
   if (strCur != d->data || ++strEnd != d->data + len)
   {
-    len = (sysuint_t)(strEnd - strCur);
+    len = (size_t)(strEnd - strCur);
     if (d->refCount.get() > 1)
     {
-      Data* newd = Data::alloc(len, strCur, len);
+      StringData* newd = StringData::alloc(len, strCur, len);
       if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
       atomicPtrXchg(&_d, newd)->deref();
     }
@@ -2367,8 +2331,8 @@ err_t String::trim()
 
 err_t String::simplify()
 {
-  Data* d = _d;
-  sysuint_t len = d->length;
+  StringData* d = _d;
+  size_t len = d->length;
 
   if (!len) return ERR_OK;
 
@@ -2405,7 +2369,7 @@ simp:
   // to increase reference count if string is detached.
   if (d->refCount.get() > 1)
   {
-    Data* newd = Data::alloc((sysuint_t)(strEnd - strCur));
+    StringData* newd = StringData::alloc((size_t)(strEnd - strCur));
     if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
     _d = newd;
   }
@@ -2431,14 +2395,14 @@ simp:
   return ERR_OK;
 }
 
-err_t String::truncate(sysuint_t n)
+err_t String::truncate(size_t n)
 {
-  Data* d = _d;
+  StringData* d = _d;
   if (d->length <= n) return ERR_OK;
 
   if (d->refCount.get() > 1)
   {
-    Data* newd = Data::alloc(n, d->data, n);
+    StringData* newd = StringData::alloc(n, d->data, n);
     if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
     atomicPtrXchg(&_d, newd)->deref();
   }
@@ -2451,16 +2415,16 @@ err_t String::truncate(sysuint_t n)
   return ERR_OK;
 }
 
-err_t String::justify(sysuint_t n, Char fill, uint32_t flags)
+err_t String::justify(size_t n, Char fill, uint32_t flags)
 {
-  Data* d = _d;
-  sysuint_t length = d->length;
+  StringData* d = _d;
+  size_t length = d->length;
 
   if (n <= length) return ERR_OK;
 
-  sysuint_t t = n - length;
-  sysuint_t left = 0;
-  sysuint_t right = 0;
+  size_t t = n - length;
+  size_t left = 0;
+  size_t right = 0;
 
   if ((flags & JUSTIFY_CENTER) == JUSTIFY_CENTER)
   {
@@ -2496,14 +2460,14 @@ String String::simplified() const
   return t;
 }
 
-String String::truncated(sysuint_t n) const
+String String::truncated(size_t n) const
 {
   String t(*this);
   t.truncate(n);
   return t;
 }
 
-String String::justified(sysuint_t n, Char fill, uint32_t flags) const
+String String::justified(size_t n, Char fill, uint32_t flags) const
 {
   String t(*this);
   t.justify(n, fill, flags);
@@ -2517,7 +2481,7 @@ String String::justified(sysuint_t n, Char fill, uint32_t flags) const
 List<String> String::split(Char ch, uint splitBehavior, uint cs) const
 {
   List<String> result;
-  Data* d = _d;
+  StringData* d = _d;
 
   if (d->length == 0) return result;
 
@@ -2532,7 +2496,7 @@ __caseSensitive:
     {
       if (strCur == strEnd || *strCur == ch)
       {
-        sysuint_t splitLength = (sysuint_t)(strCur - strBeg);
+        size_t splitLength = (size_t)(strCur - strBeg);
         if ((splitLength == 0 && splitBehavior == SPLIT_KEEP_EMPTY_PARTS) || splitLength != 0)
         {
           result.append(String(strBeg, splitLength));
@@ -2554,7 +2518,7 @@ __caseSensitive:
     {
       if (strCur == strEnd || *strCur == cLower || *strCur == cUpper)
       {
-        sysuint_t splitLength = (sysuint_t)(strCur - strBeg);
+        size_t splitLength = (size_t)(strCur - strBeg);
         if ((splitLength == 0 && splitBehavior == SPLIT_KEEP_EMPTY_PARTS) || splitLength != 0)
         {
           result.append(String(strBeg, splitLength));
@@ -2571,7 +2535,7 @@ __caseSensitive:
 
 List<String> String::split(const String& pattern, uint splitBehavior, uint cs) const
 {
-  sysuint_t plen = pattern.getLength();
+  size_t plen = pattern.getLength();
 
   if (!plen)
   {
@@ -2593,18 +2557,18 @@ List<String> String::split(const String& pattern, uint splitBehavior, uint cs) c
 List<String> String::split(const StringFilter& filter, uint splitBehavior, uint cs) const
 {
   List<String> result;
-  Data* d = _d;
+  StringData* d = _d;
 
-  sysuint_t length = d->length;
+  size_t length = d->length;
 
   const Char* strCur = d->data;
   const Char* strEnd = strCur + length;
 
   for (;;)
   {
-    sysuint_t remain = (sysuint_t)(strEnd - strCur);
+    size_t remain = (size_t)(strEnd - strCur);
     Range m = filter.match(strCur, remain, cs, Range(0, remain));
-    sysuint_t splitLength = (m.getStart() != INVALID_INDEX) ? m.getStart() : remain;
+    size_t splitLength = (m.getStart() != INVALID_INDEX) ? m.getStart() : remain;
 
     if ((splitLength == 0 && splitBehavior == SPLIT_KEEP_EMPTY_PARTS) || splitLength != 0)
       result.append(String(strCur, splitLength));
@@ -2627,14 +2591,14 @@ String String::join(const List<String>& seq, const String& separator)
 {
   String result;
 
-  sysuint_t seqLength = 0;
-  sysuint_t sepLength = separator.getLength();
+  size_t seqLength = 0;
+  size_t sepLength = separator.getLength();
 
   List<String>::ConstIterator it(seq);
 
   for (it.toStart(); it.isValid(); it.toNext())
   {
-    sysuint_t len = it.value().getLength();
+    size_t len = it.value().getLength();
 
     // Prevent for possible overflow (shouldn't normally happen)
     if (!it.atStart())
@@ -2657,7 +2621,7 @@ String String::join(const List<String>& seq, const String& separator)
   // Serialize
   for (it.toStart(); it.isValid(); it.toNext())
   {
-    sysuint_t len = it.value().getLength();
+    size_t len = it.value().getLength();
 
     if (!it.atStart())
     {
@@ -2670,7 +2634,7 @@ String String::join(const List<String>& seq, const String& separator)
   }
 
   cur[0] = Char(0);
-  result._d->length = (sysuint_t)(cur - result._d->data);
+  result._d->length = (size_t)(cur - result._d->data);
   return result;
 }
 
@@ -2680,7 +2644,7 @@ String String::join(const List<String>& seq, const String& separator)
 
 String String::substring(const Range& range) const
 {
-  sysuint_t rstart, rend;
+  size_t rstart, rend;
   if (fitToRange(*this, rstart, rend, range))
     return String(Utf16(getData() + rstart, rend - rstart));
   else
@@ -2691,52 +2655,52 @@ String String::substring(const Range& range) const
 // [Fog::String - Conversion]
 // ============================================================================
 
-err_t String::atob(bool* dst, int base, sysuint_t* end, uint32_t* parserFlags) const
+err_t String::atob(bool* dst, int base, size_t* end, uint32_t* parserFlags) const
 {
   return StringUtil::atob(getData(), getLength(), dst, end, parserFlags);
 }
 
-err_t String::atoi8(int8_t* dst, int base, sysuint_t* end, uint32_t* parserFlags) const
+err_t String::atoi8(int8_t* dst, int base, size_t* end, uint32_t* parserFlags) const
 {
   return StringUtil::atoi8(getData(), getLength(), dst, base, end, parserFlags);
 }
 
-err_t String::atou8(uint8_t* dst, int base, sysuint_t* end, uint32_t* parserFlags) const
+err_t String::atou8(uint8_t* dst, int base, size_t* end, uint32_t* parserFlags) const
 {
   return StringUtil::atou8(getData(), getLength(), dst, base, end, parserFlags);
 }
 
-err_t String::atoi16(int16_t* dst, int base, sysuint_t* end, uint32_t* parserFlags) const
+err_t String::atoi16(int16_t* dst, int base, size_t* end, uint32_t* parserFlags) const
 {
   return StringUtil::atoi16(getData(), getLength(), dst, base, end, parserFlags);
 }
 
-err_t String::atou16(uint16_t* dst, int base, sysuint_t* end, uint32_t* parserFlags) const
+err_t String::atou16(uint16_t* dst, int base, size_t* end, uint32_t* parserFlags) const
 {
   return StringUtil::atou16(getData(), getLength(), dst, base, end, parserFlags);
 }
 
-err_t String::atoi32(int32_t* dst, int base, sysuint_t* end, uint32_t* parserFlags) const
+err_t String::atoi32(int32_t* dst, int base, size_t* end, uint32_t* parserFlags) const
 {
   return StringUtil::atoi32(getData(), getLength(), dst, base, end, parserFlags);
 }
 
-err_t String::atou32(uint32_t* dst, int base, sysuint_t* end, uint32_t* parserFlags) const
+err_t String::atou32(uint32_t* dst, int base, size_t* end, uint32_t* parserFlags) const
 {
   return StringUtil::atou32(getData(), getLength(), dst, base, end, parserFlags);
 }
 
-err_t String::atoi64(int64_t* dst, int base, sysuint_t* end, uint32_t* parserFlags) const
+err_t String::atoi64(int64_t* dst, int base, size_t* end, uint32_t* parserFlags) const
 {
   return StringUtil::atoi64(getData(), getLength(), dst, base, end, parserFlags);
 }
 
-err_t String::atou64(uint64_t* dst, int base, sysuint_t* end, uint32_t* parserFlags) const
+err_t String::atou64(uint64_t* dst, int base, size_t* end, uint32_t* parserFlags) const
 {
   return StringUtil::atou64(getData(), getLength(), dst, base, end, parserFlags);
 }
 
-err_t String::atof(float* dst, const Locale* locale, sysuint_t* end, uint32_t* parserFlags) const
+err_t String::atof(float* dst, const Locale* locale, size_t* end, uint32_t* parserFlags) const
 {
   if (locale == NULL) locale = &Locale::posix();
 
@@ -2744,7 +2708,7 @@ err_t String::atof(float* dst, const Locale* locale, sysuint_t* end, uint32_t* p
     locale->getChar(LOCALE_CHAR_DECIMAL_POINT), end, parserFlags);
 }
 
-err_t String::atod(double* dst, const Locale* locale, sysuint_t* end, uint32_t* parserFlags) const
+err_t String::atod(double* dst, const Locale* locale, size_t* end, uint32_t* parserFlags) const
 {
   if (locale == NULL) locale = &Locale::posix();
 
@@ -2759,7 +2723,7 @@ err_t String::atod(double* dst, const Locale* locale, sysuint_t* end, uint32_t* 
 bool String::contains(Char ch,
   uint cs, const Range& range) const
 {
-  sysuint_t rstart, rend;
+  size_t rstart, rend;
   if (fitToRange(*this, rstart, rend, range))
     return StringUtil::indexOf(getData() + rstart, rend - rstart, ch, cs) != INVALID_INDEX;
   else
@@ -2783,23 +2747,23 @@ bool String::contains(const StringFilter& filter,
 // [Fog::String - CountOf]
 // ============================================================================
 
-sysuint_t String::countOf(Char ch,
+size_t String::countOf(Char ch,
   uint cs, const Range& range) const
 {
-  sysuint_t rstart, rend;
+  size_t rstart, rend;
   if (fitToRange(*this, rstart, rend, range))
     return StringUtil::countOf(getData() + rstart, rend - rstart, ch, cs);
   else
     return 0;
 }
 
-sysuint_t String::countOf(const String& pattern,
+size_t String::countOf(const String& pattern,
   uint cs, const Range& range) const
 {
-  sysuint_t rstart, rend;
+  size_t rstart, rend;
   if (!fitToRange(*this, rstart, rend, range)) return 0;
 
-  sysuint_t len = pattern.getLength();
+  size_t len = pattern.getLength();
   if (len == 0) return 0;
   if (len == 1) return countOf(pattern.getAt(0), cs, range);
 
@@ -2817,11 +2781,11 @@ sysuint_t String::countOf(const String& pattern,
     const Char* aStr = getData();
     const Char* bStr = pattern.getData();
 
-    sysuint_t count = 0;
+    size_t count = 0;
 
     for (;;)
     {
-      sysuint_t i = StringUtil::indexOf(aStr + rstart, rend - rstart, bStr, len);
+      size_t i = StringUtil::indexOf(aStr + rstart, rend - rstart, bStr, len);
       if (i == INVALID_INDEX) break;
       rstart += i;
 
@@ -2833,15 +2797,15 @@ sysuint_t String::countOf(const String& pattern,
   }
 }
 
-sysuint_t String::countOf(const StringFilter& filter,
+size_t String::countOf(const StringFilter& filter,
   uint cs, const Range& range) const
 {
-  sysuint_t rstart, rend;
+  size_t rstart, rend;
   if (!fitToRange(*this, rstart, rend, range)) return 0;
 
   const Char* str = getData();
-  sysuint_t len = getLength();
-  sysuint_t count = 0;
+  size_t len = getLength();
+  size_t count = 0;
 
   for (;;)
   {
@@ -2859,23 +2823,23 @@ sysuint_t String::countOf(const StringFilter& filter,
 // [Fog::String - IndexOf / LastIndexOf]
 // ============================================================================
 
-sysuint_t String::indexOf(Char ch,
+size_t String::indexOf(Char ch,
   uint cs, const Range& range) const
 {
-  sysuint_t rstart, rend;
+  size_t rstart, rend;
   if (!fitToRange(*this, rstart, rend, range)) return INVALID_INDEX;
 
-  sysuint_t i = StringUtil::indexOf(getData() + rstart, rend - rstart, ch, cs);
+  size_t i = StringUtil::indexOf(getData() + rstart, rend - rstart, ch, cs);
   return i != INVALID_INDEX ? i + rstart : i;
 }
 
-sysuint_t String::indexOf(const String& pattern,
+size_t String::indexOf(const String& pattern,
   uint cs, const Range& range) const
 {
-  sysuint_t rstart, rend;
+  size_t rstart, rend;
   if (!fitToRange(*this, rstart, rend, range)) return INVALID_INDEX;
 
-  sysuint_t len = pattern.getLength();
+  size_t len = pattern.getLength();
   if (len == 0) return INVALID_INDEX;
   if (len == 1) return indexOf(pattern.getAt(0), cs, range);
 
@@ -2890,38 +2854,38 @@ sysuint_t String::indexOf(const String& pattern,
   else
   {
     // Match using naive algorithm.
-    sysuint_t i = StringUtil::indexOf(getData() + rstart, rend - rstart, pattern.getData(), len, cs);
+    size_t i = StringUtil::indexOf(getData() + rstart, rend - rstart, pattern.getData(), len, cs);
     return (i == INVALID_INDEX) ? i : i + rstart;
   }
 }
 
-sysuint_t String::indexOf(const StringFilter& filter,
+size_t String::indexOf(const StringFilter& filter,
   uint cs, const Range& range) const
 {
-  sysuint_t rstart, rend;
+  size_t rstart, rend;
   if (!fitToRange(*this, rstart, rend, range)) return INVALID_INDEX;
 
   Range m = filter.match(getData(), getLength(), cs, Range(rstart, rend));
   return m.getStart();
 }
 
-sysuint_t String::lastIndexOf(Char ch,
+size_t String::lastIndexOf(Char ch,
   uint cs, const Range& range) const
 {
-  sysuint_t rstart, rend;
+  size_t rstart, rend;
   if (!fitToRange(*this, rstart, rend, range)) return INVALID_INDEX;
 
-  sysuint_t i = StringUtil::lastIndexOf(getData() + rstart, rend - rstart, ch, cs);
+  size_t i = StringUtil::lastIndexOf(getData() + rstart, rend - rstart, ch, cs);
   return i != INVALID_INDEX ? i + rstart : i;
 }
 
-sysuint_t String::lastIndexOf(const String& pattern,
+size_t String::lastIndexOf(const String& pattern,
   uint cs, const Range& range) const
 {
-  sysuint_t rstart, rend;
+  size_t rstart, rend;
   if (!fitToRange(*this, rstart, rend, range)) return INVALID_INDEX;
 
-  sysuint_t len = pattern.getLength();
+  size_t len = pattern.getLength();
   if (len == 0) return INVALID_INDEX;
   if (len == 1) return lastIndexOf(pattern.getAt(0), cs, range);
 
@@ -2939,11 +2903,11 @@ sysuint_t String::lastIndexOf(const String& pattern,
     const Char* aData = getData();
     const Char* bData = pattern.getData();
 
-    sysuint_t result = INVALID_INDEX;
+    size_t result = INVALID_INDEX;
 
     for (;;)
     {
-      sysuint_t i = StringUtil::indexOf(aData + rstart, rend - rstart, bData, len);
+      size_t i = StringUtil::indexOf(aData + rstart, rend - rstart, bData, len);
       if (i == INVALID_INDEX) break;
 
       result = i + rstart;
@@ -2953,13 +2917,13 @@ sysuint_t String::lastIndexOf(const String& pattern,
   }
 }
 
-sysuint_t String::lastIndexOf(const StringFilter& filter,
+size_t String::lastIndexOf(const StringFilter& filter,
   uint cs, const Range& range) const
 {
-  sysuint_t rstart, rend;
+  size_t rstart, rend;
   if (!fitToRange(*this, rstart, rend, range)) return INVALID_INDEX;
 
-  sysuint_t result = INVALID_INDEX;
+  size_t result = INVALID_INDEX;
 
   for (;;)
   {
@@ -2977,21 +2941,21 @@ sysuint_t String::lastIndexOf(const StringFilter& filter,
 // [Fog::String - IndexOfAny / LastIndexOfAny]
 // ============================================================================
 
-sysuint_t String::indexOfAny(const Char* chars, sysuint_t numChars, uint cs, const Range& range) const
+size_t String::indexOfAny(const Char* chars, size_t numChars, uint cs, const Range& range) const
 {
-  sysuint_t rstart, rend;
+  size_t rstart, rend;
   if (!chars || !fitToRange(*this, rstart, rend, range)) return INVALID_INDEX;
 
-  sysuint_t i = StringUtil::indexOfAny(getData() + rstart, rend - rstart, chars, numChars, cs);
+  size_t i = StringUtil::indexOfAny(getData() + rstart, rend - rstart, chars, numChars, cs);
   return i != INVALID_INDEX ? i + rstart : i;
 }
 
-sysuint_t String::lastIndexOfAny(const Char* chars, sysuint_t numChars, uint cs, const Range& range) const
+size_t String::lastIndexOfAny(const Char* chars, size_t numChars, uint cs, const Range& range) const
 {
-  sysuint_t rstart, rend;
+  size_t rstart, rend;
   if (!chars || !fitToRange(*this, rstart, rend, range)) return INVALID_INDEX;
 
-  sysuint_t i = StringUtil::lastIndexOfAny(getData() + rstart, rend - rstart, chars, numChars, cs);
+  size_t i = StringUtil::lastIndexOfAny(getData() + rstart, rend - rstart, chars, numChars, cs);
   return i != INVALID_INDEX ? i + rstart : i;
 }
 
@@ -3002,7 +2966,7 @@ sysuint_t String::lastIndexOfAny(const Char* chars, sysuint_t numChars, uint cs,
 bool String::startsWith(const Ascii8& str, uint cs) const
 {
   const char* sData = str.getData();
-  sysuint_t sLength = str.getComputedLength();
+  size_t sLength = str.getComputedLength();
 
   return getLength() >= sLength && StringUtil::eq(getData(), sData, sLength, cs);
 }
@@ -3010,7 +2974,7 @@ bool String::startsWith(const Ascii8& str, uint cs) const
 bool String::startsWith(const Utf16& str, uint cs) const
 {
   const Char* sData = str.getData();
-  sysuint_t sLength = str.getComputedLength();
+  size_t sLength = str.getComputedLength();
 
   return getLength() >= sLength && StringUtil::eq(getData(), sData, sLength, cs);
 }
@@ -3023,7 +2987,7 @@ bool String::startsWith(const String& str, uint cs) const
 
 bool String::startsWith(const StringFilter& filter, uint cs) const
 {
-  sysuint_t flen = filter.getLength();
+  size_t flen = filter.getLength();
 
   if (flen == INVALID_INDEX) flen = getLength();
   return filter.match(getData(), getLength(), cs, Range(0, flen)).getStart() == 0;
@@ -3032,7 +2996,7 @@ bool String::startsWith(const StringFilter& filter, uint cs) const
 bool String::endsWith(const Ascii8& str, uint cs) const
 {
   const char* sData = str.getData();
-  sysuint_t sLength = str.getComputedLength();
+  size_t sLength = str.getComputedLength();
 
   return getLength() >= sLength && StringUtil::eq(getData() + getLength() - sLength, sData, sLength, cs);
 }
@@ -3040,7 +3004,7 @@ bool String::endsWith(const Ascii8& str, uint cs) const
 bool String::endsWith(const Utf16& str, uint cs) const
 {
   const Char* sData = str.getData();
-  sysuint_t sLength = str.getComputedLength();
+  size_t sLength = str.getComputedLength();
 
   return getLength() >= sLength && StringUtil::eq(getData() + getLength() - sLength, sData, sLength, cs);
 }
@@ -3052,12 +3016,12 @@ bool String::endsWith(const String& str, uint cs) const
 
 bool String::endsWith(const StringFilter& filter, uint cs) const
 {
-  sysuint_t flen = filter.getLength();
+  size_t flen = filter.getLength();
 
   if (flen == INVALID_INDEX)
   {
-    sysuint_t i = 0;
-    sysuint_t len = getLength();
+    size_t i = 0;
+    size_t len = getLength();
 
     for (;;)
     {
@@ -3084,7 +3048,7 @@ err_t String::bswap()
 
   FOG_RETURN_ON_ERROR(detach());
 
-  sysuint_t i, len = getLength();
+  size_t i, len = getLength();
   Char* ch = _d->data;
   for (i = 0; i < len; i++) ch[i].bswap();
 
@@ -3098,8 +3062,8 @@ err_t String::bswap()
 
 bool String::eq(const String* a, const String* b)
 {
-  sysuint_t alen = a->getLength();
-  sysuint_t blen = b->getLength();
+  size_t alen = a->getLength();
+  size_t blen = b->getLength();
   if (alen != blen) return false;
 
   return StringUtil::eq(a->getData(), b->getData(), alen, CASE_SENSITIVE);
@@ -3107,8 +3071,8 @@ bool String::eq(const String* a, const String* b)
 
 bool String::ieq(const String* a, const String* b)
 {
-  sysuint_t alen = a->getLength();
-  sysuint_t blen = b->getLength();
+  size_t alen = a->getLength();
+  size_t blen = b->getLength();
   if (alen != blen) return false;
 
   return StringUtil::eq(a->getData(), b->getData(), alen, CASE_INSENSITIVE);
@@ -3116,8 +3080,8 @@ bool String::ieq(const String* a, const String* b)
 
 int String::compare(const String* a, const String* b)
 {
-  sysuint_t aLen = a->getLength();
-  sysuint_t bLen = b->getLength();
+  size_t aLen = a->getLength();
+  size_t bLen = b->getLength();
   const Char* aCur = a->getData();
   const Char* bCur = b->getData();
   const Char* aEnd = aCur + aLen;
@@ -3134,8 +3098,8 @@ int String::compare(const String* a, const String* b)
 
 int String::icompare(const String* a, const String* b)
 {
-  sysuint_t aLen = a->getLength();
-  sysuint_t bLen = b->getLength();
+  size_t aLen = a->getLength();
+  size_t bLen = b->getLength();
   const Char* aCur = a->getData();
   const Char* bCur = b->getData();
   const Char* aEnd = aCur + aLen;
@@ -3152,7 +3116,7 @@ int String::icompare(const String* a, const String* b)
 
 bool String::eq(const Ascii8& other, uint cs) const
 {
-  sysuint_t len = other.getLength();
+  size_t len = other.getLength();
   if (len == DETECT_LENGTH)
   {
     const Char* aCur = getData();
@@ -3160,7 +3124,7 @@ bool String::eq(const Ascii8& other, uint cs) const
 
     if (cs == CASE_SENSITIVE)
     {
-      for (sysuint_t i = getLength(); i; i--, aCur++, bCur++)
+      for (size_t i = getLength(); i; i--, aCur++, bCur++)
       {
         if (!bCur) return false;
         if (*aCur != *bCur) return false;
@@ -3168,7 +3132,7 @@ bool String::eq(const Ascii8& other, uint cs) const
     }
     else
     {
-      for (sysuint_t i = getLength(); i; i--, aCur++, bCur++)
+      for (size_t i = getLength(); i; i--, aCur++, bCur++)
       {
         if (!bCur) return false;
         if (aCur->toLower() != Byte::toLower(*bCur)) return false;
@@ -3182,7 +3146,7 @@ bool String::eq(const Ascii8& other, uint cs) const
 
 bool String::eq(const Utf16& other, uint cs) const
 {
-  sysuint_t len = other.getLength();
+  size_t len = other.getLength();
   if (len == DETECT_LENGTH)
   {
     const Char* aCur = getData();
@@ -3190,7 +3154,7 @@ bool String::eq(const Utf16& other, uint cs) const
 
     if (cs == CASE_SENSITIVE)
     {
-      for (sysuint_t i = getLength(); i; i--, aCur++, bCur++)
+      for (size_t i = getLength(); i; i--, aCur++, bCur++)
       {
         if (FOG_UNLIKELY(bCur->ch() == 0)) return false;
         if (*aCur != *bCur) return false;
@@ -3198,7 +3162,7 @@ bool String::eq(const Utf16& other, uint cs) const
     }
     else
     {
-      for (sysuint_t i = getLength(); i; i--, aCur++, bCur++)
+      for (size_t i = getLength(); i; i--, aCur++, bCur++)
       {
         if (FOG_UNLIKELY(bCur->ch() == 0)) return false;
         if (aCur->toLower().ch() != bCur->toLower().ch()) return false;
@@ -3218,8 +3182,8 @@ bool String::eq(const String& other, uint cs) const
 
 int String::compare(const Ascii8& other, uint cs) const
 {
-  sysuint_t aLen = getLength();
-  sysuint_t bLen = other.getLength();
+  size_t aLen = getLength();
+  size_t bLen = other.getLength();
   const Char* aCur = getData();
   const Char* aEnd = aCur + aLen;
   const char* bCur = other.getData();
@@ -3270,8 +3234,8 @@ int String::compare(const Ascii8& other, uint cs) const
 
 int String::compare(const Utf16& other, uint cs) const
 {
-  sysuint_t aLen = getLength();
-  sysuint_t bLen = other.getLength();
+  size_t aLen = getLength();
+  size_t bLen = other.getLength();
   const Char* aCur = getData();
   const Char* aEnd = aCur + aLen;
   const Char* bCur = other.getData();
@@ -3322,8 +3286,8 @@ int String::compare(const Utf16& other, uint cs) const
 
 int String::compare(const String& other, uint cs) const
 {
-  sysuint_t aLen = getLength();
-  sysuint_t bLen = other.getLength();
+  size_t aLen = getLength();
+  size_t bLen = other.getLength();
   const Char* aCur = getData();
   const Char* aEnd = aCur + aLen;
   const Char* bCur = other.getData();
@@ -3349,12 +3313,12 @@ int String::compare(const String& other, uint cs) const
 // [Fog::String::Utf16]
 // ============================================================================
 
-err_t String::validateUtf16(sysuint_t* invalidPos) const
+err_t String::validateUtf16(size_t* invalidPos) const
 {
   return StringUtil::validateUtf16(getData(), getLength());
 }
 
-err_t String::getNumUtf16Chars(sysuint_t* charsCount) const
+err_t String::getNumUtf16Chars(size_t* charsCount) const
 {
   return StringUtil::getNumUtf16Chars(getData(), getLength(), charsCount);
 }
@@ -3386,29 +3350,16 @@ uint32_t String::getHashCode() const
 }
 
 // ============================================================================
-// [Fog::String::Data]
+// [Fog::StringData]
 // ============================================================================
 
-String::Data* String::Data::ref() const
+StringData* StringData::adopt(void* address, size_t capacity)
 {
-  if ((flags & IsSharable) != 0)
-    return refAlways();
-  else
-    return copy(this);
-}
+  if (capacity == 0) return String::_dnull->ref();
 
-void String::Data::deref()
-{
-  derefInline();
-}
-
-String::Data* String::Data::adopt(void* address, sysuint_t capacity)
-{
-  if (capacity == 0) return String::_dnull->refAlways();
-
-  Data* d = (Data*)address;
+  StringData* d = (StringData*)address;
   d->refCount.init(1);
-  d->flags = 0;
+  d->flags = CONTAINER_DATA_STATIC;
   d->hashCode = 0;
   d->length = 0;
   d->capacity = capacity;
@@ -3417,13 +3368,13 @@ String::Data* String::Data::adopt(void* address, sysuint_t capacity)
   return d;
 }
 
-String::Data* String::Data::adopt(void* address, sysuint_t capacity, const char* str, sysuint_t length)
+StringData* StringData::adopt(void* address, size_t capacity, const char* str, size_t length)
 {
   if (length == DETECT_LENGTH) length = StringUtil::len(str);
 
   if (length <= capacity)
   {
-    Data* d = adopt(address, capacity);
+    StringData* d = adopt(address, capacity);
     d->length = length;
     StringUtil::copy(d->data, str, length);
     d->data[length] = 0;
@@ -3435,13 +3386,13 @@ String::Data* String::Data::adopt(void* address, sysuint_t capacity, const char*
   }
 }
 
-String::Data* String::Data::adopt(void* address, sysuint_t capacity, const Char* str, sysuint_t length)
+StringData* StringData::adopt(void* address, size_t capacity, const Char* str, size_t length)
 {
   if (length == DETECT_LENGTH) length = StringUtil::len(str);
 
   if (length <= capacity)
   {
-    Data* d = adopt(address, capacity);
+    StringData* d = adopt(address, capacity);
     d->length = length;
     StringUtil::copy(d->data, str, length);
     d->data[length] = Char(0);
@@ -3453,19 +3404,19 @@ String::Data* String::Data::adopt(void* address, sysuint_t capacity, const Char*
   }
 }
 
-String::Data* String::Data::alloc(sysuint_t capacity)
+StringData* StringData::alloc(size_t capacity)
 {
-  if (capacity == 0) return String::_dnull->refAlways();
+  if (capacity == 0) return String::_dnull->ref();
 
   // Pad to 16 bytes (8 chars).
   capacity = (capacity + 7) & ~7;
 
-  sysuint_t dsize = sizeFor(capacity);
-  Data* d = (Data *)Memory::alloc(dsize);
+  size_t dsize = sizeFor(capacity);
+  StringData* d = (StringData *)Memory::alloc(dsize);
   if (FOG_IS_NULL(d)) return NULL;
 
   d->refCount.init(1);
-  d->flags = IsDynamic | IsSharable;
+  d->flags = NO_FLAGS;
   d->hashCode = 0;
   d->capacity = capacity;
   d->length = 0;
@@ -3473,14 +3424,14 @@ String::Data* String::Data::alloc(sysuint_t capacity)
   return d;
 }
 
-String::Data* String::Data::alloc(sysuint_t capacity, const char* str, sysuint_t length)
+StringData* StringData::alloc(size_t capacity, const char* str, size_t length)
 {
   if (length == DETECT_LENGTH) length = StringUtil::len(str);
   if (length > capacity) capacity = length;
 
-  if (capacity == 0) return String::_dnull->refAlways();
+  if (capacity == 0) return String::_dnull->ref();
 
-  Data* d = alloc(capacity);
+  StringData* d = alloc(capacity);
   if (FOG_IS_NULL(d)) return NULL;
 
   d->length = length;
@@ -3490,14 +3441,14 @@ String::Data* String::Data::alloc(sysuint_t capacity, const char* str, sysuint_t
   return d;
 }
 
-String::Data* String::Data::alloc(sysuint_t capacity, const Char* str, sysuint_t length)
+StringData* StringData::alloc(size_t capacity, const Char* str, size_t length)
 {
   if (length == DETECT_LENGTH) length = StringUtil::len(str);
   if (length > capacity) capacity = length;
 
-  if (capacity == 0) return String::_dnull->refAlways();
+  if (capacity == 0) return String::_dnull->ref();
 
-  Data* d = alloc(capacity);
+  StringData* d = alloc(capacity);
   if (FOG_IS_NULL(d)) return NULL;
 
   d->length = length;
@@ -3507,42 +3458,33 @@ String::Data* String::Data::alloc(sysuint_t capacity, const Char* str, sysuint_t
   return d;
 }
 
-String::Data* String::Data::realloc(Data* d, sysuint_t capacity)
+StringData* StringData::realloc(StringData* d, size_t capacity)
 {
   FOG_ASSERT(capacity >= d->length);
 
-  sysuint_t dsize = String::Data::sizeFor(capacity);
-
-  if ((d->flags & String::Data::IsDynamic) != 0)
+  size_t dsize = StringData::sizeFor(capacity);
+  if ((d->flags & CONTAINER_DATA_STATIC) == 0)
   {
-    if ((d = (Data *)Memory::realloc((void*)d, dsize)) != NULL)
-    {
+    if ((d = (StringData *)Memory::realloc((void*)d, dsize)) != NULL)
       d->capacity = capacity;
-    }
+    return d;
   }
   else
   {
-    Data* newd = alloc(capacity, d->data, d->length);
+    StringData* newd = alloc(capacity, d->data, d->length);
     if (FOG_IS_NULL(newd)) return NULL;
 
     d->deref();
-    d = newd;
+    return newd;
   }
-
-  return d;
 }
 
-String::Data* String::Data::copy(const Data* d)
+StringData* StringData::copy(const StringData* d)
 {
   return alloc(0, d->data, d->length);
 }
 
-void String::Data::free(Data* d)
-{
-  Memory::free((void*)d);
-}
-
-Static<String::Data> String::_dnull;
+Static<StringData> String::_dnull;
 
 // ============================================================================
 // [Fog::Core - Library Initializers]
@@ -3550,9 +3492,9 @@ Static<String::Data> String::_dnull;
 
 FOG_NO_EXPORT void _core_string_init(void)
 {
-  String::Data* d = String::_dnull.instancep();
+  StringData* d = String::_dnull.instancep();
   d->refCount.init(1);
-  d->flags |= String::Data::IsSharable;
+  d->flags = NO_FLAGS;
   d->hashCode = 0;
   d->capacity = 0;
   d->length = 0;

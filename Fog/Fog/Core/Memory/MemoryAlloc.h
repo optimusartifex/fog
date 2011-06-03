@@ -39,17 +39,17 @@ namespace Memory {
 // [Fog::Memory - Alloc / Free]
 // ============================================================================
 
-static FOG_INLINE void* alloc(sysuint_t size)
+static FOG_INLINE void* alloc(size_t size)
 {
   return _core.memory.alloc(size);
 }
 
-static FOG_INLINE void* calloc(sysuint_t size)
+static FOG_INLINE void* calloc(size_t size)
 {
   return _core.memory.calloc(size);
 }
 
-static FOG_INLINE void* realloc(void* addr, sysuint_t size)
+static FOG_INLINE void* realloc(void* addr, size_t size)
 {
   return _core.memory.realloc(addr, size);
 }
@@ -84,7 +84,7 @@ static FOG_INLINE err_t unregisterCleanupHandler(MemoryCleanupHandlerFn handler,
 } // Fog namespace
 
 #if !defined(FOG_USE_STDNEW)
-static FOG_INLINE void* _fog_memory_alloc(sysuint_t size) { return Fog::Memory::alloc(size); }
+static FOG_INLINE void* _fog_memory_alloc(size_t size) { return Fog::Memory::alloc(size); }
 static FOG_INLINE void _fog_memory_free(void* addr) { return Fog::Memory::free(addr); }
 #endif
 

@@ -87,10 +87,10 @@ struct FOG_API Thread
   //! Specifies the maximum stack size that the thread is allowed to use.
   //! This does not necessarily correspond to the thread's initial stack size.
   //! A value of 0 indicates that the default maximum should be used.
-  void setStackSize(sysuint_t ssize);
+  void setStackSize(size_t ssize);
 
   //! @brief Get thread stack size (0 means default).
-  FOG_INLINE sysuint_t getStackSize() const { return _stackSize; }
+  FOG_INLINE size_t getStackSize() const { return _stackSize; }
 
   err_t setAffinity(int mask);
   err_t resetAffinity();
@@ -190,7 +190,7 @@ struct FOG_API Thread
   //! NOTE: When you are done with the thread handle, you must call join() to
   //! release system resources associated with the thread. You must ensure that
   //! the Delegate object outlives the thread.
-  static bool _create(sysuint_t stackSize, Thread* thread);
+  static bool _create(size_t stackSize, Thread* thread);
 
   //! @brief Joins with a thread created via the create() function. This
   //! function blocks the caller until the designated thread exits. This
@@ -239,7 +239,7 @@ protected:
   String _name;
 
   //! Stack size.
-  sysuint_t _stackSize;
+  size_t _stackSize;
 
   //! Used to pass data to threadMain. This structure is allocated on the stack
   //! from within start().

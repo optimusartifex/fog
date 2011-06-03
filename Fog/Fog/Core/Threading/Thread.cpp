@@ -23,9 +23,11 @@
 #include <Fog/Core/System/Application.h>
 #include <Fog/Core/System/Event.h>
 #include <Fog/Core/System/Object.h>
+#include <Fog/Core/Threading/Lazy.h>
 #include <Fog/Core/Threading/Thread.h>
 #include <Fog/Core/Threading/ThreadLocalStorage.h>
-#include <Fog/Core/Tools/Lazy.h>
+#include <Fog/Core/Tools/ByteArray.h>
+#include <Fog/Core/Tools/ByteArrayTmp_p.h>
 #include <Fog/Core/Tools/TextCodec.h>
 
 #if defined(FOG_OS_WINDOWS)
@@ -120,7 +122,7 @@ void Thread::_setName(const String& name)
   if (!::IsDebuggerPresent()) return;
 
   ByteArrayTmp<256> t;
-  TextCodec::local8().appendFromUnicode(t, name);
+  TextCodec::local8().encode(t, name, NULL);
 
   THREADNAME_INFO info;
   info.dwType = 0x1000;
@@ -131,7 +133,7 @@ void Thread::_setName(const String& name)
   __setThreadName(&info);
 }
 
-bool Thread::_create(sysuint_t stackSize, Thread* thread)
+bool Thread::_create(size_t stackSize, Thread* thread)
 {
   uint flags = 0;
   if (stackSize > 0 && OS::getWindowsVersion() >= OS::WIN_VERSION_XP)
@@ -207,7 +209,7 @@ void Thread::_setName(const String& name)
   // consolation prize.)
 }
 
-bool Thread::_create(sysuint_t stackSize, Thread* thread)
+bool Thread::_create(size_t stackSize, Thread* thread)
 {
   bool success = false;
   pthread_attr_t attributes;
@@ -256,7 +258,7 @@ Thread::~Thread()
   stop();
 }
 
-void Thread::setStackSize(sysuint_t ssize)
+void Thread::setStackSize(size_t ssize)
 {
   _stackSize = ssize;
 }

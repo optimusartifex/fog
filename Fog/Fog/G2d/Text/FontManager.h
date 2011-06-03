@@ -64,7 +64,7 @@ struct FOG_API FontManagerData
   // --------------------------------------------------------------------------
 
   //! @brief Reference count.
-  mutable Atomic<sysuint_t> refCount;
+  mutable Atomic<size_t> refCount;
 
   //! @brief List of font providers associated with this font-manager data.
   List<FontProvider> providers;

@@ -12,37 +12,7 @@
 #define _FOG_XML_H
 
 // ============================================================================
-// [Fog-Xml Documentation]
-// ============================================================================
-
-#if defined(FOG_DOXYGEN)
-//! @defgroup Fog_Xml_Public Fog-Xml
-//!
-//! Public classes and functions related to Fog-Xml library.
-
-
-
-//! @defgroup Fog_Xml_Constants Constants
-//! @ingroup Fog_Xml_Public
-
-
-
-//! @defgroup Fog_Xml_Dom Xml-DOM
-//! @ingroup Fog_Xml_Public
-
-
-
-//! @defgroup Fog_Xml_IO Xml-IO
-//! @ingroup Fog_Xml_Public
-
-
-
-//! @defgroup Fog_Xml_Util Xml-Util
-//! @ingroup Fog_Xml_Public
-#endif // FOG_DOXYGEN
-
-// ============================================================================
-// [Fog-Xml Include Files]
+// [Fog-Xml]
 // ============================================================================
 
 #include <Fog/Core/Config/Config.h>

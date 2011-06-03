@@ -1759,7 +1759,7 @@ err_t FOG_CDECL RasterPainterImpl_::setSourceArgb32(Painter& self, uint32_t argb
   engine->source.color.initCustom1(Argb32(argb32));
   Face::p32PRGB32FromARGB32(engine->ctx.solid.prgb32.p32, argb32);
 
-  engine->ctx.pc = (RenderPatternContext*)(sysuint_t)0x1;
+  engine->ctx.pc = (RenderPatternContext*)(size_t)0x1;
   if (engine->ctx.precision == IMAGE_PRECISION_BYTE) return ERR_OK;
 
   Face::p64PRGB64FromPRGB32(engine->ctx.solid.prgb64.p64, engine->ctx.solid.prgb32.p32);
@@ -1778,7 +1778,7 @@ err_t FOG_CDECL RasterPainterImpl_::setSourceArgb64(Painter& self, const Argb64&
   engine->source.color.initCustom1(argb64);
   Face::p64PRGB64FromARGB64(engine->ctx.solid.prgb64.p64, argb64.p64);
 
-  engine->ctx.pc = (RenderPatternContext*)(sysuint_t)0x1;
+  engine->ctx.pc = (RenderPatternContext*)(size_t)0x1;
   if (engine->ctx.precision == IMAGE_PRECISION_WORD) return ERR_OK;
 
   Face::p64PRGB32FromPRGB64(engine->ctx.solid.prgb32.p32, engine->ctx.solid.prgb64.p64);
@@ -1796,7 +1796,7 @@ err_t FOG_CDECL RasterPainterImpl_::setSourceColor(Painter& self, const Color& c
 
   engine->sourceType = PATTERN_TYPE_COLOR;
   engine->source.color.initCustom1(color);
-  engine->ctx.pc = (RenderPatternContext*)(sysuint_t)0x1;
+  engine->ctx.pc = (RenderPatternContext*)(size_t)0x1;
 
   if (engine->ctx.precision == IMAGE_PRECISION_BYTE)
   {
@@ -1813,7 +1813,7 @@ err_t FOG_CDECL RasterPainterImpl_::setSourceColor(Painter& self, const Color& c
 _Invalid:
   engine->sourceType = PATTERN_TYPE_NONE;
   engine->masterFlags |= RASTER_NO_PAINT_SOURCE;
-  engine->ctx.pc = (RenderPatternContext*)(sysuint_t)0x1;
+  engine->ctx.pc = (RenderPatternContext*)(size_t)0x1;
   return ERR_OK;
 }
 
@@ -1829,7 +1829,7 @@ err_t FOG_CDECL RasterPainterImpl_::setSourcePatternF(Painter& self, const Patte
 
       engine->sourceType = PATTERN_TYPE_NONE;
       engine->masterFlags |= RASTER_NO_PAINT_SOURCE;
-      engine->ctx.pc = (RenderPatternContext*)(sysuint_t)0x1;
+      engine->ctx.pc = (RenderPatternContext*)(size_t)0x1;
       return ERR_OK;
 
     case PATTERN_TYPE_COLOR:
@@ -1860,7 +1860,7 @@ err_t FOG_CDECL RasterPainterImpl_::setSourcePatternD(Painter& self, const Patte
 
       engine->sourceType = PATTERN_TYPE_NONE;
       engine->masterFlags |= RASTER_NO_PAINT_SOURCE;
-      engine->ctx.pc = (RenderPatternContext*)(sysuint_t)0x1;
+      engine->ctx.pc = (RenderPatternContext*)(size_t)0x1;
       return ERR_OK;
 
     case PATTERN_TYPE_COLOR:
@@ -1969,7 +1969,7 @@ err_t FOG_CDECL RasterPainterImpl_::setSourceAbstract(Painter& self, uint32_t so
 _Invalid:
   engine->sourceType = PATTERN_TYPE_NONE;
   engine->masterFlags |= RASTER_NO_PAINT_SOURCE;
-  engine->ctx.pc = (RenderPatternContext*)(sysuint_t)0x1;
+  engine->ctx.pc = (RenderPatternContext*)(size_t)0x1;
   return ERR_OK;
 
 _HasTransform:
@@ -2188,7 +2188,7 @@ err_t FOG_CDECL RasterPainterImpl_::restore(Painter& self)
         // ... Fall through ...
 
       case PATTERN_TYPE_NONE:
-        engine->ctx.pc = (RenderPatternContext*)(sysuint_t)(0x1);
+        engine->ctx.pc = (RenderPatternContext*)(size_t)(0x1);
         break;
 
       case PATTERN_TYPE_TEXTURE:
@@ -3039,13 +3039,13 @@ struct RasterPainterImpl : public RasterPainterImpl_
   static err_t FOG_CDECL drawRectF(Painter& self, const RectF& r);
   static err_t FOG_CDECL drawRectD(Painter& self, const RectD& r);
 
-  static err_t FOG_CDECL drawPolylineI(Painter& self, const PointI* p, sysuint_t count);
-  static err_t FOG_CDECL drawPolylineF(Painter& self, const PointF* p, sysuint_t count);
-  static err_t FOG_CDECL drawPolylineD(Painter& self, const PointD* p, sysuint_t count);
+  static err_t FOG_CDECL drawPolylineI(Painter& self, const PointI* p, size_t count);
+  static err_t FOG_CDECL drawPolylineF(Painter& self, const PointF* p, size_t count);
+  static err_t FOG_CDECL drawPolylineD(Painter& self, const PointD* p, size_t count);
 
-  static err_t FOG_CDECL drawPolygonI(Painter& self, const PointI* p, sysuint_t count);
-  static err_t FOG_CDECL drawPolygonF(Painter& self, const PointF* p, sysuint_t count);
-  static err_t FOG_CDECL drawPolygonD(Painter& self, const PointD* p, sysuint_t count);
+  static err_t FOG_CDECL drawPolygonI(Painter& self, const PointI* p, size_t count);
+  static err_t FOG_CDECL drawPolygonF(Painter& self, const PointF* p, size_t count);
+  static err_t FOG_CDECL drawPolygonD(Painter& self, const PointD* p, size_t count);
 
   static err_t FOG_CDECL drawShapeF(Painter& self, uint32_t shapeType, const void* shapeData);
   static err_t FOG_CDECL drawShapeD(Painter& self, uint32_t shapeType, const void* shapeData);
@@ -3063,13 +3063,13 @@ struct RasterPainterImpl : public RasterPainterImpl_
   static err_t FOG_CDECL fillRectF(Painter& self, const RectF& r);
   static err_t FOG_CDECL fillRectD(Painter& self, const RectD& r);
 
-  static err_t FOG_CDECL fillRectsI(Painter& self, const RectI* r, sysuint_t count);
-  static err_t FOG_CDECL fillRectsF(Painter& self, const RectF* r, sysuint_t count);
-  static err_t FOG_CDECL fillRectsD(Painter& self, const RectD* r, sysuint_t count);
+  static err_t FOG_CDECL fillRectsI(Painter& self, const RectI* r, size_t count);
+  static err_t FOG_CDECL fillRectsF(Painter& self, const RectF* r, size_t count);
+  static err_t FOG_CDECL fillRectsD(Painter& self, const RectD* r, size_t count);
 
-  static err_t FOG_CDECL fillPolygonI(Painter& self, const PointI* p, sysuint_t count);
-  static err_t FOG_CDECL fillPolygonF(Painter& self, const PointF* p, sysuint_t count);
-  static err_t FOG_CDECL fillPolygonD(Painter& self, const PointD* p, sysuint_t count);
+  static err_t FOG_CDECL fillPolygonI(Painter& self, const PointI* p, size_t count);
+  static err_t FOG_CDECL fillPolygonF(Painter& self, const PointF* p, size_t count);
+  static err_t FOG_CDECL fillPolygonD(Painter& self, const PointD* p, size_t count);
 
   static err_t FOG_CDECL fillShapeF(Painter& self, uint32_t shapeType, const void* shapeData);
   static err_t FOG_CDECL fillShapeD(Painter& self, uint32_t shapeType, const void* shapeData);
@@ -3123,13 +3123,13 @@ struct RasterPainterImpl : public RasterPainterImpl_
   static err_t FOG_CDECL clipRectF(Painter& self, uint32_t clipOp, const RectF& r);
   static err_t FOG_CDECL clipRectD(Painter& self, uint32_t clipOp, const RectD& r);
 
-  static err_t FOG_CDECL clipRectsI(Painter& self, uint32_t clipOp, const RectI* r, sysuint_t count);
-  static err_t FOG_CDECL clipRectsF(Painter& self, uint32_t clipOp, const RectF* r, sysuint_t count);
-  static err_t FOG_CDECL clipRectsD(Painter& self, uint32_t clipOp, const RectD* r, sysuint_t count);
+  static err_t FOG_CDECL clipRectsI(Painter& self, uint32_t clipOp, const RectI* r, size_t count);
+  static err_t FOG_CDECL clipRectsF(Painter& self, uint32_t clipOp, const RectF* r, size_t count);
+  static err_t FOG_CDECL clipRectsD(Painter& self, uint32_t clipOp, const RectD* r, size_t count);
 
-  static err_t FOG_CDECL clipPolygonI(Painter& self, uint32_t clipOp, const PointI* p, sysuint_t count);
-  static err_t FOG_CDECL clipPolygonF(Painter& self, uint32_t clipOp, const PointF* p, sysuint_t count);
-  static err_t FOG_CDECL clipPolygonD(Painter& self, uint32_t clipOp, const PointD* p, sysuint_t count);
+  static err_t FOG_CDECL clipPolygonI(Painter& self, uint32_t clipOp, const PointI* p, size_t count);
+  static err_t FOG_CDECL clipPolygonF(Painter& self, uint32_t clipOp, const PointF* p, size_t count);
+  static err_t FOG_CDECL clipPolygonD(Painter& self, uint32_t clipOp, const PointD* p, size_t count);
 
   static err_t FOG_CDECL clipShapeF(Painter& self, uint32_t clipOp, uint32_t shapeType, const void* shapeData);
   static err_t FOG_CDECL clipShapeD(Painter& self, uint32_t clipOp, uint32_t shapeType, const void* shapeData);
@@ -3486,7 +3486,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::drawRectD(Painter& self, const RectD& 
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPolylineI(Painter& self, const PointI* p, sysuint_t count)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPolylineI(Painter& self, const PointI* p, size_t count)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
   _FOG_RASTER_ENTER_STROKE_FUNC();
@@ -3508,7 +3508,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPolylineI(Painter& self, const Poi
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPolylineF(Painter& self, const PointF* p, sysuint_t count)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPolylineF(Painter& self, const PointF* p, size_t count)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
   _FOG_RASTER_ENTER_STROKE_FUNC();
@@ -3520,7 +3520,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPolylineF(Painter& self, const Poi
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPolylineD(Painter& self, const PointD* p, sysuint_t count)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPolylineD(Painter& self, const PointD* p, size_t count)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
   _FOG_RASTER_ENTER_STROKE_FUNC();
@@ -3532,7 +3532,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPolylineD(Painter& self, const Poi
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPolygonI(Painter& self, const PointI* p, sysuint_t count)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPolygonI(Painter& self, const PointI* p, size_t count)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
   _FOG_RASTER_ENTER_STROKE_FUNC();
@@ -3554,7 +3554,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPolygonI(Painter& self, const Poin
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPolygonF(Painter& self, const PointF* p, sysuint_t count)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPolygonF(Painter& self, const PointF* p, size_t count)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
   _FOG_RASTER_ENTER_STROKE_FUNC();
@@ -3566,7 +3566,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPolygonF(Painter& self, const Poin
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPolygonD(Painter& self, const PointD* p, sysuint_t count)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPolygonD(Painter& self, const PointD* p, size_t count)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
   _FOG_RASTER_ENTER_STROKE_FUNC();
@@ -3726,7 +3726,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectD(Painter& self, const RectD& 
 // doFillNormalizedPath() instead.
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectsI(Painter& self, const RectI* r, sysuint_t count)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectsI(Painter& self, const RectI* r, size_t count)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
@@ -3748,7 +3748,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectsI(Painter& self, const RectI*
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectsF(Painter& self, const RectF* r, sysuint_t count)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectsF(Painter& self, const RectF* r, size_t count)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
@@ -3764,7 +3764,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectsF(Painter& self, const RectF*
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectsD(Painter& self, const RectD* r, sysuint_t count)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectsD(Painter& self, const RectD* r, size_t count)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
@@ -3781,7 +3781,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectsD(Painter& self, const RectD*
 // TODO: It's easy to clip polygon, do it here, PathClipper should be enabled to do that.
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillPolygonI(Painter& self, const PointI* p, sysuint_t count)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::fillPolygonI(Painter& self, const PointI* p, size_t count)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
@@ -3803,7 +3803,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillPolygonI(Painter& self, const Poin
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillPolygonF(Painter& self, const PointF* p, sysuint_t count)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::fillPolygonF(Painter& self, const PointF* p, size_t count)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
@@ -3815,7 +3815,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::fillPolygonF(Painter& self, const Poin
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillPolygonD(Painter& self, const PointD* p, sysuint_t count)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::fillPolygonD(Painter& self, const PointD* p, size_t count)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
@@ -4480,7 +4480,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::clipRectD(Painter& self, uint32_t clip
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipRectsI(Painter& self, uint32_t clipOp, const RectI* r, sysuint_t count)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::clipRectsI(Painter& self, uint32_t clipOp, const RectI* r, size_t count)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
 
@@ -4488,7 +4488,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::clipRectsI(Painter& self, uint32_t cli
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipRectsF(Painter& self, uint32_t clipOp, const RectF* r, sysuint_t count)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::clipRectsF(Painter& self, uint32_t clipOp, const RectF* r, size_t count)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
 
@@ -4496,7 +4496,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::clipRectsF(Painter& self, uint32_t cli
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipRectsD(Painter& self, uint32_t clipOp, const RectD* r, sysuint_t count)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::clipRectsD(Painter& self, uint32_t clipOp, const RectD* r, size_t count)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
 
@@ -4504,7 +4504,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::clipRectsD(Painter& self, uint32_t cli
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipPolygonI(Painter& self, uint32_t clipOp, const PointI* p, sysuint_t count)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::clipPolygonI(Painter& self, uint32_t clipOp, const PointI* p, size_t count)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
 
@@ -4512,7 +4512,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::clipPolygonI(Painter& self, uint32_t c
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipPolygonF(Painter& self, uint32_t clipOp, const PointF* p, sysuint_t count)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::clipPolygonF(Painter& self, uint32_t clipOp, const PointF* p, size_t count)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
 
@@ -4520,7 +4520,7 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::clipPolygonF(Painter& self, uint32_t c
 }
 
 template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipPolygonD(Painter& self, uint32_t clipOp, const PointD* p, sysuint_t count)
+err_t FOG_CDECL RasterPainterImpl<_MODE>::clipPolygonD(Painter& self, uint32_t clipOp, const PointD* p, size_t count)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
 

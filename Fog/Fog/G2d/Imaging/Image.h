@@ -80,7 +80,7 @@ struct FOG_API ImageData
   // [Statics]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE sysuint_t getSizeFor(sysuint_t size)
+  static FOG_INLINE size_t getSizeFor(size_t size)
   { return sizeof(ImageData) - (sizeof(uint8_t) * 8) + size; }
 
   // --------------------------------------------------------------------------
@@ -88,7 +88,7 @@ struct FOG_API ImageData
   // --------------------------------------------------------------------------
 
   //! @brief Reference count.
-  mutable Atomic<sysuint_t> refCount;
+  mutable Atomic<size_t> refCount;
 
   //! @brief Whether there is exclusive access to the image.
   //!
@@ -158,10 +158,10 @@ struct FOG_API Image
   // [Sharing]
   // --------------------------------------------------------------------------
 
-  //! @copydoc Doxygen::Implicit::getRefCount().
-  FOG_INLINE sysuint_t getRefCount() const { return _d->refCount.get(); }
+  //! @copydoc Doxygen::Implicit::getReference().
+  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
   //! @copydoc Doxygen::Implicit::isDetached().
-  FOG_INLINE bool isDetached() const { return (getRefCount() + isReadOnly()) == 1; }
+  FOG_INLINE bool isDetached() const { return (getReference() + isReadOnly()) == 1; }
   //! @copydoc Doxygen::Implicit::detach().
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
 
@@ -524,8 +524,8 @@ struct FOG_API Image
   err_t readFromStream(Stream& stream, const String& extension);
   err_t readFromBuffer(const ByteArray& buffer);
   err_t readFromBuffer(const ByteArray& buffer, const String& extension);
-  err_t readFromBuffer(const void* buffer, sysuint_t size);
-  err_t readFromBuffer(const void* buffer, sysuint_t size, const String& extension);
+  err_t readFromBuffer(const void* buffer, size_t size);
+  err_t readFromBuffer(const void* buffer, size_t size, const String& extension);
 
   // --------------------------------------------------------------------------
   // [Write]
@@ -559,7 +559,7 @@ struct FOG_API Image
   // [Ref / Deref]
   // --------------------------------------------------------------------------
 
-  static ImageData* _dalloc(sysuint_t size);
+  static ImageData* _dalloc(size_t size);
   static ImageData* _dalloc(const SizeI& size, uint32_t format);
 
   // --------------------------------------------------------------------------

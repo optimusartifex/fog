@@ -185,10 +185,10 @@ protected:
   // --------------------------------------------------------------------------
 
   FOG_INLINE LayoutItem* getAt(int index) const
-  { return (sysuint_t)index < _children.getLength() ? _children.at((uint)index) : 0; }
+  { return (size_t)index < _children.getLength() ? _children.at((uint)index) : 0; }
 
   FOG_INLINE LayoutItem* takeAt(int index)
-  { return (sysuint_t)index < _children.getLength() ? _children.take((uint)index) : 0; }
+  { return (size_t)index < _children.getLength() ? _children.take((uint)index) : 0; }
 
   FOG_INLINE int getLength() const
   { return (int)(uint)_children.getLength(); }

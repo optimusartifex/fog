@@ -14,7 +14,9 @@
 #include <Fog/Core/OS/UserInfo.h>
 #include <Fog/Core/System/Application.h>
 #include <Fog/Core/Tools/ByteArray.h>
+#include <Fog/Core/Tools/ByteArrayTmp_p.h>
 #include <Fog/Core/Tools/String.h>
+#include <Fog/Core/Tools/StringTmp_p.h>
 #include <Fog/Core/Tools/StringUtil.h>
 #include <Fog/Core/Tools/TextCodec.h>
 
@@ -40,9 +42,9 @@ namespace Fog {
 // ============================================================================
 
 // Copy src to dst and convert slashes to posix form
-static Char* copyAndNorm(Char* dst, const Char* src, sysuint_t length)
+static Char* copyAndNorm(Char* dst, const Char* src, size_t length)
 {
-  for (sysuint_t i = length; i; i--)
+  for (size_t i = length; i; i--)
   {
 #if defined(FOG_OS_WINDOWS)
     Char ch = *src++;
@@ -120,7 +122,7 @@ uint32_t FileSystem::testFile(const String& fileName, uint32_t flags)
       extractExtension(ext, fileName);
 
       const Char* extStr = ext.getData();
-      sysuint_t extLength = ext.getLength();
+      size_t extLength = ext.getLength();
 
       // Executable extension has usually 3 characters
       if (extLength == 3)
@@ -174,7 +176,7 @@ bool FileSystem::findFile(const List<String>& paths, const String& fileName, Str
   return false;
 }
 
-static uint createDirectoryHelper(const Char* path, sysuint_t len)
+static uint createDirectoryHelper(const Char* path, size_t len)
 {
   err_t err;
 
@@ -214,8 +216,8 @@ err_t FileSystem::createDirectory(const String& dir, bool recursive)
   // FileSystem::toAbsolutePath() always normalize dir to 'X:/', we can imagine
   // that dirAbs is absolute dir, so we need to find first two occurences
   // of '/'. Second occurece can be end of string.
-  sysuint_t i = dirAbs.indexOf(Char('/'));
-  sysuint_t length = dirAbs.getLength();
+  size_t i = dirAbs.indexOf(Char('/'));
+  size_t length = dirAbs.getLength();
 
   if (i == INVALID_INDEX) return ERR_RT_INVALID_ARGUMENT;
   if (dirAbs.getAt(length-1) == Char('/')) length--;
@@ -350,7 +352,7 @@ bool FileSystem::findFile(const List<String>& paths, const String& fileName, Str
   return false;
 }
 
-static err_t createDirectoryHelper(const Char* path, sysuint_t len)
+static err_t createDirectoryHelper(const Char* path, size_t len)
 {
   if (len == 1 && path[0] == '/') return ERR_IO_DIR_ALREADY_EXISTS;
 
@@ -380,8 +382,8 @@ err_t FileSystem::createDirectory(const String& dir, bool recursive)
   // of '/'. Second occurece can be end of string.
   if (dirAbs.getLength() == 1 && dirAbs.getAt(0) == '/') return ERR_IO_DIR_ALREADY_EXISTS;
 
-  sysuint_t i = dirAbs.indexOf(Char('/'));
-  sysuint_t length = dirAbs.getLength();
+  size_t i = dirAbs.indexOf(Char('/'));
+  size_t length = dirAbs.getLength();
 
   if (i == INVALID_INDEX) return ERR_RT_INVALID_ARGUMENT;
   if (dirAbs.getAt(length-1) == Char('/')) length--;
@@ -413,7 +415,7 @@ err_t FileSystem::deleteDirectory(const String& dir)
 
 err_t FileSystem::extractFile(String& dst, const String& path)
 {
-  sysuint_t index = path.lastIndexOf(Char('/')) + 1U;
+  size_t index = path.lastIndexOf(Char('/')) + 1U;
 
   if (index)
   {
@@ -428,7 +430,7 @@ err_t FileSystem::extractFile(String& dst, const String& path)
 
 err_t FileSystem::extractDirectory(String& dst, const String& _path)
 {
-  sysuint_t index = _path.lastIndexOf(Char('/'));
+  size_t index = _path.lastIndexOf(Char('/'));
 
   // in some cases (for example path /root), index can be 0. So check for this
   // case
@@ -449,7 +451,7 @@ err_t FileSystem::extractExtension(String& dst, const String& _path)
   String path(_path);
   dst.clear();
 
-  sysuint_t pathLength = path.getLength();
+  size_t pathLength = path.getLength();
   if (!pathLength) { return ERR_RT_INVALID_ARGUMENT; }
 
   // Speed is important, so RAW manipulation is needed
@@ -462,7 +464,7 @@ err_t FileSystem::extractExtension(String& dst, const String& _path)
     {
       if (++pathCur != pathEnd)
       {
-        return dst.set(pathCur, sysuint_t(pathEnd - pathCur));
+        return dst.set(pathCur, size_t(pathEnd - pathCur));
       }
       break;
     }
@@ -485,7 +487,7 @@ err_t FileSystem::normalizePath(String& dst, const String& _path)
   // - all "/./" to "/" or "BEGIN./" to ""
   // - all "/../" eats previous directory
 
-  sysuint_t pathLength = path.getLength();
+  size_t pathLength = path.getLength();
   if (pathLength == 0)
   {
     dst.clear();
@@ -526,7 +528,7 @@ err_t FileSystem::normalizePath(String& dst, const String& _path)
     c = *pathCur++;
 
     // skip "./" from result
-    if (isDirSeparator(c) && (sysuint_t)(dstCur - dstBeg) == 1 && dstCur[-1] == Char('.'))
+    if (isDirSeparator(c) && (size_t)(dstCur - dstBeg) == 1 && dstCur[-1] == Char('.'))
     {
       prevSlash = true;
       dstCur--;
@@ -543,7 +545,7 @@ err_t FileSystem::normalizePath(String& dst, const String& _path)
       // Catch "/."
       if (c == Char('.'))
       {
-        sysuint_t remain = (sysuint_t)(pathEnd - pathCur);
+        size_t remain = (size_t)(pathEnd - pathCur);
 
         // Catch "/./" -> "/"
         if (remain > 0 && isDirSeparator(pathCur[0]))
@@ -560,7 +562,7 @@ err_t FileSystem::normalizePath(String& dst, const String& _path)
           // we need to check if "../" possibility. In this case we can't
           // go back and we will append "../" to the result.
 
-          sysuint_t resultLength = (sysuint_t)(dstCur - dstBeg);
+          size_t resultLength = (size_t)(dstCur - dstBeg);
 
           // Bail if result is too small to hold any directory
           if (resultLength <= 1) goto __inc;
@@ -630,8 +632,8 @@ static err_t _joinPath(String& dst, const String& base, const String& part)
 {
   const Char* d_str = base.getData();
   const Char* f_str = part.getData();
-  sysuint_t d_length = base.getLength();
-  sysuint_t f_length = part.getLength();
+  size_t d_length = base.getLength();
+  size_t f_length = part.getLength();
 
   if (d_length && isDirSeparator(d_str[d_length-1])) d_length--;
 
@@ -658,8 +660,8 @@ err_t FileSystem::joinPath(String& dst, const String& base, const String& part)
 
 bool FileSystem::isPathContainsFile(const String& path, const String& file, uint cs)
 {
-  sysuint_t index = path.lastIndexOf(Char('/'));
-  sysuint_t length = path.getLength() - index;
+  size_t index = path.lastIndexOf(Char('/'));
+  size_t length = path.getLength() - index;
 
   return (length == file.getLength() &&
     StringUtil::eq(path.getData() + index, file.getData(), length, cs));
@@ -668,7 +670,7 @@ bool FileSystem::isPathContainsFile(const String& path, const String& file, uint
 bool FileSystem::isPathContainsDirectory(const String& path, const String& directory, uint cs)
 {
   const Char* d_str = directory.getData();
-  sysuint_t d_length = directory.getLength();
+  size_t d_length = directory.getLength();
 
   if (d_length == 0) return false;
   if (isDirSeparator(d_str[d_length-1])) d_length--;
@@ -680,7 +682,7 @@ bool FileSystem::isPathContainsDirectory(const String& path, const String& direc
 
 bool FileSystem::isPathContainsExtension(const String& path, const String& extension, uint cs)
 {
-  sysuint_t pathLength = path.getLength();
+  size_t pathLength = path.getLength();
   if (!pathLength) return false;
 
   // Speed is important, so RAW manipulation is needed
@@ -692,7 +694,7 @@ bool FileSystem::isPathContainsExtension(const String& path, const String& exten
     if (FOG_UNLIKELY(*--pathCur == Char('.')))
     {
       pathCur++;
-      return ((sysuint_t)(pathEnd - pathCur) == extension.getLength() &&
+      return ((size_t)(pathEnd - pathCur) == extension.getLength() &&
         StringUtil::eq(pathCur, extension.getData(), extension.getLength(), cs));
     }
     else if (FOG_UNLIKELY(isDirSeparator(*pathCur)))

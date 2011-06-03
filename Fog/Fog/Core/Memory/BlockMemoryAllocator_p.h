@@ -76,11 +76,11 @@ struct FOG_NO_EXPORT BlockMemoryAllocator
     Block* next;
 
     //! @brief Size of the block.
-    sysuint_t size;
+    size_t size;
     //! @brief Allocator position, incremented by each @c BlockMemoryAllocator::alloc().
-    sysuint_t pos;
+    size_t pos;
     //! @brief Count of bytes used by the block (atomic).
-    Atomic<sysuint_t> used;
+    Atomic<size_t> used;
 
     //! @brief The memory.
     uint8_t memory[BLOCK_SIZE];
@@ -98,7 +98,7 @@ struct FOG_NO_EXPORT BlockMemoryAllocator
     //! @brief Link to block structure.
     Block* block;
     //! @brief Size of block (at this time same as BLOCK_SIZE, for future).
-    sysuint_t size;
+    size_t size;
   };
 
   // --------------------------------------------------------------------------
@@ -117,7 +117,7 @@ struct FOG_NO_EXPORT BlockMemoryAllocator
   //! @brief Alloc @a size bytes of memory, like @c ::malloc().
   //!
   //! This method is reentrant, never call it from other than engine thread.
-  void* alloc(sysuint_t size);
+  void* alloc(size_t size);
 
   //! @brief Free @a ptr allocated by @c alloc();
   FOG_INLINE void free(void* ptr);

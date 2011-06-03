@@ -16,6 +16,29 @@ namespace Fog {
 //! @{
 
 // ============================================================================
+// [Fog::DETECT_LENGTH / INVALID_INDEX]
+// ============================================================================
+
+//! @brief Detect length means that string function should first detect it length.
+static const size_t DETECT_LENGTH = SYSUINT_MAX;
+//! @brief Returned by functions like indexOf() to indicate that element wasn't
+//! found.
+static const size_t INVALID_INDEX = SYSUINT_MAX;
+
+static const size_t NO_PRECISION = SYSUINT_MAX;
+static const size_t NO_WIDTH     = SYSUINT_MAX;
+
+// ============================================================================
+// [Fog::NO_FLAGS_ENUM]
+// ============================================================================
+
+//! @brief Convenience value that can be used instead of zero.
+enum NO_FLAGS_ENUM
+{
+  NO_FLAGS = 0
+};
+
+// ============================================================================
 // [Fog::CONTAINER_DATA]
 // ============================================================================
 
@@ -60,21 +83,13 @@ enum CONTAINER_OP
 };
 
 // ============================================================================
-// [Fog::DETECT_LENGTH / INVALID_INDEX]
+// [Fog::CPU_BUG]
 // ============================================================================
 
-//! @brief Detect length means that string function should first detect it length.
-static const sysuint_t DETECT_LENGTH  = (sysuint_t)-1;
-//! @brief Returned by functions like indexOf() to indicate that element wasn't
-//! found.
-static const sysuint_t INVALID_INDEX  = (sysuint_t)-1;
-
-// ============================================================================
-// [Fog::NO_FLAGS]
-// ============================================================================
-
-//! @brief Convenience value that can be used instead of zero.
-static const uint32_t NO_FLAGS = 0;
+enum CPU_BUG
+{
+  CPU_BUG_AMD_LOCK_MB = 1U << 0
+};
 
 // ============================================================================
 // [Fog::CPU_FEATURE]
@@ -147,28 +162,16 @@ enum CPU_FEATURE
 };
 
 // ============================================================================
-// [Fog::CPU_BUG]
-// ============================================================================
-
-enum CPU_BUG
-{
-  CPU_BUG_AMD_LOCK_MB = 1U << 0
-};
-
-// ============================================================================
 // [Fog::TEMPORARY_LENGTH]
 // ============================================================================
 
 //! @brief how much to reserve stack for local strings in Fog library or all
 //! additional libraries.
-static const sysuint_t TEMPORARY_LENGTH = 256;
+static const size_t TEMPORARY_LENGTH = 256;
 
 // ============================================================================
 // [Fog::FORMAT_FLAGS]
 // ============================================================================
-
-static const sysuint_t NO_PRECISION = (sysuint_t)-1;
-static const sysuint_t NO_WIDTH     = (sysuint_t)-1;
 
 //! @brief String formatting flags.
 enum FORMAT_FLAGS
@@ -205,17 +208,21 @@ enum FORMAT_FLAGS
 //! @brief Case sensitivity, used by @c String and @c ByteArray classes.
 enum CASE_SENSITIVITY
 {
-  //! @brief Case insensitive (search, replace, indexOf, ...).
+  //! @brief Case insensitive (search, replace, indexOf, lastIndexOf, ...).
   CASE_INSENSITIVE = 0,
+  //! @brief Case sensitive (search, replace, indexOf, lastIndexOf, ...).
+  CASE_SENSITIVE = 1
+};
 
-  //! @brief Case sensitive (search, replace, indexOf, ...).
-  CASE_SENSITIVE = 1,
+// ============================================================================
+// [Fog::JUSTIFY]
+// ============================================================================
 
-#if defined(FOG_OS_WINDOWS)
-  CASE_FILESYSTEM = CASE_INSENSITIVE
-#else
-  CASE_FILESYSTEM = CASE_SENSITIVE
-#endif // FOG_OS_WINDOWS
+enum JUSTIFY
+{
+  JUSTIFY_LEFT = 0x1,
+  JUSTIFY_RIGHT = 0x2,
+  JUSTIFY_CENTER = 0x3
 };
 
 // ============================================================================
@@ -233,6 +240,18 @@ enum MATH_INTEGRATION_METHOD
 };
 
 // ============================================================================
+// [Fog::MATH_SOLVE]
+// ============================================================================
+
+enum MATH_SOLVE
+{
+  MATH_SOLVE_QUADRATIC = 0,
+  MATH_SOLVE_CUBIC = 1,
+
+  MATH_SOLVE_COUNT = 2
+};
+
+// ============================================================================
 // [Fog::OUTPUT_CASE]
 // ============================================================================
 
@@ -241,37 +260,6 @@ enum OUTPUT_CASE
 {
   OUTPUT_CASE_LOWER = 0,
   OUTPUT_CASE_UPPER = 1
-};
-
-// ============================================================================
-// [Fog::SPLIT_BEHAVIOR]
-// ============================================================================
-
-enum SPLIT_BEHAVIOR
-{
-  SPLIT_KEEP_EMPTY_PARTS = 0,
-  SPLIT_REMOVE_EMPTY_PARTS = 1
-};
-
-// ============================================================================
-// [Fog::JUSTIFY]
-// ============================================================================
-
-enum JUSTIFY
-{
-  JUSTIFY_LEFT = 0x1,
-  JUSTIFY_RIGHT = 0x2,
-  JUSTIFY_CENTER = 0x3
-};
-
-// ============================================================================
-// [Fog::SORT_ORDER]
-// ============================================================================
-
-enum SORT_ORDER
-{
-  SORT_ORDER_ASCENT = 0,
-  SORT_ORDER_DESCENT = 1
 };
 
 // ============================================================================
@@ -340,81 +328,7 @@ enum LOCALE_CHAR
   LOCALE_CHAR_NEXT_THOUSANDS_GROUP = 8,
   LOCALE_CHAR_RESERVED = 9,
 
-  LOCALE_CHAR_INVALID
-};
-
-// ============================================================================
-// [Fog::USER_DIRECTORY]
-// ============================================================================
-
-enum USER_DIRECTORY
-{
-  USER_DIRECTORY_HOME = 0,
-  USER_DIRECTORY_DESKTOP = 1,
-  USER_DIRECTORY_DOCUMENTS = 2,
-  USER_DIRECTORY_MUSIC = 3,
-  USER_DIRECTORY_PICTURES = 4,
-  USER_DIRECTORY_VIDEOS = 5,
-
-  USER_DIRECTORY_COUNT
-};
-
-// ============================================================================
-// [Fog::VALUE_TYPE]
-// ============================================================================
-
-//! @brief Value type id.
-enum VALUE_TYPE
-{
-  //! @brief Value is null.
-  VALUE_TYPE_NULL = 0,
-  //! @brief Value is signed 32-bit integer.
-  VALUE_TYPE_INTEGER = 1,
-  //! @brief Value is double-precision floating point.
-  VALUE_TYPE_DOUBLE = 2,
-  //! @brief Value is string.
-  VALUE_TYPE_STRING = 3
-};
-
-// ============================================================================
-// [Fog::TYPEINFO_TYPE]
-// ============================================================================
-
-//! @brief Types for @c Fog::TypeInfo, use together with @c _FOG_TYPEINFO_DECLARE
-//! macro.
-enum TYPEINFO_TYPE
-{
-  //! @brief Simple data type like @c int, @c long, ...
-  //!
-  //! Simple data can be copyed from one memory location into another.
-  TYPEINFO_PRIMITIVE = 0,
-
-  //! @brief Moveable data type line @c Fog::String, ...
-  //!
-  //! Moveable data type can't be copyed to another location, but
-  //! can be moved in memory.
-  TYPEINFO_MOVABLE = 1,
-
-  //! @brief Class data type.
-  //!
-  //! Means that class cannot be moved to another location.
-  TYPEINFO_CLASS = 2
-};
-
-// ============================================================================
-// [Fog::TYPEINFO_FLAGS]
-// ============================================================================
-
-//! @brief Additional flags for @c _FOG_TYPEINFO_DECLARE. All flags are initially
-//! unsed when used @c _FOG_TYPEINFO_DECLARE to declare information about a type.
-enum TYPEINFO_FLAGS
-{
-  TYPEINFO_IS_POD_TYPE    = 0x00000100,
-  TYPEINFO_IS_FLOAT_TYPE  = 0x00000200,
-  TYPEINFO_IS_DOUBLE_TYPE = 0x00000400,
-  TYPEINFO_HAS_COMPARE    = 0x00000800,
-  TYPEINFO_HAS_EQ         = 0x00001000,
-  TYPEINFO_MASK           = 0xFFFFFF00
+  LOCALE_CHAR_COUNT = 10
 };
 
 // ============================================================================
@@ -479,6 +393,26 @@ enum OBJECT_FLAG
 };
 
 // ============================================================================
+// [Fog::SORT_ORDER]
+// ============================================================================
+
+enum SORT_ORDER
+{
+  SORT_ORDER_ASCENT = 0,
+  SORT_ORDER_DESCENT = 1
+};
+
+// ============================================================================
+// [Fog::SPLIT_BEHAVIOR]
+// ============================================================================
+
+enum SPLIT_BEHAVIOR
+{
+  SPLIT_KEEP_EMPTY_PARTS = 0,
+  SPLIT_REMOVE_EMPTY_PARTS = 1
+};
+
+// ============================================================================
 // [Fog::STREAM_DEVICE_FLAGS]
 // ============================================================================
 
@@ -524,6 +458,253 @@ enum STREAM_SEEK_MODE
   STREAM_SEEK_SET = 0,
   STREAM_SEEK_CUR = 1,
   STREAM_SEEK_END = 2
+};
+
+// ============================================================================
+// [Fog::TEXT_CODEC]
+// ============================================================================
+
+//! @brief Text-codec codes.
+enum TEXT_CODEC
+{
+  //! @brief None, not initialized or signalizes error.
+  TEXT_CODEC_NONE = 0,
+
+  //! @brief ISO-8859-1 text-codec.
+  TEXT_CODEC_ISO8859_1 = 1,
+  //! @brief ISO-8859-2 text-codec.
+  TEXT_CODEC_ISO8859_2 = 2,
+  //! @brief ISO-8859-3 text-codec.
+  TEXT_CODEC_ISO8859_3 = 3,
+  //! @brief ISO-8859-4 text-codec.
+  TEXT_CODEC_ISO8859_4 = 4,
+  //! @brief ISO-8859-5 text-codec.
+  TEXT_CODEC_ISO8859_5 = 5,
+  //! @brief ISO-8859-6 text-codec.
+  TEXT_CODEC_ISO8859_6 = 6,
+  //! @brief ISO-8859-7 text-codec.
+  TEXT_CODEC_ISO8859_7 = 7,
+  //! @brief ISO-8859-8 text-codec.
+  TEXT_CODEC_ISO8859_8 = 8,
+  //! @brief ISO-8859-9 text-codec.
+  TEXT_CODEC_ISO8859_9 = 9,
+  //! @brief ISO-8859-10 text-codec.
+  TEXT_CODEC_ISO8859_10 = 10,
+  //! @brief ISO-8859-11 text-codec.
+  TEXT_CODEC_ISO8859_11 = 11,
+  //! @brief ISO-8859-13 text-codec.
+  TEXT_CODEC_ISO8859_13 = 12,
+  //! @brief ISO-8859-14 text-codec.
+  TEXT_CODEC_ISO8859_14 = 13,
+  //! @brief ISO-8859-14 text-codec.
+  TEXT_CODEC_ISO8859_15 = 14,
+  //! @brief ISO-8859-16 text-codec.
+  TEXT_CODEC_ISO8859_16 = 15,
+
+  //! @brief CP-850 text-codec.
+  TEXT_CODEC_CP850 = 16,
+  //! @brief CP-866 text-codec.
+  TEXT_CODEC_CP866 = 17,
+  //! @brief CP-874 text-codec.
+  TEXT_CODEC_CP874 = 18,
+  //! @brief CP-1250 text-codec.
+  TEXT_CODEC_CP1250 = 19,
+  //! @brief CP-1251 text-codec.
+  TEXT_CODEC_CP1251 = 20,
+  //! @brief CP-1252 text-codec.
+  TEXT_CODEC_CP1252 = 21,
+  //! @brief CP-1253 text-codec.
+  TEXT_CODEC_CP1253 = 22,
+  //! @brief CP-1254 text-codec.
+  TEXT_CODEC_CP1254 = 23,
+  //! @brief CP-1255 text-codec.
+  TEXT_CODEC_CP1255 = 24,
+  //! @brief CP-1256 text-codec.
+  TEXT_CODEC_CP1256 = 25,
+  //! @brief CP-1257 text-codec.
+  TEXT_CODEC_CP1257 = 26,
+  //! @brief CP-1258 text-codec.
+  TEXT_CODEC_CP1258 = 27,
+
+  //! @brief MAC-ROMAN codec.
+  TEXT_CODEC_MAC_ROMAN = 28,
+
+  //! @brief KOI8R text-codec.
+  TEXT_CODEC_KOI8R = 29,
+  //! @brief KOI8U text-codec.
+  TEXT_CODEC_KOI8U = 30,
+
+  //! @brief WINSAMI-2 text-codec.
+  TEXT_CODEC_WINSAMI2 = 31,
+
+  //! @brief ROMAN-8 text-codec.
+  TEXT_CODEC_ROMAN8 = 32,
+
+  //! @brief ARMSCII-8 text-codec.
+  TEXT_CODEC_ARMSCII8 = 33,
+
+  //! @brief GEORGIAN-ACADEMY text-codec.
+  TEXT_CODEC_GEORGIAN_ACADEMY = 34,
+  //! @brief GEORGIAN-PS text-codec.
+  TEXT_CODEC_GEORGIAN_PS = 35,
+
+  //! @brief UTF-8 text-codec.
+  TEXT_CODEC_UTF8 = 36,
+
+  //! @brief UTF-16 text-codec (little-endian).
+  TEXT_CODEC_UTF16_LE = 37,
+  //! @brief UTF-16 text-codec (big-endian).
+  TEXT_CODEC_UTF16_BE = 38,
+
+  //! @brief UTF-32 text-codec (little-endian).
+  TEXT_CODEC_UTF32_LE = 39,
+  //! @brief UTF-32 text-codec (big-endian).
+  TEXT_CODEC_UTF32_BE = 40,
+
+  //! @brief UCS-2 text-codec (little-endian).
+  TEXT_CODEC_UCS2_LE = 41,
+  //! @brief UCS-2 text-codec (big-endian).
+  TEXT_CODEC_UCS2_BE = 42,
+
+  //! @brief UTF-16 text-codec (native-endian).
+  TEXT_CODEC_UTF16 = FOG_BYTE_ORDER_CHOICE(TEXT_CODEC_UTF16_LE, TEXT_CODEC_UTF16_BE),
+  //! @brief UTF-16 text-codec (swapped-endian).
+  TEXT_CODEC_UTF16_SWAPPED = FOG_BYTE_ORDER_CHOICE(TEXT_CODEC_UTF16_BE, TEXT_CODEC_UTF16_LE),
+
+  //! @brief UTF-32 text-codec (native-endian).
+  TEXT_CODEC_UTF32 = FOG_BYTE_ORDER_CHOICE(TEXT_CODEC_UTF32_LE, TEXT_CODEC_UTF32_BE),
+  //! @brief UTF-32 text-codec (swapped-endian).
+  TEXT_CODEC_UTF32_SWAPPED = FOG_BYTE_ORDER_CHOICE(TEXT_CODEC_UTF32_BE, TEXT_CODEC_UTF32_LE),
+
+  //! @brief UCS-2 text-codec (native-endian).
+  TEXT_CODEC_UCS2 = FOG_BYTE_ORDER_CHOICE(TEXT_CODEC_UCS2_LE, TEXT_CODEC_UCS2_BE),
+  //! @brief UCS-2 text-codec (swapped-endian).
+  TEXT_CODEC_UCS2_SWAPPED = FOG_BYTE_ORDER_CHOICE(TEXT_CODEC_UCS2_BE, TEXT_CODEC_UCS2_LE),
+
+  //! @brief wchar_t text-codec (native-endian)
+  TEXT_CODEC_WCHAR_T = sizeof(wchar_t) == 2 ? TEXT_CODEC_UTF16 : TEXT_CODEC_UTF32,
+
+  //! @brief Count of text-codecs.
+  TEXT_CODEC_COUNT = 43
+};
+
+// ============================================================================
+// [Fog::TEXT_CODEC_FLAGS]
+// ============================================================================
+
+//! @brief Text-codec flags.
+enum TEXT_CODEC_FLAGS
+{
+  //! @brief Text-codec is table based.
+  TEXT_CODEC_IS_TABLE = 0x00000001,
+  //! @brief Text-codec is unicode based (UTF-8, UTF-16, UTF-32 or UCS-2).
+  TEXT_CODEC_IS_UNICODE = 0x00000002,
+
+  //! @brief Text-codec base is little-endian.
+  TEXT_CODEC_IS_LE = 0x00000004,
+  //! @brief Text-codec base is big-endian.
+  TEXT_CODEC_IS_BE = 0x00000008,
+
+  //! @brief Text-codec is 8-bit.
+  TEXT_CODEC_IS_8BIT = 0x00000010,
+  //! @brief Text-codec is 16-bit.
+  TEXT_CODEC_IS_16BIT = 0x00000020,
+  //! @brief Text-codec is 32-bit.
+  TEXT_CODEC_IS_32BIT = 0x00000040,
+
+  //! @brief Text-codec is variable-length (UTF-8 and UTF-16 codecs).
+  TEXT_CODEC_IS_VARLEN = 0x00000080
+};
+
+// ============================================================================
+// [Fog::TEXT_CODEC_BUILTIN]
+// ============================================================================
+
+enum TEXT_CODEC_CACHE
+{
+  TEXT_CODEC_CACHE_NONE  = 0,
+  TEXT_CODEC_CACHE_ASCII = 1,
+  TEXT_CODEC_CACHE_LOCAL = 2,
+  TEXT_CODEC_CACHE_UTF8  = 3,
+  TEXT_CODEC_CACHE_UTF16 = 4,
+  TEXT_CODEC_CACHE_UTF32 = 5,
+  TEXT_CODEC_CACHE_WCHAR = sizeof(wchar_t) == 2 ? TEXT_CODEC_CACHE_UTF16 : TEXT_CODEC_CACHE_UTF32,
+
+  TEXT_CODEC_CACHE_COUNT = 6
+};
+
+// ============================================================================
+// [Fog::TYPEINFO_TYPE]
+// ============================================================================
+
+//! @brief Types for @c Fog::TypeInfo, use together with @c _FOG_TYPEINFO_DECLARE
+//! macro.
+enum TYPEINFO_TYPE
+{
+  //! @brief Simple data type like @c int, @c long, ...
+  //!
+  //! Simple data can be copyed from one memory location into another.
+  TYPEINFO_PRIMITIVE = 0,
+
+  //! @brief Moveable data type line @c Fog::String, ...
+  //!
+  //! Moveable data type can't be copyed to another location, but
+  //! can be moved in memory.
+  TYPEINFO_MOVABLE = 1,
+
+  //! @brief Class data type.
+  //!
+  //! Means that class cannot be moved to another location.
+  TYPEINFO_CLASS = 2
+};
+
+// ============================================================================
+// [Fog::TYPEINFO_FLAGS]
+// ============================================================================
+
+//! @brief Additional flags for @c _FOG_TYPEINFO_DECLARE. All flags are initially
+//! unsed when used @c _FOG_TYPEINFO_DECLARE to declare information about a type.
+enum TYPEINFO_FLAGS
+{
+  TYPEINFO_IS_POD_TYPE    = 0x00000100,
+  TYPEINFO_IS_FLOAT_TYPE  = 0x00000200,
+  TYPEINFO_IS_DOUBLE_TYPE = 0x00000400,
+  TYPEINFO_HAS_COMPARE    = 0x00000800,
+  TYPEINFO_HAS_EQ         = 0x00001000,
+  TYPEINFO_MASK           = 0xFFFFFF00
+};
+
+// ============================================================================
+// [Fog::USER_DIRECTORY]
+// ============================================================================
+
+enum USER_DIRECTORY
+{
+  USER_DIRECTORY_HOME = 0,
+  USER_DIRECTORY_DESKTOP = 1,
+  USER_DIRECTORY_DOCUMENTS = 2,
+  USER_DIRECTORY_MUSIC = 3,
+  USER_DIRECTORY_PICTURES = 4,
+  USER_DIRECTORY_VIDEOS = 5,
+
+  USER_DIRECTORY_COUNT = 6
+};
+
+// ============================================================================
+// [Fog::VALUE_TYPE]
+// ============================================================================
+
+//! @brief Value type id.
+enum VALUE_TYPE
+{
+  //! @brief Value is null.
+  VALUE_TYPE_NULL = 0,
+  //! @brief Value is signed 32-bit integer.
+  VALUE_TYPE_INTEGER = 1,
+  //! @brief Value is double-precision floating point.
+  VALUE_TYPE_DOUBLE = 2,
+  //! @brief Value is string.
+  VALUE_TYPE_STRING = 3
 };
 
 // ============================================================================
@@ -583,7 +764,7 @@ enum EVENT_CORE_ENUM
   //! @brief Last event that can be used by all libraries.
   //!
   //! This number is first retrieved by Fog::Event::uid() and incremented
-  //! each time that function is called.
+  //! each time the function is called.
   EVENT_UID = 10000000
 };
 
@@ -615,7 +796,7 @@ enum ERR_CORE_ENUM
   ERR_CORE_LAST  = 0x00010FFF,
 
   // --------------------------------------------------------------------------
-  // [Runtime]
+  // [Run-Time]
   // --------------------------------------------------------------------------
 
   //! @brief Failed to allocate memory.
@@ -719,6 +900,12 @@ enum ERR_CORE_ENUM
 
   ERR_LIBRARY_LOAD_FAILED,
   ERR_LIBRARY_SYMBOL_NOT_FOUND,
+
+  // --------------------------------------------------------------------------
+  // [Locale]
+  // --------------------------------------------------------------------------
+
+  ERR_LOCALE_NOT_MATCHED,
 
   // --------------------------------------------------------------------------
   // [Environment]

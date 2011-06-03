@@ -39,7 +39,7 @@ namespace Fog {
 // &quot;Hello&quot will be decoded to "Hello".
 static err_t xmlDecodeText(String& dst, const Utf16& src)
 {
-  sysuint_t length = src.getLength();
+  size_t length = src.getLength();
 
   // Not allowed here.
   FOG_ASSERT(length != DETECT_LENGTH);
@@ -69,7 +69,7 @@ static err_t xmlDecodeText(String& dst, const Utf16& src)
       if (srcPtr == srcEnd)
         break;
 
-      dstPtr[0] = XmlEntity::decode(mark, (sysuint_t)(srcPtr - mark));
+      dstPtr[0] = XmlEntity::decode(mark, (size_t)(srcPtr - mark));
       dstPtr++;
       srcPtr++;
     }

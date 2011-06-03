@@ -93,8 +93,8 @@ struct FOG_API StringMatcher : public StringFilter
   // [Filter Implementation]
   // --------------------------------------------------------------------------
 
-  virtual sysuint_t getLength() const;
-  virtual Range match(const Char* str, sysuint_t slen, uint cs, const Range& range) const;
+  virtual size_t getLength() const;
+  virtual Range match(const Char* str, size_t slen, uint cs, const Range& range) const;
 
   // --------------------------------------------------------------------------
   // [Operator Overload]

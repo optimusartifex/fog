@@ -91,7 +91,7 @@ struct FOG_NO_EXPORT TextChunk
 
   FOG_INLINE void _normalizeRange()
   {
-    sysuint_t length = _text.getLength();
+    size_t length = _text.getLength();
 
     _range._start = Math::min(length, _range._start);
     _range._end   = Math::min(length, _range._end  );

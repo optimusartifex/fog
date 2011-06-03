@@ -8,12 +8,14 @@
 #define _FOG_CORE_TOOLS_STRING_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Api.h>
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/Static.h>
 #include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Memory/Memory.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Tools/Char.h>
 #include <Fog/Core/Tools/Format.h>
@@ -35,8 +37,55 @@ namespace Fog {
 struct Locale;
 struct TextCodec;
 struct StringFilter;
-
 template<typename T> struct List;
+
+// ============================================================================
+// [Fog::StringData]
+// ============================================================================
+
+struct FOG_API StringData
+{
+  FOG_INLINE StringData* ref() const
+  {
+    refCount.inc();
+    return (StringData*)this;
+  }
+
+  FOG_INLINE void deref()
+  {
+    if (refCount.deref() && (flags & CONTAINER_DATA_STATIC) == 0) Memory::free(this);
+  }
+
+  // [Statics]
+
+  static StringData* adopt(void* address, size_t capacity);
+  static StringData* adopt(void* address, size_t capacity, const char* str, size_t length);
+  static StringData* adopt(void* address, size_t capacity, const Char* str, size_t length);
+
+  static StringData* alloc(size_t capacity);
+  static StringData* alloc(size_t capacity, const char* str, size_t length);
+  static StringData* alloc(size_t capacity, const Char* str, size_t length);
+
+  static StringData* realloc(StringData* d, size_t capacity);
+  static StringData* copy(const StringData* d);
+
+  // [Size]
+
+  static FOG_INLINE size_t sizeFor(size_t capacity)
+  { return sizeof(StringData) + sizeof(Char) * capacity; }
+
+  // [Members]
+
+  mutable Atomic<size_t> refCount;
+
+  uint32_t flags;
+  uint32_t hashCode;
+
+  size_t capacity;
+  size_t length;
+
+  Char data[2];
+};
 
 // ============================================================================
 // [Fog::String]
@@ -45,88 +94,7 @@ template<typename T> struct List;
 //! @brief String.
 struct FOG_API String
 {
-  // --------------------------------------------------------------------------
-  // [String Data]
-  // --------------------------------------------------------------------------
-
-  //! @brief String data
-  struct FOG_API Data
-  {
-    // [Flags]
-
-    //! @brief String data flags.
-    enum
-    {
-      //! @brief String data are created on the heap.
-      //!
-      //! Object is created by function like @c Fog::Memory::alloc() or by
-      //! @c new operator. It this flag is not set, you can't delete object from
-      //! the heap and object is probabbly only temporary (short life object).
-      IsDynamic = (1U << 0),
-
-      //! @brief String data are shareable.
-      //!
-      //! Object can be directly referenced by internal method @c ref().
-      //! Sharable data are usually created on the heap and together
-      //! with this flag is set also @c IsDynamic, but it isn't prerequisite.
-      IsSharable = (1U << 1),
-
-      //! @brief String data are strong to weak assignments.
-      //!
-      //! This flag means:
-      //!   "Don't assign other data to me, instead, copy them to me!".
-      IsStrong = (1U << 2)
-    };
-
-    // [Ref]
-
-    Data* ref() const;
-    void deref();
-
-    FOG_INLINE Data* refAlways() const
-    {
-      refCount.inc();
-      return (Data*)this;
-    }
-
-    FOG_INLINE void derefInline()
-    {
-      if (refCount.deref() && (flags & IsDynamic) != 0) free(this);
-    }
-
-    // [Statics]
-
-    static Data* adopt(void* address, sysuint_t capacity);
-    static Data* adopt(void* address, sysuint_t capacity, const char* str, sysuint_t length);
-    static Data* adopt(void* address, sysuint_t capacity, const Char* str, sysuint_t length);
-
-    static Data* alloc(sysuint_t capacity);
-    static Data* alloc(sysuint_t capacity, const char* str, sysuint_t length);
-    static Data* alloc(sysuint_t capacity, const Char* str, sysuint_t length);
-
-    static Data* realloc(Data* d, sysuint_t capacity);
-    static Data* copy(const Data* d);
-    static void free(Data* d);
-
-    // [Size]
-
-    static FOG_INLINE sysuint_t sizeFor(sysuint_t capacity)
-    { return sizeof(Data) + sizeof(Char) * capacity; }
-
-    // [Members]
-
-    mutable Atomic<sysuint_t> refCount;
-
-    uint32_t flags;
-    uint32_t hashCode;
-
-    sysuint_t capacity;
-    sysuint_t length;
-
-    Char data[2];
-  };
-
-  static Static<Data> _dnull;
+  static Static<StringData> _dnull;
 
   // --------------------------------------------------------------------------
   // [Function Prototypes]
@@ -141,17 +109,17 @@ struct FOG_API String
 
   String();
 
-  String(Char ch, sysuint_t length);
+  String(Char ch, size_t length);
   String(const String& other);
   String(const String& other1, const String& other2);
   String(const Char* str);
-  String(const Char* str, sysuint_t length);
+  String(const Char* str, size_t length);
 
   String(const Ascii8& str);
   String(const Utf8& str);
   String(const Utf16& str);
 
-  explicit FOG_INLINE String(Data* d) : _d(d) {}
+  explicit FOG_INLINE String(StringData* d) : _d(d) {}
 
   ~String();
 
@@ -159,10 +127,10 @@ struct FOG_API String
   // [Sharing]
   // --------------------------------------------------------------------------
 
-  //! @copydoc Doxygen::Implicit::getRefCount().
-  FOG_INLINE sysuint_t getRefCount() const { return _d->refCount.get(); }
+  //! @copydoc Doxygen::Implicit::getReference().
+  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
   //! @copydoc Doxygen::Implicit::isDetached().
-  FOG_INLINE bool isDetached() const { return getRefCount() == 1; }
+  FOG_INLINE bool isDetached() const { return getReference() == 1; }
   //! @copydoc Doxygen::Implicit::detach().
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
 
@@ -177,35 +145,26 @@ struct FOG_API String
   FOG_INLINE uint32_t getFlags() const { return _d->flags; }
   //! @copydoc Doxygen::Implicit::isNull().
   FOG_INLINE bool isNull() const { return _d == _dnull.instancep(); }
-  //! @copydoc Doxygen::Implicit::isDynamic().
-  FOG_INLINE bool isDynamic() const { return (_d->flags & Data::IsDynamic) != 0; }
-  //! @copydoc Doxygen::Implicit::isSharable().
-  FOG_INLINE bool isSharable() const { return (_d->flags & Data::IsSharable) != 0; }
-  //! @copydoc Doxygen::Implicit::isStrong().
-  FOG_INLINE bool isStrong() const { return (_d->flags & Data::IsStrong) != 0; }
-
-  //! @copydoc Doxygen::Implicit::setSharable().
-  void setSharable(bool val);
-  //! @copydoc Doxygen::Implicit::setStrong().
-  void setStrong(bool val);
+  //! @copydoc Doxygen::Implicit::isStatic().
+  FOG_INLINE bool isStatic() const { return (_d->flags & CONTAINER_DATA_STATIC) != 0; }
 
   // --------------------------------------------------------------------------
-  // [Data]
+  // [StringData]
   // --------------------------------------------------------------------------
 
   //! @brief Returns count of allocated characters (capacity).
-  FOG_INLINE sysuint_t getCapacity() const { return _d->capacity; }
+  FOG_INLINE size_t getCapacity() const { return _d->capacity; }
   //! @brief Returns count of used characters (length).
-  FOG_INLINE sysuint_t getLength() const { return _d->length; }
+  FOG_INLINE size_t getLength() const { return _d->length; }
   //! @brief Returns @c true if string is empty (length == 0).
   FOG_INLINE bool isEmpty() const { return _d->length == 0; }
 
-  err_t prepare(sysuint_t capacity);
-  Char* beginManipulation(sysuint_t max, uint32_t op);
+  err_t prepare(size_t capacity);
+  Char* beginManipulation(size_t max, uint32_t op);
 
-  err_t reserve(sysuint_t to);
-  err_t resize(sysuint_t to);
-  err_t grow(sysuint_t by);
+  err_t reserve(size_t to);
+  err_t resize(size_t to);
+  err_t grow(size_t by);
 
   void squeeze();
   void clear();
@@ -238,10 +197,10 @@ struct FOG_API String
     *end = 0;
 
     _d->hashCode = 0;
-    _d->length = (sysuint_t)(end - _d->data);
+    _d->length = (size_t)(end - _d->data);
   }
 
-  FOG_INLINE const Char& getAt(sysuint_t index) const
+  FOG_INLINE const Char& getAt(size_t index) const
   {
     FOG_ASSERT_X(index < getLength(), "Fog::String::getAt() - Index out of range.");
     return _d->data[index];
@@ -251,23 +210,23 @@ struct FOG_API String
   // [Set]
   // --------------------------------------------------------------------------
 
-  err_t set(Char ch, sysuint_t length = 1);
+  err_t set(Char ch, size_t length = 1);
   err_t set(const Ascii8& str);
   err_t set(const Utf16& str);
   err_t set(const String& other);
-  err_t set(const void* str, sysuint_t size, const TextCodec& tc);
+  err_t set(const void* str, size_t size, const TextCodec& tc);
 
-  FOG_INLINE err_t set(const Char* s, sysuint_t length = DETECT_LENGTH) { return set(Utf16(s, length)); }
+  FOG_INLINE err_t set(const Char* s, size_t length = DETECT_LENGTH) { return set(Utf16(s, length)); }
 
-  err_t setUtf8(const char* s, sysuint_t length = DETECT_LENGTH);
-  err_t setUtf32(const uint32_t* s, sysuint_t length = DETECT_LENGTH);
+  err_t setUtf8(const char* s, size_t length = DETECT_LENGTH);
+  err_t setUtf32(const uint32_t* s, size_t length = DETECT_LENGTH);
 
-  FOG_INLINE err_t setUtf16(const uint16_t* s, sysuint_t length = DETECT_LENGTH)
+  FOG_INLINE err_t setUtf16(const uint16_t* s, size_t length = DETECT_LENGTH)
   {
     return set(reinterpret_cast<const Char*>(s), length);
   }
 
-  FOG_INLINE err_t setWChar(const wchar_t* s, sysuint_t length = DETECT_LENGTH)
+  FOG_INLINE err_t setWChar(const wchar_t* s, size_t length = DETECT_LENGTH)
   {
     if (sizeof(wchar_t) == 2)
       return set(reinterpret_cast<const Char*>(s), length);
@@ -296,29 +255,29 @@ struct FOG_API String
   err_t vformat(const char* fmt, va_list ap);
 
   err_t wformat(const String& fmt, Char lex, const List<String>& args);
-  err_t wformat(const String& fmt, Char lex, const String* args, sysuint_t length);
+  err_t wformat(const String& fmt, Char lex, const String* args, size_t length);
 
   // --------------------------------------------------------------------------
   // [Append]
   // --------------------------------------------------------------------------
 
-  err_t append(Char ch, sysuint_t length = 1);
+  err_t append(Char ch, size_t length = 1);
   err_t append(const Ascii8& str);
   err_t append(const Utf16& str);
   err_t append(const String& other);
-  err_t append(const void* str, sysuint_t size, const TextCodec& tc);
+  err_t append(const void* str, size_t size, const TextCodec& tc);
 
-  FOG_INLINE err_t append(const Char* s, sysuint_t length = DETECT_LENGTH) { return append(Utf16(s, length)); }
+  FOG_INLINE err_t append(const Char* s, size_t length = DETECT_LENGTH) { return append(Utf16(s, length)); }
 
-  err_t appendUtf8(const char* s, sysuint_t length = DETECT_LENGTH);
-  err_t appendUtf32(const uint32_t* s, sysuint_t length);
+  err_t appendUtf8(const char* s, size_t length = DETECT_LENGTH);
+  err_t appendUtf32(const uint32_t* s, size_t length);
 
-  FOG_INLINE err_t appendUtf16(const uint16_t* s, sysuint_t length = DETECT_LENGTH)
+  FOG_INLINE err_t appendUtf16(const uint16_t* s, size_t length = DETECT_LENGTH)
   {
     return append(reinterpret_cast<const Char*>(s), length);
   }
 
-  FOG_INLINE err_t appendWChar(const wchar_t* s, sysuint_t length)
+  FOG_INLINE err_t appendWChar(const wchar_t* s, size_t length)
   {
     if (sizeof(wchar_t) == 2)
       return append(reinterpret_cast<const Char*>(s), length);
@@ -344,40 +303,40 @@ struct FOG_API String
   err_t appendVformat(const char* fmt, va_list ap);
 
   err_t appendWformat(const String& fmt, Char lex, const List<String>& args);
-  err_t appendWformat(const String& fmt, Char lex, const String* args, sysuint_t length);
+  err_t appendWformat(const String& fmt, Char lex, const String* args, size_t length);
 
   // --------------------------------------------------------------------------
   // [Prepend]
   // --------------------------------------------------------------------------
 
-  err_t prepend(Char ch, sysuint_t length = 1);
+  err_t prepend(Char ch, size_t length = 1);
   err_t prepend(const Ascii8& str);
   err_t prepend(const Utf16& str);
   err_t prepend(const String& other);
 
-  FOG_INLINE err_t prepend(const Char* s, sysuint_t length = DETECT_LENGTH) { return prepend(Utf16(s, length)); }
+  FOG_INLINE err_t prepend(const Char* s, size_t length = DETECT_LENGTH) { return prepend(Utf16(s, length)); }
 
   // --------------------------------------------------------------------------
   // [Insert]
   // --------------------------------------------------------------------------
 
-  err_t insert(sysuint_t index, Char ch, sysuint_t length = 1);
-  err_t insert(sysuint_t index, const Ascii8& str);
-  err_t insert(sysuint_t index, const Utf16& str);
-  err_t insert(sysuint_t index, const String& other);
+  err_t insert(size_t index, Char ch, size_t length = 1);
+  err_t insert(size_t index, const Ascii8& str);
+  err_t insert(size_t index, const Utf16& str);
+  err_t insert(size_t index, const String& other);
 
-  FOG_INLINE err_t insert(sysuint_t index, const Char* s, sysuint_t length = DETECT_LENGTH) { return insert(index, Utf16(s, length)); }
+  FOG_INLINE err_t insert(size_t index, const Char* s, size_t length = DETECT_LENGTH) { return insert(index, Utf16(s, length)); }
 
   // --------------------------------------------------------------------------
   // [Remove]
   // --------------------------------------------------------------------------
 
-  sysuint_t remove(Char ch, uint cs = CASE_SENSITIVE, const Range& range = Range(0));
-  sysuint_t remove(const String& other, uint cs = CASE_SENSITIVE, const Range& range = Range(0));
-  sysuint_t remove(const StringFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0));
+  size_t remove(Char ch, uint cs = CASE_SENSITIVE, const Range& range = Range(0));
+  size_t remove(const String& other, uint cs = CASE_SENSITIVE, const Range& range = Range(0));
+  size_t remove(const StringFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0));
 
-  sysuint_t remove(const Range& range);
-  sysuint_t remove(const Range* range, sysuint_t count);
+  size_t remove(const Range& range);
+  size_t remove(const Range* range, size_t count);
 
   // --------------------------------------------------------------------------
   // [Replace]
@@ -388,7 +347,7 @@ struct FOG_API String
   err_t replace(const StringFilter& filter, const String& after, uint cs = CASE_SENSITIVE, const Range& range = Range(0));
 
   err_t replace(const Range& range, const String& replacement);
-  err_t replace(const Range* range, sysuint_t count, const Char* after, sysuint_t alen);
+  err_t replace(const Range* range, size_t count, const Char* after, size_t alen);
 
   // --------------------------------------------------------------------------
   // [Lower / Upper]
@@ -406,13 +365,13 @@ struct FOG_API String
 
   err_t trim();
   err_t simplify();
-  err_t truncate(sysuint_t n);
-  err_t justify(sysuint_t n, Char fill, uint32_t flags);
+  err_t truncate(size_t n);
+  err_t justify(size_t n, Char fill, uint32_t flags);
 
   String trimmed() const;
   String simplified() const;
-  String truncated(sysuint_t n) const;
-  String justified(sysuint_t n, Char fill, uint32_t flags) const;
+  String truncated(size_t n) const;
+  String justified(size_t n, Char fill, uint32_t flags) const;
 
   // --------------------------------------------------------------------------
   // [Split / Join]
@@ -435,42 +394,42 @@ struct FOG_API String
   // [Conversion]
   // --------------------------------------------------------------------------
 
-  err_t atob(bool* dst, int base = 0, sysuint_t* end = NULL, uint32_t* parserFlags = NULL) const;
-  err_t atoi8(int8_t* dst, int base = 0, sysuint_t* end = NULL, uint32_t* parserFlags = NULL) const;
-  err_t atou8(uint8_t* dst, int base = 0, sysuint_t* end = NULL, uint32_t* parserFlags = NULL) const;
-  err_t atoi16(int16_t* dst, int base = 0, sysuint_t* end = NULL, uint32_t* parserFlags = NULL) const;
-  err_t atou16(uint16_t* dst, int base = 0, sysuint_t* end = NULL, uint32_t* parserFlags = NULL) const;
-  err_t atoi32(int32_t* dst, int base = 0, sysuint_t* end = NULL, uint32_t* parserFlags = NULL) const;
-  err_t atou32(uint32_t* dst, int base = 0, sysuint_t* end = NULL, uint32_t* parserFlags = NULL) const;
-  err_t atoi64(int64_t* dst, int base = 0, sysuint_t* end = NULL, uint32_t* parserFlags = NULL) const;
-  err_t atou64(uint64_t* dst, int base = 0, sysuint_t* end = NULL, uint32_t* parserFlags = NULL) const;
+  err_t atob(bool* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags = NULL) const;
+  err_t atoi8(int8_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags = NULL) const;
+  err_t atou8(uint8_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags = NULL) const;
+  err_t atoi16(int16_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags = NULL) const;
+  err_t atou16(uint16_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags = NULL) const;
+  err_t atoi32(int32_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags = NULL) const;
+  err_t atou32(uint32_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags = NULL) const;
+  err_t atoi64(int64_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags = NULL) const;
+  err_t atou64(uint64_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags = NULL) const;
 
 #if FOG_SIZEOF_LONG == 32
-  FOG_INLINE err_t atol(long* dst, int base = 0, sysuint_t* end = NULL, uint32_t* parserFlags = NULL) const
+  FOG_INLINE err_t atol(long* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags = NULL) const
   { return atoi32((int32_t*)dst, base, end, parserFlags); }
-  FOG_INLINE ulong atoul(ulong* dst, uint base = 0, sysuint_t* end = NULL, uint32_t* parserFlags = NULL) const
+  FOG_INLINE ulong atoul(ulong* dst, uint base = 0, size_t* end = NULL, uint32_t* parserFlags = NULL) const
   { return atou32((uint32_t*)dst, base, end, parserFlags); }
 #else
-  FOG_INLINE err_t atol(long* dst, int base = 0, sysuint_t* end = NULL, uint32_t* parserFlags = NULL) const
+  FOG_INLINE err_t atol(long* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags = NULL) const
   { return atoi64((int64_t*)dst, base, end, parserFlags); }
-  FOG_INLINE ulong atoul(ulong* dst, uint base = 0, sysuint_t* end = NULL, uint32_t* parserFlags = NULL) const
+  FOG_INLINE ulong atoul(ulong* dst, uint base = 0, size_t* end = NULL, uint32_t* parserFlags = NULL) const
   { return atou64((uint64_t*)dst, base, end, parserFlags); }
 #endif
 
 #if FOG_ARCH_BITS == 32
-  FOG_INLINE err_t atosysint(sysint_t* dst, int base = 0, sysuint_t* end = NULL, uint32_t* parserFlags = NULL) const
+  FOG_INLINE err_t atosysint(sysint_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags = NULL) const
   { return atoi32((int32_t*)dst, base, end, parserFlags); }
-  FOG_INLINE err_t atosysuint(sysuint_t* dst, uint base = 0, sysuint_t* end = NULL, uint32_t* parserFlags = NULL) const
+  FOG_INLINE err_t atosysuint(size_t* dst, uint base = 0, size_t* end = NULL, uint32_t* parserFlags = NULL) const
   { return atou32((uint32_t*)dst, base, end, parserFlags); }
 #else
-  FOG_INLINE err_t atosysint(sysint_t* dst, int base = 0, sysuint_t* end = NULL, uint32_t* parserFlags = NULL) const
+  FOG_INLINE err_t atosysint(sysint_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags = NULL) const
   { return atoi64((int64_t*)dst, base, end, parserFlags); }
-  FOG_INLINE err_t atosysuint(sysuint_t* dst, uint base = 0, sysuint_t* end = NULL, uint32_t* parserFlags = NULL) const
+  FOG_INLINE err_t atosysuint(size_t* dst, uint base = 0, size_t* end = NULL, uint32_t* parserFlags = NULL) const
   { return atou64((uint64_t*)dst, base, end, parserFlags); }
 #endif
 
-  err_t atof(float* dst, const Locale* locale = NULL, sysuint_t* end = NULL, uint32_t* parserFlags = NULL) const;
-  err_t atod(double* dst, const Locale* locale = NULL, sysuint_t* end = NULL, uint32_t* parserFlags = NULL) const;
+  err_t atof(float* dst, const Locale* locale = NULL, size_t* end = NULL, uint32_t* parserFlags = NULL) const;
+  err_t atod(double* dst, const Locale* locale = NULL, size_t* end = NULL, uint32_t* parserFlags = NULL) const;
 
   // --------------------------------------------------------------------------
   // [Contains]
@@ -484,28 +443,28 @@ struct FOG_API String
   // [CountOf]
   // --------------------------------------------------------------------------
 
-  sysuint_t countOf(Char ch, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  sysuint_t countOf(const String& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  sysuint_t countOf(const StringFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  size_t countOf(Char ch, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  size_t countOf(const String& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  size_t countOf(const StringFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
 
   // --------------------------------------------------------------------------
   // [IndexOf / LastIndexOf]
   // --------------------------------------------------------------------------
 
-  sysuint_t indexOf(Char ch, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  sysuint_t indexOf(const String& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  sysuint_t indexOf(const StringFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  size_t indexOf(Char ch, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  size_t indexOf(const String& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  size_t indexOf(const StringFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
 
-  sysuint_t lastIndexOf(Char ch, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  sysuint_t lastIndexOf(const String& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  sysuint_t lastIndexOf(const StringFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  size_t lastIndexOf(Char ch, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  size_t lastIndexOf(const String& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  size_t lastIndexOf(const StringFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
 
   // --------------------------------------------------------------------------
   // [IndexOfAny / LastIndexOfAny]
   // --------------------------------------------------------------------------
 
-  sysuint_t indexOfAny(const Char* chars, sysuint_t numChars, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  sysuint_t lastIndexOfAny(const Char* chars, sysuint_t numChars, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  size_t indexOfAny(const Char* chars, size_t numChars, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  size_t lastIndexOfAny(const Char* chars, size_t numChars, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
 
   // --------------------------------------------------------------------------
   // [StartsWith / EndsWith]
@@ -541,7 +500,7 @@ struct FOG_API String
   FOG_INLINE String& operator+=(const String& other) { append(other); return *this; }
   FOG_INLINE String& operator+=(const Char* str) { append(str); return *this; }
 
-  FOG_INLINE Char operator[](sysuint_t index) const { return getAt(index); }
+  FOG_INLINE Char operator[](size_t index) const { return getAt(index); }
 
   // --------------------------------------------------------------------------
   // [ByteSwap]
@@ -571,8 +530,8 @@ struct FOG_API String
   // [Utf16]
   // --------------------------------------------------------------------------
 
-  err_t validateUtf16(sysuint_t* invalidPos = NULL) const;
-  err_t getNumUtf16Chars(sysuint_t* charsCount) const;
+  err_t validateUtf16(size_t* invalidPos = NULL) const;
+  err_t getNumUtf16Chars(size_t* charsCount) const;
 
   // --------------------------------------------------------------------------
   // [FileSystem]
@@ -591,91 +550,7 @@ struct FOG_API String
   // [Members]
   // --------------------------------------------------------------------------
 
-  _FOG_CLASS_D(Data)
-};
-
-// ============================================================================
-// [Fog::StringTmp<N>]
-// ============================================================================
-
-template<sysuint_t N>
-struct StringTmp : public String
-{
-  // --------------------------------------------------------------------------
-  // [Temporary Storage]
-  // --------------------------------------------------------------------------
-
-  // Keep 'Storage' name for this struct for Borland compiler
-  struct Storage
-  {
-    Data _d;
-    Char _str[N];
-  } _storage;
-
-  // --------------------------------------------------------------------------
-  // [Construction / Destruction]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE StringTmp() :
-    String(Data::adopt((void*)&_storage, N))
-  {
-  }
-
-  FOG_INLINE StringTmp(Char ch) :
-    String(Data::adopt((void*)&_storage, N, &ch, 1))
-  {
-  }
-
-  FOG_INLINE StringTmp(const Ascii8& str) :
-    String(Data::adopt((void*)&_storage, N, str.getData(), str.getLength()))
-  {
-  }
-
-  FOG_INLINE StringTmp(const Utf16& str) :
-    String(Data::adopt((void*)&_storage, N, str.getData(), str.getLength()))
-  {
-  }
-
-  FOG_INLINE StringTmp(const String& other) :
-    String(Data::adopt((void*)&_storage, N, other.getData(), other.getLength()))
-  {
-  }
-
-  FOG_INLINE StringTmp(const StringTmp<N>& other) :
-    String(Data::adopt((void*)&_storage, N, other.getData(), other.getLength()))
-  {
-  }
-
-  FOG_INLINE StringTmp(const Char* str) :
-    String(Data::adopt((void*)&_storage, N, str, DETECT_LENGTH))
-  {
-  }
-
-  // --------------------------------------------------------------------------
-  // [Implicit Data]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE void reset()
-  {
-    if ((void*)_d != (void*)&_storage)
-    {
-      atomicPtrXchg(&_d, Data::adopt((void*)&_storage, N))->deref();
-    }
-  }
-
-  // --------------------------------------------------------------------------
-  // [Operator Overload]
-  // --------------------------------------------------------------------------
-
-  // These overloads are needed to succesfully use this template (or implicit
-  // conversion will break template and new string will be allocated).
-
-  FOG_INLINE StringTmp<N>& operator=(Char ch) { set(ch); return *this; }
-  FOG_INLINE StringTmp<N>& operator=(const Ascii8& str) { set(str); return *this; }
-  FOG_INLINE StringTmp<N>& operator=(const Utf16& str) { set(str); return *this; }
-  FOG_INLINE StringTmp<N>& operator=(const String& other) { set(other); return *this; }
-  FOG_INLINE StringTmp<N>& operator=(const StringTmp<N>& other) { set(other); return *this; }
-  FOG_INLINE StringTmp<N>& operator=(const Char* str) { set(str); return *this; }
+  _FOG_CLASS_D(StringData)
 };
 
 } // Fog namespace

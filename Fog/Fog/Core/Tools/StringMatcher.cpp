@@ -22,7 +22,7 @@ namespace Fog {
 // [Fog::StringMatcher]
 // ============================================================================
 
-static void buildTable(StringMatcher::SkipTable* skipTable, const Char* ps, sysuint_t plen, uint cs)
+static void buildTable(StringMatcher::SkipTable* skipTable, const Char* ps, size_t plen, uint cs)
 {
   FOG_ASSERT(plen > 1);
   FOG_ASSERT(plen >= UINT_MAX);
@@ -32,8 +32,8 @@ static void buildTable(StringMatcher::SkipTable* skipTable, const Char* ps, sysu
     StringMatcher::SkipTable::STATUS_INITIALIZING_NOW))
   {
     // Init skip table.
-    sysuint_t a = 32; // 256 / 8
-    sysuint_t i = plen;
+    size_t a = 32; // 256 / 8
+    size_t i = plen;
     uint* data = skipTable->data;
 
     while (a--)
@@ -108,7 +108,7 @@ err_t StringMatcher::setPattern(const StringMatcher& matcher)
   if ( (err = _pattern.set(matcher._pattern)) ) return err;
 
   // Copy skip tables if they are initialized.
-  for (sysuint_t i = 0; i != 2; i++)
+  for (size_t i = 0; i != 2; i++)
   {
     if (srcSkipTable[i].status.get() == SkipTable::STATUS_INITIALIZED)
     {
@@ -122,7 +122,7 @@ err_t StringMatcher::setPattern(const StringMatcher& matcher)
   return ERR_OK;
 }
 
-Range StringMatcher::match(const Char* str, sysuint_t slen, uint cs, const Range& range) const
+Range StringMatcher::match(const Char* str, size_t slen, uint cs, const Range& range) const
 {
   Range m(INVALID_INDEX, INVALID_INDEX);
 
@@ -130,7 +130,7 @@ Range StringMatcher::match(const Char* str, sysuint_t slen, uint cs, const Range
   FOG_ASSERT(range.isValid());
   FOG_ASSERT(range.getStart() <= slen);
 
-  sysuint_t patternLength = _pattern.getLength();
+  size_t patternLength = _pattern.getLength();
 
   // Simple reject.
   if (patternLength == 0 || patternLength > slen) return m;
@@ -144,7 +144,7 @@ Range StringMatcher::match(const Char* str, sysuint_t slen, uint cs, const Range
   // Simple 'Char' search.
   if (patternLength == 1)
   {
-    sysuint_t i = StringUtil::indexOf(strCur, range.getLengthNoCheck(), patternStr[0], cs);
+    size_t i = StringUtil::indexOf(strCur, range.getLengthNoCheck(), patternStr[0], cs);
 
     if (i != INVALID_INDEX)
     {
@@ -161,8 +161,8 @@ Range StringMatcher::match(const Char* str, sysuint_t slen, uint cs, const Range
 
   const uint* skipTable = _skipTable[cs].data;
 
-  sysuint_t skip;
-  sysuint_t remain = range.getLengthNoCheck();
+  size_t skip;
+  size_t remain = range.getLengthNoCheck();
 
   patternStr += patternLength - 1;
   strCur     += patternLength - 1;
@@ -184,7 +184,7 @@ Range StringMatcher::match(const Char* str, sysuint_t slen, uint cs, const Range
 
         // Match.
         if (skip >= patternLength)
-          return Range((sysuint_t)(strCur - str) - skip + 1, patternLength);
+          return Range((size_t)(strCur - str) - skip + 1, patternLength);
 
         if (skipTable[(strCur - skip)->ch() & 0xFF] == patternLength)
           skip = patternLength - skip;
@@ -213,7 +213,7 @@ Range StringMatcher::match(const Char* str, sysuint_t slen, uint cs, const Range
 
         // Match.
         if (skip >= patternLength)
-          return Range((sysuint_t)(strCur - str) - skip + 1, patternLength);
+          return Range((size_t)(strCur - str) - skip + 1, patternLength);
 
         if (skipTable[(strCur - skip)->toLower().ch() & 0xFF] == patternLength)
           skip = patternLength - skip;
@@ -230,7 +230,7 @@ Range StringMatcher::match(const Char* str, sysuint_t slen, uint cs, const Range
   return m;
 }
 
-sysuint_t StringMatcher::getLength() const
+size_t StringMatcher::getLength() const
 {
   return _pattern.getLength();
 }

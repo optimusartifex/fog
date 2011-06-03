@@ -29,7 +29,7 @@ struct FOG_NO_EXPORT LibraryData
 {
   // [Members]
 
-  mutable Atomic<sysuint_t> refCount;
+  mutable Atomic<size_t> refCount;
   void* handle;
 };
 
@@ -51,8 +51,8 @@ struct FOG_API Library
 
   // [Sharing]
 
-  //! @copydoc Doxygen::Implicit::getRefCount().
-  FOG_INLINE sysuint_t getRefCount() const { return _d->refCount.get(); }
+  //! @copydoc Doxygen::Implicit::getReference().
+  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
 
   // [Flags]
 
@@ -93,7 +93,7 @@ struct FOG_API Library
   //! @return Count of loaded symbols, if return value is smaller than
   //! @a count parameter, @a fail parameter will be position to begin of
   //! symbol name that wasn't loaded.
-  sysuint_t getSymbols(void** target, const char* symbols, sysuint_t symbolsLength, sysuint_t symbolsCount, char** fail);
+  size_t getSymbols(void** target, const char* symbols, size_t symbolsLength, size_t symbolsCount, char** fail);
 
   // [Operator Overload]
 

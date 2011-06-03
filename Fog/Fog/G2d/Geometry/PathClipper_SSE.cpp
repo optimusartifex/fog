@@ -67,7 +67,7 @@ static uint32_t FOG_CDECL _G2d_PathClipperF_initPath_SSE(PathClipperF& self, con
 
   Face::m128fXor(xmmClipBox, xmmClipBox, FOG_SSE_GET_CONST_PS(m128f_p0_p0_sn_sn));
 
-  sysuint_t i = src.getLength();
+  size_t i = src.getLength();
   const uint8_t* cmd = src.getCommands();
   const PointF* pts = src.getVertices();
 
@@ -197,7 +197,7 @@ static uint32_t FOG_CDECL _G2d_PathClipperF_initPath_SSE(PathClipperF& self, con
   return CLIPPER_INIT_ALREADY_CLIPPED;
 
 _MustClip:
-  self._lastIndex = (sysuint_t)(cmd - src.getCommands());
+  self._lastIndex = (size_t)(cmd - src.getCommands());
   return CLIPPER_INIT_NOT_CLIPPED;
 
 _Invalid:

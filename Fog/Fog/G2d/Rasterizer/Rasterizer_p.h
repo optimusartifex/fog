@@ -189,17 +189,17 @@ struct FOG_NO_EXPORT Rasterizer8
     //! @brief Setup this cell storage, providing the data and chunk size.
     //! @param storageSize Size of storage within CellStorage data.
     //! @param chunkSize Size of one chunk - 64-bytes or 128-bytes.
-    FOG_INLINE void setup(sysuint_t storageSize, sysuint_t chunkSize)
+    FOG_INLINE void setup(size_t storageSize, size_t chunkSize)
     {
       _storageSize = storageSize;
 
-      _dataBuffer = (uint8_t*)(((sysuint_t)this + sizeof(CellStorage) + 63) & ~(sysuint_t)63);
-      _dataSize = storageSize - ( (sysuint_t)this - (sysuint_t)_dataBuffer );
+      _dataBuffer = (uint8_t*)(((size_t)this + sizeof(CellStorage) + 63) & ~(size_t)63);
+      _dataSize = storageSize - ( (size_t)this - (size_t)_dataBuffer );
 
-      sysuint_t numBytes = (sysuint_t)this + storageSize - (sysuint_t)_dataBuffer;
+      size_t numBytes = (size_t)this + storageSize - (size_t)_dataBuffer;
 
       _chunkPtr = _dataBuffer;
-      _chunkEnd = _dataBuffer + numBytes / chunkSize * chunkSize;//(uint8_t*)(((sysuint_t)this + storageSize) & ~(_chunkSize-1));
+      _chunkEnd = _dataBuffer + numBytes / chunkSize * chunkSize;//(uint8_t*)(((size_t)this + storageSize) & ~(_chunkSize-1));
       _chunkSize = chunkSize;
     }
 
@@ -209,19 +209,19 @@ struct FOG_NO_EXPORT Rasterizer8
     FOG_INLINE CellStorage* getNext() const { return _next; }
 
     //! @brief Get the storage size.
-    FOG_INLINE sysuint_t getStorageSize() const { return _storageSize; }
+    FOG_INLINE size_t getStorageSize() const { return _storageSize; }
 
     //! @brief Get the data pointer.
     FOG_INLINE uint8_t* getDataBuffer() const { return _dataBuffer; }
     //! @brief Get the data size.
-    FOG_INLINE sysuint_t getDataSize() const { return _dataSize; }
+    FOG_INLINE size_t getDataSize() const { return _dataSize; }
 
     //! @brief Get the current chunk pointer.
     FOG_INLINE uint8_t* getChunkPtr() const { return _chunkPtr; }
     //! @brief Get the end chunk pointer (the first invalid chunk).
     FOG_INLINE uint8_t* getChunkEnd() const { return _chunkEnd; }
     //! @brief Get the chunk size.
-    FOG_INLINE sysuint_t getChunkSize() const { return _chunkSize; }
+    FOG_INLINE size_t getChunkSize() const { return _chunkSize; }
 
     //! @brief Previous storage (fully used ones, can be NULL).
     CellStorage* _prev;
@@ -230,20 +230,20 @@ struct FOG_NO_EXPORT Rasterizer8
 
     //! @brief Size of the whole cell storage including structure members and
     //! cell chunks.
-    sysuint_t _storageSize;
+    size_t _storageSize;
 
     //! @brief Cell data aligned to 64-bytes. The data are always allocated
     //! together with @c Storage structure.
     uint8_t* _dataBuffer;
     //! @brief Cell data size.
-    sysuint_t _dataSize;
+    size_t _dataSize;
 
     //! @brief Current chunk pointer.
     uint8_t* _chunkPtr;
     //! @brief End chunk pointer.
     uint8_t* _chunkEnd;
     //! @brief Chunk size.
-    sysuint_t _chunkSize;
+    size_t _chunkSize;
   };
 
   // --------------------------------------------------------------------------
@@ -312,9 +312,9 @@ struct FOG_NO_EXPORT Rasterizer8
     FOG_INLINE ChunkD* getPrev() const { return (ChunkD*)( (sysint_t)_prev & (sysint_t)-64 ); }
 
     //! @brief Get count of cells in this chunk.
-    FOG_INLINE sysuint_t getCount() const { return (sysuint_t)_prev & 63; }
+    FOG_INLINE size_t getCount() const { return (size_t)_prev & 63; }
     //! @brief Get count of available cells in this chunk.
-    FOG_INLINE sysuint_t getAvail() const { return CELLS_COUNT - getCount(); }
+    FOG_INLINE size_t getAvail() const { return CELLS_COUNT - getCount(); }
 
     //! @brief Get whether this chunk is full.
     FOG_INLINE bool isFull() const { return getCount() == CELLS_COUNT; }
@@ -325,17 +325,17 @@ struct FOG_NO_EXPORT Rasterizer8
     FOG_INLINE const CellD* getCells() const { return _cells; }
 
     //! @brief Increment cells counter.
-    FOG_INLINE void incCount(sysuint_t count)
+    FOG_INLINE void incCount(size_t count)
     {
       FOG_ASSERT(getCount() + count <= CELLS_COUNT);
       _prev += count;
     }
 
     //! @brief Set cells counter to @a count.
-    FOG_INLINE void setCount(sysuint_t count)
+    FOG_INLINE void setCount(size_t count)
     {
       FOG_ASSERT(count <= CELLS_COUNT);
-      _prev = (uint8_t*)((sysuint_t)_prev & ~(sysuint_t)63) + count;
+      _prev = (uint8_t*)((size_t)_prev & ~(size_t)63) + count;
     }
 
     //! @brief Link to prevous cells.
@@ -427,9 +427,9 @@ struct FOG_NO_EXPORT Rasterizer8
     FOG_INLINE ChunkQ* getPrev() const { return (ChunkQ*)( (sysint_t)_prev & (sysint_t)-64 ); }
 
     //! @brief Get count of cells in this chunk.
-    FOG_INLINE sysuint_t getCount() const { return (sysuint_t)_prev & 63; }
+    FOG_INLINE size_t getCount() const { return (size_t)_prev & 63; }
     //! @brief Get count of available cells in this chunk.
-    FOG_INLINE sysuint_t getAvail() const { return CELLS_COUNT - getCount(); }
+    FOG_INLINE size_t getAvail() const { return CELLS_COUNT - getCount(); }
 
     //! @brief Get whether this chunk is full.
     FOG_INLINE bool isFull() const { return getCount() == CELLS_COUNT; }
@@ -440,17 +440,17 @@ struct FOG_NO_EXPORT Rasterizer8
     FOG_INLINE const CellQ* getCells() const { return _cells; }
 
     //! @brief Increment cells counter.
-    FOG_INLINE void incCount(sysuint_t count)
+    FOG_INLINE void incCount(size_t count)
     {
       FOG_ASSERT(getCount() + count <= CELLS_COUNT);
       _prev += count;
     }
 
     //! @brief Set cells counter to @a count.
-    FOG_INLINE void setCount(sysuint_t count)
+    FOG_INLINE void setCount(size_t count)
     {
       FOG_ASSERT(count <= CELLS_COUNT);
-      _prev = (uint8_t*)((sysuint_t)_prev & ~(sysuint_t)63) + count;
+      _prev = (uint8_t*)((size_t)_prev & ~(size_t)63) + count;
     }
 
     //! @brief Link to prevous cells.
@@ -617,7 +617,7 @@ struct FOG_NO_EXPORT Rasterizer8
   // --------------------------------------------------------------------------
 
   //! @internal
-  bool getNextChunkStorage(sysuint_t chunkSize);
+  bool getNextChunkStorage(size_t chunkSize);
 
   // --------------------------------------------------------------------------
   // [Renderer]
@@ -634,7 +634,7 @@ struct FOG_NO_EXPORT Rasterizer8
   // --------------------------------------------------------------------------
 
   typedef Span8* (*SweepScanlineSimpleFn)(Rasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y);
-  typedef Span8* (*SweepScanlineRegionFn)(Rasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y, const BoxI* clipBoxes, sysuint_t count);
+  typedef Span8* (*SweepScanlineRegionFn)(Rasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y, const BoxI* clipBoxes, size_t count);
   typedef Span8* (*SweepScanlineSpansFn)(Rasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y, const Span8* clipSpans);
 
   // --------------------------------------------------------------------------
@@ -648,7 +648,7 @@ struct FOG_NO_EXPORT Rasterizer8
   //! @brief Enhanced version of @c sweepScanline() that accepts clip region.
   //!
   //! This method is called by raster paint engine if clipping region is complex.
-  FOG_INLINE Span8* sweepScanline(Scanline8& scanline, MemoryBuffer& temp, int y, const BoxI* clipBoxes, sysuint_t count)
+  FOG_INLINE Span8* sweepScanline(Scanline8& scanline, MemoryBuffer& temp, int y, const BoxI* clipBoxes, size_t count)
   { return _sweepScanlineRegionFn(this, scanline, temp, y, clipBoxes, count); }
 
   //! @brief Enhanced version of @c sweepScanline() that accepts clip spans.

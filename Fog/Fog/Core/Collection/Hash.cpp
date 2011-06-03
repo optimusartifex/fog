@@ -25,9 +25,9 @@ namespace Fog {
 
 Static<UnorderedAbstract::Data> UnorderedAbstract::_dnull;
 
-UnorderedAbstract::Data* UnorderedAbstract::_allocData(sysuint_t capacity)
+UnorderedAbstract::Data* UnorderedAbstract::_allocData(size_t capacity)
 {
-  sysuint_t dsize =
+  size_t dsize =
     sizeof(Data) - sizeof(void*) + capacity * sizeof(void**);
 
   Data* d = (Data*)Memory::calloc(dsize);
@@ -37,10 +37,10 @@ UnorderedAbstract::Data* UnorderedAbstract::_allocData(sysuint_t capacity)
   d->capacity = capacity;
 
   d->expandCapacity = _calcExpandCapacity(capacity);
-  d->expandLength = (sysuint_t)((sysint_t)d->capacity * 0.92);
+  d->expandLength = (size_t)((sysint_t)d->capacity * 0.92);
 
   d->shrinkCapacity = _calcShrinkCapacity(capacity);
-  d->shrinkLength = (sysuint_t)((sysint_t)d->shrinkCapacity * 0.70);
+  d->shrinkLength = (size_t)((sysint_t)d->shrinkCapacity * 0.70);
 
   return d;
 }
@@ -50,9 +50,9 @@ void UnorderedAbstract::_freeData(Data* d)
   Memory::free(d);
 }
 
-sysuint_t UnorderedAbstract::_calcExpandCapacity(sysuint_t capacity)
+size_t UnorderedAbstract::_calcExpandCapacity(size_t capacity)
 {
-  static const sysuint_t threshold = 1024*1024*4;
+  static const size_t threshold = 1024*1024*4;
 
   if (capacity < threshold)
     return capacity << 1;
@@ -60,9 +60,9 @@ sysuint_t UnorderedAbstract::_calcExpandCapacity(sysuint_t capacity)
     return capacity + threshold;
 }
 
-sysuint_t UnorderedAbstract::_calcShrinkCapacity(sysuint_t capacity)
+size_t UnorderedAbstract::_calcShrinkCapacity(size_t capacity)
 {
-  static const sysuint_t threshold = 1024*1024*4;
+  static const size_t threshold = 1024*1024*4;
 
   if (capacity < threshold)
     return capacity >> 1;
@@ -70,12 +70,12 @@ sysuint_t UnorderedAbstract::_calcShrinkCapacity(sysuint_t capacity)
     return capacity - threshold;
 }
 
-bool UnorderedAbstract::_rehash(sysuint_t bc)
+bool UnorderedAbstract::_rehash(size_t bc)
 {
   Data* newd = _allocData(bc);
   if (FOG_IS_NULL(newd)) return false;
 
-  sysuint_t i, len = _d->capacity;
+  size_t i, len = _d->capacity;
   for (i = 0; i < len; i++)
   {
     Node* node = (Node*)(_d->buckets[i]);
@@ -109,7 +109,7 @@ void UnorderedAbstract::_Iterator::_toBegin()
     return;
   }
 
-  sysuint_t i, len = _hash->_d->capacity;
+  size_t i, len = _hash->_d->capacity;
   UnorderedAbstract::Node* node;
 
   for (i = 0; i < len; i++)
@@ -127,7 +127,7 @@ void UnorderedAbstract::_Iterator::_toBegin()
 
 void UnorderedAbstract::_Iterator::_toNext()
 {
-  sysuint_t i, len = _hash->_d->capacity;
+  size_t i, len = _hash->_d->capacity;
   UnorderedAbstract::Node* node = _node;
 
   // Bail out if there is problem
@@ -156,7 +156,7 @@ void UnorderedAbstract::_Iterator::_toNext()
 UnorderedAbstract::Node* UnorderedAbstract::_Iterator::_removeCurrent()
 {
   Node* node = _node;
-  sysuint_t i = _index;
+  size_t i = _index;
 
   if (node == NULL) return NULL;
 

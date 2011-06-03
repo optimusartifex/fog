@@ -263,7 +263,7 @@ static bool _initCells(Rasterizer8* rasterizer)
 template<typename _CHUNK_TYPE, typename _CELL_TYPE>
 static void _addPathF(
   Rasterizer8* rasterizer,
-  const PointF* vertices, const uint8_t* commands, sysuint_t count)
+  const PointF* vertices, const uint8_t* commands, size_t count)
 {
   if (count == 0) return;
 
@@ -271,7 +271,7 @@ static void _addPathF(
   const uint8_t* end = commands + count;
 
   const PointF* polyPoints;   // Polyline points.
-  sysuint_t polyLength;       // Polyline length.
+  size_t polyLength;       // Polyline length.
 
   Fixed24x8 x0, startX0;      // Current/Start moveTo x position.
   Fixed24x8 y0, startY0;      // Current/Start moveTo y position.
@@ -333,7 +333,7 @@ _MoveTo:
       }
 
       polyPoints = vertices;
-      polyLength = (sysuint_t)(commands - mark);
+      polyLength = (size_t)(commands - mark);
 
       vertices += polyLength;
       goto _PolyLine;
@@ -422,7 +422,7 @@ _ClosePath:
 template<typename _CHUNK_TYPE, typename _CELL_TYPE>
 static void _addPathD(
   Rasterizer8* rasterizer,
-  const PointD* vertices, const uint8_t* commands, sysuint_t count)
+  const PointD* vertices, const uint8_t* commands, size_t count)
 {
   if (count == 0) return;
 
@@ -430,7 +430,7 @@ static void _addPathD(
   const uint8_t* end = commands + count;
 
   const PointD* polyPoints;   // Polyline points.
-  sysuint_t polyLength;       // Polyline length.
+  size_t polyLength;       // Polyline length.
 
   Fixed24x8 x0, startX0;      // Current/Start moveTo x position.
   Fixed24x8 y0, startY0;      // Current/Start moveTo y position.
@@ -492,7 +492,7 @@ _MoveTo:
       }
 
       polyPoints = vertices;
-      polyLength = (sysuint_t)(commands - mark);
+      polyLength = (size_t)(commands - mark);
 
       vertices += polyLength;
       goto _PolyLine;
@@ -734,7 +734,7 @@ void Rasterizer8::addPath(const PathF& path)
   if (_error) return;
   FOG_ASSERT(_isFinalized == false);
 
-  sysuint_t length = path.getLength();
+  size_t length = path.getLength();
   if (length == 0) return;
 
   if (_shape == SHAPE_TYPE_NONE)
@@ -759,7 +759,7 @@ void Rasterizer8::addPath(const PathD& path)
   if (_error) return;
   FOG_ASSERT(_isFinalized == false);
 
-  sysuint_t length = path.getLength();
+  size_t length = path.getLength();
   if (length == 0) return;
 
   if (_shape == SHAPE_TYPE_NONE)
@@ -835,7 +835,7 @@ void Rasterizer8::switchToPath()
 // [Fog::Rasterizer8 - Cache]
 // ============================================================================
 
-bool Rasterizer8::getNextChunkStorage(sysuint_t chunkSize)
+bool Rasterizer8::getNextChunkStorage(size_t chunkSize)
 {
   CellStorage* storage = _current ? _current->getNext() : NULL;
   if (storage != NULL)
@@ -1251,7 +1251,7 @@ static FOG_INLINE void qsortCells(CELL* start, uint32_t num)
 
   for (;;)
   {
-    sysuint_t len = sysuint_t(limit - base);
+    size_t len = size_t(limit - base);
 
     CELL* i;
     CELL* j;
@@ -1422,7 +1422,7 @@ static bool _mergeCells(Rasterizer8* rasterizer, void* _chunks, MemoryBuffer& te
       chunkCur = chunkCur->getPrev();
     };
 
-    _CELL_TYPE* buf = reinterpret_cast<_CELL_TYPE*>(temp.alloc((sysuint_t)numCells * sizeof(_CELL_TYPE)));
+    _CELL_TYPE* buf = reinterpret_cast<_CELL_TYPE*>(temp.alloc((size_t)numCells * sizeof(_CELL_TYPE)));
     if (FOG_IS_NULL(buf)) return false;
 
     chunkCur = chunk;
@@ -1611,7 +1611,7 @@ static Span8* _sweepScanlineSimpleImpl(
 template<typename _CHUNK_TYPE, typename _CELL_TYPE, int _RULE, int _USE_ALPHA>
 static Span8* _sweepScanlineRegionImpl(
   Rasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y,
-  const BoxI* clipBoxes, sysuint_t count)
+  const BoxI* clipBoxes, size_t count)
 {
   if (!count) return NULL;
   y -= rasterizer->_sceneBox.y0;
@@ -2383,7 +2383,7 @@ static Span8* _sweepRectSimpleImpl(
 
 static Span8* _sweepRectRegionImpl(
   Rasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y,
-  const BoxI* clipBoxes, sysuint_t count)
+  const BoxI* clipBoxes, size_t count)
 {
   y -= rasterizer->_boundingBox.y0;
 

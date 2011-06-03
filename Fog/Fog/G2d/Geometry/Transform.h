@@ -1014,23 +1014,23 @@ struct FOG_NO_EXPORT TransformF
     _g2d.transformf.mapPointF(*this, dst, src);
   }
 
-  FOG_INLINE void mapPoints(PointF* pts, sysuint_t count) const
+  FOG_INLINE void mapPoints(PointF* pts, size_t count) const
   {
     _g2d.transformf.mapPointsF[getType()](*this, pts, pts, count);
   }
 
-  FOG_INLINE void mapPoints(PointF* dst, const PointF* src, sysuint_t count) const
+  FOG_INLINE void mapPoints(PointF* dst, const PointF* src, size_t count) const
   {
     _g2d.transformf.mapPointsF[getType()](*this, dst, src, count);
   }
 
-  FOG_INLINE void _mapPoints(PointF* pts, sysuint_t count) const
+  FOG_INLINE void _mapPoints(PointF* pts, size_t count) const
   {
     FOG_ASSERT(_type < TRANSFORM_TYPE_COUNT);
     _g2d.transformf.mapPointsF[_type](*this, pts, pts, count);
   }
 
-  FOG_INLINE void _mapPoints(PointF* dst, const PointF* src, sysuint_t count) const
+  FOG_INLINE void _mapPoints(PointF* dst, const PointF* src, size_t count) const
   {
     FOG_ASSERT(_type < TRANSFORM_TYPE_COUNT);
     _g2d.transformf.mapPointsF[_type](*this, dst, src, count);
@@ -1056,7 +1056,7 @@ struct FOG_NO_EXPORT TransformF
     return _g2d.transformf.mapPathF(*this, dst, src, cntOp);
   }
 
-  FOG_INLINE err_t mapPathData(PathF& dst, const uint8_t* srcCmd, const PointF* srcPts, sysuint_t srcLength, uint32_t cntOp = CONTAINER_OP_REPLACE) const
+  FOG_INLINE err_t mapPathData(PathF& dst, const uint8_t* srcCmd, const PointF* srcPts, size_t srcLength, uint32_t cntOp = CONTAINER_OP_REPLACE) const
   {
     return _g2d.transformf.mapPathDataF(*this, dst, srcCmd, srcPts, srcLength, cntOp);
   }
@@ -2206,34 +2206,34 @@ struct FOG_NO_EXPORT TransformD
     _g2d.transformd.mapPointD(*this, dst, src);
   }
 
-  FOG_INLINE void mapPoints(PointD* pts, sysuint_t count) const
+  FOG_INLINE void mapPoints(PointD* pts, size_t count) const
   {
     _g2d.transformd.mapPointsD[getType()](*this, pts, pts, count);
   }
 
-  FOG_INLINE void mapPoints(PointD* dst, const PointF* src, sysuint_t count) const
+  FOG_INLINE void mapPoints(PointD* dst, const PointF* src, size_t count) const
   {
     _g2d.transformd.mapPointsF[getType()](*this, dst, src, count);
   }
 
-  FOG_INLINE void mapPoints(PointD* dst, const PointD* src, sysuint_t count) const
+  FOG_INLINE void mapPoints(PointD* dst, const PointD* src, size_t count) const
   {
     _g2d.transformd.mapPointsD[getType()](*this, dst, src, count);
   }
 
-  FOG_INLINE void _mapPoints(PointD* pts, sysuint_t count) const
+  FOG_INLINE void _mapPoints(PointD* pts, size_t count) const
   {
     FOG_ASSERT(_type < TRANSFORM_TYPE_COUNT);
     _g2d.transformd.mapPointsD[_type](*this, pts, pts, count);
   }
 
-  FOG_INLINE void _mapPoints(PointD* dst, const PointF* src, sysuint_t count) const
+  FOG_INLINE void _mapPoints(PointD* dst, const PointF* src, size_t count) const
   {
     FOG_ASSERT(_type < TRANSFORM_TYPE_COUNT);
     _g2d.transformd.mapPointsF[_type](*this, dst, src, count);
   }
 
-  FOG_INLINE void _mapPoints(PointD* dst, const PointD* src, sysuint_t count) const
+  FOG_INLINE void _mapPoints(PointD* dst, const PointD* src, size_t count) const
   {
     FOG_ASSERT(_type < TRANSFORM_TYPE_COUNT);
     _g2d.transformd.mapPointsD[_type](*this, dst, src, count);
@@ -2249,12 +2249,12 @@ struct FOG_NO_EXPORT TransformD
     return _g2d.transformd.mapPathD(*this, dst, src, cntOp);
   }
 
-  FOG_INLINE err_t mapPathData(PathD& dst, const uint8_t* srcCmd, const PointF* srcPts, sysuint_t srcLength, uint32_t cntOp = CONTAINER_OP_REPLACE) const
+  FOG_INLINE err_t mapPathData(PathD& dst, const uint8_t* srcCmd, const PointF* srcPts, size_t srcLength, uint32_t cntOp = CONTAINER_OP_REPLACE) const
   {
     return _g2d.transformd.mapPathDataF(*this, dst, srcCmd, srcPts, srcLength, cntOp);
   }
 
-  FOG_INLINE err_t mapPathData(PathD& dst, const uint8_t* srcCmd, const PointD* srcPts, sysuint_t srcLength, uint32_t cntOp = CONTAINER_OP_REPLACE) const
+  FOG_INLINE err_t mapPathData(PathD& dst, const uint8_t* srcCmd, const PointD* srcPts, size_t srcLength, uint32_t cntOp = CONTAINER_OP_REPLACE) const
   {
     return _g2d.transformd.mapPathDataD(*this, dst, srcCmd, srcPts, srcLength, cntOp);
   }

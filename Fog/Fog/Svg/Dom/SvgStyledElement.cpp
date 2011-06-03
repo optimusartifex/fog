@@ -80,7 +80,7 @@ static Utf16 parseCssLinkId(const String& url)
   {
     if (++idStr == idEnd) goto _Bail;
   }
-  return Utf16(idMark, (sysuint_t)(idStr - idMark));
+  return Utf16(idMark, (size_t)(idStr - idMark));
 
 _Bail:
   return Utf16((const Char*)NULL, 0);

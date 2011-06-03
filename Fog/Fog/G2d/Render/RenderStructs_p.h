@@ -216,7 +216,7 @@ struct FOG_NO_EXPORT RenderPatternContext
   // --------------------------------------------------------------------------
 
   //! @brief Reference count.
-  Atomic<sysuint_t> _refCount;
+  Atomic<size_t> _refCount;
 
   //! @brief Prepare function.
   RenderPatternPrepareFn _prepare;

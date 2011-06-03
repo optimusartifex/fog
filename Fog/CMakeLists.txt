@@ -292,25 +292,25 @@ Set(FOG_CORE_LIB_HEADERS
 # [Fog/Core/Collection]
 Set(FOG_CORE_COLLECTION_SOURCES
   Fog/Core/Collection/Algorithms.cpp
+  Fog/Core/Collection/BufferP.cpp
   Fog/Core/Collection/List.cpp
+  Fog/Core/Collection/ListP.cpp
   Fog/Core/Collection/Hash.cpp
   Fog/Core/Collection/HashUtil.cpp
-  Fog/Core/Collection/PBuffer.cpp
-  Fog/Core/Collection/PHash.cpp
-  Fog/Core/Collection/PList.cpp
-  Fog/Core/Collection/PStack.cpp
+  Fog/Core/Collection/HashP.cpp
+  Fog/Core/Collection/StackP.cpp
   Fog/Core/Collection/Util.cpp
 )
 
 Set(FOG_CORE_COLLECTION_HEADERS
   Fog/Core/Collection/Algorithms.h
+  Fog/Core/Collection/BufferP.h
   Fog/Core/Collection/List.h
+  Fog/Core/Collection/ListP.h
   Fog/Core/Collection/Hash.h
   Fog/Core/Collection/HashUtil.h
-  Fog/Core/Collection/PBuffer.h
-  Fog/Core/Collection/PHash.h
-  Fog/Core/Collection/PList.h
-  Fog/Core/Collection/PStack.h
+  Fog/Core/Collection/HashP.h
+  Fog/Core/Collection/StackP.h
   Fog/Core/Collection/Util.h
 )
 
@@ -349,15 +349,6 @@ Set(FOG_CORE_CPU_HEADERS
   Fog/Core/Cpu/Intrin_SSE2.h
   Fog/Core/Cpu/Intrin_SSE3.h
   Fog/Core/Cpu/Intrin_SSSE3.h
-)
-
-# [Fog/Core/Data]
-Set(FOG_CORE_DATA_SOURCES
-  Fog/Core/Data/Value.cpp
-)
-
-Set(FOG_CORE_DATA_HEADERS
-  Fog/Core/Data/Value.h
 )
 
 # [Fog/Core/DateTime]
@@ -552,6 +543,7 @@ Set(FOG_CORE_SYSTEM_HEADERS
 
 # [Fog/Core/Threading]
 Set(FOG_CORE_THREADING_SOURCES
+  Fog/Core/Threading/Lazy.cpp
   Fog/Core/Threading/Lock.cpp
   Fog/Core/Threading/Thread.cpp
   Fog/Core/Threading/ThreadCondition.cpp
@@ -567,6 +559,7 @@ Set(FOG_CORE_THREADING_HEADERS
   Fog/Core/Threading/Atomic_msc_intrin.h
   Fog/Core/Threading/Atomic_msc_x86.h
   Fog/Core/Threading/AtomicPadding.h
+  Fog/Core/Threading/Lazy.h
   Fog/Core/Threading/Lock.h
   Fog/Core/Threading/Thread.h
   Fog/Core/Threading/ThreadCondition.h
@@ -584,7 +577,6 @@ Set(FOG_CORE_TOOLS_SOURCES
   Fog/Core/Tools/Char.cpp
   Fog/Core/Tools/CharUtil.cpp
   Fog/Core/Tools/Format.cpp
-  Fog/Core/Tools/Lazy.cpp
   Fog/Core/Tools/Locale.cpp
   Fog/Core/Tools/ManagedString.cpp
   Fog/Core/Tools/Range.cpp
@@ -610,7 +602,6 @@ Set(FOG_CORE_TOOLS_HEADERS
   Fog/Core/Tools/Char.h
   Fog/Core/Tools/CharUtil.h
   Fog/Core/Tools/Format.h
-  Fog/Core/Tools/Lazy.h
   Fog/Core/Tools/Locale.h
   Fog/Core/Tools/ManagedString.h
   Fog/Core/Tools/Range.h
@@ -623,8 +614,18 @@ Set(FOG_CORE_TOOLS_HEADERS
   Fog/Core/Tools/Stub.h
   Fog/Core/Tools/TextChunk.h
   Fog/Core/Tools/TextCodec.h
+  Fog/Core/Tools/TextCodec_Page8Tables_p.h
   Fog/Core/Tools/TextIterator.h
   Fog/Core/Tools/Unicode.h
+)
+
+# [Fog/Core/Variant]
+Set(FOG_CORE_VARIANT_SOURCES
+  Fog/Core/Variant/Var.cpp
+)
+
+Set(FOG_CORE_VARIANT_HEADERS
+  Fog/Core/Variant/Var.h
 )
 
 # [Fog/Core/Win]
@@ -663,7 +664,6 @@ Source_Group("Core"                 FILES ${FOG_CORE_LIB_SOURCES}             ${
 Source_Group("Core/Collection"      FILES ${FOG_CORE_COLLECTION_SOURCES}      ${FOG_CORE_COLLECTION_HEADERS}     )
 Source_Group("Core/Config"          FILES ${FOG_CORE_CONFIG_SOURCES}          ${FOG_CORE_CONFIG_HEADERS}         )
 Source_Group("Core/Cpu"             FILES ${FOG_CORE_CPU_SOURCES}             ${FOG_CORE_CPU_HEADERS}            )
-Source_Group("Core/Data"            FILES ${FOG_CORE_DATA_SOURCES}            ${FOG_CORE_DATA_HEADERS}           )
 Source_Group("Core/DateTime"        FILES ${FOG_CORE_DATETIME_SOURCES}        ${FOG_CORE_DATETIME_HEADERS}       )
 Source_Group("Core/Face"            FILES ${FOG_CORE_FACE_SOURCES}            ${FOG_CORE_FACE_HEADERS}           )
 Source_Group("Core/Global"          FILES ${FOG_CORE_GLOBAL_SOURCES}          ${FOG_CORE_GLOBAL_HEADERS}         )
@@ -677,6 +677,7 @@ Source_Group("Core/Pack"            FILES ${FOG_CORE_PACK_SOURCES}            ${
 Source_Group("Core/System"          FILES ${FOG_CORE_SYSTEM_SOURCES}          ${FOG_CORE_SYSTEM_HEADERS}         )
 Source_Group("Core/Threading"       FILES ${FOG_CORE_THREADING_SOURCES}       ${FOG_CORE_THREADING_HEADERS}      )
 Source_Group("Core/Tools"           FILES ${FOG_CORE_TOOLS_SOURCES}           ${FOG_CORE_TOOLS_HEADERS}          )
+Source_Group("Core/Variant"         FILES ${FOG_CORE_VARIANT_SOURCES}         ${FOG_CORE_VARIANT_HEADERS}        )
 
 If(FOG_OS_WINDOWS)
 Source_Group("Core/Win"             FILES ${FOG_CORE_WIN_SOURCES}             ${FOG_CORE_WIN_HEADERS}            )
@@ -1708,7 +1709,6 @@ Set(FOG_ALL_SOURCES
   ${FOG_CORE_COLLECTION_SOURCES}
   ${FOG_CORE_CONFIG_SOURCES}
   ${FOG_CORE_CPU_SOURCES}
-  ${FOG_CORE_DATA_SOURCES}
   ${FOG_CORE_DATETIME_SOURCES}
   ${FOG_CORE_FACE_SOURCES}
   ${FOG_CORE_GLOBAL_SOURCES}
@@ -1721,6 +1721,7 @@ Set(FOG_ALL_SOURCES
   ${FOG_CORE_SYSTEM_SOURCES}
   ${FOG_CORE_THREADING_SOURCES}
   ${FOG_CORE_TOOLS_SOURCES}
+  ${FOG_CORE_VARIANT_SOURCES}
   # Fog/G2d.
   ${FOG_G2D_LIB_SOURCES}
   ${FOG_G2D_FACE_SOURCES}
@@ -1767,7 +1768,6 @@ Set(FOG_ALL_HEADERS
   ${FOG_CORE_COLLECTION_HEADERS}
   ${FOG_CORE_CONFIG_HEADERS}
   ${FOG_CORE_CPU_HEADERS}
-  ${FOG_CORE_DATA_HEADERS}
   ${FOG_CORE_DATETIME_HEADERS}
   ${FOG_CORE_FACE_HEADERS}
   ${FOG_CORE_GLOBAL_HEADERS}
@@ -1780,6 +1780,7 @@ Set(FOG_ALL_HEADERS
   ${FOG_CORE_SYSTEM_HEADERS}
   ${FOG_CORE_THREADING_HEADERS}
   ${FOG_CORE_TOOLS_HEADERS}
+  ${FOG_CORE_VARIANT_HEADERS}
   # Fog/G2d.
   ${FOG_G2D_LIB_HEADERS}
   ${FOG_G2D_FACE_HEADERS}

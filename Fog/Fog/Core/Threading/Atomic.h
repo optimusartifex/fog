@@ -20,7 +20,7 @@ namespace Fog {
 // [Fog::AtomicImplementation]
 // ============================================================================
 
-template<sysuint_t SizeI>
+template<size_t SizeI>
 struct AtomicImplementation {};
 
 } // Fog namespace

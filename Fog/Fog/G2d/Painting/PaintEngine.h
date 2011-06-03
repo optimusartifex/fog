@@ -186,17 +186,17 @@ struct FOG_NO_EXPORT PainterVTable
   typedef err_t (FOG_CDECL *PaintRectF)(Painter& self, const RectF& r);
   typedef err_t (FOG_CDECL *PaintRectD)(Painter& self, const RectD& r);
 
-  typedef err_t (FOG_CDECL *PaintRectsI)(Painter& self, const RectI* r, sysuint_t count);
-  typedef err_t (FOG_CDECL *PaintRectsF)(Painter& self, const RectF* r, sysuint_t count);
-  typedef err_t (FOG_CDECL *PaintRectsD)(Painter& self, const RectD* r, sysuint_t count);
+  typedef err_t (FOG_CDECL *PaintRectsI)(Painter& self, const RectI* r, size_t count);
+  typedef err_t (FOG_CDECL *PaintRectsF)(Painter& self, const RectF* r, size_t count);
+  typedef err_t (FOG_CDECL *PaintRectsD)(Painter& self, const RectD* r, size_t count);
 
-  typedef err_t (FOG_CDECL *PaintPolylineI)(Painter& self, const PointI* p, sysuint_t count);
-  typedef err_t (FOG_CDECL *PaintPolylineF)(Painter& self, const PointF* p, sysuint_t count);
-  typedef err_t (FOG_CDECL *PaintPolylineD)(Painter& self, const PointD* p, sysuint_t count);
+  typedef err_t (FOG_CDECL *PaintPolylineI)(Painter& self, const PointI* p, size_t count);
+  typedef err_t (FOG_CDECL *PaintPolylineF)(Painter& self, const PointF* p, size_t count);
+  typedef err_t (FOG_CDECL *PaintPolylineD)(Painter& self, const PointD* p, size_t count);
 
-  typedef err_t (FOG_CDECL *PaintPolygonI)(Painter& self, const PointI* p, sysuint_t count);
-  typedef err_t (FOG_CDECL *PaintPolygonF)(Painter& self, const PointF* p, sysuint_t count);
-  typedef err_t (FOG_CDECL *PaintPolygonD)(Painter& self, const PointD* p, sysuint_t count);
+  typedef err_t (FOG_CDECL *PaintPolygonI)(Painter& self, const PointI* p, size_t count);
+  typedef err_t (FOG_CDECL *PaintPolygonF)(Painter& self, const PointF* p, size_t count);
+  typedef err_t (FOG_CDECL *PaintPolygonD)(Painter& self, const PointD* p, size_t count);
 
   typedef err_t (FOG_CDECL *PaintShapeF)(Painter& self, uint32_t shapeType, const void* shapeData);
   typedef err_t (FOG_CDECL *PaintShapeD)(Painter& self, uint32_t shapeType, const void* shapeData);
@@ -334,13 +334,13 @@ struct FOG_NO_EXPORT PainterVTable
   typedef err_t (FOG_CDECL *ClipRectF)(Painter& self, uint32_t clipOp, const RectF& r);
   typedef err_t (FOG_CDECL *ClipRectD)(Painter& self, uint32_t clipOp, const RectD& r);
 
-  typedef err_t (FOG_CDECL *ClipRectsI)(Painter& self, uint32_t clipOp, const RectI* r, sysuint_t count);
-  typedef err_t (FOG_CDECL *ClipRectsF)(Painter& self, uint32_t clipOp, const RectF* r, sysuint_t count);
-  typedef err_t (FOG_CDECL *ClipRectsD)(Painter& self, uint32_t clipOp, const RectD* r, sysuint_t count);
+  typedef err_t (FOG_CDECL *ClipRectsI)(Painter& self, uint32_t clipOp, const RectI* r, size_t count);
+  typedef err_t (FOG_CDECL *ClipRectsF)(Painter& self, uint32_t clipOp, const RectF* r, size_t count);
+  typedef err_t (FOG_CDECL *ClipRectsD)(Painter& self, uint32_t clipOp, const RectD* r, size_t count);
 
-  typedef err_t (FOG_CDECL *ClipPolygonI)(Painter& self, uint32_t clipOp, const PointI* p, sysuint_t count);
-  typedef err_t (FOG_CDECL *ClipPolygonF)(Painter& self, uint32_t clipOp, const PointF* p, sysuint_t count);
-  typedef err_t (FOG_CDECL *ClipPolygonD)(Painter& self, uint32_t clipOp, const PointD* p, sysuint_t count);
+  typedef err_t (FOG_CDECL *ClipPolygonI)(Painter& self, uint32_t clipOp, const PointI* p, size_t count);
+  typedef err_t (FOG_CDECL *ClipPolygonF)(Painter& self, uint32_t clipOp, const PointF* p, size_t count);
+  typedef err_t (FOG_CDECL *ClipPolygonD)(Painter& self, uint32_t clipOp, const PointD* p, size_t count);
 
   typedef err_t (FOG_CDECL *ClipShapeF)(Painter& self, uint32_t clipOp, uint32_t shapeType, const void* shapeData);
   typedef err_t (FOG_CDECL *ClipShapeD)(Painter& self, uint32_t clipOp, uint32_t shapeType, const void* shapeData);

@@ -28,7 +28,7 @@
 #else
 
 // Defined in Fog/Core/Memory/Memory.h
-static FOG_INLINE void* _fog_memory_alloc(sysuint_t size);
+static FOG_INLINE void* _fog_memory_alloc(size_t size);
 static FOG_INLINE void _fog_memory_free(void* addr);
 
 struct __FogMemMgr {};

@@ -85,7 +85,7 @@ struct FOG_NO_EXPORT PatternDataF
   // --------------------------------------------------------------------------
 
   //! @brief Reference count.
-  mutable Atomic<sysuint_t> refCount;
+  mutable Atomic<size_t> refCount;
 
   //! @brief Pattern type.
   uint32_t type;
@@ -147,7 +147,7 @@ struct FOG_NO_EXPORT PatternDataD
   // --------------------------------------------------------------------------
 
   //! @brief Reference count.
-  mutable Atomic<sysuint_t> refCount;
+  mutable Atomic<size_t> refCount;
 
   //! @brief Pattern type.
   uint32_t type;
@@ -196,9 +196,9 @@ struct FOG_API PatternF
   // [Data]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE sysuint_t getRefCount() const { return _d->refCount.get(); }
+  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
 
-  FOG_INLINE bool isDetached() const { return getRefCount() == 1; }
+  FOG_INLINE bool isDetached() const { return getReference() == 1; }
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
 
   err_t _detach();
@@ -401,9 +401,9 @@ struct FOG_API PatternD
   // [Data]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE sysuint_t getRefCount() const { return _d->refCount.get(); }
+  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
 
-  FOG_INLINE bool isDetached() const { return getRefCount() == 1; }
+  FOG_INLINE bool isDetached() const { return getReference() == 1; }
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
 
   err_t _detach();

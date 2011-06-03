@@ -61,20 +61,20 @@ struct FOG_NO_EXPORT ListData
   // [Members]
 
   //! @brief Reference count.
-  mutable Atomic<sysuint_t> refCount;
+  mutable Atomic<size_t> refCount;
 
   //! @brief Capacity.
-  sysuint_t capacity;
+  size_t capacity;
 
   //! @brief Elements in list.
-  sysuint_t length;
+  size_t length;
 
   //! @brief Start index in data.
   //!
   //! In Fog::List<T>::Data is startIndex always equal to 0.
   //!
   //! In Fog::List<T>::Data is startIndex variable.
-  sysuint_t startIndex;
+  size_t startIndex;
 
   //! @brief Compatibility with ListBase::UntypedData::endIndex
   //!
@@ -83,7 +83,7 @@ struct FOG_NO_EXPORT ListData
   //! In Fog::List<T>::Data is endIndex variable, but never lower than
   //! 'startIndex'. Also endIndex - startIndex is equal to length and
   //! endIndex is never larger than capacity.
-  sysuint_t endIndex;
+  size_t endIndex;
 
   //! @brief Pointer to data (adjusted by @c startIndex * sizeof(T)).
   char* p;
@@ -107,48 +107,48 @@ struct FOG_API ListPrivate_
 {
   // [Primitive Types]
 
-  static err_t p_detach(ListUntyped* self, sysuint_t typeSize);
-  static err_t p_reserve(ListUntyped* self, sysuint_t typeSize, sysuint_t to);
-  static err_t p_reserve(ListUntyped* self, sysuint_t typeSize, sysuint_t left, sysuint_t right);
-  static err_t p_resize(ListUntyped* self, sysuint_t typeSize, sysuint_t to);
-  static err_t p_reserveoptimal(ListUntyped* self, sysuint_t typeSize, sysuint_t leftBy, sysuint_t rightBy);
+  static err_t p_detach(ListUntyped* self, size_t typeSize);
+  static err_t p_reserve(ListUntyped* self, size_t typeSize, size_t to);
+  static err_t p_reserve(ListUntyped* self, size_t typeSize, size_t left, size_t right);
+  static err_t p_resize(ListUntyped* self, size_t typeSize, size_t to);
+  static err_t p_reserveoptimal(ListUntyped* self, size_t typeSize, size_t leftBy, size_t rightBy);
 
-  static void p_squeeze(ListUntyped* self, sysuint_t typeSize);
+  static void p_squeeze(ListUntyped* self, size_t typeSize);
   static void p_reset(ListUntyped* self);
   static void p_clear(ListUntyped* self);
 
-  static err_t p_assign(ListUntyped* self, sysuint_t typeSize, const void* data, sysuint_t length);
-  static err_t p_append(ListUntyped* self, sysuint_t typeSize, const void* data, sysuint_t length);
-  static err_t p_insert(ListUntyped* self, sysuint_t typeSize, sysuint_t index, const void* data, sysuint_t length);
-  static err_t p_remove(ListUntyped* self, sysuint_t typeSize, const Range& range);
-  static err_t p_replace(ListUntyped* self, sysuint_t typeSize, const Range& range, const void* data, sysuint_t length);
+  static err_t p_assign(ListUntyped* self, size_t typeSize, const void* data, size_t length);
+  static err_t p_append(ListUntyped* self, size_t typeSize, const void* data, size_t length);
+  static err_t p_insert(ListUntyped* self, size_t typeSize, size_t index, const void* data, size_t length);
+  static err_t p_remove(ListUntyped* self, size_t typeSize, const Range& range);
+  static err_t p_replace(ListUntyped* self, size_t typeSize, const Range& range, const void* data, size_t length);
 
   static void p_deref(ListData* d);
 
   // [Class Types]
 
   static err_t c_detach(ListUntyped* self, const SequenceInfoVTable* vtable);
-  static err_t c_reserve(ListUntyped* self, const SequenceInfoVTable* vtable, sysuint_t to);
-  static err_t c_reserve(ListUntyped* self, const SequenceInfoVTable* vtable, sysuint_t left, sysuint_t right);
-  static err_t c_resize(ListUntyped* self, const SequenceInfoVTable* vtable, sysuint_t to);
-  static err_t c_reserveoptimal(ListUntyped* self, const SequenceInfoVTable* vtable, sysuint_t left, sysuint_t right);
+  static err_t c_reserve(ListUntyped* self, const SequenceInfoVTable* vtable, size_t to);
+  static err_t c_reserve(ListUntyped* self, const SequenceInfoVTable* vtable, size_t left, size_t right);
+  static err_t c_resize(ListUntyped* self, const SequenceInfoVTable* vtable, size_t to);
+  static err_t c_reserveoptimal(ListUntyped* self, const SequenceInfoVTable* vtable, size_t left, size_t right);
 
   static void c_squeeze(ListUntyped* self, const SequenceInfoVTable* vtable);
   static void c_reset(ListUntyped* self, const SequenceInfoVTable* vtable);
   static void c_clear(ListUntyped* self, const SequenceInfoVTable* vtable);
 
-  static err_t c_assign(ListUntyped* self, const SequenceInfoVTable* vtable, const void* data, sysuint_t length);
-  static err_t c_append(ListUntyped* self, const SequenceInfoVTable* vtable, const void* data, sysuint_t length);
-  static err_t c_insert(ListUntyped* self, const SequenceInfoVTable* vtable, sysuint_t index, const void* data, sysuint_t length);
+  static err_t c_assign(ListUntyped* self, const SequenceInfoVTable* vtable, const void* data, size_t length);
+  static err_t c_append(ListUntyped* self, const SequenceInfoVTable* vtable, const void* data, size_t length);
+  static err_t c_insert(ListUntyped* self, const SequenceInfoVTable* vtable, size_t index, const void* data, size_t length);
   static err_t c_remove(ListUntyped* self, const SequenceInfoVTable* vtable, const Range& range);
-  static err_t c_replace(ListUntyped* self, const SequenceInfoVTable* vtable, const Range& range, const void* data, sysuint_t length);
+  static err_t c_replace(ListUntyped* self, const SequenceInfoVTable* vtable, const Range& range, const void* data, size_t length);
 
   static void c_deref(ListData* d, const SequenceInfoVTable* vtable);
 
   // [Data]
 
-  static ListData* d_alloc(sysuint_t typeSize, sysuint_t capacity);
-  static sysuint_t d_getSize(sysuint_t typeSize, sysuint_t capacity);
+  static ListData* d_alloc(size_t typeSize, size_t capacity);
+  static size_t d_getSize(size_t typeSize, size_t capacity);
 
   static Static<ListData> _dnull;
 };
@@ -169,10 +169,10 @@ struct FOG_NO_EXPORT ListPrivate_T<T, 0> : public ListPrivate_
   static FOG_INLINE err_t detach(List<T>* self)
   { return p_detach(reinterpret_cast<ListUntyped*>(self), sizeof(T)); }
 
-  static FOG_INLINE err_t reserve(List<T>* self, sysuint_t to)
+  static FOG_INLINE err_t reserve(List<T>* self, size_t to)
   { return p_reserve(reinterpret_cast<ListUntyped*>(self), sizeof(T), to); }
 
-  static FOG_INLINE err_t resize(List<T>* self, sysuint_t to)
+  static FOG_INLINE err_t resize(List<T>* self, size_t to)
   { return p_resize(reinterpret_cast<ListUntyped*>(self), sizeof(T), to); }
 
   static FOG_INLINE void squeeze(List<T>* self)
@@ -187,22 +187,22 @@ struct FOG_NO_EXPORT ListPrivate_T<T, 0> : public ListPrivate_
   static FOG_INLINE void deref(ListData* d)
   { p_deref(d); }
 
-  static FOG_INLINE err_t reserve(List<T>* self, sysuint_t left, sysuint_t right)
+  static FOG_INLINE err_t reserve(List<T>* self, size_t left, size_t right)
   { return p_reserve(reinterpret_cast<ListUntyped*>(self), sizeof(T), left, right); }
 
-  static FOG_INLINE err_t assign(List<T>* self, const T* data, sysuint_t length)
+  static FOG_INLINE err_t assign(List<T>* self, const T* data, size_t length)
   { return p_assign(reinterpret_cast<ListUntyped*>(self), sizeof(T), (const void*)data, length); }
 
-  static FOG_INLINE err_t append(List<T>* self, const T* data, sysuint_t length)
+  static FOG_INLINE err_t append(List<T>* self, const T* data, size_t length)
   { return p_append(reinterpret_cast<ListUntyped*>(self), sizeof(T), (const void*)data, length); }
 
-  static FOG_INLINE err_t insert(List<T>* self, sysuint_t index, const T* data, sysuint_t length)
+  static FOG_INLINE err_t insert(List<T>* self, size_t index, const T* data, size_t length)
   { return p_insert(reinterpret_cast<ListUntyped*>(self), sizeof(T), index, (const void*)data, length); }
 
   static FOG_INLINE err_t remove(List<T>* self, const Range& range)
   { return p_remove(reinterpret_cast<ListUntyped*>(self), sizeof(T), range); }
 
-  static FOG_INLINE err_t replace(List<T>* self, const Range& range, const T* data, sysuint_t length)
+  static FOG_INLINE err_t replace(List<T>* self, const Range& range, const T* data, size_t length)
   { return p_replace(reinterpret_cast<ListUntyped*>(self), sizeof(T), range, (const void*)data, length); }
 };
 
@@ -216,10 +216,10 @@ struct FOG_NO_EXPORT ListPrivate_T<T, 1> : public ListPrivate_
   static FOG_INLINE err_t detach(List<T>* self)
   { return c_detach(reinterpret_cast<ListUntyped*>(self), &SequenceInfo<T>::seqvtable); }
 
-  static FOG_INLINE err_t reserve(List<T>* self, sysuint_t to)
+  static FOG_INLINE err_t reserve(List<T>* self, size_t to)
   { return c_reserve(reinterpret_cast<ListUntyped*>(self), &SequenceInfo<T>::seqvtable, to); }
 
-  static FOG_INLINE err_t resize(List<T>* self, sysuint_t to)
+  static FOG_INLINE err_t resize(List<T>* self, size_t to)
   { return c_resize(reinterpret_cast<ListUntyped*>(self), &SequenceInfo<T>::seqvtable, to); }
 
   static FOG_INLINE void squeeze(List<T>* self)
@@ -234,22 +234,22 @@ struct FOG_NO_EXPORT ListPrivate_T<T, 1> : public ListPrivate_
   static FOG_INLINE void deref(ListData* d)
   { c_deref(d, &SequenceInfo<T>::seqvtable); }
 
-  static FOG_INLINE err_t reserve(List<T>* self, sysuint_t left, sysuint_t right)
+  static FOG_INLINE err_t reserve(List<T>* self, size_t left, size_t right)
   { return c_reserve(reinterpret_cast<ListUntyped*>(self), SequenceInfo<T>::seqvtable, left, right); }
 
-  static FOG_INLINE err_t assign(List<T>* self, const T* data, sysuint_t length)
+  static FOG_INLINE err_t assign(List<T>* self, const T* data, size_t length)
   { return c_assign(reinterpret_cast<ListUntyped*>(self), &SequenceInfo<T>::seqvtable, (const void*)data, length); }
 
-  static FOG_INLINE err_t append(List<T>* self, const T* data, sysuint_t length)
+  static FOG_INLINE err_t append(List<T>* self, const T* data, size_t length)
   { return c_append(reinterpret_cast<ListUntyped*>(self), &SequenceInfo<T>::seqvtable, (const void*)data, length); }
 
-  static FOG_INLINE err_t insert(List<T>* self, sysuint_t index, const T* data, sysuint_t length)
+  static FOG_INLINE err_t insert(List<T>* self, size_t index, const T* data, size_t length)
   { return c_insert(reinterpret_cast<ListUntyped*>(self), &SequenceInfo<T>::seqvtable, index, (const void*)data, length); }
 
   static FOG_INLINE err_t remove(List<T>* self, const Range& range)
   { return c_remove(reinterpret_cast<ListUntyped*>(self), &SequenceInfo<T>::seqvtable, range); }
 
-  static FOG_INLINE err_t replace(List<T>* self, const Range& range, const T* data, sysuint_t length)
+  static FOG_INLINE err_t replace(List<T>* self, const Range& range, const T* data, size_t length)
   { return c_replace(reinterpret_cast<ListUntyped*>(self), &SequenceInfo<T>::seqvtable, range, (const void*)data, length); }
 };
 
@@ -304,10 +304,10 @@ struct FOG_NO_EXPORT List
   // [Sharing]
   // --------------------------------------------------------------------------
 
-  //! @copydoc Doxygen::Implicit::getRefCount().
-  FOG_INLINE sysuint_t getRefCount() const { return _d->refCount.get(); }
+  //! @copydoc Doxygen::Implicit::getReference().
+  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
   //! @copydoc Doxygen::Implicit::isDetached().
-  FOG_INLINE bool isDetached() const { return getRefCount() == 1; }
+  FOG_INLINE bool isDetached() const { return getReference() == 1; }
   //! @copydoc Doxygen::Implicit::detach().
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : ListPrivate<T>::detach(this); }
 
@@ -322,18 +322,18 @@ struct FOG_NO_EXPORT List
   // [Container]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE sysuint_t getLength() const { return _d->length; }
-  FOG_INLINE sysuint_t getCapacity() const { return _d->capacity; }
+  FOG_INLINE size_t getLength() const { return _d->length; }
+  FOG_INLINE size_t getCapacity() const { return _d->capacity; }
 
   FOG_INLINE bool isEmpty() const { return _d->length == 0; }
 
-  FOG_INLINE err_t reserve(sysuint_t to)
+  FOG_INLINE err_t reserve(size_t to)
   { return ListPrivate<T>::reserve(this, to); }
 
-  FOG_INLINE void reserve(sysuint_t left, sysuint_t right)
+  FOG_INLINE void reserve(size_t left, size_t right)
   { return ListPrivate<T>::reserve(this, left, right); }
 
-  FOG_INLINE err_t resize(sysuint_t to)
+  FOG_INLINE err_t resize(size_t to)
   { return ListPrivate<T>::resize(this, to); }
 
   FOG_INLINE void squeeze()
@@ -354,7 +354,7 @@ struct FOG_NO_EXPORT List
     return reinterpret_cast<T*>(_d->p);
   }
 
-  FOG_INLINE const T& at(sysuint_t index) const
+  FOG_INLINE const T& at(size_t index) const
   {
     FOG_ASSERT_X(index < _d->length, "Fog::List<T>::at() - Index out of range.");
     return reinterpret_cast<const T*>(_d->p)[index];
@@ -367,13 +367,13 @@ struct FOG_NO_EXPORT List
   FOG_INLINE err_t assign(const T& element)
   { return ListPrivate<T>::assign(this, &element, 1); }
 
-  FOG_INLINE err_t assign(const T* elements, sysuint_t length)
+  FOG_INLINE err_t assign(const T* elements, size_t length)
   { return ListPrivate<T>::assign(this, elements, length); }
 
   FOG_INLINE err_t assign(const List<T>& other)
   { ListPrivate<T>::deref(atomicPtrXchg(&_d, other._d->ref())); return ERR_OK; }
 
-  FOG_INLINE err_t set(sysuint_t index, const T& element)
+  FOG_INLINE err_t set(size_t index, const T& element)
   {
     FOG_ASSERT_X(index < _d->length, "Fog::List<T>::set() - Index out of range.");
 
@@ -387,7 +387,7 @@ struct FOG_NO_EXPORT List
   FOG_INLINE err_t append(const T& element)
   { return ListPrivate<T>::append(this, &element, 1); }
 
-  FOG_INLINE err_t append(const T* data, sysuint_t length)
+  FOG_INLINE err_t append(const T* data, size_t length)
   { return ListPrivate<T>::append(this, data, length); }
 
   FOG_INLINE err_t append(const List<T>& other)
@@ -396,25 +396,25 @@ struct FOG_NO_EXPORT List
   FOG_INLINE err_t prepend(const T& element)
   { return ListPrivate<T>::insert(this, 0, &element, 1); }
 
-  FOG_INLINE err_t prepend(const T* data, sysuint_t length)
+  FOG_INLINE err_t prepend(const T* data, size_t length)
   { return ListPrivate<T>::insert(this, 0, data, length); }
 
   FOG_INLINE err_t prepend(const List<T>& other)
   { List<T> t(other); return prepend(t.getData(), t.getLength()); }
 
-  FOG_INLINE err_t insert(sysuint_t index, const T& element)
+  FOG_INLINE err_t insert(size_t index, const T& element)
   { return ListPrivate<T>::insert(this, index, &element, 1); }
 
-  FOG_INLINE err_t insert(sysuint_t index, const T* data, sysuint_t length)
+  FOG_INLINE err_t insert(size_t index, const T* data, size_t length)
   { return ListPrivate<T>::insert(this, index, data, length); }
 
-  FOG_INLINE err_t insert(sysuint_t index, const List<T>& other)
+  FOG_INLINE err_t insert(size_t index, const List<T>& other)
   { List<T> t(other); return insert(index, t.getData(), t.getLength()); }
 
   FOG_INLINE err_t remove(const T& element)
   { return removeAt(indexOf(element)); }
 
-  FOG_INLINE err_t removeAt(sysuint_t index)
+  FOG_INLINE err_t removeAt(size_t index)
   { return ListPrivate<T>::remove(this, Range(index, index + 1)); }
 
   FOG_INLINE err_t removeAt(const Range& range)
@@ -424,15 +424,15 @@ struct FOG_NO_EXPORT List
   { return removeAt(0, 1) == 1; }
 
   FOG_INLINE bool removeLast()
-  { sysuint_t len = getLength(); return removeAt(Range(len - 1, len)) == 1; }
+  { size_t len = getLength(); return removeAt(Range(len - 1, len)) == 1; }
 
-  FOG_INLINE err_t replace(sysuint_t index, sysuint_t range, const T* data, sysuint_t length)
+  FOG_INLINE err_t replace(size_t index, size_t range, const T* data, size_t length)
   { return ListPrivate<T>::replace(this, index, range, data, length); }
 
-  FOG_INLINE err_t replace(sysuint_t index, sysuint_t range, const List<T>& other)
+  FOG_INLINE err_t replace(size_t index, size_t range, const List<T>& other)
   { List<T> t(other); return replace(index, range, t.getData(), t.getLength()); }
 
-  T take(sysuint_t index)
+  T take(size_t index)
   {
     FOG_ASSERT_X(index < _d->length, "Fog::List<T>::takeAt() - Index out of range.");
 
@@ -445,7 +445,7 @@ struct FOG_NO_EXPORT List
   FOG_INLINE T takeLast() { return take(getLength() - 1); }
 
   FOG_INLINE T top() const { return at(getLength() - 1); }
-  FOG_INLINE void pop() { sysuint_t len = getLength(); removeAt(Range(len - 1, len)); }
+  FOG_INLINE void pop() { size_t len = getLength(); removeAt(Range(len - 1, len)); }
 
   FOG_INLINE void clear()
   { ListPrivate<T>::clear(this); }
@@ -455,10 +455,10 @@ struct FOG_NO_EXPORT List
 
   //! @brief Return first index of element @a element in list, otherwise
   //! INVALID_INDEX.
-  FOG_NO_INLINE sysuint_t indexOf(const T& element) const
+  FOG_NO_INLINE size_t indexOf(const T& element) const
   {
     const ListData* d = _d;
-    sysuint_t i, length = d->length;
+    size_t i, length = d->length;
 
     const T* cur = reinterpret_cast<const T*>(d->p);
     for (i = 0; i < length; i++, cur++)
@@ -470,13 +470,13 @@ struct FOG_NO_EXPORT List
   }
 
   //! @overload.
-  FOG_NO_INLINE sysuint_t indexOf(const T& element, const Range& range_) const
+  FOG_NO_INLINE size_t indexOf(const T& element, const Range& range_) const
   {
     const ListData* d = _d;
-    sysuint_t i, length = d->length;
+    size_t i, length = d->length;
 
-    sysuint_t rstart = range_.getStart();
-    sysuint_t rend = Math::min(range_.getEnd(), length);
+    size_t rstart = range_.getStart();
+    size_t rend = Math::min(range_.getEnd(), length);
     if (rstart >= rend) return INVALID_INDEX;
 
     const T* cur = reinterpret_cast<const T*>(d->p) + rstart;
@@ -489,11 +489,11 @@ struct FOG_NO_EXPORT List
   }
 
   //! @brief Return last index of element @a element in list, otherwise INVALID_INDEX.
-  FOG_NO_INLINE sysuint_t lastIndexOf(const T& element) const
+  FOG_NO_INLINE size_t lastIndexOf(const T& element) const
   {
     const ListData* d = _d;
 
-    sysuint_t i = d->length - 1;
+    size_t i = d->length - 1;
     const T* cur = reinterpret_cast<const T*>(d->p) + i;
 
     for (; i != INVALID_INDEX; i--, cur--)
@@ -504,13 +504,13 @@ struct FOG_NO_EXPORT List
   }
 
   //! @overload.
-  FOG_NO_INLINE sysuint_t lastIndexOf(const T& element, const Range& range_) const
+  FOG_NO_INLINE size_t lastIndexOf(const T& element, const Range& range_) const
   {
     const ListData* d = _d;
-    sysuint_t i, length = d->length;
+    size_t i, length = d->length;
 
-    sysuint_t rstart = range_.getStart();
-    sysuint_t rend = Math::min(range_.getEnd(), length);
+    size_t rstart = range_.getStart();
+    size_t rend = Math::min(range_.getEnd(), length);
     if (rstart >= rend) return INVALID_INDEX;
 
     rstart--;
@@ -535,7 +535,7 @@ struct FOG_NO_EXPORT List
   FOG_INLINE bool contains(const T& element, const Range& range) const
   { return indexOf(element, range) != INVALID_INDEX; }
 
-  FOG_NO_INLINE err_t swap(sysuint_t index1, sysuint_t index2)
+  FOG_NO_INLINE err_t swap(size_t index1, size_t index2)
   {
     FOG_ASSERT_X(index1 < _d->length, "Fog::List<T>::swap - Index1 out of range.");
     FOG_ASSERT_X(index2 < _d->length, "Fog::List<T>::swap - Index2 out of range.");
@@ -571,7 +571,7 @@ struct FOG_NO_EXPORT List
     FOG_RETURN_ON_ERROR(detach());
 
     ListData* d = _d;
-    sysuint_t len = d->length;
+    size_t len = d->length;
 
     T* a = reinterpret_cast<T*>(d->p);
     T* b = reinterpret_cast<T*>(d->p) + (len - 1);
@@ -602,7 +602,7 @@ struct FOG_NO_EXPORT List
   FOG_INLINE List<T>& operator+=(const List<T>& other)
   { append(other); return *this; }
 
-  FOG_INLINE const T& operator[](sysuint_t index) const
+  FOG_INLINE const T& operator[](size_t index) const
   { return at(index); }
 
   // --------------------------------------------------------------------------
@@ -630,7 +630,7 @@ struct FOG_NO_EXPORT List
     //! @brief Go to the end of list.
     FOG_INLINE ConstIterator& toEnd() { _cur = _end; _isValid = (_cur >= _beg); return *this; }
     //! @brief Go to the specified index.
-    FOG_INLINE ConstIterator& toIndex(sysuint_t index) { _cur = _beg + index; _isValid = (index < _owner->_d->length); return *this; }
+    FOG_INLINE ConstIterator& toIndex(size_t index) { _cur = _beg + index; _isValid = (index < _owner->_d->length); return *this; }
 
     //! @brief Go to the next element.
     FOG_INLINE ConstIterator& toNext() { _cur++; _isValid = (_cur <= _end); return *this; }
@@ -642,13 +642,13 @@ struct FOG_NO_EXPORT List
     //! @brief Returns @c true if the iterator is at the end of list.
     FOG_INLINE bool atEnd() { return _cur == _end; }
     //! @brief Returns @c true if the iterator is at the specified index @c index.
-    FOG_INLINE bool atIndex(sysuint_t index) { return _cur == _beg + index; }
+    FOG_INLINE bool atIndex(size_t index) { return _cur == _beg + index; }
 
     //! @brief Returns @c true if iterator position is valid in both sides.
     FOG_INLINE bool isValid() const { return _isValid; }
 
     //! @brief Returns current index.
-    FOG_INLINE sysuint_t index() const { return (sysuint_t)(_cur - _beg); }
+    FOG_INLINE size_t index() const { return (size_t)(_cur - _beg); }
 
     //! @brief Returns current element.
     FOG_INLINE const T& value() const { return *_cur; }
@@ -663,7 +663,7 @@ struct FOG_NO_EXPORT List
     FOG_INLINE ConstIterator& operator+=(int n) { _cur += n; _isValid = (_cur <= _end); return *this; }
     FOG_INLINE ConstIterator& operator-=(int n) { _cur -= n; _isValid = (_cur >= _beg); return *this; }
 
-    ConstIterator& init(sysuint_t i = 0)
+    ConstIterator& init(size_t i = 0)
     {
       ListData* d = _owner->_d;
 
@@ -698,7 +698,7 @@ struct FOG_NO_EXPORT List
     //! @brief Go to the end of list.
     FOG_INLINE MutableIterator& toEnd() { _cur = _end; _isValid = (_cur >= _beg); return *this; }
     //! @brief Go to the specified index.
-    FOG_INLINE MutableIterator& toIndex(sysuint_t index) { _cur = _beg + index; _isValid = (index < _owner->_d->length); return *this; }
+    FOG_INLINE MutableIterator& toIndex(size_t index) { _cur = _beg + index; _isValid = (index < _owner->_d->length); return *this; }
 
     //! @brief Go to the next element.
     FOG_INLINE MutableIterator& toNext() { _cur++; _isValid = (_cur <= _end); return *this; }
@@ -710,13 +710,13 @@ struct FOG_NO_EXPORT List
     //! @brief Returns @c true if the iterator is at the end of list.
     FOG_INLINE bool atEnd() { return _cur == _end; }
     //! @brief Returns @c true if the iterator is at the specified index @c index.
-    FOG_INLINE bool atIndex(sysuint_t index) { return _cur == (_beg + index); }
+    FOG_INLINE bool atIndex(size_t index) { return _cur == (_beg + index); }
 
     //! @brief Returns @c true if iterator position is valid in both sides.
     FOG_INLINE bool isValid() const { return _isValid; }
 
     //! @brief Returns current index.
-    FOG_INLINE sysuint_t index() const { return (sysuint_t)(_cur - _beg); }
+    FOG_INLINE size_t index() const { return (size_t)(_cur - _beg); }
 
     //! @brief Returns current element.
     FOG_INLINE T& value() const { return *_cur; }
@@ -737,7 +737,7 @@ struct FOG_NO_EXPORT List
     {
       FOG_ASSERT_X(isValid(), "Fog::List<T>::MutableIterator::remove() - Iterator out of range");
 
-      sysuint_t i = index();
+      size_t i = index();
       _owner->remove(i);
       return init(i);
     }
@@ -746,14 +746,14 @@ struct FOG_NO_EXPORT List
     {
       FOG_ASSERT_X(isValid(), "Fog::List<T>::MutableIterator::take() - Iterator out of range");
 
-      sysuint_t i = index();
+      size_t i = index();
       T element = _owner->takeAt(i);
       init(i);
 
       return element;
     }
 
-    MutableIterator& init(sysuint_t i = 0)
+    MutableIterator& init(size_t i = 0)
     {
       ListData* d = _owner->_d;
 

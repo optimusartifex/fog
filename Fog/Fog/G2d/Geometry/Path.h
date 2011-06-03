@@ -203,7 +203,7 @@ struct FOG_NO_EXPORT PathDataF
   // --------------------------------------------------------------------------
 
   //! @brief Reference count.
-  mutable Atomic<sysuint_t> refCount;
+  mutable Atomic<size_t> refCount;
   //! @brief Flags (see @c PATH_DATA).
   volatile uint32_t flags;
 #if FOG_ARCH_BITS >= 64
@@ -211,9 +211,9 @@ struct FOG_NO_EXPORT PathDataF
 #endif // FOG_ARCH_BITS >= 64
 
   //! @brief Path capacity (allocated space for vertices).
-  sysuint_t capacity;
+  size_t capacity;
   //! @brief Path length (count of vertices used).
-  sysuint_t length;
+  size_t length;
 
   //! @brief Path bounding box.
   BoxF boundingBox;
@@ -260,7 +260,7 @@ struct FOG_NO_EXPORT PathDataD
   // --------------------------------------------------------------------------
 
   //! @brief Reference count.
-  mutable Atomic<sysuint_t> refCount;
+  mutable Atomic<size_t> refCount;
   //! @brief Flags (see @c PATH_DATA).
   volatile uint32_t flags;
 #if FOG_ARCH_BITS >= 64
@@ -268,9 +268,9 @@ struct FOG_NO_EXPORT PathDataD
 #endif // FOG_ARCH_BITS >= 64
 
   //! @brief Path capacity (allocated space for vertices).
-  sysuint_t capacity;
+  size_t capacity;
   //! @brief Path length (count of vertices used).
-  sysuint_t length;
+  size_t length;
 
   //! @brief Path bounding box.
   BoxD boundingBox;
@@ -310,15 +310,51 @@ struct FOG_NO_EXPORT PathF
   }
 
   // --------------------------------------------------------------------------
-  // [Data]
+  // [Sharing]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
+  FOG_INLINE bool isDetached() const { return getReference() == 1; }
+
+  FOG_INLINE err_t detach()
+  {
+    return isDetached() ? (err_t)ERR_OK : _g2d.pathf.detach(*this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Container]
   // --------------------------------------------------------------------------
 
   //! @brief Get path capacity (count of allocated vertices).
-  FOG_INLINE sysuint_t getCapacity() const { return _d->capacity; }
+  FOG_INLINE size_t getCapacity() const { return _d->capacity; }
   //! @brief Get path length (count of vertices used).
-  FOG_INLINE sysuint_t getLength() const { return _d->length; }
+  FOG_INLINE size_t getLength() const { return _d->length; }
   //! @brief Get whether path is empty.
   FOG_INLINE bool isEmpty() const { return _d->length == 0; }
+
+  FOG_INLINE err_t reserve(size_t capacity)
+  {
+    return _g2d.pathf.reserve(*this, capacity);
+  }
+
+  FOG_INLINE void squeeze()
+  {
+    return _g2d.pathf.squeeze(*this);
+  }
+
+  FOG_INLINE size_t _prepare(size_t count, uint32_t cntOp)
+  {
+    return _g2d.pathf.prepare(*this, count, cntOp);
+  }
+
+  FOG_INLINE size_t _add(size_t count)
+  {
+    return _g2d.pathf.add(*this, count);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
 
   //! @brief Get path commands array (const).
   FOG_INLINE const uint8_t* getCommands() const { return _d->commands; }
@@ -337,41 +373,6 @@ struct FOG_NO_EXPORT PathF
   {
     FOG_ASSERT_X(isDetached(), "Fog::PathF::getVerticesX() - Called on non-detached object.");
     return _d->vertices;
-  }
-
-  FOG_INLINE sysuint_t getRefCount() const
-  {
-    return _d->refCount.get();
-  }
-
-  FOG_INLINE bool isDetached() const
-  {
-    return getRefCount() == 1;
-  }
-
-  FOG_INLINE err_t detach()
-  {
-    return isDetached() ? (err_t)ERR_OK : _g2d.pathf.detach(*this);
-  }
-
-  FOG_INLINE err_t reserve(sysuint_t capacity)
-  {
-    return _g2d.pathf.reserve(*this, capacity);
-  }
-
-  FOG_INLINE void squeeze()
-  {
-    return _g2d.pathf.squeeze(*this);
-  }
-
-  FOG_INLINE sysuint_t _prepare(sysuint_t count, uint32_t cntOp)
-  {
-    return _g2d.pathf.prepare(*this, count, cntOp);
-  }
-
-  FOG_INLINE sysuint_t _add(sysuint_t count)
-  {
-    return _g2d.pathf.add(*this, count);
   }
 
   // --------------------------------------------------------------------------
@@ -408,7 +409,7 @@ struct FOG_NO_EXPORT PathF
 
   //! @brief Get range of subpath at index @a index (range is from the @a index
   //! to next 'move-to' command or to the end of the path).
-  FOG_INLINE Range getSubpathRange(sysuint_t index) const
+  FOG_INLINE Range getSubpathRange(size_t index) const
   {
     return _g2d.pathf.getSubpathRange(*this, index);
   }
@@ -474,13 +475,13 @@ struct FOG_NO_EXPORT PathF
   // --------------------------------------------------------------------------
 
   //! @brief Polyline to @a pts (absolute).
-  FOG_INLINE err_t polyTo(const PointF* pts, sysuint_t count)
+  FOG_INLINE err_t polyTo(const PointF* pts, size_t count)
   {
     return _g2d.pathf.polyTo(*this, pts, count);
   }
 
   //! @brief Polyline to @a pts (relative).
-  FOG_INLINE err_t polyToRel(const PointF* pts, sysuint_t count)
+  FOG_INLINE err_t polyToRel(const PointF* pts, size_t count)
   {
     return _g2d.pathf.polyToRel(*this, pts, count);
   }
@@ -603,25 +604,25 @@ struct FOG_NO_EXPORT PathF
   }
 
   //! @brief Add a set of rectangles to the path.
-  FOG_INLINE err_t boxes(const BoxI* b, sysuint_t count, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t boxes(const BoxI* b, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
     return _g2d.pathf.boxesI(*this, b, count, direction);
   }
 
   //! @brief Add a set of rectangles to the path.
-  FOG_INLINE err_t boxes(const BoxF* b, sysuint_t count, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t boxes(const BoxF* b, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
     return _g2d.pathf.boxesF(*this, b, count, direction);
   }
 
   //! @brief Add a set of rectangles to the path.
-  FOG_INLINE err_t rects(const RectI* r, sysuint_t count, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t rects(const RectI* r, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
     return _g2d.pathf.rectsI(*this, r, count, direction);
   }
 
   //! @brief Add a set of rectangles to the path.
-  FOG_INLINE err_t rects(const RectF* r, sysuint_t count, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t rects(const RectF* r, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
     return _g2d.pathf.rectsF(*this, r, count, direction);
   }
@@ -641,25 +642,25 @@ struct FOG_NO_EXPORT PathF
   // --------------------------------------------------------------------------
 
   //! @brief Add a polyline to the path.
-  FOG_INLINE err_t polyline(const PointI* pts, sysuint_t count, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t polyline(const PointI* pts, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
     return _g2d.pathf.polylineI(*this, pts, count, direction);
   }
 
   //! @brief Add a polyline to the path.
-  FOG_INLINE err_t polyline(const PointF* pts, sysuint_t count, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t polyline(const PointF* pts, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
     return _g2d.pathf.polylineF(*this, pts, count, direction);
   }
 
   //! @brief Add a closed polygon to the path.
-  FOG_INLINE err_t polygon(const PointI* pts, sysuint_t count, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t polygon(const PointI* pts, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
     return _g2d.pathf.polygonI(*this, pts, count, direction);
   }
 
   //! @brief Add a closed polygon to the path.
-  FOG_INLINE err_t polygon(const PointF* pts, sysuint_t count, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t polygon(const PointF* pts, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
     return _g2d.pathf.polygonF(*this, pts, count, direction);
   }
@@ -1071,15 +1072,51 @@ struct FOG_API PathD
   }
 
   // --------------------------------------------------------------------------
-  // [Data]
+  // [Sharing]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
+  FOG_INLINE bool isDetached() const { return getReference() == 1; }
+
+  FOG_INLINE err_t detach()
+  {
+    return isDetached() ? (err_t)ERR_OK : _g2d.pathd.detach(*this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Container]
   // --------------------------------------------------------------------------
 
   //! @brief Get path capacity (count of allocated vertices).
-  FOG_INLINE sysuint_t getCapacity() const { return _d->capacity; }
+  FOG_INLINE size_t getCapacity() const { return _d->capacity; }
   //! @brief Get path length (count of vertices used).
-  FOG_INLINE sysuint_t getLength() const { return _d->length; }
+  FOG_INLINE size_t getLength() const { return _d->length; }
   //! @brief Get whether path is empty.
   FOG_INLINE bool isEmpty() const { return _d->length == 0; }
+
+  FOG_INLINE err_t reserve(size_t capacity)
+  {
+    return _g2d.pathd.reserve(*this, capacity);
+  }
+
+  FOG_INLINE void squeeze()
+  {
+    return _g2d.pathd.squeeze(*this);
+  }
+
+  FOG_INLINE size_t _prepare(size_t count, uint32_t cntOp)
+  {
+    return _g2d.pathd.prepare(*this, count, cntOp);
+  }
+
+  FOG_INLINE size_t _add(size_t count)
+  {
+    return _g2d.pathd.add(*this, count);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
 
   //! @brief Get path commands array (const).
   FOG_INLINE const uint8_t* getCommands() const { return _d->commands; }
@@ -1098,41 +1135,6 @@ struct FOG_API PathD
   {
     FOG_ASSERT_X(isDetached(), "Fog::PathD::getVerticesX() - Called on non-detached object.");
     return _d->vertices;
-  }
-
-  FOG_INLINE sysuint_t getRefCount() const
-  {
-    return _d->refCount.get();
-  }
-
-  FOG_INLINE bool isDetached() const
-  {
-    return getRefCount() == 1;
-  }
-
-  FOG_INLINE err_t detach()
-  {
-    return isDetached() ? (err_t)ERR_OK : _g2d.pathd.detach(*this);
-  }
-
-  FOG_INLINE err_t reserve(sysuint_t capacity)
-  {
-    return _g2d.pathd.reserve(*this, capacity);
-  }
-
-  FOG_INLINE void squeeze()
-  {
-    return _g2d.pathd.squeeze(*this);
-  }
-
-  FOG_INLINE sysuint_t _prepare(sysuint_t count, uint32_t cntOp)
-  {
-    return _g2d.pathd.prepare(*this, count, cntOp);
-  }
-
-  FOG_INLINE sysuint_t _add(sysuint_t count)
-  {
-    return _g2d.pathd.add(*this, count);
   }
 
   // --------------------------------------------------------------------------
@@ -1174,7 +1176,7 @@ struct FOG_API PathD
 
   //! @brief Get range of subpath at index @a index (range is from the @a index
   //! to next 'move-to' command or to the end of the path).
-  FOG_INLINE Range getSubpathRange(sysuint_t index) const
+  FOG_INLINE Range getSubpathRange(size_t index) const
   {
     return _g2d.pathd.getSubpathRange(*this, index);
   }
@@ -1240,13 +1242,13 @@ struct FOG_API PathD
   // --------------------------------------------------------------------------
 
   //! @brief Polyline to @a pts (absolute).
-  FOG_INLINE err_t polyTo(const PointD* pts, sysuint_t count)
+  FOG_INLINE err_t polyTo(const PointD* pts, size_t count)
   {
     return _g2d.pathd.polyTo(*this, pts, count);
   }
 
   //! @brief Polyline to @a pts (relative).
-  FOG_INLINE err_t polyToRel(const PointD* pts, sysuint_t count)
+  FOG_INLINE err_t polyToRel(const PointD* pts, size_t count)
   {
     return _g2d.pathd.polyToRel(*this, pts, count);
   }
@@ -1381,37 +1383,37 @@ struct FOG_API PathD
   }
 
   //! @brief Add a set of rectangles to the path.
-  FOG_INLINE err_t boxes(const BoxI* b, sysuint_t count, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t boxes(const BoxI* b, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
     return _g2d.pathd.boxesI(*this, b, count, direction);
   }
 
   //! @brief Add a set of rectangles to the path.
-  FOG_INLINE err_t boxes(const BoxF* b, sysuint_t count, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t boxes(const BoxF* b, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
     return _g2d.pathd.boxesF(*this, b, count, direction);
   }
 
   //! @brief Add a set of rectangles to the path.
-  FOG_INLINE err_t boxes(const BoxD* b, sysuint_t count, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t boxes(const BoxD* b, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
     return _g2d.pathd.boxesD(*this, b, count, direction);
   }
 
   //! @brief Add a set of rectangles to the path.
-  FOG_INLINE err_t rects(const RectI* r, sysuint_t count, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t rects(const RectI* r, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
     return _g2d.pathd.rectsI(*this, r, count, direction);
   }
 
   //! @brief Add a set of rectangles to the path.
-  FOG_INLINE err_t rects(const RectF* r, sysuint_t count, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t rects(const RectF* r, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
     return _g2d.pathd.rectsF(*this, r, count, direction);
   }
 
   //! @brief Add a set of rectangles to the path.
-  FOG_INLINE err_t rects(const RectD* r, sysuint_t count, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t rects(const RectD* r, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
     return _g2d.pathd.rectsD(*this, r, count, direction);
   }
@@ -1431,25 +1433,25 @@ struct FOG_API PathD
   // --------------------------------------------------------------------------
 
   //! @brief Add a polyline to the path.
-  FOG_INLINE err_t polyline(const PointI* pts, sysuint_t count, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t polyline(const PointI* pts, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
     return _g2d.pathd.polylineI(*this, pts, count, direction);
   }
 
   //! @brief Add a polyline to the path.
-  FOG_INLINE err_t polyline(const PointD* pts, sysuint_t count, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t polyline(const PointD* pts, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
     return _g2d.pathd.polylineD(*this, pts, count, direction);
   }
 
   //! @brief Add a closed polygon to the path.
-  FOG_INLINE err_t polygon(const PointI* pts, sysuint_t count, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t polygon(const PointI* pts, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
     return _g2d.pathd.polygonI(*this, pts, count, direction);
   }
 
   //! @brief Add a closed polygon to the path.
-  FOG_INLINE err_t polygon(const PointD* pts, sysuint_t count, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t polygon(const PointD* pts, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
     return _g2d.pathd.polygonD(*this, pts, count, direction);
   }

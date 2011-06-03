@@ -94,7 +94,7 @@ XmlElement* XmlDocument::getElementById(const String& id) const
 XmlElement* XmlDocument::getElementById(const Utf16& id) const
 {
   const Char* idData = id.getData();
-  sysuint_t idLen = id.getComputedLength();
+  size_t idLen = id.getComputedLength();
 
   if (idLen == 0) return NULL;
   return _elementIdsHash.get(idData, idLen);
@@ -124,7 +124,7 @@ err_t XmlDocument::readFromStream(Stream& stream)
   return err;
 }
 
-err_t XmlDocument::readFromMemory(const void* mem, sysuint_t size)
+err_t XmlDocument::readFromMemory(const void* mem, size_t size)
 {
   clear();
 

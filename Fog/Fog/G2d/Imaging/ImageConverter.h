@@ -92,7 +92,7 @@ struct FOG_NO_EXPORT ImageDither8Params
 struct FOG_NO_EXPORT ImageConverterData
 {
   //! @brief Reference count.
-  mutable Atomic<sysuint_t> refCount;
+  mutable Atomic<size_t> refCount;
   //! @brief Converter function.
   ImageConverterBlitLineFn blitFn;
 
@@ -204,8 +204,8 @@ struct FOG_API ImageConverter
   // [Blit - Rect]
   // --------------------------------------------------------------------------
 
-  void blitRect(void* dst, sysuint_t dstStride, const void* src, sysuint_t srcStride, int w, int h);
-  void blitRect(void* dst, sysuint_t dstStride, const void* src, sysuint_t srcStride, int w, int h, const PointI& ditherOrigin);
+  void blitRect(void* dst, size_t dstStride, const void* src, size_t srcStride, int w, int h);
+  void blitRect(void* dst, size_t dstStride, const void* src, size_t srcStride, int w, int h, const PointI& ditherOrigin);
 
   // --------------------------------------------------------------------------
   // [Accessors]

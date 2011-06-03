@@ -52,7 +52,7 @@ namespace Fog {
 // Input data characteristics:
 // - Already clipped to SIMPLE or COMPLEX clip region.
 void RasterPaintEngine::CTX_SYMBOL(_doPaintBoxes)(
-  RasterContext* ctx, const BoxI* box, sysuint_t count)
+  RasterContext* ctx, const BoxI* box, size_t count)
 {
   FOG_ASSERT(ctx->finalClipType != RASTER_CLIP_NULL);
 
@@ -374,7 +374,7 @@ void RasterPaintEngine::CTX_SYMBOL(_doPaintBoxes)(
               {
                 RENDER_LOOP_FULL(bltSolidDirect32Clip, 4,
                 {
-                  cblit_line(pCur, &ctx->solid, (sysuint_t)w, &ctx->closure);
+                  cblit_line(pCur, &ctx->solid, (size_t)w, &ctx->closure);
                 });
               }
               else
@@ -385,7 +385,7 @@ void RasterPaintEngine::CTX_SYMBOL(_doPaintBoxes)(
                 RENDER_LOOP_FULL(bltSolidIndirect32Clip, 4,
                 {
                   ctx->paintLayer.toSecondaryFull(pCur, pCur, w, &ctx->closure);
-                  cblit_line(pCur, &ctx->solid, (sysuint_t)w, &ctx->closure);
+                  cblit_line(pCur, &ctx->solid, (size_t)w, &ctx->closure);
                   ctx->paintLayer.fromSecondaryFull(pCur, pCur, w, &ctx->closure);
                 });
               }
@@ -395,7 +395,7 @@ void RasterPaintEngine::CTX_SYMBOL(_doPaintBoxes)(
             {
               RENDER_LOOP_FULL(bltSolidDirect8Clip, 1,
               {
-                cblit_line(pCur, &ctx->solid, (sysuint_t)w, &ctx->closure);
+                cblit_line(pCur, &ctx->solid, (size_t)w, &ctx->closure);
               });
               break;
             }
@@ -1601,7 +1601,7 @@ void RasterPaintEngine::CTX_SYMBOL(_doPaintGlyphSet)(
   if (FOG_UNLIKELY(!glyphSet.getLength())) return;
 
   const Glyph* glyphs = glyphSet.glyphs();
-  sysuint_t count = glyphSet.getLength();
+  size_t count = glyphSet.getLength();
 
   int px = pt.x;
   int py = pt.y;
@@ -1624,7 +1624,7 @@ void RasterPaintEngine::CTX_SYMBOL(_doPaintGlyphSet)(
     SpanExt8 _maskSpan; \
     _maskSpan.setNext(NULL); \
     \
-    for (sysuint_t i = 0; i < count; i++) \
+    for (size_t i = 0; i < count; i++) \
     { \
       GlyphData* glyphd = glyphs[i]._d; \
       ImageData* bitmapd = glyphd->bitmap._d; \
@@ -1788,7 +1788,7 @@ void RasterPaintEngine::CTX_SYMBOL(_doPaintPath)(
     const BoxI* clipCur = ctx->finalRegion.getData(); \
     const BoxI* clipTo; \
     const BoxI* clipEnd = clipCur + ctx->finalRegion.getLength(); \
-    sysuint_t clipLen; \
+    size_t clipLen; \
     \
     /* Advance clip pointer. */ \
 NAME##_advance: \
@@ -1799,7 +1799,7 @@ NAME##_advance: \
     /* Advance to end of the current span list (same y0, y1). */ \
     clipTo = clipCur + 1; \
     while (clipTo != clipEnd && clipCur->y0 == clipTo->y0) clipTo++; \
-    clipLen = (sysuint_t)(clipTo - clipCur); \
+    clipLen = (size_t)(clipTo - clipCur); \
     \
     /* Skip some rows if needed. */ \
     if (y < clipCur->y0) \
@@ -1925,7 +1925,7 @@ NAME##_end: \
     if (!pctx) return;
 
     RenderVBlitSpanFn vblit_span = funcs->vblit_span[pctx->format];
-    sysuint_t bufSize = (uint)(ctx->finalClipBox.getWidth()) * pctx->bytesPerPixel;
+    size_t bufSize = (uint)(ctx->finalClipBox.getWidth()) * pctx->bytesPerPixel;
 
     if (vblit_span != NULL)
     {

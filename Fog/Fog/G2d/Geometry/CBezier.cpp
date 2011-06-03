@@ -105,9 +105,9 @@ static err_t FOG_CDECL _G2d_CBezierT_getBoundingBox(const NumT_(Point)* self, Nu
 // ============================================================================
 
 template<typename NumT>
-static err_t FOG_CDECL _G2d_CBezierT_getSplineBBox(const NumT_(Point)* self, sysuint_t length, NumT_(Box)* dst)
+static err_t FOG_CDECL _G2d_CBezierT_getSplineBBox(const NumT_(Point)* self, size_t length, NumT_(Box)* dst)
 {
-  sysuint_t i;
+  size_t i;
 
   if (length < 4) return ERR_RT_INVALID_ARGUMENT;
   FOG_ASSERT((length - 1) % 3 == 0);
@@ -377,8 +377,8 @@ static err_t FOG_CDECL _G2d_CBezierT_flatten(
   NumT x3 = self[3].x;
   NumT y3 = self[3].y;
 
-  sysuint_t initialLength = dst._d->length;
-  sysuint_t level = 0;
+  size_t initialLength = dst._d->length;
+  size_t level = 0;
 
   NumT_(Point)* curVertex;
   NumT_(Point)* endVertex;
@@ -388,7 +388,7 @@ static err_t FOG_CDECL _G2d_CBezierT_flatten(
 
 _Realloc:
   {
-    sysuint_t pos = dst._add(CUBIC_CURVE_VERTEX_INITIAL_SIZE);
+    size_t pos = dst._add(CUBIC_CURVE_VERTEX_INITIAL_SIZE);
 
     if (pos == INVALID_INDEX)
     {
@@ -406,7 +406,7 @@ _Realloc:
     // Realloc if needed.
     if (curVertex >= endVertex)
     {
-      dst._d->length = (sysuint_t)(curVertex - dst._d->vertices);
+      dst._d->length = (size_t)(curVertex - dst._d->vertices);
       goto _Realloc;
     }
 
@@ -574,7 +574,7 @@ _Ret:
 
   {
     // Update dst length.
-    sysuint_t length = (sysuint_t)(curVertex - dst._d->vertices);
+    size_t length = (size_t)(curVertex - dst._d->vertices);
     dst._d->length = length;
 
     // Make sure we are not out of bounds.
@@ -582,7 +582,7 @@ _Ret:
 
     // Fill initial and MoveTo commands.
     uint8_t* commands = dst._d->commands + initialLength;
-    sysuint_t i = length - initialLength;
+    size_t i = length - initialLength;
 
     if (i)
     {

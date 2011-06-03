@@ -36,7 +36,7 @@ namespace Fog {
 // [Fog::Memory - Alloc / Free]
 // ===========================================================================
 
-static void* FOG_CDECL _Core_Memory_alloc(sysuint_t size)
+static void* FOG_CDECL _Core_Memory_alloc(size_t size)
 {
   void* addr = ::malloc(size);
 
@@ -49,7 +49,7 @@ static void* FOG_CDECL _Core_Memory_alloc(sysuint_t size)
   return addr;
 }
 
-static void* FOG_CDECL _Core_Memory_calloc(sysuint_t size)
+static void* FOG_CDECL _Core_Memory_calloc(size_t size)
 {
   void* addr = ::calloc(size, 1);
 
@@ -62,7 +62,7 @@ static void* FOG_CDECL _Core_Memory_calloc(sysuint_t size)
   return addr;
 }
 
-static void* FOG_CDECL _Core_Memory_realloc(void* addr, sysuint_t size)
+static void* FOG_CDECL _Core_Memory_realloc(void* addr, size_t size)
 {
   if (FOG_IS_NULL(addr)) { return Memory::alloc(size); }
   if (FOG_UNLIKELY(size == 0)) { Memory::free(addr); return NULL; }
@@ -108,7 +108,7 @@ static err_t FOG_CDECL _Core_Memory_unregisterCleanupHandler(void* handler, void
 // [Fog::Memory - Copy]
 // ============================================================================
 
-static void* FOG_CDECL _Core_Memory_zero(void* dst, sysuint_t size)
+static void* FOG_CDECL _Core_Memory_zero(void* dst, size_t size)
 {
   return memset(dst, 0, size);
 }
@@ -117,19 +117,19 @@ static void* FOG_CDECL _Core_Memory_zero(void* dst, sysuint_t size)
 // [Fog::Memory - Xchg]
 // ============================================================================
 
-static void _Core_Memory_xchg(uint8_t* addr1, uint8_t* addr2, sysuint_t count)
+static void _Core_Memory_xchg(uint8_t* addr1, uint8_t* addr2, size_t count)
 {
-  sysuint_t i;
+  size_t i;
 
-  for (i = count / (sizeof(sysuint_t)); i; i--)
+  for (i = count / (sizeof(size_t)); i; i--)
   {
-    Memory::xchg_t<sysuint_t>((sysuint_t*)addr1, (sysuint_t*)addr2);
+    Memory::xchg_t<size_t>((size_t*)addr1, (size_t*)addr2);
 
-    addr1 += sizeof(sysuint_t);
-    addr2 += sizeof(sysuint_t);
+    addr1 += sizeof(size_t);
+    addr2 += sizeof(size_t);
   }
 
-  for (i = count & (sizeof(sysuint_t) - 1); i; i--)
+  for (i = count & (sizeof(size_t) - 1); i; i--)
   {
     Memory::xchg_1((void*)addr1, (void*)addr2);
 
@@ -146,22 +146,22 @@ struct FOG_NO_EXPORT DefaultMemoryManager : public MemoryManager
 {
   DefaultMemoryManager();
 
-  virtual void* alloc(sysuint_t size, sysuint_t* allocated);
-  virtual void free(void* ptr, sysuint_t size);
+  virtual void* alloc(size_t size, size_t* allocated);
+  virtual void free(void* ptr, size_t size);
 };
 
 DefaultMemoryManager::DefaultMemoryManager()
 {
 }
 
-void* DefaultMemoryManager::alloc(sysuint_t size, sysuint_t* allocated)
+void* DefaultMemoryManager::alloc(size_t size, size_t* allocated)
 {
   void* ptr = Memory::alloc(size);
   if (allocated) *allocated = ptr ? size : 0;
   return ptr;
 }
 
-void DefaultMemoryManager::free(void* ptr, sysuint_t size)
+void DefaultMemoryManager::free(void* ptr, size_t size)
 {
   Memory::free(ptr);
 }
@@ -186,16 +186,16 @@ FOG_NO_EXPORT void _core_memory_init(void)
   _core.memory.registerCleanupHandler = _Core_Memory_registerCleanupHandler;
   _core.memory.unregisterCleanupHandler = _Core_Memory_unregisterCleanupHandler;
 
-  _core.memory.copy = (_CoreApi::Memory_Copy)::memcpy;
-  _core.memory.move = (_CoreApi::Memory_Move)::memmove;
-  _core.memory.zero = (_CoreApi::Memory_Zero)_Core_Memory_zero;
-  _core.memory.set = (_CoreApi::Memory_Set)::memset;
+  _core.memory.copy = (CoreApi::Memory_Copy)::memcpy;
+  _core.memory.move = (CoreApi::Memory_Move)::memmove;
+  _core.memory.zero = (CoreApi::Memory_Zero)_Core_Memory_zero;
+  _core.memory.set = (CoreApi::Memory_Set)::memset;
 
   _core.memory.copy_nt = _core.memory.copy;
   _core.memory.zero_nt = _core.memory.zero;
   _core.memory.set_nt = _core.memory.set;
 
-  _core.memory.xchg = (_CoreApi::Memory_Xchg)_Core_Memory_xchg;
+  _core.memory.xchg = (CoreApi::Memory_Xchg)_Core_Memory_xchg;
 }
 
 FOG_NO_EXPORT void _core_memory_fini(void)

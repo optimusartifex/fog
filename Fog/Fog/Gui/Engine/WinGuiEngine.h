@@ -44,7 +44,7 @@ struct FOG_API WinGuiEngine : public GuiEngine
   // [Update]
   // --------------------------------------------------------------------------
 
-  virtual void doBlitWindow(GuiWindow* window, const BoxI* rects, sysuint_t count);
+  virtual void doBlitWindow(GuiWindow* window, const BoxI* rects, size_t count);
 
   // --------------------------------------------------------------------------
   // [GuiWindow]
@@ -186,13 +186,13 @@ struct FOG_API WinGuiBackBuffer : public GuiBackBuffer
 
   virtual bool resize(int width, int height, bool cache);
   virtual void destroy();
-  virtual void updateRects(const BoxI* rects, sysuint_t count);
+  virtual void updateRects(const BoxI* rects, size_t count);
 
   // --------------------------------------------------------------------------
   // [Helpers]
   // --------------------------------------------------------------------------
 
-  void blitRects(HDC target, const BoxI* rects, sysuint_t count);
+  void blitRects(HDC target, const BoxI* rects, size_t count);
 
   // --------------------------------------------------------------------------
   // [Accessors]

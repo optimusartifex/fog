@@ -32,7 +32,7 @@ namespace HashUtil {
 //!
 //! @note @c makeDataHash() and @c makeStringHash() methods will result in different
 //! hashes, also the speed of makeStringHash() is maximized.
-FOG_API uint32_t makeDataHash(const void* data, sysuint_t size);
+FOG_API uint32_t makeDataHash(const void* data, size_t size);
 
 // STANDARD hash functions for 8 bit and 16 bit NULL terminated strings.
 // 8 bit and 16 bit hashes are compatible between LATIN1 and UTF16 strings.
@@ -48,7 +48,7 @@ FOG_API uint32_t makeDataHash(const void* data, sysuint_t size);
 //!
 //! @note @c makeDataHash() and @c makeStringHash() methods will result in different
 //! hashes, also the speed of makeStringHash() is maximized.
-FOG_API uint32_t makeStringHash(const char* key, sysuint_t length);
+FOG_API uint32_t makeStringHash(const char* key, size_t length);
 
 //! @brief Hash 16-bit string.
 //!
@@ -59,7 +59,7 @@ FOG_API uint32_t makeStringHash(const char* key, sysuint_t length);
 //!
 //! @note @c makeDataHash() and @c makeStringHash() methods will result in different
 //! hashes, also the speed of makeStringHash() is maximized.
-FOG_API uint32_t makeStringHash(const Char* key, sysuint_t length);
+FOG_API uint32_t makeStringHash(const Char* key, size_t length);
 
 // ============================================================================
 // [Fog::HashUtil::combineHash]

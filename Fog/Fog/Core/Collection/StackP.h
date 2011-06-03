@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_COLLECTION_PSTACK_H
-#define _FOG_CORE_COLLECTION_PSTACK_H
+#ifndef _FOG_CORE_COLLECTION_STACKP_H
+#define _FOG_CORE_COLLECTION_STACKP_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
@@ -19,13 +19,13 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// Fog::PStack<>
+// Fog::StackP<>
 // ============================================================================
 
 //! @brief Fast and secure stack implementation for performance-critical
 //! operations.
-template<sysuint_t N>
-struct PStack
+template<size_t N>
+struct StackP
 {
   // --------------------------------------------------------------------------
   // [Node]
@@ -40,7 +40,7 @@ struct PStack
     //! @brief Pointer to previous node.
     Node* prev;
     //! @brief Remaining bytes in bufer.
-    sysuint_t remain;
+    size_t remain;
     //! @brief Node data.
     uint8_t buffer[N];
   };
@@ -49,7 +49,7 @@ struct PStack
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE PStack()
+  FOG_INLINE StackP()
   {
     _current = &_first;
     _first.prev = NULL;
@@ -58,7 +58,7 @@ struct PStack
     _first.remain = N;
   }
 
-  FOG_INLINE ~PStack()
+  FOG_INLINE ~StackP()
   {
     Node* node = _first.next;
     while (node)
@@ -135,7 +135,7 @@ protected:
   Node _first;
 
 private:
-  _FOG_CLASS_NO_COPY(PStack)
+  _FOG_CLASS_NO_COPY(StackP)
 };
 
 //! @}
@@ -143,4 +143,4 @@ private:
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_CORE_COLLECTION_PSTACK_H
+#endif // _FOG_CORE_COLLECTION_STACKP_H

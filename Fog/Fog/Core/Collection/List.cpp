@@ -42,13 +42,13 @@ Static<ListData> ListPrivate_::_dnull;
 // [Fog::ListPrivate_ - Primitive Types]
 // ===========================================================================
 
-err_t ListPrivate_::p_detach(ListUntyped* self, sysuint_t typeSize)
+err_t ListPrivate_::p_detach(ListUntyped* self, size_t typeSize)
 {
   ListData* d = self->_d;
   if (d->refCount.get() == 1) return ERR_OK;
 
   ListData* newd;
-  sysuint_t length = d->length;
+  size_t length = d->length;
 
   newd = (ListData*)d_alloc(typeSize, length);
   if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
@@ -61,15 +61,15 @@ err_t ListPrivate_::p_detach(ListUntyped* self, sysuint_t typeSize)
   return ERR_OK;
 }
 
-err_t ListPrivate_::p_reserve(ListUntyped* self, sysuint_t typeSize, sysuint_t to)
+err_t ListPrivate_::p_reserve(ListUntyped* self, size_t typeSize, size_t to)
 {
   ListData* d = self->_d;
-  sysuint_t length = d->length;
+  size_t length = d->length;
 
   if (d->refCount.get() == 1 && d->capacity >= to)
   {
-    sysuint_t remain = d->capacity - d->endIndex;
-    sysuint_t needed = to - length;
+    size_t remain = d->capacity - d->endIndex;
+    size_t needed = to - length;
 
     if (remain >= needed)
     {
@@ -103,17 +103,17 @@ err_t ListPrivate_::p_reserve(ListUntyped* self, sysuint_t typeSize, sysuint_t t
   return ERR_OK;
 }
 
-err_t ListPrivate_::p_reserve(ListUntyped* self, sysuint_t typeSize, sysuint_t left, sysuint_t right)
+err_t ListPrivate_::p_reserve(ListUntyped* self, size_t typeSize, size_t left, size_t right)
 {
   ListData* d = self->_d;
 
-  sysuint_t leftCapacity = d->startIndex;
-  sysuint_t rightCapacity = d->capacity - d->endIndex;
+  size_t leftCapacity = d->startIndex;
+  size_t rightCapacity = d->capacity - d->endIndex;
 
   if (leftCapacity < left || rightCapacity < right || d->refCount.get() > 1)
   {
-    sysuint_t to = left + right;
-    sysuint_t length = d->length;
+    size_t to = left + right;
+    size_t length = d->length;
 
     // Overflow.
     if (to < left) return ERR_RT_OUT_OF_MEMORY;
@@ -137,16 +137,16 @@ err_t ListPrivate_::p_reserve(ListUntyped* self, sysuint_t typeSize, sysuint_t l
   return ERR_OK;
 }
 
-err_t ListPrivate_::p_resize(ListUntyped* self, sysuint_t typeSize, sysuint_t to)
+err_t ListPrivate_::p_resize(ListUntyped* self, size_t typeSize, size_t to)
 {
   ListData* d = self->_d;
-  sysuint_t length = d->length;
-  sysuint_t copy = Math::min<sysuint_t>(to, length);
+  size_t length = d->length;
+  size_t copy = Math::min<size_t>(to, length);
 
   if (d->refCount.get() == 1 && d->capacity >= to)
   {
-    sysuint_t remain = d->capacity - d->endIndex;
-    sysuint_t needed = to - length;
+    size_t remain = d->capacity - d->endIndex;
+    size_t needed = to - length;
 
     if (remain >= needed)
     {
@@ -182,12 +182,12 @@ err_t ListPrivate_::p_resize(ListUntyped* self, sysuint_t typeSize, sysuint_t to
   return ERR_OK;
 }
 
-err_t ListPrivate_::p_reserveoptimal(ListUntyped* self, sysuint_t typeSize, sysuint_t left, sysuint_t right)
+err_t ListPrivate_::p_reserveoptimal(ListUntyped* self, size_t typeSize, size_t left, size_t right)
 {
   ListData* d = self->_d;
 
-  sysuint_t leftCapacity = d->startIndex;
-  sysuint_t rightCapacity = d->capacity - d->endIndex;
+  size_t leftCapacity = d->startIndex;
+  size_t rightCapacity = d->capacity - d->endIndex;
 
   if (leftCapacity < left || rightCapacity < right)
   {
@@ -199,19 +199,19 @@ err_t ListPrivate_::p_reserveoptimal(ListUntyped* self, sysuint_t typeSize, sysu
     // and rightCapacity variables. leftCapacity is never larger than 0
     // if data hasn't been prepended, inserted, removed or replaced.
 
-    sysuint_t length = d->length;
+    size_t length = d->length;
 
-    sysuint_t leftThreshold = leftCapacity - (leftCapacity >> 1);
-    sysuint_t rightThreshold = rightCapacity - (rightCapacity >> 1);
+    size_t leftThreshold = leftCapacity - (leftCapacity >> 1);
+    size_t rightThreshold = rightCapacity - (rightCapacity >> 1);
 
-    sysuint_t oldLeft = left;
-    sysuint_t oldRight = right;
+    size_t oldLeft = left;
+    size_t oldRight = right;
 
     if (leftThreshold >= left) left = leftThreshold;
     if (rightThreshold >= right) right = rightThreshold;
 
-    sysuint_t by = left + right;
-    sysuint_t after = length + by;
+    size_t by = left + right;
+    size_t after = length + by;
 
     // TODO: Not working...
     // Overflow.
@@ -228,8 +228,8 @@ err_t ListPrivate_::p_reserveoptimal(ListUntyped* self, sysuint_t typeSize, sysu
     }
     */
 
-    sysuint_t optimal = Util::getGrowCapacity(sizeof(ListData), typeSize, d->length, after);
-    sysuint_t distribute = optimal - length - left - right;
+    size_t optimal = Util::getGrowCapacity(sizeof(ListData), typeSize, d->length, after);
+    size_t distribute = optimal - length - left - right;
 
     if (oldLeft > oldRight)
       left += distribute;
@@ -248,10 +248,10 @@ err_t ListPrivate_::p_reserveoptimal(ListUntyped* self, sysuint_t typeSize, sysu
   }
 }
 
-void ListPrivate_::p_squeeze(ListUntyped* self, sysuint_t typeSize)
+void ListPrivate_::p_squeeze(ListUntyped* self, size_t typeSize)
 {
   ListData* d = self->_d;
-  sysuint_t length = d->length;
+  size_t length = d->length;
 
   if (d->capacity == length) return;
 
@@ -290,7 +290,7 @@ void ListPrivate_::p_clear(ListUntyped* self)
   }
 }
 
-err_t ListPrivate_::p_assign(ListUntyped* self, sysuint_t typeSize, const void* data, sysuint_t dataLength)
+err_t ListPrivate_::p_assign(ListUntyped* self, size_t typeSize, const void* data, size_t dataLength)
 {
   ListData* d = self->_d;
 
@@ -316,7 +316,7 @@ err_t ListPrivate_::p_assign(ListUntyped* self, sysuint_t typeSize, const void* 
   return ERR_OK;
 }
 
-err_t ListPrivate_::p_append(ListUntyped* self, sysuint_t typeSize, const void* data, sysuint_t dataLength)
+err_t ListPrivate_::p_append(ListUntyped* self, size_t typeSize, const void* data, size_t dataLength)
 {
   ListData* d = self->_d;
 
@@ -328,7 +328,7 @@ err_t ListPrivate_::p_append(ListUntyped* self, sysuint_t typeSize, const void* 
     d = self->_d;
   }
 
-  sysuint_t length = d->length;
+  size_t length = d->length;
 
   d->length += dataLength;
   d->endIndex += dataLength;
@@ -338,14 +338,14 @@ err_t ListPrivate_::p_append(ListUntyped* self, sysuint_t typeSize, const void* 
   return ERR_OK;
 }
 
-err_t ListPrivate_::p_insert(ListUntyped* self, sysuint_t typeSize, sysuint_t index, const void* data, sysuint_t dataLength)
+err_t ListPrivate_::p_insert(ListUntyped* self, size_t typeSize, size_t index, const void* data, size_t dataLength)
 {
   ListData* d = self->_d;
 
-  sysuint_t length = d->length;
+  size_t length = d->length;
   if (index >= length) return p_append(self, typeSize, data, dataLength);
 
-  sysuint_t half = length >> 1;
+  size_t half = length >> 1;
 
   if (index < half)
   {
@@ -391,17 +391,17 @@ err_t ListPrivate_::p_insert(ListUntyped* self, sysuint_t typeSize, sysuint_t in
   }
 }
 
-err_t ListPrivate_::p_remove(ListUntyped* self, sysuint_t typeSize, const Range& range)
+err_t ListPrivate_::p_remove(ListUntyped* self, size_t typeSize, const Range& range)
 {
   ListData* d = self->_d;
-  sysuint_t length = d->length;
+  size_t length = d->length;
 
-  sysuint_t rstart = range.getStart();
-  sysuint_t rend = Math::min(range.getEnd(), length);
+  size_t rstart = range.getStart();
+  size_t rend = Math::min(range.getEnd(), length);
   if (rstart >= rend) return ERR_OK;
 
-  sysuint_t rlen = rend - rstart;
-  sysuint_t newLength = length - rlen;
+  size_t rlen = rend - rstart;
+  size_t newLength = length - rlen;
 
   if (d->refCount.get() > 1)
   {
@@ -425,11 +425,11 @@ err_t ListPrivate_::p_remove(ListUntyped* self, sysuint_t typeSize, const Range&
   }
   else if (newLength)
   {
-    sysuint_t startIndex = d->startIndex;
+    size_t startIndex = d->startIndex;
 
-    sysuint_t moveFrom = startIndex;
-    sysuint_t moveTo = startIndex;
-    sysuint_t moveBy;
+    size_t moveFrom = startIndex;
+    size_t moveTo = startIndex;
+    size_t moveBy;
 
     char* pdst = d->pstart();
 
@@ -466,16 +466,16 @@ err_t ListPrivate_::p_remove(ListUntyped* self, sysuint_t typeSize, const Range&
   }
 }
 
-err_t ListPrivate_::p_replace(ListUntyped* self, sysuint_t typeSize, const Range& range, const void* data, sysuint_t dataLength)
+err_t ListPrivate_::p_replace(ListUntyped* self, size_t typeSize, const Range& range, const void* data, size_t dataLength)
 {
   ListData* d = self->_d;
-  sysuint_t d_length = d->length;
+  size_t d_length = d->length;
 
-  sysuint_t rstart = range.getStart();
-  sysuint_t rend = Math::min(range.getEnd(), d_length);
+  size_t rstart = range.getStart();
+  size_t rend = Math::min(range.getEnd(), d_length);
   if (rstart >= rend) return ERR_OK;
 
-  sysuint_t rlen = rend - rstart;
+  size_t rlen = rend - rstart;
   if (dataLength == rlen)
   {
     FOG_RETURN_ON_ERROR(p_detach(self, typeSize));
@@ -485,7 +485,7 @@ err_t ListPrivate_::p_replace(ListUntyped* self, sysuint_t typeSize, const Range
   }
   else if (dataLength > rlen)
   {
-    sysuint_t diff = dataLength - rlen;
+    size_t diff = dataLength - rlen;
 
     FOG_RETURN_ON_ERROR(p_insert(self, typeSize, rstart, data, diff));
     FOG_RETURN_ON_ERROR(p_detach(self, typeSize));
@@ -521,8 +521,8 @@ err_t ListPrivate_::c_detach(ListUntyped* self, const SequenceInfoVTable* vtable
   if (d->refCount.get() == 1) return ERR_OK;
 
   ListData* newd;
-  sysuint_t length = d->length;
-  sysuint_t typeSize = vtable->typeSize;
+  size_t length = d->length;
+  size_t typeSize = vtable->typeSize;
 
   newd = (ListData*)d_alloc(typeSize, length);
   if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
@@ -535,16 +535,16 @@ err_t ListPrivate_::c_detach(ListUntyped* self, const SequenceInfoVTable* vtable
   return ERR_OK;
 }
 
-err_t ListPrivate_::c_reserve(ListUntyped* self, const SequenceInfoVTable* vtable, sysuint_t to)
+err_t ListPrivate_::c_reserve(ListUntyped* self, const SequenceInfoVTable* vtable, size_t to)
 {
   ListData* d = self->_d;
-  sysuint_t length = d->length;
-  sysuint_t typeSize = vtable->typeSize;
+  size_t length = d->length;
+  size_t typeSize = vtable->typeSize;
 
   if (d->refCount.get() == 1 && d->capacity >= to)
   {
-    sysuint_t remain = d->capacity - d->endIndex;
-    sysuint_t needed = to - length;
+    size_t remain = d->capacity - d->endIndex;
+    size_t needed = to - length;
 
     if (remain >= needed)
     {
@@ -574,18 +574,18 @@ err_t ListPrivate_::c_reserve(ListUntyped* self, const SequenceInfoVTable* vtabl
   return ERR_OK;
 }
 
-err_t ListPrivate_::c_reserve(ListUntyped* self, const SequenceInfoVTable* vtable, sysuint_t left, sysuint_t right)
+err_t ListPrivate_::c_reserve(ListUntyped* self, const SequenceInfoVTable* vtable, size_t left, size_t right)
 {
   ListData* d = self->_d;
 
-  sysuint_t leftCapacity = d->startIndex;
-  sysuint_t rightCapacity = d->capacity - d->endIndex;
+  size_t leftCapacity = d->startIndex;
+  size_t rightCapacity = d->capacity - d->endIndex;
 
   if (leftCapacity < left || rightCapacity < right || d->refCount.get() > 1)
   {
-    sysuint_t typeSize = vtable->typeSize;
-    sysuint_t to = left + right;
-    sysuint_t length = d->length;
+    size_t typeSize = vtable->typeSize;
+    size_t to = left + right;
+    size_t length = d->length;
 
     // Overflow.
     if (to < left) return ERR_RT_OUT_OF_MEMORY;
@@ -608,17 +608,17 @@ err_t ListPrivate_::c_reserve(ListUntyped* self, const SequenceInfoVTable* vtabl
   return ERR_OK;
 }
 
-err_t ListPrivate_::c_resize(ListUntyped* self, const SequenceInfoVTable* vtable, sysuint_t to)
+err_t ListPrivate_::c_resize(ListUntyped* self, const SequenceInfoVTable* vtable, size_t to)
 {
   ListData* d = self->_d;
-  sysuint_t length = d->length;
-  sysuint_t copy = Math::min<sysuint_t>(to, length);
-  sysuint_t typeSize = vtable->typeSize;
+  size_t length = d->length;
+  size_t copy = Math::min<size_t>(to, length);
+  size_t typeSize = vtable->typeSize;
 
   if (d->refCount.get() == 1 && d->capacity >= to)
   {
-    sysuint_t remain = d->capacity - d->endIndex;
-    sysuint_t needed = to - length;
+    size_t remain = d->capacity - d->endIndex;
+    size_t needed = to - length;
 
     if (remain >= needed)
     {
@@ -658,7 +658,7 @@ err_t ListPrivate_::c_resize(ListUntyped* self, const SequenceInfoVTable* vtable
 void ListPrivate_::c_squeeze(ListUntyped* self, const SequenceInfoVTable* vtable)
 {
   ListData* d = self->_d;
-  sysuint_t length = d->length;
+  size_t length = d->length;
 
   if (d->capacity == length) return;
 
@@ -698,12 +698,12 @@ void ListPrivate_::c_clear(ListUntyped* self, const SequenceInfoVTable* vtable)
   }
 }
 
-err_t ListPrivate_::c_reserveoptimal(ListUntyped* self, const SequenceInfoVTable* vtable, sysuint_t left, sysuint_t right)
+err_t ListPrivate_::c_reserveoptimal(ListUntyped* self, const SequenceInfoVTable* vtable, size_t left, size_t right)
 {
   ListData* d = self->_d;
 
-  sysuint_t leftCapacity = d->startIndex;
-  sysuint_t rightCapacity = d->capacity - d->endIndex;
+  size_t leftCapacity = d->startIndex;
+  size_t rightCapacity = d->capacity - d->endIndex;
 
   if (leftCapacity < left || rightCapacity < right)
   {
@@ -714,20 +714,20 @@ err_t ListPrivate_::c_reserveoptimal(ListUntyped* self, const SequenceInfoVTable
     // for appending data. We can predict future by checking leftCapacity
     // and rightCapacity variables. leftCapacity is never larger than 0
     // if data haven't been prepended, inserted, removed or replaced.
-    sysuint_t typeSize = vtable->typeSize;
-    sysuint_t length = d->length;
+    size_t typeSize = vtable->typeSize;
+    size_t length = d->length;
 
-    sysuint_t leftThreshold = leftCapacity - (leftCapacity >> 1);
-    sysuint_t rightThreshold = rightCapacity - (rightCapacity >> 1);
+    size_t leftThreshold = leftCapacity - (leftCapacity >> 1);
+    size_t rightThreshold = rightCapacity - (rightCapacity >> 1);
 
-    sysuint_t oldLeft = left;
-    sysuint_t oldRight = right;
+    size_t oldLeft = left;
+    size_t oldRight = right;
 
     if (leftThreshold >= left) left = leftThreshold;
     if (rightThreshold >= right) right = rightThreshold;
 
-    sysuint_t by = left + right;
-    sysuint_t after = length + by;
+    size_t by = left + right;
+    size_t after = length + by;
 
     // TODO: Not working...
     // Overflow
@@ -744,8 +744,8 @@ err_t ListPrivate_::c_reserveoptimal(ListUntyped* self, const SequenceInfoVTable
     }
     */
 
-    sysuint_t optimal = Util::getGrowCapacity(sizeof(ListData), typeSize, d->length, after);
-    sysuint_t distribute = optimal - length - left - right;
+    size_t optimal = Util::getGrowCapacity(sizeof(ListData), typeSize, d->length, after);
+    size_t distribute = optimal - length - left - right;
 
     if (oldLeft > oldRight)
       left += distribute;
@@ -764,7 +764,7 @@ err_t ListPrivate_::c_reserveoptimal(ListUntyped* self, const SequenceInfoVTable
   }
 }
 
-err_t ListPrivate_::c_assign(ListUntyped* self, const SequenceInfoVTable* vtable, const void* data, sysuint_t dataLength)
+err_t ListPrivate_::c_assign(ListUntyped* self, const SequenceInfoVTable* vtable, const void* data, size_t dataLength)
 {
   c_clear(self, vtable);
 
@@ -780,10 +780,10 @@ err_t ListPrivate_::c_assign(ListUntyped* self, const SequenceInfoVTable* vtable
   return ERR_OK;
 }
 
-err_t ListPrivate_::c_append(ListUntyped* self, const SequenceInfoVTable* vtable, const void* data, sysuint_t dataLength)
+err_t ListPrivate_::c_append(ListUntyped* self, const SequenceInfoVTable* vtable, const void* data, size_t dataLength)
 {
   ListData* d = self->_d;
-  sysuint_t typeSize = vtable->typeSize;
+  size_t typeSize = vtable->typeSize;
 
   if (d->capacity - d->length < dataLength || d->refCount.get() > 1)
   {
@@ -793,7 +793,7 @@ err_t ListPrivate_::c_append(ListUntyped* self, const SequenceInfoVTable* vtable
     d = self->_d;
   }
 
-  sysuint_t length = d->length;
+  size_t length = d->length;
 
   d->length += dataLength;
   d->endIndex += dataLength;
@@ -803,15 +803,15 @@ err_t ListPrivate_::c_append(ListUntyped* self, const SequenceInfoVTable* vtable
   return ERR_OK;
 }
 
-err_t ListPrivate_::c_insert(ListUntyped* self, const SequenceInfoVTable* vtable, sysuint_t index, const void* data, sysuint_t dataLength)
+err_t ListPrivate_::c_insert(ListUntyped* self, const SequenceInfoVTable* vtable, size_t index, const void* data, size_t dataLength)
 {
   ListData* d = self->_d;
-  sysuint_t typeSize = vtable->typeSize;
+  size_t typeSize = vtable->typeSize;
 
-  sysuint_t length = d->length;
+  size_t length = d->length;
   if (index >= length) { return c_append(self, vtable, data, dataLength); }
 
-  sysuint_t half = length >> 1;
+  size_t half = length >> 1;
 
   if (index < half)
   {
@@ -844,8 +844,8 @@ err_t ListPrivate_::c_insert(ListUntyped* self, const SequenceInfoVTable* vtable
       d = self->_d;
     }
 
-    sysuint_t moveFrom = index;
-    sysuint_t moveTo = moveFrom + dataLength;
+    size_t moveFrom = index;
+    size_t moveTo = moveFrom + dataLength;
 
     d->endIndex += dataLength;
     d->length += dataLength;
@@ -861,15 +861,15 @@ err_t ListPrivate_::c_insert(ListUntyped* self, const SequenceInfoVTable* vtable
 err_t ListPrivate_::c_remove(ListUntyped* self, const SequenceInfoVTable* vtable, const Range& range)
 {
   ListData* d = self->_d;
-  sysuint_t length = d->length;
-  sysuint_t typeSize = vtable->typeSize;
+  size_t length = d->length;
+  size_t typeSize = vtable->typeSize;
 
-  sysuint_t rstart = range.getStart();
-  sysuint_t rend = Math::min(range.getEnd(), length);
+  size_t rstart = range.getStart();
+  size_t rend = Math::min(range.getEnd(), length);
   if (rstart >= rend) return ERR_OK;
 
-  sysuint_t rlen = rend - rstart;
-  sysuint_t newLength = length - rlen;
+  size_t rlen = rend - rstart;
+  size_t newLength = length - rlen;
 
   if (d->refCount.get() > 1)
   {
@@ -888,11 +888,11 @@ err_t ListPrivate_::c_remove(ListUntyped* self, const SequenceInfoVTable* vtable
   }
   else if (newLength)
   {
-    sysuint_t startIndex = d->startIndex;
+    size_t startIndex = d->startIndex;
 
-    sysuint_t moveFrom = startIndex;
-    sysuint_t moveTo = startIndex;
-    sysuint_t moveBy;
+    size_t moveFrom = startIndex;
+    size_t moveTo = startIndex;
+    size_t moveBy;
 
     char* pdst = d->pstart();
 
@@ -931,17 +931,17 @@ err_t ListPrivate_::c_remove(ListUntyped* self, const SequenceInfoVTable* vtable
   }
 }
 
-err_t ListPrivate_::c_replace(ListUntyped* self, const SequenceInfoVTable* vtable, const Range& range, const void* data, sysuint_t dataLength)
+err_t ListPrivate_::c_replace(ListUntyped* self, const SequenceInfoVTable* vtable, const Range& range, const void* data, size_t dataLength)
 {
   ListData* d = self->_d;
-  sysuint_t typeSize = vtable->typeSize;
-  sysuint_t d_length = d->length;
+  size_t typeSize = vtable->typeSize;
+  size_t d_length = d->length;
 
-  sysuint_t rstart = range.getStart();
-  sysuint_t rend = Math::min(range.getEnd(), d_length);
+  size_t rstart = range.getStart();
+  size_t rend = Math::min(range.getEnd(), d_length);
   if (rstart >= rend) return ERR_OK;
 
-  sysuint_t rlen = rend - rstart;
+  size_t rlen = rend - rstart;
   if (dataLength == rlen)
   {
     FOG_RETURN_ON_ERROR(c_detach(self, vtable));
@@ -953,7 +953,7 @@ err_t ListPrivate_::c_replace(ListUntyped* self, const SequenceInfoVTable* vtabl
   }
   else if (dataLength > rlen)
   {
-    sysuint_t diff = dataLength - rlen;
+    size_t diff = dataLength - rlen;
 
     FOG_RETURN_ON_ERROR(c_insert(self, vtable, rstart, data, diff));
     FOG_RETURN_ON_ERROR(c_detach(self, vtable));
@@ -981,10 +981,10 @@ err_t ListPrivate_::c_replace(ListUntyped* self, const SequenceInfoVTable* vtabl
 // [Fog::ListPrivate_ - Data Functions]
 // ===========================================================================
 
-ListData* ListPrivate_::d_alloc(sysuint_t typeSize, sysuint_t capacity)
+ListData* ListPrivate_::d_alloc(size_t typeSize, size_t capacity)
 {
   ListData* d = NULL;
-  sysuint_t dsize = d_getSize(typeSize, capacity);
+  size_t dsize = d_getSize(typeSize, capacity);
 
   // Alloc.
   if (dsize == 0 || !(d = (ListData*)Memory::alloc(dsize))) return NULL;
@@ -1000,11 +1000,11 @@ ListData* ListPrivate_::d_alloc(sysuint_t typeSize, sysuint_t capacity)
   return d;
 }
 
-sysuint_t ListPrivate_::d_getSize(sysuint_t typeSize, sysuint_t capacity)
+size_t ListPrivate_::d_getSize(size_t typeSize, size_t capacity)
 {
-  sysuint_t dSize = sizeof(ListData);
-  sysuint_t eSize = typeSize * capacity;
-  sysuint_t _Size = dSize + eSize;
+  size_t dSize = sizeof(ListData);
+  size_t eSize = typeSize * capacity;
+  size_t _Size = dSize + eSize;
 
   // Overflow.
   if ((eSize / typeSize) != capacity) return 0;

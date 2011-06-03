@@ -24,20 +24,26 @@ namespace Fog {
 //! @brief Byte array filter.
 struct FOG_API ByteArrayFilter
 {
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   ByteArrayFilter();
   virtual ~ByteArrayFilter();
 
+  // --------------------------------------------------------------------------
   // [Public]
+  // --------------------------------------------------------------------------
 
-  virtual Range indexOf(const char* str, sysuint_t slen, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  virtual Range lastIndexOf(const char* str, sysuint_t slen, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  virtual Range indexOf(const char* str, size_t slen, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  virtual Range lastIndexOf(const char* str, size_t slen, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
 
-  // [Filter Implementation]
+  // --------------------------------------------------------------------------
+  // [Interface]
+  // --------------------------------------------------------------------------
 
-  virtual sysuint_t getLength() const;
-  virtual Range match(const char* str, sysuint_t slen, uint cs, const Range& range) const = 0;
+  virtual size_t getLength() const;
+  virtual Range match(const char* str, size_t slen, uint cs, const Range& range) const = 0;
 
 private:
   _FOG_CLASS_NO_COPY(ByteArrayFilter)

@@ -10,7 +10,6 @@
 // [Dependencies]
 #include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Static.h>
 #include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Global/TypeInfo.h>
 #include <Fog/Core/Threading/Atomic.h>
@@ -21,6 +20,22 @@ namespace Fog {
 
 //! @addtogroup Fog_Core_Tools
 //! @{
+
+// ============================================================================
+// [Fog::LocaleData]
+// ============================================================================
+
+struct FOG_NO_EXPORT LocaleData
+{
+  //! @brief Reference count.
+  mutable Atomic<size_t> refCount;
+
+  //! @brief Locale string.
+  String locale;
+
+  //! @brief Locale UTF-32 characters.
+  Char data[LOCALE_CHAR_COUNT];
+};
 
 // ============================================================================
 // [Fog::Locale]
@@ -35,105 +50,91 @@ namespace Fog {
 //! configuration files or platform indenpendent documents should use POSIX
 //! locale only.
 //!
-//! To get user locale use @c Locale::user() method and to get built-in posix
-//! locale use @c Locale::posix().
+//! Use @c Locale::user() method to get the user locale and @c Locale::posix()
+//! method to get the posix (C) locale.
 struct FOG_API Locale
 {
-  // [Data]
-
-  struct FOG_API Data
-  {
-    // [Construction / Destruction]
-
-    Data();
-    Data(const Data& other);
-    ~Data();
-
-    // [Ref / Deref]
-
-    FOG_INLINE Data* ref() const
-    {
-      refCount.inc();
-      return const_cast<Data*>(this);
-    }
-
-    void deref();
-
-    // [Members]
-
-    mutable Atomic<sysuint_t> refCount;
-    String name;
-    uint32_t data[LOCALE_CHAR_INVALID];
-  };
-
-
-  static Static<Data> _dnull;
-  static Static<Data> sharedPosix;
-  static Static<Data> sharedUser;
-
-  static Locale* _dnullLocale;
-  static Locale* sharedPosixLocale;
-  static Locale* sharedUserLocale;
-
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   Locale();
   Locale(const Locale& other);
-  explicit Locale(Data* d);
   explicit Locale(const String& name);
+  explicit FOG_INLINE Locale(LocaleData* d) { _d = d; }
   ~Locale();
 
+  // --------------------------------------------------------------------------
   // [Sharing]
+  // --------------------------------------------------------------------------
 
-  //! @copydoc Doxygen::Implicit::getRefCount().
-  FOG_INLINE sysuint_t getRefCount() const { return _d->refCount.get(); }
+  //! @copydoc Doxygen::Implicit::getReference().
+  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
   //! @copydoc Doxygen::Implicit::isDetached().
-  FOG_INLINE bool isDetached() const { return getRefCount() == 1; }
+  FOG_INLINE bool isDetached() const { return getReference() == 1; }
   //! @copydoc Doxygen::Implicit::detach().
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
   //! @copydoc Doxygen::Implicit::_detach().
   err_t _detach();
-  //! @copydoc Doxygen::Implicit::reset().
-  void reset();
 
+  // --------------------------------------------------------------------------
   // [Flags]
+  // --------------------------------------------------------------------------
 
-  FOG_INLINE bool isNull() const { return _d == _dnull.instancep(); }
+  FOG_INLINE bool isNull() const { return _d == _dnull->_d; }
 
-  // [Set]
-
-  bool set(const String& name);
-  bool set(const Locale& other);
-
+  // --------------------------------------------------------------------------
   // [Accessors]
+  // --------------------------------------------------------------------------
 
-  FOG_INLINE Char getChar(int id) const
-  {
-    FOG_ASSERT_X((uint)id < LOCALE_CHAR_INVALID, "Fog::Locale::getChar() - Id out of range");
-    return Char(_d->data[id]);
-  }
+  //! @brief Get locale string.
+  FOG_INLINE const String& getLocale() const { return _d->locale; }
 
-  FOG_INLINE uint32_t getValue(int id) const
+  //! @brief Get locale character.
+  FOG_INLINE Char getChar(uint32_t id) const
   {
-    FOG_ASSERT_X((uint)id < LOCALE_CHAR_INVALID, "Fog::Locale::getValue() - Id out of range");
+    FOG_ASSERT_X(id < LOCALE_CHAR_COUNT, "Fog::Locale::getChar() - Id out of range");
     return _d->data[id];
   }
 
-  err_t setValue(int id, uint32_t value);
+  err_t setChar(uint32_t id, Char uc);
 
+  // --------------------------------------------------------------------------
+  // [Create]
+  // --------------------------------------------------------------------------
+
+  err_t create(const String& locale);
+
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  //! @copydoc Doxygen::Implicit::reset().
+  void reset();
+
+  // --------------------------------------------------------------------------
   // [Operator Overload]
+  // --------------------------------------------------------------------------
 
-  FOG_INLINE Locale& operator=(const Locale& other) { set(other); return *this; }
+  Locale& operator=(const Locale& other);
 
+  // --------------------------------------------------------------------------
   // [Statics]
+  // --------------------------------------------------------------------------
 
-  static FOG_INLINE const Locale& null() { return *_dnullLocale; }
-  static FOG_INLINE const Locale& posix() { return *sharedPosixLocale; }
-  static FOG_INLINE const Locale& user() { return *sharedUserLocale; }
+  static Locale* _dnull;
+  static Locale* _dposix;
+  static Locale* _duser;
 
+  static FOG_INLINE const Locale& null() { return *_dnull; }
+  static FOG_INLINE const Locale& posix() { return *_dposix; }
+  static FOG_INLINE const Locale& user() { return *_duser; }
+
+  // --------------------------------------------------------------------------
   // [Members]
+  // --------------------------------------------------------------------------
 
-  _FOG_CLASS_D(Data)
+  _FOG_CLASS_D(LocaleData)
 };
 
 //! @}

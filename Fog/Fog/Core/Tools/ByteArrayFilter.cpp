@@ -27,25 +27,25 @@ ByteArrayFilter::~ByteArrayFilter()
 {
 }
 
-Range ByteArrayFilter::indexOf(const char* str, sysuint_t slen, uint cs, const Range& range) const
+Range ByteArrayFilter::indexOf(const char* str, size_t slen, uint cs, const Range& range) const
 {
   Range m(INVALID_INDEX, INVALID_INDEX);
   if (range.getStart() >= slen) return m;
 
-  sysuint_t rstart = range.getStart();
-  sysuint_t rend = Math::min(slen, range.getEnd());
+  size_t rstart = range.getStart();
+  size_t rend = Math::min(slen, range.getEnd());
 
   if (rstart < rend) m = match(str, slen, cs, Range(rstart, rend));
   return m;
 }
 
-Range ByteArrayFilter::lastIndexOf(const char* str, sysuint_t slen, uint cs, const Range& range) const
+Range ByteArrayFilter::lastIndexOf(const char* str, size_t slen, uint cs, const Range& range) const
 {
   Range m(INVALID_INDEX, INVALID_INDEX);
   if (range.getStart() >= slen) return m;
 
-  sysuint_t rstart = range.getStart();
-  sysuint_t rend = Math::min(slen, range.getEnd());
+  size_t rstart = range.getStart();
+  size_t rend = Math::min(slen, range.getEnd());
 
   for (;;)
   {
@@ -59,7 +59,7 @@ Range ByteArrayFilter::lastIndexOf(const char* str, sysuint_t slen, uint cs, con
   return m;
 }
 
-sysuint_t ByteArrayFilter::getLength() const
+size_t ByteArrayFilter::getLength() const
 {
   return INVALID_INDEX;
 }

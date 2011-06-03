@@ -28,7 +28,7 @@ namespace Fog {
 struct FOG_NO_EXPORT GlyphBitmapData
 {
   //! @brief Reference count.
-  mutable Atomic<sysuint_t> refCount;
+  mutable Atomic<size_t> refCount;
 
   //! @brief Metrics.
   GlyphMetricsF metrics;

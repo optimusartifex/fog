@@ -43,7 +43,7 @@ namespace Fog {
 // ============================================================================
 
 void RasterPaintEngine::CTX_SYMBOL(_doMaskConvert)(
-  RasterContext* ctx, const BoxI* box, sysuint_t count)
+  RasterContext* ctx, const BoxI* box, size_t count)
 {
   // Can't be called with empty region.
   FOG_ASSERT(count > 0);
@@ -109,7 +109,7 @@ void RasterPaintEngine::CTX_SYMBOL(_doMaskConvert)(
 // ============================================================================
 
 void RasterPaintEngine::CTX_SYMBOL(_doMaskBoxes)(
-  RasterContext* ctx, const BoxI* box, sysuint_t count, uint32_t clipOp)
+  RasterContext* ctx, const BoxI* box, size_t count, uint32_t clipOp)
 {
   // Can't be called with empty region.
   FOG_ASSERT(count > 0);

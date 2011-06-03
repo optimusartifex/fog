@@ -404,7 +404,7 @@ void WinGuiEngine::updateDisplayInfo()
 // [Fog::WinGuiEngine - Update]
 // ============================================================================
 
-void WinGuiEngine::doBlitWindow(GuiWindow* window, const BoxI* rects, sysuint_t count)
+void WinGuiEngine::doBlitWindow(GuiWindow* window, const BoxI* rects, size_t count)
 {
   Widget* w = window->getWidget();
 
@@ -743,7 +743,7 @@ const char* WinGuiEngine::msgToStr(uint message)
 #endif
   };
 
-  for (sysuint_t i = 0; i != FOG_ARRAY_SIZE(msgTable); i++)
+  for (size_t i = 0; i != FOG_ARRAY_SIZE(msgTable); i++)
   {
     if (msgTable[i].message == message) return msgTable[i].str;
   }
@@ -1929,14 +1929,14 @@ void WinGuiBackBuffer::destroy()
   resize(0, 0, false);
 }
 
-void WinGuiBackBuffer::updateRects(const BoxI* rects, sysuint_t count)
+void WinGuiBackBuffer::updateRects(const BoxI* rects, size_t count)
 {
   // There is nothing to do (this is mainly for X11).
 }
 
-void WinGuiBackBuffer::blitRects(HDC target, const BoxI* rects, sysuint_t count)
+void WinGuiBackBuffer::blitRects(HDC target, const BoxI* rects, size_t count)
 {
-  sysuint_t i;
+  size_t i;
 
   switch (getType())
   {

@@ -155,8 +155,8 @@ err_t TextLayout::_updateLayout()
 
       if (endLine)
       {
-        range.setRange((sysuint_t)(startLine - beg),
-                       (sysuint_t)(endLine   - beg));
+        range.setRange((size_t)(startLine - beg),
+                       (size_t)(endLine   - beg));
 
         err = _lines.append(range);
         if (FOG_IS_ERROR(err)) goto _End;
@@ -169,8 +169,8 @@ err_t TextLayout::_updateLayout()
   // Add the last line (without \n or \r). If there is only this line then
   // _lines will contain only one element and _isMultiLine will be set to
   // false.
-  range.setRange((sysuint_t)(startLine - beg),
-                 (sysuint_t)(cur       - beg));
+  range.setRange((size_t)(startLine - beg),
+                 (size_t)(cur       - beg));
 
   err = _lines.append(range);
   if (FOG_IS_ERROR(err)) goto _End;

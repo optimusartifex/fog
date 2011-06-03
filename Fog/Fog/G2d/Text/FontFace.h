@@ -92,7 +92,7 @@ struct FOG_API FontFace
   // --------------------------------------------------------------------------
 
   //! @brief Reference count.
-  mutable Atomic<sysuint_t> refCount;
+  mutable Atomic<size_t> refCount;
 
   //! @brief Font-face id.
   uint32_t id;

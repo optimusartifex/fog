@@ -11,68 +11,8 @@
 #ifndef _FOG_G2D_H
 #define _FOG_G2D_H
 
-#if defined(FOG_DOXYGEN)
-
 // ============================================================================
-// [Fog/G2d - Documentation]
-// ============================================================================
-
-//! @defgroup Fog_G2d_Public Fog-Graphics
-//!
-//! Public classes and functions related to Fog-Graphics library.
-
-
-
-//! @defgroup Fog_G2d_Constants Constants
-//! @ingroup Fog_G2d_Public
-
-
-
-//! @defgroup Fog_G2d_Geometry Geometry
-//! @ingroup Fog_G2d_Public
-
-
-
-//! @defgroup Fog_G2d_Imaging Imaging
-//! @ingroup Fog_G2d_Public
-
-
-
-//! @defgroup Fog_G2d_Painting Painting
-//! @ingroup Fog_G2d_Public
-
-
-
-//! @defgroup Fog_G2d_Text Fonts and Text
-//! @ingroup Fog_G2d_Public
-
-
-
-//! @defgroup Fog_G2d_Tools Tools
-//! @ingroup Fog_G2d_Public
-
-// ============================================================================
-// [Fog/G2d - Namespaces]
-// ============================================================================
-
-//! @namespace Fog::RasterEngine
-//! @internal
-//! @brief Low level raster based functions namespace.
-//!
-//! RasterEngine namespace contains lowest level pixel manipulation library that
-//! is used in Fog library.
-//!
-//! @section Pixel format conversion and definitions.
-//!
-//! Fog library contains few pixel formats that can be usually combined together.
-//! When using compositing function and destination not supports alpha channel,
-//! the result is premultiplied and alpha is set to 0xFF. This is like blitting
-//! the result into black destination using a source over operator.
-
-#endif // FOG_DOXYGEN
-
-// ============================================================================
-// [Fog/G2d Include Files]
+// [Fog/G2d]
 // ============================================================================
 
 #include <Fog/Core/Config/Config.h>

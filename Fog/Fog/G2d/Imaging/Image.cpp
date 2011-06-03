@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/PBuffer.h>
+#include <Fog/Core/Collection/BufferP.h>
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Face/Face_C.h>
 #include <Fog/Core/IO/FileSystem.h>
@@ -19,6 +19,7 @@
 #include <Fog/Core/Memory/BSwap.h>
 #include <Fog/Core/Memory/Memory.h>
 #include <Fog/Core/Memory/MemoryBuffer.h>
+#include <Fog/Core/Tools/StringTmp_p.h>
 #include <Fog/G2d/Face/Face_Raster_C.h>
 #include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Global/Init_G2d_p.h>
@@ -368,7 +369,7 @@ err_t Image::set(const Image& other, const RectI& area)
   sysint_t srcStride = other._d->stride;
 
   srcCur += (uint)y0 * srcStride + (uint)x0 * other.getBytesPerPixel();
-  sysuint_t bpl = w * other.getBytesPerPixel();
+  size_t bpl = w * other.getBytesPerPixel();
 
   for (sysint_t i = 0; i < h; i++, dstCur += dstStride, srcCur += srcStride)
   {
@@ -1347,7 +1348,7 @@ static err_t applyColorFilter(Image& im, const BoxI& box, ColorFilterFn fn, cons
   sysint_t imStride = im.getStride();
   sysint_t imBpp = im.getBytesPerPixel();
 
-  sysuint_t y;
+  size_t y;
 
   uint8_t* cur = imData + (sysint_t)y0 * imStride + (sysint_t)x0 * imBpp;
   for (y = (uint)h; y; y--, cur += imStride) fn(context, cur, cur, w);
@@ -1797,7 +1798,7 @@ static err_t _G2d_Image_blitImage(
   closure.palette = src._d->palette._d;
   closure.data = NULL;
 
-  PBuffer<2048> buffer;
+  BufferP<2048> buffer;
 
   if (isOpaque)
   {
@@ -2418,14 +2419,14 @@ err_t Image::readFromBuffer(const ByteArray& buffer, const String& extension)
   return readFromBuffer(buffer.getData(), buffer.getLength(), extension);
 }
 
-err_t Image::readFromBuffer(const void* buffer, sysuint_t size)
+err_t Image::readFromBuffer(const void* buffer, size_t size)
 {
   Stream stream;
   stream.openBuffer((void*)buffer, size, STREAM_OPEN_READ);
   return readFromStream(stream, String());
 }
 
-err_t Image::readFromBuffer(const void* buffer, sysuint_t size, const String& extension)
+err_t Image::readFromBuffer(const void* buffer, size_t size, const String& extension)
 {
   Stream stream;
   stream.openBuffer((void*)buffer, size, STREAM_OPEN_READ);
@@ -2534,7 +2535,7 @@ _Align:
   return result;
 }
 
-ImageData* Image::_dalloc(sysuint_t size)
+ImageData* Image::_dalloc(size_t size)
 {
   ImageData* d = (ImageData*)Memory::alloc(ImageData::getSizeFor(size));
   if (FOG_IS_NULL(d)) return NULL;
@@ -2569,7 +2570,7 @@ ImageData* Image::_dalloc(const SizeI& size, uint32_t format)
   if ((stride = Image::getStrideFromWidth(size.w, depth)) == 0) return 0;
 
   // Try to alloc data.
-  d = _dalloc((sysuint_t)(size.h * stride));
+  d = _dalloc((size_t)(size.h * stride));
   if (FOG_UNLIKELY(d == NULL)) return NULL;
 
   d->size = size;

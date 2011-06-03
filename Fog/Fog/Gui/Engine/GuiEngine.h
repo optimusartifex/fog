@@ -252,7 +252,7 @@ struct FOG_API GuiEngine : public Object
   virtual void doUpdateWindow(GuiWindow* window);
 
   //! @brief Blits window content into screen. Called usually from @c doUpdateWindow().
-  virtual void doBlitWindow(GuiWindow* window, const BoxI* rects, sysuint_t count) = 0;
+  virtual void doBlitWindow(GuiWindow* window, const BoxI* rects, size_t count) = 0;
 
   // --------------------------------------------------------------------------
   // [GuiWindow Create / Destroy]
@@ -581,7 +581,7 @@ struct FOG_API GuiBackBuffer
 
   virtual bool resize(int width, int height, bool cache) = 0;
   virtual void destroy() = 0;
-  virtual void updateRects(const BoxI* rects, sysuint_t count) = 0;
+  virtual void updateRects(const BoxI* rects, size_t count) = 0;
 
   // --------------------------------------------------------------------------
   // [Generic Methods]

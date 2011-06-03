@@ -26,7 +26,7 @@ namespace Fog {
 //!
 //! @note Default size of @c PathTmpF is 108 elements which matches approximately
 //! 1kB of memory.
-template<sysuint_t N = 108>
+template<size_t N = 108>
 struct FOG_NO_EXPORT PathTmpF : public PathF
 {
   struct _Storage;
@@ -70,7 +70,7 @@ struct FOG_NO_EXPORT PathTmpF : public PathF
     storage.d.capacity = N;
     storage.d.length = 0;
     storage.d.boundingBox.reset();
-    storage.d.vertices = (PointF*)( (sysuint_t)(storage.data + N + 15) & ~(sysuint_t)15 );
+    storage.d.vertices = (PointF*)( (size_t)(storage.data + N + 15) & ~(size_t)15 );
     return &storage.d;
   }
 
@@ -95,7 +95,7 @@ struct FOG_NO_EXPORT PathTmpF : public PathF
 //!
 //! @note Default size of @c PathTmpD is 58 elements which matches approximately
 //! 1kB of memory.
-template<sysuint_t N = 58>
+template<size_t N = 58>
 struct FOG_NO_EXPORT PathTmpD : public PathD
 {
   struct _Storage;
@@ -128,7 +128,7 @@ struct FOG_NO_EXPORT PathTmpD : public PathD
     storage.d.capacity = N;
     storage.d.length = 0;
     storage.d.boundingBox.reset();
-    storage.d.vertices = (PointD*)( (sysuint_t)(storage.data + N + 15) & ~(sysuint_t)15 );
+    storage.d.vertices = (PointD*)( (size_t)(storage.data + N + 15) & ~(size_t)15 );
     return &storage.d;
   }
 
@@ -158,7 +158,7 @@ struct FOG_NO_EXPORT PathTmpD : public PathD
 // [Fog::PathTmpT<>]
 // ============================================================================
 
-FOG_TYPEVARIANT_DECLARE_TEMPLATE1_F_D(PathTmp, sysuint_t, N)
+FOG_TYPEVARIANT_DECLARE_TEMPLATE1_F_D(PathTmp, size_t, N)
 
 //! @}
 

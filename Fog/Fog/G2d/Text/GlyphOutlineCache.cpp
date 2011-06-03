@@ -18,7 +18,7 @@ namespace Fog {
 // [Fog::GlyphOutlineCache - Helpers]
 // ============================================================================
 
-static FOG_INLINE sysuint_t _G2d_GlyphOutlineCache_getUsedBytes(const GlyphOutline& glyph)
+static FOG_INLINE size_t _G2d_GlyphOutlineCache_getUsedBytes(const GlyphOutline& glyph)
 {
   return sizeof(PathDataF) + (
     (glyph.getOutline().getCapacity() * (sizeof(PointF) + 1) + 15 ) & ~15
@@ -103,7 +103,8 @@ err_t GlyphOutlineCache::put(uint32_t uc, const GlyphOutline& glyph)
   // Realloc table rows if needed (and align the count of rows to 32).
   if (FOG_UNLIKELY(tRow >= _tableSize))
   {
-    uint32_t s = (tRow + 31) & ~31;
+    // Make sure 32 is added, because tRow needs to be valid after realloc!
+    uint32_t s = (tRow + 32) & ~31;
     Table** newt = reinterpret_cast<Table**>(Memory::realloc(_tableData, s * sizeof(Table*)));
 
     if (FOG_IS_NULL(newt)) return ERR_RT_OUT_OF_MEMORY;

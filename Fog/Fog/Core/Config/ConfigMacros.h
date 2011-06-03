@@ -11,7 +11,7 @@
 #endif // _FOG_CORE_CONFIG_CONFIG_H
 
 // ============================================================================
-// [Fog::Core::Build - Standard Macros]
+// [Fog::Core - Standard Macros]
 // ============================================================================
 
 //! @addtogroup Fog_Core_Macros
@@ -20,7 +20,7 @@
 //! @brief Some systems hasn't defined @c offsetof keyword, but FOG_OFFSET_OF
 //! is always defined and it's possible to use it to get offset from a class
 //! member (only single inheritance is allowed).
-#define FOG_OFFSET_OF(_Struct_, _Field_) ((sysuint_t) ((const uint8_t*) &((const _Struct_*)0x1)->_Field_) - 1)
+#define FOG_OFFSET_OF(_Struct_, _Field_) ((size_t) ((const uint8_t*) &((const _Struct_*)0x1)->_Field_) - 1)
 
 //! @brief Size of static table. Do not use this macro to get size of dynamic
 //! table, you can't get it by this way!!!
@@ -38,6 +38,8 @@
 #define FOG_ARRAY_SIZE(element) ( sizeof(element) / sizeof(element[0]) )
 
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
+#define FOG_BYTE_ORDER_CHOICE(_LE_, _BE_) _LE_
+
 #define FOG_MAKE_UINT16_SEQ(_V0_, _V1_) \
   (uint16_t) ( ((uint16_t)(_V0_) <<  0) | \
                ((uint16_t)(_V1_) <<  8) )
@@ -55,7 +57,11 @@
                ((uint64_t)(_V5_) << 40) | \
                ((uint64_t)(_V6_) << 48) | \
                ((uint64_t)(_V7_) << 56) )
-#else
+#endif // FOG_LITTLE_ENDIAN
+
+#if FOG_BYTE_ORDER == FOG_BIG_ENDIAN
+#define FOG_BYTE_ORDER_CHOICE(_LE_, _BE_) _BE_
+
 #define FOG_MAKE_UINT16_SEQ(_V0_, _V1_) \
   (uint16_t) ( ((uint16_t)(_V1_) <<  0) | \
                ((uint16_t)(_V0_) <<  8) )
@@ -73,7 +79,7 @@
                ((uint64_t)(_V2_) << 40) | \
                ((uint64_t)(_V1_) << 48) | \
                ((uint64_t)(_V0_) << 56) )
-#endif
+#endif // FOG_BIG_ENDIAN
 
 #define FOG_RETURN_ON_ERROR(_Expression_) \
   FOG_MACRO_BEGIN \
@@ -85,7 +91,7 @@
 #define FOG_IS_NULL(_Var_) (FOG_UNLIKELY((_Var_) == NULL))
 
 // ============================================================================
-// [Noop]
+// [Nop]
 // ============================================================================
 
 #define FOG_NOP ((void)0)

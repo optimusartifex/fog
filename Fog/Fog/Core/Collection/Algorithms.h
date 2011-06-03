@@ -32,7 +32,7 @@ template<typename T>
 struct QSortCore : public T
 {
   FOG_INLINE uint8_t* _med3(uint8_t* a, uint8_t* b, uint8_t* c);
-  FOG_NO_INLINE void _sort(uint8_t* base, sysuint_t nmemb);
+  FOG_NO_INLINE void _sort(uint8_t* base, size_t nmemb);
 };
 
 template<typename T>
@@ -46,7 +46,7 @@ uint8_t* QSortCore<T>::_med3(uint8_t* a, uint8_t* b, uint8_t* c)
 }
 
 template<typename T>
-void QSortCore<T>::_sort(uint8_t* base, sysuint_t nmemb)
+void QSortCore<T>::_sort(uint8_t* base, size_t nmemb)
 {
   uint8_t* pa; uint8_t* pb; uint8_t* pc; uint8_t* pd;
   uint8_t* pl; uint8_t* pm; uint8_t* pn;
@@ -125,7 +125,7 @@ _Repeat:
     pn = base + nmemb * T::_size;
 
     // Step 1.
-    r = Math::min((sysuint_t)(pa - base), (sysuint_t)(pb - pa));
+    r = Math::min((size_t)(pa - base), (size_t)(pb - pa));
     swpA = base;
     swpB = pb - r;
 
@@ -148,13 +148,13 @@ _Repeat:
       swpB = pn - r;
     }
 
-    if ((r = (sysuint_t)(pb - pa) > T::_size))
+    if ((r = (size_t)(pb - pa) > T::_size))
     {
       // Recurse.
-      _sort(base, (sysuint_t)r / T::_size);
+      _sort(base, (size_t)r / T::_size);
     }
 
-    if ((r = (sysuint_t)(pd - pc) > T::_size))
+    if ((r = (size_t)(pd - pc) > T::_size))
     {
       // Iterate.
       base = pn - r;
@@ -206,13 +206,13 @@ struct QSortType
 template<typename T>
 struct BSearchCore : public T
 {
-  FOG_NO_INLINE const uint8_t* _search(const uint8_t* base, sysuint_t nmemb, const uint8_t* key);
+  FOG_NO_INLINE const uint8_t* _search(const uint8_t* base, size_t nmemb, const uint8_t* key);
 };
 
 template<typename T>
-const uint8_t* BSearchCore<T>::_search(const uint8_t* base, sysuint_t nmemb, const uint8_t* key)
+const uint8_t* BSearchCore<T>::_search(const uint8_t* base, size_t nmemb, const uint8_t* key)
 {
-  sysuint_t lim;
+  size_t lim;
   for (lim = nmemb; lim != 0; lim >>= 1)
   {
     const uint8_t* cur = base + (lim >> 1) * T::_size;
@@ -259,11 +259,11 @@ struct BSearchType
 // [Fog::Algorithms::QSort]
 // ============================================================================
 
-FOG_API void qsort(void* base, sysuint_t nmemb, sysuint_t size, CompareFn compar);
-FOG_API void qsort(void* base, sysuint_t nmemb, sysuint_t size, CompareEx compar, const void* self);
+FOG_API void qsort(void* base, size_t nmemb, size_t size, CompareFn compar);
+FOG_API void qsort(void* base, size_t nmemb, size_t size, CompareEx compar, const void* self);
 
 template<typename T>
-static FOG_INLINE void qsort_t(T* base, sysuint_t nmemb)
+static FOG_INLINE void qsort_t(T* base, size_t nmemb)
 {
   QSortCore< QSortType<T> > context;
   context._sort(base, nmemb);
@@ -274,7 +274,7 @@ static FOG_INLINE void qsort_t(T* base, sysuint_t nmemb)
 // ============================================================================
 
 template<typename T>
-static FOG_INLINE void isort_t(T* base, sysuint_t nmemb)
+static FOG_INLINE void isort_t(T* base, size_t nmemb)
 {
   T* pm;
   T* pl;
@@ -288,11 +288,11 @@ static FOG_INLINE void isort_t(T* base, sysuint_t nmemb)
 // [Fog::Algorithms::BSearch]
 // ============================================================================
 
-FOG_API const void* bsearch(const void* base, sysuint_t nmemb, sysuint_t size, const void* key, CompareFn compar);
-FOG_API const void* bsearch(const void* base, sysuint_t nmemb, sysuint_t size, const void* key, CompareEx compar, const void* self);
+FOG_API const void* bsearch(const void* base, size_t nmemb, size_t size, const void* key, CompareFn compar);
+FOG_API const void* bsearch(const void* base, size_t nmemb, size_t size, const void* key, CompareEx compar, const void* self);
 
 template<typename T>
-const T* bsearch_t(const T* base, sysuint_t nmemb, const T* key)
+const T* bsearch_t(const T* base, size_t nmemb, const T* key)
 {
   BSearchCore< BSearchType<T> > context;
 

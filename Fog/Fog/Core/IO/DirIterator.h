@@ -111,7 +111,7 @@ private:
 
 #if defined(FOG_OS_POSIX)
   ByteArray _pathCache;
-  sysuint_t _pathCacheBaseLength;
+  size_t _pathCacheBaseLength;
   struct dirent *_dent;
 #endif // FOG_OS_POSIX
 

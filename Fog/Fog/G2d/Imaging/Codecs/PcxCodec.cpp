@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/PBuffer.h>
+#include <Fog/Core/Collection/BufferP.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Memory/BSwap.h>
@@ -55,7 +55,7 @@ PcxCodecProvider::~PcxCodecProvider()
 {
 }
 
-uint32_t PcxCodecProvider::checkSignature(const void* mem, sysuint_t length) const
+uint32_t PcxCodecProvider::checkSignature(const void* mem, size_t length) const
 {
   if (!mem || length == 0) return 0;
 
@@ -223,21 +223,21 @@ _Fail:
 static bool _PcxEncodeScanline(
   Stream& stream,
   uint8_t* buffer, const uint8_t* dataCur,
-  sysuint_t length, sysuint_t alignment, sysuint_t increment)
+  size_t length, size_t alignment, size_t increment)
 {
   uint8_t *bufferPtr = buffer;
-  sysuint_t rleCandidate;
-  sysuint_t rleCount;
+  size_t rleCandidate;
+  size_t rleCount;
 
   const uint8_t* dataEnd = dataCur + length * increment;
 
   do {
     // Get the sequence of equal pixels.
-    rleCandidate = (sysuint_t)dataCur[0];
+    rleCandidate = (size_t)dataCur[0];
     rleCount = 1;
     dataCur += increment;
 
-    while (dataCur != dataEnd && rleCandidate == (sysuint_t)dataCur[0] && rleCount < 62)
+    while (dataCur != dataEnd && rleCandidate == (size_t)dataCur[0] && rleCount < 62)
     {
       dataCur += increment;
       rleCount++;
@@ -276,7 +276,7 @@ static bool _PcxEncodeScanline(
   {
     // If the last bytes are encoded using RLE, we can increment
     // it if it not exceeds 191
-    /*if ((sysuint_t)(bufferPtr - buffer) >= 2 &&
+    /*if ((size_t)(bufferPtr - buffer) >= 2 &&
         bufferPtr[-1] > 192 &&
         bufferPtr[-1] < 255 )
     {
@@ -290,7 +290,7 @@ static bool _PcxEncodeScanline(
   }
 
   // Write the compressed line into the stream and return.
-  length = (sysuint_t)(bufferPtr - buffer);
+  length = (size_t)(bufferPtr - buffer);
   return stream.write((const char *)buffer, length) == length;
 }
 
@@ -326,9 +326,9 @@ static void _PcxFillEgaPalette(uint32_t* palette)
   palette[0xF] = 0xFFFFFFFF;
 }
 
-static void _PcxPaletteFromXRGB32(uint8_t* dst, const uint8_t* src, sysuint_t count)
+static void _PcxPaletteFromXRGB32(uint8_t* dst, const uint8_t* src, size_t count)
 {
-  for (sysuint_t i = 0; i != count; i++, dst += 3, src += 4)
+  for (size_t i = 0; i != count; i++, dst += 3, src += 4)
   {
     uint32_t c = ((uint32_t *)src)[0];
     dst[0] = (uint8_t)( (c & 0x00FF0000) >> 16 );
@@ -479,7 +479,7 @@ err_t PcxDecoder::readImage(Image& image)
   sysint_t stride;
 
   // Temporary plane data.
-  PBuffer<1024> temporary;
+  BufferP<1024> temporary;
   uint8_t* mem;
 
   // Bytes per line.
@@ -674,7 +674,7 @@ err_t PcxDecoder::readImage(Image& image)
       }
       else
       {
-        sysuint_t n = (sysuint_t)(dataEnd - dataCur) / 3;
+        size_t n = (size_t)(dataEnd - dataCur) / 3;
         if (n < palLength) palLength = (uint)n;
       }
       infoSecPaletteColors = palLength;
@@ -737,7 +737,7 @@ err_t PcxEncoder::writeImage(const Image& image)
   err_t err = ERR_OK;
 
   PcxHeader pcx;
-  PBuffer<1024> rle;
+  BufferP<1024> rle;
 
   ImageConverter converter;
   ImageData* d = image._d;
@@ -753,7 +753,7 @@ err_t PcxEncoder::writeImage(const Image& image)
   sysint_t pos[4] = { 0, 0, 0, 0 };
 
   const uint8_t* pixels = d->first;
-  sysuint_t stride = d->stride;
+  size_t stride = d->stride;
 
   if (w <= 0 || h <= 0)
   {
@@ -826,7 +826,7 @@ err_t PcxEncoder::writeImage(const Image& image)
   // Try to write comment.
   if (!_comment.isEmpty())
   {
-    sysuint_t length = _comment.getLength();
+    size_t length = _comment.getLength();
     if (length > 54) length = 54;
     memcpy(pcx.unused, (const char*)_comment.getData(), length);
   }
@@ -882,7 +882,7 @@ err_t PcxEncoder::writeImage(const Image& image)
     }
     else
     {
-      PBuffer<1024> buffer;
+      BufferP<1024> buffer;
       PointI ditherOrigin(0, 0);
 
       if (!buffer.alloc(w * inc)) return ERR_RT_OUT_OF_MEMORY;

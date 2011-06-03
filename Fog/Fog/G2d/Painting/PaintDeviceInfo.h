@@ -34,7 +34,7 @@ struct Font;
 struct FOG_NO_EXPORT PaintDeviceInfoData
 {
   //! @brief Reference count.
-  Atomic<sysuint_t> refCount;
+  Atomic<size_t> refCount;
 
   //! @brief Paint device ID (see @c PAINT_DEVICE).
   uint32_t paintDevice;

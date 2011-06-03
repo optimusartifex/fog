@@ -50,7 +50,7 @@ IcoCodecProvider::~IcoCodecProvider()
 {
 }
 
-uint32_t IcoCodecProvider::checkSignature(const void* mem, sysuint_t length) const
+uint32_t IcoCodecProvider::checkSignature(const void* mem, size_t length) const
 {
   if (!mem || length < sizeof(IcoHeader)) return 0;
 
@@ -59,7 +59,7 @@ uint32_t IcoCodecProvider::checkSignature(const void* mem, sysuint_t length) con
   if (*(const uint16_t*)m != 0x0000) return 0;
   if (Memory::bswap16le(*(const uint16_t*)(m+2)) != 0x0001) return 0;
 
-  sysuint_t remaining = length - sizeof(IcoHeader);
+  size_t remaining = length - sizeof(IcoHeader);
   uint16_t count = Memory::bswap16le(*(const uint16_t*)(m+4));
 
   if (remaining < sizeof(IcoEntry) || count == 0)
@@ -69,9 +69,9 @@ uint32_t IcoCodecProvider::checkSignature(const void* mem, sysuint_t length) con
   }
 
   uint16_t entriesAvail = 0;
-  sysuint_t fOffset, fSize;
+  size_t fOffset, fSize;
   IcoEntry *entry = (IcoEntry*)(m + sizeof(IcoHeader));
-  sysuint_t minOffset = sizeof(IcoHeader) + (sysuint_t)count * sizeof(IcoEntry);
+  size_t minOffset = sizeof(IcoHeader) + (size_t)count * sizeof(IcoEntry);
 
   while (remaining >= sizeof(IcoEntry))
   {
@@ -181,7 +181,7 @@ err_t IcoDecoder::readHeader()
       return (_headerResult = ERR_IMAGE_MALFORMED_HEADER);
     }
 
-    sysuint_t memSize = _framesCount * sizeof(IcoEntry);
+    size_t memSize = _framesCount * sizeof(IcoEntry);
 
     _framesInfo = (IcoEntry*)Memory::alloc(memSize);
     if (_framesInfo == NULL)
@@ -201,7 +201,7 @@ err_t IcoDecoder::readHeader()
     int64_t _currentOffset = sizeof(IcoHeader) + memSize;
     IcoEntry *currentEntry = _framesInfo;
 
-    for (sysuint_t i = 0; i < _framesCount; ++i, ++currentEntry)
+    for (size_t i = 0; i < _framesCount; ++i, ++currentEntry)
     {
 #if FOG_BYTE_ORDER == FOG_BIG_ENDIAN
       currentEntry->colorPlanes = Memory::bswap16le(currentEntry->colorPlanes);

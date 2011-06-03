@@ -143,7 +143,7 @@ static FOG_INLINE void copy_64(void* dst, const void* src)
 // [Fog::Memory - Copy (Templates)]
 // ============================================================================
 
-template<sysuint_t Size>
+template<size_t Size>
 static FOG_INLINE void copy_s(void* _dst, const void* _src)
 {
   uint8_t* dst = reinterpret_cast<uint8_t*>(_dst);
@@ -244,7 +244,7 @@ static FOG_INLINE void zero_64(void* dst)
 // [Fog::Memory - Zero (Templates)]
 // ============================================================================
 
-template<sysuint_t Size>
+template<size_t Size>
 static FOG_INLINE void zero_s(void* _dst)
 {
   uint8_t* dst = reinterpret_cast<uint8_t*>(_dst);
@@ -401,7 +401,7 @@ static FOG_INLINE bool eq_64(const void* a, const void* b)
 // [Fog::Memory - Eq (Templates)]
 // ============================================================================
 
-template<sysuint_t Size>
+template<size_t Size>
 static FOG_INLINE bool eq_s(const void* _a, const void* _b)
 {
   bool result = true;
@@ -537,7 +537,7 @@ static FOG_INLINE void xchg_32(void* a, void* b)
 // [Fog::Memory - Xchg (Templates)]
 // ============================================================================
 
-template<sysuint_t Size>
+template<size_t Size>
 static FOG_INLINE void xchg_s(void* _a, void* _b)
 {
   uint8_t* a = reinterpret_cast<uint8_t*>(_a);

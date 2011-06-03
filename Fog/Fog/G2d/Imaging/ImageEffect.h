@@ -61,7 +61,7 @@ struct FOG_NO_EXPORT ImageEffectData
   // --------------------------------------------------------------------------
 
   //! @brief Reference count.
-  mutable Atomic<sysuint_t> refCount;
+  mutable Atomic<size_t> refCount;
 
   //! @brief Destructor function.
   ImageEffectDestroyFn destroy;
@@ -89,7 +89,7 @@ struct FOG_API ImageEffect
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE sysuint_t getRefCount() const { return _d->refCount.get(); }
+  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
   FOG_INLINE uint32_t getType() const { return _d->type; }
 
   // --------------------------------------------------------------------------

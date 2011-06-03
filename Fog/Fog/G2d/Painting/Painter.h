@@ -1126,13 +1126,13 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t drawRect(const RectF& r) { return _vtable->drawRectF(*this, r); }
   FOG_INLINE err_t drawRect(const RectD& r) { return _vtable->drawRectD(*this, r); }
 
-  FOG_INLINE err_t drawPolyline(const PointI* p, sysuint_t count) { return _vtable->drawPolylineI(*this, p, count); }
-  FOG_INLINE err_t drawPolyline(const PointF* p, sysuint_t count) { return _vtable->drawPolylineF(*this, p, count); }
-  FOG_INLINE err_t drawPolyline(const PointD* p, sysuint_t count) { return _vtable->drawPolylineD(*this, p, count); }
+  FOG_INLINE err_t drawPolyline(const PointI* p, size_t count) { return _vtable->drawPolylineI(*this, p, count); }
+  FOG_INLINE err_t drawPolyline(const PointF* p, size_t count) { return _vtable->drawPolylineF(*this, p, count); }
+  FOG_INLINE err_t drawPolyline(const PointD* p, size_t count) { return _vtable->drawPolylineD(*this, p, count); }
 
-  FOG_INLINE err_t drawPolygon(const PointI* p, sysuint_t count) { return _vtable->drawPolygonI(*this, p, count); }
-  FOG_INLINE err_t drawPolygon(const PointF* p, sysuint_t count) { return _vtable->drawPolygonF(*this, p, count); }
-  FOG_INLINE err_t drawPolygon(const PointD* p, sysuint_t count) { return _vtable->drawPolygonD(*this, p, count); }
+  FOG_INLINE err_t drawPolygon(const PointI* p, size_t count) { return _vtable->drawPolygonI(*this, p, count); }
+  FOG_INLINE err_t drawPolygon(const PointF* p, size_t count) { return _vtable->drawPolygonF(*this, p, count); }
+  FOG_INLINE err_t drawPolygon(const PointD* p, size_t count) { return _vtable->drawPolygonD(*this, p, count); }
 
   FOG_INLINE err_t drawLine(const LineF& line) { return _vtable->drawShapeF(*this, SHAPE_TYPE_LINE, &line); }
   FOG_INLINE err_t drawLine(const LineD& line) { return _vtable->drawShapeD(*this, SHAPE_TYPE_LINE, &line); }
@@ -1187,13 +1187,13 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t fillRect(const RectF& r) { return _vtable->fillRectF(*this, r); }
   FOG_INLINE err_t fillRect(const RectD& r) { return _vtable->fillRectD(*this, r); }
 
-  FOG_INLINE err_t fillRects(const RectI* r, sysuint_t count) { return _vtable->fillRectsI(*this, r, count); }
-  FOG_INLINE err_t fillRects(const RectF* r, sysuint_t count) { return _vtable->fillRectsF(*this, r, count); }
-  FOG_INLINE err_t fillRects(const RectD* r, sysuint_t count) { return _vtable->fillRectsD(*this, r, count); }
+  FOG_INLINE err_t fillRects(const RectI* r, size_t count) { return _vtable->fillRectsI(*this, r, count); }
+  FOG_INLINE err_t fillRects(const RectF* r, size_t count) { return _vtable->fillRectsF(*this, r, count); }
+  FOG_INLINE err_t fillRects(const RectD* r, size_t count) { return _vtable->fillRectsD(*this, r, count); }
 
-  FOG_INLINE err_t fillPolygon(const PointI* p, sysuint_t count) { return _vtable->fillPolygonI(*this, p, count); }
-  FOG_INLINE err_t fillPolygon(const PointF* p, sysuint_t count) { return _vtable->fillPolygonF(*this, p, count); }
-  FOG_INLINE err_t fillPolygon(const PointD* p, sysuint_t count) { return _vtable->fillPolygonD(*this, p, count); }
+  FOG_INLINE err_t fillPolygon(const PointI* p, size_t count) { return _vtable->fillPolygonI(*this, p, count); }
+  FOG_INLINE err_t fillPolygon(const PointF* p, size_t count) { return _vtable->fillPolygonF(*this, p, count); }
+  FOG_INLINE err_t fillPolygon(const PointD* p, size_t count) { return _vtable->fillPolygonD(*this, p, count); }
 
   FOG_INLINE err_t fillQBezier(const QBezierF& quad) { return _vtable->fillShapeF(*this, SHAPE_TYPE_QBEZIER, &quad); }
   FOG_INLINE err_t fillQBezier(const QBezierD& quad) { return _vtable->fillShapeD(*this, SHAPE_TYPE_QBEZIER, &quad); }
@@ -1302,13 +1302,13 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t clipRect(uint32_t clipOp, const RectF& r) { return _vtable->clipRectF(*this, clipOp, r); }
   FOG_INLINE err_t clipRect(uint32_t clipOp, const RectD& r) { return _vtable->clipRectD(*this, clipOp, r); }
 
-  FOG_INLINE err_t clipRects(uint32_t clipOp, const RectI* r, sysuint_t count) { return _vtable->clipRectsI(*this, clipOp, r, count); }
-  FOG_INLINE err_t clipRects(uint32_t clipOp, const RectF* r, sysuint_t count) { return _vtable->clipRectsF(*this, clipOp, r, count); }
-  FOG_INLINE err_t clipRects(uint32_t clipOp, const RectD* r, sysuint_t count) { return _vtable->clipRectsD(*this, clipOp, r, count); }
+  FOG_INLINE err_t clipRects(uint32_t clipOp, const RectI* r, size_t count) { return _vtable->clipRectsI(*this, clipOp, r, count); }
+  FOG_INLINE err_t clipRects(uint32_t clipOp, const RectF* r, size_t count) { return _vtable->clipRectsF(*this, clipOp, r, count); }
+  FOG_INLINE err_t clipRects(uint32_t clipOp, const RectD* r, size_t count) { return _vtable->clipRectsD(*this, clipOp, r, count); }
 
-  FOG_INLINE err_t clipPolygon(uint32_t clipOp, const PointI* p, sysuint_t count) { return _vtable->clipPolygonI(*this, clipOp, p, count); }
-  FOG_INLINE err_t clipPolygon(uint32_t clipOp, const PointF* p, sysuint_t count) { return _vtable->clipPolygonF(*this, clipOp, p, count); }
-  FOG_INLINE err_t clipPolygon(uint32_t clipOp, const PointD* p, sysuint_t count) { return _vtable->clipPolygonD(*this, clipOp, p, count); }
+  FOG_INLINE err_t clipPolygon(uint32_t clipOp, const PointI* p, size_t count) { return _vtable->clipPolygonI(*this, clipOp, p, count); }
+  FOG_INLINE err_t clipPolygon(uint32_t clipOp, const PointF* p, size_t count) { return _vtable->clipPolygonF(*this, clipOp, p, count); }
+  FOG_INLINE err_t clipPolygon(uint32_t clipOp, const PointD* p, size_t count) { return _vtable->clipPolygonD(*this, clipOp, p, count); }
 
   FOG_INLINE err_t clipLine(uint32_t clipOp, const LineF& line) { return _vtable->clipShapeF(*this, clipOp, SHAPE_TYPE_LINE, &line); }
   FOG_INLINE err_t clipLine(uint32_t clipOp, const LineD& line) { return _vtable->clipShapeD(*this, clipOp, SHAPE_TYPE_LINE, &line); }

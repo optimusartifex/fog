@@ -15,15 +15,15 @@ namespace StringUtil {
 // [Fog::StringUtil::atoi, atou]
 // ============================================================================
 
-err_t atob(const CHAR_TYPE* str, sysuint_t length, bool* dst, sysuint_t* parserEnd, uint32_t* parserFlags)
+err_t atob(const CHAR_TYPE* str, size_t length, bool* dst, size_t* parserEnd, uint32_t* parserFlags)
 {
   const CHAR_TYPE* beg = str;
   const CHAR_TYPE* end = str + length;
 
   err_t err = ERR_STRING_INVALID_INPUT;
   uint32_t flags = 0;
-  sysuint_t i;
-  sysuint_t remain = (sysuint_t)(end - str);
+  size_t i;
+  size_t remain = (size_t)(end - str);
 
   *dst = false;
 
@@ -33,7 +33,7 @@ err_t atob(const CHAR_TYPE* str, sysuint_t length, bool* dst, sysuint_t* parserE
 
   for (i = 0; i < FOG_ARRAY_SIZE(boolMap); i++)
   {
-    sysuint_t blen = boolMap[i].length;
+    size_t blen = boolMap[i].length;
     if (remain >= blen && eq(str, boolMap[i].str, blen, CASE_INSENSITIVE))
     {
       str += blen;
@@ -46,12 +46,12 @@ err_t atob(const CHAR_TYPE* str, sysuint_t length, bool* dst, sysuint_t* parserE
   }
 
 skip:
-  if (parserEnd) *parserEnd = (sysuint_t)(str - beg);
+  if (parserEnd) *parserEnd = (size_t)(str - beg);
   if (parserFlags) *parserFlags = flags;
   return err;
 }
 
-err_t atoi8(const CHAR_TYPE* str, sysuint_t length, int8_t* dst, int base, sysuint_t* end, uint32_t* parserFlags)
+err_t atoi8(const CHAR_TYPE* str, size_t length, int8_t* dst, int base, size_t* end, uint32_t* parserFlags)
 {
   int64_t n;
   err_t err = atoi64(str, length, &n, base, end, parserFlags);
@@ -73,7 +73,7 @@ err_t atoi8(const CHAR_TYPE* str, sysuint_t length, int8_t* dst, int base, sysui
   }
 }
 
-err_t atou8(const CHAR_TYPE* str, sysuint_t length, uint8_t* dst, int base, sysuint_t* end, uint32_t* parserFlags)
+err_t atou8(const CHAR_TYPE* str, size_t length, uint8_t* dst, int base, size_t* end, uint32_t* parserFlags)
 {
   uint64_t n;
   err_t err = atou64(str, length, &n, base, end, parserFlags);
@@ -90,7 +90,7 @@ err_t atou8(const CHAR_TYPE* str, sysuint_t length, uint8_t* dst, int base, sysu
   }
 }
 
-err_t atoi16(const CHAR_TYPE* str, sysuint_t length, int16_t* dst, int base, sysuint_t* end, uint32_t* parserFlags)
+err_t atoi16(const CHAR_TYPE* str, size_t length, int16_t* dst, int base, size_t* end, uint32_t* parserFlags)
 {
   int64_t n;
   err_t err = atoi64(str, length, &n, base, end, parserFlags);
@@ -112,7 +112,7 @@ err_t atoi16(const CHAR_TYPE* str, sysuint_t length, int16_t* dst, int base, sys
   }
 }
 
-err_t atou16(const CHAR_TYPE* str, sysuint_t length, uint16_t* dst, int base, sysuint_t* end, uint32_t* parserFlags)
+err_t atou16(const CHAR_TYPE* str, size_t length, uint16_t* dst, int base, size_t* end, uint32_t* parserFlags)
 {
   uint64_t n;
   err_t err = atou64(str, length, &n, base, end, parserFlags);
@@ -129,7 +129,7 @@ err_t atou16(const CHAR_TYPE* str, sysuint_t length, uint16_t* dst, int base, sy
   }
 }
 
-err_t atoi32(const CHAR_TYPE* str, sysuint_t length, int32_t* dst, int base, sysuint_t* end, uint32_t* parserFlags)
+err_t atoi32(const CHAR_TYPE* str, size_t length, int32_t* dst, int base, size_t* end, uint32_t* parserFlags)
 {
   int64_t n;
   err_t err = atoi64(str, length, &n, base, end, parserFlags);
@@ -151,7 +151,7 @@ err_t atoi32(const CHAR_TYPE* str, sysuint_t length, int32_t* dst, int base, sys
   }
 }
 
-err_t atou32(const CHAR_TYPE* str, sysuint_t length, uint32_t* dst, int base, sysuint_t* end, uint32_t* parserFlags)
+err_t atou32(const CHAR_TYPE* str, size_t length, uint32_t* dst, int base, size_t* end, uint32_t* parserFlags)
 {
   uint64_t n;
   err_t err = atou64(str, length, &n, base, end, parserFlags);
@@ -168,7 +168,7 @@ err_t atou32(const CHAR_TYPE* str, sysuint_t length, uint32_t* dst, int base, sy
   }
 }
 
-static err_t atou64_priv(const CHAR_TYPE* str, sysuint_t length, uint64_t* dst, int base, bool* negative, sysuint_t* parserEnd, uint32_t* parserFlags)
+static err_t atou64_priv(const CHAR_TYPE* str, size_t length, uint64_t* dst, int base, bool* negative, size_t* parserEnd, uint32_t* parserFlags)
 {
   uint32_t flags = 0;
   const CHAR_TYPE* beg = str;
@@ -440,7 +440,7 @@ large_basen:
 
 done:
   *dst = res64;
-  if (parserEnd) *parserEnd = (sysuint_t)(str - beg);
+  if (parserEnd) *parserEnd = (size_t)(str - beg);
   if (parserFlags) *parserFlags = flags;
   return ERR_OK;
 
@@ -452,7 +452,7 @@ overflow:
 #endif
 
   *dst = UINT64_MAX;
-  if (parserEnd) *parserEnd = (sysuint_t)(str - beg);
+  if (parserEnd) *parserEnd = (size_t)(str - beg);
   if (parserFlags) *parserFlags = flags;
   return ERR_RT_OVERFLOW;
 
@@ -463,7 +463,7 @@ truncated:
   return ERR_STRING_INVALID_INPUT;
 }
 
-err_t atoi64(const CHAR_TYPE* str, sysuint_t length, int64_t* dst, int base, sysuint_t* end, uint32_t* parserFlags)
+err_t atoi64(const CHAR_TYPE* str, size_t length, int64_t* dst, int base, size_t* end, uint32_t* parserFlags)
 {
   uint64_t n;
   bool negative = false;
@@ -497,7 +497,7 @@ err_t atoi64(const CHAR_TYPE* str, sysuint_t length, int64_t* dst, int base, sys
   }
 }
 
-err_t atou64(const CHAR_TYPE* str, sysuint_t length, uint64_t* dst, int base, sysuint_t* end, uint32_t* parserFlags)
+err_t atou64(const CHAR_TYPE* str, size_t length, uint64_t* dst, int base, size_t* end, uint32_t* parserFlags)
 {
   uint64_t n;
   bool negative = false;
@@ -520,7 +520,7 @@ err_t atou64(const CHAR_TYPE* str, sysuint_t length, uint64_t* dst, int base, sy
 // [Fog::StringUtil::atof, atod]
 // ============================================================================
 
-err_t atof(const CHAR_TYPE* str, sysuint_t length, float* dst, CHAR_TYPE decimalPoint, sysuint_t* end, uint32_t* parserFlags)
+err_t atof(const CHAR_TYPE* str, size_t length, float* dst, CHAR_TYPE decimalPoint, size_t* end, uint32_t* parserFlags)
 {
   double d;
   err_t err = atod(str, length, &d, decimalPoint, end, parserFlags);
@@ -629,7 +629,7 @@ static BInt* BContext_s2b(BContext* context, const CHAR_TYPE* s, int nd0, int nd
   return b;
 }
 
-err_t atod(const CHAR_TYPE* str, sysuint_t length, double* dst, CHAR_TYPE decimalPoint, sysuint_t* end, uint32_t* parserFlags)
+err_t atod(const CHAR_TYPE* str, size_t length, double* dst, CHAR_TYPE decimalPoint, size_t* end, uint32_t* parserFlags)
 {
   BContext context;
 
@@ -842,17 +842,17 @@ exp_done:
     {
 #ifdef INFNAN_CHECK
       // Check for Nan and Infinity.
-      if ((c == 'i' || c == 'I') && (sysuint_t)(send - s) >= 2 &&
+      if ((c == 'i' || c == 'I') && (size_t)(send - s) >= 2 &&
         eq(s+1, "nf", 2, CASE_INSENSITIVE))
       {
         s += 3;
-        if ((sysuint_t)(send - s) >= 5 && eq(s, "inity", 5, CASE_INSENSITIVE)) s += 5;
+        if ((size_t)(send - s) >= 5 && eq(s, "inity", 5, CASE_INSENSITIVE)) s += 5;
 
         rv.i[DTOA_DWORD_0] = 0x7FF00000;
         rv.i[DTOA_DWORD_1] = 0;
         goto ret;
       }
-      else if ((c == 'n' || c == 'N') && (sysuint_t)(send - s) >= 2 &&
+      else if ((c == 'n' || c == 'N') && (size_t)(send - s) >= 2 &&
         eq(s+1, "an", 2, CASE_INSENSITIVE))
       {
         s += 3;
@@ -1603,7 +1603,7 @@ retfree:
 ret:
   BContext_destroy(&context);
 
-  if (end) *end = (sysuint_t)(s - sbegin);
+  if (end) *end = (size_t)(s - sbegin);
   if (parserFlags) *parserFlags = flags;
 
   if (sign)

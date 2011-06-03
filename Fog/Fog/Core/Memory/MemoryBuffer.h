@@ -69,7 +69,7 @@ struct FOG_API MemoryBuffer
 
   //! @brief Create a @c MemoryManager instance, using a given memory manager
   //! and a given embedded buffer.
-  FOG_INLINE MemoryBuffer(MemoryManager* memoryManager, uint8_t* embeddedBuffer, sysuint_t embeddedSize) :
+  FOG_INLINE MemoryBuffer(MemoryManager* memoryManager, uint8_t* embeddedBuffer, size_t embeddedSize) :
     _memoryManager(memoryManager),
     _memoryBuffer(embeddedBuffer),
     _memorySize(embeddedSize),
@@ -93,7 +93,7 @@ struct FOG_API MemoryBuffer
   // --------------------------------------------------------------------------
 
   //! @brief Try to allocate memory buffer at @a size and return it.
-  FOG_INLINE uint8_t* alloc(sysuint_t size)
+  FOG_INLINE uint8_t* alloc(size_t size)
   {
     return (size > _memorySize) ? _alloc(size) : _memoryBuffer;
   }
@@ -101,11 +101,11 @@ struct FOG_API MemoryBuffer
 protected:
   //! @brief Private allocator used if there is no memory. This method is not
   //! inlined, because it is called only if embedded buffer is too small.
-  uint8_t* _alloc(sysuint_t size);
+  uint8_t* _alloc(size_t size);
 
 public:
   FOG_INLINE uint8_t* getMemoryBuffer() const { return _memoryBuffer; }
-  FOG_INLINE sysuint_t getMemorySize() const { return _memorySize; }
+  FOG_INLINE size_t getMemorySize() const { return _memorySize; }
 
   // --------------------------------------------------------------------------
   // [Embedded memory]
@@ -117,7 +117,7 @@ public:
   FOG_INLINE uint8_t* getEmbeddedBuffer() const { return _embeddedBuffer; }
   //! @brief Get size of embedded memory block (can be zero if no embedded
   //! block is used).
-  FOG_INLINE sysuint_t getEmbeddedSize() const { return _embeddedSize; }
+  FOG_INLINE size_t getEmbeddedSize() const { return _embeddedSize; }
 
 protected:
   //! @brief Memory manager used to allocate / free the memory block.
@@ -126,13 +126,13 @@ protected:
   //! @brief Memory buffer.
   uint8_t* _memoryBuffer;
   //! @brief Memory buffer size.
-  sysuint_t _memorySize;
+  size_t _memorySize;
 
   //! @brief Embedded memory block (will be never freed, can be stack based
   //! memory).
   uint8_t* _embeddedBuffer;
   //! @brief Embedded memory block size.
-  sysuint_t _embeddedSize;
+  size_t _embeddedSize;
 
 private:
   _FOG_CLASS_NO_COPY(MemoryBuffer)

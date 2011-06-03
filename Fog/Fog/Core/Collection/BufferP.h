@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_COLLECTION_UBUFFER_H
-#define _FOG_CORE_COLLECTION_UBUFFER_H
+#ifndef _FOG_CORE_COLLECTION_BUFFERP_H
+#define _FOG_CORE_COLLECTION_BUFFERP_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
@@ -19,7 +19,7 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// Fog::PBuffer<>
+// Fog::BufferP<>
 // ============================================================================
 
 //! @brief This template is for fast routines that need to use memory
@@ -40,19 +40,19 @@ namespace Fog {
 //!
 //! This template simulates the @c alloca() function, improving portability
 //! and using heap memory allocation if requested buffer is too large.
-template<sysuint_t N = 0>
-struct PBuffer
+template<size_t N = 0>
+struct BufferP
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE PBuffer() :
+  FOG_INLINE BufferP() :
     _mem(NULL)
   {
   }
 
-  FOG_INLINE ~PBuffer()
+  FOG_INLINE ~BufferP()
   {
     _reset();
   }
@@ -75,7 +75,7 @@ struct PBuffer
   // [Alloc / Free]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void* alloc(sysuint_t size)
+  FOG_INLINE void* alloc(size_t size)
   {
     FOG_ASSERT(_mem == NULL);
 
@@ -112,7 +112,7 @@ protected:
   uint8_t _storage[N];
 
 private:
-  _FOG_CLASS_NO_COPY(PBuffer)
+  _FOG_CLASS_NO_COPY(BufferP)
 };
 
 //! @}
@@ -120,4 +120,4 @@ private:
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_CORE_COLLECTION_UBUFFER_H
+#endif // _FOG_CORE_COLLECTION_BUFFERP_H

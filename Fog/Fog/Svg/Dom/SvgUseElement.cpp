@@ -45,7 +45,7 @@ static Utf16 parseHtmlLinkId(const String& url)
   {
     if (++idStr == idEnd) break;
   }
-  return Utf16(idMark, (sysuint_t)(idStr - idMark));
+  return Utf16(idMark, (size_t)(idStr - idMark));
 
 bail:
   return Utf16((const Char*)NULL, 0);

@@ -96,8 +96,8 @@ err_t FontManager::addProvider(const FontProvider& provider, uint32_t order)
 
   AutoLock locked(_G2d_FontManager_lock.instance());
 
-  sysuint_t i = _d->providers.indexOf(provider);
-  sysuint_t w = (order == FONT_ORDER_FIRST) ? 0 : _d->providers.getLength();
+  size_t i = _d->providers.indexOf(provider);
+  size_t w = (order == FONT_ORDER_FIRST) ? 0 : _d->providers.getLength();
 
   if (i == w)
     return ERR_OK;
@@ -141,7 +141,7 @@ err_t FontManager::removeProvider(const FontProvider& provider)
 
   AutoLock locked(_G2d_FontManager_lock.instance());
 
-  sysuint_t i = _d->providers.indexOf(provider);
+  size_t i = _d->providers.indexOf(provider);
   if (i == INVALID_INDEX) return ERR_RT_OBJECT_NOT_FOUND;
 
   if (_d->refCount.get() > 1)

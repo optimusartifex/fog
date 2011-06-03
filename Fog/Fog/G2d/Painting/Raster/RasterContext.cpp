@@ -45,7 +45,7 @@ RasterContext::RasterContext() :
 
   solid.prgb32.u32 = 0xFF000000;
   solid.prgb64.u64 = FOG_UINT64_C(0xFFFF000000000000);
-  pc = (RenderPatternContext*)(sysuint_t)0x1;
+  pc = (RenderPatternContext*)(size_t)0x1;
 
   closure.ditherOrigin.reset();
   closure.palette = NULL;
@@ -82,7 +82,7 @@ err_t RasterContext::_initByMaster(const RasterContext& master)
   closure = master.closure;
   solid.prgb64 = master.solid.prgb64;
   solid.prgb32 = master.solid.prgb32;
-  pc = (RenderPatternContext*)(sysuint_t)0x1;
+  pc = (RenderPatternContext*)(size_t)0x1;
 
   return _initPrecision(master.precision);
 }

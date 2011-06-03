@@ -153,7 +153,7 @@ typedef err_t (FOG_FASTCALL *RenderPatternGradientCreateFn)(
 
 //! @internal
 typedef void (FOG_FASTCALL *RenderPatternGradientInterpolateFn)(
-  uint8_t* dst, int w, const ColorStop* stops, sysuint_t length);
+  uint8_t* dst, int w, const ColorStop* stops, size_t length);
 
 // ============================================================================
 // [Fog::Render - Prototype - Pattern - Destroy]

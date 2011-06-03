@@ -71,7 +71,7 @@ struct FOG_NO_EXPORT ColorStopListData
   // [Statics]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE sysuint_t sizeFor(sysuint_t capacity)
+  static FOG_INLINE size_t sizeFor(size_t capacity)
   {
     return sizeof(ColorStopListData) - sizeof(ColorStop) +
       capacity * sizeof(ColorStop);
@@ -81,12 +81,12 @@ struct FOG_NO_EXPORT ColorStopListData
   // [Members]
   // --------------------------------------------------------------------------
 
-  mutable Atomic<sysuint_t> refCount;
+  mutable Atomic<size_t> refCount;
 
   //! @brief The color-stop list capacity.
-  sysuint_t capacity;
+  size_t capacity;
   //! @brief The color-stop list length.
-  sysuint_t length;
+  size_t length;
 
   //! @brief The color-stop cache for PRGB32 or XRGB32 formats (the most used).
   ColorStopCache* stopCachePrgb32;
@@ -113,14 +113,14 @@ struct FOG_API ColorStopList
   // [Data]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE sysuint_t getRefCount() const { return _d->refCount.get(); }
-  FOG_INLINE bool isDetached() const { return getRefCount() == 1; }
+  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
+  FOG_INLINE bool isDetached() const { return getReference() == 1; }
 
-  FOG_INLINE sysuint_t getCapacity() const { return _d->capacity; }
-  FOG_INLINE sysuint_t getLength() const { return _d->length; }
+  FOG_INLINE size_t getCapacity() const { return _d->capacity; }
+  FOG_INLINE size_t getLength() const { return _d->length; }
   FOG_INLINE bool isEmpty() const { return _d->length == 0; }
 
-  err_t reserve(sysuint_t n);
+  err_t reserve(size_t n);
   void squeeze();
 
   // --------------------------------------------------------------------------
@@ -146,7 +146,7 @@ struct FOG_API ColorStopList
     return _d->data;
   }
 
-  FOG_INLINE const ColorStop& getAt(sysuint_t index) const
+  FOG_INLINE const ColorStop& getAt(size_t index) const
   {
     FOG_ASSERT_X(index < _d->length, "Fog::ColorStopList::getAt() - Index out of range");
     return _d->data[index];
@@ -154,7 +154,7 @@ struct FOG_API ColorStopList
 
   err_t setList(const ColorStopList& other);
   err_t setList(const List<ColorStop>& stops);
-  err_t setList(const ColorStop* stops, sysuint_t length);
+  err_t setList(const ColorStop* stops, size_t length);
 
   // --------------------------------------------------------------------------
   // [Manipulation]
@@ -165,11 +165,11 @@ struct FOG_API ColorStopList
   err_t remove(float offset);
   err_t remove(const ColorStop& stop);
 
-  err_t removeAt(sysuint_t index);
+  err_t removeAt(size_t index);
   err_t removeAt(const Range& range);
   err_t removeAt(const IntervalF& interval);
 
-  sysuint_t indexOf(float offset) const;
+  size_t indexOf(float offset) const;
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
@@ -183,7 +183,7 @@ struct FOG_API ColorStopList
   // --------------------------------------------------------------------------
 
   static Static<ColorStopListData> _dnull;
-  static ColorStopListData* _dalloc(sysuint_t capacity);
+  static ColorStopListData* _dalloc(size_t capacity);
 
   // --------------------------------------------------------------------------
   // [Members]

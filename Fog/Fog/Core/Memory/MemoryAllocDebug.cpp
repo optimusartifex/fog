@@ -10,7 +10,7 @@
 #endif
 
 #if 0
-FOG_CAPI_DECLARE void* fog_memory_alloc(sysuint_t size)
+FOG_CAPI_DECLARE void* fog_memory_alloc(size_t size)
 {
   if (FOG_LIKELY(size))
   {
@@ -29,7 +29,7 @@ FOG_CAPI_DECLARE void* fog_memory_alloc(sysuint_t size)
     return NULL;
 }
 
-FOG_CAPI_DECLARE void* fog_memory_calloc(sysuint_t size)
+FOG_CAPI_DECLARE void* fog_memory_calloc(size_t size)
 {
   if (FOG_LIKELY(size))
   {
@@ -48,7 +48,7 @@ FOG_CAPI_DECLARE void* fog_memory_calloc(sysuint_t size)
     return NULL;
 }
 
-FOG_CAPI_DECLARE void* fog_memory_realloc(void* addr, sysuint_t size)
+FOG_CAPI_DECLARE void* fog_memory_realloc(void* addr, size_t size)
 {
   if (FOG_LIKELY(addr != NULL))
   {
@@ -78,7 +78,7 @@ FOG_CAPI_DECLARE void* fog_memory_realloc(void* addr, sysuint_t size)
     return fog_memory_alloc(size);
 }
 
-FOG_CAPI_DECLARE void* fog_memory_reallocf(void* addr, sysuint_t size)
+FOG_CAPI_DECLARE void* fog_memory_reallocf(void* addr, size_t size)
 {
   void* r_addr = fog_memory_realloc(addr, size);
   // If out of memory returns true, try realloc again
@@ -130,7 +130,7 @@ FOG_CAPI_DECLARE void fog_memory_free(void* addr)
 struct MemDbgNode
 {
   void* addr;
-  sysuint_t size;
+  size_t size;
   MemDbgNode* next;
 };
 
@@ -151,7 +151,7 @@ static MemDbgNode** fog_memdbg_nodes;
 
 static MemDbgNode* fog_memdbg_find(void* addr);
 static void fog_memdbg_leaks(void);
-static void fog_memdbg_dump(void* addr, sysuint_t size);
+static void fog_memdbg_dump(void* addr, size_t size);
 
 #define FOG_MEMDBG_TABLE_SIZE 47431
 
@@ -161,7 +161,7 @@ static FOG_INLINE uint32_t fog_memdbg_hash(void* addr)
 #if FOG_ARCH_BITS == 32
   return ((uint32_t)addr >> 2) % FOG_MEMDBG_TABLE_SIZE;
 #else
-  return (((uint32_t)(sysuint_t)addr ^ (uint32_t)((sysuint_t)addr >> 32)) >> 3) % FOG_MEMDBG_TABLE_SIZE;
+  return (((uint32_t)(size_t)addr ^ (uint32_t)((size_t)addr >> 32)) >> 3) % FOG_MEMDBG_TABLE_SIZE;
 #endif
 }
 
@@ -209,7 +209,7 @@ static void fog_memdbg_fini(void)
   fog_memdbg_lock.destroy();
 }
 
-static void fog_memdbg_add(void* addr, sysuint_t size)
+static void fog_memdbg_add(void* addr, size_t size)
 {
   MemDbgNode* node = (MemDbgNode*)malloc(sizeof(MemDbgNode));
 
@@ -285,7 +285,7 @@ static void fog_memdbg_leaks(void)
   {
     fog_stderr_msg("Fog::MemDbg", "leaks", "Detected %llu memory leak(s), size:%llu bytes.", fog_memdbg_blocks_current, fog_memdbg_heapalloc_current);
 
-    sysuint_t i;
+    size_t i;
     MemDbgNode* node;
 
     for (i = 0; i != FOG_MEMDBG_TABLE_SIZE; i++)
@@ -339,14 +339,14 @@ static MemDbgNode* fog_memdbg_find(void* addr)
   return NULL;
 }
 
-static void fog_memdbg_dump(void* addr, sysuint_t size)
+static void fog_memdbg_dump(void* addr, size_t size)
 {
   const uint8_t* addr_c = (const uint8_t*)addr;
-  sysuint_t a = 0, i;
+  size_t a = 0, i;
 
   while (a < size)
   {
-    sysuint_t width = 24;
+    size_t width = 24;
     if (a + width > size) width = size - a;
 
     for (i = 0; i != width; i++)

@@ -17,7 +17,7 @@
 #include <Fog/Core/DateTime/Time.h>
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Tools/Lazy.h>
+#include <Fog/Core/Threading/Lazy.h>
 #include <Fog/Core/Threading/Lock.h>
 
 #if defined(FOG_OS_WINDOWS)

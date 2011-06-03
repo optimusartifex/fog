@@ -4,7 +4,7 @@
 // MIT, See COPYING file in package
 
 // [Dependencies]
-#include <Fog/Core/Collection/PStack.h>
+#include <Fog/Core/Collection/StackP.h>
 #include <Fog/Core/System/Application.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Painting/Painter.h>
@@ -323,7 +323,7 @@ bool GuiEngine::stopButtonRepeat(uint32_t button)
 
 void GuiEngine::clearButtonRepeat()
 {
-  for (sysuint_t i = 0; i < FOG_ARRAY_SIZE(_buttonRepeat); i++)
+  for (size_t i = 0; i < FOG_ARRAY_SIZE(_buttonRepeat); i++)
   {
     if (_buttonRepeat[i].isRunning()) _buttonRepeat[i].stop();
   }
@@ -820,7 +820,7 @@ void GuiEngine::doUpdateWindow(GuiWindow* window)
   // [Update]
   // ==========================================================================
 
-  PStack<1024> stack;
+  StackP<1024> stack;
   err_t stackerr;
 
   // Manual object iterator.
@@ -1064,7 +1064,7 @@ end:
 
   {
     const BoxI* rptr;
-    sysuint_t rlen = 0;
+    size_t rlen = 0;
 
     if (blitFull || window->_needBlit)
     {
@@ -1167,7 +1167,7 @@ GuiWindow::~GuiWindow()
   }
 
   // Remove GuiWindow's from dirty list.
-  sysuint_t i = guiEngine->_dirtyList.indexOf(this);
+  size_t i = guiEngine->_dirtyList.indexOf(this);
   if (i != INVALID_INDEX) guiEngine->_dirtyList.set(i, NULL);
 }
 

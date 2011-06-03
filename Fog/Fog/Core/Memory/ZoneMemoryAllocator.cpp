@@ -17,7 +17,7 @@ namespace Fog {
 // [Fog::ZoneMemoryAllocator]
 // ============================================================================
 
-ZoneMemoryAllocator::ZoneMemoryAllocator(sysuint_t chunkSize)
+ZoneMemoryAllocator::ZoneMemoryAllocator(size_t chunkSize)
   : _chunkSize(chunkSize)
 {
   // We need at least one chunk. The first chunk is here just to prevent
@@ -35,7 +35,7 @@ ZoneMemoryAllocator::~ZoneMemoryAllocator()
   reset();
 }
 
-void* ZoneMemoryAllocator::_alloc(sysuint_t size)
+void* ZoneMemoryAllocator::_alloc(size_t size)
 {
   // First look into the next chunk.
   Chunk* chunk = _current->next;

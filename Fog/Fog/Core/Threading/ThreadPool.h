@@ -63,7 +63,7 @@ struct FOG_API ThreadPool
   //! data remains in cpu-cache and os-cpu scheduler can use the cpu again).
   err_t getThread(Thread** threads, int workId = -1);
   //! @brief Get @a count of threads.
-  err_t getThreads(Thread** threads, sysuint_t count, int workId = -1);
+  err_t getThreads(Thread** threads, size_t count, int workId = -1);
 
   //! @brief Release @a thread previously returned by @c getThread().
   //!
@@ -71,7 +71,7 @@ struct FOG_API ThreadPool
   //! @a workId passed to the @c getThread() method).
   err_t releaseThread(Thread* thread, int workId = -1);
   //! @brief Release @a count of threads.
-  err_t releaseThreads(Thread** threads, sysuint_t count, int workId = -1);
+  err_t releaseThreads(Thread** threads, size_t count, int workId = -1);
 
   //! @brief Get minimum count of threads that can be used by the thread pool.
   int getMinThreads() const;

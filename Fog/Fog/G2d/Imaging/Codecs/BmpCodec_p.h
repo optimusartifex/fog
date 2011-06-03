@@ -240,7 +240,7 @@ struct FOG_NO_EXPORT BmpCodecProvider : public ImageCodecProvider
   // [Implementation]
   // --------------------------------------------------------------------------
 
-  virtual uint32_t checkSignature(const void* mem, sysuint_t length) const;
+  virtual uint32_t checkSignature(const void* mem, size_t length) const;
   virtual err_t createCodec(uint32_t codecType, ImageCodec** codec) const;
 };
 
@@ -282,7 +282,7 @@ struct FOG_NO_EXPORT BmpDecoder : public ImageDecoder
   // Clear everything.
   FOG_INLINE void zeroall()
   {
-    static const sysuint_t ddsize = sizeof(ImageDecoder);
+    static const size_t ddsize = sizeof(ImageDecoder);
     Memory::zero((uint8_t*)this + ddsize, sizeof(BmpDecoder) - ddsize);
   }
 

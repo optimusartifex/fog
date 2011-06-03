@@ -135,7 +135,7 @@ struct FOG_NO_EXPORT PaintParamsF
   FOG_INLINE void setMiterLimit(float miterLimit) { _strokeParams.setMiterLimit(miterLimit); }
   FOG_INLINE void setDashOffset(float dashOffset) { _strokeParams.setDashOffset(dashOffset); }
   FOG_INLINE void setDashList(const List<float>& dashList) { _strokeParams.setDashList(dashList); }
-  FOG_INLINE void setDashList(const float* dashList, sysuint_t length) { _strokeParams.setDashList(dashList, length); }
+  FOG_INLINE void setDashList(const float* dashList, size_t length) { _strokeParams.setDashList(dashList, length); }
 
   FOG_INLINE void setStartCap(uint32_t startCap) { _strokeParams.setStartCap(startCap); }
   FOG_INLINE void setEndCap(uint32_t endCap) { _strokeParams.setEndCap(endCap); }
@@ -246,7 +246,7 @@ struct FOG_NO_EXPORT PaintParamsD
   FOG_INLINE void setMiterLimit(double miterLimit) { _strokeParams.setMiterLimit(miterLimit); }
   FOG_INLINE void setDashOffset(double dashOffset) { _strokeParams.setDashOffset(dashOffset); }
   FOG_INLINE void setDashList(const List<double>& dashList) { _strokeParams.setDashList(dashList); }
-  FOG_INLINE void setDashList(const double* dashList, sysuint_t length) { _strokeParams.setDashList(dashList, length); }
+  FOG_INLINE void setDashList(const double* dashList, size_t length) { _strokeParams.setDashList(dashList, length); }
 
   FOG_INLINE void setStartCap(uint32_t startCap) { _strokeParams.setStartCap(startCap); }
   FOG_INLINE void setEndCap(uint32_t endCap) { _strokeParams.setEndCap(endCap); }

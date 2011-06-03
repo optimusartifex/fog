@@ -67,7 +67,7 @@ err_t MapFile::map(const String& fileName, bool loadOnFail)
   HANDLE hFile;
   HANDLE hFileMapping;
   void* data;
-  sysuint_t size;
+  size_t size;
 
   DWORD szLow = 0;
   DWORD szHigh = 0;
@@ -90,7 +90,7 @@ err_t MapFile::map(const String& fileName, bool loadOnFail)
   }
   size = szLow;
 #else
-  size = (sysuint_t)( ((uint64_t)szHigh << FOG_UINT64_C(32)) | (uint64_t)szLow );
+  size = (size_t)( ((uint64_t)szHigh << FOG_UINT64_C(32)) | (uint64_t)szLow );
 #endif
 
   if (size == 0)
@@ -136,10 +136,10 @@ err_t MapFile::map(const String& fileName, bool loadOnFail)
     return ERR_RT_OUT_OF_MEMORY;
   }
 
-  static const sysuint_t chunkSize = 1024*1024*16;
+  static const size_t chunkSize = 1024*1024*16;
 
   uint8_t* dataCur = (uint8_t*)data;
-  sysuint_t i;
+  size_t i;
   DWORD bytesToRead;
   DWORD bytesRead;
 
@@ -228,32 +228,32 @@ err_t MapFile::map(const String& fileName, bool loadOnFail)
     {
       _fileName = fileName;
       _data = mmap_data;
-      _length = (sysuint_t)s.st_size;
+      _length = (size_t)s.st_size;
       _fd = fd;
       _state = STATE_MAPPED;
       return ERR_OK;
     }
 
-    void* data = Memory::alloc((sysuint_t)s.st_size);
+    void* data = Memory::alloc((size_t)s.st_size);
     if (FOG_IS_NULL(data))
     {
       close(fd);
       return ERR_RT_OUT_OF_MEMORY;
     }
 
-    const sysuint_t chunkSize = 1024*1024*16;
+    const size_t chunkSize = 1024*1024*16;
 
     uint8_t* dataCur = (uint8_t*)data;
-    sysuint_t i;
-    sysuint_t bytesToRead;
-    sysuint_t bytesRead;
+    size_t i;
+    size_t bytesToRead;
+    size_t bytesRead;
 
     bytesToRead = chunkSize;
-    for (i = (sysuint_t)s.st_size / chunkSize + 1; i; i--, dataCur += bytesToRead)
+    for (i = (size_t)s.st_size / chunkSize + 1; i; i--, dataCur += bytesToRead)
     {
       if (i == 1)
       {
-        bytesToRead = ((sysuint_t)s.st_size % chunkSize);
+        bytesToRead = ((size_t)s.st_size % chunkSize);
         if (bytesToRead == 0) break;
       }
 
@@ -271,7 +271,7 @@ err_t MapFile::map(const String& fileName, bool loadOnFail)
 
     _fileName = fileName;
     _data = data;
-    _length = (sysuint_t)s.st_size;
+    _length = (size_t)s.st_size;
     _fd = -1;
     _state = STATE_LOADED;
     return ERR_OK;

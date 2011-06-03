@@ -81,7 +81,7 @@ Widget::~Widget()
 // [Fog::Widget - Object Hierarchy]
 // ============================================================================
 
-err_t Widget::_addChild(sysuint_t index, Object* child)
+err_t Widget::_addChild(size_t index, Object* child)
 {
   Widget* w = fog_object_cast<Widget*>(child);
 
@@ -127,7 +127,7 @@ err_t Widget::_addChild(sysuint_t index, Object* child)
   return Object::_addChild(index, child);
 }
 
-err_t Widget::_removeChild(sysuint_t index, Object* child)
+err_t Widget::_removeChild(size_t index, Object* child)
 {
   Widget* w = fog_object_cast<Widget*>(child);
 

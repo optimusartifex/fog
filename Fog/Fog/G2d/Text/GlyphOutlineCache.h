@@ -82,7 +82,7 @@ struct FOG_API GlyphOutlineCache
   // --------------------------------------------------------------------------
 
   //! @brief Number of bytes used by the cache.
-  sysuint_t _usedBytes;
+  size_t _usedBytes;
 
   //! @brief Count of rows in cache-table.
   uint32_t _tableSize;

@@ -111,7 +111,7 @@ struct FOG_NO_EXPORT PathStrokerParamsF
   FOG_INLINE void setMiterLimit(float miterLimit) { _miterLimit = miterLimit; }
   FOG_INLINE void setDashOffset(float dashOffset) { _dashOffset = dashOffset; }
   FOG_INLINE void setDashList(const List<float>& dashList) { _dashList = dashList; }
-  FOG_INLINE void setDashList(const float* dashList, sysuint_t length) { _dashList.assign(dashList, length); }
+  FOG_INLINE void setDashList(const float* dashList, size_t length) { _dashList.assign(dashList, length); }
 
   FOG_INLINE void setHints(uint32_t hints) { _hints.packed = hints; }
   FOG_INLINE void setStartCap(uint32_t startCap) { _hints.startCap = startCap; }
@@ -212,7 +212,7 @@ struct FOG_NO_EXPORT PathStrokerParamsD
   FOG_INLINE void setMiterLimit(double miterLimit) { _miterLimit = miterLimit; }
   FOG_INLINE void setDashOffset(double dashOffset) { _dashOffset = dashOffset; }
   FOG_INLINE void setDashList(const List<double>& dashList) { _dashList = dashList; }
-  FOG_INLINE void setDashList(const double* dashList, sysuint_t length) { _dashList.assign(dashList, length); }
+  FOG_INLINE void setDashList(const double* dashList, size_t length) { _dashList.assign(dashList, length); }
 
   FOG_INLINE void setHints(uint32_t hints) { _hints.packed = hints; }
   FOG_INLINE void setStartCap(uint32_t startCap) { _hints.startCap = startCap; }

@@ -35,17 +35,17 @@ namespace StringUtil {
 // [Fog::StringUtil::Unicode Tools]
 // ============================================================================
 
-err_t validateUtf8(const char* str, sysuint_t len, sysuint_t* invalidPos)
+err_t validateUtf8(const char* str, size_t len, size_t* invalidPos)
 {
   err_t err = ERR_OK;
   const uint8_t* strCur = reinterpret_cast<const uint8_t*>(str);
-  sysuint_t remain = len;
+  size_t remain = len;
 
   while (remain)
   {
     uint8_t c0 = strCur[0];
 
-    sysuint_t clen = utf8LengthTable[c0];
+    size_t clen = utf8LengthTable[c0];
     if (!clen) { err = ERR_STRING_INVALID_UTF8; break; }
     if (remain < clen) { err = ERR_STRING_TRUNCATED; break; }
 
@@ -53,11 +53,11 @@ err_t validateUtf8(const char* str, sysuint_t len, sysuint_t* invalidPos)
     remain -= clen;
   }
 
-  if (invalidPos) *invalidPos = (sysuint_t)(strCur - reinterpret_cast<const uint8_t*>(str));
+  if (invalidPos) *invalidPos = (size_t)(strCur - reinterpret_cast<const uint8_t*>(str));
   return err;
 }
 
-err_t validateUtf16(const Char* str, sysuint_t len, sysuint_t* invalidPos)
+err_t validateUtf16(const Char* str, size_t len, size_t* invalidPos)
 {
   err_t err = ERR_OK;
 
@@ -82,23 +82,23 @@ err_t validateUtf16(const Char* str, sysuint_t len, sysuint_t* invalidPos)
     }
   }
 
-  if (invalidPos) *invalidPos = (sysuint_t)((--srcCur) - str);
+  if (invalidPos) *invalidPos = (size_t)((--srcCur) - str);
   return err;
 }
 
-FOG_API err_t getNumUtf8Chars(const char* str, sysuint_t len, sysuint_t* charsCount)
+FOG_API err_t getNumUtf8Chars(const char* str, size_t len, size_t* charsCount)
 {
-  sysuint_t num = 0;
+  size_t num = 0;
   err_t err = ERR_OK;
 
   const uint8_t* strCur = reinterpret_cast<const uint8_t*>(str);
-  sysuint_t remain = len;
+  size_t remain = len;
 
   while (remain)
   {
     uint8_t c0 = strCur[0];
 
-    sysuint_t clen = utf8LengthTable[c0];
+    size_t clen = utf8LengthTable[c0];
     if (!clen) { err = ERR_STRING_INVALID_UTF8; break; }
     if (remain < clen) { err = ERR_STRING_TRUNCATED; break; }
 
@@ -111,9 +111,9 @@ FOG_API err_t getNumUtf8Chars(const char* str, sysuint_t len, sysuint_t* charsCo
   return err;
 }
 
-FOG_API err_t getNumUtf16Chars(const Char* str, sysuint_t len, sysuint_t* charsCount)
+FOG_API err_t getNumUtf16Chars(const Char* str, size_t len, size_t* charsCount)
 {
-  sysuint_t num = 0;
+  size_t num = 0;
   err_t err = ERR_OK;
 
   const Char* srcCur = str;
@@ -144,10 +144,10 @@ FOG_API err_t getNumUtf16Chars(const Char* str, sysuint_t len, sysuint_t* charsC
 
 // Miscellany
 
-bool unicodeToLatin1(char* dst, const Char* src, sysuint_t length)
+bool unicodeToLatin1(char* dst, const Char* src, size_t length)
 {
   bool ok = true;
-  sysuint_t i;
+  size_t i;
   uint16_t uc;
 
   for (i = length; i; i--, src++, dst++)
@@ -163,25 +163,25 @@ bool unicodeToLatin1(char* dst, const Char* src, sysuint_t length)
 // [Fog::StringUtil::Mem]
 // ============================================================================
 
-void copy(Char* dst, const Char* src, sysuint_t length)
+void copy(Char* dst, const Char* src, size_t length)
 {
-  sysuint_t i;
+  size_t i;
   for (i = 0; i < length; i++) dst[i] = src[i];
 
 }
 
-void copy(Char* dst, const char* src, sysuint_t length)
+void copy(Char* dst, const char* src, size_t length)
 {
-  sysuint_t i;
+  size_t i;
   for (i = 0; i < length; i++) dst[i] = src[i];
 }
 
-void move(Char* dst, const Char* src, sysuint_t length)
+void move(Char* dst, const Char* src, size_t length)
 {
-  sysuint_t i;
+  size_t i;
   if (dst > src)
   {
-    for (i = length - 1; i != (sysuint_t)-1; i--) dst[i] = src[i];
+    for (i = length - 1; i != (size_t)-1; i--) dst[i] = src[i];
   }
   else
   {
@@ -189,53 +189,53 @@ void move(Char* dst, const Char* src, sysuint_t length)
   }
 }
 
-void fill(Char* dst, Char ch, sysuint_t length)
+void fill(Char* dst, Char ch, size_t length)
 {
-  sysuint_t i;
+  size_t i;
   for (i = 0; i < length; i++) dst[i] = ch;
 }
 
-sysuint_t len(const Char* str)
+size_t len(const Char* str)
 {
   const Char* p = str;
   if (p == NULL) return 0;
 
   while (*p) p++;
-  return (sysuint_t)(p - str);
+  return (size_t)(p - str);
 }
 
-sysuint_t nlen(const Char* str, sysuint_t maxlen)
+size_t nlen(const Char* str, size_t maxlen)
 {
   const Char* p = str;
   if (p == NULL) return 0;
 
   const Char* end = str + maxlen;
   while (p < end && *p) p++;
-  return (sysuint_t)(p - str);
+  return (size_t)(p - str);
 }
 
-sysuint_t len(const uint32_t* str)
+size_t len(const uint32_t* str)
 {
   const uint32_t* p = str;
   if (p == NULL) return 0;
 
   while (*p) p++;
-  return (sysuint_t)(p - str);
+  return (size_t)(p - str);
 }
 
-sysuint_t nlen(const uint32_t* str, sysuint_t maxlen)
+size_t nlen(const uint32_t* str, size_t maxlen)
 {
   const uint32_t* p = str;
   if (p == NULL) return 0;
 
   const uint32_t* end = str + maxlen;
   while (p < end && *p) p++;
-  return (sysuint_t)(p - str);
+  return (size_t)(p - str);
 }
 
-bool eq(const char* a, const char* b, sysuint_t length, uint cs)
+bool eq(const char* a, const char* b, size_t length, uint cs)
 {
-  sysuint_t i;
+  size_t i;
 
   if (cs == CASE_SENSITIVE)
   {
@@ -254,9 +254,9 @@ bool eq(const char* a, const char* b, sysuint_t length, uint cs)
   return true;
 }
 
-bool eq(const Char* a, const Char* b, sysuint_t length, uint cs)
+bool eq(const Char* a, const Char* b, size_t length, uint cs)
 {
-  sysuint_t i;
+  size_t i;
 
   if (cs == CASE_SENSITIVE)
   {
@@ -275,9 +275,9 @@ bool eq(const Char* a, const Char* b, sysuint_t length, uint cs)
   return true;
 }
 
-bool eq(const Char* a, const char* b, sysuint_t length, uint cs)
+bool eq(const Char* a, const char* b, size_t length, uint cs)
 {
-  sysuint_t i;
+  size_t i;
   if (cs == CASE_SENSITIVE)
   {
     for (i = 0; i < length; i++)
@@ -295,10 +295,10 @@ bool eq(const Char* a, const char* b, sysuint_t length, uint cs)
   return true;
 }
 
-sysuint_t countOf(const char* str, sysuint_t length, char ch, uint cs)
+size_t countOf(const char* str, size_t length, char ch, uint cs)
 {
-  sysuint_t n = 0;
-  sysuint_t i;
+  size_t n = 0;
+  size_t i;
 
   if (cs == CASE_SENSITIVE)
   {
@@ -323,10 +323,10 @@ caseSensitiveLoop:
   return n;
 }
 
-sysuint_t countOf(const Char* str, sysuint_t length, Char ch, uint cs)
+size_t countOf(const Char* str, size_t length, Char ch, uint cs)
 {
-  sysuint_t n = 0;
-  sysuint_t i;
+  size_t n = 0;
+  size_t i;
 
   if (cs == CASE_SENSITIVE)
   {
@@ -351,9 +351,9 @@ caseSensitiveLoop:
   return n;
 }
 
-sysuint_t indexOf(const char* str, sysuint_t length, char ch, uint cs)
+size_t indexOf(const char* str, size_t length, char ch, uint cs)
 {
-  sysuint_t i;
+  size_t i;
 
   if (cs == CASE_SENSITIVE)
   {
@@ -378,9 +378,9 @@ caseSensitiveLoop:
   return INVALID_INDEX;
 }
 
-sysuint_t indexOf(const Char* str, sysuint_t length, Char ch, uint cs)
+size_t indexOf(const Char* str, size_t length, Char ch, uint cs)
 {
-  sysuint_t i;
+  size_t i;
 
   if (cs == CASE_SENSITIVE)
   {
@@ -405,15 +405,15 @@ caseSensitiveLoop:
   return INVALID_INDEX;
 }
 
-sysuint_t indexOf(const char* aStr, sysuint_t aLength, const char* bStr, sysuint_t bLength, uint cs)
+size_t indexOf(const char* aStr, size_t aLength, const char* bStr, size_t bLength, uint cs)
 {
   if (bLength > aLength) return INVALID_INDEX;
 
   const char* aOrig = aStr;
   const char* aEnd = aStr + aLength - bLength + 1;
 
-  sysuint_t i;
-  sysuint_t bLengthMinus1 = bLength - 1;
+  size_t i;
+  size_t bLengthMinus1 = bLength - 1;
 
   char c = *bStr++;
 
@@ -427,7 +427,7 @@ sysuint_t indexOf(const char* aStr, sysuint_t aLength, const char* bStr, sysuint
         // Compare remaining characters.
         for (i = 0;; i++)
         {
-          if (i == bLengthMinus1) return (sysuint_t)((aStr - 1) - aOrig);
+          if (i == bLengthMinus1) return (size_t)((aStr - 1) - aOrig);
           if (aStr[i] != bStr[i]) break;
         }
       }
@@ -447,7 +447,7 @@ sysuint_t indexOf(const char* aStr, sysuint_t aLength, const char* bStr, sysuint
         // Compare remaining characters.
         for (i = 0;; i++)
         {
-          if (i == bLengthMinus1) return (sysuint_t)((aStr - 1) - aOrig);
+          if (i == bLengthMinus1) return (size_t)((aStr - 1) - aOrig);
           if (Byte::toLower(aStr[i]) != Byte::toLower(bStr[i])) break;
         }
       }
@@ -459,15 +459,15 @@ sysuint_t indexOf(const char* aStr, sysuint_t aLength, const char* bStr, sysuint
   return INVALID_INDEX;
 }
 
-sysuint_t indexOf(const Char* aStr, sysuint_t aLength, const Char* bStr, sysuint_t bLength, uint cs)
+size_t indexOf(const Char* aStr, size_t aLength, const Char* bStr, size_t bLength, uint cs)
 {
   if (bLength > aLength) return INVALID_INDEX;
 
   const Char* aOrig = aStr;
   const Char* aEnd = aStr + aLength - bLength + 1;
 
-  sysuint_t i;
-  sysuint_t bLengthMinus1 = bLength - 1;
+  size_t i;
+  size_t bLengthMinus1 = bLength - 1;
 
   Char c(*bStr++);
 
@@ -481,7 +481,7 @@ sysuint_t indexOf(const Char* aStr, sysuint_t aLength, const Char* bStr, sysuint
         // Compare remaining characters.
         for (i = 0;; i++)
         {
-          if (i == bLengthMinus1) return (sysuint_t)((aStr - 1) - aOrig);
+          if (i == bLengthMinus1) return (size_t)((aStr - 1) - aOrig);
           if (aStr[i] != bStr[i]) break;
         }
       }
@@ -501,7 +501,7 @@ sysuint_t indexOf(const Char* aStr, sysuint_t aLength, const Char* bStr, sysuint
         // Compare remaining characters.
         for (i = 0;; i++)
         {
-          if (i == bLengthMinus1) return (sysuint_t)((aStr - 1) - aOrig);
+          if (i == bLengthMinus1) return (size_t)((aStr - 1) - aOrig);
           if (aStr[i].toLower() != bStr[i].toLower()) break;
         }
       }
@@ -513,7 +513,7 @@ sysuint_t indexOf(const Char* aStr, sysuint_t aLength, const Char* bStr, sysuint
   return INVALID_INDEX;
 }
 
-sysuint_t indexOfAny(const char* str, sysuint_t length, const char* ch, sysuint_t count, uint cs)
+size_t indexOfAny(const char* str, size_t length, const char* ch, size_t count, uint cs)
 {
   if (count == DETECT_LENGTH) count = len(ch);
   if (count == 0)
@@ -521,7 +521,7 @@ sysuint_t indexOfAny(const char* str, sysuint_t length, const char* ch, sysuint_
   else if (count == 1)
     return indexOf(str, length, ch[0], cs);
 
-  sysuint_t i, j;
+  size_t i, j;
 
   if (cs == CASE_SENSITIVE)
   {
@@ -550,7 +550,7 @@ sysuint_t indexOfAny(const char* str, sysuint_t length, const char* ch, sysuint_
   return INVALID_INDEX;
 }
 
-sysuint_t indexOfAny(const Char* str, sysuint_t length, const Char* ch, sysuint_t count, uint cs)
+size_t indexOfAny(const Char* str, size_t length, const Char* ch, size_t count, uint cs)
 {
   if (count == DETECT_LENGTH) count = len(ch);
   if (count == 0)
@@ -558,7 +558,7 @@ sysuint_t indexOfAny(const Char* str, sysuint_t length, const Char* ch, sysuint_
   else if (count == 1)
     return indexOf(str, length, ch[0], cs);
 
-  sysuint_t i, j;
+  size_t i, j;
 
   if (cs == CASE_SENSITIVE)
   {
@@ -587,14 +587,14 @@ sysuint_t indexOfAny(const Char* str, sysuint_t length, const Char* ch, sysuint_
   return INVALID_INDEX;
 }
 
-sysuint_t lastIndexOf(const char* str, sysuint_t length, char ch, uint cs)
+size_t lastIndexOf(const char* str, size_t length, char ch, uint cs)
 {
-  sysuint_t i;
+  size_t i;
 
   if (cs == CASE_SENSITIVE)
   {
 caseSensitiveLoop:
-    for (i = length - 1; i < (sysuint_t)-1; i--)
+    for (i = length - 1; i < (size_t)-1; i--)
     {
       if (str[i] == ch) return i;
     }
@@ -605,7 +605,7 @@ caseSensitiveLoop:
     char ch2 = Byte::toLower(ch);
     if (ch1 == ch2) goto caseSensitiveLoop;
 
-    for (i = length - 1; i < (sysuint_t)-1; i--)
+    for (i = length - 1; i < (size_t)-1; i--)
     {
       if (str[i] == ch1 || str[i] == ch2) return i;
     }
@@ -614,14 +614,14 @@ caseSensitiveLoop:
   return INVALID_INDEX;
 }
 
-sysuint_t lastIndexOf(const Char* str, sysuint_t length, Char ch, uint cs)
+size_t lastIndexOf(const Char* str, size_t length, Char ch, uint cs)
 {
-  sysuint_t i;
+  size_t i;
 
   if (cs == CASE_SENSITIVE)
   {
 caseSensitiveLoop:
-    for (i = length - 1; i < (sysuint_t)-1; i--)
+    for (i = length - 1; i < (size_t)-1; i--)
     {
       if (str[i] == ch) return i;
     }
@@ -632,7 +632,7 @@ caseSensitiveLoop:
     Char ch2 = ch.toUpper();
     if (ch1 == ch2) goto caseSensitiveLoop;
 
-    for (i = length - 1; i < (sysuint_t)-1; i--)
+    for (i = length - 1; i < (size_t)-1; i--)
     {
       if (str[i] == ch1 || str[i] == ch2) return i;
     }
@@ -641,7 +641,7 @@ caseSensitiveLoop:
   return INVALID_INDEX;
 }
 
-sysuint_t lastIndexOfAny(const char* str, sysuint_t length, const char* ch, sysuint_t count, uint cs)
+size_t lastIndexOfAny(const char* str, size_t length, const char* ch, size_t count, uint cs)
 {
   if (count == DETECT_LENGTH) count = len(ch);
   if (count == 0)
@@ -649,11 +649,11 @@ sysuint_t lastIndexOfAny(const char* str, sysuint_t length, const char* ch, sysu
   else if (count == 1)
     return lastIndexOf(str, length, ch[0], cs);
 
-  sysuint_t i, j;
+  size_t i, j;
 
   if (cs == CASE_SENSITIVE)
   {
-    for (i = length - 1; i != (sysuint_t)-1; i--)
+    for (i = length - 1; i != (size_t)-1; i--)
     {
       char cur = str[i];
       for (j = 0; j < count; j++)
@@ -664,7 +664,7 @@ sysuint_t lastIndexOfAny(const char* str, sysuint_t length, const char* ch, sysu
   }
   else
   {
-    for (i = length - 1; i != (sysuint_t)-1; i--)
+    for (i = length - 1; i != (size_t)-1; i--)
     {
       char cur1 = Byte::toLower(str[i]);
       char cur2 = Byte::toLower(str[i]);
@@ -678,7 +678,7 @@ sysuint_t lastIndexOfAny(const char* str, sysuint_t length, const char* ch, sysu
   return INVALID_INDEX;
 }
 
-sysuint_t lastIndexOfAny(const Char* str, sysuint_t length, const Char* ch, sysuint_t count, uint cs)
+size_t lastIndexOfAny(const Char* str, size_t length, const Char* ch, size_t count, uint cs)
 {
   if (count == DETECT_LENGTH) count = len(ch);
   if (count == 0)
@@ -686,11 +686,11 @@ sysuint_t lastIndexOfAny(const Char* str, sysuint_t length, const Char* ch, sysu
   else if (count == 1)
     return lastIndexOf(str, length, ch[0], cs);
 
-  sysuint_t i, j;
+  size_t i, j;
 
   if (cs == CASE_SENSITIVE)
   {
-    for (i = length - 1; i != (sysuint_t)-1; i--)
+    for (i = length - 1; i != (size_t)-1; i--)
     {
       Char cur = str[i];
       for (j = 0; j < count; j++)
@@ -701,7 +701,7 @@ sysuint_t lastIndexOfAny(const Char* str, sysuint_t length, const Char* ch, sysu
   }
   else
   {
-    for (i = length - 1; i != (sysuint_t)-1; i--)
+    for (i = length - 1; i != (size_t)-1; i--)
     {
       Char cur1 = str[i].toLower();
       Char cur2 = str[i].toUpper();
@@ -938,7 +938,7 @@ __convBaseN_32bit:
 
   // write result and it's length back to args
   out->result = reinterpret_cast<char*>(resultCur);
-  out->length = (sysuint_t)(resultEnd - resultCur);
+  out->length = (size_t)(resultEnd - resultCur);
   out->negative = false;
 }
 
@@ -1358,7 +1358,7 @@ struct BContext
 
 static void BContext_init(BContext* context)
 {
-  sysuint_t i;
+  size_t i;
 
   for (i = 0; i != FOG_ARRAY_SIZE(context->freelist); i++)
   {
@@ -1377,7 +1377,7 @@ static void BContext_destroy(BContext* context)
   {
     BInt* bi;
     BInt* next;
-    sysuint_t i;
+    size_t i;
 
     for (i = 0; i != FOG_ARRAY_SIZE(context->freelist); i++)
     {
@@ -3187,8 +3187,8 @@ ret:
 
 err_t fromHex(ByteArray& dst, const ByteArray& src, uint32_t cntOp)
 {
-  sysuint_t srcLength = src.getLength();
-  sysuint_t growBy = (srcLength >> 1) + (srcLength & 1);
+  size_t srcLength = src.getLength();
+  size_t growBy = (srcLength >> 1) + (srcLength & 1);
 
   uint8_t* dstCur = reinterpret_cast<uint8_t*>(dst.beginManipulation(growBy, cntOp));
   if (FOG_IS_NULL(dstCur)) return ERR_RT_OUT_OF_MEMORY;
@@ -3197,7 +3197,7 @@ err_t fromHex(ByteArray& dst, const ByteArray& src, uint32_t cntOp)
   uint8_t c0 = 0xFF;
   uint8_t c1;
 
-  for (sysuint_t i = srcLength; i; i--)
+  for (size_t i = srcLength; i; i--)
   {
     c1 = *srcCur++;
 
@@ -3227,8 +3227,8 @@ err_t fromHex(ByteArray& dst, const ByteArray& src, uint32_t cntOp)
 
 err_t toHex(ByteArray& dst, const ByteArray& src, uint32_t cntOp, int outputCase)
 {
-  sysuint_t srcLength = src.getLength();
-  sysuint_t growBy = srcLength << 1;
+  size_t srcLength = src.getLength();
+  size_t growBy = srcLength << 1;
   if (growBy < srcLength) return ERR_RT_OUT_OF_MEMORY;
 
   uint8_t* dstCur = reinterpret_cast<uint8_t*>(dst.beginManipulation(growBy, cntOp));
@@ -3242,7 +3242,7 @@ err_t toHex(ByteArray& dst, const ByteArray& src, uint32_t cntOp, int outputCase
     ? (uint8_t)'a' - ((uint8_t)'9' + 1U)
     : (uint8_t)'A' - ((uint8_t)'9' + 1U);
 
-  for (sysuint_t i = srcLength; i; i--)
+  for (size_t i = srcLength; i; i--)
   {
     c0 = *srcCur++;
     c1 = c0;
@@ -3283,10 +3283,10 @@ err_t fromBase64(ByteArray& dst, const String& src, uint32_t cntOp)
   return fromBase64(dst, src.getData(), src.getLength(), cntOp);
 }
 
-err_t fromBase64(ByteArray& dst, const char* src, sysuint_t srcLength, uint32_t cntOp)
+err_t fromBase64(ByteArray& dst, const char* src, size_t srcLength, uint32_t cntOp)
 {
   if (srcLength == DETECT_LENGTH) srcLength = len(src);
-  sysuint_t growBy = (srcLength / 4) * 3 + 3;
+  size_t growBy = (srcLength / 4) * 3 + 3;
 
   uint8_t* dstCur = reinterpret_cast<uint8_t*>(dst.beginManipulation(growBy, cntOp));
   if (FOG_IS_NULL(dstCur)) return ERR_RT_OUT_OF_MEMORY;
@@ -3296,7 +3296,7 @@ err_t fromBase64(ByteArray& dst, const char* src, sysuint_t srcLength, uint32_t 
   uint32_t bits = 0;
   uint32_t c0;
 
-  for (sysuint_t i = srcLength; i; i--)
+  for (size_t i = srcLength; i; i--)
   {
     c0 = *srcCur++;
 
@@ -3329,10 +3329,10 @@ err_t fromBase64(ByteArray& dst, const char* src, sysuint_t srcLength, uint32_t 
   return ERR_OK;
 }
 
-err_t fromBase64(ByteArray& dst, const Char* src, sysuint_t srcLength, uint32_t cntOp)
+err_t fromBase64(ByteArray& dst, const Char* src, size_t srcLength, uint32_t cntOp)
 {
   if (srcLength == DETECT_LENGTH) srcLength = len(src);
-  sysuint_t growBy = (srcLength / 4) * 3 + 3;
+  size_t growBy = (srcLength / 4) * 3 + 3;
 
   uint8_t* dstCur = reinterpret_cast<uint8_t*>(dst.beginManipulation(growBy, cntOp));
   if (FOG_IS_NULL(dstCur)) return ERR_RT_OUT_OF_MEMORY;
@@ -3342,7 +3342,7 @@ err_t fromBase64(ByteArray& dst, const Char* src, sysuint_t srcLength, uint32_t 
   uint32_t bits = 0;
   uint32_t c0;
 
-  for (sysuint_t i = srcLength; i; i--)
+  for (size_t i = srcLength; i; i--)
   {
     c0 = *srcCur++;
 
@@ -3397,18 +3397,18 @@ err_t toBase64(String& dst, const ByteArray& src, uint32_t cntOp)
   return toBase64(dst, src.getData(), src.getLength(), cntOp);
 }
 
-err_t toBase64(ByteArray& dst, const char* src, sysuint_t srcLength, uint32_t cntOp)
+err_t toBase64(ByteArray& dst, const char* src, size_t srcLength, uint32_t cntOp)
 {
   if (srcLength == DETECT_LENGTH) srcLength = len(src);
 
-  sysuint_t growBy = (sysuint_t)( ((uint64_t)srcLength * 4) / 3 + 3 );
+  size_t growBy = (size_t)( ((uint64_t)srcLength * 4) / 3 + 3 );
   if (growBy < srcLength) return ERR_RT_OUT_OF_MEMORY;
 
   char* dstCur = dst.beginManipulation(growBy, cntOp);
   if (FOG_IS_NULL(dstCur)) return ERR_RT_OUT_OF_MEMORY;
   const uint8_t* srcCur = reinterpret_cast<const uint8_t*>(src);
 
-  sysuint_t i = srcLength;
+  size_t i = srcLength;
 
   while (i >= 3)
   {
@@ -3449,18 +3449,18 @@ err_t toBase64(ByteArray& dst, const char* src, sysuint_t srcLength, uint32_t cn
   return ERR_OK;
 }
 
-err_t toBase64(String& dst, const char* src, sysuint_t srcLength, uint32_t cntOp)
+err_t toBase64(String& dst, const char* src, size_t srcLength, uint32_t cntOp)
 {
   if (srcLength == DETECT_LENGTH) srcLength = len(src);
 
-  sysuint_t growBy = (sysuint_t)( ((uint64_t)srcLength * 4) / 3 + 3 );
+  size_t growBy = (size_t)( ((uint64_t)srcLength * 4) / 3 + 3 );
   if (growBy < srcLength) return ERR_RT_OUT_OF_MEMORY;
 
   Char* dstCur = dst.beginManipulation(growBy, cntOp);
   if (FOG_IS_NULL(dstCur)) return ERR_RT_OUT_OF_MEMORY;
   const uint8_t* srcCur = reinterpret_cast<const uint8_t*>(src);
 
-  sysuint_t i = srcLength;
+  size_t i = srcLength;
 
   while (i >= 3)
   {

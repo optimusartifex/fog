@@ -131,19 +131,19 @@ err_t XmlSaxReader::parseStream(Stream& stream)
   return parseMemory(reinterpret_cast<const void*>(buffer.getData()), buffer.getLength());
 }
 
-err_t XmlSaxReader::parseMemory(const void* mem, sysuint_t size)
+err_t XmlSaxReader::parseMemory(const void* mem, size_t size)
 {
-  TextCodec textCodec = _detectEncoding(mem, size);
-  if (textCodec.isNull()) textCodec.setCode(TextCodec::UTF8);
+  TextCodec textCodec = TextCodec::utf8();
+  _detectEncoding(textCodec, mem, size);
 
   String buffer;
-  err_t err = textCodec.toUnicode(buffer, mem, size);
+  err_t err = textCodec.decode(buffer, Stub8(reinterpret_cast<const char*>(mem), size));
   if (FOG_IS_ERROR(err)) return err;
 
   return parseString(buffer.getData(), buffer.getLength());
 }
 
-err_t XmlSaxReader::parseString(const Char* s, sysuint_t len)
+err_t XmlSaxReader::parseString(const Char* s, size_t len)
 {
   // Check if encoded length is zero (no document).
   if (len == DETECT_LENGTH) len = StringUtil::len(s);
@@ -191,7 +191,7 @@ _Continue:
           {
             bool isWhiteSpace = xmlIsWhiteSpace(mark, strCur);
 
-            err = onAddText(Utf16(mark, (sysuint_t)(strCur - mark)), isWhiteSpace);
+            err = onAddText(Utf16(mark, (size_t)(strCur - mark)), isWhiteSpace);
             if (FOG_IS_ERROR(err)) goto _End;
           }
 
@@ -244,7 +244,7 @@ _Continue:
         depth++;
         element = XML_SAX_ELEMENT_TAG;
 
-        err = onAddElement(Utf16(markTagStart, (sysuint_t)(markTagEnd - markTagStart)));
+        err = onAddElement(Utf16(markTagStart, (size_t)(markTagEnd - markTagStart)));
         if (FOG_IS_ERROR(err)) goto _End;
 
         // ... go through ...
@@ -335,8 +335,8 @@ _Continue:
         state = XML_SAX_STATE_TAG_INSIDE;
 
         err = onAddAttribute(
-          Utf16(markAttrStart, (sysuint_t)(markAttrEnd - markAttrStart)),
-          Utf16(markDataStart, (sysuint_t)(markDataEnd - markDataStart)));
+          Utf16(markAttrStart, (size_t)(markAttrEnd - markAttrStart)),
+          Utf16(markDataStart, (size_t)(markDataEnd - markDataStart)));
         if (FOG_IS_ERROR(err)) goto _End;
 
         goto _Begin;
@@ -354,7 +354,7 @@ _TagEnd:
           if (element == XML_SAX_ELEMENT_TAG_SELF_CLOSING)
           {
             depth--;
-            err = onCloseElement(Utf16(markTagStart, (sysuint_t)(markTagEnd - markTagStart)));
+            err = onCloseElement(Utf16(markTagStart, (size_t)(markTagEnd - markTagStart)));
             if (FOG_IS_ERROR(err)) goto _End;
           }
 
@@ -392,7 +392,7 @@ _TagEnd:
           mark = ++strCur;
           depth--;
 
-          err = onCloseElement(Utf16(markTagStart, (sysuint_t)(markTagEnd - markTagStart)));
+          err = onCloseElement(Utf16(markTagStart, (size_t)(markTagEnd - markTagStart)));
           if (FOG_IS_ERROR(err)) goto _End;
 
           goto _Begin;
@@ -405,7 +405,7 @@ _TagEnd:
         goto _End;
 
       case XML_SAX_STATE_TAG_QUESTION_MARK:
-        if ((sysuint_t)(strEnd - strCur) > 3 && StringUtil::eq(strCur, "xml", 3, CASE_INSENSITIVE) && strCur[3].isSpace())
+        if ((size_t)(strEnd - strCur) > 3 && StringUtil::eq(strCur, "xml", 3, CASE_INSENSITIVE) && strCur[3].isSpace())
         {
           element = XML_SAX_ELEMENT_XML;
           state = XML_SAX_STATE_TAG_INSIDE;
@@ -420,13 +420,13 @@ _TagEnd:
         break;
 
       case XML_SAX_STATE_TAG_EXCLAMATION_MARK:
-        if ((sysuint_t)(strEnd - strCur) > 1 && StringUtil::eq(strCur, "--", 2, CASE_SENSITIVE))
+        if ((size_t)(strEnd - strCur) > 1 && StringUtil::eq(strCur, "--", 2, CASE_SENSITIVE))
         {
           state = XML_SAX_STATE_COMMENT;
           strCur += 3;
           goto _Begin;
         }
-        else if ((sysuint_t)(strEnd - strCur) > 7 && StringUtil::eq(strCur, "DOCTYPE", 7, CASE_SENSITIVE) && strCur[7].isSpace())
+        else if ((size_t)(strEnd - strCur) > 7 && StringUtil::eq(strCur, "DOCTYPE", 7, CASE_SENSITIVE) && strCur[7].isSpace())
         {
           element = XML_SAX_ELEMENT_DOCTYPE;
           state = XML_SAX_STATE_DOCTYPE;
@@ -434,7 +434,7 @@ _TagEnd:
           doctype.clear();
           goto _Begin;
         }
-        else if ((sysuint_t)(strEnd - strCur) > 6 && StringUtil::eq(strCur, "[CDATA[", 7, CASE_SENSITIVE))
+        else if ((size_t)(strEnd - strCur) > 6 && StringUtil::eq(strCur, "[CDATA[", 7, CASE_SENSITIVE))
         {
           element = XML_SAX_ELEMENT_CDATA;
           state = XML_SAX_STATE_CDATA;
@@ -494,7 +494,7 @@ _DOCTYPEEnd:
       case XML_SAX_STATE_DOCTYPE_TEXT:
         if (ch.isAlnum() || ch == Char('_') || ch == Char(':') || ch == Char('-') || ch == Char('.')) break;
         markDataEnd = strCur;
-        doctype.append(Utf16(markDataStart, (sysuint_t)(markDataEnd - markDataStart)));
+        doctype.append(Utf16(markDataStart, (size_t)(markDataEnd - markDataStart)));
 
         state = XML_SAX_STATE_DOCTYPE;
         goto _Continue;
@@ -503,7 +503,7 @@ _DOCTYPEEnd:
         if (ch != Char('\"')) break;
 
         markDataEnd = strCur;
-        doctype.append(String(markDataStart, (sysuint_t)(markDataEnd - markDataStart)));
+        doctype.append(String(markDataStart, (size_t)(markDataEnd - markDataStart)));
 
         state = XML_SAX_STATE_DOCTYPE;
         break;
@@ -529,7 +529,7 @@ _DOCTYPEEnd:
           state = XML_SAX_STATE_READY;
           mark = strCur;
 
-          err = onAddPI(Utf16(markDataStart, (sysuint_t)(markDataEnd - markDataStart)));
+          err = onAddPI(Utf16(markDataStart, (size_t)(markDataEnd - markDataStart)));
           if (FOG_IS_ERROR(err)) goto _End;
 
           goto _Begin;
@@ -558,7 +558,7 @@ _DOCTYPEEnd:
           state = XML_SAX_STATE_READY;
           mark = strCur;
 
-          err = onAddComment(Utf16(markDataStart, (sysuint_t)(markDataEnd - markDataStart)));
+          err = onAddComment(Utf16(markDataStart, (size_t)(markDataEnd - markDataStart)));
           if (FOG_IS_ERROR(err)) goto _End;
 
           goto _Begin;
@@ -587,7 +587,7 @@ _DOCTYPEEnd:
           state = XML_SAX_STATE_READY;
           mark = strCur;
 
-          err = onAddCDATA(Utf16(markDataStart, (sysuint_t)(markDataEnd - markDataStart)));
+          err = onAddCDATA(Utf16(markDataStart, (size_t)(markDataEnd - markDataStart)));
           if (FOG_IS_ERROR(err)) goto _End;
 
           goto _Begin;
@@ -612,16 +612,15 @@ _End:
   return err;
 }
 
-TextCodec XmlSaxReader::_detectEncoding(const void* mem, sysuint_t size)
+void XmlSaxReader::_detectEncoding(TextCodec& tc, const void* mem, size_t size)
 {
   // first check for BOM
-  TextCodec textCodec = TextCodec::fromBom(mem, size);
-  if (!textCodec.isNull()) return textCodec;
+  if (tc.createFromBom(mem, size) == ERR_OK) return;
 
   const char* ptr = reinterpret_cast<const char*>(mem);
   const char* end = ptr + size;
 
-  if (size < 15) goto _End;
+  if (size < 15) return;
 
   while (ptr != end)
   {
@@ -638,7 +637,7 @@ TextCodec XmlSaxReader::_detectEncoding(const void* mem, sysuint_t size)
 
       while(ptr + 9 < end)
       {
-        if (*ptr == '>') goto _End;
+        if (*ptr == '>') return;
         if (Byte::isSpace(*ptr) && StringUtil::eq(ptr + 1, "encoding", 8, CASE_INSENSITIVE))
         {
           // We are in "<?xml ..... encoding".
@@ -648,23 +647,23 @@ TextCodec XmlSaxReader::_detectEncoding(const void* mem, sysuint_t size)
 
           // Find '='.
           while (ptr != end && *ptr != '=') ptr++;
-          if (ptr == end) goto _End;
+          if (ptr == end) return;
 
           ptr++;
 
           // We are in "<?xml ..... encoding = "
           while (ptr != end && Byte::isSpace(*ptr)) ptr++;
-          if (ptr == end) goto _End;
+          if (ptr == end) return;
 
           q = *ptr++;
           begin = ptr;
 
           while (ptr != end && *ptr != q) ptr++;
-          if (ptr == end) goto _End;
+          if (ptr == end) return;
 
-          // Try encoding and return
-          textCodec = TextCodec::fromMime(Ascii8(begin, (sysuint_t)(ptr - begin)));
-          goto _End;
+          // Try encoding and return.
+          tc.createFromMime(Ascii8(begin, (size_t)(ptr - begin)));
+          return;
         }
         ptr++;
       }
@@ -677,9 +676,6 @@ TextCodec XmlSaxReader::_detectEncoding(const void* mem, sysuint_t size)
 
     ptr++;
   }
-
-_End:
-  return textCodec;
 }
 
 } // Fog namespace

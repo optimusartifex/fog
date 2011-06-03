@@ -16,7 +16,7 @@ namespace Algorithms {
 // [Fog::Algorithms::QSort]
 // ============================================================================
 
-template<sysuint_t Size>
+template<size_t Size>
 struct QSortCompare
 {
   FOG_INLINE int _compare(const void* _a, const void* _b) const
@@ -33,7 +33,7 @@ struct QSortCompare
   enum { _size = Size };
 };
 
-template<sysuint_t Size>
+template<size_t Size>
 struct QSortCompareEx
 {
   FOG_INLINE int _compare(const void* _a, const void* _b) const
@@ -61,7 +61,7 @@ struct QSortGeneric
 
   FOG_INLINE void _swap(void* _a, void* _b)
   {
-    sysuint_t i;
+    size_t i;
     T* a = reinterpret_cast<T*>(_a);
     T* b = reinterpret_cast<T*>(_b);
 
@@ -74,7 +74,7 @@ struct QSortGeneric
   }
 
   CompareFn _cmp;
-  sysuint_t _size;
+  size_t _size;
 };
 
 template<typename T>
@@ -87,7 +87,7 @@ struct QSortGenericEx
 
   FOG_INLINE void _swap(void* _a, void* _b)
   {
-    sysuint_t i;
+    size_t i;
     T* a = reinterpret_cast<T*>(_a);
     T* b = reinterpret_cast<T*>(_b);
 
@@ -101,14 +101,14 @@ struct QSortGenericEx
 
   CompareEx _cmp;
   const void* _self;
-  sysuint_t _size;
+  size_t _size;
 };
 
 // ============================================================================
 // [Fog::Algorithms::QSort - API]
 // ============================================================================
 
-void qsort(void* base, sysuint_t nmemb, sysuint_t size, CompareFn compar)
+void qsort(void* base, size_t nmemb, size_t size, CompareFn compar)
 {
 #define FOG_QSORT_DEFINE(_Size_) \
   case _Size_: \
@@ -123,9 +123,9 @@ void qsort(void* base, sysuint_t nmemb, sysuint_t size, CompareFn compar)
 #define FOG_QSORT_GENERIC() \
   default: \
   { \
-    if (((sysuint_t)base & (sizeof(sysuint_t)-1)) == 0 && size % sizeof(sysuint_t) == 0) \
+    if (((size_t)base & (sizeof(size_t)-1)) == 0 && size % sizeof(size_t) == 0) \
     { \
-      QSortCore< QSortGeneric<sysuint_t> > context; \
+      QSortCore< QSortGeneric<size_t> > context; \
       \
       context._cmp = compar; \
       context._size = size; \
@@ -160,7 +160,7 @@ void qsort(void* base, sysuint_t nmemb, sysuint_t size, CompareFn compar)
 #undef FOG_QSORT_DEFINE
 }
 
-void qsort(void* base, sysuint_t nmemb, sysuint_t size, CompareEx compar, const void* self)
+void qsort(void* base, size_t nmemb, size_t size, CompareEx compar, const void* self)
 {
 #define FOG_QSORT_DEFINE(_Size_) \
   case _Size_: \
@@ -176,9 +176,9 @@ void qsort(void* base, sysuint_t nmemb, sysuint_t size, CompareEx compar, const 
 #define FOG_QSORT_GENERIC() \
   default: \
   { \
-    if (((sysuint_t)base & (sizeof(sysuint_t)-1)) == 0 && size % sizeof(sysuint_t) == 0) \
+    if (((size_t)base & (sizeof(size_t)-1)) == 0 && size % sizeof(size_t) == 0) \
     { \
-      QSortCore< QSortGenericEx<sysuint_t> > context; \
+      QSortCore< QSortGenericEx<size_t> > context; \
       \
       context._cmp = compar; \
       context._self = self; \
@@ -227,7 +227,7 @@ struct BSearchGeneric
   }
 
   CompareFn _cmp;
-  sysuint_t _size;
+  size_t _size;
 };
 
 struct BSearchGenericEx
@@ -239,10 +239,10 @@ struct BSearchGenericEx
 
   CompareEx _cmp;
   const void* _self;
-  sysuint_t _size;
+  size_t _size;
 };
 
-const void* bsearch(const void* _base, sysuint_t nmemb, sysuint_t size, const void* key, CompareFn compar)
+const void* bsearch(const void* _base, size_t nmemb, size_t size, const void* key, CompareFn compar)
 {
   BSearchCore<BSearchGeneric> context;
 
@@ -253,7 +253,7 @@ const void* bsearch(const void* _base, sysuint_t nmemb, sysuint_t size, const vo
     reinterpret_cast<const uint8_t*>(key));
 }
 
-const void* bsearch(const void* _base, sysuint_t nmemb, sysuint_t size, const void* key, CompareEx compar, const void* self)
+const void* bsearch(const void* _base, size_t nmemb, size_t size, const void* key, CompareEx compar, const void* self)
 {
   BSearchCore<BSearchGenericEx> context;
 

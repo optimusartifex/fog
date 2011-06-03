@@ -253,9 +253,9 @@ RasterWorkerManager::~RasterWorkerManager()
 
 RasterWorker* RasterWorkerManager::wakeUpScheduled(RasterWorker* calledFrom)
 {
-  sysuint_t c = cmdCount.get();
+  size_t c = cmdCount.get();
 
-  for (sysuint_t i = 0; i < numWorkers; i++)
+  for (size_t i = 0; i < numWorkers; i++)
   {
     RasterWorker* worker = &workers[i];
 
@@ -272,7 +272,7 @@ RasterWorker* RasterWorkerManager::wakeUpScheduled(RasterWorker* calledFrom)
 
 RasterWorker* RasterWorkerManager::wakeUpSleeping(RasterWorker* calledFrom)
 {
-  for (sysuint_t i = 0; i < numWorkers; i++)
+  for (size_t i = 0; i < numWorkers; i++)
   {
     RasterWorker* worker = &workers[i];
 
@@ -289,10 +289,10 @@ RasterWorker* RasterWorkerManager::wakeUpSleeping(RasterWorker* calledFrom)
 
 bool RasterWorkerManager::isCompleted()
 {
-  sysuint_t done = 0;
-  sysuint_t c = cmdCount.get();
+  size_t done = 0;
+  size_t c = cmdCount.get();
 
-  for (sysuint_t i = 0; i < numWorkers; i++)
+  for (size_t i = 0; i < numWorkers; i++)
   {
     RasterWorker* worker = &workers[i];
     if (worker->cmdPosition == c) done++;

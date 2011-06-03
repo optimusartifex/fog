@@ -399,7 +399,7 @@ List<XmlAttribute*> XmlElement::attributes() const
 
 bool XmlElement::hasAttribute(const String& name) const
 {
-  sysuint_t i, len = _attributes.getLength();
+  size_t i, len = _attributes.getLength();
   if (!len) return false;
 
   ManagedString managedName;
@@ -448,7 +448,7 @@ err_t XmlElement::removeAttributes()
 {
   if ((_flags & XML_ALLOWED_ATTRIBUTES) == 0) return ERR_XML_ATTRIBUTES_NOT_ALLOWED;
 
-  sysuint_t i = 0;
+  size_t i = 0;
   while (i < _attributes.getLength())
   {
     if (_removeAttribute(_attributes.at(i)->_name) != ERR_OK) i++;
@@ -508,7 +508,7 @@ err_t XmlElement::setTextContent(const String& text)
 
 err_t XmlElement::_setAttribute(const ManagedString& name, const String& value)
 {
-  sysuint_t i, len = _attributes.getLength();
+  size_t i, len = _attributes.getLength();
   XmlAttribute** attrs = (XmlAttribute**)_attributes.getData();
 
   for (i = 0; i < len; i++)
@@ -534,7 +534,7 @@ err_t XmlElement::_setAttribute(const ManagedString& name, const String& value)
 
 String XmlElement::_getAttribute(const ManagedString& name) const
 {
-  sysuint_t i, len = _attributes.getLength();
+  size_t i, len = _attributes.getLength();
 
   XmlAttribute** attrs = (XmlAttribute**)_attributes.getData();
   for (i = 0; i < len; i++)
@@ -547,7 +547,7 @@ String XmlElement::_getAttribute(const ManagedString& name) const
 
 err_t XmlElement::_removeAttribute(const ManagedString& name)
 {
-  sysuint_t i, len = _attributes.getLength();
+  size_t i, len = _attributes.getLength();
   XmlAttribute** attrs = (XmlAttribute**)_attributes.getData();
 
   for (i = 0; i < len; i++)
@@ -566,7 +566,7 @@ err_t XmlElement::_removeAttribute(const ManagedString& name)
 
 err_t XmlElement::_removeAttributes()
 {
-  sysuint_t i, len = _attributes.getLength();
+  size_t i, len = _attributes.getLength();
   if (!len) return ERR_OK;
 
   List<XmlAttribute*> attributes = _attributes;
@@ -592,7 +592,7 @@ XmlAttribute* XmlElement::_createAttribute(const ManagedString& name) const
 
 void XmlElement::_copyAttributes(XmlElement* dst, XmlElement* src)
 {
-  sysuint_t i, len = src->_attributes.getLength();
+  size_t i, len = src->_attributes.getLength();
   XmlAttribute** attrs = (XmlAttribute**)src->_attributes.getData();
   for (i = 0; i < len; i++)
   {

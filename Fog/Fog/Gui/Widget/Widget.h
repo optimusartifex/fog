@@ -89,8 +89,8 @@ struct FOG_API Widget : public LayoutItem
   // [Object Hierarchy]
   // --------------------------------------------------------------------------
 
-  virtual err_t _addChild(sysuint_t index, Object* child);
-  virtual err_t _removeChild(sysuint_t index, Object* child);
+  virtual err_t _addChild(size_t index, Object* child);
+  virtual err_t _removeChild(size_t index, Object* child);
 
   // --------------------------------------------------------------------------
   // [Widget Hierarchy]

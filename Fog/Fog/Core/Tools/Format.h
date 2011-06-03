@@ -28,7 +28,7 @@ struct FOG_NO_EXPORT FormatFlags
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE FormatFlags(sysuint_t precision = NO_PRECISION, sysuint_t width = NO_WIDTH, uint32_t flags = NO_FLAGS) :
+  FOG_INLINE FormatFlags(size_t precision = NO_PRECISION, size_t width = NO_WIDTH, uint32_t flags = NO_FLAGS) :
     precision(precision),
     width(width),
     flags(flags)
@@ -39,8 +39,8 @@ struct FOG_NO_EXPORT FormatFlags
   // [Members]
   // --------------------------------------------------------------------------
 
-  sysuint_t precision;
-  sysuint_t width;
+  size_t precision;
+  size_t width;
   uint32_t flags;
 };
 

@@ -97,7 +97,7 @@ struct FOG_NO_EXPORT ColorStopCache
   // --------------------------------------------------------------------------
 
   //! @brief Reference count.
-  mutable Atomic<sysuint_t> refCount;
+  mutable Atomic<size_t> refCount;
 
   //! @brief Format of color-stop cache.
   uint32_t format;

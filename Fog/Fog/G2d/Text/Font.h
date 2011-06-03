@@ -50,7 +50,7 @@ struct TextExtents;
 struct FOG_NO_EXPORT FontData
 {
   //! @brief Reference count.
-  mutable Atomic<sysuint_t> refCount;
+  mutable Atomic<size_t> refCount;
 
   //! @brief Font-face.
   FontFace* face;
@@ -111,7 +111,7 @@ struct FOG_API Font
   // [Sharing]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE sysuint_t getRefCount() const { return _d->refCount.get(); }
+  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
 
   FOG_INLINE bool isDetached() const { return _d->refCount.get() == 1; }
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }

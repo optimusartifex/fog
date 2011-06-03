@@ -190,7 +190,7 @@ struct FOG_NO_EXPORT Span
     //!
     //! Use CMask/VMask getters & setters to access or modify this value.
     void* _mask;
-    sysuint_t _mask_uint;
+    size_t _mask_uint;
   };
 
   //! @brief Pointer to the next span (or @c NULL).
@@ -243,7 +243,7 @@ struct FOG_NO_EXPORT Span8 : public Span
     // Never call setConstMask() on the VMask span.
     FOG_ASSERT(isConst());
 
-    _mask_uint = (sysuint_t)mask;
+    _mask_uint = (size_t)mask;
   }
 
   // --------------------------------------------------------------------------
@@ -328,17 +328,17 @@ struct FOG_NO_EXPORT Span8 : public Span
 
   static FOG_INLINE bool isConstMaskPointer(const uint8_t* mask)
   {
-    return (sysuint_t)mask <= (sysuint_t)0x100;
+    return (size_t)mask <= (size_t)0x100;
   }
 
   static FOG_INLINE bool isVariantMaskPointer(const uint8_t* mask)
   {
-    return (sysuint_t)mask > (sysuint_t)0x100;
+    return (size_t)mask > (size_t)0x100;
   }
 
   static FOG_INLINE uint32_t getConstMaskFromPointer(const uint8_t* mask)
   {
-    return (uint32_t)(sysuint_t)mask;
+    return (uint32_t)(size_t)mask;
   }
 
   static FOG_INLINE uint8_t* getPointerFromConstMask(uint32_t mask)
@@ -438,7 +438,7 @@ struct FOG_NO_EXPORT Span16 : public Span
     // Never call setCMask() on the VMask span.
     FOG_ASSERT(isConst());
 
-    _mask_uint = (sysuint_t)mask;
+    _mask_uint = (size_t)mask;
   }
 
   // --------------------------------------------------------------------------

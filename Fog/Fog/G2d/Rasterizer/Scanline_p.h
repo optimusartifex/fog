@@ -596,7 +596,7 @@ _Link:
     getCurrent()->setX1(x1);
     getCurrent()->setGenericMask(const_cast<uint8_t*>(_maskCurrent));
 
-    sysuint_t w = (uint)(x1 - x0);
+    size_t w = (uint)(x1 - x0);
 
     Face::p32 mskAp;
     Face::p32 mskBp;

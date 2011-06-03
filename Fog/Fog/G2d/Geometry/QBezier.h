@@ -160,7 +160,7 @@ struct FOG_NO_EXPORT QBezierF
     return _g2d.quadcurvef.getBoundingBox(self, dst);
   }
 
-  static FOG_INLINE err_t getSplineBBox(const PointF* self, sysuint_t length, BoxF* dst)
+  static FOG_INLINE err_t getSplineBBox(const PointF* self, size_t length, BoxF* dst)
   {
     return _g2d.quadcurvef.getSplineBBox(self, length, dst);
   }
@@ -350,7 +350,7 @@ struct FOG_NO_EXPORT QBezierD
     return _g2d.quadcurved.getBoundingBox(self, dst);
   }
 
-  static FOG_INLINE err_t getSplineBBox(const PointD* self, sysuint_t length, BoxD* dst)
+  static FOG_INLINE err_t getSplineBBox(const PointD* self, size_t length, BoxD* dst)
   {
     return _g2d.quadcurved.getSplineBBox(self, length, dst);
   }

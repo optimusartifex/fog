@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_DATA_VALUE_H
-#define _FOG_CORE_DATA_VALUE_H
+#ifndef _FOG_CORE_VARIANT_VAR_H
+#define _FOG_CORE_VARIANT_VAR_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Class.h>
@@ -51,7 +51,7 @@ struct FOG_API ValueData
   // [Members]
 
   //! @brief Reference count.
-  mutable Atomic<sysuint_t> refCount;
+  mutable Atomic<size_t> refCount;
 
   //! @brief Type of Value.
   uint32_t type;
@@ -100,17 +100,12 @@ struct FOG_API Value
   static Value fromDouble(double val);
   static Value fromString(const String& val);
 
-  static Value fromErrno();
-#if defined(FOG_OS_WINDOWS)
-  static Value fromWinLastError();
-#endif // FOG_OS_WINDOWS
-
   // [Sharing]
 
-  //! @copydoc Doxygen::Implicit::getRefCount().
-  FOG_INLINE sysuint_t getRefCount() const { return _d->refCount.get(); }
+  //! @copydoc Doxygen::Implicit::getReference().
+  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
   //! @copydoc Doxygen::Implicit::isDetached().
-  FOG_INLINE bool isDetached() const { return getRefCount() == 1; }
+  FOG_INLINE bool isDetached() const { return getReference() == 1; }
   //! @copydoc Doxygen::Implicit::detach().
   err_t detach();
 
@@ -160,4 +155,4 @@ _FOG_TYPEINFO_DECLARE(Fog::Value, Fog::TYPEINFO_MOVABLE)
 _FOG_SWAP_D(Fog::Value)
 
 // [Guard]
-#endif // _FOG_CORE_DATA_VALUE_H
+#endif // _FOG_CORE_VARIANT_VAR_H

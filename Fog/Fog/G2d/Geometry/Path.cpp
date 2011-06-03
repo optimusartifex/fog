@@ -57,23 +57,23 @@ FOG_INLINE PathDataD* _G2d_PathT_getDNull<double>() { return &_G2d_PathD_dnull; 
 // ============================================================================
 
 template<typename NumT>
-static FOG_INLINE sysuint_t _G2d_PathT_getDataSize(sysuint_t capacity)
+static FOG_INLINE size_t _G2d_PathT_getDataSize(size_t capacity)
 {
   return sizeof(NumT_(PathData)) + capacity * (sizeof(NumT_(Point)) + 1);
 }
 
 template<typename NumT>
 static FOG_INLINE void _G2d_PathT_updateDataPointers(
-  NumT_(PathData)* d, sysuint_t capacity)
+  NumT_(PathData)* d, size_t capacity)
 {
-  d->vertices = (NumT_(Point)*) (((sysuint_t)d->commands + capacity + 15) & ~(sysuint_t)15);
+  d->vertices = (NumT_(Point)*) (((size_t)d->commands + capacity + 15) & ~(size_t)15);
 }
 
 template<typename NumT>
 static bool FOG_FASTCALL _G2d_PathT_getLastPoint(
   NumT_(PathData)* d, NumT_(Point)& dst)
 {
-  sysuint_t last = d->length;
+  size_t last = d->length;
   if (!last) return false;
 
   const uint8_t* commands = d->commands;
@@ -95,10 +95,10 @@ _End:
 
 #define PATH_ADD_VERTEX_BEGIN(NumT, _Count_) \
   { \
-    sysuint_t _length = self._d->length; \
+    size_t _length = self._d->length; \
     \
     { \
-      sysuint_t _remain = self._d->capacity - _length; \
+      size_t _remain = self._d->capacity - _length; \
       \
       if (FOG_UNLIKELY(!_length) || \
           FOG_UNLIKELY(!PathCmd::isVertex(self._d->commands[_length - 1]))) \
@@ -128,9 +128,9 @@ _End:
 // ============================================================================
 
 template<typename NumT>
-static NumT_(PathData)* _G2d_PathT_dalloc(sysuint_t capacity)
+static NumT_(PathData)* _G2d_PathT_dalloc(size_t capacity)
 {
-  sysuint_t dsize = _G2d_PathT_getDataSize<NumT>(capacity);
+  size_t dsize = _G2d_PathT_getDataSize<NumT>(capacity);
 
   NumT_(PathData)* newd = reinterpret_cast<NumT_(PathData)*>(Memory::alloc(dsize));
   if (FOG_IS_NULL(newd)) return NULL;
@@ -149,15 +149,15 @@ static NumT_(PathData)* _G2d_PathT_dalloc(sysuint_t capacity)
 }
 
 template<typename NumT>
-static NumT_(PathData)* _G2d_PathT_drealloc(NumT_(PathData)* d, sysuint_t capacity)
+static NumT_(PathData)* _G2d_PathT_drealloc(NumT_(PathData)* d, size_t capacity)
 {
   FOG_ASSERT(d->length <= capacity);
-  sysuint_t dsize = _G2d_PathT_getDataSize<NumT>(capacity);
+  size_t dsize = _G2d_PathT_getDataSize<NumT>(capacity);
 
   NumT_(PathData)* newd = reinterpret_cast<NumT_(PathData)*>(Memory::alloc(dsize));
   if (FOG_IS_NULL(newd)) return NULL;
 
-  sysuint_t length = d->length;
+  size_t length = d->length;
 
   newd->refCount.init(1);
   newd->flags = d->flags & PATH_DATA_OWN_FLAGS;
@@ -179,7 +179,7 @@ static NumT_(PathData)* _G2d_PathT_drealloc(NumT_(PathData)* d, sysuint_t capaci
 template<typename NumT>
 static NumT_(PathData)* _G2d_PathT_dcopy(const NumT_(PathData)* d)
 {
-  sysuint_t length = d->length;
+  size_t length = d->length;
   if (length == 0) return _G2d_PathT_getDNull<NumT>()->ref();
 
   NumT_(PathData)* newd = _G2d_PathT_dalloc<NumT>(length);
@@ -234,11 +234,11 @@ static err_t _G2d_PathT_detach(NumT_(Path)& self)
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_reserve(NumT_(Path)& self, sysuint_t capacity)
+static err_t _G2d_PathT_reserve(NumT_(Path)& self, size_t capacity)
 {
   if (self._d->refCount.get() == 1 && self._d->capacity >= capacity) return ERR_OK;
 
-  sysuint_t length = self._d->length;
+  size_t length = self._d->length;
   if (capacity < length) capacity = length;
 
   NumT_(PathData)* newd = _G2d_PathT_dalloc<NumT>(capacity);
@@ -277,10 +277,10 @@ static void _G2d_PathT_squeeze(NumT_(Path)& self)
 }
 
 template<typename NumT>
-static sysuint_t _G2d_PathT_prepare(NumT_(Path)& self, sysuint_t count, uint32_t cntOp)
+static size_t _G2d_PathT_prepare(NumT_(Path)& self, size_t count, uint32_t cntOp)
 {
-  sysuint_t start = (cntOp == CONTAINER_OP_REPLACE) ? 0 : self._d->length;
-  sysuint_t remain = self._d->capacity - start;
+  size_t start = (cntOp == CONTAINER_OP_REPLACE) ? 0 : self._d->length;
+  size_t remain = self._d->capacity - start;
 
   if (self._d->refCount.get() == 1 && count <= remain)
   {
@@ -288,7 +288,7 @@ static sysuint_t _G2d_PathT_prepare(NumT_(Path)& self, sysuint_t count, uint32_t
   }
   else
   {
-    sysuint_t optimalCapacity =
+    size_t optimalCapacity =
       Util::getGrowCapacity(sizeof(NumT_(PathData)), sizeof(NumT_(Point)) + sizeof(uint8_t), start, start + count);
 
     NumT_(PathData)* newd = _G2d_PathT_dalloc<NumT>(optimalCapacity);
@@ -312,10 +312,10 @@ static sysuint_t _G2d_PathT_prepare(NumT_(Path)& self, sysuint_t count, uint32_t
 }
 
 template<typename NumT>
-static sysuint_t _G2d_PathT_add(NumT_(Path)& self, sysuint_t count)
+static size_t _G2d_PathT_add(NumT_(Path)& self, size_t count)
 {
-  sysuint_t length = self._d->length;
-  sysuint_t remain = self._d->capacity - length;
+  size_t length = self._d->length;
+  size_t remain = self._d->capacity - length;
 
   if (self._d->refCount.get() == 1 && count <= remain)
   {
@@ -323,7 +323,7 @@ static sysuint_t _G2d_PathT_add(NumT_(Path)& self, sysuint_t count)
   }
   else
   {
-    sysuint_t optimalCapacity =
+    size_t optimalCapacity =
       Util::getGrowCapacity(sizeof(NumT_(PathData)), sizeof(NumT_(Point)) + sizeof(uint8_t), length, length + count);
 
     NumT_(PathData)* newd = _G2d_PathT_dalloc<NumT>(optimalCapacity);
@@ -402,7 +402,7 @@ static err_t _G2d_PathT_setDeepT(NumT_(Path)& self, const SrcT_(Path)& other)
     return ERR_RT_OUT_OF_MEMORY;
   }
 
-  sysuint_t length = other_d->length;
+  size_t length = other_d->length;
 
   self_d = self._d;
   self_d->flags = (self._d->flags & ~PATH_DATA_OWN_FLAGS) | (other_d->flags & PATH_DATA_OWN_FLAGS);
@@ -422,12 +422,12 @@ static err_t _G2d_PathT_setDeepT(NumT_(Path)& self, const SrcT_(Path)& other)
 // ============================================================================
 
 template<typename NumT>
-static Range _G2d_PathT_getSubpathRange(const NumT_(Path)& self, sysuint_t index)
+static Range _G2d_PathT_getSubpathRange(const NumT_(Path)& self, size_t index)
 {
-  sysuint_t length = self._d->length;
+  size_t length = self._d->length;
   if (index >= length) return Range(INVALID_INDEX, INVALID_INDEX);
 
-  sysuint_t i = index + 1;
+  size_t i = index + 1;
   const uint8_t* commands = self._d->commands;
 
   while (i < length)
@@ -448,7 +448,7 @@ static Range _G2d_PathT_getSubpathRange(const NumT_(Path)& self, sysuint_t index
 template<typename NumT>
 static err_t _G2d_PathT_moveTo(NumT_(Path)& self, const NumT_(Point)& pt0)
 {
-  sysuint_t pos = self._add(1);
+  size_t pos = self._add(1);
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
   uint8_t* commands = self._d->commands + pos;
@@ -541,13 +541,13 @@ static err_t _G2d_PathT_vlineToRel(NumT_(Path)& self, NumT y)
 // ============================================================================
 
 template<typename NumT>
-static err_t _G2d_PathT_polyTo(NumT_(Path)& self, const NumT_(Point)* pts, sysuint_t count)
+static err_t _G2d_PathT_polyTo(NumT_(Path)& self, const NumT_(Point)* pts, size_t count)
 {
   if (count == 0) return ERR_OK;
   FOG_ASSERT(pts != NULL);
 
   PATH_ADD_VERTEX_BEGIN(NumT, count)
-    sysuint_t i;
+    size_t i;
 
     for (i = 0; i < count; i++) commands[i] = PATH_CMD_LINE_TO;
     for (i = 0; i < count; i++) vertices[i] = pts[i];
@@ -556,13 +556,13 @@ static err_t _G2d_PathT_polyTo(NumT_(Path)& self, const NumT_(Point)* pts, sysui
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_polyToRel(NumT_(Path)& self, const NumT_(Point)* pts, sysuint_t count)
+static err_t _G2d_PathT_polyToRel(NumT_(Path)& self, const NumT_(Point)* pts, size_t count)
 {
   if (count == 0) return ERR_OK;
   FOG_ASSERT(pts != NULL);
 
   PATH_ADD_VERTEX_BEGIN(NumT, count)
-    sysuint_t i;
+    size_t i;
     NumT_(Point) tr(vertices[-1]);
 
     for (i = 0; i < count; i++) commands[i] = PATH_CMD_LINE_TO;
@@ -774,7 +774,7 @@ static err_t _G2d_PathT_arcTo(
   {
     NumT as, ac;
 
-    sysuint_t pos = self._add(2);
+    size_t pos = self._add(2);
     if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
     commands = self._d->commands + pos;
@@ -802,7 +802,7 @@ static err_t _G2d_PathT_arcTo(
   }
   else
   {
-    sysuint_t pos = self._add(13);
+    size_t pos = self._add(13);
     if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
     commands = self._d->commands + pos;
@@ -841,7 +841,7 @@ static err_t _G2d_PathT_svgArcTo(
   const NumT_(Point)& p2)
 {
   // Mark current length (will be position where the first bezier would start).
-  sysuint_t mark = self._d->length;
+  size_t mark = self._d->length;
 
   NumT_(Point) p0;
   bool radiiOk = true;
@@ -996,7 +996,7 @@ static err_t _G2d_PathT_rectT(
 {
   if (!r.isValid()) return ERR_OK;
 
-  sysuint_t pos = self._add(5);
+  size_t pos = self._add(5);
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
   uint8_t* commands = self._d->commands + pos;
@@ -1047,7 +1047,7 @@ static err_t _G2d_PathT_boxT(
 {
   if (!r.isValid()) return ERR_OK;
 
-  sysuint_t pos = self._add(5);
+  size_t pos = self._add(5);
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
   uint8_t* commands = self._d->commands + pos;
@@ -1094,16 +1094,16 @@ static err_t _G2d_PathT_boxT(
 template<typename NumT, typename SrcT>
 static err_t _G2d_PathT_boxesT(
   NumT_(Path)& self,
-  const SrcT_(Box)* r, sysuint_t count, uint32_t direction)
+  const SrcT_(Box)* r, size_t count, uint32_t direction)
 {
   if (!count) return ERR_OK;
   FOG_ASSERT(r);
 
-  sysuint_t pos = self._add(count * 5);
+  size_t pos = self._add(count * 5);
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
-  sysuint_t i;
-  sysuint_t added = 0;
+  size_t i;
+  size_t added = 0;
   NumT_(Point)* vertices = self._d->vertices + pos;
 
   if (direction == PATH_DIRECTION_CW)
@@ -1160,7 +1160,7 @@ static err_t _G2d_PathT_boxesT(
   }
 
   self._d->flags |= PATH_DATA_DIRTY_BBOX;
-  self._d->length = (sysuint_t)(commands - self._d->commands);
+  self._d->length = (size_t)(commands - self._d->commands);
 
   return ERR_OK;
 }
@@ -1168,16 +1168,16 @@ static err_t _G2d_PathT_boxesT(
 template<typename NumT, typename SrcT>
 static err_t _G2d_PathT_rectsT(
   NumT_(Path)& self,
-  const SrcT_(Rect)* r, sysuint_t count, uint32_t direction)
+  const SrcT_(Rect)* r, size_t count, uint32_t direction)
 {
   if (!count) return ERR_OK;
   FOG_ASSERT(r);
 
-  sysuint_t pos = self._add(count * 5);
+  size_t pos = self._add(count * 5);
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
-  sysuint_t i;
-  sysuint_t added = 0;
+  size_t i;
+  size_t added = 0;
   NumT_(Point)* vertices = self._d->vertices + pos;
 
   if (direction == PATH_DIRECTION_CW)
@@ -1234,7 +1234,7 @@ static err_t _G2d_PathT_rectsT(
   }
 
   self._d->flags |= PATH_DATA_DIRTY_BBOX;
-  self._d->length = (sysuint_t)(commands - self._d->commands);
+  self._d->length = (size_t)(commands - self._d->commands);
 
   return ERR_OK;
 }
@@ -1254,13 +1254,13 @@ static err_t _G2d_PathT_region(NumT_(Path)& self, const Region& r, uint32_t dire
 // ============================================================================
 
 template<typename NumT>
-static err_t _G2d_PathT_polylineI(NumT_(Path)& self, const PointI* pts, sysuint_t count, uint32_t direction)
+static err_t _G2d_PathT_polylineI(NumT_(Path)& self, const PointI* pts, size_t count, uint32_t direction)
 {
   if (!count) return ERR_OK;
   FOG_ASSERT(pts);
 
-  sysuint_t i;
-  sysuint_t pos = self._add(count);
+  size_t i;
+  size_t pos = self._add(count);
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
   uint8_t* commands = self._d->commands + pos;
@@ -1284,13 +1284,13 @@ static err_t _G2d_PathT_polylineI(NumT_(Path)& self, const PointI* pts, sysuint_
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_polylineT(NumT_(Path)& self, const NumT_(Point)* pts, sysuint_t count, uint32_t direction)
+static err_t _G2d_PathT_polylineT(NumT_(Path)& self, const NumT_(Point)* pts, size_t count, uint32_t direction)
 {
   if (!count) return ERR_OK;
   FOG_ASSERT(pts);
 
-  sysuint_t i;
-  sysuint_t pos = self._add(count);
+  size_t i;
+  size_t pos = self._add(count);
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
   uint8_t* commands = self._d->commands + pos;
@@ -1314,13 +1314,13 @@ static err_t _G2d_PathT_polylineT(NumT_(Path)& self, const NumT_(Point)* pts, sy
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_polygonI(NumT_(Path)& self, const PointI* pts, sysuint_t count, uint32_t direction)
+static err_t _G2d_PathT_polygonI(NumT_(Path)& self, const PointI* pts, size_t count, uint32_t direction)
 {
   if (!count) return ERR_OK;
   FOG_ASSERT(pts);
 
-  sysuint_t i;
-  sysuint_t pos = self._add(count + 1);
+  size_t i;
+  size_t pos = self._add(count + 1);
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
   uint8_t* commands = self._d->commands + pos;
@@ -1347,13 +1347,13 @@ static err_t _G2d_PathT_polygonI(NumT_(Path)& self, const PointI* pts, sysuint_t
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_polygonT(NumT_(Path)& self, const NumT_(Point)* pts, sysuint_t count, uint32_t direction)
+static err_t _G2d_PathT_polygonT(NumT_(Path)& self, const NumT_(Point)* pts, size_t count, uint32_t direction)
 {
   if (!count) return ERR_OK;
   FOG_ASSERT(pts);
 
-  sysuint_t i;
-  sysuint_t pos = self._add(count + 1);
+  size_t i;
+  size_t pos = self._add(count + 1);
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
   uint8_t* commands = self._d->commands + pos;
@@ -1421,7 +1421,7 @@ static err_t _G2d_PathT_shape(
     return self.appendTransformed(tmp, *tr);
   }
 
-  sysuint_t pos = self._add(_G2d_PathT_shapeSize[shapeType]);
+  size_t pos = self._add(_G2d_PathT_shapeSize[shapeType]);
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
   uint8_t* dstCmd = self._d->commands + pos;
@@ -1850,7 +1850,7 @@ _ShapeRect:
       dstPts += len + 1;
 
       self._d->flags |= PATH_DATA_HAS_CBEZIER;
-      self._d->length = (sysuint_t)(dstCmd - self._d->commands);
+      self._d->length = (size_t)(dstCmd - self._d->commands);
       combBBox = false;
       break;
     }
@@ -1914,8 +1914,8 @@ static err_t _G2d_PathT_appendPathT(
   const SrcT_(Path)& path,
   const Range* range)
 {
-  sysuint_t srcPos = 0;
-  sysuint_t srcLen = path.getLength();
+  size_t srcPos = 0;
+  size_t srcLen = path.getLength();
 
   if (range != NULL)
   {
@@ -1926,7 +1926,7 @@ static err_t _G2d_PathT_appendPathT(
   }
   if (srcLen == 0) return ERR_OK;
 
-  sysuint_t pos = self._add(srcLen);
+  size_t pos = self._add(srcLen);
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
   Memory::copy(self._d->commands + pos, path._d->commands + srcPos, srcLen);
@@ -1969,8 +1969,8 @@ static err_t _G2d_PathT_appendTransformedPathT(
   const NumT_(Transform)& tr,
   const Range* range)
 {
-  sysuint_t srcPos = 0;
-  sysuint_t srcLen = path.getLength();
+  size_t srcPos = 0;
+  size_t srcLen = path.getLength();
 
   if (range != NULL)
   {
@@ -1985,7 +1985,7 @@ static err_t _G2d_PathT_appendTransformedPathT(
   uint32_t transformType = tr.getType();
   if (transformType < TRANSFORM_TYPE_PROJECTION)
   {
-    sysuint_t pos = self._add(srcLen);
+    size_t pos = self._add(srcLen);
     if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
     Memory::copy(self._d->commands + pos, path._d->commands + srcPos, srcLen);
@@ -2052,8 +2052,8 @@ static err_t _G2d_PathT_appendTranslatedPathT(
 template<typename NumT>
 static void _G2d_PathT_updateFlat(const NumT_(Path)& self)
 {
-  sysuint_t i = 0;
-  sysuint_t len = self._d->length;
+  size_t i = 0;
+  size_t len = self._d->length;
 
   const uint8_t* cmd = self._d->commands;
   uint32_t flags = NO_FLAGS;
@@ -2091,7 +2091,7 @@ static void _G2d_PathT_updateFlat(const NumT_(Path)& self)
 template<typename NumT>
 static err_t _G2d_PathT_doFlatten(
   NumT_(Path)& dst,
-  const uint8_t* srcCmd, const NumT_(Point)* srcPts, sysuint_t srcLength,
+  const uint8_t* srcCmd, const NumT_(Point)* srcPts, size_t srcLength,
   const NumT_(PathFlattenParams)& params)
 {
   if (srcLength == 0) return ERR_OK;
@@ -2099,8 +2099,8 @@ static err_t _G2d_PathT_doFlatten(
   const NumT_(Transform)* tr = params.getTransform();
   NumT flatness = params.getFlatness();
 
-  sysuint_t i = 0;
-  sysuint_t dstInitial = dst.getLength();
+  size_t i = 0;
+  size_t dstInitial = dst.getLength();
 
   uint8_t c;
   err_t err = ERR_OK;
@@ -2109,7 +2109,7 @@ static err_t _G2d_PathT_doFlatten(
   // that there are curves in the source path so length is multiplied by 4
   // and small constant is added to ensure that we don't reallocate if a given
   // path is small, but contains curves.
-  sysuint_t predict = dstInitial + (srcLength * 4U) + 128;
+  size_t predict = dstInitial + (srcLength * 4U) + 128;
 
   // Overflow?
   if (predict < dstInitial) predict = dstInitial;
@@ -2139,7 +2139,7 @@ static err_t _G2d_PathT_doFlatten(
 
       // Copy commands and vertices to the destination path.
       {
-        sysuint_t pos = dst._add(i);
+        size_t pos = dst._add(i);
         if (pos == INVALID_INDEX) goto _OutOfMemory;
 
         memcpy(dst._d->commands + pos, srcCmd, i);
@@ -2214,7 +2214,7 @@ static err_t _G2d_PathT_doFlatten(
 
       // Copy commands and vertices to the destination path.
       {
-        sysuint_t pos = dst._add(i);
+        size_t pos = dst._add(i);
         if (pos == INVALID_INDEX) goto _OutOfMemory;
 
         memcpy(dst._d->commands + pos, srcCmd, i);
@@ -2309,11 +2309,11 @@ static err_t _G2d_PathT_flatten(
   }
   else
   {
-    sysuint_t start = range->getStart();
-    sysuint_t end = Math::min(range->getEnd(), src.getLength());
+    size_t start = range->getStart();
+    size_t end = Math::min(range->getEnd(), src.getLength());
 
     if (start >= end) return (start == 0) ? (err_t)ERR_OK : (err_t)ERR_RT_INVALID_ARGUMENT;
-    sysuint_t len = start - end;
+    size_t len = start - end;
 
     if (dst._d == src._d)
     {
@@ -2345,7 +2345,7 @@ static err_t FOG_CDECL _G2d_PathT_getBoundingBox(const NumT_(Path)& self,
   uint32_t transformType = transform ? transform->getType() : TRANSFORM_TYPE_IDENTITY;
   bool hasBoundingBox = self._d->hasBoundingBox();
 
-  sysuint_t i = self._d->length;
+  size_t i = self._d->length;
   if (i == 0) goto _Empty;
 
   switch (transformType)
@@ -2771,7 +2771,7 @@ static bool _G2d_PathT_hitTest(
   const NumT_(Path)& self,
   const NumT_(Point)& pt, uint32_t fillRule)
 {
-  sysuint_t i = self.getLength();
+  size_t i = self.getLength();
   if (i == 0) return false;
 
   const NumT_(Point)* pts = self.getVertices();
@@ -3137,7 +3137,7 @@ static err_t _G2d_PathT_transform(
   NumT_(Path)& self,
   const NumT_(Transform)& tr, const Range* range)
 {
-  sysuint_t length = self._d->length;
+  size_t length = self._d->length;
   uint32_t transformType = tr.getType();
 
   if (transformType == TRANSFORM_TYPE_IDENTITY)
@@ -3159,8 +3159,8 @@ static err_t _G2d_PathT_transform(
     }
     else
     {
-      sysuint_t start = range->getStart();
-      sysuint_t end = range->getEnd();
+      size_t start = range->getStart();
+      size_t end = range->getEnd();
 
       if (start >= length && start >= end)
         return ERR_RT_INVALID_ARGUMENT;
@@ -3183,9 +3183,9 @@ static err_t _G2d_PathT_transform(
     const uint8_t* srcCmd = self._d->commands;
     const NumT_(Point)* srcPts = self._d->vertices;
 
-    sysuint_t srcLength = length;
-    sysuint_t start = 0;
-    sysuint_t end = length;
+    size_t srcLength = length;
+    size_t start = 0;
+    size_t end = length;
 
     if (range != NULL)
     {
@@ -3202,7 +3202,7 @@ static err_t _G2d_PathT_transform(
     }
 
     FOG_RETURN_ON_ERROR(tr.mapPathData(tmp, srcCmd, srcPts, srcLength));
-    sysuint_t tmpLength = tmp.getLength();
+    size_t tmpLength = tmp.getLength();
 
     if (tmpLength == srcLength)
     {
@@ -3213,10 +3213,10 @@ static err_t _G2d_PathT_transform(
     }
     else
     {
-      sysuint_t moveToIndex = start + tmpLength;
-      sysuint_t moveToLength = length - end;
+      size_t moveToIndex = start + tmpLength;
+      size_t moveToLength = length - end;
 
-      sysuint_t final = length - srcLength + tmpLength;
+      size_t final = length - srcLength + tmpLength;
       FOG_RETURN_ON_ERROR(self.reserve(final));
 
       Memory::move(self._d->commands + moveToIndex, self._d->commands + start, moveToLength);
@@ -3265,7 +3265,7 @@ static err_t _G2d_PathT_fitTo(
 
   FOG_RETURN_ON_ERROR(self.detach());
 
-  sysuint_t i, length = self._d->length;
+  size_t i, length = self._d->length;
   NumT_(Point)* pts = self._d->vertices;
 
   for (i = 0; i < length; i++, pts++)
@@ -3286,7 +3286,7 @@ static err_t _G2d_PathT_scale(
   NumT_(Path)& self,
   const NumT_(Point)& pt, bool keepStartPos)
 {
-  sysuint_t i, len = self._d->length;
+  size_t i, len = self._d->length;
   if (!len) return ERR_OK;
 
   FOG_RETURN_ON_ERROR(self.detach());
@@ -3364,7 +3364,7 @@ template<typename NumT>
 static err_t _G2d_PathT_flipX(
   NumT_(Path)& self, NumT x0, NumT x1)
 {
-  sysuint_t i, len = self._d->length;
+  size_t i, len = self._d->length;
   if (!len) return ERR_OK;
 
   FOG_RETURN_ON_ERROR(self.detach());
@@ -3394,7 +3394,7 @@ template<typename NumT>
 static err_t _G2d_PathT_flipY(
   NumT_(Path)& self, NumT y0, NumT y1)
 {
-  sysuint_t i, len = self._d->length;
+  size_t i, len = self._d->length;
   if (!len) return ERR_OK;
 
   FOG_RETURN_ON_ERROR(self.detach());
@@ -3432,7 +3432,7 @@ static bool _G2d_PathT_eq(const NumT_(Path)& _a, const NumT_(Path)& _b)
 
   if (a == b) return true;
 
-  sysuint_t length = a->length;
+  size_t length = a->length;
   if (length != b->length) return false;
 
   return memcmp(a->commands, b->commands, length) == 0 &&

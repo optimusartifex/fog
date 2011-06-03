@@ -11,6 +11,7 @@
 #include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Memory/MemoryOps.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Tools/Char.h>
 #include <Fog/Core/Tools/String.h>
@@ -21,383 +22,298 @@ namespace Fog {
 //! @{
 
 // ============================================================================
+// [Forward Declarations]
+// ============================================================================
+
+struct TextCodecData;
+struct TextCodecHandler;
+struct TextCodecState;
+
+// ============================================================================
+// [Typedefs]
+// ============================================================================
+
+//! @brief Text-codec destroy function.
+typedef void (FOG_CDECL *TextCodecDestroyFn)(TextCodecData* d);
+
+//! @brief Text-codec encode function.
+typedef err_t (FOG_CDECL *TextCodecEncodeFn)(const TextCodecData* d, 
+  ByteArray& dst, const Char* src, size_t srcLength, TextCodecState* state, TextCodecHandler* handler);
+
+//! @brief Text-codec decode function.
+typedef err_t (FOG_CDECL *TextCodecDecodeFn)(const TextCodecData* d,
+  String& dst, const void* src, size_t srcSize, TextCodecState* state);
+
+// ============================================================================
+// [Fog::TextCodecPage8]
+// ============================================================================
+
+//! @brief Text-codec page used to convert between unicode and 8-bit encoding.
+struct FOG_NO_EXPORT TextCodecPage8
+{
+  //! @brief Encode-table (from 8-bit code-point to unicode).
+  struct FOG_NO_EXPORT Encode
+  {
+    //! Unicode characters from extended 8-bit characters (128 and above).
+    uint16_t uc[128];
+  };
+
+  //! @brief Decode-table (from unicode to 8-bit code-point).
+  struct FOG_NO_EXPORT Decode
+  {
+    //! 8 bit encoded characters
+    uint8_t uc[256];
+  };
+
+  //! @brief Encode-table instance.
+  Encode* encode;
+  //! @brief Decode-table instances.
+  Decode* decode[256];
+};
+
+// ============================================================================
+// [Fog::TextCodecHandler]
+// ============================================================================
+
+//! @brief Text-codec handler
+//!
+//! Text-code handler can be used to catch characters which can't be encoded
+//! to the target encoding. These characters can be replaced by the special
+//! character or by sequence of other characters (for example xml-entity).
+struct FOG_API TextCodecHandler
+{
+  virtual ~TextCodecHandler() = 0;
+
+  //! @brief Callback to replace the character which can't be encoded into
+  //! target 8-bit encoding.
+  //!
+  //! @param dst Destination where to write the replacement.
+  //! @param ch Unicode character to replace.
+  //! @param pos Position relative to the input buffer used by the last
+  //! call to TextCodec::encode() - for logging or extended error handling.
+  //!
+  //! @note This function should use only low 0-127 ascii characters on the
+  //! output.
+  virtual err_t replace8BitCharacter(ByteArray& dst, uint32_t uc, size_t pos) = 0;
+};
+
+// ============================================================================
+// [Fog::TextCodecState]
+// ============================================================================
+
+//! @brief Text-codec state.
+struct FOG_NO_EXPORT TextCodecState
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE TextCodecState()
+  {
+    Memory::zero_t<TextCodecState>(this);
+  }
+
+  FOG_INLINE ~TextCodecState()
+  {
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE uint64_t getProcessedBytes() const { return _processedBytes; }
+  FOG_INLINE void setProcessedBytes(uint64_t val) { _processedBytes = val; }
+
+  FOG_INLINE uint32_t getBufferLength() const { return _bufferLength; }
+  FOG_INLINE void setBufferLength(uint32_t len) { _bufferLength = (uint8_t)len; }
+
+  FOG_INLINE bool isIncomplete() const { return _bufferLength > 0; }
+
+  FOG_INLINE uint8_t hasBom() const { return _hasBom; }
+  FOG_INLINE uint8_t isByteSwapped() const { return _isByteSwapped; }
+
+  FOG_INLINE uint32_t getInvalidUtf8Codec() const { return _invalidUtf8Codec; }
+  FOG_INLINE void setInvalidUtf8Codec(uint32_t codec) { _invalidUtf8Codec = (uint8_t)codec; }
+
+  FOG_INLINE const uint8_t* getBuffer() const { return _buffer; }
+  FOG_INLINE uint8_t* getBuffer() { return _buffer; }
+
+  FOG_INLINE void setByteSwapped(uint8_t val)
+  {
+    _hasBom = true;
+    _isByteSwapped = val;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  //! @brief Clears all variables to it's constructor defaults (all zero).
+  FOG_INLINE void reset()
+  {
+    memset(this, 0, sizeof(*this));
+  }
+
+  FOG_INLINE void resetProcessedBytes()
+  {
+    _processedBytes = FOG_UINT64_C(0);
+  }
+
+  FOG_INLINE void resetBufferLength()
+  {
+    _bufferLength = 0;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  //! @brief Count of bytes processed by the text-codec.
+  uint64_t _processedBytes;
+
+  //! @brief Count of bytes in buffer.
+  uint8_t _bufferLength;
+
+  //! @brief Whether the input text stream contains BOM (byte-order mark).
+  uint8_t _hasBom;
+
+  //! @brief Whteher the input text is byte-swapped (may change during advance).
+  uint8_t _isByteSwapped;
+
+  //! @brief Text-codec (ID) to use when an invalid UTF-8 sequence is found.
+  uint8_t _invalidUtf8Codec;
+
+  //! @brief Small buffer used to remember unfinished sequences.
+  uint8_t _buffer[4];
+};
+
+// ============================================================================
+// [Fog::TextCodecData]
+// ============================================================================
+
+struct FOG_NO_EXPORT TextCodecData
+{
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  //! @brief Reference count.
+  mutable Atomic<size_t> refCount;
+
+  //! @brief Destroy function (called when reference count is decreased to zero).
+  TextCodecDestroyFn destroy;
+  //! @brief Encode function.
+  TextCodecEncodeFn encode;
+  //! @brief Decode function.
+  TextCodecDecodeFn decode;
+
+  //! @brief Text-codec code (see @c TEXT_CODEC).
+  uint32_t code;
+
+  //! @brief Flags (see @c TEXT_CODEC_FLAGS).
+  uint32_t flags;
+
+  //! @brief Text codec mime and aliases.
+  //!
+  //! First ASCII string is Mime. After the @c NULL terminator there is alias-list.
+  //! If alias-list contains two @c NULL teminators, list ends, otherwise there
+  //! is the next alias. It is possible to have only MIME without aliases.
+  //!
+  //! This mechanism is designed to decrease run-time relocations needed to
+  //! load the Fog-Framework library.
+  const char* mime;
+
+  //! @brief Table for 8 bit codecs (@c NULL if no tables are needed).
+  const TextCodecPage8* page8;
+};
+
+// ============================================================================
 // [Fog::TextCodec]
 // ============================================================================
 
-//! @brief Text codec.
+//! @brief Text-codec.
 //!
-//! Text codec class provides easy way to encode or decode unicode text to various
-//! encodings. Input and output class is usually String in combination with ByteArray.
+//! Text-codec provides conversion methods from various text-encoding into
+//! unicode (UTF-16) and vica-versa.
 //!
-//! Default text codec created by empty constructor is always @c Null.
+//! Default text codec created by empty constructor is always @c TEXT_CODEC_NONE.
 //!
 //! Text codec contains built-in codecs:
-//! - @c Fog::TextCodec::ascii8() - Ascii text codec.
-//! - @c Fog::TextCodec::local8() - Local 8 bit text codec (system dependent).
+//! - @c Fog::TextCodec::ascii8() - Ascii text-codec.
+//! - @c Fog::TextCodec::local8() - Local 8-bit text-codec (depends on system).
+//! - @c Fog::TextCodec::localW() - Local <code>wchar_t</code> text-codec (depends on OS).
 //! - @c Fog::TextCodec::utf8() - UTF-8 text codec.
 //! - @c Fog::TextCodec::utf16() - UTF-16 text codec.
 //! - @c Fog::TextCodec::utf32() - UTF-32 text codec.
-//! - @c Fog::TextCodec::ucs2() - UCS-2 text codec.
-//! - @c Fog::TextCodec::ucs4() - UCS-4 text codec.
-//! - @c Fog::TextCodec::localW() - Local <code>wchar_t*</code> text codec.
 struct FOG_API TextCodec
 {
-  // --------------------------------------------------------------------------
-  // [Code]
-  // --------------------------------------------------------------------------
-
-  enum Code
-  {
-    // If you want to modify these enums, you must modify text codec table
-    // in Core/TextCodec.cpp
-
-    //! @brief None, not initialized or signalizes error.
-    None = 0,
-    //! @brief Built-in UTF-8 codec.
-    UTF8 = 1,
-    //! @brief Built-in UTF-16 codec.
-    UTF16 = 2,
-    //! @brief Built-in UTF-16 (byteswapped) codec.
-    UTF16Swapped = 3,
-    //! @brief Built-in UTF-32 codec.
-    UTF32 = 4,
-    //! @brief Built-in UTF-32 (byteswapped) codec.
-    UTF32Swapped = 5,
-    //! @brief Built-in UCS-2 codec.
-    UCS2 = 6,
-    //! @brief Built-in UCS-2 (byteswapped) codec.
-    UCS2Swapped = 7,
-    //! @brief Built-in UCS-4 codec.
-    UCS4 = UTF32,
-    //! @brief Built-in UCS-4 (byteswapped) codec.
-    UCS4Swapped = UTF32Swapped,
-
-#if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-    //! @brief Built-in UTF-16LE codec.
-    UTF16LE = UTF16,
-    //! @brief Built-in UTF-32LE codec.
-    UTF32LE = UTF32,
-    //! @brief Built-in UCS-2LE codec.
-    UCS2LE = UCS2,
-    //! @brief Built-in UCS-4LE codec.
-    UCS4LE = UCS4,
-    //! @brief Built-in UTF-16BE codec.
-    UTF16BE = UTF16Swapped,
-    //! @brief Built-in UTF-32BE codec.
-    UTF32BE = UTF32Swapped,
-    //! @brief Built-in UCS-2BE codec.
-    UCS2BE = UCS2Swapped,
-    //! @brief Built-in UCS-4BE codec.
-    UCS4BE = UCS4Swapped,
-#else
-    //! @brief Built-in UTF-16LE codec.
-    UTF16LE = UTF16Swapped,
-    //! @brief Built-in UTF-32LE codec.
-    UTF32LE = UTF32Swapped,
-    //! @brief Built-in UCS-2LE codec.
-    UCS2LE = UCS2Swapped,
-    //! @brief Built-in UCS-4LE codec.
-    UCS4LE = UCS4Swapped,
-    //! @brief Built-in UTF-16LE codec.
-    UTF16BE = UTF16,
-    //! @brief Built-in UTF-32BE codec.
-    UTF32BE = UTF32,
-    //! @brief Built-in UCS-2BE codec.
-    UCS2BE = UCS2,
-    //! @brief Built-in UCS-4BE codec.
-    UCS4BE = UCS4,
-#endif
-
-#if FOG_SIZEOF_WCHAR_T == 2
-    WideChar = UTF16,
-#else
-    WideChar = UTF32,
-#endif
-
-    //! @brief Built-in ISO-8859-1 codec.
-    ISO8859_1 = 8,
-    //! @brief Built-in ISO-8859-2 codec.
-    ISO8859_2 = 9,
-    //! @brief Built-in ISO-8859-3 codec.
-    ISO8859_3 = 10,
-    //! @brief Built-in ISO-8859-4 codec.
-    ISO8859_4 = 11,
-    //! @brief Built-in ISO-8859-5 codec.
-    ISO8859_5 = 12,
-    //! @brief Built-in ISO-8859-6 codec.
-    ISO8859_6 = 13,
-    //! @brief Built-in ISO-8859-7 codec.
-    ISO8859_7 = 14,
-    //! @brief Built-in ISO-8859-8 codec.
-    ISO8859_8 = 15,
-    //! @brief Built-in ISO-8859-9 codec.
-    ISO8859_9 = 16,
-    //! @brief Built-in ISO-8859-10 codec.
-    ISO8859_10 = 17,
-    //! @brief Built-in ISO-8859-11 codec.
-    ISO8859_11 = 18,
-    //! @brief Built-in ISO-8859-13 codec.
-    ISO8859_13 = 19,
-    //! @brief Built-in ISO-8859-14 codec.
-    ISO8859_14 = 20,
-    //! @brief Built-in ISO-8859-16 codec.
-    ISO8859_16 = 21,
-
-    //! @brief Built-in CP-850 codec.
-    CP850 = 22,
-    //! @brief Built-in CP-866 codec.
-    CP866 = 23,
-    //! @brief Built-in CP-874 codec.
-    CP874 = 24,
-    //! @brief Built-in CP-1250 codec.
-    CP1250 = 25,
-    //! @brief Built-in CP-1251 codec.
-    CP1251 = 26,
-    //! @brief Built-in CP-1252 codec.
-    CP1252 = 27,
-    //! @brief Built-in CP-1253 codec.
-    CP1253 = 28,
-    //! @brief Built-in CP-1254 codec.
-    CP1254 = 29,
-    //! @brief Built-in CP-1255 codec.
-    CP1255 = 30,
-    //! @brief Built-in CP-1256 codec.
-    CP1256 = 31,
-    //! @brief Built-in CP-1257 codec.
-    CP1257 = 32,
-    //! @brief Built-in CP-1258 codec.
-    CP1258 = 33,
-
-    //! @brief Built-in APPLE-ROMAN codec.
-    AppleRoman = 34,
-
-    //! @brief Built-in KOI8R codec.
-    KOI8R = 35,
-    //! @brief Built-in KOI8U codec.
-    KOI8U = 36,
-
-    //! @brief Built-in WINSAMI-2 codec.
-    WinSami2 = 37,
-
-    //! @brief Built-in ROMAN-8 codec.
-    Roman8 = 38,
-
-    //! @brief Built-in ARMSCII-8 codec.
-    Armscii8 = 39,
-
-    //! @brief Built-in GEORGIAN-ACADEMY codec.
-    GeorgianAcademy = 40,
-    //! @brief Built-in GEORGIAN-PS codec.
-    GeorgianPS = 41,
-
-    //! @brief Last built-in codec (not valid type).
-    Invalid = 42
-  };
-
-  // --------------------------------------------------------------------------
-  // [Flags]
-  // --------------------------------------------------------------------------
-
-  //! @brief Text codec flags that's used in @c TextCodecPrivate::flags.
-  enum Flag
-  {
-    //! @brief Null text codec.
-    IsNull = (1U << 0),
-    //! @brief Unicode (UTF8, UTF16 or UTF32) text codec.
-    IsUnicode = (1U << 1),
-    //! @brief 8 bit text codec.
-    Is8Bit = (1U << 2),
-    //! @brief 16 bit text codec.
-    Is16Bit = (1U << 3),
-    //! @brief 32 bit text codec.
-    Is32Bit = (1U << 4),
-    //! @brief Character code size is variable (UTF8, UTF16 codecs).
-    IsVariableSize = (1U << 5),
-    //! @brief Swapped byte order (UTF16 or UTF32 codecs).
-    IsByteSwapped = (1U << 6)
-  };
-
-  // --------------------------------------------------------------------------
-  // [Page8]
-  // --------------------------------------------------------------------------
-
-  //! @brief 8 bit text codecs table.
-  //!
-  //! This table is used to convert text from 8 bit encoding to / from
-  //! unicode encoding like UTF8, UTF16 and UTF32.
-  struct FOG_NO_EXPORT Page8
-  {
-    struct FOG_NO_EXPORT Encode
-    {
-      //! Unicode characters for extended 8 bit characters (upper 128 characters)
-      uint16_t uc[128];
-    };
-
-    struct FOG_NO_EXPORT Decode
-    {
-      //! 8 bit encoded characters
-      uint8_t uc[256];
-    };
-
-    Encode* encode;
-    Decode* decode[256];
-  };
-
-  // --------------------------------------------------------------------------
-  // [State]
-  // --------------------------------------------------------------------------
-
-  //! @brief Text codec encoding state.
-  struct FOG_NO_EXPORT State
-  {
-    //! @brief Count of bytes in buffer.
-    uint32_t count;
-
-    //! @brief @c true if BOM is initialized.
-    //!
-    //! For UTF-8, UTF-16 and UTF-32 codecs.
-    bool bomInitialized;
-
-    //! @brief @c true if BOM is byteswapped.
-    //!
-    //! For UTF-16 and UTF32 codecs.
-    bool bomSwapped;
-
-    //! @brief Small buffer used to remember unfinished sequences.
-    char buffer[8];
-
-    FOG_INLINE State() { clear(); }
-    FOG_INLINE ~State() {}
-
-    //! @brief Clears all variables to it's constructor defaults (all zero).
-    FOG_INLINE void clear() { memset(this, 0, sizeof(*this)); }
-
-    FOG_INLINE void setBomSwapped(bool swapped)
-    {
-      bomInitialized = true;
-      bomSwapped = swapped;
-    }
-  };
-
-  // --------------------------------------------------------------------------
-  // [Replacer]
-  // --------------------------------------------------------------------------
-
-  //! @brief Callback function that can replace character that can't be encoded
-  //! to target encoding.
-  //!
-  //! @param dst Destination, where can be written replacement.
-  //! @param ch Unicode character to replace.
-  //!
-  //! @note This function can use only low 0-127 ascii characters.
-  typedef err_t (*Replacer)(ByteArray& dst, uint32_t ch);
-
-  // --------------------------------------------------------------------------
-  // [Engine]
-  // --------------------------------------------------------------------------
-
-  struct FOG_API Engine
-  {
-    typedef TextCodec::Replacer Replacer;
-    typedef TextCodec::State State;
-    typedef TextCodec::Page8 Page8;
-
-    // [Construction / Destruction]
-
-    Engine(uint32_t code, uint32_t flags, const char* mime, const Page8* page8 = NULL);
-    virtual ~Engine();
-
-    // [Abstract]
-
-    virtual err_t appendFromUnicode(ByteArray& dst, const Char* src, sysuint_t length, Replacer replacer, State* state) const = 0;
-    virtual err_t appendToUnicode(String& dst, const void* src, sysuint_t size, State* state) const = 0;
-
-    // [Sharing]
-
-    FOG_INLINE Engine* ref() const { refCount.inc(); return (Engine*)this; }
-    FOG_INLINE void deref() { if (refCount.deref()) fog_delete(this); }
-
-    // [Members]
-
-    mutable Atomic<sysuint_t> refCount;
-
-    //! @brief Text codec code
-    uint32_t code;
-
-    //! @brief Text codec flags
-    uint32_t flags;
-
-    //! @brief Text codec mime and aliases.
-    //!
-    //! First ASCII string is Mime, after @c NULL terminator are aliases list, if
-    //! @c NULL teminator has two characters (two @c NULL terminators), list ends.
-    //! It possible to has only mime and no aliases.
-    //!
-    //! @note This mechanism is designed to decrease library binary size and
-    //! relocations.
-    const char* mime;
-
-    // [8 Bit Codecs]
-
-    //! @brief Table for 8 bit codecs (@c NULL if no tables are needed).
-    const Page8* page8;
-
-  private:
-    _FOG_CLASS_NO_COPY(Engine)
-  };
-
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
   TextCodec();
   TextCodec(const TextCodec& other);
-  TextCodec(Engine* d);
+  explicit FOG_INLINE TextCodec(TextCodecData* d) : _d(d) {}
   ~TextCodec();
-
-  // --------------------------------------------------------------------------
-  // [From]
-  // --------------------------------------------------------------------------
-
-  static TextCodec fromCode(uint32_t code);
-  static TextCodec fromMime(const char* mime);
-  static TextCodec fromMime(const String& mime);
-  static TextCodec fromBom(const void* data, sysuint_t length);
 
   // --------------------------------------------------------------------------
   // [Sharing]
   // --------------------------------------------------------------------------
 
-  //! @copydoc Doxygen::Implicit::getRefCount().
-  FOG_INLINE sysuint_t getRefCount() const { return _d->refCount.get(); }
-
-  void reset();
+  //! @copydoc Doxygen::Implicit::getReference().
+  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
 
   // --------------------------------------------------------------------------
-  // [Code / Flags]
+  // [Accessors]
   // --------------------------------------------------------------------------
 
   FOG_INLINE uint32_t getCode() const { return _d->code; }
   FOG_INLINE uint32_t getFlags() const { return _d->flags; }
-  FOG_INLINE bool isNull() const { return _d->code == None; }
-  FOG_INLINE bool isUnicode() const { return (_d->flags & IsUnicode) != 0; }
-  FOG_INLINE bool is8Bit() const { return (_d->flags & Is8Bit) != 0; }
-  FOG_INLINE bool is16Bit() const { return (_d->flags & Is16Bit) != 0; }
-  FOG_INLINE bool is32Bit() const { return (_d->flags & Is32Bit) != 0; }
-  FOG_INLINE bool isVariableSize() const { return (_d->flags & IsVariableSize) != 0; }
-  FOG_INLINE bool isByteSwapped() const { return (_d->flags & IsByteSwapped) != 0; }
-
-  // --------------------------------------------------------------------------
-  // [Mime]
-  // --------------------------------------------------------------------------
-
   FOG_INLINE const char* getMime() const { return _d->mime; }
 
+  FOG_INLINE bool isTable() const { return (_d->flags & TEXT_CODEC_IS_TABLE) != 0; }
+  FOG_INLINE bool isUnicode() const { return (_d->flags & TEXT_CODEC_IS_UNICODE) != 0; }
+
+  FOG_INLINE bool isLittleEndian() const { return (_d->flags & TEXT_CODEC_IS_LE) != 0; }
+  FOG_INLINE bool isBigEndian() const { return (_d->flags & TEXT_CODEC_IS_LE) != 0; }
+
+  FOG_INLINE bool is8Bit() const { return (_d->flags & TEXT_CODEC_IS_8BIT) != 0; }
+  FOG_INLINE bool is16Bit() const { return (_d->flags & TEXT_CODEC_IS_16BIT) != 0; }
+  FOG_INLINE bool is32Bit() const { return (_d->flags & TEXT_CODEC_IS_32BIT) != 0; }
+  FOG_INLINE bool isVarLength() const { return (_d->flags & TEXT_CODEC_IS_VARLEN) != 0; }
+
+  FOG_INLINE const TextCodecPage8* getPage8() const { return _d->page8; }
+
   // --------------------------------------------------------------------------
-  // [8 Bit Tables]
+  // [Create]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const Page8* getPage8() const { return _d->page8; }
+  err_t createFromCode(uint32_t code);
+  err_t createFromMime(const char* mime);
+  err_t createFromMime(const String& mime);
+  err_t createFromBom(const void* data, size_t length);
+
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  void reset();
+
+  // --------------------------------------------------------------------------
+  // [Encode / Decode]
+  // --------------------------------------------------------------------------
+
+  err_t encode(ByteArray& dst, const Utf16& src, TextCodecState* state = NULL,
+    TextCodecHandler* handler = NULL, uint32_t cntOp = CONTAINER_OP_REPLACE) const;
+
+  err_t encode(ByteArray& dst, const String& src, TextCodecState* state = NULL,
+    TextCodecHandler* handler = NULL, uint32_t cntOp = CONTAINER_OP_REPLACE) const;
+
+  err_t decode(String& dst, const Stub8& src, TextCodecState* state = NULL,
+    uint32_t cntOp = CONTAINER_OP_REPLACE) const;
+
+  err_t decode(String& dst, const ByteArray& src, TextCodecState* state = NULL,
+    uint32_t cntOp = CONTAINER_OP_REPLACE) const;
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
@@ -406,64 +322,23 @@ struct FOG_API TextCodec
   TextCodec& operator=(const TextCodec& other);
 
   // --------------------------------------------------------------------------
-  // [Set]
+  // [Statics]
   // --------------------------------------------------------------------------
 
-  err_t setCode(uint32_t code);
-  err_t setMime(const char* mime);
-  err_t setMime(const String& mime);
+  static uint8_t _cache[sizeof(void*) * TEXT_CODEC_CACHE_COUNT];
 
-  // --------------------------------------------------------------------------
-  // [From/AppendFrom]
-  // --------------------------------------------------------------------------
-
-  err_t fromUnicode(ByteArray& dst, const Char* src, sysuint_t length = DETECT_LENGTH, Replacer replacer = NULL, State* state = NULL) const;
-  err_t fromUnicode(ByteArray& dst, const String& src, Replacer replacer = NULL, State* state = NULL) const;
-
-  err_t appendFromUnicode(ByteArray& dst, const Char* src, sysuint_t length = DETECT_LENGTH, Replacer replacer = NULL, State* state = NULL) const;
-  err_t appendFromUnicode(ByteArray& dst, const String& src, Replacer replacer = NULL, State* state = NULL) const;
-
-  // --------------------------------------------------------------------------
-  // [To/AppendTo]
-  // --------------------------------------------------------------------------
-
-  err_t toUnicode(String& dst, const void* src, sysuint_t size = DETECT_LENGTH, State* state = NULL) const;
-  err_t toUnicode(String& dst, const ByteArray& src, State* state = NULL) const;
-
-  err_t appendToUnicode(String& dst, const void* src, sysuint_t size = DETECT_LENGTH, State* state = NULL) const;
-  err_t appendToUnicode(String& dst, const ByteArray& src, State* state = NULL) const;
-
-  // --------------------------------------------------------------------------
-  // [BuiltIn]
-  // --------------------------------------------------------------------------
-
-  enum BuiltIn
-  {
-    BuiltInNull = 0,
-    BuiltInAscii = 1,
-    BuiltInLocal = 2,
-    BuiltInUTF8 = 3,
-    BuiltInUTF16 = 4,
-    BuiltInUTF32 = 5,
-    BuiltInWChar = (FOG_SIZEOF_WCHAR_T == 2) ? BuiltInUTF16 : BuiltInUTF32,
-
-    BuiltInCount = 6
-  };
-
-  static void* _codecs[BuiltInCount];
-
-  static FOG_INLINE const TextCodec& ascii8() { return ((const TextCodec*)_codecs)[BuiltInAscii]; }
-  static FOG_INLINE const TextCodec& local8() { return ((const TextCodec*)_codecs)[BuiltInLocal]; }
-  static FOG_INLINE const TextCodec& utf8()   { return ((const TextCodec*)_codecs)[BuiltInUTF8 ]; }
-  static FOG_INLINE const TextCodec& utf16()  { return ((const TextCodec*)_codecs)[BuiltInUTF16]; }
-  static FOG_INLINE const TextCodec& utf32()  { return ((const TextCodec*)_codecs)[BuiltInUTF32]; }
-  static FOG_INLINE const TextCodec& localW() { return ((const TextCodec*)_codecs)[BuiltInWChar]; }
+  static FOG_INLINE const TextCodec& ascii8() { return ((const TextCodec*)_cache)[TEXT_CODEC_CACHE_ASCII]; }
+  static FOG_INLINE const TextCodec& local8() { return ((const TextCodec*)_cache)[TEXT_CODEC_CACHE_LOCAL]; }
+  static FOG_INLINE const TextCodec& utf8()   { return ((const TextCodec*)_cache)[TEXT_CODEC_CACHE_UTF8 ]; }
+  static FOG_INLINE const TextCodec& utf16()  { return ((const TextCodec*)_cache)[TEXT_CODEC_CACHE_UTF16]; }
+  static FOG_INLINE const TextCodec& utf32()  { return ((const TextCodec*)_cache)[TEXT_CODEC_CACHE_UTF32]; }
+  static FOG_INLINE const TextCodec& localW() { return ((const TextCodec*)_cache)[TEXT_CODEC_CACHE_WCHAR]; }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  _FOG_CLASS_D(Engine)
+  _FOG_CLASS_D(TextCodecData)
 };
 
 //! @}
@@ -475,7 +350,7 @@ struct FOG_API TextCodec
 // ============================================================================
 
 _FOG_TYPEINFO_DECLARE(Fog::TextCodec, Fog::TYPEINFO_MOVABLE)
-_FOG_TYPEINFO_DECLARE(Fog::TextCodec::State, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::TextCodecState, Fog::TYPEINFO_PRIMITIVE)
 
 // ============================================================================
 // [Fog::Swap]

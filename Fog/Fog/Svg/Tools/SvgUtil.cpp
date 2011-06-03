@@ -48,7 +48,7 @@ FOG_API uint32_t parseColor(Color& dst, const String& str)
     return SVG_SOURCE_NONE;
   }
 
-  err_t err = dst.parse(Utf16(strCur, (sysuint_t)(strEnd - strCur)), COLOR_NAME_CSS);
+  err_t err = dst.parse(Utf16(strCur, (size_t)(strEnd - strCur)), COLOR_NAME_CSS);
   if (err == ERR_OK) return SVG_SOURCE_COLOR;
 
   return SVG_SOURCE_INVALID;
@@ -60,7 +60,7 @@ FOG_API uint32_t parseColor(Color& dst, const String& str)
 
 err_t parseOpacity(float& dst, const String& str)
 {
-  sysuint_t end;
+  size_t end;
   float d = 0.0;
   err_t err = str.atof(&d, NULL, &end);
 
@@ -108,10 +108,10 @@ err_t parseTransform(TransformF& dst, const String& str)
   const Char* strCur = str.getData();
   const Char* strEnd = strCur + str.getLength();
   const Char* functionName;
-  sysuint_t functionLen;
+  size_t functionLen;
 
   float d[6];
-  sysuint_t d_count;
+  size_t d_count;
 
   dst.reset();
 
@@ -132,7 +132,7 @@ _Start:
     else if (strCur->isAsciiAlpha()) strCur++;
     else break;
   }
-  functionLen = (sysuint_t)(strCur - functionName);
+  functionLen = (size_t)(strCur - functionName);
 
   // Parse '('.
   if (strCur[0] != Char('(')) goto _End;
@@ -145,8 +145,8 @@ _Start:
     if (strCur == strEnd) goto _End;
 
     // Parse number.
-    sysuint_t end;
-    if (StringUtil::atof(strCur, (sysuint_t)(strEnd - strCur), &d[d_count++], Char('.'), &end) != ERR_OK)
+    size_t end;
+    if (StringUtil::atof(strCur, (size_t)(strEnd - strCur), &d[d_count++], Char('.'), &end) != ERR_OK)
     {
       goto _End;
     }
@@ -275,14 +275,14 @@ err_t parseCoord(SvgCoord& coord, const String& str)
   float d = 0.0f;
   uint32_t unit = UNIT_PX;
 
-  sysuint_t end;
+  size_t end;
   err_t err = str.atof(&d, NULL, &end);
 
   if (err == ERR_OK)
   {
     if (end < str.getLength())
     {
-      sysuint_t end2 = str.indexOf(Char(' '), CASE_SENSITIVE, Range(end));
+      size_t end2 = str.indexOf(Char(' '), CASE_SENSITIVE, Range(end));
       Utf16 spec(str.getData() + end, (end2 == INVALID_INDEX ? str.getLength() : end2) - end);
 
       if (spec.getLength() == 1)
@@ -325,7 +325,7 @@ err_t parseViewBox(BoxF& box, const String& str)
 
   float coords[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
   uint32_t position = 0;
-  sysuint_t numEnd;
+  size_t numEnd;
 
   // Finished?
   if (strCur == strEnd) goto _Bail;
@@ -340,7 +340,7 @@ err_t parseViewBox(BoxF& box, const String& str)
     }
 
     // Parse number.
-    err = StringUtil::atof(strCur, (sysuint_t)(strEnd - strCur), &coords[position], Char('.'), &numEnd);
+    err = StringUtil::atof(strCur, (size_t)(strEnd - strCur), &coords[position], Char('.'), &numEnd);
     if (FOG_IS_ERROR(err)) goto _Bail;
 
     strCur += numEnd;
@@ -391,8 +391,8 @@ err_t parsePoints(PathF& dst, const String& str, bool closePath)
     }
 
     // Parse number.
-    sysuint_t numEnd;
-    err = StringUtil::atof(strCur, (sysuint_t)(strEnd - strCur), &coords[position], Char('.'), &numEnd);
+    size_t numEnd;
+    err = StringUtil::atof(strCur, (size_t)(strEnd - strCur), &coords[position], Char('.'), &numEnd);
     if (FOG_IS_ERROR(err)) goto _Bail;
 
     if (++position == 2)
@@ -502,9 +502,9 @@ err_t parsePath(PathF& dst, const String& str)
       }
 
       // Parse number.
-      sysuint_t numEnd;
+      size_t numEnd;
 
-      err = StringUtil::atof(strCur, (sysuint_t)(strEnd - strCur), &coords[position], Char('.'), &numEnd);
+      err = StringUtil::atof(strCur, (size_t)(strEnd - strCur), &coords[position], Char('.'), &numEnd);
       if (FOG_IS_ERROR(err)) goto _Bail;
 
       strCur += numEnd;

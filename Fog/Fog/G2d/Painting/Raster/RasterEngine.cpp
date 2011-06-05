@@ -277,6 +277,7 @@ err_t FOG_CDECL RasterPainterImpl_::getMetaParams(const Painter& self, Region& r
 err_t FOG_CDECL RasterPainterImpl_::setMetaParams(Painter& self, const Region& region, const PointI& origin)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  discardStates(engine);
 
   engine->metaRegion = region;
   engine->metaOrigin = origin;
@@ -290,6 +291,7 @@ err_t FOG_CDECL RasterPainterImpl_::setMetaParams(Painter& self, const Region& r
 err_t FOG_CDECL RasterPainterImpl_::resetMetaParams(Painter& self)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  discardStates(engine);
 
   engine->metaRegion = Region::infinite();
   engine->metaOrigin.reset();
@@ -4709,7 +4711,8 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::flush(Painter& self, uint32_t flags)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
 
-  return ERR_RT_NOT_IMPLEMENTED;
+  // TODO: MT version.
+  return ERR_OK;
 }
 
 // ============================================================================

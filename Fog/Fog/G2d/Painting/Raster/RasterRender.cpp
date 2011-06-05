@@ -164,8 +164,12 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillNormalizedBoxI(RasterContext& ctx, co
   {
     int x0 = box.x0;
     int y0 = box.y0;
+
     int yEnd = box.y1;
     int w = box.getWidth();
+
+    FOG_ASSERT(x0 + w <= ctx.layer.size.w);
+    FOG_ASSERT(yEnd   <= ctx.layer.size.h);
 
     if (C::_MODE == RASTER_MODE_MT)
     {
@@ -410,6 +414,8 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillRasterizedShape(RasterContext& ctx, v
     int y0 = box.y0;
     int yEnd = box.y1;
 
+    FOG_ASSERT(yEnd <= ctx.layer.size.h);
+
     if (C::_MODE == RASTER_MODE_MT)
     {
       y0 = RasterUtil::alignToDelta(y0, offset, delta);
@@ -541,7 +547,9 @@ void FOG_FASTCALL RasterRenderImpl<C>::blitNormalizedImageI(RasterContext& ctx, 
 
     int x0 = pt.x;
     int y0 = pt.y;
+
     int yEnd = y0 + srcHeight;
+    FOG_ASSERT(yEnd <= ctx.layer.size.h);
 
     if (C::_MODE == RASTER_MODE_MT)
     {

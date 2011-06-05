@@ -236,67 +236,67 @@ struct FOG_NO_EXPORT CoreApi
   typedef err_t (FOG_CDECL *ByteArray_Join)(ByteArray* self, const List<ByteArray>& seq, const char separator);
   typedef err_t (FOG_CDECL *ByteArray_Join)(ByteArray* self, const List<ByteArray>& seq, const ByteArray& separator);
 
-  err_t atob(bool* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags) const;
-  err_t atoi8(int8_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags) const;
-  err_t atou8(uint8_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags) const;
-  err_t atoi16(int16_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags) const;
-  err_t atou16(uint16_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags) const;
-  err_t atoi32(int32_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags) const;
-  err_t atou32(uint32_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags) const;
-  err_t atoi64(int64_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags) const;
-  err_t atou64(uint64_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags) const;
+  typedef err_t (FOG_CDECL *ByteArray_ToBool)(const ByteArray* self, bool* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags) const;
+  typedef err_t (FOG_CDECL *ByteArray_ToI8)(const ByteArray* self, int8_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags) const;
+  typedef err_t (FOG_CDECL *ByteArray_ToU8)(const ByteArray* self, uint8_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags) const;
+  typedef err_t (FOG_CDECL *ByteArray_ToI16)(const ByteArray* self, int16_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags) const;
+  typedef err_t (FOG_CDECL *ByteArray_ToU16)(const ByteArray* self, uint16_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags) const;
+  typedef err_t (FOG_CDECL *ByteArray_ToI32)(const ByteArray* self, int32_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags) const;
+  typedef err_t (FOG_CDECL *ByteArray_ToU32)(const ByteArray* self, uint32_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags) const;
+  typedef err_t (FOG_CDECL *ByteArray_ToI64)(const ByteArray* self, int64_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags) const;
+  typedef err_t (FOG_CDECL *ByteArray_ToU64)(const ByteArray* self, uint64_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags) const;
 
-  err_t atof(float* dst, size_t* end = NULL, uint32_t* parserFlags) const;
-  err_t atod(double* dst, size_t* end = NULL, uint32_t* parserFlagsNULL) const;
+  typedef err_t (FOG_CDECL *ByteArray_ToFloat)(const ByteArray* self, float* dst, size_t* end = NULL, uint32_t* parserFlags) const;
+  typedef err_t (FOG_CDECL *ByteArray_ToDouble)(const ByteArray* self, double* dst, size_t* end = NULL, uint32_t* parserFlags) const;
 
-  bool contains(char ch, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  bool contains(const ByteArray& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  bool contains(const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  typedef bool (FOG_CDECL *ByteArray_Contains)(const ByteArray* self, char ch, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  typedef bool (FOG_CDECL *ByteArray_Contains)(const ByteArray* self, const ByteArray& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  typedef bool (FOG_CDECL *ByteArray_Contains)(const ByteArray* self, const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
 
-  size_t countOf(char ch, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  size_t countOf(const ByteArray& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  size_t countOf(const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  typedef size_t (FOG_CDECL *ByteArray_CountOf)(const ByteArray* self, char ch, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  typedef size_t (FOG_CDECL *ByteArray_CountOf)(const ByteArray* self, const ByteArray& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  typedef size_t (FOG_CDECL *ByteArray_CountOf)(const ByteArray* self, const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
 
-  size_t indexOf(char ch, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  size_t indexOf(const ByteArray& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  size_t indexOf(const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  typedef size_t (FOG_CDECL *ByteArray_IndexOf)(const ByteArray* self, char ch, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  typedef size_t (FOG_CDECL *ByteArray_IndexOf)(const ByteArray* self, const ByteArray& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  typedef size_t (FOG_CDECL *ByteArray_IndexOf)(const ByteArray* self, const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
 
-  size_t lastIndexOf(char ch, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  size_t lastIndexOf(const ByteArray& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  size_t lastIndexOf(const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  typedef size_t (FOG_CDECL *ByteArray_LastIndexOf)(const ByteArray* self, char ch, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  typedef size_t (FOG_CDECL *ByteArray_LastIndexOf)(const ByteArray* self, const ByteArray& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  typedef size_t (FOG_CDECL *ByteArray_LastIndexOf)(const ByteArray* self, const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
 
-  size_t indexOfAny(const char* chars, size_t numChars, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  size_t lastIndexOfAny(const char* chars, size_t numChars, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  typedef size_t (FOG_CDECL *ByteArray_IndexOfAny)(const ByteArray* self, const char* chars, size_t numChars, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  typedef size_t (FOG_CDECL *ByteArray_LastIndexOfAny)(const ByteArray* self, const char* chars, size_t numChars, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
 
-  bool startsWith(char ch, uint cs = CASE_SENSITIVE) const;
-  bool startsWith(const Stub8& str, uint cs = CASE_SENSITIVE) const;
-  bool startsWith(const ByteArray& str, uint cs = CASE_SENSITIVE) const;
-  bool startsWith(const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE) const;
+  typedef bool (FOG_CDECL *ByteArray_StartsWith)(const ByteArray* self, char ch, uint cs = CASE_SENSITIVE) const;
+  typedef bool (FOG_CDECL *ByteArray_StartsWith)(const ByteArray* self, const Stub8& str, uint cs = CASE_SENSITIVE) const;
+  typedef bool (FOG_CDECL *ByteArray_StartsWith)(const ByteArray* self, const ByteArray& str, uint cs = CASE_SENSITIVE) const;
+  typedef bool (FOG_CDECL *ByteArray_StartsWith)(const ByteArray* self, const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE) const;
 
-  bool endsWith(char ch, uint cs = CASE_SENSITIVE) const;
-  bool endsWith(const Stub8& str, uint cs = CASE_SENSITIVE) const;
-  bool endsWith(const ByteArray& str, uint cs = CASE_SENSITIVE) const;
-  bool endsWith(const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE) const;
+  typedef bool (FOG_CDECL *ByteArray_EndsWith)(const ByteArray* self, char ch, uint cs = CASE_SENSITIVE) const;
+  typedef bool (FOG_CDECL *ByteArray_EndsWith)(const ByteArray* self, const Stub8& str, uint cs = CASE_SENSITIVE) const;
+  typedef bool (FOG_CDECL *ByteArray_EndsWith)(const ByteArray* self, const ByteArray& str, uint cs = CASE_SENSITIVE) const;
+  typedef bool (FOG_CDECL *ByteArray_EndsWith)(const ByteArray* self, const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE) const;
 
-  static bool eq(const ByteArray* a, const ByteArray* b);
-  static bool ieq(const ByteArray* a, const ByteArray* b);
+  typedef bool (FOG_CDECL *ByteArray_eq)(const ByteArray* a, const ByteArray* b);
+  typedef bool (FOG_CDECL *ByteArray_ieq)(const ByteArray* a, const ByteArray* b);
 
-  static int compare(const ByteArray* a, const ByteArray* b);
-  static int icompare(const ByteArray* a, const ByteArray* b);
+  typedef int (FOG_CDECL *ByteArray_compare)(const ByteArray* a, const ByteArray* b);
+  typedef int (FOG_CDECL *ByteArray_icompare)(const ByteArray* a, const ByteArray* b);
 
-  bool eq(const Stub8& other, uint cs) const;
-  bool eq(const ByteArray& other, uint cs) const;
+  typedef bool (FOG_CDECL *ByteArray_eq)(const Stub8& other, uint cs) const;
+  typedef bool (FOG_CDECL *ByteArray_eq)(const ByteArray& other, uint cs) const;
 
-  int compare(const Stub8& other, uint cs) const;
-  int compare(const ByteArray& other, uint cs) const;
+  typedef int (FOG_CDECL *ByteArray_compare)(const Stub8& other, uint cs) const;
+  typedef int (FOG_CDECL *ByteArray_compare)(const ByteArray& other, uint cs) const;
 
-  err_t validateUtf8(size_t* invalidPos = NULL) const;
-  err_t getNumUtf8Chars(size_t* charsCount) const;
+  typedef err_t (FOG_CDECL *ByteArray_validateUtf8)(size_t* invalidPos = NULL) const;
+  typedef err_t (FOG_CDECL *ByteArray_getNumUtf8Chars)(size_t* charsCount) const;
 
-  err_t slashesToPosix();
-  err_t slashesToWin();
+  typedef err_t (FOG_CDECL *ByteArray_slashesToPosix)();
+  typedef err_t (FOG_CDECL *ByteArray_slashesToWin)();
 
-  uint32_t getHashCode() const;
+  typedef uint32_t (FOG_CDECL *ByteArray_getHashCode)() const;
   */
 
   // --------------------------------------------------------------------------

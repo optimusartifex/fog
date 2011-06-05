@@ -70,7 +70,7 @@ struct FOG_NO_EXPORT PathTmpF : public PathF
     storage.d.capacity = N;
     storage.d.length = 0;
     storage.d.boundingBox.reset();
-    storage.d.vertices = (PointF*)( (size_t)(storage.data + N + 15) & ~(size_t)15 );
+    storage.d.vertices = (PointF*)( (size_t)(storage.d.commands + N + 15) & ~(size_t)15 );
     return &storage.d;
   }
 
@@ -128,7 +128,7 @@ struct FOG_NO_EXPORT PathTmpD : public PathD
     storage.d.capacity = N;
     storage.d.length = 0;
     storage.d.boundingBox.reset();
-    storage.d.vertices = (PointD*)( (size_t)(storage.data + N + 15) & ~(size_t)15 );
+    storage.d.vertices = (PointD*)( (size_t)(storage.d.commands + N + 15) & ~(size_t)15 );
     return &storage.d;
   }
 

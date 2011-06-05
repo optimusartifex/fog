@@ -96,6 +96,13 @@ void ImageData::deref()
   if (refCount.deref())
   {
     bool wasStatic = (flags & IMAGE_DATA_STATIC) != 0;
+
+    // FATAL: Image dereferenced during painting.
+    if (locked)
+    {
+      Debug::failFunc("Fog::ImageData", "deref", "Image dereferenced during painting");
+    }
+
     this->~ImageData();
     if (!wasStatic) Memory::free(this);
   }

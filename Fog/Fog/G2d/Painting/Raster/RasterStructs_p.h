@@ -233,6 +233,13 @@ struct FOG_NO_EXPORT RasterLayer
   RenderVBlitLineFn cvtSecondaryFromPrimary;
   //! @brief The 'primary-from-secondary' format blitter.
   RenderVBlitLineFn cvtPrimaryFromSecondary;
+
+  // --------------------------------------------------------------------------
+  // [Members - Image Data]
+  // --------------------------------------------------------------------------
+
+  //! @brief Image data instance (optional, for lock/unlock).
+  ImageData* imageData;
 };
 
 // ============================================================================

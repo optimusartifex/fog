@@ -5144,6 +5144,9 @@ RasterPaintEngine::RasterPaintEngine() :
 
 RasterPaintEngine::~RasterPaintEngine()
 {
+  if (ctx.layer.imageData)
+    ctx.layer.imageData->locked--;
+
   RasterPainterImpl_::discardStates(this);
   RasterPainterImpl_::discardSource(this);
 
@@ -5158,6 +5161,9 @@ err_t RasterPaintEngine::init(const ImageBits& imageBits, ImageData* imaged, uin
   ctx.layer.size = imageBits.size;
   ctx.layer.stride = imageBits.stride;
   ctx.layer.primaryFormat = imageBits.format;
+
+  ctx.layer.imageData = imaged;
+  if (imaged) imaged->locked++;
 
   RasterPainterImpl_::setupLayer(this);
   FOG_RETURN_ON_ERROR(ctx._initPrecision(ctx.layer.precision));

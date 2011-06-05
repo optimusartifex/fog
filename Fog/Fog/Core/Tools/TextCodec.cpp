@@ -105,7 +105,7 @@ static size_t _TextCodec_addToState(TextCodecState* state, const uint8_t* cur, c
   FOG_ASSERT(state->_bufferLength <= 4);
 
   uint32_t len = (uint32_t)state->_bufferLength;
-  uint32_t add = (uint32_t)Math::min((size_t)(end - cur), 4 - len);
+  uint32_t add = (uint32_t)Math::min((size_t)(end - cur), (size_t)(4 - len));
 
   memcpy(state->_buffer + len, cur, add);
   state->_bufferLength += (uint8_t)add;

@@ -19,12 +19,12 @@ namespace Fog {
 // [Fog::Math]
 // ============================================================================
 
-static void FOG_CDECL _Core_MathVec_vFloatFromDouble(float* dst, const double* src, size_t length)
+static void FOG_CDECL _Math_vecFloatFromDouble(float* dst, const double* src, size_t length)
 {
   for (size_t i = 0; i < length; i++) dst[i] = float(src[i]);
 }
 
-static void FOG_CDECL _Core_MathVec_vDoubleFromFloat(double* dst, const float* src, size_t length)
+static void FOG_CDECL _Math_vecDoubleFromFloat(double* dst, const float* src, size_t length)
 {
   for (size_t i = 0; i < length; i++) dst[i] = double(src[i]);
 }
@@ -35,8 +35,8 @@ static void FOG_CDECL _Core_MathVec_vDoubleFromFloat(double* dst, const float* s
 
 FOG_NO_EXPORT void _core_math_init_vec(void)
 {
-  _core.mathf.vFloatFromDouble = _Core_MathVec_vFloatFromDouble;
-  _core.mathd.vDoubleFromFloat = _Core_MathVec_vDoubleFromFloat;
+  _core.mathf.vecFloatFromDouble = _Math_vecFloatFromDouble;
+  _core.mathd.vecDoubleFromFloat = _Math_vecDoubleFromFloat;
 }
 
 } // Fog namespace

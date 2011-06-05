@@ -23,73 +23,46 @@ namespace Math {
 // [Fog::Math - SolveQuadraticFunction]
 // ============================================================================
 
-//! @brief Solve the quadratic function and return the roots.
+//! @brief Solve the quadratic or cubic function and return the roots.
 //!
-//! The form of quadratic function:
+//! Quadratic function:
 //!
 //!   Ax^2 + Bx + C == 0
 //!
-//! The form of arguments:
+//!   A == func[0]
+//!   B == func[1]
+//!   C == func[2]
 //!
-//!   A == src[0]
-//!   B == src[1]
-//!   C == src[2]
-static FOG_INLINE int solveQuadraticFunction(float* dst, const float* src)
-{
-  return _core.mathf.solveQuadraticFunction(dst, src);
-}
-
-//! @overload
-static FOG_INLINE int solveQuadraticFunction(double* dst, const double* src)
-{
-  return _core.mathd.solveQuadraticFunction(dst, src);
-}
-
-static FOG_INLINE int solveQuadraticFunction(float* dst, const float* src, const IntervalF& interval)
-{
-  return _core.mathf.solveQuadraticFunctionAt(dst, src, interval);
-}
-
-static FOG_INLINE int solveQuadraticFunction(double* dst, const double* src, const IntervalD& interval)
-{
-  return _core.mathd.solveQuadraticFunctionAt(dst, src, interval);
-}
-
-// ============================================================================
-// [Fog::Math - SolveCubicFunction]
-// ============================================================================
-
-//! @brief Solve the cubic function and return the roots.
-//!
-//! The form of cubic function:
+//! Cubic function:
 //!
 //!   Ax^3 + Bx^2 + Cx + D == 0
 //!
-//! The form of arguments:
-//!
-//!   A == src[0]
-//!   B == src[1]
-//!   C == src[2]
-//!   D == src[3]
-static FOG_INLINE int solveCubicFunction(float* dst, const float* src)
+//!   A == func[0]
+//!   B == func[1]
+//!   C == func[2]
+//!   D == func[3]
+static FOG_INLINE int solve(float* dst, const float* func, uint32_t type)
 {
-  return _core.mathf.solveCubicFunction(dst, src);
+  FOG_ASSERT(type < MATH_SOLVE_COUNT);
+  return _core.mathf.solve[type](dst, func);
 }
 
 //! @overload
-static FOG_INLINE int solveCubicFunction(double* dst, const double* src)
+static FOG_INLINE int solve(double* dst, const double* func, uint32_t type)
 {
-  return _core.mathd.solveCubicFunction(dst, src);
+  return _core.mathd.solve[type](dst, func);
 }
 
-static FOG_INLINE int solveCubicFunction(float* dst, const float* src, const IntervalF& interval)
+static FOG_INLINE int solve(float* dst, const float* func, uint32_t type, const IntervalF& interval)
 {
-  return _core.mathf.solveCubicFunctionAt(dst, src, interval);
+  FOG_ASSERT(type < MATH_SOLVE_COUNT);
+  return _core.mathf.solveAt[type](dst, func, interval);
 }
 
-static FOG_INLINE int solveCubicFunction(double* dst, const double* src, const IntervalD& interval)
+//! @overload
+static FOG_INLINE int solve(double* dst, const double* func, uint32_t type, const IntervalD& interval)
 {
-  return _core.mathd.solveCubicFunctionAt(dst, src, interval);
+  return _core.mathd.solveAt[type](dst, func, interval);
 }
 
 //! @}

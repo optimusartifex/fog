@@ -483,7 +483,7 @@ void X11GuiEngine::doUpdate()
   pXSync(_display, false);
 }
 
-void X11GuiEngine::doBlitWindow(GuiWindow* window, const BoxI* rects, sysuint_t count)
+void X11GuiEngine::doBlitWindow(GuiWindow* window, const BoxI* rects, size_t count)
 {
   reinterpret_cast<X11GuiBackBuffer*>(window->_backingStore)->blitRects(
     (XID)window->getHandle(), rects, count);
@@ -1958,7 +1958,7 @@ void X11GuiBackBuffer::destroy()
   resize(0, 0, false);
 }
 
-void X11GuiBackBuffer::updateRects(const BoxI* rects, sysuint_t count)
+void X11GuiBackBuffer::updateRects(const BoxI* rects, size_t count)
 {
   X11GuiEngine* engine = GUI_ENGINE();
 
@@ -1980,7 +1980,7 @@ void X11GuiBackBuffer::updateRects(const BoxI* rects, sysuint_t count)
 
     const uint8_t* palConv = engine->_paletteInfo.palConv;
 
-    for (sysuint_t i = 0; i != count; i++)
+    for (size_t i = 0; i != count; i++)
     {
       int x0 = rects[i].getX0();
       int y0 = rects[i].getY0();
@@ -2018,7 +2018,7 @@ void X11GuiBackBuffer::updateRects(const BoxI* rects, sysuint_t count)
   // put XImage here instead in blitRects() method.
   if (_type == TYPE_X11_XIMAGE_WITH_PIXMAP)
   {
-    for (sysuint_t i = 0; i != count; i++)
+    for (size_t i = 0; i != count; i++)
     {
       int x = rects[i].getX();
       int y = rects[i].getY();
@@ -2037,10 +2037,10 @@ void X11GuiBackBuffer::updateRects(const BoxI* rects, sysuint_t count)
   }
 }
 
-void X11GuiBackBuffer::blitRects(XID target, const BoxI* rects, sysuint_t count)
+void X11GuiBackBuffer::blitRects(XID target, const BoxI* rects, size_t count)
 {
   X11GuiEngine* engine = GUI_ENGINE();
-  sysuint_t i;
+  size_t i;
 
   switch (getType())
   {

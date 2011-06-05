@@ -60,7 +60,7 @@ struct FOG_API MacGuiEngine : public GuiEngine
   // [Update]
   // --------------------------------------------------------------------------
 
-  virtual void doBlitWindow(GuiWindow* window, const BoxI* rects, sysuint_t count);
+  virtual void doBlitWindow(GuiWindow* window, const BoxI* rects, size_t count);
 
   // --------------------------------------------------------------------------
   // [GuiWindow]
@@ -161,8 +161,8 @@ struct FOG_API MacGuiBackBuffer : public GuiBackBuffer
 
   virtual bool resize(int width, int height, bool cache);
   virtual void destroy();
-  virtual void updateRects(const BoxI* rects, sysuint_t count);
-  virtual void updateRects(FogView* view, const BoxI* rects, sysuint_t count);
+  virtual void updateRects(const BoxI* rects, size_t count);
+  virtual void updateRects(FogView* view, const BoxI* rects, size_t count);
 };
 
 // ============================================================================

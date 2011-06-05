@@ -1404,7 +1404,7 @@ static const TextCodecItem _TextCodec_items[] =
   _INIT_NONE(NONE       , "NONE\0"), 
 
   // --------------------------------------------------------------------------
-  // [Table-Based Codecs]
+  // [Table Codecs]
   // --------------------------------------------------------------------------
 
   _INIT_8BIT(ISO8859_1  , "ISO-8859-1\0" "8859-1\0" "LATIN1\0" "L1\0" "ISO-IR-100\0" "CP819\0" "IBM819\0" "819\0"),
@@ -1444,7 +1444,7 @@ static const TextCodecItem _TextCodec_items[] =
   _INIT_8BIT(GEORGIAN_PS, "GEORGIAN-PS\0"),
   
   // --------------------------------------------------------------------------
-  // [Unicode]
+  // [Unicode Codecs]
   // --------------------------------------------------------------------------
 
   _INIT_UTF8(UTF8       , "UTF-8\0"),

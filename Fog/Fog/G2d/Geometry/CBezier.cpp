@@ -255,7 +255,7 @@ static int FOG_CDECL _G2d_CBezierT_getInflectionPoints(const NumT_(Point)* self,
   q[1] = NumT(6.0) * (ay * cx - ax * cy);
   q[2] = NumT(2.0) * (by * cx - bx * cy);
 
-  return Math::solveQuadraticFunction(t, q);
+  return Math::solve(t, q, MATH_SOLVE_QUADRATIC);
 }
 
 // ============================================================================
@@ -292,7 +292,7 @@ static int FOG_CDECL _G2d_CBezierT_simplifyForProcessing(const NumT_(Point)* sel
   q[1] *= NumT(6.0);
   q[2] *= NumT(2.0);
 
-  switch (Math::solveQuadraticFunction(t, q))
+  switch (Math::solve(t, q, MATH_SOLVE_QUADRATIC))
   {
     // Two inflection points. Subdivide at t0, tCusp, and t1.
     case 2:

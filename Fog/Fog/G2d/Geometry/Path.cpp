@@ -2951,7 +2951,7 @@ _DoLine:
               NumT ti[2];
               NumT ix;
 
-              if (Math::solveQuadraticFunction(ti, func, NumT_(Interval)(NumT(0.0), NumT(1.0))) >= 1)
+              if (Math::solve(ti, func, MATH_SOLVE_QUADRATIC, NumT_(Interval)(NumT(0.0), NumT(1.0))) >= 1)
                 ix = ax * Math::pow2(ti[0]) + bx * ti[0] + cx;
               else if (py - minY < maxY - py)
                 ix = p[0].x;
@@ -3017,7 +3017,7 @@ _DoLine:
           int tIndex;
           int tLength;
 
-          tLength = Math::solveQuadraticFunction(tExtrema, func, NumT_(Interval)(NumT(0.0), NumT(1.0)));
+          tLength = Math::solve(tExtrema, func, MATH_SOLVE_QUADRATIC, NumT_(Interval)(NumT(0.0), NumT(1.0)));
           tExtrema[tLength++] = NumT(1.0);
 
           rght[0] = p[0];
@@ -3065,7 +3065,7 @@ _DoLine:
               NumT ti[3];
               NumT ix;
 
-              if (Math::solveCubicFunction(ti, func, NumT_(Interval)(NumT(0.0), NumT(1.0))) >= 1)
+              if (Math::solve(ti, func, MATH_SOLVE_CUBIC, NumT_(Interval)(NumT(0.0), NumT(1.0))) >= 1)
                 ix = ax * Math::pow3(ti[0]) + bx * Math::pow2(ti[0]) + cx * ti[0] + dx;
               else if (py - minY < maxY - py)
                 ix = p[0].x;

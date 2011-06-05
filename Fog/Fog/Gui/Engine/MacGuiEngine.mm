@@ -316,7 +316,7 @@ void MacGuiEngine::destroyGuiWindow(GuiWindow* native)
   fog_delete(native);
 }
 
-void MacGuiEngine::doBlitWindow(GuiWindow* native, const BoxI* rects, sysuint_t count)
+void MacGuiEngine::doBlitWindow(GuiWindow* native, const BoxI* rects, size_t count)
 {
   MacGuiBackBuffer* back = reinterpret_cast<MacGuiBackBuffer*>(native->getBackBuffer());
   back->updateRects([static_cast<MacGuiWindow*>(native)->window contentView], rects, count);
@@ -635,11 +635,11 @@ void MacGuiBackBuffer::destroy()
   resize(0, 0, false);
 }
 
-void MacGuiBackBuffer::updateRects(const BoxI* rects, sysuint_t count)
+void MacGuiBackBuffer::updateRects(const BoxI* rects, size_t count)
 {
 }
 
-void MacGuiBackBuffer::updateRects(FogView* view, const BoxI* rects, sysuint_t count)
+void MacGuiBackBuffer::updateRects(FogView* view, const BoxI* rects, size_t count)
 {
   if (_buffer.size.w == 0 || _buffer.size.h == 0) return;
   

@@ -22,16 +22,7 @@ namespace Fog {
 template<size_t N>
 struct ByteArrayTmp : public ByteArray
 {
-  // --------------------------------------------------------------------------
-  // [Temporary Storage]
-  // --------------------------------------------------------------------------
-
-  // Keep 'Storage' name for this struct for Borland compiler
-  struct Storage
-  {
-    ByteArrayData _d;
-    char _str[N];
-  } _storage;
+  struct _Storage;
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -67,8 +58,14 @@ struct ByteArrayTmp : public ByteArray
   {
   }
 
+  FOG_INLINE ~ByteArrayTmp()
+  {
+    FOG_ASSERT( (_d == &_storage.d && _storage.d.refCount.get() == 1) ||
+                (_d != &_storage.d && _storage.d.refCount.get() == 0) );
+  }
+
   // --------------------------------------------------------------------------
-  // [Implicit Data]
+  // [Reset]
   // --------------------------------------------------------------------------
 
   FOG_INLINE void reset()
@@ -91,6 +88,16 @@ struct ByteArrayTmp : public ByteArray
   FOG_INLINE ByteArrayTmp<N>& operator=(const char* str) { set(str); return *this; }
   FOG_INLINE ByteArrayTmp<N>& operator=(const ByteArray& other) { set(other); return *this; }
   FOG_INLINE ByteArrayTmp<N>& operator=(const ByteArrayTmp<N>& other) { set(other); return *this; }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  struct _Storage
+  {
+    ByteArrayData d;
+    char data[N];
+  } _storage;
 };
 
 //! @}

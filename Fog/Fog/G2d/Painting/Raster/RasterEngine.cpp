@@ -58,6 +58,10 @@ namespace Fog {
 // [Helpers]
 // ============================================================================
 
+// Called by all 'fill' functions. This macro simply ensures that all fill
+// parameters are correct (it's possible to fill something). 
+// 
+// Please see RASTER_NO_PAINT flags to better understand how this works.
 #define _FOG_RASTER_ENTER_FILL_FUNC() \
   FOG_MACRO_BEGIN \
     if (FOG_UNLIKELY((engine->masterFlags & (RASTER_NO_PAINT_BASE_FLAGS | \
@@ -67,6 +71,11 @@ namespace Fog {
     } \
   FOG_MACRO_END
 
+// Called by all 'stroke' functions. This macro simply ensures that all stroke
+// parameters are correct (it's possible to stroke something). Note that stroke
+// is implemented normally using fill pipe-line, there are only few exceptions.
+// 
+// Please see RASTER_NO_PAINT flags to better understand how this works.
 #define _FOG_RASTER_ENTER_STROKE_FUNC() \
   FOG_MACRO_BEGIN \
     if (FOG_UNLIKELY((engine->masterFlags & (RASTER_NO_PAINT_BASE_FLAGS | \

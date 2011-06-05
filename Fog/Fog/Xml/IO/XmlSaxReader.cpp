@@ -192,7 +192,8 @@ _Continue:
             bool isWhiteSpace = xmlIsWhiteSpace(mark, strCur);
 
             err = onAddText(Utf16(mark, (size_t)(strCur - mark)), isWhiteSpace);
-            if (FOG_IS_ERROR(err)) goto _End;
+            if (FOG_IS_ERROR(err))
+              goto _End;
           }
 
           state = XML_SAX_STATE_TAG_BEGIN;
@@ -210,19 +211,19 @@ _Continue:
         }
 
         // Match closing tag slash.
-        if (ch.ch() == Char('/'))
+        if (ch == Char('/'))
         {
           state = XML_SAX_STATE_TAG_CLOSE;
           break;
         }
 
-        if (ch.ch() == Char('?'))
+        if (ch == Char('?'))
         {
           state = XML_SAX_STATE_TAG_QUESTION_MARK;
           break;
         }
 
-        if (ch.ch() == Char('!'))
+        if (ch == Char('!'))
         {
           state = XML_SAX_STATE_TAG_EXCLAMATION_MARK;
           break;
@@ -245,7 +246,8 @@ _Continue:
         element = XML_SAX_ELEMENT_TAG;
 
         err = onAddElement(Utf16(markTagStart, (size_t)(markTagEnd - markTagStart)));
-        if (FOG_IS_ERROR(err)) goto _End;
+        if (FOG_IS_ERROR(err))
+          goto _End;
 
         // ... go through ...
 
@@ -294,7 +296,8 @@ _Continue:
         // Now we expect =
         while (ch.isSpace())
         {
-          if (++strCur == strEnd) goto _EndOfInput;
+          if (++strCur == strEnd)
+            goto _EndOfInput;
           ch = *strCur;
         }
 
@@ -304,7 +307,8 @@ _Continue:
           goto _End;
         }
 
-        if (++strCur == strEnd) goto _EndOfInput;
+        if (++strCur == strEnd)
+          goto _EndOfInput;
         ch = *strCur;
 
         // Now we expect ' or "
@@ -337,7 +341,8 @@ _Continue:
         err = onAddAttribute(
           Utf16(markAttrStart, (size_t)(markAttrEnd - markAttrStart)),
           Utf16(markDataStart, (size_t)(markDataEnd - markDataStart)));
-        if (FOG_IS_ERROR(err)) goto _End;
+        if (FOG_IS_ERROR(err))
+          goto _End;
 
         goto _Begin;
 
@@ -355,7 +360,8 @@ _TagEnd:
           {
             depth--;
             err = onCloseElement(Utf16(markTagStart, (size_t)(markTagEnd - markTagStart)));
-            if (FOG_IS_ERROR(err)) goto _End;
+            if (FOG_IS_ERROR(err))
+              goto _End;
           }
 
           goto _Begin;
@@ -393,7 +399,8 @@ _TagEnd:
           depth--;
 
           err = onCloseElement(Utf16(markTagStart, (size_t)(markTagEnd - markTagStart)));
-          if (FOG_IS_ERROR(err)) goto _End;
+          if (FOG_IS_ERROR(err))
+            goto _End;
 
           goto _Begin;
         }
@@ -513,8 +520,8 @@ _DOCTYPEEnd:
         const Char* q = strEnd-1;
 
         while (strCur < q &&
-               strCur[0].ch() != Char('?') &&
-               strCur[1].ch() != Char('>')) strCur++;
+               strCur[0] != Char('?') &&
+               strCur[1] != Char('>')) strCur++;
 
         if (strCur == q)
         {
@@ -530,7 +537,8 @@ _DOCTYPEEnd:
           mark = strCur;
 
           err = onAddPI(Utf16(markDataStart, (size_t)(markDataEnd - markDataStart)));
-          if (FOG_IS_ERROR(err)) goto _End;
+          if (FOG_IS_ERROR(err))
+            goto _End;
 
           goto _Begin;
         }
@@ -541,9 +549,9 @@ _DOCTYPEEnd:
         const Char* q = strEnd-2;
 
         while (strCur < q && (
-               strCur[0].ch() != Char('-') ||
-               strCur[1].ch() != Char('-') ||
-               strCur[2].ch() != Char('>'))) strCur++;
+               strCur[0] != Char('-') ||
+               strCur[1] != Char('-') ||
+               strCur[2] != Char('>'))) strCur++;
 
         if (strCur == q)
         {
@@ -559,7 +567,8 @@ _DOCTYPEEnd:
           mark = strCur;
 
           err = onAddComment(Utf16(markDataStart, (size_t)(markDataEnd - markDataStart)));
-          if (FOG_IS_ERROR(err)) goto _End;
+          if (FOG_IS_ERROR(err))
+            goto _End;
 
           goto _Begin;
         }
@@ -570,9 +579,9 @@ _DOCTYPEEnd:
         const Char* q = strEnd-2;
 
         while (strCur < q &&
-               strCur[0].ch() != Char(']') &&
-               strCur[1].ch() != Char(']') &&
-               strCur[2].ch() != Char('>')) strCur++;
+               strCur[0] != Char(']') &&
+               strCur[1] != Char(']') &&
+               strCur[2] != Char('>')) strCur++;
 
         if (strCur == q)
         {
@@ -588,7 +597,8 @@ _DOCTYPEEnd:
           mark = strCur;
 
           err = onAddCDATA(Utf16(markDataStart, (size_t)(markDataEnd - markDataStart)));
-          if (FOG_IS_ERROR(err)) goto _End;
+          if (FOG_IS_ERROR(err))
+            goto _End;
 
           goto _Begin;
         }

@@ -22,16 +22,7 @@ namespace Fog {
 template<size_t N>
 struct StringTmp : public String
 {
-  // --------------------------------------------------------------------------
-  // [Temporary Storage]
-  // --------------------------------------------------------------------------
-
-  // Keep 'Storage' name for this struct for Borland compiler
-  struct Storage
-  {
-    StringData _d;
-    Char _str[N];
-  } _storage;
+  struct _Storage;
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -72,8 +63,14 @@ struct StringTmp : public String
   {
   }
 
+  FOG_INLINE ~StringTmp()
+  {
+    FOG_ASSERT( (_d == &_storage.d && _storage.d.refCount.get() == 1) ||
+                (_d != &_storage.d && _storage.d.refCount.get() == 0) );
+  }
+
   // --------------------------------------------------------------------------
-  // [Implicit StringData]
+  // [Reset]
   // --------------------------------------------------------------------------
 
   FOG_INLINE void reset()
@@ -97,6 +94,16 @@ struct StringTmp : public String
   FOG_INLINE StringTmp<N>& operator=(const String& other) { set(other); return *this; }
   FOG_INLINE StringTmp<N>& operator=(const StringTmp<N>& other) { set(other); return *this; }
   FOG_INLINE StringTmp<N>& operator=(const Char* str) { set(str); return *this; }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  struct _Storage
+  {
+    StringData d;
+    Char data[N];
+  } _storage;
 };
 
 //! @}

@@ -914,7 +914,7 @@ _ClipLineCmd_Done:
               func[2] = cx - clipBox.x0;
               s[tLength + 0] = CLIP_SIDE_X0;
               s[tLength + 1] = CLIP_SIDE_X0;
-              tLength += Math::solveQuadraticFunction(t + tLength, func);
+              tLength += Math::solve(t + tLength, func, MATH_SOLVE_QUADRATIC);
             }
 
             if (sides & CLIP_SIDE_X1)
@@ -922,7 +922,7 @@ _ClipLineCmd_Done:
               func[2] = cx - clipBox.x1;
               s[tLength + 0] = CLIP_SIDE_X1;
               s[tLength + 1] = CLIP_SIDE_X1;
-              tLength += Math::solveQuadraticFunction(t + tLength, func);
+              tLength += Math::solve(t + tLength, func, MATH_SOLVE_QUADRATIC);
             }
 
             func[0] = ay;
@@ -933,7 +933,7 @@ _ClipLineCmd_Done:
               func[2] = cy - clipBox.y0;
               s[tLength + 0] = CLIP_SIDE_Y0;
               s[tLength + 1] = CLIP_SIDE_Y0;
-              tLength += Math::solveQuadraticFunction(t + tLength, func);
+              tLength += Math::solve(t + tLength, func, MATH_SOLVE_QUADRATIC);
             }
 
             if (sides & CLIP_SIDE_Y1)
@@ -941,7 +941,7 @@ _ClipLineCmd_Done:
               func[2] = cy - clipBox.y1;
               s[tLength + 0] = CLIP_SIDE_Y1;
               s[tLength + 1] = CLIP_SIDE_Y1;
-              tLength += Math::solveQuadraticFunction(t + tLength, func);
+              tLength += Math::solve(t + tLength, func, MATH_SOLVE_QUADRATIC);
             }
 
             // Remove t-values outside of [0, 1] range and sort them.
@@ -1168,7 +1168,7 @@ _ClipQuadCmd_EvaluateY:
               s[tLength + 0] = CLIP_SIDE_X0;
               s[tLength + 1] = CLIP_SIDE_X0;
               s[tLength + 2] = CLIP_SIDE_X0;
-              tLength += Math::solveCubicFunction(t + tLength, func);
+              tLength += Math::solve(t + tLength, func, MATH_SOLVE_CUBIC);
             }
 
             if (sides & CLIP_SIDE_X1)
@@ -1177,7 +1177,7 @@ _ClipQuadCmd_EvaluateY:
               s[tLength + 0] = CLIP_SIDE_X1;
               s[tLength + 1] = CLIP_SIDE_X1;
               s[tLength + 2] = CLIP_SIDE_X1;
-              tLength += Math::solveCubicFunction(t + tLength, func);
+              tLength += Math::solve(t + tLength, func, MATH_SOLVE_CUBIC);
             }
 
             func[0] = ay;
@@ -1190,7 +1190,7 @@ _ClipQuadCmd_EvaluateY:
               s[tLength + 0] = CLIP_SIDE_Y0;
               s[tLength + 1] = CLIP_SIDE_Y0;
               s[tLength + 2] = CLIP_SIDE_Y0;
-              tLength += Math::solveCubicFunction(t + tLength, func);
+              tLength += Math::solve(t + tLength, func, MATH_SOLVE_CUBIC);
             }
 
             if (sides & CLIP_SIDE_Y1)
@@ -1199,7 +1199,7 @@ _ClipQuadCmd_EvaluateY:
               s[tLength + 0] = CLIP_SIDE_Y1;
               s[tLength + 1] = CLIP_SIDE_Y1;
               s[tLength + 2] = CLIP_SIDE_Y1;
-              tLength += Math::solveCubicFunction(t + tLength, func);
+              tLength += Math::solve(t + tLength, func, MATH_SOLVE_CUBIC);
             }
 
             // Remove t-values outside of [0, 1] range and sort them.

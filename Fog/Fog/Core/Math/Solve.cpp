@@ -29,7 +29,7 @@ static FOG_INLINE double mycbrt(double x)
 }
 
 // ============================================================================
-// [Fog::Solve - SolveQuadraticFunction]
+// [Fog::Solve - Quadratic]
 // ============================================================================
 
 // I found one message on stackoverflow forum which noted that the standard
@@ -59,11 +59,11 @@ static FOG_INLINE double mycbrt(double x)
 //   x0 = q / a
 //   x1 = c / q
 template<typename NumT>
-static int FOG_CDECL _G2d_MathT_solveQuadraticFunction(NumT* dst, const NumT* src)
+static int FOG_CDECL _G2d_MathT_solve_Quadratic(NumT* dst, const NumT* func)
 {
-  double a = (double)src[0];
-  double b = (double)src[1];
-  double c = (double)src[2];
+  double a = (double)func[0];
+  double b = (double)func[1];
+  double c = (double)func[2];
 
   // Catch the A and B near zero.
   if (Math::isFuzzyZero(a))
@@ -99,11 +99,11 @@ static int FOG_CDECL _G2d_MathT_solveQuadraticFunction(NumT* dst, const NumT* sr
 }
 
 template<typename NumT>
-static int FOG_CDECL _G2d_MathT_solveQuadraticFunctionAt(NumT* dst, const NumT* src, const NumT_(Interval)& interval)
+static int FOG_CDECL _G2d_MathT_solveAt_Quadratic(NumT* dst, const NumT* func, const NumT_(Interval)& interval)
 {
-  double a = (double)src[0];
-  double b = (double)src[1];
-  double c = (double)src[2];
+  double a = (double)func[0];
+  double b = (double)func[1];
+  double c = (double)func[2];
   double d;
 
   NumT r0, r1;
@@ -155,22 +155,22 @@ _OneRoot:
 }
 
 // ============================================================================
-// [Fog::Solve - SolveCubicFunction]
+// [Fog::Solve - Cubic]
 // ============================================================================
 
 // Roots3And4.c: Graphics Gems, original author Jochen Schwarze (schwarze@isa.de).
 // See also the wiki article at http://en.wikipedia.org/wiki/Cubic_function for
 // other equations.
 template<typename NumT>
-static int FOG_CDECL _G2d_MathT_solveCubicFunction(NumT* dst, const NumT* src)
+static int FOG_CDECL _G2d_MathT_solve_Cubic(NumT* dst, const NumT* func)
 {
-  if (Math::isFuzzyZero(src[0])) return Math::solveQuadraticFunction(dst, src + 1);
+  if (Math::isFuzzyZero(func[0])) return Math::solve(dst, func + 1, MATH_SOLVE_QUADRATIC);
 
   // Convert to a normal form: x^3 + Ax^2 + Bx + C == 0.
-  double _norm = (double)src[0];
-  double a = (double)src[1] / _norm;
-  double b = (double)src[2] / _norm;
-  double c = (double)src[3] / _norm;
+  double _norm = (double)func[0];
+  double a = (double)func[1] / _norm;
+  double b = (double)func[2] / _norm;
+  double c = (double)func[3] / _norm;
 
   // Substitute x = y - A/3 to eliminate quadric term:
   //
@@ -235,10 +235,10 @@ static int FOG_CDECL _G2d_MathT_solveCubicFunction(NumT* dst, const NumT* src)
 }
 
 template<typename NumT>
-static int FOG_CDECL _G2d_MathT_solveCubicFunctionAt(NumT* dst, const NumT* src, const NumT_(Interval)& interval)
+static int FOG_CDECL _G2d_MathT_solveAt_Cubic(NumT* dst, const NumT* func, const NumT_(Interval)& interval)
 {
   NumT tmp[3];
-  int roots = _G2d_MathT_solveCubicFunction(tmp, src);
+  int roots = _G2d_MathT_solve_Cubic(tmp, func);
   int interestingRoots = 0;
 
   NumT tMin = interval.getMin();
@@ -259,15 +259,17 @@ static int FOG_CDECL _G2d_MathT_solveCubicFunctionAt(NumT* dst, const NumT* src,
 
 FOG_NO_EXPORT void _core_math_init_solve(void)
 {
-  _core.mathf.solveQuadraticFunction = _G2d_MathT_solveQuadraticFunction<float>;
-  _core.mathf.solveQuadraticFunctionAt = _G2d_MathT_solveQuadraticFunctionAt<float>;
-  _core.mathf.solveCubicFunction = _G2d_MathT_solveCubicFunction<float>;
-  _core.mathf.solveCubicFunctionAt = _G2d_MathT_solveCubicFunctionAt<float>;
+  _core.mathf.solve[MATH_SOLVE_QUADRATIC] = _G2d_MathT_solve_Quadratic<float>;
+  _core.mathd.solve[MATH_SOLVE_QUADRATIC] = _G2d_MathT_solve_Quadratic<double>;
 
-  _core.mathd.solveQuadraticFunction = _G2d_MathT_solveQuadraticFunction<double>;
-  _core.mathd.solveQuadraticFunctionAt = _G2d_MathT_solveQuadraticFunctionAt<double>;
-  _core.mathd.solveCubicFunction = _G2d_MathT_solveCubicFunction<double>;
-  _core.mathd.solveCubicFunctionAt = _G2d_MathT_solveCubicFunctionAt<double>;
+  _core.mathf.solve[MATH_SOLVE_CUBIC] = _G2d_MathT_solve_Cubic<float>;
+  _core.mathd.solve[MATH_SOLVE_CUBIC] = _G2d_MathT_solve_Cubic<double>;
+
+  _core.mathf.solveAt[MATH_SOLVE_QUADRATIC] = _G2d_MathT_solveAt_Quadratic<float>;
+  _core.mathd.solveAt[MATH_SOLVE_QUADRATIC] = _G2d_MathT_solveAt_Quadratic<double>;
+
+  _core.mathf.solveAt[MATH_SOLVE_CUBIC] = _G2d_MathT_solveAt_Cubic<float>;
+  _core.mathd.solveAt[MATH_SOLVE_CUBIC] = _G2d_MathT_solveAt_Cubic<double>;
 }
 
 } // Fog namespace

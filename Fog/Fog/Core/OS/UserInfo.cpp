@@ -207,7 +207,7 @@ static err_t getXdgDirectory(String& dst, int id)
     }
 
     if (relative) { dst.setDeep(home); dst.append(Char('/')); }
-    return TextCodec::local8().appendToUnicode(dst, mark, remain);
+    return TextCodec::local8().decode(dst, Stub8(mark, remain), NULL, CONTAINER_OP_APPEND);
 
 _NextLine:
     while (p != end && *p != '\n') p++;
@@ -237,7 +237,7 @@ static err_t getHomeDirectory(String& dst)
   struct passwd *pwd = getpwuid(UserInfo::uid());
   if (pwd)
   {
-    TextCodec::local8().toUnicode(dst, pwd->pw_dir);
+    TextCodec::local8().decode(dst, Stub8(pwd->pw_dir, DETECT_LENGTH));
     return ERR_OK;
   }
   else
@@ -246,12 +246,12 @@ static err_t getHomeDirectory(String& dst)
 
     if ((s = getenv("HOME")) != 0)
     {
-      TextCodec::local8().toUnicode(dst, s);
+      TextCodec::local8().decode(dst, Stub8(s, DETECT_LENGTH));
       return ERR_OK;
     }
     else if ((s = getenv("TMPDIR")) != 0)
     {
-      TextCodec::local8().toUnicode(dst, s);
+      TextCodec::local8().decode(dst, Stub8(s, DETECT_LENGTH));
       return ERR_USER_NO_HOME_DIRECTORY;
     }
     else

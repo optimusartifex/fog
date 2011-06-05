@@ -14,6 +14,7 @@
 #include <Fog/Core/IO/MapFile.h>
 #include <Fog/Core/Memory/Memory.h>
 #include <Fog/Core/Tools/ByteArray.h>
+#include <Fog/Core/Tools/ByteArrayTmp_p.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/TextCodec.h>
 
@@ -205,10 +206,8 @@ err_t MapFile::map(const String& fileName, bool loadOnFail)
 {
   unmap();
 
-  err_t err;
-
   ByteArrayTmp<TEMPORARY_LENGTH> fileName8;
-  if ((err = TextCodec::local8().appendFromUnicode(fileName8, fileName))) return err;
+  FOG_RETURN_ON_ERROR(TextCodec::local8().encode(fileName8, fileName));
 
   int fd = open(fileName8.getData(), O_RDONLY);
   if (fd < 0) return errno;
@@ -260,7 +259,7 @@ err_t MapFile::map(const String& fileName, bool loadOnFail)
       bytesRead = read(fd, dataCur, bytesToRead);
       if (bytesRead != bytesToRead)
       {
-        err = errno;
+        err_t err = errno;
         Memory::free(data);
         close(fd);
         return err;
@@ -278,7 +277,7 @@ err_t MapFile::map(const String& fileName, bool loadOnFail)
   }
   else
   {
-    err = errno;
+    err_t err = errno;
     close(fd);
     return err;
   }

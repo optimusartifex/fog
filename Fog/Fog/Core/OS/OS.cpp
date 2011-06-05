@@ -15,6 +15,7 @@
 #include <Fog/Core/Global/Static.h>
 #include <Fog/Core/OS/OS.h>
 #include <Fog/Core/Tools/ByteArray.h>
+#include <Fog/Core/Tools/ByteArrayTmp_p.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/TextCodec.h>
 
@@ -164,7 +165,7 @@ String OS::getVersion()
 
 #if defined(FOG_OS_POSIX)
   utsname info;
-  if (uname(&info) >= 0) TextCodec::local8().appendToUnicode(result, info.release);
+  if (uname(&info) >= 0) TextCodec::local8().decode(result, Stub8(info.release, DETECT_LENGTH));
 #endif // FOG_OS_POSIX
 
   return result;
@@ -268,13 +269,12 @@ err_t OS::getEnv(const String& name, String& value)
 #if defined(FOG_OS_POSIX)
   ByteArrayTmp<TEMPORARY_LENGTH> name8;
 
-  err_t err;
-  if ((err = TextCodec::local8().appendFromUnicode(name8, name))) return err;
+  FOG_RETURN_ON_ERROR(TextCodec::local8().encode(name8, name));
 
   const char* e = getenv(name8.getData());
   if (e)
   {
-    return TextCodec::local8().toUnicode(value, e);
+    return TextCodec::local8().decode(value, Stub8(e, DETECT_LENGTH));
   }
   else
   {
@@ -302,19 +302,19 @@ err_t OS::setEnv(const String& name, const String& value)
   ByteArrayTmp<TEMPORARY_LENGTH> name8;
   ByteArrayTmp<TEMPORARY_LENGTH> value8;
 
-  err_t err;
+  FOG_RETURN_ON_ERROR(TextCodec::local8().encode(name8, name));
+  FOG_RETURN_ON_ERROR(TextCodec::local8().encode(value8, value));
+
   int result;
-
-  if ((err = TextCodec::local8().appendFromUnicode(name8, name))) return err;
-  if ((err = TextCodec::local8().appendFromUnicode(value8, value))) return err;
-
   if (value8.isEmpty())
     result = unsetenv(name8.getData());
   else
     result = setenv(name8.getData(), value8.getData(), 1);
 
-  if (result != 0) err = ERR_ENV_SET_FAILED;
-  return err;
+  if (result != 0) 
+    return ERR_ENV_SET_FAILED;
+  else
+    return ERR_OK;
 #endif
 }
 

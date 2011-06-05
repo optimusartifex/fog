@@ -470,7 +470,7 @@ err_t FdStreamDevice::openFile(const String& fileName, uint32_t openFlags, Strea
   err_t err;
   ByteArrayTmp<TEMPORARY_LENGTH> fileName8;
 
-  if ((err = TextCodec::local8().appendFromUnicode(fileName8, fileName))) return err;
+  if ((err = TextCodec::local8().encode(fileName8, fileName))) return err;
 
   // Read / Write.
   if ((openFlags & STREAM_OPEN_RW) == STREAM_OPEN_RW)

@@ -14,6 +14,8 @@
 #include <Fog/Core/IO/DirIterator.h>
 #include <Fog/Core/IO/FileSystem.h>
 #include <Fog/Core/OS/UserInfo.h>
+#include <Fog/Core/Tools/ByteArray.h>
+#include <Fog/Core/Tools/ByteArrayTmp_p.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringTmp_p.h>
 #include <Fog/Core/Tools/StringUtil.h>
@@ -239,29 +241,34 @@ DirIterator::~DirIterator()
 
 err_t DirIterator::open(const String& path)
 {
+  StringTmp<TEMPORARY_LENGTH> pathAbs;
+
   close();
 
-  StringTmp<TEMPORARY_LENGTH> pathAbs;
-  ByteArrayTmp<TEMPORARY_LENGTH> t;
-
-  // Get max size of file name in this directory + fallback.
-  long direntSize = pathconf(t.getData(), _PC_NAME_MAX);
-  if (direntSize == -1) direntSize = _POSIX_NAME_MAX;
-
-  // Add offset of d_name field + 1 to get correct dirent size.
-  direntSize += FOG_OFFSET_OF(struct dirent, d_name) + 1;
-
-  // Ugly typecast from long, but there is no better way.
-  _dent = reinterpret_cast<struct dirent*>(Memory::alloc((size_t)direntSize));
-  if (!_dent) return ERR_RT_OUT_OF_MEMORY;
-
   FOG_RETURN_ON_ERROR(FileSystem::toAbsolutePath(pathAbs, String(), path));
-  FOG_RETURN_ON_ERROR(TextCodec::local8().appendFromUnicode(t, pathAbs));
-
-  if ((_handle = (void*)::opendir(t.getData())) != NULL)
+  FOG_RETURN_ON_ERROR(TextCodec::local8().encode(_pathCache, pathAbs));
+  
+  errno = 0;
+  if ((_handle = (void*)::opendir(_pathCache.getData())) != NULL)
   {
+    // Get max size of file name in this directory + fallback.
+    long direntSize = pathconf(_pathCache.getData(), _PC_NAME_MAX);
+    if (direntSize == -1) direntSize = _POSIX_NAME_MAX;
+    
+    // Add offset of d_name field + 1 to get correct dirent size.
+    direntSize += FOG_OFFSET_OF(struct dirent, d_name) + 1;
+    
+    // Ugly typecast from long, but there is no better way.
+    _dent = reinterpret_cast<struct dirent*>(Memory::alloc((size_t)direntSize));
+    if (!_dent)
+    {
+      ::closedir((DIR*)_handle);
+      _handle = NULL;
+
+      return ERR_RT_OUT_OF_MEMORY;
+    }
+
     _path = pathAbs;
-    _pathCache = t;
     _pathCacheBaseLength = _pathCache.getLength();
     return ERR_OK;
   }
@@ -276,7 +283,7 @@ void DirIterator::close()
 {
   if (!_handle) return;
 
-  ::closedir((DIR*)(_handle));
+  ::closedir((DIR*)_handle);
   _handle = NULL;
 
   _path.clear();
@@ -305,7 +312,7 @@ bool DirIterator::read(DirEntry& dirEntry)
     size_t nameLength = strlen(name);
 
     // Translate entry name to unicode.
-    TextCodec::local8().toUnicode(dirEntry._name, name, nameLength);
+    TextCodec::local8().decode(dirEntry._name, Stub8(name, nameLength));
 
     _pathCache.resize(_pathCacheBaseLength);
     _pathCache.append('/');
@@ -369,7 +376,7 @@ bool DirIterator::read(String& fileName)
     }
 
     // Translate entry name to unicode.
-    return (TextCodec::local8().toUnicode(fileName, name) == ERR_OK);
+    return (TextCodec::local8().decode(fileName, Stub8(name, DETECT_LENGTH)) == ERR_OK);
   }
   return false;
 }

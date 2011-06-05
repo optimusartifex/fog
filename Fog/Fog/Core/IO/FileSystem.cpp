@@ -255,7 +255,7 @@ err_t FileSystem::deleteDirectory(const String& path)
 int FileSystem::stat(const String& fileName, struct stat* s)
 {
   ByteArrayTmp<TEMPORARY_LENGTH> t;
-  TextCodec::local8().appendFromUnicode(t, fileName);
+  TextCodec::local8().encode(t, fileName);
   return ::stat(t.getData(), s);
 }
 
@@ -330,12 +330,12 @@ bool FileSystem::findFile(const List<String>& paths, const String& fileName, Str
   ByteArrayTmp<TEMPORARY_LENGTH> fileName8;
 
   // Encode fileName here to avoid encoding in loop.
-  TextCodec::local8().appendFromUnicode(fileName8, fileName);
+  TextCodec::local8().encode(fileName8, fileName);
 
   for (it.toStart(); it.isValid(); it.toNext())
   {
-    // Append path.
-    TextCodec::local8().fromUnicode(path8, it.value());
+    // Setup path.
+    TextCodec::local8().encode(path8, it.value());
 
     // Append directory separator if needed
     if (path8.getLength() && !path8.endsWith(Stub8("/", 1))) path8.append('/');
@@ -354,12 +354,12 @@ bool FileSystem::findFile(const List<String>& paths, const String& fileName, Str
 
 static err_t createDirectoryHelper(const Char* path, size_t len)
 {
-  if (len == 1 && path[0] == '/') return ERR_IO_DIR_ALREADY_EXISTS;
+  if (len == 1 && path[0] == Char('/'))
+    return ERR_IO_DIR_ALREADY_EXISTS;
 
   ByteArrayTmp<TEMPORARY_LENGTH> path8;
-  err_t err;
+  FOG_RETURN_ON_ERROR(TextCodec::local8().encode(path8, Utf16(path, len)));
 
-  if ((err = TextCodec::local8().appendFromUnicode(path8, path, len))) return err;
   if (::mkdir(path8.getData(), S_IRWXU | S_IXGRP | S_IXOTH) == 0) return ERR_OK;
 
   if (errno == EEXIST)
@@ -404,7 +404,7 @@ err_t FileSystem::deleteDirectory(const String& dir)
   err_t err;
   ByteArrayTmp<TEMPORARY_LENGTH> dir8;
 
-  if ((err = TextCodec::local8().appendFromUnicode(dir8, dir))) return err;
+  if ((err = TextCodec::local8().encode(dir8, dir))) return err;
 
   if (::rmdir(dir8.getData()) == 0)
     return ERR_OK;
@@ -803,7 +803,7 @@ bool FileSystem::testLocalName(const String& path)
   if (TextCodec::local8().isUnicode()) return true;
 
   ByteArrayTmp<TEMPORARY_LENGTH> path8;
-  return TextCodec::local8().appendFromUnicode(path8, path) == ERR_OK;
+  return TextCodec::local8().encode(path8, path) == ERR_OK;
 #endif
 }
 

@@ -23,6 +23,7 @@
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Threading/Thread.h>
 #include <Fog/Core/Tools/ByteArray.h>
+#include <Fog/Core/Tools/ByteArrayTmp_p.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/TextCodec.h>
 #include <Fog/Core/Win/WinUtil_p.h>
@@ -383,28 +384,25 @@ err_t Application::setWorkingDirectory(const String& _dir)
 #if defined(FOG_OS_POSIX)
 err_t Application::getWorkingDirectory(String& dst)
 {
-  err_t err;
   ByteArrayTmp<TEMPORARY_LENGTH> dir8;
-
   dst.clear();
+
   for (;;)
   {
     const char* ptr = ::getcwd(dir8.getDataX(), dir8.getCapacity() + 1);
-    if (ptr) return TextCodec::local8().appendToUnicode(dst, ptr);
+    if (ptr) return TextCodec::local8().decode(dst, Stub8(ptr, DETECT_LENGTH));
 
     if (errno != ERANGE) return errno;
 
     // Alloc more...
-    if ((err = dir8.reserve(dir8.getCapacity() + 4096))) return err;
+    FOG_RETURN_ON_ERROR(dir8.reserve(dir8.getCapacity() + 4096));
   }
 }
 
 err_t Application::setWorkingDirectory(const String& dir)
 {
-  err_t err;
   ByteArrayTmp<TEMPORARY_LENGTH> dir8;
-
-  if ((err = TextCodec::local8().appendFromUnicode(dir8, dir))) return err;
+  FOG_RETURN_ON_ERROR(TextCodec::local8().encode(dir8, dir));
 
   if (::chdir(dir8.getData()) == 0)
     return ERR_OK;

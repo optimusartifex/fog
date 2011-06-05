@@ -93,10 +93,8 @@ static void* systemLoadSymbol(void* handle, const char* symbol)
 
 static err_t systemOpenLibrary(const String& fileName, void** handle)
 {
-  err_t err;
-
   ByteArrayTmp<TEMPORARY_LENGTH> fileName8;
-  if ((err = TextCodec::local8().appendFromUnicode(fileName8, fileName))) return err;
+  FOG_RETURN_ON_ERROR(TextCodec::local8().encode(fileName8, fileName));
 
   void* h = (void*)::dlopen(fileName8.getData(), RTLD_NOW);
   if (h == NULL)

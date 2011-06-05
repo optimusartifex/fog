@@ -265,6 +265,7 @@ err_t PathStrokerContextT<NumT>::strokePathPrivate(const NumT_(Path)& src)
 #define ADD_VERTEX(x, y) \
   do { \
     if (FOG_UNLIKELY(dstCur == dstEnd)) FOG_RETURN_ON_ERROR(_grow()); \
+    \
     dstCur->set(x, y); \
     dstCur++; \
   } while(0)
@@ -309,10 +310,7 @@ err_t PathStrokerContextT<NumT>::_grow()
 
   err_t err = dst.reserve(cap);
   if (FOG_IS_ERROR(err))
-  {
-    dst._d->length = len;
     return err;
-  }
 
   dstCur = const_cast<NumT_(Point)*>(dst.getVertices());
   dstEnd = dstCur;

@@ -149,14 +149,16 @@ static void FOG_CDECL _G2d_QBezierT_getLength(const NumT_(Point)* self, NumT* le
 }
 
 // ============================================================================
-// [Fog::QBezier - Approximate]
+// [Fog::QBezier - Flatten]
 // ============================================================================
 
-#define QUAD_CURVE_APPROXIMATE_RECURSION_LIMIT 32
+#define QUAD_CURVE_FLATTEN_RECURSION_LIMIT 32
 #define QUAD_CURVE_VERTEX_INITIAL_SIZE 256
 
 #define ADD_VERTEX(_x, _y) \
   do { \
+    FOG_ASSERT((size_t)(curVertex - dst._d->vertices) < dst._d->capacity); \
+    \
     curVertex->set(_x, _y); \
     curVertex++; \
   } while(0)
@@ -182,7 +184,7 @@ static err_t FOG_CDECL _G2d_QBezierT_flatten(
   NumT_(Point)* curVertex;
   NumT_(Point)* endVertex;
 
-  NumT_(Point) _stack[QUAD_CURVE_APPROXIMATE_RECURSION_LIMIT * 3];
+  NumT_(Point) _stack[QUAD_CURVE_FLATTEN_RECURSION_LIMIT * 3];
   NumT_(Point)* stack = _stack;
 
 _Realloc:
@@ -272,7 +274,7 @@ _Realloc:
     // First recursive subdivision will be set into x0, y0, x1, y1, x2, y2,
     // second subdivision will be added into stack.
 
-    if (level < QUAD_CURVE_APPROXIMATE_RECURSION_LIMIT)
+    if (level < QUAD_CURVE_FLATTEN_RECURSION_LIMIT)
     {
       stack[0].set(x012, y012);
       stack[1].set(x12 , y12 );

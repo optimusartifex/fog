@@ -2082,8 +2082,8 @@ static void _G2d_PathT_updateFlat(const NumT_(Path)& self)
     i++;
   }
 
-  self._d->flags = (self._d->flags & ~(PATH_DATA_DIRTY_CMD     |
-                                       PATH_DATA_HAS_QBEZIER  |
+  self._d->flags = (self._d->flags & ~(PATH_DATA_DIRTY_CMD      |
+                                       PATH_DATA_HAS_QBEZIER    |
                                        PATH_DATA_HAS_CBEZIER )) | flags;
 }
 

@@ -93,7 +93,7 @@ static err_t FOG_CDECL _G2d_CBezierT_getBoundingBox(const NumT_(Point)* self, Nu
     // Y extrema.
     a = NumT(3.0) * (-self[0].y + NumT(3.0) * (self[1].y - self[2].y) + self[3].y);
     b = NumT(6.0) * ( self[0].y - NumT(2.0) *  self[1].y + self[2].y             );
-    c = NumT(3.0) * (-self[0].y +                self[1].y                         );
+    c = NumT(3.0) * (-self[0].y +              self[1].y                         );
   }
 
   dst->setBox(pMin.x, pMin.y, pMax.x, pMax.y);
@@ -348,14 +348,16 @@ _NoInflection:
 }
 
 // ============================================================================
-// [Fog::CBezier - Approximate]
+// [Fog::CBezier - Flatten]
 // ============================================================================
 
-#define CUBIC_CURVE_APPROXIMATE_RECURSION_LIMIT 32
+#define CUBIC_CURVE_FLATTEN_RECURSION_LIMIT 32
 #define CUBIC_CURVE_VERTEX_INITIAL_SIZE 256
 
 #define ADD_VERTEX(_X_, _Y_) \
   FOG_MACRO_BEGIN \
+    FOG_ASSERT((size_t)(curVertex - dst._d->vertices) < dst._d->capacity); \
+    \
     curVertex->set(_X_, _Y_); \
     curVertex++; \
   FOG_MACRO_END
@@ -383,7 +385,7 @@ static err_t FOG_CDECL _G2d_CBezierT_flatten(
   NumT_(Point)* curVertex;
   NumT_(Point)* endVertex;
 
-  NumT_(Point) _stack[CUBIC_CURVE_APPROXIMATE_RECURSION_LIMIT * 4];
+  NumT_(Point) _stack[CUBIC_CURVE_FLATTEN_RECURSION_LIMIT * 4];
   NumT_(Point)* stack = _stack;
 
 _Realloc:
@@ -529,7 +531,7 @@ _Realloc:
     //
     // First recursive subdivision will be set into x0, y0, x1, y1, x2, y2,
     // second subdivision will be added into stack.
-    if (level < CUBIC_CURVE_APPROXIMATE_RECURSION_LIMIT)
+    if (level < CUBIC_CURVE_FLATTEN_RECURSION_LIMIT)
     {
       stack[0].set(x0123, y0123);
       stack[1].set(x123 , y123 );

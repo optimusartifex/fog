@@ -124,7 +124,7 @@ static uint32_t FOG_CDECL _G2d_PathClipperF_initPath_SSE(PathClipperF& self, con
         FOG_ASSERT(i >= 2);
         if (FOG_UNLIKELY(!hasInitial)) goto _Invalid;
 
-        Face::m128fLoad8Hi(xmm0, pts + 2);
+        Face::m128fLoad8Hi(xmm0, pts + 1);
 
         Face::m128fCopy(xmm1, xmm0);
         Face::m128fCmpGePS(xmm0, xmm0, xmmClipMin);
@@ -153,8 +153,8 @@ static uint32_t FOG_CDECL _G2d_PathClipperF_initPath_SSE(PathClipperF& self, con
         if (FOG_UNLIKELY(!hasInitial)) goto _Invalid;
 
         Face::m128fZero(xmm2);
-        Face::m128fLoad8Hi(xmm0, pts + 2);
-        Face::m128fLoad8Lo(xmm2, pts + 4);
+        Face::m128fLoad8Hi(xmm0, pts + 1);
+        Face::m128fLoad8Lo(xmm2, pts + 2);
 
         Face::m128fShuffle<1, 0, 1, 0>(xmm2, xmm2, xmm2);
         Face::m128fXor(xmm2, xmm2, FOG_SSE_GET_CONST_PS(m128f_p0_p0_sn_sn));

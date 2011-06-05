@@ -64,7 +64,7 @@ RasterContext::~RasterContext()
 err_t RasterContext::_initByMaster(const RasterContext& master)
 {
   // If mask was created we can't copy the data from master context into thread's
-  // own. The setEngine() method must check for this condition before and return
+  // own. The RasterEngine must check for this condition before and must return
   // @c ERR_PAINTER_NOT_ALLOWED error.
   FOG_ASSERT(mask == NULL && master.mask == NULL);
 
@@ -106,6 +106,9 @@ err_t RasterContext::_initPrecision(uint32_t precision)
         // scanline16.destroy();
         // scanlineExt16.destroy();
         break;
+
+      default:
+        break;
     }
 
     // Create resources using the new precision.
@@ -129,6 +132,9 @@ err_t RasterContext::_initPrecision(uint32_t precision)
         // scanline16.init();
         // scanlineExt16.init((uint32_t)sizeof(SpanExt16));
         break;
+
+      default:
+        break;
     }
   }
 
@@ -151,7 +157,7 @@ err_t RasterContext::_initPrecision(uint32_t precision)
 
     default:
       pcBpl = 0;
-      break;
+      return ERR_OK;
   }
 
   uint8_t* pcBuf = pcRowBuffer.alloc(pcBpl);

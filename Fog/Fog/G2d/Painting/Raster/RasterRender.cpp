@@ -375,6 +375,31 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillNormalizedPathD(RasterContext& ctx, c
 // [Fog::RasterRender - FillRasterizedShape]
 // ============================================================================
 
+#if defined(FOG_DEBUG)
+
+// Validate the linked list of spans, checking whether all spans fits into the
+// target screen bounds.
+template<typename SpanT>
+static void RasterRenderImpl_validateSpanList(RasterContext& ctx, int y0, SpanT* span)
+{
+  FOG_ASSERT(y0 >= 0);
+  FOG_ASSERT(y0 < ctx.layer.size.h);
+
+  while (span != NULL)
+  {
+    int x0 = span->getX0();
+    int x1 = span->getX1();
+
+    FOG_ASSERT(x0 < x1);
+    FOG_ASSERT(x0 >= 0);
+    FOG_ASSERT(x1 <= ctx.layer.size.w);
+
+    span = span->getNext();
+  }
+}
+
+#endif // FOG_DEBUG
+
 template<typename C>
 void FOG_FASTCALL RasterRenderImpl<C>::fillRasterizedShape(RasterContext& ctx, void* _rasterizer)
 {
@@ -436,7 +461,14 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillRasterizedShape(RasterContext& ctx, v
 
       do {
         typename C::SpanP* span = rasterizer.sweepScanline(sl, ctx.tmpMemory, y0);
-        if (span) blitSpan(dstPixels, &ctx.solid, span, &ctx.closure);
+
+        if (span)
+        {
+#if defined(FOG_DEBUG)
+          RasterRenderImpl_validateSpanList<typename C::SpanP>(ctx, y0, span);
+#endif // FOG_DEBUG
+          blitSpan(dstPixels, &ctx.solid, span, &ctx.closure);
+        }
 
         y0 += delta;
         dstPixels += dstStrideTimesDelta;
@@ -462,6 +494,9 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillRasterizedShape(RasterContext& ctx, v
         typename C::SpanP* span = rasterizer.sweepScanline(sl, ctx.tmpMemory, y0);
         if (span)
         {
+#if defined(FOG_DEBUG)
+          RasterRenderImpl_validateSpanList<typename C::SpanP>(ctx, y0, span);
+#endif // FOG_DEBUG
           fetcher.fetch(span, src);
           blitSpan(dstPixels, span, &ctx.closure);
         }

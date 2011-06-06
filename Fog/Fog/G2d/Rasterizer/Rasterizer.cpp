@@ -946,7 +946,9 @@ bool Rasterizer8::renderLine(Fixed24x8 x0, Fixed24x8 y0, Fixed24x8 x1, Fixed24x8
     _CHUNK_TYPE* _chunk;
     NEW_CHUNK(_CHUNK_TYPE, _Bail, _chunk);
 
-    _chunk->_prev = NULL; \
+    _chunk->_prev = NULL;
+
+    FOG_ASSERT(ey0 >= 0 && (uint)ey0 < _rowsCapacity);
     _rows[ey0] = _chunk;
   }
 
@@ -967,14 +969,17 @@ bool Rasterizer8::renderLine(Fixed24x8 x0, Fixed24x8 y0, Fixed24x8 x1, Fixed24x8
 #define PURGE_ROWS(CHUNK_TYPE, start, count) \
   do { \
     CHUNK_TYPE** _p = (CHUNK_TYPE**)(&_rows[start]); \
-    uint _c = count; \
+    uint _i = start, _c = start + count; \
+    \
     do { \
       CHUNK_TYPE* _chunk; \
       NEW_CHUNK(CHUNK_TYPE, _Bail, _chunk); \
       \
       _chunk->_prev = NULL; \
-      *_p++ = _chunk; \
-    } while (--_c); \
+      \
+      FOG_ASSERT(_i >= 0 && _i < _rowsCapacity); \
+      _rows[_i] = _chunk; \
+    } while (++_i < _c); \
   } while(0)
 
   if (ey0 < ey1)
@@ -1569,10 +1574,10 @@ static Span8* _sweepScanlineSimpleImpl(
 
     else
     {
-      uint32_t alpha;
       if (area != 0)
       {
-        if ((alpha = _calculateAlpha<_RULE, _USE_ALPHA>(rasterizer, coversh - area)) != 0)
+        uint32_t alpha = alpha = _calculateAlpha<_RULE, _USE_ALPHA>(rasterizer, coversh - area);
+        if (alpha != 0)
         {
           scanline.lnkA8Extra(x);
           scanline.valA8Extra(alpha);
@@ -2365,14 +2370,17 @@ static Span8* _sweepRectSimpleImpl(
     return NULL;
 
   const uint32_t* covers = shape->coverageI;
-  if (FOG_UNLIKELY(y == 0))
+
+  if (y == 0)
     covers = shape->coverageT;
-  else if (FOG_UNLIKELY(y == (shape->bounds.y1 - shape->bounds.y0)))
+  else if (y == (shape->bounds.y1 - shape->bounds.y0))
     covers = shape->coverageB;
+
+
 
   scanline.newA8Extra_buf(x0, x0 + 1)[0] = covers[0];
   if (w > 1) scanline.lnkConstSpanOrMerge(x0 + 1, x1, covers[1]);
-  if (w > 0) scanline.lnkA8Extra_buf(x1, x1 + 1)[0] = covers[2];
+  if (w > 0 && covers[2]) scanline.lnkA8Extra_buf(x1, x1 + 1)[0] = covers[2];
 
   if (scanline.close() != ERR_OK) return NULL;
 #if defined(FOG_DEBUG_RASTERIZER)

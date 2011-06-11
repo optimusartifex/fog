@@ -21,8 +21,8 @@
 // ============================================================================
 
 #if defined(FOG_OS_WINDOWS) && defined(FOG_CC_MSC)
-# define FOG_CONTROL87_BEGIN() uint _control87_old = _control87(0x9001F, FOG_ARCH_32_64(_MCW_DN|_MCW_EM|_MCW_RC, 0xFFFF))
-# define FOG_CONTROL87_END() _control87(_control87_old, FOG_ARCH_32_64(_MCW_DN|_MCW_EM|_MCW_RC, 0xFFFF))
+# define FOG_CONTROL87_BEGIN() uint _control87_old = _control87(0x9001F, _MCW_DN | _MCW_EM | _MCW_RC)
+# define FOG_CONTROL87_END() _control87(_control87_old, _MCW_DN | _MCW_EM | _MCW_RC)
 #elif defined(FOG_OS_WINDOWS)
 # define FOG_CONTROL87_BEGIN() _control87(0, 0)
 # define FOG_CONTROL87_END() _clear87()

@@ -533,7 +533,7 @@ static TextCodecData* _TextCodec_8Bit_create(const TextCodecItem& item)
 
 _Fail:
   // Silently destroy the created data and return NULL.
-  if (page8)
+  if (page8 != NULL)
   {
     for (i = 0; i < 256; i++)
     {

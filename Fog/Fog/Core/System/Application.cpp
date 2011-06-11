@@ -353,7 +353,7 @@ err_t Application::getWorkingDirectory(String& dst)
 
   for (;;)
   {
-    DWORD size = GetCurrentDirectoryW(dst.getCapacity() + 1, reinterpret_cast<wchar_t*>(dst.getDataX()));
+    DWORD size = GetCurrentDirectoryW((DWORD)dst.getCapacity() + 1, reinterpret_cast<wchar_t*>(dst.getDataX()));
     if (size >= dst.getCapacity())
     {
       FOG_RETURN_ON_ERROR(dst.reserve(size));

@@ -139,7 +139,6 @@ err_t RasterContext::_initPrecision(uint32_t precision)
   }
 
   uint32_t pcBpl = layer.size.w;
-
   switch (this->precision)
   {
     case IMAGE_PRECISION_BYTE:

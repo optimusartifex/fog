@@ -20,19 +20,23 @@
 #include <Fog/Core/Tools/StringUtil.h>
 #include <Fog/Core/Tools/TextCodec.h>
 
+// [Dependencies - Windows]
 #if defined(FOG_OS_WINDOWS)
 // windows.h is already included in Fog/Core/Config/Config.h
-#include <io.h>
-#ifndef IO_REPARSE_TAG_SYMLINK
-#define IO_REPARSE_TAG_SYMLINK 0xA000000C
-#endif // IO_REPARSE_TAG_SYMLINK
-#else
-#include <dirent.h>
-#include <errno.h>
-#include <sys/stat.h>
-#if defined(FOG_HAVE_UNISTD_H)
-#include <unistd.h>
+# include <io.h>
+# ifndef IO_REPARSE_TAG_SYMLINK
+#  define IO_REPARSE_TAG_SYMLINK 0xA000000C
+# endif // IO_REPARSE_TAG_SYMLINK
 #endif
+
+// [Dependencies - Posix]
+#if defined(FOG_OS_POSIX)
+# include <dirent.h>
+# include <errno.h>
+# include <sys/stat.h>
+# if defined(FOG_HAVE_UNISTD_H)
+#  include <unistd.h>
+# endif
 #endif
 
 namespace Fog {

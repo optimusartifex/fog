@@ -9,7 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Config/Config.h>
-#include <Fog/Core/Global/TypeVariant.h>
+#include <Fog/Core/Global/Class.h>
 
 namespace Fog {
 
@@ -40,7 +40,7 @@ struct FOG_API FunctionD
 // [Fog::FunctionT<>]
 // ============================================================================
 
-FOG_TYPEVARIANT_DECLARE_F_D(Function)
+FOG_CLASS_PRECISION_F_D(Function)
 
 //! @}
 

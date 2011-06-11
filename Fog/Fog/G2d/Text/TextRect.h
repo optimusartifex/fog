@@ -8,8 +8,8 @@
 #define _FOG_G2D_TEXT_TEXTRECT_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/TypeVariant.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Global/Constants.h>
 
@@ -183,7 +183,7 @@ struct FOG_NO_EXPORT TextRectD : public RectD
 // [Fog::TextRectT<>]
 // ============================================================================
 
-FOG_TYPEVARIANT_DECLARE_F_D(TextRect)
+FOG_CLASS_PRECISION_F_D(TextRect)
 
 //! @}
 

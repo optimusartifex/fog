@@ -14,6 +14,7 @@
 #include <Fog/Core/Global/Error.h>
 #include <Fog/Core/Global/Init_Core_p.h>
 
+// [Dependencies - Windows]
 #if defined(FOG_OS_WINDOWS)
 # include <windows.h>
 #endif // FOG_OS_WINDOWS

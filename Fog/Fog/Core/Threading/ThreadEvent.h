@@ -14,10 +14,12 @@
 #include <Fog/Core/Global/TypeInfo.h>
 #include <Fog/Core/Threading/Atomic.h>
 
+// [Dependencies - Windows]
 #if defined(FOG_OS_WINDOWS)
 #include <windows.h>
 #endif // FOG_OS_WINDOWS
 
+// [Dependencies - Posix]
 #if defined(FOG_OS_POSIX)
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Threading/ThreadCondition.h>

@@ -182,6 +182,7 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   TransformD coreTransform;
   //! @brief The user transformation matrix.
   TransformD userTransform;
+
   //! @brief The final transformation matrix (double).
   TransformD finalTransform;
   //! @brief The final transformation matrix (float).

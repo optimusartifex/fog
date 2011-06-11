@@ -19,13 +19,13 @@
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Threading/ThreadEvent.h>
 
+// [Dependencies - Windows]
 #if defined(FOG_OS_WINDOWS)
 #include <windows.h>
 #include <math.h>
-
-#include <stack>
 #endif // FOG_OS_WINDOWS
 
+// [Dependencies - Posix]
 #if defined(FOG_OS_POSIX)
 #include <errno.h>
 #include <sys/time.h>

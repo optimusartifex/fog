@@ -41,7 +41,6 @@
 #include <Fog/Core/Global/Static.h>
 #include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/TypeVariant.h>
 #include <Fog/Core/Global/Uninitialized.h>
 #include <Fog/Core/IO/DirEntry.h>
 #include <Fog/Core/IO/DirIterator.h>

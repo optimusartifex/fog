@@ -23,10 +23,13 @@
 #include <Fog/Core/Tools/StringTmp_p.h>
 #include <Fog/Core/Tools/TextCodec.h>
 
-// [Platform Specific]
+// [Dependencies - Windows]
 #if defined(FOG_OS_WINDOWS)
 # include <windows.h>
-#else
+#endif // FOG_OS_WINDOWS
+
+// [Dependencies - Posix]
+#if defined(FOG_OS_POSIX)
 # include <dlfcn.h>
 # include <errno.h>
 # ifndef RTLD_NOW
@@ -125,7 +128,7 @@ static void* systemLoadSymbol(void* handle, const char* symbol)
 // [Fog::LibraryData]
 // ============================================================================
 
-static LibraryData* newLibraryData(void* handle)
+static LibraryData* _Library_alloc(void* handle)
 {
   LibraryData* d = reinterpret_cast<LibraryData*>(Memory::alloc(sizeof(LibraryData)));
   if (FOG_IS_NULL(d)) return NULL;
@@ -135,13 +138,13 @@ static LibraryData* newLibraryData(void* handle)
   return d;
 }
 
-static LibraryData* refLibraryData(LibraryData* d)
+static FOG_INLINE LibraryData* _Library_ref(LibraryData* d)
 {
   d->refCount.inc();
   return d;
 }
 
-static void derefLibraryData(LibraryData* d)
+static FOG_INLINE void _Library_deref(LibraryData* d)
 {
   if (d->refCount.deref())
   {
@@ -157,24 +160,24 @@ static void derefLibraryData(LibraryData* d)
 Static<LibraryData> Library::_dnull;
 
 Library::Library() :
-  _d(refLibraryData(_dnull.instancep()))
+  _d(_Library_ref(_dnull.instancep()))
 {
 }
 
 Library::Library(const Library& other) :
-  _d(refLibraryData(other._d))
+  _d(_Library_ref(other._d))
 {
 }
 
 Library::Library(const String& fileName, uint32_t openFlags) :
-  _d(refLibraryData(_dnull.instancep()))
+  _d(_Library_ref(_dnull.instancep()))
 {
   open(fileName, openFlags);
 }
 
 Library::~Library()
 {
-  derefLibraryData(_d);
+  _Library_deref(_d);
 }
 
 err_t Library::open(const String& _fileName, uint32_t openFlags)
@@ -207,14 +210,14 @@ err_t Library::open(const String& _fileName, uint32_t openFlags)
       goto _End;
     }
 
-    LibraryData* newd = newLibraryData(handle);
+    LibraryData* newd = _Library_alloc(handle);
     if (FOG_IS_NULL(newd))
     {
       systemCloseLibrary(handle);
       return ERR_RT_OUT_OF_MEMORY;
     }
 
-    derefLibraryData(atomicPtrXchg(&_d, newd));
+    _Library_deref(atomicPtrXchg(&_d, newd));
     return ERR_OK;
   }
 
@@ -267,8 +270,8 @@ _Fail:
 
 void Library::close()
 {
-  derefLibraryData(
-    atomicPtrXchg(&_d, refLibraryData(_dnull.instancep()))
+  _Library_deref(
+    atomicPtrXchg(&_d, _Library_ref(_dnull.instancep()))
   );
 }
 
@@ -324,8 +327,8 @@ _End:
 
 Library& Library::operator=(const Library& other)
 {
-  derefLibraryData(
-    atomicPtrXchg(&_d, refLibraryData(other._d))
+  _Library_deref(
+    atomicPtrXchg(&_d, _Library_ref(other._d))
   );
   return *this;
 }

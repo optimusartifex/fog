@@ -12,7 +12,6 @@
 #include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Static.h>
 #include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/TypeVariant.h>
 #include <Fog/Core/Global/Uninitialized.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/G2d/Geometry/Path.h>
@@ -504,13 +503,13 @@ FOG_INLINE PathStrokerParamsD& PathStrokerParamsD::operator=(const PathStrokerPa
 // [Fog::PathStrokerParamsT]
 // ============================================================================
 
-FOG_TYPEVARIANT_DECLARE_F_D(PathStrokerParams)
+FOG_CLASS_PRECISION_F_D(PathStrokerParams)
 
 // ============================================================================
 // [Fog::PathStrokerT<>]
 // ============================================================================
 
-FOG_TYPEVARIANT_DECLARE_F_D(PathStroker)
+FOG_CLASS_PRECISION_F_D(PathStroker)
 
 //! @}
 

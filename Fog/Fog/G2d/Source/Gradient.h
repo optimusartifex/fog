@@ -8,8 +8,8 @@
 #define _FOG_G2D_SOURCE_GRADIENT_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/TypeVariant.h>
 #include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
@@ -280,7 +280,7 @@ struct FOG_API GradientD
 // [Fog::GradientT<>]
 // ============================================================================
 
-FOG_TYPEVARIANT_DECLARE_F_D(Gradient)
+FOG_CLASS_PRECISION_F_D(Gradient)
 
 //! @}
 

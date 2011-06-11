@@ -8,8 +8,8 @@
 #define _FOG_G2D_SOURCE_RADIALGRADIENT_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/TypeVariant.h>
 #include <Fog/G2d/Source/Gradient.h>
 
 namespace Fog {
@@ -170,7 +170,7 @@ FOG_INLINE err_t RadialGradientD::setGradient(const RadialGradientD& other) { re
 // [Fog::RadialGradientT<>]
 // ============================================================================
 
-FOG_TYPEVARIANT_DECLARE_F_D(RadialGradient)
+FOG_CLASS_PRECISION_F_D(RadialGradient)
 
 //! @}
 

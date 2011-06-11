@@ -33,10 +33,12 @@
 // These classes are represented as only a 64-bit value, so they can be
 // efficiently passed by value.
 
+// [Dependencies - Windows]
 #if defined(FOG_OS_WINDOWS)
 #include <windows.h>
-#endif
+#endif // FOG_OS_WINDOWS
 
+// [Dependencies - C]
 #include <time.h>
 
 namespace Fog {

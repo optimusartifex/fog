@@ -283,7 +283,7 @@ static FOG_INLINE double getNInfD()
 #endif
 }
 
-// TypeVariant support.
+// Abstract.
 _FOG_MATH_DECLARE_VARIANT_TEMPLATE(getSNan)
 _FOG_MATH_DECLARE_VARIANT_TEMPLATE(getQNan)
 _FOG_MATH_DECLARE_VARIANT_TEMPLATE(getPInf)

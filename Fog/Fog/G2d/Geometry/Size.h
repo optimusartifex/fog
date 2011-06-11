@@ -8,8 +8,8 @@
 #define _FOG_G2D_GEOMETRY_SIZE_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/TypeVariant.h>
 #include <Fog/Core/Global/Uninitialized.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
@@ -603,7 +603,7 @@ FOG_INLINE SizeD SizeF::toSizeD() const { return SizeD((double)w, (double)h); }
 // [Fog::SizeT<>]
 // ============================================================================
 
-FOG_TYPEVARIANT_DECLARE_F_D_I(Size)
+FOG_CLASS_PRECISION_F_D_I(Size)
 
 //! @}
 

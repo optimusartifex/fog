@@ -129,11 +129,13 @@ err_t ImagePalette::setLength(size_t length)
   if (FOG_UNLIKELY(length > 256))
     return ERR_RT_INVALID_ARGUMENT;
 
-  if (FOG_UNLIKELY((size_t)_d->length == length))
+  uint32_t len32 = (uint32_t)length;
+
+  if (FOG_UNLIKELY(_d->length == len32))
     return ERR_OK;
 
   FOG_RETURN_ON_ERROR(detach());
-  _d->length = length;
+  _d->length = len32;
 
   return ERR_OK;
 }

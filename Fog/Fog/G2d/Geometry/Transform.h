@@ -9,8 +9,8 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/HashUtil.h>
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/TypeVariant.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Point.h>
@@ -2500,9 +2500,9 @@ FOG_INLINE err_t TransformF::setTransform(const TransformD& other)
 // [Fog::TransformT<>]
 // ============================================================================
 
-FOG_TYPEVARIANT_DECLARE_F_D(ParallelogramParams)
-FOG_TYPEVARIANT_DECLARE_F_D(QuadToQuadParams)
-FOG_TYPEVARIANT_DECLARE_F_D(Transform)
+FOG_CLASS_PRECISION_F_D(ParallelogramParams)
+FOG_CLASS_PRECISION_F_D(QuadToQuadParams)
+FOG_CLASS_PRECISION_F_D(Transform)
 
 //! @}
 

@@ -8,8 +8,8 @@
 #define _FOG_G2D_GEOMETRY_CUBICCURVE_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/TypeVariant.h>
 #include <Fog/Core/Global/Uninitialized.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
@@ -710,7 +710,7 @@ struct FOG_NO_EXPORT CBezierD
 // [Fog::CBezierT<>]
 // ============================================================================
 
-FOG_TYPEVARIANT_DECLARE_F_D(CBezier)
+FOG_CLASS_PRECISION_F_D(CBezier)
 
 //! @}
 

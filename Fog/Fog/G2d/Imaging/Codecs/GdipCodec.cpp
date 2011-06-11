@@ -29,9 +29,10 @@
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageConverter.h>
 #include <Fog/G2d/Imaging/ImageFormatDescription.h>
+#include <Fog/G2d/Win/GdipLibrary.h>
 
-FOG_IMPLEMENT_OBJECT(Fog::GdiPlusDecoder)
-FOG_IMPLEMENT_OBJECT(Fog::GdiPlusEncoder)
+FOG_IMPLEMENT_OBJECT(Fog::GdipDecoder)
+FOG_IMPLEMENT_OBJECT(Fog::GdipEncoder)
 
 namespace Fog {
 
@@ -39,7 +40,7 @@ namespace Fog {
 // [Fog::GdiPlusImage - Format - Helpers]
 // ===========================================================================
 
-static uint32_t GdiPlus_fogFormatFromGpFormat(GpPixelFormat fmt)
+static uint32_t _GdipCodec_cvtFogFormatFromGpFormat(GpPixelFormat fmt)
 {
   switch (fmt)
   {
@@ -61,7 +62,7 @@ static uint32_t GdiPlus_fogFormatFromGpFormat(GpPixelFormat fmt)
   }
 }
 
-static GpPixelFormat GdiPlus_gpFormatFromFogFormat(uint32_t fmt)
+static GpPixelFormat _GdipCodec_cvtGpFormatFromFogFormat(uint32_t fmt)
 {
   switch (fmt)
   {
@@ -87,9 +88,9 @@ FOG_COM_DEFINE_GUID(GpEncoderQuality, 0x1d5be4b5, 0xfa4a, 0x452d, 0x9c, 0xdd, 0x
 // [Fog::GdiPlusImage - Params - Helpers]
 // ===========================================================================
 
-static void GdiPlus_clearCommonParameters(GdiPlusCommonParams* params, uint32_t streamType)
+static void _GdipCodec_clearCommonParams(GdipCommonParams* params, uint32_t streamType)
 {
-  memset(params, 0, sizeof(GdiPlusCommonParams));
+  memset(params, 0, sizeof(GdipCommonParams));
 
   switch (streamType)
   {
@@ -103,7 +104,7 @@ static void GdiPlus_clearCommonParameters(GdiPlusCommonParams* params, uint32_t 
   }
 }
 
-static err_t GdiPlus_getCommonParameter(const GdiPlusCommonParams* params, uint32_t streamType, const ManagedString& name, Value& value)
+static err_t _GdipCodec_getCommonParam(const GdipCommonParams* params, uint32_t streamType, const ManagedString& name, Value& value)
 {
   // This means to continue property processing calling superclass.
   err_t err = (err_t)0xFFFFFFFF;
@@ -125,7 +126,7 @@ static err_t GdiPlus_getCommonParameter(const GdiPlusCommonParams* params, uint3
   return err;
 }
 
-static err_t GdiPlus_setCommonParameter(GdiPlusCommonParams* params, uint32_t streamType, const ManagedString& name, const Value& value)
+static err_t _GdipCodec_setCommonParam(GdipCommonParams* params, uint32_t streamType, const ManagedString& name, const Value& value)
 {
   // This means to continue property processing calling superclass.
   err_t err = (err_t)0xFFFFFFFF;
@@ -150,117 +151,14 @@ static err_t GdiPlus_setCommonParameter(GdiPlusCommonParams* params, uint32_t st
   return err;
 }
 
-// ===========================================================================
-// [Fog::WinGdiPlusLibrary]
-// ===========================================================================
-
-WinGdiPlusLibrary::WinGdiPlusLibrary() :
-  err(0xFFFFFFFF),
-  gdiplusToken(0)
-{
-}
-
-WinGdiPlusLibrary::~WinGdiPlusLibrary()
-{
-  close();
-}
-
-err_t WinGdiPlusLibrary::prepare()
-{
-  if (err == 0xFFFFFFFF)
-  {
-    FOG_ONCE_LOCK();
-    if (err == 0xFFFFFFFF) err = init();
-    FOG_ONCE_UNLOCK();
-  }
-
-  return err;
-}
-
-err_t WinGdiPlusLibrary::init()
-{
-  static const char symbols[] =
-    "GdiplusStartup\0"
-    "GdiplusShutdown\0"
-    "GdipLoadImageFromStream\0"
-    "GdipSaveImageToStream\0"
-    "GdipDisposeImage\0"
-    "GdipGetImageType\0"
-    "GdipGetImageWidth\0"
-    "GdipGetImageHeight\0"
-    "GdipGetImageFlags\0"
-    "GdipGetImagePixelFormat\0"
-    "GdipGetImageGraphicsContext\0"
-    "GdipImageGetFrameCount\0"
-    "GdipImageSelectActiveFrame\0"
-    "GdipCreateBitmapFromScan0\0"
-    "GdipSetCompositingMode\0"
-    "GdipDrawImageI\0"
-    "GdipFlush\0"
-    "GdipDeleteGraphics\0"
-
-    "GdipGetImageEncoders\0"
-    "GdipGetImageEncodersSize\0"
-    ;
-
-  // Ensure that we are not called twice (once initialization is done
-  // we can't be called again).
-  FOG_ASSERT(err == 0xFFFFFFFF);
-
-  if (dll.open(Ascii8("gdiplus")) != ERR_OK)
-  {
-    // gdiplus.dll not found.
-    return ERR_IMAGE_GDIPLUS_NOT_LOADED;
-  }
-
-  const char* badSymbol;
-  if (dll.getSymbols(addr, symbols, FOG_ARRAY_SIZE(symbols), NUM_SYMBOLS, (char**)&badSymbol) != NUM_SYMBOLS)
-  {
-    // Some symbol failed to load? Inform about it.
-    Debug::dbgFunc("Fog::WinGdiPlusLibrary", "init", "Can't load symbol '%s'.\n", badSymbol);
-    dll.close();
-    return ERR_IMAGE_GDIPLUS_NOT_LOADED;
-  }
-
-  // GdiPlus - Startup.
-  GpGdiplusStartupInput startupInput;
-  startupInput.GdiplusVersion = 1;
-  startupInput.DebugEventCallback = NULL;
-  startupInput.SuppressBackgroundThread = false;
-  startupInput.SuppressExternalCodecs = false;
-
-  GpStatus status = pGdiplusStartup(&gdiplusToken, &startupInput, NULL);
-  if (status != GpOk)
-  {
-    Debug::dbgFunc("Fog::WinGdiPlusLibrary", "init", "GdiplusStartup() failed (%u).\n", status);
-    dll.close();
-    return ERR_IMAGE_GDIPLUS_NOT_LOADED;
-  }
-
-  return ERR_OK;
-}
-
-void WinGdiPlusLibrary::close()
-{
-  // GdiPlus - Shutdown.
-  if (err == ERR_OK)
-  {
-    pGdiplusShutdown(gdiplusToken);
-    gdiplusToken = 0;
-  }
-
-  dll.close();
-  err = 0xFFFFFFFF;
-}
-
-static Static<WinGdiPlusLibrary> _gdiPlusLibrary;
-static Atomic<sysint_t> _gdiPlusRefCount;
+static Static<GdipLibrary> _gdipLibrary;
+static Atomic<sysint_t> _gdipReference;
 
 // ===========================================================================
-// [Fog::GdiPlusCodecProvider]
+// [Fog::GdipCodecProvider]
 // ===========================================================================
 
-static err_t getGdiPlusEncoderClsid(const WCHAR* mime, CLSID* clsid)
+static err_t getGdipEncoderClsid(const WCHAR* mime, CLSID* clsid)
 {
   GpStatus status;
   GpImageCodecInfo* codecs = NULL;
@@ -271,7 +169,7 @@ static err_t getGdiPlusEncoderClsid(const WCHAR* mime, CLSID* clsid)
 
   err_t err = ERR_OK;
 
-  status = _gdiPlusLibrary->pGdipGetImageEncodersSize(&codecsCount, &codecsDataSize);
+  status = _gdipLibrary->pGdipGetImageEncodersSize(&codecsCount, &codecsDataSize);
   if (status != GpOk)
   {
     err = ERR_IMAGE_GDIPLUS_ERROR;
@@ -285,7 +183,7 @@ static err_t getGdiPlusEncoderClsid(const WCHAR* mime, CLSID* clsid)
     goto _End;
   }
 
-  status = _gdiPlusLibrary->pGdipGetImageEncoders(codecsCount, codecsDataSize, codecs);
+  status = _gdipLibrary->pGdipGetImageEncoders(codecsCount, codecsDataSize, codecs);
   if (status != GpOk)
   {
     err = ERR_IMAGE_GDIPLUS_ERROR;
@@ -309,10 +207,10 @@ _End:
   return err;
 }
 
-GdiPlusCodecProvider::GdiPlusCodecProvider(uint32_t streamType)
+GdipCodecProvider::GdipCodecProvider(uint32_t streamType)
 {
-  // Initialize WinGdiPlusLibrary.
-  if (_gdiPlusRefCount.addXchg(1) == 0) _gdiPlusLibrary.init();
+  // Initialize GdipLibrary.
+  if (_gdipReference.addXchg(1) == 0) _gdipLibrary.init();
 
   const WCHAR* gdipMime = NULL;
 
@@ -366,13 +264,13 @@ GdiPlusCodecProvider::GdiPlusCodecProvider(uint32_t streamType)
   }
 }
 
-GdiPlusCodecProvider::~GdiPlusCodecProvider()
+GdipCodecProvider::~GdipCodecProvider()
 {
-  // Shutdown WinGdiPlusLibrary.
-  if (_gdiPlusRefCount.deref()) _gdiPlusLibrary.destroy();
+  // Shutdown GdipLibrary.
+  if (_gdipReference.deref()) _gdipLibrary.destroy();
 }
 
-uint32_t GdiPlusCodecProvider::checkSignature(const void* mem, size_t length) const
+uint32_t GdipCodecProvider::checkSignature(const void* mem, size_t length) const
 {
   // Note: GdiPlus proxy provider uses 14 as a base score. This
   // is by one less than all other providers based on external
@@ -414,19 +312,19 @@ uint32_t GdiPlusCodecProvider::checkSignature(const void* mem, size_t length) co
   return score;
 }
 
-err_t GdiPlusCodecProvider::createCodec(uint32_t codecType, ImageCodec** codec) const
+err_t GdipCodecProvider::createCodec(uint32_t codecType, ImageCodec** codec) const
 {
   FOG_ASSERT(codec != NULL);
-  FOG_RETURN_ON_ERROR(_gdiPlusLibrary->prepare());
+  FOG_RETURN_ON_ERROR(_gdipLibrary->prepare());
 
   ImageCodec* c = NULL;
   switch (codecType)
   {
     case IMAGE_CODEC_DECODER:
-      c = fog_new GdiPlusDecoder(const_cast<GdiPlusCodecProvider*>(this));
+      c = fog_new GdipDecoder(const_cast<GdipCodecProvider*>(this));
       break;
     case IMAGE_CODEC_ENCODER:
-      c = fog_new GdiPlusEncoder(const_cast<GdiPlusCodecProvider*>(this));
+      c = fog_new GdipEncoder(const_cast<GdipCodecProvider*>(this));
       break;
     default:
       return ERR_RT_INVALID_ARGUMENT;
@@ -439,37 +337,37 @@ err_t GdiPlusCodecProvider::createCodec(uint32_t codecType, ImageCodec** codec) 
 }
 
 // ===========================================================================
-// [Fog::GdiPlusDecoder - Construction / Destruction]
+// [Fog::GdipDecoder - Construction / Destruction]
 // ===========================================================================
 
-GdiPlusDecoder::GdiPlusDecoder(ImageCodecProvider* provider) :
+GdipDecoder::GdipDecoder(ImageCodecProvider* provider) :
   ImageDecoder(provider),
   _istream(NULL),
   _gpImage(NULL)
 {
-  GdiPlus_clearCommonParameters(&_params, _streamType);
+  _GdipCodec_clearCommonParams(&_params, _streamType);
 }
 
-GdiPlusDecoder::~GdiPlusDecoder()
+GdipDecoder::~GdipDecoder()
 {
 }
 
 // ===========================================================================
-// [Fog::GdiPlusDecoder - AttachStream / DetachStream]
+// [Fog::GdipDecoder - AttachStream / DetachStream]
 // ===========================================================================
 
-void GdiPlusDecoder::attachStream(Stream& stream)
+void GdipDecoder::attachStream(Stream& stream)
 {
   _istream = fog_new WinComStream(stream);
 
   base::attachStream(stream);
 }
 
-void GdiPlusDecoder::detachStream()
+void GdipDecoder::detachStream()
 {
   if (_gpImage)
   {
-    _gdiPlusLibrary->pGdipDisposeImage(_gpImage);
+    _gdipLibrary->pGdipDisposeImage(_gpImage);
     _gpImage = NULL;
   }
 
@@ -483,48 +381,48 @@ void GdiPlusDecoder::detachStream()
 }
 
 // ===========================================================================
-// [Fog::GdiPlusDecoder - Reset]
+// [Fog::GdipDecoder - Reset]
 // ===========================================================================
 
-void GdiPlusDecoder::reset()
+void GdipDecoder::reset()
 {
-  GdiPlus_clearCommonParameters(&_params, _streamType);
+  _GdipCodec_clearCommonParams(&_params, _streamType);
   ImageDecoder::reset();
 }
 
 // ===========================================================================
-// [Fog::GdiPlusDecoder - ReadHeader]
+// [Fog::GdipDecoder - ReadHeader]
 // ===========================================================================
 
-err_t GdiPlusDecoder::readHeader()
+err_t GdipDecoder::readHeader()
 {
   // Do not read header more than once.
   if (_headerResult) return _headerResult;
 
   if (_istream == NULL) return ERR_RT_INVALID_HANDLE;
 
-  GpStatus status = _gdiPlusLibrary->pGdipLoadImageFromStream(_istream, &_gpImage);
+  GpStatus status = _gdipLibrary->pGdipLoadImageFromStream(_istream, &_gpImage);
   if (status != GpOk) return (_headerResult = ERR_IMAGE_GDIPLUS_ERROR);
 
   FOG_ASSERT(sizeof(UINT) == sizeof(int));
-  _gdiPlusLibrary->pGdipGetImageWidth(_gpImage, (UINT*)&_size.w);
-  _gdiPlusLibrary->pGdipGetImageHeight(_gpImage, (UINT*)&_size.h);
+  _gdipLibrary->pGdipGetImageWidth(_gpImage, (UINT*)&_size.w);
+  _gdipLibrary->pGdipGetImageHeight(_gpImage, (UINT*)&_size.h);
   _planes = 1;
 
   GpPixelFormat pf;
-  _gdiPlusLibrary->pGdipGetImagePixelFormat(_gpImage, &pf);
+  _gdipLibrary->pGdipGetImagePixelFormat(_gpImage, &pf);
 
-  _format = GdiPlus_fogFormatFromGpFormat(pf);
+  _format = _GdipCodec_cvtFogFormatFromGpFormat(pf);
   _depth = ImageFormatDescription::getByFormat(_format).getDepth();
 
   return ERR_OK;
 }
 
 // ===========================================================================
-// [Fog::GdiPlusDecoder - ReadImage]
+// [Fog::GdipDecoder - ReadImage]
 // ===========================================================================
 
-err_t GdiPlusDecoder::readImage(Image& image)
+err_t GdipDecoder::readImage(Image& image)
 {
   err_t err = ERR_OK;
 
@@ -544,86 +442,86 @@ err_t GdiPlusDecoder::readImage(Image& image)
   if ((err = image.create(_size, _format)) != ERR_OK) return err;
 
   // Create GpBitmap that will share raster data with our image.
-  status = _gdiPlusLibrary->pGdipCreateBitmapFromScan0(
+  status = _gdipLibrary->pGdipCreateBitmapFromScan0(
     (INT)image.getWidth(),
     (INT)image.getHeight(),
     (INT)image.getStride(),
-    GdiPlus_gpFormatFromFogFormat(image.getFormat()),
+    _GdipCodec_cvtGpFormatFromFogFormat(image.getFormat()),
     (BYTE*)image.getDataX(),
     &bm);
   if (status != GpOk) { err = ERR_IMAGE_GDIPLUS_ERROR; goto _End; }
 
   // Create GpGraphics context.
-  status = _gdiPlusLibrary->pGdipGetImageGraphicsContext((GpImage*)bm, &gr);
+  status = _gdipLibrary->pGdipGetImageGraphicsContext((GpImage*)bm, &gr);
   if (status != GpOk) { err = ERR_IMAGE_GDIPLUS_ERROR; goto _End; }
 
   // Set compositing to source copy (we want alpha bits).
-  status = _gdiPlusLibrary->pGdipSetCompositingMode(gr, GpCompositingModeSourceCopy);
+  status = _gdipLibrary->pGdipSetCompositingMode(gr, GpCompositingModeSourceCopy);
   if (status != GpOk) { err = ERR_IMAGE_GDIPLUS_ERROR; goto _End; }
 
   // Draw streamed image to GpGraphics context.
-  status = _gdiPlusLibrary->pGdipDrawImageI(gr, _gpImage, 0, 0);
+  status = _gdipLibrary->pGdipDrawImageI(gr, _gpImage, 0, 0);
   if (status != GpOk) { err = ERR_IMAGE_GDIPLUS_ERROR; goto _End; }
 
   // flush (this step is probably not necessary).
-  status = _gdiPlusLibrary->pGdipFlush(gr, GpFlushIntentionSync);
+  status = _gdipLibrary->pGdipFlush(gr, GpFlushIntentionSync);
   if (status != GpOk) { err = ERR_IMAGE_GDIPLUS_ERROR; goto _End; }
 
 _End:
   // Delete created Gdi+ objects.
-  if (gr) _gdiPlusLibrary->pGdipDeleteGraphics(gr);
-  if (bm) _gdiPlusLibrary->pGdipDisposeImage((GpImage*)bm);
+  if (gr) _gdipLibrary->pGdipDeleteGraphics(gr);
+  if (bm) _gdipLibrary->pGdipDisposeImage((GpImage*)bm);
 
   if (err == ERR_OK) updateProgress(1.0f);
   return (_readerResult = err);
 }
 
 // ===========================================================================
-// [Fog::GdiPlusDecoder - Properties]
+// [Fog::GdipDecoder - Properties]
 // ===========================================================================
 
-err_t GdiPlusDecoder::getProperty(const ManagedString& name, Value& value) const
+err_t GdipDecoder::getProperty(const ManagedString& name, Value& value) const
 {
-  err_t err = GdiPlus_getCommonParameter(&_params, _streamType, name, value);
+  err_t err = _GdipCodec_getCommonParam(&_params, _streamType, name, value);
   if (err != (err_t)0xFFFFFFFF) return err;
 
   return base::getProperty(name, value);
 }
 
-err_t GdiPlusDecoder::setProperty(const ManagedString& name, const Value& value)
+err_t GdipDecoder::setProperty(const ManagedString& name, const Value& value)
 {
-  err_t err = GdiPlus_setCommonParameter(&_params, _streamType, name, value);
+  err_t err = _GdipCodec_setCommonParam(&_params, _streamType, name, value);
   if (err != (err_t)0xFFFFFFFF) return err;
 
   return base::setProperty(name, value);
 }
 
 // ===========================================================================
-// [Fog::GdiPlusEncoder - Construction / Destruction]
+// [Fog::GdipEncoder - Construction / Destruction]
 // ===========================================================================
 
-GdiPlusEncoder::GdiPlusEncoder(ImageCodecProvider* provider) :
+GdipEncoder::GdipEncoder(ImageCodecProvider* provider) :
   ImageEncoder(provider)
 {
-  GdiPlus_clearCommonParameters(&_params, _streamType);
+  _GdipCodec_clearCommonParams(&_params, _streamType);
 }
 
-GdiPlusEncoder::~GdiPlusEncoder()
+GdipEncoder::~GdipEncoder()
 {
 }
 
 // ===========================================================================
-// [Fog::GdiPlusEncoder - AttachStream / DetachStream]
+// [Fog::GdipEncoder - AttachStream / DetachStream]
 // ===========================================================================
 
-void GdiPlusEncoder::attachStream(Stream& stream)
+void GdipEncoder::attachStream(Stream& stream)
 {
   _istream = fog_new WinComStream(stream);
 
   base::attachStream(stream);
 }
 
-void GdiPlusEncoder::detachStream()
+void GdipEncoder::detachStream()
 {
   if (_istream)
   {
@@ -635,20 +533,20 @@ void GdiPlusEncoder::detachStream()
 }
 
 // ===========================================================================
-// [Fog::GdiPlusEncoder - Reset]
+// [Fog::GdipEncoder - Reset]
 // ===========================================================================
 
-void GdiPlusEncoder::reset()
+void GdipEncoder::reset()
 {
-  GdiPlus_clearCommonParameters(&_params, _streamType);
+  _GdipCodec_clearCommonParams(&_params, _streamType);
   ImageEncoder::reset();
 }
 
 // ===========================================================================
-// [Fog::GdiPlusEncoder - WriteImage]
+// [Fog::GdipEncoder - WriteImage]
 // ===========================================================================
 
-err_t GdiPlusEncoder::writeImage(const Image& image)
+err_t GdipEncoder::writeImage(const Image& image)
 {
   Image tmp;
   if (image.isEmpty()) return ERR_IMAGE_INVALID_SIZE;
@@ -663,21 +561,21 @@ err_t GdiPlusEncoder::writeImage(const Image& image)
   CLSID encoderClsid;
 
   uint32_t fogFormat = image.getFormat();
-  GpPixelFormat gpFormat = GdiPlus_gpFormatFromFogFormat(fogFormat);
+  GpPixelFormat gpFormat = _GdipCodec_cvtGpFormatFromFogFormat(fogFormat);
 
   // Get GDI+ encoder CLSID.
-  err = getGdiPlusEncoderClsid(
-    reinterpret_cast<GdiPlusCodecProvider*>(getProvider())->_gdipMime, &encoderClsid);
+  err = getGdipEncoderClsid(
+    reinterpret_cast<GdipCodecProvider*>(getProvider())->_gdipMime, &encoderClsid);
   if (FOG_IS_ERROR(err)) goto _End;
 
-  if (GdiPlus_fogFormatFromGpFormat(gpFormat) != fogFormat)
+  if (_GdipCodec_cvtFogFormatFromGpFormat(gpFormat) != fogFormat)
   {
     // Create GpBitmap that will share raster data with the temporary image.
     tmp = image;
-    err = tmp.convert(GdiPlus_fogFormatFromGpFormat(gpFormat));
+    err = tmp.convert(_GdipCodec_cvtFogFormatFromGpFormat(gpFormat));
     if (FOG_IS_ERROR(err)) goto _End;
 
-    status = _gdiPlusLibrary->pGdipCreateBitmapFromScan0(
+    status = _gdipLibrary->pGdipCreateBitmapFromScan0(
       (INT)tmp.getWidth(),
       (INT)tmp.getHeight(),
       (INT)tmp.getStride(),
@@ -688,7 +586,7 @@ err_t GdiPlusEncoder::writeImage(const Image& image)
   else
   {
     // Create GpBitmap that will share raster data with the image.
-    status = _gdiPlusLibrary->pGdipCreateBitmapFromScan0(
+    status = _gdipLibrary->pGdipCreateBitmapFromScan0(
       (INT)image.getWidth(),
       (INT)image.getHeight(),
       (INT)image.getStride(),
@@ -716,7 +614,7 @@ err_t GdiPlusEncoder::writeImage(const Image& image)
         break;
     }
 
-    status = _gdiPlusLibrary->pGdipSaveImageToStream(
+    status = _gdipLibrary->pGdipSaveImageToStream(
       (GpImage*)bm, _istream, &encoderClsid,
       // If there are no parameters then NULL pointer must be used instead.
       // This information can be found on MSDN. Windows Vista and Win7 will
@@ -726,27 +624,27 @@ err_t GdiPlusEncoder::writeImage(const Image& image)
 
 _End:
   // Delete created Gdi+ objects.
-  if (bm) _gdiPlusLibrary->pGdipDisposeImage((GpImage*)bm);
+  if (bm) _gdipLibrary->pGdipDisposeImage((GpImage*)bm);
 
   if (err == ERR_OK) updateProgress(1.0f);
   return err;
 }
 
 // ===========================================================================
-// [Fog::GdiPlusEncoder - Properties]
+// [Fog::GdipEncoder - Properties]
 // ===========================================================================
 
-err_t GdiPlusEncoder::getProperty(const ManagedString& name, Value& value) const
+err_t GdipEncoder::getProperty(const ManagedString& name, Value& value) const
 {
-  err_t err = GdiPlus_getCommonParameter(&_params, _streamType, name, value);
+  err_t err = _GdipCodec_getCommonParam(&_params, _streamType, name, value);
   if (err != (err_t)0xFFFFFFFF) return err;
 
   return base::getProperty(name, value);
 }
 
-err_t GdiPlusEncoder::setProperty(const ManagedString& name, const Value& value)
+err_t GdipEncoder::setProperty(const ManagedString& name, const Value& value)
 {
-  err_t err = GdiPlus_setCommonParameter(&_params, _streamType, name, value);
+  err_t err = _GdipCodec_setCommonParam(&_params, _streamType, name, value);
   if (err != (err_t)0xFFFFFFFF) return err;
 
   return base::setProperty(name, value);
@@ -758,16 +656,16 @@ err_t GdiPlusEncoder::setProperty(const ManagedString& name, const Value& value)
 
 FOG_NO_EXPORT void _g2d_imagecodecprovider_init_gdip(void)
 {
-  _gdiPlusRefCount.init(0);
-  GdiPlusCodecProvider* provider;
+  _gdipReference.init(0);
+  GdipCodecProvider* provider;
 
-  provider = fog_new GdiPlusCodecProvider(IMAGE_STREAM_PNG);
+  provider = fog_new GdipCodecProvider(IMAGE_STREAM_PNG);
   ImageCodecProvider::addProvider(IMAGE_CODEC_BOTH, provider);
 
-  provider = fog_new GdiPlusCodecProvider(IMAGE_STREAM_JPEG);
+  provider = fog_new GdipCodecProvider(IMAGE_STREAM_JPEG);
   ImageCodecProvider::addProvider(IMAGE_CODEC_BOTH, provider);
 
-  provider = fog_new GdiPlusCodecProvider(IMAGE_STREAM_TIFF);
+  provider = fog_new GdipCodecProvider(IMAGE_STREAM_TIFF);
   ImageCodecProvider::addProvider(IMAGE_CODEC_BOTH, provider);
 }
 

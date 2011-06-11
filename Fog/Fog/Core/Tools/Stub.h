@@ -189,7 +189,7 @@ protected:
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-_FOG_TYPEINFO_DECLARE(Fog::Stub8  , Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPEINFO_DECLARE(Fog::Stub8 , Fog::TYPEINFO_PRIMITIVE)
 _FOG_TYPEINFO_DECLARE(Fog::Ascii8, Fog::TYPEINFO_PRIMITIVE)
 _FOG_TYPEINFO_DECLARE(Fog::Local8, Fog::TYPEINFO_PRIMITIVE)
 _FOG_TYPEINFO_DECLARE(Fog::Utf8  , Fog::TYPEINFO_PRIMITIVE)

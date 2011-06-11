@@ -257,7 +257,7 @@ struct FOG_NO_EXPORT Helpers
       // by the largest span here. If there is only one span then this is
       // without effect, if there are many small spans then we can save some
       // CPU cycles.
-      sysint_t filledWidth = 0;
+      int filledWidth = 0;
 
       P_FETCH_SPAN8_INIT()
       P_FETCH_SPAN8_BEGIN()

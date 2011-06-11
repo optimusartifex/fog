@@ -18,6 +18,7 @@
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Math/Math.h>
 
+// [Dependencies - Windows]
 #if defined(FOG_OS_WINDOWS)
 # include <windows.h>
 #endif // FOG_OS_WINDOWS
@@ -31,6 +32,7 @@
 # endif // _MSC_VER >= 1400 (>= VS2005)
 #endif // _MSC_VER
 
+// [Dependencies - Posix]
 #if defined(FOG_OS_POSIX)
 # include <errno.h>
 # include <string.h>

@@ -118,7 +118,7 @@ void Rasterizer8::reset()
 
   // Default fill rule / shape.
   _fillRule = FILL_RULE_DEFAULT;
-  _shape = SHAPE_TYPE_NONE;
+  _fillShape = RASTERIZER_FILL_NONE;
   // Not valid either finalized.
   _isValid = false;
   _isFinalized = false;
@@ -134,7 +134,7 @@ err_t Rasterizer8::initialize()
   _boundingBox.setBox(-1, -1, -1, -1);
 
   _error = ERR_OK;
-  _shape = SHAPE_TYPE_NONE;
+  _fillShape = RASTERIZER_FILL_NONE;
   _isValid = false;
   _isFinalized = false;
 
@@ -177,14 +177,14 @@ err_t Rasterizer8::finalize()
   // If already finalized this is the NOP.
   if (_error || _isFinalized) return _error;
 
-  switch (_shape)
+  switch (_fillShape)
   {
-    case RASTERIZER_SHAPE_NONE:
+    case RASTERIZER_FILL_NONE:
     {
       goto _NotValid;
     }
 
-    case RASTERIZER_SHAPE_PATH:
+    case RASTERIZER_FILL_PATH:
     {
       if (_boundingBox.y0 == -1) goto _NotValid;
 
@@ -192,9 +192,9 @@ err_t Rasterizer8::finalize()
       break;
     }
 
-    case RASTERIZER_SHAPE_RECT:
+    case RASTERIZER_FILL_RECT:
     {
-      RectShape* shape = reinterpret_cast<RectShape*>(_rows);
+      FillRect* shape = reinterpret_cast<FillRect*>(_rows);
       _boundingBox.setBox(shape->bounds);
       _initRectSweepFunctions(this);
       break;
@@ -603,8 +603,8 @@ void Rasterizer8::addRect(const RectD& rect)
 void Rasterizer8::addBox(const BoxF& box)
 {
   // Initial addBox(). Try to add rectangle to the data section and to
-  // initialize shape to the RASTERIZER_SHAPE_RECT.
-  if (_shape == SHAPE_TYPE_NONE)
+  // initialize shape to the RASTERIZER_FILL_RECT.
+  if (_fillShape == RASTERIZER_FILL_NONE)
   {
     BoxI box24x8(UNINITIALIZED);
 
@@ -617,10 +617,8 @@ void Rasterizer8::addBox(const BoxF& box)
     return;
   }
 
-  if (_shape != RASTERIZER_SHAPE_PATH)
-  {
+  if (_fillShape != RASTERIZER_FILL_PATH)
     switchToPath();
-  }
 
   PointF vertices[5];
 
@@ -639,8 +637,8 @@ void Rasterizer8::addBox(const BoxF& box)
 void Rasterizer8::addBox(const BoxD& box)
 {
   // Initial addBox(). Try to add rectangle to the data section and to
-  // initialize shape to the RASTERIZER_SHAPE_RECT.
-  if (_shape == SHAPE_TYPE_NONE)
+  // initialize shape to the RASTERIZER_FILL_RECT.
+  if (_fillShape == RASTERIZER_FILL_NONE)
   {
     BoxI box24x8(UNINITIALIZED);
 
@@ -653,10 +651,8 @@ void Rasterizer8::addBox(const BoxD& box)
     return;
   }
 
-  if (_shape != RASTERIZER_SHAPE_PATH)
-  {
+  if (_fillShape != RASTERIZER_FILL_PATH)
     switchToPath();
-  }
 
   PointD vertices[5];
 
@@ -687,7 +683,7 @@ void Rasterizer8::_addBox24x8(const BoxI& box24x8)
   if (x0 >= x1 || y0 >= y1) return;
 
   // Okay, the rectangle is in the clipBox.
-  RectShape* shape = reinterpret_cast<RectShape*>(_rows);
+  FillRect* shape = reinterpret_cast<FillRect*>(_rows);
 
   shape->bounds.setBox(x0 >> 8, y0 >> 8, x1 >> 8, y1 >> 8);
   shape->box24x8.setBox(x0, y0, x1, y1);
@@ -722,7 +718,7 @@ void Rasterizer8::_addBox24x8(const BoxI& box24x8)
   shape->coverageB[1] = (vertBottom) >> 8;
   shape->coverageB[2] = (horzRight * vertBottom) >> 16;
 
-  _shape = RASTERIZER_SHAPE_RECT;
+  _fillShape = RASTERIZER_FILL_RECT;
 }
 
 // ============================================================================
@@ -737,13 +733,13 @@ void Rasterizer8::addPath(const PathF& path)
   size_t length = path.getLength();
   if (length == 0) return;
 
-  if (_shape == SHAPE_TYPE_NONE)
+  if (_fillShape == RASTERIZER_FILL_NONE)
   {
-    // Initialize cells and set shape to SHAPE_TYPE_PATH.
+    // Initialize cells and set shape to RASTERIZER_FILL_PATH.
     if (!_initCells(this)) return;
-    _shape = RASTERIZER_SHAPE_PATH;
+    _fillShape = RASTERIZER_FILL_PATH;
   }
-  else if (_shape != RASTERIZER_SHAPE_PATH)
+  else if (_fillShape != RASTERIZER_FILL_PATH)
   {
     switchToPath();
   }
@@ -762,13 +758,13 @@ void Rasterizer8::addPath(const PathD& path)
   size_t length = path.getLength();
   if (length == 0) return;
 
-  if (_shape == SHAPE_TYPE_NONE)
+  if (_fillShape == RASTERIZER_FILL_NONE)
   {
-    // Initialize cells and set shape to SHAPE_TYPE_PATH.
+    // Initialize cells and set shape to RASTERIZER_FILL_PATH.
     if (!_initCells(this)) return;
-    _shape = RASTERIZER_SHAPE_PATH;
+    _fillShape = RASTERIZER_FILL_PATH;
   }
-  else if (_shape != RASTERIZER_SHAPE_PATH)
+  else if (_fillShape != RASTERIZER_FILL_PATH)
   {
     switchToPath();
   }
@@ -785,27 +781,31 @@ void Rasterizer8::addPath(const PathD& path)
 
 void Rasterizer8::switchToPath()
 {
-  switch (_shape)
+  switch (_fillShape)
   {
-    case SHAPE_TYPE_NONE:
+    case RASTERIZER_FILL_NONE:
     {
-      _shape = RASTERIZER_SHAPE_PATH;
+      _fillShape = RASTERIZER_FILL_PATH;
       break;
     }
 
-    case RASTERIZER_SHAPE_PATH:
+    case RASTERIZER_FILL_PATH:
     {
       break;
     }
 
-    case RASTERIZER_SHAPE_RECT:
+    case RASTERIZER_FILL_RECT:
     {
-      RectShape* shape = reinterpret_cast<RectShape*>(_rows);
+      FillRect* shape = reinterpret_cast<FillRect*>(_rows);
       BoxI box = shape->box24x8;
 
-      if (!_initCells(this)) { _shape = SHAPE_TYPE_NONE; return; }
-      _shape = RASTERIZER_SHAPE_PATH;
+      if (!_initCells(this))
+      {
+        _fillShape = RASTERIZER_FILL_NONE;
+        return;
+      }
 
+      _fillShape = RASTERIZER_FILL_PATH;
       if (useCellD(this))
       {
         renderLine<ChunkD, CellD>(box.x0, box.y0, box.x1, box.y0);
@@ -820,12 +820,6 @@ void Rasterizer8::switchToPath()
         renderLine<ChunkQ, CellQ>(box.x1, box.y1, box.x0, box.y1);
         renderLine<ChunkQ, CellQ>(box.x0, box.y1, box.x0, box.y0);
       }
-      break;
-    }
-
-    case RASTERIZER_SHAPE_LINE:
-    {
-      // TODO:
       break;
     }
   }
@@ -1099,7 +1093,7 @@ FOG_INLINE bool Rasterizer8::renderHLine(int ey, Fixed24x8 x0, Fixed24x8 y0, Fix
   fx1 = x1 & A8_POLY_SUBPIXEL_MASK;
 
   _CHUNK_TYPE* chunk;
-  uint index;
+  size_t index;
 
   GET_CHUNK(_CHUNK_TYPE, _Bail, ey, chunk);
   index = chunk->getCount();
@@ -1243,7 +1237,7 @@ static FOG_INLINE void swapCells(CELL* a, CELL* b)
 }
 
 template<typename CELL>
-static FOG_INLINE void qsortCells(CELL* start, uint32_t num)
+static FOG_INLINE void qsortCells(CELL* start, size_t num)
 {
   CELL*  stack[80];
   CELL** top;
@@ -1408,12 +1402,12 @@ static FOG_INLINE uint32_t _calculateAlpha(const Rasterizer8* rasterizer, int ar
 }
 
 template<typename _CHUNK_TYPE, typename _CELL_TYPE>
-static bool _mergeCells(Rasterizer8* rasterizer, void* _chunks, MemoryBuffer& temp, _CELL_TYPE** cellsOut, uint* numCellsOut)
+static bool _mergeCells(Rasterizer8* rasterizer, void* _chunks, MemoryBuffer& temp, _CELL_TYPE** cellsOut, size_t* numCellsOut)
 {
   _CHUNK_TYPE* chunk = reinterpret_cast<_CHUNK_TYPE*>(_chunks);
   _CELL_TYPE* cellCur = chunk->getCells();
 
-  uint numCells = chunk->getCount();
+  size_t numCells = chunk->getCount();
   if (!numCells) return false;
 
   {
@@ -1433,7 +1427,7 @@ static bool _mergeCells(Rasterizer8* rasterizer, void* _chunks, MemoryBuffer& te
     chunkCur = chunk;
     do {
       cellCur = chunkCur->getCells();
-      uint i = chunkCur->getCount();
+      size_t i = chunkCur->getCount();
 
       // Copy cells reversed if they are in reverse order.
       if (i > 1 && cellCur[0].getComparable() > cellCur[1].getComparable())
@@ -1466,7 +1460,7 @@ static bool _mergeCells(Rasterizer8* rasterizer, void* _chunks, MemoryBuffer& te
 
 #define CELL_DECLARE() \
   _CELL_TYPE* cellCur; \
-  uint numCells; \
+  size_t numCells; \
   \
   if (!_mergeCells<_CHUNK_TYPE, _CELL_TYPE>(rasterizer, rasterizer->_rows[y], temp, &cellCur, &numCells)) \
     return NULL; \
@@ -2360,7 +2354,7 @@ static Span8* _sweepRectSimpleImpl(
   FOG_ASSERT(rasterizer->_isFinalized);
   FOG_ASSERT((uint)y < (uint)rasterizer->_boundingBox.y1);
 
-  Rasterizer8::RectShape* shape = reinterpret_cast<Rasterizer8::RectShape*>(rasterizer->_rows);
+  Rasterizer8::FillRect* shape = reinterpret_cast<Rasterizer8::FillRect*>(rasterizer->_rows);
 
   int x0 = shape->xLeft;
   int x1 = shape->xRight;
@@ -2375,8 +2369,6 @@ static Span8* _sweepRectSimpleImpl(
     covers = shape->coverageT;
   else if (y == (shape->bounds.y1 - shape->bounds.y0))
     covers = shape->coverageB;
-
-
 
   scanline.newA8Extra_buf(x0, x0 + 1)[0] = covers[0];
   if (w > 1) scanline.lnkConstSpanOrMerge(x0 + 1, x1, covers[1]);
@@ -2398,7 +2390,7 @@ static Span8* _sweepRectRegionImpl(
   FOG_ASSERT(rasterizer->_isFinalized);
   FOG_ASSERT((uint)y < (uint)rasterizer->_boundingBox.y1);
 
-  Rasterizer8::RectShape* shape = reinterpret_cast<Rasterizer8::RectShape*>(rasterizer->_rows);
+  Rasterizer8::FillRect* shape = reinterpret_cast<Rasterizer8::FillRect*>(rasterizer->_rows);
 
   int x0 = shape->xLeft;
   int x1 = shape->xRight;

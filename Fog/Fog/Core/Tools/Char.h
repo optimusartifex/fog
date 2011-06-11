@@ -28,7 +28,9 @@ namespace Fog {
 //! @brief 16-bit unicode character.
 struct FOG_NO_EXPORT Char
 {
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE Char() {}
   FOG_INLINE Char(const Char& c) : _ch(c._ch) {}
@@ -40,12 +42,16 @@ struct FOG_NO_EXPORT Char
   explicit FOG_INLINE Char(int32_t  c) : _ch((uint16_t)(uint32_t)c) {}
   explicit FOG_INLINE Char(uint32_t c) : _ch((uint16_t)c) {}
 
+  // --------------------------------------------------------------------------
   // [Character]
+  // --------------------------------------------------------------------------
 
   //! @brief Return 16-bit character value.
   FOG_INLINE uint16_t ch() const { return _ch; }
 
-  // [Char::operator=]
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE Char& operator=(const char&     ch) { _ch = (uint8_t )ch          ; return *this; }
   FOG_INLINE Char& operator=(const uint8_t&  ch) { _ch = ch                    ; return *this; }
@@ -55,15 +61,15 @@ struct FOG_NO_EXPORT Char
   FOG_INLINE Char& operator=(const uint32_t& ch) { _ch = (uint16_t)ch          ; return *this; }
   FOG_INLINE Char& operator=(const Char&     ch) { _ch = ch._ch                ; return *this; }
 
+  // --------------------------------------------------------------------------
   // [Implicit Conversion]
+  // --------------------------------------------------------------------------
 
-  FOG_INLINE operator bool() const { return _ch != 0; }
-  FOG_INLINE operator int16_t() const { return (int16_t)_ch; }
   FOG_INLINE operator uint16_t() const { return (uint16_t)_ch; }
-  FOG_INLINE operator int32_t() const { return (int32_t)_ch; }
-  FOG_INLINE operator uint32_t() const { return (uint32_t)_ch; }
 
+  // --------------------------------------------------------------------------
   // [Ascii CTypes]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE bool isAsciiAlpha() const { return CharUtil::isAsciiAlpha(_ch); }
   FOG_INLINE bool isAsciiAlnum() const { return CharUtil::isAsciiAlnum(_ch); }
@@ -80,7 +86,10 @@ struct FOG_NO_EXPORT Char
   FOG_INLINE Char toAsciiLower() const { return Char(CharUtil::toAsciiLower(_ch)); }
   FOG_INLINE Char toAsciiUpper() const { return Char(CharUtil::toAsciiUpper(_ch)); }
 
-  // Statics.
+  // --------------------------------------------------------------------------
+  // [Statics]
+  // --------------------------------------------------------------------------
+
   static FOG_INLINE bool isAsciiAlpha(uint16_t ch) { return CharUtil::isAsciiAlpha(ch); }
   static FOG_INLINE bool isAsciiAlnum(uint16_t ch) { return CharUtil::isAsciiAlnum(ch); }
   static FOG_INLINE bool isAsciiLower(uint16_t ch) { return CharUtil::isAsciiLower(ch); }
@@ -96,7 +105,9 @@ struct FOG_NO_EXPORT Char
   static FOG_INLINE Char toAsciiLower(uint16_t ch) { return Char(CharUtil::toAsciiLower(ch)); }
   static FOG_INLINE Char toAsciiUpper(uint16_t ch) { return Char(CharUtil::toAsciiUpper(ch)); }
 
+  // --------------------------------------------------------------------------
   // [Unicode CTypes]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE bool isAlpha() const { return CharUtil::isAlpha(_ch); }
   FOG_INLINE bool isLower() const { return CharUtil::isLower(_ch); }
@@ -115,7 +126,10 @@ struct FOG_NO_EXPORT Char
   FOG_INLINE bool isPrint() const { return CharUtil::isPrint(_ch); }
   FOG_INLINE bool isCntrl() const { return CharUtil::isCntrl(_ch); }
 
-  // Statics.
+  // --------------------------------------------------------------------------
+  // [Statics]
+  // --------------------------------------------------------------------------
+
   static FOG_INLINE bool isAlpha(uint16_t ch) { return CharUtil::isAlpha(ch); }
   static FOG_INLINE bool isLower(uint16_t ch) { return CharUtil::isLower(ch); }
   static FOG_INLINE bool isUpper(uint16_t ch) { return CharUtil::isUpper(ch); }
@@ -133,38 +147,51 @@ struct FOG_NO_EXPORT Char
   static FOG_INLINE bool isPrint(uint16_t ch) { return CharUtil::isPrint(ch); }
   static FOG_INLINE bool isCntrl(uint16_t ch) { return CharUtil::isCntrl(ch); }
 
-  // [Unicode Helpers]
+  // --------------------------------------------------------------------------
+  // [UTF16]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE bool isLeadSurrogate() const { return isLeadSurrogate(_ch); }
   FOG_INLINE bool isTrailSurrogate() const { return isTrailSurrogate(_ch); }
   FOG_INLINE bool isSurrogatePair() const { return isSurrogatePair(_ch); }
   FOG_INLINE bool isValid() const { return isValid(_ch); }
 
-  // Statics.
+  // --------------------------------------------------------------------------
+  // [Statics]
+  // --------------------------------------------------------------------------
+
   static FOG_INLINE bool isLeadSurrogate(uint16_t ch) { return (ch & UTF16_SURROGATE_PAIR_MASK) == UTF16_SURROGATE_LEAD_MIN; }
   static FOG_INLINE bool isTrailSurrogate(uint16_t ch) { return (ch & UTF16_SURROGATE_PAIR_MASK) == UTF16_SURROGATE_TRAIL_MIN; }
   static FOG_INLINE bool isSurrogatePair(uint16_t ch) { return (ch & UTF16_SURROGATE_PAIR_MASK) == UTF16_SURROGATE_PAIR_BASE; }
   static FOG_INLINE bool isValid(uint16_t ch) { return (ch < 0xFFFE); }
 
+  // --------------------------------------------------------------------------
   // [BOM / BSwap]
-
+  // --------------------------------------------------------------------------
 
   FOG_INLINE bool isBom() const { return _ch == UTF16_BOM_NATIVE; }
   FOG_INLINE bool isBomSwapped() const { return _ch == UTF16_BOM_SWAPPED; }
 
   FOG_INLINE Char& bswap() { _ch = Memory::bswap16(_ch); return *this; }
 
-  // Statics.
+  // --------------------------------------------------------------------------
+  // [Statics]
+  // --------------------------------------------------------------------------
+
   static FOG_INLINE bool isBom(uint16_t ch) { return ch == UTF16_BOM_NATIVE; }
   static FOG_INLINE bool isBomSwapped(uint16_t ch) { return ch == UTF16_BOM_SWAPPED; }
 
   static FOG_INLINE uint16_t bswap(uint16_t ch) { return Memory::bswap16(ch); }
 
+  // --------------------------------------------------------------------------
   // [Combine]
+  // --------------------------------------------------------------------------
 
   static FOG_INLINE Char combine(Char ch, Char comb) { return Char((uint16_t)unicodeCombine(ch._ch, comb._ch)); }
 
+  // --------------------------------------------------------------------------
   // [Surrogates]
+  // --------------------------------------------------------------------------
 
   static FOG_INLINE uint32_t fromSurrogate(uint16_t uc0, uint16_t uc1)
   {
@@ -183,7 +210,7 @@ struct FOG_NO_EXPORT Char
   // [Members]
   // --------------------------------------------------------------------------
 
-  //! @brief 16-bit unicode character value.
+  //! @brief 16-bit code-point.
   uint16_t _ch;
 };
 #include <Fog/Core/Pack/PackRestore.h>

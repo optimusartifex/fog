@@ -4,15 +4,15 @@
 
 CMake_Minimum_Required(VERSION 2.8)
 
-Message("== ========================================")
-Message("== [Fog-Framework]")
-Message("== ========================================")
-
 If(NOT FOG_BUILD_STATIC)
   Project(Fog C CXX)
-  Message("-- Fog cmake-project created")
+  Message("== ====================================================")
+  Message("== [Fog-Framework - Normal, Build=${CMAKE_BUILD_TYPE}]")
+  Message("== ====================================================")
 Else()
-  Message("-- Fog included from existing list-file")
+  Message("== ====================================================")
+  Message("== [Fog-Framework - Static, Build=${CMAKE_BUILD_TYPE}]")
+  Message("== ====================================================")
 EndIf()
 
 # =============================================================================
@@ -70,13 +70,13 @@ EndIf()
 # [C++ Compiler - Clear Flags]
 # =============================================================================
 
-Set(FOG_CFLAGS_OPTIMIZE "")
-Set(FOG_CFLAGS_MMX "")
-Set(FOG_CFLAGS_3DNOW "")
-Set(FOG_CFLAGS_SSE "")
-Set(FOG_CFLAGS_SSE2 "")
-Set(FOG_CFLAGS_SSE3 "")
-Set(FOG_CFLAGS_SSSE3 "")
+Set(FOG_CXX_FLAGS_OPTIMIZE "")
+Set(FOG_CXX_FLAGS_MMX "")
+Set(FOG_CXX_FLAGS_3DNOW "")
+Set(FOG_CXX_FLAGS_SSE "")
+Set(FOG_CXX_FLAGS_SSE2 "")
+Set(FOG_CXX_FLAGS_SSE3 "")
+Set(FOG_CXX_FLAGS_SSSE3 "")
 
 # =============================================================================
 # [C++ Compiler - GCC Support]
@@ -118,9 +118,11 @@ If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   # -flto
   #
   # Use link-time optimization.
-  If (${FOG_CC_HAS_FLTO})
-    Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
-  EndIf()
+
+  # TODO: Disabled, not working properly!
+  # If (${FOG_CC_HAS_FLTO})
+  #   Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
+  # EndIf()
 
   # -Winline:
   #
@@ -136,20 +138,18 @@ If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   EndIf()
 
   # Use -O2 as a standard optimization level when running release builds. The
-  # -O3 not improve the performance, because all inner loops used by Fog are
-  # generally optimized - there is no that compiler can do. Another argument
-  # to use -O2 is that -O3 produces larger binaries with no speed improvement.
-  If(NOT ${CMAKE_BUILD_TYPE} MATCHES "Debug")
-    Set(FOG_CFLAGS_OPTIMIZE "-O2")
-  EndIf()
+  # -O3 doesn't improve the performance, because all inner loops used by Fog
+  # are already optimized - there is nothing compiler can do. Another argument
+  # to use -O2 is that -O3 produces larger binaries without speed improvements.
+  Set(FOG_CXX_FLAGS_OPTIMIZE "-O2")
 
   # Setup FOG_CFLAGS specific to GCC.
-  Set(FOG_CFLAGS_MMX "${FOG_CFLAGS_OPTIMIZE} -mmmx")
-  Set(FOG_CFLAGS_3DNOW "${FOG_CFLAGS_OPTIMIZE} -mmmx -m3dnow")
-  Set(FOG_CFLAGS_SSE "${FOG_CFLAGS_OPTIMIZE} -mmmx -msse")
-  Set(FOG_CFLAGS_SSE2 "${FOG_CFLAGS_OPTIMIZE} -msse2")
-  Set(FOG_CFLAGS_SSE3 "${FOG_CFLAGS_OPTIMIZE} -msse3")
-  Set(FOG_CFLAGS_SSSE3 "${FOG_CFLAGS_OPTIMIZE} -mssse3")
+  Set(FOG_CXX_FLAGS_MMX "${FOG_CXX_FLAGS_OPTIMIZE} -mmmx")
+  Set(FOG_CXX_FLAGS_3DNOW "${FOG_CXX_FLAGS_OPTIMIZE} -mmmx -m3dnow")
+  Set(FOG_CXX_FLAGS_SSE "${FOG_CXX_FLAGS_OPTIMIZE} -mmmx -msse")
+  Set(FOG_CXX_FLAGS_SSE2 "${FOG_CXX_FLAGS_OPTIMIZE} -msse2")
+  Set(FOG_CXX_FLAGS_SSE3 "${FOG_CXX_FLAGS_OPTIMIZE} -msse3")
+  Set(FOG_CXX_FLAGS_SSSE3 "${FOG_CXX_FLAGS_OPTIMIZE} -mssse3")
 EndIf()
 
 # =============================================================================
@@ -157,19 +157,54 @@ EndIf()
 # =============================================================================
 
 If(MSVC)
-  Set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Oi /Oy /GF /GS- /GR-")
+  Set(FOG_CXX_FLAGS_RELEASE "/Oi /Oy /GF /GS- /GR-")
+  Set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${FOG_CXX_FLAGS_RELEASE}")
+  Set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} ${FOG_CXX_FLAGS_RELEASE}")
+  Set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} ${FOG_CXX_FLAGS_RELEASE}")
 
-  Set(FOG_CFLAGS_OPTIMIZE "/Ot")
-  Set(FOG_CFLAGS_MMX "${FOG_CFLAGS_OPTIMIZE}")
-  Set(FOG_CFLAGS_3DNOW "${FOG_CFLAGS_OPTIMIZE}")
-  Set(FOG_CFLAGS_SSE "${FOG_CFLAGS_OPTIMIZE} /arch:SSE")
-  Set(FOG_CFLAGS_SSE2 "${FOG_CFLAGS_OPTIMIZE} /arch:SSE2")
-  Set(FOG_CFLAGS_SSE3 "${FOG_CFLAGS_OPTIMIZE} /arch:SSE2")
-  Set(FOG_CFLAGS_SSSE3 "${FOG_CFLAGS_OPTIMIZE} /arch:SSE2")
+  Set(FOG_CXX_FLAGS_OPTIMIZE "/Ot")
+  Set(FOG_CXX_FLAGS_MMX "${FOG_CXX_FLAGS_OPTIMIZE}")
+  Set(FOG_CXX_FLAGS_3DNOW "${FOG_CXX_FLAGS_OPTIMIZE}")
+  Set(FOG_CXX_FLAGS_SSE "${FOG_CXX_FLAGS_OPTIMIZE} /arch:SSE")
+  Set(FOG_CXX_FLAGS_SSE2 "${FOG_CXX_FLAGS_OPTIMIZE} /arch:SSE2")
+  Set(FOG_CXX_FLAGS_SSE3 "${FOG_CXX_FLAGS_OPTIMIZE} /arch:SSE2")
+  Set(FOG_CXX_FLAGS_SSSE3 "${FOG_CXX_FLAGS_OPTIMIZE} /arch:SSE2")
+
+  # Enable multi-process compilation by default.
+  If(MSVC80 OR MSVC90 OR MSVC10)
+ 	  Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+  EndIf()
 EndIf()
 
-If(${CMAKE_BUILD_TYPE} MATCHES "Debug")
-  Set(FOG_DEBUG TRUE)
+# =============================================================================
+# [C++ Compiler - Build-Type]
+# =============================================================================
+
+# According to CMake documentation, these CMAKE variables are used to control
+# the build type using a single-configuration generator:
+#
+#   None           - CMAKE_C_FLAGS               , CMAKE_CXX_FLAGS
+#   Debug          - CMAKE_C_FLAGS_DEBUG         , CMAKE_CXX_FLAGS_DEBUG
+#   Release        - CMAKE_C_FLAGS_RELEASE       , CMAKE_CXX_FLAGS_RELEASE
+#   RelWithDebInfo - CMAKE_C_FLAGS_RELWITHDEBINFO, CMAKE_CXX_FLAGS_RELWITHDEBINFO
+#   MinSizeRel     - CMAKE_C_FLAGS_MINSIZEREL    , CMAKE_CXX_FLAGS_MINSIZEREL
+
+If(CMAKE_BUILD_TYPE)
+  # Build type is "Debug".
+  If(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+    Set(FOG_DEBUG TRUE)
+  EndIf()
+
+  # Build type is "Release".
+  If(${CMAKE_BUILD_TYPE} MATCHES "Release")
+  EndIf()
+Else()
+  # Build type is "None". set, assuming that the project is generated for IDE which
+  # supports multiple build options.
+  Set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DFOG_DEBUG")
+  Set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DFOG_NO_DEBUG")
+  Set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DFOG_NO_DEBUG")
+  Set (CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} -DFOG_NO_DEBUG")
 EndIf()
 
 # =============================================================================
@@ -298,6 +333,8 @@ Set(FOG_CORE_COLLECTION_SOURCES
   Fog/Core/Collection/Hash.cpp
   Fog/Core/Collection/HashUtil.cpp
   Fog/Core/Collection/HashP.cpp
+  Fog/Core/Collection/Map.cpp
+  Fog/Core/Collection/MapP.cpp
   Fog/Core/Collection/StackP.cpp
   Fog/Core/Collection/Util.cpp
 )
@@ -310,6 +347,8 @@ Set(FOG_CORE_COLLECTION_HEADERS
   Fog/Core/Collection/Hash.h
   Fog/Core/Collection/HashUtil.h
   Fog/Core/Collection/HashP.h
+  Fog/Core/Collection/Map.h
+  Fog/Core/Collection/MapP.h
   Fog/Core/Collection/StackP.h
   Fog/Core/Collection/Util.h
 )
@@ -412,7 +451,6 @@ Set(FOG_CORE_GLOBAL_HEADERS
   Fog/Core/Global/SequenceInfo.h
   Fog/Core/Global/Swap.h
   Fog/Core/Global/TypeInfo.h
-  Fog/Core/Global/TypeVariant.h
   Fog/Core/Global/Uninitialized.h
 )
 
@@ -633,16 +671,12 @@ If(FOG_OS_WINDOWS)
   Set(FOG_CORE_WIN_SOURCES
     Fog/Core/Win/WinCom.cpp
     Fog/Core/Win/WinComStream.cpp
-    Fog/Core/Win/WinGdipLibrary.cpp
     Fog/Core/Win/WinUtil.cpp
-    Fog/Core/Win/WinUxThemeLibrary.cpp
   )
   Set(FOG_CORE_WIN_HEADERS
     Fog/Core/Win/WinCom.h
     Fog/Core/Win/WinComStream_p.h
-    Fog/Core/Win/WinGdipLibrary.h
     Fog/Core/Win/WinUtil_p.h
-    Fog/Core/Win/WinUxThemeLibrary.h
   )
 EndIf()
 
@@ -772,7 +806,7 @@ Set(FOG_G2D_GEOMETRY_HEADERS
 
 Set_Source_Files_Properties(
   Fog/G2d/Geometry/Transform.cpp
-  PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}"
+  PROPERTIES COMPILE_FLAGS "${FOG_CXX_FLAGS_OPTIMIZE}"
 )
 
 If(FOG_OPTIMIZE_3DNOW)
@@ -781,7 +815,7 @@ If(FOG_OPTIMIZE_3DNOW)
   )
   Set_Source_Files_Properties(
     Fog/G2d/Geometry/Transform_3dNow.cpp
-    PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_3DNOW}"
+    PROPERTIES COMPILE_FLAGS "${FOG_CXX_FLAGS_3DNOW}"
   )
 EndIf()
 
@@ -793,7 +827,7 @@ If(FOG_OPTIMIZE_SSE)
   Set_Source_Files_Properties(
     Fog/G2d/Geometry/PathClipper_SSE.cpp
     Fog/G2d/Geometry/Transform_SSE.cpp
-    PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_SSE}"
+    PROPERTIES COMPILE_FLAGS "${FOG_CXX_FLAGS_SSE}"
   )
 EndIf()
 
@@ -805,7 +839,7 @@ If(FOG_OPTIMIZE_SSE2)
   Set_Source_Files_Properties(
     Fog/G2d/Geometry/PathClipper_SSE2.cpp
     Fog/G2d/Geometry/Transform_SSE2.cpp
-    PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_SSE2}"
+    PROPERTIES COMPILE_FLAGS "${FOG_CXX_FLAGS_SSE2}"
   )
 EndIf()
 
@@ -907,7 +941,7 @@ EndIf()
 
 Set_Source_Files_Properties(
   Fog/G2d/Imaging/Image.cpp
-  PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}"
+  PROPERTIES COMPILE_FLAGS "${FOG_CXX_FLAGS_OPTIMIZE}"
 )
 
 # [Fog/G2d/Painting]
@@ -983,7 +1017,7 @@ Set(FOG_G2D_RASTERIZER_HEADERS
 
 Set_Source_Files_Properties(
   Fog/G2d/Rasterizer/Rasterizer.cpp
-  PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}"
+  PROPERTIES COMPILE_FLAGS "${FOG_CXX_FLAGS_OPTIMIZE}"
 )
 
 # [Fog/G2d/Render]
@@ -1001,7 +1035,7 @@ If(FOG_OPTIMIZE_MMX)
   )
   Set_Source_Files_Properties(
     Fog/G2d/Render/RenderInit_MMX.cpp
-    PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_MMX}"
+    PROPERTIES COMPILE_FLAGS "${FOG_CXX_FLAGS_MMX}"
   )
 EndIf()
 
@@ -1011,7 +1045,7 @@ If(FOG_OPTIMIZE_3DNOW)
   )
   Set_Source_Files_Properties(
     Fog/G2d/Render/RenderInit_MMX3dNow.cpp
-    PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_3DNOW}"
+    PROPERTIES COMPILE_FLAGS "${FOG_CXX_FLAGS_3DNOW}"
   )
 EndIf()
 
@@ -1021,7 +1055,7 @@ If(FOG_OPTIMIZE_SSE)
   )
   Set_Source_Files_Properties(
     Fog/G2d/Render/RenderInit_MMXSSE.cpp
-    PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_SSE}"
+    PROPERTIES COMPILE_FLAGS "${FOG_CXX_FLAGS_SSE}"
   )
 EndIf()
 
@@ -1031,7 +1065,7 @@ If(FOG_OPTIMIZE_SSE2)
   )
   Set_Source_Files_Properties(
     Fog/G2d/Render/RenderInit_SSE2.cpp
-    PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_SSE2}"
+    PROPERTIES COMPILE_FLAGS "${FOG_CXX_FLAGS_SSE2}"
   )
 EndIf()
 
@@ -1041,7 +1075,7 @@ If(FOG_OPTIMIZE_SSSE3)
   )
   Set_Source_Files_Properties(
     Fog/G2d/Render/RenderInit_SSSE3.cpp
-    PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_SSSE3}"
+    PROPERTIES COMPILE_FLAGS "${FOG_CXX_FLAGS_SSSE3}"
   )
 EndIf()
 
@@ -1114,7 +1148,7 @@ If(FOG_OPTIMIZE_SSE2)
   )
   Set_Source_Files_Properties(
     Fog/G2d/Source/Color_SSE2.cpp
-    PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_SSE2}"
+    PROPERTIES COMPILE_FLAGS "${FOG_CXX_FLAGS_SSE2}"
   )
 EndIf()
 
@@ -1256,8 +1290,20 @@ Set(FOG_G2D_TOOLS_HEADERS
 
 Set_Source_Files_Properties(
   Fog/G2d/Tools/Region.cpp
-  PROPERTIES COMPILE_FLAGS "${FOG_CFLAGS_OPTIMIZE}"
+  PROPERTIES COMPILE_FLAGS "${FOG_CXX_FLAGS_OPTIMIZE}"
 )
+
+# [Fog/G2d/Win]
+If(FOG_OS_WINDOWS)
+  Set(FOG_G2D_WIN_SOURCES
+    Fog/G2d/Win/GdipLibrary.cpp
+    Fog/G2d/Win/UxThemeLibrary.cpp
+  )
+  Set(FOG_G2D_WIN_HEADERS
+    Fog/G2d/Win/GdipLibrary.h
+    Fog/G2d/Win/UxThemeLibrary.h
+  )
+EndIf()
 
 # [Fog/G2d/Mac]
 If(FOG_OS_MAC)
@@ -1289,6 +1335,10 @@ Source_Group("G2d/Shader"           FILES ${FOG_G2D_SHADER_SOURCES}           ${
 Source_Group("G2d/Source"           FILES ${FOG_G2D_SOURCE_SOURCES}           ${FOG_G2D_SOURCE_HEADERS}          )
 Source_Group("G2d/Text"             FILES ${FOG_G2D_TEXT_SOURCES}             ${FOG_G2D_TEXT_HEADERS}            )
 Source_Group("G2d/Tools"            FILES ${FOG_G2D_TOOLS_SOURCES}            ${FOG_G2D_TOOLS_HEADERS}           )
+
+If(FOG_OS_WINDOWS)
+Source_Group("G2d/Win"              FILES ${FOG_G2D_WIN_SOURCES}              ${FOG_G2D_WIN_HEADERS}             )
+EndIf()
 
 If(FOG_OS_MAC)
 Source_Group("G2d/Mac"              FILES ${FOG_G2D_MAC_SOURCES}              ${FOG_G2D_MAC_HEADERS}             )
@@ -1830,11 +1880,15 @@ Set(FOG_ALL_HEADERS
 If(FOG_OS_WINDOWS)
   List(APPEND FOG_ALL_SOURCES ${FOG_CORE_WIN_SOURCES})
   List(APPEND FOG_ALL_HEADERS ${FOG_CORE_WIN_HEADERS})
+  List(APPEND FOG_ALL_SOURCES ${FOG_G2D_WIN_SOURCES})
+  List(APPEND FOG_ALL_HEADERS ${FOG_G2D_WIN_HEADERS})
 EndIf()
 
 If(FOG_OS_MAC)
   List(APPEND FOG_ALL_SOURCES ${FOG_CORE_MAC_SOURCES})
   List(APPEND FOG_ALL_HEADERS ${FOG_CORE_MAC_HEADERS})
+  List(APPEND FOG_ALL_SOURCES ${FOG_G2D_MAC_SOURCES})
+  List(APPEND FOG_ALL_HEADERS ${FOG_G2D_MAC_HEADERS})
 EndIf()
 
 If(FOG_GUI_WINDOWS)

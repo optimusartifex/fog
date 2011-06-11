@@ -20,20 +20,23 @@
 #include <Fog/Core/Threading/Lazy.h>
 #include <Fog/Core/Threading/Lock.h>
 
+// [Dependencies - Windows]
 #if defined(FOG_OS_WINDOWS)
 #include <windows.h>
 #include <mmsystem.h>
 #endif // FOG_OS_WINDOWS
 
+// [Dependencies - Mac]
+#if defined(FOG_OS_MAC)
+#include <mach/mach_time.h>
+#endif // FOG_OS_MAC
+
+// [Dependencies - Posix]
 #if defined(FOG_OS_POSIX)
 #include <sys/time.h>
 #include <time.h>
 #include <unistd.h>
 #endif // FOG_OS_POSIX
-
-#if defined(FOG_OS_MAC)
-#include <mach/mach_time.h>
-#endif // FOG_OS_MAC
 
 namespace Fog {
 

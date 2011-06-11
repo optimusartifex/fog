@@ -8,27 +8,28 @@
 #define _FOG_CORE_CONFIG_DEFS_CONFIGCMAKE_H
 
 // ============================================================================
-// [Static Building/Linking]
+// [FOG_BUILD]
 // ============================================================================
 
 #cmakedefine FOG_BUILD_STATIC
 
 // ============================================================================
-// [Library Directories]
+// [FOG_DEBUG]
 // ============================================================================
 
-//! @brief Install prefix specified by configure parameters.
-#define FOG_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}"
+// If FOG_DEBUG and FOG_NO_DEBUG is not defined then FOG_DEBUG will be detected
+// using the compiler specific macros. This enables to set the build type using
+// IDE.
+#if !defined(FOG_DEBUG) && !defined(FOG_NO_DEBUG)
+
+#if defined(_DEBUG)
+#define FOG_DEBUG
+#endif // _DEBUG
+
+#endif // !FOG_DEBUG && !FOG_NO_DEBUG
 
 // ============================================================================
-// [Debug]
-// ============================================================================
-
-#cmakedefine FOG_DEBUG
-#cmakedefine FOG_DEBUG_MEMORY
-
-// ============================================================================
-// [Optimizations]
+// [FOG_OPTIMIZE]
 // ============================================================================
 
 //! @brief Enable support for MMX instructions.
@@ -44,7 +45,7 @@
 #cmakedefine FOG_OPTIMIZE_SSSE3
 
 // ============================================================================
-// [Byte Order]
+// [FOG_BYTE_ORDER]
 // ============================================================================
 
 //! @brief Target byteorder, can be:
@@ -102,13 +103,14 @@
 //! This is default when using Linux/BSD. May be used together with Windows/Mac
 //! font support.
 #cmakedefine FOG_FONT_FREETYPE
+
 //! @brief Whether to build FontConfig support.
 //!
 //! Can be enabled only if FOG_FONT_FREETYPE is defined.
 #cmakedefine FOG_HAVE_FONTCONFIG
 
 // ============================================================================
-// [Fog-Gui Backends]
+// [FOG_GUI]
 // ============================================================================
 
 //! @brief Whether to build Windows GUI support.
@@ -117,6 +119,13 @@
 #cmakedefine FOG_GUI_MAC
 //! @brief Whether to build X11 GUI support (plugin).
 #cmakedefine FOG_GUI_X11
+
+// ============================================================================
+// [FOG_INSTALL]
+// ============================================================================
+
+//! @brief Install prefix specified by configure parameters.
+#define FOG_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}"
 
 // [Guard]
 #endif // _FOG_CORE_CONFIG_DEFS_CONFIGCMAKE_H

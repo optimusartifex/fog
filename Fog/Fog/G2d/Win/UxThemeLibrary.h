@@ -1,14 +1,11 @@
-// [Fog-Core]
+// [Fog-G2d]
 //
 // [License]
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_WIN_WINUXTHEMELIBRARY_H
-#define _FOG_CORE_WIN_WINUXTHEMELIBRARY_H
-
-#include <Fog/Core/Config/Config.h>
-#if defined(FOG_OS_WINDOWS)
+#ifndef _FOG_G2D_WIN_UXTHEMELIBRARY_H
+#define _FOG_G2D_WIN_UXTHEMELIBRARY_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Class.h>
@@ -17,7 +14,7 @@
 #include <Fog/Gui/Global/Constants.h>
 
 // ============================================================================
-// [UxTheme Stuff]
+// [Fog::UxThemeLibrary - Defs]
 // ============================================================================
 
 // #include <uxtheme.h>
@@ -26,25 +23,25 @@ typedef HANDLE HPAINTBUFFER;
 
 namespace Fog {
 
-//! @addtogroup Fog_Gui_Engine
+//! @addtogroup Fog_G2d_Win
 //! @{
 
 // ============================================================================
-// [Fog::WinUxThemeLibrary]
+// [Fog::UxThemeLibrary]
 // ============================================================================
 
 //! @internal
 //!
 //! MSDN: Visual Styles Reference:
 //!   http://msdn.microsoft.com/en-us/library/bb773178%28v=VS.85%29.aspx
-struct FOG_API WinUxThemeLibrary
+struct FOG_API UxThemeLibrary
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  WinUxThemeLibrary();
-  ~WinUxThemeLibrary();
+  UxThemeLibrary();
+  ~UxThemeLibrary();
 
   // --------------------------------------------------------------------------
   // [Initialization]
@@ -103,7 +100,7 @@ struct FOG_API WinUxThemeLibrary
 private:
   err_t _init();
 
-  _FOG_CLASS_NO_COPY(WinUxThemeLibrary)
+  _FOG_CLASS_NO_COPY(UxThemeLibrary)
 };
 
 //! @}
@@ -111,5 +108,4 @@ private:
 } // Fog namespace
 
 // [Guard]
-#endif // FOG_OS_WINDOWS
-#endif // _FOG_CORE_WIN_WINUXTHEMELIBRARY_H
+#endif // _FOG_G2D_WIN_UXTHEMELIBRARY_H

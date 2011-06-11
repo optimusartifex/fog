@@ -84,8 +84,8 @@ struct FOG_API TextCodecHandler
 {
   virtual ~TextCodecHandler() = 0;
 
-  //! @brief Callback to replace the character which can't be encoded into
-  //! target 8-bit encoding.
+  //! @brief Callback to replace the character which can't be encoded into the
+  //! target stream (buffer).
   //!
   //! @param dst Destination where to write the replacement.
   //! @param ch Unicode character to replace.
@@ -94,7 +94,7 @@ struct FOG_API TextCodecHandler
   //!
   //! @note This function should use only low 0-127 ascii characters on the
   //! output.
-  virtual err_t replace8BitCharacter(ByteArray& dst, uint32_t uc, size_t pos) = 0;
+  virtual err_t replaceCharacter(ByteArray& dst, uint32_t uc, size_t pos) = 0;
 };
 
 // ============================================================================
@@ -271,16 +271,16 @@ struct FOG_API TextCodec
   FOG_INLINE uint32_t getFlags() const { return _d->flags; }
   FOG_INLINE const char* getMime() const { return _d->mime; }
 
-  FOG_INLINE bool isTable() const { return (_d->flags & TEXT_CODEC_IS_TABLE) != 0; }
-  FOG_INLINE bool isUnicode() const { return (_d->flags & TEXT_CODEC_IS_UNICODE) != 0; }
+  FOG_INLINE bool isTable() const { return (_d->flags & TEXT_ENCODING_IS_TABLE) != 0; }
+  FOG_INLINE bool isUnicode() const { return (_d->flags & TEXT_ENCODING_IS_UNICODE) != 0; }
 
-  FOG_INLINE bool isLittleEndian() const { return (_d->flags & TEXT_CODEC_IS_LE) != 0; }
-  FOG_INLINE bool isBigEndian() const { return (_d->flags & TEXT_CODEC_IS_LE) != 0; }
+  FOG_INLINE bool isLittleEndian() const { return (_d->flags & TEXT_ENCODING_IS_LE) != 0; }
+  FOG_INLINE bool isBigEndian() const { return (_d->flags & TEXT_ENCODING_IS_LE) != 0; }
 
-  FOG_INLINE bool is8Bit() const { return (_d->flags & TEXT_CODEC_IS_8BIT) != 0; }
-  FOG_INLINE bool is16Bit() const { return (_d->flags & TEXT_CODEC_IS_16BIT) != 0; }
-  FOG_INLINE bool is32Bit() const { return (_d->flags & TEXT_CODEC_IS_32BIT) != 0; }
-  FOG_INLINE bool isVarLength() const { return (_d->flags & TEXT_CODEC_IS_VARLEN) != 0; }
+  FOG_INLINE bool is8Bit() const { return (_d->flags & TEXT_ENCODING_IS_8BIT) != 0; }
+  FOG_INLINE bool is16Bit() const { return (_d->flags & TEXT_ENCODING_IS_16BIT) != 0; }
+  FOG_INLINE bool is32Bit() const { return (_d->flags & TEXT_ENCODING_IS_32BIT) != 0; }
+  FOG_INLINE bool isVarLength() const { return (_d->flags & TEXT_ENCODING_IS_VARLEN) != 0; }
 
   FOG_INLINE const TextCodecPage8* getPage8() const { return _d->page8; }
 

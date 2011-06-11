@@ -1,4 +1,4 @@
-// [Fog-Core]
+// [Fog-G2d]
 //
 // [License]
 // MIT, See COPYING file in package
@@ -8,34 +8,30 @@
 #include FOG_PRECOMP
 #endif // FOG_PRECOMP
 
-// [Guard]
-#include <Fog/Core/Config/Config.h>
-#if defined(FOG_OS_WINDOWS)
-
 // [Dependencies]
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/Debug.h>
 #include <Fog/Core/Library/Library.h>
 #include <Fog/Core/Threading/Lock.h>
-#include <Fog/Core/Win/WinUxThemeLibrary.h>
+#include <Fog/G2d/Win/UxThemeLibrary.h>
 
 namespace Fog {
 
 // ============================================================================
-// [Fog::WinUxThemeLibrary]
+// [Fog::UxThemeLibrary]
 // ============================================================================
 
-WinUxThemeLibrary::WinUxThemeLibrary() :
+UxThemeLibrary::UxThemeLibrary() :
   err(0xFFFFFFFF)
 {
 }
 
-WinUxThemeLibrary::~WinUxThemeLibrary()
+UxThemeLibrary::~UxThemeLibrary()
 {
   close();
 }
 
-err_t WinUxThemeLibrary::init()
+err_t UxThemeLibrary::init()
 {
   if (err == 0xFFFFFFFF)
   {
@@ -47,13 +43,13 @@ err_t WinUxThemeLibrary::init()
   return err;
 }
 
-void WinUxThemeLibrary::close()
+void UxThemeLibrary::close()
 {
   dll.close();
   err = 0xFFFFFFFF;
 }
 
-err_t WinUxThemeLibrary::_init()
+err_t UxThemeLibrary::_init()
 {
   static const char xp_symbols[] =
     "OpenThemeData\0"
@@ -94,7 +90,7 @@ err_t WinUxThemeLibrary::_init()
     NUM_XP_SYMBOLS, (char**)&badSymbol) != NUM_XP_SYMBOLS)
   {
     // Some symbol failed to load? Inform about it.
-    Debug::dbgFunc("Fog::WinUxThemeLibrary", "init", "Can't load symbol '%s'.\n", badSymbol);
+    Debug::dbgFunc("Fog::UxThemeLibrary", "init", "Can't load symbol '%s'.\n", badSymbol);
     dll.close();
     return ERR_THEME_NATIVE_NOT_AVAILABLE;
   }
@@ -111,6 +107,3 @@ err_t WinUxThemeLibrary::_init()
 }
 
 } // Fog namespace
-
-// [Guard]
-#endif // FOG_OS_WINDOWS

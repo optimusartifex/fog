@@ -13,10 +13,12 @@
 #include <Fog/Core/Tools/ByteArray.h>
 #include <Fog/Core/Tools/String.h>
 
+// [Dependencies - Windows]
 #if defined(FOG_OS_WINDOWS)
 #include <windows.h>
 #endif // FOG_OS_WINDOWS
 
+// [Dependencies - Posix]
 #if defined(FOG_OS_POSIX)
 #include <sys/stat.h>
 #include <dirent.h>

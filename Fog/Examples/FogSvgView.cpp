@@ -269,7 +269,6 @@ void MyWindow::onPaint(PaintEvent* e)
     p->setSource(Argb32(0xFFFF0000));
     p->fillPath(path);
   }
-
   // p->fillText(PointI(0, 0), text, getFont());
 }
 

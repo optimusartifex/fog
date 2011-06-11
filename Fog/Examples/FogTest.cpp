@@ -197,6 +197,35 @@ void MyWindow::onPaint(PaintEvent* e)
 
   p->restore();
 
+  /*
+  {
+    uint i, j;
+    p->setLineWidth(1.5f);
+
+    for (i = 10; i < 100; i++)
+    {
+      PathF p0;
+
+      for (j = 0; j < i; j++)
+      {
+        PointF pt0((rand() % 1000) - 200, (rand() % 1000) - 200);
+        PointF pt1((rand() % 1000) - 200, (rand() % 1000) - 200);
+        PointF pt2((rand() % 1000) - 200, (rand() % 1000) - 200);
+
+        if (j == 0)
+          p0.moveTo(pt0);
+        else
+          p0.cubicTo(pt0, pt1, pt2);
+      }
+
+      p->setSource(Argb32(0xFFFF0000));
+      p->fillPath(p0);
+      p->setSource(Argb32(0xFF000000));
+      p->drawPath(p0);
+    }
+  }
+  */
+
   if (pie.getBoundingBox(box, tr) == ERR_OK)
   {
     p->setSource(Argb32(0xFF000000));

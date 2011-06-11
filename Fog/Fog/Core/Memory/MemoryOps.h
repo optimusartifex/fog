@@ -305,15 +305,15 @@ static FOG_INLINE bool eq_8(const void* a, const void* b)
 
 static FOG_INLINE bool eq_16(const void* a, const void* b)
 {
-#if FOG_ARCH_BITS >= 64
-  return ((uint64_t *)a)[0] == ((uint64_t *)b)[0] &
-         ((uint64_t *)a)[1] == ((uint64_t *)b)[1] ;
-#elif defined(FOG_HARDCODE_SSE2)
+#if defined(FOG_HARDCODE_SSE2)
   __m128i xmm0a = _mm_loadu_si128((__m128i*)(a) + 0);
   __m128i xmm0b = _mm_loadu_si128((__m128i*)(b) + 0);
 
   xmm0a = _mm_cmpeq_epi8(xmm0a, xmm0b);
   return _mm_movemask_epi8(xmm0a) == 0xFFFF;
+#elif FOG_ARCH_BITS >= 64
+  return (((uint64_t *)a)[0] == ((uint64_t *)b)[0]) &
+         (((uint64_t *)a)[1] == ((uint64_t *)b)[1]) ;
 #else
   return (((uint32_t *)a)[0] == ((uint32_t *)b)[0]) &
          (((uint32_t *)a)[1] == ((uint32_t *)b)[1]) &

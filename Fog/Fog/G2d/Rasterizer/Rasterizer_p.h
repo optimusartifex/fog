@@ -29,37 +29,27 @@ namespace Fog {
 struct MemoryBuffer;
 
 // --------------------------------------------------------------------------
-// [Fog::RASTERIZER_SHAPE]
+// [Fog::RASTERIZER_FILL]
 // --------------------------------------------------------------------------
 
-//! @brief Rasterizer shape.
+//! @brief Rasterizer fill shape.
 //!
-//! Analytic rasterizer contains fast-paths which may be used to rasterizer
-//! specific shapes. The common, the most universal shape, which can be used
-//! by any path-data is @c SHAPE_TYPE_PATH. All other shapes are specific to
-//! the input data.
-//!
-//! @note All shapes are filled.
-enum RASTERIZER_SHAPE
+//! The rasterizer contains special fast-paths which may be used to rasterize
+//! simple shapes. The generic fill-type is @c RASTERIZER_FILL_PATH, which 
+//! can be used to fill any shape (polygon based or complex path). All other 
+//! fill-types are specific to simple shapes like rect, line, and others...
+enum RASTERIZER_FILL
 {
   //! @brief Initial state.
-  RASTERIZER_SHAPE_NONE = 0,
+  RASTERIZER_FILL_NONE = 0,
 
   //! @brief Path (universal).
-  RASTERIZER_SHAPE_PATH = 1,
+  RASTERIZER_FILL_PATH = 1,
 
   //! @brief Rectangle, only subpixel translation.
   //!
-  //! The data is stored in @c RectShape structure, allocated by @c CellStorage.
-  RASTERIZER_SHAPE_RECT = 2,
-
-  // TODO: Not implemented, convert to SHAPE_LINE
-
-  //! @brief Rectangle after affine transform, may be used also for
-  //! BUTT or SQUARE lines.
-  //!
-  //! The data is stored in @c LineShape structure, allocated by @c CellStorage.
-  RASTERIZER_SHAPE_LINE = 3
+  //! The data is stored in @c FillRect structure, allocated by @c CellStorage.
+  RASTERIZER_FILL_RECT = 2
 };
 
 // ============================================================================
@@ -172,7 +162,7 @@ enum RASTERIZER_SHAPE
 struct FOG_NO_EXPORT Rasterizer8
 {
   // --------------------------------------------------------------------------
-  // [Cell Storage]
+  // [CellStorage]
   // --------------------------------------------------------------------------
 
   //! @internal
@@ -180,11 +170,19 @@ struct FOG_NO_EXPORT Rasterizer8
   //! @brief Cell storage, contains chunks for thousands of cells.
   struct FOG_NO_EXPORT CellStorage
   {
+    // ------------------------------------------------------------------------
+    // [Constants]
+    // ------------------------------------------------------------------------
+
     enum
     {
       //! @brief Size of @c CellStorage buffer, including members.
       STORAGE_SIZE = 32768 - 80
     };
+
+    // ------------------------------------------------------------------------
+    // [Setup]
+    // ------------------------------------------------------------------------
 
     //! @brief Setup this cell storage, providing the data and chunk size.
     //! @param storageSize Size of storage within CellStorage data.
@@ -202,6 +200,10 @@ struct FOG_NO_EXPORT Rasterizer8
       _chunkEnd = _dataBuffer + numBytes / chunkSize * chunkSize;//(uint8_t*)(((size_t)this + storageSize) & ~(_chunkSize-1));
       _chunkSize = chunkSize;
     }
+
+    // ------------------------------------------------------------------------
+    // [Accessors]
+    // ------------------------------------------------------------------------
 
     //! @brief Get the previous cell storage.
     FOG_INLINE CellStorage* getPrev() const { return _prev; }
@@ -222,6 +224,10 @@ struct FOG_NO_EXPORT Rasterizer8
     FOG_INLINE uint8_t* getChunkEnd() const { return _chunkEnd; }
     //! @brief Get the chunk size.
     FOG_INLINE size_t getChunkSize() const { return _chunkSize; }
+
+    // ------------------------------------------------------------------------
+    // [Members]
+    // ------------------------------------------------------------------------
 
     //! @brief Previous storage (fully used ones, can be NULL).
     CellStorage* _prev;
@@ -256,11 +262,19 @@ struct FOG_NO_EXPORT Rasterizer8
   //! @brief Compact version of cell that fits into DWORD (32-bit integer).
   struct FOG_NO_EXPORT CellD
   {
+    // ------------------------------------------------------------------------
+    // [Constants]
+    // ------------------------------------------------------------------------
+
     enum
     {
       //! @brief Maximum x position in @c Rasterizer8::CellD (12-bit, 8191).
       MAX_X = 0x00001FFF
     };
+
+    // ------------------------------------------------------------------------
+    // [Accessors]
+    // ------------------------------------------------------------------------
 
     //! @brief Set all cell values at once.
     FOG_INLINE void setData(int x, int cover, int weight)
@@ -292,6 +306,10 @@ struct FOG_NO_EXPORT Rasterizer8
     //! @brief Get comparable value (for sorting).
     FOG_INLINE uint32_t getComparable() const { return _combined; }
 
+    // ------------------------------------------------------------------------
+    // [Members]
+    // ------------------------------------------------------------------------
+
     //! @brief X, cover and area packed in a DWORD.
     uint32_t _combined;
   };
@@ -300,6 +318,10 @@ struct FOG_NO_EXPORT Rasterizer8
   //! @brief Small chunk of @c CellD instances.
   struct FOG_NO_EXPORT ChunkD
   {
+    // ------------------------------------------------------------------------
+    // [Constants]
+    // ------------------------------------------------------------------------
+
     enum
     {
       //! @brief Size of this chunk.
@@ -307,6 +329,10 @@ struct FOG_NO_EXPORT Rasterizer8
       //! @brief Count of cells in this chunk.
       CELLS_COUNT = (CHUNK_SIZE - sizeof(void*)) / sizeof(CellD)
     };
+
+    // ------------------------------------------------------------------------
+    // [Accessors]
+    // ------------------------------------------------------------------------
 
     //! @brief Get previous cell chunks.
     FOG_INLINE ChunkD* getPrev() const { return (ChunkD*)( (sysint_t)_prev & (sysint_t)-64 ); }
@@ -338,6 +364,10 @@ struct FOG_NO_EXPORT Rasterizer8
       _prev = (uint8_t*)((size_t)_prev & ~(size_t)63) + count;
     }
 
+    // ------------------------------------------------------------------------
+    // [Members]
+    // ------------------------------------------------------------------------
+
     //! @brief Link to prevous cells.
     //!
     //! @note _prev contains pointer and cells counter. The pointer is always
@@ -358,11 +388,19 @@ struct FOG_NO_EXPORT Rasterizer8
   //! @brief Full version of cell that fits into QWORD (64-bit integer).
   struct FOG_NO_EXPORT CellQ
   {
+    // ------------------------------------------------------------------------
+    // [Constants]
+    // ------------------------------------------------------------------------
+
     enum
     {
       //! @brief Maximum x position in @c Rasterizer8::CellQ (32-bit).
       MAX_X = 0xFFFFFFFF
     };
+
+    // ------------------------------------------------------------------------
+    // [Accessors]
+    // ------------------------------------------------------------------------
 
     //! @brief Set all cell values at once.
     FOG_INLINE void setData(int x, int cover, int weight)
@@ -394,6 +432,10 @@ struct FOG_NO_EXPORT Rasterizer8
     //! @brief Get comparable value (for sorting).
     FOG_INLINE uint32_t getComparable() const { return _x; }
 
+    // ------------------------------------------------------------------------
+    // [Members]
+    // ------------------------------------------------------------------------
+
     union
     {
       struct
@@ -415,6 +457,10 @@ struct FOG_NO_EXPORT Rasterizer8
   //! @brief Small chunk of @c CellQ instances.
   struct FOG_NO_EXPORT ChunkQ
   {
+    // ------------------------------------------------------------------------
+    // [Constants]
+    // ------------------------------------------------------------------------
+
     enum
     {
       //! @brief Size of this chunk.
@@ -422,6 +468,10 @@ struct FOG_NO_EXPORT Rasterizer8
       //! @brief Count of cells in this chunk.
       CELLS_COUNT = (CHUNK_SIZE - sizeof(void*)) / sizeof(CellQ)
     };
+
+    // ------------------------------------------------------------------------
+    // [Accessors]
+    // ------------------------------------------------------------------------
 
     //! @brief Get previous cell chunks.
     FOG_INLINE ChunkQ* getPrev() const { return (ChunkQ*)( (sysint_t)_prev & (sysint_t)-64 ); }
@@ -453,6 +503,10 @@ struct FOG_NO_EXPORT Rasterizer8
       _prev = (uint8_t*)((size_t)_prev & ~(size_t)63) + count;
     }
 
+    // ------------------------------------------------------------------------
+    // [Members]
+    // ------------------------------------------------------------------------
+
     //! @brief Link to prevous cells.
     //!
     //! @note _prev contains pointer and cells counter. The pointer is always
@@ -467,8 +521,12 @@ struct FOG_NO_EXPORT Rasterizer8
     CellQ _cells[CELLS_COUNT];
   };
 
+  // --------------------------------------------------------------------------
+  // [FillRect]
+  // --------------------------------------------------------------------------
+
   //! @brief Structure that holds data related to @c SHAPE_TYPE_SUBPX_RECTANGLE.
-  struct FOG_NO_EXPORT RectShape
+  struct FOG_NO_EXPORT FillRect
   {
     //! @brief Bounding box.
     BoxI bounds;
@@ -486,8 +544,12 @@ struct FOG_NO_EXPORT Rasterizer8
     uint32_t coverageB[4];
   };
 
+  // --------------------------------------------------------------------------
+  // [FastLine]
+  // --------------------------------------------------------------------------
+
   //! @brief Structure that holds data related to @c SHAPE_TYPE_AFFINE_RECTANGLE.
-  struct FOG_NO_EXPORT LineShape
+  struct FOG_NO_EXPORT FastLine
   {
   };
 
@@ -610,6 +672,11 @@ struct FOG_NO_EXPORT Rasterizer8
   // --------------------------------------------------------------------------
 
   //! @brief Convert any shape that is being rasterized to the @c SHAPE_TYPE_PATH.
+  //!
+  //! This method is used to switch to scanline polygon rasterizer. It's called
+  //! in case that simple shape rasterizer is being used, but another shape is
+  //! added to the rasterizer, thus it's not possible to finish rasterization
+  //! using the simple-shape rasterizer.
   void switchToPath();
 
   // --------------------------------------------------------------------------
@@ -694,10 +761,10 @@ struct FOG_NO_EXPORT Rasterizer8
   //! @brief Alpha.
   uint32_t _alpha;
 
-  //! @brief Fill rule;
+  //! @brief Fill rule (see @c FILL_RULE);
   uint8_t _fillRule;
-  //! @brief Shape type.
-  uint8_t _shape;
+  //! @brief Fill shape (see @c RASTERIZER_FILL).
+  uint8_t _fillShape;
 
   //! @brief Whether the rasterized object is empty (no-paint).
   uint8_t _isValid;

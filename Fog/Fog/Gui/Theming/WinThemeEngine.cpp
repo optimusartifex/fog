@@ -15,9 +15,9 @@
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Library/Library.h>
 #include <Fog/Core/Threading/Lock.h>
-#include <Fog/Core/Win/WinUxThemeLibrary.h>
 #include <Fog/G2d/Painting/Painter.h>
 #include <Fog/Gui/Theming/WinThemeEngine_p.h>
+#include <Fog/G2d/Win/UxThemeLibrary.h>
 
 FOG_IMPLEMENT_OBJECT(Fog::WinThemeEngine)
 

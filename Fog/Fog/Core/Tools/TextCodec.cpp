@@ -50,7 +50,7 @@ struct TextCodecDefaultHandler : public TextCodecHandler
   {
   }
 
-  virtual err_t replace8BitCharacter(ByteArray& dst, uint32_t uc, size_t pos)
+  virtual err_t replaceCharacter(ByteArray& dst, uint32_t uc, size_t pos)
   {
     return dst.appendFormat("\\u%0.4X", uc);
   }
@@ -93,9 +93,9 @@ static FOG_INLINE void _TextCodec_deref(TextCodecData* d)
 static FOG_INLINE bool _TextCodec_isByteSwappedOnInit(const TextCodecData* d)
 {
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-  return (d->flags & TEXT_CODEC_IS_BE) != 0;
+  return (d->flags & TEXT_ENCODING_IS_BE) != 0;
 #else
-  return (d->flags & TEXT_CODEC_IS_LE) != 0;
+  return (d->flags & TEXT_ENCODING_IS_LE) != 0;
 #endif // FOG_BYTE_ORDER
 }
 
@@ -151,6 +151,132 @@ static TextCodecData* _TextCodec_None_create(const TextCodecItem& item)
   d->page8 = NULL;
 
   return d;
+}
+
+// ============================================================================
+// [Fog::TextCodec - ISO-8859-1]
+// ============================================================================
+
+// The ISO-8859-1 encoding is compatible to the first 0-255 characters in the
+// Unicode.
+
+static err_t FOG_CDECL _TextCodec_ISO8859_1_encode(const TextCodecData* d, 
+  ByteArray& dst, const Char* src, size_t srcLength, TextCodecState* state,
+  TextCodecHandler* handler)
+{
+  // Length initialization and check.
+  if (srcLength == DETECT_LENGTH) srcLength = StringUtil::len(src);
+  if (srcLength == 0) return ERR_OK;
+  if (handler == NULL) handler = _TextCodecHandler_default.instancep();
+
+  // Source buffer.
+  const Char* srcCur = src;
+  const Char* srcEnd = src + srcLength;
+
+  // Destination buffer.
+  size_t initSize = dst.getLength();
+  size_t growSize = srcLength + 1;
+
+  err_t err = dst.grow(growSize);
+  if (FOG_IS_ERROR(err)) return err;
+
+  uint8_t* dstCur = reinterpret_cast<uint8_t*>(dst.getDataX()) + initSize;
+
+  // Characters.
+  Char uc0, uc1;
+
+  if (state && state->getBufferLength() == 2)
+  {
+    uc0 = reinterpret_cast<uint16_t*>(state->_buffer)[0];
+    state->_bufferLength = 0;
+    goto _SurrogateTrail;
+  }
+
+_Loop:
+  while (srcCur != srcEnd)
+  {
+    uc0 = *srcCur++;
+
+    if (FOG_LIKELY(uc0.ch() < 256))
+    {
+      *dstCur++ = (uint8_t)uc0.ch();
+    }
+    else
+    {
+      // Finalize dst.
+      dst.finishDataX(reinterpret_cast<char*>(dstCur));
+
+      if (uc0.isLeadSurrogate())
+      {
+        // Incomplete surrogate pair.
+        if (srcCur == srcEnd)
+        {
+          if (state == NULL)
+          {
+            err = ERR_STRING_TRUNCATED;
+            goto _End;
+          }
+
+          reinterpret_cast<uint16_t*>(state->_buffer)[0] = uc0;
+          state->_bufferLength = 2;
+          goto _End;
+        }
+
+_SurrogateTrail:
+        uc1 = *srcCur++;
+        if (!uc1.isTrailSurrogate())
+        {
+          err = ERR_STRING_INVALID_UTF16;
+          goto _End;
+        }
+
+        err = handler->replaceCharacter(dst, Char::fromSurrogate(uc0, uc1), (size_t)(srcCur - src) - 2);
+        if (FOG_IS_ERROR(err)) return err;
+      }
+      else
+      {
+        err = handler->replaceCharacter(dst, uc0.ch(), (size_t)(srcCur - src));
+        if (FOG_IS_ERROR(err)) return err;
+      }
+
+      err = dst.reserve(dst.getLength() + (size_t)(srcEnd - srcCur));
+      if (FOG_IS_ERROR(err)) return err;
+
+      dstCur = reinterpret_cast<uint8_t*>(dst.getDataX()) + dst.getLength();
+    }
+  }
+
+_End:
+  dst.finishDataX(reinterpret_cast<char*>(dstCur));
+  return err;
+}
+
+static err_t FOG_CDECL _TextCodec_ISO8859_1_decode(const TextCodecData* d,
+  String& dst, const void* src, size_t srcSize, TextCodecState* state)
+{
+  // Source Buffer.
+  if (srcSize == DETECT_LENGTH) srcSize = strlen(reinterpret_cast<const char*>(src));
+
+  const uint8_t* srcCur = reinterpret_cast<const uint8_t*>(src);
+  const uint8_t* srcEnd = srcCur + srcSize;
+
+  // Destination Buffer.
+  size_t initSize = dst.getLength();
+  size_t growSize = srcSize + 1;
+
+  err_t err = dst.grow(growSize);
+  if (FOG_IS_ERROR(err)) return err;
+
+  Char* dstCur = dst.getDataX() + initSize;
+
+  for (;;)
+  {
+    *dstCur++ = *srcCur++;
+    if (srcCur == srcEnd) break;
+  }
+
+  dst.finishDataX(dstCur);
+  return ERR_OK;
 }
 
 // ============================================================================
@@ -240,7 +366,12 @@ _Loop:
       // Incomplete surrogate pair.
       if (srcCur == srcEnd)
       {
-        if (!state) { err = ERR_STRING_TRUNCATED; goto _End; }
+        if (state == NULL)
+        {
+          err = ERR_STRING_TRUNCATED;
+          goto _End;
+        }
+
         reinterpret_cast<uint16_t*>(state->_buffer)[0] = uc0;
         state->_bufferLength = 2;
         goto _End;
@@ -252,7 +383,7 @@ _SurrogateTrail:
 
       // Need to finalize dst.
       dst.finishDataX(reinterpret_cast<char*>(dstCur));
-      err = handler->replace8BitCharacter(dst, Char::fromSurrogate(uc0, uc1), (size_t)(srcCur - src) - 2);
+      err = handler->replaceCharacter(dst, Char::fromSurrogate(uc0, uc1), (size_t)(srcCur - src) - 2);
 
       goto _Replaced;
     }
@@ -263,10 +394,10 @@ _SurrogateTrail:
       {
         // Need to finalize dst, append and reserve for next appending.
         dst.finishDataX(reinterpret_cast<char*>(dstCur));
-        err = handler->replace8BitCharacter(dst, uc0, (size_t)(srcCur - src) - 1);
+        err = handler->replaceCharacter(dst, uc0, (size_t)(srcCur - src) - 1);
 
 _Replaced:
-        if (FOG_IS_ERROR(err)) goto _End;
+        if (FOG_IS_ERROR(err)) return err;
         
         err = dst.reserve(dst.getLength() + (size_t)(srcEnd - srcCur));
         if (FOG_IS_ERROR(err)) return err;
@@ -346,8 +477,19 @@ static TextCodecData* _TextCodec_8Bit_create(const TextCodecItem& item)
 
   d->refCount.init(1);
   d->destroy = _TextCodec_8Bit_destroy;
-  d->encode = _TextCodec_8Bit_encode;
-  d->decode = _TextCodec_8Bit_decode;
+
+  if (item.code == TEXT_ENCODING_ISO8859_1)
+  {
+    // Optimized ISO-8859-1 (Latin1) encode/decode.
+    d->encode = _TextCodec_ISO8859_1_encode;
+    d->decode = _TextCodec_ISO8859_1_decode;
+  }
+  else
+  {
+    // Generic table based encode/decode.
+    d->encode = _TextCodec_8Bit_encode;
+    d->decode = _TextCodec_8Bit_decode;
+  }
 
   d->code = item.code;
   d->flags = item.flags;
@@ -453,7 +595,12 @@ _Loop:
       // Incomplete surrogate pair.
       if (srcCur == srcEnd)
       {
-        if (!state) { err = ERR_STRING_TRUNCATED; goto _End; }
+        if (state == NULL)
+        {
+          err = ERR_STRING_TRUNCATED;
+          goto _End;
+        }
+
         reinterpret_cast<uint16_t*>(state->_buffer)[0] = uc0;
         state->_bufferLength = 2;
         goto _End;
@@ -719,7 +866,12 @@ _Loop:
       // Incomplete surrogate pair.
       if (srcCur == srcEnd)
       {
-        if (!state) { err = ERR_STRING_TRUNCATED; goto _End; }
+        if (state == NULL)
+        {
+          err = ERR_STRING_TRUNCATED;
+          goto _End;
+        }
+
         reinterpret_cast<uint16_t*>(state->_buffer)[0] = uc0;
         state->_bufferLength = 2;
         goto _End;
@@ -965,7 +1117,12 @@ _Loop:
       // Incomplete surrogate pair.
       if (srcCur == srcEnd)
       {
-        if (!state) { err = ERR_STRING_TRUNCATED; goto _End; }
+        if (state == NULL)
+        {
+          err = ERR_STRING_TRUNCATED;
+          goto _End;
+        }
+
         reinterpret_cast<uint16_t*>(state->_buffer)[0] = uc0;
         state->_bufferLength = 2;
         goto _End;
@@ -976,7 +1133,7 @@ _SurrogateTrail:
       if (!uc1.isTrailSurrogate()) { err = ERR_STRING_INVALID_UTF16; goto _End; }
 
       {
-        err = handler->replace8BitCharacter(buf, Char::fromSurrogate(uc0, uc1), (size_t)(srcCur - src) - 2);
+        err = handler->replaceCharacter(buf, Char::fromSurrogate(uc0, uc1), (size_t)(srcCur - src) - 2);
         if (FOG_IS_ERROR(err)) goto _End;
 
         // Need to finalize dst, append and reserve for next appending.
@@ -1184,7 +1341,12 @@ _Loop:
       // Incomplete surrogate pair.
       if (srcCur == srcEnd)
       {
-        if (!state) { err = ERR_STRING_TRUNCATED; goto _End; }
+        if (state == NULL)
+        {
+          err = ERR_STRING_TRUNCATED;
+          goto _End;
+        }
+
         reinterpret_cast<uint16_t*>(state->_buffer)[0] = uc0;
         state->_bufferLength = 2;
         goto _End;
@@ -1346,7 +1508,7 @@ static TextCodecData* _TextCodec_UTF32_create(const TextCodecItem& item)
 
 #define _INIT_NONE(_Code_, _Mime_) \
   { \
-    TEXT_CODEC_##_Code_, \
+    TEXT_ENCODING_##_Code_, \
     NO_FLAGS, \
     _TextCodec_None_create, \
     _Mime_, \
@@ -1355,8 +1517,8 @@ static TextCodecData* _TextCodec_UTF32_create(const TextCodecItem& item)
 
 #define _INIT_8BIT(_Code_, _Mime_) \
   { \
-    TEXT_CODEC_##_Code_, \
-    TEXT_CODEC_IS_TABLE | TEXT_CODEC_IS_8BIT, \
+    TEXT_ENCODING_##_Code_, \
+    TEXT_ENCODING_IS_TABLE | TEXT_ENCODING_IS_8BIT, \
     _TextCodec_8Bit_create, \
     _Mime_, \
     _TextCodec_Table_##_Code_ \
@@ -1364,8 +1526,8 @@ static TextCodecData* _TextCodec_UTF32_create(const TextCodecItem& item)
 
 #define _INIT_UTF8(_Code_, _Mime_) \
   { \
-    TEXT_CODEC_##_Code_, \
-    TEXT_CODEC_IS_UNICODE | TEXT_CODEC_IS_8BIT | TEXT_CODEC_IS_VARLEN, \
+    TEXT_ENCODING_##_Code_, \
+    TEXT_ENCODING_IS_UNICODE | TEXT_ENCODING_IS_8BIT | TEXT_ENCODING_IS_VARLEN, \
     _TextCodec_UTF8_create, \
     _Mime_, \
     NULL \
@@ -1373,8 +1535,8 @@ static TextCodecData* _TextCodec_UTF32_create(const TextCodecItem& item)
 
 #define _INIT_UTF16(_Code_, _Mime_, _Flags_) \
   { \
-    TEXT_CODEC_##_Code_, \
-    TEXT_CODEC_IS_UNICODE | TEXT_CODEC_IS_16BIT | TEXT_CODEC_IS_VARLEN | _Flags_, \
+    TEXT_ENCODING_##_Code_, \
+    TEXT_ENCODING_IS_UNICODE | TEXT_ENCODING_IS_16BIT | TEXT_ENCODING_IS_VARLEN | _Flags_, \
     _TextCodec_UTF16_create, \
     _Mime_, \
     NULL \
@@ -1382,8 +1544,8 @@ static TextCodecData* _TextCodec_UTF32_create(const TextCodecItem& item)
 
 #define _INIT_UTF32(_Code_, _Mime_, _Flags_) \
   { \
-    TEXT_CODEC_##_Code_, \
-    TEXT_CODEC_IS_UNICODE | TEXT_CODEC_IS_32BIT | _Flags_, \
+    TEXT_ENCODING_##_Code_, \
+    TEXT_ENCODING_IS_UNICODE | TEXT_ENCODING_IS_32BIT | _Flags_, \
     _TextCodec_UTF32_create, \
     _Mime_, \
     NULL \
@@ -1391,14 +1553,14 @@ static TextCodecData* _TextCodec_UTF32_create(const TextCodecItem& item)
 
 #define _INIT_UCS2(_Code_, _Mime_, _Flags_) \
   { \
-    TEXT_CODEC_##_Code_, \
-    TEXT_CODEC_IS_UNICODE | TEXT_CODEC_IS_16BIT | _Flags_, \
+    TEXT_ENCODING_##_Code_, \
+    TEXT_ENCODING_IS_UNICODE | TEXT_ENCODING_IS_16BIT | _Flags_, \
     _TextCodec_UCS2_create, \
     _Mime_, \
     NULL \
   }
 
-// ${TEXT_CODEC:BEGIN}
+// ${TEXT_ENCODING:BEGIN}
 static const TextCodecItem _TextCodec_items[] =
 {
   _INIT_NONE(NONE       , "NONE\0"), 
@@ -1450,24 +1612,24 @@ static const TextCodecItem _TextCodec_items[] =
   _INIT_UTF8(UTF8       , "UTF-8\0"),
 
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-  _INIT_UTF16(UTF16_LE  , "UTF-16LE\0" "UTF-16\0", TEXT_CODEC_IS_LE),
-  _INIT_UTF16(UTF16_BE  , "UTF-16BE\0"           , TEXT_CODEC_IS_BE),
-  _INIT_UTF32(UTF32_LE  , "UTF-32LE\0" "UTF-32\0", TEXT_CODEC_IS_LE),
-  _INIT_UTF32(UTF32_BE  , "UTF-32BE\0"           , TEXT_CODEC_IS_BE),
-  _INIT_UCS2 (UCS2_LE   , "UCS-2LE\0" "UCS-2\0"  , TEXT_CODEC_IS_LE),
-  _INIT_UCS2 (UCS2_BE   , "UCS-2BE\0"            , TEXT_CODEC_IS_BE),
+  _INIT_UTF16(UTF16_LE  , "UTF-16LE\0" "UTF-16\0", TEXT_ENCODING_IS_LE),
+  _INIT_UTF16(UTF16_BE  , "UTF-16BE\0"           , TEXT_ENCODING_IS_BE),
+  _INIT_UTF32(UTF32_LE  , "UTF-32LE\0" "UTF-32\0", TEXT_ENCODING_IS_LE),
+  _INIT_UTF32(UTF32_BE  , "UTF-32BE\0"           , TEXT_ENCODING_IS_BE),
+  _INIT_UCS2 (UCS2_LE   , "UCS-2LE\0" "UCS-2\0"  , TEXT_ENCODING_IS_LE),
+  _INIT_UCS2 (UCS2_BE   , "UCS-2BE\0"            , TEXT_ENCODING_IS_BE),
 #endif // FOG_LITTLE_ENDIAN
 
 #if FOG_BYTE_ORDER == FOG_BIG_ENDIAN
-  _INIT_UTF16(UTF16_LE  , "UTF-16LE\0"           , TEXT_CODEC_IS_LE),
-  _INIT_UTF16(UTF16_BE  , "UTF-16BE\0" "UTF-16\0", TEXT_CODEC_IS_BE),
-  _INIT_UTF32(UTF32_LE  , "UTF-32LE\0"           , TEXT_CODEC_IS_LE),
-  _INIT_UTF32(UTF32_BE  , "UTF-32BE\0" "UTF-32\0", TEXT_CODEC_IS_BE),
-  _INIT_UCS2 (UCS2_LE   , "UCS-2LE\0"            , TEXT_CODEC_IS_LE),
-  _INIT_UCS2 (UCS2_BE   , "UCS-2BE\0" "UCS-2\0"  , TEXT_CODEC_IS_BE),
+  _INIT_UTF16(UTF16_LE  , "UTF-16LE\0"           , TEXT_ENCODING_IS_LE),
+  _INIT_UTF16(UTF16_BE  , "UTF-16BE\0" "UTF-16\0", TEXT_ENCODING_IS_BE),
+  _INIT_UTF32(UTF32_LE  , "UTF-32LE\0"           , TEXT_ENCODING_IS_LE),
+  _INIT_UTF32(UTF32_BE  , "UTF-32BE\0" "UTF-32\0", TEXT_ENCODING_IS_BE),
+  _INIT_UCS2 (UCS2_LE   , "UCS-2LE\0"            , TEXT_ENCODING_IS_LE),
+  _INIT_UCS2 (UCS2_BE   , "UCS-2BE\0" "UCS-2\0"  , TEXT_ENCODING_IS_BE),
 #endif // FOG_BIG_ENDIAN
 };
-// ${TEXT_CODEC:END}
+// ${TEXT_ENCODING:END}
 
 // ============================================================================
 // [Fog::TextCodec - Search]
@@ -1552,11 +1714,11 @@ static const char* _TextCodec_getCodeset(void)
 // [Fog::TextCodec - Cache]
 // ============================================================================
 
-static TextCodecData* _TextCodec_d[TEXT_CODEC_COUNT];
+static TextCodecData* _TextCodec_d[TEXT_ENCODING_COUNT];
 
 static TextCodecData* _TextCodec_create(uint32_t code)
 {
-  if (code >= TEXT_CODEC_COUNT) code = TEXT_CODEC_NONE;
+  if (code >= TEXT_ENCODING_COUNT) code = TEXT_ENCODING_NONE;
 
   TextCodecData** p = &_TextCodec_d[code];
   TextCodecData*  v = AtomicCore<TextCodecData*>::get(p);
@@ -1612,7 +1774,7 @@ TextCodec::~TextCodec()
 
 err_t TextCodec::createFromCode(uint32_t code)
 {
-  if (code >= TEXT_CODEC_COUNT)
+  if (code >= TEXT_ENCODING_COUNT)
     return ERR_RT_INVALID_ARGUMENT;
 
   TextCodecData* newd = _TextCodec_create(code);
@@ -1658,11 +1820,11 @@ err_t TextCodec::createFromBom(const void* data, size_t length)
 {
   static const TextCodecBom bomData[] =
   {
-    { TEXT_CODEC_UTF8    , 3, { 0xEF, 0xBB, 0xBF       } },
-    { TEXT_CODEC_UTF16_BE, 2, { 0xFE, 0xFF             } },
-    { TEXT_CODEC_UTF16_LE, 2, { 0xFF, 0xFE             } },
-    { TEXT_CODEC_UTF32_BE, 4, { 0x00, 0x00, 0xFE, 0xFF } },
-    { TEXT_CODEC_UTF32_LE, 4, { 0xFF, 0xFE, 0x00, 0x00 } }
+    { TEXT_ENCODING_UTF8    , 3, { 0xEF, 0xBB, 0xBF       } },
+    { TEXT_ENCODING_UTF16_BE, 2, { 0xFE, 0xFF             } },
+    { TEXT_ENCODING_UTF16_LE, 2, { 0xFF, 0xFE             } },
+    { TEXT_ENCODING_UTF32_BE, 4, { 0x00, 0x00, 0xFE, 0xFF } },
+    { TEXT_ENCODING_UTF32_LE, 4, { 0xFF, 0xFE, 0x00, 0x00 } }
   };
 
   for (size_t i = 0; i != FOG_ARRAY_SIZE(bomData); i++)
@@ -1743,17 +1905,18 @@ FOG_NO_EXPORT void _core_textcodec_init(void)
   _TextCodecHandler_default.init();
 
   // Initialize the 'd' cache.
-  Memory::zero(_TextCodec_d, sizeof(void*) * TEXT_CODEC_COUNT);
+  Memory::zero(_TextCodec_d, sizeof(void*) * TEXT_ENCODING_COUNT);
 
   // Initialize the cached codecs.
   TextCodec* cache = (TextCodec*)TextCodec::_cache;
 
-  cache[TEXT_CODEC_CACHE_NONE ]._d = _TextCodec_create(TEXT_CODEC_NONE     );
-  cache[TEXT_CODEC_CACHE_ASCII]._d = _TextCodec_create(TEXT_CODEC_ISO8859_1);
-  cache[TEXT_CODEC_CACHE_LOCAL]._d = _TextCodec_create(TEXT_CODEC_ISO8859_1);
-  cache[TEXT_CODEC_CACHE_UTF8 ]._d = _TextCodec_create(TEXT_CODEC_UTF8     );
-  cache[TEXT_CODEC_CACHE_UTF16]._d = _TextCodec_create(TEXT_CODEC_UTF16    );
-  cache[TEXT_CODEC_CACHE_UTF32]._d = _TextCodec_create(TEXT_CODEC_UTF32    );
+  // LOCAL codec is initially initialized to LATIN-1.
+  cache[TEXT_CODEC_CACHE_NONE ]._d = _TextCodec_create(TEXT_ENCODING_NONE     );
+  cache[TEXT_CODEC_CACHE_ASCII]._d = _TextCodec_create(TEXT_ENCODING_ISO8859_1);
+  cache[TEXT_CODEC_CACHE_LOCAL]._d = _TextCodec_create(TEXT_ENCODING_ISO8859_1);
+  cache[TEXT_CODEC_CACHE_UTF8 ]._d = _TextCodec_create(TEXT_ENCODING_UTF8     );
+  cache[TEXT_CODEC_CACHE_UTF16]._d = _TextCodec_create(TEXT_ENCODING_UTF16    );
+  cache[TEXT_CODEC_CACHE_UTF32]._d = _TextCodec_create(TEXT_ENCODING_UTF32    );
 
   // Initialize the local 8-bit text codec. 
   cache[TEXT_CODEC_CACHE_LOCAL].createFromMime(_TextCodec_getCodeset());

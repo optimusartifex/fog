@@ -8,8 +8,8 @@
 #define _FOG_G2D_SOURCE_CONICALGRADIENT_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/TypeVariant.h>
 #include <Fog/G2d/Source/Gradient.h>
 
 namespace Fog {
@@ -144,7 +144,7 @@ FOG_INLINE err_t ConicalGradientD::setGradient(const ConicalGradientD& other) { 
 // [Fog::ConicalGradientT<>]
 // ============================================================================
 
-FOG_TYPEVARIANT_DECLARE_F_D(ConicalGradient)
+FOG_CLASS_PRECISION_F_D(ConicalGradient)
 
 //! @}
 

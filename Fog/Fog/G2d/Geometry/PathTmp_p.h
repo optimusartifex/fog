@@ -158,7 +158,7 @@ struct FOG_NO_EXPORT PathTmpD : public PathD
 // [Fog::PathTmpT<>]
 // ============================================================================
 
-FOG_TYPEVARIANT_DECLARE_TEMPLATE1_F_D(PathTmp, size_t, N)
+FOG_CLASS_PRECISION_TEMPLATE1_F_D(PathTmp, size_t, N)
 
 //! @}
 

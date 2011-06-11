@@ -8,8 +8,8 @@
 #define _FOG_G2D_GEOMETRY_BOX_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/TypeVariant.h>
 #include <Fog/Core/Global/Uninitialized.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
@@ -1050,7 +1050,7 @@ FOG_INLINE RectD& RectD::setBox(const BoxI& other)
 // [Fog::BoxT<>]
 // ============================================================================
 
-FOG_TYPEVARIANT_DECLARE_F_D_I(Box)
+FOG_CLASS_PRECISION_F_D_I(Box)
 
 //! @}
 

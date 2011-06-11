@@ -461,163 +461,163 @@ enum STREAM_SEEK_MODE
 };
 
 // ============================================================================
-// [Fog::TEXT_CODEC]
+// [Fog::TEXT_ENCODING]
 // ============================================================================
 
 //! @brief Text-codec codes.
-enum TEXT_CODEC
+enum TEXT_ENCODING
 {
   //! @brief None, not initialized or signalizes error.
-  TEXT_CODEC_NONE = 0,
+  TEXT_ENCODING_NONE = 0,
 
   //! @brief ISO-8859-1 text-codec.
-  TEXT_CODEC_ISO8859_1 = 1,
+  TEXT_ENCODING_ISO8859_1 = 1,
   //! @brief ISO-8859-2 text-codec.
-  TEXT_CODEC_ISO8859_2 = 2,
+  TEXT_ENCODING_ISO8859_2 = 2,
   //! @brief ISO-8859-3 text-codec.
-  TEXT_CODEC_ISO8859_3 = 3,
+  TEXT_ENCODING_ISO8859_3 = 3,
   //! @brief ISO-8859-4 text-codec.
-  TEXT_CODEC_ISO8859_4 = 4,
+  TEXT_ENCODING_ISO8859_4 = 4,
   //! @brief ISO-8859-5 text-codec.
-  TEXT_CODEC_ISO8859_5 = 5,
+  TEXT_ENCODING_ISO8859_5 = 5,
   //! @brief ISO-8859-6 text-codec.
-  TEXT_CODEC_ISO8859_6 = 6,
+  TEXT_ENCODING_ISO8859_6 = 6,
   //! @brief ISO-8859-7 text-codec.
-  TEXT_CODEC_ISO8859_7 = 7,
+  TEXT_ENCODING_ISO8859_7 = 7,
   //! @brief ISO-8859-8 text-codec.
-  TEXT_CODEC_ISO8859_8 = 8,
+  TEXT_ENCODING_ISO8859_8 = 8,
   //! @brief ISO-8859-9 text-codec.
-  TEXT_CODEC_ISO8859_9 = 9,
+  TEXT_ENCODING_ISO8859_9 = 9,
   //! @brief ISO-8859-10 text-codec.
-  TEXT_CODEC_ISO8859_10 = 10,
+  TEXT_ENCODING_ISO8859_10 = 10,
   //! @brief ISO-8859-11 text-codec.
-  TEXT_CODEC_ISO8859_11 = 11,
+  TEXT_ENCODING_ISO8859_11 = 11,
   //! @brief ISO-8859-13 text-codec.
-  TEXT_CODEC_ISO8859_13 = 12,
+  TEXT_ENCODING_ISO8859_13 = 12,
   //! @brief ISO-8859-14 text-codec.
-  TEXT_CODEC_ISO8859_14 = 13,
+  TEXT_ENCODING_ISO8859_14 = 13,
   //! @brief ISO-8859-14 text-codec.
-  TEXT_CODEC_ISO8859_15 = 14,
+  TEXT_ENCODING_ISO8859_15 = 14,
   //! @brief ISO-8859-16 text-codec.
-  TEXT_CODEC_ISO8859_16 = 15,
+  TEXT_ENCODING_ISO8859_16 = 15,
 
   //! @brief CP-850 text-codec.
-  TEXT_CODEC_CP850 = 16,
+  TEXT_ENCODING_CP850 = 16,
   //! @brief CP-866 text-codec.
-  TEXT_CODEC_CP866 = 17,
+  TEXT_ENCODING_CP866 = 17,
   //! @brief CP-874 text-codec.
-  TEXT_CODEC_CP874 = 18,
+  TEXT_ENCODING_CP874 = 18,
   //! @brief CP-1250 text-codec.
-  TEXT_CODEC_CP1250 = 19,
+  TEXT_ENCODING_CP1250 = 19,
   //! @brief CP-1251 text-codec.
-  TEXT_CODEC_CP1251 = 20,
+  TEXT_ENCODING_CP1251 = 20,
   //! @brief CP-1252 text-codec.
-  TEXT_CODEC_CP1252 = 21,
+  TEXT_ENCODING_CP1252 = 21,
   //! @brief CP-1253 text-codec.
-  TEXT_CODEC_CP1253 = 22,
+  TEXT_ENCODING_CP1253 = 22,
   //! @brief CP-1254 text-codec.
-  TEXT_CODEC_CP1254 = 23,
+  TEXT_ENCODING_CP1254 = 23,
   //! @brief CP-1255 text-codec.
-  TEXT_CODEC_CP1255 = 24,
+  TEXT_ENCODING_CP1255 = 24,
   //! @brief CP-1256 text-codec.
-  TEXT_CODEC_CP1256 = 25,
+  TEXT_ENCODING_CP1256 = 25,
   //! @brief CP-1257 text-codec.
-  TEXT_CODEC_CP1257 = 26,
+  TEXT_ENCODING_CP1257 = 26,
   //! @brief CP-1258 text-codec.
-  TEXT_CODEC_CP1258 = 27,
+  TEXT_ENCODING_CP1258 = 27,
 
   //! @brief MAC-ROMAN codec.
-  TEXT_CODEC_MAC_ROMAN = 28,
+  TEXT_ENCODING_MAC_ROMAN = 28,
 
   //! @brief KOI8R text-codec.
-  TEXT_CODEC_KOI8R = 29,
+  TEXT_ENCODING_KOI8R = 29,
   //! @brief KOI8U text-codec.
-  TEXT_CODEC_KOI8U = 30,
+  TEXT_ENCODING_KOI8U = 30,
 
   //! @brief WINSAMI-2 text-codec.
-  TEXT_CODEC_WINSAMI2 = 31,
+  TEXT_ENCODING_WINSAMI2 = 31,
 
   //! @brief ROMAN-8 text-codec.
-  TEXT_CODEC_ROMAN8 = 32,
+  TEXT_ENCODING_ROMAN8 = 32,
 
   //! @brief ARMSCII-8 text-codec.
-  TEXT_CODEC_ARMSCII8 = 33,
+  TEXT_ENCODING_ARMSCII8 = 33,
 
   //! @brief GEORGIAN-ACADEMY text-codec.
-  TEXT_CODEC_GEORGIAN_ACADEMY = 34,
+  TEXT_ENCODING_GEORGIAN_ACADEMY = 34,
   //! @brief GEORGIAN-PS text-codec.
-  TEXT_CODEC_GEORGIAN_PS = 35,
+  TEXT_ENCODING_GEORGIAN_PS = 35,
 
   //! @brief UTF-8 text-codec.
-  TEXT_CODEC_UTF8 = 36,
+  TEXT_ENCODING_UTF8 = 36,
 
   //! @brief UTF-16 text-codec (little-endian).
-  TEXT_CODEC_UTF16_LE = 37,
+  TEXT_ENCODING_UTF16_LE = 37,
   //! @brief UTF-16 text-codec (big-endian).
-  TEXT_CODEC_UTF16_BE = 38,
+  TEXT_ENCODING_UTF16_BE = 38,
 
   //! @brief UTF-32 text-codec (little-endian).
-  TEXT_CODEC_UTF32_LE = 39,
+  TEXT_ENCODING_UTF32_LE = 39,
   //! @brief UTF-32 text-codec (big-endian).
-  TEXT_CODEC_UTF32_BE = 40,
+  TEXT_ENCODING_UTF32_BE = 40,
 
   //! @brief UCS-2 text-codec (little-endian).
-  TEXT_CODEC_UCS2_LE = 41,
+  TEXT_ENCODING_UCS2_LE = 41,
   //! @brief UCS-2 text-codec (big-endian).
-  TEXT_CODEC_UCS2_BE = 42,
+  TEXT_ENCODING_UCS2_BE = 42,
 
   //! @brief UTF-16 text-codec (native-endian).
-  TEXT_CODEC_UTF16 = FOG_BYTE_ORDER_CHOICE(TEXT_CODEC_UTF16_LE, TEXT_CODEC_UTF16_BE),
+  TEXT_ENCODING_UTF16 = FOG_BYTE_ORDER_CHOICE(TEXT_ENCODING_UTF16_LE, TEXT_ENCODING_UTF16_BE),
   //! @brief UTF-16 text-codec (swapped-endian).
-  TEXT_CODEC_UTF16_SWAPPED = FOG_BYTE_ORDER_CHOICE(TEXT_CODEC_UTF16_BE, TEXT_CODEC_UTF16_LE),
+  TEXT_ENCODING_UTF16_SWAPPED = FOG_BYTE_ORDER_CHOICE(TEXT_ENCODING_UTF16_BE, TEXT_ENCODING_UTF16_LE),
 
   //! @brief UTF-32 text-codec (native-endian).
-  TEXT_CODEC_UTF32 = FOG_BYTE_ORDER_CHOICE(TEXT_CODEC_UTF32_LE, TEXT_CODEC_UTF32_BE),
+  TEXT_ENCODING_UTF32 = FOG_BYTE_ORDER_CHOICE(TEXT_ENCODING_UTF32_LE, TEXT_ENCODING_UTF32_BE),
   //! @brief UTF-32 text-codec (swapped-endian).
-  TEXT_CODEC_UTF32_SWAPPED = FOG_BYTE_ORDER_CHOICE(TEXT_CODEC_UTF32_BE, TEXT_CODEC_UTF32_LE),
+  TEXT_ENCODING_UTF32_SWAPPED = FOG_BYTE_ORDER_CHOICE(TEXT_ENCODING_UTF32_BE, TEXT_ENCODING_UTF32_LE),
 
   //! @brief UCS-2 text-codec (native-endian).
-  TEXT_CODEC_UCS2 = FOG_BYTE_ORDER_CHOICE(TEXT_CODEC_UCS2_LE, TEXT_CODEC_UCS2_BE),
+  TEXT_ENCODING_UCS2 = FOG_BYTE_ORDER_CHOICE(TEXT_ENCODING_UCS2_LE, TEXT_ENCODING_UCS2_BE),
   //! @brief UCS-2 text-codec (swapped-endian).
-  TEXT_CODEC_UCS2_SWAPPED = FOG_BYTE_ORDER_CHOICE(TEXT_CODEC_UCS2_BE, TEXT_CODEC_UCS2_LE),
+  TEXT_ENCODING_UCS2_SWAPPED = FOG_BYTE_ORDER_CHOICE(TEXT_ENCODING_UCS2_BE, TEXT_ENCODING_UCS2_LE),
 
   //! @brief wchar_t text-codec (native-endian)
-  TEXT_CODEC_WCHAR_T = sizeof(wchar_t) == 2 ? TEXT_CODEC_UTF16 : TEXT_CODEC_UTF32,
+  TEXT_ENCODING_WCHAR_T = sizeof(wchar_t) == 2 ? TEXT_ENCODING_UTF16 : TEXT_ENCODING_UTF32,
 
   //! @brief Count of text-codecs.
-  TEXT_CODEC_COUNT = 43
+  TEXT_ENCODING_COUNT = 43
 };
 
 // ============================================================================
-// [Fog::TEXT_CODEC_FLAGS]
+// [Fog::TEXT_ENCODING_FLAGS]
 // ============================================================================
 
 //! @brief Text-codec flags.
-enum TEXT_CODEC_FLAGS
+enum TEXT_ENCODING_FLAGS
 {
   //! @brief Text-codec is table based.
-  TEXT_CODEC_IS_TABLE = 0x00000001,
+  TEXT_ENCODING_IS_TABLE = 0x00000001,
   //! @brief Text-codec is unicode based (UTF-8, UTF-16, UTF-32 or UCS-2).
-  TEXT_CODEC_IS_UNICODE = 0x00000002,
+  TEXT_ENCODING_IS_UNICODE = 0x00000002,
 
   //! @brief Text-codec base is little-endian.
-  TEXT_CODEC_IS_LE = 0x00000004,
+  TEXT_ENCODING_IS_LE = 0x00000004,
   //! @brief Text-codec base is big-endian.
-  TEXT_CODEC_IS_BE = 0x00000008,
+  TEXT_ENCODING_IS_BE = 0x00000008,
 
   //! @brief Text-codec is 8-bit.
-  TEXT_CODEC_IS_8BIT = 0x00000010,
+  TEXT_ENCODING_IS_8BIT = 0x00000010,
   //! @brief Text-codec is 16-bit.
-  TEXT_CODEC_IS_16BIT = 0x00000020,
+  TEXT_ENCODING_IS_16BIT = 0x00000020,
   //! @brief Text-codec is 32-bit.
-  TEXT_CODEC_IS_32BIT = 0x00000040,
+  TEXT_ENCODING_IS_32BIT = 0x00000040,
 
   //! @brief Text-codec is variable-length (UTF-8 and UTF-16 codecs).
-  TEXT_CODEC_IS_VARLEN = 0x00000080
+  TEXT_ENCODING_IS_VARLEN = 0x00000080
 };
 
 // ============================================================================
-// [Fog::TEXT_CODEC_BUILTIN]
+// [Fog::TEXT_CODEC_CACHE]
 // ============================================================================
 
 enum TEXT_CODEC_CACHE

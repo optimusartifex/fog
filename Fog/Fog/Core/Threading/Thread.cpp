@@ -30,30 +30,32 @@
 #include <Fog/Core/Tools/ByteArrayTmp_p.h>
 #include <Fog/Core/Tools/TextCodec.h>
 
+// [Dependencies - Windows]
 #if defined(FOG_OS_WINDOWS)
-#include <windows.h>
-#include <process.h>
-#endif // FOG_OS_WINDOWS
-
-#if defined(FOG_OS_POSIX)
-#include <pthread.h>
-#include <signal.h>
-#include <errno.h>
-#include <sched.h>
-
-#if defined(FOG_OS_MAC)
-#include <mach/mach.h>
-#elif defined(FOG_OS_LINUX)
-#include <sys/syscall.h>
-#include <unistd.h>
-#endif
-#endif
-
-#if defined(FOG_OS_WINDOWS)
+# include <windows.h>
+# include <process.h>
 # if !defined(STACK_SIZE_PARAM_IS_A_RESERVATION)
 #  define STACK_SIZE_PARAM_IS_A_RESERVATION 0x00010000
 # endif // STACK_SIZE_PARAM_IS_A_RESERVATION
 #endif // FOG_OS_WINDOWS
+
+// [Dependencies - Posix]
+#if defined(FOG_OS_POSIX)
+# include <pthread.h>
+# include <signal.h>
+# include <errno.h>
+# include <sched.h>
+#endif // FOG_OS_POSIX
+
+// [Dependencies - Mac]
+#if defined(FOG_OS_MAC)
+# include <mach/mach.h>
+#endif // FOG_OS_MAC
+
+#if defined(FOG_OS_LINUX)
+# include <sys/syscall.h>
+# include <unistd.h>
+#endif // FOG_OS_LINUX
 
 namespace Fog {
 
@@ -141,7 +143,7 @@ bool Thread::_create(size_t stackSize, Thread* thread)
   else
     stackSize = 0;
 
-  thread->_handle = reinterpret_cast<Handle>(_beginthreadex(NULL, stackSize, threadFunc, thread, flags, NULL));
+  thread->_handle = reinterpret_cast<Handle>(_beginthreadex(NULL, (uint)stackSize, threadFunc, thread, flags, NULL));
   return thread->_handle != NULL;
 }
 

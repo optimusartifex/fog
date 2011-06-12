@@ -93,13 +93,13 @@ struct FOG_NO_EXPORT TextIterator
 
     if (_pos != _end)
     {
-      if (_pos[0].isLeadSurrogate())
+      if (_pos[0].isSurrogateLead())
       {
         err = ERR_STRING_INVALID_INPUT;
         goto _Fail;
       }
 
-      if (_end[-1].isLeadSurrogate())
+      if (_end[-1].isSurrogateLead())
       {
         err = ERR_STRING_TRUNCATED;
         goto _Fail;

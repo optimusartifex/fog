@@ -25,7 +25,7 @@ namespace Fog {
 // ============================================================================
 
 #include <Fog/Core/Pack/PackByte.h>
-//! @brief 16-bit unicode character.
+//! @brief UTF-16 Character.
 struct FOG_NO_EXPORT Char
 {
   // --------------------------------------------------------------------------
@@ -151,8 +151,8 @@ struct FOG_NO_EXPORT Char
   // [UTF16]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool isLeadSurrogate() const { return isLeadSurrogate(_ch); }
-  FOG_INLINE bool isTrailSurrogate() const { return isTrailSurrogate(_ch); }
+  FOG_INLINE bool isSurrogateLead() const { return isSurrogateLead(_ch); }
+  FOG_INLINE bool isSurrogateTrail() const { return isSurrogateTrail(_ch); }
   FOG_INLINE bool isSurrogatePair() const { return isSurrogatePair(_ch); }
   FOG_INLINE bool isValid() const { return isValid(_ch); }
 
@@ -160,16 +160,23 @@ struct FOG_NO_EXPORT Char
   // [Statics]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE bool isLeadSurrogate(uint16_t ch) { return (ch & UTF16_SURROGATE_PAIR_MASK) == UTF16_SURROGATE_LEAD_MIN; }
-  static FOG_INLINE bool isTrailSurrogate(uint16_t ch) { return (ch & UTF16_SURROGATE_PAIR_MASK) == UTF16_SURROGATE_TRAIL_MIN; }
+  static FOG_INLINE bool isSurrogateLead(uint16_t ch) { return (ch & UTF16_SURROGATE_PAIR_MASK) == UTF16_SURROGATE_LEAD_MIN; }
+  static FOG_INLINE bool isSurrogateLead(uint32_t ch) { return (ch & UTF16_SURROGATE_PAIR_MASK) == UTF16_SURROGATE_LEAD_MIN; }
+
+  static FOG_INLINE bool isSurrogateTrail(uint16_t ch) { return (ch & UTF16_SURROGATE_PAIR_MASK) == UTF16_SURROGATE_TRAIL_MIN; }
+  static FOG_INLINE bool isSurrogateTrail(uint32_t ch) { return (ch & UTF16_SURROGATE_PAIR_MASK) == UTF16_SURROGATE_TRAIL_MIN; }
+
   static FOG_INLINE bool isSurrogatePair(uint16_t ch) { return (ch & UTF16_SURROGATE_PAIR_MASK) == UTF16_SURROGATE_PAIR_BASE; }
+  static FOG_INLINE bool isSurrogatePair(uint32_t ch) { return (ch & UTF16_SURROGATE_PAIR_MASK) == UTF16_SURROGATE_PAIR_BASE; }
+
   static FOG_INLINE bool isValid(uint16_t ch) { return (ch < 0xFFFE); }
+  static FOG_INLINE bool isValid(uint32_t ch) { return (ch < 0xFFFE); }
 
   // --------------------------------------------------------------------------
   // [BOM / BSwap]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool isBom() const { return _ch == UTF16_BOM_NATIVE; }
+  FOG_INLINE bool isBomNative() const { return _ch == UTF16_BOM_NATIVE; }
   FOG_INLINE bool isBomSwapped() const { return _ch == UTF16_BOM_SWAPPED; }
 
   FOG_INLINE Char& bswap() { _ch = Memory::bswap16(_ch); return *this; }
@@ -178,7 +185,7 @@ struct FOG_NO_EXPORT Char
   // [Statics]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE bool isBom(uint16_t ch) { return ch == UTF16_BOM_NATIVE; }
+  static FOG_INLINE bool isBomNative(uint16_t ch) { return ch == UTF16_BOM_NATIVE; }
   static FOG_INLINE bool isBomSwapped(uint16_t ch) { return ch == UTF16_BOM_SWAPPED; }
 
   static FOG_INLINE uint16_t bswap(uint16_t ch) { return Memory::bswap16(ch); }

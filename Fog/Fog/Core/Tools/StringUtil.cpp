@@ -70,11 +70,11 @@ err_t validateUtf16(const Char* str, size_t len, size_t* invalidPos)
     if (srcCur == srcEnd) return ERR_OK;
     uc = *srcCur++;
 
-    if (Char::isLeadSurrogate(uc))
+    if (Char::isSurrogateLead(uc))
     {
       if (srcCur == srcEnd) { err = ERR_STRING_TRUNCATED; break; }
       uc = *srcCur++;
-      if (!Char::isTrailSurrogate(uc)) { err = ERR_STRING_INVALID_UTF16; break; }
+      if (!Char::isSurrogateTrail(uc)) { err = ERR_STRING_INVALID_UTF16; break; }
     }
     else
     {
@@ -125,11 +125,11 @@ FOG_API err_t getNumUtf16Chars(const Char* str, size_t len, size_t* charsCount)
     if (srcCur == srcEnd) break;
     uc = *srcCur++;
 
-    if (Char::isLeadSurrogate(uc))
+    if (Char::isSurrogateLead(uc))
     {
       if (srcCur == srcEnd) { err = ERR_STRING_TRUNCATED; break; }
       uc = *srcCur++;
-      if (!Char::isTrailSurrogate(uc)) { err = ERR_STRING_INVALID_UTF16; break; }
+      if (!Char::isSurrogateTrail(uc)) { err = ERR_STRING_INVALID_UTF16; break; }
     }
     else
     {
@@ -1014,6 +1014,7 @@ __convBaseN_32bit:
 // #define int32_t int on machines with 32-bit ints and 64-bit longs.
 // #define IBM for IBM mainframe-style floating-point arithmetic.
 // #define VAX for VAX-style floating-point arithmetic (D_floating).
+//
 // #define No_leftright to omit left-right logic in fast floating-point
 //  computation of dtoa.
 // #define Honor_FLT_ROUNDS if FLT_ROUNDS can assume the values 2 or 3
@@ -1035,7 +1036,7 @@ __convBaseN_32bit:
 //  something other than "long long", #define Llong to be the name,
 //  and if "unsigned Llong" does not work as an unsigned version of
 //  Llong, #define #ULLong to be the corresponding unsigned type.
-// #define KR_headers for old-style C function headers. --- Removed
+//
 // #define Bad_float_h if your system lacks a float.h or if it does not
 //  define some or all of DBL_DIG, DBL_MAX_10_EXP, DBL_MAX_EXP,
 //  FLT_RADIX, FLT_ROUNDS, and DBL_MAX.
@@ -1112,7 +1113,7 @@ __convBaseN_32bit:
 #define Bug(x) Debug::failFormat("%s", x)
 #endif // FOG_DEBUG
 
-#if FOG_ARCH_BITS == 64
+#if FOG_ARCH_BITS >= 64
 #define USE_UINT64
 #endif
 
@@ -1137,7 +1138,7 @@ __convBaseN_32bit:
 #define IEEE_Arith
 #endif
 
-#ifdef Bad_float_h
+#if !defined(FOG_HAVE_FLOAT_H)
 
 #ifdef IEEE_Arith
 #define DBL_DIG 15
@@ -1162,9 +1163,7 @@ __convBaseN_32bit:
 #define DBL_MAX 1.7014118346046923e+38
 #endif
 
-#else /* ifndef Bad_float_h */
-#include <float.h>
-#endif /* Bad_float_h */
+#endif // FOG_HAVE_FLOAT_H
 
 #if defined(IEEE_8087) + defined(IEEE_MC68k) + defined(VAX) + defined(IBM) != 1
 #error "Exactly one of IEEE_8087, IEEE_MC68k, VAX, or IBM should be defined."
@@ -1187,8 +1186,7 @@ union DTOA_U
 // The following definition of Storeinc is appropriate for MIPS processors.
 // An alternative that may be better on some machines is
 // #define Storeinc(a,b,c) (*a++ = b << 16 | c & 0xffff)
-//
-#if defined(IEEE_8087) + defined(VAX)
+#if defined(IEEE_8087) || defined(VAX)
 #define Storeinc(a,b,c) (((unsigned short *)a)[1] = (unsigned short)b, \
 ((unsigned short *)a)[0] = (unsigned short)c, a++)
 #else
@@ -1350,10 +1348,9 @@ struct BContext
   // Where to escape if allocation failed.
   jmp_buf escape;
 
-  // This memory was 5124 bytes * sizeof(double). It's 40kB of memory and I
-  // think it's much more actually needed. Decreased to 1kB.
-  // - Petr.
-  char memory[1024];
+  // This memory was 5124 bytes * sizeof(double). It's 40kB of memory and
+  // it's much more actually needed for expected numbers. Decreased to 2kB.
+  char memory[2048];
 };
 
 static void BContext_init(BContext* context)

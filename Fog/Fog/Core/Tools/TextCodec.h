@@ -94,7 +94,7 @@ struct FOG_API TextCodecHandler
   //!
   //! @note This function should use only low 0-127 ascii characters on the
   //! output.
-  virtual err_t replaceCharacter(ByteArray& dst, uint32_t uc, size_t pos) = 0;
+  virtual err_t replaceCharacter(ByteArray& dst, uint32_t uc) = 0;
 };
 
 // ============================================================================

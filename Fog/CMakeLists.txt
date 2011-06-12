@@ -1027,8 +1027,6 @@ Set(FOG_G2D_RASTERIZER_SOURCES
   Fog/G2d/Rasterizer/Rasterizer_Path.cpp
   Fog/G2d/Rasterizer/Rasterizer_Rect.cpp
   Fog/G2d/Rasterizer/Rasterizer_RectXorRect.cpp
-  Fog/G2d/Rasterizer/Rasterizer_Round.cpp
-  Fog/G2d/Rasterizer/Rasterizer_RoundXorRound.cpp
   Fog/G2d/Rasterizer/Scanline.cpp
   Fog/G2d/Rasterizer/Span.cpp
 )

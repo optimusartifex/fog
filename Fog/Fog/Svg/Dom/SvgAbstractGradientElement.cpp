@@ -10,12 +10,12 @@
 
 // [Dependencies]
 #include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Xml/XmlDocument.h>
 #include <Fog/G2d/Source/Color.h>
 #include <Fog/G2d/Source/Gradient.h>
 #include <Fog/Svg/Dom/SvgAbstractGradientElement_p.h>
 #include <Fog/Svg/Dom/SvgEnumItem_p.h>
 #include <Fog/Svg/Dom/SvgStopElement_p.h>
-#include <Fog/Xml/Dom/XmlDocument.h>
 
 namespace Fog {
 

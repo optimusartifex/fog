@@ -9,11 +9,11 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Xml/XmlAttribute.h>
+#include <Fog/Core/Xml/XmlElement.h>
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Source/Color.h>
-#include <Fog/Xml/Dom/XmlAttribute.h>
-#include <Fog/Xml/Dom/XmlElement.h>
 #include <Fog/Svg/Global/Constants.h>
 #include <Fog/Svg/Tools/SvgCoord.h>
 

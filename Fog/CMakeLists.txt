@@ -666,6 +666,43 @@ Set(FOG_CORE_VARIANT_HEADERS
   Fog/Core/Variant/Var.h
 )
 
+# [Fog/Core/Xml]
+Set(FOG_CORE_XML_SOURCES
+  Fog/Core/Xml/XmlAttribute.cpp
+  Fog/Core/Xml/XmlCDATA.cpp
+  Fog/Core/Xml/XmlComment.cpp
+  Fog/Core/Xml/XmlDocument.cpp
+  Fog/Core/Xml/XmlDomReader.cpp
+  Fog/Core/Xml/XmlDomWriter.cpp
+  Fog/Core/Xml/XmlElement.cpp
+  Fog/Core/Xml/XmlEntity.cpp
+  Fog/Core/Xml/XmlIdAttribute.cpp
+  Fog/Core/Xml/XmlIdManager.cpp
+  Fog/Core/Xml/XmlNoText.cpp
+  Fog/Core/Xml/XmlPI.cpp
+  Fog/Core/Xml/XmlSaxReader.cpp
+  Fog/Core/Xml/XmlSaxWriter.cpp
+  Fog/Core/Xml/XmlText.cpp
+)
+
+Set(FOG_CORE_XML_HEADERS
+  Fog/Core/Xml/XmlAttribute.h
+  Fog/Core/Xml/XmlCDATA.h
+  Fog/Core/Xml/XmlComment.h
+  Fog/Core/Xml/XmlDocument.h
+  Fog/Core/Xml/XmlDomReader.h
+  Fog/Core/Xml/XmlDomWriter.h
+  Fog/Core/Xml/XmlElement.h
+  Fog/Core/Xml/XmlEntity_p.h
+  Fog/Core/Xml/XmlIdAttribute_p.h
+  Fog/Core/Xml/XmlIdManager.h
+  Fog/Core/Xml/XmlNoText.h
+  Fog/Core/Xml/XmlPI.h
+  Fog/Core/Xml/XmlSaxReader.h
+  Fog/Core/Xml/XmlSaxWriter.h
+  Fog/Core/Xml/XmlText.h
+)
+
 # [Fog/Core/Win]
 If(FOG_OS_WINDOWS)
   Set(FOG_CORE_WIN_SOURCES
@@ -712,6 +749,7 @@ Source_Group("Core/System"          FILES ${FOG_CORE_SYSTEM_SOURCES}          ${
 Source_Group("Core/Threading"       FILES ${FOG_CORE_THREADING_SOURCES}       ${FOG_CORE_THREADING_HEADERS}      )
 Source_Group("Core/Tools"           FILES ${FOG_CORE_TOOLS_SOURCES}           ${FOG_CORE_TOOLS_HEADERS}          )
 Source_Group("Core/Variant"         FILES ${FOG_CORE_VARIANT_SOURCES}         ${FOG_CORE_VARIANT_HEADERS}        )
+Source_Group("Core/Xml"             FILES ${FOG_CORE_XML_SOURCES}             ${FOG_CORE_XML_HEADERS}            )
 
 If(FOG_OS_WINDOWS)
 Source_Group("Core/Win"             FILES ${FOG_CORE_WIN_SOURCES}             ${FOG_CORE_WIN_HEADERS}            )
@@ -1675,81 +1713,6 @@ Source_Group("Svg/Tools"            FILES ${FOG_SVG_TOOLS_SOURCES}            ${
 Source_Group("Svg/Visit"            FILES ${FOG_SVG_VISIT_SOURCES}            ${FOG_SVG_VISIT_HEADERS}           )
 
 # =============================================================================
-# [Fog-Xml]
-# =============================================================================
-
-Set(FOG_XML_LIB_SOURCES
-)
-
-Set(FOG_XML_LIB_HEADERS
-  Fog/Xml.h
-)
-
-Set(FOG_XML_DOM_SOURCES
-  Fog/Xml/Dom/XmlAttribute.cpp
-  Fog/Xml/Dom/XmlCDATA.cpp
-  Fog/Xml/Dom/XmlComment.cpp
-  Fog/Xml/Dom/XmlDocument.cpp
-  Fog/Xml/Dom/XmlElement.cpp
-  Fog/Xml/Dom/XmlIdAttribute.cpp
-  Fog/Xml/Dom/XmlIdManager.cpp
-  Fog/Xml/Dom/XmlNoText.cpp
-  Fog/Xml/Dom/XmlPI.cpp
-  Fog/Xml/Dom/XmlText.cpp
-)
-
-Set(FOG_XML_DOM_HEADERS
-  Fog/Xml/Dom/XmlAttribute.h
-  Fog/Xml/Dom/XmlCDATA.h
-  Fog/Xml/Dom/XmlComment.h
-  Fog/Xml/Dom/XmlDocument.h
-  Fog/Xml/Dom/XmlElement.h
-  Fog/Xml/Dom/XmlIdAttribute_p.h
-  Fog/Xml/Dom/XmlIdManager.h
-  Fog/Xml/Dom/XmlNoText.h
-  Fog/Xml/Dom/XmlPI.h
-  Fog/Xml/Dom/XmlText.h
-)
-
-Set(FOG_XML_GLOBAL_SOURCES
-  Fog/Xml/Global/Init_Xml.cpp
-)
-
-Set(FOG_XML_GLOBAL_HEADERS
-  Fog/Xml/Global/Constants.h
-  Fog/Xml/Global/Init_Xml_p.h
-)
-
-Set(FOG_XML_IO_SOURCES
-  Fog/Xml/IO/XmlDomReader.cpp
-  Fog/Xml/IO/XmlDomWriter.cpp
-  Fog/Xml/IO/XmlSaxReader.cpp
-  Fog/Xml/IO/XmlSaxWriter.cpp
-)
-
-Set(FOG_XML_IO_HEADERS
-  Fog/Xml/IO/XmlDomReader.h
-  Fog/Xml/IO/XmlDomWriter.h
-  Fog/Xml/IO/XmlSaxReader.h
-  Fog/Xml/IO/XmlSaxWriter.h
-)
-
-Set(FOG_XML_TOOLS_SOURCES
-  Fog/Xml/Tools/XmlEntity.cpp
-)
-
-Set(FOG_XML_TOOLS_HEADERS
-  Fog/Xml/Tools/XmlEntity_p.h
-)
-
-# Source groups.
-Source_Group("Xml"                  FILES ${FOG_XML_LIB_SOURCES}              ${FOG_XML_LIB_HEADERS}             )
-Source_Group("Xml/Dom"              FILES ${FOG_XML_DOM_SOURCES}              ${FOG_XML_DOM_HEADERS}             )
-Source_Group("Xml/Global"           FILES ${FOG_XML_GLOBAL_SOURCES}           ${FOG_XML_GLOBAL_HEADERS}          )
-Source_Group("Xml/IO"               FILES ${FOG_XML_IO_SOURCES}               ${FOG_XML_IO_HEADERS}              )
-Source_Group("Xml/Tools"            FILES ${FOG_XML_TOOLS_SOURCES}            ${FOG_XML_TOOLS_HEADERS}           )
-
-# =============================================================================
 # [Fog-All]
 # =============================================================================
 
@@ -1772,6 +1735,7 @@ Set(FOG_ALL_SOURCES
   ${FOG_CORE_THREADING_SOURCES}
   ${FOG_CORE_TOOLS_SOURCES}
   ${FOG_CORE_VARIANT_SOURCES}
+  ${FOG_CORE_XML_SOURCES}
   # Fog/G2d.
   ${FOG_G2D_LIB_SOURCES}
   ${FOG_G2D_FACE_SOURCES}
@@ -1804,12 +1768,6 @@ Set(FOG_ALL_SOURCES
   ${FOG_SVG_GLOBAL_SOURCES}
   ${FOG_SVG_TOOLS_SOURCES}
   ${FOG_SVG_VISIT_SOURCES}
-  # Fog/Xml.
-  ${FOG_XML_LIB_SOURCES}
-  ${FOG_XML_DOM_SOURCES}
-  ${FOG_XML_GLOBAL_SOURCES}
-  ${FOG_XML_IO_SOURCES}
-  ${FOG_XML_TOOLS_SOURCES}
 )
 
 Set(FOG_ALL_HEADERS
@@ -1831,6 +1789,7 @@ Set(FOG_ALL_HEADERS
   ${FOG_CORE_THREADING_HEADERS}
   ${FOG_CORE_TOOLS_HEADERS}
   ${FOG_CORE_VARIANT_HEADERS}
+  ${FOG_CORE_XML_HEADERS}
   # Fog/G2d.
   ${FOG_G2D_LIB_HEADERS}
   ${FOG_G2D_FACE_HEADERS}
@@ -1869,12 +1828,6 @@ Set(FOG_ALL_HEADERS
   ${FOG_SVG_GLOBAL_HEADERS}
   ${FOG_SVG_TOOLS_HEADERS}
   ${FOG_SVG_VISIT_HEADERS}
-  # Fog/Xml.
-  ${FOG_XML_LIB_HEADERS}
-  ${FOG_XML_DOM_HEADERS}
-  ${FOG_XML_GLOBAL_HEADERS}
-  ${FOG_XML_IO_HEADERS}
-  ${FOG_XML_TOOLS_HEADERS}
 )
 
 If(FOG_OS_WINDOWS)

@@ -4,9 +4,9 @@
 // MIT, See COPYING file in package
 
 // [Dependencies]
+#include <Fog/Core/Xml/XmlDocument.h>
 #include <Fog/Svg/Dom/SvgElement.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
-#include <Fog/Xml/Dom/XmlDocument.h>
 
 namespace Fog {
 

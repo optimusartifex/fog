@@ -10,10 +10,10 @@
 
 // [Dependencies]
 #include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Xml/XmlDocument.h>
 #include <Fog/Svg/Dom/SvgDocument.h>
 #include <Fog/Svg/Dom/SvgStyledElement_p.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
-#include <Fog/Xml/Dom/XmlDocument.h>
 
 // Disable the MSC specific warning.
 #if defined(FOG_CC_MSC)

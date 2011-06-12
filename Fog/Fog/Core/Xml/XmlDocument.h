@@ -1,38 +1,42 @@
-// [Fog-Svg]
+// [Fog-Core]
 //
 // [License]
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_SVG_DOM_SVGELEMENT_H
-#define _FOG_SVG_DOM_SVGELEMENT_H
+#ifndef _FOG_CORE_XML_XMLDOCUMENT_H
+#define _FOG_CORE_XML_XMLDOCUMENT_H
 
 // [Dependencies]
+#include <Fog/Core/Collection/Hash.h>
+#include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/Tools/ManagedString.h>
+#include <Fog/Core/Tools/Range.h>
+#include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Xml/XmlElement.h>
-#include <Fog/G2d/Geometry/Box.h>
-#include <Fog/G2d/Geometry/Rect.h>
-#include <Fog/G2d/Geometry/PathStroker.h>
-#include <Fog/G2d/Geometry/Transform.h>
-#include <Fog/Svg/Global/Constants.h>
+#include <Fog/Core/Xml/XmlIdManager.h>
 
 namespace Fog {
 
-//! @addtogroup Fog_Svg_Dom
+//! @addtogroup Fog_Xml_Dom
 //! @{
 
 // ============================================================================
 // [Forward Declarations]
 // ============================================================================
 
-struct SvgGState;
-struct SvgVisitor;
+struct Stream;
+struct XmlIdAttribute;
+struct XmlDomReader;
 
 // ============================================================================
-// [Fog::SvgElement]
+// [Fog::XmlDocument]
 // ============================================================================
 
-struct FOG_API SvgElement : public XmlElement
+//! @brief Xml document element.
+struct FOG_API XmlDocument : public XmlElement
 {
   typedef XmlElement base;
 
@@ -40,78 +44,85 @@ struct FOG_API SvgElement : public XmlElement
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  SvgElement(const ManagedString& tagName, uint32_t svgType);
-  virtual ~SvgElement();
+  XmlDocument();
+  virtual ~XmlDocument();
 
   // --------------------------------------------------------------------------
   // [Clone]
   // --------------------------------------------------------------------------
 
-  virtual SvgElement* clone() const;
+  virtual XmlElement* clone() const;
 
   // --------------------------------------------------------------------------
-  // [SVG Type]
+  // [Root Node]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE int getSvgType() const { return _svgType; }
+  //! @brief Set document root element to @a e.
+  virtual err_t setDocumentRoot(XmlElement* e);
+
+  //! @brief Return document root element.
+  FOG_INLINE XmlElement* getDocumentRoot() const { return _documentRoot; }
 
   // --------------------------------------------------------------------------
-  // [SVG Attributes]
+  // [Clear]
   // --------------------------------------------------------------------------
 
-  virtual XmlAttribute* _createAttribute(const ManagedString& name) const;
+  virtual void clear();
 
   // --------------------------------------------------------------------------
-  // [SVG Interface]
+  // [Document Extensions]
   // --------------------------------------------------------------------------
 
-  virtual err_t onPrepare(SvgVisitor* visitor, SvgGState* state) const;
-  virtual err_t onProcess(SvgVisitor* visitor) const;
-  virtual err_t onPattern(SvgVisitor* visitor, SvgElement* obj, uint32_t paintType) const;
-
-  virtual err_t onGeometryBoundingBox(BoxF& box, const TransformF* tr) const;
-  virtual err_t onStrokeBoundingBox(BoxF& box, const PathStrokerParamsF& stroke, const TransformF* tr) const;
-
-  err_t _visitContainer(SvgVisitor* visitor) const;
+  virtual XmlElement* createElement(const ManagedString& tagName);
+  static XmlElement* createElementStatic(const ManagedString& tagName);
+  virtual XmlDomReader* createDomReader();
 
   // --------------------------------------------------------------------------
-  // [SVG Styles]
+  // [Dom]
   // --------------------------------------------------------------------------
 
-  virtual String getStyle(const String& name) const;
-  virtual err_t setStyle(const String& name, const String& value);
+  XmlElement* getElementById(const String& id) const;
+  XmlElement* getElementById(const Utf16& id) const;
 
   // --------------------------------------------------------------------------
-  // [SVG Implementation]
+  // [Read]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE uint32_t isBoundingBoxDirty() const { return _boundingBoxDirty; }
-
-  err_t getBoundingBox(BoxF& box) const;
-  err_t getBoundingBox(BoxF& box, const TransformF* tr) const;
+  virtual err_t readFromFile(const String& fileName);
+  virtual err_t readFromStream(Stream& stream);
+  virtual err_t readFromMemory(const void* mem, size_t size);
+  virtual err_t readFromString(const String& str);
 
   // --------------------------------------------------------------------------
-  // [Visible]
+  // [DOCTYPE]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool getVisible() const { return _visible; }
-  FOG_INLINE void setVisible(bool value) { _visible = value; }
+  FOG_INLINE const String& getDOCTYPE() const { return _doctype; }
+  FOG_INLINE err_t setDOCTYPE(const String& doctype) { return _doctype.set(doctype); }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
-
-  uint8_t _svgType;
-  mutable uint8_t _boundingBoxDirty;
-
-  uint8_t _visible;
-  uint8_t _unused;
-
 protected:
-  mutable BoxF _boundingBox;
+
+  //! @brief Document root.
+  XmlElement* _documentRoot;
+
+  //! @brief Hash table that contains all managed strings and reference counts.
+  UnorderedHash<String, size_t> _managedStrings;
+
+  //! @brief Hash table that contains all managed IDs.
+  XmlIdManager _elementIdsHash;
+
+  //! @brief DOCTYPE string.
+  String _doctype;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgElement)
+  friend struct XmlAttribute;
+  friend struct XmlIdAttribute;
+  friend struct XmlElement;
+
+  _FOG_CLASS_NO_COPY(XmlDocument)
 };
 
 //! @}
@@ -119,4 +130,4 @@ private:
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_SVG_DOM_SVGELEMENT_H
+#endif // _FOG_CORE_XML_XMLDOCUMENT_H

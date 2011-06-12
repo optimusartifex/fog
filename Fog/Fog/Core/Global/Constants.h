@@ -708,6 +708,42 @@ enum VALUE_TYPE
 };
 
 // ============================================================================
+// [Fog::XML_ELEMENT]
+// ============================================================================
+
+//! @brief Xml element type.
+enum XML_ELEMENT
+{
+  XML_ELEMENT_BASE = 0x01,
+  XML_ELEMENT_TEXT = 0x03,
+  XML_ELEMENT_CDATA = 0x04,
+  XML_ELEMENT_PI = 0x07,
+  XML_ELEMENT_COMMENT = 0x08,
+  XML_ELEMENT_DOCUMENT = 0x09,
+
+  XML_ELEMENT_MASK = 0x0F,
+
+  // Svg support.
+  SVG_ELEMENT_MASK = 0x10,
+  SVG_ELEMENT_BASE = XML_ELEMENT_BASE | SVG_ELEMENT_MASK,
+  SVG_ELEMENT_DOCUMENT = XML_ELEMENT_DOCUMENT | SVG_ELEMENT_MASK
+};
+
+// ============================================================================
+// [Fog::XML_FLAGS]
+// ============================================================================
+
+enum XML_FLAGS
+{
+  //! @brief Whether element can be manipulated (DOM).
+  XML_ALLOWED_DOM_MANIPULATION = 0x01,
+  //! @brief Whether element tag name can be changed.
+  XML_ALLOWED_TAG = 0x02,
+  //! @brief Whether element supports attributes.
+  XML_ALLOWED_ATTRIBUTES = 0x04
+};
+
+// ============================================================================
 // [Fog::EVENT_CORE]
 // ============================================================================
 
@@ -946,7 +982,41 @@ enum ERR_CORE_ENUM
   ERR_OBJECT_READ_ONLY_PROPERTY,
 
   // TODO: Shouldn't we use ERR_RT_INVALID_ARGUMENT instead?
-  ERR_OBJECT_INVALID_VALUE
+  ERR_OBJECT_INVALID_VALUE,
+
+  // --------------------------------------------------------------------------
+  // [Xml]
+  // --------------------------------------------------------------------------
+
+  ERR_XML_INTERNAL,
+
+  // XmlDom Errors.
+  ERR_XML_DOCUMENT_INVALID_CHILD,
+  ERR_XML_MANUPULATION_NOT_ALLOWED,
+  ERR_XML_TAG_CHANGE_NOT_ALLOWED,
+  ERR_XML_ATTRIBUTES_NOT_ALLOWED,
+  ERR_XML_NOT_A_TEXT_NODE,
+  ERR_XML_ATTRIBUTE_NOT_EXISTS,
+  ERR_XML_ATTRIBUTE_CANT_BE_REMOVED,
+  ERR_XML_INVALID_ATTRIBUTE,
+  ERR_XML_CYCLIC,
+  ERR_XML_INVALID_CHILD,
+  ERR_XML_INVALID_TAG_NAME,
+  ERR_XML_DOCUMENT_HAS_ALREADY_ROOT,
+
+  // XmlSaxReader Errors.
+  ERR_XML_NO_DOCUMENT,
+  ERR_XML_MISSING_ROOT_TAG,
+  ERR_XML_MISSING_TAG,
+  ERR_XML_MISSING_ATTRIBUTE,
+  ERR_XML_UNMATCHED_CLOSING_TAG,
+  ERR_XML_UNCLOSED_CDATA,
+  ERR_XML_UNCLOSED_PI,
+  ERR_XML_UNCLOSED_COMMENT,
+  ERR_XML_UNCLOSED_DOCTYPE,
+  ERR_XML_SYNTAX_ERROR,
+
+  ERR_XML_INVALID_CLOSING_TAG
 };
 
 //! @}

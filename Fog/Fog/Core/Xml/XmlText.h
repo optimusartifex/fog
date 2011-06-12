@@ -1,47 +1,42 @@
-// [Fog-Svg]
+// [Fog-Core]
 //
 // [License]
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_SVG_DOM_SVGDOCUMENT_H
-#define _FOG_SVG_DOM_SVGDOCUMENT_H
+#ifndef _FOG_CORE_XML_XMLTEXT_H
+#define _FOG_CORE_XML_XMLTEXT_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Xml/XmlDocument.h>
-#include <Fog/G2d/Geometry/Size.h>
-#include <Fog/G2d/Tools/Dpi.h>
-#include <Fog/Svg/Global/Constants.h>
+#include <Fog/Core/Xml/XmlElement.h>
 
 namespace Fog {
 
-//! @addtogroup Fog_Svg_Dom
+//! @addtogroup Fog_Xml_Dom
 //! @{
 
 // ============================================================================
 // [Forward Declarations]
 // ============================================================================
 
-struct Painter;
-struct SvgElement;
-struct SvgVisitor;
+struct XmlDocument;
 
 // ============================================================================
-// [Fog::SvgDocument]
+// [Fog::XmlText]
 // ============================================================================
 
-struct FOG_API SvgDocument : public XmlDocument
+//! @brief Xml text element.
+struct FOG_API XmlText : public XmlElement
 {
-  typedef XmlDocument base;
+  typedef XmlElement base;
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  SvgDocument();
-  virtual ~SvgDocument();
+  XmlText(const String& data = String());
+  virtual ~XmlText();
 
   // --------------------------------------------------------------------------
   // [Clone]
@@ -50,33 +45,31 @@ struct FOG_API SvgDocument : public XmlDocument
   virtual XmlElement* clone() const;
 
   // --------------------------------------------------------------------------
-  // [SVG Document Extensions]
+  // [Text Specific]
   // --------------------------------------------------------------------------
 
-  virtual XmlElement* createElement(const ManagedString& tagName);
-  static XmlElement* createElementStatic(const ManagedString& tagName);
+  virtual String getTextContent() const;
+  virtual err_t setTextContent(const String& text);
 
-  // --------------------------------------------------------------------------
-  // [SVG Public]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE float getDpi() const { return _dpi.getDpi(); }
-  err_t setDpi(float dpi);
-
-  SizeF getDocumentSize() const;
-
-  err_t onProcess(SvgVisitor* visitor) const;
-  err_t render(Painter* painter) const;
-  List<SvgElement*> hitTest(const PointF& pt, const TransformF* tr = NULL) const;
+  FOG_INLINE const String& getData() const { return _data; }
+  err_t setData(const String& data);
+  err_t appendData(const String& data);
+  err_t deleteData();
+  err_t insertData(size_t start, const String& data);
+  err_t replaceData(const Range& range, const String& data);
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  Dpi _dpi;
+protected:
+  String _data;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgDocument)
+  friend struct XmlElement;
+  friend struct XmlDocument;
+
+  _FOG_CLASS_NO_COPY(XmlText)
 };
 
 //! @}
@@ -84,4 +77,4 @@ private:
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_SVG_DOM_SVGDOCUMENT_H
+#endif // _FOG_CORE_XML_XMLTEXT_H

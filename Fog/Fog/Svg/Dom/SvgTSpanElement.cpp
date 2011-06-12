@@ -10,9 +10,9 @@
 
 // [Dependencies]
 #include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Xml/XmlText.h>
 #include <Fog/Svg/Dom/SvgTSpanElement_p.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
-#include <Fog/Xml/Dom/XmlText.h>
 
 namespace Fog {
 

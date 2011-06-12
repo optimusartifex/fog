@@ -17,20 +17,18 @@
 #include <Fog/G2d/Global/Init_G2d_p.h>
 #include <Fog/Gui/Global/Init_UI_p.h>
 #include <Fog/Svg/Global/Init_Svg_p.h>
-#include <Fog/Xml/Global/Init_Xml_p.h>
 
 // ============================================================================
 // [Fog::All - Library Initializers]
 // ============================================================================
 
-static sysint_t _fog_init_counter = 0;
+static size_t _fog_init_counter = 0;
 
 FOG_CAPI_DECLARE void _fog_init(void)
 {
   if (++_fog_init_counter == 1)
   {
     Fog::_core_init();
-    Fog::_xml_init();
     Fog::_g2d_init();
     Fog::_svg_init();
     Fog::_gui_init();
@@ -44,7 +42,6 @@ FOG_CAPI_DECLARE void _fog_fini(void)
     Fog::_gui_fini();
     Fog::_svg_fini();
     Fog::_g2d_fini();
-    Fog::_xml_fini();
     Fog::_core_fini();
   }
 }

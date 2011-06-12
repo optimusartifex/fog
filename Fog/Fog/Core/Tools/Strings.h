@@ -42,6 +42,20 @@ enum STR_ID
   // reserved...
 
   // --------------------------------------------------------------------------
+  // [Fog/Core - Xml]
+  // --------------------------------------------------------------------------
+
+  STR_XML_unnamed,
+  STR_XML_ATTRIBUTE_id,
+  STR_XML_ATTRIBUTE_style,
+
+  STR_XML__text,
+  STR_XML__cdata,
+  STR_XML__pi,
+  STR_XML__comment,
+  STR_XML__document,
+
+  // --------------------------------------------------------------------------
   // [Fog/G2d/Imaging - Stream Types]
   // --------------------------------------------------------------------------
 
@@ -104,20 +118,6 @@ enum STR_ID
   STR_G2D_CODEC_quality,
   STR_G2D_CODEC_compression,
   STR_G2D_CODEC_skipFileHeader,
-
-  // --------------------------------------------------------------------------
-  // [Fog/Xml]
-  // --------------------------------------------------------------------------
-
-  STR_XML_unnamed,
-  STR_XML_ATTRIBUTE_id,
-  STR_XML_ATTRIBUTE_style,
-
-  STR_XML__text,
-  STR_XML__cdata,
-  STR_XML__pi,
-  STR_XML__comment,
-  STR_XML__document,
 
   // --------------------------------------------------------------------------
   // [Fog/Svg - Elements]

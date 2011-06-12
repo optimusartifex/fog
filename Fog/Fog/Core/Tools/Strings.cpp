@@ -31,7 +31,19 @@ static const char fog_strings_data[] =
 
   // reserved...
 
-  // [Graphics - Imaging - Stream Types]
+  // [Core - Xml]
+
+  "unnamed\0"
+  "id\0"
+  "style\0"
+
+  "#text\0"
+  "#cdata\0"
+  "#pi\0"
+  "#comment\0"
+  "#document\0"
+
+  // [G2d - Imaging - Stream Types]
 
   "ANI\0"
   "APNG\0"
@@ -51,7 +63,7 @@ static const char fog_strings_data[] =
   "XBM\0"
   "XPM\0"
 
-  // [Graphics - Imaging - Stream Extensions]
+  // [G2d - Imaging - Stream Extensions]
 
   "ani\0"
   "apng\0"
@@ -76,7 +88,7 @@ static const char fog_strings_data[] =
   "xbm\0"
   "xpm\0"
 
-  // [Graphics - Imaging - Device Properties]
+  // [G2d - Imaging - Device Properties]
 
   "width\0"
   "height\0"
@@ -88,18 +100,6 @@ static const char fog_strings_data[] =
   "quality\0"
   "compression\0"
   "skipFileHeader\0"
-
-  // [Xml]
-
-  "unnamed\0"
-  "id\0"
-  "style\0"
-
-  "#text\0"
-  "#cdata\0"
-  "#pi\0"
-  "#comment\0"
-  "#document\0"
 
   // [Svg]
 

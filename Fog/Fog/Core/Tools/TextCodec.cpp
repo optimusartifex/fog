@@ -1699,8 +1699,8 @@ err_t TextCodec::createFromMime(const String& mime)
 
 struct TextCodecBom
 {
-  uint32_t code;
-  uint32_t size;
+  uint16_t code;
+  uint16_t size;
   uint8_t data[4];
 };
 

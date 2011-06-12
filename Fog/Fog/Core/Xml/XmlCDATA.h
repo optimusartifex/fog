@@ -1,65 +1,63 @@
-// [Fog-Svg]
+// [Fog-Core]
 //
 // [License]
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_SVG_DOM_SVGIMAGELINKATTRIBUTE_P_H
-#define _FOG_SVG_DOM_SVGIMAGELINKATTRIBUTE_P_H
+#ifndef _FOG_CORE_XML_XMLCDATA_H
+#define _FOG_CORE_XML_XMLCDATA_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Xml/XmlAttribute.h>
-#include <Fog/Core/Xml/XmlElement.h>
-#include <Fog/G2d/Imaging/Image.h>
-#include <Fog/Svg/Global/Constants.h>
+#include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/Xml/XmlNoText.h>
 
 namespace Fog {
 
-//! @addtogroup Fog_Svg_Dom
+//! @addtogroup Fog_Xml_Dom
 //! @{
 
 // ============================================================================
-// [Fog::SvgImageLinkAttribute]
+// [Fog::XmlCDATA]
 // ============================================================================
 
-struct FOG_NO_EXPORT SvgImageLinkAttribute : public XmlAttribute
+//! @brief Xml CDATA section.
+struct FOG_API XmlCDATA : public XmlNoText
 {
-  typedef XmlAttribute base;
+  typedef XmlNoText base;
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  SvgImageLinkAttribute(XmlElement* element, const ManagedString& name, int offset);
-  virtual ~SvgImageLinkAttribute();
+  XmlCDATA(const String& data = String());
+  virtual ~XmlCDATA();
 
   // --------------------------------------------------------------------------
-  // [Methods]
+  // [Clone]
   // --------------------------------------------------------------------------
 
-  virtual String getValue() const;
-  virtual err_t setValue(const String& value);
+  virtual XmlElement* clone() const;
 
   // --------------------------------------------------------------------------
-  // [Image]
+  // [CDATA Specific]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void setImage(const Image& image) { _image = image; }
-  FOG_INLINE const Image& getImage() const { return _image; }
+  const String& getData() const;
+  err_t setData(const String& data);
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
-protected:
 
-  Image _image;
-  bool _embedded;
+protected:
+  String _data;
 
 private:
-  friend struct SvgImageElement;
+  friend struct XmlElement;
+  friend struct XmlDocument;
 
-  _FOG_CLASS_NO_COPY(SvgImageLinkAttribute)
+  _FOG_CLASS_NO_COPY(XmlCDATA)
 };
 
 //! @}
@@ -67,4 +65,4 @@ private:
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_SVG_DOM_SVGIMAGELINKATTRIBUTE_P_H
+#endif // _FOG_CORE_XML_XMLCDATA_H

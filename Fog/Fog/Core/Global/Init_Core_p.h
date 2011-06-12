@@ -96,6 +96,9 @@ FOG_NO_EXPORT void _core_strings_fini(void);
 FOG_NO_EXPORT void _core_textcodec_init(void);
 FOG_NO_EXPORT void _core_textcodec_fini(void);
 
+// [Fog/Core/Xml]
+FOG_NO_EXPORT void _core_xmlentity_init(void);
+
 } // Fog namespace
 
 // [Guard]

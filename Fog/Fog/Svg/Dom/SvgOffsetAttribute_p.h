@@ -9,8 +9,8 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Class.h>
-#include <Fog/Xml/Dom/XmlAttribute.h>
-#include <Fog/Xml/Dom/XmlElement.h>
+#include <Fog/Core/Xml/XmlAttribute.h>
+#include <Fog/Core/Xml/XmlElement.h>
 #include <Fog/Svg/Global/Constants.h>
 
 namespace Fog {

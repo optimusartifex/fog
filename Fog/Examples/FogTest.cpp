@@ -2,7 +2,6 @@
 #include <Fog/G2d.h>
 #include <Fog/Gui.h>
 #include <Fog/Svg.h>
-#include <Fog/Xml.h>
 
 // This is for MY testing:)
 

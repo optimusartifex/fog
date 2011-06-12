@@ -67,6 +67,9 @@ namespace Fog {
 // +----------+---------------------------------------------------------------+
 // |gld-ratio | 1.618033988749894848204586834365638117720309179805762862135449|
 // +----------+---------------------------------------------------------------+
+// | TODO:    | 1/255    1/256                                                |
+// |          | 1/65535  1/65536                                              |
+// +----------+---------------------------------------------------------------+
 
 // ============================================================================
 // [Fog::Math - Constants]
@@ -164,6 +167,16 @@ static const double MATH_GOLDEN_RATIO   = 1.61803398874989484820;
 static const double MATH_RAD_FROM_DEG   = 0.017453292519943295769;
 //! @brief Constant to convert degrees from radians.
 static const double MATH_DEG_FROM_RAD   =57.29577951308232087680;
+
+//! @brief 1 / 255.
+static const double MATH_1_DIV_255       = 1.0 / 255.0;
+//! @brief 1 / 256.
+static const double MATH_1_DIV_256       = 1.0 / 256.0;
+
+//! @brief 1 / 65535.
+static const double MATH_1_DIV_65535     = 1.0 / 65535.0;
+//! @brief 1 / 65536.
+static const double MATH_1_DIV_65536     = 1.0 / 65536.0;
 
 //! @brief Default epsilon used in math for 32-bit floats.
 static const float MATH_EPSILON_F = 1e-8f;

@@ -706,13 +706,13 @@ Set(FOG_CORE_XML_HEADERS
 # [Fog/Core/Win]
 If(FOG_OS_WINDOWS)
   Set(FOG_CORE_WIN_SOURCES
-    Fog/Core/Win/WinCom.cpp
-    Fog/Core/Win/WinComStream.cpp
+    Fog/Core/Win/Com.cpp
+    Fog/Core/Win/ComStream.cpp
     Fog/Core/Win/WinUtil.cpp
   )
   Set(FOG_CORE_WIN_HEADERS
-    Fog/Core/Win/WinCom.h
-    Fog/Core/Win/WinComStream_p.h
+    Fog/Core/Win/Com.h
+    Fog/Core/Win/ComStream_p.h
     Fog/Core/Win/WinUtil_p.h
   )
 EndIf()

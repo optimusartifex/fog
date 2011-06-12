@@ -22,8 +22,8 @@
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Strings.h>
-#include <Fog/Core/Win/WinCom.h>
-#include <Fog/Core/Win/WinComStream_p.h>
+#include <Fog/Core/Win/Com.h>
+#include <Fog/Core/Win/ComStream_p.h>
 #include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Imaging/Codecs/GdipCodec_p.h>
 #include <Fog/G2d/Imaging/Image.h>
@@ -358,20 +358,20 @@ GdipDecoder::~GdipDecoder()
 
 void GdipDecoder::attachStream(Stream& stream)
 {
-  _istream = fog_new WinComStream(stream);
+  _istream = fog_new ComStream(stream);
 
   base::attachStream(stream);
 }
 
 void GdipDecoder::detachStream()
 {
-  if (_gpImage)
+  if (_gpImage != NULL)
   {
     _gdipLibrary->pGdipDisposeImage(_gpImage);
     _gpImage = NULL;
   }
 
-  if (_istream)
+  if (_istream != NULL)
   {
     _istream->Release();
     _istream = NULL;
@@ -516,14 +516,14 @@ GdipEncoder::~GdipEncoder()
 
 void GdipEncoder::attachStream(Stream& stream)
 {
-  _istream = fog_new WinComStream(stream);
+  _istream = fog_new ComStream(stream);
 
   base::attachStream(stream);
 }
 
 void GdipEncoder::detachStream()
 {
-  if (_istream)
+  if (_istream != NULL)
   {
     _istream->Release();
     _istream = NULL;

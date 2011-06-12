@@ -4,11 +4,10 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_WIN_WINCOM_H
-#define _FOG_CORE_WIN_WINCOM_H
+#ifndef _FOG_CORE_WIN_COM_H
+#define _FOG_CORE_WIN_COM_H
 
 #include <Fog/Core/Config/Config.h>
-#if defined(FOG_OS_WINDOWS)
 
 // ============================================================================
 // [Fog::Core - WinCOM Macros]
@@ -27,5 +26,4 @@
 //! @}
 
 // [Guard]
-#endif // FOG_OS_WINDOWS
-#endif // _FOG_CORE_WIN_WINCOM_H
+#endif // _FOG_CORE_WIN_COM_H

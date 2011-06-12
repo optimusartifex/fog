@@ -29,6 +29,7 @@ namespace Face {
 
 typedef __m64 m64;
 typedef __m64 m64i;
+typedef __m64 m64f;
 
 // ============================================================================
 // [Fog::Face - MMX - Constants]

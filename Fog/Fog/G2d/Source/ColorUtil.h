@@ -71,7 +71,7 @@ struct FOG_NO_EXPORT ColorUtil
     Face::m128f xmmf;
 
     Face::m128fLoad16u(xmmf, argbf);
-    Face::m128fMulPS(xmmf, xmmf, FOG_SSE_GET_CONST_PS(m128f_to_byte));
+    Face::m128fMulPS(xmmf, xmmf, FOG_SSE_GET_CONST_PS(m128f_4x_255));
     Face::m128iCvtPI32FromPS(xmm0, xmmf);
     Face::m128iSwapPI32(xmm0, xmm0);
     Face::m128iPackPU8FromPI32(xmm0, xmm0);
@@ -129,7 +129,7 @@ struct FOG_NO_EXPORT ColorUtil
     Face::m128f xmmf;
 
     Face::m128fLoad16u(xmmf, argbf);
-    Face::m128fMulPS(xmmf, xmmf, FOG_SSE_GET_CONST_PS(m128f_to_word));
+    Face::m128fMulPS(xmmf, xmmf, FOG_SSE_GET_CONST_PS(m128f_4x_65535));
     Face::m128iCvtPI32FromPS(xmm0, xmmf);
     Face::m128iSwapPI32(xmm0, xmm0);
     Face::m128iPackPU16FromPI32(xmm0, xmm0);
@@ -154,7 +154,7 @@ struct FOG_NO_EXPORT ColorUtil
     Face::m128iUnpackPI32FromPI8Lo(xmm0, xmm0);
     Face::m128iSwapPI32(xmm0, xmm0);
     Face::m128fCvtPSFromPI32(xmmf, xmm0);
-    Face::m128fMulPS(xmmf, xmmf, FOG_SSE_GET_CONST_PS(m128f_from_byte));
+    Face::m128fMulPS(xmmf, xmmf, FOG_SSE_GET_CONST_PS(m128f_4x_1_div_255));
 
     Face::m128fStore16u(dst, xmmf);
 #else
@@ -177,7 +177,7 @@ struct FOG_NO_EXPORT ColorUtil
     Face::m128iUnpackPI32FromPI16Lo(xmm0, xmm0);
     Face::m128iSwapPI32(xmm0, xmm0);
     Face::m128fCvtPSFromPI32(xmmf, xmm0);
-    Face::m128fMulPS(xmmf, xmmf, FOG_SSE_GET_CONST_PS(m128f_from_word));
+    Face::m128fMulPS(xmmf, xmmf, FOG_SSE_GET_CONST_PS(m128f_4x_1_div_65535));
 
     Face::m128fStore16u(dst, xmmf);
 #else

@@ -80,7 +80,7 @@ static err_t FOG_CDECL _G2d_Color_setData_SSE2(Color& self, uint32_t modelExtend
       Face::m128fStore16uLoHi(&self._data[0], xmm0);
       Face::m128fStore4(&self._data[4], xmm1);
 
-      Face::m128fMulPS(xmm0, xmm0, FOG_SSE_GET_CONST_PS(m128f_to_byte));
+      Face::m128fMulPS(xmm0, xmm0, FOG_SSE_GET_CONST_PS(m128f_4x_255));
       Face::m128iCvtPI32FromPS(xmmI, xmm0);
 
       Face::m128iSwapPI32(xmmI, xmmI);
@@ -103,7 +103,7 @@ static err_t FOG_CDECL _G2d_Color_setData_SSE2(Color& self, uint32_t modelExtend
       Face::m128iUnpackPI32FromPI16Lo(xmmI, xmmI);
       Face::m128fCvtPSFromPI32(xmm0, xmmI);
       Face::m128fShuffle<0, 1, 2, 3>(xmm0, xmm0);
-      Face::m128fMulPS(xmm0, xmm0, FOG_SSE_GET_CONST_PS(m128f_from_byte));
+      Face::m128fMulPS(xmm0, xmm0, FOG_SSE_GET_CONST_PS(m128f_4x_1_div_255));
       Face::m128iPackPU8FromPI32(xmmI, xmmI);
 
       Face::m128fStore16uLoHi(&self._data[0], xmm0);
@@ -125,7 +125,7 @@ static err_t FOG_CDECL _G2d_Color_setData_SSE2(Color& self, uint32_t modelExtend
 
       Face::m128iSwapPI32(xmmI, xmmI);
       Face::m128iRShiftLogPI32<8>(xmmI, xmmI);
-      Face::m128fMulPS(xmm0, xmm0, FOG_SSE_GET_CONST_PS(m128f_from_word));
+      Face::m128fMulPS(xmm0, xmm0, FOG_SSE_GET_CONST_PS(m128f_4x_1_div_65535));
       Face::m128iPackPU8FromPI32(xmmI, xmmI);
 
       Face::m128fStore16uLoHi(&self._data[0], xmm0);

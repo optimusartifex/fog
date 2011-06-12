@@ -13,28 +13,29 @@
 #include <Fog/Core/Math/Math.h>
 
 #include <Fog/Core/Cpu/Intrin_SSE.h>
-#if defined(FOG_FACE_HAS_SSE2)
+#if defined(FOG_HARDCODE_SSE2)
 #include <Fog/Core/Cpu/Intrin_SSE2.h>
-#endif // FOG_FACE_HAS_SSE2
+#endif // FOG_HARDCODE_SSE2
 
 // ============================================================================
 // [Fog::Face - SSE - Constants]
 // ============================================================================
 
-FOG_SSE_DECLARE_CONST_PI32_VAR(m128f_sn_sn_sn_sn, 0x80000000, 0x80000000, 0x80000000, 0x80000000);
-FOG_SSE_DECLARE_CONST_PI32_VAR(m128f_p0_p0_sn_sn, 0x00000000, 0x00000000, 0x80000000, 0x80000000);
-FOG_SSE_DECLARE_CONST_PI32_VAR(m128f_sn_sn_p0_p0, 0x80000000, 0x80000000, 0x00000000, 0x00000000);
-FOG_SSE_DECLARE_CONST_PI32_SET(m128f_num_mask   , 0x7FFFFFFF);
+FOG_SSE_DECLARE_CONST_PI32_VAR(m128f_sn_sn_sn_sn   , 0x80000000, 0x80000000, 0x80000000, 0x80000000);
+FOG_SSE_DECLARE_CONST_PI32_VAR(m128f_p0_p0_sn_sn   , 0x00000000, 0x00000000, 0x80000000, 0x80000000);
+FOG_SSE_DECLARE_CONST_PI32_VAR(m128f_sn_sn_p0_p0   , 0x80000000, 0x80000000, 0x00000000, 0x00000000);
+FOG_SSE_DECLARE_CONST_PI32_VAR(m128f_nm_nm_nm_nm   , 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF);
 
-FOG_SSE_DECLARE_CONST_PS_SET  (m128f_one        , 1.0f      );
-FOG_SSE_DECLARE_CONST_PS_VAR  (m128f_0f_0f_0f_1f, 0.0f, 0.0f, 0.0f, 1.0f);
-FOG_SSE_DECLARE_CONST_PS_SET  (m128f_epsilon    , Fog::MATH_EPSILON_F);
+FOG_SSE_DECLARE_CONST_PS_VAR  (m128f_p0_p0_p0_p1   , 0.0f, 0.0f, 0.0f, 1.0f);
 
-FOG_SSE_DECLARE_CONST_PS_SET  (m128f_from_byte  , 1.0f / 255.0f);
-FOG_SSE_DECLARE_CONST_PS_SET  (m128f_from_word  , 1.0f / 65535.0f);
+FOG_SSE_DECLARE_CONST_PS_SET  (m128f_4x_one        , 1.0f);
+FOG_SSE_DECLARE_CONST_PS_SET  (m128f_4x_eps        , Fog::MATH_EPSILON_F);
 
-FOG_SSE_DECLARE_CONST_PS_SET  (m128f_to_byte    , 255.0f);
-FOG_SSE_DECLARE_CONST_PS_SET  (m128f_to_word    , 65535.0f);
+FOG_SSE_DECLARE_CONST_PS_SET  (m128f_4x_1_div_255  , float(Fog::MATH_1_DIV_255));
+FOG_SSE_DECLARE_CONST_PS_SET  (m128f_4x_1_div_65535, float(Fog::MATH_1_DIV_65535));
+
+FOG_SSE_DECLARE_CONST_PS_SET  (m128f_4x_255        , 255.0f);
+FOG_SSE_DECLARE_CONST_PS_SET  (m128f_4x_65535      , 65535.0f);
 
 namespace Fog {
 namespace Face {
@@ -254,11 +255,11 @@ static FOG_INLINE void m128fCopy(m128f& dst, const m128f& src)
 template<int Z, int Y, int X, int W>
 static FOG_INLINE void m128fShuffle(m128f& dst, const m128f& a)
 {
-#if defined(FOG_FACE_HAS_SSE2)
+#if defined(FOG_HARDCODE_SSE2)
   dst = _mm_shuffle_epi32_f(a, _MM_SHUFFLE(Z, Y, X, W));
 #else
   dst = _mm_shuffle_ps(a, a, _MM_SHUFFLE(Z, Y, X, W));
-#endif // FOG_FACE_HAS_SSE2
+#endif // FOG_HARDCODE_SSE2
 }
 
 //! @brief Shuffle SP-FP values from @a and @a b to @a dst.
@@ -445,12 +446,12 @@ static FOG_INLINE void m128fSqrtPS(m128f& dst, const m128f& a)
 
 static FOG_INLINE void m128fRcpSS(m128f& dst, const m128f& a)
 {
-  dst = _mm_div_ss(_mm_load_ss((const float*)(&FOG_SSE_GET_CONST_PS(m128f_one))), a);
+  dst = _mm_div_ss(_mm_load_ss((const float*)(&FOG_SSE_GET_CONST_PS(m128f_4x_one))), a);
 }
 
 static FOG_INLINE void m128fRcpPS(m128f& dst, const m128f& a)
 {
-  dst = _mm_div_ps(FOG_SSE_GET_CONST_PS(m128f_one), a);
+  dst = _mm_div_ps(FOG_SSE_GET_CONST_PS(m128f_4x_one), a);
 }
 
 // ============================================================================
@@ -611,8 +612,8 @@ static FOG_INLINE void m128fEpsilonSS(m128f& dst, const m128f& a)
   sgn = FOG_SSE_GET_CONST_PS(m128f_sn_sn_sn_sn);
   sgn = _mm_and_ps(sgn, a);
 
-  dst = _mm_and_ps(a, FOG_SSE_GET_CONST_PS(m128f_num_mask));
-  dst = _mm_max_ss(dst, FOG_SSE_GET_CONST_PS(m128f_epsilon));
+  dst = _mm_and_ps(a, FOG_SSE_GET_CONST_PS(m128f_nm_nm_nm_nm));
+  dst = _mm_max_ss(dst, FOG_SSE_GET_CONST_PS(m128f_4x_eps));
   dst = _mm_or_ps(dst, sgn);
 }
 
@@ -632,8 +633,8 @@ static FOG_INLINE void m128fEpsilonPS(m128f& dst, const m128f& a)
   sgn = FOG_SSE_GET_CONST_PS(m128f_sn_sn_sn_sn);
   sgn = _mm_and_ps(sgn, a);
 
-  dst = _mm_and_ps(a, FOG_SSE_GET_CONST_PS(m128f_num_mask));
-  dst = _mm_max_ps(dst, FOG_SSE_GET_CONST_PS(m128f_epsilon));
+  dst = _mm_and_ps(a, FOG_SSE_GET_CONST_PS(m128f_nm_nm_nm_nm));
+  dst = _mm_max_ps(dst, FOG_SSE_GET_CONST_PS(m128f_4x_eps));
   dst = _mm_or_ps(dst, sgn);
 }
 

@@ -4,15 +4,13 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_WIN_WINCOMSTREAM_H
-#define _FOG_CORE_WIN_WINCOMSTREAM_H
-
-#include <Fog/Core/Config/Config.h>
-#if defined(FOG_OS_WINDOWS)
+#ifndef _FOG_CORE_WIN_COMSTREAM_H
+#define _FOG_CORE_WIN_COMSTREAM_H
 
 // [Dependencies]
 #include <Fog/Core/IO/Stream.h>
 
+// [Dependencies - Windows]
 #include <objidl.h>
 
 namespace Fog {
@@ -20,12 +18,16 @@ namespace Fog {
 //! @addtogroup Fog_Core_Win
 //! @{
 
-class FOG_NO_EXPORT WinComStream : public IStream
+class FOG_NO_EXPORT ComStream : public IStream
 {
 public:
-  WinComStream(Stream& stream);
+  ComStream(Stream& stream);
 private:
-  ~WinComStream();
+  ~ComStream();
+
+  // --------------------------------------------------------------------------
+  // [Interface]
+  // --------------------------------------------------------------------------
 
 public:
   // IUnknown Interface.
@@ -48,7 +50,10 @@ public:
   virtual HRESULT STDMETHODCALLTYPE Seek(LARGE_INTEGER liDistanceToMove, DWORD dwOrigin, ULARGE_INTEGER* lpNewFilePointer);
   virtual HRESULT STDMETHODCALLTYPE Stat(STATSTG* pStatstg, DWORD grfStatFlag);
 
-private:
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
   Stream _stream;
   LONG _refCount;
 };
@@ -58,5 +63,4 @@ private:
 } // Fog namespace
 
 // [Guard]
-#endif // FOG_OS_WINDOWS
-#endif // _FOG_CORE_WIN_WINCOMSTREAM_H
+#endif // _FOG_CORE_WIN_COMSTREAM_H

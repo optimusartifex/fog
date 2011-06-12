@@ -30,6 +30,7 @@ namespace Face {
 
 // @brief Create a 8-bit mask from the most significant bits of the 8 signed
 // or unsigned 8-bit integers in a and zero extend the upper bits.
+//
 // static FOG_INLINE void m128iMoveMask8(int& dst, const m64i& a)
 // {
 //   dst = _mm_movemask_pi8(a);

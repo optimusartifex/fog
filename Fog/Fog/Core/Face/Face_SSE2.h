@@ -46,23 +46,24 @@ FOG_SSE_DECLARE_CONST_PI16_VAR(FFFFFFFFFFFFFFFF_FFFFFFFFFFFFFFFF, 0xFFFF, 0xFFFF
 FOG_SSE_DECLARE_CONST_PI16_VAR(00FFFFFF00FFFFFF_00FFFFFF00FFFFFF, 0x00FF, 0xFFFF, 0x00FF, 0xFFFF, 0x00FF, 0xFFFF, 0x00FF, 0xFFFF);
 FOG_SSE_DECLARE_CONST_PI16_VAR(0000000100000001_0000000100000001, 0x0000, 0x0001, 0x0000, 0x0001, 0x0000, 0x0001, 0x0000, 0x0001);
 
-FOG_SSE_DECLARE_CONST_PI64_SET(m128d_sgn_mask    , FOG_UINT64_C(0x8000000000000000));
-FOG_SSE_DECLARE_CONST_PI64_SET(m128d_num_mask    , FOG_UINT64_C(0x7FFFFFFFFFFFFFFF));
+FOG_SSE_DECLARE_CONST_PI64_SET(m128d_2x_sn         , FOG_UINT64_C(0x8000000000000000));
+FOG_SSE_DECLARE_CONST_PI64_SET(m128d_2x_nm         , FOG_UINT64_C(0x7FFFFFFFFFFFFFFF));
 
-FOG_SSE_DECLARE_CONST_PD_SET  (m128d_one         , 1.0                             );
-FOG_SSE_DECLARE_CONST_PD_VAR  (m128d_0f_1f       , 0.0, 1.0                        );
-FOG_SSE_DECLARE_CONST_PD_SET  (m128d_epsilon     , Fog::MATH_EPSILON_D             );
+FOG_SSE_DECLARE_CONST_PD_SET  (m128d_2x_one        , 1.0);
+FOG_SSE_DECLARE_CONST_PD_SET  (m128d_2x_eps        , Fog::MATH_EPSILON_D);
 
-FOG_SSE_DECLARE_CONST_PD_SET  (m128d_from_byte   , 1.0 / 255.0);
-FOG_SSE_DECLARE_CONST_PD_SET  (m128d_from_word   , 1.0 / 65535.0);
+FOG_SSE_DECLARE_CONST_PD_SET  (m128d_2x_1_div_255  , Fog::MATH_1_DIV_255);
+FOG_SSE_DECLARE_CONST_PD_SET  (m128d_2x_1_div_65535, Fog::MATH_1_DIV_65535);
 
-FOG_SSE_DECLARE_CONST_PD_SET  (m128d_to_byte     , 255.0);
-FOG_SSE_DECLARE_CONST_PD_SET  (m128d_to_word     , 65535.0);
+FOG_SSE_DECLARE_CONST_PD_SET  (m128d_2x_255        , 255.0);
+FOG_SSE_DECLARE_CONST_PD_SET  (m128d_2x_65535      , 65535.0);
+
+FOG_SSE_DECLARE_CONST_PD_VAR  (m128d_p0_p1         , 0.0, 1.0);
 
 // A constant that is subtracted from the U32 value and added back to U16 value
 // to simulate unsigned saturation (this instruction is missing).
-FOG_SSE_DECLARE_CONST_PI32_SET(m128i_packusdw_u32, 0x8000);
-FOG_SSE_DECLARE_CONST_PI16_SET(m128i_packusdw_u16, 0x8000);
+FOG_SSE_DECLARE_CONST_PI32_SET(m128i_packusdw_u32  , 0x8000);
+FOG_SSE_DECLARE_CONST_PI16_SET(m128i_packusdw_u16  , 0x8000);
 
 namespace Fog {
 namespace Face {
@@ -609,12 +610,12 @@ static FOG_INLINE void m128dSqrtPD(m128d& dst, const m128d& a)
 
 static FOG_INLINE void m128dRcpSD(m128d& dst, const m128d& a)
 {
-  dst = _mm_div_sd(_mm_load_sd(&FOG_SSE_GET_CONST_SD(m128d_one)), a);
+  dst = _mm_div_sd(_mm_load_sd(&FOG_SSE_GET_CONST_SD(m128d_2x_one)), a);
 }
 
 static FOG_INLINE void m128dRcpPD(m128d& dst, const m128d& a)
 {
-  dst = _mm_div_pd(FOG_SSE_GET_CONST_PD(m128d_one), a);
+  dst = _mm_div_pd(FOG_SSE_GET_CONST_PD(m128d_2x_one), a);
 }
 
 // ============================================================================
@@ -692,22 +693,22 @@ static FOG_INLINE void m128iXor(m128i& dst, const m128i& a, const m128i& b)
 static FOG_INLINE void m128dEpsilonSD(m128d& dst, const m128d& a)
 {
   m128d sgn;
-  sgn = FOG_SSE_GET_CONST_PD(m128d_sgn_mask);
+  sgn = FOG_SSE_GET_CONST_PD(m128d_2x_sn);
   sgn = _mm_and_pd(sgn, a);
 
-  dst = _mm_and_pd(a, FOG_SSE_GET_CONST_PD(m128d_num_mask));
-  dst = _mm_max_sd(dst, FOG_SSE_GET_CONST_PD(m128d_epsilon));
+  dst = _mm_and_pd(a, FOG_SSE_GET_CONST_PD(m128d_2x_nm));
+  dst = _mm_max_sd(dst, FOG_SSE_GET_CONST_PD(m128d_2x_eps));
   dst = _mm_or_pd(dst, sgn);
 }
 
 static FOG_INLINE void m128dEpsilonPD(m128d& dst, const m128d& a)
 {
   m128d sgn;
-  sgn = FOG_SSE_GET_CONST_PD(m128d_sgn_mask);
+  sgn = FOG_SSE_GET_CONST_PD(m128d_2x_sn);
   sgn = _mm_and_pd(sgn, a);
 
-  dst = _mm_and_pd(a, FOG_SSE_GET_CONST_PD(m128d_num_mask));
-  dst = _mm_max_pd(dst, FOG_SSE_GET_CONST_PD(m128d_epsilon));
+  dst = _mm_and_pd(a, FOG_SSE_GET_CONST_PD(m128d_2x_nm));
+  dst = _mm_max_pd(dst, FOG_SSE_GET_CONST_PD(m128d_2x_eps));
   dst = _mm_or_pd(dst, sgn);
 }
 

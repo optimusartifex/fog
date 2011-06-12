@@ -29,10 +29,6 @@ namespace Face {
 // #define FOG_FACE_HAS_FAST_MUL
 
 // #define FOG_FACE_HAS_MMX
-// #define FOG_FACE_HAS_SSE
-// #define FOG_FACE_HAS_SSE2
-// #define FOG_FACE_HAS_SSE3
-// #define FOG_FACE_HAS_SSSE3
 
 // ============================================================================
 // [FOG_FACE_HAS_64BIT]
@@ -146,46 +142,6 @@ namespace Face {
 #  define FOG_FACE_HAS_FAST_MUL
 # endif
 #endif
-
-// ============================================================================
-// [FOG_FACE_HAS_MMX]
-// ============================================================================
-
-#if defined(FOG_HARDCODE_MMX)
-# define FOG_FACE_HAS_MMX
-#endif // FOG_HARDCODE_MMX
-
-// ============================================================================
-// [FOG_FACE_HAS_SSE]
-// ============================================================================
-
-#if defined(FOG_HARDCODE_SSE)
-# define FOG_FACE_HAS_SSE
-#endif // FOG_HARDCODE_SSE
-
-// ============================================================================
-// [FOG_FACE_HAS_SSE2]
-// ============================================================================
-
-#if defined(FOG_HARDCODE_SSE2)
-# define FOG_FACE_HAS_SSE2
-#endif // FOG_HARDCODE_SSE2
-
-// ============================================================================
-// [FOG_FACE_HAS_SSE3]
-// ============================================================================
-
-#if defined(FOG_HARDCODE_SSE3)
-# define FOG_FACE_HAS_SSE3
-#endif // FOG_HARDCODE_SSE3
-
-// ============================================================================
-// [FOG_FACE_HAS_SSSE3]
-// ============================================================================
-
-#if defined(FOG_HARDCODE_SSSE3)
-# define FOG_FACE_HAS_SSSE3
-#endif // FOG_HARDCODE_SSSE3
 
 //! @}
 

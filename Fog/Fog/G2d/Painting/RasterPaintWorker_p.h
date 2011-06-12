@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_PAINTING_RASTER_RASTERWORKER_P_H
-#define _FOG_G2D_PAINTING_RASTER_RASTERWORKER_P_H
+#ifndef _FOG_G2D_PAINTING_RASTERPAINTWORKER_P_H
+#define _FOG_G2D_PAINTING_RASTERPAINTWORKER_P_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
@@ -16,8 +16,8 @@
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Threading/Thread.h>
 #include <Fog/Core/Threading/ThreadCondition.h>
-#include <Fog/G2d/Painting/Raster/RasterContext_p.h>
-#include <Fog/G2d/Painting/Raster/RasterStructs_p.h>
+#include <Fog/G2d/Painting/RasterPaintContext_p.h>
+#include <Fog/G2d/Painting/RasterPaintStructs_p.h>
 
 namespace Fog {
 
@@ -183,4 +183,4 @@ struct FOG_NO_EXPORT RasterWorkerManager
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_PAINTING_RASTER_RASTERWORKER_P_H
+#endif // _FOG_G2D_PAINTING_RASTERPAINTWORKER_P_H

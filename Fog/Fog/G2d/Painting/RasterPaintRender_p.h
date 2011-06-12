@@ -4,13 +4,13 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_PAINTING_RASTER_RASTERRENDERER_P_H
-#define _FOG_G2D_PAINTING_RASTER_RASTERRENDERER_P_H
+#ifndef _FOG_G2D_PAINTING_RASTERPAINTRENDER_P_H
+#define _FOG_G2D_PAINTING_RASTERPAINTRENDER_P_H
 
 // [Dependencies]
 #include <Fog/G2d/Global/Constants.h>
-#include <Fog/G2d/Painting/Raster/RasterConstants_p.h>
-#include <Fog/G2d/Painting/Raster/RasterStructs_p.h>
+#include <Fog/G2d/Painting/RasterPaintConstants_p.h>
+#include <Fog/G2d/Painting/RasterPaintStructs_p.h>
 
 namespace Fog {
 
@@ -72,4 +72,4 @@ FOG_NO_EXPORT void _g2d_painter_init_raster_render(void);
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_PAINTING_RASTER_RASTERRENDERER_P_H
+#endif // _FOG_G2D_PAINTING_RASTERPAINTRENDER_P_H

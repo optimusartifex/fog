@@ -9,12 +9,12 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/G2d/Painting/Raster/RasterConstants_p.h>
-#include <Fog/G2d/Painting/Raster/RasterContext_p.h>
-#include <Fog/G2d/Painting/Raster/RasterFuncs_p.h>
-#include <Fog/G2d/Painting/Raster/RasterRender_p.h>
-#include <Fog/G2d/Painting/Raster/RasterStructs_p.h>
-#include <Fog/G2d/Painting/Raster/RasterUtil_p.h>
+#include <Fog/G2d/Painting/RasterPaintConstants_p.h>
+#include <Fog/G2d/Painting/RasterPaintContext_p.h>
+#include <Fog/G2d/Painting/RasterPaintFuncs_p.h>
+#include <Fog/G2d/Painting/RasterPaintRender_p.h>
+#include <Fog/G2d/Painting/RasterPaintStructs_p.h>
+#include <Fog/G2d/Painting/RasterPaintUtil_p.h>
 #include <Fog/G2d/Render/RenderApi_p.h>
 #include <Fog/G2d/Render/RenderConstants_p.h>
 #include <Fog/G2d/Render/RenderStructs_p.h>

@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_PAINTING_RASTER_RASTERENGINE_P_H
-#define _FOG_G2D_PAINTING_RASTER_RASTERENGINE_P_H
+#ifndef _FOG_G2D_PAINTING_RASTERPAINTENGINE_P_H
+#define _FOG_G2D_PAINTING_RASTERPAINTENGINE_P_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
@@ -22,12 +22,12 @@
 #include <Fog/G2d/Geometry/Size.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Painting/PaintEngine.h>
-#include <Fog/G2d/Painting/Raster/RasterConstants_p.h>
-#include <Fog/G2d/Painting/Raster/RasterFuncs_p.h>
-#include <Fog/G2d/Painting/Raster/RasterState_p.h>
-#include <Fog/G2d/Painting/Raster/RasterStructs_p.h>
-#include <Fog/G2d/Painting/Raster/RasterUtil_p.h>
-#include <Fog/G2d/Painting/Raster/RasterWorker_p.h>
+#include <Fog/G2d/Painting/RasterPaintConstants_p.h>
+#include <Fog/G2d/Painting/RasterPaintFuncs_p.h>
+#include <Fog/G2d/Painting/RasterPaintState_p.h>
+#include <Fog/G2d/Painting/RasterPaintStructs_p.h>
+#include <Fog/G2d/Painting/RasterPaintUtil_p.h>
+#include <Fog/G2d/Painting/RasterPaintWorker_p.h>
 #include <Fog/G2d/Rasterizer/Rasterizer_p.h>
 #include <Fog/G2d/Rasterizer/Scanline_p.h>
 #include <Fog/G2d/Rasterizer/Span_p.h>
@@ -281,4 +281,4 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_PAINTING_RASTER_RASTERENGINE_P_H
+#endif // _FOG_G2D_PAINTING_RASTERPAINTENGINE_P_H

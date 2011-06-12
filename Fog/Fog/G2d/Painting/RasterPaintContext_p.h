@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_PAINTING_RASTER_RASTERCONTEXT_P_H
-#define _FOG_G2D_PAINTING_RASTER_RASTERCONTEXT_P_H
+#ifndef _FOG_G2D_PAINTING_RASTERPAINTCONTEXT_P_H
+#define _FOG_G2D_PAINTING_RASTERPAINTCONTEXT_P_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Class.h>
@@ -17,9 +17,9 @@
 #include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Painting/PaintParams.h>
-#include <Fog/G2d/Painting/Raster/RasterFuncs_p.h>
-#include <Fog/G2d/Painting/Raster/RasterRender_p.h>
-#include <Fog/G2d/Painting/Raster/RasterStructs_p.h>
+#include <Fog/G2d/Painting/RasterPaintFuncs_p.h>
+#include <Fog/G2d/Painting/RasterPaintRender_p.h>
+#include <Fog/G2d/Painting/RasterPaintStructs_p.h>
 #include <Fog/G2d/Render/RenderStructs_p.h>
 #include <Fog/G2d/Rasterizer/Scanline_p.h>
 #include <Fog/G2d/Source/Pattern.h>
@@ -363,4 +363,4 @@ private:
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_PAINTING_RASTER_RASTERCONTEXT_P_H
+#endif // _FOG_G2D_PAINTING_RASTERPAINTCONTEXT_P_H

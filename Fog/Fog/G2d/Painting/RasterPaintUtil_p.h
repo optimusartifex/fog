@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_PAINTING_RASTER_RASTERUTIL_P_H
-#define _FOG_G2D_PAINTING_RASTER_RASTERUTIL_P_H
+#ifndef _FOG_G2D_PAINTING_RASTERPAINTUTIL_P_H
+#define _FOG_G2D_PAINTING_RASTERPAINTUTIL_P_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
@@ -218,4 +218,4 @@ static FOG_INLINE const BoxI* Raster_bsearchRegion(const BoxI* base, size_t leng
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_PAINTING_RASTER_RASTERUTIL_P_H
+#endif // _FOG_G2D_PAINTING_RASTERPAINTUTIL_P_H

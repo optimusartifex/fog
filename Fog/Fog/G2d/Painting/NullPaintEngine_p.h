@@ -4,21 +4,22 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_PAINTING_NULL_NULLENGINE_P_H
-#define _FOG_G2D_PAINTING_NULL_NULLENGINE_P_H
+#ifndef _FOG_G2D_PAINTING_NULLPAINTENGINE_P_H
+#define _FOG_G2D_PAINTING_NULLPAINTENGINE_P_H
 
 // [Dependencies]
 #include <Fog/G2d/Painting/PaintEngine.h>
 
 namespace Fog {
 
-//! @addtogroup Fog_G2d_Painting_Null
+//! @addtogroup Fog_G2d_Painting
 //! @{
 
 // ============================================================================
 // [Fog::NullPainterVTable]
 // ============================================================================
 
+//! @internal
 struct FOG_NO_EXPORT NullPainterVTable : public PainterVTable
 {
 };
@@ -32,11 +33,13 @@ struct FOG_NO_EXPORT NullPainterVTable : public PainterVTable
 //! @brief The null painter engine (does nothing).
 //!
 //! The nearly all methods result in @ref ERR_RT_INVALID_STATE error code.
-struct FOG_NO_EXPORT NullPaintEngine : public PaintEngine {};
+struct FOG_NO_EXPORT NullPaintEngine : public PaintEngine
+{
+};
 
 //! @}
 
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_PAINTING_NULL_NULLENGINE_P_H
+#endif // _FOG_G2D_PAINTING_NULLPAINTENGINE_P_H

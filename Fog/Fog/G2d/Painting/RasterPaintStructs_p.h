@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_PAINTING_RASTER_RASTERCORETYPES_P_H
-#define _FOG_G2D_PAINTING_RASTER_RASTERCORETYPES_P_H
+#ifndef _FOG_G2D_PAINTING_RASTERPAINTSTRUCTS_P_H
+#define _FOG_G2D_PAINTING_RASTERPAINTSTRUCTS_P_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
@@ -20,7 +20,7 @@
 #include <Fog/G2d/Geometry/Transform.h>
 #include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Imaging/Image.h>
-#include <Fog/G2d/Painting/Raster/RasterConstants_p.h>
+#include <Fog/G2d/Painting/RasterPaintConstants_p.h>
 #include <Fog/G2d/Rasterizer/Rasterizer_p.h>
 #include <Fog/G2d/Render/RenderApi_p.h>
 #include <Fog/G2d/Render/RenderConstants_p.h>
@@ -354,4 +354,4 @@ struct FOG_NO_EXPORT RasterMaskSnapshot
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_PAINTING_RASTER_RASTERCORETYPES_P_H
+#endif // _FOG_G2D_PAINTING_RASTERPAINTSTRUCTS_P_H

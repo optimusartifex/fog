@@ -10,7 +10,7 @@
 
 // [Dependencies]
 #include <Fog/G2d/Painting/Painter.h>
-#include <Fog/G2d/Painting/Null/NullEngine_p.h>
+#include <Fog/G2d/Painting/NullPaintEngine_p.h>
 
 namespace Fog {
 

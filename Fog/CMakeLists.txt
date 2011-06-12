@@ -984,54 +984,40 @@ Set_Source_Files_Properties(
 
 # [Fog/G2d/Painting]
 Set(FOG_G2D_PAINTING_SOURCES
+  Fog/G2d/Painting/NullPaintEngine.cpp
   Fog/G2d/Painting/PaintDevice.cpp
   Fog/G2d/Painting/PaintDeviceInfo.cpp
   Fog/G2d/Painting/PaintEngine.cpp
   Fog/G2d/Painting/PaintParams.cpp
   Fog/G2d/Painting/PaintUtil.cpp
   Fog/G2d/Painting/Painter.cpp
+  Fog/G2d/Painting/RasterPaintAction.cpp
+  Fog/G2d/Painting/RasterPaintContext.cpp
+  Fog/G2d/Painting/RasterPaintEngine.cpp
+  Fog/G2d/Painting/RasterPaintFuncs.cpp
+  Fog/G2d/Painting/RasterPaintRender.cpp
+  Fog/G2d/Painting/RasterPaintState.cpp
+  Fog/G2d/Painting/RasterPaintWorker.cpp
 )
 
 Set(FOG_G2D_PAINTING_HEADERS
+  Fog/G2d/Painting/NullPaintEngine_p.h
   Fog/G2d/Painting/PaintDevice.h
   Fog/G2d/Painting/PaintDeviceInfo.h
   Fog/G2d/Painting/PaintEngine.h
   Fog/G2d/Painting/PaintParams.h
   Fog/G2d/Painting/PaintUtil.h
   Fog/G2d/Painting/Painter.h
-)
-
-Set(FOG_G2D_PAINTING_NULL_SOURCES
-  Fog/G2d/Painting/Null/NullEngine.cpp
-)
-
-Set(FOG_G2D_PAINTING_NULL_HEADERS
-  Fog/G2d/Painting/Null/NullEngine_p.h
-)
-
-Set(FOG_G2D_PAINTING_RASTER_SOURCES
-  Fog/G2d/Painting/Raster/RasterAction.cpp
-  Fog/G2d/Painting/Raster/RasterContext.cpp
-  Fog/G2d/Painting/Raster/RasterEngine.cpp
-  Fog/G2d/Painting/Raster/RasterFuncs.cpp
-  Fog/G2d/Painting/Raster/RasterRender.cpp
-  Fog/G2d/Painting/Raster/RasterState.cpp
-  Fog/G2d/Painting/Raster/RasterWorker.cpp
-)
-
-Set(FOG_G2D_PAINTING_RASTER_HEADERS
-  Fog/G2d/Painting/Raster/RasterEngine_DoMask_p.h
-  Fog/G2d/Painting/Raster/RasterEngine_DoPaint_p.h
-  Fog/G2d/Painting/Raster/RasterAction_p.h
-  Fog/G2d/Painting/Raster/RasterConstants_p.h
-  Fog/G2d/Painting/Raster/RasterContext_p.h
-  Fog/G2d/Painting/Raster/RasterEngine_p.h
-  Fog/G2d/Painting/Raster/RasterFuncs_p.h
-  Fog/G2d/Painting/Raster/RasterRender_p.h
-  Fog/G2d/Painting/Raster/RasterState_p.h
-  Fog/G2d/Painting/Raster/RasterStructs_p.h
-  Fog/G2d/Painting/Raster/RasterUtil_p.h
-  Fog/G2d/Painting/Raster/RasterWorker_p.h
+  Fog/G2d/Painting/RasterPaintAction_p.h
+  Fog/G2d/Painting/RasterPaintConstants_p.h
+  Fog/G2d/Painting/RasterPaintContext_p.h
+  Fog/G2d/Painting/RasterPaintEngine_p.h
+  Fog/G2d/Painting/RasterPaintFuncs_p.h
+  Fog/G2d/Painting/RasterPaintRender_p.h
+  Fog/G2d/Painting/RasterPaintState_p.h
+  Fog/G2d/Painting/RasterPaintStructs_p.h
+  Fog/G2d/Painting/RasterPaintUtil_p.h
+  Fog/G2d/Painting/RasterPaintWorker_p.h
 )
 
 # [Fog/G2d/Rasterizer]
@@ -1362,8 +1348,6 @@ Source_Group("G2d/Imaging"          FILES ${FOG_G2D_IMAGING_SOURCES}          ${
 Source_Group("G2d/Imaging/Codecs"   FILES ${FOG_G2D_IMAGING_CODECS_SOURCES}   ${FOG_G2D_IMAGING_CODECS_HEADERS}  )
 Source_Group("G2d/Imaging/Effects"  FILES ${FOG_G2D_IMAGING_EFFECTS_SOURCES}  ${FOG_G2D_IMAGING_EFFECTS_HEADERS} )
 Source_Group("G2d/Painting"         FILES ${FOG_G2D_PAINTING_SOURCES}         ${FOG_G2D_PAINTING_HEADERS}        )
-Source_Group("G2d/Painting/Null"    FILES ${FOG_G2D_PAINTING_NULL_SOURCES}    ${FOG_G2D_PAINTING_NULL_HEADERS}   )
-Source_Group("G2d/Painting/Raster"  FILES ${FOG_G2D_PAINTING_RASTER_SOURCES}  ${FOG_G2D_PAINTING_RASTER_HEADERS} )
 Source_Group("G2d/Rasterizer"       FILES ${FOG_G2D_RASTERIZER_SOURCES}       ${FOG_G2D_RASTERIZER_HEADERS}      )
 Source_Group("G2d/Render"           FILES ${FOG_G2D_RENDER_SOURCES}           ${FOG_G2D_RENDER_HEADERS}          )
 Source_Group("G2d/Render/C"         FILES                                     ${FOG_G2D_RENDER_C_HEADERS}        )
@@ -1745,8 +1729,6 @@ Set(FOG_ALL_SOURCES
   ${FOG_G2D_IMAGING_CODECS_SOURCES}
   ${FOG_G2D_IMAGING_EFFECTS_SOURCES}
   ${FOG_G2D_PAINTING_SOURCES}
-  ${FOG_G2D_PAINTING_NULL_SOURCES}
-  ${FOG_G2D_PAINTING_RASTER_SOURCES}
   ${FOG_G2D_RASTERIZER_SOURCES}
   ${FOG_G2D_RENDER_SOURCES}
   ${FOG_G2D_SHADER_SOURCES}
@@ -1799,8 +1781,6 @@ Set(FOG_ALL_HEADERS
   ${FOG_G2D_IMAGING_CODECS_HEADERS}
   ${FOG_G2D_IMAGING_EFFECTS_HEADERS}
   ${FOG_G2D_PAINTING_HEADERS}
-  ${FOG_G2D_PAINTING_NULL_HEADERS}
-  ${FOG_G2D_PAINTING_RASTER_HEADERS}
   ${FOG_G2D_GEOMETRY_HEADERS}
   ${FOG_G2D_RASTERIZER_HEADERS}
   ${FOG_G2D_RENDER_HEADERS}

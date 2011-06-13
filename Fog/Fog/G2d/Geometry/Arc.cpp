@@ -27,7 +27,7 @@ namespace Fog {
 // ============================================================================
 
 template<typename NumT>
-static err_t FOG_CDECL _G2d_ArcT_getBoundingBox(const NumT_(Arc)* self,
+static err_t FOG_CDECL _ArcT_getBoundingBox(const NumT_(Arc)* self,
   NumT_(Box)* dst, const NumT_(Transform)* transform, bool includeCenterPoint)
 {
   NumT cx = self->center.x;
@@ -248,7 +248,7 @@ _Identity:
 // ============================================================================
 
 template<typename NumT>
-static uint FOG_CDECL _G2d_ArcT_toCSpline(const NumT_(Arc)* self,
+static uint FOG_CDECL _ArcT_toCSpline(const NumT_(Arc)* self,
   NumT_(Point)* pts)
 {
   NumT cx = self->center.x;
@@ -366,11 +366,11 @@ _Skip:
 
 FOG_NO_EXPORT void _g2d_arc_init(void)
 {
-  _g2d.arcf.getBoundingBox = _G2d_ArcT_getBoundingBox<float>;
-  _g2d.arcd.getBoundingBox = _G2d_ArcT_getBoundingBox<double>;
+  _g2d.arcf.getBoundingBox = _ArcT_getBoundingBox<float>;
+  _g2d.arcd.getBoundingBox = _ArcT_getBoundingBox<double>;
 
-  _g2d.arcf.toCSpline = _G2d_ArcT_toCSpline<float>;
-  _g2d.arcd.toCSpline = _G2d_ArcT_toCSpline<double>;
+  _g2d.arcf.toCSpline = _ArcT_toCSpline<float>;
+  _g2d.arcd.toCSpline = _ArcT_toCSpline<double>;
 }
 
 } // Fog namespace

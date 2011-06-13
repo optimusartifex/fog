@@ -26,7 +26,7 @@ namespace Fog {
 // ============================================================================
 
 template<typename NumT>
-static err_t FOG_CDECL _G2d_CircleT_getBoundingBox(
+static err_t FOG_CDECL _CircleT_getBoundingBox(
   const NumT_(Circle)* self,
   NumT_(Box)* dst,
   const NumT_(Transform)* transform)
@@ -134,7 +134,7 @@ _Identity:
 // ============================================================================
 
 template<typename NumT>
-static bool FOG_CDECL _G2d_CircleT_hitTest(const NumT_(Circle)* self, const NumT_(Point)* pt)
+static bool FOG_CDECL _CircleT_hitTest(const NumT_(Circle)* self, const NumT_(Point)* pt)
 {
   // Hit-test in circle can be simplified to checking the distance of a center
   // point and a given pt. It's not needed to calculate normalized distance
@@ -156,7 +156,7 @@ static bool FOG_CDECL _G2d_CircleT_hitTest(const NumT_(Circle)* self, const NumT
 // ============================================================================
 
 template<typename NumT>
-static uint FOG_CDECL _G2d_CircleT_toCSpline(const NumT_(Circle)* self, NumT_(Point)* pts)
+static uint FOG_CDECL _CircleT_toCSpline(const NumT_(Circle)* self, NumT_(Point)* pts)
 {
   NumT cx = self->center.x;
   NumT cy = self->center.y;
@@ -187,14 +187,14 @@ static uint FOG_CDECL _G2d_CircleT_toCSpline(const NumT_(Circle)* self, NumT_(Po
 
 FOG_NO_EXPORT void _g2d_circle_init(void)
 {
-  _g2d.circlef.getBoundingBox = _G2d_CircleT_getBoundingBox<float>;
-  _g2d.circled.getBoundingBox = _G2d_CircleT_getBoundingBox<double>;
+  _g2d.circlef.getBoundingBox = _CircleT_getBoundingBox<float>;
+  _g2d.circled.getBoundingBox = _CircleT_getBoundingBox<double>;
 
-  _g2d.circlef.hitTest = _G2d_CircleT_hitTest<float>;
-  _g2d.circled.hitTest = _G2d_CircleT_hitTest<double>;
+  _g2d.circlef.hitTest = _CircleT_hitTest<float>;
+  _g2d.circled.hitTest = _CircleT_hitTest<double>;
 
-  _g2d.circlef.toCSpline = _G2d_CircleT_toCSpline<float>;
-  _g2d.circled.toCSpline = _G2d_CircleT_toCSpline<double>;
+  _g2d.circlef.toCSpline = _CircleT_toCSpline<float>;
+  _g2d.circled.toCSpline = _CircleT_toCSpline<double>;
 }
 
 } // Fog namespace

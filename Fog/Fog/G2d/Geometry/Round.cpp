@@ -24,7 +24,7 @@ namespace Fog {
 // ============================================================================
 
 template<typename NumT>
-static err_t FOG_CDECL _G2d_RoundT_getBoundingBox(const NumT_(Round)* self,
+static err_t FOG_CDECL _RoundT_getBoundingBox(const NumT_(Round)* self,
   NumT_(Box)* dst,
   const NumT_(Transform)* tr)
 {
@@ -37,7 +37,7 @@ static err_t FOG_CDECL _G2d_RoundT_getBoundingBox(const NumT_(Round)* self,
 // ============================================================================
 
 template<typename NumT>
-static bool FOG_CDECL _G2d_RoundT_hitTest(const NumT_(Round)* self,
+static bool FOG_CDECL _RoundT_hitTest(const NumT_(Round)* self,
   const NumT_(Point)* pt)
 {
   NumT x = pt->x - self->rect.x;
@@ -93,11 +93,11 @@ static bool FOG_CDECL _G2d_RoundT_hitTest(const NumT_(Round)* self,
 
 FOG_NO_EXPORT void _g2d_round_init(void)
 {
-  _g2d.roundf.getBoundingBox = _G2d_RoundT_getBoundingBox<float>;
-  _g2d.roundd.getBoundingBox = _G2d_RoundT_getBoundingBox<double>;
+  _g2d.roundf.getBoundingBox = _RoundT_getBoundingBox<float>;
+  _g2d.roundd.getBoundingBox = _RoundT_getBoundingBox<double>;
 
-  _g2d.roundf.hitTest = _G2d_RoundT_hitTest<float>;
-  _g2d.roundd.hitTest = _G2d_RoundT_hitTest<double>;
+  _g2d.roundf.hitTest = _RoundT_hitTest<float>;
+  _g2d.roundd.hitTest = _RoundT_hitTest<double>;
 }
 
 } // Fog namespace

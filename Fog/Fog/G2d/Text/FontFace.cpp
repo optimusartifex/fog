@@ -44,7 +44,7 @@ FontFace::~FontFace()
 // ============================================================================
 
 template<typename NumT, bool UseKerning>
-static FOG_INLINE err_t _G2d_FontFace_getTextOutline(FontFace* self,
+static FOG_INLINE err_t _FontFace_getTextOutline(FontFace* self,
   NumT_(Path)& dst,
   GlyphOutlineCache* outlineCache,
   const FontKerningTableF* kerningTable,
@@ -141,9 +141,9 @@ err_t FontFace::_getTextOutline(PathF& dst, GlyphOutlineCache* outlineCache, con
     kerningTable = getKerningTable(d);
 
   if (kerningTable)
-    return _G2d_FontFace_getTextOutline<float, true >(this, dst, outlineCache, kerningTable, d, pt, str, ctx);
+    return _FontFace_getTextOutline<float, true >(this, dst, outlineCache, kerningTable, d, pt, str, ctx);
   else
-    return _G2d_FontFace_getTextOutline<float, false>(this, dst, outlineCache, kerningTable, d, pt, str, ctx);
+    return _FontFace_getTextOutline<float, false>(this, dst, outlineCache, kerningTable, d, pt, str, ctx);
 }
 
 err_t FontFace::_getTextOutline(PathD& dst, GlyphOutlineCache* outlineCache, const FontData* d, const PointD& pt, const Utf16& str, void* ctx)
@@ -153,9 +153,9 @@ err_t FontFace::_getTextOutline(PathD& dst, GlyphOutlineCache* outlineCache, con
     kerningTable = getKerningTable(d);
 
   if (kerningTable)
-    return _G2d_FontFace_getTextOutline<double, true >(this, dst, outlineCache, kerningTable, d, pt, str, ctx);
+    return _FontFace_getTextOutline<double, true >(this, dst, outlineCache, kerningTable, d, pt, str, ctx);
   else
-    return _G2d_FontFace_getTextOutline<double, false>(this, dst, outlineCache, kerningTable, d, pt, str, ctx);
+    return _FontFace_getTextOutline<double, false>(this, dst, outlineCache, kerningTable, d, pt, str, ctx);
 }
 
 } // Fog namespace

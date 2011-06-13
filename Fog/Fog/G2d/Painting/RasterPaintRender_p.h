@@ -59,7 +59,7 @@ struct FOG_NO_EXPORT RasterRenderVTable
 //!   1. Threading model - ST(Singlethreaded) and MT(Multithreaded).
 //!   2. Precision - BYTE and WORD.
 //!   3. Clipping - BOX, REGION and MASK.
-extern FOG_NO_EXPORT RasterRenderVTable _G2d_RasterRender_vtable[RASTER_MODE_COUNT][IMAGE_PRECISION_COUNT][RASTER_CLIP_COUNT];
+extern FOG_NO_EXPORT RasterRenderVTable _RasterRender_vtable[RASTER_MODE_COUNT][IMAGE_PRECISION_COUNT][RASTER_CLIP_COUNT];
 
 // ============================================================================
 // [Fog::RasterRender - Initializer]

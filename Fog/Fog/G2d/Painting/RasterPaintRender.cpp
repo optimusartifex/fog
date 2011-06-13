@@ -460,7 +460,7 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillRasterizedShape(RasterContext& ctx, v
       typename C::ScanlineP& sl = ctx.scanline8.instance();
 
       do {
-        typename C::SpanP* span = rasterizer.sweepScanline(sl, ctx.tmpMemory, y0);
+        typename C::SpanP* span = rasterizer.sweep(sl, ctx.tmpMemory, y0);
 
         if (span)
         {
@@ -491,7 +491,7 @@ void FOG_FASTCALL RasterRenderImpl<C>::fillRasterizedShape(RasterContext& ctx, v
       pc->prepare(&fetcher, y0, delta, RENDER_FETCH_REFERENCE);
 
       do {
-        typename C::SpanP* span = rasterizer.sweepScanline(sl, ctx.tmpMemory, y0);
+        typename C::SpanP* span = rasterizer.sweep(sl, ctx.tmpMemory, y0);
         if (span)
         {
 #if defined(FOG_DEBUG)
@@ -726,27 +726,27 @@ _Blit_ClipBox_Alpha_Direct:
 // [Fog::RasterRender - Initializer]
 // ============================================================================
 
-FOG_NO_EXPORT RasterRenderVTable _G2d_RasterRender_vtable[RASTER_MODE_COUNT][IMAGE_PRECISION_COUNT][RASTER_CLIP_COUNT];
+FOG_NO_EXPORT RasterRenderVTable _RasterRender_vtable[RASTER_MODE_COUNT][IMAGE_PRECISION_COUNT][RASTER_CLIP_COUNT];
 
 FOG_NO_EXPORT void _g2d_painter_init_raster_render(void)
 {
-  RasterRenderImpl<RasterRenderConfig_ST_PB_CB>::initVTable(_G2d_RasterRender_vtable[RASTER_MODE_ST][IMAGE_PRECISION_BYTE][RASTER_CLIP_BOX  ]);
-  RasterRenderImpl<RasterRenderConfig_ST_PB_CR>::initVTable(_G2d_RasterRender_vtable[RASTER_MODE_ST][IMAGE_PRECISION_BYTE][RASTER_CLIP_REGION]);
-  RasterRenderImpl<RasterRenderConfig_ST_PB_CM>::initVTable(_G2d_RasterRender_vtable[RASTER_MODE_ST][IMAGE_PRECISION_BYTE][RASTER_CLIP_MASK  ]);
+  RasterRenderImpl<RasterRenderConfig_ST_PB_CB>::initVTable(_RasterRender_vtable[RASTER_MODE_ST][IMAGE_PRECISION_BYTE][RASTER_CLIP_BOX  ]);
+  RasterRenderImpl<RasterRenderConfig_ST_PB_CR>::initVTable(_RasterRender_vtable[RASTER_MODE_ST][IMAGE_PRECISION_BYTE][RASTER_CLIP_REGION]);
+  RasterRenderImpl<RasterRenderConfig_ST_PB_CM>::initVTable(_RasterRender_vtable[RASTER_MODE_ST][IMAGE_PRECISION_BYTE][RASTER_CLIP_MASK  ]);
 
-  RasterRenderImpl<RasterRenderConfig_MT_PB_CB>::initVTable(_G2d_RasterRender_vtable[RASTER_MODE_MT][IMAGE_PRECISION_BYTE][RASTER_CLIP_BOX  ]);
-  RasterRenderImpl<RasterRenderConfig_MT_PB_CR>::initVTable(_G2d_RasterRender_vtable[RASTER_MODE_MT][IMAGE_PRECISION_BYTE][RASTER_CLIP_REGION]);
-  RasterRenderImpl<RasterRenderConfig_MT_PB_CM>::initVTable(_G2d_RasterRender_vtable[RASTER_MODE_MT][IMAGE_PRECISION_BYTE][RASTER_CLIP_MASK  ]);
+  RasterRenderImpl<RasterRenderConfig_MT_PB_CB>::initVTable(_RasterRender_vtable[RASTER_MODE_MT][IMAGE_PRECISION_BYTE][RASTER_CLIP_BOX  ]);
+  RasterRenderImpl<RasterRenderConfig_MT_PB_CR>::initVTable(_RasterRender_vtable[RASTER_MODE_MT][IMAGE_PRECISION_BYTE][RASTER_CLIP_REGION]);
+  RasterRenderImpl<RasterRenderConfig_MT_PB_CM>::initVTable(_RasterRender_vtable[RASTER_MODE_MT][IMAGE_PRECISION_BYTE][RASTER_CLIP_MASK  ]);
 
   /*
   // TODO: 16-bit rasterizer.
-  RasterRenderImpl<RasterRenderConfig_ST_PW_CB>::initVTable(_G2d_RasterRender_vtable[RASTER_MODE_ST][IMAGE_PRECISION_WORD][RASTER_CLIP_BOX  ]);
-  RasterRenderImpl<RasterRenderConfig_ST_PW_CR>::initVTable(_G2d_RasterRender_vtable[RASTER_MODE_ST][IMAGE_PRECISION_WORD][RASTER_CLIP_REGION]);
-  RasterRenderImpl<RasterRenderConfig_ST_PW_CM>::initVTable(_G2d_RasterRender_vtable[RASTER_MODE_ST][IMAGE_PRECISION_WORD][RASTER_CLIP_MASK  ]);
+  RasterRenderImpl<RasterRenderConfig_ST_PW_CB>::initVTable(_RasterRender_vtable[RASTER_MODE_ST][IMAGE_PRECISION_WORD][RASTER_CLIP_BOX  ]);
+  RasterRenderImpl<RasterRenderConfig_ST_PW_CR>::initVTable(_RasterRender_vtable[RASTER_MODE_ST][IMAGE_PRECISION_WORD][RASTER_CLIP_REGION]);
+  RasterRenderImpl<RasterRenderConfig_ST_PW_CM>::initVTable(_RasterRender_vtable[RASTER_MODE_ST][IMAGE_PRECISION_WORD][RASTER_CLIP_MASK  ]);
 
-  RasterRenderImpl<RasterRenderConfig_MT_PW_CB>::initVTable(_G2d_RasterRender_vtable[RASTER_MODE_MT][IMAGE_PRECISION_WORD][RASTER_CLIP_BOX  ]);
-  RasterRenderImpl<RasterRenderConfig_MT_PW_CR>::initVTable(_G2d_RasterRender_vtable[RASTER_MODE_MT][IMAGE_PRECISION_WORD][RASTER_CLIP_REGION]);
-  RasterRenderImpl<RasterRenderConfig_MT_PW_CM>::initVTable(_G2d_RasterRender_vtable[RASTER_MODE_MT][IMAGE_PRECISION_WORD][RASTER_CLIP_MASK  ]);
+  RasterRenderImpl<RasterRenderConfig_MT_PW_CB>::initVTable(_RasterRender_vtable[RASTER_MODE_MT][IMAGE_PRECISION_WORD][RASTER_CLIP_BOX  ]);
+  RasterRenderImpl<RasterRenderConfig_MT_PW_CR>::initVTable(_RasterRender_vtable[RASTER_MODE_MT][IMAGE_PRECISION_WORD][RASTER_CLIP_REGION]);
+  RasterRenderImpl<RasterRenderConfig_MT_PW_CM>::initVTable(_RasterRender_vtable[RASTER_MODE_MT][IMAGE_PRECISION_WORD][RASTER_CLIP_MASK  ]);
   */
 }
 

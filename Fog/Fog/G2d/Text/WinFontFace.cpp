@@ -38,7 +38,7 @@ namespace Fog {
 // [Fog::WinFontFace - Helpers - FIXED]
 // ============================================================================
 
-static FOG_INLINE FIXED _G2d_WinFIXEDZero()
+static FOG_INLINE FIXED _WinFIXEDZero()
 {
   FIXED fx;
   fx.value = 0;
@@ -46,7 +46,7 @@ static FOG_INLINE FIXED _G2d_WinFIXEDZero()
   return fx;
 }
 
-static FOG_INLINE FIXED _G2d_WinFIXEDOne()
+static FOG_INLINE FIXED _WinFIXEDOne()
 {
   FIXED fx;
   fx.value = 1;
@@ -54,7 +54,7 @@ static FOG_INLINE FIXED _G2d_WinFIXEDOne()
   return fx;
 }
 
-static FOG_INLINE FIXED _G2d_WinFIXEDFrom16x16(uint32_t v16x16)
+static FOG_INLINE FIXED _WinFIXEDFrom16x16(uint32_t v16x16)
 {
   FIXED fx;
   fx.value = v16x16 >> 16;
@@ -63,13 +63,13 @@ static FOG_INLINE FIXED _G2d_WinFIXEDFrom16x16(uint32_t v16x16)
 }
 
 template<typename NumT>
-static FOG_INLINE FIXED _G2d_WinFIXEDFromFloat(const NumT& d)
+static FOG_INLINE FIXED _WinFIXEDFromFloat(const NumT& d)
 {
-  return _G2d_WinFIXEDFrom16x16(Math::fixed16x16FromFloat(d));
+  return _WinFIXEDFrom16x16(Math::fixed16x16FromFloat(d));
 }
 
 template<typename NumT>
-static FOG_INLINE NumT _G2d_WinFloatFromFIXED(const FIXED& f)
+static FOG_INLINE NumT _WinFloatFromFIXED(const FIXED& f)
 {
   return NumT(f.value) + NumT(f.fract) * NumT(1.0 / 65536.0);
 }
@@ -143,16 +143,16 @@ err_t WinFontContext::prepare(HFONT hFont)
   if (hOldFont == NULL) return ERR_FONT_INTERNAL;
 
   ZeroMemory(&gm, sizeof(gm));
-  mat.eM11 = _G2d_WinFIXEDOne();
-  mat.eM12 = _G2d_WinFIXEDZero();
-  mat.eM21 = _G2d_WinFIXEDZero();
-  mat.eM22 = _G2d_WinFIXEDOne();
+  mat.eM11 = _WinFIXEDOne();
+  mat.eM12 = _WinFIXEDZero();
+  mat.eM21 = _WinFIXEDZero();
+  mat.eM22 = _WinFIXEDOne();
 
   return ERR_OK;
 }
 
 template<typename NumT>
-static err_t _G2d_WinDecomposeTTOutline(NumT_(Path)& path,
+static err_t _WinDecomposeTTOutline(NumT_(Path)& path,
   const uint8_t* glyphBuffer, size_t glyphSize, bool flipY)
 {
   err_t err = ERR_OK;
@@ -169,8 +169,8 @@ static err_t _G2d_WinDecomposeTTOutline(NumT_(Path)& path,
     const uint8_t* polyEnd = glyphCur + polyHeader->cb;
     const uint8_t* polyCur = glyphCur + sizeof(TTPOLYGONHEADER);
 
-    p1.x = _G2d_WinFloatFromFIXED<NumT>(polyHeader->pfxStart.x);
-    p1.y = _G2d_WinFloatFromFIXED<NumT>(polyHeader->pfxStart.y);
+    p1.x = _WinFloatFromFIXED<NumT>(polyHeader->pfxStart.x);
+    p1.y = _WinFloatFromFIXED<NumT>(polyHeader->pfxStart.y);
     if (flipY) p1.y = -p1.y;
 
     path.moveTo(p1);
@@ -185,8 +185,8 @@ static err_t _G2d_WinDecomposeTTOutline(NumT_(Path)& path,
         {
           for (uint i = 0; i < pc->cpfx; i++)
           {
-            p1.x = _G2d_WinFloatFromFIXED<NumT>(pc->apfx[i].x);
-            p1.y = _G2d_WinFloatFromFIXED<NumT>(pc->apfx[i].y);
+            p1.x = _WinFloatFromFIXED<NumT>(pc->apfx[i].x);
+            p1.y = _WinFloatFromFIXED<NumT>(pc->apfx[i].y);
             if (flipY) p1.y = -p1.y;
 
             path.lineTo(p1);
@@ -201,11 +201,11 @@ static err_t _G2d_WinDecomposeTTOutline(NumT_(Path)& path,
             NumT_(Point) p2(UNINITIALIZED);
 
             // B is always the current point.
-            p1.x = _G2d_WinFloatFromFIXED<NumT>(pc->apfx[i].x);
-            p1.y = _G2d_WinFloatFromFIXED<NumT>(pc->apfx[i].y);
+            p1.x = _WinFloatFromFIXED<NumT>(pc->apfx[i].x);
+            p1.y = _WinFloatFromFIXED<NumT>(pc->apfx[i].y);
 
-            p2.x = _G2d_WinFloatFromFIXED<NumT>(pc->apfx[i + 1].x);
-            p2.y = _G2d_WinFloatFromFIXED<NumT>(pc->apfx[i + 1].y);
+            p2.x = _WinFloatFromFIXED<NumT>(pc->apfx[i + 1].x);
+            p2.y = _WinFloatFromFIXED<NumT>(pc->apfx[i + 1].y);
 
             // If not on last spline, compute C (midpoint).
             if (i < (uint)pc->cpfx - 2)
@@ -232,14 +232,14 @@ static err_t _G2d_WinDecomposeTTOutline(NumT_(Path)& path,
             NumT_(Point) p2(UNINITIALIZED);
             NumT_(Point) p3(UNINITIALIZED);
 
-            p1.x = _G2d_WinFloatFromFIXED<NumT>(pc->apfx[i].x);
-            p1.y = _G2d_WinFloatFromFIXED<NumT>(pc->apfx[i].y);
+            p1.x = _WinFloatFromFIXED<NumT>(pc->apfx[i].x);
+            p1.y = _WinFloatFromFIXED<NumT>(pc->apfx[i].y);
 
-            p2.x = _G2d_WinFloatFromFIXED<NumT>(pc->apfx[i + 1].x);
-            p2.y = _G2d_WinFloatFromFIXED<NumT>(pc->apfx[i + 1].y);
+            p2.x = _WinFloatFromFIXED<NumT>(pc->apfx[i + 1].x);
+            p2.y = _WinFloatFromFIXED<NumT>(pc->apfx[i + 1].y);
 
-            p3.x = _G2d_WinFloatFromFIXED<NumT>(pc->apfx[i + 2].x);
-            p3.y = _G2d_WinFloatFromFIXED<NumT>(pc->apfx[i + 2].y);
+            p3.x = _WinFloatFromFIXED<NumT>(pc->apfx[i + 2].x);
+            p3.y = _WinFloatFromFIXED<NumT>(pc->apfx[i + 2].y);
 
             if (flipY)
             {
@@ -273,13 +273,13 @@ static err_t _G2d_WinDecomposeTTOutline(NumT_(Path)& path,
 // [Fog::WinFontFace - Handle]
 // ============================================================================
 
-static FOG_INLINE void _G2d_WinFontHandle_init(WinFontHandle& handle, HFONT hFont, FontKerningTableF* kerningTable)
+static FOG_INLINE void _WinFontHandle_init(WinFontHandle& handle, HFONT hFont, FontKerningTableF* kerningTable)
 {
   handle.hFont = hFont;
   handle.kerningTable = kerningTable;
 }
 
-static FOG_INLINE void _G2d_WinFontHandle_free(WinFontHandle& handle)
+static FOG_INLINE void _WinFontHandle_free(WinFontHandle& handle)
 {
   if (handle.hFont)
   {
@@ -294,7 +294,7 @@ static FOG_INLINE void _G2d_WinFontHandle_free(WinFontHandle& handle)
   }
 }
 
-static FOG_INLINE void _G2d_WinFontHandle_zero(WinFontHandle& handle)
+static FOG_INLINE void _WinFontHandle_zero(WinFontHandle& handle)
 {
   handle.hFont = NULL;
   handle.kerningTable = NULL;
@@ -304,7 +304,7 @@ static FOG_INLINE void _G2d_WinFontHandle_zero(WinFontHandle& handle)
 // [Fog::WinFontFace - Helpers - Metrics]
 // ============================================================================
 
-static err_t _G2d_WinGetMetricsF(HDC hdc, FontMetricsF& metrics)
+static err_t _WinGetMetricsF(HDC hdc, FontMetricsF& metrics)
 {
   TEXTMETRICW tm;
   if (!GetTextMetricsW(hdc, &tm)) return ERR_FONT_INTERNAL;
@@ -324,7 +324,7 @@ static err_t _G2d_WinGetMetricsF(HDC hdc, FontMetricsF& metrics)
 // [Fog::WinFontFace - Helpers - Kerning]
 // ============================================================================
 
-static err_t _G2d_WinGetKerningF(HDC hdc, FontKerningTableF** out)
+static err_t _WinGetKerningF(HDC hdc, FontKerningTableF** out)
 {
   DWORD kerningPairsLength = GetKerningPairsW(hdc, 0, NULL);
   KERNINGPAIR* kerningWin = NULL;
@@ -403,9 +403,9 @@ WinFontFace::WinFontFace(WinFontProviderData* pd_)
   id = FONT_FACE_WINDOWS;
   pd = pd_;
 
-  _G2d_WinFontHandle_zero(hMaster);
+  _WinFontHandle_zero(hMaster);
   for (uint i = 0; i < HFONT_CACHE_SIZE; i++)
-    _G2d_WinFontHandle_zero(hCache[i]);
+    _WinFontHandle_zero(hCache[i]);
 }
 
 WinFontFace::~WinFontFace()
@@ -449,7 +449,7 @@ FontKerningTableF* WinFontFace::getKerningTable(const FontData* d)
 // ============================================================================
 
 template<typename NumT>
-static FOG_INLINE err_t _G2d_WinFontFace_renderGlyphOutline(WinFontFace* self,
+static FOG_INLINE err_t _WinFontFace_renderGlyphOutline(WinFontFace* self,
   NumT_(Path)& dst, GlyphMetricsF& metrics, const FontData* d, uint32_t uc, WinFontContext* ctx)
 {
   if (!ctx->isInitialized())
@@ -472,7 +472,7 @@ static FOG_INLINE err_t _G2d_WinFontFace_renderGlyphOutline(WinFontFace* self,
       continue;
     }
 
-    FOG_RETURN_ON_ERROR(_G2d_WinDecomposeTTOutline<NumT>(dst,
+    FOG_RETURN_ON_ERROR(_WinDecomposeTTOutline<NumT>(dst,
       reinterpret_cast<uint8_t*>(ctx->buffer.getMem()), dataSize, true));
 
     metrics._horizontalAdvance.set(PointF(float(ctx->gm.gmCellIncX), float(ctx->gm.gmCellIncY)));
@@ -484,12 +484,12 @@ static FOG_INLINE err_t _G2d_WinFontFace_renderGlyphOutline(WinFontFace* self,
 
 err_t WinFontFace::_renderGlyphOutline(PathF& dst, GlyphMetricsF& metrics, const FontData* d, uint32_t uc, void* ctx)
 {
-  return _G2d_WinFontFace_renderGlyphOutline<float>(this, dst, metrics, d, uc, reinterpret_cast<WinFontContext*>(ctx));
+  return _WinFontFace_renderGlyphOutline<float>(this, dst, metrics, d, uc, reinterpret_cast<WinFontContext*>(ctx));
 }
 
 err_t WinFontFace::_renderGlyphOutline(PathD& dst, GlyphMetricsF& metrics, const FontData* d, uint32_t uc, void* ctx)
 {
-  return _G2d_WinFontFace_renderGlyphOutline<double>(this, dst, metrics, d, uc, reinterpret_cast<WinFontContext*>(ctx));
+  return _WinFontFace_renderGlyphOutline<double>(this, dst, metrics, d, uc, reinterpret_cast<WinFontContext*>(ctx));
 }
 
 // ============================================================================
@@ -522,10 +522,10 @@ err_t WinFontFace::_init(const LOGFONTW* logFont)
   hFontOld = (HFONT)SelectObject(hDC, (HGDIOBJ)hFont);
   if (hFontOld == (HFONT)GDI_ERROR) goto _EndDeleteFont;
 
-  err = _G2d_WinGetMetricsF(hDC, designMetrics);
+  err = _WinGetMetricsF(hDC, designMetrics);
   if (FOG_IS_ERROR(err)) goto _EndSelect;
 
-  err = _G2d_WinGetKerningF(hDC, &kerningTable);
+  err = _WinGetKerningF(hDC, &kerningTable);
   if (FOG_IS_ERROR(err)) goto _EndSelect;
 
   family.setWChar(logFont->lfFaceName);
@@ -536,7 +536,7 @@ err_t WinFontFace::_init(const LOGFONTW* logFont)
   // --------------------------------------------------------------------------
 
   // Keep the FONT handle.
-  _G2d_WinFontHandle_init(hMaster, hFont, kerningTable);
+  _WinFontHandle_init(hMaster, hFont, kerningTable);
   hFont = NULL;
 
   // Update the flags.
@@ -562,10 +562,10 @@ _EndDeleteDC:
 
 void WinFontFace::_reset()
 {
-  _G2d_WinFontHandle_free(hMaster);
+  _WinFontHandle_free(hMaster);
 
   for (uint i = 0; i < HFONT_CACHE_SIZE; i++)
-    _G2d_WinFontHandle_free(hCache[i]);
+    _WinFontHandle_free(hCache[i]);
 }
 
 } // Fog namespace

@@ -168,6 +168,9 @@ static const double MATH_RAD_FROM_DEG   = 0.017453292519943295769;
 //! @brief Constant to convert degrees from radians.
 static const double MATH_DEG_FROM_RAD   =57.29577951308232087680;
 
+//! @brief 1 / 3.
+static const double MATH_1_DIV_3         = 1.0 / 3.0;
+
 //! @brief 1 / 255.
 static const double MATH_1_DIV_255       = 1.0 / 255.0;
 //! @brief 1 / 256.

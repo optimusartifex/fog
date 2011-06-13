@@ -25,7 +25,7 @@ struct FOG_NO_EXPORT MyPainterVTable : public PainterVTable
 {
 };
 
-static PainterVTable _G2d_MyPaintEngine_vtable;
+static PainterVTable _MyPaintEngine_vtable;
 
 // ============================================================================
 // [Fog::MyPaintEngine]
@@ -996,7 +996,7 @@ err_t FOG_CDECL MyPainterImpl::flush(Painter& self, uint32_t flags)
 
 static void _g2d_painter_init_my()
 {
-  PainterVTable& v = _G2d_MyPaintEngine_vtable;
+  PainterVTable& v = _MyPaintEngine_vtable;
 
   // --------------------------------------------------------------------------
   // [AddRef / Release]
@@ -1224,7 +1224,7 @@ static void _g2d_painter_fini_my()
 // [Fog::NullPainterVTable]
 // ============================================================================
 
-static PainterVTable _G2d_NullPaintEngine_vtable;
+static PainterVTable _NullPaintEngine_vtable;
 
 // ============================================================================
 // [Fog::NullPainterImpl]
@@ -1707,11 +1707,11 @@ err_t FOG_CDECL NullPainterImpl::flush(Painter& self, uint32_t flags)
 // [Fog::NullPaintEngine - Statics]
 // ============================================================================
 
-static NullPaintEngine _G2d_NullPaintEngine_instance;
+static NullPaintEngine _NullPaintEngine_instance;
 
-static PaintEngine* FOG_CDECL _G2d_NullPaintEngine_getNullEngine()
+static PaintEngine* FOG_CDECL _NullPaintEngine_getNullEngine()
 {
-  return &_G2d_NullPaintEngine_instance;
+  return &_NullPaintEngine_instance;
 }
 
 // ============================================================================
@@ -1720,9 +1720,9 @@ static PaintEngine* FOG_CDECL _G2d_NullPaintEngine_getNullEngine()
 
 FOG_NO_EXPORT void _g2d_painter_init_null()
 {
-  _g2d.painter.getNullEngine = _G2d_NullPaintEngine_getNullEngine;
+  _g2d.painter.getNullEngine = _NullPaintEngine_getNullEngine;
 
-  PainterVTable& v = _G2d_NullPaintEngine_vtable;
+  PainterVTable& v = _NullPaintEngine_vtable;
 
   // --------------------------------------------------------------------------
   // [AddRef / Release]
@@ -1943,7 +1943,7 @@ FOG_NO_EXPORT void _g2d_painter_init_null()
   // [NullPaintEngine]
   // --------------------------------------------------------------------------
 
-  _G2d_NullPaintEngine_instance.vtable = &_G2d_NullPaintEngine_vtable;
+  _NullPaintEngine_instance.vtable = &_NullPaintEngine_vtable;
 }
 
 FOG_NO_EXPORT void _g2d_painter_fini_null()

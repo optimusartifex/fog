@@ -56,7 +56,7 @@ struct FOG_NO_EXPORT RasterPainterVTable : public PainterVTable {};
 //!
 //!   1. Threading model - ST(Singlethreaded) and MT(Multithreaded).
 //!   2. Precision - BYTE, WORD and FLOAT.
-extern RasterPainterVTable _G2d_RasterPaintEngine_vtable[RASTER_MODE_COUNT];
+extern RasterPainterVTable _RasterPaintEngine_vtable[RASTER_MODE_COUNT];
 
 // ============================================================================
 // [Fog::RasterPaintEngine]

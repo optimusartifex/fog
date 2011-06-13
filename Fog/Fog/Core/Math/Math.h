@@ -559,27 +559,6 @@ static FOG_INLINE float atan2(float x, float y) { return ::atan2f(x, y); }
 static FOG_INLINE double atan2(double x, double y) { return ::atan2(x, y); }
 
 // ============================================================================
-// [Fog::Math - Sqrt]
-// ============================================================================
-
-static FOG_INLINE float sqrt(float x) { return ::sqrtf(x); }
-static FOG_INLINE double sqrt(double x) { return ::sqrt(x); }
-
-// ============================================================================
-// [Fog::Math - Hypot]
-//
-// "Math::hypot(x, y) ~~ Math::sqrt(x * x + y * y)"
-// ============================================================================
-
-#if defined(FOG_CC_MSC)
-static FOG_INLINE float hypot(float x, float y) { return ::_hypotf(x, y); }
-static FOG_INLINE double hypot(double x, double y) { return ::_hypot(x, y); }
-#else
-static FOG_INLINE float hypot(float x, float y) { return ::hypotf(x, y); }
-static FOG_INLINE double hypot(double x, double y) { return ::hypot(x, y); }
-#endif
-
-// ============================================================================
 // [Fog::Math - Pow]
 // ============================================================================
 
@@ -594,6 +573,43 @@ static FOG_INLINE double pow3(double x) { return x * x * x; }
 
 static FOG_INLINE float pow4(float x) { float x2 = x * x; return x2 * x2; }
 static FOG_INLINE double pow4(double x) { double x2 = x * x; return x2 * x2; }
+
+// ============================================================================
+// [Fog::Math - Sqrt]
+// ============================================================================
+
+static FOG_INLINE float sqrt(float x) { return ::sqrtf(x); }
+static FOG_INLINE double sqrt(double x) { return ::sqrt(x); }
+
+// ============================================================================
+// [Fog::Math - Cbrt]
+// ============================================================================
+
+static FOG_INLINE float cbrt(float x)
+{
+  return (x > 0.0f) ?  pow( x, float(MATH_1_DIV_3)) :
+         (x < 0.0f) ? -pow(-x, float(MATH_1_DIV_3)) : 0.0f;
+}
+
+static FOG_INLINE double cbrt(double x)
+{
+  return (x > 0.0f) ?  pow( x, MATH_1_DIV_3) :
+         (x < 0.0f) ? -pow(-x, MATH_1_DIV_3) : 0.0f;
+}
+
+// ============================================================================
+// [Fog::Math - Hypot]
+//
+// "Math::hypot(x, y) ~~ Math::sqrt(x * x + y * y)"
+// ============================================================================
+
+#if defined(FOG_CC_MSC)
+static FOG_INLINE float hypot(float x, float y) { return ::_hypotf(x, y); }
+static FOG_INLINE double hypot(double x, double y) { return ::_hypot(x, y); }
+#else
+static FOG_INLINE float hypot(float x, float y) { return ::hypotf(x, y); }
+static FOG_INLINE double hypot(double x, double y) { return ::hypot(x, y); }
+#endif
 
 // ============================================================================
 // [Fog::Math - Log]

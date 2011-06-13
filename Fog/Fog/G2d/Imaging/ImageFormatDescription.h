@@ -221,17 +221,17 @@ struct FOG_NO_EXPORT ImageFormatDescription
   uint64_t _bMask;
 };
 
-extern FOG_API const ImageFormatDescription _G2d_ImageFormatDescription_list[IMAGE_FORMAT_COUNT + 1];
+extern FOG_API const ImageFormatDescription _ImageFormatDescription_list[IMAGE_FORMAT_COUNT + 1];
 
 FOG_INLINE const ImageFormatDescription* ImageFormatDescription::getList()
 {
-  return _G2d_ImageFormatDescription_list;
+  return _ImageFormatDescription_list;
 }
 
 FOG_INLINE const ImageFormatDescription& ImageFormatDescription::getByFormat(uint32_t id)
 {
   FOG_ASSERT(id <= IMAGE_FORMAT_COUNT);
-  return _G2d_ImageFormatDescription_list[id];
+  return _ImageFormatDescription_list[id];
 }
 
 //! @}

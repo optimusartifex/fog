@@ -27,7 +27,7 @@ enum COLOR_STOP_LIST_VALIDITY
   COLOR_STOP_LIST_NOT_SORTED = 0x02
 };
 
-static uint _G2d_ColorStopList_validate(const ColorStop* stops, size_t length)
+static uint _ColorStopList_validate(const ColorStop* stops, size_t length)
 {
   uint result = 0;
   if (length == 0) return result;
@@ -46,7 +46,7 @@ static uint _G2d_ColorStopList_validate(const ColorStop* stops, size_t length)
   return result;
 }
 
-static void _G2d_ColorStopList_sort(ColorStop* stops, size_t length)
+static void _ColorStopList_sort(ColorStop* stops, size_t length)
 {
   // Insertion sort is used, because the order of stops with the same offset
   // must be preserved (see qsort/isort documentation for differences).
@@ -208,7 +208,7 @@ err_t ColorStopList::setList(const ColorStop* stops, size_t length)
 {
   if (FOG_UNLIKELY(length == 0)) { clear(); return ERR_OK; }
 
-  uint validity = _G2d_ColorStopList_validate(stops, length);
+  uint validity = _ColorStopList_validate(stops, length);
   if (validity & COLOR_STOP_LIST_INVALID_OFFSET) return ERR_RT_INVALID_ARGUMENT;
 
   // Detach or Resize.
@@ -225,7 +225,7 @@ err_t ColorStopList::setList(const ColorStop* stops, size_t length)
 
   if (validity & COLOR_STOP_LIST_NOT_SORTED)
   {
-    _G2d_ColorStopList_sort(_d->data, length);
+    _ColorStopList_sort(_d->data, length);
   }
 
   return ERR_OK;

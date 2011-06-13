@@ -122,7 +122,7 @@ namespace Fog {
 // [Cubic Curve Macros]
 // ============================================================================
 
-static FOG_INLINE void _G2d_PathT_verifyBoundingBox(const PathF& path)
+static FOG_INLINE void _PathT_verifyBoundingBox(const PathF& path)
 {
   if ((path._d->flags & PATH_DATA_DIRTY_BBOX) == 0)
   {
@@ -137,7 +137,7 @@ static FOG_INLINE void _G2d_PathT_verifyBoundingBox(const PathF& path)
   }
 }
 
-static FOG_INLINE void _G2d_PathT_verifyBoundingBox(const PathD& path)
+static FOG_INLINE void _PathT_verifyBoundingBox(const PathD& path)
 {
   if ((path._d->flags & PATH_DATA_DIRTY_BBOX) == 0)
   {
@@ -153,7 +153,7 @@ static FOG_INLINE void _G2d_PathT_verifyBoundingBox(const PathD& path)
 }
 
 #if defined(FOG_DEBUG)
-#define _FOG_PATH_VERIFY_BOUNDING_BOX(_Path_) _G2d_PathT_verifyBoundingBox(_Path_)
+#define _FOG_PATH_VERIFY_BOUNDING_BOX(_Path_) _PathT_verifyBoundingBox(_Path_)
 #else
 #define _FOG_PATH_VERIFY_BOUNDING_BOX(_Path_) FOG_NOP
 #endif

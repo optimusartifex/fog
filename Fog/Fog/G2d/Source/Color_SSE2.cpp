@@ -33,7 +33,7 @@ namespace Fog {
 // [Fog::Color - SetData]
 // ============================================================================
 
-static err_t FOG_CDECL _G2d_Color_setData_SSE2(Color& self, uint32_t modelExtended, const void* modelData)
+static err_t FOG_CDECL _Color_setData_SSE2(Color& self, uint32_t modelExtended, const void* modelData)
 {
   Face::m128f xmm0;
   Face::m128f xmm1;
@@ -148,7 +148,7 @@ static err_t FOG_CDECL _G2d_Color_setData_SSE2(Color& self, uint32_t modelExtend
 
 FOG_NO_EXPORT void _g2d_color_init_sse2(void)
 {
-  _g2d.color.setData = _G2d_Color_setData_SSE2;
+  _g2d.color.setData = _Color_setData_SSE2;
 }
 
 } // Fog namespace

@@ -25,7 +25,7 @@ namespace Fog {
 // ============================================================================
 
 template<typename NumT>
-static err_t FOG_CDECL _G2d_MathT_integrate_GaussLegendre(NumT* dst, const NumT_(Function)& f, const NumT_(Interval)& interval, uint32_t steps)
+static err_t FOG_CDECL _MathT_integrate_GaussLegendre(NumT* dst, const NumT_(Function)& f, const NumT_(Interval)& interval, uint32_t steps)
 {
   if (!interval.isValid())
     return ERR_RT_INVALID_ARGUMENT;
@@ -97,8 +97,8 @@ static err_t FOG_CDECL _G2d_MathT_integrate_GaussLegendre(NumT* dst, const NumT_
 
 FOG_NO_EXPORT void _core_math_init_integrate(void)
 {
-  _core.mathf.integrate[MATH_INTEGRATION_METHOD_GAUSS] = _G2d_MathT_integrate_GaussLegendre<float>;
-  _core.mathd.integrate[MATH_INTEGRATION_METHOD_GAUSS] = _G2d_MathT_integrate_GaussLegendre<double>;
+  _core.mathf.integrate[MATH_INTEGRATION_METHOD_GAUSS] = _MathT_integrate_GaussLegendre<float>;
+  _core.mathd.integrate[MATH_INTEGRATION_METHOD_GAUSS] = _MathT_integrate_GaussLegendre<double>;
 }
 
 } // Fog namespace

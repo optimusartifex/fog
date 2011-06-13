@@ -22,24 +22,24 @@ namespace Fog {
 // [Fog::PaintDeviceInfo - Statics]
 // ============================================================================
 
-static Static<PaintDeviceInfoData> _G2d_PaintDeviceInfo_dnull;
+static Static<PaintDeviceInfoData> _PaintDeviceInfo_dnull;
 
 // ============================================================================
 // [Fog::PaintDeviceInfo - Helpers]
 // ============================================================================
 
-static FOG_INLINE PaintDeviceInfoData* _G2d_PaintDeviceInfo_ref(PaintDeviceInfoData* d)
+static FOG_INLINE PaintDeviceInfoData* _PaintDeviceInfo_ref(PaintDeviceInfoData* d)
 {
   d->refCount.inc();
   return d;
 }
 
-static FOG_INLINE void _G2d_PaintDeviceInfo_deref(PaintDeviceInfoData* d)
+static FOG_INLINE void _PaintDeviceInfo_deref(PaintDeviceInfoData* d)
 {
   if (d->refCount.deref()) Memory::free(d);
 }
 
-static FOG_INLINE err_t _G2d_PaintDeviceInfo_detach(PaintDeviceInfo* self)
+static FOG_INLINE err_t _PaintDeviceInfo_detach(PaintDeviceInfo* self)
 {
   PaintDeviceInfoData* d = self->_d;
 
@@ -69,18 +69,18 @@ static FOG_INLINE err_t _G2d_PaintDeviceInfo_detach(PaintDeviceInfo* self)
 // ============================================================================
 
 PaintDeviceInfo::PaintDeviceInfo() :
-  _d(_G2d_PaintDeviceInfo_ref(_G2d_PaintDeviceInfo_dnull.instancep()))
+  _d(_PaintDeviceInfo_ref(_PaintDeviceInfo_dnull.instancep()))
 {
 }
 
 PaintDeviceInfo::PaintDeviceInfo(const PaintDeviceInfo& other) :
-  _d(_G2d_PaintDeviceInfo_ref(other._d))
+  _d(_PaintDeviceInfo_ref(other._d))
 {
 }
 
 PaintDeviceInfo::~PaintDeviceInfo()
 {
-  _G2d_PaintDeviceInfo_deref(_d);
+  _PaintDeviceInfo_deref(_d);
 }
 
 // ============================================================================
@@ -89,8 +89,8 @@ PaintDeviceInfo::~PaintDeviceInfo()
 
 void PaintDeviceInfo::reset()
 {
-  _G2d_PaintDeviceInfo_deref(
-    atomicPtrXchg(&_d, _G2d_PaintDeviceInfo_ref(_G2d_PaintDeviceInfo_dnull.instancep()))
+  _PaintDeviceInfo_deref(
+    atomicPtrXchg(&_d, _PaintDeviceInfo_ref(_PaintDeviceInfo_dnull.instancep()))
   );
 }
 
@@ -119,7 +119,7 @@ err_t PaintDeviceInfo::create(uint32_t paintDevice,
     return ERR_RT_INVALID_ARGUMENT;
   }
 
-  FOG_RETURN_ON_ERROR(_G2d_PaintDeviceInfo_detach(this));
+  FOG_RETURN_ON_ERROR(_PaintDeviceInfo_detach(this));
   _d->paintDevice = paintDevice;
   _d->fontKerning = fontKerning;
   _d->fontHinting = fontHinting;
@@ -171,8 +171,8 @@ err_t PaintDeviceInfo::makePhysicalFont(Font& physical, const Font& src)
 
 PaintDeviceInfo& PaintDeviceInfo::operator=(const PaintDeviceInfo& other)
 {
-  _G2d_PaintDeviceInfo_deref(
-    atomicPtrXchg(&_d, _G2d_PaintDeviceInfo_ref(other._d))
+  _PaintDeviceInfo_deref(
+    atomicPtrXchg(&_d, _PaintDeviceInfo_ref(other._d))
   );
   return *this;
 }
@@ -183,7 +183,7 @@ PaintDeviceInfo& PaintDeviceInfo::operator=(const PaintDeviceInfo& other)
 
 FOG_NO_EXPORT void _g2d_paintdeviceinfo_init(void)
 {
-  PaintDeviceInfoData* d = _G2d_PaintDeviceInfo_dnull.instancep();
+  PaintDeviceInfoData* d = _PaintDeviceInfo_dnull.instancep();
 
   d->refCount.init(1);
   d->paintDevice = PAINT_DEVICE_UNKNOWN;
@@ -199,7 +199,7 @@ FOG_NO_EXPORT void _g2d_paintdeviceinfo_init(void)
 
 FOG_NO_EXPORT void _g2d_paintdeviceinfo_fini(void)
 {
-  PaintDeviceInfoData* d = _G2d_PaintDeviceInfo_dnull.instancep();
+  PaintDeviceInfoData* d = _PaintDeviceInfo_dnull.instancep();
 
   d->refCount.dec();
 }

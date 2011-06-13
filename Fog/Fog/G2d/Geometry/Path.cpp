@@ -40,37 +40,37 @@ namespace Fog {
 // [Fog::Path - DNull]
 // ============================================================================
 
-static PathDataF _G2d_PathF_dnull;
-static PathDataD _G2d_PathD_dnull;
+static PathDataF _PathF_dnull;
+static PathDataD _PathD_dnull;
 
 template<typename NumT>
-FOG_INLINE NumT_(PathData)* _G2d_PathT_getDNull() { return NULL; }
+FOG_INLINE NumT_(PathData)* _PathT_getDNull() { return NULL; }
 
 template<>
-FOG_INLINE PathDataF* _G2d_PathT_getDNull<float>() { return &_G2d_PathF_dnull; }
+FOG_INLINE PathDataF* _PathT_getDNull<float>() { return &_PathF_dnull; }
 
 template<>
-FOG_INLINE PathDataD* _G2d_PathT_getDNull<double>() { return &_G2d_PathD_dnull; }
+FOG_INLINE PathDataD* _PathT_getDNull<double>() { return &_PathD_dnull; }
 
 // ============================================================================
 // [Fog::Path - Helpers]
 // ============================================================================
 
 template<typename NumT>
-static FOG_INLINE size_t _G2d_PathT_getDataSize(size_t capacity)
+static FOG_INLINE size_t _PathT_getDataSize(size_t capacity)
 {
   return sizeof(NumT_(PathData)) + capacity * (sizeof(NumT_(Point)) + 1);
 }
 
 template<typename NumT>
-static FOG_INLINE void _G2d_PathT_updateDataPointers(
+static FOG_INLINE void _PathT_updateDataPointers(
   NumT_(PathData)* d, size_t capacity)
 {
   d->vertices = (NumT_(Point)*) (((size_t)d->commands + capacity + 15) & ~(size_t)15);
 }
 
 template<typename NumT>
-static bool FOG_FASTCALL _G2d_PathT_getLastPoint(
+static bool FOG_FASTCALL _PathT_getLastPoint(
   NumT_(PathData)* d, NumT_(Point)& dst)
 {
   size_t last = d->length;
@@ -128,9 +128,9 @@ _End:
 // ============================================================================
 
 template<typename NumT>
-static NumT_(PathData)* _G2d_PathT_dalloc(size_t capacity)
+static NumT_(PathData)* _PathT_dalloc(size_t capacity)
 {
-  size_t dsize = _G2d_PathT_getDataSize<NumT>(capacity);
+  size_t dsize = _PathT_getDataSize<NumT>(capacity);
 
   NumT_(PathData)* newd = reinterpret_cast<NumT_(PathData)*>(Memory::alloc(dsize));
   if (FOG_IS_NULL(newd)) return NULL;
@@ -144,15 +144,15 @@ static NumT_(PathData)* _G2d_PathT_dalloc(size_t capacity)
   newd->length = 0;
   newd->boundingBox.reset();
 
-  _G2d_PathT_updateDataPointers<NumT>(newd, capacity);
+  _PathT_updateDataPointers<NumT>(newd, capacity);
   return newd;
 }
 
 template<typename NumT>
-static NumT_(PathData)* _G2d_PathT_drealloc(NumT_(PathData)* d, size_t capacity)
+static NumT_(PathData)* _PathT_drealloc(NumT_(PathData)* d, size_t capacity)
 {
   FOG_ASSERT(d->length <= capacity);
-  size_t dsize = _G2d_PathT_getDataSize<NumT>(capacity);
+  size_t dsize = _PathT_getDataSize<NumT>(capacity);
 
   NumT_(PathData)* newd = reinterpret_cast<NumT_(PathData)*>(Memory::alloc(dsize));
   if (FOG_IS_NULL(newd)) return NULL;
@@ -168,7 +168,7 @@ static NumT_(PathData)* _G2d_PathT_drealloc(NumT_(PathData)* d, size_t capacity)
   newd->length = length;
   newd->boundingBox = d->boundingBox;
 
-  _G2d_PathT_updateDataPointers<NumT>(newd, capacity);
+  _PathT_updateDataPointers<NumT>(newd, capacity);
   Memory::copy(newd->commands, d->commands, length);
   Memory::copy(newd->vertices, d->vertices, length * sizeof(NumT_(Point)));
 
@@ -177,12 +177,12 @@ static NumT_(PathData)* _G2d_PathT_drealloc(NumT_(PathData)* d, size_t capacity)
 }
 
 template<typename NumT>
-static NumT_(PathData)* _G2d_PathT_dcopy(const NumT_(PathData)* d)
+static NumT_(PathData)* _PathT_dcopy(const NumT_(PathData)* d)
 {
   size_t length = d->length;
-  if (length == 0) return _G2d_PathT_getDNull<NumT>()->ref();
+  if (length == 0) return _PathT_getDNull<NumT>()->ref();
 
-  NumT_(PathData)* newd = _G2d_PathT_dalloc<NumT>(length);
+  NumT_(PathData)* newd = _PathT_dalloc<NumT>(length);
   if (FOG_IS_NULL(newd)) return NULL;
 
   newd->flags |= d->flags & PATH_DATA_OWN_FLAGS;
@@ -200,19 +200,19 @@ static NumT_(PathData)* _G2d_PathT_dcopy(const NumT_(PathData)* d)
 // ============================================================================
 
 template<typename NumT>
-static void _G2d_PathT_ctor(NumT_(Path)& self)
+static void _PathT_ctor(NumT_(Path)& self)
 {
-  self._d = _G2d_PathT_getDNull<NumT>()->ref();
+  self._d = _PathT_getDNull<NumT>()->ref();
 }
 
 template<typename NumT>
-static void _G2d_PathT_ctorCopyT(NumT_(Path)& self, const NumT_(Path)& other)
+static void _PathT_ctorCopyT(NumT_(Path)& self, const NumT_(Path)& other)
 {
   self._d = other._d->ref();
 }
 
 template<typename NumT>
-static void _G2d_PathT_dtor(NumT_(Path)& self)
+static void _PathT_dtor(NumT_(Path)& self)
 {
   self._d->deref();
 }
@@ -222,11 +222,11 @@ static void _G2d_PathT_dtor(NumT_(Path)& self)
 // ============================================================================
 
 template<typename NumT>
-static err_t _G2d_PathT_detach(NumT_(Path)& self)
+static err_t _PathT_detach(NumT_(Path)& self)
 {
   if (self.isDetached()) return ERR_OK;
 
-  NumT_(PathData)* newd = _G2d_PathT_dcopy<NumT>(self._d);
+  NumT_(PathData)* newd = _PathT_dcopy<NumT>(self._d);
   if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
   atomicPtrXchg(&self._d, newd)->deref();
@@ -234,14 +234,14 @@ static err_t _G2d_PathT_detach(NumT_(Path)& self)
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_reserve(NumT_(Path)& self, size_t capacity)
+static err_t _PathT_reserve(NumT_(Path)& self, size_t capacity)
 {
   if (self._d->refCount.get() == 1 && self._d->capacity >= capacity) return ERR_OK;
 
   size_t length = self._d->length;
   if (capacity < length) capacity = length;
 
-  NumT_(PathData)* newd = _G2d_PathT_dalloc<NumT>(capacity);
+  NumT_(PathData)* newd = _PathT_dalloc<NumT>(capacity);
   if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
   newd->flags |= self._d->flags & PATH_DATA_OWN_FLAGS;
@@ -256,20 +256,20 @@ static err_t _G2d_PathT_reserve(NumT_(Path)& self, size_t capacity)
 }
 
 template<typename NumT>
-static void _G2d_PathT_squeeze(NumT_(Path)& self)
+static void _PathT_squeeze(NumT_(Path)& self)
 {
   if (self._d->length == self._d->capacity) return;
 
   if (self._d->refCount.get() == 1)
   {
-    NumT_(PathData)* newd = _G2d_PathT_drealloc<NumT>(self._d, self._d->length);
+    NumT_(PathData)* newd = _PathT_drealloc<NumT>(self._d, self._d->length);
     if (FOG_IS_NULL(newd)) return;
 
     atomicPtrXchg(&self._d, newd);
   }
   else
   {
-    NumT_(PathData)* newd = _G2d_PathT_dcopy<NumT>(self._d);
+    NumT_(PathData)* newd = _PathT_dcopy<NumT>(self._d);
     if (FOG_IS_NULL(newd)) return;
 
     atomicPtrXchg(&self._d, newd)->deref();
@@ -277,7 +277,7 @@ static void _G2d_PathT_squeeze(NumT_(Path)& self)
 }
 
 template<typename NumT>
-static size_t _G2d_PathT_prepare(NumT_(Path)& self, size_t count, uint32_t cntOp)
+static size_t _PathT_prepare(NumT_(Path)& self, size_t count, uint32_t cntOp)
 {
   size_t start = (cntOp == CONTAINER_OP_REPLACE) ? 0 : self._d->length;
   size_t remain = self._d->capacity - start;
@@ -291,7 +291,7 @@ static size_t _G2d_PathT_prepare(NumT_(Path)& self, size_t count, uint32_t cntOp
     size_t optimalCapacity =
       Util::getGrowCapacity(sizeof(NumT_(PathData)), sizeof(NumT_(Point)) + sizeof(uint8_t), start, start + count);
 
-    NumT_(PathData)* newd = _G2d_PathT_dalloc<NumT>(optimalCapacity);
+    NumT_(PathData)* newd = _PathT_dalloc<NumT>(optimalCapacity);
     if (FOG_IS_NULL(newd)) return INVALID_INDEX;
 
     newd->flags |= self._d->flags & PATH_DATA_OWN_FLAGS;
@@ -312,7 +312,7 @@ static size_t _G2d_PathT_prepare(NumT_(Path)& self, size_t count, uint32_t cntOp
 }
 
 template<typename NumT>
-static size_t _G2d_PathT_add(NumT_(Path)& self, size_t count)
+static size_t _PathT_add(NumT_(Path)& self, size_t count)
 {
   size_t length = self._d->length;
   size_t remain = self._d->capacity - length;
@@ -326,7 +326,7 @@ static size_t _G2d_PathT_add(NumT_(Path)& self, size_t count)
     size_t optimalCapacity =
       Util::getGrowCapacity(sizeof(NumT_(PathData)), sizeof(NumT_(Point)) + sizeof(uint8_t), length, length + count);
 
-    NumT_(PathData)* newd = _G2d_PathT_dalloc<NumT>(optimalCapacity);
+    NumT_(PathData)* newd = _PathT_dalloc<NumT>(optimalCapacity);
     if (FOG_IS_NULL(newd)) return INVALID_INDEX;
 
     newd->flags |= self._d->flags & PATH_DATA_OWN_FLAGS;
@@ -347,11 +347,11 @@ static size_t _G2d_PathT_add(NumT_(Path)& self, size_t count)
 // ============================================================================
 
 template<typename NumT>
-static void _G2d_PathT_clear(NumT_(Path)& self)
+static void _PathT_clear(NumT_(Path)& self)
 {
   if (self._d->refCount.get() > 1)
   {
-    atomicPtrXchg(&self._d, _G2d_PathT_getDNull<NumT>()->ref())->deref();
+    atomicPtrXchg(&self._d, _PathT_getDNull<NumT>()->ref())->deref();
   }
   else
   {
@@ -362,9 +362,9 @@ static void _G2d_PathT_clear(NumT_(Path)& self)
 }
 
 template<typename NumT>
-static void _G2d_PathT_reset(NumT_(Path)& self)
+static void _PathT_reset(NumT_(Path)& self)
 {
-  atomicPtrXchg(&self._d, _G2d_PathT_getDNull<NumT>()->ref())->deref();
+  atomicPtrXchg(&self._d, _PathT_getDNull<NumT>()->ref())->deref();
 }
 
 // ============================================================================
@@ -372,7 +372,7 @@ static void _G2d_PathT_reset(NumT_(Path)& self)
 // ============================================================================
 
 template<typename NumT>
-static err_t _G2d_PathT_setPathT(NumT_(Path)& self, const NumT_(Path)& other)
+static err_t _PathT_setPathT(NumT_(Path)& self, const NumT_(Path)& other)
 {
   if (self._d == other._d) return ERR_OK;
 
@@ -381,7 +381,7 @@ static err_t _G2d_PathT_setPathT(NumT_(Path)& self, const NumT_(Path)& other)
 }
 
 template<typename NumT, typename SrcT>
-static err_t _G2d_PathT_setDeepT(NumT_(Path)& self, const SrcT_(Path)& other)
+static err_t _PathT_setDeepT(NumT_(Path)& self, const SrcT_(Path)& other)
 {
   NumT_(PathData)* self_d = self._d;
   SrcT_(PathData)* other_d = other._d;
@@ -422,7 +422,7 @@ static err_t _G2d_PathT_setDeepT(NumT_(Path)& self, const SrcT_(Path)& other)
 // ============================================================================
 
 template<typename NumT>
-static Range _G2d_PathT_getSubpathRange(const NumT_(Path)& self, size_t index)
+static Range _PathT_getSubpathRange(const NumT_(Path)& self, size_t index)
 {
   size_t length = self._d->length;
   if (index >= length) return Range(INVALID_INDEX, INVALID_INDEX);
@@ -446,7 +446,7 @@ static Range _G2d_PathT_getSubpathRange(const NumT_(Path)& self, size_t index)
 // ============================================================================
 
 template<typename NumT>
-static err_t _G2d_PathT_moveTo(NumT_(Path)& self, const NumT_(Point)& pt0)
+static err_t _PathT_moveTo(NumT_(Path)& self, const NumT_(Point)& pt0)
 {
   size_t pos = self._add(1);
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
@@ -462,10 +462,10 @@ static err_t _G2d_PathT_moveTo(NumT_(Path)& self, const NumT_(Point)& pt0)
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_moveToRel(NumT_(Path)& self, const NumT_(Point)& pt0)
+static err_t _PathT_moveToRel(NumT_(Path)& self, const NumT_(Point)& pt0)
 {
   NumT_(Point) tr;
-  if (!_G2d_PathT_getLastPoint<NumT>(self._d, tr)) return ERR_PATH_NO_RELATIVE;
+  if (!_PathT_getLastPoint<NumT>(self._d, tr)) return ERR_PATH_NO_RELATIVE;
 
   return self.moveTo(pt0 + tr);
 }
@@ -475,7 +475,7 @@ static err_t _G2d_PathT_moveToRel(NumT_(Path)& self, const NumT_(Point)& pt0)
 // ============================================================================
 
 template<typename NumT>
-static err_t _G2d_PathT_lineTo(NumT_(Path)& self, const NumT_(Point)& pt1)
+static err_t _PathT_lineTo(NumT_(Path)& self, const NumT_(Point)& pt1)
 {
   PATH_ADD_VERTEX_BEGIN(NumT, 1)
     commands[0] = PATH_CMD_LINE_TO;
@@ -485,7 +485,7 @@ static err_t _G2d_PathT_lineTo(NumT_(Path)& self, const NumT_(Point)& pt1)
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_lineToRel(NumT_(Path)& self, const NumT_(Point)& pt1)
+static err_t _PathT_lineToRel(NumT_(Path)& self, const NumT_(Point)& pt1)
 {
   PATH_ADD_VERTEX_BEGIN(NumT, 1)
     NumT_(Point) tr(vertices[-1]);
@@ -497,7 +497,7 @@ static err_t _G2d_PathT_lineToRel(NumT_(Path)& self, const NumT_(Point)& pt1)
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_hlineTo(NumT_(Path)& self, NumT x)
+static err_t _PathT_hlineTo(NumT_(Path)& self, NumT x)
 {
   PATH_ADD_VERTEX_BEGIN(NumT, 1)
     commands[0] = PATH_CMD_LINE_TO;
@@ -507,7 +507,7 @@ static err_t _G2d_PathT_hlineTo(NumT_(Path)& self, NumT x)
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_hlineToRel(NumT_(Path)& self, NumT x)
+static err_t _PathT_hlineToRel(NumT_(Path)& self, NumT x)
 {
   PATH_ADD_VERTEX_BEGIN(NumT, 1)
     commands[0] = PATH_CMD_LINE_TO;
@@ -517,7 +517,7 @@ static err_t _G2d_PathT_hlineToRel(NumT_(Path)& self, NumT x)
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_vlineTo(NumT_(Path)& self, NumT y)
+static err_t _PathT_vlineTo(NumT_(Path)& self, NumT y)
 {
   PATH_ADD_VERTEX_BEGIN(NumT, 1)
     commands[0] = PATH_CMD_LINE_TO;
@@ -527,7 +527,7 @@ static err_t _G2d_PathT_vlineTo(NumT_(Path)& self, NumT y)
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_vlineToRel(NumT_(Path)& self, NumT y)
+static err_t _PathT_vlineToRel(NumT_(Path)& self, NumT y)
 {
   PATH_ADD_VERTEX_BEGIN(NumT, 1)
     commands[0] = PATH_CMD_LINE_TO;
@@ -541,7 +541,7 @@ static err_t _G2d_PathT_vlineToRel(NumT_(Path)& self, NumT y)
 // ============================================================================
 
 template<typename NumT>
-static err_t _G2d_PathT_polyTo(NumT_(Path)& self, const NumT_(Point)* pts, size_t count)
+static err_t _PathT_polyTo(NumT_(Path)& self, const NumT_(Point)* pts, size_t count)
 {
   if (count == 0) return ERR_OK;
   FOG_ASSERT(pts != NULL);
@@ -556,7 +556,7 @@ static err_t _G2d_PathT_polyTo(NumT_(Path)& self, const NumT_(Point)* pts, size_
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_polyToRel(NumT_(Path)& self, const NumT_(Point)* pts, size_t count)
+static err_t _PathT_polyToRel(NumT_(Path)& self, const NumT_(Point)* pts, size_t count)
 {
   if (count == 0) return ERR_OK;
   FOG_ASSERT(pts != NULL);
@@ -576,7 +576,7 @@ static err_t _G2d_PathT_polyToRel(NumT_(Path)& self, const NumT_(Point)* pts, si
 // ============================================================================
 
 template<typename NumT>
-static err_t _G2d_PathT_quadTo(
+static err_t _PathT_quadTo(
   NumT_(Path)& self,
   const NumT_(Point)& pt1,
   const NumT_(Point)& pt2)
@@ -592,7 +592,7 @@ static err_t _G2d_PathT_quadTo(
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_quadToRel(
+static err_t _PathT_quadToRel(
   NumT_(Path)& self,
   const NumT_(Point)& pt1,
   const NumT_(Point)& pt2)
@@ -610,7 +610,7 @@ static err_t _G2d_PathT_quadToRel(
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_smoothQuadTo(
+static err_t _PathT_smoothQuadTo(
   NumT_(Path)& self,
   const NumT_(Point)& pt2)
 {
@@ -633,7 +633,7 @@ static err_t _G2d_PathT_smoothQuadTo(
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_smoothQuadToRel(
+static err_t _PathT_smoothQuadToRel(
   NumT_(Path)& self,
   const NumT_(Point)& pt2)
 {
@@ -660,7 +660,7 @@ static err_t _G2d_PathT_smoothQuadToRel(
 // ============================================================================
 
 template<typename NumT>
-static err_t _G2d_PathT_cubicTo(
+static err_t _PathT_cubicTo(
   NumT_(Path)& self,
   const NumT_(Point)& pt1,
   const NumT_(Point)& pt2,
@@ -679,7 +679,7 @@ static err_t _G2d_PathT_cubicTo(
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_cubicToRel(
+static err_t _PathT_cubicToRel(
   NumT_(Path)& self,
   const NumT_(Point)& pt1,
   const NumT_(Point)& pt2,
@@ -700,7 +700,7 @@ static err_t _G2d_PathT_cubicToRel(
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_smoothCubicTo(
+static err_t _PathT_smoothCubicTo(
   NumT_(Path)& self,
   const NumT_(Point)& pt2,
   const NumT_(Point)& pt3)
@@ -726,7 +726,7 @@ static err_t _G2d_PathT_smoothCubicTo(
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_smoothCubicToRel(
+static err_t _PathT_smoothCubicToRel(
   NumT_(Path)& self,
   const NumT_(Point)& pt2,
   const NumT_(Point)& pt3)
@@ -756,7 +756,7 @@ static err_t _G2d_PathT_smoothCubicToRel(
 // ============================================================================
 
 template<typename NumT>
-static err_t _G2d_PathT_arcTo(
+static err_t _PathT_arcTo(
   NumT_(Path)& self,
   const NumT_(Point)& cp,
   const NumT_(Point)& rp,
@@ -821,20 +821,20 @@ static err_t _G2d_PathT_arcTo(
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_arcToRel(
+static err_t _PathT_arcToRel(
   NumT_(Path)& self,
   const NumT_(Point)& cp,
   const NumT_(Point)& r,
   NumT start, NumT sweep, bool startPath)
 {
   NumT_(Point) tr;
-  if (!_G2d_PathT_getLastPoint<NumT>(self._d, tr)) return ERR_PATH_NO_RELATIVE;
+  if (!_PathT_getLastPoint<NumT>(self._d, tr)) return ERR_PATH_NO_RELATIVE;
 
   return self.arcTo(cp + tr, r, start, sweep, startPath);
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_svgArcTo(
+static err_t _PathT_svgArcTo(
   NumT_(Path)& self,
   const NumT_(Point)& rp,
   NumT angle, bool largeArcFlag, bool sweepFlag,
@@ -847,7 +847,7 @@ static err_t _G2d_PathT_svgArcTo(
   bool radiiOk = true;
 
   // Get initial point - p0.
-  if (!_G2d_PathT_getLastPoint<NumT>(self._d, p0)) return ERR_PATH_NO_RELATIVE;
+  if (!_PathT_getLastPoint<NumT>(self._d, p0)) return ERR_PATH_NO_RELATIVE;
 
   // Normalize radius.
   NumT rx = (rp.x >= NumT(0.0)) ? rp.x : -rp.x;
@@ -960,14 +960,14 @@ static err_t _G2d_PathT_svgArcTo(
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_svgArcToRel(
+static err_t _PathT_svgArcToRel(
   NumT_(Path)& self,
   const NumT_(Point)& rp,
   NumT angle, bool largeArcFlag, bool sweepFlag,
   const NumT_(Point)& pt)
 {
   NumT_(Point) last;
-  if (!_G2d_PathT_getLastPoint<NumT>(self._d, last)) return ERR_PATH_NO_RELATIVE;
+  if (!_PathT_getLastPoint<NumT>(self._d, last)) return ERR_PATH_NO_RELATIVE;
 
   return self.svgArcTo(rp, angle, largeArcFlag, sweepFlag, pt + last);
 }
@@ -977,7 +977,7 @@ static err_t _G2d_PathT_svgArcToRel(
 // ============================================================================
 
 template<typename NumT>
-static err_t _G2d_PathT_close(NumT_(Path)& self)
+static err_t _PathT_close(NumT_(Path)& self)
 {
   PATH_ADD_VERTEX_BEGIN(NumT, 1)
     commands[0] = PATH_CMD_CLOSE;
@@ -990,7 +990,7 @@ static err_t _G2d_PathT_close(NumT_(Path)& self)
 // ============================================================================
 
 template<typename NumT, typename SrcT>
-static err_t _G2d_PathT_rectT(
+static err_t _PathT_rectT(
   NumT_(Path)& self,
   const SrcT_(Rect)& r, uint32_t direction)
 {
@@ -1041,7 +1041,7 @@ static err_t _G2d_PathT_rectT(
 }
 
 template<typename NumT, typename SrcT>
-static err_t _G2d_PathT_boxT(
+static err_t _PathT_boxT(
   NumT_(Path)& self,
   const SrcT_(Box)& r, uint32_t direction)
 {
@@ -1092,7 +1092,7 @@ static err_t _G2d_PathT_boxT(
 }
 
 template<typename NumT, typename SrcT>
-static err_t _G2d_PathT_boxesT(
+static err_t _PathT_boxesT(
   NumT_(Path)& self,
   const SrcT_(Box)* r, size_t count, uint32_t direction)
 {
@@ -1166,7 +1166,7 @@ static err_t _G2d_PathT_boxesT(
 }
 
 template<typename NumT, typename SrcT>
-static err_t _G2d_PathT_rectsT(
+static err_t _PathT_rectsT(
   NumT_(Path)& self,
   const SrcT_(Rect)* r, size_t count, uint32_t direction)
 {
@@ -1244,7 +1244,7 @@ static err_t _G2d_PathT_rectsT(
 // ============================================================================
 
 template<typename NumT>
-static err_t _G2d_PathT_region(NumT_(Path)& self, const Region& r, uint32_t direction)
+static err_t _PathT_region(NumT_(Path)& self, const Region& r, uint32_t direction)
 {
   return self.boxes(r.getData(), r.getLength(), direction);
 }
@@ -1254,7 +1254,7 @@ static err_t _G2d_PathT_region(NumT_(Path)& self, const Region& r, uint32_t dire
 // ============================================================================
 
 template<typename NumT>
-static err_t _G2d_PathT_polylineI(NumT_(Path)& self, const PointI* pts, size_t count, uint32_t direction)
+static err_t _PathT_polylineI(NumT_(Path)& self, const PointI* pts, size_t count, uint32_t direction)
 {
   if (!count) return ERR_OK;
   FOG_ASSERT(pts);
@@ -1284,7 +1284,7 @@ static err_t _G2d_PathT_polylineI(NumT_(Path)& self, const PointI* pts, size_t c
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_polylineT(NumT_(Path)& self, const NumT_(Point)* pts, size_t count, uint32_t direction)
+static err_t _PathT_polylineT(NumT_(Path)& self, const NumT_(Point)* pts, size_t count, uint32_t direction)
 {
   if (!count) return ERR_OK;
   FOG_ASSERT(pts);
@@ -1314,7 +1314,7 @@ static err_t _G2d_PathT_polylineT(NumT_(Path)& self, const NumT_(Point)* pts, si
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_polygonI(NumT_(Path)& self, const PointI* pts, size_t count, uint32_t direction)
+static err_t _PathT_polygonI(NumT_(Path)& self, const PointI* pts, size_t count, uint32_t direction)
 {
   if (!count) return ERR_OK;
   FOG_ASSERT(pts);
@@ -1347,7 +1347,7 @@ static err_t _G2d_PathT_polygonI(NumT_(Path)& self, const PointI* pts, size_t co
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_polygonT(NumT_(Path)& self, const NumT_(Point)* pts, size_t count, uint32_t direction)
+static err_t _PathT_polygonT(NumT_(Path)& self, const NumT_(Point)* pts, size_t count, uint32_t direction)
 {
   if (!count) return ERR_OK;
   FOG_ASSERT(pts);
@@ -1384,7 +1384,7 @@ static err_t _G2d_PathT_polygonT(NumT_(Path)& self, const NumT_(Point)* pts, siz
 // ============================================================================
 
 // ${SHAPE_TYPE:BEGIN}
-static const uint8_t _G2d_PathT_shapeSize[] =
+static const uint8_t _PathT_shapeSize[] =
 {
   /* 00: SHAPE_TYPE_NONE    */ 0,
   /* 01: SHAPE_TYPE_LINE    */ 2,
@@ -1402,7 +1402,7 @@ static const uint8_t _G2d_PathT_shapeSize[] =
 // ${SHAPE_TYPE:END}
 
 template<typename NumT>
-static err_t _G2d_PathT_shape(
+static err_t _PathT_shape(
   NumT_(Path)& self,
   uint32_t shapeType, const void* shapeData, uint32_t direction,
   const NumT_(Transform)* tr)
@@ -1421,7 +1421,7 @@ static err_t _G2d_PathT_shape(
     return self.appendTransformed(tmp, *tr);
   }
 
-  size_t pos = self._add(_G2d_PathT_shapeSize[shapeType]);
+  size_t pos = self._add(_PathT_shapeSize[shapeType]);
   if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
 
   uint8_t* dstCmd = self._d->commands + pos;
@@ -1909,7 +1909,7 @@ _Fail:
 // ============================================================================
 
 template<typename NumT, typename SrcT>
-static err_t _G2d_PathT_appendPathT(
+static err_t _PathT_appendPathT(
   NumT_(Path)& self,
   const SrcT_(Path)& path,
   const Range* range)
@@ -1963,7 +1963,7 @@ static err_t _G2d_PathT_appendPathT(
 }
 
 template<typename NumT, typename SrcT>
-static err_t _G2d_PathT_appendTransformedPathT(
+static err_t _PathT_appendTransformedPathT(
   NumT_(Path)& self,
   const SrcT_(Path)& path,
   const NumT_(Transform)& tr,
@@ -2030,7 +2030,7 @@ static err_t _G2d_PathT_appendTransformedPathT(
 }
 
 template<typename NumT, typename SrcT>
-static err_t _G2d_PathT_appendTranslatedPathT(
+static err_t _PathT_appendTranslatedPathT(
   NumT_(Path)& self,
   const SrcT_(Path)& path,
   const NumT_(Point)& pt,
@@ -2042,7 +2042,7 @@ static err_t _G2d_PathT_appendTranslatedPathT(
   tr._20 = pt.x;
   tr._21 = pt.y;
 
-  return _G2d_PathT_appendTransformedPathT<NumT, SrcT>(self, path, tr, range);
+  return _PathT_appendTransformedPathT<NumT, SrcT>(self, path, tr, range);
 }
 
 // ============================================================================
@@ -2050,7 +2050,7 @@ static err_t _G2d_PathT_appendTranslatedPathT(
 // ============================================================================
 
 template<typename NumT>
-static void _G2d_PathT_updateFlat(const NumT_(Path)& self)
+static void _PathT_updateFlat(const NumT_(Path)& self)
 {
   size_t i = 0;
   size_t len = self._d->length;
@@ -2089,7 +2089,7 @@ static void _G2d_PathT_updateFlat(const NumT_(Path)& self)
 
 // TODO: Path, not perspecive correct assumptions.
 template<typename NumT>
-static err_t _G2d_PathT_doFlatten(
+static err_t _PathT_doFlatten(
   NumT_(Path)& dst,
   const uint8_t* srcCmd, const NumT_(Point)* srcPts, size_t srcLength,
   const NumT_(PathFlattenParams)& params)
@@ -2284,7 +2284,7 @@ _Fail:
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_flatten(
+static err_t _PathT_flatten(
   NumT_(Path)& dst,
   const NumT_(Path)& src,
   const NumT_(PathFlattenParams)& params,
@@ -2297,14 +2297,14 @@ static err_t _G2d_PathT_flatten(
       NumT_(Path) tmp;
 
       FOG_RETURN_ON_ERROR(
-        _G2d_PathT_doFlatten<NumT>(tmp, src.getCommands(), src.getVertices(), src.getLength(), params)
+        _PathT_doFlatten<NumT>(tmp, src.getCommands(), src.getVertices(), src.getLength(), params)
       );
       return dst.setPath(tmp);
     }
     else
     {
       dst.clear();
-      return _G2d_PathT_doFlatten<NumT>(dst, src.getCommands(), src.getVertices(), src.getLength(), params);
+      return _PathT_doFlatten<NumT>(dst, src.getCommands(), src.getVertices(), src.getLength(), params);
     }
   }
   else
@@ -2320,7 +2320,7 @@ static err_t _G2d_PathT_flatten(
       NumT_(Path) t;
 
       FOG_RETURN_ON_ERROR(
-        _G2d_PathT_doFlatten<NumT>(t, src.getCommands() + start, src.getVertices() + start, len, params)
+        _PathT_doFlatten<NumT>(t, src.getCommands() + start, src.getVertices() + start, len, params)
       );
       return dst.setPath(t);
     }
@@ -2328,7 +2328,7 @@ static err_t _G2d_PathT_flatten(
     {
       dst.clear();
 
-      return _G2d_PathT_doFlatten<NumT>(dst, src.getCommands() + start, src.getVertices() + start, len, params);
+      return _PathT_doFlatten<NumT>(dst, src.getCommands() + start, src.getVertices() + start, len, params);
     }
   }
 }
@@ -2338,7 +2338,7 @@ static err_t _G2d_PathT_flatten(
 // ============================================================================
 
 template<typename NumT>
-static err_t FOG_CDECL _G2d_PathT_getBoundingBox(const NumT_(Path)& self,
+static err_t FOG_CDECL _PathT_getBoundingBox(const NumT_(Path)& self,
   NumT_(Box)* dst,
   const NumT_(Transform)* transform)
 {
@@ -2767,7 +2767,7 @@ _Invalid:
 // ============================================================================
 
 template<typename NumT>
-static bool _G2d_PathT_hitTest(
+static bool _PathT_hitTest(
   const NumT_(Path)& self,
   const NumT_(Point)& pt, uint32_t fillRule)
 {
@@ -3133,7 +3133,7 @@ _Invalid:
 // ============================================================================
 
 template<typename NumT>
-static err_t _G2d_PathT_transform(
+static err_t _PathT_transform(
   NumT_(Path)& self,
   const NumT_(Transform)& tr, const Range* range)
 {
@@ -3231,7 +3231,7 @@ static err_t _G2d_PathT_transform(
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_translate(
+static err_t _PathT_translate(
   NumT_(Path)& self,
   const NumT_(Point)& pt, const Range* range)
 {
@@ -3241,11 +3241,11 @@ static err_t _G2d_PathT_translate(
   tr._20 = pt.x;
   tr._21 = pt.y;
 
-  return _G2d_PathT_transform<NumT>(self, tr, range);
+  return _PathT_transform<NumT>(self, tr, range);
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_fitTo(
+static err_t _PathT_fitTo(
   NumT_(Path)& self,
   const NumT_(Rect)& bounds)
 {
@@ -3282,7 +3282,7 @@ static err_t _G2d_PathT_fitTo(
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_scale(
+static err_t _PathT_scale(
   NumT_(Path)& self,
   const NumT_(Point)& pt, bool keepStartPos)
 {
@@ -3361,7 +3361,7 @@ static err_t _G2d_PathT_scale(
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_flipX(
+static err_t _PathT_flipX(
   NumT_(Path)& self, NumT x0, NumT x1)
 {
   size_t i, len = self._d->length;
@@ -3391,7 +3391,7 @@ static err_t _G2d_PathT_flipX(
 }
 
 template<typename NumT>
-static err_t _G2d_PathT_flipY(
+static err_t _PathT_flipY(
   NumT_(Path)& self, NumT y0, NumT y1)
 {
   size_t i, len = self._d->length;
@@ -3425,7 +3425,7 @@ static err_t _G2d_PathT_flipY(
 // ============================================================================
 
 template<typename NumT>
-static bool _G2d_PathT_eq(const NumT_(Path)& _a, const NumT_(Path)& _b)
+static bool _PathT_eq(const NumT_(Path)& _a, const NumT_(Path)& _b)
 {
   const NumT_(PathData)* a = _a._d;
   const NumT_(PathData)* b = _b._d;
@@ -3445,146 +3445,146 @@ static bool _G2d_PathT_eq(const NumT_(Path)& _a, const NumT_(Path)& _b)
 
 FOG_NO_EXPORT void _g2d_path_init(void)
 {
-  _g2d.pathf.ctor = _G2d_PathT_ctor<float>;
-  _g2d.pathf.ctorCopyF = _G2d_PathT_ctorCopyT<float>;
-  _g2d.pathf.dtor = _G2d_PathT_dtor<float>;
-  _g2d.pathf.detach = _G2d_PathT_detach<float>;
-  _g2d.pathf.reserve = _G2d_PathT_reserve<float>;
-  _g2d.pathf.squeeze = _G2d_PathT_squeeze<float>;
-  _g2d.pathf.prepare = _G2d_PathT_prepare<float>;
-  _g2d.pathf.add = _G2d_PathT_add<float>;
-  _g2d.pathf.clear = _G2d_PathT_clear<float>;
-  _g2d.pathf.reset = _G2d_PathT_reset<float>;
-  _g2d.pathf.setPathF = _G2d_PathT_setPathT<float>;
-  _g2d.pathf.setDeepF = _G2d_PathT_setDeepT<float, float>;
-  _g2d.pathf.getSubpathRange = _G2d_PathT_getSubpathRange<float>;
-  _g2d.pathf.moveTo = _G2d_PathT_moveTo<float>;
-  _g2d.pathf.moveToRel = _G2d_PathT_moveToRel<float>;
-  _g2d.pathf.lineTo = _G2d_PathT_lineTo<float>;
-  _g2d.pathf.lineToRel = _G2d_PathT_lineToRel<float>;
-  _g2d.pathf.hlineTo = _G2d_PathT_hlineTo<float>;
-  _g2d.pathf.hlineToRel = _G2d_PathT_hlineToRel<float>;
-  _g2d.pathf.vlineTo = _G2d_PathT_vlineTo<float>;
-  _g2d.pathf.vlineToRel = _G2d_PathT_vlineToRel<float>;
-  _g2d.pathf.polyTo = _G2d_PathT_polyTo<float>;
-  _g2d.pathf.polyToRel = _G2d_PathT_polyToRel<float>;
-  _g2d.pathf.quadTo = _G2d_PathT_quadTo<float>;
-  _g2d.pathf.quadToRel = _G2d_PathT_quadToRel<float>;
-  _g2d.pathf.cubicTo = _G2d_PathT_cubicTo<float>;
-  _g2d.pathf.cubicToRel = _G2d_PathT_cubicToRel<float>;
-  _g2d.pathf.smoothQuadTo = _G2d_PathT_smoothQuadTo<float>;
-  _g2d.pathf.smoothQuadToRel = _G2d_PathT_smoothQuadToRel<float>;
-  _g2d.pathf.smoothCubicTo = _G2d_PathT_smoothCubicTo<float>;
-  _g2d.pathf.smoothCubicToRel = _G2d_PathT_smoothCubicToRel<float>;
-  _g2d.pathf.arcTo = _G2d_PathT_arcTo<float>;
-  _g2d.pathf.arcToRel = _G2d_PathT_arcToRel<float>;
-  _g2d.pathf.svgArcTo = _G2d_PathT_svgArcTo<float>;
-  _g2d.pathf.svgArcToRel = _G2d_PathT_svgArcToRel<float>;
-  _g2d.pathf.close = _G2d_PathT_close<float>;
-  _g2d.pathf.boxI = _G2d_PathT_boxT<float, int>;
-  _g2d.pathf.boxF = _G2d_PathT_boxT<float, float>;
-  _g2d.pathf.rectI = _G2d_PathT_rectT<float, int>;
-  _g2d.pathf.rectF = _G2d_PathT_rectT<float, float>;
-  _g2d.pathf.boxesI = _G2d_PathT_boxesT<float, int>;
-  _g2d.pathf.boxesF = _G2d_PathT_boxesT<float, float>;
-  _g2d.pathf.rectsI = _G2d_PathT_rectsT<float, int>;
-  _g2d.pathf.rectsF = _G2d_PathT_rectsT<float, float>;
-  _g2d.pathf.region = _G2d_PathT_region<float>;
-  _g2d.pathf.polylineI = _G2d_PathT_polylineI<float>;
-  _g2d.pathf.polylineF = _G2d_PathT_polylineT<float>;
-  _g2d.pathf.polygonI = _G2d_PathT_polygonI<float>;
-  _g2d.pathf.polygonF = _G2d_PathT_polygonT<float>;
-  _g2d.pathf.shape = _G2d_PathT_shape<float>;
-  _g2d.pathf.appendPathF = _G2d_PathT_appendPathT<float, float>;
-  _g2d.pathf.appendTranslatedPathF = _G2d_PathT_appendTranslatedPathT<float, float>;
-  _g2d.pathf.appendTransformedPathF = _G2d_PathT_appendTransformedPathT<float, float>;
-  _g2d.pathf.updateFlat = _G2d_PathT_updateFlat<float>;
-  _g2d.pathf.flatten = _G2d_PathT_flatten<float>;
-  _g2d.pathf.getBoundingBox = _G2d_PathT_getBoundingBox<float>;
-  _g2d.pathf.hitTest = _G2d_PathT_hitTest<float>;
-  _g2d.pathf.translate = _G2d_PathT_translate<float>;
-  _g2d.pathf.transform = _G2d_PathT_transform<float>;
-  _g2d.pathf.fitTo = _G2d_PathT_fitTo<float>;
-  _g2d.pathf.scale = _G2d_PathT_scale<float>;
-  _g2d.pathf.flipX = _G2d_PathT_flipX<float>;
-  _g2d.pathf.flipY = _G2d_PathT_flipY<float>;
-  _g2d.pathf.eq = _G2d_PathT_eq<float>;
+  _g2d.pathf.ctor = _PathT_ctor<float>;
+  _g2d.pathf.ctorCopyF = _PathT_ctorCopyT<float>;
+  _g2d.pathf.dtor = _PathT_dtor<float>;
+  _g2d.pathf.detach = _PathT_detach<float>;
+  _g2d.pathf.reserve = _PathT_reserve<float>;
+  _g2d.pathf.squeeze = _PathT_squeeze<float>;
+  _g2d.pathf.prepare = _PathT_prepare<float>;
+  _g2d.pathf.add = _PathT_add<float>;
+  _g2d.pathf.clear = _PathT_clear<float>;
+  _g2d.pathf.reset = _PathT_reset<float>;
+  _g2d.pathf.setPathF = _PathT_setPathT<float>;
+  _g2d.pathf.setDeepF = _PathT_setDeepT<float, float>;
+  _g2d.pathf.getSubpathRange = _PathT_getSubpathRange<float>;
+  _g2d.pathf.moveTo = _PathT_moveTo<float>;
+  _g2d.pathf.moveToRel = _PathT_moveToRel<float>;
+  _g2d.pathf.lineTo = _PathT_lineTo<float>;
+  _g2d.pathf.lineToRel = _PathT_lineToRel<float>;
+  _g2d.pathf.hlineTo = _PathT_hlineTo<float>;
+  _g2d.pathf.hlineToRel = _PathT_hlineToRel<float>;
+  _g2d.pathf.vlineTo = _PathT_vlineTo<float>;
+  _g2d.pathf.vlineToRel = _PathT_vlineToRel<float>;
+  _g2d.pathf.polyTo = _PathT_polyTo<float>;
+  _g2d.pathf.polyToRel = _PathT_polyToRel<float>;
+  _g2d.pathf.quadTo = _PathT_quadTo<float>;
+  _g2d.pathf.quadToRel = _PathT_quadToRel<float>;
+  _g2d.pathf.cubicTo = _PathT_cubicTo<float>;
+  _g2d.pathf.cubicToRel = _PathT_cubicToRel<float>;
+  _g2d.pathf.smoothQuadTo = _PathT_smoothQuadTo<float>;
+  _g2d.pathf.smoothQuadToRel = _PathT_smoothQuadToRel<float>;
+  _g2d.pathf.smoothCubicTo = _PathT_smoothCubicTo<float>;
+  _g2d.pathf.smoothCubicToRel = _PathT_smoothCubicToRel<float>;
+  _g2d.pathf.arcTo = _PathT_arcTo<float>;
+  _g2d.pathf.arcToRel = _PathT_arcToRel<float>;
+  _g2d.pathf.svgArcTo = _PathT_svgArcTo<float>;
+  _g2d.pathf.svgArcToRel = _PathT_svgArcToRel<float>;
+  _g2d.pathf.close = _PathT_close<float>;
+  _g2d.pathf.boxI = _PathT_boxT<float, int>;
+  _g2d.pathf.boxF = _PathT_boxT<float, float>;
+  _g2d.pathf.rectI = _PathT_rectT<float, int>;
+  _g2d.pathf.rectF = _PathT_rectT<float, float>;
+  _g2d.pathf.boxesI = _PathT_boxesT<float, int>;
+  _g2d.pathf.boxesF = _PathT_boxesT<float, float>;
+  _g2d.pathf.rectsI = _PathT_rectsT<float, int>;
+  _g2d.pathf.rectsF = _PathT_rectsT<float, float>;
+  _g2d.pathf.region = _PathT_region<float>;
+  _g2d.pathf.polylineI = _PathT_polylineI<float>;
+  _g2d.pathf.polylineF = _PathT_polylineT<float>;
+  _g2d.pathf.polygonI = _PathT_polygonI<float>;
+  _g2d.pathf.polygonF = _PathT_polygonT<float>;
+  _g2d.pathf.shape = _PathT_shape<float>;
+  _g2d.pathf.appendPathF = _PathT_appendPathT<float, float>;
+  _g2d.pathf.appendTranslatedPathF = _PathT_appendTranslatedPathT<float, float>;
+  _g2d.pathf.appendTransformedPathF = _PathT_appendTransformedPathT<float, float>;
+  _g2d.pathf.updateFlat = _PathT_updateFlat<float>;
+  _g2d.pathf.flatten = _PathT_flatten<float>;
+  _g2d.pathf.getBoundingBox = _PathT_getBoundingBox<float>;
+  _g2d.pathf.hitTest = _PathT_hitTest<float>;
+  _g2d.pathf.translate = _PathT_translate<float>;
+  _g2d.pathf.transform = _PathT_transform<float>;
+  _g2d.pathf.fitTo = _PathT_fitTo<float>;
+  _g2d.pathf.scale = _PathT_scale<float>;
+  _g2d.pathf.flipX = _PathT_flipX<float>;
+  _g2d.pathf.flipY = _PathT_flipY<float>;
+  _g2d.pathf.eq = _PathT_eq<float>;
 
-  _g2d.pathd.ctor = _G2d_PathT_ctor<double>;
-  _g2d.pathd.ctorCopyD = _G2d_PathT_ctorCopyT<double>;
-  _g2d.pathd.dtor = _G2d_PathT_dtor<double>;
-  _g2d.pathd.detach = _G2d_PathT_detach<double>;
-  _g2d.pathd.reserve = _G2d_PathT_reserve<double>;
-  _g2d.pathd.squeeze = _G2d_PathT_squeeze<double>;
-  _g2d.pathd.prepare = _G2d_PathT_prepare<double>;
-  _g2d.pathd.add = _G2d_PathT_add<double>;
-  _g2d.pathd.clear = _G2d_PathT_clear<double>;
-  _g2d.pathd.reset = _G2d_PathT_reset<double>;
-  _g2d.pathd.setPathD = _G2d_PathT_setPathT<double>;
-  _g2d.pathd.setPathF = _G2d_PathT_setDeepT<double, float>;
-  _g2d.pathd.setDeepD = _G2d_PathT_setDeepT<double, double>;
-  _g2d.pathd.getSubpathRange = _G2d_PathT_getSubpathRange<double>;
-  _g2d.pathd.moveTo = _G2d_PathT_moveTo<double>;
-  _g2d.pathd.moveToRel = _G2d_PathT_moveToRel<double>;
-  _g2d.pathd.lineTo = _G2d_PathT_lineTo<double>;
-  _g2d.pathd.lineToRel = _G2d_PathT_lineToRel<double>;
-  _g2d.pathd.hlineTo = _G2d_PathT_hlineTo<double>;
-  _g2d.pathd.hlineToRel = _G2d_PathT_hlineToRel<double>;
-  _g2d.pathd.vlineTo = _G2d_PathT_vlineTo<double>;
-  _g2d.pathd.vlineToRel = _G2d_PathT_vlineToRel<double>;
-  _g2d.pathd.polyTo = _G2d_PathT_polyTo<double>;
-  _g2d.pathd.polyToRel = _G2d_PathT_polyToRel<double>;
-  _g2d.pathd.quadTo = _G2d_PathT_quadTo<double>;
-  _g2d.pathd.quadToRel = _G2d_PathT_quadToRel<double>;
-  _g2d.pathd.cubicTo = _G2d_PathT_cubicTo<double>;
-  _g2d.pathd.cubicToRel = _G2d_PathT_cubicToRel<double>;
-  _g2d.pathd.smoothQuadTo = _G2d_PathT_smoothQuadTo<double>;
-  _g2d.pathd.smoothQuadToRel = _G2d_PathT_smoothQuadToRel<double>;
-  _g2d.pathd.smoothCubicTo = _G2d_PathT_smoothCubicTo<double>;
-  _g2d.pathd.smoothCubicToRel = _G2d_PathT_smoothCubicToRel<double>;
-  _g2d.pathd.arcTo = _G2d_PathT_arcTo<double>;
-  _g2d.pathd.arcToRel = _G2d_PathT_arcToRel<double>;
-  _g2d.pathd.svgArcTo = _G2d_PathT_svgArcTo<double>;
-  _g2d.pathd.svgArcToRel = _G2d_PathT_svgArcToRel<double>;
-  _g2d.pathd.close = _G2d_PathT_close<double>;
-  _g2d.pathd.boxI = _G2d_PathT_boxT<double, int>;
-  _g2d.pathd.boxF = _G2d_PathT_boxT<double, float>;
-  _g2d.pathd.boxD = _G2d_PathT_boxT<double, double>;
-  _g2d.pathd.rectI = _G2d_PathT_rectT<double, int>;
-  _g2d.pathd.rectF = _G2d_PathT_rectT<double, float>;
-  _g2d.pathd.rectD = _G2d_PathT_rectT<double, double>;
-  _g2d.pathd.boxesI = _G2d_PathT_boxesT<double, int>;
-  _g2d.pathd.boxesF = _G2d_PathT_boxesT<double, float>;
-  _g2d.pathd.boxesD = _G2d_PathT_boxesT<double, double>;
-  _g2d.pathd.rectsI = _G2d_PathT_rectsT<double, int>;
-  _g2d.pathd.rectsF = _G2d_PathT_rectsT<double, float>;
-  _g2d.pathd.rectsD = _G2d_PathT_rectsT<double, double>;
-  _g2d.pathd.region = _G2d_PathT_region<double>;
-  _g2d.pathd.polylineI = _G2d_PathT_polylineI<double>;
-  _g2d.pathd.polylineD = _G2d_PathT_polylineT<double>;
-  _g2d.pathd.polygonI = _G2d_PathT_polygonI<double>;
-  _g2d.pathd.polygonD = _G2d_PathT_polygonT<double>;
-  _g2d.pathd.shape = _G2d_PathT_shape<double>;
-  _g2d.pathd.appendPathF = _G2d_PathT_appendPathT<double, float>;
-  _g2d.pathd.appendPathD = _G2d_PathT_appendPathT<double, double>;
-  _g2d.pathd.appendTranslatedPathF = _G2d_PathT_appendTranslatedPathT<double, float>;
-  _g2d.pathd.appendTranslatedPathD = _G2d_PathT_appendTranslatedPathT<double, double>;
-  _g2d.pathd.appendTransformedPathF = _G2d_PathT_appendTransformedPathT<double, float>;
-  _g2d.pathd.appendTransformedPathD = _G2d_PathT_appendTransformedPathT<double, double>;
-  _g2d.pathd.updateFlat = _G2d_PathT_updateFlat<double>;
-  _g2d.pathd.flatten = _G2d_PathT_flatten<double>;
-  _g2d.pathd.getBoundingBox = _G2d_PathT_getBoundingBox<double>;
-  _g2d.pathd.hitTest = _G2d_PathT_hitTest<double>;
-  _g2d.pathd.translate = _G2d_PathT_translate<double>;
-  _g2d.pathd.transform = _G2d_PathT_transform<double>;
-  _g2d.pathd.fitTo = _G2d_PathT_fitTo<double>;
-  _g2d.pathd.scale = _G2d_PathT_scale<double>;
-  _g2d.pathd.flipX = _G2d_PathT_flipX<double>;
-  _g2d.pathd.flipY = _G2d_PathT_flipY<double>;
-  _g2d.pathd.eq = _G2d_PathT_eq<double>;
+  _g2d.pathd.ctor = _PathT_ctor<double>;
+  _g2d.pathd.ctorCopyD = _PathT_ctorCopyT<double>;
+  _g2d.pathd.dtor = _PathT_dtor<double>;
+  _g2d.pathd.detach = _PathT_detach<double>;
+  _g2d.pathd.reserve = _PathT_reserve<double>;
+  _g2d.pathd.squeeze = _PathT_squeeze<double>;
+  _g2d.pathd.prepare = _PathT_prepare<double>;
+  _g2d.pathd.add = _PathT_add<double>;
+  _g2d.pathd.clear = _PathT_clear<double>;
+  _g2d.pathd.reset = _PathT_reset<double>;
+  _g2d.pathd.setPathD = _PathT_setPathT<double>;
+  _g2d.pathd.setPathF = _PathT_setDeepT<double, float>;
+  _g2d.pathd.setDeepD = _PathT_setDeepT<double, double>;
+  _g2d.pathd.getSubpathRange = _PathT_getSubpathRange<double>;
+  _g2d.pathd.moveTo = _PathT_moveTo<double>;
+  _g2d.pathd.moveToRel = _PathT_moveToRel<double>;
+  _g2d.pathd.lineTo = _PathT_lineTo<double>;
+  _g2d.pathd.lineToRel = _PathT_lineToRel<double>;
+  _g2d.pathd.hlineTo = _PathT_hlineTo<double>;
+  _g2d.pathd.hlineToRel = _PathT_hlineToRel<double>;
+  _g2d.pathd.vlineTo = _PathT_vlineTo<double>;
+  _g2d.pathd.vlineToRel = _PathT_vlineToRel<double>;
+  _g2d.pathd.polyTo = _PathT_polyTo<double>;
+  _g2d.pathd.polyToRel = _PathT_polyToRel<double>;
+  _g2d.pathd.quadTo = _PathT_quadTo<double>;
+  _g2d.pathd.quadToRel = _PathT_quadToRel<double>;
+  _g2d.pathd.cubicTo = _PathT_cubicTo<double>;
+  _g2d.pathd.cubicToRel = _PathT_cubicToRel<double>;
+  _g2d.pathd.smoothQuadTo = _PathT_smoothQuadTo<double>;
+  _g2d.pathd.smoothQuadToRel = _PathT_smoothQuadToRel<double>;
+  _g2d.pathd.smoothCubicTo = _PathT_smoothCubicTo<double>;
+  _g2d.pathd.smoothCubicToRel = _PathT_smoothCubicToRel<double>;
+  _g2d.pathd.arcTo = _PathT_arcTo<double>;
+  _g2d.pathd.arcToRel = _PathT_arcToRel<double>;
+  _g2d.pathd.svgArcTo = _PathT_svgArcTo<double>;
+  _g2d.pathd.svgArcToRel = _PathT_svgArcToRel<double>;
+  _g2d.pathd.close = _PathT_close<double>;
+  _g2d.pathd.boxI = _PathT_boxT<double, int>;
+  _g2d.pathd.boxF = _PathT_boxT<double, float>;
+  _g2d.pathd.boxD = _PathT_boxT<double, double>;
+  _g2d.pathd.rectI = _PathT_rectT<double, int>;
+  _g2d.pathd.rectF = _PathT_rectT<double, float>;
+  _g2d.pathd.rectD = _PathT_rectT<double, double>;
+  _g2d.pathd.boxesI = _PathT_boxesT<double, int>;
+  _g2d.pathd.boxesF = _PathT_boxesT<double, float>;
+  _g2d.pathd.boxesD = _PathT_boxesT<double, double>;
+  _g2d.pathd.rectsI = _PathT_rectsT<double, int>;
+  _g2d.pathd.rectsF = _PathT_rectsT<double, float>;
+  _g2d.pathd.rectsD = _PathT_rectsT<double, double>;
+  _g2d.pathd.region = _PathT_region<double>;
+  _g2d.pathd.polylineI = _PathT_polylineI<double>;
+  _g2d.pathd.polylineD = _PathT_polylineT<double>;
+  _g2d.pathd.polygonI = _PathT_polygonI<double>;
+  _g2d.pathd.polygonD = _PathT_polygonT<double>;
+  _g2d.pathd.shape = _PathT_shape<double>;
+  _g2d.pathd.appendPathF = _PathT_appendPathT<double, float>;
+  _g2d.pathd.appendPathD = _PathT_appendPathT<double, double>;
+  _g2d.pathd.appendTranslatedPathF = _PathT_appendTranslatedPathT<double, float>;
+  _g2d.pathd.appendTranslatedPathD = _PathT_appendTranslatedPathT<double, double>;
+  _g2d.pathd.appendTransformedPathF = _PathT_appendTransformedPathT<double, float>;
+  _g2d.pathd.appendTransformedPathD = _PathT_appendTransformedPathT<double, double>;
+  _g2d.pathd.updateFlat = _PathT_updateFlat<double>;
+  _g2d.pathd.flatten = _PathT_flatten<double>;
+  _g2d.pathd.getBoundingBox = _PathT_getBoundingBox<double>;
+  _g2d.pathd.hitTest = _PathT_hitTest<double>;
+  _g2d.pathd.translate = _PathT_translate<double>;
+  _g2d.pathd.transform = _PathT_transform<double>;
+  _g2d.pathd.fitTo = _PathT_fitTo<double>;
+  _g2d.pathd.scale = _PathT_scale<double>;
+  _g2d.pathd.flipX = _PathT_flipX<double>;
+  _g2d.pathd.flipY = _PathT_flipY<double>;
+  _g2d.pathd.eq = _PathT_eq<double>;
 
   {
-    PathDataF* d = _G2d_PathT_getDNull<float>();
+    PathDataF* d = _PathT_getDNull<float>();
 
     d->refCount.init(1);
     d->flags = NO_FLAGS;
@@ -3594,7 +3594,7 @@ FOG_NO_EXPORT void _g2d_path_init(void)
   }
 
   {
-    PathDataD* d = _G2d_PathT_getDNull<double>();
+    PathDataD* d = _PathT_getDNull<double>();
 
     d->refCount.init(1);
     d->flags = NO_FLAGS;
@@ -3606,8 +3606,8 @@ FOG_NO_EXPORT void _g2d_path_init(void)
 
 FOG_NO_EXPORT void _g2d_path_fini(void)
 {
-  _G2d_PathT_getDNull<float>()->refCount.dec();
-  _G2d_PathT_getDNull<double>()->refCount.dec();
+  _PathT_getDNull<float>()->refCount.dec();
+  _PathT_getDNull<double>()->refCount.dec();
 }
 
 } // Fog namespace

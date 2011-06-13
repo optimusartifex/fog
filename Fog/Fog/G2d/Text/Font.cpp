@@ -35,7 +35,7 @@ namespace Fog {
 // [Fog::Font - Helpers]
 // ============================================================================
 
-static FOG_INLINE bool _G2d_Font_isSupportedUnit(uint32_t unit)
+static FOG_INLINE bool _Font_isSupportedUnit(uint32_t unit)
 {
   // Supported units:
   //
@@ -50,7 +50,7 @@ static FOG_INLINE bool _G2d_Font_isSupportedUnit(uint32_t unit)
   return unit < UNIT_PERCENTAGE;
 }
 
-static FOG_INLINE FontData* _G2d_Font_dalloc()
+static FOG_INLINE FontData* _Font_dalloc()
 {
   FontData* d = reinterpret_cast<FontData*>(Memory::alloc(sizeof(FontData)));
   if (FOG_IS_NULL(d)) return d;
@@ -59,24 +59,24 @@ static FOG_INLINE FontData* _G2d_Font_dalloc()
   return d;
 }
 
-static FOG_INLINE void _G2d_Font_dfree(FontData* d)
+static FOG_INLINE void _Font_dfree(FontData* d)
 {
   if (d->face) d->face->deref();
   Memory::free(d);
 }
 
-static FOG_INLINE FontData* _G2d_Font_ref(FontData* d)
+static FOG_INLINE FontData* _Font_ref(FontData* d)
 {
   d->refCount.inc();
   return d;
 }
 
-static FOG_INLINE void _G2d_Font_deref(FontData* d)
+static FOG_INLINE void _Font_deref(FontData* d)
 {
-  if (d->refCount.deref()) _G2d_Font_dfree(d);
+  if (d->refCount.deref()) _Font_dfree(d);
 }
 
-static void _G2d_Font_initValues(FontData* d)
+static void _Font_initValues(FontData* d)
 {
   d->letterSpacingMode = FONT_SPACING_MODE_PERCENTAGE;
   d->wordSpacingMode = FONT_SPACING_MODE_PERCENTAGE;
@@ -90,9 +90,9 @@ static void _G2d_Font_initValues(FontData* d)
   d->forceCaching = false;
 }
 
-static FOG_INLINE void _G2d_Font_updateMetrics(FontData* d, float height, uint32_t unit)
+static FOG_INLINE void _Font_updateMetrics(FontData* d, float height, uint32_t unit)
 {
-  FOG_ASSERT(_G2d_Font_isSupportedUnit(unit));
+  FOG_ASSERT(_Font_isSupportedUnit(unit));
 
   d->unit = unit;
 
@@ -132,18 +132,18 @@ static FOG_INLINE void _G2d_Font_updateMetrics(FontData* d, float height, uint32
 
 Font::Font()
 {
-  _d = _G2d_Font_ref(FontManager::getGlobal()._d->defaultFont._d);
+  _d = _Font_ref(FontManager::getGlobal()._d->defaultFont._d);
 }
 
 Font::Font(const Font& other)
 {
-  _d = _G2d_Font_ref(other._d);
+  _d = _Font_ref(other._d);
 }
 
 Font::~Font()
 {
   if (FOG_IS_NULL(_d)) return;
-  _G2d_Font_deref(_d);
+  _Font_deref(_d);
 }
 
 // ============================================================================
@@ -154,7 +154,7 @@ err_t Font::_detach()
 {
   if (isDetached()) return ERR_OK;
 
-  FontData* newd = _G2d_Font_dalloc();
+  FontData* newd = _Font_dalloc();
   if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
   newd->face = NULL;
@@ -176,7 +176,7 @@ err_t Font::_detach()
   if (_d->face != NULL)
     newd->face = _d->face->ref();
 
-  _G2d_Font_deref(atomicPtrXchg(&_d, newd));
+  _Font_deref(atomicPtrXchg(&_d, newd));
   return ERR_OK;
 }
 
@@ -188,7 +188,7 @@ err_t Font::setFont(const Font& other)
 {
   FOG_ASSERT(_d != NULL);
 
-  _G2d_Font_deref(atomicPtrXchg(&_d, _G2d_Font_ref(other._d)));
+  _Font_deref(atomicPtrXchg(&_d, _Font_ref(other._d)));
   return ERR_OK;
 }
 
@@ -199,11 +199,11 @@ err_t Font::setHeight(float height, uint32_t unit)
   if (_d->metrics.getHeight() == height && _d->unit == unit)
     return ERR_OK;
 
-  if (!_G2d_Font_isSupportedUnit(unit))
+  if (!_Font_isSupportedUnit(unit))
     return ERR_RT_INVALID_ARGUMENT;
   FOG_RETURN_ON_ERROR(detach());
 
-  _G2d_Font_updateMetrics(_d, height, unit);
+  _Font_updateMetrics(_d, height, unit);
   return ERR_OK;
 }
 
@@ -406,8 +406,8 @@ void Font::reset()
 {
   FOG_ASSERT(_d != NULL);
 
-  _G2d_Font_deref(_d);
-  _d = _G2d_Font_ref(FontManager::getGlobal()._d->defaultFont._d);
+  _Font_deref(_d);
+  _d = _Font_ref(FontManager::getGlobal()._d->defaultFont._d);
 }
 
 // ============================================================================
@@ -418,7 +418,7 @@ err_t Font::create(const String& family, float height, uint32_t unit)
 {
   FOG_ASSERT(_d != NULL);
 
-  if (!_G2d_Font_isSupportedUnit(unit))
+  if (!_Font_isSupportedUnit(unit))
     return ERR_RT_INVALID_ARGUMENT;
 
   FOG_RETURN_ON_ERROR(detach());
@@ -439,15 +439,15 @@ err_t Font::create(const String& family, float height, uint32_t unit)
     if (face != NULL) face->deref();
   }
 
-  _G2d_Font_initValues(_d);
-  _G2d_Font_updateMetrics(_d, height, unit);
+  _Font_initValues(_d);
+  _Font_updateMetrics(_d, height, unit);
   return ERR_OK;
 }
 
 err_t Font::create(const String& family, float height, uint32_t unit,
   const FontHints& hints, const TransformF& transform)
 {
-  if (!_G2d_Font_isSupportedUnit(unit))
+  if (!_Font_isSupportedUnit(unit))
     return ERR_RT_INVALID_ARGUMENT;
 
   uint32_t transformType = transform.getType();
@@ -472,7 +472,7 @@ err_t Font::create(const String& family, float height, uint32_t unit,
     if (face != NULL) face->deref();
   }
 
-  _G2d_Font_initValues(_d);
+  _Font_initValues(_d);
 
   _d->hints = hints;
   if (transformType != TRANSFORM_TYPE_IDENTITY)
@@ -481,7 +481,7 @@ err_t Font::create(const String& family, float height, uint32_t unit,
     _d->dataFlags |= FONT_DATA_HAS_TRANSFORM;
   }
 
-  _G2d_Font_updateMetrics(_d, height, unit);
+  _Font_updateMetrics(_d, height, unit);
   return ERR_OK;
 }
 
@@ -489,7 +489,7 @@ err_t Font::_fromFace(FontFace* face, float height, uint32_t unit)
 {
   FOG_ASSERT(_d != NULL);
 
-  if (!_G2d_Font_isSupportedUnit(unit))
+  if (!_Font_isSupportedUnit(unit))
     return ERR_RT_INVALID_ARGUMENT;
 
   FOG_RETURN_ON_ERROR(detach());
@@ -497,8 +497,8 @@ err_t Font::_fromFace(FontFace* face, float height, uint32_t unit)
   face = atomicPtrXchg(&_d->face, face);
   if (face != NULL) face->deref();
 
-  _G2d_Font_initValues(_d);
-  _G2d_Font_updateMetrics(_d, height, unit);
+  _Font_initValues(_d);
+  _Font_updateMetrics(_d, height, unit);
   return ERR_OK;
 }
 

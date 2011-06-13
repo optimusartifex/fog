@@ -25,7 +25,7 @@ namespace Fog {
 // ============================================================================
 
 template<typename NumT>
-static err_t FOG_CDECL _G2d_ShapeT_getBoundingBox(uint32_t shapeType, const void* shapeData,
+static err_t FOG_CDECL _ShapeT_getBoundingBox(uint32_t shapeType, const void* shapeData,
   NumT_(Box)* dst, const NumT_(Transform)* transform)
 {
   NumT_(Point) tmp[8];
@@ -139,7 +139,7 @@ static err_t FOG_CDECL _G2d_ShapeT_getBoundingBox(uint32_t shapeType, const void
 // ============================================================================
 
 template<typename NumT>
-static bool FOG_CDECL _G2d_ShapeT_hitTest(uint32_t shapeType, const void* shapeData, const NumT_(Point)* pt)
+static bool FOG_CDECL _ShapeT_hitTest(uint32_t shapeType, const void* shapeData, const NumT_(Point)* pt)
 {
   switch (shapeType)
   {
@@ -182,11 +182,11 @@ static bool FOG_CDECL _G2d_ShapeT_hitTest(uint32_t shapeType, const void* shapeD
 
 FOG_NO_EXPORT void _g2d_shape_init(void)
 {
-  _g2d.shapef.getBoundingBox = _G2d_ShapeT_getBoundingBox<float>;
-  _g2d.shaped.getBoundingBox = _G2d_ShapeT_getBoundingBox<double>;
+  _g2d.shapef.getBoundingBox = _ShapeT_getBoundingBox<float>;
+  _g2d.shaped.getBoundingBox = _ShapeT_getBoundingBox<double>;
 
-  _g2d.shapef.hitTest = _G2d_ShapeT_hitTest<float>;
-  _g2d.shaped.hitTest = _G2d_ShapeT_hitTest<double>;
+  _g2d.shapef.hitTest = _ShapeT_hitTest<float>;
+  _g2d.shaped.hitTest = _ShapeT_hitTest<double>;
 }
 
 FOG_NO_EXPORT void _g2d_shape_fini(void)

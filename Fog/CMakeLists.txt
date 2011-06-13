@@ -1024,7 +1024,6 @@ Set(FOG_G2D_PAINTING_HEADERS
 Set(FOG_G2D_RASTERIZER_SOURCES
   Fog/G2d/Rasterizer/Rasterizer.cpp
   Fog/G2d/Rasterizer/Rasterizer_Line.cpp
-  Fog/G2d/Rasterizer/Rasterizer_Path.cpp
   Fog/G2d/Rasterizer/Rasterizer_Rect.cpp
   Fog/G2d/Rasterizer/Rasterizer_RectXorRect.cpp
   Fog/G2d/Rasterizer/Scanline.cpp

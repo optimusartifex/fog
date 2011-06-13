@@ -20,7 +20,7 @@ namespace Fog {
 // [Fog::Dpi - Helpers]
 // ============================================================================
 
-static inline void _G2d_Dpi_setup(float* data, float dpi, float em, float ex)
+static inline void _Dpi_setup(float* data, float dpi, float em, float ex)
 {
   data[UNIT_NONE] = 1.0f;
   data[UNIT_PX] = 1.0f;
@@ -51,7 +51,7 @@ Dpi::Dpi(float dpi)
 {
   if (dpi <= 0.0f) { reset(); return; }
 
-  _G2d_Dpi_setup(_data, dpi, 0.0f, 0.0f);
+  _Dpi_setup(_data, dpi, 0.0f, 0.0f);
   resetEmEx();
 }
 
@@ -71,7 +71,7 @@ Dpi::~Dpi()
 err_t Dpi::setDpi(float dpi)
 {
   if (dpi <= 0.0f) return ERR_RT_INVALID_ARGUMENT;
-  _G2d_Dpi_setup(_data, dpi, 0.0f, 0.0f);
+  _Dpi_setup(_data, dpi, 0.0f, 0.0f);
 
   resetEmEx();
   return ERR_OK;
@@ -80,7 +80,7 @@ err_t Dpi::setDpi(float dpi)
 err_t Dpi::setDpi(float dpi, float em, float ex)
 {
   if (dpi <= 0.0f) return ERR_RT_INVALID_ARGUMENT;
-  _G2d_Dpi_setup(_data, dpi, em, ex);
+  _Dpi_setup(_data, dpi, em, ex);
 
   if (em <= 0.0f || ex <= 0.0f) resetEmEx();
   return ERR_OK;
@@ -92,7 +92,7 @@ err_t Dpi::setDpi(float dpi, float em, float ex)
 
 void Dpi::reset()
 {
-  _G2d_Dpi_setup(_data, 72.0f, 12.0f, 6.0f);
+  _Dpi_setup(_data, 72.0f, 12.0f, 6.0f);
 }
 
 // ============================================================================

@@ -22,7 +22,7 @@ namespace Fog {
 // ============================================================================
 
 template<typename NumT>
-static bool FOG_CDECL _G2d_PieT_hitTest(const NumT_(Pie)* self, const NumT_(Point)* pt)
+static bool FOG_CDECL _PieT_hitTest(const NumT_(Pie)* self, const NumT_(Point)* pt)
 {
   NumT cx = self->center.x;
   NumT cy = self->center.y;
@@ -76,8 +76,8 @@ static bool FOG_CDECL _G2d_PieT_hitTest(const NumT_(Pie)* self, const NumT_(Poin
 
 FOG_NO_EXPORT void _g2d_pie_init(void)
 {
-  _g2d.pief.hitTest = _G2d_PieT_hitTest<float>;
-  _g2d.pied.hitTest = _G2d_PieT_hitTest<double>;
+  _g2d.pief.hitTest = _PieT_hitTest<float>;
+  _g2d.pied.hitTest = _PieT_hitTest<double>;
 }
 
 } // Fog namespace

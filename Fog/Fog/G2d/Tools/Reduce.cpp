@@ -23,7 +23,7 @@ namespace Fog {
 // [Fog::Reduce - Helpers]
 // ============================================================================
 
-static int _G2d_Reduce_compareAscent(const void* _a, const void* _b)
+static int _Reduce_compareAscent(const void* _a, const void* _b)
 {
   const Reduce::Entity* a = (const Reduce::Entity *)_a;
   const Reduce::Entity* b = (const Reduce::Entity *)_b;
@@ -156,7 +156,7 @@ bool Reduce::analyze(const Image& image, bool discardAlphaChannel)
 
   // Sort, optimize for PCX and all formats where compression depends to the
   // pixel value (the most used colors go first).
-  qsort(e, _count, sizeof(Entity), _G2d_Reduce_compareAscent);
+  qsort(e, _count, sizeof(Entity), _Reduce_compareAscent);
 
   // Fix the B&W images, it's usual that black color is at [0].
   if (_count == 2 && e[1].key == 0) Memory::xchg_t<Entity>(&e[0], &e[1]);

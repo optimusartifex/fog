@@ -191,14 +191,14 @@ uint8_t ImagePalette::findColor(uint8_t r, uint8_t g, uint8_t b) const
 // ============================================================================
 
 Static<ImagePaletteData> ImagePalette::_dnull;
-static Static<ImagePaletteData> _G2d_ImagePalette_dgrey;
+static Static<ImagePaletteData> _ImagePalette_dgrey;
 
 ImagePalette ImagePalette::fromGreyscale(uint count)
 {
   ImagePaletteData* d = NULL;
 
   if (count <= 1 || count > 256) { goto _End; }
-  if (count == 256) { d = _G2d_ImagePalette_dgrey->ref(); goto _Ret; }
+  if (count == 256) { d = _ImagePalette_dgrey->ref(); goto _Ret; }
 
   d = ImagePalette_dalloc();
   if (FOG_LIKELY(d != NULL))
@@ -302,7 +302,7 @@ FOG_NO_EXPORT void _g2d_imagepalette_init(void)
   // Setup 'Greyscale' palette
   // --------------------------------------------------------------------------
 
-  d = _G2d_ImagePalette_dgrey.instancep();
+  d = _ImagePalette_dgrey.instancep();
   d->refCount.init(1);
   d->length = 256;
 
@@ -312,7 +312,7 @@ FOG_NO_EXPORT void _g2d_imagepalette_init(void)
 
 FOG_NO_EXPORT void _g2d_imagepalette_fini(void)
 {
-  _G2d_ImagePalette_dgrey.instancep()->refCount.dec();
+  _ImagePalette_dgrey.instancep()->refCount.dec();
   ImagePalette::_dnull.instancep()->refCount.dec();
 }
 

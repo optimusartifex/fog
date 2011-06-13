@@ -20,7 +20,7 @@ namespace Fog {
 // ============================================================================
 
 template<typename NumT>
-static uint32_t FOG_CDECL _G2d_LineT_intersect(NumT_(Point)* dst,
+static uint32_t FOG_CDECL _LineT_intersect(NumT_(Point)* dst,
   const NumT_(Point)* lineA,
   const NumT_(Point)* lineB)
 {
@@ -49,8 +49,8 @@ static uint32_t FOG_CDECL _G2d_LineT_intersect(NumT_(Point)* dst,
 
 FOG_NO_EXPORT void _g2d_line_init(void)
 {
-  _g2d.linef.intersect = _G2d_LineT_intersect<float>;
-  _g2d.lined.intersect = _G2d_LineT_intersect<double>;
+  _g2d.linef.intersect = _LineT_intersect<float>;
+  _g2d.lined.intersect = _LineT_intersect<double>;
 }
 
 } // Fog namespace

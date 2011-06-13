@@ -29,7 +29,7 @@ namespace Fog {
 // [Fog::PathClipper - InitPath]
 // ============================================================================
 
-static uint32_t FOG_CDECL _G2d_PathClipperF_initPath_SSE(PathClipperF& self, const PathF& src)
+static uint32_t FOG_CDECL _PathClipperF_initPath_SSE(PathClipperF& self, const PathF& src)
 {
   self._lastIndex = INVALID_INDEX;
 
@@ -210,7 +210,7 @@ _Invalid:
 
 FOG_NO_EXPORT void _g2d_pathclipper_init_sse(void)
 {
-  _g2d.pathclipperf.initPath = _G2d_PathClipperF_initPath_SSE;
+  _g2d.pathclipperf.initPath = _PathClipperF_initPath_SSE;
 }
 
 } // Fog namespace

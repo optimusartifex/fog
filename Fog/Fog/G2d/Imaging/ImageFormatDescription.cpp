@@ -19,14 +19,14 @@ namespace Fog {
 // [Fog::ImageFormatDescription - Helpers]
 // ============================================================================
 
-static uint32_t _G2d_ImageFormatDescription_detectId(ImageFormatDescription* self)
+static uint32_t _ImageFormatDescription_detectId(ImageFormatDescription* self)
 {
   uint32_t format;
   if (!self->isValid()) return IMAGE_FORMAT_NULL;
 
   for (format = 0; format < IMAGE_FORMAT_COUNT; format++)
   {
-    if (*self == _G2d_ImageFormatDescription_list[format])
+    if (*self == _ImageFormatDescription_list[format])
     {
       self->_format = format;
       break;
@@ -36,7 +36,7 @@ static uint32_t _G2d_ImageFormatDescription_detectId(ImageFormatDescription* sel
   return self->_format;
 }
 
-static err_t _G2d_ImageFormatDescription_detectIntegerFormatValues(ImageFormatDescription* self)
+static err_t _ImageFormatDescription_detectIntegerFormatValues(ImageFormatDescription* self)
 {
   uint32_t c;
 
@@ -218,7 +218,7 @@ static err_t _G2d_ImageFormatDescription_detectIntegerFormatValues(ImageFormatDe
 
   if (self->_isPremultiplied && self->_aSize == 0) self->_isPremultiplied = 0;
 
-  _G2d_ImageFormatDescription_detectId(self);
+  _ImageFormatDescription_detectId(self);
   return ERR_OK;
 
 _Fail:
@@ -230,7 +230,7 @@ _Fail:
 // [Fog::ImageFormatDescription - Init]
 // ============================================================================
 
-static uint32_t FOG_CDECL _G2d_ImageFormatDescription_getCompatibleFormat(
+static uint32_t FOG_CDECL _ImageFormatDescription_getCompatibleFormat(
   const ImageFormatDescription* self)
 {
   if (!self->isValid()) return IMAGE_FORMAT_COUNT;
@@ -241,7 +241,7 @@ static uint32_t FOG_CDECL _G2d_ImageFormatDescription_getCompatibleFormat(
   // First try to match an alternative pixel format (different mask, etc...)
   for (i = 0; i < IMAGE_FORMAT_COUNT; i++)
   {
-    const ImageFormatDescription* f = &_G2d_ImageFormatDescription_list[i];
+    const ImageFormatDescription* f = &_ImageFormatDescription_list[i];
 
     if (self->_aSize == f->_aSize &&
         self->_rSize == f->_rSize &&
@@ -259,7 +259,7 @@ static uint32_t FOG_CDECL _G2d_ImageFormatDescription_getCompatibleFormat(
   // Alternatively, pick the format where there is no loss of information.
   for (i = 0; i < IMAGE_FORMAT_COUNT; i++)
   {
-    const ImageFormatDescription* f = &_G2d_ImageFormatDescription_list[i];
+    const ImageFormatDescription* f = &_ImageFormatDescription_list[i];
 
     if (self->_isPremultiplied == f->_isPremultiplied &&
         (f->_aSize > 0) == (self->_aSize > 0) &&
@@ -284,7 +284,7 @@ static uint32_t FOG_CDECL _G2d_ImageFormatDescription_getCompatibleFormat(
   return best ? best->getFormat() : IMAGE_FORMAT_COUNT;
 }
 
-static err_t FOG_CDECL _G2d_ImageFormatDescription_createArgb(
+static err_t FOG_CDECL _ImageFormatDescription_createArgb(
   ImageFormatDescription* self,
   uint32_t depth, uint32_t flags,
   uint64_t aMask, uint64_t rMask, uint64_t gMask, uint64_t bMask)
@@ -307,7 +307,7 @@ static err_t FOG_CDECL _G2d_ImageFormatDescription_createArgb(
   self->_gMask = gMask;
   self->_bMask = bMask;
 
-  return _G2d_ImageFormatDescription_detectIntegerFormatValues(self);
+  return _ImageFormatDescription_detectIntegerFormatValues(self);
 }
 
 // ============================================================================
@@ -388,7 +388,7 @@ static err_t FOG_CDECL _G2d_ImageFormatDescription_createArgb(
 }
 
 // ${IMAGE_FORMAT:BEGIN}
-const ImageFormatDescription _G2d_ImageFormatDescription_list[IMAGE_FORMAT_COUNT + 1] =
+const ImageFormatDescription _ImageFormatDescription_list[IMAGE_FORMAT_COUNT + 1] =
 {
   //                        |Image Format           |Dpt|P|A|F| Position  |   Size    |
   __FOG_IMAGE_FORMAT_INTEGER(IMAGE_FORMAT_PRGB32    , 32,1,1,0,24,16, 8, 0, 8, 8, 8, 8),
@@ -427,8 +427,8 @@ const ImageFormatDescription _G2d_ImageFormatDescription_list[IMAGE_FORMAT_COUNT
 
 FOG_NO_EXPORT void _g2d_imageformatdescription_init(void)
 {
-  _g2d.imageformatdescription.getCompatibleFormat = _G2d_ImageFormatDescription_getCompatibleFormat;
-  _g2d.imageformatdescription.createArgb = _G2d_ImageFormatDescription_createArgb;
+  _g2d.imageformatdescription.getCompatibleFormat = _ImageFormatDescription_getCompatibleFormat;
+  _g2d.imageformatdescription.createArgb = _ImageFormatDescription_createArgb;
 }
 
 FOG_NO_EXPORT void _g2d_imageformatdescription_fini(void)

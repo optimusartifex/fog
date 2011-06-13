@@ -31,7 +31,7 @@ namespace Fog {
 // [Fog::Color - Convert - Generic]
 // ============================================================================
 
-static void FOG_CDECL _G2d_Color_zero4f(float* dst, const float* src)
+static void FOG_CDECL _Color_zero4f(float* dst, const float* src)
 {
   dst[0] = 0.0f;
   dst[1] = 0.0f;
@@ -39,7 +39,7 @@ static void FOG_CDECL _G2d_Color_zero4f(float* dst, const float* src)
   dst[3] = 0.0f;
 }
 
-static void FOG_CDECL _G2d_Color_zero5f(float* dst, const float* src)
+static void FOG_CDECL _Color_zero5f(float* dst, const float* src)
 {
   dst[0] = 0.0f;
   dst[1] = 0.0f;
@@ -48,7 +48,7 @@ static void FOG_CDECL _G2d_Color_zero5f(float* dst, const float* src)
   dst[4] = 0.0f;
 }
 
-static void FOG_CDECL _G2d_Color_copy4f(float* dst, const float* src)
+static void FOG_CDECL _Color_copy4f(float* dst, const float* src)
 {
   dst[0] = src[0];
   dst[1] = src[1];
@@ -56,7 +56,7 @@ static void FOG_CDECL _G2d_Color_copy4f(float* dst, const float* src)
   dst[3] = src[3];
 }
 
-static void FOG_CDECL _G2d_Color_copy5f(float* dst, const float* src)
+static void FOG_CDECL _Color_copy5f(float* dst, const float* src)
 {
   dst[0] = src[0];
   dst[1] = src[1];
@@ -69,17 +69,17 @@ static void FOG_CDECL _G2d_Color_copy5f(float* dst, const float* src)
 // [Fog::Color - Convert - ArgbF]
 // ============================================================================
 
-static void FOG_CDECL _G2d_Color_argbf_from_argb32(float* dst, const ArgbBase32* src)
+static void FOG_CDECL _Color_argbf_from_argb32(float* dst, const ArgbBase32* src)
 {
   ColorUtil::argbfFromArgb32(dst, *src);
 }
 
-static void FOG_CDECL _G2d_Color_argbf_from_argb64(float* dst, const ArgbBase64* src)
+static void FOG_CDECL _Color_argbf_from_argb64(float* dst, const ArgbBase64* src)
 {
   ColorUtil::argbfFromArgb64(dst, *src);
 }
 
-static void FOG_CDECL _G2d_Color_argbf_from_ahsvf(float* dst, const float* src)
+static void FOG_CDECL _Color_argbf_from_ahsvf(float* dst, const float* src)
 {
   float a = src[0];
   float h = src[1];
@@ -110,7 +110,7 @@ static void FOG_CDECL _G2d_Color_argbf_from_ahsvf(float* dst, const float* src)
   }
 }
 
-static void FOG_CDECL _G2d_Color_argbf_from_ahslf(float* dst, const float* src)
+static void FOG_CDECL _Color_argbf_from_ahslf(float* dst, const float* src)
 {
   float a = src[0];
   float h = src[1];
@@ -174,7 +174,7 @@ static void FOG_CDECL _G2d_Color_argbf_from_ahslf(float* dst, const float* src)
   }
 }
 
-static void FOG_CDECL _G2d_Color_argbf_from_acmykf(float* dst, const float* src)
+static void FOG_CDECL _Color_argbf_from_acmykf(float* dst, const float* src)
 {
   float a = src[0];
   float kinv = 1.0f - src[4];
@@ -189,7 +189,7 @@ static void FOG_CDECL _G2d_Color_argbf_from_acmykf(float* dst, const float* src)
 // [Fog::Color - Convert - AhsvF]
 // ============================================================================
 
-static void FOG_CDECL _G2d_Color_ahsvf_from_argbf(float* dst, const float* src)
+static void FOG_CDECL _Color_ahsvf_from_argbf(float* dst, const float* src)
 {
   float a = src[0];
   float r = src[1];
@@ -226,7 +226,7 @@ static void FOG_CDECL _G2d_Color_ahsvf_from_argbf(float* dst, const float* src)
   dst[3] = v;
 }
 
-static void FOG_CDECL _G2d_Color_ahsvf_from_ahslf(float* dst, const float* src)
+static void FOG_CDECL _Color_ahsvf_from_ahslf(float* dst, const float* src)
 {
   float a = src[0];
   float h = src[1];
@@ -254,21 +254,21 @@ static void FOG_CDECL _G2d_Color_ahsvf_from_ahslf(float* dst, const float* src)
   }
 }
 
-static void FOG_CDECL _G2d_Color_ahsvf_from_acmykf(float* dst, const float* src)
+static void FOG_CDECL _Color_ahsvf_from_acmykf(float* dst, const float* src)
 {
   float argb[4];
   _g2d.color.convert[COLOR_MODEL_ARGB][COLOR_MODEL_ACMYK](argb, src);
   _g2d.color.convert[COLOR_MODEL_AHSV][COLOR_MODEL_ARGB ](dst, argb);
 }
 
-static void FOG_CDECL _G2d_Color_ahsvf_from_argb32(float* dst, const ArgbBase32* src)
+static void FOG_CDECL _Color_ahsvf_from_argb32(float* dst, const ArgbBase32* src)
 {
   float argbf[4];
   ColorUtil::argbfFromArgb32(argbf, *src);
   _g2d.color.convert[COLOR_MODEL_AHSV][COLOR_MODEL_ARGB](dst, argbf);
 }
 
-static void FOG_CDECL _G2d_Color_ahsvf_from_argb64(float* dst, const ArgbBase64* src)
+static void FOG_CDECL _Color_ahsvf_from_argb64(float* dst, const ArgbBase64* src)
 {
   float argbf[4];
   ColorUtil::argbfFromArgb64(argbf, *src);
@@ -279,7 +279,7 @@ static void FOG_CDECL _G2d_Color_ahsvf_from_argb64(float* dst, const ArgbBase64*
 // [Fog::Color - Convert - AhslF]
 // ============================================================================
 
-static void FOG_CDECL _G2d_Color_ahslf_from_argbf(float* dst, const float* src)
+static void FOG_CDECL _Color_ahslf_from_argbf(float* dst, const float* src)
 {
   float a = src[0];
   float r = src[1];
@@ -317,7 +317,7 @@ static void FOG_CDECL _G2d_Color_ahslf_from_argbf(float* dst, const float* src)
   dst[3] = l;
 }
 
-static void FOG_CDECL _G2d_Color_ahslf_from_ahsvf(float* dst, const float* src)
+static void FOG_CDECL _Color_ahslf_from_ahsvf(float* dst, const float* src)
 {
   float a = src[0];
   float h = src[1];
@@ -342,21 +342,21 @@ static void FOG_CDECL _G2d_Color_ahslf_from_ahsvf(float* dst, const float* src)
   }
 }
 
-static void FOG_CDECL _G2d_Color_ahslf_from_acmykf(float* dst, const float* src)
+static void FOG_CDECL _Color_ahslf_from_acmykf(float* dst, const float* src)
 {
   float argb[4];
   _g2d.color.convert[COLOR_MODEL_ARGB][COLOR_MODEL_ACMYK](argb, src);
   _g2d.color.convert[COLOR_MODEL_AHSL][COLOR_MODEL_ARGB ](dst, argb);
 }
 
-static void FOG_CDECL _G2d_Color_ahslf_from_argb32(float* dst, const ArgbBase32* src)
+static void FOG_CDECL _Color_ahslf_from_argb32(float* dst, const ArgbBase32* src)
 {
   float argbf[4];
   ColorUtil::argbfFromArgb32(argbf, *src);
   _g2d.color.convert[COLOR_MODEL_AHSL][COLOR_MODEL_ARGB](dst, argbf);
 }
 
-static void FOG_CDECL _G2d_Color_ahslf_from_argb64(float* dst, const ArgbBase64* src)
+static void FOG_CDECL _Color_ahslf_from_argb64(float* dst, const ArgbBase64* src)
 {
   float argbf[4];
   ColorUtil::argbfFromArgb64(argbf, *src);
@@ -367,7 +367,7 @@ static void FOG_CDECL _G2d_Color_ahslf_from_argb64(float* dst, const ArgbBase64*
 // [Fog::Color - Convert - AcmykF]
 // ============================================================================
 
-static void FOG_CDECL _G2d_Color_acmykf_from_argbf(float* dst, const float* src)
+static void FOG_CDECL _Color_acmykf_from_argbf(float* dst, const float* src)
 {
   float a = src[0];
   float c = 1.0f - src[1];
@@ -391,28 +391,28 @@ static void FOG_CDECL _G2d_Color_acmykf_from_argbf(float* dst, const float* src)
   dst[4] = k;
 }
 
-static void FOG_CDECL _G2d_Color_acmykf_from_ahsvf(float* dst, const float* src)
+static void FOG_CDECL _Color_acmykf_from_ahsvf(float* dst, const float* src)
 {
   float argb[4];
   _g2d.color.convert[COLOR_MODEL_ARGB ][COLOR_MODEL_AHSV](argb, src);
   _g2d.color.convert[COLOR_MODEL_ACMYK][COLOR_MODEL_ARGB](dst, argb);
 }
 
-static void FOG_CDECL _G2d_Color_acmykf_from_ahslf(float* dst, const float* src)
+static void FOG_CDECL _Color_acmykf_from_ahslf(float* dst, const float* src)
 {
   float argb[4];
   _g2d.color.convert[COLOR_MODEL_ARGB ][COLOR_MODEL_AHSL](argb, src);
   _g2d.color.convert[COLOR_MODEL_ACMYK][COLOR_MODEL_ARGB](dst, argb);
 }
 
-static void FOG_CDECL _G2d_Color_acmykf_from_argb32(float* dst, const ArgbBase32* src)
+static void FOG_CDECL _Color_acmykf_from_argb32(float* dst, const ArgbBase32* src)
 {
   float argbf[4];
   ColorUtil::argbfFromArgb32(argbf, *src);
   _g2d.color.convert[COLOR_MODEL_ACMYK][COLOR_MODEL_ARGB](dst, argbf);
 }
 
-static void FOG_CDECL _G2d_Color_acmykf_from_argb64(float* dst, const ArgbBase64* src)
+static void FOG_CDECL _Color_acmykf_from_argb64(float* dst, const ArgbBase64* src)
 {
   float argbf[4];
   ColorUtil::argbfFromArgb64(argbf, *src);
@@ -423,25 +423,25 @@ static void FOG_CDECL _G2d_Color_acmykf_from_argb64(float* dst, const ArgbBase64
 // [Fog::Color - Convert - Argb32]
 // ============================================================================
 
-static void FOG_CDECL _G2d_Color_argb32_zero(ArgbBase32* dst, const ArgbBase32* src)
+static void FOG_CDECL _Color_argb32_zero(ArgbBase32* dst, const ArgbBase32* src)
 {
   FOG_UNUSED(src);
   dst->u32 = 0;
 }
 
-static void FOG_CDECL _G2d_Color_argb32_from_argbf(ArgbBase32* dst, const ArgbBaseF* src)
+static void FOG_CDECL _Color_argb32_from_argbf(ArgbBase32* dst, const ArgbBaseF* src)
 {
   ColorUtil::argb32FromF(*dst, src->data);
 }
 
-static void FOG_CDECL _G2d_Color_argb32_from_ahsvf(ArgbBase32* dst, const float* src)
+static void FOG_CDECL _Color_argb32_from_ahsvf(ArgbBase32* dst, const float* src)
 {
   float argbf[4];
   _g2d.color.convert[COLOR_MODEL_ARGB][COLOR_MODEL_AHSV](argbf, src);
   ColorUtil::argb32FromF(*dst, argbf);
 }
 
-static void FOG_CDECL _G2d_Color_argb32_from_ahslf(ArgbBase32* dst, const float* src)
+static void FOG_CDECL _Color_argb32_from_ahslf(ArgbBase32* dst, const float* src)
 {
   float argbf[4];
   _g2d.color.convert[COLOR_MODEL_ARGB][COLOR_MODEL_AHSL](argbf, src);
@@ -449,19 +449,19 @@ static void FOG_CDECL _G2d_Color_argb32_from_ahslf(ArgbBase32* dst, const float*
 }
 
 
-static void FOG_CDECL _G2d_Color_argb32_from_acmykf(ArgbBase32* dst, const float* src)
+static void FOG_CDECL _Color_argb32_from_acmykf(ArgbBase32* dst, const float* src)
 {
   float argbf[4];
   _g2d.color.convert[COLOR_MODEL_ARGB][COLOR_MODEL_ACMYK](argbf, src);
   ColorUtil::argb32FromF(*dst, argbf);
 }
 
-static void FOG_CDECL _G2d_Color_argb32_from_argb32(ArgbBase32* dst, const ArgbBase32* src)
+static void FOG_CDECL _Color_argb32_from_argb32(ArgbBase32* dst, const ArgbBase32* src)
 {
   dst->u32 = src->u32;
 }
 
-static void FOG_CDECL _G2d_Color_argb32_from_argb64(ArgbBase32* dst, const ArgbBase64* src)
+static void FOG_CDECL _Color_argb32_from_argb64(ArgbBase32* dst, const ArgbBase64* src)
 {
   ColorUtil::argb32From64(*dst, *src);
 }
@@ -470,25 +470,25 @@ static void FOG_CDECL _G2d_Color_argb32_from_argb64(ArgbBase32* dst, const ArgbB
 // [Fog::Color - Convert - Argb64]
 // ============================================================================
 
-static void FOG_CDECL _G2d_Color_argb64_zero(ArgbBase64* dst, const ArgbBase32* src)
+static void FOG_CDECL _Color_argb64_zero(ArgbBase64* dst, const ArgbBase32* src)
 {
   FOG_UNUSED(src);
   dst->u64 = 0;
 }
 
-static void FOG_CDECL _G2d_Color_argb64_from_argbf(ArgbBase64* dst, const ArgbBaseF* src)
+static void FOG_CDECL _Color_argb64_from_argbf(ArgbBase64* dst, const ArgbBaseF* src)
 {
   ColorUtil::argb64FromF(*dst, src->data);
 }
 
-static void FOG_CDECL _G2d_Color_argb64_from_ahsvf(ArgbBase64* dst, const float* src)
+static void FOG_CDECL _Color_argb64_from_ahsvf(ArgbBase64* dst, const float* src)
 {
   float argbf[4];
   _g2d.color.convert[COLOR_MODEL_ARGB][COLOR_MODEL_AHSV](argbf, src);
   ColorUtil::argb64FromF(*dst, argbf);
 }
 
-static void FOG_CDECL _G2d_Color_argb64_from_ahslf(ArgbBase64* dst, const float* src)
+static void FOG_CDECL _Color_argb64_from_ahslf(ArgbBase64* dst, const float* src)
 {
   float argbf[4];
   _g2d.color.convert[COLOR_MODEL_ARGB][COLOR_MODEL_AHSL](argbf, src);
@@ -496,19 +496,19 @@ static void FOG_CDECL _G2d_Color_argb64_from_ahslf(ArgbBase64* dst, const float*
 }
 
 
-static void FOG_CDECL _G2d_Color_argb64_from_acmykf(ArgbBase64* dst, const float* src)
+static void FOG_CDECL _Color_argb64_from_acmykf(ArgbBase64* dst, const float* src)
 {
   float argbf[4];
   _g2d.color.convert[COLOR_MODEL_ARGB][COLOR_MODEL_ACMYK](argbf, src);
   ColorUtil::argb64FromF(*dst, argbf);
 }
 
-static void FOG_CDECL _G2d_Color_argb64_from_argb32(ArgbBase64* dst, const ArgbBase32* src)
+static void FOG_CDECL _Color_argb64_from_argb32(ArgbBase64* dst, const ArgbBase32* src)
 {
   ColorUtil::argb64From32(*dst, *src);
 }
 
-static void FOG_CDECL _G2d_Color_argb64_from_argb64(ArgbBase64* dst, const ArgbBase64* src)
+static void FOG_CDECL _Color_argb64_from_argb64(ArgbBase64* dst, const ArgbBase64* src)
 {
   dst->u64 = src->u64;
 }
@@ -517,7 +517,7 @@ static void FOG_CDECL _G2d_Color_argb64_from_argb64(ArgbBase64* dst, const ArgbB
 // [Fog::Color - SetModel]
 // ============================================================================
 
-static err_t FOG_CDECL _G2d_Color_setModel(Color& self, uint32_t model)
+static err_t FOG_CDECL _Color_setModel(Color& self, uint32_t model)
 {
   uint32_t oldModel = self._model;
 
@@ -539,7 +539,7 @@ _None:
 // [Fog::Color - SetData]
 // ============================================================================
 
-static err_t FOG_CDECL _G2d_Color_setData(Color& self, uint32_t modelExtended, const void* modelData)
+static err_t FOG_CDECL _Color_setData(Color& self, uint32_t modelExtended, const void* modelData)
 {
   self._model = modelExtended;
   self._hints = NO_FLAGS;
@@ -603,7 +603,7 @@ struct FOG_NO_EXPORT ColorMix_C
   static FOG_INLINE float difference(float S0, float S1, float M, float MI) { return MI * S0 + Math::abs(S0 - S1)*M; }
 };
 
-static err_t FOG_CDECL _G2d_Color_mix(Color& self, uint32_t mixOp, uint32_t alphaOp, const Color& secondary, float mask)
+static err_t FOG_CDECL _Color_mix(Color& self, uint32_t mixOp, uint32_t alphaOp, const Color& secondary, float mask)
 {
   // Source models.
   uint32_t m0 = self._model;
@@ -675,7 +675,7 @@ static err_t FOG_CDECL _G2d_Color_mix(Color& self, uint32_t mixOp, uint32_t alph
 // [Fog::Color - Adjust]
 // ============================================================================
 
-static err_t FOG_CDECL _G2d_Color_adjust(Color& self, uint32_t adjustOp, float param)
+static err_t FOG_CDECL _Color_adjust(Color& self, uint32_t adjustOp, float param)
 {
   const float* argb = NULL;      // ARGB components (if used).
   uint32_t sModel = self._model; // Source color model.
@@ -942,7 +942,7 @@ static const ColorName _colorNames[] =
 };
 #undef _COLOR_ENTITY
 
-static uint32_t _G2d_Color_singleHexToComponent(uint32_t c0)
+static uint32_t _Color_singleHexToComponent(uint32_t c0)
 {
   uint32_t h0 = (c0 <= '9') ? c0 - '0' : 9 + (c0 & 0xF);
   FOG_ASSERT(h0 <= 0xF);
@@ -950,7 +950,7 @@ static uint32_t _G2d_Color_singleHexToComponent(uint32_t c0)
   return h0 * 0x11;
 }
 
-static uint32_t _G2d_Color_doubleHexToComponent(uint32_t c0, uint32_t c1)
+static uint32_t _Color_doubleHexToComponent(uint32_t c0, uint32_t c1)
 {
   uint32_t h0 = (c0 <= '9') ? c0 - '0' : 9 + (c0 & 0xF);
   uint32_t h1 = (c1 <= '9') ? c1 - '0' : 9 + (c1 & 0xF);
@@ -960,7 +960,7 @@ static uint32_t _G2d_Color_doubleHexToComponent(uint32_t c0, uint32_t c1)
   return (h0 << 4) + h1;
 }
 
-static const ColorName* _G2d_Color_find(const Stub8& key)
+static const ColorName* _Color_find(const Stub8& key)
 {
   const ColorName* base = _colorNames;
   size_t i, lim;
@@ -1008,7 +1008,7 @@ static const ColorName* _G2d_Color_find(const Stub8& key)
   return NULL;
 }
 
-static err_t FOG_CDECL _G2d_Color_parseA(Color& dst, const Stub8& str, uint32_t flags)
+static err_t FOG_CDECL _Color_parseA(Color& dst, const Stub8& str, uint32_t flags)
 {
   const uint8_t* sCur = reinterpret_cast<const uint8_t*>(str.getData());
   const uint8_t* sEnd = sCur + str.getComputedLength();
@@ -1060,9 +1060,9 @@ static err_t FOG_CDECL _G2d_Color_parseA(Color& dst, const Stub8& str, uint32_t 
         }
 
         // The HEX letters were verified, parse the values.
-        argb32.r = (uint8_t)_G2d_Color_doubleHexToComponent(sCur[0], sCur[1]);
-        argb32.g = (uint8_t)_G2d_Color_doubleHexToComponent(sCur[2], sCur[3]);
-        argb32.b = (uint8_t)_G2d_Color_doubleHexToComponent(sCur[4], sCur[5]);
+        argb32.r = (uint8_t)_Color_doubleHexToComponent(sCur[0], sCur[1]);
+        argb32.g = (uint8_t)_Color_doubleHexToComponent(sCur[2], sCur[3]);
+        argb32.b = (uint8_t)_Color_doubleHexToComponent(sCur[4], sCur[5]);
         sCur += 6;
       }
       // Try to parse the #RGB string.
@@ -1075,9 +1075,9 @@ _TryCssHex3:
         }
 
         // The HEX letters were verified, parse the values.
-        argb32.r = (uint8_t)_G2d_Color_singleHexToComponent(sCur[0]);
-        argb32.g = (uint8_t)_G2d_Color_singleHexToComponent(sCur[1]);
-        argb32.b = (uint8_t)_G2d_Color_singleHexToComponent(sCur[2]);
+        argb32.r = (uint8_t)_Color_singleHexToComponent(sCur[0]);
+        argb32.g = (uint8_t)_Color_singleHexToComponent(sCur[1]);
+        argb32.b = (uint8_t)_Color_singleHexToComponent(sCur[2]);
         sCur += 3;
       }
       else
@@ -1314,7 +1314,7 @@ _ParseRrbOrHsv:
     sCur += i;
 
     // CSS keywords (basic and extended color names).
-    if ((flags & COLOR_NAME_CSS_KEYWORD) != 0 && (entity = _G2d_Color_find(name8)) != NULL)
+    if ((flags & COLOR_NAME_CSS_KEYWORD) != 0 && (entity = _Color_find(name8)) != NULL)
     {
       dst.setArgb32(Argb32(0xFF, entity->r, entity->g, entity->b));
       goto _Done;
@@ -1339,7 +1339,7 @@ _Done:
   return ERR_OK;
 }
 
-static err_t FOG_CDECL _G2d_Color_parseU(Color& dst, const Utf16& str, uint32_t flags)
+static err_t FOG_CDECL _Color_parseU(Color& dst, const Utf16& str, uint32_t flags)
 {
   const Char* sCur = str.getData();
   const Char* sEnd = sCur + str.getComputedLength();
@@ -1391,9 +1391,9 @@ static err_t FOG_CDECL _G2d_Color_parseU(Color& dst, const Utf16& str, uint32_t 
         }
 
         // The HEX letters were verified, parse the values.
-        argb32.r = (uint8_t)_G2d_Color_doubleHexToComponent(sCur[0], sCur[1]);
-        argb32.g = (uint8_t)_G2d_Color_doubleHexToComponent(sCur[2], sCur[3]);
-        argb32.b = (uint8_t)_G2d_Color_doubleHexToComponent(sCur[4], sCur[5]);
+        argb32.r = (uint8_t)_Color_doubleHexToComponent(sCur[0], sCur[1]);
+        argb32.g = (uint8_t)_Color_doubleHexToComponent(sCur[2], sCur[3]);
+        argb32.b = (uint8_t)_Color_doubleHexToComponent(sCur[4], sCur[5]);
         sCur += 6;
       }
       // Try to parse the #RGB string.
@@ -1406,9 +1406,9 @@ _TryCssHex3:
         }
 
         // The HEX letters were verified, parse the values.
-        argb32.r = (uint8_t)_G2d_Color_singleHexToComponent(sCur[0]);
-        argb32.g = (uint8_t)_G2d_Color_singleHexToComponent(sCur[1]);
-        argb32.b = (uint8_t)_G2d_Color_singleHexToComponent(sCur[2]);
+        argb32.r = (uint8_t)_Color_singleHexToComponent(sCur[0]);
+        argb32.g = (uint8_t)_Color_singleHexToComponent(sCur[1]);
+        argb32.b = (uint8_t)_Color_singleHexToComponent(sCur[2]);
         sCur += 3;
       }
       else
@@ -1642,7 +1642,7 @@ _ParseRrbOrHsv:
     sCur += i;
 
     // CSS keywords (basic and extended color names).
-    if ((flags & COLOR_NAME_CSS_KEYWORD) != 0 && (entity = _G2d_Color_find(name8)) != NULL)
+    if ((flags & COLOR_NAME_CSS_KEYWORD) != 0 && (entity = _Color_find(name8)) != NULL)
     {
       dst.setArgb32(Argb32(0xFF, entity->r, entity->g, entity->b));
       goto _Done;
@@ -1677,62 +1677,62 @@ FOG_NO_EXPORT void _g2d_color_init(void)
 {
   typedef _G2dApi::Color_Convert CONVFN;
 
-  _g2d.color.convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_NONE  ] = (CONVFN)_G2d_Color_zero4f;
-  _g2d.color.convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_ARGB  ] = (CONVFN)_G2d_Color_copy4f;
-  _g2d.color.convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_AHSV  ] = (CONVFN)_G2d_Color_argbf_from_ahsvf;
-  _g2d.color.convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_AHSL  ] = (CONVFN)_G2d_Color_argbf_from_ahslf;
-  _g2d.color.convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_ACMYK ] = (CONVFN)_G2d_Color_argbf_from_acmykf;
-  _g2d.color.convert[ COLOR_MODEL_ARGB  ][_COLOR_MODEL_ARGB32] = (CONVFN)_G2d_Color_argbf_from_argb32;
-  _g2d.color.convert[ COLOR_MODEL_ARGB  ][_COLOR_MODEL_ARGB64] = (CONVFN)_G2d_Color_argbf_from_argb64;
+  _g2d.color.convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_NONE  ] = (CONVFN)_Color_zero4f;
+  _g2d.color.convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_ARGB  ] = (CONVFN)_Color_copy4f;
+  _g2d.color.convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_AHSV  ] = (CONVFN)_Color_argbf_from_ahsvf;
+  _g2d.color.convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_AHSL  ] = (CONVFN)_Color_argbf_from_ahslf;
+  _g2d.color.convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_ACMYK ] = (CONVFN)_Color_argbf_from_acmykf;
+  _g2d.color.convert[ COLOR_MODEL_ARGB  ][_COLOR_MODEL_ARGB32] = (CONVFN)_Color_argbf_from_argb32;
+  _g2d.color.convert[ COLOR_MODEL_ARGB  ][_COLOR_MODEL_ARGB64] = (CONVFN)_Color_argbf_from_argb64;
 
-  _g2d.color.convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_NONE  ] = (CONVFN)_G2d_Color_zero4f;
-  _g2d.color.convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_ARGB  ] = (CONVFN)_G2d_Color_ahsvf_from_argbf;
-  _g2d.color.convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_AHSV  ] = (CONVFN)_G2d_Color_copy4f;
-  _g2d.color.convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_AHSL  ] = (CONVFN)_G2d_Color_ahsvf_from_ahslf;
-  _g2d.color.convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_ACMYK ] = (CONVFN)_G2d_Color_ahsvf_from_acmykf;
-  _g2d.color.convert[ COLOR_MODEL_AHSV  ][_COLOR_MODEL_ARGB32] = (CONVFN)_G2d_Color_ahsvf_from_argb32;
-  _g2d.color.convert[ COLOR_MODEL_AHSV  ][_COLOR_MODEL_ARGB64] = (CONVFN)_G2d_Color_ahsvf_from_argb64;
+  _g2d.color.convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_NONE  ] = (CONVFN)_Color_zero4f;
+  _g2d.color.convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_ARGB  ] = (CONVFN)_Color_ahsvf_from_argbf;
+  _g2d.color.convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_AHSV  ] = (CONVFN)_Color_copy4f;
+  _g2d.color.convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_AHSL  ] = (CONVFN)_Color_ahsvf_from_ahslf;
+  _g2d.color.convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_ACMYK ] = (CONVFN)_Color_ahsvf_from_acmykf;
+  _g2d.color.convert[ COLOR_MODEL_AHSV  ][_COLOR_MODEL_ARGB32] = (CONVFN)_Color_ahsvf_from_argb32;
+  _g2d.color.convert[ COLOR_MODEL_AHSV  ][_COLOR_MODEL_ARGB64] = (CONVFN)_Color_ahsvf_from_argb64;
 
-  _g2d.color.convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_NONE  ] = (CONVFN)_G2d_Color_zero4f;
-  _g2d.color.convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_ARGB  ] = (CONVFN)_G2d_Color_ahslf_from_argbf;
-  _g2d.color.convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_AHSV  ] = (CONVFN)_G2d_Color_ahslf_from_ahsvf;
-  _g2d.color.convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_AHSL  ] = (CONVFN)_G2d_Color_copy4f;
-  _g2d.color.convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_ACMYK ] = (CONVFN)_G2d_Color_ahslf_from_acmykf;
-  _g2d.color.convert[ COLOR_MODEL_AHSL  ][_COLOR_MODEL_ARGB32] = (CONVFN)_G2d_Color_ahslf_from_argb32;
-  _g2d.color.convert[ COLOR_MODEL_AHSL  ][_COLOR_MODEL_ARGB64] = (CONVFN)_G2d_Color_ahslf_from_argb64;
+  _g2d.color.convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_NONE  ] = (CONVFN)_Color_zero4f;
+  _g2d.color.convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_ARGB  ] = (CONVFN)_Color_ahslf_from_argbf;
+  _g2d.color.convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_AHSV  ] = (CONVFN)_Color_ahslf_from_ahsvf;
+  _g2d.color.convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_AHSL  ] = (CONVFN)_Color_copy4f;
+  _g2d.color.convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_ACMYK ] = (CONVFN)_Color_ahslf_from_acmykf;
+  _g2d.color.convert[ COLOR_MODEL_AHSL  ][_COLOR_MODEL_ARGB32] = (CONVFN)_Color_ahslf_from_argb32;
+  _g2d.color.convert[ COLOR_MODEL_AHSL  ][_COLOR_MODEL_ARGB64] = (CONVFN)_Color_ahslf_from_argb64;
 
-  _g2d.color.convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_NONE  ] = (CONVFN)_G2d_Color_zero5f;
-  _g2d.color.convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_ARGB  ] = (CONVFN)_G2d_Color_acmykf_from_argbf;
-  _g2d.color.convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_AHSV  ] = (CONVFN)_G2d_Color_acmykf_from_ahsvf;
-  _g2d.color.convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_AHSL  ] = (CONVFN)_G2d_Color_acmykf_from_ahslf;
-  _g2d.color.convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_ACMYK ] = (CONVFN)_G2d_Color_copy5f;
-  _g2d.color.convert[ COLOR_MODEL_ACMYK ][_COLOR_MODEL_ARGB32] = (CONVFN)_G2d_Color_acmykf_from_argb32;
-  _g2d.color.convert[ COLOR_MODEL_ACMYK ][_COLOR_MODEL_ARGB64] = (CONVFN)_G2d_Color_acmykf_from_argb64;
+  _g2d.color.convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_NONE  ] = (CONVFN)_Color_zero5f;
+  _g2d.color.convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_ARGB  ] = (CONVFN)_Color_acmykf_from_argbf;
+  _g2d.color.convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_AHSV  ] = (CONVFN)_Color_acmykf_from_ahsvf;
+  _g2d.color.convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_AHSL  ] = (CONVFN)_Color_acmykf_from_ahslf;
+  _g2d.color.convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_ACMYK ] = (CONVFN)_Color_copy5f;
+  _g2d.color.convert[ COLOR_MODEL_ACMYK ][_COLOR_MODEL_ARGB32] = (CONVFN)_Color_acmykf_from_argb32;
+  _g2d.color.convert[ COLOR_MODEL_ACMYK ][_COLOR_MODEL_ARGB64] = (CONVFN)_Color_acmykf_from_argb64;
 
-  _g2d.color.convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_NONE  ] = (CONVFN)_G2d_Color_argb32_zero;
-  _g2d.color.convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_ARGB  ] = (CONVFN)_G2d_Color_argb32_from_argbf;
-  _g2d.color.convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_AHSV  ] = (CONVFN)_G2d_Color_argb32_from_ahsvf;
-  _g2d.color.convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_AHSL  ] = (CONVFN)_G2d_Color_argb32_from_ahslf;
-  _g2d.color.convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_ACMYK ] = (CONVFN)_G2d_Color_argb32_from_acmykf;
-  _g2d.color.convert[_COLOR_MODEL_ARGB32][_COLOR_MODEL_ARGB32] = (CONVFN)_G2d_Color_argb32_from_argb32;
-  _g2d.color.convert[_COLOR_MODEL_ARGB32][_COLOR_MODEL_ARGB64] = (CONVFN)_G2d_Color_argb32_from_argb64;
+  _g2d.color.convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_NONE  ] = (CONVFN)_Color_argb32_zero;
+  _g2d.color.convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_ARGB  ] = (CONVFN)_Color_argb32_from_argbf;
+  _g2d.color.convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_AHSV  ] = (CONVFN)_Color_argb32_from_ahsvf;
+  _g2d.color.convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_AHSL  ] = (CONVFN)_Color_argb32_from_ahslf;
+  _g2d.color.convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_ACMYK ] = (CONVFN)_Color_argb32_from_acmykf;
+  _g2d.color.convert[_COLOR_MODEL_ARGB32][_COLOR_MODEL_ARGB32] = (CONVFN)_Color_argb32_from_argb32;
+  _g2d.color.convert[_COLOR_MODEL_ARGB32][_COLOR_MODEL_ARGB64] = (CONVFN)_Color_argb32_from_argb64;
 
-  _g2d.color.convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_NONE  ] = (CONVFN)_G2d_Color_argb64_zero;
-  _g2d.color.convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_ARGB  ] = (CONVFN)_G2d_Color_argb64_from_argbf;
-  _g2d.color.convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_AHSV  ] = (CONVFN)_G2d_Color_argb64_from_ahsvf;
-  _g2d.color.convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_AHSL  ] = (CONVFN)_G2d_Color_argb64_from_ahslf;
-  _g2d.color.convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_ACMYK ] = (CONVFN)_G2d_Color_argb64_from_acmykf;
-  _g2d.color.convert[_COLOR_MODEL_ARGB64][_COLOR_MODEL_ARGB32] = (CONVFN)_G2d_Color_argb64_from_argb32;
-  _g2d.color.convert[_COLOR_MODEL_ARGB64][_COLOR_MODEL_ARGB64] = (CONVFN)_G2d_Color_argb64_from_argb64;
+  _g2d.color.convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_NONE  ] = (CONVFN)_Color_argb64_zero;
+  _g2d.color.convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_ARGB  ] = (CONVFN)_Color_argb64_from_argbf;
+  _g2d.color.convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_AHSV  ] = (CONVFN)_Color_argb64_from_ahsvf;
+  _g2d.color.convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_AHSL  ] = (CONVFN)_Color_argb64_from_ahslf;
+  _g2d.color.convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_ACMYK ] = (CONVFN)_Color_argb64_from_acmykf;
+  _g2d.color.convert[_COLOR_MODEL_ARGB64][_COLOR_MODEL_ARGB32] = (CONVFN)_Color_argb64_from_argb32;
+  _g2d.color.convert[_COLOR_MODEL_ARGB64][_COLOR_MODEL_ARGB64] = (CONVFN)_Color_argb64_from_argb64;
 
-  _g2d.color.setModel = _G2d_Color_setModel;
-  _g2d.color.setData = _G2d_Color_setData;
+  _g2d.color.setModel = _Color_setModel;
+  _g2d.color.setData = _Color_setData;
 
-  _g2d.color.mix = _G2d_Color_mix;
-  _g2d.color.adjust = _G2d_Color_adjust;
+  _g2d.color.mix = _Color_mix;
+  _g2d.color.adjust = _Color_adjust;
 
-  _g2d.color.parseA = _G2d_Color_parseA;
-  _g2d.color.parseU = _G2d_Color_parseU;
+  _g2d.color.parseA = _Color_parseA;
+  _g2d.color.parseU = _Color_parseU;
 
   FOG_CPU_USE_INITIALIZER_SSE2(_g2d_color_init_sse2)
 }

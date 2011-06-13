@@ -19,13 +19,13 @@ namespace Fog {
 // [Fog::GlyphOutline - Statics]
 // ============================================================================
 
-static Static<GlyphOutlineData> _G2d_GlyphOutline_dnull;
+static Static<GlyphOutlineData> _GlyphOutline_dnull;
 
 // ============================================================================
 // [Fog::GlyphOutline - Helpers]
 // ============================================================================
 
-static FOG_INLINE GlyphOutlineData* _G2d_GlyphOutline_dalloc(const GlyphMetricsF& metrics, const PathF& outline)
+static FOG_INLINE GlyphOutlineData* _GlyphOutline_dalloc(const GlyphMetricsF& metrics, const PathF& outline)
 {
   GlyphOutlineData* d = reinterpret_cast<GlyphOutlineData*>(
     Memory::alloc(sizeof(GlyphOutlineData)));
@@ -38,13 +38,13 @@ static FOG_INLINE GlyphOutlineData* _G2d_GlyphOutline_dalloc(const GlyphMetricsF
   return d;
 }
 
-static FOG_INLINE GlyphOutlineData* _G2d_GlyphOutline_dref(GlyphOutlineData* d)
+static FOG_INLINE GlyphOutlineData* _GlyphOutline_dref(GlyphOutlineData* d)
 {
   d->refCount.inc();
   return d;
 }
 
-static FOG_INLINE void _G2d_GlyphOutline_deref(GlyphOutlineData* d)
+static FOG_INLINE void _GlyphOutline_deref(GlyphOutlineData* d)
 {
   if (d->refCount.deref())
   {
@@ -58,18 +58,18 @@ static FOG_INLINE void _G2d_GlyphOutline_deref(GlyphOutlineData* d)
 // ============================================================================
 
 GlyphOutline::GlyphOutline() :
-  _d(_G2d_GlyphOutline_dref(_G2d_GlyphOutline_dnull))
+  _d(_GlyphOutline_dref(_GlyphOutline_dnull))
 {
 }
 
 GlyphOutline::GlyphOutline(const GlyphOutline& other) :
-  _d(_G2d_GlyphOutline_dref(other._d))
+  _d(_GlyphOutline_dref(other._d))
 {
 }
 
 GlyphOutline::~GlyphOutline()
 {
-  _G2d_GlyphOutline_deref(_d);
+  _GlyphOutline_deref(_d);
 }
 
 // ============================================================================
@@ -78,10 +78,10 @@ GlyphOutline::~GlyphOutline()
 
 err_t GlyphOutline::create(const GlyphMetricsF& metrics, const PathF& outline)
 {
-  GlyphOutlineData* newd = _G2d_GlyphOutline_dalloc(metrics, outline);
+  GlyphOutlineData* newd = _GlyphOutline_dalloc(metrics, outline);
   if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
-  _G2d_GlyphOutline_deref(atomicPtrXchg(&_d, newd));
+  _GlyphOutline_deref(atomicPtrXchg(&_d, newd));
   return ERR_OK;
 }
 
@@ -91,8 +91,8 @@ err_t GlyphOutline::create(const GlyphMetricsF& metrics, const PathF& outline)
 
 GlyphOutline& GlyphOutline::operator=(const GlyphOutline& other)
 {
-  _G2d_GlyphOutline_deref(
-    atomicPtrXchg(&_d, _G2d_GlyphOutline_dref(other._d))
+  _GlyphOutline_deref(
+    atomicPtrXchg(&_d, _GlyphOutline_dref(other._d))
   );
 
   return *this;
@@ -104,7 +104,7 @@ GlyphOutline& GlyphOutline::operator=(const GlyphOutline& other)
 
 FOG_NO_EXPORT void _g2d_glyphoutline_init(void)
 {
-  GlyphOutlineData* d = _G2d_GlyphOutline_dnull.instancep();
+  GlyphOutlineData* d = _GlyphOutline_dnull.instancep();
 
   d->refCount.init(1);
   d->metrics.reset();
@@ -113,7 +113,7 @@ FOG_NO_EXPORT void _g2d_glyphoutline_init(void)
 
 FOG_NO_EXPORT void _g2d_glyphoutline_fini(void)
 {
-  GlyphOutlineData* d = _G2d_GlyphOutline_dnull.instancep();
+  GlyphOutlineData* d = _GlyphOutline_dnull.instancep();
 
   d->refCount.dec();
   d->outline.destroy();

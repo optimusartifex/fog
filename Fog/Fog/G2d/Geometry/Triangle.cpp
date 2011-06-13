@@ -23,7 +23,7 @@ namespace Fog {
 // ============================================================================
 
 template<typename NumT>
-static err_t FOG_CDECL _G2d_TriangleT_getBoundingBox(const NumT_(Point)* self,
+static err_t FOG_CDECL _TriangleT_getBoundingBox(const NumT_(Point)* self,
   NumT_(Box)* dst,
   const NumT_(Transform)* tr)
 {
@@ -56,7 +56,7 @@ static err_t FOG_CDECL _G2d_TriangleT_getBoundingBox(const NumT_(Point)* self,
 // ============================================================================
 
 template<typename NumT>
-static bool FOG_CDECL _G2d_TriangleT_hitTest(const NumT_(Point)* self,
+static bool FOG_CDECL _TriangleT_hitTest(const NumT_(Point)* self,
   const NumT_(Point)* pt)
 {
   // Hit-Test using Barycentric Technique.
@@ -94,11 +94,11 @@ static bool FOG_CDECL _G2d_TriangleT_hitTest(const NumT_(Point)* self,
 
 FOG_NO_EXPORT void _g2d_triangle_init(void)
 {
-  _g2d.trianglef.getBoundingBox = _G2d_TriangleT_getBoundingBox<float>;
-  _g2d.triangled.getBoundingBox = _G2d_TriangleT_getBoundingBox<double>;
+  _g2d.trianglef.getBoundingBox = _TriangleT_getBoundingBox<float>;
+  _g2d.triangled.getBoundingBox = _TriangleT_getBoundingBox<double>;
 
-  _g2d.trianglef.hitTest = _G2d_TriangleT_hitTest<float>;
-  _g2d.triangled.hitTest = _G2d_TriangleT_hitTest<double>;
+  _g2d.trianglef.hitTest = _TriangleT_hitTest<float>;
+  _g2d.triangled.hitTest = _TriangleT_hitTest<double>;
 }
 
 } // Fog namespace

@@ -1073,26 +1073,26 @@ err_t Image::invert(Image& dst, const Image& src, uint32_t channels)
 typedef void (FOG_FASTCALL *MirrorFunc)(uint8_t*, uint8_t*, int);
 
 template<int SIZE>
-static void FOG_FASTCALL _G2d_MirrorCopySrcIsNotDst(uint8_t* dst, uint8_t* src, int w)
+static void FOG_FASTCALL _MirrorCopySrcIsNotDst(uint8_t* dst, uint8_t* src, int w)
 {
   Memory::copy(dst, src, w * SIZE);
 }
 
 template<int SIZE>
-static void FOG_FASTCALL _G2d_MirrorFlipSrcIsNotDst(uint8_t* dst, uint8_t* src, int w)
+static void FOG_FASTCALL _MirrorFlipSrcIsNotDst(uint8_t* dst, uint8_t* src, int w)
 {
   src += w * SIZE - SIZE;
   for (int x = 0; x < w; x++, dst += SIZE, src -= SIZE) Memory::copy_s<SIZE>(dst, src);
 }
 
 template<int SIZE>
-static void FOG_FASTCALL _G2d_MirrorCopySrcIsDst(uint8_t* dst, uint8_t* src, int w)
+static void FOG_FASTCALL _MirrorCopySrcIsDst(uint8_t* dst, uint8_t* src, int w)
 {
   Memory::xchg(dst, src, w * SIZE);
 }
 
 template<int SIZE>
-static void FOG_FASTCALL _G2d_MirrorFlipSrcIsDst(uint8_t* dst, uint8_t* src, int w)
+static void FOG_FASTCALL _MirrorFlipSrcIsDst(uint8_t* dst, uint8_t* src, int w)
 {
   int x = w;
   if (src == dst) x >>= 1;
@@ -1101,56 +1101,56 @@ static void FOG_FASTCALL _G2d_MirrorFlipSrcIsDst(uint8_t* dst, uint8_t* src, int
   for (; x; x--, dst += SIZE, src -= SIZE) Memory::xchg_s<SIZE>(dst, src);
 }
 
-static const MirrorFunc _G2d_MirrorFuncsCopySrcIsNotDst[] =
+static const MirrorFunc _MirrorFuncsCopySrcIsNotDst[] =
 {
   NULL,
-  _G2d_MirrorCopySrcIsNotDst<1>,
-  _G2d_MirrorCopySrcIsNotDst<2>,
-  _G2d_MirrorCopySrcIsNotDst<3>,
-  _G2d_MirrorCopySrcIsNotDst<4>,
+  _MirrorCopySrcIsNotDst<1>,
+  _MirrorCopySrcIsNotDst<2>,
+  _MirrorCopySrcIsNotDst<3>,
+  _MirrorCopySrcIsNotDst<4>,
   NULL,
-  _G2d_MirrorCopySrcIsNotDst<6>,
+  _MirrorCopySrcIsNotDst<6>,
   NULL,
-  _G2d_MirrorCopySrcIsNotDst<8>
+  _MirrorCopySrcIsNotDst<8>
 };
 
-static const MirrorFunc _G2d_MirrorFuncsFlipSrcIsNotDst[] =
+static const MirrorFunc _MirrorFuncsFlipSrcIsNotDst[] =
 {
   NULL,
-  _G2d_MirrorFlipSrcIsNotDst<1>,
-  _G2d_MirrorFlipSrcIsNotDst<2>,
-  _G2d_MirrorFlipSrcIsNotDst<3>,
-  _G2d_MirrorFlipSrcIsNotDst<4>,
+  _MirrorFlipSrcIsNotDst<1>,
+  _MirrorFlipSrcIsNotDst<2>,
+  _MirrorFlipSrcIsNotDst<3>,
+  _MirrorFlipSrcIsNotDst<4>,
   NULL,
-  _G2d_MirrorFlipSrcIsNotDst<6>,
+  _MirrorFlipSrcIsNotDst<6>,
   NULL,
-  _G2d_MirrorFlipSrcIsNotDst<8>
+  _MirrorFlipSrcIsNotDst<8>
 };
 
-static const MirrorFunc _G2d_MirrorFuncsCopySrcIsDst[] =
+static const MirrorFunc _MirrorFuncsCopySrcIsDst[] =
 {
   NULL,
-  _G2d_MirrorCopySrcIsDst<1>,
-  _G2d_MirrorCopySrcIsDst<2>,
-  _G2d_MirrorCopySrcIsDst<3>,
-  _G2d_MirrorCopySrcIsDst<4>,
+  _MirrorCopySrcIsDst<1>,
+  _MirrorCopySrcIsDst<2>,
+  _MirrorCopySrcIsDst<3>,
+  _MirrorCopySrcIsDst<4>,
   NULL,
-  _G2d_MirrorCopySrcIsDst<6>,
+  _MirrorCopySrcIsDst<6>,
   NULL,
-  _G2d_MirrorCopySrcIsDst<8>
+  _MirrorCopySrcIsDst<8>
 };
 
-static const MirrorFunc _G2d_MirrorFuncsFlipSrcIsDst[] =
+static const MirrorFunc _MirrorFuncsFlipSrcIsDst[] =
 {
   NULL,
-  _G2d_MirrorFlipSrcIsDst<1>,
-  _G2d_MirrorFlipSrcIsDst<2>,
-  _G2d_MirrorFlipSrcIsDst<3>,
-  _G2d_MirrorFlipSrcIsDst<4>,
+  _MirrorFlipSrcIsDst<1>,
+  _MirrorFlipSrcIsDst<2>,
+  _MirrorFlipSrcIsDst<3>,
+  _MirrorFlipSrcIsDst<4>,
   NULL,
-  _G2d_MirrorFlipSrcIsDst<6>,
+  _MirrorFlipSrcIsDst<6>,
   NULL,
-  _G2d_MirrorFlipSrcIsDst<8>
+  _MirrorFlipSrcIsDst<8>
 };
 
 err_t Image::mirror(Image& dst, const Image& src, uint32_t mirrorMode)
@@ -1190,11 +1190,11 @@ err_t Image::mirror(Image& dst, const Image& src, uint32_t mirrorMode)
 
       if (dst_d != src_d)
       {
-        func = _G2d_MirrorFuncsCopySrcIsNotDst[bytesPerPixel];
+        func = _MirrorFuncsCopySrcIsNotDst[bytesPerPixel];
       }
       else
       {
-        func = _G2d_MirrorFuncsCopySrcIsDst[bytesPerPixel];
+        func = _MirrorFuncsCopySrcIsDst[bytesPerPixel];
         h >>= 1;
       }
       break;
@@ -1202,11 +1202,11 @@ err_t Image::mirror(Image& dst, const Image& src, uint32_t mirrorMode)
     case IMAGE_MIRROR_HORIZONTAL:
       if (dst_d != src_d)
       {
-        func = _G2d_MirrorFuncsFlipSrcIsNotDst[bytesPerPixel];
+        func = _MirrorFuncsFlipSrcIsNotDst[bytesPerPixel];
       }
       else
       {
-        func = _G2d_MirrorFuncsFlipSrcIsDst[bytesPerPixel];
+        func = _MirrorFuncsFlipSrcIsDst[bytesPerPixel];
       }
       break;
 
@@ -1216,11 +1216,11 @@ err_t Image::mirror(Image& dst, const Image& src, uint32_t mirrorMode)
 
       if (dst_d != src_d)
       {
-        func = _G2d_MirrorFuncsFlipSrcIsNotDst[bytesPerPixel];
+        func = _MirrorFuncsFlipSrcIsNotDst[bytesPerPixel];
       }
       else
       {
-        func = _G2d_MirrorFuncsFlipSrcIsDst[bytesPerPixel];
+        func = _MirrorFuncsFlipSrcIsDst[bytesPerPixel];
         h >>= 1;
       }
       break;
@@ -1734,7 +1734,7 @@ err_t Image::fillRect(const RectI& r, const Color& color,  uint32_t compositingO
 // [Fog::Image - Blit]
 // ============================================================================
 
-static err_t _G2d_Image_blitImage(
+static err_t _Image_blitImage(
   Image& dst, int dstX, int dstY,
   const Image& src, int srcX, int srcY,
   int w, int h,
@@ -1938,7 +1938,7 @@ err_t Image::blitImage(const PointI& pt, const Image& src, uint32_t compositingO
   if (y1 > h) y1 = h;
 
   if (x0 >= x1 || y0 >= y1) return ERR_OK;
-  return _G2d_Image_blitImage(*this, x0, y0, src, x0 - pt.getX(), y0 - pt.getY(), x1 - x0, y1 - y0, compositingOperator, opacity);
+  return _Image_blitImage(*this, x0, y0, src, x0 - pt.getX(), y0 - pt.getY(), x1 - x0, y1 - y0, compositingOperator, opacity);
 }
 
 err_t Image::blitImage(const PointI& pt, const Image& src, const RectI& srcRect, uint32_t compositingOperator, float opacity)
@@ -1972,7 +1972,7 @@ err_t Image::blitImage(const PointI& pt, const Image& src, const RectI& srcRect,
   if (dstY1 > dst_d->size.h) dstY1 = dst_d->size.h;
 
   if (dstX0 >= dstX1 || dstY0 >= dstY1) return ERR_OK;
-  return _G2d_Image_blitImage(*this, dstX0, dstY0, src, srcX0, srcY0, dstX1 - dstX0, dstY1 - dstY0, compositingOperator, opacity);
+  return _Image_blitImage(*this, dstX0, dstY0, src, srcX0, srcY0, dstX1 - dstX0, dstY1 - dstY0, compositingOperator, opacity);
 }
 
 // ============================================================================
@@ -2111,7 +2111,7 @@ err_t Image::glyphFromPath(Image& glyph, PointI& offset, const PathD& path, uint
       {
         Memory::zero(glyphPixels, glyphStride);
 
-        Span8* span = rasterizer.sweepScanline(scanline, temporaryMemory, y + y0);
+        Span8* span = rasterizer.sweep(scanline, temporaryMemory, y + y0);
         while (span)
         {
           uint8_t* p = glyphPixels + (uint)(span->getX0() - x0);

@@ -22,7 +22,7 @@ namespace Fog {
 // ============================================================================
 
 template<typename NumT>
-static bool FOG_CDECL _G2d_ChordT_hitTest(const NumT_(Chord)* self, const NumT_(Point)* pt)
+static bool FOG_CDECL _ChordT_hitTest(const NumT_(Chord)* self, const NumT_(Point)* pt)
 {
   NumT cx = self->center.x;
   NumT cy = self->center.y;
@@ -92,8 +92,8 @@ static bool FOG_CDECL _G2d_ChordT_hitTest(const NumT_(Chord)* self, const NumT_(
 
 FOG_NO_EXPORT void _g2d_chord_init(void)
 {
-  _g2d.chordf.hitTest = _G2d_ChordT_hitTest<float>;
-  _g2d.chordd.hitTest = _G2d_ChordT_hitTest<double>;
+  _g2d.chordf.hitTest = _ChordT_hitTest<float>;
+  _g2d.chordd.hitTest = _ChordT_hitTest<double>;
 }
 
 } // Fog namespace

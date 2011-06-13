@@ -18,7 +18,7 @@ namespace Fog {
 // [Fog::GlyphOutlineCache - Helpers]
 // ============================================================================
 
-static FOG_INLINE size_t _G2d_GlyphOutlineCache_getUsedBytes(const GlyphOutline& glyph)
+static FOG_INLINE size_t _GlyphOutlineCache_getUsedBytes(const GlyphOutline& glyph)
 {
   return sizeof(PathDataF) + (
     (glyph.getOutline().getCapacity() * (sizeof(PointF) + 1) + 15 ) & ~15
@@ -131,7 +131,7 @@ err_t GlyphOutlineCache::put(uint32_t uc, const GlyphOutline& glyph)
     t->glyphs[tCol].initCustom1(glyph);
 
     // Update the statistics.
-    _usedBytes += _G2d_GlyphOutlineCache_getUsedBytes(glyph);
+    _usedBytes += _GlyphOutlineCache_getUsedBytes(glyph);
   }
 
   return ERR_OK;

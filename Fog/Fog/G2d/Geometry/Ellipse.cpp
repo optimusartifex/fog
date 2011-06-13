@@ -26,7 +26,7 @@ namespace Fog {
 // ============================================================================
 
 template<typename NumT>
-static err_t FOG_CDECL _G2d_EllipseT_getBoundingBox(
+static err_t FOG_CDECL _EllipseT_getBoundingBox(
   const NumT_(Ellipse)* self,
   NumT_(Box)* dst,
   const NumT_(Transform)* transform)
@@ -139,7 +139,7 @@ _Identity:
 // ============================================================================
 
 template<typename NumT>
-static bool FOG_CDECL _G2d_EllipseT_hitTest(const NumT_(Ellipse)* self, const NumT_(Point)* pt)
+static bool FOG_CDECL _EllipseT_hitTest(const NumT_(Ellipse)* self, const NumT_(Point)* pt)
 {
   // Point-In-Ellipse problem reduced to Point-In-Circle problem. It is always
   // possible to scale an ellipse to get a circle. This trick is used to get
@@ -174,7 +174,7 @@ static bool FOG_CDECL _G2d_EllipseT_hitTest(const NumT_(Ellipse)* self, const Nu
 // ============================================================================
 
 template<typename NumT>
-static uint FOG_CDECL _G2d_EllipseT_toCSpline(const NumT_(Ellipse)* self, NumT_(Point)* pts)
+static uint FOG_CDECL _EllipseT_toCSpline(const NumT_(Ellipse)* self, NumT_(Point)* pts)
 {
   NumT cx = self->center.x;
   NumT cy = self->center.y;
@@ -208,14 +208,14 @@ static uint FOG_CDECL _G2d_EllipseT_toCSpline(const NumT_(Ellipse)* self, NumT_(
 
 FOG_NO_EXPORT void _g2d_ellipse_init(void)
 {
-  _g2d.ellipsef.getBoundingBox = _G2d_EllipseT_getBoundingBox<float>;
-  _g2d.ellipsed.getBoundingBox = _G2d_EllipseT_getBoundingBox<double>;
+  _g2d.ellipsef.getBoundingBox = _EllipseT_getBoundingBox<float>;
+  _g2d.ellipsed.getBoundingBox = _EllipseT_getBoundingBox<double>;
 
-  _g2d.ellipsef.hitTest = _G2d_EllipseT_hitTest<float>;
-  _g2d.ellipsed.hitTest = _G2d_EllipseT_hitTest<double>;
+  _g2d.ellipsef.hitTest = _EllipseT_hitTest<float>;
+  _g2d.ellipsed.hitTest = _EllipseT_hitTest<double>;
 
-  _g2d.ellipsef.toCSpline = _G2d_EllipseT_toCSpline<float>;
-  _g2d.ellipsed.toCSpline = _G2d_EllipseT_toCSpline<double>;
+  _g2d.ellipsef.toCSpline = _EllipseT_toCSpline<float>;
+  _g2d.ellipsed.toCSpline = _EllipseT_toCSpline<double>;
 }
 
 } // Fog namespace

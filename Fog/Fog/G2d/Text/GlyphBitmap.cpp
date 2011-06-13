@@ -19,13 +19,13 @@ namespace Fog {
 // [Fog::GlyphBitmap - Statics]
 // ============================================================================
 
-static Static<GlyphBitmapData> _G2d_GlyphBitmap_dnull;
+static Static<GlyphBitmapData> _GlyphBitmap_dnull;
 
 // ============================================================================
 // [Fog::GlyphBitmap - Helpers]
 // ============================================================================
 
-static FOG_INLINE GlyphBitmapData* _G2d_GlyphBitmap_dalloc(const GlyphMetricsF& metrics, const Image& bitmap)
+static FOG_INLINE GlyphBitmapData* _GlyphBitmap_dalloc(const GlyphMetricsF& metrics, const Image& bitmap)
 {
   GlyphBitmapData* d = reinterpret_cast<GlyphBitmapData*>(
     Memory::alloc(sizeof(GlyphBitmapData)));
@@ -38,13 +38,13 @@ static FOG_INLINE GlyphBitmapData* _G2d_GlyphBitmap_dalloc(const GlyphMetricsF& 
   return d;
 }
 
-static FOG_INLINE GlyphBitmapData* _G2d_GlyphBitmap_dref(GlyphBitmapData* d)
+static FOG_INLINE GlyphBitmapData* _GlyphBitmap_dref(GlyphBitmapData* d)
 {
   d->refCount.inc();
   return d;
 }
 
-static FOG_INLINE void _G2d_GlyphBitmap_deref(GlyphBitmapData* d)
+static FOG_INLINE void _GlyphBitmap_deref(GlyphBitmapData* d)
 {
   if (d->refCount.deref())
   {
@@ -58,18 +58,18 @@ static FOG_INLINE void _G2d_GlyphBitmap_deref(GlyphBitmapData* d)
 // ============================================================================
 
 GlyphBitmap::GlyphBitmap() :
-  _d(_G2d_GlyphBitmap_dref(_G2d_GlyphBitmap_dnull))
+  _d(_GlyphBitmap_dref(_GlyphBitmap_dnull))
 {
 }
 
 GlyphBitmap::GlyphBitmap(const GlyphBitmap& other) :
-  _d(_G2d_GlyphBitmap_dref(other._d))
+  _d(_GlyphBitmap_dref(other._d))
 {
 }
 
 GlyphBitmap::~GlyphBitmap()
 {
-  _G2d_GlyphBitmap_deref(_d);
+  _GlyphBitmap_deref(_d);
 }
 
 // ============================================================================
@@ -78,10 +78,10 @@ GlyphBitmap::~GlyphBitmap()
 
 err_t GlyphBitmap::create(const GlyphMetricsF& metrics, const Image& bitmap)
 {
-  GlyphBitmapData* newd = _G2d_GlyphBitmap_dalloc(metrics, bitmap);
+  GlyphBitmapData* newd = _GlyphBitmap_dalloc(metrics, bitmap);
   if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
-  _G2d_GlyphBitmap_deref(atomicPtrXchg(&_d, newd));
+  _GlyphBitmap_deref(atomicPtrXchg(&_d, newd));
   return ERR_OK;
 }
 
@@ -91,8 +91,8 @@ err_t GlyphBitmap::create(const GlyphMetricsF& metrics, const Image& bitmap)
 
 GlyphBitmap& GlyphBitmap::operator=(const GlyphBitmap& other)
 {
-  _G2d_GlyphBitmap_deref(
-    atomicPtrXchg(&_d, _G2d_GlyphBitmap_dref(other._d))
+  _GlyphBitmap_deref(
+    atomicPtrXchg(&_d, _GlyphBitmap_dref(other._d))
   );
 
   return *this;
@@ -104,7 +104,7 @@ GlyphBitmap& GlyphBitmap::operator=(const GlyphBitmap& other)
 
 FOG_NO_EXPORT void _g2d_glyphbitmap_init(void)
 {
-  GlyphBitmapData* d = _G2d_GlyphBitmap_dnull.instancep();
+  GlyphBitmapData* d = _GlyphBitmap_dnull.instancep();
 
   d->refCount.init(1);
   d->metrics.reset();
@@ -113,7 +113,7 @@ FOG_NO_EXPORT void _g2d_glyphbitmap_init(void)
 
 FOG_NO_EXPORT void _g2d_glyphbitmap_fini(void)
 {
-  GlyphBitmapData* d = _G2d_GlyphBitmap_dnull.instancep();
+  GlyphBitmapData* d = _GlyphBitmap_dnull.instancep();
 
   d->refCount.dec();
   d->bitmap[0].destroy();

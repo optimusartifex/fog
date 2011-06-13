@@ -53,6 +53,9 @@ static FOG_INLINE int upscale(float  v) { return (int)(v * (float )A8_POLY_SUBPI
 static FOG_INLINE int upscale(double v) { return (int)(v * (double)A8_POLY_SUBPIXEL_SCALE + 0.5 ); }
 
 // Forward Declarations.
+template<typename _CHUNK_TYPE, typename _CELL_TYPE>
+static bool _Rasterizer8_renderLine(Rasterizer8* self, Fixed24x8 x0, Fixed24x8 y0, Fixed24x8 x1, Fixed24x8 y1);
+
 FOG_NO_EXPORT void _Rasterizer8_Path_initSweepFunctions(Rasterizer8* rasterizer);
 FOG_NO_EXPORT void _Rasterizer8_Rect_initSweepFunctions(Rasterizer8* rasterizer);
 
@@ -201,8 +204,7 @@ static bool _Rasterizer8_initCells(Rasterizer8* rasterizer)
 // ============================================================================
 
 template<typename SrcT, typename _CHUNK_TYPE, typename _CELL_TYPE>
-static void _Rasterizer_addPathData(
-  Rasterizer8* rasterizer,
+static void _Rasterizer_addPathData(Rasterizer8* self,
   const SrcT_(Point)* vertices, const uint8_t* commands, size_t count)
 {
   if (count == 0) return;
@@ -216,8 +218,8 @@ static void _Rasterizer_addPathData(
 
   // Temporary path.
   SrcT_(Path)* tmpPath = (sizeof(SrcT) == sizeof(float))
-    ? reinterpret_cast<SrcT_(Path)*>(&rasterizer->_tmpPathF)
-    : reinterpret_cast<SrcT_(Path)*>(&rasterizer->_tmpPathD);
+    ? reinterpret_cast<SrcT_(Path)*>(&self->_tmpPathF)
+    : reinterpret_cast<SrcT_(Path)*>(&self->_tmpPathD);
 
   // Current/Start moveTo x position.
   Fixed24x8 x0, startX0;
@@ -247,14 +249,14 @@ _NewPath:
     if (PathCmd::isMoveTo(cmd))
     {
 _MoveTo:
-      x0 = upscale(vertices[-1].x + rasterizer->_offsetF.x);
-      y0 = upscale(vertices[-1].y + rasterizer->_offsetF.y);
+      x0 = upscale(vertices[-1].x + self->_offsetF.x);
+      y0 = upscale(vertices[-1].y + self->_offsetF.y);
 
       // Correct small errors which might be caused by floating point clipper.
       if (x0 < 0) x0 = 0;
       if (y0 < 0) y0 = 0;
-      if (x0 > rasterizer->_size24x8.w) x0 = rasterizer->_size24x8.w;
-      if (y0 > rasterizer->_size24x8.h) y0 = rasterizer->_size24x8.h;
+      if (x0 > self->_size24x8.w) x0 = self->_size24x8.w;
+      if (y0 > self->_size24x8.h) y0 = self->_size24x8.h;
 
       startX0 = x0;
       startY0 = y0;
@@ -323,16 +325,16 @@ _MoveTo:
 _PolyLine:
       FOG_ASSERT(polyLength > 0);
       do {
-        Fixed24x8 x1 = upscale(polyPoints->x + rasterizer->_offsetF.x);
-        Fixed24x8 y1 = upscale(polyPoints->y + rasterizer->_offsetF.y);
+        Fixed24x8 x1 = upscale(polyPoints->x + self->_offsetF.x);
+        Fixed24x8 y1 = upscale(polyPoints->y + self->_offsetF.y);
 
         // Correct small errors which might be caused by floating point clipper.
         if (x1 < 0) x1 = 0;
         if (y1 < 0) y1 = 0;
-        if (x1 > rasterizer->_size24x8.w) x1 = rasterizer->_size24x8.w;
-        if (y1 > rasterizer->_size24x8.h) y1 = rasterizer->_size24x8.h;
+        if (x1 > self->_size24x8.w) x1 = self->_size24x8.w;
+        if (y1 > self->_size24x8.h) y1 = self->_size24x8.h;
 
-        if ((x0 != x1) | (y0 != y1) && !rasterizer->renderLine<_CHUNK_TYPE, _CELL_TYPE>(x0, y0, x1, y1))
+        if ((x0 != x1) | (y0 != y1) && !_Rasterizer8_renderLine<_CHUNK_TYPE, _CELL_TYPE>(self, x0, y0, x1, y1))
           return;
 
         x0 = x1;
@@ -354,7 +356,7 @@ _PolyLine:
 
 _ClosePath:
       // Close the current polygon.
-      if ((x0 != startX0) | (y0 != startY0) && !rasterizer->renderLine<_CHUNK_TYPE, _CELL_TYPE>(x0, y0, startX0, startY0))
+      if ((x0 != startX0) | (y0 != startY0) && !_Rasterizer8_renderLine<_CHUNK_TYPE, _CELL_TYPE>(self, x0, y0, startX0, startY0))
         return;
 
       if (commands == end) return;
@@ -552,17 +554,17 @@ bool Rasterizer8::switchToPath()
 
       if (_Rasterizer8_useCellD(this))
       {
-        renderLine<ChunkD, CellD>(box.x0, box.y0, box.x1, box.y0);
-        renderLine<ChunkD, CellD>(box.x1, box.y0, box.x1, box.y1);
-        renderLine<ChunkD, CellD>(box.x1, box.y1, box.x0, box.y1);
-        renderLine<ChunkD, CellD>(box.x0, box.y1, box.x0, box.y0);
+        _Rasterizer8_renderLine<ChunkD, CellD>(this, box.x0, box.y0, box.x1, box.y0);
+        _Rasterizer8_renderLine<ChunkD, CellD>(this, box.x1, box.y0, box.x1, box.y1);
+        _Rasterizer8_renderLine<ChunkD, CellD>(this, box.x1, box.y1, box.x0, box.y1);
+        _Rasterizer8_renderLine<ChunkD, CellD>(this, box.x0, box.y1, box.x0, box.y0);
       }
       else
       {
-        renderLine<ChunkQ, CellQ>(box.x0, box.y0, box.x1, box.y0);
-        renderLine<ChunkQ, CellQ>(box.x1, box.y0, box.x1, box.y1);
-        renderLine<ChunkQ, CellQ>(box.x1, box.y1, box.x0, box.y1);
-        renderLine<ChunkQ, CellQ>(box.x0, box.y1, box.x0, box.y0);
+        _Rasterizer8_renderLine<ChunkQ, CellQ>(this, box.x0, box.y0, box.x1, box.y0);
+        _Rasterizer8_renderLine<ChunkQ, CellQ>(this, box.x1, box.y0, box.x1, box.y1);
+        _Rasterizer8_renderLine<ChunkQ, CellQ>(this, box.x1, box.y1, box.x0, box.y1);
+        _Rasterizer8_renderLine<ChunkQ, CellQ>(this, box.x0, box.y1, box.x0, box.y0);
       }
 
       return true;
@@ -676,216 +678,47 @@ _NotValid:
 // [Fog::Rasterizer8 - Path - Render]
 // ============================================================================
 
-#define NEW_CHUNK(CHUNK_TYPE, _Bail, _dst) \
+#define NEW_CHUNK(CHUNK_TYPE, _Bail, _Dst_) \
   do { \
-    if (FOG_UNLIKELY(_current->getChunkPtr() == _current->getChunkEnd()) && !getNextChunkStorage(CHUNK_TYPE::CHUNK_SIZE)) \
-      goto _Bail; \
-    _dst = (CHUNK_TYPE*)_current->_chunkPtr; \
-    _current->_chunkPtr += CHUNK_TYPE::CHUNK_SIZE; \
-  } while (0)
-
-#define ADD_CHUNK(CHUNK_TYPE, _Bail, _y, _dst) \
-  do { \
-    NEW_CHUNK(CHUNK_TYPE, _Bail, _dst); \
-    _dst->_prev = reinterpret_cast<uint8_t*>(_rows[_y]); \
-    _rows[_y] = reinterpret_cast<uint8_t*>(_dst); \
-  } while (0)
-
-#define GET_CHUNK(CHUNK_TYPE, _Bail, _y, _dst) \
-  do { \
-    _dst = reinterpret_cast<CHUNK_TYPE*>(_rows[_y]); \
-    if (FOG_UNLIKELY(_dst->isFull())) \
+    if (FOG_UNLIKELY(self->_current->getChunkPtr() == self->_current->getChunkEnd()) && \
+                     !self->getNextChunkStorage(CHUNK_TYPE::CHUNK_SIZE)) \
     { \
-      NEW_CHUNK(CHUNK_TYPE, _Bail, _dst); \
-      _dst->_prev = reinterpret_cast<uint8_t*>(_rows[_y]); \
-      _rows[_y] = reinterpret_cast<uint8_t*>(_dst); \
+      goto _Bail; \
+    } \
+    \
+    _Dst_ = (CHUNK_TYPE*)self->_current->_chunkPtr; \
+    self->_current->_chunkPtr += CHUNK_TYPE::CHUNK_SIZE; \
+  } while (0)
+
+#define ADD_CHUNK(CHUNK_TYPE, _Bail, _Y_, _Dst_) \
+  do { \
+    NEW_CHUNK(CHUNK_TYPE, _Bail, _Dst_); \
+    _Dst_->_prev = reinterpret_cast<uint8_t*>(self->_rows[_Y_]); \
+    self->_rows[_Y_] = reinterpret_cast<uint8_t*>(_Dst_); \
+  } while (0)
+
+#define GET_CHUNK(CHUNK_TYPE, _Bail, _Y_, _Dst_) \
+  do { \
+    _Dst_ = reinterpret_cast<CHUNK_TYPE*>(self->_rows[_Y_]); \
+    if (FOG_UNLIKELY(_Dst_->isFull())) \
+    { \
+      NEW_CHUNK(CHUNK_TYPE, _Bail, _Dst_); \
+      _Dst_->_prev = reinterpret_cast<uint8_t*>(self->_rows[_Y_]); \
+      self->_rows[_Y_] = reinterpret_cast<uint8_t*>(_Dst_); \
     } \
   } while (0)
 
-#define ADD_CELL_SINGLE(CHUNK_TYPE, _Bail, _y, _x, _cover, _weight) \
+#define ADD_CELL_SINGLE(CHUNK_TYPE, _Bail, _Y_, _X_, _Cover_, _Weight_) \
   do { \
     CHUNK_TYPE* _chunk; \
-    GET_CHUNK(CHUNK_TYPE, _Bail, _y, _chunk); \
+    GET_CHUNK(CHUNK_TYPE, _Bail, _Y_, _chunk); \
     \
-    _chunk->getCells()[_chunk->getCount()].setData(_x, _cover, _weight); \
+    _chunk->getCells()[_chunk->getCount()].setData(_X_, _Cover_, _Weight_); \
     _chunk->incCount(1); \
   } while (0)
 
 template<typename _CHUNK_TYPE, typename _CELL_TYPE>
-bool Rasterizer8::renderLine(Fixed24x8 x0, Fixed24x8 y0, Fixed24x8 x1, Fixed24x8 y1)
-{
-  enum DXLimitEnum { DXLimit = 16384 << A8_POLY_SUBPIXEL_SHIFT };
-
-  int dx = x1 - x0;
-
-  if (FOG_UNLIKELY((dx >= DXLimit) | (dx <= -DXLimit)))
-  {
-    int cx = (x0 + x1) >> 1;
-    int cy = (y0 + y1) >> 1;
-
-    if (!Rasterizer8::renderLine<_CHUNK_TYPE, _CELL_TYPE>(x0, y0, cx, cy)) return false;
-    if (!Rasterizer8::renderLine<_CHUNK_TYPE, _CELL_TYPE>(cx, cy, x1, y1)) return false;
-
-    return true;
-  }
-
-  int dy = y1 - y0;
-
-  int ex0 = x0 >> A8_POLY_SUBPIXEL_SHIFT;
-  int ex1 = x1 >> A8_POLY_SUBPIXEL_SHIFT;
-  int ey0 = y0 >> A8_POLY_SUBPIXEL_SHIFT;
-  int ey1 = y1 >> A8_POLY_SUBPIXEL_SHIFT;
-  int fy0 = y0 & A8_POLY_SUBPIXEL_MASK;
-  int fy1 = y1 & A8_POLY_SUBPIXEL_MASK;
-
-  int x_from, x_to;
-  int p, rem, mod, lift, delta, first, incr;
-
-  // Initialize bounding box if this is the first call to renderLine().
-  if (FOG_UNLIKELY(_boundingBox.y0 == -1))
-  {
-    _boundingBox.x0 = ex0;
-    _boundingBox.y0 = ey0;
-    _boundingBox.x1 = ex0;
-    _boundingBox.y1 = ey0;
-
-    _CHUNK_TYPE* _chunk;
-    NEW_CHUNK(_CHUNK_TYPE, _Bail, _chunk);
-
-    _chunk->_prev = NULL;
-
-    FOG_ASSERT(ey0 >= 0 && (uint)ey0 < _rowsCapacity);
-    _rows[ey0] = _chunk;
-  }
-
-  if (ex0 < ex1)
-  {
-    if (ex0 < _boundingBox.x0) _boundingBox.x0 = ex0;
-    if (ex1 > _boundingBox.x1) _boundingBox.x1 = ex1;
-  }
-  else
-  {
-    if (ex1 < _boundingBox.x0) _boundingBox.x0 = ex1;
-    if (ex0 > _boundingBox.x1) _boundingBox.x1 = ex0;
-  }
-
-  FOG_ASSERT(ex0 >= _sceneBox.x0 && ey0 >= _sceneBox.y0 && ex0 <= _sceneBox.x1 && ey0 <= _sceneBox.y1);
-  FOG_ASSERT(ex1 >= _sceneBox.x0 && ey1 >= _sceneBox.y0 && ex1 <= _sceneBox.x1 && ey1 <= _sceneBox.y1);
-
-#define PURGE_ROWS(CHUNK_TYPE, start, count) \
-  do { \
-    CHUNK_TYPE** _p = (CHUNK_TYPE**)(&_rows[start]); \
-    uint _i = start, _c = start + count; \
-    \
-    do { \
-      CHUNK_TYPE* _chunk; \
-      NEW_CHUNK(CHUNK_TYPE, _Bail, _chunk); \
-      \
-      _chunk->_prev = NULL; \
-      \
-      FOG_ASSERT(_i >= 0 && _i < _rowsCapacity); \
-      _rows[_i] = _chunk; \
-    } while (++_i < _c); \
-  } while(0)
-
-  if (ey0 < ey1)
-  {
-    if (ey0 < _boundingBox.y0) { PURGE_ROWS(_CHUNK_TYPE, ey0                , _boundingBox.y0 - ey0); _boundingBox.y0 = ey0; }
-    if (ey1 > _boundingBox.y1) { PURGE_ROWS(_CHUNK_TYPE, _boundingBox.y1 + 1, ey1 - _boundingBox.y1); _boundingBox.y1 = ey1; }
-  }
-  else
-  {
-    if (ey1 < _boundingBox.y0) { PURGE_ROWS(_CHUNK_TYPE, ey1                , _boundingBox.y0 - ey1); _boundingBox.y0 = ey1; }
-    if (ey0 > _boundingBox.y1) { PURGE_ROWS(_CHUNK_TYPE, _boundingBox.y1 + 1, ey0 - _boundingBox.y1); _boundingBox.y1 = ey0; }
-  }
-#undef PURGE_ROWS
-
-  // Everything is on a single hline.
-  if (ey0 == ey1)
-  {
-    return renderHLine<_CHUNK_TYPE, _CELL_TYPE>(ey0, x0, fy0, x1, fy1);
-  }
-
-  // Vertical line - we have to calculate start and end cells, and then - the
-  // common values of the area and coverage for all cells of the line. We know
-  // exactly there's only one cell, so, we don't have to call renderHLine().
-  incr = 1;
-  if (dx == 0)
-  {
-    int two_fx = (x0 - (ex0 << A8_POLY_SUBPIXEL_SHIFT)) << 1;
-
-    first = A8_POLY_SUBPIXEL_SCALE;
-    if (dy < 0) { first = 0; incr = -1; }
-
-    delta = first - fy0;
-    ADD_CELL_SINGLE(_CHUNK_TYPE, _Bail, ey0, ex0, delta, two_fx);
-
-    ey0 += incr;
-    delta = first + first - A8_POLY_SUBPIXEL_SCALE;
-
-    while (ey0 != ey1)
-    {
-      ADD_CELL_SINGLE(_CHUNK_TYPE, _Bail, ey0, ex0, delta, two_fx);
-      ey0 += incr;
-    }
-
-    delta = first + fy1 - A8_POLY_SUBPIXEL_SCALE;
-    ADD_CELL_SINGLE(_CHUNK_TYPE, _Bail, ey0, ex0, delta, two_fx);
-    return true;
-  }
-
-  // Ok, we have to render several hlines.
-  p = (A8_POLY_SUBPIXEL_SCALE - fy0) * dx;
-  first = A8_POLY_SUBPIXEL_SCALE;
-
-  if (dy < 0)
-  {
-    p     = fy0 * dx;
-    first = 0;
-    incr  = -1;
-    dy    = -dy;
-  }
-
-  delta = p / dy;
-  mod   = p % dy;
-
-  if (mod < 0) { delta--; mod += dy; }
-
-  x_from = x0 + delta;
-  renderHLine<_CHUNK_TYPE, _CELL_TYPE>(ey0, x0, fy0, x_from, first);
-  ey0 += incr;
-
-  if (ey0 != ey1)
-  {
-    p     = dx * A8_POLY_SUBPIXEL_SCALE;
-    lift  = p / dy;
-    rem   = p % dy;
-
-    if (rem < 0) { lift--; rem += dy; }
-    mod -= dy;
-
-    while (ey0 != ey1)
-    {
-      delta = lift;
-      mod  += rem;
-      if (mod >= 0) { mod -= dy; delta++; }
-
-      x_to = x_from + delta;
-      if (!renderHLine<_CHUNK_TYPE, _CELL_TYPE>(ey0, x_from, A8_POLY_SUBPIXEL_SCALE - first, x_to, first)) goto _Bail;
-      x_from = x_to;
-
-      ey0 += incr;
-    }
-  }
-
-  return renderHLine<_CHUNK_TYPE, _CELL_TYPE>(ey0, x_from, A8_POLY_SUBPIXEL_SCALE - first, x1, fy1);
-
-_Bail:
-  return false;
-}
-
-template<typename _CHUNK_TYPE, typename _CELL_TYPE>
-FOG_INLINE bool Rasterizer8::renderHLine(int ey, Fixed24x8 x0, Fixed24x8 y0, Fixed24x8 x1, Fixed24x8 y1)
+FOG_INLINE bool _Rasterizer8_renderHLine(Rasterizer8* self, int ey, Fixed24x8 x0, Fixed24x8 y0, Fixed24x8 x1, Fixed24x8 y1)
 {
   int ex0;
   int ex1;
@@ -1031,6 +864,197 @@ FOG_INLINE bool Rasterizer8::renderHLine(int ey, Fixed24x8 x0, Fixed24x8 y0, Fix
     chunk->setCount(index);
     return true;
   }
+
+_Bail:
+  return false;
+}
+
+template<typename _CHUNK_TYPE, typename _CELL_TYPE>
+static bool _Rasterizer8_renderLine(Rasterizer8* self, Fixed24x8 x0, Fixed24x8 y0, Fixed24x8 x1, Fixed24x8 y1)
+{
+  enum DXLimitEnum { DXLimit = 16384 << A8_POLY_SUBPIXEL_SHIFT };
+
+  int dx = x1 - x0;
+
+  if (FOG_UNLIKELY((dx >= DXLimit) | (dx <= -DXLimit)))
+  {
+    int cx = (x0 + x1) >> 1;
+    int cy = (y0 + y1) >> 1;
+
+    if (!_Rasterizer8_renderLine<_CHUNK_TYPE, _CELL_TYPE>(self, x0, y0, cx, cy)) return false;
+    if (!_Rasterizer8_renderLine<_CHUNK_TYPE, _CELL_TYPE>(self, cx, cy, x1, y1)) return false;
+
+    return true;
+  }
+
+  int dy = y1 - y0;
+
+  int ex0 = x0 >> A8_POLY_SUBPIXEL_SHIFT;
+  int ex1 = x1 >> A8_POLY_SUBPIXEL_SHIFT;
+  int ey0 = y0 >> A8_POLY_SUBPIXEL_SHIFT;
+  int ey1 = y1 >> A8_POLY_SUBPIXEL_SHIFT;
+  int fy0 = y0 & A8_POLY_SUBPIXEL_MASK;
+  int fy1 = y1 & A8_POLY_SUBPIXEL_MASK;
+
+  int x_from, x_to;
+  int p, rem, mod, lift, delta, first, incr;
+
+  // Initialize bounding box if this is the first call to renderLine().
+  if (FOG_UNLIKELY(self->_boundingBox.y0 == -1))
+  {
+    self->_boundingBox.x0 = ex0;
+    self->_boundingBox.y0 = ey0;
+    self->_boundingBox.x1 = ex0;
+    self->_boundingBox.y1 = ey0;
+
+    _CHUNK_TYPE* _chunk;
+    NEW_CHUNK(_CHUNK_TYPE, _Bail, _chunk);
+
+    _chunk->_prev = NULL;
+
+    FOG_ASSERT(ey0 >= 0 && (uint)ey0 < self->_rowsCapacity);
+    self->_rows[ey0] = _chunk;
+  }
+
+  if (ex0 < ex1)
+  {
+    if (ex0 < self->_boundingBox.x0) self->_boundingBox.x0 = ex0;
+    if (ex1 > self->_boundingBox.x1) self->_boundingBox.x1 = ex1;
+  }
+  else
+  {
+    if (ex1 < self->_boundingBox.x0) self->_boundingBox.x0 = ex1;
+    if (ex0 > self->_boundingBox.x1) self->_boundingBox.x1 = ex0;
+  }
+
+  FOG_ASSERT(ex0 >= _sceneBox.x0 && ey0 >= _sceneBox.y0 && ex0 <= _sceneBox.x1 && ey0 <= _sceneBox.y1);
+  FOG_ASSERT(ex1 >= _sceneBox.x0 && ey1 >= _sceneBox.y0 && ex1 <= _sceneBox.x1 && ey1 <= _sceneBox.y1);
+
+#define PURGE_ROWS(CHUNK_TYPE, start, count) \
+  do { \
+    CHUNK_TYPE** _p = (CHUNK_TYPE**)(&self->_rows[start]); \
+    uint _i = start, _c = start + count; \
+    \
+    do { \
+      CHUNK_TYPE* _chunk; \
+      NEW_CHUNK(CHUNK_TYPE, _Bail, _chunk); \
+      \
+      _chunk->_prev = NULL; \
+      \
+      FOG_ASSERT(_i >= 0 && _i < self->_rowsCapacity); \
+      self->_rows[_i] = _chunk; \
+    } while (++_i < _c); \
+  } while(0)
+
+  if (ey0 < ey1)
+  {
+    if (ey0 < self->_boundingBox.y0)
+    {
+      PURGE_ROWS(_CHUNK_TYPE, ey0, self->_boundingBox.y0 - ey0);
+      self->_boundingBox.y0 = ey0;
+    }
+    if (ey1 > self->_boundingBox.y1)
+    {
+      PURGE_ROWS(_CHUNK_TYPE, self->_boundingBox.y1 + 1, ey1 - self->_boundingBox.y1);
+      self->_boundingBox.y1 = ey1;
+    }
+  }
+  else
+  {
+    if (ey1 < self->_boundingBox.y0)
+    {
+      PURGE_ROWS(_CHUNK_TYPE, ey1, self->_boundingBox.y0 - ey1);
+      self->_boundingBox.y0 = ey1;
+    }
+    if (ey0 > self->_boundingBox.y1)
+    {
+      PURGE_ROWS(_CHUNK_TYPE, self->_boundingBox.y1 + 1, ey0 - self->_boundingBox.y1);
+      self->_boundingBox.y1 = ey0;
+    }
+  }
+#undef PURGE_ROWS
+
+  // Everything is on a single hline.
+  if (ey0 == ey1)
+  {
+    return _Rasterizer8_renderHLine<_CHUNK_TYPE, _CELL_TYPE>(self, ey0, x0, fy0, x1, fy1);
+  }
+
+  // Vertical line - we have to calculate start and end cells, and then - the
+  // common values of the area and coverage for all cells of the line. We know
+  // exactly there's only one cell, so, we don't have to call renderHLine().
+  incr = 1;
+  if (dx == 0)
+  {
+    int two_fx = (x0 - (ex0 << A8_POLY_SUBPIXEL_SHIFT)) << 1;
+
+    first = A8_POLY_SUBPIXEL_SCALE;
+    if (dy < 0) { first = 0; incr = -1; }
+
+    delta = first - fy0;
+    ADD_CELL_SINGLE(_CHUNK_TYPE, _Bail, ey0, ex0, delta, two_fx);
+
+    ey0 += incr;
+    delta = first + first - A8_POLY_SUBPIXEL_SCALE;
+
+    while (ey0 != ey1)
+    {
+      ADD_CELL_SINGLE(_CHUNK_TYPE, _Bail, ey0, ex0, delta, two_fx);
+      ey0 += incr;
+    }
+
+    delta = first + fy1 - A8_POLY_SUBPIXEL_SCALE;
+    ADD_CELL_SINGLE(_CHUNK_TYPE, _Bail, ey0, ex0, delta, two_fx);
+    return true;
+  }
+
+  // Ok, we have to render several hlines.
+  p = (A8_POLY_SUBPIXEL_SCALE - fy0) * dx;
+  first = A8_POLY_SUBPIXEL_SCALE;
+
+  if (dy < 0)
+  {
+    p     = fy0 * dx;
+    first = 0;
+    incr  = -1;
+    dy    = -dy;
+  }
+
+  delta = p / dy;
+  mod   = p % dy;
+
+  if (mod < 0) { delta--; mod += dy; }
+
+  x_from = x0 + delta;
+  if (!_Rasterizer8_renderHLine<_CHUNK_TYPE, _CELL_TYPE>(self, ey0, x0, fy0, x_from, first))
+    goto _Bail;
+  ey0 += incr;
+
+  if (ey0 != ey1)
+  {
+    p     = dx * A8_POLY_SUBPIXEL_SCALE;
+    lift  = p / dy;
+    rem   = p % dy;
+
+    if (rem < 0) { lift--; rem += dy; }
+    mod -= dy;
+
+    while (ey0 != ey1)
+    {
+      delta = lift;
+      mod  += rem;
+      if (mod >= 0) { mod -= dy; delta++; }
+
+      x_to = x_from + delta;
+      if (!_Rasterizer8_renderHLine<_CHUNK_TYPE, _CELL_TYPE>(self, ey0, x_from, A8_POLY_SUBPIXEL_SCALE - first, x_to, first))
+        goto _Bail;
+      x_from = x_to;
+
+      ey0 += incr;
+    }
+  }
+
+  return _Rasterizer8_renderHLine<_CHUNK_TYPE, _CELL_TYPE>(self, ey0, x_from, A8_POLY_SUBPIXEL_SCALE - first, x1, fy1);
 
 _Bail:
   return false;
@@ -1184,19 +1208,17 @@ static FOG_INLINE uint32_t _Rasterizer8_calculateAlpha(const Rasterizer8* raster
 }
 
 template<typename _CHUNK_TYPE, typename _CELL_TYPE>
-static bool _mergeCells(Rasterizer8* rasterizer, void* _chunks, MemoryBuffer& temp, _CELL_TYPE** cellsOut, size_t* numCellsOut)
+static size_t _Rasterizer8_mergeCells(Rasterizer8* rasterizer, void* _chunks, MemoryBuffer& temp, _CELL_TYPE** cellsOut)
 {
   _CHUNK_TYPE* chunk = reinterpret_cast<_CHUNK_TYPE*>(_chunks);
   _CELL_TYPE* cellCur = chunk->getCells();
 
   size_t numCells = chunk->getCount();
-  if (!numCells) return false;
+  if (numCells == 0) return 0;
 
   {
-    // First calculate count of cellCur needed to alloc.
-    _CHUNK_TYPE* chunkCur;
-
-    chunkCur = chunk->getPrev();
+    // First calculate count of cells needed to alloc.
+    _CHUNK_TYPE* chunkCur = chunk->getPrev();
     while (chunkCur)
     {
       numCells += chunkCur->getCount();
@@ -1211,7 +1233,7 @@ static bool _mergeCells(Rasterizer8* rasterizer, void* _chunks, MemoryBuffer& te
       cellCur = chunkCur->getCells();
       size_t i = chunkCur->getCount();
 
-      // Copy cells reversed if they are in reverse order.
+      // Copy cells reversed if they are in reversed order.
       if (i > 1 && cellCur[0].getComparable() > cellCur[1].getComparable())
       {
         cellCur += i - 1;
@@ -1232,8 +1254,7 @@ static bool _mergeCells(Rasterizer8* rasterizer, void* _chunks, MemoryBuffer& te
   _Rasterizer8_qsortCells<_CELL_TYPE>(cellCur, numCells);
 
   *cellsOut = cellCur;
-  *numCellsOut = numCells;
-  return true;
+  return numCells;
 }
 
 // ============================================================================
@@ -1242,10 +1263,11 @@ static bool _mergeCells(Rasterizer8* rasterizer, void* _chunks, MemoryBuffer& te
 
 #define CELL_DECLARE() \
   _CELL_TYPE* cellCur; \
-  size_t numCells; \
+  size_t numCells = _Rasterizer8_mergeCells<_CHUNK_TYPE, _CELL_TYPE>(rasterizer, rasterizer->_rows[y], temp, &cellCur); \
   \
-  if (!_mergeCells<_CHUNK_TYPE, _CELL_TYPE>(rasterizer, rasterizer->_rows[y], temp, &cellCur, &numCells)) \
+  if (numCells == 0) \
     return NULL; \
+  \
   if (scanline.begin(rasterizer->_boundingBox.x0, rasterizer->_boundingBox.x1) != ERR_OK) \
     return NULL; \
   \

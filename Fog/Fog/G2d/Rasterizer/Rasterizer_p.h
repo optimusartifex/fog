@@ -773,18 +773,6 @@ struct FOG_NO_EXPORT Rasterizer8
   bool getNextChunkStorage(size_t chunkSize);
 
   // --------------------------------------------------------------------------
-  // [Render]
-  // --------------------------------------------------------------------------
-
-  // TODO: Remove from here
-
-  template<typename _CHUNK_TYPE, typename _CELL_TYPE>
-  bool renderLine(Fixed24x8 x1, Fixed24x8 y1, Fixed24x8 x2, Fixed24x8 y2);
-
-  template<typename _CHUNK_TYPE, typename _CELL_TYPE>
-  FOG_INLINE bool renderHLine(int ey, Fixed24x8 x1, Fixed24x8 y1, Fixed24x8 x2, Fixed24x8 y2);
-
-  // --------------------------------------------------------------------------
   // [Finalize]
   // --------------------------------------------------------------------------
 

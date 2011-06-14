@@ -4,8 +4,7 @@
 // MIT, See COPYING file in package
 
 // [Dependencies]
-#include <Fog/Core/Config/Config.h>
-#include <Fog/Core/Memory/Memory.h>
+#include <Fog/Core/Global/Types.h>
 
 // [Guard]
 #if !defined(FOG_IDE) && !defined(_FOG_CORE_MEMORY_BSWAP_H)

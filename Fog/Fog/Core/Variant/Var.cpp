@@ -12,7 +12,7 @@
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/Init_Core_p.h>
-#include <Fog/Core/Memory/Memory.h>
+#include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringUtil.h>
 #include <Fog/Core/Variant/Var.h>
@@ -36,7 +36,7 @@ ValueData::~ValueData()
 {
 }
 
-void* ValueData::allogetData()
+void* ValueData::allocData()
 {
   return Memory::alloc(sizeof(ValueData));
 }
@@ -376,35 +376,35 @@ Value Value::null()
 Value Value::fromBool(bool val)
 {
   return Value(
-    fog_new_p(ValueData::allogetData())
+    fog_new_p(ValueData::allocData())
       IntegerValueData(static_cast<int64_t>(val)));
 }
 
 Value Value::fromInt32(int32_t val)
 {
   return Value(
-    fog_new_p(ValueData::allogetData())
+    fog_new_p(ValueData::allocData())
       IntegerValueData(static_cast<int64_t>(val)));
 }
 
 Value Value::fromInt64(int64_t val)
 {
   return Value(
-    fog_new_p(ValueData::allogetData())
+    fog_new_p(ValueData::allocData())
       IntegerValueData(val));
 }
 
 Value Value::fromDouble(double val)
 {
   return Value(
-    fog_new_p(ValueData::allogetData())
+    fog_new_p(ValueData::allocData())
       DoubleValueData(val));
 }
 
 Value Value::fromString(const String& val)
 {
   return Value(
-    fog_new_p(ValueData::allogetData())
+    fog_new_p(ValueData::allocData())
       StringValueData(val));
 }
 
@@ -412,7 +412,7 @@ err_t Value::detach()
 {
   if (isDetached()) return ERR_OK;
 
-  ValueData* d = (ValueData*)ValueData::allogetData();
+  ValueData* d = (ValueData*)ValueData::allocData();
   if (FOG_IS_NULL(d)) return ERR_RT_OUT_OF_MEMORY;
 
   _d->clone(d);
@@ -448,7 +448,7 @@ err_t Value::setInt64(int64_t val)
   }
   else
   {
-    void* p = ValueData::allogetData();
+    void* p = ValueData::allocData();
     if (FOG_IS_NULL(p)) return ERR_RT_OUT_OF_MEMORY;
 
     atomicPtrXchg(&_d,
@@ -473,7 +473,7 @@ err_t Value::setDouble(double val)
   }
   else
   {
-    void* p = ValueData::allogetData();
+    void* p = ValueData::allocData();
     if (FOG_IS_NULL(p)) return ERR_RT_OUT_OF_MEMORY;
 
     atomicPtrXchg(&_d,
@@ -498,7 +498,7 @@ err_t Value::setString(const String& val)
   }
   else
   {
-    void* p = ValueData::allogetData();
+    void* p = ValueData::allocData();
     if (FOG_IS_NULL(p)) return ERR_RT_OUT_OF_MEMORY;
 
     atomicPtrXchg(&_d,

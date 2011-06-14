@@ -9,7 +9,6 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Math/Fixed.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Path.h>

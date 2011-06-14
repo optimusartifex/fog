@@ -14,8 +14,7 @@
 #include <Fog/Core/Global/Debug.h>
 #include <Fog/Core/Global/Static.h>
 #include <Fog/Core/IO/FileSystem.h>
-#include <Fog/Core/Memory/Memory.h>
-#include <Fog/Core/Memory/MemoryAlloc.h>
+#include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/OS/OS.h>
 #include <Fog/Core/OS/UserInfo.h>
 #include <Fog/Core/Threading/Lock.h>

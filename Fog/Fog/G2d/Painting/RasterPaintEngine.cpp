@@ -15,10 +15,10 @@
 #include <Fog/Core/Cpu/Cpu.h>
 #include <Fog/Core/Face/Face_C.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/BlockMemoryAllocator_p.h>
-#include <Fog/Core/Memory/Memory.h>
-#include <Fog/Core/Memory/MemoryOps.h>
-#include <Fog/Core/Memory/ZoneMemoryAllocator_p.h>
+#include <Fog/Core/Memory/Alloc.h>
+#include <Fog/Core/Memory/BlockAllocator_p.h>
+#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/ZoneAllocator_p.h>
 #include <Fog/Core/OS/OS.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Threading/Lock.h>

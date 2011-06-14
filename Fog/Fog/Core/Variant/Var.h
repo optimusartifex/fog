@@ -11,7 +11,6 @@
 #include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Memory/Memory.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Tools/String.h>
 
@@ -32,7 +31,7 @@ struct FOG_API ValueData
   ValueData(uint32_t type);
   virtual ~ValueData();
 
-  static void* allogetData();
+  static void* allocData();
   static void freeData(void* data);
 
   // [Methods]

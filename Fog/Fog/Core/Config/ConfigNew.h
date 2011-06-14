@@ -27,20 +27,26 @@
 
 #else
 
-// Defined in Fog/Core/Memory/Memory.h
-static FOG_INLINE void* _fog_memory_alloc(size_t size);
-static FOG_INLINE void _fog_memory_free(void* addr);
+// Implemented by Fog/Core/Memory/Alloc.h
+namespace Fog {
+namespace Memory {
+
+static FOG_INLINE void* alloc(size_t size);
+static FOG_INLINE void free(void* p);
+
+} // Memory namespace
+} // Fog namespace
 
 struct __FogMemMgr {};
 // Implemented in Fog/Core/Memory.cpp
 FOG_CVAR_EXTERN __FogMemMgr fog_memmgr;
 
 // Standard new/delete implementation (using Fog/Memory backend and no exceptions).
-FOG_INLINE void* operator new(size_t size, const __FogMemMgr&) FOG_NOTHROW { return _fog_memory_alloc(size); }
-FOG_INLINE void* operator new[](size_t size, const __FogMemMgr&) FOG_NOTHROW { return _fog_memory_alloc(size); }
+FOG_INLINE void* operator new(size_t size, const __FogMemMgr&) FOG_NOTHROW { return Fog::Memory::alloc(size); }
+FOG_INLINE void* operator new[](size_t size, const __FogMemMgr&) FOG_NOTHROW { return Fog::Memory::alloc(size); }
 
-FOG_INLINE void operator delete(void* p, const __FogMemMgr&) FOG_NOTHROW { return _fog_memory_free(p); }
-FOG_INLINE void operator delete[](void* p, const __FogMemMgr&) FOG_NOTHROW { return _fog_memory_free(p); }
+FOG_INLINE void operator delete(void* p, const __FogMemMgr&) FOG_NOTHROW { return Fog::Memory::free(p); }
+FOG_INLINE void operator delete[](void* p, const __FogMemMgr&) FOG_NOTHROW { return Fog::Memory::free(p); }
 
 // Placement new/delete implementation (using fog_memmgr to distinguist between
 // STD/FOG implementations).
@@ -51,7 +57,11 @@ FOG_INLINE void operator delete(void*, const __FogMemMgr&, void*) FOG_NOTHROW {}
 FOG_INLINE void operator delete[](void*, const __FogMemMgr&, void*) FOG_NOTHROW {}
 
 template<typename T>
-void __fog_delete(T* inst) { inst->~T(); _fog_memory_free(inst); }
+void __fog_delete(T* inst)
+{
+  inst->~T();
+  Fog::Memory::free(inst);
+}
 
 // Fog macros to make memory allocation more friendly and compatible to std
 // version.

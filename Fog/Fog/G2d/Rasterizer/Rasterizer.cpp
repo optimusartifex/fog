@@ -13,7 +13,7 @@
 #include <Fog/Core/Global/Static.h>
 #include <Fog/Core/Global/Internal_Core_p.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Memory.h>
+#include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Memory/MemoryBuffer.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/G2d/Global/Constants.h>
@@ -1300,7 +1300,7 @@ static size_t _Rasterizer8_mergeCells(Rasterizer8* rasterizer, void* _chunks, Me
   FOG_MACRO_END
 
 template<typename _CHUNK_TYPE, typename _CELL_TYPE, int _RULE, int _USE_ALPHA>
-static Span8* _Rasterizer8_sweepSimpleImpl(
+static Span8* _Rasterizer8_Path_sweepSimpleImpl(
   Rasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y)
 {
   y -= rasterizer->_sceneBox.y0;
@@ -1412,7 +1412,7 @@ static Span8* _Rasterizer8_sweepSimpleImpl(
 // ============================================================================
 
 template<typename _CHUNK_TYPE, typename _CELL_TYPE, int _RULE, int _USE_ALPHA>
-static Span8* _Rasterizer8_sweepRegionImpl(
+static Span8* _Rasterizer8_Path_sweepRegionImpl(
   Rasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y,
   const BoxI* clipBoxes, size_t count)
 {
@@ -1597,7 +1597,7 @@ _End:
 // ============================================================================
 
 template<typename _CHUNK_TYPE, typename _CELL_TYPE, int _RULE, int _USE_ALPHA>
-static Span8* _Rasterizer8_sweepSpansImpl(
+static Span8* _Rasterizer8_Path_sweepSpansImpl(
   Rasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y,
   const Span8* clipSpans)
 {
@@ -2112,15 +2112,15 @@ static void _Rasterizer8_Path_initSweepFunctions(Rasterizer8* rasterizer)
   FOG_MACRO_BEGIN \
     if (_Rasterizer8_useCellD(rasterizer)) \
     { \
-      rasterizer->_sweepSimpleFn = _Rasterizer8_sweepSimpleImpl<Rasterizer8::ChunkD, Rasterizer8::CellD, _FILL_MODE, _USE_ALPHA>; \
-      rasterizer->_sweepRegionFn = _Rasterizer8_sweepRegionImpl<Rasterizer8::ChunkD, Rasterizer8::CellD, _FILL_MODE, _USE_ALPHA>; \
-      rasterizer->_sweepSpansFn  = _Rasterizer8_sweepSpansImpl <Rasterizer8::ChunkD, Rasterizer8::CellD, _FILL_MODE, _USE_ALPHA>; \
+      rasterizer->_sweepSimpleFn = _Rasterizer8_Path_sweepSimpleImpl<Rasterizer8::ChunkD, Rasterizer8::CellD, _FILL_MODE, _USE_ALPHA>; \
+      rasterizer->_sweepRegionFn = _Rasterizer8_Path_sweepRegionImpl<Rasterizer8::ChunkD, Rasterizer8::CellD, _FILL_MODE, _USE_ALPHA>; \
+      rasterizer->_sweepSpansFn  = _Rasterizer8_Path_sweepSpansImpl <Rasterizer8::ChunkD, Rasterizer8::CellD, _FILL_MODE, _USE_ALPHA>; \
     } \
     else \
     { \
-      rasterizer->_sweepSimpleFn = _Rasterizer8_sweepSimpleImpl<Rasterizer8::ChunkQ, Rasterizer8::CellQ, _FILL_MODE, _USE_ALPHA>; \
-      rasterizer->_sweepRegionFn = _Rasterizer8_sweepRegionImpl<Rasterizer8::ChunkQ, Rasterizer8::CellQ, _FILL_MODE, _USE_ALPHA>; \
-      rasterizer->_sweepSpansFn  = _Rasterizer8_sweepSpansImpl <Rasterizer8::ChunkQ, Rasterizer8::CellQ, _FILL_MODE, _USE_ALPHA>; \
+      rasterizer->_sweepSimpleFn = _Rasterizer8_Path_sweepSimpleImpl<Rasterizer8::ChunkQ, Rasterizer8::CellQ, _FILL_MODE, _USE_ALPHA>; \
+      rasterizer->_sweepRegionFn = _Rasterizer8_Path_sweepRegionImpl<Rasterizer8::ChunkQ, Rasterizer8::CellQ, _FILL_MODE, _USE_ALPHA>; \
+      rasterizer->_sweepSpansFn  = _Rasterizer8_Path_sweepSpansImpl <Rasterizer8::ChunkQ, Rasterizer8::CellQ, _FILL_MODE, _USE_ALPHA>; \
     } \
   FOG_MACRO_END
 

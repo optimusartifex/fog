@@ -11,7 +11,7 @@
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Global/TypeInfo.h>
 #include <Fog/Core/Global/Uninitialized.h>
-#include <Fog/Core/Memory/MemoryOps.h>
+#include <Fog/Core/Memory/Ops.h>
 #include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Global/Api.h>
 

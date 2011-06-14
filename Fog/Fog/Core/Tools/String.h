@@ -15,7 +15,7 @@
 #include <Fog/Core/Global/Static.h>
 #include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Memory/Memory.h>
+#include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Tools/Char.h>
 #include <Fog/Core/Tools/Format.h>

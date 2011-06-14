@@ -314,7 +314,7 @@ struct FOG_NO_EXPORT RasterContext
   // --------------------------------------------------------------------------
 
   //! @brief The clip-mask span allocator owned by the raster-context.
-  ZoneMemoryAllocator maskMemoryAllocator;
+  ZoneAllocator maskMemoryAllocator;
 
   //! @brief The clip mask.
   RasterMask* mask;

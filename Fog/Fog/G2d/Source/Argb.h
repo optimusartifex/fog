@@ -11,7 +11,7 @@
 #include <Fog/Core/Face/Face_C.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Memory.h>
+#include <Fog/Core/Memory/Ops.h>
 #include <Fog/Core/Memory/BSwap.h>
 #include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Global/TypeInfo.h>

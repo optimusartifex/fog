@@ -4,13 +4,13 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_MEMORY_ZONEMEMORYALLOCATOR_P_H
-#define _FOG_CORE_MEMORY_ZONEMEMORYALLOCATOR_P_H
+#ifndef _FOG_CORE_MEMORY_ZONEALLOCATOR_P_H
+#define _FOG_CORE_MEMORY_ZONEALLOCATOR_P_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Memory/Memory.h>
+#include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Threading/Atomic.h>
 
 namespace Fog {
@@ -19,7 +19,7 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::ZoneMemoryAllocator]
+// [Fog::ZoneAllocator]
 // ============================================================================
 
 //! @internal
@@ -29,8 +29,8 @@ namespace Fog {
 //! temporary objects).
 //!
 //! This is hackery for performance. Concept is that objects created by
-//! @c ZoneMemoryAllocator are freed all at once. This means that lifetime of
-//! these objects are the same as the lifetime of the @c ZoneMemoryAllocator
+//! @c ZoneAllocator are freed all at once. This means that lifetime of
+//! these objects are the same as the lifetime of the @c ZoneAllocator
 //! itself. Optionally it's possible to call @c record() and @c revert() methods
 //! that can be used to record current allocation position and to revert
 //! it back. This is used by clip-span engine to reuse memory used by the
@@ -39,7 +39,7 @@ namespace Fog {
 //! This class was stripped from AsmJit, and little modified for clip-span
 //! allocator:
 //!   http://code.google.com/p/asmjit/
-struct FOG_NO_EXPORT ZoneMemoryAllocator
+struct FOG_NO_EXPORT ZoneAllocator
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -47,10 +47,10 @@ struct FOG_NO_EXPORT ZoneMemoryAllocator
 
   //! @brief Create a new instance of zone allocator.
   //! @param chunkSize Default size for one zone chunk.
-  ZoneMemoryAllocator(size_t chunkSize);
+  ZoneAllocator(size_t chunkSize);
 
   //! @brief Destroy the zone allocator instance.
-  ~ZoneMemoryAllocator();
+  ~ZoneAllocator();
 
   // --------------------------------------------------------------------------
   // [Chunk]
@@ -97,7 +97,7 @@ struct FOG_NO_EXPORT ZoneMemoryAllocator
 
   //! @brief Allocate @c size bytes of memory and return pointer to it.
   //!
-  //! Pointer allocated by this way will be valid until @c ZoneMemoryAllocator object
+  //! Pointer allocated by this way will be valid until @c ZoneAllocator object
   //! is destroyed. To create class by this way use placement @c new and
   //! @c delete operators:
   //!
@@ -114,7 +114,7 @@ struct FOG_NO_EXPORT ZoneMemoryAllocator
   //! void f()
   //! {
   //!   // Create zone object with chunk size of 65536 bytes.
-  //!   ZoneMemoryAllocator zone(8096);
+  //!   ZoneAllocator zone(8096);
   //!
   //!   // Create your objects using zone object allocating, for example:
   //!   Object* obj = new(zone.alloc(sizeof(YourClass))) Object();
@@ -124,7 +124,7 @@ struct FOG_NO_EXPORT ZoneMemoryAllocator
   //!   // Destroy your objects:
   //!   obj->~Object();
   //!
-  //!   // ZoneMemoryAllocator destructor will free all memory allocated through it,
+  //!   // ZoneAllocator destructor will free all memory allocated through it,
   //!   // alternative is to call @c zone.free().
   //! }
   //! @endcode
@@ -196,7 +196,7 @@ protected:
   size_t _chunkSize;
 
 private:
-  _FOG_CLASS_NO_COPY(ZoneMemoryAllocator)
+  _FOG_CLASS_NO_COPY(ZoneAllocator)
 };
 
 //! @}
@@ -204,4 +204,4 @@ private:
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_CORE_MEMORY_ZONEMEMORYALLOCATOR_P_H
+#endif // _FOG_CORE_MEMORY_ZONEALLOCATOR_P_H

@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Memory/Memory.h>
+#include <Fog/Core/Memory/Alloc.h>
 #include <Fog/G2d/Imaging/ImageConverter.h>
 #include <Fog/G2d/Render/RenderApi_p.h>
 #include <Fog/G2d/Render/RenderConstants_p.h>

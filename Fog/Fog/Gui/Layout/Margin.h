@@ -11,8 +11,7 @@
 #include <Fog/Core/Config/Config.h>
 #include <Fog/Core/Global/TypeInfo.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Memory.h>
-#include <Fog/Core/Memory/MemoryOps.h>
+#include <Fog/Core/Memory/Ops.h>
 #include <Fog/Gui/Global/Constants.h>
 
 namespace Fog {

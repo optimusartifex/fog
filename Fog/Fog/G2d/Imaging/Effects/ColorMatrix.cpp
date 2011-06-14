@@ -16,6 +16,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/Math/Convert.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Imaging/Effects/ColorMatrix.h>
 #include <Fog/G2d/Source/Color.h>

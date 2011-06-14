@@ -451,6 +451,7 @@ Set(FOG_CORE_GLOBAL_HEADERS
   Fog/Core/Global/SequenceInfo.h
   Fog/Core/Global/Swap.h
   Fog/Core/Global/TypeInfo.h
+  Fog/Core/Global/Types.h
   Fog/Core/Global/Uninitialized.h
 )
 
@@ -482,7 +483,6 @@ Set(FOG_CORE_LIBRARY_HEADERS
 
 # [Fog/Core/Math]
 Set(FOG_CORE_MATH_SOURCES
-  Fog/Core/Math/Fixed.cpp
   Fog/Core/Math/Function.cpp
   Fog/Core/Math/Fuzzy.cpp
   Fog/Core/Math/Integrate.cpp
@@ -494,7 +494,7 @@ Set(FOG_CORE_MATH_SOURCES
 Set(FOG_CORE_MATH_HEADERS
   Fog/Core/Math/Cleanup.h
   Fog/Core/Math/Constants.h
-  Fog/Core/Math/Fixed.h
+  Fog/Core/Math/Convert.h
   Fog/Core/Math/FloatBits.h
   Fog/Core/Math/FloatControl.h
   Fog/Core/Math/Function.h
@@ -508,30 +508,31 @@ Set(FOG_CORE_MATH_HEADERS
 
 # [Fog/Core/Memory]
 Set(FOG_CORE_MEMORY_SOURCES
-  Fog/Core/Memory/BlockMemoryAllocator.cpp
-  Fog/Core/Memory/Memory.cpp
-  Fog/Core/Memory/MemoryAlloc.cpp
-  Fog/Core/Memory/MemoryAllocDebug.cpp
+  Fog/Core/Memory/Alloc.cpp
+  Fog/Core/Memory/BlockAllocator.cpp
+  Fog/Core/Memory/Cleanup.cpp
   Fog/Core/Memory/MemoryBuffer.cpp
+  Fog/Core/Memory/MemoryDebug.cpp
   Fog/Core/Memory/MemoryManager.cpp
-  Fog/Core/Memory/MemoryOps.cpp
-  Fog/Core/Memory/ZoneMemoryAllocator.cpp
+  Fog/Core/Memory/Ops.cpp
+  Fog/Core/Memory/ZoneAllocator.cpp
 )
 
 Set(FOG_CORE_MEMORY_HEADERS
-  Fog/Core/Memory/BlockMemoryAllocator_p.h
+  Fog/Core/Memory/Alloc.h
+  Fog/Core/Memory/BlockAllocator_p.h
   Fog/Core/Memory/BSwap.h
   Fog/Core/Memory/BSwap_gcc_pcc.h
   Fog/Core/Memory/BSwap_gcc_x86x64.h
   Fog/Core/Memory/BSwap_generic.h
   Fog/Core/Memory/BSwap_msc_intrin.h
   Fog/Core/Memory/BSwap_msc_x86.h
-  Fog/Core/Memory/Memory.h
-  Fog/Core/Memory/MemoryAlloc.h
+  Fog/Core/Memory/Cleanup.h
   Fog/Core/Memory/MemoryBuffer.h
+  Fog/Core/Memory/MemoryDebug.h
   Fog/Core/Memory/MemoryManager.h
-  Fog/Core/Memory/MemoryOps.h
-  Fog/Core/Memory/ZoneMemoryAllocator_p.h
+  Fog/Core/Memory/Ops.h
+  Fog/Core/Memory/ZoneAllocator_p.h
 )
 
 # [Fog/Core/OS]

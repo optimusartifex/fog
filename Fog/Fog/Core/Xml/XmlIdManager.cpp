@@ -11,6 +11,7 @@
 // [Dependencies]
 #include <Fog/Core/Collection/Hash.h>
 #include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Memory/Ops.h>
 #include <Fog/Core/Tools/StringUtil.h>
 #include <Fog/Core/Xml/XmlElement.h>
 #include <Fog/Core/Xml/XmlIdManager.h>

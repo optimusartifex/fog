@@ -12,7 +12,7 @@
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Memory/BSwap.h>
-#include <Fog/Core/Memory/Memory.h>
+#include <Fog/Core/Memory/Ops.h>
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Strings.h>

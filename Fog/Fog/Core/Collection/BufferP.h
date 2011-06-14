@@ -11,7 +11,7 @@
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Memory/Memory.h>
+#include <Fog/Core/Memory/Alloc.h>
 
 namespace Fog {
 

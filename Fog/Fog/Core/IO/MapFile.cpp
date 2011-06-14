@@ -12,7 +12,7 @@
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/IO/FileSystem.h>
 #include <Fog/Core/IO/MapFile.h>
-#include <Fog/Core/Memory/Memory.h>
+#include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Tools/ByteArray.h>
 #include <Fog/Core/Tools/ByteArrayTmp_p.h>
 #include <Fog/Core/Tools/String.h>

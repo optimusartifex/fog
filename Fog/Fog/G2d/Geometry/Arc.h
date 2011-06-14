@@ -13,7 +13,6 @@
 #include <Fog/Core/Global/Uninitialized.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Memory.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Ellipse.h>
 #include <Fog/G2d/Geometry/Point.h>

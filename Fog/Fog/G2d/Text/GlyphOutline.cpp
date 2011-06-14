@@ -10,7 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Static.h>
-#include <Fog/Core/Memory/Memory.h>
+#include <Fog/Core/Memory/Alloc.h>
 #include <Fog/G2d/Text/GlyphOutline.h>
 
 namespace Fog {

@@ -53,8 +53,10 @@ FOG_NO_EXPORT void _core_math_init_solve(void);
 FOG_NO_EXPORT void _core_math_init_vec(void);
 
 // [Fog/Core/Memory]
-FOG_NO_EXPORT void _core_memory_init(void);
-FOG_NO_EXPORT void _core_memory_fini(void);
+FOG_NO_EXPORT void _core_memory_init_alloc(void);
+FOG_NO_EXPORT void _core_memory_init_cleanup(void);
+FOG_NO_EXPORT void _core_memory_init_ops(void);
+FOG_NO_EXPORT void _core_memory_init_manager(void);
 
 // [Fog/Core/OS]
 FOG_NO_EXPORT void _core_os_init(void);

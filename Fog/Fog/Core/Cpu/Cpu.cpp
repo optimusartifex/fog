@@ -43,13 +43,13 @@
 
 namespace Fog {
 
-// ============================================================================
-// [Fog::Cpu]
-// ============================================================================
-
 Cpu _core_cpu;
 
-static uint32_t detectNumberOfProcessors(void)
+// ============================================================================
+// [Fog::Cpu - Number Of Processors]
+// ============================================================================
+
+static uint32_t _Cpu_detectNumberOfProcessors(void)
 {
 #if defined(FOG_OS_WINDOWS)
   SYSTEM_INFO info;
@@ -70,6 +70,10 @@ static uint32_t detectNumberOfProcessors(void)
   return 1;
 #endif
 }
+
+// ============================================================================
+// [Fog::Cpu - CPUID]
+// ============================================================================
 
 #if defined(FOG_ARCH_X86) || defined(FOG_ARCH_X86_64)
 void cpuid(uint32_t in, CpuId* out)
@@ -116,7 +120,48 @@ void cpuid(uint32_t in, CpuId* out)
 }
 #endif // FOG_ARCH_X86) || FOG_ARCH_X86_64
 
-static void detectCpu(Cpu* i)
+// ============================================================================
+// [Fog::Cpu - Vendors]
+// ============================================================================
+
+struct CpuVendorInfo
+{
+  uint32_t id;
+  char text[12];
+};
+
+static const CpuVendorInfo cpuVendorInfo[] = 
+{
+  { CPU_VENDOR_INTEL    , { 'G', 'e', 'n', 'u', 'i', 'n', 'e', 'I', 'n', 't', 'e', 'l' } },
+
+  { CPU_VENDOR_AMD      , { 'A', 'u', 't', 'h', 'e', 'n', 't', 'i', 'c', 'A', 'M', 'D' } },
+  { CPU_VENDOR_AMD      , { 'A', 'M', 'D', 'i', 's', 'b', 'e', 't', 't', 'e', 'r', '!' } },
+
+  { CPU_VENDOR_NSM      , { 'G', 'e', 'o', 'd', 'e', ' ', 'b', 'y', ' ', 'N', 'S', 'C' } },
+  { CPU_VENDOR_NSM      , { 'C', 'y', 'r', 'i', 'x', 'I', 'n', 's', 't', 'e', 'a', 'd' } },
+
+  { CPU_VENDOR_TRANSMETA, { 'G', 'e', 'n', 'u', 'i', 'n', 'e', 'T', 'M', 'x', '8', '6' } },
+  { CPU_VENDOR_TRANSMETA, { 'T', 'r', 'a', 'n', 's', 'm', 'e', 't', 'a', 'C', 'P', 'U' } },
+
+  { CPU_VENDOR_VIA      , { 'V', 'I', 'A',  0 , 'V', 'I', 'A',  0 , 'V', 'I', 'A',  0  } },
+  { CPU_VENDOR_VIA      , { 'C', 'e', 'n', 't', 'a', 'u', 'r', 'H', 'a', 'u', 'l', 's' } }
+};
+
+static FOG_INLINE bool cpuVencorEq(const CpuVendorInfo& info, const char* vendorString)
+{
+  const uint32_t* a = reinterpret_cast<const uint32_t*>(info.text);
+  const uint32_t* b = reinterpret_cast<const uint32_t*>(vendorString);
+
+  return (a[0] == b[0]) &
+         (a[1] == b[1]) &
+         (a[2] == b[2]) ;
+}
+
+// ============================================================================
+// [Fog::Cpu - Detect]
+// ============================================================================
+
+static void _Cpu_detectCpu(Cpu* i)
 {
   uint32_t a;
 
@@ -124,7 +169,7 @@ static void detectCpu(Cpu* i)
   memset(i, 0, sizeof(Cpu));
   memcpy(i->vendor, "Unknown", 8);
 
-  i->numberOfProcessors = detectNumberOfProcessors();
+  i->numberOfProcessors = _Cpu_detectNumberOfProcessors();
 
 #if defined(FOG_ARCH_X86) || defined(FOG_ARCH_X86_64)
   CpuId out;
@@ -135,6 +180,15 @@ static void detectCpu(Cpu* i)
   memcpy(i->vendor, &out.ebx, 4);
   memcpy(i->vendor + 4, &out.edx, 4);
   memcpy(i->vendor + 8, &out.ecx, 4);
+
+  for (a = 0; a < 3; a++)
+  {
+    if (cpuVencorEq(cpuVendorInfo[a], i->vendor))
+    {
+      i->vendorId = cpuVendorInfo[a].id;
+      break;
+    }
+  }
 
   // get feature flags in ecx/edx, and family/model in eax
   cpuid(1, &out);
@@ -152,12 +206,15 @@ static void detectCpu(Cpu* i)
   }
 
   if (out.ecx & 0x00000001U) i->features |= CPU_FEATURE_SSE3;
+  if (out.ecx & 0x00000002U) i->features |= CPU_FEATURE_PCLMULDQ;
   if (out.ecx & 0x00000008U) i->features |= CPU_FEATURE_MONITOR_MWAIT;
   if (out.ecx & 0x00000200U) i->features |= CPU_FEATURE_SSSE3;
   if (out.ecx & 0x00002000U) i->features |= CPU_FEATURE_CMPXCHG16B;
   if (out.ecx & 0x00080000U) i->features |= CPU_FEATURE_SSE4_1;
   if (out.ecx & 0x00100000U) i->features |= CPU_FEATURE_SSE4_2;
+  if (out.ecx & 0x00400000U) i->features |= CPU_FEATURE_MOVBE;
   if (out.ecx & 0x00800000U) i->features |= CPU_FEATURE_POPCNT;
+  if (out.ecx & 0x10000000U) i->features |= CPU_FEATURE_AVX;
 
   if (out.edx & 0x00000010U) i->features |= CPU_FEATURE_RDTSC;
   if (out.edx & 0x00000100U) i->features |= CPU_FEATURE_CMPXCHG8B;
@@ -168,8 +225,7 @@ static void detectCpu(Cpu* i)
   if (out.edx & 0x04000000U) i->features |= CPU_FEATURE_SSE | CPU_FEATURE_SSE2;
   if (out.edx & 0x10000000U) i->features |= CPU_FEATURE_MULTITHREADING;
 
-  if (strcmp(i->vendor, "AuthenticAMD") == 0 &&
-      (out.edx & 0x10000000U))
+  if (i->vendorId == CPU_VENDOR_AMD && (out.edx & 0x10000000U))
   {
     // AMD sets Multithreading to ON if it has more cores.
     if (i->numberOfProcessors == 1) i->numberOfProcessors = 2;
@@ -183,8 +239,7 @@ static void detectCpu(Cpu* i)
   // pre-release versions, but not in versions released to customers,
   // so we test only for Rev E, which is family 15, model 32..63 inclusive.
 
-  if (strcmp(i->vendor, "AuthenticAMD") == 0 &&
-      i->family == 15 && i->model >= 32 && i->model <= 63)
+  if (i->vendorId == CPU_VENDOR_AMD && i->family == 15 && i->model >= 32 && i->model <= 63)
   {
     i->bugs |= CPU_BUG_AMD_LOCK_MB;
   }
@@ -208,7 +263,6 @@ static void detectCpu(Cpu* i)
         if (out.ecx & 0x00000040U) i->features |= CPU_FEATURE_SSE4_A;
         if (out.ecx & 0x00000080U) i->features |= CPU_FEATURE_MSSE;
         if (out.ecx & 0x00000100U) i->features |= CPU_FEATURE_PREFETCH;
-        if (out.ecx & 0x00000800U) i->features |= CPU_FEATURE_SSE5;
 
         if (out.edx & 0x00100000U) i->features |= CPU_FEATURE_EXECUTE_DISABLE_BIT;
         if (out.edx & 0x00200000U) i->features |= CPU_FEATURE_FFXSR;
@@ -263,7 +317,7 @@ static void detectCpu(Cpu* i)
 
 FOG_NO_EXPORT void _core_cpu_init(void)
 {
-  detectCpu(&_core_cpu);
+  _Cpu_detectCpu(&_core_cpu);
 }
 
 } // Fog namespace

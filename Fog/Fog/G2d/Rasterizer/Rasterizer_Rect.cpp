@@ -58,7 +58,7 @@ static Span8* _Rasterizer8_Rect_sweepSimple(
   return scanline.getSpans();
 }
 
-static Span8* _Rasterizer8_ShapeRect_sweepRegion(
+static Span8* _Rasterizer8_Rect_sweepRegion(
   Rasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y,
   const BoxI* clipBoxes, size_t count)
 {
@@ -132,7 +132,7 @@ static Span8* _Rasterizer8_ShapeRect_sweepRegion(
   return scanline.getSpans();
 }
 
-static Span8* _Rasterizer8_ShapeRect_sweepSpans(
+static Span8* _Rasterizer8_Rect_sweepSpans(
   Rasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y,
   const Span8* clipSpans)
 {
@@ -148,8 +148,8 @@ static Span8* _Rasterizer8_ShapeRect_sweepSpans(
 FOG_NO_EXPORT void _Rasterizer8_Rect_initSweepFunctions(Rasterizer8* rasterizer)
 {
   rasterizer->_sweepSimpleFn = _Rasterizer8_Rect_sweepSimple;
-  rasterizer->_sweepRegionFn = _Rasterizer8_ShapeRect_sweepRegion;
-  rasterizer->_sweepSpansFn  = _Rasterizer8_ShapeRect_sweepSpans;
+  rasterizer->_sweepRegionFn = _Rasterizer8_Rect_sweepRegion;
+  rasterizer->_sweepSpansFn  = _Rasterizer8_Rect_sweepSpans;
 }
 
 } // Fog namespace

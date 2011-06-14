@@ -22,10 +22,12 @@ namespace Fog {
 
 FOG_NO_EXPORT void _core_init(void)
 {
-  // fog_std_init();
-
   _core_cpu_init();
-  _core_memory_init();
+  _core_memory_init_ops();
+  _core_memory_init_alloc();
+  _core_memory_init_cleanup();
+  _core_memory_init_manager();
+
   _core_lock_init(),
   _core_error_init();
   _core_math_init();             // Depends to Cpu.
@@ -68,9 +70,6 @@ FOG_NO_EXPORT void _core_fini(void)
   _core_list_fini();
 
   _core_error_fini();
-  _core_memory_fini();
-
-  // fog_std_fini();
 }
 
 } // Fog namespace

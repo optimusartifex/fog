@@ -11,7 +11,7 @@
 #include <Fog/Core/Face/Face_C.h>
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Memory/ZoneMemoryAllocator_p.h>
+#include <Fog/Core/Memory/ZoneAllocator_p.h>
 #include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Rasterizer/Span_p.h>
 
@@ -166,7 +166,7 @@ struct FOG_NO_EXPORT Scanline
   // --------------------------------------------------------------------------
 
   //! @brief Zone memory allocator used to alloc span instances.
-  ZoneMemoryAllocator _spanAllocator;
+  ZoneAllocator _spanAllocator;
 
   //! @brief First span that is never part of returned spans (it's used
   //! internally). Returned span by @c getSpans() is always get using

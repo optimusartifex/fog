@@ -4,11 +4,12 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_MEMORY_MEMORYOPS_H
-#define _FOG_CORE_MEMORY_MEMORYOPS_H
+#ifndef _FOG_CORE_MEMORY_OPS_H
+#define _FOG_CORE_MEMORY_OPS_H
 
 // [Dependencies]
-#include <Fog/Core/Memory/Memory.h>
+#include <Fog/Core/Global/Api.h>
+#include <Fog/Core/Global/Assert.h>
 
 namespace Fog {
 namespace Memory {
@@ -37,6 +38,20 @@ static FOG_INLINE void write_4a(void* mem, uint32_t x) { ((uint32_t *)mem)[0] = 
 static FOG_INLINE void write_4u(void* mem, uint32_t x) { ((uint32_t *)mem)[0] = x; }
 static FOG_INLINE void write_8a(void* mem, uint64_t x) { ((uint64_t *)mem)[0] = x; }
 static FOG_INLINE void write_8u(void* mem, uint64_t x) { ((uint64_t *)mem)[0] = x; }
+
+// ============================================================================
+// [Fog::Memory - Copy]
+// ============================================================================
+
+static FOG_INLINE void* copy(void* dst, const void* src, size_t size)
+{
+  return _core.memory.copy(dst, src, size);
+}
+
+static FOG_INLINE void* copy_nt(void* dst, const void* src, size_t size)
+{
+  return _core.memory.copy_nt(dst, src, size);
+}
 
 // ============================================================================
 // [Fog::Memory - Copy (Exact)]
@@ -166,6 +181,43 @@ template<typename Type>
 static FOG_INLINE void copy_t(Type* dst, const Type* src)
 {
   copy_s<sizeof(Type)>((void*)(dst), (const void*)(src));
+}
+
+// ============================================================================
+// [Fog::Memory - Move]
+// ============================================================================
+
+static FOG_INLINE void* move(void* dst, const void* src, size_t size)
+{
+  return _core.memory.move(dst, src, size);
+}
+
+// ============================================================================
+// [Fog::Memory - Set]
+// ============================================================================
+
+static FOG_INLINE void* set(void* dst, int c, size_t size)
+{
+  return _core.memory.set(dst, c, size);
+}
+
+static FOG_INLINE void* set_nt(void* dst, int c, size_t size)
+{
+  return _core.memory.set_nt(dst, c, size);
+}
+
+// ============================================================================
+// [Fog::Memory - Zero]
+// ============================================================================
+
+static FOG_INLINE void* zero(void* dst, size_t size)
+{
+  return _core.memory.zero(dst, size);
+}
+
+static FOG_INLINE void* zero_nt(void* dst, size_t size)
+{
+  return _core.memory.zero_nt(dst, size);
 }
 
 // ============================================================================
@@ -435,6 +487,15 @@ static FOG_INLINE bool eq_t(const Type* dst, const Type* src)
 }
 
 // ============================================================================
+// [Fog::Memory - Xchg]
+// ============================================================================
+
+static FOG_INLINE void xchg(void* mem0, void* mem1, size_t size)
+{
+  _core.memory.xchg(mem0, mem1, size);
+}
+
+// ============================================================================
 // [Fog::Memory - Xchg (Exact)]
 // ============================================================================
 
@@ -578,4 +639,4 @@ static FOG_INLINE void xchgPtr(T** a, T** b)
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_CORE_MEMORY_MEMORYOPS_H
+#endif // _FOG_CORE_MEMORY_OPS_H

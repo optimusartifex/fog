@@ -182,7 +182,7 @@ RasterMaskSnapshot* RasterContext::makeSnapshot()
     maskY2);
 #endif // FOG_DEBUG_RASTER_MASK
 
-  ZoneMemoryAllocator::Record* record = maskMemoryAllocator.record();
+  ZoneAllocator::Record* record = maskMemoryAllocator.record();
 
   RasterMaskSnapshot* snapshot = reinterpret_cast<RasterMaskSnapshot*>(
     maskMemoryAllocator.alloc(sizeof(RasterMaskSnapshot)));

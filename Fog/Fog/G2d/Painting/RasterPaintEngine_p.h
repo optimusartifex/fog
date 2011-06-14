@@ -9,9 +9,8 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Memory/BlockMemoryAllocator_p.h>
-#include <Fog/Core/Memory/Memory.h>
-#include <Fog/Core/Memory/ZoneMemoryAllocator_p.h>
+#include <Fog/Core/Memory/BlockAllocator_p.h>
+#include <Fog/Core/Memory/ZoneAllocator_p.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Threading/Thread.h>
 #include <Fog/Core/Threading/ThreadCondition.h>
@@ -93,7 +92,7 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   // --------------------------------------------------------------------------
 
   //! @brief Block memory allocator for small objects.
-  BlockMemoryAllocator blockAllocator;
+  BlockAllocator blockAllocator;
 
   // --------------------------------------------------------------------------
   // [Methods - Transform]
@@ -230,7 +229,7 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   // --------------------------------------------------------------------------
 
   //! @brief Zone memory allocator for @c RasterState objects.
-  ZoneMemoryAllocator stateAllocator;
+  ZoneAllocator stateAllocator;
 
   //! @brief Unused states pool.
   RasterState* statePool;
@@ -242,7 +241,7 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   // [Members - Pattern Context]
   // --------------------------------------------------------------------------
 
-  ZoneMemoryAllocator pcAllocator;
+  ZoneAllocator pcAllocator;
   RasterAbstractLinkedList* pcPool;
 
   // --------------------------------------------------------------------------

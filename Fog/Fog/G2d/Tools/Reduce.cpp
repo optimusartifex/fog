@@ -11,7 +11,7 @@
 // [Dependencies]
 #include <Fog/Core/Collection/Hash.h>
 #include <Fog/Core/Face/Face_C.h>
-#include <Fog/Core/Memory/Memory.h>
+#include <Fog/Core/Memory/Ops.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Tools/Reduce_p.h>
 

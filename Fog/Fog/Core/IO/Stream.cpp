@@ -10,8 +10,10 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Init_Core_p.h>
+#include <Fog/Core/Global/Types.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Memory.h>
+#include <Fog/Core/Memory/Alloc.h>
+#include <Fog/Core/Memory/Ops.h>
 #include <Fog/Core/IO/FileSystem.h>
 #include <Fog/Core/IO/MapFile.h>
 #include <Fog/Core/IO/Stream.h>

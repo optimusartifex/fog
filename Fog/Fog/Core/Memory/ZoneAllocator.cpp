@@ -9,15 +9,15 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Memory/ZoneMemoryAllocator_p.h>
+#include <Fog/Core/Memory/ZoneAllocator_p.h>
 
 namespace Fog {
 
 // ============================================================================
-// [Fog::ZoneMemoryAllocator]
+// [Fog::ZoneAllocator]
 // ============================================================================
 
-ZoneMemoryAllocator::ZoneMemoryAllocator(size_t chunkSize)
+ZoneAllocator::ZoneAllocator(size_t chunkSize)
   : _chunkSize(chunkSize)
 {
   // We need at least one chunk. The first chunk is here just to prevent
@@ -30,12 +30,12 @@ ZoneMemoryAllocator::ZoneMemoryAllocator(size_t chunkSize)
   _current = &_first;
 }
 
-ZoneMemoryAllocator::~ZoneMemoryAllocator()
+ZoneAllocator::~ZoneAllocator()
 {
   reset();
 }
 
-void* ZoneMemoryAllocator::_alloc(size_t size)
+void* ZoneAllocator::_alloc(size_t size)
 {
   // First look into the next chunk.
   Chunk* chunk = _current->next;
@@ -63,7 +63,7 @@ void* ZoneMemoryAllocator::_alloc(size_t size)
   return chunk->data;
 }
 
-ZoneMemoryAllocator::Record* ZoneMemoryAllocator::record()
+ZoneAllocator::Record* ZoneAllocator::record()
 {
   Record* rec = reinterpret_cast<Record*>(alloc(sizeof(Record)));
 
@@ -73,7 +73,7 @@ ZoneMemoryAllocator::Record* ZoneMemoryAllocator::record()
   return rec;
 }
 
-void ZoneMemoryAllocator::revert(Record* record, bool keepRecord)
+void ZoneAllocator::revert(Record* record, bool keepRecord)
 {
   _current = record->current;
   _current->pos = record->pos;
@@ -81,12 +81,12 @@ void ZoneMemoryAllocator::revert(Record* record, bool keepRecord)
   if (keepRecord) alloc(sizeof(Record));
 }
 
-void ZoneMemoryAllocator::reset()
+void ZoneAllocator::reset()
 {
   _current = &_first;
 }
 
-void ZoneMemoryAllocator::free()
+void ZoneAllocator::free()
 {
   Chunk* cur = _first.next;
   while (cur)

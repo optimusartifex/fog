@@ -9,7 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Memory/MemoryOps.h>
+#include <Fog/Core/Memory/Ops.h>
 #include <Fog/G2d/Imaging/Effects/BorderEffect.h>
 
 namespace Fog {

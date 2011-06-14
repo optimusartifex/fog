@@ -16,7 +16,8 @@
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Math/MathVec.h>
 #include <Fog/Core/Math/Solve.h>
-#include <Fog/Core/Memory/Memory.h>
+#include <Fog/Core/Memory/Alloc.h>
+#include <Fog/Core/Memory/Ops.h>
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Global/TypeInfo.h>

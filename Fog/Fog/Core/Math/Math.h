@@ -8,18 +8,19 @@
 #define _FOG_CORE_MATH_MATH_H
 
 // [Dependencies]
-#include <Fog/Core/Config/Config.h>
 #include <Fog/Core/Global/Api.h>
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/FloatBits.h>
 
+// [Dependencies - C]
 #include <math.h>
 
 #if defined(FOG_HAVE_FLOAT_H)
-#include <float.h>
+# include <float.h>
 #endif // FOG_HAVE_FLOAT_H
 
+// [Cleanup]
 #include <Fog/Core/Math/Cleanup.h>
 
 // I experienced that some platforms has no support for single precision
@@ -357,71 +358,6 @@ static FOG_INLINE bool isNaN(double x)
 #undef _FOG_MATH_GET_CONST_F
 #undef _FOG_MATH_GET_CONST_D
 #undef _FOG_MATH_DECLARE_VARIANT_TEMPLATE
-
-// ============================================================================
-// [Fog::Math - Float <-> Integer]
-// ============================================================================
-
-// We define these optimized rounding methods to make conversion from floats
-// as fast as possible. There is danger that if there is set incorrect rounding
-// mode then we can get something we not expect (incorrect rounding).
-#if defined(FOG_CC_MSC) && FOG_ARCH_BITS == 32 && (!defined(_M_IX86_FP) || _M_IX86_FP < 2)
-FOG_INLINE int iround(float v)
-{
-  int t;
-  __asm {
-    fld dword ptr [v]
-    fistp dword ptr [t]
-    //mov eax, dword ptr [t]
-  }
-  return t;
-}
-
-FOG_INLINE uint uround(float v)
-{
-  uint t;
-  __asm {
-    fld dword ptr [v]
-    fistp dword ptr [t]
-    //mov eax, dword ptr [t]
-  }
-  return t;
-}
-
-FOG_INLINE int iround(double v)
-{
-  int t;
-  __asm {
-    fld qword ptr [v]
-    fistp dword ptr [t]
-    //mov eax, dword ptr [t]
-  }
-  return t;
-}
-
-FOG_INLINE uint uround(double v)
-{
-  unsigned t;
-  __asm {
-    fld qword ptr [v]
-    fistp dword ptr [t]
-    //mov eax, dword ptr [t]
-  }
-  return t;
-}
-#else
-static FOG_INLINE int iround(float v) { return (int)((v < 0.0f) ? v - 0.5f : v + 0.5f); }
-static FOG_INLINE uint uround(float v) { return (uint)(int)(v + 0.5f); }
-
-static FOG_INLINE int iround(double v) { return (int)((v < 0.0) ? v - 0.5 : v + 0.5); }
-static FOG_INLINE uint uround(double v) { return (uint)(int)(v + 0.5); }
-#endif
-
-static FOG_INLINE int ifloor(double v) { return iround(::floor(v)); }
-static FOG_INLINE int iceil(double v) { return iround(::ceil(v)); }
-
-static FOG_INLINE uint ufloor(double v) { return uround(::floor(v)); }
-static FOG_INLINE uint uceil(double v) { return uround(::ceil(v)); }
 
 // ============================================================================
 // [Fog::Math - Mod]

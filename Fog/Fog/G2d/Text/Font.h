@@ -11,8 +11,6 @@
 #include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Memory/MemoryAlloc.h>
-#include <Fog/Core/Memory/MemoryOps.h>
 #include <Fog/Core/Tools/Char.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/G2d/Geometry/Point.h>

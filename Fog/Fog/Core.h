@@ -41,6 +41,7 @@
 #include <Fog/Core/Global/Static.h>
 #include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Types.h>
 #include <Fog/Core/Global/Uninitialized.h>
 #include <Fog/Core/IO/DirEntry.h>
 #include <Fog/Core/IO/DirIterator.h>
@@ -48,8 +49,10 @@
 #include <Fog/Core/IO/MapFile.h>
 #include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Library/Library.h>
-#include <Fog/Core/Math/Fixed.h>
+#include <Fog/Core/Math/Constants.h>
+#include <Fog/Core/Math/Convert.h>
 #include <Fog/Core/Math/FloatBits.h>
+#include <Fog/Core/Math/FloatControl.h>
 #include <Fog/Core/Math/Function.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Integrate.h>
@@ -57,10 +60,13 @@
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Math/MathVec.h>
 #include <Fog/Core/Math/Solve.h>
+#include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Memory/BSwap.h>
-#include <Fog/Core/Memory/Memory.h>
+#include <Fog/Core/Memory/Cleanup.h>
 #include <Fog/Core/Memory/MemoryBuffer.h>
+#include <Fog/Core/Memory/MemoryDebug.h>
 #include <Fog/Core/Memory/MemoryManager.h>
+#include <Fog/Core/Memory/Ops.h>
 #include <Fog/Core/OS/OS.h>
 #include <Fog/Core/OS/UserInfo.h>
 #include <Fog/Core/System/Application.h>

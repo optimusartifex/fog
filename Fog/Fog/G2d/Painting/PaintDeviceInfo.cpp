@@ -11,7 +11,7 @@
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Global/Static.h>
-#include <Fog/Core/Memory/Memory.h>
+#include <Fog/Core/Memory/Alloc.h>
 #include <Fog/G2d/Painting/PaintDeviceInfo.h>
 #include <Fog/G2d/Text/Font.h>
 #include <Fog/G2d/Text/FontHints.h>

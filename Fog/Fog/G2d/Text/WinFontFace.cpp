@@ -11,7 +11,6 @@
 // [Dependencies]
 #include <Fog/Core/Collection/BufferP.h>
 #include <Fog/Core/Global/Internal_Core_p.h>
-#include <Fog/Core/Math/Fixed.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Tools/TextIterator.h>
 #include <Fog/G2d/Geometry/Path.h>

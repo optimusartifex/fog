@@ -10,7 +10,7 @@
 // [Dependencies]
 #include <Fog/Core/Global/TypeInfo.h>
 #include <Fog/Core/Math/Fuzzy.h>
-#include <Fog/Core/Memory/Memory.h>
+#include <Fog/Core/Memory/Alloc.h>
 #include <Fog/G2d/Source/Color.h>
 #include <Fog/G2d/Source/ColorStop.h>
 

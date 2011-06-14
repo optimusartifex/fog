@@ -4,13 +4,13 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_MEMORY_BLOCKMEMORYALLOCATOR_P_H
-#define _FOG_CORE_MEMORY_BLOCKMEMORYALLOCATOR_P_H
+#ifndef _FOG_CORE_MEMORY_BLOCKALLOCATOR_P_H
+#define _FOG_CORE_MEMORY_BLOCKALLOCATOR_P_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Memory/Memory.h>
+#include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Threading/Atomic.h>
 
 namespace Fog {
@@ -19,7 +19,7 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::BlockMemoryAllocator]
+// [Fog::BlockAllocator]
 // ============================================================================
 
 //! @internal
@@ -27,22 +27,22 @@ namespace Fog {
 //! @brief Custom memory allocator used by raster paint engine.
 //!
 //! This allocator allocates larger blocks (see @c BLOCK_SIZE) dividing them
-//! into small pieces demanded throught @c BlockMemoryAllocator::alloc() method.
+//! into small pieces demanded throught @c BlockAllocator::alloc() method.
 //! Each allocation contains information about memory block used by allocator
-//! and when the memory is not needed (and @c BlockMemoryAllocator::free() is called)
+//! and when the memory is not needed (and @c BlockAllocator::free() is called)
 //! it's atomically removed from memory block.
 //!
 //! In short: Each memory block has information about used memory, increased by
-//! @c BlockMemoryAllocator::alloc() and decreased by @c BlockMemoryAllocator::free().
+//! @c BlockAllocator::alloc() and decreased by @c BlockAllocator::free().
 //! When the number is decreased to zero then the block is free and will be
 //! reused. The goal of this algorithm is to provide fast memory alloc/free,
 //! but do not eat too much memory (reuse it).
 //!
-//! @note The @c BlockMemoryAllocator::alloc() is reentrant and can be called only
-//! by main thread, but @c BlockMemoryAllocator::free() is thread-safe and it can
+//! @note The @c BlockAllocator::alloc() is reentrant and can be called only
+//! by main thread, but @c BlockAllocator::free() is thread-safe and it can
 //! be called (and it is) from worker threads.
 //!
-//! @section BlockMemoryAllocator vs. ZoneMemoryAllocator
+//! @section BlockAllocator vs. ZoneAllocator
 //!
 //! Block allocator can be used to alloc / free memory chunks, the chunks can
 //! be allocated and freed individually. Block allocator can be also used to
@@ -50,9 +50,9 @@ namespace Fog {
 //! locking.
 //!
 //! Zone allocator can be used only to alloc memory chunks that will be all
-//! freed by ZoneMemoryAllocator::reset(). Zone allocator arhieves extra performance
+//! freed by ZoneAllocator::reset(). Zone allocator arhieves extra performance
 //! and nearly zero overhead when allocating very small chunks.
-struct FOG_NO_EXPORT BlockMemoryAllocator
+struct FOG_NO_EXPORT BlockAllocator
 {
   // --------------------------------------------------------------------------
   // [Constants]
@@ -77,7 +77,7 @@ struct FOG_NO_EXPORT BlockMemoryAllocator
 
     //! @brief Size of the block.
     size_t size;
-    //! @brief Allocator position, incremented by each @c BlockMemoryAllocator::alloc().
+    //! @brief Allocator position, incremented by each @c BlockAllocator::alloc().
     size_t pos;
     //! @brief Count of bytes used by the block (atomic).
     Atomic<size_t> used;
@@ -106,9 +106,9 @@ struct FOG_NO_EXPORT BlockMemoryAllocator
   // --------------------------------------------------------------------------
 
   //! @brief Block allocator constructor.
-  BlockMemoryAllocator();
+  BlockAllocator();
   //! @brief Block allocator destructor, will check if all blocks are freed.
-  ~BlockMemoryAllocator();
+  ~BlockAllocator();
 
   // --------------------------------------------------------------------------
   // [Alloc / Free]
@@ -133,10 +133,10 @@ struct FOG_NO_EXPORT BlockMemoryAllocator
   Block* blocks;
 
 private:
-  _FOG_CLASS_NO_COPY(BlockMemoryAllocator)
+  _FOG_CLASS_NO_COPY(BlockAllocator)
 };
 
-FOG_INLINE void BlockMemoryAllocator::free(void* ptr)
+FOG_INLINE void BlockAllocator::free(void* ptr)
 {
   Header* header = reinterpret_cast<Header*>(reinterpret_cast<uint8_t*>(ptr) - sizeof(Header));
   header->block->used.sub(header->size);
@@ -147,4 +147,4 @@ FOG_INLINE void BlockMemoryAllocator::free(void* ptr)
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_CORE_MEMORY_BLOCKMEMORYALLOCATOR_P_H
+#endif // _FOG_CORE_MEMORY_BLOCKALLOCATOR_P_H

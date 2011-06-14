@@ -16,9 +16,10 @@
 #include <Fog/Core/IO/MapFile.h>
 #include <Fog/Core/Math/FloatBits.h>
 #include <Fog/Core/Math/Math.h>
+#include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Memory/BSwap.h>
-#include <Fog/Core/Memory/Memory.h>
 #include <Fog/Core/Memory/MemoryBuffer.h>
+#include <Fog/Core/Memory/Ops.h>
 #include <Fog/Core/Tools/StringTmp_p.h>
 #include <Fog/G2d/Face/Face_Raster_C.h>
 #include <Fog/G2d/Global/Constants.h>

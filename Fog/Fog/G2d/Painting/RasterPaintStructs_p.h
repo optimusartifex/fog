@@ -340,7 +340,7 @@ struct FOG_NO_EXPORT RasterMaskSnapshot
   Span** rowsAdj;
 
   //! @brief Saved mask span allocator record (will be restored with clip-mask).
-  ZoneMemoryAllocator::Record* record;
+  ZoneAllocator::Record* record;
 
   //! @brief Saved clip CSpan pool (saving clip-mask causes reset).
   Span* cSpanPool;

@@ -10,11 +10,10 @@
 // [Dependencies]
 #include <Fog/Core/Collection/BufferP.h>
 #include <Fog/Core/Face/Face_C.h>
-#include <Fog/Core/Math/Fixed.h>
 #include <Fog/Core/Math/Math.h>
+#include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Memory/BSwap.h>
-#include <Fog/Core/Memory/Memory.h>
-#include <Fog/Core/Memory/MemoryOps.h>
+#include <Fog/Core/Memory/Ops.h>
 #include <Fog/G2d/Face/Face_Raster_C.h>
 #include <Fog/G2d/Geometry/Math2d.h>
 #include <Fog/G2d/Geometry/Point.h>

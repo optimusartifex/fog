@@ -9,6 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Math/Convert.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Render/RenderStructs_p.h>

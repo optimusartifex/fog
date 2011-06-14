@@ -9,25 +9,26 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Memory/BlockMemoryAllocator_p.h>
+#include <Fog/Core/Memory/BlockAllocator_p.h>
+#include <Fog/Core/Memory/Alloc.h>
 
 namespace Fog {
 
 // ============================================================================
-// [Fog::BlockMemoryAllocator]
+// [Fog::BlockAllocator]
 // ============================================================================
 
-BlockMemoryAllocator::BlockMemoryAllocator() :
+BlockAllocator::BlockAllocator() :
   blocks(NULL)
 {
 }
 
-BlockMemoryAllocator::~BlockMemoryAllocator()
+BlockAllocator::~BlockAllocator()
 {
   reset();
 }
 
-void* BlockMemoryAllocator::alloc(size_t size)
+void* BlockAllocator::alloc(size_t size)
 {
   size += sizeof(Header);
 
@@ -83,7 +84,7 @@ allocFromBlocks:
   return reinterpret_cast<void*>(reinterpret_cast<uint8_t*>(header) + sizeof(Header));
 }
 
-void BlockMemoryAllocator::reset()
+void BlockAllocator::reset()
 {
   Block* cur = blocks;
   blocks = NULL;

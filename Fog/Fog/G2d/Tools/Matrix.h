@@ -13,7 +13,6 @@
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/Static.h>
 #include <Fog/Core/Global/Swap.h>
-#include <Fog/Core/Memory/Memory.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Geometry/Size.h>
@@ -30,28 +29,9 @@ namespace Fog {
 
 struct FOG_NO_EXPORT MatrixDataF
 {
-  // --------------------------------------------------------------------------
-  // [Ref / Deref]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE MatrixDataF* ref() const
-  {
-    refCount.inc();
-    return const_cast<MatrixDataF*>(this);
-  }
-
-  FOG_INLINE void deref()
-  {
-    if (refCount.deref()) Memory::free(this);
-  }
-
-  // --------------------------------------------------------------------------
-  // [Members]
-  // --------------------------------------------------------------------------
-
   //! @brief Reference count.
   mutable Atomic<size_t> refCount;
-  //! @brief Size.
+  //! @brief Matrix size.
   SizeI size;
   //! @brief Elements.
   float data[1];
@@ -63,25 +43,6 @@ struct FOG_NO_EXPORT MatrixDataF
 
 struct FOG_NO_EXPORT MatrixDataD
 {
-  // --------------------------------------------------------------------------
-  // [Ref / Deref]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE MatrixDataD* ref() const
-  {
-    refCount.inc();
-    return const_cast<MatrixDataD*>(this);
-  }
-
-  FOG_INLINE void deref()
-  {
-    if (refCount.deref()) Memory::free(this);
-  }
-
-  // --------------------------------------------------------------------------
-  // [Members]
-  // --------------------------------------------------------------------------
-
   //! @brief Reference count.
   mutable Atomic<size_t> refCount;
   //! @brief Size.
@@ -124,7 +85,6 @@ struct FOG_API MatrixF
   FOG_INLINE const SizeI& getSize() const { return _d->size; }
   FOG_INLINE int getWidth() const { return _d->size.w; }
   FOG_INLINE int getHeight() const { return _d->size.h; }
-
   FOG_INLINE bool isEmpty() const { return _d->size.w == 0; }
 
   FOG_INLINE const float* getData() const
@@ -135,19 +95,22 @@ struct FOG_API MatrixF
   FOG_INLINE float* getDataX()
   {
     FOG_ASSERT_X(isDetached(), "Fog::MatrixF::getDataX() - Called on non-detached object.");
+
     return _d->data;
   }
 
   FOG_INLINE const float* getRow(size_t index) const
   {
     FOG_ASSERT_X(index < (size_t)(uint)_d->size.h, "Fog::MatrixF::getRow() - Index out of range.");
+
     return _d->data + (index * (size_t)(uint)_d->size.w);
   }
 
   FOG_INLINE float* getRowX(size_t index)
   {
     FOG_ASSERT_X(isDetached(), "Fog::MatrixF::getRowX() - Called on non-detached object.");
-    FOG_ASSERT_X(index < (size_t)(uint)_d->size.h, "Fog::MatrixF::getRow() - Index out of range.");
+    FOG_ASSERT_X(index < (size_t)(uint)_d->size.h, "Fog::MatrixF::getRowX() - Index out of range.");
+
     return _d->data + (index * (size_t)(uint)_d->size.w);
   }
 

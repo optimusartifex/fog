@@ -9,22 +9,38 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
+#include <Fog/Core/Memory/Alloc.h>
 #include <Fog/G2d/Global/Init_G2d_p.h>
 #include <Fog/G2d/Tools/Matrix.h>
 
 namespace Fog {
 
 // ============================================================================
+// [Fog::MatrixF - Helpers]
+// ============================================================================
+
+static FOG_INLINE MatrixDataF* _MatrixF_ref(MatrixDataF* d)
+{
+  d->refCount.inc();
+  return d;
+}
+
+static FOG_INLINE void _MatrixF_deref(MatrixDataF* d)
+{
+  if (d->refCount.deref()) Memory::free(d);
+}
+
+// ============================================================================
 // [Fog::MatrixF - Construction / Destruction]
 // ============================================================================
 
 MatrixF::MatrixF() :
-  _d(_dnull->ref())
+  _d(_MatrixF_ref(_dnull))
 {
 }
 
 MatrixF::MatrixF(const MatrixF& other) :
-  _d(other._d->ref())
+  _d(_MatrixF_ref(other._d))
 {
 }
 
@@ -33,7 +49,7 @@ MatrixF::MatrixF(const SizeI& size, const float* data) :
 {
   if (FOG_UNLIKELY(_d == NULL))
   {
-    _d = _dnull->ref();
+    _d = _MatrixF_ref(_dnull);
     return;
   }
 
@@ -45,7 +61,7 @@ MatrixF::MatrixF(const SizeI& size, const float* data) :
 
 MatrixF::~MatrixF()
 {
-  _d->deref();
+  _MatrixF_deref(_d);
 }
 
 // ============================================================================
@@ -61,7 +77,7 @@ err_t MatrixF::_detach()
 
   Memory::copy(newd->data, _d->data, _d->size.w * _d->size.h * sizeof(float));
 
-  atomicPtrXchg(&_d, newd)->deref();
+  _MatrixF_deref(atomicPtrXchg(&_d, newd));
   return ERR_OK;
 }
 
@@ -87,7 +103,7 @@ err_t MatrixF::create(const SizeI& size, const float* data)
 
   if (data) Memory::copy(newd->data, data, size.w * size.h * sizeof(float));
 
-  atomicPtrXchg(&_d, newd)->deref();
+  _MatrixF_deref(atomicPtrXchg(&_d, newd));
   return ERR_OK;
 }
 
@@ -130,13 +146,13 @@ err_t MatrixF::resize(const SizeI& size, float value)
     dstCur[0] = value;
   }
 
-  atomicPtrXchg(&_d, newd)->deref();
+  _MatrixF_deref(atomicPtrXchg(&_d, newd));
   return ERR_OK;
 }
 
 void MatrixF::reset()
 {
-  atomicPtrXchg(&_d, _dnull->ref())->deref();
+  _MatrixF_deref(atomicPtrXchg(&_d, _MatrixF_ref(_dnull)));
 }
 
 float MatrixF::getCell(int x, int y) const
@@ -192,7 +208,7 @@ err_t MatrixF::fill(const RectI& rect, float val)
 
 MatrixF& MatrixF::operator=(const MatrixF& other)
 {
-  atomicPtrXchg(&_d, other._d->ref())->deref();
+  _MatrixF_deref(atomicPtrXchg(&_d, _MatrixF_ref(other._d)));
   return *this;
 }
 
@@ -204,7 +220,7 @@ Static<MatrixDataF> MatrixF::_dnull;
 
 MatrixDataF* MatrixF::_dalloc(const SizeI& size)
 {
-  if (!size.isValid()) return _dnull->ref();
+  if (!size.isValid()) return _MatrixF_ref(_dnull);
 
   MatrixDataF* d = reinterpret_cast<MatrixDataF*>(
     Memory::alloc(sizeof(MatrixDataF) - sizeof(float) + (size.w * size.h) * sizeof(float)));

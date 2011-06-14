@@ -5,6 +5,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/Algorithms.h>
+#include <Fog/Core/Math/Convert.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Tools/StringUtil.h>
 #include <Fog/G2d/Geometry/Transform.h>

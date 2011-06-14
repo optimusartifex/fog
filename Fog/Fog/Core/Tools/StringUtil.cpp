@@ -7,7 +7,7 @@
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Math/FloatControl.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Memory.h>
+#include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Tools/Byte.h>
 #include <Fog/Core/Tools/ByteArray.h>
 #include <Fog/Core/Tools/Char.h>

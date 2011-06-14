@@ -7,7 +7,7 @@
 #include <Fog/Core/Collection/Algorithms.h>
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/MemoryOps.h>
+#include <Fog/Core/Memory/Ops.h>
 
 namespace Fog {
 namespace Algorithms {

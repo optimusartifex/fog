@@ -15,7 +15,6 @@
 #include <Fog/Core/IO/FileSystem.h>
 #include <Fog/Core/IO/MapFile.h>
 #include <Fog/Core/IO/Stream.h>
-#include <Fog/Core/Memory/Memory.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/String.h>

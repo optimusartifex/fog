@@ -8,7 +8,7 @@
 #define _FOG_G2D_IMAGING_EFFECTS_BORDEREFFECT_H
 
 // [Dependencies]
-#include <Fog/Core/Memory/MemoryOps.h>
+#include <Fog/Core/Memory/Ops.h>
 #include <Fog/G2d/Source/Color.h>
 
 namespace Fog {

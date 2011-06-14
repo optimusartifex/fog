@@ -10,7 +10,6 @@
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Memory/Memory.h>
 #include <Fog/Core/Memory/MemoryManager.h>
 #include <Fog/Core/Threading/Atomic.h>
 
@@ -48,7 +47,7 @@ struct FOG_API MemoryBuffer
   //! @brief Create a @c MemoryManager instance, using default memory manager
   //! and no embedded buffer.
   FOG_INLINE MemoryBuffer() :
-    _memoryManager(Memory::getDefaultManager()),
+    _memoryManager(MemoryManager::getDefault()),
     _memoryBuffer(NULL),
     _memorySize(0),
     _embeddedBuffer(NULL),

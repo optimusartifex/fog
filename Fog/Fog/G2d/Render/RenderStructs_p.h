@@ -9,7 +9,6 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Math/Fixed.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/G2d/Geometry/Transform.h>
 #include <Fog/G2d/Global/Constants.h>

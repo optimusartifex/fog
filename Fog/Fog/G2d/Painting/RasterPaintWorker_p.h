@@ -9,7 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Memory/ZoneMemoryAllocator_p.h>
+#include <Fog/Core/Memory/ZoneAllocator_p.h>
 #include <Fog/Core/System/Task.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Threading/AtomicPadding.h>
@@ -147,8 +147,8 @@ struct FOG_NO_EXPORT RasterWorkerManager
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   //! @brief Action allocator.
-  ZoneMemoryAllocator allocator;
-  AtomicPadding1<ZoneMemoryAllocator> _padding_allocator;
+  ZoneAllocator allocator;
+  AtomicPadding1<ZoneAllocator> _padding_allocator;
 
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

@@ -66,6 +66,9 @@ struct FOG_NO_EXPORT Cpu
   char vendor[16];
   //! @brief Cpu long vendor string (brand).
   char brand[64];
+
+  //! @brief Cpu vendor id (see @c CPU_VENDOR).
+  uint32_t vendorId;
   //! @brief Cpu family ID.
   uint32_t family;
   //! @brief Cpu model ID.
@@ -74,9 +77,9 @@ struct FOG_NO_EXPORT Cpu
   uint32_t stepping;
   //! @brief Number of processors or cores.
   uint32_t numberOfProcessors;
-  //! @brief Cpu features bitfield, see @c CPU_FEATURE enum).
+  //! @brief Cpu features bitfield, see @c CPU_FEATURE).
   uint32_t features;
-  //! @brief Cpu bugs bitfield, see @c CPU_BUG enum).
+  //! @brief Cpu bugs bitfield, see @c CPU_BUG).
   uint32_t bugs;
 
   FOG_INLINE bool hasFeature(uint32_t feature) const { return (this->features & feature) != 0; }

@@ -12,6 +12,7 @@
 #include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/Debug.h>
 #include <Fog/Core/Library/Library.h>
+#include <Fog/Core/Memory/Ops.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/G2d/Win/UxThemeLibrary.h>
 

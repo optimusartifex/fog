@@ -157,6 +157,38 @@ static FOG_INLINE bool cpuVencorEq(const CpuVendorInfo& info, const char* vendor
          (a[2] == b[2]) ;
 }
 
+static FOG_INLINE void simplifyBrandString(char* s)
+{
+  // Always clear the current character in the buffer. This ensures that there
+  // is no garbage after the string NULL terminator.
+  char* d = s;
+
+  char prev = 0;
+  char curr = s[0];
+  s[0] = '\0';
+
+  for (;;)
+  {
+    if (curr == 0) break;
+
+    if (curr == ' ')
+    {
+      if (prev == '@') goto _Skip;
+      if (s[1] == ' ' || s[1] == '@') goto _Skip;
+    }
+
+    d[0] = curr;
+    d++;
+    prev = curr;
+
+_Skip:
+    curr = *++s;
+    s[0] = '\0';
+  }
+
+  d[0] = '\0';
+}
+
 // ============================================================================
 // [Fog::Cpu - Detect]
 // ============================================================================
@@ -286,28 +318,8 @@ static void _Cpu_detectCpu(Cpu* i)
     }
   }
 
-  if (exIds < 0x80000002)
-  {
-    // Set brand string to vendor if it can't be read.
-    memcpy(i->brand, i->vendor, 16);
-  }
-  else
-  {
-    // Remove extra spaces from brand string.
-    char* bDst = i->brand;
-    char* bSrc = i->brand;
-    char c;
-
-    do {
-      c = *bSrc++;
-      *bDst++ = c;
-      if (c == ' ')
-      {
-        while ((c = *bSrc) == ' ') bSrc++;
-      }
-    } while (c != '\0');
-    *bDst = '\0';
-  }
+  // Simplify the brand string (remove unnecessary spaces to make it printable).
+  simplifyBrandString(i->brand);
 #endif // FOG_ARCH_X86 || FOG_ARCH_X64
 }
 

@@ -8890,13 +8890,14 @@ const CharData _charData =
 
 #   define _CHAR_PROPERTY(_InfoIndex_, _MappingType_, _MappingData_, _Category_, _Space_, _DecompositionType_, _DecompositionIndex_) \
     { \
-      _InfoIndex_,                              \
-      CHAR_MAPPING_##_MappingType_,             \
-      _MappingData_,                            \
-      CHAR_CATEGORY_##_Category_,               \
-      _Space_,                                  \
-      CHAR_DECOMPOSITION_##_DecompositionType_, \
-      _DecompositionIndex_                      \
+      ((int32_t)(_InfoIndex_)) |                        \
+      ((int32_t)(CHAR_MAPPING_##_MappingType_) << 12) | \
+      ((int32_t)(_MappingData_) << 15),                 \
+                                                        \
+      CHAR_CATEGORY_##_Category_,                       \
+      _Space_,                                          \
+      CHAR_DECOMPOSITION_##_DecompositionType_,         \
+      _DecompositionIndex_                              \
     }
 
     // Range : U+0000..U+007F

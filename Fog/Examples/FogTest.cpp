@@ -251,7 +251,7 @@ void MyWindow::onPaint(PaintEvent* e)
   }
 
   String text;
-  text.format("FPS: %g, Time: %g (%d %d)", fps, frameDelta.getMillisecondsD(), (int)sizeof(CharProperty), (int)sizeof(CharSpecial));
+  text.format("FPS: %g, Time: %g", fps, frameDelta.getMillisecondsD());
 
   {
     PathF path;

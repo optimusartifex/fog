@@ -35,9 +35,9 @@ struct AtomicPaddingMemory<0>
 // [Fog::AtomicPadding<>]
 // ============================================================================
 
-//! @brief The padding buffer.
+//! @brief Padding buffer.
 //!
-//! The padding buffer is required to avoid false shading between CPU cores'
+//! The padding buffer is required to avoid false sharing between CPU cores'
 //! private cache.
 template<typename T0>
 struct AtomicPadding1 : public AtomicPaddingMemory

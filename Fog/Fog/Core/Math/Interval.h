@@ -8,23 +8,13 @@
 #define _FOG_CORE_MATH_INTERVAL_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Api.h>
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/Uninitialized.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 
 namespace Fog {
 
 //! @addtogroup Fog_Core_Math
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct IntervalF;
-struct IntervalD;
 
 // ============================================================================
 // [Fog::IntervalF]
@@ -38,9 +28,9 @@ struct FOG_NO_EXPORT IntervalF
 
   FOG_INLINE IntervalF() :  _min(0.0f), _max(0.0f) {}
   FOG_INLINE IntervalF(float min, float max) : _min(min), _max(max) {}
-  FOG_INLINE IntervalF(_Uninitialized) {}
-
   FOG_INLINE IntervalF(const IntervalF& other) { setInterval(other); }
+
+  explicit FOG_INLINE IntervalF(_Uninitialized) {}
   explicit FOG_INLINE IntervalF(const IntervalD& other) { setInterval(other); }
 
   // --------------------------------------------------------------------------
@@ -108,10 +98,10 @@ struct FOG_NO_EXPORT IntervalD
 
   FOG_INLINE IntervalD() :  _min(0.0), _max(0.0) {}
   FOG_INLINE IntervalD(double min, double max) : _min(min), _max(max) {}
-  FOG_INLINE IntervalD(_Uninitialized) {}
-
   FOG_INLINE IntervalD(const IntervalD& other) { setInterval(other); }
-  FOG_INLINE IntervalD(const IntervalF& other) { setInterval(other); }
+
+  explicit FOG_INLINE IntervalD(_Uninitialized) {}
+  explicit FOG_INLINE IntervalD(const IntervalF& other) { setInterval(other); }
 
   // --------------------------------------------------------------------------
   // [Consistency]

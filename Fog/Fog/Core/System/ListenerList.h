@@ -13,7 +13,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 
 namespace Fog {
 

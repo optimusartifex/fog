@@ -9,10 +9,9 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Init_Core_p.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Memory/Alloc.h>
+#include <Fog/Core/Memory/AllocDebug_p.h>
 #include <Fog/Core/Memory/Cleanup.h>
 
 // [Dependencies - C]
@@ -22,10 +21,16 @@
 namespace Fog {
 
 // ===========================================================================
+// [Configuration]
+// ===========================================================================
+
+#define FOG_DEBUG_MEMORY 0
+
+// ===========================================================================
 // [Fog::Memory - Alloc / Realloc / Free]
 // ===========================================================================
 
-static void* FOG_CDECL _Memory_alloc(size_t size)
+static void* FOG_CDECL Memory_alloc(size_t size)
 {
   void* p = ::malloc(size);
 
@@ -38,7 +43,7 @@ static void* FOG_CDECL _Memory_alloc(size_t size)
   return p;
 }
 
-static void* FOG_CDECL _Memory_calloc(size_t size)
+static void* FOG_CDECL Memory_calloc(size_t size)
 {
   void* p = ::calloc(size, 1);
 
@@ -51,18 +56,18 @@ static void* FOG_CDECL _Memory_calloc(size_t size)
   return p;
 }
 
-static void* FOG_CDECL _Memory_realloc(void* p, size_t size)
+static void* FOG_CDECL Memory_realloc(void* p, size_t size)
 {
   void* newp;
 
   if (FOG_IS_NULL(p))
   {
-    return _core.memory._m_alloc(size);
+    return _api.memory._m_alloc(size);
   }
 
   if (FOG_UNLIKELY(size == 0))
   {
-    _core.memory._m_free(p);
+    _api.memory._m_free(p);
     return NULL;
   }
 
@@ -76,21 +81,34 @@ static void* FOG_CDECL _Memory_realloc(void* p, size_t size)
   return newp;
 }
 
-static void FOG_CDECL _Memory_free(void* p)
+static void FOG_CDECL Memory_free(void* p)
 {
   ::free(p);
 }
 
 // ============================================================================
-// [Fog::Core - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _core_memory_init_alloc(void)
+FOG_NO_EXPORT void MemoryAlloc_init(void)
 {
-  _core.memory._m_alloc = _Memory_alloc;
-  _core.memory._m_calloc = _Memory_calloc;
-  _core.memory._m_realloc = _Memory_realloc;
-  _core.memory._m_free = _Memory_free;
+  _api.memory._m_alloc = Memory_alloc;
+  _api.memory._m_calloc = Memory_calloc;
+  _api.memory._m_realloc = Memory_realloc;
+  _api.memory._m_free = Memory_free;
+
+  if (FOG_DEBUG_MEMORY)
+  {
+    _core_memoryalloc_init_debug();
+  }
+}
+
+FOG_NO_EXPORT void MemoryAlloc_fini(void)
+{
+  if (FOG_DEBUG_MEMORY)
+  {
+    _core_memoryalloc_fini_debug();
+  }
 }
 
 } // Fog namespace

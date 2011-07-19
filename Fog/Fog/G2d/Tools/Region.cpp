@@ -10,13 +10,10 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/BufferP.h>
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Memory/MemoryBuffer.h>
-#include <Fog/G2d/Global/Constants.h>
-#include <Fog/G2d/Global/Init_G2d_p.h>
 #include <Fog/G2d/Rasterizer/Rasterizer_p.h>
 #include <Fog/G2d/Tools/Region.h>
 #include <Fog/G2d/Tools/RegionTmp_p.h>
@@ -2449,13 +2446,13 @@ _End:
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
 static Static<Region> _oempty_region;
 static Static<Region> _oinfinite_region;
 
-FOG_NO_EXPORT void _g2d_region_init(void)
+FOG_NO_EXPORT void Region_init(void)
 {
   RegionData* d;
 
@@ -2476,12 +2473,6 @@ FOG_NO_EXPORT void _g2d_region_init(void)
 
   Region::_oempty    = _oempty_region.instancep();
   Region::_oinfinite = _oinfinite_region.instancep();
-}
-
-FOG_NO_EXPORT void _g2d_region_fini(void)
-{
-  Region::_dinfinite->refCount.dec();
-  Region::_dnull->refCount.dec();
 }
 
 } // Fog namespace

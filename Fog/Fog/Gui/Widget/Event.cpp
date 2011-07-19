@@ -9,7 +9,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Static.h>
 #include <Fog/Gui/Widget/Event.h>
 
 namespace Fog {

@@ -8,7 +8,7 @@
 #define _FOG_G2D_IMAGING_EFFECTS_BLUREFFECT_H
 
 // [Dependencies]
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Memory/Ops.h>
 #include <Fog/G2d/Imaging/Effects/BorderEffect.h>
 

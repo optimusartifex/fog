@@ -8,8 +8,7 @@
 #define _FOG_CORE_MEMORY_MEMORYMANAGER_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 
 namespace Fog {
 

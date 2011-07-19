@@ -10,7 +10,6 @@
 // [Dependencies]
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/Point.h>
-#include <Fog/G2d/Global/Api.h>
 
 namespace Fog {
 

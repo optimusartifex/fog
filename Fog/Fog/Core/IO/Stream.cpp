@@ -9,8 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Init_Core_p.h>
-#include <Fog/Core/Global/Types.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Memory/Ops.h>
@@ -1192,7 +1191,7 @@ _NonSeekable:
     if (curPosition == -1 || endPosition == -1) return 0;
     int64_t remain = endPosition - curPosition;
 
-    if (maxBytes > 0 && remain > maxBytes)
+    if (maxBytes > 0 && (uint64_t)remain > (uint64_t)maxBytes)
       remain = maxBytes;
 
     if (seek(curPosition, SEEK_SET) == -1) return 0;
@@ -1250,16 +1249,15 @@ Stream& Stream::operator=(const Stream& other)
 }
 
 // ============================================================================
-// [Fog::Core - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _core_stream_init(void)
+FOG_NO_EXPORT void Stream_init(void)
 {
-  streamdevice_null.init();
-  Stream::_dnull = streamdevice_null.instancep();
+  Stream::_dnull = streamdevice_null.init();
 }
 
-FOG_NO_EXPORT void _core_stream_fini(void)
+FOG_NO_EXPORT void Stream_fini(void)
 {
   streamdevice_null.destroy();
 }

@@ -8,24 +8,14 @@
 #define _FOG_G2D_IMAGING_EFFECTS_COLORMATRIX_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Uninitialized.h>
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/G2d/Global/Constants.h>
 
 namespace Fog {
 
 //! @addtogroup Fog_G2d_Imaging
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct Argb32;
 
 // ============================================================================
 // [Fog::ColorMatrix]
@@ -51,11 +41,6 @@ struct FOG_API ColorMatrix
     _copyData(getData(), IDENTITY.getData());
   }
 
-  FOG_INLINE ColorMatrix(const float src[5][5])
-  {
-    _copyData(getData(), reinterpret_cast<const float*>(src));
-  }
-
   FOG_INLINE ColorMatrix(const float src[25])
   {
     _copyData(getData(), src);
@@ -64,10 +49,6 @@ struct FOG_API ColorMatrix
   FOG_INLINE ColorMatrix(const ColorMatrix& other)
   {
     _copyData(getData(), other.getData());
-  }
-
-  FOG_INLINE ColorMatrix(_Uninitialized)
-  {
   }
 
   FOG_INLINE ColorMatrix(
@@ -83,6 +64,8 @@ struct FOG_API ColorMatrix
     m[3][0] = m30; m[3][1] = m31; m[3][2] = m32; m[3][3] = m33; m[3][4] = m34;
     m[4][0] = m40; m[4][1] = m41; m[4][2] = m42; m[4][3] = m43; m[4][4] = m44;
   }
+
+  explicit FOG_INLINE ColorMatrix(_Uninitialized) {}
 
   // --------------------------------------------------------------------------
   // [Type]
@@ -239,12 +222,6 @@ struct FOG_API ColorMatrix
   // --------------------------------------------------------------------------
   // [Operations]
   // --------------------------------------------------------------------------
-
-  FOG_INLINE ColorMatrix& set(const float src[5][5])
-  {
-    _copyData(getData(), reinterpret_cast<const float*>(src));
-    return *this;
-  }
 
   FOG_INLINE ColorMatrix& set(const float src[25])
   {

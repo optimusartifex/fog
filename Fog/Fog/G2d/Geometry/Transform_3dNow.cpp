@@ -17,7 +17,7 @@ namespace Fog {
 // [Fog::Transform - MapPoint(s)]
 // ============================================================================
 
-static void FOG_CDECL _G2d_TransformF_mapPointsF_Translation_3dNow(const TransformF& self, PointF* dst, const PointF* src, size_t length)
+static void FOG_CDECL G2d_TransformF_mapPointsF_Translation_3dNow(const TransformF& self, PointF* dst, const PointF* src, size_t length)
 {
   size_t i;
 
@@ -57,7 +57,7 @@ static void FOG_CDECL _G2d_TransformF_mapPointsF_Translation_3dNow(const Transfo
   Face::m64fEMMS();
 }
 
-static void FOG_CDECL _G2d_TransformF_mapPointsF_Scaling_3dNow(const TransformF& self, PointF* dst, const PointF* src, size_t length)
+static void FOG_CDECL G2d_TransformF_mapPointsF_Scaling_3dNow(const TransformF& self, PointF* dst, const PointF* src, size_t length)
 {
   size_t i;
 
@@ -105,7 +105,7 @@ static void FOG_CDECL _G2d_TransformF_mapPointsF_Scaling_3dNow(const TransformF&
   Face::m64fEMMS();
 }
 
-static void FOG_CDECL _G2d_TransformF_mapPointsF_Affine_3dNow(const TransformF& self, PointF* dst, const PointF* src, size_t length)
+static void FOG_CDECL G2d_TransformF_mapPointsF_Affine_3dNow(const TransformF& self, PointF* dst, const PointF* src, size_t length)
 {
   size_t i;
 
@@ -186,7 +186,7 @@ static void FOG_CDECL _G2d_TransformF_mapPointsF_Affine_3dNow(const TransformF& 
 // [Fog::G2d - Library Initializers]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_transform_init_3dnow(void)
+FOG_NO_EXPORT void Transform_init3dNow(void)
 {
   _g2d.transformf.mapPointsF[TRANSFORM_TYPE_TRANSLATION] = _G2d_TransformF_mapPointsF_Translation_3dNow;
   _g2d.transformf.mapPointsF[TRANSFORM_TYPE_SCALING    ] = _G2d_TransformF_mapPointsF_Scaling_3dNow;

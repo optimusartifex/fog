@@ -9,7 +9,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/IO/DirEntry.h>
 #include <Fog/Core/IO/DirIterator.h>
 #include <Fog/Core/IO/FileSystem.h>
@@ -247,17 +246,17 @@ err_t DirIterator::open(const String& path)
 
   FOG_RETURN_ON_ERROR(FileSystem::toAbsolutePath(pathAbs, String(), path));
   FOG_RETURN_ON_ERROR(TextCodec::local8().encode(_pathCache, pathAbs));
-  
+
   errno = 0;
   if ((_handle = (void*)::opendir(_pathCache.getData())) != NULL)
   {
     // Get max size of file name in this directory + fallback.
     long direntSize = pathconf(_pathCache.getData(), _PC_NAME_MAX);
     if (direntSize == -1) direntSize = _POSIX_NAME_MAX;
-    
+
     // Add offset of d_name field + 1 to get correct dirent size.
     direntSize += FOG_OFFSET_OF(struct dirent, d_name) + 1;
-    
+
     // Ugly typecast from long, but there is no better way.
     _dent = reinterpret_cast<struct dirent*>(Memory::alloc((size_t)direntSize));
     if (!_dent)

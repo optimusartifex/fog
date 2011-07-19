@@ -10,8 +10,6 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/Util.h>
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Math/Math.h>
 
 namespace Fog {

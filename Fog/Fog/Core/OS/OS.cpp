@@ -10,9 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Config/Config.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Init_Core_p.h>
-#include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/OS/OS.h>
 #include <Fog/Core/Tools/ByteArray.h>
 #include <Fog/Core/Tools/ByteArrayTmp_p.h>
@@ -311,7 +309,7 @@ err_t OS::setEnv(const String& name, const String& value)
   else
     result = setenv(name8.getData(), value8.getData(), 1);
 
-  if (result != 0) 
+  if (result != 0)
     return ERR_ENV_SET_FAILED;
   else
     return ERR_OK;
@@ -319,15 +317,15 @@ err_t OS::setEnv(const String& name, const String& value)
 }
 
 // ============================================================================
-// [Fog::Core - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _core_os_init(void)
+FOG_NO_EXPORT void OS_init(void)
 {
   _core_os_local.init();
 }
 
-FOG_NO_EXPORT void _core_os_fini(void)
+FOG_NO_EXPORT void OS_fini(void)
 {
   _core_os_local.destroy();
 }

@@ -8,8 +8,7 @@
 #define _FOG_CORE_TOOLS_BYTEARRAYFILTER_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Tools/ByteArray.h>
 
 namespace Fog {
@@ -35,8 +34,8 @@ struct FOG_API ByteArrayFilter
   // [Public]
   // --------------------------------------------------------------------------
 
-  virtual Range indexOf(const char* str, size_t slen, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  virtual Range lastIndexOf(const char* str, size_t slen, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  virtual Range indexOf(const char* str, size_t slen, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
+  virtual Range lastIndexOf(const char* str, size_t slen, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
 
   // --------------------------------------------------------------------------
   // [Interface]

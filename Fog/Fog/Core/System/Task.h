@@ -8,8 +8,7 @@
 #define _FOG_CORE_SYSTEM_TASK_H
 
 // [Dependencies]
-#include <Fog/Core/Config/Config.h>
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 
 namespace Fog {
 

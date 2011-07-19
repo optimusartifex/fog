@@ -8,32 +8,25 @@
 #define _FOG_CORE_IO_DIRENTRY_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Tools/ByteArray.h>
 #include <Fog/Core/Tools/String.h>
 
 // [Dependencies - Windows]
 #if defined(FOG_OS_WINDOWS)
-#include <windows.h>
+# include <windows.h>
 #endif // FOG_OS_WINDOWS
 
 // [Dependencies - Posix]
 #if defined(FOG_OS_POSIX)
-#include <sys/stat.h>
-#include <dirent.h>
+# include <sys/stat.h>
+# include <dirent.h>
 #endif // FOG_OS_POSIX
 
 namespace Fog {
 
 //! @addtogroup Fog_Core_IO
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct DirIterator;
 
 // ============================================================================
 // [Fog::DirEntry]

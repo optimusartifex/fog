@@ -9,13 +9,13 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Internal_Core_p.h>
+#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Internals_p.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/CBezier.h>
 #include <Fog/G2d/Geometry/Round.h>
 #include <Fog/G2d/Geometry/Transform.h>
-#include <Fog/G2d/Global/Init_G2d_p.h>
 
 namespace Fog {
 
@@ -24,7 +24,7 @@ namespace Fog {
 // ============================================================================
 
 template<typename NumT>
-static err_t FOG_CDECL _RoundT_getBoundingBox(const NumT_(Round)* self,
+static err_t FOG_CDECL RoundT_getBoundingBox(const NumT_(Round)* self,
   NumT_(Box)* dst,
   const NumT_(Transform)* tr)
 {
@@ -37,7 +37,7 @@ static err_t FOG_CDECL _RoundT_getBoundingBox(const NumT_(Round)* self,
 // ============================================================================
 
 template<typename NumT>
-static bool FOG_CDECL _RoundT_hitTest(const NumT_(Round)* self,
+static bool FOG_CDECL RoundT_hitTest(const NumT_(Round)* self,
   const NumT_(Point)* pt)
 {
   NumT x = pt->x - self->rect.x;
@@ -88,16 +88,16 @@ static bool FOG_CDECL _RoundT_hitTest(const NumT_(Round)* self,
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_round_init(void)
+FOG_NO_EXPORT void Round_init(void)
 {
-  _g2d.roundf.getBoundingBox = _RoundT_getBoundingBox<float>;
-  _g2d.roundd.getBoundingBox = _RoundT_getBoundingBox<double>;
+  _api.roundf.getBoundingBox = RoundT_getBoundingBox<float>;
+  _api.roundd.getBoundingBox = RoundT_getBoundingBox<double>;
 
-  _g2d.roundf.hitTest = _RoundT_hitTest<float>;
-  _g2d.roundd.hitTest = _RoundT_hitTest<double>;
+  _api.roundf.hitTest = RoundT_hitTest<float>;
+  _api.roundd.hitTest = RoundT_hitTest<double>;
 }
 
 } // Fog namespace

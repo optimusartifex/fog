@@ -9,10 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Global/Error.h>
-#include <Fog/Core/Global/Init_Core_p.h>
 
 // [Dependencies - Windows]
 #if defined(FOG_OS_WINDOWS)
@@ -47,14 +44,10 @@ err_t Error::unregisterErrorRange(err_t start, err_t end)
 }
 
 // ============================================================================
-// [Fog::Core - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _core_error_init(void)
-{
-}
-
-FOG_NO_EXPORT void _core_error_fini(void)
+FOG_NO_EXPORT void Error_init(void)
 {
 }
 

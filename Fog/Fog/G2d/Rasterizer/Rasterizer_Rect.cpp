@@ -10,7 +10,6 @@
 
 // [Dependencies]
 #include <Fog/Core/Face/Face_C.h>
-#include <Fog/Core/Global/Static.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Rasterizer/Rasterizer_p.h>
 #include <Fog/G2d/Rasterizer/Scanline_p.h>

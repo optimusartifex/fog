@@ -8,11 +8,9 @@
 #define _FOG_CORE_TOOLS_CHAR_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Memory/BSwap.h>
-#include <Fog/Core/Tools/CharUtil.h>
-#include <Fog/Core/Tools/Unicode.h>
+#include <Fog/Core/Tools/CharData.h>
 
 namespace Fog {
 
@@ -24,243 +22,629 @@ namespace Fog {
 // ============================================================================
 
 #include <Fog/Core/Pack/PackByte.h>
-//! @brief UTF-16 Character.
+//! @brief 16-bit unicode character.
 struct FOG_NO_EXPORT Char
 {
+  // --------------------------------------------------------------------------
+  // [Typedefs]
+  // --------------------------------------------------------------------------
+
+  // Template support.
+  typedef Char PType;
+  typedef Char UType;
+  typedef uint16_t Value;
+  typedef Utf16 Stub;
+  typedef String Sequence;
+  typedef StringFilter Filter;
+  typedef StringMatcher Matcher;
+
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
   FOG_INLINE Char() {}
-  FOG_INLINE Char(const Char& c) : _ch(c._ch) {}
+  FOG_INLINE Char(const Char& c) : _value(c._value) {}
 
-  explicit FOG_INLINE Char(char     c) : _ch((uint8_t)c) {}
-  explicit FOG_INLINE Char(uint8_t  c) : _ch(c) {}
-  explicit FOG_INLINE Char(int16_t  c) : _ch((uint16_t)c) {}
-  explicit FOG_INLINE Char(uint16_t c) : _ch(c) {}
-  explicit FOG_INLINE Char(int32_t  c) : _ch((uint16_t)(uint32_t)c) {}
-  explicit FOG_INLINE Char(uint32_t c) : _ch((uint16_t)c) {}
+#if defined(FOG_CC_HAVE_STANDARD_CHAR_TYPE)
+  explicit FOG_INLINE Char(char c) : _value((unsigned char)c) {}
+#endif // FOG_CC_HAVE_STANDARD_CHAR_TYPE
 
-  // --------------------------------------------------------------------------
-  // [Character]
-  // --------------------------------------------------------------------------
+  explicit FOG_INLINE Char(signed char c) : _value((unsigned char)c) {}
+  explicit FOG_INLINE Char(unsigned char c) : _value(c) {}
 
-  //! @brief Return 16-bit character value.
-  FOG_INLINE uint16_t ch() const { return _ch; }
+  explicit FOG_INLINE Char(signed short c) : _value((unsigned short)c) {}
+  explicit FOG_INLINE Char(unsigned short c) : _value(c) {}
 
-  // --------------------------------------------------------------------------
-  // [Operator Overload]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE Char& operator=(const char&     ch) { _ch = (uint8_t )ch          ; return *this; }
-  FOG_INLINE Char& operator=(const uint8_t&  ch) { _ch = ch                    ; return *this; }
-  FOG_INLINE Char& operator=(const int16_t&  ch) { _ch = (uint16_t)ch          ; return *this; }
-  FOG_INLINE Char& operator=(const uint16_t& ch) { _ch = ch                    ; return *this; }
-  FOG_INLINE Char& operator=(const int32_t&  ch) { _ch = (uint16_t)(uint32_t)ch; return *this; }
-  FOG_INLINE Char& operator=(const uint32_t& ch) { _ch = (uint16_t)ch          ; return *this; }
-  FOG_INLINE Char& operator=(const Char&     ch) { _ch = ch._ch                ; return *this; }
+  explicit FOG_INLINE Char(signed int c) : _value((uint16_t)(unsigned int)c) {}
+  explicit FOG_INLINE Char(unsigned int c) : _value((uint16_t)c) {}
 
   // --------------------------------------------------------------------------
-  // [Implicit Conversion]
+  // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE operator uint16_t() const { return (uint16_t)_ch; }
+  //! @brief Get the 16-bit character value.
+  FOG_INLINE uint16_t getValue() const { return _value; }
+  //! @brief Set the 16-bit character value.
+  FOG_INLINE void setValue(uint16_t value) { _value = value; }
+
+  //! @brief Get the 16-bit character value converted to a signed integer.
+  FOG_INLINE int getInt() const
+  {
+    return (int)_value;
+  }
+
+  //! @brief Set the 16-bit character value from an integer.
+  FOG_INLINE void setInt(int value)
+  {
+    FOG_ASSERT(value >= 0 && value <= 0xFFFF);
+    _value = (uint16_t)value;
+  }
 
   // --------------------------------------------------------------------------
-  // [Ascii CTypes]
+  // [Properties]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool isAsciiAlpha() const { return CharUtil::isAsciiAlpha(_ch); }
-  FOG_INLINE bool isAsciiAlnum() const { return CharUtil::isAsciiAlnum(_ch); }
-  FOG_INLINE bool isAsciiLower() const { return CharUtil::isAsciiLower(_ch); }
-  FOG_INLINE bool isAsciiUpper() const { return CharUtil::isAsciiUpper(_ch); }
-  FOG_INLINE bool isAsciiDigit() const { return CharUtil::isAsciiDigit(_ch); }
-  FOG_INLINE bool isAsciiXDigit()const { return CharUtil::isAsciiXDigit(_ch); }
-  FOG_INLINE bool isAsciiSpace() const { return CharUtil::isAsciiSpace(_ch); }
-  FOG_INLINE bool isAsciiBlank() const { return CharUtil::isAsciiSpace(_ch); }
-  FOG_INLINE bool isAsciiPunct() const { return CharUtil::isAsciiPunct(_ch); }
-  FOG_INLINE bool isAsciiGraph() const { return CharUtil::isAsciiGraph(_ch); }
-  FOG_INLINE bool isAsciiPrint() const { return CharUtil::isAsciiPrint(_ch); }
-
-  FOG_INLINE Char toAsciiLower() const { return Char(CharUtil::toAsciiLower(_ch)); }
-  FOG_INLINE Char toAsciiUpper() const { return Char(CharUtil::toAsciiUpper(_ch)); }
+  FOG_INLINE bool isNull() const { return _value == 0; }
+  FOG_INLINE bool isAt(uint16_t start, uint16_t end) const { return _value >= start && _value <= end; }
 
   // --------------------------------------------------------------------------
-  // [Statics]
+  // [ASCII Properties]
   // --------------------------------------------------------------------------
+  
+  FOG_INLINE bool isAsciiBlank() const { return isAsciiBlank(_value); }
+  FOG_INLINE bool isAsciiCntrl() const { return isAsciiCntrl(_value); }
+  FOG_INLINE bool isAsciiDigit() const { return isAsciiDigit(_value); }
+  FOG_INLINE bool isAsciiGraph() const { return isAsciiGraph(_value); }
+  FOG_INLINE bool isAsciiLetter() const { return isAsciiLetter(_value); }
+  FOG_INLINE bool isAsciiLetter_() const { return isAsciiLetter_(_value); }
+  FOG_INLINE bool isAsciiLower() const { return isAsciiLower(_value); }
+  FOG_INLINE bool isAsciiNumlet() const { return isAsciiNumlet(_value); }
+  FOG_INLINE bool isAsciiPrint() const { return isAsciiPrint(_value); }
+  FOG_INLINE bool isAsciiPunct() const { return isAsciiPunct(_value); }
+  FOG_INLINE bool isAsciiSpace() const { return isAsciiSpace(_value); }
+  FOG_INLINE bool isAsciiUpper() const { return isAsciiUpper(_value); }
+  FOG_INLINE bool isAsciiXDigit() const { return isAsciiXDigit(_value); }
+  FOG_INLINE bool isAsciiXLetter() const { return isAsciiXLetter(_value); }
 
-  static FOG_INLINE bool isAsciiAlpha(uint16_t ch) { return CharUtil::isAsciiAlpha(ch); }
-  static FOG_INLINE bool isAsciiAlnum(uint16_t ch) { return CharUtil::isAsciiAlnum(ch); }
-  static FOG_INLINE bool isAsciiLower(uint16_t ch) { return CharUtil::isAsciiLower(ch); }
-  static FOG_INLINE bool isAsciiUpper(uint16_t ch) { return CharUtil::isAsciiUpper(ch); }
-  static FOG_INLINE bool isAsciiDigit(uint16_t ch) { return CharUtil::isAsciiDigit(ch); }
-  static FOG_INLINE bool isAsciiXDigit(uint16_t ch){ return CharUtil::isAsciiXDigit(ch); }
-  static FOG_INLINE bool isAsciiSpace(uint16_t ch) { return CharUtil::isAsciiSpace(ch); }
-  static FOG_INLINE bool isAsciiBlank(uint16_t ch) { return CharUtil::isAsciiSpace(ch); }
-  static FOG_INLINE bool isAsciiPunct(uint16_t ch) { return CharUtil::isAsciiPunct(ch); }
-  static FOG_INLINE bool isAsciiGraph(uint16_t ch) { return CharUtil::isAsciiGraph(ch); }
-  static FOG_INLINE bool isAsciiPrint(uint16_t ch) { return CharUtil::isAsciiPrint(ch); }
-
-  static FOG_INLINE Char toAsciiLower(uint16_t ch) { return Char(CharUtil::toAsciiLower(ch)); }
-  static FOG_INLINE Char toAsciiUpper(uint16_t ch) { return Char(CharUtil::toAsciiUpper(ch)); }
-
-  // --------------------------------------------------------------------------
-  // [Unicode CTypes]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE bool isAlpha() const { return CharUtil::isAlpha(_ch); }
-  FOG_INLINE bool isLower() const { return CharUtil::isLower(_ch); }
-  FOG_INLINE bool isUpper() const { return CharUtil::isUpper(_ch); }
-  FOG_INLINE Char toLower() const { return Char(CharUtil::toLower(_ch)); }
-  FOG_INLINE Char toUpper() const { return Char(CharUtil::toUpper(_ch)); }
-  FOG_INLINE Char toAscii() const { return Char(CharUtil::toAscii(_ch)); }
-
-  FOG_INLINE bool isSpace() const { return CharUtil::isSpace(_ch); }
-  FOG_INLINE bool isBlank() const { return CharUtil::isBlank(_ch); }
-  FOG_INLINE bool isDigit() const { return CharUtil::isDigit(_ch); }
-  FOG_INLINE bool isAlnum() const { return CharUtil::isAlnum(_ch); }
-  FOG_INLINE bool isXDigit() const { return CharUtil::isXDigit(_ch); }
-  FOG_INLINE bool isPunct() const { return CharUtil::isPunct(_ch); }
-  FOG_INLINE bool isGraph() const { return CharUtil::isGraph(_ch); }
-  FOG_INLINE bool isPrint() const { return CharUtil::isPrint(_ch); }
-  FOG_INLINE bool isCntrl() const { return CharUtil::isCntrl(_ch); }
+  FOG_INLINE Char toAsciiLower() const { return Char(_value < 128 ? _charData.asciiToLower[_value] : _value); }
+  FOG_INLINE Char toAsciiUpper() const { return Char(_value < 128 ? _charData.asciiToUpper[_value] : _value); }
 
   // --------------------------------------------------------------------------
-  // [Statics]
+  // [Unicode Properties]
   // --------------------------------------------------------------------------
+  
+  FOG_INLINE const CharProperty& getProperty() const { return _charData.getPropertyUCS2(_value); }
 
-  static FOG_INLINE bool isAlpha(uint16_t ch) { return CharUtil::isAlpha(ch); }
-  static FOG_INLINE bool isLower(uint16_t ch) { return CharUtil::isLower(ch); }
-  static FOG_INLINE bool isUpper(uint16_t ch) { return CharUtil::isUpper(ch); }
-  static FOG_INLINE uint16_t toLower(uint16_t ch) { return CharUtil::toLower(ch); }
-  static FOG_INLINE uint16_t toUpper(uint16_t ch) { return CharUtil::toUpper(ch); }
-  static FOG_INLINE uint16_t toAscii(uint16_t ch) { return CharUtil::toAscii(ch); }
+  FOG_INLINE bool isControl() const { return isControl(_value); }
+  FOG_INLINE bool isDigit() const { return isDigit(_value); }
+  FOG_INLINE bool isLetter() const { return isLetter(_value); }
+  FOG_INLINE bool isLower() const { return isLower(_value); }
+  FOG_INLINE bool isMark() const { return isMark(_value); }
+  FOG_INLINE bool isNumber() const { return isNumber(_value); }
+  FOG_INLINE bool isNumlet() const { return isNumlet(_value); }
+  FOG_INLINE bool isPrint() const { return isPrint(_value); }
+  FOG_INLINE bool isPunct() const { return isPunct(_value); }
+  FOG_INLINE bool isSpace() const { return isSpace(_value); }
+  FOG_INLINE bool isSymbol() const { return isSymbol(_value); }
+  FOG_INLINE bool isTitle() const { return isTitle(_value); }
+  FOG_INLINE bool isUpper() const { return isUpper(_value); }
+  
+  FOG_INLINE uint32_t getCategory() const { return getProperty().getCategory(); }
+  FOG_INLINE uint32_t getUnicodeVersion() const { return getProperty().getUnicodeVersion(); }
+  FOG_INLINE uint32_t getCombiningClass() const { return getProperty().getCombiningClass(); }
+  FOG_INLINE uint32_t getScript() const { return getProperty().getScript(); }
 
-  static FOG_INLINE bool isSpace(uint16_t ch) { return CharUtil::isSpace(ch); }
-  static FOG_INLINE bool isBlank(uint16_t ch) { return CharUtil::isBlank(ch); }
-  static FOG_INLINE bool isDigit(uint16_t ch) { return CharUtil::isDigit(ch); }
-  static FOG_INLINE bool isAlnum(uint16_t ch) { return CharUtil::isAlnum(ch); }
-  static FOG_INLINE bool isXDigit(uint16_t ch) { return CharUtil::isXDigit(ch); }
-  static FOG_INLINE bool isPunct(uint16_t ch) { return CharUtil::isPunct(ch); }
-  static FOG_INLINE bool isGraph(uint16_t ch) { return CharUtil::isGraph(ch); }
-  static FOG_INLINE bool isPrint(uint16_t ch) { return CharUtil::isPrint(ch); }
-  static FOG_INLINE bool isCntrl(uint16_t ch) { return CharUtil::isCntrl(ch); }
+  FOG_INLINE uint32_t getGraphemeBreak() const { return getProperty().getGraphemeBreak(); }
+  FOG_INLINE uint32_t getWordBreak() const { return getProperty().getWordBreak(); }
+  FOG_INLINE uint32_t getSentenceBreak() const { return getProperty().getSentenceBreak(); }
+  FOG_INLINE uint32_t getLineBreak() const { return getProperty().getLineBreak(); }
 
-  // --------------------------------------------------------------------------
-  // [UTF16]
-  // --------------------------------------------------------------------------
+  FOG_INLINE uint32_t getBidi() const { return getProperty().getBidi(); }
+  FOG_INLINE uint32_t getJoining() const { return getProperty().getJoining(); }
+  FOG_INLINE uint32_t getEastAsianWidth() const { return getProperty().getEastAsianWidth(); }
 
-  FOG_INLINE bool isSurrogateLead() const { return isSurrogateLead(_ch); }
-  FOG_INLINE bool isSurrogateTrail() const { return isSurrogateTrail(_ch); }
-  FOG_INLINE bool isSurrogatePair() const { return isSurrogatePair(_ch); }
-  FOG_INLINE bool isValid() const { return isValid(_ch); }
+  FOG_INLINE uint32_t getCompositionExclusion() const { return getProperty().getCompositionExclusion(); }
+  FOG_INLINE uint32_t quickCheckNFD() const { return getProperty().quickCheckNFD(); }
+  FOG_INLINE uint32_t quickCheckNFC() const { return getProperty().quickCheckNFC(); }
+  FOG_INLINE uint32_t quickCheckNFKD() const { return getProperty().quickCheckNFKD(); }
+  FOG_INLINE uint32_t quickCheckNFKC() const { return getProperty().quickCheckNFKC(); }
 
-  // --------------------------------------------------------------------------
-  // [Statics]
-  // --------------------------------------------------------------------------
+  FOG_INLINE bool hasDecomposition() const { return getProperty().hasDecomposition(); }
+  FOG_INLINE uint32_t getDecompositionType() const { return getProperty().getDecompositionType(); }
 
-  static FOG_INLINE bool isSurrogateLead(uint16_t ch) { return (ch & UTF16_SURROGATE_PAIR_MASK) == UTF16_SURROGATE_LEAD_MIN; }
-  static FOG_INLINE bool isSurrogateLead(uint32_t ch) { return (ch & UTF16_SURROGATE_PAIR_MASK) == UTF16_SURROGATE_LEAD_MIN; }
+  FOG_INLINE const uint16_t* getDecompositionData() const { return getProperty().getDecompositionData(); }
+  FOG_INLINE uint32_t getDecompositionIndex() const { return getProperty().getDecompositionIndex(); }
 
-  static FOG_INLINE bool isSurrogateTrail(uint16_t ch) { return (ch & UTF16_SURROGATE_PAIR_MASK) == UTF16_SURROGATE_TRAIL_MIN; }
-  static FOG_INLINE bool isSurrogateTrail(uint32_t ch) { return (ch & UTF16_SURROGATE_PAIR_MASK) == UTF16_SURROGATE_TRAIL_MIN; }
+  FOG_INLINE bool hasUpper() const { return hasUpper(_value); }
+  FOG_INLINE bool hasLower() const { return hasLower(_value); }
+  FOG_INLINE bool hasTitle() const { return hasTitle(_value); }
 
-  static FOG_INLINE bool isSurrogatePair(uint16_t ch) { return (ch & UTF16_SURROGATE_PAIR_MASK) == UTF16_SURROGATE_PAIR_BASE; }
-  static FOG_INLINE bool isSurrogatePair(uint32_t ch) { return (ch & UTF16_SURROGATE_PAIR_MASK) == UTF16_SURROGATE_PAIR_BASE; }
-
-  static FOG_INLINE bool isValid(uint16_t ch) { return (ch < 0xFFFE); }
-  static FOG_INLINE bool isValid(uint32_t ch) { return (ch < 0xFFFE); }
-
-  // --------------------------------------------------------------------------
-  // [BOM / BSwap]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE bool isBomNative() const { return _ch == UTF16_BOM_NATIVE; }
-  FOG_INLINE bool isBomSwapped() const { return _ch == UTF16_BOM_SWAPPED; }
-
-  FOG_INLINE Char& bswap() { _ch = Memory::bswap16(_ch); return *this; }
-
-  // --------------------------------------------------------------------------
-  // [Statics]
-  // --------------------------------------------------------------------------
-
-  static FOG_INLINE bool isBomNative(uint16_t ch) { return ch == UTF16_BOM_NATIVE; }
-  static FOG_INLINE bool isBomSwapped(uint16_t ch) { return ch == UTF16_BOM_SWAPPED; }
-
-  static FOG_INLINE uint16_t bswap(uint16_t ch) { return Memory::bswap16(ch); }
-
-  // --------------------------------------------------------------------------
-  // [Combine]
-  // --------------------------------------------------------------------------
-
-  static FOG_INLINE Char combine(Char ch, Char comb) { return Char((uint16_t)unicodeCombine(ch._ch, comb._ch)); }
+  FOG_INLINE Char toUpper() const { return Char(toUpper(_value)); }
+  FOG_INLINE Char toLower() const { return Char(toLower(_value)); }
+  FOG_INLINE Char toTitle() const { return Char(toTitle(_value)); }
 
   // --------------------------------------------------------------------------
   // [Surrogates]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE uint32_t fromSurrogate(uint16_t uc0, uint16_t uc1)
+  FOG_INLINE bool isSurrogate() const { return isSurrogate(_value); }
+  FOG_INLINE bool isHiSurrogate() const { return isHiSurrogate(_value); }
+  FOG_INLINE bool isLoSurrogate() const { return isLoSurrogate(_value); }
+
+  // --------------------------------------------------------------------------
+  // [BOM / BSwap]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool isBomMark() const { return _value == UTF16_BOM_MARK; }
+  FOG_INLINE bool isBomSwap() const { return _value == UTF16_BOM_SWAP; }
+  FOG_INLINE Char& bswap() { _value = Memory::bswap16(_value); return *this; }
+
+  // --------------------------------------------------------------------------
+  // [Equality / Comparison]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const Char& other) { return _value == other._value; }
+  FOG_INLINE int compare(const Char& other) { return (int)_value - (int)other._value; }
+
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE Char& operator =(const Char& c) { _value  = c._value; return *this; }
+  FOG_INLINE Char& operator-=(const Char& c) { _value -= c._value; return *this; }
+  FOG_INLINE Char& operator+=(const Char& c) { _value += c._value; return *this; }
+  FOG_INLINE Char operator-(const Char& c) { return Char(_value - c._value); }
+  FOG_INLINE Char operator+(const Char& c) { return Char(_value + c._value); }
+
+#if defined(FOG_CC_HAVE_STANDARD_CHAR_TYPE)
+  FOG_INLINE Char& operator =(const char& c) { _value  = (uint8_t)c; return *this; }
+  FOG_INLINE Char& operator-=(const char& c) { _value -= (uint8_t)c; return *this; }
+  FOG_INLINE Char& operator+=(const char& c) { _value += (uint8_t)c; return *this; }
+  FOG_INLINE Char operator-(const char& c) { return Char(_value - (uint8_t)c); }
+  FOG_INLINE Char operator+(const char& c) { return Char(_value + (uint8_t)c); }
+#endif // FOG_CC_HAVE_STANDARD_CHAR_TYPE
+
+  FOG_INLINE Char& operator =(const signed char& c) { _value  = (uint8_t)c; return *this; }
+  FOG_INLINE Char& operator-=(const signed char& c) { _value -= (uint8_t)c; return *this; }
+  FOG_INLINE Char& operator+=(const signed char& c) { _value += (uint8_t)c; return *this; }
+  FOG_INLINE Char operator-(const signed char& c) { return Char(_value - (uint8_t)c); }
+  FOG_INLINE Char operator+(const signed char& c) { return Char(_value + (uint8_t)c); }
+
+  FOG_INLINE Char& operator =(const unsigned char& c) { _value  = c; return *this; }
+  FOG_INLINE Char& operator-=(const unsigned char& c) { _value -= c; return *this; }
+  FOG_INLINE Char& operator+=(const unsigned char& c) { _value += c; return *this; }
+  FOG_INLINE Char operator-(const unsigned char& c) { return Char(_value - c); }
+  FOG_INLINE Char operator+(const unsigned char& c) { return Char(_value + c); }
+
+  FOG_INLINE Char& operator =(const signed short& c) { _value  = (unsigned short)c; return *this; }
+  FOG_INLINE Char& operator-=(const signed short& c) { _value -= (unsigned short)c; return *this; }
+  FOG_INLINE Char& operator+=(const signed short& c) { _value += (unsigned short)c; return *this; }
+  FOG_INLINE Char operator-(const signed short& c) { return Char(_value - (uint16_t)c); }
+  FOG_INLINE Char operator+(const signed short& c) { return Char(_value + (uint16_t)c); }
+
+  FOG_INLINE Char& operator =(const unsigned short& c) { _value  = c; return *this; }
+  FOG_INLINE Char& operator-=(const unsigned short& c) { _value -= c; return *this; }
+  FOG_INLINE Char& operator+=(const unsigned short& c) { _value += c; return *this; }
+  FOG_INLINE Char operator-(const unsigned short& c) { return Char(_value - c); }
+  FOG_INLINE Char operator+(const unsigned short& c) { return Char(_value + c); }
+
+  FOG_INLINE Char& operator =(const signed int& c) { _value  = (uint16_t)(unsigned int)c; return *this; }
+  FOG_INLINE Char& operator-=(const signed int& c) { _value -= (uint16_t)(unsigned int)c; return *this; }
+  FOG_INLINE Char& operator+=(const signed int& c) { _value += (uint16_t)(unsigned int)c; return *this; }
+  FOG_INLINE Char operator-(const signed int& c) { return Char(_value - (uint16_t)(unsigned int)c); }
+  FOG_INLINE Char operator+(const signed int& c) { return Char(_value + (uint16_t)(unsigned int)c); }
+
+  FOG_INLINE Char& operator =(const unsigned int& c) { _value  = (uint16_t)c; return *this; }
+  FOG_INLINE Char& operator-=(const unsigned int& c) { _value -= (uint16_t)c; return *this; }
+  FOG_INLINE Char& operator+=(const unsigned int& c) { _value += (uint16_t)c; return *this; }
+  FOG_INLINE Char operator-(const unsigned int& c) { return Char(_value - (uint16_t)c); }
+  FOG_INLINE Char operator+(const unsigned int& c) { return Char(_value + (uint16_t)c); }
+
+  FOG_INLINE bool operator==(const Char& c) { return _value == c._value; }
+  FOG_INLINE bool operator!=(const Char& c) { return _value != c._value; }
+  FOG_INLINE bool operator>=(const Char& c) { return _value >= c._value; }
+  FOG_INLINE bool operator> (const Char& c) { return _value >  c._value; }
+  FOG_INLINE bool operator<=(const Char& c) { return _value <= c._value; }
+  FOG_INLINE bool operator< (const Char& c) { return _value <  c._value; }
+
+#if defined(FOG_CC_HAVE_STANDARD_CHAR_TYPE)
+  FOG_INLINE bool operator==(const char& c) { return _value == (uint8_t)c; }
+  FOG_INLINE bool operator!=(const char& c) { return _value != (uint8_t)c; }
+  FOG_INLINE bool operator>=(const char& c) { return _value >= (uint8_t)c; }
+  FOG_INLINE bool operator> (const char& c) { return _value >  (uint8_t)c; }
+  FOG_INLINE bool operator<=(const char& c) { return _value <= (uint8_t)c; }
+  FOG_INLINE bool operator< (const char& c) { return _value <  (uint8_t)c; }
+#endif // FOG_CC_HAVE_STANDARD_CHAR_TYPE
+
+  FOG_INLINE bool operator==(const signed char& c) { return _value == (uint8_t)c; }
+  FOG_INLINE bool operator!=(const signed char& c) { return _value != (uint8_t)c; }
+  FOG_INLINE bool operator>=(const signed char& c) { return _value >= (uint8_t)c; }
+  FOG_INLINE bool operator> (const signed char& c) { return _value >  (uint8_t)c; }
+  FOG_INLINE bool operator<=(const signed char& c) { return _value <= (uint8_t)c; }
+  FOG_INLINE bool operator< (const signed char& c) { return _value <  (uint8_t)c; }
+
+  FOG_INLINE bool operator==(const unsigned char& c) { return _value == c; }
+  FOG_INLINE bool operator!=(const unsigned char& c) { return _value != c; }
+  FOG_INLINE bool operator>=(const unsigned char& c) { return _value >= c; }
+  FOG_INLINE bool operator> (const unsigned char& c) { return _value >  c; }
+  FOG_INLINE bool operator<=(const unsigned char& c) { return _value <= c; }
+  FOG_INLINE bool operator< (const unsigned char& c) { return _value <  c; }
+
+  FOG_INLINE bool operator==(const signed short& c) { return _value == (unsigned short)c; }
+  FOG_INLINE bool operator!=(const signed short& c) { return _value != (unsigned short)c; }
+  FOG_INLINE bool operator>=(const signed short& c) { return _value >= (unsigned short)c; }
+  FOG_INLINE bool operator> (const signed short& c) { return _value >  (unsigned short)c; }
+  FOG_INLINE bool operator<=(const signed short& c) { return _value <= (unsigned short)c; }
+  FOG_INLINE bool operator< (const signed short& c) { return _value <  (unsigned short)c; }
+
+  FOG_INLINE bool operator==(const unsigned short& c) { return _value == c; }
+  FOG_INLINE bool operator!=(const unsigned short& c) { return _value != c; }
+  FOG_INLINE bool operator>=(const unsigned short& c) { return _value >= c; }
+  FOG_INLINE bool operator> (const unsigned short& c) { return _value >  c; }
+  FOG_INLINE bool operator<=(const unsigned short& c) { return _value <= c; }
+  FOG_INLINE bool operator< (const unsigned short& c) { return _value <  c; }
+
+  FOG_INLINE bool operator==(const signed int& c) { return _value == (unsigned int)c; }
+  FOG_INLINE bool operator!=(const signed int& c) { return _value != (unsigned int)c; }
+  FOG_INLINE bool operator>=(const signed int& c) { return _value >= (unsigned int)c; }
+  FOG_INLINE bool operator> (const signed int& c) { return _value >  (unsigned int)c; }
+  FOG_INLINE bool operator<=(const signed int& c) { return _value <= (unsigned int)c; }
+  FOG_INLINE bool operator< (const signed int& c) { return _value <  (unsigned int)c; }
+
+  FOG_INLINE bool operator==(const unsigned int& c) { return _value == c; }
+  FOG_INLINE bool operator!=(const unsigned int& c) { return _value != c; }
+  FOG_INLINE bool operator>=(const unsigned int& c) { return _value >= c; }
+  FOG_INLINE bool operator> (const unsigned int& c) { return _value >  c; }
+  FOG_INLINE bool operator<=(const unsigned int& c) { return _value <= c; }
+  FOG_INLINE bool operator< (const unsigned int& c) { return _value <  c; }
+
+  // --------------------------------------------------------------------------
+  // [Implicit Conversion]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE operator uint16_t() const { return (uint16_t)_value; }
+
+  // --------------------------------------------------------------------------
+  // [Statics]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE bool isNull(uint16_t c) { return c == 0; }
+  static FOG_INLINE bool isNull(uint32_t c) { return c == 0; }
+
+  static FOG_INLINE bool isAsciiBlank(uint16_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_BLANK) != 0 : false; }
+  static FOG_INLINE bool isAsciiBlank(uint32_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_BLANK) != 0 : false; }
+
+  static FOG_INLINE bool isAsciiCntrl(uint16_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_PRINT) == 0 : true; }
+  static FOG_INLINE bool isAsciiCntrl(uint32_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_PRINT) == 0 : true; }
+
+  static FOG_INLINE bool isAsciiDigit(uint16_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_DIGIT) != 0 : false; }
+  static FOG_INLINE bool isAsciiDigit(uint32_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_DIGIT) != 0 : false; }
+
+  static FOG_INLINE bool isAsciiGraph(uint16_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_GRAPH) != 0 : false; }
+  static FOG_INLINE bool isAsciiGraph(uint32_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_GRAPH) != 0 : false; }
+
+  static FOG_INLINE bool isAsciiLetter(uint16_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_ALPHA) != 0 : false; }
+  static FOG_INLINE bool isAsciiLetter(uint32_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_ALPHA) != 0 : false; }
+
+  static FOG_INLINE bool isAsciiLetter_(uint16_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_ALPHA_) != 0 : false; }
+  static FOG_INLINE bool isAsciiLetter_(uint32_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_ALPHA_) != 0 : false; }
+
+  static FOG_INLINE bool isAsciiLower(uint16_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_LOWER) != 0 : false; }
+  static FOG_INLINE bool isAsciiLower(uint32_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_LOWER) != 0 : false; }
+
+  static FOG_INLINE bool isAsciiNumlet(uint16_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_ALNUM) != 0 : false; }
+  static FOG_INLINE bool isAsciiNumlet(uint32_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_ALNUM) != 0 : false; }
+
+  static FOG_INLINE bool isAsciiPrint(uint16_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_PRINT) != 0 : false; }
+  static FOG_INLINE bool isAsciiPrint(uint32_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_PRINT) != 0 : false; }
+
+  static FOG_INLINE bool isAsciiPunct(uint16_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_PUNCT) != 0 : false; }
+  static FOG_INLINE bool isAsciiPunct(uint32_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_PUNCT) != 0 : false; }
+
+  static FOG_INLINE bool isAsciiSpace(uint16_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_SPACE) != 0 : false; }
+  static FOG_INLINE bool isAsciiSpace(uint32_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_SPACE) != 0 : false; }
+
+  static FOG_INLINE bool isAsciiUpper(uint16_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_UPPER) != 0 : false; }
+  static FOG_INLINE bool isAsciiUpper(uint32_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_UPPER) != 0 : false; }
+
+  static FOG_INLINE bool isAsciiXDigit(uint16_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_XDIGIT) != 0 : false; }
+  static FOG_INLINE bool isAsciiXDigit(uint32_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_XDIGIT) != 0 : false; }
+
+  static FOG_INLINE bool isAsciiXLetter(uint16_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_XALPHA) != 0 : false; }
+  static FOG_INLINE bool isAsciiXLetter(uint32_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_XALPHA) != 0 : false; }
+
+  static FOG_INLINE uint16_t toAsciiLower(uint16_t c) { return c < 128 ? (uint16_t)_charData.asciiToLower[c] : c; }
+  static FOG_INLINE uint32_t toAsciiLower(uint32_t c) { return c < 128 ? (uint16_t)_charData.asciiToLower[c] : c; }
+
+  static FOG_INLINE uint16_t toAsciiUpper(uint16_t c) { return c < 128 ? (uint16_t)_charData.asciiToUpper[c] : c; }
+  static FOG_INLINE uint32_t toAsciiUpper(uint32_t c) { return c < 128 ? (uint16_t)_charData.asciiToUpper[c] : c; }
+
+  static FOG_INLINE const CharProperty& getProperty(uint16_t c) { return _charData.getPropertyUCS2(c); }
+  static FOG_INLINE const CharProperty& getProperty(uint32_t c) { return _charData.getPropertyUCS2(c); }
+
+  static FOG_INLINE bool isCategoryAt(uint16_t c, uint32_t first, uint32_t last)
   {
-    return UTF16_SURROGATE_OFFSET + (uc0 << 10) + uc1;
+    FOG_ASSERT(first <= last);
+    return getCategory(c) - first <= last - first; 
   }
 
-  static FOG_INLINE void toSurrogatePair(uint32_t uc, uint16_t* uc0, uint16_t* uc1)
+  static FOG_INLINE bool isCategoryAt(uint32_t c, uint32_t first, uint32_t last)
   {
-    FOG_ASSERT(uc >= 0x10000);
-
-    *uc0 = UTF16_LEAD_OFFSET + (uc >> 10);
-    *uc1 = UTF16_SURROGATE_TRAIL_MIN + (uc & 0x03FFU);
+    FOG_ASSERT(first <= last);
+    return getCategory(c) - first <= last - first; 
   }
+
+  static FOG_INLINE bool isControl(uint16_t c) { return isCategoryAt(c, CHAR_CATEGORY_CC, CHAR_CATEGORY_CN); }
+  static FOG_INLINE bool isControl(uint32_t c) { return isCategoryAt(c, CHAR_CATEGORY_CC, CHAR_CATEGORY_CN); }
+
+  static FOG_INLINE bool isDigit(uint16_t c) { return getCategory(c) == CHAR_CATEGORY_NUMBER_DECIMAL; }
+  static FOG_INLINE bool isDigit(uint32_t c) { return getCategory(c) == CHAR_CATEGORY_NUMBER_DECIMAL; }
+
+  static FOG_INLINE bool isLetter(uint16_t c) { return isCategoryAt(c, CHAR_CATEGORY_LETTER_UPPERCASE, CHAR_CATEGORY_LETTER_OTHER); }
+  static FOG_INLINE bool isLetter(uint32_t c) { return isCategoryAt(c, CHAR_CATEGORY_LETTER_UPPERCASE, CHAR_CATEGORY_LETTER_OTHER); }
+
+  static FOG_INLINE bool isLower(uint16_t c) { return getCategory(c) == CHAR_CATEGORY_LETTER_LOWERCASE; }
+  static FOG_INLINE bool isLower(uint32_t c) { return getCategory(c) == CHAR_CATEGORY_LETTER_LOWERCASE; }
+
+  static FOG_INLINE bool isMark(uint16_t c) { return isCategoryAt(c, CHAR_CATEGORY_MARK_SPACING, CHAR_CATEGORY_MARK_NONSPACING); }
+  static FOG_INLINE bool isMark(uint32_t c) { return isCategoryAt(c, CHAR_CATEGORY_MARK_SPACING, CHAR_CATEGORY_MARK_NONSPACING); }
+
+  static FOG_INLINE bool isNumber(uint16_t c) { return isCategoryAt(c, CHAR_CATEGORY_NUMBER_DECIMAL, CHAR_CATEGORY_NUMBER_OTHER); }
+  static FOG_INLINE bool isNumber(uint32_t c) { return isCategoryAt(c, CHAR_CATEGORY_NUMBER_DECIMAL, CHAR_CATEGORY_NUMBER_OTHER); }
+
+  static FOG_INLINE bool isNumlet(uint16_t c) { return isCategoryAt(c, CHAR_CATEGORY_LETTER_UPPERCASE, CHAR_CATEGORY_NUMBER_OTHER); }
+  static FOG_INLINE bool isNumlet(uint32_t c) { return isCategoryAt(c, CHAR_CATEGORY_LETTER_UPPERCASE, CHAR_CATEGORY_NUMBER_OTHER); }
+
+  static FOG_INLINE bool isPrint(uint16_t c) { return !isCategoryAt(c, CHAR_CATEGORY_OTHER_CONTROL, CHAR_CATEGORY_OTHER_UNASSIGNED); }
+  static FOG_INLINE bool isPrint(uint32_t c) { return !isCategoryAt(c, CHAR_CATEGORY_OTHER_CONTROL, CHAR_CATEGORY_OTHER_UNASSIGNED); }
+
+  static FOG_INLINE bool isPunct(uint16_t c) { return isCategoryAt(c, CHAR_CATEGORY_PUNCT_CONNECTOR, CHAR_CATEGORY_PUNCT_OTHER); }
+  static FOG_INLINE bool isPunct(uint32_t c) { return isCategoryAt(c, CHAR_CATEGORY_PUNCT_CONNECTOR, CHAR_CATEGORY_PUNCT_OTHER); }
+
+  static FOG_INLINE bool isSpace(uint16_t c) { return getProperty(c).isSpace(); }
+  static FOG_INLINE bool isSpace(uint32_t c) { return getProperty(c).isSpace(); }
+
+  static FOG_INLINE bool isSymbol(uint16_t c) { return isCategoryAt(c, CHAR_CATEGORY_SYMBOL_MATH, CHAR_CATEGORY_SYMBOL_OTHER); }
+  static FOG_INLINE bool isSymbol(uint32_t c) { return isCategoryAt(c, CHAR_CATEGORY_SYMBOL_MATH, CHAR_CATEGORY_SYMBOL_OTHER); }
+
+  static FOG_INLINE bool isTitle(uint16_t c) { return getCategory(c) == CHAR_CATEGORY_LETTER_TITLECASE; }
+  static FOG_INLINE bool isTitle(uint32_t c) { return getCategory(c) == CHAR_CATEGORY_LETTER_TITLECASE; }
+
+  static FOG_INLINE bool isUpper(uint16_t c) { return getCategory(c) == CHAR_CATEGORY_LETTER_UPPERCASE; }
+  static FOG_INLINE bool isUpper(uint32_t c) { return getCategory(c) == CHAR_CATEGORY_LETTER_UPPERCASE; }
+
+  static FOG_INLINE uint32_t getCategory(uint16_t c) { return getProperty(c).getCategory(); }
+  static FOG_INLINE uint32_t getCategory(uint32_t c) { return getProperty(c).getCategory(); }
+
+  static FOG_INLINE uint32_t getUnicodeVersion(uint16_t c) { return getProperty(c).getUnicodeVersion(); }
+  static FOG_INLINE uint32_t getUnicodeVersion(uint32_t c) { return getProperty(c).getUnicodeVersion(); }
+
+  static FOG_INLINE uint32_t getCombiningClass(uint16_t c) { return getProperty(c).getCombiningClass(); }
+  static FOG_INLINE uint32_t getCombiningClass(uint32_t c) { return getProperty(c).getCombiningClass(); }
+
+  static FOG_INLINE uint32_t getScript(uint16_t c) { return getProperty(c).getScript(); }
+  static FOG_INLINE uint32_t getScript(uint32_t c) { return getProperty(c).getScript(); }
+
+  static FOG_INLINE uint32_t getGraphemeBreak(uint16_t c) { return getProperty(c).getGraphemeBreak(); }
+  static FOG_INLINE uint32_t getGraphemeBreak(uint32_t c) { return getProperty(c).getGraphemeBreak(); }
+
+  static FOG_INLINE uint32_t getWordBreak(uint16_t c) { return getProperty(c).getWordBreak(); }
+  static FOG_INLINE uint32_t getWordBreak(uint32_t c) { return getProperty(c).getWordBreak(); }
+
+  static FOG_INLINE uint32_t getSentenceBreak(uint16_t c) { return getProperty(c).getSentenceBreak(); }
+  static FOG_INLINE uint32_t getSentenceBreak(uint32_t c) { return getProperty(c).getSentenceBreak(); }
+
+  static FOG_INLINE uint32_t getLineBreak(uint16_t c) { return getProperty(c).getLineBreak(); }
+  static FOG_INLINE uint32_t getLineBreak(uint32_t c) { return getProperty(c).getLineBreak(); }
+
+  static FOG_INLINE uint32_t getBidi(uint16_t c) { return getProperty(c).getBidi(); }
+  static FOG_INLINE uint32_t getBidi(uint32_t c) { return getProperty(c).getBidi(); }
+
+  static FOG_INLINE uint32_t getJoining(uint16_t c) { return getProperty(c).getJoining(); }
+  static FOG_INLINE uint32_t getJoining(uint32_t c) { return getProperty(c).getJoining(); }
+
+  static FOG_INLINE uint32_t getEastAsianWidth(uint16_t c) { return getProperty(c).getEastAsianWidth(); }
+  static FOG_INLINE uint32_t getEastAsianWidth(uint32_t c) { return getProperty(c).getEastAsianWidth(); }
+
+  static FOG_INLINE uint32_t getCompositionExclusion(uint16_t c) { return getProperty(c).getCompositionExclusion(); }
+  static FOG_INLINE uint32_t getCompositionExclusion(uint32_t c) { return getProperty(c).getCompositionExclusion(); }
+
+  static FOG_INLINE uint32_t quickCheckNFD(uint16_t c) { return getProperty(c).quickCheckNFD(); }
+  static FOG_INLINE uint32_t quickCheckNFD(uint32_t c) { return getProperty(c).quickCheckNFD(); }
+
+  static FOG_INLINE uint32_t quickCheckNFC(uint16_t c) { return getProperty(c).quickCheckNFC(); }
+  static FOG_INLINE uint32_t quickCheckNFC(uint32_t c) { return getProperty(c).quickCheckNFC(); }
+
+  static FOG_INLINE uint32_t quickCheckNFKD(uint16_t c) { return getProperty(c).quickCheckNFKD(); }
+  static FOG_INLINE uint32_t quickCheckNFKD(uint32_t c) { return getProperty(c).quickCheckNFKD(); }
+
+  static FOG_INLINE uint32_t quickCheckNFKC(uint16_t c) { return getProperty(c).quickCheckNFKC(); }
+  static FOG_INLINE uint32_t quickCheckNFKC(uint32_t c) { return getProperty(c).quickCheckNFKC(); }
+
+  static FOG_INLINE bool hasDecomposition(uint16_t c) { return getProperty(c).hasDecomposition(); }
+  static FOG_INLINE bool hasDecomposition(uint32_t c) { return getProperty(c).hasDecomposition(); }
+
+  static FOG_INLINE uint32_t getDecompositionType(uint16_t c) { return getProperty(c).getDecompositionType(); }
+  static FOG_INLINE uint32_t getDecompositionType(uint32_t c) { return getProperty(c).getDecompositionType(); }
+
+  static FOG_INLINE const uint16_t* getDecompositionData(uint16_t c) { return getProperty(c).getDecompositionData(); }
+  static FOG_INLINE const uint16_t* getDecompositionData(uint32_t c) { return getProperty(c).getDecompositionData(); }
+
+  static FOG_INLINE uint32_t getDecompositionIndex(uint16_t c) { return getProperty(c).getDecompositionIndex(); }
+  static FOG_INLINE uint32_t getDecompositionIndex(uint32_t c) { return getProperty(c).getDecompositionIndex(); }
+
+  static FOG_INLINE bool hasUpper(uint16_t c)
+  {
+    const CharProperty& p = getProperty(c);
+    return (p.getMappingType() == CHAR_MAPPING_UPPERCASE) ||
+           (p.getMappingType() == CHAR_MAPPING_SPECIAL && _charData.special[p.getMappingData()]._upperCaseDiff != 0);
+  }
+
+  static FOG_INLINE bool hasUpper(uint32_t c)
+  {
+    const CharProperty& p = getProperty(c);
+    return (p.getMappingType() == CHAR_MAPPING_UPPERCASE) ||
+           (p.getMappingType() == CHAR_MAPPING_SPECIAL && _charData.special[p.getMappingData()]._upperCaseDiff != 0);
+  }
+
+  static FOG_INLINE bool hasLower(uint16_t c)
+  {
+    const CharProperty& p = getProperty(c);
+    return (p.getMappingType() == CHAR_MAPPING_LOWERCASE) ||
+           (p.getMappingType() == CHAR_MAPPING_SPECIAL && _charData.special[p.getMappingData()]._lowerCaseDiff != 0);
+  }
+
+  static FOG_INLINE bool hasLower(uint32_t c)
+  {
+    const CharProperty& p = getProperty(c);
+    return (p.getMappingType() == CHAR_MAPPING_LOWERCASE) ||
+           (p.getMappingType() == CHAR_MAPPING_SPECIAL && _charData.special[p.getMappingData()]._lowerCaseDiff != 0);
+  }
+
+  static FOG_INLINE bool hasTitle(uint16_t c)
+  {
+    const CharProperty& p = getProperty(c);
+    return p.getMappingType() == CHAR_MAPPING_SPECIAL && _charData.special[p.getMappingData()]._titleCaseDiff != 0;
+  }
+
+  static FOG_INLINE bool hasTitle(uint32_t c)
+  {
+    const CharProperty& p = getProperty(c);
+    return p.getMappingType() == CHAR_MAPPING_SPECIAL && _charData.special[p.getMappingData()]._titleCaseDiff != 0;
+  }
+
+  static FOG_INLINE uint16_t toUpper(uint16_t c)
+  {
+    const CharProperty& p = getProperty(c);
+    int32_t x = p.getMappingData();
+
+    if (p.getMappingType() == CHAR_MAPPING_SPECIAL)
+      x = _charData.special[x]._upperCaseDiff;
+    else if (p.getMappingType() != CHAR_MAPPING_UPPERCASE)
+      x = 0;
+
+    x += (int32_t)c;
+    FOG_ASSUME(x >= 0 && x < 0x10000);
+
+    return (uint16_t)x;
+  }
+
+  static FOG_INLINE uint32_t toUpper(uint32_t c)
+  {
+    const CharProperty& p = getProperty(c);
+    int32_t x = p.getMappingData();
+
+    if (p.getMappingType() == CHAR_MAPPING_SPECIAL)
+      x = _charData.special[x]._upperCaseDiff;
+    else if (p.getMappingType() != CHAR_MAPPING_UPPERCASE)
+      x = 0;
+
+    x += (int32_t)c;
+    FOG_ASSUME(x >= 0);
+
+    return (uint32_t)x;
+  }
+
+  static FOG_INLINE uint16_t toLower(uint16_t c)
+  {
+    const CharProperty& p = getProperty(c);
+    int32_t x = p.getMappingData();
+
+    if (p.getMappingType() == CHAR_MAPPING_SPECIAL)
+      x = _charData.special[x]._lowerCaseDiff;
+    else if (p.getMappingType() != CHAR_MAPPING_LOWERCASE)
+      x = 0;
+
+    x += (int32_t)c;
+    FOG_ASSUME(x >= 0 && x < 0x10000);
+
+    return (uint16_t)x;
+  }
+
+  static FOG_INLINE uint32_t toLower(uint32_t c)
+  {
+    const CharProperty& p = getProperty(c);
+    int32_t x = p.getMappingData();
+
+    if (p.getMappingType() == CHAR_MAPPING_SPECIAL)
+      x = _charData.special[x]._lowerCaseDiff;
+    else if (p.getMappingType() != CHAR_MAPPING_LOWERCASE)
+      x = 0;
+
+    x += (int32_t)c;
+    FOG_ASSUME(x >= 0);
+
+    return (uint32_t)x;
+  }
+
+  static FOG_INLINE uint16_t toTitle(uint16_t c)
+  {
+    const CharProperty& p = getProperty(c);
+    if (p.getMappingType() != CHAR_MAPPING_SPECIAL)
+      return c;
+
+    int32_t x = (int32_t)c + _charData.special[x]._titleCaseDiff;
+    FOG_ASSUME(x >= 0 && x < 0x10000);
+
+    return (uint16_t)x;
+  }
+
+  static FOG_INLINE uint32_t toTitle(uint32_t c)
+  {
+    const CharProperty& p = getProperty(c);
+    if (p.getMappingType() != CHAR_MAPPING_SPECIAL)
+      return c;
+
+    int32_t x = (int32_t)c + _charData.special[x]._titleCaseDiff;
+    FOG_ASSUME(x >= 0);
+
+    return (uint32_t)x;
+  }
+
+  static FOG_INLINE bool isSurrogate(uint16_t c) { return (c & 0x0000F800) == 0xD800; }
+  static FOG_INLINE bool isSurrogate(uint32_t c) { return (c & 0xFFFFF800) == 0xD800; }
+
+  static FOG_INLINE bool isHiSurrogate(uint16_t c) { return (c & 0x0000FC00) == 0xD800; }
+  static FOG_INLINE bool isHiSurrogate(uint32_t c) { return (c & 0xFFFFFC00) == 0xD800; }
+
+  static FOG_INLINE bool isLoSurrogate(uint16_t c) { return (c & 0x0000FC00) == 0xDC00; }
+  static FOG_INLINE bool isLoSurrogate(uint32_t c) { return (c & 0xFFFFFC00) == 0xDC00; }
+
+  static FOG_INLINE uint32_t ucs4FromSurrogate(uint16_t hi, uint16_t lo)
+  {
+    // 0x035FDC00 == 0x0D800 - (0x10000 >> 10)
+    return (uint32_t)lo + ((uint32_t)hi << 10) - 0x035FDC00;
+  }
+
+  static FOG_INLINE void ucs4ToSurrogate(uint16_t* hi, uint16_t* lo, uint32_t ucs4)
+  {
+    FOG_ASSERT(ucs4 >= 0x10000);
+
+    *hi = 0xD7C0 + (ucs4 >> 10);
+    *lo = 0xDC00 + (ucs4 & 0x03FFU);
+  }
+
+  static FOG_INLINE void ucs4ToSurrogate(Char* hi, Char* lo, uint32_t ucs4)
+  {
+    ucs4ToSurrogate(&hi->_value, &lo->_value, ucs4);
+  }
+
+  static FOG_INLINE bool isBomMark(uint16_t ch) { return ch == UTF16_BOM_MARK; }
+  static FOG_INLINE bool isBomSwap(uint16_t ch) { return ch == UTF16_BOM_SWAP; }
+  static FOG_INLINE uint16_t bswap(uint16_t ch) { return Memory::bswap16(ch); }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  //! @brief 16-bit code-point.
-  uint16_t _ch;
+  //! @brief 16-bit character value.
+  uint16_t _value;
 };
 #include <Fog/Core/Pack/PackRestore.h>
 
 //! @}
 
 } // Fog namespace
-
-// [Overloads]
-#define __FOG_CHAR_MAKE_COMPARE_OVERLOAD(TYPE_A, GET_A, TYPE_B, GET_B) \
-static FOG_INLINE bool operator==(TYPE_A, TYPE_B) { return GET_A == GET_B; } \
-static FOG_INLINE bool operator!=(TYPE_A, TYPE_B) { return GET_A != GET_B; } \
-static FOG_INLINE bool operator<=(TYPE_A, TYPE_B) { return GET_A <= GET_B; } \
-static FOG_INLINE bool operator>=(TYPE_A, TYPE_B) { return GET_A >= GET_B; } \
-static FOG_INLINE bool operator< (TYPE_A, TYPE_B) { return GET_A <  GET_B; } \
-static FOG_INLINE bool operator> (TYPE_A, TYPE_B) { return GET_A >  GET_B; }
-
-__FOG_CHAR_MAKE_COMPARE_OVERLOAD(const Fog::Char& a, a._ch, const Fog::Char& b, b._ch)
-
-__FOG_CHAR_MAKE_COMPARE_OVERLOAD(const Fog::Char& a, a._ch, char b, (uint8_t)b)
-__FOG_CHAR_MAKE_COMPARE_OVERLOAD(char a, (uint8_t)a, const Fog::Char& b, b._ch)
-
-__FOG_CHAR_MAKE_COMPARE_OVERLOAD(const Fog::Char& a, a._ch, uint8_t b, b)
-__FOG_CHAR_MAKE_COMPARE_OVERLOAD(uint8_t a, a, const Fog::Char& b, b._ch)
-
-__FOG_CHAR_MAKE_COMPARE_OVERLOAD(const Fog::Char& a, a._ch, int16_t b, (uint16_t)b)
-__FOG_CHAR_MAKE_COMPARE_OVERLOAD(int16_t a, (uint16_t)a, const Fog::Char& b, b._ch)
-
-__FOG_CHAR_MAKE_COMPARE_OVERLOAD(const Fog::Char& a, a._ch, uint16_t b, b)
-__FOG_CHAR_MAKE_COMPARE_OVERLOAD(uint16_t a, a, const Fog::Char& b, b._ch)
-
-#undef __FOG_CHAR_MAKE_COMPARE_OVERLOAD
-
-#define __FOG_CHAR_MAKE_ARITH_OVERLOAD(TYPE_A, GET_A, TYPE_B, GET_B) \
-static FOG_INLINE Fog::Char operator+(TYPE_A, TYPE_B) { return Fog::Char(GET_A + GET_B); } \
-static FOG_INLINE Fog::Char operator-(TYPE_A, TYPE_B) { return Fog::Char(GET_A - GET_B); }
-
-__FOG_CHAR_MAKE_ARITH_OVERLOAD(const Fog::Char& a, a._ch, const Fog::Char& b, b._ch)
-__FOG_CHAR_MAKE_ARITH_OVERLOAD(const Fog::Char& a, a._ch, char b, (uint16_t)(uint8_t)b)
-__FOG_CHAR_MAKE_ARITH_OVERLOAD(char a, (uint16_t)(uint8_t)a, const Fog::Char& b, b._ch)
-__FOG_CHAR_MAKE_ARITH_OVERLOAD(const Fog::Char& a, a._ch, int16_t b, (uint16_t)b)
-__FOG_CHAR_MAKE_ARITH_OVERLOAD(int16_t a, (uint16_t)a, const Fog::Char& b, b._ch)
-
-#undef __FOG_CHAR_MAKE_ARITH_OVERLOAD
 
 // ============================================================================
 // [Fog::TypeInfo<>]

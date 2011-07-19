@@ -14,17 +14,13 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/BufferP.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Debug.h>
-#include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Library/Library.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Strings.h>
-#include <Fog/G2d/Global/Constants.h>
-#include <Fog/G2d/Global/Init_G2d_p.h>
 #include <Fog/G2d/Imaging/Codecs/PngCodec_p.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageConverter.h>
@@ -397,7 +393,7 @@ err_t PngDecoder::readImage(Image& image)
   {
     err = converter.create(
       ImageFormatDescription::getByFormat(_format),
-      ImageFormatDescription::fromArgb(32, IMAGE_FD_NONE, ARGB32_AMASK, ARGB32_RMASK, ARGB32_GMASK, ARGB32_BMASK));
+      ImageFormatDescription::fromArgb(32, IMAGE_FD_NONE, PIXEL_ARGB32_MASK_A, PIXEL_ARGB32_MASK_R, PIXEL_ARGB32_MASK_G, PIXEL_ARGB32_MASK_B));
     if (FOG_IS_ERROR(err)) goto _End;
   }
 
@@ -578,10 +574,10 @@ err_t PngEncoder::writeImage(const Image& image)
 
       err = converter.create(
         ImageFormatDescription::fromArgb(32, IMAGE_FD_NONE,
-          ARGB32_AMASK,
-          ARGB32_RMASK,
-          ARGB32_GMASK,
-          ARGB32_BMASK),
+          PIXEL_ARGB32_MASK_A,
+          PIXEL_ARGB32_MASK_R,
+          PIXEL_ARGB32_MASK_G,
+          PIXEL_ARGB32_MASK_B),
         ImageFormatDescription::getByFormat(format));
       if (FOG_IS_ERROR(err)) goto _End;
 
@@ -719,13 +715,14 @@ err_t PngEncoder::setProperty(const ManagedString& name, const Value& value)
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_imagecodecprovider_init_png(void)
+FOG_NO_EXPORT void ImageCodecProvider_initPNG(void)
 {
-  PngCodecProvider* provider = fog_new PngCodecProvider();
-  ImageCodecProvider::addProvider(IMAGE_CODEC_BOTH, provider);
+  ImageCodecProvider* provider = fog_new PngCodecProvider();
+  ImageCodecProvider::addProvider(provider);
+  provider->deref();
 }
 
 } // Fog namespace

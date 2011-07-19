@@ -9,15 +9,14 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Internal_Core_p.h>
-#include <Fog/Core/Global/Swap.h>
+#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Internals_p.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/CBezier.h>
 #include <Fog/G2d/Geometry/Circle.h>
 #include <Fog/G2d/Geometry/PathTmp_p.h>
 #include <Fog/G2d/Geometry/Transform.h>
-#include <Fog/G2d/Global/Init_G2d_p.h>
 
 namespace Fog {
 
@@ -26,7 +25,7 @@ namespace Fog {
 // ============================================================================
 
 template<typename NumT>
-static err_t FOG_CDECL _CircleT_getBoundingBox(
+static err_t FOG_CDECL CircleT_getBoundingBox(
   const NumT_(Circle)* self,
   NumT_(Box)* dst,
   const NumT_(Transform)* transform)
@@ -134,7 +133,7 @@ _Identity:
 // ============================================================================
 
 template<typename NumT>
-static bool FOG_CDECL _CircleT_hitTest(const NumT_(Circle)* self, const NumT_(Point)* pt)
+static bool FOG_CDECL CircleT_hitTest(const NumT_(Circle)* self, const NumT_(Point)* pt)
 {
   // Hit-test in circle can be simplified to checking the distance of a center
   // point and a given pt. It's not needed to calculate normalized distance
@@ -156,7 +155,7 @@ static bool FOG_CDECL _CircleT_hitTest(const NumT_(Circle)* self, const NumT_(Po
 // ============================================================================
 
 template<typename NumT>
-static uint FOG_CDECL _CircleT_toCSpline(const NumT_(Circle)* self, NumT_(Point)* pts)
+static uint FOG_CDECL CircleT_toCSpline(const NumT_(Circle)* self, NumT_(Point)* pts)
 {
   NumT cx = self->center.x;
   NumT cy = self->center.y;
@@ -182,19 +181,19 @@ static uint FOG_CDECL _CircleT_toCSpline(const NumT_(Circle)* self, NumT_(Point)
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_circle_init(void)
+FOG_NO_EXPORT void Circle_init(void)
 {
-  _g2d.circlef.getBoundingBox = _CircleT_getBoundingBox<float>;
-  _g2d.circled.getBoundingBox = _CircleT_getBoundingBox<double>;
+  _api.circlef.getBoundingBox = CircleT_getBoundingBox<float>;
+  _api.circled.getBoundingBox = CircleT_getBoundingBox<double>;
 
-  _g2d.circlef.hitTest = _CircleT_hitTest<float>;
-  _g2d.circled.hitTest = _CircleT_hitTest<double>;
+  _api.circlef.hitTest = CircleT_hitTest<float>;
+  _api.circled.hitTest = CircleT_hitTest<double>;
 
-  _g2d.circlef.toCSpline = _CircleT_toCSpline<float>;
-  _g2d.circled.toCSpline = _CircleT_toCSpline<double>;
+  _api.circlef.toCSpline = CircleT_toCSpline<float>;
+  _api.circled.toCSpline = CircleT_toCSpline<double>;
 }
 
 } // Fog namespace

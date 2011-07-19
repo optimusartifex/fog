@@ -8,9 +8,7 @@
 #define _FOG_G2D_TEXT_GLYPHOUTLINECACHE_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/Static.h>
-#include <Fog/Core/Global/Swap.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/G2d/Text/GlyphOutline.h>
 
 namespace Fog {

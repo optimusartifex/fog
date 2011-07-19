@@ -9,9 +9,8 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/HashUtil.h>
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Memory/Ops.h>
-#include <Fog/G2d/Global/Constants.h>
 
 namespace Fog {
 

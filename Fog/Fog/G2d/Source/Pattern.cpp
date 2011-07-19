@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/G2d/Global/Init_G2d_p.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/G2d/Source/Pattern.h>
 
 namespace Fog {
@@ -246,7 +246,7 @@ err_t PatternF::_transform(uint32_t transformOp, const void* params)
 {
   FOG_RETURN_ON_ERROR(detach());
 
-  return _g2d.transformf.transform(_d->transform, transformOp, params);
+  return _api.transformf.transform(_d->transform, transformOp, params);
 }
 
 // ============================================================================
@@ -653,7 +653,7 @@ err_t PatternD::_transform(uint32_t transformOp, const void* params)
 {
   FOG_RETURN_ON_ERROR(detach());
 
-  return _g2d.transformd.transform(_d->transform, transformOp, params);
+  return _api.transformd.transform(_d->transform, transformOp, params);
 }
 
 // ============================================================================
@@ -864,10 +864,10 @@ err_t PatternD::setPattern(const PatternD& other)
 Static<PatternDataD> PatternD::_dnull;
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_pattern_init(void)
+FOG_NO_EXPORT void Pattern_init(void)
 {
   PatternF::_dnull->refCount.init(1);
   PatternF::_dnull->type = PATTERN_TYPE_NONE;
@@ -876,12 +876,6 @@ FOG_NO_EXPORT void _g2d_pattern_init(void)
   PatternD::_dnull->refCount.init(1);
   PatternD::_dnull->type = PATTERN_TYPE_NONE;
   PatternD::_dnull->transform.reset();
-}
-
-FOG_NO_EXPORT void _g2d_pattern_fini(void)
-{
-  PatternF::_dnull->refCount.dec();
-  PatternD::_dnull->refCount.dec();
 }
 
 } // Fog namespace

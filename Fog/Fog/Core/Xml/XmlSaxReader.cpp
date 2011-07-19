@@ -11,8 +11,6 @@
 // [Dependencies]
 #include <Fog/Core/Collection/Hash.h>
 #include <Fog/Core/Collection/List.h>
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/IO/MapFile.h>
 #include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Tools/Byte.h>
@@ -203,7 +201,7 @@ _Continue:
 
       case XML_SAX_STATE_TAG_BEGIN:
         // Match start tag name (this is probably the most common).
-        if (ch.isAlpha() || ch == Char('_') || ch == Char(':'))
+        if (ch.isLetter() || ch == Char('_') || ch == Char(':'))
         {
           state = XML_SAX_STATE_TAG_NAME;
           markTagStart = strCur;
@@ -236,7 +234,7 @@ _Continue:
         goto _End;
 
       case XML_SAX_STATE_TAG_NAME:
-        if (ch.isAlnum() || ch == Char('_') || ch == Char(':') || ch == Char('-') || ch == Char('.'))
+        if (ch.isLetter() || ch == Char('_') || ch == Char(':') || ch == Char('-') || ch == Char('.'))
           break;
 
         markTagEnd = strCur;
@@ -255,7 +253,7 @@ _Continue:
         if (ch.isSpace()) break;
 
         // Check for start of xml attribute.
-        if (ch.isAlpha() || ch == Char('_'))
+        if (ch.isLetter() || ch == Char('_'))
         {
           markAttrStart = strCur;
           state = XML_SAX_STATE_TAG_INSIDE_ATTRIBUTE_NAME;
@@ -289,7 +287,7 @@ _Continue:
         goto _End;
 
       case XML_SAX_STATE_TAG_INSIDE_ATTRIBUTE_NAME:
-        if (ch.isAlnum()  || ch == Char('_') || ch == Char(':') || ch == Char('-') || ch == Char('.')) break;
+        if (ch.isNumlet()  || ch == Char('_') || ch == Char(':') || ch == Char('-') || ch == Char('.')) break;
 
         markAttrEnd = strCur;
 
@@ -371,7 +369,7 @@ _TagEnd:
 
       case XML_SAX_STATE_TAG_CLOSE:
         // Only possible sequence here is [StartTagSequence].
-        if (ch.isAlpha() || ch == Char('_') || ch == Char(':'))
+        if (ch.isLetter() || ch == Char('_') || ch == Char(':'))
         {
           state = XML_SAX_STATE_TAG_CLOSE_NAME;
           markTagStart = strCur;
@@ -382,7 +380,7 @@ _TagEnd:
         goto _End;
 
       case XML_SAX_STATE_TAG_CLOSE_NAME:
-        if (ch.isAlnum() || ch == Char('_') || ch == Char(':') || ch == Char('-') || ch == Char('.'))
+        if (ch.isNumlet() || ch == Char('_') || ch == Char(':') || ch == Char('-') || ch == Char('.'))
           break;
 
         state = XML_SAX_STATE_TAG_CLOSE_END;
@@ -459,7 +457,7 @@ _TagEnd:
 
         if (doctype.getLength() < 2)
         {
-          if (ch.isAlpha() || ch == Char('_'))
+          if (ch.isLetter() || ch == Char('_'))
           {
             state = XML_SAX_STATE_DOCTYPE_TEXT;
             markDataStart = ++strCur;
@@ -499,7 +497,7 @@ _DOCTYPEEnd:
         break;
 
       case XML_SAX_STATE_DOCTYPE_TEXT:
-        if (ch.isAlnum() || ch == Char('_') || ch == Char(':') || ch == Char('-') || ch == Char('.')) break;
+        if (ch.isNumlet() || ch == Char('_') || ch == Char(':') || ch == Char('-') || ch == Char('.')) break;
         markDataEnd = strCur;
         doctype.append(Utf16(markDataStart, (size_t)(markDataEnd - markDataStart)));
 

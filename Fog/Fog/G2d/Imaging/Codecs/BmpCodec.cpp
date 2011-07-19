@@ -10,7 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/BufferP.h>
-#include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/BSwap.h>
@@ -18,8 +18,6 @@
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Strings.h>
-#include <Fog/G2d/Global/Constants.h>
-#include <Fog/G2d/Global/Init_G2d_p.h>
 #include <Fog/G2d/Imaging/Codecs/BmpCodec_p.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageConverter.h>
@@ -1015,12 +1013,14 @@ _Fail:
 }
 
 // ===========================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ===========================================================================
 
-FOG_NO_EXPORT void _g2d_imagecodecprovider_init_bmp(void)
+FOG_NO_EXPORT void ImageCodecProvider_initBMP(void)
 {
-  ImageCodecProvider::addProvider(IMAGE_CODEC_BOTH, fog_new BmpCodecProvider());
+  ImageCodecProvider* provider = fog_new BmpCodecProvider();
+  ImageCodecProvider::addProvider(provider);
+  provider->deref();
 }
 
 } // Fog namespace

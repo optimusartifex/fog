@@ -10,10 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Init_Core_p.h>
-#include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/IO/FileSystem.h>
 #include <Fog/Core/Library/Library.h>
 #include <Fog/Core/Threading/Lock.h>
@@ -383,13 +380,12 @@ List<String> Library::getSystemExtensions()
 }
 
 // ============================================================================
-// [Fog::Core - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _core_library_init(void)
+FOG_NO_EXPORT void Library_init(void)
 {
-  Library::_dnull.init();
-  LibraryData* d = Library::_dnull.instancep();
+  LibraryData* d = Library::_dnull.init();
   d->refCount.init(1);
   d->handle = NULL;
 
@@ -432,7 +428,7 @@ FOG_NO_EXPORT void _core_library_init(void)
 #endif // FOG_OS_MAC
 }
 
-FOG_NO_EXPORT void _core_library_fini(void)
+FOG_NO_EXPORT void Library_fini(void)
 {
   _core_library_local.destroy();
   Library::_dnull->refCount.dec();

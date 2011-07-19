@@ -9,14 +9,12 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Internal_Core_p.h>
+#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Internals_p.h>
 #include <Fog/G2d/Geometry/Shape.h>
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Geometry/PathTmp_p.h>
 #include <Fog/G2d/Geometry/Transform.h>
-#include <Fog/G2d/Global/Api.h>
-#include <Fog/G2d/Global/Init_G2d_p.h>
 
 namespace Fog {
 
@@ -25,7 +23,7 @@ namespace Fog {
 // ============================================================================
 
 template<typename NumT>
-static err_t FOG_CDECL _ShapeT_getBoundingBox(uint32_t shapeType, const void* shapeData,
+static err_t FOG_CDECL ShapeT_getBoundingBox(uint32_t shapeType, const void* shapeData,
   NumT_(Box)* dst, const NumT_(Transform)* transform)
 {
   NumT_(Point) tmp[8];
@@ -139,7 +137,7 @@ static err_t FOG_CDECL _ShapeT_getBoundingBox(uint32_t shapeType, const void* sh
 // ============================================================================
 
 template<typename NumT>
-static bool FOG_CDECL _ShapeT_hitTest(uint32_t shapeType, const void* shapeData, const NumT_(Point)* pt)
+static bool FOG_CDECL ShapeT_hitTest(uint32_t shapeType, const void* shapeData, const NumT_(Point)* pt)
 {
   switch (shapeType)
   {
@@ -177,20 +175,16 @@ static bool FOG_CDECL _ShapeT_hitTest(uint32_t shapeType, const void* shapeData,
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_shape_init(void)
+FOG_NO_EXPORT void Shape_init(void)
 {
-  _g2d.shapef.getBoundingBox = _ShapeT_getBoundingBox<float>;
-  _g2d.shaped.getBoundingBox = _ShapeT_getBoundingBox<double>;
+  _api.shapef.getBoundingBox = ShapeT_getBoundingBox<float>;
+  _api.shaped.getBoundingBox = ShapeT_getBoundingBox<double>;
 
-  _g2d.shapef.hitTest = _ShapeT_hitTest<float>;
-  _g2d.shaped.hitTest = _ShapeT_hitTest<double>;
-}
-
-FOG_NO_EXPORT void _g2d_shape_fini(void)
-{
+  _api.shapef.hitTest = ShapeT_hitTest<float>;
+  _api.shaped.hitTest = ShapeT_hitTest<double>;
 }
 
 } // Fog namespace

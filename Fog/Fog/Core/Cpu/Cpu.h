@@ -8,7 +8,7 @@
 #define _FOG_CORE_CPU_CPU_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/Global/Global.h>
 
 namespace Fog {
 
@@ -27,7 +27,6 @@ enum { CPU_CACHE_LINE = 64 };
 
 union FOG_NO_EXPORT CpuId
 {
-  uint32_t i[4];
   struct
   {
     uint32_t eax;
@@ -35,6 +34,8 @@ union FOG_NO_EXPORT CpuId
     uint32_t ecx;
     uint32_t edx;
   };
+
+  uint32_t i[4];
 };
 
 // ============================================================================

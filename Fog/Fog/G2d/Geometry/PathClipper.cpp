@@ -11,8 +11,8 @@
 // [Dependencies]
 #include <Fog/Core/Cpu/Cpu.h>
 #include <Fog/Core/Cpu/Initializer.h>
-#include <Fog/Core/Global/Internal_Core_p.h>
-#include <Fog/Core/Global/Swap.h>
+#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Internals_p.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Math/Solve.h>
 #include <Fog/G2d/Geometry/Box.h>
@@ -22,8 +22,6 @@
 #include <Fog/G2d/Geometry/PathTmp_p.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Geometry/Transform.h>
-#include <Fog/G2d/Global/Api.h>
-#include <Fog/G2d/Global/Init_G2d_p.h>
 
 namespace Fog {
 
@@ -88,7 +86,7 @@ namespace Fog {
 // ============================================================================
 
 template<typename NumT>
-static FOG_INLINE uint32_t _PathClipperT_getFlags(const NumT_(Point)& pt, const NumT_(Box)& box)
+static FOG_INLINE uint32_t PathClipperT_getFlags(const NumT_(Point)& pt, const NumT_(Box)& box)
 {
   return ((uint32_t)(pt.x < box.x0) << CLIP_SHIFT_X0) | ((uint32_t)(pt.y < box.y0) << CLIP_SHIFT_Y0) |
          ((uint32_t)(pt.x > box.x1) << CLIP_SHIFT_X1) | ((uint32_t)(pt.y > box.y1) << CLIP_SHIFT_Y1) ;
@@ -99,7 +97,7 @@ static FOG_INLINE uint32_t _PathClipperT_getFlags(const NumT_(Point)& pt, const 
 // ============================================================================
 
 template<typename NumT>
-static FOG_INLINE void _PathClipperT_clipPoint(NumT_(Point)& pt, const NumT_(Box)& box)
+static FOG_INLINE void PathClipperT_clipPoint(NumT_(Point)& pt, const NumT_(Box)& box)
 {
   if (pt.x < box.x0) pt.x = box.x0;
   if (pt.y < box.y0) pt.y = box.y0;
@@ -113,7 +111,7 @@ static FOG_INLINE void _PathClipperT_clipPoint(NumT_(Point)& pt, const NumT_(Box
 
 // Remove the redundant lines from the given array.
 template<typename NumT>
-static FOG_INLINE NumT_(Point)* _PathClipperT_removeRedundantLines(NumT_(Point)* pts, size_t length)
+static FOG_INLINE NumT_(Point)* PathClipperT_removeRedundantLines(NumT_(Point)* pts, size_t length)
 {
   size_t i = length;
   if (i < 3) return pts + length;
@@ -211,7 +209,7 @@ static FOG_INLINE void sortTSValues(NumT* t, uint32_t* s, int length)
 // ============================================================================
 
 template<typename NumT>
-static uint32_t FOG_CDECL _PathClipperT_initPath(NumT_(PathClipper)& self, const NumT_(Path)& src)
+static uint32_t FOG_CDECL PathClipperT_initPath(NumT_(PathClipper)& self, const NumT_(Path)& src)
 {
   self._lastIndex = INVALID_INDEX;
 
@@ -220,7 +218,7 @@ static uint32_t FOG_CDECL _PathClipperT_initPath(NumT_(PathClipper)& self, const
   if (src._d->hasBoundingBox() && self._clipBox.subsumes(src._d->boundingBox))
   {
     _FOG_PATH_VERIFY_BOUNDING_BOX(src);
-    return CLIPPER_INIT_ALREADY_CLIPPED;
+    return PATH_CLIPPER_STATUS_CLIPPED;
   }
 
   size_t i = src.getLength();
@@ -322,21 +320,21 @@ static uint32_t FOG_CDECL _PathClipperT_initPath(NumT_(PathClipper)& self, const
   }
 
   // Path don't need to be clipped.
-  return CLIPPER_INIT_ALREADY_CLIPPED;
+  return PATH_CLIPPER_STATUS_CLIPPED;
 
 _MustClip:
   self._lastIndex = (size_t)(cmd - src.getCommands());
-  return CLIPPER_INIT_NOT_CLIPPED;
+  return PATH_CLIPPER_STATUS_MUST_CLIP;
 
 _Invalid:
-  return CLIPPER_INIT_INVALID_PATH;
+  return PATH_CLIPPER_STATUS_INVALID;
 }
 
 // ============================================================================
 // [Fog::PathClipper - ContinuePath]
 // ============================================================================
 template<typename NumT>
-static err_t FOG_CDECL _PathClipperT_continuePath(NumT_(PathClipper)& self,
+static err_t FOG_CDECL PathClipperT_continuePath(NumT_(PathClipper)& self,
   NumT_(Path)& dst, const NumT_(Path)& src)
 {
   // Prevent using the same source and destination.
@@ -352,7 +350,7 @@ static err_t FOG_CDECL _PathClipperT_continuePath(NumT_(PathClipper)& self,
 }
 
 template<typename NumT>
-static err_t FOG_CDECL _PathClipperT_continueRaw(NumT_(PathClipper)& self,
+static err_t FOG_CDECL PathClipperT_continueRaw(NumT_(PathClipper)& self,
   NumT_(Path)& dst, const NumT_(Point)* srcPts, const uint8_t* srcCmd, size_t srcLength)
 {
   size_t i = srcLength;
@@ -416,7 +414,7 @@ _DetectLoopDo:
         if (initialFlags != NO_INITIAL_FLAGS && (initialFlags | previousFlags) != CLIP_SIDE_NONE) goto _ClipLoop;
 
         initialFlags = NO_INITIAL_FLAGS;
-        currentFlags = _PathClipperT_getFlags<NumT>(srcPts[0], clipBox);
+        currentFlags = PathClipperT_getFlags<NumT>(srcPts[0], clipBox);
         if (currentFlags != CLIP_SIDE_NONE) goto _ClipLoop;
 
         initialPoint = srcPts[0];
@@ -434,7 +432,7 @@ _DetectLoopDo:
       case PATH_CMD_LINE_TO:
         if (FOG_UNLIKELY(initialFlags == NO_INITIAL_FLAGS)) goto _Invalid;
 
-        currentFlags = _PathClipperT_getFlags<NumT>(srcPts[0], clipBox);
+        currentFlags = PathClipperT_getFlags<NumT>(srcPts[0], clipBox);
         if (currentFlags != CLIP_SIDE_NONE) goto _ClipLoop;
 
         i--;
@@ -450,8 +448,8 @@ _DetectLoopDo:
         FOG_ASSERT(i >= 2);
         if (FOG_UNLIKELY(initialFlags == NO_INITIAL_FLAGS)) goto _Invalid;
 
-        currentFlags = _PathClipperT_getFlags<NumT>(srcPts[0], clipBox) |
-                       _PathClipperT_getFlags<NumT>(srcPts[1], clipBox) ;
+        currentFlags = PathClipperT_getFlags<NumT>(srcPts[0], clipBox) |
+                       PathClipperT_getFlags<NumT>(srcPts[1], clipBox) ;
         if (currentFlags != CLIP_SIDE_NONE) goto _ClipLoop;
 
         i      -= 2;
@@ -467,9 +465,9 @@ _DetectLoopDo:
         FOG_ASSERT(i >= 3);
         if (FOG_UNLIKELY(initialFlags == NO_INITIAL_FLAGS)) goto _Invalid;
 
-        currentFlags = _PathClipperT_getFlags<NumT>(srcPts[0], clipBox) |
-                       _PathClipperT_getFlags<NumT>(srcPts[1], clipBox) |
-                       _PathClipperT_getFlags<NumT>(srcPts[2], clipBox) ;
+        currentFlags = PathClipperT_getFlags<NumT>(srcPts[0], clipBox) |
+                       PathClipperT_getFlags<NumT>(srcPts[1], clipBox) |
+                       PathClipperT_getFlags<NumT>(srcPts[2], clipBox) ;
         if (currentFlags != CLIP_SIDE_NONE) goto _ClipLoop;
 
         i      -= 3;
@@ -606,16 +604,16 @@ _ClipLoopDo:
             }
           }
 
-          currentFlags = _PathClipperT_getFlags<NumT>(srcPts[0], clipBox);
+          currentFlags = PathClipperT_getFlags<NumT>(srcPts[0], clipBox);
           initialPoint = srcPts[0];
           initialFlags = currentFlags;
 
-          dstPts = _PathClipperT_removeRedundantLines<NumT>(dstMark, (size_t)(dstPts - dstMark));
+          dstPts = PathClipperT_removeRedundantLines<NumT>(dstMark, (size_t)(dstPts - dstMark));
           dstCmd = dst.getCommandsX() + (size_t)(dstPts - dst.getVertices());
 
           dstPts[0] = srcPts[0];
           dstCmd[0] = PATH_CMD_MOVE_TO;
-          _PathClipperT_clipPoint<NumT>(dstPts[0], clipBox);
+          PathClipperT_clipPoint<NumT>(dstPts[0], clipBox);
           dstPts++;
           dstCmd++;
 
@@ -633,7 +631,7 @@ _ClipLoopDo:
 
         case PATH_CMD_LINE_TO:
         {
-          currentFlags = _PathClipperT_getFlags<NumT>(srcPts[0], clipBox);
+          currentFlags = PathClipperT_getFlags<NumT>(srcPts[0], clipBox);
 
           // Fully visible, finish here and jump to detection loop.
           if ((previousFlags | currentFlags) == 0)
@@ -641,7 +639,7 @@ _ClipLoopDo:
             dstPts[0] = srcPts[0];
             dstCmd[0] = PATH_CMD_LINE_TO;
 
-            dstPts = _PathClipperT_removeRedundantLines<NumT>(dstMark, (size_t)(dstPts + 1 - dstMark));
+            dstPts = PathClipperT_removeRedundantLines<NumT>(dstMark, (size_t)(dstPts + 1 - dstMark));
             dst._d->length = (size_t)(dstPts - dst.getVertices());
 
             i--;
@@ -667,7 +665,7 @@ _ClipLineCmd:
           {
             dstPts[0].set(ux, uy);
             dstCmd[0] = PATH_CMD_LINE_TO;
-            _PathClipperT_clipPoint<NumT>(dstPts[0], clipBox);
+            PathClipperT_clipPoint<NumT>(dstPts[0], clipBox);
             dstPts++;
             dstCmd++;
           }
@@ -840,7 +838,7 @@ _ClipLineCmd_LeftRight1:
 _ClipLineCmd_Done:
           if (initialFlags == NO_INITIAL_FLAGS)
           {
-            dstPts = _PathClipperT_removeRedundantLines<NumT>(dstMark, (size_t)(dstPts - dstMark));
+            dstPts = PathClipperT_removeRedundantLines<NumT>(dstMark, (size_t)(dstPts - dstMark));
             dstMark = dstPts;
             dstCmd = dst.getCommandsX() + (size_t)(dstPts - dst.getVertices());
           }
@@ -855,15 +853,15 @@ _ClipLineCmd_Done:
         {
           const NumT_(Point)* p = srcPts - 1;
 
-          uint32_t cp1 = _PathClipperT_getFlags<NumT>(p[1], clipBox);
-          currentFlags = _PathClipperT_getFlags<NumT>(p[2], clipBox);
+          uint32_t cp1 = PathClipperT_getFlags<NumT>(p[1], clipBox);
+          currentFlags = PathClipperT_getFlags<NumT>(p[2], clipBox);
 
           uint32_t sides = previousFlags | cp1 | currentFlags;
 
           // Fully visible, finish here and jump to detection loop.
           if (sides == CLIP_SIDE_NONE)
           {
-            dstPts = _PathClipperT_removeRedundantLines<NumT>(dstMark, (size_t)(dstPts - dstMark));
+            dstPts = PathClipperT_removeRedundantLines<NumT>(dstMark, (size_t)(dstPts - dstMark));
             dstCmd = dst.getCommandsX() + (size_t)(dstPts - dst.getVertices());
 
             dstPts[0] = srcPts[0];
@@ -889,7 +887,7 @@ _ClipLineCmd_Done:
           {
             dstPts[0] = srcPts[1];
             dstCmd[0] = PATH_CMD_LINE_TO;
-            _PathClipperT_clipPoint<NumT>(dstPts[0], clipBox);
+            PathClipperT_clipPoint<NumT>(dstPts[0], clipBox);
             dstPts++;
             dstCmd++;
           }
@@ -1029,10 +1027,10 @@ _ClipQuadCmd_EvaluateY:
                   FOG_ASSERT_NOT_REACHED();
               }
 
-              if ((tf = _PathClipperT_getFlags<NumT>(tp, clipBox)) != CLIP_SIDE_NONE || previousFlags != CLIP_SIDE_NONE)
+              if ((tf = PathClipperT_getFlags<NumT>(tp, clipBox)) != CLIP_SIDE_NONE || previousFlags != CLIP_SIDE_NONE)
               {
                 // The point is clipped-out, emit line.
-                _PathClipperT_clipPoint<NumT>(tp, clipBox);
+                PathClipperT_clipPoint<NumT>(tp, clipBox);
                 dstPts[0] = tp;
                 dstCmd[0] = PATH_CMD_LINE_TO;
 
@@ -1049,11 +1047,11 @@ _ClipQuadCmd_EvaluateY:
                 center.x = ax * Math::pow2(tMiddle) + bx * tMiddle + cx;
                 center.y = ay * Math::pow2(tMiddle) + by * tMiddle + cy;
 
-                if (_PathClipperT_getFlags<NumT>(center, clipBox) == CLIP_SIDE_NONE)
+                if (PathClipperT_getFlags<NumT>(center, clipBox) == CLIP_SIDE_NONE)
                 {
                   NumT dt = (tVal - tCut) * NumT(0.5);
 
-                  dstPts = _PathClipperT_removeRedundantLines<NumT>(dstMark, (size_t)(dstPts - dstMark));
+                  dstPts = PathClipperT_removeRedundantLines<NumT>(dstMark, (size_t)(dstPts - dstMark));
                   dstCmd = dst.getCommandsX() + (size_t)(dstPts - dst.getVertices());
 
                   // Derivative: 2a*t + b.
@@ -1104,16 +1102,16 @@ _ClipQuadCmd_EvaluateY:
         {
           const NumT_(Point)* p = srcPts - 1;
 
-          uint32_t cp1 = _PathClipperT_getFlags<NumT>(p[1], clipBox);
-          uint32_t cp2 = _PathClipperT_getFlags<NumT>(p[2], clipBox);
-          currentFlags = _PathClipperT_getFlags<NumT>(p[3], clipBox);
+          uint32_t cp1 = PathClipperT_getFlags<NumT>(p[1], clipBox);
+          uint32_t cp2 = PathClipperT_getFlags<NumT>(p[2], clipBox);
+          currentFlags = PathClipperT_getFlags<NumT>(p[3], clipBox);
 
           uint32_t sides = previousFlags | cp1 | cp2 | currentFlags;
 
           // Fully visible, finish here and jump to detection loop.
           if (sides == CLIP_SIDE_NONE)
           {
-            dstPts = _PathClipperT_removeRedundantLines<NumT>(dstMark, (size_t)(dstPts - dstMark));
+            dstPts = PathClipperT_removeRedundantLines<NumT>(dstMark, (size_t)(dstPts - dstMark));
             dstCmd = dst.getCommandsX() + (size_t)(dstPts - dst.getVertices());
 
             dstPts[0] = srcPts[0];
@@ -1141,7 +1139,7 @@ _ClipQuadCmd_EvaluateY:
           {
             dstPts[0] = srcPts[2];
             dstCmd[0] = PATH_CMD_LINE_TO;
-            _PathClipperT_clipPoint<NumT>(dstPts[0], clipBox);
+            PathClipperT_clipPoint<NumT>(dstPts[0], clipBox);
             dstPts++;
             dstCmd++;
           }
@@ -1287,10 +1285,10 @@ _ClipCubicCmd_EvaluateY:
                   FOG_ASSERT_NOT_REACHED();
               }
 
-              if ((tf = _PathClipperT_getFlags<NumT>(tp, clipBox)) != CLIP_SIDE_NONE || previousFlags != CLIP_SIDE_NONE)
+              if ((tf = PathClipperT_getFlags<NumT>(tp, clipBox)) != CLIP_SIDE_NONE || previousFlags != CLIP_SIDE_NONE)
               {
                 // The point is clipped-out, emit line.
-                _PathClipperT_clipPoint<NumT>(tp, clipBox);
+                PathClipperT_clipPoint<NumT>(tp, clipBox);
                 dstPts[0] = tp;
                 dstCmd[0] = PATH_CMD_LINE_TO;
 
@@ -1307,11 +1305,11 @@ _ClipCubicCmd_EvaluateY:
                 center.x = ax * Math::pow3(tMiddle) + bx * Math::pow2(tMiddle) + cx * tMiddle + dx;
                 center.y = ay * Math::pow3(tMiddle) + by * Math::pow2(tMiddle) + cy * tMiddle + dy;
 
-                if (_PathClipperT_getFlags<NumT>(center, clipBox) == CLIP_SIDE_NONE)
+                if (PathClipperT_getFlags<NumT>(center, clipBox) == CLIP_SIDE_NONE)
                 {
                   NumT dt = (tVal - tCut) * NumT(1.0 / 3.0);
 
-                  dstPts = _PathClipperT_removeRedundantLines<NumT>(dstMark, (size_t)(dstPts - dstMark));
+                  dstPts = PathClipperT_removeRedundantLines<NumT>(dstMark, (size_t)(dstPts - dstMark));
                   dstCmd = dst.getCommandsX() + (size_t)(dstPts - dst.getVertices());
 
                   // Derivative: 3*a*t^2 + 2*b*t + c.
@@ -1408,7 +1406,7 @@ _ClipCubicCmd_EvaluateY:
     }
 
     // Finalize.
-    dstPts = _PathClipperT_removeRedundantLines<NumT>(dstMark, (size_t)(dstPts - dstMark));
+    dstPts = PathClipperT_removeRedundantLines<NumT>(dstMark, (size_t)(dstPts - dstMark));
     dst._d->length = (size_t)(dstPts - dst.getVertices());
   }
 
@@ -1431,7 +1429,7 @@ _OutOfMemory:
 // ============================================================================
 
 template<typename NumT>
-static err_t FOG_CDECL _PathClipperT_clipPath(NumT_(PathClipper)& self,
+static err_t FOG_CDECL PathClipperT_clipPath(NumT_(PathClipper)& self,
   NumT_(Path)& dst, const NumT_(Path)& src, const
   NumT_(Transform)* tr)
 {
@@ -1465,7 +1463,7 @@ static err_t FOG_CDECL _PathClipperT_clipPath(NumT_(PathClipper)& self,
         // Clip and transform.
         size_t dstIndex = dst.getLength();
         err_t err = self.continuePath(dst, src);
-        dst.transform(*tr, Range(dstIndex));
+        dst.transform(*tr, Range(dstIndex, DETECT_LENGTH));
 
         // Restore the clip box and return possible error.
         self._clipBox = box;
@@ -1498,26 +1496,26 @@ static err_t FOG_CDECL _PathClipperT_clipPath(NumT_(PathClipper)& self,
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_CPU_DECLARE_INITIALIZER_SSE(_g2d_pathclipper_init_sse)
-FOG_CPU_DECLARE_INITIALIZER_SSE2(_g2d_pathclipper_init_sse2)
+FOG_CPU_DECLARE_INITIALIZER_SSE(PathClipper_initSSE)
+FOG_CPU_DECLARE_INITIALIZER_SSE2(PathClipper_initSSE2)
 
-FOG_NO_EXPORT void _g2d_pathclipper_init(void)
+FOG_NO_EXPORT void PathClipper_init(void)
 {
-  _g2d.pathclipperf.initPath     = _PathClipperT_initPath<float>;
-  _g2d.pathclipperf.continuePath = _PathClipperT_continuePath<float>;
-  _g2d.pathclipperf.continueRaw  = _PathClipperT_continueRaw<float>;
-  _g2d.pathclipperf.clipPath     = _PathClipperT_clipPath<float>;
+  _api.pathclipperf.initPath     = PathClipperT_initPath<float>;
+  _api.pathclipperf.continuePath = PathClipperT_continuePath<float>;
+  _api.pathclipperf.continueRaw  = PathClipperT_continueRaw<float>;
+  _api.pathclipperf.clipPath     = PathClipperT_clipPath<float>;
 
-  _g2d.pathclipperd.initPath     = _PathClipperT_initPath<double>;
-  _g2d.pathclipperd.continuePath = _PathClipperT_continuePath<double>;
-  _g2d.pathclipperd.continueRaw  = _PathClipperT_continueRaw<double>;
-  _g2d.pathclipperd.clipPath     = _PathClipperT_clipPath<double>;
+  _api.pathclipperd.initPath     = PathClipperT_initPath<double>;
+  _api.pathclipperd.continuePath = PathClipperT_continuePath<double>;
+  _api.pathclipperd.continueRaw  = PathClipperT_continueRaw<double>;
+  _api.pathclipperd.clipPath     = PathClipperT_clipPath<double>;
 
-  FOG_CPU_USE_INITIALIZER_SSE2(_g2d_pathclipper_init_sse)
-  FOG_CPU_USE_INITIALIZER_SSE2(_g2d_pathclipper_init_sse2)
+  FOG_CPU_USE_INITIALIZER_SSE2(PathClipper_initSSE)
+  FOG_CPU_USE_INITIALIZER_SSE2(PathClipper_initSSE2)
 }
 
 } // Fog namespace

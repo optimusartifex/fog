@@ -191,9 +191,9 @@ void GuiEngine::changeMouseStatus(Widget* w, const PointI& pos)
   if (_mouseStatus.widget != w)
   {
     // Clear button press times (double click).
-    _buttonTime[0].clear();
-    _buttonTime[1].clear();
-    _buttonTime[2].clear();
+    _buttonTime[0].reset();
+    _buttonTime[1].reset();
+    _buttonTime[2].reset();
 
     Widget* before = _mouseStatus.widget;
 
@@ -225,9 +225,9 @@ void GuiEngine::changeMouseStatus(Widget* w, const PointI& pos)
   else if (_mouseStatus.position != pos)
   {
     // Clear button press times (double click).
-    _buttonTime[0].clear();
-    _buttonTime[1].clear();
-    _buttonTime[2].clear();
+    _buttonTime[0].reset();
+    _buttonTime[1].reset();
+    _buttonTime[2].reset();
 
     uint32_t code = 0; // Be quite.
     uint32_t hoverChange;;
@@ -1376,7 +1376,7 @@ void GuiWindow::onMousePress(uint32_t button, bool repeated)
 
   if (!repeated && (now - guiEngine->_buttonTime[buttonId]) <= guiEngine->_doubleClickInterval)
   {
-    guiEngine->_buttonTime[buttonId].clear();
+    guiEngine->_buttonTime[buttonId].reset();
     e._code = EVENT_DOUBLE_CLICK;
     w->sendEvent(&e);
   }
@@ -1481,10 +1481,9 @@ bool GuiWindow::onKeyPress(uint32_t key, uint32_t modifier, uint32_t systemCode,
   // Set this status after modifiers check.
   guiEngine->_keyboardStatus.modifiers |= modifier;
 
-  if ((e.getUnicode().ch() >= 1 && e.getUnicode().ch() <= 31) ||
-      e.getUnicode().ch() == 127 /* DEL key */)
+  if (e.getUnicode().isAt(1, 31) || e.getUnicode().getValue() == 127 /* DEL key */)
   {
-    e._unicode._ch = 0;
+    e._unicode = 0;
   }
 
   _widget->_findFocus()->sendEvent(&e);
@@ -1500,7 +1499,7 @@ bool GuiWindow::onKeyRelease(uint32_t key, uint32_t modifier, uint32_t systemCod
   e._key = key;
   e._modifiers = guiEngine->getKeyboardModifiers();
   e._systemCode = systemCode;
-  e._unicode._ch = 0;
+  e._unicode = 0;
 
   if (isShiftMod(guiEngine->_keyboardStatus.modifiers)) e._key |= KEY_SHIFT;
   if (isCtrlMod (guiEngine->_keyboardStatus.modifiers)) e._key |= KEY_CTRL;

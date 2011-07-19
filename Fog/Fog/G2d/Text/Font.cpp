@@ -10,9 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/Hash.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Debug.h>
-#include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/IO/FileSystem.h>
 #include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/OS/OS.h>
@@ -22,7 +20,6 @@
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Transform.h>
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Source/Color.h>
 #include <Fog/G2d/Text/Font.h>
 #include <Fog/G2d/Text/FontManager.h>

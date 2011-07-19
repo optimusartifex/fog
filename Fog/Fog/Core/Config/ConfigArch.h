@@ -11,7 +11,7 @@
 #endif // _FOG_CORE_CONFIG_CONFIG_H
 
 // ============================================================================
-// [Fog::Core::Build - Architecture]
+// [Fog::Core::Config - Architecture]
 // ============================================================================
 
 //! @addtogroup Fog_Core_Compiler
@@ -46,8 +46,27 @@
 //! @def FOG_HARDCODE_SSE3
 //! @brief If defined, SSE3 assembly will be hardcoded into binaries and no lower optimizations are allowed.
 
-#if (defined(__i386__) || defined(_M_IX86) || defined(_WIN32)) && \
-    !(defined(__x86_64__) || defined(_WIN64) || defined(_M_IA64) || defined(_M_X64))
+// ============================================================================
+// [Fog::Core::Config - Architecture - X86_64]
+// ============================================================================
+
+#if defined(_M_X64    ) || \
+    defined(_M_AMD64  ) || \
+    defined(__x86_64__)
+
+# define FOG_ARCH_X86_64
+# define FOG_ARCH_BITS 64
+
+// x86_64 uses always SSE/SSE2
+# define FOG_HARDCODE_SSE
+# define FOG_HARDCODE_SSE2
+
+// ============================================================================
+// [Fog::Core::Config - Architecture - X86_32]
+// ============================================================================
+
+#elif defined(_M_IX86 ) || \
+      defined(__i386__)
 
 # define FOG_ARCH_X86
 # define FOG_ARCH_BITS 32
@@ -67,19 +86,30 @@
 #  endif
 # endif // _M_IX86_FP
 
-#elif (defined(__x86_64__) || defined(_WIN64) || defined(_M_IA64) || defined(_M_X64))
+// ============================================================================
+// [Fog::Core::Config - Architecture - Itanium]
+// ============================================================================
 
-# define FOG_ARCH_X86_64
-# define FOG_ARCH_BITS 64
+#elif defined(_M_IA64)
 
-// x86_64 uses always SSE/SSE2
-# define FOG_HARDCODE_SSE
-# define FOG_HARDCODE_SSE2
+#define FOG_ARCH_ITANIUM
+#define FOG_ARCH_BITS 64
 
-#elif defined(__powerpc__) || defined(__ppc__)
+// ============================================================================
+// [Fog::Core::Config - Architecture - PowerPC]
+// ============================================================================
+
+#elif defined(_M_PPC     ) || \
+      defined(_M_MPPC    ) || \
+      defined(__ppc__    ) || \
+      defined(__powerpc__)
 
 # define FOG_ARCH_PPC
 # define FOG_ARCH_BITS 32
+
+// ============================================================================
+// [Fog::Core::Build - Hack for IDE]
+// ============================================================================
 
 #elif defined(FOG_IDE)
 
@@ -90,7 +120,7 @@
 // If you know your architecture and you want to try compile
 // Fog library. Uncomment error and declare following macro:
 // #define FOG_ARCH_BITS 32 or 64
-# error "Unsupported target CPU"
+# error "Unsupported CPU architecture"
 #endif
 
 #define FOG_BIG_ENDIAN 0

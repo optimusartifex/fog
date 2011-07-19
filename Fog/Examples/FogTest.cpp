@@ -163,6 +163,7 @@ void MyWindow::onPaint(PaintEvent* e)
   p->setSource(Argb32(0xFFFFFFFF));
   p->fillAll();
 
+#if 1
   PieD pie(PointD(0, 0), PointD(200, 200), 0.0, MATH_ONE_HALF_PI);
   BoxD box;
 
@@ -230,6 +231,7 @@ void MyWindow::onPaint(PaintEvent* e)
     p->setSource(Argb32(0xFF000000));
     p->drawBox(box);
   }
+#endif
 
   // --------------------------------------------------------------------------
   Time lastTime = Time::now();
@@ -237,7 +239,7 @@ void MyWindow::onPaint(PaintEvent* e)
   TimeDelta frameDelta = lastTime - startTime;
   TimeDelta fpsDelta = lastTime - fpsTime;
 
-  if (fpsDelta.inMillisecondsF() >= 1000.0f)
+  if (fpsDelta.getMillisecondsD() >= 1000.0f)
   {
     fps = fpsCounter;
     fpsCounter = 0.0f;
@@ -249,7 +251,7 @@ void MyWindow::onPaint(PaintEvent* e)
   }
 
   String text;
-  text.format("FPS: %g, Time: %g", fps, frameDelta.inMillisecondsF());
+  text.format("FPS: %g, Time: %g", fps, frameDelta.getMillisecondsD());
 
   {
     PathF path;
@@ -265,14 +267,14 @@ void MyWindow::onPaint(PaintEvent* e)
 // [MAIN]
 // ============================================================================
 
-FOG_GUI_MAIN()
+FOG_UI_MAIN()
 {
   Application app(Ascii8("Gui"));
 
   MyWindow window(WINDOW_TYPE_DEFAULT);
 
   window.addListener(EVENT_CLOSE, &app, &Application::quit);
-  window.setSize(SizeI(1200, 800));
+  window.setSize(SizeI(1000, 700));
   window.show();
 
   return app.run();

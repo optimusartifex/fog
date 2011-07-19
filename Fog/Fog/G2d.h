@@ -40,8 +40,6 @@
 #include <Fog/G2d/Geometry/Size.h>
 #include <Fog/G2d/Geometry/Transform.h>
 #include <Fog/G2d/Geometry/Triangle.h>
-#include <Fog/G2d/Global/Api.h>
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageBits.h>
 #include <Fog/G2d/Imaging/ImageCodec.h>

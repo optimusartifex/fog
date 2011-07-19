@@ -10,11 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/Hash.h>
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Debug.h>
-#include <Fog/Core/Global/Init_Core_p.h>
-#include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/IO/FileSystem.h>
 #include <Fog/Core/Library/Library.h>
 #include <Fog/Core/System/Application.h>
@@ -98,7 +94,7 @@ static void parseWinCmdLine(const String& cmdLine, List<String>& dst)
     }
 
     // Zero character means end.
-    if (cur->ch() == 0) goto end;
+    if (cur->isNull()) goto end;
 
     // Parse quote character (if it's here).
     mark = cur;
@@ -119,8 +115,8 @@ static void parseWinCmdLine(const String& cmdLine, List<String>& dst)
       if (cur == end) goto parsed;
 
       Char c = cur[0];
-      if (c.ch() == 0) goto parsed;
-      if (c.isSpace() && quote.ch() == 0) goto parsed;
+      if (c.isNull()) goto parsed;
+      if (c.isSpace() && quote.isNull()) goto parsed;
 
       // Quotes.
       if (c == quote)
@@ -146,7 +142,7 @@ static void parseWinCmdLine(const String& cmdLine, List<String>& dst)
 
 parsed:
     len = (size_t)(cur - mark);
-    if (quote.ch() != 0)
+    if (quote.isNull())
     {
       mark++;
       len--;
@@ -441,7 +437,7 @@ GuiEngine* Application::createGuiEngine(const String& _name)
   if (!name.startsWith(Ascii8("Gui."))) return NULL;
 
   Library lib;
-  err_t err = lib.openPlugin(Ascii8("Fog_Gui"), name.substring(Range(4)));
+  err_t err = lib.openPlugin(Ascii8("Fog_Gui"), name.substring(Range(4, DETECT_LENGTH)));
   if (FOG_IS_ERROR(err)) return NULL;
 
   GuiEngineConstructor ctor = (GuiEngineConstructor)lib.getSymbol(Ascii8("createGuiEngine"));
@@ -502,10 +498,10 @@ EventLoop* Application::createEventLoop(const String &_name)
 }
 
 // ============================================================================
-// [Fog::Core - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _core_application_init(void)
+FOG_NO_EXPORT void Application_init(void)
 {
   _core_application_local.init();
   Application::registerEventLoopType<DefaultEventLoop>(Ascii8("Default"));
@@ -524,7 +520,7 @@ FOG_NO_EXPORT void _core_application_init(void)
 #endif
 }
 
-FOG_NO_EXPORT void _core_application_fini(void)
+FOG_NO_EXPORT void Application_fini(void)
 {
   _core_application_local.destroy();
 }

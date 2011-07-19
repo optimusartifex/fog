@@ -11,7 +11,7 @@
 // [Dependencies]
 #include <Fog/Core/Collection/Hash.h>
 #include <Fog/Core/Collection/HashUtil.h>
-#include <Fog/Core/Global/Init_Core_p.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/StringUtil.h>
@@ -491,15 +491,15 @@ ManagedString::Cache* ManagedString::getCacheByName(const String& name)
 }
 
 // ============================================================================
-// [Fog::Core - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _core_managedstring_init(void)
+FOG_NO_EXPORT void ManagedString_init(void)
 {
   managed_local.init();
 }
 
-FOG_NO_EXPORT void _core_managedstring_fini(void)
+FOG_NO_EXPORT void ManagedString_fini(void)
 {
   managed_local.destroy();
 }

@@ -8,11 +8,7 @@
 #define _FOG_CORE_THREADING_LOCK_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Static.h>
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Threading/Atomic.h>
 
 #if defined(FOG_OS_WINDOWS)
@@ -31,12 +27,6 @@ namespace Fog {
 
 //! @addtogroup Fog_Core_Threading
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct ThreadCondition;
 
 // ============================================================================
 // [Fog::Lock]
@@ -130,12 +120,9 @@ struct FOG_NO_EXPORT Lock
   // [Members]
   // --------------------------------------------------------------------------
 
-protected:
   Handle _handle;
 
 private:
-  friend struct ThreadCondition;
-
   _FOG_CLASS_NO_COPY(Lock)
 };
 

@@ -10,13 +10,7 @@
 // [Dependencies]
 #include <Fog/Core/Collection/HashUtil.h>
 #include <Fog/Core/Collection/List.h>
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/SequenceInfo.h>
-#include <Fog/Core/Global/Static.h>
-#include <Fog/Core/Global/Swap.h>
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Tools/Char.h>
 

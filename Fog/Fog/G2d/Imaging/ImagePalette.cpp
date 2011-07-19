@@ -9,27 +9,15 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Memory/Ops.h>
-#include <Fog/G2d/Global/Constants.h>
-#include <Fog/G2d/Global/Init_G2d_p.h>
 #include <Fog/G2d/Imaging/ImagePalette.h>
 #include <Fog/G2d/Render/RenderApi_p.h>
 #include <Fog/G2d/Render/RenderConstants_p.h>
 
 namespace Fog {
-
-// ============================================================================
-// [Fog::ImagePaletteDataWithPRGB]
-// ============================================================================
-
-struct FOG_NO_EXPORT ImagePalettePrgb : public ImagePaletteData
-{
-  uint32_t prgbData[256];
-};
 
 // ============================================================================
 // [Fog::ImagePalette - Helpers]
@@ -192,14 +180,14 @@ uint8_t ImagePalette::findColor(uint8_t r, uint8_t g, uint8_t b) const
 // ============================================================================
 
 Static<ImagePaletteData> ImagePalette::_dnull;
-static Static<ImagePaletteData> _ImagePalette_dgrey;
+static Static<ImagePaletteData> ImagePalette_dgrey;
 
 ImagePalette ImagePalette::fromGreyscale(uint count)
 {
   ImagePaletteData* d = NULL;
 
   if (count <= 1 || count > 256) { goto _End; }
-  if (count == 256) { d = _ImagePalette_dgrey->ref(); goto _Ret; }
+  if (count == 256) { d = ImagePalette_dgrey->ref(); goto _Ret; }
 
   d = ImagePalette_dalloc();
   if (FOG_LIKELY(d != NULL))
@@ -278,10 +266,10 @@ bool ImagePalette::isGreyscale(const Argb32* data, size_t count)
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_imagepalette_init(void)
+FOG_NO_EXPORT void ImagePalette_init(void)
 {
   ImagePaletteData* d;
 
@@ -303,18 +291,12 @@ FOG_NO_EXPORT void _g2d_imagepalette_init(void)
   // Setup 'Greyscale' palette
   // --------------------------------------------------------------------------
 
-  d = _ImagePalette_dgrey.instancep();
+  d = ImagePalette_dgrey.instancep();
   d->refCount.init(1);
   d->length = 256;
 
   for (i = 0, c0 = 0xFF000000; i < 256; i++, c0 += 0x00010101)
     d->data[i] = c0;
-}
-
-FOG_NO_EXPORT void _g2d_imagepalette_fini(void)
-{
-  _ImagePalette_dgrey.instancep()->refCount.dec();
-  ImagePalette::_dnull.instancep()->refCount.dec();
 }
 
 } // Fog namespace

@@ -8,13 +8,12 @@
 #define _FOG_G2D_PAINTING_RASTERPAINTCONTEXT_P_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Memory/MemoryBuffer.h>
 #include <Fog/G2d/Geometry/PathClipper.h>
 #include <Fog/G2d/Geometry/PathStroker.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Transform.h>
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Painting/PaintParams.h>
 #include <Fog/G2d/Painting/RasterPaintFuncs_p.h>

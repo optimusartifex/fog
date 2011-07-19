@@ -8,14 +8,9 @@
 #define _FOG_G2D_TOOLS_REGION_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Static.h>
-#include <Fog/Core/Global/Swap.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Threading/Atomic.h>
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Rect.h>
 
@@ -81,8 +76,8 @@ struct FOG_API Region
   explicit Region(const BoxI& rect);
   explicit Region(const RectI& rect);
 
+  explicit FOG_INLINE Region(_Uninitialized) {}
   explicit FOG_INLINE Region(RegionData* d) : _d(d) {}
-  FOG_INLINE Region(_Uninitialized) {}
 
   ~Region();
 

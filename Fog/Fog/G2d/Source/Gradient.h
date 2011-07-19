@@ -8,9 +8,7 @@
 #define _FOG_G2D_SOURCE_GRADIENT_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/G2d/Global/Constants.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Source/Color.h>
@@ -22,13 +20,6 @@ namespace Fog {
 
 //! @addtogroup Fog_G2d_Source
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct GradientF;
-struct GradientD;
 
 // ============================================================================
 // [Fog::GradientF]
@@ -131,7 +122,7 @@ struct FOG_API GradientF
   //! @brief Color stops.
   ColorStopList _stops;
 
-  //! @brief Points data (meaning depends to the gradient type).
+  //! @brief Points data (meaning depends on the gradient type).
   //!
   //! Linear gradient:
   //! - pts[0] - Start point.
@@ -254,7 +245,7 @@ struct FOG_API GradientD
   //! @brief Color stops.
   ColorStopList _stops;
 
-  //! @brief Points data (meaning depends to the gradient type).
+  //! @brief Points data (meaning depends on the gradient type).
   //!
   //! Linear gradient:
   //! - pts[0] - Start point.

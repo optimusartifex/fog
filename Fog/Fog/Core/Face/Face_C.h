@@ -8,8 +8,10 @@
 #define _FOG_CORE_FACE_FACE_C_H
 
 // [Dependencies]
-#include <Fog/Core/Face/Face_Constants.h>
+#include <Fog/Core/Face/Constants.h>
+#include <Fog/Core/Face/Features.h>
 
+#include <Fog/Core/Face/Face_C_Asm.h>
 #include <Fog/Core/Face/Face_C_P32.h>
 #include <Fog/Core/Face/Face_C_P64.h>
 #include <Fog/Core/Face/Face_C_F32.h>

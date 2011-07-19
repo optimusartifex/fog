@@ -9,8 +9,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Api.h>
-#include <Fog/Core/Global/Static.h>
 #include <Fog/Core/Memory/MemoryManager.h>
 
 namespace Fog {
@@ -29,14 +27,14 @@ struct FOG_NO_EXPORT DefaultMemoryManager : public MemoryManager
 
 void* DefaultMemoryManager::alloc(size_t size, size_t* allocated)
 {
-  void* ptr = _core.memory._m_alloc(size);
+  void* ptr = _api.memory._m_alloc(size);
   if (allocated) *allocated = ptr ? size : 0;
   return ptr;
 }
 
 void DefaultMemoryManager::free(void* p, size_t size)
 {
-  _core.memory._m_free(p);
+  _api.memory._m_free(p);
 }
 
 static Static<DefaultMemoryManager> _MemoryManager_default;
@@ -54,10 +52,10 @@ MemoryManager* MemoryManager::getDefault()
 }
 
 // ============================================================================
-// [Fog::Core - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _core_memory_init_manager(void)
+FOG_NO_EXPORT void MemoryManager_init(void)
 {
   _MemoryManager_default.init();
 }

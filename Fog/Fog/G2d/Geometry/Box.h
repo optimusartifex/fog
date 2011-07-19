@@ -8,33 +8,18 @@
 #define _FOG_G2D_GEOMETRY_BOX_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/Uninitialized.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Ops.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Geometry/Size.h>
-#include <Fog/G2d/Global/Api.h>
 
 namespace Fog {
 
 //! @addtogroup Fog_G2d_Geometry
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct BoxI;
-struct BoxF;
-struct BoxD;
-
-struct RectI;
-struct RectF;
-struct RectD;
 
 // ============================================================================
 // [Fog::BoxI]
@@ -48,11 +33,10 @@ struct BoxI
   // --------------------------------------------------------------------------
 
   FOG_INLINE BoxI() {}
-  FOG_INLINE BoxI(_Uninitialized) {}
-
   FOG_INLINE BoxI(const BoxI& other) { setBox(other); }
   FOG_INLINE BoxI(int px0, int py0, int px1, int py1) { setBox(px0, py0, px1, py1); }
 
+  explicit FOG_INLINE BoxI(_Uninitialized) {}
   explicit FOG_INLINE BoxI(const RectI& other) { setRect(other); }
 
   // --------------------------------------------------------------------------
@@ -120,10 +104,9 @@ struct BoxI
   // [Reset]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE BoxI& reset()
+  FOG_INLINE void reset()
   {
     Memory::zero_t<BoxI>(this);
-    return *this;
   }
 
   // --------------------------------------------------------------------------
@@ -318,11 +301,11 @@ struct BoxF
   // --------------------------------------------------------------------------
 
   FOG_INLINE BoxF() {}
-  FOG_INLINE BoxF(_Uninitialized) {}
 
   FOG_INLINE BoxF(const BoxF& other) { setBox(other); }
   FOG_INLINE BoxF(float px0, float py0, float px1, float py1) { setBox(px0, py0, px1, py1); }
 
+  explicit FOG_INLINE BoxF(_Uninitialized) {}
   explicit FOG_INLINE BoxF(const BoxI& other) { setBox(other); }
   explicit FOG_INLINE BoxF(const BoxD& other) { setBox(other); }
   explicit FOG_INLINE BoxF(const RectI& other) { setRect(other); }
@@ -425,13 +408,12 @@ struct BoxF
   // [Reset]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE BoxF& reset()
+  FOG_INLINE void reset()
   {
     x0 = 0.0f;
     y0 = 0.0f;
     x1 = 0.0f;
     y1 = 0.0f;
-    return *this;
   }
 
   // --------------------------------------------------------------------------
@@ -633,14 +615,12 @@ struct FOG_NO_EXPORT BoxD
   // --------------------------------------------------------------------------
 
   FOG_INLINE BoxD() {}
-  FOG_INLINE BoxD(_Uninitialized) {}
-
   FOG_INLINE BoxD(const BoxD& other) { setBox(other); }
   FOG_INLINE BoxD(double px0, double py0, double px1, double py1) { setBox(px0, py0, px1, py1); }
 
+  explicit FOG_INLINE BoxD(_Uninitialized) {}
   explicit FOG_INLINE BoxD(const BoxF& other) { setBox(other); }
   explicit FOG_INLINE BoxD(const BoxI& other) { setBox(other); }
-
   explicit FOG_INLINE BoxD(const RectD& other) { setRect(other); }
   explicit FOG_INLINE BoxD(const RectF& other) { setRect(other); }
   explicit FOG_INLINE BoxD(const RectI& other) { setRect(other); }
@@ -745,13 +725,12 @@ struct FOG_NO_EXPORT BoxD
   // [Reset]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE BoxD& reset()
+  FOG_INLINE void reset()
   {
     x0 = 0.0;
     y0 = 0.0;
     x1 = 0.0;
     y1 = 0.0;
-    return *this;
   }
 
   // --------------------------------------------------------------------------

@@ -9,7 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Face/Face_C.h>
-#include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
 
@@ -18,9 +18,6 @@ namespace Face {
 
 //! @addtogroup Fog_Face_C
 //! @{
-
-// Shortcuts.
-#define _U64 _FOG_FACE_U64
 
 // ============================================================================
 // [Fog::Face - Documentation]
@@ -195,6 +192,7 @@ static FOG_INLINE void p32ZRGB32QuadFromRGB16_555Quad(p32& dst0, p32& dst1, p32&
   dst2 = _FOG_FACE_COMBINE_3((t2 >>  2) & 0x000000FFU, (t2 <<  4) & 0x0000FF00U, (t3 << 6) & 0x00FF0000U);
   dst3 = _FOG_FACE_COMBINE_3((t3 >> 11) & 0x000000FFU, (t2 >> 15) & 0x0000FF00U, (t3 >> 7) & 0x00FF0000U);
 #else
+  // [0][1][2][3]
   dst0 = _FOG_FACE_COMBINE_3((t1 >>  2) & 0x000000FFU, (t1 <<  4) & 0x0000FF00U, (t0 << 6) & 0x00FF0000U);
   dst1 = _FOG_FACE_COMBINE_3((t0 >> 11) & 0x000000FFU, (t1 >> 15) & 0x0000FF00U, (t0 >> 7) & 0x00FF0000U);
   dst2 = _FOG_FACE_COMBINE_3((t3 >>  2) & 0x000000FFU, (t3 <<  4) & 0x0000FF00U, (t2 << 6) & 0x00FF0000U);
@@ -417,20 +415,20 @@ static FOG_INLINE void p32ARGB32FromARGB16_4444(
   p32 t1;
   p32 t2;
 
-  Face::p32LShift(t1, t0, 12);       // T1 = [0A][RG][B0][00]
-  Face::p32LShift(t2, t0, 4);        // T2 = [00][0A][RG][B0]
+  p32LShift(t1, t0, 12);       // T1 = [0A][RG][B0][00]
+  p32LShift(t2, t0, 4);        // T2 = [00][0A][RG][B0]
 
-  Face::p32Or(t0, t0, t1);           // T0 = [0A][RG][XR][GB]
-  Face::p32LShift(t1, t2, 4);        // T1 = [00][AR][GB][00]
+  p32Or(t0, t0, t1);           // T0 = [0A][RG][XR][GB]
+  p32LShift(t1, t2, 4);        // T1 = [00][AR][GB][00]
 
-  Face::p32And(t0, t0, 0x0F00000F);  // T0 = [0A][00][00][0B]
-  Face::p32And(t1, t1, 0x000F0000);  // T1 = [00][0R][00][00]
-  Face::p32And(t2, t2, 0x00000F00);  // T2 = [00][00][0G][00]
+  p32And(t0, t0, 0x0F00000F);  // T0 = [0A][00][00][0B]
+  p32And(t1, t1, 0x000F0000);  // T1 = [00][0R][00][00]
+  p32And(t2, t2, 0x00000F00);  // T2 = [00][00][0G][00]
 
-  Face::p32Combine(t0, t0, t1);      // T0 = [0A][0R][00][0B]
-  Face::p32Combine(t0, t0, t2);      // T0 = [0A][0R][0G][0B]
+  p32Combine(t0, t0, t1);      // T0 = [0A][0R][00][0B]
+  p32Combine(t0, t0, t2);      // T0 = [0A][0R][0G][0B]
 
-  Face::p32Mul(dst0, t0, 17);        // T0 = [AA][RR][GG][BB]
+  p32Mul(dst0, t0, 17);        // T0 = [AA][RR][GG][BB]
 }
 
 static FOG_INLINE void p32ARGB32FromARGB16_4444_bs(
@@ -440,20 +438,20 @@ static FOG_INLINE void p32ARGB32FromARGB16_4444_bs(
   p32 t1;
   p32 t2;
 
-  Face::p32RShift(t1, t0, 12);       // T1 = [00][00][00][0B]
-  Face::p32LShift(t2, t0, 16);       // T2 = [BG][AR][00][00]
+  p32RShift(t1, t0, 12);       // T1 = [00][00][00][0B]
+  p32LShift(t2, t0, 16);       // T2 = [BG][AR][00][00]
 
-  Face::p32And(t0, t0, 0x00000F00);  // T0 = [00][00][0G][00]
-  Face::p32Combine(t1, t1, t2);      // T1 = [BG][AR][00][0B]
-  Face::p32LShift(t2, t2, 4);        // T2 = [GA][R0][00][00]
+  p32And(t0, t0, 0x00000F00);  // T0 = [00][00][0G][00]
+  p32Combine(t1, t1, t2);      // T1 = [BG][AR][00][0B]
+  p32LShift(t2, t2, 4);        // T2 = [GA][R0][00][00]
 
-  Face::p32And(t1, t1, 0x000F000F);  // T1 = [00][0R][00][0B]
-  Face::p32And(t2, t2, 0x0F000000);  // T2 = [0A][00][00][00]
+  p32And(t1, t1, 0x000F000F);  // T1 = [00][0R][00][0B]
+  p32And(t2, t2, 0x0F000000);  // T2 = [0A][00][00][00]
 
-  Face::p32Combine(t0, t0, t1);      // T0 = [00][0R][0G][0B]
-  Face::p32Combine(t0, t0, t2);      // T0 = [0A][0R][0G][0B]
+  p32Combine(t0, t0, t1);      // T0 = [00][0R][0G][0B]
+  p32Combine(t0, t0, t2);      // T0 = [0A][0R][0G][0B]
 
-  Face::p32Mul(dst0, t0, 17);        // T0 = [AA][RR][GG][BB]
+  p32Mul(dst0, t0, 17);        // T0 = [AA][RR][GG][BB]
 }
 
 // ============================================================================
@@ -1124,57 +1122,56 @@ static FOG_INLINE void p32RGB16_000_565_MulDiv_PBW_2031(p32& dst0, const p32& x0
 // ============================================================================
 
 static FOG_INLINE void p32RGB48Load(
-  p32& dst0_r, p32& dst0_g, p32& dst0_b, const void* srcp)
+  p32& dr0, p32& dg0, p32& db0, const void* srcp)
 {
   const uint8_t* src = reinterpret_cast<const uint8_t*>(srcp);
 
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-  Face::p32Load2aNative(dst0_b, src + 0);
-  Face::p32Load2aNative(dst0_g, src + 2);
-  Face::p32Load2aNative(dst0_r, src + 4);
+  p32Load2aNative(db0, src + 0);
+  p32Load2aNative(dg0, src + 2);
+  p32Load2aNative(dr0, src + 4);
 #else
-  Face::p32Load2aNative(dst0_r, src + 0);
-  Face::p32Load2aNative(dst0_g, src + 2);
-  Face::p32Load2aNative(dst0_b, src + 4);
+  p32Load2aNative(dr0, src + 0);
+  p32Load2aNative(dg0, src + 2);
+  p32Load2aNative(db0, src + 4);
 #endif
 }
-
 
 static FOG_INLINE void p32RGB48LoadToZRGB32(
   p32& dst0, const void* srcp)
 {
-  Face::p32 dst0_r;
-  Face::p32 dst0_g;
-  Face::p32 dst0_b;
+  p32 dr0;
+  p32 dg0;
+  p32 db0;
 
-  Face::p32RGB48Load(dst0_r, dst0_g, dst0_b, srcp);
-  Face::p32ZRGB32FromRGB48(dst0, dst0_r, dst0_g, dst0_b);
+  p32RGB48Load(dr0, dg0, db0, srcp);
+  p32ZRGB32FromRGB48(dst0, dr0, dg0, db0);
 }
 
 static FOG_INLINE void p32RGB48LoadToFRGB32(
   p32& dst0, const void* srcp)
 {
-  Face::p32 dst0_r;
-  Face::p32 dst0_g;
-  Face::p32 dst0_b;
+  p32 dr0;
+  p32 dg0;
+  p32 db0;
 
-  Face::p32RGB48Load(dst0_r, dst0_g, dst0_b, srcp);
-  Face::p32FRGB32FromRGB48(dst0, dst0_r, dst0_g, dst0_b);
+  p32RGB48Load(dr0, dg0, db0, srcp);
+  p32FRGB32FromRGB48(dst0, dr0, dg0, db0);
 }
 
 static FOG_INLINE void p32RGB48Store(
-  void* dstp, const p32& src0_r, const p32& src0_g, const p32& src0_b)
+  void* dstp, const p32& sr0, const p32& sg0, const p32& sb0)
 {
   uint8_t* dst = reinterpret_cast<uint8_t*>(dstp);
 
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-  Face::p32Store2aNative(dst + 0, src0_b);
-  Face::p32Store2aNative(dst + 2, src0_g);
-  Face::p32Store2aNative(dst + 4, src0_r);
+  p32Store2aNative(dst + 0, sb0);
+  p32Store2aNative(dst + 2, sg0);
+  p32Store2aNative(dst + 4, sr0);
 #else
-  Face::p32Store2aNative(dst + 0, src0_r);
-  Face::p32Store2aNative(dst + 2, src0_g);
-  Face::p32Store2aNative(dst + 4, src0_b);
+  p32Store2aNative(dst + 0, sr0);
+  p32Store2aNative(dst + 2, sg0);
+  p32Store2aNative(dst + 4, sb0);
 #endif
 }
 
@@ -1194,13 +1191,13 @@ static FOG_INLINE void p32RGB48StoreFromARGB32(
   gg = ((src0 & 0x0000FF00U) * a0) >> 8;
 
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-  Face::p32Store2aNative(dst + 0, rb);
-  Face::p32Store2aNative(dst + 2, gg);
-  Face::p32Store2aNative(dst + 4, rb >> 16);
+  p32Store2aNative(dst + 0, rb);
+  p32Store2aNative(dst + 2, gg);
+  p32Store2aNative(dst + 4, rb >> 16);
 #else
-  Face::p32Store2aNative(dst + 0, rb >> 16);
-  Face::p32Store2aNative(dst + 2, gg);
-  Face::p32Store2aNative(dst + 4, rb);
+  p32Store2aNative(dst + 0, rb >> 16);
+  p32Store2aNative(dst + 2, gg);
+  p32Store2aNative(dst + 4, rb);
 #endif
 }
 
@@ -1210,16 +1207,16 @@ static FOG_INLINE void p32RGB48StoreFromXRGB32(
   uint8_t* dst = reinterpret_cast<uint8_t*>(dstp);
 
   p32 rb = ((src0 & 0x00FF00FFU) * 0x00000101U);
-  p32 gg = ((src0 & 0x0000FF00U) * 0x00010101U) >> 8;
+  p32 gg = ((src0 & 0x0000FF00U) * 0x00000101U) >> 8;
 
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-  Face::p32Store2aNative(dst + 0, rb);
-  Face::p32Store2aNative(dst + 2, gg);
-  Face::p32Store2aNative(dst + 4, rb >> 16);
+  p32Store2aNative(dst + 0, rb);
+  p32Store2aNative(dst + 2, gg);
+  p32Store2aNative(dst + 4, rb >> 16);
 #else
-  Face::p32Store2aNative(dst + 0, rb >> 16);
-  Face::p32Store2aNative(dst + 2, gg);
-  Face::p32Store2aNative(dst + 4, rb);
+  p32Store2aNative(dst + 0, rb >> 16);
+  p32Store2aNative(dst + 2, gg);
+  p32Store2aNative(dst + 4, rb);
 #endif
 }
 
@@ -1438,8 +1435,8 @@ static FOG_INLINE void p32ARGB64FromARGB16_4444(
   dst0_10 = _FOG_FACE_COMBINE_2((t0     ) & 0x0000000F, (t0 << 12) & 0x000F0000);
   dst0_32 = _FOG_FACE_COMBINE_2((t0 >> 8) & 0x0000000F, (t0 <<  4) & 0x000F0000);
 
-  Face::p32Mul(dst0_10, dst0_10, 0x1111);
-  Face::p32Mul(dst0_32, dst0_32, 0x1111);
+  p32Mul(dst0_10, dst0_10, 0x1111);
+  p32Mul(dst0_32, dst0_32, 0x1111);
 }
 
 static FOG_INLINE void p32ARGB64FromARGB16_4444_bs(
@@ -1450,8 +1447,8 @@ static FOG_INLINE void p32ARGB64FromARGB16_4444_bs(
   dst0_10 = _FOG_FACE_COMBINE_2((t0 >> 8) & 0x0000000F, (t0 <<  4) & 0x000F0000);
   dst0_32 = _FOG_FACE_COMBINE_2((t0     ) & 0x0000000F, (t0 << 12) & 0x000F0000);
 
-  Face::p32Mul(dst0_10, dst0_10, 0x1111);
-  Face::p32Mul(dst0_32, dst0_32, 0x1111);
+  p32Mul(dst0_10, dst0_10, 0x1111);
+  p32Mul(dst0_32, dst0_32, 0x1111);
 }
 
 // ============================================================================
@@ -1696,9 +1693,6 @@ static FOG_INLINE void p64PRGB64FromARGB64_1032(
 {
   p64PRGB64FromARGB64_2031(dst0_20, dst0_31, x0_20, x0_31);
 }
-
-// Cleanup.
-#undef _U64
 
 //! @}
 

@@ -9,7 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/Hash.h>
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/G2d/Text/FontFace.h>
 
 namespace Fog {

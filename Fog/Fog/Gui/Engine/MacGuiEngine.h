@@ -198,7 +198,7 @@ private:
   bool runWork();
   bool runDelayedWork();
   bool runIdleWork();
-  
+
   // [Work Helpers]
   FOG_INLINE static void runWorkSource(void* info) { static_cast<MacEventLoopBase*>(info)->runWork(); }
   FOG_INLINE static void runDelayedWorkSource(void* info) { static_cast<MacEventLoopBase*>(info)->runDelayedWork(); }

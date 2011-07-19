@@ -8,8 +8,8 @@
 #define _FOG_G2D_TOOLS_DPI_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Threading/Atomic.h>
-#include <Fog/G2d/Global/Constants.h>
 
 namespace Fog {
 

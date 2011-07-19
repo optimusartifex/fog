@@ -9,9 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Init_Core_p.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringUtil.h>
@@ -508,16 +506,16 @@ err_t Value::setString(const String& val)
 }
 
 // ============================================================================
-// [Fog::Core - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _core_value_init(void)
+FOG_NO_EXPORT void Var_init(void)
 {
   _dnullData.init();
   Value::_dnull = _dnullData.instancep();
 }
 
-FOG_NO_EXPORT void _core_value_fini(void)
+FOG_NO_EXPORT void Var_fini(void)
 {
   _dnullData.destroy();
 }

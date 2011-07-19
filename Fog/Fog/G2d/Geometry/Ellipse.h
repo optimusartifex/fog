@@ -8,9 +8,7 @@
 #define _FOG_G2D_GEOMETRY_ELLIPSE_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/Uninitialized.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Ops.h>
@@ -18,19 +16,11 @@
 #include <Fog/G2d/Geometry/Circle.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
-#include <Fog/G2d/Global/Api.h>
 
 namespace Fog {
 
 //! @addtogroup Fog_G2d_Geometry
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct EllipseF;
-struct EllipseD;
 
 // ============================================================================
 // [Fog::EllipseF]
@@ -44,16 +34,14 @@ struct FOG_NO_EXPORT EllipseF
   // --------------------------------------------------------------------------
 
   FOG_INLINE EllipseF() { reset(); }
-  FOG_INLINE EllipseF(_Uninitialized) {}
-
   FOG_INLINE EllipseF(const EllipseF& other) { center = other.center; radius = other.radius; }
   FOG_INLINE EllipseF(const PointF& cp, const PointF& rp) { setEllipse(cp, rp); }
   FOG_INLINE EllipseF(const PointF& cp, float rad) { setEllipse(cp, rad); }
 
-  explicit FOG_INLINE EllipseF(const RectF& r) { setEllipse(r); }
+  explicit FOG_INLINE EllipseF(_Uninitialized) {}
+  explicit FOG_INLINE EllipseF(const EllipseD& ellipse) { setEllipse(ellipse); }
   explicit FOG_INLINE EllipseF(const BoxF& r) { setEllipse(r); }
-
-  explicit FOG_INLINE EllipseF(const EllipseD& ellipse);
+  explicit FOG_INLINE EllipseF(const RectF& r) { setEllipse(r); }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -80,7 +68,11 @@ struct FOG_NO_EXPORT EllipseF
   // [Reset]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void reset() { center.reset(); radius.reset(); }
+  FOG_INLINE void reset()
+  {
+    center.reset();
+    radius.reset();
+  }
 
   // --------------------------------------------------------------------------
   // [BoundingBox / BoundingRect]
@@ -108,12 +100,12 @@ struct FOG_NO_EXPORT EllipseF
 
   FOG_INLINE err_t _getBoundingBox(BoxF& dst, const TransformF* tr) const
   {
-    return _g2d.ellipsef.getBoundingBox(this, &dst, tr);
+    return _api.ellipsef.getBoundingBox(this, &dst, tr);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectF& dst, const TransformF* tr) const
   {
-    err_t err = _g2d.ellipsef.getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr);
+    err_t err = _api.ellipsef.getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -125,7 +117,7 @@ struct FOG_NO_EXPORT EllipseF
 
   FOG_INLINE bool hitTest(const PointF& pt) const
   {
-    return _g2d.ellipsef.hitTest(this, &pt);
+    return _api.ellipsef.hitTest(this, &pt);
   }
 
   // --------------------------------------------------------------------------
@@ -143,7 +135,7 @@ struct FOG_NO_EXPORT EllipseF
 
   FOG_INLINE uint toCSpline(PointF* dst) const
   {
-    return _g2d.ellipsef.toCSpline(this, dst);
+    return _api.ellipsef.toCSpline(this, dst);
   }
 
   // --------------------------------------------------------------------------
@@ -186,12 +178,12 @@ struct FOG_NO_EXPORT EllipseD
   // --------------------------------------------------------------------------
 
   FOG_INLINE EllipseD() { reset(); }
-  FOG_INLINE EllipseD(_Uninitialized) {}
-
   FOG_INLINE EllipseD(const EllipseD& other) { center = other.center; radius = other.radius; }
   FOG_INLINE EllipseD(const PointD& cp, const PointD& rp) { setEllipse(cp, rp); }
   FOG_INLINE EllipseD(const PointD& cp, double rad) { setEllipse(cp, rad); }
 
+  explicit FOG_INLINE EllipseD(_Uninitialized) {}
+  explicit FOG_INLINE EllipseD(const EllipseF& ellipse) { setEllipse(ellipse); }
   explicit FOG_INLINE EllipseD(const RectD& r) { setEllipse(r); }
   explicit FOG_INLINE EllipseD(const BoxD& r) { setEllipse(r); }
 
@@ -207,11 +199,11 @@ struct FOG_NO_EXPORT EllipseD
   FOG_INLINE void setRadius(double rad) { radius.set(rad, rad); }
 
   FOG_INLINE void setEllipse(const EllipseD& ellipse) { center = ellipse.center; radius = ellipse.radius; }
+  FOG_INLINE void setEllipse(const EllipseF& ellipse) { center = ellipse.center; radius = ellipse.radius; }
   FOG_INLINE void setEllipse(const PointD& cp, const PointD& rp) { center = cp; radius = rp; }
-
-  FOG_INLINE void setEllipse(const CircleD& circle) { center = circle.center; radius.set(circle.radius, circle.radius); }
   FOG_INLINE void setEllipse(const PointD& cp, double rad) { center = cp; radius.set(rad, rad); }
 
+  FOG_INLINE void setEllipse(const CircleD& circle) { center = circle.center; radius.set(circle.radius, circle.radius); }
   FOG_INLINE void setEllipse(const RectD& r) { radius.set(r.w * 0.5, r.h * 0.5); center.set(r.x + radius.x, r.y + radius.y); }
   FOG_INLINE void setEllipse(const BoxD& r) { radius.set(r.getWidth() * 0.5, r.getHeight() * 0.5); center.set(r.x0 + radius.x, r.y0 + radius.y); }
 
@@ -219,7 +211,11 @@ struct FOG_NO_EXPORT EllipseD
   // [Reset]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void reset() { center.reset(); radius.reset(); }
+  FOG_INLINE void reset()
+  {
+    center.reset();
+    radius.reset();
+  }
 
   // --------------------------------------------------------------------------
   // [BoundingBox / BoundingRect]
@@ -247,12 +243,12 @@ struct FOG_NO_EXPORT EllipseD
 
   FOG_INLINE err_t _getBoundingBox(BoxD& dst, const TransformD* tr) const
   {
-    return _g2d.ellipsed.getBoundingBox(this, &dst, tr);
+    return _api.ellipsed.getBoundingBox(this, &dst, tr);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectD& dst, const TransformD* tr) const
   {
-    err_t err = _g2d.ellipsed.getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr);
+    err_t err = _api.ellipsed.getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -264,7 +260,7 @@ struct FOG_NO_EXPORT EllipseD
 
   FOG_INLINE bool hitTest(const PointD& pt) const
   {
-    return _g2d.ellipsed.hitTest(this, &pt);
+    return _api.ellipsed.hitTest(this, &pt);
   }
 
   // --------------------------------------------------------------------------
@@ -282,7 +278,7 @@ struct FOG_NO_EXPORT EllipseD
 
   FOG_INLINE uint toCSpline(PointD* dst) const
   {
-    return _g2d.ellipsed.toCSpline(this, dst);
+    return _api.ellipsed.toCSpline(this, dst);
   }
 
   // --------------------------------------------------------------------------
@@ -316,12 +312,6 @@ struct FOG_NO_EXPORT EllipseD
 // ============================================================================
 // [Implemented-Later]
 // ============================================================================
-
-FOG_INLINE EllipseF::EllipseF(const EllipseD& ellipse) :
-  center(ellipse.center),
-  radius(ellipse.radius)
-{
-}
 
 FOG_INLINE void EllipseF::setEllipse(const EllipseD& ellipse)
 {

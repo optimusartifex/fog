@@ -8,7 +8,7 @@
 #define _FOG_CORE_TOOLS_BYTEARRAYMATCHER_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Tools/ByteArray.h>
 #include <Fog/Core/Tools/ByteArrayFilter.h>
 

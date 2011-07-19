@@ -8,9 +8,7 @@
 #define _FOG_CORE_VARIANT_VAR_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/Swap.h>
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Tools/String.h>
 

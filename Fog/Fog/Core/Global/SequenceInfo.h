@@ -100,17 +100,17 @@ struct SequenceInfo_Primitive :
 {
 };
 
-// Moveable types.
+// Movable types.
 
 template<typename T>
-struct SequenceInfo_Moveable :
+struct SequenceInfo_Movable :
   public SequenceInfo_TypeInitFree<T>,
   public SequenceInfo_TypeCopy<T>,
   public SequenceInfo_MemMove<sizeof(T)>
 {
 };
 
-// Class types.
+// Complex types.
 
 template<typename T>
 struct SequenceInfo_Complex :
@@ -164,16 +164,16 @@ struct SequenceInfoVTable
 // [Fog::SequenceInfo
 // ===========================================================================
 
-// 0 = PrimitiveType
-// 1 = MoveableType
-// 2 = ClassType
+// 0 = Primitive type.
+// 1 = Movable type.
+// 2 = Complex type.
 template<typename T, uint __TypeInfo__>
 struct SequenceInfo_Wrapper {};
 
 template<typename T>
 struct SequenceInfo_Wrapper<T, 0> : public SequenceInfo_Primitive<T> {};
 template<typename T>
-struct SequenceInfo_Wrapper<T, 1> : public SequenceInfo_Moveable<T> {};
+struct SequenceInfo_Wrapper<T, 1> : public SequenceInfo_Movable<T> {};
 template<typename T>
 struct SequenceInfo_Wrapper<T, 2> : public SequenceInfo_Complex<T> {};
 

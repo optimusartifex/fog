@@ -10,14 +10,12 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/BufferP.h>
-#include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Memory/BSwap.h>
 #include <Fog/Core/Memory/Ops.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Strings.h>
-#include <Fog/G2d/Global/Constants.h>
-#include <Fog/G2d/Global/Init_G2d_p.h>
 #include <Fog/G2d/Imaging/Codecs/PcxCodec_p.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageConverter.h>
@@ -595,18 +593,18 @@ err_t PcxDecoder::readImage(Image& image)
         break;
 
       case 24:
-        pos[0] = RGB24_RBYTE;
-        pos[1] = RGB24_GBYTE;
-        pos[2] = RGB24_BBYTE;
+        pos[0] = PIXEL_RGB24_POS_R;
+        pos[1] = PIXEL_RGB24_POS_G;
+        pos[2] = PIXEL_RGB24_POS_B;
         increment = 3;
         planeMax = 3;
         break;
 
       case 32:
-        pos[0] = ARGB32_RBYTE;
-        pos[1] = ARGB32_GBYTE;
-        pos[2] = ARGB32_BBYTE;
-        pos[3] = ARGB32_ABYTE;
+        pos[0] = PIXEL_ARGB32_POS_R;
+        pos[1] = PIXEL_ARGB32_POS_G;
+        pos[2] = PIXEL_ARGB32_POS_B;
+        pos[3] = PIXEL_ARGB32_POS_A;
         increment = 4;
         planeMax = 4;
         break;
@@ -767,13 +765,13 @@ err_t PcxEncoder::writeImage(const Image& image)
     case IMAGE_FORMAT_A8:
     case IMAGE_FORMAT_A16:
       converter.create(
-        ImageFormatDescription::fromArgb(32, NO_FLAGS, ARGB32_AMASK, ARGB32_RMASK, ARGB32_GMASK, ARGB32_BMASK),
+        ImageFormatDescription::fromArgb(32, NO_FLAGS, PIXEL_ARGB32_MASK_A, PIXEL_ARGB32_MASK_R, PIXEL_ARGB32_MASK_G, PIXEL_ARGB32_MASK_B),
         ImageFormatDescription::getByFormat(d->format));
 
-      pos[0] = ARGB32_RBYTE;
-      pos[1] = ARGB32_GBYTE;
-      pos[2] = ARGB32_BBYTE;
-      pos[3] = ARGB32_ABYTE;
+      pos[0] = PIXEL_ARGB32_POS_R;
+      pos[1] = PIXEL_ARGB32_POS_G;
+      pos[2] = PIXEL_ARGB32_POS_B;
+      pos[3] = PIXEL_ARGB32_POS_A;
       nPlanes = 4;
       break;
 
@@ -782,9 +780,9 @@ err_t PcxEncoder::writeImage(const Image& image)
         ImageFormatDescription::getByFormat(IMAGE_FORMAT_RGB24),
         ImageFormatDescription::getByFormat(IMAGE_FORMAT_RGB24));
 
-      pos[0] = RGB24_RBYTE;
-      pos[1] = RGB24_GBYTE;
-      pos[2] = RGB24_BBYTE;
+      pos[0] = PIXEL_RGB24_POS_R;
+      pos[1] = PIXEL_RGB24_POS_G;
+      pos[2] = PIXEL_RGB24_POS_B;
       nPlanes = 3;
       break;
 
@@ -794,9 +792,9 @@ err_t PcxEncoder::writeImage(const Image& image)
         ImageFormatDescription::getByFormat(IMAGE_FORMAT_XRGB32),
         ImageFormatDescription::getByFormat(d->format));
 
-      pos[0] = ARGB32_RBYTE;
-      pos[1] = ARGB32_GBYTE;
-      pos[2] = ARGB32_BBYTE;
+      pos[0] = PIXEL_ARGB32_POS_R;
+      pos[1] = PIXEL_ARGB32_POS_G;
+      pos[2] = PIXEL_ARGB32_POS_B;
       nPlanes = 3;
       break;
 
@@ -910,12 +908,14 @@ _Fail:
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_imagecodecprovider_init_pcx(void)
+FOG_NO_EXPORT void ImageCodecProvider_initPCX(void)
 {
-  ImageCodecProvider::addProvider(IMAGE_CODEC_BOTH, fog_new PcxCodecProvider());
+  ImageCodecProvider* provider = fog_new PcxCodecProvider();
+  ImageCodecProvider::addProvider(provider);
+  provider->deref();
 }
 
 } // Fog namespace

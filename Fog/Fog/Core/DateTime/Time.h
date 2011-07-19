@@ -3,39 +3,16 @@
 // [License]
 // MIT, See COPYING file in package
 
-// Copyright (c) 2006-2008 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 // [Guard]
 #ifndef _FOG_CORE_DATETIME_TIME_H
 #define _FOG_CORE_DATETIME_TIME_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/TypeInfo.h>
-
-// Time represents an absolute point in time, internally represented as
-// microseconds (s/1,000,000) since a platform-dependent epoch.  Each
-// platform's epoch, along with other system-dependent clock interface
-// routines, is defined in time_PLATFORM.cc.
-//
-// TimeDelta represents a duration of time, internally represented in
-// microseconds.
-//
-// TimeTicks represents an abstract time that is always incrementing for use
-// in measuring time durations. It is internally represented in microseconds.
-// It can not be converted to a human-readable time, but is guaranteed not to
-// decrease (if the user changes the computer clock, Time::Now() may actually
-// decrease or jump).
-//
-// These classes are represented as only a 64-bit value, so they can be
-// efficiently passed by value.
+#include <Fog/Core/Global/Global.h>
 
 // [Dependencies - Windows]
 #if defined(FOG_OS_WINDOWS)
-#include <windows.h>
+# include <windows.h>
 #endif // FOG_OS_WINDOWS
 
 // [Dependencies - C]
@@ -47,474 +24,275 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct Time;
-struct TimeDelta;
-struct TimeTicks;
-
-// ============================================================================
 // [Fog::TimeDelta]
 // ============================================================================
 
-//! @brief Time delta (the delta between two @a Time instances).
-struct FOG_API TimeDelta
+//! @brief Time delta (the difference between two @a Time oe @c TimeTicks instances).
+struct FOG_NO_EXPORT TimeDelta
 {
-public:
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  //! @brief Create a time delta initialized to zero.
   FOG_INLINE TimeDelta() : _delta(0) {}
-  FOG_INLINE ~TimeDelta() {}
 
-  // Converts units of time to TimeDeltas.
-  static TimeDelta fromDays(int64_t days);
-  static TimeDelta fromHours(int64_t hours);
-  static TimeDelta fromMinutes(int64_t minutes);
-  static TimeDelta fromSeconds(int64_t secs);
-  static TimeDelta fromMilliseconds(int64_t ms);
-  static TimeDelta fromMicroseconds(int64_t us);
+  //! @brief Create a uninitialized @c TimeDelta.
+  explicit FOG_INLINE TimeDelta(_Uninitialized) {}
+  //! @brief Create a @c TimeDelta from the value (in microseconds).
+  explicit FOG_INLINE TimeDelta(int64_t value) : _delta(value) {}
 
-  FOG_INLINE void clear()
-  { _delta = 0; }
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
 
-  // Returns the internal numeric value of the TimeDelta object. Please don't
-  // use this and do arithmetic on it, as it is more error prone than using the
-  // provided operators.
-  FOG_INLINE int64_t toInternalValue() const { return _delta; }
+  //! @brief Get time-delta value.
+  FOG_INLINE int64_t getDelta() const { return _delta; }
+  //! @brief Set time-delta value.
+  FOG_INLINE void setDelta(int64_t value) { _delta = value; }
 
-  // Returns the time delta in some unit. The F versions return a floating
-  // point value, the "regular" versions return a rounded-down value.
-  int inDays() const;
-  int inHours() const;
-  int inMinutes() const;
-  double inSecondsF() const;
-  int64_t inSeconds() const;
-  double inMillisecondsF() const;
-  int64_t inMilliseconds() const;
-  int64_t inMicroseconds() const;
+  int64_t getMicroseconds() const { return _delta; }
+  int64_t getMilliseconds() const { return _delta / TIME_US_PER_MS; }
+  int64_t getSeconds() const { return _delta / TIME_US_PER_SECOND; }
 
-  FOG_INLINE TimeDelta& operator=(TimeDelta other)
+  int getMinutes() const { return (int)(_delta / TIME_US_PER_MINUTE); }
+  int getHours() const { return (int)(_delta / TIME_US_PER_HOUR); }
+  int getDays() const { return (int)(_delta / TIME_US_PER_DAY); }
+
+  float getMillisecondsF() const { return (float)(double(_delta) / double(TIME_US_PER_MS)); }
+  float getSecondsF() const { return (float)(double(_delta) / double(TIME_US_PER_SECOND)); }
+
+  double getMillisecondsD() const { return double(_delta) / double(TIME_US_PER_MS);}
+  double getSecondsD() const { return double(_delta) / double(TIME_US_PER_SECOND); }
+
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void reset()
   {
-    _delta = other._delta;
-    return *this;
-  }
-
-  // Computations with other deltas.
-  FOG_INLINE TimeDelta operator+(TimeDelta other) const
-  {
-    return TimeDelta(_delta + other._delta);
+    _delta = 0;
   }
 
-  FOG_INLINE TimeDelta operator-(TimeDelta other) const
-  {
-    return TimeDelta(_delta - other._delta);
-  }
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
 
-  FOG_INLINE TimeDelta& operator+=(TimeDelta other)
-  {
-    _delta += other._delta;
-    return *this;
-  }
-  FOG_INLINE TimeDelta& operator-=(TimeDelta other)
-  {
-    _delta -= other._delta;
-    return *this;
-  }
-  FOG_INLINE TimeDelta operator-() const
-  {
-    return TimeDelta(-_delta);
-  }
+  FOG_INLINE TimeDelta& operator =(const TimeDelta& other) { _delta  = other._delta; return *this; }
+  FOG_INLINE TimeDelta& operator+=(const TimeDelta& other) { _delta += other._delta; return *this; }
+  FOG_INLINE TimeDelta& operator-=(const TimeDelta& other) { _delta -= other._delta; return *this; }
 
-  // Computations with ints, note that we only allow multiplicative operations
-  // with ints, and additive operations with other deltas.
-  FOG_INLINE TimeDelta operator*(int64_t a) const
-  {
-    return TimeDelta(_delta * a);
-  }
-  FOG_INLINE TimeDelta operator/(int64_t a) const
-  {
-    return TimeDelta(_delta / a);
-  }
-  FOG_INLINE TimeDelta& operator*=(int64_t a)
-  {
-    _delta *= a;
-    return *this;
-  }
-  FOG_INLINE TimeDelta& operator/=(int64_t a)
-  {
-    _delta /= a;
-    return *this;
-  }
-  FOG_INLINE int64_t operator/(TimeDelta a) const
-  {
-    return _delta / a._delta;
-  }
+  FOG_INLINE TimeDelta operator+(const TimeDelta& other) const { return TimeDelta(_delta + other._delta); }
+  FOG_INLINE TimeDelta operator-(const TimeDelta& other) const { return TimeDelta(_delta - other._delta); }
 
-  // Defined below because it depends on the definition of the other classes.
-  FOG_INLINE Time operator+(Time t) const;
-  FOG_INLINE TimeTicks operator+(TimeTicks t) const;
+  FOG_INLINE TimeDelta operator-() const { return TimeDelta(-_delta); }
 
-  // Comparison operators.
-  FOG_INLINE bool operator==(TimeDelta other) const
-  {
-    return _delta == other._delta;
-  }
-  FOG_INLINE bool operator!=(TimeDelta other) const
-  {
-    return _delta != other._delta;
-  }
-  FOG_INLINE bool operator<(TimeDelta other) const
-  {
-    return _delta < other._delta;
-  }
-  FOG_INLINE bool operator<=(TimeDelta other) const
-  {
-    return _delta <= other._delta;
-  }
-  FOG_INLINE bool operator>(TimeDelta other) const
-  {
-    return _delta > other._delta;
-  }
-  FOG_INLINE bool operator>=(TimeDelta other) const
-  {
-    return _delta >= other._delta;
-  }
+  // Implemented-Later.
+  FOG_INLINE Time operator+(const Time& t) const;
+  FOG_INLINE TimeTicks operator+(const TimeTicks& t) const;
 
-  FOG_INLINE int64_t delta() const
-  {
-    return _delta;
-  }
+  FOG_INLINE bool operator==(const TimeDelta& other) const { return _delta == other._delta; }
+  FOG_INLINE bool operator!=(const TimeDelta& other) const { return _delta != other._delta; }
+  FOG_INLINE bool operator< (const TimeDelta& other) const { return _delta <  other._delta; }
+  FOG_INLINE bool operator<=(const TimeDelta& other) const { return _delta <= other._delta; }
+  FOG_INLINE bool operator> (const TimeDelta& other) const { return _delta >  other._delta; }
+  FOG_INLINE bool operator>=(const TimeDelta& other) const { return _delta >= other._delta; }
 
-private:
-  friend struct Time;
-  friend struct TimeTicks;
+  // --------------------------------------------------------------------------
+  // [Statics]
+  // --------------------------------------------------------------------------
 
-  // Constructs a delta given the duration in microseconds. This is private
-  // to avoid confusion by callers with an integer constructor. Use
-  // fromSeconds, fromMilliseconds, etc. instead.
-  explicit FOG_INLINE TimeDelta(int64_t _deltaus) : _delta(_deltaus) {}
+  static TimeDelta fromDays(int64_t days) { return TimeDelta(days * TIME_US_PER_DAY); }
+  static TimeDelta fromHours(int64_t hours) { return TimeDelta(hours * TIME_US_PER_HOUR); }
+  static TimeDelta fromMinutes(int64_t minutes) { return TimeDelta(minutes * TIME_US_PER_MINUTE); }
+  static TimeDelta fromSeconds(int64_t secs) { return TimeDelta(secs * TIME_US_PER_SECOND); }
+  static TimeDelta fromMilliseconds(int64_t ms) { return TimeDelta(ms * TIME_US_PER_MS); }
+  static TimeDelta fromMicroseconds(int64_t us) { return TimeDelta(us); }
 
-  // Delta in microseconds.
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  //! @brief Time delta in microseconds.
   int64_t _delta;
 };
-
-FOG_INLINE TimeDelta operator*(int64_t a, TimeDelta td)
-{
-  return TimeDelta::fromMicroseconds(a * td.delta());
-}
 
 // ============================================================================
 // [Fog::Time]
 // ============================================================================
 
 //! @brief Time.
-struct FOG_API Time
+struct FOG_NO_EXPORT Time
 {
-public:
-  static const int64_t MillisecondsPerSecond      = 1000;
-  static const int64_t MicrosecondsPerMillisecond = 1000;
-  static const int64_t MicrosecondsPerSecond      = MicrosecondsPerMillisecond *
-                                                    MillisecondsPerSecond;
-  static const int64_t MicrosecondsPerMinute      = MicrosecondsPerSecond * 60;
-  static const int64_t MicrosecondsPerHour        = MicrosecondsPerMinute * 60;
-  static const int64_t MicrosecondsPerDay         = MicrosecondsPerHour * 24;
-  static const int64_t MicrosecondsPerWeek        = MicrosecondsPerDay * 7;
-  static const int64_t NanosecondsPerMicrosecond  = 1000;
-  static const int64_t NanosecondsPerSecond       = NanosecondsPerMicrosecond *
-                                                    MicrosecondsPerSecond;
+  FOG_INLINE Time() : _us(0) {}
+  explicit FOG_INLINE Time(_Uninitialized) {}
+  explicit FOG_INLINE Time(int64_t us) : _us(us) {}
 
-  // Represents an exploded time that can be formatted nicely. This is kind of
-  // like the Win32 SYSTEMTIME structure or the Unix "struct tm" with a few
-  // additions and changes to prevent errors.
-  struct Exploded
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  //! @brief Get time value (in microseconds).
+  FOG_INLINE int64_t getValue() const { return _us; }
+  //! @brief Set time value (in microseconds).
+  FOG_INLINE void setValue(int64_t value) { _us = value; }
+
+  //! @brief Get whether the object has not been initialized.
+  FOG_INLINE bool isNull() const { return _us == 0; }
+
+  //! @brief Get time converted to @c time_t.
+  FOG_INLINE time_t getTimeT() const { return _api.time.toTimeT(_us); }
+
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void reset()
   {
-    int year;          // Four digit year "2007"
-    int month;         // 1-based month (values 1 = January, etc.)
-    int dayOfWeek;     // 0-based day of week (0 = Sunday, etc.)
-    int dayOfMonth;    // 1-based day of month (1-31)
-    int hour;          // Hour within the current day (0-23)
-    int minute;        // Minute within the current hour (0-59)
-    int second;        // Second within the current minute (0-59 plus leap
-                       //   seconds which may take it up to 60).
-    int millisecond;   // Milliseconds within the current second (0-999)
-  };
-
-  // Contains the NULL time. Use Time::now() to get the current time.
-  explicit FOG_INLINE Time() : _us(0) {}
-
-  // Returns true if the time object has not been initialized.
-  FOG_INLINE bool isNull() const
-  {
-    return _us == 0;
+    _us = 0;
   }
 
-  FOG_INLINE void clear()
-  { _us = 0; }
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
 
-  // Returns the current time. Watch out, the system might adjust its clock
-  // in which case time will actually go backwards. We don't guarantee that
-  // times are increasing, or that two calls to now() won't be the same.
-  static Time now();
+  FOG_INLINE Time& operator=(const Time& other) { _us = other._us; return *this; }
+  FOG_INLINE Time& operator+=(const TimeDelta& delta) { _us += delta._delta; return *this; }
+  FOG_INLINE Time& operator-=(const TimeDelta& delta) { _us -= delta._delta; return *this; }
 
-  // Converts to/from time_t in UTC and a Time class.
-  static Time fromTimeT(time_t tt);
-  time_t toTimeT() const;
+  FOG_INLINE TimeDelta operator-(const Time& other) const { return TimeDelta(_us - other._us); }
 
-  // Converts time to a double which is the number of seconds since epoch
-  // (Jan 1, 1970). Webkit uses this format to represent time.
-  double toDoubleT() const;
+  FOG_INLINE Time operator+(const TimeDelta& delta) const { return Time(_us + delta._delta); }
+  FOG_INLINE Time operator-(const TimeDelta& delta) const { return Time(_us - delta._delta); }
 
-#if defined(FOG_OS_WINDOWS)
-  static Time fromFILETIME(FILETIME ft);
-  FILETIME toFILETIME() const;
-#endif
+  FOG_INLINE bool operator==(const Time& other) const { return _us == other._us; }
+  FOG_INLINE bool operator!=(const Time& other) const { return _us != other._us; }
+  FOG_INLINE bool operator< (const Time& other) const { return _us <  other._us; }
+  FOG_INLINE bool operator<=(const Time& other) const { return _us <= other._us; }
+  FOG_INLINE bool operator> (const Time& other) const { return _us >  other._us; }
+  FOG_INLINE bool operator>=(const Time& other) const { return _us >= other._us; }
 
-  // Converts an exploded structure representing either the local time or UTC
-  // into a Time class.
-  static FOG_INLINE Time fromUTCExploded(const Exploded& exploded)
+  // --------------------------------------------------------------------------
+  // [Statics]
+  // --------------------------------------------------------------------------
+
+  //! @brief Get the current time.
+  //!
+  //! @note Return value depends on system time, which can be adjusted by user
+  //! or by the system itself. There is no guarantee that times returned by
+  //! successive calls will be increasing.
+  static FOG_INLINE Time now()
   {
-    return fromExploded(false, exploded);
-  }
-  static FOG_INLINE Time fromLocalExploded(const Exploded& exploded)
-  {
-    return fromExploded(true, exploded);
-  }
-
-  // Converts an integer value representing Time to a class. This is used
-  // when deserializing a |Time| structure, using a value known to be
-  // compatible. It is not provided as a constructor because the integer type
-  // may be unclear from the perspective of a caller.
-  static FOG_INLINE Time fromInternalValue(int64_t us)
-  {
-    return Time(us);
+    return Time(_api.time.now());
   }
 
-  // For serializing, use fromInternalValue to reconstitute. Please don't use
-  // this and do arithmetic on it, as it is more error prone than using the
-  // provided operators.
-  FOG_INLINE int64_t toInternalValue() const
+  //! @brief Create a @c Time from @c time_t (in seconds).
+  static FOG_INLINE Time fromTimeT(time_t t)
   {
-    return _us;
+    return Time(_api.time.fromTimeT(t));
   }
 
-  // Fills the given exploded structure with either the local time or UTC from
-  // this time structure (containing UTC).
-  FOG_INLINE void utcExplode(Exploded* exploded) const
-  {
-    return explode(false, exploded);
-  }
-  FOG_INLINE void localExplode(Exploded* exploded) const
-  {
-    return explode(true, exploded);
-  }
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
 
-  // Rounds this time down to the nearest day in local time. It will represent
-  // midnight on that day.
-  Time LocalMidnight() const;
-
-  FOG_INLINE Time& operator=(Time other)
-  {
-    _us = other._us;
-    return *this;
-  }
-
-  // Compute the difference between two times.
-  FOG_INLINE TimeDelta operator-(Time other) const
-  {
-    return TimeDelta(_us - other._us);
-  }
-
-  // Modify by some time delta.
-  FOG_INLINE Time& operator+=(TimeDelta delta)
-  {
-    _us += delta._delta;
-    return *this;
-  }
-  FOG_INLINE Time& operator-=(TimeDelta delta)
-  {
-    _us -= delta._delta;
-    return *this;
-  }
-
-  // Return a new time modified by some delta.
-  FOG_INLINE Time operator+(TimeDelta delta) const
-  {
-    return _us + delta._delta;
-  }
-  FOG_INLINE Time operator-(TimeDelta delta) const
-  {
-    return _us - delta._delta;
-  }
-
-  // Comparison operators
-  FOG_INLINE bool operator==(Time other) const
-  {
-    return _us == other._us;
-  }
-  FOG_INLINE bool operator!=(Time other) const
-  {
-    return _us != other._us;
-  }
-  FOG_INLINE bool operator<(Time other) const
-  {
-    return _us < other._us;
-  }
-  FOG_INLINE bool operator<=(Time other) const
-  {
-    return _us <= other._us;
-  }
-  FOG_INLINE bool operator>(Time other) const
-  {
-    return _us > other._us;
-  }
-  FOG_INLINE bool operator>=(Time other) const
-  {
-    return _us >= other._us;
-  }
-
-  FOG_INLINE int64_t us() const
-  {
-    return _us;
-  }
-
-private:
-  friend struct TimeDelta;
-
-  // Explodes the given time to either local time |is_local = true| or UTC
-  // |is_local = false|.
-  void explode(bool isLocal, Exploded* exploded) const;
-
-  // Unexplodes a given time assuming the source is either local time
-  // |is_local = true| or UTC |is_local = false|.
-  static Time fromExploded(bool is_local, const Exploded& exploded);
-
-  FOG_INLINE Time(int64_t us) : _us(us) {}
-
-  // The representation of Jan 1, 1970 UTC in microseconds since the
-  // platform-dependent epoch.
-  static const int64_t kTimeTToMicrosecondsOffset;
-
-  // Time in microseconds in UTC.
+  //! @brief Time in microseconds in UTC.
   int64_t _us;
 };
-
-FOG_INLINE Time TimeDelta::operator+(Time t) const
-{
-  return Time(t._us + _delta);
-}
 
 // ============================================================================
 // [Fog::TimeTicks]
 // ============================================================================
 
 //! @brief Tick count.
-struct FOG_API TimeTicks
+struct FOG_NO_EXPORT TimeTicks
 {
-public:
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
   FOG_INLINE TimeTicks() : _ticks(0) {}
 
-  // Platform-dependent tick count representing "right now."
-  // The resolution of this clock is ~1-15ms.  Resolution varies depending
-  // on hardware/operating system configuration.
-  static TimeTicks now();
-
-  // Returns a platform-dependent high-resolution tick count. Implementation
-  // is hardware dependent and may or may not return sub-millisecond
-  // resolution.  THIS CALL IS GENERALLY MUCH MORE EXPENSIVE THAN Now() AND
-  // SHOULD ONLY BE USED WHEN IT IS REALLY NEEDED.
-  static TimeTicks highResNow();
-
-  FOG_INLINE void clear()
-  { _ticks = 0; }
-
-  // Returns true if this object has not been initialized.
-  FOG_INLINE bool isNull() const
-  {
-    return _ticks == 0;
-  }
-
-  // Returns the internal numeric value of the TimeTicks object.
-  FOG_INLINE int64_t toInternalValue() const
-  {
-    return _ticks;
-  }
-
-  FOG_INLINE TimeTicks& operator=(TimeTicks other)
-  {
-    _ticks = other._ticks;
-    return *this;
-  }
-
-  // Compute the difference between two times.
-  FOG_INLINE TimeDelta operator-(TimeTicks other) const
-  {
-    return TimeDelta(_ticks - other._ticks);
-  }
-
-  // Modify by some time delta.
-  FOG_INLINE TimeTicks& operator+=(TimeDelta delta)
-  {
-    _ticks += delta._delta;
-    return *this;
-  }
-  FOG_INLINE TimeTicks& operator-=(TimeDelta delta)
-  {
-    _ticks -= delta._delta;
-    return *this;
-  }
-
-  // Return a new TimeTicks modified by some delta.
-  FOG_INLINE TimeTicks operator+(TimeDelta delta) const
-  {
-    return TimeTicks(_ticks + delta._delta);
-  }
-  FOG_INLINE TimeTicks operator-(TimeDelta delta) const
-  {
-    return TimeTicks(_ticks - delta._delta);
-  }
-
-  // Comparison operators
-  FOG_INLINE bool operator==(TimeTicks other) const
-  {
-    return _ticks == other._ticks;
-  }
-  FOG_INLINE bool operator!=(TimeTicks other) const
-  {
-    return _ticks != other._ticks;
-  }
-  FOG_INLINE bool operator<(TimeTicks other) const
-  {
-    return _ticks < other._ticks;
-  }
-  FOG_INLINE bool operator<=(TimeTicks other) const
-  {
-    return _ticks <= other._ticks;
-  }
-  FOG_INLINE bool operator>(TimeTicks other) const
-  {
-    return _ticks > other._ticks;
-  }
-  FOG_INLINE bool operator>=(TimeTicks other) const
-  {
-    return _ticks >= other._ticks;
-  }
-
-protected:
-  friend struct TimeDelta;
-
-  // Please use now() to create a new object. This is for internal use
-  // and testing. Ticks is in microseconds.
+  explicit FOG_INLINE TimeTicks(_Uninitialized) {}
   explicit FOG_INLINE TimeTicks(int64_t ticks) : _ticks(ticks) {}
 
-  // Tick count in microseconds.
-  int64_t _ticks;
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
 
-#if defined(FOG_OS_WINDOWS)
-  typedef DWORD (*TickFunctionType)(void);
-  static TickFunctionType setMockTickFunction(TickFunctionType ticker);
-#endif // FOG_OS_WINDOWS
+  //! @brief Get ticks value.
+  FOG_INLINE int64_t getTicks() const { return _ticks; }
+  //! @brief Set ticks value.
+  FOG_INLINE void setTicks(int64_t ticks) { _ticks = ticks; }
+
+  //! @brief Get whether the object has not been initialized.
+  FOG_INLINE bool isNull() const { return _ticks == 0; }
+
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  //! @brief Clear the value to zero.
+  FOG_INLINE void reset()
+  {
+    _ticks = 0;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE TimeDelta operator-(const TimeTicks& other) const { return TimeDelta(_ticks - other._ticks); }
+
+  FOG_INLINE TimeTicks& operator =(const TimeTicks& other) { _ticks  = other._ticks; return *this; }
+  FOG_INLINE TimeTicks& operator+=(const TimeDelta& delta) { _ticks += delta._delta; return *this; }
+  FOG_INLINE TimeTicks& operator-=(const TimeDelta& delta) { _ticks -= delta._delta; return *this; }
+
+  FOG_INLINE TimeTicks operator+(const TimeDelta& delta) const { return TimeTicks(_ticks + delta._delta); }
+  FOG_INLINE TimeTicks operator-(const TimeDelta& delta) const { return TimeTicks(_ticks - delta._delta); }
+
+  FOG_INLINE bool operator==(const TimeTicks& other) const { return _ticks == other._ticks; }
+  FOG_INLINE bool operator!=(const TimeTicks& other) const { return _ticks != other._ticks; }
+  FOG_INLINE bool operator< (const TimeTicks& other) const { return _ticks <  other._ticks; }
+  FOG_INLINE bool operator<=(const TimeTicks& other) const { return _ticks <= other._ticks; }
+  FOG_INLINE bool operator> (const TimeTicks& other) const { return _ticks >  other._ticks; }
+  FOG_INLINE bool operator>=(const TimeTicks& other) const { return _ticks >= other._ticks; }
+
+  // --------------------------------------------------------------------------
+  // [Statics]
+  // --------------------------------------------------------------------------
+
+  //! @brief Get the platform dependent tick-count.
+  //!
+  //! The precision can be adjusted using @c ticksPrecision argument. If the
+  //! low precision is requested (@c TICKS_PRECISION_LOW) then the precision
+  //! varies between 1-15ms, otherwise the high-resolution tick-count is used.
+  //!
+  //! @note The high-resolution tick-count is generally slower and should be
+  //! used only when it is really needed (benchmarking, for example)
+  static FOG_INLINE TimeTicks now(uint32_t ticksPrecision = TICKS_PRECISION_LOW)
+  {
+    return TimeTicks(_api.timeticks.now(ticksPrecision));
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  //! @brief Time ticks value in microseconds.
+  int64_t _ticks;
 };
 
-FOG_INLINE TimeTicks TimeDelta::operator+(TimeTicks t) const
+// ============================================================================
+// [Implemented-Later]
+// ============================================================================
+
+FOG_INLINE Time TimeDelta::operator+(const Time& t) const
+{
+  return Time(t._us + _delta);
+}
+
+FOG_INLINE TimeTicks TimeDelta::operator+(const TimeTicks& t) const
 {
   return TimeTicks(t._ticks + _delta);
 }
@@ -524,7 +302,7 @@ FOG_INLINE TimeTicks TimeDelta::operator+(TimeTicks t) const
 } // Fog namespace
 
 // ============================================================================
-// Fog::TypeInfo<>
+// [Fog::TypeInfo<>]
 // ============================================================================
 
 _FOG_TYPEINFO_DECLARE(Fog::Time, Fog::TYPEINFO_PRIMITIVE)

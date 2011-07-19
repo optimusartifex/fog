@@ -16,21 +16,10 @@ namespace Fog {
 //! @{
 
 // ===========================================================================
-// [Fog::TypeInfo - Types]
-//
-// Class types for Fog::TypeInfo<T> template.
-// ===========================================================================
-
-// [Fog::AbstractCompareFn and Fog::AbstractEqFn]
-
-typedef int (*AbstractCompareFn)(const void* a, const void* b);
-typedef bool (*AbstractEqFn)(const void* a, const void* b);
-
-// ===========================================================================
 // [Fog::TypeInfo<T>
 // ===========================================================================
 
-//! @class template<T> TypeInfo
+//! @class template<typename T> TypeInfo
 //! @brief Template for partial @c Fog::TypeInfo specialization.
 
 #if defined(FOG_CC_HAVE_PARTIAL_TEMPLATE_SPECIALIZATION)
@@ -38,54 +27,71 @@ typedef bool (*AbstractEqFn)(const void* a, const void* b);
 template<typename T>
 struct TypeInfo
 {
-  // TypeInfo constants
   enum
   {
-    // [Type - Generic type is always ClassType]
-    TYPE = TYPEINFO_CLASS,
-    FLAGS = 0,
+    // ------------------------------------------------------------------------
+    // [Type / Flags]
+    // ------------------------------------------------------------------------
 
-    // [Basic Information]
-    IS_POINTER = 0,
+    TYPE         = TYPEINFO_COMPLEX,
+    FLAGS        = 0,
+
+    // ------------------------------------------------------------------------
+    // [Basic]
+    // ------------------------------------------------------------------------
+
     IS_PRIMITIVE = (TYPE == TYPEINFO_PRIMITIVE),
-    IS_MOVABLE = (TYPE <= TYPEINFO_MOVABLE),
-    IS_CLASS = (TYPE == TYPEINFO_CLASS),
+    IS_MOVABLE   = (TYPE <= TYPEINFO_MOVABLE),
+    IS_COMPLEX   = (TYPE == TYPEINFO_COMPLEX),
 
-    // [Extended Information]
-    IS_POD = 0,
-    IS_FLOAT = 0,
-    IS_DOUBLE = 0,
-    HAS_COMPARE = 0,
-    HAS_EQ = 0
+    // ------------------------------------------------------------------------
+    // [Extended]
+    // ------------------------------------------------------------------------
+
+    IS_POINTER   = 0,
+    IS_POD       = 0,
+    IS_FLOAT     = 0,
+    IS_DOUBLE    = 0,
+
+    HAS_COMPARE  = 0,
+    HAS_EQ       = 0
   };
 
   typedef bool (*EqFn)(const T* a, const T* b);
   typedef int (*CompareFn)(const T* a, const T* b);
 };
 
-// Specialization for pointers. Pointer is always TYPEINFO_PRIMITIVE.
+// TypeInfo pointer specialization. Pointer is always primitive type.
 template<typename T>
 struct TypeInfo<T*>
 {
-  // TypeInfo constants
   enum
   {
-    // [Type - Pointer is always simple type]
-    TYPE = TYPEINFO_PRIMITIVE,
-    FLAGS = TYPEINFO_IS_POD_TYPE,
+    // ------------------------------------------------------------------------
+    // [Type / Flags]
+    // ------------------------------------------------------------------------
 
-    // [Type - Generic type is always ClassType]
-    IS_POINTER = 1,
+    TYPE         = TYPEINFO_PRIMITIVE,
+    FLAGS        = TYPEINFO_IS_POD_TYPE,
+
+    // ------------------------------------------------------------------------
+    // [Basic]
+    // ------------------------------------------------------------------------
+
     IS_PRIMITIVE = (TYPE == TYPEINFO_PRIMITIVE),
-    IS_MOVABLE = (TYPE <= TYPEINFO_MOVABLE),
-    IS_CLASS = (TYPE == TYPEINFO_CLASS),
+    IS_MOVABLE   = (TYPE <= TYPEINFO_MOVABLE),
+    IS_COMPLEX   = (TYPE == TYPEINFO_COMPLEX),
 
-    // [Extended Information]
-    IS_POD = 1, // POD is comparable by default
-    IS_FLOAT = 0,
-    IS_DOUBLE = 0,
-    HAS_COMPARE = 0,
-    HAS_EQ = 0
+    // ------------------------------------------------------------------------
+    // [Extended]
+    // ------------------------------------------------------------------------
+
+    IS_POINTER   = 1,
+    IS_POD       = 1, // Pointer is comparable.
+    IS_FLOAT     = 0,
+    IS_DOUBLE    = 0,
+    HAS_COMPARE  = 0,
+    HAS_EQ       = 0
   };
 
   typedef bool (*EqFn)(const T** a, const T** b);
@@ -94,14 +100,11 @@ struct TypeInfo<T*>
 
 #else // No template specialization.
 
-// I first seen following hackery in Qt / Boost. This is very
-// smart method how to get whether type is pointer or not. To
-// make this working following dummy function and it's
-// specialization is needed.
-//
-// It's easy. It's needed to use sizeof() to determine the size
-// of return value of this function. If size will be sizeof(char)
-// (this is our type) then type is pointer, otherwise it's not.
+// I first saw the following hackery in Qt / Boost. It's very smart method
+// which can be used to check whether the type is a pointer. To make this
+// working the template TypeInfo_NoPtiHelper<> was created. The trick is
+// to make another specialized variant and to compare the type size of a
+// return value.
 template<typename T>
 char TypeInfo_NoPtiHelper(T*(*)());
 // And specialization.
@@ -110,27 +113,34 @@ void* TypeInfo_NoPtiHelper(...);
 template<typename T>
 struct TypeInfo
 {
-  // TypeInfo constants
   enum
   {
-    // This is the hackery result.
-    IS_POINTER = (sizeof(char) == sizeof( TypeInfo_NoPtiHelper((T(*)())0) ) ),
+    IS_POINTER   = (sizeof(char) == sizeof( TypeInfo_NoPtiHelper((T(*)())0) ) ),
 
-    // [Type - Generic type is always ClassType]
-    TYPE = IS_POINTER ? TYPEINFO_PRIMITIVE : TYPEINFO_CLASS,
-    FLAGS = 0,
+    // ------------------------------------------------------------------------
+    // [Type / Flags]
+    // ------------------------------------------------------------------------
 
-    // [Basic Information]
+    TYPE         = IS_POINTER ? TYPEINFO_PRIMITIVE : TYPEINFO_COMPLEX,
+    FLAGS        = 0,
+
+    // ------------------------------------------------------------------------
+    // [Basic]
+    // ------------------------------------------------------------------------
+
     IS_PRIMITIVE = (!IS_POINTER),
-    IS_MOVABLE = (!IS_POINTER),
-    IS_CLASS = (!IS_POINTER),
+    IS_MOVABLE   = (!IS_POINTER),
+    IS_COMPLEX   = (!IS_POINTER),
 
-    // [Extended Information]
-    IS_POD = IS_POINTER,
-    IS_FLOAT = 0,
-    IS_DOUBLE = 0,
-    HAS_COMPARE = 0,
-    HAS_EQ = 0
+    // ------------------------------------------------------------------------
+    // [Extended]
+    // ------------------------------------------------------------------------
+
+    IS_POD       = IS_POINTER,
+    IS_FLOAT     = 0,
+    IS_DOUBLE    = 0,
+    HAS_COMPARE  = 0,
+    HAS_EQ       = 0
   };
 
   typedef bool (*EqFn)(const T* a, const T* b);
@@ -143,24 +153,29 @@ struct TypeInfo
 template<typename T, uint __TypeInfo__>
 struct TypeInfo_Wrapper
 {
-  // TypeInfo constants
-  enum {
-    // [Type - Based on __TypeInfo__]
-    TYPE = (__TypeInfo__ & ~TYPEINFO_MASK),
-    FLAGS = (__TypeInfo__ & TYPEINFO_MASK),
+  enum
+  {
+    // ------------------------------------------------------------------------
+    // [Type]
+    // ------------------------------------------------------------------------
 
-    // [Basic Information]
+    TYPE         = (__TypeInfo__ & ~TYPEINFO_MASK),
+    FLAGS        = (__TypeInfo__ & TYPEINFO_MASK),
+
     IS_PRIMITIVE = (TYPE == TYPEINFO_PRIMITIVE),
-    IS_MOVABLE = (TYPE <= TYPEINFO_MOVABLE),
-    IS_CLASS = (TYPE == TYPEINFO_CLASS),
-    IS_POINTER = 0,
+    IS_MOVABLE   = (TYPE <= TYPEINFO_MOVABLE),
+    IS_COMPLEX   = (TYPE == TYPEINFO_COMPLEX),
 
-    // [Extended Information]
-    IS_POD = (__TypeInfo__ & TYPEINFO_IS_POD_TYPE) != 0,
-    IS_FLOAT = (__TypeInfo__ & TYPEINFO_IS_FLOAT_TYPE) != 0,
-    IS_DOUBLE = (__TypeInfo__ & TYPEINFO_IS_DOUBLE_TYPE) != 0,
-    HAS_COMPARE = (__TypeInfo__ & TYPEINFO_HAS_COMPARE) != 0,
-    HAS_EQ = (__TypeInfo__ & TYPEINFO_HAS_EQ) != 0
+    // ------------------------------------------------------------------------
+    // [Extended]
+    // ------------------------------------------------------------------------
+
+    IS_POINTER   = 0,
+    IS_POD       = (__TypeInfo__ & TYPEINFO_IS_POD_TYPE   ) != 0,
+    IS_FLOAT     = (__TypeInfo__ & TYPEINFO_IS_FLOAT_TYPE ) != 0,
+    IS_DOUBLE    = (__TypeInfo__ & TYPEINFO_IS_DOUBLE_TYPE) != 0,
+    HAS_COMPARE  = (__TypeInfo__ & TYPEINFO_HAS_COMPARE   ) != 0,
+    HAS_EQ       = (__TypeInfo__ & TYPEINFO_HAS_EQ        ) != 0
   };
 
   typedef bool (*EqFn)(const T* a, const T* b);

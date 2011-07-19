@@ -9,10 +9,8 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Alloc.h>
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Rasterizer/Scanline_p.h>
 
 namespace Fog {

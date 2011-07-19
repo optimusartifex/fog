@@ -15,21 +15,19 @@
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
 #include <Fog/Core/DateTime/Time.h>
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Threading/ThreadCondition.h>
 
 // [Dependencies - Windows]
 #if defined(FOG_OS_WINDOWS)
-#include <windows.h>
-#include <math.h>
+# include <windows.h>
+# include <math.h>
 #endif // FOG_OS_WINDOWS
 
 // [Dependencies - Posix]
 #if defined(FOG_OS_POSIX)
-#include <errno.h>
-#include <sys/time.h>
+# include <errno.h>
+# include <sys/time.h>
 #endif // FOG_OS_POSIX
 
 namespace Fog {
@@ -41,169 +39,153 @@ namespace Fog {
 /*
 FAQ On subtle implementation details:
 
-1) What makes this problem subtle?  Please take a look at "Strategies
-for Implementing POSIX Condition Variables on Win32" by Douglas
-C. Schmidt and Irfan Pyarali.
-http://www.cs.wustl.edu/~schmidt/win32-cv-1.html It includes
-discussions of numerous flawed strategies for implementing this
-functionality.  I'm not convinced that even the final proposed
-implementation has semantics that are as nice as this implementation
-(especially with regard to broadcast() and the impact on threads that
-try to Wait() after a broadcast() has been called, but before all the
-original waiting threads have been signaled).
+1) What makes this problem subtle? Please take a look at "Strategies for
+implementing POSIX Condition Variables on Win32" by Douglas C. Schmidt and
+Irfan Pyarali:
+  http://www.cs.wustl.edu/~schmidt/win32-cv-1.html
 
-2) Why can't you use a single wait_event for all threads that call
-Wait()?  See FAQ-question-1, or consider the following: If a single
-event were used, then numerous threads calling Wait() could release
-their cs locks, and be preempted just before calling
-WaitForSingleObject().  If a call to broadcast() was then presented on
-a second thread, it would be impossible to actually signal all
-waiting(?) threads.  Some number of SetEvent() calls *could* be made,
-but there could be no guarantee that those led to to more than one
-signaled thread (SetEvent()'s may be discarded after the first!), and
-there could be no guarantee that the SetEvent() calls didn't just
-awaken "other" threads that hadn't even started waiting yet (oops).
-Without any limit on the number of requisite SetEvent() calls, the
-system would be forced to do many such calls, allowing many new waits
-to receive spurious signals.
+It includes discussions of numerous flawed strategies for implementing this
+functionality. I'm not convinced that even the final proposed implementation
+has semantics that are as nice as this implementation (especially with regard
+to broadcast() and the impact on threads that try to wait() after a broadcast()
+has been called, but before all the original waiting threads have been signaled).
 
-3) How does this implementation cause spurious signal events?  The
-cause in this implementation involves a race between a signal via
-time-out and a signal via Signal() or broadcast().  The series of
-actions leading to this are:
+2) Why can't you use a single wait_event for all threads that call wait()? See
+FAQ-question-1, or consider the following: If a single event were used, then
+numerous threads calling wait() could release their cs locks, and be preempted
+just before calling WaitForSingleObject(). If a call to broadcast() was then
+presented on a second thread, it would be impossible to actually signal all
+waiting(?) threads. Some number of setEvent() calls *could* be made, but there
+could be no guarantee that those led to to more than one signaled thread
+(SetEvent()'s may be discarded after the first!), and there could be no
+guarantee that the SetEvent() calls didn't just awaken "other" threads that
+hadn't even started waiting yet (oops). Without any limit on the number of
+requisite SetEvent() calls, the system would be forced to do many such calls,
+allowing many new waits to receive spurious signals.
 
-a) Timer fires, and a waiting thread exits the line of code:
+3) How does this implementation cause spurious signal events?  The cause in this
+implementation involves a race between a signal via time-out and a signal via
+signal() or broadcast().  The series of actions leading to this are:
+
+  a) Timer fires, and a waiting thread exits the line of code:
 
     WaitForSingleObject(waitingEvent, max_time.InMilliseconds());
 
-b) That thread (in (a)) is randomly pre-empted after the above line,
-leaving the waitingEvent reset (unsignaled) and still in the
-_waitingList.
+  b) That thread (in (a)) is randomly pre-empted after the above line, leaving
+     the waitingEvent reset (unsignaled) and still in the _waitingList.
 
-c) A call to Signal() (or broadcast()) on a second thread proceeds, and
-selects the waiting cv_event (identified in step (b)) as the event to revive
-via a call to SetEvent().
+  c) A call to Signal() (or broadcast()) on a second thread proceeds, and
+     selects the waiting cv_event (identified in step (b)) as the event to
+     revive via a call to SetEvent().
 
-d) The Signal() method (step c) calls SetEvent() on waitingEvent (step b).
+  d) The Signal() method (step c) calls SetEvent() on waitingEvent (step b).
 
-e) The waiting cv_event (step b) is now signaled, but no thread is
-waiting on it.
+  e) The waiting cv_event (step b) is now signaled, but no thread is waiting on
+     it.
 
-f) When that waitingEvent (step b) is reused, it will immediately
-be signaled (spuriously).
+  f) When that waitingEvent (step b) is reused, it will immediately be signaled
+     (spuriously).
 
+4) Why do you recycle events, and cause spurious signals?  First off, the
+spurious events are very rare. They can only (I think) appear when the race
+described in FAQ-question-3 takes place. This should be very rare.  Most(?)
+uses will involve only timer expiration, or only signal/broadcast() actions.
+When both are used, it will be rare that the race will appear, and it would
+require MANY Wait() and signaling activities.  If this implementation did not
+recycle events, then it would have to create and destroy events for every call
+to wait(). That allocation/deallocation and associated construction/destruction
+would be costly (per wait), and would only be a rare benefit (when the race was
+"lost" and a spurious signal took place). That would be bad (IMO) optimization
+trade-off. Finally, such spurious events are allowed by the specification of
+condition variables (such as implemented in Vista), and hence it is better if
+any user accommodates such spurious events (see usage note in ThreadCondition.h).
 
-4) Why do you recycle events, and cause spurious signals?  First off,
-the spurious events are very rare.  They can only (I think) appear
-when the race described in FAQ-question-3 takes place.  This should be
-very rare.  Most(?)  uses will involve only timer expiration, or only
-Signal/broadcast() actions.  When both are used, it will be rare that
-the race will appear, and it would require MANY Wait() and signaling
-activities.  If this implementation did not recycle events, then it
-would have to create and destroy events for every call to Wait().
-That allocation/deallocation and associated construction/destruction
-would be costly (per wait), and would only be a rare benefit (when the
-race was "lost" and a spurious signal took place). That would be bad
-(IMO) optimization trade-off.  Finally, such spurious events are
-allowed by the specification of condition variables (such as
-implemented in Vista), and hence it is better if any user accommodates
-such spurious events (see usage note in ThreadCondition.h).
+5) Why don't you reset events when you are about to recycle them, or about to
+reuse them, so that the spurious signals don't take place? The thread described
+in FAQ-question-3 step c may be pre-empted for an arbitrary length of time
+before proceeding to step d. As a result, the wait_event may actually be re-used
+*before* step (e) is reached. As a result, calling reset would not help
+significantly.
 
-5) Why don't you reset events when you are about to recycle them, or
-about to reuse them, so that the spurious signals don't take place?
-The thread described in FAQ-question-3 step c may be pre-empted for an
-arbitrary length of time before proceeding to step d.  As a result,
-the wait_event may actually be re-used *before* step (e) is reached.
-As a result, calling reset would not help significantly.
+6) How is it that the callers lock is released atomically with the entry into a
+wait state? We commit to the wait activity when we allocate the wait_event for
+use in a given call to Wait(). This allocation takes place before the caller's
+lock is released (and actually before our _internalLock is released). That
+allocation is the defining moment when "the wait state has been entered," as
+that thread *can* now be signaled by a call to broadcast() or signal(). Hence
+we actually "commit to wait" before releasing the lock, making the pair
+effectively atomic.
 
-6) How is it that the callers lock is released atomically with the
-entry into a wait state?  We commit to the wait activity when we
-allocate the wait_event for use in a given call to Wait().  This
-allocation takes place before the caller's lock is released (and
-actually before our _internalLock is released).  That allocation is
-the defining moment when "the wait state has been entered," as that
-thread *can* now be signaled by a call to broadcast() or Signal().
-Hence we actually "commit to wait" before releasing the lock, making
-the pair effectively atomic.
+8) Why do you need to lock your data structures during waiting, as the caller is
+already in possession of a lock?  We need to acquire() and release() our
+internal lock during signal() and broadcast(). If we tried to use a callers lock
+for this purpose, we might conflict with their external use of the lock. For
+example, the caller may use to consistently hold a lock on one thread while
+calling signal() on another, and that would block signal().
 
-8) Why do you need to lock your data structures during waiting, as the
-caller is already in possession of a lock?  We need to Acquire() and
-Release() our internal lock during Signal() and broadcast().  If we tried
-to use a callers lock for this purpose, we might conflict with their
-external use of the lock.  For example, the caller may use to consistently
-hold a lock on one thread while calling Signal() on another, and that would
-block Signal().
+9) Couldn't a more efficient implementation be provided if you preclude using
+more than one external lock in conjunction with a single ThreadCondition
+instance? Yes, at least it could be viewed as a simpler API (since you don't
+have to reiterate the lock argument in each wait() call). One of the
+constructors now takes a specific lock as an argument, and a there are
+corresponding wait() calls that don't specify a lock now. It turns that the
+resulting implmentation can't be made more efficient, as the internal lock needs
+to be used by signal() and broadcast(), to access internal data structures. As a
+result, I was not able to utilize the user supplied lock (which is being used by
+the user elsewhere presumably) to protect the private member access.
 
-9) Couldn't a more efficient implementation be provided if you
-preclude using more than one external lock in conjunction with a
-single ThreadCondition instance?  Yes, at least it could be viewed
-as a simpler API (since you don't have to reiterate the lock argument
-in each Wait() call).  One of the constructors now takes a specific
-lock as an argument, and a there are corresponding Wait() calls that
-don't specify a lock now.  It turns that the resulting implmentation
-can't be made more efficient, as the internal lock needs to be used by
-Signal() and broadcast(), to access internal data structures.  As a
-result, I was not able to utilize the user supplied lock (which is
-being used by the user elsewhere presumably) to protect the private
-member access.
+9) Since you have a second lock, how can be be sure that there is no possible
+deadlock scenario? Our _internalLock is always the last lock acquired, and the
+first one released, and hence a deadlock (due to critical section problems) is
+impossible as a consequence of our lock.
 
-9) Since you have a second lock, how can be be sure that there is no
-possible deadlock scenario?  Our _internalLock is always the last
-lock acquired, and the first one released, and hence a deadlock (due
-to critical section problems) is impossible as a consequence of our
-lock.
+10) When doing a broadcast(), why did you copy all the events into an STL queue,
+rather than making a linked-loop, and iterating over it? The iterating during
+broadcast() is done so outside the protection of the internal lock. As a result,
+other threads, such as the thread wherein a related event is waiting, could
+asynchronously manipulate the links around a cv_event. As a result, the link
+structure cannot be used outside a lock. broadcast() could iterate over waiting
+events by cycling in-and-out of the protection of the internal_lock, but that
+appears more expensive than copying the list into an STL stack.
 
-10) When doing a broadcast(), why did you copy all the events into
-an STL queue, rather than making a linked-loop, and iterating over it?
-The iterating during broadcast() is done so outside the protection
-of the internal lock. As a result, other threads, such as the thread
-wherein a related event is waiting, could asynchronously manipulate
-the links around a cv_event.  As a result, the link structure cannot
-be used outside a lock. broadcast() could iterate over waiting
-events by cycling in-and-out of the protection of the internal_lock,
-but that appears more expensive than copying the list into an STL
-stack.
-
-11) Why did the lock.h file need to be modified so much for this
-change?  Central to a Condition Variable is the atomic release of a
-lock during a Wait().  This places Wait() functionality exactly
-mid-way between the two classes, Lock and Condition Variable.  Given
-that there can be nested Acquire()'s of locks, and Wait() had to
-Release() completely a held lock, it was necessary to augment the Lock
-class with a recursion counter. Even more subtle is the fact that the
-recursion counter (in a Lock) must be protected, as many threads can
-access it asynchronously.  As a positive fallout of this, there are
-now some ASSERTS to be sure no one Release()s a Lock more than they
-Acquire()ed it, and there is ifdef'ed functionality that can detect
-nested locks (legal under windows, but not under Posix).
+11) Why did the lock.h file need to be modified so much for this change? Central
+to a Condition Variable is the atomic release of a lock during a wait(). This
+places wait() functionality exactly mid-way between the two classes, Lock and
+Condition Variable. Given that there can be nested acquire()'s of locks, and
+wait() had to release() completely a held lock, it was necessary to augment the
+Lock class with a recursion counter. Even more subtle is the fact that the
+recursion counter (in a Lock) must be protected, as many threads can access it
+asynchronously. As a positive fallout of this, there are now some ASSERTS to be
+sure no one release()s a Lock more than they Acquire()ed it, and there is
+ifdef'ed functionality that can detect nested locks (legal under Windows, but
+not under Posix).
 
 12) Why is it that the cv_events removed from list in broadcast() and signal()
-are not leaked?  How are they recovered??  The cv_events that appear to leak are
+are not leaked? How are they recovered? The cv_events that appear to leak are
 taken from the _waitingList.  For each element in that list, there is currently
 a thread in or around the WaitForSingleObject() call of Wait(), and those
 threads have references to these otherwise leaked events. They are passed as
 arguments to be recycled just aftre returning from WaitForSingleObject().
 
 13) Why did you use a custom container class (the linked list), when STL has
-perfectly good containers, such as an STL list?  The STL list, as with any
+perfectly good containers, such as an STL list? The STL list, as with any
 container, does not guarantee the utility of an iterator across manipulation
-(such as insertions and deletions) of the underlying container.  The custom
-double-linked-list container provided that assurance.  I don't believe any
+(such as insertions and deletions) of the underlying container. The custom
+double-linked-list container provided that assurance. I don't believe any
 combination of STL containers provided the services that were needed at the same
-O(1) efficiency as the custom linked list.  The unusual requirement
-for the container class is that a reference to an item within a container (an
-iterator) needed to be maintained across an arbitrary manipulation of the
-container.  This requirement exposes itself in the Wait() method, where a
-waitingEvent must be selected prior to the WaitForSingleObject(), and then it
-must be used as part of recycling to remove the related instance from the
-waiting_list.  A hash table (STL map) could be used, but I was embarrased to
-use a complex and relatively low efficiency container when a doubly linked list
-provided O(1) performance in all required operations.  Since other operations
-to provide performance-and/or-fairness required queue (FIFO) and list (LIFO)
-containers, I would also have needed to use an STL list/queue as well as an STL
-map.  In the end I decided it would be "fun" to just do it right, and I put
-so many assertions into the container class that it is trivial to code review
-and validate its correctness.
+O(1) efficiency as the custom linked list. The unusual requirement for the
+container class is that a reference to an item within a container (an iterator)
+needed to be maintained across an arbitrary manipulation of the container. This
+requirement exposes itself in the Wait() method, where a waitingEvent must be
+selected prior to the WaitForSingleObject(), and then it must be used as part of
+recycling to remove the related instance from the waiting_list. A hash table
+(STL map) could be used, but I was embarrased to use a complex and relatively
+low efficiency container when a doubly linked list provided O(1) performance in
+all required operations. Since other operations to provide performance-and/or-
+fairness required queue (FIFO) and list (LIFO) containers, I would also have
+needed to use an STL list/queue as well as an STL map. In the end I decided it
+would be "fun" to just do it right, and I put so many assertions into the
+container class that it is trivial to code review and validate its correctness.
 */
 
 #if defined(FOG_OS_WINDOWS)
@@ -266,7 +248,7 @@ void ThreadCondition::timedWait(const TimeDelta& maxTime)
   {
     // Release caller's lock
     AutoUnlock autoUnlock(_userLock);
-    WaitForSingleObject(handle, static_cast<DWORD>(maxTime.inMilliseconds()));
+    WaitForSingleObject(handle, static_cast<DWORD>(maxTime.getMilliseconds()));
     // Minimize spurious signal creation window by recycling asap.
     AutoLock locked(_internalLock);
     recycleEvent(waitingEvent);
@@ -540,23 +522,23 @@ void ThreadCondition::wait()
 
 void ThreadCondition::timedWait(const TimeDelta& maxTime)
 {
-  int64_t usecs = maxTime.inMicroseconds();
+  int64_t us = maxTime.getMicroseconds();
 
   // The timeout argument to pthread_cond_timedwait is in absolute time.
   struct timeval now;
+  struct timespec atm;
+
   gettimeofday(&now, NULL);
 
-  struct timespec abstime;
-  abstime.tv_sec = now.tv_sec + (usecs / Time::MicrosecondsPerSecond);
-  abstime.tv_nsec = (now.tv_usec + (usecs % Time::MicrosecondsPerSecond)) *
-                    Time::NanosecondsPerMicrosecond;
-  abstime.tv_sec += abstime.tv_nsec / Time::NanosecondsPerSecond;
-  abstime.tv_nsec %= Time::NanosecondsPerSecond;
+  atm.tv_sec   = (now.tv_sec  + (us / TIME_US_PER_SECOND));
+  atm.tv_nsec  = (now.tv_usec + (us % TIME_US_PER_SECOND)) * 1000;
+  atm.tv_sec  += atm.tv_nsec / FOG_INT64_C(1000000000);
+  atm.tv_nsec %= FOG_INT64_C(1000000000);
 
-  // Overflow paranoia
-  FOG_ASSERT(abstime.tv_sec >= now.tv_sec);
+  // Overflow paranoia.
+  FOG_ASSERT(atm.tv_sec >= now.tv_sec);
 
-  int rv = pthread_cond_timedwait(&_condition, _userMutex, &abstime);
+  int rv = pthread_cond_timedwait(&_condition, _userMutex, &atm);
   FOG_ASSERT(rv == 0 || rv == ETIMEDOUT);
 }
 

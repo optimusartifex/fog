@@ -8,26 +8,15 @@
 #define _FOG_G2D_GEOMETRY_SIZE_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/Uninitialized.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Ops.h>
-#include <Fog/G2d/Global/Api.h>
 
 namespace Fog {
 
 //! @addtogroup Fog_G2d_Geometry
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct SizeI;
-struct SizeF;
-struct SizeD;
 
 // ============================================================================
 // [Fog::SizeI]
@@ -41,10 +30,10 @@ struct SizeI
   // --------------------------------------------------------------------------
 
   FOG_INLINE SizeI() {}
-  FOG_INLINE SizeI(_Uninitialized) {}
-
   FOG_INLINE SizeI(const SizeI& other) : w(other.w), h(other.h) {}
   FOG_INLINE SizeI(int sw, int sh) : w(sw), h(sh) {}
+
+  explicit FOG_INLINE SizeI(_Uninitialized) {}
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -74,11 +63,10 @@ struct SizeI
   // [Reset]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE SizeI& reset()
+  FOG_INLINE void reset()
   {
     w = 0;
     h = 0;
-    return *this;
   }
 
   // --------------------------------------------------------------------------
@@ -191,12 +179,12 @@ struct SizeF
   // --------------------------------------------------------------------------
 
   FOG_INLINE SizeF() {}
-  FOG_INLINE SizeF(_Uninitialized) {}
-
-  FOG_INLINE SizeF(const SizeI& other) : w((float)other.w), h((float)other.h) {}
   FOG_INLINE SizeF(const SizeF& other) : w(other.w), h(other.h) {}
   FOG_INLINE SizeF(int sw, int sh) : w((float)sw), h((float)sh) {}
   FOG_INLINE SizeF(float sw, float sh) : w(sw), h(sh) {}
+
+  explicit FOG_INLINE SizeF(_Uninitialized) {}
+  explicit FOG_INLINE SizeF(const SizeI& other) : w((float)other.w), h((float)other.h) {}
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -243,11 +231,10 @@ struct SizeF
   // [Reset]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE SizeF& reset()
+  FOG_INLINE void reset()
   {
     w = 0.0f;
     h = 0.0f;
-    return *this;
   }
 
   // --------------------------------------------------------------------------
@@ -372,15 +359,15 @@ struct SizeD
   // --------------------------------------------------------------------------
 
   FOG_INLINE SizeD() {}
-  FOG_INLINE SizeD(_Uninitialized) {}
-
-  FOG_INLINE SizeD(const SizeI& other) : w((double)other.w), h((double)other.h) {}
-  FOG_INLINE SizeD(const SizeF& other) : w((double)other.w), h((double)other.h) {}
   FOG_INLINE SizeD(const SizeD& other) : w(other.w), h(other.h) {}
 
   FOG_INLINE SizeD(int sw, int sh) : w((double)sw), h((double)sh) {}
   FOG_INLINE SizeD(float sw, float sh) : w((double)sw), h((double)sh) {}
   FOG_INLINE SizeD(double sw, double sh) : w(sw), h(sh) {}
+
+  explicit FOG_INLINE SizeD(_Uninitialized) {}
+  explicit FOG_INLINE SizeD(const SizeI& other) : w((double)other.w), h((double)other.h) {}
+  explicit FOG_INLINE SizeD(const SizeF& other) : w((double)other.w), h((double)other.h) {}
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -444,11 +431,10 @@ struct SizeD
   // [Reset]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE SizeD& reset()
+  FOG_INLINE void reset()
   {
     w = 0.0;
     h = 0.0;
-    return *this;
   }
 
   // --------------------------------------------------------------------------

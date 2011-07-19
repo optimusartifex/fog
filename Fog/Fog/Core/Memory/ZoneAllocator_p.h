@@ -8,8 +8,7 @@
 #define _FOG_CORE_MEMORY_ZONEALLOCATOR_P_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Threading/Atomic.h>
 

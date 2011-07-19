@@ -8,7 +8,7 @@
 #define _FOG_CORE_MEMORY_CLEANUP_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Api.h>
+#include <Fog/Core/Global/Global.h>
 
 namespace Fog {
 
@@ -34,17 +34,17 @@ namespace Memory {
 
 static FOG_INLINE void cleanup()
 {
-  _core.memory.cleanup();
+  _api.memory.cleanup();
 }
 
 static FOG_INLINE err_t registerCleanupHandler(MemoryCleanupHandlerFn handler, void* closure)
 {
-  return _core.memory.registerCleanupHandler((void*)handler, closure);
+  return _api.memory.registerCleanupHandler((void*)handler, closure);
 }
 
 static FOG_INLINE err_t unregisterCleanupHandler(MemoryCleanupHandlerFn handler, void* closure)
 {
-  return _core.memory.unregisterCleanupHandler((void*)handler, closure);
+  return _api.memory.unregisterCleanupHandler((void*)handler, closure);
 }
 
 //! @}

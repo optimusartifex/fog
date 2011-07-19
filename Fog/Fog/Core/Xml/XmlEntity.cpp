@@ -13,7 +13,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringUtil.h>
 #include <Fog/Core/Xml/XmlEntity_p.h>
@@ -718,17 +717,17 @@ Char XmlEntity::decode(const Char* entityName, size_t entityLength)
 
 size_t XmlEntity::encode(char* dst, Char _ch)
 {
+  uint16_t ch = _ch.getValue();
+
   // We first try to find named entity, it it fails, we will
   // generate hexadecimal character entity.
-  if (_ch.ch() < 0xFFFF)
+  if (ch < 0xFFFF)
   {
     const XmlEntity::PairRev* base = xmlentity_pairs_rev;
     const XmlEntity::PairRev* basep;
 
     size_t index;
     size_t count = FOG_ARRAY_SIZE(xmlentity_pairs_rev);
-
-    uint16_t ch = (uint16_t)_ch.ch();
 
     for (index = count; index != 0; index >>= 1)
     {
@@ -757,17 +756,17 @@ size_t XmlEntity::encode(char* dst, Char _ch)
     }
   }
 
-  if (_ch.ch() > 255)
-    return (size_t)sprintf(dst, "&#x%04X;", _ch.ch());
+  if (ch > 255)
+    return (size_t)sprintf(dst, "&#x%04X;", ch);
   else
-    return (size_t)sprintf(dst, "&#x%02X;", _ch.ch());
+    return (size_t)sprintf(dst, "&#x%02X;", ch);
 }
 
 // ============================================================================
-// [Fog::Xml - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _xml_xmlentity_init(void)
+FOG_NO_EXPORT void XmlEntity_init(void)
 {
   XmlEntity::_pairs = xmlentity_pairs;
   XmlEntity::_pairsCount = FOG_ARRAY_SIZE(xmlentity_pairs);

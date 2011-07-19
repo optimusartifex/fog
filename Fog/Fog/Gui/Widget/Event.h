@@ -8,6 +8,7 @@
 #define _FOG_GUI_WIDGET_EVENT_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/System/Event.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
@@ -21,7 +22,6 @@ namespace Fog {
 // ============================================================================
 
 struct Widget;
-struct Painter;
 
 //! @addtogroup Fog_Gui_Widget
 //! @{
@@ -185,7 +185,7 @@ struct FOG_API KeyEvent : public Event
   //! @brief Returns modifiers. See @c MODIFIER_CODE enum for possible ones.
   FOG_INLINE uint32_t getModifiers() const { return _modifiers; }
 
-  //! @brief Returns key code that depends to windowing system.
+  //! @brief Returns key code that depends on the windowing system.
   FOG_INLINE uint32_t getSystemCode() const { return _systemCode; }
 
   //! @brief Returns key code translated to unicode character, can be zero if it's not possible to translate it.
@@ -234,7 +234,7 @@ struct FOG_API MouseEvent : public Event
   FOG_INLINE uint32_t getModifiers() const { return _modifiers; }
 
   //! @brief Returns mouse position relative to client or non-client
-  //! area (depends to event type).
+  //! area (depends on the event type).
   FOG_INLINE const PointI& getPosition() const { return _position; }
 
   //! @brief Get if event was generated outside of widget.

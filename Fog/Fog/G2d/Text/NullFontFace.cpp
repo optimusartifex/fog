@@ -72,17 +72,17 @@ err_t NullFontFace::_renderGlyphOutline(PathD& dst, GlyphMetricsF& metrics, cons
 Static<FontFace> NullFontFace::_dnull;
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_fontface_init_null(void)
+FOG_NO_EXPORT void FontFace_initNull(void)
 {
   NullFontFace* d = reinterpret_cast<NullFontFace*>(NullFontFace::_dnull.instancep());
 
   fog_new_p(d) NullFontFace();
 }
 
-FOG_NO_EXPORT void _g2d_fontface_fini_null(void)
+FOG_NO_EXPORT void FontFace_finiNull(void)
 {
   NullFontFace* d = reinterpret_cast<NullFontFace*>(NullFontFace::_dnull.instancep());
 

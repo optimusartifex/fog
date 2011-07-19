@@ -7,11 +7,11 @@ CMake_Minimum_Required(VERSION 2.8)
 If(NOT FOG_BUILD_STATIC)
   Project(Fog C CXX)
   Message("== ====================================================")
-  Message("== [Fog-Framework - Normal, Build=${CMAKE_BUILD_TYPE}]")
+  Message("== [Fog-Framework - Normal Build (${CMAKE_BUILD_TYPE})]")
   Message("== ====================================================")
 Else()
   Message("== ====================================================")
-  Message("== [Fog-Framework - Static, Build=${CMAKE_BUILD_TYPE}]")
+  Message("== [Fog-Framework - Static Build (${CMAKE_BUILD_TYPE})]")
   Message("== ====================================================")
 EndIf()
 
@@ -172,7 +172,7 @@ If(MSVC)
 
   # Enable multi-process compilation by default.
   If(MSVC80 OR MSVC90 OR MSVC10)
- 	  Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+     Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
   EndIf()
 EndIf()
 
@@ -392,31 +392,30 @@ Set(FOG_CORE_CPU_HEADERS
 
 # [Fog/Core/DateTime]
 Set(FOG_CORE_DATETIME_SOURCES
+  Fog/Core/DateTime/Date.cpp
   Fog/Core/DateTime/Time.cpp
-  Fog/Core/DateTime/TimeDelta.cpp
-  Fog/Core/DateTime/TimeTicks.cpp
 )
 
 Set(FOG_CORE_DATETIME_HEADERS
+  Fog/Core/DateTime/Date.h
   Fog/Core/DateTime/Time.h
-  Fog/Core/DateTime/TimeDelta.h
-  Fog/Core/DateTime/TimeTicks.h
 )
 
 # [Fog/Core/Face]
 Set(FOG_CORE_FACE_SOURCES
-  Fog/Core/Face/Face_Constants.cpp
+  Fog/Core/Face/Constants.cpp
 )
 
 Set(FOG_CORE_FACE_HEADERS
+  Fog/Core/Face/Constants.h
   Fog/Core/Face/Face_3dNow.h
   Fog/Core/Face/Face_3dNowExt.h
   Fog/Core/Face/Face_C.h
+  Fog/Core/Face/Face_C_Asm.h
   Fog/Core/Face/Face_C_F32.h
   Fog/Core/Face/Face_C_P32.h
   Fog/Core/Face/Face_C_P64.h
   Fog/Core/Face/Face_C_Types.h
-  Fog/Core/Face/Face_Constants.h
   Fog/Core/Face/Face_MMX.h
   Fog/Core/Face/Face_MMXExt.h
   Fog/Core/Face/Face_SSE.h
@@ -433,7 +432,6 @@ Set(FOG_CORE_GLOBAL_SOURCES
   Fog/Core/Global/Debug.cpp
   Fog/Core/Global/Error.cpp
   Fog/Core/Global/Init.cpp
-  Fog/Core/Global/Init_Core.cpp
   Fog/Core/Global/Uninitialized.cpp
 )
 
@@ -444,9 +442,10 @@ Set(FOG_CORE_GLOBAL_HEADERS
   Fog/Core/Global/Constants.h
   Fog/Core/Global/Debug.h
   Fog/Core/Global/Error.h
+  Fog/Core/Global/Global.h
   Fog/Core/Global/Init.h
-  Fog/Core/Global/Init_Core_p.h
-  Fog/Core/Global/Internal_Core_p.h
+  Fog/Core/Global/Init_p.h
+  Fog/Core/Global/Internals_p.h
   Fog/Core/Global/Static.h
   Fog/Core/Global/SequenceInfo.h
   Fog/Core/Global/Swap.h
@@ -509,10 +508,10 @@ Set(FOG_CORE_MATH_HEADERS
 # [Fog/Core/Memory]
 Set(FOG_CORE_MEMORY_SOURCES
   Fog/Core/Memory/Alloc.cpp
+  Fog/Core/Memory/AllocDebug.cpp
   Fog/Core/Memory/BlockAllocator.cpp
   Fog/Core/Memory/Cleanup.cpp
   Fog/Core/Memory/MemoryBuffer.cpp
-  Fog/Core/Memory/MemoryDebug.cpp
   Fog/Core/Memory/MemoryManager.cpp
   Fog/Core/Memory/Ops.cpp
   Fog/Core/Memory/ZoneAllocator.cpp
@@ -520,6 +519,7 @@ Set(FOG_CORE_MEMORY_SOURCES
 
 Set(FOG_CORE_MEMORY_HEADERS
   Fog/Core/Memory/Alloc.h
+  Fog/Core/Memory/AllocDebug_p.h
   Fog/Core/Memory/BlockAllocator_p.h
   Fog/Core/Memory/BSwap.h
   Fog/Core/Memory/BSwap_gcc_pcc.h
@@ -529,7 +529,6 @@ Set(FOG_CORE_MEMORY_HEADERS
   Fog/Core/Memory/BSwap_msc_x86.h
   Fog/Core/Memory/Cleanup.h
   Fog/Core/Memory/MemoryBuffer.h
-  Fog/Core/Memory/MemoryDebug.h
   Fog/Core/Memory/MemoryManager.h
   Fog/Core/Memory/Ops.h
   Fog/Core/Memory/ZoneAllocator_p.h
@@ -582,12 +581,11 @@ Set(FOG_CORE_SYSTEM_HEADERS
 
 # [Fog/Core/Threading]
 Set(FOG_CORE_THREADING_SOURCES
-  Fog/Core/Threading/Lazy.cpp
   Fog/Core/Threading/Lock.cpp
   Fog/Core/Threading/Thread.cpp
   Fog/Core/Threading/ThreadCondition.cpp
   Fog/Core/Threading/ThreadEvent.cpp
-  Fog/Core/Threading/ThreadLocalStorage.cpp
+  Fog/Core/Threading/ThreadLocal.cpp
   Fog/Core/Threading/ThreadPool.cpp
 )
 
@@ -598,12 +596,11 @@ Set(FOG_CORE_THREADING_HEADERS
   Fog/Core/Threading/Atomic_msc_intrin.h
   Fog/Core/Threading/Atomic_msc_x86.h
   Fog/Core/Threading/AtomicPadding.h
-  Fog/Core/Threading/Lazy.h
   Fog/Core/Threading/Lock.h
   Fog/Core/Threading/Thread.h
   Fog/Core/Threading/ThreadCondition.h
   Fog/Core/Threading/ThreadEvent.h
-  Fog/Core/Threading/ThreadLocalStorage.h
+  Fog/Core/Threading/ThreadLocal.h
   Fog/Core/Threading/ThreadPool.h
 )
 
@@ -614,7 +611,7 @@ Set(FOG_CORE_TOOLS_SOURCES
   Fog/Core/Tools/ByteArrayFilter.cpp
   Fog/Core/Tools/ByteArrayMatcher.cpp
   Fog/Core/Tools/Char.cpp
-  Fog/Core/Tools/CharUtil.cpp
+  Fog/Core/Tools/CharData.cpp
   Fog/Core/Tools/Format.cpp
   Fog/Core/Tools/Locale.cpp
   Fog/Core/Tools/ManagedString.cpp
@@ -629,7 +626,6 @@ Set(FOG_CORE_TOOLS_SOURCES
   Fog/Core/Tools/TextChunk.cpp
   Fog/Core/Tools/TextCodec.cpp
   Fog/Core/Tools/TextIterator.cpp
-  Fog/Core/Tools/Unicode.cpp
 )
 
 Set(FOG_CORE_TOOLS_HEADERS
@@ -639,7 +635,7 @@ Set(FOG_CORE_TOOLS_HEADERS
   Fog/Core/Tools/ByteArrayMatcher.h
   Fog/Core/Tools/ByteArrayTmp_p.h
   Fog/Core/Tools/Char.h
-  Fog/Core/Tools/CharUtil.h
+  Fog/Core/Tools/CharData.h
   Fog/Core/Tools/Format.h
   Fog/Core/Tools/Locale.h
   Fog/Core/Tools/ManagedString.h
@@ -655,7 +651,6 @@ Set(FOG_CORE_TOOLS_HEADERS
   Fog/Core/Tools/TextCodec.h
   Fog/Core/Tools/TextCodec_Page8Tables_p.h
   Fog/Core/Tools/TextIterator.h
-  Fog/Core/Tools/Unicode.h
 )
 
 # [Fog/Core/Variant]
@@ -881,19 +876,6 @@ If(FOG_OPTIMIZE_SSE2)
     PROPERTIES COMPILE_FLAGS "${FOG_CXX_FLAGS_SSE2}"
   )
 EndIf()
-
-# [Fog/G2d/Global]
-Set(FOG_G2D_GLOBAL_SOURCES
-  Fog/G2d/Global/Api.cpp
-  Fog/G2d/Global/Constants.cpp
-  Fog/G2d/Global/Init_G2d.cpp
-)
-
-Set(FOG_G2D_GLOBAL_HEADERS
-  Fog/G2d/Global/Api.h
-  Fog/G2d/Global/Constants.h
-  Fog/G2d/Global/Init_G2d_p.h
-)
 
 # [Fog/G2d/Imaging]
 Set(FOG_G2D_IMAGING_SOURCES
@@ -1164,15 +1146,9 @@ Set(FOG_G2D_SOURCE_SOURCES
   Fog/G2d/Source/Texture.cpp
 )
 
-If(FOG_OPTIMIZE_SSE2)
-  List(APPEND FOG_G2D_SOURCE_SOURCES
-    Fog/G2d/Source/Color_SSE2.cpp
-  )
-  Set_Source_Files_Properties(
-    Fog/G2d/Source/Color_SSE2.cpp
-    PROPERTIES COMPILE_FLAGS "${FOG_CXX_FLAGS_SSE2}"
-  )
-EndIf()
+Set(FOG_G2D_SOURCE_SOURCES_SSE2
+  Fog/G2d/Source/Color_SSE2.cpp
+)
 
 Set(FOG_G2D_SOURCE_HEADERS
   Fog/G2d/Source/Acmyk.h
@@ -1193,6 +1169,13 @@ Set(FOG_G2D_SOURCE_HEADERS
   Fog/G2d/Source/RectangularGradient.h
   Fog/G2d/Source/Texture.h
 )
+
+If(FOG_OPTIMIZE_SSE2)
+  List(APPEND FOG_G2D_SOURCE_SOURCES ${FOG_G2D_SOURCE_SOURCES_SSE2})
+  Set_Source_Files_Properties(${FOG_G2D_SOURCE_SOURCES_SSE2}
+    PROPERTIES COMPILE_FLAGS "${FOG_CXX_FLAGS_SSE2}"
+  )
+EndIf()
 
 # [Fog/G2d/Text]
 Set(FOG_G2D_TEXT_SOURCES
@@ -1233,10 +1216,55 @@ Set(FOG_G2D_TEXT_HEADERS
   Fog/G2d/Text/TextRect.h
 )
 
+# [Fog/G2d/Text - Windows]
+Set(FOG_G2D_TEXT_SOURCES_WIN
+  Fog/G2d/Text/WinFontFace.cpp
+  Fog/G2d/Text/WinFontMaster.cpp
+  Fog/G2d/Text/WinFontProvider.cpp
+  Fog/G2d/Text/WinFontUtil.cpp
+)
+
+Set(FOG_G2D_TEXT_HEADERS_WIN
+  Fog/G2d/Text/WinFontFace.h
+  Fog/G2d/Text/WinFontMaster.h
+  Fog/G2d/Text/WinFontProvider.h
+  Fog/G2d/Text/WinFontUtil_p.h
+)
+
+# [Fog/G2d/Text - Mac]
+Set(FOG_G2D_TEXT_SOURCES_MAC
+  Fog/G2d/Text/MacFontFace.mm
+  Fog/G2d/Text/MacFontMaster.mm
+  Fog/G2d/Text/MacFontProvider.mm
+)
+Set(FOG_G2D_TEXT_HEADERS_MAC
+  Fog/G2d/Text/MacFontFace.h
+  Fog/G2d/Text/MacFontMaster.h
+  Fog/G2d/Text/MacFontProvider.h
+)
+
+# [Fog/G2d/Text - FreeType]
+Set(FOG_G2D_TEXT_SOURCES_FREETYPE
+  Fog/G2d/Text/FTFontFace.cpp
+  Fog/G2d/Text/FTFontMaster.cpp
+  Fog/G2d/Text/FTFontProvider.cpp
+)
+
+Set(FOG_G2D_TEXT_HEADERS_FREETYPE
+  Fog/G2d/Text/FTFontFace.h
+  Fog/G2d/Text/FTFontMaster.h
+  Fog/G2d/Text/FTFontProvider.h
+)
+
+# [Fog/G2d/Text - Detect]
 If(FOG_OS_WINDOWS)
   Set(FOG_FONT_WINDOWS TRUE)
+  List(APPEND FOG_G2D_TEXT_SOURCES ${FOG_G2D_TEXT_SOURCES_WIN})
+  List(APPEND FOG_G2D_TEXT_HEADERS ${FOG_G2D_TEXT_HEADERS_WIN})
 ElseIf(FOG_OS_MAC)
   Set(FOG_FONT_MAC TRUE)
+  List(APPEND FOG_G2D_TEXT_SOURCES ${FOG_G2D_TEXT_SOURCES_MAC})
+  List(APPEND FOG_G2D_TEXT_HEADERS ${FOG_G2D_TEXT_HEADERS_MAC})
 Else()
   Find_File(HAVE_FREETYPE freetype-config)
   If(HAVE_FREETYPE)
@@ -1247,47 +1275,10 @@ Else()
   If(NOT FOG_HAVE_FONTCONFIG)
     Check_Include_Files(fontconfig/fontconfig.h FOG_HAVE_FONTCONFIG)
   EndIf()
-EndIf()
 
-If(FOG_FONT_WINDOWS)
-  List(APPEND FOG_G2D_TEXT_SOURCES
-    Fog/G2d/Text/WinFontFace.cpp
-    Fog/G2d/Text/WinFontProvider.cpp
-    Fog/G2d/Text/WinFontUtil.cpp
-  )
-  List(APPEND FOG_G2D_TEXT_HEADERS
-    Fog/G2d/Text/WinFontFace.h
-    Fog/G2d/Text/WinFontProvider.h
-    Fog/G2d/Text/WinFontUtil_p.h
-  )
-EndIf()
-
-If(FOG_FONT_FREETYPE)
-  List(APPEND FOG_G2D_TEXT_SOURCES
-    Fog/G2d/Text/FTFontFace.cpp
-    Fog/G2d/Text/FTFontProvider.cpp
-  )
-  List(APPEND FOG_G2D_TEXT_HEADERS
-    Fog/G2d/Text/FTFontFace.h
-    Fog/G2d/Text/FTFontProvider.h
-  )
-
-  Set_Source_Files_Properties(
-    Fog/G2d/Text/FTFontFace.cpp
-    Fog/G2d/Text/FTFontProvider.cpp
-    PROPERTIES COMPILE_FLAGS "${FREETYPE_CONFIG_OUT}"
-  )
-EndIf()
-
-If(FOG_FONT_MAC)
-  List(APPEND FOG_G2D_TEXT_SOURCES
-    Fog/G2d/Text/MacFontFace.mm
-    Fog/G2d/Text/MacFontProvider.mm
-  )
-  List(APPEND FOG_G2D_TEXT_HEADERS
-    Fog/G2d/Text/MacFontFace.h
-    Fog/G2d/Text/MacFontProvider.h
-  )
+  List(APPEND FOG_G2D_TEXT_SOURCES ${FOG_G2D_TEXT_SOURCES_FREETYPE})
+  List(APPEND FOG_G2D_TEXT_HEADERS ${FOG_G2D_TEXT_HEADERS_FREETYPE})
+  Set_Source_Files_Properties(${FOG_G2d_TEXT_SOURCES_FREETYPE} PROPERTIES COMPILE_FLAGS "${FREETYPE_CONFIG_OUT}")
 EndIf()
 
 # [Fog/G2d/Tools]
@@ -1341,7 +1332,6 @@ EndIf()
 Source_Group("G2d"                  FILES ${FOG_G2D_LIB_SOURCES}              ${FOG_G2D_LIB_HEADERS}             )
 Source_Group("G2d/Face"             FILES ${FOG_G2D_FACE_SOURCES}             ${FOG_G2D_FACE_HEADERS}            )
 Source_Group("G2d/Geometry"         FILES ${FOG_G2D_GEOMETRY_SOURCES}         ${FOG_G2D_GEOMETRY_HEADERS}        )
-Source_Group("G2d/Global"           FILES ${FOG_G2D_GLOBAL_SOURCES}           ${FOG_G2D_GLOBAL_HEADERS}          )
 Source_Group("G2d/Imaging"          FILES ${FOG_G2D_IMAGING_SOURCES}          ${FOG_G2D_IMAGING_HEADERS}         )
 Source_Group("G2d/Imaging/Codecs"   FILES ${FOG_G2D_IMAGING_CODECS_SOURCES}   ${FOG_G2D_IMAGING_CODECS_HEADERS}  )
 Source_Group("G2d/Imaging/Effects"  FILES ${FOG_G2D_IMAGING_EFFECTS_SOURCES}  ${FOG_G2D_IMAGING_EFFECTS_HEADERS} )
@@ -1409,12 +1399,10 @@ Set(FOG_GUI_CANVAS_HEADERS
 
 # [Fog/Gui/Global]
 Set(FOG_GUI_GLOBAL_SOURCES
-  Fog/Gui/Global/Init_UI.cpp
 )
 
 Set(FOG_GUI_GLOBAL_HEADERS
   Fog/Gui/Global/Constants.h
-  Fog/Gui/Global/Init_UI_p.h
 )
 
 # [Fog/Gui/Engine]
@@ -1655,12 +1643,10 @@ Set(FOG_SVG_DOM_HEADERS
 )
 
 Set(FOG_SVG_GLOBAL_SOURCES
-  Fog/Svg/Global/Init_Svg.cpp
 )
 
 Set(FOG_SVG_GLOBAL_HEADERS
   Fog/Svg/Global/Constants.h
-  Fog/Svg/Global/Init_Svg_p.h
 )
 
 Set(FOG_SVG_VISIT_SOURCES
@@ -1722,7 +1708,6 @@ Set(FOG_ALL_SOURCES
   ${FOG_G2D_LIB_SOURCES}
   ${FOG_G2D_FACE_SOURCES}
   ${FOG_G2D_GEOMETRY_SOURCES}
-  ${FOG_G2D_GLOBAL_SOURCES}
   ${FOG_G2D_IMAGING_SOURCES}
   ${FOG_G2D_IMAGING_CODECS_SOURCES}
   ${FOG_G2D_IMAGING_EFFECTS_SOURCES}
@@ -1774,7 +1759,6 @@ Set(FOG_ALL_HEADERS
   ${FOG_G2D_LIB_HEADERS}
   ${FOG_G2D_FACE_HEADERS}
   ${FOG_G2D_GEOMETRY_HEADERS}
-  ${FOG_G2D_GLOBAL_HEADERS}
   ${FOG_G2D_IMAGING_HEADERS}
   ${FOG_G2D_IMAGING_CODECS_HEADERS}
   ${FOG_G2D_IMAGING_EFFECTS_HEADERS}

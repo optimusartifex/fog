@@ -15,8 +15,8 @@ namespace Face {
 
 // [Warnings]
 #if defined(FOG_CC_MSC)
-#pragma warning(push)
-#pragma warning(disable:4799) // function '...' has no EMMS instruction.
+# pragma warning(push)
+# pragma warning(disable:4799) // function '...' has no EMMS instruction.
 #endif // FOG_CC_MSC
 
 //! @addtogroup Fog_Face_3dNow
@@ -70,7 +70,7 @@ static FOG_INLINE void m64fHAddSub(m64f& dst, const m64f& a, const m64f& b)
 
 // [Warnings]
 #if defined(FOG_CC_MSC)
-#pragma warning(pop)
+# pragma warning(pop)
 #endif // FOG_CC_MSC
 
 } // Face namespace

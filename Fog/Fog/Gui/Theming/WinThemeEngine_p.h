@@ -11,6 +11,7 @@
 #if defined(FOG_OS_WINDOWS)
 
 // [Dependencies]
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Library/Library.h>
 #include <Fog/Core/System/Object.h>
 #include <Fog/Gui/Global/Constants.h>

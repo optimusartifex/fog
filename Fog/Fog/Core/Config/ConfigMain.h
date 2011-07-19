@@ -17,7 +17,7 @@
 namespace Fog {
 
 // Defined also in Fog/Core/System/Application.h. It's defined here to prevent
-// compilation errors when using FOG_CORE_MAIN() or FOG_GUI_MAIN() and
+// compilation errors when using FOG_CORE_MAIN() or FOG_UI_MAIN() and
 // this header file is not included.
 FOG_API void _core_application_init_arguments(int argc, const char* argv[]);
 
@@ -26,21 +26,21 @@ FOG_API void _core_application_init_arguments(int argc, const char* argv[]);
 //! @addtogroup Fog_Core_Macros
 //! @{
 
-//! @def FOG_GUI_MAIN
+//! @def FOG_UI_MAIN
 //! @brief Application entry point declaration.
 //!
 //! Usage:
 //!
-//! FOG_GUI_MAIN()
+//! FOG_UI_MAIN()
 //! {
 //!   // Your main() here ...
 //!   return Fog::ExitSuccess;
 //! }
 #if defined(FOG_OS_WINDOWS)
-#define FOG_GUI_MAIN() \
+#define FOG_UI_MAIN() \
 int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 #else
-#define FOG_GUI_MAIN() \
+#define FOG_UI_MAIN() \
 static int _fog_main(int argc, char* argv[]); \
 \
 int main(int argc, char* argv[]) \

@@ -8,13 +8,7 @@
 #define _FOG_CORE_TOOLS_STRING_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Api.h>
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Static.h>
-#include <Fog/Core/Global/Swap.h>
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Tools/Char.h>
@@ -28,16 +22,6 @@
 //! @{
 
 namespace Fog {
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-// foreign classes
-struct Locale;
-struct TextCodec;
-struct StringFilter;
-template<typename T> struct List;
 
 // ============================================================================
 // [Fog::StringData]
@@ -194,8 +178,7 @@ struct FOG_API String
     FOG_ASSERT_X(end <= _d->data + _d->capacity,
       "Fog::ByteArray::finishDataX() - Buffer overflow.");
 
-    *end = 0;
-
+    end->setValue(0);
     _d->hashCode = 0;
     _d->length = (size_t)(end - _d->data);
   }
@@ -331,9 +314,9 @@ struct FOG_API String
   // [Remove]
   // --------------------------------------------------------------------------
 
-  size_t remove(Char ch, uint cs = CASE_SENSITIVE, const Range& range = Range(0));
-  size_t remove(const String& other, uint cs = CASE_SENSITIVE, const Range& range = Range(0));
-  size_t remove(const StringFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0));
+  size_t remove(Char ch, uint cs = CASE_SENSITIVE, const Range& range = Range());
+  size_t remove(const String& other, uint cs = CASE_SENSITIVE, const Range& range = Range());
+  size_t remove(const StringFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range());
 
   size_t remove(const Range& range);
   size_t remove(const Range* range, size_t count);
@@ -342,9 +325,9 @@ struct FOG_API String
   // [Replace]
   // --------------------------------------------------------------------------
 
-  err_t replace(Char before, Char after, uint cs = CASE_SENSITIVE, const Range& range = Range(0));
-  err_t replace(const String& before, const String& after, uint cs = CASE_SENSITIVE, const Range& range = Range(0));
-  err_t replace(const StringFilter& filter, const String& after, uint cs = CASE_SENSITIVE, const Range& range = Range(0));
+  err_t replace(Char before, Char after, uint cs = CASE_SENSITIVE, const Range& range = Range());
+  err_t replace(const String& before, const String& after, uint cs = CASE_SENSITIVE, const Range& range = Range());
+  err_t replace(const StringFilter& filter, const String& after, uint cs = CASE_SENSITIVE, const Range& range = Range());
 
   err_t replace(const Range& range, const String& replacement);
   err_t replace(const Range* range, size_t count, const Char* after, size_t alen);
@@ -435,36 +418,36 @@ struct FOG_API String
   // [Contains]
   // --------------------------------------------------------------------------
 
-  bool contains(Char ch, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  bool contains(const String& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  bool contains(const StringFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  bool contains(Char ch, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
+  bool contains(const String& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
+  bool contains(const StringFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
 
   // --------------------------------------------------------------------------
   // [CountOf]
   // --------------------------------------------------------------------------
 
-  size_t countOf(Char ch, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  size_t countOf(const String& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  size_t countOf(const StringFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  size_t countOf(Char ch, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
+  size_t countOf(const String& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
+  size_t countOf(const StringFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
 
   // --------------------------------------------------------------------------
   // [IndexOf / LastIndexOf]
   // --------------------------------------------------------------------------
 
-  size_t indexOf(Char ch, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  size_t indexOf(const String& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  size_t indexOf(const StringFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  size_t indexOf(Char ch, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
+  size_t indexOf(const String& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
+  size_t indexOf(const StringFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
 
-  size_t lastIndexOf(Char ch, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  size_t lastIndexOf(const String& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  size_t lastIndexOf(const StringFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  size_t lastIndexOf(Char ch, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
+  size_t lastIndexOf(const String& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
+  size_t lastIndexOf(const StringFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
 
   // --------------------------------------------------------------------------
   // [IndexOfAny / LastIndexOfAny]
   // --------------------------------------------------------------------------
 
-  size_t indexOfAny(const Char* chars, size_t numChars, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  size_t lastIndexOfAny(const Char* chars, size_t numChars, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  size_t indexOfAny(const Char* chars, size_t numChars, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
+  size_t lastIndexOfAny(const Char* chars, size_t numChars, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
 
   // --------------------------------------------------------------------------
   // [StartsWith / EndsWith]

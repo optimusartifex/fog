@@ -9,9 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Debug.h>
+#include <Fog/Core/Global/Global.h>
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -49,6 +47,19 @@ static FILE* Debug_getFile()
 {
   return stderr;
 }
+
+#if defined(FOG_OS_WINDOWS)
+// When a Fog-App is build using WIN32, there is no standard input/output. So
+// we can show a message-box before the application exits without info.
+// This can help to solve some problems.
+static void WinMessageBox(const char* title, const char* fileName, int line, const char* msg)
+{
+  char buffer[1024];
+
+  _snprintf(buffer, 1024, "%s, line %d\n\n%s\n", fileName, line, msg ? msg : "");
+  MessageBoxA(NULL, buffer, title, MB_OK);
+}
+#endif // FOG_OS_WINDOWS
 
 // ============================================================================
 // [Fog::Debug - Message]
@@ -110,19 +121,6 @@ void Debug::failFunc(const char* className, const char* methodName, const char* 
 // [Fog::Debug - Assert]
 // ============================================================================
 
-#if defined(FOG_OS_WINDOWS)
-// When a FogApp is build using WIN32, there is no standard input/output. So
-// we can show a message-box before the application ends. This can help to
-// solve some problems.
-static void WinAssertionFailure(const char* fileName, int line, const char* msg)
-{
-  char buffer[1024];
-
-  _snprintf(buffer, 1024, "%s, line %d\n\n%s\n", fileName, line, msg ? msg : "");
-  MessageBoxA(NULL, buffer, "ASSERTION FAILURE!", MB_OK);
-}
-#endif // FOG_OS_WINDOWS
-
 void Debug::assertMessage(const char* fileName, int line, const char* msg)
 {
   FILE* file = Debug_getFile();
@@ -131,7 +129,7 @@ void Debug::assertMessage(const char* fileName, int line, const char* msg)
   fputs(msg, file);
 
 #if defined(FOG_OS_WINDOWS)
-  WinAssertionFailure(fileName, line, msg);
+  WinMessageBox("ASSERTION FAILURE", fileName, line, msg);
 #endif // FOG_OS_WINDOWS
 
   exit(-1);
@@ -152,7 +150,7 @@ void Debug::assertFormat(const char* fileName, int line, const char* fmt, ...)
   va_start(ap, fmt);
     _vsnprintf(buffer, 1024, fmt, ap);
   va_end(ap);
-  WinAssertionFailure(fileName, line, buffer);
+  WinMessageBox("ASSERTION FAILURE", fileName, line, buffer);
 #endif // FOG_OS_WINDOWS
 
   exit(-1);

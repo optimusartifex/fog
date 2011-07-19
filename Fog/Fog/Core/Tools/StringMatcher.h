@@ -8,7 +8,7 @@
 #define _FOG_CORE_TOOLS_STRINGMATCHER_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringFilter.h>
 

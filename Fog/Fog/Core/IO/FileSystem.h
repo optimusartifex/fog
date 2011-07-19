@@ -9,10 +9,12 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Tools/String.h>
 
+// [Dependencies - C]
 #if defined(FOG_OS_POSIX)
-#include <sys/stat.h>
+# include <sys/stat.h>
 #endif // FOG_OS_POSIX
 
 namespace Fog {

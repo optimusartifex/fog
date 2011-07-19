@@ -10,7 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Init_Core_p.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/Strings.h>
 
@@ -199,10 +199,10 @@ static const char fog_strings_data[] =
 Fog::ManagedString::Cache* fog_strings;
 
 // ============================================================================
-// [Fog::Core - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _core_strings_init(void)
+FOG_NO_EXPORT void Strings_init(void)
 {
   fog_strings = ManagedString::createCache(
     fog_strings_data,
@@ -210,10 +210,6 @@ FOG_NO_EXPORT void _core_strings_init(void)
     STR_COUNT,
     Ascii8("Fog")
   );
-}
-
-FOG_NO_EXPORT void _core_strings_fini(void)
-{
 }
 
 } // Fog namespace

@@ -8,7 +8,7 @@
 #define _FOG_SVG_DOM_SVGPATTERNELEMENT_P_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/G2d/Source/Pattern.h>
 #include <Fog/Svg/Dom/SvgCoordAttribute_p.h>
 #include <Fog/Svg/Dom/SvgElement.h>

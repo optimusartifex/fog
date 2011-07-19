@@ -10,7 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/BufferP.h>
-#include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Face/Face_C.h>
 #include <Fog/Core/IO/FileSystem.h>
 #include <Fog/Core/IO/MapFile.h>
@@ -22,8 +22,6 @@
 #include <Fog/Core/Memory/Ops.h>
 #include <Fog/Core/Tools/StringTmp_p.h>
 #include <Fog/G2d/Face/Face_Raster_C.h>
-#include <Fog/G2d/Global/Constants.h>
-#include <Fog/G2d/Global/Init_G2d_p.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageBits.h>
 #include <Fog/G2d/Imaging/ImageCodec.h>
@@ -676,9 +674,9 @@ err_t Image::convertTo8BitDepth(const ImagePalette& pal)
       {
         for (x = 0; x < w; x++, dstCur += 1, srcCur += 3)
         {
-          dstCur[0] = pal.findColor(srcCur[RGB24_RBYTE],
-                                    srcCur[RGB24_GBYTE],
-                                    srcCur[RGB24_BBYTE]);
+          dstCur[0] = pal.findColor(srcCur[PIXEL_RGB24_POS_R],
+                                    srcCur[PIXEL_RGB24_POS_G],
+                                    srcCur[PIXEL_RGB24_POS_B]);
         }
       }
       break;
@@ -770,7 +768,7 @@ uint32_t Image::getAlphaDistribution() const
   switch (getFormat())
   {
     case IMAGE_FORMAT_PRGB32:
-      analyzer = ColorAnalyzer::analyzeAlpha32; aPos = ARGB32_ABYTE; inc = 4;
+      analyzer = ColorAnalyzer::analyzeAlpha32; aPos = PIXEL_ARGB32_POS_A; inc = 4;
       break;
 
     case IMAGE_FORMAT_A8:
@@ -778,7 +776,7 @@ uint32_t Image::getAlphaDistribution() const
       break;
 
     case IMAGE_FORMAT_PRGB64:
-      analyzer = ColorAnalyzer::analyzeAlpha64; aPos = ARGB64_AWORD; inc = 8;
+      analyzer = ColorAnalyzer::analyzeAlpha64; aPos = PIXEL_ARGB64_POS_A; inc = 8;
       break;
 
     case IMAGE_FORMAT_A16:
@@ -868,10 +866,10 @@ err_t Image::invert(Image& dst, const Image& src, uint32_t channels)
     {
       Face::p32 mask = 0;
 
-      if (channels & COLOR_CHANNEL_ALPHA) Face::p32Or(mask, mask, ARGB32_AMASK);
-      if (channels & COLOR_CHANNEL_RED  ) Face::p32Or(mask, mask, ARGB32_AMASK);
-      if (channels & COLOR_CHANNEL_GREEN) Face::p32Or(mask, mask, ARGB32_AMASK);
-      if (channels & COLOR_CHANNEL_BLUE ) Face::p32Or(mask, mask, ARGB32_AMASK);
+      if (channels & COLOR_CHANNEL_ALPHA) Face::p32Or(mask, mask, PIXEL_ARGB32_MASK_A);
+      if (channels & COLOR_CHANNEL_RED  ) Face::p32Or(mask, mask, PIXEL_ARGB32_MASK_A);
+      if (channels & COLOR_CHANNEL_GREEN) Face::p32Or(mask, mask, PIXEL_ARGB32_MASK_A);
+      if (channels & COLOR_CHANNEL_BLUE ) Face::p32Or(mask, mask, PIXEL_ARGB32_MASK_A);
 
       if (format != IMAGE_FORMAT_PRGB32)
       {
@@ -975,10 +973,10 @@ err_t Image::invert(Image& dst, const Image& src, uint32_t channels)
       Face::p64 mask;
       Face::p64Clear(mask);
 
-      if (channels & COLOR_CHANNEL_ALPHA) Face::p64Or(mask, mask, Face::p64FromU64(ARGB64_AMASK));
-      if (channels & COLOR_CHANNEL_RED  ) Face::p64Or(mask, mask, Face::p64FromU64(ARGB64_RMASK));
-      if (channels & COLOR_CHANNEL_GREEN) Face::p64Or(mask, mask, Face::p64FromU64(ARGB64_GMASK));
-      if (channels & COLOR_CHANNEL_BLUE ) Face::p64Or(mask, mask, Face::p64FromU64(ARGB64_BMASK));
+      if (channels & COLOR_CHANNEL_ALPHA) Face::p64Or(mask, mask, Face::p64FromU64(PIXEL_ARGB64_MASK_A));
+      if (channels & COLOR_CHANNEL_RED  ) Face::p64Or(mask, mask, Face::p64FromU64(PIXEL_ARGB64_MASK_R));
+      if (channels & COLOR_CHANNEL_GREEN) Face::p64Or(mask, mask, Face::p64FromU64(PIXEL_ARGB64_MASK_G));
+      if (channels & COLOR_CHANNEL_BLUE ) Face::p64Or(mask, mask, Face::p64FromU64(PIXEL_ARGB64_MASK_B));
 
       if ((channels & COLOR_CHANNEL_ALPHA) == 0)
       {
@@ -1735,7 +1733,7 @@ err_t Image::fillRect(const RectI& r, const Color& color,  uint32_t compositingO
 // [Fog::Image - Blit]
 // ============================================================================
 
-static err_t _Image_blitImage(
+static err_t Image_blitImage(
   Image& dst, int dstX, int dstY,
   const Image& src, int srcX, int srcY,
   int w, int h,
@@ -1939,7 +1937,7 @@ err_t Image::blitImage(const PointI& pt, const Image& src, uint32_t compositingO
   if (y1 > h) y1 = h;
 
   if (x0 >= x1 || y0 >= y1) return ERR_OK;
-  return _Image_blitImage(*this, x0, y0, src, x0 - pt.getX(), y0 - pt.getY(), x1 - x0, y1 - y0, compositingOperator, opacity);
+  return Image_blitImage(*this, x0, y0, src, x0 - pt.getX(), y0 - pt.getY(), x1 - x0, y1 - y0, compositingOperator, opacity);
 }
 
 err_t Image::blitImage(const PointI& pt, const Image& src, const RectI& srcRect, uint32_t compositingOperator, float opacity)
@@ -1973,7 +1971,7 @@ err_t Image::blitImage(const PointI& pt, const Image& src, const RectI& srcRect,
   if (dstY1 > dst_d->size.h) dstY1 = dst_d->size.h;
 
   if (dstX0 >= dstX1 || dstY0 >= dstY1) return ERR_OK;
-  return _Image_blitImage(*this, dstX0, dstY0, src, srcX0, srcY0, dstX1 - dstX0, dstY1 - dstY0, compositingOperator, opacity);
+  return Image_blitImage(*this, dstX0, dstY0, src, srcX0, srcY0, dstX1 - dstX0, dstY1 - dstY0, compositingOperator, opacity);
 }
 
 // ============================================================================
@@ -2590,21 +2588,14 @@ ImageData* Image::_dalloc(const SizeI& size, uint32_t format)
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_image_init(void)
+FOG_NO_EXPORT void Image_init(void)
 {
-  Image::_dnull.init();
-  ImageData* d = Image::_dnull.instancep();
+  ImageData* d = Image::_dnull.init();
   d->refCount.init(1);
   d->flags = NO_FLAGS;
-}
-
-FOG_NO_EXPORT void _g2d_image_fini(void)
-{
-  Image::_dnull.instancep()->refCount.dec();
-  Image::_dnull.destroy();
 }
 
 } // Fog namespace

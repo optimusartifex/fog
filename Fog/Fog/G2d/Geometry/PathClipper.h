@@ -8,27 +8,17 @@
 #define _FOG_G2D_GEOMETRY_PATHCLIPPER_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/Uninitialized.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Rect.h>
-#include <Fog/G2d/Global/Api.h>
 
 namespace Fog {
 
 //! @addtogroup Fog_G2d_Geometry
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct PathF;
-struct PathD;
 
 // ============================================================================
 // [Fog::PathClipperF]
@@ -98,7 +88,7 @@ struct FOG_NO_EXPORT PathClipperF
   //! @retval @false The path do not need to be clipped.
   FOG_INLINE uint32_t initPath(const PathF& src)
   {
-    return _g2d.pathclipperf.initPath(*this, src);
+    return _api.pathclipperf.initPath(*this, src);
   }
 
   //! @brief Continue with the clipping using the info collected by
@@ -109,12 +99,12 @@ struct FOG_NO_EXPORT PathClipperF
   //! the @c ERR_RT_INVALID_STATE error.
   FOG_INLINE err_t continuePath(PathF& dst, const PathF& src)
   {
-    return _g2d.pathclipperf.continuePath(*this, dst, src);
+    return _api.pathclipperf.continuePath(*this, dst, src);
   }
 
   FOG_INLINE err_t continueRaw(PathF& dst, const PointF* srcPts, const uint8_t* srcCmd, size_t srcLength)
   {
-    return _g2d.pathclipperf.continueRaw(*this, dst, srcPts, srcCmd, srcLength);
+    return _api.pathclipperf.continueRaw(*this, dst, srcPts, srcCmd, srcLength);
   }
 
   FOG_INLINE void resetPath()
@@ -125,13 +115,13 @@ struct FOG_NO_EXPORT PathClipperF
   //! @brief Clip path @a src to @a dst.
   FOG_INLINE err_t clipPath(PathF& dst, const PathF& src)
   {
-    return _g2d.pathclipperf.clipPath(*this, dst, src, NULL);
+    return _api.pathclipperf.clipPath(*this, dst, src, NULL);
   }
 
   //! @brief Clip transformed path @a src to @a dst.
   FOG_INLINE err_t clipPath(PathF& dst, const PathF& src, const TransformF& tr)
   {
-    return _g2d.pathclipperf.clipPath(*this, dst, src, &tr);
+    return _api.pathclipperf.clipPath(*this, dst, src, &tr);
   }
 
   // --------------------------------------------------------------------------
@@ -224,7 +214,7 @@ struct FOG_NO_EXPORT PathClipperD
   //! @retval @false The path do not need to be clipped.
   FOG_INLINE uint32_t initPath(const PathD& src)
   {
-    return _g2d.pathclipperd.initPath(*this, src);
+    return _api.pathclipperd.initPath(*this, src);
   }
 
   //! @brief Continue with the clipping using the info collected by
@@ -235,12 +225,12 @@ struct FOG_NO_EXPORT PathClipperD
   //! the @c ERR_RT_INVALID_STATE error.
   FOG_INLINE err_t continuePath(PathD& dst, const PathD& src)
   {
-    return _g2d.pathclipperd.continuePath(*this, dst, src);
+    return _api.pathclipperd.continuePath(*this, dst, src);
   }
 
   FOG_INLINE err_t continueRaw(PathD& dst, const PointD* srcPts, const uint8_t* srcCmd, size_t srcLength)
   {
-    return _g2d.pathclipperd.continueRaw(*this, dst, srcPts, srcCmd, srcLength);
+    return _api.pathclipperd.continueRaw(*this, dst, srcPts, srcCmd, srcLength);
   }
 
   FOG_INLINE void resetPath()
@@ -251,13 +241,13 @@ struct FOG_NO_EXPORT PathClipperD
   //! @brief Clip path @a src to @a dst.
   FOG_INLINE err_t clipPath(PathD& dst, const PathD& src)
   {
-    return _g2d.pathclipperd.clipPath(*this, dst, src, NULL);
+    return _api.pathclipperd.clipPath(*this, dst, src, NULL);
   }
 
   //! @brief Clip transformed path @a src to @a dst.
   FOG_INLINE err_t clipPath(PathD& dst, const PathD& src, const TransformD& tr)
   {
-    return _g2d.pathclipperd.clipPath(*this, dst, src, &tr);
+    return _api.pathclipperd.clipPath(*this, dst, src, &tr);
   }
 
   // --------------------------------------------------------------------------

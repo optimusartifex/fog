@@ -8,9 +8,7 @@
 #define _FOG_CORE_COLLECTION_STACKP_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Memory/Alloc.h>
 
 namespace Fog {

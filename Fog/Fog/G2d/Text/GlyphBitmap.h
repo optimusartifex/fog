@@ -8,11 +8,8 @@
 #define _FOG_G2D_TEXT_GLYPHIMAGE_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/Static.h>
-#include <Fog/Core/Global/Swap.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Threading/Atomic.h>
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Text/GlyphMetrics.h>
 

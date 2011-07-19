@@ -3,23 +3,20 @@
 // [License]
 // MIT, See COPYING file in package
 
-// Copyright (c) 2006-2008 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 // [Guard]
 #ifndef _FOG_CORE_THREADING_THREAD_H
 #define _FOG_CORE_THREADING_THREAD_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/System/EventLoop.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Threading/ThreadEvent.h>
 #include <Fog/Core/Tools/String.h>
 
+// [Dependencies - Posix]
 #if defined(FOG_OS_POSIX)
-#include <pthread.h>
+# include <pthread.h>
 #endif // FOG_OS_POSIX
 
 namespace Fog {
@@ -28,96 +25,120 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct Application;
-
-// ============================================================================
 // [Fog::Thread]
 // ============================================================================
 
-//! A simple thread abstraction that establishes an @c EventLoop on a new thread.
-//! The consumer uses the @c EventLoop of the thread to cause code to execute on
-//! the thread. When this object is destroyed the thread is terminated. All
-//! pending tasks queued on the thread's event loop will run to completion
-//! before the thread is terminated.
-//!
-//! If you want to run backgroun thread with no event loop. Use @c "" type
-//! in Thread constructor and override main() method.
+//! @brief Thread.
 struct FOG_API Thread
 {
   // --------------------------------------------------------------------------
   // [Handle]
   // --------------------------------------------------------------------------
 
-  // Fog::Thread::Handle should not be assumed to be a numeric type,
-  // since the standard intends to allow pthread_t to be a structure. This
-  // means you should not initialize it to a value, like 0.  If it's a member
-  // variable, the constructor can safely "value initialize" using () in the
-  // initializer list.
-
 #if defined(FOG_OS_WINDOWS)
   //! @brief Thread system handle.
   typedef void* Handle;
-#elif defined(FOG_OS_POSIX)
+#endif // FOG_OS_WINDOWS
+
+#if defined(FOG_OS_POSIX)
   //! @brief Thread system handle.
   typedef pthread_t Handle;
-#endif
+#endif // FOG_OS_POSIX
+
+  // --------------------------------------------------------------------------
+  // [StartupData]
+  // --------------------------------------------------------------------------
+
+  //! @brief Thread startup-data.
+  struct StartupData
+  {
+    //! @brief Event loop type (string).
+    String eventLoopType;
+
+    //! @brief Used to synchronize thread startup.
+    ThreadEvent event;
+
+    StartupData(const String& eventLoopType) :
+      eventLoopType(eventLoopType),
+      event(false, false)
+    {
+    }
+  };
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  //! @brief Constructor.
-  //! @param name String to identify the thread (default "").
-  explicit Thread(const String& name = String());
-
-  //! Destroy the thread, stopping (joining) it if necessary.
+  //! @brief Create a new @c Thread instance.
   //!
-  //! NOTE: If you are subclassing from @c Thread, and you wish for your
-  //! cleanUp method to be called, then you need to call stop() from your
-  //! destructor.
+  //! @param name String to identify the thread (default "").
+  Thread();
+
+  //! @brief Destructor.
   virtual ~Thread();
 
   // --------------------------------------------------------------------------
-  // [Options]
+  // [Accessors - Native]
   // --------------------------------------------------------------------------
 
-  //! Specifies the maximum stack size that the thread is allowed to use.
-  //! This does not necessarily correspond to the thread's initial stack size.
-  //! A value of 0 indicates that the default maximum should be used.
-  void setStackSize(size_t ssize);
+  //! @brief Get the thread handle.
+  FOG_INLINE Handle& getHandle()
+  {
+    return _handle;
+  }
+
+  //! @overload
+  FOG_INLINE const Handle& getHandle() const
+  {
+    return _handle;
+  }
+
+  //! @brief Get the native thread id.
+  FOG_INLINE uint32_t getId() const
+  {
+    return _id;
+  }
+
+  // TODO: Rename
+
+  //! @brief Get whether the thread was started.
+  FOG_INLINE bool isStarted() const
+  {
+    return _startupData != NULL;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors - Stack Size]
+  // --------------------------------------------------------------------------
 
   //! @brief Get thread stack size (0 means default).
-  FOG_INLINE size_t getStackSize() const { return _stackSize; }
+  FOG_INLINE uint32_t getStackSize() const
+  {
+    return _stackSize;
+  }
+
+  //! @brief Set thread stack size (0 means default).
+  //!
+  //! @note This function can be only called before the thread is created,
+  //! otherwise the @c ERR_INVALID_STATE is returned.
+  err_t setStackSize(uint32_t stackSize);
+
+  // --------------------------------------------------------------------------
+  // [Accessors - Affinity]
+  // --------------------------------------------------------------------------
 
   err_t setAffinity(int mask);
   err_t resetAffinity();
 
-  //! @brief Get thread flags
-  FOG_INLINE uint32_t getFlags() const { return _flags; }
+  // --------------------------------------------------------------------------
+  // [Accessors - Event Loop]
+  // --------------------------------------------------------------------------
 
-  //! @brief Get the native thread handle.
-  FOG_INLINE Handle& getHandle() { return _handle; }
-  //! @brief Get the native thread handle (const).
-  FOG_INLINE const Handle& getHandle() const { return _handle; }
-
-  //! @brief Get the native thread id.
-  FOG_INLINE uint32_t getId() const { return _id; }
-
-  //! @brief Get the name of this thread (for debugging for example).
-  FOG_INLINE const String& getName() const { return _name; }
-
-  //! @brief Return the event loop for this thread.
-  //!
-  //! Use the @c EventLoop::postTask() methods to execute code on the thread.
-  //! This only returns non-null after a successful call to @c start(). After
-  //! @c stop() has been called, this will return NULL.
-  //!
-  //! @note You must not call @c EventLoop::quit() method directly. Use
-  //! the @c Thread::stop() method instead.
-  FOG_INLINE EventLoop* getEventLoop() const { return _eventLoop; }
+  //! @brief Get the thread's event loop.
+  FOG_INLINE EventLoop* getEventLoop() const
+  {
+    return _eventLoop;
+  }
 
   // --------------------------------------------------------------------------
   // [Methods]
@@ -167,111 +188,74 @@ struct FOG_API Thread
   virtual void cleanUp();
 
   // --------------------------------------------------------------------------
-  // [Static methods]
+  // [Statics - Yield / Sleep]
   // --------------------------------------------------------------------------
 
-  //! @brief Gets the current thread id, which may be useful for logging purposes.
-  static uint32_t _tid();
-
-  //! @brief Yield the current thread so another thread can be scheduled.
-  static void _yield();
+  //! @brief Yield the current thread.
+  static void yield();
 
   //! @brief Sleeps for the specified duration (units are milliseconds).
-  static void _sleep(uint32_t ms);
-
-  //! @brief Sets the thread name visible to a debugger. This has no effect otherwise.
-  static void _setName(const String& name);
-
-  //! @brief Creates a new thread.  The @c stackSize parameter can be 0 to
-  //! indicate that the default stack size should be used. Upon success,
-  //! @c *handle will be assigned a handle to the newly created thread, and
-  //! @c d's main() method will be executed on the newly created thread.
-  //!
-  //! NOTE: When you are done with the thread handle, you must call join() to
-  //! release system resources associated with the thread. You must ensure that
-  //! the Delegate object outlives the thread.
-  static bool _create(size_t stackSize, Thread* thread);
-
-  //! @brief Joins with a thread created via the create() function. This
-  //! function blocks the caller until the designated thread exits. This
-  //! will invalidate @c handle.
-  static void _join(Thread* thread);
+  static void sleep(uint32_t ms);
 
   // --------------------------------------------------------------------------
-  // [Main thread]
+  // [Statics - Current]
   // --------------------------------------------------------------------------
+
+  //! @brief Get the current thread instance.
+  static Thread* getCurrentThread();
+
+  //! @brief Get the current thread id.
+  static uint32_t getCurrentThreadId();
+
+  // --------------------------------------------------------------------------
+  // [Statics - Main]
+  // --------------------------------------------------------------------------
+
+  static Thread* _mainThread;
+  static uint32_t _mainThreadId;
 
   //! @brief Get main thread instance.
-  static FOG_INLINE Thread* getMainThread() { return _mainThread; }
+  static FOG_INLINE Thread* getMainThread()
+  {
+    return _mainThread;
+  }
 
   //! @brief Get main thread id.
-  static FOG_INLINE uint32_t getMainThreadId() { return _mainThreadId; }
+  static FOG_INLINE uint32_t getMainThreadId()
+  {
+    return _mainThreadId;
+  }
 
   //! @brief Get whether current thread is main.
-  static FOG_INLINE bool isMainThread() { return _tid() == _mainThreadId; }
-
-  // --------------------------------------------------------------------------
-  // [Current thread]
-  // --------------------------------------------------------------------------
-
-  //! @brief Get current thread.
-  static Thread* getCurrent();
+  static FOG_INLINE bool isMainThread()
+  {
+    return getCurrentThreadId() == _mainThreadId;
+  }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-protected:
-  //! We piggy-back on the _startupData member to know if we successfully
-  //! started the thread.  This way we know that we need to call Join.
-  FOG_INLINE bool _threadWasStarted() const { return _startupData != NULL; }
-
-  //! The thread's handle.
+  //! @brief Thread's handle.
   Handle _handle;
 
-  //! Thread flags
-  uint32_t _flags;
-
-  //! Thread id. Used for debugging purposes.
+  //! @brief Thread id. Used for debugging purposes.
   uint32_t _id;
 
-  //! The name of the thread. Used for debugging purposes.
-  String _name;
+  //! @brief Stack size.
+  uint32_t _stackSize;
 
-  //! Stack size.
-  size_t _stackSize;
-
-  //! Used to pass data to threadMain. This structure is allocated on the stack
-  //! from within start().
-  struct StartupData
-  {
-    //! @brief Event loop type (string).
-    String eventLoopType;
-
-    //! @brief Used to synchronize thread startup.
-    ThreadEvent event;
-
-    StartupData(const String& eventLoopType) :
-      eventLoopType(eventLoopType),
-      event(false, false)
-    {
-    }
-  };
-
+  //! @brief Thread startup-data.
   StartupData* _startupData;
 
-  //! The thread's event loop. Valid only while the thread is alive. Set by
-  //! the created thread.
+  //! @brief Thread's event-loop instance (can be @c NULL if no event loop
+  //! was created).
   EventLoop* _eventLoop;
-
-  static Thread* _mainThread;
-  static uint32_t _mainThreadId;
-
-  friend struct QuitTask;
-  friend struct MainThread;
 
 private:
   friend struct Application;
+  friend struct MainThread;
+  friend struct QuitTask;
 
   _FOG_CLASS_NO_COPY(Thread)
 };

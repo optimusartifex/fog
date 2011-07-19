@@ -8,10 +8,7 @@
 #define _FOG_CORE_IO_STREAM_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Swap.h>
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/IO/FileSystem.h>
 #include <Fog/Core/Tools/ByteArray.h>
 #include <Fog/Core/Tools/String.h>

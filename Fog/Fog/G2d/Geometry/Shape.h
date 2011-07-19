@@ -8,11 +8,7 @@
 #define _FOG_G2D_GEOMETRY_SHAPE_TYPE_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/Static.h>
-#include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/Uninitialized.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/G2d/Geometry/Arc.h>
 #include <Fog/G2d/Geometry/CBezier.h>
 #include <Fog/G2d/Geometry/Chord.h>
@@ -24,8 +20,6 @@
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Geometry/Round.h>
 #include <Fog/G2d/Geometry/Triangle.h>
-#include <Fog/G2d/Global/Constants.h>
-#include <Fog/G2d/Global/Api.h>
 
 // Common geometric structures:
 //
@@ -130,7 +124,8 @@ struct FOG_NO_EXPORT ShapeF
 
   FOG_INLINE ShapeF() { _type = SHAPE_TYPE_NONE; }
   FOG_INLINE ShapeF(const ShapeF& other) { _type = other._type; Memory::copy(&_data, &other._data, sizeof(ShapeDataF)); }
-  FOG_INLINE ShapeF(_Uninitialized) {}
+
+  explicit FOG_INLINE ShapeF(_Uninitialized) {}
 
   explicit FOG_INLINE ShapeF(const LineF& line) { _type = SHAPE_TYPE_LINE; _data.line.instance() = line; }
   explicit FOG_INLINE ShapeF(const QBezierF& qbezier) { _type = SHAPE_TYPE_QBEZIER; _data.qbezier.instance() = qbezier; }
@@ -241,12 +236,12 @@ struct FOG_NO_EXPORT ShapeF
 
   FOG_INLINE err_t _getBoundingBox(BoxF& dst, const TransformF* tr) const
   {
-    return _g2d.shapef.getBoundingBox(_type, &_data, &dst, tr);
+    return _api.shapef.getBoundingBox(_type, &_data, &dst, tr);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectF& dst, const TransformF* tr) const
   {
-    err_t err = _g2d.shapef.getBoundingBox(_type, &_data, reinterpret_cast<BoxF*>(&dst), tr);
+    err_t err = _api.shapef.getBoundingBox(_type, &_data, reinterpret_cast<BoxF*>(&dst), tr);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -258,7 +253,7 @@ struct FOG_NO_EXPORT ShapeF
 
   FOG_INLINE bool hitTest(const PointF& pt) const
   {
-    return _g2d.shapef.hitTest(_type, &_data, &pt);
+    return _api.shapef.hitTest(_type, &_data, &pt);
   }
 
   // --------------------------------------------------------------------------
@@ -293,7 +288,8 @@ struct FOG_NO_EXPORT ShapeD
 
   FOG_INLINE ShapeD() { _type = SHAPE_TYPE_NONE; }
   FOG_INLINE ShapeD(const ShapeD& other) { _type = other._type; Memory::copy(&_data, &other._data, sizeof(ShapeDataD)); }
-  FOG_INLINE ShapeD(_Uninitialized) {}
+
+  explicit FOG_INLINE ShapeD(_Uninitialized) {}
 
   explicit FOG_INLINE ShapeD(const LineD& line) { _type = SHAPE_TYPE_LINE; _data.line.instance() = line; }
   explicit FOG_INLINE ShapeD(const QBezierD& quad) { _type = SHAPE_TYPE_LINE; _data.qbezier.instance() = quad; }
@@ -405,12 +401,12 @@ struct FOG_NO_EXPORT ShapeD
 
   FOG_INLINE err_t _getBoundingBox(BoxD& dst, const TransformD* tr) const
   {
-    return _g2d.shaped.getBoundingBox(_type, &_data, &dst, tr);
+    return _api.shaped.getBoundingBox(_type, &_data, &dst, tr);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectD& dst, const TransformD* tr) const
   {
-    err_t err = _g2d.shaped.getBoundingBox(_type, &_data, reinterpret_cast<BoxD*>(&dst), tr);
+    err_t err = _api.shaped.getBoundingBox(_type, &_data, reinterpret_cast<BoxD*>(&dst), tr);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -422,7 +418,7 @@ struct FOG_NO_EXPORT ShapeD
 
   FOG_INLINE bool hitTest(const PointD& pt) const
   {
-    return _g2d.shaped.hitTest(_type, &_data, &pt);
+    return _api.shaped.hitTest(_type, &_data, &pt);
   }
 
   // --------------------------------------------------------------------------

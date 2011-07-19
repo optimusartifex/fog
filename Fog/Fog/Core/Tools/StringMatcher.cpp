@@ -9,7 +9,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Threading/Thread.h>
 #include <Fog/Core/Tools/Char.h>
@@ -49,14 +48,14 @@ static void buildTable(StringMatcher::SkipTable* skipTable, const Char* ps, size
     {
       while (i--)
       {
-        data[ps->ch() & 0xFF] = (uint)i; ps++;
+        data[ps->getValue() & 0xFF] = (uint)i; ps++;
       }
     }
     else
     {
       while (i--)
       {
-        data[ps->toLower().ch() & 0xFF] = (uint)i; ps++;
+        data[ps->toLower().getValue() & 0xFF] = (uint)i; ps++;
       }
     }
     skipTable->status.set(StringMatcher::SkipTable::STATUS_INITIALIZED);
@@ -64,7 +63,7 @@ static void buildTable(StringMatcher::SkipTable* skipTable, const Char* ps, size
   }
 
   // Wait...another thread creating the table...
-  while (skipTable->status.get() != StringMatcher::SkipTable::STATUS_INITIALIZED) Thread::_yield();
+  while (skipTable->status.get() != StringMatcher::SkipTable::STATUS_INITIALIZED) Thread::yield();
 }
 
 StringMatcher::StringMatcher()
@@ -173,7 +172,7 @@ Range StringMatcher::match(const Char* str, size_t slen, uint cs, const Range& r
     for (;;)
     {
       // Get count of characters to skip from skip table.
-      if ((skip = skipTable[strCur->ch() & 0xFF]) == 0)
+      if ((skip = skipTable[strCur->getValue() & 0xFF]) == 0)
       {
         // Check if there is possible match.
         while (skip < patternLength)
@@ -186,7 +185,7 @@ Range StringMatcher::match(const Char* str, size_t slen, uint cs, const Range& r
         if (skip >= patternLength)
           return Range((size_t)(strCur - str) - skip + 1, patternLength);
 
-        if (skipTable[(strCur - skip)->ch() & 0xFF] == patternLength)
+        if (skipTable[(strCur - skip)->getValue() & 0xFF] == patternLength)
           skip = patternLength - skip;
         else
           skip = 1;
@@ -202,7 +201,7 @@ Range StringMatcher::match(const Char* str, size_t slen, uint cs, const Range& r
     for (;;)
     {
       // Get count of characters to skip from skip table.
-      if ((skip = skipTable[strCur->toLower().ch() & 0xFF]) == 0)
+      if ((skip = skipTable[strCur->toLower().getValue() & 0xFF]) == 0)
       {
         // Check if there is possible match.
         while (skip < patternLength)
@@ -215,7 +214,7 @@ Range StringMatcher::match(const Char* str, size_t slen, uint cs, const Range& r
         if (skip >= patternLength)
           return Range((size_t)(strCur - str) - skip + 1, patternLength);
 
-        if (skipTable[(strCur - skip)->toLower().ch() & 0xFF] == patternLength)
+        if (skipTable[(strCur - skip)->toLower().getValue() & 0xFF] == patternLength)
           skip = patternLength - skip;
         else
           skip = 1;

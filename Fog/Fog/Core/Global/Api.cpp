@@ -6,8 +6,8 @@
 // [Dependencies]
 #include <Fog/Core/Global/Api.h>
 
-namespace Fog {
+// ============================================================================
+// Fog::Api
+// ============================================================================
 
-CoreApi _core;
-
-} // Fog namespace
+Fog::Api Fog::_api;

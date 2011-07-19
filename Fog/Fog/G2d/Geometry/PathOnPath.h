@@ -9,12 +9,11 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Geometry/PathEffect.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Transform.h>
-#include <Fog/G2d/Global/Constants.h>
 
 namespace Fog {
 

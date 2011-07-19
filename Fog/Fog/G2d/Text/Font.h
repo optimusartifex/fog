@@ -8,16 +8,13 @@
 #define _FOG_G2D_TEXT_FONT_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/Swap.h>
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Tools/Char.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Geometry/Size.h>
 #include <Fog/G2d/Geometry/Transform.h>
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Text/FontFace.h>
 #include <Fog/G2d/Text/FontHints.h>
 #include <Fog/G2d/Text/FontKerning.h>
@@ -32,13 +29,6 @@ namespace Fog {
 // [Forward Declarations]
 // ============================================================================
 
-struct Font;
-struct FontData;
-struct FontManager;
-
-struct GlyphSet;
-struct PathF;
-struct PathD;
 struct TextExtents;
 
 // ============================================================================

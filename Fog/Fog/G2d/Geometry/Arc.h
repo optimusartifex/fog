@@ -8,28 +8,18 @@
 #define _FOG_G2D_GEOMETRY_ARC_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/Uninitialized.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Ellipse.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
-#include <Fog/G2d/Global/Api.h>
 
 namespace Fog {
 
 //! @addtogroup Fog_G2d_Geometry
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct ArcF;
-struct ArcD;
 
 // ============================================================================
 // [Fog::ArcF]
@@ -43,10 +33,7 @@ struct FOG_NO_EXPORT ArcF
   // --------------------------------------------------------------------------
 
   FOG_INLINE ArcF() { reset(); }
-  FOG_INLINE ArcF(_Uninitialized) {}
-
   FOG_INLINE ArcF(const ArcF& other) { setArc(other); }
-  explicit FOG_INLINE ArcF(const ArcD& other) { setArc(other); }
 
   FOG_INLINE ArcF(const PointF& cp, float rad, float start_, float sweep_)
   {
@@ -75,6 +62,9 @@ struct FOG_NO_EXPORT ArcF
     start = start_;
     sweep = sweep_;
   }
+
+  explicit FOG_INLINE ArcF(_Uninitialized) {}
+  explicit FOG_INLINE ArcF(const ArcD& other) { setArc(other); }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -165,12 +155,12 @@ struct FOG_NO_EXPORT ArcF
 
   FOG_INLINE err_t _getBoundingBox(BoxF& dst, const TransformF* tr) const
   {
-    return _g2d.arcf.getBoundingBox(this, &dst, tr, false);
+    return _api.arcf.getBoundingBox(this, &dst, tr, false);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectF& dst, const TransformF* tr) const
   {
-    err_t err = _g2d.arcf.getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr, false);
+    err_t err = _api.arcf.getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr, false);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -191,7 +181,7 @@ struct FOG_NO_EXPORT ArcF
 
   FOG_INLINE uint toCSpline(PointF* dst) const
   {
-    return _g2d.arcf.toCSpline(this, dst);
+    return _api.arcf.toCSpline(this, dst);
   }
 
   // --------------------------------------------------------------------------
@@ -236,8 +226,6 @@ struct FOG_NO_EXPORT ArcD
   // --------------------------------------------------------------------------
 
   FOG_INLINE ArcD() { reset(); }
-  FOG_INLINE ArcD(_Uninitialized) {}
-
   FOG_INLINE ArcD(const ArcD& other) { setArc(other); }
 
   FOG_INLINE ArcD(const PointD& cp, double rad, double start_, double sweep_)
@@ -268,6 +256,7 @@ struct FOG_NO_EXPORT ArcD
     sweep = sweep_;
   }
 
+  explicit FOG_INLINE ArcD(_Uninitialized) {}
   explicit FOG_INLINE ArcD(const ArcF& other) { setArc(other); }
 
   // --------------------------------------------------------------------------
@@ -365,12 +354,12 @@ struct FOG_NO_EXPORT ArcD
 
   FOG_INLINE err_t _getBoundingBox(BoxD& dst, const TransformD* tr) const
   {
-    return _g2d.arcd.getBoundingBox(this, &dst, tr, false);
+    return _api.arcd.getBoundingBox(this, &dst, tr, false);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectD& dst, const TransformD* tr) const
   {
-    err_t err = _g2d.arcd.getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr, false);
+    err_t err = _api.arcd.getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr, false);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -391,7 +380,7 @@ struct FOG_NO_EXPORT ArcD
 
   FOG_INLINE uint toCSpline(PointD* dst) const
   {
-    return _g2d.arcd.toCSpline(this, dst);
+    return _api.arcd.toCSpline(this, dst);
   }
 
   // --------------------------------------------------------------------------

@@ -8,7 +8,7 @@
 #define _FOG_CORE_SYSTEM_APPLICATION_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/System/Object.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Gui/Animation/Animation.h>
@@ -22,16 +22,13 @@ namespace Fog {
 //! initialized and Application object not exists or it's not kwown that
 //! it will exist in the future.
 //!
-//! This method is called automatically by @c FOG_CORE_MAIN and
-//! @c FOG_GUI_MAIN macros.
+//! This method is called automatically by @c FOG_CORE_MAIN and @c FOG_UI_MAIN
+//! macros.
 FOG_API void _core_application_init_arguments(int argc, const char* argv[]);
 
 // ============================================================================
 // [Forward Declarations]
 // ============================================================================
-
-struct Application;
-struct EventLoop;
 
 // Declared in Fog-Gui
 struct GuiEngine;

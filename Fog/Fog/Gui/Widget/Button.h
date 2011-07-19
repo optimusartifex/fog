@@ -8,6 +8,7 @@
 #define _FOG_GUI_WIDGET_BUTTON_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Gui/Widget/ButtonBase.h>
 
 namespace Fog {

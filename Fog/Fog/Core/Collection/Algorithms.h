@@ -8,7 +8,7 @@
 #define _FOG_CORE_COLLECTION_ALGORITHMS_H
 
 // [Dependencies]
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Math.h>
 
 namespace Fog {

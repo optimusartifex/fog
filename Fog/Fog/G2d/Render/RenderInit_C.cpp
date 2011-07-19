@@ -43,7 +43,7 @@
 namespace Fog {
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
 static void fog_rasterengine_set_nops(G2dRenderApi::CompositeExtFuncs* funcs)
@@ -58,7 +58,7 @@ static void fog_rasterengine_set_nops(G2dRenderApi::CompositeExtFuncs* funcs)
   for (i = 0; i < RENDER_VBLIT_COUNT; i++) funcs->vblit_span[i] = Render_C::CompositeNop::nop_vblit_span;
 }
 
-FOG_NO_EXPORT void _g2d_render_init_c(void)
+FOG_NO_EXPORT void Render_initC(void)
 {
   G2dRenderApi& api = _g2d_render;
 

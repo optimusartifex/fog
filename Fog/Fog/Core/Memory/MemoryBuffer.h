@@ -8,8 +8,7 @@
 #define _FOG_CORE_MEMORY_MEMORYBUFFER_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Memory/MemoryManager.h>
 #include <Fog/Core/Threading/Atomic.h>
 

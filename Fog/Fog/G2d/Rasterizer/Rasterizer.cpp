@@ -10,13 +10,11 @@
 
 // [Dependencies]
 #include <Fog/Core/Face/Face_C.h>
-#include <Fog/Core/Global/Static.h>
-#include <Fog/Core/Global/Internal_Core_p.h>
+#include <Fog/Core/Global/Internals_p.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Memory/MemoryBuffer.h>
 #include <Fog/Core/Threading/Lock.h>
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Rasterizer/Rasterizer_p.h>
 #include <Fog/G2d/Rasterizer/Scanline_p.h>
 #include <Fog/G2d/Rasterizer/Span_p.h>
@@ -2106,7 +2104,7 @@ _End:
 #undef CELL_DECLARE
 #undef CELL_FETCH
 
-static void _Rasterizer8_Path_initSweepFunctions(Rasterizer8* rasterizer)
+FOG_NO_EXPORT void _Rasterizer8_Path_initSweepFunctions(Rasterizer8* rasterizer)
 {
 #define SETUP_SWEEP(rasterizer, _FILL_MODE, _USE_ALPHA) \
   FOG_MACRO_BEGIN \

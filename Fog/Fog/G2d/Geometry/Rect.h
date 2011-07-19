@@ -8,32 +8,17 @@
 #define _FOG_G2D_GEOMETRY_RECT_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/Uninitialized.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Ops.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Size.h>
-#include <Fog/G2d/Global/Api.h>
 
 namespace Fog {
 
 //! @addtogroup Fog_G2d_Geometry
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct BoxI;
-struct BoxF;
-struct BoxD;
-
-struct RectI;
-struct RectF;
-struct RectD;
 
 // ============================================================================
 // [Fog::RectI]
@@ -47,14 +32,13 @@ struct RectI
   // --------------------------------------------------------------------------
 
   FOG_INLINE RectI() {}
-  FOG_INLINE RectI(_Uninitialized) {}
-
   FOG_INLINE RectI(const RectI& other) { setRect(other); }
   FOG_INLINE RectI(const PointI& pt0, const SizeI& sz) { setRect(pt0, sz); }
+  FOG_INLINE RectI(const PointI& pt0, const PointI& pt1) { setBox(pt0, pt1); }
   FOG_INLINE RectI(int px, int py, int pw, int ph) { setRect(px, py, pw, ph); }
 
+  explicit FOG_INLINE RectI(_Uninitialized) {}
   explicit FOG_INLINE RectI(const BoxI& box) { setBox(box); }
-  FOG_INLINE RectI(const PointI& pt0, const PointI& pt1) { setBox(pt0, pt1); }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -357,7 +341,6 @@ struct RectF
   // --------------------------------------------------------------------------
 
   FOG_INLINE RectF() {}
-  FOG_INLINE RectF(_Uninitialized) {}
 
   FOG_INLINE RectF(const RectF& other) { setRect(other); }
   FOG_INLINE RectF(float px, float py, float pw, float ph) { setRect(px, py, pw, ph); }
@@ -367,6 +350,8 @@ struct RectF
 
   FOG_INLINE RectF(const PointF& pt0, const PointF& pt1) { setBox(pt0, pt1); }
   FOG_INLINE RectF(const PointI& pt0, const PointI& pt1) { setBox(pt0, pt1); }
+
+  explicit FOG_INLINE RectF(_Uninitialized) {}
 
   explicit FOG_INLINE RectF(const RectI& other) { setRect(other); }
   explicit FOG_INLINE RectF(const RectD& other) { setRect(other); }
@@ -754,7 +739,6 @@ struct RectD
   // --------------------------------------------------------------------------
 
   FOG_INLINE RectD() {}
-  FOG_INLINE RectD(_Uninitialized) {}
 
   FOG_INLINE RectD(const RectD& other) { setRect(other); }
   FOG_INLINE RectD(double px, double py, double pw, double ph) { setRect(px, py, pw, ph); }
@@ -762,6 +746,8 @@ struct RectD
   FOG_INLINE RectD(const PointI& pt0, const SizeI& sz) { setRect(pt0, sz); }
   FOG_INLINE RectD(const PointF& pt0, const SizeF& sz) { setRect(pt0, sz); }
   FOG_INLINE RectD(const PointD& pt0, const SizeD& sz) { setRect(pt0, sz); }
+
+  explicit FOG_INLINE RectD(_Uninitialized) {}
 
   explicit FOG_INLINE RectD(const RectF& other) { setRect(other); }
   explicit FOG_INLINE RectD(const RectI& other) { setRect(other); }

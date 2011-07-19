@@ -9,41 +9,178 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Config/Config.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Debug.h>
-
-#include <Fog/Core/Global/Init_Core_p.h>
-#include <Fog/G2d/Global/Init_G2d_p.h>
-#include <Fog/Gui/Global/Init_UI_p.h>
-#include <Fog/Svg/Global/Init_Svg_p.h>
+#include <Fog/Core/Global/Global.h>
+#include <Fog/Core/Global/Init_p.h>
 
 // ============================================================================
 // [Fog::All - Library Initializers]
 // ============================================================================
 
-static size_t _fog_init_counter = 0;
+static size_t _fog_init_counter;
 
 FOG_CAPI_DECLARE void _fog_init(void)
 {
-  if (++_fog_init_counter == 1)
-  {
-    Fog::_core_init();
-    Fog::_g2d_init();
-    Fog::_svg_init();
-    Fog::_gui_init();
-  }
+  using namespace Fog;
+
+  if (++_fog_init_counter != 1)
+    return;
+
+  // [Core/Cpu]
+  Cpu_init();
+
+  // [Core/Threading]
+  Lock_init(),
+
+  // [Core/Error]
+  Error_init();
+
+  // [Core/Memory]
+  MemoryOps_init();              // Depends on Cpu.
+  MemoryAlloc_init();
+  MemoryCleanup_init();
+  MemoryManager_init();
+
+  // [Core/Threading]
+  ThreadLocal_init();
+
+  // [Core/Math]
+  Math_init();                   // Depends on Cpu.
+
+  // [Core/DateTime]
+  Time_init();                   // Depends on Lock.
+  Date_init();
+
+  // [Core/Collection]
+  List_init();
+  Hash_init();
+
+  // [Core/Tools]
+  ByteArray_init();
+  String_init();
+  TextCodec_init();
+  ManagedString_init();          // Depends on String and Lock.
+  Strings_init();                // Depends on StringCache.
+  Locale_init();                 // Depends on TextCodec.
+
+  // [Core/Variant]
+  Var_init();
+
+  // [Core/Library]
+  Library_init();
+
+  // [Core/OS]
+  OS_init();                     // Depends on String and TextCodec.
+
+  // [Core/Streaming]
+  Stream_init();
+
+  // [Core/Threading]
+  Thread_init();
+  ThreadPool_init();
+
+  // [Core/Object]
+  Object_init();                 // Depends on String.
+
+  // [Core/Xml
+  XmlEntity_init();
+
+  // [Core/Application]
+  Application_init();
+
+  // [G2d/Geometry]
+  Line_init();
+  QBezier_init();
+  CBezier_init();
+  Arc_init();
+  Circle_init();
+  Ellipse_init();
+  Chord_init();
+  Pie_init();
+  Round_init();
+  Triangle_init();
+  Path_init();
+  Shape_init();
+
+  Transform_init();
+  PathClipper_init();
+
+  // [G2d/Render]
+  Render_init();
+
+  // [G2d/Source]
+  Color_init();
+  ColorStopList_init();
+  Pattern_init();
+
+  // [G2d/Imaging]
+  ImagePalette_init();
+  ImageFormatDescription_init();
+  Image_init();
+  ImageConverter_init();
+  ImageCodecProvider_init();
+  ImageEffect_init();
+
+  // [G2d/Tools]
+  Region_init();
+  Matrix_init();
+
+  // [G2d/Painter]
+  PaintDeviceInfo_init();
+  Painter_initNull();
+  Painter_initRaster();
+
+  // [G2d/Text]
+  GlyphBitmap_init();
+  GlyphOutline_init();
+  FontManager_init();
 }
 
 FOG_CAPI_DECLARE void _fog_fini(void)
 {
-  if (--_fog_init_counter == 0)
-  {
-    Fog::_gui_fini();
-    Fog::_svg_fini();
-    Fog::_g2d_fini();
-    Fog::_core_fini();
-  }
+  using namespace Fog;
+
+  if (--_fog_init_counter != 0)
+    return;
+
+  // [G2d/Text]
+  FontManager_fini();
+  GlyphOutline_fini();
+  GlyphBitmap_fini();
+
+  // [G2d/Imaging]
+  ImageCodecProvider_fini();
+
+  // [Core/Application]
+  Application_fini();
+
+  // [Core/Object]
+  Object_fini();
+
+  // [Core/Threading]
+  ThreadPool_fini();
+  Thread_fini();
+
+  // [Core/Streaming]
+  Stream_fini();
+
+  // [Core/OS]
+  OS_fini();
+
+  // [Core/Library]
+  Library_fini();
+
+  // [Core/Variant]
+  Var_fini();
+
+  // [Core/Tools]
+  ManagedString_fini();
+  TextCodec_fini();
+
+  // [Core/Threading]
+  ThreadLocal_fini();
+
+  // [Core/Memory]
+  MemoryAlloc_fini();
 }
 
 // ============================================================================
@@ -60,12 +197,14 @@ struct FOG_NO_EXPORT _FogInitHelper
 
   ~_FogInitHelper()
   {
-    // We shutdown only if there is no error and fog_failed is zero. This is
-    // because for example a Fog::ThreadPool might need to release all threads,
-    // but an assertion can be raised by the thread owned by it.
-    //
-    // So if failed, it's better to exit quickly than fail again.
-    if (fog_failed == 0) _fog_fini();
+    // We shutdown Fog only in case that application terminated normally (this
+    // means that fog_failed is zero). This is needed because for example a
+    // Fog::ThreadPool might need to release all threads, but an assertion can
+    // be raised by the thread owned by it.
+    if (fog_failed == 0)
+    {
+      _fog_fini();
+    }
   }
 };
 

@@ -9,7 +9,8 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Internal_Core_p.h>
+#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Internals_p.h>
 #include <Fog/Core/Tools/TextIterator.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Transform.h>
@@ -92,7 +93,7 @@ static FOG_INLINE err_t _FontFace_getTextOutline(FontFace* self,
 
       FOG_RETURN_ON_ERROR(self->_renderGlyphOutline(path, metrics, d, uc0, ctx));
 
-      if (FOG_LIKELY(uc0 <= UNICHAR_MAX))
+      if (FOG_LIKELY(uc0 <= UNICODE_MAX))
       {
         GlyphOutline tmpOutline;
         if (tmpOutline.create(metrics, path) == ERR_OK)

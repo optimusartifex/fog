@@ -10,14 +10,10 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/BufferP.h>
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Debug.h>
-#include <Fog/Core/Global/Internal_Core_p.h>
+#include <Fog/Core/Global/Internals_p.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Alloc.h>
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Geometry/Math2d.h>
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Geometry/PathStroker.h>

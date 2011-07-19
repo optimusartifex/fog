@@ -9,8 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Memory/Alloc.h>
 #include <Fog/G2d/Painting/PaintDeviceInfo.h>
 #include <Fog/G2d/Text/Font.h>
@@ -22,24 +21,24 @@ namespace Fog {
 // [Fog::PaintDeviceInfo - Statics]
 // ============================================================================
 
-static Static<PaintDeviceInfoData> _PaintDeviceInfo_dnull;
+static Static<PaintDeviceInfoData> PaintDeviceInfo_dnull;
 
 // ============================================================================
 // [Fog::PaintDeviceInfo - Helpers]
 // ============================================================================
 
-static FOG_INLINE PaintDeviceInfoData* _PaintDeviceInfo_ref(PaintDeviceInfoData* d)
+static FOG_INLINE PaintDeviceInfoData* PaintDeviceInfo_ref(PaintDeviceInfoData* d)
 {
   d->refCount.inc();
   return d;
 }
 
-static FOG_INLINE void _PaintDeviceInfo_deref(PaintDeviceInfoData* d)
+static FOG_INLINE void PaintDeviceInfo_deref(PaintDeviceInfoData* d)
 {
   if (d->refCount.deref()) Memory::free(d);
 }
 
-static FOG_INLINE err_t _PaintDeviceInfo_detach(PaintDeviceInfo* self)
+static FOG_INLINE err_t PaintDeviceInfo_detach(PaintDeviceInfo* self)
 {
   PaintDeviceInfoData* d = self->_d;
 
@@ -69,18 +68,18 @@ static FOG_INLINE err_t _PaintDeviceInfo_detach(PaintDeviceInfo* self)
 // ============================================================================
 
 PaintDeviceInfo::PaintDeviceInfo() :
-  _d(_PaintDeviceInfo_ref(_PaintDeviceInfo_dnull.instancep()))
+  _d(PaintDeviceInfo_ref(PaintDeviceInfo_dnull.instancep()))
 {
 }
 
 PaintDeviceInfo::PaintDeviceInfo(const PaintDeviceInfo& other) :
-  _d(_PaintDeviceInfo_ref(other._d))
+  _d(PaintDeviceInfo_ref(other._d))
 {
 }
 
 PaintDeviceInfo::~PaintDeviceInfo()
 {
-  _PaintDeviceInfo_deref(_d);
+  PaintDeviceInfo_deref(_d);
 }
 
 // ============================================================================
@@ -89,8 +88,8 @@ PaintDeviceInfo::~PaintDeviceInfo()
 
 void PaintDeviceInfo::reset()
 {
-  _PaintDeviceInfo_deref(
-    atomicPtrXchg(&_d, _PaintDeviceInfo_ref(_PaintDeviceInfo_dnull.instancep()))
+  PaintDeviceInfo_deref(
+    atomicPtrXchg(&_d, PaintDeviceInfo_ref(PaintDeviceInfo_dnull.instancep()))
   );
 }
 
@@ -119,7 +118,7 @@ err_t PaintDeviceInfo::create(uint32_t paintDevice,
     return ERR_RT_INVALID_ARGUMENT;
   }
 
-  FOG_RETURN_ON_ERROR(_PaintDeviceInfo_detach(this));
+  FOG_RETURN_ON_ERROR(PaintDeviceInfo_detach(this));
   _d->paintDevice = paintDevice;
   _d->fontKerning = fontKerning;
   _d->fontHinting = fontHinting;
@@ -171,19 +170,19 @@ err_t PaintDeviceInfo::makePhysicalFont(Font& physical, const Font& src)
 
 PaintDeviceInfo& PaintDeviceInfo::operator=(const PaintDeviceInfo& other)
 {
-  _PaintDeviceInfo_deref(
-    atomicPtrXchg(&_d, _PaintDeviceInfo_ref(other._d))
+  PaintDeviceInfo_deref(
+    atomicPtrXchg(&_d, PaintDeviceInfo_ref(other._d))
   );
   return *this;
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_paintdeviceinfo_init(void)
+FOG_NO_EXPORT void PaintDeviceInfo_init(void)
 {
-  PaintDeviceInfoData* d = _PaintDeviceInfo_dnull.instancep();
+  PaintDeviceInfoData* d = PaintDeviceInfo_dnull.instancep();
 
   d->refCount.init(1);
   d->paintDevice = PAINT_DEVICE_UNKNOWN;
@@ -195,13 +194,6 @@ FOG_NO_EXPORT void _g2d_paintdeviceinfo_init(void)
   d->scale.set(1.0f, 1.0f);
   d->aspectRatio.set(1.0f, 1.0f);
   d->dpiInfo.setDpi(90.0f);
-}
-
-FOG_NO_EXPORT void _g2d_paintdeviceinfo_fini(void)
-{
-  PaintDeviceInfoData* d = _PaintDeviceInfo_dnull.instancep();
-
-  d->refCount.dec();
 }
 
 } // Fog namespace

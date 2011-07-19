@@ -8,7 +8,9 @@
 #define _FOG_G2D_WIN_GDIPLIBRARY_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Library/Library.h>
+#include <Fog/Core/Threading/ThreadLocal.h>
 
 // [Dependencies - Windows]
 #include <windows.h>
@@ -229,49 +231,68 @@ namespace Fog {
 // ============================================================================
 
 //! @brief GdiPlus library interface.
+//!
+//! Because there is a known limitation that Gdi+ library can't be created by
+//! DllMain() function, it's initialized when the @c Application object is,
+//! and unloaded when the @c Application object is being destroyed.
 struct FOG_API GdipLibrary
 {
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
   GdipLibrary();
   ~GdipLibrary();
 
-  err_t prepare();
-  err_t init();
-  void close();
+  // --------------------------------------------------------------------------
+  // [Statics]
+  // --------------------------------------------------------------------------
+
+  static GdipLibrary* get();
+
+  // --------------------------------------------------------------------------
+  // [API]
+  // --------------------------------------------------------------------------
 
   enum { NUM_SYMBOLS = 20 };
+
   union
   {
     struct
     {
-      GpStatus (FOG_STDCALL* pGdiplusStartup)(ULONG_PTR* token, const GpGdiplusStartupInput* input, GpGdiplusStartupOutput *output);
-      void (FOG_STDCALL* pGdiplusShutdown)(ULONG_PTR token);
-      GpStatus (FOG_STDCALL* pGdipLoadImageFromStream)(IStream* stream, GpImage** image);
-      GpStatus (FOG_STDCALL* pGdipSaveImageToStream)(GpImage* image, IStream* stream, const CLSID* clsidEncoder, const GpEncoderParameters* encoderParams);
-      GpStatus (FOG_STDCALL* pGdipDisposeImage)(GpImage* image);
-      GpStatus (FOG_STDCALL* pGdipGetImageType)(GpImage* image, UINT* type);
-      GpStatus (FOG_STDCALL* pGdipGetImageWidth)(GpImage* image, UINT* width);
-      GpStatus (FOG_STDCALL* pGdipGetImageHeight)(GpImage* image, UINT* height);
-      GpStatus (FOG_STDCALL* pGdipGetImageFlags)(GpImage* image, UINT* flags);
-      GpStatus (FOG_STDCALL* pGdipGetImagePixelFormat)(GpImage* image, GpPixelFormat* format);
-      GpStatus (FOG_STDCALL* pGdipGetImageGraphicsContext)(GpImage* image, GpGraphics** graphics);
-      GpStatus (FOG_STDCALL* pGdipImageGetFrameCount)(GpImage* image, const GUID* dimensionID, UINT* count);
-      GpStatus (FOG_STDCALL* pGdipImageSelectActiveFrame)(GpImage* image, const GUID* dimensionID, UINT frameIndex);
-      GpStatus (FOG_STDCALL* pGdipCreateBitmapFromScan0)(INT width, INT height, INT stride, GpPixelFormat format, BYTE* scan0, GpBitmap** bitmap);
-      GpStatus (FOG_STDCALL* pGdipSetCompositingMode)(GpGraphics* graphics, GpCompositingMode compositingMode);
-      GpStatus (FOG_STDCALL* pGdipDrawImageI)(GpGraphics* graphics, GpImage* image, INT x, INT y);
-      GpStatus (FOG_STDCALL* pGdipFlush)(GpGraphics* graphics, GpFlushIntention intention);
-      GpStatus (FOG_STDCALL* pGdipDeleteGraphics)(GpGraphics* graphics);
-
-      GpStatus (FOG_STDCALL* pGdipGetImageEncoders)(UINT numEncoders, UINT size, GpImageCodecInfo* encoders);
-      GpStatus (FOG_STDCALL* pGdipGetImageEncodersSize)(UINT *numEncoders, UINT *size);
+      GpStatus (FOG_STDCALL* _GdiplusStartup)(ULONG_PTR* token, const GpGdiplusStartupInput* input, GpGdiplusStartupOutput *output);
+      void     (FOG_STDCALL* _GdiplusShutdown)(ULONG_PTR token);
+      GpStatus (FOG_STDCALL* _GdipLoadImageFromStream)(IStream* stream, GpImage** image);
+      GpStatus (FOG_STDCALL* _GdipSaveImageToStream)(GpImage* image, IStream* stream, const CLSID* clsidEncoder, const GpEncoderParameters* encoderParams);
+      GpStatus (FOG_STDCALL* _GdipDisposeImage)(GpImage* image);
+      GpStatus (FOG_STDCALL* _GdipGetImageType)(GpImage* image, UINT* type);
+      GpStatus (FOG_STDCALL* _GdipGetImageWidth)(GpImage* image, UINT* width);
+      GpStatus (FOG_STDCALL* _GdipGetImageHeight)(GpImage* image, UINT* height);
+      GpStatus (FOG_STDCALL* _GdipGetImageFlags)(GpImage* image, UINT* flags);
+      GpStatus (FOG_STDCALL* _GdipGetImagePixelFormat)(GpImage* image, GpPixelFormat* format);
+      GpStatus (FOG_STDCALL* _GdipGetImageGraphicsContext)(GpImage* image, GpGraphics** graphics);
+      GpStatus (FOG_STDCALL* _GdipImageGetFrameCount)(GpImage* image, const GUID* dimensionID, UINT* count);
+      GpStatus (FOG_STDCALL* _GdipImageSelectActiveFrame)(GpImage* image, const GUID* dimensionID, UINT frameIndex);
+      GpStatus (FOG_STDCALL* _GdipCreateBitmapFromScan0)(INT width, INT height, INT stride, GpPixelFormat format, BYTE* scan0, GpBitmap** bitmap);
+      GpStatus (FOG_STDCALL* _GdipSetCompositingMode)(GpGraphics* graphics, GpCompositingMode compositingMode);
+      GpStatus (FOG_STDCALL* _GdipDrawImageI)(GpGraphics* graphics, GpImage* image, INT x, INT y);
+      GpStatus (FOG_STDCALL* _GdipFlush)(GpGraphics* graphics, GpFlushIntention intention);
+      GpStatus (FOG_STDCALL* _GdipDeleteGraphics)(GpGraphics* graphics);
+      GpStatus (FOG_STDCALL* _GdipGetImageEncoders)(UINT numEncoders, UINT size, GpImageCodecInfo* encoders);
+      GpStatus (FOG_STDCALL* _GdipGetImageEncodersSize)(UINT *numEncoders, UINT* size);
     };
-    void* addr[NUM_SYMBOLS];
+    void* _symbols[NUM_SYMBOLS];
   };
 
-  Library dll;
-  volatile err_t err;
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
 
-  ULONG_PTR gdiplusToken;
+  //! @brief The gdiplus.dll library instance.
+  Library _library;
+
+  //! @brief The token returned by GdipStartup().
+  ULONG_PTR _gdipToken;
 
 private:
   _FOG_CLASS_NO_COPY(GdipLibrary)

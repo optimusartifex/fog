@@ -70,6 +70,9 @@
 // Has Borland compiler partial template specialization?
 #endif
 
+// MSC treats char, signed char, and unsigned char as different types.
+#define FOG_CC_HAVE_STANDARD_CHAR_TYPE
+
 // Visibility.
 #define FOG_NO_EXPORT
 #define FOG_DLL_IMPORT __declspec(dllimport)

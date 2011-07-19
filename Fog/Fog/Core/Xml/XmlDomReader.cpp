@@ -11,8 +11,6 @@
 // [Dependencies]
 #include <Fog/Core/Collection/Hash.h>
 #include <Fog/Core/Collection/List.h>
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/IO/MapFile.h>
 #include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Tools/Byte.h>

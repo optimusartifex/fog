@@ -8,24 +8,15 @@
 #define _FOG_G2D_PAINTING_PAINTDEVICEINFO_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/Swap.h>
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/G2d/Geometry/Point.h>
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Tools/Dpi.h>
 
 namespace Fog {
 
 //! @addtogroup Fog_G2d_Painting
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct Font;
 
 // ============================================================================
 // [Fog::PaintDeviceInfoData]

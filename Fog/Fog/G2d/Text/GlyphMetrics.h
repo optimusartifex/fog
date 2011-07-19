@@ -8,8 +8,8 @@
 #define _FOG_G2D_TEXT_GLYPHMETRICS_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Global.h>
 #include <Fog/G2d/Geometry/Point.h>
-#include <Fog/G2d/Global/Constants.h>
 
 namespace Fog {
 

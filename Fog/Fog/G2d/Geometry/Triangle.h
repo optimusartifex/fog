@@ -8,16 +8,13 @@
 #define _FOG_G2D_GEOMETRY_TRIANGLE_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/Uninitialized.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Ops.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
-#include <Fog/G2d/Global/Api.h>
 
 namespace Fog {
 
@@ -43,7 +40,6 @@ struct FOG_NO_EXPORT TriangleF
   // --------------------------------------------------------------------------
 
   FOG_INLINE TriangleF() { reset(); }
-  FOG_INLINE TriangleF(_Uninitialized) {}
 
   FOG_INLINE TriangleF(const PointF& pt0, const PointF& pt1, const PointF& pt2)
   {
@@ -60,10 +56,8 @@ struct FOG_NO_EXPORT TriangleF
     setTriangle(other);
   }
 
-  explicit FOG_INLINE TriangleF(const TriangleD& other)
-  {
-    setTriangle(other);
-  }
+  explicit FOG_INLINE TriangleF(_Uninitialized) {}
+  explicit FOG_INLINE TriangleF(const TriangleD& other) { setTriangle(other); }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -130,12 +124,12 @@ struct FOG_NO_EXPORT TriangleF
 
   FOG_INLINE err_t _getBoundingBox(BoxF& dst, const TransformF* tr) const
   {
-    return _g2d.trianglef.getBoundingBox(this->p, &dst, tr);
+    return _api.trianglef.getBoundingBox(this->p, &dst, tr);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectF& dst, const TransformF* tr) const
   {
-    err_t err = _g2d.trianglef.getBoundingBox(this->p, reinterpret_cast<BoxF*>(&dst), tr);
+    err_t err = _api.trianglef.getBoundingBox(this->p, reinterpret_cast<BoxF*>(&dst), tr);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -147,7 +141,7 @@ struct FOG_NO_EXPORT TriangleF
 
   FOG_INLINE bool hitTest(const PointF& pt) const
   {
-    return _g2d.trianglef.hitTest(this->p, &pt);
+    return _api.trianglef.hitTest(this->p, &pt);
   }
 
   // --------------------------------------------------------------------------
@@ -197,7 +191,6 @@ struct FOG_NO_EXPORT TriangleD
   // --------------------------------------------------------------------------
 
   FOG_INLINE TriangleD() { reset(); }
-  FOG_INLINE TriangleD(_Uninitialized) {}
 
   FOG_INLINE TriangleD(const PointD& pt0, const PointD& pt1, const PointD& pt2)
   {
@@ -214,10 +207,8 @@ struct FOG_NO_EXPORT TriangleD
     setTriangle(other);
   }
 
-  explicit FOG_INLINE TriangleD(const TriangleF& other)
-  {
-    setTriangle(other);
-  }
+  explicit FOG_INLINE TriangleD(const TriangleF& other) { setTriangle(other); }
+  explicit FOG_INLINE TriangleD(_Uninitialized) {}
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -288,12 +279,12 @@ struct FOG_NO_EXPORT TriangleD
 
   FOG_INLINE err_t _getBoundingBox(BoxD& dst, const TransformD* tr) const
   {
-    return _g2d.triangled.getBoundingBox(this->p, &dst, tr);
+    return _api.triangled.getBoundingBox(this->p, &dst, tr);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectD& dst, const TransformD* tr) const
   {
-    err_t err = _g2d.triangled.getBoundingBox(this->p, reinterpret_cast<BoxD*>(&dst), tr);
+    err_t err = _api.triangled.getBoundingBox(this->p, reinterpret_cast<BoxD*>(&dst), tr);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -305,7 +296,7 @@ struct FOG_NO_EXPORT TriangleD
 
   FOG_INLINE bool hitTest(const PointD& pt) const
   {
-    return _g2d.triangled.hitTest(this->p, &pt);
+    return _api.triangled.hitTest(this->p, &pt);
   }
 
   // --------------------------------------------------------------------------

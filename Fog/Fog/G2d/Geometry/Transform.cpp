@@ -3,16 +3,20 @@
 // [License]
 // MIT, See COPYING file in package
 
+// [Precompiled Headers]
+#if defined(FOG_PRECOMP)
+#include FOG_PRECOMP
+#endif // FOG_PRECOMP
+
 #include <Fog/Core/Cpu/Cpu.h>
 #include <Fog/Core/Cpu/Initializer.h>
-#include <Fog/Core/Global/Internal_Core_p.h>
+#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Internals_p.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Transform.h>
-#include <Fog/G2d/Global/Constants.h>
-#include <Fog/G2d/Global/Init_G2d_p.h>
 
 namespace Fog {
 
@@ -26,7 +30,7 @@ namespace Fog {
 // ============================================================================
 
 template<typename NumT>
-static bool _TransformT_squareToQuad(NumT_(Transform)& self, const NumT_(Point)* p)
+static bool TransformT_squareToQuad(NumT_(Transform)& self, const NumT_(Point)* p)
 {
   NumT dx = p[0].x - p[1].x + p[2].x - p[3].x;
   NumT dy = p[0].y - p[1].y + p[2].y - p[3].y;
@@ -86,7 +90,7 @@ static bool _TransformT_squareToQuad(NumT_(Transform)& self, const NumT_(Point)*
 // ============================================================================
 
 template<typename NumT>
-static err_t FOG_CDECL _TransformT_create(NumT_(Transform)& self,
+static err_t FOG_CDECL TransformT_create(NumT_(Transform)& self,
   uint32_t createType, const void* params)
 {
   const NumT* paramsT = reinterpret_cast<const NumT*>(params);
@@ -322,8 +326,8 @@ _CreateReflectionUnit:
       NumT_(Transform) dm(UNINITIALIZED);
       NumT_(Transform) sm(UNINITIALIZED);
 
-      if (!_TransformT_squareToQuad<NumT>(dm, p->dst) ||
-          !_TransformT_squareToQuad<NumT>(sm, p->src) ||
+      if (!TransformT_squareToQuad<NumT>(dm, p->dst) ||
+          !TransformT_squareToQuad<NumT>(sm, p->src) ||
           !sm.invert())
       {
         goto _CreateIdentity;
@@ -342,7 +346,7 @@ _CreateReflectionUnit:
 // ============================================================================
 
 template<typename NumT>
-static uint32_t FOG_CDECL _TransformT_update(const NumT_(Transform)& self)
+static uint32_t FOG_CDECL TransformT_update(const NumT_(Transform)& self)
 {
   uint32_t type = self._type;
 
@@ -448,7 +452,7 @@ static uint32_t FOG_CDECL _TransformT_update(const NumT_(Transform)& self)
 #define ENCODE_OP(_Op_, _Order_) ((uint32_t)(_Op_) | ((uint32_t)(_Order_) << 4))
 
 template<typename NumT>
-static err_t FOG_CDECL _TransformT_transform(NumT_(Transform)& self, uint32_t opType, const void* params)
+static err_t FOG_CDECL TransformT_transform(NumT_(Transform)& self, uint32_t opType, const void* params)
 {
   const NumT* paramsT = reinterpret_cast<const NumT*>(params);
   uint32_t selfType = self.getType();
@@ -1199,7 +1203,7 @@ _MultiplyAppend:
 }
 
 template<typename NumT>
-static NumT_(Transform) FOG_CDECL _TransformT_transformed(const NumT_(Transform)& self,
+static NumT_(Transform) FOG_CDECL TransformT_transformed(const NumT_(Transform)& self,
   uint32_t opType, const void* params)
 {
   NumT_(Transform) result(self);
@@ -1212,7 +1216,7 @@ static NumT_(Transform) FOG_CDECL _TransformT_transformed(const NumT_(Transform)
 // ============================================================================
 
 template<typename NumT, typename SrcT>
-static void FOG_CDECL _TransformT_multiply(NumT_(Transform)& dst,
+static void FOG_CDECL TransformT_multiply(NumT_(Transform)& dst,
   const NumT_(Transform)& a,
   const SrcT_(Transform)& b)
 {
@@ -1302,7 +1306,7 @@ static void FOG_CDECL _TransformT_multiply(NumT_(Transform)& dst,
 // ============================================================================
 
 template<typename NumT>
-static bool FOG_CDECL _TransformT_invert(NumT_(Transform)& self,
+static bool FOG_CDECL TransformT_invert(NumT_(Transform)& self,
   const NumT_(Transform)& a)
 {
   // Inverted matrix should be as accurate as possible so the 'double'
@@ -1444,7 +1448,7 @@ _NonInvertible:
 // ============================================================================
 
 template<typename NumT, typename SrcT>
-static void FOG_CDECL _TransformT_mapPointT(const NumT_(Transform)& self,
+static void FOG_CDECL TransformT_mapPointT(const NumT_(Transform)& self,
   NumT_(Point)& dst,
   const SrcT_(Point)& src)
 {
@@ -1526,7 +1530,7 @@ static void FOG_CDECL _TransformT_mapPointT(const NumT_(Transform)& self,
 }
 
 template<typename NumT, typename SrcT>
-static void FOG_CDECL _TransformT_mapPointsT_Identity(const NumT_(Transform)& self,
+static void FOG_CDECL TransformT_mapPointsT_Identity(const NumT_(Transform)& self,
   NumT_(Point)* dst,
   const SrcT_(Point)* src,
   size_t length)
@@ -1545,7 +1549,7 @@ static void FOG_CDECL _TransformT_mapPointsT_Identity(const NumT_(Transform)& se
 }
 
 template<typename NumT, typename SrcT>
-static void FOG_CDECL _TransformT_mapPointsT_Translation(const NumT_(Transform)& self,
+static void FOG_CDECL TransformT_mapPointsT_Translation(const NumT_(Transform)& self,
   NumT_(Point)* dst,
   const SrcT_(Point)* src,
   size_t length)
@@ -1561,7 +1565,7 @@ static void FOG_CDECL _TransformT_mapPointsT_Translation(const NumT_(Transform)&
 }
 
 template<typename NumT, typename SrcT>
-static void FOG_CDECL _TransformT_mapPointsT_Scaling(const NumT_(Transform)& self,
+static void FOG_CDECL TransformT_mapPointsT_Scaling(const NumT_(Transform)& self,
   NumT_(Point)* dst,
   const SrcT_(Point)* src,
   size_t length)
@@ -1580,7 +1584,7 @@ static void FOG_CDECL _TransformT_mapPointsT_Scaling(const NumT_(Transform)& sel
 }
 
 template<typename NumT, typename SrcT>
-static void FOG_CDECL _TransformT_mapPointsT_Swap(const NumT_(Transform)& self,
+static void FOG_CDECL TransformT_mapPointsT_Swap(const NumT_(Transform)& self,
   NumT_(Point)* dst,
   const SrcT_(Point)* src,
   size_t length)
@@ -1599,7 +1603,7 @@ static void FOG_CDECL _TransformT_mapPointsT_Swap(const NumT_(Transform)& self,
 }
 
 template<typename NumT, typename SrcT>
-static void FOG_CDECL _TransformT_mapPointsT_Affine(const NumT_(Transform)& self,
+static void FOG_CDECL TransformT_mapPointsT_Affine(const NumT_(Transform)& self,
   NumT_(Point)* dst,
   const SrcT_(Point)* src,
   size_t length)
@@ -1619,7 +1623,7 @@ static void FOG_CDECL _TransformT_mapPointsT_Affine(const NumT_(Transform)& self
 }
 
 template<typename NumT, typename SrcT>
-static void FOG_CDECL _TransformT_mapPointsT_Projection(const NumT_(Transform)& self,
+static void FOG_CDECL TransformT_mapPointsT_Projection(const NumT_(Transform)& self,
   NumT_(Point)* dst,
   const SrcT_(Point)* src,
   size_t length)
@@ -1644,7 +1648,7 @@ static void FOG_CDECL _TransformT_mapPointsT_Projection(const NumT_(Transform)& 
 }
 
 template<typename NumT, typename SrcT>
-static void FOG_CDECL _TransformT_mapPointsT_Degenerate(const NumT_(Transform)& self,
+static void FOG_CDECL TransformT_mapPointsT_Degenerate(const NumT_(Transform)& self,
   NumT_(Point)* dst,
   const SrcT_(Point)* src,
   size_t length)
@@ -1657,7 +1661,7 @@ static void FOG_CDECL _TransformT_mapPointsT_Degenerate(const NumT_(Transform)& 
 // ============================================================================
 
 template<typename NumT, typename SrcT>
-static err_t FOG_CDECL _TransformT_mapPathT(const NumT_(Transform)& self,
+static err_t FOG_CDECL TransformT_mapPathT(const NumT_(Transform)& self,
   NumT_(Path)& dst,
   const SrcT_(Path)& src, uint32_t cntOp)
 {
@@ -1709,7 +1713,7 @@ static err_t FOG_CDECL _TransformT_mapPathT(const NumT_(Transform)& self,
 }
 
 template<typename NumT, typename SrcT>
-static err_t FOG_CDECL _TransformT_mapPathDataT(const NumT_(Transform)& self,
+static err_t FOG_CDECL TransformT_mapPathDataT(const NumT_(Transform)& self,
   NumT_(Path)& dst,
   const uint8_t* srcCmd, const SrcT_(Point)* srcPts, size_t srcLength, uint32_t cntOp)
 {
@@ -1933,7 +1937,7 @@ _Invalid:
 // ============================================================================
 
 template<typename NumT, typename SrcT>
-static void FOG_CDECL _TransformT_mapBoxT(const NumT_(Transform)& self,
+static void FOG_CDECL TransformT_mapBoxT(const NumT_(Transform)& self,
   NumT_(Box)& dst,
   const SrcT_(Box)& src)
 {
@@ -2060,7 +2064,7 @@ _Swap:
 // ============================================================================
 
 template<typename NumT, typename SrcT>
-static void FOG_CDECL _TransformT_mapVectorT(const NumT_(Transform)& self,
+static void FOG_CDECL TransformT_mapVectorT(const NumT_(Transform)& self,
   NumT_(Point)& dst,
   const SrcT_(Point)& src)
 {
@@ -2134,7 +2138,7 @@ static void FOG_CDECL _TransformT_mapVectorT(const NumT_(Transform)& self,
 // sx, sy.
 
 template<typename NumT>
-static NumT_(Point) FOG_CDECL _TransformT_getScaling(const NumT_(Transform)& self,
+static NumT_(Point) FOG_CDECL TransformT_getScaling(const NumT_(Transform)& self,
   bool absolute)
 {
   NumT_(Point) result;
@@ -2162,7 +2166,7 @@ static NumT_(Point) FOG_CDECL _TransformT_getScaling(const NumT_(Transform)& sel
 // ============================================================================
 
 template<typename NumT>
-static NumT FOG_CDECL _TransformT_getRotation(const NumT_(Transform)& self)
+static NumT FOG_CDECL TransformT_getRotation(const NumT_(Transform)& self)
 {
   NumT_(Point) pt(NumT(1.0), NumT(0.0));
   self.mapVector(pt);
@@ -2174,7 +2178,7 @@ static NumT FOG_CDECL _TransformT_getRotation(const NumT_(Transform)& self)
 // ============================================================================
 
 template<typename NumT>
-static NumT FOG_CDECL _TransformT_getAverageScaling(const NumT_(Transform)& self)
+static NumT FOG_CDECL TransformT_getAverageScaling(const NumT_(Transform)& self)
 {
   NumT x = self._00 + self._10;
   NumT y = self._01 + self._11;
@@ -2182,82 +2186,82 @@ static NumT FOG_CDECL _TransformT_getAverageScaling(const NumT_(Transform)& self
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_CPU_DECLARE_INITIALIZER_3DNOW(_g2d_transform_init_3dnow)
-FOG_CPU_DECLARE_INITIALIZER_SSE(_g2d_transform_init_sse)
-FOG_CPU_DECLARE_INITIALIZER_SSE2(_g2d_transform_init_sse2)
+FOG_CPU_DECLARE_INITIALIZER_3DNOW(Transform_init3dNow)
+FOG_CPU_DECLARE_INITIALIZER_SSE(Transform_initSSE)
+FOG_CPU_DECLARE_INITIALIZER_SSE2(Transform_initSSE2)
 
-FOG_NO_EXPORT void _g2d_transform_init(void)
+FOG_NO_EXPORT void Transform_init(void)
 {
-  _g2d.transformf.create = _TransformT_create<float>;
-  _g2d.transformf.update = _TransformT_update<float>;
-  _g2d.transformf.transform = _TransformT_transform<float>;
-  _g2d.transformf.transformed = _TransformT_transformed<float>;
-  _g2d.transformf.multiply = _TransformT_multiply<float, float>;
-  _g2d.transformf.invert = _TransformT_invert<float>;
-  _g2d.transformf.getScaling = _TransformT_getScaling<float>;
-  _g2d.transformf.getRotation = _TransformT_getRotation<float>;
-  _g2d.transformf.getAverageScaling = _TransformT_getAverageScaling<float>;
+  _api.transformf.create = TransformT_create<float>;
+  _api.transformf.update = TransformT_update<float>;
+  _api.transformf.transform = TransformT_transform<float>;
+  _api.transformf.transformed = TransformT_transformed<float>;
+  _api.transformf.multiply = TransformT_multiply<float, float>;
+  _api.transformf.invert = TransformT_invert<float>;
+  _api.transformf.getScaling = TransformT_getScaling<float>;
+  _api.transformf.getRotation = TransformT_getRotation<float>;
+  _api.transformf.getAverageScaling = TransformT_getAverageScaling<float>;
 
-  _g2d.transformd.create = _TransformT_create<double>;
-  _g2d.transformd.update = _TransformT_update<double>;
-  _g2d.transformd.transform = _TransformT_transform<double>;
-  _g2d.transformd.transformed = _TransformT_transformed<double>;
-  _g2d.transformd.multiply = _TransformT_multiply<double, double>;
-  _g2d.transformd.invert = _TransformT_invert<double>;
-  _g2d.transformd.getScaling = _TransformT_getScaling<double>;
-  _g2d.transformd.getRotation = _TransformT_getRotation<double>;
-  _g2d.transformd.getAverageScaling = _TransformT_getAverageScaling<double>;
+  _api.transformd.create = TransformT_create<double>;
+  _api.transformd.update = TransformT_update<double>;
+  _api.transformd.transform = TransformT_transform<double>;
+  _api.transformd.transformed = TransformT_transformed<double>;
+  _api.transformd.multiply = TransformT_multiply<double, double>;
+  _api.transformd.invert = TransformT_invert<double>;
+  _api.transformd.getScaling = TransformT_getScaling<double>;
+  _api.transformd.getRotation = TransformT_getRotation<double>;
+  _api.transformd.getAverageScaling = TransformT_getAverageScaling<double>;
 
-  _g2d.transformf.mapPointF = _TransformT_mapPointT<float, float>;
-  _g2d.transformf.mapPathF = _TransformT_mapPathT<float, float>;
-  _g2d.transformf.mapPathDataF = _TransformT_mapPathDataT<float, float>;
-  _g2d.transformf.mapBoxF = _TransformT_mapBoxT<float, float>;
-  _g2d.transformf.mapVectorF = _TransformT_mapVectorT<float, float>;
+  _api.transformf.mapPointF = TransformT_mapPointT<float, float>;
+  _api.transformf.mapPathF = TransformT_mapPathT<float, float>;
+  _api.transformf.mapPathDataF = TransformT_mapPathDataT<float, float>;
+  _api.transformf.mapBoxF = TransformT_mapBoxT<float, float>;
+  _api.transformf.mapVectorF = TransformT_mapVectorT<float, float>;
 
-  _g2d.transformd.mapPathF = _TransformT_mapPathT<double, float>;
-  _g2d.transformd.mapPathD = _TransformT_mapPathT<double, double>;
-  _g2d.transformd.mapPathDataF = _TransformT_mapPathDataT<double, float>;
-  _g2d.transformd.mapPathDataD = _TransformT_mapPathDataT<double, double>;
-  _g2d.transformd.mapBoxD = _TransformT_mapBoxT<double, double>;
+  _api.transformd.mapPathF = TransformT_mapPathT<double, float>;
+  _api.transformd.mapPathD = TransformT_mapPathT<double, double>;
+  _api.transformd.mapPathDataF = TransformT_mapPathDataT<double, float>;
+  _api.transformd.mapPathDataD = TransformT_mapPathDataT<double, double>;
+  _api.transformd.mapBoxD = TransformT_mapBoxT<double, double>;
 
 #if defined(FOG_TRANSFORM_INIT_C)
-  _g2d.transformd.mapPointD = _TransformT_mapPointT<double, double>;
-  _g2d.transformd.mapVectorD = _TransformT_mapVectorT<double, double>;
+  _api.transformd.mapPointD = TransformT_mapPointT<double, double>;
+  _api.transformd.mapVectorD = TransformT_mapVectorT<double, double>;
 
-  _g2d.transformf.mapPointsF[TRANSFORM_TYPE_IDENTITY   ] = _TransformT_mapPointsT_Identity   <float, float>;
-  _g2d.transformf.mapPointsF[TRANSFORM_TYPE_TRANSLATION] = _TransformT_mapPointsT_Translation<float, float>;
-  _g2d.transformf.mapPointsF[TRANSFORM_TYPE_SCALING    ] = _TransformT_mapPointsT_Scaling    <float, float>;
-  _g2d.transformf.mapPointsF[TRANSFORM_TYPE_SWAP       ] = _TransformT_mapPointsT_Swap       <float, float>;
-  _g2d.transformf.mapPointsF[TRANSFORM_TYPE_ROTATION   ] = _TransformT_mapPointsT_Affine     <float, float>;
-  _g2d.transformf.mapPointsF[TRANSFORM_TYPE_AFFINE     ] = _TransformT_mapPointsT_Affine     <float, float>;
-  _g2d.transformf.mapPointsF[TRANSFORM_TYPE_PROJECTION ] = _TransformT_mapPointsT_Projection <float, float>;
-  _g2d.transformf.mapPointsF[TRANSFORM_TYPE_DEGENERATE ] = _TransformT_mapPointsT_Degenerate <float, float>;
+  _api.transformf.mapPointsF[TRANSFORM_TYPE_IDENTITY   ] = TransformT_mapPointsT_Identity   <float, float>;
+  _api.transformf.mapPointsF[TRANSFORM_TYPE_TRANSLATION] = TransformT_mapPointsT_Translation<float, float>;
+  _api.transformf.mapPointsF[TRANSFORM_TYPE_SCALING    ] = TransformT_mapPointsT_Scaling    <float, float>;
+  _api.transformf.mapPointsF[TRANSFORM_TYPE_SWAP       ] = TransformT_mapPointsT_Swap       <float, float>;
+  _api.transformf.mapPointsF[TRANSFORM_TYPE_ROTATION   ] = TransformT_mapPointsT_Affine     <float, float>;
+  _api.transformf.mapPointsF[TRANSFORM_TYPE_AFFINE     ] = TransformT_mapPointsT_Affine     <float, float>;
+  _api.transformf.mapPointsF[TRANSFORM_TYPE_PROJECTION ] = TransformT_mapPointsT_Projection <float, float>;
+  _api.transformf.mapPointsF[TRANSFORM_TYPE_DEGENERATE ] = TransformT_mapPointsT_Degenerate <float, float>;
 
-  _g2d.transformd.mapPointsF[TRANSFORM_TYPE_IDENTITY   ] = _TransformT_mapPointsT_Identity   <double, float>;
-  _g2d.transformd.mapPointsF[TRANSFORM_TYPE_TRANSLATION] = _TransformT_mapPointsT_Translation<double, float>;
-  _g2d.transformd.mapPointsF[TRANSFORM_TYPE_SCALING    ] = _TransformT_mapPointsT_Scaling    <double, float>;
-  _g2d.transformd.mapPointsF[TRANSFORM_TYPE_SWAP       ] = _TransformT_mapPointsT_Swap       <double, float>;
-  _g2d.transformd.mapPointsF[TRANSFORM_TYPE_ROTATION   ] = _TransformT_mapPointsT_Affine     <double, float>;
-  _g2d.transformd.mapPointsF[TRANSFORM_TYPE_AFFINE     ] = _TransformT_mapPointsT_Affine     <double, float>;
-  _g2d.transformd.mapPointsF[TRANSFORM_TYPE_PROJECTION ] = _TransformT_mapPointsT_Projection <double, float>;
-  _g2d.transformd.mapPointsF[TRANSFORM_TYPE_DEGENERATE ] = _TransformT_mapPointsT_Degenerate <double, float>;
+  _api.transformd.mapPointsF[TRANSFORM_TYPE_IDENTITY   ] = TransformT_mapPointsT_Identity   <double, float>;
+  _api.transformd.mapPointsF[TRANSFORM_TYPE_TRANSLATION] = TransformT_mapPointsT_Translation<double, float>;
+  _api.transformd.mapPointsF[TRANSFORM_TYPE_SCALING    ] = TransformT_mapPointsT_Scaling    <double, float>;
+  _api.transformd.mapPointsF[TRANSFORM_TYPE_SWAP       ] = TransformT_mapPointsT_Swap       <double, float>;
+  _api.transformd.mapPointsF[TRANSFORM_TYPE_ROTATION   ] = TransformT_mapPointsT_Affine     <double, float>;
+  _api.transformd.mapPointsF[TRANSFORM_TYPE_AFFINE     ] = TransformT_mapPointsT_Affine     <double, float>;
+  _api.transformd.mapPointsF[TRANSFORM_TYPE_PROJECTION ] = TransformT_mapPointsT_Projection <double, float>;
+  _api.transformd.mapPointsF[TRANSFORM_TYPE_DEGENERATE ] = TransformT_mapPointsT_Degenerate <double, float>;
 
-  _g2d.transformd.mapPointsD[TRANSFORM_TYPE_IDENTITY   ] = _TransformT_mapPointsT_Identity   <double, double>;
-  _g2d.transformd.mapPointsD[TRANSFORM_TYPE_TRANSLATION] = _TransformT_mapPointsT_Translation<double, double>;
-  _g2d.transformd.mapPointsD[TRANSFORM_TYPE_SCALING    ] = _TransformT_mapPointsT_Scaling    <double, double>;
-  _g2d.transformd.mapPointsD[TRANSFORM_TYPE_SWAP       ] = _TransformT_mapPointsT_Swap       <double, double>;
-  _g2d.transformd.mapPointsD[TRANSFORM_TYPE_ROTATION   ] = _TransformT_mapPointsT_Affine     <double, double>;
-  _g2d.transformd.mapPointsD[TRANSFORM_TYPE_AFFINE     ] = _TransformT_mapPointsT_Affine     <double, double>;
-  _g2d.transformd.mapPointsD[TRANSFORM_TYPE_PROJECTION ] = _TransformT_mapPointsT_Projection <double, double>;
-  _g2d.transformd.mapPointsD[TRANSFORM_TYPE_DEGENERATE ] = _TransformT_mapPointsT_Degenerate <double, double>;
+  _api.transformd.mapPointsD[TRANSFORM_TYPE_IDENTITY   ] = TransformT_mapPointsT_Identity   <double, double>;
+  _api.transformd.mapPointsD[TRANSFORM_TYPE_TRANSLATION] = TransformT_mapPointsT_Translation<double, double>;
+  _api.transformd.mapPointsD[TRANSFORM_TYPE_SCALING    ] = TransformT_mapPointsT_Scaling    <double, double>;
+  _api.transformd.mapPointsD[TRANSFORM_TYPE_SWAP       ] = TransformT_mapPointsT_Swap       <double, double>;
+  _api.transformd.mapPointsD[TRANSFORM_TYPE_ROTATION   ] = TransformT_mapPointsT_Affine     <double, double>;
+  _api.transformd.mapPointsD[TRANSFORM_TYPE_AFFINE     ] = TransformT_mapPointsT_Affine     <double, double>;
+  _api.transformd.mapPointsD[TRANSFORM_TYPE_PROJECTION ] = TransformT_mapPointsT_Projection <double, double>;
+  _api.transformd.mapPointsD[TRANSFORM_TYPE_DEGENERATE ] = TransformT_mapPointsT_Degenerate <double, double>;
 #endif // FOG_TRANSFORM_INIT_C
 
-  FOG_CPU_USE_INITIALIZER_3DNOW(_g2d_transform_init_3dnow)
-  FOG_CPU_USE_INITIALIZER_SSE(_g2d_transform_init_sse)
-  FOG_CPU_USE_INITIALIZER_SSE2(_g2d_transform_init_sse2)
+  FOG_CPU_USE_INITIALIZER_3DNOW(Transform_init3dNow)
+  FOG_CPU_USE_INITIALIZER_SSE(Transform_initSSE)
+  FOG_CPU_USE_INITIALIZER_SSE2(Transform_initSSE2)
 }
 
 } // Fog namespace

@@ -8,9 +8,7 @@
 #define _FOG_G2D_RENDER_RENDERUTIL_P_H
 
 // [Dependencies]
-#include <Fog/Core/Config/Config.h>
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/G2d/Global/Constants.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/G2d/Render/RenderConstants_p.h>
 
 namespace Fog {

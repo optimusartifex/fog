@@ -10,7 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Memory/Alloc.h>
-#include <Fog/G2d/Global/Init_G2d_p.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/G2d/Tools/Matrix.h>
 
 namespace Fog {
@@ -247,18 +247,13 @@ void MatrixF::_dcopy(
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_genericmatrix_init(void)
+FOG_NO_EXPORT void Matrix_init(void)
 {
   MatrixF::_dnull->refCount.init(1);
   MatrixF::_dnull->size.reset();
-}
-
-FOG_NO_EXPORT void _g2d_genericmatrix_fini(void)
-{
-  MatrixF::_dnull->refCount.dec();
 }
 
 } // Fog namespace

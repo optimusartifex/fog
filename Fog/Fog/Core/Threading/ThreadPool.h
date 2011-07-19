@@ -8,7 +8,7 @@
 #define _FOG_CORE_THREADING_THREADPOOL_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Threading/Thread.h>
@@ -17,12 +17,6 @@ namespace Fog {
 
 //! @addtogroup Fog_Core_Threading
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct Thread;
 
 // ============================================================================
 // [Fog::ThreadPool]

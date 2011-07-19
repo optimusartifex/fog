@@ -8,23 +8,13 @@
 #define _FOG_CORE_TOOLS_STUB_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/Uninitialized.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Tools/Char.h>
 
 namespace Fog {
 
 //! @addtogroup Fog_Core_Tools
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct ByteArray;
-struct String;
 
 // Used by Fog::Utf16.
 namespace StringUtil {

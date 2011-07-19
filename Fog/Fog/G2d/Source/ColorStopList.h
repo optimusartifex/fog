@@ -9,10 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/Static.h>
-#include <Fog/Core/Global/Swap.h>
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Math/Interval.h>
@@ -25,12 +22,6 @@ namespace Fog {
 
 //! @addtogroup Fog_G2d_Source
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct ColorStopCache;
 
 // ============================================================================
 // [Fog::ColorStopListData]

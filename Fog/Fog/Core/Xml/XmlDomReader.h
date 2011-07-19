@@ -8,6 +8,7 @@
 #define _FOG_CORE_XML_XMLDOMREADER_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Xml/XmlSaxReader.h>
 
 namespace Fog {

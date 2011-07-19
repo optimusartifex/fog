@@ -4,15 +4,14 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_SOURCE_COLORBASE_H
-#define _FOG_G2D_SOURCE_COLORBASE_H
+#ifndef _FOG_G2D_COLOR_COLORBASE_H
+#define _FOG_G2D_COLOR_COLORBASE_H
 
 // [Dependencies]
 #include <Fog/Core/Face/Face_C_Types.h>
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Math/Fuzzy.h>
-#include <Fog/G2d/Global/Constants.h>
 
 namespace Fog {
 
@@ -217,4 +216,4 @@ FOG_FUZZY_DECLARE(Fog::AhslBaseF, Math::feqv(a.data, b.data, 4))
 FOG_FUZZY_DECLARE(Fog::AcmykBaseF, Math::feqv(a.data, b.data, 5))
 
 // [Guard]
-#endif // _FOG_G2D_SOURCE_COLORBASE_H
+#endif // _FOG_G2D_COLOR_COLORBASE_H

@@ -34,10 +34,10 @@ namespace Render {
 // [Fog::RenderC - Scale]
 // ============================================================================
 
-#define A_VAL(p) ((uint8_t*)(p))[ARGB32_ABYTE]
-#define R_VAL(p) ((uint8_t*)(p))[ARGB32_RBYTE]
-#define G_VAL(p) ((uint8_t*)(p))[ARGB32_GBYTE]
-#define B_VAL(p) ((uint8_t*)(p))[ARGB32_BBYTE]
+#define A_VAL(p) ((uint8_t*)(p))[PIXEL_ARGB32_POS_A]
+#define R_VAL(p) ((uint8_t*)(p))[PIXEL_ARGB32_POS_R]
+#define G_VAL(p) ((uint8_t*)(p))[PIXEL_ARGB32_POS_G]
+#define B_VAL(p) ((uint8_t*)(p))[PIXEL_ARGB32_POS_B]
 
 #define ARGB_COMPOSE(r, g, b, a) \
   ((uint32_t)(a) << 24) | ((uint32_t)(r) << 16) | ((uint32_t)(g) << 8) | (uint32_t)(b)

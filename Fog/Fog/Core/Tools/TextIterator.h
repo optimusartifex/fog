@@ -9,12 +9,11 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Tools/Char.h>
+#include <Fog/Core/Tools/CharData.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/TextChunk.h>
-#include <Fog/Core/Tools/Unicode.h>
 
 namespace Fog {
 
@@ -93,13 +92,13 @@ struct FOG_NO_EXPORT TextIterator
 
     if (_pos != _end)
     {
-      if (_pos[0].isSurrogateLead())
+      if (_pos[0].isHiSurrogate())
       {
         err = ERR_STRING_INVALID_INPUT;
         goto _Fail;
       }
 
-      if (_end[-1].isSurrogateLead())
+      if (_end[-1].isHiSurrogate())
       {
         err = ERR_STRING_TRUNCATED;
         goto _Fail;
@@ -153,20 +152,20 @@ _Fail:
   //! @c nextU32() method is called.
   FOG_INLINE uint32_t nextU32()
   {
-    int32_t uc0 = nextU16();
+    uint32_t uc0 = nextU16();
 
-    if (FOG_UNLIKELY((uc0 & UTF16_SURROGATE_TEST_MASK) == UTF16_SURROGATE_PAIR_BASE))
+    if (FOG_UNLIKELY(Char::isSurrogate(uc0)))
     {
       // Invalid position already checked by _detectInvalidString().
       // Other case is the runtime failure.
-      int32_t uc1 = nextU16();
+      uint32_t uc1 = nextU16();
 
-      // Combine uc0 and uc1 to 32-bit code-point.
-      // 0x35FDC00 == (0xD800 << 10) + 0xDC00 - 0x10000.
-      uc0 = (uc0 << 10) + uc1 - 0x35FDC00;
+      // Combine uc0 and uc1 to UCS4 code-point.
+      // -0x35FDC00 == (0xD800 << 10) + 0xDC00 - 0x10000.
+      uc0 = (uc0 << 10) + uc1 - 0x035FDC00;
     }
 
-    return (uint32_t)uc0;
+    return uc0;
   }
 
   // --------------------------------------------------------------------------

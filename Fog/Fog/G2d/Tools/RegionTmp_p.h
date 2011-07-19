@@ -57,11 +57,8 @@ struct RegionTmp : public Region
 
   FOG_INLINE void reset()
   {
-    if ((void*)_d != (void*)&_storage)
-    {
-      _d->deref();
-      _d = RegionData::adopt((void*)&_storage, N);
-    }
+    _d->deref();
+    _d = RegionData::adopt((void*)&_storage, N);
   }
 
   // These overloads are needed to succesfull use this template (or implicit conversion

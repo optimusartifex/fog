@@ -9,8 +9,8 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Tools/String.h>
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/Svg/Dom/SvgEnumItem_p.h>
 #include <Fog/Svg/Global/Constants.h>
 

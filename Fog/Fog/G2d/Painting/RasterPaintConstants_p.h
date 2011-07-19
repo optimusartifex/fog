@@ -8,7 +8,7 @@
 #define _FOG_G2D_PAINTING_RASTERPAINTCONSTANTS_P_H
 
 // [Dependencies]
-#include <Fog/G2d/Global/Constants.h>
+#include <Fog/Core/Global/Global.h>
 
 namespace Fog {
 

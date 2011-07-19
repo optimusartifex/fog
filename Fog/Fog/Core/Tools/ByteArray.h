@@ -8,13 +8,7 @@
 #define _FOG_CORE_TOOLS_BYTEARRAY_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Api.h>
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Static.h>
-#include <Fog/Core/Global/Swap.h>
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Tools/Format.h>
@@ -27,20 +21,16 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct ByteArrayFilter;
-struct Locale;
-struct TextCodec;
-template<typename T> struct List;
-
-// ============================================================================
 // [Fog::ByteArrayData]
 // ============================================================================
 
+#include <Fog/Core/Pack/PackByte.h>
 struct FOG_API ByteArrayData
 {
+  // --------------------------------------------------------------------------
+  // [Ref / Deref]
+  // --------------------------------------------------------------------------
+
   FOG_INLINE ByteArrayData* ref() const
   {
     refCount.inc();
@@ -63,12 +53,18 @@ struct FOG_API ByteArrayData
   static ByteArrayData* realloc(ByteArrayData* d, size_t capacity);
   static ByteArrayData* copy(const ByteArrayData* d);
 
-  // [Size]
+  // --------------------------------------------------------------------------
+  // [Statics]
+  // --------------------------------------------------------------------------
 
   static FOG_INLINE size_t sizeFor(size_t capacity)
-  { return sizeof(ByteArrayData) + sizeof(char) * capacity; }
+  {
+    return sizeof(ByteArrayData) + sizeof(char) * capacity;
+  }
 
+  // --------------------------------------------------------------------------
   // [Members]
+  // --------------------------------------------------------------------------
 
   mutable Atomic<size_t> refCount;
 
@@ -80,6 +76,7 @@ struct FOG_API ByteArrayData
 
   char data[4];
 };
+#include <Fog/Core/Pack/PackRestore.h>
 
 // ============================================================================
 // [Fog::ByteArray]
@@ -288,9 +285,9 @@ struct FOG_API ByteArray
   // [Remove]
   // --------------------------------------------------------------------------
 
-  size_t remove(char ch, uint cs = CASE_SENSITIVE, const Range& range = Range(0));
-  size_t remove(const ByteArray& other, uint cs = CASE_SENSITIVE, const Range& range = Range(0));
-  size_t remove(const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0));
+  size_t remove(char ch, uint cs = CASE_SENSITIVE, const Range& range = Range());
+  size_t remove(const ByteArray& other, uint cs = CASE_SENSITIVE, const Range& range = Range());
+  size_t remove(const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range());
 
   size_t remove(const Range& range);
   size_t remove(const Range* range, size_t count);
@@ -299,9 +296,9 @@ struct FOG_API ByteArray
   // [Replace]
   // --------------------------------------------------------------------------
 
-  err_t replace(char before, char after, uint cs = CASE_SENSITIVE, const Range& range = Range(0));
-  err_t replace(const ByteArray& before, const ByteArray& after, uint cs = CASE_SENSITIVE, const Range& range = Range(0));
-  err_t replace(const ByteArrayFilter& filter, const ByteArray& after, uint cs = CASE_SENSITIVE, const Range& range = Range(0));
+  err_t replace(char before, char after, uint cs = CASE_SENSITIVE, const Range& range = Range());
+  err_t replace(const ByteArray& before, const ByteArray& after, uint cs = CASE_SENSITIVE, const Range& range = Range());
+  err_t replace(const ByteArrayFilter& filter, const ByteArray& after, uint cs = CASE_SENSITIVE, const Range& range = Range());
 
   err_t replace(const Range& range, const ByteArray& replacement);
   err_t replace(const Range* range, size_t count, const char* after, size_t alen);
@@ -392,36 +389,36 @@ struct FOG_API ByteArray
   // [Contains]
   // --------------------------------------------------------------------------
 
-  bool contains(char ch, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  bool contains(const ByteArray& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  bool contains(const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  bool contains(char ch, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
+  bool contains(const ByteArray& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
+  bool contains(const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
 
   // --------------------------------------------------------------------------
   // [CountOf]
   // --------------------------------------------------------------------------
 
-  size_t countOf(char ch, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  size_t countOf(const ByteArray& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  size_t countOf(const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  size_t countOf(char ch, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
+  size_t countOf(const ByteArray& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
+  size_t countOf(const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
 
   // --------------------------------------------------------------------------
   // [IndexOf / LastIndexOf]
   // --------------------------------------------------------------------------
 
-  size_t indexOf(char ch, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  size_t indexOf(const ByteArray& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  size_t indexOf(const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  size_t indexOf(char ch, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
+  size_t indexOf(const ByteArray& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
+  size_t indexOf(const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
 
-  size_t lastIndexOf(char ch, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  size_t lastIndexOf(const ByteArray& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  size_t lastIndexOf(const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  size_t lastIndexOf(char ch, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
+  size_t lastIndexOf(const ByteArray& pattern, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
+  size_t lastIndexOf(const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
 
   // --------------------------------------------------------------------------
   // [IndexOfAny / LastIndexOfAny]
   // --------------------------------------------------------------------------
 
-  size_t indexOfAny(const char* chars, size_t numChars, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  size_t lastIndexOfAny(const char* chars, size_t numChars, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  size_t indexOfAny(const char* chars, size_t numChars, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
+  size_t lastIndexOfAny(const char* chars, size_t numChars, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
 
   // --------------------------------------------------------------------------
   // [StartsWith / EndsWith]

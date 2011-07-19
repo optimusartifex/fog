@@ -13,9 +13,7 @@
 #include <Fog/Core/Collection/HashUtil.h>
 #include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Collection/Util.h>
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Init_Core_p.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Tools/Byte.h>
 #include <Fog/Core/Tools/ByteArray.h>
@@ -1075,7 +1073,7 @@ err_t ByteArray::appendVformatc(const char* fmt, const TextCodec& tc, va_list ap
       }
 
       // Parse field width.
-      if (Byte::isDigit(c))
+      if (Byte::isAsciiDigit(c))
       {
         __VFORMAT_PARSE_NUMBER(fmt, fieldWidth)
       }
@@ -1094,7 +1092,7 @@ err_t ByteArray::appendVformatc(const char* fmt, const TextCodec& tc, va_list ap
       {
         c = *++fmt;
 
-        if (Byte::isDigit(c))
+        if (Byte::isAsciiDigit(c))
         {
           __VFORMAT_PARSE_NUMBER(fmt, precision);
         }
@@ -2223,16 +2221,16 @@ err_t ByteArray::justify(size_t n, char fill, uint32_t flags)
   size_t left = 0;
   size_t right = 0;
 
-  if ((flags & JUSTIFY_CENTER) == JUSTIFY_CENTER)
+  if ((flags & TEXT_JUSTIFY_CENTER) == TEXT_JUSTIFY_CENTER)
   {
     left = t >> 1;
     right = t - left;
   }
-  else if ((flags & JUSTIFY_LEFT) == JUSTIFY_LEFT)
+  else if ((flags & TEXT_JUSTIFY_LEFT) == TEXT_JUSTIFY_LEFT)
   {
     right = t;
   }
-  else if ((flags & JUSTIFY_RIGHT) == JUSTIFY_RIGHT)
+  else if ((flags & TEXT_JUSTIFY_RIGHT) == TEXT_JUSTIFY_RIGHT)
   {
     left = t;
   }
@@ -2798,7 +2796,7 @@ bool ByteArray::endsWith(const ByteArrayFilter& filter, uint cs) const
 
     for (;;)
     {
-      Range r = filter.match(getData(), len, cs, Range(i));
+      Range r = filter.match(getData(), len, cs, Range(i, DETECT_LENGTH));
       if (r.getStart() == INVALID_INDEX) return false;
       if ((i = r.getEnd()) == len) return true;
     }
@@ -3122,10 +3120,10 @@ ByteArrayData* ByteArrayData::copy(const ByteArrayData* d)
 Static<ByteArrayData> ByteArray::_dnull;
 
 // ============================================================================
-// [Fog::Core - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _core_bytearray_init(void)
+FOG_NO_EXPORT void ByteArray_init(void)
 {
   ByteArrayData* d = ByteArray::_dnull.instancep();
   d->refCount.init(1);
@@ -3134,10 +3132,6 @@ FOG_NO_EXPORT void _core_bytearray_init(void)
   d->capacity = 0;
   d->length = 0;
   memset(d->data, 0, sizeof(d->data));
-}
-
-FOG_NO_EXPORT void _core_bytearray_fini(void)
-{
 }
 
 } // Fog namespace

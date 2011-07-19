@@ -8,26 +8,16 @@
 #define _FOG_G2D_GEOMETRY_CHORD_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/Uninitialized.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Ops.h>
 #include <Fog/G2d/Geometry/Arc.h>
-#include <Fog/G2d/Global/Api.h>
 
 namespace Fog {
 
 //! @addtogroup Fog_G2d_Geometry
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct ChordF;
-struct ChordD;
 
 // ============================================================================
 // [Fog::ChordF]
@@ -41,14 +31,13 @@ struct FOG_NO_EXPORT ChordF : ArcF
   // --------------------------------------------------------------------------
 
   FOG_INLINE ChordF() : ArcF() {}
-  FOG_INLINE ChordF(_Uninitialized) : ArcF(UNINITIALIZED) {}
-
   FOG_INLINE ChordF(const ArcF& other) : ArcF(other) {}
   FOG_INLINE ChordF(const PointF& cp, float rad, float start_, float sweep_) : ArcF(cp, rad, start_, sweep_) {}
   FOG_INLINE ChordF(const PointF& cp, const PointF& rad, float start_, float sweep_) : ArcF(cp, rad, start_, sweep_) {}
   FOG_INLINE ChordF(const RectF& r, float start_, float sweep_) : ArcF(r, start_, sweep_) {}
   FOG_INLINE ChordF(const BoxF& r, float start_, float sweep_) : ArcF(r, start_, sweep_) {}
 
+  explicit FOG_INLINE ChordF(_Uninitialized) : ArcF(UNINITIALIZED) {}
   explicit FOG_INLINE ChordF(const ArcD& other) : ArcF(other) {}
 
   // --------------------------------------------------------------------------
@@ -57,7 +46,7 @@ struct FOG_NO_EXPORT ChordF : ArcF
 
   FOG_INLINE bool hitTest(const PointF& pt) const
   {
-    return _g2d.chordf.hitTest(this, &pt);
+    return _api.chordf.hitTest(this, &pt);
   }
 };
 
@@ -73,14 +62,13 @@ struct FOG_NO_EXPORT ChordD : ArcD
   // --------------------------------------------------------------------------
 
   FOG_INLINE ChordD() : ArcD() {}
-  FOG_INLINE ChordD(_Uninitialized) : ArcD(UNINITIALIZED) {}
-
   FOG_INLINE ChordD(const ArcD& other) : ArcD(other) {}
   FOG_INLINE ChordD(const PointD& cp, double rad, double start_, double sweep_) : ArcD(cp, rad, start_, sweep_) {}
   FOG_INLINE ChordD(const PointD& cp, const PointD& rad, double start_, double sweep_) : ArcD(cp, rad, start_, sweep_) {}
   FOG_INLINE ChordD(const RectD& r, double start_, double sweep_) : ArcD(r, start_, sweep_) {}
   FOG_INLINE ChordD(const BoxD& r, double start_, double sweep_) : ArcD(r, start_, sweep_) {}
 
+  explicit FOG_INLINE ChordD(_Uninitialized) : ArcD(UNINITIALIZED) {}
   explicit FOG_INLINE ChordD(const ArcF& other) : ArcD(other) {}
 
   // --------------------------------------------------------------------------
@@ -89,7 +77,7 @@ struct FOG_NO_EXPORT ChordD : ArcD
 
   FOG_INLINE bool hitTest(const PointD& pt) const
   {
-    return _g2d.chordd.hitTest(this, &pt);
+    return _api.chordd.hitTest(this, &pt);
   }
 };
 

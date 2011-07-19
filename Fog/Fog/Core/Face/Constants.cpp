@@ -4,7 +4,7 @@
 // MIT, See COPYING file in package
 
 // [Dependencies]
-#include <Fog/Core/Face/Face_Constants.h>
+#include <Fog/Core/Face/Constants.h>
 
 namespace Fog {
 namespace Face {

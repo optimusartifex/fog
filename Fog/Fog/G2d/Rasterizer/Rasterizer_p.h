@@ -8,11 +8,10 @@
 #define _FOG_G2D_RASTERIZER_RASTERIZER_P_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Path.h>
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Rasterizer/Scanline_p.h>
 #include <Fog/G2d/Rasterizer/Span_p.h>
 
@@ -53,8 +52,8 @@ typedef Span8* (*RasterizerSweepSpansFn)(Rasterizer8* rasterizer, Scanline8& sca
 //! @brief Rasterizer fill shape.
 //!
 //! The rasterizer contains special fast-paths which may be used to rasterize
-//! simple shapes. The generic fill-type is @c RASTERIZER_SHAPE_PATH, which 
-//! can be used to fill any shape (polygon based or complex path). All other 
+//! simple shapes. The generic fill-type is @c RASTERIZER_SHAPE_PATH, which
+//! can be used to fill any shape (polygon based or complex path). All other
 //! fill-types are specific to simple shapes like rect, line, and others...
 enum RASTERIZER_SHAPE
 {
@@ -68,7 +67,7 @@ enum RASTERIZER_SHAPE
   //!
   //! This kind of rasterizer is used to fill a simple rectangle shape.
   //!
-  //! @note The data is stored in @c ShapeRect structure, allocated by 
+  //! @note The data is stored in @c ShapeRect structure, allocated by
   //! @c CellStorage.
   RASTERIZER_SHAPE_RECT = 2,
 
@@ -77,7 +76,7 @@ enum RASTERIZER_SHAPE
   //! This kind of rasterizer is used to fill a stroked rectangle with angular
   //! (miter join) corners.
   //!
-  //! @note The data is stored in @c ShapeRectXorRect structure, allocated by 
+  //! @note The data is stored in @c ShapeRectXorRect structure, allocated by
   //! @c CellStorage.
   RASTERIZER_SHAPE_RECT_XOR_RECT = 3
 };
@@ -96,7 +95,7 @@ enum RASTERIZER_SHAPE
 //! part and 8 bits for fractional part.
 //!
 //! Because the path/polygon rasterization is too generic, there are some
-//! specialized fast-paths which can be used to rasterize simple shapes. 
+//! specialized fast-paths which can be used to rasterize simple shapes.
 //! The common shapes are:
 //!
 //!   - @c RASTERIZER_SHAPE_NONE - Not initialized.
@@ -105,7 +104,7 @@ enum RASTERIZER_SHAPE
 //!   - @c RASTERIZER_SHAPE_RECT_XOR_RECT - Used to fill a stroked rectangle
 //!     (two rectangles, but the second subtracts the first one).
 //!
-//! The rasterizer is re-usable class, which should be used by the following 
+//! The rasterizer is re-usable class, which should be used by the following
 //! way:
 //!
 //!   1. Reset
@@ -120,14 +119,14 @@ enum RASTERIZER_SHAPE
 //!      scene-box, fill-rule, and global alpha. Scene-box is required!
 //!
 //!      The scene-box is similar to clip-box, the exception is that rasterizer
-//!      excepts that the path/polygon is already clipped by the underlying 
+//!      excepts that the path/polygon is already clipped by the underlying
 //!      paint-engine, so instead of complicated clipping the coordinates are
 //!      simply saturated to the scene-box. This means that if the clipping is
-//!      not exact (and believe me, the floating point calculation is not!) 
+//!      not exact (and believe me, the floating point calculation is not!)
 //!      then these small errors are simply corrected, preventing buffer-overrun
 //!      problems.
 //!
-//!      To get/set scene-box use the @c Rasterizer8::getSceneBox() and 
+//!      To get/set scene-box use the @c Rasterizer8::getSceneBox() and
 //!      @c Rasterizer8::setSceneBox() methods.
 //!
 //!      The fill-rule describes how the shape is filled. It must be set before
@@ -142,41 +141,41 @@ enum RASTERIZER_SHAPE
 //!   3. Initialize
 //!
 //!      After the rasterizer parameters are set-up, the rasterizer must be
-//!      initialized. The initialization is simply a validation of all 
-//!      parameters and preparation for adding shapes. To initialize the 
+//!      initialized. The initialization is simply a validation of all
+//!      parameters and preparation for adding shapes. To initialize the
 //!      rasterizer use @c Rasterizer8::initialize() method.
 //!
 //!      The initialization step is mandatory!
 //!
 //!   4. Add shapes (polygons/paths/specials)
 //!
-//!      After the rasterizer was initialized, the shapes can be added. 
+//!      After the rasterizer was initialized, the shapes can be added.
 //!      Currently the rasterizer supports multi-shape mode, that means that
 //!      there is no limitation to shapes combination and count. Simply call
-//!      methods which start by 'add', for example @c addPath(), @c addBox(), 
+//!      methods which start by 'add', for example @c addPath(), @c addBox(),
 //!      etc...
 //!
-//!      The scanline path/polygon rasterizer requires that the one contour 
-//!      must consist of at least 3 vertices, is the absolute minimum of 
+//!      The scanline path/polygon rasterizer requires that the one contour
+//!      must consist of at least 3 vertices, is the absolute minimum of
 //!      vertices that define a triangle. The algorithm does not check either
-//!      the number of vertices nor coincidence of their coordinates, but in 
+//!      the number of vertices nor coincidence of their coordinates, but in
 //!      the worst case it just render nothing.
 //!
 //!      The order of the vertices (clockwise or counterclockwise) is important
-//!      when using the non-zero filling rule (@c FILL_RULE_NON_ZERO). In this 
-//!      case the vertex order of all the contours must be the same if you want 
-//!      your intersecting polygons to be without "holes". You actually can use 
+//!      when using the non-zero filling rule (@c FILL_RULE_NON_ZERO). In this
+//!      case the vertex order of all the contours must be the same if you want
+//!      your intersecting polygons to be without "holes". You actually can use
 //!      different vertices order. If the contours do not intersect each other
 //!      the order is not important anyway. If they do, contours with the same
-//!      vertex order will be rendered without "holes" while the intersecting 
+//!      vertex order will be rendered without "holes" while the intersecting
 //!      contours with different orders will have "holes".
 //!
 //!   5. Finalize
 //!
 //!      After the shapes were added to the rasterizer using the 'add' methods,
 //!      the rasterizer must be finalized. Internally the finalization is step
-//!      which depends on the rasterizer shape (special shapes have no 
-//!      finalization), but rasterizer takes care of that. To finalize the 
+//!      which depends on the rasterizer shape (special shapes have no
+//!      finalization), but rasterizer takes care of that. To finalize the
 //!      rasterizer use the @c Rasterizer8::finalize() method.
 //!
 //!      The finalization step is mandatory!
@@ -195,7 +194,7 @@ enum RASTERIZER_SHAPE
 //! cover and area are used to calculate the final coverage. Notice that when
 //! rasterizing shapes which are crossing themselves or near, there are more
 //! cells with the same position.
-//! 
+//!
 //! One cell contains these members:
 //!
 //!   X     - a horizontal pixel position in pixel units. Must be relative to
@@ -203,7 +202,7 @@ enum RASTERIZER_SHAPE
 //!   Cover - a value at interval -256 to 256. This means that 10-bits are
 //!           enough to store the value.
 //!   Area  - a value at interval -(511<<8) to (511<<8). This value is the
-//!           Cover multiplied by the Weight in range (0-511). Notice that 
+//!           Cover multiplied by the Weight in range (0-511). Notice that
 //!           instead of storing the result (Area), the rasterizer stores only
 //!           the weight, to same memory.
 //!
@@ -216,16 +215,16 @@ enum RASTERIZER_SHAPE
 //!
 //!     Applicable for resolution up to 8192 pixels in horizontal direction.
 //!     In this case the cell structure is only 4-byte long and it's stored
-//!     simply as one 32-bit integer. This is the common and the most used 
+//!     simply as one 32-bit integer. This is the common and the most used
 //!     case.
 //!
 //!   - QWORD (64-bit):
 //!     - X     - 32 bits.
 //!     - Cover - 16 bits.
 //!     - Area  - 16 bits.
-//! 
+//!
 //!     Applicable for any resolution (X is a 32-bit integer). This cell was
-//!     introduced to support painting in very high-resolution. It's rarely 
+//!     introduced to support painting in very high-resolution. It's rarely
 //!     used.
 //!
 //! NOTE: The cell 'Area' value is always stored in compact format. This
@@ -236,8 +235,8 @@ enum RASTERIZER_SHAPE
 //! some disadvantages which should be fixed in the future.
 //!
 //! The rasterizer disadvantages:
-//! 
-//!   - The crossing lines are not handled correctly. The maximum error in 
+//!
+//!   - The crossing lines are not handled correctly. The maximum error in
 //!     this case is 50%. Because the original rasterizer was created to
 //!     render the text (which doesn't contain self-intersecting polygons).
 //!

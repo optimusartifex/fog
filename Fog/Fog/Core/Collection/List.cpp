@@ -11,8 +11,6 @@
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Collection/Util.h>
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Memory/Ops.h>
@@ -1028,10 +1026,10 @@ void ListPrivate_::c_deref(ListData* d, const SequenceInfoVTable* vtable)
 }
 
 // ===========================================================================
-// [Fog::Core - Library Initializers]
+// [Init / Fini]
 // ===========================================================================
 
-FOG_NO_EXPORT void _core_list_init(void)
+FOG_NO_EXPORT void List_init(void)
 {
   ListData* d = ListPrivate_::_dnull.instancep();
   d->refCount.init(1);
@@ -1040,12 +1038,6 @@ FOG_NO_EXPORT void _core_list_init(void)
   d->startIndex = 0;
   d->endIndex = 0;
   d->p = d->pstart();
-}
-
-FOG_NO_EXPORT void _core_list_fini(void)
-{
-  ListData* d = ListPrivate_::_dnull.instancep();
-  d->refCount.dec();
 }
 
 } // Fog namespace

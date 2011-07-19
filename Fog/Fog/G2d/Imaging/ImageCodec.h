@@ -8,11 +8,11 @@
 #define _FOG_G2D_IMAGING_IMAGEDEVICE_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/System/Object.h>
 #include <Fog/Core/Tools/ByteArray.h>
 #include <Fog/Core/Tools/String.h>
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImagePalette.h>
 #include <Fog/Core/Variant/Var.h>
@@ -26,7 +26,6 @@ namespace Fog {
 // [Forward Declarations]
 // ============================================================================
 
-struct ImageCodecProvider;
 struct IcoDecoder;
 
 // ============================================================================
@@ -120,9 +119,9 @@ protected:
   //! @brief Image provider.
   ImageCodecProvider* _provider;
 
-  //! @brief Device type (see @c IMAGE_CODEC_TYPE).
+  //! @brief Device type (see @c IMAGE_CODEC).
   uint32_t _codecType;
-  //! @brief File format of target / source image (see @c IMAGE_STREAM_TYPE).
+  //! @brief File format of target / source image (see @c IMAGE_STREAM).
   uint32_t _streamType;
 
   //! @brief Attached stream offset.

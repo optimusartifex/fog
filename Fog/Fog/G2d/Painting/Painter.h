@@ -9,8 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
-#include <Fog/Core/Global/Class.h>
-#include <Fog/G2d/Global/Api.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Painting/PaintEngine.h>
 #include <Fog/G2d/Painting/PaintParams.h>
@@ -34,7 +33,7 @@ struct ImageBits;
 //!
 //! The painter is high level class that can be used to draw into the image or
 //! raw memory buffer. The painter is a state based machine where each paint
-//! command depends to the current state. The current state can be changed by
+//! command depends on the current state. The current state can be changed by
 //! methods like @c setFillRule(), @c setLineWidth(), @c setLineCaps()
 //! @c setCompositingOperator(), and many others.
 //!
@@ -84,7 +83,7 @@ struct FOG_NO_EXPORT Painter
   //! @brief Create a null painter.
   FOG_INLINE Painter()
   {
-    _engine = _g2d.painter.getNullEngine();
+    _engine = _api.painter.getNullEngine();
     _vtable = _engine->vtable;
   }
 
@@ -94,14 +93,14 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE Painter(Image& image, uint32_t initFlags = NO_FLAGS)
   {
     _engine = NULL;
-    _g2d.painter.beginImage(*this, image, NULL, initFlags);
+    _api.painter.beginImage(*this, image, NULL, initFlags);
   }
 
   //! @overload
   FOG_INLINE Painter(Image& image, const RectI& rect, uint32_t initFlags = NO_FLAGS)
   {
     _engine = NULL;
-    _g2d.painter.beginImage(*this, image, &rect, initFlags);
+    _api.painter.beginImage(*this, image, &rect, initFlags);
   }
 
   //! @brief Create a raster painter using the @a raw image buffer as a destination.
@@ -110,14 +109,14 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE Painter(const ImageBits& imageBits, uint32_t initFlags = NO_FLAGS)
   {
     _engine = NULL;
-    _g2d.painter.beginIBits(*this, imageBits, NULL, initFlags);
+    _api.painter.beginIBits(*this, imageBits, NULL, initFlags);
   }
 
   //! @overload
   FOG_INLINE Painter(const ImageBits& imageBits, const RectI& rect, uint32_t initFlags = NO_FLAGS)
   {
     _engine = NULL;
-    _g2d.painter.beginIBits(*this, imageBits, &rect, initFlags);
+    _api.painter.beginIBits(*this, imageBits, &rect, initFlags);
   }
 
   //! @brief Destroy the painter (waiting to complete all painter commands).
@@ -140,13 +139,13 @@ struct FOG_NO_EXPORT Painter
   //! with @c PAINTER_FLUSH_SYNC flag to make content in the image ready.
   FOG_INLINE err_t begin(Image& image, uint32_t initFlags = NO_FLAGS)
   {
-    return _g2d.painter.beginImage(*this, image, NULL, initFlags);
+    return _api.painter.beginImage(*this, image, NULL, initFlags);
   }
 
   //! @overload
   FOG_INLINE err_t begin(Image& image, const RectI& rect, uint32_t initFlags = NO_FLAGS)
   {
-    return _g2d.painter.beginImage(*this, image, &rect, initFlags);
+    return _api.painter.beginImage(*this, image, &rect, initFlags);
   }
 
   //! @brief Begin painting to the custom raw image @a raw.
@@ -155,13 +154,13 @@ struct FOG_NO_EXPORT Painter
   //! Qt4, SDL_Surface, and others).
   FOG_INLINE err_t begin(const ImageBits& imageBits, uint32_t initFlags = NO_FLAGS)
   {
-    return _g2d.painter.beginIBits(*this, imageBits, NULL, initFlags);
+    return _api.painter.beginIBits(*this, imageBits, NULL, initFlags);
   }
 
   //! @overload
   FOG_INLINE err_t begin(const ImageBits& imageBits, const RectI& rect, uint32_t initFlags = NO_FLAGS)
   {
-    return _g2d.painter.beginIBits(*this, imageBits, &rect, initFlags);
+    return _api.painter.beginIBits(*this, imageBits, &rect, initFlags);
   }
 
   //! @brief Wait for completition of all painter commands, unlock the
@@ -182,13 +181,13 @@ struct FOG_NO_EXPORT Painter
   //! like calling @c end(), but reusing the painter engine and its resources.
   FOG_INLINE err_t switchTo(Image& image)
   {
-    return _g2d.painter.switchToImage(*this, image, NULL);
+    return _api.painter.switchToImage(*this, image, NULL);
   }
 
   //! @overload
   FOG_INLINE err_t switchTo(Image& image, const RectI& rect)
   {
-    return _g2d.painter.switchToImage(*this, image, &rect);
+    return _api.painter.switchToImage(*this, image, &rect);
   }
 
   //! @brief Finish painting and switch the destination image to @a raw buffer,
@@ -198,13 +197,13 @@ struct FOG_NO_EXPORT Painter
   //! like calling @c end(), but reusing the painter engine and its resources.
   FOG_INLINE err_t switchTo(const ImageBits& imageBits)
   {
-    return _g2d.painter.switchToIBits(*this, imageBits, NULL);
+    return _api.painter.switchToIBits(*this, imageBits, NULL);
   }
 
   //! @overload
   FOG_INLINE err_t switchTo(const ImageBits& imageBits, const RectI& rect)
   {
-    return _g2d.painter.switchToIBits(*this, imageBits, &rect);
+    return _api.painter.switchToIBits(*this, imageBits, &rect);
   }
 
   // --------------------------------------------------------------------------

@@ -9,6 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Memory/Alloc.h>
 #include <Fog/G2d/Imaging/ImageConverter.h>
 #include <Fog/G2d/Render/RenderApi_p.h>
@@ -286,10 +287,10 @@ void ImageConverter::blitRect(void* dst, size_t dstStride, const void* src, size
 Static<ImageConverterData> ImageConverter::_dnull;
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_imageconverter_init(void)
+FOG_NO_EXPORT void ImageConverter_init(void)
 {
   ImageConverterData* d = ImageConverter::_dnull.instancep();
 
@@ -299,13 +300,6 @@ FOG_NO_EXPORT void _g2d_imageconverter_init(void)
   d->srcFormatDescription.reset();
   d->dstPalette->_d = NULL;
   d->srcPalette->_d = NULL;
-}
-
-FOG_NO_EXPORT void _g2d_imageconverter_fini(void)
-{
-  ImageConverterData* d = ImageConverter::_dnull.instancep();
-
-  d->refCount.dec();
 }
 
 } // Fog namespace

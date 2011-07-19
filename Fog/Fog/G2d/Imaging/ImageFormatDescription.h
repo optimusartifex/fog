@@ -8,12 +8,8 @@
 #define _FOG_G2D_IMAGING_IMAGEFORMATDESCRIPTION_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/Uninitialized.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Memory/Ops.h>
-#include <Fog/G2d/Global/Constants.h>
-#include <Fog/G2d/Global/Api.h>
 
 namespace Fog {
 
@@ -35,7 +31,7 @@ struct FOG_NO_EXPORT ImageFormatDescription
   FOG_INLINE uint32_t getBytesPerPixel() const { return _bytesPerPixel; }
   FOG_INLINE uint32_t getPrecision() const { return _precision; }
 
-  FOG_INLINE uint32_t getCompatibleFormat() const { return _g2d.imageformatdescription.getCompatibleFormat(this); }
+  FOG_INLINE uint32_t getCompatibleFormat() const { return _api.imageformatdescription.getCompatibleFormat(this); }
 
   FOG_INLINE uint32_t getComponentMask() const { return _componentMask; }
 
@@ -112,7 +108,7 @@ struct FOG_NO_EXPORT ImageFormatDescription
     uint32_t depth, uint32_t flags,
     uint64_t aMask, uint64_t rMask, uint64_t gMask, uint64_t bMask)
   {
-    return _g2d.imageformatdescription.createArgb(this,
+    return _api.imageformatdescription.createArgb(this,
       depth, flags, aMask, rMask, gMask, bMask);
   }
 
@@ -221,17 +217,17 @@ struct FOG_NO_EXPORT ImageFormatDescription
   uint64_t _bMask;
 };
 
-extern FOG_API const ImageFormatDescription _ImageFormatDescription_list[IMAGE_FORMAT_COUNT + 1];
+extern FOG_API const ImageFormatDescription ImageFormatDescription_list[IMAGE_FORMAT_COUNT + 1];
 
 FOG_INLINE const ImageFormatDescription* ImageFormatDescription::getList()
 {
-  return _ImageFormatDescription_list;
+  return ImageFormatDescription_list;
 }
 
 FOG_INLINE const ImageFormatDescription& ImageFormatDescription::getByFormat(uint32_t id)
 {
   FOG_ASSERT(id <= IMAGE_FORMAT_COUNT);
-  return _ImageFormatDescription_list[id];
+  return ImageFormatDescription_list[id];
 }
 
 //! @}

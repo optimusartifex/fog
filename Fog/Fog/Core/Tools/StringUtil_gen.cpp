@@ -37,7 +37,7 @@ err_t atob(const CHAR_TYPE* str, size_t length, bool* dst, size_t* parserEnd, ui
     if (remain >= blen && eq(str, boolMap[i].str, blen, CASE_INSENSITIVE))
     {
       str += blen;
-      if (str != end && CHAR_IS_ALNUM(*str)) { str -= blen; continue; }
+      if (str != end && CHAR_IS_NUMLET(*str)) { str -= blen; continue; }
 
       *dst = (bool)boolMap[i].result;
       err = ERR_OK;
@@ -446,9 +446,9 @@ done:
 
 overflow:
 #if CHAR_SIZE == 1
-  while (++str != end && asciiMap[(uint8_t)*str] < (uint)base) ;
+  while (++str != end && asciiMap[(uint8_t)*str] < (uint)base) continue;
 #else
-  while (++str != end && str->ch() < 256 && asciiMap[str->ch()] < (uint)base) ;
+  while (++str != end && str->getValue() < 256 && asciiMap[str->getValue()] < (uint)base) continue;
 #endif
 
   *dst = UINT64_MAX;

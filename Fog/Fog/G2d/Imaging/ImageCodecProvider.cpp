@@ -10,8 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/IO/FileSystem.h>
 #include <Fog/Core/IO/MapFile.h>
 #include <Fog/Core/IO/Stream.h>
@@ -21,8 +20,6 @@
 #include <Fog/Core/Tools/StringTmp_p.h>
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Core/Tools/TextCodec.h>
-#include <Fog/G2d/Global/Constants.h>
-#include <Fog/G2d/Global/Init_G2d_p.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageCodec.h>
 #include <Fog/G2d/Imaging/ImageCodecProvider.h>
@@ -35,33 +32,31 @@ namespace Fog {
 // [Fog::ImageCodecProvider Initializers]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_imagecodecprovider_init_bmp(void);
-FOG_NO_EXPORT void _g2d_imagecodecprovider_init_gif(void);
-FOG_NO_EXPORT void _g2d_imagecodecprovider_init_ico(void);
-FOG_NO_EXPORT void _g2d_imagecodecprovider_init_jpeg(void);
-FOG_NO_EXPORT void _g2d_imagecodecprovider_init_pcx(void);
-FOG_NO_EXPORT void _g2d_imagecodecprovider_init_png(void);
+FOG_NO_EXPORT void ImageCodecProvider_initBMP(void);
+FOG_NO_EXPORT void ImageCodecProvider_initGIF(void);
+FOG_NO_EXPORT void ImageCodecProvider_initICO(void);
+FOG_NO_EXPORT void ImageCodecProvider_initJPEG(void);
+FOG_NO_EXPORT void ImageCodecProvider_initPCX(void);
+FOG_NO_EXPORT void ImageCodecProvider_initPNG(void);
 
 #if defined(FOG_OS_WINDOWS)
-FOG_NO_EXPORT void _g2d_imagecodecprovider_init_gdip(void);
+FOG_NO_EXPORT void ImageCodecProvider_initGdip(void);
 #endif // FOG_OS_WINDOWS
 
 // ============================================================================
-// [Fog::ImageCodecProvider - Local]
+// [Fog::ImageCodecProvider - Global]
 // ============================================================================
 
-struct ImageCodecProvider_Local
+struct ImageCodecProvider_Global
 {
   // Critical section for accessing members.
   Lock lock;
 
-  // List of decoder providers.
-  List<ImageCodecProvider*> decoderProviders;
-  // List of encoder providers.
-  List<ImageCodecProvider*> encoderProviders;
+  // List of image-codec providers.
+  List<ImageCodecProvider*> providers;
 };
 
-static Static<ImageCodecProvider_Local> _g2d_imagecodecprovider_local;
+static Static<ImageCodecProvider_Global> ImageCodecProvider_global;
 
 // ============================================================================
 // [Fog::ImageCodecProvider - Construction / Destruction]
@@ -69,7 +64,7 @@ static Static<ImageCodecProvider_Local> _g2d_imagecodecprovider_local;
 
 ImageCodecProvider::ImageCodecProvider()
 {
-  _refCount.init(0);
+  _refCount.init(1);
 
   _codecType = IMAGE_CODEC_NONE;
   _streamType = IMAGE_STREAM_NONE;
@@ -107,102 +102,63 @@ bool ImageCodecProvider::supportsImageExtension(const String& extension) const
 // [Fog::ImageCodecProvider - Statics]
 // ============================================================================
 
-err_t ImageCodecProvider::addProvider(uint32_t codecType, ImageCodecProvider* provider)
+err_t ImageCodecProvider::addProvider(ImageCodecProvider* provider)
 {
-  if ((codecType & (IMAGE_CODEC_DECODER | IMAGE_CODEC_ENCODER)) == 0)
+  if (FOG_IS_NULL(provider))
     return ERR_RT_INVALID_ARGUMENT;
 
-  err_t err = ERR_OK;
-  AutoLock locked(_g2d_imagecodecprovider_local->lock);
+  AutoLock locked(ImageCodecProvider_global->lock);
 
-  if ((codecType & IMAGE_CODEC_DECODER) &&
-      (_g2d_imagecodecprovider_local->decoderProviders.indexOf(provider) == INVALID_INDEX))
+  if (ImageCodecProvider_global->providers.indexOf(provider) == INVALID_INDEX)
   {
-    err |= _g2d_imagecodecprovider_local->decoderProviders.append(provider);
-    if (FOG_IS_ERROR(err)) goto _End;
+    FOG_RETURN_ON_ERROR(ImageCodecProvider_global->providers.append(provider));
     provider->ref();
   }
 
-  if ((codecType & IMAGE_CODEC_ENCODER) &&
-      (_g2d_imagecodecprovider_local->encoderProviders.indexOf(provider) == INVALID_INDEX))
-  {
-    err |= _g2d_imagecodecprovider_local->encoderProviders.append(provider);
-    if (FOG_IS_ERROR(err)) goto _End;
-    provider->ref();
-  }
-
-_End:
-  return err;
+  return ERR_OK;
 }
 
-err_t ImageCodecProvider::removeProvider(uint32_t codecType, ImageCodecProvider* provider)
+err_t ImageCodecProvider::removeProvider(ImageCodecProvider* provider)
 {
-  if ((codecType & (IMAGE_CODEC_DECODER | IMAGE_CODEC_ENCODER)) == 0)
+  if (FOG_IS_NULL(provider))
     return ERR_RT_INVALID_ARGUMENT;
 
-  err_t err = ERR_OK;
-  size_t index;
-  AutoLock locked(_g2d_imagecodecprovider_local->lock);
+  AutoLock locked(ImageCodecProvider_global->lock);
 
-  if ((codecType & IMAGE_CODEC_DECODER) &&
-      (index = _g2d_imagecodecprovider_local->decoderProviders.indexOf(provider)) != INVALID_INDEX)
-  {
-    err |= _g2d_imagecodecprovider_local->decoderProviders.removeAt(index);
-    if (FOG_IS_ERROR(err)) goto _End;
-    provider->deref();
-  }
+  size_t index = ImageCodecProvider_global->providers.indexOf(provider);
+  if (index == INVALID_INDEX) return ERR_RT_OBJECT_NOT_FOUND;
 
-  if ((codecType & IMAGE_CODEC_ENCODER) &&
-      (index = _g2d_imagecodecprovider_local->encoderProviders.indexOf(provider)) != INVALID_INDEX)
-  {
-    err |= _g2d_imagecodecprovider_local->encoderProviders.removeAt(index);
-    if (FOG_IS_ERROR(err)) goto _End;
-    provider->deref();
-  }
+  FOG_RETURN_ON_ERROR(ImageCodecProvider_global->providers.remove(provider));
 
-_End:
-  return err;
+  provider->deref();
+  return ERR_OK;
 }
 
-bool ImageCodecProvider::hasProvider(uint32_t codecType, ImageCodecProvider* provider)
+bool ImageCodecProvider::hasProvider(ImageCodecProvider* provider)
 {
-  AutoLock locked(_g2d_imagecodecprovider_local->lock);
-
-  switch (codecType & (IMAGE_CODEC_DECODER | IMAGE_CODEC_ENCODER))
-  {
-    case IMAGE_CODEC_DECODER:
-      return _g2d_imagecodecprovider_local->decoderProviders.indexOf(provider) != INVALID_INDEX;
-    case IMAGE_CODEC_ENCODER:
-      return _g2d_imagecodecprovider_local->encoderProviders.indexOf(provider) != INVALID_INDEX;
-    case IMAGE_CODEC_DECODER | IMAGE_CODEC_ENCODER:
-      return _g2d_imagecodecprovider_local->decoderProviders.indexOf(provider) != INVALID_INDEX &&
-             _g2d_imagecodecprovider_local->encoderProviders.indexOf(provider) != INVALID_INDEX;
-    default:
-      return false;
-  }
+  AutoLock locked(ImageCodecProvider_global->lock);
+  return ImageCodecProvider_global->providers.indexOf(provider) != INVALID_INDEX;
 }
 
-List<ImageCodecProvider*> ImageCodecProvider::getProviders(uint32_t codecType)
+List<ImageCodecProvider*> ImageCodecProvider::getProviders()
 {
-  AutoLock locked(_g2d_imagecodecprovider_local->lock);
-
-  if ((codecType & (IMAGE_CODEC_DECODER | IMAGE_CODEC_ENCODER)) == IMAGE_CODEC_ENCODER)
-    return _g2d_imagecodecprovider_local->encoderProviders;
-
-  if ((codecType & (IMAGE_CODEC_DECODER | IMAGE_CODEC_ENCODER)) == IMAGE_CODEC_DECODER)
-    return _g2d_imagecodecprovider_local->decoderProviders;
-
-  return List<ImageCodecProvider*>();
+  AutoLock locked(ImageCodecProvider_global->lock);
+  return ImageCodecProvider_global->providers;
 }
 
 ImageCodecProvider* ImageCodecProvider::getProviderByName(uint32_t codecType, const String& name)
 {
-  List<ImageCodecProvider*> providers = getProviders(codecType);
+  if (codecType == IMAGE_CODEC_NONE || codecType > IMAGE_CODEC_BOTH)
+    return NULL;
+
+  List<ImageCodecProvider*> providers = getProviders();
   List<ImageCodecProvider*>::ConstIterator it(providers);
 
   for (; it.isValid(); it.toNext())
   {
-    if (it.value()->getName() == name) return it.value();
+    ImageCodecProvider* provider = it.value();
+    if ((provider->getCodecType() & codecType) == codecType && provider->getName() == name)
+      return provider;
   }
 
   return 0;
@@ -210,7 +166,10 @@ ImageCodecProvider* ImageCodecProvider::getProviderByName(uint32_t codecType, co
 
 ImageCodecProvider* ImageCodecProvider::getProviderByExtension(uint32_t codecType, const String& extension)
 {
-  List<ImageCodecProvider*> providers = getProviders(codecType);
+  if (codecType == IMAGE_CODEC_NONE || codecType > IMAGE_CODEC_BOTH)
+    return NULL;
+
+  List<ImageCodecProvider*> providers = getProviders();
   List<ImageCodecProvider*>::ConstIterator it(providers);
 
   // Convert extension to lower case.
@@ -219,7 +178,9 @@ ImageCodecProvider* ImageCodecProvider::getProviderByExtension(uint32_t codecTyp
 
   for (it.toStart(); it.isValid(); it.toNext())
   {
-    if (it.value()->supportsImageExtension(e)) return it.value();
+    ImageCodecProvider* provider = it.value();
+    if ((provider->getCodecType() & codecType) == codecType && provider->supportsImageExtension(e))
+      return provider;
   }
 
   return NULL;
@@ -227,9 +188,13 @@ ImageCodecProvider* ImageCodecProvider::getProviderByExtension(uint32_t codecTyp
 
 ImageCodecProvider* ImageCodecProvider::getProviderBySignature(uint32_t codecType, void* mem, size_t len)
 {
-  if (!mem || len == 0) return NULL;
+  if (codecType == IMAGE_CODEC_NONE || codecType > IMAGE_CODEC_BOTH)
+    return NULL;
 
-  List<ImageCodecProvider*> providers = getProviders(codecType);
+  if (mem == NULL || len == 0)
+    return NULL;
+
+  List<ImageCodecProvider*> providers = getProviders();
   List<ImageCodecProvider*>::ConstIterator it(providers);
 
   uint32_t bestScore = 0;
@@ -237,12 +202,14 @@ ImageCodecProvider* ImageCodecProvider::getProviderBySignature(uint32_t codecTyp
 
   for (it.toStart(); it.isValid(); it.toNext())
   {
-    uint32_t score = it.value()->checkSignature(mem, len);
+    ImageCodecProvider* provider = it.value();
+    if ((provider->getCodecType() & codecType) != codecType) continue;
 
+    uint32_t score = provider->checkSignature(mem, len);
     if (score > bestScore)
     {
       bestScore = score;
-      bestProvider = it.value();
+      bestProvider = provider;
     }
   }
 
@@ -370,51 +337,50 @@ _End:
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_imagecodecprovider_init(void)
+FOG_NO_EXPORT void ImageCodecProvider_init(void)
 {
-  // Init _g2d_imagecodecprovider_local.
-  _g2d_imagecodecprovider_local.init();
+  // Global.
+  ImageCodecProvider_global.init();
 
   // Init all built-in providers.
-  _g2d_imagecodecprovider_init_bmp();
-  _g2d_imagecodecprovider_init_gif();
-  _g2d_imagecodecprovider_init_ico();
-  _g2d_imagecodecprovider_init_pcx();
+  ImageCodecProvider_initBMP();
+  ImageCodecProvider_initGIF();
+  ImageCodecProvider_initICO();
+  ImageCodecProvider_initPCX();
 
 #if defined(FOG_HAVE_LIBJPEG)
-  _g2d_imagecodecprovider_init_jpeg();
+  ImageCodecProvider_initJPEG();
 #endif // FOG_HAVE_LIBJPEG
 
 #if defined(FOG_HAVE_LIBPNG)
-  _g2d_imagecodecprovider_init_png();
+  ImageCodecProvider_initPNG();
 #endif // FOG_HAVE_LIBPNG
 
 #if defined(FOG_OS_WINDOWS)
-  _g2d_imagecodecprovider_init_gdip();
+  ImageCodecProvider_initGdip();
 #endif // FOG_OS_WINDOWS
 }
 
-FOG_NO_EXPORT void _g2d_imagecodecprovider_fini(void)
+FOG_NO_EXPORT void ImageCodecProvider_fini(void)
 {
   // Remove (and delete) all providers
   //
   // Do not need to lock, because we are shutting down. All threads should
   // been already destroyed.
   {
-    List<ImageCodecProvider*>::ConstIterator it(_g2d_imagecodecprovider_local->decoderProviders);
-    for (it.toStart(); it.isValid(); it.toNext()) it.value()->deref();
+    List<ImageCodecProvider*>::ConstIterator it(ImageCodecProvider_global->providers);
+    for (it.toStart(); it.isValid(); it.toNext())
+    {
+      ImageCodecProvider* provider = it.value();
+      provider->deref();
+    }
   }
 
-  {
-    List<ImageCodecProvider*>::ConstIterator it(_g2d_imagecodecprovider_local->encoderProviders);
-    for (it.toStart(); it.isValid(); it.toNext()) it.value()->deref();
-  }
-
-  // Shutdown _g2d_imagecodecprovider_local.
-  _g2d_imagecodecprovider_local.destroy();
+  // Shutdown.
+  ImageCodecProvider_global.destroy();
 }
 
 } // Fog namespace

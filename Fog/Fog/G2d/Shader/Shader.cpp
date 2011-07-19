@@ -9,7 +9,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Shader/Shader.h>
 
 namespace Fog {

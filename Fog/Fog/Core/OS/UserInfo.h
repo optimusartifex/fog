@@ -8,6 +8,7 @@
 #define _FOG_CORE_OS_USERINFO_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Tools/String.h>
 
 namespace Fog {

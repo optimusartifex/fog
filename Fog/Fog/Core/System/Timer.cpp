@@ -42,7 +42,7 @@ struct FOG_NO_EXPORT TimerTask : public Task
       // Repeat?
       if (timer)
       {
-        timer->getHomeThread()->getEventLoop()->postTask(this, true, static_cast<int>(timer->_interval.inMilliseconds()));
+        timer->getHomeThread()->getEventLoop()->postTask(this, true, static_cast<int>(timer->_interval.getMilliseconds()));
         _destroyOnFinish = false;
       }
       else
@@ -80,7 +80,7 @@ bool Timer::start()
   stop();
 
   _task = fog_new TimerTask(this);
-  getHomeThread()->getEventLoop()->postTask(_task, true, static_cast<int>(_interval.inMilliseconds()));
+  getHomeThread()->getEventLoop()->postTask(_task, true, static_cast<int>(_interval.getMilliseconds()));
   return true;
 }
 

@@ -8,9 +8,7 @@
 #define _FOG_CORE_TOOLS_FORMAT_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 
 namespace Fog {
 

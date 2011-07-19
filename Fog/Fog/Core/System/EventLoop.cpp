@@ -15,13 +15,10 @@
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
 #include <Fog/Core/DateTime/Time.h>
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Debug.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/OS/OS.h>
 #include <Fog/Core/System/EventLoop.h>
 #include <Fog/Core/System/Task.h>
-#include <Fog/Core/Threading/Lazy.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Threading/ThreadEvent.h>
 #include <Fog/Core/Tools/String.h>
@@ -764,7 +761,7 @@ int WinEventLoop::_getCurrentDelay() const
   // Be careful here.  TimeDelta has a precision of microseconds, but we want a
   // value in milliseconds.  If there are 5.5ms left, should the delay be 5 or
   // 6?  It should be 6 to avoid executing delayed work too early.
-  double timeout = ceil((_delayedWorkTime - Time::now()).inMillisecondsF());
+  double timeout = ceil((_delayedWorkTime - Time::now()).getMillisecondsD());
 
   // If this value is negative, then we need to run delayed work soon.
   int delay = static_cast<int>(timeout);

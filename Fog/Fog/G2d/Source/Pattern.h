@@ -8,15 +8,11 @@
 #define _FOG_G2D_SOURCE_PATTERN_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/Static.h>
-#include <Fog/Core/Global/Swap.h>
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Memory/Alloc.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Geometry/Transform.h>
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Source/Color.h>
 #include <Fog/G2d/Source/ColorStop.h>
@@ -33,13 +29,6 @@ namespace Fog {
 
 //! @addtogroup Fog_G2d_Source
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct PatternF;
-struct PatternD;
 
 // ============================================================================
 // [Fog::PatternDataF]

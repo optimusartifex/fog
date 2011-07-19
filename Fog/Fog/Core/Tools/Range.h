@@ -8,10 +8,7 @@
 #define _FOG_CORE_TOOLS_RANGE_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/Uninitialized.h>
+#include <Fog/Core/Global/Global.h>
 
 namespace Fog {
 
@@ -34,13 +31,9 @@ struct FOG_NO_EXPORT Range
   // --------------------------------------------------------------------------
 
   //! @brief Create an infinite range.
-  FOG_INLINE Range() : _start(0), _end(DETECT_LENGTH) {}
-  FOG_INLINE Range(_Uninitialized) {}
-
-  //! @brief Create a range from @a start to @a end.
-  explicit FOG_INLINE Range(size_t start, size_t end = DETECT_LENGTH) :
-    _start(start),
-    _end(end)
+  FOG_INLINE Range() :
+    _start(0),
+    _end(DETECT_LENGTH)
   {
   }
 
@@ -48,6 +41,15 @@ struct FOG_NO_EXPORT Range
   FOG_INLINE Range(const Range& other) :
     _start(other._start),
     _end(other._end)
+  {
+  }
+
+  //! @brief Create a uninitialized range.
+  explicit FOG_INLINE Range(_Uninitialized) {}
+  //! @brief Create a range from @a start to @a end.
+  explicit FOG_INLINE Range(size_t start, size_t end) :
+    _start(start),
+    _end(end)
   {
   }
 

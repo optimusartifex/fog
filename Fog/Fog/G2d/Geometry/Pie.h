@@ -8,26 +8,16 @@
 #define _FOG_G2D_GEOMETRY_PIE_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/Uninitialized.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Ops.h>
 #include <Fog/G2d/Geometry/Arc.h>
-#include <Fog/G2d/Global/Api.h>
 
 namespace Fog {
 
 //! @addtogroup Fog_G2d_Geometry
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct PieF;
-struct PieD;
 
 // ============================================================================
 // [Fog::PieF]
@@ -41,14 +31,13 @@ struct FOG_NO_EXPORT PieF : ArcF
   // --------------------------------------------------------------------------
 
   FOG_INLINE PieF() : ArcF() {}
-  FOG_INLINE PieF(_Uninitialized) : ArcF(UNINITIALIZED) {}
-
   FOG_INLINE PieF(const ArcF& other) : ArcF(other) {}
   FOG_INLINE PieF(const PointF& cp, float rad, float start_, float sweep_) : ArcF(cp, rad, start_, sweep_) {}
   FOG_INLINE PieF(const PointF& cp, const PointF& rad, float start_, float sweep_) : ArcF(cp, rad, start_, sweep_) {}
   FOG_INLINE PieF(const RectF& r, float start_, float sweep_) : ArcF(r, start_, sweep_) {}
   FOG_INLINE PieF(const BoxF& r, float start_, float sweep_) : ArcF(r, start_, sweep_) {}
 
+  explicit FOG_INLINE PieF(_Uninitialized) : ArcF(UNINITIALIZED) {}
   explicit FOG_INLINE PieF(const ArcD& other) : ArcF(other) {}
 
   // --------------------------------------------------------------------------
@@ -77,12 +66,12 @@ struct FOG_NO_EXPORT PieF : ArcF
 
   FOG_INLINE err_t _getBoundingBox(BoxF& dst, const TransformF* tr) const
   {
-    return _g2d.arcf.getBoundingBox(this, &dst, tr, true);
+    return _api.arcf.getBoundingBox(this, &dst, tr, true);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectF& dst, const TransformF* tr) const
   {
-    err_t err = _g2d.arcf.getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr, true);
+    err_t err = _api.arcf.getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr, true);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -94,7 +83,7 @@ struct FOG_NO_EXPORT PieF : ArcF
 
   FOG_INLINE bool hitTest(const PointF& pt) const
   {
-    return _g2d.pief.hitTest(this, &pt);
+    return _api.pief.hitTest(this, &pt);
   }
 };
 
@@ -110,14 +99,13 @@ struct FOG_NO_EXPORT PieD : ArcD
   // --------------------------------------------------------------------------
 
   FOG_INLINE PieD() : ArcD() {}
-  FOG_INLINE PieD(_Uninitialized) : ArcD(UNINITIALIZED) {}
-
   FOG_INLINE PieD(const ArcD& other) : ArcD(other) {}
   FOG_INLINE PieD(const PointD& cp, double rad, double start_, double sweep_) : ArcD(cp, rad, start_, sweep_) {}
   FOG_INLINE PieD(const PointD& cp, const PointD& rad, double start_, double sweep_) : ArcD(cp, rad, start_, sweep_) {}
   FOG_INLINE PieD(const RectD& r, double start_, double sweep_) : ArcD(r, start_, sweep_) {}
   FOG_INLINE PieD(const BoxD& r, double start_, double sweep_) : ArcD(r, start_, sweep_) {}
 
+  explicit FOG_INLINE PieD(_Uninitialized) : ArcD(UNINITIALIZED) {}
   explicit FOG_INLINE PieD(const ArcF& other) : ArcD(other) {}
 
   // --------------------------------------------------------------------------
@@ -146,12 +134,12 @@ struct FOG_NO_EXPORT PieD : ArcD
 
   FOG_INLINE err_t _getBoundingBox(BoxD& dst, const TransformD* tr) const
   {
-    return _g2d.arcd.getBoundingBox(this, &dst, tr, true);
+    return _api.arcd.getBoundingBox(this, &dst, tr, true);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectD& dst, const TransformD* tr) const
   {
-    err_t err = _g2d.arcd.getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr, true);
+    err_t err = _api.arcd.getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr, true);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -163,7 +151,7 @@ struct FOG_NO_EXPORT PieD : ArcD
 
   FOG_INLINE bool hitTest(const PointD& pt) const
   {
-    return _g2d.pied.hitTest(this, &pt);
+    return _api.pied.hitTest(this, &pt);
   }
 };
 

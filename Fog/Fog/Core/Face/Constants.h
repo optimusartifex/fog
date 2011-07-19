@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_FACE_FACE_CONSTANTS_H
-#define _FOG_CORE_FACE_FACE_CONSTANTS_H
+#ifndef _FOG_CORE_FACE_CONSTANTS_H
+#define _FOG_CORE_FACE_CONSTANTS_H
 
 // [Dependencies]
 #include <Fog/Core/Config/Config.h>
@@ -82,4 +82,4 @@ extern FOG_API const float _u8_divide_table_f[256];
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_CORE_FACE_FACE_CONSTANTS_H
+#endif // _FOG_CORE_FACE_CONSTANTS_H

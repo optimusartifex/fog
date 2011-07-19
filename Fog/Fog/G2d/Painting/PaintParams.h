@@ -8,9 +8,8 @@
 #define _FOG_G2D_PAINTING_PAINTPARAMS_H
 
 // [Dependencies]
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/G2d/Geometry/PathStroker.h>
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Source/Color.h>
 #include <Fog/G2d/Source/Pattern.h>
 

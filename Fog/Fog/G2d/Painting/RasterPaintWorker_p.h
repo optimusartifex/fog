@@ -8,7 +8,7 @@
 #define _FOG_G2D_PAINTING_RASTERPAINTWORKER_P_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Memory/ZoneAllocator_p.h>
 #include <Fog/Core/System/Task.h>
 #include <Fog/Core/Threading/Atomic.h>

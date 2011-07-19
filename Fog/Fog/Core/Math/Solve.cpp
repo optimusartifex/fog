@@ -9,9 +9,8 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Init_Core_p.h>
-#include <Fog/Core/Global/Internal_Core_p.h>
-#include <Fog/Core/Global/Swap.h>
+#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Internals_p.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Math/Solve.h>
@@ -49,7 +48,7 @@ namespace Fog {
 //   x0 = q / a
 //   x1 = c / q
 template<typename NumT>
-static int FOG_CDECL _MathT_solve_Quadratic(NumT* dst, const NumT* func)
+static int FOG_CDECL MathT_solve_Quadratic(NumT* dst, const NumT* func)
 {
   double a = (double)func[0];
   double b = (double)func[1];
@@ -89,7 +88,7 @@ static int FOG_CDECL _MathT_solve_Quadratic(NumT* dst, const NumT* func)
 }
 
 template<typename NumT>
-static int FOG_CDECL _MathT_solveAt_Quadratic(NumT* dst, const NumT* func, const NumT_(Interval)& interval)
+static int FOG_CDECL MathT_solveAt_Quadratic(NumT* dst, const NumT* func, const NumT_(Interval)& interval)
 {
   double a = (double)func[0];
   double b = (double)func[1];
@@ -152,7 +151,7 @@ _OneRoot:
 // See also the wiki article at http://en.wikipedia.org/wiki/Cubic_function for
 // other equations.
 template<typename NumT>
-static int FOG_CDECL _MathT_solve_Cubic(NumT* dst, const NumT* func)
+static int FOG_CDECL MathT_solve_Cubic(NumT* dst, const NumT* func)
 {
   if (Math::isFuzzyZero(func[0])) return Math::solve(dst, func + 1, MATH_SOLVE_QUADRATIC);
 
@@ -225,10 +224,10 @@ static int FOG_CDECL _MathT_solve_Cubic(NumT* dst, const NumT* func)
 }
 
 template<typename NumT>
-static int FOG_CDECL _MathT_solveAt_Cubic(NumT* dst, const NumT* func, const NumT_(Interval)& interval)
+static int FOG_CDECL MathT_solveAt_Cubic(NumT* dst, const NumT* func, const NumT_(Interval)& interval)
 {
   NumT tmp[3];
-  int roots = _MathT_solve_Cubic(tmp, func);
+  int roots = MathT_solve_Cubic(tmp, func);
   int interestingRoots = 0;
 
   NumT tMin = interval.getMin();
@@ -244,22 +243,22 @@ static int FOG_CDECL _MathT_solveAt_Cubic(NumT* dst, const NumT* func, const Num
 }
 
 // ============================================================================
-// [Fog::Core - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _core_math_init_solve(void)
+FOG_NO_EXPORT void Math_init_solve(void)
 {
-  _core.mathf.solve[MATH_SOLVE_QUADRATIC] = _MathT_solve_Quadratic<float>;
-  _core.mathd.solve[MATH_SOLVE_QUADRATIC] = _MathT_solve_Quadratic<double>;
+  _api.mathf.solve[MATH_SOLVE_QUADRATIC] = MathT_solve_Quadratic<float>;
+  _api.mathd.solve[MATH_SOLVE_QUADRATIC] = MathT_solve_Quadratic<double>;
 
-  _core.mathf.solve[MATH_SOLVE_CUBIC] = _MathT_solve_Cubic<float>;
-  _core.mathd.solve[MATH_SOLVE_CUBIC] = _MathT_solve_Cubic<double>;
+  _api.mathf.solve[MATH_SOLVE_CUBIC] = MathT_solve_Cubic<float>;
+  _api.mathd.solve[MATH_SOLVE_CUBIC] = MathT_solve_Cubic<double>;
 
-  _core.mathf.solveAt[MATH_SOLVE_QUADRATIC] = _MathT_solveAt_Quadratic<float>;
-  _core.mathd.solveAt[MATH_SOLVE_QUADRATIC] = _MathT_solveAt_Quadratic<double>;
+  _api.mathf.solveAt[MATH_SOLVE_QUADRATIC] = MathT_solveAt_Quadratic<float>;
+  _api.mathd.solveAt[MATH_SOLVE_QUADRATIC] = MathT_solveAt_Quadratic<double>;
 
-  _core.mathf.solveAt[MATH_SOLVE_CUBIC] = _MathT_solveAt_Cubic<float>;
-  _core.mathd.solveAt[MATH_SOLVE_CUBIC] = _MathT_solveAt_Cubic<double>;
+  _api.mathf.solveAt[MATH_SOLVE_CUBIC] = MathT_solveAt_Cubic<float>;
+  _api.mathd.solveAt[MATH_SOLVE_CUBIC] = MathT_solveAt_Cubic<double>;
 }
 
 } // Fog namespace

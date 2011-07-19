@@ -32,6 +32,7 @@
 
 // Features setup.
 #define FOG_CC_HAVE_PARTIAL_TEMPLATE_SPECIALIZATION
+#define FOG_CC_HAVE_STANDARD_CHAR_TYPE
 
 // Visibility.
 #define FOG_NO_EXPORT

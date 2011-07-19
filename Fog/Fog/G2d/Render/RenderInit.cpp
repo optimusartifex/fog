@@ -10,7 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Cpu/Cpu.h>
-#include <Fog/G2d/Global/Constants.h>
+#include <Fog/Core/Global/Constants.h>
 #include <Fog/G2d/Render/RenderApi_p.h>
 #include <Fog/G2d/Render/RenderConstants_p.h>
 #include <Fog/G2d/Render/RenderInit_p.h>
@@ -21,16 +21,16 @@ namespace Fog {
 // [Fog::G2d - Initialization / Finalization]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_render_init(void)
+FOG_NO_EXPORT void Render_init(void)
 {
   // Install C optimized code (default).
-  _g2d_render_init_c();
+  Render_initC();
 
   // Post-initialize function pointers.
-  _g2d_render_init_post();
+  Render_initPost();
 }
 
-FOG_NO_EXPORT void _g2d_render_init_post(void)
+FOG_NO_EXPORT void Render_initPost(void)
 {
   // Post-initialize function pointers defined by Fog::G2d::Render API. These
   // pointers are always marked as POST_INITIALIZED in the code.
@@ -113,10 +113,6 @@ FOG_NO_EXPORT void _g2d_render_init_post(void)
       fSrcOver.vblit_span[IMAGE_FORMAT_RGB48    ] = fSrc.vblit_span[IMAGE_FORMAT_RGB48    ];
     }
   }
-}
-
-FOG_NO_EXPORT void _g2d_render_fini(void)
-{
 }
 
 } // Fog namespace

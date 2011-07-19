@@ -16,7 +16,6 @@
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Strings.h>
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Imaging/Codecs/BmpCodec_p.h>
 #include <Fog/G2d/Imaging/Codecs/IcoCodec_p.h>
 #include <Fog/G2d/Imaging/Image.h>
@@ -294,12 +293,14 @@ _End:
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_imagecodecprovider_init_ico(void)
+FOG_NO_EXPORT void ImageCodecProvider_initICO(void)
 {
-  ImageCodecProvider::addProvider(IMAGE_CODEC_DECODER, fog_new IcoCodecProvider());
+  ImageCodecProvider* provider = fog_new IcoCodecProvider();
+  ImageCodecProvider::addProvider(provider);
+  provider->deref();
 }
 
 } // Fog namespace

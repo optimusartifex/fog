@@ -9,7 +9,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Threading/Thread.h>
 #include <Fog/Core/Tools/Byte.h>
@@ -54,7 +53,7 @@ static void buildTable(ByteArrayMatcher::SkipTable* skipTable, const char* ps, s
     {
       while (i--)
       {
-        data[(uint8_t)Byte::toLower(*ps)] = (uint)i; ps++;
+        data[(uint8_t)Byte::toAsciiLower(*ps)] = (uint)i; ps++;
       }
     }
     skipTable->status.set(ByteArrayMatcher::SkipTable::STATUS_INITIALIZED);
@@ -62,7 +61,7 @@ static void buildTable(ByteArrayMatcher::SkipTable* skipTable, const char* ps, s
   }
 
   // Wait...another thread creating the table...
-  while (skipTable->status.get() != ByteArrayMatcher::SkipTable::STATUS_INITIALIZED) Thread::_yield();
+  while (skipTable->status.get() != ByteArrayMatcher::SkipTable::STATUS_INITIALIZED) Thread::yield();
 }
 
 ByteArrayMatcher::ByteArrayMatcher()
@@ -203,12 +202,12 @@ Range ByteArrayMatcher::match(const char* str, size_t slen, uint cs, const Range
     for (;;)
     {
       // Get count of characters to skip from skip table.
-      if ((skip = skipTable[Byte::toLower(*strCur)]) == 0)
+      if ((skip = skipTable[Byte::toAsciiLower(*strCur)]) == 0)
       {
         // Check if there is possible match.
         while (skip < patternLength)
         {
-          if (Byte::toLower(strCur[-(sysint_t)skip]) != Byte::toLower(patternStr[-(sysint_t)skip])) break;
+          if (Byte::toAsciiLower(strCur[-(sysint_t)skip]) != Byte::toAsciiLower(patternStr[-(sysint_t)skip])) break;
           skip++;
         }
 
@@ -216,7 +215,7 @@ Range ByteArrayMatcher::match(const char* str, size_t slen, uint cs, const Range
         if (skip >= patternLength)
           return Range((size_t)(strCur - reinterpret_cast<const uint8_t*>(str)) - skip + 1, patternLength);
 
-        if (skipTable[Byte::toLower(strCur[-(sysint_t)skip])] == patternLength)
+        if (skipTable[Byte::toAsciiLower(strCur[-(sysint_t)skip])] == patternLength)
           skip = patternLength - skip;
         else
           skip = 1;

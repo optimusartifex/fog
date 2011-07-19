@@ -14,8 +14,6 @@
 
 // [Dependencies]
 #include <Fog/Core/Cpu/Cpu.h>
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Math/Math.h>
 
 // [Dependencies - Windows]
@@ -49,7 +47,7 @@ Cpu _core_cpu;
 // [Fog::Cpu - Number Of Processors]
 // ============================================================================
 
-static uint32_t _Cpu_detectNumberOfProcessors(void)
+static uint32_t Cpu_detectNumberOfProcessors(void)
 {
 #if defined(FOG_OS_WINDOWS)
   SYSTEM_INFO info;
@@ -130,7 +128,7 @@ struct CpuVendorInfo
   char text[12];
 };
 
-static const CpuVendorInfo cpuVendorInfo[] = 
+static const CpuVendorInfo cpuVendorInfo[] =
 {
   { CPU_VENDOR_INTEL    , { 'G', 'e', 'n', 'u', 'i', 'n', 'e', 'I', 'n', 't', 'e', 'l' } },
 
@@ -193,7 +191,7 @@ _Skip:
 // [Fog::Cpu - Detect]
 // ============================================================================
 
-static void _Cpu_detectCpu(Cpu* i)
+static void Cpu_detectCpu(Cpu* i)
 {
   uint32_t a;
 
@@ -201,7 +199,7 @@ static void _Cpu_detectCpu(Cpu* i)
   memset(i, 0, sizeof(Cpu));
   memcpy(i->vendor, "Unknown", 8);
 
-  i->numberOfProcessors = _Cpu_detectNumberOfProcessors();
+  i->numberOfProcessors = Cpu_detectNumberOfProcessors();
 
 #if defined(FOG_ARCH_X86) || defined(FOG_ARCH_X86_64)
   CpuId out;
@@ -324,12 +322,12 @@ static void _Cpu_detectCpu(Cpu* i)
 }
 
 // ============================================================================
-// [Fog::Core - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _core_cpu_init(void)
+FOG_NO_EXPORT void Cpu_init(void)
 {
-  _Cpu_detectCpu(&_core_cpu);
+  Cpu_detectCpu(&_core_cpu);
 }
 
 } // Fog namespace

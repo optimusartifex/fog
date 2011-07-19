@@ -41,7 +41,7 @@ static Utf16 parseHtmlLinkId(const String& url)
   }
 
   idMark = idStr;
-  while ((c = *idStr).isAlnum() || c == Char('-') || c == Char('_'))
+  while ((c = *idStr).isAsciiNumlet() || c == Char('-') || c == Char('_'))
   {
     if (++idStr == idEnd) break;
   }

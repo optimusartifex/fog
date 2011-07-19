@@ -9,9 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Init_Core_p.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Memory/Ops.h>
 
 namespace Fog {
@@ -20,7 +18,7 @@ namespace Fog {
 // [Fog::Memory - Copy]
 // ============================================================================
 
-static void* FOG_CDECL _Memory_zero(void* dst, size_t size)
+static void* FOG_CDECL Memory_zero(void* dst, size_t size)
 {
   return memset(dst, 0, size);
 }
@@ -29,7 +27,7 @@ static void* FOG_CDECL _Memory_zero(void* dst, size_t size)
 // [Fog::Memory - Xchg]
 // ============================================================================
 
-static void _Memory_xchg(uint8_t* addr1, uint8_t* addr2, size_t count)
+static void Memory_xchg(uint8_t* addr1, uint8_t* addr2, size_t count)
 {
   size_t i;
 
@@ -51,21 +49,21 @@ static void _Memory_xchg(uint8_t* addr1, uint8_t* addr2, size_t count)
 }
 
 // ============================================================================
-// [Fog::Core - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _core_memory_init_ops(void)
+FOG_NO_EXPORT void MemoryOps_init(void)
 {
-  _core.memory.copy = (CoreApi::Memory_Copy)::memcpy;
-  _core.memory.move = (CoreApi::Memory_Move)::memmove;
-  _core.memory.zero = (CoreApi::Memory_Zero)_Memory_zero;
-  _core.memory.set = (CoreApi::Memory_Set)::memset;
+  _api.memory.copy = (Api::Memory_Copy)::memcpy;
+  _api.memory.move = (Api::Memory_Move)::memmove;
+  _api.memory.zero = (Api::Memory_Zero)Memory_zero;
+  _api.memory.set = (Api::Memory_Set)::memset;
 
-  _core.memory.copy_nt = _core.memory.copy;
-  _core.memory.zero_nt = _core.memory.zero;
-  _core.memory.set_nt = _core.memory.set;
+  _api.memory.copy_nt = _api.memory.copy;
+  _api.memory.zero_nt = _api.memory.zero;
+  _api.memory.set_nt = _api.memory.set;
 
-  _core.memory.xchg = (CoreApi::Memory_Xchg)_Memory_xchg;
+  _api.memory.xchg = (Api::Memory_Xchg)Memory_xchg;
 }
 
 } // Fog namespace

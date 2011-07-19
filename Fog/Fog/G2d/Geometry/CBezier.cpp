@@ -10,7 +10,8 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/Algorithms.h>
-#include <Fog/Core/Global/Internal_Core_p.h>
+#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Internals_p.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Function.h>
 #include <Fog/Core/Math/Integrate.h>
@@ -21,7 +22,6 @@
 #include <Fog/G2d/Geometry/Math2d.h>
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Geometry/Point.h>
-#include <Fog/G2d/Global/Init_G2d_p.h>
 
 namespace Fog {
 
@@ -39,7 +39,7 @@ namespace Fog {
 // ============================================================================
 
 template<typename NumT>
-static err_t FOG_CDECL _CBezierT_getBoundingBox(const NumT_(Point)* self, NumT_(Box)* dst)
+static err_t FOG_CDECL CBezierT_getBoundingBox(const NumT_(Point)* self, NumT_(Box)* dst)
 {
   // Init pMin/pMax - self[0].
   NumT_(Point) pMin = self[0];
@@ -105,7 +105,7 @@ static err_t FOG_CDECL _CBezierT_getBoundingBox(const NumT_(Point)* self, NumT_(
 // ============================================================================
 
 template<typename NumT>
-static err_t FOG_CDECL _CBezierT_getSplineBBox(const NumT_(Point)* self, size_t length, NumT_(Box)* dst)
+static err_t FOG_CDECL CBezierT_getSplineBBox(const NumT_(Point)* self, size_t length, NumT_(Box)* dst)
 {
   size_t i;
 
@@ -208,7 +208,7 @@ struct CubicDt : public FunctionD
 };
 
 template<typename NumT>
-static void FOG_CDECL _CBezierT_getLength(const NumT_(Point)* self, NumT* length)
+static void FOG_CDECL CBezierT_getLength(const NumT_(Point)* self, NumT* length)
 {
   CubicDt dfunc;
 
@@ -242,7 +242,7 @@ static void FOG_CDECL _CBezierT_getLength(const NumT_(Point)* self, NumT* length
 // Value = A * t^3 + b * t^2 + C * t + D
 
 template<typename NumT>
-static int FOG_CDECL _CBezierT_getInflectionPoints(const NumT_(Point)* self, NumT* t)
+static int FOG_CDECL CBezierT_getInflectionPoints(const NumT_(Point)* self, NumT* t)
 {
   // Extract the parameters.
   NumT ax, ay, bx, by, cx, cy, dx, dy;
@@ -270,7 +270,7 @@ static int FOG_CDECL _CBezierT_getInflectionPoints(const NumT_(Point)* self, Num
 // stroking.
 
 template<typename NumT>
-static int FOG_CDECL _CBezierT_simplifyForProcessing(const NumT_(Point)* self, NumT_(Point)* pts, NumT flatness)
+static int FOG_CDECL CBezierT_simplifyForProcessing(const NumT_(Point)* self, NumT_(Point)* pts, NumT flatness)
 {
   // Extract the parameters.
   NumT ax, ay, bx, by, cx, cy, dx, dy;
@@ -363,7 +363,7 @@ _NoInflection:
   FOG_MACRO_END
 
 template<typename NumT>
-static err_t FOG_CDECL _CBezierT_flatten(
+static err_t FOG_CDECL CBezierT_flatten(
   const NumT_(Point)* self,
   NumT_(Path)& dst,
   uint8_t initialCommand,
@@ -608,28 +608,28 @@ _InvalidNumber:
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_cbezier_init(void)
+FOG_NO_EXPORT void CBezier_init(void)
 {
-  _g2d.cubiccurvef.getBoundingBox = _CBezierT_getBoundingBox<float>;
-  _g2d.cubiccurved.getBoundingBox = _CBezierT_getBoundingBox<double>;
+  _api.cubiccurvef.getBoundingBox = CBezierT_getBoundingBox<float>;
+  _api.cubiccurved.getBoundingBox = CBezierT_getBoundingBox<double>;
 
-  _g2d.cubiccurvef.getSplineBBox = _CBezierT_getSplineBBox<float>;
-  _g2d.cubiccurved.getSplineBBox = _CBezierT_getSplineBBox<double>;
+  _api.cubiccurvef.getSplineBBox = CBezierT_getSplineBBox<float>;
+  _api.cubiccurved.getSplineBBox = CBezierT_getSplineBBox<double>;
 
-  _g2d.cubiccurvef.getLength = _CBezierT_getLength<float>;
-  _g2d.cubiccurved.getLength = _CBezierT_getLength<double>;
+  _api.cubiccurvef.getLength = CBezierT_getLength<float>;
+  _api.cubiccurved.getLength = CBezierT_getLength<double>;
 
-  _g2d.cubiccurvef.getInflectionPoints = _CBezierT_getInflectionPoints<float>;
-  _g2d.cubiccurved.getInflectionPoints = _CBezierT_getInflectionPoints<double>;
+  _api.cubiccurvef.getInflectionPoints = CBezierT_getInflectionPoints<float>;
+  _api.cubiccurved.getInflectionPoints = CBezierT_getInflectionPoints<double>;
 
-  _g2d.cubiccurvef.simplifyForProcessing = _CBezierT_simplifyForProcessing<float>;
-  _g2d.cubiccurved.simplifyForProcessing = _CBezierT_simplifyForProcessing<double>;
+  _api.cubiccurvef.simplifyForProcessing = CBezierT_simplifyForProcessing<float>;
+  _api.cubiccurved.simplifyForProcessing = CBezierT_simplifyForProcessing<double>;
 
-  _g2d.cubiccurvef.flatten = _CBezierT_flatten<float>;
-  _g2d.cubiccurved.flatten = _CBezierT_flatten<double>;
+  _api.cubiccurvef.flatten = CBezierT_flatten<float>;
+  _api.cubiccurved.flatten = CBezierT_flatten<double>;
 }
 
 } // Fog namespace

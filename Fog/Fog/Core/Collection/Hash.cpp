@@ -10,9 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/Hash.h>
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Init_Core_p.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringUtil.h>
@@ -184,10 +182,10 @@ UnorderedAbstract::Node* UnorderedAbstract::_Iterator::_removeCurrent()
 }
 
 // ===========================================================================
-// [Fog::Core - Library Initializers]
+// [Init / Fini]
 // ===========================================================================
 
-FOG_NO_EXPORT void _core_hash_init(void)
+FOG_NO_EXPORT void Hash_init(void)
 {
   UnorderedAbstract::Data* d = UnorderedAbstract::_dnull.instancep();
   d->refCount.init(1);
@@ -198,12 +196,6 @@ FOG_NO_EXPORT void _core_hash_init(void)
   d->shrinkCapacity = 0;
   d->shrinkLength = 0;
   d->buckets[0] = NULL;
-}
-
-FOG_NO_EXPORT void _core_hash_fini(void)
-{
-  UnorderedAbstract::Data* d = UnorderedAbstract::_dnull.instancep();
-  d->refCount.dec();
 }
 
 } // Fog namespace

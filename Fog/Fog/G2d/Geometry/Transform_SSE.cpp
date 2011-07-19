@@ -3,12 +3,16 @@
 // [License]
 // MIT, See COPYING file in package
 
+// [Precompiled Headers]
+#if defined(FOG_PRECOMP)
+#include FOG_PRECOMP
+#endif // FOG_PRECOMP
+
 #include <Fog/Core/Face/Face_SSE.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Transform.h>
-#include <Fog/G2d/Global/Constants.h>
-#include <Fog/G2d/Global/Init_G2d_p.h>
 
 namespace Fog {
 
@@ -16,7 +20,7 @@ namespace Fog {
 // [Fog::Transform - MapPoint(s)]
 // ============================================================================
 
-static void FOG_CDECL _TransformF_mapPointsF_Identity_SSE(const TransformF& self, PointF* dst, const PointF* src, size_t length)
+static void FOG_CDECL TransformF_mapPointsF_Identity_SSE(const TransformF& self, PointF* dst, const PointF* src, size_t length)
 {
   size_t i;
 
@@ -63,7 +67,7 @@ static void FOG_CDECL _TransformF_mapPointsF_Identity_SSE(const TransformF& self
   }
 }
 
-static void FOG_CDECL _TransformF_mapPointsF_Translation_SSE(const TransformF& self, PointF* dst, const PointF* src, size_t length)
+static void FOG_CDECL TransformF_mapPointsF_Translation_SSE(const TransformF& self, PointF* dst, const PointF* src, size_t length)
 {
   size_t i;
   Face::m128f m_20_21_20_21 = _mm_setr_ps(self._20, self._21, self._20, self._21);
@@ -140,7 +144,7 @@ static void FOG_CDECL _TransformF_mapPointsF_Translation_SSE(const TransformF& s
   }
 }
 
-static void FOG_CDECL _TransformF_mapPointsF_Scaling_SSE(const TransformF& self, PointF* dst, const PointF* src, size_t length)
+static void FOG_CDECL TransformF_mapPointsF_Scaling_SSE(const TransformF& self, PointF* dst, const PointF* src, size_t length)
 {
   size_t i;
 
@@ -229,7 +233,7 @@ static void FOG_CDECL _TransformF_mapPointsF_Scaling_SSE(const TransformF& self,
   }
 }
 
-static void FOG_CDECL _TransformF_mapPointsF_Swap_SSE(const TransformF& self, PointF* dst, const PointF* src, size_t length)
+static void FOG_CDECL TransformF_mapPointsF_Swap_SSE(const TransformF& self, PointF* dst, const PointF* src, size_t length)
 {
   size_t i;
 
@@ -329,7 +333,7 @@ static void FOG_CDECL _TransformF_mapPointsF_Swap_SSE(const TransformF& self, Po
   }
 }
 
-static void FOG_CDECL _TransformF_mapPointsF_Affine_SSE(const TransformF& self, PointF* dst, const PointF* src, size_t length)
+static void FOG_CDECL TransformF_mapPointsF_Affine_SSE(const TransformF& self, PointF* dst, const PointF* src, size_t length)
 {
   size_t i;
 
@@ -461,7 +465,7 @@ static void FOG_CDECL _TransformF_mapPointsF_Affine_SSE(const TransformF& self, 
   }
 }
 
-static void FOG_CDECL _TransformF_mapPointsF_Projection_SSE(const TransformF& self, PointF* dst, const PointF* src, size_t length)
+static void FOG_CDECL TransformF_mapPointsF_Projection_SSE(const TransformF& self, PointF* dst, const PointF* src, size_t length)
 {
   size_t i;
 
@@ -617,7 +621,7 @@ static void FOG_CDECL _TransformF_mapPointsF_Projection_SSE(const TransformF& se
   }
 }
 
-static void FOG_CDECL _TransformF_mapPointsF_Degenerate_SSE(const TransformF& self, PointF* dst, const PointF* src, size_t length)
+static void FOG_CDECL TransformF_mapPointsF_Degenerate_SSE(const TransformF& self, PointF* dst, const PointF* src, size_t length)
 {
   size_t i;
 
@@ -654,19 +658,19 @@ static void FOG_CDECL _TransformF_mapPointsF_Degenerate_SSE(const TransformF& se
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_transform_init_sse(void)
+FOG_NO_EXPORT void Transform_initSSE(void)
 {
-  _g2d.transformf.mapPointsF[TRANSFORM_TYPE_IDENTITY   ] = _TransformF_mapPointsF_Identity_SSE;
-  _g2d.transformf.mapPointsF[TRANSFORM_TYPE_TRANSLATION] = _TransformF_mapPointsF_Translation_SSE;
-  _g2d.transformf.mapPointsF[TRANSFORM_TYPE_SCALING    ] = _TransformF_mapPointsF_Scaling_SSE;
-  _g2d.transformf.mapPointsF[TRANSFORM_TYPE_SWAP       ] = _TransformF_mapPointsF_Swap_SSE;
-  _g2d.transformf.mapPointsF[TRANSFORM_TYPE_ROTATION   ] = _TransformF_mapPointsF_Affine_SSE;
-  _g2d.transformf.mapPointsF[TRANSFORM_TYPE_AFFINE     ] = _TransformF_mapPointsF_Affine_SSE;
-  _g2d.transformf.mapPointsF[TRANSFORM_TYPE_PROJECTION ] = _TransformF_mapPointsF_Projection_SSE;
-  _g2d.transformf.mapPointsF[TRANSFORM_TYPE_DEGENERATE ] = _TransformF_mapPointsF_Degenerate_SSE;
+  _api.transformf.mapPointsF[TRANSFORM_TYPE_IDENTITY   ] = TransformF_mapPointsF_Identity_SSE;
+  _api.transformf.mapPointsF[TRANSFORM_TYPE_TRANSLATION] = TransformF_mapPointsF_Translation_SSE;
+  _api.transformf.mapPointsF[TRANSFORM_TYPE_SCALING    ] = TransformF_mapPointsF_Scaling_SSE;
+  _api.transformf.mapPointsF[TRANSFORM_TYPE_SWAP       ] = TransformF_mapPointsF_Swap_SSE;
+  _api.transformf.mapPointsF[TRANSFORM_TYPE_ROTATION   ] = TransformF_mapPointsF_Affine_SSE;
+  _api.transformf.mapPointsF[TRANSFORM_TYPE_AFFINE     ] = TransformF_mapPointsF_Affine_SSE;
+  _api.transformf.mapPointsF[TRANSFORM_TYPE_PROJECTION ] = TransformF_mapPointsF_Projection_SSE;
+  _api.transformf.mapPointsF[TRANSFORM_TYPE_DEGENERATE ] = TransformF_mapPointsF_Degenerate_SSE;
 }
 
 } // Fog namespace

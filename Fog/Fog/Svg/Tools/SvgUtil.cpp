@@ -130,7 +130,7 @@ _Start:
   for (;;)
   {
     if (strCur == strEnd) goto _End;
-    else if (strCur->isAsciiAlpha()) strCur++;
+    else if (strCur->isAsciiLetter()) strCur++;
     else break;
   }
   functionLen = (size_t)(strCur - functionName);
@@ -283,7 +283,7 @@ err_t parseCoord(SvgCoord& coord, const String& str)
   {
     if (end < str.getLength())
     {
-      size_t end2 = str.indexOf(Char(' '), CASE_SENSITIVE, Range(end));
+      size_t end2 = str.indexOf(Char(' '), CASE_SENSITIVE, Range(end, DETECT_LENGTH));
       Utf16 spec(str.getData() + end, (end2 == INVALID_INDEX ? str.getLength() : end2) - end);
 
       if (spec.getLength() == 1)
@@ -462,13 +462,13 @@ err_t parsePath(PathF& dst, const String& str)
     }
 
     // Parse command.
-    if (!strCur->isAsciiAlpha())
+    if (!strCur->isAsciiLetter())
     {
       if (command == 0) goto _Bail;
     }
     else
     {
-      command = strCur->ch();
+      command = strCur->getValue();
       if (++strCur == strEnd)
       {
         if (command == 'Z' || command == 'z') goto _Close;

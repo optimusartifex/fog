@@ -9,7 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
-#include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/System/Object.h>
 #include <Fog/Gui/Global/Constants.h>
 #include <Fog/Gui/Layout/GridLayout.h>

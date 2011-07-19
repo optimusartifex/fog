@@ -8,8 +8,7 @@
 #define _FOG_CORE_MATH_MATH_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Api.h>
-#include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/FloatBits.h>
 

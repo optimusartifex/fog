@@ -8,28 +8,18 @@
 #define _FOG_G2D_GEOMETRY_CIRCLE_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/Uninitialized.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Ops.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
-#include <Fog/G2d/Global/Api.h>
 
 namespace Fog {
 
 //! @addtogroup Fog_G2d_Geometry
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct CircleF;
-struct CircleD;
 
 // ============================================================================
 // [Fog::CircleF]
@@ -43,11 +33,10 @@ struct FOG_NO_EXPORT CircleF
   // --------------------------------------------------------------------------
 
   FOG_INLINE CircleF() { reset(); }
-  FOG_INLINE CircleF(_Uninitialized) {}
-
   FOG_INLINE CircleF(const CircleF& other) { center = other.center; radius = other.radius; }
   FOG_INLINE CircleF(const PointF& cp, float rad) { center = cp; radius = rad; }
 
+  explicit FOG_INLINE CircleF(_Uninitialized) {}
   explicit FOG_INLINE CircleF(const CircleD& circle);
 
   // --------------------------------------------------------------------------
@@ -67,7 +56,11 @@ struct FOG_NO_EXPORT CircleF
   // [Reset]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void reset() { center.reset(); radius = 0.0f; }
+  FOG_INLINE void reset()
+  {
+    center.reset();
+    radius = 0.0f;
+  }
 
   // --------------------------------------------------------------------------
   // [BoundingBox / BoundingRect]
@@ -95,12 +88,12 @@ struct FOG_NO_EXPORT CircleF
 
   FOG_INLINE err_t _getBoundingBox(BoxF& dst, const TransformF* tr) const
   {
-    return _g2d.circlef.getBoundingBox(this, &dst, tr);
+    return _api.circlef.getBoundingBox(this, &dst, tr);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectF& dst, const TransformF* tr) const
   {
-    err_t err = _g2d.circlef.getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr);
+    err_t err = _api.circlef.getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -112,7 +105,7 @@ struct FOG_NO_EXPORT CircleF
 
   FOG_INLINE bool hitTest(const PointF& pt) const
   {
-    return _g2d.circlef.hitTest(this, &pt);
+    return _api.circlef.hitTest(this, &pt);
   }
 
   // --------------------------------------------------------------------------
@@ -130,7 +123,7 @@ struct FOG_NO_EXPORT CircleF
 
   FOG_INLINE uint toCSpline(PointF* dst) const
   {
-    return _g2d.circlef.toCSpline(this, dst);
+    return _api.circlef.toCSpline(this, dst);
   }
 
   // --------------------------------------------------------------------------
@@ -172,32 +165,12 @@ struct FOG_NO_EXPORT CircleD
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE CircleD()
-  {
-    reset();
-  }
+  FOG_INLINE CircleD() { reset(); }
+  FOG_INLINE CircleD(const CircleD& other) : center(other.center), radius(other.radius) {}
+  FOG_INLINE CircleD(const PointD& cp, double r) : center(cp), radius(r) {}
 
-  FOG_INLINE CircleD(_Uninitialized)
-  {
-  }
-
-  FOG_INLINE CircleD(const CircleD& other) :
-    center(other.center),
-    radius(other.radius)
-  {
-  }
-
-  FOG_INLINE CircleD(const PointD& cp, double r) :
-    center(cp),
-    radius(r)
-  {
-  }
-
-  explicit FOG_INLINE CircleD(const CircleF& circle) :
-    center(circle.center),
-    radius(circle.radius)
-  {
-  }
+  explicit FOG_INLINE CircleD(_Uninitialized) {}
+  explicit FOG_INLINE CircleD(const CircleF& circle) : center(circle.center), radius(circle.radius) {}
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -216,7 +189,11 @@ struct FOG_NO_EXPORT CircleD
   // [Reset]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void reset() { center.reset(); radius = 0.0; }
+  FOG_INLINE void reset()
+  {
+    center.reset();
+    radius = 0.0;
+  }
 
   // --------------------------------------------------------------------------
   // [BoundingBox / BoundingRect]
@@ -244,12 +221,12 @@ struct FOG_NO_EXPORT CircleD
 
   FOG_INLINE err_t _getBoundingBox(BoxD& dst, const TransformD* tr) const
   {
-    return _g2d.circled.getBoundingBox(this, &dst, tr);
+    return _api.circled.getBoundingBox(this, &dst, tr);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectD& dst, const TransformD* tr) const
   {
-    err_t err = _g2d.circled.getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr);
+    err_t err = _api.circled.getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -261,7 +238,7 @@ struct FOG_NO_EXPORT CircleD
 
   FOG_INLINE bool hitTest(const PointD& pt) const
   {
-    return _g2d.circled.hitTest(this, &pt);
+    return _api.circled.hitTest(this, &pt);
   }
 
   // --------------------------------------------------------------------------
@@ -279,7 +256,7 @@ struct FOG_NO_EXPORT CircleD
 
   FOG_INLINE uint toCSpline(PointD* dst) const
   {
-    return _g2d.circled.toCSpline(this, dst);
+    return _api.circled.toCSpline(this, dst);
   }
 
   // --------------------------------------------------------------------------

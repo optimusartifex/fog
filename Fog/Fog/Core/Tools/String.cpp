@@ -13,13 +13,12 @@
 #include <Fog/Core/Collection/HashUtil.h>
 #include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Collection/Util.h>
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Init_Core_p.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Memory/BSwap.h>
 #include <Fog/Core/Tools/Byte.h>
 #include <Fog/Core/Tools/ByteArray.h>
+#include <Fog/Core/Tools/CharData.h>
 #include <Fog/Core/Tools/Locale.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringFilter.h>
@@ -28,6 +27,7 @@
 #include <Fog/Core/Tools/StringUtil.h>
 #include <Fog/Core/Tools/TextCodec.h>
 
+// [Dependencies - C]
 #include <stdarg.h>
 
 namespace Fog {
@@ -815,12 +815,12 @@ err_t String::appendUtf8(const char* str, size_t length)
   while (i)
   {
     uint32_t uc = (uint8_t)*str;
-    uint32_t utf8Size = utf8LengthTable[uc];
+    uint32_t utf8Size = Unicode::utf8GetSize(uc);
 
-    if (i < utf8Size)
+    if (FOG_UNLIKELY(i < utf8Size))
     {
       err = ERR_STRING_TRUNCATED;
-      goto end;
+      goto _End;
     }
 
     switch (utf8Size)
@@ -828,38 +828,36 @@ err_t String::appendUtf8(const char* str, size_t length)
       // Invalid UTF-8 Sequence.
       case 0:
         err = ERR_STRING_INVALID_UTF8;
-        goto end;
+        goto _End;
       case 1:
         break;
       case 2:
-        uc = ((uc - 192U) << 6U)
-           | (uint32_t((uint8_t)str[1]) - 128U);
+        uc = ((uc - 192U) <<  6U) | (uint32_t((uint8_t)str[1]) - 128U);
         break;
       case 3:
-        // Remove UTF8-BOM (EFBBBF) - We don't want it.
-        if (uc == 0xEF && (uint8_t)str[1] == 0xBB && (uint8_t)str[2] == 0xBF) goto cont;
+        uc = ((uc - 224U) << 12U) | ((uint32_t((uint8_t)str[1]) - 128U) <<  6)
+                                  | ((uint32_t((uint8_t)str[2]) - 128U)      );
+ 
+        // Remove the UTF8-BOM.
+        if (FOG_UNLIKELY(uc == 0xFEFF)) goto _Continue;
 
-        uc = ((uc - 224U) << 12U)
-           | ((uint32_t((uint8_t)str[1]) - 128U) << 6)
-           |  (uint32_t((uint8_t)str[2]) - 128U);
         break;
       case 4:
-        uc = ((uc - 240U) << 24U)
-           | ((uint32_t((uint8_t)str[1]) - 128U) << 12)
-           | ((uint32_t((uint8_t)str[2]) - 128U) << 6)
-           |  (uint32_t((uint8_t)str[3]) - 128U);
+        uc = ((uc - 240U) << 24U) | ((uint32_t((uint8_t)str[1]) - 128U) << 12)
+                                  | ((uint32_t((uint8_t)str[2]) - 128U) <<  6)
+                                  | ((uint32_t((uint8_t)str[3]) - 128U)      );
         break;
       default:
         err = ERR_STRING_INVALID_UTF8;
-        goto end;
+        goto _End;
     }
 
-    if (uc >= 0x10000U && uc <= UNICHAR_MAX)
+    if (uc >= 0x10000U && uc <= UNICODE_MAX)
     {
-      Char::toSurrogatePair(uc, &dstCur[0]._ch, &dstCur[1]._ch);
+      Char::ucs4ToSurrogate(&dstCur[0], &dstCur[1], uc);
       dstCur += 2;
     }
-    else if (Char::isSurrogatePair(uc) && uc >= 0xFFFE)
+    else if (Char::isSurrogate(uc) && uc >= 0xFFFE)
     {
       err = ERR_STRING_INVALID_CHAR;
       break;
@@ -869,11 +867,11 @@ err_t String::appendUtf8(const char* str, size_t length)
       *dstCur++ = (uint16_t)uc;
     }
 
-cont:
+_Continue:
     str += utf8Size;
     i -= utf8Size;
   }
-end:
+_End:
   finishDataX(dstCur);
   return err;
 }
@@ -899,12 +897,12 @@ reallocBuffer:
   {
     uint32_t uc = *str;
 
-    if (uc >= 0x10000U && uc <= UNICHAR_MAX)
+    if (uc >= 0x10000U && uc <= UNICODE_MAX)
     {
-      Char::toSurrogatePair(uc, &dstCur[0]._ch, &dstCur[1]._ch);
+      Char::ucs4ToSurrogate(&dstCur[0], &dstCur[1], uc);
       dstCur += 2;
     }
-    else if (Char::isSurrogatePair(uc) && uc >= 0xFFFE)
+    else if (Char::isSurrogate(uc) && uc >= 0xFFFE)
     {
       err = ERR_STRING_INVALID_CHAR;
       break;
@@ -1171,7 +1169,7 @@ __ret:
     if ((fmt & FORMAT_LEFT_ADJUSTED) == 0)
     {
       if (savedPrecision == NO_PRECISION)
-        err |= insert(beginLength + (sign.ch() != 0), zero + Char('0'), fill);
+        err |= insert(beginLength + !sign.isNull(), zero + Char('0'), fill);
       else
         err |= insert(beginLength, Char(' '), fill);
     }
@@ -1216,7 +1214,7 @@ err_t String::appendVformat(const char* fmt, va_list ap)
   if (fmt == NULL) return ERR_RT_INVALID_ARGUMENT;
 
   const char* fmtBeginChunk = fmt;
-  uint32_t c;
+  uint8_t c;
   size_t beginLength = getLength();
 
   for (;;)
@@ -1248,7 +1246,7 @@ err_t String::appendVformat(const char* fmt, va_list ap)
       }
 
       // Parse field width.
-      if (Byte::isDigit(c))
+      if (Byte::isAsciiDigit(c))
       {
         __VFORMAT_PARSE_NUMBER(fmt, fieldWidth)
       }
@@ -1267,7 +1265,7 @@ err_t String::appendVformat(const char* fmt, va_list ap)
       {
         c = *++fmt;
 
-        if (Byte::isDigit(c))
+        if (Byte::isAsciiDigit(c))
         {
           __VFORMAT_PARSE_NUMBER(fmt, precision);
         }
@@ -1603,7 +1601,7 @@ err_t String::appendWformat(const String& fmt, Char lex, const String* args, siz
 
         if (ch >= Char('0') && ch <= Char('9'))
         {
-          uint32_t n = ch.ch() - (uint32_t)'0';
+          uint32_t n = ch.getValue() - (uint32_t)'0';
           if (n < length)
           {
             if ( (err = append(args[n])) ) goto done;
@@ -2426,16 +2424,16 @@ err_t String::justify(size_t n, Char fill, uint32_t flags)
   size_t left = 0;
   size_t right = 0;
 
-  if ((flags & JUSTIFY_CENTER) == JUSTIFY_CENTER)
+  if ((flags & TEXT_JUSTIFY_CENTER) == TEXT_JUSTIFY_CENTER)
   {
     left = t >> 1;
     right = t - left;
   }
-  else if ((flags & JUSTIFY_LEFT) == JUSTIFY_LEFT)
+  else if ((flags & TEXT_JUSTIFY_LEFT) == TEXT_JUSTIFY_LEFT)
   {
     right = t;
   }
-  else if ((flags & JUSTIFY_RIGHT) == JUSTIFY_RIGHT)
+  else if ((flags & TEXT_JUSTIFY_RIGHT) == TEXT_JUSTIFY_RIGHT)
   {
     left = t;
   }
@@ -3025,7 +3023,7 @@ bool String::endsWith(const StringFilter& filter, uint cs) const
 
     for (;;)
     {
-      Range r = filter.match(getData(), len, cs, Range(i));
+      Range r = filter.match(getData(), len, cs, Range(i, DETECT_LENGTH));
       if (r.getStart() == INVALID_INDEX) return false;
       if ((i = r.getEnd()) == len) return true;
     }
@@ -3091,7 +3089,7 @@ int String::compare(const String* a, const String* b)
   if (bLen < aLen) aEnd = aCur + bLen;
 
   for (; aCur != aEnd; aCur++, bCur++)
-    if ((c = (int)aCur->ch() - (int)bCur->ch())) return c;
+    if ((c = aCur->getInt() - bCur->getInt())) return c;
 
   return (int)((sysint_t)aLen - (sysint_t)bLen);
 }
@@ -3109,7 +3107,7 @@ int String::icompare(const String* a, const String* b)
   if (bLen < aLen) aEnd = aCur + bLen;
 
   for (; aCur != aEnd; aCur++, bCur++)
-    if ((c = (int)aCur->toLower().ch() - (int)bCur->toLower().ch())) return c;
+    if ((c = aCur->toLower().getInt() - bCur->toLower().getInt())) return c;
 
   return (int)((sysint_t)aLen - (sysint_t)bLen);
 }
@@ -3135,7 +3133,7 @@ bool String::eq(const Ascii8& other, uint cs) const
       for (size_t i = getLength(); i; i--, aCur++, bCur++)
       {
         if (!bCur) return false;
-        if (aCur->toLower() != Byte::toLower(*bCur)) return false;
+        if (aCur->toLower() != Byte::toAsciiLower(*bCur)) return false;
       }
     }
     return *bCur == 0;
@@ -3156,7 +3154,7 @@ bool String::eq(const Utf16& other, uint cs) const
     {
       for (size_t i = getLength(); i; i--, aCur++, bCur++)
       {
-        if (FOG_UNLIKELY(bCur->ch() == 0)) return false;
+        if (FOG_UNLIKELY(bCur->isNull())) return false;
         if (*aCur != *bCur) return false;
       }
     }
@@ -3164,14 +3162,16 @@ bool String::eq(const Utf16& other, uint cs) const
     {
       for (size_t i = getLength(); i; i--, aCur++, bCur++)
       {
-        if (FOG_UNLIKELY(bCur->ch() == 0)) return false;
-        if (aCur->toLower().ch() != bCur->toLower().ch()) return false;
+        if (FOG_UNLIKELY(bCur->isNull())) return false;
+        if (aCur->toLower() != bCur->toLower()) return false;
       }
     }
-    return bCur->ch() == 0;
+    return bCur->isNull();
   }
   else
+  {
     return getLength() == len && StringUtil::eq(getData(), other.getData(), len, cs);
+  }
 }
 
 bool String::eq(const String& other, uint cs) const
@@ -3197,7 +3197,7 @@ int String::compare(const Ascii8& other, uint cs) const
       for (;;)
       {
         if (FOG_UNLIKELY(aCur == aEnd)) return *bCur ? -1 : 0;
-        if ((c = (int)aCur->ch() - (int)(uint8_t)*bCur)) return c;
+        if ((c = aCur->getInt() - (int)(uint8_t)*bCur)) return c;
         aCur++;
         bCur++;
       }
@@ -3207,7 +3207,7 @@ int String::compare(const Ascii8& other, uint cs) const
       for (;;)
       {
         if (FOG_UNLIKELY(aCur == aEnd)) return *bCur ? -1 : 0;
-        if ((c = (int)aCur->toLower().ch() - (int)(uint8_t)Byte::toLower(*bCur))) return c;
+        if ((c = aCur->toLower().getInt() - (int)(uint8_t)Byte::toAsciiLower(*bCur))) return c;
         aCur++;
         bCur++;
       }
@@ -3220,12 +3220,16 @@ int String::compare(const Ascii8& other, uint cs) const
     if (cs == CASE_SENSITIVE)
     {
       for (; aCur != aEnd; aCur++, bCur++)
-        if ((c = (int)aCur->ch() - (int)(uint8_t)*bCur)) return c;
+      {
+        if ((c = aCur->getInt() - (int)(uint8_t)*bCur)) return c;
+      }
     }
     else
     {
       for (; aCur != aEnd; aCur++, bCur++)
-        if ((c = (int)aCur->toLower().ch() - (int)(uint8_t)Byte::toLower(*bCur))) return c;
+      {
+        if ((c = aCur->toAsciiLower().getInt() - (int)(uint8_t)Byte::toAsciiLower(*bCur))) return c;
+      }
     }
 
     return (int)((sysint_t)aLen - (sysint_t)bLen);
@@ -3249,7 +3253,7 @@ int String::compare(const Utf16& other, uint cs) const
       for (;;)
       {
         if (FOG_UNLIKELY(aCur == aEnd)) return *bCur ? -1 : 0;
-        if ((c = (int)aCur->ch() - (int)bCur->ch())) return c;
+        if ((c = aCur->getInt() - bCur->getInt())) return c;
         aCur++;
         bCur++;
       }
@@ -3259,7 +3263,7 @@ int String::compare(const Utf16& other, uint cs) const
       for (;;)
       {
         if (FOG_UNLIKELY(aCur == aEnd)) return *bCur ? -1 : 0;
-        if ((c = (int)aCur->toLower().ch() - (int)bCur->toLower().ch())) return c;
+        if ((c = aCur->toLower().getInt() - bCur->toLower().getInt())) return c;
         aCur++;
         bCur++;
       }
@@ -3272,12 +3276,12 @@ int String::compare(const Utf16& other, uint cs) const
     if (cs == CASE_SENSITIVE)
     {
       for (; aCur != aEnd; aCur++, bCur++)
-        if ((c = (int)aCur->ch() - (int)bCur->ch())) return c;
+        if ((c = aCur->getInt() - bCur->getInt())) return c;
     }
     else
     {
       for (; aCur != aEnd; aCur++, bCur++)
-        if ((c = (int)aCur->toLower().ch() - (int)bCur->toLower().ch())) return c;
+        if ((c = aCur->toLower().getInt() - bCur->toLower().getInt())) return c;
     }
 
     return (int)((sysint_t)aLen - (sysint_t)bLen);
@@ -3298,12 +3302,16 @@ int String::compare(const String& other, uint cs) const
   if (cs == CASE_SENSITIVE)
   {
     for (; aCur != aEnd; aCur++, bCur++)
-      if ((c = (int)aCur->ch() - (int)bCur->ch())) return c;
+    {
+      if ((c = aCur->getInt() - bCur->getInt())) return c;
+    }
   }
   else
   {
     for (; aCur != aEnd; aCur++, bCur++)
-      if ((c = (int)aCur->toLower().ch() - (int)bCur->toLower().ch())) return c;
+    {
+      if ((c = aCur->toLower().getInt() - bCur->toLower().getInt())) return c;
+    }
   }
 
   return (int)((sysint_t)aLen - (sysint_t)bLen);
@@ -3487,10 +3495,10 @@ StringData* StringData::copy(const StringData* d)
 Static<StringData> String::_dnull;
 
 // ============================================================================
-// [Fog::Core - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _core_string_init(void)
+FOG_NO_EXPORT void String_init(void)
 {
   StringData* d = String::_dnull.instancep();
   d->refCount.init(1);
@@ -3499,10 +3507,6 @@ FOG_NO_EXPORT void _core_string_init(void)
   d->capacity = 0;
   d->length = 0;
   memset(d->data, 0, sizeof(d->data));
-}
-
-FOG_NO_EXPORT void _core_string_fini(void)
-{
 }
 
 } // Fog namespace

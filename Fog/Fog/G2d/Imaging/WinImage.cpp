@@ -13,7 +13,6 @@
 #if defined(FOG_OS_WINDOWS)
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Memory/Alloc.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/WinImage_p.h>

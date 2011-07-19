@@ -9,7 +9,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Static.h>
 #include <Fog/Core/Memory/Alloc.h>
 #include <Fog/G2d/Text/GlyphBitmap.h>
 
@@ -99,10 +98,10 @@ GlyphBitmap& GlyphBitmap::operator=(const GlyphBitmap& other)
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_glyphbitmap_init(void)
+FOG_NO_EXPORT void GlyphBitmap_init(void)
 {
   GlyphBitmapData* d = _GlyphBitmap_dnull.instancep();
 
@@ -111,7 +110,7 @@ FOG_NO_EXPORT void _g2d_glyphbitmap_init(void)
   d->bitmap[0].init();
 }
 
-FOG_NO_EXPORT void _g2d_glyphbitmap_fini(void)
+FOG_NO_EXPORT void GlyphBitmap_fini(void)
 {
   GlyphBitmapData* d = _GlyphBitmap_dnull.instancep();
 

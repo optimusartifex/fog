@@ -8,8 +8,7 @@
 #define _FOG_SVG_VISIT_SVGVISITOR_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/G2d/Geometry/Circle.h>
 #include <Fog/G2d/Geometry/Ellipse.h>
 #include <Fog/G2d/Geometry/Line.h>

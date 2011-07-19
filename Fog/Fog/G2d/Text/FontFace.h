@@ -8,14 +8,13 @@
 #define _FOG_G2D_TEXT_FONTFACE_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Text/FontKerning.h>
 #include <Fog/G2d/Text/FontMetrics.h>
 
@@ -32,8 +31,6 @@ struct GlyphMetricsF;
 struct GlyphOutlineCache;
 struct FontData;
 struct FontProvider;
-struct PathF;
-struct PathD;
 struct TextExtents;
 
 // ============================================================================

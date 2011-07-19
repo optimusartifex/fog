@@ -8,8 +8,7 @@
 #define _FOG_G2D_TEXT_TEXTEXTENTS_H
 
 // [Dependencies]
-#include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/G2d/Global/Constants.h>
+#include <Fog/Core/Global/Global.h>
 
 namespace Fog {
 

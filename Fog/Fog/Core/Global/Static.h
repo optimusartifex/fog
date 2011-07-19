@@ -48,44 +48,73 @@ namespace Fog {
 template<typename Type>
 struct Static
 {
+  // --------------------------------------------------------------------------
+  // [Init / Destroy]
+  // --------------------------------------------------------------------------
+
   //! @brief Initializer (calls placement @c new operator).
-  FOG_INLINE void init() { fog_new_p(reinterpret_cast<void*>(_storage)) Type; }
+  FOG_INLINE Type* init()
+  {
+    return fog_new_p(reinterpret_cast<void*>(_storage)) Type;
+  }
+
   //! @brief Initializer with copy assignment (calls placement @c new operator).
-  FOG_INLINE void init(const Static<Type>& t) { fog_new_p(reinterpret_cast<void*>(_storage)) Type(t.instance()); }
+  FOG_INLINE Type* init(const Static<Type>& t)
+  {
+    return fog_new_p(reinterpret_cast<void*>(_storage)) Type(t.instance());
+  }
+
   //! @brief Initializer with copy assignment (calls placement @c new operator).
-  FOG_INLINE void init(const Type& t) { fog_new_p(reinterpret_cast<void*>(_storage)) Type(t); }
+  FOG_INLINE Type* init(const Type& t)
+  {
+    return fog_new_p(reinterpret_cast<void*>(_storage)) Type(t);
+  }
 
   template<typename C1>
-  FOG_INLINE void initCustom1(C1 t1) { fog_new_p(reinterpret_cast<void*>(_storage)) Type(t1); }
+  FOG_INLINE Type* initCustom1(C1 t1)
+  {
+    return fog_new_p(reinterpret_cast<void*>(_storage)) Type(t1);
+  }
 
   template<typename C1, typename C2>
-  FOG_INLINE void initCustom2(C1 t1, C2 t2) { fog_new_p(reinterpret_cast<void*>(_storage)) Type(t1, t2); }
+  FOG_INLINE Type* initCustom2(C1 t1, C2 t2)
+  {
+    return fog_new_p(reinterpret_cast<void*>(_storage)) Type(t1, t2);
+  }
 
   //! @brief Deinitializer (calls placement @c delete operator).
-  FOG_INLINE void destroy() { getStorage()->~Type(); }
+  FOG_INLINE void destroy()
+  {
+    instancep()->~Type();
+  }
+
+  // --------------------------------------------------------------------------
+  // [Instance]
+  // --------------------------------------------------------------------------
 
   //! @brief Returns instance of @c Type.
-  FOG_INLINE Type& instance() { return *getStorage(); }
+  FOG_INLINE Type& instance() { return *reinterpret_cast<Type*>(_storage); }
   //! @brief Returns const instance of @c Type.
-  FOG_INLINE const Type& instance() const { return *getStorage(); }
+  FOG_INLINE const Type& instance() const { return *reinterpret_cast<const Type*>(_storage); }
 
   //! @brief Returns pointer to instance of @c Type.
-  FOG_INLINE Type* instancep() { return getStorage(); }
+  FOG_INLINE Type* instancep() { return reinterpret_cast<Type*>(_storage); }
   //! @brief Returns const pointer to instance of @c Type.
-  FOG_INLINE const Type* instancep() const { return getStorage(); }
+  FOG_INLINE const Type* instancep() const { return reinterpret_cast<const Type*>(_storage); }
+
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
 
   //! @brief Overriden Type* operator.
-  FOG_INLINE operator Type*() { return getStorage(); }
+  FOG_INLINE operator Type*() { return instancep(); }
   //! @brief Overriden const Type* operator.
-  FOG_INLINE operator const Type*() const { return getStorage(); }
+  FOG_INLINE operator const Type*() const { return instancep(); }
 
   //! @brief Overriden -> operator.
-  FOG_INLINE Type* operator->() { return getStorage(); }
+  FOG_INLINE Type* operator->() { return instancep(); }
   //! @brief Overriden const -> operator.
-  FOG_INLINE Type const* operator->() const { return getStorage(); }
-
-  FOG_INLINE Type* getStorage() { return reinterpret_cast<Type*>(_storage); }
-  FOG_INLINE const Type* getStorage() const { return reinterpret_cast<const Type*>(_storage); }
+  FOG_INLINE Type const* operator->() const { return instancep(); }
 
 private:
   //! @brief Stack based storage.

@@ -9,8 +9,8 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Internal_Core_p.h>
-#include <Fog/Core/Global/Swap.h>
+#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Internals_p.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/Arc.h>
@@ -18,7 +18,6 @@
 #include <Fog/G2d/Geometry/Math2d.h>
 #include <Fog/G2d/Geometry/PathTmp_p.h>
 #include <Fog/G2d/Geometry/Transform.h>
-#include <Fog/G2d/Global/Init_G2d_p.h>
 
 namespace Fog {
 
@@ -27,7 +26,7 @@ namespace Fog {
 // ============================================================================
 
 template<typename NumT>
-static err_t FOG_CDECL _ArcT_getBoundingBox(const NumT_(Arc)* self,
+static err_t FOG_CDECL ArcT_getBoundingBox(const NumT_(Arc)* self,
   NumT_(Box)* dst, const NumT_(Transform)* transform, bool includeCenterPoint)
 {
   NumT cx = self->center.x;
@@ -248,7 +247,7 @@ _Identity:
 // ============================================================================
 
 template<typename NumT>
-static uint FOG_CDECL _ArcT_toCSpline(const NumT_(Arc)* self,
+static uint FOG_CDECL ArcT_toCSpline(const NumT_(Arc)* self,
   NumT_(Point)* pts)
 {
   NumT cx = self->center.x;
@@ -361,16 +360,16 @@ _Skip:
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_arc_init(void)
+FOG_NO_EXPORT void Arc_init(void)
 {
-  _g2d.arcf.getBoundingBox = _ArcT_getBoundingBox<float>;
-  _g2d.arcd.getBoundingBox = _ArcT_getBoundingBox<double>;
+  _api.arcf.getBoundingBox = ArcT_getBoundingBox<float>;
+  _api.arcd.getBoundingBox = ArcT_getBoundingBox<double>;
 
-  _g2d.arcf.toCSpline = _ArcT_toCSpline<float>;
-  _g2d.arcd.toCSpline = _ArcT_toCSpline<double>;
+  _api.arcf.toCSpline = ArcT_toCSpline<float>;
+  _api.arcd.toCSpline = ArcT_toCSpline<double>;
 }
 
 } // Fog namespace

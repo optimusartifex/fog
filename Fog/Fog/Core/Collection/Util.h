@@ -8,8 +8,7 @@
 #define _FOG_CORE_COLLECTION_UTIL_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/Global/Global.h>
 
 namespace Fog {
 namespace Util {

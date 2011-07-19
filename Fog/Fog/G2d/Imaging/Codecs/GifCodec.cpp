@@ -13,14 +13,13 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Ops.h>
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Strings.h>
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageCodec.h>
 #include <Fog/G2d/Imaging/ImageCodecProvider.h>
@@ -2888,14 +2887,16 @@ FOG_IMPLEMENT_OBJECT(Fog::GifDecoder)
 FOG_IMPLEMENT_OBJECT(Fog::GifEncoder)
 
 // ===========================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ===========================================================================
 
 namespace Fog {
 
-FOG_NO_EXPORT void _g2d_imagecodecprovider_init_gif(void)
+FOG_NO_EXPORT void ImageCodecProvider_initGIF(void)
 {
-  ImageCodecProvider::addProvider(IMAGE_CODEC_DECODER, fog_new GifCodecProvider());
+  ImageCodecProvider* provider = fog_new GifCodecProvider();
+  ImageCodecProvider::addProvider(provider);
+  provider->deref();
 }
 
 } // Fog namespace

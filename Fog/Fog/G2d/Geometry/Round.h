@@ -8,28 +8,18 @@
 #define _FOG_G2D_GEOMETRY_ROUND_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/Uninitialized.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Ops.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
-#include <Fog/G2d/Global/Api.h>
 
 namespace Fog {
 
 //! @addtogroup Fog_G2d_Geometry
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct RoundF;
-struct RoundD;
 
 // ============================================================================
 // [Fog::RoundF]
@@ -43,8 +33,6 @@ struct FOG_NO_EXPORT RoundF
   // --------------------------------------------------------------------------
 
   FOG_INLINE RoundF() { reset(); }
-  FOG_INLINE RoundF(_Uninitialized) {}
-
   FOG_INLINE RoundF(const RoundF& other) { rect = other.rect; radius = other.radius; }
 
   FOG_INLINE RoundF(const RectF& r, const PointF& rp) { rect = r; radius = rp; }
@@ -53,6 +41,7 @@ struct FOG_NO_EXPORT RoundF
   FOG_INLINE RoundF(float rx, float ry, float rw, float rh, float rad) { rect.setRect(rx, ry, rw, rh); radius.set(rad, rad); }
   FOG_INLINE RoundF(float rx, float ry, float rw, float rh, float radx, float rady) { rect.setRect(rx, ry, rw, rh); radius.set(radx, rady); }
 
+  explicit FOG_INLINE RoundF(_Uninitialized) {}
   explicit RoundF(const RoundD& other) { setRound(other); }
 
   // --------------------------------------------------------------------------
@@ -111,12 +100,12 @@ struct FOG_NO_EXPORT RoundF
 
   FOG_INLINE err_t _getBoundingBox(BoxF& dst, const TransformF* tr) const
   {
-    return _g2d.roundf.getBoundingBox(this, &dst, tr);
+    return _api.roundf.getBoundingBox(this, &dst, tr);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectF& dst, const TransformF* tr) const
   {
-    err_t err = _g2d.roundf.getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr);
+    err_t err = _api.roundf.getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -128,7 +117,7 @@ struct FOG_NO_EXPORT RoundF
 
   FOG_INLINE bool hitTest(const PointF& pt) const
   {
-    return _g2d.roundf.hitTest(this, &pt);
+    return _api.roundf.hitTest(this, &pt);
   }
 
   // --------------------------------------------------------------------------
@@ -180,8 +169,6 @@ struct FOG_NO_EXPORT RoundD
   // --------------------------------------------------------------------------
 
   FOG_INLINE RoundD() { reset(); }
-  FOG_INLINE RoundD(_Uninitialized) {}
-
   FOG_INLINE RoundD(const RoundD& other) { rect = other.rect; radius = other.radius; }
 
   FOG_INLINE RoundD(const RectD& r, const PointD& rp) { rect = r; radius = rp; }
@@ -190,6 +177,7 @@ struct FOG_NO_EXPORT RoundD
   FOG_INLINE RoundD(double rx, double ry, double rw, double rh, double rad) { rect.setRect(rx, ry, rw, rh); radius.set(rad, rad); }
   FOG_INLINE RoundD(double rx, double ry, double rw, double rh, double radx, double rady) { rect.setRect(rx, ry, rw, rh); radius.set(radx, rady); }
 
+  explicit FOG_INLINE RoundD(_Uninitialized) {}
   explicit FOG_INLINE RoundD(const RoundF& other) { rect = other.rect; radius = other.radius; }
 
   // --------------------------------------------------------------------------
@@ -248,12 +236,12 @@ struct FOG_NO_EXPORT RoundD
 
   FOG_INLINE err_t _getBoundingBox(BoxD& dst, const TransformD* tr) const
   {
-    return _g2d.roundd.getBoundingBox(this, &dst, tr);
+    return _api.roundd.getBoundingBox(this, &dst, tr);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectD& dst, const TransformD* tr) const
   {
-    err_t err = _g2d.roundd.getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr);
+    err_t err = _api.roundd.getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -265,7 +253,7 @@ struct FOG_NO_EXPORT RoundD
 
   FOG_INLINE bool hitTest(const PointD& pt) const
   {
-    return _g2d.roundd.hitTest(this, &pt);
+    return _api.roundd.hitTest(this, &pt);
   }
 
   // --------------------------------------------------------------------------

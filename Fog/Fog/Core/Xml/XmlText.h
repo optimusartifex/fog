@@ -8,7 +8,7 @@
 #define _FOG_CORE_XML_XMLTEXT_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Xml/XmlElement.h>
 
 namespace Fog {

@@ -9,15 +9,14 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Internal_Core_p.h>
-#include <Fog/Core/Global/Swap.h>
+#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Internals_p.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/CBezier.h>
 #include <Fog/G2d/Geometry/Ellipse.h>
 #include <Fog/G2d/Geometry/PathTmp_p.h>
 #include <Fog/G2d/Geometry/Transform.h>
-#include <Fog/G2d/Global/Init_G2d_p.h>
 
 namespace Fog {
 
@@ -26,7 +25,7 @@ namespace Fog {
 // ============================================================================
 
 template<typename NumT>
-static err_t FOG_CDECL _EllipseT_getBoundingBox(
+static err_t FOG_CDECL EllipseT_getBoundingBox(
   const NumT_(Ellipse)* self,
   NumT_(Box)* dst,
   const NumT_(Transform)* transform)
@@ -139,7 +138,7 @@ _Identity:
 // ============================================================================
 
 template<typename NumT>
-static bool FOG_CDECL _EllipseT_hitTest(const NumT_(Ellipse)* self, const NumT_(Point)* pt)
+static bool FOG_CDECL EllipseT_hitTest(const NumT_(Ellipse)* self, const NumT_(Point)* pt)
 {
   // Point-In-Ellipse problem reduced to Point-In-Circle problem. It is always
   // possible to scale an ellipse to get a circle. This trick is used to get
@@ -174,7 +173,7 @@ static bool FOG_CDECL _EllipseT_hitTest(const NumT_(Ellipse)* self, const NumT_(
 // ============================================================================
 
 template<typename NumT>
-static uint FOG_CDECL _EllipseT_toCSpline(const NumT_(Ellipse)* self, NumT_(Point)* pts)
+static uint FOG_CDECL EllipseT_toCSpline(const NumT_(Ellipse)* self, NumT_(Point)* pts)
 {
   NumT cx = self->center.x;
   NumT cy = self->center.y;
@@ -203,19 +202,19 @@ static uint FOG_CDECL _EllipseT_toCSpline(const NumT_(Ellipse)* self, NumT_(Poin
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_ellipse_init(void)
+FOG_NO_EXPORT void Ellipse_init(void)
 {
-  _g2d.ellipsef.getBoundingBox = _EllipseT_getBoundingBox<float>;
-  _g2d.ellipsed.getBoundingBox = _EllipseT_getBoundingBox<double>;
+  _api.ellipsef.getBoundingBox = EllipseT_getBoundingBox<float>;
+  _api.ellipsed.getBoundingBox = EllipseT_getBoundingBox<double>;
 
-  _g2d.ellipsef.hitTest = _EllipseT_hitTest<float>;
-  _g2d.ellipsed.hitTest = _EllipseT_hitTest<double>;
+  _api.ellipsef.hitTest = EllipseT_hitTest<float>;
+  _api.ellipsed.hitTest = EllipseT_hitTest<double>;
 
-  _g2d.ellipsef.toCSpline = _EllipseT_toCSpline<float>;
-  _g2d.ellipsed.toCSpline = _EllipseT_toCSpline<double>;
+  _api.ellipsef.toCSpline = EllipseT_toCSpline<float>;
+  _api.ellipsed.toCSpline = EllipseT_toCSpline<double>;
 }
 
 } // Fog namespace

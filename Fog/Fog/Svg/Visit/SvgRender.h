@@ -8,7 +8,7 @@
 #define _FOG_SVG_VISIT_SVGRENDER_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
 
 namespace Fog {

@@ -4,20 +4,15 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_SOURCE_ACMYK_H
-#define _FOG_G2D_SOURCE_ACMYK_H
+#ifndef _FOG_G2D_COLOR_ACMYK_H
+#define _FOG_G2D_COLOR_ACMYK_H
 
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Ops.h>
-#include <Fog/Core/Global/Swap.h>
-#include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/Uninitialized.h>
-#include <Fog/G2d/Global/Api.h>
-#include <Fog/G2d/Global/Constants.h>
-#include <Fog/G2d/Source/Argb.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/G2d/Source/ColorBase.h>
 #include <Fog/G2d/Source/ColorUtil.h>
 
@@ -25,12 +20,6 @@ namespace Fog {
 
 //! @addtogroup Fog_G2d_Source
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct AhsvF;
 
 // ============================================================================
 // [Fog::AcmykF]
@@ -63,31 +52,6 @@ struct FOG_NO_EXPORT AcmykF : public AcmykBaseF
     setAcmykF(af, cf, mf, yf, kf);
   }
 
-  explicit FOG_INLINE AcmykF(const ArgbBase32& argb32)
-  {
-    setArgb32(argb32);
-  }
-
-  explicit FOG_INLINE AcmykF(const ArgbBase64& argb64)
-  {
-    setArgb64(argb64);
-  }
-
-  explicit FOG_INLINE AcmykF(const ArgbBaseF& argbf)
-  {
-    setArgbF(argbf);
-  }
-
-  explicit FOG_INLINE AcmykF(const AhsvBaseF& ahsvf)
-  {
-    setAhsvF(ahsvf);
-  }
-
-  explicit FOG_INLINE AcmykF(const AhslBaseF& ahslf)
-  {
-    setAhslF(ahslf);
-  }
-
   // --------------------------------------------------------------------------
   // [Accessors]
   // --------------------------------------------------------------------------
@@ -111,56 +75,6 @@ struct FOG_NO_EXPORT AcmykF : public AcmykBaseF
   // [Conversion]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE Argb32 getArgb32() const
-  {
-    Argb32 argb32(UNINITIALIZED);
-    _g2d.color.convert[_COLOR_MODEL_ARGB32][COLOR_MODEL_ACMYK](&argb32, data);
-    return argb32;
-  }
-
-  FOG_INLINE Argb64 getArgb64() const
-  {
-    Argb64 argb64(UNINITIALIZED);
-    _g2d.color.convert[_COLOR_MODEL_ARGB64][COLOR_MODEL_ACMYK](&argb64, data);
-    return argb64;
-  }
-
-  FOG_INLINE ArgbF getArgbF() const
-  {
-    ArgbF argbf(UNINITIALIZED);
-    _g2d.color.convert[COLOR_MODEL_ARGB][COLOR_MODEL_ACMYK](&argbf, data);
-    return argbf;
-  }
-
-  FOG_INLINE AcmykF getAcmykF() const
-  {
-    return AcmykF(*this);
-  }
-
-  FOG_INLINE AhsvF getAhsvF() const;
-  FOG_INLINE AhslF getAhslF() const;
-
-  FOG_INLINE void setArgb32(const ArgbBase32& argb32)
-  {
-    _g2d.color.convert[COLOR_MODEL_ACMYK][_COLOR_MODEL_ARGB32](data, &argb32);
-  }
-
-  FOG_INLINE void setArgb64(const ArgbBase64& argb64)
-  {
-    _g2d.color.convert[COLOR_MODEL_ACMYK][_COLOR_MODEL_ARGB64](data, &argb64);
-  }
-
-  FOG_INLINE void setArgbF(const ArgbBaseF& argbf)
-  {
-    _g2d.color.convert[COLOR_MODEL_ACMYK][COLOR_MODEL_ARGB](data, &argbf);
-  }
-
-  FOG_INLINE void setArgbF(float af, float rf, float gf, float bf)
-  {
-    float argbf[4] = { af, rf, gf, bf };
-    _g2d.color.convert[COLOR_MODEL_ACMYK][COLOR_MODEL_ARGB](data, argbf);
-  }
-
   FOG_INLINE void setAcmykF(const AcmykF& acmyk)
   {
     a = acmyk.a;
@@ -177,28 +91,6 @@ struct FOG_NO_EXPORT AcmykF : public AcmykBaseF
     m = mf;
     y = yf;
     k = kf;
-  }
-
-  FOG_INLINE void setAhsvF(const AhsvBaseF& ahsv)
-  {
-    _g2d.color.convert[COLOR_MODEL_ACMYK][COLOR_MODEL_AHSV](data, &ahsv);
-  }
-
-  FOG_INLINE void setAhsvF(float af, float hf, float sf, float vf)
-  {
-    float ahsvf[4] = { af, hf, sf, vf };
-    _g2d.color.convert[COLOR_MODEL_ACMYK][COLOR_MODEL_AHSV](data, ahsvf);
-  }
-
-  FOG_INLINE void setAhslF(const AhslBaseF& ahslf)
-  {
-    _g2d.color.convert[COLOR_MODEL_ACMYK][COLOR_MODEL_AHSL](data, &ahslf);
-  }
-
-  FOG_INLINE void setAhslF(float af, float hf, float sf, float vf)
-  {
-    float ahslf[4] = { af, hf, sf, vf };
-    _g2d.color.convert[COLOR_MODEL_ACMYK][COLOR_MODEL_AHSL](data, ahslf);
   }
 
   // --------------------------------------------------------------------------
@@ -225,6 +117,45 @@ struct FOG_NO_EXPORT AcmykF : public AcmykBaseF
   {
     return Math::isFuzzyLowerEq(a, 0.0f);
   }
+
+  // --------------------------------------------------------------------------
+  // [Statics]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE AcmykF fromArgb(const ArgbBase32& argb32)
+  {
+    AcmykF acmykf(UNINITIALIZED);
+    _api.color.convert[COLOR_MODEL_ACMYK][_COLOR_MODEL_ARGB32](&acmykf, &argb32);
+    return acmykf;
+  }
+
+  static FOG_INLINE AcmykF fromArgb(const ArgbBase64& argb64)
+  {
+    AcmykF acmykf(UNINITIALIZED);
+    _api.color.convert[COLOR_MODEL_ACMYK][_COLOR_MODEL_ARGB64](&acmykf, &argb64);
+    return acmykf;
+  }
+
+  static FOG_INLINE AcmykF fromArgb(const ArgbBaseF& argbf)
+  {
+    AcmykF acmykf(UNINITIALIZED);
+    _api.color.convert[COLOR_MODEL_ACMYK][COLOR_MODEL_ARGB](&acmykf, &argbf);
+    return acmykf;
+  }
+
+  static FOG_INLINE AcmykF fromAhsv(const AhsvBaseF& ahsvf)
+  {
+    AcmykF acmykf(UNINITIALIZED);
+    _api.color.convert[COLOR_MODEL_ACMYK][COLOR_MODEL_AHSV](&acmykf, &ahsvf);
+    return acmykf;
+  }
+
+  static FOG_INLINE AcmykF fromAhsl(const AhsvBaseF& ahslf)
+  {
+    AcmykF acmykf(UNINITIALIZED);
+    _api.color.convert[COLOR_MODEL_ACMYK][COLOR_MODEL_AHSL](&acmykf, &ahslf);
+    return acmykf;
+  }
 };
 #include <Fog/Core/Pack/PackRestore.h>
 
@@ -245,4 +176,4 @@ _FOG_TYPEINFO_DECLARE(Fog::AcmykF, Fog::TYPEINFO_PRIMITIVE)
 FOG_FUZZY_DECLARE(Fog::AcmykF, Math::feqv(a.data, b.data, 5))
 
 // [Guard]
-#endif // _FOG_G2D_SOURCE_ACMYK_H
+#endif // _FOG_G2D_COLOR_ACMYK_H

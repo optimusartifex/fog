@@ -9,11 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Config/Config.h>
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Static.h>
-#include <Fog/Core/Global/Swap.h>
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Tools/String.h>
 
 namespace Fog {
@@ -27,7 +23,9 @@ namespace Fog {
 
 struct FOG_NO_EXPORT LibraryData
 {
+  // --------------------------------------------------------------------------
   // [Members]
+  // --------------------------------------------------------------------------
 
   mutable Atomic<size_t> refCount;
   void* handle;
@@ -42,19 +40,25 @@ struct FOG_API Library
 {
   static Static<LibraryData> _dnull;
 
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   Library();
   Library(const Library& other);
   Library(const String& fileName, uint32_t openFlags = LIBRARY_OPEN_DEFAULT);
   ~Library();
 
+  // --------------------------------------------------------------------------
   // [Sharing]
+  // --------------------------------------------------------------------------
 
   //! @copydoc Doxygen::Implicit::getReference().
   FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
 
+  // --------------------------------------------------------------------------
   // [Flags]
+  // --------------------------------------------------------------------------
 
   //! @copydoc Doxygen::Implicit::isNull().
   FOG_INLINE bool isNull() const { return _d->handle == NULL; }
@@ -65,6 +69,10 @@ struct FOG_API Library
   err_t open(const String& fileName, uint32_t openFlags = LIBRARY_OPEN_DEFAULT);
   err_t openPlugin(const String& category, const String& fileName);
   void close();
+
+  // --------------------------------------------------------------------------
+  // [GetSymbol]
+  // --------------------------------------------------------------------------
 
   // Two functions for symbol name, because symbols are encoded in
   // 8 bit ASCII null terminated strings and we can avoid to use
@@ -95,11 +103,15 @@ struct FOG_API Library
   //! symbol name that wasn't loaded.
   size_t getSymbols(void** target, const char* symbols, size_t symbolsLength, size_t symbolsCount, char** fail);
 
+  // --------------------------------------------------------------------------
   // [Operator Overload]
+  // --------------------------------------------------------------------------
 
   Library& operator=(const Library& other);
 
+  // --------------------------------------------------------------------------
   // [Paths]
+  // --------------------------------------------------------------------------
 
   enum PATH_MODE
   {
@@ -112,12 +124,16 @@ struct FOG_API Library
   static bool removePath(const String& path);
   static bool hasPath(const String& path);
 
+  // --------------------------------------------------------------------------
   // [System]
+  // --------------------------------------------------------------------------
 
   static String getSystemPrefix();
   static List<String> getSystemExtensions();
 
+  // --------------------------------------------------------------------------
   // [Members]
+  // --------------------------------------------------------------------------
 
   _FOG_CLASS_D(LibraryData)
 };

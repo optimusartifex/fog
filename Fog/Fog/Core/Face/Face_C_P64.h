@@ -8,10 +8,10 @@
 #define _FOG_CORE_FACE_FACE_C_P64_H
 
 // [Dependencies]
+#include <Fog/Core/Face/Constants.h>
 #include <Fog/Core/Face/Face_C_P32.h>
 #include <Fog/Core/Face/Face_C_Types.h>
-#include <Fog/Core/Face/Face_Constants.h>
-#include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Global.h>
 
 namespace Fog {
 namespace Face {
@@ -966,7 +966,7 @@ static FOG_INLINE void p64ReplacePDD1(p64& dst0, const p64& x0, const p32& u0) {
   FOG_MACRO_END
 #endif
 
-//! @brief Scalar combine (AND or OR, depends to platform).
+//! @brief Scalar combine (AND or OR, depends on platform).
 //!
 //! @verbatim
 //! dst0.u32[0] = x0.u32[0] +| y0.u32[0]
@@ -982,7 +982,7 @@ static FOG_INLINE void p64Combine(
 #endif // FOG_FACE_P64_IS_TYPE
 }
 
-//! @brief Scalar combine (AND or OR, depends to platform) (2x).
+//! @brief Scalar combine (AND or OR, depends on platform) (2x).
 //!
 //! @verbatim
 //! dst0.u32[0] = x0.u32[0] +| y0.u32[0]

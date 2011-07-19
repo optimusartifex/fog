@@ -9,7 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/DateTime/Time.h>
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/System/Object.h>
 #include <Fog/Core/System/Timer.h>
 #include <Fog/Gui/Global/Constants.h>
@@ -24,7 +24,6 @@ namespace Fog {
 // ============================================================================
 
 struct Animation;
-struct Application;
 
 // ============================================================================
 // [Fog::AnimationDispatcher]

@@ -13,8 +13,9 @@
 #include <Fog/Core/Math/Math.h>
 
 #include <Fog/Core/Cpu/Intrin_SSE.h>
+
 #if defined(FOG_HARDCODE_SSE2)
-#include <Fog/Core/Cpu/Intrin_SSE2.h>
+# include <Fog/Core/Cpu/Intrin_SSE2.h>
 #endif // FOG_HARDCODE_SSE2
 
 // ============================================================================

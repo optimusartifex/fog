@@ -8,13 +8,10 @@
 #define _FOG_G2D_TEXT_TEXTCHUNK_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/Swap.h>
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Range.h>
-#include <Fog/G2d/Global/Constants.h>
 
 namespace Fog {
 

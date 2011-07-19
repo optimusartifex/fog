@@ -9,9 +9,9 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Internal_Core_p.h>
+#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Internals_p.h>
 #include <Fog/G2d/Geometry/Line.h>
-#include <Fog/G2d/Global/Init_G2d_p.h>
 
 namespace Fog {
 
@@ -20,7 +20,7 @@ namespace Fog {
 // ============================================================================
 
 template<typename NumT>
-static uint32_t FOG_CDECL _LineT_intersect(NumT_(Point)* dst,
+static uint32_t FOG_CDECL LineT_intersect(NumT_(Point)* dst,
   const NumT_(Point)* lineA,
   const NumT_(Point)* lineB)
 {
@@ -44,13 +44,13 @@ static uint32_t FOG_CDECL _LineT_intersect(NumT_(Point)* dst,
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_line_init(void)
+FOG_NO_EXPORT void Line_init(void)
 {
-  _g2d.linef.intersect = _LineT_intersect<float>;
-  _g2d.lined.intersect = _LineT_intersect<double>;
+  _api.linef.intersect = LineT_intersect<float>;
+  _api.lined.intersect = LineT_intersect<double>;
 }
 
 } // Fog namespace

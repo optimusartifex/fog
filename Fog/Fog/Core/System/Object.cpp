@@ -12,9 +12,7 @@
 #include <Fog/Core/Collection/Hash.h>
 #include <Fog/Core/Collection/HashUtil.h>
 #include <Fog/Core/Collection/List.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Init_Core_p.h>
-#include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/System/Event.h>
 #include <Fog/Core/System/EventLoop.h>
 #include <Fog/Core/System/Object.h>
@@ -39,7 +37,7 @@ Object::Object() :
   _objectFlags(0),
   _objectId(0),
   _parent(NULL),
-  _homeThread(Thread::getCurrent()),
+  _homeThread(Thread::getCurrentThread()),
   _events(NULL)
 {
 }
@@ -122,7 +120,7 @@ const MetaClass* Object::_getStaticMetaClassRace(MetaClass** p)
     // Yield is not optimal, but this should really rarely happen and if we
     // had the luck then there is 100% probability that it will not happen
     // again.
-    Thread::_yield();
+    Thread::yield();
   }
 
   return *p;
@@ -606,10 +604,10 @@ void Object::onProperty(PropertyEvent* e)
 }
 
 // ============================================================================
-// [Fog::Core - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _core_object_init(void)
+FOG_NO_EXPORT void Object_init(void)
 {
   // Initialize the Object meta class.
   static MetaClass _privateObjectMetaClass;
@@ -626,7 +624,7 @@ FOG_NO_EXPORT void _core_object_init(void)
   Object::_internalLock.init();
 }
 
-FOG_NO_EXPORT void _core_object_fini(void)
+FOG_NO_EXPORT void Object_fini(void)
 {
   // The meta class shouldn't be used from now.
   Object::_staticMetaClass = NULL;

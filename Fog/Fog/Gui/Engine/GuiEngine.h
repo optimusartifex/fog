@@ -30,9 +30,7 @@ namespace Fog {
 // [Forward Declarations]
 // ============================================================================
 
-struct Application;
 struct CancelableTask;
-struct String;
 struct Widget;
 
 // Defined here.

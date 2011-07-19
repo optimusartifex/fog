@@ -728,7 +728,7 @@ _Blit_ClipBox_Alpha_Direct:
 
 FOG_NO_EXPORT RasterRenderVTable _RasterRender_vtable[RASTER_MODE_COUNT][IMAGE_PRECISION_COUNT][RASTER_CLIP_COUNT];
 
-FOG_NO_EXPORT void _g2d_painter_init_raster_render(void)
+FOG_NO_EXPORT void Painter_initRasterRender(void)
 {
   RasterRenderImpl<RasterRenderConfig_ST_PB_CB>::initVTable(_RasterRender_vtable[RASTER_MODE_ST][IMAGE_PRECISION_BYTE][RASTER_CLIP_BOX  ]);
   RasterRenderImpl<RasterRenderConfig_ST_PB_CR>::initVTable(_RasterRender_vtable[RASTER_MODE_ST][IMAGE_PRECISION_BYTE][RASTER_CLIP_REGION]);

@@ -8,7 +8,7 @@
 #define _FOG_G2D_IMAGING_IMAGEENCODER_H
 
 // [Dependencies]
-#include <Fog/G2d/Global/Constants.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/G2d/Imaging/ImageCodec.h>
 
 namespace Fog {

@@ -9,22 +9,13 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Tools/String.h>
-#include <Fog/G2d/Global/Constants.h>
 
 namespace Fog {
 
 //! @addtogroup Fog_G2d_Imaging
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct ImageDecoder;
-struct ImageCodec;
-struct ImageEncoder;
 
 // ============================================================================
 // [Fog::ImageCodecProvider]
@@ -62,7 +53,7 @@ struct FOG_API ImageCodecProvider
   //! @brief Get the image device flags (encoder / decoder support).
   FOG_INLINE uint32_t getCodecType() const { return _codecType; }
 
-  //! @brief Get the image stream type (see @c IMAGE_STREAM_TYPE).
+  //! @brief Get the image stream type (see @c IMAGE_STREAM).
   FOG_INLINE uint32_t getStreamType() const { return _streamType; }
 
   //! @brief Get name of the provider.
@@ -97,14 +88,14 @@ struct FOG_API ImageCodecProvider
   // --------------------------------------------------------------------------
 
   //! @brief Add provider @a provider to the list.
-  static err_t addProvider(uint32_t codecType, ImageCodecProvider* provider);
+  static err_t addProvider(ImageCodecProvider* provider);
   //! @brief Remove provider @a provider from the list.
-  static err_t removeProvider(uint32_t codecType, ImageCodecProvider* provider);
+  static err_t removeProvider(ImageCodecProvider* provider);
   //! @brief Get whether provider @a provider is in the list.
-  static bool hasProvider(uint32_t codecType, ImageCodecProvider* provider);
+  static bool hasProvider(ImageCodecProvider* provider);
 
   //! @brief Get list of image providers.
-  static List<ImageCodecProvider*> getProviders(uint32_t codecType);
+  static List<ImageCodecProvider*> getProviders();
 
   //! @brief Get image provider by @a name.
   static ImageCodecProvider* getProviderByName(uint32_t codecType, const String& name);
@@ -141,10 +132,10 @@ struct FOG_API ImageCodecProvider
 protected:
   mutable Atomic<size_t> _refCount;
 
-  //! @brief Supported device flags (see @c IMAGE_CODEC_TYPE).
+  //! @brief Supported device flags (see @c IMAGE_CODEC).
   uint32_t _codecType;
 
-  //! @brief Image stream type (see @c IMAGE_STREAM_TYPE).
+  //! @brief Image stream type (see @c IMAGE_STREAM).
   uint32_t _streamType;
 
   //! @brief Image provider name (for example "BMP", "PNG", "PNG[GDI+]", ...).

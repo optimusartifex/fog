@@ -32,7 +32,7 @@ ZoneAllocator::ZoneAllocator(size_t chunkSize)
 
 ZoneAllocator::~ZoneAllocator()
 {
-  reset();
+  free();
 }
 
 void* ZoneAllocator::_alloc(size_t size)

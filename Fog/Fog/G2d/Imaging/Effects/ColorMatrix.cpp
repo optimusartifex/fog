@@ -6,8 +6,7 @@
 // AggOO - Version 0.1
 // Copyright (c) 2006 Dratek Software
 //
-// Author of AggOO (Chad M. Draper) agreed relicencing code to the MIT license
-// that is used for Fog (original code was 3 clause BSD license). Thanks.
+// Author of AggOO (Chad M. Draper) agreed relicencing code to the MIT license.
 
 // [Precompiled Headers]
 #if defined(FOG_PRECOMP)
@@ -15,7 +14,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Math/Convert.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Imaging/Effects/ColorMatrix.h>

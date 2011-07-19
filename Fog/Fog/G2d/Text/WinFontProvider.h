@@ -8,6 +8,7 @@
 #define _FOG_G2D_TEXT_WINFONTPROVIDER_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Global.h>
 #include <Fog/G2d/Text/FontFaceCache.h>
 #include <Fog/G2d/Text/FontProvider.h>
 

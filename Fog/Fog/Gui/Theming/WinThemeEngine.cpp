@@ -12,7 +12,6 @@
 #if defined(FOG_OS_WINDOWS)
 
 // [Dependencies]
-#include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Library/Library.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/G2d/Painting/Painter.h>

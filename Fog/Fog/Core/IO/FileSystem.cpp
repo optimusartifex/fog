@@ -9,7 +9,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/IO/FileSystem.h>
 #include <Fog/Core/OS/UserInfo.h>
 #include <Fog/Core/System/Application.h>
@@ -184,7 +183,7 @@ static uint createDirectoryHelper(const Char* path, size_t len)
 {
   err_t err;
 
-  if (len == 3 && path[0].isAsciiAlpha() && path[1] == Char(':') && path[2] == Char('/'))
+  if (len == 3 && path[0].isAsciiLetter() && path[1] == Char(':') && path[2] == Char('/'))
   {
     // TODO: Maybe we should return failure if disk is not mounted.
     return ERR_IO_DIR_ALREADY_EXISTS;
@@ -512,7 +511,7 @@ err_t FileSystem::normalizePath(String& dst, const String& _path)
   // Handle Windows absolute path "X:\"
 #if defined(FOG_OS_WINDOWS)
   if (pathLength > 2 &&
-    pathCur[0].isAsciiAlpha() &&
+    pathCur[0].isAsciiLetter() &&
     pathCur[1] == Char(':') &&
     isDirSeparator(pathCur[2]))
   {
@@ -788,7 +787,7 @@ bool FileSystem::isAbsolutePath(const String& path)
   if (path.getLength() > 2)
   {
     const Char* pathStr = path.getData();
-    return (pathStr[0].isAsciiAlpha() &&
+    return (pathStr[0].isAsciiLetter() &&
       pathStr[1] == Char(':') &&
       isDirSeparator(pathStr[2]));
   }

@@ -8,7 +8,7 @@
 #define _FOG_G2D_RENDER_RENDERINIT_P_H
 
 // [Dependencies]
-#include <Fog/G2d/Global/Init_G2d_p.h>
+#include <Fog/Core/Global/Init_p.h>
 
 namespace Fog {
 
@@ -16,10 +16,9 @@ namespace Fog {
 // [Fog::Init - C]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_render_init(void);
-FOG_NO_EXPORT void _g2d_render_init_c(void);
-FOG_NO_EXPORT void _g2d_render_init_post(void);
-FOG_NO_EXPORT void _g2d_render_fini(void);
+FOG_NO_EXPORT void Render_init(void);
+FOG_NO_EXPORT void Render_initC(void);
+FOG_NO_EXPORT void Render_initPost(void);
 
 // ============================================================================
 // [Fog::RENDER_INIT / RENDER_POST]

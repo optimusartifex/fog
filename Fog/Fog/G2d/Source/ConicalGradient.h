@@ -8,21 +8,13 @@
 #define _FOG_G2D_SOURCE_CONICALGRADIENT_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/G2d/Source/Gradient.h>
 
 namespace Fog {
 
 //! @addtogroup Fog_G2d_Source
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct ConicalGradientF;
-struct ConicalGradientD;
 
 // ============================================================================
 // [Fog::ConicalGradientF]

@@ -22,7 +22,6 @@
 #include <Fog/G2d/Geometry/PathClipper.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Geometry/Transform.h>
-#include <Fog/G2d/Global/Api.h>
 
 namespace Fog {
 
@@ -33,10 +32,10 @@ namespace Fog {
 // TODO: Optimization
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_pathclipper_init_sse2(void)
+FOG_NO_EXPORT void PathClipper_initSSE2(void)
 {
 }
 

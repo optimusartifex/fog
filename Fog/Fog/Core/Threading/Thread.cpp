@@ -3,29 +3,21 @@
 // [License]
 // MIT, See COPYING file in package
 
-// Copyright (c) 2006-2008 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 // [Precompiled Headers]
 #if defined(FOG_PRECOMP)
 #include FOG_PRECOMP
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Debug.h>
-#include <Fog/Core/Global/Init_Core_p.h>
-#include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Tools/ByteArray.h>
 #include <Fog/Core/Cpu/Cpu.h>
 #include <Fog/Core/OS/OS.h>
 #include <Fog/Core/System/Application.h>
 #include <Fog/Core/System/Event.h>
 #include <Fog/Core/System/Object.h>
-#include <Fog/Core/Threading/Lazy.h>
 #include <Fog/Core/Threading/Thread.h>
-#include <Fog/Core/Threading/ThreadLocalStorage.h>
+#include <Fog/Core/Threading/ThreadLocal.h>
 #include <Fog/Core/Tools/ByteArray.h>
 #include <Fog/Core/Tools/ByteArrayTmp_p.h>
 #include <Fog/Core/Tools/TextCodec.h>
@@ -52,6 +44,7 @@
 # include <mach/mach.h>
 #endif // FOG_OS_MAC
 
+// [Dependencies - Linux]
 #if defined(FOG_OS_LINUX)
 # include <sys/syscall.h>
 # include <unistd.h>
@@ -59,100 +52,83 @@
 
 namespace Fog {
 
-// A lazily created thread local storage for quick access to a thread's message
-// loop, if one exists. This should be safe and free of static constructors.
-static Static< ThreadLocalPointer<Thread> > thread_tls;
-
 // ============================================================================
-// [Fog::Thread]
+// [Fog::Thread - Windows]
 // ============================================================================
 
 #if defined(FOG_OS_WINDOWS)
 
-// The information on how to set the thread name comes from
-// a MSDN article: http://msdn2.microsoft.com/en-us/library/xcb2z8hs.aspx
-static const DWORD MS_VC_EXCEPTION = 0x406D1388;
+// ============================================================================
+// [Fog::Thread - Windows - Thread TLS]
+// ============================================================================
 
-typedef struct tagTHREADNAME_INFO {
-  DWORD dwType;     // Must be 0x1000.
-  LPCSTR szName;    // Pointer to name (in user addr space).
-  DWORD dwThreadID; // Thread ID (-1=caller thread).
-  DWORD dwFlags;    // Reserved for future use, must be zero.
-} THREADNAME_INFO;
+static DWORD _Thread_tls;
 
-static unsigned __stdcall threadFunc(void* closure)
-{
-  Thread* thread = static_cast<Thread*>(closure);
-  thread_tls.instance().set(thread);
-  thread->main();
-  thread->finished();
-  return 0;
-}
+// ============================================================================
+// [Fog::Thread - Windows - Yield / Sleep]
+// ============================================================================
 
-uint32_t Thread::_tid()
-{
-  return GetCurrentThreadId();
-}
-
-void Thread::_yield()
+void Thread::yield()
 {
   ::Sleep(0);
 }
 
-void Thread::_sleep(uint32_t ms)
+void Thread::sleep(uint32_t ms)
 {
   ::Sleep(ms);
 }
 
-static void __setThreadName(THREADNAME_INFO* info)
+// ============================================================================
+// [Fog::Thread - Windows - Current Thread]
+// ============================================================================
+
+Thread* Thread::getCurrentThread()
 {
-#if defined(FOG_CC_MSC)
-  __try
-  {
-    RaiseException(MS_VC_EXCEPTION, 0, sizeof(info)/sizeof(DWORD), reinterpret_cast<DWORD_PTR*>(info));
-  }
-  __except(EXCEPTION_CONTINUE_EXECUTION) {}
-#else
-#warning "SEH handling not enabled for this compiler"
-#endif
+  return reinterpret_cast<Thread*>(TlsGetValue(_Thread_tls));
 }
 
-void Thread::_setName(const String& name)
+uint32_t Thread::getCurrentThreadId()
 {
-  // The debugger needs to be around to catch the name in the exception. If
-  // there isn't a debugger, we are just needlessly throwing an exception.
-  if (!::IsDebuggerPresent()) return;
-
-  ByteArrayTmp<256> t;
-  TextCodec::local8().encode(t, name, NULL);
-
-  THREADNAME_INFO info;
-  info.dwType = 0x1000;
-  info.szName = t.getData();
-  info.dwThreadID = _tid();
-  info.dwFlags = 0;
-
-  __setThreadName(&info);
+  return GetCurrentThreadId();
 }
 
-bool Thread::_create(size_t stackSize, Thread* thread)
+// ============================================================================
+// [Fog::Thread - Windows - Entry]
+// ============================================================================
+
+static unsigned __stdcall _Thread_entry(void* closure)
+{
+  Thread* thread = static_cast<Thread*>(closure);
+  TlsSetValue(_Thread_tls, thread);
+
+  thread->main();
+  thread->finished();
+
+  return 0;
+}
+
+// ============================================================================
+// [Fog::Thread - Windows - Create / Join]
+// ============================================================================
+
+static bool _Thread_create(size_t stackSize, Thread* thread)
 {
   uint flags = 0;
+
   if (stackSize > 0 && OS::getWindowsVersion() >= OS::WIN_VERSION_XP)
     flags = STACK_SIZE_PARAM_IS_A_RESERVATION;
   else
     stackSize = 0;
 
-  thread->_handle = reinterpret_cast<Handle>(_beginthreadex(NULL, (uint)stackSize, threadFunc, thread, flags, NULL));
+  thread->_handle = reinterpret_cast<Thread::Handle>(_beginthreadex(NULL, (uint)stackSize, _Thread_entry, thread, flags, NULL));
   return thread->_handle != NULL;
 }
 
-void Thread::_join(Thread* thread)
+static void _Thread_join(Thread* thread)
 {
   FOG_ASSERT(thread->_handle);
 
-  // Wait for the thread to exit. It should already have terminated but make
-  // sure this assumption is valid.
+  // Wait for the thread to exit.
   DWORD result = WaitForSingleObject(thread->_handle, INFINITE);
   FOG_ASSERT(result == WAIT_OBJECT_0);
 
@@ -160,35 +136,56 @@ void Thread::_join(Thread* thread)
   thread->_handle = NULL;
 }
 
-#elif defined(FOG_OS_POSIX)
+// ============================================================================
+// [Fog::Thread - Windows - Affinity]
+// ============================================================================
 
-static void* threadFunc(void* closure)
+err_t Thread::setAffinity(int mask)
 {
-  Thread* thread = static_cast<Thread*>(closure);
-  thread_tls.instance().set(thread);
+  if (mask <= 0) return resetAffinity();
+  DWORD_PTR result = SetThreadAffinityMask(_handle, (DWORD_PTR)mask);
 
-  thread->main();
-  thread->finished();
-  return NULL;
+  if (result != 0)
+    return ERR_OK;
+  else
+    return ERR_RT_INVALID_ARGUMENT;
 }
 
-uint32_t Thread::_tid()
+err_t Thread::resetAffinity()
 {
-  // Pthreads doesn't have the concept of a thread ID, so we have to reach down
-  // into the kernel.
-#if defined(FOG_OS_MAC)
-  return (uint32_t)mach_thread_self();
-#elif defined(FOG_OS_LINUX)
-  return (uint32_t)syscall(__NR_gettid);
+  size_t affinityMask = (1 << Cpu::get()->numberOfProcessors) - 1;
+  DWORD_PTR result = SetThreadAffinityMask(_handle, (DWORD_PTR)(affinityMask));
+
+  if (result != 0)
+    return ERR_OK;
+  else
+    return ERR_RT_INVALID_ARGUMENT;
+}
+
 #endif
-}
 
-void Thread::_yield()
+// ============================================================================
+// [Fog::Thread - Posix]
+// ============================================================================
+
+#if defined(FOG_OS_POSIX)
+
+// ============================================================================
+// [Fog::Thread - Posix - Thread TLS]
+// ============================================================================
+
+static pthread_key_t _Thread_tls;
+
+// ============================================================================
+// [Fog::Thread - Posix - Yield / Sleep]
+// ============================================================================
+
+void Thread::yield()
 {
   sched_yield();
 }
 
-void Thread::_sleep(uint32_t ms)
+void Thread::sleep(uint32_t ms)
 {
   struct timespec sleep_time, remaining;
 
@@ -203,79 +200,82 @@ void Thread::_sleep(uint32_t ms)
     sleep_time = remaining;
 }
 
-void Thread::_setName(const String& name)
+// ============================================================================
+// [Fog::Thread - Posix - Current Thread]
+// ============================================================================
+
+Thread* Thread::getCurrentThread()
 {
-  // The POSIX standard does not provide for naming threads, and neither Linux
-  // nor Mac OS X (our two POSIX targets) provide any non-portable way of doing
-  // it either. (Some BSDs provide pthread_set_name_np but that isn't much of a
-  // consolation prize.)
+  return reinterpret_cast<Thread*>(pthread_getspecific(_Thread_tls));
 }
 
-bool Thread::_create(size_t stackSize, Thread* thread)
+uint32_t Thread::getCurrentThreadId()
+{
+  // There is no thread-id concept in pthread API. To get OS specific thread
+  // ID the kernel must be called.
+  uint32_t id = 0;
+
+#if defined(FOG_OS_MAC)
+  id = (uint32_t)mach_thread_self();
+#endif // FOG_OS_MAC
+
+#if defined(FOG_OS_LINUX)
+  id = (uint32_t)syscall(__NR_gettid);
+#endif // FOG_OS_LINUX
+
+  return id;
+}
+
+// ============================================================================
+// [Fog::Thread - Posix - Entry]
+// ============================================================================
+
+static void* _Thread_entry(void* closure)
+{
+  Thread* thread = static_cast<Thread*>(closure);
+  pthread_setspecific(_Thread_tls, thread);
+
+  thread->main();
+  thread->finished();
+  return NULL;
+}
+
+// ============================================================================
+// [Fog::Thread - Posix - Create / Join]
+// ============================================================================
+
+static bool _Thread_create(size_t stackSize, Thread* thread)
 {
   bool success = false;
+
   pthread_attr_t attributes;
   pthread_attr_init(&attributes);
 
   // Pthreads are joinable by default, so we don't need to specify any special
   // attributes to be able to call pthread_join later.
-
   if (stackSize > 0)
     pthread_attr_setstacksize(&attributes, stackSize);
 
-  success = !pthread_create(&thread->_handle, &attributes, threadFunc, thread);
+  success = !pthread_create(&thread->_handle, &attributes, _Thread_entry, thread);
 
   pthread_attr_destroy(&attributes);
   return success;
 }
 
-void Thread::_join(Thread* thread)
+static void _Thread_join(Thread* thread)
 {
   pthread_join(thread->_handle, NULL);
 }
 
-#endif
-
 // ============================================================================
-// [Fog::Thread]
+// [Fog::Thread - Posix - Affinity]
 // ============================================================================
-
-Thread* Thread::getCurrent()
-{
-  return thread_tls.instance().get();
-}
-
-Thread::Thread(const String& name) :
-  _handle(0),
-  _id(0),
-  _name(name),
-  _stackSize(0),
-  _startupData(NULL),
-  _eventLoop(NULL)
-{
-}
-
-Thread::~Thread()
-{
-  stop();
-}
-
-void Thread::setStackSize(size_t ssize)
-{
-  _stackSize = ssize;
-}
 
 err_t Thread::setAffinity(int mask)
 {
   if (mask <= 0) return resetAffinity();
 
-#if defined(FOG_OS_WINDOWS)
-  DWORD_PTR result = SetThreadAffinityMask(_handle, (DWORD_PTR)mask);
-  if (result != 0)
-    return ERR_OK;
-  else
-    return ERR_RT_INVALID_ARGUMENT;
-#elif defined(FOG_OS_LINUX)
+#if defined(FOG_OS_LINUX)
   size_t affinityMask = mask;
   return pthread_setaffinity_np(_handle, sizeof(affinityMask), (const cpu_set_t*)&affinityMask);
 #else
@@ -285,19 +285,47 @@ err_t Thread::setAffinity(int mask)
 
 err_t Thread::resetAffinity()
 {
-#if defined(FOG_OS_WINDOWS)
-  size_t affinityMask = (1 << Cpu::get()->numberOfProcessors) - 1;
-  DWORD_PTR result = SetThreadAffinityMask(_handle, (DWORD_PTR)(affinityMask));
-  if (result != 0)
-    return ERR_OK;
-  else
-    return ERR_RT_INVALID_ARGUMENT;
-#elif defined(FOG_OS_LINUX)
+#if defined(FOG_OS_LINUX)
   size_t affinityMask = (1 << Cpu::get()->numberOfProcessors) - 1;
   return pthread_setaffinity_np(_handle, sizeof(affinityMask), (const cpu_set_t*)&affinityMask);
 #else
   return ERR_RT_NOT_IMPLEMENTED;
 #endif
+}
+
+#endif
+
+// ============================================================================
+// [Fog::Thread]
+// ============================================================================
+
+Thread::Thread() :
+  _handle(),
+  _id(0),
+  _stackSize(0),
+  _startupData(NULL),
+  _eventLoop(NULL)
+{
+}
+
+Thread::~Thread()
+{
+  if (this == _mainThread)
+  {
+    _mainThread = NULL;
+    return;
+  }
+
+  stop();
+}
+
+err_t Thread::setStackSize(uint32_t stackSize)
+{
+  if (isStarted())
+    return ERR_RT_INVALID_STATE;
+
+  _stackSize = stackSize;
+  return ERR_OK;
 }
 
 bool Thread::start(const String& eventLoopType)
@@ -307,7 +335,7 @@ bool Thread::start(const String& eventLoopType)
   StartupData startupData(eventLoopType);
   _startupData = &startupData;
 
-  if (!_create(_stackSize, this))
+  if (!_Thread_create(_stackSize, this))
   {
     Debug::dbgFunc("Fog::Thread", "start", "failed to create a thread.\n");
     _startupData = NULL; // Record that we failed to start.
@@ -321,17 +349,17 @@ bool Thread::start(const String& eventLoopType)
 
 void Thread::stop()
 {
-  if (!_threadWasStarted()) return;
-
   // We should only be called on the same thread that started us.
-  FOG_ASSERT(_id != _tid());
+  FOG_ASSERT(_id != getCurrentThreadId());
+
+  if (!isStarted()) return;
 
   // StopSoon may have already been called.
   if (_eventLoop) _eventLoop->postTask(fog_new QuitTask());
 
   // Wait for the thread to exit. It should already have terminated but make
   // sure this assumption is valid.
-  Thread::_join(this);
+  _Thread_join(this);
 
   // The thread can't receive messages anymore.
   _eventLoop = NULL;
@@ -342,10 +370,10 @@ void Thread::stop()
 
 void Thread::stopSoon()
 {
-  if (!_eventLoop) return;
-
   // We should only be called on the same thread that started us.
-  FOG_ASSERT(_id != _tid());
+  FOG_ASSERT(_id != getCurrentThreadId());
+
+  if (!_eventLoop) return;
 
   // We had better have a event loop at this point!  If we do not, then it
   // most likely means that the thread terminated unexpectedly, probably due
@@ -369,8 +397,7 @@ void Thread::cleanUp()
 void Thread::main()
 {
   // Complete the initialization of our Thread object.
-  _id = _tid();
-  _setName(_name);
+  _id = getCurrentThreadId();
 
   if (!_startupData->eventLoopType.isEmpty())
   {
@@ -409,43 +436,21 @@ void Thread::finished()
 {
 }
 
+// ============================================================================
+// [Fog::Thread - Main]
+// ============================================================================
+
 Thread* Thread::_mainThread;
 uint32_t Thread::_mainThreadId;
 
-// [Fog::MainThread]
-
-struct MainThread : public Thread
+struct FOG_NO_EXPORT MainThread : public Thread
 {
   MainThread();
-  virtual ~MainThread();
-
   virtual void main();
 };
 
 MainThread::MainThread()
 {
-  thread_tls.instance().set(this);
-
-#if defined(FOG_OS_WINDOWS)
-  _handle = GetCurrentThread();
-  _id = GetCurrentThreadId();
-#endif
-
-#if defined(FOG_OS_POSIX)
-  _handle = pthread_self();
-  _id = _tid();
-#endif // FOG_OS_POSIX
-
-  _flags = 0;
-  _name.set(Ascii8("Main"));
-
-  _mainThread = this;
-  _mainThreadId = _id;
-}
-
-MainThread::~MainThread()
-{
-  _mainThread = NULL;
 }
 
 void MainThread::main()
@@ -453,22 +458,49 @@ void MainThread::main()
   FOG_ASSERT_NOT_REACHED();
 }
 
-static Static<MainThread> mainThread;
+static Static<MainThread> _Thread_mainThread;
 
 // ============================================================================
-// [Fog::Core - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _core_thread_init(void)
+FOG_NO_EXPORT void Thread_init(void)
 {
-  thread_tls.init();
-  mainThread.init();
+  Thread* thread = _Thread_mainThread.init();
+
+#if defined(FOG_OS_WINDOWS)
+  thread->_handle = GetCurrentThread();
+  thread->_id = Thread::getCurrentThreadId();
+
+  _Thread_tls = ::TlsAlloc();
+  ::TlsSetValue(_Thread_tls, thread);
+#endif // FOG_OS_WINDOWS
+
+#if defined(FOG_OS_POSIX)
+  thread->_handle = pthread_self();
+
+  int error = ::pthread_key_create(&_Thread_tls, NULL);
+  if (error != 0)
+    Debug::failFunc("Fog::ThreadLocal", "$init", "Failed to create system TLS using pthread_key_create().\n");
+
+  pthread_setspecific(_Thread_tls, thread);
+#endif // FOG_OS_POSIX
+
+  Thread::_mainThread = thread;
+  Thread::_mainThreadId = thread->getId();
 }
 
-FOG_NO_EXPORT void _core_thread_fini(void)
+FOG_NO_EXPORT void Thread_fini(void)
 {
-  mainThread.destroy();
-  thread_tls.destroy();
+  _Thread_mainThread.destroy();
+
+#if defined(FOG_OS_WINDOWS)
+  ::TlsFree(_Thread_tls);
+#endif // FOG_OS_WINDOWS
+
+#if defined(FOG_OS_POSIX)
+  ::pthread_key_delete(_Thread_tls);
+#endif // FOG_OS_POSIX
 }
 
 } // Fog namespace

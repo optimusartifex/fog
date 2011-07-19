@@ -28,8 +28,6 @@ namespace Face {
 // #define FOG_FACE_HAS_FAST_ADD
 // #define FOG_FACE_HAS_FAST_MUL
 
-// #define FOG_FACE_HAS_MMX
-
 // ============================================================================
 // [FOG_FACE_HAS_64BIT]
 // ============================================================================
@@ -44,19 +42,17 @@ namespace Face {
 //! using uint64_t) in 32-bit BYTE manipulation functions without having the
 //! 64-bit processor.
 
-#if FOG_ARCH_BITS >= 64
-# if !defined(FOG_FACE_HAS_64BIT)
-#  define FOG_FACE_HAS_64BIT
-# endif
-#endif
+#if FOG_ARCH_BITS >= 64 && !defined(FOG_FACE_HAS_64BIT)
+# define FOG_FACE_HAS_64BIT
+#endif // FOG_ARCH_BITS >= 64 && !defined(FOG_FACE_HAS_64BIT)
 
 // ============================================================================
 // [FOG_FACE_P64_IS_TYPE]
 // ============================================================================
 
 #if defined(FOG_FACE_HAS_64BIT)
-#define FOG_FACE_P64_IS_TYPE
-#endif
+# define FOG_FACE_P64_IS_TYPE
+#endif // FOG_FACE_HAS_64BIT
 
 // ============================================================================
 // [FOG_FACE_HAS_CMOV]
@@ -72,8 +68,7 @@ namespace Face {
 //! generate good code (using cmov on x86 platform) then it's good to define
 //! it (target code will be smaller and faster).
 
-#if defined(FOG_ARCH_X86) || \
-    defined(FOG_ARCH_X86_64)
+#if defined(FOG_ARCH_X86) || defined(FOG_ARCH_X86_64)
 # if !defined(FOG_FACE_HAS_CMOV)
 #  define FOG_FACE_HAS_CMOV
 # endif
@@ -86,9 +81,7 @@ namespace Face {
 //! @def FOG_FACE_HAS_FAST_MUL
 //!
 //! @brief Whether to prefer ADD over OR operator.
-
-#if defined(FOG_ARCH_X86) || \
-    defined(FOG_ARCH_X86_64)
+#if defined(FOG_ARCH_X86) || defined(FOG_ARCH_X86_64)
 # if !defined(FOG_FACE_HAS_FAST_ADD)
 #  define FOG_FACE_HAS_FAST_ADD
 # endif
@@ -147,6 +140,8 @@ namespace Face {
 
 } // Face namespace
 } // Fog namespace
+
+// #include <Fog/Core/Face/Features_Asm.h>
 
 // [Guard]
 #endif // _FOG_CORE_FACE_FEATURES_H

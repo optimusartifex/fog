@@ -8,10 +8,7 @@
 #define _FOG_CORE_COLLECTION_HASHUTIL_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Static.h>
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Tools/Char.h>
 

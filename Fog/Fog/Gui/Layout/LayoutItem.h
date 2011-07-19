@@ -8,7 +8,7 @@
 #define _FOG_GUI_LAYOUT_LAYOUTITEM_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/System/Object.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Geometry/Size.h>

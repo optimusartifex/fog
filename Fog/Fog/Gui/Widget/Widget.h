@@ -11,7 +11,7 @@
 #include <Fog/Core/Collection/Hash.h>
 #include <Fog/Core/Collection/List.h>
 #include <Fog/Core/DateTime/Time.h>
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Threading/Thread.h>
 #include <Fog/Core/System/Event.h>

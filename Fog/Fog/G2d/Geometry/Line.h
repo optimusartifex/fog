@@ -8,29 +8,18 @@
 #define _FOG_G2D_GEOMETRY_LINE_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/Swap.h>
-#include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/Uninitialized.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Ops.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
-#include <Fog/G2d/Global/Api.h>
 
 namespace Fog {
 
 //! @addtogroup Fog_G2d_Geometry
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct LineF;
-struct LineD;
 
 // ============================================================================
 // [Fog::LineF]
@@ -44,13 +33,12 @@ struct FOG_NO_EXPORT LineF
   // --------------------------------------------------------------------------
 
   FOG_INLINE LineF() { reset(); }
-  FOG_INLINE LineF(_Uninitialized) {}
-
   FOG_INLINE LineF(const LineF& other) { setLine(other); }
   FOG_INLINE LineF(const PointF& pt0, const PointF& pt1) { p[0] = pt0; p[1] = pt1; }
   FOG_INLINE LineF(float x0, float y0, float x1, float y1) { p[0].set(x0, y0); p[1].set(x1, y1); }
   FOG_INLINE LineF(const PointF* pts) { p[0] = pts[0]; p[1] = pts[1]; }
 
+  explicit FOG_INLINE LineF(_Uninitialized) {}
   explicit FOG_INLINE LineF(const LineD& other) { setLine(other); }
 
   // --------------------------------------------------------------------------
@@ -157,7 +145,7 @@ struct FOG_NO_EXPORT LineF
 
   static FOG_INLINE uint32_t intersect(PointF& dst, const LineF& a, const LineF& b)
   {
-    return _g2d.linef.intersect(&dst, a.p, b.p);
+    return _api.linef.intersect(&dst, a.p, b.p);
   }
 
   // --------------------------------------------------------------------------
@@ -179,13 +167,12 @@ struct FOG_NO_EXPORT LineD
   // --------------------------------------------------------------------------
 
   FOG_INLINE LineD() { reset(); }
-  FOG_INLINE LineD(_Uninitialized) {}
-
   FOG_INLINE LineD(const LineD& other) { setLine(other); }
   FOG_INLINE LineD(const PointD& pt0, const PointD& pt1) { p[0] = pt0; p[1] = pt1; }
   FOG_INLINE LineD(double x0, double y0, double x1, double y1) { p[0].set(x0, y0); p[1].set(x1, y1); }
   FOG_INLINE LineD(const PointD* pts) { p[0] = pts[0]; p[1] = pts[1]; }
 
+  explicit FOG_INLINE LineD(_Uninitialized) {}
   explicit FOG_INLINE LineD(const LineF& other) { setLine(other); }
 
   // --------------------------------------------------------------------------
@@ -292,7 +279,7 @@ struct FOG_NO_EXPORT LineD
 
   static FOG_INLINE uint32_t intersect(PointD& dst, const LineD& a, const LineD& b)
   {
-    return _g2d.lined.intersect(&dst, a.p, b.p);
+    return _api.lined.intersect(&dst, a.p, b.p);
   }
 
   // --------------------------------------------------------------------------

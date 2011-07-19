@@ -9,8 +9,6 @@
 #endif
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Xml/XmlAttribute.h>
 
 namespace Fog {

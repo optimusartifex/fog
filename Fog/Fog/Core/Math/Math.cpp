@@ -9,21 +9,24 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Init_Core_p.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Math/Math.h>
 
 namespace Fog {
 
 // ============================================================================
-// [Fog::Core - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _core_math_init(void)
+FOG_NO_EXPORT void Math_init_integrate(void);
+FOG_NO_EXPORT void Math_init_solve(void);
+FOG_NO_EXPORT void Math_init_vec(void);
+
+FOG_NO_EXPORT void Math_init(void)
 {
-  _core_math_init_vec();
-  _core_math_init_integrate();
-  _core_math_init_solve();
+  Math_init_vec();
+  Math_init_integrate();
+  Math_init_solve();
 }
 
 } // Fog namespace

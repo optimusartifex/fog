@@ -9,8 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Math/Fuzzy.h>
-#include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/Uninitialized.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/G2d/Source/Color.h>
 
 namespace Fog {
@@ -35,11 +34,6 @@ struct FOG_NO_EXPORT ColorStop
   {
   }
 
-  FOG_INLINE ColorStop(_Uninitialized) :
-    _color(UNINITIALIZED)
-  {
-  }
-
   FOG_INLINE ColorStop(const ColorStop& other) :
     _color(other._color),
     _offset(other._offset)
@@ -57,6 +51,8 @@ struct FOG_NO_EXPORT ColorStop
     _offset(offset)
   {
   }
+
+  explicit FOG_INLINE ColorStop(_Uninitialized) : _color(UNINITIALIZED) {}
 
   // --------------------------------------------------------------------------
   // [Accessors]

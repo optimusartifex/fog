@@ -10,7 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/Util.h>
-#include <Fog/G2d/Global/Init_G2d_p.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/G2d/Source/ColorStop.h>
 #include <Fog/G2d/Source/ColorStopCache.h>
 #include <Fog/G2d/Source/ColorStopList.h>
@@ -27,7 +27,7 @@ enum COLOR_STOP_LIST_VALIDITY
   COLOR_STOP_LIST_NOT_SORTED = 0x02
 };
 
-static uint _ColorStopList_validate(const ColorStop* stops, size_t length)
+static uint ColorStopList_validate(const ColorStop* stops, size_t length)
 {
   uint result = 0;
   if (length == 0) return result;
@@ -46,7 +46,7 @@ static uint _ColorStopList_validate(const ColorStop* stops, size_t length)
   return result;
 }
 
-static void _ColorStopList_sort(ColorStop* stops, size_t length)
+static void ColorStopList_sort(ColorStop* stops, size_t length)
 {
   // Insertion sort is used, because the order of stops with the same offset
   // must be preserved (see qsort/isort documentation for differences).
@@ -208,7 +208,7 @@ err_t ColorStopList::setList(const ColorStop* stops, size_t length)
 {
   if (FOG_UNLIKELY(length == 0)) { clear(); return ERR_OK; }
 
-  uint validity = _ColorStopList_validate(stops, length);
+  uint validity = ColorStopList_validate(stops, length);
   if (validity & COLOR_STOP_LIST_INVALID_OFFSET) return ERR_RT_INVALID_ARGUMENT;
 
   // Detach or Resize.
@@ -225,7 +225,7 @@ err_t ColorStopList::setList(const ColorStop* stops, size_t length)
 
   if (validity & COLOR_STOP_LIST_NOT_SORTED)
   {
-    _ColorStopList_sort(_d->data, length);
+    ColorStopList_sort(_d->data, length);
   }
 
   return ERR_OK;
@@ -424,10 +424,10 @@ ColorStopListData* ColorStopList::_dalloc(size_t capacity)
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_colorstoplist_init(void)
+FOG_NO_EXPORT void ColorStopList_init(void)
 {
   ColorStopListData* d = ColorStopList::_dnull.instancep();
 
@@ -435,11 +435,6 @@ FOG_NO_EXPORT void _g2d_colorstoplist_init(void)
   d->capacity = 0;
   d->length = 0;
   d->stopCachePrgb32 = NULL;
-}
-
-FOG_NO_EXPORT void _g2d_colorstoplist_fini(void)
-{
-  ColorStopList::_dnull->refCount.dec();
 }
 
 } // Fog namespace

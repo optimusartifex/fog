@@ -47,9 +47,7 @@ struct FOG_NO_EXPORT LayoutHint
   {
   }
 
-  FOG_INLINE LayoutHint(_Uninitialized)
-  {
-  }
+  explicit FOG_INLINE LayoutHint(_Uninitialized) {}
 
   // --------------------------------------------------------------------------
   // [Methods]

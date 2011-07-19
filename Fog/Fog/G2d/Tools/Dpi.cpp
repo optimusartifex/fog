@@ -9,7 +9,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/G2d/Tools/Dpi.h>
 

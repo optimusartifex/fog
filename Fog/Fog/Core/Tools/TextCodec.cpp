@@ -9,10 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Static.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Init_Core_p.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Memory/BSwap.h>
@@ -22,6 +19,7 @@
 #include <Fog/Core/Tools/Byte.h>
 #include <Fog/Core/Tools/ByteArray.h>
 #include <Fog/Core/Tools/ByteArrayTmp_p.h>
+#include <Fog/Core/Tools/CharData.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringUtil.h>
 #include <Fog/Core/Tools/TextCodec.h>
@@ -43,13 +41,11 @@ TextCodecHandler::~TextCodecHandler()
 {
 }
 
-// Default implementation of TextCodecHandler which replace the unencodable
-// character by \uXXXX, compatible to JSON format.
+// Default implementation of TextCodecHandler which replaces the unencodable
+// character by the escaping sequence "\uXXXX".
 struct TextCodecDefaultHandler : public TextCodecHandler
 {
-  virtual ~TextCodecDefaultHandler()
-  {
-  }
+  virtual ~TextCodecDefaultHandler() {}
 
   virtual err_t replaceCharacter(ByteArray& dst, uint32_t uc)
   {
@@ -80,13 +76,13 @@ struct TextCodecItem
 // [Fog::TextCodec - Helpers]
 // ============================================================================
 
-static FOG_INLINE TextCodecData* _TextCodec_ref(TextCodecData* d)
+static FOG_INLINE TextCodecData* TextCodec_ref(TextCodecData* d)
 {
   d->refCount.inc();
   return d;
 }
 
-static FOG_INLINE void _TextCodec_deref(TextCodecData* d)
+static FOG_INLINE void TextCodec_deref(TextCodecData* d)
 {
   if (d->refCount.deref()) d->destroy(d);
 }
@@ -97,7 +93,7 @@ static FOG_INLINE void _TextCodec_deref(TextCodecData* d)
 # define _FOG_TEXTCODEC_IS_BYTESWAPPED(_Flags_) ((_Flags_ & TEXT_ENCODING_IS_LE) != 0)
 #endif // FOG_BYTE_ORDER
 
-static FOG_INLINE bool _TextCodec_isByteSwappedOnInit(const TextCodecData* d)
+static FOG_INLINE bool TextCodec_isByteSwappedOnInit(const TextCodecData* d)
 {
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
   return (d->flags & TEXT_ENCODING_IS_BE) != 0;
@@ -106,7 +102,7 @@ static FOG_INLINE bool _TextCodec_isByteSwappedOnInit(const TextCodecData* d)
 #endif // FOG_BYTE_ORDER
 }
 
-static size_t _TextCodec_addToState(TextCodecState* state, const uint8_t* cur, const uint8_t* end)
+static size_t TextCodec_addToState(TextCodecState* state, const uint8_t* cur, const uint8_t* end)
 {
   FOG_ASSERT(state != NULL);
   FOG_ASSERT(state->_bufferLength <= 4);
@@ -124,7 +120,7 @@ static size_t _TextCodec_addToState(TextCodecState* state, const uint8_t* cur, c
 // [Fog::TextCodec - Helpers - Encode]
 // ============================================================================
 
-#define _FOG_TEXTCODEC_ENCODE_BEGIN(_GrowBy_) \
+#define _FOG_TEXTCODEC_ENCODE_INIT_VARS(_GrowBy_) \
   /* Length initialization and check. */ \
   if (srcLength == DETECT_LENGTH) srcLength = StringUtil::len(src); \
   if (srcLength == 0) return ERR_OK; \
@@ -146,8 +142,9 @@ static size_t _TextCodec_addToState(TextCodecState* state, const uint8_t* cur, c
   uint8_t* dstCur = reinterpret_cast<uint8_t*>(dst.getDataX()) + initSize; \
   \
   /* Input characters. */ \
-  uint32_t uc, ucSurrogate; \
-  \
+  uint32_t uc, ucSurrogate;
+
+#define _FOG_TEXTCODEC_ENCODE_INIT_STATE() \
   /* Streaming */ \
   if (state != NULL && state->getBufferLength() == 2) \
   { \
@@ -156,7 +153,7 @@ static size_t _TextCodec_addToState(TextCodecState* state, const uint8_t* cur, c
     goto _SurrogateTrail; \
   }
 
-#define _FOG_TEXTCODEC_ENCODE_SURROGATE(_DoEncode_) \
+#define _FOG_TEXTCODEC_ENCODE_DO_SURROGATE(_DoEncode_) \
   /* Handle the incomplete surrogate pair. */ \
   if (FOG_UNLIKELY(srcCur == srcEnd)) \
   { \
@@ -178,7 +175,7 @@ static size_t _TextCodec_addToState(TextCodecState* state, const uint8_t* cur, c
   /* Read the surrogate-trail character and convert to one 32-bit code-point. */ \
 _SurrogateTrail: \
   ucSurrogate = *srcCur++; \
-  if (!Char::isSurrogateTrail(ucSurrogate)) \
+  if (!Char::isLoSurrogate(ucSurrogate)) \
   { \
     err = ERR_STRING_INVALID_UTF16; \
     goto _End; \
@@ -186,40 +183,40 @@ _SurrogateTrail: \
   \
   if (_DoEncode_) \
   { \
-    uc = Char::fromSurrogate(uc, ucSurrogate); \
+    uc = Char::ucs4FromSurrogate(uc, ucSurrogate); \
   }
 
 // ============================================================================
 // [Fog::TextCodec - None]
 // ============================================================================
 
-static TextCodecData _TextCodec_None_instance;
+static TextCodecData TextCodec_None_instance;
 
-static err_t FOG_CDECL _TextCodec_None_encode(const TextCodecData* d, 
+static err_t FOG_CDECL TextCodec_None_encode(const TextCodecData* d,
   ByteArray& dst, const Char* src, size_t srcLength, TextCodecState* state,
   TextCodecHandler* handler)
 {
   return ERR_STRING_INVALID_CODEC;
 }
 
-static err_t FOG_CDECL _TextCodec_None_decode(const TextCodecData* d,
+static err_t FOG_CDECL TextCodec_None_decode(const TextCodecData* d,
   String& dst, const void* src, size_t srcSize, TextCodecState* state)
 {
   return ERR_STRING_INVALID_CODEC;
 }
 
-static void FOG_CDECL _TextCodec_None_destroy(TextCodecData* d)
+static void FOG_CDECL TextCodec_None_destroy(TextCodecData* d)
 {
 }
 
-static TextCodecData* _TextCodec_None_create(const TextCodecItem& item)
+static TextCodecData* TextCodec_None_create(const TextCodecItem& item)
 {
-  TextCodecData* d = &_TextCodec_None_instance;
+  TextCodecData* d = &TextCodec_None_instance;
 
   d->refCount.init(1);
-  d->destroy = _TextCodec_None_destroy;
-  d->encode = _TextCodec_None_encode;
-  d->decode = _TextCodec_None_decode;
+  d->destroy = TextCodec_None_destroy;
+  d->encode = TextCodec_None_encode;
+  d->decode = TextCodec_None_decode;
 
   d->code = item.code;
   d->flags = item.flags;
@@ -233,11 +230,12 @@ static TextCodecData* _TextCodec_None_create(const TextCodecItem& item)
 // [Fog::TextCodec - ISO-8859-1]
 // ============================================================================
 
-static err_t FOG_CDECL _TextCodec_ISO8859_1_encode(const TextCodecData* d, 
+static err_t FOG_CDECL TextCodec_ISO8859_1_encode(const TextCodecData* d,
   ByteArray& dst, const Char* src, size_t srcLength, TextCodecState* state,
   TextCodecHandler* handler)
 {
-  _FOG_TEXTCODEC_ENCODE_BEGIN(srcLength + 1)
+  _FOG_TEXTCODEC_ENCODE_INIT_VARS(srcLength + 1)
+  _FOG_TEXTCODEC_ENCODE_INIT_STATE()
 
   while (srcCur != srcEnd)
   {
@@ -249,9 +247,9 @@ static err_t FOG_CDECL _TextCodec_ISO8859_1_encode(const TextCodecData* d,
     }
     else
     {
-      if (FOG_UNLIKELY(Char::isSurrogateLead(uc)))
+      if (FOG_UNLIKELY(Char::isHiSurrogate(uc)))
       {
-        _FOG_TEXTCODEC_ENCODE_SURROGATE(true)
+        _FOG_TEXTCODEC_ENCODE_DO_SURROGATE(true)
       }
 
       // Finalize dst and use handler to generate ASCII representation.
@@ -273,7 +271,7 @@ _End:
   return err;
 }
 
-static err_t FOG_CDECL _TextCodec_ISO8859_1_decode(const TextCodecData* d,
+static err_t FOG_CDECL TextCodec_ISO8859_1_decode(const TextCodecData* d,
   String& dst, const void* src, size_t srcSize, TextCodecState* state)
 {
   // Source Buffer.
@@ -305,7 +303,7 @@ static err_t FOG_CDECL _TextCodec_ISO8859_1_decode(const TextCodecData* d,
 // [Fog::TextCodec - 8-Bit]
 // ============================================================================
 
-static const TextCodecPage8::Decode _TextCodec_8Bit_empty =
+static const TextCodecPage8::Decode TextCodec_8Bit_empty =
 {
   {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -343,7 +341,7 @@ static const TextCodecPage8::Decode _TextCodec_8Bit_empty =
   }
 };
 
-static err_t FOG_CDECL _TextCodec_8Bit_encode(const TextCodecData* d, 
+static err_t FOG_CDECL TextCodec_8Bit_encode(const TextCodecData* d,
   ByteArray& dst, const Char* src, size_t srcLength, TextCodecState* state,
   TextCodecHandler* handler)
 {
@@ -351,14 +349,15 @@ static err_t FOG_CDECL _TextCodec_8Bit_encode(const TextCodecData* d,
   TextCodecPage8::Decode* const* table = d->page8->decode;
   uint8_t b;
 
-  _FOG_TEXTCODEC_ENCODE_BEGIN(srcLength + 1)
+  _FOG_TEXTCODEC_ENCODE_INIT_VARS(srcLength + 1)
+  _FOG_TEXTCODEC_ENCODE_INIT_STATE()
 
   while (srcCur != srcEnd)
   {
     uc = *srcCur++;
-    if (FOG_UNLIKELY(Char::isSurrogateLead(uc)))
+    if (FOG_UNLIKELY(Char::isHiSurrogate(uc)))
     {
-      _FOG_TEXTCODEC_ENCODE_SURROGATE(true)
+      _FOG_TEXTCODEC_ENCODE_DO_SURROGATE(true)
       goto _ReplaceCharacter;
     }
     else
@@ -391,7 +390,7 @@ _End:
   return err;
 }
 
-static err_t FOG_CDECL _TextCodec_8Bit_decode(const TextCodecData* d,
+static err_t FOG_CDECL TextCodec_8Bit_decode(const TextCodecData* d,
   String& dst, const void* src, size_t srcSize, TextCodecState* state)
 {
   // Source Buffer.
@@ -425,7 +424,7 @@ static err_t FOG_CDECL _TextCodec_8Bit_decode(const TextCodecData* d,
   return ERR_OK;
 }
 
-static void FOG_CDECL _TextCodec_8Bit_destroy(TextCodecData* d)
+static void FOG_CDECL TextCodec_8Bit_destroy(TextCodecData* d)
 {
   TextCodecPage8* page = const_cast<TextCodecPage8*>(d->page8);
 
@@ -435,7 +434,7 @@ static void FOG_CDECL _TextCodec_8Bit_destroy(TextCodecData* d)
 
     for (uint i = 0; i != 256; i++)
     {
-      if (tables[i] != &_TextCodec_8Bit_empty) 
+      if (tables[i] != &TextCodec_8Bit_empty)
         Memory::free(tables[i]);
     }
 
@@ -445,25 +444,25 @@ static void FOG_CDECL _TextCodec_8Bit_destroy(TextCodecData* d)
   Memory::free(d);
 }
 
-static TextCodecData* _TextCodec_8Bit_create(const TextCodecItem& item)
+static TextCodecData* TextCodec_8Bit_create(const TextCodecItem& item)
 {
   TextCodecData* d = reinterpret_cast<TextCodecData*>(Memory::alloc(sizeof(TextCodecData)));
   if (FOG_IS_NULL(d)) return d;
 
   d->refCount.init(1);
-  d->destroy = _TextCodec_8Bit_destroy;
+  d->destroy = TextCodec_8Bit_destroy;
 
   if (item.code == TEXT_ENCODING_ISO8859_1)
   {
     // Optimized ISO-8859-1 (Latin1) encode/decode.
-    d->encode = _TextCodec_ISO8859_1_encode;
-    d->decode = _TextCodec_ISO8859_1_decode;
+    d->encode = TextCodec_ISO8859_1_encode;
+    d->decode = TextCodec_ISO8859_1_decode;
   }
   else
   {
     // Generic table-based encode/decode.
-    d->encode = _TextCodec_8Bit_encode;
-    d->decode = _TextCodec_8Bit_decode;
+    d->encode = TextCodec_8Bit_encode;
+    d->decode = TextCodec_8Bit_decode;
   }
 
   d->code = item.code;
@@ -480,7 +479,7 @@ static TextCodecData* _TextCodec_8Bit_create(const TextCodecItem& item)
 
   for (i = 0; i < 256; i++)
   {
-    page8->decode[i] = (TextCodecPage8::Decode*)&_TextCodec_8Bit_empty;
+    page8->decode[i] = (TextCodecPage8::Decode*)&TextCodec_8Bit_empty;
   }
 
   for (i = 0; i < 256; i++)
@@ -491,7 +490,7 @@ static TextCodecData* _TextCodec_8Bit_create(const TextCodecItem& item)
 
     TextCodecPage8::Decode* decode = (TextCodecPage8::Decode*)page8->decode[ucPage];
 
-    if (decode == &_TextCodec_8Bit_empty)
+    if (decode == &TextCodec_8Bit_empty)
     {
       decode = reinterpret_cast<TextCodecPage8::Decode *>(
         Memory::calloc(sizeof(TextCodecPage8::Decode)));
@@ -513,7 +512,7 @@ _Fail:
     for (i = 0; i < 256; i++)
     {
       TextCodecPage8::Decode* decode = page8->decode[i];
-      if (decode != &_TextCodec_8Bit_empty)
+      if (decode != &TextCodec_8Bit_empty)
         Memory::free(decode);
     }
     Memory::free(page8);
@@ -527,19 +526,20 @@ _Fail:
 // [Fog::TextCodec - UTF-8]
 // ============================================================================
 
-static err_t FOG_CDECL _TextCodec_UTF8_encode(const TextCodecData* d, 
+static err_t FOG_CDECL TextCodec_UTF8_encode(const TextCodecData* d,
   ByteArray& dst, const Char* src, size_t srcLength, TextCodecState* state,
   TextCodecHandler* handler)
 {
-  _FOG_TEXTCODEC_ENCODE_BEGIN(srcLength * 2 + 4)
+  _FOG_TEXTCODEC_ENCODE_INIT_VARS(srcLength * 2 + 4)
   size_t remain = dst.getCapacity() - initSize;
+  _FOG_TEXTCODEC_ENCODE_INIT_STATE()
 
   while (srcCur != srcEnd)
   {
     uc = *srcCur++;
-    if (FOG_UNLIKELY(Char::isSurrogateLead(uc)))
+    if (FOG_UNLIKELY(Char::isHiSurrogate(uc)))
     {
-      _FOG_TEXTCODEC_ENCODE_SURROGATE(true)
+      _FOG_TEXTCODEC_ENCODE_DO_SURROGATE(true)
     }
 
     // Get whether the destination buffer is large enough.
@@ -548,7 +548,7 @@ static err_t FOG_CDECL _TextCodec_UTF8_encode(const TextCodecData* d,
       dst.finishDataX(reinterpret_cast<char*>(dstCur));
       initSize = dst.getLength();
 
-      // If we failed to predict the ideal destination size, then assume 
+      // If we failed to predict the ideal destination size, then assume
       // the worst, preventing another reallocation.
       err = dst.reserve(initSize + (size_t)(srcEnd - srcCur) * 4);
       if (FOG_IS_ERROR(err)) return err;
@@ -598,7 +598,7 @@ _End:
   return err;
 }
 
-static err_t FOG_CDECL _TextCodec_UTF8_decode(const TextCodecData* d,
+static err_t FOG_CDECL TextCodec_UTF8_decode(const TextCodecData* d,
   String& dst, const void* src, size_t srcSize, TextCodecState* state)
 {
 #define GET_UTF8_CHAR(_Buffer_) \
@@ -615,12 +615,13 @@ static err_t FOG_CDECL _TextCodec_UTF8_decode(const TextCodecData* d,
          | (uint32_t((_Buffer_)[1]) - 128U); \
       break; \
     case 3: \
-      /* Remove UTF8-BOM (EFBBBF) - We don't want it */ \
-      if (uc == 0xEF && (_Buffer_)[1] == 0xBB && (_Buffer_)[2] == 0xBF) goto _Continue; \
-      \
       uc = ((uc - 224U) << 12U) \
          | ((uint32_t((_Buffer_)[1]) - 128U) << 6) \
          |  (uint32_t((_Buffer_)[2]) - 128U); \
+      \
+      /* Remove the UTF8-BOM - [EF][BB][BF] == \uFEFF. */ \
+      if (FOG_UNLIKELY(uc == 0xFEFF)) goto _Continue; \
+      \
       break; \
     case 4: \
       uc = ((uc - 240U) << 24U) \
@@ -659,10 +660,10 @@ static err_t FOG_CDECL _TextCodec_UTF8_decode(const TextCodecData* d,
   if (state && (oldStateSize = state->getBufferLength()))
   {
     const uint8_t* bufPtr = reinterpret_cast<uint8_t*>(state->_buffer);
-    size_t bufSize = _TextCodec_addToState(state, srcCur, srcEnd);
+    size_t bufSize = TextCodec_addToState(state, srcCur, srcEnd);
 
     uc = *bufPtr;
-    utf8Size = utf8LengthTable[uc];
+    utf8Size = Unicode::utf8GetSize(uc);
 
     // Incomplete Input, we are returning ERR_OK, because we know
     // that the state isn't NULL pointer. In all other cases TextCodec
@@ -680,7 +681,7 @@ _Loop:
   for (;;)
   {
     uc = *srcCur;
-    utf8Size = utf8LengthTable[uc];
+    utf8Size = Unicode::utf8GetSize(uc);
 
     // Incomplete Input
     if (FOG_UNLIKELY((size_t)(srcEnd - srcCur) < utf8Size)) goto _InputTruncated;
@@ -688,12 +689,12 @@ _Loop:
     GET_UTF8_CHAR(srcCur);
 
 _Code:
-    if (uc >= 0x10000U && uc <= UNICHAR_MAX)
+    if (uc >= 0x10000U && uc <= UNICODE_MAX)
     {
-      Char::toSurrogatePair(uc, &dstCur[0]._ch, &dstCur[1]._ch);
+      Char::ucs4ToSurrogate(&dstCur[0], &dstCur[1], uc);
       dstCur += 2;
     }
-    else if (Char::isSurrogatePair(uc) && uc >= 0xFFFE)
+    else if (Char::isSurrogate(uc) && uc >= 0xFFFE)
     {
       err = ERR_STRING_INVALID_CHAR;
       goto _End;
@@ -729,20 +730,20 @@ _End:
 #undef GET_UTF8_CHAR
 }
 
-static void FOG_CDECL _TextCodec_UTF8_destroy(TextCodecData* d)
+static void FOG_CDECL TextCodec_UTF8_destroy(TextCodecData* d)
 {
   Memory::free(d);
 }
 
-static TextCodecData* _TextCodec_UTF8_create(const TextCodecItem& item)
+static TextCodecData* TextCodec_UTF8_create(const TextCodecItem& item)
 {
   TextCodecData* d = reinterpret_cast<TextCodecData*>(Memory::alloc(sizeof(TextCodecData)));
   if (FOG_IS_NULL(d)) return d;
 
   d->refCount.init(1);
-  d->destroy = _TextCodec_UTF8_destroy;
-  d->encode = _TextCodec_UTF8_encode;
-  d->decode = _TextCodec_UTF8_decode;
+  d->destroy = TextCodec_UTF8_destroy;
+  d->encode = TextCodec_UTF8_encode;
+  d->decode = TextCodec_UTF8_decode;
 
   d->code = item.code;
   d->flags = item.flags;
@@ -756,18 +757,19 @@ static TextCodecData* _TextCodec_UTF8_create(const TextCodecItem& item)
 // [Fog::TextCodec - UTF-16]
 // ============================================================================
 
-static err_t FOG_CDECL _TextCodec_UTF16_encode_native(const TextCodecData* d, 
+static err_t FOG_CDECL TextCodec_UTF16_encode_native(const TextCodecData* d,
   ByteArray& dst, const Char* src, size_t srcLength, TextCodecState* state,
   TextCodecHandler* handler)
 {
-  _FOG_TEXTCODEC_ENCODE_BEGIN(srcLength * 2 + 2)
+  _FOG_TEXTCODEC_ENCODE_INIT_VARS(srcLength * 2 + 2)
+  _FOG_TEXTCODEC_ENCODE_INIT_STATE()
 
   while (srcCur != srcEnd)
   {
     uc = *srcCur++;
-    if (FOG_UNLIKELY(Char::isSurrogateLead(uc)))
+    if (FOG_UNLIKELY(Char::isHiSurrogate(uc)))
     {
-      _FOG_TEXTCODEC_ENCODE_SURROGATE(false)
+      _FOG_TEXTCODEC_ENCODE_DO_SURROGATE(false)
 
       Memory::write_2a(dstCur + 0, (uint16_t)uc);
       Memory::write_2a(dstCur + 2, (uint16_t)ucSurrogate);
@@ -785,18 +787,19 @@ _End:
   return err;
 }
 
-static err_t FOG_CDECL _TextCodec_UTF16_encode_swapped(const TextCodecData* d, 
+static err_t FOG_CDECL TextCodec_UTF16_encode_swapped(const TextCodecData* d,
   ByteArray& dst, const Char* src, size_t srcLength, TextCodecState* state,
   TextCodecHandler* handler)
 {
-  _FOG_TEXTCODEC_ENCODE_BEGIN(srcLength * 2 + 2)
+  _FOG_TEXTCODEC_ENCODE_INIT_VARS(srcLength * 2 + 2)
+  _FOG_TEXTCODEC_ENCODE_INIT_STATE()
 
   while (srcCur != srcEnd)
   {
     uc = *srcCur++;
-    if (FOG_UNLIKELY(Char::isSurrogateLead(uc)))
+    if (FOG_UNLIKELY(Char::isHiSurrogate(uc)))
     {
-      _FOG_TEXTCODEC_ENCODE_SURROGATE(false)
+      _FOG_TEXTCODEC_ENCODE_DO_SURROGATE(false)
 
       Memory::write_2a(dstCur + 0, Memory::bswap16((uint16_t)uc));
       Memory::write_2a(dstCur + 2, Memory::bswap16((uint16_t)ucSurrogate));
@@ -814,7 +817,7 @@ _End:
   return err;
 }
 
-static err_t FOG_CDECL _TextCodec_UTF16_decode(const TextCodecData* d,
+static err_t FOG_CDECL TextCodec_UTF16_decode(const TextCodecData* d,
   String& dst, const void* src, size_t srcSize, TextCodecState* state)
 {
   // Length initialization and check.
@@ -842,7 +845,7 @@ static err_t FOG_CDECL _TextCodec_UTF16_decode(const TextCodecData* d,
   Char uc1;
 
   // Byte swapping.
-  uint8_t isByteSwapped = _TextCodec_isByteSwappedOnInit(d);
+  uint8_t isByteSwapped = TextCodec_isByteSwappedOnInit(d);
 
   if (state)
   {
@@ -851,14 +854,14 @@ static err_t FOG_CDECL _TextCodec_UTF16_decode(const TextCodecData* d,
     if (oldStateSize = state->getBufferLength())
     {
       const uint8_t* bufPtr = reinterpret_cast<uint8_t*>(state->_buffer);
-      size_t bufSize = _TextCodec_addToState(state, srcCur, srcEnd);
+      size_t bufSize = TextCodec_addToState(state, srcCur, srcEnd);
 
       if (state->getBufferLength() < 2) return ERR_OK;
 
       uc0 = reinterpret_cast<const uint16_t*>(bufPtr)[0];
       if (isByteSwapped) uc0.bswap();
 
-      if (uc0.isSurrogateLead())
+      if (uc0.isHiSurrogate())
       {
         if (state->getBufferLength() < 4) return ERR_OK;
 
@@ -888,7 +891,7 @@ _Loop:
     uc0 = reinterpret_cast<const uint16_t*>(srcCur)[0];
     if (isByteSwapped) uc0.bswap();
 
-    if (uc0.isSurrogateLead())
+    if (uc0.isHiSurrogate())
     {
       if (srcCur + 2 > srcEndM2) break;
 
@@ -896,7 +899,7 @@ _Loop:
       if (isByteSwapped) uc1.bswap();
 
 _SurrogatePair:
-      if (!uc1.isSurrogateTrail())
+      if (!uc1.isLoSurrogate())
       {
         err = ERR_STRING_INVALID_UTF16;
         goto _End;
@@ -911,11 +914,11 @@ _SurrogatePair:
     {
 _NotSurrogatePair:
       // BOM support.
-      if (uc0.isBomSwapped())
+      if (uc0.isBomSwap())
       {
         isByteSwapped = !isByteSwapped;
       }
-      else if (uc0.isSurrogateTrail())
+      else if (uc0.isLoSurrogate())
       {
         err = ERR_STRING_INVALID_UTF16;
         goto _End;
@@ -953,22 +956,22 @@ _End:
   return err;
 }
 
-static void FOG_CDECL _TextCodec_UTF16_destroy(TextCodecData* d)
+static void FOG_CDECL TextCodec_UTF16_destroy(TextCodecData* d)
 {
   Memory::free(d);
 }
 
-static TextCodecData* _TextCodec_UTF16_create(const TextCodecItem& item)
+static TextCodecData* TextCodec_UTF16_create(const TextCodecItem& item)
 {
   TextCodecData* d = reinterpret_cast<TextCodecData*>(Memory::alloc(sizeof(TextCodecData)));
   if (FOG_IS_NULL(d)) return d;
 
   d->refCount.init(1);
-  d->destroy = _TextCodec_UTF16_destroy;
-  d->encode = _FOG_TEXTCODEC_IS_BYTESWAPPED(item.flags) 
-    ? _TextCodec_UTF16_encode_swapped 
-    : _TextCodec_UTF16_encode_native;
-  d->decode = _TextCodec_UTF16_decode;
+  d->destroy = TextCodec_UTF16_destroy;
+  d->encode = _FOG_TEXTCODEC_IS_BYTESWAPPED(item.flags)
+    ? TextCodec_UTF16_encode_swapped
+    : TextCodec_UTF16_encode_native;
+  d->decode = TextCodec_UTF16_decode;
 
   d->code = item.code;
   d->flags = item.flags;
@@ -982,21 +985,20 @@ static TextCodecData* _TextCodec_UTF16_create(const TextCodecItem& item)
 // [Fog::TextCodec - UCS-2]
 // ============================================================================
 
-static err_t FOG_CDECL _TextCodec_UCS2_encode_native(const TextCodecData* d, 
+static err_t FOG_CDECL TextCodec_UCS2_encode_native(const TextCodecData* d,
   ByteArray& dst, const Char* src, size_t srcLength, TextCodecState* state,
   TextCodecHandler* handler)
 {
-  // Temporary buffer.
+  _FOG_TEXTCODEC_ENCODE_INIT_VARS(srcLength * 2 + 2)
   ByteArrayTmp<32> buf;
-
-  _FOG_TEXTCODEC_ENCODE_BEGIN(srcLength * 2 + 2)
+  _FOG_TEXTCODEC_ENCODE_INIT_STATE()
 
   while (srcCur != srcEnd)
   {
     uc = *srcCur++;
-    if (FOG_UNLIKELY(Char::isSurrogateLead(uc)))
+    if (FOG_UNLIKELY(Char::isHiSurrogate(uc)))
     {
-      _FOG_TEXTCODEC_ENCODE_SURROGATE(true)
+      _FOG_TEXTCODEC_ENCODE_DO_SURROGATE(true)
 
       buf.clear();
       err = handler->replaceCharacter(buf, uc);
@@ -1033,21 +1035,20 @@ _End:
   return err;
 }
 
-static err_t FOG_CDECL _TextCodec_UCS2_encode_swapped(const TextCodecData* d, 
+static err_t FOG_CDECL TextCodec_UCS2_encode_swapped(const TextCodecData* d,
   ByteArray& dst, const Char* src, size_t srcLength, TextCodecState* state,
   TextCodecHandler* handler)
 {
-  // Temporary buffer.
+  _FOG_TEXTCODEC_ENCODE_INIT_VARS(srcLength * 2 + 2)
   ByteArrayTmp<32> buf;
-
-  _FOG_TEXTCODEC_ENCODE_BEGIN(srcLength * 2 + 2)
+  _FOG_TEXTCODEC_ENCODE_INIT_STATE()
 
   while (srcCur != srcEnd)
   {
     uc = *srcCur++;
-    if (FOG_UNLIKELY(Char::isSurrogateLead(uc)))
+    if (FOG_UNLIKELY(Char::isHiSurrogate(uc)))
     {
-      _FOG_TEXTCODEC_ENCODE_SURROGATE(true)
+      _FOG_TEXTCODEC_ENCODE_DO_SURROGATE(true)
 
       // Need to finalize dst, append and reserve for next appending.
       dst.finishDataX(reinterpret_cast<char*>(dstCur));
@@ -1084,7 +1085,7 @@ _End:
   return err;
 }
 
-static err_t FOG_CDECL _TextCodec_UCS2_decode(const TextCodecData* d,
+static err_t FOG_CDECL TextCodec_UCS2_decode(const TextCodecData* d,
   String& dst, const void* src, size_t srcSize, TextCodecState* state)
 {
   // Length initialization and check.
@@ -1109,7 +1110,7 @@ static err_t FOG_CDECL _TextCodec_UCS2_decode(const TextCodecData* d,
   Char uc0;
 
   // Byte Swapping.
-  uint8_t isByteSwapped = _TextCodec_isByteSwappedOnInit(d);
+  uint8_t isByteSwapped = TextCodec_isByteSwappedOnInit(d);
 
   if (state)
   {
@@ -1118,7 +1119,7 @@ static err_t FOG_CDECL _TextCodec_UCS2_decode(const TextCodecData* d,
     if ((oldStateSize = state->getBufferLength()))
     {
       const uint8_t* bufPtr = reinterpret_cast<uint8_t*>(state->_buffer);
-      size_t bufSize = _TextCodec_addToState(state, srcCur, srcEnd);
+      size_t bufSize = TextCodec_addToState(state, srcCur, srcEnd);
 
       if (state->getBufferLength() < 2) return ERR_OK;
 
@@ -1141,14 +1142,14 @@ _Loop:
     if (isByteSwapped) uc0.bswap();
 
 _ProcessChar:
-    if (uc0.isSurrogatePair())
+    if (uc0.isSurrogate())
     {
       err = ERR_STRING_INVALID_UCS2;
       goto _End;
     }
 
     // BOM support.
-    if (uc0.isBomSwapped())
+    if (uc0.isBomSwap())
     {
       isByteSwapped = !isByteSwapped;
     }
@@ -1184,22 +1185,22 @@ _End:
   return err;
 }
 
-static void FOG_CDECL _TextCodec_UCS2_destroy(TextCodecData* d)
+static void FOG_CDECL TextCodec_UCS2_destroy(TextCodecData* d)
 {
   Memory::free(d);
 }
 
-static TextCodecData* _TextCodec_UCS2_create(const TextCodecItem& item)
+static TextCodecData* TextCodec_UCS2_create(const TextCodecItem& item)
 {
   TextCodecData* d = reinterpret_cast<TextCodecData*>(Memory::alloc(sizeof(TextCodecData)));
   if (FOG_IS_NULL(d)) return d;
 
   d->refCount.init(1);
-  d->destroy = _TextCodec_UCS2_destroy;
-  d->encode = _FOG_TEXTCODEC_IS_BYTESWAPPED(item.flags) 
-    ? _TextCodec_UCS2_encode_swapped 
-    : _TextCodec_UCS2_encode_native;
-  d->decode = _TextCodec_UCS2_decode;
+  d->destroy = TextCodec_UCS2_destroy;
+  d->encode = _FOG_TEXTCODEC_IS_BYTESWAPPED(item.flags)
+    ? TextCodec_UCS2_encode_swapped
+    : TextCodec_UCS2_encode_native;
+  d->decode = TextCodec_UCS2_decode;
 
   d->code = item.code;
   d->flags = item.flags;
@@ -1213,18 +1214,19 @@ static TextCodecData* _TextCodec_UCS2_create(const TextCodecItem& item)
 // [Fog::TextCodec - UTF-32]
 // ============================================================================
 
-static err_t FOG_CDECL _TextCodec_UTF32_encode_native(const TextCodecData* d, 
+static err_t FOG_CDECL TextCodec_UTF32_encode_native(const TextCodecData* d,
   ByteArray& dst, const Char* src, size_t srcLength, TextCodecState* state,
   TextCodecHandler* handler)
 {
-  _FOG_TEXTCODEC_ENCODE_BEGIN(srcLength * 4 + 2)
+  _FOG_TEXTCODEC_ENCODE_INIT_VARS(srcLength * 4 + 4)
+  _FOG_TEXTCODEC_ENCODE_INIT_STATE()
 
   while (srcCur != srcEnd)
   {
     uc = *srcCur++;
-    if (FOG_UNLIKELY(Char::isSurrogateLead(uc)))
+    if (FOG_UNLIKELY(Char::isHiSurrogate(uc)))
     {
-      _FOG_TEXTCODEC_ENCODE_SURROGATE(true)
+      _FOG_TEXTCODEC_ENCODE_DO_SURROGATE(true)
     }
 
     Memory::write_4a(dstCur, uc);
@@ -1236,18 +1238,19 @@ _End:
   return err;
 }
 
-static err_t FOG_CDECL _TextCodec_UTF32_encode_swapped(const TextCodecData* d, 
+static err_t FOG_CDECL TextCodec_UTF32_encode_swapped(const TextCodecData* d,
   ByteArray& dst, const Char* src, size_t srcLength, TextCodecState* state,
   TextCodecHandler* handler)
 {
-  _FOG_TEXTCODEC_ENCODE_BEGIN(srcLength * 4 + 2)
+  _FOG_TEXTCODEC_ENCODE_INIT_VARS(srcLength * 4 + 4)
+  _FOG_TEXTCODEC_ENCODE_INIT_STATE()
 
   while (srcCur != srcEnd)
   {
     uc = *srcCur++;
-    if (FOG_UNLIKELY(Char::isSurrogateLead(uc)))
+    if (FOG_UNLIKELY(Char::isHiSurrogate(uc)))
     {
-      _FOG_TEXTCODEC_ENCODE_SURROGATE(true)
+      _FOG_TEXTCODEC_ENCODE_DO_SURROGATE(true)
     }
 
     Memory::write_4a(dstCur, Memory::bswap32(uc));
@@ -1259,7 +1262,7 @@ _End:
   return err;
 }
 
-static err_t FOG_CDECL _TextCodec_UTF32_decode(const TextCodecData* d,
+static err_t FOG_CDECL TextCodec_UTF32_decode(const TextCodecData* d,
   String& dst, const void* src, size_t srcSize, TextCodecState* state)
 {
   // Length initialization and check.
@@ -1286,7 +1289,7 @@ static err_t FOG_CDECL _TextCodec_UTF32_decode(const TextCodecData* d,
   uint32_t uc;
 
   // Byte Swapping.
-  uint8_t isByteSwapped = _TextCodec_isByteSwappedOnInit(d);
+  uint8_t isByteSwapped = TextCodec_isByteSwappedOnInit(d);
 
   if (state)
   {
@@ -1295,7 +1298,7 @@ static err_t FOG_CDECL _TextCodec_UTF32_decode(const TextCodecData* d,
     if ((oldStateSize = state->getBufferLength()))
     {
       const uint8_t* bufPtr = reinterpret_cast<uint8_t*>(state->_buffer);
-      size_t bufSize = _TextCodec_addToState(state, srcCur, srcEnd);
+      size_t bufSize = TextCodec_addToState(state, srcCur, srcEnd);
 
       if (state->getBufferLength() < 4) return ERR_OK;
 
@@ -1318,7 +1321,7 @@ _Loop:
     if (isByteSwapped) uc = Memory::bswap32(uc);
 
 _ProcessChar:
-    if (uc > UNICHAR_MAX || (uc <= 0xFFFF && Char::isSurrogatePair((uint16_t)uc)))
+    if (uc > UNICODE_MAX || (uc <= 0xFFFF && Char::isSurrogate((uint16_t)uc)))
     {
       err = ERR_STRING_INVALID_CHAR;
       goto _End;
@@ -1331,7 +1334,7 @@ _ProcessChar:
     }
     else if (uc >= 0x10000)
     {
-      Char::toSurrogatePair(uc, &dstCur[0]._ch, &dstCur[1]._ch);
+      Char::ucs4ToSurrogate(&dstCur[0], &dstCur[1], uc);
       dstCur += 2;
     }
     else
@@ -1366,22 +1369,22 @@ _End:
   return err;
 }
 
-static void FOG_CDECL _TextCodec_UTF32_destroy(TextCodecData* d)
+static void FOG_CDECL TextCodec_UTF32_destroy(TextCodecData* d)
 {
   Memory::free(d);
 }
 
-static TextCodecData* _TextCodec_UTF32_create(const TextCodecItem& item)
+static TextCodecData* TextCodec_UTF32_create(const TextCodecItem& item)
 {
   TextCodecData* d = reinterpret_cast<TextCodecData*>(Memory::alloc(sizeof(TextCodecData)));
   if (FOG_IS_NULL(d)) return d;
 
   d->refCount.init(1);
-  d->destroy = _TextCodec_UTF32_destroy;
-  d->encode = _FOG_TEXTCODEC_IS_BYTESWAPPED(item.flags) 
-    ? _TextCodec_UTF32_encode_swapped
-    : _TextCodec_UTF32_encode_native;
-  d->decode = _TextCodec_UTF32_decode;
+  d->destroy = TextCodec_UTF32_destroy;
+  d->encode = _FOG_TEXTCODEC_IS_BYTESWAPPED(item.flags)
+    ? TextCodec_UTF32_encode_swapped
+    : TextCodec_UTF32_encode_native;
+  d->decode = TextCodec_UTF32_decode;
 
   d->code = item.code;
   d->flags = item.flags;
@@ -1399,7 +1402,7 @@ static TextCodecData* _TextCodec_UTF32_create(const TextCodecItem& item)
   { \
     TEXT_ENCODING_##_Code_, \
     NO_FLAGS, \
-    _TextCodec_None_create, \
+    TextCodec_None_create, \
     _Mime_, \
     NULL \
   }
@@ -1408,16 +1411,16 @@ static TextCodecData* _TextCodec_UTF32_create(const TextCodecItem& item)
   { \
     TEXT_ENCODING_##_Code_, \
     TEXT_ENCODING_IS_TABLE | TEXT_ENCODING_IS_8BIT, \
-    _TextCodec_8Bit_create, \
+    TextCodec_8Bit_create, \
     _Mime_, \
-    _TextCodec_Table_##_Code_ \
+    TextCodec_Table_##_Code_ \
   }
 
 #define _INIT_UTF8(_Code_, _Mime_) \
   { \
     TEXT_ENCODING_##_Code_, \
     TEXT_ENCODING_IS_UNICODE | TEXT_ENCODING_IS_8BIT | TEXT_ENCODING_IS_VARLEN, \
-    _TextCodec_UTF8_create, \
+    TextCodec_UTF8_create, \
     _Mime_, \
     NULL \
   }
@@ -1426,7 +1429,7 @@ static TextCodecData* _TextCodec_UTF32_create(const TextCodecItem& item)
   { \
     TEXT_ENCODING_##_Code_, \
     TEXT_ENCODING_IS_UNICODE | TEXT_ENCODING_IS_16BIT | TEXT_ENCODING_IS_VARLEN | _Flags_, \
-    _TextCodec_UTF16_create, \
+    TextCodec_UTF16_create, \
     _Mime_, \
     NULL \
   }
@@ -1435,7 +1438,7 @@ static TextCodecData* _TextCodec_UTF32_create(const TextCodecItem& item)
   { \
     TEXT_ENCODING_##_Code_, \
     TEXT_ENCODING_IS_UNICODE | TEXT_ENCODING_IS_32BIT | _Flags_, \
-    _TextCodec_UTF32_create, \
+    TextCodec_UTF32_create, \
     _Mime_, \
     NULL \
   }
@@ -1444,15 +1447,15 @@ static TextCodecData* _TextCodec_UTF32_create(const TextCodecItem& item)
   { \
     TEXT_ENCODING_##_Code_, \
     TEXT_ENCODING_IS_UNICODE | TEXT_ENCODING_IS_16BIT | _Flags_, \
-    _TextCodec_UCS2_create, \
+    TextCodec_UCS2_create, \
     _Mime_, \
     NULL \
   }
 
 // ${TEXT_ENCODING:BEGIN}
-static const TextCodecItem _TextCodec_items[] =
+static const TextCodecItem TextCodec_items[] =
 {
-  _INIT_NONE(NONE       , "NONE\0"), 
+  _INIT_NONE(NONE       , "NONE\0"),
 
   // --------------------------------------------------------------------------
   // [Table Codecs]
@@ -1493,7 +1496,7 @@ static const TextCodecItem _TextCodec_items[] =
   _INIT_8BIT(ARMSCII8   , "ARMSCII-8\0"),
   _INIT_8BIT(GEORGIAN_ACADEMY, "GEORGIAN-ACADEMY\0"),
   _INIT_8BIT(GEORGIAN_PS, "GEORGIAN-PS\0"),
-  
+
   // --------------------------------------------------------------------------
   // [Unicode Codecs]
   // --------------------------------------------------------------------------
@@ -1531,7 +1534,7 @@ static const TextCodecItem _TextCodec_items[] =
 // that aliases list ends.
 //
 // Mime compare function that ignores case, ' ', '-' and '_'.
-static bool _TextCodec_mimeCompare(const char* mime, const char* str, size_t length)
+static bool TextCodec_mimeCompare(const char* mime, const char* str, size_t length)
 {
   const char* strCur;
   const char* strEnd = str + length;
@@ -1575,7 +1578,7 @@ _RepeatMime:
 // [Fog::TextCodec - GetCodeset]
 // ============================================================================
 
-static const char* _TextCodec_getCodeset(void)
+static const char* TextCodec_getCodeset(void)
 {
 #if defined(FOG_OS_WINDOWS)
   // Windows hasn't nl_langinto(CODESET), but we can use setlocale()
@@ -1603,13 +1606,13 @@ static const char* _TextCodec_getCodeset(void)
 // [Fog::TextCodec - Cache]
 // ============================================================================
 
-static TextCodecData* _TextCodec_d[TEXT_ENCODING_COUNT];
+static TextCodecData* TextCodec_d[TEXT_ENCODING_COUNT];
 
-static TextCodecData* _TextCodec_create(uint32_t code)
+static TextCodecData* TextCodec_create(uint32_t code)
 {
   if (code >= TEXT_ENCODING_COUNT) code = TEXT_ENCODING_NONE;
 
-  TextCodecData** p = &_TextCodec_d[code];
+  TextCodecData** p = &TextCodec_d[code];
   TextCodecData*  v = AtomicCore<TextCodecData*>::get(p);
 
   enum { CREATING_NOW = 1 };
@@ -1620,7 +1623,7 @@ static TextCodecData* _TextCodec_create(uint32_t code)
   // Create.
   if (AtomicCore<TextCodecData*>::cmpXchg(p, (TextCodecData*)NULL, (TextCodecData*)CREATING_NOW))
   {
-    v = _TextCodec_items[code].create(_TextCodec_items[code]);
+    v = TextCodec_items[code].create(TextCodec_items[code]);
     AtomicCore<TextCodecData*>::set(p, v);
     goto _End;
   }
@@ -1629,7 +1632,7 @@ static TextCodecData* _TextCodec_create(uint32_t code)
   // This is very rare situation, but it can happen!
   while ((v = AtomicCore<TextCodecData*>::get(p)) == (TextCodecData*)CREATING_NOW)
   {
-    Thread::_yield();
+    Thread::yield();
   }
   if (FOG_IS_NULL(v)) return NULL;
 
@@ -1643,18 +1646,18 @@ _End:
 // ============================================================================
 
 TextCodec::TextCodec() :
-  _d(_TextCodec_ref(((TextCodec*)_cache)[TEXT_CODEC_CACHE_NONE]._d))
+  _d(TextCodec_ref(((TextCodec*)_cache)[TEXT_CODEC_CACHE_NONE]._d))
 {
 }
 
 TextCodec::TextCodec(const TextCodec& other) :
-  _d(_TextCodec_ref(other._d))
+  _d(TextCodec_ref(other._d))
 {
 }
 
 TextCodec::~TextCodec()
 {
-  _TextCodec_deref(_d);
+  TextCodec_deref(_d);
 }
 
 // ============================================================================
@@ -1666,10 +1669,10 @@ err_t TextCodec::createFromCode(uint32_t code)
   if (code >= TEXT_ENCODING_COUNT)
     return ERR_RT_INVALID_ARGUMENT;
 
-  TextCodecData* newd = _TextCodec_create(code);
+  TextCodecData* newd = TextCodec_create(code);
   if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
-  _TextCodec_deref(atomicPtrXchg(&_d, newd));
+  TextCodec_deref(atomicPtrXchg(&_d, newd));
   return ERR_OK;
 }
 
@@ -1678,9 +1681,9 @@ err_t TextCodec::createFromMime(const char* mime)
   uint32_t i;
   size_t mimeLength = strlen(mime);
 
-  for (i = 0; i != FOG_ARRAY_SIZE(_TextCodec_items); i++)
+  for (i = 0; i != FOG_ARRAY_SIZE(TextCodec_items); i++)
   {
-    if (_TextCodec_mimeCompare(_TextCodec_items[i].mime, mime, mimeLength))
+    if (TextCodec_mimeCompare(TextCodec_items[i].mime, mime, mimeLength))
       return createFromCode(i);
   }
 
@@ -1731,8 +1734,8 @@ err_t TextCodec::createFromBom(const void* data, size_t length)
 
 void TextCodec::reset()
 {
-  _TextCodec_deref(
-    atomicPtrXchg(&_d, _TextCodec_ref(((TextCodec *)_cache)[TEXT_CODEC_CACHE_NONE]._d))
+  TextCodec_deref(
+    atomicPtrXchg(&_d, TextCodec_ref(((TextCodec *)_cache)[TEXT_CODEC_CACHE_NONE]._d))
   );
 }
 
@@ -1747,7 +1750,7 @@ err_t TextCodec::encode(ByteArray& dst, const Utf16& src, TextCodecState* state,
   return _d->encode(_d, dst, src.getData(), src.getLength(), state, handler);
 }
 
-err_t TextCodec::encode(ByteArray& dst, const String& src, TextCodecState* state, 
+err_t TextCodec::encode(ByteArray& dst, const String& src, TextCodecState* state,
   TextCodecHandler* handler, uint32_t cntOp) const
 {
   if (cntOp == CONTAINER_OP_REPLACE) dst.clear();
@@ -1774,7 +1777,7 @@ err_t TextCodec::decode(String& dst, const ByteArray& src, TextCodecState* state
 
 TextCodec& TextCodec::operator=(const TextCodec& other)
 {
-  _TextCodec_deref(atomicPtrXchg(&_d, _TextCodec_ref(other._d)));
+  TextCodec_deref(atomicPtrXchg(&_d, TextCodec_ref(other._d)));
   return *this;
 }
 
@@ -1785,33 +1788,33 @@ TextCodec& TextCodec::operator=(const TextCodec& other)
 uint8_t TextCodec::_cache[sizeof(void*) * TEXT_CODEC_CACHE_COUNT];
 
 // ============================================================================
-// [Fog::Core - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _core_textcodec_init(void)
+FOG_NO_EXPORT void TextCodec_init(void)
 {
   // Create the default text-codec handler.
   _TextCodecHandler_default.init();
 
   // Initialize the 'd' cache.
-  Memory::zero(_TextCodec_d, sizeof(void*) * TEXT_ENCODING_COUNT);
+  Memory::zero(TextCodec_d, sizeof(void*) * TEXT_ENCODING_COUNT);
 
   // Initialize the cached codecs.
   TextCodec* cache = (TextCodec*)TextCodec::_cache;
 
   // LOCAL codec is initially initialized to LATIN-1.
-  cache[TEXT_CODEC_CACHE_NONE ]._d = _TextCodec_create(TEXT_ENCODING_NONE     );
-  cache[TEXT_CODEC_CACHE_ASCII]._d = _TextCodec_create(TEXT_ENCODING_ISO8859_1);
-  cache[TEXT_CODEC_CACHE_LOCAL]._d = _TextCodec_create(TEXT_ENCODING_ISO8859_1);
-  cache[TEXT_CODEC_CACHE_UTF8 ]._d = _TextCodec_create(TEXT_ENCODING_UTF8     );
-  cache[TEXT_CODEC_CACHE_UTF16]._d = _TextCodec_create(TEXT_ENCODING_UTF16    );
-  cache[TEXT_CODEC_CACHE_UTF32]._d = _TextCodec_create(TEXT_ENCODING_UTF32    );
+  cache[TEXT_CODEC_CACHE_NONE ]._d = TextCodec_create(TEXT_ENCODING_NONE     );
+  cache[TEXT_CODEC_CACHE_ASCII]._d = TextCodec_create(TEXT_ENCODING_ISO8859_1);
+  cache[TEXT_CODEC_CACHE_LOCAL]._d = TextCodec_create(TEXT_ENCODING_ISO8859_1);
+  cache[TEXT_CODEC_CACHE_UTF8 ]._d = TextCodec_create(TEXT_ENCODING_UTF8     );
+  cache[TEXT_CODEC_CACHE_UTF16]._d = TextCodec_create(TEXT_ENCODING_UTF16    );
+  cache[TEXT_CODEC_CACHE_UTF32]._d = TextCodec_create(TEXT_ENCODING_UTF32    );
 
-  // Initialize the local 8-bit text codec. 
-  cache[TEXT_CODEC_CACHE_LOCAL].createFromMime(_TextCodec_getCodeset());
+  // Initialize the local 8-bit text codec.
+  cache[TEXT_CODEC_CACHE_LOCAL].createFromMime(TextCodec_getCodeset());
 }
 
-FOG_NO_EXPORT void _core_textcodec_fini(void)
+FOG_NO_EXPORT void TextCodec_fini(void)
 {
   TextCodec* cache = (TextCodec*)TextCodec::_cache;
 
@@ -1824,9 +1827,9 @@ FOG_NO_EXPORT void _core_textcodec_fini(void)
   cache[TEXT_CODEC_CACHE_UTF32].~TextCodec();
 
   // Destroy the 'd' cache.
-  for (size_t i = 0; i != FOG_ARRAY_SIZE(_TextCodec_d); i++)
+  for (size_t i = 0; i != FOG_ARRAY_SIZE(TextCodec_d); i++)
   {
-    if (_TextCodec_d[i]) _TextCodec_deref(_TextCodec_d[i]);
+    if (TextCodec_d[i]) TextCodec_deref(TextCodec_d[i]);
   }
 
   // Destroy the default text-codec handler.

@@ -8,7 +8,7 @@
 #define _FOG_G2D_WIN_UXTHEMELIBRARY_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Library/Library.h>
 #include <Fog/Core/System/Object.h>
 #include <Fog/Gui/Global/Constants.h>

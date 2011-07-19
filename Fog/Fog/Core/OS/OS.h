@@ -8,7 +8,7 @@
 #define _FOG_CORE_OS_OS_H
 
 // [Dependencies]
-#include <Fog/Core/Config/Config.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Tools/String.h>
 
 namespace Fog {

@@ -8,7 +8,7 @@
 #define _FOG_G2D_PAINTING_RASTERPAINTRENDER_P_H
 
 // [Dependencies]
-#include <Fog/G2d/Global/Constants.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/G2d/Painting/RasterPaintConstants_p.h>
 #include <Fog/G2d/Painting/RasterPaintStructs_p.h>
 
@@ -65,7 +65,7 @@ extern FOG_NO_EXPORT RasterRenderVTable _RasterRender_vtable[RASTER_MODE_COUNT][
 // [Fog::RasterRender - Initializer]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_painter_init_raster_render(void);
+FOG_NO_EXPORT void Painter_initRasterRender(void);
 
 //! @}
 

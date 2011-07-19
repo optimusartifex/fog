@@ -418,13 +418,13 @@ enum WINDOW_FLAGS
   //! @brief Flag to indicate the maximum of window hints
   WINDOW_HINTS_MASK = 0xFFFFFF00,
 
-  //! @brief Marks the window as not resizeable
+  //! @brief Marks the window as non-resizeable
   //!
   //! The window could not be resized at all. This will overwrite
   //! resize feature of window frame flag (e.g. WINDOW_NATIVE)
   WINDOW_FIXED_SIZE = (1 << 8),
 
-  //! @brief Marks the window as not moveable
+  //! @brief Marks the window as non-movable
   //!
   //! The window could not be dragged using the window decoration
   WINDOW_DRAGABLE = (1 << 9),
@@ -641,9 +641,9 @@ enum KEY_CODE
   KEY_SYS_REQ              = 317,
   KEY_BREAK                = 318,
   KEY_MENU                 = 319,
-  KEY_POWER                = 320, //!< @brief Macintosh power key.
-  KEY_EURO                 = 321, //!< @brief Some european keyboards.
-  KEY_ALPHA                = 322, //!< @brief Selects letters on a numeric keypad (for celphones and similar devices).
+  KEY_POWER                = 320, //!< @brief Mac power key.
+  KEY_EURO                 = 321, //!< @brief Euro key.
+  KEY_ALPHA                = 322, //!< @brief Select letters on a numeric keypad.
 
   KEY_COMPOSE              = 400,
 

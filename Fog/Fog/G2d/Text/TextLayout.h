@@ -9,13 +9,9 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/Static.h>
-#include <Fog/Core/Global/Swap.h>
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/TextChunk.h>
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Painting/PaintDeviceInfo.h>
 #include <Fog/G2d/Text/Font.h>
 

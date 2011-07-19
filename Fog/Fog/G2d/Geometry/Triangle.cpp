@@ -9,12 +9,12 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Internal_Core_p.h>
+#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Internals_p.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/Transform.h>
 #include <Fog/G2d/Geometry/Triangle.h>
-#include <Fog/G2d/Global/Init_G2d_p.h>
 
 namespace Fog {
 
@@ -23,7 +23,7 @@ namespace Fog {
 // ============================================================================
 
 template<typename NumT>
-static err_t FOG_CDECL _TriangleT_getBoundingBox(const NumT_(Point)* self,
+static err_t FOG_CDECL TriangleT_getBoundingBox(const NumT_(Point)* self,
   NumT_(Box)* dst,
   const NumT_(Transform)* tr)
 {
@@ -56,7 +56,7 @@ static err_t FOG_CDECL _TriangleT_getBoundingBox(const NumT_(Point)* self,
 // ============================================================================
 
 template<typename NumT>
-static bool FOG_CDECL _TriangleT_hitTest(const NumT_(Point)* self,
+static bool FOG_CDECL TriangleT_hitTest(const NumT_(Point)* self,
   const NumT_(Point)* pt)
 {
   // Hit-Test using Barycentric Technique.
@@ -89,16 +89,16 @@ static bool FOG_CDECL _TriangleT_hitTest(const NumT_(Point)* self,
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_triangle_init(void)
+FOG_NO_EXPORT void Triangle_init(void)
 {
-  _g2d.trianglef.getBoundingBox = _TriangleT_getBoundingBox<float>;
-  _g2d.triangled.getBoundingBox = _TriangleT_getBoundingBox<double>;
+  _api.trianglef.getBoundingBox = TriangleT_getBoundingBox<float>;
+  _api.triangled.getBoundingBox = TriangleT_getBoundingBox<double>;
 
-  _g2d.trianglef.hitTest = _TriangleT_hitTest<float>;
-  _g2d.triangled.hitTest = _TriangleT_hitTest<double>;
+  _api.trianglef.hitTest = TriangleT_hitTest<float>;
+  _api.triangled.hitTest = TriangleT_hitTest<double>;
 }
 
 } // Fog namespace

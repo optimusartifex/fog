@@ -9,7 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Memory/Ops.h>
 #include <Fog/Core/Tools/String.h>
 

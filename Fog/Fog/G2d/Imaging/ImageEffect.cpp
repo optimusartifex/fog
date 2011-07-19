@@ -4,7 +4,7 @@
 // MIT, See COPYING file in package
 
 // [Dependencies]
-#include <Fog/G2d/Global/Init_G2d_p.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/G2d/Imaging/ImageEffect.h>
 
 namespace Fog {
@@ -67,23 +67,16 @@ void ImageEffect::reset()
 Static<ImageEffectData> ImageEffect::_dnull;
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_imageeffect_init(void)
+FOG_NO_EXPORT void ImageEffect_init(void)
 {
   ImageEffectData* d = ImageEffect::_dnull.instancep();
 
   d->refCount.init(1);
   d->destroy = NULL; // Never called.
   d->type = IMAGE_EFFECT_NONE;
-}
-
-FOG_NO_EXPORT void _g2d_imageeffect_fini(void)
-{
-  ImageEffectData* d = ImageEffect::_dnull.instancep();
-
-  d->refCount.deref();
 }
 
 } // Fog namespace

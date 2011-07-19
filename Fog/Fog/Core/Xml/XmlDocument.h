@@ -10,8 +10,7 @@
 // [Dependencies]
 #include <Fog/Core/Collection/Hash.h>
 #include <Fog/Core/Collection/List.h>
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/Range.h>
 #include <Fog/Core/Tools/String.h>
@@ -27,7 +26,6 @@ namespace Fog {
 // [Forward Declarations]
 // ============================================================================
 
-struct Stream;
 struct XmlIdAttribute;
 struct XmlDomReader;
 

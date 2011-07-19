@@ -9,12 +9,9 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Tools/TextChunk.h>
 #include <Fog/Core/Tools/TextIterator.h>
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Text/TextLayout.h>
 
 namespace Fog {
@@ -135,7 +132,7 @@ err_t TextLayout::_updateLayout()
     Char c = cur[0];
     cur++;
 
-    if (c.ch() < 32)
+    if (c.getValue() < 32)
     {
       const Char* endLine = NULL;
 

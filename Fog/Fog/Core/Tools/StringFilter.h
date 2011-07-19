@@ -8,8 +8,7 @@
 #define _FOG_CORE_TOOLS_STRINGFILTER_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Tools/String.h>
 
 namespace Fog {
@@ -34,8 +33,8 @@ struct FOG_API StringFilter
   // [Public]
   // --------------------------------------------------------------------------
 
-  virtual Range indexOf(const Char* str, size_t slen, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
-  virtual Range lastIndexOf(const Char* str, size_t slen, uint cs = CASE_SENSITIVE, const Range& range = Range(0)) const;
+  virtual Range indexOf(const Char* str, size_t slen, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
+  virtual Range lastIndexOf(const Char* str, size_t slen, uint cs = CASE_SENSITIVE, const Range& range = Range()) const;
 
   // --------------------------------------------------------------------------
   // [Interface]

@@ -13,14 +13,10 @@
 #endif // FOG_OS_WINDOWS
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Library/Library.h>
 #include <Fog/Core/Tools/String.h>
-#include <Fog/G2d/Global/Constants.h>
-#include <Fog/G2d/Global/Init_G2d_p.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageCodec.h>
 #include <Fog/G2d/Imaging/ImageCodecProvider.h>
@@ -132,11 +128,12 @@ struct FOG_NO_EXPORT GdipDecoder : public ImageDecoder
   // [Members]
   // --------------------------------------------------------------------------
 
-  //! @brief JPEG, PNG or TIFF parameters.
-  GdipCommonParams _params;
-
   //! @brief IStream bridge.
   IStream* _istream;
+  //! @brief Gdi+ library.
+  GdipLibrary* _gdip;
+  //! @brief JPEG, PNG or TIFF parameters.
+  GdipCommonParams _params;
 
   //! @brief Gdi+ shadow image instance.
   GpImage* _gpImage;
@@ -183,11 +180,12 @@ struct FOG_NO_EXPORT GdipEncoder : public ImageEncoder
   // [Members]
   // --------------------------------------------------------------------------
 
-  //! @brief JPEG, PNG or TIFF parameters.
-  GdipCommonParams _params;
-
   //! @brief IStream bridge.
   IStream* _istream;
+  //! @brief Gdi+ library.
+  GdipLibrary* _gdip;
+  //! @brief JPEG, PNG or TIFF parameters.
+  GdipCommonParams _params;
 };
 
 } // Fog namespace

@@ -9,7 +9,8 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Internal_Core_p.h>
+#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Internals_p.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/Internals_p.h>
@@ -17,7 +18,6 @@
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/QBezier.h>
-#include <Fog/G2d/Global/Init_G2d_p.h>
 
 namespace Fog {
 
@@ -35,7 +35,7 @@ namespace Fog {
 // ============================================================================
 
 template<typename NumT>
-static err_t FOG_CDECL _QBezierT_getBoundingBox(const NumT_(Point)* self, NumT_(Box)* dst)
+static err_t FOG_CDECL QBezierT_getBoundingBox(const NumT_(Point)* self, NumT_(Box)* dst)
 {
   // Init pMin/pMax - self[0].
   NumT_(Point) pMin = self[0];
@@ -62,7 +62,7 @@ static err_t FOG_CDECL _QBezierT_getBoundingBox(const NumT_(Point)* self, NumT_(
 // ============================================================================
 
 template<typename NumT>
-static err_t FOG_CDECL _QBezierT_getSplineBBox(const NumT_(Point)* self, size_t length, NumT_(Box)* dst)
+static err_t FOG_CDECL QBezierT_getSplineBBox(const NumT_(Point)* self, size_t length, NumT_(Box)* dst)
 {
   size_t i;
 
@@ -111,7 +111,7 @@ static err_t FOG_CDECL _QBezierT_getSplineBBox(const NumT_(Point)* self, size_t 
 // Implementation based on segfaultlabs.com 'Quadratic Bezier Curve Length':
 //   http://segfaultlabs.com/docs/quadratic-bezier-curve-length
 
-static double _QBezierT_getLength_private(
+static double QBezierT_getLength_private(
   double p0x, double p0y,
   double p1x, double p1y,
   double p2x, double p2y)
@@ -139,10 +139,10 @@ static double _QBezierT_getLength_private(
 }
 
 template<typename NumT>
-static void FOG_CDECL _QBezierT_getLength(const NumT_(Point)* self, NumT* length)
+static void FOG_CDECL QBezierT_getLength(const NumT_(Point)* self, NumT* length)
 {
   // Always using 'double' to get maximum precision.
-  *length = (NumT)_QBezierT_getLength_private(
+  *length = (NumT)QBezierT_getLength_private(
     self[0].x, self[0].y,
     self[1].x, self[1].y,
     self[2].x, self[2].y);
@@ -164,7 +164,7 @@ static void FOG_CDECL _QBezierT_getLength(const NumT_(Point)* self, NumT* length
   } while(0)
 
 template<typename NumT>
-static err_t FOG_CDECL _QBezierT_flatten(
+static err_t FOG_CDECL QBezierT_flatten(
   const NumT_(Point)* self,
   NumT_(Path)& dst,
   uint8_t initialCommand,
@@ -346,22 +346,22 @@ _InvalidNumber:
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_qbezier_init(void)
+FOG_NO_EXPORT void QBezier_init(void)
 {
-  _g2d.quadcurvef.getBoundingBox = _QBezierT_getBoundingBox<float>;
-  _g2d.quadcurved.getBoundingBox = _QBezierT_getBoundingBox<double>;
+  _api.quadcurvef.getBoundingBox = QBezierT_getBoundingBox<float>;
+  _api.quadcurved.getBoundingBox = QBezierT_getBoundingBox<double>;
 
-  _g2d.quadcurvef.getSplineBBox = _QBezierT_getSplineBBox<float>;
-  _g2d.quadcurved.getSplineBBox = _QBezierT_getSplineBBox<double>;
+  _api.quadcurvef.getSplineBBox = QBezierT_getSplineBBox<float>;
+  _api.quadcurved.getSplineBBox = QBezierT_getSplineBBox<double>;
 
-  _g2d.quadcurvef.getLength = _QBezierT_getLength<float>;
-  _g2d.quadcurved.getLength = _QBezierT_getLength<double>;
+  _api.quadcurvef.getLength = QBezierT_getLength<float>;
+  _api.quadcurved.getLength = QBezierT_getLength<double>;
 
-  _g2d.quadcurvef.flatten = _QBezierT_flatten<float>;
-  _g2d.quadcurved.flatten = _QBezierT_flatten<double>;
+  _api.quadcurvef.flatten = QBezierT_flatten<float>;
+  _api.quadcurved.flatten = QBezierT_flatten<double>;
 }
 
 } // Fog namespace

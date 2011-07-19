@@ -9,11 +9,11 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Internal_Core_p.h>
+#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Internals_p.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/Chord.h>
-#include <Fog/G2d/Global/Init_G2d_p.h>
 
 namespace Fog {
 
@@ -22,7 +22,7 @@ namespace Fog {
 // ============================================================================
 
 template<typename NumT>
-static bool FOG_CDECL _ChordT_hitTest(const NumT_(Chord)* self, const NumT_(Point)* pt)
+static bool FOG_CDECL ChordT_hitTest(const NumT_(Chord)* self, const NumT_(Point)* pt)
 {
   NumT cx = self->center.x;
   NumT cy = self->center.y;
@@ -87,13 +87,13 @@ static bool FOG_CDECL _ChordT_hitTest(const NumT_(Chord)* self, const NumT_(Poin
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_chord_init(void)
+FOG_NO_EXPORT void Chord_init(void)
 {
-  _g2d.chordf.hitTest = _ChordT_hitTest<float>;
-  _g2d.chordd.hitTest = _ChordT_hitTest<double>;
+  _api.chordf.hitTest = ChordT_hitTest<float>;
+  _api.chordd.hitTest = ChordT_hitTest<double>;
 }
 
 } // Fog namespace

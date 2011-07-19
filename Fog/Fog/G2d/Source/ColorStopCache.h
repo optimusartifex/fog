@@ -8,7 +8,7 @@
 #define _FOG_G2D_SOURCE_COLORSTOPCACHE_H
 
 // [Dependencies]
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Memory/Alloc.h>
 #include <Fog/G2d/Source/Color.h>

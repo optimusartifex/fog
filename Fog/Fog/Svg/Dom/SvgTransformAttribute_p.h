@@ -8,7 +8,7 @@
 #define _FOG_SVG_DOM_SVGTRANSFORMATTRIBUTE_P_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Xml/XmlAttribute.h>
 #include <Fog/Core/Xml/XmlElement.h>
 #include <Fog/G2d/Geometry/Transform.h>

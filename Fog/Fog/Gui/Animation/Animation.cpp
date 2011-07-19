@@ -105,13 +105,14 @@ Animation::~Animation()
 void Animation::onStart()
 {
   //called from Dispatcher after animation was inserted into listener queue
-  _starttime = TimeTicks::highResNow();
+  _starttime = TimeTicks::now(TICKS_PRECISION_HIGH);
+
   if (_type == ANIMATION_FIXED_TIME)
   {
     _endtime = _starttime + getDuration();
-    //store in _step the value for 1 ms for easy calculate of _position
-    //based on elapsed time since start
-    _step = (float) (1.0f / getDuration().inMilliseconds());
+    // Store in _step the value for 1 ms for easy calculation of _position
+    // based on elapsed time since start.
+    _step = 1.0f / getDuration().getMillisecondsF();
   }
 }
 
@@ -153,7 +154,7 @@ void Animation::onTimer(TimerEvent* e)
   else
   {
     // Dynamically calculate position based on time elapsed since start.
-    TimeTicks now = TimeTicks::highResNow();
+    TimeTicks now = TimeTicks::now(TICKS_PRECISION_HIGH);
     if (now >= _endtime)
     {
       if (_direction == ANIMATION_BACKWARD)
@@ -170,7 +171,7 @@ void Animation::onTimer(TimerEvent* e)
     {
       TimeDelta delta = now - _starttime;
       //in _step the value for one ms is stored
-      _position = delta.inMilliseconds() * _step;
+      _position = _step * delta.getMillisecondsF();
 
       if (_position > 1.0f)
       {

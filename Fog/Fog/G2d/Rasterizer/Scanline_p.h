@@ -9,10 +9,8 @@
 
 // [Dependencies]
 #include <Fog/Core/Face/Face_C.h>
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Memory/ZoneAllocator_p.h>
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Rasterizer/Span_p.h>
 
 namespace Fog {

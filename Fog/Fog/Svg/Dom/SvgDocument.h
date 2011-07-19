@@ -9,7 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Xml/XmlDocument.h>
 #include <Fog/G2d/Geometry/Size.h>
 #include <Fog/G2d/Tools/Dpi.h>

@@ -4,17 +4,17 @@
 // MIT, See COPYING file in package
 
 // [Dependencies]
-#include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Math/FloatControl.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Tools/Byte.h>
 #include <Fog/Core/Tools/ByteArray.h>
 #include <Fog/Core/Tools/Char.h>
-#include <Fog/Core/Tools/CharUtil.h>
+#include <Fog/Core/Tools/CharData.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringUtil.h>
 
+// [Dependencies - C]
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
@@ -45,7 +45,7 @@ err_t validateUtf8(const char* str, size_t len, size_t* invalidPos)
   {
     uint8_t c0 = strCur[0];
 
-    size_t clen = utf8LengthTable[c0];
+    size_t clen = Unicode::utf8GetSize(c0);
     if (!clen) { err = ERR_STRING_INVALID_UTF8; break; }
     if (remain < clen) { err = ERR_STRING_TRUNCATED; break; }
 
@@ -70,11 +70,11 @@ err_t validateUtf16(const Char* str, size_t len, size_t* invalidPos)
     if (srcCur == srcEnd) return ERR_OK;
     uc = *srcCur++;
 
-    if (Char::isSurrogateLead(uc))
+    if (Char::isHiSurrogate(uc))
     {
       if (srcCur == srcEnd) { err = ERR_STRING_TRUNCATED; break; }
       uc = *srcCur++;
-      if (!Char::isSurrogateTrail(uc)) { err = ERR_STRING_INVALID_UTF16; break; }
+      if (!Char::isLoSurrogate(uc)) { err = ERR_STRING_INVALID_UTF16; break; }
     }
     else
     {
@@ -98,7 +98,7 @@ FOG_API err_t getNumUtf8Chars(const char* str, size_t len, size_t* charsCount)
   {
     uint8_t c0 = strCur[0];
 
-    size_t clen = utf8LengthTable[c0];
+    size_t clen = Unicode::utf8GetSize(c0);
     if (!clen) { err = ERR_STRING_INVALID_UTF8; break; }
     if (remain < clen) { err = ERR_STRING_TRUNCATED; break; }
 
@@ -125,11 +125,11 @@ FOG_API err_t getNumUtf16Chars(const Char* str, size_t len, size_t* charsCount)
     if (srcCur == srcEnd) break;
     uc = *srcCur++;
 
-    if (Char::isSurrogateLead(uc))
+    if (Char::isHiSurrogate(uc))
     {
       if (srcCur == srcEnd) { err = ERR_STRING_TRUNCATED; break; }
       uc = *srcCur++;
-      if (!Char::isSurrogateTrail(uc)) { err = ERR_STRING_INVALID_UTF16; break; }
+      if (!Char::isLoSurrogate(uc)) { err = ERR_STRING_INVALID_UTF16; break; }
     }
     else
     {
@@ -152,7 +152,7 @@ bool unicodeToLatin1(char* dst, const Char* src, size_t length)
 
   for (i = length; i; i--, src++, dst++)
   {
-    if ((uc = src->ch()) > 255) { uc = '?'; ok = false; }
+    if ((uc = src->getValue()) > 255) { uc = '?'; ok = false; }
     *dst = (uint8_t)uc;
   }
 
@@ -3222,7 +3222,7 @@ err_t fromHex(ByteArray& dst, const ByteArray& src, uint32_t cntOp)
   return ERR_OK;
 }
 
-err_t toHex(ByteArray& dst, const ByteArray& src, uint32_t cntOp, int outputCase)
+err_t toHex(ByteArray& dst, const ByteArray& src, uint32_t cntOp, int textCase)
 {
   size_t srcLength = src.getLength();
   size_t growBy = srcLength << 1;
@@ -3235,7 +3235,7 @@ err_t toHex(ByteArray& dst, const ByteArray& src, uint32_t cntOp, int outputCase
   uint8_t c0;
   uint8_t c1;
 
-  uint8_t hx = (outputCase == OUTPUT_CASE_LOWER)
+  uint8_t hx = (textCase == TEXT_CASE_LOWER)
     ? (uint8_t)'a' - ((uint8_t)'9' + 1U)
     : (uint8_t)'A' - ((uint8_t)'9' + 1U);
 
@@ -3508,22 +3508,22 @@ err_t toBase64(String& dst, const char* src, size_t srcLength, uint32_t cntOp)
 #define __G_GENERATE
 
 #define CHAR_TYPE char
-#define CHAR_IS_SPACE(x) Byte::isSpace(x)
-#define CHAR_IS_ALNUM(x) Byte::isAlnum(x)
+#define CHAR_IS_SPACE(x) Byte::isAsciiSpace(x)
+#define CHAR_IS_NUMLET(x) Byte::isAsciiNumlet(x)
 #define CHAR_SIZE 1
 #include <Fog/Core/Tools/StringUtil_gen.cpp>
 #undef CHAR_SIZE
-#undef CHAR_IS_ALNUM
+#undef CHAR_IS_NUMLET
 #undef CHAR_IS_SPACE
 #undef CHAR_TYPE
 
 #define CHAR_TYPE Char
 #define CHAR_IS_SPACE(x) ((x).isSpace())
-#define CHAR_IS_ALNUM(x) ((x).isAlnum())
+#define CHAR_IS_NUMLET(x) ((x).isAsciiNumlet())
 #define CHAR_SIZE 2
 #include <Fog/Core/Tools/StringUtil_gen.cpp>
 #undef CHAR_SIZE
-#undef CHAR_IS_ALNUM
+#undef CHAR_IS_NUMLET
 #undef CHAR_IS_SPACE
 #undef CHAR_TYPE
 

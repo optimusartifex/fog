@@ -8,7 +8,7 @@
 #define _FOG_G2D_PAINTING_RASTERPAINTUTIL_P_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Convert.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Rect.h>

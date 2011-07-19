@@ -9,6 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/G2d/Source/Color.h>
 
 namespace Fog {
@@ -34,10 +35,10 @@ struct FOG_NO_EXPORT ColorAnalyzer
   static uint32_t analyzeAlpha64(const uint8_t* data, sysint_t stride, int w, int h, int aPos, int inc);
 
   static FOG_INLINE uint32_t analyzeAlphaArgb32(const uint8_t* data, sysint_t stride, int w, int h)
-  { return analyzeAlpha32(data, stride, w, h, ARGB32_ABYTE, 4); }
+  { return analyzeAlpha32(data, stride, w, h, PIXEL_ARGB32_POS_A, 4); }
 
   static FOG_INLINE uint32_t analyzeAlphaArgb64(const uint8_t* data, sysint_t stride, int w, int h)
-  { return analyzeAlpha32(data, stride, w, h, ARGB64_AWORD, 8); }
+  { return analyzeAlpha32(data, stride, w, h, PIXEL_ARGB64_POS_A, 8); }
 };
 
 //! @}

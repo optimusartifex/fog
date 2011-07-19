@@ -13,10 +13,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Init_Core_p.h>
-#include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Tools/ByteArray.h>
 #include <Fog/Core/Tools/ByteArrayTmp_p.h>
 #include <Fog/Core/Tools/Locale.h>
@@ -137,7 +134,7 @@ err_t Locale::setChar(uint32_t id, Char value)
 err_t Locale::create(const String& locale)
 {
   char localeA[512];
-  if (!StringUtil::unicodeToLatin1(localeA, locale.getData(), locale.getLength())) 
+  if (!StringUtil::unicodeToLatin1(localeA, locale.getData(), locale.getLength()))
     return ERR_RT_INVALID_ARGUMENT;
 
   err_t err = ERR_OK;
@@ -195,10 +192,10 @@ static Static<Locale> _Locale_dposix_instance;
 static Static<Locale> _Locale_duser_instance;
 
 // ============================================================================
-// [Fog::Core - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _core_locale_init(void)
+FOG_NO_EXPORT void Locale_init(void)
 {
   _Locale_dnull.init();
   _Locale_dnull->refCount.init(1);
@@ -222,17 +219,6 @@ FOG_NO_EXPORT void _core_locale_init(void)
 
   Locale::_duser = _Locale_duser_instance.instancep();
   Locale::_duser->_d = _Locale_duser.instancep();
-}
-
-FOG_NO_EXPORT void _core_locale_fini(void)
-{
-  Locale::_duser = NULL;
-  Locale::_dposix = NULL;
-  Locale::_dnull = NULL;
-
-  _Locale_duser.destroy();
-  _Locale_dposix.destroy();
-  _Locale_dnull.destroy();
 }
 
 } // Fog namespace

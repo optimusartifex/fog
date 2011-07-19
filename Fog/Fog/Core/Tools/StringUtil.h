@@ -8,6 +8,7 @@
 #define _FOG_CORE_TOOLS_STRINGUTIL_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Tools/Char.h>
 
 #include <string.h>
@@ -179,7 +180,7 @@ FOG_API err_t atod(const Char* str, size_t length, double* dst, Char decimalPoin
 // ============================================================================
 
 FOG_API err_t fromHex(ByteArray& dst, const ByteArray& src, uint32_t cntOp = CONTAINER_OP_REPLACE);
-FOG_API err_t toHex(ByteArray& dst, const ByteArray& src, uint32_t cntOp = CONTAINER_OP_REPLACE, int outputCase = OUTPUT_CASE_UPPER);
+FOG_API err_t toHex(ByteArray& dst, const ByteArray& src, uint32_t cntOp = CONTAINER_OP_REPLACE, int textCase = TEXT_CASE_UPPER);
 
 FOG_API err_t fromBase64(ByteArray& dst, const ByteArray& src, uint32_t cntOp = CONTAINER_OP_REPLACE);
 FOG_API err_t fromBase64(ByteArray& dst, const String& src, uint32_t cntOp = CONTAINER_OP_REPLACE);

@@ -9,9 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Debug.h>
-#include <Fog/Core/Global/Init_Core_p.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Threading/Thread.h>
 #include <Fog/Core/Threading/ThreadPool.h>
@@ -81,7 +79,7 @@ ThreadPool::~ThreadPool()
     if (used)
     {
       Debug::dbgFunc("Fog::ThreadPool", "~ThreadPool()", "Destroying instance, but some threads are still used, waiting...\n");
-      while (_usedThreads != NULL) Thread::_yield();
+      while (_usedThreads != NULL) Thread::yield();
     }
   }
 
@@ -97,12 +95,13 @@ err_t ThreadPool::getThread(Thread** threads, int workId)
   return getThreads(threads, 1, workId);
 }
 
-err_t ThreadPool::getThreads(Thread** threads, size_t count, int workId)
+err_t ThreadPool::getThreads(Thread** threads, size_t _count, int workId)
 {
   AutoLock locked(_lock);
 
   err_t err = ERR_OK;
-  size_t i;
+  uint i;
+  uint count = (uint)_count;
 
   for (i = 0; i < count; i++)
   {
@@ -256,10 +255,7 @@ ThreadPool* ThreadPool::getInstance()
 
 Thread* ThreadPool::_createThread()
 {
-  String threadName;
-  threadName.format("Fog::ThreadPool #", _numThreads);
-
-  Thread* thread = fog_new Thread(threadName);
+  Thread* thread = fog_new Thread();
   if (FOG_IS_NULL(thread)) return NULL;
 
   // Update statistics.
@@ -289,15 +285,15 @@ void ThreadPool::releaseAllAvailable()
 }
 
 // ============================================================================
-// [Fog::Core - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _core_threadpool_init(void)
+FOG_NO_EXPORT void ThreadPool_init(void)
 {
   _core_threadpool_global.init();
 }
 
-FOG_NO_EXPORT void _core_threadpool_fini(void)
+FOG_NO_EXPORT void ThreadPool_fini(void)
 {
   _core_threadpool_global.destroy();
 }

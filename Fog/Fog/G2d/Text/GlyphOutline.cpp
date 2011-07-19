@@ -9,7 +9,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Static.h>
 #include <Fog/Core/Memory/Alloc.h>
 #include <Fog/G2d/Text/GlyphOutline.h>
 
@@ -99,10 +98,10 @@ GlyphOutline& GlyphOutline::operator=(const GlyphOutline& other)
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_glyphoutline_init(void)
+FOG_NO_EXPORT void GlyphOutline_init(void)
 {
   GlyphOutlineData* d = _GlyphOutline_dnull.instancep();
 
@@ -111,7 +110,7 @@ FOG_NO_EXPORT void _g2d_glyphoutline_init(void)
   d->outline.init();
 }
 
-FOG_NO_EXPORT void _g2d_glyphoutline_fini(void)
+FOG_NO_EXPORT void GlyphOutline_fini(void)
 {
   GlyphOutlineData* d = _GlyphOutline_dnull.instancep();
 

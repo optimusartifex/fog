@@ -8,7 +8,7 @@
 #define _FOG_SVG_DOM_SVGRADIALGRADIENTELEMENT_P_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Svg/Dom/SvgCoordAttribute_p.h>
 #include <Fog/Svg/Dom/SvgAbstractGradientElement_p.h>
 

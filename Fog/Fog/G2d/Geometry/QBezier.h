@@ -8,9 +8,7 @@
 #define _FOG_G2D_GEOMETRY_QUADCURVE_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/Uninitialized.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Ops.h>
@@ -18,19 +16,11 @@
 #include <Fog/G2d/Geometry/Math2d.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
-#include <Fog/G2d/Global/Api.h>
 
 namespace Fog {
 
 //! @addtogroup Fog_G2d_Geometry
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct QBezierF;
-struct QBezierD;
 
 // ============================================================================
 // [Fog::QBezierF]
@@ -43,16 +33,29 @@ struct FOG_NO_EXPORT QBezierF
   // --------------------------------------------------------------------------
 
   FOG_INLINE QBezierF() {}
-  FOG_INLINE QBezierF(_Uninitialized) {}
 
   FOG_INLINE QBezierF(const PointF& p0, const PointF& p1, const PointF& p2)
-  { p[0] = p0; p[1] = p1; p[2] = p2; }
+  {
+    p[0] = p0;
+    p[1] = p1;
+    p[2] = p2;
+  }
 
   FOG_INLINE QBezierF(float x0, float y0, float x1, float y1, float x2, float y2)
-  { p[0].set(x0, y0); p[1].set(x1, y1); p[2].set(x2, y2); }
+  {
+    p[0].set(x0, y0);
+    p[1].set(x1, y1);
+    p[2].set(x2, y2);
+  }
 
-  FOG_INLINE QBezierF(const PointF* pts)
-  { p[0] = pts[0]; p[1] = pts[1]; p[2] = pts[2]; }
+  explicit FOG_INLINE QBezierF(_Uninitialized) {}
+
+  explicit FOG_INLINE QBezierF(const PointF* pts)
+  {
+    p[0] = pts[0];
+    p[1] = pts[1];
+    p[2] = pts[2];
+  }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -75,7 +78,7 @@ struct FOG_NO_EXPORT QBezierF
   FOG_INLINE float getLength() const
   {
     float length;
-    _g2d.quadcurvef.getLength(p, &length);
+    _api.quadcurvef.getLength(p, &length);
     return length;
   }
 
@@ -83,7 +86,12 @@ struct FOG_NO_EXPORT QBezierF
   // [Reset]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void reset() { p[0].reset(); p[1].reset(); p[2].reset(); }
+  FOG_INLINE void reset()
+  {
+    p[0].reset();
+    p[1].reset();
+    p[2].reset();
+  }
 
   // --------------------------------------------------------------------------
   // [BoundingBox / BoundingRect]
@@ -91,12 +99,12 @@ struct FOG_NO_EXPORT QBezierF
 
   FOG_INLINE err_t getBoundingBox(BoxF& dst) const
   {
-    return _g2d.quadcurvef.getBoundingBox(p, &dst);
+    return _api.quadcurvef.getBoundingBox(p, &dst);
   }
 
   FOG_INLINE err_t getBoundingRect(RectF& dst) const
   {
-    err_t err = _g2d.quadcurvef.getBoundingBox(p, reinterpret_cast<BoxF*>(&dst));
+    err_t err = _api.quadcurvef.getBoundingBox(p, reinterpret_cast<BoxF*>(&dst));
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -119,7 +127,7 @@ struct FOG_NO_EXPORT QBezierF
 
   FOG_INLINE err_t flatten(PathF& dst, uint8_t initialCommand, float flatness) const
   {
-    return _g2d.quadcurvef.flatten(p, dst, initialCommand, flatness);
+    return _api.quadcurvef.flatten(p, dst, initialCommand, flatness);
   }
 
   // --------------------------------------------------------------------------
@@ -152,17 +160,17 @@ struct FOG_NO_EXPORT QBezierF
 
   static FOG_INLINE err_t getBoundingBox(const QBezierF* self, BoxF* dst)
   {
-    return _g2d.quadcurvef.getBoundingBox(self->p, dst);
+    return _api.quadcurvef.getBoundingBox(self->p, dst);
   }
 
   static FOG_INLINE err_t getBoundingBox(const PointF* self, BoxF* dst)
   {
-    return _g2d.quadcurvef.getBoundingBox(self, dst);
+    return _api.quadcurvef.getBoundingBox(self, dst);
   }
 
   static FOG_INLINE err_t getSplineBBox(const PointF* self, size_t length, BoxF* dst)
   {
-    return _g2d.quadcurvef.getSplineBBox(self, length, dst);
+    return _api.quadcurvef.getSplineBBox(self, length, dst);
   }
 
   static FOG_INLINE void splitHalf(const PointF* self, PointF* left, PointF* rght)
@@ -207,12 +215,12 @@ struct FOG_NO_EXPORT QBezierF
 
   static FOG_INLINE err_t flatten(const QBezierF* self, PathF& dst, uint8_t initialCommand, float flatness)
   {
-    return _g2d.quadcurvef.flatten(self->p, dst, initialCommand, flatness);
+    return _api.quadcurvef.flatten(self->p, dst, initialCommand, flatness);
   }
 
   static FOG_INLINE err_t flatten(const PointF* self, PathF& dst, uint8_t initialCommand, float flatness)
   {
-    return _g2d.quadcurvef.flatten(self, dst, initialCommand, flatness);
+    return _api.quadcurvef.flatten(self, dst, initialCommand, flatness);
   }
 
   // --------------------------------------------------------------------------
@@ -233,16 +241,29 @@ struct FOG_NO_EXPORT QBezierD
   // --------------------------------------------------------------------------
 
   FOG_INLINE QBezierD() {}
-  FOG_INLINE QBezierD(_Uninitialized) {}
 
   FOG_INLINE QBezierD(const PointD& p0, const PointD& p1, const PointD& p2)
-  { p[0] = p0; p[1] = p1; p[2] = p2; }
+  {
+    p[0] = p0;
+    p[1] = p1;
+    p[2] = p2;
+  }
 
   FOG_INLINE QBezierD(double x0, double y0, double x1, double y1, double x2, double y2)
-  { p[0].set(x0, y0); p[1].set(x1, y1); p[2].set(x2, y2); }
+  {
+    p[0].set(x0, y0);
+    p[1].set(x1, y1);
+    p[2].set(x2, y2);
+  }
 
-  FOG_INLINE QBezierD(const PointD* pts)
-  { p[0] = pts[0]; p[1] = pts[1]; p[2] = pts[2]; }
+  explicit FOG_INLINE QBezierD(_Uninitialized) {}
+
+  explicit FOG_INLINE QBezierD(const PointD* pts)
+  {
+    p[0] = pts[0];
+    p[1] = pts[1];
+    p[2] = pts[2];
+  }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -265,7 +286,7 @@ struct FOG_NO_EXPORT QBezierD
   FOG_INLINE double getLength() const
   {
     double length;
-    _g2d.quadcurved.getLength(p, &length);
+    _api.quadcurved.getLength(p, &length);
     return length;
   }
 
@@ -273,7 +294,12 @@ struct FOG_NO_EXPORT QBezierD
   // [Reset]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void reset() { p[0].reset(); p[1].reset(); p[2].reset(); }
+  FOG_INLINE void reset()
+  {
+    p[0].reset();
+    p[1].reset();
+    p[2].reset();
+  }
 
   // --------------------------------------------------------------------------
   // [BoundingBox / BoundingRect]
@@ -281,12 +307,12 @@ struct FOG_NO_EXPORT QBezierD
 
   FOG_INLINE err_t getBoundingBox(BoxD& dst) const
   {
-    return _g2d.quadcurved.getBoundingBox(p, &dst);
+    return _api.quadcurved.getBoundingBox(p, &dst);
   }
 
   FOG_INLINE err_t getBoundingRect(RectD& dst) const
   {
-    err_t err = _g2d.quadcurved.getBoundingBox(p, reinterpret_cast<BoxD*>(&dst));
+    err_t err = _api.quadcurved.getBoundingBox(p, reinterpret_cast<BoxD*>(&dst));
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -309,7 +335,7 @@ struct FOG_NO_EXPORT QBezierD
 
   FOG_INLINE err_t flatten(PathD& dst, uint8_t initialCommand, double flatness) const
   {
-    return _g2d.quadcurved.flatten(p, dst, initialCommand, flatness);
+    return _api.quadcurved.flatten(p, dst, initialCommand, flatness);
   }
 
   // --------------------------------------------------------------------------
@@ -342,17 +368,17 @@ struct FOG_NO_EXPORT QBezierD
 
   static FOG_INLINE err_t getBoundingBox(const QBezierD* self, BoxD* dst)
   {
-    return _g2d.quadcurved.getBoundingBox(self->p, dst);
+    return _api.quadcurved.getBoundingBox(self->p, dst);
   }
 
   static FOG_INLINE err_t getBoundingBox(const PointD* self, BoxD* dst)
   {
-    return _g2d.quadcurved.getBoundingBox(self, dst);
+    return _api.quadcurved.getBoundingBox(self, dst);
   }
 
   static FOG_INLINE err_t getSplineBBox(const PointD* self, size_t length, BoxD* dst)
   {
-    return _g2d.quadcurved.getSplineBBox(self, length, dst);
+    return _api.quadcurved.getSplineBBox(self, length, dst);
   }
 
   static FOG_INLINE void splitHalf(const PointD* self, PointD* left, PointD* rght)
@@ -397,12 +423,12 @@ struct FOG_NO_EXPORT QBezierD
 
   static FOG_INLINE err_t flatten(const QBezierD* self, PathD& dst, uint8_t initialCommand, double flatness)
   {
-    return _g2d.quadcurved.flatten(self->p, dst, initialCommand, flatness);
+    return _api.quadcurved.flatten(self->p, dst, initialCommand, flatness);
   }
 
   static FOG_INLINE err_t flatten(const PointD* self, PathD& dst, uint8_t initialCommand, double flatness)
   {
-    return _g2d.quadcurved.flatten(self, dst, initialCommand, flatness);
+    return _api.quadcurved.flatten(self, dst, initialCommand, flatness);
   }
 
   // --------------------------------------------------------------------------

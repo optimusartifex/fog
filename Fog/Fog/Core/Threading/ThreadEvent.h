@@ -8,10 +8,7 @@
 #define _FOG_CORE_THREADING_THREADEVENT_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Threading/Atomic.h>
 
 // [Dependencies - Windows]
@@ -30,12 +27,6 @@ namespace Fog {
 
 //! @addtogroup Fog_Core_Threading
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct TimeDelta;
 
 // ============================================================================
 // [Fog::ThreadEvent]

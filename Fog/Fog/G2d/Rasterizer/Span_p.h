@@ -8,8 +8,7 @@
 #define _FOG_G2D_RASTERIZER_SPAN_P_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/G2d/Global/Constants.h>
+#include <Fog/Core/Global/Global.h>
 
 namespace Fog {
 
@@ -22,7 +21,7 @@ namespace Fog {
 
 //! @brief Helper constant to determine how many constant pixels are
 //! profitable for pure CMask span instance. Minimum is 1, but recommended
-//! are 4 or more (it depends to available SIMD instructions per platform).
+//! are 4 or more (it depends on the  available SIMD instructions per platform).
 enum { SPAN_C_THRESHOLD = 4 };
 
 // ============================================================================

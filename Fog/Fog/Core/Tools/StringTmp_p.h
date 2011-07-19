@@ -75,10 +75,8 @@ struct StringTmp : public String
 
   FOG_INLINE void reset()
   {
-    if ((void*)_d != (void*)&_storage)
-    {
-      atomicPtrXchg(&_d, StringData::adopt((void*)&_storage, N))->deref();
-    }
+    _d->deref();
+    _d = StringData::adopt((void*)&_storage, N);
   }
 
   // --------------------------------------------------------------------------

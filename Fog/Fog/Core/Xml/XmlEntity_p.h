@@ -8,6 +8,7 @@
 #define _FOG_CORE_XML_XMLENTITY_P_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Tools/ByteArray.h>
 #include <Fog/Core/Tools/Char.h>
 #include <Fog/Core/Tools/String.h>

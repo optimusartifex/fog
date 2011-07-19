@@ -9,9 +9,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Debug.h>
-#include <Fog/Core/Global/Static.h>
 #include <Fog/Core/Cpu/Cpu.h>
 #include <Fog/Core/Face/Face_C.h>
 #include <Fog/Core/Math/Math.h>
@@ -28,8 +25,6 @@
 #include <Fog/G2d/Geometry/PathClipper.h>
 #include <Fog/G2d/Geometry/PathStroker.h>
 #include <Fog/G2d/Geometry/Transform.h>
-#include <Fog/G2d/Global/Api.h>
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageBits.h>
 #include <Fog/G2d/Imaging/ImageEffect.h>
@@ -59,8 +54,8 @@ namespace Fog {
 // ============================================================================
 
 // Called by all 'fill' functions. This macro simply ensures that all fill
-// parameters are correct (it's possible to fill something). 
-// 
+// parameters are correct (it's possible to fill something).
+//
 // Please see RASTER_NO_PAINT flags to better understand how this works.
 #define _FOG_RASTER_ENTER_FILL_FUNC() \
   FOG_MACRO_BEGIN \
@@ -74,7 +69,7 @@ namespace Fog {
 // Called by all 'stroke' functions. This macro simply ensures that all stroke
 // parameters are correct (it's possible to stroke something). Note that stroke
 // is implemented normally using fill pipe-line, there are only few exceptions.
-// 
+//
 // Please see RASTER_NO_PAINT flags to better understand how this works.
 #define _FOG_RASTER_ENTER_STROKE_FUNC() \
   FOG_MACRO_BEGIN \
@@ -254,7 +249,7 @@ err_t FOG_CDECL RasterPainterImpl_::release(Painter& self)
   engine->finalizing = true;
   fog_delete(engine);
 
-  self._engine = _g2d.painter.getNullEngine();
+  self._engine = _api.painter.getNullEngine();
   self._vtable = self._engine->vtable;
 
   return ERR_OK;
@@ -2063,17 +2058,17 @@ err_t FOG_CDECL RasterPainterImpl_::applyTransformF(Painter& self, uint32_t tran
       d[1] = reinterpret_cast<const float*>(params)[1];
     case TRANSFORM_OP_ROTATE:
       d[0] = reinterpret_cast<const float*>(params)[0];
-      err = _g2d.transformd.transform(engine->userTransform, transformOp, d);
+      err = _api.transformd.transform(engine->userTransform, transformOp, d);
       break;
 
     case TRANSFORM_OP_FLIP:
-      err = _g2d.transformd.transform(engine->userTransform, transformOp, params);
+      err = _api.transformd.transform(engine->userTransform, transformOp, params);
       break;
 
     case TRANSFORM_OP_MULTIPLY:
     case TRANSFORM_OP_MULTIPLY_INV:
       tr.initCustom1(*reinterpret_cast<const TransformF*>(params));
-      err = _g2d.transformd.transform(engine->userTransform, transformOp, tr);
+      err = _api.transformd.transform(engine->userTransform, transformOp, tr);
       break;
   }
 
@@ -2089,7 +2084,7 @@ err_t FOG_CDECL RasterPainterImpl_::applyTransformD(Painter& self, uint32_t tran
   err_t err = ERR_OK;
 
   if ((engine->savedStateFlags & RASTER_STATE_TRANSFORM) == 0) saveTransform(engine);
-  err = _g2d.transformd.transform(engine->userTransform, transformOp, params);
+  err = _api.transformd.transform(engine->userTransform, transformOp, params);
   if (FOG_IS_ERROR(err)) engine->userTransform.reset();
 
   changedTransform(engine);
@@ -4829,11 +4824,11 @@ err_t RasterPainterImpl<_MODE>::doFillUntransformedPathF(RasterPaintEngine* engi
       {
         switch (engine->ctx.finalClipperF.initPath(path))
         {
-          case CLIPPER_INIT_ALREADY_CLIPPED:
+          case PATH_CLIPPER_STATUS_CLIPPED:
             engine->ctx.renderer->fillNormalizedPathF(engine->ctx, path, fillRule);
             return ERR_OK;
 
-          case CLIPPER_INIT_NOT_CLIPPED:
+          case PATH_CLIPPER_STATUS_MUST_CLIP:
             FOG_RETURN_ON_ERROR(engine->ctx.finalClipperF.continuePath(engine->ctx.tmpPathF[1], path));
             engine->ctx.renderer->fillNormalizedPathF(engine->ctx, engine->ctx.tmpPathF[1], fillRule);
             return ERR_OK;
@@ -4888,11 +4883,11 @@ err_t RasterPainterImpl<_MODE>::doFillUntransformedPathD(RasterPaintEngine* engi
       {
         switch (engine->ctx.finalClipperD.initPath(path))
         {
-          case CLIPPER_INIT_ALREADY_CLIPPED:
+          case PATH_CLIPPER_STATUS_CLIPPED:
             engine->ctx.renderer->fillNormalizedPathD(engine->ctx, path, fillRule);
             return ERR_OK;
 
-          case CLIPPER_INIT_NOT_CLIPPED:
+          case PATH_CLIPPER_STATUS_MUST_CLIP:
             FOG_RETURN_ON_ERROR(engine->ctx.finalClipperD.continuePath(engine->ctx.tmpPathD[1], path));
             engine->ctx.renderer->fillNormalizedPathD(engine->ctx, engine->ctx.tmpPathD[1], fillRule);
             return ERR_OK;
@@ -5089,7 +5084,7 @@ err_t RasterPainterImpl<_MODE>::doBlitUntransformedImageD(
 // [Fog::RasterPainterVTable]
 // ============================================================================
 
-RasterPainterVTable _RasterPaintEngine_vtable[RASTER_MODE_COUNT];
+RasterPainterVTable RasterPaintEngine_vtable[RASTER_MODE_COUNT];
 
 // ============================================================================
 // [Fog::RasterPaintEngine]
@@ -5111,10 +5106,10 @@ RasterPaintEngine::RasterPaintEngine() :
   metaRegion(Region::infinite()),
   userRegion(Region::infinite()),
   coreRegion(Region::infinite()),
-  stateAllocator(4000),
+  stateAllocator(16300),
   statePool(NULL),
   state(NULL),
-  pcAllocator(4000),
+  pcAllocator(16300),
   pcPool(NULL)
 {
   vtable = NULL;
@@ -5169,7 +5164,7 @@ err_t RasterPaintEngine::init(const ImageBits& imageBits, ImageData* imaged, uin
   FOG_RETURN_ON_ERROR(ctx._initPrecision(ctx.layer.precision));
 
   // Setup defaults.
-  vtable = &_RasterPaintEngine_vtable[RASTER_MODE_ST];
+  vtable = &RasterPaintEngine_vtable[RASTER_MODE_ST];
 
   RasterPainterImpl_::setupOps(this);
   RasterPainterImpl_::setupDefaultClip(this);
@@ -5185,15 +5180,15 @@ err_t RasterPaintEngine::switchTo(const ImageBits& imageBits, ImageData* imaged)
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-static FOG_INLINE bool _RasterPaintEngine_isFormatSupported(uint32_t format)
+static FOG_INLINE bool RasterPaintEngine_isFormatSupported(uint32_t format)
 {
   return format < IMAGE_FORMAT_COUNT && format != IMAGE_FORMAT_I8;
 }
 
-static FOG_INLINE bool _RasterPaintEngine_checkRect(const SizeI& size, const RectI& rect)
+static FOG_INLINE bool RasterPaintEngine_checkRect(const SizeI& size, const RectI& rect)
 {
   return !((uint)(rect.x) >= (uint)(size.w         ) ||
            (uint)(rect.y) >= (uint)(size.h         ) ||
@@ -5201,7 +5196,7 @@ static FOG_INLINE bool _RasterPaintEngine_checkRect(const SizeI& size, const Rec
            (uint)(rect.h) >  (uint)(size.h - rect.y) );
 }
 
-static err_t _RasterPaintEngine_prepareToImage(ImageBits& imageBits, Image& image, const RectI* rect)
+static err_t RasterPaintEngine_prepareToImage(ImageBits& imageBits, Image& image, const RectI* rect)
 {
   uint32_t format = image.getFormat();
 
@@ -5213,11 +5208,11 @@ static err_t _RasterPaintEngine_prepareToImage(ImageBits& imageBits, Image& imag
 
   if (rect)
   {
-    if (!_RasterPaintEngine_checkRect(image.getSize(), *rect))
+    if (!RasterPaintEngine_checkRect(image.getSize(), *rect))
       return ERR_RT_INVALID_ARGUMENT;
   }
 
-  if (!_RasterPaintEngine_isFormatSupported(format))
+  if (!RasterPaintEngine_isFormatSupported(format))
   {
     return ERR_IMAGE_UNSUPPORTED_FORMAT;
   }
@@ -5240,15 +5235,15 @@ static err_t _RasterPaintEngine_prepareToImage(ImageBits& imageBits, Image& imag
   return ERR_OK;
 }
 
-static err_t _RasterPaintEngine_prepareToImage(ImageBits& imageBits, const ImageBits& _src, const RectI* rect)
+static err_t RasterPaintEngine_prepareToImage(ImageBits& imageBits, const ImageBits& _src, const RectI* rect)
 {
   // Basic checks.
-  if (rect && !_RasterPaintEngine_checkRect(_src.size, *rect))
+  if (rect && !RasterPaintEngine_checkRect(_src.size, *rect))
   {
     return ERR_RT_INVALID_ARGUMENT;
   }
 
-  if (!_RasterPaintEngine_isFormatSupported(_src.format))
+  if (!RasterPaintEngine_isFormatSupported(_src.format))
   {
     return ERR_IMAGE_UNSUPPORTED_FORMAT;
   }
@@ -5266,7 +5261,7 @@ static err_t _RasterPaintEngine_prepareToImage(ImageBits& imageBits, const Image
   return ERR_OK;
 }
 
-static err_t FOG_CDECL _RasterPaintEngine_beginImage(Painter& self, Image& image, const RectI* rect, uint32_t initFlags)
+static err_t FOG_CDECL RasterPaintEngine_beginImage(Painter& self, Image& image, const RectI* rect, uint32_t initFlags)
 {
   err_t err;
 
@@ -5277,7 +5272,7 @@ static err_t FOG_CDECL _RasterPaintEngine_beginImage(Painter& self, Image& image
   if (self._engine) self._vtable->release(self);
 
   // Prepare.
-  if ((err = _RasterPaintEngine_prepareToImage(imageBits, image, rect)) != ERR_OK) goto _Fail;
+  if ((err = RasterPaintEngine_prepareToImage(imageBits, image, rect)) != ERR_OK) goto _Fail;
 
   // Create the raster painter engine.
   if ((engine = fog_new RasterPaintEngine()) == NULL)
@@ -5297,12 +5292,12 @@ static err_t FOG_CDECL _RasterPaintEngine_beginImage(Painter& self, Image& image
   return ERR_OK;
 
 _Fail:
-  self._engine = _g2d.painter.getNullEngine();
+  self._engine = _api.painter.getNullEngine();
   self._vtable = self._engine->vtable;
   return err;
 }
 
-static err_t FOG_CDECL _RasterPaintEngine_beginIBits(Painter& self, const ImageBits& _imageBits, const RectI* rect, uint32_t initFlags)
+static err_t FOG_CDECL RasterPaintEngine_beginIBits(Painter& self, const ImageBits& _imageBits, const RectI* rect, uint32_t initFlags)
 {
   err_t err;
 
@@ -5313,7 +5308,7 @@ static err_t FOG_CDECL _RasterPaintEngine_beginIBits(Painter& self, const ImageB
   if (self._engine) self._vtable->release(self);
 
   // Prepare.
-  if ((err = _RasterPaintEngine_prepareToImage(imageBits, _imageBits, rect)) != ERR_OK) goto _Fail;
+  if ((err = RasterPaintEngine_prepareToImage(imageBits, _imageBits, rect)) != ERR_OK) goto _Fail;
 
   // Create the raster painter engine.
   if ((engine = fog_new RasterPaintEngine()) == NULL)
@@ -5333,12 +5328,12 @@ static err_t FOG_CDECL _RasterPaintEngine_beginIBits(Painter& self, const ImageB
   return ERR_OK;
 
 _Fail:
-  self._engine = _g2d.painter.getNullEngine();
+  self._engine = _api.painter.getNullEngine();
   self._vtable = self._engine->vtable;
   return err;
 }
 
-static err_t FOG_CDECL _RasterPaintEngine_switchToImage(Painter& self, Image& image, const RectI* rect)
+static err_t FOG_CDECL RasterPaintEngine_switchToImage(Painter& self, Image& image, const RectI* rect)
 {
   err_t err;
   ImageBits imageBits(UNINITIALIZED);
@@ -5346,7 +5341,7 @@ static err_t FOG_CDECL _RasterPaintEngine_switchToImage(Painter& self, Image& im
   uint32_t deviceId;
 
   // Prepare.
-  if ((err = _RasterPaintEngine_prepareToImage(imageBits, image, rect)) != ERR_OK) goto _Fail;
+  if ((err = RasterPaintEngine_prepareToImage(imageBits, image, rect)) != ERR_OK) goto _Fail;
   if ((err = self.getDeviceId(deviceId)) != ERR_OK) goto _Fail;
 
   if (deviceId == PAINT_DEVICE_RASTER)
@@ -5355,7 +5350,7 @@ static err_t FOG_CDECL _RasterPaintEngine_switchToImage(Painter& self, Image& im
   }
   else
   {
-    return _g2d.painter.beginImage(self, image, rect, NO_FLAGS);
+    return _api.painter.beginImage(self, image, rect, NO_FLAGS);
   }
 
 _Fail:
@@ -5363,7 +5358,7 @@ _Fail:
   return err;
 }
 
-static err_t FOG_CDECL _RasterPaintEngine_switchToIBits(Painter& self, const ImageBits& _imageBits, const RectI* rect)
+static err_t FOG_CDECL RasterPaintEngine_switchToIBits(Painter& self, const ImageBits& _imageBits, const RectI* rect)
 {
   err_t err;
   ImageBits imageBits(UNINITIALIZED);
@@ -5371,35 +5366,31 @@ static err_t FOG_CDECL _RasterPaintEngine_switchToIBits(Painter& self, const Ima
   uint32_t deviceId;
 
   // Prepare.
-  if ((err = _RasterPaintEngine_prepareToImage(imageBits, _imageBits, rect)) != ERR_OK) goto _Fail;
+  if ((err = RasterPaintEngine_prepareToImage(imageBits, _imageBits, rect)) != ERR_OK) goto _Fail;
   if ((err = self.getDeviceId(deviceId)) != ERR_OK) goto _Fail;
 
   if (deviceId == PAINT_DEVICE_RASTER)
     return reinterpret_cast<RasterPaintEngine*>(self._engine)->switchTo(imageBits, NULL);
   else
-    return _g2d.painter.beginIBits(self, _imageBits, rect, NO_FLAGS);
+    return _api.painter.beginIBits(self, _imageBits, rect, NO_FLAGS);
 
 _Fail:
   self.end();
   return err;
 }
 
-FOG_NO_EXPORT void _g2d_painter_init_raster(void)
+FOG_NO_EXPORT void Painter_initRaster(void)
 {
-  _g2d.painter.beginImage = _RasterPaintEngine_beginImage;
-  _g2d.painter.beginIBits = _RasterPaintEngine_beginIBits;
+  _api.painter.beginImage = RasterPaintEngine_beginImage;
+  _api.painter.beginIBits = RasterPaintEngine_beginIBits;
 
-  _g2d.painter.switchToImage = _RasterPaintEngine_switchToImage;
-  _g2d.painter.switchToIBits = _RasterPaintEngine_switchToIBits;
+  _api.painter.switchToImage = RasterPaintEngine_switchToImage;
+  _api.painter.switchToIBits = RasterPaintEngine_switchToIBits;
 
-  RasterPainterImpl<RASTER_MODE_ST>::initVTable(_RasterPaintEngine_vtable[RASTER_MODE_ST]);
-  RasterPainterImpl<RASTER_MODE_MT>::initVTable(_RasterPaintEngine_vtable[RASTER_MODE_MT]);
+  RasterPainterImpl<RASTER_MODE_ST>::initVTable(RasterPaintEngine_vtable[RASTER_MODE_ST]);
+  RasterPainterImpl<RASTER_MODE_MT>::initVTable(RasterPaintEngine_vtable[RASTER_MODE_MT]);
 
-  _g2d_painter_init_raster_render();
-}
-
-FOG_NO_EXPORT void _g2d_painter_fini_raster(void)
-{
+  Painter_initRasterRender();
 }
 
 } // Fog namespace

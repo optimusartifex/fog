@@ -8,10 +8,9 @@
 #define _FOG_G2D_RENDER_RENDERSTRUCTS_P_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/G2d/Geometry/Transform.h>
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageConverter.h>
 #include <Fog/G2d/Imaging/ImagePalette.h>

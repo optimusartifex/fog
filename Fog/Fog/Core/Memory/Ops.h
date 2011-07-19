@@ -8,8 +8,7 @@
 #define _FOG_CORE_MEMORY_OPS_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Api.h>
-#include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Global.h>
 
 namespace Fog {
 namespace Memory {
@@ -45,12 +44,12 @@ static FOG_INLINE void write_8u(void* mem, uint64_t x) { ((uint64_t *)mem)[0] = 
 
 static FOG_INLINE void* copy(void* dst, const void* src, size_t size)
 {
-  return _core.memory.copy(dst, src, size);
+  return _api.memory.copy(dst, src, size);
 }
 
 static FOG_INLINE void* copy_nt(void* dst, const void* src, size_t size)
 {
-  return _core.memory.copy_nt(dst, src, size);
+  return _api.memory.copy_nt(dst, src, size);
 }
 
 // ============================================================================
@@ -189,7 +188,7 @@ static FOG_INLINE void copy_t(Type* dst, const Type* src)
 
 static FOG_INLINE void* move(void* dst, const void* src, size_t size)
 {
-  return _core.memory.move(dst, src, size);
+  return _api.memory.move(dst, src, size);
 }
 
 // ============================================================================
@@ -198,12 +197,12 @@ static FOG_INLINE void* move(void* dst, const void* src, size_t size)
 
 static FOG_INLINE void* set(void* dst, int c, size_t size)
 {
-  return _core.memory.set(dst, c, size);
+  return _api.memory.set(dst, c, size);
 }
 
 static FOG_INLINE void* set_nt(void* dst, int c, size_t size)
 {
-  return _core.memory.set_nt(dst, c, size);
+  return _api.memory.set_nt(dst, c, size);
 }
 
 // ============================================================================
@@ -212,12 +211,12 @@ static FOG_INLINE void* set_nt(void* dst, int c, size_t size)
 
 static FOG_INLINE void* zero(void* dst, size_t size)
 {
-  return _core.memory.zero(dst, size);
+  return _api.memory.zero(dst, size);
 }
 
 static FOG_INLINE void* zero_nt(void* dst, size_t size)
 {
-  return _core.memory.zero_nt(dst, size);
+  return _api.memory.zero_nt(dst, size);
 }
 
 // ============================================================================
@@ -492,7 +491,7 @@ static FOG_INLINE bool eq_t(const Type* dst, const Type* src)
 
 static FOG_INLINE void xchg(void* mem0, void* mem1, size_t size)
 {
-  _core.memory.xchg(mem0, mem1, size);
+  _api.memory.xchg(mem0, mem1, size);
 }
 
 // ============================================================================

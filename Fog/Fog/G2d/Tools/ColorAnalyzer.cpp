@@ -9,7 +9,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Tools/ColorAnalyzer_p.h>
 
 namespace Fog {

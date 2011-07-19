@@ -8,11 +8,9 @@
 #define _FOG_G2D_IMAGING_CODECS_PCXCODEC_P_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Tools/String.h>
-#include <Fog/G2d/Global/Constants.h>
-#include <Fog/G2d/Global/Init_G2d_p.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageCodec.h>
 #include <Fog/G2d/Imaging/ImageCodecProvider.h>

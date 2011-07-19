@@ -14,7 +14,7 @@
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
 #include <Fog/Core/DateTime/Time.h>
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/System/ListenerList.h>
 #include <Fog/Core/System/Task.h>
 #include <Fog/Core/Threading/Lock.h>

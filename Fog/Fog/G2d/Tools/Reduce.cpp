@@ -154,7 +154,7 @@ bool Reduce::analyze(const Image& image, bool discardAlphaChannel)
       return false;
   }
 
-  // Sort, optimize for PCX and all formats where compression depends to the
+  // Sort, optimize for PCX and all formats where compression depends on the
   // pixel value (the most used colors go first).
   qsort(e, _count, sizeof(Entity), _Reduce_compareAscent);
 

@@ -8,7 +8,7 @@
 #define _FOG_CORE_XML_XMLIDMANAGER_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Tools/String.h>
 
 namespace Fog {

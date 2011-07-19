@@ -8,9 +8,8 @@
 #define _FOG_G2D_IMAGING_IMAGEBITS_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/G2d/Geometry/Size.h>
-#include <Fog/G2d/Global/Constants.h>
 
 namespace Fog {
 
@@ -38,10 +37,6 @@ struct FOG_NO_EXPORT ImageBits
   {
   }
 
-  FOG_INLINE ImageBits(_Uninitialized)
-  {
-  }
-
   FOG_INLINE ImageBits(const ImageBits& other) :
     data(other.data),
     size(other.size),
@@ -57,6 +52,8 @@ struct FOG_NO_EXPORT ImageBits
     stride(stride)
   {
   }
+
+  explicit FOG_INLINE ImageBits(_Uninitialized) {}
 
   // --------------------------------------------------------------------------
   // [Consistency]

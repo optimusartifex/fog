@@ -47,11 +47,13 @@
 
 // Features setup.
 #define FOG_CC_HAVE_PARTIAL_TEMPLATE_SPECIALIZATION
+#define FOG_CC_HAVE_STANDARD_CHAR_TYPE
 
 // Visibility.
 //
 // Following code is better than the code we use, but in this case GCC shows
-// incredible count of warnings.
+// incredible number of warnings. So we assume that the default visibility is
+// "hidden" and Fog-API visibility is "default".
 //
 // #if __GNUC__ >= 4
 // # define FOG_NO_EXPORT __attribute__((visibility("hidden")))

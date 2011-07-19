@@ -8,8 +8,7 @@
 #define _FOG_CORE_MEMORY_ALLOC_H
 
 // [Dependencies]
-#include <Fog/Core/Config/Config.h>
-#include <Fog/Core/Global/Api.h>
+#include <Fog/Core/Global/Global.h>
 
 namespace Fog {
 namespace Memory {
@@ -23,22 +22,22 @@ namespace Memory {
 
 static FOG_INLINE void* alloc(size_t size)
 {
-  return _core.memory._m_alloc(size);
+  return _api.memory._m_alloc(size);
 }
 
 static FOG_INLINE void* calloc(size_t size)
 {
-  return _core.memory._m_calloc(size);
+  return _api.memory._m_calloc(size);
 }
 
 static FOG_INLINE void* realloc(void* addr, size_t size)
 {
-  return _core.memory._m_realloc(addr, size);
+  return _api.memory._m_realloc(addr, size);
 }
 
 static FOG_INLINE void free(void* addr)
 {
-  return _core.memory._m_free(addr);
+  return _api.memory._m_free(addr);
 }
 
 //! @}

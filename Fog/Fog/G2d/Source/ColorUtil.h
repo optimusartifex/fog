@@ -4,21 +4,21 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_SOURCE_COLORUTIL_H
-#define _FOG_G2D_SOURCE_COLORUTIL_H
+#ifndef _FOG_G2D_COLOR_COLORUTIL_H
+#define _FOG_G2D_COLOR_COLORUTIL_H
 
 // [Dependencies]
 #include <Fog/Core/Face/Face_C.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Source/ColorBase.h>
 
 #if defined(FOG_HARDCODE_SSE)
-#include <Fog/Core/Face/Face_SSE.h>
+# include <Fog/Core/Face/Face_SSE.h>
 #endif // FOG_HARDCODE
 
 #if defined(FOG_HARDCODE_SSE2)
-#include <Fog/Core/Face/Face_SSE2.h>
+# include <Fog/Core/Face/Face_SSE2.h>
 #endif // FOG_HARDCODE
 
 namespace Fog {
@@ -79,10 +79,10 @@ struct FOG_NO_EXPORT ColorUtil
     Face::m128iStore4(&argb32.p32, xmm0);
 #else
     argb32.u32 =
-      ((uint32_t)((int)(argbf[0] * (255.0f)) ) << ARGB32_ASHIFT) |
-      ((uint32_t)((int)(argbf[1] * (255.0f)) ) << ARGB32_RSHIFT) |
-      ((uint32_t)((int)(argbf[2] * (255.0f)) ) << ARGB32_GSHIFT) |
-      ((uint32_t)((int)(argbf[3] * (255.0f)) ) << ARGB32_BSHIFT) ;
+      ((uint32_t)((int)(argbf[0] * (255.0f)) ) << PIXEL_ARGB32_SHIFT_A) |
+      ((uint32_t)((int)(argbf[1] * (255.0f)) ) << PIXEL_ARGB32_SHIFT_R) |
+      ((uint32_t)((int)(argbf[2] * (255.0f)) ) << PIXEL_ARGB32_SHIFT_G) |
+      ((uint32_t)((int)(argbf[3] * (255.0f)) ) << PIXEL_ARGB32_SHIFT_B) ;
 #endif // FOG_HARDCODE
   }
 
@@ -137,10 +137,10 @@ struct FOG_NO_EXPORT ColorUtil
     Face::m128iStore8(&argb64.p64, xmm0);
 #else
     argb64.u64 =
-      ((uint64_t)((int)(argbf[0] * (65535.0f)) ) << ARGB64_ASHIFT) |
-      ((uint64_t)((int)(argbf[1] * (65535.0f)) ) << ARGB64_RSHIFT) |
-      ((uint64_t)((int)(argbf[2] * (65535.0f)) ) << ARGB64_GSHIFT) |
-      ((uint64_t)((int)(argbf[3] * (65535.0f)) ) << ARGB64_BSHIFT) ;
+      ((uint64_t)((int)(argbf[0] * (65535.0f)) ) << PIXEL_ARGB64_SHIFT_A) |
+      ((uint64_t)((int)(argbf[1] * (65535.0f)) ) << PIXEL_ARGB64_SHIFT_R) |
+      ((uint64_t)((int)(argbf[2] * (65535.0f)) ) << PIXEL_ARGB64_SHIFT_G) |
+      ((uint64_t)((int)(argbf[3] * (65535.0f)) ) << PIXEL_ARGB64_SHIFT_B) ;
 #endif // FOG_HARDCODE
   }
 
@@ -160,10 +160,10 @@ struct FOG_NO_EXPORT ColorUtil
 #else
     uint32_t c0 = argb32.u32;
 
-    dst[0] = (float)((c0 >> ARGB32_ASHIFT) & 0xFF) * (1.0f / 255.0f);
-    dst[1] = (float)((c0 >> ARGB32_RSHIFT) & 0xFF) * (1.0f / 255.0f);
-    dst[2] = (float)((c0 >> ARGB32_GSHIFT) & 0xFF) * (1.0f / 255.0f);
-    dst[3] = (float)((c0 >> ARGB32_BSHIFT) & 0xFF) * (1.0f / 255.0f);
+    dst[0] = (float)((c0 >> PIXEL_ARGB32_SHIFT_A) & 0xFF) * (1.0f / 255.0f);
+    dst[1] = (float)((c0 >> PIXEL_ARGB32_SHIFT_R) & 0xFF) * (1.0f / 255.0f);
+    dst[2] = (float)((c0 >> PIXEL_ARGB32_SHIFT_G) & 0xFF) * (1.0f / 255.0f);
+    dst[3] = (float)((c0 >> PIXEL_ARGB32_SHIFT_B) & 0xFF) * (1.0f / 255.0f);
 #endif // FOG_HARDCODE
   }
 
@@ -257,4 +257,4 @@ struct FOG_NO_EXPORT ColorUtil
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_SOURCE_COLORUTIL_H
+#endif // _FOG_G2D_COLOR_COLORUTIL_H

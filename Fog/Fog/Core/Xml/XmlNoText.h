@@ -8,8 +8,7 @@
 #define _FOG_CORE_XML_XMLNOTEXT_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/Range.h>
 #include <Fog/Core/Tools/String.h>

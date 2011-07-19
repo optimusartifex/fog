@@ -13,8 +13,7 @@
 #if defined(FOG_OS_WINDOWS)
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Win/Com.h>
 #include <Fog/Core/Win/ComStream_p.h>
 

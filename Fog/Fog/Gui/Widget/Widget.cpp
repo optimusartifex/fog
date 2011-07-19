@@ -10,7 +10,6 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
-#include <Fog/Core/Global/Static.h>
 #include <Fog/Core/System/Application.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/G2d/Tools/Region.h>

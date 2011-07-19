@@ -8,26 +8,15 @@
 #define _FOG_G2D_GEOMETRY_POINT_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/TypeInfo.h>
-#include <Fog/Core/Global/Uninitialized.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Ops.h>
-#include <Fog/G2d/Global/Api.h>
 
 namespace Fog {
 
 //! @addtogroup Fog_G2d_Geometry
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct PointI;
-struct PointF;
-struct PointD;
 
 // ============================================================================
 // [Fog::PointI]
@@ -41,15 +30,10 @@ struct FOG_NO_EXPORT PointI
   // --------------------------------------------------------------------------
 
   FOG_INLINE PointI() {}
-  FOG_INLINE PointI(_Uninitialized) {}
-
+  FOG_INLINE PointI(const PointI& other) : x(other.x), y(other.y) {}
   FOG_INLINE PointI(int px, int py) : x(px), y(py) {}
 
-  FOG_INLINE PointI(const PointI& other)
-  {
-    x = other.x;
-    y = other.y;
-  }
+  explicit FOG_INLINE PointI(_Uninitialized) {}
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -186,26 +170,11 @@ struct PointF
   // --------------------------------------------------------------------------
 
   FOG_INLINE PointF() {}
-  FOG_INLINE PointF(_Uninitialized) {}
+  FOG_INLINE PointF(const PointF& other) : x(other.x), y(other.y) {}
+  FOG_INLINE PointF(int px, int py) : x(float(px)), y(float(py)) {}
+  FOG_INLINE PointF(float px, float py) : x(px), y(py) {}
 
-  FOG_INLINE PointF(const PointF& other) :
-    x(other.x),
-    y(other.y)
-  {
-  }
-
-  FOG_INLINE PointF(int px, int py) :
-    x(float(px)),
-    y(float(py))
-  {
-  }
-
-  FOG_INLINE PointF(float px, float py) :
-    x(px),
-    y(py)
-  {
-  }
-
+  explicit FOG_INLINE PointF(_Uninitialized) {}
   explicit FOG_INLINE PointF(const PointI& other) { set(other); }
   explicit FOG_INLINE PointF(const PointD& other) { set(other); }
 
@@ -390,43 +359,15 @@ struct PointD
   // --------------------------------------------------------------------------
 
   FOG_INLINE PointD() {}
-  FOG_INLINE PointD(_Uninitialized) {}
+  FOG_INLINE PointD(int px, int py) : x(double(px)), y(double(py)) {}
+  FOG_INLINE PointD(float px, float py) : x(double(px)), y(double(py)) {}
 
-  FOG_INLINE PointD(int px, int py) :
-    x(double(px)),
-    y(double(py))
-  {
-  }
+  FOG_INLINE PointD(const PointD& other) : x(other.x), y(other.y) {}
+  FOG_INLINE PointD(double px, double py) : x(px), y(py) {}
 
-  FOG_INLINE PointD(float px, float py) :
-    x(double(px)),
-    y(double(py))
-  {
-  }
-
-  FOG_INLINE PointD(const PointD& other) :
-    x(other.x),
-    y(other.y)
-  {
-  }
-
-  FOG_INLINE PointD(double px, double py) :
-    x(px),
-    y(py)
-  {
-  }
-
-  explicit FOG_INLINE PointD(const PointI& other) :
-    x((double)other.x),
-    y((double)other.y)
-  {
-  }
-
-  explicit FOG_INLINE PointD(const PointF& other) :
-    x((double)other.x),
-    y((double)other.y)
-  {
-  }
+  explicit FOG_INLINE PointD(_Uninitialized) {}
+  explicit FOG_INLINE PointD(const PointI& other) : x((double)other.x), y((double)other.y) {}
+  explicit FOG_INLINE PointD(const PointF& other) : x((double)other.x), y((double)other.y) {}
 
   // --------------------------------------------------------------------------
   // [Accessors]

@@ -13,6 +13,7 @@
 
 // [Dependencies]
 #include <Fog/Core/DateTime/Time.h>
+#include <Fog/Core/Global/Api.h>
 #include <Fog/Core/System/Object.h>
 #include <Fog/Core/System/Task.h>
 
@@ -20,12 +21,6 @@ namespace Fog {
 
 //! @addtogroup Fog_Core_System
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct EventLoop;
 
 // ============================================================================
 // [Fog::Timer]

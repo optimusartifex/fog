@@ -991,7 +991,7 @@ err_t FOG_CDECL MyPainterImpl::flush(Painter& self, uint32_t flags)
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
 static void _g2d_painter_init_my()
@@ -1224,7 +1224,7 @@ static void _g2d_painter_fini_my()
 // [Fog::NullPainterVTable]
 // ============================================================================
 
-static PainterVTable _NullPaintEngine_vtable;
+static PainterVTable NullPaintEngine_vtable;
 
 // ============================================================================
 // [Fog::NullPainterImpl]
@@ -1707,22 +1707,22 @@ err_t FOG_CDECL NullPainterImpl::flush(Painter& self, uint32_t flags)
 // [Fog::NullPaintEngine - Statics]
 // ============================================================================
 
-static NullPaintEngine _NullPaintEngine_instance;
+static NullPaintEngine NullPaintEngine_instance;
 
-static PaintEngine* FOG_CDECL _NullPaintEngine_getNullEngine()
+static PaintEngine* FOG_CDECL NullPaintEngine_getNullEngine()
 {
-  return &_NullPaintEngine_instance;
+  return &NullPaintEngine_instance;
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_painter_init_null()
+FOG_NO_EXPORT void Painter_initNull()
 {
-  _g2d.painter.getNullEngine = _NullPaintEngine_getNullEngine;
+  _api.painter.getNullEngine = NullPaintEngine_getNullEngine;
 
-  PainterVTable& v = _NullPaintEngine_vtable;
+  PainterVTable& v = NullPaintEngine_vtable;
 
   // --------------------------------------------------------------------------
   // [AddRef / Release]
@@ -1943,11 +1943,7 @@ FOG_NO_EXPORT void _g2d_painter_init_null()
   // [NullPaintEngine]
   // --------------------------------------------------------------------------
 
-  _NullPaintEngine_instance.vtable = &_NullPaintEngine_vtable;
-}
-
-FOG_NO_EXPORT void _g2d_painter_fini_null()
-{
+  NullPaintEngine_instance.vtable = &NullPaintEngine_vtable;
 }
 
 } // Fog namespace

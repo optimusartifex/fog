@@ -9,7 +9,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Debug.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Threading/ThreadCondition.h>
 #include <Fog/Core/Threading/ThreadEvent.h>
@@ -41,7 +40,7 @@ void RasterWorker::run()
   RasterWorkerManager* wm = engine->wm;
 
 #if defined(FOG_DEBUG_RASTER_SYNC)
-  Debug::dbgMessage("Fog::RasterWorker[#%d]::run() - ThreadID=%d.\n", ctx.id, Thread::getCurrent()->getId());
+  Debug::dbgMessage("Fog::RasterWorker[#%d]::run() - ThreadID=%d.\n", ctx.id, Thread::getCurrentThreadId());
 #endif // FOG_DEBUG_RASTER_SYNC
 
 #if 0

@@ -9,7 +9,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Debug.h>
 #include <Fog/G2d/Painting/RasterPaintContext_p.h>
 
 namespace Fog {

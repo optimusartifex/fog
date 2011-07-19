@@ -9,7 +9,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringUtil.h>
@@ -327,7 +326,7 @@ __begin:
         {
           Char uc = XmlEntity::decode(begin, size_t( buffer - begin ));
           buffer++;
-          if (uc.ch())
+          if (!uc.isNull())
           {
             *p++ = uc;
             goto __begin;

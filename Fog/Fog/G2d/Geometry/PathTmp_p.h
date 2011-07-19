@@ -8,7 +8,7 @@
 #define _FOG_G2D_GEOMETRY_PATH_TMP_P_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/G2d/Geometry/Path.h>
 
 namespace Fog {

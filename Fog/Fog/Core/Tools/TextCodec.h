@@ -8,9 +8,7 @@
 #define _FOG_CORE_TOOLS_TEXTCODEC_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/Swap.h>
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Memory/Ops.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Tools/Char.h>
@@ -22,14 +20,6 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct TextCodecData;
-struct TextCodecHandler;
-struct TextCodecState;
-
-// ============================================================================
 // [Typedefs]
 // ============================================================================
 
@@ -37,7 +27,7 @@ struct TextCodecState;
 typedef void (FOG_CDECL *TextCodecDestroyFn)(TextCodecData* d);
 
 //! @brief Text-codec encode function.
-typedef err_t (FOG_CDECL *TextCodecEncodeFn)(const TextCodecData* d, 
+typedef err_t (FOG_CDECL *TextCodecEncodeFn)(const TextCodecData* d,
   ByteArray& dst, const Char* src, size_t srcLength, TextCodecState* state, TextCodecHandler* handler);
 
 //! @brief Text-codec decode function.

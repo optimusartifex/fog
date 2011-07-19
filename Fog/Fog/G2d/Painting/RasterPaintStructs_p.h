@@ -8,8 +8,7 @@
 #define _FOG_G2D_PAINTING_RASTERPAINTSTRUCTS_P_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Path.h>
@@ -18,7 +17,6 @@
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Geometry/Size.h>
 #include <Fog/G2d/Geometry/Transform.h>
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Painting/RasterPaintConstants_p.h>
 #include <Fog/G2d/Rasterizer/Rasterizer_p.h>

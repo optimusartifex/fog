@@ -38,7 +38,7 @@ void Task::destroy()
 
 void QuitTask::run()
 {
-  Thread::getCurrent()->getEventLoop()->quit();
+  Thread::getCurrentThread()->getEventLoop()->quit();
 }
 
 } // Fog namespace

@@ -9,9 +9,9 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Init_Core_p.h>
-#include <Fog/Core/Global/Internal_Core_p.h>
-#include <Fog/Core/Global/Swap.h>
+#include <Fog/Core/Global/Global.h>
+#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Internals_p.h>
 #include <Fog/Core/Math/Function.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Interval.h>
@@ -25,7 +25,7 @@ namespace Fog {
 // ============================================================================
 
 template<typename NumT>
-static err_t FOG_CDECL _MathT_integrate_GaussLegendre(NumT* dst, const NumT_(Function)& f, const NumT_(Interval)& interval, uint32_t steps)
+static err_t FOG_CDECL MathT_integrate_GaussLegendre(NumT* dst, const NumT_(Function)& f, const NumT_(Interval)& interval, uint32_t steps)
 {
   if (!interval.isValid())
     return ERR_RT_INVALID_ARGUMENT;
@@ -92,13 +92,13 @@ static err_t FOG_CDECL _MathT_integrate_GaussLegendre(NumT* dst, const NumT_(Fun
 }
 
 // ============================================================================
-// [Fog::Core - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _core_math_init_integrate(void)
+FOG_NO_EXPORT void Math_init_integrate(void)
 {
-  _core.mathf.integrate[MATH_INTEGRATION_METHOD_GAUSS] = _MathT_integrate_GaussLegendre<float>;
-  _core.mathd.integrate[MATH_INTEGRATION_METHOD_GAUSS] = _MathT_integrate_GaussLegendre<double>;
+  _api.mathf.integrate[MATH_INTEGRATION_METHOD_GAUSS] = MathT_integrate_GaussLegendre<float>;
+  _api.mathd.integrate[MATH_INTEGRATION_METHOD_GAUSS] = MathT_integrate_GaussLegendre<double>;
 }
 
 } // Fog namespace

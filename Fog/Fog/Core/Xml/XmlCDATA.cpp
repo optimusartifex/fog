@@ -9,7 +9,6 @@
 #endif
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Core/Xml/XmlCDATA.h>
 

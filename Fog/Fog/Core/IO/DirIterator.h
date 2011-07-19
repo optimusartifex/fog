@@ -8,7 +8,7 @@
 #define _FOG_CORE_IO_DIRITERATOR_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/IO/DirEntry.h>
 #include <Fog/Core/Tools/ByteArray.h>
 

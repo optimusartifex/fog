@@ -33,8 +33,8 @@ namespace Math {
 // [Fog::Math - IRound]
 // ============================================================================
 
-// According to MSDN the _M_IX86_FP is defined for x86 compilation. If the 
-// _M_IX86_FP is set to 2 then the SSE2-Enabled code generation is used, 
+// According to MSDN the _M_IX86_FP is defined for x86 compilation. If the
+// _M_IX86_FP is set to 2 then the SSE2-Enabled code generation is used,
 // otherwise the x87 floating point stack is used.
 //
 // Note 1: When compiling for AMD64 the _M_IX86_FP is usually defined to 0, but

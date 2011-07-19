@@ -9,11 +9,11 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Internal_Core_p.h>
+#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Internals_p.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/Pie.h>
-#include <Fog/G2d/Global/Init_G2d_p.h>
 
 namespace Fog {
 
@@ -22,7 +22,7 @@ namespace Fog {
 // ============================================================================
 
 template<typename NumT>
-static bool FOG_CDECL _PieT_hitTest(const NumT_(Pie)* self, const NumT_(Point)* pt)
+static bool FOG_CDECL PieT_hitTest(const NumT_(Pie)* self, const NumT_(Point)* pt)
 {
   NumT cx = self->center.x;
   NumT cy = self->center.y;
@@ -71,13 +71,13 @@ static bool FOG_CDECL _PieT_hitTest(const NumT_(Pie)* self, const NumT_(Point)* 
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_pie_init(void)
+FOG_NO_EXPORT void Pie_init(void)
 {
-  _g2d.pief.hitTest = _PieT_hitTest<float>;
-  _g2d.pied.hitTest = _PieT_hitTest<double>;
+  _api.pief.hitTest = PieT_hitTest<float>;
+  _api.pied.hitTest = PieT_hitTest<double>;
 }
 
 } // Fog namespace

@@ -16,15 +16,10 @@
 #include <Fog/Core/Face/Face_SSE.h>
 #include <Fog/Core/Face/Face_SSE2.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/TypeInfo.h>
 #include <Fog/Core/Tools/Byte.h>
 #include <Fog/Core/Tools/Char.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringUtil.h>
-#include <Fog/G2d/Global/Api.h>
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Source/Color.h>
 
 namespace Fog {
@@ -33,7 +28,7 @@ namespace Fog {
 // [Fog::Color - SetData]
 // ============================================================================
 
-static err_t FOG_CDECL _Color_setData_SSE2(Color& self, uint32_t modelExtended, const void* modelData)
+static err_t FOG_CDECL Color_setData_SSE2(Color& self, uint32_t modelExtended, const void* modelData)
 {
   Face::m128f xmm0;
   Face::m128f xmm1;
@@ -67,7 +62,7 @@ static err_t FOG_CDECL _Color_setData_SSE2(Color& self, uint32_t modelExtended, 
       self._model = modelExtended;
       self._hints = NO_FLAGS;
 
-      _g2d.color.convert[_COLOR_MODEL_ARGB32][modelExtended](&self._argb32, self._data);
+      _api.color.convert[_COLOR_MODEL_ARGB32][modelExtended](&self._argb32, self._data);
       return ERR_OK;
     }
 
@@ -143,12 +138,12 @@ static err_t FOG_CDECL _Color_setData_SSE2(Color& self, uint32_t modelExtended, 
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_color_init_sse2(void)
+FOG_NO_EXPORT void Color_initSSE2(void)
 {
-  _g2d.color.setData = _Color_setData_SSE2;
+  _api.color.setData = Color_setData_SSE2;
 }
 
 } // Fog namespace

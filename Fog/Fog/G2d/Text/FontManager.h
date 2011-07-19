@@ -9,26 +9,16 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/List.h>
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/Swap.h>
-#include <Fog/Core/Global/TypeInfo.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Tools/String.h>
-#include <Fog/G2d/Global/Constants.h>
 #include <Fog/G2d/Text/Font.h>
 
 namespace Fog {
 
 //! @addtogroup Fog_G2d_Text
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct FontFace;
-struct FontProvider;
 
 // ============================================================================
 // [Fog::FontManagerData]

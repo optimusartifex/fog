@@ -8,7 +8,7 @@
 #define _FOG_SVG_VISIT_SVGMEASURE_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
 

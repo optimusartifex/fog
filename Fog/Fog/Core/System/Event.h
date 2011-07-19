@@ -8,6 +8,7 @@
 #define _FOG_CORE_SYSTEM_EVENT_H
 
 // [Dependencies]
+#include <Fog/Core/Global/Api.h>
 #include <Fog/Core/System/Task.h>
 #include <Fog/Core/Tools/String.h>
 
@@ -15,13 +16,6 @@ namespace Fog {
 
 //! @addtogroup Fog_Core_System
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct Object;
-struct Timer;
 
 // ============================================================================
 // [Fog::Event]

@@ -21,7 +21,6 @@
 #include <Fog/G2d/Geometry/PathClipper.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Geometry/Transform.h>
-#include <Fog/G2d/Global/Api.h>
 
 namespace Fog {
 
@@ -29,7 +28,7 @@ namespace Fog {
 // [Fog::PathClipper - InitPath]
 // ============================================================================
 
-static uint32_t FOG_CDECL _PathClipperF_initPath_SSE(PathClipperF& self, const PathF& src)
+static uint32_t FOG_CDECL PathClipperF_initPath_SSE(PathClipperF& self, const PathF& src)
 {
   self._lastIndex = INVALID_INDEX;
 
@@ -61,7 +60,7 @@ static uint32_t FOG_CDECL _PathClipperF_initPath_SSE(PathClipperF& self, const P
     if (msk == 0xF)
     {
       _FOG_PATH_VERIFY_BOUNDING_BOX(src);
-      return CLIPPER_INIT_ALREADY_CLIPPED;
+      return PATH_CLIPPER_STATUS_CLIPPED;
     }
   }
 
@@ -194,23 +193,23 @@ static uint32_t FOG_CDECL _PathClipperF_initPath_SSE(PathClipperF& self, const P
   }
 
   // Path don't need to be clipped.
-  return CLIPPER_INIT_ALREADY_CLIPPED;
+  return PATH_CLIPPER_STATUS_CLIPPED;
 
 _MustClip:
   self._lastIndex = (size_t)(cmd - src.getCommands());
-  return CLIPPER_INIT_NOT_CLIPPED;
+  return PATH_CLIPPER_STATUS_MUST_CLIP;
 
 _Invalid:
-  return CLIPPER_INIT_INVALID_PATH;
+  return PATH_CLIPPER_STATUS_INVALID;
 }
 
 // ============================================================================
-// [Fog::G2d - Library Initializers]
+// [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void _g2d_pathclipper_init_sse(void)
+FOG_NO_EXPORT void PathClipper_initSSE(void)
 {
-  _g2d.pathclipperf.initPath = _PathClipperF_initPath_SSE;
+  _api.pathclipperf.initPath = PathClipperF_initPath_SSE;
 }
 
 } // Fog namespace

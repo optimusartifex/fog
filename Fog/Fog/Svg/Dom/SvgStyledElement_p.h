@@ -8,7 +8,7 @@
 #define _FOG_SVG_DOM_SVGSTYLEDELEMENT_P_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Svg/Dom/SvgElement.h>
 #include <Fog/Svg/Dom/SvgStyleAttribute_p.h>
 #include <Fog/Svg/Dom/SvgTransformAttribute_p.h>

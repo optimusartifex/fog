@@ -9,8 +9,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Global/Constants.h>
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Core/Xml/XmlDocument.h>
 #include <Fog/Core/Xml/XmlElement.h>

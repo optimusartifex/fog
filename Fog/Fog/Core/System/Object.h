@@ -11,9 +11,7 @@
 #include <Fog/Core/Collection/Hash.h>
 #include <Fog/Core/Collection/HashUtil.h>
 #include <Fog/Core/Collection/List.h>
-#include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Global/Constants.h>
-#include <Fog/Core/Global/Static.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/System/Delegate.h>
 #include <Fog/Core/System/Event.h>
 #include <Fog/Core/Threading/Atomic.h>

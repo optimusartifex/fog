@@ -22,7 +22,7 @@ namespace Fog {
 // [Fog::Rasterizer8 - Rect - Sweep]
 // ============================================================================
 
-static Span8* _Rasterizer8_Rect_sweepSimple(
+static Span8* Rasterizer8_Rect_sweepSimple(
   Rasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y)
 {
   y -= rasterizer->_boundingBox.y0;
@@ -52,12 +52,12 @@ static Span8* _Rasterizer8_Rect_sweepSimple(
 
   if (scanline.close() != ERR_OK) return NULL;
 #if defined(FOG_DEBUG_RASTERIZER)
-  _Rasterizer_dumpSpans(y, scanline.getSpans());
+  Rasterizer_dumpSpans(y, scanline.getSpans());
 #endif // FOG_DEBUG_RASTERIZER
   return scanline.getSpans();
 }
 
-static Span8* _Rasterizer8_Rect_sweepRegion(
+static Span8* Rasterizer8_Rect_sweepRegion(
   Rasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y,
   const BoxI* clipBoxes, size_t count)
 {
@@ -126,12 +126,12 @@ static Span8* _Rasterizer8_Rect_sweepRegion(
 
   if (scanline.close() != ERR_OK) return NULL;
 #if defined(FOG_DEBUG_RASTERIZER)
-  _Rasterizer_dumpSpans(y, scanline.getSpans());
+  Rasterizer_dumpSpans(y, scanline.getSpans());
 #endif // FOG_DEBUG_RASTERIZER
   return scanline.getSpans();
 }
 
-static Span8* _Rasterizer8_Rect_sweepSpans(
+static Span8* Rasterizer8_Rect_sweepSpans(
   Rasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y,
   const Span8* clipSpans)
 {
@@ -144,11 +144,11 @@ static Span8* _Rasterizer8_Rect_sweepSpans(
 // [Fog::Rasterizer8 - Rect - Init]
 // ============================================================================
 
-FOG_NO_EXPORT void _Rasterizer8_Rect_initSweepFunctions(Rasterizer8* rasterizer)
+FOG_NO_EXPORT void Rasterizer8_Rect_initSweepFunctions(Rasterizer8* rasterizer)
 {
-  rasterizer->_sweepSimpleFn = _Rasterizer8_Rect_sweepSimple;
-  rasterizer->_sweepRegionFn = _Rasterizer8_Rect_sweepRegion;
-  rasterizer->_sweepSpansFn  = _Rasterizer8_Rect_sweepSpans;
+  rasterizer->_sweepSimpleFn = Rasterizer8_Rect_sweepSimple;
+  rasterizer->_sweepRegionFn = Rasterizer8_Rect_sweepRegion;
+  rasterizer->_sweepSpansFn  = Rasterizer8_Rect_sweepSpans;
 }
 
 } // Fog namespace

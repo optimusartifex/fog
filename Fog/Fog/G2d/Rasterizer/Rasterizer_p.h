@@ -57,13 +57,13 @@ typedef Span8* (*RasterizerSweepSpansFn)(Rasterizer8* rasterizer, Scanline8& sca
 //! fill-types are specific to simple shapes like rect, line, and others...
 enum RASTERIZER_SHAPE
 {
-  //! @brief None.
+  //! @brief None (no command used yet).
   RASTERIZER_SHAPE_NONE = 0,
 
-  //! @brief Fill a path (universal).
+  //! @brief Fill a path (this is the most generic shape, always usable).
   RASTERIZER_SHAPE_PATH = 1,
 
-  //! @brief Fill a rect, subpixel accuracy.
+  //! @brief Fill a rect using subpixel accuracy.
   //!
   //! This kind of rasterizer is used to fill a simple rectangle shape.
   //!
@@ -71,7 +71,7 @@ enum RASTERIZER_SHAPE
   //! @c CellStorage.
   RASTERIZER_SHAPE_RECT = 2,
 
-  //! @brief Fill a rect XORed by another rect (stroke).
+  //! @brief Fill a rect XORed by another rect (stroke) using subpixel accuracy.
   //!
   //! This kind of rasterizer is used to fill a stroked rectangle with angular
   //! (miter join) corners.
@@ -465,7 +465,7 @@ struct FOG_NO_EXPORT Rasterizer8
     //! @brief Link to prevous cells.
     //!
     //! @note _prev contains pointer and cells counter. The pointer is always
-    //! allocated using 64-bytes alignment so there are 6 bits for counter.
+    //! allocated using 64-byte alignment so there are 6 bits for counter.
     uint8_t* _prev;
 
     //! @brief Cells.
@@ -604,7 +604,7 @@ struct FOG_NO_EXPORT Rasterizer8
     //! @brief Link to prevous cells.
     //!
     //! @note _prev contains pointer and cells counter. The pointer is always
-    //! allocated using 64-bytes alignment so there are 6 bits for counter.
+    //! allocated using 64-byte alignment so there are 6 bits for counter.
     uint8_t* _prev;
 
 #if FOG_ARCH_BITS == 32
@@ -787,7 +787,7 @@ struct FOG_NO_EXPORT Rasterizer8
     return _sweepSimpleFn(this, scanline, temp, y);
   }
 
-  //! @brief Enhanced version of @c sweep() that accepts a clip boxes.
+  //! @brief Enhanced version of @c sweep() that accepts clip boxes.
   //!
   //! This method is called by raster paint engine if clipping region is complex.
   FOG_INLINE Span8* sweep(Scanline8& scanline, MemoryBuffer& temp, int y, const BoxI* clipBoxes, size_t count)
@@ -795,7 +795,7 @@ struct FOG_NO_EXPORT Rasterizer8
     return _sweepRegionFn(this, scanline, temp, y, clipBoxes, count);
   }
 
-  //! @brief Enhanced version of @c sweep() that accepts a clip spans.
+  //! @brief Enhanced version of @c sweep() that accepts clip spans.
   //!
   //! This method is called by raster paint engine if clipping region is mask.
   FOG_INLINE Span8* sweep(Scanline8& scanline, MemoryBuffer& temp, int y, const Span8* clipSpans)
@@ -888,7 +888,7 @@ private:
 // ============================================================================
 
 #if defined(FOG_DEBUG_RASTERIZER)
-static void _Rasterizer_dumpSpans(int y, const Span8* span)
+static void Rasterizer_dumpSpans(int y, const Span8* span)
 {
   ByteArray b;
   b.appendFormat("Y=%d - ", y);

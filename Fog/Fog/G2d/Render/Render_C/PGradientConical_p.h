@@ -34,12 +34,17 @@ struct FOG_NO_EXPORT PGradientConical
     uint32_t spread = gradient.getGradientSpread();
 
     FOG_ASSERT(gradient.getGradientType() == GRADIENT_TYPE_CONICAL);
-    FOG_ASSERT(stops.getLength() >= 1);
     FOG_ASSERT(spread < GRADIENT_SPREAD_COUNT);
+
+    if (stops.isEmpty())
+    {
+      return Helpers::p_solid_create_color(ctx, dstFormat, Color(Argb32(0x00000000)));
+    }
 
     // ------------------------------------------------------------------------
     // [Transform input matrix to get the center point at (0, 0)].
     // ------------------------------------------------------------------------
+
     TransformD t(tr);
 
     double cx = gradient._pts[0].x;

@@ -1022,7 +1022,11 @@ static err_t FOG_CDECL Color_parse(Color& dst, const typename CharT::Stub& str, 
   if ((flags & COLOR_NAME_STRICT) == 0)
   {
     // Skip whitespaces.
-    while (CharT::isSpace(*cur)) { if (++cur == end) goto _Fail; }
+    while (CharT::isSpace(*cur))
+    {
+      if (++cur == end)
+        goto _Fail;
+    }
   }
 
   // --------------------------------------------------------------------------
@@ -1068,7 +1072,8 @@ static err_t FOG_CDECL Color_parse(Color& dst, const typename CharT::Stub& str, 
 _TryCssHex3:
         for (i = 0; i < 3; i++)
         {
-          if (!CharT::isAsciiXDigit(cur[i])) goto _Fail;
+          if (!CharT::isAsciiXDigit(cur[i]))
+            goto _Fail;
         }
 
         // The HEX letters were verified, parse the values.
@@ -1155,13 +1160,22 @@ _TryCssHex3:
 _ParseRrbOrHsv:
 
       // Skip whitespaces.
-      while (CharT::isSpace(*cur)) { if (++cur == end) goto _Fail; }
+      while (CharT::isSpace(*cur))
+      {
+        if (++cur == end)
+          goto _Fail;
+      }
 
       // Parse '('.
-      if (*cur != '(' || ++cur == end) goto _Fail;
+      if (*cur != '(' || ++cur == end)
+        goto _Fail;
 
       // Skip whitespaces.
-      while (CharT::isSpace(*cur)) { if (++cur == end) goto _Fail; }
+      while (CharT::isSpace(*cur))
+      {
+        if (++cur == end)
+          goto _Fail;
+      }
 
       {
         for (i = 1; i < 4; i++)
@@ -1171,18 +1185,23 @@ _ParseRrbOrHsv:
           uint32_t pf;
 
           // Skip whitespaces.
-          while (CharT::isSpace(*cur)) { if (++cur == end) goto _Fail; }
+          while (CharT::isSpace(*cur))
+          {
+            if (++cur == end)
+              goto _Fail;
+          }
 
           // Parse number. It's against standard, but some SVG generators emit
           // number in floating point, including 'dot' and some numbers behind.
-          if ((StringUtil::atof((const char*)cur, (size_t)(end - cur), &val, '.', &valEnd, &pf) != ERR_OK) ||
+          if ((StringUtil::atof((const typename CharT::PType*)cur, (size_t)(end - cur), &val, CharT::PType('.'), &valEnd, &pf) != ERR_OK) ||
               (pf & (StringUtil::PARSED_EXPONENT)) != 0)
           {
             goto _Fail;
           }
 
           // String can't end here.
-          if ((cur += valEnd) == end) goto _Fail;
+          if ((cur += valEnd) == end)
+            goto _Fail;
 
           if (isHSL)
           {
@@ -1195,7 +1214,8 @@ _ParseRrbOrHsv:
             else
             {
               // Parse '%'.
-              if (*cur != '%' || ++cur == end) goto _Fail;
+              if (*cur != '%' || ++cur == end)
+                goto _Fail;
               f[i] = Math::bound<float>(val, 0.0f, 100.0f) * (1.0f / 100.0f);
             }
           }
@@ -1205,31 +1225,40 @@ _ParseRrbOrHsv:
             if (*cur == '%')
             {
               percentUsed = true;
-              if (++cur == end) goto _Fail;
+              if (++cur == end)
+                goto _Fail;
 
               f[i] = Math::bound<float>(val, 0.0f, 100.0f) * (1.0f / 100.0f);
             }
             else
             {
               // Invalid when strict mode is used, accepted when not.
-              if (percentUsed && (flags & COLOR_NAME_STRICT)) goto _Fail;
+              if (percentUsed && (flags & COLOR_NAME_STRICT))
+                goto _Fail;
 
               f[i] = Math::bound<float>(val, 0.0f, 255.0f) * (1.0f / 255.0f);
             }
           }
 
           // Skip whitespaces.
-          while (CharT::isSpace(*cur)) { if (++cur == end) goto _Fail; }
+          while (CharT::isSpace(*cur))
+          {
+            if (++cur == end)
+              goto _Fail;
+          }
 
           // Expect ','.
           if (*cur == ',')
           {
-            if (++cur == end) goto _Fail;
-            if (i == 3 && !isAlpha) goto _Fail;
+            if (++cur == end)
+              goto _Fail;
+            if (i == 3 && !isAlpha)
+              goto _Fail;
           }
           else
           {
-            if (i < 3 || isAlpha) goto _Fail;
+            if (i < 3 || isAlpha)
+              goto _Fail;
           }
         }
 
@@ -1239,24 +1268,30 @@ _ParseRrbOrHsv:
           uint32_t pf;
 
           // Parse float.
-          if ((StringUtil::atof((const char*)cur, (size_t)(end - cur), &f[0], '.', &valEnd, &pf) != ERR_OK) ||
+          if ((StringUtil::atof((const typename CharT::PType*)cur, (size_t)(end - cur), &f[0], CharT::PType('.'), &valEnd, &pf) != ERR_OK) ||
               (pf & (StringUtil::PARSED_EXPONENT)) != 0)
           {
             goto _Fail;
           }
 
           // Can't stop here.
-          if ((cur += valEnd) == end) goto _Fail;
+          if ((cur += valEnd) == end)
+            goto _Fail;
 
           // Saturate to 0-1.
           f[0] = Math::bound(f[0], 0.0f, 1.0f);
 
           // Skip whitespaces.
-          while (CharT::isSpace(*cur)) { if (++cur == end) goto _Fail; }
+          while (CharT::isSpace(*cur))
+          {
+            if (++cur == end)
+              goto _Fail;
+          }
         }
 
         // Expect ')'.
-        if (*cur != ')') goto _Fail;
+        if (*cur != ')')
+          goto _Fail;
         cur++;
 
         // Finalize.
@@ -1285,7 +1320,8 @@ _ParseRrbOrHsv:
       if (!(CharT::isAsciiNumlet(c) || c == '-')) break;
 
       keyword[i] = (uint8_t)c;
-      if (++i == 32) goto _Fail;
+      if (++i == 32)
+        goto _Fail;
 
       name8.setData(keyword);
       name8.setLength(i);

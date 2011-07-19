@@ -131,6 +131,7 @@ enum CASE_SENSITIVITY
 // [Fog::CHAR_BIDI]
 // ============================================================================
 
+//! @brief Character BIDI class.
 enum CHAR_BIDI
 {
   // --------------------------------------------------------------------------
@@ -221,9 +222,37 @@ enum CHAR_BIDI
 };
 
 // ============================================================================
+// [Fog::CHAR_CASE_FOLDING]
+// ============================================================================
+
+//! @brief Type of case-folding (as defined by the unicode standard).
+enum CHAR_CASE_FOLDING
+{
+  //! @brief Simple case-folding, mapping characters one-to-one.
+  CHAR_CASE_FOLDING_SIMPLE = 0,
+  //! @brief Full case-folding, mapping characters one-to-many (ligatures).
+  CHAR_CASE_FOLDING_FULL = 1,
+
+  //! @brief Special case-folding for uppercase I and dotted uppercase I.
+  //!
+  //! - For non-Turkic languages, this mapping is normally not used.
+  //! - For Turkic languages (tr, az), this mapping can be used instead of the 
+  //!   normal mapping for these characters.
+  //!
+  //! @note This is a flag, can be combined with @c CHAR_CASE_FOLDING_SIMPLE
+  //! or @c CHAR_CASE_FOLDING_FULL. If used as a value, it's combined with 
+  //! @c CHAR_CASE_FOLDING_SIMPLE.
+  CHAR_CASE_FOLDING_SPECIAL = 2,
+
+  //! @brief Combination of @c CHAR_CASE_FOLDING_FULL and @c CHAR_CASE_FOLDING_SPECIAL.
+  CHAR_CASE_FOLDING_FULL_SPECIAL = 3
+};
+
+// ============================================================================
 // [Fog::CHAR_CATEGORY]
 // ============================================================================
 
+//! @brief Character category.
 enum CHAR_CATEGORY
 {
   // --------------------------------------------------------------------------
@@ -1026,7 +1055,10 @@ enum CHAR_UNICODE_VERSION
   //! @brief Unicode version 6.0.
   CHAR_UNICODE_V6_0 = 12,
   //! @brief Unicode version 6.1.
-  CHAR_UNICODE_V6_1 = 13
+  CHAR_UNICODE_V6_1 = 13,
+
+  //! @brief Default unicode version to use when unassigned.
+  CHAR_UNICODE_DEFAULT = CHAR_UNICODE_V6_0
 };
 
 // ============================================================================

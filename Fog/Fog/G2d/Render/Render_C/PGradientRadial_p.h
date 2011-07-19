@@ -34,8 +34,12 @@ struct FOG_NO_EXPORT PGradientRadial
     uint32_t spread = gradient.getGradientSpread();
 
     FOG_ASSERT(gradient.getGradientType() == GRADIENT_TYPE_RADIAL);
-    FOG_ASSERT(stops.getLength() >= 1);
     FOG_ASSERT(spread < GRADIENT_SPREAD_COUNT);
+
+    if (stops.isEmpty())
+    {
+      return Helpers::p_solid_create_color(ctx, dstFormat, Color(Argb32(0x00000000)));
+    }
 
     // ------------------------------------------------------------------------
     // [Transform elliptic shape to a circle]

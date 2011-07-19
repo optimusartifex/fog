@@ -158,10 +158,12 @@ struct FOG_NO_EXPORT Char
   FOG_INLINE bool hasUpper() const { return hasUpper(_value); }
   FOG_INLINE bool hasLower() const { return hasLower(_value); }
   FOG_INLINE bool hasTitle() const { return hasTitle(_value); }
+  FOG_INLINE bool hasMirror() const { return hasMirror(_value); }
 
   FOG_INLINE Char toUpper() const { return Char(toUpper(_value)); }
   FOG_INLINE Char toLower() const { return Char(toLower(_value)); }
   FOG_INLINE Char toTitle() const { return Char(toTitle(_value)); }
+  FOG_INLINE Char toMirror() const { return Char(toMirror(_value)); } 
 
   // --------------------------------------------------------------------------
   // [Surrogates]
@@ -513,6 +515,20 @@ struct FOG_NO_EXPORT Char
     return p.getMappingType() == CHAR_MAPPING_SPECIAL && _charData.special[p.getMappingData()]._titleCaseDiff != 0;
   }
 
+  static FOG_INLINE bool hasMirror(uint16_t c)
+  {
+    const CharProperty& p = getProperty(c);
+    return (p.getMappingType() == CHAR_MAPPING_MIRROR) ||
+           (p.getMappingType() == CHAR_MAPPING_SPECIAL && _charData.special[p.getMappingData()]._mirrorDiff != 0);
+  }
+
+  static FOG_INLINE bool hasMirror(uint32_t c)
+  {
+    const CharProperty& p = getProperty(c);
+    return (p.getMappingType() == CHAR_MAPPING_MIRROR) ||
+           (p.getMappingType() == CHAR_MAPPING_SPECIAL && _charData.special[p.getMappingData()]._mirrorDiff != 0);
+  }
+
   static FOG_INLINE uint16_t toUpper(uint16_t c)
   {
     const CharProperty& p = getProperty(c);
@@ -596,6 +612,38 @@ struct FOG_NO_EXPORT Char
       return c;
 
     int32_t x = (int32_t)c + _charData.special[x]._titleCaseDiff;
+    FOG_ASSUME(x >= 0);
+
+    return (uint32_t)x;
+  }
+
+  static FOG_INLINE uint16_t toMirror(uint16_t c)
+  {
+    const CharProperty& p = getProperty(c);
+    int32_t x = p.getMappingData();
+
+    if (p.getMappingType() == CHAR_MAPPING_SPECIAL)
+      x = _charData.special[x]._mirrorDiff;
+    else if (p.getMappingType() != CHAR_MAPPING_MIRROR)
+      x = 0;
+
+    x += (int32_t)c;
+    FOG_ASSUME(x >= 0 && x < 0x10000);
+
+    return (uint16_t)x;
+  }
+
+  static FOG_INLINE uint32_t toMirror(uint32_t c)
+  {
+    const CharProperty& p = getProperty(c);
+    int32_t x = p.getMappingData();
+
+    if (p.getMappingType() == CHAR_MAPPING_SPECIAL)
+      x = _charData.special[x]._mirrorDiff;
+    else if (p.getMappingType() != CHAR_MAPPING_MIRROR)
+      x = 0;
+
+    x += (int32_t)c;
     FOG_ASSUME(x >= 0);
 
     return (uint32_t)x;

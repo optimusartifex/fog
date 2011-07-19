@@ -1516,7 +1516,7 @@ def GenerateTable():
     isSpace = c.category == CHAR_CATEGORY.get("Zs") or \
               c.category == CHAR_CATEGORY.get("Zl") or \
               c.category == CHAR_CATEGORY.get("Zp") or \
-              (c >= 9 and c <= 13)
+              (i >= 9 and i <= 13)
 
     s += CHAR_CATEGORY.fog(c.category) + ", "               # Category.
     s += str(int(isSpace)) + ", "                           # Space.

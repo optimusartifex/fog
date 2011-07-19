@@ -251,7 +251,7 @@ void MyWindow::onPaint(PaintEvent* e)
   }
 
   String text;
-  text.format("FPS: %g, Time: %g", fps, frameDelta.getMillisecondsD());
+  text.format("FPS: %g, Time: %g (%d %d)", fps, frameDelta.getMillisecondsD(), (int)sizeof(CharProperty), (int)sizeof(CharSpecial));
 
   {
     PathF path;
@@ -270,7 +270,6 @@ void MyWindow::onPaint(PaintEvent* e)
 FOG_UI_MAIN()
 {
   Application app(Ascii8("Gui"));
-
   MyWindow window(WINDOW_TYPE_DEFAULT);
 
   window.addListener(EVENT_CLOSE, &app, &Application::quit);

@@ -147,13 +147,20 @@ static err_t FOG_CDECL RasterPaintEngine_setMetaParams(Painter* self, const Regi
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
   engine->discardStates();
 
-  engine->metaRegion = region;
+  BoxI screen(0, 0, engine->ctx.layer.size.w, engine->ctx.layer.size.h);
   engine->metaOrigin = origin;
 
-  engine->userRegion = Region::infinite();
-  engine->userOrigin.reset();
+  if (region.isInfinite())
+    engine->metaRegion = screen;
+  else if (screen.subsumes(region.getExtents()))
+    engine->metaRegion = region;
+  else
+    Region::combine(engine->metaRegion, region, screen, REGION_OP_INTERSECT);
 
-  return engine->changedCoreClip();
+  engine->metaClipBox = engine->metaRegion.getExtents();
+  engine->changedMetaParams();
+
+  return ERR_OK;
 }
 
 static err_t FOG_CDECL RasterPaintEngine_resetMetaParams(Painter* self)
@@ -161,47 +168,14 @@ static err_t FOG_CDECL RasterPaintEngine_resetMetaParams(Painter* self)
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
   engine->discardStates();
 
-  engine->metaRegion = Region::infinite();
+  BoxI screen(0, 0, engine->ctx.layer.size.w, engine->ctx.layer.size.h);
+
   engine->metaOrigin.reset();
-
-  engine->userRegion = Region::infinite();
-  engine->userOrigin.reset();
-
-  return engine->changedCoreClip();
-}
-
-// ============================================================================
-// [Fog::RasterPaintEngine - User Params]
-// ============================================================================
-
-static err_t FOG_CDECL RasterPaintEngine_getUserParams(const Painter* self, Region& region, PointI& origin)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-
-  region = engine->userRegion;
-  origin = engine->userOrigin;
+  engine->metaRegion = screen;
+  engine->metaClipBox = screen;
+  engine->changedMetaParams();
 
   return ERR_OK;
-}
-
-static err_t FOG_CDECL RasterPaintEngine_setUserParams(Painter* self, const Region& region, const PointI& origin)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-
-  engine->userRegion = region;
-  engine->userOrigin = origin;
-
-  return engine->changedCoreClip();
-}
-
-static err_t FOG_CDECL RasterPaintEngine_resetUserParams(Painter* self)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-
-  engine->metaRegion = Region::infinite();
-  engine->metaOrigin.reset();
-
-  return engine->changedCoreClip();
 }
 
 // ============================================================================
@@ -1857,14 +1831,14 @@ _Invalid:
   return ERR_OK;
 
 _HasTransform:
-  TransformD::multiply(engine->source.adjusted.instance(), engine->source.transform.instance(), engine->finalTransform);
+  TransformD::multiply(engine->source.adjusted.instance(), engine->source.transform.instance(), engine->finalTransformD);
   return ERR_OK;
 
 _NoTransform:
-  if (engine->finalTransform.getType() == TRANSFORM_TYPE_IDENTITY)
+  if (engine->finalTransformD.getType() == TRANSFORM_TYPE_IDENTITY)
     engine->source.adjusted.instance().reset();
   else
-    engine->source.adjusted.instance() = engine->finalTransform;
+    engine->source.adjusted.instance() = engine->finalTransformD;
   return ERR_OK;
 }
 
@@ -1875,14 +1849,14 @@ _NoTransform:
 static err_t FOG_CDECL RasterPaintEngine_getTransformF(const Painter* self, TransformF& tr)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-  tr = engine->userTransform;
+  tr = engine->userTransformD;
   return ERR_OK;
 }
 
 static err_t FOG_CDECL RasterPaintEngine_getTransformD(const Painter* self, TransformD& tr)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-  tr = engine->userTransform;
+  tr = engine->userTransformD;
   return ERR_OK;
 }
 
@@ -1891,8 +1865,8 @@ static err_t FOG_CDECL RasterPaintEngine_setTransformF(Painter* self, const Tran
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
   if ((engine->savedStateFlags & RASTER_STATE_TRANSFORM) == 0) engine->saveTransform();
 
-  engine->userTransform = tr;
-  engine->changedTransform();
+  engine->userTransformD = tr;
+  engine->changedUserTransform();
   return ERR_OK;
 }
 
@@ -1901,8 +1875,8 @@ static err_t FOG_CDECL RasterPaintEngine_setTransformD(Painter* self, const Tran
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
   if ((engine->savedStateFlags & RASTER_STATE_TRANSFORM) == 0) engine->saveTransform();
 
-  engine->userTransform = tr;
-  engine->changedTransform();
+  engine->userTransformD = tr;
+  engine->changedUserTransform();
   return ERR_OK;
 }
 
@@ -1936,23 +1910,23 @@ static err_t FOG_CDECL RasterPaintEngine_applyTransformF(Painter* self, uint32_t
       d[1] = reinterpret_cast<const float*>(params)[1];
     case TRANSFORM_OP_ROTATE:
       d[0] = reinterpret_cast<const float*>(params)[0];
-      err = _api.transformd.transform(engine->userTransform, transformOp, d);
+      err = _api.transformd.transform(engine->userTransformD, transformOp, d);
       break;
 
     case TRANSFORM_OP_FLIP:
-      err = _api.transformd.transform(engine->userTransform, transformOp, params);
+      err = _api.transformd.transform(engine->userTransformD, transformOp, params);
       break;
 
     case TRANSFORM_OP_MULTIPLY:
     case TRANSFORM_OP_MULTIPLY_INV:
       tr.initCustom1(*reinterpret_cast<const TransformF*>(params));
-      err = _api.transformd.transform(engine->userTransform, transformOp, tr);
+      err = _api.transformd.transform(engine->userTransformD, transformOp, tr);
       break;
   }
 
-  if (FOG_IS_ERROR(err)) engine->userTransform.reset();
+  if (FOG_IS_ERROR(err)) engine->userTransformD.reset();
 
-  engine->changedTransform();
+  engine->changedUserTransform();
   return err;
 }
 
@@ -1962,10 +1936,10 @@ static err_t FOG_CDECL RasterPaintEngine_applyTransformD(Painter* self, uint32_t
   err_t err = ERR_OK;
 
   if ((engine->savedStateFlags & RASTER_STATE_TRANSFORM) == 0) engine->saveTransform();
-  err = _api.transformd.transform(engine->userTransform, transformOp, params);
-  if (FOG_IS_ERROR(err)) engine->userTransform.reset();
+  err = _api.transformd.transform(engine->userTransformD, transformOp, params);
+  if (FOG_IS_ERROR(err)) engine->userTransformD.reset();
 
-  engine->changedTransform();
+  engine->changedUserTransform();
   return err;
 }
 
@@ -1974,9 +1948,9 @@ static err_t FOG_CDECL RasterPaintEngine_resetTransform(Painter* self)
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
 
   if ((engine->savedStateFlags & RASTER_STATE_TRANSFORM) == 0) engine->saveTransform();
-  engine->userTransform.reset();
+  engine->userTransformD.reset();
 
-  engine->changedTransform();
+  engine->changedUserTransform();
   return ERR_OK;
 }
 
@@ -2146,16 +2120,15 @@ _RestoreSourceContinue:
 
   if (restoreFlags & RASTER_STATE_TRANSFORM)
   {
-    engine->userTransform = state->userTransform.instance();
-    engine->finalTransform = state->finalTransform.instance();
+    engine->userTransformD = state->userTransformD.instance();
+    engine->finalTransformD = state->finalTransformD.instance();
     engine->finalTransformF = state->finalTransformF.instance();
 
-    engine->coreTranslationI = state->coreTranslationI;
-    engine->finalTransformI._type = state->finalTransformI._type;
-    engine->finalTransformI._sx = state->finalTransformI._sx;
-    engine->finalTransformI._sy = state->finalTransformI._sy;
-    engine->finalTransformI._tx = state->finalTransformI._tx;
-    engine->finalTransformI._ty = state->finalTransformI._ty;
+    engine->integralTransformType = state->integralTransformType;
+    engine->integralTransform._sx = state->integralTransform._sx;
+    engine->integralTransform._sy = state->integralTransform._sy;
+    engine->integralTransform._tx = state->integralTransform._tx;
+    engine->integralTransform._ty = state->integralTransform._ty;
   }
 
   // ------------------------------------------------------------------------
@@ -2447,7 +2420,7 @@ static err_t FOG_CDECL RasterPaintEngine_fillRectI(Painter* self, const RectI& r
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
 
-  if (engine->finalTransformI._type != RASTER_INTEGRAL_TRANSFORM_NONE)
+  if (engine->integralTransformType != RASTER_INTEGRAL_TRANSFORM_NONE)
   {
     BoxI box(UNINITIALIZED);
     if (engine->doIntegralTransformAndClip(box, r))
@@ -2494,7 +2467,7 @@ static err_t FOG_CDECL RasterPaintEngine_fillRectD(Painter* self, const RectD& r
   _FOG_RASTER_ENTER_FILL_FUNC();
 
   BoxD box(r);
-  if (engine->finalTransform.getType() != TRANSFORM_TYPE_IDENTITY)
+  if (engine->finalTransformD.getType() != TRANSFORM_TYPE_IDENTITY)
   {
     if (!engine->ctx.rasterHints.rectToRectTransform)
     {
@@ -2503,7 +2476,7 @@ static err_t FOG_CDECL RasterPaintEngine_fillRectD(Painter* self, const RectD& r
       path.rect(r, PATH_DIRECTION_CW);
       return engine->serializer->fillRawPathD(engine, path, FILL_RULE_NON_ZERO);
     }
-    engine->finalTransform.mapBox(box, box);
+    engine->finalTransformD.mapBox(box, box);
   }
 
   if (!BoxD::intersect(box, box, engine->ctx.finalClipperD.getClipBox()))
@@ -2767,6 +2740,8 @@ static err_t FOG_CDECL RasterPaintEngine_fillRegion(Painter* self, const Region&
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
 
+  // TODO: Not optimal.
+
   if (!engine->ctx.paintHints.geometricPrecision)
   {
     PathF& path = engine->ctx.tmpPathF[0];
@@ -2825,7 +2800,7 @@ static err_t FOG_CDECL RasterPaintEngine_blitImageAtI(Painter* self, const Point
   int dstY = p.y, dstH;
   int d;
 
-  switch (engine->finalTransformI._type)
+  switch (engine->integralTransformType)
   {
     case RASTER_INTEGRAL_TRANSFORM_NONE:
     {
@@ -2837,8 +2812,8 @@ static err_t FOG_CDECL RasterPaintEngine_blitImageAtI(Painter* self, const Point
 
     case RASTER_INTEGRAL_TRANSFORM_SIMPLE:
     {
-      dstX += engine->finalTransformI._tx;
-      dstY += engine->finalTransformI._ty;
+      dstX += engine->integralTransform._tx;
+      dstY += engine->integralTransform._ty;
 
       if ((uint)(d = dstX - engine->ctx.finalClipBoxI.x0) >= (uint)engine->ctx.finalClipBoxI.getWidth())
       {
@@ -2860,15 +2835,15 @@ static err_t FOG_CDECL RasterPaintEngine_blitImageAtI(Painter* self, const Point
 
     case RASTER_INTEGRAL_TRANSFORM_SCALING:
     {
-      dstX = dstX * engine->finalTransformI._sx;
-      dstY = dstY * engine->finalTransformI._sy;
+      dstX = dstX * engine->integralTransform._sx;
+      dstY = dstY * engine->integralTransform._sy;
 
-      dstW = iW * engine->finalTransformI._sx;
-      dstH = iH * engine->finalTransformI._sy;
+      dstW = iW * engine->integralTransform._sx;
+      dstH = iH * engine->integralTransform._sy;
 
 _Scaling:
-      dstX += engine->finalTransformI._tx;
-      dstY += engine->finalTransformI._ty;
+      dstX += engine->integralTransform._tx;
+      dstY += engine->integralTransform._ty;
 
       if (dstW < 0) { dstX += dstW; dstW = -dstW; }
       if (dstH < 0) { dstY += dstH; dstH = -dstH; }
@@ -2885,7 +2860,7 @@ _Scaling:
 
       if (dstX >= dstW || dstY >= dstH) return ERR_OK;
 
-      TransformD tr(engine->finalTransform);
+      TransformD tr(engine->finalTransformD);
       tr.translate(PointD(p.x, p.y));
 
       return engine->serializer->blitNormalizedTransformedImageI(engine, BoxI(dstX, dstY, dstW, dstH), i, RectI(iX, iY, iW, iH), tr);
@@ -2895,11 +2870,11 @@ _Scaling:
     {
       d = dstX;
 
-      dstX = dstY * engine->finalTransformI._sx;
-      dstY = d    * engine->finalTransformI._sy;
+      dstX = dstY * engine->integralTransform._sx;
+      dstY = d    * engine->integralTransform._sy;
 
-      dstW = iH * engine->finalTransformI._sx;
-      dstH = iW * engine->finalTransformI._sy;
+      dstW = iH * engine->integralTransform._sx;
+      dstH = iW * engine->integralTransform._sy;
 
       goto _Scaling;
     }
@@ -2917,7 +2892,7 @@ static err_t FOG_CDECL RasterPaintEngine_blitImageAtF(Painter* self, const Point
   _FOG_RASTER_ENTER_BLIT_FUNC();
   _FOG_RASTER_IMAGE_PARAMS(i, iFragment)
 
-  uint32_t transformType = engine->finalTransform.getType();
+  uint32_t transformType = engine->finalTransformD.getType();
   BoxD box(double(p.x), double(p.y), double(p.x) + double(iW), double(p.y) + double(iH));
 
   switch (transformType)
@@ -2925,8 +2900,8 @@ static err_t FOG_CDECL RasterPaintEngine_blitImageAtF(Painter* self, const Point
     case TRANSFORM_TYPE_IDENTITY:
     case TRANSFORM_TYPE_TRANSLATION:
     {
-      PointD t(double(p.x) + engine->finalTransform._20,
-               double(p.y) + engine->finalTransform._21);
+      PointD t(double(p.x) + engine->finalTransformD._20,
+               double(p.y) + engine->finalTransformD._21);
 
       Fixed48x16 x48x16 = Math::fixed48x16FromFloat(t.x);
       Fixed48x16 y48x16 = Math::fixed48x16FromFloat(t.y);
@@ -2961,11 +2936,11 @@ static err_t FOG_CDECL RasterPaintEngine_blitImageAtF(Painter* self, const Point
       }
       else
       {
-        box.translate(engine->finalTransform._20, engine->finalTransform._21);
+        box.translate(engine->finalTransformD._20, engine->finalTransformD._21);
         if (!BoxD::intersect(box, box, engine->ctx.finalClipperD.getClipBox()))
           return ERR_OK;
 
-        TransformD tr(engine->finalTransform);
+        TransformD tr(engine->finalTransformD);
         tr.translate(PointD(p.x, p.y));
 
         return engine->serializer->blitNormalizedTransformedImageD(engine, box, i, RectI(iX, iY, iW, iH), tr);
@@ -2974,12 +2949,12 @@ static err_t FOG_CDECL RasterPaintEngine_blitImageAtF(Painter* self, const Point
 
     case TRANSFORM_TYPE_SCALING:
     {
-      engine->finalTransform.mapBox(box, box);
+      engine->finalTransformD.mapBox(box, box);
 
       if (!BoxD::intersect(box, box, engine->ctx.finalClipperD.getClipBox()))
         return ERR_OK;
 
-      TransformD tr(engine->finalTransform);
+      TransformD tr(engine->finalTransformD);
       tr.translate(PointD(p.x, p.y));
 
       return engine->serializer->blitNormalizedTransformedImageD(engine, box, i, RectI(iX, iY, iW, iH), tr);
@@ -2988,12 +2963,12 @@ static err_t FOG_CDECL RasterPaintEngine_blitImageAtF(Painter* self, const Point
     default:
     {
       BoxD transformedBox(UNINITIALIZED);
-      engine->finalTransform.mapBox(transformedBox, box);
+      engine->finalTransformD.mapBox(transformedBox, box);
 
       if (!BoxD::intersect(transformedBox, transformedBox, engine->ctx.finalClipperD.getClipBox()))
         return ERR_OK;
 
-      TransformD tr(engine->finalTransform);
+      TransformD tr(engine->finalTransformD);
       tr.translate(PointD(p.x, p.y));
 
       return engine->serializer->blitRawImageD(engine, box, i, RectI(iX, iY, iW, iH), tr);
@@ -3009,7 +2984,7 @@ static err_t FOG_CDECL RasterPaintEngine_blitImageAtD(Painter* self, const Point
   _FOG_RASTER_ENTER_BLIT_FUNC();
   _FOG_RASTER_IMAGE_PARAMS(i, iFragment)
 
-  uint32_t transformType = engine->finalTransform.getType();
+  uint32_t transformType = engine->finalTransformD.getType();
   BoxD box(double(p.x), double(p.y), double(p.x) + double(iW), double(p.y) + double(iH));
 
   switch (transformType)
@@ -3017,8 +2992,8 @@ static err_t FOG_CDECL RasterPaintEngine_blitImageAtD(Painter* self, const Point
     case TRANSFORM_TYPE_IDENTITY:
     case TRANSFORM_TYPE_TRANSLATION:
     {
-      PointD t(double(p.x) + engine->finalTransform._20,
-               double(p.y) + engine->finalTransform._21);
+      PointD t(double(p.x) + engine->finalTransformD._20,
+               double(p.y) + engine->finalTransformD._21);
 
       Fixed48x16 x48x16 = Math::fixed48x16FromFloat(t.x);
       Fixed48x16 y48x16 = Math::fixed48x16FromFloat(t.y);
@@ -3053,11 +3028,11 @@ static err_t FOG_CDECL RasterPaintEngine_blitImageAtD(Painter* self, const Point
       }
       else
       {
-        box.translate(engine->finalTransform._20, engine->finalTransform._21);
+        box.translate(engine->finalTransformD._20, engine->finalTransformD._21);
         if (!BoxD::intersect(box, box, engine->ctx.finalClipperD.getClipBox()))
           return ERR_OK;
 
-        TransformD tr(engine->finalTransform);
+        TransformD tr(engine->finalTransformD);
         tr.translate(PointD(p.x, p.y));
 
         return engine->serializer->blitNormalizedTransformedImageD(engine, box, i, RectI(iX, iY, iW, iH), tr);
@@ -3066,12 +3041,12 @@ static err_t FOG_CDECL RasterPaintEngine_blitImageAtD(Painter* self, const Point
 
     case TRANSFORM_TYPE_SCALING:
     {
-      engine->finalTransform.mapBox(box, box);
+      engine->finalTransformD.mapBox(box, box);
 
       if (!BoxD::intersect(box, box, engine->ctx.finalClipperD.getClipBox()))
         return ERR_OK;
 
-      TransformD tr(engine->finalTransform);
+      TransformD tr(engine->finalTransformD);
       tr.translate(PointD(p.x, p.y));
 
       return engine->serializer->blitNormalizedTransformedImageD(engine, box, i, RectI(iX, iY, iW, iH), tr);
@@ -3080,12 +3055,12 @@ static err_t FOG_CDECL RasterPaintEngine_blitImageAtD(Painter* self, const Point
     default:
     {
       BoxD transformedBox(UNINITIALIZED);
-      engine->finalTransform.mapBox(transformedBox, box);
+      engine->finalTransformD.mapBox(transformedBox, box);
 
       if (!BoxD::intersect(transformedBox, transformedBox, engine->ctx.finalClipperD.getClipBox()))
         return ERR_OK;
 
-      TransformD tr(engine->finalTransform);
+      TransformD tr(engine->finalTransformD);
       tr.translate(PointD(p.x, p.y));
 
       return engine->serializer->blitRawImageD(engine, box, i, RectI(iX, iY, iW, iH), tr);
@@ -3102,12 +3077,13 @@ static err_t FOG_CDECL RasterPaintEngine_blitImageInI(Painter* self, const RectI
   _FOG_RASTER_IMAGE_PARAMS(i, iFragment)
 
   // Try to use unscaled blit if possible.
-  if (r.w == iW && r.h == iH) return engine->vtable->blitImageAtI(self, PointI(r.x, r.y), i, iFragment);
+  if (r.w == iW && r.h == iH)
+    return engine->vtable->blitImageAtI(self, PointI(r.x, r.y), i, iFragment);
 
-  uint32_t transformType = engine->finalTransform.getType();
+  uint32_t transformType = engine->finalTransformD.getType();
   BoxD box(double(r.x), double(r.y), double(r.x) + double(r.w), double(r.y) + double(r.h));
 
-  TransformD tr(engine->finalTransform);
+  TransformD tr(engine->finalTransformD);
   double sx = double(r.w) / double(iW);
   double sy = double(r.h) / double(iH);
 
@@ -3115,7 +3091,7 @@ static err_t FOG_CDECL RasterPaintEngine_blitImageInI(Painter* self, const RectI
   tr.transform(scaling);
 
   BoxD transformedBox(UNINITIALIZED);
-  engine->finalTransform.mapBox(transformedBox, box);
+  engine->finalTransformD.mapBox(transformedBox, box);
   if (!BoxD::intersect(transformedBox, transformedBox, engine->ctx.finalClipperD.getClipBox()))
     return ERR_OK;
 
@@ -3135,14 +3111,15 @@ static err_t FOG_CDECL RasterPaintEngine_blitImageInF(Painter* self, const RectF
   _FOG_RASTER_ENTER_BLIT_FUNC();
   _FOG_RASTER_IMAGE_PARAMS(i, iFragment)
 
-  uint32_t transformType = engine->finalTransform.getType();
+  uint32_t transformType = engine->finalTransformD.getType();
   BoxD box(double(r.x), double(r.y), double(r.x) + double(r.w), double(r.y) + double(r.h));
 
   TransformD tr(double(r.w) / double(iW), 0.0, 0.0, double(r.h) / double(iH), r.x, r.y);
-  tr.transform(engine->finalTransform, MATRIX_ORDER_APPEND);
+  tr.transform(engine->finalTransformD, MATRIX_ORDER_APPEND);
 
   BoxD transformedBox(UNINITIALIZED);
-  engine->finalTransform.mapBox(transformedBox, box);
+  engine->finalTransformD.mapBox(transformedBox, box);
+
   if (!BoxD::intersect(transformedBox, transformedBox, engine->ctx.finalClipperD.getClipBox()))
     return ERR_OK;
 
@@ -3160,14 +3137,15 @@ static err_t FOG_CDECL RasterPaintEngine_blitImageInD(Painter* self, const RectD
   _FOG_RASTER_ENTER_BLIT_FUNC();
   _FOG_RASTER_IMAGE_PARAMS(i, iFragment)
 
-  uint32_t transformType = engine->finalTransform.getType();
+  uint32_t transformType = engine->finalTransformD.getType();
   BoxD box(double(r.x), double(r.y), double(r.x) + double(r.w), double(r.y) + double(r.h));
 
   TransformD tr(double(r.w) / double(iW), 0.0, 0.0, double(r.h) / double(iH), r.x, r.y);
-  tr.transform(engine->finalTransform, MATRIX_ORDER_APPEND);
+  tr.transform(engine->finalTransformD, MATRIX_ORDER_APPEND);
 
   BoxD transformedBox(UNINITIALIZED);
-  engine->finalTransform.mapBox(transformedBox, box);
+  engine->finalTransformD.mapBox(transformedBox, box);
+
   if (!BoxD::intersect(transformedBox, transformedBox, engine->ctx.finalClipperD.getClipBox()))
     return ERR_OK;
 
@@ -3461,14 +3439,6 @@ static void RasterPaintEngine_initVTable(RasterPaintEngineVTable* v)
   v->getMetaParams = RasterPaintEngine_getMetaParams;
   v->setMetaParams = RasterPaintEngine_setMetaParams;
   v->resetMetaParams = RasterPaintEngine_resetMetaParams;
-
-  // --------------------------------------------------------------------------
-  // [User Params]
-  // --------------------------------------------------------------------------
-
-  v->getUserParams = RasterPaintEngine_getUserParams;
-  v->setUserParams = RasterPaintEngine_setUserParams;
-  v->resetUserParams = RasterPaintEngine_resetUserParams;
 
   // --------------------------------------------------------------------------
   // [Parameters]
@@ -4021,7 +3991,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillRawPathD_st(
 {
   PathD& tmp = engine->ctx.tmpPathD[1];
 
-  bool hasTransform = (engine->finalTransform.getType() != TRANSFORM_TYPE_IDENTITY);
+  bool hasTransform = (engine->finalTransformD.getType() != TRANSFORM_TYPE_IDENTITY);
   if (!hasTransform)
   {
     switch (engine->ctx.finalClipperD.initPath(path))
@@ -4043,7 +4013,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillRawPathD_st(
   else
   {
     tmp.clear();
-    FOG_RETURN_ON_ERROR(engine->ctx.finalClipperD.clipPath(tmp, path, engine->finalTransform));
+    FOG_RETURN_ON_ERROR(engine->ctx.finalClipperD.clipPath(tmp, path, engine->finalTransformD));
     engine->serializer->fillNormalizedPathD(engine, tmp, fillRule);
     return ERR_OK;
   }
@@ -4117,7 +4087,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_blitRawImageD_st(
   RasterPaintEngine* engine, const BoxD& box, const Image& srcImage, const RectI& srcFragment, const TransformD& srcTransform)
 {
   BoxD boxClipped(box);
-  engine->finalTransform.mapBox(boxClipped, boxClipped);
+  engine->finalTransformD.mapBox(boxClipped, boxClipped);
 
   if (!BoxD::intersect(boxClipped, boxClipped, engine->ctx.finalClipperD.getClipBox()))
     return ERR_OK;
@@ -4128,7 +4098,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_blitRawImageD_st(
   FOG_RETURN_ON_ERROR(
     _g2d_render.texture.create(&pc,
       engine->ctx.layer.primaryFormat,
-      engine->coreClipBox,
+      engine->metaClipBox,
       srcImage, srcFragment,
       srcTransform, Color(), TEXTURE_TILE_PAD, engine->ctx.paintHints.imageQuality)
   );
@@ -4303,7 +4273,7 @@ _Blit_ClipBox_Alpha_Direct:
       FOG_RETURN_ON_ERROR(
         _g2d_render.texture.create(&pc,
           engine->ctx.layer.primaryFormat,
-          engine->coreClipBox,
+          engine->metaClipBox,
           srcImage, srcFragment,
           TransformD::fromTranslation(PointD(pt)), Color(), TEXTURE_TILE_PAD, engine->ctx.paintHints.imageQuality)
       );
@@ -4338,7 +4308,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_blitNormalizedTransformedImageI_
   FOG_RETURN_ON_ERROR(
     _g2d_render.texture.create(&pc,
       engine->ctx.layer.primaryFormat,
-      engine->coreClipBox,
+      engine->metaClipBox,
       srcImage, srcFragment,
       srcTransform, Color(), TEXTURE_TILE_PAD, engine->ctx.paintHints.imageQuality)
   );
@@ -4363,7 +4333,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_blitNormalizedTransformedImageD_
   FOG_RETURN_ON_ERROR(
     _g2d_render.texture.create(&pc,
       engine->ctx.layer.primaryFormat,
-      engine->coreClipBox,
+      engine->metaClipBox,
       srcImage, srcFragment,
       srcTransform, Color(), TEXTURE_TILE_PAD, engine->ctx.paintHints.imageQuality)
   );
@@ -4419,43 +4389,35 @@ RasterPaintEngine::RasterPaintEngine() :
   sourceType(PATTERN_TYPE_COLOR),
   savedStateFlags(0xFF),
   strokeParamsPrecision(RASTER_PRECISION_NONE),
-  coreClipType(RASTER_CLIP_NULL),
-  coreClipBox(0, 0, 0, 0),
+  integralTransformType(RASTER_INTEGRAL_TRANSFORM_SIMPLE),
   metaOrigin(0, 0),
-  userOrigin(0, 0),
-  coreOrigin(0, 0),
   metaRegion(Region::infinite()),
-  userRegion(Region::infinite()),
-  coreRegion(Region::infinite()),
+  metaClipBox(0, 0, 0, 0),
   stateAllocator(16300),
   statePool(NULL),
   state(NULL),
   pcAllocator(16300),
-  pcPool(NULL)
+  pcPool(NULL),
+  wm(NULL),
+  maxThreads(0),
+  finalizing(0)
 {
-  vtable = NULL;
-
   // Setup the essentials.
+  vtable = NULL;
   ctx.engine = this;
 
-  opacityF = 1.0f;
-  source.color.initCustom1(Argb32(0xFF000000));
-  ctx.pc = (RenderPatternContext*)NULL;
+  integralTransform._sx = 1;
+  integralTransform._sy = 1;
+  integralTransform._tx = 0;
+  integralTransform._ty = 0;
 
-  finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_SIMPLE;
-  finalTransformI._sx = 1;
-  finalTransformI._sy = 1;
-  finalTransformI._tx = 0;
-  finalTransformI._ty = 0;
+  source.color.initCustom1(Argb32(0xFF000000));
+  opacityF = 1.0f;
 
   strokeParams.f.init();
   strokeParams.d.init();
 
-  // Disable multithreading, it may be enabled by init().
-  wm = NULL;
-
   maxThreads = getMaxThreads();
-  finalizing = 0;
 }
 
 RasterPaintEngine::~RasterPaintEngine()
@@ -4481,12 +4443,11 @@ err_t RasterPaintEngine::init(const ImageBits& imageBits, ImageData* imaged, uin
   ctx.layer.imageData = imaged;
   if (imaged) imaged->locked++;
 
-  setupLayer();
-  FOG_RETURN_ON_ERROR(ctx._initPrecision(ctx.layer.precision));
-
-  // Setup defaults.
   vtable = &RasterPaintEngine_vtable;
   serializer = &RasterPaintEngine_serializer[RASTER_MODE_ST];
+
+  setupLayer();
+  FOG_RETURN_ON_ERROR(ctx._initPrecision(ctx.layer.precision));
 
   setupOps();
   setupDefaultClip();
@@ -4515,28 +4476,28 @@ uint RasterPaintEngine::getMaxThreads()
 
 bool RasterPaintEngine::doIntegralTransformAndClip(BoxI& dst, const RectI& src)
 {
-  int tx = finalTransformI._tx;
-  int ty = finalTransformI._ty;
+  int tx = integralTransform._tx;
+  int ty = integralTransform._ty;
 
   int sw = src.w;
   int sh = src.h;
 
-  switch (finalTransformI._type)
+  switch (integralTransformType)
   {
     case RASTER_INTEGRAL_TRANSFORM_SWAP:
-      tx += src.y * finalTransformI._sx;
-      ty += src.x * finalTransformI._sy;
+      tx += src.y * integralTransform._sx;
+      ty += src.x * integralTransform._sy;
 
-      sw *= finalTransformI._sy;
-      sh *= finalTransformI._sx;
+      sw *= integralTransform._sy;
+      sh *= integralTransform._sx;
       goto _Scaled;
 
     case RASTER_INTEGRAL_TRANSFORM_SCALING:
-      tx += src.x * finalTransformI._sx;
-      ty += src.y * finalTransformI._sy;
+      tx += src.x * integralTransform._sx;
+      ty += src.y * integralTransform._sy;
 
-      sw *= finalTransformI._sx;
-      sh *= finalTransformI._sy;
+      sw *= integralTransform._sx;
+      sh *= integralTransform._sy;
 
 _Scaled:
       dst.x0 = tx;
@@ -4649,16 +4610,15 @@ void RasterPaintEngine::saveTransform()
   FOG_ASSERT(state != NULL);
 
   savedStateFlags |= RASTER_STATE_TRANSFORM;
-  state->userTransform.initCustom1(userTransform);
-  state->finalTransform.initCustom1(finalTransform);
+  state->userTransformD.initCustom1(userTransformD);
+  state->finalTransformD.initCustom1(finalTransformD);
   state->finalTransformF.initCustom1(finalTransformF);
 
-  state->coreTranslationI = coreTranslationI;
-  state->finalTransformI._type = finalTransformI._type;
-  state->finalTransformI._sx = finalTransformI._sx;
-  state->finalTransformI._sy = finalTransformI._sy;
-  state->finalTransformI._tx = finalTransformI._tx;
-  state->finalTransformI._ty = finalTransformI._ty;
+  state->integralTransformType = integralTransformType;
+  state->integralTransform._sx = integralTransform._sx;
+  state->integralTransform._sy = integralTransform._sy;
+  state->integralTransform._tx = integralTransform._tx;
+  state->integralTransform._ty = integralTransform._ty;
 }
 
 void RasterPaintEngine::saveClipping()
@@ -4819,32 +4779,25 @@ void RasterPaintEngine::setupOps()
 
 void RasterPaintEngine::setupDefaultClip()
 {
-  BoxI boundingBox(0, 0, (int)ctx.layer.size.w, (int)ctx.layer.size.h);
-  FOG_ASSERT(boundingBox.isValid());
+  BoxI bounds(0, 0, (int)ctx.layer.size.w, (int)ctx.layer.size.h);
+  FOG_ASSERT(bounds.isValid());
 
   // Final matrix is translated by the finalOrigin, we are translating it back.
   // After this function is called it remains fully usable and valid.
   // TODO: Painter.
-  //finalTransformI._tx -= finalOrigin.x;
-  //finalTransformI._ty -= finalOrigin.y;
+  //integralTransform._tx -= finalOrigin.x;
+  //integralTransform._ty -= finalOrigin.y;
 
   // Clear the regions and origins and set work and final region to the bounds.
+  metaRegion = bounds;
   metaOrigin.reset();
-  metaRegion = Region::infinite();
-
-  userOrigin.reset();
-  userRegion = Region::infinite();
-
-  coreClipType = RASTER_CLIP_BOX;
-  coreClipBox = boundingBox;
-  coreRegion = boundingBox;
 
   // TODO:?
   ctx.finalClipType = RASTER_CLIP_BOX;
-  ctx.finalClipBoxI = boundingBox;
-  ctx.finalClipperF.setClipBox(BoxF(boundingBox));
-  ctx.finalClipperD.setClipBox(BoxD(boundingBox));
-  ctx.finalRegion = coreRegion;
+  ctx.finalClipBoxI = bounds;
+  ctx.finalClipperF.setClipBox(BoxF(bounds));
+  ctx.finalClipperD.setClipBox(BoxD(bounds));
+  ctx.finalRegion = metaRegion;
 
   // TODO:
   //ctx.state |= RASTER_STATE_PENDING_CLIP_REGION;
@@ -4916,7 +4869,7 @@ err_t RasterPaintEngine::createPatternContext()
     {
       err = _g2d_render.texture.create(pc,
         ctx.layer.primaryFormat,
-        coreClipBox,
+        metaClipBox,
         source.texture->getImage(),
         source.texture->getFragment(),
         source.adjusted.instance(),
@@ -4931,7 +4884,7 @@ err_t RasterPaintEngine::createPatternContext()
       uint32_t gradientType = source.gradient->getGradientType();
       err = _g2d_render.gradient.create[gradientType](pc,
         ctx.layer.primaryFormat,
-        coreClipBox,
+        metaClipBox,
         source.gradient.instance(),
         source.adjusted.instance(),
         ctx.paintHints.gradientQuality);
@@ -4961,131 +4914,45 @@ void RasterPaintEngine::destroyPatternContext(RenderPatternContext* pc)
 }
 
 // ============================================================================
-// [Fog::RasterPaintEngine - Changed - Core]
+// [Fog::RasterPaintEngine - Changed - Meta-Params]
 // ============================================================================
 
-err_t RasterPaintEngine::changedCoreClip()
+void RasterPaintEngine::changedMetaParams()
 {
-  err_t err = ERR_OK;
   BoxI bounds(0, 0, ctx.layer.size.w, ctx.layer.size.h);
+  masterFlags &= ~RASTER_NO_PAINT_META_REGION;
 
-  masterFlags &= ~RASTER_NO_PAINT_CORE_REGION;
-  coreOrigin = metaOrigin + userOrigin;
-
-  if (metaRegion.isInfinite())
-  {
-    if (userRegion.isInfinite())
-    {
-      // Meta=Infinite, User=Infinite.
-      coreRegion = Region::infinite();
-    }
-    else
-    {
-      // Meta=Infinite, User=Finite.
-      err = Region::translateAndClip(coreRegion, userRegion, metaOrigin, bounds);
-      if (FOG_IS_ERROR(err)) goto _Fail;
-    }
-  }
-  else
-  {
-    if (userRegion.isInfinite())
-    {
-      // Meta=Finite, User=Infinite.
-      coreRegion = metaRegion;
-    }
-    else
-    {
-      // Meta=Finite, User=Finite.
-      err = Region::translateAndClip(tmpRegion[0], userRegion, metaOrigin, bounds);
-      if (FOG_IS_ERROR(err)) goto _Fail;
-
-      err = Region::combine(coreRegion, metaRegion, tmpRegion[0], REGION_OP_INTERSECT);
-      if (FOG_IS_ERROR(err)) goto _Fail;
-    }
-  }
-
-  // Detect the core clip-type.
-  switch (coreRegion.getType())
-  {
-    case REGION_TYPE_EMPTY:
-      masterFlags |= RASTER_NO_PAINT_CORE_REGION;
-
-      coreClipType = RASTER_CLIP_NULL;
-      coreClipBox.reset();
-      break;
-
-    case REGION_TYPE_SIMPLE:
-      coreClipType = RASTER_CLIP_BOX;
-      coreClipBox = coreRegion.getExtents();
-      break;
-
-    case REGION_TYPE_COMPLEX:
-      coreClipType = RASTER_CLIP_REGION;
-      coreClipBox = coreRegion.getExtents();
-      break;
-
-    case REGION_TYPE_INFINITE:
-      coreClipType = RASTER_CLIP_BOX;
-      coreClipBox = bounds;
-      break;
-
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
-
-  if (coreOrigin.x == 0 && coreOrigin.y == 0)
-  {
-    coreTranslationI.reset();
-
-    coreTransform._type = TRANSFORM_TYPE_IDENTITY;
-    coreTransform._20 = 0.0;
-    coreTransform._21 = 0.0;
-  }
-  else
-  {
-    coreTranslationI.set(-coreOrigin.x, -coreOrigin.y);
-
-    coreTransform._type = TRANSFORM_TYPE_TRANSLATION;
-    coreTransform._20 = (double)(coreTranslationI.x);
-    coreTransform._21 = (double)(coreTranslationI.y);
-  }
-  return ERR_OK;
-
-_Fail:
-  masterFlags |= RASTER_NO_PAINT_CORE_REGION;
-
-  coreRegion.clear();
-  coreOrigin.reset();
-
-  return err;
+  metaTransformD._type = (metaOrigin.x | metaOrigin.y) == 0 ? TRANSFORM_TYPE_IDENTITY : TRANSFORM_TYPE_TRANSLATION;
+  metaTransformD._20 = double(-metaOrigin.x);
+  metaTransformD._21 = double(-metaOrigin.y);
 }
 
 // ============================================================================
 // [Fog::RasterPaintEngine - Changed - Transform]
 // ============================================================================
 
-void RasterPaintEngine::changedTransform()
+void RasterPaintEngine::changedUserTransform()
 {
-  masterFlags &= ~RASTER_NO_PAINT_FINAL_TRANSFORM;
+  masterFlags &= ~RASTER_NO_PAINT_USER_TRANSFORM;
 
   ctx.rasterHints.rectToRectTransform = 1;
   ctx.rasterHints.finalTransformF = 0;
 
-  finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_NONE;
-  finalTransformI._sx = 1;
-  finalTransformI._sy = 1;
-  finalTransformI._tx = 0;
-  finalTransformI._ty = 0;
+  integralTransformType = RASTER_INTEGRAL_TRANSFORM_NONE;
+  integralTransform._sx = 1;
+  integralTransform._sy = 1;
+  integralTransform._tx = 0;
+  integralTransform._ty = 0;
 
-  if (userTransform.getType() == TRANSFORM_TYPE_IDENTITY)
-    finalTransform = coreTransform;
+  if (userTransformD.getType() == TRANSFORM_TYPE_IDENTITY)
+    finalTransformD = metaTransformD;
   else
-    TransformD::multiply(finalTransform, coreTransform, userTransform);
+    TransformD::multiply(finalTransformD, metaTransformD, userTransformD);
 
-  switch (finalTransform.getType())
+  switch (finalTransformD.getType())
   {
     case TRANSFORM_TYPE_DEGENERATE:
-      masterFlags |= RASTER_NO_PAINT_FINAL_TRANSFORM;
+      masterFlags |= RASTER_NO_PAINT_USER_TRANSFORM;
       ctx.rasterHints.rectToRectTransform = 0;
       return;
 
@@ -5099,34 +4966,34 @@ void RasterPaintEngine::changedTransform()
       return;
 
     case TRANSFORM_TYPE_SWAP:
-      if (!Math::isFuzzyToInt(finalTransform._01, finalTransformI._sx)) break;
-      if (!Math::isFuzzyToInt(finalTransform._10, finalTransformI._sy)) break;
+      if (!Math::isFuzzyToInt(finalTransformD._01, integralTransform._sx)) break;
+      if (!Math::isFuzzyToInt(finalTransformD._10, integralTransform._sy)) break;
 
-      finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_SWAP;
+      integralTransformType = RASTER_INTEGRAL_TRANSFORM_SWAP;
       goto _Translation;
 
     case TRANSFORM_TYPE_SCALING:
-      if (!Math::isFuzzyToInt(finalTransform._00, finalTransformI._sx)) break;
-      if (!Math::isFuzzyToInt(finalTransform._11, finalTransformI._sy)) break;
+      if (!Math::isFuzzyToInt(finalTransformD._00, integralTransform._sx)) break;
+      if (!Math::isFuzzyToInt(finalTransformD._11, integralTransform._sy)) break;
 
-      finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_SCALING;
+      integralTransformType = RASTER_INTEGRAL_TRANSFORM_SCALING;
       goto _Translation;
 
     case TRANSFORM_TYPE_TRANSLATION:
-      finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_SIMPLE;
+      integralTransformType = RASTER_INTEGRAL_TRANSFORM_SIMPLE;
 
 _Translation:
-      if (!Math::isFuzzyToInt(finalTransform._20, finalTransformI._tx)) break;
-      if (!Math::isFuzzyToInt(finalTransform._21, finalTransformI._ty)) break;
+      if (!Math::isFuzzyToInt(finalTransformD._20, integralTransform._tx)) break;
+      if (!Math::isFuzzyToInt(finalTransformD._21, integralTransform._ty)) break;
       return;
 
     case TRANSFORM_TYPE_IDENTITY:
-      finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_SIMPLE;
+      integralTransformType = RASTER_INTEGRAL_TRANSFORM_SIMPLE;
       return;
   }
 
   // Transform is not integral.
-  finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_NONE;
+  integralTransformType = RASTER_INTEGRAL_TRANSFORM_NONE;
 }
 
 // ============================================================================

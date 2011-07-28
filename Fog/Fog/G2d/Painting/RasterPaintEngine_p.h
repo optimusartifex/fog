@@ -146,19 +146,19 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
 
   FOG_INLINE bool ensureFinalTransformF()
   {
-    if (finalTransform._type == TRANSFORM_TYPE_IDENTITY)
+    if (finalTransformD._type == TRANSFORM_TYPE_IDENTITY)
       return false;
     if (ctx.rasterHints.finalTransformF)
       return true;
 
-    finalTransformF = finalTransform;
+    finalTransformF = finalTransformD;
     ctx.rasterHints.finalTransformF = 1;
     return true;
   }
 
   FOG_INLINE bool isIntegralTransform() const
   {
-    return finalTransformI._type != RASTER_INTEGRAL_TRANSFORM_NONE;
+    return integralTransformType != RASTER_INTEGRAL_TRANSFORM_NONE;
   }
 
   bool doIntegralTransformAndClip(BoxI& dst, const RectI& src);
@@ -208,13 +208,13 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   FOG_INLINE void destroyPatternContext(RenderPatternContext* pc);
 
   // --------------------------------------------------------------------------
-  // [Changed - Core]
+  // [Changed]
   // --------------------------------------------------------------------------
 
-  //! @brief Called when core clip variables were changed.
-  err_t changedCoreClip();
-  //! @brief Called when transform was changed.
-  void changedTransform();
+  //! @brief Called when meta-region/meta-origin were changed.
+  void changedMetaParams();
+  //! @brief Called when user-transform was changed.
+  void changedUserTransform();
 
   // --------------------------------------------------------------------------
   // [Members - Serializer]
@@ -229,13 +229,6 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
 
   //! @brief Context (st).
   RasterContext ctx;
-
-  // --------------------------------------------------------------------------
-  // [Members - Allocators]
-  // --------------------------------------------------------------------------
-
-  //! @brief Block memory allocator for small objects.
-  BlockAllocator blockAllocator;
 
   // --------------------------------------------------------------------------
   // [Members - Flags]
@@ -287,10 +280,44 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   //! @brief The strokeParams[F|D] precision.
   uint8_t strokeParamsPrecision;
 
-  //! @brief The type of core clip (coreRegion, coreClipBox).
-  //!
-  //! @note Don't miss it with the @c finalType member!
-  uint8_t coreClipType;
+  // --------------------------------------------------------------------------
+  // [Members - Integral-Transform]
+  // --------------------------------------------------------------------------
+
+  //! @brief The integralTransform type, see @c RASTER_INTEGRAL_TRANSFORM.
+  uint8_t integralTransformType;
+
+  //! @brief The final transform/scaling in integral units.
+  struct _IntegralTransform
+  {
+    int _sx, _sy;
+    int _tx, _ty;
+  } integralTransform;
+
+  // --------------------------------------------------------------------------
+  // [Members - Meta-Params]
+  // --------------------------------------------------------------------------
+
+  //! @brief Meta origin.
+  PointI metaOrigin;
+  //! @brief Meta clip-region.
+  Region metaRegion;
+  //! @brief Meta clip-box.
+  BoxI metaClipBox;
+
+  // --------------------------------------------------------------------------
+  // [Members - Transform]
+  // --------------------------------------------------------------------------
+
+  //! @brief The meta transformation matrix.
+  TransformD metaTransformD;
+  //! @brief The user transformation matrix.
+  TransformD userTransformD;
+
+  //! @brief The final transformation matrix (double).
+  TransformD finalTransformD;
+  //! @brief The final transformation matrix (float).
+  TransformF finalTransformF;
 
   // --------------------------------------------------------------------------
   // [Members - Source & Opacity]
@@ -298,7 +325,7 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
 
   //! @brief Source.
   RasterSource source;
-  //! @brief The original opacity.
+  //! @brief opacity (in floating-point format).
   float opacityF;
 
   // --------------------------------------------------------------------------
@@ -315,66 +342,13 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   } strokeParams;
 
   // --------------------------------------------------------------------------
-  // [Members - Transform]
-  // --------------------------------------------------------------------------
-
-  //! @brief The core transformation matrix.
-  TransformD coreTransform;
-  //! @brief The user transformation matrix.
-  TransformD userTransform;
-
-  //! @brief The final transformation matrix (double).
-  TransformD finalTransform;
-  //! @brief The final transformation matrix (float).
-  TransformF finalTransformF;
-
-  //! @brief The core translation point in pixels (negated coreOrigin).
-  PointI coreTranslationI;
-
-  //! @brief The final translation point in pixels, available if the core
-  //! transformation matrix is @c TRANSFORM_TYPE_IDENTITY or
-  //! @c TRANSFORM_TYPE_TRANSLATION and the values of the final transformation
-  //! matrix are integrals.
-  struct _FinalTransformI
-  {
-    //! @brief The finalTransformI type, see @c RASTER_INTEGRAL_TRANSFORM.
-    int _type;
-
-    int _sx, _sy;
-    int _tx, _ty;
-  } finalTransformI;
-
-  // --------------------------------------------------------------------------
-  // [Members - Clipping]
-  // --------------------------------------------------------------------------
-
-  //! @brief The core clip-box.
-  BoxI coreClipBox;
-
-  //! @brief The meta origin.
-  PointI metaOrigin;
-  //! @brief The user origin.
-  PointI userOrigin;
-  //! @brief The core origin (the meta origin + the user origin).
-  PointI coreOrigin;
-
-  //! @brief The meta region.
-  Region metaRegion;
-  //! @brief The user region.
-  Region userRegion;
-  //! @brief The core region (the meta region & the user region).
-  Region coreRegion;
-
-  // --------------------------------------------------------------------------
   // [Members - State]
   // --------------------------------------------------------------------------
 
   //! @brief Zone memory allocator for @c RasterState objects.
   ZoneAllocator stateAllocator;
-
   //! @brief Unused states pool.
   RasterState* statePool;
-
   //! @brief State.
   RasterState* state;
 
@@ -382,7 +356,9 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   // [Members - Pattern Context]
   // --------------------------------------------------------------------------
 
+  //! @brief Pattern-context allocator.
   ZoneAllocator pcAllocator;
+  //! @brief Pattern-context pool.
   RasterAbstractLinkedList* pcPool;
 
   // --------------------------------------------------------------------------

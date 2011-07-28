@@ -64,7 +64,7 @@ struct FOG_NO_EXPORT RasterState
   float opacityF;
 
   // ------------------------------------------------------------------------
-  // [Type and Precision]
+  // [Type & Precision]
   // ------------------------------------------------------------------------
 
   //! @brief Source type (see @ref PATTERN_TYPE).
@@ -73,20 +73,29 @@ struct FOG_NO_EXPORT RasterState
   uint8_t savedStateFlags;
   //! @brief The strokeParams[F|D] precision.
   uint8_t strokeParamsPrecision;
-  //! @brief The type of core clip (coreRegion, coreClipBox).
-  //!
-  //! @note Don't miss it with the @c finalType member!
-  uint8_t coreClipType;
 
   // ------------------------------------------------------------------------
-  // [RASTER_STATE_SOURCE]
+  // [Integral Transform]
+  // ------------------------------------------------------------------------
+
+  //! @brief The integralTransform type, see @c RASTER_INTEGRAL_TRANSFORM.
+  uint8_t integralTransformType;
+
+  struct _IntegralTransform
+  {
+    int _sx, _sy;
+    int _tx, _ty;
+  } integralTransform;
+
+  // ------------------------------------------------------------------------
+  // [Source]
   // ------------------------------------------------------------------------
 
   RasterSource source;
   RenderPatternContext* pc;
 
   // ------------------------------------------------------------------------
-  // [RASTER_STATE_STROKE]
+  // [Stroke]
   // ------------------------------------------------------------------------
 
   struct StrokeParamsData
@@ -102,36 +111,20 @@ struct FOG_NO_EXPORT RasterState
   // --------------------------------------------------------------------------
 
   //! @brief The user transformation matrix (double).
-  Static<TransformD> userTransform;
+  Static<TransformD> userTransformD;
   //! @brief The final transformation matrix (double).
-  Static<TransformD> finalTransform;
+  Static<TransformD> finalTransformD;
   //! @brief The final transformation matrix (float).
   Static<TransformF> finalTransformF;
-
-  //! @brief The core translation point in pixels (negated coreOrigin).
-  PointI coreTranslationI;
-
-  struct
-  {
-    //! @brief The finalTransformI type, see @c RASTER_INTEGRAL_TRANSFORM.
-    int _type;
-
-    int _sx, _sy;
-    int _tx, _ty;
-  } finalTransformI;
 
   // ------------------------------------------------------------------------
   // [RASTER_STATE_CLIPPING]
   // ------------------------------------------------------------------------
 
-  //! @brief The core clip-box.
-  BoxI coreClipBox;
+  //! @brief The clip-box.
+  BoxI clipBox;
 
-  //! @brief The core origin (the meta origin + the user origin).
-  PointI coreOrigin;
-
-  //! @brief The core region (the meta region & the user region).
-  Static<Region> coreRegion;
+  // TODO: Clipping
 };
 
 //! @}

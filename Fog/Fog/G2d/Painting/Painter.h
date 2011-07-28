@@ -207,7 +207,7 @@ struct FOG_NO_EXPORT Painter
   }
 
   // --------------------------------------------------------------------------
-  // [Parameters - Meta]
+  // [Parameters - Meta-Params]
   // --------------------------------------------------------------------------
 
   //! @brief Get meta variables (meta origin and meta region).
@@ -237,28 +237,6 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t resetMetaParams()
   {
     return _vtable->resetMetaParams(this);
-  }
-
-  // --------------------------------------------------------------------------
-  // [Parameters - User]
-  // --------------------------------------------------------------------------
-
-  //! @brief Get user variables (user origin and user region).
-  FOG_INLINE err_t getUserParams(Region& region, PointI& origin) const
-  {
-    return _vtable->getMetaParams(this, region, origin);
-  }
-
-  //! @brief Set user variables (user origin and user region).
-  FOG_INLINE err_t setUserParams(const Region& region, const PointI& origin)
-  {
-    return _vtable->setUserParams(this, region, origin);
-  }
-
-  //! @brief Reset user variables (setting user region to infinite and user origin to zero).
-  FOG_INLINE err_t resetUserParams()
-  {
-    return _vtable->resetUserParams(this);
   }
 
   // --------------------------------------------------------------------------

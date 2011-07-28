@@ -50,10 +50,6 @@ struct FOG_NO_EXPORT PaintEngineVTable
   typedef err_t (FOG_CDECL *SetMetaParams)(Painter* self, const Region& region, const PointI& origin);
   typedef err_t (FOG_CDECL *ResetMetaParams)(Painter* self);
 
-  typedef err_t (FOG_CDECL *GetUserParams)(const Painter* self, Region& region, PointI& origin);
-  typedef err_t (FOG_CDECL *SetUserParams)(Painter* self, const Region& region, const PointI& origin);
-  typedef err_t (FOG_CDECL *ResetUserParams)(Painter* self);
-
   typedef err_t (FOG_CDECL *GetParameter)(const Painter* self, uint32_t parameterId, void* value);
   typedef err_t (FOG_CDECL *SetParameter)(Painter* self, uint32_t parameterId, const void* value);
   typedef err_t (FOG_CDECL *ResetParameter)(Painter* self, uint32_t parameterId);
@@ -65,10 +61,6 @@ struct FOG_NO_EXPORT PaintEngineVTable
   GetMetaParams getMetaParams;
   SetMetaParams setMetaParams;
   ResetMetaParams resetMetaParams;
-
-  GetUserParams getUserParams;
-  SetUserParams setUserParams;
-  ResetUserParams resetUserParams;
 
   GetParameter getParameter;
   SetParameter setParameter;

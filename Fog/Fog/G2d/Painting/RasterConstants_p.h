@@ -228,22 +228,20 @@ enum RASTER_MASTER_FLAGS
   //! @brief Mask including all no-paint states and fatal-error.
   RASTER_NO_PAINT_ALL_FLAGS = 0x8000FFFF,
 
-  //! @brief The core clip-region (intersected meta-region and user-region)
-  //! contains no painting area.
-  RASTER_NO_PAINT_CORE_REGION = 0x00000001,
+  //! @brief The meta clip-region contains no painting area.
+  RASTER_NO_PAINT_META_REGION = 0x00000001,
 
-  //! @brief The final clip-region (intersected core-region and AABB rectangles)
-  //! contains no painting area.
-  RASTER_NO_PAINT_FINAL_REGION = 0x00000002,
+  //! @brief The meta transform is invalid.
+  RASTER_NO_PAINT_META_TRANSFORM = 0x00000002,
 
-  //! @brief The final mask contains no painting area.
-  RASTER_NO_PAINT_FINAL_MASK = 0x0000004,
+  //! @brief The user clip-region contains no painting area.
+  RASTER_NO_PAINT_USER_REGION = 0x00000004,
 
-  //! @brief The core transform is invalid.
-  RASTER_NO_PAINT_CORE_TRANSFORM = 0x00000008,
+  //! @brief The user transform is invalid.
+  RASTER_NO_PAINT_USER_TRANSFORM = 0x00000008,
 
-  //! @brief The final transform is invalid.
-  RASTER_NO_PAINT_FINAL_TRANSFORM = 0x00000010,
+  //! @brief The user clip-mask contains no painting area.
+  RASTER_NO_PAINT_USER_MASK = 0x00000010,
 
   //! @brief The compositing operator produces no painting onto the current layer.
   RASTER_NO_PAINT_COMPOSITING_OPERATOR = 0x00000020,
@@ -257,11 +255,11 @@ enum RASTER_MASTER_FLAGS
   //! example line-width set to zero).
   RASTER_NO_PAINT_STROKE = 0x00001000,
 
-  RASTER_NO_PAINT_BASE_FLAGS   = RASTER_NO_PAINT_CORE_REGION          |
-                                 RASTER_NO_PAINT_FINAL_REGION         |
-                                 RASTER_NO_PAINT_FINAL_MASK           |
-                                 RASTER_NO_PAINT_CORE_TRANSFORM       |
-                                 RASTER_NO_PAINT_FINAL_TRANSFORM      |
+  RASTER_NO_PAINT_BASE_FLAGS   = RASTER_NO_PAINT_META_REGION          |
+                                 RASTER_NO_PAINT_META_TRANSFORM       |
+                                 RASTER_NO_PAINT_USER_REGION          |
+                                 RASTER_NO_PAINT_USER_TRANSFORM       |
+                                 RASTER_NO_PAINT_USER_MASK            |
                                  RASTER_NO_PAINT_COMPOSITING_OPERATOR |
                                  RASTER_NO_PAINT_OPACITY              ,
 

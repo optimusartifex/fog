@@ -57,28 +57,6 @@ static err_t FOG_CDECL MyPaintEngine_resetMetaParams(Painter* self)
 }
 
 // ============================================================================
-// [Fog::MyPaintEngine - User Params]
-// ============================================================================
-
-static err_t FOG_CDECL MyPaintEngine_getUserParams(const Painter* self, Region& region, PointI& origin)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL MyPaintEngine_setUserParams(Painter* self, const Region& region, const PointI& origin)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL MyPaintEngine_resetUserParams(Painter* self)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-// ============================================================================
 // [Fog::MyPaintEngine - Parameters]
 // ============================================================================
 
@@ -787,14 +765,6 @@ static void MyPaintEngine_init()
   v.resetMetaParams = MyPaintEngine_resetMetaParams;
 
   // --------------------------------------------------------------------------
-  // [User Params]
-  // --------------------------------------------------------------------------
-
-  v.getUserParams = MyPaintEngine_getUserParams;
-  v.setUserParams = MyPaintEngine_setUserParams;
-  v.resetUserParams = MyPaintEngine_resetUserParams;
-
-  // --------------------------------------------------------------------------
   // [Parameters]
   // --------------------------------------------------------------------------
 
@@ -1025,25 +995,6 @@ static err_t FOG_CDECL NullPaintEngine_setMetaParams(Painter* self, const Region
 }
 
 static err_t FOG_CDECL NullPaintEngine_resetMetaParams(Painter* self)
-{
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-// ============================================================================
-// [Fog::NullPaintEngine - User Params]
-// ============================================================================
-
-static err_t FOG_CDECL NullPaintEngine_getUserParams(const Painter* self, Region& region, PointI& origin)
-{
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL NullPaintEngine_setUserParams(Painter* self, const Region& region, const PointI& origin)
-{
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL NullPaintEngine_resetUserParams(Painter* self)
 {
   return ERR_RT_NOT_IMPLEMENTED;
 }
@@ -1387,14 +1338,6 @@ FOG_NO_EXPORT void NullPaintEngine_init()
   v.getMetaParams = NullPaintEngine_getMetaParams;
   v.setMetaParams = NullPaintEngine_setMetaParams;
   v.resetMetaParams = NullPaintEngine_resetMetaParams;
-
-  // --------------------------------------------------------------------------
-  // [User Params]
-  // --------------------------------------------------------------------------
-
-  v.getUserParams = NullPaintEngine_getUserParams;
-  v.setUserParams = NullPaintEngine_setUserParams;
-  v.resetUserParams = NullPaintEngine_resetUserParams;
 
   // --------------------------------------------------------------------------
   // [Parameters]

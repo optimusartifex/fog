@@ -129,8 +129,8 @@ FOG_CAPI_DECLARE void _fog_init(void)
 
   // [G2d/Painting]
   PaintDeviceInfo_init();
-  Painter_initNull();
-  Painter_initRaster();
+  NullPaintEngine_init();
+  RasterPaintEngine_init();
 
   // [G2d/Text]
   GlyphBitmap_init();

@@ -16,21 +16,12 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::NullPaintEngineVTable]
-// ============================================================================
-
-//! @internal
-struct FOG_NO_EXPORT NullPaintEngineVTable : public PaintEngineVTable
-{
-};
-
-// ============================================================================
 // [Fog::NullPaintEngine]
 // ============================================================================
 
 //! @internal
 //!
-//! @brief The null painter engine (does nothing).
+//! @brief The null paint-engine (does nothing).
 //!
 //! The nearly all methods result in @ref ERR_RT_INVALID_STATE error code.
 struct FOG_NO_EXPORT NullPaintEngine : public PaintEngine

@@ -1317,11 +1317,11 @@ struct FOG_NO_EXPORT Api
 
   typedef PaintEngine* (FOG_CDECL *Painter_GetNullEngine)();
 
-  typedef err_t (FOG_CDECL *Painter_BeginImage)(Painter& self, Image& image, const RectI* rect, uint32_t initFlags);
-  typedef err_t (FOG_CDECL *Painter_BeginIBits)(Painter& self, const ImageBits& imageBits, const RectI* rect, uint32_t initFlags);
+  typedef err_t (FOG_CDECL *Painter_BeginImage)(Painter* self, Image& image, const RectI* rect, uint32_t initFlags);
+  typedef err_t (FOG_CDECL *Painter_BeginIBits)(Painter* self, const ImageBits& imageBits, const RectI* rect, uint32_t initFlags);
 
-  typedef err_t (FOG_CDECL *Painter_SwitchToImage)(Painter& self, Image& image, const RectI* rect);
-  typedef err_t (FOG_CDECL *Painter_SwitchToIBits)(Painter& self, const ImageBits& imageBits, const RectI* rect);
+  typedef err_t (FOG_CDECL *Painter_SwitchToImage)(Painter* self, Image& image, const RectI* rect);
+  typedef err_t (FOG_CDECL *Painter_SwitchToIBits)(Painter* self, const ImageBits& imageBits, const RectI* rect);
 
   struct FOG_NO_EXPORT _FuncsPainter
   {

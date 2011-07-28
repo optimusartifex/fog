@@ -336,14 +336,14 @@ enum RENDER_FETCH
 //! the @c RasterPaintEngine and compositing templates in Fog::Render module.
 enum RENDER_COMBINE
 {
-  //! @brief Compositing result is affected by destination color components.
-  RENDER_COMBINE_DC = (1 << 0),
-  //! @brief Compositing result is affected by destination alpha component.
-  RENDER_COMBINE_DA = (1 << 1),
-  //! @brief Compositing result is affected by source color components.
-  RENDER_COMBINE_SC = (1 << 2),
-  //! @brief Compositing result is affected by source alpha component.
-  RENDER_COMBINE_SA = (1 << 3),
+  //! @brief Compositing result is affected by dst-color component(s).
+  RENDER_COMBINE_DC = 0x0001,
+  //! @brief Compositing result is affected by dst-alpha component.
+  RENDER_COMBINE_DA = 0x0002,
+  //! @brief Compositing result is affected by src-color component(s).
+  RENDER_COMBINE_SC = 0x0004,
+  //! @brief Compositing result is affected by src-alpha component.
+  RENDER_COMBINE_SA = 0x0008,
 
   //! @brief Operator is not bound.
   //!
@@ -353,31 +353,31 @@ enum RENDER_COMBINE
   //!
   //! Typical bounded operator is @c COMPOSITE_SRC_OVER, but for example
   //! @c COMPOSITE_SRC is unbounded.
-  RENDER_COMBINE_UNBOUND = (1 << 4),
+  RENDER_COMBINE_UNBOUND = 0x0010,
   //! @brief Operator is not bound, but in formula is always Sca.m or Sa.m.
   //!
   //! This flag is used only as optimization and it must be set together with
   //! @c RENDER_COMBINE_UNBOUND.
-  RENDER_COMBINE_UNBOUND_MSK_IN = (1 << 5),
+  RENDER_COMBINE_UNBOUND_MSK_IN = 0x0020,
 
   //! @brief Operator is always nop (@c COMPOSITE_DST).
-  RENDER_COMBINE_NOP = (1 << 6),
+  RENDER_COMBINE_NOP = 0x0040,
   //! @brief Operator is nop if destination alpha is zero.
-  RENDER_COMBINE_NOP_IF_DA_ZERO = (1 << 7),
+  RENDER_COMBINE_NOP_IF_DA_ZERO = 0x0080,
   //! @brief Operator is nop if destination alpha is fully opaque.
-  RENDER_COMBINE_NOP_IF_DA_FULL = (1 << 8),
+  RENDER_COMBINE_NOP_IF_DA_FULL = 0x0100,
   //! @brief Operator is nop if source alpha value is zero.
-  RENDER_COMBINE_NOP_IF_SA_ZERO = (1 << 9),
+  RENDER_COMBINE_NOP_IF_SA_ZERO = 0x0200,
   //! @brief Operator is nop if source alpha value is fully opaque.
-  RENDER_COMBINE_NOP_IF_SA_FULL = (1 << 10),
+  RENDER_COMBINE_NOP_IF_SA_FULL = 0x0400,
 
   //! @brief Operator can be done on packed data (this is hint for mmx/sse2
   //! templates).
-  RENDER_COMBINE_PACKED = (1 << 11),
+  RENDER_COMBINE_PREFER_PACKED = 0x1000,
 
   //! @brief Prefer color in 0xFFRRGGBB format instead of 0xXXRRGGBB. Used as
   //! an optimization hint for MMX/SSE2 code.
-  RENDER_COMBINE_PREFER_FRGB = (1 << 12)
+  RENDER_COMBINE_PREFER_FRGB = 0x2000
 };
 
 // ============================================================================
@@ -403,7 +403,7 @@ enum RENDER_COMBINE
 #define NOP_DA_F       RENDER_COMBINE_NOP_IF_DA_FULL
 #define NOP_SA_Z       RENDER_COMBINE_NOP_IF_SA_ZERO
 #define NOP_SA_F       RENDER_COMBINE_NOP_IF_SA_FULL
-#define HINT_PACKED    RENDER_COMBINE_PACKED
+#define HINT_PACKED    RENDER_COMBINE_PREFER_PACKED
 #define HINT_FRGB      RENDER_COMBINE_PREFER_FRGB
 
 #endif // FOG_DOXYGEN

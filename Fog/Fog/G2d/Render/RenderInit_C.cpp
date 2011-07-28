@@ -46,7 +46,7 @@ namespace Fog {
 // [Init / Fini]
 // ============================================================================
 
-static void fog_rasterengine_set_nops(G2dRenderApi::CompositeExtFuncs* funcs)
+static void fog_rasterengine_set_nops(G2dRenderApi::_FuncsCompositeExt* funcs)
 {
   funcs->cblit_line[RENDER_CBLIT_PRGB ] = Render_C::CompositeNop::nop_cblit_line;
   funcs->cblit_span[RENDER_CBLIT_PRGB ] = Render_C::CompositeNop::nop_cblit_span;
@@ -69,7 +69,7 @@ FOG_NO_EXPORT void Render_initC(void)
   // --------------------------------------------------------------------------
 
   {
-    G2dRenderApi::ConvertFuncs& funcs = api.convert;
+    G2dRenderApi::_FuncsConvert& funcs = api.convert;
 
     RENDER_INIT(init, Render_C::CConvert::init);
 
@@ -182,7 +182,7 @@ FOG_NO_EXPORT void Render_initC(void)
   // --------------------------------------------------------------------------
 
   {
-    G2dRenderApi::CompositeCoreFuncs& funcs = api.compositeCore[IMAGE_FORMAT_PRGB32][RENDER_COMPOSITE_CORE_SRC];
+    G2dRenderApi::_FuncsCompositeCore& funcs = api.compositeCore[IMAGE_FORMAT_PRGB32][RENDER_COMPOSITE_CORE_SRC];
 
     RENDER_INIT(cblit_line[RENDER_CBLIT_PRGB     ], Render_C::CSrc::prgb32_cblit_prgb32_line);
     RENDER_POST(cblit_line[RENDER_CBLIT_XRGB     ]);
@@ -214,7 +214,7 @@ FOG_NO_EXPORT void Render_initC(void)
   // --------------------------------------------------------------------------
 
   {
-    G2dRenderApi::CompositeCoreFuncs& funcs = api.compositeCore[IMAGE_FORMAT_XRGB32][RENDER_COMPOSITE_CORE_SRC];
+    G2dRenderApi::_FuncsCompositeCore& funcs = api.compositeCore[IMAGE_FORMAT_XRGB32][RENDER_COMPOSITE_CORE_SRC];
 
     RENDER_INIT(cblit_line[RENDER_CBLIT_PRGB     ], Render_C::CSrc::xrgb32_cblit_prgb32_line);
     RENDER_POST(cblit_line[RENDER_CBLIT_XRGB     ]);
@@ -246,7 +246,7 @@ FOG_NO_EXPORT void Render_initC(void)
   // --------------------------------------------------------------------------
 
   {
-    G2dRenderApi::CompositeCoreFuncs& funcs = api.compositeCore[IMAGE_FORMAT_PRGB32][RENDER_COMPOSITE_CORE_SRC_OVER];
+    G2dRenderApi::_FuncsCompositeCore& funcs = api.compositeCore[IMAGE_FORMAT_PRGB32][RENDER_COMPOSITE_CORE_SRC_OVER];
 
     RENDER_INIT(cblit_line[RENDER_CBLIT_PRGB     ], Render_C::CSrcOver::prgb32_cblit_prgb32_line);
     RENDER_POST(cblit_line[RENDER_CBLIT_XRGB     ]);
@@ -278,7 +278,7 @@ FOG_NO_EXPORT void Render_initC(void)
   // --------------------------------------------------------------------------
 
   {
-    G2dRenderApi::CompositeCoreFuncs& funcs = api.compositeCore[IMAGE_FORMAT_XRGB32][RENDER_COMPOSITE_CORE_SRC_OVER];
+    G2dRenderApi::_FuncsCompositeCore& funcs = api.compositeCore[IMAGE_FORMAT_XRGB32][RENDER_COMPOSITE_CORE_SRC_OVER];
 
     RENDER_INIT(cblit_line[RENDER_CBLIT_PRGB     ], Render_C::CSrcOver::prgb32_cblit_prgb32_line);
     RENDER_POST(cblit_line[RENDER_CBLIT_XRGB     ]);
@@ -319,7 +319,7 @@ FOG_NO_EXPORT void Render_initC(void)
 
 #if defined(FOG_RENDER_INIT_C)
   {
-    G2dRenderApi::SolidFuncs& solid = api.solid;
+    G2dRenderApi::_FuncsSolid& solid = api.solid;
 
     solid.create = Render_C::Helpers::p_solid_create_solid;
     solid.destroy = Render_C::Helpers::p_solid_destroy;
@@ -341,7 +341,7 @@ FOG_NO_EXPORT void Render_initC(void)
 
 #if defined(FOG_RENDER_INIT_C)
   {
-    G2dRenderApi::GradientFuncs& gradient = api.gradient;
+    G2dRenderApi::_FuncsGradient& gradient = api.gradient;
 
     gradient.interpolate[IMAGE_FORMAT_PRGB32] = Render_C::PGradientBase::interpolate_prgb32;
     gradient.interpolate[IMAGE_FORMAT_XRGB32] = Render_C::PGradientBase::interpolate_prgb32;
@@ -353,7 +353,7 @@ FOG_NO_EXPORT void Render_initC(void)
   // --------------------------------------------------------------------------
 
   {
-    G2dRenderApi::GradientFuncs& gradient = api.gradient;
+    G2dRenderApi::_FuncsGradient& gradient = api.gradient;
 
     gradient.create[GRADIENT_TYPE_LINEAR] = Render_C::PGradientLinear::create;
 
@@ -383,7 +383,7 @@ FOG_NO_EXPORT void Render_initC(void)
   // --------------------------------------------------------------------------
 
   {
-    G2dRenderApi::GradientFuncs& gradient = api.gradient;
+    G2dRenderApi::_FuncsGradient& gradient = api.gradient;
 
     gradient.create[GRADIENT_TYPE_RADIAL] = Render_C::PGradientRadial::create;
 
@@ -413,7 +413,7 @@ FOG_NO_EXPORT void Render_initC(void)
   // --------------------------------------------------------------------------
 
   {
-    G2dRenderApi::GradientFuncs& gradient = api.gradient;
+    G2dRenderApi::_FuncsGradient& gradient = api.gradient;
 
     gradient.create[GRADIENT_TYPE_CONICAL] = Render_C::PGradientConical::create;
 
@@ -428,7 +428,7 @@ FOG_NO_EXPORT void Render_initC(void)
   // --------------------------------------------------------------------------
 
   {
-    G2dRenderApi::GradientFuncs& gradient = api.gradient;
+    G2dRenderApi::_FuncsGradient& gradient = api.gradient;
 
     gradient.create[GRADIENT_TYPE_RECTANGULAR] = Render_C::PGradientRectangular::create;
 
@@ -458,7 +458,7 @@ FOG_NO_EXPORT void Render_initC(void)
   // --------------------------------------------------------------------------
 
   {
-    G2dRenderApi::TextureFuncs& texture = api.texture;
+    G2dRenderApi::_FuncsTexture& texture = api.texture;
 
     texture.create = Render_C::PTextureBase::create;
 

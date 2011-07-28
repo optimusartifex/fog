@@ -44,9 +44,6 @@ union RasterHints;
 struct RasterLayer;
 struct RasterPaintEngine;
 struct RasterScope;
-struct RasterState;
-struct RasterWorker;
-struct RasterWorkerManager;
 
 // ============================================================================
 // [Fog::RasterAbstractLinkedList]
@@ -189,18 +186,6 @@ struct FOG_NO_EXPORT RasterSource
 
   Static<TransformD> transform;
   Static<TransformD> adjusted;
-};
-
-// ============================================================================
-// [Fog::RasterStrokeParams]
-// ============================================================================
-
-struct RasterStrokeParams
-{
-  //! @brief Stroke parameters (float).
-  Static<PathStrokerParamsF> f;
-  //! @brief Stroke parameters (double).
-  Static<PathStrokerParamsD> d;
 };
 
 // ============================================================================

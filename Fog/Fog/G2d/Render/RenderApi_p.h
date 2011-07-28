@@ -39,7 +39,7 @@ struct FOG_NO_EXPORT G2dRenderApi
   // [Members - Convert]
   // --------------------------------------------------------------------------
 
-  struct FOG_NO_EXPORT ConvertFuncs
+  struct FOG_NO_EXPORT _FuncsConvert
   {
     RenderConverterInitFn init;
 
@@ -76,7 +76,7 @@ struct FOG_NO_EXPORT G2dRenderApi
   // [Members - Composite - Core]
   // --------------------------------------------------------------------------
 
-  struct FOG_NO_EXPORT CompositeCoreFuncs
+  struct FOG_NO_EXPORT _FuncsCompositeCore
   {
     // ------------------------------------------------------------------------
     // [CompositeCore - CBlit]
@@ -95,13 +95,13 @@ struct FOG_NO_EXPORT G2dRenderApi
     RenderVBlitSpanFn vblit_span[IMAGE_FORMAT_COUNT];
   };
 
-  CompositeCoreFuncs compositeCore[IMAGE_FORMAT_COUNT][RENDER_COMPOSITE_CORE_COUNT];
+  _FuncsCompositeCore compositeCore[IMAGE_FORMAT_COUNT][RENDER_COMPOSITE_CORE_COUNT];
 
   // --------------------------------------------------------------------------
   // [Members - Composite - Extended]
   // --------------------------------------------------------------------------
 
-  struct FOG_NO_EXPORT CompositeExtFuncs
+  struct FOG_NO_EXPORT _FuncsCompositeExt
   {
     // ------------------------------------------------------------------------
     // [CompositeExt - CBlit]
@@ -118,26 +118,27 @@ struct FOG_NO_EXPORT G2dRenderApi
     RenderVBlitSpanFn vblit_span[RENDER_VBLIT_COUNT];
   };
 
-  CompositeExtFuncs compositeExt[IMAGE_FORMAT_COUNT][RENDER_COMPOSITE_EXT_COUNT];
+  _FuncsCompositeExt compositeExt[IMAGE_FORMAT_COUNT][RENDER_COMPOSITE_EXT_COUNT];
 
   // --------------------------------------------------------------------------
   // [Members - Mask]
   // --------------------------------------------------------------------------
 
-  struct FOG_NO_EXPORT MaskFuncs
+  // TODO?
+  struct FOG_NO_EXPORT _FuncsMask
   {
     RasterMaskCOpVFn c_op_v;
     RasterMaskVOpCFn v_op_c;
     RasterMaskVOpVFn v_op_v;
   };
 
-  MaskFuncs mask[CLIP_OP_COUNT][IMAGE_FORMAT_COUNT];
+  _FuncsMask mask[CLIP_OP_COUNT][IMAGE_FORMAT_COUNT];
 
   // --------------------------------------------------------------------------
   // [Members - Pattern - Solid]
   // --------------------------------------------------------------------------
 
-  struct FOG_NO_EXPORT SolidFuncs
+  struct FOG_NO_EXPORT _FuncsSolid
   {
     // ------------------------------------------------------------------------
     // [Create / Destroy]
@@ -159,13 +160,13 @@ struct FOG_NO_EXPORT G2dRenderApi
     RenderPatternFetchFn fetch[IMAGE_FORMAT_COUNT];
   };
 
-  SolidFuncs solid;
+  _FuncsSolid solid;
 
   // --------------------------------------------------------------------------
   // [Members - Pattern - Texture]
   // --------------------------------------------------------------------------
 
-  struct FOG_NO_EXPORT TextureFuncs
+  struct FOG_NO_EXPORT _FuncsTexture
   {
     // ------------------------------------------------------------------------
     // [Create]
@@ -214,13 +215,13 @@ struct FOG_NO_EXPORT G2dRenderApi
     _Fetch a16;
   };
 
-  TextureFuncs texture;
+  _FuncsTexture texture;
 
   // --------------------------------------------------------------------------
   // [Members - Pattern - Gradient]
   // --------------------------------------------------------------------------
 
-  struct FOG_NO_EXPORT GradientFuncs
+  struct FOG_NO_EXPORT _FuncsGradient
   {
     // ------------------------------------------------------------------------
     // [Interpolate]
@@ -284,7 +285,7 @@ struct FOG_NO_EXPORT G2dRenderApi
     } rectangular;
   };
 
-  GradientFuncs gradient;
+  _FuncsGradient gradient;
 
   // --------------------------------------------------------------------------
   // [Accessors - Convert]
@@ -333,7 +334,7 @@ struct FOG_NO_EXPORT G2dRenderApi
   // [Accessors - Composite - Core]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const CompositeCoreFuncs* getCompositeCoreFuncs(uint32_t format, uint32_t op) const
+  FOG_INLINE const _FuncsCompositeCore* get_FuncsCompositeCore(uint32_t format, uint32_t op) const
   {
     FOG_ASSERT(format < IMAGE_FORMAT_COUNT);
     FOG_ASSERT(op >= RENDER_COMPOSITE_CORE_START &&
@@ -346,7 +347,7 @@ struct FOG_NO_EXPORT G2dRenderApi
   // [Accessors - Composite - Extended]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const CompositeExtFuncs* getCompositeExtFuncs(uint32_t format, uint32_t op) const
+  FOG_INLINE const _FuncsCompositeExt* get_FuncsCompositeExt(uint32_t format, uint32_t op) const
   {
     FOG_ASSERT(format < IMAGE_FORMAT_COUNT);
     FOG_ASSERT(op >= RENDER_COMPOSITE_EXT_START &&
@@ -362,40 +363,40 @@ struct FOG_NO_EXPORT G2dRenderApi
   FOG_INLINE RenderCBlitLineFn getCBlitLine(uint32_t dstFormat, uint32_t op, uint32_t isOpaque)
   {
     if (RenderUtil::isCompositeCoreOperator(op))
-      return getCompositeCoreFuncs(dstFormat, op)->cblit_line[isOpaque];
+      return get_FuncsCompositeCore(dstFormat, op)->cblit_line[isOpaque];
     else
-      return getCompositeExtFuncs(dstFormat, op)->cblit_line[isOpaque];
+      return get_FuncsCompositeExt(dstFormat, op)->cblit_line[isOpaque];
   }
 
   FOG_INLINE RenderCBlitSpanFn getCBlitSpan(uint32_t dstFormat, uint32_t op, uint32_t isOpaque)
   {
     if (RenderUtil::isCompositeCoreOperator(op))
-      return getCompositeCoreFuncs(dstFormat, op)->cblit_span[isOpaque];
+      return get_FuncsCompositeCore(dstFormat, op)->cblit_span[isOpaque];
     else
-      return getCompositeExtFuncs(dstFormat, op)->cblit_span[isOpaque];
+      return get_FuncsCompositeExt(dstFormat, op)->cblit_span[isOpaque];
   }
 
   FOG_INLINE RenderVBlitLineFn getVBlitLine(uint32_t dstFormat, uint32_t op, uint32_t srcFormat)
   {
     if (RenderUtil::isCompositeCoreOperator(op))
-      return getCompositeCoreFuncs(dstFormat, op)->vblit_line[srcFormat];
+      return get_FuncsCompositeCore(dstFormat, op)->vblit_line[srcFormat];
     else
-      return getCompositeExtFuncs(dstFormat, op)->vblit_line[RenderUtil::getCompatVBlitId(dstFormat, srcFormat)];
+      return get_FuncsCompositeExt(dstFormat, op)->vblit_line[RenderUtil::getCompatVBlitId(dstFormat, srcFormat)];
   }
 
   FOG_INLINE RenderVBlitSpanFn getVBlitSpan(uint32_t dstFormat, uint32_t op, uint32_t srcFormat)
   {
     if (RenderUtil::isCompositeCoreOperator(op))
-      return getCompositeCoreFuncs(dstFormat, op)->vblit_span[srcFormat];
+      return get_FuncsCompositeCore(dstFormat, op)->vblit_span[srcFormat];
     else
-      return getCompositeExtFuncs(dstFormat, op)->vblit_span[RenderUtil::getCompatVBlitId(dstFormat, srcFormat)];
+      return get_FuncsCompositeExt(dstFormat, op)->vblit_span[RenderUtil::getCompatVBlitId(dstFormat, srcFormat)];
   }
 
   // --------------------------------------------------------------------------
   // [Accessors - Mask]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const MaskFuncs* getMaskFuncs(uint32_t op, uint32_t format) const
+  FOG_INLINE const _FuncsMask* getMaskFuncs(uint32_t op, uint32_t format) const
   {
     FOG_ASSERT(op < CLIP_OP_COUNT);
     FOG_ASSERT(format < IMAGE_FORMAT_COUNT);

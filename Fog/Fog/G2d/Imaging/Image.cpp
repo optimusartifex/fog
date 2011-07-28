@@ -447,7 +447,7 @@ err_t Image::convert(uint32_t format)
   int h = d->size.h;
   int y;
 
-  const G2dRenderApi::CompositeCoreFuncs* funcs = _g2d_render.getCompositeCoreFuncs(targetFormat, COMPOSITE_SRC);
+  const G2dRenderApi::_FuncsCompositeCore* funcs = _g2d_render.get_FuncsCompositeCore(targetFormat, COMPOSITE_SRC);
   RenderVBlitLineFn blitLine = funcs->vblit_line[sourceFormat];
 
   RenderClosure closure;
@@ -1814,18 +1814,18 @@ static err_t Image_blitImage(
 
     if (RenderUtil::isCompositeCoreOperator(compositingOperator))
     {
-      blitLine = _g2d_render.getCompositeCoreFuncs(dstFormat, compositingOperator)->vblit_line[srcFormat];
+      blitLine = _g2d_render.get_FuncsCompositeCore(dstFormat, compositingOperator)->vblit_line[srcFormat];
     }
     else
     {
       uint32_t compat  = RenderUtil::getCompatFormat(dstFormat, srcFormat);
       uint32_t vBlitId = RenderUtil::getCompatVBlitId(dstFormat, srcFormat);
 
-      blitLine = _g2d_render.getCompositeExtFuncs(dstFormat, compositingOperator)->vblit_line[compat];
+      blitLine = _g2d_render.get_FuncsCompositeExt(dstFormat, compositingOperator)->vblit_line[compat];
 
       if (compat != srcFormat)
       {
-        converter = _g2d_render.getCompositeCoreFuncs(compat, COMPOSITE_SRC)->vblit_line[srcFormat];
+        converter = _g2d_render.get_FuncsCompositeCore(compat, COMPOSITE_SRC)->vblit_line[srcFormat];
 
         if (FOG_IS_NULL(buffer.alloc(w * ImageFormatDescription::getByFormat(compat).getBytesPerPixel())))
           return ERR_RT_OUT_OF_MEMORY;
@@ -1835,7 +1835,7 @@ static err_t Image_blitImage(
     // Overlapped.
     if (converter == NULL && dst._d == src._d && dstX >= srcX && (dstX - srcX) <= w)
     {
-      converter = _g2d_render.getCompositeCoreFuncs(srcFormat, COMPOSITE_SRC)->vblit_line[srcFormat];
+      converter = _g2d_render.get_FuncsCompositeCore(srcFormat, COMPOSITE_SRC)->vblit_line[srcFormat];
 
       if (FOG_IS_NULL(buffer.alloc(w * src.getBytesPerPixel())))
         return ERR_RT_OUT_OF_MEMORY;
@@ -1864,18 +1864,18 @@ static err_t Image_blitImage(
 
     if (RenderUtil::isCompositeCoreOperator(compositingOperator))
     {
-      blitLine = _g2d_render.getCompositeCoreFuncs(dstFormat, compositingOperator)->vblit_span[srcFormat];
+      blitLine = _g2d_render.get_FuncsCompositeCore(dstFormat, compositingOperator)->vblit_span[srcFormat];
     }
     else
     {
       uint32_t compat  = RenderUtil::getCompatFormat(dstFormat, srcFormat);
       uint32_t vBlitId = RenderUtil::getCompatVBlitId(dstFormat, srcFormat);
 
-      blitLine = _g2d_render.getCompositeExtFuncs(dstFormat, compositingOperator)->vblit_span[compat];
+      blitLine = _g2d_render.get_FuncsCompositeExt(dstFormat, compositingOperator)->vblit_span[compat];
 
       if (compat != srcFormat)
       {
-        converter = _g2d_render.getCompositeCoreFuncs(compat, COMPOSITE_SRC)->vblit_line[srcFormat];
+        converter = _g2d_render.get_FuncsCompositeCore(compat, COMPOSITE_SRC)->vblit_line[srcFormat];
 
         if (FOG_IS_NULL(buffer.alloc(w * ImageFormatDescription::getByFormat(compat).getBytesPerPixel())))
           return ERR_RT_OUT_OF_MEMORY;
@@ -1885,7 +1885,7 @@ static err_t Image_blitImage(
     // Overlapped.
     if (converter == NULL && dst._d == src._d && dstX >= srcX && (dstX - srcX) <= w)
     {
-      converter = _g2d_render.getCompositeCoreFuncs(srcFormat, COMPOSITE_SRC)->vblit_line[srcFormat];
+      converter = _g2d_render.get_FuncsCompositeCore(srcFormat, COMPOSITE_SRC)->vblit_line[srcFormat];
 
       if (FOG_IS_NULL(buffer.alloc(w * src.getBytesPerPixel())))
         return ERR_RT_OUT_OF_MEMORY;
@@ -2276,7 +2276,7 @@ HBITMAP Image::toWinBitmap() const
   err_t err = WinDibImageData::_createDibSection(d->size, dstFormat, &hBitmap, &dstBits, &dstStride);
   if (FOG_IS_ERROR(err)) return NULL;
 
-  RenderVBlitLineFn blitLine = _g2d_render.getCompositeCoreFuncs(dstFormat, COMPOSITE_SRC)->vblit_line[d->format];
+  RenderVBlitLineFn blitLine = _g2d_render.get_FuncsCompositeCore(dstFormat, COMPOSITE_SRC)->vblit_line[d->format];
 
   RenderClosure closure;
   closure.ditherOrigin.reset();

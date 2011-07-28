@@ -197,14 +197,12 @@ void MyWindow::onPaint(PaintEvent* e)
 
   p->restore();
 
-  p->blitImage(PointI(220, 220), i[0]);
-
   /*
   {
     uint i, j;
     p->setLineWidth(1.5f);
 
-    for (i = 10; i < 100; i++)
+    for (i = 10; i < 20; i++)
     {
       PathF p0;
 

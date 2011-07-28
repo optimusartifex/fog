@@ -81,7 +81,7 @@ struct FOG_NO_EXPORT PTextureBase
 
     // Choose the format of fetched pixels.
     uint32_t fetchFormat = srcFormat;
-    const G2dRenderApi::TextureFuncs::_Fetch* fetchFuncs;
+    const G2dRenderApi::_FuncsTexture::_Fetch* fetchFuncs;
 
     // ${IMAGE_FORMAT:BEGIN}
     switch (dstFormat)

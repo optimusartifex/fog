@@ -135,13 +135,86 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   err_t switchTo(const ImageBits& imageBits, ImageData* imaged);
 
   // --------------------------------------------------------------------------
+  // [MaxThreads]
+  // --------------------------------------------------------------------------
+
+  uint getMaxThreads();
+
+  // --------------------------------------------------------------------------
   // [Transform]
   // --------------------------------------------------------------------------
+
+  FOG_INLINE bool ensureFinalTransformF()
+  {
+    if (finalTransform._type == TRANSFORM_TYPE_IDENTITY)
+      return false;
+    if (ctx.rasterHints.finalTransformF)
+      return true;
+
+    finalTransformF = finalTransform;
+    ctx.rasterHints.finalTransformF = 1;
+    return true;
+  }
 
   FOG_INLINE bool isIntegralTransform() const
   {
     return finalTransformI._type != RASTER_INTEGRAL_TRANSFORM_NONE;
   }
+
+  bool doIntegralTransformAndClip(BoxI& dst, const RectI& src);
+
+  // --------------------------------------------------------------------------
+  // [State]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE RasterState* createState()
+  {
+    RasterState* s = statePool;
+    if (FOG_IS_NULL(s))
+      s = reinterpret_cast<RasterState*>(stateAllocator.alloc(sizeof(RasterState)));
+    else
+      statePool = s->prevState;
+    return s;
+  }
+
+  FOG_INLINE void poolState(RasterState* state)
+  {
+    state->prevState = statePool;
+    statePool = state;
+  }
+
+  void saveSource();
+  void saveStroke();
+  void saveTransform();
+  void saveClipping();
+
+  void discardStates();
+
+  // --------------------------------------------------------------------------
+  // [Setup]
+  // --------------------------------------------------------------------------
+
+  void setupLayer();
+  void setupOps();
+  void setupDefaultClip();
+
+  // --------------------------------------------------------------------------
+  // [Helpers - Source]
+  // --------------------------------------------------------------------------
+
+  err_t createPatternContext();
+
+  FOG_INLINE void discardSource();
+  FOG_INLINE void destroyPatternContext(RenderPatternContext* pc);
+
+  // --------------------------------------------------------------------------
+  // [Changed - Core]
+  // --------------------------------------------------------------------------
+
+  //! @brief Called when core clip variables were changed.
+  err_t changedCoreClip();
+  //! @brief Called when transform was changed.
+  void changedTransform();
 
   // --------------------------------------------------------------------------
   // [Members - Serializer]
@@ -232,7 +305,14 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   // [Members - Stroke Params]
   // --------------------------------------------------------------------------
 
-  RasterStrokeParams strokeParams;
+  //! @brief Stroke parameters.
+  struct _StrokeParams
+  {
+    //! @brief Stroke parameters (float).
+    Static<PathStrokerParamsF> f;
+    //! @brief Stroke parameters (double).
+    Static<PathStrokerParamsD> d;
+  } strokeParams;
 
   // --------------------------------------------------------------------------
   // [Members - Transform]

@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_PAINTING_RASTERPAINTCONTEXT_P_H
-#define _FOG_G2D_PAINTING_RASTERPAINTCONTEXT_P_H
+#ifndef _FOG_G2D_PAINTING_RASTERCONTEXT_P_H
+#define _FOG_G2D_PAINTING_RASTERCONTEXT_P_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
@@ -358,4 +358,4 @@ private:
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_PAINTING_RASTERPAINTCONTEXT_P_H
+#endif // _FOG_G2D_PAINTING_RASTERCONTEXT_P_H

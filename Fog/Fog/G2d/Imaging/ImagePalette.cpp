@@ -106,7 +106,7 @@ err_t ImagePalette::setData(const Range& range, const Argb32* entries)
   }
 
   _d->length = Math::max<uint32_t>(_d->length, (uint32_t)rend);
-  _g2d_render.getCompositeCoreFuncs(IMAGE_FORMAT_XRGB32, COMPOSITE_SRC)->vblit_line[IMAGE_FORMAT_PRGB32](
+  _g2d_render.get_FuncsCompositeCore(IMAGE_FORMAT_XRGB32, COMPOSITE_SRC)->vblit_line[IMAGE_FORMAT_PRGB32](
     reinterpret_cast<uint8_t*>(_d->data + rstart),
     reinterpret_cast<const uint8_t*>(entries), (int)(uint)rlen, NULL);
 

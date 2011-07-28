@@ -125,8 +125,8 @@ FOG_NO_EXPORT void ImageCodecProvider_fini(void);
 
 // [Fog/G2d/Painting]
 FOG_NO_EXPORT void PaintDeviceInfo_init(void);
-FOG_NO_EXPORT void Painter_initNull(void);
-FOG_NO_EXPORT void Painter_initRaster(void);
+FOG_NO_EXPORT void NullPaintEngine_init(void);
+FOG_NO_EXPORT void RasterPaintEngine_init(void);
 FOG_NO_EXPORT void Rasterizer_init(void);
 
 // [Fog/G2d/Render]

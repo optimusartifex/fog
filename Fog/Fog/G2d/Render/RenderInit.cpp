@@ -44,7 +44,7 @@ FOG_NO_EXPORT void Render_initPost(void)
   // --------------------------------------------------------------------------
 
   {
-    G2dRenderApi::ConvertFuncs& f = api.convert;
+    G2dRenderApi::_FuncsConvert& f = api.convert;
 
     // A8 Destination.
     f.a8_from_dib     [RENDER_CONVERTER_DIB_A8               ] = api.convert.copy[RENDER_CONVERTER_COPY_8];
@@ -95,8 +95,8 @@ FOG_NO_EXPORT void Render_initPost(void)
   {
     for (i = 0; i < IMAGE_FORMAT_COUNT; i++)
     {
-      G2dRenderApi::CompositeCoreFuncs& fSrc     = api.compositeCore[i][RENDER_COMPOSITE_CORE_SRC];
-      G2dRenderApi::CompositeCoreFuncs& fSrcOver = api.compositeCore[i][RENDER_COMPOSITE_CORE_SRC_OVER];
+      G2dRenderApi::_FuncsCompositeCore& fSrc     = api.compositeCore[i][RENDER_COMPOSITE_CORE_SRC];
+      G2dRenderApi::_FuncsCompositeCore& fSrcOver = api.compositeCore[i][RENDER_COMPOSITE_CORE_SRC_OVER];
 
       fSrc.cblit_line[RENDER_CBLIT_XRGB] = fSrc.cblit_line[RENDER_CBLIT_PRGB];
       fSrc.cblit_span[RENDER_CBLIT_XRGB] = fSrc.cblit_span[RENDER_CBLIT_PRGB];

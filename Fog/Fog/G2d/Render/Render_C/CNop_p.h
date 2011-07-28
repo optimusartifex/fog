@@ -34,7 +34,7 @@ struct FOG_NO_EXPORT CompositeNop
   // ==========================================================================
 
   static void FOG_FASTCALL nop_cblit_span(
-    uint8_t* dst, const RenderSolid* src, const Span* span, const RenderClosure* closure)
+    uint8_t* dst, const RenderSolid* src, const RasterSpan* span, const RenderClosure* closure)
   {
   }
 
@@ -52,7 +52,7 @@ struct FOG_NO_EXPORT CompositeNop
   // ==========================================================================
 
   static void FOG_FASTCALL nop_vblit_span(
-    uint8_t* dst, const Span* span, const RenderClosure* closure)
+    uint8_t* dst, const RasterSpan* span, const RenderClosure* closure)
   {
   }
 };

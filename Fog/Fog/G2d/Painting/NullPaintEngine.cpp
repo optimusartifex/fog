@@ -18,14 +18,14 @@ namespace Fog {
 #if 0
 
 // ============================================================================
-// [Fog::MyPainterVTable]
+// [Fog::MyPaintEngineVTable]
 // ============================================================================
 
-struct FOG_NO_EXPORT MyPainterVTable : public PainterVTable
+struct FOG_NO_EXPORT MyPaintEngineVTable : public PaintEngineVTable
 {
 };
 
-static PainterVTable _MyPaintEngine_vtable;
+static PaintEngineVTable _MyPaintEngine_vtable;
 
 // ============================================================================
 // [Fog::MyPaintEngine]
@@ -996,7 +996,7 @@ err_t FOG_CDECL MyPainterImpl::flush(Painter& self, uint32_t flags)
 
 static void _g2d_painter_init_my()
 {
-  PainterVTable& v = _MyPaintEngine_vtable;
+  PaintEngineVTable& v = _MyPaintEngine_vtable;
 
   // --------------------------------------------------------------------------
   // [AddRef / Release]
@@ -1221,10 +1221,10 @@ static void _g2d_painter_fini_my()
 #endif
 
 // ============================================================================
-// [Fog::NullPainterVTable]
+// [Fog::NullPaintEngineVTable]
 // ============================================================================
 
-static PainterVTable NullPaintEngine_vtable;
+static PaintEngineVTable NullPaintEngine_vtable;
 
 // ============================================================================
 // [Fog::NullPainterImpl]
@@ -1722,7 +1722,7 @@ FOG_NO_EXPORT void Painter_initNull()
 {
   _api.painter.getNullEngine = NullPaintEngine_getNullEngine;
 
-  PainterVTable& v = NullPaintEngine_vtable;
+  PaintEngineVTable& v = NullPaintEngine_vtable;
 
   // --------------------------------------------------------------------------
   // [AddRef / Release]
@@ -1775,16 +1775,16 @@ FOG_NO_EXPORT void Painter_initNull()
   // [Transform]
   // --------------------------------------------------------------------------
 
-  v.getTransformF = (PainterVTable::GetTransformF)NullPainterImpl::getTransform;
-  v.getTransformD = (PainterVTable::GetTransformD)NullPainterImpl::getTransform;
+  v.getTransformF = (PaintEngineVTable::GetTransformF)NullPainterImpl::getTransform;
+  v.getTransformD = (PaintEngineVTable::GetTransformD)NullPainterImpl::getTransform;
 
-  v.setTransformF = (PainterVTable::SetTransformF)NullPainterImpl::setTransform;
-  v.setTransformD = (PainterVTable::SetTransformD)NullPainterImpl::setTransform;
+  v.setTransformF = (PaintEngineVTable::SetTransformF)NullPainterImpl::setTransform;
+  v.setTransformD = (PaintEngineVTable::SetTransformD)NullPainterImpl::setTransform;
 
-  v.applyTransformF = (PainterVTable::ApplyTransformF)NullPainterImpl::applyTransform;
-  v.applyTransformD = (PainterVTable::ApplyTransformD)NullPainterImpl::applyTransform;
+  v.applyTransformF = (PaintEngineVTable::ApplyTransformF)NullPainterImpl::applyTransform;
+  v.applyTransformD = (PaintEngineVTable::ApplyTransformD)NullPainterImpl::applyTransform;
 
-  v.resetTransform = (PainterVTable::ResetTransform)NullPainterImpl::resetTransform;
+  v.resetTransform = (PaintEngineVTable::ResetTransform)NullPainterImpl::resetTransform;
 
   // --------------------------------------------------------------------------
   // [State]
@@ -1797,30 +1797,30 @@ FOG_NO_EXPORT void Painter_initNull()
   // [Map]
   // --------------------------------------------------------------------------
 
-  v.mapPointF = (PainterVTable::MapPointF)NullPainterImpl::mapPoint;
-  v.mapPointD = (PainterVTable::MapPointD)NullPainterImpl::mapPoint;
+  v.mapPointF = (PaintEngineVTable::MapPointF)NullPainterImpl::mapPoint;
+  v.mapPointD = (PaintEngineVTable::MapPointD)NullPainterImpl::mapPoint;
 
   // --------------------------------------------------------------------------
   // [Draw]
   // --------------------------------------------------------------------------
 
-  v.drawRectI = (PainterVTable::PaintRectI)NullPainterImpl::doRect;
-  v.drawRectF = (PainterVTable::PaintRectF)NullPainterImpl::doRect;
-  v.drawRectD = (PainterVTable::PaintRectD)NullPainterImpl::doRect;
+  v.drawRectI = (PaintEngineVTable::PaintRectI)NullPainterImpl::doRect;
+  v.drawRectF = (PaintEngineVTable::PaintRectF)NullPainterImpl::doRect;
+  v.drawRectD = (PaintEngineVTable::PaintRectD)NullPainterImpl::doRect;
 
-  v.drawPolylineI = (PainterVTable::PaintPolylineI)NullPainterImpl::doPoly;
-  v.drawPolylineF = (PainterVTable::PaintPolylineF)NullPainterImpl::doPoly;
-  v.drawPolylineD = (PainterVTable::PaintPolylineD)NullPainterImpl::doPoly;
+  v.drawPolylineI = (PaintEngineVTable::PaintPolylineI)NullPainterImpl::doPoly;
+  v.drawPolylineF = (PaintEngineVTable::PaintPolylineF)NullPainterImpl::doPoly;
+  v.drawPolylineD = (PaintEngineVTable::PaintPolylineD)NullPainterImpl::doPoly;
 
-  v.drawPolygonI = (PainterVTable::PaintPolygonI)NullPainterImpl::doPoly;
-  v.drawPolygonF = (PainterVTable::PaintPolygonF)NullPainterImpl::doPoly;
-  v.drawPolygonD = (PainterVTable::PaintPolygonD)NullPainterImpl::doPoly;
+  v.drawPolygonI = (PaintEngineVTable::PaintPolygonI)NullPainterImpl::doPoly;
+  v.drawPolygonF = (PaintEngineVTable::PaintPolygonF)NullPainterImpl::doPoly;
+  v.drawPolygonD = (PaintEngineVTable::PaintPolygonD)NullPainterImpl::doPoly;
 
-  v.drawShapeF = (PainterVTable::PaintShapeF)NullPainterImpl::doShape;
-  v.drawShapeD = (PainterVTable::PaintShapeD)NullPainterImpl::doShape;
+  v.drawShapeF = (PaintEngineVTable::PaintShapeF)NullPainterImpl::doShape;
+  v.drawShapeD = (PaintEngineVTable::PaintShapeD)NullPainterImpl::doShape;
 
-  v.drawPathF = (PainterVTable::PaintPathF)NullPainterImpl::doPath;
-  v.drawPathD = (PainterVTable::PaintPathD)NullPainterImpl::doPath;
+  v.drawPathF = (PaintEngineVTable::PaintPathF)NullPainterImpl::doPath;
+  v.drawPathD = (PaintEngineVTable::PaintPathD)NullPainterImpl::doPath;
 
   // --------------------------------------------------------------------------
   // [Fill]
@@ -1828,39 +1828,39 @@ FOG_NO_EXPORT void Painter_initNull()
 
   v.fillAll = NullPainterImpl::fillAll;
 
-  v.fillRectI = (PainterVTable::PaintRectI)NullPainterImpl::doRect;
-  v.fillRectF = (PainterVTable::PaintRectF)NullPainterImpl::doRect;
-  v.fillRectD = (PainterVTable::PaintRectD)NullPainterImpl::doRect;
+  v.fillRectI = (PaintEngineVTable::PaintRectI)NullPainterImpl::doRect;
+  v.fillRectF = (PaintEngineVTable::PaintRectF)NullPainterImpl::doRect;
+  v.fillRectD = (PaintEngineVTable::PaintRectD)NullPainterImpl::doRect;
 
-  v.fillRectsI = (PainterVTable::PaintRectsI)NullPainterImpl::doRects;
-  v.fillRectsF = (PainterVTable::PaintRectsF)NullPainterImpl::doRects;
-  v.fillRectsD = (PainterVTable::PaintRectsD)NullPainterImpl::doRects;
+  v.fillRectsI = (PaintEngineVTable::PaintRectsI)NullPainterImpl::doRects;
+  v.fillRectsF = (PaintEngineVTable::PaintRectsF)NullPainterImpl::doRects;
+  v.fillRectsD = (PaintEngineVTable::PaintRectsD)NullPainterImpl::doRects;
 
-  v.fillPolygonI = (PainterVTable::PaintPolygonI)NullPainterImpl::doPoly;
-  v.fillPolygonF = (PainterVTable::PaintPolygonF)NullPainterImpl::doPoly;
-  v.fillPolygonD = (PainterVTable::PaintPolygonD)NullPainterImpl::doPoly;
+  v.fillPolygonI = (PaintEngineVTable::PaintPolygonI)NullPainterImpl::doPoly;
+  v.fillPolygonF = (PaintEngineVTable::PaintPolygonF)NullPainterImpl::doPoly;
+  v.fillPolygonD = (PaintEngineVTable::PaintPolygonD)NullPainterImpl::doPoly;
 
-  v.fillShapeF = (PainterVTable::PaintShapeF)NullPainterImpl::doShape;
-  v.fillShapeD = (PainterVTable::PaintShapeD)NullPainterImpl::doShape;
+  v.fillShapeF = (PaintEngineVTable::PaintShapeF)NullPainterImpl::doShape;
+  v.fillShapeD = (PaintEngineVTable::PaintShapeD)NullPainterImpl::doShape;
 
-  v.fillPathF = (PainterVTable::PaintPathF)NullPainterImpl::doPath;
-  v.fillPathD = (PainterVTable::PaintPathD)NullPainterImpl::doPath;
+  v.fillPathF = (PaintEngineVTable::PaintPathF)NullPainterImpl::doPath;
+  v.fillPathD = (PaintEngineVTable::PaintPathD)NullPainterImpl::doPath;
 
-  v.fillTextAtI = (PainterVTable::PaintTextAtI)NullPainterImpl::doText;
-  v.fillTextAtF = (PainterVTable::PaintTextAtF)NullPainterImpl::doText;
-  v.fillTextAtD = (PainterVTable::PaintTextAtD)NullPainterImpl::doText;
+  v.fillTextAtI = (PaintEngineVTable::PaintTextAtI)NullPainterImpl::doText;
+  v.fillTextAtF = (PaintEngineVTable::PaintTextAtF)NullPainterImpl::doText;
+  v.fillTextAtD = (PaintEngineVTable::PaintTextAtD)NullPainterImpl::doText;
 
-  v.fillTextInI = (PainterVTable::PaintTextInI)NullPainterImpl::doText;
-  v.fillTextInF = (PainterVTable::PaintTextInF)NullPainterImpl::doText;
-  v.fillTextInD = (PainterVTable::PaintTextInD)NullPainterImpl::doText;
+  v.fillTextInI = (PaintEngineVTable::PaintTextInI)NullPainterImpl::doText;
+  v.fillTextInF = (PaintEngineVTable::PaintTextInF)NullPainterImpl::doText;
+  v.fillTextInD = (PaintEngineVTable::PaintTextInD)NullPainterImpl::doText;
 
-  v.fillMaskAtI = (PainterVTable::PaintMaskAtI)NullPainterImpl::doMask;
-  v.fillMaskAtF = (PainterVTable::PaintMaskAtF)NullPainterImpl::doMask;
-  v.fillMaskAtD = (PainterVTable::PaintMaskAtD)NullPainterImpl::doMask;
+  v.fillMaskAtI = (PaintEngineVTable::PaintMaskAtI)NullPainterImpl::doMask;
+  v.fillMaskAtF = (PaintEngineVTable::PaintMaskAtF)NullPainterImpl::doMask;
+  v.fillMaskAtD = (PaintEngineVTable::PaintMaskAtD)NullPainterImpl::doMask;
 
-  v.fillMaskInI = (PainterVTable::PaintMaskInI)NullPainterImpl::doMask;
-  v.fillMaskInF = (PainterVTable::PaintMaskInF)NullPainterImpl::doMask;
-  v.fillMaskInD = (PainterVTable::PaintMaskInD)NullPainterImpl::doMask;
+  v.fillMaskInI = (PaintEngineVTable::PaintMaskInI)NullPainterImpl::doMask;
+  v.fillMaskInF = (PaintEngineVTable::PaintMaskInF)NullPainterImpl::doMask;
+  v.fillMaskInD = (PaintEngineVTable::PaintMaskInD)NullPainterImpl::doMask;
 
   v.fillRegion = NullPainterImpl::doRegion;
 
@@ -1868,59 +1868,59 @@ FOG_NO_EXPORT void Painter_initNull()
   // [Blit]
   // --------------------------------------------------------------------------
 
-  v.blitImageAtI = (PainterVTable::BlitImageAtI)NullPainterImpl::blitImage;
-  v.blitImageAtF = (PainterVTable::BlitImageAtF)NullPainterImpl::blitImage;
-  v.blitImageAtD = (PainterVTable::BlitImageAtD)NullPainterImpl::blitImage;
+  v.blitImageAtI = (PaintEngineVTable::BlitImageAtI)NullPainterImpl::blitImage;
+  v.blitImageAtF = (PaintEngineVTable::BlitImageAtF)NullPainterImpl::blitImage;
+  v.blitImageAtD = (PaintEngineVTable::BlitImageAtD)NullPainterImpl::blitImage;
 
-  v.blitImageInI = (PainterVTable::BlitImageInI)NullPainterImpl::blitImage;
-  v.blitImageInF = (PainterVTable::BlitImageInF)NullPainterImpl::blitImage;
-  v.blitImageInD = (PainterVTable::BlitImageInD)NullPainterImpl::blitImage;
+  v.blitImageInI = (PaintEngineVTable::BlitImageInI)NullPainterImpl::blitImage;
+  v.blitImageInF = (PaintEngineVTable::BlitImageInF)NullPainterImpl::blitImage;
+  v.blitImageInD = (PaintEngineVTable::BlitImageInD)NullPainterImpl::blitImage;
 
-  v.blitMaskedImageAtI = (PainterVTable::BlitMaskedImageAtI)NullPainterImpl::blitMaskedImage;
-  v.blitMaskedImageAtF = (PainterVTable::BlitMaskedImageAtF)NullPainterImpl::blitMaskedImage;
-  v.blitMaskedImageAtD = (PainterVTable::BlitMaskedImageAtD)NullPainterImpl::blitMaskedImage;
+  v.blitMaskedImageAtI = (PaintEngineVTable::BlitMaskedImageAtI)NullPainterImpl::blitMaskedImage;
+  v.blitMaskedImageAtF = (PaintEngineVTable::BlitMaskedImageAtF)NullPainterImpl::blitMaskedImage;
+  v.blitMaskedImageAtD = (PaintEngineVTable::BlitMaskedImageAtD)NullPainterImpl::blitMaskedImage;
 
-  v.blitMaskedImageInI = (PainterVTable::BlitMaskedImageInI)NullPainterImpl::blitMaskedImage;
-  v.blitMaskedImageInF = (PainterVTable::BlitMaskedImageInF)NullPainterImpl::blitMaskedImage;
-  v.blitMaskedImageInD = (PainterVTable::BlitMaskedImageInD)NullPainterImpl::blitMaskedImage;
+  v.blitMaskedImageInI = (PaintEngineVTable::BlitMaskedImageInI)NullPainterImpl::blitMaskedImage;
+  v.blitMaskedImageInF = (PaintEngineVTable::BlitMaskedImageInF)NullPainterImpl::blitMaskedImage;
+  v.blitMaskedImageInD = (PaintEngineVTable::BlitMaskedImageInD)NullPainterImpl::blitMaskedImage;
 
   // --------------------------------------------------------------------------
   // [Clip]
   // --------------------------------------------------------------------------
 
-  v.clipRectI = (PainterVTable::ClipRectI)NullPainterImpl::clipRect;
-  v.clipRectF = (PainterVTable::ClipRectF)NullPainterImpl::clipRect;
-  v.clipRectD = (PainterVTable::ClipRectD)NullPainterImpl::clipRect;
+  v.clipRectI = (PaintEngineVTable::ClipRectI)NullPainterImpl::clipRect;
+  v.clipRectF = (PaintEngineVTable::ClipRectF)NullPainterImpl::clipRect;
+  v.clipRectD = (PaintEngineVTable::ClipRectD)NullPainterImpl::clipRect;
 
-  v.clipRectsI = (PainterVTable::ClipRectsI)NullPainterImpl::clipRects;
-  v.clipRectsF = (PainterVTable::ClipRectsF)NullPainterImpl::clipRects;
-  v.clipRectsD = (PainterVTable::ClipRectsD)NullPainterImpl::clipRects;
+  v.clipRectsI = (PaintEngineVTable::ClipRectsI)NullPainterImpl::clipRects;
+  v.clipRectsF = (PaintEngineVTable::ClipRectsF)NullPainterImpl::clipRects;
+  v.clipRectsD = (PaintEngineVTable::ClipRectsD)NullPainterImpl::clipRects;
 
-  v.clipPolygonI = (PainterVTable::ClipPolygonI)NullPainterImpl::clipPoly;
-  v.clipPolygonF = (PainterVTable::ClipPolygonF)NullPainterImpl::clipPoly;
-  v.clipPolygonD = (PainterVTable::ClipPolygonD)NullPainterImpl::clipPoly;
+  v.clipPolygonI = (PaintEngineVTable::ClipPolygonI)NullPainterImpl::clipPoly;
+  v.clipPolygonF = (PaintEngineVTable::ClipPolygonF)NullPainterImpl::clipPoly;
+  v.clipPolygonD = (PaintEngineVTable::ClipPolygonD)NullPainterImpl::clipPoly;
 
-  v.clipShapeF = (PainterVTable::ClipShapeF)NullPainterImpl::clipShape;
-  v.clipShapeD = (PainterVTable::ClipShapeD)NullPainterImpl::clipShape;
+  v.clipShapeF = (PaintEngineVTable::ClipShapeF)NullPainterImpl::clipShape;
+  v.clipShapeD = (PaintEngineVTable::ClipShapeD)NullPainterImpl::clipShape;
 
-  v.clipPathF = (PainterVTable::ClipPathF)NullPainterImpl::clipPath;
-  v.clipPathD = (PainterVTable::ClipPathD)NullPainterImpl::clipPath;
+  v.clipPathF = (PaintEngineVTable::ClipPathF)NullPainterImpl::clipPath;
+  v.clipPathD = (PaintEngineVTable::ClipPathD)NullPainterImpl::clipPath;
 
-  v.clipTextAtI = (PainterVTable::ClipTextAtI)NullPainterImpl::clipText;
-  v.clipTextAtF = (PainterVTable::ClipTextAtF)NullPainterImpl::clipText;
-  v.clipTextAtD = (PainterVTable::ClipTextAtD)NullPainterImpl::clipText;
+  v.clipTextAtI = (PaintEngineVTable::ClipTextAtI)NullPainterImpl::clipText;
+  v.clipTextAtF = (PaintEngineVTable::ClipTextAtF)NullPainterImpl::clipText;
+  v.clipTextAtD = (PaintEngineVTable::ClipTextAtD)NullPainterImpl::clipText;
 
-  v.clipTextInI = (PainterVTable::ClipTextInI)NullPainterImpl::clipText;
-  v.clipTextInF = (PainterVTable::ClipTextInF)NullPainterImpl::clipText;
-  v.clipTextInD = (PainterVTable::ClipTextInD)NullPainterImpl::clipText;
+  v.clipTextInI = (PaintEngineVTable::ClipTextInI)NullPainterImpl::clipText;
+  v.clipTextInF = (PaintEngineVTable::ClipTextInF)NullPainterImpl::clipText;
+  v.clipTextInD = (PaintEngineVTable::ClipTextInD)NullPainterImpl::clipText;
 
-  v.clipMaskAtI = (PainterVTable::ClipMaskAtI)NullPainterImpl::clipMask;
-  v.clipMaskAtF = (PainterVTable::ClipMaskAtF)NullPainterImpl::clipMask;
-  v.clipMaskAtD = (PainterVTable::ClipMaskAtD)NullPainterImpl::clipMask;
+  v.clipMaskAtI = (PaintEngineVTable::ClipMaskAtI)NullPainterImpl::clipMask;
+  v.clipMaskAtF = (PaintEngineVTable::ClipMaskAtF)NullPainterImpl::clipMask;
+  v.clipMaskAtD = (PaintEngineVTable::ClipMaskAtD)NullPainterImpl::clipMask;
 
-  v.clipMaskInI = (PainterVTable::ClipMaskInI)NullPainterImpl::clipMask;
-  v.clipMaskInF = (PainterVTable::ClipMaskInF)NullPainterImpl::clipMask;
-  v.clipMaskInD = (PainterVTable::ClipMaskInD)NullPainterImpl::clipMask;
+  v.clipMaskInI = (PaintEngineVTable::ClipMaskInI)NullPainterImpl::clipMask;
+  v.clipMaskInF = (PaintEngineVTable::ClipMaskInF)NullPainterImpl::clipMask;
+  v.clipMaskInD = (PaintEngineVTable::ClipMaskInD)NullPainterImpl::clipMask;
 
   v.clipRegion = NullPainterImpl::clipRegion;
 

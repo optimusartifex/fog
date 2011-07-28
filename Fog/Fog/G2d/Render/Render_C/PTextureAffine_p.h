@@ -31,7 +31,7 @@ struct FOG_NO_EXPORT PTextureAffine
 
   template<typename Accessor>
   static void FOG_FASTCALL fetch_affine_nearest_pad(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     Accessor accessor(ctx);
@@ -180,7 +180,7 @@ struct FOG_NO_EXPORT PTextureAffine
 
   template<typename Accessor>
   static void FOG_FASTCALL fetch_affine_bilinear_pad(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     Accessor accessor(ctx);
@@ -440,7 +440,7 @@ struct FOG_NO_EXPORT PTextureAffine
 
   template<typename Accessor>
   static void FOG_FASTCALL fetch_affine_nearest_repeat(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     Accessor accessor(ctx);
@@ -611,7 +611,7 @@ struct FOG_NO_EXPORT PTextureAffine
 
   template<typename Accessor>
   static void FOG_FASTCALL fetch_affine_bilinear_repeat(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     Accessor accessor(ctx);
@@ -855,7 +855,7 @@ struct FOG_NO_EXPORT PTextureAffine
 
   template<typename Accessor>
   static void FOG_FASTCALL fetch_affine_nearest_reflect(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     Accessor accessor(ctx);
@@ -1037,7 +1037,7 @@ struct FOG_NO_EXPORT PTextureAffine
 
   template<typename Accessor>
   static void FOG_FASTCALL fetch_affine_bilinear_reflect(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     Accessor accessor(ctx);
@@ -1281,7 +1281,7 @@ struct FOG_NO_EXPORT PTextureAffine
 
   template<typename Accessor>
   static void FOG_FASTCALL fetch_affine_nearest_clamp(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     Accessor accessor(ctx);
@@ -1469,7 +1469,7 @@ _FetchEnd:
 
   template<typename Accessor>
   static void FOG_FASTCALL fetch_affine_bilinear_clamp(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     Accessor accessor(ctx);

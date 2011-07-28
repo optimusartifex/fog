@@ -499,7 +499,7 @@ struct FOG_NO_EXPORT RenderPatternFetcher
   // [Methods]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void fetch(Span* span, uint8_t* buffer) { _fetch(this, span, buffer); }
+  FOG_INLINE void fetch(RasterSpan* span, uint8_t* buffer) { _fetch(this, span, buffer); }
   FOG_INLINE void skip(int count) { _skip(this, count); }
 
   // --------------------------------------------------------------------------

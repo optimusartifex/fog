@@ -16,11 +16,11 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::NullPainterVTable]
+// [Fog::NullPaintEngineVTable]
 // ============================================================================
 
 //! @internal
-struct FOG_NO_EXPORT NullPainterVTable : public PainterVTable
+struct FOG_NO_EXPORT NullPaintEngineVTable : public PaintEngineVTable
 {
 };
 

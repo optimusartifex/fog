@@ -30,8 +30,9 @@
 #include <Fog/G2d/Imaging/ImageDecoder.h>
 #include <Fog/G2d/Imaging/ImageEffect.h>
 #include <Fog/G2d/Imaging/ImageEncoder.h>
-#include <Fog/G2d/Rasterizer/Rasterizer_p.h>
-#include <Fog/G2d/Rasterizer/Scanline_p.h>
+#include <Fog/G2d/Painting/RasterFiller_p.h>
+#include <Fog/G2d/Painting/RasterScanline_p.h>
+#include <Fog/G2d/Painting/Rasterizer_p.h>
 #include <Fog/G2d/Render/RenderApi_p.h>
 #include <Fog/G2d/Render/RenderConstants_p.h>
 #include <Fog/G2d/Render/RenderStructs_p.h>
@@ -99,7 +100,7 @@ void ImageData::deref()
     // FATAL: Image dereferenced during painting.
     if (locked)
     {
-      Debug::failFunc("Fog::ImageData", "deref", "Image dereferenced during painting");
+      Debug::failFunc("Fog::ImageData", "deref", "Image dereferenced during painting.\n");
     }
 
     this->~ImageData();
@@ -1594,8 +1595,8 @@ Image Image::scaled(const SizeI& to, uint32_t interpolationType) const
   uint8_t* dstData = (uint8_t*)dst.getData();
   sysint_t dstStride = dst.getStride();
 
-  SpanExt8 span;
-  span.setPositionAndType(0, to.w, SPAN_C);
+  RasterSpanExt8 span;
+  span.setPositionAndType(0, to.w, RASTER_SPAN_C);
   span.setCMask(0xFF);
   span.setNext(NULL);
 
@@ -1636,7 +1637,7 @@ err_t Image::fillRect(const RectI& r, const Color& color,  uint32_t compositingO
   uint32_t spanOpacity = 0;
 
   RenderSolid solid;
-  Span span;
+  RasterSpan span;
 
   switch (ImageFormatDescription::getByFormat(dstFormat).getPrecision())
   {
@@ -1716,9 +1717,9 @@ err_t Image::fillRect(const RectI& r, const Color& color,  uint32_t compositingO
   {
     RenderCBlitSpanFn blitSpan = _g2d_render.getCBlitSpan(dstFormat, compositingOperator, isPRGBPixel);
 
-    span.setPositionAndType(x0, x1, SPAN_C);
+    span.setPositionAndType(x0, x1, RASTER_SPAN_C);
     span.setNext(NULL);
-    reinterpret_cast<Span16*>(&span)->setConstMask(spanOpacity);
+    reinterpret_cast<RasterSpan16*>(&span)->setConstMask(spanOpacity);
 
     for (int i = 0; i < h; i++, dstPixels += dstStride)
     {
@@ -1742,7 +1743,7 @@ static err_t Image_blitImage(
   uint32_t dstFormat = dst._d->format;
 
   bool isOpaque;
-  SpanExt8 span;
+  RasterSpanExt8 span;
 
   switch (ImageFormatDescription::getByFormat(dstFormat).getPrecision())
   {
@@ -1753,7 +1754,7 @@ static err_t Image_blitImage(
       if (opacity_8 == 0) return ERR_OK;
 
       isOpaque = (opacity_8 == 0x100);
-      reinterpret_cast<Span8*>(&span)->setConstMask(opacity_8);
+      reinterpret_cast<RasterSpan8*>(&span)->setConstMask(opacity_8);
       break;
     }
 
@@ -1764,7 +1765,7 @@ static err_t Image_blitImage(
       if (opacity_16 == 0) return ERR_OK;
 
       isOpaque = (opacity_16 == 0x10000);
-      reinterpret_cast<Span16*>(&span)->setConstMask(opacity_16);
+      reinterpret_cast<RasterSpan16*>(&span)->setConstMask(opacity_16);
       break;
     }
 
@@ -1890,7 +1891,7 @@ static err_t Image_blitImage(
         return ERR_RT_OUT_OF_MEMORY;
     }
 
-    span.setPositionAndType(0, w, SPAN_C);
+    span.setPositionAndType(0, w, RASTER_SPAN_C);
     span.setNext(NULL);
 
     if (converter == NULL)
@@ -2050,11 +2051,74 @@ err_t Image::scroll(int scrollX, int scrollY, const RectI& r)
 // [Fog::Image - Misc]
 // ============================================================================
 
+struct GlyphFromPathFiller8 : public RasterFiller
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE GlyphFromPathFiller8(uint8_t* pixels, sysint_t stride, int x0, int y0)
+  {
+    this->_prepare = (RasterFiller::PrepareFn)advanceFn;
+    this->_process = (RasterFiller::ProcessFn)processFn;
+    this->_skip = (RasterFiller::SkipFn)advanceFn;
+
+    this->pixels = pixels - y0 * stride - x0;
+    this->stride = stride;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Callbacks]
+  // --------------------------------------------------------------------------
+
+  static void FOG_FASTCALL advanceFn(GlyphFromPathFiller8* self, int y)
+  {
+    self->pixels += y * self->stride;
+  }
+
+  static void FOG_FASTCALL processFn(GlyphFromPathFiller8* self, RasterSpan* _span)
+  {
+    RasterSpan8* span = reinterpret_cast<RasterSpan8*>(_span);
+
+    do {
+      uint8_t* p = self->pixels + (uint)(span->getX0());
+      uint8_t* m = reinterpret_cast<uint8_t*>(span->getGenericMask());
+
+      uint i;
+      uint len = (uint)span->getLength();
+
+      switch (span->getType())
+      {
+        case RASTER_SPAN_C:
+          memset(p, (0xFF * RasterSpan8::getConstMaskFromPointer(m)) >> 8, len);
+          break;
+        case RASTER_SPAN_A8_GLYPH:
+        case RASTER_SPAN_AX_GLYPH:
+          memcpy(p, m, len);
+          break;
+        case RASTER_SPAN_AX_EXTRA:
+          for (i = 0; i < len; i++) p[i] = (uint8_t)((0xFF * ((uint16_t*)m)[i]) >> 8);
+          break;
+      }
+
+      span = span->getNext();
+    } while (span);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  uint8_t* pixels;
+  sysint_t stride;
+};
+
+
 err_t Image::glyphFromPath(Image& glyph, PointI& offset, const PathD& path, uint32_t precision)
 {
   err_t err = ERR_OK;
 
-  MemoryBuffer temporaryMemory;
+  MemoryBuffer buffer;
   BoxD boundingBox(UNINITIALIZED);
 
   int x0;
@@ -2065,7 +2129,11 @@ err_t Image::glyphFromPath(Image& glyph, PointI& offset, const PathD& path, uint
   int w;
   int h;
 
-  if (FOG_UNLIKELY(precision) >= IMAGE_PRECISION_COUNT) { err = ERR_RT_INVALID_ARGUMENT; goto _Fail; }
+  if (FOG_UNLIKELY(precision) >= IMAGE_PRECISION_COUNT)
+  {
+    err = ERR_RT_INVALID_ARGUMENT;
+    goto _Fail;
+  }
 
   err = path.getBoundingBox(boundingBox);
   if (FOG_IS_ERROR(err))
@@ -2087,7 +2155,8 @@ err_t Image::glyphFromPath(Image& glyph, PointI& offset, const PathD& path, uint
   {
     case IMAGE_PRECISION_BYTE:
     {
-      Rasterizer8 rasterizer;
+      PathRasterizer8 rasterizer;
+      RasterScanline8 scanline;
 
       rasterizer.setSceneBox(BoxI(x0, y0, x1, y1));
       rasterizer.addPath(path);
@@ -2102,41 +2171,13 @@ err_t Image::glyphFromPath(Image& glyph, PointI& offset, const PathD& path, uint
       err = glyph.create(SizeI(w, h), IMAGE_FORMAT_A8);
       if (FOG_IS_ERROR(err)) goto _Fail;
 
-      uint8_t* glyphPixels = glyph.getDataX();
-      sysint_t glyphStride = glyph.getStride();
+      uint8_t* pixels = glyph.getFirstX();
+      sysint_t stride = glyph.getStride();
 
-      Scanline8 scanline;
-      for (int y = 0; y < h; y++, glyphPixels += glyphStride)
-      {
-        Memory::zero(glyphPixels, glyphStride);
+      Memory::zero(pixels, glyph.getHeight() * stride);
 
-        Span8* span = rasterizer.sweep(scanline, temporaryMemory, y + y0);
-        while (span)
-        {
-          uint8_t* p = glyphPixels + (uint)(span->getX0() - x0);
-          uint8_t* m = reinterpret_cast<uint8_t*>(span->getGenericMask());
-
-          uint i;
-          uint len = (uint)span->getLength();
-
-          switch (span->getType())
-          {
-            case SPAN_C:
-              memset(p, (0xFF * Span8::getConstMaskFromPointer(m)) >> 8, len);
-              break;
-            case SPAN_A8_GLYPH:
-            case SPAN_AX_GLYPH:
-              memcpy(p, m, len);
-              break;
-            case SPAN_AX_EXTRA:
-              for (i = 0; i < len; i++) p[i] = (uint8_t)((0xFF * ((uint16_t*)m)[i]) >> 8);
-              break;
-          }
-
-          span = span->getNext();
-        }
-      }
-
+      GlyphFromPathFiller8 filler(pixels, stride, x0, y0);
+      rasterizer.render(&filler, &scanline, &buffer);
       break;
     }
 
@@ -2190,9 +2231,8 @@ HBITMAP Image::toWinBitmap() const
   ImageData* d = _d;
   if (d->size.w == 0 || d->size.h == 0) return NULL;
 
-  // If the image format is XRGB32 or PRGB32 then it's very easy, we just
-  // create DIBSECTION and copy bits there. If the image format is ARGB32
-  // then we need to premultiply the output. Lastly, if the image format
+  // If the image format is PRGB32/XRGB32/RGB24 then it's easy, it's only
+  // needed to create DIBSECTION and copy bits there. If the image format
   // is A8/I8 then we create 32-bit DIBSECTION and copy there the alphas,
   // this image will be still usable when using functions like AlphaBlend().
 

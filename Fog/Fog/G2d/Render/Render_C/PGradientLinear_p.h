@@ -181,7 +181,7 @@ struct FOG_NO_EXPORT PGradientLinear
   // ==========================================================================
 
   static void FOG_FASTCALL fetch_simple_nearest_pad_prgb32_xrgb32(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     const uint32_t* table = reinterpret_cast<const uint32_t*>(ctx->_d.gradient.base.table);
@@ -300,7 +300,7 @@ _End:
   }
 
   static void FOG_FASTCALL fetch_simple_nearest_repeat_prgb32_xrgb32(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     const uint32_t* table = reinterpret_cast<const uint32_t*>(ctx->_d.gradient.base.table);
@@ -384,7 +384,7 @@ _End:
   }
 
   static void FOG_FASTCALL fetch_simple_nearest_reflect_prgb32_xrgb32(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     const uint32_t* table = reinterpret_cast<const uint32_t*>(ctx->_d.gradient.base.table);
@@ -475,7 +475,7 @@ _Backward:
 
   template<typename Accessor>
   static void FOG_FASTCALL fetch_proj_nearest(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     Accessor accessor(ctx);

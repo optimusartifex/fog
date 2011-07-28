@@ -253,7 +253,7 @@ fail:
 
   // Scale by pixel sampling only.
   static void FOG_FASTCALL fetch_argb32_nn(
-    const RenderPatternContext* ctx, Span* span, uint8_t* buffer, int y, uint32_t mode)
+    const RenderPatternContext* ctx, RasterSpan* span, uint8_t* buffer, int y, uint32_t mode)
   {
     P_FETCH_SPAN8_INIT()
 
@@ -299,7 +299,7 @@ fail:
 
   // Scale by area sampling.
   static void FOG_FASTCALL fetch_argb32_aa(
-    const RenderPatternContext* ctx, Span* span, uint8_t* buffer, int y, uint32_t mode)
+    const RenderPatternContext* ctx, RasterSpan* span, uint8_t* buffer, int y, uint32_t mode)
   {
     P_FETCH_SPAN8_INIT()
 

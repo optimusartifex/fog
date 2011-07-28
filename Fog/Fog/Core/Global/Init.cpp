@@ -104,6 +104,13 @@ FOG_CAPI_DECLARE void _fog_init(void)
   Transform_init();
   PathClipper_init();
 
+  // [G2d/Tools]
+  Region_init();
+  Matrix_init();
+
+  // [G2d/Painting]
+  Rasterizer_init();
+
   // [G2d/Render]
   Render_init();
 
@@ -120,11 +127,7 @@ FOG_CAPI_DECLARE void _fog_init(void)
   ImageCodecProvider_init();
   ImageEffect_init();
 
-  // [G2d/Tools]
-  Region_init();
-  Matrix_init();
-
-  // [G2d/Painter]
+  // [G2d/Painting]
   PaintDeviceInfo_init();
   Painter_initNull();
   Painter_initRaster();

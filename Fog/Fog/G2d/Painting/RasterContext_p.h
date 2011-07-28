@@ -16,17 +16,17 @@
 #include <Fog/G2d/Geometry/Transform.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Painting/PaintParams.h>
-#include <Fog/G2d/Painting/RasterPaintFuncs_p.h>
-#include <Fog/G2d/Painting/RasterPaintRender_p.h>
+#include <Fog/G2d/Painting/RasterMask_p.h>
 #include <Fog/G2d/Painting/RasterPaintStructs_p.h>
+#include <Fog/G2d/Painting/RasterScanline_p.h>
+#include <Fog/G2d/Painting/Rasterizer_p.h>
 #include <Fog/G2d/Render/RenderStructs_p.h>
-#include <Fog/G2d/Rasterizer/Scanline_p.h>
 #include <Fog/G2d/Source/Pattern.h>
 #include <Fog/G2d/Tools/Region.h>
 
 namespace Fog {
 
-//! @addtogroup Fog_G2d_Painting_Raster
+//! @addtogroup Fog_G2d_Painting
 //! @{
 
 // ============================================================================
@@ -56,10 +56,8 @@ struct FOG_NO_EXPORT RasterContext
   // [Multithreading]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool isSingleThreaded() const
-  {
-    return delta == 1;
-  }
+  FOG_INLINE bool isSingleThreaded() const { return scope.isSingleThreaded(); }
+  FOG_INLINE bool isMultiThreaded() const { return scope.isMultiThreaded(); }
 
   // --------------------------------------------------------------------------
   // [Mask - Pools]
@@ -75,53 +73,53 @@ struct FOG_NO_EXPORT RasterContext
   // [Mask - Rows]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE Span* _getMaskRow(int y) const
+  FOG_INLINE RasterSpan* _getMaskRow(int y) const
   {
     FOG_ASSERT(y >= maskY1 && y < maskY2);
     return maskRowsAdj[y];
   }
 
-  FOG_INLINE void _setMaskRow(int y, Span* span) const
+  FOG_INLINE void _setMaskRow(int y, RasterSpan* span) const
   {
     FOG_ASSERT(y >= maskY1 && y < maskY2);
     maskRowsAdj[y] = span;
   }
 
-  FOG_INLINE Span8* getMaskRow8(int y) const { return reinterpret_cast<Span8*>(_getMaskRow(y)); }
-  FOG_INLINE Span16* getMaskRow16(int y) const { return reinterpret_cast<Span16*>(_getMaskRow(y)); }
+  FOG_INLINE RasterSpan8* getMaskRow8(int y) const { return reinterpret_cast<RasterSpan8*>(_getMaskRow(y)); }
+  FOG_INLINE RasterSpan16* getMaskRow16(int y) const { return reinterpret_cast<RasterSpan16*>(_getMaskRow(y)); }
 
-  FOG_INLINE void setMaskRow8(int y, Span8* span) const { _setMaskRow(y, reinterpret_cast<Span8*>(span)); }
-  FOG_INLINE void setMaskRow16(int y, Span16* span) const { _setMaskRow(y, reinterpret_cast<Span16*>(span)); }
+  FOG_INLINE void setMaskRow8(int y, RasterSpan8* span) const { _setMaskRow(y, reinterpret_cast<RasterSpan8*>(span)); }
+  FOG_INLINE void setMaskRow16(int y, RasterSpan16* span) const { _setMaskRow(y, reinterpret_cast<RasterSpan16*>(span)); }
 
   // --------------------------------------------------------------------------
   // [Mask - CSpan Management]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE Span* _allocMaskCSpan()
+  FOG_INLINE RasterSpan* _allocMaskCSpan()
   {
-    Span* span = maskCSpanPool;
+    RasterSpan* span = maskCSpanPool;
     if (span) { maskCSpanPool = span->getNext(); return span; }
-    return reinterpret_cast<Span*>(maskMemoryAllocator.alloc(sizeof(Span)));
+    return reinterpret_cast<RasterSpan*>(maskMemoryAllocator.alloc(sizeof(RasterSpan)));
   }
 
-  FOG_INLINE void _freeMaskCSpan(Span* span)
+  FOG_INLINE void _freeMaskCSpan(RasterSpan* span)
   {
     FOG_ASSERT(span != NULL);
     span->setNext(maskCSpanPool);
     maskCSpanPool = span;
   }
 
-  FOG_INLINE Span8* allocMaskCSpan8() { return reinterpret_cast<Span8*>(_allocMaskCSpan()); }
-  FOG_INLINE Span16* allocMaskCSpan16() { return reinterpret_cast<Span16*>(_allocMaskCSpan()); }
+  FOG_INLINE RasterSpan8* allocMaskCSpan8() { return reinterpret_cast<RasterSpan8*>(_allocMaskCSpan()); }
+  FOG_INLINE RasterSpan16* allocMaskCSpan16() { return reinterpret_cast<RasterSpan16*>(_allocMaskCSpan()); }
 
-  FOG_INLINE void freeMaskCSpan8(Span8* span) { _freeMaskCSpan(span); }
-  FOG_INLINE void freeMaskCSpan16(Span16* span) { _freeMaskCSpan(span); }
+  FOG_INLINE void freeMaskCSpan8(RasterSpan8* span) { _freeMaskCSpan(span); }
+  FOG_INLINE void freeMaskCSpan16(RasterSpan16* span) { _freeMaskCSpan(span); }
 
   // --------------------------------------------------------------------------
   // [Mask - VSpan Management]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE Span* _allocMaskVSpan(int len)
+  FOG_INLINE RasterSpan* _allocMaskVSpan(int len)
   {
     uint maxLen = (uint)(len + RASTER_MASK_VSPAN_POOL_GRANULARITY_BASE    ) &
                              ~(RASTER_MASK_VSPAN_POOL_GRANULARITY_BASE - 1) ;
@@ -131,61 +129,61 @@ struct FOG_NO_EXPORT RasterContext
     FOG_ASSERT(maxLen <= RASTER_MASK_VSPAN_MAX_LENGTH_8);
     FOG_ASSERT(poolId < RASTER_MASK_VSPAN_POOL_COUNT);
 
-    RasterSpan8* span = reinterpret_cast<RasterSpan8*>(maskVSpanPool[poolId]);
+    RasterMaskSpan8* span = reinterpret_cast<RasterMaskSpan8*>(maskVSpanPool[poolId]);
     if (span)
     {
-      maskVSpanPool[poolId] = reinterpret_cast<RasterSpan8*>(span->getNext());
+      maskVSpanPool[poolId] = reinterpret_cast<RasterMaskSpan8*>(span->getNext());
       return span;
     }
     else
     {
-      span = reinterpret_cast<RasterSpan8*>(maskMemoryAllocator.alloc(sizeof(RasterSpan8) + maxLen));
-      span->setGenericMask(reinterpret_cast<uint8_t*>(span) + sizeof(RasterSpan8));
+      span = reinterpret_cast<RasterMaskSpan8*>(maskMemoryAllocator.alloc(sizeof(RasterMaskSpan8) + maxLen));
+      span->setGenericMask(reinterpret_cast<uint8_t*>(span) + sizeof(RasterMaskSpan8));
       span->maxLen = maxLen;
       span->poolId = poolId;
       return span;
     }
   }
 
-  FOG_INLINE void _freeMaskVSpan(Span* span)
+  FOG_INLINE void _freeMaskVSpan(RasterSpan* span)
   {
     FOG_ASSERT(span != NULL);
 
-    uint poolId = reinterpret_cast<RasterSpan8*>(span)->poolId;
+    uint poolId = reinterpret_cast<RasterMaskSpan8*>(span)->poolId;
     FOG_ASSERT(poolId < RASTER_MASK_VSPAN_POOL_COUNT);
 
     span->setNext(maskVSpanPool[poolId]);
     maskVSpanPool[poolId] = span;
   }
 
-  FOG_INLINE Span8* allocVSpan8_8(int len) { return reinterpret_cast<Span8*>(_allocMaskVSpan(len)); }
-  FOG_INLINE Span8* allocVSpan8_16(int len) { return reinterpret_cast<Span8*>(_allocMaskVSpan(len * 2)); }
-  FOG_INLINE void freeVSpan8(Span8* span) { _freeMaskVSpan(span); }
+  FOG_INLINE RasterSpan8* allocVSpan8_8(int len) { return reinterpret_cast<RasterSpan8*>(_allocMaskVSpan(len)); }
+  FOG_INLINE RasterSpan8* allocVSpan8_16(int len) { return reinterpret_cast<RasterSpan8*>(_allocMaskVSpan(len * 2)); }
+  FOG_INLINE void freeVSpan8(RasterSpan8* span) { _freeMaskVSpan(span); }
 
-  FOG_INLINE Span16* allocVSpan16_16(int len) { return reinterpret_cast<Span16*>(_allocMaskVSpan(len * 2)); }
-  FOG_INLINE Span16* allocVSpan16_32(int len) { return reinterpret_cast<Span16*>(_allocMaskVSpan(len * 4)); }
-  FOG_INLINE void freeVSpan16(Span16* span) { _freeMaskVSpan(span); }
+  FOG_INLINE RasterSpan16* allocVSpan16_16(int len) { return reinterpret_cast<RasterSpan16*>(_allocMaskVSpan(len * 2)); }
+  FOG_INLINE RasterSpan16* allocVSpan16_32(int len) { return reinterpret_cast<RasterSpan16*>(_allocMaskVSpan(len * 4)); }
+  FOG_INLINE void freeVSpan16(RasterSpan16* span) { _freeMaskVSpan(span); }
 
   // --------------------------------------------------------------------------
   // [Mask - XSpan Management]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void freeMaskSpan(Span* span)
+  FOG_INLINE void freeMaskSpan(RasterSpan* span)
   {
     FOG_ASSERT(span != NULL);
 
-    if (span->getGenericMask() == reinterpret_cast<uint8_t*>(span) + sizeof(RasterSpan8))
+    if (span->getGenericMask() == reinterpret_cast<uint8_t*>(span) + sizeof(RasterMaskSpan8))
       _freeMaskVSpan(span);
     else
       _freeMaskCSpan(span);
   }
 
-  FOG_INLINE void freeMaskChain(Span* span)
+  FOG_INLINE void freeMaskChain(RasterSpan* span)
   {
     FOG_ASSERT(span != NULL);
 
     do {
-      Span* next = span->getNext();
+      RasterSpan* next = span->getNext();
       freeMaskSpan(span);
       span = next;
     } while (span);
@@ -206,18 +204,8 @@ struct FOG_NO_EXPORT RasterContext
   //! @brief Owner of this context.
   RasterPaintEngine* engine;
 
-  //! @brief Renderer table.
-  const RasterRenderVTable* renderer;
-
-  //! @brief Context offset (multithreading).
-  //!
-  //! @note If multithreading is disabled, offset is 0.
-  int offset;
-
-  //! @brief Context delta (multithreading).
-  //!
-  //! @note If multithreading is disabled, delta is 1.
-  int delta;
+  //! @brief Context scope (used by multithreaded paint-engine)
+  RasterScope scope;
 
   // --------------------------------------------------------------------------
   // [Members - Precision]
@@ -226,10 +214,13 @@ struct FOG_NO_EXPORT RasterContext
   //! @brief Context precision (see @c IMAGE_PRECISION).
   uint32_t precision;
 
-  //! @brief Full opacity (0x100 or 0x10000). Depends on @c IMAGE_PRECISION.
-  uint32_t fullOpacityValueU;
-  //! @brief Full opacity for float conversion. Depends on @c IMAGE_PRECISION.
-  float fullOpacityValueF;
+  struct FOG_NO_EXPORT _FullOpacity
+  {
+    //! @brief Full opacity (0x100 or 0x10000). Depends on @c IMAGE_PRECISION.
+    uint32_t u;
+    //! @brief Full opacity for float conversion. Depends on @c IMAGE_PRECISION.
+    float f;
+  } fullOpacity;
 
   // --------------------------------------------------------------------------
   // [Members - Layer]
@@ -244,51 +235,56 @@ struct FOG_NO_EXPORT RasterContext
 
   //! @brief Paint hints.
   PaintHints paintHints;
-
   //! @brief Raster hints.
   RasterHints rasterHints;
 
-  //! @brief Render closure.
-  RenderClosure closure;
-
   //! @brief Solid source.
   RenderSolid solid;
-
   //! @brief Pattern context.
   //!
   //! Applicable if source type is @c PATTERN_TYPE_TEXTURE or @c PATTERN_TYPE_GRADIENT.
   RenderPatternContext* pc;
-  //! @brief Pattern row buffer (always allocated).
-  MemoryBuffer pcRowBuffer;
+  //! @brief Render closure.
+  RenderClosure closure;
 
   union
   {
-    //! @brief The analytic rasterizer (8-bit).
-    Static<Rasterizer8> rasterizer8;
+    //! @brief The box analytic rasterizer (8-bit).
+    Static<BoxRasterizer8> boxRasterizer8;
+
+    // TODO: 16-bit rasterizer.
+    // //! @brief The box analytic rasterizer (16-bit).
+    // Static<BoxRasterizer16> boxRasterizer16;
+  };
+
+  union
+  {
+    //! @brief The path/polygon analytic rasterizer (8-bit).
+    Static<PathRasterizer8> pathRasterizer8;
 
     // TODO: 16-bit rasterizer.
     // //! @brief The analytic rasterizer (16-bit).
-    // Static<Rasterizer16> rasterizer16;
+    // Static<PathRasterizer16> pathRasterizer16;
   };
 
   union
   {
     //! @brief The scanline container for solid spans (8-bit).
-    Static<Scanline8> scanline8;
+    Static<RasterScanline8> scanline8;
 
     // TODO: 16-bit rasterizer.
     // //! @brief The scanline container for solid spans (16-bit).
-    // Static<Scanline16> scanline16;
+    // Static<RasterScanline16> scanline16;
   };
 
   union
   {
     //! @brief The scanline container for extended spans (8-bit).
-    Static<Scanline8> scanlineExt8;
+    Static<RasterScanline8> scanlineExt8;
 
     // TODO: 16-bit rasterizer.
     // //! @brief  The scanline container for extended spans (16-bit).
-    // Static<Scanline16> scanlineExt16;
+    // Static<RasterScanline16> scanlineExt16;
   };
 
   // --------------------------------------------------------------------------
@@ -332,20 +328,20 @@ struct FOG_NO_EXPORT RasterContext
   //! To access mask spans use always @c getClipSpan() / setClipSpan() methods.
   //!
   //! Length of array is the same as @c mask->spans.
-  Span** maskRowsAdj;
+  RasterSpan** maskRowsAdj;
 
   //! @brief Unused clip 'CSpan' instances (pooled) for current clip state.
-  Span* maskCSpanPool;
+  RasterSpan* maskCSpanPool;
 
   //! @brief Unused clip 'VSpan' instances (pooled) for current clip state.
-  Span* maskVSpanPool[RASTER_MASK_VSPAN_POOL_COUNT];
+  RasterSpan* maskVSpanPool[RASTER_MASK_VSPAN_POOL_COUNT];
 
   // --------------------------------------------------------------------------
   // [Members - Temp]
   // --------------------------------------------------------------------------
 
   //! @brief Temporary memory buffer.
-  MemoryBuffer tmpMemory;
+  MemoryBuffer buffer;
 
   //! @brief Temporary path per context, used by calculations (float).
   PathF tmpPathF[3];

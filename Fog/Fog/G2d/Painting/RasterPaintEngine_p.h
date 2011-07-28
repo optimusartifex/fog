@@ -21,23 +21,21 @@
 #include <Fog/G2d/Geometry/Size.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Painting/PaintEngine.h>
-#include <Fog/G2d/Painting/RasterPaintConstants_p.h>
-#include <Fog/G2d/Painting/RasterPaintFuncs_p.h>
-#include <Fog/G2d/Painting/RasterPaintState_p.h>
-#include <Fog/G2d/Painting/RasterPaintStructs_p.h>
-#include <Fog/G2d/Painting/RasterPaintUtil_p.h>
-#include <Fog/G2d/Painting/RasterPaintWorker_p.h>
-#include <Fog/G2d/Rasterizer/Rasterizer_p.h>
-#include <Fog/G2d/Rasterizer/Scanline_p.h>
-#include <Fog/G2d/Rasterizer/Span_p.h>
+#include <Fog/G2d/Painting/RasterConstants_p.h>
+#include <Fog/G2d/Painting/RasterScanline_p.h>
+#include <Fog/G2d/Painting/RasterSpan_p.h>
+#include <Fog/G2d/Painting/RasterState_p.h>
+#include <Fog/G2d/Painting/RasterUtil_p.h>
+#include <Fog/G2d/Painting/RasterWorker_p.h>
+#include <Fog/G2d/Painting/Rasterizer_p.h>
 
 namespace Fog {
 
-//! @addtogroup Fog_G2d_Painting_Raster
+//! @addtogroup Fog_G2d_Painting
 //! @{
 
 // ============================================================================
-// [Fog::RasterPainterVTable]
+// [Fog::RasterPaintEngineVTable]
 // ============================================================================
 
 //! @internal
@@ -45,17 +43,73 @@ namespace Fog {
 //! @brief @c RasterPaintEngine VTable struct.
 //!
 //! Currently there are no more members, but in future there could be.
-struct FOG_NO_EXPORT RasterPainterVTable : public PainterVTable {};
+struct FOG_NO_EXPORT RasterPaintEngineVTable : public PaintEngineVTable
+{
+};
 
 //! @internal
 //!
-//! @brief @c RasterPaintEngine VTable instances.
+//! @brief Raster paint-engine vtable (versions for different precision).
+extern RasterPaintEngineVTable _RasterPaintEngine_vtable;
+
+// ============================================================================
+// [Fog::RasterPaintSerializer]
+// ============================================================================
+
+//! @internal
 //!
-//! For performance reasons there are vtable for these combinations:
+//! @brief Raster paint-engine serializer.
 //!
-//!   1. Threading model - ST(Singlethreaded) and MT(Multithreaded).
-//!   2. Precision - BYTE, WORD and FLOAT.
-extern RasterPainterVTable _RasterPaintEngine_vtable[RASTER_MODE_COUNT];
+//! This class contains function pointers to low-level painter operations. When
+//! single-threaded mode is used, the serializer contains function pointers to
+//! render functions, otherwise serialize functions are used.
+struct FOG_NO_EXPORT RasterPaintSerializer
+{
+  // --------------------------------------------------------------------------
+  // [Typedefs]
+  // --------------------------------------------------------------------------
+
+  typedef err_t (FOG_FASTCALL *FillNormalizedBoxI)(RasterPaintEngine* engine, const BoxI& box);
+  typedef err_t (FOG_FASTCALL *FillNormalizedBoxF)(RasterPaintEngine* engine, const BoxF& box);
+  typedef err_t (FOG_FASTCALL *FillNormalizedBoxD)(RasterPaintEngine* engine, const BoxD& box);
+
+  typedef err_t (FOG_FASTCALL *DrawRawPathF)(RasterPaintEngine* engine, const PathF& path);
+  typedef err_t (FOG_FASTCALL *DrawRawPathD)(RasterPaintEngine* engine, const PathD& path);
+  typedef err_t (FOG_FASTCALL *FillRawPathF)(RasterPaintEngine* engine, const PathF& path, uint32_t fillRule);
+  typedef err_t (FOG_FASTCALL *FillRawPathD)(RasterPaintEngine* engine, const PathD& path, uint32_t fillRule);
+  typedef err_t (FOG_FASTCALL *FillNormalizedPathF)(RasterPaintEngine* engine, const PathF& path, uint32_t fillRule);
+  typedef err_t (FOG_FASTCALL *FillNormalizedPathD)(RasterPaintEngine* engine, const PathD& path, uint32_t fillRule);
+
+  typedef err_t (FOG_FASTCALL *BlitRawImageD)(RasterPaintEngine* engine, const BoxD& box, const Image& srcImage, const RectI& srcFragment, const TransformD& srcTransform);
+  typedef err_t (FOG_FASTCALL *BlitNormalizedImageI)(RasterPaintEngine* engine, const PointI& pt, const Image& srcImage, const RectI& srcFragment);
+  typedef err_t (FOG_FASTCALL *BlitNormalizedTransformedImageI)(RasterPaintEngine* engine, const BoxI& box, const Image& srcImage, const RectI& srcFragment, const TransformD& srcTransform);
+  typedef err_t (FOG_FASTCALL *BlitNormalizedTransformedImageD)(RasterPaintEngine* engine, const BoxD& box, const Image& srcImage, const RectI& srcFragment, const TransformD& srcTransform);
+
+  // --------------------------------------------------------------------------
+  // [Funcs]
+  // --------------------------------------------------------------------------
+
+  FillNormalizedBoxI fillNormalizedBoxI;
+  FillNormalizedBoxF fillNormalizedBoxF;
+  FillNormalizedBoxD fillNormalizedBoxD;
+
+  DrawRawPathF drawRawPathF;
+  DrawRawPathD drawRawPathD;
+  FillRawPathF fillRawPathF;
+  FillRawPathD fillRawPathD;
+  FillNormalizedPathF fillNormalizedPathF;
+  FillNormalizedPathD fillNormalizedPathD;
+
+  BlitRawImageD blitRawImageD;
+  BlitNormalizedImageI blitNormalizedImageI;
+  BlitNormalizedTransformedImageI blitNormalizedTransformedImageI;
+  BlitNormalizedTransformedImageD blitNormalizedTransformedImageD;
+};
+
+//! @internal
+//!
+//! @brief Raster paint-engine serializer (versions for different mode / precision).
+extern RasterPaintSerializer RasterPaintEngine_serialize[RASTER_MODE_COUNT][IMAGE_PRECISION_COUNT];
 
 // ============================================================================
 // [Fog::RasterPaintEngine]
@@ -63,7 +117,7 @@ extern RasterPainterVTable _RasterPaintEngine_vtable[RASTER_MODE_COUNT];
 
 //! @internal
 //!
-//! @brief Raster engine.
+//! @brief Raster paint-engine.
 struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
 {
   // --------------------------------------------------------------------------
@@ -81,10 +135,26 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   err_t switchTo(const ImageBits& imageBits, ImageData* imaged);
 
   // --------------------------------------------------------------------------
+  // [Transform]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool isIntegralTransform() const
+  {
+    return finalTransformI._type != RASTER_INTEGRAL_TRANSFORM_NONE;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members - Serializer]
+  // --------------------------------------------------------------------------
+
+  //! @brief Serializer (st/mt).
+  const RasterPaintSerializer* serializer;
+
+  // --------------------------------------------------------------------------
   // [Members - Context]
   // --------------------------------------------------------------------------
 
-  //! @brief The context (st).
+  //! @brief Context (st).
   RasterContext ctx;
 
   // --------------------------------------------------------------------------
@@ -93,15 +163,6 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
 
   //! @brief Block memory allocator for small objects.
   BlockAllocator blockAllocator;
-
-  // --------------------------------------------------------------------------
-  // [Methods - Transform]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE bool isIntegralTransform() const
-  {
-    return finalTransformI._type != RASTER_INTEGRAL_TRANSFORM_NULL;
-  }
 
   // --------------------------------------------------------------------------
   // [Members - Flags]
@@ -194,7 +255,7 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   //! transformation matrix is @c TRANSFORM_TYPE_IDENTITY or
   //! @c TRANSFORM_TYPE_TRANSLATION and the values of the final transformation
   //! matrix are integrals.
-  struct
+  struct _FinalTransformI
   {
     //! @brief The finalTransformI type, see @c RASTER_INTEGRAL_TRANSFORM.
     int _type;
@@ -269,10 +330,6 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
 
   // Temporary regions.
   Region tmpRegion[2];
-
-  // TODO: Remove?
-  // Temporary glyph set.
-  //GlyphSet tmpGlyphSet;
 };
 
 //! @}

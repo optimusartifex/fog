@@ -102,8 +102,8 @@ protected:
   uint8_t* _alloc(size_t size);
 
 public:
-  FOG_INLINE uint8_t* getMemoryBuffer() const { return _memoryBuffer; }
-  FOG_INLINE size_t getMemorySize() const { return _memorySize; }
+  FOG_INLINE uint8_t* getBuffer() const { return _memoryBuffer; }
+  FOG_INLINE size_t getSize() const { return _memorySize; }
 
   // --------------------------------------------------------------------------
   // [Embedded memory]

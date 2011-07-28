@@ -135,7 +135,7 @@ def PrepareFiles():
 MAX_CODE_POINT = 0x10FFFF
 NUM_CODE_POINTS = MAX_CODE_POINT + 1
 
-# 17 bits, see Fog::UnicodeProperty.
+# 17 bits, see Fog::CharProperty.
 MAX_PAIRED_DIFF = 2**16 - 1
 
 # http://www.unicode.org/Public/6.0.0/ucd/UnicodeData.txt

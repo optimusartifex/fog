@@ -11,15 +11,15 @@
 // [Dependencies]
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Alloc.h>
-#include <Fog/G2d/Rasterizer/Scanline_p.h>
+#include <Fog/G2d/Painting/RasterScanline_p.h>
 
 namespace Fog {
 
 // ============================================================================
-// [Fog::Scanline - Construction / Destruction]
+// [Fog::RasterScanline - Construction / Destruction]
 // ============================================================================
 
-Scanline::Scanline(uint32_t spanSize, uint32_t maskUnit) :
+RasterScanline::RasterScanline(uint32_t spanSize, uint32_t maskUnit) :
   _maskData(NULL),
   _maskCurrent(NULL),
   _maskCapacity(0),
@@ -30,18 +30,18 @@ Scanline::Scanline(uint32_t spanSize, uint32_t maskUnit) :
   _spanCurrent(NULL),
   _spanSize(spanSize)
 {
-  // Make sure that span size is based on the 'Span' class.
-  FOG_ASSERT(spanSize >= sizeof(Span));
+  // Make sure that span size is based on the 'RasterSpan' class.
+  FOG_ASSERT(spanSize >= sizeof(RasterSpan));
 
   // Initialize the '_spanFirst', the first 'invisible' span.
   _spanFirst._x0 = SPAN_INVALID_POSITION;
-  _spanFirst._type = SPAN_C;
+  _spanFirst._type = RASTER_SPAN_C;
   _spanFirst._x1 = SPAN_INVALID_POSITION;
   _spanFirst._mask = NULL;
   _spanFirst._next = NULL;
 }
 
-Scanline::~Scanline()
+RasterScanline::~RasterScanline()
 {
   if (_maskData) Memory::free(_maskData);
 }
@@ -50,10 +50,10 @@ Scanline::~Scanline()
 // [Fog::Scanline - Private]
 // ============================================================================
 
-err_t Scanline::_prepare(int w)
+err_t RasterScanline::_prepare(int w)
 {
   FOG_ASSERT(w > 0);
-  w = Math::max<int>(w + SPAN_C_THRESHOLD, 512);
+  w = Math::max<int>(w + RASTER_SPAN_C_THRESHOLD, 512);
 
   // See prepare()
   FOG_ASSERT(_maskCapacity < (uint)w);
@@ -72,7 +72,7 @@ err_t Scanline::_prepare(int w)
   return ERR_OK;
 }
 
-err_t Scanline::_begin(int x0, int x1)
+err_t RasterScanline::_begin(int x0, int x1)
 {
   FOG_ASSERT(x0 < x1);
 
@@ -90,18 +90,18 @@ err_t Scanline::_begin(int x0, int x1)
   return ERR_OK;
 }
 
-Span* Scanline::_growSpans()
+RasterSpan* RasterScanline::_growSpans()
 {
   // 10 spans is our grow limit. When painting antialiased shapes where are no
   // intersections we need usually 3 spans. When painting antialiased stroked
   // shapes then span we need usually 6 spans per scanline. 10 spans growth is
   // convenient for filling and stroking shapes that could be simple or complex.
   const uint GROW_BY = 10;
-  Span* cur = _spanCurrent;
+  RasterSpan* cur = _spanCurrent;
 
   for (uint i = 0; i < GROW_BY; i++)
   {
-    Span8* span = reinterpret_cast<Span8*>(_spanAllocator.alloc(_spanSize));
+    RasterSpan8* span = reinterpret_cast<RasterSpan8*>(_spanAllocator.alloc(_spanSize));
     if (FOG_UNLIKELY(span == NULL)) goto _Fail;
     cur->setNext(span);
     cur = span;

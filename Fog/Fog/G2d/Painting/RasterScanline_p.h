@@ -4,18 +4,18 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_RASTERIZER_SCANLINE_P_H
-#define _FOG_G2D_RASTERIZER_SCANLINE_P_H
+#ifndef _FOG_G2D_PAINTING_RASTERSCANLINE_P_H
+#define _FOG_G2D_PAINTING_RASTERSCANLINE_P_H
 
 // [Dependencies]
 #include <Fog/Core/Face/Face_C.h>
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Memory/ZoneAllocator_p.h>
-#include <Fog/G2d/Rasterizer/Span_p.h>
+#include <Fog/G2d/Painting/RasterSpan_p.h>
 
 namespace Fog {
 
-//! @addtogroup Fog_G2d_Rasterizer
+//! @addtogroup Fog_G2d_Painting
 //! @{
 
 // ============================================================================
@@ -41,14 +41,14 @@ enum { SPAN_INVALID_POSITION = 0x1FFFFFF0 };
 //! 2. Build scanline using @c newXXSpan(), @lnkXXSpan(), @c endXXSpan(), etc...
 //!
 //! 3. Finalize scanline using @c endScanline().
-struct FOG_NO_EXPORT Scanline
+struct FOG_NO_EXPORT RasterScanline
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  Scanline(uint32_t spanSize, uint32_t maskUnit);
-  ~Scanline();
+  RasterScanline(uint32_t spanSize, uint32_t maskUnit);
+  ~RasterScanline();
 
   // --------------------------------------------------------------------------
   // [Scanline - Prepare]
@@ -129,7 +129,7 @@ struct FOG_NO_EXPORT Scanline
   err_t _begin(int x0, int x1);
 
   //! @brief Private method that can be called by @c newSpan().
-  Span* _growSpans();
+  RasterSpan* _growSpans();
 
   // --------------------------------------------------------------------------
   // [Span]
@@ -137,7 +137,7 @@ struct FOG_NO_EXPORT Scanline
 
   FOG_INLINE void newSpan(int x0, uint type)
   {
-    Span* span = _spanCurrent->getNext();
+    RasterSpan* span = _spanCurrent->getNext();
     if (FOG_UNLIKELY(span == NULL)) span = _growSpans();
 
     _spanCurrent = span;
@@ -169,52 +169,52 @@ struct FOG_NO_EXPORT Scanline
   //! @brief First span that is never part of returned spans (it's used
   //! internally). Returned span by @c getSpans() is always get using
   //! <code>_spanFirst->getNext()</code>.
-  Span _spanFirst;
+  RasterSpan _spanFirst;
 
   //! @brief Last span in the scanline.
   //!
   //! Last span is set-up by @c endScanline() method.
-  Span* _spanLast;
+  RasterSpan* _spanLast;
 
   //! @brief Saved span that will be normally after the @c _spanLast. Purpose
   //! of this variable is to keep saved chain that was break by @c endScanline()
   //! method. Calling @c _begin() will join this broken chain so span
   //! builder has all spans together for building the new chain.
-  Span* _spanSaved;
+  RasterSpan* _spanSaved;
 
   //! @brief Current span, used by span-builder.
-  Span* _spanCurrent;
+  RasterSpan* _spanCurrent;
 
-  //! @brief The size of one span, sizeof(Span8) for example.
+  //! @brief The size of one span, sizeof(RasterSpan8) for example.
   uint32_t _spanSize;
 
 private:
-  _FOG_CLASS_NO_COPY(Scanline)
+  _FOG_CLASS_NO_COPY(RasterScanline)
 };
 
 // ============================================================================
-// [Fog::Scanline8]
+// [Fog::RasterScanline8]
 // ============================================================================
 
 //! @internal
 //!
 //! @brief The scanline container for 8-bit per component spans.
 //!
-//! The @c Scanline8 is class that is able to produce list of the
-//! @c Span8 instances applicable as a mask when using low-level render
+//! The @c RasterScanline8 is class that is able to produce list of the
+//! @c RasterSpan8 instances applicable as a mask when using low-level render
 //! functions.
-struct FOG_NO_EXPORT Scanline8 : public Scanline
+struct FOG_NO_EXPORT RasterScanline8 : public RasterScanline
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE Scanline8(uint32_t spanSize = sizeof(Span8)) :
-    Scanline(spanSize, 4)
+  FOG_INLINE RasterScanline8(uint32_t spanSize = sizeof(RasterSpan8)) :
+    RasterScanline(spanSize, 4)
   {
   }
 
-  FOG_INLINE ~Scanline8()
+  FOG_INLINE ~RasterScanline8()
   {
   }
 
@@ -222,10 +222,10 @@ struct FOG_NO_EXPORT Scanline8 : public Scanline
   // [Span - Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE Span8* getSpans() const { return reinterpret_cast<Span8*>(_spanFirst.getNext()); }
+  FOG_INLINE RasterSpan8* getSpans() const { return reinterpret_cast<RasterSpan8*>(_spanFirst.getNext()); }
 
-  FOG_INLINE Span8* getCurrent() { return reinterpret_cast<Span8*>(_spanCurrent); }
-  FOG_INLINE const Span8* getCurrent() const { return reinterpret_cast<const Span8*>(_spanCurrent); }
+  FOG_INLINE RasterSpan8* getCurrent() { return reinterpret_cast<RasterSpan8*>(_spanCurrent); }
+  FOG_INLINE const RasterSpan8* getCurrent() const { return reinterpret_cast<const RasterSpan8*>(_spanCurrent); }
 
   // --------------------------------------------------------------------------
   // [Span - C-Mask]
@@ -238,7 +238,7 @@ struct FOG_NO_EXPORT Scanline8 : public Scanline
     // Detect an invalid mask.
     FOG_ASSERT(m <= 0x100);
 
-    newSpan(x0, SPAN_C);
+    newSpan(x0, RASTER_SPAN_C);
     getCurrent()->setX1(x1);
     getCurrent()->setConstMask(m);
   }
@@ -254,7 +254,7 @@ struct FOG_NO_EXPORT Scanline8 : public Scanline
     if (getCurrent()->getGenericMask() == (uint8_t*)m && getCurrent()->getX1() == x0)
       goto _Link;
 
-    newSpan(x0, SPAN_C);
+    newSpan(x0, RASTER_SPAN_C);
     getCurrent()->setConstMask(m);
 _Link:
     getCurrent()->setX1(x1);
@@ -266,9 +266,9 @@ _Link:
     FOG_ASSERT(x0 < x1);
 
     uint len = (uint)(x1 - x0);
-    if (len < SPAN_C_THRESHOLD)
+    if (len < RASTER_SPAN_C_THRESHOLD)
     {
-      // If length is smaller than SPAN_C_THRESHOLD then we generate A8-Extra.
+      // If length is smaller than RASTER_SPAN_C_THRESHOLD then we generate A8-Extra.
       lnkA8Extra(x0);
       for (uint i = 0; i < len; i++) ((uint16_t*)_maskCurrent)[i] = (uint16_t)m;
       _maskCurrent += len * 2;
@@ -276,7 +276,7 @@ _Link:
     else
     {
       // Larger const fill.
-      newSpan(x0, SPAN_C);
+      newSpan(x0, RASTER_SPAN_C);
       getCurrent()->setConstMask(m);
     }
 
@@ -291,7 +291,7 @@ _Link:
 
   FOG_INLINE void newA8Glyph(int x0)
   {
-    newSpan(x0, SPAN_A8_GLYPH);
+    newSpan(x0, RASTER_SPAN_A8_GLYPH);
     getCurrent()->setGenericMask(_maskCurrent);
   }
 
@@ -314,7 +314,7 @@ _Link:
     // Detect an invalid range.
     FOG_ASSERT(x0 < x1);
 
-    newSpan(x0, SPAN_A8_GLYPH);
+    newSpan(x0, RASTER_SPAN_A8_GLYPH);
     getCurrent()->setX1(x1);
     getCurrent()->setGenericMask(const_cast<uint8_t*>(buf));
   }
@@ -322,7 +322,7 @@ _Link:
   FOG_INLINE void lnkA8Glyph(int x0)
   {
     // Try to join with the current span.
-    if (getCurrent()->getX1() == x0 && getCurrent()->getType() == SPAN_A8_GLYPH) return;
+    if (getCurrent()->getX1() == x0 && getCurrent()->getType() == RASTER_SPAN_A8_GLYPH) return;
 
     newA8Glyph(x0);
   }
@@ -335,7 +335,7 @@ _Link:
     uint8_t* mask = _maskCurrent;
 
     // Try to join with the current span.
-    if (getCurrent()->getX1() == x0 && getCurrent()->getType() == SPAN_A8_GLYPH)
+    if (getCurrent()->getX1() == x0 && getCurrent()->getType() == RASTER_SPAN_A8_GLYPH)
       goto _Link;
 
     newA8Glyph(x0);
@@ -352,8 +352,8 @@ _Link:
   FOG_INLINE void valA8Glyph(uint32_t m)
   {
     // Detect an invalid span.
-    FOG_ASSERT(getCurrent()->getType() == SPAN_A8_GLYPH ||
-               getCurrent()->getType() == SPAN_AX_GLYPH);
+    FOG_ASSERT(getCurrent()->getType() == RASTER_SPAN_A8_GLYPH ||
+               getCurrent()->getType() == RASTER_SPAN_AX_GLYPH);
     // Detect buffer overflow.
     FOG_ASSERT(_maskCurrent < _maskData + _maskCapacity);
     // Detect an invalid mask.
@@ -365,8 +365,8 @@ _Link:
   FOG_INLINE void endA8Glyph()
   {
     // Detect an invalid span.
-    FOG_ASSERT(getCurrent()->getType() == SPAN_A8_GLYPH ||
-               getCurrent()->getType() == SPAN_AX_GLYPH);
+    FOG_ASSERT(getCurrent()->getType() == RASTER_SPAN_A8_GLYPH ||
+               getCurrent()->getType() == RASTER_SPAN_AX_GLYPH);
 
     getCurrent()->setX1(getCurrent()->getX0() + (int)(sysint_t)(_maskCurrent - (uint8_t*)getCurrent()->getGenericMask()));
     FOG_ASSERT(getCurrent()->getX0() < getCurrent()->getX1());
@@ -375,8 +375,8 @@ _Link:
   FOG_INLINE void endA8Glyph(int x1)
   {
     // Detect an invalid span.
-    FOG_ASSERT(getCurrent()->getType() == SPAN_A8_GLYPH ||
-               getCurrent()->getType() == SPAN_AX_GLYPH);
+    FOG_ASSERT(getCurrent()->getType() == RASTER_SPAN_A8_GLYPH ||
+               getCurrent()->getType() == RASTER_SPAN_AX_GLYPH);
     // Detect an invalid range.
     FOG_ASSERT(getCurrent()->getX0() < x1);
     // Detect an invalid buffer position.
@@ -391,7 +391,7 @@ _Link:
 
   FOG_INLINE void newA8Extra(int x0)
   {
-    newSpan(x0, SPAN_AX_EXTRA);
+    newSpan(x0, RASTER_SPAN_AX_EXTRA);
     getCurrent()->setGenericMask(_maskCurrent);
   }
 
@@ -414,7 +414,7 @@ _Link:
     // Detect an invalid range.
     FOG_ASSERT(x0 < x1);
 
-    newSpan(x0, SPAN_AX_EXTRA);
+    newSpan(x0, RASTER_SPAN_AX_EXTRA);
     getCurrent()->setX1(x1);
     getCurrent()->setGenericMask(const_cast<uint16_t*>(buf));
   }
@@ -422,7 +422,7 @@ _Link:
   FOG_INLINE void lnkA8Extra(int x0)
   {
     // Try to join with the current span.
-    if (getCurrent()->getX1() == x0 && getCurrent()->getType() == SPAN_AX_EXTRA) return;
+    if (getCurrent()->getX1() == x0 && getCurrent()->getType() == RASTER_SPAN_AX_EXTRA) return;
 
     newA8Extra(x0);
   }
@@ -435,7 +435,7 @@ _Link:
     uint16_t* mask = reinterpret_cast<uint16_t*>(_maskCurrent);
 
     // Try to join with the current span.
-    if (getCurrent()->getX1() == x0 && getCurrent()->getType() == SPAN_AX_EXTRA)
+    if (getCurrent()->getX1() == x0 && getCurrent()->getType() == RASTER_SPAN_AX_EXTRA)
       goto _Link;
 
     newA8Extra(x0);
@@ -452,7 +452,7 @@ _Link:
   FOG_INLINE void valA8Extra(uint32_t m)
   {
     // Detect an invalid span.
-    FOG_ASSERT(getCurrent()->getType() == SPAN_AX_EXTRA);
+    FOG_ASSERT(getCurrent()->getType() == RASTER_SPAN_AX_EXTRA);
     // Detect buffer overflow.
     FOG_ASSERT(_maskCurrent < _maskData + _maskCapacity);
     // Detect an invalid mask.
@@ -465,7 +465,7 @@ _Link:
   FOG_INLINE void endA8Extra()
   {
     // Detect an invalid span.
-    FOG_ASSERT(getCurrent()->getType() == SPAN_AX_EXTRA);
+    FOG_ASSERT(getCurrent()->getType() == RASTER_SPAN_AX_EXTRA);
 
     getCurrent()->setX1(getCurrent()->getX0() + (int)(sysint_t)(_maskCurrent - (uint8_t*)getCurrent()->getGenericMask()) / 2);
     FOG_ASSERT(getCurrent()->getX0() < getCurrent()->getX1());
@@ -474,7 +474,7 @@ _Link:
   FOG_INLINE void endA8Extra(int x1)
   {
     // Detect an invalid span.
-    FOG_ASSERT(getCurrent()->getType() == SPAN_AX_EXTRA);
+    FOG_ASSERT(getCurrent()->getType() == RASTER_SPAN_AX_EXTRA);
     // Detect an invalid range.
     FOG_ASSERT(getCurrent()->getX0() < x1);
     // Detect an invalid position.
@@ -489,7 +489,7 @@ _Link:
 
   FOG_INLINE void newARGB32Glyph(int x0)
   {
-    newSpan(x0, SPAN_ARGB32_GLYPH);
+    newSpan(x0, RASTER_SPAN_ARGB32_GLYPH);
     getCurrent()->setGenericMask(_maskCurrent);
   }
 
@@ -512,7 +512,7 @@ _Link:
     // Detect an invalid range.
     FOG_ASSERT(x0 < x1);
 
-    newSpan(x0, SPAN_ARGB32_GLYPH);
+    newSpan(x0, RASTER_SPAN_ARGB32_GLYPH);
     getCurrent()->setX1(x1);
     getCurrent()->setGenericMask(const_cast<uint8_t*>(buf));
   }
@@ -520,7 +520,7 @@ _Link:
   FOG_INLINE void lnkARGB32Glyph(int x0)
   {
     // Try to join with the current span.
-    if (getCurrent()->getX1() == x0 && getCurrent()->getType() == SPAN_ARGB32_GLYPH) return;
+    if (getCurrent()->getX1() == x0 && getCurrent()->getType() == RASTER_SPAN_ARGB32_GLYPH) return;
 
     newARGB32Glyph(x0);
   }
@@ -533,7 +533,7 @@ _Link:
     uint8_t* mask = _maskCurrent;
 
     // Try to join with the current span.
-    if (getCurrent()->getX1() == x0 && getCurrent()->getType() == SPAN_ARGB32_GLYPH)
+    if (getCurrent()->getX1() == x0 && getCurrent()->getType() == RASTER_SPAN_ARGB32_GLYPH)
       goto _Link;
 
     newARGB32Glyph(x0);
@@ -547,8 +547,8 @@ _Link:
   FOG_INLINE void valARGB32Glyph(uint32_t m)
   {
     // Detect an invalid span.
-    FOG_ASSERT(getCurrent()->getType() == SPAN_ARGB32_GLYPH ||
-               getCurrent()->getType() == SPAN_ARGBXX_GLYPH);
+    FOG_ASSERT(getCurrent()->getType() == RASTER_SPAN_ARGB32_GLYPH ||
+               getCurrent()->getType() == RASTER_SPAN_ARGBXX_GLYPH);
     // Detect buffer overflow.
     FOG_ASSERT(_maskCurrent < _maskData + _maskCapacity);
 
@@ -559,8 +559,8 @@ _Link:
   FOG_INLINE void endARGB32Glyph()
   {
     // Detect an invalid span.
-    FOG_ASSERT(getCurrent()->getType() == SPAN_ARGB32_GLYPH ||
-               getCurrent()->getType() == SPAN_ARGBXX_GLYPH);
+    FOG_ASSERT(getCurrent()->getType() == RASTER_SPAN_ARGB32_GLYPH ||
+               getCurrent()->getType() == RASTER_SPAN_ARGBXX_GLYPH);
 
     getCurrent()->setX1(getCurrent()->getX0() + (int)(sysint_t)(_maskCurrent - (uint8_t*)getCurrent()->getGenericMask()) / 4);
     FOG_ASSERT(getCurrent()->getX0() < getCurrent()->getX1());
@@ -569,8 +569,8 @@ _Link:
   FOG_INLINE void endARGB32Glyph(int x1)
   {
     // Detect an invalid span.
-    FOG_ASSERT(getCurrent()->getType() == SPAN_ARGB32_GLYPH ||
-               getCurrent()->getType() == SPAN_ARGBXX_GLYPH);
+    FOG_ASSERT(getCurrent()->getType() == RASTER_SPAN_ARGB32_GLYPH ||
+               getCurrent()->getType() == RASTER_SPAN_ARGBXX_GLYPH);
     // Detect an invalid range.
     FOG_ASSERT(getCurrent()->getX0() < x1);
     // Detect an invalid buffer position.
@@ -613,11 +613,11 @@ _Link:
   */
 
 private:
-  _FOG_CLASS_NO_COPY(Scanline8)
+  _FOG_CLASS_NO_COPY(RasterScanline8)
 };
 
 // ============================================================================
-// [Fog::Scanline16]
+// [Fog::RasterScanline16]
 // ============================================================================
 
 // TODO:
@@ -627,4 +627,4 @@ private:
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_RASTERIZER_SCANLINE_P_H
+#endif // _FOG_G2D_PAINTING_RASTERSCANLINE_P_H

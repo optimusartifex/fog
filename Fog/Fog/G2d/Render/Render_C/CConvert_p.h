@@ -2600,7 +2600,7 @@ struct FOG_NO_EXPORT DibC
   }
 
   static void FOG_FASTCALL prgb32_from_argb32_span(
-    uint8_t* _dst, const Span* span, const RenderClosure* closure)
+    uint8_t* _dst, const RasterSpan* span, const RenderClosure* closure)
   {
     uint32_t* pixels = reinterpret_cast<uint32_t*>(_dst);
 
@@ -2620,7 +2620,7 @@ struct FOG_NO_EXPORT DibC
   }
 
   static void FOG_FASTCALL argb32_from_prgb32_span(
-    uint8_t* _dst, const Span* span, const RenderClosure* closure)
+    uint8_t* _dst, const RasterSpan* span, const RenderClosure* closure)
   {
     uint32_t* pixels = reinterpret_cast<uint32_t*>(_dst);
 

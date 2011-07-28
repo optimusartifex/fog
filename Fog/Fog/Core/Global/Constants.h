@@ -3685,60 +3685,6 @@ enum SORT_ORDER
 };
 
 // ============================================================================
-// [Fog::SPAN]
-// ============================================================================
-
-//! @brief Type of @c Span.
-enum SPAN
-{
-  // --------------------------------------------------------------------------
-  // NOTE: When changing these constants, please make sure that the span methods
-  // like isConst()/isVariant() are also changed. There are some optimizations
-  // which are based on order of these constants.
-  // --------------------------------------------------------------------------
-
-  // --------------------------------------------------------------------------
-  // [Const]
-  // --------------------------------------------------------------------------
-
-  //! @brief Span is a const-mask.
-  SPAN_C = 0,
-
-  // --------------------------------------------------------------------------
-  // [Variant]
-  // --------------------------------------------------------------------------
-
-  //! @brief Start of variant-alpha span types (may be used by asserts).
-  //!
-  //! @note This constant is only shadow to valid mask type, don't use this
-  //! value in switch() {}.
-  SPAN_V_BEGIN = 1,
-
-  //! @brief Span is a variable-alpha mask (8-bit, A8).
-  //!
-  //! @sa @c SPAN_AX_EXTRA.
-  SPAN_A8_GLYPH = 1,
-
-  //! @brief Span is a variable-alpha mask (target bit-depth, A8, A16 or A32).
-  //!
-  //! @sa @c SPAN_AX_EXTRA.
-  SPAN_AX_GLYPH = 2,
-
-  //! @brief Span is an extended variable-alpha mask (target bit-depth + 1 bit
-  //! for exact scaling).
-  SPAN_AX_EXTRA = 3,
-
-  //! @brief Span is a variable-argb mask (8-bit, PRGB32).
-  SPAN_ARGB32_GLYPH = 4,
-
-  //! @brief Span is a variable-argb mask (target bit-depth, PRGB32 or PRGB64).
-  SPAN_ARGBXX_GLYPH = 5,
-
-  //! @brief The count of span types.
-  SPAN_COUNT = 6
-};
-
-// ============================================================================
 // [Fog::SPLIT_BEHAVIOR]
 // ============================================================================
 

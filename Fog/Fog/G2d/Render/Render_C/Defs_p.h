@@ -19,7 +19,7 @@
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImagePalette.h>
-#include <Fog/G2d/Rasterizer/Span_p.h>
+#include <Fog/G2d/Painting/RasterSpan_p.h>
 #include <Fog/G2d/Render/RenderApi_p.h>
 #include <Fog/G2d/Render/RenderConstants_p.h>
 #include <Fog/G2d/Render/RenderFuncs_p.h>
@@ -108,7 +108,7 @@
 // The V_BLIT_SPAN8_XXX functions are used when there is variable-source. The
 // 'src' variable should be used inside of 'CASE' sections.
 
-//! @brief CBlit - Span8 - Begin.
+//! @brief CBlit - RasterSpan8 - Begin.
 #define C_BLIT_SPAN8_BEGIN(BPP) \
   uint8_t* dstBase = dst; \
   \
@@ -118,32 +118,32 @@
     FOG_ASSUME(w > 0); \
     \
     dst = dstBase + (size_t)(uint)x * BPP; \
-    const uint8_t* _msk = (const uint8_t*)reinterpret_cast<const Span8*>(span)->getGenericMask(); \
+    const uint8_t* _msk = (const uint8_t*)reinterpret_cast<const RasterSpan8*>(span)->getGenericMask(); \
     \
     switch (span->getType()) \
     {
 
 // ----------------------------------------------------------------------------
 
-//! @brief CBlit - Span8 - C-Any.
+//! @brief CBlit - RasterSpan8 - C-Any.
 #define C_BLIT_SPAN8_C_ANY() \
-      case SPAN_C: \
+      case RASTER_SPAN_C: \
       { \
-        uint32_t msk0 = Span8::getConstMaskFromPointer(_msk); \
+        uint32_t msk0 = RasterSpan8::getConstMaskFromPointer(_msk); \
         FOG_ASSUME(msk0 <= 0x100); \
         {
 
-//! @brief CBlit - Span8 - C-Opaque.
+//! @brief CBlit - RasterSpan8 - C-Opaque.
 #define C_BLIT_SPAN8_C_OPAQUE() \
-      case SPAN_C: \
+      case RASTER_SPAN_C: \
       { \
-        uint32_t msk0 = Span8::getConstMaskFromPointer(_msk); \
+        uint32_t msk0 = RasterSpan8::getConstMaskFromPointer(_msk); \
         FOG_ASSUME(msk0 <= 0x100); \
         \
         if (msk0 == 0x100) \
         {
 
-//! @brief CBlit - Span8 - C-Mask.
+//! @brief CBlit - RasterSpan8 - C-Mask.
 #define C_BLIT_SPAN8_C_MASK() \
         } \
         else \
@@ -151,37 +151,37 @@
 
 // ----------------------------------------------------------------------------
 
-//! @brief CBlit - Span8 - A8-Glyph.
+//! @brief CBlit - RasterSpan8 - A8-Glyph.
 #define C_BLIT_SPAN8_A8_GLYPH() \
         } \
         break; \
       } \
       \
-      case SPAN_A8_GLYPH: \
-      case SPAN_AX_GLYPH: \
+      case RASTER_SPAN_A8_GLYPH: \
+      case RASTER_SPAN_AX_GLYPH: \
       { \
         const uint8_t* msk = _msk;
 
 // ----------------------------------------------------------------------------
 
-//! @brief CBlit - Span8 - A8-Extra.
+//! @brief CBlit - RasterSpan8 - A8-Extra.
 #define C_BLIT_SPAN8_A8_EXTRA() \
         break; \
       } \
       \
-      case SPAN_AX_EXTRA: \
+      case RASTER_SPAN_AX_EXTRA: \
       { \
         const uint8_t* msk = _msk;
 
 // ----------------------------------------------------------------------------
 
-//! @brief CBlit - Span8 - ARGB32-Glyph.
+//! @brief CBlit - RasterSpan8 - ARGB32-Glyph.
 #define C_BLIT_SPAN8_ARGB32_GLYPH() \
         break; \
       } \
       \
-      case SPAN_ARGB32_GLYPH: \
-      case SPAN_ARGBXX_GLYPH: \
+      case RASTER_SPAN_ARGB32_GLYPH: \
+      case RASTER_SPAN_ARGBXX_GLYPH: \
       { \
         const uint8_t* msk = _msk;
 
@@ -201,7 +201,7 @@
 // ============================================================================
 
 
-//! @brief VBlit - Span8 - Begin.
+//! @brief VBlit - RasterSpan8 - Begin.
 #define V_BLIT_SPAN8_BEGIN(BPP) \
   uint8_t* dstBase = dst; \
   \
@@ -211,33 +211,33 @@
     FOG_ASSUME(w > 0); \
     \
     dst = dstBase + x * BPP; \
-    const uint8_t* _msk = (const uint8_t*)reinterpret_cast<const Span8*>(span)->getGenericMask(); \
-    const uint8_t* src = (const uint8_t*)reinterpret_cast<const SpanExt8*>(span)->getData(); \
+    const uint8_t* _msk = (const uint8_t*)reinterpret_cast<const RasterSpan8*>(span)->getGenericMask(); \
+    const uint8_t* src = (const uint8_t*)reinterpret_cast<const RasterSpanExt8*>(span)->getData(); \
     \
     switch (span->getType()) \
     {
 
 // ----------------------------------------------------------------------------
 
-//! @brief VBlit - Span8 - C-Any.
+//! @brief VBlit - RasterSpan8 - C-Any.
 #define V_BLIT_SPAN8_C_ANY() \
-      case SPAN_C: \
+      case RASTER_SPAN_C: \
       { \
-        uint32_t msk0 = Span8::getConstMaskFromPointer(_msk); \
+        uint32_t msk0 = RasterSpan8::getConstMaskFromPointer(_msk); \
         FOG_ASSERT(msk0 <= 0x100); \
         {
 
-//! @brief VBlit - Span8 - C-Opaque.
+//! @brief VBlit - RasterSpan8 - C-Opaque.
 #define V_BLIT_SPAN8_C_OPAQUE() \
-      case SPAN_C: \
+      case RASTER_SPAN_C: \
       { \
-        uint32_t msk0 = Span8::getConstMaskFromPointer(_msk); \
+        uint32_t msk0 = RasterSpan8::getConstMaskFromPointer(_msk); \
         FOG_ASSERT(msk0 <= 0x100); \
         \
         if (msk0 == 0x100) \
         {
 
-//! @brief VBlit - Span8 - C-Mask.
+//! @brief VBlit - RasterSpan8 - C-Mask.
 #define V_BLIT_SPAN8_C_MASK() \
         } \
         else \
@@ -245,37 +245,37 @@
 
 // ----------------------------------------------------------------------------
 
-//! @brief VBlit - Span8 - A8-Mask - Glyph.
+//! @brief VBlit - RasterSpan8 - A8-Mask - Glyph.
 #define V_BLIT_SPAN8_A8_GLYPH() \
         } \
         break; \
       } \
       \
-      case SPAN_A8_GLYPH: \
-      case SPAN_AX_GLYPH: \
+      case RASTER_SPAN_A8_GLYPH: \
+      case RASTER_SPAN_AX_GLYPH: \
       { \
         const uint8_t* msk = _msk;
 
 // ----------------------------------------------------------------------------
 
-//! @brief VBlit - Span8 - A8-Mask - Extended.
+//! @brief VBlit - RasterSpan8 - A8-Mask - Extended.
 #define V_BLIT_SPAN8_A8_EXTRA() \
         break; \
       } \
       \
-      case SPAN_AX_EXTRA: \
+      case RASTER_SPAN_AX_EXTRA: \
       { \
         const uint8_t* msk = _msk;
 
 // ----------------------------------------------------------------------------
 
-//! @brief VBlit - Span8 - ARGB32-Glyph.
+//! @brief VBlit - RasterSpan8 - ARGB32-Glyph.
 #define V_BLIT_SPAN8_ARGB32_GLYPH() \
         break; \
       } \
       \
-      case SPAN_ARGB32_GLYPH: \
-      case SPAN_ARGBXX_GLYPH: \
+      case RASTER_SPAN_ARGB32_GLYPH: \
+      case RASTER_SPAN_ARGBXX_GLYPH: \
       { \
         const uint8_t* msk = _msk;
 
@@ -1263,7 +1263,7 @@ _##_Group_##_End: \
 // Example of fetch function:
 //
 // static void FOG_FASTCALL fetch(
-//   RenderPatternContext* ctx, Span* span, uint8_t* buffer, int y, uint32_t mode)
+//   RenderPatternContext* ctx, RasterSpan* span, uint8_t* buffer, int y, uint32_t mode)
 // {
 //   // Initialize fetch function (some variables needed for span loop).
 //   P_FETCH_SPAN8_INIT()
@@ -1338,17 +1338,17 @@ _##_Group_##_End: \
   {
 
 #define P_FETCH_SPAN8_SET_CURRENT() \
-    reinterpret_cast<SpanExt8*>(span)->setData(dst);
+    reinterpret_cast<RasterSpanExt8*>(span)->setData(dst);
 
 #define P_FETCH_SPAN8_SET_CURRENT_AND_MERGE_NEIGHBORS(_BPP_) \
-    reinterpret_cast<SpanExt8*>(span)->setData(dst); \
+    reinterpret_cast<RasterSpanExt8*>(span)->setData(dst); \
     \
     { \
-      Span* next = span->getNext(); \
+      RasterSpan* next = span->getNext(); \
       if (next && next->getX0() == span->getX1()) \
       { \
         do { \
-          reinterpret_cast<SpanExt8*>(next)->setData(dst + (uint)w * _BPP_); \
+          reinterpret_cast<RasterSpanExt8*>(next)->setData(dst + (uint)w * _BPP_); \
           span = next; \
           w = (int)((uint)next->getX1() - (uint)x); \
           next = span->getNext(); \
@@ -1357,7 +1357,7 @@ _##_Group_##_End: \
     }
 
 #define P_FETCH_SPAN8_SET_CUSTOM(_Dst_) \
-    reinterpret_cast<SpanExt8*>(span)->setData((uint8_t*)(_Dst_));
+    reinterpret_cast<RasterSpanExt8*>(span)->setData((uint8_t*)(_Dst_));
 
 #define P_FETCH_SPAN8_NEXT() \
     if ((span = span->getNext()) == NULL) break; \

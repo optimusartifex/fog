@@ -94,7 +94,7 @@ enum RENDER_VBLIT
   RENDER_VBLIT_COUNT = 3,
 
   //! @brief Invalid VBlit format.
-  RENDER_VBLIT_INVALID = 3
+  RENDER_VBLIT_INVALID = RENDER_VBLIT_COUNT
 };
 
 // ============================================================================

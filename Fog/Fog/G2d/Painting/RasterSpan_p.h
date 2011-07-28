@@ -4,35 +4,27 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_RASTERIZER_SPAN_P_H
-#define _FOG_G2D_RASTERIZER_SPAN_P_H
+#ifndef _FOG_G2D_PAINTING_RASTERSPAN_P_H
+#define _FOG_G2D_PAINTING_RASTERSPAN_P_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
+#include <Fog/G2d/Painting/RasterConstants_p.h>
 
 namespace Fog {
 
-//! @addtogroup Fog_G2d_Rasterizer
+//! @addtogroup Fog_G2d_Painting
 //! @{
 
 // ============================================================================
-// [Constants]
-// ============================================================================
-
-//! @brief Helper constant to determine how many constant pixels are
-//! profitable for pure CMask span instance. Minimum is 1, but recommended
-//! are 4 or more (it depends on the  available SIMD instructions per platform).
-enum { SPAN_C_THRESHOLD = 4 };
-
-// ============================================================================
-// [Fog::Span]
+// [Fog::RasterSpan]
 // ============================================================================
 
 #include <Fog/Core/Pack/PackByte.h>
 //! @internal
 //!
-//! @brief Span is small element that contains position, length, CMask (const
-//! mask) or VMask (variant mask).
+//! @brief RasterSpan is small element that contains position, length, CMask
+//! (const mask) or VMask (variant mask).
 //!
 //! Spans are always related with scanline, so information about Y position is
 //! not part of the span. The const mask is encoded in mask pointer so you should
@@ -40,12 +32,12 @@ enum { SPAN_C_THRESHOLD = 4 };
 //! method). There are asserts so you should be warned that you are using span
 //! incorrectly.
 //!
-//! Note that you can base another class on @c Span to extend its
-//! functionality. The core idea is that @c Span is used across the API so you
-//! don't need to define more classes to work with spans.
+//! Note that you can base another class on @c RasterSpan to extend its
+//! functionality. The core idea is that @c RasterSpan is used across the API
+//! so you don't need to define more classes to work with spans.
 //!
-//! @sa @c Span8.
-struct FOG_NO_EXPORT Span
+//! @sa @c RasterSpan8.
+struct FOG_NO_EXPORT RasterSpan
 {
   // --------------------------------------------------------------------------
   // [Consistency]
@@ -72,7 +64,7 @@ struct FOG_NO_EXPORT Span
   //! @brief Set span type.
   FOG_INLINE void setType(uint type)
   {
-    FOG_ASSERT(type < SPAN_COUNT);
+    FOG_ASSERT(type < RASTER_SPAN_COUNT);
     _type = type;
   }
 
@@ -121,21 +113,21 @@ struct FOG_NO_EXPORT Span
   // --------------------------------------------------------------------------
 
   //! @brief Get whether the span is a const-mask.
-  FOG_INLINE bool isConst() const { return _type < SPAN_V_BEGIN; }
+  FOG_INLINE bool isConst() const { return _type < RASTER_SPAN_V_BEGIN; }
   //! @brief Get whether the span is a variant-mask.
-  FOG_INLINE bool isVariant() const { return _type >= SPAN_V_BEGIN; }
+  FOG_INLINE bool isVariant() const { return _type >= RASTER_SPAN_V_BEGIN; }
 
   //! @brief Get whether the span is a A8-Glyph.
-  FOG_INLINE bool isA8Glyph() const { return _type == SPAN_A8_GLYPH; }
+  FOG_INLINE bool isA8Glyph() const { return _type == RASTER_SPAN_A8_GLYPH; }
   //! @brief Get whether the span is a AX-Glyph.
-  FOG_INLINE bool isAXGlyph() const { return _type == SPAN_AX_GLYPH; }
+  FOG_INLINE bool isAXGlyph() const { return _type == RASTER_SPAN_AX_GLYPH; }
   //! @brief Get whether the span is a AX-Extra.
-  FOG_INLINE bool isAXExtra() const { return _type == SPAN_AX_EXTRA; }
+  FOG_INLINE bool isAXExtra() const { return _type == RASTER_SPAN_AX_EXTRA; }
 
   //! @brief Get whether the span is a ARGB32-Glyph.
-  FOG_INLINE bool isArgb32Glyph() const { return _type == SPAN_ARGB32_GLYPH; }
+  FOG_INLINE bool isArgb32Glyph() const { return _type == RASTER_SPAN_ARGB32_GLYPH; }
   //! @brief Get whether the span is a ARGBXX-Glyph.
-  FOG_INLINE bool isArgbXXGlyph() const { return _type == SPAN_ARGBXX_GLYPH; }
+  FOG_INLINE bool isArgbXXGlyph() const { return _type == RASTER_SPAN_ARGBXX_GLYPH; }
 
   // --------------------------------------------------------------------------
   // [Generic-Mask Interface]
@@ -168,9 +160,9 @@ struct FOG_NO_EXPORT Span
   // --------------------------------------------------------------------------
 
   //! @brief Get the next span.
-  FOG_INLINE Span* getNext() const { return _next; }
+  FOG_INLINE RasterSpan* getNext() const { return _next; }
   //! @brief Set the next span.
-  FOG_INLINE void setNext(Span* next) { _next = next; }
+  FOG_INLINE void setNext(RasterSpan* next) { _next = next; }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -193,25 +185,25 @@ struct FOG_NO_EXPORT Span
   };
 
   //! @brief Pointer to the next span (or @c NULL).
-  Span* _next;
+  RasterSpan* _next;
 };
 #include <Fog/Core/Pack/PackRestore.h>
 
 // ============================================================================
-// [Fog::Span8]
+// [Fog::RasterSpan8]
 // ============================================================================
 
 #include <Fog/Core/Pack/PackByte.h>
 //! @internal
 //!
-//! @brief Span that is used by rendering to 8-bit image formats.
+//! @brief RasterSpan that is used by rendering to 8-bit image formats.
 //!
 //! Image formats:
 //! - @c IMAGE_FORMAT_PRGB32.
 //! - @c IMAGE_FORMAT_XRGB32.
 //! - @c IMAGE_FORMAT_RGB24.
 //! - @c IMAGE_FORMAT_A8.
-struct FOG_NO_EXPORT Span8 : public Span
+struct FOG_NO_EXPORT RasterSpan8 : public RasterSpan
 {
   // --------------------------------------------------------------------------
   // [Const-Mask Interface]
@@ -251,13 +243,13 @@ struct FOG_NO_EXPORT Span8 : public Span
 
   FOG_INLINE uint8_t* getA8Glyph() const
   {
-    FOG_ASSERT(getType() == SPAN_A8_GLYPH || getType() == SPAN_AX_GLYPH);
+    FOG_ASSERT(getType() == RASTER_SPAN_A8_GLYPH || getType() == RASTER_SPAN_AX_GLYPH);
     return reinterpret_cast<uint8_t*>(_mask);
   }
 
   FOG_INLINE void setA8Glyph(uint8_t* mask)
   {
-    FOG_ASSERT(getType() == SPAN_A8_GLYPH || getType() == SPAN_AX_GLYPH);
+    FOG_ASSERT(getType() == RASTER_SPAN_A8_GLYPH || getType() == RASTER_SPAN_AX_GLYPH);
     _mask = reinterpret_cast<uint8_t*>(mask);
   }
 
@@ -267,13 +259,13 @@ struct FOG_NO_EXPORT Span8 : public Span
 
   FOG_INLINE uint8_t* getA8Extra() const
   {
-    FOG_ASSERT(getType() == SPAN_AX_EXTRA);
+    FOG_ASSERT(getType() == RASTER_SPAN_AX_EXTRA);
     return reinterpret_cast<uint8_t*>(_mask);
   }
 
   FOG_INLINE void setA8Extra(uint8_t* mask)
   {
-    FOG_ASSERT(getType() == SPAN_AX_EXTRA);
+    FOG_ASSERT(getType() == RASTER_SPAN_AX_EXTRA);
     _mask = reinterpret_cast<uint8_t*>(mask);
   }
 
@@ -283,13 +275,13 @@ struct FOG_NO_EXPORT Span8 : public Span
 
   FOG_INLINE uint8_t* getARGB32Glyph() const
   {
-    FOG_ASSERT(getType() == SPAN_ARGB32_GLYPH || getType() == SPAN_ARGBXX_GLYPH);
+    FOG_ASSERT(getType() == RASTER_SPAN_ARGB32_GLYPH || getType() == RASTER_SPAN_ARGBXX_GLYPH);
     return reinterpret_cast<uint8_t*>(_mask);
   }
 
   FOG_INLINE void setARGB32Glyph(uint8_t* mask)
   {
-    FOG_ASSERT(getType() == SPAN_ARGB32_GLYPH || getType() == SPAN_ARGBXX_GLYPH);
+    FOG_ASSERT(getType() == RASTER_SPAN_ARGB32_GLYPH || getType() == RASTER_SPAN_ARGBXX_GLYPH);
     _mask = reinterpret_cast<uint8_t*>(mask);
   }
 
@@ -298,9 +290,9 @@ struct FOG_NO_EXPORT Span8 : public Span
   // --------------------------------------------------------------------------
 
   //! @brief Get the next span.
-  FOG_INLINE Span8* getNext() const
+  FOG_INLINE RasterSpan8* getNext() const
   {
-    return reinterpret_cast<Span8*>(_next);
+    return reinterpret_cast<RasterSpan8*>(_next);
   }
 
   // --------------------------------------------------------------------------
@@ -312,13 +304,13 @@ struct FOG_NO_EXPORT Span8 : public Span
     // ${SPAN:BEGIN}
     static const int advanceData[] =
     {
-      /* 00 - SPAN_C            */ 0,
-      /* 01 - SPAN_A8_GLYPH     */ 1,
-      /* 02 - SPAN_AX_GLYPH     */ 1,
-      /* 03 - SPAN_AX_EXTRA     */ 2,
-      /* 04 - SPAN_ARGB32_GLYPH */ 4,
-      /* 05 - SPAN_ARGBXX_GLYPH */ 4,
-      /* 06 - ...               */ 0
+      /* 00 - RASTER_SPAN_C            */ 0,
+      /* 01 - RASTER_SPAN_A8_GLYPH     */ 1,
+      /* 02 - RASTER_SPAN_AX_GLYPH     */ 1,
+      /* 03 - RASTER_SPAN_AX_EXTRA     */ 2,
+      /* 04 - RASTER_SPAN_ARGB32_GLYPH */ 4,
+      /* 05 - RASTER_SPAN_ARGBXX_GLYPH */ 4,
+      /* 06 - ...                      */ 0
     };
     // ${SPAN:END}
 
@@ -348,26 +340,26 @@ struct FOG_NO_EXPORT Span8 : public Span
 #include <Fog/Core/Pack/PackRestore.h>
 
 // ============================================================================
-// [Fog::SpanExt8]
+// [Fog::RasterSpanExt8]
 // ============================================================================
 
 #include <Fog/Core/Pack/PackByte.h>
 //! @internal
 //!
-//! @brief @c Span8 extended by a @c data pointer.
-struct FOG_NO_EXPORT SpanExt8 : public Span8
+//! @brief @c RasterSpan8 extended by a @c data pointer.
+struct FOG_NO_EXPORT RasterSpanExt8 : public RasterSpan8
 {
   // --------------------------------------------------------------------------
   // [Data]
   // --------------------------------------------------------------------------
 
-  //! @brief Get the @c SpanExt8 data.
+  //! @brief Get the @c RasterSpanExt8 data.
   FOG_INLINE uint8_t* getData() const
   {
     return _data;
   }
 
-  //! @brief Set the @c SpanExt8 data.
+  //! @brief Set the @c RasterSpanExt8 data.
   FOG_INLINE void setData(uint8_t* data)
   {
     _data = data;
@@ -378,9 +370,9 @@ struct FOG_NO_EXPORT SpanExt8 : public Span8
   // --------------------------------------------------------------------------
 
   //! @brief Get the next span.
-  FOG_INLINE SpanExt8* getNext() const
+  FOG_INLINE RasterSpanExt8* getNext() const
   {
-    return reinterpret_cast<SpanExt8*>(_next);
+    return reinterpret_cast<RasterSpanExt8*>(_next);
   }
 
   // --------------------------------------------------------------------------
@@ -393,20 +385,20 @@ struct FOG_NO_EXPORT SpanExt8 : public Span8
 #include <Fog/Core/Pack/PackRestore.h>
 
 // ============================================================================
-// [Fog::Span16]
+// [Fog::RasterSpan16]
 // ============================================================================
 
 #include <Fog/Core/Pack/PackByte.h>
 //! @internal
 //!
-//! @brief Span that is used by rendering to 16-bit image formats.
+//! @brief RasterSpan that is used by rendering to 16-bit image formats.
 //!
 //! Image formats:
 //! - @c IMAGE_FORMAT_ARGB64.
 //! - @c IMAGE_FORMAT_PRGB64.
 //! - @c IMAGE_FORMAT_RGB48.
 //! - @c IMAGE_FORMAT_A16.
-struct FOG_NO_EXPORT Span16 : public Span
+struct FOG_NO_EXPORT RasterSpan16 : public RasterSpan
 {
   // --------------------------------------------------------------------------
   // [Const-Mask Interface]
@@ -446,13 +438,13 @@ struct FOG_NO_EXPORT Span16 : public Span
 
   FOG_INLINE uint8_t* getA8Glyph() const
   {
-    FOG_ASSERT(getType() == SPAN_A8_GLYPH);
+    FOG_ASSERT(getType() == RASTER_SPAN_A8_GLYPH);
     return reinterpret_cast<uint8_t*>(_mask);
   }
 
   FOG_INLINE void setA8Glyph(uint8_t* mask)
   {
-    FOG_ASSERT(getType() == SPAN_A8_GLYPH);
+    FOG_ASSERT(getType() == RASTER_SPAN_A8_GLYPH);
     _mask = reinterpret_cast<uint8_t*>(mask);
   }
 
@@ -462,13 +454,13 @@ struct FOG_NO_EXPORT Span16 : public Span
 
   FOG_INLINE uint8_t* getA16Glyph() const
   {
-    FOG_ASSERT(getType() == SPAN_AX_GLYPH);
+    FOG_ASSERT(getType() == RASTER_SPAN_AX_GLYPH);
     return reinterpret_cast<uint8_t*>(_mask);
   }
 
   FOG_INLINE void setA16Glyph(uint8_t* mask)
   {
-    FOG_ASSERT(getType() == SPAN_AX_GLYPH);
+    FOG_ASSERT(getType() == RASTER_SPAN_AX_GLYPH);
     _mask = reinterpret_cast<uint8_t*>(mask);
   }
 
@@ -478,13 +470,13 @@ struct FOG_NO_EXPORT Span16 : public Span
 
   FOG_INLINE uint8_t* getA16Extra() const
   {
-    FOG_ASSERT(getType() == SPAN_AX_EXTRA);
+    FOG_ASSERT(getType() == RASTER_SPAN_AX_EXTRA);
     return reinterpret_cast<uint8_t*>(_mask);
   }
 
   FOG_INLINE void setA16Extra(uint8_t* mask)
   {
-    FOG_ASSERT(getType() == SPAN_AX_EXTRA);
+    FOG_ASSERT(getType() == RASTER_SPAN_AX_EXTRA);
     _mask = reinterpret_cast<uint8_t*>(mask);
   }
 
@@ -494,13 +486,13 @@ struct FOG_NO_EXPORT Span16 : public Span
 
   FOG_INLINE uint8_t* getARGB32Glyph() const
   {
-    FOG_ASSERT(getType() == SPAN_ARGB32_GLYPH);
+    FOG_ASSERT(getType() == RASTER_SPAN_ARGB32_GLYPH);
     return reinterpret_cast<uint8_t*>(_mask);
   }
 
   FOG_INLINE void setARGB32Glyph(uint8_t* mask)
   {
-    FOG_ASSERT(getType() == SPAN_ARGB32_GLYPH);
+    FOG_ASSERT(getType() == RASTER_SPAN_ARGB32_GLYPH);
     _mask = reinterpret_cast<uint8_t*>(mask);
   }
 
@@ -510,13 +502,13 @@ struct FOG_NO_EXPORT Span16 : public Span
 
   FOG_INLINE uint8_t* getARGB64Glyph() const
   {
-    FOG_ASSERT(getType() == SPAN_ARGBXX_GLYPH);
+    FOG_ASSERT(getType() == RASTER_SPAN_ARGBXX_GLYPH);
     return reinterpret_cast<uint8_t*>(_mask);
   }
 
   FOG_INLINE void setARGB64Glyph(uint8_t* mask)
   {
-    FOG_ASSERT(getType() == SPAN_ARGBXX_GLYPH);
+    FOG_ASSERT(getType() == RASTER_SPAN_ARGBXX_GLYPH);
     _mask = reinterpret_cast<uint8_t*>(mask);
   }
 
@@ -525,9 +517,9 @@ struct FOG_NO_EXPORT Span16 : public Span
   // --------------------------------------------------------------------------
 
   //! @brief Get the next span.
-  FOG_INLINE Span16* getNext() const
+  FOG_INLINE RasterSpan16* getNext() const
   {
-    return reinterpret_cast<Span16*>(_next);
+    return reinterpret_cast<RasterSpan16*>(_next);
   }
 
   // --------------------------------------------------------------------------
@@ -539,13 +531,13 @@ struct FOG_NO_EXPORT Span16 : public Span
     // ${SPAN:BEGIN}
     static const int advanceData[] =
     {
-      /* 00 - SPAN_C            */ 0,
-      /* 01 - SPAN_A8_GLYPH     */ 1,
-      /* 02 - SPAN_AX_GLYPH     */ 2,
-      /* 03 - SPAN_AX_EXTRA     */ 4,
-      /* 04 - SPAN_ARGB32_GLYPH */ 4,
-      /* 05 - SPAN_ARGBXX_GLYPH */ 8,
-      /* 06 - ...               */ 0
+      /* 00 - RASTER_SPAN_C            */ 0,
+      /* 01 - RASTER_SPAN_A8_GLYPH     */ 1,
+      /* 02 - RASTER_SPAN_AX_GLYPH     */ 2,
+      /* 03 - RASTER_SPAN_AX_EXTRA     */ 4,
+      /* 04 - RASTER_SPAN_ARGB32_GLYPH */ 4,
+      /* 05 - RASTER_SPAN_ARGBXX_GLYPH */ 8,
+      /* 06 - ...                      */ 0
     };
     // ${SPAN:END}
 
@@ -555,26 +547,26 @@ struct FOG_NO_EXPORT Span16 : public Span
 #include <Fog/Core/Pack/PackRestore.h>
 
 // ============================================================================
-// [Fog::SpanExt16]
+// [Fog::RasterSpanExt16]
 // ============================================================================
 
 #include <Fog/Core/Pack/PackByte.h>
 //! @internal
 //!
-//! @brief @c Span16 extended by a @c data pointer.
-struct FOG_NO_EXPORT SpanExt16 : public Span16
+//! @brief @c RasterSpan16 extended by a @c data pointer.
+struct FOG_NO_EXPORT RasterSpanExt16 : public RasterSpan16
 {
   // --------------------------------------------------------------------------
   // [Data]
   // --------------------------------------------------------------------------
 
-  //! @brief Get the @c SpanExt16 data.
+  //! @brief Get the @c RasterSpanExt16 data.
   FOG_INLINE uint8_t* getData() const
   {
     return _data;
   }
 
-  //! @brief Set the @c SpanExt16 data.
+  //! @brief Set the @c RasterSpanExt16 data.
   FOG_INLINE void setData(uint8_t* data)
   {
     _data = data;
@@ -585,9 +577,9 @@ struct FOG_NO_EXPORT SpanExt16 : public Span16
   // --------------------------------------------------------------------------
 
   //! @brief Get the next span.
-  FOG_INLINE SpanExt16* getNext() const
+  FOG_INLINE RasterSpanExt16* getNext() const
   {
-    return reinterpret_cast<SpanExt16*>(_next);
+    return reinterpret_cast<RasterSpanExt16*>(_next);
   }
 
   // --------------------------------------------------------------------------
@@ -604,4 +596,4 @@ struct FOG_NO_EXPORT SpanExt16 : public Span16
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_RASTERIZER_SPAN_P_H
+#endif // _FOG_G2D_PAINTING_RASTERSPAN_P_H

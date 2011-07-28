@@ -19,21 +19,8 @@ namespace Fog {
 // [Forward Declarations]
 // ============================================================================
 
-// Fog/G2d.
-struct Color;
-struct ColorStop;
-struct ColorStopCache;
-struct ColorStopList;
-struct ImageConverterClosure;
-struct ImageConverterData;
-struct GradientF;
-struct GradientD;
-struct PatternF;
-struct PatternD;
-struct Span;
-struct Texture;
-struct TransformF;
-struct TransformD;
+// Fog/G2d/Painting.
+struct RasterSpan;
 
 // Fog/G2d/Render.
 typedef ImageConverterClosure RenderClosure;
@@ -82,7 +69,7 @@ typedef void (FOG_FASTCALL *RenderCBlitLineFn)(
 typedef void (FOG_FASTCALL *RenderCBlitSpanFn)(
   uint8_t* dst,
   const RenderSolid* src,
-  const Span* span,
+  const RasterSpan* span,
   const RenderClosure* closure);
 
 // ============================================================================
@@ -106,7 +93,7 @@ typedef void (FOG_FASTCALL *RenderVBlitLineFn)(
 //! @internal
 typedef void (FOG_FASTCALL *RenderVBlitSpanFn)(
   uint8_t* dst,
-  const Span* span,
+  const RasterSpan* span,
   const RenderClosure* closure);
 
 // ============================================================================
@@ -178,7 +165,7 @@ typedef void (FOG_FASTCALL *RenderPatternPrepareFn)(
 
 //! @internal
 typedef void (FOG_FASTCALL *RenderPatternFetchFn)(
-  RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer);
+  RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer);
 
 //! @internal
 typedef void (FOG_FASTCALL *RenderPatternSkipFn)(

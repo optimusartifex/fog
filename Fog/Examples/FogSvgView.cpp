@@ -304,11 +304,11 @@ FOG_UI_MAIN()
 
     //fileName = Ascii8("C:/my/svg/ISO_12233-reschart.svg");
     //fileName = Ascii8("C:/my/svg/lorem_ipsum_compound.svg");
-    //fileName = Ascii8("C:/my/svg/tiger.svg");
+    fileName = Ascii8("C:/my/svg/tiger.svg");
     //fileName = Ascii8("C:/my/svg/lion.svg");
     //fileName = Ascii8("C:/my/svg/Minimap_fixed.svg");
     //fileName = Ascii8("C:/my/svg/path-lines-BE-01.svg");
-    fileName = Ascii8("C:/my/svg/gradPatt-linearGr-BE-01.svg");
+    //fileName = Ascii8("C:/my/svg/gradPatt-linearGr-BE-01.svg");
     //fileName = Ascii8("C:/my/svg/brown_fish_01.svg");
     //fileName = Ascii8("C:/my/svg/pattern.svg");
     //fileName = Ascii8("C:/my/svg/paint-fill-BE-01.svg");

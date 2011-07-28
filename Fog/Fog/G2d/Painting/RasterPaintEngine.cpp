@@ -30,16 +30,15 @@
 #include <Fog/G2d/Imaging/ImageEffect.h>
 #include <Fog/G2d/Imaging/ImageFormatDescription.h>
 #include <Fog/G2d/Painting/Painter.h>
-#include <Fog/G2d/Painting/RasterPaintConstants_p.h>
+#include <Fog/G2d/Painting/RasterConstants_p.h>
+#include <Fog/G2d/Painting/RasterFiller_p.h>
 #include <Fog/G2d/Painting/RasterPaintEngine_p.h>
-#include <Fog/G2d/Painting/RasterPaintFuncs_p.h>
-#include <Fog/G2d/Painting/RasterPaintState_p.h>
-#include <Fog/G2d/Painting/RasterPaintStructs_p.h>
-#include <Fog/G2d/Painting/RasterPaintUtil_p.h>
-#include <Fog/G2d/Painting/RasterPaintWorker_p.h>
-#include <Fog/G2d/Rasterizer/Rasterizer_p.h>
-#include <Fog/G2d/Rasterizer/Scanline_p.h>
-#include <Fog/G2d/Rasterizer/Span_p.h>
+#include <Fog/G2d/Painting/RasterScanline_p.h>
+#include <Fog/G2d/Painting/RasterSpan_p.h>
+#include <Fog/G2d/Painting/RasterState_p.h>
+#include <Fog/G2d/Painting/RasterUtil_p.h>
+#include <Fog/G2d/Painting/RasterWorker_p.h>
+#include <Fog/G2d/Painting/Rasterizer_p.h>
 #include <Fog/G2d/Render/RenderApi_p.h>
 #include <Fog/G2d/Render/RenderConstants_p.h>
 #include <Fog/G2d/Render/RenderUtil_p.h>
@@ -93,18 +92,33 @@ namespace Fog {
   FOG_MACRO_BEGIN \
     if (_Engine_->ctx.pc == NULL) \
     { \
-      FOG_RETURN_ON_ERROR(createPatternContext(_Engine_)); \
+      FOG_RETURN_ON_ERROR(RasterPaintEngineImpl::createPatternContext(_Engine_)); \
     } \
   FOG_MACRO_END
 
+#define _PARAM_C(_Type_) (*reinterpret_cast<const _Type_*>(value))
+#define _PARAM_M(_Type_) (*reinterpret_cast<_Type_*>(value))
+
 // ============================================================================
-// [Fog::RasterPainterImpl_]
+// [Fog::RasterPaintEngine - VTable]
+// ============================================================================
+
+RasterPaintEngineVTable RasterPaintEngine_vtable;
+
+// ============================================================================
+// [Fog::RasterPaintEngine - Serializer]
+// ============================================================================
+
+RasterPaintSerializer RasterPaintEngine_serializer[RASTER_MODE_COUNT];
+
+// ============================================================================
+// [Fog::RasterPaintEngineImpl]
 // ============================================================================
 
 //! @internal
 //!
-//! @brief Non-template based implementation of RasterPainterImpl<>.
-struct RasterPainterImpl_
+//! @brief Non-template based implementation of RasterPaintEngineImpl<>.
+struct FOG_NO_EXPORT RasterPaintEngineImpl
 {
   // --------------------------------------------------------------------------
   // [AddRef / Release]
@@ -174,6 +188,162 @@ struct RasterPainterImpl_
   static err_t FOG_CDECL save(Painter& self);
   static err_t FOG_CDECL restore(Painter& self);
 
+  // --------------------------------------------------------------------------
+  // [Map]
+  // --------------------------------------------------------------------------
+
+  static err_t FOG_CDECL mapPointF(const Painter& self, uint32_t mapOp, PointF& pt);
+  static err_t FOG_CDECL mapPointD(const Painter& self, uint32_t mapOp, PointD& pt);
+
+  // --------------------------------------------------------------------------
+  // [Draw]
+  // --------------------------------------------------------------------------
+
+  static err_t FOG_CDECL drawRectI(Painter& self, const RectI& r);
+  static err_t FOG_CDECL drawRectF(Painter& self, const RectF& r);
+  static err_t FOG_CDECL drawRectD(Painter& self, const RectD& r);
+
+  static err_t FOG_CDECL drawPolylineI(Painter& self, const PointI* p, size_t count);
+  static err_t FOG_CDECL drawPolylineF(Painter& self, const PointF* p, size_t count);
+  static err_t FOG_CDECL drawPolylineD(Painter& self, const PointD* p, size_t count);
+
+  static err_t FOG_CDECL drawPolygonI(Painter& self, const PointI* p, size_t count);
+  static err_t FOG_CDECL drawPolygonF(Painter& self, const PointF* p, size_t count);
+  static err_t FOG_CDECL drawPolygonD(Painter& self, const PointD* p, size_t count);
+
+  static err_t FOG_CDECL drawShapeF(Painter& self, uint32_t shapeType, const void* shapeData);
+  static err_t FOG_CDECL drawShapeD(Painter& self, uint32_t shapeType, const void* shapeData);
+
+  static err_t FOG_CDECL drawPathF(Painter& self, const PathF& p);
+  static err_t FOG_CDECL drawPathD(Painter& self, const PathD& p);
+
+  // --------------------------------------------------------------------------
+  // [Fill]
+  // --------------------------------------------------------------------------
+
+  static err_t FOG_CDECL fillAll(Painter& self);
+
+  static err_t FOG_CDECL fillRectI(Painter& self, const RectI& r);
+  static err_t FOG_CDECL fillRectF(Painter& self, const RectF& r);
+  static err_t FOG_CDECL fillRectD(Painter& self, const RectD& r);
+
+  static err_t FOG_CDECL fillRectsI(Painter& self, const RectI* r, size_t count);
+  static err_t FOG_CDECL fillRectsF(Painter& self, const RectF* r, size_t count);
+  static err_t FOG_CDECL fillRectsD(Painter& self, const RectD* r, size_t count);
+
+  static err_t FOG_CDECL fillPolygonI(Painter& self, const PointI* p, size_t count);
+  static err_t FOG_CDECL fillPolygonF(Painter& self, const PointF* p, size_t count);
+  static err_t FOG_CDECL fillPolygonD(Painter& self, const PointD* p, size_t count);
+
+  static err_t FOG_CDECL fillShapeF(Painter& self, uint32_t shapeType, const void* shapeData);
+  static err_t FOG_CDECL fillShapeD(Painter& self, uint32_t shapeType, const void* shapeData);
+
+  static err_t FOG_CDECL fillPathF(Painter& self, const PathF& p);
+  static err_t FOG_CDECL fillPathD(Painter& self, const PathD& p);
+
+  static err_t FOG_CDECL fillTextAtI(Painter& self, const PointI& p, const String& text, const Font& font, const RectI* clip);
+  static err_t FOG_CDECL fillTextAtF(Painter& self, const PointF& p, const String& text, const Font& font, const RectF* clip);
+  static err_t FOG_CDECL fillTextAtD(Painter& self, const PointD& p, const String& text, const Font& font, const RectD* clip);
+
+  static err_t FOG_CDECL fillTextInI(Painter& self, const TextRectI& r, const String& text, const Font& font, const RectI* clip);
+  static err_t FOG_CDECL fillTextInF(Painter& self, const TextRectF& r, const String& text, const Font& font, const RectF* clip);
+  static err_t FOG_CDECL fillTextInD(Painter& self, const TextRectD& r, const String& text, const Font& font, const RectD* clip);
+
+  static err_t FOG_CDECL fillMaskAtI(Painter& self, const PointI& p, const Image& m, const RectI* mFragment);
+  static err_t FOG_CDECL fillMaskAtF(Painter& self, const PointF& p, const Image& m, const RectI* mFragment);
+  static err_t FOG_CDECL fillMaskAtD(Painter& self, const PointD& p, const Image& m, const RectI* mFragment);
+
+  static err_t FOG_CDECL fillMaskInI(Painter& self, const RectI& r, const Image& m, const RectI* mFragment);
+  static err_t FOG_CDECL fillMaskInF(Painter& self, const RectF& r, const Image& m, const RectI* mFragment);
+  static err_t FOG_CDECL fillMaskInD(Painter& self, const RectD& r, const Image& m, const RectI* mFragment);
+
+  static err_t FOG_CDECL fillRegion(Painter& self, const Region& r);
+
+  // --------------------------------------------------------------------------
+  // [Blit]
+  // --------------------------------------------------------------------------
+
+  static err_t FOG_CDECL blitImageAtI(Painter& self, const PointI& p, const Image& i, const RectI* iFragment);
+  static err_t FOG_CDECL blitImageAtF(Painter& self, const PointF& p, const Image& i, const RectI* iFragment);
+  static err_t FOG_CDECL blitImageAtD(Painter& self, const PointD& p, const Image& i, const RectI* iFragment);
+
+  static err_t FOG_CDECL blitImageInI(Painter& self, const RectI& r, const Image& i, const RectI* iFragment);
+  static err_t FOG_CDECL blitImageInF(Painter& self, const RectF& r, const Image& i, const RectI* iFragment);
+  static err_t FOG_CDECL blitImageInD(Painter& self, const RectD& r, const Image& i, const RectI* iFragment);
+
+  static err_t FOG_CDECL blitMaskedImageAtI(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
+  static err_t FOG_CDECL blitMaskedImageAtF(Painter& self, const PointF& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
+  static err_t FOG_CDECL blitMaskedImageAtD(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
+
+  static err_t FOG_CDECL blitMaskedImageInI(Painter& self, const RectI& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
+  static err_t FOG_CDECL blitMaskedImageInF(Painter& self, const RectF& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
+  static err_t FOG_CDECL blitMaskedImageInD(Painter& self, const RectD& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
+
+  // --------------------------------------------------------------------------
+  // [Clip]
+  // --------------------------------------------------------------------------
+
+  static err_t FOG_CDECL clipRectI(Painter& self, uint32_t clipOp, const RectI& r);
+  static err_t FOG_CDECL clipRectF(Painter& self, uint32_t clipOp, const RectF& r);
+  static err_t FOG_CDECL clipRectD(Painter& self, uint32_t clipOp, const RectD& r);
+
+  static err_t FOG_CDECL clipRectsI(Painter& self, uint32_t clipOp, const RectI* r, size_t count);
+  static err_t FOG_CDECL clipRectsF(Painter& self, uint32_t clipOp, const RectF* r, size_t count);
+  static err_t FOG_CDECL clipRectsD(Painter& self, uint32_t clipOp, const RectD* r, size_t count);
+
+  static err_t FOG_CDECL clipPolygonI(Painter& self, uint32_t clipOp, const PointI* p, size_t count);
+  static err_t FOG_CDECL clipPolygonF(Painter& self, uint32_t clipOp, const PointF* p, size_t count);
+  static err_t FOG_CDECL clipPolygonD(Painter& self, uint32_t clipOp, const PointD* p, size_t count);
+
+  static err_t FOG_CDECL clipShapeF(Painter& self, uint32_t clipOp, uint32_t shapeType, const void* shapeData);
+  static err_t FOG_CDECL clipShapeD(Painter& self, uint32_t clipOp, uint32_t shapeType, const void* shapeData);
+
+  static err_t FOG_CDECL clipPathF(Painter& self, uint32_t clipOp, const PathF& p);
+  static err_t FOG_CDECL clipPathD(Painter& self, uint32_t clipOp, const PathD& p);
+
+  static err_t FOG_CDECL clipTextAtI(Painter& self, uint32_t clipOp, const PointI& p, const String& text, const Font& font, const RectI* clip);
+  static err_t FOG_CDECL clipTextAtF(Painter& self, uint32_t clipOp, const PointF& p, const String& text, const Font& font, const RectF* clip);
+  static err_t FOG_CDECL clipTextAtD(Painter& self, uint32_t clipOp, const PointD& p, const String& text, const Font& font, const RectD* clip);
+
+  static err_t FOG_CDECL clipTextInI(Painter& self, uint32_t clipOp, const TextRectI& r, const String& text, const Font& font, const RectI* clip);
+  static err_t FOG_CDECL clipTextInF(Painter& self, uint32_t clipOp, const TextRectF& r, const String& text, const Font& font, const RectF* clip);
+  static err_t FOG_CDECL clipTextInD(Painter& self, uint32_t clipOp, const TextRectD& r, const String& text, const Font& font, const RectD* clip);
+
+  static err_t FOG_CDECL clipMaskAtI(Painter& self, uint32_t clipOp, const PointI& p, const Image& m, const RectI* mFragment);
+  static err_t FOG_CDECL clipMaskAtF(Painter& self, uint32_t clipOp, const PointF& p, const Image& m, const RectI* mFragment);
+  static err_t FOG_CDECL clipMaskAtD(Painter& self, uint32_t clipOp, const PointD& p, const Image& m, const RectI* mFragment);
+
+  static err_t FOG_CDECL clipMaskInI(Painter& self, uint32_t clipOp, const RectI& r, const Image& m, const RectI* mFragment);
+  static err_t FOG_CDECL clipMaskInF(Painter& self, uint32_t clipOp, const RectF& r, const Image& m, const RectI* mFragment);
+  static err_t FOG_CDECL clipMaskInD(Painter& self, uint32_t clipOp, const RectD& r, const Image& m, const RectI* mFragment);
+
+  static err_t FOG_CDECL clipRegion(Painter& self, uint32_t clipOp, const Region& r);
+
+  static err_t FOG_CDECL resetClip(Painter& self);
+
+  // --------------------------------------------------------------------------
+  // [Layer]
+  // --------------------------------------------------------------------------
+
+  static err_t FOG_CDECL beginLayer(Painter& self);
+  static err_t FOG_CDECL endLayer(Painter& self);
+
+  // --------------------------------------------------------------------------
+  // [Flush]
+  // --------------------------------------------------------------------------
+
+  static err_t FOG_CDECL flush(Painter& self, uint32_t flags);
+
+  // --------------------------------------------------------------------------
+  // [InitVTable]
+  // --------------------------------------------------------------------------
+
+  static void initVTable(RasterPaintEngineVTable& v);
+
+  // --------------------------------------------------------------------------
+  // [State - Helpers]
+  // --------------------------------------------------------------------------
+
   static FOG_INLINE RasterState* createState(RasterPaintEngine* engine);
   static FOG_INLINE void poolState(RasterPaintEngine* engine, RasterState* state);
 
@@ -183,13 +353,6 @@ struct RasterPainterImpl_
   static void saveClipping(RasterPaintEngine* engine);
 
   static void discardStates(RasterPaintEngine* engine);
-
-  // --------------------------------------------------------------------------
-  // [Map]
-  // --------------------------------------------------------------------------
-
-  static err_t FOG_CDECL mapPointF(const Painter& self, uint32_t mapOp, PointF& pt);
-  static err_t FOG_CDECL mapPointD(const Painter& self, uint32_t mapOp, PointD& pt);
 
   // --------------------------------------------------------------------------
   // [Mode]
@@ -205,7 +368,7 @@ struct RasterPainterImpl_
   static void setupOps(RasterPaintEngine* engine);
 
   static void setupDefaultClip(RasterPaintEngine* engine);
-  static void setupDefaultRenderer(RasterPaintEngine* engine);
+  static void setupDefaultSerializer(RasterPaintEngine* engine);
 
   // --------------------------------------------------------------------------
   // [Helpers - Source]
@@ -239,10 +402,10 @@ struct RasterPainterImpl_
 };
 
 // ============================================================================
-// [Fog::RasterPainterImpl_ - AddRef / Release]
+// [Fog::RasterPaintEngineImpl - AddRef / Release]
 // ============================================================================
 
-err_t FOG_CDECL RasterPainterImpl_::release(Painter& self)
+err_t FOG_CDECL RasterPaintEngineImpl::release(Painter& self)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
 
@@ -256,10 +419,10 @@ err_t FOG_CDECL RasterPainterImpl_::release(Painter& self)
 }
 
 // ============================================================================
-// [Fog::RasterPainterImpl_ - Meta Params]
+// [Fog::RasterPaintEngineImpl - Meta Params]
 // ============================================================================
 
-err_t FOG_CDECL RasterPainterImpl_::getMetaParams(const Painter& self, Region& region, PointI& origin)
+err_t FOG_CDECL RasterPaintEngineImpl::getMetaParams(const Painter& self, Region& region, PointI& origin)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
 
@@ -269,7 +432,7 @@ err_t FOG_CDECL RasterPainterImpl_::getMetaParams(const Painter& self, Region& r
   return ERR_OK;
 }
 
-err_t FOG_CDECL RasterPainterImpl_::setMetaParams(Painter& self, const Region& region, const PointI& origin)
+err_t FOG_CDECL RasterPaintEngineImpl::setMetaParams(Painter& self, const Region& region, const PointI& origin)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
   discardStates(engine);
@@ -283,7 +446,7 @@ err_t FOG_CDECL RasterPainterImpl_::setMetaParams(Painter& self, const Region& r
   return changedCoreClip(engine);
 }
 
-err_t FOG_CDECL RasterPainterImpl_::resetMetaParams(Painter& self)
+err_t FOG_CDECL RasterPaintEngineImpl::resetMetaParams(Painter& self)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
   discardStates(engine);
@@ -298,10 +461,10 @@ err_t FOG_CDECL RasterPainterImpl_::resetMetaParams(Painter& self)
 }
 
 // ============================================================================
-// [Fog::RasterPainterImpl_ - User Params]
+// [Fog::RasterPaintEngineImpl - User Params]
 // ============================================================================
 
-err_t FOG_CDECL RasterPainterImpl_::getUserParams(const Painter& self, Region& region, PointI& origin)
+err_t FOG_CDECL RasterPaintEngineImpl::getUserParams(const Painter& self, Region& region, PointI& origin)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
 
@@ -311,7 +474,7 @@ err_t FOG_CDECL RasterPainterImpl_::getUserParams(const Painter& self, Region& r
   return ERR_OK;
 }
 
-err_t FOG_CDECL RasterPainterImpl_::setUserParams(Painter& self, const Region& region, const PointI& origin)
+err_t FOG_CDECL RasterPaintEngineImpl::setUserParams(Painter& self, const Region& region, const PointI& origin)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
 
@@ -321,7 +484,7 @@ err_t FOG_CDECL RasterPainterImpl_::setUserParams(Painter& self, const Region& r
   return changedCoreClip(engine);
 }
 
-err_t FOG_CDECL RasterPainterImpl_::resetUserParams(Painter& self)
+err_t FOG_CDECL RasterPaintEngineImpl::resetUserParams(Painter& self)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
 
@@ -332,13 +495,10 @@ err_t FOG_CDECL RasterPainterImpl_::resetUserParams(Painter& self)
 }
 
 // ============================================================================
-// [Fog::RasterPainterImpl_ - Parameters]
+// [Fog::RasterPaintEngineImpl - Parameters]
 // ============================================================================
 
-#define VALUE_M(_Type_) (*reinterpret_cast<_Type_*>(value))
-#define VALUE_C(_Type_) (*reinterpret_cast<const _Type_*>(value))
-
-err_t FOG_CDECL RasterPainterImpl_::getParameter(const Painter& self, uint32_t parameterId, void* value)
+err_t FOG_CDECL RasterPaintEngineImpl::getParameter(const Painter& self, uint32_t parameterId, void* value)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
 
@@ -350,31 +510,31 @@ err_t FOG_CDECL RasterPainterImpl_::getParameter(const Painter& self, uint32_t p
 
     case PAINTER_PARAMETER_SIZE_I:
     {
-      VALUE_M(SizeI).set(engine->ctx.layer.size);
+      _PARAM_M(SizeI).set(engine->ctx.layer.size);
       return ERR_OK;
     }
 
     case PAINTER_PARAMETER_SIZE_F:
     {
-      VALUE_M(SizeF).set(engine->ctx.layer.size);
+      _PARAM_M(SizeF).set(engine->ctx.layer.size);
       return ERR_OK;
     }
 
     case PAINTER_PARAMETER_SIZE_D:
     {
-      VALUE_M(SizeD).set(engine->ctx.layer.size);
+      _PARAM_M(SizeD).set(engine->ctx.layer.size);
       return ERR_OK;
     }
 
     case PAINTER_PARAMETER_FORMAT_I:
     {
-      VALUE_M(uint32_t) = engine->ctx.layer.primaryFormat;
+      _PARAM_M(uint32_t) = engine->ctx.layer.primaryFormat;
       return ERR_OK;
     }
 
     case PAINTER_PARAMETER_DEVICE_I:
     {
-      VALUE_M(uint32_t) = PAINT_DEVICE_RASTER;
+      _PARAM_M(uint32_t) = PAINT_DEVICE_RASTER;
       return ERR_OK;
     }
 
@@ -384,13 +544,13 @@ err_t FOG_CDECL RasterPainterImpl_::getParameter(const Painter& self, uint32_t p
 
     case PAINTER_PARAMETER_MULTITHREADED_I:
     {
-      VALUE_M(uint32_t) = engine->wm ? true : false;
+      _PARAM_M(uint32_t) = engine->wm ? true : false;
       return ERR_OK;
     }
 
     case PAINTER_PARAMETER_MAX_THREADS_I:
     {
-      VALUE_M(uint32_t) = engine->maxThreads;
+      _PARAM_M(uint32_t) = engine->maxThreads;
       return ERR_OK;
     }
 
@@ -400,7 +560,7 @@ err_t FOG_CDECL RasterPainterImpl_::getParameter(const Painter& self, uint32_t p
 
     case PAINTER_PARAMETER_PARAMS_F:
     {
-      PaintParamsF& params = VALUE_M(PaintParamsF);
+      PaintParamsF& params = _PARAM_M(PaintParamsF);
 
       params._hints = engine->ctx.paintHints;
       params._opacity = engine->opacityF;
@@ -430,7 +590,7 @@ err_t FOG_CDECL RasterPainterImpl_::getParameter(const Painter& self, uint32_t p
 
     case PAINTER_PARAMETER_PARAMS_D:
     {
-      PaintParamsD& params = VALUE_M(PaintParamsD);
+      PaintParamsD& params = _PARAM_M(PaintParamsD);
 
       params._hints = engine->ctx.paintHints;
       params._opacity  = engine->opacityF;
@@ -464,49 +624,49 @@ err_t FOG_CDECL RasterPainterImpl_::getParameter(const Painter& self, uint32_t p
 
     case PAINTER_PARAMETER_PAINT_HINTS:
     {
-      VALUE_M(PaintHints) = engine->ctx.paintHints;
+      _PARAM_M(PaintHints) = engine->ctx.paintHints;
       return ERR_OK;
     }
 
     case PAINTER_PARAMETER_COMPOSITING_OPERATOR_I:
     {
-      VALUE_M(uint32_t) = engine->ctx.paintHints.compositingOperator;
+      _PARAM_M(uint32_t) = engine->ctx.paintHints.compositingOperator;
       return ERR_OK;
     }
 
     case PAINTER_PARAMETER_RENDER_QUALITY_I:
     {
-      VALUE_M(uint32_t) = engine->ctx.paintHints.renderQuality;
+      _PARAM_M(uint32_t) = engine->ctx.paintHints.renderQuality;
       return ERR_OK;
     }
 
     case PAINTER_PARAMETER_IMAGE_QUALITY_I:
     {
-      VALUE_M(uint32_t) = engine->ctx.paintHints.imageQuality;
+      _PARAM_M(uint32_t) = engine->ctx.paintHints.imageQuality;
       return ERR_OK;
     }
 
     case PAINTER_PARAMETER_GRADIENT_QUALITY_I:
     {
-      VALUE_M(uint32_t) = engine->ctx.paintHints.gradientQuality;
+      _PARAM_M(uint32_t) = engine->ctx.paintHints.gradientQuality;
       return ERR_OK;
     }
 
     case PAINTER_PARAMETER_OUTLINED_TEXT_I:
     {
-      VALUE_M(uint32_t) = engine->ctx.paintHints.outlinedText;
+      _PARAM_M(uint32_t) = engine->ctx.paintHints.outlinedText;
       return ERR_OK;
     }
 
     case PAINTER_PARAMETER_FAST_LINE_I:
     {
-      VALUE_M(uint32_t) = engine->ctx.paintHints.fastLine;
+      _PARAM_M(uint32_t) = engine->ctx.paintHints.fastLine;
       return ERR_OK;
     }
 
     case PAINTER_PARAMETER_GEOMETRIC_PRECISION_I:
     {
-      VALUE_M(uint32_t) = engine->ctx.paintHints.geometricPrecision;
+      _PARAM_M(uint32_t) = engine->ctx.paintHints.geometricPrecision;
       return ERR_OK;
     }
 
@@ -516,13 +676,13 @@ err_t FOG_CDECL RasterPainterImpl_::getParameter(const Painter& self, uint32_t p
 
     case PAINTER_PARAMETER_OPACITY_F:
     {
-      VALUE_M(float) = engine->opacityF;
+      _PARAM_M(float) = engine->opacityF;
       return ERR_OK;
     }
 
     case PAINTER_PARAMETER_OPACITY_D:
     {
-      VALUE_M(double) = engine->opacityF;
+      _PARAM_M(double) = engine->opacityF;
       return ERR_OK;
     }
 
@@ -532,7 +692,7 @@ err_t FOG_CDECL RasterPainterImpl_::getParameter(const Painter& self, uint32_t p
 
     case PAINTER_PARAMETER_FILL_RULE_I:
     {
-      VALUE_M(uint32_t) = engine->ctx.paintHints.fillRule;
+      _PARAM_M(uint32_t) = engine->ctx.paintHints.fillRule;
       return ERR_OK;
     }
 
@@ -542,7 +702,7 @@ err_t FOG_CDECL RasterPainterImpl_::getParameter(const Painter& self, uint32_t p
 
     case PAINTER_PARAMETER_STROKE_PARAMS_F:
     {
-      PathStrokerParamsF& params = VALUE_M(PathStrokerParamsF);
+      PathStrokerParamsF& params = _PARAM_M(PathStrokerParamsF);
 
       switch (engine->strokeParamsPrecision)
       {
@@ -569,7 +729,7 @@ err_t FOG_CDECL RasterPainterImpl_::getParameter(const Painter& self, uint32_t p
 
     case PAINTER_PARAMETER_STROKE_PARAMS_D:
     {
-      PathStrokerParamsD& params = VALUE_M(PathStrokerParamsD);
+      PathStrokerParamsD& params = _PARAM_M(PathStrokerParamsD);
 
       switch (engine->strokeParamsPrecision)
       {
@@ -601,9 +761,9 @@ err_t FOG_CDECL RasterPainterImpl_::getParameter(const Painter& self, uint32_t p
     case PAINTER_PARAMETER_LINE_WIDTH_F:
     {
       if (engine->strokeParamsPrecision == RASTER_PRECISION_D)
-        VALUE_M(float) = (float)engine->strokeParams.d->getLineWidth();
+        _PARAM_M(float) = (float)engine->strokeParams.d->getLineWidth();
       else
-        VALUE_M(float) = engine->strokeParams.f->getLineWidth();
+        _PARAM_M(float) = engine->strokeParams.f->getLineWidth();
 
       return ERR_OK;
     }
@@ -611,9 +771,9 @@ err_t FOG_CDECL RasterPainterImpl_::getParameter(const Painter& self, uint32_t p
     case PAINTER_PARAMETER_LINE_WIDTH_D:
     {
       if (engine->strokeParamsPrecision == RASTER_PRECISION_F)
-        VALUE_M(double) = engine->strokeParams.f->getLineWidth();
+        _PARAM_M(double) = engine->strokeParams.f->getLineWidth();
       else
-        VALUE_M(double) = engine->strokeParams.d->getLineWidth();
+        _PARAM_M(double) = engine->strokeParams.d->getLineWidth();
 
       return ERR_OK;
     }
@@ -624,7 +784,7 @@ err_t FOG_CDECL RasterPainterImpl_::getParameter(const Painter& self, uint32_t p
 
     case PAINTER_PARAMETER_LINE_JOIN_I:
     {
-      VALUE_M(uint32_t) = engine->strokeParams.f->getLineJoin();
+      _PARAM_M(uint32_t) = engine->strokeParams.f->getLineJoin();
       return ERR_OK;
     }
 
@@ -634,13 +794,13 @@ err_t FOG_CDECL RasterPainterImpl_::getParameter(const Painter& self, uint32_t p
 
     case PAINTER_PARAMETER_START_CAP_I:
     {
-      VALUE_M(uint32_t) = engine->strokeParams.f->getStartCap();
+      _PARAM_M(uint32_t) = engine->strokeParams.f->getStartCap();
       return ERR_OK;
     }
 
     case PAINTER_PARAMETER_END_CAP_I:
     {
-      VALUE_M(uint32_t) = engine->strokeParams.f->getEndCap();
+      _PARAM_M(uint32_t) = engine->strokeParams.f->getEndCap();
       return ERR_OK;
     }
 
@@ -651,7 +811,7 @@ err_t FOG_CDECL RasterPainterImpl_::getParameter(const Painter& self, uint32_t p
 
       if (startCap == endCap)
       {
-        VALUE_M(uint32_t) = startCap;
+        _PARAM_M(uint32_t) = startCap;
         return ERR_OK;
       }
       else
@@ -667,9 +827,9 @@ err_t FOG_CDECL RasterPainterImpl_::getParameter(const Painter& self, uint32_t p
     case PAINTER_PARAMETER_MITER_LIMIT_F:
     {
       if (engine->strokeParamsPrecision == RASTER_PRECISION_D)
-        VALUE_M(float) = (float)engine->strokeParams.d->getMiterLimit();
+        _PARAM_M(float) = (float)engine->strokeParams.d->getMiterLimit();
       else
-        VALUE_M(float) = engine->strokeParams.f->getMiterLimit();
+        _PARAM_M(float) = engine->strokeParams.f->getMiterLimit();
 
       return ERR_OK;
     }
@@ -677,9 +837,9 @@ err_t FOG_CDECL RasterPainterImpl_::getParameter(const Painter& self, uint32_t p
     case PAINTER_PARAMETER_MITER_LIMIT_D:
     {
       if (engine->strokeParamsPrecision == RASTER_PRECISION_F)
-        VALUE_M(double) = engine->strokeParams.f->getMiterLimit();
+        _PARAM_M(double) = engine->strokeParams.f->getMiterLimit();
       else
-        VALUE_M(double) = engine->strokeParams.d->getMiterLimit();
+        _PARAM_M(double) = engine->strokeParams.d->getMiterLimit();
 
       return ERR_OK;
     }
@@ -691,9 +851,9 @@ err_t FOG_CDECL RasterPainterImpl_::getParameter(const Painter& self, uint32_t p
     case PAINTER_PARAMETER_DASH_OFFSET_F:
     {
       if (engine->strokeParamsPrecision == RASTER_PRECISION_D)
-        VALUE_M(float) = (float)engine->strokeParams.d->getDashOffset();
+        _PARAM_M(float) = (float)engine->strokeParams.d->getDashOffset();
       else
-        VALUE_M(float) = engine->strokeParams.f->getDashOffset();
+        _PARAM_M(float) = engine->strokeParams.f->getDashOffset();
 
       return ERR_OK;
     }
@@ -701,9 +861,9 @@ err_t FOG_CDECL RasterPainterImpl_::getParameter(const Painter& self, uint32_t p
     case PAINTER_PARAMETER_DASH_OFFSET_D:
     {
       if (engine->strokeParamsPrecision == RASTER_PRECISION_F)
-        VALUE_M(double) = engine->strokeParams.f->getDashOffset();
+        _PARAM_M(double) = engine->strokeParams.f->getDashOffset();
       else
-        VALUE_M(double) = engine->strokeParams.d->getDashOffset();
+        _PARAM_M(double) = engine->strokeParams.d->getDashOffset();
 
       return ERR_OK;
     }
@@ -714,7 +874,7 @@ err_t FOG_CDECL RasterPainterImpl_::getParameter(const Painter& self, uint32_t p
 
     case PAINTER_PARAMETER_DASH_LIST_F:
     {
-      List<float>& v = VALUE_M(List<float>);
+      List<float>& v = _PARAM_M(List<float>);
 
       if (engine->strokeParamsPrecision == RASTER_PRECISION_D)
       {
@@ -729,7 +889,7 @@ err_t FOG_CDECL RasterPainterImpl_::getParameter(const Painter& self, uint32_t p
 
     case PAINTER_PARAMETER_DASH_LIST_D:
     {
-      List<double>& v = VALUE_M(List<double>);
+      List<double>& v = _PARAM_M(List<double>);
 
       if (engine->strokeParamsPrecision == RASTER_PRECISION_F)
       {
@@ -751,7 +911,7 @@ err_t FOG_CDECL RasterPainterImpl_::getParameter(const Painter& self, uint32_t p
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FOG_CDECL RasterPainterImpl_::setParameter(Painter& self, uint32_t parameterId, const void* value)
+err_t FOG_CDECL RasterPaintEngineImpl::setParameter(Painter& self, uint32_t parameterId, const void* value)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
   float vFloat;
@@ -778,7 +938,7 @@ err_t FOG_CDECL RasterPainterImpl_::setParameter(Painter& self, uint32_t paramet
 
     case PAINTER_PARAMETER_MULTITHREADED_I:
     {
-      uint32_t v = VALUE_C(uint32_t);
+      uint32_t v = _PARAM_C(uint32_t);
 
       // TODO:
       return ERR_OK;
@@ -786,7 +946,7 @@ err_t FOG_CDECL RasterPainterImpl_::setParameter(Painter& self, uint32_t paramet
 
     case PAINTER_PARAMETER_MAX_THREADS_I:
     {
-      uint32_t v = VALUE_C(uint32_t);
+      uint32_t v = _PARAM_C(uint32_t);
 
       if (v == 0) return ERR_RT_INVALID_ARGUMENT;
       if (v > RASTER_MAX_THREADS_USED) v = RASTER_MAX_THREADS_USED;
@@ -801,7 +961,7 @@ err_t FOG_CDECL RasterPainterImpl_::setParameter(Painter& self, uint32_t paramet
 
     case PAINTER_PARAMETER_PARAMS_F:
     {
-      const PaintParamsF& v = VALUE_C(PaintParamsF);
+      const PaintParamsF& v = _PARAM_C(PaintParamsF);
 
       if ((engine->savedStateFlags & RASTER_STATE_STROKE) == 0) saveStroke(engine);
       engine->masterFlags &= ~(RASTER_NO_PAINT_COMPOSITING_OPERATOR |
@@ -809,7 +969,7 @@ err_t FOG_CDECL RasterPainterImpl_::setParameter(Painter& self, uint32_t paramet
                                RASTER_NO_PAINT_STROKE               );
 
       engine->ctx.paintHints = v._hints;
-      engine->ctx.rasterHints.opacity = (int)(v._opacity * engine->ctx.fullOpacityValueF) >> 4;
+      engine->ctx.rasterHints.opacity = Math::iround(v._opacity * engine->ctx.fullOpacity.f);
       engine->opacityF = v._opacity;
       engine->strokeParams.f.instance() = v._strokeParams;
 
@@ -819,15 +979,15 @@ err_t FOG_CDECL RasterPainterImpl_::setParameter(Painter& self, uint32_t paramet
       if (engine->ctx.rasterHints.opacity == 0)
         engine->masterFlags |= RASTER_NO_PAINT_OPACITY;
 
-      if (engine->ctx.paintHints.geometricPrecision)
-      {
-        engine->strokeParamsPrecision = RASTER_PRECISION_BOTH;
-        engine->strokeParams.d.instance() = v._strokeParams;
-      }
-      else
+      if (!engine->ctx.paintHints.geometricPrecision)
       {
         engine->strokeParamsPrecision = RASTER_PRECISION_F;
         engine->strokeParams.d->setHints(v._strokeParams.getHints());
+      }
+      else
+      {
+        engine->strokeParamsPrecision = RASTER_PRECISION_BOTH;
+        engine->strokeParams.d.instance() = v._strokeParams;
       }
 
       // TODO: ImageQuality/GradientQuality hints changed.
@@ -838,7 +998,7 @@ err_t FOG_CDECL RasterPainterImpl_::setParameter(Painter& self, uint32_t paramet
 
     case PAINTER_PARAMETER_PARAMS_D:
     {
-      const PaintParamsD& v = VALUE_C(PaintParamsD);
+      const PaintParamsD& v = _PARAM_C(PaintParamsD);
       float opacity = (float)v._opacity;
 
       if ((engine->savedStateFlags & RASTER_STATE_STROKE) == 0) saveStroke(engine);
@@ -847,7 +1007,7 @@ err_t FOG_CDECL RasterPainterImpl_::setParameter(Painter& self, uint32_t paramet
                                RASTER_NO_PAINT_STROKE               );
 
       engine->ctx.paintHints = v._hints;
-      engine->ctx.rasterHints.opacity = (int)(opacity * engine->ctx.fullOpacityValueF) >> 4;
+      engine->ctx.rasterHints.opacity = Math::iround(opacity * engine->ctx.fullOpacity.f);
       engine->opacityF = opacity;
 
       engine->strokeParamsPrecision = RASTER_PRECISION_D;
@@ -872,7 +1032,7 @@ err_t FOG_CDECL RasterPainterImpl_::setParameter(Painter& self, uint32_t paramet
 
     case PAINTER_PARAMETER_PAINT_HINTS:
     {
-      const PaintHints& v = VALUE_C(PaintHints);
+      const PaintHints& v = _PARAM_C(PaintHints);
 
       engine->masterFlags &= ~RASTER_NO_PAINT_COMPOSITING_OPERATOR;
       engine->ctx.paintHints = v;
@@ -886,7 +1046,7 @@ err_t FOG_CDECL RasterPainterImpl_::setParameter(Painter& self, uint32_t paramet
 
     case PAINTER_PARAMETER_COMPOSITING_OPERATOR_I:
     {
-      uint32_t v = VALUE_C(uint32_t);
+      uint32_t v = _PARAM_C(uint32_t);
       if (v >= COMPOSITE_COUNT) return ERR_RT_INVALID_ARGUMENT;
 
       engine->masterFlags &= ~RASTER_NO_PAINT_COMPOSITING_OPERATOR;
@@ -900,7 +1060,7 @@ err_t FOG_CDECL RasterPainterImpl_::setParameter(Painter& self, uint32_t paramet
 
     case PAINTER_PARAMETER_RENDER_QUALITY_I:
     {
-      uint32_t v = VALUE_C(uint32_t);
+      uint32_t v = _PARAM_C(uint32_t);
       if (v >= RENDER_QUALITY_COUNT) return ERR_RT_INVALID_ARGUMENT;
 
       engine->ctx.paintHints.renderQuality = v;
@@ -909,7 +1069,7 @@ err_t FOG_CDECL RasterPainterImpl_::setParameter(Painter& self, uint32_t paramet
 
     case PAINTER_PARAMETER_IMAGE_QUALITY_I:
     {
-      uint32_t v = VALUE_C(uint32_t);
+      uint32_t v = _PARAM_C(uint32_t);
       if (v >= IMAGE_QUALITY_COUNT) return ERR_RT_INVALID_ARGUMENT;
 
       engine->ctx.paintHints.imageQuality = v;
@@ -918,7 +1078,7 @@ err_t FOG_CDECL RasterPainterImpl_::setParameter(Painter& self, uint32_t paramet
 
     case PAINTER_PARAMETER_GRADIENT_QUALITY_I:
     {
-      uint32_t v = VALUE_C(uint32_t);
+      uint32_t v = _PARAM_C(uint32_t);
       if (v >= GRADIENT_QUALITY_COUNT) return ERR_RT_INVALID_ARGUMENT;
 
       engine->ctx.paintHints.gradientQuality = v;
@@ -927,7 +1087,7 @@ err_t FOG_CDECL RasterPainterImpl_::setParameter(Painter& self, uint32_t paramet
 
     case PAINTER_PARAMETER_OUTLINED_TEXT_I:
     {
-      uint32_t v = VALUE_C(uint32_t);
+      uint32_t v = _PARAM_C(uint32_t);
       if (v >= 2) return ERR_RT_INVALID_ARGUMENT;
 
       engine->ctx.paintHints.outlinedText = v;
@@ -936,7 +1096,7 @@ err_t FOG_CDECL RasterPainterImpl_::setParameter(Painter& self, uint32_t paramet
 
     case PAINTER_PARAMETER_FAST_LINE_I:
     {
-      uint32_t v = VALUE_C(uint32_t);
+      uint32_t v = _PARAM_C(uint32_t);
       if (v >= 2) return ERR_RT_INVALID_ARGUMENT;
 
       engine->ctx.paintHints.fastLine = v;
@@ -945,7 +1105,7 @@ err_t FOG_CDECL RasterPainterImpl_::setParameter(Painter& self, uint32_t paramet
 
     case PAINTER_PARAMETER_GEOMETRIC_PRECISION_I:
     {
-      uint32_t v = VALUE_C(uint32_t);
+      uint32_t v = _PARAM_C(uint32_t);
       if (v >= GEOMETRIC_PRECISION_COUNT) return ERR_RT_INVALID_ARGUMENT;
 
       engine->ctx.paintHints.geometricPrecision = v;
@@ -958,13 +1118,13 @@ err_t FOG_CDECL RasterPainterImpl_::setParameter(Painter& self, uint32_t paramet
 
     case PAINTER_PARAMETER_OPACITY_F:
     {
-      vFloat = VALUE_C(float);
+      vFloat = _PARAM_C(float);
       if (vFloat < 0.0f || vFloat > 1.0f) return ERR_RT_INVALID_ARGUMENT;
 
 _GlobalOpacityF:
       engine->masterFlags &= ~RASTER_NO_PAINT_OPACITY;
       engine->opacityF = vFloat;
-      engine->ctx.rasterHints.opacity = (int)(vFloat * engine->ctx.fullOpacityValueF) >> 4;
+      engine->ctx.rasterHints.opacity = Math::iround(vFloat * engine->ctx.fullOpacity.f);
 
       if (engine->ctx.rasterHints.opacity == 0) engine->masterFlags |= RASTER_NO_PAINT_OPACITY;
       return ERR_OK;
@@ -972,7 +1132,7 @@ _GlobalOpacityF:
 
     case PAINTER_PARAMETER_OPACITY_D:
     {
-      double v = VALUE_C(double);
+      double v = _PARAM_C(double);
       if (v < 0.0 || v > 1.0) return ERR_RT_INVALID_ARGUMENT;
 
       vFloat = (float)v;
@@ -985,7 +1145,7 @@ _GlobalOpacityF:
 
     case PAINTER_PARAMETER_FILL_RULE_I:
     {
-      uint32_t v = VALUE_C(uint32_t);
+      uint32_t v = _PARAM_C(uint32_t);
       if (FOG_UNLIKELY(v >= FILL_RULE_COUNT)) return ERR_RT_INVALID_ARGUMENT;
 
       engine->ctx.paintHints.fillRule = v;
@@ -998,7 +1158,7 @@ _GlobalOpacityF:
 
     case PAINTER_PARAMETER_STROKE_PARAMS_F:
     {
-      const PathStrokerParamsF& v = VALUE_C(PathStrokerParamsF);
+      const PathStrokerParamsF& v = _PARAM_C(PathStrokerParamsF);
 
       if ((engine->savedStateFlags & RASTER_STATE_STROKE) == 0) saveStroke(engine);
       engine->strokeParamsPrecision = RASTER_PRECISION_F;
@@ -1011,7 +1171,7 @@ _GlobalOpacityF:
 
     case PAINTER_PARAMETER_STROKE_PARAMS_D:
     {
-      const PathStrokerParamsD& v = VALUE_C(PathStrokerParamsD);
+      const PathStrokerParamsD& v = _PARAM_C(PathStrokerParamsD);
 
       if ((engine->savedStateFlags & RASTER_STATE_STROKE) == 0) saveStroke(engine);
       engine->strokeParamsPrecision = RASTER_PRECISION_D;
@@ -1028,7 +1188,7 @@ _GlobalOpacityF:
 
     case PAINTER_PARAMETER_LINE_WIDTH_F:
     {
-      float v = VALUE_C(float);
+      float v = _PARAM_C(float);
 
       if ((engine->savedStateFlags & RASTER_STATE_STROKE) == 0) saveStroke(engine);
       engine->strokeParams.f->setLineWidth(v);
@@ -1042,7 +1202,8 @@ _GlobalOpacityF:
           // Initialize to 'Float' or 'Double' precision.
           engine->strokeParamsPrecision = RASTER_PRECISION_F;
 
-          if (!engine->ctx.paintHints.geometricPrecision) break;
+          if (!engine->ctx.paintHints.geometricPrecision)
+            break;
           engine->strokeParamsPrecision = RASTER_PRECISION_BOTH;
           // ... Fall through ...
 
@@ -1061,7 +1222,7 @@ _GlobalOpacityF:
 
     case PAINTER_PARAMETER_LINE_WIDTH_D:
     {
-      double v = VALUE_C(double);
+      double v = _PARAM_C(double);
 
       if ((engine->savedStateFlags & RASTER_STATE_STROKE) == 0) saveStroke(engine);
       engine->strokeParams.d->setLineWidth(v);
@@ -1104,7 +1265,7 @@ _GlobalOpacityF:
 
     case PAINTER_PARAMETER_LINE_JOIN_I:
     {
-      uint32_t v = VALUE_C(uint32_t);
+      uint32_t v = _PARAM_C(uint32_t);
       if (v >= LINE_JOIN_COUNT) return ERR_RT_INVALID_ARGUMENT;
 
       if ((engine->savedStateFlags & RASTER_STATE_STROKE) == 0) saveStroke(engine);
@@ -1121,7 +1282,7 @@ _GlobalOpacityF:
 
     case PAINTER_PARAMETER_START_CAP_I:
     {
-      uint32_t v = VALUE_C(uint32_t);
+      uint32_t v = _PARAM_C(uint32_t);
       if (v >= LINE_CAP_COUNT) return ERR_RT_INVALID_ARGUMENT;
 
       if ((engine->savedStateFlags & RASTER_STATE_STROKE) == 0) saveStroke(engine);
@@ -1134,7 +1295,7 @@ _GlobalOpacityF:
 
     case PAINTER_PARAMETER_END_CAP_I:
     {
-      uint32_t v = VALUE_C(uint32_t);
+      uint32_t v = _PARAM_C(uint32_t);
       if (v >= LINE_CAP_COUNT) return ERR_RT_INVALID_ARGUMENT;
 
       if ((engine->savedStateFlags & RASTER_STATE_STROKE) == 0) saveStroke(engine);
@@ -1147,7 +1308,7 @@ _GlobalOpacityF:
 
     case PAINTER_PARAMETER_LINE_CAPS_I:
     {
-      uint32_t v = VALUE_C(uint32_t);
+      uint32_t v = _PARAM_C(uint32_t);
       if (v >= LINE_CAP_COUNT) return ERR_RT_INVALID_ARGUMENT;
 
       if ((engine->savedStateFlags & RASTER_STATE_STROKE) == 0) saveStroke(engine);
@@ -1164,7 +1325,7 @@ _GlobalOpacityF:
 
     case PAINTER_PARAMETER_MITER_LIMIT_F:
     {
-      float v = VALUE_C(float);
+      float v = _PARAM_C(float);
 
       if ((engine->savedStateFlags & RASTER_STATE_STROKE) == 0) saveStroke(engine);
       engine->strokeParams.f->setMiterLimit(v);
@@ -1178,7 +1339,8 @@ _GlobalOpacityF:
           // Initialize to 'Float' or 'Double' precision.
           engine->strokeParamsPrecision = RASTER_PRECISION_F;
 
-          if (!engine->ctx.paintHints.geometricPrecision) break;
+          if (!engine->ctx.paintHints.geometricPrecision)
+            break;
           engine->strokeParamsPrecision = RASTER_PRECISION_BOTH;
           // ... Fall through ...
 
@@ -1197,7 +1359,7 @@ _GlobalOpacityF:
 
     case PAINTER_PARAMETER_MITER_LIMIT_D:
     {
-      double v = VALUE_C(double);
+      double v = _PARAM_C(double);
 
       if ((engine->savedStateFlags & RASTER_STATE_STROKE) == 0) saveStroke(engine);
       engine->strokeParams.d->setMiterLimit(v);
@@ -1240,7 +1402,7 @@ _GlobalOpacityF:
 
     case PAINTER_PARAMETER_DASH_OFFSET_F:
     {
-      float v = VALUE_C(float);
+      float v = _PARAM_C(float);
 
       if ((engine->savedStateFlags & RASTER_STATE_STROKE) == 0) saveStroke(engine);
       engine->strokeParams.f->setDashOffset(v);
@@ -1254,7 +1416,8 @@ _GlobalOpacityF:
           // Initialize to 'Float' or 'Double' precision.
           engine->strokeParamsPrecision = RASTER_PRECISION_F;
 
-          if (!engine->ctx.paintHints.geometricPrecision) break;
+          if (!engine->ctx.paintHints.geometricPrecision)
+            break;
           engine->strokeParamsPrecision = RASTER_PRECISION_BOTH;
           // ... Fall through ...
 
@@ -1273,7 +1436,7 @@ _GlobalOpacityF:
 
     case PAINTER_PARAMETER_DASH_OFFSET_D:
     {
-      double v = VALUE_C(double);
+      double v = _PARAM_C(double);
 
       if ((engine->savedStateFlags & RASTER_STATE_STROKE) == 0) saveStroke(engine);
       engine->strokeParams.d->setDashOffset(v);
@@ -1316,7 +1479,7 @@ _GlobalOpacityF:
 
     case PAINTER_PARAMETER_DASH_LIST_F:
     {
-      const List<float>& v = VALUE_C(List<float>);
+      const List<float>& v = _PARAM_C(List<float>);
 
       if ((engine->savedStateFlags & RASTER_STATE_STROKE) == 0) saveStroke(engine);
       engine->strokeParams.f->setDashList(v);
@@ -1330,7 +1493,8 @@ _GlobalOpacityF:
           // Initialize to 'Float' or 'Double' precision.
           engine->strokeParamsPrecision = RASTER_PRECISION_F;
 
-          if (!engine->ctx.paintHints.geometricPrecision) break;
+          if (!engine->ctx.paintHints.geometricPrecision)
+            break;
           engine->strokeParamsPrecision = RASTER_PRECISION_BOTH;
           // ... Fall through ...
 
@@ -1349,7 +1513,7 @@ _GlobalOpacityF:
 
     case PAINTER_PARAMETER_DASH_LIST_D:
     {
-      const List<double>& v = VALUE_C(List<double>);
+      const List<double>& v = _PARAM_C(List<double>);
 
       if ((engine->savedStateFlags & RASTER_STATE_STROKE) == 0) saveStroke(engine);
       engine->strokeParams.d->setDashList(v);
@@ -1393,7 +1557,7 @@ _GlobalOpacityF:
   }
 }
 
-err_t FOG_CDECL RasterPainterImpl_::resetParameter(Painter& self, uint32_t parameterId)
+err_t FOG_CDECL RasterPaintEngineImpl::resetParameter(Painter& self, uint32_t parameterId)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
 
@@ -1502,7 +1666,7 @@ err_t FOG_CDECL RasterPainterImpl_::resetParameter(Painter& self, uint32_t param
     {
       engine->masterFlags &= ~(RASTER_NO_PAINT_OPACITY);
       engine->opacityF = 1.0f;
-      engine->ctx.rasterHints.opacity = engine->ctx.fullOpacityValueU;
+      engine->ctx.rasterHints.opacity = engine->ctx.fullOpacity.u;
       return ERR_OK;
     }
 
@@ -1671,14 +1835,11 @@ err_t FOG_CDECL RasterPainterImpl_::resetParameter(Painter& self, uint32_t param
   }
 }
 
-// #undef VALUE_M
-// #undef VALUE_C
-
 // ============================================================================
-// [Fog::RasterPainterImpl_ - Source]
+// [Fog::RasterPaintEngineImpl - Source]
 // ============================================================================
 
-err_t FOG_CDECL RasterPainterImpl_::getSourceType(const Painter& self, uint32_t& val)
+err_t FOG_CDECL RasterPaintEngineImpl::getSourceType(const Painter& self, uint32_t& val)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
 
@@ -1686,7 +1847,7 @@ err_t FOG_CDECL RasterPainterImpl_::getSourceType(const Painter& self, uint32_t&
   return ERR_OK;
 }
 
-err_t FOG_CDECL RasterPainterImpl_::getSourceColor(const Painter& self, Color& color)
+err_t FOG_CDECL RasterPaintEngineImpl::getSourceColor(const Painter& self, Color& color)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
   if (engine->sourceType != PATTERN_TYPE_COLOR) return ERR_RT_INVALID_STATE;
@@ -1695,7 +1856,7 @@ err_t FOG_CDECL RasterPainterImpl_::getSourceColor(const Painter& self, Color& c
   return ERR_OK;
 }
 
-err_t FOG_CDECL RasterPainterImpl_::getSourcePatternF(const Painter& self, PatternF& pattern)
+err_t FOG_CDECL RasterPaintEngineImpl::getSourcePatternF(const Painter& self, PatternF& pattern)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
 
@@ -1724,7 +1885,7 @@ err_t FOG_CDECL RasterPainterImpl_::getSourcePatternF(const Painter& self, Patte
   }
 }
 
-err_t FOG_CDECL RasterPainterImpl_::getSourcePatternD(const Painter& self, PatternD& pattern)
+err_t FOG_CDECL RasterPaintEngineImpl::getSourcePatternD(const Painter& self, PatternD& pattern)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
 
@@ -1753,11 +1914,13 @@ err_t FOG_CDECL RasterPainterImpl_::getSourcePatternD(const Painter& self, Patte
   }
 }
 
-err_t FOG_CDECL RasterPainterImpl_::setSourceArgb32(Painter& self, uint32_t argb32)
+err_t FOG_CDECL RasterPaintEngineImpl::setSourceArgb32(Painter& self, uint32_t argb32)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
 
-  if ((engine->savedStateFlags & RASTER_STATE_SOURCE) == 0) saveSource(engine);
+  if ((engine->savedStateFlags & RASTER_STATE_SOURCE) == 0)
+    saveSource(engine);
+
   discardSource(engine);
   engine->masterFlags &= ~RASTER_NO_PAINT_SOURCE;
 
@@ -1772,11 +1935,13 @@ err_t FOG_CDECL RasterPainterImpl_::setSourceArgb32(Painter& self, uint32_t argb
   return ERR_OK;
 }
 
-err_t FOG_CDECL RasterPainterImpl_::setSourceArgb64(Painter& self, const Argb64& argb64)
+err_t FOG_CDECL RasterPaintEngineImpl::setSourceArgb64(Painter& self, const Argb64& argb64)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
 
-  if ((engine->savedStateFlags & RASTER_STATE_SOURCE) == 0) saveSource(engine);
+  if ((engine->savedStateFlags & RASTER_STATE_SOURCE) == 0)
+    saveSource(engine);
+
   discardSource(engine);
   engine->masterFlags &= ~RASTER_NO_PAINT_SOURCE;
 
@@ -1791,12 +1956,14 @@ err_t FOG_CDECL RasterPainterImpl_::setSourceArgb64(Painter& self, const Argb64&
   return ERR_OK;
 }
 
-err_t FOG_CDECL RasterPainterImpl_::setSourceColor(Painter& self, const Color& color)
+err_t FOG_CDECL RasterPaintEngineImpl::setSourceColor(Painter& self, const Color& color)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
   if (!color.isValid()) goto _Invalid;
 
-  if ((engine->savedStateFlags & RASTER_STATE_SOURCE) == 0) saveSource(engine);
+  if ((engine->savedStateFlags & RASTER_STATE_SOURCE) == 0)
+    saveSource(engine);
+
   discardSource(engine);
   engine->masterFlags &= ~RASTER_NO_PAINT_SOURCE;
 
@@ -1822,17 +1989,17 @@ _Invalid:
   engine->ctx.pc = (RenderPatternContext*)(size_t)0x1;
   return ERR_OK;
 }
-
-err_t FOG_CDECL RasterPainterImpl_::setSourcePatternF(Painter& self, const PatternF& pattern)
+err_t FOG_CDECL RasterPaintEngineImpl::setSourcePatternF(Painter& self, const PatternF& pattern)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
 
   switch (pattern.getType())
   {
     case PATTERN_TYPE_NONE:
-      if ((engine->savedStateFlags & RASTER_STATE_SOURCE) == 0) saveSource(engine);
-      discardSource(engine);
+      if ((engine->savedStateFlags & RASTER_STATE_SOURCE) == 0)
+        saveSource(engine);
 
+      discardSource(engine);
       engine->sourceType = PATTERN_TYPE_NONE;
       engine->masterFlags |= RASTER_NO_PAINT_SOURCE;
       engine->ctx.pc = (RenderPatternContext*)(size_t)0x1;
@@ -1854,16 +2021,17 @@ err_t FOG_CDECL RasterPainterImpl_::setSourcePatternF(Painter& self, const Patte
   return ERR_RT_INVALID_STATE;
 }
 
-err_t FOG_CDECL RasterPainterImpl_::setSourcePatternD(Painter& self, const PatternD& pattern)
+err_t FOG_CDECL RasterPaintEngineImpl::setSourcePatternD(Painter& self, const PatternD& pattern)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
 
   switch (pattern.getType())
   {
     case PATTERN_TYPE_NONE:
-      if ((engine->savedStateFlags & RASTER_STATE_SOURCE) == 0) saveSource(engine);
-      discardSource(engine);
+      if ((engine->savedStateFlags & RASTER_STATE_SOURCE) == 0)
+        saveSource(engine);
 
+      discardSource(engine);
       engine->sourceType = PATTERN_TYPE_NONE;
       engine->masterFlags |= RASTER_NO_PAINT_SOURCE;
       engine->ctx.pc = (RenderPatternContext*)(size_t)0x1;
@@ -1885,7 +2053,7 @@ err_t FOG_CDECL RasterPainterImpl_::setSourcePatternD(Painter& self, const Patte
   return ERR_RT_INVALID_STATE;
 }
 
-err_t FOG_CDECL RasterPainterImpl_::setSourceAbstract(Painter& self, uint32_t sourceId, const void* value, const void* tr)
+err_t FOG_CDECL RasterPaintEngineImpl::setSourceAbstract(Painter& self, uint32_t sourceId, const void* value, const void* tr)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
 
@@ -1902,7 +2070,7 @@ err_t FOG_CDECL RasterPainterImpl_::setSourceAbstract(Painter& self, uint32_t so
     case PAINTER_SOURCE_TEXTURE_F:
     case PAINTER_SOURCE_TEXTURE_D:
     {
-      const Texture& v = VALUE_C(Texture);
+      const Texture& v = _PARAM_C(Texture);
       if (!v._image.isValid()) goto _Invalid;
 
       engine->sourceType = PATTERN_TYPE_TEXTURE;
@@ -1930,7 +2098,7 @@ err_t FOG_CDECL RasterPainterImpl_::setSourceAbstract(Painter& self, uint32_t so
 
     case PAINTER_SOURCE_GRADIENT_F:
     {
-      const GradientF& gradient = VALUE_C(GradientF);
+      const GradientF& gradient = _PARAM_C(GradientF);
 
       engine->sourceType = PATTERN_TYPE_GRADIENT;
       engine->source.gradient.initCustom1(gradient);
@@ -1951,7 +2119,7 @@ err_t FOG_CDECL RasterPainterImpl_::setSourceAbstract(Painter& self, uint32_t so
 
     case PAINTER_SOURCE_GRADIENT_D:
     {
-      const GradientD& gradient = VALUE_C(GradientD);
+      const GradientD& gradient = _PARAM_C(GradientD);
 
       engine->sourceType = PATTERN_TYPE_GRADIENT;
       engine->source.gradient.initCustom1(gradient);
@@ -1991,24 +2159,24 @@ _NoTransform:
 }
 
 // ============================================================================
-// [Fog::RasterPainterImpl_ - Transform]
+// [Fog::RasterPaintEngineImpl - Transform]
 // ============================================================================
 
-err_t FOG_CDECL RasterPainterImpl_::getTransformF(const Painter& self, TransformF& tr)
+err_t FOG_CDECL RasterPaintEngineImpl::getTransformF(const Painter& self, TransformF& tr)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
   tr = engine->userTransform;
   return ERR_OK;
 }
 
-err_t FOG_CDECL RasterPainterImpl_::getTransformD(const Painter& self, TransformD& tr)
+err_t FOG_CDECL RasterPaintEngineImpl::getTransformD(const Painter& self, TransformD& tr)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
   tr = engine->userTransform;
   return ERR_OK;
 }
 
-err_t FOG_CDECL RasterPainterImpl_::setTransformF(Painter& self, const TransformF& tr)
+err_t FOG_CDECL RasterPaintEngineImpl::setTransformF(Painter& self, const TransformF& tr)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
   if ((engine->savedStateFlags & RASTER_STATE_TRANSFORM) == 0) saveTransform(engine);
@@ -2018,7 +2186,7 @@ err_t FOG_CDECL RasterPainterImpl_::setTransformF(Painter& self, const Transform
   return ERR_OK;
 }
 
-err_t FOG_CDECL RasterPainterImpl_::setTransformD(Painter& self, const TransformD& tr)
+err_t FOG_CDECL RasterPaintEngineImpl::setTransformD(Painter& self, const TransformD& tr)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
   if ((engine->savedStateFlags & RASTER_STATE_TRANSFORM) == 0) saveTransform(engine);
@@ -2028,7 +2196,7 @@ err_t FOG_CDECL RasterPainterImpl_::setTransformD(Painter& self, const Transform
   return ERR_OK;
 }
 
-err_t FOG_CDECL RasterPainterImpl_::applyTransformF(Painter& self, uint32_t transformOp, const void* params)
+err_t FOG_CDECL RasterPaintEngineImpl::applyTransformF(Painter& self, uint32_t transformOp, const void* params)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
   err_t err = ERR_OK;
@@ -2078,7 +2246,7 @@ err_t FOG_CDECL RasterPainterImpl_::applyTransformF(Painter& self, uint32_t tran
   return err;
 }
 
-err_t FOG_CDECL RasterPainterImpl_::applyTransformD(Painter& self, uint32_t transformOp, const void* params)
+err_t FOG_CDECL RasterPaintEngineImpl::applyTransformD(Painter& self, uint32_t transformOp, const void* params)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
   err_t err = ERR_OK;
@@ -2091,7 +2259,7 @@ err_t FOG_CDECL RasterPainterImpl_::applyTransformD(Painter& self, uint32_t tran
   return err;
 }
 
-err_t FOG_CDECL RasterPainterImpl_::resetTransform(Painter& self)
+err_t FOG_CDECL RasterPaintEngineImpl::resetTransform(Painter& self)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
 
@@ -2103,15 +2271,15 @@ err_t FOG_CDECL RasterPainterImpl_::resetTransform(Painter& self)
 }
 
 // ============================================================================
-// [Fog::RasterPainterImpl_ - State ]
+// [Fog::RasterPaintEngineImpl - State ]
 // ============================================================================
 
-err_t FOG_CDECL RasterPainterImpl_::save(Painter& self)
+err_t FOG_CDECL RasterPaintEngineImpl::save(Painter& self)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
 
   RasterState* prev = engine->state;
-  RasterState* state = RasterPainterImpl_::createState(engine);
+  RasterState* state = RasterPaintEngineImpl::createState(engine);
   if (FOG_IS_NULL(state)) return ERR_RT_OUT_OF_MEMORY;
 
   // --------------------------------------------------------------------------
@@ -2147,7 +2315,7 @@ err_t FOG_CDECL RasterPainterImpl_::save(Painter& self)
   return ERR_OK;
 }
 
-err_t FOG_CDECL RasterPainterImpl_::restore(Painter& self)
+err_t FOG_CDECL RasterPaintEngineImpl::restore(Painter& self)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
 
@@ -2174,7 +2342,7 @@ err_t FOG_CDECL RasterPainterImpl_::restore(Painter& self)
   engine->opacityF = state->opacityF;
 
   // Pool here so it can be reused later.
-  RasterPainterImpl_::poolState(engine, state);
+  RasterPaintEngineImpl::poolState(engine, state);
 
   // We can simply return if there are no flags.
   if (restoreFlags == 0) return ERR_OK;
@@ -2293,211 +2461,10 @@ _RestoreSourceContinue:
 }
 
 // ============================================================================
-// [Fog::RasterPainterImpl_ - State - Create / Pool]
+// [Fog::RasterPaintEngineImpl - Map]
 // ============================================================================
 
-RasterState* RasterPainterImpl_::createState(RasterPaintEngine* engine)
-{
-  RasterState* s = engine->statePool;
-
-  if (FOG_IS_NULL(s))
-  {
-    s = reinterpret_cast<RasterState*>(engine->stateAllocator.alloc(sizeof(RasterState)));
-    return s;
-  }
-  else
-  {
-    engine->statePool = s->prevState;
-    return s;
-  }
-}
-
-void RasterPainterImpl_::poolState(RasterPaintEngine* engine, RasterState* state)
-{
-  state->prevState = engine->statePool;
-  engine->statePool = state;
-}
-
-// ============================================================================
-// [Fog::RasterPainterImpl_ - State - Save ...]
-// ============================================================================
-
-void RasterPainterImpl_::saveSource(RasterPaintEngine* engine)
-{
-  FOG_ASSERT((engine->savedStateFlags & RASTER_STATE_SOURCE) == 0);
-
-  RasterState* state = engine->state;
-  FOG_ASSERT(state != NULL);
-
-  engine->savedStateFlags |= RASTER_STATE_SOURCE;
-  state->sourceType = (uint8_t)engine->sourceType;
-
-  switch (engine->sourceType)
-  {
-    case PATTERN_TYPE_NONE:
-      break;
-
-    case PATTERN_TYPE_COLOR:
-      state->source.color.initCustom1(engine->source.color.instance());
-      break;
-
-    case PATTERN_TYPE_TEXTURE:
-      state->source.texture.initCustom1(engine->source.texture.instance());
-      goto _SaveSourceContinue;
-
-    case PATTERN_TYPE_GRADIENT:
-      state->source.gradient.initCustom1(engine->source.gradient.instance());
-
-_SaveSourceContinue:
-      state->source.transform.initCustom1(engine->source.transform.instance());
-      state->pc = NULL;
-      if (!RasterUtil::isPatternContext(engine->ctx.pc)) break;
-
-      state->pc = engine->ctx.pc;
-      state->pc->_refCount.inc();
-      break;
-
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
-}
-
-void RasterPainterImpl_::saveStroke(RasterPaintEngine* engine)
-{
-  FOG_ASSERT((engine->savedStateFlags & RASTER_STATE_STROKE) == 0);
-
-  RasterState* state = engine->state;
-  FOG_ASSERT(state != NULL);
-
-  engine->savedStateFlags |= RASTER_STATE_STROKE;
-  state->strokeParamsPrecision = engine->strokeParamsPrecision;
-
-  switch (state->strokeParamsPrecision)
-  {
-    case RASTER_PRECISION_NONE:
-      break;
-
-    case RASTER_PRECISION_BOTH:
-      state->strokeParams.f.initCustom1(engine->strokeParams.f.instance());
-      // ... Fall through ...
-
-    case RASTER_PRECISION_D:
-      state->strokeParams.d.initCustom1(engine->strokeParams.d.instance());
-      break;
-
-    case RASTER_PRECISION_F:
-      state->strokeParams.f.initCustom1(engine->strokeParams.f.instance());
-      break;
-
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
-}
-
-void RasterPainterImpl_::saveTransform(RasterPaintEngine* engine)
-{
-  FOG_ASSERT((engine->savedStateFlags & RASTER_STATE_TRANSFORM) == 0);
-
-  RasterState* state = engine->state;
-  FOG_ASSERT(state != NULL);
-
-  engine->savedStateFlags |= RASTER_STATE_TRANSFORM;
-  state->userTransform.initCustom1(engine->userTransform);
-  state->finalTransform.initCustom1(engine->finalTransform);
-  state->finalTransformF.initCustom1(engine->finalTransformF);
-
-  state->coreTranslationI = engine->coreTranslationI;
-  state->finalTransformI._type = engine->finalTransformI._type;
-  state->finalTransformI._sx = engine->finalTransformI._sx;
-  state->finalTransformI._sy = engine->finalTransformI._sy;
-  state->finalTransformI._tx = engine->finalTransformI._tx;
-  state->finalTransformI._ty = engine->finalTransformI._ty;
-}
-
-void RasterPainterImpl_::saveClipping(RasterPaintEngine* engine)
-{
-  FOG_ASSERT((engine->savedStateFlags & RASTER_STATE_CLIPPING) == 0);
-
-  RasterState* state = engine->state;
-  FOG_ASSERT(state != NULL);
-
-  engine->savedStateFlags |= RASTER_STATE_CLIPPING;
-
-  // TODO: Clipping.
-}
-
-// ============================================================================
-// [Fog::RasterPainterImpl_ - State - Discard States]
-// ============================================================================
-
-void RasterPainterImpl_::discardStates(RasterPaintEngine* engine)
-{
-  RasterState* state = engine->state;
-  RasterState* last = NULL;
-  if (state == NULL) return;
-
-  do {
-    // Get the states which must be restored. It's important to destroy all
-    // state resources or memory leak will occur.
-    uint32_t restoreFlags = engine->savedStateFlags;
-
-    if (restoreFlags & RASTER_STATE_SOURCE)
-    {
-      switch (state->sourceType)
-      {
-        case PATTERN_TYPE_NONE:
-        case PATTERN_TYPE_COLOR:
-          break;
-
-        case PATTERN_TYPE_TEXTURE:
-          state->source.texture.destroy();
-          goto _DiscardSourceContinue;
-
-        case PATTERN_TYPE_GRADIENT:
-          state->source.gradient.destroy();
-
-_DiscardSourceContinue:
-          if (state->pc != NULL && state->pc->_refCount.deref())
-            destroyPatternContext(engine, state->pc);
-          break;
-
-        default:
-          FOG_ASSERT_NOT_REACHED();
-      }
-    }
-
-    if (restoreFlags & RASTER_STATE_STROKE)
-    {
-      if (state->strokeParamsPrecision & RASTER_PRECISION_F) state->strokeParams.f.destroy();
-      if (state->strokeParamsPrecision & RASTER_PRECISION_D) state->strokeParams.d.destroy();
-    }
-
-    if (restoreFlags & RASTER_STATE_TRANSFORM)
-    {
-      // Nothing here.
-    }
-
-    if (restoreFlags & RASTER_STATE_CLIPPING)
-    {
-      // TODO: Clipping.
-    }
-
-    last = state;
-    state = state->prevState;
-  } while (state != NULL);
-
-  // Pool all discarded states.
-  last->prevState = engine->statePool;
-
-  engine->statePool = engine->state;
-  engine->state = NULL;
-}
-
-// ============================================================================
-// [Fog::RasterPainterImpl_ - Map]
-// ============================================================================
-
-err_t FOG_CDECL RasterPainterImpl_::mapPointF(const Painter& self, uint32_t mapOp, PointF& pt)
+err_t FOG_CDECL RasterPaintEngineImpl::mapPointF(const Painter& self, uint32_t mapOp, PointF& pt)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
 
@@ -2516,7 +2483,7 @@ err_t FOG_CDECL RasterPainterImpl_::mapPointF(const Painter& self, uint32_t mapO
   }
 }
 
-err_t FOG_CDECL RasterPainterImpl_::mapPointD(const Painter& self, uint32_t mapOp, PointD& pt)
+err_t FOG_CDECL RasterPaintEngineImpl::mapPointD(const Painter& self, uint32_t mapOp, PointD& pt)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
 
@@ -2535,692 +2502,1240 @@ err_t FOG_CDECL RasterPainterImpl_::mapPointD(const Painter& self, uint32_t mapO
   }
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ============================================================================
-// [Fog::RasterPainterImpl_ - Mode]
+// [Fog::RasterPaintEngineImpl - FillAll]
 // ============================================================================
 
-FOG_INLINE uint RasterPainterImpl_::getMaxThreads()
+err_t FOG_CDECL RasterPaintEngineImpl::fillAll(Painter& self)
 {
-  return Math::max<uint>(Cpu::get()->numberOfProcessors, RASTER_MAX_THREADS_SUGGESTED);
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  return engine->serializer->fillNormalizedBoxI(engine, engine->ctx.finalClipBoxI);
 }
 
 // ============================================================================
-// [Fog::RasterPainterImpl_ - Initialize]
+// [Fog::RasterPaintEngineImpl - Draw]
 // ============================================================================
 
-void RasterPainterImpl_::setupLayer(RasterPaintEngine* engine)
+err_t FOG_CDECL RasterPaintEngineImpl::drawRectI(Painter& self, const RectI& r)
 {
-  // ${IMAGE_FORMAT:BEGIN}
-  static const uint8_t secondaryFromPrimary[] =
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_STROKE_FUNC();
+
+  if (!engine->ctx.paintHints.geometricPrecision)
   {
-    /* 00: PRGB32    -> */ IMAGE_FORMAT_PRGB32,
-    /* 01: XRGB32    -> */ IMAGE_FORMAT_XRGB32,
-    /* 02: RGB24     -> */ IMAGE_FORMAT_XRGB32,
-    /* 03: A8        -> */ IMAGE_FORMAT_PRGB32,
-    /* 04: I8        -> */ IMAGE_FORMAT_NULL  ,
-    /* 05: PRGB64    -> */ IMAGE_FORMAT_PRGB64,
-    /* 06: RGB48     -> */ IMAGE_FORMAT_PRGB64,
-    /* 07: A16       -> */ IMAGE_FORMAT_PRGB64
-  };
-  // ${IMAGE_FORMAT:END}
-
-  uint32_t primaryFormat = engine->ctx.layer.primaryFormat;
-  uint32_t secondaryFormat = secondaryFromPrimary[primaryFormat];
-
-  const ImageFormatDescription& primaryDescription = ImageFormatDescription::getByFormat(primaryFormat);
-  const ImageFormatDescription& secondaryDescription = ImageFormatDescription::getByFormat(secondaryFormat);
-
-  engine->ctx.layer.primaryBPP = (uint32_t)primaryDescription.getBytesPerPixel();
-  engine->ctx.layer.primaryBPL = (uint32_t)engine->ctx.layer.size.w * engine->ctx.layer.primaryBPP;
-  engine->ctx.layer.precision = primaryDescription.getPrecision();
-
-  if (primaryFormat != secondaryFormat)
-  {
-    engine->ctx.layer.secondaryFormat = secondaryFormat;
-    engine->ctx.layer.secondaryBPP = (uint32_t)secondaryDescription.getBytesPerPixel();
-    engine->ctx.layer.secondaryBPL = (uint32_t)engine->ctx.layer.size.w * engine->ctx.layer.secondaryBPP;
-
-    engine->ctx.layer.cvtSecondaryFromPrimary = _g2d_render.getCompositeCoreFuncs(secondaryFormat, COMPOSITE_SRC)->vblit_line[primaryFormat];
-    engine->ctx.layer.cvtPrimaryFromSecondary = _g2d_render.getCompositeCoreFuncs(primaryFormat, COMPOSITE_SRC)->vblit_line[secondaryFormat];
-
-    FOG_ASSERT(engine->ctx.layer.cvtSecondaryFromPrimary != NULL);
-    FOG_ASSERT(engine->ctx.layer.cvtPrimaryFromSecondary != NULL);
+    return engine->vtable->drawRectF(self, RectF(r));
   }
   else
   {
-    engine->ctx.layer.secondaryFormat = IMAGE_FORMAT_NULL;
-    engine->ctx.layer.secondaryBPP = 0;
-    engine->ctx.layer.secondaryBPL = 0;
-
-    engine->ctx.layer.cvtSecondaryFromPrimary = NULL;
-    engine->ctx.layer.cvtPrimaryFromSecondary = NULL;
+    return engine->vtable->drawRectD(self, RectD(r));
   }
 }
 
-void RasterPainterImpl_::setupOps(RasterPaintEngine* engine)
+err_t FOG_CDECL RasterPaintEngineImpl::drawRectF(Painter& self, const RectF& r)
 {
-  engine->ctx.paintHints.packed = 0;
-  engine->ctx.paintHints.compositingOperator = COMPOSITE_SRC_OVER;
-  engine->ctx.paintHints.renderQuality = RENDER_QUALITY_DEFAULT;
-  engine->ctx.paintHints.imageQuality = IMAGE_QUALITY_DEFAULT;
-  engine->ctx.paintHints.gradientQuality = GRADIENT_QUALITY_NORMAL;
-  engine->ctx.paintHints.outlinedText = 0;
-  engine->ctx.paintHints.fastLine = 0;
-  engine->ctx.paintHints.geometricPrecision = GEOMETRIC_PRECISION_NORMAL;
-  engine->ctx.paintHints.fillRule = FILL_RULE_DEFAULT;
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_STROKE_FUNC();
 
-  engine->ctx.rasterHints.packed = 0;
-  engine->ctx.rasterHints.opacity = engine->ctx.fullOpacityValueU;
-  engine->ctx.rasterHints.rectToRectTransform = 1;
-  engine->ctx.rasterHints.finalTransformF = 0;
-  engine->ctx.rasterHints.idealLine = 1;
-
-  engine->opacityF = 1.0f;
-
-  // TODO: Move.
-  engine->sourceType = PATTERN_TYPE_COLOR;
-
-  engine->source.color.init();
-  engine->source.transform.init();
+  PathF& path = engine->ctx.tmpPathF[2];
+  path.clear();
+  path.rect(r);
+  return engine->serializer->drawRawPathF(engine, path);
 }
 
-void RasterPainterImpl_::setupDefaultClip(RasterPaintEngine* engine)
+err_t FOG_CDECL RasterPaintEngineImpl::drawRectD(Painter& self, const RectD& r)
 {
-  BoxI boundingBox(
-    0, 0,
-    (int)engine->ctx.layer.size.w,
-    (int)engine->ctx.layer.size.h);
-  FOG_ASSERT(boundingBox.isValid());
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_STROKE_FUNC();
 
-  // Final matrix is translated by the finalOrigin, we are translating it back.
-  // After this function is called it remains fully usable and valid.
-  // TODO: Painter.
-  //engine->finalTransformI._tx -= engine->finalOrigin.x;
-  //engine->finalTransformI._ty -= engine->finalOrigin.y;
+  PathD& path = engine->ctx.tmpPathD[2];
+  path.clear();
+  path.rect(r);
+  return engine->serializer->drawRawPathD(engine, path);
+}
 
-  // Clear the regions and origins and set work and final region to the bounds.
-  engine->metaOrigin.reset();
-  engine->metaRegion = Region::infinite();
+err_t FOG_CDECL RasterPaintEngineImpl::drawPolylineI(Painter& self, const PointI* p, size_t count)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_STROKE_FUNC();
 
-  engine->userOrigin.reset();
-  engine->userRegion = Region::infinite();
+  if (!engine->ctx.paintHints.geometricPrecision)
+  {
+    PathF& path = engine->ctx.tmpPathF[2];
+    path.clear();
+    path.polyline(p, count);
+    return engine->serializer->drawRawPathF(engine, path);
+  }
+  else
+  {
+    PathD& path = engine->ctx.tmpPathD[2];
+    path.clear();
+    path.polyline(p, count);
+    return engine->serializer->drawRawPathD(engine, path);
+  }
+}
 
-  engine->coreClipType = RASTER_CLIP_BOX;
-  engine->coreClipBox = boundingBox;
-  engine->coreRegion = boundingBox;
+err_t FOG_CDECL RasterPaintEngineImpl::drawPolylineF(Painter& self, const PointF* p, size_t count)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_STROKE_FUNC();
 
-  // TODO:?
-  engine->ctx.finalClipType = RASTER_CLIP_BOX;
-  engine->ctx.finalClipBoxI = boundingBox;
-  engine->ctx.finalClipperF.setClipBox(BoxF(boundingBox));
-  engine->ctx.finalClipperD.setClipBox(BoxD(boundingBox));
-  engine->ctx.finalRegion = engine->coreRegion;
+  PathF& path = engine->ctx.tmpPathF[2];
+  path.clear();
+  path.polyline(p, count);
+  return engine->serializer->drawRawPathF(engine, path);
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::drawPolylineD(Painter& self, const PointD* p, size_t count)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_STROKE_FUNC();
+
+  PathD& path = engine->ctx.tmpPathD[2];
+  path.clear();
+  path.polyline(p, count);
+  return engine->serializer->drawRawPathD(engine, path);
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::drawPolygonI(Painter& self, const PointI* p, size_t count)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_STROKE_FUNC();
+
+  if (!engine->ctx.paintHints.geometricPrecision)
+  {
+    PathF& path = engine->ctx.tmpPathF[2];
+    path.clear();
+    path.polygon(p, count);
+    return engine->serializer->drawRawPathF(engine, path);
+  }
+  else
+  {
+    PathD& path = engine->ctx.tmpPathD[2];
+    path.clear();
+    path.polygon(p, count);
+    return engine->serializer->drawRawPathD(engine, path);
+  }
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::drawPolygonF(Painter& self, const PointF* p, size_t count)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_STROKE_FUNC();
+
+  PathF& path = engine->ctx.tmpPathF[2];
+  path.clear();
+  path.polygon(p, count);
+  return engine->serializer->drawRawPathF(engine, path);
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::drawPolygonD(Painter& self, const PointD* p, size_t count)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_STROKE_FUNC();
+
+  PathD& path = engine->ctx.tmpPathD[2];
+  path.clear();
+  path.polygon(p, count);
+  return engine->serializer->drawRawPathD(engine, path);
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::drawShapeF(Painter& self, uint32_t shapeType, const void* shapeData)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_STROKE_FUNC();
+
+  PathF& path = engine->ctx.tmpPathF[2];
+  path.clear();
+  path._shape(shapeType, shapeData, PATH_DIRECTION_CW, NULL);
+  return engine->serializer->drawRawPathF(engine, path);
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::drawShapeD(Painter& self, uint32_t shapeType, const void* shapeData)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_STROKE_FUNC();
+
+  PathD& path = engine->ctx.tmpPathD[2];
+  path.clear();
+  path._shape(shapeType, shapeData, PATH_DIRECTION_CW, NULL);
+  return engine->serializer->drawRawPathD(engine, path);
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::drawPathF(Painter& self, const PathF& p)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_STROKE_FUNC();
+
+  return engine->serializer->drawRawPathF(engine, p);
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::drawPathD(Painter& self, const PathD& p)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_STROKE_FUNC();
+
+  return engine->serializer->drawRawPathD(engine, p);
+}
+
+// ============================================================================
+// [Fog::RasterPaintEngineImpl - Fill]
+// ============================================================================
+
+err_t FOG_CDECL RasterPaintEngineImpl::fillRectI(Painter& self, const RectI& r)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  if (engine->finalTransformI._type != RASTER_INTEGRAL_TRANSFORM_NONE)
+  {
+    BoxI box(UNINITIALIZED);
+    if (doIntegralTransformAndClip(engine, box, r))
+      return engine->serializer->fillNormalizedBoxI(engine, box);
+    else
+      return ERR_OK;
+  }
+  else
+  {
+    if (!engine->ctx.paintHints.geometricPrecision)
+      return fillRectF(self, RectF(r));
+    else
+      return fillRectD(self, RectD(r));
+  }
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::fillRectF(Painter& self, const RectF& r)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  BoxF box(r);
+  if (ensureFinalTransformF(engine))
+  {
+    if (!engine->ctx.rasterHints.rectToRectTransform)
+    {
+      PathF& path = engine->ctx.tmpPathF[0];
+      path.clear();
+      path.rect(r, PATH_DIRECTION_CW);
+      return engine->serializer->fillRawPathF(engine, path, FILL_RULE_NON_ZERO);
+    }
+    engine->finalTransformF.mapBox(box, box);
+  }
+
+  if (!BoxF::intersect(box, box, engine->ctx.finalClipperF.getClipBox()))
+    return ERR_OK;
+
+  return engine->serializer->fillNormalizedBoxF(engine, box);
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::fillRectD(Painter& self, const RectD& r)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  BoxD box(r);
+  if (engine->finalTransform.getType() != TRANSFORM_TYPE_IDENTITY)
+  {
+    if (!engine->ctx.rasterHints.rectToRectTransform)
+    {
+      PathD& path = engine->ctx.tmpPathD[0];
+      path.clear();
+      path.rect(r, PATH_DIRECTION_CW);
+      return engine->serializer->fillRawPathD(engine, path, FILL_RULE_NON_ZERO);
+    }
+    engine->finalTransform.mapBox(box, box);
+  }
+
+  if (!BoxD::intersect(box, box, engine->ctx.finalClipperD.getClipBox()))
+    return ERR_OK;
+
+  return engine->serializer->fillNormalizedBoxD(engine, box);
+}
+
+// TODO: It's easy to clip rectangles, so clip them here and call
+// doFillNormalizedPath() instead.
+
+err_t FOG_CDECL RasterPaintEngineImpl::fillRectsI(Painter& self, const RectI* r, size_t count)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  if (!engine->ctx.paintHints.geometricPrecision)
+  {
+    PathF& path = engine->ctx.tmpPathF[0];
+    path.clear();
+    path.rects(r, count);
+    return engine->serializer->fillRawPathF(engine, path, FILL_RULE_NON_ZERO);
+  }
+  else
+  {
+    PathD& path = engine->ctx.tmpPathD[0];
+    path.clear();
+    path.rects(r, count);
+    return engine->serializer->fillRawPathD(engine, path, FILL_RULE_NON_ZERO);
+  }
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::fillRectsF(Painter& self, const RectF* r, size_t count)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  if (count == 0) return ERR_OK;
+  if (count == 1) return fillRectF(self, *r);
+
+  PathF& path = engine->ctx.tmpPathF[0];
+  path.clear();
+  path.rects(r, count, PATH_DIRECTION_CW);
+
+  return engine->serializer->fillRawPathF(engine, path, FILL_RULE_NON_ZERO);
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::fillRectsD(Painter& self, const RectD* r, size_t count)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  if (count == 0) return ERR_OK;
+  if (count == 1) return fillRectD(self, *r);
+
+  PathD& path = engine->ctx.tmpPathD[0];
+  path.clear();
+  path.rects(r, count, PATH_DIRECTION_CW);
+  return engine->serializer->fillRawPathD(engine, path, FILL_RULE_NON_ZERO);
+}
+
+// TODO: It's easy to clip polygon, do it here, PathClipper should be enabled to do that.
+
+err_t FOG_CDECL RasterPaintEngineImpl::fillPolygonI(Painter& self, const PointI* p, size_t count)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  if (!engine->ctx.paintHints.geometricPrecision)
+  {
+    PathF& path = engine->ctx.tmpPathF[0];
+    path.clear();
+    path.polygon(p, count, PATH_DIRECTION_CW);
+    return engine->serializer->fillRawPathF(engine, path, engine->ctx.paintHints.fillRule);
+  }
+  else
+  {
+    PathD& path = engine->ctx.tmpPathD[0];
+    path.clear();
+    path.polygon(p, count, PATH_DIRECTION_CW);
+    return engine->serializer->fillRawPathD(engine, path, engine->ctx.paintHints.fillRule);
+  }
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::fillPolygonF(Painter& self, const PointF* p, size_t count)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  PathF& path = engine->ctx.tmpPathF[0];
+  path.clear();
+  path.polygon(p, count, PATH_DIRECTION_CW);
+  return engine->serializer->fillRawPathF(engine, path, engine->ctx.paintHints.fillRule);
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::fillPolygonD(Painter& self, const PointD* p, size_t count)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  PathD& path = engine->ctx.tmpPathD[0];
+  path.clear();
+  path.polygon(p, count, PATH_DIRECTION_CW);
+  return engine->serializer->fillRawPathD(engine, path, engine->ctx.paintHints.fillRule);
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::fillShapeF(Painter& self, uint32_t shapeType, const void* shapeData)
+{
+  if (shapeType == SHAPE_TYPE_RECT)
+    return fillRectF(self, *(const RectF*)shapeData);
+
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  PathF& path = engine->ctx.tmpPathF[0];
+  path.clear();
+  path._shape(shapeType, shapeData, PATH_DIRECTION_CW, NULL);
+  return engine->serializer->fillRawPathF(engine, path, engine->ctx.paintHints.fillRule);
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::fillShapeD(Painter& self, uint32_t shapeType, const void* shapeData)
+{
+  if (shapeType == SHAPE_TYPE_RECT)
+    return fillRectD(self, *(const RectD*)shapeData);
+
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  PathD& path = engine->ctx.tmpPathD[0];
+  path.clear();
+  path._shape(shapeType, shapeData, PATH_DIRECTION_CW, NULL);
+  return engine->serializer->fillRawPathD(engine, path, engine->ctx.paintHints.fillRule);
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::fillPathF(Painter& self, const PathF& p)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  return engine->serializer->fillRawPathF(engine, p, engine->ctx.paintHints.fillRule);
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::fillPathD(Painter& self, const PathD& p)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  return engine->serializer->fillRawPathD(engine, p, engine->ctx.paintHints.fillRule);
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::fillTextAtI(Painter& self, const PointI& p, const String& text, const Font& font, const RectI* clip)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
 
   // TODO:
-  //engine->ctx.state |= RASTER_STATE_PENDING_CLIP_REGION;
+  return ERR_RT_NOT_IMPLEMENTED;
 }
 
-void RasterPainterImpl_::setupDefaultRenderer(RasterPaintEngine* engine)
+err_t FOG_CDECL RasterPaintEngineImpl::fillTextAtF(Painter& self, const PointF& p, const String& text, const Font& font, const RectF* clip)
 {
-  engine->ctx.renderer = &_RasterRender_vtable[RASTER_MODE_ST][engine->ctx.layer.precision][engine->ctx.finalClipType];
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  // TODO:
+  return ERR_RT_NOT_IMPLEMENTED;
 }
 
-// ============================================================================
-// [Fog::RasterPainterImpl_ - Helpers - Source]
-// ============================================================================
-
-void RasterPainterImpl_::discardSource(RasterPaintEngine* engine)
+err_t FOG_CDECL RasterPaintEngineImpl::fillTextAtD(Painter& self, const PointD& p, const String& text, const Font& font, const RectD* clip)
 {
-  switch (engine->sourceType)
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  // TODO:
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::fillTextInI(Painter& self, const TextRectI& r, const String& text, const Font& font, const RectI* clip)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  // TODO:
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::fillTextInF(Painter& self, const TextRectF& r, const String& text, const Font& font, const RectF* clip)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  // TODO:
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::fillTextInD(Painter& self, const TextRectD& r, const String& text, const Font& font, const RectD* clip)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  // TODO:
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::fillMaskAtI(Painter& self, const PointI& p, const Image& m, const RectI* mFragment)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  // TODO:
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::fillMaskAtF(Painter& self, const PointF& p, const Image& m, const RectI* mFragment)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  // TODO:
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::fillMaskAtD(Painter& self, const PointD& p, const Image& m, const RectI* mFragment)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  // TODO:
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::fillMaskInI(Painter& self, const RectI& r, const Image& m, const RectI* mFragment)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  // TODO:
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::fillMaskInF(Painter& self, const RectF& r, const Image& m, const RectI* mFragment)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  // TODO:
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::fillMaskInD(Painter& self, const RectD& r, const Image& m, const RectI* mFragment)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  // TODO:
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::fillRegion(Painter& self, const Region& r)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  if (!engine->ctx.paintHints.geometricPrecision)
   {
-    case PATTERN_TYPE_NONE:
-    case PATTERN_TYPE_COLOR:
-      break;
-
-    case PATTERN_TYPE_TEXTURE:
-      engine->source.texture.destroy();
-      goto _DiscardContinue;
-
-    case PATTERN_TYPE_GRADIENT:
-      engine->source.gradient.destroy();
-
-_DiscardContinue:
-      if (engine->source.transform->_type != TRANSFORM_TYPE_IDENTITY) engine->source.transform->reset();
-
-      if (RasterUtil::isPatternContext(engine->ctx.pc) && engine->ctx.pc->_refCount.deref())
-        destroyPatternContext(engine, engine->ctx.pc);
-      break;
-
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
-}
-
-err_t RasterPainterImpl_::createPatternContext(RasterPaintEngine* engine)
-{
-  err_t err = ERR_RT_NOT_IMPLEMENTED;
-  uint32_t sourceType = engine->sourceType;
-
-  FOG_ASSERT(sourceType != PATTERN_TYPE_NONE);
-  FOG_ASSERT(sourceType != PATTERN_TYPE_COLOR);
-
-  // First try to reuse context from context-pool.
-  RenderPatternContext* pc = reinterpret_cast<RenderPatternContext*>(engine->pcPool);
-
-  if (FOG_IS_NULL(pc))
-  {
-    pc = reinterpret_cast<RenderPatternContext*>(engine->pcAllocator.alloc(sizeof(RenderPatternContext)));
-    if (FOG_IS_NULL(pc)) return ERR_RT_OUT_OF_MEMORY;
+    PathF& path = engine->ctx.tmpPathF[0];
+    path.clear();
+    path.region(r);
+    return engine->serializer->fillRawPathF(engine, path, FILL_RULE_NON_ZERO);
   }
   else
   {
-    engine->pcPool = reinterpret_cast<RasterAbstractLinkedList*>(pc)->next;
+    PathD& path = engine->ctx.tmpPathD[0];
+    path.clear();
+    path.region(r);
+    return engine->serializer->fillRawPathD(engine, path, FILL_RULE_NON_ZERO);
   }
-
-  engine->ctx.pc = pc;
-
-  // Set reference count to 1 and initialize the context state to UNINITIALIZED.
-  // It's important to mark context as uninitialized, because there are asserts
-  // inside pattern-context initializers and leaving the pattern-context state
-  // as is might cause crash in debug-mode.
-  pc->_refCount.set(1);
-  pc->reset();
-
-  switch (sourceType)
-  {
-    case PATTERN_TYPE_TEXTURE:
-    {
-      err = _g2d_render.texture.create(pc,
-        engine->ctx.layer.primaryFormat,
-        engine->coreClipBox,
-        engine->source.texture->getImage(),
-        engine->source.texture->getFragment(),
-        engine->source.adjusted.instance(),
-        engine->source.texture->getClampColor(),
-        engine->source.texture->getTileType(),
-        engine->ctx.paintHints.imageQuality);
-      break;
-    }
-
-    case PATTERN_TYPE_GRADIENT:
-    {
-      uint32_t gradientType = engine->source.gradient->getGradientType();
-      err = _g2d_render.gradient.create[gradientType](pc,
-        engine->ctx.layer.primaryFormat,
-        engine->coreClipBox,
-        engine->source.gradient.instance(),
-        engine->source.adjusted.instance(),
-        engine->ctx.paintHints.gradientQuality);
-      break;
-    }
-
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
-
-  if (FOG_IS_ERROR(err))
-  {
-    reinterpret_cast<RasterAbstractLinkedList*>(pc)->next = engine->pcPool;
-    engine->pcPool = reinterpret_cast<RasterAbstractLinkedList*>(pc);
-
-    engine->ctx.pc = NULL;
-  }
-
-  return err;
-}
-
-void RasterPainterImpl_::destroyPatternContext(RasterPaintEngine* engine, RenderPatternContext* pc)
-{
-  pc->destroy();
-
-  reinterpret_cast<RasterAbstractLinkedList*>(pc)->next = engine->pcPool;
-  engine->pcPool = reinterpret_cast<RasterAbstractLinkedList*>(pc);
 }
 
 // ============================================================================
-// [Fog::RasterPainterImpl_ - Helpers - Transform]
+// [Fog::RasterPaintEngineImpl - Blit]
 // ============================================================================
 
-bool RasterPainterImpl_::ensureFinalTransformF(RasterPaintEngine* engine)
+#define _FOG_RASTER_IMAGE_PARAMS(_Image_, _ImageFragment_) \
+  int iX = 0; \
+  int iY = 0; \
+  int iW = _Image_.getWidth(); \
+  int iH = _Image_.getHeight(); \
+  \
+  if (_ImageFragment_ != NULL) \
+  { \
+    if (!_ImageFragment_->isValid()) return ERR_RT_INVALID_ARGUMENT; \
+    \
+    iX = _ImageFragment_->x; \
+    iY = _ImageFragment_->y; \
+    \
+    if ((uint)(iX) >= (uint)iW || \
+        (uint)(iY) >= (uint)iH || \
+        (uint)(_ImageFragment_->w - iX) > (uint)iW || \
+        (uint)(_ImageFragment_->h - iY) > (uint)iH) \
+    { \
+      return ERR_RT_INVALID_ARGUMENT; \
+    } \
+    \
+    iW = _ImageFragment_->w; \
+    iH = _ImageFragment_->h; \
+    if (iW == 0 || iH == 0) return ERR_OK; \
+  }
+
+err_t FOG_CDECL RasterPaintEngineImpl::blitImageAtI(Painter& self, const PointI& p, const Image& i, const RectI* iFragment)
 {
-  if (engine->finalTransform._type == TRANSFORM_TYPE_IDENTITY) return false;
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  if (i.isEmpty()) return ERR_OK;
 
-  if (!engine->ctx.rasterHints.finalTransformF)
-  {
-    engine->finalTransformF = engine->finalTransform;
-    engine->ctx.rasterHints.finalTransformF = 1;
-  }
-  return true;
-}
+  _FOG_RASTER_ENTER_BLIT_FUNC();
+  _FOG_RASTER_IMAGE_PARAMS(i, iFragment)
 
-// ============================================================================
-// [Fog::RasterPainterImpl_ - Changed - Core]
-// ============================================================================
-
-err_t RasterPainterImpl_::changedCoreClip(RasterPaintEngine* engine)
-{
-  err_t err = ERR_OK;
-  BoxI bounds(0, 0, engine->ctx.layer.size.w, engine->ctx.layer.size.h);
-
-  engine->masterFlags &= ~RASTER_NO_PAINT_CORE_REGION;
-  engine->coreOrigin = engine->metaOrigin + engine->userOrigin;
-
-  if (engine->metaRegion.isInfinite())
-  {
-    if (engine->userRegion.isInfinite())
-    {
-      // Meta=Infinite, User=Infinite.
-      engine->coreRegion = Region::infinite();
-    }
-    else
-    {
-      // Meta=Infinite, User=Finite.
-      err = Region::translateAndClip(engine->coreRegion, engine->userRegion, engine->metaOrigin, bounds);
-      if (FOG_IS_ERROR(err)) goto _Fail;
-    }
-  }
-  else
-  {
-    if (engine->userRegion.isInfinite())
-    {
-      // Meta=Finite, User=Infinite.
-      engine->coreRegion = engine->metaRegion;
-    }
-    else
-    {
-      // Meta=Finite, User=Finite.
-      err = Region::translateAndClip(engine->tmpRegion[0], engine->userRegion, engine->metaOrigin, bounds);
-      if (FOG_IS_ERROR(err)) goto _Fail;
-
-      err = Region::combine(engine->coreRegion, engine->metaRegion, engine->tmpRegion[0], REGION_OP_INTERSECT);
-      if (FOG_IS_ERROR(err)) goto _Fail;
-    }
-  }
-
-  // Detect the core clip-type.
-  switch (engine->coreRegion.getType())
-  {
-    case REGION_TYPE_EMPTY:
-      engine->masterFlags |= RASTER_NO_PAINT_CORE_REGION;
-
-      engine->coreClipType = RASTER_CLIP_NULL;
-      engine->coreClipBox.reset();
-      break;
-
-    case REGION_TYPE_SIMPLE:
-      engine->coreClipType = RASTER_CLIP_BOX;
-      engine->coreClipBox = engine->coreRegion.getExtents();
-      break;
-
-    case REGION_TYPE_COMPLEX:
-      engine->coreClipType = RASTER_CLIP_REGION;
-      engine->coreClipBox = engine->coreRegion.getExtents();
-      break;
-
-    case REGION_TYPE_INFINITE:
-      engine->coreClipType = RASTER_CLIP_BOX;
-      engine->coreClipBox = bounds;
-      break;
-
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
-
-  if (engine->coreOrigin.x == 0 && engine->coreOrigin.y == 0)
-  {
-    engine->coreTranslationI.reset();
-
-    engine->coreTransform._type = TRANSFORM_TYPE_IDENTITY;
-    engine->coreTransform._20 = 0.0;
-    engine->coreTransform._21 = 0.0;
-  }
-  else
-  {
-    engine->coreTranslationI.set(-engine->coreOrigin.x, -engine->coreOrigin.y);
-
-    engine->coreTransform._type = TRANSFORM_TYPE_TRANSLATION;
-    engine->coreTransform._20 = (double)(engine->coreTranslationI.x);
-    engine->coreTransform._21 = (double)(engine->coreTranslationI.y);
-  }
-  return ERR_OK;
-
-_Fail:
-  engine->masterFlags |= RASTER_NO_PAINT_CORE_REGION;
-
-  engine->coreRegion.clear();
-  engine->coreOrigin.reset();
-
-  return err;
-}
-
-// ============================================================================
-// [Fog::RasterPainterImpl_ - Changed - Transform]
-// ============================================================================
-
-void RasterPainterImpl_::changedTransform(RasterPaintEngine* engine)
-{
-  engine->masterFlags &= ~RASTER_NO_PAINT_FINAL_TRANSFORM;
-
-  engine->ctx.rasterHints.rectToRectTransform = 1;
-  engine->ctx.rasterHints.finalTransformF = 0;
-
-  engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_NULL;
-  engine->finalTransformI._sx = 1;
-  engine->finalTransformI._sy = 1;
-  engine->finalTransformI._tx = 0;
-  engine->finalTransformI._ty = 0;
-
-  if (engine->userTransform.getType() == TRANSFORM_TYPE_IDENTITY)
-    engine->finalTransform = engine->coreTransform;
-  else
-    TransformD::multiply(engine->finalTransform, engine->coreTransform, engine->userTransform);
-
-  switch (engine->finalTransform.getType())
-  {
-    case TRANSFORM_TYPE_DEGENERATE:
-      engine->masterFlags |= RASTER_NO_PAINT_FINAL_TRANSFORM;
-      engine->ctx.rasterHints.rectToRectTransform = 0;
-      return;
-
-    case TRANSFORM_TYPE_PROJECTION:
-      engine->ctx.rasterHints.rectToRectTransform = 0;
-      return;
-
-    case TRANSFORM_TYPE_AFFINE:
-    case TRANSFORM_TYPE_ROTATION:
-      engine->ctx.rasterHints.rectToRectTransform = 0;
-      return;
-
-    case TRANSFORM_TYPE_SWAP:
-      if (!Math::isFuzzyToInt(engine->finalTransform._01, engine->finalTransformI._sx)) break;
-      if (!Math::isFuzzyToInt(engine->finalTransform._10, engine->finalTransformI._sy)) break;
-
-      engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_SWAP;
-      goto _Translation;
-
-    case TRANSFORM_TYPE_SCALING:
-      if (!Math::isFuzzyToInt(engine->finalTransform._00, engine->finalTransformI._sx)) break;
-      if (!Math::isFuzzyToInt(engine->finalTransform._11, engine->finalTransformI._sy)) break;
-
-      engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_SCALING;
-      goto _Translation;
-
-    case TRANSFORM_TYPE_TRANSLATION:
-      engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_SIMPLE;
-
-_Translation:
-      if (!Math::isFuzzyToInt(engine->finalTransform._20, engine->finalTransformI._tx)) break;
-      if (!Math::isFuzzyToInt(engine->finalTransform._21, engine->finalTransformI._ty)) break;
-      return;
-
-    case TRANSFORM_TYPE_IDENTITY:
-      engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_SIMPLE;
-      return;
-  }
-
-  // Transform is not integral.
-  engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_NULL;
-}
-
-// ============================================================================
-// [Fog::RasterPainterImpl_ - Helpers - Clipping]
-// ============================================================================
-
-bool RasterPainterImpl_::doIntegralTransformAndClip(RasterPaintEngine* engine, BoxI& dst, const RectI& src)
-{
-  int tx = engine->finalTransformI._tx;
-  int ty = engine->finalTransformI._ty;
-
-  int sw = src.w;
-  int sh = src.h;
+  int dstX = p.x, dstW;
+  int dstY = p.y, dstH;
+  int d;
 
   switch (engine->finalTransformI._type)
   {
-    case RASTER_INTEGRAL_TRANSFORM_SWAP:
-      tx += src.y * engine->finalTransformI._sx;
-      ty += src.x * engine->finalTransformI._sy;
-
-      sw *= engine->finalTransformI._sy;
-      sh *= engine->finalTransformI._sx;
-      goto _Scaled;
-
-    case RASTER_INTEGRAL_TRANSFORM_SCALING:
-      tx += src.x * engine->finalTransformI._sx;
-      ty += src.y * engine->finalTransformI._sy;
-
-      sw *= engine->finalTransformI._sx;
-      sh *= engine->finalTransformI._sy;
-
-_Scaled:
-      dst.x0 = tx;
-      dst.y0 = ty;
-
-      tx += sw;
-      ty += sh;
-
-      dst.x1 = tx;
-      dst.y1 = ty;
-
-      if (dst.x0 > dst.x1) swap(dst.x0, dst.x1);
-      if (dst.y0 > dst.y1) swap(dst.x0, dst.x1);
-      return BoxI::intersect(dst, dst, engine->ctx.finalClipBoxI);
+    case RASTER_INTEGRAL_TRANSFORM_NONE:
+    {
+      if (!engine->ctx.paintHints.geometricPrecision)
+        return engine->vtable->blitImageAtF(self, PointF(p), i, iFragment);
+      else
+        return engine->vtable->blitImageAtD(self, PointD(p), i, iFragment);
+    }
 
     case RASTER_INTEGRAL_TRANSFORM_SIMPLE:
-      tx += src.x;
-      ty += src.y;
+    {
+      dstX += engine->finalTransformI._tx;
+      dstY += engine->finalTransformI._ty;
 
-      dst.x0 = tx;
-      dst.y0 = ty;
+      if ((uint)(d = dstX - engine->ctx.finalClipBoxI.x0) >= (uint)engine->ctx.finalClipBoxI.getWidth())
+      {
+        dstX = engine->ctx.finalClipBoxI.x0; iX -= d;
+        if (d >= 0 || (iW += d) <= 0) return ERR_OK;
+      }
 
-      tx += sw;
-      ty += sh;
+      if ((uint)(d = dstY - engine->ctx.finalClipBoxI.y0) >= (uint)engine->ctx.finalClipBoxI.getHeight())
+      {
+        dstY = engine->ctx.finalClipBoxI.y0; iY -= d;
+        if (d >= 0 || (iH += d) <= 0) return ERR_OK;
+      }
 
-      dst.x1 = tx;
-      dst.y1 = ty;
-      return BoxI::intersect(dst, dst, engine->ctx.finalClipBoxI);
+      if ((d = engine->ctx.finalClipBoxI.x1 - dstX) < iW) iW = d;
+      if ((d = engine->ctx.finalClipBoxI.y1 - dstY) < iH) iH = d;
+
+      return engine->serializer->blitNormalizedImageI(engine, PointI(dstX, dstY), i, RectI(iX, iY, iW, iH));
+    }
+
+    case RASTER_INTEGRAL_TRANSFORM_SCALING:
+    {
+      dstX = dstX * engine->finalTransformI._sx;
+      dstY = dstY * engine->finalTransformI._sy;
+
+      dstW = iW * engine->finalTransformI._sx;
+      dstH = iH * engine->finalTransformI._sy;
+
+_Scaling:
+      dstX += engine->finalTransformI._tx;
+      dstY += engine->finalTransformI._ty;
+
+      if (dstW < 0) { dstX += dstW; dstW = -dstW; }
+      if (dstH < 0) { dstY += dstH; dstH = -dstH; }
+
+      // Make a box model (dstX, dstY -> dstW, dstH).
+      dstW += dstX;
+      dstH += dstY;
+
+      if (dstX < engine->ctx.finalClipBoxI.x0) dstX = engine->ctx.finalClipBoxI.x0;
+      if (dstY < engine->ctx.finalClipBoxI.y0) dstY = engine->ctx.finalClipBoxI.y0;
+
+      if (dstW > engine->ctx.finalClipBoxI.x1) dstW = engine->ctx.finalClipBoxI.x1;
+      if (dstH > engine->ctx.finalClipBoxI.y1) dstH = engine->ctx.finalClipBoxI.y1;
+
+      if (dstX >= dstW || dstY >= dstH) return ERR_OK;
+
+      TransformD tr(engine->finalTransform);
+      tr.translate(PointD(p.x, p.y));
+
+      return engine->serializer->blitNormalizedTransformedImageI(engine, BoxI(dstX, dstY, dstW, dstH), i, RectI(iX, iY, iW, iH), tr);
+    }
+
+    case RASTER_INTEGRAL_TRANSFORM_SWAP:
+    {
+      d = dstX;
+
+      dstX = dstY * engine->finalTransformI._sx;
+      dstY = d    * engine->finalTransformI._sy;
+
+      dstW = iH * engine->finalTransformI._sx;
+      dstH = iW * engine->finalTransformI._sy;
+
+      goto _Scaling;
+    }
 
     default:
       FOG_ASSERT_NOT_REACHED();
   }
 }
 
-// ============================================================================
-// [Fog::RasterPainter - Impl]
-// ============================================================================
-
-template<int _MODE>
-struct RasterPainterImpl : public RasterPainterImpl_
+err_t FOG_CDECL RasterPaintEngineImpl::blitImageAtF(Painter& self, const PointF& p, const Image& i, const RectI* iFragment)
 {
-  // --------------------------------------------------------------------------
-  // [Initialization]
-  // --------------------------------------------------------------------------
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  if (i.isEmpty()) return ERR_OK;
 
-  static void initVTable(RasterPainterVTable& v);
+  _FOG_RASTER_ENTER_BLIT_FUNC();
+  _FOG_RASTER_IMAGE_PARAMS(i, iFragment)
 
-  // --------------------------------------------------------------------------
-  // [Draw]
-  // --------------------------------------------------------------------------
+  uint32_t transformType = engine->finalTransform.getType();
+  BoxD box(double(p.x), double(p.y), double(p.x) + double(iW), double(p.y) + double(iH));
 
-  static err_t FOG_CDECL drawRectI(Painter& self, const RectI& r);
-  static err_t FOG_CDECL drawRectF(Painter& self, const RectF& r);
-  static err_t FOG_CDECL drawRectD(Painter& self, const RectD& r);
+  switch (transformType)
+  {
+    case TRANSFORM_TYPE_IDENTITY:
+    case TRANSFORM_TYPE_TRANSLATION:
+    {
+      PointD t(double(p.x) + engine->finalTransform._20,
+               double(p.y) + engine->finalTransform._21);
 
-  static err_t FOG_CDECL drawPolylineI(Painter& self, const PointI* p, size_t count);
-  static err_t FOG_CDECL drawPolylineF(Painter& self, const PointF* p, size_t count);
-  static err_t FOG_CDECL drawPolylineD(Painter& self, const PointD* p, size_t count);
+      Fixed48x16 x48x16 = Math::fixed48x16FromFloat(t.x);
+      Fixed48x16 y48x16 = Math::fixed48x16FromFloat(t.y);
 
-  static err_t FOG_CDECL drawPolygonI(Painter& self, const PointI* p, size_t count);
-  static err_t FOG_CDECL drawPolygonF(Painter& self, const PointF* p, size_t count);
-  static err_t FOG_CDECL drawPolygonD(Painter& self, const PointD* p, size_t count);
+      int fx = (int)(x48x16 >> 8) & 0xFF;
+      int fy = (int)(y48x16 >> 8) & 0xFF;
 
-  static err_t FOG_CDECL drawShapeF(Painter& self, uint32_t shapeType, const void* shapeData);
-  static err_t FOG_CDECL drawShapeD(Painter& self, uint32_t shapeType, const void* shapeData);
+      // Aligned.
+      if ((fx | fy) == 0)
+      {
+        int dstX = (int)(x48x16 >> 16);
+        int dstY = (int)(y48x16 >> 16);
 
-  static err_t FOG_CDECL drawPathF(Painter& self, const PathF& p);
-  static err_t FOG_CDECL drawPathD(Painter& self, const PathD& p);
+        int d;
 
-  // --------------------------------------------------------------------------
-  // [Fill]
-  // --------------------------------------------------------------------------
+        if ((uint)(d = dstX - engine->ctx.finalClipBoxI.x0) >= (uint)engine->ctx.finalClipBoxI.getWidth())
+        {
+          dstX = engine->ctx.finalClipBoxI.x0; iX -= d;
+          if (d >= 0 || (iW += d) <= 0) return ERR_OK;
+        }
 
-  static err_t FOG_CDECL fillAll(Painter& self);
+        if ((uint)(d = dstY - engine->ctx.finalClipBoxI.y0) >= (uint)engine->ctx.finalClipBoxI.getHeight())
+        {
+          dstY = engine->ctx.finalClipBoxI.y0; iY -= d;
+          if (d >= 0 || (iH += d) <= 0) return ERR_OK;
+        }
 
-  static err_t FOG_CDECL fillRectI(Painter& self, const RectI& r);
-  static err_t FOG_CDECL fillRectF(Painter& self, const RectF& r);
-  static err_t FOG_CDECL fillRectD(Painter& self, const RectD& r);
+        if ((d = engine->ctx.finalClipBoxI.x1 - dstX) < iW) iW = d;
+        if ((d = engine->ctx.finalClipBoxI.y1 - dstY) < iH) iH = d;
 
-  static err_t FOG_CDECL fillRectsI(Painter& self, const RectI* r, size_t count);
-  static err_t FOG_CDECL fillRectsF(Painter& self, const RectF* r, size_t count);
-  static err_t FOG_CDECL fillRectsD(Painter& self, const RectD* r, size_t count);
+        return engine->serializer->blitNormalizedImageI(engine, PointI(dstX, dstY), i, RectI(iX, iY, iW, iH));
+      }
+      else
+      {
+        box.translate(engine->finalTransform._20, engine->finalTransform._21);
+        if (!BoxD::intersect(box, box, engine->ctx.finalClipperD.getClipBox()))
+          return ERR_OK;
 
-  static err_t FOG_CDECL fillPolygonI(Painter& self, const PointI* p, size_t count);
-  static err_t FOG_CDECL fillPolygonF(Painter& self, const PointF* p, size_t count);
-  static err_t FOG_CDECL fillPolygonD(Painter& self, const PointD* p, size_t count);
+        TransformD tr(engine->finalTransform);
+        tr.translate(PointD(p.x, p.y));
 
-  static err_t FOG_CDECL fillShapeF(Painter& self, uint32_t shapeType, const void* shapeData);
-  static err_t FOG_CDECL fillShapeD(Painter& self, uint32_t shapeType, const void* shapeData);
+        return engine->serializer->blitNormalizedTransformedImageD(engine, box, i, RectI(iX, iY, iW, iH), tr);
+      }
+    }
 
-  static err_t FOG_CDECL fillPathF(Painter& self, const PathF& p);
-  static err_t FOG_CDECL fillPathD(Painter& self, const PathD& p);
+    case TRANSFORM_TYPE_SCALING:
+    {
+      engine->finalTransform.mapBox(box, box);
 
-  static err_t FOG_CDECL fillTextAtI(Painter& self, const PointI& p, const String& text, const Font& font, const RectI* clip);
-  static err_t FOG_CDECL fillTextAtF(Painter& self, const PointF& p, const String& text, const Font& font, const RectF* clip);
-  static err_t FOG_CDECL fillTextAtD(Painter& self, const PointD& p, const String& text, const Font& font, const RectD* clip);
+      if (!BoxD::intersect(box, box, engine->ctx.finalClipperD.getClipBox()))
+        return ERR_OK;
 
-  static err_t FOG_CDECL fillTextInI(Painter& self, const TextRectI& r, const String& text, const Font& font, const RectI* clip);
-  static err_t FOG_CDECL fillTextInF(Painter& self, const TextRectF& r, const String& text, const Font& font, const RectF* clip);
-  static err_t FOG_CDECL fillTextInD(Painter& self, const TextRectD& r, const String& text, const Font& font, const RectD* clip);
+      TransformD tr(engine->finalTransform);
+      tr.translate(PointD(p.x, p.y));
 
-  static err_t FOG_CDECL fillMaskAtI(Painter& self, const PointI& p, const Image& m, const RectI* mFragment);
-  static err_t FOG_CDECL fillMaskAtF(Painter& self, const PointF& p, const Image& m, const RectI* mFragment);
-  static err_t FOG_CDECL fillMaskAtD(Painter& self, const PointD& p, const Image& m, const RectI* mFragment);
+      return engine->serializer->blitNormalizedTransformedImageD(engine, box, i, RectI(iX, iY, iW, iH), tr);
+    }
 
-  static err_t FOG_CDECL fillMaskInI(Painter& self, const RectI& r, const Image& m, const RectI* mFragment);
-  static err_t FOG_CDECL fillMaskInF(Painter& self, const RectF& r, const Image& m, const RectI* mFragment);
-  static err_t FOG_CDECL fillMaskInD(Painter& self, const RectD& r, const Image& m, const RectI* mFragment);
+    default:
+    {
+      BoxD transformedBox(UNINITIALIZED);
+      engine->finalTransform.mapBox(transformedBox, box);
 
-  static err_t FOG_CDECL fillRegion(Painter& self, const Region& r);
+      if (!BoxD::intersect(transformedBox, transformedBox, engine->ctx.finalClipperD.getClipBox()))
+        return ERR_OK;
 
-  // --------------------------------------------------------------------------
-  // [Blit]
-  // --------------------------------------------------------------------------
+      TransformD tr(engine->finalTransform);
+      tr.translate(PointD(p.x, p.y));
 
-  static err_t FOG_CDECL blitImageAtI(Painter& self, const PointI& p, const Image& i, const RectI* iFragment);
-  static err_t FOG_CDECL blitImageAtF(Painter& self, const PointF& p, const Image& i, const RectI* iFragment);
-  static err_t FOG_CDECL blitImageAtD(Painter& self, const PointD& p, const Image& i, const RectI* iFragment);
+      return engine->serializer->blitRawImageD(engine, box, i, RectI(iX, iY, iW, iH), tr);
+    }
+  }
+}
 
-  static err_t FOG_CDECL blitImageInI(Painter& self, const RectI& r, const Image& i, const RectI* iFragment);
-  static err_t FOG_CDECL blitImageInF(Painter& self, const RectF& r, const Image& i, const RectI* iFragment);
-  static err_t FOG_CDECL blitImageInD(Painter& self, const RectD& r, const Image& i, const RectI* iFragment);
+err_t FOG_CDECL RasterPaintEngineImpl::blitImageAtD(Painter& self, const PointD& p, const Image& i, const RectI* iFragment)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  if (i.isEmpty()) return ERR_OK;
 
-  static err_t FOG_CDECL blitMaskedImageAtI(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
-  static err_t FOG_CDECL blitMaskedImageAtF(Painter& self, const PointF& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
-  static err_t FOG_CDECL blitMaskedImageAtD(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
+  _FOG_RASTER_ENTER_BLIT_FUNC();
+  _FOG_RASTER_IMAGE_PARAMS(i, iFragment)
 
-  static err_t FOG_CDECL blitMaskedImageInI(Painter& self, const RectI& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
-  static err_t FOG_CDECL blitMaskedImageInF(Painter& self, const RectF& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
-  static err_t FOG_CDECL blitMaskedImageInD(Painter& self, const RectD& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment);
+  uint32_t transformType = engine->finalTransform.getType();
+  BoxD box(double(p.x), double(p.y), double(p.x) + double(iW), double(p.y) + double(iH));
 
-  // --------------------------------------------------------------------------
-  // [Clip]
-  // --------------------------------------------------------------------------
+  switch (transformType)
+  {
+    case TRANSFORM_TYPE_IDENTITY:
+    case TRANSFORM_TYPE_TRANSLATION:
+    {
+      PointD t(double(p.x) + engine->finalTransform._20,
+               double(p.y) + engine->finalTransform._21);
 
-  static err_t FOG_CDECL clipRectI(Painter& self, uint32_t clipOp, const RectI& r);
-  static err_t FOG_CDECL clipRectF(Painter& self, uint32_t clipOp, const RectF& r);
-  static err_t FOG_CDECL clipRectD(Painter& self, uint32_t clipOp, const RectD& r);
+      Fixed48x16 x48x16 = Math::fixed48x16FromFloat(t.x);
+      Fixed48x16 y48x16 = Math::fixed48x16FromFloat(t.y);
 
-  static err_t FOG_CDECL clipRectsI(Painter& self, uint32_t clipOp, const RectI* r, size_t count);
-  static err_t FOG_CDECL clipRectsF(Painter& self, uint32_t clipOp, const RectF* r, size_t count);
-  static err_t FOG_CDECL clipRectsD(Painter& self, uint32_t clipOp, const RectD* r, size_t count);
+      int fx = (int)(x48x16 >> 8) & 0xFF;
+      int fy = (int)(y48x16 >> 8) & 0xFF;
 
-  static err_t FOG_CDECL clipPolygonI(Painter& self, uint32_t clipOp, const PointI* p, size_t count);
-  static err_t FOG_CDECL clipPolygonF(Painter& self, uint32_t clipOp, const PointF* p, size_t count);
-  static err_t FOG_CDECL clipPolygonD(Painter& self, uint32_t clipOp, const PointD* p, size_t count);
+      // Aligned.
+      if ((fx | fy) == 0)
+      {
+        int dstX = (int)(x48x16 >> 16);
+        int dstY = (int)(y48x16 >> 16);
 
-  static err_t FOG_CDECL clipShapeF(Painter& self, uint32_t clipOp, uint32_t shapeType, const void* shapeData);
-  static err_t FOG_CDECL clipShapeD(Painter& self, uint32_t clipOp, uint32_t shapeType, const void* shapeData);
+        int d;
 
-  static err_t FOG_CDECL clipPathF(Painter& self, uint32_t clipOp, const PathF& p);
-  static err_t FOG_CDECL clipPathD(Painter& self, uint32_t clipOp, const PathD& p);
+        if ((uint)(d = dstX - engine->ctx.finalClipBoxI.x0) >= (uint)engine->ctx.finalClipBoxI.getWidth())
+        {
+          dstX = engine->ctx.finalClipBoxI.x0; iX -= d;
+          if (d >= 0 || (iW += d) <= 0) return ERR_OK;
+        }
 
-  static err_t FOG_CDECL clipTextAtI(Painter& self, uint32_t clipOp, const PointI& p, const String& text, const Font& font, const RectI* clip);
-  static err_t FOG_CDECL clipTextAtF(Painter& self, uint32_t clipOp, const PointF& p, const String& text, const Font& font, const RectF* clip);
-  static err_t FOG_CDECL clipTextAtD(Painter& self, uint32_t clipOp, const PointD& p, const String& text, const Font& font, const RectD* clip);
+        if ((uint)(d = dstY - engine->ctx.finalClipBoxI.y0) >= (uint)engine->ctx.finalClipBoxI.getHeight())
+        {
+          dstY = engine->ctx.finalClipBoxI.y0; iY -= d;
+          if (d >= 0 || (iH += d) <= 0) return ERR_OK;
+        }
 
-  static err_t FOG_CDECL clipTextInI(Painter& self, uint32_t clipOp, const TextRectI& r, const String& text, const Font& font, const RectI* clip);
-  static err_t FOG_CDECL clipTextInF(Painter& self, uint32_t clipOp, const TextRectF& r, const String& text, const Font& font, const RectF* clip);
-  static err_t FOG_CDECL clipTextInD(Painter& self, uint32_t clipOp, const TextRectD& r, const String& text, const Font& font, const RectD* clip);
+        if ((d = engine->ctx.finalClipBoxI.x1 - dstX) < iW) iW = d;
+        if ((d = engine->ctx.finalClipBoxI.y1 - dstY) < iH) iH = d;
 
-  static err_t FOG_CDECL clipMaskAtI(Painter& self, uint32_t clipOp, const PointI& p, const Image& m, const RectI* mFragment);
-  static err_t FOG_CDECL clipMaskAtF(Painter& self, uint32_t clipOp, const PointF& p, const Image& m, const RectI* mFragment);
-  static err_t FOG_CDECL clipMaskAtD(Painter& self, uint32_t clipOp, const PointD& p, const Image& m, const RectI* mFragment);
+        return engine->serializer->blitNormalizedImageI(engine, PointI(dstX, dstY), i, RectI(iX, iY, iW, iH));
+      }
+      else
+      {
+        box.translate(engine->finalTransform._20, engine->finalTransform._21);
+        if (!BoxD::intersect(box, box, engine->ctx.finalClipperD.getClipBox()))
+          return ERR_OK;
 
-  static err_t FOG_CDECL clipMaskInI(Painter& self, uint32_t clipOp, const RectI& r, const Image& m, const RectI* mFragment);
-  static err_t FOG_CDECL clipMaskInF(Painter& self, uint32_t clipOp, const RectF& r, const Image& m, const RectI* mFragment);
-  static err_t FOG_CDECL clipMaskInD(Painter& self, uint32_t clipOp, const RectD& r, const Image& m, const RectI* mFragment);
+        TransformD tr(engine->finalTransform);
+        tr.translate(PointD(p.x, p.y));
 
-  static err_t FOG_CDECL clipRegion(Painter& self, uint32_t clipOp, const Region& r);
+        return engine->serializer->blitNormalizedTransformedImageD(engine, box, i, RectI(iX, iY, iW, iH), tr);
+      }
+    }
 
-  static err_t FOG_CDECL resetClip(Painter& self);
+    case TRANSFORM_TYPE_SCALING:
+    {
+      engine->finalTransform.mapBox(box, box);
 
-  // --------------------------------------------------------------------------
-  // [Layer]
-  // --------------------------------------------------------------------------
+      if (!BoxD::intersect(box, box, engine->ctx.finalClipperD.getClipBox()))
+        return ERR_OK;
 
-  static err_t FOG_CDECL beginLayer(Painter& self);
-  static err_t FOG_CDECL endLayer(Painter& self);
+      TransformD tr(engine->finalTransform);
+      tr.translate(PointD(p.x, p.y));
 
-  // --------------------------------------------------------------------------
-  // [Flush]
-  // --------------------------------------------------------------------------
+      return engine->serializer->blitNormalizedTransformedImageD(engine, box, i, RectI(iX, iY, iW, iH), tr);
+    }
 
-  static err_t FOG_CDECL flush(Painter& self, uint32_t flags);
+    default:
+    {
+      BoxD transformedBox(UNINITIALIZED);
+      engine->finalTransform.mapBox(transformedBox, box);
 
-  // --------------------------------------------------------------------------
-  // [Painting - FillNormalizedBox]
-  // --------------------------------------------------------------------------
+      if (!BoxD::intersect(transformedBox, transformedBox, engine->ctx.finalClipperD.getClipBox()))
+        return ERR_OK;
 
-  static FOG_INLINE err_t doFillNormalizedBoxI(RasterPaintEngine* engine, const BoxI& box);
-  static FOG_INLINE err_t doFillNormalizedBoxF(RasterPaintEngine* engine, const BoxF& box);
-  static FOG_INLINE err_t doFillNormalizedBoxD(RasterPaintEngine* engine, const BoxD& box);
+      TransformD tr(engine->finalTransform);
+      tr.translate(PointD(p.x, p.y));
 
-  // --------------------------------------------------------------------------
-  // [Painting - FillNormalizedPath]
-  // --------------------------------------------------------------------------
+      return engine->serializer->blitRawImageD(engine, box, i, RectI(iX, iY, iW, iH), tr);
+    }
+  }
+}
 
-  static FOG_NO_INLINE err_t doFillNormalizedPathF(RasterPaintEngine* engine, const PathF& path, uint32_t fillRule);
-  static FOG_NO_INLINE err_t doFillNormalizedPathD(RasterPaintEngine* engine, const PathD& path, uint32_t fillRule);
+err_t FOG_CDECL RasterPaintEngineImpl::blitImageInI(Painter& self, const RectI& r, const Image& i, const RectI* iFragment)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  if (i.isEmpty()) return ERR_OK;
 
-  // --------------------------------------------------------------------------
-  // [Painting - FillUntransformedPath]
-  // --------------------------------------------------------------------------
+  _FOG_RASTER_ENTER_BLIT_FUNC();
+  _FOG_RASTER_IMAGE_PARAMS(i, iFragment)
 
-  static err_t doFillUntransformedPathF(RasterPaintEngine* engine, const PathF& path, uint32_t fillRule, bool clip);
-  static err_t doFillUntransformedPathD(RasterPaintEngine* engine, const PathD& path, uint32_t fillRule, bool clip);
+  // Try to use unscaled blit if possible.
+  if (r.w == iW && r.h == iH) return engine->vtable->blitImageAtI(self, PointI(r.x, r.y), i, iFragment);
 
-  // --------------------------------------------------------------------------
-  // [Painting - Blit]
-  // --------------------------------------------------------------------------
+  uint32_t transformType = engine->finalTransform.getType();
+  BoxD box(double(r.x), double(r.y), double(r.x) + double(r.w), double(r.y) + double(r.h));
 
-  static FOG_INLINE err_t doBlitNormalizedImageI(RasterPaintEngine* engine,
-    const PointI& pt, const Image& srcImage, const RectI& srcFragment);
+  TransformD tr(engine->finalTransform);
+  double sx = double(r.w) / double(iW);
+  double sy = double(r.h) / double(iH);
 
-  static err_t doBlitNormalizedTransformedImageI(RasterPaintEngine* engine,
-    const BoxI& box, const Image& srcImage, const RectI& srcFragment, const TransformD& srcTransform);
+  TransformD scaling(sx, 0.0, 0.0, sy, r.x, r.y);
+  tr.transform(scaling);
 
-  static err_t doBlitNormalizedTransformedImageD(RasterPaintEngine* engine,
-    const BoxD& box, const Image& srcImage, const RectI& srcFragment, const TransformD& srcTransform);
+  BoxD transformedBox(UNINITIALIZED);
+  engine->finalTransform.mapBox(transformedBox, box);
+  if (!BoxD::intersect(transformedBox, transformedBox, engine->ctx.finalClipperD.getClipBox()))
+    return ERR_OK;
 
-  static err_t doBlitUntransformedImageD(RasterPaintEngine* engine,
-    const BoxD& box, const Image& srcImage, const RectI& srcFragment, const TransformD& srcTransform);
-};
+  if (transformType <= TRANSFORM_TYPE_SWAP)
+    return engine->serializer->blitNormalizedTransformedImageD(engine, transformedBox, i, RectI(iX, iY, iW, iH), tr);
+  else
+    return engine->serializer->blitRawImageD(engine, box, i, RectI(iX, iY, iW, iH), tr);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::blitImageInF(Painter& self, const RectF& r, const Image& i, const RectI* iFragment)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  if (i.isEmpty()) return ERR_OK;
+
+  _FOG_RASTER_ENTER_BLIT_FUNC();
+  _FOG_RASTER_IMAGE_PARAMS(i, iFragment)
+
+  uint32_t transformType = engine->finalTransform.getType();
+  BoxD box(double(r.x), double(r.y), double(r.x) + double(r.w), double(r.y) + double(r.h));
+
+  TransformD tr(double(r.w) / double(iW), 0.0, 0.0, double(r.h) / double(iH), r.x, r.y);
+  tr.transform(engine->finalTransform, MATRIX_ORDER_APPEND);
+
+  BoxD transformedBox(UNINITIALIZED);
+  engine->finalTransform.mapBox(transformedBox, box);
+  if (!BoxD::intersect(transformedBox, transformedBox, engine->ctx.finalClipperD.getClipBox()))
+    return ERR_OK;
+
+  if (transformType <= TRANSFORM_TYPE_SWAP)
+    return engine->serializer->blitNormalizedTransformedImageD(engine, transformedBox, i, RectI(iX, iY, iW, iH), tr);
+  else
+    return engine->serializer->blitRawImageD(engine, box, i, RectI(iX, iY, iW, iH), tr);
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::blitImageInD(Painter& self, const RectD& r, const Image& i, const RectI* iFragment)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+  if (i.isEmpty()) return ERR_OK;
+
+  _FOG_RASTER_ENTER_BLIT_FUNC();
+  _FOG_RASTER_IMAGE_PARAMS(i, iFragment)
+
+  uint32_t transformType = engine->finalTransform.getType();
+  BoxD box(double(r.x), double(r.y), double(r.x) + double(r.w), double(r.y) + double(r.h));
+
+  TransformD tr(double(r.w) / double(iW), 0.0, 0.0, double(r.h) / double(iH), r.x, r.y);
+  tr.transform(engine->finalTransform, MATRIX_ORDER_APPEND);
+
+  BoxD transformedBox(UNINITIALIZED);
+  engine->finalTransform.mapBox(transformedBox, box);
+  if (!BoxD::intersect(transformedBox, transformedBox, engine->ctx.finalClipperD.getClipBox()))
+    return ERR_OK;
+
+  if (transformType <= TRANSFORM_TYPE_SWAP)
+    return engine->serializer->blitNormalizedTransformedImageD(engine, transformedBox, i, RectI(iX, iY, iW, iH), tr);
+  else
+    return engine->serializer->blitRawImageD(engine, box, i, RectI(iX, iY, iW, iH), tr);
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::blitMaskedImageAtI(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::blitMaskedImageAtF(Painter& self, const PointF& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::blitMaskedImageAtD(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::blitMaskedImageInI(Painter& self, const RectI& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::blitMaskedImageInF(Painter& self, const RectF& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::blitMaskedImageInD(Painter& self, const RectD& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
 
 // ============================================================================
-// [Fog::RasterPainterImpl<> - Initialization]
+// [Fog::RasterPaintEngineImpl - Clip]
 // ============================================================================
 
-template<int _MODE>
-void RasterPainterImpl<_MODE>::initVTable(RasterPainterVTable& v)
+err_t FOG_CDECL RasterPaintEngineImpl::clipRectI(Painter& self, uint32_t clipOp, const RectI& r)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::clipRectF(Painter& self, uint32_t clipOp, const RectF& r)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::clipRectD(Painter& self, uint32_t clipOp, const RectD& r)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::clipRectsI(Painter& self, uint32_t clipOp, const RectI* r, size_t count)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::clipRectsF(Painter& self, uint32_t clipOp, const RectF* r, size_t count)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::clipRectsD(Painter& self, uint32_t clipOp, const RectD* r, size_t count)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::clipPolygonI(Painter& self, uint32_t clipOp, const PointI* p, size_t count)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::clipPolygonF(Painter& self, uint32_t clipOp, const PointF* p, size_t count)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::clipPolygonD(Painter& self, uint32_t clipOp, const PointD* p, size_t count)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::clipShapeF(Painter& self, uint32_t clipOp, uint32_t shapeType, const void* shapeData)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::clipShapeD(Painter& self, uint32_t clipOp, uint32_t shapeType, const void* shapeData)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::clipPathF(Painter& self, uint32_t clipOp, const PathF& p)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::clipPathD(Painter& self, uint32_t clipOp, const PathD& p)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::clipTextAtI(Painter& self, uint32_t clipOp, const PointI& p, const String& text, const Font& font, const RectI* clip)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::clipTextAtF(Painter& self, uint32_t clipOp, const PointF& p, const String& text, const Font& font, const RectF* clip)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::clipTextAtD(Painter& self, uint32_t clipOp, const PointD& p, const String& text, const Font& font, const RectD* clip)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::clipTextInI(Painter& self, uint32_t clipOp, const TextRectI& r, const String& text, const Font& font, const RectI* clip)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::clipTextInF(Painter& self, uint32_t clipOp, const TextRectF& r, const String& text, const Font& font, const RectF* clip)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::clipTextInD(Painter& self, uint32_t clipOp, const TextRectD& r, const String& text, const Font& font, const RectD* clip)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::clipMaskAtI(Painter& self, uint32_t clipOp, const PointI& p, const Image& m, const RectI* mFragment)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::clipMaskAtF(Painter& self, uint32_t clipOp, const PointF& p, const Image& m, const RectI* mFragment)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::clipMaskAtD(Painter& self, uint32_t clipOp, const PointD& p, const Image& m, const RectI* mFragment)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::clipMaskInI(Painter& self, uint32_t clipOp, const RectI& r, const Image& m, const RectI* mFragment)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::clipMaskInF(Painter& self, uint32_t clipOp, const RectF& r, const Image& m, const RectI* mFragment)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::clipMaskInD(Painter& self, uint32_t clipOp, const RectD& r, const Image& m, const RectI* mFragment)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::clipRegion(Painter& self, uint32_t clipOp, const Region& r)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::resetClip(Painter& self)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+// ============================================================================
+// [Fog::RasterPaintEngineImpl - Layer]
+// ============================================================================
+
+err_t FOG_CDECL RasterPaintEngineImpl::beginLayer(Painter& self)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t FOG_CDECL RasterPaintEngineImpl::endLayer(Painter& self)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+// ============================================================================
+// [Fog::RasterPaintEngineImpl - Flush]
+// ============================================================================
+
+err_t FOG_CDECL RasterPaintEngineImpl::flush(Painter& self, uint32_t flags)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
+
+  // TODO: MT version.
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::RasterPaintEngineImpl - InitVTable]
+// ============================================================================
+
+void RasterPaintEngineImpl::initVTable(RasterPaintEngineVTable& v)
 {
   // --------------------------------------------------------------------------
   // [AddRef / Release]
@@ -3438,181 +3953,1016 @@ void RasterPainterImpl<_MODE>::initVTable(RasterPainterVTable& v)
 }
 
 // ============================================================================
-// [Fog::RasterPainterImpl<> - Clear]
+// [Fog::RasterPaintEngineImpl - State - Create / Pool]
 // ============================================================================
 
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillAll(Painter& self)
+RasterState* RasterPaintEngineImpl::createState(RasterPaintEngine* engine)
 {
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
+  RasterState* s = engine->statePool;
 
-  doFillNormalizedBoxI(engine, engine->ctx.finalClipBoxI);
+  if (FOG_IS_NULL(s))
+  {
+    s = reinterpret_cast<RasterState*>(engine->stateAllocator.alloc(sizeof(RasterState)));
+    return s;
+  }
+  else
+  {
+    engine->statePool = s->prevState;
+    return s;
+  }
+}
+
+void RasterPaintEngineImpl::poolState(RasterPaintEngine* engine, RasterState* state)
+{
+  state->prevState = engine->statePool;
+  engine->statePool = state;
+}
+
+// ============================================================================
+// [Fog::RasterPaintEngineImpl - State - Save ...]
+// ============================================================================
+
+void RasterPaintEngineImpl::saveSource(RasterPaintEngine* engine)
+{
+  FOG_ASSERT((engine->savedStateFlags & RASTER_STATE_SOURCE) == 0);
+
+  RasterState* state = engine->state;
+  FOG_ASSERT(state != NULL);
+
+  engine->savedStateFlags |= RASTER_STATE_SOURCE;
+  state->sourceType = (uint8_t)engine->sourceType;
+
+  switch (engine->sourceType)
+  {
+    case PATTERN_TYPE_NONE:
+      break;
+
+    case PATTERN_TYPE_COLOR:
+      state->source.color.initCustom1(engine->source.color.instance());
+      break;
+
+    case PATTERN_TYPE_TEXTURE:
+      state->source.texture.initCustom1(engine->source.texture.instance());
+      goto _SaveSourceContinue;
+
+    case PATTERN_TYPE_GRADIENT:
+      state->source.gradient.initCustom1(engine->source.gradient.instance());
+
+_SaveSourceContinue:
+      state->source.transform.initCustom1(engine->source.transform.instance());
+      state->pc = NULL;
+      if (!RasterUtil::isPatternContext(engine->ctx.pc)) break;
+
+      state->pc = engine->ctx.pc;
+      state->pc->_refCount.inc();
+      break;
+
+    default:
+      FOG_ASSERT_NOT_REACHED();
+  }
+}
+
+void RasterPaintEngineImpl::saveStroke(RasterPaintEngine* engine)
+{
+  FOG_ASSERT((engine->savedStateFlags & RASTER_STATE_STROKE) == 0);
+
+  RasterState* state = engine->state;
+  FOG_ASSERT(state != NULL);
+
+  engine->savedStateFlags |= RASTER_STATE_STROKE;
+  state->strokeParamsPrecision = engine->strokeParamsPrecision;
+
+  switch (state->strokeParamsPrecision)
+  {
+    case RASTER_PRECISION_NONE:
+      break;
+
+    case RASTER_PRECISION_BOTH:
+      state->strokeParams.f.initCustom1(engine->strokeParams.f.instance());
+      // ... Fall through ...
+
+    case RASTER_PRECISION_D:
+      state->strokeParams.d.initCustom1(engine->strokeParams.d.instance());
+      break;
+
+    case RASTER_PRECISION_F:
+      state->strokeParams.f.initCustom1(engine->strokeParams.f.instance());
+      break;
+
+    default:
+      FOG_ASSERT_NOT_REACHED();
+  }
+}
+
+void RasterPaintEngineImpl::saveTransform(RasterPaintEngine* engine)
+{
+  FOG_ASSERT((engine->savedStateFlags & RASTER_STATE_TRANSFORM) == 0);
+
+  RasterState* state = engine->state;
+  FOG_ASSERT(state != NULL);
+
+  engine->savedStateFlags |= RASTER_STATE_TRANSFORM;
+  state->userTransform.initCustom1(engine->userTransform);
+  state->finalTransform.initCustom1(engine->finalTransform);
+  state->finalTransformF.initCustom1(engine->finalTransformF);
+
+  state->coreTranslationI = engine->coreTranslationI;
+  state->finalTransformI._type = engine->finalTransformI._type;
+  state->finalTransformI._sx = engine->finalTransformI._sx;
+  state->finalTransformI._sy = engine->finalTransformI._sy;
+  state->finalTransformI._tx = engine->finalTransformI._tx;
+  state->finalTransformI._ty = engine->finalTransformI._ty;
+}
+
+void RasterPaintEngineImpl::saveClipping(RasterPaintEngine* engine)
+{
+  FOG_ASSERT((engine->savedStateFlags & RASTER_STATE_CLIPPING) == 0);
+
+  RasterState* state = engine->state;
+  FOG_ASSERT(state != NULL);
+
+  engine->savedStateFlags |= RASTER_STATE_CLIPPING;
+
+  // TODO: Clipping.
+}
+
+// ============================================================================
+// [Fog::RasterPaintEngineImpl - State - Discard States]
+// ============================================================================
+
+void RasterPaintEngineImpl::discardStates(RasterPaintEngine* engine)
+{
+  RasterState* state = engine->state;
+  RasterState* last = NULL;
+  if (state == NULL) return;
+
+  do {
+    // Get the states which must be restored. It's important to destroy all
+    // state resources or memory leak will occur.
+    uint32_t restoreFlags = engine->savedStateFlags;
+
+    if (restoreFlags & RASTER_STATE_SOURCE)
+    {
+      switch (state->sourceType)
+      {
+        case PATTERN_TYPE_NONE:
+        case PATTERN_TYPE_COLOR:
+          break;
+
+        case PATTERN_TYPE_TEXTURE:
+          state->source.texture.destroy();
+          goto _DiscardSourceContinue;
+
+        case PATTERN_TYPE_GRADIENT:
+          state->source.gradient.destroy();
+
+_DiscardSourceContinue:
+          if (state->pc != NULL && state->pc->_refCount.deref())
+            destroyPatternContext(engine, state->pc);
+          break;
+
+        default:
+          FOG_ASSERT_NOT_REACHED();
+      }
+    }
+
+    if (restoreFlags & RASTER_STATE_STROKE)
+    {
+      if (state->strokeParamsPrecision & RASTER_PRECISION_F) state->strokeParams.f.destroy();
+      if (state->strokeParamsPrecision & RASTER_PRECISION_D) state->strokeParams.d.destroy();
+    }
+
+    if (restoreFlags & RASTER_STATE_TRANSFORM)
+    {
+      // Nothing here.
+    }
+
+    if (restoreFlags & RASTER_STATE_CLIPPING)
+    {
+      // TODO: Clipping.
+    }
+
+    last = state;
+    state = state->prevState;
+  } while (state != NULL);
+
+  // Pool all discarded states.
+  last->prevState = engine->statePool;
+
+  engine->statePool = engine->state;
+  engine->state = NULL;
+}
+
+// ============================================================================
+// [Fog::RasterPaintEngineImpl - Mode]
+// ============================================================================
+
+FOG_INLINE uint RasterPaintEngineImpl::getMaxThreads()
+{
+  return Math::max<uint>(Cpu::get()->numberOfProcessors, RASTER_MAX_THREADS_SUGGESTED);
+}
+
+// ============================================================================
+// [Fog::RasterPaintEngineImpl - Initialize]
+// ============================================================================
+
+void RasterPaintEngineImpl::setupLayer(RasterPaintEngine* engine)
+{
+  // ${IMAGE_FORMAT:BEGIN}
+  static const uint8_t secondaryFromPrimary[] =
+  {
+    /* 00: PRGB32    -> */ IMAGE_FORMAT_PRGB32,
+    /* 01: XRGB32    -> */ IMAGE_FORMAT_XRGB32,
+    /* 02: RGB24     -> */ IMAGE_FORMAT_XRGB32,
+    /* 03: A8        -> */ IMAGE_FORMAT_PRGB32,
+    /* 04: I8        -> */ IMAGE_FORMAT_NULL  ,
+    /* 05: PRGB64    -> */ IMAGE_FORMAT_PRGB64,
+    /* 06: RGB48     -> */ IMAGE_FORMAT_PRGB64,
+    /* 07: A16       -> */ IMAGE_FORMAT_PRGB64
+  };
+  // ${IMAGE_FORMAT:END}
+
+  uint32_t primaryFormat = engine->ctx.layer.primaryFormat;
+  uint32_t secondaryFormat = secondaryFromPrimary[primaryFormat];
+
+  const ImageFormatDescription& primaryDescription = ImageFormatDescription::getByFormat(primaryFormat);
+  const ImageFormatDescription& secondaryDescription = ImageFormatDescription::getByFormat(secondaryFormat);
+
+  engine->ctx.layer.primaryBPP = (uint32_t)primaryDescription.getBytesPerPixel();
+  engine->ctx.layer.primaryBPL = (uint32_t)engine->ctx.layer.size.w * engine->ctx.layer.primaryBPP;
+  engine->ctx.layer.precision = primaryDescription.getPrecision();
+
+  if (primaryFormat != secondaryFormat)
+  {
+    engine->ctx.layer.secondaryFormat = secondaryFormat;
+    engine->ctx.layer.secondaryBPP = (uint32_t)secondaryDescription.getBytesPerPixel();
+    engine->ctx.layer.secondaryBPL = (uint32_t)engine->ctx.layer.size.w * engine->ctx.layer.secondaryBPP;
+
+    engine->ctx.layer.cvtSecondaryFromPrimary = _g2d_render.getCompositeCoreFuncs(secondaryFormat, COMPOSITE_SRC)->vblit_line[primaryFormat];
+    engine->ctx.layer.cvtPrimaryFromSecondary = _g2d_render.getCompositeCoreFuncs(primaryFormat, COMPOSITE_SRC)->vblit_line[secondaryFormat];
+
+    FOG_ASSERT(engine->ctx.layer.cvtSecondaryFromPrimary != NULL);
+    FOG_ASSERT(engine->ctx.layer.cvtPrimaryFromSecondary != NULL);
+  }
+  else
+  {
+    engine->ctx.layer.secondaryFormat = IMAGE_FORMAT_NULL;
+    engine->ctx.layer.secondaryBPP = 0;
+    engine->ctx.layer.secondaryBPL = 0;
+
+    engine->ctx.layer.cvtSecondaryFromPrimary = NULL;
+    engine->ctx.layer.cvtPrimaryFromSecondary = NULL;
+  }
+}
+
+void RasterPaintEngineImpl::setupOps(RasterPaintEngine* engine)
+{
+  engine->ctx.paintHints.packed = 0;
+  engine->ctx.paintHints.compositingOperator = COMPOSITE_SRC_OVER;
+  engine->ctx.paintHints.renderQuality = RENDER_QUALITY_DEFAULT;
+  engine->ctx.paintHints.imageQuality = IMAGE_QUALITY_DEFAULT;
+  engine->ctx.paintHints.gradientQuality = GRADIENT_QUALITY_NORMAL;
+  engine->ctx.paintHints.outlinedText = 0;
+  engine->ctx.paintHints.fastLine = 0;
+  engine->ctx.paintHints.geometricPrecision = GEOMETRIC_PRECISION_NORMAL;
+  engine->ctx.paintHints.fillRule = FILL_RULE_DEFAULT;
+
+  engine->ctx.rasterHints.packed = 0;
+  engine->ctx.rasterHints.opacity = engine->ctx.fullOpacity.u;
+  engine->ctx.rasterHints.rectToRectTransform = 1;
+  engine->ctx.rasterHints.finalTransformF = 0;
+  engine->ctx.rasterHints.idealLine = 1;
+
+  engine->opacityF = 1.0f;
+
+  // TODO: Move.
+  engine->sourceType = PATTERN_TYPE_COLOR;
+
+  engine->source.color.init();
+  engine->source.transform.init();
+}
+
+void RasterPaintEngineImpl::setupDefaultClip(RasterPaintEngine* engine)
+{
+  BoxI boundingBox(
+    0, 0,
+    (int)engine->ctx.layer.size.w,
+    (int)engine->ctx.layer.size.h);
+  FOG_ASSERT(boundingBox.isValid());
+
+  // Final matrix is translated by the finalOrigin, we are translating it back.
+  // After this function is called it remains fully usable and valid.
+  // TODO: Painter.
+  //engine->finalTransformI._tx -= engine->finalOrigin.x;
+  //engine->finalTransformI._ty -= engine->finalOrigin.y;
+
+  // Clear the regions and origins and set work and final region to the bounds.
+  engine->metaOrigin.reset();
+  engine->metaRegion = Region::infinite();
+
+  engine->userOrigin.reset();
+  engine->userRegion = Region::infinite();
+
+  engine->coreClipType = RASTER_CLIP_BOX;
+  engine->coreClipBox = boundingBox;
+  engine->coreRegion = boundingBox;
+
+  // TODO:?
+  engine->ctx.finalClipType = RASTER_CLIP_BOX;
+  engine->ctx.finalClipBoxI = boundingBox;
+  engine->ctx.finalClipperF.setClipBox(BoxF(boundingBox));
+  engine->ctx.finalClipperD.setClipBox(BoxD(boundingBox));
+  engine->ctx.finalRegion = engine->coreRegion;
+
+  // TODO:
+  //engine->ctx.state |= RASTER_STATE_PENDING_CLIP_REGION;
+}
+
+void RasterPaintEngineImpl::setupDefaultSerializer(RasterPaintEngine* engine)
+{
+  engine->serializer = &RasterPaintEngine_serializer[RASTER_MODE_ST];
+}
+
+// ============================================================================
+// [Fog::RasterPaintEngineImpl - Helpers - Source]
+// ============================================================================
+
+void RasterPaintEngineImpl::discardSource(RasterPaintEngine* engine)
+{
+  switch (engine->sourceType)
+  {
+    case PATTERN_TYPE_NONE:
+    case PATTERN_TYPE_COLOR:
+      break;
+
+    case PATTERN_TYPE_TEXTURE:
+      engine->source.texture.destroy();
+      goto _DiscardContinue;
+
+    case PATTERN_TYPE_GRADIENT:
+      engine->source.gradient.destroy();
+
+_DiscardContinue:
+      if (engine->source.transform->_type != TRANSFORM_TYPE_IDENTITY) engine->source.transform->reset();
+
+      if (RasterUtil::isPatternContext(engine->ctx.pc) && engine->ctx.pc->_refCount.deref())
+        destroyPatternContext(engine, engine->ctx.pc);
+      break;
+
+    default:
+      FOG_ASSERT_NOT_REACHED();
+  }
+}
+
+err_t RasterPaintEngineImpl::createPatternContext(RasterPaintEngine* engine)
+{
+  err_t err = ERR_RT_NOT_IMPLEMENTED;
+  uint32_t sourceType = engine->sourceType;
+
+  FOG_ASSERT(sourceType != PATTERN_TYPE_NONE);
+  FOG_ASSERT(sourceType != PATTERN_TYPE_COLOR);
+
+  // First try to reuse context from context-pool.
+  RenderPatternContext* pc = reinterpret_cast<RenderPatternContext*>(engine->pcPool);
+
+  if (FOG_IS_NULL(pc))
+  {
+    pc = reinterpret_cast<RenderPatternContext*>(engine->pcAllocator.alloc(sizeof(RenderPatternContext)));
+    if (FOG_IS_NULL(pc)) return ERR_RT_OUT_OF_MEMORY;
+  }
+  else
+  {
+    engine->pcPool = reinterpret_cast<RasterAbstractLinkedList*>(pc)->next;
+  }
+
+  engine->ctx.pc = pc;
+
+  // Set reference count to 1 and initialize the context state to UNINITIALIZED.
+  // It's important to mark context as uninitialized, because there are asserts
+  // inside pattern-context initializers and leaving the pattern-context state
+  // as is might cause crash in debug-mode.
+  pc->_refCount.set(1);
+  pc->reset();
+
+  switch (sourceType)
+  {
+    case PATTERN_TYPE_TEXTURE:
+    {
+      err = _g2d_render.texture.create(pc,
+        engine->ctx.layer.primaryFormat,
+        engine->coreClipBox,
+        engine->source.texture->getImage(),
+        engine->source.texture->getFragment(),
+        engine->source.adjusted.instance(),
+        engine->source.texture->getClampColor(),
+        engine->source.texture->getTileType(),
+        engine->ctx.paintHints.imageQuality);
+      break;
+    }
+
+    case PATTERN_TYPE_GRADIENT:
+    {
+      uint32_t gradientType = engine->source.gradient->getGradientType();
+      err = _g2d_render.gradient.create[gradientType](pc,
+        engine->ctx.layer.primaryFormat,
+        engine->coreClipBox,
+        engine->source.gradient.instance(),
+        engine->source.adjusted.instance(),
+        engine->ctx.paintHints.gradientQuality);
+      break;
+    }
+
+    default:
+      FOG_ASSERT_NOT_REACHED();
+  }
+
+  if (FOG_IS_ERROR(err))
+  {
+    reinterpret_cast<RasterAbstractLinkedList*>(pc)->next = engine->pcPool;
+    engine->pcPool = reinterpret_cast<RasterAbstractLinkedList*>(pc);
+
+    engine->ctx.pc = NULL;
+  }
+
+  return err;
+}
+
+void RasterPaintEngineImpl::destroyPatternContext(RasterPaintEngine* engine, RenderPatternContext* pc)
+{
+  pc->destroy();
+
+  reinterpret_cast<RasterAbstractLinkedList*>(pc)->next = engine->pcPool;
+  engine->pcPool = reinterpret_cast<RasterAbstractLinkedList*>(pc);
+}
+
+// ============================================================================
+// [Fog::RasterPaintEngineImpl - Helpers - Transform]
+// ============================================================================
+
+bool RasterPaintEngineImpl::ensureFinalTransformF(RasterPaintEngine* engine)
+{
+  if (engine->finalTransform._type == TRANSFORM_TYPE_IDENTITY) return false;
+
+  if (!engine->ctx.rasterHints.finalTransformF)
+  {
+    engine->finalTransformF = engine->finalTransform;
+    engine->ctx.rasterHints.finalTransformF = 1;
+  }
+  return true;
+}
+
+// ============================================================================
+// [Fog::RasterPaintEngineImpl - Changed - Core]
+// ============================================================================
+
+err_t RasterPaintEngineImpl::changedCoreClip(RasterPaintEngine* engine)
+{
+  err_t err = ERR_OK;
+  BoxI bounds(0, 0, engine->ctx.layer.size.w, engine->ctx.layer.size.h);
+
+  engine->masterFlags &= ~RASTER_NO_PAINT_CORE_REGION;
+  engine->coreOrigin = engine->metaOrigin + engine->userOrigin;
+
+  if (engine->metaRegion.isInfinite())
+  {
+    if (engine->userRegion.isInfinite())
+    {
+      // Meta=Infinite, User=Infinite.
+      engine->coreRegion = Region::infinite();
+    }
+    else
+    {
+      // Meta=Infinite, User=Finite.
+      err = Region::translateAndClip(engine->coreRegion, engine->userRegion, engine->metaOrigin, bounds);
+      if (FOG_IS_ERROR(err)) goto _Fail;
+    }
+  }
+  else
+  {
+    if (engine->userRegion.isInfinite())
+    {
+      // Meta=Finite, User=Infinite.
+      engine->coreRegion = engine->metaRegion;
+    }
+    else
+    {
+      // Meta=Finite, User=Finite.
+      err = Region::translateAndClip(engine->tmpRegion[0], engine->userRegion, engine->metaOrigin, bounds);
+      if (FOG_IS_ERROR(err)) goto _Fail;
+
+      err = Region::combine(engine->coreRegion, engine->metaRegion, engine->tmpRegion[0], REGION_OP_INTERSECT);
+      if (FOG_IS_ERROR(err)) goto _Fail;
+    }
+  }
+
+  // Detect the core clip-type.
+  switch (engine->coreRegion.getType())
+  {
+    case REGION_TYPE_EMPTY:
+      engine->masterFlags |= RASTER_NO_PAINT_CORE_REGION;
+
+      engine->coreClipType = RASTER_CLIP_NULL;
+      engine->coreClipBox.reset();
+      break;
+
+    case REGION_TYPE_SIMPLE:
+      engine->coreClipType = RASTER_CLIP_BOX;
+      engine->coreClipBox = engine->coreRegion.getExtents();
+      break;
+
+    case REGION_TYPE_COMPLEX:
+      engine->coreClipType = RASTER_CLIP_REGION;
+      engine->coreClipBox = engine->coreRegion.getExtents();
+      break;
+
+    case REGION_TYPE_INFINITE:
+      engine->coreClipType = RASTER_CLIP_BOX;
+      engine->coreClipBox = bounds;
+      break;
+
+    default:
+      FOG_ASSERT_NOT_REACHED();
+  }
+
+  if (engine->coreOrigin.x == 0 && engine->coreOrigin.y == 0)
+  {
+    engine->coreTranslationI.reset();
+
+    engine->coreTransform._type = TRANSFORM_TYPE_IDENTITY;
+    engine->coreTransform._20 = 0.0;
+    engine->coreTransform._21 = 0.0;
+  }
+  else
+  {
+    engine->coreTranslationI.set(-engine->coreOrigin.x, -engine->coreOrigin.y);
+
+    engine->coreTransform._type = TRANSFORM_TYPE_TRANSLATION;
+    engine->coreTransform._20 = (double)(engine->coreTranslationI.x);
+    engine->coreTransform._21 = (double)(engine->coreTranslationI.y);
+  }
+  return ERR_OK;
+
+_Fail:
+  engine->masterFlags |= RASTER_NO_PAINT_CORE_REGION;
+
+  engine->coreRegion.clear();
+  engine->coreOrigin.reset();
+
+  return err;
+}
+
+// ============================================================================
+// [Fog::RasterPaintEngineImpl - Changed - Transform]
+// ============================================================================
+
+void RasterPaintEngineImpl::changedTransform(RasterPaintEngine* engine)
+{
+  engine->masterFlags &= ~RASTER_NO_PAINT_FINAL_TRANSFORM;
+
+  engine->ctx.rasterHints.rectToRectTransform = 1;
+  engine->ctx.rasterHints.finalTransformF = 0;
+
+  engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_NONE;
+  engine->finalTransformI._sx = 1;
+  engine->finalTransformI._sy = 1;
+  engine->finalTransformI._tx = 0;
+  engine->finalTransformI._ty = 0;
+
+  if (engine->userTransform.getType() == TRANSFORM_TYPE_IDENTITY)
+    engine->finalTransform = engine->coreTransform;
+  else
+    TransformD::multiply(engine->finalTransform, engine->coreTransform, engine->userTransform);
+
+  switch (engine->finalTransform.getType())
+  {
+    case TRANSFORM_TYPE_DEGENERATE:
+      engine->masterFlags |= RASTER_NO_PAINT_FINAL_TRANSFORM;
+      engine->ctx.rasterHints.rectToRectTransform = 0;
+      return;
+
+    case TRANSFORM_TYPE_PROJECTION:
+      engine->ctx.rasterHints.rectToRectTransform = 0;
+      return;
+
+    case TRANSFORM_TYPE_AFFINE:
+    case TRANSFORM_TYPE_ROTATION:
+      engine->ctx.rasterHints.rectToRectTransform = 0;
+      return;
+
+    case TRANSFORM_TYPE_SWAP:
+      if (!Math::isFuzzyToInt(engine->finalTransform._01, engine->finalTransformI._sx)) break;
+      if (!Math::isFuzzyToInt(engine->finalTransform._10, engine->finalTransformI._sy)) break;
+
+      engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_SWAP;
+      goto _Translation;
+
+    case TRANSFORM_TYPE_SCALING:
+      if (!Math::isFuzzyToInt(engine->finalTransform._00, engine->finalTransformI._sx)) break;
+      if (!Math::isFuzzyToInt(engine->finalTransform._11, engine->finalTransformI._sy)) break;
+
+      engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_SCALING;
+      goto _Translation;
+
+    case TRANSFORM_TYPE_TRANSLATION:
+      engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_SIMPLE;
+
+_Translation:
+      if (!Math::isFuzzyToInt(engine->finalTransform._20, engine->finalTransformI._tx)) break;
+      if (!Math::isFuzzyToInt(engine->finalTransform._21, engine->finalTransformI._ty)) break;
+      return;
+
+    case TRANSFORM_TYPE_IDENTITY:
+      engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_SIMPLE;
+      return;
+  }
+
+  // Transform is not integral.
+  engine->finalTransformI._type = RASTER_INTEGRAL_TRANSFORM_NONE;
+}
+
+// ============================================================================
+// [Fog::RasterPaintEngineImpl - Helpers - Clipping]
+// ============================================================================
+
+bool RasterPaintEngineImpl::doIntegralTransformAndClip(RasterPaintEngine* engine, BoxI& dst, const RectI& src)
+{
+  int tx = engine->finalTransformI._tx;
+  int ty = engine->finalTransformI._ty;
+
+  int sw = src.w;
+  int sh = src.h;
+
+  switch (engine->finalTransformI._type)
+  {
+    case RASTER_INTEGRAL_TRANSFORM_SWAP:
+      tx += src.y * engine->finalTransformI._sx;
+      ty += src.x * engine->finalTransformI._sy;
+
+      sw *= engine->finalTransformI._sy;
+      sh *= engine->finalTransformI._sx;
+      goto _Scaled;
+
+    case RASTER_INTEGRAL_TRANSFORM_SCALING:
+      tx += src.x * engine->finalTransformI._sx;
+      ty += src.y * engine->finalTransformI._sy;
+
+      sw *= engine->finalTransformI._sx;
+      sh *= engine->finalTransformI._sy;
+
+_Scaled:
+      dst.x0 = tx;
+      dst.y0 = ty;
+
+      tx += sw;
+      ty += sh;
+
+      dst.x1 = tx;
+      dst.y1 = ty;
+
+      if (dst.x0 > dst.x1) swap(dst.x0, dst.x1);
+      if (dst.y0 > dst.y1) swap(dst.x0, dst.x1);
+      return BoxI::intersect(dst, dst, engine->ctx.finalClipBoxI);
+
+    case RASTER_INTEGRAL_TRANSFORM_SIMPLE:
+      tx += src.x;
+      ty += src.y;
+
+      dst.x0 = tx;
+      dst.y0 = ty;
+
+      tx += sw;
+      ty += sh;
+
+      dst.x1 = tx;
+      dst.y1 = ty;
+      return BoxI::intersect(dst, dst, engine->ctx.finalClipBoxI);
+
+    default:
+      FOG_ASSERT_NOT_REACHED();
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ============================================================================
+// [Fog::RasterPaintFiller]
+// ============================================================================
+
+struct FOG_NO_EXPORT RasterPaintFiller : public RasterFiller
+{
+  RasterContext* ctx;
+
+  uint8_t* pixels;
+  sysint_t stride;
+  int delta;
+
+  struct _CBlit
+  {
+    RenderCBlitSpanFn blit;
+    RenderClosure* closure;
+    RenderSolid* solid;
+  };
+
+  struct _VBlit
+  {
+    RenderVBlitSpanFn blit;
+    RenderClosure* closure;
+    RenderPatternContext* pc;
+    MemoryBuffer* pb;
+    RenderPatternFetcher pf;
+  };
+
+  union
+  {
+    _CBlit c;
+    _VBlit v;
+  };
+};
+
+static void FOG_FASTCALL RasterPaintFiller_prepare_solid(RasterPaintFiller* self, int y)
+{
+  self->pixels += self->stride * y;
+  self->stride *= self->delta;
+}
+
+static void FOG_FASTCALL RasterPaintFiller_prepare_pattern(RasterPaintFiller* self, int y)
+{
+  self->v.pc->prepare(&self->v.pf, y, self->delta, RENDER_FETCH_REFERENCE);
+
+  self->pixels += self->stride * y;
+  self->stride *= self->delta;
+}
+
+static void FOG_FASTCALL RasterPaintFiller_process_solid(RasterPaintFiller* self, RasterSpan8* spans)
+{
+#if defined(FOG_DEBUG)
+  RasterUtil::validateSpans<RasterSpan8>(spans, self->ctx->finalClipBoxI.x0, self->ctx->finalClipBoxI.x1);
+#endif // FOG_DEBUG
+
+  self->c.blit(self->pixels, self->c.solid, spans, self->c.closure);
+  self->pixels += self->stride;
+}
+
+static void FOG_FASTCALL RasterPaintFiller_process_pattern(RasterPaintFiller* self, RasterSpan8* spans)
+{
+#if defined(FOG_DEBUG)
+  RasterUtil::validateSpans<RasterSpan8>(spans, self->ctx->finalClipBoxI.x0, self->ctx->finalClipBoxI.x1);
+#endif // FOG_DEBUG
+
+  self->v.pf.fetch(spans, self->v.pb->getBuffer());
+  self->v.blit(self->pixels, spans, self->v.closure);
+  self->pixels += self->stride;
+}
+
+static void FOG_FASTCALL RasterPaintFiller_skip_solid(RasterPaintFiller* self, int step)
+{
+  self->pixels += self->stride * step;
+}
+
+static void FOG_FASTCALL RasterPaintFiller_skip_pattern(RasterPaintFiller* self, int step)
+{
+  self->pixels += self->stride * step;
+  self->v.pf.skip(step);
+}
+
+// ============================================================================
+// [Fog::RasterPaintSerializer - FillRasterizedShape (st)]
+// ============================================================================
+
+static err_t FOG_FASTCALL RasterPaintSerializer_fillRasterizedShape8_st(RasterPaintEngine* engine, Rasterizer8* rasterizer)
+{
+  RasterPaintFiller filler;
+
+  uint8_t* pixels = engine->ctx.layer.pixels;
+  sysint_t stride = engine->ctx.layer.stride;
+  uint32_t format = engine->ctx.layer.primaryFormat;
+  uint32_t compositingOperator = engine->ctx.paintHints.compositingOperator;
+
+  filler.ctx = &engine->ctx;
+  filler.pixels = pixels;
+  filler.stride = stride;
+  filler.delta = engine->ctx.scope.getDelta();
+
+  if (RasterUtil::isSolidContext(engine->ctx.pc))
+  {
+    bool isSrcOpaque = Face::p32PRGB32IsAlphaFF(engine->ctx.solid.prgb32.p32);
+
+    filler._prepare = (RasterFiller::PrepareFn)RasterPaintFiller_prepare_solid;
+    filler._process = (RasterFiller::ProcessFn)RasterPaintFiller_process_solid;
+    filler._skip = (RasterFiller::SkipFn)RasterPaintFiller_skip_solid;
+
+    filler.c.blit = _g2d_render.getCBlitSpan(format, compositingOperator, isSrcOpaque);
+    filler.c.closure = &engine->ctx.closure;
+    filler.c.solid = &engine->ctx.solid;
+
+    rasterizer->render(&filler, engine->ctx.scanline8.instancep(), &engine->ctx.buffer);
+  }
+  else
+  {
+    _FOG_RASTER_ENSURE_PATTERN(engine);
+
+    filler._prepare = (RasterFiller::PrepareFn)RasterPaintFiller_prepare_pattern;
+    filler._process = (RasterFiller::ProcessFn)RasterPaintFiller_process_pattern;
+    filler._skip = (RasterFiller::SkipFn)RasterPaintFiller_skip_pattern;
+
+    filler.v.blit = _g2d_render.getVBlitSpan(format, compositingOperator, engine->ctx.pc->getSrcFormat());
+    filler.v.closure = &engine->ctx.closure;
+
+    filler.v.pc = engine->ctx.pc;
+    filler.v.pb = &engine->ctx.buffer;
+
+    rasterizer->render(&filler, engine->ctx.scanlineExt8.instancep(), &engine->ctx.buffer);
+  }
+
   return ERR_OK;
 }
 
 // ============================================================================
-// [Fog::RasterPainterImpl<> - Draw]
+// [Fog::RasterPaintSerializer - FillNormalizedBox (st)]
 // ============================================================================
 
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::drawRectI(Painter& self, const RectI& r)
+static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxI_st(
+  RasterPaintEngine* engine, const BoxI& box)
 {
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_STROKE_FUNC();
-
-  if (engine->ctx.paintHints.geometricPrecision)
-    return engine->vtable->drawRectD(self, RectD(r));
-  else
-    return engine->vtable->drawRectF(self, RectF(r));
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::drawRectF(Painter& self, const RectF& r)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_STROKE_FUNC();
-
-  PathF& path = engine->ctx.tmpPathF[2];
-  path.clear();
-  path.rect(r);
-  return engine->vtable->drawPathF(self, path);
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::drawRectD(Painter& self, const RectD& r)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_STROKE_FUNC();
-
-  PathD& path = engine->ctx.tmpPathD[2];
-  path.clear();
-  path.rect(r);
-  return engine->vtable->drawPathD(self, path);
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPolylineI(Painter& self, const PointI* p, size_t count)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_STROKE_FUNC();
-
-  if (engine->ctx.paintHints.geometricPrecision)
+  if (engine->ctx.precision == IMAGE_PRECISION_BYTE)
   {
-    PathD& path = engine->ctx.tmpPathD[2];
-    path.clear();
-    path.polyline(p, count);
-    return engine->vtable->drawPathD(self, path);
+    // Fast-path (clip-box and full-opacity).
+    if (engine->ctx.rasterHints.opacity == 0x100 && engine->ctx.finalClipType == RASTER_CLIP_BOX)
+    {
+      uint8_t* pixels = engine->ctx.layer.pixels;
+      sysint_t stride = engine->ctx.layer.stride;
+      uint32_t format = engine->ctx.layer.primaryFormat;
+      uint32_t compositingOperator = engine->ctx.paintHints.compositingOperator;
+
+      int y0 = box.y0;
+      int y1 = box.y1;
+
+      int w = box.x1 - box.x0;
+      int i = box.y1 - box.y0;
+
+      pixels += y0 * stride;
+
+      if (RasterUtil::isSolidContext(engine->ctx.pc))
+      {
+        bool isSrcOpaque = Face::p32PRGB32IsAlphaFF(engine->ctx.solid.prgb32.p32);
+        RenderCBlitLineFn blitLine = _g2d_render.getCBlitLine(format, compositingOperator, isSrcOpaque);
+
+        pixels += box.x0 * engine->ctx.layer.primaryBPP;
+        do {
+          blitLine(pixels, &engine->ctx.solid, w, &engine->ctx.closure);
+          pixels += stride;
+        } while (--i);
+      }
+      else
+      {
+        _FOG_RASTER_ENSURE_PATTERN(engine);
+
+        RenderPatternContext* pc = engine->ctx.pc;
+        RenderPatternFetcher pf;
+        
+        uint32_t srcFormat = pc->getSrcFormat();
+
+        RasterSpanExt8 span[1];
+        span[0].setPositionAndType(0, w, RASTER_SPAN_C);
+        span[0].setConstMask(0x100);
+        span[0].setNext(NULL);
+
+        if (RasterUtil::isCompositeCopyOp(format, srcFormat, compositingOperator))
+        {
+          pc->prepare(&pf, y0, 1, RENDER_FETCH_COPY);
+
+          pixels += box.x0 * engine->ctx.layer.primaryBPP;
+          do {
+            pf.fetch(span, pixels);
+            pixels += stride;
+          } while (--i);
+        }
+        else
+        {
+          pc->prepare(&pf, y0, 1, RENDER_FETCH_REFERENCE);
+
+          RenderVBlitLineFn blitLine = _g2d_render.getVBlitLine(format, compositingOperator, srcFormat);
+          uint8_t* srcPixels = engine->ctx.buffer.getBuffer();
+
+          do {
+            pf.fetch(span, srcPixels);
+            blitLine(pixels, span->getData(), w, &engine->ctx.closure);
+            pixels += stride;
+          } while (--i);
+        }
+      }
+      return ERR_OK;
+    }
+    else
+    {
+      BoxRasterizer8& rasterizer = engine->ctx.boxRasterizer8.instance();
+
+      rasterizer.setSceneBox(engine->ctx.finalClipBoxI);
+      rasterizer.setOpacity(engine->ctx.rasterHints.opacity);
+
+      rasterizer.initAligned(box);
+      return RasterPaintSerializer_fillRasterizedShape8_st(engine, &rasterizer);
+    }
   }
   else
   {
-    PathF& path = engine->ctx.tmpPathF[2];
-    path.clear();
-    path.polyline(p, count);
-    return engine->vtable->drawPathF(self, path);
+    // TODO: 16-bit rasterizer.
   }
 }
 
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPolylineF(Painter& self, const PointF* p, size_t count)
+static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxF_st(
+  RasterPaintEngine* engine, const BoxF& box)
 {
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_STROKE_FUNC();
-
-  PathF& path = engine->ctx.tmpPathF[2];
-  path.clear();
-  path.polyline(p, count);
-  return engine->vtable->drawPathF(self, path);
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPolylineD(Painter& self, const PointD* p, size_t count)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_STROKE_FUNC();
-
-  PathD& path = engine->ctx.tmpPathD[2];
-  path.clear();
-  path.polyline(p, count);
-  return engine->vtable->drawPathD(self, path);
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPolygonI(Painter& self, const PointI* p, size_t count)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_STROKE_FUNC();
-
-  if (engine->ctx.paintHints.geometricPrecision)
+  if (engine->ctx.precision == IMAGE_PRECISION_BYTE)
   {
-    PathD& path = engine->ctx.tmpPathD[2];
-    path.clear();
-    path.polygon(p, count);
-    return engine->vtable->drawPathD(self, path);
+    BoxI box24x8(UNINITIALIZED);
+    box24x8.x0 = Math::fixed24x8FromFloat(box.x0);
+    box24x8.y0 = Math::fixed24x8FromFloat(box.y0);
+    box24x8.x1 = Math::fixed24x8FromFloat(box.x1);
+    box24x8.y1 = Math::fixed24x8FromFloat(box.y1);
+
+    BoxRasterizer8& rasterizer = engine->ctx.boxRasterizer8.instance();
+
+    rasterizer.setSceneBox(engine->ctx.finalClipBoxI);
+    rasterizer.setOpacity(engine->ctx.rasterHints.opacity);
+
+    rasterizer.init24x8(box24x8);
+    return RasterPaintSerializer_fillRasterizedShape8_st(engine, &rasterizer);
   }
   else
   {
-    PathF& path = engine->ctx.tmpPathF[2];
-    path.clear();
-    path.polygon(p, count);
-    return engine->vtable->drawPathF(self, path);
+    // TODO: 16-bit rasterizer.
   }
 }
 
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPolygonF(Painter& self, const PointF* p, size_t count)
+static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxD_st(
+  RasterPaintEngine* engine, const BoxD& box)
 {
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_STROKE_FUNC();
+  if (engine->ctx.precision == IMAGE_PRECISION_BYTE)
+  {
+    BoxI box24x8(UNINITIALIZED);
+    box24x8.x0 = Math::fixed24x8FromFloat(box.x0);
+    box24x8.y0 = Math::fixed24x8FromFloat(box.y0);
+    box24x8.x1 = Math::fixed24x8FromFloat(box.x1);
+    box24x8.y1 = Math::fixed24x8FromFloat(box.y1);
 
-  PathF& path = engine->ctx.tmpPathF[2];
-  path.clear();
-  path.polygon(p, count);
-  return engine->vtable->drawPathF(self, path);
+    BoxRasterizer8& rasterizer = engine->ctx.boxRasterizer8.instance();
+
+    rasterizer.setSceneBox(engine->ctx.finalClipBoxI);
+    rasterizer.setOpacity(engine->ctx.rasterHints.opacity);
+
+    rasterizer.init24x8(box24x8);
+    return RasterPaintSerializer_fillRasterizedShape8_st(engine, &rasterizer);
+  }
+  else
+  {
+    // TODO: 16-bit rasterizer.
+  }
 }
 
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPolygonD(Painter& self, const PointD* p, size_t count)
+// ============================================================================
+// [Fog::RasterPaintSerializer - DrawRawPath (st)]
+// ============================================================================
+
+static err_t FOG_FASTCALL RasterPaintSerializer_drawRawPathF_st(
+  RasterPaintEngine* engine, const PathF& path)
 {
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_STROKE_FUNC();
-
-  PathD& path = engine->ctx.tmpPathD[2];
-  path.clear();
-  path.polygon(p, count);
-  return engine->vtable->drawPathD(self, path);
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::drawShapeF(Painter& self, uint32_t shapeType, const void* shapeData)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_STROKE_FUNC();
-
-  PathF& path = engine->ctx.tmpPathF[2];
-  path.clear();
-  path._shape(shapeType, shapeData, PATH_DIRECTION_CW, NULL);
-  return engine->vtable->drawPathF(self, path);
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::drawShapeD(Painter& self, uint32_t shapeType, const void* shapeData)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_STROKE_FUNC();
-
-  PathD& path = engine->ctx.tmpPathD[2];
-  path.clear();
-  path._shape(shapeType, shapeData, PATH_DIRECTION_CW, NULL);
-  return engine->vtable->drawPathD(self, path);
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPathF(Painter& self, const PathF& p)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_STROKE_FUNC();
-
   if (engine->strokeParamsPrecision == RASTER_PRECISION_D)
   {
     engine->strokeParamsPrecision = RASTER_PRECISION_BOTH;
@@ -3623,17 +4973,14 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPathF(Painter& self, const PathF& 
   tmp.clear();
 
   PathStrokerF stroker(engine->strokeParams.f.instance());
-  stroker.strokePath(tmp, p);
+  stroker.strokePath(tmp, path);
 
-  return doFillUntransformedPathF(engine, tmp, FILL_RULE_NON_ZERO, true);
+  return engine->serializer->fillRawPathF(engine, tmp, FILL_RULE_NON_ZERO);
 }
 
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPathD(Painter& self, const PathD& p)
+static err_t FOG_FASTCALL RasterPaintSerializer_drawRawPathD_st(
+  RasterPaintEngine* engine, const PathD& path)
 {
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_STROKE_FUNC();
-
   if (engine->strokeParamsPrecision == RASTER_PRECISION_F)
   {
     engine->strokeParamsPrecision = RASTER_PRECISION_BOTH;
@@ -3644,1385 +4991,146 @@ err_t FOG_CDECL RasterPainterImpl<_MODE>::drawPathD(Painter& self, const PathD& 
   tmp.clear();
 
   PathStrokerD stroker(engine->strokeParams.d.instance());
-  stroker.strokePath(tmp, p);
+  stroker.strokePath(tmp, path);
 
-  return doFillUntransformedPathD(engine, tmp, FILL_RULE_NON_ZERO, true);
+  return engine->serializer->fillRawPathD(engine, tmp, FILL_RULE_NON_ZERO);
 }
 
 // ============================================================================
-// [Fog::RasterPainterImpl<> - Fill]
+// [Fog::RasterPaintSerializer - FillRawPath (st)]
 // ============================================================================
 
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectI(Painter& self, const RectI& r)
+static err_t FOG_FASTCALL RasterPaintSerializer_fillRawPathF_st(
+  RasterPaintEngine* engine, const PathF& path, uint32_t fillRule)
 {
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
+  PathF& tmp = engine->ctx.tmpPathF[1];
 
-  if (engine->finalTransformI._type == RASTER_INTEGRAL_TRANSFORM_NULL)
+  bool hasTransform = RasterPaintEngineImpl::ensureFinalTransformF(engine);
+  if (!hasTransform)
   {
-    if (engine->ctx.paintHints.geometricPrecision)
-      return fillRectD(self, RectD(r));
-    else
-      return fillRectF(self, RectF(r));
+    switch (engine->ctx.finalClipperF.initPath(path))
+    {
+      case PATH_CLIPPER_STATUS_CLIPPED:
+        engine->serializer->fillNormalizedPathF(engine, path, fillRule);
+        return ERR_OK;
+
+      case PATH_CLIPPER_STATUS_MUST_CLIP:
+        tmp.clear();
+        FOG_RETURN_ON_ERROR(engine->ctx.finalClipperF.continuePath(tmp, path));
+        engine->serializer->fillNormalizedPathF(engine, tmp, fillRule);
+        return ERR_OK;
+
+      default:
+        return ERR_GEOMETRY_INVALID;
+    }
   }
   else
   {
-    BoxI box(UNINITIALIZED);
-    if (doIntegralTransformAndClip(engine, box, r))
-      return doFillNormalizedBoxI(engine, box);
+    tmp.clear();
+    FOG_RETURN_ON_ERROR(engine->ctx.finalClipperF.clipPath(tmp, path, engine->finalTransformF));
+    engine->serializer->fillNormalizedPathF(engine, tmp, fillRule);
+    return ERR_OK;
+  }
+}
+
+static err_t FOG_FASTCALL RasterPaintSerializer_fillRawPathD_st(
+  RasterPaintEngine* engine, const PathD& path, uint32_t fillRule)
+{
+  PathD& tmp = engine->ctx.tmpPathD[1];
+
+  bool hasTransform = (engine->finalTransform.getType() != TRANSFORM_TYPE_IDENTITY);
+  if (!hasTransform)
+  {
+    switch (engine->ctx.finalClipperD.initPath(path))
+    {
+      case PATH_CLIPPER_STATUS_CLIPPED:
+        engine->serializer->fillNormalizedPathD(engine, path, fillRule);
+        return ERR_OK;
+
+      case PATH_CLIPPER_STATUS_MUST_CLIP:
+        tmp.clear();
+        FOG_RETURN_ON_ERROR(engine->ctx.finalClipperD.continuePath(tmp, path));
+        engine->serializer->fillNormalizedPathD(engine, tmp, fillRule);
+        return ERR_OK;
+
+      default:
+        return ERR_GEOMETRY_INVALID;
+    }
+  }
+  else
+  {
+    tmp.clear();
+    FOG_RETURN_ON_ERROR(engine->ctx.finalClipperD.clipPath(tmp, path, engine->finalTransform));
+    engine->serializer->fillNormalizedPathD(engine, tmp, fillRule);
+    return ERR_OK;
+  }
+}
+
+// ============================================================================
+// [Fog::RasterPaintSerializer - FillNormalizedPath (st)]
+// ============================================================================
+
+static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedPathF_st(
+  RasterPaintEngine* engine, const PathF& path, uint32_t fillRule)
+{
+  if (engine->ctx.precision == IMAGE_PRECISION_BYTE)
+  {
+    PathRasterizer8& rasterizer = engine->ctx.pathRasterizer8.instance();
+
+    rasterizer.setSceneBox(engine->ctx.finalClipBoxI);
+    rasterizer.setFillRule(fillRule);
+    rasterizer.setOpacity(engine->ctx.rasterHints.opacity);
+
+    if (FOG_IS_ERROR(rasterizer.initialize()))
+      return rasterizer.getError();
+
+    rasterizer.addPath(path);
+    rasterizer.finalize();
+
+    if (rasterizer.isValid())
+      return RasterPaintSerializer_fillRasterizedShape8_st(engine, &rasterizer);
     else
       return ERR_OK;
   }
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectF(Painter& self, const RectF& r)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  BoxF box(r);
-  if (ensureFinalTransformF(engine))
-  {
-    if (!engine->ctx.rasterHints.rectToRectTransform)
-    {
-      PathF& path = engine->ctx.tmpPathF[0];
-      path.clear();
-      path.rect(r, PATH_DIRECTION_CW);
-      return doFillUntransformedPathF(engine, path, FILL_RULE_NON_ZERO, true);
-    }
-
-    engine->finalTransformF.mapBox(box, box);
-  }
-
-  if (BoxF::intersect(box, box, engine->ctx.finalClipperF.getClipBox()))
-    return doFillNormalizedBoxF(engine, box);
-  else
-    return ERR_OK;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectD(Painter& self, const RectD& r)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  BoxD box(r);
-  if (engine->finalTransform.getType() != TRANSFORM_TYPE_IDENTITY)
-  {
-    if (!engine->ctx.rasterHints.rectToRectTransform)
-    {
-      PathD& path = engine->ctx.tmpPathD[0];
-      path.clear();
-      path.rect(r, PATH_DIRECTION_CW);
-      return doFillUntransformedPathD(engine, path, FILL_RULE_NON_ZERO, true);
-    }
-
-    engine->finalTransform.mapBox(box, box);
-  }
-
-  if (BoxD::intersect(box, box, engine->ctx.finalClipperD.getClipBox()))
-    return doFillNormalizedBoxD(engine, box);
-  else
-    return ERR_OK;
-}
-
-// TODO: It's easy to clip rectangles, so clip them here and call
-// doFillNormalizedPath() instead.
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectsI(Painter& self, const RectI* r, size_t count)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  if (engine->ctx.paintHints.geometricPrecision)
-  {
-    PathD& path = engine->ctx.tmpPathD[0];
-    path.clear();
-    path.rects(r, count);
-    return doFillUntransformedPathD(engine, path, FILL_RULE_NON_ZERO, true);
-  }
   else
   {
-    PathF& path = engine->ctx.tmpPathF[0];
-    path.clear();
-    path.rects(r, count);
-    return doFillUntransformedPathF(engine, path, FILL_RULE_NON_ZERO, true);
+    // TODO: 16-bit rasterizer.
   }
 }
 
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectsF(Painter& self, const RectF* r, size_t count)
+static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedPathD_st(
+  RasterPaintEngine* engine, const PathD& path, uint32_t fillRule)
 {
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  if (count == 0) return ERR_OK;
-  if (count == 1) return fillRectF(self, *r);
-
-  PathF& path = engine->ctx.tmpPathF[0];
-  path.clear();
-  path.rects(r, count, PATH_DIRECTION_CW);
-
-  return doFillUntransformedPathF(engine, path, FILL_RULE_NON_ZERO, true);
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRectsD(Painter& self, const RectD* r, size_t count)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  if (count == 0) return ERR_OK;
-  if (count == 1) return fillRectD(self, *r);
-
-  PathD& path = engine->ctx.tmpPathD[0];
-  path.clear();
-  path.rects(r, count, PATH_DIRECTION_CW);
-  return doFillUntransformedPathD(engine, path, FILL_RULE_NON_ZERO, true);
-}
-
-// TODO: It's easy to clip polygon, do it here, PathClipper should be enabled to do that.
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillPolygonI(Painter& self, const PointI* p, size_t count)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  if (engine->ctx.paintHints.geometricPrecision)
+  if (engine->ctx.precision == IMAGE_PRECISION_BYTE)
   {
-    PathD& path = engine->ctx.tmpPathD[0];
-    path.clear();
-    path.polygon(p, count, PATH_DIRECTION_CW);
-    return doFillUntransformedPathD(engine, path, engine->ctx.paintHints.fillRule, true);
-  }
-  else
-  {
-    PathF& path = engine->ctx.tmpPathF[0];
-    path.clear();
-    path.polygon(p, count, PATH_DIRECTION_CW);
-    return doFillUntransformedPathF(engine, path, engine->ctx.paintHints.fillRule, true);
-  }
-}
+    PathRasterizer8& rasterizer = engine->ctx.pathRasterizer8.instance();
 
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillPolygonF(Painter& self, const PointF* p, size_t count)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
+    rasterizer.setSceneBox(engine->ctx.finalClipBoxI);
+    rasterizer.setFillRule(fillRule);
+    rasterizer.setOpacity(engine->ctx.rasterHints.opacity);
 
-  PathF& path = engine->ctx.tmpPathF[0];
-  path.clear();
-  path.polygon(p, count, PATH_DIRECTION_CW);
-  return doFillUntransformedPathF(engine, path, engine->ctx.paintHints.fillRule, true);
-}
+    if (FOG_IS_ERROR(rasterizer.initialize()))
+      return rasterizer.getError();
 
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillPolygonD(Painter& self, const PointD* p, size_t count)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
+    rasterizer.addPath(path);
+    rasterizer.finalize();
 
-  PathD& path = engine->ctx.tmpPathD[0];
-  path.clear();
-  path.polygon(p, count, PATH_DIRECTION_CW);
-  return doFillUntransformedPathD(engine, path, engine->ctx.paintHints.fillRule, true);
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillShapeF(Painter& self, uint32_t shapeType, const void* shapeData)
-{
-  if (shapeType == SHAPE_TYPE_RECT)
-    return fillRectF(self, *(const RectF*)shapeData);
-
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  PathF& path = engine->ctx.tmpPathF[0];
-  path.clear();
-  path._shape(shapeType, shapeData, PATH_DIRECTION_CW, NULL);
-  return doFillUntransformedPathF(engine, path, engine->ctx.paintHints.fillRule, true);
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillShapeD(Painter& self, uint32_t shapeType, const void* shapeData)
-{
-  if (shapeType == SHAPE_TYPE_RECT)
-    return fillRectD(self, *(const RectD*)shapeData);
-
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  PathD& path = engine->ctx.tmpPathD[0];
-  path.clear();
-  path._shape(shapeType, shapeData, PATH_DIRECTION_CW, NULL);
-  return doFillUntransformedPathD(engine, path, engine->ctx.paintHints.fillRule, true);
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillPathF(Painter& self, const PathF& p)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  return doFillUntransformedPathF(engine, p, engine->ctx.paintHints.fillRule, true);
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillPathD(Painter& self, const PathD& p)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  return doFillUntransformedPathD(engine, p, engine->ctx.paintHints.fillRule, true);
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillTextAtI(Painter& self, const PointI& p, const String& text, const Font& font, const RectI* clip)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillTextAtF(Painter& self, const PointF& p, const String& text, const Font& font, const RectF* clip)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillTextAtD(Painter& self, const PointD& p, const String& text, const Font& font, const RectD* clip)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillTextInI(Painter& self, const TextRectI& r, const String& text, const Font& font, const RectI* clip)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillTextInF(Painter& self, const TextRectF& r, const String& text, const Font& font, const RectF* clip)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillTextInD(Painter& self, const TextRectD& r, const String& text, const Font& font, const RectD* clip)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillMaskAtI(Painter& self, const PointI& p, const Image& m, const RectI* mFragment)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillMaskAtF(Painter& self, const PointF& p, const Image& m, const RectI* mFragment)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillMaskAtD(Painter& self, const PointD& p, const Image& m, const RectI* mFragment)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillMaskInI(Painter& self, const RectI& r, const Image& m, const RectI* mFragment)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillMaskInF(Painter& self, const RectF& r, const Image& m, const RectI* mFragment)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillMaskInD(Painter& self, const RectD& r, const Image& m, const RectI* mFragment)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::fillRegion(Painter& self, const Region& r)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-// ============================================================================
-// [Fog::RasterPainterImpl<> - Blit]
-// ============================================================================
-
-#define _FOG_RASTER_GET_IMAGE_PARAMS(_Image_, _ImageFragment_) \
-  int iX = 0; \
-  int iY = 0; \
-  int iW = _Image_.getWidth(); \
-  int iH = _Image_.getHeight(); \
-  \
-  if (_ImageFragment_ != NULL) \
-  { \
-    if (!_ImageFragment_->isValid()) return ERR_RT_INVALID_ARGUMENT; \
-    \
-    iX = _ImageFragment_->x; \
-    iY = _ImageFragment_->y; \
-    \
-    if ((uint)(iX) >= (uint)iW ||        \
-        (uint)(iY) >= (uint)iH ||        \
-        (uint)(_ImageFragment_->w - iX) > (uint)iW || \
-        (uint)(_ImageFragment_->h - iY) > (uint)iH)  \
-    { \
-      return ERR_RT_INVALID_ARGUMENT; \
-    } \
-    \
-    iW = _ImageFragment_->w; \
-    iH = _ImageFragment_->h; \
-    if (iW == 0 || iH == 0) return ERR_OK; \
-  }
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtI(Painter& self, const PointI& p, const Image& i, const RectI* iFragment)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  if (i.isEmpty()) return ERR_OK;
-
-  _FOG_RASTER_ENTER_BLIT_FUNC();
-  _FOG_RASTER_GET_IMAGE_PARAMS(i, iFragment)
-
-  int dstX = p.x, dstW;
-  int dstY = p.y, dstH;
-  int d;
-
-  switch (engine->finalTransformI._type)
-  {
-    case RASTER_INTEGRAL_TRANSFORM_NULL:
-    {
-      if (engine->ctx.paintHints.geometricPrecision)
-        return engine->vtable->blitImageAtD(self, PointD(p), i, iFragment);
-      else
-        return engine->vtable->blitImageAtF(self, PointF(p), i, iFragment);
-    }
-
-    case RASTER_INTEGRAL_TRANSFORM_SIMPLE:
-    {
-      dstX += engine->finalTransformI._tx;
-      dstY += engine->finalTransformI._ty;
-
-      if ((uint)(d = dstX - engine->ctx.finalClipBoxI.x0) >= (uint)engine->ctx.finalClipBoxI.getWidth())
-      {
-        dstX = engine->ctx.finalClipBoxI.x0; iX -= d;
-        if (d >= 0 || (iW += d) <= 0) return ERR_OK;
-      }
-
-      if ((uint)(d = dstY - engine->ctx.finalClipBoxI.y0) >= (uint)engine->ctx.finalClipBoxI.getHeight())
-      {
-        dstY = engine->ctx.finalClipBoxI.y0; iY -= d;
-        if (d >= 0 || (iH += d) <= 0) return ERR_OK;
-      }
-
-      if ((d = engine->ctx.finalClipBoxI.x1 - dstX) < iW) iW = d;
-      if ((d = engine->ctx.finalClipBoxI.y1 - dstY) < iH) iH = d;
-
-      return doBlitNormalizedImageI(engine, PointI(dstX, dstY), i, RectI(iX, iY, iW, iH));
-    }
-
-    case RASTER_INTEGRAL_TRANSFORM_SCALING:
-    {
-      dstX = dstX * engine->finalTransformI._sx;
-      dstY = dstY * engine->finalTransformI._sy;
-
-      dstW = iW * engine->finalTransformI._sx;
-      dstH = iH * engine->finalTransformI._sy;
-
-_Scaling:
-      dstX += engine->finalTransformI._tx;
-      dstY += engine->finalTransformI._ty;
-
-      if (dstW < 0) { dstX += dstW; dstW = -dstW; }
-      if (dstH < 0) { dstY += dstH; dstH = -dstH; }
-
-      // Make a box model (dstX, dstY -> dstW, dstH).
-      dstW += dstX;
-      dstH += dstY;
-
-      if (dstX < engine->ctx.finalClipBoxI.x0) dstX = engine->ctx.finalClipBoxI.x0;
-      if (dstY < engine->ctx.finalClipBoxI.y0) dstY = engine->ctx.finalClipBoxI.y0;
-
-      if (dstW > engine->ctx.finalClipBoxI.x1) dstW = engine->ctx.finalClipBoxI.x1;
-      if (dstH > engine->ctx.finalClipBoxI.y1) dstH = engine->ctx.finalClipBoxI.y1;
-
-      if (dstX >= dstW || dstY >= dstH) return ERR_OK;
-
-      TransformD tr(engine->finalTransform);
-      tr.translate(PointD(p.x, p.y));
-
-      return doBlitNormalizedTransformedImageI(engine, BoxI(dstX, dstY, dstW, dstH), i, RectI(iX, iY, iW, iH), tr);
-    }
-
-    case RASTER_INTEGRAL_TRANSFORM_SWAP:
-    {
-      d = dstX;
-
-      dstX = dstY * engine->finalTransformI._sx;
-      dstY = d    * engine->finalTransformI._sy;
-
-      dstW = iH * engine->finalTransformI._sx;
-      dstH = iW * engine->finalTransformI._sy;
-
-      goto _Scaling;
-    }
-
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtF(Painter& self, const PointF& p, const Image& i, const RectI* iFragment)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  if (i.isEmpty()) return ERR_OK;
-
-  _FOG_RASTER_ENTER_BLIT_FUNC();
-  _FOG_RASTER_GET_IMAGE_PARAMS(i, iFragment)
-
-  uint32_t transformType = engine->finalTransform.getType();
-  BoxD box(double(p.x), double(p.y), double(p.x) + double(iW), double(p.y) + double(iH));
-
-  switch (transformType)
-  {
-    case TRANSFORM_TYPE_IDENTITY:
-    case TRANSFORM_TYPE_TRANSLATION:
-    {
-      PointD t(double(p.x) + engine->finalTransform._20,
-               double(p.y) + engine->finalTransform._21);
-
-      Fixed48x16 x48x16 = Math::fixed48x16FromFloat(t.x);
-      Fixed48x16 y48x16 = Math::fixed48x16FromFloat(t.y);
-
-      int fx = (int)(x48x16 >> 8) & 0xFF;
-      int fy = (int)(y48x16 >> 8) & 0xFF;
-
-      // Aligned.
-      if ((fx | fy) == 0)
-      {
-        int dstX = (int)(x48x16 >> 16);
-        int dstY = (int)(y48x16 >> 16);
-
-        int d;
-
-        if ((uint)(d = dstX - engine->ctx.finalClipBoxI.x0) >= (uint)engine->ctx.finalClipBoxI.getWidth())
-        {
-          dstX = engine->ctx.finalClipBoxI.x0; iX -= d;
-          if (d >= 0 || (iW += d) <= 0) return ERR_OK;
-        }
-
-        if ((uint)(d = dstY - engine->ctx.finalClipBoxI.y0) >= (uint)engine->ctx.finalClipBoxI.getHeight())
-        {
-          dstY = engine->ctx.finalClipBoxI.y0; iY -= d;
-          if (d >= 0 || (iH += d) <= 0) return ERR_OK;
-        }
-
-        if ((d = engine->ctx.finalClipBoxI.x1 - dstX) < iW) iW = d;
-        if ((d = engine->ctx.finalClipBoxI.y1 - dstY) < iH) iH = d;
-
-        return doBlitNormalizedImageI(engine, PointI(dstX, dstY), i, RectI(iX, iY, iW, iH));
-      }
-      else
-      {
-        box.translate(engine->finalTransform._20, engine->finalTransform._21);
-        if (!BoxD::intersect(box, box, engine->ctx.finalClipperD.getClipBox()))
-          return ERR_OK;
-
-        TransformD tr(engine->finalTransform);
-        tr.translate(PointD(p.x, p.y));
-
-        return doBlitNormalizedTransformedImageD(engine, box, i, RectI(iX, iY, iW, iH), tr);
-      }
-    }
-
-    case TRANSFORM_TYPE_SCALING:
-    {
-      engine->finalTransform.mapBox(box, box);
-
-      if (!BoxD::intersect(box, box, engine->ctx.finalClipperD.getClipBox()))
-        return ERR_OK;
-
-      TransformD tr(engine->finalTransform);
-      tr.translate(PointD(p.x, p.y));
-
-      return doBlitNormalizedTransformedImageD(engine, box, i, RectI(iX, iY, iW, iH), tr);
-    }
-
-    default:
-    {
-      TransformD tr(engine->finalTransform);
-      tr.translate(PointD(p.x, p.y));
-
-      return doBlitUntransformedImageD(engine, box, i, RectI(iX, iY, iW, iH), tr);
-    }
-  }
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageAtD(Painter& self, const PointD& p, const Image& i, const RectI* iFragment)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  if (i.isEmpty()) return ERR_OK;
-
-  _FOG_RASTER_ENTER_BLIT_FUNC();
-  _FOG_RASTER_GET_IMAGE_PARAMS(i, iFragment)
-
-  uint32_t transformType = engine->finalTransform.getType();
-  BoxD box(double(p.x), double(p.y), double(p.x) + double(iW), double(p.y) + double(iH));
-
-  switch (transformType)
-  {
-    case TRANSFORM_TYPE_IDENTITY:
-    case TRANSFORM_TYPE_TRANSLATION:
-    {
-      PointD t(double(p.x) + engine->finalTransform._20,
-               double(p.y) + engine->finalTransform._21);
-
-      Fixed48x16 x48x16 = Math::fixed48x16FromFloat(t.x);
-      Fixed48x16 y48x16 = Math::fixed48x16FromFloat(t.y);
-
-      int fx = (int)(x48x16 >> 8) & 0xFF;
-      int fy = (int)(y48x16 >> 8) & 0xFF;
-
-      // Aligned.
-      if ((fx | fy) == 0)
-      {
-        int dstX = (int)(x48x16 >> 16);
-        int dstY = (int)(y48x16 >> 16);
-
-        int d;
-
-        if ((uint)(d = dstX - engine->ctx.finalClipBoxI.x0) >= (uint)engine->ctx.finalClipBoxI.getWidth())
-        {
-          dstX = engine->ctx.finalClipBoxI.x0; iX -= d;
-          if (d >= 0 || (iW += d) <= 0) return ERR_OK;
-        }
-
-        if ((uint)(d = dstY - engine->ctx.finalClipBoxI.y0) >= (uint)engine->ctx.finalClipBoxI.getHeight())
-        {
-          dstY = engine->ctx.finalClipBoxI.y0; iY -= d;
-          if (d >= 0 || (iH += d) <= 0) return ERR_OK;
-        }
-
-        if ((d = engine->ctx.finalClipBoxI.x1 - dstX) < iW) iW = d;
-        if ((d = engine->ctx.finalClipBoxI.y1 - dstY) < iH) iH = d;
-
-        return doBlitNormalizedImageI(engine, PointI(dstX, dstY), i, RectI(iX, iY, iW, iH));
-      }
-      else
-      {
-        box.translate(engine->finalTransform._20, engine->finalTransform._21);
-        if (!BoxD::intersect(box, box, engine->ctx.finalClipperD.getClipBox()))
-          return ERR_OK;
-
-        TransformD tr(engine->finalTransform);
-        tr.translate(PointD(p.x, p.y));
-
-        return doBlitNormalizedTransformedImageD(engine, box, i, RectI(iX, iY, iW, iH), tr);
-      }
-    }
-
-    case TRANSFORM_TYPE_SCALING:
-    {
-      engine->finalTransform.mapBox(box, box);
-
-      if (!BoxD::intersect(box, box, engine->ctx.finalClipperD.getClipBox()))
-        return ERR_OK;
-
-      TransformD tr(engine->finalTransform);
-      tr.translate(PointD(p.x, p.y));
-
-      return doBlitNormalizedTransformedImageD(engine, box, i, RectI(iX, iY, iW, iH), tr);
-    }
-
-    default:
-    {
-      TransformD tr(engine->finalTransform);
-      tr.translate(PointD(p.x, p.y));
-
-      return doBlitUntransformedImageD(engine, box, i, RectI(iX, iY, iW, iH), tr);
-    }
-  }
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageInI(Painter& self, const RectI& r, const Image& i, const RectI* iFragment)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  if (i.isEmpty()) return ERR_OK;
-
-  _FOG_RASTER_ENTER_BLIT_FUNC();
-  _FOG_RASTER_GET_IMAGE_PARAMS(i, iFragment)
-
-  // Try to use unscaled blit if possible.
-  if (r.w == iW && r.h == iH) return engine->vtable->blitImageAtI(self, PointI(r.x, r.y), i, iFragment);
-
-  uint32_t transformType = engine->finalTransform.getType();
-  BoxD box(double(r.x), double(r.y), double(r.x) + double(r.w), double(r.y) + double(r.h));
-
-  TransformD tr(engine->finalTransform);
-  double sx = double(r.w) / double(iW);
-  double sy = double(r.h) / double(iH);
-
-  TransformD scaling(sx, 0.0, 0.0, sy, r.x, r.y);
-  tr.transform(scaling);
-  //tr.translate(PointD(r.x, r.y));
-  //tr.scale(PointD(sx, sy));
-
-  if (transformType <= TRANSFORM_TYPE_SCALING)
-  {
-    engine->finalTransform.mapBox(box, box);
-    if (!BoxD::intersect(box, box, engine->ctx.finalClipperD.getClipBox()))
-      return ERR_OK;
-
-    return doBlitNormalizedTransformedImageD(engine, box, i, RectI(iX, iY, iW, iH), tr);
-  }
-  else
-  {
-    return doBlitUntransformedImageD(engine, box, i, RectI(iX, iY, iW, iH), tr);
-  }
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageInF(Painter& self, const RectF& r, const Image& i, const RectI* iFragment)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  if (i.isEmpty()) return ERR_OK;
-
-  _FOG_RASTER_ENTER_BLIT_FUNC();
-  _FOG_RASTER_GET_IMAGE_PARAMS(i, iFragment)
-
-  uint32_t transformType = engine->finalTransform.getType();
-  BoxD box(double(r.x), double(r.y), double(r.x) + double(r.w), double(r.y) + double(r.h));
-
-  TransformD tr(double(r.w) / double(iW), 0.0, 0.0, double(r.h) / double(iH), r.x, r.y);
-  tr.transform(engine->finalTransform, MATRIX_ORDER_APPEND);
-
-  if (transformType <= TRANSFORM_TYPE_SCALING)
-  {
-    engine->finalTransform.mapBox(box, box);
-    if (!BoxD::intersect(box, box, engine->ctx.finalClipperD.getClipBox()))
-      return ERR_OK;
-
-    return doBlitNormalizedTransformedImageD(engine, box, i, RectI(iX, iY, iW, iH), tr);
-  }
-  else
-  {
-    return doBlitUntransformedImageD(engine, box, i, RectI(iX, iY, iW, iH), tr);
-  }
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitImageInD(Painter& self, const RectD& r, const Image& i, const RectI* iFragment)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-  if (i.isEmpty()) return ERR_OK;
-
-  _FOG_RASTER_ENTER_BLIT_FUNC();
-  _FOG_RASTER_GET_IMAGE_PARAMS(i, iFragment)
-
-  uint32_t transformType = engine->finalTransform.getType();
-  BoxD box(double(r.x), double(r.y), double(r.x) + double(r.w), double(r.y) + double(r.h));
-
-  TransformD tr(double(r.w) / double(iW), 0.0, 0.0, double(r.h) / double(iH), r.x, r.y);
-  tr.transform(engine->finalTransform, MATRIX_ORDER_APPEND);
-
-  if (transformType <= TRANSFORM_TYPE_SCALING)
-  {
-    engine->finalTransform.mapBox(box, box);
-    if (!BoxD::intersect(box, box, engine->ctx.finalClipperD.getClipBox()))
-      return ERR_OK;
-
-    return doBlitNormalizedTransformedImageD(engine, box, i, RectI(iX, iY, iW, iH), tr);
-  }
-  else
-  {
-    return doBlitUntransformedImageD(engine, box, i, RectI(iX, iY, iW, iH), tr);
-  }
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageAtI(Painter& self, const PointI& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageAtF(Painter& self, const PointF& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageAtD(Painter& self, const PointD& p, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageInI(Painter& self, const RectI& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageInF(Painter& self, const RectF& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::blitMaskedImageInD(Painter& self, const RectD& r, const Image& i, const Image& m, const RectI* iFragment, const RectI* mFragment)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-// ============================================================================
-// [Fog::RasterPainterImpl<> - Clip]
-// ============================================================================
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipRectI(Painter& self, uint32_t clipOp, const RectI& r)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipRectF(Painter& self, uint32_t clipOp, const RectF& r)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipRectD(Painter& self, uint32_t clipOp, const RectD& r)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipRectsI(Painter& self, uint32_t clipOp, const RectI* r, size_t count)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipRectsF(Painter& self, uint32_t clipOp, const RectF* r, size_t count)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipRectsD(Painter& self, uint32_t clipOp, const RectD* r, size_t count)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipPolygonI(Painter& self, uint32_t clipOp, const PointI* p, size_t count)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipPolygonF(Painter& self, uint32_t clipOp, const PointF* p, size_t count)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipPolygonD(Painter& self, uint32_t clipOp, const PointD* p, size_t count)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipShapeF(Painter& self, uint32_t clipOp, uint32_t shapeType, const void* shapeData)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipShapeD(Painter& self, uint32_t clipOp, uint32_t shapeType, const void* shapeData)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipPathF(Painter& self, uint32_t clipOp, const PathF& p)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipPathD(Painter& self, uint32_t clipOp, const PathD& p)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipTextAtI(Painter& self, uint32_t clipOp, const PointI& p, const String& text, const Font& font, const RectI* clip)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipTextAtF(Painter& self, uint32_t clipOp, const PointF& p, const String& text, const Font& font, const RectF* clip)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipTextAtD(Painter& self, uint32_t clipOp, const PointD& p, const String& text, const Font& font, const RectD* clip)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipTextInI(Painter& self, uint32_t clipOp, const TextRectI& r, const String& text, const Font& font, const RectI* clip)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipTextInF(Painter& self, uint32_t clipOp, const TextRectF& r, const String& text, const Font& font, const RectF* clip)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipTextInD(Painter& self, uint32_t clipOp, const TextRectD& r, const String& text, const Font& font, const RectD* clip)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipMaskAtI(Painter& self, uint32_t clipOp, const PointI& p, const Image& m, const RectI* mFragment)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipMaskAtF(Painter& self, uint32_t clipOp, const PointF& p, const Image& m, const RectI* mFragment)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipMaskAtD(Painter& self, uint32_t clipOp, const PointD& p, const Image& m, const RectI* mFragment)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipMaskInI(Painter& self, uint32_t clipOp, const RectI& r, const Image& m, const RectI* mFragment)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipMaskInF(Painter& self, uint32_t clipOp, const RectF& r, const Image& m, const RectI* mFragment)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipMaskInD(Painter& self, uint32_t clipOp, const RectD& r, const Image& m, const RectI* mFragment)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::clipRegion(Painter& self, uint32_t clipOp, const Region& r)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::resetClip(Painter& self)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-// ============================================================================
-// [Fog::RasterPainterImpl<> - Layer]
-// ============================================================================
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::beginLayer(Painter& self)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::endLayer(Painter& self)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-// ============================================================================
-// [Fog::RasterPainterImpl<> - Flush]
-// ============================================================================
-
-template<int _MODE>
-err_t FOG_CDECL RasterPainterImpl<_MODE>::flush(Painter& self, uint32_t flags)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self._engine);
-
-  // TODO: MT version.
-  return ERR_OK;
-}
-
-// ============================================================================
-// [Fog::RasterPainterImpl<> - FillNormalizedBox]
-// ============================================================================
-
-template<int _MODE>
-FOG_INLINE err_t RasterPainterImpl<_MODE>::doFillNormalizedBoxI(RasterPaintEngine* engine, const BoxI& box)
-{
-  _FOG_RASTER_ENSURE_PATTERN(engine);
-
-  if (_MODE == RASTER_MODE_ST)
-  {
-    engine->ctx.renderer->fillNormalizedBoxI(engine->ctx, box);
-    return ERR_OK;
-  }
-  else
-  {
-    // TODO:
-    return ERR_RT_NOT_IMPLEMENTED;
-  }
-}
-
-template<int _MODE>
-FOG_INLINE err_t RasterPainterImpl<_MODE>::doFillNormalizedBoxF(RasterPaintEngine* engine, const BoxF& box)
-{
-  _FOG_RASTER_ENSURE_PATTERN(engine);
-
-  if (_MODE == RASTER_MODE_ST)
-  {
-    engine->ctx.renderer->fillNormalizedBoxF(engine->ctx, box);
-    return ERR_OK;
-  }
-  else
-  {
-    // TODO:
-    return ERR_RT_NOT_IMPLEMENTED;
-  }
-}
-
-template<int _MODE>
-FOG_INLINE err_t RasterPainterImpl<_MODE>::doFillNormalizedBoxD(RasterPaintEngine* engine, const BoxD& box)
-{
-  _FOG_RASTER_ENSURE_PATTERN(engine);
-
-  if (_MODE == RASTER_MODE_ST)
-  {
-    engine->ctx.renderer->fillNormalizedBoxD(engine->ctx, box);
-    return ERR_OK;
-  }
-  else
-  {
-    // TODO:
-    return ERR_RT_NOT_IMPLEMENTED;
-  }
-}
-
-// ============================================================================
-// [Fog::RasterPainterImpl<> - FillNormalizedPath]
-// ============================================================================
-
-template<int _MODE>
-err_t RasterPainterImpl<_MODE>::doFillNormalizedPathF(RasterPaintEngine* engine, const PathF& path, uint32_t fillRule)
-{
-  _FOG_RASTER_ENSURE_PATTERN(engine);
-
-  if (_MODE == RASTER_MODE_ST)
-  {
-    engine->ctx.renderer->fillNormalizedPathF(engine->ctx, path, fillRule);
-    return ERR_OK;
-  }
-  else
-  {
-    // TODO:
-    return ERR_RT_NOT_IMPLEMENTED;
-  }
-}
-
-template<int _MODE>
-err_t RasterPainterImpl<_MODE>::doFillNormalizedPathD(RasterPaintEngine* engine, const PathD& path, uint32_t fillRule)
-{
-  _FOG_RASTER_ENSURE_PATTERN(engine);
-
-  if (_MODE == RASTER_MODE_ST)
-  {
-    engine->ctx.renderer->fillNormalizedPathD(engine->ctx, path, fillRule);
-    return ERR_OK;
-  }
-  else
-  {
-    // TODO:
-    return ERR_RT_NOT_IMPLEMENTED;
-  }
-}
-
-// ============================================================================
-// [Fog::RasterPainterImpl<> - FillUntransformedPath]
-// ============================================================================
-
-template<int _MODE>
-err_t RasterPainterImpl<_MODE>::doFillUntransformedPathF(RasterPaintEngine* engine, const PathF& path, uint32_t fillRule, bool clip)
-{
-  _FOG_RASTER_ENSURE_PATTERN(engine);
-
-  if (_MODE == RASTER_MODE_ST)
-  {
-    bool hasTransform = ensureFinalTransformF(engine);
-
-    if (clip)
-    {
-      engine->ctx.tmpPathF[1].clear();
-
-      if (!hasTransform)
-      {
-        switch (engine->ctx.finalClipperF.initPath(path))
-        {
-          case PATH_CLIPPER_STATUS_CLIPPED:
-            engine->ctx.renderer->fillNormalizedPathF(engine->ctx, path, fillRule);
-            return ERR_OK;
-
-          case PATH_CLIPPER_STATUS_MUST_CLIP:
-            FOG_RETURN_ON_ERROR(engine->ctx.finalClipperF.continuePath(engine->ctx.tmpPathF[1], path));
-            engine->ctx.renderer->fillNormalizedPathF(engine->ctx, engine->ctx.tmpPathF[1], fillRule);
-            return ERR_OK;
-
-          default:
-            return ERR_GEOMETRY_INVALID;
-        }
-      }
-      else
-      {
-        FOG_RETURN_ON_ERROR(engine->ctx.finalClipperF.clipPath(engine->ctx.tmpPathF[1], path, engine->finalTransformF));
-        engine->ctx.renderer->fillNormalizedPathF(engine->ctx, engine->ctx.tmpPathF[1], fillRule);
-        return ERR_OK;
-      }
-    }
+    if (rasterizer.isValid())
+      return RasterPaintSerializer_fillRasterizedShape8_st(engine, &rasterizer);
     else
-    {
-      if (!hasTransform)
-      {
-        engine->ctx.renderer->fillNormalizedPathF(engine->ctx, path, fillRule);
-        return ERR_OK;
-      }
-      else
-      {
-        FOG_RETURN_ON_ERROR(engine->finalTransformF.mapPath(engine->ctx.tmpPathF[1], path));
-        engine->ctx.renderer->fillNormalizedPathF(engine->ctx, engine->ctx.tmpPathF[1], fillRule);
-        return ERR_OK;
-      }
-    }
+      return ERR_OK;
   }
   else
   {
-    // TODO:
-    return ERR_RT_NOT_IMPLEMENTED;
-  }
-}
-
-template<int _MODE>
-err_t RasterPainterImpl<_MODE>::doFillUntransformedPathD(RasterPaintEngine* engine, const PathD& path, uint32_t fillRule, bool clip)
-{
-  _FOG_RASTER_ENSURE_PATTERN(engine);
-
-  if (_MODE == RASTER_MODE_ST)
-  {
-    bool hasTransform = (engine->finalTransform.getType() != TRANSFORM_TYPE_IDENTITY);
-
-    if (clip)
-    {
-      engine->ctx.tmpPathD[1].clear();
-
-      if (!hasTransform)
-      {
-        switch (engine->ctx.finalClipperD.initPath(path))
-        {
-          case PATH_CLIPPER_STATUS_CLIPPED:
-            engine->ctx.renderer->fillNormalizedPathD(engine->ctx, path, fillRule);
-            return ERR_OK;
-
-          case PATH_CLIPPER_STATUS_MUST_CLIP:
-            FOG_RETURN_ON_ERROR(engine->ctx.finalClipperD.continuePath(engine->ctx.tmpPathD[1], path));
-            engine->ctx.renderer->fillNormalizedPathD(engine->ctx, engine->ctx.tmpPathD[1], fillRule);
-            return ERR_OK;
-
-          default:
-            return ERR_GEOMETRY_INVALID;
-        }
-      }
-      else
-      {
-        FOG_RETURN_ON_ERROR(engine->ctx.finalClipperD.clipPath(engine->ctx.tmpPathD[1], path, engine->finalTransform));
-        engine->ctx.renderer->fillNormalizedPathD(engine->ctx, engine->ctx.tmpPathD[1], fillRule);
-        return ERR_OK;
-      }
-    }
-    else
-    {
-      if (!hasTransform)
-      {
-        engine->ctx.renderer->fillNormalizedPathD(engine->ctx, path, fillRule);
-        return ERR_OK;
-      }
-      else
-      {
-        FOG_RETURN_ON_ERROR(engine->finalTransform.mapPath(engine->ctx.tmpPathD[1], path));
-        engine->ctx.renderer->fillNormalizedPathD(engine->ctx, engine->ctx.tmpPathD[1], fillRule);
-        return ERR_OK;
-      }
-    }
-  }
-  else
-  {
-    // TODO:
-    return ERR_RT_NOT_IMPLEMENTED;
+    // TODO: 16-bit rasterizer.
   }
 }
 
 // ============================================================================
-// [Fog::RasterPainterImpl<> - Blit]
+// [Fog::RasterPaintSerializer - BlitRawImage (st)]
 // ============================================================================
 
-template<int _MODE>
-FOG_INLINE err_t RasterPainterImpl<_MODE>::doBlitNormalizedImageI(
-  RasterPaintEngine* engine,
-  const PointI& pt, const Image& srcImage, const RectI& srcFragment)
-{
-  // Must be already clipped.
-  FOG_ASSERT(engine->ctx.finalClipBoxI.subsumes(BoxI(pt.x, pt.y, pt.x + srcFragment.w, pt.y + srcFragment.h)));
-
-  if (_MODE == RASTER_MODE_ST)
-  {
-    engine->ctx.renderer->blitNormalizedImageI(engine->ctx, pt, srcImage, srcFragment);
-    return ERR_OK;
-  }
-  else
-  {
-    // TODO:
-    return ERR_RT_NOT_IMPLEMENTED;
-  }
-}
-
-template<int _MODE>
-err_t RasterPainterImpl<_MODE>::doBlitNormalizedTransformedImageI(RasterPaintEngine* engine,
-  const BoxI& box, const Image& srcImage, const RectI& srcFragment, const TransformD& srcTransform)
-{
-  // Must be already clipped.
-  FOG_ASSERT(engine->ctx.finalClipBoxI.subsumes(box));
-
-  if (_MODE == RASTER_MODE_ST)
-  {
-    err_t err;
-
-    RenderPatternContext* pcOld = engine->ctx.pc;
-    RenderPatternContext pc;
-
-    FOG_RETURN_ON_ERROR(
-      _g2d_render.texture.create(&pc,
-        engine->ctx.layer.primaryFormat,
-        engine->coreClipBox,
-        srcImage, srcFragment,
-        srcTransform, Color(), TEXTURE_TILE_PAD, engine->ctx.paintHints.imageQuality)
-    );
-
-    engine->ctx.pc = &pc;
-    err = doFillNormalizedBoxI(engine, box);
-    engine->ctx.pc = pcOld;
-
-    pc.destroy();
-    return err;
-  }
-  else
-  {
-    // TODO:
-    return ERR_RT_NOT_IMPLEMENTED;
-  }
-}
-
-template<int _MODE>
-err_t RasterPainterImpl<_MODE>::doBlitNormalizedTransformedImageD(RasterPaintEngine* engine,
-  const BoxD& box, const Image& srcImage, const RectI& srcFragment, const TransformD& srcTransform)
-{
-  // Must be already clipped.
-  FOG_ASSERT(engine->ctx.finalClipperD.getClipBox().subsumes(box));
-
-  if (_MODE == RASTER_MODE_ST)
-  {
-    err_t err;
-
-    RenderPatternContext* pcOld = engine->ctx.pc;
-    RenderPatternContext pc;
-
-    FOG_RETURN_ON_ERROR(
-      _g2d_render.texture.create(&pc,
-        engine->ctx.layer.primaryFormat,
-        engine->coreClipBox,
-        srcImage, srcFragment,
-        srcTransform, Color(), TEXTURE_TILE_PAD, engine->ctx.paintHints.imageQuality)
-    );
-
-    engine->ctx.pc = &pc;
-    err = doFillNormalizedBoxD(engine, box);
-    engine->ctx.pc = pcOld;
-
-    pc.destroy();
-    return err;
-  }
-  else
-  {
-    // TODO:
-    return ERR_RT_NOT_IMPLEMENTED;
-  }
-}
-
-template<int _MODE>
-err_t RasterPainterImpl<_MODE>::doBlitUntransformedImageD(
+static err_t FOG_FASTCALL RasterPaintSerializer_blitRawImageD_st(
   RasterPaintEngine* engine, const BoxD& box, const Image& srcImage, const RectI& srcFragment, const TransformD& srcTransform)
 {
   BoxD boxClipped(box);
@@ -5031,60 +5139,290 @@ err_t RasterPainterImpl<_MODE>::doBlitUntransformedImageD(
   if (!BoxD::intersect(boxClipped, boxClipped, engine->ctx.finalClipperD.getClipBox()))
     return ERR_OK;
 
-  if (_MODE == RASTER_MODE_ST)
+  RenderPatternContext* old = engine->ctx.pc;
+  RenderPatternContext pc;
+
+  FOG_RETURN_ON_ERROR(
+    _g2d_render.texture.create(&pc,
+      engine->ctx.layer.primaryFormat,
+      engine->coreClipBox,
+      srcImage, srcFragment,
+      srcTransform, Color(), TEXTURE_TILE_PAD, engine->ctx.paintHints.imageQuality)
+  );
+
+  PathD& path = engine->ctx.tmpPathD[0];
+  path.clear();
+  path.box(box);
+
+  engine->ctx.pc = &pc;
+  err_t err = engine->serializer->fillRawPathD(engine, path, FILL_RULE_NON_ZERO);
+  engine->ctx.pc = old;
+
+  pc.destroy();
+  return err;
+}
+
+// ============================================================================
+// [Fog::RasterPaintSerializer - BlitNormalizedImage (st)]
+// ============================================================================
+
+static err_t FOG_FASTCALL RasterPaintSerializer_blitNormalizedImageI_st(
+  RasterPaintEngine* engine, const PointI& pt, const Image& srcImage, const RectI& srcFragment)
+{
+  if (engine->ctx.precision == IMAGE_PRECISION_BYTE)
   {
-    err_t err;
-
-    RenderPatternContext* pcOld = engine->ctx.pc;
-    RenderPatternContext pc;
-
-    if (srcTransform.getType() <= TRANSFORM_TYPE_SCALING)
+    // Fast-path (clip-box and full-opacity).
+    if (engine->ctx.finalClipType == RASTER_CLIP_BOX)
     {
-      FOG_RETURN_ON_ERROR(
-        _g2d_render.texture.create(&pc,
-          engine->ctx.layer.primaryFormat,
-          engine->coreClipBox,
-          srcImage, srcFragment,
-          srcTransform, Color(), TEXTURE_TILE_PAD, engine->ctx.paintHints.imageQuality)
-      );
+      uint8_t* pixels = engine->ctx.layer.pixels;
+      sysint_t stride = engine->ctx.layer.stride;
+      uint32_t format = engine->ctx.layer.primaryFormat;
 
-      engine->ctx.pc = &pc;
-      err = doFillNormalizedBoxD(engine, boxClipped);
+      const ImageData* srcD = srcImage._d;
+      const uint8_t* srcPixels = srcD->first;
+      sysint_t srcStride = srcD->stride;
+      uint32_t srcFormat = srcD->format;
+
+      uint32_t compositingOperator = engine->ctx.paintHints.compositingOperator;
+      uint32_t opacity = engine->ctx.rasterHints.opacity;
+
+      // --------------------------------------------------------------------------
+      // [Clip == Box]
+      // --------------------------------------------------------------------------
+
+      int srcWidth = srcFragment.w;
+      int srcHeight = srcFragment.h;
+
+      int x0 = pt.x;
+      int y0 = pt.y;
+
+      int i = srcHeight;
+      FOG_ASSERT(y0 + srcHeight <= engine->ctx.layer.size.h);
+
+      pixels += y0 * stride;
+      srcPixels += srcFragment.y * srcStride;
+
+      if (opacity == 0x100)
+      {
+        RenderVBlitLineFn blitLine;
+
+        pixels += x0 * engine->ctx.layer.primaryBPP;
+        srcPixels += srcFragment.x * srcD->bytesPerPixel;
+        engine->ctx.closure.palette = srcD->palette._d;
+
+        // If compositing operator is SRC or SRC_OVER then any image format
+        // combination is supported. However, if compositing operator is one
+        // of other values, then only few image formats can be mixed together.
+        if (RenderUtil::isCompositeCoreOperator(compositingOperator))
+        {
+          blitLine = _g2d_render.getCompositeCoreFuncs(format, compositingOperator)->vblit_line[srcFormat];
+
+_Blit_ClipBox_Opaque_Direct:
+          do {
+            blitLine(pixels, srcPixels, srcWidth, &engine->ctx.closure);
+
+            pixels += stride;
+            srcPixels += srcStride;
+          } while (--i);
+        }
+        else
+        {
+          uint32_t vBlitSrc = _g2d_render_compatibleFormat[format][srcFormat].srcFormat;
+          uint32_t vBlitId = _g2d_render_compatibleFormat[format][srcFormat].vblitId;
+
+          blitLine = _g2d_render.getCompositeExtFuncs(format, compositingOperator)->vblit_line[vBlitId];
+          if (srcFormat == vBlitSrc)
+            goto _Blit_ClipBox_Opaque_Direct;
+
+          uint8_t* tmpPixels = engine->ctx.buffer.getBuffer();
+          RenderVBlitLineFn cvtLine = _g2d_render.getCompositeCoreFuncs(vBlitSrc, COMPOSITE_SRC)->vblit_line[srcFormat];
+
+          do {
+            cvtLine(tmpPixels, srcPixels, srcWidth, &engine->ctx.closure);
+            blitLine(pixels, tmpPixels, srcWidth, &engine->ctx.closure);
+
+            pixels += stride;
+            srcPixels += srcStride;
+          } while (--i);
+        }
+
+        engine->ctx.closure.palette = NULL;
+      }
+      else
+      {
+        RenderVBlitSpanFn blitSpan;
+
+        RasterSpanExt8 span[1];
+        span[0].setPositionAndType(x0, x0 + srcWidth, RASTER_SPAN_C);
+        span[0].setConstMask(opacity);
+        span[0].setNext(NULL);
+
+        srcPixels += srcFragment.x * srcD->bytesPerPixel;
+        engine->ctx.closure.palette = srcD->palette._d;
+
+        // If compositing operator is SRC or SRC_OVER then any image format
+        // combination is supported. However, if compositing operator is one
+        // of other values, then only few image formats can be mixed together.
+        if (RenderUtil::isCompositeCoreOperator(compositingOperator))
+        {
+          blitSpan = _g2d_render.getCompositeCoreFuncs(format, compositingOperator)->vblit_span[srcFormat];
+
+_Blit_ClipBox_Alpha_Direct:
+          do {
+            // SrcPixels won't be changed, it's just needed to remove the const modifier.
+            span[0].setData(const_cast<uint8_t*>(srcPixels));
+            blitSpan(pixels, span, &engine->ctx.closure);
+
+            pixels += stride;
+            srcPixels += srcStride;
+          } while (--i);
+        }
+        else
+        {
+          uint32_t vBlitSrc = _g2d_render_compatibleFormat[format][srcFormat].srcFormat;
+          uint32_t vBlitId = _g2d_render_compatibleFormat[format][srcFormat].vblitId;
+
+          blitSpan = _g2d_render.getCompositeExtFuncs(format, compositingOperator)->vblit_span[vBlitId];
+          if (srcFormat == vBlitSrc)
+            goto _Blit_ClipBox_Alpha_Direct;
+
+          uint8_t* tmpPixels = engine->ctx.buffer.getBuffer();
+          RenderVBlitLineFn cvtLine = _g2d_render.getCompositeCoreFuncs(vBlitSrc, COMPOSITE_SRC)->vblit_line[srcFormat];
+
+          span[0].setData(tmpPixels);
+
+          do {
+            cvtLine(tmpPixels, srcPixels, srcWidth, &engine->ctx.closure);
+            blitSpan(pixels, span, &engine->ctx.closure);
+
+            pixels += stride;
+            srcPixels += srcStride;
+          } while (--i);
+        }
+
+        engine->ctx.closure.palette = NULL;
+      }
+      return ERR_OK;
     }
     else
     {
+      BoxRasterizer8& rasterizer = engine->ctx.boxRasterizer8.instance();
+      BoxI box(pt.x, pt.y, pt.x + srcFragment.w, pt.y + srcFragment.h);
+
+      rasterizer.setSceneBox(engine->ctx.finalClipBoxI);
+      rasterizer.setOpacity(engine->ctx.rasterHints.opacity);
+
+      rasterizer.initAligned(box);
+
+      RenderPatternContext* old = engine->ctx.pc;
+      RenderPatternContext pc;
+
       FOG_RETURN_ON_ERROR(
         _g2d_render.texture.create(&pc,
           engine->ctx.layer.primaryFormat,
           engine->coreClipBox,
           srcImage, srcFragment,
-          srcTransform, Color(), TEXTURE_TILE_PAD, engine->ctx.paintHints.imageQuality)
+          TransformD::fromTranslation(PointD(pt)), Color(), TEXTURE_TILE_PAD, engine->ctx.paintHints.imageQuality)
       );
 
-      PathD& path = engine->ctx.tmpPathD[0];
-      path.clear();
-      path.box(box);
-
       engine->ctx.pc = &pc;
-      err = doFillUntransformedPathD(engine, path, FILL_RULE_NON_ZERO, true);
-    }
+      err_t err = RasterPaintSerializer_fillRasterizedShape8_st(engine, &rasterizer);
+      engine->ctx.pc = old;
 
-    engine->ctx.pc = pcOld;
-    pc.destroy();
-    return err;
+      pc.destroy();
+      return err;
+    }
   }
   else
   {
-    // TODO:
-    return ERR_RT_NOT_IMPLEMENTED;
+    // TODO: 16-bit rasterizer.
   }
 }
 
 // ============================================================================
-// [Fog::RasterPainterVTable]
+// [Fog::RasterPaintSerializer - BlitNormalizedTrasnformedImage (st)]
 // ============================================================================
 
-RasterPainterVTable RasterPaintEngine_vtable[RASTER_MODE_COUNT];
+static err_t FOG_FASTCALL RasterPaintSerializer_blitNormalizedTransformedImageI_st(
+  RasterPaintEngine* engine, const BoxI& box, const Image& srcImage, const RectI& srcFragment, const TransformD& srcTransform)
+{
+  // Must be already clipped.
+  FOG_ASSERT(engine->ctx.finalClipBoxI.subsumes(box));
+
+  RenderPatternContext* old = engine->ctx.pc;
+  RenderPatternContext pc;
+
+  FOG_RETURN_ON_ERROR(
+    _g2d_render.texture.create(&pc,
+      engine->ctx.layer.primaryFormat,
+      engine->coreClipBox,
+      srcImage, srcFragment,
+      srcTransform, Color(), TEXTURE_TILE_PAD, engine->ctx.paintHints.imageQuality)
+  );
+
+  engine->ctx.pc = &pc;
+  err_t err = engine->serializer->fillNormalizedBoxI(engine, box);
+  engine->ctx.pc = old;
+
+  pc.destroy();
+  return err;
+}
+
+static err_t FOG_FASTCALL RasterPaintSerializer_blitNormalizedTransformedImageD_st(
+  RasterPaintEngine* engine, const BoxD& box, const Image& srcImage, const RectI& srcFragment, const TransformD& srcTransform)
+{
+  // Must be already clipped.
+  FOG_ASSERT(engine->ctx.finalClipperD.getClipBox().subsumes(box));
+
+  RenderPatternContext* old = engine->ctx.pc;
+  RenderPatternContext pc;
+
+  FOG_RETURN_ON_ERROR(
+    _g2d_render.texture.create(&pc,
+      engine->ctx.layer.primaryFormat,
+      engine->coreClipBox,
+      srcImage, srcFragment,
+      srcTransform, Color(), TEXTURE_TILE_PAD, engine->ctx.paintHints.imageQuality)
+  );
+
+  engine->ctx.pc = &pc;
+  err_t err = engine->serializer->fillNormalizedBoxD(engine, box);
+  engine->ctx.pc = old;
+
+  pc.destroy();
+  return err;
+}
+
+// ============================================================================
+// [Fog::RasterPaintSerializer - Init (st)]
+// ============================================================================
+
+static void FOG_FASTCALL RasterPaintSerializer_init_st(RasterPaintSerializer* self)
+{
+  self->fillNormalizedBoxI = RasterPaintSerializer_fillNormalizedBoxI_st;
+  self->fillNormalizedBoxF = RasterPaintSerializer_fillNormalizedBoxF_st;
+  self->fillNormalizedBoxD = RasterPaintSerializer_fillNormalizedBoxD_st;
+
+  self->drawRawPathF = RasterPaintSerializer_drawRawPathF_st;
+  self->drawRawPathD = RasterPaintSerializer_drawRawPathD_st;
+  self->fillRawPathF = RasterPaintSerializer_fillRawPathF_st;
+  self->fillRawPathD = RasterPaintSerializer_fillRawPathD_st;
+  self->fillNormalizedPathF = RasterPaintSerializer_fillNormalizedPathF_st;
+  self->fillNormalizedPathD = RasterPaintSerializer_fillNormalizedPathD_st;
+
+  self->blitRawImageD = RasterPaintSerializer_blitRawImageD_st;
+  self->blitNormalizedImageI = RasterPaintSerializer_blitNormalizedImageI_st;
+  self->blitNormalizedTransformedImageI = RasterPaintSerializer_blitNormalizedTransformedImageI_st;
+  self->blitNormalizedTransformedImageD = RasterPaintSerializer_blitNormalizedTransformedImageD_st;
+}
+
+// ============================================================================
+// [Fog::RasterPaintSerializer - Init (mt)]
+// ============================================================================
+
+static void FOG_FASTCALL RasterPaintSerializer_init_mt(RasterPaintSerializer* self)
+{
+}
 
 // ============================================================================
 // [Fog::RasterPaintEngine]
@@ -5133,7 +5471,7 @@ RasterPaintEngine::RasterPaintEngine() :
   // Disable multithreading, it may be enabled by init().
   wm = NULL;
 
-  maxThreads = RasterPainterImpl_::getMaxThreads();
+  maxThreads = RasterPaintEngineImpl::getMaxThreads();
   finalizing = 0;
 }
 
@@ -5142,8 +5480,8 @@ RasterPaintEngine::~RasterPaintEngine()
   if (ctx.layer.imageData)
     ctx.layer.imageData->locked--;
 
-  RasterPainterImpl_::discardStates(this);
-  RasterPainterImpl_::discardSource(this);
+  RasterPaintEngineImpl::discardStates(this);
+  RasterPaintEngineImpl::discardSource(this);
 
   strokeParams.f.destroy();
   strokeParams.d.destroy();
@@ -5160,15 +5498,15 @@ err_t RasterPaintEngine::init(const ImageBits& imageBits, ImageData* imaged, uin
   ctx.layer.imageData = imaged;
   if (imaged) imaged->locked++;
 
-  RasterPainterImpl_::setupLayer(this);
+  RasterPaintEngineImpl::setupLayer(this);
   FOG_RETURN_ON_ERROR(ctx._initPrecision(ctx.layer.precision));
 
   // Setup defaults.
-  vtable = &RasterPaintEngine_vtable[RASTER_MODE_ST];
+  vtable = &RasterPaintEngine_vtable;
 
-  RasterPainterImpl_::setupOps(this);
-  RasterPainterImpl_::setupDefaultClip(this);
-  RasterPainterImpl_::setupDefaultRenderer(this);
+  RasterPaintEngineImpl::setupOps(this);
+  RasterPaintEngineImpl::setupDefaultClip(this);
+  RasterPaintEngineImpl::setupDefaultSerializer(this);
 
   return ERR_OK;
 }
@@ -5387,10 +5725,9 @@ FOG_NO_EXPORT void Painter_initRaster(void)
   _api.painter.switchToImage = RasterPaintEngine_switchToImage;
   _api.painter.switchToIBits = RasterPaintEngine_switchToIBits;
 
-  RasterPainterImpl<RASTER_MODE_ST>::initVTable(RasterPaintEngine_vtable[RASTER_MODE_ST]);
-  RasterPainterImpl<RASTER_MODE_MT>::initVTable(RasterPaintEngine_vtable[RASTER_MODE_MT]);
-
-  Painter_initRasterRender();
+  RasterPaintEngineImpl::initVTable(RasterPaintEngine_vtable);
+  RasterPaintSerializer_init_st(&RasterPaintEngine_serializer[RASTER_MODE_ST]);
+  RasterPaintSerializer_init_mt(&RasterPaintEngine_serializer[RASTER_MODE_MT]);
 }
 
 } // Fog namespace

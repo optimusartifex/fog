@@ -974,13 +974,17 @@ Set(FOG_G2D_PAINTING_SOURCES
   Fog/G2d/Painting/PaintParams.cpp
   Fog/G2d/Painting/PaintUtil.cpp
   Fog/G2d/Painting/Painter.cpp
-  Fog/G2d/Painting/RasterPaintAction.cpp
-  Fog/G2d/Painting/RasterPaintContext.cpp
+  Fog/G2d/Painting/RasterApi.cpp
+  Fog/G2d/Painting/RasterContext.cpp
+  Fog/G2d/Painting/RasterFiller.cpp
+  Fog/G2d/Painting/RasterMask.cpp
   Fog/G2d/Painting/RasterPaintEngine.cpp
-  Fog/G2d/Painting/RasterPaintFuncs.cpp
-  Fog/G2d/Painting/RasterPaintRender.cpp
-  Fog/G2d/Painting/RasterPaintState.cpp
-  Fog/G2d/Painting/RasterPaintWorker.cpp
+  Fog/G2d/Painting/RasterScanline.cpp
+  Fog/G2d/Painting/RasterSpan.cpp
+  Fog/G2d/Painting/RasterState.cpp
+  Fog/G2d/Painting/RasterUtil.cpp
+  Fog/G2d/Painting/RasterWorker.cpp
+  Fog/G2d/Painting/Rasterizer.cpp
 )
 
 Set(FOG_G2D_PAINTING_HEADERS
@@ -991,36 +995,23 @@ Set(FOG_G2D_PAINTING_HEADERS
   Fog/G2d/Painting/PaintParams.h
   Fog/G2d/Painting/PaintUtil.h
   Fog/G2d/Painting/Painter.h
-  Fog/G2d/Painting/RasterPaintAction_p.h
-  Fog/G2d/Painting/RasterPaintConstants_p.h
-  Fog/G2d/Painting/RasterPaintContext_p.h
+  Fog/G2d/Painting/RasterApi_p.h
+  Fog/G2d/Painting/RasterConstants_p.h
+  Fog/G2d/Painting/RasterContext_p.h
+  Fog/G2d/Painting/RasterFiller_p.h
+  Fog/G2d/Painting/RasterMask_p.h
   Fog/G2d/Painting/RasterPaintEngine_p.h
-  Fog/G2d/Painting/RasterPaintFuncs_p.h
-  Fog/G2d/Painting/RasterPaintRender_p.h
-  Fog/G2d/Painting/RasterPaintState_p.h
   Fog/G2d/Painting/RasterPaintStructs_p.h
-  Fog/G2d/Painting/RasterPaintUtil_p.h
-  Fog/G2d/Painting/RasterPaintWorker_p.h
-)
-
-# [Fog/G2d/Rasterizer]
-Set(FOG_G2D_RASTERIZER_SOURCES
-  Fog/G2d/Rasterizer/Rasterizer.cpp
-  Fog/G2d/Rasterizer/Rasterizer_Line.cpp
-  Fog/G2d/Rasterizer/Rasterizer_Rect.cpp
-  Fog/G2d/Rasterizer/Rasterizer_RectXorRect.cpp
-  Fog/G2d/Rasterizer/Scanline.cpp
-  Fog/G2d/Rasterizer/Span.cpp
-)
-
-Set(FOG_G2D_RASTERIZER_HEADERS
-  Fog/G2d/Rasterizer/Rasterizer_p.h
-  Fog/G2d/Rasterizer/Scanline_p.h
-  Fog/G2d/Rasterizer/Span_p.h
+  Fog/G2d/Painting/RasterScanline_p.h
+  Fog/G2d/Painting/RasterSpan_p.h
+  Fog/G2d/Painting/RasterState_p.h
+  Fog/G2d/Painting/RasterUtil_p.h
+  Fog/G2d/Painting/RasterWorker_p.h
+  Fog/G2d/Painting/Rasterizer_p.h
 )
 
 Set_Source_Files_Properties(
-  Fog/G2d/Rasterizer/Rasterizer.cpp
+  Fog/G2d/Painting/Rasterizer.cpp
   PROPERTIES COMPILE_FLAGS "${FOG_CXX_FLAGS_OPTIMIZE}"
 )
 
@@ -1336,7 +1327,6 @@ Source_Group("G2d/Imaging"          FILES ${FOG_G2D_IMAGING_SOURCES}          ${
 Source_Group("G2d/Imaging/Codecs"   FILES ${FOG_G2D_IMAGING_CODECS_SOURCES}   ${FOG_G2D_IMAGING_CODECS_HEADERS}  )
 Source_Group("G2d/Imaging/Effects"  FILES ${FOG_G2D_IMAGING_EFFECTS_SOURCES}  ${FOG_G2D_IMAGING_EFFECTS_HEADERS} )
 Source_Group("G2d/Painting"         FILES ${FOG_G2D_PAINTING_SOURCES}         ${FOG_G2D_PAINTING_HEADERS}        )
-Source_Group("G2d/Rasterizer"       FILES ${FOG_G2D_RASTERIZER_SOURCES}       ${FOG_G2D_RASTERIZER_HEADERS}      )
 Source_Group("G2d/Render"           FILES ${FOG_G2D_RENDER_SOURCES}           ${FOG_G2D_RENDER_HEADERS}          )
 Source_Group("G2d/Render/C"         FILES                                     ${FOG_G2D_RENDER_C_HEADERS}        )
 Source_Group("G2d/Render/MMX"       FILES                                     ${FOG_G2D_RENDER_MMX_HEADERS}      )
@@ -1712,7 +1702,6 @@ Set(FOG_ALL_SOURCES
   ${FOG_G2D_IMAGING_CODECS_SOURCES}
   ${FOG_G2D_IMAGING_EFFECTS_SOURCES}
   ${FOG_G2D_PAINTING_SOURCES}
-  ${FOG_G2D_RASTERIZER_SOURCES}
   ${FOG_G2D_RENDER_SOURCES}
   ${FOG_G2D_SHADER_SOURCES}
   ${FOG_G2D_SOURCE_SOURCES}
@@ -1764,7 +1753,6 @@ Set(FOG_ALL_HEADERS
   ${FOG_G2D_IMAGING_EFFECTS_HEADERS}
   ${FOG_G2D_PAINTING_HEADERS}
   ${FOG_G2D_GEOMETRY_HEADERS}
-  ${FOG_G2D_RASTERIZER_HEADERS}
   ${FOG_G2D_RENDER_HEADERS}
   ${FOG_G2D_RENDER_C_HEADERS}
   ${FOG_G2D_RENDER_MMX_HEADERS}

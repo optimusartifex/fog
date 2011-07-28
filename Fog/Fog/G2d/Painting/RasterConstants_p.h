@@ -4,24 +4,25 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_PAINTING_RASTERPAINTCONSTANTS_P_H
-#define _FOG_G2D_PAINTING_RASTERPAINTCONSTANTS_P_H
+#ifndef _FOG_G2D_PAINTING_RASTERCONSTANTS_P_H
+#define _FOG_G2D_PAINTING_RASTERCONSTANTS_P_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
 
 namespace Fog {
 
-//! @addtogroup Fog_G2d_Painting_Raster
+//! @addtogroup Fog_G2d_Painting
 //! @{
 
 // ============================================================================
 // [Debugging]
 // ============================================================================
 
-// #define FOG_DEBUG_RASTER_SYNC
 // #define FOG_DEBUG_RASTER_CMD
 // #define FOG_DEBUG_RASTER_MASK
+// #define FOG_DEBUG_RASTER_SYNC
+// #define FOG_DEBUG_RASTERIZER
 
 // ============================================================================
 // [Fog::RASTER_CORE]
@@ -107,10 +108,14 @@ enum RASTER_CMD_OPCODE
 
 enum RASTER_INTEGRAL_TRANSFORM
 {
-  RASTER_INTEGRAL_TRANSFORM_NULL = 0,
+  //! @brief Transform is not integral.
+  RASTER_INTEGRAL_TRANSFORM_NONE = 0,
 
+  //! @brief Transform is simple (identity or translation).
   RASTER_INTEGRAL_TRANSFORM_SIMPLE = 1,
+  //! @brief Transform is scaling (translation + scaling).
   RASTER_INTEGRAL_TRANSFORM_SCALING = 2,
+  //! @brief Transform is swap (translation + swap).
   RASTER_INTEGRAL_TRANSFORM_SWAP = 3
 };
 
@@ -391,6 +396,68 @@ enum RASTER_PRECISION
 };
 
 // ============================================================================
+// [Fog::RASTER_SPAN]
+// ============================================================================
+
+//! @brief Type of @c RasterSpan.
+enum RASTER_SPAN
+{
+  // --------------------------------------------------------------------------
+  // NOTE: When changing these constants, please make sure that the span methods
+  // like isConst()/isVariant() are also changed. There are some optimizations
+  // which are based on order of these constants.
+  // --------------------------------------------------------------------------
+
+  // --------------------------------------------------------------------------
+  // [Const]
+  // --------------------------------------------------------------------------
+
+  //! @brief Span is a const-mask.
+  RASTER_SPAN_C = 0,
+
+  // --------------------------------------------------------------------------
+  // [Variant]
+  // --------------------------------------------------------------------------
+
+  //! @brief Start of variant-alpha span types (may be used by asserts).
+  //!
+  //! @note This constant is only shadow to valid mask type, don't use this
+  //! value in switch() {}.
+  RASTER_SPAN_V_BEGIN = 1,
+
+  //! @brief Span is a variable-alpha mask (8-bit, A8).
+  //!
+  //! @sa @c RASTER_SPAN_AX_EXTRA.
+  RASTER_SPAN_A8_GLYPH = 1,
+
+  //! @brief Span is a variable-alpha mask (target bit-depth, A8, A16 or A32).
+  //!
+  //! @sa @c RASTER_SPAN_AX_EXTRA.
+  RASTER_SPAN_AX_GLYPH = 2,
+
+  //! @brief Span is an extended variable-alpha mask (target bit-depth + 1 bit
+  //! for exact scaling).
+  RASTER_SPAN_AX_EXTRA = 3,
+
+  //! @brief Span is a variable-argb mask (8-bit, PRGB32).
+  RASTER_SPAN_ARGB32_GLYPH = 4,
+
+  //! @brief Span is a variable-argb mask (target bit-depth, PRGB32 or PRGB64).
+  RASTER_SPAN_ARGBXX_GLYPH = 5,
+
+  //! @brief The count of span types.
+  RASTER_SPAN_COUNT = 6
+};
+
+enum
+{
+  //! @brief Helper constant to determine how many constant pixels are
+  //! profitable for pure CMask span instance. Minimum is 1, but recommended
+  //! are 4 or more (it depends on the  available SIMD instructions per platform).
+  RASTER_SPAN_C_THRESHOLD = 4
+};
+
+// ============================================================================
 // [Fog::RASTER_WORKER_STATE]
 // ============================================================================
 
@@ -410,4 +477,4 @@ enum RASTER_WORKER_STATE
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_PAINTING_RASTERPAINTCONSTANTS_P_H
+#endif // _FOG_G2D_PAINTING_RASTERCONSTANTS_P_H

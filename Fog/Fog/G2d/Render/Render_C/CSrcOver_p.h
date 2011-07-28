@@ -55,7 +55,7 @@ struct FOG_NO_EXPORT CSrcOver
   // ==========================================================================
 
   static void FOG_FASTCALL prgb32_cblit_prgb32_span(
-    uint8_t* dst, const RenderSolid* src, const Span* span, const RenderClosure* closure)
+    uint8_t* dst, const RenderSolid* src, const RasterSpan* span, const RenderClosure* closure)
   {
     Face::p32 sro0p, sro0p_20, sro0p_31;
     Face::p32 inv0p;
@@ -277,7 +277,7 @@ _C_Opaque_Skip:
   // ==========================================================================
 
   static void FOG_FASTCALL prgb32_vblit_prgb32_span(
-    uint8_t* dst, const Span* span, const RenderClosure* closure)
+    uint8_t* dst, const RasterSpan* span, const RenderClosure* closure)
   {
     V_BLIT_SPAN8_BEGIN(4)
 
@@ -559,7 +559,7 @@ _VARGBGlyphMask:
   // ==========================================================================
 
   static void FOG_FASTCALL xrgb32_cblit_span(
-    uint8_t* dst, const RenderSolid* src, const Span* span, const RenderClosure* closure)
+    uint8_t* dst, const RenderSolid* src, const RasterSpan* span, const RenderClosure* closure)
   {
     Face::p32 sro0p, sro0p_20, sro0p_31;
     Face::p32 srf0p;
@@ -766,7 +766,7 @@ _VARGBGlyphMask:
   // ==========================================================================
 
   //static void FOG_FASTCALL xrgb32_vblit_prgb32_span(
-  //  uint8_t* dst, const Span* span, const RenderClosure* closure)
+  //  uint8_t* dst, const RasterSpan* span, const RenderClosure* closure)
   //{
   //}
 

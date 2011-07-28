@@ -1,13 +1,13 @@
-// [Fog-Core]
+// [Fog-G2d]
 //
 // [License]
 // MIT, See COPYING file in package
 
 // [Dependencies]
-#include <Fog/Core/Global/Api.h>
+#include <Fog/G2d/Painting/RasterApi_p.h>
 
 // ============================================================================
-// [Fog::Api]
+// [Fog::RasterApi]
 // ============================================================================
 
-Fog::Api Fog::_api;
+Fog::RasterApi Fog::_rasterApi;

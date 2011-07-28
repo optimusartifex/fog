@@ -257,7 +257,7 @@ _ARGB32_Glyph_Fill:
 
   template<typename DstF>
   static void FOG_FASTCALL comp8_vblit_a8_span(
-    uint8_t* dst, const Span* span, const RenderClosure* closure)
+    uint8_t* dst, const RasterSpan* span, const RenderClosure* closure)
   {
     V_BLIT_SPAN8_BEGIN(DstF::SIZE)
 
@@ -501,7 +501,7 @@ _ARGB32_Glyph_Skip:
 
   template<typename DstF>
   static void FOG_FASTCALL comp8_vblit_i8_span(
-    uint8_t* dst, const Span* span, const RenderClosure* closure)
+    uint8_t* dst, const RasterSpan* span, const RenderClosure* closure)
   {
     V_BLIT_SPAN8_BEGIN(DstF::SIZE)
 
@@ -755,7 +755,7 @@ _ARGB32_Glyph_Skip:
 
   template<typename DstF>
   static void FOG_FASTCALL comp8_vblit_prgb64_span(
-    uint8_t* dst, const Span* span, const RenderClosure* closure)
+    uint8_t* dst, const RasterSpan* span, const RenderClosure* closure)
   {
     V_BLIT_SPAN8_BEGIN(DstF::SIZE)
 
@@ -1020,7 +1020,7 @@ _ARGB32_Glyph_Skip:
 
   template<typename DstF>
   static void FOG_FASTCALL comp8_vblit_rgb48_span(
-    uint8_t* dst, const Span* span, const RenderClosure* closure)
+    uint8_t* dst, const RasterSpan* span, const RenderClosure* closure)
   {
     V_BLIT_SPAN8_BEGIN(DstF::SIZE)
 
@@ -1325,7 +1325,7 @@ _ARGB32_Glyph_Fill:
 
   template<typename DstF>
   static void FOG_FASTCALL comp8_vblit_a16_span(
-    uint8_t* dst, const Span* span, const RenderClosure* closure)
+    uint8_t* dst, const RasterSpan* span, const RenderClosure* closure)
   {
     V_BLIT_SPAN8_BEGIN(DstF::SIZE)
 
@@ -1405,7 +1405,7 @@ _ARGB32_Glyph_Fill:
   // ==========================================================================
 
   static void FOG_FASTCALL prgb32_cblit_prgb32_span(
-    uint8_t* dst, const RenderSolid* src, const Span* span, const RenderClosure* closure)
+    uint8_t* dst, const RenderSolid* src, const RasterSpan* span, const RenderClosure* closure)
   {
     Face::p32 sro0p;
     Face::p32 sro0p_20, sro0p_31;
@@ -1744,7 +1744,7 @@ _ARGB32_Glyph_Skip:
   // ==========================================================================
 
   static void FOG_FASTCALL frgb32_vblit_xrgb32_span(
-    uint8_t* dst, const Span* span, const RenderClosure* closure)
+    uint8_t* dst, const RasterSpan* span, const RenderClosure* closure)
   {
     V_BLIT_SPAN8_BEGIN(4)
 
@@ -2041,7 +2041,7 @@ _ARGB32_Glyph_Skip:
   // ==========================================================================
 
   static void FOG_FASTCALL frgb32_vblit_rgb24_span(
-    uint8_t* dst, const Span* span, const RenderClosure* closure)
+    uint8_t* dst, const RasterSpan* span, const RenderClosure* closure)
   {
     V_BLIT_SPAN8_BEGIN(4)
 
@@ -2246,7 +2246,7 @@ _ARGB32_Glyph_Skip:
   // ==========================================================================
 
   static void FOG_FASTCALL prgb32_vblit_prgb32_span(
-    uint8_t* dst, const Span* span, const RenderClosure* closure)
+    uint8_t* dst, const RasterSpan* span, const RenderClosure* closure)
   {
     V_BLIT_SPAN8_BEGIN(4)
 
@@ -2327,7 +2327,7 @@ _ARGB32_Glyph_Skip:
   // ==========================================================================
 
   static void FOG_FASTCALL xrgb32_cblit_prgb32_span(
-    uint8_t* dst, const RenderSolid* src, const Span* span, const RenderClosure* closure)
+    uint8_t* dst, const RenderSolid* src, const RasterSpan* span, const RenderClosure* closure)
   {
     Face::p32 sro0p;
     Face::p32 sro0p_20, sro0p_31;
@@ -2515,7 +2515,7 @@ _ARGB32_Glyph_Skip:
   // ==========================================================================
 
   static void FOG_FASTCALL xrgb32_vblit_prgb32_span(
-    uint8_t* dst, const Span* span, const RenderClosure* closure)
+    uint8_t* dst, const RasterSpan* span, const RenderClosure* closure)
   {
     V_BLIT_SPAN8_BEGIN(4)
 
@@ -2708,7 +2708,7 @@ _ARGB32_Glyph_Skip:
   // ==========================================================================
 
   static void FOG_FASTCALL rgb24_cblit_prgb32_span(
-    uint8_t* dst, const RenderSolid* src, const Span* span, const RenderClosure* closure)
+    uint8_t* dst, const RenderSolid* src, const RasterSpan* span, const RenderClosure* closure)
   {
     Face::p32 sro0p;
     Face::p32Copy(sro0p, src->prgb32.p32);

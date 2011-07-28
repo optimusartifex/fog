@@ -197,6 +197,8 @@ void MyWindow::onPaint(PaintEvent* e)
 
   p->restore();
 
+  p->blitImage(PointI(220, 220), i[0]);
+
   /*
   {
     uint i, j;
@@ -228,8 +230,8 @@ void MyWindow::onPaint(PaintEvent* e)
 
   if (pie.getBoundingBox(box, tr) == ERR_OK)
   {
-    p->setSource(Argb32(0xFF000000));
-    p->drawBox(box);
+    p->setSource(Argb32(0x4F000000));
+    p->fillBox(box);
   }
 #endif
 

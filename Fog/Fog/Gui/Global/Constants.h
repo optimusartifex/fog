@@ -877,7 +877,7 @@ enum ANIMATION_FLAGS
   //! @brief destroy Widget when animation ends.
   ANIMATION_WIDGET_DESTROY_ON_END = (1 << 3),
   //! @brief marks that the positions are relative to parent.
-  ANIMATION_WIDGET_RELATIV_TO_PARENT = (1 << 4),
+  ANIMATION_WIDGET_RELATIVE_TO_PARENT = (1 << 4),
 
   //! @brief identifies where the widget is relative to parent.
   ANIMATION_WIDGET_ORIENTATION_TOP = (1 << 5),

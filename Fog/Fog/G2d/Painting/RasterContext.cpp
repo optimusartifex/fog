@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/G2d/Painting/RasterPaintContext_p.h>
+#include <Fog/G2d/Painting/RasterContext_p.h>
 
 namespace Fog {
 
@@ -19,9 +19,6 @@ namespace Fog {
 
 RasterContext::RasterContext() :
   engine(NULL),
-  renderer(NULL),
-  offset(0),
-  delta(1),
   precision(0xFFFFFFFF),
   finalClipType(RASTER_CLIP_NULL),
   finalClipBoxI(0, 0, 0, 0),
@@ -36,6 +33,8 @@ RasterContext::RasterContext() :
   maskY2(-1),
   maskRowsAdj(NULL)
 {
+  scope.reset();
+
   layer.reset();
   maskResetPools();
 
@@ -94,14 +93,16 @@ err_t RasterContext::_initPrecision(uint32_t precision)
     switch (this->precision)
     {
       case IMAGE_PRECISION_BYTE:
-        rasterizer8.destroy();
+        boxRasterizer8.destroy();
+        pathRasterizer8.destroy();
         scanline8.destroy();
         scanlineExt8.destroy();
         break;
 
       case IMAGE_PRECISION_WORD:
         // TODO: 16-bit rasterizer.
-        // rasterizer16.destroy();
+        // boxRasterizer16.destroy();
+        // pathRasterizer16.destroy();
         // scanline16.destroy();
         // scanlineExt16.destroy();
         break;
@@ -116,20 +117,22 @@ err_t RasterContext::_initPrecision(uint32_t precision)
     switch (this->precision)
     {
       case IMAGE_PRECISION_BYTE:
-        fullOpacityValueU = 0x100;
-        fullOpacityValueF = (float)(0x100 << 4);
-        rasterizer8.init();
+        fullOpacity.u = 0x100;
+        fullOpacity.f = float(0x100);
+        boxRasterizer8.init();
+        pathRasterizer8.init();
         scanline8.init();
-        scanlineExt8.initCustom1((uint32_t)sizeof(SpanExt8));
+        scanlineExt8.initCustom1((uint32_t)sizeof(RasterSpanExt8));
         break;
 
       case IMAGE_PRECISION_WORD:
-        fullOpacityValueU = 0x10000;
-        fullOpacityValueF = (float)(0x10000 << 4);
+        fullOpacity.u = 0x10000;
+        fullOpacity.f = float(0x10000);
         // TODO: 16-bit rasterizer.
-        // rasterizer16.init();
+        // boxRasterizer16.init();
+        // pathRasterizer16.init();
         // scanline16.init();
-        // scanlineExt16.init((uint32_t)sizeof(SpanExt16));
+        // scanlineExt16.init((uint32_t)sizeof(RasterSpanExt16));
         break;
 
       default:
@@ -158,7 +161,7 @@ err_t RasterContext::_initPrecision(uint32_t precision)
       return ERR_OK;
   }
 
-  uint8_t* pcBuf = pcRowBuffer.alloc(pcBpl);
+  uint8_t* pcBuf = buffer.alloc(pcBpl);
   return pcBuf != NULL ? (err_t)ERR_OK : (err_t)ERR_RT_OUT_OF_MEMORY;
 }
 

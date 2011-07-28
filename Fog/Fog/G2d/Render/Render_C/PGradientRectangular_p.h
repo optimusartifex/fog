@@ -179,7 +179,7 @@ struct FOG_NO_EXPORT PGradientRectangular
 
   template<typename Accessor>
   static void FOG_FASTCALL fetch_simple_nearest(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     Accessor accessor(ctx);
@@ -227,7 +227,7 @@ struct FOG_NO_EXPORT PGradientRectangular
 
   template<typename Accessor>
   static void FOG_FASTCALL fetch_proj_nearest(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     Accessor accessor(ctx);

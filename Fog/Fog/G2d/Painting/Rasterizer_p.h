@@ -4,22 +4,24 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_RASTERIZER_RASTERIZER_P_H
-#define _FOG_G2D_RASTERIZER_RASTERIZER_P_H
+#ifndef _FOG_G2D_PAINTING_RASTERIZER_P_H
+#define _FOG_G2D_PAINTING_RASTERIZER_P_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
+#include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Path.h>
-#include <Fog/G2d/Rasterizer/Scanline_p.h>
-#include <Fog/G2d/Rasterizer/Span_p.h>
+#include <Fog/G2d/Painting/RasterApi_p.h>
+#include <Fog/G2d/Painting/RasterConstants_p.h>
+#include <Fog/G2d/Painting/RasterPaintStructs_p.h>
+#include <Fog/G2d/Painting/RasterScanline_p.h>
+#include <Fog/G2d/Painting/RasterSpan_p.h>
 
 // ============================================================================
 // [Debugging]
 // ============================================================================
-
-// #define FOG_DEBUG_RASTERIZER
 
 #if defined(FOG_DEBUG_RASTERIZER)
 #include <Fog/Core/Tools/ByteArray.h>
@@ -27,59 +29,8 @@
 
 namespace Fog {
 
-//! @addtogroup Fog_G2d_Rasterizer
+//! @addtogroup Fog_G2d_Painting
 //! @{
-
-// ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-struct MemoryBuffer;
-struct Rasterizer8;
-
-// ============================================================================
-// [Typedefs]
-// ============================================================================
-
-typedef Span8* (*RasterizerSweepSimpleFn)(Rasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y);
-typedef Span8* (*RasterizerSweepRegionFn)(Rasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y, const BoxI* clipBoxes, size_t count);
-typedef Span8* (*RasterizerSweepSpansFn)(Rasterizer8* rasterizer, Scanline8& scanline, MemoryBuffer& temp, int y, const Span8* clipSpans);
-
-// ============================================================================
-// [Fog::RASTERIZER_SHAPE]
-// ============================================================================
-
-//! @brief Rasterizer fill shape.
-//!
-//! The rasterizer contains special fast-paths which may be used to rasterize
-//! simple shapes. The generic fill-type is @c RASTERIZER_SHAPE_PATH, which
-//! can be used to fill any shape (polygon based or complex path). All other
-//! fill-types are specific to simple shapes like rect, line, and others...
-enum RASTERIZER_SHAPE
-{
-  //! @brief None (no command used yet).
-  RASTERIZER_SHAPE_NONE = 0,
-
-  //! @brief Fill a path (this is the most generic shape, always usable).
-  RASTERIZER_SHAPE_PATH = 1,
-
-  //! @brief Fill a rect using subpixel accuracy.
-  //!
-  //! This kind of rasterizer is used to fill a simple rectangle shape.
-  //!
-  //! @note The data is stored in @c ShapeRect structure, allocated by
-  //! @c CellStorage.
-  RASTERIZER_SHAPE_RECT = 2,
-
-  //! @brief Fill a rect XORed by another rect (stroke) using subpixel accuracy.
-  //!
-  //! This kind of rasterizer is used to fill a stroked rectangle with angular
-  //! (miter join) corners.
-  //!
-  //! @note The data is stored in @c ShapeRectXorRect structure, allocated by
-  //! @c CellStorage.
-  RASTERIZER_SHAPE_RECT_XOR_RECT = 3
-};
 
 // ============================================================================
 // [Fog::Rasterizer8]
@@ -87,73 +38,297 @@ enum RASTERIZER_SHAPE
 
 //! @internal
 //!
-//! @brief Scanline path/polygon rasterizer, which produces 256 levels of gray.
+//! @brief Rasterizer interface (8-bit).
+struct FOG_NO_EXPORT Rasterizer8
+{
+  // --------------------------------------------------------------------------
+  // [Typedefs]
+  // --------------------------------------------------------------------------
+
+  //! @brief Rasterize the entire shape, using callback functions to perform
+  //! a specific tasks.
+  typedef void (FOG_CDECL *RenderFn)(Rasterizer8* self, RasterFiller* filler, RasterScanline8* scanline, MemoryBuffer* buffer);
+
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE Rasterizer8()
+  {
+    _scope.reset();
+    _render = NULL;
+
+    _opacity = 0x100;
+    _clipType = RASTER_CLIP_BOX;
+    _initialized = false;
+  }
+
+  FOG_INLINE ~Rasterizer8()
+  {
+  }
+
+  // --------------------------------------------------------------------------
+  // [Scene-Box]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE const BoxI& getSceneBox() const
+  {
+    return _sceneBox;
+  }
+
+  FOG_INLINE void setSceneBox(const BoxI& sceneBox)
+  {
+    _sceneBox = sceneBox;
+    _sceneBox24x8.x0 = sceneBox.x0 << 8;
+    _sceneBox24x8.y0 = sceneBox.y0 << 8;
+    _sceneBox24x8.x1 = sceneBox.x1 << 8;
+    _sceneBox24x8.y1 = sceneBox.y1 << 8;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Opacity]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE uint32_t getOpacity() const
+  {
+    return _opacity;
+  }
+  
+  FOG_INLINE void setOpacity(uint32_t opacity)
+  {
+    FOG_ASSERT(opacity <= 0x100);
+    _opacity = opacity;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Clipping]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void setClipRegion(const BoxI* data, size_t length)
+  {
+    _clipType = RASTER_CLIP_REGION;
+    _clip.region.y0 = data[0].y0;
+    _clip.region.y1 = data[length - 1].y1;
+    _clip.region.data = data;
+    _clip.region.length = length;
+  }
+  
+  FOG_INLINE void setClipMask(int y0, int y1, const RasterSpan8** spans)
+  {
+    _clipType = RASTER_CLIP_MASK;
+    _clip.mask.y0 = y0;
+    _clip.mask.y1 = y1;
+    _clip.mask.spans = spans;
+  }
+
+  FOG_INLINE void resetClip()
+  {
+    _clipType = RASTER_CLIP_BOX;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Render]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void render(RasterFiller* filler, RasterScanline8* scanline, MemoryBuffer* buffer)
+  {
+    _render(this, filler, scanline, buffer);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  //! @brief Scene-box (always must be valid, initialy set to zero == no paint).
+  BoxI _sceneBox;
+  //! @brief Scene-box in 24x8 format.
+  BoxI _sceneBox24x8;
+
+  //! @brief The rasterizer scope (per thread, used by multi-threaded paint engine).
+  RasterScope _scope;
+
+  //! @brief Render function (set by rasterizer).
+  RenderFn _render;
+
+  //! @brief Whether the rasterizer is initialized (contains something which
+  //! can be rendered).
+  uint8_t _initialized;
+  //! @brief Clip type.
+  uint8_t _clipType;
+  //! @brief Opacity (0 to 0x100, inclusive).
+  uint16_t _opacity;
+
+  struct FOG_NO_EXPORT _ClipBase
+  {
+    int y0;
+    int y1;
+  };
+
+  struct FOG_NO_EXPORT _ClipRegion : public _ClipBase
+  {
+    const BoxI* data;
+    size_t length;
+  };
+
+  struct FOG_NO_EXPORT _ClipMask : public _ClipBase
+  {
+    const RasterSpan8** spans;
+  };
+
+  union
+  {
+    _ClipBase base;
+    _ClipRegion region;
+    _ClipMask mask;
+  } _clip;
+};
+
+// ============================================================================
+// [Fog::BoxRasterizer8]
+// ============================================================================
+
+//! @internal
+//!
+//! @brief Scanline box/rect rasterizer with subpixel precision.
+struct FOG_NO_EXPORT BoxRasterizer8 : public Rasterizer8
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE BoxRasterizer8()
+  {
+  }
+
+  FOG_INLINE ~BoxRasterizer8()
+  {
+  }
+
+  // --------------------------------------------------------------------------
+  // [Setup]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void initAligned(const BoxI& box)
+  {
+    _rasterApi.boxrasterizer8.initAligned(this, &box);
+  }
+
+  FOG_INLINE void init24x8(const BoxI& box24x8)
+  {
+    _rasterApi.boxrasterizer8.init24x8(this, &box24x8);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void reset()
+  {
+    // TODO:
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  //! @brief Box to fill.
+  BoxI _boxBounds;
+  //! @brief Box to fill in 24.8 fixed point.
+  BoxI _box24x8;
+
+  //! @brief Coverate-top.
+  uint16_t _ct[4];
+  //! @brief Coverage-inner.
+  uint16_t _ci[4];
+  //! @brief Coverage-bottom.
+  uint16_t _cb[4];
+};
+
+// ============================================================================
+// [Fog::PathRasterizer8]
+// ============================================================================
+
+//! @internal
+//!
+//! @brief Scanline path/polygon rasterizer, which produces 256 shades of gray.
 //!
 //! Scanline path/polygon rasterizer that is used to render filled polygons
 //! using high-quality anti-aliasing. Internally, by default, the class uses
 //! integer coordinates in 24.8 fixed point format, i.e. 24 bits for integer
 //! part and 8 bits for fractional part.
 //!
-//! Because the path/polygon rasterization is too generic, there are some
-//! specialized fast-paths which can be used to rasterize simple shapes.
-//! The common shapes are:
-//!
-//!   - @c RASTERIZER_SHAPE_NONE - Not initialized.
-//!   - @c RASTERIZER_SHAPE_PATH - Path/Polygon rasterization (default)
-//!   - @c RASTERIZER_SHAPE_RECT - Used to fill one rectangle.
-//!   - @c RASTERIZER_SHAPE_RECT_XOR_RECT - Used to fill a stroked rectangle
-//!     (two rectangles, but the second subtracts the first one).
-//!
 //! The rasterizer is re-usable class, which should be used by the following
 //! way:
 //!
-//!   1. Reset
+//!   1. Create/Reset
 //!
-//!      If the rasterizer is reused, reset ensures that all data  related to
-//!      previous rasterization are lost. It is the requirement. To reset the
-//!      rasterizer use @c Rasterizer8::reset() method.
+//!      If the rasterizer is reused, reset ensures that all data related to
+//!      the previous rasterization are reset. It is the requirement. To reset 
+//!      the rasterizer use @c Rasterizer8::reset() method.
 //!
-//!   2. Setup
+//!      In case that the rasterizer is only used one time, the Reset step should
+//!      be ignored.
+//!
+//!   2. Setup Parameters
 //!
 //!      After the rasterizer is created or reset, it's needed to specify the
-//!      scene-box, fill-rule, and global alpha. Scene-box is required!
+//!      scene-box, fill-rule, opacity, and clipping. The scene-box is required!
+//!
+//!      2a) Scene-Box:
 //!
 //!      The scene-box is similar to clip-box, the exception is that rasterizer
-//!      excepts that the path/polygon is already clipped by the underlying
+//!      expects that the path/polygon is already clipped by the underlying
 //!      paint-engine, so instead of complicated clipping the coordinates are
 //!      simply saturated to the scene-box. This means that if the clipping is
-//!      not exact (and believe me, the floating point calculation is not!)
-//!      then these small errors are simply corrected, preventing buffer-overrun
-//!      problems.
+//!      not exact (and believe me, the floating point calculation isn't!) then
+//!      these small errors are corrected using saturation, instead of complex
+//!      clipping algorithm, the correction is here only to prevent possible
+//!      buffer underrun/overrun errors.
 //!
 //!      To get/set scene-box use the @c Rasterizer8::getSceneBox() and
 //!      @c Rasterizer8::setSceneBox() methods.
 //!
+//!      2b) Fill-Rule:
+//!
 //!      The fill-rule describes how the shape is filled. It must be set before
-//!      the path/polygon/shape is added to the rasterizer and can't be modified.
+//!      the path/polygon/shape is added to the rasterizer and it can't be modified.
 //!      The methods @c Rasterizer8::getFillRule() and @c Rasterizer8::setFillRule()
 //!      can be used to get/set the fill-rule property.
 //!
-//!      The last parameter 'alpha' is used to rasterize a semi-transparent
-//!      shape. The default 'alpha' value is 256. To control the global alpha
-//!      use the @c Rasterizer8::getAlpha() and @c Rasterizer8::setAlpha() methods.
+//!      2c) Opacity:
+//!
+//!      The opacity parameter is used to rasterize a semi-transparent shape. 
+//!      The default 'opacity' value is 256. To control the global opacity
+//!      use the @c Rasterizer8::getOpacity() and @c Rasterizer8::setOpacity() 
+//!      methods.
+//!
+//!      2d) Clipping:
+//!
+//!      Currently the raster paint-engine supports three kinds of clipping.
+//!      The box clipping is always used (PathClipper by raster-paint engine 
+//!      and scene-box by Rasterizer8). To use region/mask clipping the
+//!      additional steps are needed.
+//!
+//!      To setup region/mask clipping the setClipRegion() or setClipMask() 
+//!      methods must be used. Notice that the clip region/mask must be known
+//!      before the shape is rasterized and can't change until the rasterizer
+//!      is used.
 //!
 //!   3. Initialize
 //!
 //!      After the rasterizer parameters are set-up, the rasterizer must be
 //!      initialized. The initialization is simply a validation of all
-//!      parameters and preparation for adding shapes. To initialize the
+//!      parameters and preparation for adding path(s). To initialize the
 //!      rasterizer use @c Rasterizer8::initialize() method.
 //!
 //!      The initialization step is mandatory!
 //!
-//!   4. Add shapes (polygons/paths/specials)
+//!   4. Add polygon(s) or path(s)
 //!
-//!      After the rasterizer was initialized, the shapes can be added.
-//!      Currently the rasterizer supports multi-shape mode, that means that
-//!      there is no limitation to shapes combination and count. Simply call
-//!      methods which start by 'add', for example @c addPath(), @c addBox(),
-//!      etc...
+//!      After the rasterizer was initialized, the shapes can be added. There
+//!      is no limitation to the type or count of shapes which might be added
+//!      to the rasterizer, but generally all shapes are converted to the 
+//!      segments of lines first. To add polygon or path use addPath() method.
 //!
 //!      The scanline path/polygon rasterizer requires that the one contour
 //!      must consist of at least 3 vertices, is the absolute minimum of
@@ -183,9 +358,13 @@ enum RASTERIZER_SHAPE
 //!   6. Sweep
 //!
 //!      The sweep is the last step that is used to fetch the rasterized shape
-//!      using the @c Scanline8 container. The sweep method generates a mask,
-//!      which is used by the Render pipeline to fill the rasterizer shape.
+//!      using the @c RasterScanline8 container. The sweep method generates a mask,
+//!      which is used by the Raster pipeline to fill the rasterized shape which
+//!      is a list of raster-spans.
 //!
+//!      Before the sweep method is used, it's needed to attach containers where
+//!      the temporary data is stored, use @c setupOutput() and @c resetOutput()
+//!      to do that.
 //!
 //!
 //! The rasterizer uses the analytic approach to exactly calculate the coverage
@@ -204,7 +383,7 @@ enum RASTERIZER_SHAPE
 //!   Area  - a value at interval -(511<<8) to (511<<8). This value is the
 //!           Cover multiplied by the Weight in range (0-511). Notice that
 //!           instead of storing the result (Area), the rasterizer stores only
-//!           the weight, to same memory.
+//!           the weight, to save memory.
 //!
 //! The cell structures (compressed) used by the rasterizer:
 //!
@@ -253,7 +432,7 @@ enum RASTERIZER_SHAPE
 //! This software is provided "as is" without express or implied
 //! warranty, and with no claim as to its suitability for any purpose.
 //! @endverbatim
-struct FOG_NO_EXPORT Rasterizer8
+struct FOG_NO_EXPORT PathRasterizer8 : public Rasterizer8
 {
   // --------------------------------------------------------------------------
   // [CellStorage]
@@ -409,6 +588,10 @@ struct FOG_NO_EXPORT Rasterizer8
   };
 #include <Fog/Core/Pack/PackRestore.h>
 
+  // --------------------------------------------------------------------------
+  // [ChunkD]
+  // --------------------------------------------------------------------------
+
   //! @brief Small chunk of @c CellD instances.
   struct FOG_NO_EXPORT ChunkD
   {
@@ -548,6 +731,10 @@ struct FOG_NO_EXPORT Rasterizer8
   };
 #include <Fog/Core/Pack/PackRestore.h>
 
+  // --------------------------------------------------------------------------
+  // [ChunkQ]
+  // --------------------------------------------------------------------------
+
   //! @brief Small chunk of @c CellQ instances.
   struct FOG_NO_EXPORT ChunkQ
   {
@@ -616,52 +803,13 @@ struct FOG_NO_EXPORT Rasterizer8
   };
 
   // --------------------------------------------------------------------------
-  // [ShapeRect]
-  // --------------------------------------------------------------------------
-
-  //! @brief Structure that holds data related to @c RASTERIZER_SHAPE_RECT.
-  struct FOG_NO_EXPORT ShapeRect
-  {
-    //! @brief Bounding box.
-    BoxI bounds;
-    //! @brief Fixed point version of rectange passed to the addBox()/addRect() method.
-    BoxI box24x8;
-
-    //! @brief For fetching, x-left/right. Screen-box offset is included.
-    int xLeft, xRight;
-
-    //! @brief Top-coverage values.
-    uint32_t coverageT[4];
-    //! @brief Inner-coverage values.
-    uint32_t coverageI[4];
-    //! @brief Bottom-coverage values.
-    uint32_t coverageB[4];
-  };
-
-  // --------------------------------------------------------------------------
-  // [ShapeLine]
-  // --------------------------------------------------------------------------
-
-  //! @brief Structure that holds data related to @c SHAPE_TYPE_AFFINE_RECTANGLE.
-  struct FOG_NO_EXPORT ShapeLine
-  {
-  };
-
-  // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
   //! @brief Create a @ Rasterizer8 instance.
-  Rasterizer8();
+  PathRasterizer8();
   //! @brief Destroy the @ Rasterizer8 instance.
-  ~Rasterizer8();
-
-  // --------------------------------------------------------------------------
-  // [Clip Box]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE const BoxI& getSceneBox() const { return _sceneBox; }
-  FOG_INLINE void setSceneBox(const BoxI& sceneBox) { _sceneBox = sceneBox; }
+  ~PathRasterizer8();
 
   // --------------------------------------------------------------------------
   // [Bounding Box]
@@ -680,15 +828,6 @@ struct FOG_NO_EXPORT Rasterizer8
   FOG_INLINE err_t getError() const { return _error; }
   //! @brief Set the rasterizer error.
   FOG_INLINE void setError(err_t error) { _error = error; }
-
-  // --------------------------------------------------------------------------
-  // [Alpha]
-  // --------------------------------------------------------------------------
-
-  //! @brief Get the rasterizer alpha (0...256)
-  FOG_INLINE uint32_t getAlpha() const { return _alpha; }
-  //! @brief Set the rasterizer alpha (0...256)
-  FOG_INLINE void setAlpha(uint32_t alpha) { _alpha = alpha; }
 
   // --------------------------------------------------------------------------
   // [Fill Rule]
@@ -722,14 +861,14 @@ struct FOG_NO_EXPORT Rasterizer8
   //! @brief Initialize the rasterizer, called after setup methods and before
   //! adding path(s).
   //!
-  //! During setup the methods like setAlpha(), setFillRule() can be called,
+  //! During setup the methods like setOpacity(), setFillRule() can be called,
   //! after calling initialize() these methods shouldn't be called, because
   //! rasterizer can use different algorithms to perform rasterization (even-odd
-  //! vs. non-zero fill rule, alpha, quality, etc...).
+  //! vs. non-zero fill rule, opacity, quality, etc...).
   err_t initialize();
 
   // --------------------------------------------------------------------------
-  // [Path - Add]
+  // [Add]
   // --------------------------------------------------------------------------
 
   //! @brief Add path to the rasterizer.
@@ -737,34 +876,13 @@ struct FOG_NO_EXPORT Rasterizer8
   //! @overload
   void addPath(const PathD& path);
 
-  // --------------------------------------------------------------------------
-  // [Rect/Box - Add]
-  // --------------------------------------------------------------------------
-
-  //! @brief Add rectangle to the rasterizer.
-  void addRect(const RectF& rect);
-  //! @overload
-  void addRect(const RectD& rect);
-
   //! @brief Add box to the rasterizer.
-  void addBox(const BoxF& box);
+  void addBox(const BoxF& path);
   //! @overload
-  void addBox(const BoxD& box);
+  void addBox(const BoxD& path);
 
   // --------------------------------------------------------------------------
-  // [Path - Switch To Path]
-  // --------------------------------------------------------------------------
-
-  //! @brief Convert any shape that is being rasterized to the @c SHAPE_TYPE_PATH.
-  //!
-  //! This method is used to switch to scanline polygon rasterizer. It's called
-  //! in case that simple shape rasterizer is being used, but another shape is
-  //! added to the rasterizer, thus it's not possible to finish rasterization
-  //! using the simple-shape rasterizer.
-  bool switchToPath();
-
-  // --------------------------------------------------------------------------
-  // [Path - Chunk Storage]
+  // [Chunk Storage]
   // --------------------------------------------------------------------------
 
   //! @internal
@@ -778,43 +896,10 @@ struct FOG_NO_EXPORT Rasterizer8
   err_t finalize();
 
   // --------------------------------------------------------------------------
-  // [Sweep]
-  // --------------------------------------------------------------------------
-
-  //! @brief Sweep scanline @a y.
-  FOG_INLINE Span8* sweep(Scanline8& scanline, MemoryBuffer& temp, int y)
-  {
-    return _sweepSimpleFn(this, scanline, temp, y);
-  }
-
-  //! @brief Enhanced version of @c sweep() that accepts clip boxes.
-  //!
-  //! This method is called by raster paint engine if clipping region is complex.
-  FOG_INLINE Span8* sweep(Scanline8& scanline, MemoryBuffer& temp, int y, const BoxI* clipBoxes, size_t count)
-  {
-    return _sweepRegionFn(this, scanline, temp, y, clipBoxes, count);
-  }
-
-  //! @brief Enhanced version of @c sweep() that accepts clip spans.
-  //!
-  //! This method is called by raster paint engine if clipping region is mask.
-  FOG_INLINE Span8* sweep(Scanline8& scanline, MemoryBuffer& temp, int y, const Span8* clipSpans)
-  {
-    return _sweepSpansFn(this, scanline, temp, y, clipSpans);
-  }
-
-  // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  //! @brief The raterizer offset (per thread, used by multithreaded painter).
-  int _offset;
-  //! @brief The rasterizer delta (per thread, used by multithreaded painter).
-  int _delta;
-
-  //! @brief Clip box (always must be valid, initialy set to zero -> no paint).
-  BoxI _sceneBox;
-  //! @brief bounding box of a rasterized object.
+  //! @brief bounding box of the rasterized shape.
   BoxI _boundingBox;
 
   //! @brief Maximum size of rasterized shape, generated by @c initialize() and
@@ -837,13 +922,8 @@ struct FOG_NO_EXPORT Rasterizer8
   //! @brief Error code (in case that any error happened it's reported here).
   err_t _error;
 
-  //! @brief Alpha.
-  uint32_t _alpha;
-
   //! @brief Fill-Rule (see @c FILL_RULE);
   uint8_t _fillRule;
-  //! @brief Shape (see @c RASTERIZER_SHAPE).
-  uint8_t _shape;
 
   //! @brief Whether the rasterized object is empty (no-paint).
   uint8_t _isValid;
@@ -867,28 +947,21 @@ struct FOG_NO_EXPORT Rasterizer8
   //! @brief Cells storage (current position in the list).
   CellStorage* _current;
 
-  //! @brief Sweep scanline using box clipping.
-  RasterizerSweepSimpleFn _sweepSimpleFn;
-  //! @brief Sweep scanline using region clipping.
-  RasterizerSweepRegionFn _sweepRegionFn;
-  //! @brief Sweep scanline using anti-aliased clipping.
-  RasterizerSweepSpansFn _sweepSpansFn;
-
   //! @brief Temporary path (float).
   PathF _tmpPathF;
   //! @brief Temporary path (double).
   PathD _tmpPathD;
 
 private:
-  _FOG_CLASS_NO_COPY(Rasterizer8)
+  _FOG_CLASS_NO_COPY(PathRasterizer8)
 };
 
 // ============================================================================
-// [Fog::Rasterizer - Helpers]
+// [Fog::Rasterizer - Debug]
 // ============================================================================
 
 #if defined(FOG_DEBUG_RASTERIZER)
-static void Rasterizer_dumpSpans(int y, const Span8* span)
+static void Rasterizer_dumpSpans(int y, const RasterSpan8* span)
 {
   ByteArray b;
   b.appendFormat("Y=%d - ", y);
@@ -918,4 +991,4 @@ static void Rasterizer_dumpSpans(int y, const Span8* span)
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_RASTERIZER_RASTERIZER_P_H
+#endif // _FOG_G2D_PAINTING_RASTERIZER_P_H

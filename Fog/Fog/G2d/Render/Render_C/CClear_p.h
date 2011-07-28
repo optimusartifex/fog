@@ -47,7 +47,7 @@ struct FOG_NO_EXPORT CClear
   // ==========================================================================
 
   static void FOG_FASTCALL prgb32_cblit_span(
-    uint8_t* dst, const void* src_dummy, const Span* span, const RenderClosure* closure)
+    uint8_t* dst, const void* src_dummy, const RasterSpan* span, const RenderClosure* closure)
   {
     C_BLIT_SPAN8_BEGIN(4)
 
@@ -182,7 +182,7 @@ _ARGB32_Glyph_Skip:
   }
 
   static void FOG_FASTCALL prgb32_vblit_span(
-    uint8_t* dst, const Span* span, const RenderClosure* closure)
+    uint8_t* dst, const RasterSpan* span, const RenderClosure* closure)
   {
     prgb32_cblit_span(dst, NULL, span, closure);
   }
@@ -213,7 +213,7 @@ _ARGB32_Glyph_Skip:
   // ==========================================================================
 
   static void FOG_FASTCALL xrgb32_cblit_span(
-    uint8_t* dst, const void* src_dummy, const Span* span, const RenderClosure* closure)
+    uint8_t* dst, const void* src_dummy, const RasterSpan* span, const RenderClosure* closure)
   {
     C_BLIT_SPAN8_BEGIN(4)
 
@@ -352,7 +352,7 @@ _ARGB32_Glyph_Skip:
   }
 
   static void FOG_FASTCALL xrgb32_vblit_span(
-    uint8_t* dst, const Span* span, const RenderClosure* closure)
+    uint8_t* dst, const RasterSpan* span, const RenderClosure* closure)
   {
     xrgb32_cblit_span(dst, NULL, span, closure);
   }
@@ -390,7 +390,7 @@ _ARGB32_Glyph_Skip:
   // ==========================================================================
 
   static void FOG_FASTCALL rgb24_cblit_span(
-    uint8_t* dst, const void* src_dummy, const Span* span, const RenderClosure* closure)
+    uint8_t* dst, const void* src_dummy, const RasterSpan* span, const RenderClosure* closure)
   {
     C_BLIT_SPAN8_BEGIN(3)
 
@@ -541,7 +541,7 @@ _ARGB32_Glyph_Skip:
   }
 
   static void FOG_FASTCALL rgb24_vblit_span(
-    uint8_t* dst, const Span* span, const RenderClosure* closure)
+    uint8_t* dst, const RasterSpan* span, const RenderClosure* closure)
   {
     rgb24_cblit_span(dst, NULL, span, closure);
   }
@@ -579,7 +579,7 @@ _ARGB32_Glyph_Skip:
   // ==========================================================================
 
   static void FOG_FASTCALL a8_cblit_span(
-    uint8_t* dst, const void* src, const Span* span, const RenderClosure* closure)
+    uint8_t* dst, const void* src, const RasterSpan* span, const RenderClosure* closure)
   {
     C_BLIT_SPAN8_BEGIN(1)
 
@@ -718,7 +718,7 @@ _ARGB32_Glyph_Skip:
   }
 
   static void FOG_FASTCALL a8_vblit_span(
-    uint8_t* dst, const Span* span, const RenderClosure* closure)
+    uint8_t* dst, const RasterSpan* span, const RenderClosure* closure)
   {
     a8_cblit_span(dst, NULL, span, closure);
   }

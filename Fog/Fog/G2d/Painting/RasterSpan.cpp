@@ -9,7 +9,4 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/G2d/Painting/RasterPaintAction_p.h>
-
-namespace Fog {
-} // Fog namespace
+#include <Fog/G2d/Painting/RasterSpan_p.h>

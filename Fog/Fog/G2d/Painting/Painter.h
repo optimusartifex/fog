@@ -1390,7 +1390,7 @@ struct FOG_NO_EXPORT Painter
 
   //! @brief The painter virtual-table (it's link to _engine->vtable for faster
   //! access).
-  const PainterVTable* _vtable;
+  const PaintEngineVTable* _vtable;
 
   //! @brief The painter engine.
   PaintEngine* _engine;

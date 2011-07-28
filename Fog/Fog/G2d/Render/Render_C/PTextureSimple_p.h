@@ -25,7 +25,7 @@ struct FOG_NO_EXPORT PTextureSimple
 
   template<typename Accessor>
   static void FOG_FASTCALL fetch_align_pad(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     Accessor accessor(ctx);
@@ -141,7 +141,7 @@ _FetchEnd:
 
   template<typename Accessor>
   static void FOG_FASTCALL fetch_subx0_pad(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     Accessor accessor(ctx);
@@ -272,7 +272,7 @@ _FetchEnd:
 
   template<typename Accessor>
   static void FOG_FASTCALL fetch_sub0y_pad(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     Accessor accessor(ctx);
@@ -463,7 +463,7 @@ _FetchEnd:
 
   template<typename Accessor>
   static void FOG_FASTCALL fetch_subxy_pad(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     Accessor accessor(ctx);
@@ -690,7 +690,7 @@ _FetchEnd:
 
   template<typename Accessor>
   static void FOG_FASTCALL fetch_align_repeat(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     Accessor accessor(ctx);
@@ -786,7 +786,7 @@ _FetchSkip:
 
   template<typename Accessor>
   static void FOG_FASTCALL fetch_subx0_repeat(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     Accessor accessor(ctx);
@@ -882,7 +882,7 @@ _FetchSkip:
 
   template<typename Accessor>
   static void FOG_FASTCALL fetch_sub0y_repeat(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     Accessor accessor(ctx);
@@ -974,7 +974,7 @@ _FetchSkip:
 
   template<typename Accessor>
   static void FOG_FASTCALL fetch_subxy_repeat(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     Accessor accessor(ctx);
@@ -1087,7 +1087,7 @@ _FetchSkip:
 
   template<typename Accessor>
   static void FOG_FASTCALL fetch_align_reflect(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     Accessor accessor(ctx);
@@ -1201,7 +1201,7 @@ _FetchSkip:
 
   template<typename Accessor>
   static void FOG_FASTCALL fetch_subx0_reflect(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     Accessor accessor(ctx);
@@ -1328,7 +1328,7 @@ _FetchSkip:
 
   template<typename Accessor>
   static void FOG_FASTCALL fetch_sub0y_reflect(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     Accessor accessor(ctx);
@@ -1464,7 +1464,7 @@ _FetchSkip:
 
   template<typename Accessor>
   static void FOG_FASTCALL fetch_subxy_reflect(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     Accessor accessor(ctx);
@@ -1629,7 +1629,7 @@ _FetchSkip:
 
   template<typename Accessor>
   static void FOG_FASTCALL fetch_align_clamp(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     Accessor accessor(ctx);
@@ -1750,7 +1750,7 @@ _FetchEnd:
 
   template<typename Accessor>
   static void FOG_FASTCALL fetch_subx0_clamp(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     Accessor accessor(ctx);
@@ -1901,7 +1901,7 @@ _FetchEnd:
 
   template<typename Accessor>
   static void FOG_FASTCALL fetch_sub0y_clamp(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     Accessor accessor(ctx);
@@ -2082,7 +2082,7 @@ _FetchEnd:
 
   template<typename Accessor>
   static void FOG_FASTCALL fetch_subxy_clamp(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RenderPatternContext* ctx = fetcher->getContext();
     Accessor accessor(ctx);

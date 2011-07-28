@@ -14,7 +14,7 @@
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Memory/MemoryBuffer.h>
-#include <Fog/G2d/Rasterizer/Rasterizer_p.h>
+#include <Fog/G2d/Painting/Rasterizer_p.h>
 #include <Fog/G2d/Tools/Region.h>
 #include <Fog/G2d/Tools/RegionTmp_p.h>
 
@@ -1054,7 +1054,7 @@ static err_t _appendPrivate(Region* dest, const BoxI* src, size_t length, const 
 {
   err_t err;
 
-  // Its guaranted that we CAN append region and its also guaranted that
+  // It's guaranted that we CAN append region and its also guaranted that
   // destination region has minimal 1 rectangle, so [-1] index from end
   // must be valid.
   if ((err = dest->reserve(dest->getLength() + length))) return err;

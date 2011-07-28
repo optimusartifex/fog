@@ -25,10 +25,10 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::PainterVTable]
+// [Fog::PaintEngineVTable]
 // ============================================================================
 
-struct FOG_NO_EXPORT PainterVTable
+struct FOG_NO_EXPORT PaintEngineVTable
 {
   // --------------------------------------------------------------------------
   // [AddRef / Release - Types]
@@ -437,7 +437,7 @@ struct FOG_NO_EXPORT PaintEngine
   // --------------------------------------------------------------------------
 
   //! @brief The pointer to the painter-engine virtual table.
-  const PainterVTable* vtable;
+  const PaintEngineVTable* vtable;
 };
 
 //! @}

@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_PAINTING_RASTERPAINTUTIL_P_H
-#define _FOG_G2D_PAINTING_RASTERPAINTUTIL_P_H
+#ifndef _FOG_G2D_PAINTING_RASTERUTIL_P_H
+#define _FOG_G2D_PAINTING_RASTERUTIL_P_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
@@ -17,8 +17,32 @@
 namespace Fog {
 namespace RasterUtil {
 
-//! @addtogroup Fog_G2d_Painting_Raster
+//! @addtogroup Fog_G2d_Painting
 //! @{
+
+// ============================================================================
+// [Fog::RasterUtil - Debugging]
+// ============================================================================
+
+#if defined(FOG_DEBUG)
+// Check whether all spans are inside screen.
+template<typename SpanT>
+static FOG_INLINE void validateSpans(const SpanT* span, int screenX0, int screenX1)
+{
+  while (span != NULL)
+  {
+    int x0 = span->getX0();
+    int x1 = span->getX1();
+
+    FOG_ASSERT(x0 < x1);
+    FOG_ASSERT(x0 >= screenX0);
+    FOG_ASSERT(x1 <= screenX1);
+
+    span = span->getNext();
+  }
+}
+
+#endif // FOG_DEBUG
 
 // ============================================================================
 // [Fog::RasterUtil - Multi-Threading]
@@ -61,13 +85,27 @@ static FOG_INLINE bool isPatternContext(RenderPatternContext* pc)
 }
 
 // ============================================================================
-// [Fog::RasterUtil - Painting]
+// [Fog::RasterUtil - CompositingOperator]
 // ============================================================================
 
 static FOG_INLINE bool isCompositingOperatorNop(uint32_t op)
 {
   return op == COMPOSITE_DST;
 }
+
+static FOG_INLINE bool isCompositeCopyOp(uint32_t dstFormat, uint32_t srcFormat, uint32_t compositingOperator)
+{
+  if (compositingOperator > COMPOSITE_SRC_OVER)
+    return false;
+
+  const ImageFormatDescription& dstDescription = ImageFormatDescription::getByFormat(dstFormat);
+  const ImageFormatDescription& srcDescription = ImageFormatDescription::getByFormat(srcFormat);
+
+  if (dstDescription.getDepth() != srcDescription.getDepth())
+    return false;
+
+  return compositingOperator == COMPOSITE_SRC || srcDescription.getASize() == 0;
+};
 
 //! @brief Whether the source rectangle @a src can be converted to aligned
 //! rectangle @a dst, used to call various fast-paths.
@@ -93,53 +131,14 @@ static FOG_INLINE bool canAlignToGrid(BoxI& dst, const RectD& src, double x, dou
   return true;
 }
 
-#define RASTER_ENTER_PAINT_FUNC() \
-  FOG_MACRO_BEGIN \
-    if (FOG_UNLIKELY(ctx.state != 0)) \
-    { \
-      if (ctx.state & (RASTER_CONTEXT_NO_PAINT_MASK)) return ERR_OK; \
-      if (ctx.state & (RASTER_CONTEXT_PENDING_MASK)) _postPending(); \
-    } \
-  FOG_MACRO_END
-
-#define RASTER_ENTER_PAINT_COND(__condition__) \
-  FOG_MACRO_BEGIN \
-    if (FOG_UNLIKELY(!(__condition__))) return ERR_OK; \
-    \
-    if (FOG_UNLIKELY(ctx.state != 0)) \
-    { \
-      if (ctx.state & (RASTER_CONTEXT_NO_PAINT_MASK)) return ERR_OK; \
-      if (ctx.state & (RASTER_CONTEXT_PENDING_MASK)) _postPending(); \
-    } \
-  FOG_MACRO_END
-
-#define RASTER_ENTER_PAINT_IMAGE(__image__) \
-  FOG_MACRO_BEGIN \
-    if (FOG_UNLIKELY(__image__.isEmpty())) return ERR_OK; \
-    \
-    if (FOG_UNLIKELY(ctx.state != 0)) \
-    { \
-      /* Image is source so we need to exclude RASTER_CONTEXT_NO_PAINT_SOURCE flag. */ \
-      if (ctx.state & (RASTER_CONTEXT_NO_PAINT_MASK & ~(RASTER_CONTEXT_NO_PAINT_SOURCE))) return ERR_OK; \
-      if (ctx.state & (RASTER_CONTEXT_PENDING_MASK)) _postPending(); \
-    } \
-  FOG_MACRO_END
-
-// Called by serializers to ensure that pattern context is created if needed.
-#define RASTER_SERIALIZE_ENSURE_PATTERN() \
-  FOG_MACRO_BEGIN \
-    if (ctx.ops.sourceType == PAINTER_SOURCE_PATTERN && FOG_UNLIKELY(_getRasterPatternContext() == NULL)) \
-      return ERR_RT_OUT_OF_MEMORY; \
-  FOG_MACRO_END
-
 // ============================================================================
-// [Fog::RasterUtil - Clipping]
+// [Fog::RasterUtil - Mask]
 // ============================================================================
 
 // Get usable span instance from span retrieved from mask. We encode 'owned'
 // bit into pointer itself so it's needed to clear it to access the instance.
 #define RASTER_CLIP_SPAN_GET_USABLE(__span__) \
-  ( (Span8*) ((size_t)(__span__) & ~1) )
+  ( (RasterSpan8*) ((size_t)(__span__) & ~1) )
 
 // Get whether a given span instance is 'owned' or not. Owned means that it
 // can be directly manipulated by clipping method. If span is not owned then
@@ -149,7 +148,7 @@ static FOG_INLINE bool canAlignToGrid(BoxI& dst, const RectD& src, double x, dou
 
 // Whether a given span instance is VSpan that contains own embedded clip mask.
 #define RASTER_CLIP_IS_EMBEDDED_VSPAN(__span__) \
-  (reinterpret_cast<const uint8_t*>(__span__) + sizeof(RasterSpan8) == __span__->getGenericMask())
+  (reinterpret_cast<const uint8_t*>(__span__) + sizeof(RasterMaskSpan8) == __span__->getGenericMask())
 
 #define RASTER_ENTER_CLIP_FUNC() \
   FOG_MACRO_BEGIN \
@@ -171,46 +170,35 @@ static FOG_INLINE bool canAlignToGrid(BoxI& dst, const RectD& src, double x, dou
     \
   FOG_MACRO_END
 
-//! @brief Get clip type from source region (src).
-static FOG_INLINE uint32_t Raster_getClipType(const Region& src)
+//! @internal
+//!
+//! @brief Binary search for the first rectangle usable for a scanline @a y.
+//!
+//! @param base The first rectangle in region.
+//! @param length Count of rectangles in @a base array.
+//! @param y The Y position to match
+//! 
+//! If there are no rectangles which matches the Y coordinate and the last
+//! @c rect.y1 is lower or equal to @a y, @c NULL is returned. If there
+//! is rectangle where @c rect.y0 >= @a y then the first rectangle in the list
+//! is returned.
+//!
+//! The @a base and @a length parameters come in the most cases from @c Region
+//! instance, but can be constructed manually.
+FOG_NO_EXPORT const BoxI* getClosestRect(const BoxI* base, size_t length, int y);
+
+//! @internal
+//!
+//! @brief Get the end band of current horizontal rectangle list.
+static FOG_INLINE const BoxI* getEndBand(const BoxI* base, const BoxI* end)
 {
-  size_t len = src.getLength();
-  if (len > 2) len = 2;
-  return (uint32_t)len;
-}
+  int y0 = base[0].y0;
+  const BoxI* cur = base;
 
-// TODO: Verify and use.
-//
-// Binary search region (YX sorted rectangles) and match the first one that
-// contains a given 'y'. If there is no such region then the next one will be
-// returned
-static FOG_INLINE const BoxI* Raster_bsearchRegion(const BoxI* base, size_t length, int y)
-{
-  FOG_ASSERT(base != NULL);
-  FOG_ASSERT(length > 0);
+  while (++cur != end && cur[0].y0 == y0)
+    continue;
 
-  const BoxI* r;
-  size_t i;
-
-  for (i = length; i != 0; i >>= 1)
-  {
-    r = base + (i >> 1);
-
-    // Try match.
-    if (y >= r->y0)
-    {
-      if (y < r->y1) return r;
-      // else: Move left.
-    }
-    else if (r->y1 <= y)
-    {
-      // Move right.
-      base = r + 1;
-      i--;
-    }
-    // else: Move left.
-  }
-  return r;
+  return cur;
 }
 
 //! @}
@@ -219,4 +207,4 @@ static FOG_INLINE const BoxI* Raster_bsearchRegion(const BoxI* base, size_t leng
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_PAINTING_RASTERPAINTUTIL_P_H
+#endif // _FOG_G2D_PAINTING_RASTERUTIL_P_H

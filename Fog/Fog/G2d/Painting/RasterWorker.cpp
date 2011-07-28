@@ -13,7 +13,7 @@
 #include <Fog/Core/Threading/ThreadCondition.h>
 #include <Fog/Core/Threading/ThreadEvent.h>
 #include <Fog/G2d/Painting/RasterPaintEngine_p.h>
-#include <Fog/G2d/Painting/RasterPaintWorker_p.h>
+#include <Fog/G2d/Painting/RasterWorker_p.h>
 
 namespace Fog {
 

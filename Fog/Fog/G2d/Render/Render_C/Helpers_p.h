@@ -247,7 +247,7 @@ struct FOG_NO_EXPORT Helpers
   // --------------------------------------------------------------------------
 
   static void FOG_FASTCALL p_solid_fetch_helper_prgb32(
-    Span* span, uint8_t* buffer, uint32_t mode, const RenderSolid& solid)
+    RasterSpan* span, uint8_t* buffer, uint32_t mode, const RenderSolid& solid)
   {
     uint32_t c0 = solid.prgb32.u32;
 
@@ -284,31 +284,31 @@ struct FOG_NO_EXPORT Helpers
   }
 
   static void FOG_FASTCALL p_solid_fetch_prgb32_xrgb32(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     p_solid_fetch_helper_prgb32(span, buffer, fetcher->getMode(), fetcher->getContext()->_d.solid);
   }
 
   static void FOG_FASTCALL p_solid_fetch_a8(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     // TODO: A8 support.
   }
 
   static void FOG_FASTCALL p_solid_fetch_prgb64(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     // TODO: PRGB64 support.
   }
 
   static void FOG_FASTCALL p_solid_fetch_rgb48(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     // TODO: PRGB48 support.
   }
 
   static void FOG_FASTCALL p_solid_fetch_a16(
-    RenderPatternFetcher* fetcher, Span* span, uint8_t* buffer)
+    RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     // TODO: A16 support.
   }

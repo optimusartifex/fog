@@ -386,7 +386,7 @@ struct FOG_NO_EXPORT PathF
   //! @brief Get path commands array (mutable).
   FOG_INLINE uint8_t* getCommandsX()
   {
-    FOG_ASSERT_X(isDetached(), "Fog::PathF::getCommandsX() - Called on non-detached object.");
+    FOG_ASSERT_X(isDetached(), "Fog::PathF::getCommandsX() - Not detached.");
     return _d->commands;
   }
 
@@ -399,7 +399,7 @@ struct FOG_NO_EXPORT PathF
   //! @brief Get path vertices array (mutable).
   FOG_INLINE PointF* getVerticesX()
   {
-    FOG_ASSERT_X(isDetached(), "Fog::PathF::getVerticesX() - Called on non-detached object.");
+    FOG_ASSERT_X(isDetached(), "Fog::PathF::getVerticesX() - Not detached.");
     return _d->vertices;
   }
 
@@ -1200,7 +1200,7 @@ struct FOG_NO_EXPORT PathD
   //! @brief Get path commands array (mutable).
   FOG_INLINE uint8_t* getCommandsX()
   {
-    FOG_ASSERT_X(isDetached(), "Fog::PathD::getCommandsX() - Called on non-detached object.");
+    FOG_ASSERT_X(isDetached(), "Fog::PathD::getCommandsX() - Not detached.");
     return _d->commands;
   }
 
@@ -1213,7 +1213,7 @@ struct FOG_NO_EXPORT PathD
   //! @brief Get path vertices array (mutable).
   FOG_INLINE PointD* getVerticesX()
   {
-    FOG_ASSERT_X(isDetached(), "Fog::PathD::getVerticesX() - Called on non-detached object.");
+    FOG_ASSERT_X(isDetached(), "Fog::PathD::getVerticesX() - Not detached.");
     return _d->vertices;
   }
 

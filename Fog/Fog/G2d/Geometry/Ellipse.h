@@ -148,15 +148,8 @@ struct FOG_NO_EXPORT EllipseF
     return *this;
   }
 
-  FOG_INLINE bool operator==(const EllipseF& other)
-  {
-    return center == other.center && radius == other.radius;
-  }
-
-  FOG_INLINE bool operator!=(const EllipseF& other)
-  {
-    return !operator==(other);
-  }
+  FOG_INLINE bool operator==(const EllipseF& other) const { return  MemOps::eq_t<EllipseF>(this, &other); }
+  FOG_INLINE bool operator!=(const EllipseF& other) const { return !MemOps::eq_t<EllipseF>(this, &other); }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -291,15 +284,8 @@ struct FOG_NO_EXPORT EllipseD
     return *this;
   }
 
-  FOG_INLINE bool operator==(const EllipseD& other)
-  {
-    return center == other.center && radius == other.radius;
-  }
-
-  FOG_INLINE bool operator!=(const EllipseD& other)
-  {
-    return !operator==(other);
-  }
+  FOG_INLINE bool operator==(const EllipseD& other) const { return  MemOps::eq_t<EllipseD>(this, &other); }
+  FOG_INLINE bool operator!=(const EllipseD& other) const { return !MemOps::eq_t<EllipseD>(this, &other); }
 
   // --------------------------------------------------------------------------
   // [Members]

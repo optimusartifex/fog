@@ -3693,8 +3693,8 @@ static bool FOG_CDECL PathT_eq(const NumT_(Path)* _a, const NumT_(Path)* _b)
   size_t length = a->length;
   if (length != b->length) return false;
 
-  return memcmp(a->commands, b->commands, length) == 0 &&
-         memcmp(a->vertices, b->vertices, length * sizeof(NumT_(Point) )) == 0 ;
+  return MemOps::eq(a->commands, b->commands, length) &&
+         MemOps::eq(a->vertices, b->vertices, length * sizeof(NumT_(Point) ));
 }
 
 // ============================================================================

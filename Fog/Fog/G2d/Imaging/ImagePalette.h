@@ -109,7 +109,7 @@ struct FOG_API ImagePalette
   FOG_INLINE Argb32* getDataX()
   {
     FOG_ASSERT_X(isDetached(),
-      "Fog::ImagePalette::getDataX() - Called on non-detached object.");
+      "Fog::ImagePalette::getDataX() - Not detached.");
 
     return reinterpret_cast<Argb32*>(_d->data);
   }

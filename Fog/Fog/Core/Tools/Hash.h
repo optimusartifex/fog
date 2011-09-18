@@ -116,8 +116,11 @@ struct HashVTable<StringW, Var>
 // [Fog::HashImpl<Unknown, Unknown>]
 // ============================================================================
 
+template<typename KeyT, typename ItemT, int IndexableItem>
+struct HashImpl {};
+
 template<typename KeyT, typename ItemT>
-struct HashImpl : public HashUntyped
+struct HashImpl<KeyT, ItemT, 0> : public HashUntyped
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -266,14 +269,45 @@ struct HashImpl : public HashUntyped
   }
 };
 
+template<typename KeyT, typename ItemT>
+struct HashImpl<KeyT, ItemT, 1> : public HashImpl<KeyT, ItemT, 0>
+{
+  // --------------------------------------------------------------------------
+  // [Eq]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const Hash<KeyT, ItemT>& other) const
+  {
+    return _api.hash.unknown_unknown.eq(this, &other, 
+      HashVTable<KeyT, ItemT>::getVTable(), TypeFunc<ItemT>::getEqFunc());
+  }
+
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool operator==(const Hash<KeyT, ItemT>& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const Hash<KeyT, ItemT>& other) const { return !eq(other); }
+
+  // --------------------------------------------------------------------------
+  // [Statics]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE bool eq(const Hash<KeyT, ItemT>* a, const Hash<KeyT, ItemT>* b)
+  {
+    return _api.hash.unknown_unknown.eq(a, b, 
+      HashVTable<KeyT, ItemT>::getVTable(), TypeFunc<ItemT>::getEqFunc());
+  }
+};
+
 // ============================================================================
 // [Fog::Hash]
 // ============================================================================
 
 template<typename KeyT, typename ItemT>
-struct Hash : public HashImpl<KeyT, ItemT>
+struct Hash : public HashImpl<KeyT, ItemT, !TypeInfo<ItemT>::NO_EQ>
 {
-  typedef HashImpl<KeyT, ItemT> Impl;
+  typedef HashImpl<KeyT, ItemT, 0> Impl;
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]

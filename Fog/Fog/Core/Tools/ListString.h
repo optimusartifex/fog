@@ -117,7 +117,7 @@ struct List<StringA> : public ListUntyped
   FOG_INLINE StringA* getDataX()
   {
     FOG_ASSERT_X(ListUntyped::isDetached(),
-      "Fog::List<Fog::StringA>::getDataX() - Called on non-detached object.");
+      "Fog::List<Fog::StringA>::getDataX() - Not detached.");
 
     return reinterpret_cast<StringA*>(_d->data);
   }
@@ -149,7 +149,7 @@ struct List<StringA> : public ListUntyped
   FOG_INLINE err_t setAtX(size_t index, const StubA& item)
   {
     FOG_ASSERT_X(ListUntyped::isDetached(),
-      "Fog::List<Fog::StringA>::setAtX() - Called on non-detached object.");
+      "Fog::List<Fog::StringA>::setAtX() - Not detached.");
     FOG_ASSERT_X(index < _d->length,
       "Fog::List<Fog::StringA>::setAtX() - Index out of range.");
 
@@ -159,7 +159,7 @@ struct List<StringA> : public ListUntyped
   FOG_INLINE err_t setAtX(size_t index, const StringA& item)
   {
     FOG_ASSERT_X(ListUntyped::isDetached(),
-      "Fog::List<Fog::StringA>::setAtX() - Called on non-detached object.");
+      "Fog::List<Fog::StringA>::setAtX() - Not detached.");
     FOG_ASSERT_X(index < _d->length,
       "Fog::List<Fog::StringA>::setAtX() - Index out of range.");
 
@@ -400,6 +400,15 @@ struct List<StringA> : public ListUntyped
   }
 
   // --------------------------------------------------------------------------
+  // [Equality]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const List<StringA>& other) const
+  {
+    return _api.list.untyped.customEq(this, &other, sizeof(StringA), StringA::getEqFunc());
+  }
+
+  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
@@ -421,12 +430,24 @@ struct List<StringA> : public ListUntyped
     return *this;
   }
 
+  FOG_INLINE bool operator==(const List<StringA>& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const List<StringA>& other) const { return !eq(other); }
+
   FOG_INLINE const StringA& operator[](size_t index) const
   {
     FOG_ASSERT_X(index < _d->length,
       "Fog::List<Fog::StringA>::operator[] - Index out of range.");
 
     return reinterpret_cast<const StringA*>(_d->data)[index];
+  }
+
+  // --------------------------------------------------------------------------
+  // [Statics]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE bool eq(const List<StringA>* a, const List<StringA>* b)
+  {
+    return _api.list.untyped.customEq(a, b, sizeof(StringA), StringA::getEqFunc());
   }
 };
 
@@ -531,7 +552,7 @@ struct List<StringW> : public ListUntyped
   FOG_INLINE StringW* getDataX()
   {
     FOG_ASSERT_X(ListUntyped::isDetached(),
-      "Fog::List<Fog::StringW>::getDataX() - Called on non-detached object.");
+      "Fog::List<Fog::StringW>::getDataX() - Not detached.");
 
     return reinterpret_cast<StringW*>(_d->data);
   }
@@ -571,7 +592,7 @@ struct List<StringW> : public ListUntyped
   FOG_INLINE err_t setAtX(size_t index, const Ascii8& item)
   {
     FOG_ASSERT_X(ListUntyped::isDetached(),
-      "Fog::List<Fog::StringW>::setAtX() - Called on non-detached object.");
+      "Fog::List<Fog::StringW>::setAtX() - Not detached.");
     FOG_ASSERT_X(index < _d->length,
       "Fog::List<Fog::StringW>::setAtX() - Index out of range.");
 
@@ -581,7 +602,7 @@ struct List<StringW> : public ListUntyped
   FOG_INLINE err_t setAtX(size_t index, const StubW& item)
   {
     FOG_ASSERT_X(ListUntyped::isDetached(),
-      "Fog::List<Fog::StringW>::setAtX() - Called on non-detached object.");
+      "Fog::List<Fog::StringW>::setAtX() - Not detached.");
     FOG_ASSERT_X(index < _d->length,
       "Fog::List<Fog::StringW>::setAtX() - Index out of range.");
 
@@ -591,7 +612,7 @@ struct List<StringW> : public ListUntyped
   FOG_INLINE err_t setAtX(size_t index, const StringW& item)
   {
     FOG_ASSERT_X(ListUntyped::isDetached(),
-      "Fog::List<Fog::StringW>::setAtX() - Called on non-detached object.");
+      "Fog::List<Fog::StringW>::setAtX() - Not detached.");
     FOG_ASSERT_X(index < _d->length,
       "Fog::List<Fog::StringW>::setAtX() - Index out of range.");
 
@@ -877,6 +898,15 @@ struct List<StringW> : public ListUntyped
   }
 
   // --------------------------------------------------------------------------
+  // [Equality]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const List<StringW>& other) const
+  {
+    return _api.list.untyped.customEq(this, &other, sizeof(StringW), StringW::getEqFunc());
+  }
+
+  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
@@ -904,12 +934,24 @@ struct List<StringW> : public ListUntyped
     return *this;
   }
 
+  FOG_INLINE bool operator==(const List<StringW>& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const List<StringW>& other) const { return !eq(other); }
+
   FOG_INLINE const StringW& operator[](size_t index) const
   {
     FOG_ASSERT_X(index < _d->length,
       "Fog::List<Fog::StringW>::operator[] - Index out of range.");
 
     return reinterpret_cast<const StringW*>(_d->data)[index];
+  }
+
+  // --------------------------------------------------------------------------
+  // [Statics]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE bool eq(const List<StringW>* a, const List<StringW>* b)
+  {
+    return _api.list.untyped.customEq(a, b, sizeof(StringW), StringW::getEqFunc());
   }
 };
 

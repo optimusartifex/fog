@@ -462,7 +462,7 @@ struct FOG_NO_EXPORT StringA
   FOG_INLINE char* getDataX()
   {
     FOG_ASSERT_X(isDetached(),
-      "Fog::StringA::getDataX() - Called on non-detached object.");
+      "Fog::StringA::getDataX() - Not detached.");
 
     return _d->data;
   }
@@ -1767,7 +1767,7 @@ struct FOG_NO_EXPORT StringA
   FOG_INLINE void _modified()
   {
     FOG_ASSERT_X(isDetached(),
-      "Fog::StringA::_modified() - Called on non-detached object.");
+      "Fog::StringA::_modified() - Not detached.");
     FOG_ASSERT_X(_d->data[_d->length] == 0,
       "Fog::StringA::_modified() - Null terminator corrupted.");
 
@@ -1777,7 +1777,7 @@ struct FOG_NO_EXPORT StringA
   FOG_INLINE void _modified(char* end)
   {
     FOG_ASSERT_X(isDetached(),
-      "Fog::StringA::_modified() - Called on non-detached object.");
+      "Fog::StringA::_modified() - Not detached.");
     FOG_ASSERT_X(end <= _d->data + _d->capacity,
       "Fog::StringA::_modified() - Buffer overflow.");
 
@@ -2153,7 +2153,7 @@ struct FOG_NO_EXPORT StringW
   FOG_INLINE CharW* getDataX()
   {
     FOG_ASSERT_X(isDetached(),
-      "Fog::StringW::getDataX() - Called on non-detached object.");
+      "Fog::StringW::getDataX() - Not detached.");
 
     return _d->data;
   }
@@ -3925,7 +3925,7 @@ struct FOG_NO_EXPORT StringW
   FOG_INLINE void _modified()
   {
     FOG_ASSERT_X(isDetached(),
-      "Fog::StringW::_modified() - Called on non-detached object.");
+      "Fog::StringW::_modified() - Not detached.");
     FOG_ASSERT_X(_d->data[_d->length] == 0,
       "Fog::StringW::_modified() - Null terminator corrupted.");
 
@@ -3935,7 +3935,7 @@ struct FOG_NO_EXPORT StringW
   FOG_INLINE void _modified(CharW* end)
   {
     FOG_ASSERT_X(isDetached(),
-      "Fog::StringW::_modified() - Called on non-detached object.");
+      "Fog::StringW::_modified() - Not detached.");
     FOG_ASSERT_X(end <= _d->data + _d->capacity,
       "Fog::StringW::_modified() - Buffer overflow.");
 

@@ -655,6 +655,133 @@ static void FOG_CDECL Hash_Unknown_Unknown_copy(HashUntyped* self, const HashUnt
 }
 
 // ============================================================================
+// [Fog::Hash<Unknown, Unknown> - Equality]
+// ============================================================================
+
+static bool FOG_CDECL Hash_Unknown_Unknown_eq(const HashUntyped* a, const HashUntyped* b, const HashUntypedVTable* v, EqFunc itemEqFunc)
+{
+  const HashUntypedData* a_d = a->_d;
+  const HashUntypedData* b_d = b->_d;
+
+  if (a_d->length != b_d->length)
+    return false;
+
+  if (a_d == b_d)
+    return true;
+
+  if (a_d->length == 0)
+    return true;
+
+  // We must choose one table, iterate, and lookup into the other one. Instead
+  // of choosing 'a' or 'b' we choose the table which has less capacity, so we
+  // do not iterate over empty table if it's nearly empty.
+  size_t aIndex = 0;
+
+  size_t aCapacity = a_d->capacity;
+  size_t bCapacity = b_d->capacity;
+
+  if (aCapacity > bCapacity)
+  {
+    swap(a, b);
+    swap(a_d, b_d);
+    swap(aCapacity, bCapacity);
+  }
+
+  const HashUntypedNode* const* aData = a_d->data;
+  const HashUntypedNode* const* bData = b_d->data;
+
+  size_t idxKey = v->idxKeyT;
+  size_t idxItem = v->idxItemT;
+  EqFunc eqKey = v->eqKey;
+
+  // If capacity of 'a' is equal to the capacity of 'b' then we can save some
+  // CPU time, because we don't need to compute hashCode and hashMod. HashMod
+  // is equal to 'aIndex' and hashCode is not needed at all.
+  if (aCapacity == bCapacity)
+  {
+    do { 
+      const HashUntypedNode* aNode = aData[aIndex];
+      const HashUntypedNode* bNode = bData[aIndex];
+
+      if (aNode)
+      {
+        do {
+          for (;;)
+          {
+            if (bNode == NULL)
+            {
+              return false;
+            }
+
+            if (!eqKey(reinterpret_cast<const uint8_t*>(aNode) + idxKey,
+                       reinterpret_cast<const uint8_t*>(bNode) + idxKey))
+            {
+              bNode = bNode->next;
+              continue;
+            }
+
+            if (!itemEqFunc(reinterpret_cast<const uint8_t*>(aNode) + idxItem,
+                            reinterpret_cast<const uint8_t*>(bNode) + idxItem))
+            {
+              return false;
+            }
+
+            break;
+          }
+
+          aNode = aNode->next;
+        } while (aNode);
+      }
+      else
+      {
+        if (bNode)
+          return false;
+      }
+    } while (++aIndex < aCapacity);
+  }
+  else
+  {
+    do { 
+      const HashUntypedNode* aNode = aData[aIndex];
+
+      while (aNode)
+      {
+        uint32_t hashCode = v->hashKey(reinterpret_cast<const uint8_t*>(aNode) + idxKey);
+        uint32_t hashMod = hashCode % bCapacity;
+
+        const HashUntypedNode* bNode = bData[hashMod];
+        for (;;)
+        {
+          if (bNode == NULL)
+          {
+            return false;
+          }
+
+          if (!eqKey(reinterpret_cast<const uint8_t*>(aNode) + idxKey,
+                     reinterpret_cast<const uint8_t*>(bNode) + idxKey))
+          {
+            bNode = bNode->next;
+            continue;
+          }
+
+          if (!itemEqFunc(reinterpret_cast<const uint8_t*>(aNode) + idxItem,
+                          reinterpret_cast<const uint8_t*>(bNode) + idxItem))
+          {
+            return false;
+          }
+
+          break;
+        }
+
+        aNode = aNode->next;
+      }
+    } while (++aIndex < aCapacity);
+  }
+
+  return true;
+}
+
+// ============================================================================
 // [Fog::Hash<Unknown, Unknown> - HashUntypedData]
 // ============================================================================
 
@@ -1095,6 +1222,126 @@ _Match:
   }
 }
 
+template<typename CharT>
+static bool FOG_CDECL Hash_StringT_Unknown_eq(const HashUntyped* a, const HashUntyped* b, const HashUntypedVTable* v, EqFunc itemEqFunc)
+{
+  const HashUntypedData* a_d = a->_d;
+  const HashUntypedData* b_d = b->_d;
+
+  if (a_d->length != b_d->length)
+    return false;
+
+  if (a_d == b_d)
+    return true;
+
+  if (a_d->length == 0)
+    return true;
+
+  // We must choose one table, iterate, and lookup into the other one. Instead
+  // of choosing 'a' or 'b' we choose the table which has less capacity, so we
+  // do not iterate over empty table if it's nearly empty.
+  size_t aIndex = 0;
+
+  size_t aCapacity = a_d->capacity;
+  size_t bCapacity = b_d->capacity;
+
+  if (aCapacity > bCapacity)
+  {
+    swap(a, b);
+    swap(a_d, b_d);
+    swap(aCapacity, bCapacity);
+  }
+
+  const HashKeyNode<CharT_(String)>* const* aData = reinterpret_cast<HashKeyNode<CharT_(String)>* const*>(a_d->data);
+  const HashKeyNode<CharT_(String)>* const* bData = reinterpret_cast<HashKeyNode<CharT_(String)>* const*>(b_d->data);
+
+  size_t idxItem = v->idxItemT;
+
+  // If capacity of 'a' is equal to the capacity of 'b' then we can save some
+  // CPU time, because we don't need to compute hashCode and hashMod. HashMod
+  // is equal to 'aIndex' and hashCode is not needed at all.
+  if (aCapacity == bCapacity)
+  {
+    do { 
+      const HashKeyNode<CharT_(String)>* aNode = aData[aIndex];
+      const HashKeyNode<CharT_(String)>* bNode = bData[aIndex];
+
+      if (aNode)
+      {
+        do {
+          for (;;)
+          {
+            if (bNode == NULL)
+            {
+              return false;
+            }
+
+            if (aNode->key != bNode->key)
+            {
+              bNode = reinterpret_cast<const HashKeyNode<CharT_(String)>*>(bNode->next);
+              continue;
+            }
+
+            if (!itemEqFunc(reinterpret_cast<const uint8_t*>(aNode) + idxItem,
+                            reinterpret_cast<const uint8_t*>(bNode) + idxItem))
+            {
+              return false;
+            }
+
+            break;
+          }
+
+          aNode = reinterpret_cast<const HashKeyNode<CharT_(String)>*>(aNode->next);
+        } while (aNode);
+      }
+      else
+      {
+        if (bNode)
+          return false;
+      }
+    } while (++aIndex < aCapacity);
+  }
+  else
+  {
+    do { 
+      const HashKeyNode<CharT_(String)>* aNode = aData[aIndex];
+
+      while (aNode)
+      {
+        uint32_t hashCode = aNode->key._d->hashCode;
+        uint32_t hashMod = hashCode % bCapacity;
+
+        const HashKeyNode<CharT_(String)>* bNode = bData[hashMod];
+        for (;;)
+        {
+          if (bNode == NULL)
+          {
+            return false;
+          }
+
+          if (aNode->key != bNode->key)
+          {
+            bNode = reinterpret_cast<const HashKeyNode<CharT_(String)>*>(bNode->next);
+            continue;
+          }
+
+          if (!itemEqFunc(reinterpret_cast<const uint8_t*>(aNode) + idxItem,
+                          reinterpret_cast<const uint8_t*>(bNode) + idxItem))
+          {
+            return false;
+          }
+
+          break;
+        }
+
+        aNode = reinterpret_cast<const HashKeyNode<CharT_(String)>*>(aNode->next);
+      }
+    } while (++aIndex < aCapacity);
+  }
+
+  return true;
+}
+
 // ============================================================================
 // [Fog::Hash<StringA, StringA>]
 // ============================================================================
@@ -1126,7 +1373,7 @@ static void FOG_CDECL Hash_StringA_StringA_dtor(HashUntyped* self)
 {
   HashUntypedData* d = self->_d;
   if (d->reference.deref())
-    return _api.hash.unknown_unknown.dFree(d, &Hash_StringA_StringA_vTable);
+    _api.hash.unknown_unknown.dFree(d, &Hash_StringA_StringA_vTable);
 }
 
 static const StringA* FOG_CDECL Hash_StringA_StringA_getStubA(const HashUntyped* self, const StubA* key)
@@ -1175,7 +1422,7 @@ static err_t FOG_CDECL Hash_StringA_StringA_removeStringA(HashUntyped* self, con
 
 static void FOG_CDECL Hash_StringA_StringA_dFree(HashUntypedData* d)
 {
-  return _api.hash.unknown_unknown.dFree(d, &Hash_StringA_StringA_vTable);
+  _api.hash.unknown_unknown.dFree(d, &Hash_StringA_StringA_vTable);
 }
 
 // ============================================================================
@@ -1209,7 +1456,7 @@ static void FOG_CDECL Hash_StringA_Var_dtor(HashUntyped* self)
 {
   HashUntypedData* d = self->_d;
   if (d->reference.deref())
-    return _api.hash.unknown_unknown.dFree(d, &Hash_StringA_Var_vTable);
+    _api.hash.unknown_unknown.dFree(d, &Hash_StringA_Var_vTable);
 }
 
 static const Var* FOG_CDECL Hash_StringA_Var_getStubA(const HashUntyped* self, const StubA* key)
@@ -1258,7 +1505,7 @@ static err_t FOG_CDECL Hash_StringA_Var_removeStringA(HashUntyped* self, const S
 
 static void FOG_CDECL Hash_StringA_Var_dFree(HashUntypedData* d)
 {
-  return _api.hash.unknown_unknown.dFree(d, &Hash_StringA_Var_vTable);
+  _api.hash.unknown_unknown.dFree(d, &Hash_StringA_Var_vTable);
 }
 
 // ============================================================================
@@ -1292,7 +1539,7 @@ static void FOG_CDECL Hash_StringW_StringW_dtor(HashUntyped* self)
 {
   HashUntypedData* d = self->_d;
   if (d->reference.deref())
-    return _api.hash.unknown_unknown.dFree(d, &Hash_StringW_StringW_vTable);
+    _api.hash.unknown_unknown.dFree(d, &Hash_StringW_StringW_vTable);
 }
 
 static const StringW* FOG_CDECL Hash_StringW_StringW_getStubA(const HashUntyped* self, const StubA* key)
@@ -1363,7 +1610,7 @@ static err_t FOG_CDECL Hash_StringW_StringW_removeStringW(HashUntyped* self, con
 
 static void FOG_CDECL Hash_StringW_StringW_dFree(HashUntypedData* d)
 {
-  return _api.hash.unknown_unknown.dFree(d, &Hash_StringW_StringW_vTable);
+  _api.hash.unknown_unknown.dFree(d, &Hash_StringW_StringW_vTable);
 }
 
 // ============================================================================
@@ -1397,7 +1644,7 @@ static void FOG_CDECL Hash_StringW_Var_dtor(HashUntyped* self)
 {
   HashUntypedData* d = self->_d;
   if (d->reference.deref())
-    return _api.hash.unknown_unknown.dFree(d, &Hash_StringW_Var_vTable);
+    _api.hash.unknown_unknown.dFree(d, &Hash_StringW_Var_vTable);
 }
 
 static const Var* FOG_CDECL Hash_StringW_Var_getStubA(const HashUntyped* self, const StubA* key)
@@ -1468,7 +1715,7 @@ static err_t FOG_CDECL Hash_StringW_Var_removeStringW(HashUntyped* self, const S
 
 static void FOG_CDECL Hash_StringW_Var_dFree(HashUntypedData* d)
 {
-  return _api.hash.unknown_unknown.dFree(d, &Hash_StringW_Var_vTable);
+  _api.hash.unknown_unknown.dFree(d, &Hash_StringW_Var_vTable);
 }
 
 // ============================================================================
@@ -1587,6 +1834,7 @@ FOG_NO_EXPORT void Hash_init(void)
   _api.hash.unknown_unknown.remove = Hash_Unknown_Unknown_remove;
 
   _api.hash.unknown_unknown.copy = Hash_Unknown_Unknown_copy;
+  _api.hash.unknown_unknown.eq = Hash_Unknown_Unknown_eq;
 
   _api.hash.unknown_unknown.dCreate = Hash_Unknown_Unknown_dCreate;
   _api.hash.unknown_unknown.dFree = Hash_Unknown_Unknown_dFree;
@@ -1615,6 +1863,8 @@ FOG_NO_EXPORT void Hash_init(void)
 
   _api.hash.stringa_unknown.removeStubA = Hash_StringT_Unknown_removeStub<char, char>;
   _api.hash.stringa_unknown.removeStringA = Hash_StringT_Unknown_removeString<char, char>;
+
+  _api.hash.stringa_unknown.eq = Hash_StringT_Unknown_eq<char>;
 
   // Hash<StringA, StringA>
   _api.hash.stringa_stringa.ctor = Hash_StringA_StringA_ctor;
@@ -1668,6 +1918,8 @@ FOG_NO_EXPORT void Hash_init(void)
   _api.hash.stringw_unknown.removeStubA = Hash_StringT_Unknown_removeStub<CharW, char>;
   _api.hash.stringw_unknown.removeStubW = Hash_StringT_Unknown_removeStub<CharW, CharW>;
   _api.hash.stringw_unknown.removeStringW = Hash_StringT_Unknown_removeString<CharW, CharW>;
+
+  _api.hash.stringw_unknown.eq = Hash_StringT_Unknown_eq<CharW>;
 
   // Hash<StringW, StringW>
   _api.hash.stringw_stringw.ctor = Hash_StringW_StringW_ctor;

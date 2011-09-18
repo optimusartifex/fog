@@ -17,31 +17,15 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::Hash<StringA, Unknown>]
+// [Fog::HashStringAImpl<Unknown>]
 // ============================================================================
 
+template<typename ItemT, int IndexableItem>
+struct HashStringAImpl {};
+
 template<typename ItemT>
-struct Hash<StringA, ItemT> : public HashUntyped
+struct HashStringAImpl<ItemT, 0> : public HashUntyped
 {
-  // --------------------------------------------------------------------------
-  // [Construction / Destruction]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE Hash()
-  {
-    _api.hash.unknown_unknown.ctor(this);
-  }
-
-  FOG_INLINE Hash(const Hash<StringA, ItemT>& other)
-  {
-    _api.hash.unknown_unknown.ctorCopy(this, &other);
-  }
-
-  FOG_INLINE ~Hash()
-  {
-    _api.hash.unknown_unknown.dtor(this, HashVTable<StringA, ItemT>::getVTable());
-  }
-
   // --------------------------------------------------------------------------
   // [Sharing]
   // --------------------------------------------------------------------------
@@ -222,6 +206,54 @@ struct Hash<StringA, ItemT> : public HashUntyped
   FOG_INLINE err_t remove(const StringA& key)
   {
     return _api.hash.stringa_unknown.removeStringA(this, HashVTable<StringA, ItemT>::getVTable(), &key);
+  }
+};
+
+template<typename ItemT>
+struct HashStringAImpl<ItemT, 1> : public HashStringAImpl<ItemT, 0>
+{
+  // --------------------------------------------------------------------------
+  // [Equality]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const Hash<StringA, ItemT>& other) const
+  {
+    return _api.hash.stringa_unknown.eq(this, &other,
+      HashVTable<StringA, ItemT>::getVTable(), TypeFunc<ItemT>::getEqFunc());
+  }
+
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool operator==(const Hash<StringA, ItemT>& other) { return  eq(other); }
+  FOG_INLINE bool operator!=(const Hash<StringA, ItemT>& other) { return !eq(other); }
+};
+
+// ============================================================================
+// [Fog::Hash<StringA, Unknown>]
+// ============================================================================
+
+template<typename ItemT>
+struct Hash<StringA, ItemT> : public HashStringAImpl<ItemT, !TypeInfo<ItemT>::NO_EQ>
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE Hash()
+  {
+    _api.hash.unknown_unknown.ctor(this);
+  }
+
+  FOG_INLINE Hash(const Hash<StringA, ItemT>& other)
+  {
+    _api.hash.unknown_unknown.ctorCopy(this, &other);
+  }
+
+  FOG_INLINE ~Hash()
+  {
+    _api.hash.unknown_unknown.dtor(this, HashVTable<StringA, ItemT>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -434,6 +466,15 @@ struct Hash<StringA, StringA> : public HashUntyped
   }
 
   // --------------------------------------------------------------------------
+  // [Eq]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const Hash<StringA, StringA>& other) const
+  {
+    return _api.hash.stringa_unknown.eq(this, &other, HashVTable<StringA, StringA>::getVTable(), StringA::getEqFunc());
+  }
+
+  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
@@ -442,6 +483,9 @@ struct Hash<StringA, StringA> : public HashUntyped
     _api.hash.unknown_unknown.copy(this, HashVTable<StringA, StringA>::getVTable(), &other);
     return *this;
   }
+
+  FOG_INLINE bool operator==(const Hash<StringA, StringA>& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const Hash<StringA, StringA>& other) const { return !eq(other); }
 };
 
 // ============================================================================
@@ -643,6 +687,15 @@ struct Hash<StringA, Var> : public HashUntyped
   }
 
   // --------------------------------------------------------------------------
+  // [Eq]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const Hash<StringA, Var>& other) const
+  {
+    return _api.hash.stringa_unknown.eq(this, &other, HashVTable<StringA, Var>::getVTable(), (EqFunc)_api.var.eq);
+  }
+
+  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
@@ -651,34 +704,21 @@ struct Hash<StringA, Var> : public HashUntyped
     _api.hash.unknown_unknown.copy(this, HashVTable<StringA, Var>::getVTable(), &other);
     return *this;
   }
+
+  FOG_INLINE bool operator==(const Hash<StringA, Var>& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const Hash<StringA, Var>& other) const { return !eq(other); }
 };
 
 // ============================================================================
-// [Fog::Hash<StringW, Unknown>]
+// [Fog::HashStringWImpl<Unknown>]
 // ============================================================================
 
+template<typename ItemT, int IndexableItem>
+struct HashStringWImpl {};
+
 template<typename ItemT>
-struct Hash<StringW, ItemT> : public HashUntyped
+struct HashStringWImpl<ItemT, 0> : public HashUntyped
 {
-  // --------------------------------------------------------------------------
-  // [Construction / Destruction]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE Hash()
-  {
-    _api.hash.unknown_unknown.ctor(this);
-  }
-
-  FOG_INLINE Hash(const Hash<StringW, ItemT>& other)
-  {
-    _api.hash.unknown_unknown.ctorCopy(this, &other);
-  }
-
-  FOG_INLINE ~Hash()
-  {
-    _api.hash.unknown_unknown.dtor(this, HashVTable<StringW, ItemT>::getVTable());
-  }
-
   // --------------------------------------------------------------------------
   // [Sharing]
   // --------------------------------------------------------------------------
@@ -923,6 +963,54 @@ struct Hash<StringW, ItemT> : public HashUntyped
   FOG_INLINE err_t remove(const StringW& key)
   {
     return _api.hash.stringw_unknown.removeStringW(this, HashVTable<StringW, ItemT>::getVTable(), &key);
+  }
+};
+
+template<typename ItemT>
+struct HashStringWImpl<ItemT, 1> : public HashStringWImpl<ItemT, 0>
+{
+  // --------------------------------------------------------------------------
+  // [Equality]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const Hash<StringW, ItemT>& other) const
+  {
+    return _api.hash.stringw_unknown.eq(this, &other,
+      HashVTable<StringW, ItemT>::getVTable(), TypeFunc<ItemT>::getEqFunc());
+  }
+
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool operator==(const Hash<StringW, ItemT>& other) { return  eq(other); }
+  FOG_INLINE bool operator!=(const Hash<StringW, ItemT>& other) { return !eq(other); }
+};
+
+// ============================================================================
+// [Fog::Hash<StringW, Unknown>]
+// ============================================================================
+
+template<typename ItemT>
+struct Hash<StringW, ItemT> : public HashStringWImpl<ItemT, !TypeInfo<ItemT>::NO_EQ>
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE Hash()
+  {
+    _api.hash.unknown_unknown.ctor(this);
+  }
+
+  FOG_INLINE Hash(const Hash<StringW, ItemT>& other)
+  {
+    _api.hash.unknown_unknown.ctorCopy(this, &other);
+  }
+
+  FOG_INLINE ~Hash()
+  {
+    _api.hash.unknown_unknown.dtor(this, HashVTable<StringW, ItemT>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -1194,6 +1282,15 @@ struct Hash<StringW, StringW> : public HashUntyped
   }
 
   // --------------------------------------------------------------------------
+  // [Eq]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const Hash<StringW, StringW>& other) const
+  {
+    return _api.hash.stringw_unknown.eq(this, &other, HashVTable<StringW, StringW>::getVTable(), StringW::getEqFunc());
+  }
+
+  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
@@ -1202,6 +1299,9 @@ struct Hash<StringW, StringW> : public HashUntyped
     _api.hash.unknown_unknown.copy(this, HashVTable<StringW, StringW>::getVTable(), &other);
     return *this;
   }
+
+  FOG_INLINE bool operator==(const Hash<StringW, StringW>& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const Hash<StringW, StringW>& other) const { return !eq(other); }
 };
 
 // ============================================================================
@@ -1462,6 +1562,15 @@ struct Hash<StringW, Var> : public HashUntyped
   }
 
   // --------------------------------------------------------------------------
+  // [Eq]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const Hash<StringW, Var>& other) const
+  {
+    return _api.hash.stringw_unknown.eq(this, &other, HashVTable<StringW, Var>::getVTable(), (EqFunc)_api.var.eq);
+  }
+
+  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
@@ -1470,6 +1579,9 @@ struct Hash<StringW, Var> : public HashUntyped
     _api.hash.unknown_unknown.copy(this, HashVTable<StringW, Var>::getVTable(), &other);
     return *this;
   }
+
+  FOG_INLINE bool operator==(const Hash<StringW, Var>& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const Hash<StringW, Var>& other) const { return !eq(other); }
 };
 
 //! @}

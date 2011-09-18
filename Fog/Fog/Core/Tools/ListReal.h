@@ -15,11 +15,11 @@ namespace Fog {
 //! @addtogroup Fog_Core_Tools
 //! @{
 
-// This file contains implementation for specialized List<> for single and
-// double precision floating point values. The interesting problem is the
-// behavior of indexing and comparing methods for NaN and Infinity values.
-// Instead of using FPU which never return true for NaN <-> NaN comparison,
-// we use binary indexOf and improved binary compare methods.
+// This file contains implementation of List<float> and List<double>. Very
+// interesting problem is the behavior of indexing and comparing of special
+// numbers like Infinity and NaN. Instead of using FPU comparison instructions
+// which never return true for NaN <-> NaN comparison, we use binary indexOf 
+// and compare methods.
 //
 // Topics:
 //   - http://stackoverflow.com/questions/4816156/are-ieee-floats-valid-key-types-for-stdmap-and-stdset

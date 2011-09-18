@@ -130,15 +130,8 @@ struct FOG_NO_EXPORT LineF
   FOG_INLINE LineF& operator=(const LineF& other) { setLine(other); return *this; }
   FOG_INLINE LineF& operator=(const LineD& other) { setLine(other); return *this; }
 
-  FOG_INLINE bool operator==(const LineF& other)
-  {
-    return p[0] == other.p[0] && p[1] == other.p[1];
-  }
-
-  FOG_INLINE bool operator!=(const LineF& other)
-  {
-    return !operator==(other);
-  }
+  FOG_INLINE bool operator==(const LineF& other) const { return  MemOps::eq_t<LineF>(this, &other); }
+  FOG_INLINE bool operator!=(const LineF& other) const { return !MemOps::eq_t<LineF>(this, &other); }
 
   // --------------------------------------------------------------------------
   // [Algebra]
@@ -278,15 +271,8 @@ struct FOG_NO_EXPORT LineD
   FOG_INLINE LineD& operator=(const LineD& other) { setLine(other); return *this; }
   FOG_INLINE LineD& operator=(const LineF& other) { setLine(other); return *this; }
 
-  FOG_INLINE bool operator==(const LineD& other)
-  {
-    return p[0] == other.p[0] && p[1] == other.p[1];
-  }
-
-  FOG_INLINE bool operator!=(const LineD& other)
-  {
-    return !operator==(other);
-  }
+  FOG_INLINE bool operator==(const LineD& other) const { return  MemOps::eq_t<LineD>(this, &other); }
+  FOG_INLINE bool operator!=(const LineD& other) const { return !MemOps::eq_t<LineD>(this, &other); }
 
   // --------------------------------------------------------------------------
   // [Algebra]

@@ -316,8 +316,8 @@ struct RectI
   FOG_INLINE RectI& operator+=(const PointI& p) { return translate(p); }
   FOG_INLINE RectI& operator-=(const PointI& p) { x -= p.x; y -= p.y; return *this; }
 
-  FOG_INLINE bool operator==(const RectI& other) const { return (x == other.x) & (y == other.y) & (w == other.w) & (h == other.h); }
-  FOG_INLINE bool operator!=(const RectI& other) const { return (x != other.x) | (y != other.y) | (w != other.w) | (h != other.h); }
+  FOG_INLINE bool operator==(const RectI& other) const { return  MemOps::eq_t<RectI>(this, &other); }
+  FOG_INLINE bool operator!=(const RectI& other) const { return !MemOps::eq_t<RectI>(this, &other); }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -687,7 +687,7 @@ struct RectF
 
   FOG_INLINE bool eq(const RectF& other) const
   {
-    return (x == other.x) & (y == other.y) & (w == other.w) & (h == other.h);
+    return MemOps::eq_t<RectF>(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -714,8 +714,8 @@ struct RectF
   FOG_INLINE RectF& operator-=(const PointI& other) { x -= (float)other.x; y -= (float)other.y; return *this; }
   FOG_INLINE RectF& operator-=(const PointF& other) { x -= (float)other.x; y -= (float)other.y; return *this; }
 
-  FOG_INLINE bool operator==(const RectF& other) const { return  eq(other); }
-  FOG_INLINE bool operator!=(const RectF& other) const { return !eq(other); }
+  FOG_INLINE bool operator==(const RectF& other) const { return  MemOps::eq_t<RectF>(this, &other); }
+  FOG_INLINE bool operator!=(const RectF& other) const { return !MemOps::eq_t<RectF>(this, &other); }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -1146,7 +1146,7 @@ struct RectD
 
   FOG_INLINE bool eq(const RectD& other) const
   {
-    return (x == other.x) & (y == other.y) & (w == other.w) & (h == other.h);
+    return MemOps::eq_t<RectD>(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -1177,8 +1177,8 @@ struct RectD
   FOG_INLINE RectD& operator-=(const PointF& other) { x -= (double)other.x; y -= (double)other.y; return *this; }
   FOG_INLINE RectD& operator-=(const PointI& other) { x -= (double)other.x; y -= (double)other.y; return *this; }
 
-  FOG_INLINE bool operator==(const RectD& other) const { return  eq(other); }
-  FOG_INLINE bool operator!=(const RectD& other) const { return !eq(other); }
+  FOG_INLINE bool operator==(const RectD& other) const { return  MemOps::eq_t<RectD>(this, &other); }
+  FOG_INLINE bool operator!=(const RectD& other) const { return !MemOps::eq_t<RectD>(this, &other); }
 
   // --------------------------------------------------------------------------
   // [Members]

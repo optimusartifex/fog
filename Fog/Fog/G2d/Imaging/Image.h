@@ -202,7 +202,7 @@ struct FOG_API Image
   FOG_INLINE uint8_t* getDataX()
   {
     FOG_ASSERT_X(isDetached(),
-      "Fog::Image::getDataX() - Called on non-detached object.");
+      "Fog::Image::getDataX() - Not detached.");
 
     return _d->data;
   }
@@ -219,7 +219,7 @@ struct FOG_API Image
   FOG_INLINE uint8_t* getFirstX()
   {
     FOG_ASSERT_X(isDetached(),
-      "Fog::Image::getFirstX() - Called on non-detached object.");
+      "Fog::Image::getFirstX() - Not detached.");
 
     return _d->first;
   }
@@ -241,7 +241,7 @@ struct FOG_API Image
     FOG_ASSERT_X((uint)y < (uint)_d->size.h,
       "Fog::Image::getScanlineX() - Index out of range.");
     FOG_ASSERT_X(isDetached(),
-      "Fog::Image::getScanlineX() - Called on non-detached object.");
+      "Fog::Image::getScanlineX() - Not detached.");
 
     return _d->first + (ssize_t)y * _d->stride;
   }

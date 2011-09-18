@@ -348,6 +348,11 @@ static FOG_INLINE void zero_t(Type* dst)
 // [Fog::Memory - Eq (Exact)]
 // ============================================================================
 
+static FOG_INLINE bool eq(const void* a, const void* b, size_t size)
+{
+  return _api.memops.eq(a, b, size);
+}
+
 static FOG_INLINE bool eq_1(const void* a, const void* b)
 {
   return (((uint8_t  *)a)[0] == ((uint8_t  *)b)[0]);

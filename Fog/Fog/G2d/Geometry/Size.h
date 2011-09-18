@@ -157,8 +157,8 @@ struct SizeI
   FOG_INLINE SizeI& operator+=(const SizeI& other) { w += other.w; h += other.h; return *this; }
   FOG_INLINE SizeI& operator-=(const SizeI& other) { w -= other.w; h -= other.h; return *this; }
 
-  FOG_INLINE bool operator==(const SizeI& other) const { return (w == other.w) & (h == other.h); }
-  FOG_INLINE bool operator!=(const SizeI& other) const { return (w != other.w) | (h != other.h); }
+  FOG_INLINE bool operator==(const SizeI& other) const { return  MemOps::eq_t<SizeI>(this, &other); }
+  FOG_INLINE bool operator!=(const SizeI& other) const { return !MemOps::eq_t<SizeI>(this, &other); }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -337,8 +337,8 @@ struct SizeF
   FOG_INLINE SizeF& operator-=(const SizeI& other) { w -= other.w; h -= other.h; return *this; }
   FOG_INLINE SizeF& operator-=(const SizeF& other) { w -= other.w; h -= other.h; return *this; }
 
-  FOG_INLINE bool operator==(const SizeF& other) const { return (w == other.w) & (h == other.h); }
-  FOG_INLINE bool operator!=(const SizeF& other) const { return (w != other.w) | (h != other.h); }
+  FOG_INLINE bool operator==(const SizeF& other) const { return  MemOps::eq_t<SizeF>(this, &other); }
+  FOG_INLINE bool operator!=(const SizeF& other) const { return !MemOps::eq_t<SizeF>(this, &other); }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -566,8 +566,8 @@ struct SizeD
   FOG_INLINE SizeD& operator-=(const SizeF& other) { w -= other.w; h -= other.h; return *this; }
   FOG_INLINE SizeD& operator-=(const SizeD& other) { w -= other.w; h -= other.h; return *this; }
 
-  FOG_INLINE bool operator==(const SizeD& other) const { return (w == other.w) & (h == other.h); }
-  FOG_INLINE bool operator!=(const SizeD& other) const { return (w != other.w) | (h != other.h); }
+  FOG_INLINE bool operator==(const SizeD& other) const { return  MemOps::eq_t<SizeD>(this, &other); }
+  FOG_INLINE bool operator!=(const SizeD& other) const { return !MemOps::eq_t<SizeD>(this, &other); }
 
   // --------------------------------------------------------------------------
   // [Members]

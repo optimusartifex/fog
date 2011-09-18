@@ -81,8 +81,8 @@ struct FOG_API GradientF
   FOG_INLINE err_t removeStop(const ColorStop& stop) { return _stops.remove(stop); }
 
   FOG_INLINE err_t removeStopAt(size_t index) { return _stops.removeAt(index); }
-  FOG_INLINE err_t removeStopAt(const Range& range) { return _stops.removeAt(range); }
-  FOG_INLINE err_t removeStopAt(const IntervalF& interval) { return _stops.removeAt(interval); }
+  FOG_INLINE err_t removeStopAt(const Range& range) { return _stops.removeRange(range); }
+  FOG_INLINE err_t removeStopAt(const IntervalF& interval) { return _stops.removeRange(interval); }
 
   // --------------------------------------------------------------------------
   // [Abstract]
@@ -204,8 +204,8 @@ struct FOG_API GradientD
   FOG_INLINE err_t removeStop(const ColorStop& stop) { return _stops.remove(stop); }
 
   FOG_INLINE err_t removeStopAt(size_t index) { return _stops.removeAt(index); }
-  FOG_INLINE err_t removeStopAt(const Range& range) { return _stops.removeAt(range); }
-  FOG_INLINE err_t removeStopAt(const IntervalF& interval) { return _stops.removeAt(interval); }
+  FOG_INLINE err_t removeStopAt(const Range& range) { return _stops.removeRange(range); }
+  FOG_INLINE err_t removeStopAt(const IntervalF& interval) { return _stops.removeRange(interval); }
 
   // --------------------------------------------------------------------------
   // [Abstract]

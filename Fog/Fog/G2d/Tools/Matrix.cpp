@@ -10,240 +10,343 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Private.h>
 #include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/G2d/Tools/Matrix.h>
 
 namespace Fog {
 
 // ============================================================================
-// [Fog::MatrixF - Helpers]
+// [Fog::Matrix - Global]
 // ============================================================================
 
-static FOG_INLINE MatrixDataF* _MatrixF_ref(MatrixDataF* d)
+static Static<MatrixDataF> MatrixF_dEmpty;
+static Static<MatrixDataD> MatrixD_dEmpty;
+
+static Static<MatrixF> MatrixF_oEmpty;
+static Static<MatrixD> MatrixD_oEmpty;
+
+template<typename NumT>
+FOG_STATIC_INLINE_T NumT_(MatrixData)* MatrixT_getDEmpty() { return NULL; }
+
+template<>
+FOG_STATIC_INLINE_T MatrixDataF* MatrixT_getDEmpty<float>() { return &MatrixF_dEmpty; }
+
+template<>
+FOG_STATIC_INLINE_T MatrixDataD* MatrixT_getDEmpty<double>() { return &MatrixD_dEmpty; }
+
+// ============================================================================
+// [Fog::Matrix - Construction / Destruction]
+// ============================================================================
+
+template<typename NumT>
+static void FOG_CDECL MatrixT_ctor(NumT_(Matrix)* self)
 {
-  d->reference.inc();
-  return d;
+  self->_d = MatrixT_getDEmpty<NumT>()->addRef();
 }
 
-static FOG_INLINE void _MatrixF_deref(MatrixDataF* d)
+template<typename NumT>
+static void FOG_CDECL MatrixT_ctorCopy(NumT_(Matrix)* self, const NumT_(Matrix)* other)
 {
-  if (d->reference.deref()) MemMgr::free(d);
+  self->_d = other->_d->addRef();
+}
+
+template<typename NumT>
+static void FOG_CDECL MatrixT_ctorCreate(NumT_(Matrix)* self, const SizeI* size, const NumT* data)
+{
+  NumT_(MatrixData)* d = NumI_(Matrix)::_dCreate(*size, data);
+
+  if (FOG_IS_NULL(d))
+    d = MatrixT_getDEmpty<NumT>()->addRef();
+
+  self->_d = d;
+}
+
+template<typename NumT>
+static void FOG_CDECL MatrixT_dtor(NumT_(Matrix)* self)
+{
+  self->_d->release();
 }
 
 // ============================================================================
-// [Fog::MatrixF - Construction / Destruction]
+// [Fog::Matrix - Sharing]
 // ============================================================================
 
-MatrixF::MatrixF() :
-  _d(_MatrixF_ref(&_dnull))
+template<typename NumT>
+static err_t FOG_CDECL MatrixT_detach(NumT_(Matrix)* self)
 {
-}
+  NumT_(MatrixData)* d = self->_d;
 
-MatrixF::MatrixF(const MatrixF& other) :
-  _d(_MatrixF_ref(other._d))
-{
-}
+  if (d->reference.get() == 1 || d->isEmpty())
+    return ERR_OK;
 
-MatrixF::MatrixF(const SizeI& size, const float* data) :
-  _d(_dalloc(size))
-{
-  if (FOG_UNLIKELY(_d == NULL))
-  {
-    _d = _MatrixF_ref(&_dnull);
-    return;
-  }
+  d = NumI_(Matrix)::_dCreate(d->size, d->data);
+  if (FOG_IS_NULL(d))
+    return ERR_RT_OUT_OF_MEMORY;
 
-  if (data)
-  {
-    MemOps::copy(_d->data, data, _d->size.w * _d->size.h * sizeof(float));
-  }
-}
-
-MatrixF::~MatrixF()
-{
-  _MatrixF_deref(_d);
-}
-
-// ============================================================================
-// [Fog::MatrixF - Methods]
-// ============================================================================
-
-err_t MatrixF::_detach()
-{
-  if (isDetached() || isEmpty()) return ERR_OK;
-
-  MatrixDataF* newd = _dalloc(_d->size);
-  if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
-
-  MemOps::copy(newd->data, _d->data, _d->size.w * _d->size.h * sizeof(float));
-
-  _MatrixF_deref(atomicPtrXchg(&_d, newd));
+  atomicPtrXchg(&self->_d, d)->release();
   return ERR_OK;
 }
 
-err_t MatrixF::create(const SizeI& size, const float* data)
+// ============================================================================
+// [Fog::Matrix - Create]
+// ============================================================================
+
+template<typename NumT>
+static err_t FOG_CDECL MatrixT_create(NumT_(Matrix)* self, const SizeI* size, const NumT* data)
 {
-  if (FOG_UNLIKELY(!size.isValid()))
+  if (size->w <= 0 || size->h <= 0)
   {
-    reset();
-    return (size.w == 0 && size.h == 0)
-      ? (err_t)ERR_OK
-      : (err_t)ERR_RT_INVALID_ARGUMENT;
+    self->reset();
+
+    if (size->w < 0 || size->h < 0)
+      return ERR_RT_INVALID_ARGUMENT;
+    else
+      return ERR_OK;
   }
 
-  if ((_d->size.w * _d->size.h) == (size.w * size.h) && isDetached())
+  NumT_(MatrixData)* d = self->_d;
+
+  size_t oldArea = (size_t)d->size.w * (size_t)d->size.h;
+  size_t newArea = (size_t)size->w * (size_t)size->h;
+
+  // Arithmetic overflow.
+  if (sizeof(size_t) == sizeof(int) && (newArea / size->h != size->w))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  if (oldArea == newArea && d->reference.get() == 1)
   {
-    if (data) MemOps::copy(_d->data, data, size.w * size.h * sizeof(float));
-    _d->size = size;
+    d->size = *size;
+    if (data)
+      MemOps::copy(d->data, data, newArea * sizeof(float));
     return ERR_OK;
   }
 
-  MatrixDataF* newd = _dalloc(size);
-  if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
+  NumT_(MatrixData)* newd = NumI_(Matrix)::_dCreate(*size, data);
+  if (FOG_IS_NULL(newd))
+    return ERR_RT_OUT_OF_MEMORY;
 
-  if (data) MemOps::copy(newd->data, data, size.w * size.h * sizeof(float));
-
-  _MatrixF_deref(atomicPtrXchg(&_d, newd));
+  atomicPtrXchg(&self->_d, newd)->release();
   return ERR_OK;
 }
 
-err_t MatrixF::resize(const SizeI& size, float value)
+// ============================================================================
+// [Fog::Matrix - Rezize]
+// ============================================================================
+
+template<typename NumT>
+static err_t FOG_CDECL MatrixT_resize(NumT_(Matrix)* self, const SizeI* size, NumT value)
 {
-  if (FOG_UNLIKELY(!size.isValid()))
+  NumT_(MatrixData)* d = self->_d;
+
+  if (d->size == *size)
+    return ERR_OK;
+
+  if (size->w < 0 || size->h < 0)
+    return ERR_RT_INVALID_ARGUMENT;
+
+  if (size->w == 0 || size->h == 0)
   {
-    reset();
-    return (size.w == 0 && size.h == 0)
-      ? (err_t)ERR_OK
-      : (err_t)ERR_RT_INVALID_ARGUMENT;
+    self->reset();
+    return ERR_OK;
   }
 
-  if (_d->size == size) return ERR_OK;
-
-  MatrixDataF* newd = _dalloc(size);
-  if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
+  NumT_(MatrixData)* newd = NumI_(Matrix)::_dCreate(*size);
+  if (FOG_IS_NULL(newd))
+    return ERR_RT_OUT_OF_MEMORY;
 
   int x, y;
 
-  int copyw = Math::min(_d->size.w, size.w);
-  int copyh = Math::min(_d->size.h, size.h);
-  int zerow = size.w - copyw;
+  int copyw = Math::min(d->size.w, size->w);
+  int copyh = Math::min(d->size.h, size->h);
+  int zerow = size->w - copyw;
 
-  float* dstCur = newd->data;
-  float* srcRow = _d->data;
+  NumT* nData = newd->data;
+  const NumT* oRow = d->data;
 
   // Copy/Set matrix rows.
-  for (y = copyh; y != 0; y--, srcRow += _d->size.w)
+  for (y = copyh; y != 0; y--, oRow += d->size.w)
   {
-    float* srcCur = srcRow;
+    const NumT* oData = oRow;
 
-    for (x = copyw; x; x--, dstCur++, srcCur++) dstCur[0] = srcCur[0];
-    for (x = zerow; x; x--, dstCur++          ) dstCur[0] = value;
+    for (x = copyw; x; x--, nData++, oData++) nData[0] = oData[0];
+    for (x = zerow; x; x--, nData++         ) nData[0] = value;
   }
 
-  // Clear created rows.
-  for (y = (size.h - copyh) * size.w; y; y--, dstCur++)
+  // Set remaining rows.
+  for (y = (size->h - copyh) * size->w; y; y--, nData++)
   {
-    dstCur[0] = value;
+    nData[0] = value;
   }
 
-  _MatrixF_deref(atomicPtrXchg(&_d, newd));
+  atomicPtrXchg(&self->_d, newd)->release();
   return ERR_OK;
 }
 
-void MatrixF::reset()
-{
-  _MatrixF_deref(atomicPtrXchg(&_d, _MatrixF_ref(&_dnull)));
-}
+// ============================================================================
+// [Fog::Matrix - Accessors]
+// ============================================================================
 
-float MatrixF::getCell(int x, int y) const
+template<typename NumT>
+static NumT FOG_CDECL MatrixT_getCell(const NumT_(Matrix)* self, int x, int y)
 {
-  MatrixDataF* d = _d;
-  if ((uint)x >= (uint)d->size.w || (uint)y >= (uint)_d->size.h) return 0.0f;
+  NumT_(MatrixData)* d = self->_d;
+
+  if ((uint)x >= (uint)d->size.w ||
+      (uint)y >= (uint)d->size.h)
+  {
+    return Math::getQNanT<NumT>();
+  }
 
   return d->data[y * d->size.w + x];
 }
 
-err_t MatrixF::setCell(int x, int y, float val)
+template<typename NumT>
+static err_t FOG_CDECL MatrixT_setCell(NumT_(Matrix)* self, int x, int y, NumT value)
 {
-  MatrixDataF* d = _d;
-  if ((uint)x >= (uint)d->size.w || (uint)y >= (uint)d->size.h) return ERR_RT_INVALID_ARGUMENT;
+  NumT_(MatrixData)* d = self->_d;
 
-  FOG_RETURN_ON_ERROR(detach());
-  d = _d;
+  if ((uint)x >= (uint)d->size.w ||
+      (uint)y >= (uint)d->size.h)
+  {
+    return ERR_RT_INVALID_ARGUMENT;
+  }
 
-  d->data[y * d->size.w + x] = val;
+  if (d->reference.get() > 1)
+  {
+    FOG_RETURN_ON_ERROR(self->_detach());
+    d = self->_d;
+  }
+
+  d->data[y * d->size.w + x] = value;
   return ERR_OK;
 }
 
-err_t MatrixF::fill(const RectI& rect, float val)
+template<typename NumT>
+static err_t FOG_CDECL MatrixT_fill(NumT_(Matrix)* self, const RectI* rect, NumT value)
 {
-  int x0 = Math::max<int>(rect.getX0(), 0);
-  int y0 = Math::max<int>(rect.getY0(), 0);
+  NumT_(MatrixData)* d = self->_d;
 
-  int x1 = Math::min<int>(rect.getX1(), getWidth());
-  int y1 = Math::min<int>(rect.getY1(), getHeight());
+  int w = d->size.w;
+  int h = d->size.h;
 
-  if (x0 >= x1 || y0 >= y1) return ERR_RT_INVALID_ARGUMENT;
+  int x0 = Math::max<int>(rect->getX0(), 0);
+  int y0 = Math::max<int>(rect->getY0(), 0);
 
-  FOG_RETURN_ON_ERROR(detach());
+  int x1 = Math::min<int>(rect->getX1(), w);
+  int y1 = Math::min<int>(rect->getY1(), h);
 
-  int width = _d->size.w;
-  float* p = &_d->data[y0 * width + x0];
+  if (x0 >= x1 || y0 >= y1)
+    return ERR_RT_INVALID_ARGUMENT;
 
-  int x, y;
-  int fillw = x1 - x0;
-  int fillh = y1 - y0;
-
-  for (y = fillh; y; y--, p += width)
+  if (d->reference.get() > 1)
   {
-    for (x = 0; x < fillw; x++) p[x] = val;
+    FOG_RETURN_ON_ERROR(self->_detach());
+    d = self->_d;
+  }
+
+  NumT* p = &d->data[y0 * w + x0];
+
+  int fw = x1 - x0;
+  int fh = y1 - y0;
+
+  for (int y = fh; y; y--, p += w)
+  {
+    for (int x = 0; x < fw; x++) p[x] = value;
   }
 
   return ERR_OK;
 }
 
 // ============================================================================
-// [Fog::MatrixF - Operator Overload]
+// [Fog::Matrix - Reset]
 // ============================================================================
 
-MatrixF& MatrixF::operator=(const MatrixF& other)
+template<typename NumT>
+static void FOG_CDECL MatrixT_reset(NumT_(Matrix)* self)
 {
-  _MatrixF_deref(atomicPtrXchg(&_d, _MatrixF_ref(other._d)));
-  return *this;
+  atomicPtrXchg(&self->_d, MatrixT_getDEmpty<NumT>()->addRef())->release();
 }
 
 // ============================================================================
-// [Fog::MatrixF - Statics]
+// [Fog::Matrix - Copy]
 // ============================================================================
 
-Static<MatrixDataF> MatrixF::_dnull;
-
-MatrixDataF* MatrixF::_dalloc(const SizeI& size)
+template<typename NumT>
+static void FOG_CDECL MatrixT_copy(NumT_(Matrix)* self, const NumT_(Matrix)* other)
 {
-  if (!size.isValid()) return _MatrixF_ref(&_dnull);
+  atomicPtrXchg(&self->_d, other->_d->addRef())->release();
+}
 
-  MatrixDataF* d = reinterpret_cast<MatrixDataF*>(
-    MemMgr::alloc(sizeof(MatrixDataF) - sizeof(float) + (size.w * size.h) * sizeof(float)));
-  if (FOG_IS_NULL(d)) return NULL;
+// ============================================================================
+// [Fog::Matrix - Eq]
+// ============================================================================
+
+template<typename NumT>
+static bool FOG_CDECL MatrixT_eq(const NumT_(Matrix)* a, const NumT_(Matrix)* b)
+{
+  NumT_(MatrixData)* a_d = a->_d;
+  NumT_(MatrixData)* b_d = b->_d;
+
+  if (a_d == b_d)
+    return true;
+
+  if (a_d->size != b_d->size)
+    return false;
+
+  const NumT* a_data = a_d->data;
+  const NumT* b_data = b_d->data;
+
+  size_t area = (size_t)(uint)a_d->size.w * (size_t)(uint)b_d->size.h;
+  for (size_t i = 0; i < area; i++)
+  {
+    if (a_data[i] != b_data[i])
+      return false;
+  }
+
+  return true;
+}
+
+// ============================================================================
+// [Fog::Matrix - MatrixData]
+// ============================================================================
+
+template<typename NumT>
+static NumT_(MatrixData)* MatrixT_dCreate(const SizeI* size, const NumT* data)
+{
+  int w = size->w;
+  int h = size->h;
+
+  if (w <= 0 || h <= 0)
+    return NULL;
+
+  size_t area = (size_t)(uint)w * (size_t)(uint)h;
+  if (area / (uint)h != w)
+    return NULL;
+
+  if (area > (SIZE_MAX - sizeof(NumT_(MatrixData))) / sizeof(NumT))
+    return NULL;
+
+  NumT_(MatrixData)* d = reinterpret_cast<NumT_(MatrixData)*>(
+    MemMgr::alloc(NumI_(MatrixData)::getSizeOf(area)));
+
+  if (FOG_IS_NULL(d))
+    return NULL;
 
   d->reference.init(1);
-  d->size = size;
+  d->size.set(w, h);
+
+  if (data != NULL)
+    MemOps::copy(d->data, data, area * sizeof(NumT));
+
   return d;
 }
 
-void MatrixF::_dcopy(
-  MatrixDataF* dst, int dstX, int dstY,
-  MatrixDataF* src, int srcX, int srcY, int w, int h)
+template<typename NumT>
+static void MatrixT_dFree(NumT_(MatrixData)* d)
 {
-  int x, y;
-
-  float* dstCur = dst->data + dstY * dst->size.w + dstX;
-  float* srcCur = src->data + srcY * src->size.w + srcX;
-
-  for (y = h; y; y--, dstCur += dst->size.w, srcCur += src->size.w)
-  {
-    for (x = 0; x < w; x++) dstCur[x] = srcCur[x];
-  }
+  if ((d->vType & VAR_FLAG_STATIC) == 0)
+    MemMgr::free(d);
 }
 
 // ============================================================================
@@ -252,8 +355,59 @@ void MatrixF::_dcopy(
 
 FOG_NO_EXPORT void Matrix_init(void)
 {
-  MatrixF::_dnull->reference.init(1);
-  MatrixF::_dnull->size.reset();
+  // --------------------------------------------------------------------------
+  // [Funcs]
+  // --------------------------------------------------------------------------
+
+  _api.matrixf.ctor = MatrixT_ctor<float>;
+  _api.matrixf.ctorCopy = MatrixT_ctorCopy<float>;
+  _api.matrixf.ctorCreate = MatrixT_ctorCreate<float>;
+  _api.matrixf.dtor = MatrixT_dtor<float>;
+  _api.matrixf.detach = MatrixT_detach<float>;
+  _api.matrixf.create = MatrixT_create<float>;
+  _api.matrixf.resize = MatrixT_resize<float>;
+  _api.matrixf.getCell = MatrixT_getCell<float>;
+  _api.matrixf.setCell = MatrixT_setCell<float>;
+  _api.matrixf.fill = MatrixT_fill<float>;
+  _api.matrixf.reset = MatrixT_reset<float>;
+  _api.matrixf.copy = MatrixT_copy<float>;
+  _api.matrixf.eq = MatrixT_eq<float>;
+
+  _api.matrixf.dCreate = MatrixT_dCreate<float>;
+  _api.matrixf.dFree = MatrixT_dFree<float>;
+
+  _api.matrixd.ctor = MatrixT_ctor<double>;
+  _api.matrixd.ctorCopy = MatrixT_ctorCopy<double>;
+  _api.matrixd.ctorCreate = MatrixT_ctorCreate<double>;
+  _api.matrixd.dtor = MatrixT_dtor<double>;
+  _api.matrixd.detach = MatrixT_detach<double>;
+  _api.matrixd.create = MatrixT_create<double>;
+  _api.matrixd.resize = MatrixT_resize<double>;
+  _api.matrixd.getCell = MatrixT_getCell<double>;
+  _api.matrixd.setCell = MatrixT_setCell<double>;
+  _api.matrixd.fill = MatrixT_fill<double>;
+  _api.matrixd.reset = MatrixT_reset<double>;
+  _api.matrixd.copy = MatrixT_copy<double>;
+  _api.matrixd.eq = MatrixT_eq<double>;
+
+  _api.matrixd.dCreate = MatrixT_dCreate<double>;
+  _api.matrixd.dFree = MatrixT_dFree<double>;
+
+  // --------------------------------------------------------------------------
+  // [Data]
+  // --------------------------------------------------------------------------
+
+  MatrixDataF* df = &MatrixF_dEmpty;
+  MatrixDataD* dd = &MatrixD_dEmpty;
+
+  df->reference.init(1);
+  df->vType = VAR_TYPE_MATRIXF | VAR_FLAG_NONE;
+
+  dd->reference.init(1);
+  dd->vType = VAR_TYPE_MATRIXF | VAR_FLAG_NONE;
+
+  _api.matrixf.oEmpty = MatrixF_oEmpty.initCustom1(df);
+  _api.matrixd.oEmpty = MatrixD_oEmpty.initCustom1(dd);
 }
 
 } // Fog namespace

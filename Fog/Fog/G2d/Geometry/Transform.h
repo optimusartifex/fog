@@ -1217,19 +1217,8 @@ struct FOG_NO_EXPORT TransformF
     return inverted();
   }
 
-  //! @brief Equal operator.
-  FOG_INLINE bool operator==(const TransformF& m) const
-  {
-    return _00 == m._00 && _01 == m._01 && _02 == m._02 &&
-           _10 == m._10 && _11 == m._11 && _12 == m._12 &&
-           _20 == m._20 && _21 == m._21 && _22 == m._22 ;
-  }
-
-  //! @brief Not Equal operator.
-  FOG_INLINE bool operator!=(const TransformF& m) const
-  {
-    return !operator==(m);
-  }
+  FOG_INLINE bool operator==(const TransformF& other) const { return  MemOps::eq_s<9 * sizeof(float)>(_data, other._data); }
+  FOG_INLINE bool operator!=(const TransformF& other) const { return !MemOps::eq_s<9 * sizeof(float)>(_data, other._data); }
 
   FOG_INLINE TransformF& operator+=(float val)
   {
@@ -2426,19 +2415,8 @@ struct FOG_NO_EXPORT TransformD
     return inverted();
   }
 
-  //! @brief Equal operator.
-  FOG_INLINE bool operator==(const TransformD& m) const
-  {
-    return _00 == m._00 && _01 == m._01 && _02 == m._02 &&
-           _10 == m._10 && _11 == m._11 && _12 == m._12 &&
-           _20 == m._20 && _21 == m._21 && _22 == m._22 ;
-  }
-
-  //! @brief Not Equal operator.
-  FOG_INLINE bool operator!=(const TransformD& m) const
-  {
-    return !operator==(m);
-  }
+  FOG_INLINE bool operator==(const TransformD& other) const { return  MemOps::eq_s<9 * sizeof(double)>(_data, other._data); }
+  FOG_INLINE bool operator!=(const TransformD& other) const { return !MemOps::eq_s<9 * sizeof(double)>(_data, other._data); }
 
   FOG_INLINE TransformD& operator+=(double val)
   {

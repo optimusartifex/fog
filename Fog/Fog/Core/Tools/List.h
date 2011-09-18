@@ -147,7 +147,7 @@ struct ListImpl<ItemT, TYPE_CATEGORY_SIMPLE, 0, 0> : public ListUntyped
   FOG_INLINE ItemT* getDataX()
   {
     FOG_ASSERT_X(isDetached(),
-      "Fog::List<?>::getDataX() - Called on non-detached object.");
+      "Fog::List<?>::getDataX() - Not detached.");
 
     return reinterpret_cast<ItemT*>(ListUntyped::_d->data);
   }
@@ -191,7 +191,7 @@ struct ListImpl<ItemT, TYPE_CATEGORY_SIMPLE, 0, 0> : public ListUntyped
   FOG_INLINE err_t setAtX(size_t index, const ItemT& item)
   {
     FOG_ASSERT_X(isDetached(),
-      "Fog::List<?>::setAtX() - Called on non-detached object.");
+      "Fog::List<?>::setAtX() - Not detached.");
     FOG_ASSERT_X(index < ListUntyped::_d->length,
       "Fog::List<?>::setAtX() - Index out of range.");
 
@@ -533,6 +533,25 @@ struct ListImpl<ItemT, TYPE_CATEGORY_SIMPLE, 1, Comparable> : public ListImpl<It
     else
       return _lastIndexOf(range_, item);
   }
+
+  // --------------------------------------------------------------------------
+  // [Equality]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const List<ItemT>& other) const
+  {
+    if (TypeInfo<ItemT>::BIN_EQ)
+      return _api.list.untyped.binaryEq(this, &other, sizeof(ItemT));
+    else
+      return _api.list.untyped.customEq(this, &other, sizeof(ItemT), TypeFunc<ItemT>::getEqFunc());
+  }
+
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool operator==(const List<ItemT>& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const List<ItemT>& other) const { return !eq(other); }
 };
 
 // ============================================================================
@@ -619,7 +638,7 @@ struct ListImpl<ItemT, TYPE_CATEGORY_MOVABLE, 0, 0> : public ListUntyped
   FOG_INLINE ItemT* getDataX()
   {
     FOG_ASSERT_X(isDetached(),
-      "Fog::List<?>::getDataX() - Called on non-detached object.");
+      "Fog::List<?>::getDataX() - Not detached.");
 
     return reinterpret_cast<ItemT*>(ListUntyped::_d->data);
   }
@@ -663,7 +682,7 @@ struct ListImpl<ItemT, TYPE_CATEGORY_MOVABLE, 0, 0> : public ListUntyped
   FOG_INLINE err_t setAtX(size_t index, const ItemT& item)
   {
     FOG_ASSERT_X(isDetached(),
-      "Fog::List<?>::setAtX() - Called on non-detached object.");
+      "Fog::List<?>::setAtX() - Not detached.");
     FOG_ASSERT_X(index < ListUntyped::_d->length,
       "Fog::List<?>::setAtX() - Index out of range.");
 
@@ -964,6 +983,25 @@ struct ListImpl<ItemT, TYPE_CATEGORY_MOVABLE, 1, Comparable> : public ListImpl<I
 
     return INVALID_INDEX;
   }
+
+  // --------------------------------------------------------------------------
+  // [Equality]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const List<ItemT>& other) const
+  {
+    if (TypeInfo<ItemT>::BIN_EQ)
+      return _api.list.untyped.binaryEq(this, &other, sizeof(ItemT));
+    else
+      return _api.list.untyped.customEq(this, &other, sizeof(ItemT), TypeFunc<ItemT>::getEqFunc());
+  }
+
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool operator==(const List<ItemT>& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const List<ItemT>& other) const { return !eq(other); }
 };
 
 // ============================================================================

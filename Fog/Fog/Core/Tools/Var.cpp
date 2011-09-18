@@ -61,6 +61,13 @@ static Static<VarData> Var_dNull;
 static Static<Var> Var_oNull;
 
 // ============================================================================
+// [Fog::Var - Helpers]
+// ============================================================================
+
+#define VAR_SIMPLE_C(_D_, _Type_) \
+  ((VarSimpleData*)(_D_))->getInstanceT< _Type_ >()
+
+// ============================================================================
 // [Fog::Var - DataSize]
 // ============================================================================
 
@@ -98,6 +105,8 @@ static const uint8_t Var_dataSize[] =
   /* 0021: VAR_TYPE_DATE                 */ sizeof(Date),
   /* 0022: VAR_TYPE_TIME                 */ sizeof(Time),
 
+  // --------------------------------------------------------------------------
+
   /* 0023:                               */ 0,
   /* 0024:                               */ 0,
   /* 0025:                               */ 0,
@@ -107,6 +116,8 @@ static const uint8_t Var_dataSize[] =
   /* 0029:                               */ 0,
   /* 0030:                               */ 0,
   /* 0031:                               */ 0,
+
+  // --------------------------------------------------------------------------
 
   /* 0032: VAR_TYPE_POINTI               */ sizeof(PointI),
   /* 0033: VAR_TYPE_POINTF               */ sizeof(PointF),
@@ -148,11 +159,12 @@ static const uint8_t Var_dataSize[] =
   /* 0069: VAR_TYPE_REGION               */ 0,
   /* 0070: VAR_TYPE_TRANSFORMF           */ sizeof(TransformF),
   /* 0071: VAR_TYPE_TRANSFORMD           */ sizeof(TransformD),
-  /* 0072: VAR_TYPE_                     */ 0,
-  /* 0073: VAR_TYPE_                     */ 0,
-  /* 0074: VAR_TYPE_                     */ 0,
-  /* 0075: VAR_TYPE_                     */ 0,
-  /* 0076: VAR_TYPE_                     */ 0,
+  /* 0072: VAR_TYPE_MATRIXF              */ 0,
+  /* 0073: VAR_TYPE_MATRIXD              */ 0,
+  /* 0074: VAR_TYPE_COLOR                */ sizeof(Color),
+  /* 0075: VAR_TYPE_COLOR_STOP           */ sizeof(ColorStop),
+  /* 0076: VAR_TYPE_COLOR_STOP_LIST      */ 0,
+
   /* 0077: VAR_TYPE_                     */ 0,
   /* 0078: VAR_TYPE_                     */ 0,
   /* 0079: VAR_TYPE_                     */ 0
@@ -255,13 +267,7 @@ _CreateNull:
       goto _CreateSimple;
 
     case VAR_TYPE_POLYGONF:
-      // TODO: Var.
-      return;
-
     case VAR_TYPE_POLYGOND:
-      // TODO: Var.
-      return;
-
     case VAR_TYPE_PATHF:
     case VAR_TYPE_PATHD:
     case VAR_TYPE_REGION:
@@ -272,8 +278,18 @@ _CreateNull:
     case VAR_TYPE_TRANSFORMD:
       goto _CreateSimple;
 
+    case VAR_TYPE_MATRIXF:
+    case VAR_TYPE_MATRIXD:
+      self->_d = reinterpret_cast<const VarData*>(vData)->addRef();
+      return;
+
     case VAR_TYPE_COLOR:
+    case VAR_TYPE_COLOR_STOP:
       goto _CreateSimple;
+
+    case VAR_TYPE_COLOR_STOP_LIST:
+      self->_d = reinterpret_cast<const VarData*>(vData)->addRef();
+      return;
 
     case VAR_TYPE_TEXTURE:
     case VAR_TYPE_GRADIENTF:
@@ -281,9 +297,6 @@ _CreateNull:
     case VAR_TYPE_PATTERN:
       // TODO: Var
       return;
-
-    case VAR_TYPE_COLOR_STOP:
-      goto _CreateSimple;
 
     case VAR_TYPE_IMAGE:
     case VAR_TYPE_IMAGE_PALETTE:
@@ -1175,8 +1188,344 @@ static err_t FOG_CDECL Var_setType(Var* self, uint32_t vType, const void* vData)
 // [Fog::Var - Eq]
 // ============================================================================
 
+static FOG_INLINE int _sign(int32_t value)
+{
+  if (value > 0) return 1;
+  if (value < 0) return -1;
+
+  return 0;
+}
+
+static FOG_INLINE int _sign(int64_t value)
+{
+  if (value > 0) return 1;
+  if (value < 0) return -1;
+
+  return 0;
+}
+
+static FOG_INLINE int _sign(float value)
+{
+  if (value == Math::getNInfF())
+    return 101;
+
+  if (value == Math::getPInfF())
+    return 102;
+
+  if (Math::isNaN(value))
+    return 103;
+
+  if (value > 0.0f) return 1;
+  if (value < 0.0f) return -1;
+
+  return 1;
+}
+
+static FOG_INLINE int _sign(double value)
+{
+  if (value == Math::getNInfD())
+    return 101;
+
+  if (value == Math::getPInfD())
+    return 102;
+
+  if (Math::isNaN(value))
+    return 103;
+
+  if (value > 0.0f) return 1;
+  if (value < 0.0f) return -1;
+
+  return 0;
+}
+
+static FOG_INLINE int Var_getSign(const VarData* d, uint32_t vType)
+{
+  FOG_ASSERT(vType <= _VAR_TYPE_NUMBER_END);
+
+  switch (vType)
+  {
+    case VAR_TYPE_NULL:
+      return 100;
+    
+    case VAR_TYPE_BOOL:
+      return VAR_SIMPLE_C(d, bool);
+    
+    case VAR_TYPE_CHAR:
+      return VAR_SIMPLE_C(d, CharW).getInt() != 0;
+    
+    case VAR_TYPE_INT32:
+      return _sign(VAR_SIMPLE_C(d, int32_t));
+    
+    case VAR_TYPE_UINT32:
+      return VAR_SIMPLE_C(d, uint32_t) != 0;
+    
+    case VAR_TYPE_INT64:
+      return _sign(VAR_SIMPLE_C(d, int64_t));
+    
+    case VAR_TYPE_UINT64:
+      return VAR_SIMPLE_C(d, uint64_t) != 0;
+    
+    case VAR_TYPE_FLOAT:
+      return _sign(VAR_SIMPLE_C(d, float));
+    
+    case VAR_TYPE_DOUBLE:
+      return _sign(VAR_SIMPLE_C(d, double));
+
+    default:
+      FOG_ASSERT_NOT_REACHED();
+  }
+}
+
 static bool FOG_CDECL Var_eq(const Var* a, const Var* b)
 {
+  VarData* a_d = a->_d;
+  VarData* b_d = b->_d;
+
+  if (a_d == b_d)
+    return true;
+
+  uint32_t aType = a_d->vType & VAR_TYPE_MASK;
+  uint32_t bType = b_d->vType & VAR_TYPE_MASK;
+
+  // Both types are equal. In such case we use the equality method implemented 
+  // by the type. There is of course room for some optimizations. For example
+  // we can create a table where we store size of types which can be checked 
+  // for equality using binary compare - MemOps::eq(), but it could be more
+  // complicated than the current approach, mainly in cases that equality
+  // method is redesigned in some class.
+  if (aType == bType)
+  {
+    switch (aType)
+    {
+      case VAR_TYPE_NULL:
+        return true;
+
+      case VAR_TYPE_BOOL:
+        return VAR_SIMPLE_C(a_d, bool) == VAR_SIMPLE_C(b_d, bool);
+
+      case VAR_TYPE_CHAR:
+        return VAR_SIMPLE_C(a_d, CharW) == VAR_SIMPLE_C(b_d, CharW);
+
+      case VAR_TYPE_INT32:
+      case VAR_TYPE_UINT32:
+      case VAR_TYPE_FLOAT:
+        return VAR_SIMPLE_C(a_d, uint32_t) == VAR_SIMPLE_C(b_d, uint32_t);
+
+      case VAR_TYPE_INT64:
+      case VAR_TYPE_UINT64:
+      case VAR_TYPE_DOUBLE:
+        return VAR_SIMPLE_C(a_d, uint64_t) == VAR_SIMPLE_C(b_d, uint64_t);
+
+      case VAR_TYPE_STRINGA:
+        return *reinterpret_cast<const StringA*>(a) == *reinterpret_cast<const StringA*>(b);
+      case VAR_TYPE_STRINGW:
+        return *reinterpret_cast<const StringW*>(a) == *reinterpret_cast<const StringW*>(b);
+
+      case VAR_TYPE_LIST_STRINGA:
+        return *reinterpret_cast<const List<StringA>*>(a) == *reinterpret_cast<const List<StringA>*>(b);
+      case VAR_TYPE_LIST_STRINGW:
+        return *reinterpret_cast<const List<StringW>*>(a) == *reinterpret_cast<const List<StringW>*>(b);
+      case VAR_TYPE_LIST_VAR:
+        return *reinterpret_cast<const List<Var    >*>(a) == *reinterpret_cast<const List<Var    >*>(b);
+
+      case VAR_TYPE_HASH_STRINGA_STRINGA:
+        return *reinterpret_cast<const Hash<StringA, StringA>*>(a) == *reinterpret_cast<const Hash<StringA, StringA>*>(b);
+      case VAR_TYPE_HASH_STRINGA_VAR:
+        return *reinterpret_cast<const Hash<StringA, Var    >*>(a) == *reinterpret_cast<const Hash<StringA, Var    >*>(b);
+
+      case VAR_TYPE_HASH_STRINGW_STRINGW:
+        return *reinterpret_cast<const Hash<StringW, StringW>*>(a) == *reinterpret_cast<const Hash<StringW, StringW>*>(b);
+      case VAR_TYPE_HASH_STRINGW_VAR:
+        return *reinterpret_cast<const Hash<StringW, Var    >*>(a) == *reinterpret_cast<const Hash<StringW, Var    >*>(b);
+
+      case VAR_TYPE_REGEXPA:
+        //return *reinterpret_cast<const RegExpA*>(a) == *reinterpret_cast<const RegExpA*>(b);
+        // TODO:
+        return false;
+      case VAR_TYPE_REGEXPW:
+        //return *reinterpret_cast<const RegExpW*>(a) == *reinterpret_cast<const RegExpW*>(b);
+        // TODO:
+        return false;
+
+      case VAR_TYPE_LOCALE:
+        //return *reinterpret_cast<const Locale*>(a) == *reinterpret_cast<const Locale*>(b);
+        // TODO:
+        return false;
+
+      case VAR_TYPE_DATE:
+        return VAR_SIMPLE_C(a_d, Date) == VAR_SIMPLE_C(b_d, Date);
+      case VAR_TYPE_TIME:
+        return VAR_SIMPLE_C(a_d, Time) == VAR_SIMPLE_C(b_d, Time);
+
+      case VAR_TYPE_POINTI:
+        return VAR_SIMPLE_C(a_d, PointI) == VAR_SIMPLE_C(b_d, PointI);
+      case VAR_TYPE_POINTF:
+        return VAR_SIMPLE_C(a_d, PointF) == VAR_SIMPLE_C(b_d, PointF);
+      case VAR_TYPE_POINTD:
+        return VAR_SIMPLE_C(a_d, PointD) == VAR_SIMPLE_C(b_d, PointD);
+
+      case VAR_TYPE_SIZEI:
+        return VAR_SIMPLE_C(a_d, SizeI) == VAR_SIMPLE_C(b_d, SizeI);
+      case VAR_TYPE_SIZEF:
+        return VAR_SIMPLE_C(a_d, SizeF) == VAR_SIMPLE_C(b_d, SizeF);
+      case VAR_TYPE_SIZED:
+        return VAR_SIMPLE_C(a_d, SizeD) == VAR_SIMPLE_C(b_d, SizeD);
+
+      case VAR_TYPE_BOXI:
+        return VAR_SIMPLE_C(a_d, BoxI) == VAR_SIMPLE_C(b_d, BoxI);
+      case VAR_TYPE_BOXF:
+        return VAR_SIMPLE_C(a_d, BoxF) == VAR_SIMPLE_C(b_d, BoxF);
+      case VAR_TYPE_BOXD:
+        return VAR_SIMPLE_C(a_d, BoxD) == VAR_SIMPLE_C(b_d, BoxD);
+      
+      case VAR_TYPE_RECTI:
+        return VAR_SIMPLE_C(a_d, RectI) == VAR_SIMPLE_C(b_d, RectI);
+      case VAR_TYPE_RECTF:
+        return VAR_SIMPLE_C(a_d, RectF) == VAR_SIMPLE_C(b_d, RectF);
+      case VAR_TYPE_RECTD:
+        return VAR_SIMPLE_C(a_d, RectD) == VAR_SIMPLE_C(b_d, RectD);
+      
+      case VAR_TYPE_LINEF:
+        return VAR_SIMPLE_C(a_d, LineF) == VAR_SIMPLE_C(b_d, LineF);
+      case VAR_TYPE_LINED:
+        return VAR_SIMPLE_C(a_d, LineD) == VAR_SIMPLE_C(b_d, LineD);
+      
+      case VAR_TYPE_QBEZIERF:
+        return VAR_SIMPLE_C(a_d, QBezierF) == VAR_SIMPLE_C(b_d, QBezierF);
+      case VAR_TYPE_QBEZIERD:
+        return VAR_SIMPLE_C(a_d, QBezierD) == VAR_SIMPLE_C(b_d, QBezierD);
+      
+      case VAR_TYPE_CBEZIERF:
+        return VAR_SIMPLE_C(a_d, CBezierF) == VAR_SIMPLE_C(b_d, CBezierF);
+      case VAR_TYPE_CBEZIERD:
+        return VAR_SIMPLE_C(a_d, CBezierD) == VAR_SIMPLE_C(b_d, CBezierD);
+      
+      case VAR_TYPE_TRIANGLEF:
+        return VAR_SIMPLE_C(a_d, TriangleF) == VAR_SIMPLE_C(b_d, TriangleF);
+      case VAR_TYPE_TRIANGLED:
+        return VAR_SIMPLE_C(a_d, TriangleD) == VAR_SIMPLE_C(b_d, TriangleD);
+      
+      case VAR_TYPE_ROUNDF:
+        return VAR_SIMPLE_C(a_d, RoundF) == VAR_SIMPLE_C(b_d, RoundF);
+      case VAR_TYPE_ROUNDD:
+        return VAR_SIMPLE_C(a_d, RoundD) == VAR_SIMPLE_C(b_d, RoundD);
+      
+      case VAR_TYPE_CIRCLEF:
+        return VAR_SIMPLE_C(a_d, CircleF) == VAR_SIMPLE_C(b_d, CircleF);
+      case VAR_TYPE_CIRCLED:
+        return VAR_SIMPLE_C(a_d, CircleD) == VAR_SIMPLE_C(b_d, CircleD);
+      
+      case VAR_TYPE_ELLIPSEF:
+        return VAR_SIMPLE_C(a_d, EllipseF) == VAR_SIMPLE_C(b_d, EllipseF);
+      case VAR_TYPE_ELLIPSED:
+        return VAR_SIMPLE_C(a_d, EllipseD) == VAR_SIMPLE_C(b_d, EllipseD);
+      
+      case VAR_TYPE_ARCF:
+        return VAR_SIMPLE_C(a_d, ArcF) == VAR_SIMPLE_C(b_d, ArcF);
+      case VAR_TYPE_ARCD:
+        return VAR_SIMPLE_C(a_d, ArcD) == VAR_SIMPLE_C(b_d, ArcD);
+      
+      case VAR_TYPE_CHORDF:
+        return VAR_SIMPLE_C(a_d, ChordF) == VAR_SIMPLE_C(b_d, ChordF);
+      case VAR_TYPE_CHORDD:
+        return VAR_SIMPLE_C(a_d, ChordD) == VAR_SIMPLE_C(b_d, ChordD);
+
+      case VAR_TYPE_PIEF:
+        return VAR_SIMPLE_C(a_d, PieF) == VAR_SIMPLE_C(b_d, PieF);
+      case VAR_TYPE_PIED:
+        return VAR_SIMPLE_C(a_d, PieD) == VAR_SIMPLE_C(b_d, PieD);
+
+      case VAR_TYPE_POLYGONF:
+        // TODO: Var.
+        return false;
+      case VAR_TYPE_POLYGOND:
+        // TODO: Var.
+        return false;
+
+      case VAR_TYPE_PATHF:
+        return *reinterpret_cast<const PathF*>(a) == *reinterpret_cast<const PathF*>(b);
+      case VAR_TYPE_PATHD:
+        return *reinterpret_cast<const PathD*>(a) == *reinterpret_cast<const PathD*>(b);
+
+      case VAR_TYPE_REGION:
+        return *reinterpret_cast<const Region*>(a) == *reinterpret_cast<const Region*>(b);
+
+      case VAR_TYPE_TRANSFORMF:
+        return *reinterpret_cast<const TransformF*>(a) == *reinterpret_cast<const TransformF*>(b);
+      case VAR_TYPE_TRANSFORMD:
+        return *reinterpret_cast<const TransformD*>(a) == *reinterpret_cast<const TransformD*>(b);
+
+      case VAR_TYPE_MATRIXF:
+        return *reinterpret_cast<const MatrixF*>(a) == *reinterpret_cast<const MatrixF*>(b);
+      case VAR_TYPE_MATRIXD:
+        return *reinterpret_cast<const MatrixD*>(a) == *reinterpret_cast<const MatrixD*>(b);
+
+      case VAR_TYPE_COLOR:
+        return *reinterpret_cast<const Color*>(a) == *reinterpret_cast<const Color*>(b);
+      case VAR_TYPE_COLOR_STOP:
+        return *reinterpret_cast<const ColorStop*>(a) == *reinterpret_cast<const ColorStop*>(b);
+      case VAR_TYPE_COLOR_STOP_LIST:
+        return *reinterpret_cast<const ColorStopList*>(a) == *reinterpret_cast<const ColorStopList*>(b);
+
+      case VAR_TYPE_TEXTURE:
+      case VAR_TYPE_GRADIENTF:
+      case VAR_TYPE_GRADIENTD:
+      case VAR_TYPE_PATTERN:
+        // TODO: Var
+        return false;
+
+      case VAR_TYPE_IMAGE:
+        //return *reinterpret_cast<const Image*>(a) == *reinterpret_cast<const Image*>(b);
+        // TODO:
+        return false;
+
+      case VAR_TYPE_IMAGE_PALETTE:
+        // TODO: Var
+        return false;
+
+      case VAR_TYPE_FONT:
+        // TODO: Var
+        return false;
+
+      default:
+        FOG_ASSERT_NOT_REACHED();
+    }
+  }
+
+  // Both are numbers. If the type of 'a' is different to the type of 'b' then
+  // it doesn't mean that variables aren't equal. It's needed to compare the
+  // numbers, not only types, because (int32_t)5 == (uint64_t)5. We first 
+  // compare signs and then values.
+  if (aType <= _VAR_TYPE_NUMBER_END &&
+      bType <= _VAR_TYPE_NUMBER_END)
+  {
+    int aSign = Var_getSign(a_d, aType);
+    int bSign = Var_getSign(b_d, bType);
+
+    if (aSign != bSign)
+      return false;
+
+    // If both numbers are special (Infinity, NaN, Null) then they are always 
+    // equal.
+    if (aSign > 1)
+      return true;
+
+    // Different types, but the same number - zero.
+    if (aSign == 0)
+      return true;
+
+    // Value is negative.
+    if (aSign < 0)
+    {
+      // TODO:
+    }
+    // Value is positive.
+    else
+    {
+      // TODO:
+    }
+  }
+
   // TODO:
   return false;
 }
@@ -1198,7 +1547,8 @@ static int FOG_CDECL Var_compare(const Var* a, const Var* b)
 static VarData* FOG_CDECL Var_dCreate(size_t dataSize)
 {
   size_t memSize = sizeof(VarData) + dataSize;
-  if (memSize < sizeof(VarSimpleData)) memSize = sizeof(VarSimpleData);
+  if (memSize < sizeof(VarSimpleData))
+    memSize = sizeof(VarSimpleData);
 
   VarData* d = reinterpret_cast<VarData*>(MemMgr::alloc(memSize));
   if (FOG_IS_NULL(d))
@@ -1217,9 +1567,7 @@ static VarData* FOG_CDECL Var_dAddRef(VarData* d)
 
   // NULL type has no reference.
   if (vType == VAR_TYPE_NULL)
-  {
     return d;
-  }
 
   if (vType != VAR_TYPE_OBJECT_REF)
   {
@@ -1369,8 +1717,21 @@ static void FOG_CDECL Var_dRelease(VarData* d)
     case VAR_TYPE_TRANSFORMD:
       goto _ReleaseSimple;
 
+    case VAR_TYPE_MATRIXF:
+      reinterpret_cast<MatrixDataF*>(d)->release();
+      return;
+
+    case VAR_TYPE_MATRIXD:
+      reinterpret_cast<MatrixDataD*>(d)->release();
+      return;
+
     case VAR_TYPE_COLOR:
+    case VAR_TYPE_COLOR_STOP:
       goto _ReleaseSimple;
+
+    case VAR_TYPE_COLOR_STOP_LIST:
+      reinterpret_cast<ColorStopListData*>(d)->release();
+      return;
 
     case VAR_TYPE_TEXTURE:
     case VAR_TYPE_GRADIENTF:
@@ -1379,11 +1740,14 @@ static void FOG_CDECL Var_dRelease(VarData* d)
       // TODO: Var
       return;
 
-    case VAR_TYPE_COLOR_STOP:
-      goto _ReleaseSimple;
-
     case VAR_TYPE_IMAGE:
+      // TODO: Var
+      return;
+
     case VAR_TYPE_IMAGE_PALETTE:
+      // TODO: Var
+      return;
+
     case VAR_TYPE_FONT:
       // TODO: Var
       return;
@@ -1393,7 +1757,11 @@ static void FOG_CDECL Var_dRelease(VarData* d)
   }
 
 _ReleaseSimple:
-  // TODO:
+  if (AtomicCore<size_t>::deref(&d->unknown.reference))
+  {
+    if ((d->vType & VAR_FLAG_STATIC) == 0)
+      MemMgr::free(d);
+  }
   return;
 }
 

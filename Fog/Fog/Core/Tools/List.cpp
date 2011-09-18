@@ -223,6 +223,46 @@ _Match:
 }
 
 // ===========================================================================
+// [Fog::List - Untyped - BinrayEq / CustomEq]
+// ===========================================================================
+
+static bool FOG_CDECL List_Untyped_binaryEq(const ListUntyped* a, const ListUntyped* b, size_t szItemT)
+{
+  ListUntypedData* a_d = a->_d;
+  ListUntypedData* b_d = b->_d;
+
+  size_t length = a_d->length;
+  if (length != b_d->length)
+    return false;
+
+  return MemOps::eq(a_d->data, b_d->data, length * szItemT);
+}
+
+static bool FOG_CDECL List_Untyped_customEq(const ListUntyped* a, const ListUntyped* b, size_t szItemT, EqFunc eqFunc)
+{
+  ListUntypedData* a_d = a->_d;
+  ListUntypedData* b_d = b->_d;
+
+  size_t length = a_d->length;
+  if (length != b_d->length)
+    return false;
+
+  const uint8_t* aData = reinterpret_cast<const uint8_t*>(a_d->data);
+  const uint8_t* bData = reinterpret_cast<const uint8_t*>(b_d->data);
+
+  for (size_t i = length; i; i--)
+  {
+    if (!eqFunc(aData, bData))
+      return false;
+
+    aData += szItemT;
+    bData += szItemT;
+  }
+
+  return true;
+}
+
+// ===========================================================================
 // [Fog::List - Untyped - Data]
 // ===========================================================================
 
@@ -1187,7 +1227,7 @@ static err_t FOG_CDECL List_Simple_swapItems(ListUntyped* self, size_t szItemT, 
 // [Fog::List - Simple - Copy]
 // ===========================================================================
 
-static void List_Simple_copy(ListUntyped* self, const ListUntyped* other)
+static void FOG_CDECL List_Simple_copy(ListUntyped* self, const ListUntyped* other)
 {
   List_Simple_dRelease(atomicPtrXchg(&self->_d, other->_d->addRef()));
 }
@@ -3022,6 +3062,9 @@ FOG_NO_EXPORT void List_init(void)
   _api.list.untyped.lastIndexOf_4B = List_indexOf_4B<-1>;
   _api.list.untyped.lastIndexOf_8B = List_indexOf_8B<-1>;
   _api.list.untyped.lastIndexOf_16B = List_indexOf_16B<-1>;
+
+  _api.list.untyped.binaryEq = List_Untyped_binaryEq;
+  _api.list.untyped.customEq = List_Untyped_customEq;
 
   _api.list.untyped.dCreate = List_dCreate;
 

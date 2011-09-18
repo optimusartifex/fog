@@ -130,7 +130,7 @@ struct FOG_NO_EXPORT ColorStop
 // ============================================================================
 
 FOG_FUZZY_DECLARE_F(Fog::ColorStop,
-  Math::isFuzzyEq(a._offset, b._offset, epsilon) &&
+  Fuzzy<float>::eq(a._offset, b._offset, epsilon) &&
   Fuzzy<Color>::eq(a._color, b._color, epsilon))
 
 // [Guard]

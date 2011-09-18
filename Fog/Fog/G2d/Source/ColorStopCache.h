@@ -26,23 +26,6 @@ namespace Fog {
 struct FOG_NO_EXPORT ColorStopCache
 {
   // --------------------------------------------------------------------------
-  // [Accessors]
-  // --------------------------------------------------------------------------
-
-  //! @brief Get the format of color-stop cache.
-  FOG_INLINE uint32_t getFormat() const { return format; }
-  //! @brief Get the count of elements in the data[] array.
-  FOG_INLINE uint32_t getLength() const { return length; }
-
-  //! @brief Get the data array.
-  FOG_INLINE uint8_t* getData()
-  { return reinterpret_cast<uint8_t*>(this) + sizeof(ColorStopCache); }
-
-  //! @overload.
-  FOG_INLINE const uint8_t* getData() const
-  { return reinterpret_cast<const uint8_t*>(this) + sizeof(ColorStopCache); }
-
-  // --------------------------------------------------------------------------
   // [AddRef / Release]
   // --------------------------------------------------------------------------
 
@@ -59,6 +42,27 @@ struct FOG_NO_EXPORT ColorStopCache
   }
 
   // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  //! @brief Get the format of color-stop cache.
+  FOG_INLINE uint32_t getFormat() const { return format; }
+  //! @brief Get the count of elements in the data[] array.
+  FOG_INLINE uint32_t getLength() const { return length; }
+
+  //! @brief Get the data array.
+  FOG_INLINE uint8_t* getData()
+  {
+    return reinterpret_cast<uint8_t*>(this) + sizeof(ColorStopCache);
+  }
+
+  //! @overload.
+  FOG_INLINE const uint8_t* getData() const
+  {
+    return reinterpret_cast<const uint8_t*>(this) + sizeof(ColorStopCache);
+  }
+
+  // --------------------------------------------------------------------------
   // [Statics]
   // --------------------------------------------------------------------------
 
@@ -66,7 +70,9 @@ struct FOG_NO_EXPORT ColorStopCache
   {
     ColorStopCache* cache = reinterpret_cast<ColorStopCache*>(
       MemMgr::alloc(sizeof(ColorStopCache) + (length + 1) * 4));
-    if (FOG_UNLIKELY(cache == NULL)) return NULL;
+
+    if (FOG_IS_NULL(cache))
+      return NULL;
 
     cache->reference.init(1);
     cache->format = format;
@@ -79,7 +85,9 @@ struct FOG_NO_EXPORT ColorStopCache
   {
     ColorStopCache* cache = reinterpret_cast<ColorStopCache*>(
       MemMgr::alloc(sizeof(ColorStopCache) + (length + 1) * 8));
-    if (FOG_UNLIKELY(cache == NULL)) return NULL;
+
+    if (FOG_IS_NULL(cache))
+      return NULL;
 
     cache->reference.init(1);
     cache->format = format;

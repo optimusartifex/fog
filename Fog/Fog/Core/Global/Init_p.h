@@ -135,6 +135,7 @@ FOG_NO_EXPORT void ColorStopList_init(void);
 FOG_NO_EXPORT void Pattern_init(void);
 
 // [Fog/G2d/Tools]
+FOG_NO_EXPORT void Dpi_init(void);
 FOG_NO_EXPORT void Matrix_init(void);
 FOG_NO_EXPORT void Region_init(void);
 FOG_NO_EXPORT void RegionUtil_init(void);

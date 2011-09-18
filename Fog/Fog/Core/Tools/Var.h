@@ -84,6 +84,22 @@ struct FOG_NO_EXPORT VarData
 struct VarSimpleData : public VarData
 {
   // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  template<typename Type>
+  FOG_INLINE const Type* getDataT() const { return reinterpret_cast<const Type*>(data); }
+
+  template<typename Type>
+  FOG_INLINE Type* getDataT() const { return reinterpret_cast<Type*>(data); }
+
+  template<typename Type>
+  FOG_INLINE const Type& getInstanceT() { return *reinterpret_cast<const Type*>(data); }
+
+  template<typename Type>
+  FOG_INLINE Type& getInstanceT() const { return *reinterpret_cast<Type*>(data); }
+
+  // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
@@ -146,40 +162,40 @@ struct FOG_NO_EXPORT Var
   // [Variable Type / Flags]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE uint32_t getVarId() const { return _d->vType & VAR_TYPE_MASK; }
+  FOG_INLINE uint32_t getVarType() const { return _d->vType & VAR_TYPE_MASK; }
   FOG_INLINE uint32_t getVarFlags() const { return _d->vType & VAR_FLAG_MASK; }
 
   FOG_INLINE bool isNull() const { return _d->vType == VAR_TYPE_NULL; }
 
-  FOG_INLINE bool isInteger() const { return Math::isBounded<uint32_t>(getVarId(), _VAR_TYPE_INTEGER_START, _VAR_TYPE_INTEGER_END); }
-  FOG_INLINE bool isReal() const { return Math::isBounded<uint32_t>(getVarId(), VAR_TYPE_FLOAT, VAR_TYPE_DOUBLE); }
-  FOG_INLINE bool isNumber() const { return Math::isBounded<uint32_t>(getVarId(), _VAR_TYPE_NUMBER_START, _VAR_TYPE_NUMBER_END);  }
-  FOG_INLINE bool isString() const { return Math::isBounded<uint32_t>(getVarId(), VAR_TYPE_STRINGA, VAR_TYPE_STRINGW); }
+  FOG_INLINE bool isInteger() const { return Math::isBounded<uint32_t>(getVarType(), _VAR_TYPE_INTEGER_START, _VAR_TYPE_INTEGER_END); }
+  FOG_INLINE bool isReal() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_FLOAT, VAR_TYPE_DOUBLE); }
+  FOG_INLINE bool isNumber() const { return Math::isBounded<uint32_t>(getVarType(), _VAR_TYPE_NUMBER_START, _VAR_TYPE_NUMBER_END);  }
+  FOG_INLINE bool isString() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_STRINGA, VAR_TYPE_STRINGW); }
 
-  FOG_INLINE bool isList() const { return Math::isBounded<uint32_t>(getVarId(), VAR_TYPE_LIST_STRINGA, VAR_TYPE_LIST_VAR); }
-  FOG_INLINE bool isHashA() const { return Math::isBounded<uint32_t>(getVarId(), VAR_TYPE_HASH_STRINGA_STRINGA, VAR_TYPE_HASH_STRINGA_VAR); }
-  FOG_INLINE bool isHashW() const { return Math::isBounded<uint32_t>(getVarId(), VAR_TYPE_HASH_STRINGW_STRINGW, VAR_TYPE_HASH_STRINGW_VAR); }
+  FOG_INLINE bool isList() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_LIST_STRINGA, VAR_TYPE_LIST_VAR); }
+  FOG_INLINE bool isHashA() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_HASH_STRINGA_STRINGA, VAR_TYPE_HASH_STRINGA_VAR); }
+  FOG_INLINE bool isHashW() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_HASH_STRINGW_STRINGW, VAR_TYPE_HASH_STRINGW_VAR); }
 
-  FOG_INLINE bool isGeometry() const { return Math::isBounded<uint32_t>(getVarId(), _VAR_TYPE_GEOMETRY_START, _VAR_TYPE_GEOMETRY_END); }
-  FOG_INLINE bool isPoint() const { return Math::isBounded<uint32_t>(getVarId(), VAR_TYPE_POINTI, VAR_TYPE_POINTD); }
-  FOG_INLINE bool isSize() const { return Math::isBounded<uint32_t>(getVarId(), VAR_TYPE_SIZEI, VAR_TYPE_SIZED); }
-  FOG_INLINE bool isBox() const { return Math::isBounded<uint32_t>(getVarId(), VAR_TYPE_BOXI, VAR_TYPE_BOXD); }
-  FOG_INLINE bool isRect() const { return Math::isBounded<uint32_t>(getVarId(), VAR_TYPE_RECTI, VAR_TYPE_RECTD); }
-  FOG_INLINE bool isLine() const { return Math::isBounded<uint32_t>(getVarId(), VAR_TYPE_LINEF, VAR_TYPE_LINED); }
-  FOG_INLINE bool isQBezier() const { return Math::isBounded<uint32_t>(getVarId(), VAR_TYPE_QBEZIERF, VAR_TYPE_QBEZIERD); }
-  FOG_INLINE bool isCBezier() const { return Math::isBounded<uint32_t>(getVarId(), VAR_TYPE_CBEZIERF, VAR_TYPE_CBEZIERD); }
-  FOG_INLINE bool isTriangle() const { return Math::isBounded<uint32_t>(getVarId(), VAR_TYPE_TRIANGLEF, VAR_TYPE_TRIANGLED); }
-  FOG_INLINE bool isRound() const { return Math::isBounded<uint32_t>(getVarId(), VAR_TYPE_ROUNDF, VAR_TYPE_ROUNDD); }
-  FOG_INLINE bool isCircle() const { return Math::isBounded<uint32_t>(getVarId(), VAR_TYPE_CIRCLEF, VAR_TYPE_CIRCLED); }
-  FOG_INLINE bool isEllipse() const { return Math::isBounded<uint32_t>(getVarId(), VAR_TYPE_ELLIPSEF, VAR_TYPE_ELLIPSED); }
-  FOG_INLINE bool isArc() const { return Math::isBounded<uint32_t>(getVarId(), VAR_TYPE_ARCF, VAR_TYPE_ARCD); }
-  FOG_INLINE bool isChord() const { return Math::isBounded<uint32_t>(getVarId(), VAR_TYPE_CHORDF, VAR_TYPE_CHORDD); }
-  FOG_INLINE bool isPie() const { return Math::isBounded<uint32_t>(getVarId(), VAR_TYPE_PIEF, VAR_TYPE_PIED); }
-  FOG_INLINE bool isPolygon() const { return Math::isBounded<uint32_t>(getVarId(), VAR_TYPE_POLYGONF, VAR_TYPE_POLYGOND); }
-  FOG_INLINE bool isPath() const { return Math::isBounded<uint32_t>(getVarId(), VAR_TYPE_PATHF, VAR_TYPE_PATHD); }
-  FOG_INLINE bool isRegion() const { return getVarId() == VAR_TYPE_REGION; }
+  FOG_INLINE bool isGeometry() const { return Math::isBounded<uint32_t>(getVarType(), _VAR_TYPE_GEOMETRY_START, _VAR_TYPE_GEOMETRY_END); }
+  FOG_INLINE bool isPoint() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_POINTI, VAR_TYPE_POINTD); }
+  FOG_INLINE bool isSize() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_SIZEI, VAR_TYPE_SIZED); }
+  FOG_INLINE bool isBox() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_BOXI, VAR_TYPE_BOXD); }
+  FOG_INLINE bool isRect() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_RECTI, VAR_TYPE_RECTD); }
+  FOG_INLINE bool isLine() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_LINEF, VAR_TYPE_LINED); }
+  FOG_INLINE bool isQBezier() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_QBEZIERF, VAR_TYPE_QBEZIERD); }
+  FOG_INLINE bool isCBezier() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_CBEZIERF, VAR_TYPE_CBEZIERD); }
+  FOG_INLINE bool isTriangle() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_TRIANGLEF, VAR_TYPE_TRIANGLED); }
+  FOG_INLINE bool isRound() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_ROUNDF, VAR_TYPE_ROUNDD); }
+  FOG_INLINE bool isCircle() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_CIRCLEF, VAR_TYPE_CIRCLED); }
+  FOG_INLINE bool isEllipse() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_ELLIPSEF, VAR_TYPE_ELLIPSED); }
+  FOG_INLINE bool isArc() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_ARCF, VAR_TYPE_ARCD); }
+  FOG_INLINE bool isChord() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_CHORDF, VAR_TYPE_CHORDD); }
+  FOG_INLINE bool isPie() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_PIEF, VAR_TYPE_PIED); }
+  FOG_INLINE bool isPolygon() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_POLYGONF, VAR_TYPE_POLYGOND); }
+  FOG_INLINE bool isPath() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_PATHF, VAR_TYPE_PATHD); }
+  FOG_INLINE bool isRegion() const { return getVarType() == VAR_TYPE_REGION; }
 
-  FOG_INLINE bool isTransform() const { return Math::isBounded<uint32_t>(getVarId(), VAR_TYPE_TRANSFORMF, VAR_TYPE_TRANSFORMD); }
+  FOG_INLINE bool isTransform() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_TRANSFORMF, VAR_TYPE_TRANSFORMD); }
 
   // --------------------------------------------------------------------------
   // [Accessors - Int]

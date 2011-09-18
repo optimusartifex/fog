@@ -19,6 +19,13 @@
 namespace Fog {
 
 // ============================================================================
+// [Fog::ColorStopList - Global]
+// ============================================================================
+
+static Static<ColorStopListData> ColorStopList_dEmpty;
+static Static<ColorStopList> ColorStopList_oEmpty;
+
+// ============================================================================
 // [Fog::ColorStopList - Helpers]
 // ============================================================================
 
@@ -72,324 +79,372 @@ static void ColorStopList_sort(ColorStop* stops, size_t length)
 // [Fog::ColorStopList - Construction / Destruction]
 // ============================================================================
 
-ColorStopList::ColorStopList() :
-  _d(_dnull->addRef())
+static void FOG_CDECL ColorStopList_ctor(ColorStopList* self)
 {
+  self->_d = ColorStopList_dEmpty->addRef();
 }
 
-ColorStopList::ColorStopList(const ColorStopList& other) :
-  _d(other._d->addRef())
+static void FOG_CDECL ColorStopList_ctorCopy(ColorStopList* self, const ColorStopList* other)
 {
+  self->_d = other->_d->addRef();
 }
 
-ColorStopList::~ColorStopList()
+static void FOG_CDECL ColorStopList_dtor(ColorStopList* self)
 {
-  _d->release();
+  self->_d->release();
 }
 
 // ============================================================================
-// [Fog::ColorStopList - Data]
+// [Fog::ColorStopList - Container]
 // ============================================================================
 
-err_t ColorStopList::reserve(size_t n)
+static err_t FOG_CDECL ColorStopList_reserve(ColorStopList* self, size_t n)
 {
-  if (isDetached() && n > _d->capacity) return ERR_OK;
+  ColorStopListData* d = self->_d;
 
-  size_t length = _d->length;
+  if (d->reference.get() == 1 && d->capacity >= n)
+    return ERR_OK;
+
+  size_t length = d->length;
   if (n < length) n = length;
 
-  ColorStopListData* newd = _dalloc(n);
-  if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
+  ColorStopListData* newd = _api.colorstoplist.dCreate(n);
+  if (FOG_IS_NULL(newd))
+    return ERR_RT_OUT_OF_MEMORY;
 
   newd->length = length;
-  memcpy(newd->data, _d->data, length * sizeof(ColorStop));
+  MemOps::copy(newd->data, d->data, length * sizeof(ColorStop));
 
-  ColorStopListData* oldd = atomicPtrXchg(&_d, newd);
-  if (oldd->reference.deref())
+  d = atomicPtrXchg(&self->_d, newd);
+  if (d->reference.deref())
   {
-    newd->stopCachePrgb32 = oldd->stopCachePrgb32;
-    MemMgr::free(oldd);
+    newd->stopCachePrgb32 = d->stopCachePrgb32;
+    MemMgr::free(d);
   }
 
-  _d = newd;
   return ERR_OK;
 }
 
-void ColorStopList::squeeze()
+static void FOG_CDECL ColorStopList_squeeze(ColorStopList* self)
 {
-  size_t length = _d->length;
-  if (length == _d->capacity) return;
+  ColorStopListData* d = self->_d;
 
-  ColorStopListData* newd = _dalloc(length);
-  if (FOG_UNLIKELY(newd == NULL)) return;
+  size_t length = d->length;
+  if (length == d->capacity) return;
+
+  ColorStopListData* newd = _api.colorstoplist.dCreate(length);
+  if (FOG_IS_NULL(newd))
+    return;
 
   newd->length = length;
-  memcpy(newd->data, _d->data, length * sizeof(ColorStop));
+  memcpy(newd->data, d->data, length * sizeof(ColorStop));
 
-  ColorStopListData* oldd = atomicPtrXchg(&_d, newd);
-  if (oldd->reference.deref())
+  d = atomicPtrXchg(&self->_d, newd);
+  if (d->reference.deref())
   {
-    newd->stopCachePrgb32 = oldd->stopCachePrgb32;
-    MemMgr::free(oldd);
+    newd->stopCachePrgb32 = d->stopCachePrgb32;
+    MemMgr::free(d);
   }
-
-  _d = newd;
-}
-
-// ============================================================================
-// [Fog::ColorStopList - Clear / Reset]
-// ============================================================================
-
-void ColorStopList::clear()
-{
-  if (!isDetached())
-  {
-    atomicPtrXchg(&_d, _dnull->addRef())->release();
-  }
-  else
-  {
-    _d->length = 0;
-
-    ColorStopCache* oldc = atomicPtrXchg(&_d->stopCachePrgb32, (ColorStopCache*)NULL);
-    if (oldc) ColorStopCache::destroy(oldc);
-  }
-}
-
-void ColorStopList::reset()
-{
-  atomicPtrXchg(&_d, _dnull->addRef())->release();
-}
-
-// ============================================================================
-// [Fog::ColorStopList - IsOpaque]
-// ============================================================================
-
-bool ColorStopList::isOpaque() const
-{
-  size_t i, length = getLength();
-  const ColorStop* stops = getList();
-
-  for (i = 0; i < length; i++)
-  {
-    if (!stops[i].getColor().isOpaque()) return false;
-  }
-
-  return true;
-}
-
-bool ColorStopList::isOpaque_ARGB32() const
-{
-  size_t i, length = getLength();
-  const ColorStop* stops = getList();
-
-  for (i = 0; i < length; i++)
-  {
-    if (!stops[i].getColor().isOpaque_ARGB32()) return false;
-  }
-
-  return true;
 }
 
 // ============================================================================
 // [Fog::ColorStopList - Accessors]
 // ============================================================================
 
-err_t ColorStopList::setList(const ColorStopList& other)
+static err_t FOG_CDECL ColorStopList_setData(ColorStopList* self, const ColorStop* stops, size_t length)
 {
-  atomicPtrXchg(&_d, other._d->addRef())->release();
-  return ERR_OK;
-}
+  ColorStopListData* d = self->_d;
 
-err_t ColorStopList::setList(const List<ColorStop>& stops)
-{
-  return setList(stops.getData(), stops.getLength());
-}
-
-err_t ColorStopList::setList(const ColorStop* stops, size_t length)
-{
-  if (FOG_UNLIKELY(length == 0)) { clear(); return ERR_OK; }
+  if (FOG_UNLIKELY(length == 0))
+  {
+    self->clear();
+    return ERR_OK;
+  }
 
   uint validity = ColorStopList_validate(stops, length);
-  if (validity & COLOR_STOP_LIST_INVALID_OFFSET) return ERR_RT_INVALID_ARGUMENT;
+  if (validity & COLOR_STOP_LIST_INVALID_OFFSET)
+    return ERR_RT_INVALID_ARGUMENT;
 
-  // Detach or Resize.
-  if (!isDetached() || length < _d->capacity)
+  // Detach or resize.
+  if (d->reference.get() > 1 || d->capacity < length)
   {
-    ColorStopListData* newd = _dalloc(length);
-    if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
+    ColorStopListData* newd = _api.colorstoplist.dCreate(length);
 
-    atomicPtrXchg(&_d, newd)->release();
+    if (FOG_IS_NULL(newd))
+      return ERR_RT_OUT_OF_MEMORY;
+
+    atomicPtrXchg(&self->_d, newd)->release();
+    d = newd;
   }
 
-  memcpy(_d->data, stops, length * sizeof(ColorStop));
-  _d->length = length;
+  d->length = length;
+  MemOps::copy(d->data, stops, length * sizeof(ColorStop));
 
   if (validity & COLOR_STOP_LIST_NOT_SORTED)
-  {
-    ColorStopList_sort(_d->data, length);
-  }
+    ColorStopList_sort(d->data, length);
 
   return ERR_OK;
 }
 
 // ============================================================================
-// [Fog::ColorStopList - Manipulation]
+// [Fog::ColorStopList - IsOpaque]
 // ============================================================================
 
-err_t ColorStopList::add(const ColorStop& stop)
+static bool FOG_CDECL ColorStopList_isOpaque(const ColorStopList* self)
 {
-  if (!stop.isValid()) return ERR_RT_INVALID_ARGUMENT;
+  ColorStopListData* d = self->_d;
 
-  size_t i, length = _d->length;
-  const ColorStop* stops = _d->data;
+  size_t i, length = d->length;
+  const ColorStop* stops = d->data;
 
   for (i = 0; i < length; i++)
   {
-    if (stops[i].getOffset() > stop.getOffset()) break;
+    if (!stops[i].getColor().isOpaque())
+      return false;
+  }
+
+  return true;
+}
+
+static bool FOG_CDECL ColorStopList_isOpaqueARGB32(const ColorStopList* self)
+{
+  ColorStopListData* d = self->_d;
+
+  size_t i, length = d->length;
+  const ColorStop* stops = d->data;
+
+  for (i = 0; i < length; i++)
+  {
+    if (!stops[i].getColor().isOpaque_ARGB32())
+      return false;
+  }
+
+  return true;
+}
+
+// ============================================================================
+// [Fog::ColorStopList - Clear / Reset]
+// ============================================================================
+
+static void FOG_CDECL ColorStopList_clear(ColorStopList* self)
+{
+  ColorStopListData* d = self->_d;
+
+  if (d->reference.get() > 1)
+  {
+    atomicPtrXchg(&self->_d, ColorStopList_dEmpty->addRef())->release();
+  }
+  else
+  {
+    d->length = 0;
+
+    ColorStopCache* cache = atomicPtrXchg(&d->stopCachePrgb32, (ColorStopCache*)NULL);
+    if (cache)
+      ColorStopCache::destroy(cache);
+  }
+}
+
+static void FOG_CDECL ColorStopList_reset(ColorStopList* self)
+{
+  atomicPtrXchg(&self->_d, ColorStopList_dEmpty->addRef())->release();
+}
+
+// ============================================================================
+// [Fog::ColorStopList - Methods]
+// ============================================================================
+
+static err_t FOG_CDECL ColorStopList_addStop(ColorStopList* self, const ColorStop* stop)
+{
+  if (!stop->isValid())
+    return ERR_RT_INVALID_ARGUMENT;
+
+  ColorStopListData* d = self->_d;
+
+  size_t i, length = d->length;
+  const ColorStop* stops = d->data;
+
+  for (i = 0; i < length; i++)
+  {
+    if (stops[i].getOffset() > stop->getOffset())
+      break;
   }
 
   // Detach or Resize.
-  if (!isDetached() || length == _d->capacity)
+  if (d->reference.get() > 1 || length == d->capacity)
   {
-    ColorStopListData* newd = _dalloc(CollectionUtil::getGrowCapacity(
+    ColorStopListData* newd = _api.colorstoplist.dCreate(CollectionUtil::getGrowCapacity(
       sizeof(ColorStopListData) - sizeof(ColorStop), sizeof(ColorStop), length, length + 1));
-    if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
-    memcpy(newd->data, _d->data, i * sizeof(ColorStop));
-    memcpy(newd->data + i + 1, _d->data + i, (length - i) * sizeof(ColorStop));
+    if (FOG_IS_NULL(newd))
+      return ERR_RT_OUT_OF_MEMORY;
+
+    MemOps::copy(newd->data, d->data, i * sizeof(ColorStop));
+    MemOps::copy(newd->data + i + 1, d->data + i, (length - i) * sizeof(ColorStop));
     newd->length = length;
 
-    atomicPtrXchg(&_d, newd)->release();
+    atomicPtrXchg(&self->_d, newd)->release();
+    d = newd;
   }
   // Insert.
   else
   {
-    _d->destroyCache();
-    memmove(_d->data + i, _d->data + i + 1, (length - i) * sizeof(ColorStop));
+    d->destroyCache();
+    MemOps::move(d->data + i, d->data + i + 1, (length - i) * sizeof(ColorStop));
   }
 
-  _d->data[i] = stop;
-  _d->length++;
+  d->data[i] = *stop;
+  d->length++;
   return ERR_OK;
 }
 
-err_t ColorStopList::remove(float offset)
+static err_t FOG_CDECL ColorStopList_removeOffset(ColorStopList* self, float offset)
 {
-  size_t start = indexOf(offset);
-  size_t length = _d->length;
-  if (start == INVALID_INDEX) return ERR_RT_INVALID_ARGUMENT;
+  ColorStopListData* d = self->_d;
 
-  const ColorStop* stops = _d->data;
+  size_t start = self->indexOf(offset);
+  size_t length = d->length;
+
+  if (start == INVALID_INDEX)
+    return ERR_RT_INVALID_ARGUMENT;
+
+  const ColorStop* stops = d->data;
   size_t end = start + 1;
 
   while (end < length)
   {
-    if (stops[end].getOffset() != offset) break;
+    if (stops[end].getOffset() != offset)
+      break;
   }
 
-  return removeAt(Range(start, end));
+  return self->removeRange(Range(start, end));
 }
 
-err_t ColorStopList::remove(const ColorStop& stop)
+static err_t FOG_CDECL ColorStopList_removeStop(ColorStopList* self, const ColorStop* stop)
 {
-  if (!stop.isValid()) return ERR_RT_INVALID_ARGUMENT;
+  if (!stop->isValid())
+    return ERR_RT_INVALID_ARGUMENT;
 
-  size_t i, length = _d->length;
-  const ColorStop* stops = _d->data;
+  ColorStopListData* d = self->_d;
+
+  size_t i, length = d->length;
+  const ColorStop* stops = d->data;
+  float stopOffset = stop->getOffset();
 
   for (i = 0; i < length; i++)
   {
     float offset = stops[i].getOffset();
-    if (offset < stop.getOffset()) continue;
-    if (offset > stop.getOffset()) break;
-    if (stops[i]._color == stop._color) return removeAt(i);
+
+    if (offset < stopOffset) continue;
+    if (offset > stopOffset) break;
+
+    if (stops[i]._color == stop->_color)
+      return self->removeAt(i);
   }
 
   return ERR_RT_OBJECT_NOT_FOUND;
 }
 
-err_t ColorStopList::removeAt(size_t index)
+static err_t FOG_CDECL ColorStopList_removeAt(ColorStopList* self, size_t index)
 {
-  size_t length = _d->length;
-  if (index >= length) return ERR_RT_INVALID_ARGUMENT;
+  ColorStopListData* d = self->_d;
+  size_t length = d->length;
 
-  if (FOG_LIKELY(isDetached()))
+  if (index >= length)
+    return ERR_RT_INVALID_ARGUMENT;
+
+  if (d->reference.get() == 1)
   {
-    _d->destroyCache();
-    memmove(_d->data + index, _d->data + index + 1, (length - index - 1) * sizeof(ColorStop));
-    _d->length--;
+    d->destroyCache();
+    MemOps::move(d->data + index, d->data + index + 1, (length - index - 1) * sizeof(ColorStop));
+    d->length--;
     return ERR_OK;
   }
   else
   {
-    ColorStopListData* newd = _dalloc(length);
-    if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
+    ColorStopListData* newd = _api.colorstoplist.dCreate(length);
 
-    memcpy(newd->data, _d->data, index * sizeof(ColorStop));
-    memcpy(newd->data + index, _d->data + index + 1, (length - index - 1) * sizeof(ColorStop));
+    if (FOG_IS_NULL(newd))
+      return ERR_RT_OUT_OF_MEMORY;
+
+    MemOps::copy(newd->data, d->data, index * sizeof(ColorStop));
+    MemOps::copy(newd->data + index, d->data + index + 1, (length - index - 1) * sizeof(ColorStop));
     newd->length = length - 1;
 
-    atomicPtrXchg(&_d, newd)->release();
+    atomicPtrXchg(&self->_d, newd)->release();
     return ERR_OK;
   }
 }
 
-err_t ColorStopList::removeAt(const Range& range)
+static err_t FOG_CDECL ColorStopList_removeRange(ColorStopList* self, const Range* range)
 {
-  size_t start = range.getStart();
-  size_t end = range.getEnd();
-  size_t length = _d->length;
+  ColorStopListData* d = self->_d;
+  size_t length = d->length;
 
-  if (start >= length) return ERR_RT_INVALID_ARGUMENT;
-  if (end > length) end = length;
+  size_t start = range->getStart();
+  size_t end = range->getEnd();
+
+  if (start >= length)
+    return ERR_RT_INVALID_ARGUMENT;
+
+  if (end > length)
+    end = length;
 
   size_t rlen = end - start;
 
-  if (FOG_LIKELY(isDetached()))
+  if (d->reference.get() == 1)
   {
-    _d->destroyCache();
-    memmove(_d->data + start, _d->data + end, (length - end) * sizeof(ColorStop));
-    _d->length -= rlen;
+    d->destroyCache();
+    MemOps::move(d->data + start, d->data + end, (length - end) * sizeof(ColorStop));
+    d->length -= rlen;
     return ERR_OK;
   }
   else
   {
-    ColorStopListData* newd = _dalloc(length);
-    if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
+    ColorStopListData* newd = _api.colorstoplist.dCreate(length);
 
-    memcpy(newd->data, _d->data, start * sizeof(ColorStop));
-    memcpy(newd->data + start, _d->data + end, (length - end) * sizeof(ColorStop));
+    if (FOG_IS_NULL(newd))
+      return ERR_RT_OUT_OF_MEMORY;
+
+    MemOps::copy(newd->data, d->data, start * sizeof(ColorStop));
+    MemOps::copy(newd->data + start, d->data + end, (length - end) * sizeof(ColorStop));
     newd->length = length - rlen;
 
-    atomicPtrXchg(&_d, newd)->release();
+    atomicPtrXchg(&self->_d, newd)->release();
     return ERR_OK;
   }
 }
 
-err_t ColorStopList::removeAt(const IntervalF& interval)
+static err_t FOG_CDECL ColorStopList_removeInterval(ColorStopList* self, const IntervalF* interval)
 {
-  if (!interval.isValid()) return ERR_RT_INVALID_ARGUMENT;
+  if (!interval->isValid())
+    return ERR_RT_INVALID_ARGUMENT;
 
-  size_t len = _d->length;
-  if (len == 0) return ERR_OK;
+  ColorStopListData* d = self->_d;
+  size_t length = d->length;
 
-  const ColorStop* stops = _d->data;
-  float min = interval.getMin();
-  float max = interval.getMax();
+  if (length == 0)
+    return ERR_OK;
+
+  const ColorStop* stops = d->data;
+  float min = interval->getMin();
+  float max = interval->getMax();
 
   // Find the min/max index.
-  size_t minI, maxI;
+  size_t minI;
+  size_t maxI;
 
-  for (minI =    0; minI < len; minI++) { if (stops[minI].getOffset() >= min) break; }
-  for (maxI = minI; maxI < len; maxI++) { if (stops[maxI].getOffset() >  max) break; }
+  for (minI =    0; minI < length; minI++) { if (stops[minI].getOffset() >= min) break; }
+  for (maxI = minI; maxI < length; maxI++) { if (stops[maxI].getOffset() >  max) break; }
 
-  return (minI < maxI) ? removeAt(Range(minI, maxI)) : ERR_OK;
+  return (minI < maxI) ? self->removeRange(Range(minI, maxI)) : ERR_OK;
 }
 
-size_t ColorStopList::indexOf(float offset) const
+static size_t FOG_CDECL ColorStopList_indexOfOffset(const ColorStopList* self, float offset)
 {
-  size_t i, length = _d->length;
-  const ColorStop* stops = _d->data;
+  ColorStopListData* d = self->_d;
+
+  size_t i, length = d->length;
+  const ColorStop* stops = d->data;
 
   for (i = 0; i < length; i++)
   {
@@ -405,23 +460,60 @@ size_t ColorStopList::indexOf(float offset) const
 }
 
 // ============================================================================
-// [Fog::ColorStopList - Statics]
+// [Fog::ColorStopList - Copy]
 // ============================================================================
 
-Static<ColorStopListData> ColorStopList::_dnull;
+static err_t FOG_CDECL ColorStopList_copy(ColorStopList* self, const ColorStopList* other)
+{
+  atomicPtrXchg(&self->_d, other->_d->addRef())->release();
+  return ERR_OK;
+}
 
-ColorStopListData* ColorStopList::_dalloc(size_t capacity)
+// ============================================================================
+// [Fog::ColorStopList - Equality]
+// ============================================================================
+
+static bool FOG_CDECL ColorStopList_eq(const ColorStopList* a, const ColorStopList* b)
+{
+  ColorStopListData* a_d = a->_d;
+  ColorStopListData* b_d = b->_d;
+
+  size_t length = a_d->length;
+  if (length != b_d->length)
+    return false;
+
+  return MemOps::eq(a_d->data, b_d->data, length * sizeof(ColorStop));
+}
+
+// ============================================================================
+// [Fog::ColorStopList - Data]
+// ============================================================================
+
+static ColorStopListData* FOG_CDECL ColorStopList_dCreate(size_t capacity)
 {
   ColorStopListData* d = reinterpret_cast<ColorStopListData*>(
     MemMgr::alloc(ColorStopListData::getSizeOf(capacity)));
-  if (FOG_UNLIKELY(d == NULL)) return NULL;
+
+  if (FOG_IS_NULL(d))
+    return NULL;
 
   d->reference.init(1);
+  d->vType = VAR_TYPE_COLOR_STOP_LIST | VAR_FLAG_NONE;
+  FOG_PADDING_ZERO_64(d->padding0_32);
+
   d->capacity = capacity;
   d->length = 0;
   d->stopCachePrgb32 = NULL;
 
   return d;
+}
+
+static void FOG_CDECL ColorStopList_dFree(ColorStopListData* d)
+{
+  if (d->stopCachePrgb32)
+    d->stopCachePrgb32->release();
+
+  MemMgr::free(d);
 }
 
 // ============================================================================
@@ -430,12 +522,42 @@ ColorStopListData* ColorStopList::_dalloc(size_t capacity)
 
 FOG_NO_EXPORT void ColorStopList_init(void)
 {
-  ColorStopListData* d = &ColorStopList::_dnull;
+  // --------------------------------------------------------------------------
+  // [Funcs]
+  // --------------------------------------------------------------------------
+
+  _api.colorstoplist.ctor = ColorStopList_ctor;
+  _api.colorstoplist.ctorCopy = ColorStopList_ctorCopy;
+  _api.colorstoplist.dtor = ColorStopList_dtor;
+  _api.colorstoplist.reserve = ColorStopList_reserve;
+  _api.colorstoplist.squeeze = ColorStopList_squeeze;
+  _api.colorstoplist.setData = ColorStopList_setData;
+  _api.colorstoplist.clear = ColorStopList_clear;
+  _api.colorstoplist.reset = ColorStopList_reset;
+  _api.colorstoplist.addStop = ColorStopList_addStop;
+  _api.colorstoplist.removeOffset = ColorStopList_removeOffset;
+  _api.colorstoplist.removeStop = ColorStopList_removeStop;
+  _api.colorstoplist.removeAt = ColorStopList_removeAt;
+  _api.colorstoplist.removeRange = ColorStopList_removeRange;
+  _api.colorstoplist.removeInterval = ColorStopList_removeInterval;
+  _api.colorstoplist.indexOfOffset = ColorStopList_indexOfOffset;
+  _api.colorstoplist.copy = ColorStopList_copy;
+  _api.colorstoplist.eq = ColorStopList_eq;
+
+  _api.colorstoplist.dCreate = ColorStopList_dCreate;
+  _api.colorstoplist.dFree = ColorStopList_dFree;
+
+  // --------------------------------------------------------------------------
+  // [Data]
+  // --------------------------------------------------------------------------
+
+  ColorStopListData* d = &ColorStopList_dEmpty;
 
   d->reference.init(1);
-  d->capacity = 0;
-  d->length = 0;
+  d->vType = VAR_TYPE_COLOR_STOP_LIST | VAR_FLAG_NONE;
   d->stopCachePrgb32 = NULL;
+
+  _api.colorstoplist.oEmpty = ColorStopList_oEmpty.initCustom1(d);
 }
 
 } // Fog namespace

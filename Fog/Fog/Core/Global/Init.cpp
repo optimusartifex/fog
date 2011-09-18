@@ -84,6 +84,12 @@ FOG_CAPI_DECLARE void _fog_init(void)
   // [Core/Application]
   Application_init();
 
+  // [G2d/Tools]
+  Dpi_init();
+  Matrix_init();
+  Region_init();
+  RegionUtil_init();
+
   // [G2d/Geometry]
   Line_init();
   QBezier_init();
@@ -102,11 +108,6 @@ FOG_CAPI_DECLARE void _fog_init(void)
   PathClipper_init();
   PathStroker_init();
   PathInfo_init();
-
-  // [G2d/Tools]
-  Matrix_init();
-  Region_init();
-  RegionUtil_init();
 
   // [G2d/Painting]
   Rasterizer_init();

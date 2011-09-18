@@ -213,6 +213,7 @@ struct ColorBase;
 struct ColorStop;
 struct ColorStopCache;
 struct ColorStopList;
+struct ColorStopListData;
 struct ConicalGradientF;
 struct ConicalGradientD;
 struct GradientF;
@@ -255,6 +256,8 @@ struct TextRectD;
 struct Dpi;
 struct MatrixF;
 struct MatrixD;
+struct MatrixDataF;
+struct MatrixDataD;
 struct Region;
 struct RegionData;
 

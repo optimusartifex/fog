@@ -10,6 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Memory/MemOps.h>
 #include <Fog/Core/Tools/Date.h>
 
 namespace Fog {
@@ -412,6 +413,88 @@ static err_t FOG_CDECL Date_convert(Date* dst, const Date* src, uint32_t timeZon
 }
 
 // ============================================================================
+// [Fog::Date - Equality]
+// ============================================================================
+
+static bool FOG_CDECL Date_eq(const Date* a, const Date* b)
+{
+  Date aUTC(UNINITIALIZED);
+  Date bUTC(UNINITIALIZED);
+
+  if (a->getZone() != TIME_ZONE_LOCAL)
+  {
+    aUTC = *a;
+    aUTC.setZone(TIME_ZONE_UTC);
+    a = &aUTC;
+  }
+
+  if (b->getZone() != TIME_ZONE_LOCAL)
+  {
+    bUTC = *b;
+    bUTC.setZone(TIME_ZONE_UTC);
+    b = &bUTC;
+  }
+
+  return MemOps::eq_t<Date>(a, b);
+}
+
+// ============================================================================
+// [Fog::Date - Compare]
+// ============================================================================
+
+static int FOG_CDECL Date_compare(const Date* a, const Date* b)
+{
+  Date aUTC(UNINITIALIZED);
+  Date bUTC(UNINITIALIZED);
+
+  if (a->getZone() != TIME_ZONE_LOCAL)
+  {
+    aUTC = *a;
+    aUTC.setZone(TIME_ZONE_UTC);
+    a = &aUTC;
+  }
+
+  if (b->getZone() != TIME_ZONE_LOCAL)
+  {
+    bUTC = *b;
+    bUTC.setZone(TIME_ZONE_UTC);
+    b = &bUTC;
+  }
+
+  if (a->_year > b->_year)
+    return 1;
+  if (a->_year < b->_year)
+    return -1;
+
+  if (a->_month > b->_month)
+    return 1;
+  if (a->_month < b->_month)
+    return -1;
+
+  if (a->_day > b->_day)
+    return 1;
+  if (a->_day < b->_day)
+    return -1;
+
+  if (a->_hour > b->_hour)
+    return 1;
+  if (a->_hour < b->_hour)
+    return -1;
+
+  if (a->_minute > b->_minute)
+    return 1;
+  if (a->_minute < b->_minute)
+    return -1;
+
+  if (a->_us > b->_us)
+    return 1;
+  if (a->_us < b->_us)
+    return -1;
+
+  return 0;
+}
+
+// ============================================================================
 // [Init / Fini]
 // ============================================================================
 
@@ -431,6 +514,8 @@ FOG_NO_EXPORT void Date_init(void)
   _api.date.getNumberOfDaysInMonth = Date_getNumberOfDaysInMonth;
 
   _api.date.convert = Date_convert;
+  _api.date.eq = Date_eq;
+  _api.date.compare = Date_compare;
 }
 
 } // Fog namespace

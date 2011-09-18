@@ -224,6 +224,24 @@ struct FOG_NO_EXPORT Date
   }
 
   // --------------------------------------------------------------------------
+  // [Equality]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const Date& other) const
+  {
+    return _api.date.eq(this, &other);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Compare]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE int compare(const Date& other) const
+  {
+    return _api.date.compare(this, &other);
+  }
+
+  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
@@ -233,8 +251,16 @@ struct FOG_NO_EXPORT Date
     return *this;
   }
 
+  FOG_INLINE bool operator==(const Date& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const Date& other) const { return !eq(other); }
+
+  FOG_INLINE bool operator< (const Date& other) const { return compare(other) < 0; }
+  FOG_INLINE bool operator> (const Date& other) const { return compare(other) > 0; }
+  FOG_INLINE bool operator<=(const Date& other) const { return compare(other) <= 0; }
+  FOG_INLINE bool operator>=(const Date& other) const { return compare(other) >= 0; }
+
   // --------------------------------------------------------------------------
-  // [Statics]
+  // [Statics - Construction]
   // --------------------------------------------------------------------------
 
   static FOG_INLINE Date fromTime(const Time& time)
@@ -242,6 +268,34 @@ struct FOG_NO_EXPORT Date
     Date result(UNINITIALIZED);
     _api.date.fromTime(&result, &time);
     return result;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Eq]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE bool eq(const Date* a, const Date* b)
+  {
+    return _api.date.eq(a, b);
+  }
+
+  static FOG_INLINE EqFunc getEqFunc()
+  {
+    return (EqFunc)_api.date.eq;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Compare]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE int compare(const Date* a, const Date* b)
+  {
+    return _api.date.compare(a, b);
+  }
+
+  static FOG_INLINE CompareFunc getCompareFunc()
+  {
+    return (CompareFunc)_api.date.compare;
   }
 
   // --------------------------------------------------------------------------

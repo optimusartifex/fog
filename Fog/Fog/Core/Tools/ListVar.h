@@ -117,7 +117,7 @@ struct List<Var> : public ListUntyped
   FOG_INLINE Var* getDataX()
   {
     FOG_ASSERT_X(ListUntyped::isDetached(),
-      "Fog::List<Fog::Var>::getDataX() - Called on non-detached object.");
+      "Fog::List<Fog::Var>::getDataX() - Not detached.");
 
     return reinterpret_cast<Var*>(_d->data);
   }
@@ -141,7 +141,7 @@ struct List<Var> : public ListUntyped
   FOG_INLINE err_t setAtX(size_t index, const Var& item)
   {
     FOG_ASSERT_X(ListUntyped::isDetached(),
-      "Fog::List<Fog::Var>::setAtX() - Called on non-detached object.");
+      "Fog::List<Fog::Var>::setAtX() - Not detached.");
     FOG_ASSERT_X(index < _d->length,
       "Fog::List<Fog::Var>::setAtX() - Index out of range.");
 
@@ -338,6 +338,15 @@ struct List<Var> : public ListUntyped
   }
 
   // --------------------------------------------------------------------------
+  // [Equality]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const List<Var>& other) const
+  {
+    return _api.list.untyped.customEq(this, &other, sizeof(Var), Var::getEqFunc());
+  }
+
+  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
@@ -353,12 +362,24 @@ struct List<Var> : public ListUntyped
     return *this;
   }
 
+  FOG_INLINE bool operator==(const List<Var>& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const List<Var>& other) const { return !eq(other); }
+
   FOG_INLINE const Var& operator[](size_t index) const
   {
     FOG_ASSERT_X(index < _d->length,
       "Fog::List<Fog::Var>::operator[] - Index out of range.");
 
     return reinterpret_cast<const Var*>(_d->data)[index];
+  }
+
+  // --------------------------------------------------------------------------
+  // [Statics]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE bool eq(const List<Var>* a, const List<Var>* b)
+  {
+    return _api.list.untyped.customEq(a, b, sizeof(Var), Var::getEqFunc());
   }
 };
 

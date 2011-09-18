@@ -139,15 +139,8 @@ struct FOG_NO_EXPORT RoundF
     return *this;
   }
 
-  FOG_INLINE bool operator==(const RoundF& other)
-  {
-    return rect == other.rect && radius == other.radius;
-  }
-
-  FOG_INLINE bool operator!=(const RoundF& other)
-  {
-    return rect != other.rect || radius != other.radius;
-  }
+  FOG_INLINE bool operator==(const RoundF& other) const { return  MemOps::eq_t<RoundF>(this, &other); }
+  FOG_INLINE bool operator!=(const RoundF& other) const { return !MemOps::eq_t<RoundF>(this, &other); }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -275,15 +268,8 @@ struct FOG_NO_EXPORT RoundD
     return *this;
   }
 
-  FOG_INLINE bool operator==(const RoundD& other)
-  {
-    return rect == other.rect && radius == other.radius;
-  }
-
-  FOG_INLINE bool operator!=(const RoundD& other)
-  {
-    return rect != other.rect || radius != other.radius;
-  }
+  FOG_INLINE bool operator==(const RoundD& other) const { return  MemOps::eq_t<RoundD>(this, &other); }
+  FOG_INLINE bool operator!=(const RoundD& other) const { return !MemOps::eq_t<RoundD>(this, &other); }
 
   // --------------------------------------------------------------------------
   // [Members]

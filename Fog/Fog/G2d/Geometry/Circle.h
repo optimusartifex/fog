@@ -136,15 +136,8 @@ struct FOG_NO_EXPORT CircleF
     return *this;
   }
 
-  FOG_INLINE bool operator==(const CircleF& other)
-  {
-    return center == other.center && radius == other.radius;
-  }
-
-  FOG_INLINE bool operator!=(const CircleF& other)
-  {
-    return !operator==(other);
-  }
+  FOG_INLINE bool operator==(const CircleF& other) const { return  MemOps::eq_t<CircleF>(this, &other); }
+  FOG_INLINE bool operator!=(const CircleF& other) const { return !MemOps::eq_t<CircleF>(this, &other); }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -269,15 +262,8 @@ struct FOG_NO_EXPORT CircleD
     return *this;
   }
 
-  FOG_INLINE bool operator==(const CircleD& other)
-  {
-    return center == other.center && radius == other.radius;
-  }
-
-  FOG_INLINE bool operator!=(const CircleD& other)
-  {
-    return !operator==(other);
-  }
+  FOG_INLINE bool operator==(const CircleD& other) const { return  MemOps::eq_t<CircleD>(this, &other); }
+  FOG_INLINE bool operator!=(const CircleD& other) const { return !MemOps::eq_t<CircleD>(this, &other); }
 
   // --------------------------------------------------------------------------
   // [Members]

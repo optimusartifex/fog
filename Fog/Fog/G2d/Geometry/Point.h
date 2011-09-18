@@ -142,8 +142,8 @@ struct FOG_NO_EXPORT PointI
   FOG_INLINE PointI& operator+=(const PointI& other) { x += other.x; y += other.y; return *this; }
   FOG_INLINE PointI& operator-=(const PointI& other) { x -= other.x; y -= other.y; return *this; }
 
-  FOG_INLINE bool operator==(const PointI& other) const { return (x == other.x) & (y == other.y); }
-  FOG_INLINE bool operator!=(const PointI& other) const { return (x != other.x) | (y != other.y); }
+  FOG_INLINE bool operator==(const PointI& other) const { return  MemOps::eq_t<PointI>(this, &other); }
+  FOG_INLINE bool operator!=(const PointI& other) const { return !MemOps::eq_t<PointI>(this, &other); }
 
   FOG_INLINE bool operator< (const PointI& other) { return (y < other.y) | ((y <= other.y) & (x <  other.x)); }
   FOG_INLINE bool operator> (const PointI& other) { return (y > other.y) | ((y <= other.y) & (x >  other.x)); }
@@ -331,8 +331,8 @@ struct PointF
   FOG_INLINE PointF& operator-=(const PointI& other) { x -= (float)other.x; y -= (float)other.y; return *this; }
   FOG_INLINE PointF& operator-=(const PointF& other) { x -= other.x; y -= other.y; return *this; }
 
-  FOG_INLINE bool operator==(const PointF& other) const { return (x == other.x) & (y == other.y); }
-  FOG_INLINE bool operator!=(const PointF& other) const { return (x != other.x) | (y != other.y); }
+  FOG_INLINE bool operator==(const PointF& other) const { return  MemOps::eq_t<PointF>(this, &other); }
+  FOG_INLINE bool operator!=(const PointF& other) const { return !MemOps::eq_t<PointF>(this, &other); }
 
   FOG_INLINE bool operator< (const PointF& other) { return (y < other.y) | ((y <= other.y) & (x <  other.x)); }
   FOG_INLINE bool operator> (const PointF& other) { return (y > other.y) | ((y <= other.y) & (x >  other.x)); }
@@ -530,8 +530,8 @@ struct PointD
   FOG_INLINE PointD& operator-=(const PointF& other) { x -= (double)other.x; y -= (double)other.y; return *this; }
   FOG_INLINE PointD& operator-=(const PointD& other) { x -= other.x; y -= other.y; return *this; }
 
-  FOG_INLINE bool operator==(const PointD& other) const { return (x == other.x) & (y == other.y); }
-  FOG_INLINE bool operator!=(const PointD& other) const { return (x != other.x) | (y != other.y); }
+  FOG_INLINE bool operator==(const PointD& other) const { return  MemOps::eq_t<PointD>(this, &other); }
+  FOG_INLINE bool operator!=(const PointD& other) const { return !MemOps::eq_t<PointD>(this, &other); }
 
   FOG_INLINE bool operator< (const PointD& other) { return (y < other.y) | ((y <= other.y) & (x <  other.x)); }
   FOG_INLINE bool operator> (const PointD& other) { return (y > other.y) | ((y <= other.y) & (x >  other.x)); }

@@ -9,7 +9,6 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/Threading/Atomic.h>
 
 namespace Fog {
 
@@ -21,16 +20,26 @@ namespace Fog {
 // ============================================================================
 
 //! @brief DPI value and converter.
-struct FOG_API Dpi
+struct FOG_NO_EXPORT Dpi
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  Dpi();
-  Dpi(const Dpi& other);
-  explicit Dpi(float dpi);
-  ~Dpi();
+  FOG_INLINE Dpi()
+  {
+    _api.dpi.reset(this);
+  }
+
+  FOG_INLINE Dpi(const Dpi& other)
+  {
+    _api.dpi.copy(this, &other);
+  }
+
+  FOG_INLINE explicit Dpi(float dpi)
+  {
+    _api.dpi.setDpi(this, dpi);
+  }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -41,14 +50,21 @@ struct FOG_API Dpi
     return _data[UNIT_IN];
   }
 
-  FOG_INLINE float getValue(uint32_t coordUnit)
+  FOG_INLINE float getValue(uint32_t unit) const
   {
-    FOG_ASSERT(coordUnit < UNIT_COUNT);
-    return _data[coordUnit];
+    FOG_ASSERT(unit < UNIT_COUNT);
+    return _data[unit];
   }
 
-  err_t setDpi(float dpi);
-  err_t setDpi(float dpi, float em, float ex);
+  FOG_INLINE err_t setDpi(float dpi)
+  {
+    return _api.dpi.setDpi(this, dpi);
+  }
+
+  FOG_INLINE err_t setDpi(float dpi, float em, float ex)
+  {
+    return _api.dpi.setDpiEmEx(this, dpi, em, ex);
+  }
 
   FOG_INLINE void setEmEx(float em, float ex)
   {
@@ -66,35 +82,42 @@ struct FOG_API Dpi
   // [Reset]
   // --------------------------------------------------------------------------
 
-  void reset();
+  FOG_INLINE void reset()
+  {
+    _api.dpi.reset(this);
+  }
 
   // --------------------------------------------------------------------------
   // [Conversion]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE float toDeviceSpace(float value, uint32_t coordUnit) const
+  FOG_INLINE float toDeviceSpace(float coord, uint32_t unit) const
   {
-    FOG_ASSERT(coordUnit < UNIT_COUNT);
-    return value * _data[coordUnit];
+    FOG_ASSERT(unit < UNIT_COUNT);
+    return coord * _data[unit];
   }
 
-  FOG_INLINE float fromDeviceSpace(float value, uint32_t coordUnit) const
+  FOG_INLINE float fromDeviceSpace(float coord, uint32_t unit) const
   {
-    FOG_ASSERT(coordUnit < UNIT_COUNT);
-    return value / _data[coordUnit];
+    FOG_ASSERT(unit < UNIT_COUNT);
+    return coord / _data[unit];
   }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  Dpi& operator=(const Dpi& other);
+  FOG_INLINE Dpi& operator=(const Dpi& other)
+  {
+    _api.dpi.copy(this, &other);
+    return *this;
+  }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  //! @brief DPI translator data.
+  //! @brief Translation data.
   float _data[UNIT_COUNT];
 };
 

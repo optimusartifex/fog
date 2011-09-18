@@ -149,6 +149,7 @@ struct FOG_NO_EXPORT Region
   FOG_INLINE size_t getReference() const { return _d->reference.get(); }
   //! @copydoc Doxygen::Implicit::isDetached().
   FOG_INLINE bool isDetached() const { return getReference() == 1; }
+
   //! @copydoc Doxygen::Implicit::detach().
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
   //! @copydoc Doxygen::Implicit::_detach().
@@ -195,7 +196,7 @@ struct FOG_NO_EXPORT Region
   //! @brief Get mutable pointer to the region data.
   FOG_INLINE BoxI* getDataX()
   {
-    FOG_ASSERT_X(isDetached(), "Fog::Region::getDataX() - Called on non-detached object");
+    FOG_ASSERT_X(isDetached(), "Fog::Region::getDataX() - Not detached");
     return _d->data;
   }
 

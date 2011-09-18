@@ -15,36 +15,49 @@
 namespace Fog {
 
 // ============================================================================
-// [Fog::Memory - Copy]
+// [Fog::MemOps - Zero]
 // ============================================================================
 
-static void* FOG_CDECL MemMgr_zero(void* dst, size_t size)
+static void* FOG_CDECL MemOps_zero(void* dst, size_t size)
 {
   return memset(dst, 0, size);
 }
 
 // ============================================================================
-// [Fog::Memory - Xchg]
+// [Fog::MemOps - Eq]
 // ============================================================================
 
-static void MemMgr_xchg(uint8_t* addr1, uint8_t* addr2, size_t count)
+static bool FOG_CDECL MemOps_eq(const uint8_t* a, const uint8_t* b, size_t size)
+{
+  for (size_t i = 0; i < size; i++)
+    if (a[i] != b[i])
+      return false;
+
+  return true;
+}
+
+// ============================================================================
+// [Fog::MemOps - Xchg]
+// ============================================================================
+
+static void MemOps_xchg(uint8_t* a, uint8_t* b, size_t count)
 {
   size_t i;
 
   for (i = count / (sizeof(size_t)); i; i--)
   {
-    MemOps::xchg_t<size_t>((size_t*)addr1, (size_t*)addr2);
+    MemOps::xchg_t<size_t>((size_t*)a, (size_t*)b);
 
-    addr1 += sizeof(size_t);
-    addr2 += sizeof(size_t);
+    a += sizeof(size_t);
+    b += sizeof(size_t);
   }
 
   for (i = count & (sizeof(size_t) - 1); i; i--)
   {
-    MemOps::xchg_1((void*)addr1, (void*)addr2);
+    MemOps::xchg_1((void*)a, (void*)b);
 
-    addr1++;
-    addr2++;
+    a++;
+    b++;
   }
 }
 
@@ -56,14 +69,15 @@ FOG_NO_EXPORT void MemOps_init(void)
 {
   _api.memops.copy = (Api::MemOps_Copy)::memcpy;
   _api.memops.move = (Api::MemOps_Move)::memmove;
-  _api.memops.zero = (Api::MemOps_Zero)MemMgr_zero;
+  _api.memops.zero = (Api::MemOps_Zero)MemOps_zero;
   _api.memops.set = (Api::MemOps_Set)::memset;
 
   _api.memops.copy_nt = _api.memops.copy;
   _api.memops.zero_nt = _api.memops.zero;
   _api.memops.set_nt = _api.memops.set;
 
-  _api.memops.xchg = (Api::MemOps_Xchg)MemMgr_xchg;
+  _api.memops.xchg = (Api::MemOps_Xchg)MemOps_xchg;
+  _api.memops.eq = (Api::MemOps_Eq)MemOps_eq;
 }
 
 } // Fog namespace

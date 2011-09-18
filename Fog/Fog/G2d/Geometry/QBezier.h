@@ -151,17 +151,8 @@ struct FOG_NO_EXPORT QBezierF
     return *this;
   }
 
-  FOG_INLINE bool operator==(const QBezierF& other) const
-  {
-    return p[0] == other.p[0] &&
-           p[1] == other.p[1] &&
-           p[2] == other.p[2] ;
-  }
-
-  FOG_INLINE bool operator!=(const QBezierF& other) const
-  {
-    return !operator==(other);
-  }
+  FOG_INLINE bool operator==(const QBezierF& other) const { return  MemOps::eq_t<QBezierF>(this, &other); }
+  FOG_INLINE bool operator!=(const QBezierF& other) const { return !MemOps::eq_t<QBezierF>(this, &other); }
 
   // --------------------------------------------------------------------------
   // [Statics]
@@ -385,17 +376,8 @@ struct FOG_NO_EXPORT QBezierD
     return *this;
   }
 
-  FOG_INLINE bool operator==(const QBezierD& other) const
-  {
-    return p[0] == other.p[0] &&
-           p[1] == other.p[1] &&
-           p[2] == other.p[2] ;
-  }
-
-  FOG_INLINE bool operator!=(const QBezierD& other) const
-  {
-    return !operator==(other);
-  }
+  FOG_INLINE bool operator==(const QBezierD& other) const { return  MemOps::eq_t<QBezierD>(this, &other); }
+  FOG_INLINE bool operator!=(const QBezierD& other) const { return !MemOps::eq_t<QBezierD>(this, &other); }
 
   // --------------------------------------------------------------------------
   // [Statics]

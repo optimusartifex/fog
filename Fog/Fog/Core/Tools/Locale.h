@@ -518,7 +518,7 @@ struct FOG_NO_EXPORT Locale
   }
 
   // --------------------------------------------------------------------------
-  // [Statics]
+  // [Statics - Instance]
   // --------------------------------------------------------------------------
 
   static FOG_INLINE const Locale& posix() { return *_api.locale.oPosix; }

@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Threading/Atomic.h>
+#include <Fog/Core/Memory/MemOps.h>
 #include <Fog/G2d/Tools/Dpi.h>
 
 namespace Fog {
@@ -18,7 +18,7 @@ namespace Fog {
 // [Fog::Dpi - Helpers]
 // ============================================================================
 
-static inline void _Dpi_setup(float* data, float dpi, float em, float ex)
+static FOG_INLINE void Dpi_setup(float* data, float dpi, float em, float ex)
 {
   data[UNIT_NONE] = 1.0f;
   data[UNIT_PX] = 1.0f;
@@ -37,70 +37,69 @@ static inline void _Dpi_setup(float* data, float dpi, float em, float ex)
 }
 
 // ============================================================================
-// [Fog::Dpi - Construction / Destruction]
-// ============================================================================
-
-Dpi::Dpi()
-{
-  reset();
-}
-
-Dpi::Dpi(float dpi)
-{
-  if (dpi <= 0.0f) { reset(); return; }
-
-  _Dpi_setup(_data, dpi, 0.0f, 0.0f);
-  resetEmEx();
-}
-
-Dpi::Dpi(const Dpi& other)
-{
-  memcpy(_data, other._data, sizeof(_data));
-}
-
-Dpi::~Dpi()
-{
-}
-
-// ============================================================================
-// [Fog::Dpi - Accessors]
-// ============================================================================
-
-err_t Dpi::setDpi(float dpi)
-{
-  if (dpi <= 0.0f) return ERR_RT_INVALID_ARGUMENT;
-  _Dpi_setup(_data, dpi, 0.0f, 0.0f);
-
-  resetEmEx();
-  return ERR_OK;
-}
-
-err_t Dpi::setDpi(float dpi, float em, float ex)
-{
-  if (dpi <= 0.0f) return ERR_RT_INVALID_ARGUMENT;
-  _Dpi_setup(_data, dpi, em, ex);
-
-  if (em <= 0.0f || ex <= 0.0f) resetEmEx();
-  return ERR_OK;
-}
-
-// ============================================================================
 // [Fog::Dpi - Reset]
 // ============================================================================
 
-void Dpi::reset()
+static void FOG_CDECL Dpi_reset(Dpi* self)
 {
-  _Dpi_setup(_data, 72.0f, 12.0f, 6.0f);
+  _api.dpi.setDpiEmEx(self, 72.0f, 12.0f, 6.0f);
 }
 
 // ============================================================================
-// [Fog::Dpi - Operator Overload]
+// [Fog::Dpi - Set]
 // ============================================================================
 
-Dpi& Dpi::operator=(const Dpi& other)
+static err_t FOG_CDECL Dpi_setDpi(Dpi* self, float dpi)
 {
-  memcpy(_data, other._data, sizeof(_data));
-  return *this;
+  if (dpi <= 0.0f)
+  {
+    _api.dpi.reset(self);
+    return ERR_RT_INVALID_ARGUMENT;
+  }
+
+  Dpi_setup(self->_data, dpi, 0.0f, 0.0f);
+  self->resetEmEx();
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL Dpi_setDpiEmEx(Dpi* self, float dpi, float em, float ex)
+{
+  if (dpi <= 0.0f)
+  {
+    _api.dpi.reset(self);
+    return ERR_RT_INVALID_ARGUMENT;
+  }
+
+  Dpi_setup(self->_data, dpi, em, ex);
+
+  if (em <= 0.0f || ex <= 0.0f)
+    self->resetEmEx();
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::Dpi - Copy]
+// ============================================================================
+
+static void FOG_CDECL Dpi_copy(Dpi* self, const Dpi* other)
+{
+  MemOps::copy_t<Dpi>(self, other);
+}
+
+// ============================================================================
+// [Init / Fini]
+// ============================================================================
+
+FOG_NO_EXPORT void Dpi_init(void)
+{
+  // --------------------------------------------------------------------------
+  // [Funcs]
+  // --------------------------------------------------------------------------
+
+  _api.dpi.reset = Dpi_reset;
+  _api.dpi.setDpi = Dpi_setDpi;
+  _api.dpi.setDpiEmEx = Dpi_setDpiEmEx;
+  _api.dpi.copy = Dpi_copy;
 }
 
 } // Fog namespace

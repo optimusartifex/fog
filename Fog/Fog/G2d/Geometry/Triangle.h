@@ -162,15 +162,8 @@ struct FOG_NO_EXPORT TriangleF
   FOG_INLINE TriangleF& operator=(const TriangleF& other) { setTriangle(other); return *this; }
   FOG_INLINE TriangleF& operator=(const TriangleD& other) { setTriangle(other); return *this; }
 
-  FOG_INLINE bool operator==(const TriangleF& other)
-  {
-    return p[0] == other.p[0] && p[1] == other.p[1] && p[2] == other.p[2] ;
-  }
-
-  FOG_INLINE bool operator!=(const TriangleF& other)
-  {
-    return p[0] != other.p[0] || p[1] != other.p[1] || p[2] != other.p[2] ;
-  }
+  FOG_INLINE bool operator==(const TriangleF& other) const { return  MemOps::eq_t<TriangleF>(this, &other); }
+  FOG_INLINE bool operator!=(const TriangleF& other) const { return !MemOps::eq_t<TriangleF>(this, &other); }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -317,15 +310,8 @@ struct FOG_NO_EXPORT TriangleD
   FOG_INLINE TriangleD& operator=(const TriangleF& other) { setTriangle(other); return *this; }
   FOG_INLINE TriangleD& operator=(const TriangleD& other) { setTriangle(other); return *this; }
 
-  FOG_INLINE bool operator==(const TriangleD& other)
-  {
-    return p[0] == other.p[0] && p[1] == other.p[1] && p[2] == other.p[2] ;
-  }
-
-  FOG_INLINE bool operator!=(const TriangleD& other)
-  {
-    return p[0] != other.p[0] || p[1] != other.p[1] || p[2] != other.p[2] ;
-  }
+  FOG_INLINE bool operator==(const TriangleD& other) const { return  MemOps::eq_t<TriangleD>(this, &other); }
+  FOG_INLINE bool operator!=(const TriangleD& other) const { return !MemOps::eq_t<TriangleD>(this, &other); }
 
   // --------------------------------------------------------------------------
   // [Members]

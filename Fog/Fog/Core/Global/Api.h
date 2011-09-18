@@ -146,7 +146,9 @@ struct FOG_NO_EXPORT Api
   typedef void* (FOG_CDECL *MemOps_Move)(void* dst, const void* src, size_t size);
   typedef void* (FOG_CDECL *MemOps_Zero)(void* dst, size_t size);
   typedef void* (FOG_CDECL *MemOps_Set)(void* dst, uint val, size_t size);
-  typedef void (FOG_CDECL *MemOps_Xchg)(void* mem0, void* mem1, size_t size);
+
+  typedef void (FOG_CDECL *MemOps_Xchg)(void* a, void* b, size_t size);
+  typedef void* (FOG_CDECL *MemOps_Eq)(const void* a, const void* b, size_t size);
 
   struct FOG_NO_EXPORT _Api_MemOps
   {
@@ -160,6 +162,7 @@ struct FOG_NO_EXPORT Api
     MemOps_Set set_nt;
 
     MemOps_Xchg xchg;
+    MemOps_Eq eq;
   } memops;
 
   // --------------------------------------------------------------------------
@@ -350,6 +353,9 @@ struct FOG_NO_EXPORT Api
 
   typedef err_t (FOG_CDECL* Date_Convert)(Date* dst, const Date* src, uint32_t zone);
 
+  typedef bool (FOG_CDECL* Date_Eq)(const Date* a, const Date* b);
+  typedef int (FOG_CDECL* Date_Compare)(const Date* a, const Date* b);
+
   struct FOG_NO_EXPORT _Api_Date
   {
     Date_GetValue getValue;
@@ -365,6 +371,9 @@ struct FOG_NO_EXPORT Api
     Date_GetNumberOfDaysInMonth getNumberOfDaysInMonth;
 
     Date_Convert convert;
+
+    Date_Eq eq;
+    Date_Compare compare;
   } date;
 
   // --------------------------------------------------------------------------
@@ -402,6 +411,7 @@ struct FOG_NO_EXPORT Api
   typedef err_t (FOG_CDECL *Hash_Unknown_Unknown_Remove)(HashUntyped* self, const HashUntypedVTable* v, const void* key);
 
   typedef void (FOG_CDECL *Hash_Unknown_Unknown_Copy)(HashUntyped* self, const HashUntypedVTable* v, const HashUntyped* other);
+  typedef bool (FOG_CDECL *Hash_Unknown_Unknown_Eq)(const HashUntyped* a, const HashUntyped* b, const HashUntypedVTable* v, EqFunc itemEqFunc);
 
   typedef HashUntypedData* (FOG_CDECL *Hash_Unknown_Unknown_DCreate)(size_t capacity);
   typedef void (FOG_CDECL *Hash_Unknown_Unknown_DFree)(HashUntypedData* d, const HashUntypedVTable* v);
@@ -426,6 +436,7 @@ struct FOG_NO_EXPORT Api
     Hash_Unknown_Unknown_Remove remove;
 
     Hash_Unknown_Unknown_Copy copy;
+    Hash_Unknown_Unknown_Eq eq;
 
     Hash_Unknown_Unknown_DCreate dCreate;
     Hash_Unknown_Unknown_DFree dFree;
@@ -483,6 +494,8 @@ struct FOG_NO_EXPORT Api
   typedef err_t (FOG_CDECL *Hash_StringA_Unknown_RemoveStubA)(HashUntyped* self, const HashUntypedVTable* v, const StubA* key);
   typedef err_t (FOG_CDECL *Hash_StringA_Unknown_RemoveStringA)(HashUntyped* self, const HashUntypedVTable* v, const StringA* key);
 
+  typedef bool (FOG_CDECL *Hash_StringA_Unknown_Eq)(const HashUntyped* a, const HashUntyped* b, const HashUntypedVTable* v, EqFunc itemEqFunc);
+
   struct FOG_NO_EXPORT _Api_Hash_StringA_Unknown
   {
     Hash_StringA_Unknown_GetStubA getStubA;
@@ -496,6 +509,8 @@ struct FOG_NO_EXPORT Api
     
     Hash_StringA_Unknown_RemoveStubA removeStubA;
     Hash_StringA_Unknown_RemoveStringA removeStringA;
+
+    Hash_StringA_Unknown_Eq eq;
   };
 
   // --------------------------------------------------------------------------
@@ -606,6 +621,8 @@ struct FOG_NO_EXPORT Api
   typedef err_t (FOG_CDECL *Hash_StringW_Unknown_RemoveStubW)(HashUntyped* self, const HashUntypedVTable* v, const StubW* key);
   typedef err_t (FOG_CDECL *Hash_StringW_Unknown_RemoveStringW)(HashUntyped* self, const HashUntypedVTable* v, const StringW* key);
 
+  typedef bool (FOG_CDECL *Hash_StringW_Unknown_Eq)(const HashUntyped* a, const HashUntyped* b, const HashUntypedVTable* v, EqFunc itemEqFunc);
+
   struct FOG_NO_EXPORT _Api_Hash_StringW_Unknown
   {
     Hash_StringW_Unknown_GetStubA getStubA;
@@ -623,6 +640,8 @@ struct FOG_NO_EXPORT Api
     Hash_StringW_Unknown_RemoveStubA removeStubA;
     Hash_StringW_Unknown_RemoveStubW removeStubW;
     Hash_StringW_Unknown_RemoveStringW removeStringW;
+
+    Hash_StringW_Unknown_Eq eq;
   };
 
   // --------------------------------------------------------------------------
@@ -794,6 +813,9 @@ struct FOG_NO_EXPORT Api
   typedef size_t (FOG_CDECL *List_Untyped_IndexOf)(const ListUntyped* self, const Range* range, const void* item);
   typedef size_t (FOG_CDECL *List_Untyped_LastIndexOf)(const ListUntyped* self, const Range* range, const void* item);
 
+  typedef bool (FOG_CDECL *List_Untyped_BinaryEq)(const ListUntyped* a, const ListUntyped* b, size_t szItemT);
+  typedef bool (FOG_CDECL *List_Untyped_CustomEq)(const ListUntyped* a, const ListUntyped* b, size_t szItemT, EqFunc eqFunc);
+
   typedef ListUntypedData* (FOG_CDECL *List_Untyped_DCreate)(size_t szItemT, size_t capacity);
 
   struct FOG_NO_EXPORT _Api_List_Untyped
@@ -808,6 +830,9 @@ struct FOG_NO_EXPORT Api
     List_Untyped_LastIndexOf lastIndexOf_4B;
     List_Untyped_LastIndexOf lastIndexOf_8B;
     List_Untyped_LastIndexOf lastIndexOf_16B;
+
+    List_Untyped_BinaryEq binaryEq;
+    List_Untyped_CustomEq customEq;
 
     List_Untyped_DCreate dCreate;
 
@@ -3366,6 +3391,176 @@ struct FOG_NO_EXPORT Api
     Color_ParseA parseA;
     Color_ParseU parseU;
   } color;
+
+  // --------------------------------------------------------------------------
+  // [G2d/Source - ColorStopList]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *ColorStopList_Ctor)(ColorStopList* self);
+  typedef void (FOG_CDECL *ColorStopList_CtorCopy)(ColorStopList* self, const ColorStopList* other);
+  typedef void (FOG_CDECL *ColorStopList_Dtor)(ColorStopList* self);
+
+  typedef err_t (FOG_CDECL *ColorStopList_Reserve)(ColorStopList* self, size_t n);
+  typedef void (FOG_CDECL *ColorStopList_Squeeze)(ColorStopList* self);
+  typedef err_t (FOG_CDECL *ColorStopList_SetData)(ColorStopList* self, const ColorStop* stops, size_t length);
+  typedef bool (FOG_CDECL *ColorStopList_IsOpaque)(const ColorStopList* self);
+  typedef bool (FOG_CDECL *ColorStopList_IsOpaque_ARGB32)(const ColorStopList* self);
+  typedef void (FOG_CDECL *ColorStopList_Clear)(ColorStopList* self);
+  typedef void (FOG_CDECL *ColorStopList_Reset)(ColorStopList* self);
+
+  typedef err_t (FOG_CDECL *ColorStopList_AddStop)(ColorStopList* self, const ColorStop* stop);
+  typedef err_t (FOG_CDECL *ColorStopList_RemoveOffset)(ColorStopList* self, float offset);
+  typedef err_t (FOG_CDECL *ColorStopList_RemoveStop)(ColorStopList* self, const ColorStop* stop);
+  typedef err_t (FOG_CDECL *ColorStopList_RemoveAt)(ColorStopList* self, size_t index);
+  typedef err_t (FOG_CDECL *ColorStopList_RemoveRange)(ColorStopList* self, const Range* range);
+  typedef err_t (FOG_CDECL *ColorStopList_RemoveInterval)(ColorStopList* self, const IntervalF* interval);
+  typedef size_t (FOG_CDECL *ColorStopList_IndexOfOffset)(const ColorStopList* self, float offset);
+
+  typedef err_t (FOG_CDECL *ColorStopList_Copy)(ColorStopList* self, const ColorStopList* other);
+  typedef bool (FOG_CDECL *ColorStopList_Eq)(const ColorStopList* a, const ColorStopList* b);
+
+  typedef ColorStopListData* (FOG_CDECL *ColorStopList_DCreate)(size_t capacity);
+  typedef void (FOG_CDECL *ColorStopList_DFree)(ColorStopListData* d);
+
+  struct FOG_NO_EXPORT _Api_ColorStopList
+  {
+    ColorStopList_Ctor ctor;
+    ColorStopList_CtorCopy ctorCopy;
+    ColorStopList_Dtor dtor;
+    ColorStopList_Reserve reserve;
+    ColorStopList_Squeeze squeeze;
+    ColorStopList_SetData setData;
+    ColorStopList_IsOpaque isOpaque;
+    ColorStopList_IsOpaque_ARGB32 isOpaque_ARGB32;
+    ColorStopList_Clear clear;
+    ColorStopList_Reset reset;
+
+    ColorStopList_AddStop addStop;
+    ColorStopList_RemoveOffset removeOffset;
+    ColorStopList_RemoveStop removeStop;
+    ColorStopList_RemoveAt removeAt;
+    ColorStopList_RemoveRange removeRange;
+    ColorStopList_RemoveInterval removeInterval;
+    ColorStopList_IndexOfOffset indexOfOffset;
+
+    ColorStopList_Copy copy;
+    ColorStopList_Eq eq;
+
+    ColorStopList_DCreate dCreate;
+    ColorStopList_DFree dFree;
+
+    ColorStopList* oEmpty;
+  } colorstoplist;
+
+  // --------------------------------------------------------------------------
+  // [G2d/Tools - Dpi]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *Dpi_Reset)(Dpi* self);
+  typedef err_t (FOG_CDECL *Dpi_SetDpi)(Dpi* self, float dpi);
+  typedef err_t (FOG_CDECL *Dpi_SetDpiEmEx)(Dpi* self, float dpi, float em, float ex);
+  typedef void (FOG_CDECL *Dpi_Copy)(Dpi* self, const Dpi* other);
+
+  struct FOG_NO_EXPORT _Api_Dpi
+  {
+    Dpi_Reset reset;
+    Dpi_SetDpi setDpi;
+    Dpi_SetDpiEmEx setDpiEmEx;
+    Dpi_Copy copy;
+  } dpi;
+
+  // --------------------------------------------------------------------------
+  // [G2d/Tools - Matrix]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *MatrixF_Ctor)(MatrixF* self);
+  typedef void (FOG_CDECL *MatrixD_Ctor)(MatrixD* self);
+
+  typedef void (FOG_CDECL *MatrixF_CtorCopy)(MatrixF* self, const MatrixF* other);
+  typedef void (FOG_CDECL *MatrixD_CtorCopy)(MatrixD* self, const MatrixD* other);
+
+  typedef void (FOG_CDECL *MatrixF_CtorCreate)(MatrixF* self, const SizeI* size, const float* data);
+  typedef void (FOG_CDECL *MatrixD_CtorCreate)(MatrixD* self, const SizeI* size, const double* data);
+
+  typedef void (FOG_CDECL *MatrixF_Dtor)(MatrixF* self);
+  typedef void (FOG_CDECL *MatrixD_Dtor)(MatrixD* self);
+
+  typedef err_t (FOG_CDECL *MatrixF_Detach)(MatrixF* self);
+  typedef err_t (FOG_CDECL *MatrixD_Detach)(MatrixD* self);
+
+  typedef err_t (FOG_CDECL *MatrixF_Create)(MatrixF* self, const SizeI* size, const float* data);
+  typedef err_t (FOG_CDECL *MatrixD_Create)(MatrixD* self, const SizeI* size, const double* data);
+
+  typedef err_t (FOG_CDECL *MatrixF_Resize)(MatrixF* self, const SizeI* size, float value);
+  typedef err_t (FOG_CDECL *MatrixD_Resize)(MatrixD* self, const SizeI* size, double value);
+
+  typedef float (FOG_CDECL *MatrixF_GetCell)(const MatrixF* self, int x, int y);
+  typedef double (FOG_CDECL *MatrixD_GetCell)(const MatrixD* self, int x, int y);
+
+  typedef err_t (FOG_CDECL *MatrixF_SetCell)(MatrixF* self, int x, int y, float value);
+  typedef err_t (FOG_CDECL *MatrixD_SetCell)(MatrixD* self, int x, int y, double value);
+
+  typedef err_t (FOG_CDECL *MatrixF_Fill)(MatrixF* self, const RectI* area, float value);
+  typedef err_t (FOG_CDECL *MatrixD_Fill)(MatrixD* self, const RectI* area, double value);
+
+  typedef void (FOG_CDECL *MatrixF_Reset)(MatrixF* self);
+  typedef void (FOG_CDECL *MatrixD_Reset)(MatrixD* self);
+
+  typedef void (FOG_CDECL *MatrixF_Copy)(MatrixF* self, const MatrixF* other);
+  typedef void (FOG_CDECL *MatrixD_Copy)(MatrixD* self, const MatrixD* other);
+
+  typedef bool (FOG_CDECL *MatrixF_Eq)(const MatrixF* a, const MatrixF* b);
+  typedef bool (FOG_CDECL *MatrixD_Eq)(const MatrixD* a, const MatrixD* b);
+
+  typedef MatrixDataF* (FOG_CDECL *MatrixF_DCreate)(const SizeI* size, const float* data);
+  typedef MatrixDataD* (FOG_CDECL *MatrixD_DCreate)(const SizeI* size, const double* data);
+
+  typedef void (FOG_CDECL *MatrixF_DFree)(MatrixDataF* d);
+  typedef void (FOG_CDECL *MatrixD_DFree)(MatrixDataD* d);
+
+  struct FOG_NO_EXPORT _Api_MatrixF
+  {
+    MatrixF_Ctor ctor;
+    MatrixF_CtorCopy ctorCopy;
+    MatrixF_CtorCreate ctorCreate;
+    MatrixF_Dtor dtor;
+    MatrixF_Detach detach;
+    MatrixF_Create create;
+    MatrixF_Resize resize;
+    MatrixF_GetCell getCell;
+    MatrixF_SetCell setCell;
+    MatrixF_Fill fill;
+    MatrixF_Reset reset;
+    MatrixF_Copy copy;
+    MatrixF_Eq eq;
+
+    MatrixF_DCreate dCreate;
+    MatrixF_DFree dFree;
+
+    MatrixF* oEmpty;
+  } matrixf;
+
+  struct FOG_NO_EXPORT _Api_MatrixD
+  {
+    MatrixD_Ctor ctor;
+    MatrixD_CtorCopy ctorCopy;
+    MatrixD_CtorCreate ctorCreate;
+    MatrixD_Dtor dtor;
+    MatrixD_Detach detach;
+    MatrixD_Create create;
+    MatrixD_Resize resize;
+    MatrixD_GetCell getCell;
+    MatrixD_SetCell setCell;
+    MatrixD_Fill fill;
+    MatrixD_Reset reset;
+    MatrixD_Copy copy;
+    MatrixD_Eq eq;
+
+    MatrixD_DCreate dCreate;
+    MatrixD_DFree dFree;
+
+    MatrixD* oEmpty;
+  } matrixd;
 
   // --------------------------------------------------------------------------
   // [G2d/Tools - Region]

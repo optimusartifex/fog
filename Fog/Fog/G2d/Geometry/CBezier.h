@@ -217,18 +217,8 @@ struct FOG_NO_EXPORT CBezierF
     return *this;
   }
 
-  FOG_INLINE bool operator==(const CBezierF& other) const
-  {
-    return p[0] == other.p[0] &&
-           p[1] == other.p[1] &&
-           p[2] == other.p[2] &&
-           p[3] == other.p[3] ;
-  }
-
-  FOG_INLINE bool operator!=(const CBezierF& other) const
-  {
-    return !operator==(other);
-  }
+  FOG_INLINE bool operator==(const CBezierF& other) const { return  MemOps::eq_t<CBezierF>(this, &other); }
+  FOG_INLINE bool operator!=(const CBezierF& other) const { return !MemOps::eq_t<CBezierF>(this, &other); }
 
   // --------------------------------------------------------------------------
   // [Statics]
@@ -555,18 +545,8 @@ struct FOG_NO_EXPORT CBezierD
     return *this;
   }
 
-  FOG_INLINE bool operator==(const CBezierD& other) const
-  {
-    return p[0] == other.p[0] &&
-           p[1] == other.p[1] &&
-           p[2] == other.p[2] &&
-           p[3] == other.p[3] ;
-  }
-
-  FOG_INLINE bool operator!=(const CBezierD& other) const
-  {
-    return !operator==(other);
-  }
+  FOG_INLINE bool operator==(const CBezierD& other) const { return  MemOps::eq_t<CBezierD>(this, &other); }
+  FOG_INLINE bool operator!=(const CBezierD& other) const { return !MemOps::eq_t<CBezierD>(this, &other); }
 
   // --------------------------------------------------------------------------
   // [Statics]

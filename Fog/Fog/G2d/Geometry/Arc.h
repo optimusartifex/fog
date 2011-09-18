@@ -191,18 +191,8 @@ struct FOG_NO_EXPORT ArcF
   FOG_INLINE ArcF& operator=(const ArcF& other) { setArc(other); return *this; }
   FOG_INLINE ArcF& operator=(const ArcD& other) { setArc(other); return *this; }
 
-  FOG_INLINE bool operator==(const ArcF& other)
-  {
-    return center == other.center &&
-           radius == other.radius &&
-           start  == other.start  &&
-           sweep  == other.sweep;
-  }
-
-  FOG_INLINE bool operator!=(const ArcF& other)
-  {
-    return !operator==(other);
-  }
+  FOG_INLINE bool operator==(const ArcF& other) const { return  MemOps::eq_t<ArcF>(this, &other); }
+  FOG_INLINE bool operator!=(const ArcF& other) const { return !MemOps::eq_t<ArcF>(this, &other); }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -390,18 +380,8 @@ struct FOG_NO_EXPORT ArcD
   FOG_INLINE ArcD& operator=(const ArcD& other) { setArc(other); return *this; }
   FOG_INLINE ArcD& operator=(const ArcF& other) { setArc(other); return *this; }
 
-  FOG_INLINE bool operator==(const ArcD& other)
-  {
-    return center == other.center &&
-           radius == other.radius &&
-           start  == other.start  &&
-           sweep  == other.sweep;
-  }
-
-  FOG_INLINE bool operator!=(const ArcD& other)
-  {
-    return !operator==(other);
-  }
+  FOG_INLINE bool operator==(const ArcD& other) const { return  MemOps::eq_t<ArcD>(this, &other); }
+  FOG_INLINE bool operator!=(const ArcD& other) const { return !MemOps::eq_t<ArcD>(this, &other); }
 
   // --------------------------------------------------------------------------
   // [Members]

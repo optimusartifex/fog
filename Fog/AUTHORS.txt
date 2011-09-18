@@ -1,5 +1,5 @@
-Fog Library
-===========
+Fog-Framework
+=============
 
 Petr Kobalicek <kobalicek.petr@gmail.com>
 
@@ -7,23 +7,3 @@ Contributors
 ============
 
 Jaroslav Smid <jardasmid@gmail.com>
-
-Other libraries and source code used in Fog (always BSD/MIT/Public Domain)
-(See COPYING file)
-==========================================================================
-
-Fog-Core
-========
-
-Delegates - FastDelegate <http://www.codeproject.com/cpp/FastDelegate.asp>.
-Threading and Event loops - Chromium <http://code.google.com/p/chromium/>.
-Unicode support - Ultimate++ <http://www.ultimatepp.com>.
-
-Fog-G2d
-============
-
-Color matrix - AggOO <http://www.dratek.com/>.
-Dither matrix - Evas <http://www.enlightenment.org>.
-Gif - GifLib <http://sourceforge.net/projects/libungif>.
-Linear blur - Mario Klingemann <http://incubator.quasimondo.com/processing/fast_blur_deluxe.php>.
-Region - XOrg <http://www.x.org>.

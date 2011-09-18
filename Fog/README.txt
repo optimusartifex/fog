@@ -1,13 +1,13 @@
-Fog-Framework - Version SVN
-===========================
+Fog-Framework - SVN
+===================
 
 http://code.google.com/p/fog/
 
 Introduction
 ============
 
-Fog library is library for cross-platform development in C++ language. Main goal
-of the Fog library is to provide very fast and accurate graphics output on all
+Fog-Framework is a library designed for a cross-platform development in C++ language.
+Main goal of the library is to provide very fast and accurate graphics output on all
 supported operating systems and architectures. Currently Fog is not only graphics
 library, it contains many other classes related to cross-platform development, but
 many classes are related to 2d graphics.
@@ -22,7 +22,7 @@ Windows:
 - Fog-G2d
   - GdiPlus    (optional - runtime loading)
   - Gdi32      (direct   - linked)
-- Fog-Gui
+- Fog-UI
   - Gdi32      (direct   - linked)
   - User32     (direct   - linked)
 
@@ -36,5 +36,5 @@ Linux/BSD:
   - libpng     (optional - runtime loading)
   - Fontconfig (optional - runtime loading)
   - Freetype2  (direct   - runtime loading)
-- Fog-Gui
+- Fog-UI
   - X11        (optional - runtime loading)

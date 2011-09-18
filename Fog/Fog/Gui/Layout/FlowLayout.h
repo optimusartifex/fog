@@ -8,7 +8,7 @@
 #define _FOG_GUI_LAYOUT_FLOWLAYOUT_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/List.h>
+#include <Fog/Core/Tools/List.h>
 #include <Fog/Gui/Layout/Layout.h>
 
 //! @addtogroup Fog_Gui

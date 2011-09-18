@@ -60,7 +60,7 @@ struct FOG_NO_EXPORT Helpers
 
       while ((i -= 4) >= 0)
       {
-        Memory::copy_16(dst, src);
+        MemOps::copy_16(dst, src);
 
         dst += 16;
         src += 16;
@@ -69,7 +69,7 @@ struct FOG_NO_EXPORT Helpers
 
       while (i)
       {
-        Memory::copy_4(dst, src);
+        MemOps::copy_4(dst, src);
 
         dst += 4;
         src += 4;

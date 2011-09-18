@@ -9,9 +9,9 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/BufferP.h>
-#include <Fog/Core/Global/Internals_p.h>
+#include <Fog/Core/Global/Private.h>
 #include <Fog/Core/Math/Math.h>
+#include <Fog/Core/Memory/MemBufferTmp_p.h>
 #include <Fog/Core/Tools/TextIterator.h>
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Text/WinFontFace.h>
@@ -108,17 +108,13 @@ struct FOG_NO_EXPORT WinFontContext
   GLYPHMETRICS gm;
   MAT2 mat;
 
-  DWORD bufferSize;
-  BufferP<2048> buffer;
+  MemBufferTmp<2048> buffer;
 };
 
 WinFontContext::WinFontContext()
 {
   hDC = NULL;
   hOldFont = NULL;
-
-  bufferSize = 2048;
-  buffer.alloc(bufferSize);
 }
 
 WinFontContext::~WinFontContext()
@@ -288,7 +284,7 @@ static FOG_INLINE void _WinFontHandle_free(WinFontHandle& handle)
 
   if (handle.kerningTable)
   {
-    Memory::free(handle.kerningTable);
+    MemMgr::free(handle.kerningTable);
     handle.kerningTable = NULL;
   }
 }
@@ -335,7 +331,7 @@ static err_t _WinGetKerningF(HDC hdc, FontKerningTableF** out)
   }
 
   FontKerningTableF* kerningTable = reinterpret_cast<FontKerningTableF*>(
-    Memory::alloc(FontKerningTableF::sizeFor(kerningPairsLength)));
+    MemMgr::alloc(FontKerningTableF::getSizeOf(kerningPairsLength)));
   if (FOG_IS_NULL(kerningTable)) return ERR_RT_OUT_OF_MEMORY;
 
   kerningTable->length = kerningPairsLength;
@@ -350,12 +346,12 @@ static err_t _WinGetKerningF(HDC hdc, FontKerningTableF** out)
   else
   {
     kerningWin = reinterpret_cast<KERNINGPAIR*>(
-      Memory::alloc(kerningPairsLength * sizeof(KERNINGPAIR)));
+      MemMgr::alloc(kerningPairsLength * sizeof(KERNINGPAIR)));
   }
 
   if (FOG_IS_NULL(kerningWin))
   {
-    Memory::free(kerningTable);
+    MemMgr::free(kerningTable);
     return ERR_RT_OUT_OF_MEMORY;
   }
 
@@ -378,12 +374,12 @@ static err_t _WinGetKerningF(HDC hdc, FontKerningTableF** out)
 
   if ((void*)kerningWin != (void*)kerningTable->pairs)
   {
-    Memory::free(kerningWin);
+    MemMgr::free(kerningWin);
   }
 
   if (!ok)
   {
-    Memory::free(kerningTable);
+    MemMgr::free(kerningTable);
     return ERR_FONT_INTERNAL;
   }
 
@@ -416,7 +412,7 @@ WinFontFace::~WinFontFace()
 // [Fog::WinFontFace - Interface]
 // ============================================================================
 
-err_t WinFontFace::getTextOutline(PathF& dst, const FontData* d, const PointF& pt, const Utf16& str)
+err_t WinFontFace::getTextOutline(PathF& dst, const FontData* d, const PointF& pt, const StubW& str)
 {
   AutoLock locked(pd->lock);
 
@@ -424,7 +420,7 @@ err_t WinFontFace::getTextOutline(PathF& dst, const FontData* d, const PointF& p
   return _getTextOutline(dst, &outlineCache, d, pt, str, &ctx);
 }
 
-err_t WinFontFace::getTextOutline(PathD& dst, const FontData* d, const PointD& pt, const Utf16& str)
+err_t WinFontFace::getTextOutline(PathD& dst, const FontData* d, const PointD& pt, const StubW& str)
 {
   AutoLock locked(pd->lock);
 
@@ -432,7 +428,7 @@ err_t WinFontFace::getTextOutline(PathD& dst, const FontData* d, const PointD& p
   return _getTextOutline(dst, &outlineCache, d, pt, str, &ctx);
 }
 
-err_t WinFontFace::getTextExtents(TextExtents& extents, const FontData* d, const Utf16& str)
+err_t WinFontFace::getTextExtents(TextExtents& extents, const FontData* d, const StubW& str)
 {
   // TODO:
   return ERR_RT_NOT_IMPLEMENTED;
@@ -456,18 +452,17 @@ static FOG_INLINE err_t _WinFontFace_renderGlyphOutline(WinFontFace* self,
 
   for (;;)
   {
-    DWORD dataSize = GetGlyphOutlineW(ctx->hDC, uc, GGO_NATIVE | GGO_UNHINTED, &ctx->gm, ctx->bufferSize, ctx->buffer.getMem(), &ctx->mat);
+    DWORD dataSize = GetGlyphOutlineW(ctx->hDC, uc, GGO_NATIVE | GGO_UNHINTED, &ctx->gm, (DWORD)ctx->buffer.getCapacity(), ctx->buffer.getMem(), &ctx->mat);
     if (dataSize == GDI_ERROR) return ERR_FONT_INTERNAL;
 
-    if (dataSize > ctx->bufferSize)
+    if ((size_t)dataSize > ctx->buffer.getCapacity())
     {
       // Reserve space for large glyph(s) and align it.
       dataSize = (dataSize + 4095) & ~4095;
 
-      ctx->buffer.reset();
-      if (FOG_IS_NULL(ctx->buffer.alloc(dataSize))) return ERR_RT_OUT_OF_MEMORY;
+      if (FOG_IS_NULL(ctx->buffer.alloc(dataSize)))
+        return ERR_RT_OUT_OF_MEMORY;
 
-      ctx->bufferSize = dataSize;
       continue;
     }
 

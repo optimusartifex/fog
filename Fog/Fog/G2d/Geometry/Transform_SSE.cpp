@@ -661,7 +661,7 @@ static void FOG_CDECL TransformF_mapPointsF_Degenerate_SSE(const TransformF& sel
 // [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void Transform_initSSE(void)
+FOG_NO_EXPORT void Transform_init_SSE(void)
 {
   _api.transformf.mapPointsF[TRANSFORM_TYPE_IDENTITY   ] = TransformF_mapPointsF_Identity_SSE;
   _api.transformf.mapPointsF[TRANSFORM_TYPE_TRANSLATION] = TransformF_mapPointsF_Translation_SSE;

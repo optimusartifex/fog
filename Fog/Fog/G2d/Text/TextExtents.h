@@ -52,12 +52,5 @@ struct TextExtentsD
 
 } // Fog namespace
 
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::TextExtentsI, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::TextExtentsF, Fog::TYPEINFO_PRIMITIVE)
-
 // [Guard]
 #endif // _FOG_G2D_TEXT_TEXTEXTENTS_H

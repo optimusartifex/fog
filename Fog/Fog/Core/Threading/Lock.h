@@ -11,10 +11,6 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Threading/Atomic.h>
 
-#if defined(FOG_OS_WINDOWS)
-#include <windows.h>
-#endif // FOG_OS_WINDOWS
-
 #if defined(FOG_OS_POSIX)
 #include <pthread.h>
 #endif // FOG_OS_POSIX
@@ -35,38 +31,72 @@ namespace Fog {
 //! @brief Lock.
 struct FOG_NO_EXPORT Lock
 {
+  // --------------------------------------------------------------------------
+  // [Windows Support]
+  // --------------------------------------------------------------------------
+
 #if defined(FOG_OS_WINDOWS)
   typedef CRITICAL_SECTION Handle;
-#endif // FOG_OS_WINDOWS
-
-#if defined(FOG_OS_POSIX)
-  typedef pthread_mutex_t Handle;
-#endif // FOG_OS_POSIX
-
-  // --------------------------------------------------------------------------
-  // [Construction / Destruction]
-  // --------------------------------------------------------------------------
 
   FOG_INLINE Lock()
   {
-#if defined(FOG_OS_WINDOWS)
     InitializeCriticalSection(&_handle);
     // InitializeCriticalSectionAndSpinCount(&_handle, 2000);
-#endif // FOG_OS_WINDOWS
-#if defined(FOG_OS_POSIX)
-    pthread_mutex_init(&_handle, &fog_lock_recursive_attrs);
-#endif // FOG_OS_POSIX
   }
 
   FOG_INLINE ~Lock()
   {
-#if defined(FOG_OS_WINDOWS)
     DeleteCriticalSection(&_handle);
-#endif // FOG_OS_WINDOWS
-#if defined(FOG_OS_POSIX)
-    pthread_mutex_destroy(&_handle);
-#endif // FOG_OS_POSIX
   }
+
+  FOG_INLINE void lock()
+  {
+    EnterCriticalSection(&_handle);
+  }
+
+  FOG_INLINE void unlock()
+  {
+    LeaveCriticalSection(&_handle);
+  }
+
+  FOG_INLINE bool tryLock()
+  {
+    return TryEnterCriticalSection(&_handle) != 0;
+  }
+#endif // FOG_OS_WINDOWS
+
+  // --------------------------------------------------------------------------
+  // [Posix Support]
+  // --------------------------------------------------------------------------
+
+#if defined(FOG_OS_POSIX)
+  typedef pthread_mutex_t Handle;
+
+  FOG_INLINE Lock()
+  {
+    pthread_mutex_init(&_handle, &fog_lock_recursive_attrs);
+  }
+
+  FOG_INLINE ~Lock()
+  {
+    pthread_mutex_destroy(&_handle);
+  }
+
+  FOG_INLINE void lock()
+  {
+    pthread_mutex_lock(&_handle);
+  }
+
+  FOG_INLINE void unlock()
+  {
+    pthread_mutex_unlock(&_handle);
+  }
+
+  FOG_INLINE bool tryLock()
+  {
+    return pthread_mutex_trylock(&_handle) != 0;
+  }
+#endif // FOG_OS_POSIX
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -83,47 +113,13 @@ struct FOG_NO_EXPORT Lock
   }
 
   // --------------------------------------------------------------------------
-  // [Lock / Unlock]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE void lock()
-  {
-#if defined(FOG_OS_WINDOWS)
-    EnterCriticalSection(&_handle);
-#endif // FOG_OS_WINDOWS
-#if defined(FOG_OS_POSIX)
-    pthread_mutex_lock(&_handle);
-#endif // FOG_OS_POSIX
-  }
-
-  FOG_INLINE void unlock()
-  {
-#if defined(FOG_OS_WINDOWS)
-    LeaveCriticalSection(&_handle);
-#endif // FOG_OS_WINDOWS
-#if defined(FOG_OS_POSIX)
-    pthread_mutex_unlock(&_handle);
-#endif // FOG_OS_POSIX
-  }
-
-  FOG_INLINE bool tryLock()
-  {
-#if defined(FOG_OS_WINDOWS)
-    return TryEnterCriticalSection(&_handle) != 0;
-#endif // FOG_OS_WINDOWS
-#if defined(FOG_OS_POSIX)
-    return pthread_mutex_trylock(&_handle) != 0;
-#endif // FOG_OS_POSIX
-  }
-
-  // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
   Handle _handle;
 
 private:
-  _FOG_CLASS_NO_COPY(Lock)
+  _FOG_NO_COPY(Lock)
 };
 
 // ============================================================================
@@ -186,11 +182,11 @@ struct FOG_NO_EXPORT AutoLock
   // --------------------------------------------------------------------------
 
 protected:
-  //! @brief Pointer to locked mutex.
+  //! @brief Pointer to a locked mutex.
   Lock* _target;
 
 private:
-  _FOG_CLASS_NO_COPY(AutoLock)
+  _FOG_NO_COPY(AutoLock)
 };
 
 // ============================================================================
@@ -231,11 +227,11 @@ struct FOG_NO_EXPORT AutoUnlock
   // --------------------------------------------------------------------------
 
 protected:
-  //! @brief Pointer to locked mutex.
+  //! @brief Pointer to a unlocked mutex.
   Lock* _target;
 
 private:
-  _FOG_CLASS_NO_COPY(AutoUnlock)
+  _FOG_NO_COPY(AutoUnlock)
 };
 
 //! @}

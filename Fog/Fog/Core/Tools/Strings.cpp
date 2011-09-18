@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/Global/EnumCore.h>
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/Strings.h>
@@ -208,7 +208,7 @@ FOG_NO_EXPORT void Strings_init(void)
     fog_strings_data,
     FOG_ARRAY_SIZE(fog_strings_data),
     STR_COUNT,
-    Ascii8("Fog")
+    StringW::fromAscii8("Fog")
   );
 }
 

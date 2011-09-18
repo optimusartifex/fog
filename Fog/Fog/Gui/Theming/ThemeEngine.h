@@ -8,7 +8,7 @@
 #define _FOG_GUI_THEMING_THEMEENGINE_H
 
 // [Dependencies]
-#include <Fog/Core/System/Object.h>
+#include <Fog/Core/Kernel/Object.h>
 
 namespace Fog {
 

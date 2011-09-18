@@ -4,12 +4,11 @@
 // MIT, See COPYING file in package
 
 // [Dependencies]
-#include <Fog/Core/Collection/Algorithms.h>
 #include <Fog/Core/Math/Convert.h>
 #include <Fog/Core/Math/Math.h>
+#include <Fog/Core/Tools/Algorithm.h>
 #include <Fog/Core/Tools/StringUtil.h>
 #include <Fog/G2d/Geometry/Transform.h>
-#include <Fog/Svg/Global/Constants.h>
 #include <Fog/Svg/Tools/SvgUtil.h>
 
 namespace Fog {
@@ -19,10 +18,10 @@ namespace SvgUtil {
 // [Fog::SvgUtil - Parse - Color]
 // ============================================================================
 
-FOG_API uint32_t parseColor(Color& dst, const String& str)
+FOG_API uint32_t parseColor(Color& dst, const StringW& str)
 {
-  const Char* strCur = str.getData();
-  const Char* strEnd = strCur + str.getLength();
+  const CharW* strCur = str.getData();
+  const CharW* strEnd = strCur + str.getLength();
 
   // Skip spaces.
   for (;;)
@@ -33,23 +32,23 @@ FOG_API uint32_t parseColor(Color& dst, const String& str)
     strCur++;
   }
 
-  if (strCur + 3 <= strEnd && strCur[0] == Char('u') &&
-                              strCur[1] == Char('r') &&
-                              strCur[2] == Char('l'))
+  if (strCur + 3 <= strEnd && strCur[0] == CharW('u') &&
+                              strCur[1] == CharW('r') &&
+                              strCur[2] == CharW('l'))
   {
     dst.reset();
     return SVG_SOURCE_URI;
   }
-  if (strCur + 4 <= strEnd && strCur[0] == Char('n') &&
-                              strCur[1] == Char('o') &&
-                              strCur[2] == Char('n') &&
-                              strCur[3] == Char('e'))
+  if (strCur + 4 <= strEnd && strCur[0] == CharW('n') &&
+                              strCur[1] == CharW('o') &&
+                              strCur[2] == CharW('n') &&
+                              strCur[3] == CharW('e'))
   {
     dst.reset();
     return SVG_SOURCE_NONE;
   }
 
-  err_t err = dst.parse(Utf16(strCur, (size_t)(strEnd - strCur)), COLOR_NAME_CSS);
+  err_t err = dst.parse(StubW(strCur, (size_t)(strEnd - strCur)), COLOR_NAME_CSS);
   if (err == ERR_OK) return SVG_SOURCE_COLOR;
 
   return SVG_SOURCE_INVALID;
@@ -59,27 +58,27 @@ FOG_API uint32_t parseColor(Color& dst, const String& str)
 // [Fog::SvgUtil - Parse - Opacity]
 // ============================================================================
 
-err_t parseOpacity(float& dst, const String& str)
+err_t parseOpacity(float& dst, const StringW& str)
 {
   size_t end;
   float d = 0.0;
-  err_t err = str.atof(&d, NULL, &end);
+  err_t err = str.parseReal(&d, CharW('.'), &end, NULL);
 
   if (err == ERR_OK)
   {
     // Parse '%'.
     if (end < str.getLength())
     {
-      const Char* strCur = str.getData();
-      const Char* strEnd = strCur + str.getLength();
+      const CharW* strCur = str.getData();
+      const CharW* strEnd = strCur + str.getLength();
 
       strCur += end;
 
       do {
-        Char c = *strCur;
+        CharW c = *strCur;
         if (c.isSpace()) continue;
 
-        if (c == Char('%'))
+        if (c == CharW('%'))
         {
           d *= 0.01f;
           return ERR_OK;
@@ -102,13 +101,13 @@ err_t parseOpacity(float& dst, const String& str)
 // [Fog::SvgUtil - Parse - Transform]
 // ============================================================================
 
-err_t parseTransform(TransformF& dst, const String& str)
+err_t parseTransform(TransformF& dst, const StringW& str)
 {
   err_t err = ERR_OK;
 
-  const Char* strCur = str.getData();
-  const Char* strEnd = strCur + str.getLength();
-  const Char* functionName;
+  const CharW* strCur = str.getData();
+  const CharW* strEnd = strCur + str.getLength();
+  const CharW* functionName;
   size_t functionLen;
 
   float d[6];
@@ -136,7 +135,7 @@ _Start:
   functionLen = (size_t)(strCur - functionName);
 
   // Parse '('.
-  if (strCur[0] != Char('(')) goto _End;
+  if (strCur[0] != CharW('(')) goto _End;
   strCur++;
 
   // Parse arguments.
@@ -147,7 +146,7 @@ _Start:
 
     // Parse number.
     size_t end;
-    if (StringUtil::atof(strCur, (size_t)(strEnd - strCur), &d[d_count++], Char('.'), &end) != ERR_OK)
+    if (StringUtil::parseReal(&d[d_count++], strCur, (size_t)(strEnd - strCur), CharW('.'), &end) != ERR_OK)
     {
       goto _End;
     }
@@ -164,19 +163,19 @@ _Start:
       {
         strCur++;
       }
-      else if (strCur[0] == Char(','))
+      else if (strCur[0] == CharW(','))
       {
         strCur++;
         if (commaParsed) goto _End;
         commaParsed = true;
       }
-      else if (strCur[0] == Char(')'))
+      else if (strCur[0] == CharW(')'))
       {
         strCur++;
         if (commaParsed) goto _End;
         goto _Done;
       }
-      else if (strCur[0].isAsciiDigit() || strCur[0] == Char('-') || strCur[0] == Char('+'))
+      else if (strCur[0].isAsciiDigit() || strCur[0] == CharW('-') || strCur[0] == CharW('+'))
       {
         break;
       }
@@ -271,24 +270,24 @@ static const char svgUnitNames[] =
   "ex";
 // ${UNIT:END}
 
-err_t parseCoord(SvgCoord& coord, const String& str)
+err_t parseCoord(SvgCoord& coord, const StringW& str)
 {
   float d = 0.0f;
   uint32_t unit = UNIT_PX;
 
   size_t end;
-  err_t err = str.atof(&d, NULL, &end);
+  err_t err = str.parseReal(&d, CharW('.'), &end, NULL);
 
   if (err == ERR_OK)
   {
     if (end < str.getLength())
     {
-      size_t end2 = str.indexOf(Char(' '), CASE_SENSITIVE, Range(end, DETECT_LENGTH));
-      Utf16 spec(str.getData() + end, (end2 == INVALID_INDEX ? str.getLength() : end2) - end);
+      size_t end2 = str.indexOf(Range(end, DETECT_LENGTH), CharW(' '), CASE_SENSITIVE);
+      StubW spec(str.getData() + end, (end2 == INVALID_INDEX ? str.getLength() : end2) - end);
 
       if (spec.getLength() == 1)
       {
-        if (spec[0] == Char('%')) unit = UNIT_PERCENTAGE;
+        if (spec[0] == CharW('%')) unit = UNIT_PERCENTAGE;
       }
       else if (spec.getLength() == 2)
       {
@@ -317,12 +316,12 @@ err_t parseCoord(SvgCoord& coord, const String& str)
 // [Fog::SvgUtil - Parse - ViewBox]
 // ============================================================================
 
-err_t parseViewBox(BoxF& box, const String& str)
+err_t parseViewBox(BoxF& box, const StringW& str)
 {
   err_t err = ERR_OK;
 
-  const Char* strCur = str.getData();
-  const Char* strEnd = strCur + str.getLength();
+  const CharW* strCur = str.getData();
+  const CharW* strEnd = strCur + str.getLength();
 
   float coords[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
   uint32_t position = 0;
@@ -341,14 +340,14 @@ err_t parseViewBox(BoxF& box, const String& str)
     }
 
     // Parse number.
-    err = StringUtil::atof(strCur, (size_t)(strEnd - strCur), &coords[position], Char('.'), &numEnd);
+    err = StringUtil::parseReal(&coords[position], strCur, (size_t)(strEnd - strCur), CharW('.'), &numEnd);
     if (FOG_IS_ERROR(err)) goto _Bail;
 
     strCur += numEnd;
     if (strCur == strEnd) break;
 
     // Parse optional comma.
-    if (*strCur == Char(','))
+    if (*strCur == CharW(','))
     {
       if (++strCur == strEnd) break;
     }
@@ -365,13 +364,13 @@ _Bail:
 // [Fog::SvgUtil - Parse - Points]
 // ============================================================================
 
-err_t parsePoints(PathF& dst, const String& str, bool closePath)
+err_t parsePoints(PathF& dst, const StringW& str, bool closePath)
 {
   err_t err = ERR_OK;
   bool first = true;
 
-  const Char* strCur = str.getData();
-  const Char* strEnd = strCur + str.getLength();
+  const CharW* strCur = str.getData();
+  const CharW* strEnd = strCur + str.getLength();
 
   float coords[2];
   uint32_t position = 0;
@@ -393,7 +392,7 @@ err_t parsePoints(PathF& dst, const String& str, bool closePath)
 
     // Parse number.
     size_t numEnd;
-    err = StringUtil::atof(strCur, (size_t)(strEnd - strCur), &coords[position], Char('.'), &numEnd);
+    err = StringUtil::parseReal(&coords[position], strCur, (size_t)(strEnd - strCur), CharW('.'), &numEnd);
     if (FOG_IS_ERROR(err)) goto _Bail;
 
     if (++position == 2)
@@ -415,14 +414,16 @@ err_t parsePoints(PathF& dst, const String& str, bool closePath)
     strCur += numEnd;
     if (strCur == strEnd) break;
 
-    if (*strCur == Char(','))
+    if (*strCur == CharW(','))
     {
       if (++strCur == strEnd) break;
     }
   }
 
 _Bail:
-  if (closePath && !dst.isEmpty()) dst.close();
+  if (closePath && !dst.isEmpty())
+    dst.close();
+
   dst.squeeze();
   return err;
 }
@@ -431,12 +432,12 @@ _Bail:
 // [Fog::SvgUtil - Parse - Path]
 // ============================================================================
 
-err_t parsePath(PathF& dst, const String& str)
+err_t parsePath(PathF& dst, const StringW& str)
 {
   err_t err = ERR_OK;
 
-  const Char* strCur = str.getData();
-  const Char* strEnd = strCur + str.getLength();
+  const CharW* strCur = str.getData();
+  const CharW* strEnd = strCur + str.getLength();
 
   uint32_t command = 0;
   uint32_t position;
@@ -505,13 +506,13 @@ err_t parsePath(PathF& dst, const String& str)
       // Parse number.
       size_t numEnd;
 
-      err = StringUtil::atof(strCur, (size_t)(strEnd - strCur), &coords[position], Char('.'), &numEnd);
+      err = StringUtil::parseReal(&coords[position], strCur, (size_t)(strEnd - strCur), CharW('.'), &numEnd);
       if (FOG_IS_ERROR(err)) goto _Bail;
 
       strCur += numEnd;
       if (strCur == strEnd) break;
 
-      if (*strCur == Char(','))
+      if (*strCur == CharW(','))
       {
         if (++strCur == strEnd) break;
       }
@@ -703,7 +704,7 @@ _Bail:
 // [Fog::SvgUtil - Serialize - Color]
 // ============================================================================
 
-err_t serializeColor(String& dst, const Color& color)
+err_t serializeColor(StringW& dst, const Color& color)
 {
   switch (color.getModel())
   {
@@ -715,8 +716,8 @@ err_t serializeColor(String& dst, const Color& color)
 
       if (argb32.getAlpha() == 0xFF)
       {
-        FOG_RETURN_ON_ERROR( dst.append(Char('#')) );
-        FOG_RETURN_ON_ERROR( dst.appendInt(argb32.getPacked32() & 0x00FFFFFF, 16, FormatFlags(6, 6)) );
+        FOG_RETURN_ON_ERROR( dst.append(CharW('#')) );
+        FOG_RETURN_ON_ERROR( dst.appendInt(argb32.getPacked32() & 0x00FFFFFF, FormatInt(16, NO_FLAGS, 6)) );
       }
       else
       {
@@ -765,17 +766,17 @@ err_t serializeColor(String& dst, const Color& color)
 // [Fog::SvgUtil - Serialize - Coord]
 // ============================================================================
 
-err_t serializeCoord(String& dst, const SvgCoord& coord)
+err_t serializeCoord(StringW& dst, const SvgCoord& coord)
 {
   float val = coord.value;
 
   if (coord.unit == UNIT_PERCENTAGE) val *= 100.0f;
-  FOG_RETURN_ON_ERROR(dst.appendDouble(coord.value));
+  FOG_RETURN_ON_ERROR(dst.appendReal(coord.value));
 
   if (coord.unit < UNIT_COUNT && svgUnitNames[coord.unit * 2] != '\0')
     FOG_RETURN_ON_ERROR(dst.append(Ascii8(&svgUnitNames[coord.unit * 2], 2)));
   else if (coord.unit == UNIT_PERCENTAGE)
-    FOG_RETURN_ON_ERROR(dst.append(Char('%')));
+    FOG_RETURN_ON_ERROR(dst.append(CharW('%')));
 
   return ERR_OK;
 }

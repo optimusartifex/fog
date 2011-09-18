@@ -9,13 +9,12 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/Hash.h>
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/IO/FileSystem.h>
-#include <Fog/Core/Memory/Alloc.h>
-#include <Fog/Core/OS/OS.h>
+#include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/Core/OS/UserInfo.h>
 #include <Fog/Core/Threading/Lock.h>
+#include <Fog/Core/Tools/Hash.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Geometry/Point.h>
@@ -48,28 +47,28 @@ static FOG_INLINE bool _Font_isSupportedUnit(uint32_t unit)
 
 static FOG_INLINE FontData* _Font_dalloc()
 {
-  FontData* d = reinterpret_cast<FontData*>(Memory::alloc(sizeof(FontData)));
+  FontData* d = reinterpret_cast<FontData*>(MemMgr::alloc(sizeof(FontData)));
   if (FOG_IS_NULL(d)) return d;
 
-  d->refCount.init(1);
+  d->reference.init(1);
   return d;
 }
 
 static FOG_INLINE void _Font_dfree(FontData* d)
 {
   if (d->face) d->face->deref();
-  Memory::free(d);
+  MemMgr::free(d);
 }
 
 static FOG_INLINE FontData* _Font_ref(FontData* d)
 {
-  d->refCount.inc();
+  d->reference.inc();
   return d;
 }
 
 static FOG_INLINE void _Font_deref(FontData* d)
 {
-  if (d->refCount.deref()) _Font_dfree(d);
+  if (d->reference.deref()) _Font_dfree(d);
 }
 
 static void _Font_initValues(FontData* d)
@@ -170,7 +169,7 @@ err_t Font::_detach()
   newd->forceCaching = _d->forceCaching;
 
   if (_d->face != NULL)
-    newd->face = _d->face->ref();
+    newd->face = _d->face->addRef();
 
   _Font_deref(atomicPtrXchg(&_d, newd));
   return ERR_OK;
@@ -410,7 +409,7 @@ void Font::reset()
 // [Fog::Font - Create]
 // ============================================================================
 
-err_t Font::create(const String& family, float height, uint32_t unit)
+err_t Font::create(const StringW& family, float height, uint32_t unit)
 {
   FOG_ASSERT(_d != NULL);
 
@@ -440,7 +439,7 @@ err_t Font::create(const String& family, float height, uint32_t unit)
   return ERR_OK;
 }
 
-err_t Font::create(const String& family, float height, uint32_t unit,
+err_t Font::create(const StringW& family, float height, uint32_t unit,
   const FontHints& hints, const TransformF& transform)
 {
   if (!_Font_isSupportedUnit(unit))
@@ -502,31 +501,15 @@ err_t Font::_fromFace(FontFace* face, float height, uint32_t unit)
 // [Fog::Font - Methods]
 // ============================================================================
 
-err_t Font::getTextOutline(PathF& dst, const PointF& pt, const String& str, uint32_t cntOp) const
+err_t Font::getTextOutline(PathF& dst, const PointF& pt, const StringW& str, uint32_t cntOp) const
 {
   FOG_ASSERT(_d != NULL);
 
   if (cntOp == CONTAINER_OP_REPLACE) dst.clear();
-  return _d->face->getTextOutline(dst, _d, pt, Utf16(str.getData(), str.getLength()));
+  return _d->face->getTextOutline(dst, _d, pt, StubW(str.getData(), str.getLength()));
 }
 
-err_t Font::getTextOutline(PathF& dst, const PointF& pt, const Utf16& str, uint32_t cntOp) const
-{
-  FOG_ASSERT(_d != NULL);
-
-  if (cntOp == CONTAINER_OP_REPLACE) dst.clear();
-  return _d->face->getTextOutline(dst, _d, pt, str);
-}
-
-err_t Font::getTextOutline(PathD& dst, const PointD& pt, const String& str, uint32_t cntOp) const
-{
-  FOG_ASSERT(_d != NULL);
-
-  if (cntOp == CONTAINER_OP_REPLACE) dst.clear();
-  return _d->face->getTextOutline(dst, _d, pt, Utf16(str.getData(), str.getLength()));
-}
-
-err_t Font::getTextOutline(PathD& dst, const PointD& pt, const Utf16& str, uint32_t cntOp) const
+err_t Font::getTextOutline(PathF& dst, const PointF& pt, const StubW& str, uint32_t cntOp) const
 {
   FOG_ASSERT(_d != NULL);
 
@@ -534,14 +517,30 @@ err_t Font::getTextOutline(PathD& dst, const PointD& pt, const Utf16& str, uint3
   return _d->face->getTextOutline(dst, _d, pt, str);
 }
 
-err_t Font::getTextExtents(TextExtents& extents, const String& str) const
+err_t Font::getTextOutline(PathD& dst, const PointD& pt, const StringW& str, uint32_t cntOp) const
 {
   FOG_ASSERT(_d != NULL);
 
-  return _d->face->getTextExtents(extents, _d, Utf16(str.getData(), str.getLength()));
+  if (cntOp == CONTAINER_OP_REPLACE) dst.clear();
+  return _d->face->getTextOutline(dst, _d, pt, StubW(str.getData(), str.getLength()));
 }
 
-err_t Font::getTextExtents(TextExtents& extents, const Utf16& str) const
+err_t Font::getTextOutline(PathD& dst, const PointD& pt, const StubW& str, uint32_t cntOp) const
+{
+  FOG_ASSERT(_d != NULL);
+
+  if (cntOp == CONTAINER_OP_REPLACE) dst.clear();
+  return _d->face->getTextOutline(dst, _d, pt, str);
+}
+
+err_t Font::getTextExtents(TextExtents& extents, const StringW& str) const
+{
+  FOG_ASSERT(_d != NULL);
+
+  return _d->face->getTextExtents(extents, _d, StubW(str.getData(), str.getLength()));
+}
+
+err_t Font::getTextExtents(TextExtents& extents, const StubW& str) const
 {
   FOG_ASSERT(_d != NULL);
 

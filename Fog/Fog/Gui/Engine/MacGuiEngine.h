@@ -8,10 +8,9 @@
 #define _FOG_GUI_GUIENGINE_MACGUIENGINE_H
 
 // [Dependencies]
-#include <Fog/Core/System/Object.h>
+#include <Fog/Core/Kernel/Object.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
-#include <Fog/Gui/Global/Constants.h>
 #include <Fog/Gui/Engine/GuiEngine.h>
 #include <Fog/Core/Mac/MacScopedAutoReleasePool.h>
 #include <Fog/Core/Mac/MacUtil_Core.h>

@@ -8,7 +8,7 @@
 #define _FOG_CORE_MATH_CONSTANTS_H
 
 // [Dependencies]
-#include <Fog/Core/Config/Config.h>
+#include <Fog/Core/C++/Base.h>
 
 namespace Fog {
 
@@ -186,6 +186,57 @@ static const float MATH_EPSILON_F = 1e-8f;
 
 //! @brief Default epsilon used in math for 64-bit floats.
 static const double MATH_EPSILON_D = 1e-14;
+
+// ============================================================================
+// [Fog::MathConstant]
+// ============================================================================
+
+//! @brief Math constants structure.
+template<typename NumT>
+struct MathConstant {};
+
+template<>
+struct MathConstant<float>
+{
+  //! @brief Get math epsilon (float).
+  static FOG_INLINE float getEpsilon() { return MATH_EPSILON_F; }
+
+  //! @brief Get default flatness (float).
+  static FOG_INLINE float getDefaultFlatness() { return 0.20f; }
+
+  //! @brief Get intersection epsilon (float).
+  static FOG_INLINE float getIntersectionEpsilon() { return 1.0e-8f; }
+
+  static FOG_INLINE float getCollinearityEpsilon() { return 1e-8f; }
+
+  //! @brief Get coinciding points maximal distance (float).
+  static FOG_INLINE float getDistanceEpsilon() { return 1.0e-6f; }
+
+  //! @brief Get epsilon used to prevent from adding degenerate curves (float).
+  static FOG_INLINE float getAngleEpsilon() { return MATH_EPSILON_F; }
+};
+
+template<>
+struct MathConstant<double>
+{
+  //! @brief Get math epsilon (double).
+  static FOG_INLINE double getEpsilon() { return MATH_EPSILON_D; }
+
+  //! @brief Get default flatness (double).
+  static FOG_INLINE double getDefaultFlatness() { return 0.20; }
+
+  //! @brief Get intersection epsilon (double).
+  static FOG_INLINE double getIntersectionEpsilon() { return 1.0e-30; }
+
+  static FOG_INLINE double getCollinearityEpsilon() { return 1e-30; }
+
+  //! @brief Get coinciding points maximal distance (double).
+  static FOG_INLINE double getDistanceEpsilon() { return 1.0e-14; }
+
+  //! TODO: DEPRECATED, remove getAngleEpsilon.
+  //! @brief Get epsilon used to prevent from adding degenerate curves (double).
+  static FOG_INLINE double getAngleEpsilon() { return MATH_EPSILON_D; }
+};
 
 //! @}
 

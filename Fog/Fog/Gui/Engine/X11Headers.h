@@ -8,7 +8,7 @@
 #define _FOG_GUI_ENGINE_X11HEADERS_H
 
 // [Dependencies]
-#include <Fog/Core/Config/Config.h>
+#include <Fog/Core/C++/Base.h>
 
 // [Guard]
 #if defined(FOG_GUI_X11)

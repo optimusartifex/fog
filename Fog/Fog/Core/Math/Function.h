@@ -8,8 +8,7 @@
 #define _FOG_CORE_MATH_FUNCTION_H
 
 // [Dependencies]
-#include <Fog/Core/Config/Config.h>
-#include <Fog/Core/Global/Class.h>
+#include <Fog/Core/Global/Global.h>
 
 namespace Fog {
 
@@ -40,7 +39,9 @@ struct FOG_API FunctionD
 // [Fog::FunctionT<>]
 // ============================================================================
 
-FOG_CLASS_PRECISION_F_D(Function)
+_FOG_NUM_T(Function)
+_FOG_NUM_F(Function)
+_FOG_NUM_D(Function)
 
 //! @}
 

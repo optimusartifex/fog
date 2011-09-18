@@ -8,12 +8,12 @@
 #include FOG_PRECOMP
 #endif // FOG_PRECOMP
 
-#include <Fog/Core/Config/Config.h>
+#include <Fog/Core/C++/Base.h>
 #if defined(FOG_OS_WINDOWS)
 
 // [Dependencies]
-#include <Fog/Core/Library/Library.h>
 #include <Fog/Core/Threading/Lock.h>
+#include <Fog/Core/OS/Library.h>
 #include <Fog/G2d/Painting/Painter.h>
 #include <Fog/Gui/Theming/WinThemeEngine_p.h>
 #include <Fog/G2d/Win/UxThemeLibrary.h>

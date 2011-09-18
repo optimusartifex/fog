@@ -53,7 +53,7 @@ struct FOG_NO_EXPORT PTextureBase
     uint32_t srcFormat = srcImage.getFormat();
     uint32_t srcBPP = srcImage.getBytesPerPixel();
     uint32_t srcHasAlpha = (srcImage.getFormatDescription().getComponentMask() & IMAGE_COMPONENT_ALPHA) != 0;
-    sysint_t srcStride = srcImage.getStride();
+    ssize_t srcStride = srcImage.getStride();
 
     if (tileMode == TEXTURE_TILE_CLAMP)
     {
@@ -67,8 +67,8 @@ struct FOG_NO_EXPORT PTextureBase
     // Initialize base variables, including shallow copy of a given image.
     ctx->_d.texture.base.texture.initCustom1(srcImage);
     ctx->_d.texture.base.pixels = srcImage.getFirst() +
-                                  (sysint_t)srcFragment.y * srcStride +
-                                  (sysint_t)srcFragment.x * srcBPP;
+                                  (ssize_t)srcFragment.y * srcStride +
+                                  (ssize_t)srcFragment.x * srcBPP;
 
     ctx->_d.texture.base.pal = (srcFormat == IMAGE_FORMAT_I8)
       ? reinterpret_cast<const uint32_t*>(srcImage.getPalette().getData())

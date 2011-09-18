@@ -4,12 +4,12 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#include <Fog/Core/Config/Config.h>
+#include <Fog/Core/C++/Base.h>
 #if defined(FOG_GUI_WINDOWS)
 
 // [Dependencies]
-#include <Fog/Core/System/Application.h>
-#include <Fog/Gui/Global/Constants.h>
+#include <Fog/Core/Global/Global.h>
+#include <Fog/Core/Kernel/Application.h>
 #include <Fog/Gui/Engine/WinGuiEngine.h>
 #include <Fog/Gui/Widget/Widget.h>
 
@@ -125,7 +125,7 @@ WinGuiEngine::WinGuiEngine()
   memset(&_winKeymap, 0, sizeof(_winKeymap));
 
   // Initialize key translation tables.
-  Fog::Memory::zero(&_winKeymap, sizeof(WinKeymap));
+  Fog::MemOps::zero(&_winKeymap, sizeof(WinKeymap));
 
   _winKeymap.vk[VK_BACK] = KEY_BACKSPACE;
   _winKeymap.vk[VK_TAB] = KEY_TAB;
@@ -336,7 +336,7 @@ void WinGuiEngine::updateDisplayInfo()
   // (for 8-bit modes) or bitfields (for 16 and 32-bit modes).
   dibSize = sizeof(BITMAPINFOHEADER) + 256 * sizeof (RGBQUAD);
 
-  dibHdr = (LPBITMAPINFOHEADER)Memory::calloc(dibSize);
+  dibHdr = (LPBITMAPINFOHEADER)MemMgr::calloc(dibSize);
   if (!dibHdr) return;
 
   dibHdr->biSize = sizeof(BITMAPINFOHEADER);
@@ -397,7 +397,7 @@ void WinGuiEngine::updateDisplayInfo()
       break;
   }
 
-  Memory::free(dibHdr);
+  MemMgr::free(dibHdr);
 }
 
 // ============================================================================
@@ -456,7 +456,7 @@ void WinGuiEngine::destroyGuiWindow(GuiWindow* native)
 }
 
 // ============================================================================
-// [Fog::WinGuiEngine - Windows Specific]
+// [Fog::WinGuiEngine - Windows Support]
 // ============================================================================
 
 uint32_t WinGuiEngine::winKeyToModifier(WPARAM* wParam, LPARAM lParam)
@@ -1151,7 +1151,7 @@ err_t WinGuiWindow::create(uint32_t flags)
   return ERR_OK;
 
 _Fail:
-  return ERR_GUI_CANT_CREATE_WINDOW;
+  return ERR_UI_CANT_CREATE_WINDOW;
 }
 
 err_t WinGuiWindow::destroy()
@@ -1309,7 +1309,7 @@ err_t WinGuiWindow::takeFocus()
   return ERR_OK;
 }
 
-err_t WinGuiWindow::setTitle(const String& title)
+err_t WinGuiWindow::setTitle(const StringW& title)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
@@ -1319,7 +1319,7 @@ err_t WinGuiWindow::setTitle(const String& title)
   return ERR_OK;
 }
 
-err_t WinGuiWindow::getTitle(String& title)
+err_t WinGuiWindow::getTitle(StringW& title)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
@@ -1365,7 +1365,7 @@ err_t WinGuiWindow::worldToClient(PointI* coords)
 
   return ScreenToClient((HWND)_handle, (POINT *)coords)
     ? (err_t)ERR_OK
-    : (err_t)ERR_GUI_CANT_TRANSLETE_COORDINATES;
+    : (err_t)ERR_UI_CANT_TRANSLATE_COORDINATES;
 }
 
 err_t WinGuiWindow::clientToWorld(PointI* coords)
@@ -1374,7 +1374,7 @@ err_t WinGuiWindow::clientToWorld(PointI* coords)
 
   return ClientToScreen((HWND)_handle, (POINT *)coords)
     ? (err_t)ERR_OK
-    : (err_t)ERR_GUI_CANT_TRANSLETE_COORDINATES;
+    : (err_t)ERR_UI_CANT_TRANSLATE_COORDINATES;
 }
 
 void WinGuiWindow::setOwner(GuiWindow* w)
@@ -1436,7 +1436,7 @@ LRESULT WinGuiWindow::KeyboardMessageHelper(HWND hwnd, UINT message, WPARAM wPar
         guiEngine->winKeyToFogKey(wParam, HIWORD(lParam)),
         modifier,
         (uint32_t)wParam,
-        Char(guiEngine->winKeyToUnicode(wParam, HIWORD(lParam)))
+        CharW(guiEngine->winKeyToUnicode(wParam, HIWORD(lParam)))
         );
 
       if (used) return 0;
@@ -1449,7 +1449,7 @@ LRESULT WinGuiWindow::KeyboardMessageHelper(HWND hwnd, UINT message, WPARAM wPar
         guiEngine->winKeyToFogKey(wParam, HIWORD(lParam)),
         modifier,
         (uint32_t)wParam,
-        Char(guiEngine->winKeyToUnicode(wParam, HIWORD(lParam)))
+        CharW(guiEngine->winKeyToUnicode(wParam, HIWORD(lParam)))
         );
 
       if (used) return 0;
@@ -1864,7 +1864,7 @@ bool WinGuiBackBuffer::resize(int width, int height, bool cache)
       goto _Fail;
     }
 
-    Fog::Memory::zero(&bmi, sizeof(bmi));
+    Fog::MemOps::zero(&bmi, sizeof(bmi));
     bmi.bmiHeader.biSize        = sizeof(bmi.bmiHeader);
     bmi.bmiHeader.biWidth       = targetWidth;
     bmi.bmiHeader.biHeight      = -targetHeight;

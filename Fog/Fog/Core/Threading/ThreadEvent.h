@@ -11,11 +11,6 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Threading/Atomic.h>
 
-// [Dependencies - Windows]
-#if defined(FOG_OS_WINDOWS)
-#include <windows.h>
-#endif // FOG_OS_WINDOWS
-
 // [Dependencies - Posix]
 #if defined(FOG_OS_POSIX)
 #include <Fog/Core/Threading/Lock.h>
@@ -91,7 +86,7 @@ private:
   bool _manualReset;
 #endif // FOG_OS_POSIX
 
-  _FOG_CLASS_NO_COPY(ThreadEvent)
+  _FOG_NO_COPY(ThreadEvent)
 };
 
 //! @}

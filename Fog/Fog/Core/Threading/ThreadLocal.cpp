@@ -10,13 +10,8 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Init_p.h>
-#include <Fog/Core/Memory/Alloc.h>
+#include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/Core/Threading/ThreadLocal.h>
-
-// [Dependencies - Windows]
-#if defined(FOG_OS_WINDOWS)
-# include <windows.h>
-#endif // FOG_OS_WINDOWS
 
 // [Dependencies - Posix]
 #if defined(FOG_OS_POSIX)
@@ -49,14 +44,14 @@ static void ThreadLocal_dummy(void*) {}
 //   http://www.nynaeve.net/?tag=tls
 //
 // NOTE: The technique to allocate one TLS variable and to use it for all
-// thread-local indexes allocated by @c ThreadLocal instance is the same for
+// thread-local indices allocated by @c ThreadLocal instance is the same for
 // all supported platforms. The only difference is the used technique.
 
 // Local TLS index to our thread-local table.
 static Atomic<uint32_t> ThreadLocal_index;
 
 // Destructors of our thread-local table.
-static ThreadLocalDestructorFn ThreadLocal_dtorList[THREAD_LOCAL_SIZE];
+static ThreadLocalDestructorFunc ThreadLocal_dtorList[THREAD_LOCAL_SIZE];
 
 // Forward Declarations.
 static void ThreadLocal_onThreadExit();
@@ -100,20 +95,20 @@ static err_t ThreadLocal_create(uint32_t* slot, void* _dtor)
   FOG_ASSERT(slot != NULL);
   FOG_ASSERT(ThreadLocal_global != TLS_OUT_OF_INDEXES);
 
-  ThreadLocalDestructorFn dtor = (ThreadLocalDestructorFn)_dtor;
+  ThreadLocalDestructorFunc dtor = (ThreadLocalDestructorFunc)_dtor;
   if (dtor == NULL) dtor = ThreadLocal_dummy;
 
   uint32_t i = ThreadLocal_index.addXchg(1);
   if (FOG_UNLIKELY(i >= THREAD_LOCAL_SIZE))
   {
-    // If all thread-local indexes are used, we try to find free index looking
+    // If all thread-local indices are used, we try to find free index looking
     // for NULL destructor in ThreadLocal_dtorList. But we also decrement the
     // index to cleanup our addXchg() operation.
     ThreadLocal_index.dec();
 
     for (i = 1; i < THREAD_LOCAL_SIZE; i++)
     {
-      if (AtomicCore<ThreadLocalDestructorFn>::cmpXchg(&ThreadLocal_dtorList[i], NULL, dtor))
+      if (AtomicCore<ThreadLocalDestructorFunc>::cmpXchg(&ThreadLocal_dtorList[i], NULL, dtor))
       {
         // Index found.
         *slot = i;
@@ -124,7 +119,7 @@ static err_t ThreadLocal_create(uint32_t* slot, void* _dtor)
     return ERR_THREAD_TLS_EXHAUSTED;
   }
 
-  AtomicCore<ThreadLocalDestructorFn>::set(&ThreadLocal_dtorList[i], dtor);
+  AtomicCore<ThreadLocalDestructorFunc>::set(&ThreadLocal_dtorList[i], dtor);
   *slot = i;
 
   return ERR_OK;
@@ -135,9 +130,9 @@ static err_t ThreadLocal_destroy(uint32_t slot)
   if (FOG_UNLIKELY(slot - 1 >= THREAD_LOCAL_SIZE - 1))
     return (slot == 0) ? (err_t)ERR_OK : ERR_THREAD_TLS_INVALID;
 
-  // The TLS index is not reused until all thread-local indexes are allocated.
+  // The TLS index is not reused until all thread-local indices are allocated.
   // So this is the only needed step to free the TLS index.
-  AtomicCore<ThreadLocalDestructorFn>::setXchg(&ThreadLocal_dtorList[slot], NULL);
+  AtomicCore<ThreadLocalDestructorFunc>::setXchg(&ThreadLocal_dtorList[slot], NULL);
 
   return ERR_OK;
 }
@@ -171,7 +166,7 @@ static err_t ThreadLocal_set(uint32_t slot, void* value)
   {
     // TLS hasn't been allocated by this thread yet. It's needed to allocate
     // the memory to store our TLS values.
-    g = Memory::calloc(THREAD_LOCAL_SIZE * sizeof(void*));
+    g = MemMgr::calloc(THREAD_LOCAL_SIZE * sizeof(void*));
     if (FOG_IS_NULL(g))
       return ERR_RT_OUT_OF_MEMORY;
 
@@ -188,18 +183,18 @@ static void ThreadLocal_onThreadExit()
   if (FOG_IS_NULL(g)) return;
 
   uint32_t i, count = ThreadLocal_index.get();
-  ThreadLocalDestructorFn dummy = ThreadLocal_dummy;
+  ThreadLocalDestructorFunc dummy = ThreadLocal_dummy;
 
   // Call all registered destructors.
   for (i = 1; i < count; i++)
   {
-    ThreadLocalDestructorFn dtor = AtomicCore<ThreadLocalDestructorFn>::get(&ThreadLocal_dtorList[i]);
+    ThreadLocalDestructorFunc dtor = AtomicCore<ThreadLocalDestructorFunc>::get(&ThreadLocal_dtorList[i]);
     if (dtor == NULL || dtor == dummy) continue;
     dtor(reinterpret_cast<void**>(g)[i]);
   }
 
   // Clean-up.
-  Memory::free(g);
+  MemMgr::free(g);
   _FOG_TLS_SET(NULL);
 }
 
@@ -249,7 +244,7 @@ FOG_NO_EXPORT void ThreadLocal_init(void)
   }
 
   // Initialize destructor list to dummy.
-  ThreadLocalDestructorFn dummy = ThreadLocal_dummy;
+  ThreadLocalDestructorFunc dummy = ThreadLocal_dummy;
   for (uint i = 1; i < THREAD_LOCAL_SIZE; i++)
     ThreadLocal_dtorList[i] = dummy;
 
@@ -273,23 +268,23 @@ FOG_NO_EXPORT void ThreadLocal_fini(void)
 
 #if defined(FOG_OS_POSIX)
 
-static void pthread_onThreadExit(void* p)
+static void ThreadLocal_pThreadExit(void* p)
 {
-
+  ThreadLocal_onThreadExit();
 }
 
-FOG_NO_EXPORT void _core_threadlocal_init(void)
+FOG_NO_EXPORT void ThreadLocal_init(void)
 {
   ThreadLocal_index.init(1);
 
-  int result = ::pthread_key_create(&ThreadLocal_global, pthread_onThreadExit);
+  int result = ::pthread_key_create(&ThreadLocal_global, ThreadLocal_pThreadExit);
   if (FOG_UNLIKELY(result != 0))
   {
     Debug::failFunc("Fog::ThreadLocal", "$init", "Failed to create system TLS using pthread_key_create().\n");
   }
 
   // Initialize destructor list to dummy.
-  ThreadLocalDestructorFn dummy = ThreadLocal_dummy;
+  ThreadLocalDestructorFunc dummy = ThreadLocal_dummy;
   for (uint i = 1; i < THREAD_LOCAL_SIZE; i++)
     ThreadLocal_dtorList[i] = dummy;
 
@@ -299,7 +294,7 @@ FOG_NO_EXPORT void _core_threadlocal_init(void)
   _api.threadlocal.set = ThreadLocal_set;
 }
 
-FOG_NO_EXPORT void _core_threadlocal_fini(void)
+FOG_NO_EXPORT void ThreadLocal_fini(void)
 {
   ::pthread_key_delete(ThreadLocal_global);
 }

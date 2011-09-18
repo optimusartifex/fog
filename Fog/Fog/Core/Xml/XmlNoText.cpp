@@ -26,12 +26,12 @@ XmlNoText::~XmlNoText()
 {
 }
 
-String XmlNoText::getTextContent() const
+StringW XmlNoText::getTextContent() const
 {
-  return String();
+  return StringW();
 }
 
-err_t XmlNoText::setTextContent(const String& text)
+err_t XmlNoText::setTextContent(const StringW& text)
 {
   return ERR_XML_NOT_A_TEXT_NODE;
 }

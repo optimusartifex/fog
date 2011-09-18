@@ -10,6 +10,7 @@
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Math.h>
+#include <Fog/Core/Memory/ZoneAllocator_p.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Path.h>
@@ -24,13 +25,50 @@
 // ============================================================================
 
 #if defined(FOG_DEBUG_RASTERIZER)
-#include <Fog/Core/Tools/ByteArray.h>
+#include <Fog/Core/Tools/String.h>
 #endif // FOG_DEBUG_RASTERIZER
 
 namespace Fog {
 
 //! @addtogroup Fog_G2d_Painting
 //! @{
+
+// ============================================================================
+// [Fog::RasterizerApi]
+// ============================================================================
+
+struct FOG_NO_EXPORT RasterizerApi
+{
+  typedef void (FOG_CDECL *Render8Func)(Rasterizer8* self, RasterFiller* filler, RasterScanline8* scanline);
+
+  // --------------------------------------------------------------------------
+  // [Box]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *BoxRasterizer8_Init32x0)(BoxRasterizer8* self, const BoxI* box);
+  typedef void (FOG_CDECL *BoxRasterizer8_Init24x8)(BoxRasterizer8* self, const BoxI* box24x8);
+
+  struct _Api_BoxRasterizer8
+  {
+    BoxRasterizer8_Init32x0 init32x0;
+    BoxRasterizer8_Init24x8 init24x8;
+
+    Render8Func render_32x0[RASTER_CLIP_COUNT];
+    Render8Func render_24x8[RASTER_CLIP_COUNT];
+  } box8;
+
+  // --------------------------------------------------------------------------
+  // [Path]
+  // --------------------------------------------------------------------------
+
+  struct _Api_PathRasterizer8
+  {
+    Render8Func render_nonzero[2][RASTER_CLIP_COUNT];
+    Render8Func render_evenodd[2][RASTER_CLIP_COUNT];
+  } path8;
+};
+
+extern FOG_NO_EXPORT RasterizerApi Rasterizer_api;
 
 // ============================================================================
 // [Fog::Rasterizer8]
@@ -41,14 +79,6 @@ namespace Fog {
 //! @brief Rasterizer interface (8-bit).
 struct FOG_NO_EXPORT Rasterizer8
 {
-  // --------------------------------------------------------------------------
-  // [Typedefs]
-  // --------------------------------------------------------------------------
-
-  //! @brief Rasterize the entire shape, using callback functions to perform
-  //! a specific tasks.
-  typedef void (FOG_CDECL *RenderFn)(Rasterizer8* self, RasterFiller* filler, RasterScanline8* scanline, MemoryBuffer* buffer);
-
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
@@ -93,7 +123,7 @@ struct FOG_NO_EXPORT Rasterizer8
   {
     return _opacity;
   }
-  
+
   FOG_INLINE void setOpacity(uint32_t opacity)
   {
     FOG_ASSERT(opacity <= 0x100);
@@ -112,7 +142,7 @@ struct FOG_NO_EXPORT Rasterizer8
     _clip.region.data = data;
     _clip.region.length = length;
   }
-  
+
   FOG_INLINE void setClipMask(int y0, int y1, const RasterSpan8** spans)
   {
     _clipType = RASTER_CLIP_MASK;
@@ -130,9 +160,9 @@ struct FOG_NO_EXPORT Rasterizer8
   // [Render]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void render(RasterFiller* filler, RasterScanline8* scanline, MemoryBuffer* buffer)
+  FOG_INLINE void render(RasterFiller* filler, RasterScanline8* scanline)
   {
-    _render(this, filler, scanline, buffer);
+    _render(this, filler, scanline);
   }
 
   // --------------------------------------------------------------------------
@@ -148,7 +178,7 @@ struct FOG_NO_EXPORT Rasterizer8
   RasterScope _scope;
 
   //! @brief Render function (set by rasterizer).
-  RenderFn _render;
+  RasterizerApi::Render8Func _render;
 
   //! @brief Whether the rasterizer is initialized (contains something which
   //! can be rendered).
@@ -208,14 +238,14 @@ struct FOG_NO_EXPORT BoxRasterizer8 : public Rasterizer8
   // [Setup]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void initAligned(const BoxI& box)
+  FOG_INLINE void init32x0(const BoxI& box)
   {
-    _rasterApi.boxrasterizer8.initAligned(this, &box);
+    Rasterizer_api.box8.init32x0(this, &box);
   }
 
   FOG_INLINE void init24x8(const BoxI& box24x8)
   {
-    _rasterApi.boxrasterizer8.init24x8(this, &box24x8);
+    Rasterizer_api.box8.init24x8(this, &box24x8);
   }
 
   // --------------------------------------------------------------------------
@@ -263,7 +293,7 @@ struct FOG_NO_EXPORT BoxRasterizer8 : public Rasterizer8
 //!   1. Create/Reset
 //!
 //!      If the rasterizer is reused, reset ensures that all data related to
-//!      the previous rasterization are reset. It is the requirement. To reset 
+//!      the previous rasterization are reset. It is the requirement. To reset
 //!      the rasterizer use @c Rasterizer8::reset() method.
 //!
 //!      In case that the rasterizer is only used one time, the Reset step should
@@ -297,19 +327,19 @@ struct FOG_NO_EXPORT BoxRasterizer8 : public Rasterizer8
 //!
 //!      2c) Opacity:
 //!
-//!      The opacity parameter is used to rasterize a semi-transparent shape. 
+//!      The opacity parameter is used to rasterize a semi-transparent shape.
 //!      The default 'opacity' value is 256. To control the global opacity
-//!      use the @c Rasterizer8::getOpacity() and @c Rasterizer8::setOpacity() 
+//!      use the @c Rasterizer8::getOpacity() and @c Rasterizer8::setOpacity()
 //!      methods.
 //!
 //!      2d) Clipping:
 //!
 //!      Currently the raster paint-engine supports three kinds of clipping.
-//!      The box clipping is always used (PathClipper by raster-paint engine 
+//!      The box clipping is always used (PathClipper by raster-paint engine
 //!      and scene-box by Rasterizer8). To use region/mask clipping the
 //!      additional steps are needed.
 //!
-//!      To setup region/mask clipping the setClipRegion() or setClipMask() 
+//!      To setup region/mask clipping the setClipRegion() or setClipMask()
 //!      methods must be used. Notice that the clip region/mask must be known
 //!      before the shape is rasterized and can't change until the rasterizer
 //!      is used.
@@ -319,7 +349,7 @@ struct FOG_NO_EXPORT BoxRasterizer8 : public Rasterizer8
 //!      After the rasterizer parameters are set-up, the rasterizer must be
 //!      initialized. The initialization is simply a validation of all
 //!      parameters and preparation for adding path(s). To initialize the
-//!      rasterizer use @c Rasterizer8::initialize() method.
+//!      rasterizer use @c Rasterizer8::init() method.
 //!
 //!      The initialization step is mandatory!
 //!
@@ -327,7 +357,7 @@ struct FOG_NO_EXPORT BoxRasterizer8 : public Rasterizer8
 //!
 //!      After the rasterizer was initialized, the shapes can be added. There
 //!      is no limitation to the type or count of shapes which might be added
-//!      to the rasterizer, but generally all shapes are converted to the 
+//!      to the rasterizer, but generally all shapes are converted to the
 //!      segments of lines first. To add polygon or path use addPath() method.
 //!
 //!      The scanline path/polygon rasterizer requires that the one contour
@@ -367,61 +397,29 @@ struct FOG_NO_EXPORT BoxRasterizer8 : public Rasterizer8
 //!      to do that.
 //!
 //!
-//! The rasterizer uses the analytic approach to exactly calculate the coverage
-//! of the output pixels. It generates CELLs which represent the pixel position
-//! (cell position), cover, and area. Pixel position is used to locate the cell,
-//! cover and area are used to calculate the final coverage. Notice that when
-//! rasterizing shapes which are crossing themselves or near, there are more
-//! cells with the same position.
+//! The rasterizer uses the analytic method for cover calculation of the output 
+//! pixels. It generates CELLs which represent the pixel covereage and area.
+//! Pixel position is stored in the chunk, which is simply a list of cells. 
+//! It's common that chunk contains only one cell. In case that rasterized
+//! shape overlaps (or the vertices are too close so they share cell(s)) then
+//! the new coverage and area is merged to the existing cell (that is, there
+//! are no overlapping cells in the final result).
 //!
-//! One cell contains these members:
+//! The analytic rasterizer idea and first implementation was based on the AGG,
+//! which was based on the freetype2 library. Although there is motivation the
+//! rasterizer was rewritten to use different algorithm to render-line/hline
+//! and to sweep-scanline (called RenderFunc in Fog)
 //!
-//!   X     - a horizontal pixel position in pixel units. Must be relative to
-//!           the rasterizer scene-box.
-//!   Cover - a value at interval -256 to 256. This means that 10-bits are
-//!           enough to store the value.
-//!   Area  - a value at interval -(511<<8) to (511<<8). This value is the
-//!           Cover multiplied by the Weight in range (0-511). Notice that
-//!           instead of storing the result (Area), the rasterizer stores only
-//!           the weight, to save memory.
-//!
-//! The cell structures (compressed) used by the rasterizer:
-//!
-//!   - DWORD (32-bit):
-//!     - X     - 13 bits.
-//!     - Cover - 10 bits.
-//!     - Area  - 9  bits.
-//!
-//!     Applicable for resolution up to 8192 pixels in horizontal direction.
-//!     In this case the cell structure is only 4-byte long and it's stored
-//!     simply as one 32-bit integer. This is the common and the most used
-//!     case.
-//!
-//!   - QWORD (64-bit):
-//!     - X     - 32 bits.
-//!     - Cover - 16 bits.
-//!     - Area  - 16 bits.
-//!
-//!     Applicable for any resolution (X is a 32-bit integer). This cell was
-//!     introduced to support painting in very high-resolution. It's rarely
-//!     used.
-//!
-//! NOTE: The cell 'Area' value is always stored in compact format. This
-//! means that to get the final value shifting by 8-bits left is needed.
-//!
-//! The analytic rasterizer idea and first implementation was based on the
-//! AntiGrain geometry, which is based on the freetype2 library. There are
-//! some disadvantages which should be fixed in the future.
-//!
-//! The rasterizer disadvantages:
+//! Implementation disadvantages:
 //!
 //!   - The crossing lines are not handled correctly. The maximum error in
-//!     this case is 50%. Because the original rasterizer was created to
-//!     render the text (which doesn't contain self-intersecting polygons).
+//!     this case is 50%. The original rasterizer was created to render text 
+//!     which doesn't contain self-intersecting polygons/paths.
 //!
-//!   - The guys which created AmanithVG library says that the rasterizer
-//!     also fails in cases that the input vertices are too close (not
-//!     strictly degenerated). I didn't tested the rasterizer for such case.
+//!   - The guys which created AmanithVG library say that the AGG rasterizer
+//!     also fails in case that input vertices are too close (not degenerated).
+//!     I didn't test the rasterizer for such case and didn't notice issue
+//!     mentioned.
 //!
 //! @verbatim
 //! Anti-Grain Geometry - Version 2.4
@@ -435,371 +433,89 @@ struct FOG_NO_EXPORT BoxRasterizer8 : public Rasterizer8
 struct FOG_NO_EXPORT PathRasterizer8 : public Rasterizer8
 {
   // --------------------------------------------------------------------------
-  // [CellStorage]
+  // [Cell]
   // --------------------------------------------------------------------------
 
-  //! @internal
-  //!
-  //! @brief Cell storage, contains chunks for thousands of cells.
-  struct FOG_NO_EXPORT CellStorage
+#include <Fog/Core/C++/PackByte.h>
+  struct FOG_NO_EXPORT Cell
   {
-    // ------------------------------------------------------------------------
-    // [Constants]
-    // ------------------------------------------------------------------------
-
-    enum
-    {
-      //! @brief Size of @c CellStorage buffer, including members.
-      STORAGE_SIZE = 32768 - 80
-    };
-
-    // ------------------------------------------------------------------------
-    // [Setup]
-    // ------------------------------------------------------------------------
-
-    //! @brief Setup this cell storage, providing the data and chunk size.
-    //! @param storageSize Size of storage within CellStorage data.
-    //! @param chunkSize Size of one chunk - 64-bytes or 128-bytes.
-    FOG_INLINE void setup(size_t storageSize, size_t chunkSize)
-    {
-      _storageSize = storageSize;
-
-      _dataBuffer = (uint8_t*)(((size_t)this + sizeof(CellStorage) + 63) & ~(size_t)63);
-      _dataSize = storageSize - ( (size_t)this - (size_t)_dataBuffer );
-
-      size_t numBytes = (size_t)this + storageSize - (size_t)_dataBuffer;
-
-      _chunkPtr = _dataBuffer;
-      _chunkEnd = _dataBuffer + numBytes / chunkSize * chunkSize;//(uint8_t*)(((size_t)this + storageSize) & ~(_chunkSize-1));
-      _chunkSize = chunkSize;
-    }
-
     // ------------------------------------------------------------------------
     // [Accessors]
     // ------------------------------------------------------------------------
 
-    //! @brief Get the previous cell storage.
-    FOG_INLINE CellStorage* getPrev() const { return _prev; }
-    //! @brief Get the next cell storage.
-    FOG_INLINE CellStorage* getNext() const { return _next; }
+    FOG_INLINE void set(int _cover, int _area)
+    {
+      FOG_ASSERT(_cover >= -256     && _cover <= 256    );
+      FOG_ASSERT(_area  >= -256*511 && _area  <= 256*511);
 
-    //! @brief Get the storage size.
-    FOG_INLINE size_t getStorageSize() const { return _storageSize; }
+      cover = _cover;
+      area = _area;
+    }
 
-    //! @brief Get the data pointer.
-    FOG_INLINE uint8_t* getDataBuffer() const { return _dataBuffer; }
-    //! @brief Get the data size.
-    FOG_INLINE size_t getDataSize() const { return _dataSize; }
+    FOG_INLINE void add(int _cover, int _area)
+    {
+      FOG_ASSERT(_cover >= -256     && _cover <= 256    );
+      FOG_ASSERT(_area  >= -256*511 && _area  <= 256*511);
 
-    //! @brief Get the current chunk pointer.
-    FOG_INLINE uint8_t* getChunkPtr() const { return _chunkPtr; }
-    //! @brief Get the end chunk pointer (the first invalid chunk).
-    FOG_INLINE uint8_t* getChunkEnd() const { return _chunkEnd; }
-    //! @brief Get the chunk size.
-    FOG_INLINE size_t getChunkSize() const { return _chunkSize; }
+      cover += _cover;
+      area += _area;
+    }
 
     // ------------------------------------------------------------------------
     // [Members]
     // ------------------------------------------------------------------------
 
-    //! @brief Previous storage (fully used ones, can be NULL).
-    CellStorage* _prev;
-    //! @brief Next storage (non-NULL only if rasterizer is reused).
-    CellStorage* _next;
-
-    //! @brief Size of the whole cell storage including structure members and
-    //! cell chunks.
-    size_t _storageSize;
-
-    //! @brief Cell data aligned to 64-bytes. The data are always allocated
-    //! together with @c Storage structure.
-    uint8_t* _dataBuffer;
-    //! @brief Cell data size.
-    size_t _dataSize;
-
-    //! @brief Current chunk pointer.
-    uint8_t* _chunkPtr;
-    //! @brief End chunk pointer.
-    uint8_t* _chunkEnd;
-    //! @brief Chunk size.
-    size_t _chunkSize;
+    int cover;
+    int area;
   };
+#include <Fog/Core/C++/PackRestore.h>
 
   // --------------------------------------------------------------------------
-  // [CellD]
+  // [Chunk]
   // --------------------------------------------------------------------------
 
-#include <Fog/Core/Pack/PackByte.h>
-  //! @internal
-  //!
-  //! @brief Compact version of cell that fits into DWORD (32-bit integer).
-  struct FOG_NO_EXPORT CellD
+#include <Fog/Core/C++/PackByte.h>
+  struct FOG_NO_EXPORT Chunk
   {
-    // ------------------------------------------------------------------------
-    // [Constants]
-    // ------------------------------------------------------------------------
-
-    enum
-    {
-      //! @brief Maximum x position in @c Rasterizer8::CellD (12-bit, 8191).
-      MAX_X = 0x00001FFF
-    };
-
     // ------------------------------------------------------------------------
     // [Accessors]
     // ------------------------------------------------------------------------
 
-    //! @brief Set all cell values at once.
-    FOG_INLINE void setData(int x, int cover, int weight)
+    FOG_INLINE int getLength() const { return x1 - x0; }
+
+    // ------------------------------------------------------------------------
+    // [Statics]
+    // ------------------------------------------------------------------------
+
+    static FOG_INLINE size_t getSizeOf(size_t capacity)
     {
-      FOG_ASSERT(x >= 0 && x <= MAX_X);
-      FOG_ASSERT(cover >= -256 && cover <= 256);
-      FOG_ASSERT(weight >= 0 && weight <= 511);
-
-      _combined = ( (((uint)x     )         ) << 19 )
-                + ( (((uint)cover ) & 0x3FFU) <<  9 )
-                + ( (((uint)weight)         )       );
+      return sizeof(Chunk) - sizeof(Cell) + capacity * sizeof(Cell);
     }
-
-    //! @brief Set all cell values to @a data.
-    FOG_INLINE void setData(const CellD& data)
-    {
-      _combined = data._combined;
-    }
-
-    //! @brief Get the x coordinate.
-    FOG_INLINE int getX() const { return (int)(_combined >> 19); }
-    //! @brief Get the cell cover.
-    FOG_INLINE int getCover() const { return ((int)(_combined << 13)) >> 22; }
-    //! @brief Get the cell weight.
-    FOG_INLINE int getWeight() const { return (int)(_combined & 0x1FF); }
-    //! @brief Get the cell area (cover * weight).
-    FOG_INLINE int getArea() const { return getCover() * getWeight(); }
-
-    //! @brief Get comparable value (for sorting).
-    FOG_INLINE uint32_t getComparable() const { return _combined; }
 
     // ------------------------------------------------------------------------
     // [Members]
     // ------------------------------------------------------------------------
 
-    //! @brief X, cover and area packed in a DWORD.
-    uint32_t _combined;
+    Chunk* next;
+    int x0;
+    int x1;
+    Cell cells[1];
   };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
   // --------------------------------------------------------------------------
-  // [ChunkD]
+  // [Row]
   // --------------------------------------------------------------------------
 
-  //! @brief Small chunk of @c CellD instances.
-  struct FOG_NO_EXPORT ChunkD
+  struct FOG_NO_EXPORT Row
   {
-    // ------------------------------------------------------------------------
-    // [Constants]
-    // ------------------------------------------------------------------------
-
-    enum
-    {
-      //! @brief Size of this chunk.
-      CHUNK_SIZE = 128,
-      //! @brief Count of cells in this chunk.
-      CELLS_COUNT = (CHUNK_SIZE - sizeof(void*)) / sizeof(CellD)
-    };
-
-    // ------------------------------------------------------------------------
-    // [Accessors]
-    // ------------------------------------------------------------------------
-
-    //! @brief Get previous cell chunks.
-    FOG_INLINE ChunkD* getPrev() const { return (ChunkD*)( (sysint_t)_prev & (sysint_t)-64 ); }
-
-    //! @brief Get count of cells in this chunk.
-    FOG_INLINE size_t getCount() const { return (size_t)_prev & 63; }
-    //! @brief Get count of available cells in this chunk.
-    FOG_INLINE size_t getAvail() const { return CELLS_COUNT - getCount(); }
-
-    //! @brief Get whether this chunk is full.
-    FOG_INLINE bool isFull() const { return getCount() == CELLS_COUNT; }
-
-    //! @brief Get cells array.
-    FOG_INLINE CellD* getCells() { return _cells; }
-    //! @overload
-    FOG_INLINE const CellD* getCells() const { return _cells; }
-
-    //! @brief Increment cells counter.
-    FOG_INLINE void incCount(size_t count)
-    {
-      FOG_ASSERT(getCount() + count <= CELLS_COUNT);
-      _prev += count;
-    }
-
-    //! @brief Set cells counter to @a count.
-    FOG_INLINE void setCount(size_t count)
-    {
-      FOG_ASSERT(count <= CELLS_COUNT);
-      _prev = (uint8_t*)((size_t)_prev & ~(size_t)63) + count;
-    }
-
-    // ------------------------------------------------------------------------
-    // [Members]
-    // ------------------------------------------------------------------------
-
-    //! @brief Link to prevous cells.
+    //! @brief First chunk in this row (sorted from left).
+    Chunk* first;
+    //! @brief Hint.
     //!
-    //! @note _prev contains pointer and cells counter. The pointer is always
-    //! allocated using 64-byte alignment so there are 6 bits for counter.
-    uint8_t* _prev;
-
-    //! @brief Cells.
-    CellD _cells[CELLS_COUNT];
-  };
-
-  // --------------------------------------------------------------------------
-  // [CellQ]
-  // --------------------------------------------------------------------------
-
-#include <Fog/Core/Pack/PackByte.h>
-  //! @internal
-  //!
-  //! @brief Full version of cell that fits into QWORD (64-bit integer).
-  struct FOG_NO_EXPORT CellQ
-  {
-    // ------------------------------------------------------------------------
-    // [Constants]
-    // ------------------------------------------------------------------------
-
-    enum
-    {
-      //! @brief Maximum x position in @c Rasterizer8::CellQ (32-bit).
-      MAX_X = 0xFFFFFFFF
-    };
-
-    // ------------------------------------------------------------------------
-    // [Accessors]
-    // ------------------------------------------------------------------------
-
-    //! @brief Set all cell values at once.
-    FOG_INLINE void setData(int x, int cover, int weight)
-    {
-      FOG_ASSERT(x >= 0);
-      FOG_ASSERT(cover >= -256 && cover <= 256);
-      FOG_ASSERT(weight >= 0 && weight <= 511);
-
-      _x = (uint32_t)x;
-      _cover = (int16_t)(cover);
-      _weight = (uint16_t)(uint)(weight);
-    }
-
-    //! @brief Set all cell values to @a data.
-    FOG_INLINE void setData(const CellQ& data)
-    {
-      _combined = data._combined;
-    }
-
-    //! @brief Get x coordinate.
-    FOG_INLINE int getX() const { return (int)_x; }
-    //! @brief Get cell cover.
-    FOG_INLINE int getCover() const { return (int)_cover; }
-    //! @brief Get cell weight.
-    FOG_INLINE int getWeight() const { return (int)_weight; }
-    //! @brief Get cell area.
-    FOG_INLINE int getArea() const { return getCover() * getWeight(); }
-
-    //! @brief Get comparable value (for sorting).
-    FOG_INLINE uint32_t getComparable() const { return _x; }
-
-    // ------------------------------------------------------------------------
-    // [Members]
-    // ------------------------------------------------------------------------
-
-    union
-    {
-      struct
-      {
-        //! @brief X coordinate in full-precision.
-        uint32_t _x;
-        //! @brief Cover value.
-        int16_t _cover;
-        //! @brief Area value.
-        uint16_t _weight;
-      };
-
-      //! @brief X, cover and area packed in a QWORD.
-      uint64_t _combined;
-    };
-  };
-#include <Fog/Core/Pack/PackRestore.h>
-
-  // --------------------------------------------------------------------------
-  // [ChunkQ]
-  // --------------------------------------------------------------------------
-
-  //! @brief Small chunk of @c CellQ instances.
-  struct FOG_NO_EXPORT ChunkQ
-  {
-    // ------------------------------------------------------------------------
-    // [Constants]
-    // ------------------------------------------------------------------------
-
-    enum
-    {
-      //! @brief Size of this chunk.
-      CHUNK_SIZE = 128,
-      //! @brief Count of cells in this chunk.
-      CELLS_COUNT = (CHUNK_SIZE - sizeof(void*)) / sizeof(CellQ)
-    };
-
-    // ------------------------------------------------------------------------
-    // [Accessors]
-    // ------------------------------------------------------------------------
-
-    //! @brief Get previous cell chunks.
-    FOG_INLINE ChunkQ* getPrev() const { return (ChunkQ*)( (sysint_t)_prev & (sysint_t)-64 ); }
-
-    //! @brief Get count of cells in this chunk.
-    FOG_INLINE size_t getCount() const { return (size_t)_prev & 63; }
-    //! @brief Get count of available cells in this chunk.
-    FOG_INLINE size_t getAvail() const { return CELLS_COUNT - getCount(); }
-
-    //! @brief Get whether this chunk is full.
-    FOG_INLINE bool isFull() const { return getCount() == CELLS_COUNT; }
-
-    //! @brief Get cells array.
-    FOG_INLINE CellQ* getCells() { return _cells; }
-    //! @overload
-    FOG_INLINE const CellQ* getCells() const { return _cells; }
-
-    //! @brief Increment cells counter.
-    FOG_INLINE void incCount(size_t count)
-    {
-      FOG_ASSERT(getCount() + count <= CELLS_COUNT);
-      _prev += count;
-    }
-
-    //! @brief Set cells counter to @a count.
-    FOG_INLINE void setCount(size_t count)
-    {
-      FOG_ASSERT(count <= CELLS_COUNT);
-      _prev = (uint8_t*)((size_t)_prev & ~(size_t)63) + count;
-    }
-
-    // ------------------------------------------------------------------------
-    // [Members]
-    // ------------------------------------------------------------------------
-
-    //! @brief Link to prevous cells.
-    //!
-    //! @note _prev contains pointer and cells counter. The pointer is always
-    //! allocated using 64-byte alignment so there are 6 bits for counter.
-    uint8_t* _prev;
-
-#if FOG_ARCH_BITS == 32
-    uint32_t _padding;
-#endif
-
-    //! @brief Cells.
-    CellQ _cells[CELLS_COUNT];
+    //! The chunk which was used last. When rendering the hint chunk is used
+    //! as in optimization to prevent traversing the engire list of chunks.
+    Chunk* hint;
   };
 
   // --------------------------------------------------------------------------
@@ -855,17 +571,17 @@ struct FOG_NO_EXPORT PathRasterizer8 : public Rasterizer8
   void reset();
 
   // --------------------------------------------------------------------------
-  // [Initialize]
+  // [Init]
   // --------------------------------------------------------------------------
 
   //! @brief Initialize the rasterizer, called after setup methods and before
   //! adding path(s).
   //!
   //! During setup the methods like setOpacity(), setFillRule() can be called,
-  //! after calling initialize() these methods shouldn't be called, because
-  //! rasterizer can use different algorithms to perform rasterization (even-odd
-  //! vs. non-zero fill rule, opacity, quality, etc...).
-  err_t initialize();
+  //! after calling init() these methods shouldn't be called, because rasterizer
+  //! can use different algorithms to perform rasterization (even-odd  vs.
+  //! non-zero fill rule, opacity, quality, etc...).
+  err_t init();
 
   // --------------------------------------------------------------------------
   // [Add]
@@ -899,21 +615,18 @@ struct FOG_NO_EXPORT PathRasterizer8 : public Rasterizer8
   // [Members]
   // --------------------------------------------------------------------------
 
+  //! @brief Cell chunk allocator.
+  ZoneAllocator _allocator;
+
   //! @brief bounding box of the rasterized shape.
   BoxI _boundingBox;
 
-  //! @brief Maximum size of rasterized shape, generated by @c initialize() and
+  //! @brief Maximum size of rasterized shape, generated by @c init() and
   //! calculated using @c _clipBox.getWidth() and @c _clipBox.getHeight().
   SizeI _size;
   //! @brief Maximum size in 24x8 format.
   SizeI _size24x8;
 
-  //! @brief The vertex translation offset (Fixed24x8).
-  //!
-  //! This offset simplifies mathematics used by access the @c _rows[] structure
-  //! and also guarantees that no point will be negative. If @c _clipBox is
-  //! [5, 5, 10, 10] then @c _offset will be set to [-5 (fixed), -5 (fixed)].
-  PointI _offset24x8;
   //! @brief The vertex translation offset (float).
   PointF _offsetF;
   //! @brief The vertex translation offset (double).
@@ -937,23 +650,13 @@ struct FOG_NO_EXPORT PathRasterizer8 : public Rasterizer8
 
   //! @brief Cell chunks per rows. Index of value 0 is index to _clipBox.y1.
   //!
-  //! _rows can contain garbage in these indexes:
+  //! _rows can contain garbage in these indices:
   //! - _clipBox.y1 -> _boundingBox.y1
   //! - _boundingBox.y2 -> _clipBox.y2
-  void** _rows;
-
-  //! @brief Cells storage (begin of the list).
-  CellStorage* _storage;
-  //! @brief Cells storage (current position in the list).
-  CellStorage* _current;
-
-  //! @brief Temporary path (float).
-  PathF _tmpPathF;
-  //! @brief Temporary path (double).
-  PathD _tmpPathD;
+  Row* _rows;
 
 private:
-  _FOG_CLASS_NO_COPY(PathRasterizer8)
+  _FOG_NO_COPY(PathRasterizer8)
 };
 
 // ============================================================================
@@ -963,7 +666,7 @@ private:
 #if defined(FOG_DEBUG_RASTERIZER)
 static void Rasterizer_dumpSpans(int y, const RasterSpan8* span)
 {
-  ByteArray b;
+  StringA b;
   b.appendFormat("Y=%d - ", y);
 
   while (span)

@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Memory/Alloc.h>
+#include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/G2d/Text/GlyphOutlineCache.h>
 
 namespace Fog {
@@ -34,17 +34,17 @@ GlyphOutlineCache::GlyphOutlineCache()
   _usedBytes = 0;
 
   _tableSize = 16;
-  _tableData = reinterpret_cast<Table**>(Memory::calloc(_tableSize * sizeof(Table*)));
+  _tableData = reinterpret_cast<Table**>(MemMgr::calloc(_tableSize * sizeof(Table*)));
   if (FOG_IS_NULL(_tableData)) goto _Fail;
 
-  _tableData[0] = reinterpret_cast<Table*>(Memory::calloc(sizeof(Table)));
+  _tableData[0] = reinterpret_cast<Table*>(MemMgr::calloc(sizeof(Table)));
   if (FOG_IS_NULL(_tableData[0])) goto _FailFreeTable;
 
   // Success.
   return;
 
 _FailFreeTable:
-  Memory::free(_tableData);
+  MemMgr::free(_tableData);
   _tableData = NULL;
 
 _Fail:
@@ -56,7 +56,7 @@ GlyphOutlineCache::~GlyphOutlineCache()
   if (FOG_IS_NULL(_tableData)) return;
 
   reset();
-  Memory::free(_tableData);
+  MemMgr::free(_tableData);
 }
 
 // ============================================================================
@@ -81,7 +81,7 @@ void GlyphOutlineCache::reset()
         if (!t->glyphs[tCol]->_isNull()) t->glyphs[tCol].destroy();
       }
 
-      Memory::free(t);
+      MemMgr::free(t);
       table[tRow] = NULL;
     }
   }
@@ -105,10 +105,10 @@ err_t GlyphOutlineCache::put(uint32_t uc, const GlyphOutline& glyph)
   {
     // Make sure 32 is added, because tRow needs to be valid after realloc!
     uint32_t s = (tRow + 32) & ~31;
-    Table** newt = reinterpret_cast<Table**>(Memory::realloc(_tableData, s * sizeof(Table*)));
+    Table** newt = reinterpret_cast<Table**>(MemMgr::realloc(_tableData, s * sizeof(Table*)));
 
     if (FOG_IS_NULL(newt)) return ERR_RT_OUT_OF_MEMORY;
-    Memory::zero(newt + _tableSize, (s - _tableSize) * sizeof(Table*));
+    MemOps::zero(newt + _tableSize, (s - _tableSize) * sizeof(Table*));
 
     _tableSize = s;
     _tableData = newt;
@@ -118,7 +118,7 @@ err_t GlyphOutlineCache::put(uint32_t uc, const GlyphOutline& glyph)
   Table* t = _tableData[tRow];
   if (FOG_IS_NULL(t))
   {
-    t = reinterpret_cast<Table*>(Memory::calloc(sizeof(Table)));
+    t = reinterpret_cast<Table*>(MemMgr::calloc(sizeof(Table)));
     if (FOG_IS_NULL(t)) return ERR_RT_OUT_OF_MEMORY;
 
     _tableData[tRow] = t;

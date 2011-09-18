@@ -11,7 +11,7 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemOps.h>
 
 namespace Fog {
 
@@ -589,26 +589,21 @@ FOG_INLINE SizeD SizeF::toSizeD() const { return SizeD((double)w, (double)h); }
 // [Fog::SizeT<>]
 // ============================================================================
 
-FOG_CLASS_PRECISION_F_D_I(Size)
+_FOG_NUM_T(Size)
+_FOG_NUM_I(Size)
+_FOG_NUM_F(Size)
+_FOG_NUM_D(Size)
 
 //! @}
 
 } // Fog namespace
 
 // ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::SizeI, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::SizeF, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::SizeD, Fog::TYPEINFO_PRIMITIVE)
-
-// ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_FUZZY_DECLARE(Fog::SizeF, Math::isFuzzyEq(a.w, b.w) && Math::isFuzzyEq(a.h, b.h))
-FOG_FUZZY_DECLARE(Fog::SizeD, Math::isFuzzyEq(a.w, b.w) && Math::isFuzzyEq(a.h, b.h))
+FOG_FUZZY_DECLARE_F_VEC(Fog::SizeF, 2)
+FOG_FUZZY_DECLARE_D_VEC(Fog::SizeD, 2)
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_SIZE_H

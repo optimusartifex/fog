@@ -18,7 +18,7 @@ namespace Fog {
 // [Fog::XmlComment]
 // ============================================================================
 
-XmlComment::XmlComment(const String& data) :
+XmlComment::XmlComment(const StringW& data) :
   XmlNoText(fog_strings->getString(STR_XML__comment)),
   _data(data)
 {
@@ -35,13 +35,13 @@ XmlElement* XmlComment::clone() const
   return fog_new XmlComment(_data);
 }
 
-const String& XmlComment::getData() const
+const StringW& XmlComment::getData() const
 {
   FOG_ASSERT(getType() == XML_ELEMENT_COMMENT);
   return _data;
 }
 
-err_t XmlComment::setData(const String& data)
+err_t XmlComment::setData(const StringW& data)
 {
   FOG_ASSERT(getType() == XML_ELEMENT_COMMENT);
   return _data.set(data);

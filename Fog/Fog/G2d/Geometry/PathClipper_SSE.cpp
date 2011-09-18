@@ -8,10 +8,6 @@
 #include FOG_PRECOMP
 #endif // FOG_PRECOMP
 
-// [Guard]
-#include <Fog/Core/Config/Config.h>
-#if defined(FOG_OPTIMIZE_SSE)
-
 // [Dependencies]
 #include <Fog/Core/Face/Face_SSE.h>
 #include <Fog/Core/Math/Math.h>
@@ -25,30 +21,30 @@
 namespace Fog {
 
 // ============================================================================
-// [Fog::PathClipper - InitPath]
+// [Fog::PathClipper - MeasurePath]
 // ============================================================================
 
-static uint32_t FOG_CDECL PathClipperF_initPath_SSE(PathClipperF& self, const PathF& src)
+static uint32_t FOG_CDECL PathClipperF_measurePath_SSE(PathClipperF* self, const PathF* src)
 {
-  self._lastIndex = INVALID_INDEX;
+  self->_lastIndex = INVALID_INDEX;
 
   Face::m128f xmmClipBox;
   Face::m128f xmmClipMin;
   Face::m128f xmmClipMax;
 
-  Face::m128fLoad16u(xmmClipBox, &self._clipBox);
+  Face::m128fLoad16u(xmmClipBox, &self->_clipBox);
   Face::m128fShuffle<1, 0, 1, 0>(xmmClipMin, xmmClipBox);
   Face::m128fShuffle<3, 2, 3, 2>(xmmClipMax, xmmClipBox);
 
   // If path bounding box is not dirty then we can simply use it instead of
   // performing the calculation.
-  if (src._hasBoundingBox())
+  if (src->_hasBoundingBox())
   {
     Face::m128f xmm0;
     Face::m128f xmm1;
     int msk;
 
-    Face::m128fLoad16u(xmm0,  &src._d->boundingBox);
+    Face::m128fLoad16u(xmm0,  &src->_d->boundingBox);
     Face::m128fCopy(xmm1, xmm0);
 
     Face::m128fCmpGePS(xmm0, xmm0, xmmClipMin);
@@ -59,16 +55,16 @@ static uint32_t FOG_CDECL PathClipperF_initPath_SSE(PathClipperF& self, const Pa
 
     if (msk == 0xF)
     {
-      _FOG_PATH_VERIFY_BOUNDING_BOX(src);
-      return PATH_CLIPPER_STATUS_CLIPPED;
+      _FOG_PATH_VERIFY_BOUNDING_BOX(*src);
+      return PATH_CLIPPER_MEASURE_BOUNDED;
     }
   }
 
-  Face::m128fXor(xmmClipBox, xmmClipBox, FOG_SSE_GET_CONST_PS(m128f_p0_p0_sn_sn));
+  Face::m128fXor(xmmClipBox, xmmClipBox, FOG_XMM_GET_CONST_PS(m128f_p0_p0_sn_sn));
 
-  size_t i = src.getLength();
-  const uint8_t* cmd = src.getCommands();
-  const PointF* pts = src.getVertices();
+  size_t i = src->getLength();
+  const uint8_t* cmd = src->getCommands();
+  const PointF* pts = src->getVertices();
 
   bool hasInitial = false;
 
@@ -88,7 +84,7 @@ static uint32_t FOG_CDECL PathClipperF_initPath_SSE(PathClipperF& self, const Pa
       // ----------------------------------------------------------------------
 
       case PATH_CMD_MOVE_TO:
-        Face::m128fStore8Lo(&self._lastMoveTo, xmm0);
+        Face::m128fStore8Lo(&self->_lastMoveTo, xmm0);
         hasInitial = true;
 
       // ----------------------------------------------------------------------
@@ -97,14 +93,15 @@ static uint32_t FOG_CDECL PathClipperF_initPath_SSE(PathClipperF& self, const Pa
 
       case PATH_CMD_LINE_TO:
       {
-        if (FOG_UNLIKELY(!hasInitial)) goto _Invalid;
+        if (FOG_UNLIKELY(!hasInitial))
+          goto _Invalid;
 
         Face::m128fShuffle<1, 0, 1, 0>(xmm0, xmm0, xmm0);
-        Face::m128fXor(xmm0, xmm0, FOG_SSE_GET_CONST_PS(m128f_p0_p0_sn_sn));
+        Face::m128fXor(xmm0, xmm0, FOG_XMM_GET_CONST_PS(m128f_p0_p0_sn_sn));
         Face::m128fCmpLePS(xmm0, xmm0, xmmClipBox);
 
         Face::m128fMoveMask(msk, xmm0);
-        if (msk != 0xF) goto _MustClip;
+        if (msk != 0xF) goto _Unbounded;
 
         i--;
         cmd++;
@@ -121,7 +118,8 @@ static uint32_t FOG_CDECL PathClipperF_initPath_SSE(PathClipperF& self, const Pa
         Face::m128f xmm1;
 
         FOG_ASSERT(i >= 2);
-        if (FOG_UNLIKELY(!hasInitial)) goto _Invalid;
+        if (FOG_UNLIKELY(!hasInitial))
+          goto _Invalid;
 
         Face::m128fLoad8Hi(xmm0, pts + 1);
 
@@ -132,7 +130,8 @@ static uint32_t FOG_CDECL PathClipperF_initPath_SSE(PathClipperF& self, const Pa
         Face::m128fAnd(xmm0, xmm0, xmm1);
 
         Face::m128fMoveMask(msk, xmm0);
-        if (msk != 0xF) goto _MustClip;
+        if (msk != 0xF)
+          goto _Unbounded;
 
         i   -= 2;
         cmd += 2;
@@ -149,14 +148,15 @@ static uint32_t FOG_CDECL PathClipperF_initPath_SSE(PathClipperF& self, const Pa
         Face::m128f xmm1, xmm2;
 
         FOG_ASSERT(i >= 3);
-        if (FOG_UNLIKELY(!hasInitial)) goto _Invalid;
+        if (FOG_UNLIKELY(!hasInitial))
+          goto _Invalid;
 
         Face::m128fZero(xmm2);
         Face::m128fLoad8Hi(xmm0, pts + 1);
         Face::m128fLoad8Lo(xmm2, pts + 2);
 
         Face::m128fShuffle<1, 0, 1, 0>(xmm2, xmm2, xmm2);
-        Face::m128fXor(xmm2, xmm2, FOG_SSE_GET_CONST_PS(m128f_p0_p0_sn_sn));
+        Face::m128fXor(xmm2, xmm2, FOG_XMM_GET_CONST_PS(m128f_p0_p0_sn_sn));
 
         Face::m128fCopy(xmm1, xmm0);
         Face::m128fCmpGePS(xmm0, xmm0, xmmClipMin);
@@ -167,7 +167,8 @@ static uint32_t FOG_CDECL PathClipperF_initPath_SSE(PathClipperF& self, const Pa
         Face::m128fAnd(xmm0, xmm0, xmm2);
 
         Face::m128fMoveMask(msk, xmm0);
-        if (msk != 0xF) goto _MustClip;
+        if (msk != 0xF)
+          goto _Unbounded;
 
         i   -= 3;
         cmd += 3;
@@ -191,28 +192,23 @@ static uint32_t FOG_CDECL PathClipperF_initPath_SSE(PathClipperF& self, const Pa
         FOG_ASSERT_NOT_REACHED();
     }
   }
+  return PATH_CLIPPER_MEASURE_BOUNDED;
 
-  // Path don't need to be clipped.
-  return PATH_CLIPPER_STATUS_CLIPPED;
-
-_MustClip:
-  self._lastIndex = (size_t)(cmd - src.getCommands());
-  return PATH_CLIPPER_STATUS_MUST_CLIP;
+_Unbounded:
+  self->_lastIndex = (size_t)(cmd - src->getCommands());
+  return PATH_CLIPPER_MEASURE_UNBOUNDED;
 
 _Invalid:
-  return PATH_CLIPPER_STATUS_INVALID;
+  return PATH_CLIPPER_MEASURE_INVALID;
 }
 
 // ============================================================================
 // [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void PathClipper_initSSE(void)
+FOG_NO_EXPORT void PathClipper_init_SSE(void)
 {
-  _api.pathclipperf.initPath = PathClipperF_initPath_SSE;
+  _api.pathclipperf.measurePath = PathClipperF_measurePath_SSE;
 }
 
 } // Fog namespace
-
-// [Guard]
-#endif // FOG_OPTIMIZE_SSE

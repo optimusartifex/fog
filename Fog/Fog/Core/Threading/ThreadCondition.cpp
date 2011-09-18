@@ -13,16 +13,10 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/List.h>
-#include <Fog/Core/DateTime/Time.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Threading/ThreadCondition.h>
-
-// [Dependencies - Windows]
-#if defined(FOG_OS_WINDOWS)
-# include <windows.h>
-# include <math.h>
-#endif // FOG_OS_WINDOWS
+#include <Fog/Core/Tools/List.h>
+#include <Fog/Core/Tools/Time.h>
 
 // [Dependencies - Posix]
 #if defined(FOG_OS_POSIX)
@@ -262,21 +256,25 @@ void ThreadCondition::timedWait(const TimeDelta& maxTime)
 void ThreadCondition::broadcast()
 {
   // See FAQ-question-10.
-  List<HANDLE> handles;
+  List<HANDLE> handleList;
   {
     AutoLock locked(_internalLock);
-    if (_waitingList.isEmpty()) return;
+
+    if (_waitingList.isEmpty())
+      return;
+
     while (!_waitingList.isEmpty())
     {
       // This is not a leak from _waitingList.  See FAQ-question 12.
-      handles.append(_waitingList.popBack()->handle());
+      handleList.append(_waitingList.popBack()->handle());
     }
     // Release _internalLock.
   }
-  while (!handles.isEmpty())
+
+  while (!handleList.isEmpty())
   {
-    ::SetEvent(handles.top());
-    handles.pop();
+    ::SetEvent(handleList.getLast());
+    handleList.removeLast();
   }
 }
 

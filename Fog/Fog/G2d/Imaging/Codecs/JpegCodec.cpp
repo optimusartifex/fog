@@ -9,17 +9,18 @@
 #endif // FOG_PRECOMP
 
 // [Guard]
-#include <Fog/Core/Config/Config.h>
+#include <Fog/Core/C++/Base.h>
 #if defined(FOG_HAVE_LIBJPEG)
 
 // [Dependencies]
-#include <Fog/Core/Collection/BufferP.h>
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/IO/Stream.h>
-#include <Fog/Core/Library/Library.h>
+#include <Fog/Core/Memory/MemBufferTmp_p.h>
+#include <Fog/Core/OS/Library.h>
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Tools/Var.h>
 #include <Fog/G2d/Imaging/Codecs/JpegCodec_p.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageConverter.h>
@@ -88,7 +89,7 @@ err_t JpegLibrary::init()
     "jpeg_destroy_compress\0"
     "jpeg_destroy_decompress\0";
 
-  if (dll.open(Ascii8("jpeg")) != ERR_OK)
+  if (dll.openLibrary(StringW::fromAscii8("jpeg")) != ERR_OK)
   {
     // No JPEG library found.
     return ERR_IMAGE_LIBJPEG_NOT_LOADED;
@@ -246,7 +247,7 @@ static FOG_CDECL int MyJpegFillInputBuffer(j_decompress_ptr cinfo)
 static FOG_CDECL void MyJpegSkipInputData(j_decompress_ptr cinfo, long num_bytes)
 {
   MyJpegSourceMgr* src = (MyJpegSourceMgr*) cinfo->src;
-  sysint_t remain = (sysint_t)( (uint8_t *)src->buffer + INPUT_BUFFER_SIZE - (uint8_t*)src->pub.next_input_byte );
+  ssize_t remain = (ssize_t)( (uint8_t *)src->buffer + INPUT_BUFFER_SIZE - (uint8_t*)src->pub.next_input_byte );
 
   if (num_bytes < remain)
   {
@@ -465,11 +466,11 @@ err_t JpegDecoder::readImage(Image& image)
     image.setPalette(ImagePalette::fromGreyscale(256));
 
     uint8_t* pixels = image.getFirstX();
-    sysint_t stride = image.getStride();
+    ssize_t stride = image.getStride();
 
     while (cinfo.output_scanline < cinfo.output_height)
     {
-      rowptr[0] = (JSAMPROW)(pixels + (sysint_t)cinfo.output_scanline * stride);
+      rowptr[0] = (JSAMPROW)(pixels + (ssize_t)cinfo.output_scanline * stride);
       jpeg.read_scanlines(&cinfo, rowptr, (JDIMENSION)1);
 
       if ((cinfo.output_scanline & 15) == 0)
@@ -491,11 +492,11 @@ err_t JpegDecoder::readImage(Image& image)
     converter.setupClosure(&closure, PointI(0, 0));
 
     uint8_t* pixels = image.getFirstX();
-    sysint_t stride = image.getStride();
+    ssize_t stride = image.getStride();
 
     while (cinfo.output_scanline < cinfo.output_height)
     {
-      rowptr[0] = (JSAMPROW)(pixels + (sysint_t)cinfo.output_scanline * stride);
+      rowptr[0] = (JSAMPROW)(pixels + (ssize_t)cinfo.output_scanline * stride);
       jpeg.read_scanlines(&cinfo, rowptr, (JDIMENSION)1);
 
       if (!converter.isCopy())
@@ -605,13 +606,13 @@ err_t JpegEncoder::writeImage(const Image& image)
   err_t err = ERR_OK;
 
   const uint8_t* pixels = image.getFirst();
-  sysint_t stride = image.getStride();
+  ssize_t stride = image.getStride();
   uint32_t format = image.getFormat();
   int w = image.getWidth();
   int h = image.getHeight();
 
   ImageConverter converter;
-  BufferP<4096> buffer;
+  MemBufferTmp<2048> buffer;
 
   // This struct contains the JPEG compression parameters and pointers to
   // working space (which is allocated as needed by the JPEG library).
@@ -683,8 +684,11 @@ err_t JpegEncoder::writeImage(const Image& image)
     cinfo.input_components = 3;          // Count of color components per pixel.
     cinfo.in_color_space = JCS_RGB;      // Colorspace of input image.
 
-    buffer.alloc(w * 3);
-    if (FOG_IS_NULL(buffer.getMem())) { err = ERR_RT_OUT_OF_MEMORY; goto _End; }
+    if (FOG_IS_NULL(buffer.alloc(w * 3)))
+    {
+      err = ERR_RT_OUT_OF_MEMORY;
+      goto _End;
+    }
 
     err = converter.create(
       ImageFormatDescription::fromArgb(24, IMAGE_FD_NONE,
@@ -739,7 +743,7 @@ err_t JpegEncoder::writeImage(const Image& image)
   if (converter.isValid())
   {
     ImageConverterClosure closure;
-    ImageConverterBlitLineFn blit;
+    ImageConverterBlitLineFunc blit;
 
     converter.setupClosure(&closure);
     blit = converter.getBlitFn();
@@ -747,7 +751,7 @@ err_t JpegEncoder::writeImage(const Image& image)
     while (cinfo.next_scanline < cinfo.image_height)
     {
       blit((uint8_t*)buffer.getMem(),
-        pixels + (sysint_t)cinfo.next_scanline * stride, w, &closure);
+        pixels + (ssize_t)cinfo.next_scanline * stride, w, &closure);
       jpeg.write_scanlines(&cinfo, row, 1);
 
       if (cinfo.next_scanline & 15)
@@ -758,7 +762,7 @@ err_t JpegEncoder::writeImage(const Image& image)
   {
     while (cinfo.next_scanline < cinfo.image_height)
     {
-      row[0] = (JSAMPLE*)(pixels + (sysint_t)cinfo.next_scanline * stride);
+      row[0] = (JSAMPLE*)(pixels + (ssize_t)cinfo.next_scanline * stride);
       jpeg.write_scanlines(&cinfo, row, 1);
 
       if (cinfo.next_scanline & 15)
@@ -782,26 +786,20 @@ _End:
 // [Fog::JpegEncoder - Properties]
 // ===========================================================================
 
-err_t JpegEncoder::getProperty(const ManagedString& name, Value& value) const
+err_t JpegEncoder::getProperty(const ManagedString& name, Var& dst) const
 {
-  if (name == fog_strings->getString(STR_G2D_CODEC_quality)) return value.setInt32(_quality);
+  if (name == fog_strings->getString(STR_G2D_CODEC_quality))
+    return dst.setInt(_quality);
 
-  return base::getProperty(name, value);
+  return base::getProperty(name, dst);
 }
 
-err_t JpegEncoder::setProperty(const ManagedString& name, const Value& value)
+err_t JpegEncoder::setProperty(const ManagedString& name, const Var& src)
 {
-  int i;
-  err_t err;
-
   if (name == fog_strings->getString(STR_G2D_CODEC_quality))
-  {
-    if ((err = value.getInt32(&i))) return err;
-    _quality = Math::bound(i, 0, 100);
-    return ERR_OK;
-  }
+    return src.getInt(_quality, 0, 100);
 
-  return base::setProperty(name, value);
+  return base::setProperty(name, src);
 }
 
 // ============================================================================

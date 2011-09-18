@@ -7,9 +7,6 @@
 #ifndef _FOG_G2D_IMAGING_WINIMAGE_P_H
 #define _FOG_G2D_IMAGING_WINIMAGE_P_H
 
-#include <Fog/Core/Config/Config.h>
-#if defined(FOG_OS_WINDOWS)
-
 // [Dependencies]
 #include <Fog/G2d/Imaging/Image.h>
 
@@ -29,7 +26,7 @@ struct FOG_API WinDibImageData : public ImageData
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  WinDibImageData(const SizeI& size, uint32_t format, uint8_t* bits, sysint_t stride, HBITMAP hBitmap);
+  WinDibImageData(const SizeI& size, uint32_t format, uint8_t* bits, ssize_t stride, HBITMAP hBitmap);
   virtual ~WinDibImageData();
 
   // --------------------------------------------------------------------------
@@ -42,7 +39,7 @@ struct FOG_API WinDibImageData : public ImageData
   virtual void paletteModified(const Range& range);
 
   // --------------------------------------------------------------------------
-  // [Windows Specific]
+  // [Windows Support]
   // --------------------------------------------------------------------------
 
   HDC getDC();
@@ -52,7 +49,7 @@ struct FOG_API WinDibImageData : public ImageData
   // [Statics]
   // --------------------------------------------------------------------------
 
-  static err_t _createDibSection(const SizeI& size, uint32_t format, HBITMAP* dst, uint8_t** bits, sysint_t* stride);
+  static err_t _createDibSection(const SizeI& size, uint32_t format, HBITMAP* dst, uint8_t** bits, ssize_t* stride);
   static err_t _createDibImage(const SizeI& size, uint32_t format, ImageData** dst);
 
   // --------------------------------------------------------------------------
@@ -68,5 +65,4 @@ struct FOG_API WinDibImageData : public ImageData
 } // Fog namespace
 
 // [Guard]
-#endif // FOG_OS_WINDOWS
 #endif // _FOG_G2D_IMAGING_WINIMAGE_P_H

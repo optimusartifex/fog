@@ -9,11 +9,11 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/List.h>
-#include <Fog/Core/System/Application.h>
+#include <Fog/Core/Global/Global.h>
+#include <Fog/Core/Kernel/Application.h>
+#include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/G2d/Tools/Region.h>
-#include <Fog/Gui/Global/Constants.h>
 #include <Fog/Gui/Engine/GuiEngine.h>
 #include <Fog/Gui/Layout/Layout.h>
 #include <Fog/Gui/Layout/LayoutItem.h>
@@ -55,7 +55,7 @@ Widget::Widget(uint32_t createFlags) :
   _reserved(0),
   _widgetflags(0)
 {
-  _objectFlags |= OBJECT_FLAG_IS_WIDGET;
+  _vType |= OBJECT_FLAG_IS_WIDGET;
 
   // TODO ?
   _focusLink = NULL;
@@ -105,21 +105,22 @@ err_t Widget::_addChild(size_t index, Object* child)
     // WIDGET TODO: Stefan, this is not optimal, we should create some stuff in
     // GuiWindow for this, so inline popup can be handled by it. Hmm, what is
     // purpose of this widget, shouldn't be sufficient to just create a regular
-    // widget and add it to the top-level hoerarchy?
+    // widget and add it to the top-level hierarchy?
     if (!isInlinePopup && _children.getLength() > 0)
     {
-      List<Object*>::ConstIterator it(_children);
-      for (it.toEnd(); it.isValid(); it.toPrevious())
+      ListReverseIterator<Object*> it(_children);
+
+      while (it.isValid())
       {
-        Widget* widget = fog_object_cast<Widget*>(it.value());
+        Widget* widget = fog_object_cast<Widget*>(it.getItem());
         if (widget && ((widget->getWindowFlags() & WINDOW_INLINE_POPUP) != 0))
         {
           // Now element can be added to that index.
-          return _addChild(it.index(), w);
+          return _addChild(it.getIndex(), w);
         }
       }
 
-      // No inline popup found...
+      it.next();
     }
   }
 
@@ -164,7 +165,7 @@ err_t Widget::createWindow(uint32_t createFlags)
     return ERR_OK;
 
   GuiEngine* ge = Application::getInstance()->getGuiEngine();
-  if (ge == NULL) return ERR_GUI_NO_ENGINE;
+  if (ge == NULL) return ERR_UI_NO_ENGINE;
 
   _guiWindow = ge->createGuiWindow(this);
 
@@ -189,14 +190,14 @@ err_t Widget::destroyWindow()
   return true;
 }
 
-String Widget::getWindowTitle() const
+StringW Widget::getWindowTitle() const
 {
-  String title;
+  StringW title;
   if (_guiWindow) _guiWindow->getTitle(title);
   return title;
 }
 
-err_t Widget::setWindowTitle(const String& title)
+err_t Widget::setWindowTitle(const StringW& title)
 {
   if (!_guiWindow) return ERR_RT_INVALID_HANDLE;
   return _guiWindow->setTitle(title);
@@ -438,10 +439,10 @@ Widget* Widget::getChildAt(const PointI& pt, bool recursive) const
 
 _Repeat:
   {
-    List<Object*>::ConstIterator it(current->_children);
-    for (it.toEnd(); it.isValid(); it.toPrevious())
+    ListReverseIterator<Object*> it(current->_children);
+    while (it.isValid())
     {
-      Widget* widget = fog_object_cast<Widget*>(it.value());
+      Widget* widget = fog_object_cast<Widget*>(it.getItem());
       if (widget && widget->_widgetGeometry.hitTest(pt))
       {
         current = widget;
@@ -452,6 +453,7 @@ _Repeat:
         if (current->hasChildren()) goto _Repeat;
         break;
       }
+      it.next();
     }
   }
 
@@ -1233,7 +1235,7 @@ uint32_t Widget::getPaintHint() const
 
 err_t Widget::getPropagatedRegion(Region* dst) const
 {
-  return dst->set(BoxI(0, 0, getWidth(), getHeight()));
+  return dst->setBox(BoxI(0, 0, getWidth(), getHeight()));
 }
 
 // ============================================================================

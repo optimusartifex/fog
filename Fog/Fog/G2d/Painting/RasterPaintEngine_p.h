@@ -35,25 +35,7 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::RasterPaintEngineVTable]
-// ============================================================================
-
-//! @internal
-//!
-//! @brief @c RasterPaintEngine VTable struct.
-//!
-//! Currently there are no more members, but in future there could be.
-struct FOG_NO_EXPORT RasterPaintEngineVTable : public PaintEngineVTable
-{
-};
-
-//! @internal
-//!
-//! @brief Raster paint-engine vtable (versions for different precision).
-extern RasterPaintEngineVTable _RasterPaintEngine_vtable;
-
-// ============================================================================
-// [Fog::RasterPaintSerializer]
+// [Fog::RasterSerializer]
 // ============================================================================
 
 //! @internal
@@ -63,53 +45,76 @@ extern RasterPaintEngineVTable _RasterPaintEngine_vtable;
 //! This class contains function pointers to low-level painter operations. When
 //! single-threaded mode is used, the serializer contains function pointers to
 //! render functions, otherwise serialize functions are used.
-struct FOG_NO_EXPORT RasterPaintSerializer
+struct FOG_NO_EXPORT RasterSerializer
 {
   // --------------------------------------------------------------------------
   // [Typedefs]
   // --------------------------------------------------------------------------
 
+  typedef err_t (FOG_FASTCALL *FillAll)(RasterPaintEngine* engine);
+  typedef err_t (FOG_FASTCALL *FillPathF)(RasterPaintEngine* engine, const PathF& path, uint32_t fillRule);
+  typedef err_t (FOG_FASTCALL *FillPathD)(RasterPaintEngine* engine, const PathD& path, uint32_t fillRule);
+  typedef err_t (FOG_FASTCALL *StrokeAndFillPathF)(RasterPaintEngine* engine, const PathF& path);
+  typedef err_t (FOG_FASTCALL *StrokeAndFillPathD)(RasterPaintEngine* engine, const PathD& path);
+
   typedef err_t (FOG_FASTCALL *FillNormalizedBoxI)(RasterPaintEngine* engine, const BoxI& box);
   typedef err_t (FOG_FASTCALL *FillNormalizedBoxF)(RasterPaintEngine* engine, const BoxF& box);
   typedef err_t (FOG_FASTCALL *FillNormalizedBoxD)(RasterPaintEngine* engine, const BoxD& box);
-
-  typedef err_t (FOG_FASTCALL *DrawRawPathF)(RasterPaintEngine* engine, const PathF& path);
-  typedef err_t (FOG_FASTCALL *DrawRawPathD)(RasterPaintEngine* engine, const PathD& path);
-  typedef err_t (FOG_FASTCALL *FillRawPathF)(RasterPaintEngine* engine, const PathF& path, uint32_t fillRule);
-  typedef err_t (FOG_FASTCALL *FillRawPathD)(RasterPaintEngine* engine, const PathD& path, uint32_t fillRule);
   typedef err_t (FOG_FASTCALL *FillNormalizedPathF)(RasterPaintEngine* engine, const PathF& path, uint32_t fillRule);
   typedef err_t (FOG_FASTCALL *FillNormalizedPathD)(RasterPaintEngine* engine, const PathD& path, uint32_t fillRule);
 
-  typedef err_t (FOG_FASTCALL *BlitRawImageD)(RasterPaintEngine* engine, const BoxD& box, const Image& srcImage, const RectI& srcFragment, const TransformD& srcTransform);
-  typedef err_t (FOG_FASTCALL *BlitNormalizedImageI)(RasterPaintEngine* engine, const PointI& pt, const Image& srcImage, const RectI& srcFragment);
-  typedef err_t (FOG_FASTCALL *BlitNormalizedTransformedImageI)(RasterPaintEngine* engine, const BoxI& box, const Image& srcImage, const RectI& srcFragment, const TransformD& srcTransform);
-  typedef err_t (FOG_FASTCALL *BlitNormalizedTransformedImageD)(RasterPaintEngine* engine, const BoxD& box, const Image& srcImage, const RectI& srcFragment, const TransformD& srcTransform);
+  typedef err_t (FOG_FASTCALL *BlitImageD)(RasterPaintEngine* engine, const BoxD& box, const Image& srcImage, const RectI& srcFragment, const TransformD& srcTransform);
+  typedef err_t (FOG_FASTCALL *BlitNormalizedImageA)(RasterPaintEngine* engine, const PointI& pt, const Image& srcImage, const RectI& srcFragment);
+  typedef err_t (FOG_FASTCALL *BlitNormalizedImageI)(RasterPaintEngine* engine, const BoxI& box, const Image& srcImage, const RectI& srcFragment, const TransformD& srcTransform);
+  typedef err_t (FOG_FASTCALL *BlitNormalizedImageD)(RasterPaintEngine* engine, const BoxD& box, const Image& srcImage, const RectI& srcFragment, const TransformD& srcTransform);
+
+  typedef err_t (FOG_FASTCALL *ClipAll)(RasterPaintEngine* engine);
+  typedef err_t (FOG_FASTCALL *ClipPathF)(RasterPaintEngine* engine, uint32_t clipOp, const PathF& path, uint32_t fillRule);
+  typedef err_t (FOG_FASTCALL *ClipPathD)(RasterPaintEngine* engine, uint32_t clipOp, const PathD& path, uint32_t fillRule);
+  typedef err_t (FOG_FASTCALL *StrokeAndClipPathF)(RasterPaintEngine* engine, uint32_t clipOp, const PathF& path);
+  typedef err_t (FOG_FASTCALL *StrokeAndClipPathD)(RasterPaintEngine* engine, uint32_t clipOp, const PathD& path);
+
+  typedef err_t (FOG_FASTCALL *ClipNormalizedBoxI)(RasterPaintEngine* engine, uint32_t clipOp, const BoxI& box);
+  typedef err_t (FOG_FASTCALL *ClipNormalizedBoxF)(RasterPaintEngine* engine, uint32_t clipOp, const BoxF& box);
+  typedef err_t (FOG_FASTCALL *ClipNormalizedBoxD)(RasterPaintEngine* engine, uint32_t clipOp, const BoxD& box);
+
+  typedef err_t (FOG_FASTCALL *ClipNormalizedPathF)(RasterPaintEngine* engine, uint32_t clipOp, const PathF& path, uint32_t fillRule);
+  typedef err_t (FOG_FASTCALL *ClipNormalizedPathD)(RasterPaintEngine* engine, uint32_t clipOp, const PathD& path, uint32_t fillRule);
 
   // --------------------------------------------------------------------------
   // [Funcs]
   // --------------------------------------------------------------------------
 
+  FillAll fillAll;
+  FillPathF fillPathF;
+  FillPathD fillPathD;
+  StrokeAndFillPathF strokeAndFillPathF;
+  StrokeAndFillPathD strokeAndFillPathD;
+
   FillNormalizedBoxI fillNormalizedBoxI;
   FillNormalizedBoxF fillNormalizedBoxF;
   FillNormalizedBoxD fillNormalizedBoxD;
-
-  DrawRawPathF drawRawPathF;
-  DrawRawPathD drawRawPathD;
-  FillRawPathF fillRawPathF;
-  FillRawPathD fillRawPathD;
   FillNormalizedPathF fillNormalizedPathF;
   FillNormalizedPathD fillNormalizedPathD;
 
-  BlitRawImageD blitRawImageD;
+  BlitImageD blitImageD;
+  BlitNormalizedImageA blitNormalizedImageA;
   BlitNormalizedImageI blitNormalizedImageI;
-  BlitNormalizedTransformedImageI blitNormalizedTransformedImageI;
-  BlitNormalizedTransformedImageD blitNormalizedTransformedImageD;
-};
+  BlitNormalizedImageD blitNormalizedImageD;
 
-//! @internal
-//!
-//! @brief Raster paint-engine serializer (versions for different mode / precision).
-extern RasterPaintSerializer RasterPaintEngine_serialize[RASTER_MODE_COUNT][IMAGE_PRECISION_COUNT];
+  ClipAll clipAll;
+  ClipPathF clipPathF;
+  ClipPathD clipPathD;
+  StrokeAndClipPathF strokeAndClipPathF;
+  StrokeAndClipPathD strokeAndClipPathD;
+
+  ClipNormalizedBoxI clipNormalizedBoxI;
+  ClipNormalizedBoxF clipNormalizedBoxF;
+  ClipNormalizedBoxD clipNormalizedBoxD;
+
+  ClipNormalizedPathF clipNormalizedPathF;
+  ClipNormalizedPathD clipNormalizedPathD;
+};
 
 // ============================================================================
 // [Fog::RasterPaintEngine]
@@ -135,24 +140,43 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   err_t switchTo(const ImageBits& imageBits, ImageData* imaged);
 
   // --------------------------------------------------------------------------
-  // [MaxThreads]
+  // [Detect Max Threads]
   // --------------------------------------------------------------------------
 
-  uint getMaxThreads();
+  static uint detectMaxThreads();
+
+  // --------------------------------------------------------------------------
+  // [Clipping]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE const BoxI& getClipBoxI() const { return ctx.clipBoxI; }
+  FOG_INLINE const BoxF& getClipBoxF() const { return stroker.f->_clipBox; }
+  FOG_INLINE const BoxD& getClipBoxD() const { return stroker.d->_clipBox; }
+
+  FOG_INLINE const BoxI& getMetaClipBoxI() const { return metaClipBoxI; }
+  FOG_INLINE const BoxF& getMetaClipBoxF() const { return metaClipBoxF; }
+  FOG_INLINE const BoxD& getMetaClipBoxD() const { return metaClipBoxD; }
 
   // --------------------------------------------------------------------------
   // [Transform]
   // --------------------------------------------------------------------------
 
+  //! @brief The final transformation matrix (float).
+  FOG_INLINE const TransformF& getFinalTransformF() { return stroker.f->_transform; }
+  //! @brief The final transformation matrix (double).
+  FOG_INLINE const TransformD& getFinalTransformD() { return stroker.d->_transform; }
+
   FOG_INLINE bool ensureFinalTransformF()
   {
-    if (finalTransformD._type == TRANSFORM_TYPE_IDENTITY)
+    if (getFinalTransformD()._getType() == TRANSFORM_TYPE_IDENTITY)
       return false;
+
     if (ctx.rasterHints.finalTransformF)
       return true;
 
-    finalTransformF = finalTransformD;
+    stroker.f->_transform->setTransform(getFinalTransformD());
     ctx.rasterHints.finalTransformF = 1;
+
     return true;
   }
 
@@ -161,7 +185,7 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
     return integralTransformType != RASTER_INTEGRAL_TRANSFORM_NONE;
   }
 
-  bool doIntegralTransformAndClip(BoxI& dst, const RectI& src);
+  bool doIntegralTransformAndClip(BoxI& dst, const RectI& src, const BoxI& clipBox);
 
   // --------------------------------------------------------------------------
   // [State]
@@ -183,7 +207,36 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
     statePool = state;
   }
 
-  void saveSource();
+  void saveSourceAndDiscard();
+
+  FOG_INLINE void saveSourceArgb32()
+  {
+    if ((savedStateFlags & RASTER_STATE_SOURCE) == 0)
+    {
+      FOG_ASSERT(state != NULL);
+      FOG_ASSERT(sourceType == RASTER_SOURCE_ARGB32);
+
+      savedStateFlags |= RASTER_STATE_SOURCE;
+      state->sourceType = RASTER_SOURCE_ARGB32;
+      state->source.color->_argb32.u32 = source.color->_argb32.u32;
+      state->solid = ctx.solid;
+    }
+  }
+
+  FOG_INLINE void saveSourceColor()
+  {
+    if ((savedStateFlags & RASTER_STATE_SOURCE) == 0)
+    {
+      FOG_ASSERT(state != NULL);
+      FOG_ASSERT(sourceType == RASTER_SOURCE_COLOR);
+
+      savedStateFlags |= RASTER_STATE_SOURCE;
+      state->sourceType = RASTER_SOURCE_COLOR;
+      MemOps::copy_t<Color>(&state->source.color, &source.color);
+      state->solid = ctx.solid;
+    }
+  }
+
   void saveStroke();
   void saveTransform();
   void saveClipping();
@@ -221,7 +274,7 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   // --------------------------------------------------------------------------
 
   //! @brief Serializer (st/mt).
-  const RasterPaintSerializer* serializer;
+  const RasterSerializer* serializer;
 
   // --------------------------------------------------------------------------
   // [Members - Context]
@@ -268,7 +321,7 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   // [Members - Base (Always Saved / Restored)]
   // --------------------------------------------------------------------------
 
-  //! @brief Source type (see @c PATTERN_TYPE).
+  //! @brief Source type (see @c RASTER_SOURCE).
   uint8_t sourceType;
 
   //! @brief 'Saved-State' flags.
@@ -278,7 +331,7 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   uint8_t savedStateFlags;
 
   //! @brief The strokeParams[F|D] precision.
-  uint8_t strokeParamsPrecision;
+  uint8_t strokerPrecision;
 
   // --------------------------------------------------------------------------
   // [Members - Integral-Transform]
@@ -288,7 +341,7 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   uint8_t integralTransformType;
 
   //! @brief The final transform/scaling in integral units.
-  struct _IntegralTransform
+  struct FOG_NO_EXPORT _IntegralTransform
   {
     int _sx, _sy;
     int _tx, _ty;
@@ -302,8 +355,13 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   PointI metaOrigin;
   //! @brief Meta clip-region.
   Region metaRegion;
-  //! @brief Meta clip-box.
-  BoxI metaClipBox;
+
+  //! @brief Meta clip-box (int).
+  BoxI metaClipBoxI;
+  //! @brief Meta clip-box (float).
+  BoxF metaClipBoxF;
+  //! @brief Meta clip-box (double).
+  BoxD metaClipBoxD;
 
   // --------------------------------------------------------------------------
   // [Members - Transform]
@@ -313,11 +371,6 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   TransformD metaTransformD;
   //! @brief The user transformation matrix.
   TransformD userTransformD;
-
-  //! @brief The final transformation matrix (double).
-  TransformD finalTransformD;
-  //! @brief The final transformation matrix (float).
-  TransformF finalTransformF;
 
   // --------------------------------------------------------------------------
   // [Members - Source & Opacity]
@@ -333,13 +386,13 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   // --------------------------------------------------------------------------
 
   //! @brief Stroke parameters.
-  struct _StrokeParams
+  struct FOG_NO_EXPORT _Stroker
   {
     //! @brief Stroke parameters (float).
-    Static<PathStrokerParamsF> f;
+    Static<PathStrokerF> f;
     //! @brief Stroke parameters (double).
-    Static<PathStrokerParamsD> d;
-  } strokeParams;
+    Static<PathStrokerD> d;
+  } stroker;
 
   // --------------------------------------------------------------------------
   // [Members - State]
@@ -387,6 +440,13 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   // Temporary regions.
   Region tmpRegion[2];
 };
+
+// ============================================================================
+// [Fog::RasterPaintEngine - VTable]
+// ============================================================================
+
+extern FOG_NO_EXPORT PaintEngineVTable RasterPaintEngine_vtable[IMAGE_PRECISION_COUNT];
+extern FOG_NO_EXPORT RasterSerializer RasterPaintEngine_serializer[RASTER_MODE_COUNT];
 
 //! @}
 

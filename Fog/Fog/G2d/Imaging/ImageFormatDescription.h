@@ -9,7 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemOps.h>
 
 namespace Fog {
 
@@ -134,14 +134,14 @@ struct FOG_NO_EXPORT ImageFormatDescription
     if (_format != other._format) return false;
     if (_format < IMAGE_FORMAT_COUNT) return true;
 
-    return Memory::eq_t<ImageFormatDescription>(this, &other);
+    return MemOps::eq_t<ImageFormatDescription>(this, &other);
   }
 
   FOG_INLINE bool operator!=(const ImageFormatDescription& other)
   {
     if (_format != other._format) return true;
 
-    return !Memory::eq_t<ImageFormatDescription>(this, &other);
+    return !MemOps::eq_t<ImageFormatDescription>(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -233,12 +233,6 @@ FOG_INLINE const ImageFormatDescription& ImageFormatDescription::getByFormat(uin
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::ImageFormatDescription, Fog::TYPEINFO_PRIMITIVE)
 
 // [Guard]
 #endif // _FOG_G2D_IMAGING_IMAGEFORMATDESCRIPTION_H

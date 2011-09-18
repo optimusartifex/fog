@@ -70,12 +70,12 @@ namespace Math {
 //! @{
 
 // ============================================================================
-// [Fog::Math - Min/Max/Bound]
+// [Fog::Math - Min]
 // ============================================================================
 
 //! @brief Returns lower number of @a a and @a b.
 template<typename T>
-static FOG_INLINE T min(const T& a, const T& b)
+FOG_STATIC_INLINE_T T min(const T& a, const T& b)
 {
   return (a < b) ? a : b;
 }
@@ -83,7 +83,7 @@ static FOG_INLINE T min(const T& a, const T& b)
 //! @brief Returns lower number of @a a, @a b and @a c.
 //! @overload.
 template<typename T>
-static FOG_INLINE T min(const T& a, const T& b, const T& c)
+FOG_STATIC_INLINE_T T min(const T& a, const T& b, const T& c)
 {
   T t = a;
   if (t > b) t = b;
@@ -94,7 +94,7 @@ static FOG_INLINE T min(const T& a, const T& b, const T& c)
 //! @brief Returns lower number of @a a, @a b, @a c and @a d.
 //! @overload.
 template<typename T>
-static FOG_INLINE T min(const T& a, const T& b, const T& c, const T& d)
+FOG_STATIC_INLINE_T T min(const T& a, const T& b, const T& c, const T& d)
 {
   T t = a;
   if (t > b) t = b;
@@ -103,9 +103,13 @@ static FOG_INLINE T min(const T& a, const T& b, const T& c, const T& d)
   return t;
 }
 
+// ============================================================================
+// [Fog::Math - Max]
+// ============================================================================
+
 //! @brief Returns higher number of @a a and @a b.
 template<typename T>
-static FOG_INLINE T max(const T& a, const T& b)
+FOG_STATIC_INLINE_T T max(const T& a, const T& b)
 {
   return (a > b) ? a : b;
 }
@@ -113,7 +117,7 @@ static FOG_INLINE T max(const T& a, const T& b)
 //! @brief Returns higher number of @a a, @a b and @a c.
 //! @overload.
 template<typename T>
-static FOG_INLINE T max(const T& a, const T& b, const T& c)
+FOG_STATIC_INLINE_T T max(const T& a, const T& b, const T& c)
 {
   T t = a;
   if (t < b) t = b;
@@ -124,7 +128,7 @@ static FOG_INLINE T max(const T& a, const T& b, const T& c)
 //! @brief Returns higher number of @a a, @a b, @a c and @a d.
 //! @overload.
 template<typename T>
-static FOG_INLINE T max(const T& a, const T& b, const T& c, const T& d)
+FOG_STATIC_INLINE_T T max(const T& a, const T& b, const T& c, const T& d)
 {
   T t = a;
   if (t < b) t = b;
@@ -133,15 +137,20 @@ static FOG_INLINE T max(const T& a, const T& b, const T& c, const T& d)
   return t;
 }
 
-//! @brief Returns value @a val saturated between @a min and @a max.
+// ============================================================================
+// [Fog::Math - Bound]
+// ============================================================================
+
+//! @brief Get value @a val bounded to @a min and @a max.
 template<typename T>
-static FOG_INLINE T bound(const T& val, const T& min, const T& max)
+FOG_STATIC_INLINE_T T bound(const T& val, const T& min, const T& max)
 {
   return val < max ? (val > min ? val : min) : max;
 }
 
-template<typename T>
-static FOG_INLINE bool isBounded(const T& x, const T& xmin, const T& xmax) { return x >= xmin && x <= xmax; }
+// ============================================================================
+// [Fog::Math - BoundToByte]
+// ============================================================================
 
 static FOG_INLINE uint8_t boundToByte(int val)
 {
@@ -152,22 +161,107 @@ static FOG_INLINE uint8_t boundToByte(int val)
 }
 
 // ============================================================================
+// [Fog::Math - IsBounded]
+// ============================================================================
+
+template<typename T>
+FOG_STATIC_INLINE_T bool isBounded(const T& x, const T& min, const T& max)
+{
+  return x >= min && x <= max;
+}
+
+#if defined(FOG_CC_HAVE_NATIVE_CHAR_TYPE)
+template<>
+FOG_STATIC_INLINE_T bool isBounded(const char& x, const char& min, const char& max)
+{
+  return (unsigned char)(x - min) <= (unsigned char)(max - min);
+}
+#endif // FOG_CC_HAVE_NATIVE_CHAR_TYPE
+
+template<>
+FOG_STATIC_INLINE_T bool isBounded(const signed char& x, const signed char& min, const signed char& max)
+{
+  return (unsigned char)(x - min) <= (unsigned char)(max - min);
+}
+
+template<>
+FOG_STATIC_INLINE_T bool isBounded(const unsigned char& x, const unsigned char& min, const unsigned char& max)
+{
+  return (x - min) <= (max - min);
+}
+
+template<>
+FOG_STATIC_INLINE_T bool isBounded(const short& x, const short& min, const short& max)
+{
+  return (unsigned short)(x - min) <= (unsigned short)(max - min);
+}
+
+template<>
+FOG_STATIC_INLINE_T bool isBounded(const unsigned short& x, const unsigned short& min, const ushort& max)
+{
+  return (x - min) <= (max - min);
+}
+
+template<>
+FOG_STATIC_INLINE_T bool isBounded(const int& x, const int& min, const int& max)
+{
+  return (unsigned int)(x - min) <= (unsigned int)(max - min);
+}
+
+template<>
+FOG_STATIC_INLINE_T bool isBounded(const unsigned int& x, const unsigned int& min, const uint& max)
+{
+  return (x - min) <= (max - min);
+}
+
+template<>
+FOG_STATIC_INLINE_T bool isBounded(const int64_t& x, const int64_t& min, const int64_t& max)
+{
+  return (uint64_t)(x - min) <= (uint64_t)(max - min);
+}
+
+template<>
+FOG_STATIC_INLINE_T bool isBounded(const uint64_t& x, const uint64_t& min, const uint64_t& max)
+{
+  return (x - min) <= (max - min);
+}
+
+// ============================================================================
+// [Fog::Math - CanSum]
+// ============================================================================
+
+//! @brief Get whether it is possible to sum @a a and @a without overflow.
+//!
+//! @note This function is designed for unsigned integers only.
+template<typename T>
+FOG_STATIC_INLINE_T bool canSum(const T& a, const T& b)
+{
+  // There are several possibilities which can be used. Maybe different
+  // approach for each compiler is good idea.
+  //
+  //   - return a + b >= a
+  //   - return a >= ~0 - b
+
+  return a + b >= a;
+}
+
+// ============================================================================
 // [Fog::Math - Abs]
 // ============================================================================
 
-//! @brief Returns absolute value of @a a
+//! @brief Get absolute value of @a a
 template<typename T>
-FOG_INLINE T abs(const T& a)
+FOG_STATIC_INLINE_T T abs(const T& a)
 { return (a >= 0) ? a : -a; }
 
 template<>
-FOG_INLINE float abs(const float& a)
+FOG_STATIC_INLINE_T float abs(const float& a)
 {
   return ::fabsf(a);
 }
 
 template<>
-FOG_INLINE double abs(const double& a)
+FOG_STATIC_INLINE_T double abs(const double& a)
 {
   return ::fabs(a);
 }
@@ -195,13 +289,13 @@ FOG_INLINE double abs(const double& a)
 
 #define _FOG_MATH_DECLARE_VARIANT_TEMPLATE(_Func_) \
   template<typename T> \
-  FOG_INLINE T _Func_##T() { FOG_ASSERT_NOT_REACHED(); } \
+  FOG_STATIC_INLINE_T T _Func_##T() { FOG_ASSERT_NOT_REACHED(); } \
   \
   template<> \
-  FOG_INLINE float _Func_##T<float>() { return _Func_##F(); } \
+  FOG_STATIC_INLINE_T float _Func_##T<float>() { return _Func_##F(); } \
   \
   template<> \
-  FOG_INLINE double _Func_##T<double>() { return _Func_##D(); }
+  FOG_STATIC_INLINE_T double _Func_##T<double>() { return _Func_##D(); }
 
 static FOG_INLINE float getSNanF()
 {

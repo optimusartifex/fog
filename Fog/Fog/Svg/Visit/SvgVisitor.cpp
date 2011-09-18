@@ -55,11 +55,12 @@ err_t SvgVisitor::advance(SvgElement* obj)
     obj = reinterpret_cast<SvgElement*>(parent);
   }
 
-  size_t i, len = elements.getLength();
-  for (i = 0; i < len; i++)
+  ListReverseIterator<SvgElement*> it(elements);
+  while (it.isValid())
   {
-    obj = elements.at(len - 1 - i);
+    obj = it.getItem();
     FOG_RETURN_ON_ERROR(obj->onPrepare(this, NULL));
+    it.next();
   }
 
   return ERR_OK;

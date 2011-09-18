@@ -8,6 +8,7 @@
 #define _FOG_G2D_GEOMETRY_MATH2D_H
 
 // [Dependencies]
+#include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/Point.h>
 
@@ -15,57 +16,6 @@ namespace Fog {
 
 //! @addtogroup Fog_G2d_Geometry
 //! @{
-
-// ============================================================================
-// [Fog::Math2dConst]
-// ============================================================================
-
-//! @brief Fog 2d math constants which might be used within templates.
-template<typename NumT>
-struct Math2dConst {};
-
-template<>
-struct Math2dConst<float>
-{
-  //! @brief Get math epsilon (float).
-  static FOG_INLINE float getMathEpsilon() { return MATH_EPSILON_F; }
-
-  //! @brief Get default flatness (float).
-  static FOG_INLINE float getDefaultFlatness() { return 0.20f; }
-
-  //! @brief Get intersection epsilon (float).
-  static FOG_INLINE float getIntersectionEpsilon() { return 1.0e-8f; }
-
-  static FOG_INLINE float getCollinearityEpsilon() { return 1e-8f; }
-
-  //! @brief Get coinciding points maximal distance (float).
-  static FOG_INLINE float getDistanceEpsilon() { return 1.0e-6f; }
-
-  //! @brief Get epsilon used to prevent from adding degenerate curves (float).
-  static FOG_INLINE float getAngleEpsilon() { return MATH_EPSILON_F; }
-};
-
-template<>
-struct Math2dConst<double>
-{
-  //! @brief Get math epsilon (double).
-  static FOG_INLINE double getMathEpsilon() { return MATH_EPSILON_D; }
-
-  //! @brief Get default flatness (double).
-  static FOG_INLINE double getDefaultFlatness() { return 0.20; }
-
-  //! @brief Get intersection epsilon (double).
-  static FOG_INLINE double getIntersectionEpsilon() { return 1.0e-30; }
-
-  static FOG_INLINE double getCollinearityEpsilon() { return 1e-30; }
-
-  //! @brief Get coinciding points maximal distance (double).
-  static FOG_INLINE double getDistanceEpsilon() { return 1.0e-14; }
-
-  //! TODO: DEPRECATED, remove getAngleEpsilon.
-  //! @brief Get epsilon used to prevent from adding degenerate curves (double).
-  static FOG_INLINE double getAngleEpsilon() { return MATH_EPSILON_D; }
-};
 
 // ============================================================================
 // [Fog::Math2d]
@@ -133,18 +83,16 @@ static FOG_INLINE double distEuclidean(const PointD& p0, const PointD& p1)
 
 static FOG_INLINE PointF half(const PointF& p0, const PointF& p1)
 {
-  PointF result(UNINITIALIZED);
-  result.x = (p0.x + p1.x) * 0.5f;
-  result.y = (p0.y + p1.y) * 0.5f;
-  return result;
+  float x = (p0.x + p1.x) * 0.5f;
+  float y = (p0.y + p1.y) * 0.5f;
+  return PointF(x, y);
 }
 
 static FOG_INLINE PointD half(const PointD& p0, const PointD& p1)
 {
-  PointD result(UNINITIALIZED);
-  result.x = (p0.x + p1.x) * 0.5;
-  result.y = (p0.y + p1.y) * 0.5;
-  return result;
+  double x = (p0.x + p1.x) * 0.5;
+  double y = (p0.y + p1.y) * 0.5;
+  return PointD(x, y);
 }
 
 // ============================================================================
@@ -153,18 +101,16 @@ static FOG_INLINE PointD half(const PointD& p0, const PointD& p1)
 
 static FOG_INLINE PointF lerp(const PointF& p0, const PointF& p1, float t, float inv_t)
 {
-  PointF result(UNINITIALIZED);
-  result.x = inv_t * p0.x + t * p1.x;
-  result.y = inv_t * p0.y + t * p1.y;
-  return result;
+  float x = inv_t * p0.x + t * p1.x;
+  float y = inv_t * p0.y + t * p1.y;
+  return PointF(x, y);
 }
 
 static FOG_INLINE PointD lerp(const PointD& p0, const PointD& p1, double t, double inv_t)
 {
-  PointD result(UNINITIALIZED);
-  result.x = inv_t * p0.x + t * p1.x;
-  result.y = inv_t * p0.y + t * p1.y;
-  return result;
+  double x = inv_t * p0.x + t * p1.x;
+  double y = inv_t * p0.y + t * p1.y;
+  return PointD(x, y);
 }
 
 // ============================================================================
@@ -175,7 +121,9 @@ static FOG_INLINE bool intersectLine(PointF& dst, const PointF& a0, const PointF
 {
   float num = (a0.y - b0.y) * (b1.x - b0.x) - (a0.x - b0.x) * (b1.y - b0.y);
   float den = (a1.x - a0.x) * (b1.y - b0.y) - (a1.y - a0.y) * (b1.x - b0.x);
-  if (Math::abs(den) < Math2dConst<float>::getIntersectionEpsilon()) return false;
+
+  if (Math::abs(den) < MathConstant<float>::getIntersectionEpsilon())
+    return false;
 
   float r = num / den;
   dst.x = a0.x + (a1.x - a0.x) * r;
@@ -187,7 +135,9 @@ static FOG_INLINE bool intersectLine(PointD& dst, const PointD& a0, const PointD
 {
   double num = (a0.y - b0.y) * (b1.x - b0.x) - (a0.x - b0.x) * (b1.y - b0.y);
   double den = (a1.x - a0.x) * (b1.y - b0.y) - (a1.y - a0.y) * (b1.x - b0.x);
-  if (Math::abs(den) < Math2dConst<double>::getIntersectionEpsilon()) return false;
+
+  if (Math::abs(den) < MathConstant<double>::getIntersectionEpsilon())
+    return false;
 
   double r = num / den;
   dst.x = a0.x + (a1.x - a0.x) * r;

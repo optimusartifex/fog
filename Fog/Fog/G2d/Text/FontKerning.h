@@ -19,7 +19,7 @@ namespace Fog {
 // [Fog::FontKerningChar]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 //! @brief Union which container two characters used by @c FontKerningPairI
 //! and @c FontKerningPairF.
 //!
@@ -50,14 +50,14 @@ union FontKerningChars
   //! @brief Packed first and second character.
   uint32_t comparable;
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 // ============================================================================
 // [Fog::FontKerningPairI]
 // ============================================================================
 
 //! @brief Kerning pair (integer).
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 struct FontKerningPairI
 {
   //! @brief Kerning characters.
@@ -65,14 +65,14 @@ struct FontKerningPairI
   //! @brief Kerning value (usually negative).
   int amount;
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 // ============================================================================
 // [Fog::FontKerningPairF]
 // ============================================================================
 
 //! @brief Kerning pair (float).
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 struct FontKerningPairF
 {
   //! @brief Kerning characters.
@@ -80,7 +80,7 @@ struct FontKerningPairF
   //! @brief Kerning value (usually negative).
   float amount;
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 // ============================================================================
 // [Fog::FontKerningTableI]
@@ -124,7 +124,7 @@ struct FOG_NO_EXPORT FontKerningTableI
   // [Statics]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE size_t sizeFor(size_t length)
+  static FOG_INLINE size_t getSizeOf(size_t length)
   {
     return sizeof(FontKerningTableI) - sizeof(FontKerningPairI) +
       length * sizeof(FontKerningPairI);
@@ -183,7 +183,7 @@ struct FOG_NO_EXPORT FontKerningTableF
   // [Statics]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE size_t sizeFor(size_t length)
+  static FOG_INLINE size_t getSizeOf(size_t length)
   {
     return sizeof(FontKerningTableF) - sizeof(FontKerningPairF) +
       length * sizeof(FontKerningPairF);
@@ -203,14 +203,6 @@ struct FOG_NO_EXPORT FontKerningTableF
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::FontKerningChars, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::FontKerningPairI, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::FontKerningPairF, Fog::TYPEINFO_PRIMITIVE)
 
 // [Guard]
 #endif // _FOG_G2D_TEXT_FONTKERNING_H

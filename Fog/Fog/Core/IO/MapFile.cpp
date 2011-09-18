@@ -11,12 +11,13 @@
 // [Dependencies]
 #include <Fog/Core/IO/FileSystem.h>
 #include <Fog/Core/IO/MapFile.h>
-#include <Fog/Core/Memory/Alloc.h>
-#include <Fog/Core/Tools/ByteArray.h>
-#include <Fog/Core/Tools/ByteArrayTmp_p.h>
+#include <Fog/Core/Memory/MemMgr.h>
+#include <Fog/Core/OS/System.h>
 #include <Fog/Core/Tools/String.h>
+#include <Fog/Core/Tools/StringTmp_p.h>
 #include <Fog/Core/Tools/TextCodec.h>
 
+// [Dependencies - Posix]
 #if defined(FOG_OS_POSIX)
 #include <errno.h>
 #include <fcntl.h>
@@ -56,13 +57,14 @@ MapFile::~MapFile()
 // ============================================================================
 
 #if defined(FOG_OS_WINDOWS)
-err_t MapFile::map(const String& fileName, bool loadOnFail)
+err_t MapFile::map(const StringW& fileName, bool loadOnFail)
 {
   unmap();
 
   err_t err;
-  String fileNameW(fileName);
-  if ((err = fileNameW.slashesToPosix())) return err;
+
+  StringW fileNameW;
+  FOG_RETURN_ON_ERROR(System::makeWindowsPath(fileNameW, fileName));
 
   HANDLE hFile;
   HANDLE hFileMapping;
@@ -73,15 +75,18 @@ err_t MapFile::map(const String& fileName, bool loadOnFail)
   DWORD szHigh = 0;
 
   // Try to open file.
-  if ((hFile = CreateFileW(
-    reinterpret_cast<const wchar_t*>(fileNameW.getData()), FILE_READ_DATA, FILE_SHARE_READ,
-    NULL, OPEN_EXISTING, 0, NULL)) == INVALID_HANDLE_VALUE)
-  {
-    return GetLastError();
-  }
+  hFile = CreateFileW(
+    reinterpret_cast<const wchar_t*>(fileNameW.getData()),
+    FILE_READ_DATA,
+    FILE_SHARE_READ,
+    NULL, OPEN_EXISTING, 0, NULL);
+
+  if (hFile == INVALID_HANDLE_VALUE)
+    return System::errorFromOSLastError();
 
   // Get size of file (if size is too large -> fail)
   szLow = GetFileSize(hFile, &szHigh);
+
 #if FOG_ARCH_BITS == 32
   if (szHigh)
   {
@@ -115,12 +120,12 @@ err_t MapFile::map(const String& fileName, bool loadOnFail)
       return ERR_OK;
     }
 
-    err = GetLastError();
+    err = System::errorFromOSLastError();
     CloseHandle(hFileMapping);
   }
   else
   {
-    err = GetLastError();
+    err = System::errorFromOSLastError();
   }
 
   if (!loadOnFail)
@@ -129,7 +134,7 @@ err_t MapFile::map(const String& fileName, bool loadOnFail)
     return err;
   }
 
-  data = Memory::alloc(size);
+  data = MemMgr::alloc(size);
   if (FOG_IS_NULL(data))
   {
     CloseHandle(hFile);
@@ -154,8 +159,8 @@ err_t MapFile::map(const String& fileName, bool loadOnFail)
 
     if (!ReadFile(hFile, (LPVOID)dataCur, bytesToRead, &bytesRead, NULL) || bytesRead != bytesToRead)
     {
-      err = GetLastError();
-      Memory::free(data);
+      err = System::errorFromOSLastError();
+      MemMgr::free(data);
       CloseHandle(hFile);
       return err;
     }
@@ -184,7 +189,7 @@ void MapFile::unmap()
   }
   else
   {
-    Memory::free(_data);
+    MemMgr::free(_data);
   }
 
   _fileName.clear();
@@ -201,11 +206,11 @@ void MapFile::unmap()
 // ============================================================================
 
 #if defined(FOG_OS_POSIX)
-err_t MapFile::map(const String& fileName, bool loadOnFail)
+err_t MapFile::map(const StringW& fileName, bool loadOnFail)
 {
   unmap();
 
-  ByteArrayTmp<TEMPORARY_LENGTH> fileName8;
+  StringTmpA<TEMPORARY_LENGTH> fileName8;
   FOG_RETURN_ON_ERROR(TextCodec::local8().encode(fileName8, fileName));
 
   int fd = open(fileName8.getData(), O_RDONLY);
@@ -232,7 +237,7 @@ err_t MapFile::map(const String& fileName, bool loadOnFail)
       return ERR_OK;
     }
 
-    void* data = Memory::alloc((size_t)s.st_size);
+    void* data = MemMgr::alloc((size_t)s.st_size);
     if (FOG_IS_NULL(data))
     {
       close(fd);
@@ -258,8 +263,8 @@ err_t MapFile::map(const String& fileName, bool loadOnFail)
       bytesRead = read(fd, dataCur, bytesToRead);
       if (bytesRead != bytesToRead)
       {
-        err_t err = errno;
-        Memory::free(data);
+        err_t err = System::errorFromOSLastError();
+        MemMgr::free(data);
         close(fd);
         return err;
       }
@@ -276,7 +281,7 @@ err_t MapFile::map(const String& fileName, bool loadOnFail)
   }
   else
   {
-    err_t err = errno;
+    err_t err = System::errorFromOSLastError();
     close(fd);
     return err;
   }
@@ -293,7 +298,7 @@ void MapFile::unmap()
   }
   else
   {
-    Memory::free(_data);
+    MemMgr::free(_data);
   }
 
   _fileName.clear();

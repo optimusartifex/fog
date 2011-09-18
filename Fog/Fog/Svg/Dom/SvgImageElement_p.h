@@ -57,7 +57,7 @@ struct FOG_NO_EXPORT SvgImageElement : public SvgStyledElement
   SvgImageLinkAttribute a_href;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgImageElement)
+  _FOG_NO_COPY(SvgImageElement)
 };
 
 //! @}

@@ -11,7 +11,7 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemOps.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Circle.h>
 #include <Fog/G2d/Geometry/Point.h>
@@ -323,25 +323,20 @@ FOG_INLINE void EllipseF::setEllipse(const EllipseD& ellipse)
 // [Fog::EllipseT<>]
 // ============================================================================
 
-FOG_CLASS_PRECISION_F_D(Ellipse)
+_FOG_NUM_T(Ellipse)
+_FOG_NUM_F(Ellipse)
+_FOG_NUM_D(Ellipse)
 
 //! @}
 
 } // Fog namespace
 
 // ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::EllipseF, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::EllipseD, Fog::TYPEINFO_PRIMITIVE)
-
-// ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_FUZZY_DECLARE(Fog::EllipseF, Math::feqv((const float *)&a, (const float *)&b, 4))
-FOG_FUZZY_DECLARE(Fog::EllipseD, Math::feqv((const double*)&a, (const double*)&b, 4))
+FOG_FUZZY_DECLARE_F_VEC(Fog::EllipseF, 4)
+FOG_FUZZY_DECLARE_D_VEC(Fog::EllipseD, 4)
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_ELLIPSE_H

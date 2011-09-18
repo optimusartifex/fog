@@ -29,7 +29,7 @@ struct FOG_API PathEffect
   virtual err_t process(PathD& dst, const PathD& src) const = 0;
 
 private:
-  _FOG_CLASS_NO_COPY(PathEffect)
+  _FOG_NO_COPY(PathEffect)
 };
 
 //! @}

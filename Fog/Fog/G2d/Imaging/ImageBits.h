@@ -45,7 +45,7 @@ struct FOG_NO_EXPORT ImageBits
   {
   }
 
-  FOG_INLINE ImageBits(uint8_t* data, const SizeI& size, uint32_t format, sysint_t stride) :
+  FOG_INLINE ImageBits(uint8_t* data, const SizeI& size, uint32_t format, ssize_t stride) :
     data(data),
     size(size),
     format(format),
@@ -83,7 +83,7 @@ struct FOG_NO_EXPORT ImageBits
     this->stride = raw->stride;
   }
 
-  FOG_INLINE void setRaw(uint8_t* data, const SizeI& size, uint32_t format, sysint_t stride)
+  FOG_INLINE void setRaw(uint8_t* data, const SizeI& size, uint32_t format, ssize_t stride)
   {
     this->data = data;
     this->size = size;
@@ -114,18 +114,12 @@ struct FOG_NO_EXPORT ImageBits
   //! @brief Image buffer format.
   uint32_t format;
   //! @brief Image buffer stride (bytes per line).
-  sysint_t stride;
+  ssize_t stride;
 };
 
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::ImageBits, Fog::TYPEINFO_PRIMITIVE)
 
 // [Guard]
 #endif // _FOG_G2D_IMAGING_IMAGEBITS_H

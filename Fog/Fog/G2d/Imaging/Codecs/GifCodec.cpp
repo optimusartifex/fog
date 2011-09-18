@@ -16,7 +16,7 @@
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemOps.h>
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Strings.h>
@@ -98,7 +98,7 @@ static GifHashTableType *_InitHashTable(void)
 {
   GifHashTableType *HashTable;
 
-  if ((HashTable = (GifHashTableType *) Fog::Memory::alloc(sizeof(GifHashTableType))) == NULL)
+  if ((HashTable = (GifHashTableType *) Fog::MemMgr::alloc(sizeof(GifHashTableType))) == NULL)
   {
     return NULL;
   }
@@ -194,14 +194,14 @@ typedef uint8_t *GifRowType;
 typedef uint16_t GifPrefixType;
 typedef int GifWord;
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 struct GifColorType
 {
   uint8_t Red;
   uint8_t Green;
   uint8_t Blue;
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 struct ColorMapObject
 {
@@ -373,10 +373,10 @@ static ColorMapObject *MakeMapObject(int ColorCount, const GifColorType * ColorM
    * make the user know that or should we automatically round up instead? */
   if (ColorCount != (1 << BitSize(ColorCount))) return NULL;
 
-  Object = (ColorMapObject *)Fog::Memory::alloc(sizeof(ColorMapObject));
+  Object = (ColorMapObject *)Fog::MemMgr::alloc(sizeof(ColorMapObject));
   if (Object == (ColorMapObject *) NULL) return NULL;
 
-  Object->Colors = (GifColorType *)Fog::Memory::calloc(ColorCount * sizeof(GifColorType));
+  Object->Colors = (GifColorType *)Fog::MemMgr::calloc(ColorCount * sizeof(GifColorType));
   if (Object->Colors == (GifColorType *) NULL) return NULL;
 
   Object->ColorCount = ColorCount;
@@ -395,8 +395,8 @@ static void FreeMapObject(ColorMapObject * Object)
 {
   if (Object != NULL)
   {
-    Fog::Memory::free(Object->Colors);
-    Fog::Memory::free(Object);
+    Fog::MemMgr::free(Object->Colors);
+    Fog::MemMgr::free(Object);
     /*** FIXME:
      * When we are willing to break API we need to make this function
      * FreeMapObject(ColorMapObject **Object)
@@ -491,7 +491,7 @@ static ColorMapObject *UnionColorMap(
 
     /* perhaps we can shrink the map? */
     if (RoundUpTo < ColorUnion->ColorCount)
-      ColorUnion->Colors = (GifColorType *)Fog::Memory::realloc(Map,
+      ColorUnion->Colors = (GifColorType *)Fog::MemMgr::realloc(Map,
                  sizeof(GifColorType) * RoundUpTo);
   }
 
@@ -532,9 +532,9 @@ static int AddExtensionBlock(SavedImage * New, int Len, unsigned char ExtData[])
   ExtensionBlock *ep;
 
   if (New->ExtensionBlocks == NULL)
-    New->ExtensionBlocks=(ExtensionBlock *)Fog::Memory::alloc(sizeof(ExtensionBlock));
+    New->ExtensionBlocks=(ExtensionBlock *)Fog::MemMgr::alloc(sizeof(ExtensionBlock));
   else
-    New->ExtensionBlocks = (ExtensionBlock *)Fog::Memory::realloc(New->ExtensionBlocks,
+    New->ExtensionBlocks = (ExtensionBlock *)Fog::MemMgr::realloc(New->ExtensionBlocks,
       sizeof(ExtensionBlock) *
       (New->ExtensionBlockCount + 1));
 
@@ -544,7 +544,7 @@ static int AddExtensionBlock(SavedImage * New, int Len, unsigned char ExtData[])
   ep = &New->ExtensionBlocks[New->ExtensionBlockCount++];
 
   ep->ByteCount=Len;
-  ep->Bytes = (char *)Fog::Memory::alloc(ep->ByteCount);
+  ep->Bytes = (char *)Fog::MemMgr::alloc(ep->ByteCount);
   if (ep->Bytes == NULL)
     return (GIF_ERROR);
 
@@ -565,10 +565,10 @@ static void FreeExtension(SavedImage *Image)
 
   for (ep = Image->ExtensionBlocks; ep < (Image->ExtensionBlocks + Image->ExtensionBlockCount); ep++)
   {
-    Fog::Memory::free((char *)ep->Bytes);
+    Fog::MemMgr::free((char *)ep->Bytes);
   }
 
-  Fog::Memory::free((char *)Image->ExtensionBlocks);
+  Fog::MemMgr::free((char *)Image->ExtensionBlocks);
   Image->ExtensionBlocks = NULL;
 }
 
@@ -594,16 +594,16 @@ static void FreeLastSavedImage(GifFileType *GifFile)
   }
 
   /* Deallocate the image data */
-  if (sp->RasterBits) Fog::Memory::free((char *)sp->RasterBits);
+  if (sp->RasterBits) Fog::MemMgr::free((char *)sp->RasterBits);
 
   /* Deallocate any extensions */
   if (sp->ExtensionBlocks) FreeExtension(sp);
 
-  /*** FIXME: We could Fog::Memory::realloc the GifFile->SavedImages structure but is
+  /*** FIXME: We could Fog::MemMgr::realloc the GifFile->SavedImages structure but is
    * there a point to it? Saves some memory but we'd have to do it every
    * time.  If this is used in FreeSavedImages then it would be inefficient
    * (The whole array is going to be deallocated.)  If we just use it when
-   * we want to Fog::Memory::free the last Image it's convenient to do it here.
+   * we want to Fog::MemMgr::free the last Image it's convenient to do it here.
    */
 }
 
@@ -613,9 +613,9 @@ static SavedImage *MakeSavedImage(GifFileType * GifFile, const SavedImage * Copy
   SavedImage *sp;
 
   if (GifFile->SavedImages == NULL)
-    GifFile->SavedImages = (SavedImage *)Fog::Memory::alloc(sizeof(SavedImage));
+    GifFile->SavedImages = (SavedImage *)Fog::MemMgr::alloc(sizeof(SavedImage));
   else
-    GifFile->SavedImages = (SavedImage *)Fog::Memory::realloc(GifFile->SavedImages,
+    GifFile->SavedImages = (SavedImage *)Fog::MemMgr::realloc(GifFile->SavedImages,
                            sizeof(SavedImage) * (GifFile->ImageCount + 1));
 
   if (GifFile->SavedImages == NULL) return ((SavedImage *)NULL);
@@ -647,7 +647,7 @@ static SavedImage *MakeSavedImage(GifFileType * GifFile, const SavedImage * Copy
     }
 
     /* next, the raster */
-    sp->RasterBits = (unsigned char *)Fog::Memory::alloc(sizeof(GifPixelType) *
+    sp->RasterBits = (unsigned char *)Fog::MemMgr::alloc(sizeof(GifPixelType) *
                                            CopyFrom->ImageDesc.Height *
                                            CopyFrom->ImageDesc.Width);
     if (sp->RasterBits == NULL)
@@ -662,7 +662,7 @@ static SavedImage *MakeSavedImage(GifFileType * GifFile, const SavedImage * Copy
     /* finally, the extension blocks */
     if (sp->ExtensionBlocks)
     {
-      sp->ExtensionBlocks = (ExtensionBlock *)Fog::Memory::alloc(
+      sp->ExtensionBlocks = (ExtensionBlock *)Fog::MemMgr::alloc(
         sizeof(ExtensionBlock) * CopyFrom->ExtensionBlockCount);
 
       if (sp->ExtensionBlocks == NULL)
@@ -675,7 +675,7 @@ static SavedImage *MakeSavedImage(GifFileType * GifFile, const SavedImage * Copy
         sizeof(ExtensionBlock) * CopyFrom->ExtensionBlockCount);
 
       // For the moment, the actual blocks can take their
-      // chances with Fog::Memory::free().  We'll fix this later.
+      // chances with Fog::MemMgr::free().  We'll fix this later.
       //
       // FIXME: [Better check this out... Toshio]
       // 2004 May 27: Looks like this was an ESR note.
@@ -702,10 +702,10 @@ static void FreeSavedImages(GifFileType * GifFile)
       sp->ImageDesc.ColorMap = NULL;
     }
 
-    if (sp->RasterBits) Fog::Memory::free((char *)sp->RasterBits);
+    if (sp->RasterBits) Fog::MemMgr::free((char *)sp->RasterBits);
     if (sp->ExtensionBlocks) FreeExtension(sp);
   }
-  Fog::Memory::free((char *)GifFile->SavedImages);
+  Fog::MemMgr::free((char *)GifFile->SavedImages);
   GifFile->SavedImages=NULL;
 }
 
@@ -728,7 +728,7 @@ static GifFileType *DGifOpen(Fog::Stream* stream)
   uint8_t Buf[GIF_STAMP_LEN + 1];
   GifFileType *GifFile;
 
-  GifFile = (GifFileType *)Fog::Memory::calloc(sizeof(GifFileType));
+  GifFile = (GifFileType *)Fog::MemMgr::calloc(sizeof(GifFileType));
   if (GifFile == NULL)
   {
     _GifError = D_GIF_ERR_NOT_ENOUGH_MEM;
@@ -742,7 +742,7 @@ static GifFileType *DGifOpen(Fog::Stream* stream)
   if (READ(GifFile, Buf, GIF_STAMP_LEN) != GIF_STAMP_LEN)
   {
     _GifError = D_GIF_ERR_READ_FAILED;
-    Fog::Memory::free((char *)GifFile);
+    Fog::MemMgr::free((char *)GifFile);
     return NULL;
   }
 
@@ -752,13 +752,13 @@ static GifFileType *DGifOpen(Fog::Stream* stream)
   if (strncmp(GIF_STAMP, (const char*)Buf, GIF_VERSION_POS) != 0)
   {
     _GifError = D_GIF_ERR_NOT_GIF_FILE;
-    Fog::Memory::free((char *)GifFile);
+    Fog::MemMgr::free((char *)GifFile);
     return NULL;
   }
 
   if (DGifGetScreenDesc(GifFile) == GIF_ERROR)
   {
-    Fog::Memory::free((char *)GifFile);
+    Fog::MemMgr::free((char *)GifFile);
     return NULL;
   }
 
@@ -942,7 +942,7 @@ static int DGifGetImageDesc(GifFileType * GifFile)
 
   if (GifFile->SavedImages)
   {
-    if ((GifFile->SavedImages = (SavedImage *)Fog::Memory::realloc(GifFile->SavedImages,
+    if ((GifFile->SavedImages = (SavedImage *)Fog::MemMgr::realloc(GifFile->SavedImages,
       sizeof(SavedImage) * (GifFile->ImageCount + 1))) == NULL)
     {
       _GifError = D_GIF_ERR_NOT_ENOUGH_MEM;
@@ -951,7 +951,7 @@ static int DGifGetImageDesc(GifFileType * GifFile)
   }
   else
   {
-    if ((GifFile->SavedImages = (SavedImage *) Fog::Memory::alloc(sizeof(SavedImage))) == NULL)
+    if ((GifFile->SavedImages = (SavedImage *) Fog::MemMgr::alloc(sizeof(SavedImage))) == NULL)
     {
       _GifError = D_GIF_ERR_NOT_ENOUGH_MEM;
       return GIF_ERROR;
@@ -1150,7 +1150,7 @@ static int DGifCloseFile(GifFileType * GifFile)
     GifFile->SavedImages = NULL;
   }
 
-  Fog::Memory::free(GifFile);
+  Fog::MemMgr::free(GifFile);
   return GIF_OK;
 }
 
@@ -1457,7 +1457,7 @@ static int DGifGetLZCodes(GifFileType * GifFile, int *Code)
  * The LZ decompression input routine:
  * This routine is responsable for the decompression of the bit stream from
  * 8 bits (bytes) packets, into the real codes.
- * Returns GIF_OK if read succesfully.
+ * Returns GIF_OK if read successfully.
  *****************************************************************************/
 static int DGifDecompressInput(GifFileType * GifFile, int *Code)
 {
@@ -1578,7 +1578,7 @@ static int DGifSlurp(GifFileType * GifFile)
         sp = &GifFile->SavedImages[GifFile->ImageCount - 1];
         ImageSize = sp->ImageDesc.Width * sp->ImageDesc.Height;
 
-        sp->RasterBits = (unsigned char *)Fog::Memory::alloc(ImageSize * sizeof(GifPixelType));
+        sp->RasterBits = (unsigned char *)Fog::MemMgr::alloc(ImageSize * sizeof(GifPixelType));
 
         if (sp->RasterBits == NULL) return GIF_ERROR;
         if (DGifGetLine(GifFile, sp->RasterBits, ImageSize) == GIF_ERROR) return (GIF_ERROR);
@@ -1656,7 +1656,7 @@ static GifFileType *EGifOpen(Fog::Stream* stream)
 {
   GifFileType *GifFile;
 
-  GifFile = (GifFileType *)Fog::Memory::calloc(sizeof(GifFileType));
+  GifFile = (GifFileType *)Fog::MemMgr::calloc(sizeof(GifFileType));
   if (GifFile == NULL)
   {
     _GifError = E_GIF_ERR_NOT_ENOUGH_MEM;
@@ -1666,7 +1666,7 @@ static GifFileType *EGifOpen(Fog::Stream* stream)
   GifFile->HashTable = _InitHashTable();
   if (GifFile->HashTable == NULL)
   {
-    Fog::Memory::free(GifFile);
+    Fog::MemMgr::free(GifFile);
     _GifError = E_GIF_ERR_NOT_ENOUGH_MEM;
     return NULL;
   }
@@ -2199,10 +2199,10 @@ static int EGifCloseFile(GifFileType* GifFile)
 
   if (GifFile->HashTable)
   {
-    Fog::Memory::free(GifFile->HashTable);
+    Fog::MemMgr::free(GifFile->HashTable);
   }
 
-  Fog::Memory::free(GifFile);
+  Fog::MemMgr::free(GifFile);
   return GIF_OK;
 }
 
@@ -2369,7 +2369,7 @@ static int EGifCompressLine(GifFileType * GifFile, GifPixelType * Line, int Line
  * The LZ compression output routine:
  * This routine is responsible for the compression of the bit stream into
  * 8 bits (bytes) packets.
- * Returns GIF_OK if written succesfully.
+ * Returns GIF_OK if written successfully.
  *****************************************************************************/
 static int EGifCompressOutput(GifFileType * GifFile, int Code)
 {
@@ -2403,7 +2403,7 @@ static int EGifCompressOutput(GifFileType * GifFile, int Code)
     }
   }
 
-  /* If code cannt fit into RunningBits bits, must raise its size. Note */
+  /* If code cannot fit into RunningBits bits, must raise its size. Note */
   /* however that codes above 4095 are used for special signaling.      */
   if (GifFile->RunningCode >= GifFile->MaxCode1 && Code <= 4095)
   {
@@ -2417,7 +2417,7 @@ static int EGifCompressOutput(GifFileType * GifFile, int Code)
  * This routines buffers the given characters until 255 characters are ready
  * to be output. If Code is equal to -1 the buffer is flushed (EOF).
  * The buffer is Dumped with first byte as its size, as GIF format requires.
- * Returns GIF_OK if written succesfully.
+ * Returns GIF_OK if written successfully.
  *****************************************************************************/
 static int EGifBufferedOutput(GifFileType * GifFile, uint8_t * Buf, int c)
 {
@@ -2766,7 +2766,7 @@ err_t GifDecoder::readImage(Image& image)
       }
       w = _context->Image.Width;
       h = _context->Image.Height;
-      rows = (GifRowType*)Fog::Memory::calloc(h * sizeof(GifRowType *));
+      rows = (GifRowType*)Fog::MemMgr::calloc(h * sizeof(GifRowType *));
       if (!rows)
       {
         error = ERR_RT_OUT_OF_MEMORY;
@@ -2774,7 +2774,7 @@ err_t GifDecoder::readImage(Image& image)
       }
       for (i = 0; i < h; i++)
       {
-        rows[i] = (GifRowType)Fog::Memory::alloc(w * sizeof(GifPixelType));
+        rows[i] = (GifRowType)Fog::MemMgr::alloc(w * sizeof(GifPixelType));
         if (!rows[i])
         {
           error = ERR_RT_OUT_OF_MEMORY;
@@ -2852,9 +2852,9 @@ _End:
   {
     for (i = 0; i < h; i++)
     {
-      if (rows[i]) Fog::Memory::free(rows[i]);
+      if (rows[i]) Fog::MemMgr::free(rows[i]);
     }
-    Fog::Memory::free(rows);
+    Fog::MemMgr::free(rows);
   }
 
   image._modified();

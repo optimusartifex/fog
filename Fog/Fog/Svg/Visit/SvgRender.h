@@ -54,7 +54,7 @@ struct FOG_API SvgRender : public SvgVisitor
   Painter* _painter;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgRender)
+  _FOG_NO_COPY(SvgRender)
 };
 
 //! @}

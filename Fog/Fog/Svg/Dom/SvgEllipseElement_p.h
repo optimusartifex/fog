@@ -55,7 +55,7 @@ struct FOG_NO_EXPORT SvgEllipseElement : public SvgStyledElement
   SvgCoordAttribute a_ry;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgEllipseElement)
+  _FOG_NO_COPY(SvgEllipseElement)
 };
 
 //! @}

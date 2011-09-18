@@ -8,10 +8,10 @@
 #define _FOG_GUI_ENGINE_WINGUIENGINE_H
 
 // [Dependencies]
-#include <Fog/Core/System/Object.h>
+#include <Fog/Core/Global/Global.h>
+#include <Fog/Core/Kernel/Object.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
-#include <Fog/Gui/Global/Constants.h>
 #include <Fog/Gui/Engine/GuiEngine.h>
 
 namespace Fog {
@@ -57,7 +57,7 @@ struct FOG_API WinGuiEngine : public GuiEngine
   virtual void maximize(GuiWindow*);
 
   // --------------------------------------------------------------------------
-  // [Windows Specific]
+  // [Windows Support]
   // --------------------------------------------------------------------------
 
   //! @brief Mouse wheel message ID.
@@ -118,8 +118,8 @@ struct FOG_API WinGuiWindow : public GuiWindow
 
   virtual err_t takeFocus();
 
-  virtual err_t setTitle(const String& title);
-  virtual err_t getTitle(String& title);
+  virtual err_t setTitle(const StringW& title);
+  virtual err_t getTitle(StringW& title);
 
   virtual err_t setIcon(const Image& icon);
   virtual err_t getIcon(Image& icon);

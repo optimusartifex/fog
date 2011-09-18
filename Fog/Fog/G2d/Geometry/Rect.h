@@ -11,7 +11,7 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemOps.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Size.h>
 
@@ -64,7 +64,7 @@ struct RectI
 
   FOG_INLINE RectI& setRect(const RectI& other)
   {
-    Memory::copy_t<RectI>(this, &other);
+    MemOps::copy_t<RectI>(this, &other);
     return *this;
   }
 
@@ -127,7 +127,7 @@ struct RectI
 
   FOG_INLINE RectI& reset()
   {
-    Memory::zero_t<RectI>(this);
+    MemOps::zero_t<RectI>(this);
     return *this;
   }
 
@@ -232,7 +232,7 @@ struct RectI
 
   FOG_INLINE bool eq(const RectI& other) const
   {
-    return Memory::eq_t<RectI>(this, &other);
+    return MemOps::eq_t<RectI>(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -1207,26 +1207,21 @@ FOG_INLINE RectF& RectF::setRect(const RectD& other)
 // [Fog::RectT<>]
 // ============================================================================
 
-FOG_CLASS_PRECISION_F_D_I(Rect)
+_FOG_NUM_T(Rect)
+_FOG_NUM_I(Rect)
+_FOG_NUM_F(Rect)
+_FOG_NUM_D(Rect)
 
 //! @}
 
 } // Fog namespace
 
 // ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::RectI, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::RectF, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::RectD, Fog::TYPEINFO_PRIMITIVE)
-
-// ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_FUZZY_DECLARE(Fog::RectF, Math::feqv((const float *)&a, (const float *)&b, 4))
-FOG_FUZZY_DECLARE(Fog::RectD, Math::feqv((const double*)&a, (const double*)&b, 4))
+FOG_FUZZY_DECLARE_F_VEC(Fog::RectF, 4)
+FOG_FUZZY_DECLARE_D_VEC(Fog::RectD, 4)
 
 // Prevent the warning about the used functions, which weren't defined (GCC).
 #if !defined(_FOG_G2D_GEOMETRY_BOX_H)

@@ -4,14 +4,13 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_COLOR_AHSV_H
-#define _FOG_G2D_COLOR_AHSV_H
+#ifndef _FOG_G2D_SOURCE_AHSV_H
+#define _FOG_G2D_SOURCE_AHSV_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemOps.h>
 #include <Fog/Core/Global/Global.h>
 #include <Fog/G2d/Source/ColorBase.h>
 
@@ -24,7 +23,7 @@ namespace Fog {
 // [Fog::AhsvF]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 //! @brief Color in AHSV format (alpha, hue, saturation, value).
 struct FOG_NO_EXPORT AhsvF : public AhsvBaseF
 {
@@ -99,7 +98,7 @@ struct FOG_NO_EXPORT AhsvF : public AhsvBaseF
 
   FOG_INLINE void reset()
   {
-    Memory::zero_t<AhsvF>(this);
+    MemOps::zero_t<AhsvF>(this);
   }
 
   // --------------------------------------------------------------------------
@@ -157,23 +156,17 @@ struct FOG_NO_EXPORT AhsvF : public AhsvBaseF
     return ahsvf;
   }
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 //! @}
 
 } // Fog namespace
 
 // ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::AhsvF, Fog::TYPEINFO_PRIMITIVE)
-
-// ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_FUZZY_DECLARE(Fog::AhsvF, Math::feqv(a.data, b.data, 4))
+FOG_FUZZY_DECLARE_F_VEC(Fog::AhsvF, 4)
 
 // [Guard]
-#endif // _FOG_G2D_COLOR_AHSV_H
+#endif // _FOG_G2D_SOURCE_AHSV_H

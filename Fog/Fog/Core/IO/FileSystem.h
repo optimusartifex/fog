@@ -8,8 +8,8 @@
 #define _FOG_CORE_IO_FILESYSTEM_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Global/Global.h>
+#include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Tools/String.h>
 
 // [Dependencies - C]
@@ -86,53 +86,53 @@ enum FILE_FLAGS
 };
 
 #if defined(FOG_OS_POSIX)
-FOG_API int stat(const String& fileName, struct stat* s);
+FOG_API int stat(const StringW& fileName, struct stat* s);
 #endif // FOG_OS_POSIX
 
-FOG_API uint32_t testFile(const String& fileName, uint32_t flags);
-FOG_API bool findFile(const List<String>& paths, const String& fileName, String& dest);
+FOG_API uint32_t testFile(const StringW& fileName, uint32_t flags);
+FOG_API bool findFile(const List<StringW>& paths, const StringW& fileName, StringW& dest);
 
-static FOG_INLINE bool exists(const String& fileName)
+static FOG_INLINE bool exists(const StringW& fileName)
 { return testFile(fileName, FILE_EXISTS) == FILE_EXISTS; }
 
-static FOG_INLINE bool isFile(const String& fileName)
+static FOG_INLINE bool isFile(const StringW& fileName)
 { return testFile(fileName, IS_FILE) == IS_FILE; }
 
-static FOG_INLINE bool isDirectory(const String& fileName)
+static FOG_INLINE bool isDirectory(const StringW& fileName)
 { return testFile(fileName, IS_DIRECTORY) == IS_DIRECTORY;}
 
-FOG_API err_t createDirectory(const String& dir, bool recursive = true);
-FOG_API err_t deleteDirectory(const String& dir);
+FOG_API err_t createDirectory(const StringW& dir, bool recursive = true);
+FOG_API err_t deleteDirectory(const StringW& dir);
 
-FOG_API err_t extractFile(String& dst, const String& path);
-FOG_API err_t extractDirectory(String& dst, const String& path);
-FOG_API err_t extractExtension(String& dst, const String& path);
-FOG_API err_t normalizePath(String& dst, const String& path);
-FOG_API err_t toAbsolutePath(String& dst, const String& base, const String& path);
-FOG_API err_t joinPath(String& dst, const String& base, const String& part);
+FOG_API err_t extractFile(StringW& dst, const StringW& path);
+FOG_API err_t extractDirectory(StringW& dst, const StringW& path);
+FOG_API err_t extractExtension(StringW& dst, const StringW& path);
+FOG_API err_t normalizePath(StringW& dst, const StringW& path);
+FOG_API err_t toAbsolutePath(StringW& dst, const StringW& base, const StringW& path);
+FOG_API err_t joinPath(StringW& dst, const StringW& base, const StringW& part);
 
-FOG_API bool isPathContainsFile(const String& path, const String& file, uint cs = CASE_SENSITIVE);
-FOG_API bool isPathContainsDirectory(const String& path, const String& directory, uint cs = CASE_SENSITIVE);
-FOG_API bool isPathContainsExtension(const String& path, const String& extension, uint cs = CASE_SENSITIVE);
-FOG_API bool isNormalizedPath(const String& path);
-FOG_API bool isAbsolutePath(const String& path);
+FOG_API bool isPathContainsFile(const StringW& path, const StringW& file, uint cs = CASE_SENSITIVE);
+FOG_API bool isPathContainsDirectory(const StringW& path, const StringW& directory, uint cs = CASE_SENSITIVE);
+FOG_API bool isPathContainsExtension(const StringW& path, const StringW& extension, uint cs = CASE_SENSITIVE);
+FOG_API bool isNormalizedPath(const StringW& path);
+FOG_API bool isAbsolutePath(const StringW& path);
 
-FOG_API bool testLocalName(const String& path);
+FOG_API bool testLocalName(const StringW& path);
 
 #if defined(FOG_OS_WINDOWS)
 static const char directorySeparatorA = '\\';
-static const Char directorySeparatorU = Char('\\');
+static const CharW directorySeparatorU = CharW('\\');
 
 static const char pathSeparatorA = ';';
-static const Char pathSeparatorU = Char(';');
+static const CharW pathSeparatorU = CharW(';');
 #endif // FOG_OS_WINDOWS
 
 #if defined(FOG_OS_POSIX)
 static const char directorySeparatorA = '/';
-static const Char directorySeparatorU = Char('/');
+static const CharW directorySeparatorU = CharW('/');
 
 static const char pathSeparatorA = ':';
-static const Char pathSeparatorU = Char(':');
+static const CharW pathSeparatorU = CharW(':');
 #endif // FOG_OS_POSIX
 
 //! @}

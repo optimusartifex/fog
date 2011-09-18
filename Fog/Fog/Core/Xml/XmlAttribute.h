@@ -41,10 +41,10 @@ struct FOG_API XmlAttribute
   FOG_INLINE bool isAssigned() const { return _element != NULL; }
 
   FOG_INLINE XmlElement* getElement() const { return _element; }
-  FOG_INLINE const String& getName() const { return _name.getString(); }
+  FOG_INLINE const StringW& getName() const { return _name.getString(); }
 
-  virtual String getValue() const;
-  virtual err_t setValue(const String& value);
+  virtual StringW getValue() const;
+  virtual err_t setValue(const StringW& value);
 
   // --------------------------------------------------------------------------
   // [Internal]
@@ -62,7 +62,7 @@ protected:
   //! @brief Attribute name (managed string).
   ManagedString _name;
   //! @brief Attribute value (or empty if value is provided by overriden class).
-  String _value;
+  StringW _value;
 
   //! @brief Attribute offset in @c XmlElement (relative to @c XmlElement).
   //!
@@ -73,7 +73,7 @@ protected:
 private:
   friend struct XmlElement;
 
-  _FOG_CLASS_NO_COPY(XmlAttribute)
+  _FOG_NO_COPY(XmlAttribute)
 };
 
 //! @}

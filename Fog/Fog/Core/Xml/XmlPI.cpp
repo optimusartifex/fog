@@ -18,7 +18,7 @@ namespace Fog {
 // [Fog::XmlPI]
 // ============================================================================
 
-XmlPI::XmlPI(const String& data) :
+XmlPI::XmlPI(const StringW& data) :
   XmlNoText(fog_strings->getString(STR_XML__pi)),
   _data(data)
 {
@@ -35,13 +35,13 @@ XmlElement* XmlPI::clone() const
   return fog_new XmlPI(_data);
 }
 
-const String& XmlPI::getData() const
+const StringW& XmlPI::getData() const
 {
   FOG_ASSERT(getType() == XML_ELEMENT_PI);
   return _data;
 }
 
-err_t XmlPI::setData(const String& data)
+err_t XmlPI::setData(const StringW& data)
 {
   FOG_ASSERT(getType() == XML_ELEMENT_PI);
   return _data.set(data);

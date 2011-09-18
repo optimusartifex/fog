@@ -14,7 +14,6 @@
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Geometry/PathStroker.h>
 #include <Fog/G2d/Geometry/Transform.h>
-#include <Fog/Svg/Global/Constants.h>
 
 namespace Fog {
 
@@ -78,8 +77,8 @@ struct FOG_API SvgElement : public XmlElement
   // [SVG Styles]
   // --------------------------------------------------------------------------
 
-  virtual String getStyle(const String& name) const;
-  virtual err_t setStyle(const String& name, const String& value);
+  virtual StringW getStyle(const StringW& name) const;
+  virtual err_t setStyle(const StringW& name, const StringW& value);
 
   // --------------------------------------------------------------------------
   // [SVG Implementation]
@@ -111,7 +110,7 @@ protected:
   mutable BoxF _boundingBox;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgElement)
+  _FOG_NO_COPY(SvgElement)
 };
 
 //! @}

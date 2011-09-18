@@ -11,7 +11,7 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemOps.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Geometry/Size.h>
@@ -58,7 +58,7 @@ struct BoxI
 
   FOG_INLINE BoxI& setBox(const BoxI& other)
   {
-    Memory::copy_t<BoxI>(this, &other);
+    MemOps::copy_t<BoxI>(this, &other);
     return *this;
   }
 
@@ -106,7 +106,7 @@ struct BoxI
 
   FOG_INLINE void reset()
   {
-    Memory::zero_t<BoxI>(this);
+    MemOps::zero_t<BoxI>(this);
   }
 
   // --------------------------------------------------------------------------
@@ -147,8 +147,8 @@ struct BoxI
   //! @brief Returns @c true if rectangle completely subsumes @a r.
   FOG_INLINE bool subsumes(const BoxI& r) const
   {
-    return ((r.x0 >= x0) & (r.x1 <= x1) &
-            (r.y0 >= y0) & (r.y1 <= y1) );
+    return ((r.x0 >= x0) & (r.x1 <= x1)) &
+           ((r.y0 >= y0) & (r.y1 <= y1)) ;
   }
 
   // --------------------------------------------------------------------------
@@ -197,7 +197,7 @@ struct BoxI
 
   FOG_INLINE bool eq(const BoxI& other) const
   {
-    return Memory::eq_t<BoxI>(this, &other);
+    return MemOps::eq_t<BoxI>(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -331,7 +331,7 @@ struct BoxF
 
   FOG_INLINE BoxF& setBox(const BoxF& other)
   {
-    Memory::copy_t<BoxF>(this, &other);
+    MemOps::copy_t<BoxF>(this, &other);
     return *this;
   }
 
@@ -644,7 +644,7 @@ struct FOG_NO_EXPORT BoxD
 
   FOG_INLINE BoxD& setBox(const BoxD& other)
   {
-    Memory::copy_t<BoxD>(this, &other);
+    MemOps::copy_t<BoxD>(this, &other);
     return *this;
   }
 
@@ -1028,26 +1028,21 @@ FOG_INLINE RectD& RectD::setBox(const BoxI& other)
 // [Fog::BoxT<>]
 // ============================================================================
 
-FOG_CLASS_PRECISION_F_D_I(Box)
+_FOG_NUM_T(Box)
+_FOG_NUM_I(Box)
+_FOG_NUM_F(Box)
+_FOG_NUM_D(Box)
 
 //! @}
 
 } // Fog namespace
 
 // ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::BoxI, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::BoxF, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::BoxD, Fog::TYPEINFO_PRIMITIVE)
-
-// ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_FUZZY_DECLARE(Fog::BoxF, Math::feqv((const float *)&a, (const float *)&b, 4))
-FOG_FUZZY_DECLARE(Fog::BoxD, Math::feqv((const double*)&a, (const double*)&b, 4))
+FOG_FUZZY_DECLARE_F_VEC(Fog::BoxF, 4)
+FOG_FUZZY_DECLARE_D_VEC(Fog::BoxD, 4)
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_BOX_H

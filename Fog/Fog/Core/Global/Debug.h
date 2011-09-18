@@ -8,7 +8,7 @@
 #define _FOG_CORE_GLOBAL_DEBUG_H
 
 // [Dependencies]
-#include <Fog/Core/Config/Config.h>
+#include <Fog/Core/C++/Base.h>
 
 FOG_CVAR_EXTERN uint32_t fog_failed;
 

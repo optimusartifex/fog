@@ -106,6 +106,12 @@ static err_t FOG_CDECL MyPaintEngine_getSourcePatternD(const Painter* self, Patt
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
+static err_t FOG_CDECL MyPaintEngine_setSourceNone(Painter* self)
+{
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
 static err_t FOG_CDECL MyPaintEngine_setSourceArgb32(Painter* self, uint32_t argb32)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
@@ -390,37 +396,37 @@ static err_t FOG_CDECL MyPaintEngine_fillPathD(Painter* self, const PathD& p)
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_fillTextAtI(Painter* self, const PointI& p, const String& text, const Font& font, const RectI* clip)
+static err_t FOG_CDECL MyPaintEngine_fillTextAtI(Painter* self, const PointI& p, const StringW& text, const Font& font, const RectI* clip)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_fillTextAtF(Painter* self, const PointF& p, const String& text, const Font& font, const RectF* clip)
+static err_t FOG_CDECL MyPaintEngine_fillTextAtF(Painter* self, const PointF& p, const StringW& text, const Font& font, const RectF* clip)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_fillTextAtD(Painter* self, const PointD& p, const String& text, const Font& font, const RectD* clip)
+static err_t FOG_CDECL MyPaintEngine_fillTextAtD(Painter* self, const PointD& p, const StringW& text, const Font& font, const RectD* clip)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_fillTextInI(Painter* self, const TextRectI& r, const String& text, const Font& font, const RectI* clip)
+static err_t FOG_CDECL MyPaintEngine_fillTextInI(Painter* self, const TextRectI& r, const StringW& text, const Font& font, const RectI* clip)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_fillTextInF(Painter* self, const TextRectF& r, const String& text, const Font& font, const RectF* clip)
+static err_t FOG_CDECL MyPaintEngine_fillTextInF(Painter* self, const TextRectF& r, const StringW& text, const Font& font, const RectF* clip)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_fillTextInD(Painter* self, const TextRectD& r, const String& text, const Font& font, const RectD* clip)
+static err_t FOG_CDECL MyPaintEngine_fillTextInD(Painter* self, const TextRectD& r, const StringW& text, const Font& font, const RectD* clip)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
@@ -626,37 +632,37 @@ static err_t FOG_CDECL MyPaintEngine_clipPathD(Painter* self, uint32_t clipOp, c
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_clipTextAtI(Painter* self, uint32_t clipOp, const PointI& p, const String& text, const Font& font, const RectI* clip)
+static err_t FOG_CDECL MyPaintEngine_clipTextAtI(Painter* self, uint32_t clipOp, const PointI& p, const StringW& text, const Font& font, const RectI* clip)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_clipTextAtF(Painter* self, uint32_t clipOp, const PointF& p, const String& text, const Font& font, const RectF* clip)
+static err_t FOG_CDECL MyPaintEngine_clipTextAtF(Painter* self, uint32_t clipOp, const PointF& p, const StringW& text, const Font& font, const RectF* clip)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_clipTextAtD(Painter* self, uint32_t clipOp, const PointD& p, const String& text, const Font& font, const RectD* clip)
+static err_t FOG_CDECL MyPaintEngine_clipTextAtD(Painter* self, uint32_t clipOp, const PointD& p, const StringW& text, const Font& font, const RectD* clip)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_clipTextInI(Painter* self, uint32_t clipOp, const TextRectI& r, const String& text, const Font& font, const RectI* clip)
+static err_t FOG_CDECL MyPaintEngine_clipTextInI(Painter* self, uint32_t clipOp, const TextRectI& r, const StringW& text, const Font& font, const RectI* clip)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_clipTextInF(Painter* self, uint32_t clipOp, const TextRectF& r, const String& text, const Font& font, const RectF* clip)
+static err_t FOG_CDECL MyPaintEngine_clipTextInF(Painter* self, uint32_t clipOp, const TextRectF& r, const StringW& text, const Font& font, const RectF* clip)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_clipTextInD(Painter* self, uint32_t clipOp, const TextRectD& r, const String& text, const Font& font, const RectD* clip)
+static err_t FOG_CDECL MyPaintEngine_clipTextInD(Painter* self, uint32_t clipOp, const TextRectD& r, const StringW& text, const Font& font, const RectD* clip)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
@@ -782,6 +788,7 @@ static void MyPaintEngine_init()
   v.getSourcePatternF = MyPaintEngine_getSourcePatternF;
   v.getSourcePatternD = MyPaintEngine_getSourcePatternD;
 
+  v.setSourceNone = MyPaintEngine_setSourceNone;
   v.setSourceArgb32 = MyPaintEngine_setSourceArgb32;
   v.setSourceArgb64 = MyPaintEngine_setSourceArgb64;
   v.setSourceColor = MyPaintEngine_setSourceColor;
@@ -1090,27 +1097,17 @@ static err_t FOG_CDECL NullPaintEngine_getSourcePatternD(const Painter* self, Pa
   return ERR_RT_INVALID_STATE;
 }
 
+static err_t FOG_CDECL NullPaintEngine_setSourceNone(Painter* self)
+{
+  return ERR_RT_INVALID_STATE;
+}
+
 static err_t FOG_CDECL NullPaintEngine_setSourceArgb32(Painter* self, uint32_t argb32)
 {
   return ERR_RT_INVALID_STATE;
 }
 
-static err_t FOG_CDECL NullPaintEngine_setSourceArgb64(Painter* self, const Argb64& argb64)
-{
-  return ERR_RT_INVALID_STATE;
-}
-
-static err_t FOG_CDECL NullPaintEngine_setSourceColor(Painter* self, const Color& color)
-{
-  return ERR_RT_INVALID_STATE;
-}
-
-static err_t FOG_CDECL NullPaintEngine_setSourcePatternF(Painter* self, const PatternF& pattern)
-{
-  return ERR_RT_INVALID_STATE;
-}
-
-static err_t FOG_CDECL NullPaintEngine_setSourcePatternD(Painter* self, const PatternD& pattern)
+static err_t FOG_CDECL NullPaintEngine_setSourceAny(Painter* self, const Any& any)
 {
   return ERR_RT_INVALID_STATE;
 }
@@ -1202,7 +1199,7 @@ static err_t FOG_CDECL NullPaintEngine_doPath(Painter* self, const Any& p)
   return ERR_RT_INVALID_STATE;
 }
 
-static err_t FOG_CDECL NullPaintEngine_doText(Painter* self, const Any& p, const String& text, const Font& font, const Any* clip)
+static err_t FOG_CDECL NullPaintEngine_doText(Painter* self, const Any& p, const StringW& text, const Font& font, const Any* clip)
 {
   return ERR_RT_INVALID_STATE;
 }
@@ -1260,7 +1257,7 @@ static err_t FOG_CDECL NullPaintEngine_clipPath(Painter* self, uint32_t clipOp, 
   return ERR_RT_INVALID_STATE;
 }
 
-static err_t FOG_CDECL NullPaintEngine_clipText(Painter* self, uint32_t clipOp, const Any& p, const String& text, const Font& font, const Any* clip)
+static err_t FOG_CDECL NullPaintEngine_clipText(Painter* self, uint32_t clipOp, const Any& p, const StringW& text, const Font& font, const Any* clip)
 {
   return ERR_RT_INVALID_STATE;
 }
@@ -1357,11 +1354,12 @@ FOG_NO_EXPORT void NullPaintEngine_init()
   v.getSourcePatternF = NullPaintEngine_getSourcePatternF;
   v.getSourcePatternD = NullPaintEngine_getSourcePatternD;
 
+  v.setSourceNone = NullPaintEngine_setSourceNone;
   v.setSourceArgb32 = NullPaintEngine_setSourceArgb32;
-  v.setSourceArgb64 = NullPaintEngine_setSourceArgb64;
-  v.setSourceColor = NullPaintEngine_setSourceColor;
-  v.setSourcePatternF = NullPaintEngine_setSourcePatternF;
-  v.setSourcePatternD = NullPaintEngine_setSourcePatternD;
+  v.setSourceArgb64 = (PaintEngineVTable::SetSourceArgb64)NullPaintEngine_setSourceAny;
+  v.setSourceColor = (PaintEngineVTable::SetSourceColor)NullPaintEngine_setSourceAny;
+  v.setSourcePatternF = (PaintEngineVTable::SetSourcePatternF)NullPaintEngine_setSourceAny;
+  v.setSourcePatternD = (PaintEngineVTable::SetSourcePatternD)NullPaintEngine_setSourceAny;
   v.setSourceAbstract = NullPaintEngine_setSourceAbstract;
 
   // --------------------------------------------------------------------------

@@ -10,7 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Alloc.h>
+#include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/G2d/Painting/RasterScanline_p.h>
 
 namespace Fog {
@@ -34,16 +34,16 @@ RasterScanline::RasterScanline(uint32_t spanSize, uint32_t maskUnit) :
   FOG_ASSERT(spanSize >= sizeof(RasterSpan));
 
   // Initialize the '_spanFirst', the first 'invisible' span.
-  _spanFirst._x0 = SPAN_INVALID_POSITION;
+  _spanFirst._x0 = RASTER_SPAN_INVALID_X;
   _spanFirst._type = RASTER_SPAN_C;
-  _spanFirst._x1 = SPAN_INVALID_POSITION;
+  _spanFirst._x1 = RASTER_SPAN_INVALID_X;
   _spanFirst._mask = NULL;
   _spanFirst._next = NULL;
 }
 
 RasterScanline::~RasterScanline()
 {
-  if (_maskData) Memory::free(_maskData);
+  if (_maskData) MemMgr::free(_maskData);
 }
 
 // ============================================================================
@@ -58,9 +58,9 @@ err_t RasterScanline::_prepare(int w)
   // See prepare()
   FOG_ASSERT(_maskCapacity < (uint)w);
 
-  if (_maskData) Memory::free(_maskData);
+  if (_maskData) MemMgr::free(_maskData);
 
-  _maskData = reinterpret_cast<uint8_t*>(Memory::alloc(w * _maskUnit));
+  _maskData = reinterpret_cast<uint8_t*>(MemMgr::alloc(w * _maskUnit));
   _maskCapacity = w * _maskUnit;
 
   if (FOG_UNLIKELY(_maskData == NULL))
@@ -82,10 +82,13 @@ err_t RasterScanline::_begin(int x0, int x1)
   // Duplicated, the same code is also in begin().
   _maskCurrent = _maskData;
   _spanCurrent = &_spanFirst;
-  if (_spanLast) _spanLast->setNext(_spanSaved);
+
+  if (_spanLast)
+    _spanLast->setNext(_spanSaved);
 
   // If we are called the first time, we also need to prepare some spans.
-  if (_spanCurrent->getNext() == NULL) _growSpans();
+  if (_spanCurrent->getNext() == NULL)
+    _growSpans();
 
   return ERR_OK;
 }
@@ -102,7 +105,9 @@ RasterSpan* RasterScanline::_growSpans()
   for (uint i = 0; i < GROW_BY; i++)
   {
     RasterSpan8* span = reinterpret_cast<RasterSpan8*>(_spanAllocator.alloc(_spanSize));
-    if (FOG_UNLIKELY(span == NULL)) goto _Fail;
+    if (FOG_UNLIKELY(span == NULL))
+      goto _Fail;
+
     cur->setNext(span);
     cur = span;
   }
@@ -114,7 +119,8 @@ _Done:
 _Fail:
   // Be silent if we failed, but some spans were allocated. We can fail in next
   // call to _growSpans(). For now we are complete.
-  if (cur != _spanCurrent) goto _Done;
+  if (cur != _spanCurrent)
+    goto _Done;
 
   // Okay, we really failed to allocate at least one new span instance. What
   // to do? Simply, make infinite chain from the last span so the allocation

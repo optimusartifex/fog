@@ -15,11 +15,9 @@
 // [Fog-Svg]
 // ============================================================================
 
-#include <Fog/Core/Config/Config.h>
-
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Svg/Dom/SvgDocument.h>
 #include <Fog/Svg/Dom/SvgElement.h>
-#include <Fog/Svg/Global/Constants.h>
 #include <Fog/Svg/Tools/SvgCoord.h>
 #include <Fog/Svg/Tools/SvgUtil.h>
 #include <Fog/Svg/Visit/SvgHitTest.h>

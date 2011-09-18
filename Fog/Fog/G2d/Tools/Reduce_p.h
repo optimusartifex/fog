@@ -6,7 +6,7 @@
 #ifndef _FOG_G2D_TOOLS_REDUCE_P_H
 #define _FOG_G2D_TOOLS_REDUCE_P_H
 
-#include <Fog/Core/Collection/Hash.h>
+#include <Fog/Core/Tools/Hash.h>
 #include <Fog/G2d/Imaging/Image.h>
 
 namespace Fog {
@@ -55,7 +55,7 @@ struct FOG_NO_EXPORT Reduce
   // [Methods]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const UnorderedHash<uint32_t, uint8_t>& getIndexes() const { return _indexes; }
+  FOG_INLINE const Hash<uint32_t, uint8_t>& getIndexes() const { return _indexes; }
   FOG_INLINE const Entity* getEntities() const { return _entities; }
   FOG_INLINE const ImagePalette& getPalette() const { return _palette; }
 
@@ -73,7 +73,7 @@ struct FOG_NO_EXPORT Reduce
 
 protected:
   //! @brief Color to index hash.
-  UnorderedHash<uint32_t, uint8_t> _indexes;
+  Hash<uint32_t, uint8_t> _indexes;
 
   //! @brief Entities.
   Entity _entities[256];
@@ -86,7 +86,7 @@ protected:
   uint32_t _mask;
 
 private:
-  _FOG_CLASS_NO_COPY(Reduce)
+  _FOG_NO_COPY(Reduce)
 };
 
 //! @}

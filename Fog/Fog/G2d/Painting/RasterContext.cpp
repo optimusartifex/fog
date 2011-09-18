@@ -20,10 +20,8 @@ namespace Fog {
 RasterContext::RasterContext() :
   engine(NULL),
   precision(0xFFFFFFFF),
-  finalClipType(RASTER_CLIP_NULL),
-  finalClipBoxI(0, 0, 0, 0),
-  finalClipperF(BoxF(0, 0, 0, 0)),
-  finalClipperD(BoxD(0, 0, 0, 0)),
+  clipType(RASTER_CLIP_NULL),
+  clipBoxI(0, 0, 0, 0),
   // 4096 - Page-size.
   // 100  - Some memory for the OS/LibC memory allocator.
   maskMemoryAllocator(4096 * 2 - 100),
@@ -68,11 +66,9 @@ err_t RasterContext::_initByMaster(const RasterContext& master)
 
   layer = master.layer;
 
-  finalClipType = master.finalClipType;
-  finalClipBoxI = master.finalClipBoxI;
-  finalClipperF.setClipBox(master.finalClipperF.getClipBox());
-  finalClipperD.setClipBox(master.finalClipperD.getClipBox());
-  finalRegion = master.finalRegion;
+  clipType = master.clipType;
+  clipRegion = master.clipRegion;
+  clipBoxI = master.clipBoxI;
 
   paintHints = master.paintHints;
   rasterHints = master.rasterHints;
@@ -161,7 +157,7 @@ err_t RasterContext::_initPrecision(uint32_t precision)
       return ERR_OK;
   }
 
-  uint8_t* pcBuf = buffer.alloc(pcBpl);
+  uint8_t* pcBuf = reinterpret_cast<uint8_t*>(buffer.alloc(pcBpl));
   return pcBuf != NULL ? (err_t)ERR_OK : (err_t)ERR_RT_OUT_OF_MEMORY;
 }
 

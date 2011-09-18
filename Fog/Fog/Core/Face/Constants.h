@@ -8,7 +8,7 @@
 #define _FOG_CORE_FACE_CONSTANTS_H
 
 // [Dependencies]
-#include <Fog/Core/Config/Config.h>
+#include <Fog/Core/C++/Base.h>
 
 namespace Fog {
 namespace Face {
@@ -25,7 +25,7 @@ namespace Face {
 //! Reciprocal table based on material provided by M Joonas Pihlaja, see
 //! <http://cgit.freedesktop.org/~joonas/unpremultiply/tree/README>
 //!
-//! The reciprocal_table[i] entries are defined by
+//! The reciprocal_table[i] entries are defined as
 //!
 //!  0       when i = 0
 //!  255 / i when i > 0
@@ -68,7 +68,7 @@ extern FOG_API const uint32_t _u8_divide_table_d[256];
 //! @internal
 //!
 //! @brief Reciprocal table that can be used to demultiply color value in
-//! 16-bit precision (used in MMX/SSE2 demultiply-code).
+//! 16-bit precision (used by MMX/SSE2 demultiply-code).
 extern FOG_API const uint16_t _u8_divide_table_w[256 * 4];
 
 //! @internal

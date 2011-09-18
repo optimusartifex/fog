@@ -25,7 +25,7 @@ namespace Fog {
 struct FOG_NO_EXPORT MatrixDataF
 {
   //! @brief Reference count.
-  mutable Atomic<size_t> refCount;
+  mutable Atomic<size_t> reference;
   //! @brief Matrix size.
   SizeI size;
   //! @brief Elements.
@@ -39,7 +39,7 @@ struct FOG_NO_EXPORT MatrixDataF
 struct FOG_NO_EXPORT MatrixDataD
 {
   //! @brief Reference count.
-  mutable Atomic<size_t> refCount;
+  mutable Atomic<size_t> reference;
   //! @brief Size.
   SizeI size;
   //! @brief Elements.
@@ -67,7 +67,7 @@ struct FOG_API MatrixF
   // [Sharing]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
+  FOG_INLINE size_t getReference() const { return _d->reference.get(); }
   FOG_INLINE bool isDetached() const { return getReference() == 1; }
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
 
@@ -149,20 +149,6 @@ struct FOG_API MatrixF
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::MatrixF, Fog::TYPEINFO_MOVABLE)
-//_FOG_TYPEINFO_DECLARE(Fog::MatrixD, Fog::TYPEINFO_MOVABLE)
-
-// ============================================================================
-// [Fog::Swap]
-// ============================================================================
-
-_FOG_SWAP_D(Fog::MatrixF)
-//_FOG_SWAP_D(Fog::MatrixD)
 
 // [Guard]
 #endif // _FOG_G2D_TOOLS_MATRIX_H

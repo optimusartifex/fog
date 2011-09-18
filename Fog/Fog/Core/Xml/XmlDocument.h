@@ -8,9 +8,9 @@
 #define _FOG_CORE_XML_XMLDOCUMENT_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/Hash.h>
-#include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Global/Global.h>
+#include <Fog/Core/Tools/Hash.h>
+#include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/Range.h>
 #include <Fog/Core/Tools/String.h>
@@ -79,24 +79,24 @@ struct FOG_API XmlDocument : public XmlElement
   // [Dom]
   // --------------------------------------------------------------------------
 
-  XmlElement* getElementById(const String& id) const;
-  XmlElement* getElementById(const Utf16& id) const;
+  XmlElement* getElementById(const StringW& id) const;
+  XmlElement* getElementById(const StubW& id) const;
 
   // --------------------------------------------------------------------------
   // [Read]
   // --------------------------------------------------------------------------
 
-  virtual err_t readFromFile(const String& fileName);
+  virtual err_t readFromFile(const StringW& fileName);
   virtual err_t readFromStream(Stream& stream);
   virtual err_t readFromMemory(const void* mem, size_t size);
-  virtual err_t readFromString(const String& str);
+  virtual err_t readFromString(const StringW& str);
 
   // --------------------------------------------------------------------------
   // [DOCTYPE]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const String& getDOCTYPE() const { return _doctype; }
-  FOG_INLINE err_t setDOCTYPE(const String& doctype) { return _doctype.set(doctype); }
+  FOG_INLINE const StringW& getDOCTYPE() const { return _doctype; }
+  FOG_INLINE err_t setDOCTYPE(const StringW& doctype) { return _doctype.set(doctype); }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -107,20 +107,20 @@ protected:
   XmlElement* _documentRoot;
 
   //! @brief Hash table that contains all managed strings and reference counts.
-  UnorderedHash<String, size_t> _managedStrings;
+  Hash<StringW, size_t> _managedStrings;
 
   //! @brief Hash table that contains all managed IDs.
   XmlIdManager _elementIdsHash;
 
   //! @brief DOCTYPE string.
-  String _doctype;
+  StringW _doctype;
 
 private:
   friend struct XmlAttribute;
   friend struct XmlIdAttribute;
   friend struct XmlElement;
 
-  _FOG_CLASS_NO_COPY(XmlDocument)
+  _FOG_NO_COPY(XmlDocument)
 };
 
 //! @}

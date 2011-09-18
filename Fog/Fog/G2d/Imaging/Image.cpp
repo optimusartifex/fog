@@ -9,17 +9,16 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/BufferP.h>
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Face/Face_C.h>
 #include <Fog/Core/IO/FileSystem.h>
 #include <Fog/Core/IO/MapFile.h>
 #include <Fog/Core/Math/FloatBits.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Memory/BSwap.h>
-#include <Fog/Core/Memory/MemoryBuffer.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemBufferTmp_p.h>
+#include <Fog/Core/Memory/MemMgr.h>
+#include <Fog/Core/Memory/MemOps.h>
 #include <Fog/Core/Tools/StringTmp_p.h>
 #include <Fog/G2d/Face/Face_Raster_C.h>
 #include <Fog/G2d/Imaging/Image.h>
@@ -61,7 +60,7 @@ static FOG_INLINE bool ImageData_containsEmbeddedBuffer(const ImageData* d)
 
 ImageData::ImageData()
 {
-  refCount.init(1);
+  reference.init(1);
   locked = 0;
 
   type = IMAGE_BUFFER_MEMORY;
@@ -85,7 +84,7 @@ ImageData::~ImageData()
 {
 }
 
-ImageData* ImageData::ref() const
+ImageData* ImageData::addRef() const
 {
   if (locked) return NULL;
   return refAlways();
@@ -93,9 +92,9 @@ ImageData* ImageData::ref() const
 
 void ImageData::deref()
 {
-  if (refCount.deref())
+  if (reference.deref())
   {
-    bool wasStatic = (flags & IMAGE_DATA_STATIC) != 0;
+    bool wasStatic = (flags & VAR_FLAG_STATIC) != 0;
 
     // FATAL: Image dereferenced during painting.
     if (locked)
@@ -104,7 +103,7 @@ void ImageData::deref()
     }
 
     this->~ImageData();
-    if (!wasStatic) Memory::free(this);
+    if (!wasStatic) MemMgr::free(this);
   }
 }
 
@@ -115,7 +114,7 @@ ImageData* ImageData::clone() const
   ImageData* newd = Image::_dalloc(size, format);
   if (FOG_IS_NULL(newd)) return NULL;
 
-  _g2d_render.getCopyRectFn(newd->format)(
+  _g2d_render.getCopyRectFunc(newd->format)(
     newd->first, newd->stride,
     this->first, this->stride,
     newd->size.w, newd->size.h, NULL);
@@ -144,7 +143,7 @@ Image::Image() :
 }
 
 Image::Image(const Image& other) :
-  _d(other._d->ref())
+  _d(other._d->addRef())
 {
   if (FOG_UNLIKELY(_d == NULL)) _d = _dnull->refAlways();
 }
@@ -161,13 +160,13 @@ Image::~Image()
 }
 
 // ============================================================================
-// [Fog::Image - Implicit Sharing]
+// [Fog::Image - Sharing]
 // ============================================================================
 
 err_t Image::_detach()
 {
   ImageData* d = _d;
-  if (d == _dnull.instancep()) return ERR_OK;
+  if (d == &_dnull) return ERR_OK;
 
   if (d->stride == 0)
   {
@@ -175,7 +174,7 @@ err_t Image::_detach()
     return ERR_OK;
   }
 
-  if (d->refCount.get() > 1 || (d->flags & IMAGE_DATA_READ_ONLY))
+  if (d->reference.get() > 1 || (d->flags & VAR_FLAG_READ_ONLY))
   {
     ImageData* newd = d->clone();
     if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
@@ -192,7 +191,7 @@ err_t Image::_detach()
 
 void Image::reset()
 {
-  atomicPtrXchg(&_d, _dnull.instancep()->refAlways())->deref();
+  atomicPtrXchg(&_d, _dnull->refAlways())->deref();
 }
 
 // ============================================================================
@@ -271,7 +270,7 @@ err_t Image::adopt(const ImageBits& imageBits, uint32_t adoptFlags)
     return ERR_RT_INVALID_ARGUMENT;
   }
 
-  if (!isDetached() || (!(d->flags & IMAGE_DATA_STATIC) && !ImageData_containsEmbeddedBuffer(d)))
+  if (!isDetached() || (!(d->flags & VAR_FLAG_STATIC) && !ImageData_containsEmbeddedBuffer(d)))
   {
     ImageData* newd = _dalloc(0);
     if (FOG_IS_NULL(newd))
@@ -304,9 +303,9 @@ err_t Image::adopt(const ImageBits& imageBits, uint32_t adoptFlags)
 
   // Read only memory ?
   if ((adoptFlags & IMAGE_ATOPT_READ_ONLY) != 0)
-    d->flags |= IMAGE_DATA_READ_ONLY;
+    d->flags |= VAR_FLAG_READ_ONLY;
   else
-    d->flags &= ~IMAGE_DATA_READ_ONLY;
+    d->flags &= ~VAR_FLAG_READ_ONLY;
 
   return ERR_OK;
 }
@@ -372,15 +371,15 @@ err_t Image::set(const Image& other, const RectI& area)
   uint8_t* dstCur = _d->first;
   uint8_t* srcCur = other._d->first;
 
-  sysint_t dstStride = _d->stride;
-  sysint_t srcStride = other._d->stride;
+  ssize_t dstStride = _d->stride;
+  ssize_t srcStride = other._d->stride;
 
   srcCur += (uint)y0 * srcStride + (uint)x0 * other.getBytesPerPixel();
   size_t bpl = w * other.getBytesPerPixel();
 
-  for (sysint_t i = 0; i < h; i++, dstCur += dstStride, srcCur += srcStride)
+  for (ssize_t i = 0; i < h; i++, dstCur += dstStride, srcCur += srcStride)
   {
-    Memory::copy(dstCur, srcCur, bpl);
+    MemOps::copy(dstCur, srcCur, bpl);
   }
 
   if (selfCopy) selfCopy->deref();
@@ -405,7 +404,7 @@ err_t Image::setDeep(const Image& other)
         (type == IMAGE_BUFFER_MEMORY && (getBytesPerPixel() == other.getBytesPerPixel())) )
     {
       const ImageData* _o = other._d;
-      _g2d_render.getCopyRectFn(_d->format)(
+      _g2d_render.getCopyRectFunc(_d->format)(
         _d->first, _d->stride,
         _o->first, _o->stride,
         _d->size.w, _d->size.h, NULL);
@@ -448,7 +447,7 @@ err_t Image::convert(uint32_t format)
   int y;
 
   const G2dRenderApi::_FuncsCompositeCore* funcs = _g2d_render.get_FuncsCompositeCore(targetFormat, COMPOSITE_SRC);
-  RenderVBlitLineFn blitLine = funcs->vblit_line[sourceFormat];
+  RenderVBlitLineFunc blitLine = funcs->vblit_line[sourceFormat];
 
   RenderClosure closure;
   closure.ditherOrigin.reset();
@@ -460,7 +459,7 @@ err_t Image::convert(uint32_t format)
   if (getDepth() == ImageFormatDescription::getByFormat(format).getDepth() && isDetached() && !isReadOnly())
   {
     uint8_t* dstCur = _d->first;
-    sysint_t dstStride = _d->stride;
+    ssize_t dstStride = _d->stride;
 
     for (y = 0; y < h; y++, dstCur += dstStride)
       blitLine(dstCur, dstCur, w, &closure);
@@ -476,8 +475,8 @@ err_t Image::convert(uint32_t format)
     uint8_t* dstCur = newd->first;
     uint8_t* srcCur = _d->first;
 
-    sysint_t dstStride = newd->stride;
-    sysint_t srcStride = _d->stride;
+    ssize_t dstStride = newd->stride;
+    ssize_t srcStride = _d->stride;
 
     for (y = 0; y < h; y++, dstCur += dstStride, srcCur += srcStride)
       blitLine(dstCur, srcCur, w, &closure);
@@ -554,10 +553,10 @@ err_t Image::convertTo8BitDepth()
   FOG_RETURN_ON_ERROR(i.create(getSize(), IMAGE_FORMAT_I8));
 
   uint8_t* dstCur = i._d->first;
-  sysint_t dstStride = i._d->stride;
+  ssize_t dstStride = i._d->stride;
 
   uint8_t* srcCur = _d->first;
-  sysint_t srcStride = _d->stride;
+  ssize_t srcStride = _d->stride;
 
   int w = getWidth();
   int h = getHeight();
@@ -641,10 +640,10 @@ err_t Image::convertTo8BitDepth(const ImagePalette& pal)
   FOG_RETURN_ON_ERROR(i.setPalette(pal));
 
   uint8_t* dstCur = i._d->first;
-  sysint_t dstStride = i._d->stride - w * i._d->bytesPerPixel;
+  ssize_t dstStride = i._d->stride - w * i._d->bytesPerPixel;
 
   uint8_t* srcCur = _d->first;
-  sysint_t srcStride = _d->stride - w * _d->bytesPerPixel;
+  ssize_t srcStride = _d->stride - w * _d->bytesPerPixel;
 
   int y, x;
 
@@ -748,7 +747,7 @@ err_t Image::setPalette(const Range& range, const Argb32* pal)
   FOG_ASSERT(range.getStart() < 256);
 
   _d->paletteModified(
-    Range(range.getStart(), Math::min<sysint_t>(256, range.getEnd())));
+    Range(range.getStart(), Math::min<ssize_t>(256, range.getEnd())));
   _modified();
 
   return ERR_OK;
@@ -762,7 +761,7 @@ uint32_t Image::getAlphaDistribution() const
 {
   uint32_t result;
 
-  ColorAnalyzer::AnalyzerFn analyzer = NULL;
+  ColorAnalyzer::AnalyzerFunc analyzer = NULL;
   int aPos = 0;
   int inc = 0;
 
@@ -839,10 +838,10 @@ err_t Image::invert(Image& dst, const Image& src, uint32_t channels)
   int y;
 
   uint8_t* dstPixels = dst_d->first;
-  sysint_t dstStride = dst_d->stride - w * dst_d->bytesPerPixel;
+  ssize_t dstStride = dst_d->stride - w * dst_d->bytesPerPixel;
 
   const uint8_t* srcPixels = src_d->first;
-  sysint_t srcStride = src_d->stride - w * src_d->bytesPerPixel;
+  ssize_t srcStride = src_d->stride - w * src_d->bytesPerPixel;
 
   // ${IMAGE_FORMAT:BEGIN}
   switch (format)
@@ -1075,20 +1074,20 @@ typedef void (FOG_FASTCALL *MirrorFunc)(uint8_t*, uint8_t*, int);
 template<int SIZE>
 static void FOG_FASTCALL _MirrorCopySrcIsNotDst(uint8_t* dst, uint8_t* src, int w)
 {
-  Memory::copy(dst, src, w * SIZE);
+  MemOps::copy(dst, src, w * SIZE);
 }
 
 template<int SIZE>
 static void FOG_FASTCALL _MirrorFlipSrcIsNotDst(uint8_t* dst, uint8_t* src, int w)
 {
   src += w * SIZE - SIZE;
-  for (int x = 0; x < w; x++, dst += SIZE, src -= SIZE) Memory::copy_s<SIZE>(dst, src);
+  for (int x = 0; x < w; x++, dst += SIZE, src -= SIZE) MemOps::copy_s<SIZE>(dst, src);
 }
 
 template<int SIZE>
 static void FOG_FASTCALL _MirrorCopySrcIsDst(uint8_t* dst, uint8_t* src, int w)
 {
-  Memory::xchg(dst, src, w * SIZE);
+  MemOps::xchg(dst, src, w * SIZE);
 }
 
 template<int SIZE>
@@ -1098,7 +1097,7 @@ static void FOG_FASTCALL _MirrorFlipSrcIsDst(uint8_t* dst, uint8_t* src, int w)
   if (src == dst) x >>= 1;
 
   src += w * SIZE - SIZE;
-  for (; x; x--, dst += SIZE, src -= SIZE) Memory::xchg_s<SIZE>(dst, src);
+  for (; x; x--, dst += SIZE, src -= SIZE) MemOps::xchg_s<SIZE>(dst, src);
 }
 
 static const MirrorFunc _MirrorFuncsCopySrcIsNotDst[] =
@@ -1170,8 +1169,8 @@ err_t Image::mirror(Image& dst, const Image& src, uint32_t mirrorMode)
   ImageData* dst_d = dst._d;
   ImageData* src_d = src._d;
 
-  sysint_t dstStride = dst_d->stride;
-  sysint_t srcStride = src_d->stride;
+  ssize_t dstStride = dst_d->stride;
+  ssize_t srcStride = src_d->stride;
 
   uint8_t* dstPixels = dst_d->first;
   uint8_t* srcPixels = src_d->first;
@@ -1185,7 +1184,7 @@ err_t Image::mirror(Image& dst, const Image& src, uint32_t mirrorMode)
   switch (mirrorMode)
   {
     case IMAGE_MIRROR_VERTICAL:
-      srcPixels += srcStride * ((sysint_t)h - 1);
+      srcPixels += srcStride * ((ssize_t)h - 1);
       srcStride = -srcStride;
 
       if (dst_d != src_d)
@@ -1211,7 +1210,7 @@ err_t Image::mirror(Image& dst, const Image& src, uint32_t mirrorMode)
       break;
 
     case IMAGE_MIRROR_BOTH:
-      srcPixels += srcStride * ((sysint_t)h - 1);
+      srcPixels += srcStride * ((ssize_t)h - 1);
       srcStride = -srcStride;
 
       if (dst_d != src_d)
@@ -1260,8 +1259,8 @@ err_t Image::rotate(Image& dst, const Image& src, uint32_t rotateMode)
   ImageData* dst_d = dst._d;
   ImageData* src_d = src._d;
 
-  sysint_t dstStride = dst_d->stride;
-  sysint_t srcStride = src_d->stride;
+  ssize_t dstStride = dst_d->stride;
+  ssize_t srcStride = src_d->stride;
 
   uint8_t* dstPixels = dst_d->first;
   uint8_t* srcPixels = src_d->first;
@@ -1278,20 +1277,20 @@ err_t Image::rotate(Image& dst, const Image& src, uint32_t rotateMode)
   int i;
   int j;
 
-  sysint_t srcInc1;
-  sysint_t srcInc2;
+  ssize_t srcInc1;
+  ssize_t srcInc2;
 
   int bytesPerPixel = src.getBytesPerPixel();
 
   if (rotateMode == IMAGE_ROTATE_90)
   {
-    srcPixels += ((sysint_t)sz2m1 * srcStride);
+    srcPixels += ((ssize_t)sz2m1 * srcStride);
     srcInc1 = bytesPerPixel;
     srcInc2 = -srcStride;
   }
   else
   {
-    srcPixels += (sysint_t)sz1m1 * bytesPerPixel;
+    srcPixels += (ssize_t)sz1m1 * bytesPerPixel;
     srcInc1 = -bytesPerPixel;
     srcInc2 = srcStride;
   }
@@ -1307,7 +1306,7 @@ err_t Image::rotate(Image& dst, const Image& src, uint32_t rotateMode)
         \
         for (j = sz2; j; j--, dstCur += _Size_, srcCur += srcInc2) \
         { \
-          Memory::copy_s<_Size_>(dstCur, srcCur); \
+          MemOps::copy_s<_Size_>(dstCur, srcCur); \
         } \
       } \
     FOG_MACRO_END
@@ -1333,7 +1332,7 @@ err_t Image::rotate(Image& dst, const Image& src, uint32_t rotateMode)
 // [Fog::Image - Color Filter]
 // ============================================================================
 
-static err_t applyColorFilter(Image& im, const BoxI& box, ColorFilterFn fn, const void* context)
+static err_t applyColorFilter(Image& im, const BoxI& box, ColorFilterFunc fn, const void* context)
 {
   // Clip.
   int imgw = im.getWidth();
@@ -1352,12 +1351,12 @@ static err_t applyColorFilter(Image& im, const BoxI& box, ColorFilterFn fn, cons
   FOG_RETURN_ON_ERROR(im.detach());
 
   uint8_t* imData = im.getDataX();
-  sysint_t imStride = im.getStride();
-  sysint_t imBpp = im.getBytesPerPixel();
+  ssize_t imStride = im.getStride();
+  ssize_t imBpp = im.getBytesPerPixel();
 
   size_t y;
 
-  uint8_t* cur = imData + (sysint_t)y0 * imStride + (sysint_t)x0 * imBpp;
+  uint8_t* cur = imData + (ssize_t)y0 * imStride + (ssize_t)x0 * imBpp;
   for (y = (uint)h; y; y--, cur += imStride) fn(context, cur, cur, w);
 
   return ERR_OK;
@@ -1368,7 +1367,7 @@ err_t Image::filter(const ColorFilter& f, const RectI* area)
   BoxI abox(0, 0, getWidth(), getHeight());
   if (area) abox.set(area->getX0(), area->getY0(), area->getX1(), area->getY1());
 
-  ColorFilterFn fn = f.getEngine()->getColorFilterFn(getFormat());
+  ColorFilterFunc fn = f.getEngine()->getColorFilterFunc(getFormat());
   if (!fn) return ERR_IMAGE_UNSUPPORTED_FORMAT;
 
   const void* context = f.getEngine()->getContext();
@@ -1383,7 +1382,7 @@ err_t Image::filter(const ColorLutFx& lut, const RectI* area)
   BoxI abox(0, 0, getWidth(), getHeight());
   if (area) abox.set(area->getX0(), area->getY0(), area->getX1(), area->getY1());
 
-  ColorFilterFn fn = (ColorFilterFn)rasterFuncs.filter.color_lut[getFormat()];
+  ColorFilterFunc fn = (ColorFilterFunc)rasterFuncs.filter.color_lut[getFormat()];
   if (!fn) return ERR_IMAGE_UNSUPPORTED_FORMAT;
 
   return applyColorFilter(*this, abox, fn, lut.getData());
@@ -1394,7 +1393,7 @@ err_t Image::filter(const ColorMatrix& cm, const RectI* area)
   BoxI abox(0, 0, getWidth(), getHeight());
   if (area) abox.set(area->getX0(), area->getY0(), area->getX1(), area->getY1());
 
-  ColorFilterFn fn = (ColorFilterFn)rasterFuncs.filter.color_matrix[getFormat()];
+  ColorFilterFunc fn = (ColorFilterFunc)rasterFuncs.filter.color_matrix[getFormat()];
   if (!fn) return ERR_IMAGE_UNSUPPORTED_FORMAT;
 
   return applyColorFilter(*this, abox, fn, &cm);
@@ -1439,16 +1438,16 @@ static err_t applyImageFilter(Image& im, const BoxI& box, const ImageFxFilter& f
   ImageFilterFn fn;
 
   uint8_t* imData = im.getDataX();
-  sysint_t imStride = im.getStride();
-  sysint_t imBpp = im.getBytesPerPixel();
+  ssize_t imStride = im.getStride();
+  ssize_t imBpp = im.getBytesPerPixel();
 
-  uint8_t* imBegin = imData + (sysint_t)y0 * imStride + (sysint_t)x0 * imBpp;
+  uint8_t* imBegin = imData + (ssize_t)y0 * imStride + (ssize_t)x0 * imBpp;
   uint8_t* imCur = imBegin;
 
   // Demultiply if needed.
   if (imgf == IMAGE_FORMAT_PRGB32 && (filterCharacteristics & IMAGE_EFFECT_CHAR_SUPPORTS_PRGB32) == 0)
   {
-    RenderVBlitLineFn vblit_line =
+    RenderVBlitLineFunc vblit_line =
       rasterFuncs.dib.convert[IMAGE_FORMAT_ARGB32][IMAGE_FORMAT_PRGB32];
     for (int y = h; y; y--, imCur += imStride) vblit_line(imCur, imCur, w, NULL);
 
@@ -1461,12 +1460,12 @@ static err_t applyImageFilter(Image& im, const BoxI& box, const ImageFxFilter& f
   // Vertical & Horizontal processing.
   if ((filterCharacteristics & IMAGE_EFFECT_CHAR_HV_PROCESSING) == IMAGE_EFFECT_CHAR_HV_PROCESSING)
   {
-    fn = filter.getEngine()->getImageFilterFn(filterFormat, IMAGE_EFFECT_CHAR_VERT_PROCESSING);
+    fn = filter.getEngine()->getImageFilterFunc(filterFormat, IMAGE_EFFECT_CHAR_VERT_PROCESSING);
     if (!fn) { err = ERR_IMAGE_UNSUPPORTED_FORMAT; goto _End; }
 
     fn(context, imCur, imStride, imCur, imStride, w, h, -1);
 
-    fn = filter.getEngine()->getImageFilterFn(filterFormat, IMAGE_EFFECT_CHAR_HORZ_PROCESSING);
+    fn = filter.getEngine()->getImageFilterFunc(filterFormat, IMAGE_EFFECT_CHAR_HORZ_PROCESSING);
     if (!fn) { err = ERR_IMAGE_UNSUPPORTED_FORMAT; goto _End; }
 
     fn(context, imCur, imStride, imCur, imStride, w, h, -1);
@@ -1474,7 +1473,7 @@ static err_t applyImageFilter(Image& im, const BoxI& box, const ImageFxFilter& f
   // Vertical processing only (one pass).
   else if ((filterCharacteristics & IMAGE_EFFECT_CHAR_VERT_PROCESSING) != 0)
   {
-    fn = filter.getEngine()->getImageFilterFn(filterFormat, IMAGE_EFFECT_CHAR_VERT_PROCESSING);
+    fn = filter.getEngine()->getImageFilterFunc(filterFormat, IMAGE_EFFECT_CHAR_VERT_PROCESSING);
     if (!fn) { err = ERR_IMAGE_UNSUPPORTED_FORMAT; goto _End; }
 
     fn(context, imCur, imStride, imCur, imStride, w, h, -1);
@@ -1482,7 +1481,7 @@ static err_t applyImageFilter(Image& im, const BoxI& box, const ImageFxFilter& f
   // Horizontal processing only (one pass).
   else if ((filterCharacteristics & IMAGE_EFFECT_CHAR_HORZ_PROCESSING) != 0)
   {
-    fn = filter.getEngine()->getImageFilterFn(filterFormat, IMAGE_EFFECT_CHAR_HORZ_PROCESSING);
+    fn = filter.getEngine()->getImageFilterFunc(filterFormat, IMAGE_EFFECT_CHAR_HORZ_PROCESSING);
     if (!fn) { err = ERR_IMAGE_UNSUPPORTED_FORMAT; goto _End; }
 
     fn(context, imCur, imStride, imCur, imStride, w, h, -1);
@@ -1490,7 +1489,7 @@ static err_t applyImageFilter(Image& im, const BoxI& box, const ImageFxFilter& f
   // Entire processing (one pass).
   else if ((filterCharacteristics & IMAGE_EFFECT_CHAR_ENTIRE_PROCESSING) != 0)
   {
-    fn = filter.getEngine()->getImageFilterFn(filterFormat, IMAGE_EFFECT_CHAR_ENTIRE_PROCESSING);
+    fn = filter.getEngine()->getImageFilterFunc(filterFormat, IMAGE_EFFECT_CHAR_ENTIRE_PROCESSING);
     if (!fn) { err = ERR_IMAGE_UNSUPPORTED_FORMAT; goto _End; }
 
     fn(context, imCur, imStride, imCur, imStride, w, h, -1);
@@ -1499,7 +1498,7 @@ static err_t applyImageFilter(Image& im, const BoxI& box, const ImageFxFilter& f
   // Premultiply if demultiplied.
   if (imgf == IMAGE_FORMAT_PRGB32 && (filterCharacteristics & IMAGE_EFFECT_CHAR_SUPPORTS_PRGB32) == 0)
   {
-    RenderVBlitLineFn vblit_line =
+    RenderVBlitLineFunc vblit_line =
       rasterFuncs.dib.convert[IMAGE_FORMAT_PRGB32][IMAGE_FORMAT_ARGB32];
     for (int y = h; y; y--, imCur += imStride) vblit_line(imCur, imCur, w, NULL);
   }
@@ -1593,7 +1592,7 @@ Image Image::scaled(const SizeI& to, uint32_t interpolationType) const
   if (FOG_IS_ERROR(err)) { dst.reset(); return dst; }
 
   uint8_t* dstData = (uint8_t*)dst.getData();
-  sysint_t dstStride = dst.getStride();
+  ssize_t dstStride = dst.getStride();
 
   RasterSpanExt8 span;
   span.setPositionAndType(0, to.w, RASTER_SPAN_C);
@@ -1695,7 +1694,7 @@ err_t Image::fillRect(const RectI& r, const Color& color,  uint32_t compositingO
 
   FOG_RETURN_ON_ERROR(detach());
 
-  sysint_t dstStride = _d->stride;
+  ssize_t dstStride = _d->stride;
   uint8_t* dstPixels = _d->first + y0 * dstStride;
 
   RenderClosure closure;
@@ -1705,7 +1704,7 @@ err_t Image::fillRect(const RectI& r, const Color& color,  uint32_t compositingO
 
   if (isOpaque)
   {
-    RenderCBlitLineFn blitLine = _g2d_render.getCBlitLine(dstFormat, compositingOperator, isPRGBPixel);
+    RenderCBlitLineFunc blitLine = _g2d_render.getCBlitLine(dstFormat, compositingOperator, isPRGBPixel);
 
     dstPixels += (uint)x0 * getBytesPerPixel();
     for (int i = 0; i < h; i++, dstPixels += dstStride)
@@ -1715,7 +1714,7 @@ err_t Image::fillRect(const RectI& r, const Color& color,  uint32_t compositingO
   }
   else
   {
-    RenderCBlitSpanFn blitSpan = _g2d_render.getCBlitSpan(dstFormat, compositingOperator, isPRGBPixel);
+    RenderCBlitSpanFunc blitSpan = _g2d_render.getCBlitSpan(dstFormat, compositingOperator, isPRGBPixel);
 
     span.setPositionAndType(x0, x1, RASTER_SPAN_C);
     span.setNext(NULL);
@@ -1776,9 +1775,9 @@ static err_t Image_blitImage(
   FOG_RETURN_ON_ERROR(dst.detach());
 
   uint8_t* dstPixels = dst._d->first;
-  sysint_t dstStride = dst._d->stride;
+  ssize_t dstStride = dst._d->stride;
 
-  sysint_t srcStride = src._d->stride;
+  ssize_t srcStride = src._d->stride;
   const uint8_t* srcPixels = src._d->first;
   uint32_t srcFormat = src._d->format;
 
@@ -1805,12 +1804,12 @@ static err_t Image_blitImage(
   closure.palette = src._d->palette._d;
   closure.data = NULL;
 
-  BufferP<2048> buffer;
+  MemBufferTmp<2048> buffer;
 
   if (isOpaque)
   {
-    RenderVBlitLineFn blitLine;
-    RenderVBlitLineFn converter = NULL;
+    RenderVBlitLineFunc blitLine;
+    RenderVBlitLineFunc converter = NULL;
 
     if (RenderUtil::isCompositeCoreOperator(compositingOperator))
     {
@@ -1859,8 +1858,8 @@ static err_t Image_blitImage(
   }
   else
   {
-    RenderVBlitSpanFn blitLine;
-    RenderVBlitLineFn converter = NULL;
+    RenderVBlitSpanFunc blitLine;
+    RenderVBlitLineFunc converter = NULL;
 
     if (RenderUtil::isCompositeCoreOperator(compositingOperator))
     {
@@ -2022,8 +2021,8 @@ err_t Image::scroll(int scrollX, int scrollY, const RectI& r)
   scrollW -= absX;
   scrollH -= absY;
 
-  sysint_t stride = d->stride;
-  sysint_t size = scrollW * d->bytesPerPixel;
+  ssize_t stride = d->stride;
+  ssize_t size = scrollW * d->bytesPerPixel;
 
   uint8_t* dstPixels = d->first + dstX * d->bytesPerPixel;
   uint8_t* srcPixels = d->first + srcX * d->bytesPerPixel;
@@ -2057,11 +2056,11 @@ struct GlyphFromPathFiller8 : public RasterFiller
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE GlyphFromPathFiller8(uint8_t* pixels, sysint_t stride, int x0, int y0)
+  FOG_INLINE GlyphFromPathFiller8(uint8_t* pixels, ssize_t stride, int x0, int y0)
   {
-    this->_prepare = (RasterFiller::PrepareFn)advanceFn;
-    this->_process = (RasterFiller::ProcessFn)processFn;
-    this->_skip = (RasterFiller::SkipFn)advanceFn;
+    this->_prepare = (RasterFiller::PrepareFunc)advanceFn;
+    this->_process = (RasterFiller::ProcessFunc)processFn;
+    this->_skip = (RasterFiller::SkipFunc)advanceFn;
 
     this->pixels = pixels - y0 * stride - x0;
     this->stride = stride;
@@ -2110,15 +2109,13 @@ struct GlyphFromPathFiller8 : public RasterFiller
   // --------------------------------------------------------------------------
 
   uint8_t* pixels;
-  sysint_t stride;
+  ssize_t stride;
 };
 
 
 err_t Image::glyphFromPath(Image& glyph, PointI& offset, const PathD& path, uint32_t precision)
 {
   err_t err = ERR_OK;
-
-  MemoryBuffer buffer;
   BoxD boundingBox(UNINITIALIZED);
 
   int x0;
@@ -2172,12 +2169,12 @@ err_t Image::glyphFromPath(Image& glyph, PointI& offset, const PathD& path, uint
       if (FOG_IS_ERROR(err)) goto _Fail;
 
       uint8_t* pixels = glyph.getFirstX();
-      sysint_t stride = glyph.getStride();
+      ssize_t stride = glyph.getStride();
 
-      Memory::zero(pixels, glyph.getHeight() * stride);
+      MemOps::zero(pixels, glyph.getHeight() * stride);
 
       GlyphFromPathFiller8 filler(pixels, stride, x0, y0);
-      rasterizer.render(&filler, &scanline, &buffer);
+      rasterizer.render(&filler, &scanline);
       break;
     }
 
@@ -2202,7 +2199,7 @@ _Fail:
 }
 
 // ============================================================================
-// [Fog::Image - Windows Specific]
+// [Fog::Image - Windows Support]
 // ============================================================================
 
 #if defined(FOG_OS_WINDOWS)
@@ -2237,10 +2234,10 @@ HBITMAP Image::toWinBitmap() const
   // this image will be still usable when using functions like AlphaBlend().
 
   uint8_t* dstBits = NULL;
-  sysint_t dstStride = 0;
+  ssize_t dstStride = 0;
 
   uint8_t* srcBits = d->first;
-  sysint_t srcStride = d->stride;
+  ssize_t srcStride = d->stride;
 
   uint32_t dstFormat = IMAGE_FORMAT_NULL;
 
@@ -2276,7 +2273,7 @@ HBITMAP Image::toWinBitmap() const
   err_t err = WinDibImageData::_createDibSection(d->size, dstFormat, &hBitmap, &dstBits, &dstStride);
   if (FOG_IS_ERROR(err)) return NULL;
 
-  RenderVBlitLineFn blitLine = _g2d_render.get_FuncsCompositeCore(dstFormat, COMPOSITE_SRC)->vblit_line[d->format];
+  RenderVBlitLineFunc blitLine = _g2d_render.get_FuncsCompositeCore(dstFormat, COMPOSITE_SRC)->vblit_line[d->format];
 
   RenderClosure closure;
   closure.ditherOrigin.reset();
@@ -2304,7 +2301,7 @@ err_t Image::fromWinBitmap(HBITMAP hBitmap)
   // DIB-Section.
   if (GetObjectW(hBitmap, sizeof(DIBSECTION), &ds) != 0)
   {
-    RenderVBlitLineFn blitLine = NULL;
+    RenderVBlitLineFunc blitLine = NULL;
 
     // RGB24
     if (ds.dsBm.bmBitsPixel == 24)
@@ -2330,15 +2327,15 @@ err_t Image::fromWinBitmap(HBITMAP hBitmap)
       FOG_RETURN_ON_ERROR(create(SizeI(w, h), format));
 
       uint8_t* dstPixels = _d->first;
-      sysint_t dstStride = _d->stride;
+      ssize_t dstStride = _d->stride;
 
       const uint8_t* srcPixels = (const uint8_t*)ds.dsBm.bmBits;
-      sysint_t srcStride = ds.dsBm.bmWidthBytes;
+      ssize_t srcStride = ds.dsBm.bmWidthBytes;
 
       // Bottom-To-Top.
       if (ds.dsBm.bmHeight > 0)
       {
-        srcPixels += (sysint_t)(h - 1) * srcStride;
+        srcPixels += (ssize_t)(h - 1) * srcStride;
         srcStride = -srcStride;
       }
 
@@ -2372,7 +2369,7 @@ err_t Image::fromWinBitmap(HBITMAP hBitmap)
     FOG_RETURN_ON_ERROR(create(SizeI((int)ds.dsBm.bmWidth, (int)ds.dsBm.bmHeight), format));
 
     uint8_t* dstPixels = _d->first;
-    sysint_t dstStride = _d->stride;
+    ssize_t dstStride = _d->stride;
 
     // DDB bitmap.
     if ((hdc = CreateCompatibleDC(NULL)) == NULL)
@@ -2426,7 +2423,7 @@ void Image::releaseDC(HDC hDC)
 // [Fog::Image - Read]
 // ============================================================================
 
-err_t Image::readFromFile(const String& fileName)
+err_t Image::readFromFile(const StringW& fileName)
 {
   ImageDecoder* decoder = NULL;
   err_t err = ImageCodecProvider::createDecoderForFile(fileName, &decoder);
@@ -2440,10 +2437,10 @@ err_t Image::readFromFile(const String& fileName)
 
 err_t Image::readFromStream(Stream& stream)
 {
-  return readFromStream(stream, String());
+  return readFromStream(stream, StringW());
 }
 
-err_t Image::readFromStream(Stream& stream, const String& extension)
+err_t Image::readFromStream(Stream& stream, const StringW& extension)
 {
   ImageDecoder* decoder = NULL;
   err_t err = ImageCodecProvider::createDecoderForStream(stream, extension, &decoder);
@@ -2455,12 +2452,12 @@ err_t Image::readFromStream(Stream& stream, const String& extension)
   return err;
 }
 
-err_t Image::readFromBuffer(const ByteArray& buffer)
+err_t Image::readFromBuffer(const StringA& buffer)
 {
   return readFromBuffer(buffer.getData(), buffer.getLength());
 }
 
-err_t Image::readFromBuffer(const ByteArray& buffer, const String& extension)
+err_t Image::readFromBuffer(const StringA& buffer, const StringW& extension)
 {
   return readFromBuffer(buffer.getData(), buffer.getLength(), extension);
 }
@@ -2469,10 +2466,10 @@ err_t Image::readFromBuffer(const void* buffer, size_t size)
 {
   Stream stream;
   stream.openBuffer((void*)buffer, size, STREAM_OPEN_READ);
-  return readFromStream(stream, String());
+  return readFromStream(stream, StringW());
 }
 
-err_t Image::readFromBuffer(const void* buffer, size_t size, const String& extension)
+err_t Image::readFromBuffer(const void* buffer, size_t size, const StringW& extension)
 {
   Stream stream;
   stream.openBuffer((void*)buffer, size, STREAM_OPEN_READ);
@@ -2483,7 +2480,7 @@ err_t Image::readFromBuffer(const void* buffer, size_t size, const String& exten
 // [Fog::Image - Write]
 // ============================================================================
 
-err_t Image::writeToFile(const String& fileName) const
+err_t Image::writeToFile(const StringW& fileName) const
 {
   Stream stream;
 
@@ -2494,7 +2491,7 @@ err_t Image::writeToFile(const String& fileName) const
     STREAM_OPEN_TRUNCATE    );
   if (FOG_IS_ERROR(err)) return err;
 
-  StringTmp<16> extension;
+  StringTmpW<16> extension;
   if ((err = FileSystem::extractExtension(extension, fileName)) || (err = extension.lower()))
   {
     return err;
@@ -2504,7 +2501,7 @@ err_t Image::writeToFile(const String& fileName) const
   return err;
 }
 
-err_t Image::writeToStream(Stream& stream, const String& extension) const
+err_t Image::writeToStream(Stream& stream, const StringW& extension) const
 {
   ImageCodecProvider* provider = ImageCodecProvider::getProviderByExtension(IMAGE_CODEC_ENCODER, extension);
   if (provider != NULL)
@@ -2524,7 +2521,7 @@ err_t Image::writeToStream(Stream& stream, const String& extension) const
   return ERR_IMAGE_NO_ENCODER;
 }
 
-err_t Image::writeToBuffer(ByteArray& buffer, const String& extension) const
+err_t Image::writeToBuffer(StringA& buffer, const StringW& extension) const
 {
   Stream stream;
   err_t err = stream.openBuffer(buffer);
@@ -2540,9 +2537,9 @@ err_t Image::writeToBuffer(ByteArray& buffer, const String& extension) const
 
 Static<ImageData> Image::_dnull;
 
-sysint_t Image::getStrideFromWidth(int width, uint32_t depth)
+ssize_t Image::getStrideFromWidth(int width, uint32_t depth)
 {
-  sysint_t result = 0;
+  ssize_t result = 0;
   FOG_ASSUME(width >= 0);
 
   switch (depth)
@@ -2575,7 +2572,7 @@ sysint_t Image::getStrideFromWidth(int width, uint32_t depth)
   // Align to 32-bit boudary.
 _Align:
   result += 3;
-  result &= ~(sysint_t)3;
+  result &= ~(ssize_t)3;
 
   // Success.
   return result;
@@ -2583,7 +2580,7 @@ _Align:
 
 ImageData* Image::_dalloc(size_t size)
 {
-  ImageData* d = (ImageData*)Memory::alloc(ImageData::getSizeFor(size));
+  ImageData* d = (ImageData*)MemMgr::alloc(ImageData::getSizeOf(size));
   if (FOG_IS_NULL(d)) return NULL;
 
   fog_new_p(d) ImageData();
@@ -2595,7 +2592,7 @@ ImageData* Image::_dalloc(size_t size)
 ImageData* Image::_dalloc(const SizeI& size, uint32_t format)
 {
   ImageData* d;
-  sysint_t stride;
+  ssize_t stride;
 
   FOG_ASSERT(size.isValid());
 
@@ -2634,7 +2631,7 @@ ImageData* Image::_dalloc(const SizeI& size, uint32_t format)
 FOG_NO_EXPORT void Image_init(void)
 {
   ImageData* d = Image::_dnull.init();
-  d->refCount.init(1);
+  d->reference.init(1);
   d->flags = NO_FLAGS;
 }
 

@@ -38,7 +38,7 @@ struct FOG_NO_EXPORT SvgDefsElement : public SvgElement
   virtual err_t onProcess(SvgVisitor* visitor) const;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgDefsElement)
+  _FOG_NO_COPY(SvgDefsElement)
 };
 
 //! @}

@@ -9,6 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
+#include <Fog/Core/Tools/Swap.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Painting/PaintUtil.h>
 #include <Fog/G2d/Painting/Painter.h>

@@ -52,7 +52,7 @@ struct FOG_NO_EXPORT SvgPathElement : public SvgStyledElement
   SvgPathAttribute a_d;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgPathElement)
+  _FOG_NO_COPY(SvgPathElement)
 };
 
 //! @}

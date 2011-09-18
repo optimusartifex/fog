@@ -39,7 +39,7 @@ struct FOG_NO_EXPORT SvgGElement : public SvgStyledElement
   virtual err_t onGeometryBoundingBox(BoxF& box, const TransformF* tr) const;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgGElement)
+  _FOG_NO_COPY(SvgGElement)
 };
 
 //! @}

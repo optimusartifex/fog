@@ -22,7 +22,7 @@ namespace Fog {
 // [Fog::PaintHints]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 union FOG_NO_EXPORT PaintHints
 {
   // --------------------------------------------------------------------------
@@ -60,7 +60,7 @@ union FOG_NO_EXPORT PaintHints
 
   uint32_t packed;
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 // ============================================================================
 // [Fog::PaintParamsF]
@@ -288,13 +288,6 @@ struct FOG_NO_EXPORT PaintParamsD
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::PaintParamsF, Fog::TYPEINFO_MOVABLE)
-_FOG_TYPEINFO_DECLARE(Fog::PaintParamsD, Fog::TYPEINFO_MOVABLE)
 
 // [Guard]
 #endif // _FOG_G2D_PAINTING_PAINTPARAMS_H

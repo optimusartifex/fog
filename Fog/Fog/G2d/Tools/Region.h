@@ -9,7 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/Memory/Alloc.h>
+#include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Rect.h>
@@ -24,259 +24,551 @@ namespace Fog {
 // ============================================================================
 
 //! @brief Region data.
-struct FOG_API RegionData
+struct FOG_NO_EXPORT RegionData
 {
-  // [Ref / Deref]
+  // --------------------------------------------------------------------------
+  // [AddRef / Release]
+  // --------------------------------------------------------------------------
 
-  FOG_INLINE RegionData* ref() const { refCount.inc(); return const_cast<RegionData*>(this); }
-  FOG_INLINE void deref() { if (refCount.deref() && (flags & CONTAINER_DATA_STATIC) == 0) Memory::free(this); }
+  FOG_INLINE RegionData* addRef() const
+  {
+    reference.inc();
+    return const_cast<RegionData*>(this);
+  }
 
-  static RegionData* adopt(void* address, size_t capacity);
-  static RegionData* adopt(void* address, size_t capacity, const BoxI& r);
-  static RegionData* adopt(void* address, size_t capacity, const BoxI* extents, const BoxI* rects, size_t count);
+  FOG_INLINE void release()
+  {
+    if (reference.deref())
+      _api.region.dFree(this);
+  }
 
-  static RegionData* create(size_t capacity);
-  static RegionData* create(size_t capacity, const BoxI* extents, const BoxI* rects, size_t count);
+  // --------------------------------------------------------------------------
+  // [GetSizeOf]
+  // --------------------------------------------------------------------------
 
-  static RegionData* copy(const RegionData* other);
+  static FOG_INLINE size_t getSizeOf(size_t capacity)
+  {
+    return sizeof(RegionData) - sizeof(BoxI) + capacity * sizeof(BoxI);
+  }
 
-  static FOG_INLINE size_t sizeFor(size_t capacity)
-  { return sizeof(RegionData) - sizeof(BoxI) + sizeof(BoxI) * capacity; }
-
+  // --------------------------------------------------------------------------
   // [Members]
+  // --------------------------------------------------------------------------
+
+  // ${VAR:BEGIN}
+  //
+  // This data-object is binary compatible to the VarData header in the second
+  // form called - "implicitly shared container". The members must be binary
+  // compatible to the header below:
+  //
+  // +==============+============+============================================+
+  // | Size         | Name       | Description / Purpose                      |
+  // +==============+============+============================================+
+  // | size_t       | reference  | Atomic reference count, can be managed by  |
+  // |              |            | VarData without calling container specific |
+  // |              |            | methods.                                   |
+  // +--------------+------------+--------------------------------------------+
+  // | uint32_t     | vType      | Variable type and flags.                   |
+  // +--------------+------------+--------------------------------------------+
+  // | uint32_t     | padding0_32| Not used by the Var. This member is only   |
+  // |              |            | defined for 64-bit compilation to pad      |
+  // |              |            | other members!                             |
+  // +--------------+------------+--------------------------------------------+
+  // | size_t       | capacity   | Capacity of the container (items).         |
+  // +--------------+------------+--------------------------------------------+
+  // | size_t       | length     | Length of the container (items).           |
+  // +==============+============+============================================+
+  //
+  // ${VAR:END}
 
   //! @brief Reference count.
-  mutable Atomic<size_t> refCount;
-  //! @brief Region flags.
-  uint32_t flags;
+  mutable Atomic<size_t> reference;
 
-  //! @brief Count of preallocated rectangles.
+  //! @brief Variable type and flags.
+  uint32_t vType;
+
+#if FOG_ARCH_BITS >= 64
+  uint32_t padding0_32;
+#endif // FOG_ARCH_BITS >= 64
+
+  //! @brief Count of allocated rectangles.
   size_t capacity;
   //! @brief Count of used rectangles.
   size_t length;
-  //! @brief Region extents.
-  BoxI extents;
-  //! @brief Region rectangles, always YX sorted.
-  BoxI rects[1];
+
+  //! @brief Bounding box.
+  BoxI boundingBox;
+  //! @brief List of YX sorted boxes.
+  BoxI data[1];
 };
 
 // ============================================================================
 // [Fog::Region]
 // ============================================================================
 
-//! @brief Region defined by rectangles.
-struct FOG_API Region
+//! @brief Region defined by set of YX sorted rectangle(s).
+struct FOG_NO_EXPORT Region
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  Region();
-  Region(const Region& other);
-  explicit Region(const BoxI& rect);
-  explicit Region(const RectI& rect);
+  FOG_INLINE Region()
+  {
+    _api.region.ctor(this);
+  }
+
+  FOG_INLINE Region(const Region& other)
+  {
+    _api.region.ctorRegion(this, &other);
+  }
+
+  explicit FOG_INLINE Region(const BoxI& box)
+  {
+    _api.region.ctorBox(this, &box);
+  }
+
+  explicit FOG_INLINE Region(const RectI& rect)
+  {
+    _api.region.ctorRect(this, &rect);
+  }
 
   explicit FOG_INLINE Region(_Uninitialized) {}
   explicit FOG_INLINE Region(RegionData* d) : _d(d) {}
 
-  ~Region();
+  FOG_INLINE ~Region()
+  {
+    _api.region.dtor(this);
+  }
 
   // --------------------------------------------------------------------------
   // [Sharing]
   // --------------------------------------------------------------------------
 
   //! @copydoc Doxygen::Implicit::getReference().
-  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
+  FOG_INLINE size_t getReference() const { return _d->reference.get(); }
   //! @copydoc Doxygen::Implicit::isDetached().
   FOG_INLINE bool isDetached() const { return getReference() == 1; }
   //! @copydoc Doxygen::Implicit::detach().
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
   //! @copydoc Doxygen::Implicit::_detach().
-  err_t _detach();
-  // --------------------------------------------------------------------------
-  // [Flags]
-  // --------------------------------------------------------------------------
-
-  //! @brief Get type of region, see @c REGION_TYPE enum for possible values.
-  uint32_t getType() const;
-
-  FOG_INLINE bool isInfinite() const { return _d == _dinfinite.instancep(); }
-  FOG_INLINE bool isNone() const { return _d->length == 0 && !isInfinite(); }
-  FOG_INLINE bool isSimple() const { return _d->length == 1; }
-  FOG_INLINE bool isComplex() const { return _d->length > 1; }
-
-  //! @copydoc Doxygen::Implicit::getFlags().
-  FOG_INLINE uint32_t getFlags() const { return _d->flags; }
-
-  //! @copydoc Doxygen::Implicit::isNull().
-  FOG_INLINE bool isNull() const { return _d == _dnull.instancep(); }
-  //! @copydoc Doxygen::Implicit::isDynamic().
-  FOG_INLINE bool isStatic() const { return (_d->flags & CONTAINER_DATA_STATIC) != 0; }
-
-  // --------------------------------------------------------------------------
-  // [Data]
-  // --------------------------------------------------------------------------
-
-  //! @brief Get const pointer to the region data.
-  FOG_INLINE const BoxI* getData() const  { return _d->rects; }
-
-  //! @brief Get mutable pointer to the region data.
-  FOG_INLINE BoxI* getDataX()
-  {
-    FOG_ASSERT_X(isDetached(), "Fog::Region::getDataX() - Called on non-detached object");
-    return _d->rects;
-  }
+  FOG_INLINE err_t _detach() { return _api.region.detach(this); }
 
   // --------------------------------------------------------------------------
   // [Container]
   // --------------------------------------------------------------------------
 
-  //! @brief Returns capacity of region in rectangles.
-  FOG_INLINE size_t getCapacity() const  { return _d->capacity; }
-
-  //! @brief Returns count of rectangles in region.
-  FOG_INLINE size_t getLength() const  { return _d->length; }
-
-  //! @brief Returns @c true if region is empty.
-  FOG_INLINE bool isEmpty() const  { return _d->length == 0; }
-
-  //! @brief Returns region extents.
-  FOG_INLINE const BoxI& getExtents() const  { return _d->extents; }
+  //! @brief Get region capacity.
+  FOG_INLINE size_t getCapacity() const { return _d->capacity; }
+  //! @brief Get region length.
+  FOG_INLINE size_t getLength() const { return _d->length; }
 
   //! @brief Reserve @a n rectangles in region and detach it. If retion is
   //! infinite then ERR_RT_INVALID_CONTEXT is returned.
-  err_t reserve(size_t n);
-  //! @brief Prepare @a n rectangles in region and clear it.
-  err_t prepare(size_t n);
+  FOG_INLINE err_t reserve(size_t n)
+  {
+    return _api.region.reserve(this, n);
+  }
+
   //! @brief Squeeze region (allocating memory exactly needed for this object).
-  void squeeze();
+  FOG_INLINE void squeeze()
+  {
+    return _api.region.squeeze(this);
+  }
+
+  //! @brief Prepare @a n rectangles in region and clear it.
+  FOG_INLINE err_t prepare(size_t n)
+  {
+    return _api.region.prepare(this, n);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  //! @brief Get const pointer to the region data.
+  FOG_INLINE const BoxI* getData() const
+  {
+    return _d->data;
+  }
+
+  //! @brief Get mutable pointer to the region data.
+  FOG_INLINE BoxI* getDataX()
+  {
+    FOG_ASSERT_X(isDetached(), "Fog::Region::getDataX() - Called on non-detached object");
+    return _d->data;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Flags]
+  // --------------------------------------------------------------------------
+
+  //! @copydoc Doxygen::Implicit::isStatic().
+  FOG_INLINE bool isStatic() const { return (_d->vType & VAR_FLAG_STATIC) != 0; }
+
+  // --------------------------------------------------------------------------
+  // [Type]
+  // --------------------------------------------------------------------------
+
+  //! @brief Get type of region, see @c REGION_TYPE enum for possible values.
+  FOG_INLINE uint32_t getType() const { return _api.region.getType(this); }
+
+  //! @brief Get whether the region is empty (zero length and not infinite).
+  FOG_INLINE bool isEmpty() const { return _d->length == 0; }
+  //! @brief Get whether the region is one rectangle.
+  FOG_INLINE bool isRect() const { return _d->length == 1; }
+  //! @brief Get whether the region is complex.
+  FOG_INLINE bool isComplex() const { return _d->length > 1; }
+  //! @brief Get whether the region is infinite.
+  FOG_INLINE bool isInfinite() const { return _d == _api.region.oInfinite->_d; }
+
+  // --------------------------------------------------------------------------
+  // [Clear]
+  // --------------------------------------------------------------------------
+
+  //! @brief Removes all rectagnels from region.
+  FOG_INLINE void clear()
+  {
+    return _api.region.clear(this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  //! @copydoc Doxygen::Implicit::reset().
+  FOG_INLINE void reset()
+  {
+    return _api.region.reset(this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Set]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t setRegion(const Region& region)
+  {
+    return _api.region.setRegion(this, &region);
+  }
+
+  //! @brief Create a deep copy of region @a region.
+  FOG_INLINE err_t setDeep(const Region& region)
+  {
+    return _api.region.setDeep(this, &region);
+  }
+
+  FOG_INLINE err_t setBox(const BoxI& box)
+  {
+    return _api.region.setBox(this, &box);
+  }
+
+  FOG_INLINE err_t setRect(const RectI& rect)
+  {
+    return _api.region.setRect(this, &rect);
+  }
+
+  FOG_INLINE err_t setBoxList(const BoxI* data, size_t length)
+  {
+    return _api.region.setBoxList(this, data, length);
+  }
+
+  FOG_INLINE err_t setRectList(const RectI* data, size_t length)
+  {
+    return _api.region.setRectList(this, data, length);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Combine]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t combine(const Region& region, uint32_t combineOp)
+  {
+    return _api.region.combineRegionRegion(this, this, &region, combineOp);
+  }
+
+  FOG_INLINE err_t combine(const BoxI& box, uint32_t combineOp)
+  {
+    return _api.region.combineRegionBox(this, this, &box, combineOp);
+  }
+
+  FOG_INLINE err_t combine(const RectI& rect, uint32_t combineOp)
+  {
+    BoxI box(rect);
+    return _api.region.combineRegionBox(this, this, &box, combineOp);
+  }
+
+  FOG_INLINE err_t union_(const Region& region) { return combine(region, REGION_OP_UNION); }
+  FOG_INLINE err_t union_(const BoxI& box) { return combine(box, REGION_OP_UNION); }
+  FOG_INLINE err_t union_(const RectI& rect) { return combine(rect, REGION_OP_UNION); }
+
+  FOG_INLINE err_t intersect(const Region& region) { return combine(region, REGION_OP_INTERSECT); }
+  FOG_INLINE err_t intersect(const BoxI& box) { return combine(box, REGION_OP_INTERSECT); }
+  FOG_INLINE err_t intersect(const RectI& rect) { return combine(rect, REGION_OP_INTERSECT); }
+
+  FOG_INLINE err_t xor_(const Region& region) { return combine(region, REGION_OP_XOR); }
+  FOG_INLINE err_t xor_(const BoxI& box) { return combine(box, REGION_OP_XOR); }
+  FOG_INLINE err_t xor_(const RectI& rect) { return combine(rect, REGION_OP_XOR); }
+
+  FOG_INLINE err_t subtract(const Region& region) { return combine(region, REGION_OP_SUBTRACT); }
+  FOG_INLINE err_t subtract(const BoxI& box) { return combine(box, REGION_OP_SUBTRACT); }
+  FOG_INLINE err_t subtract(const RectI& rect) { return combine(rect, REGION_OP_SUBTRACT); }
+
+  FOG_INLINE err_t subtractReverse(const Region& region) { return combine(region, REGION_OP_SUBTRACT_REV); }
+  FOG_INLINE err_t subtractReverse(const BoxI& box) { return combine(box, REGION_OP_SUBTRACT_REV); }
+  FOG_INLINE err_t subtractReverse(const RectI& rect) { return combine(rect, REGION_OP_SUBTRACT_REV); }
+
+  // --------------------------------------------------------------------------
+  // [Translate]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t translate(const PointI& pt)
+  {
+    return _api.region.translate(this, this, &pt);
+  }
+
+  FOG_INLINE err_t translate(int x, int y)
+  {
+    PointI pt(x, y);
+    return _api.region.translate(this, this, &pt);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Special]
+  // --------------------------------------------------------------------------
+
+  //! @brief Translate current region by @a pt and clip it into @a clipBox.
+  //!
+  //! This is special function designed for windowing systems where the region
+  //! used by UI component needs to be translated and clipped to the view-box.
+  //! The result of the operation is the same as translating the region by
+  //! @a pt and then intersecting it with @a clipBox. The advantage of using
+  //! this method is that everything is done withing a single pass so the
+  //! performance is increased.
+  FOG_INLINE err_t translateAndClip(const PointI& pt, const BoxI& clipBox)
+  {
+    return _api.region.translateAndClip(this, this, &pt, &clipBox);
+  }
+
+  //! @brief Intersect current region with the @a region and clip it into @a clipBox.
+  //!
+  //! This is special function designed for windowing systems. The result of
+  //! this operation is the same as intersecting the current region with the
+  //! @a region and then intersecting it again with the @a clipBox. The
+  //! advantage of using this method is that both operations are done within
+  //! a single pass so the performance is increased.
+  FOG_INLINE err_t intersectAndClip(const Region& region, const BoxI& clipBox)
+  {
+    return _api.region.intersectAndClip(this, this, &region, &clipBox);
+  }
+
+  // --------------------------------------------------------------------------
+  // [BoundingBox]
+  // --------------------------------------------------------------------------
+
+  //! @brief Returns region extents.
+  FOG_INLINE const BoxI& getBoundingBox() const
+  {
+    return _d->boundingBox;
+  }
 
   // --------------------------------------------------------------------------
   // [HitTest]
   // --------------------------------------------------------------------------
 
   //! @brief Tests if a given point is in region, see @c REGION_HIT_TEST enum.
-  uint32_t hitTest(const PointI& pt) const;
-  uint32_t hitTest(const RectI& r) const;
-  uint32_t hitTest(const BoxI& r) const;
+  FOG_INLINE uint32_t hitTest(const PointI& pt) const
+  {
+    return _api.region.hitTestPoint(this, &pt);
+  }
 
-  FOG_INLINE uint32_t hitTest(int x, int y) const { return hitTest(PointI(x, y)); }
+  FOG_INLINE uint32_t hitTest(int x, int y) const
+  {
+    PointI pt(x, y);
+    return _api.region.hitTestPoint(this, &pt);
+  }
 
-  // --------------------------------------------------------------------------
-  // [Clear / Reset]
-  // --------------------------------------------------------------------------
+  FOG_INLINE uint32_t hitTest(const BoxI& box) const
+  {
+    return _api.region.hitTestBox(this, &box);
+  }
 
-  //! @brief Removes all rectagnels from region.
-  void clear();
-  //! @copydoc Doxygen::Implicit::reset().
-  void reset();
-
-  // --------------------------------------------------------------------------
-  // [Operations]
-  // --------------------------------------------------------------------------
-
-  err_t set(const Region& r);
-  err_t set(const RectI& r);
-  err_t set(const BoxI& r);
-
-  //! @brief Creates a deep copy instead of reference.
-  //!
-  //! This function is used internally to optimize computing where we know
-  //! that we need to copy region and do some ops with them (Because if we
-  //! create a reference, it will free existing allocated block of memory
-  //! and it's expensive to alloc it back.
-  //!
-  //! @param r Region to copy from;
-  //! @return @c ERR_OK on success, error code on failure.
-  err_t setDeep(const Region& r);
-
-  err_t set(const RectI* rects, size_t count);
-  err_t set(const BoxI* rects, size_t count);
-
-  err_t combine(const Region& r, uint32_t combineOp);
-  err_t combine(const RectI& r, uint32_t combineOp);
-  err_t combine(const BoxI& r, uint32_t combineOp);
-
-  err_t translate(const PointI& pt);
-  err_t shrink(const PointI& pt);
-  err_t frame(const PointI& pt);
-
-  FOG_INLINE err_t translate(int x, int y) { return translate(PointI(x, y)); }
-  FOG_INLINE err_t shrink(int x, int y) { return shrink(PointI(x, y)); }
-  FOG_INLINE err_t frame(int x, int y) { return frame(PointI(x, y)); }
-
-  bool eq(const Region& other) const;
+  FOG_INLINE uint32_t hitTest(const RectI& rect) const
+  {
+    return _api.region.hitTestRect(this, &rect);
+  }
 
   // --------------------------------------------------------------------------
-  // [Windows Specific]
+  // [Equality]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const Region& other) const
+  {
+    return _api.region.eq(this, &other);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Windows Support]
   // --------------------------------------------------------------------------
 
 #if defined(FOG_OS_WINDOWS)
-  HRGN toHRGN() const;
-  err_t fromHRGN(HRGN hrgn);
+  FOG_INLINE err_t toHRGN(HRGN* hrgn) const
+  {
+    return _api.region.hrgnFromRegion(hrgn, this);
+  }
+
+  FOG_INLINE err_t fromHRGN(HRGN hrgn)
+  {
+    return _api.region.regionFromHRGN(this, hrgn);
+  }
 #endif // FOG_OS_WINDOWS
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE Region& operator=(const Region& r) { set(r); return *this; }
-  FOG_INLINE Region& operator=(const RectI& r) { set(r); return *this; }
-  FOG_INLINE Region& operator=(const BoxI& r) { set(r); return *this; }
+  FOG_INLINE Region& operator=(const Region& other) { _api.region.setRegion(this, &other); return *this; }
+  FOG_INLINE Region& operator=(const BoxI& box) { _api.region.setBox(this, &box); return *this; }
+  FOG_INLINE Region& operator=(const RectI& rect) { _api.region.setRect(this, &rect); return *this; }
 
-  FOG_INLINE Region& operator+=(const Region& r) { combine(r, REGION_OP_UNION); return *this; }
-  FOG_INLINE Region& operator+=(const RectI& r) { combine(r, REGION_OP_UNION); return *this; }
-  FOG_INLINE Region& operator+=(const BoxI& r) { combine(r, REGION_OP_UNION); return *this; }
+  FOG_INLINE Region& operator+=(const Region& other) { union_   (other); return *this; }
+  FOG_INLINE Region& operator|=(const Region& other) { union_   (other); return *this; }
+  FOG_INLINE Region& operator&=(const Region& other) { intersect(other); return *this; }
+  FOG_INLINE Region& operator^=(const Region& other) { xor_     (other); return *this; }
+  FOG_INLINE Region& operator-=(const Region& other) { subtract (other); return *this; }
 
-  FOG_INLINE Region& operator|=(const Region& r) { combine(r, REGION_OP_UNION); return *this; }
-  FOG_INLINE Region& operator|=(const RectI& r) { combine(r, REGION_OP_UNION); return *this; }
-  FOG_INLINE Region& operator|=(const BoxI& r) { combine(r, REGION_OP_UNION); return *this; }
+  FOG_INLINE Region& operator+=(const BoxI& box) { union_   (box); return *this; }
+  FOG_INLINE Region& operator|=(const BoxI& box) { union_   (box); return *this; }
+  FOG_INLINE Region& operator&=(const BoxI& box) { intersect(box); return *this; }
+  FOG_INLINE Region& operator^=(const BoxI& box) { xor_     (box); return *this; }
+  FOG_INLINE Region& operator-=(const BoxI& box) { subtract (box); return *this; }
 
-  FOG_INLINE Region& operator&=(const Region& r) { combine(r, REGION_OP_INTERSECT); return *this; }
-  FOG_INLINE Region& operator&=(const RectI& r) { combine(r, REGION_OP_INTERSECT); return *this; }
-  FOG_INLINE Region& operator&=(const BoxI& r) { combine(r, REGION_OP_INTERSECT); return *this; }
+  FOG_INLINE Region& operator+=(const RectI& rect) { union_   (rect); return *this; }
+  FOG_INLINE Region& operator|=(const RectI& rect) { union_   (rect); return *this; }
+  FOG_INLINE Region& operator&=(const RectI& rect) { intersect(rect); return *this; }
+  FOG_INLINE Region& operator^=(const RectI& rect) { xor_     (rect); return *this; }
+  FOG_INLINE Region& operator-=(const RectI& rect) { subtract (rect); return *this; }
 
-  FOG_INLINE Region& operator^=(const Region& r) { combine(r, REGION_OP_XOR); return *this; }
-  FOG_INLINE Region& operator^=(const RectI& r) { combine(r, REGION_OP_XOR); return *this; }
-  FOG_INLINE Region& operator^=(const BoxI& r) { combine(r, REGION_OP_XOR); return *this; }
-
-  FOG_INLINE Region& operator-=(const Region& r) { combine(r, REGION_OP_SUBTRACT); return *this; }
-  FOG_INLINE Region& operator-=(const RectI& r) { combine(r, REGION_OP_SUBTRACT); return *this; }
-  FOG_INLINE Region& operator-=(const BoxI& r) { combine(r, REGION_OP_SUBTRACT); return *this; }
-
-  FOG_INLINE bool operator==(const Region& other) const { return  eq(other); }
-  FOG_INLINE bool operator!=(const Region& other) const { return !eq(other); }
+  FOG_INLINE bool operator==(const Region& other) const { return  _api.region.eq(this, &other); }
+  FOG_INLINE bool operator!=(const Region& other) const { return !_api.region.eq(this, &other); }
 
   // --------------------------------------------------------------------------
-  // [Statics]
+  // [Statics - Instance]
   // --------------------------------------------------------------------------
 
-  static Static<RegionData> _dnull;
-  static Static<RegionData> _dinfinite;
+  //! @brief Get empty region instance.
+  static FOG_INLINE const Region& empty() { return *_api.region.oEmpty; }
+  //! @brief Get infinite region instance.
+  static FOG_INLINE const Region& infinite() { return *_api.region.oInfinite; }
 
-  static Region* _oempty;
-  static Region* _oinfinite;
+  // --------------------------------------------------------------------------
+  // [Statics - Eq]
+  // --------------------------------------------------------------------------
 
-  //! @brief Empty region instance.
-  static const Region& empty() { return *_oempty; }
-  //! @brief Infinite region instance.
-  static const Region& infinite() { return *_oinfinite; }
+  static FOG_INLINE EqFunc getEqFunc()
+  {
+    return (EqFunc)_api.region.eq;
+  }
 
-  static err_t combine(Region& dst, const Region& src1, const Region& src2, uint32_t combineOp);
-  static err_t combine(Region& dst, const Region& src1, const BoxI& src2, uint32_t combineOp);
-  static err_t combine(Region& dst, const BoxI& src1, const Region& src2, uint32_t combineOp);
-  static err_t combine(Region& dst, const BoxI& src1, const BoxI& src2, uint32_t combineOp);
+  // --------------------------------------------------------------------------
+  // [Statics - Combine]
+  // --------------------------------------------------------------------------
 
-  static err_t translate(Region& dst, const Region& src, const PointI& pt);
-  static err_t shrink(Region& dst, const Region& src, const PointI& pt);
-  static err_t frame(Region& dst, const Region& src, const PointI& pt);
+  static FOG_INLINE err_t combine(Region& dst, const Region& a, const Region& b, uint32_t combineOp)
+  {
+    return _api.region.combineRegionRegion(&dst, &a, &b, combineOp);
+  }
+
+  static FOG_INLINE err_t combine(Region& dst, const Region& a, const BoxI& b, uint32_t combineOp)
+  {
+    return _api.region.combineRegionBox(&dst, &a, &b, combineOp);
+  }
+
+  static FOG_INLINE err_t combine(Region& dst, const Region& a, const RectI& b, uint32_t combineOp)
+  {
+    BoxI bBox(b);
+    return _api.region.combineRegionBox(&dst, &a, &bBox, combineOp);
+  }
+
+  static FOG_INLINE err_t combine(Region& dst, const BoxI& a, const Region& b, uint32_t combineOp)
+  {
+    return _api.region.combineBoxRegion(&dst, &a, &b, combineOp);
+  }
+
+  static FOG_INLINE err_t combine(Region& dst, const RectI& a, const Region& b, uint32_t combineOp)
+  {
+    BoxI aBox(a);
+    return _api.region.combineBoxRegion(&dst, &aBox, &b, combineOp);
+  }
+
+  static FOG_INLINE err_t combine(Region& dst, const BoxI& a, const BoxI& b, uint32_t combineOp)
+  {
+    return _api.region.combineBoxBox(&dst, &a, &b, combineOp);
+  }
+
+  static FOG_INLINE err_t combine(Region& dst, const RectI& a, const RectI& b, uint32_t combineOp)
+  {
+    BoxI aBox(a);
+    BoxI bBox(b);
+    return _api.region.combineBoxBox(&dst, &aBox, &bBox, combineOp);
+  }
+
+  static FOG_INLINE err_t union_(Region& dst, const Region& a, const Region& b) { return combine(dst, a, b, REGION_OP_UNION); }
+  static FOG_INLINE err_t union_(Region& dst, const Region& a, const BoxI&   b) { return combine(dst, a, b, REGION_OP_UNION); }
+  static FOG_INLINE err_t union_(Region& dst, const Region& a, const RectI&  b) { return combine(dst, a, b, REGION_OP_UNION); }
+  static FOG_INLINE err_t union_(Region& dst, const BoxI&   a, const Region& b) { return combine(dst, a, b, REGION_OP_UNION); }
+  static FOG_INLINE err_t union_(Region& dst, const RectI&  a, const Region& b) { return combine(dst, a, b, REGION_OP_UNION); }
+  static FOG_INLINE err_t union_(Region& dst, const BoxI&   a, const BoxI&   b) { return combine(dst, a, b, REGION_OP_UNION); }
+  static FOG_INLINE err_t union_(Region& dst, const RectI&  a, const RectI&  b) { return combine(dst, a, b, REGION_OP_UNION); }
+
+  static FOG_INLINE err_t intersect(Region& dst, const Region& a, const Region& b) { return combine(dst, a, b, REGION_OP_INTERSECT); }
+  static FOG_INLINE err_t intersect(Region& dst, const Region& a, const BoxI&   b) { return combine(dst, a, b, REGION_OP_INTERSECT); }
+  static FOG_INLINE err_t intersect(Region& dst, const Region& a, const RectI&  b) { return combine(dst, a, b, REGION_OP_INTERSECT); }
+  static FOG_INLINE err_t intersect(Region& dst, const BoxI&   a, const Region& b) { return combine(dst, a, b, REGION_OP_INTERSECT); }
+  static FOG_INLINE err_t intersect(Region& dst, const RectI&  a, const Region& b) { return combine(dst, a, b, REGION_OP_INTERSECT); }
+  static FOG_INLINE err_t intersect(Region& dst, const BoxI&   a, const BoxI&   b) { return combine(dst, a, b, REGION_OP_INTERSECT); }
+  static FOG_INLINE err_t intersect(Region& dst, const RectI&  a, const RectI&  b) { return combine(dst, a, b, REGION_OP_INTERSECT); }
+
+  static FOG_INLINE err_t xor_(Region& dst, const Region& a, const Region& b) { return combine(dst, a, b, REGION_OP_XOR); }
+  static FOG_INLINE err_t xor_(Region& dst, const Region& a, const BoxI&   b) { return combine(dst, a, b, REGION_OP_XOR); }
+  static FOG_INLINE err_t xor_(Region& dst, const Region& a, const RectI&  b) { return combine(dst, a, b, REGION_OP_XOR); }
+  static FOG_INLINE err_t xor_(Region& dst, const BoxI&   a, const Region& b) { return combine(dst, a, b, REGION_OP_XOR); }
+  static FOG_INLINE err_t xor_(Region& dst, const RectI&  a, const Region& b) { return combine(dst, a, b, REGION_OP_XOR); }
+  static FOG_INLINE err_t xor_(Region& dst, const BoxI&   a, const BoxI&   b) { return combine(dst, a, b, REGION_OP_XOR); }
+  static FOG_INLINE err_t xor_(Region& dst, const RectI&  a, const RectI&  b) { return combine(dst, a, b, REGION_OP_XOR); }
+
+  static FOG_INLINE err_t subtract(Region& dst, const Region& a, const Region& b) { return combine(dst, a, b, REGION_OP_SUBTRACT); }
+  static FOG_INLINE err_t subtract(Region& dst, const Region& a, const BoxI&   b) { return combine(dst, a, b, REGION_OP_SUBTRACT); }
+  static FOG_INLINE err_t subtract(Region& dst, const Region& a, const RectI&  b) { return combine(dst, a, b, REGION_OP_SUBTRACT); }
+  static FOG_INLINE err_t subtract(Region& dst, const BoxI&   a, const Region& b) { return combine(dst, a, b, REGION_OP_SUBTRACT); }
+  static FOG_INLINE err_t subtract(Region& dst, const RectI&  a, const Region& b) { return combine(dst, a, b, REGION_OP_SUBTRACT); }
+  static FOG_INLINE err_t subtract(Region& dst, const BoxI&   a, const BoxI&   b) { return combine(dst, a, b, REGION_OP_SUBTRACT); }
+  static FOG_INLINE err_t subtract(Region& dst, const RectI&  a, const RectI&  b) { return combine(dst, a, b, REGION_OP_SUBTRACT); }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Translate / TranslateAndClip]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE err_t translate(Region& dst, const Region& src, const PointI& pt)
+  {
+    return _api.region.translate(&dst, &src, &pt);
+  }
+
+  static FOG_INLINE err_t translateAndClip(Region& dst, const Region& src, const PointI& pt, const BoxI& clipBox)
+  {
+    return _api.region.translateAndClip(&dst, &src, &pt, &clipBox);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Statics - IntersectAndClip]
+  // --------------------------------------------------------------------------
 
   //! @brief Special method that will intersect two regions and clip them.
   //!
   //! @note Calling this method is faster than doing these operations individually.
-  static err_t intersectAndClip(Region& dst, const Region& src1Region, const Region& src2Region, const BoxI& clip);
-  //! @overload
-  static err_t translateAndClip(Region& dst, const Region& src1Region, const PointI& pt, const BoxI& clip);
+  static FOG_INLINE err_t intersectAndClip(Region& dst, const Region& a, const Region& b, const BoxI& clipBox)
+  {
+    return _api.region.intersectAndClip(&dst, &a, &b, &clipBox);
+  }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -289,35 +581,35 @@ struct FOG_API Region
 
 } // Fog namespace
 
-FOG_INLINE const Fog::Region operator+(const Fog::Region& src1, const Fog::Region& src2) { Fog::Region r; Fog::Region::combine(r, src1, src2, Fog::REGION_OP_UNION    ); return r; }
-FOG_INLINE const Fog::Region operator|(const Fog::Region& src1, const Fog::Region& src2) { Fog::Region r; Fog::Region::combine(r, src1, src2, Fog::REGION_OP_UNION    ); return r; }
-FOG_INLINE const Fog::Region operator&(const Fog::Region& src1, const Fog::Region& src2) { Fog::Region r; Fog::Region::combine(r, src1, src2, Fog::REGION_OP_INTERSECT); return r; }
-FOG_INLINE const Fog::Region operator^(const Fog::Region& src1, const Fog::Region& src2) { Fog::Region r; Fog::Region::combine(r, src1, src2, Fog::REGION_OP_XOR      ); return r; }
-FOG_INLINE const Fog::Region operator-(const Fog::Region& src1, const Fog::Region& src2) { Fog::Region r; Fog::Region::combine(r, src1, src2, Fog::REGION_OP_SUBTRACT ); return r; }
+FOG_INLINE const Fog::Region operator+(const Fog::Region& a, const Fog::Region& b) { Fog::Region r; Fog::Region::combine(r, a, b, Fog::REGION_OP_UNION    ); return r; }
+FOG_INLINE const Fog::Region operator|(const Fog::Region& a, const Fog::Region& b) { Fog::Region r; Fog::Region::combine(r, a, b, Fog::REGION_OP_UNION    ); return r; }
+FOG_INLINE const Fog::Region operator&(const Fog::Region& a, const Fog::Region& b) { Fog::Region r; Fog::Region::combine(r, a, b, Fog::REGION_OP_INTERSECT); return r; }
+FOG_INLINE const Fog::Region operator^(const Fog::Region& a, const Fog::Region& b) { Fog::Region r; Fog::Region::combine(r, a, b, Fog::REGION_OP_XOR      ); return r; }
+FOG_INLINE const Fog::Region operator-(const Fog::Region& a, const Fog::Region& b) { Fog::Region r; Fog::Region::combine(r, a, b, Fog::REGION_OP_SUBTRACT ); return r; }
 
-FOG_INLINE const Fog::Region operator+(const Fog::Region& src1, const Fog::RectI& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_UNION    ); return r; }
-FOG_INLINE const Fog::Region operator|(const Fog::Region& src1, const Fog::RectI& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_UNION    ); return r; }
-FOG_INLINE const Fog::Region operator&(const Fog::Region& src1, const Fog::RectI& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_INTERSECT); return r; }
-FOG_INLINE const Fog::Region operator^(const Fog::Region& src1, const Fog::RectI& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_XOR      ); return r; }
-FOG_INLINE const Fog::Region operator-(const Fog::Region& src1, const Fog::RectI& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_SUBTRACT ); return r; }
+FOG_INLINE const Fog::Region operator+(const Fog::Region& a, const Fog::BoxI& b) { Fog::Region r; Fog::Region::combine(r, a, b, Fog::REGION_OP_UNION    ); return r; }
+FOG_INLINE const Fog::Region operator|(const Fog::Region& a, const Fog::BoxI& b) { Fog::Region r; Fog::Region::combine(r, a, b, Fog::REGION_OP_UNION    ); return r; }
+FOG_INLINE const Fog::Region operator&(const Fog::Region& a, const Fog::BoxI& b) { Fog::Region r; Fog::Region::combine(r, a, b, Fog::REGION_OP_INTERSECT); return r; }
+FOG_INLINE const Fog::Region operator^(const Fog::Region& a, const Fog::BoxI& b) { Fog::Region r; Fog::Region::combine(r, a, b, Fog::REGION_OP_XOR      ); return r; }
+FOG_INLINE const Fog::Region operator-(const Fog::Region& a, const Fog::BoxI& b) { Fog::Region r; Fog::Region::combine(r, a, b, Fog::REGION_OP_SUBTRACT ); return r; }
 
-FOG_INLINE const Fog::Region operator+(const Fog::Region& src1, const Fog::BoxI& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_UNION    ); return r; }
-FOG_INLINE const Fog::Region operator|(const Fog::Region& src1, const Fog::BoxI& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_UNION    ); return r; }
-FOG_INLINE const Fog::Region operator&(const Fog::Region& src1, const Fog::BoxI& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_INTERSECT); return r; }
-FOG_INLINE const Fog::Region operator^(const Fog::Region& src1, const Fog::BoxI& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_XOR      ); return r; }
-FOG_INLINE const Fog::Region operator-(const Fog::Region& src1, const Fog::BoxI& src2) { Fog::Region r(src1); r.combine(src2, Fog::REGION_OP_SUBTRACT ); return r; }
+FOG_INLINE const Fog::Region operator+(const Fog::BoxI& a, const Fog::Region& b) { Fog::Region r; Fog::Region::combine(r, a, b, Fog::REGION_OP_UNION    ); return r; }
+FOG_INLINE const Fog::Region operator|(const Fog::BoxI& a, const Fog::Region& b) { Fog::Region r; Fog::Region::combine(r, a, b, Fog::REGION_OP_UNION    ); return r; }
+FOG_INLINE const Fog::Region operator&(const Fog::BoxI& a, const Fog::Region& b) { Fog::Region r; Fog::Region::combine(r, a, b, Fog::REGION_OP_INTERSECT); return r; }
+FOG_INLINE const Fog::Region operator^(const Fog::BoxI& a, const Fog::Region& b) { Fog::Region r; Fog::Region::combine(r, a, b, Fog::REGION_OP_XOR      ); return r; }
+FOG_INLINE const Fog::Region operator-(const Fog::BoxI& a, const Fog::Region& b) { Fog::Region r; Fog::Region::combine(r, a, b, Fog::REGION_OP_SUBTRACT ); return r; }
 
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
+FOG_INLINE const Fog::Region operator+(const Fog::Region& a, const Fog::RectI& b) { Fog::Region r; Fog::Region::combine(r, a, b, Fog::REGION_OP_UNION    ); return r; }
+FOG_INLINE const Fog::Region operator|(const Fog::Region& a, const Fog::RectI& b) { Fog::Region r; Fog::Region::combine(r, a, b, Fog::REGION_OP_UNION    ); return r; }
+FOG_INLINE const Fog::Region operator&(const Fog::Region& a, const Fog::RectI& b) { Fog::Region r; Fog::Region::combine(r, a, b, Fog::REGION_OP_INTERSECT); return r; }
+FOG_INLINE const Fog::Region operator^(const Fog::Region& a, const Fog::RectI& b) { Fog::Region r; Fog::Region::combine(r, a, b, Fog::REGION_OP_XOR      ); return r; }
+FOG_INLINE const Fog::Region operator-(const Fog::Region& a, const Fog::RectI& b) { Fog::Region r; Fog::Region::combine(r, a, b, Fog::REGION_OP_SUBTRACT ); return r; }
 
-_FOG_TYPEINFO_DECLARE(Fog::Region, Fog::TYPEINFO_MOVABLE)
-
-// ============================================================================
-// [Fog::Swap]
-// ============================================================================
-
-_FOG_SWAP_D(Fog::Region)
+FOG_INLINE const Fog::Region operator+(const Fog::RectI& a, const Fog::Region& b) { Fog::Region r; Fog::Region::combine(r, a, b, Fog::REGION_OP_UNION    ); return r; }
+FOG_INLINE const Fog::Region operator|(const Fog::RectI& a, const Fog::Region& b) { Fog::Region r; Fog::Region::combine(r, a, b, Fog::REGION_OP_UNION    ); return r; }
+FOG_INLINE const Fog::Region operator&(const Fog::RectI& a, const Fog::Region& b) { Fog::Region r; Fog::Region::combine(r, a, b, Fog::REGION_OP_INTERSECT); return r; }
+FOG_INLINE const Fog::Region operator^(const Fog::RectI& a, const Fog::Region& b) { Fog::Region r; Fog::Region::combine(r, a, b, Fog::REGION_OP_XOR      ); return r; }
+FOG_INLINE const Fog::Region operator-(const Fog::RectI& a, const Fog::Region& b) { Fog::Region r; Fog::Region::combine(r, a, b, Fog::REGION_OP_SUBTRACT ); return r; }
 
 // [Guard]
 #endif // _FOG_G2D_TOOLS_REGION_H

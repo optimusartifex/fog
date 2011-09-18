@@ -10,7 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Init_p.h>
-#include <Fog/Core/Memory/Alloc.h>
+#include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/G2d/Imaging/ImageConverter.h>
 #include <Fog/G2d/Render/RenderApi_p.h>
 #include <Fog/G2d/Render/RenderConstants_p.h>
@@ -23,10 +23,10 @@ namespace Fog {
 
 static ImageConverterData* ImageConverter_dalloc()
 {
-  ImageConverterData* d = reinterpret_cast<ImageConverterData*>(Memory::alloc(sizeof(ImageConverterData)));
+  ImageConverterData* d = reinterpret_cast<ImageConverterData*>(MemMgr::alloc(sizeof(ImageConverterData)));
   if (FOG_UNLIKELY(d == NULL)) return NULL;
 
-  d->refCount.init(1);
+  d->reference.init(1);
   d->dstPalette->_d = NULL;
   d->srcPalette->_d = NULL;
 
@@ -38,7 +38,7 @@ static void ImageConverter_dfree(ImageConverterData* d)
   if (d->dstPalette->_d) d->dstPalette.destroy();
   if (d->srcPalette->_d) d->srcPalette.destroy();
 
-  Memory::free(d);
+  MemMgr::free(d);
 }
 
 // ============================================================================
@@ -46,15 +46,15 @@ static void ImageConverter_dfree(ImageConverterData* d)
 // ============================================================================
 
 ImageConverter::ImageConverter() :
-  _d(_dnull)
+  _d(&_dnull)
 {
-  _d->refCount.inc();
+  _d->reference.inc();
 }
 
 ImageConverter::ImageConverter(const ImageConverter& other) :
   _d(other._d)
 {
-  _d->refCount.inc();
+  _d->reference.inc();
 }
 
 ImageConverter::ImageConverter(
@@ -70,7 +70,8 @@ ImageConverter::ImageConverter(
 
 ImageConverter::~ImageConverter()
 {
-  if (_d->refCount.deref()) ImageConverter_dfree(_d);
+  if (_d->reference.deref())
+    ImageConverter_dfree(_d);
 }
 
 // ============================================================================
@@ -101,7 +102,7 @@ err_t ImageConverter::create(
     goto _Fail;
   }
 
-  if (_d == NULL || !_d->refCount.deref())
+  if (_d == NULL || !_d->reference.deref())
   {
     _d = ImageConverter_dalloc();
     if (FOG_UNLIKELY(_d == NULL))
@@ -116,7 +117,7 @@ err_t ImageConverter::create(
     if (_d->dstPalette->_d) { _d->dstPalette.destroy(); _d->dstPalette->_d = NULL; }
     if (_d->srcPalette->_d) { _d->srcPalette.destroy(); _d->srcPalette->_d = NULL; }
 
-    _d->refCount.init(1);
+    _d->reference.init(1);
   }
 
   _d->blitFn = NULL;
@@ -179,7 +180,7 @@ err_t ImageConverter::create(
   if (df.getFormat() < IMAGE_FORMAT_COUNT && !df.isIndexed() &&
       sf.getFormat() < IMAGE_FORMAT_COUNT && !dither)
   {
-    _d->blitFn = (ImageConverterBlitLineFn)_g2d_render.getCopyFullFn(
+    _d->blitFn = (ImageConverterBlitLineFunc)_g2d_render.getCopyFullFunc(
       df.getFormat(), sf.getFormat());
     if (_d->blitFn != NULL) return ERR_OK;
   }
@@ -189,10 +190,11 @@ err_t ImageConverter::create(
   if (err == ERR_OK) return ERR_OK;
 
 _Fail:
-  if (_d != NULL && _d->refCount.deref()) ImageConverter_dfree(_d);
+  if (_d != NULL && _d->reference.deref())
+    ImageConverter_dfree(_d);
 
-  _d = _dnull;
-  _d->refCount.inc();
+  _d = &_dnull;
+  _d->reference.inc();
 
   return err;
 }
@@ -213,9 +215,11 @@ err_t ImageConverter::createDithered8(
 
 void ImageConverter::reset()
 {
-  _dnull->refCount.inc();
-  ImageConverterData* old = atomicPtrXchg(&_d, _dnull.instancep());
-  if (old->refCount.deref()) ImageConverter_dfree(old);
+  _dnull->reference.inc();
+  ImageConverterData* old = atomicPtrXchg(&_d, &_dnull);
+
+  if (old->reference.deref())
+    ImageConverter_dfree(old);
 }
 
 // ============================================================================
@@ -292,9 +296,9 @@ Static<ImageConverterData> ImageConverter::_dnull;
 
 FOG_NO_EXPORT void ImageConverter_init(void)
 {
-  ImageConverterData* d = ImageConverter::_dnull.instancep();
+  ImageConverterData* d = &ImageConverter::_dnull;
 
-  d->refCount.init(1);
+  d->reference.init(1);
   d->blitFn = NULL;
   d->dstFormatDescription.reset();
   d->srcFormatDescription.reset();

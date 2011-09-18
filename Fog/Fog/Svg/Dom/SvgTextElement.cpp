@@ -76,7 +76,7 @@ err_t SvgTextElement::onProcess(SvgVisitor* visitor) const
 
     if (e->isText())
     {
-      String text = e->getTextContent();
+      StringW text = e->getTextContent();
       text.simplify();
 
       // TODO: Not optimal, just initial support for text rendering.

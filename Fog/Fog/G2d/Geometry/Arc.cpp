@@ -10,7 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Init_p.h>
-#include <Fog/Core/Global/Internals_p.h>
+#include <Fog/Core/Global/Private.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/Arc.h>
@@ -341,7 +341,7 @@ static uint FOG_CDECL ArcT_toCSpline(const NumT_(Arc)* self,
   pts[12].set( rxOne  , z      );
 
 _Skip:
-  if (lastSegment < NumT(MATH_HALF_PI - Math2dConst<NumT>::getMathEpsilon()))
+  if (lastSegment < NumT(MATH_HALF_PI - MathConstant<NumT>::getEpsilon()))
   {
     NumT t = lastSegment / NumT(MATH_HALF_PI);
     NumI_(CBezier)::leftAt(&pts[numSegments - 4], &pts[numSegments - 4], t);

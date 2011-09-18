@@ -9,11 +9,12 @@
 #endif // FOG_PRECOMP
 
 // [Guard]
-#include <Fog/Core/Config/Config.h>
+#include <Fog/Core/C++/Base.h>
+
 #if defined(FOG_OS_WINDOWS)
 
 // [Dependencies]
-#include <Fog/Core/Memory/Alloc.h>
+#include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/WinImage_p.h>
 #include <Fog/G2d/Render/RenderApi_p.h>
@@ -25,7 +26,7 @@ namespace Fog {
 // [Fog::WinDibImageData]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 struct BitfieldsBitmapHeader
 {
   BITMAPINFOHEADER bmi;
@@ -33,9 +34,9 @@ struct BitfieldsBitmapHeader
   DWORD gMask;
   DWORD bMask;
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
-WinDibImageData::WinDibImageData(const SizeI& size, uint32_t format, uint8_t* bits, sysint_t stride, HBITMAP hBitmap)
+WinDibImageData::WinDibImageData(const SizeI& size, uint32_t format, uint8_t* bits, ssize_t stride, HBITMAP hBitmap)
 {
   this->type = IMAGE_BUFFER_WIN_DIB;
   this->flags = NO_FLAGS;
@@ -61,7 +62,7 @@ ImageData* WinDibImageData::clone() const
   err_t err = _createDibImage(size, format, &newd);
   if (FOG_IS_ERROR(err)) return NULL;
 
-  RenderVBlitRectFn blit = _g2d_render.getCopyRectFn(format);
+  RenderVBlitRectFunc blit = _g2d_render.getCopyRectFunc(format);
   blit(newd->first, newd->stride,
        this->first, this->stride,
        newd->size.w, newd->size.h, NULL);
@@ -87,7 +88,7 @@ void WinDibImageData::paletteModified(const Range& range)
 
 HDC WinDibImageData::getDC()
 {
-  FOG_ASSERT(refCount.get() == 1);
+  FOG_ASSERT(reference.get() == 1);
 
   HDC hDC;
   HGDIOBJ hOldObj;
@@ -113,7 +114,7 @@ failed:
 
 void WinDibImageData::releaseDC(HDC hDC)
 {
-  FOG_ASSERT(refCount.get() == 1);
+  FOG_ASSERT(reference.get() == 1);
 
   if (hDC == NULL) return;
   DeleteDC(hDC);
@@ -122,7 +123,7 @@ void WinDibImageData::releaseDC(HDC hDC)
   locked--;
 }
 
-err_t WinDibImageData::_createDibSection(const SizeI& size, uint32_t format, HBITMAP* dst, uint8_t** bits, sysint_t* stride)
+err_t WinDibImageData::_createDibSection(const SizeI& size, uint32_t format, HBITMAP* dst, uint8_t** bits, ssize_t* stride)
 {
   err_t err = ERR_OK;
   HBITMAP hBitmap = NULL;
@@ -195,12 +196,12 @@ err_t WinDibImageData::_createDibSection(const SizeI& size, uint32_t format, HBI
 err_t WinDibImageData::_createDibImage(const SizeI& size, uint32_t format, ImageData** dst)
 {
   uint8_t* bits;
-  sysint_t stride;
+  ssize_t stride;
   HBITMAP hBitmap;
   WinDibImageData* d;
 
   FOG_RETURN_ON_ERROR(_createDibSection(size, format, &hBitmap, &bits, &stride));
-  d = reinterpret_cast<WinDibImageData*>(Memory::alloc(sizeof(WinDibImageData)));
+  d = reinterpret_cast<WinDibImageData*>(MemMgr::alloc(sizeof(WinDibImageData)));
 
   if (d == NULL)
   {

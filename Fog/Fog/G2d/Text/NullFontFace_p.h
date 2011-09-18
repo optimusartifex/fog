@@ -33,10 +33,10 @@ struct FOG_NO_EXPORT NullFontFace : public FontFace
   // [Interface]
   // --------------------------------------------------------------------------
 
-  virtual err_t getTextOutline(PathF& dst, const FontData* d, const PointF& pt, const Utf16& str);
-  virtual err_t getTextOutline(PathD& dst, const FontData* d, const PointD& pt, const Utf16& str);
+  virtual err_t getTextOutline(PathF& dst, const FontData* d, const PointF& pt, const StubW& str);
+  virtual err_t getTextOutline(PathD& dst, const FontData* d, const PointD& pt, const StubW& str);
 
-  virtual err_t getTextExtents(TextExtents& extents, const FontData* d, const Utf16& str);
+  virtual err_t getTextExtents(TextExtents& extents, const FontData* d, const StubW& str);
 
   virtual FontKerningTableF* getKerningTable(const FontData* d);
 

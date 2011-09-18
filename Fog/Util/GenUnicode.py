@@ -683,6 +683,13 @@ class CharProperty(object):
     else:
       return 0
 
+  @property
+  def isSpace(self):
+    return self.category == CHAR_CATEGORY.get("Zs") or \
+           self.category == CHAR_CATEGORY.get("Zl") or \
+           self.category == CHAR_CATEGORY.get("Zp") or \
+           (self.codePoint >= 9 and self.codePoint <= 13)
+
 # -----------------------------------------------------------------------------
 # [UCD-BlockProperty]
 # -----------------------------------------------------------------------------
@@ -1137,6 +1144,7 @@ def Check():
   maxSimpleCaseFolding = 0
   maxSpecialCaseFolding = 0
   maxFullCaseFolding = 0
+  maxSpace = 0
 
   for i in xrange(NUM_CODE_POINTS):
     c = CharList[i]
@@ -1161,6 +1169,10 @@ def Check():
       for d in c.fullCaseFolding:
         if maxFullCaseFolding < d:
           maxFullCaseFolding = d
+
+    if c.isSpace:
+      if maxSpace < i:
+        maxSpace = i
 
     # Check whether the uppercase, lowercase, titlecase and mirror mapping 
     # doesn't exceed our limit (in this case Fog-API must be changed).
@@ -1208,6 +1220,22 @@ def Check():
   log("   MAX SIMPLE-CASE-FOLDING : " + str(maxSimpleCaseFolding))
   log("   MAX SPECIAL-CASE-FOLDING: " + str(maxSpecialCaseFolding))
   log("   MAX FULL-CASE-FOLDING   : " + str(maxFullCaseFolding))
+  log("   MAX SPACE               : " + str(maxSpace))
+
+def PrintTitleCase():
+  log("-- Printing all titlecases characters")
+
+  chars = {}
+
+  for i in xrange(NUM_CODE_POINTS):
+    c = CharList[i]
+
+    if c.category == CHAR_CATEGORY.get("Lt"):
+      chars[c.codePoint] = True
+
+  for c in chars:
+    c = CharList[c]
+    log("   TC=" + ucd(c.codePoint) + " LC=" + ucd(c.lowercase) + " UC=" + ucd(c.uppercase))
 
 # -----------------------------------------------------------------------------
 # [UCD-Generate]
@@ -1515,13 +1543,8 @@ def GenerateTable():
     s += CHAR_MAPPING.fog(c.mapping) + ", "                 # MappingType.
     s += str(mappingConstant) + ", "                        # MappingData.
 
-    isSpace = c.category == CHAR_CATEGORY.get("Zs") or \
-              c.category == CHAR_CATEGORY.get("Zl") or \
-              c.category == CHAR_CATEGORY.get("Zp") or \
-              (i >= 9 and i <= 13)
-
     s += CHAR_CATEGORY.fog(c.category) + ", "               # Category.
-    s += str(int(isSpace)) + ", "                           # Space.
+    s += str(int(c.isSpace)) + ", "                         # Space.
     s += CHAR_DECOMPOSITION.fog(c.decompositionType) + ", " # DecompositionType.
     s += str(decompositionDataIndex)                        # DecompositionIndex.
     s += ")"
@@ -1851,7 +1874,7 @@ def Write():
     "CHAR_DECOMPOSITION_DATA": "".join(Code.DecompositionData)
   })
   
-  WriteDataToFile("Fog/Core/Global/Constants.h", {
+  WriteDataToFile("Fog/Core/Global/EnumCore.h", {
     "TEXT_SCRIPT_ENUM"   : "".join(Code.TextScriptEnum)
   })
 
@@ -1883,6 +1906,7 @@ def main():
   ReadBlocks()
 
   Check()
+  PrintTitleCase()
 
   GenerateSpecial()
   GenerateClasses()

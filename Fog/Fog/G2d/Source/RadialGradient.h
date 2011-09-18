@@ -162,18 +162,13 @@ FOG_INLINE err_t RadialGradientD::setGradient(const RadialGradientD& other) { re
 // [Fog::RadialGradientT<>]
 // ============================================================================
 
-FOG_CLASS_PRECISION_F_D(RadialGradient)
+_FOG_NUM_T(RadialGradient)
+_FOG_NUM_F(RadialGradient)
+_FOG_NUM_D(RadialGradient)
 
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::RadialGradientF, Fog::TYPEINFO_MOVABLE)
-_FOG_TYPEINFO_DECLARE(Fog::RadialGradientD, Fog::TYPEINFO_MOVABLE)
 
 // [Guard]
 #endif // _FOG_G2D_SOURCE_RADIALGRADIENT_H

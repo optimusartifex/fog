@@ -1,17 +1,18 @@
-// [Fog-Gui Library - Public API]
+// [Fog-Gui]
 //
 // [License]
 // MIT, See COPYING file in package
 
 // [Dependencies]
+#include <Fog/Core/Kernel/Application.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/System/Application.h>
-#include <Fog/Core/Tools/Byte.h>
+#include <Fog/Core/Tools/Char.h>
+#include <Fog/Core/Tools/String.h>
+#include <Fog/Core/Tools/StringTmp_p.h>
 #include <Fog/Core/Tools/TextCodec.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageConverter.h>
 #include <Fog/Gui/Engine/X11GuiEngine.h>
-#include <Fog/Gui/Global/Constants.h>
 #include <Fog/Gui/Widget/Widget.h>
 
 // [Shared memory and IPC]
@@ -313,7 +314,7 @@ static void X11GuiEngine_sendClientMessage(X11GuiEngine* engine, XWindow win, lo
 
 void X11GuiEngine::registerGuiEngine()
 {
-  String uiX11(Ascii8("Gui.X11"));
+  StringW uiX11(Ascii8("UI.X11"));
   Application::registerGuiEngineType<X11GuiEngine>(uiX11);
 }
 
@@ -326,8 +327,8 @@ X11GuiEngine::X11GuiEngine()
   err_t err;
 
   // Clear all members
-  Memory::zero(&_atoms, sizeof(_atoms));
-  Memory::zero(&_xKeymap, sizeof(_xKeymap));
+  MemOps::zero(&_atoms, sizeof(_atoms));
+  MemOps::zero(&_xKeymap, sizeof(_xKeymap));
 
   _display = NULL;
   _fd = -1;
@@ -369,7 +370,7 @@ X11GuiEngine::X11GuiEngine()
   if ((_display = pXOpenDisplay("")) == NULL)
   {
     Debug::dbgFunc("Fog::X11GuiEngine", "X11GuiEngine", "Can't open display.");
-    err = ERR_GUI_CANT_OPEN_DISPLAY;
+    err = ERR_UI_CANT_OPEN_DISPLAY;
     return;
   }
 
@@ -390,7 +391,7 @@ X11GuiEngine::X11GuiEngine()
   if (pipe(_wakeUpPipe) < 0)
   {
     Debug::dbgFormat("Fog::X11GuiEngine::X11GuiEngine() - Can't create wakeup pipe (errno=%d).", errno);
-    err = ERR_GUI_CANT_CREATE_PIPE;
+    err = ERR_UI_CANT_CREATE_PIPE;
     goto fail;
   }
 
@@ -406,7 +407,7 @@ X11GuiEngine::X11GuiEngine()
   if (_displayInfo.depth <= 8 && !createColormap())
   {
     Debug::dbgFormat("Fog::X11GuiEngine::X11GuiEngine() - Can't create colormap.");
-    err = ERR_GUI_CANT_CREATE_COLORMAP;
+    err = ERR_UI_CANT_CREATE_COLORMAP;
     goto fail;
   }
 
@@ -429,7 +430,7 @@ X11GuiEngine::X11GuiEngine()
 
   // Finally add the event loop type into application. Event loop will be
   // instantiated by application after GuiEngine was properly constructed.
-  Application::registerEventLoopType<X11GuiEventLoop>(Ascii8("Gui.X11"));
+  Application::registerEventLoopType<X11GuiEventLoop>(StringW::fromAscii8("UI.X11"));
 
   _initialized = true;
   return;
@@ -441,7 +442,7 @@ fail:
 X11GuiEngine::~X11GuiEngine()
 {
   // We don't want that event loop is available after X11GuiEngine was destroyed.
-  Application::unregisterEventLoop(Fog::Ascii8("Gui.X11"));
+  Application::unregisterEventLoop(StringW::fromAscii8("UI.X11"));
 
   // Close display and free X resources.
   if (_display)
@@ -496,7 +497,7 @@ void X11GuiEngine::doBlitWindow(GuiWindow* window, const BoxI* rects, size_t cou
 void X11GuiEngine::initKeyboard()
 {
   // Initialize key translation tables.
-  Memory::zero(&_xKeymap, sizeof(_xKeymap));
+  MemOps::zero(&_xKeymap, sizeof(_xKeymap));
 
   // 0xFE
   _xKeymap.odd[32] = KEY_TAB; // TAB
@@ -650,7 +651,7 @@ uint32_t X11GuiEngine::translateXSym(KeySym xsym) const
     case 0x0A: // Publishing
     case 0x0C: // Hebrew
     case 0x0D: // Thai
-      key = Byte::toLower((uint8_t)(xsym & 0xFF));
+      key = CharA::toLower((uint8_t)(xsym & 0xFF));
       break;
     case 0xFE:
       key = _xKeymap.odd[xsym & 0xFF];
@@ -876,39 +877,39 @@ void X11GuiEngine::destroyGuiWindow(GuiWindow* native)
 err_t X11GuiEngine::loadLibraries()
 {
   // Load X11.
-  if (_xlib.open(Ascii8("X11")) != ERR_OK)
-    return ERR_GUI_LIBX11_NOT_LOADED;
+  if (_xlib.openLibrary(StringW::fromAscii8("X11")) != ERR_OK)
+    return ERR_UI_LIBX11_NOT_LOADED;
 
   if (_xlib.getSymbols(xlibFunctions,
     X11_xlibFunctionNames, FOG_ARRAY_SIZE(X11_xlibFunctionNames),
     NUM_XLIB_FUNCTIONS,
     (char**)NULL) != NUM_XLIB_FUNCTIONS)
   {
-    return ERR_GUI_LIBX11_NOT_LOADED;
+    return ERR_UI_LIBX11_NOT_LOADED;
   }
 
   // Load Xext.
-  if (_xext.open(Ascii8("Xext")) != ERR_OK)
-    return ERR_GUI_LIBEXT_NOT_LOADED;
+  if (_xext.openLibrary(StringW::fromAscii8("Xext")) != ERR_OK)
+    return ERR_UI_LIBEXT_NOT_LOADED;
 
   if (_xext.getSymbols(xextFunctions,
     X11_xextFunctionNames, FOG_ARRAY_SIZE(X11_xextFunctionNames),
     NUM_XEXT_FUNCTIONS,
     (char**)NULL) != NUM_XEXT_FUNCTIONS)
   {
-    return ERR_GUI_LIBEXT_NOT_LOADED;
+    return ERR_UI_LIBEXT_NOT_LOADED;
   }
 
   // Load Xrender.
-  if (_xrender.open(Ascii8("Xrender")) != ERR_OK)
-    return ERR_GUI_LIBXRENDER_NOT_LOADED;
+  if (_xrender.openLibrary(StringW::fromAscii8("Xrender")) != ERR_OK)
+    return ERR_UI_LIBXRENDER_NOT_LOADED;
 
   if (_xrender.getSymbols(xrenderFunctions,
     X11_xrenderFunctionNames, FOG_ARRAY_SIZE(X11_xrenderFunctionNames),
     NUM_XRENDER_FUNCTIONS,
     (char**)NULL) != NUM_XRENDER_FUNCTIONS)
   {
-    return ERR_GUI_LIBXRENDER_NOT_LOADED;
+    return ERR_UI_LIBXRENDER_NOT_LOADED;
   }
 
   return ERR_OK;
@@ -1231,23 +1232,23 @@ err_t X11GuiWindow::takeFocus()
   return ERR_OK;
 }
 
-err_t X11GuiWindow::setTitle(const String& title)
+err_t X11GuiWindow::setTitle(const StringW& title)
 {
-  if (!_handle) return ERR_RT_INVALID_HANDLE;
+  if (!_handle)
+    return ERR_RT_INVALID_HANDLE;
 
-  err_t err = ERR_OK;
-
+  X11GuiEngine* engine = GUI_ENGINE();
   XTextProperty windowProperty;
 
 #if FOG_SIZEOF_WCHAR_T == 2
   const wchar_t *titleWChar = reinterpret_cast<const wchar_t *>(title.getData());
 #else
-  TemporaryByteArray<TEMPORARY_LENGTH> titleW;
-  if ((err = TextCodec::utf32().appendFromUnicode(titleW, title))) return err;
-  const wchar_t *titleWChar = reinterpret_cast<const wchar_t *>(titleW.nullTerminated());
+  StringTmpA<TEMPORARY_LENGTH> titleWArray;
+
+  FOG_RETURN_ON_ERROR(TextCodec::utf32().encode(titleWArray, title));
+  const wchar_t *titleWChar = reinterpret_cast<const wchar_t *>(titleWArray.getData());
 #endif
 
-  X11GuiEngine* engine = GUI_ENGINE();
   int result = engine->pXwcTextListToTextProperty(engine->getDisplay(),
     (wchar_t **)&titleWChar, 1, XTextStyle, &windowProperty);
 
@@ -1258,18 +1259,18 @@ err_t X11GuiWindow::setTitle(const String& title)
     engine->pXSync(engine->getDisplay(), False);
 
     _title = title;
+    return ERR_OK;
   }
   else
   {
-    err = ERR_GUI_INTERNAL_ERROR;
+    return ERR_UI_INTERNAL_ERROR;
   }
-
-  return err;
 }
 
-err_t X11GuiWindow::getTitle(String& title)
+err_t X11GuiWindow::getTitle(StringW& title)
 {
-  if (!_handle) return ERR_RT_INVALID_HANDLE;
+  if (!_handle)
+    return ERR_RT_INVALID_HANDLE;
 
   title = _title;
   return ERR_OK;
@@ -1277,24 +1278,27 @@ err_t X11GuiWindow::getTitle(String& title)
 
 err_t X11GuiWindow::setIcon(const Image& icon)
 {
-  if (!_handle) return ERR_RT_INVALID_HANDLE;
+  if (!_handle)
+    return ERR_RT_INVALID_HANDLE;
 
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t X11GuiWindow::getIcon(Image& icon)
 {
-  if (!_handle) return ERR_RT_INVALID_HANDLE;
+  if (!_handle)
+    return ERR_RT_INVALID_HANDLE;
 
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 err_t X11GuiWindow::setSizeGranularity(const PointI& pt)
 {
-  if (!_handle) return ERR_RT_INVALID_HANDLE;
+  if (!_handle)
+    return ERR_RT_INVALID_HANDLE;
 
   XSizeHints hints;
-  Memory::zero(&hints, sizeof(XSizeHints));
+  MemOps::zero(&hints, sizeof(XSizeHints));
 
   // TODO:
   // hints.flags = PBaseSize;
@@ -1315,7 +1319,8 @@ err_t X11GuiWindow::setSizeGranularity(const PointI& pt)
 
 err_t X11GuiWindow::getSizeGranularity(PointI& pt)
 {
-  if (!_handle) return ERR_RT_INVALID_HANDLE;
+  if (!_handle)
+    return ERR_RT_INVALID_HANDLE;
 
   pt = _sizeGranularity;
   return ERR_OK;
@@ -1323,7 +1328,8 @@ err_t X11GuiWindow::getSizeGranularity(PointI& pt)
 
 err_t X11GuiWindow::worldToClient(PointI* coords)
 {
-  if (!_handle) return ERR_RT_INVALID_HANDLE;
+  if (!_handle)
+    return ERR_RT_INVALID_HANDLE;
 
   XWindow childRet;
   X11GuiEngine* engine = GUI_ENGINE();
@@ -1333,7 +1339,7 @@ err_t X11GuiWindow::worldToClient(PointI* coords)
     &coords->x, &coords->y,
     &childRet);
 
-  return (ok) ? (err_t)ERR_OK : (err_t)ERR_GUI_CANT_TRANSLETE_COORDINATES;
+  return (ok) ? (err_t)ERR_OK : (err_t)ERR_UI_CANT_TRANSLATE_COORDINATES;
 }
 
 err_t X11GuiWindow::clientToWorld(PointI* coords)
@@ -1348,7 +1354,7 @@ err_t X11GuiWindow::clientToWorld(PointI* coords)
     &coords->x, &coords->y,
     &childRet);
 
-  return (ok) ? (err_t)ERR_OK : (err_t)ERR_GUI_CANT_TRANSLETE_COORDINATES;
+  return (ok) ? (err_t)ERR_OK : (err_t)ERR_UI_CANT_TRANSLATE_COORDINATES;
 }
 
 void X11GuiWindow::setOwner(GuiWindow* w)
@@ -1448,7 +1454,7 @@ void X11GuiWindow::onX11Event(XEvent* xe)
 
     case XKeyPress:
     {
-      TemporaryString<8> unicode;
+      StringTmpW<8> unicode;
 
       KeySym xsym = 0;
       uint32_t key;
@@ -1479,21 +1485,21 @@ void X11GuiWindow::onX11Event(XEvent* xe)
             unicode.setWChar(buf, len);
             break;
           default:
-            goto __keyPressNoXIC;
+            goto _XKeyPressNoXIC;
         }
       }
       else
       {
-__keyPressNoXIC:
+_XKeyPressNoXIC:
         // XIC not supported...?
         char buf[15*6 + 1];
         int len = engine->pXLookupString(&xe->xkey, buf, FOG_ARRAY_SIZE(buf) - 1, &xsym, 0);
-        TextCodec::local8().toUnicode(unicode, buf, len);
+        TextCodec::local8().decode(unicode, StubA(buf, len));
       }
 
       key = engine->translateXSym(xsym);
       onKeyPress(key, engine->keyToModifier(key), xe->xkey.keycode,
-        Char(unicode.getLength() == 1 ? unicode.getAt(0).ch() : 0));
+        CharW(unicode.getLength() == 1 ? unicode.getAt(0).getValue() : (uint16_t)0));
       break;
     }
 
@@ -1502,7 +1508,7 @@ __keyPressNoXIC:
       KeySym xsym = engine->pXKeycodeToKeysym(engine->getDisplay(), xe->xkey.keycode, 0);
       uint32_t key = engine->translateXSym(xsym);
 
-      onKeyRelease(key, engine->keyToModifier(key), xe->xkey.keycode, Char(0));
+      onKeyRelease(key, engine->keyToModifier(key), xe->xkey.keycode, CharW(0));
       break;
     }
 
@@ -1629,17 +1635,18 @@ __keyPressNoXIC:
   }
 }
 
-// tell window manager that we want's to move our window to our position
-// (it will be not discarded if we will specify PPosition)
+// Tell the active window manager that we want to move our window to a specific 
+// position (or the window manager will discard it and use own calculation).
 void X11GuiWindow::setMoveableHints()
 {
   XSizeHints hints;
-  Memory::zero(&hints, sizeof(XSizeHints));
+  MemOps::zero(&hints, sizeof(XSizeHints));
   hints.flags = PPosition;
 
   X11GuiEngine* engine = GUI_ENGINE();
   engine->pXSetNormalHints(engine->getDisplay(), (XID)getHandle(), &hints);
 }
+
 // ============================================================================
 // [Fog::X11GuiBackBuffer]
 // ============================================================================
@@ -1647,7 +1654,7 @@ void X11GuiWindow::setMoveableHints()
 X11GuiBackBuffer::X11GuiBackBuffer()
 {
   _pixmap = 0;
-  Memory::zero(&_shmi, sizeof(_shmi));
+  MemOps::zero(&_shmi, sizeof(_shmi));
   _ximage = NULL;
 }
 
@@ -1662,8 +1669,8 @@ bool X11GuiBackBuffer::resize(int width, int height, bool cache)
 
   int targetWidth = width;
   int targetHeight = height;
-  sysint_t targetSize;
-  sysint_t targetStride;
+  ssize_t targetSize;
+  ssize_t targetStride;
 
   bool destroyImage = false;
   bool createImage = false;
@@ -1713,13 +1720,13 @@ bool X11GuiBackBuffer::resize(int width, int height, bool cache)
 
         engine->pXFreePixmap(engine->getDisplay(), _pixmap);
 
-        if (_secondaryPixels) Memory::free(_secondaryPixels);
+        if (_secondaryPixels) MemMgr::free(_secondaryPixels);
         break;
 
       case TYPE_X11_XIMAGE:
       case TYPE_X11_XIMAGE_WITH_PIXMAP:
         // We want to free image data ourselves
-        Memory::free(_primaryPixels);
+        MemMgr::free(_primaryPixels);
         _ximage->data = NULL;
 
         engine->pXDestroyImage(_ximage);
@@ -1729,7 +1736,7 @@ bool X11GuiBackBuffer::resize(int width, int height, bool cache)
           engine->pXFreePixmap(engine->getDisplay(), _pixmap);
         }
 #endif
-        if (_secondaryPixels) Memory::free(_secondaryPixels);
+        if (_secondaryPixels) MemMgr::free(_secondaryPixels);
         break;
     }
   }
@@ -1785,7 +1792,7 @@ bool X11GuiBackBuffer::resize(int width, int height, bool cache)
     {
 __tryImage:
       // try to alloc image data
-      _primaryPixels = (uint8_t*)Memory::alloc(targetSize);
+      _primaryPixels = (uint8_t*)MemMgr::alloc(targetSize);
       if (!_primaryPixels)
       {
         Debug::dbgFunc("Fog::X11GuiBackBuffer", "resize", "Memory allocation error %s", strerror(errno));
@@ -1804,7 +1811,7 @@ __tryImage:
       if (!_ximage)
       {
         Debug::dbgFunc("Fog::X11GuiBackBuffer", "resize", "XCreateImage() failed");
-        Memory::free(_primaryPixels);
+        MemMgr::free(_primaryPixels);
         goto fail;
       }
 #if defined(FOG_X11BACKBUFFER_FORCE_PIXMAP)
@@ -1836,12 +1843,12 @@ __tryImage:
       // Now image is created and we must check if we have correct
       // depth and pixel format, if not, we must create secondary
       // buffer that will be used for conversion
-      sysint_t secondaryStride = (sysint_t)targetWidth * 4;
+      ssize_t secondaryStride = (ssize_t)targetWidth * 4;
 
       if (targetStride != secondaryStride)
       {
         // Alloc extra buffer.
-        _secondaryPixels = (uint8_t*)Memory::alloc(secondaryStride * targetHeight);
+        _secondaryPixels = (uint8_t*)MemMgr::alloc(secondaryStride * targetHeight);
         _secondaryStride = secondaryStride;
 
         if (!_secondaryPixels)
@@ -1969,11 +1976,11 @@ void X11GuiBackBuffer::updateRects(const BoxI* rects, size_t count)
     uint8_t* dstBase = _primaryPixels;
     uint8_t* srcBase = _secondaryPixels;
 
-    sysint_t dstStride = _primaryStride;
-    sysint_t srcStride = _secondaryStride;
+    ssize_t dstStride = _primaryStride;
+    ssize_t srcStride = _secondaryStride;
 
-    sysint_t dstBPP = _convertDepth >> 3;
-    sysint_t srcBPP = 4;
+    ssize_t dstBPP = _convertDepth >> 3;
+    ssize_t srcBPP = 4;
 
     int bufw = getSize().getWidth();
     int bufh = getSize().getHeight();
@@ -2095,7 +2102,7 @@ void X11GuiBackBuffer::blitRects(XID target, const BoxI* rects, size_t count)
 // [Fog::X11GuiEventLoop]
 // ============================================================================
 
-X11GuiEventLoop::X11GuiEventLoop() : EventLoop(Ascii8("Gui.X11"))
+X11GuiEventLoop::X11GuiEventLoop() : EventLoop(StringW::fromAscii8("UI.X11"))
 {
   _wakeUpSent.init(0);
 }
@@ -2204,7 +2211,7 @@ void X11GuiEventLoop::_waitForWork()
     {
       // Go to sleep. X11 will wake us to process X events and we also set
       // interval to wake up to run planned tasks (usually Timers).
-      int64_t udelay = delay.inMicroseconds();
+      int64_t udelay = delay.getMicroseconds();
       tval.tv_sec = (int)(udelay / 1000000);
       tval.tv_usec = (int)(udelay % 1000000);
       if (tval.tv_usec <= 100) tval.tv_usec = 100;

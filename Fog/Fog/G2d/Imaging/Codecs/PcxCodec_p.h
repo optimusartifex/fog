@@ -26,7 +26,7 @@ namespace Fog {
 // [Fog::PcxHeader]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 
 //! @internal
 struct PcxHeader
@@ -51,7 +51,7 @@ struct PcxHeader
   uint8_t unused[54];
 };
 
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 // ============================================================================
 // [Fog::PcxCodecProvider]
@@ -110,7 +110,7 @@ struct FOG_NO_EXPORT PcxDecoder : public ImageDecoder
   // --------------------------------------------------------------------------
 
   // Clear everything.
-  FOG_INLINE void zeroall() { Memory::zero(&_pcxFileHeader, sizeof(_pcxFileHeader)); }
+  FOG_INLINE void zeroall() { MemOps::zero(&_pcxFileHeader, sizeof(_pcxFileHeader)); }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -150,7 +150,7 @@ struct FOG_NO_EXPORT PcxEncoder : public ImageEncoder
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-_FOG_TYPEINFO_DECLARE(Fog::PcxHeader, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPE_DECLARE(Fog::PcxHeader, Fog::TYPE_CATEGORY_SIMPLE)
 
 // [Guard]
 #endif // _FOG_G2D_IMAGING_CODECS_PCXCODEC_P_H

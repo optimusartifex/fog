@@ -8,7 +8,64 @@
 #define _FOG_CORE_GLOBAL_TYPEINFO_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/Global/Api.h>
+#include <Fog/Core/Global/EnumCore.h>
+#include <Fog/Core/Global/TypeDefs.h>
+
+// ===========================================================================
+// [_Fog_TypeFlags]
+// ===========================================================================
+
+#if defined(FOG_CC_HAVE_PARTIAL_TEMPLATE_SPECIALIZATION)
+template<typename Type>
+struct _Fog_TypeFlags
+{
+  enum
+  {
+    TYPE = Fog::TYPE_CATEGORY_COMPLEX
+  };
+};
+
+template<typename Type>
+struct _Fog_TypeFlags<Type*>
+{
+  enum
+  {
+    TYPE = Fog::TYPE_CATEGORY_SIMPLE |
+           Fog::TYPE_FLAG_POD        |
+           Fog::TYPE_FLAG_POINTER    |
+           Fog::TYPE_FLAG_INTEGER    |
+           Fog::TYPE_FLAG_BIN_EQ
+  };
+};
+#else
+// Hackery.
+//
+// I first saw the following hackery in Qt and Boost. It's very smart method
+// which can be used to get the info whether the type is a pointer when
+// compiling with C++ compiler without partial template specialization.
+template<typename Type> char TypeNoPtiHelper(Type*(*)());
+void* TypeNoPtiHelper(...);
+
+template<typename Type>
+struct _Fog_TypeFlags
+{
+  enum
+  {
+    TYPE = ( sizeof(char) == sizeof(TypeNoPtiHelper((Type(*)())0)) )
+      ? Fog::TYPE_CATEGORY_SIMPLE |
+        Fog::TYPE_FLAG_POD        |
+        Fog::TYPE_FLAG_POINTER    |
+        Fog::TYPE_FLAG_INTEGER    |
+        Fog::TYPE_FLAG_BIN_EQ
+      : Fog::TYPE_CATEGORY_COMPLEX
+  };
+};
+#endif // FOG_CC_HAVE_PARTIAL_TEMPLATE_SPECIALIZATION
+
+// ===========================================================================
+// [Fog::]
+// ===========================================================================
 
 namespace Fog {
 
@@ -16,142 +73,12 @@ namespace Fog {
 //! @{
 
 // ===========================================================================
-// [Fog::TypeInfo<T>
+// [Fog::TypeInfo<>]
 // ===========================================================================
 
-//! @class template<typename T> TypeInfo
-//! @brief Template for partial @c Fog::TypeInfo specialization.
-
-#if defined(FOG_CC_HAVE_PARTIAL_TEMPLATE_SPECIALIZATION)
-
-template<typename T>
+//! @brief Inherited by all types declared using @c _FOG_TYPE_DECLARE().
+template<typename Type>
 struct TypeInfo
-{
-  enum
-  {
-    // ------------------------------------------------------------------------
-    // [Type / Flags]
-    // ------------------------------------------------------------------------
-
-    TYPE         = TYPEINFO_COMPLEX,
-    FLAGS        = 0,
-
-    // ------------------------------------------------------------------------
-    // [Basic]
-    // ------------------------------------------------------------------------
-
-    IS_PRIMITIVE = (TYPE == TYPEINFO_PRIMITIVE),
-    IS_MOVABLE   = (TYPE <= TYPEINFO_MOVABLE),
-    IS_COMPLEX   = (TYPE == TYPEINFO_COMPLEX),
-
-    // ------------------------------------------------------------------------
-    // [Extended]
-    // ------------------------------------------------------------------------
-
-    IS_POINTER   = 0,
-    IS_POD       = 0,
-    IS_FLOAT     = 0,
-    IS_DOUBLE    = 0,
-
-    HAS_COMPARE  = 0,
-    HAS_EQ       = 0
-  };
-
-  typedef bool (*EqFn)(const T* a, const T* b);
-  typedef int (*CompareFn)(const T* a, const T* b);
-};
-
-// TypeInfo pointer specialization. Pointer is always primitive type.
-template<typename T>
-struct TypeInfo<T*>
-{
-  enum
-  {
-    // ------------------------------------------------------------------------
-    // [Type / Flags]
-    // ------------------------------------------------------------------------
-
-    TYPE         = TYPEINFO_PRIMITIVE,
-    FLAGS        = TYPEINFO_IS_POD_TYPE,
-
-    // ------------------------------------------------------------------------
-    // [Basic]
-    // ------------------------------------------------------------------------
-
-    IS_PRIMITIVE = (TYPE == TYPEINFO_PRIMITIVE),
-    IS_MOVABLE   = (TYPE <= TYPEINFO_MOVABLE),
-    IS_COMPLEX   = (TYPE == TYPEINFO_COMPLEX),
-
-    // ------------------------------------------------------------------------
-    // [Extended]
-    // ------------------------------------------------------------------------
-
-    IS_POINTER   = 1,
-    IS_POD       = 1, // Pointer is comparable.
-    IS_FLOAT     = 0,
-    IS_DOUBLE    = 0,
-    HAS_COMPARE  = 0,
-    HAS_EQ       = 0
-  };
-
-  typedef bool (*EqFn)(const T** a, const T** b);
-  typedef int (*CompareFn)(const T** a, const T** b);
-};
-
-#else // No template specialization.
-
-// I first saw the following hackery in Qt / Boost. It's very smart method
-// which can be used to check whether the type is a pointer. To make this
-// working the template TypeInfo_NoPtiHelper<> was created. The trick is
-// to make another specialized variant and to compare the type size of a
-// return value.
-template<typename T>
-char TypeInfo_NoPtiHelper(T*(*)());
-// And specialization.
-void* TypeInfo_NoPtiHelper(...);
-
-template<typename T>
-struct TypeInfo
-{
-  enum
-  {
-    IS_POINTER   = (sizeof(char) == sizeof( TypeInfo_NoPtiHelper((T(*)())0) ) ),
-
-    // ------------------------------------------------------------------------
-    // [Type / Flags]
-    // ------------------------------------------------------------------------
-
-    TYPE         = IS_POINTER ? TYPEINFO_PRIMITIVE : TYPEINFO_COMPLEX,
-    FLAGS        = 0,
-
-    // ------------------------------------------------------------------------
-    // [Basic]
-    // ------------------------------------------------------------------------
-
-    IS_PRIMITIVE = (!IS_POINTER),
-    IS_MOVABLE   = (!IS_POINTER),
-    IS_COMPLEX   = (!IS_POINTER),
-
-    // ------------------------------------------------------------------------
-    // [Extended]
-    // ------------------------------------------------------------------------
-
-    IS_POD       = IS_POINTER,
-    IS_FLOAT     = 0,
-    IS_DOUBLE    = 0,
-    HAS_COMPARE  = 0,
-    HAS_EQ       = 0
-  };
-
-  typedef bool (*EqFn)(const T* a, const T* b);
-  typedef int (*CompareFn)(const T* a, const T* b);
-};
-
-#endif // FOG_CC_HAVE_PARTIAL_TEMPLATE_SPECIALIZATION
-
-//! @brief Inherited by all types declared using @c _FOG_TYPEINFO_DECLARE().
-template<typename T, uint __TypeInfo__>
-struct TypeInfo_Wrapper
 {
   enum
   {
@@ -159,256 +86,425 @@ struct TypeInfo_Wrapper
     // [Type]
     // ------------------------------------------------------------------------
 
-    TYPE         = (__TypeInfo__ & ~TYPEINFO_MASK),
-    FLAGS        = (__TypeInfo__ & TYPEINFO_MASK),
+    TYPE         = _Fog_TypeFlags<Type>::TYPE & TYPE_CATEGORY_MASK,
 
-    IS_PRIMITIVE = (TYPE == TYPEINFO_PRIMITIVE),
-    IS_MOVABLE   = (TYPE <= TYPEINFO_MOVABLE),
-    IS_COMPLEX   = (TYPE == TYPEINFO_COMPLEX),
+    IS_SIMPLE    = (TYPE == TYPE_CATEGORY_SIMPLE),
+    IS_MOVABLE   = (TYPE <= TYPE_CATEGORY_MOVABLE),
+    IS_COMPLEX   = (TYPE >= TYPE_CATEGORY_COMPLEX),
 
     // ------------------------------------------------------------------------
-    // [Extended]
+    // [Flags]
     // ------------------------------------------------------------------------
 
-    IS_POINTER   = 0,
-    IS_POD       = (__TypeInfo__ & TYPEINFO_IS_POD_TYPE   ) != 0,
-    IS_FLOAT     = (__TypeInfo__ & TYPEINFO_IS_FLOAT_TYPE ) != 0,
-    IS_DOUBLE    = (__TypeInfo__ & TYPEINFO_IS_DOUBLE_TYPE) != 0,
-    HAS_COMPARE  = (__TypeInfo__ & TYPEINFO_HAS_COMPARE   ) != 0,
-    HAS_EQ       = (__TypeInfo__ & TYPEINFO_HAS_EQ        ) != 0
+    FLAGS        = _Fog_TypeFlags<Type>::TYPE & TYPE_FLAG_MASK,
+
+    IS_POD       = (FLAGS & TYPE_FLAG_POD     ) != 0,
+    IS_POINTER   = (FLAGS & TYPE_FLAG_POINTER ) != 0,
+    IS_IMPLICIT  = (FLAGS & TYPE_FLAG_IMPLICIT) != 0,
+
+    IS_INTEGER   = (FLAGS & TYPE_FLAG_INTEGER ) != 0,
+    IS_FLOAT     = (FLAGS & TYPE_FLAG_FLOAT   ) != 0,
+    IS_DOUBLE    = (FLAGS & TYPE_FLAG_DOUBLE  ) != 0,
+
+    NO_EQ        = (FLAGS & TYPE_FLAG_NO_EQ   ) != 0,
+    OWN_EQ       = (FLAGS & TYPE_FLAG_OWN_EQ  ) != 0,
+    BIN_EQ       = (FLAGS & TYPE_FLAG_BIN_EQ  ) != 0,
+
+    NO_CMP       = (FLAGS & TYPE_FLAG_NO_CMP  ) != 0,
+    ONW_CMP      = (FLAGS & TYPE_FLAG_OWN_CMP ) != 0,
   };
-
-  typedef bool (*EqFn)(const T* a, const T* b);
-  typedef int (*CompareFn)(const T* a, const T* b);
 };
 
 // ===========================================================================
-// [Fog::TypeCmp<T>]
+// [Fog::TypeFunc<>]
 // ===========================================================================
 
-template<typename T>
-struct TypeCmp
-{
-  static FOG_INLINE int compare(const T* a, const T* b)
-  {
-    // This is default compare method. For POD integral types it's quite
-    // inefficient so there are some overloads.
-    //
-    // Also this implementation needs overloaded operator < and == in classes
-    // that are ready for comparisions. I think that this method is compatible
-    // with STL and other libraries as well.
-    return (*a < *b) ? -1 : ((*a == *b) ? 0 : 1);
-  }
-};
+// HasCompare can be:
+//
+//   - -1 - Comparison is forbidden and there are no methods to use.
+//
+//   -  0 - [Default] Type has no built-in compare method, but when needed the
+//          compiler should generate it based on the '<' and '==' operators.
+//
+//   -  1 - Type has built-int compare method which should be used for
+//          comparison. In this case it's highly probable that type has also
+//          overloaded compare operators, but using native getCompareFunc()
+//          forbids C++ compiler to generate a wrapper for this function.
+//
+//   -  2 - Type is integral, thus optimization to do only one comparison is
+//          used if possible.
+template<typename Type, int HasCompare>
+struct TypeFunc_Cmp {};
 
-// Some overloads to optimize performance.
-#define ___FOG_TYPECMP_DECLAREINT(TYPE) \
-template<> \
-struct TypeCmp<TYPE> \
-{ \
-  static FOG_INLINE int compare(const TYPE* a, const TYPE* b) { return *a - *b; } \
-};
-
-___FOG_TYPECMP_DECLAREINT(int8_t)
-___FOG_TYPECMP_DECLAREINT(int16_t)
-___FOG_TYPECMP_DECLAREINT(int32_t)
-
-#undef ___FOG_TYPECMP_DECLAREINT
-
-//! @brief Inherited by all types declared using @c _FOG_TYPECMP_DECLARE().
-template<typename T>
-struct TypeCmp_Wrapper : public T {};
-
-// ===========================================================================
-// [_FOG_TYPEINFO_DECLARE()]
-// ===========================================================================
-
-/*
 template<typename Type>
-struct TypeToType { typedef Type Self; };
+struct TypeFunc_Cmp<Type, 0>
+{
+  //! @brief Compare function wrapper.
+  //!
+  //! The default compare method which should be compatible to any code which
+  //! overloads the compare operator < and equality operator ==. Because this
+  //! leads into two comparisons for any type, including POD type, there are
+  //! some overloads which should perform better than this generic function.
+  //!
+  //! See _FOG_TYPE_COMPARE_INT() macro how POD types are handled, see
+  //! also TYPE_FLAG_CMP_API flag which can be used together which
+  //! FOG_TYPE_DECLARE to inform compiler that the specified type contains
+  //! compare() and getCompareFunc() methods.
+  static FOG_INLINE int FOG_CDECL compare(const Type* a, const Type* b)
+  {
+    if (*a < *b)
+      return -1;
+    else if (*a == *b)
+      return 0;
+    else
+      return 1;
+  }
 
-template<typename Base, typename A1>
-struct TypeToType1 { typedef Base< TypeToType<A1>::Self > Self; };
-*/
+  //! @brief Get compare function.
+  static FOG_INLINE CompareFunc getCompareFunc() { return (CompareFunc)compare; }
+};
 
-//! @brief Use this macro to declare @c Fog::TypeInfo.
-//!
-//! @c Fog::TypeInfo is template to resolve type at compile time. It's
-//! used in template specializations
-#define _FOG_TYPEINFO_DECLARE(_Symbol_, _TypeInfo_) \
-namespace Fog { \
-template <> \
-struct TypeInfo < ::_Symbol_ > : public TypeInfo_Wrapper< ::_Symbol_, _TypeInfo_ > {}; \
-}
+template<typename Type>
+struct TypeFunc_Cmp<Type, 1>
+{
+  //! @brief Compare function wrapper.
+  static FOG_INLINE int FOG_CDECL compare(const Type* a, const Type* b) { return Type::compare(a, b); }
 
-#define _FOG_TYPEINFO_DECLARE_T1(_Symbol_, T1, A1, _TypeInfo_) \
-namespace Fog { \
-template <T1 A1> \
-struct TypeInfo < ::_Symbol_<A1> > : public TypeInfo_Wrapper< ::_Symbol_<A1>, _TypeInfo_ > {}; \
-}
+  //! @brief Get compare function.
+  static FOG_INLINE CompareFunc getCompareFunc() { return (CompareFunc)Type::getCompareFunc(); }
+};
 
-#define _FOG_TYPEINFO_DECLARE_T2(_Symbol_, T1, A1, T2, A2, _TypeInfo_) \
-namespace Fog { \
-template <T1 A1, T2 A2> \
-struct TypeInfo < ::_Symbol_<A1, A2> > : public TypeInfo_Wrapper< ::_Symbol_<A1, A2>, _TypeInfo_ > {}; \
-}
+template<typename Type>
+struct TypeFunc_Cmp<Type, 2>
+{
+  //! @brief Compare function wrapper.
+  static FOG_INLINE int FOG_CDECL compare(const Type* a, const Type* b)
+  {
+    if (sizeof(Type) < sizeof(int))
+    {
+      return (int)*a - (int)*b;
+    }
+    else
+    {
+      if (*a < *b)
+        return -1;
+      else if (*a == *b)
+        return 0;
+      else
+        return 1;
+    }
+  }
 
-#define _FOG_TYPEINFO_DECLARE_T3(_Symbol_, T1, A1, T2, A2, T3, A3, _TypeInfo_) \
-namespace Fog { \
-template <T1 A1, T2 A2, T3 A3> \
-struct TypeInfo < ::_Symbol_<A1, A2, A3> > : public TypeInfo_Wrapper< ::_Symbol_<A1, A2, A3>, _TypeInfo_ > {}; \
-}
+  //! @brief Get compare function.
+  static FOG_INLINE CompareFunc getCompareFunc() { return (CompareFunc)compare; }
+};
 
-#define _FOG_TYPEINFO_DECLARE_T4(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4, _TypeInfo_) \
-namespace Fog { \
-template <T1 A1, T2 A2, T3 A3, T4 A4> \
-struct TypeInfo < ::_Symbol_<A1, A2, A3, A4> > : public TypeInfo_Wrapper< ::_Symbol_<A1, A2, A3, A4>, _TypeInfo_ > {}; \
-}
+template<typename Type, int HasEq>
+struct TypeFunc_Eq {};
 
-#define _FOG_TYPEINFO_DECLARE_T5(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, _TypeInfo_) \
-namespace Fog { \
-template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5> \
-struct TypeInfo < ::_Symbol_<A1, A2, A3, A4, A5> > : public TypeInfo_Wrapper< ::_Symbol_<A1, A2, A3, A4, A5>, _TypeInfo_ > {}; \
-}
+template<typename Type>
+struct TypeFunc_Eq<Type, 0>
+{
+  // @brief Equality function wrapper.
+  static FOG_INLINE int FOG_CDECL eq(const Type* a, const Type* b) { return *a == *b; }
 
-#define _FOG_TYPEINFO_DECLARE_T6(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, _TypeInfo_) \
-namespace Fog { \
-template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5, T6 A6> \
-struct TypeInfo < ::_Symbol_<A1, A2, A3, A4, A5, A6> > : public TypeInfo_Wrapper< ::_Symbol_<A1, A2, A3, A4, A5, A6>, _TypeInfo_ > {}; \
-}
+  //! @brief Get equality function
+  static FOG_INLINE EqFunc getEqFunc() { return (EqFunc)eq; }
+};
 
-#define _FOG_TYPEINFO_DECLARE_T7(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7, _TypeInfo_) \
-namespace Fog { \
-template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5, T6 A6, T7 A7> \
-struct TypeInfo < ::_Symbol_<A1, A2, A3, A4, A5, A6, A7> > : public TypeInfo_Wrapper< ::_Symbol_<A1, A2, A3, A4, A5, A6, A7>, _TypeInfo_ > {}; \
-}
+template<typename Type>
+struct TypeFunc_Eq<Type, 1>
+{
+  // @brief Equality function wrapper.
+  static FOG_INLINE int FOG_CDECL eq(const Type* a, const Type* b) { return Type::eq(a, b); }
 
-#define _FOG_TYPEINFO_DECLARE_T8(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7, T8, A8, _TypeInfo_) \
-namespace Fog { \
-template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5, T6 A6, T7 A7, T8 A8> \
-struct TypeInfo < ::_Symbol_<A1, A2, A3, A4, A5, A6, A7, A8> > : public TypeInfo_Wrapper< ::_Symbol_<A1, A2, A3, A4, A5, A6, A7, A8>, _TypeInfo_ > {}; \
-}
+  //! @brief Get equality function
+  static FOG_INLINE EqFunc getEqFunc() { return (EqFunc)Type::getEqFunc(); }
+};
 
-#define _FOG_TYPEINFO_DECLARE_T9(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7, T8, A8, T9, A9, _TypeInfo_) \
-namespace Fog { \
-template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5, T6 A6, T7 A7, T8 A8, T9 A9> \
-struct TypeInfo < ::_Symbol_<A1, A2, A3, A4, A5, A6, A7, A8, A9> > : public TypeInfo_Wrapper< ::_Symbol_<A1, A2, A3, A4, A5, A6, A7, A8, A9>, _TypeInfo_ > {}; \
-}
-
-#define _FOG_TYPEINFO_DECLARE_T10(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7, T8, A8, T9, A9, T10, A10, _TypeInfo_) \
-namespace Fog { \
-template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5, T6 A6, T7 A7, T8 A8, T9 A9, T10 A10> \
-struct TypeInfo < ::_Symbol_<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10> > : public TypeInfo_Wrapper< ::_Symbol_<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>, _TypeInfo_ > {}; \
-}
-
-// ===========================================================================
-// [_FOG_TYPECMP_DECLARE()]
-// ===========================================================================
-
-#define _FOG_TYPECMP_DECLARE(_Symbol_) \
-namespace Fog { \
-template <> \
-struct TypeCmp <_Symbol_> : public TypeCmp_Wrapper< _Symbol_ > {}; \
-}
-
-#define _FOG_TYPECMP_DECLARE_TEMPLATE1(_Symbol_, T1, A1) \
-namespace Fog { \
-template <T1 A1> \
-struct TypeCmp < _Symbol_<A1> > : public TypeCmp_Wrapper< _Symbol_<A1> > {}; \
-}
-
-#define _FOG_TYPECMP_DECLARE_TEMPLATE2(_Symbol_, T1, A1, T2, A2) \
-namespace Fog { \
-template <T1 A1, T2 A2> \
-struct TypeCmp < _Symbol_<A1, A2> > : public TypeCmp_Wrapper< _Symbol_<A1, A2> > {}; \
-}
-
-#define _FOG_TYPECMP_DECLARE_TEMPLATE3(_Symbol_, T1, A1, T2, A2, T3, A3) \
-namespace Fog { \
-template <T1 A1, T2 A2, T3 A3> \
-struct TypeCmp < _Symbol_<A1, A2, A3> > : public TypeCmp_Wrapper< _Symbol_<A1, A2, A3> > {}; \
-}
-
-#define _FOG_TYPECMP_DECLARE_TEMPLATE4(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4) \
-namespace Fog { \
-template <T1 A1, T2 A2, T3 A3, T4 A4> \
-struct TypeCmp < _Symbol_<A1, A2, A3, A4> > : public TypeCmp_Wrapper< _Symbol_<A1, A2, A3, A4> > {}; \
-}
-
-#define _FOG_TYPECMP_DECLARE_TEMPLATE5(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5) \
-namespace Fog { \
-template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5> \
-struct TypeCmp < _Symbol_<A1, A2, A3, A4, A5> > : public TypeCmp_Wrapper< _Symbol_<A1, A2, A3, A4, A5> > {}; \
-}
-
-#define _FOG_TYPECMP_DECLARE_TEMPLATE6(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6) \
-namespace Fog { \
-template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5, T6 A6> \
-struct TypeCmp < _Symbol_<A1, A2, A3, A4, A5, A6> > : public TypeCmp_Wrapper< _Symbol_<A1, A2, A3, A4, A5, A6> > {}; \
-}
-
-#define _FOG_TYPECMP_DECLARE_TEMPLATE7(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7) \
-namespace Fog { \
-template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5, T6 A6, T7 A7> \
-struct TypeCmp < _Symbol_<A1, A2, A3, A4, A5, A6, A7> > : public TypeCmp_Wrapper< _Symbol_<A1, A2, A3, A4, A5, A6, A7> > {}; \
-}
-
-#define _FOG_TYPECMP_DECLARE_TEMPLATE8(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7, T8, A8) \
-namespace Fog { \
-template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5, T6 A6, T7 A7, T8 A8> \
-struct TypeCmp < _Symbol_<A1, A2, A3, A4, A5, A6, A7, A8> > : public TypeCmp_Wrapper< _Symbol_<A1, A2, A3, A4, A5, A6, A7, A8> > {}; \
-}
-
-#define _FOG_TYPECMP_DECLARE_TEMPLATE9(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7, T8, A8, T9, A9) \
-namespace Fog { \
-template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5, T6 A6, T7 A7, T8 A8, T9 A9> \
-struct TypeCmp < _Symbol_<A1, A2, A3, A4, A5, A6, A7, A8, A9> > : public TypeCmp_Wrapper< _Symbol_<A1, A2, A3, A4, A5, A6, A7, A8, A9> > {}; \
-}
-
-#define _FOG_TYPECMP_DECLARE_TEMPLATE10(_Symbol_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7, T8, A8, T9, A9, T10, A10) \
-namespace Fog { \
-template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5, T6 A6, T7 A7, T8 A8, T9 A9, T10 A10> \
-struct TypeCmp < _Symbol_<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10> > : public TypeCmp_Wrapper< _Symbol_<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10> > {}; \
-}
+template<typename Type>
+struct TypeFunc :
+  public TypeFunc_Cmp< Type, ((TypeInfo<Type>::FLAGS & TYPE_FLAG_INTEGER) != 0) ? 2 :
+                             ((TypeInfo<Type>::FLAGS & TYPE_FLAG_OWN_CMP) != 0) ? 1 :
+                             ((TypeInfo<Type>::FLAGS & TYPE_FLAG_NO_CMP ) == 0) ? 0 : -1 >,
+  public TypeFunc_Eq < Type, ((TypeInfo<Type>::FLAGS & TYPE_FLAG_OWN_CMP) != 0) ? 1 :
+                             ((TypeInfo<Type>::FLAGS & TYPE_FLAG_NO_CMP ) == 0) ? 0 : -1 > {};
 
 //! @}
 
 } // Fog namespace
 
 // ===========================================================================
-// [Fog::TypeInfo<> - C++ Types]
+// [_FOG_TYPE_DECLARE]
 // ===========================================================================
 
-#define _FOG_TYPEINFO_DECLARE_POD(_Symbol_, _TypeInfo_) \
-namespace Fog { \
-template <> \
-struct TypeInfo < _Symbol_ > : public TypeInfo_Wrapper< _Symbol_, _TypeInfo_ > {}; \
-}
+//! @brief Use this macro to declare @c Fog::TypeInfo<_Type_>.
+//!
+//! @c Fog::TypeInfo is template to resolve type at compile time. It's
+//! used in template specializations.
+#define _FOG_TYPE_DECLARE(_Type_, _Flags_) \
+  template <> \
+  struct _Fog_TypeFlags < _Type_ > { enum { TYPE = _Flags_ }; };
 
-_FOG_TYPEINFO_DECLARE_POD(int8_t  , Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
-_FOG_TYPEINFO_DECLARE_POD(uint8_t , Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
-_FOG_TYPEINFO_DECLARE_POD(int16_t , Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
-_FOG_TYPEINFO_DECLARE_POD(uint16_t, Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
-_FOG_TYPEINFO_DECLARE_POD(int32_t , Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
-_FOG_TYPEINFO_DECLARE_POD(uint32_t, Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
-_FOG_TYPEINFO_DECLARE_POD(int64_t , Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
-_FOG_TYPEINFO_DECLARE_POD(uint64_t, Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
+#define _FOG_TYPE_DECLARE_T1(_Type_, T1, A1, _Flags_) \
+  template <T1 A1> \
+  struct _Fog_TypeFlags < _Type_<A1> > { enum { TYPE = _Flags_ }; };
 
-_FOG_TYPEINFO_DECLARE_POD(float   , Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE | Fog::TYPEINFO_IS_FLOAT_TYPE)
-_FOG_TYPEINFO_DECLARE_POD(double  , Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE | Fog::TYPEINFO_IS_FLOAT_TYPE | Fog::TYPEINFO_IS_DOUBLE_TYPE)
+#define _FOG_TYPE_DECLARE_T2(_Type_, T1, A1, T2, A2, _Flags_) \
+  template <T1 A1, T2 A2> \
+  struct _Fog_TypeFlags < _Type_<A1, A2> > { enum { TYPE = _Flags_ }; };
 
-#if !defined(FOG_CC_MSC) && !defined(FOG_CC_BORLAND)
-// char is same as int8_t or uint8_t for borland compiler
-_FOG_TYPEINFO_DECLARE_POD(char    , Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
-#endif // FOG_CC_BORLAND
+#define _FOG_TYPE_DECLARE_T3(_Type_, T1, A1, T2, A2, T3, A3, _Flags_) \
+  template <T1 A1, T2 A2, T3 A3> \
+  struct _Fog_TypeFlags < _Type_<A1, A2, A3> > { enum { TYPE = _Flags_ }; };
 
-// TODO: long and ulong checking
+#define _FOG_TYPE_DECLARE_T4(_Type_, T1, A1, T2, A2, T3, A3, T4, A4, _Flags_) \
+  template <T1 A1, T2 A2, T3 A3, T4 A4> \
+  struct _Fog_TypeFlags < _Type_<A1, A2, A3, A4> > { enum { TYPE = _Flags_ }; };
+
+#define _FOG_TYPE_DECLARE_T5(_Type_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, _Flags_) \
+  template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5> \
+  struct _Fog_TypeFlags < _Type_<A1, A2, A3, A4, A5> > { enum { TYPE = _Flags_ }; };
+
+#define _FOG_TYPE_DECLARE_T6(_Type_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, _Flags_) \
+  template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5, T6 A6> \
+  struct _Fog_TypeFlags < _Type_<A1, A2, A3, A4, A5, A6> > { enum { TYPE = _Flags_ }; };
+
+#define _FOG_TYPE_DECLARE_T7(_Type_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7, _Flags_) \
+  template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5, T6 A6, T7 A7> \
+  struct _Fog_TypeFlags < _Type_<A1, A2, A3, A4, A5, A6, A7> > { enum { TYPE = _Flags_ }; };
+
+#define _FOG_TYPE_DECLARE_T8(_Type_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7, T8, A8, _Flags_) \
+  template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5, T6 A6, T7 A7, T8 A8> \
+  struct _Fog_TypeFlags < _Type_<A1, A2, A3, A4, A5, A6, A7, A8> > { enum { TYPE = _Flags_ }; };
+
+#define _FOG_TYPE_DECLARE_T9(_Type_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7, T8, A8, T9, A9, _Flags_) \
+  template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5, T6 A6, T7 A7, T8 A8, T9 A9> \
+  struct _Fog_TypeFlags < _Type_<A1, A2, A3, A4, A5, A6, A7, A8, A9> > { enum { TYPE = _Flags_ }; };
+
+#define _FOG_TYPE_DECLARE_T10(_Type_, T1, A1, T2, A2, T3, A3, T4, A4, T5, A5, T6, A6, T7, A7, T8, A8, T9, A9, T10, A10, _Flags_) \
+  template <T1 A1, T2 A2, T3 A3, T4 A4, T5 A5, T6 A6, T7 A7, T8 A8, T9 A9, T10 A10> \
+  struct _Fog_TypeFlags < _Type_<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10> > { enum { TYPE = _Flags_ }; };
+
+// ===========================================================================
+// [Fog::TypeInfo - Begin]
+// ===========================================================================
+
+#define C(_Category_) Fog::TYPE_CATEGORY_##_Category_
+#define F(_Flag_) Fog::TYPE_FLAG_##_Flag_
+
+// ===========================================================================
+// [Fog::TypeInfo - C++]
+// ===========================================================================
+
+#if defined(FOG_CC_HAVE_NATIVE_CHAR_TYPE)
+_FOG_TYPE_DECLARE(char                       , C(SIMPLE) | F(POD) | F(INTEGER) | F(BIN_EQ))
+#endif // FOG_CC_HAVE_NATIVE_CHAR_TYPE
+
+#if defined(FOG_CC_HAVE_NATIVE_WCHAR_TYPE)
+_FOG_TYPE_DECLARE(wchar_t                    , C(SIMPLE) | F(POD) | F(INTEGER) | F(BIN_EQ))
+#endif // FOG_CC_HAVE_NATIVE_WCHAR_TYPE
+
+_FOG_TYPE_DECLARE(signed char                , C(SIMPLE) | F(POD) | F(INTEGER) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(unsigned char              , C(SIMPLE) | F(POD) | F(INTEGER) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(short                      , C(SIMPLE) | F(POD) | F(INTEGER) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(unsigned short             , C(SIMPLE) | F(POD) | F(INTEGER) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(int                        , C(SIMPLE) | F(POD) | F(INTEGER) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(unsigned int               , C(SIMPLE) | F(POD) | F(INTEGER) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(int64_t                    , C(SIMPLE) | F(POD) | F(INTEGER) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(uint64_t                   , C(SIMPLE) | F(POD) | F(INTEGER) | F(BIN_EQ))
+
+// TODO: better long and ulong check.
+
 #if !(defined(FOG_CC_GNU) && FOG_ARCH_BITS == 64) && !defined(FOG_CC_CLANG)
-_FOG_TYPEINFO_DECLARE_POD(long    , Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
-_FOG_TYPEINFO_DECLARE_POD(ulong   , Fog::TYPEINFO_PRIMITIVE | Fog::TYPEINFO_IS_POD_TYPE)
+_FOG_TYPE_DECLARE(long                       , C(SIMPLE) | F(POD) | F(INTEGER) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(ulong                      , C(SIMPLE) | F(POD) | F(INTEGER) | F(BIN_EQ))
 #endif // long / ulong
 
-// TODO: wchar_t
+_FOG_TYPE_DECLARE(float                      , C(SIMPLE) | F(POD) | F(FLOAT  ))
+_FOG_TYPE_DECLARE(double                     , C(SIMPLE) | F(POD) | F(DOUBLE ))
+
+// ===========================================================================
+// [Fog::TypeInfo - Fog]
+// ===========================================================================
+
+// [Fog/Core/IO]
+_FOG_TYPE_DECLARE(Fog::Stream                , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::DirEntry              , C(MOVABLE)               | F(NO_CMP )            )
+
+// [Fog/Core/Math]
+_FOG_TYPE_DECLARE(Fog::FloatBits             , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(Fog::DoubleBits            , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(Fog::IntervalF             , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::IntervalD             , C(SIMPLE )               | F(NO_CMP )            )
+
+// [Fog/Core/Memory]
+_FOG_TYPE_DECLARE(Fog::MemBuffer             , C(MOVABLE)               | F(NO_CMP ) | F(NO_EQ ))
+_FOG_TYPE_DECLARE(Fog::MemPool               , C(MOVABLE)               | F(NO_CMP ) | F(NO_EQ ))
+
+// [Fog/Core/Threading]
+_FOG_TYPE_DECLARE_T1(
+                  Fog::Atomic,
+                  typename, T                , C(SIMPLE )                                       )
+
+// [Fog/Core/Tools]
+_FOG_TYPE_DECLARE(Fog::StubA                 , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::Ascii8                , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::Local8                , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::Utf8                  , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::StubW                 , C(SIMPLE )               | F(NO_CMP )            )
+
+_FOG_TYPE_DECLARE_T2(
+                  Fog::Hash,
+                  typename, KeyT,
+                  typename, ItemT            , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP)             )
+
+_FOG_TYPE_DECLARE_T1(
+                  Fog::List,
+                  typename, ItemT            , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP)             )
+
+_FOG_TYPE_DECLARE(Fog::CharA                 , C(SIMPLE )                            | F(BIN_EQ))
+_FOG_TYPE_DECLARE(Fog::CharW                 , C(SIMPLE )                            | F(BIN_EQ))
+_FOG_TYPE_DECLARE(Fog::Date                  , C(SIMPLE )                                       )
+_FOG_TYPE_DECLARE(Fog::FormatInt             , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(Fog::FormatReal            , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(Fog::Library               , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::Locale                , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::ManagedString         , C(MOVABLE) | F(IMPLICIT) | F(OWN_CMP) | F(OWN_EQ) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(Fog::Range                 , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(Fog::RegExpA               , C(MOVABLE) | F(IMPLICIT)                         )
+_FOG_TYPE_DECLARE(Fog::RegExpW               , C(MOVABLE) | F(IMPLICIT)                         )
+_FOG_TYPE_DECLARE(Fog::StringA               , C(MOVABLE) | F(IMPLICIT) | F(OWN_CMP) | F(OWN_EQ))
+_FOG_TYPE_DECLARE(Fog::StringW               , C(MOVABLE) | F(IMPLICIT) | F(OWN_CMP) | F(OWN_EQ))
+_FOG_TYPE_DECLARE(Fog::TextCodec             , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::TextCodecState        , C(SIMPLE )               | F(NO_CMP ) | F(NO_EQ ))
+_FOG_TYPE_DECLARE(Fog::Time                  , C(SIMPLE )                            | F(BIN_EQ))
+_FOG_TYPE_DECLARE(Fog::TimeDelta             , C(SIMPLE )                            | F(BIN_EQ))
+_FOG_TYPE_DECLARE(Fog::TimeTicks             , C(SIMPLE )                            | F(BIN_EQ))
+_FOG_TYPE_DECLARE(Fog::Var                   , C(MOVABLE) | F(IMPLICIT)                         )
+
+// [Fog/G2d/Geometry]
+_FOG_TYPE_DECLARE(Fog::ArcF                  , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::ArcD                  , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::BoxI                  , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(Fog::BoxF                  , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::BoxD                  , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::CBezierF              , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::CBezierD              , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::ChordF                , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::ChordD                , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::CircleF               , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::CircleD               , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::EllipseF              , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::EllipseD              , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::LineF                 , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::LineD                 , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::PathF                 , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::PathD                 , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::PathClipperF          , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::PathClipperD          , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::PathFlattenParamsF    , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::PathFlattenParamsD    , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::PathStrokerF          , C(MOVABLE)               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::PathStrokerD          , C(MOVABLE)               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::PathStrokerHints      , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(Fog::PathStrokerParamsF    , C(MOVABLE)               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::PathStrokerParamsD    , C(MOVABLE)               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::PieF                  , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::PieD                  , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::PointI                , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(Fog::PointF                , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::PointD                , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::QBezierF              , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::QBezierD              , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::RectI                 , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(Fog::RectF                 , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::RectD                 , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::RoundF                , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::RoundD                , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::SizeI                 , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(Fog::SizeF                 , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::SizeD                 , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::TransformF            , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::TransformD            , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::TriangleF             , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::TriangleD             , C(SIMPLE )               | F(NO_CMP )            )
+
+// [Fog/G2d/Imaging]
+_FOG_TYPE_DECLARE(Fog::Image                 , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::ImageBits             , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::ImageConverter        , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::ImageDither8Params    , C(SIMPLE )               | F(NO_CMP ) | F(NO_EQ) )
+_FOG_TYPE_DECLARE(Fog::ImageFormatDescription, C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::ImagePalette          , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+
+// [Fog/G2d/Imaging/Effects]
+_FOG_TYPE_DECLARE(Fog::ColorMatrix           , C(SIMPLE )               | F(NO_CMP )            )
+
+// [Fog/G2d/Painting]
+_FOG_TYPE_DECLARE(Fog::PaintDeviceInfo       , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::PaintParamsF          , C(MOVABLE)               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::PaintParamsD          , C(MOVABLE)               | F(NO_CMP )            )
+
+// [Fog/G2d/Source]
+_FOG_TYPE_DECLARE(Fog::AcmykF                , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::AcmykBaseF            , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::AhslF                 , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::AhslBaseF             , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::AhsvF                 , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::AhsvBaseF             , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::Argb32                , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(Fog::ArgbBase32            , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(Fog::Argb64                , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(Fog::ArgbBase64            , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(Fog::ArgbF                 , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::ArgbBaseF             , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::Color                 , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::ColorBase             , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::ColorStop             , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::ColorStopList         , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::ConicalGradientF      , C(MOVABLE)               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::ConicalGradientD      , C(MOVABLE)               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::GradientF             , C(MOVABLE)               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::GradientD             , C(MOVABLE)               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::LinearGradientF       , C(MOVABLE)               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::LinearGradientD       , C(MOVABLE)               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::PatternF              , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::PatternD              , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::RadialGradientF       , C(MOVABLE)               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::RadialGradientD       , C(MOVABLE)               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::RectangularGradientF  , C(MOVABLE)               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::RectangularGradientD  , C(MOVABLE)               | F(NO_CMP )            )
+
+// [Fog/G2d/Text]
+_FOG_TYPE_DECLARE(Fog::Font                  , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::FontKerningChars      , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::FontKerningPairI      , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::FontKerningPairF      , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::FontManager           , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::FontMetricsF          , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::FontProvider          , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::GlyphBitmap           , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::GlyphOutline          , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::TextExtentsI          , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::TextExtentsF          , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::TextExtentsD          , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::TextLayout            , C(MOVABLE)               | F(NO_CMP ) | F(NO_EQ ))
+_FOG_TYPE_DECLARE(Fog::TextRectI             , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(Fog::TextRectF             , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::TextRectD             , C(SIMPLE )               | F(NO_CMP )            )
+
+// [Fog/G2d/Tools]
+_FOG_TYPE_DECLARE(Fog::Dpi                   , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::MatrixF               , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::Region                , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP ) | F(OWN_EQ))
+
+// ===========================================================================
+// [Fog::TypeInfo - End]
+// ===========================================================================
+
+#undef F
+#undef C
 
 // [Guard]
 #endif // _FOG_CORE_GLOBAL_TYPEINFO_H

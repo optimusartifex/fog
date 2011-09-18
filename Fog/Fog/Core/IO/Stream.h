@@ -10,7 +10,6 @@
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/IO/FileSystem.h>
-#include <Fog/Core/Tools/ByteArray.h>
 #include <Fog/Core/Tools/String.h>
 
 namespace Fog {
@@ -39,7 +38,7 @@ struct FOG_API StreamDevice
   // [Sharing]
   // --------------------------------------------------------------------------
 
-  virtual StreamDevice* ref() const;
+  virtual StreamDevice* addRef() const;
   virtual void deref();
 
   // --------------------------------------------------------------------------
@@ -58,13 +57,13 @@ struct FOG_API StreamDevice
 
   virtual void close() = 0;
 
-  virtual ByteArray getBuffer() const;
+  virtual StringA getBuffer() const;
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  mutable Atomic<size_t> refCount;
+  mutable Atomic<size_t> reference;
   uint32_t flags;
 };
 
@@ -94,7 +93,7 @@ struct FOG_API Stream
   // [Sharing]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
+  FOG_INLINE size_t getReference() const { return _d->reference.get(); }
 
   // --------------------------------------------------------------------------
   // [Flags]
@@ -122,8 +121,8 @@ struct FOG_API Stream
   // [Open]
   // --------------------------------------------------------------------------
 
-  err_t openFile(const String& fileName, uint32_t openFlags);
-  err_t openMMap(const String& fileName, bool loadOnFail = true);
+  err_t openFile(const StringW& fileName, uint32_t openFlags);
+  err_t openMMap(const StringW& fileName, bool loadOnFail = true);
 
 #if defined(FOG_OS_WINDOWS)
   err_t openHandle(HANDLE hFile, uint32_t openFlags, bool canClose);
@@ -134,7 +133,7 @@ struct FOG_API Stream
 #endif // FOG_OS_POSIX
 
   err_t openBuffer();
-  err_t openBuffer(const ByteArray& buffer);
+  err_t openBuffer(const StringA& buffer);
   err_t openBuffer(void* buffer, size_t size, uint32_t openFlags);
 
   // --------------------------------------------------------------------------
@@ -149,11 +148,11 @@ struct FOG_API Stream
   // --------------------------------------------------------------------------
 
   size_t read(void* buffer, size_t size);
-  size_t read(ByteArray& dst, size_t size);
-  size_t readAll(ByteArray& dst, size_t maxBytes = 0);
+  size_t read(StringA& dst, size_t size);
+  size_t readAll(StringA& dst, size_t maxBytes = 0);
 
   size_t write(const void* buffer, size_t size);
-  size_t write(const ByteArray& data);
+  size_t write(const StringA& data);
 
   // --------------------------------------------------------------------------
   // [GetSize, SetSize, Truncate]
@@ -179,8 +178,8 @@ struct FOG_API Stream
   //!   <core>openBuffer(void* buffer, size_t size, uint32_t openFlags);</core>
   //! buffer will be created for it and data will be copied to this buffer.
   //!
-  //! If stream was open by @c ByteArray instance, this method will return it.
-  ByteArray getBuffer() const;
+  //! If stream was open by @c StringA instance, this method will return it.
+  StringA getBuffer() const;
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
@@ -198,18 +197,6 @@ struct FOG_API Stream
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::Stream, Fog::TYPEINFO_MOVABLE)
-
-// ============================================================================
-// [Fog::Swap]
-// ============================================================================
-
-_FOG_SWAP_D(Fog::Stream)
 
 // [Guard]
 #endif // _FOG_CORE_STREAM_H

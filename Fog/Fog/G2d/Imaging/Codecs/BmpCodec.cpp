@@ -9,12 +9,12 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/BufferP.h>
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/BSwap.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemBufferTmp_p.h>
+#include <Fog/Core/Memory/MemOps.h>
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Strings.h>
@@ -222,8 +222,8 @@ err_t BmpDecoder::readHeader()
   _headerDone = true;
 
   // Clear headers. This is not important step, but safe.
-  Memory::zero(&bmpFileHeader, sizeof(BmpFileHeader));
-  Memory::zero(&bmpDataHeader, sizeof(bmpDataHeader));
+  MemOps::zero(&bmpFileHeader, sizeof(BmpFileHeader));
+  MemOps::zero(&bmpDataHeader, sizeof(bmpDataHeader));
 
   // Read bmp header or skip it if configured for this.
   if (!_skipFileHeader)
@@ -451,16 +451,17 @@ err_t BmpDecoder::readImage(Image& image)
   // Buffer pointers.
   uint8_t* pixelsBegin;
   uint8_t* pixelsCur;
-  sysint_t stride;
+  ssize_t stride;
 
   // Reader variables.
   uint32_t x = 0;
   uint32_t y = 0;
   uint32_t i;
 
-  BufferP<512> rawBufferStorage;
-  BufferP<512> rleBufferStorage;
-  uint8_t* buffer = (uint8_t *)rawBufferStorage.alloc(bmpStride);
+  MemBufferTmp<512> rawBufferStorage;
+  MemBufferTmp<512> rleBufferStorage;
+
+  uint8_t* buffer = reinterpret_cast<uint8_t*>(rawBufferStorage.alloc(bmpStride));
   uint8_t* rleBuffer = NULL;
 
   // First skip bytes if needed.
@@ -534,8 +535,12 @@ err_t BmpDecoder::readImage(Image& image)
     uint8_t b0;
     uint8_t b1;
 
-    if ((rleBuffer = (uint8_t *)rleBufferStorage.alloc(bmpImageSize)) == NULL) goto _OutOfMemory;
-    if (_stream.read(rleBuffer, bmpImageSize) != bmpImageSize) goto _Truncated;
+    rleBuffer = reinterpret_cast<uint8_t*>(rleBufferStorage.alloc(bmpImageSize));
+    if (FOG_IS_NULL(rleBuffer))
+      goto _OutOfMemory;
+    
+    if (_stream.read(rleBuffer, bmpImageSize) != bmpImageSize)
+      goto _Truncated;
 
     rleCur = rleBuffer;
     rleEnd = rleBuffer + bmpImageSize;
@@ -791,29 +796,20 @@ _End:
   return (_readerResult = err);
 }
 
-err_t BmpDecoder::getProperty(const ManagedString& name, Value& value) const
+err_t BmpDecoder::getProperty(const ManagedString& name, Var& dst) const
 {
   if (name == fog_strings->getString(STR_G2D_CODEC_skipFileHeader))
-  {
-    return value.setInt32(_skipFileHeader);
-  }
+    return dst.setInt(_skipFileHeader);
 
-  return base::getProperty(name, value);
+  return base::getProperty(name, dst);
 }
 
-err_t BmpDecoder::setProperty(const ManagedString& name, const Value& value)
+err_t BmpDecoder::setProperty(const ManagedString& name, const Var& src)
 {
-  err_t err;
-  int i;
-
   if (name == fog_strings->getString(STR_G2D_CODEC_skipFileHeader))
-  {
-    if ((err = value.getInt32(&i))) return err;
-    _skipFileHeader = i ? 1 : 0;
-    return ERR_OK;
-  }
+    return src.getInt(_skipFileHeader, 0, 1);
 
-  return base::setProperty(name, value);
+  return base::setProperty(name, src);
 }
 
 // ============================================================================
@@ -840,7 +836,7 @@ err_t BmpEncoder::writeImage(const Image& image)
 
   BmpFileHeader bmpFileHeader;
   BmpDataHeader bmpDataHeader;
-  BufferP<1024> bufferLocal;
+  MemBufferTmp<1024> bufferLocal;
 
   ImageConverter converter;
   ImageData* d = image._d;
@@ -860,7 +856,7 @@ err_t BmpEncoder::writeImage(const Image& image)
     goto _End;
   }
 
-  Memory::zero(&bmpDataHeader, sizeof(BmpDataHeader));
+  MemOps::zero(&bmpDataHeader, sizeof(BmpDataHeader));
 
   // Bitmap file header.
   bmpFileHeader.magic_B                = 'B';
@@ -962,17 +958,22 @@ err_t BmpEncoder::writeImage(const Image& image)
   // Write palette.
   if (paletteEntries)
   {
-    uint32_t* buffer = reinterpret_cast<uint32_t*>(bufferLocal.getPrivateStorage());
+    uint32_t* buffer = reinterpret_cast<uint32_t*>(bufferLocal.getMem());
     const uint32_t* pal = reinterpret_cast<const uint32_t*>(d->palette.getData());
 
-    for (uint i = 0; i < paletteEntries; i++) buffer[i] = pal[i] & 0x00FFFFFF;
-    if (_stream.write((const void*)buffer, paletteEntries * 4) != paletteEntries * 4) goto _Fail;
+    FOG_ASSERT(buffer != NULL);
+
+    for (uint i = 0; i < paletteEntries; i++)
+      buffer[i] = pal[i] & 0x00FFFFFF;
+
+    if (_stream.write((const void*)buffer, paletteEntries * 4) != paletteEntries * 4)
+      goto _Fail;
   }
 
   // Write scanlines.
   {
     const uint8_t* scanline = image.getScanline(h - 1);
-    sysint_t stride = -image.getStride();
+    ssize_t stride = -image.getStride();
 
     if (converter.isCopy())
     {

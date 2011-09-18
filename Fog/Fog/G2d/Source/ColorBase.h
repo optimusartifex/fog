@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_COLOR_COLORBASE_H
-#define _FOG_G2D_COLOR_COLORBASE_H
+#ifndef _FOG_G2D_SOURCE_COLORBASE_H
+#define _FOG_G2D_SOURCE_COLORBASE_H
 
 // [Dependencies]
 #include <Fog/Core/Face/Face_C_Types.h>
@@ -22,7 +22,7 @@ namespace Fog {
 // [Fog::ArgbBase32]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 //! @brief ARGB32 color data (8-bit integer per component).
 struct FOG_NO_EXPORT ArgbBase32
 {
@@ -46,13 +46,13 @@ struct FOG_NO_EXPORT ArgbBase32
     uint32_t u32;
   };
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 // ============================================================================
 // [Fog::ArgbBase64]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 //! @brief ARGB64 color data (16-bit integer per component).
 struct FOG_NO_EXPORT ArgbBase64
 {
@@ -78,13 +78,13 @@ struct FOG_NO_EXPORT ArgbBase64
     uint32_t u32[2];
   };
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 // ============================================================================
 // [Fog::ArgbF]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 //! @brief ARGBF color data (32-bit float per component).
 struct FOG_NO_EXPORT ArgbBaseF
 {
@@ -101,13 +101,13 @@ struct FOG_NO_EXPORT ArgbBaseF
     float data[4];
   };
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 // ============================================================================
 // [Fog::AhsvBaseF]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 //! @brief AHSVF color data.
 struct FOG_NO_EXPORT AhsvBaseF
 {
@@ -123,13 +123,13 @@ struct FOG_NO_EXPORT AhsvBaseF
     float data[4];
   };
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 // ============================================================================
 // [Fog::AhsvBaseF]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 //! @brief AHSLF color data.
 struct FOG_NO_EXPORT AhslBaseF
 {
@@ -145,13 +145,13 @@ struct FOG_NO_EXPORT AhslBaseF
     float data[4];
   };
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 // ============================================================================
 // [Fog::AcmykBaseF]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 //! @brief ACMYKF color data.
 struct FOG_NO_EXPORT AcmykBaseF
 {
@@ -168,13 +168,13 @@ struct FOG_NO_EXPORT AcmykBaseF
     float data[5];
   };
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 // ============================================================================
 // [Fog::ColorBase]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 struct FOG_NO_EXPORT ColorBase
 {
   //! @brief The ARGB, AHSV, AHSL, or ACMYK components array.
@@ -188,32 +188,20 @@ struct FOG_NO_EXPORT ColorBase
   //! @brief The packed ARGB32 color (for fast use/access).
   ArgbBase32 _argb32;
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 //! @}
 
 } // Fog namespace
 
 // ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::ArgbBase32, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::ArgbBase64, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::ArgbBaseF, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::AhsvBaseF, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::AhslBaseF, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::AcmykBaseF, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::ColorBase, Fog::TYPEINFO_PRIMITIVE)
-
-// ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_FUZZY_DECLARE(Fog::ArgbBaseF, Math::feqv(a.data, b.data, 4))
-FOG_FUZZY_DECLARE(Fog::AhsvBaseF, Math::feqv(a.data, b.data, 4))
-FOG_FUZZY_DECLARE(Fog::AhslBaseF, Math::feqv(a.data, b.data, 4))
-FOG_FUZZY_DECLARE(Fog::AcmykBaseF, Math::feqv(a.data, b.data, 5))
+FOG_FUZZY_DECLARE_F_VEC(Fog::ArgbBaseF, 4)
+FOG_FUZZY_DECLARE_F_VEC(Fog::AhsvBaseF, 4)
+FOG_FUZZY_DECLARE_F_VEC(Fog::AhslBaseF, 4)
+FOG_FUZZY_DECLARE_F_VEC(Fog::AcmykBaseF, 5)
 
 // [Guard]
-#endif // _FOG_G2D_COLOR_COLORBASE_H
+#endif // _FOG_G2D_SOURCE_COLORBASE_H

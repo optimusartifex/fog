@@ -58,7 +58,7 @@ struct FOG_NO_EXPORT GlyphMetricsF
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-_FOG_TYPEINFO_DECLARE(Fog::GlyphMetricsF, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPE_DECLARE(Fog::GlyphMetricsF, Fog::TYPE_CATEGORY_SIMPLE)
 
 // [Guard]
 #endif // _FOG_G2D_TEXT_GLYPHMETRICS_H

@@ -9,9 +9,9 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Swap.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringTmp_p.h>
+#include <Fog/Core/Tools/Swap.h>
 #include <Fog/G2d/Text/FTFontFace.h>
 #include <Fog/G2d/Text/FTFontProvider.h>
 
@@ -33,16 +33,23 @@ FTFontProviderData::~FTFontProviderData()
 // [Fog::FTFontProviderData - Interface]
 // ============================================================================
 
-err_t FTFontProviderData::getFontFace(FontFace** dst, const String& fontFamily)
+err_t FTFontProviderData::getFontFace(FontFace** dst, const StringW& fontFamily)
 {
+  // TODO:
+  *dst = NULL;
+  return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t FTFontProviderData::getFontList(List<String>& dst)
+err_t FTFontProviderData::getFontList(List<StringW>& dst)
 {
+  // TODO:
+  return ERR_RT_NOT_IMPLEMENTED;
 }
 
-String FTFontProviderData::getDefaultFamily()
+StringW FTFontProviderData::getDefaultFamily()
 {
+  // TODO:
+  return StringW();
 }
 
 // ============================================================================

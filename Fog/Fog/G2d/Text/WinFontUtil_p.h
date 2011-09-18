@@ -8,12 +8,11 @@
 #define _FOG_G2D_TEXT_WINFONTUTIL_P_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemOps.h>
+#include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Tools/String.h>
-
-#include <windows.h>
+#include <Fog/Core/Tools/Swap.h>
 
 namespace Fog {
 
@@ -73,7 +72,7 @@ struct WinAbstractEnumContext
   HDC hdc;
 
 private:
-  _FOG_CLASS_NO_COPY(WinAbstractEnumContext)
+  _FOG_NO_COPY(WinAbstractEnumContext)
 };
 
 // ============================================================================
@@ -86,7 +85,7 @@ struct FOG_NO_EXPORT WinFontEnumContext : public WinAbstractEnumContext<WinFontE
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE WinFontEnumContext(List<String>& fonts) :
+  FOG_INLINE WinFontEnumContext(List<StringW>& fonts) :
     fonts(fonts),
     err(ERR_OK)
   {
@@ -140,12 +139,12 @@ struct FOG_NO_EXPORT WinFontEnumContext : public WinAbstractEnumContext<WinFontE
 
   err_t err;
 
-  List<String>& fonts;
-  String curFaceName;
-  String lastFaceName;
+  List<StringW>& fonts;
+  StringW curFaceName;
+  StringW lastFaceName;
 
 private:
-  _FOG_CLASS_NO_COPY(WinFontEnumContext)
+  _FOG_NO_COPY(WinFontEnumContext)
 };
 
 // ============================================================================
@@ -172,7 +171,7 @@ struct FOG_NO_EXPORT WinFontInfoContext : public WinAbstractEnumContext<WinFontI
     const NEWTEXTMETRICEXW* pntm = reinterpret_cast<const NEWTEXTMETRICEXW*>(ptm);
     acceptable = true;
     designEmSquare = pntm->ntmTm.ntmCellHeight;
-    Memory::copy(&logFont, plf, sizeof(LOGFONTW));
+    MemOps::copy(&logFont, plf, sizeof(LOGFONTW));
 
     return 0;
   }

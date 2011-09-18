@@ -8,19 +8,18 @@
 #define _FOG_GUI_WIDGET_WIDGET_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/Hash.h>
-#include <Fog/Core/Collection/List.h>
-#include <Fog/Core/DateTime/Time.h>
 #include <Fog/Core/Global/Global.h>
+#include <Fog/Core/Kernel/Event.h>
+#include <Fog/Core/Kernel/Object.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Threading/Thread.h>
-#include <Fog/Core/System/Event.h>
-#include <Fog/Core/System/Object.h>
+#include <Fog/Core/Tools/Hash.h>
+#include <Fog/Core/Tools/List.h>
+#include <Fog/Core/Tools/Time.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Painting/Painter.h>
 #include <Fog/G2d/Text/Font.h>
-#include <Fog/Gui/Global/Constants.h>
 #include <Fog/Gui/Layout/LayoutItem.h>
 #include <Fog/Gui/Layout/LayoutHint.h>
 #include <Fog/Gui/Widget/Event.h>
@@ -140,9 +139,9 @@ struct FOG_API Widget : public LayoutItem
   err_t destroyWindow();
 
   //! @brief Get native gui window title.
-  String getWindowTitle() const;
+  StringW getWindowTitle() const;
   //! @brief Set native gui window title.
-  err_t setWindowTitle(const String& title);
+  err_t setWindowTitle(const StringW& title);
 
   //! @brief Get native gui window icon.
   Image getWindowIcon() const;
@@ -814,7 +813,7 @@ private:
   friend struct GuiWindow;
   friend struct Window;
 
-  _FOG_CLASS_NO_COPY(Widget)
+  _FOG_NO_COPY(Widget)
 };
 
 //! @}

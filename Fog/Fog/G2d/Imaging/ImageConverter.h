@@ -25,9 +25,9 @@ namespace Fog {
 
 //! @brief Converter blitter function.
 //!
-//! @note This structure is the same as the internal @c RenderVBlitLineFn used
+//! @note This structure is the same as the internal @c RenderVBlitLineFunc used
 //! by the private Fog::Render module.
-typedef void (FOG_FASTCALL *ImageConverterBlitLineFn)(
+typedef void (FOG_FASTCALL *ImageConverterBlitLineFunc)(
   uint8_t* dst,
   const uint8_t* src,
   int w,
@@ -82,9 +82,9 @@ struct FOG_NO_EXPORT ImageDither8Params
 struct FOG_NO_EXPORT ImageConverterData
 {
   //! @brief Reference count.
-  mutable Atomic<size_t> refCount;
+  mutable Atomic<size_t> reference;
   //! @brief Converter function.
-  ImageConverterBlitLineFn blitFn;
+  ImageConverterBlitLineFunc blitFn;
 
   //! @brief The destination image format description.
   ImageFormatDescription dstFormatDescription;
@@ -136,7 +136,7 @@ struct FOG_API ImageConverter
   // [Validity]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool isValid() const { return _d != _dnull.instancep(); }
+  FOG_INLINE bool isValid() const { return _d != &_dnull; }
 
   // --------------------------------------------------------------------------
   // [Create]
@@ -171,7 +171,7 @@ struct FOG_API ImageConverter
   FOG_INLINE void setupClosure(ImageConverterClosure* closure) const
   {
     closure->ditherOrigin.reset();
-    closure->palette = _d->srcPalette.instance()._d;
+    closure->palette = _d->srcPalette->_d;
     closure->data = _d;
   }
 
@@ -179,7 +179,7 @@ struct FOG_API ImageConverter
   FOG_INLINE void setupClosure(ImageConverterClosure* closure, const PointI& ditherOrigin) const
   {
     closure->ditherOrigin = ditherOrigin;
-    closure->palette = _d->srcPalette.instance()._d;
+    closure->palette = _d->srcPalette->_d;
     closure->data = _d;
   }
 
@@ -202,7 +202,7 @@ struct FOG_API ImageConverter
   // --------------------------------------------------------------------------
 
   //! @brief Get the blitter function.
-  FOG_INLINE ImageConverterBlitLineFn getBlitFn() const
+  FOG_INLINE ImageConverterBlitLineFunc getBlitFn() const
   {
     return _d->blitFn;
   }
@@ -240,20 +240,6 @@ struct FOG_API ImageConverter
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::ImageConverter, Fog::TYPEINFO_MOVABLE)
-_FOG_TYPEINFO_DECLARE(Fog::ImageConverterClosure, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::ImageDither8Params, Fog::TYPEINFO_PRIMITIVE)
-
-// ============================================================================
-// [Fog::Swap]
-// ============================================================================
-
-_FOG_SWAP_D(Fog::ImageConverter)
 
 // [Guard]
 #endif // _FOG_G2D_IMAGING_IMAGECONVERTER_H

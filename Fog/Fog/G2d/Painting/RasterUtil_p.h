@@ -107,6 +107,15 @@ static FOG_INLINE bool isCompositeCopyOp(uint32_t dstFormat, uint32_t srcFormat,
   return compositingOperator == COMPOSITE_SRC || srcDescription.getASize() == 0;
 };
 
+// ============================================================================
+// [Fog::RasterUtil - Geometry]
+// ============================================================================
+
+static FOG_INLINE bool isBox24x8Aligned(const BoxI& box)
+{
+  return ((box.x0 | box.y0 | box.x1 | box.y1) & 0xFF) == 0;
+}
+
 //! @brief Whether the source rectangle @a src can be converted to aligned
 //! rectangle @a dst, used to call various fast-paths.
 static FOG_INLINE bool canAlignToGrid(BoxI& dst, const RectD& src, double x, double y)
@@ -132,7 +141,19 @@ static FOG_INLINE bool canAlignToGrid(BoxI& dst, const RectD& src, double x, dou
 }
 
 // ============================================================================
-// [Fog::RasterUtil - Mask]
+// [Fog::RasterUtil - Engine-Macros]
+// ============================================================================
+
+#define _FOG_RASTER_ENSURE_PATTERN(_Engine_) \
+  FOG_MACRO_BEGIN \
+    if (_Engine_->ctx.pc == NULL) \
+    { \
+      FOG_RETURN_ON_ERROR(_Engine_->createPatternContext()); \
+    } \
+  FOG_MACRO_END
+
+// ============================================================================
+// [Fog::RasterUtil - Mask-Macros]
 // ============================================================================
 
 // Get usable span instance from span retrieved from mask. We encode 'owned'
@@ -170,36 +191,10 @@ static FOG_INLINE bool canAlignToGrid(BoxI& dst, const RectD& src, double x, dou
     \
   FOG_MACRO_END
 
-//! @internal
-//!
-//! @brief Binary search for the first rectangle usable for a scanline @a y.
-//!
-//! @param base The first rectangle in region.
-//! @param length Count of rectangles in @a base array.
-//! @param y The Y position to match
-//! 
-//! If there are no rectangles which matches the Y coordinate and the last
-//! @c rect.y1 is lower or equal to @a y, @c NULL is returned. If there
-//! is rectangle where @c rect.y0 >= @a y then the first rectangle in the list
-//! is returned.
-//!
-//! The @a base and @a length parameters come in the most cases from @c Region
-//! instance, but can be constructed manually.
-FOG_NO_EXPORT const BoxI* getClosestRect(const BoxI* base, size_t length, int y);
+// ============================================================================
+// [Fog::RasterUtil - Region]
+// ============================================================================
 
-//! @internal
-//!
-//! @brief Get the end band of current horizontal rectangle list.
-static FOG_INLINE const BoxI* getEndBand(const BoxI* base, const BoxI* end)
-{
-  int y0 = base[0].y0;
-  const BoxI* cur = base;
-
-  while (++cur != end && cur[0].y0 == y0)
-    continue;
-
-  return cur;
-}
 
 //! @}
 

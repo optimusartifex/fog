@@ -44,7 +44,7 @@ struct FOG_NO_EXPORT SvgAElement : public SvgStyledElement
   virtual err_t onProcess(SvgVisitor* visitor) const;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgAElement)
+  _FOG_NO_COPY(SvgAElement)
 };
 
 //! @}

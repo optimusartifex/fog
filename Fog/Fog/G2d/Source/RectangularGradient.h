@@ -144,18 +144,13 @@ FOG_INLINE err_t RectangularGradientD::setGradient(const RectangularGradientD& o
 // [Fog::RectangularGradientT<>]
 // ============================================================================
 
-FOG_CLASS_PRECISION_F_D(RectangularGradient)
+_FOG_NUM_T(RectangularGradient)
+_FOG_NUM_F(RectangularGradient)
+_FOG_NUM_D(RectangularGradient)
 
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::RectangularGradientF, Fog::TYPEINFO_MOVABLE)
-_FOG_TYPEINFO_DECLARE(Fog::RectangularGradientD, Fog::TYPEINFO_MOVABLE)
 
 // [Guard]
 #endif // _FOG_G2D_SOURCE_RECTANGULARGRADIENT_H

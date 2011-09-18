@@ -10,7 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Init_p.h>
-#include <Fog/Core/Global/Internals_p.h>
+#include <Fog/Core/Global/Private.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/Internals_p.h>
@@ -21,19 +21,18 @@
 
 namespace Fog {
 
-// ============================================================================
-// Based on the Graphics-Gems and several papers related to curve approximation,
-// curve-arc length calculation, etc...
-//
 // Please read these articles/papers (search for them):
-// - Fast, precise flattening of cubic Bézier path and offset curves
-// - Computing the Arc Length of Quadratic/Cubic Bezier Curves
-// ============================================================================
+//
+//   - Graphics-Gems
+//   - Fast, precise flattening of cubic Bézier path and offset curves
+//   - Computing the Arc Length of Quadratic/Cubic Bezier Curves
 
 // ============================================================================
 // [Fog::QBezier - GetBoundingBox]
 // ============================================================================
 
+// We know that there is an extrema only when the control point is outside of
+// the bounding box created by the two end points.
 template<typename NumT>
 static err_t FOG_CDECL QBezierT_getBoundingBox(const NumT_(Point)* self, NumT_(Box)* dst)
 {
@@ -45,13 +44,33 @@ static err_t FOG_CDECL QBezierT_getBoundingBox(const NumT_(Point)* self, NumT_(B
   if (self[2].x < pMin.x) pMin.x = self[2].x; else if (self[2].x > pMax.x) pMax.x = self[2].x;
   if (self[2].y < pMin.y) pMin.y = self[2].y; else if (self[2].y > pMax.y) pMax.y = self[2].y;
 
-  // X/Y extrema.
-  NumT t0 = (self[0].x - self[1].x) / (self[0].x - NumT(2.0) * self[1].x + self[2].x);
-  NumT t1 = (self[0].y - self[1].y) / (self[0].y - NumT(2.0) * self[1].y + self[2].y);
+  // Merge X extrema.
+  if (self[1].x < pMin.x || self[1].x > pMax.x)
+  {
+    NumT t = (self[0].x - self[1].x) / (self[0].x - NumT(2.0) * self[1].x + self[2].x);
+    NumT a, b, c;
+    _FOG_QUAD_COEFF(NumT, t, a, b, c);
 
-  NumT a, b, c;
-  _FOG_QUAD_MERGE(NumT, t0, self, pMin, pMax);
-  _FOG_QUAD_MERGE(NumT, t1, self, pMin, pMax);
+    NumT x = a * self[0].x + b * self[1].x + c * self[2].x;
+    if (x < pMin.x)
+      pMin.x = x;
+    else if (x > pMax.x)
+      pMax.x = x;
+  }
+
+  // Merge Y extrema.
+  if (self[1].y < pMin.y || self[1].y > pMax.y)
+  {
+    NumT t = (self[0].y - self[1].y) / (self[0].y - NumT(2.0) * self[1].y + self[2].y);
+    NumT a, b, c;
+    _FOG_QUAD_COEFF(NumT, t, a, b, c);
+
+    NumT y = a * self[0].y + b * self[1].y + c * self[2].y;
+    if (y < pMin.y)
+      pMin.y = y;
+    else if (y > pMax.y)
+      pMax.y = y;
+  }
 
   dst->setBox(pMin.x, pMin.y, pMax.x, pMax.y);
   return ERR_OK;
@@ -86,17 +105,33 @@ static err_t FOG_CDECL QBezierT_getSplineBBox(const NumT_(Point)* self, size_t l
   for (i = 0; i < length; i += 2)
   {
     const NumT_(Point)* curve = &self[i];
-    NumT cx = curve[1].x;
-    NumT cy = curve[1].y;
 
-    if (cx < pMin.x || cy < pMin.y || cx > pMax.x || cy > pMax.y)
+    // Merge X extrema.
+    if (curve[1].x < pMin.x || curve[1].x > pMax.x)
     {
-      NumT t0 = (curve[0].x - curve[1].x) / (curve[0].x - NumT(2.0) * curve[1].x + curve[2].x);
-      NumT t1 = (curve[0].y - curve[1].y) / (curve[0].y - NumT(2.0) * curve[1].y + curve[2].y);
-
+      NumT t = (curve[0].x - curve[1].x) / (curve[0].x - NumT(2.0) * curve[1].x + curve[2].x);
       NumT a, b, c;
-      _FOG_QUAD_MERGE(NumT, t0, curve, pMin, pMax);
-      _FOG_QUAD_MERGE(NumT, t1, curve, pMin, pMax);
+      _FOG_QUAD_COEFF(NumT, t, a, b, c);
+
+      NumT x = a * curve[0].x + b * curve[1].x + c * curve[2].x;
+      if (x < pMin.x)
+        pMin.x = x;
+      else if (x > pMax.x)
+        pMax.x = x;
+    }
+
+    // Merge Y extrema.
+    if (curve[1].y < pMin.y || curve[1].y > pMax.y)
+    {
+      NumT t = (curve[0].y - curve[1].y) / (curve[0].y - NumT(2.0) * curve[1].y + curve[2].y);
+      NumT a, b, c;
+      _FOG_QUAD_COEFF(NumT, t, a, b, c);
+
+      NumT y = a * curve[0].y + b * curve[1].y + c * curve[2].y;
+      if (y < pMin.y)
+        pMin.y = y;
+      else if (y > pMax.y)
+        pMax.y = y;
     }
   }
 
@@ -223,7 +258,7 @@ _Realloc:
     NumT d = Math::abs(((x1 - x2) * dy - (y1 - y2) * dx));
     NumT da;
 
-    if (d > Math2dConst<NumT>::getCollinearityEpsilon())
+    if (d > MathConstant<NumT>::getCollinearityEpsilon())
     {
       // Regular case.
       if (d * d <= distanceToleranceSquare * (dx*dx + dy*dy))
@@ -351,17 +386,17 @@ _InvalidNumber:
 
 FOG_NO_EXPORT void QBezier_init(void)
 {
-  _api.quadcurvef.getBoundingBox = QBezierT_getBoundingBox<float>;
-  _api.quadcurved.getBoundingBox = QBezierT_getBoundingBox<double>;
+  _api.qbezierf.getBoundingBox = QBezierT_getBoundingBox<float>;
+  _api.qbezierd.getBoundingBox = QBezierT_getBoundingBox<double>;
 
-  _api.quadcurvef.getSplineBBox = QBezierT_getSplineBBox<float>;
-  _api.quadcurved.getSplineBBox = QBezierT_getSplineBBox<double>;
+  _api.qbezierf.getSplineBBox = QBezierT_getSplineBBox<float>;
+  _api.qbezierd.getSplineBBox = QBezierT_getSplineBBox<double>;
 
-  _api.quadcurvef.getLength = QBezierT_getLength<float>;
-  _api.quadcurved.getLength = QBezierT_getLength<double>;
+  _api.qbezierf.getLength = QBezierT_getLength<float>;
+  _api.qbezierd.getLength = QBezierT_getLength<double>;
 
-  _api.quadcurvef.flatten = QBezierT_flatten<float>;
-  _api.quadcurved.flatten = QBezierT_flatten<double>;
+  _api.qbezierf.flatten = QBezierT_flatten<float>;
+  _api.qbezierd.flatten = QBezierT_flatten<double>;
 }
 
 } // Fog namespace

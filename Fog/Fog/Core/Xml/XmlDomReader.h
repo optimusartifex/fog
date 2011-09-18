@@ -34,15 +34,15 @@ struct FOG_API XmlDomReader : public XmlSaxReader
   // [Event Handlers]
   // --------------------------------------------------------------------------
 
-  virtual err_t onAddElement(const Utf16& tagName);
-  virtual err_t onCloseElement(const Utf16& tagName);
-  virtual err_t onAddAttribute(const Utf16& name, const Utf16& value);
+  virtual err_t onAddElement(const StubW& tagName);
+  virtual err_t onCloseElement(const StubW& tagName);
+  virtual err_t onAddAttribute(const StubW& name, const StubW& value);
 
-  virtual err_t onAddText(const Utf16& data, bool isWhiteSpace);
-  virtual err_t onAddCDATA(const Utf16& data);
-  virtual err_t onAddDOCTYPE(const List<String>& doctype);
-  virtual err_t onAddPI(const Utf16& data);
-  virtual err_t onAddComment(const Utf16& data);
+  virtual err_t onAddText(const StubW& data, bool isWhiteSpace);
+  virtual err_t onAddCDATA(const StubW& data);
+  virtual err_t onAddDOCTYPE(const List<StringW>& doctype);
+  virtual err_t onAddPI(const StubW& data);
+  virtual err_t onAddComment(const StubW& data);
 
   FOG_INLINE XmlDocument* getDocument() const { return _document; }
 

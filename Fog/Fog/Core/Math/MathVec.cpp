@@ -20,12 +20,14 @@ namespace Fog {
 
 static void FOG_CDECL MathF_vecFloatFromDouble(float* dst, const double* src, size_t length)
 {
-  for (size_t i = 0; i < length; i++) dst[i] = float(src[i]);
+  for (size_t i = 0; i < length; i++)
+    dst[i] = float(src[i]);
 }
 
 static void FOG_CDECL MathD_vecDoubleFromFloat(double* dst, const float* src, size_t length)
 {
-  for (size_t i = 0; i < length; i++) dst[i] = double(src[i]);
+  for (size_t i = 0; i < length; i++)
+    dst[i] = double(src[i]);
 }
 
 // ============================================================================

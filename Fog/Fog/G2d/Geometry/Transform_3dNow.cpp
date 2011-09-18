@@ -186,7 +186,7 @@ static void FOG_CDECL G2d_TransformF_mapPointsF_Affine_3dNow(const TransformF& s
 // [Fog::G2d - Library Initializers]
 // ============================================================================
 
-FOG_NO_EXPORT void Transform_init3dNow(void)
+FOG_NO_EXPORT void Transform_init_3dNow(void)
 {
   _g2d.transformf.mapPointsF[TRANSFORM_TYPE_TRANSLATION] = _G2d_TransformF_mapPointsF_Translation_3dNow;
   _g2d.transformf.mapPointsF[TRANSFORM_TYPE_SCALING    ] = _G2d_TransformF_mapPointsF_Scaling_3dNow;

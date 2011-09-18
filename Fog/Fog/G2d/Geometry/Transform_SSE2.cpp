@@ -1210,12 +1210,12 @@ static void FOG_CDECL TransformD_mapVectorD_SSE2(const TransformD& self, PointD&
       rcp0 = _mm_add_sd(rcp0, _mm_load_sd(&self._22));
       rcp0 = _mm_loadh_pd(rcp0, &self._22);
 
-      rcpX = FOG_SSE_GET_CONST_PD(m128d_2x_sn);
+      rcpX = FOG_XMM_GET_CONST_PD(m128d_2x_sn);
       rcpX = _mm_and_pd(rcpX, rcp0);
       rcp0 = _mm_xor_pd(rcp0, rcpX);
-      rcp0 = _mm_max_pd(rcp0, FOG_SSE_GET_CONST_PD(m128d_2x_eps));
+      rcp0 = _mm_max_pd(rcp0, FOG_XMM_GET_CONST_PD(m128d_2x_eps));
       rcp0 = _mm_xor_pd(rcp0, rcpX);
-      rcp0 = _mm_div_pd(FOG_SSE_GET_CONST_PD(m128d_2x_one), rcp0);
+      rcp0 = _mm_div_pd(FOG_XMM_GET_CONST_PD(m128d_2x_one), rcp0);
 
       rcpX = _mm_loadu_pd(&self._20);
       src0 = _mm_add_pd(src0, rcpX);
@@ -1242,7 +1242,7 @@ static void FOG_CDECL TransformD_mapVectorD_SSE2(const TransformD& self, PointD&
 // [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void Transform_initSSE2(void)
+FOG_NO_EXPORT void Transform_init_SSE2(void)
 {
   _api.transformd.mapPointD = TransformD_mapPointD_SSE2;
   _api.transformd.mapVectorD = TransformD_mapVectorD_SSE2;

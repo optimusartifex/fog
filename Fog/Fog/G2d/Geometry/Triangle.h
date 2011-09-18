@@ -11,7 +11,7 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemOps.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
@@ -349,25 +349,20 @@ FOG_INLINE void TriangleF::setTriangle(const TriangleD& other)
 // [Fog::TriangleT<>]
 // ============================================================================
 
-FOG_CLASS_PRECISION_F_D(Triangle)
+_FOG_NUM_T(Triangle)
+_FOG_NUM_F(Triangle)
+_FOG_NUM_D(Triangle)
 
 //! @}
 
 } // Fog namespace
 
 // ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::TriangleF, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::TriangleD, Fog::TYPEINFO_PRIMITIVE)
-
-// ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_FUZZY_DECLARE(Fog::TriangleF, Math::feqv(reinterpret_cast<const float *>(&a), reinterpret_cast<const float *>(&b), 6));
-FOG_FUZZY_DECLARE(Fog::TriangleD, Math::feqv(reinterpret_cast<const double*>(&a), reinterpret_cast<const double*>(&b), 6));
+FOG_FUZZY_DECLARE_F_VEC(Fog::TriangleF, 6);
+FOG_FUZZY_DECLARE_D_VEC(Fog::TriangleD, 6);
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_TRIANGLE_H

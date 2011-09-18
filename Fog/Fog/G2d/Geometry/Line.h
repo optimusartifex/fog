@@ -11,7 +11,8 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemOps.h>
+#include <Fog/Core/Tools/Swap.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
@@ -148,6 +149,20 @@ struct FOG_NO_EXPORT LineF
     return _api.linef.intersect(&dst, a.p, b.p);
   }
 
+  static FOG_INLINE float polyAngle(const PointF pts[3])
+  {
+    return _api.linef.polyAngle(pts);
+  }
+
+  static FOG_INLINE float polyAngle(const PointF& a, const PointF& b, const PointF& c)
+  {
+    PointF pts[3];
+    pts[0] = a;
+    pts[1] = b;
+    pts[2] = c;
+    return _api.linef.polyAngle(pts);
+  }
+
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
@@ -282,6 +297,20 @@ struct FOG_NO_EXPORT LineD
     return _api.lined.intersect(&dst, a.p, b.p);
   }
 
+  static FOG_INLINE double polyAngle(const PointD pts[3])
+  {
+    return _api.lined.polyAngle(pts);
+  }
+
+  static FOG_INLINE double polyAngle(const PointD& a, const PointD& b, const PointD& c)
+  {
+    PointD pts[3];
+    pts[0] = a;
+    pts[1] = b;
+    pts[2] = c;
+    return _api.lined.polyAngle(pts);
+  }
+
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
@@ -303,25 +332,20 @@ FOG_INLINE void LineF::setLine(const LineD& line)
 // [Fog::LineT<>]
 // ============================================================================
 
-FOG_CLASS_PRECISION_F_D(Line)
+_FOG_NUM_T(Line)
+_FOG_NUM_F(Line)
+_FOG_NUM_D(Line)
 
 //! @}
 
 } // Fog namespace
 
 // ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::LineF, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::LineD, Fog::TYPEINFO_PRIMITIVE)
-
-// ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_FUZZY_DECLARE(Fog::LineF, Math::feqv((const float *)&a, (const float *)&b, 4))
-FOG_FUZZY_DECLARE(Fog::LineD, Math::feqv((const double*)&a, (const double*)&b, 4))
+FOG_FUZZY_DECLARE_F_VEC(Fog::LineF, 4)
+FOG_FUZZY_DECLARE_D_VEC(Fog::LineD, 4)
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_LINE_H

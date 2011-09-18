@@ -8,10 +8,10 @@
 #define _FOG_GUI_ENGINE_GUIENGINE_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/Hash.h>
-#include <Fog/Core/Library/Library.h>
-#include <Fog/Core/System/Object.h>
-#include <Fog/Core/System/Timer.h>
+#include <Fog/Core/Kernel/Object.h>
+#include <Fog/Core/Kernel/Timer.h>
+#include <Fog/Core/OS/Library.h>
+#include <Fog/Core/Tools/Hash.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Geometry/Size.h>
@@ -19,7 +19,6 @@
 #include <Fog/G2d/Imaging/ImageBits.h>
 #include <Fog/G2d/Imaging/ImageConverter.h>
 #include <Fog/G2d/Source/Color.h>
-#include <Fog/Gui/Global/Constants.h>
 
 namespace Fog {
 
@@ -157,7 +156,7 @@ struct FOG_API GuiEngine : public Object
   // --------------------------------------------------------------------------
 
   //! Widget mapper (Handle <-> GuiWindow)
-  typedef UnorderedHash<void*, GuiWindow*> WidgetMapper;
+  typedef Hash<void*, GuiWindow*> WidgetMapper;
 
   //! @brief Map windowing system handle to the @ref GuiWindow instance.
   virtual bool mapHandle(void* handle, GuiWindow* w);
@@ -387,8 +386,8 @@ struct FOG_API GuiWindow : public Object
 
   virtual err_t takeFocus() = 0;
 
-  virtual err_t setTitle(const String& title) = 0;
-  virtual err_t getTitle(String& title) = 0;
+  virtual err_t setTitle(const StringW& title) = 0;
+  virtual err_t getTitle(StringW& title) = 0;
 
   virtual err_t setIcon(const Image& icon) = 0;
   virtual err_t getIcon(Image& icon) = 0;
@@ -418,8 +417,8 @@ struct FOG_API GuiWindow : public Object
 
   virtual void onFocus(bool focus);
 
-  virtual bool onKeyPress(uint32_t key, uint32_t modifier, uint32_t systemCode, Char unicode);
-  virtual bool onKeyRelease(uint32_t key, uint32_t modifier, uint32_t systemCode, Char unicode);
+  virtual bool onKeyPress(uint32_t key, uint32_t modifier, uint32_t systemCode, CharW unicode);
+  virtual bool onKeyRelease(uint32_t key, uint32_t modifier, uint32_t systemCode, CharW unicode);
 
   virtual void setFocus(Widget* w, uint32_t reason);
   virtual void resetFocus();
@@ -547,7 +546,7 @@ struct FOG_API GuiWindow : public Object
   RectI _clientRect;
 
   //! @brief Window title.
-  String _title;
+  StringW _title;
   //! @brief Window resize granularity.
   PointI _sizeGranularity;
 
@@ -600,17 +599,17 @@ struct FOG_API GuiBackBuffer
   FOG_INLINE uint8_t* getPixels() const { return _buffer.data; }
   FOG_INLINE const SizeI& getSize() const { return _buffer.size; }
   FOG_INLINE uint32_t getFormat() const { return _buffer.format; }
-  FOG_INLINE sysint_t getStride() const { return _buffer.stride; }
+  FOG_INLINE ssize_t getStride() const { return _buffer.stride; }
 
   FOG_INLINE const SizeI& getCachedSize() const { return _cachedSize; }
 
   FOG_INLINE uint8_t* getPrimaryPixels() const { return _primaryPixels; }
-  FOG_INLINE sysint_t getPrimaryStride() const { return _primaryStride; }
+  FOG_INLINE ssize_t getPrimaryStride() const { return _primaryStride; }
 
   FOG_INLINE uint8_t* getSecondaryPixels() const { return _secondaryPixels; }
-  FOG_INLINE sysint_t getSecondaryStride() const { return _secondaryStride; }
+  FOG_INLINE ssize_t getSecondaryStride() const { return _secondaryStride; }
 
-  FOG_INLINE ImageConverterBlitLineFn getConvertFunc() const { return _convertFunc; }
+  FOG_INLINE ImageConverterBlitLineFunc getConvertFunc() const { return _convertFunc; }
   FOG_INLINE TimeTicks getCreatedTime() const { return _createdTime; }
   FOG_INLINE TimeTicks getExpireTime() const { return _expireTime; }
 
@@ -650,15 +649,15 @@ struct FOG_API GuiBackBuffer
   //! @brief Cached 32-bit double buffer pixel data.
   uint8_t* _primaryPixels;
   //! @brief Cached 32-bit double buffer stride.
-  sysint_t _primaryStride;
+  ssize_t _primaryStride;
 
   //! @brief Cached 4/8/16/24/32 bit buffer pixel data (only created when needed).
   uint8_t* _secondaryPixels;
   //! @brief Cached 4/8/16/24/32 bit buffer stride (only created when needed).
-  sysint_t _secondaryStride;
+  ssize_t _secondaryStride;
 
   //! @brief Converter used to convert pixels from secondary to primary buffer.
-  ImageConverterBlitLineFn _convertFunc;
+  ImageConverterBlitLineFunc _convertFunc;
   //! @brief Converter depth.
   int _convertDepth;
 
@@ -676,12 +675,12 @@ struct FOG_API GuiBackBuffer
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-_FOG_TYPEINFO_DECLARE(Fog::GuiEngine::DisplayInfo, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::GuiEngine::PaletteInfo, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::GuiEngine::CaretStatus, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::GuiEngine::MouseStatus, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::GuiEngine::SystemMouseStatus, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::GuiEngine::KeyboardStatus, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPE_DECLARE(Fog::GuiEngine::DisplayInfo, Fog::TYPE_CATEGORY_SIMPLE)
+_FOG_TYPE_DECLARE(Fog::GuiEngine::PaletteInfo, Fog::TYPE_CATEGORY_SIMPLE)
+_FOG_TYPE_DECLARE(Fog::GuiEngine::CaretStatus, Fog::TYPE_CATEGORY_SIMPLE)
+_FOG_TYPE_DECLARE(Fog::GuiEngine::MouseStatus, Fog::TYPE_CATEGORY_SIMPLE)
+_FOG_TYPE_DECLARE(Fog::GuiEngine::SystemMouseStatus, Fog::TYPE_CATEGORY_SIMPLE)
+_FOG_TYPE_DECLARE(Fog::GuiEngine::KeyboardStatus, Fog::TYPE_CATEGORY_SIMPLE)
 
 // [Guard]
 #endif // _FOG_GUI_ENGINE_GUIENGINE_H

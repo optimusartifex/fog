@@ -9,9 +9,9 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/Hash.h>
 #include <Fog/Core/Face/Face_C.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemOps.h>
+#include <Fog/Core/Tools/Hash.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Tools/Reduce_p.h>
 
@@ -57,7 +57,7 @@ void Reduce::reset()
 {
   _indexes.clear();
 
-  Memory::zero(_entities, sizeof(_entities));
+  MemOps::zero(_entities, sizeof(_entities));
   _count = 0;
 }
 
@@ -101,7 +101,7 @@ bool Reduce::analyze(const Image& image, bool discardAlphaChannel)
     case 24:
     case 32:
     {
-      UnorderedHash<uint32_t, uint64_t> hash;
+      Hash<uint32_t, uint64_t> hash;
 
       uint32_t mask = image.getFormatDescription().getUsedBits32();
       if (discardAlphaChannel) mask ^= image.getFormatDescription().getAMask32();
@@ -118,7 +118,7 @@ bool Reduce::analyze(const Image& image, bool discardAlphaChannel)
             \
             /* Increase the count of 'c' if it is already in the hash-table. */ \
             if (hash.contains(c)) \
-              (*hash[c])++; \
+              (*hash.usePtr(c))++; \
             /* Create new node if sum of the created nodes is smaller than 256. */ \
             else if (hash.getLength() < 256) \
               if (FOG_IS_ERROR(hash.put(c, 1))) return false; \
@@ -139,11 +139,13 @@ bool Reduce::analyze(const Image& image, bool discardAlphaChannel)
       // If we are here, the color reduction is possible.
       i = 0;
 
-      UnorderedHash<uint32_t, uint64_t>::ConstIterator it(hash);
-      for (it.toStart(); it.isValid(); it.toNext(), i++)
+      HashIterator<uint32_t, uint64_t> it(hash);
+      while (it.isValid())
       {
-        e[i].key   = it.key();
-        e[i].usage = it.value();
+        e[i].key   = it.getKey();
+        e[i].usage = it.getItem();
+
+        it.next();
       }
 
       // The count of items in the hash table means the count of colors used.
@@ -159,7 +161,7 @@ bool Reduce::analyze(const Image& image, bool discardAlphaChannel)
   qsort(e, _count, sizeof(Entity), _Reduce_compareAscent);
 
   // Fix the B&W images, it's usual that black color is at [0].
-  if (_count == 2 && e[1].key == 0) Memory::xchg_t<Entity>(&e[0], &e[1]);
+  if (_count == 2 && e[1].key == 0) MemOps::xchg_t<Entity>(&e[0], &e[1]);
 
   // Create a fast index table.
   for (i = 0; i < (int)_count; i++)
@@ -180,23 +182,28 @@ bool Reduce::analyze(const Image& image, bool discardAlphaChannel)
       case IMAGE_FORMAT_PRGB32:
         if (!discardAlphaChannel)
         {
-          for (uint32_t i = 0; i < _count; i++) pal[i] = _entities[i].key;
+          for (uint32_t i = 0; i < _count; i++)
+            pal[i] = _entities[i].key;
           break;
         }
         // ... Fall through ...
 
       case IMAGE_FORMAT_RGB24:
-        for (uint32_t i = 0; i < _count; i++) pal[i] = _entities[i].key | 0xFF000000;
+        for (uint32_t i = 0; i < _count; i++)
+          pal[i] = _entities[i].key | 0xFF000000;
         break;
 
       case IMAGE_FORMAT_A8:
-        for (uint32_t i = 0; i < _count; i++) pal[i] = _entities[i].key * 0x01010101;
+        for (uint32_t i = 0; i < _count; i++)
+          pal[i] = _entities[i].key * 0x01010101;
         break;
 
       case IMAGE_FORMAT_I8:
       {
         const Argb32* srcPal = image.getPalette().getData();
-        for (uint32_t i = 0; i < _count; i++) pal[i] = srcPal[_entities[i].key];
+        
+        for (uint32_t i = 0; i < _count; i++)
+          pal[i] = srcPal[_entities[i].key];
         break;
       }
 
@@ -220,7 +227,7 @@ _Fail:
 
 uint32_t Reduce::traslate(uint32_t key) const
 {
-  return _indexes.value(key, 255);
+  return _indexes.get(key, 255);
 }
 
 } // Fog namespace

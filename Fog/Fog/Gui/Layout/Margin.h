@@ -8,11 +8,9 @@
 #define _FOG_GUI_LAYOUT_MARGIN_H
 
 // [Dependencies]
-#include <Fog/Core/Config/Config.h>
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Ops.h>
-#include <Fog/Gui/Global/Constants.h>
+#include <Fog/Core/Memory/MemOps.h>
 
 namespace Fog {
 
@@ -116,7 +114,7 @@ struct FOG_NO_EXPORT Margin
 
   FOG_INLINE Margin& setMargin(const Margin &other)
   {
-    Memory::copy_t<Margin>(this, &other);
+    MemOps::copy_t<Margin>(this, &other);
     return *this;
   }
 
@@ -126,7 +124,7 @@ struct FOG_NO_EXPORT Margin
 
   FOG_INLINE Margin& clear()
   {
-    Memory::zero_t<Margin>(this);
+    MemOps::zero_t<Margin>(this);
     return *this;
   }
 
@@ -160,7 +158,7 @@ struct FOG_NO_EXPORT Margin
 
   FOG_INLINE bool eq(const Margin& other) const
   {
-    return Memory::eq_t<Margin>(this, &other);
+    return MemOps::eq_t<Margin>(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -188,7 +186,7 @@ struct FOG_NO_EXPORT Margin
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-_FOG_TYPEINFO_DECLARE(Fog::Margin, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPE_DECLARE(Fog::Margin, Fog::TYPE_CATEGORY_SIMPLE)
 
 // [Guard]
 #endif // _FOG_GUI_LAYOUT_MARGIN_H

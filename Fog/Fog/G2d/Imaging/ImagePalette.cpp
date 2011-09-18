@@ -11,8 +11,8 @@
 // [Dependencies]
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Alloc.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemMgr.h>
+#include <Fog/Core/Memory/MemOps.h>
 #include <Fog/G2d/Imaging/ImagePalette.h>
 #include <Fog/G2d/Render/RenderApi_p.h>
 #include <Fog/G2d/Render/RenderConstants_p.h>
@@ -25,10 +25,10 @@ namespace Fog {
 
 static ImagePaletteData* ImagePalette_dalloc(void)
 {
-  ImagePaletteData* d = reinterpret_cast<ImagePaletteData*>(Memory::alloc(sizeof(ImagePaletteData)));
+  ImagePaletteData* d = reinterpret_cast<ImagePaletteData*>(MemMgr::alloc(sizeof(ImagePaletteData)));
   if (FOG_IS_NULL(d)) return NULL;
 
-  d->refCount.init(1);
+  d->reference.init(1);
   d->length = 256;
 
   return d;
@@ -38,9 +38,9 @@ static ImagePaletteData* ImagePalette_dalloc(void)
 // [Fog::ImagePalette - Construction / Destruction]
 // ============================================================================
 
-ImagePalette::ImagePalette() : _d(_dnull->ref()) {}
-ImagePalette::ImagePalette(const ImagePalette& other) : _d(other._d->ref()) {}
-ImagePalette::~ImagePalette() { _d->deref(); }
+ImagePalette::ImagePalette() : _d(_dnull->addRef()) {}
+ImagePalette::ImagePalette(const ImagePalette& other) : _d(other._d->addRef()) {}
+ImagePalette::~ImagePalette() { _d->release(); }
 
 // ============================================================================
 // [Fog::ImagePalette - Data]
@@ -54,15 +54,15 @@ err_t ImagePalette::_detach()
   if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
   newd->length = _d->length;
-  Memory::copy(newd->data, _d->data, sizeof(Argb32) * 256);
+  MemOps::copy(newd->data, _d->data, sizeof(Argb32) * 256);
 
-  atomicPtrXchg(&_d, newd)->deref();
+  atomicPtrXchg(&_d, newd)->release();
   return ERR_OK;
 }
 
 err_t ImagePalette::setData(const ImagePalette& other)
 {
-  atomicPtrXchg(&_d, other._d->ref())->deref();
+  atomicPtrXchg(&_d, other._d->addRef())->release();
   return ERR_OK;
 }
 
@@ -74,14 +74,14 @@ err_t ImagePalette::setDeep(const ImagePalette& other)
     if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
     newd->length = other._d->length;
-    Memory::copy(newd->data, other._d->data, sizeof(Argb32) * 256);
+    MemOps::copy(newd->data, other._d->data, sizeof(Argb32) * 256);
 
-    atomicPtrXchg(&_d, newd)->deref();
+    atomicPtrXchg(&_d, newd)->release();
   }
   else
   {
     _d->length = other._d->length;
-    Memory::copy(_d->data, other._d->data, sizeof(Argb32) * 256);
+    MemOps::copy(_d->data, other._d->data, sizeof(Argb32) * 256);
   }
 
   return ERR_OK;
@@ -101,8 +101,8 @@ err_t ImagePalette::setData(const Range& range, const Argb32* entries)
     ImagePaletteData* newd = ImagePalette_dalloc();
     if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
-    Memory::copy(newd->data, _d->data, sizeof(Argb32) * 256);
-    atomicPtrXchg(&_d, newd)->deref();
+    MemOps::copy(newd->data, _d->data, sizeof(Argb32) * 256);
+    atomicPtrXchg(&_d, newd)->release();
   }
 
   _d->length = Math::max<uint32_t>(_d->length, (uint32_t)rend);
@@ -143,7 +143,7 @@ void ImagePalette::clear()
 
 void ImagePalette::reset()
 {
-  atomicPtrXchg(&_d, _dnull->ref())->deref();
+  atomicPtrXchg(&_d, _dnull->addRef())->release();
 }
 
 // ============================================================================
@@ -187,7 +187,7 @@ ImagePalette ImagePalette::fromGreyscale(uint count)
   ImagePaletteData* d = NULL;
 
   if (count <= 1 || count > 256) { goto _End; }
-  if (count == 256) { d = ImagePalette_dgrey->ref(); goto _Ret; }
+  if (count == 256) { d = ImagePalette_dgrey->addRef(); goto _Ret; }
 
   d = ImagePalette_dalloc();
   if (FOG_LIKELY(d != NULL))
@@ -204,7 +204,7 @@ ImagePalette ImagePalette::fromGreyscale(uint count)
   }
 
 _End:
-  if (FOG_IS_NULL(d)) d = _dnull->ref();
+  if (FOG_IS_NULL(d)) d = _dnull->addRef();
 
 _Ret:
   return ImagePalette(d);
@@ -245,7 +245,7 @@ ImagePalette ImagePalette::fromCube(uint32_t nr, uint32_t ng, uint32_t nb)
   }
 
 _End:
-  if (FOG_IS_NULL(d)) d = _dnull->ref();
+  if (FOG_IS_NULL(d)) d = _dnull->addRef();
   return ImagePalette(d);
 }
 
@@ -280,8 +280,8 @@ FOG_NO_EXPORT void ImagePalette_init(void)
   // Setup 'Null' palette.
   // --------------------------------------------------------------------------
 
-  d = ImagePalette::_dnull.instancep();
-  d->refCount.init(1);
+  d = &ImagePalette::_dnull;
+  d->reference.init(1);
   d->length = 256;
 
   for (i = 0, c0 = 0xFF000000; i < 256; i++)
@@ -291,8 +291,8 @@ FOG_NO_EXPORT void ImagePalette_init(void)
   // Setup 'Greyscale' palette
   // --------------------------------------------------------------------------
 
-  d = ImagePalette_dgrey.instancep();
-  d->refCount.init(1);
+  d = &ImagePalette_dgrey;
+  d->reference.init(1);
   d->length = 256;
 
   for (i = 0, c0 = 0xFF000000; i < 256; i++, c0 += 0x00010101)

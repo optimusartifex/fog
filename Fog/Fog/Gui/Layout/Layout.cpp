@@ -40,7 +40,7 @@ Layout::Layout() :
   _enabled(1),
   _nextactivate(0)
 {
-  _objectFlags |= OBJECT_FLAG_IS_LAYOUT;
+  _vType |= OBJECT_FLAG_IS_LAYOUT;
 }
 
 Layout::Layout(Widget* parent, Layout* parentLayout) :
@@ -52,7 +52,7 @@ Layout::Layout(Widget* parent, Layout* parentLayout) :
   _parentItem(0),
   _nextactivate(0)
 {
-  _objectFlags |= OBJECT_FLAG_IS_LAYOUT;
+  _vType |= OBJECT_FLAG_IS_LAYOUT;
 
   if (parentLayout)
   {
@@ -82,7 +82,7 @@ Layout::~Layout()
 
   while(_children.getLength())
   {
-    remove(_children.at(0));
+    remove(_children.getAt(0));
   }
 }
 

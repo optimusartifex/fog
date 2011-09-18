@@ -8,7 +8,7 @@
 #define _FOG_CORE_GLOBAL_UNINITIALIZED_H
 
 // [Dependencies]
-#include <Fog/Core/Config/Config.h>
+#include <Fog/Core/C++/Base.h>
 
 namespace Fog {
 

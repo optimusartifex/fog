@@ -9,12 +9,11 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/Hash.h>
-#include <Fog/Core/Collection/List.h>
 #include <Fog/Core/IO/MapFile.h>
 #include <Fog/Core/IO/Stream.h>
-#include <Fog/Core/Tools/Byte.h>
 #include <Fog/Core/Tools/Char.h>
+#include <Fog/Core/Tools/Hash.h>
+#include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringUtil.h>
 #include <Fog/Core/Tools/TextCodec.h>
@@ -91,7 +90,7 @@ enum XML_SAX_ELEMENT
 // [Fog::XmlSaxReader - Helpers]
 // ============================================================================
 
-static bool xmlIsWhiteSpace(const Char* buffer, const Char* end)
+static bool xmlIsWhiteSpace(const CharW* buffer, const CharW* end)
 {
   while (buffer < end)
   {
@@ -113,7 +112,7 @@ XmlSaxReader::~XmlSaxReader()
 {
 }
 
-err_t XmlSaxReader::parseFile(const String& fileName)
+err_t XmlSaxReader::parseFile(const StringW& fileName)
 {
   Stream stream;
   err_t err = stream.openFile(fileName, STREAM_OPEN_READ);
@@ -124,7 +123,7 @@ err_t XmlSaxReader::parseFile(const String& fileName)
 
 err_t XmlSaxReader::parseStream(Stream& stream)
 {
-  ByteArray buffer;
+  StringA buffer;
   stream.readAll(buffer);
   return parseMemory(reinterpret_cast<const void*>(buffer.getData()), buffer.getLength());
 }
@@ -134,42 +133,42 @@ err_t XmlSaxReader::parseMemory(const void* mem, size_t size)
   TextCodec textCodec = TextCodec::utf8();
   _detectEncoding(textCodec, mem, size);
 
-  String buffer;
-  err_t err = textCodec.decode(buffer, Stub8(reinterpret_cast<const char*>(mem), size));
+  StringW buffer;
+  err_t err = textCodec.decode(buffer, StubA(reinterpret_cast<const char*>(mem), size));
   if (FOG_IS_ERROR(err)) return err;
 
   return parseString(buffer.getData(), buffer.getLength());
 }
 
-err_t XmlSaxReader::parseString(const Char* s, size_t len)
+err_t XmlSaxReader::parseString(const CharW* s, size_t len)
 {
   // Check if encoded length is zero (no document).
   if (len == DETECT_LENGTH) len = StringUtil::len(s);
   if (len == 0) return ERR_XML_NO_DOCUMENT;
 
-  const Char* strCur = s;           // Parsing buffer.
-  const Char* strEnd = s + len;     // End of buffer.
+  const CharW* strCur = s;           // Parsing buffer.
+  const CharW* strEnd = s + len;     // End of buffer.
 
-  const Char* mark = s;             // Mark to start position of currently parsed item.
+  const CharW* mark = s;             // Mark to start position of currently parsed item.
 
-  const Char* markTagStart  = NULL; // Mark to start position of currently parsed tag name.
-  const Char* markTagEnd    = NULL; // Mark to end position of currently parsed tag name.
+  const CharW* markTagStart  = NULL; // Mark to start position of currently parsed tag name.
+  const CharW* markTagEnd    = NULL; // Mark to end position of currently parsed tag name.
 
-  const Char* markAttrStart = NULL; // Mark to start of attribute.
-  const Char* markAttrEnd   = NULL; // Mark to end of attribute.
+  const CharW* markAttrStart = NULL; // Mark to start of attribute.
+  const CharW* markAttrEnd   = NULL; // Mark to end of attribute.
 
-  const Char* markDataStart = NULL; // Mark to start of data (CDATA, Comment, attribute text, ...).
-  const Char* markDataEnd   = NULL; // Mark to end of data (CDATA, Comment, attribute text, ...).
+  const CharW* markDataStart = NULL; // Mark to start of data (CDATA, Comment, attribute text, ...).
+  const CharW* markDataEnd   = NULL; // Mark to end of data (CDATA, Comment, attribute text, ...).
 
-  Char ch;                          // Current character.
-  Char attr;                        // Attribute marker (' or ").
+  CharW ch;                          // Current character.
+  CharW attr;                        // Attribute marker (' or ").
 
   err_t err = ERR_OK;               // Current error code.
   int state = XML_SAX_STATE_READY;  // Current state.
   int element = XML_SAX_ELEMENT_TAG;// Element type.
   int depth = 0;                    // Current depth.
 
-  List<String> doctype;
+  List<StringW> doctype;
 
   for (;;)
   {
@@ -182,14 +181,14 @@ _Continue:
     {
       case XML_SAX_STATE_READY:
         // If xml char has special meaning, we will process it, otherwise go away.
-        if (ch == Char('<'))
+        if (ch == CharW('<'))
         {
           // If there is text, we will call addText().
           if (mark != strCur)
           {
             bool isWhiteSpace = xmlIsWhiteSpace(mark, strCur);
 
-            err = onAddText(Utf16(mark, (size_t)(strCur - mark)), isWhiteSpace);
+            err = onAddText(StubW(mark, (size_t)(strCur - mark)), isWhiteSpace);
             if (FOG_IS_ERROR(err))
               goto _End;
           }
@@ -201,7 +200,7 @@ _Continue:
 
       case XML_SAX_STATE_TAG_BEGIN:
         // Match start tag name (this is probably the most common).
-        if (ch.isLetter() || ch == Char('_') || ch == Char(':'))
+        if (ch.isLetter() || ch == CharW('_') || ch == CharW(':'))
         {
           state = XML_SAX_STATE_TAG_NAME;
           markTagStart = strCur;
@@ -209,19 +208,19 @@ _Continue:
         }
 
         // Match closing tag slash.
-        if (ch == Char('/'))
+        if (ch == CharW('/'))
         {
           state = XML_SAX_STATE_TAG_CLOSE;
           break;
         }
 
-        if (ch == Char('?'))
+        if (ch == CharW('?'))
         {
           state = XML_SAX_STATE_TAG_QUESTION_MARK;
           break;
         }
 
-        if (ch == Char('!'))
+        if (ch == CharW('!'))
         {
           state = XML_SAX_STATE_TAG_EXCLAMATION_MARK;
           break;
@@ -234,7 +233,7 @@ _Continue:
         goto _End;
 
       case XML_SAX_STATE_TAG_NAME:
-        if (ch.isLetter() || ch == Char('_') || ch == Char(':') || ch == Char('-') || ch == Char('.'))
+        if (ch.isLetter() || ch == CharW('_') || ch == CharW(':') || ch == CharW('-') || ch == CharW('.'))
           break;
 
         markTagEnd = strCur;
@@ -243,7 +242,7 @@ _Continue:
         depth++;
         element = XML_SAX_ELEMENT_TAG;
 
-        err = onAddElement(Utf16(markTagStart, (size_t)(markTagEnd - markTagStart)));
+        err = onAddElement(StubW(markTagStart, (size_t)(markTagEnd - markTagStart)));
         if (FOG_IS_ERROR(err))
           goto _End;
 
@@ -253,7 +252,7 @@ _Continue:
         if (ch.isSpace()) break;
 
         // Check for start of xml attribute.
-        if (ch.isLetter() || ch == Char('_'))
+        if (ch.isLetter() || ch == CharW('_'))
         {
           markAttrStart = strCur;
           state = XML_SAX_STATE_TAG_INSIDE_ATTRIBUTE_NAME;
@@ -264,17 +263,17 @@ _Continue:
         switch (element)
         {
           case XML_SAX_ELEMENT_TAG:
-            if (ch == Char('/'))
+            if (ch == CharW('/'))
             {
               element = XML_SAX_ELEMENT_TAG_SELF_CLOSING;
               state = XML_SAX_STATE_TAG_END;
               strCur++;
               goto _Begin;
             }
-            if (ch == Char('>')) goto _TagEnd;
+            if (ch == CharW('>')) goto _TagEnd;
             break;
           case XML_SAX_ELEMENT_XML:
-            if (ch == Char('?'))
+            if (ch == CharW('?'))
             {
               state = XML_SAX_STATE_TAG_END;
               strCur++;
@@ -287,7 +286,7 @@ _Continue:
         goto _End;
 
       case XML_SAX_STATE_TAG_INSIDE_ATTRIBUTE_NAME:
-        if (ch.isNumlet()  || ch == Char('_') || ch == Char(':') || ch == Char('-') || ch == Char('.')) break;
+        if (ch.isNumlet()  || ch == CharW('_') || ch == CharW(':') || ch == CharW('-') || ch == CharW('.')) break;
 
         markAttrEnd = strCur;
 
@@ -299,7 +298,7 @@ _Continue:
           ch = *strCur;
         }
 
-        if (ch != Char('='))
+        if (ch != CharW('='))
         {
           err = ERR_XML_SYNTAX_ERROR;
           goto _End;
@@ -316,7 +315,7 @@ _Continue:
           ch = *strCur;
         }
 
-        if (ch == Char('\'') || ch == Char('\"'))
+        if (ch == CharW('\'') || ch == CharW('\"'))
         {
           attr = ch;
           state = XML_SAX_STATE_TAG_INSIDE_ATTRIBUTE_VALUE;
@@ -337,8 +336,8 @@ _Continue:
         state = XML_SAX_STATE_TAG_INSIDE;
 
         err = onAddAttribute(
-          Utf16(markAttrStart, (size_t)(markAttrEnd - markAttrStart)),
-          Utf16(markDataStart, (size_t)(markDataEnd - markDataStart)));
+          StubW(markAttrStart, (size_t)(markAttrEnd - markAttrStart)),
+          StubW(markDataStart, (size_t)(markDataEnd - markDataStart)));
         if (FOG_IS_ERROR(err))
           goto _End;
 
@@ -347,7 +346,7 @@ _Continue:
       case XML_SAX_STATE_TAG_END:
         if (ch.isSpace()) break;
 
-        if (ch == Char('>'))
+        if (ch == CharW('>'))
         {
 _TagEnd:
           state = XML_SAX_STATE_READY;
@@ -357,7 +356,7 @@ _TagEnd:
           if (element == XML_SAX_ELEMENT_TAG_SELF_CLOSING)
           {
             depth--;
-            err = onCloseElement(Utf16(markTagStart, (size_t)(markTagEnd - markTagStart)));
+            err = onCloseElement(StubW(markTagStart, (size_t)(markTagEnd - markTagStart)));
             if (FOG_IS_ERROR(err))
               goto _End;
           }
@@ -369,7 +368,7 @@ _TagEnd:
 
       case XML_SAX_STATE_TAG_CLOSE:
         // Only possible sequence here is [StartTagSequence].
-        if (ch.isLetter() || ch == Char('_') || ch == Char(':'))
+        if (ch.isLetter() || ch == CharW('_') || ch == CharW(':'))
         {
           state = XML_SAX_STATE_TAG_CLOSE_NAME;
           markTagStart = strCur;
@@ -380,7 +379,7 @@ _TagEnd:
         goto _End;
 
       case XML_SAX_STATE_TAG_CLOSE_NAME:
-        if (ch.isNumlet() || ch == Char('_') || ch == Char(':') || ch == Char('-') || ch == Char('.'))
+        if (ch.isNumlet() || ch == CharW('_') || ch == CharW(':') || ch == CharW('-') || ch == CharW('.'))
           break;
 
         state = XML_SAX_STATE_TAG_CLOSE_END;
@@ -390,13 +389,13 @@ _TagEnd:
 
       case XML_SAX_STATE_TAG_CLOSE_END:
         // This is we are waiting for.
-        if (ch == Char('>'))
+        if (ch == CharW('>'))
         {
           state = XML_SAX_STATE_READY;
           mark = ++strCur;
           depth--;
 
-          err = onCloseElement(Utf16(markTagStart, (size_t)(markTagEnd - markTagStart)));
+          err = onCloseElement(StubW(markTagStart, (size_t)(markTagEnd - markTagStart)));
           if (FOG_IS_ERROR(err))
             goto _End;
 
@@ -457,7 +456,7 @@ _TagEnd:
 
         if (doctype.getLength() < 2)
         {
-          if (ch.isLetter() || ch == Char('_'))
+          if (ch.isLetter() || ch == CharW('_'))
           {
             state = XML_SAX_STATE_DOCTYPE_TEXT;
             markDataStart = ++strCur;
@@ -465,11 +464,11 @@ _TagEnd:
           }
 
           // End of DOCTYPE
-          if (ch == Char('>')) goto _DOCTYPEEnd;
+          if (ch == CharW('>')) goto _DOCTYPEEnd;
         }
         else
         {
-          if (ch == Char('\"'))
+          if (ch == CharW('\"'))
           {
             if (doctype.getLength() < 4)
             {
@@ -483,7 +482,7 @@ _TagEnd:
               goto _End;
             }
           }
-          if (ch == Char('>'))
+          if (ch == CharW('>'))
           {
 _DOCTYPEEnd:
             if ((err = onAddDOCTYPE(doctype))) return err;
@@ -497,29 +496,29 @@ _DOCTYPEEnd:
         break;
 
       case XML_SAX_STATE_DOCTYPE_TEXT:
-        if (ch.isNumlet() || ch == Char('_') || ch == Char(':') || ch == Char('-') || ch == Char('.')) break;
+        if (ch.isNumlet() || ch == CharW('_') || ch == CharW(':') || ch == CharW('-') || ch == CharW('.')) break;
         markDataEnd = strCur;
-        doctype.append(Utf16(markDataStart, (size_t)(markDataEnd - markDataStart)));
+        doctype.append(StubW(markDataStart, (size_t)(markDataEnd - markDataStart)));
 
         state = XML_SAX_STATE_DOCTYPE;
         goto _Continue;
 
       case XML_SAX_STATE_DOCTYPE_ATTRIBUTE:
-        if (ch != Char('\"')) break;
+        if (ch != CharW('\"')) break;
 
         markDataEnd = strCur;
-        doctype.append(String(markDataStart, (size_t)(markDataEnd - markDataStart)));
+        doctype.append(StringW(markDataStart, (size_t)(markDataEnd - markDataStart)));
 
         state = XML_SAX_STATE_DOCTYPE;
         break;
 
       case XML_SAX_STATE_PI:
       {
-        const Char* q = strEnd-1;
+        const CharW* q = strEnd-1;
 
         while (strCur < q &&
-               strCur[0] != Char('?') &&
-               strCur[1] != Char('>')) strCur++;
+               strCur[0] != CharW('?') &&
+               strCur[1] != CharW('>')) strCur++;
 
         if (strCur == q)
         {
@@ -534,7 +533,7 @@ _DOCTYPEEnd:
           state = XML_SAX_STATE_READY;
           mark = strCur;
 
-          err = onAddPI(Utf16(markDataStart, (size_t)(markDataEnd - markDataStart)));
+          err = onAddPI(StubW(markDataStart, (size_t)(markDataEnd - markDataStart)));
           if (FOG_IS_ERROR(err))
             goto _End;
 
@@ -544,12 +543,12 @@ _DOCTYPEEnd:
 
       case XML_SAX_STATE_COMMENT:
       {
-        const Char* q = strEnd-2;
+        const CharW* q = strEnd-2;
 
         while (strCur < q && (
-               strCur[0] != Char('-') ||
-               strCur[1] != Char('-') ||
-               strCur[2] != Char('>'))) strCur++;
+               strCur[0] != CharW('-') ||
+               strCur[1] != CharW('-') ||
+               strCur[2] != CharW('>'))) strCur++;
 
         if (strCur == q)
         {
@@ -564,7 +563,7 @@ _DOCTYPEEnd:
           state = XML_SAX_STATE_READY;
           mark = strCur;
 
-          err = onAddComment(Utf16(markDataStart, (size_t)(markDataEnd - markDataStart)));
+          err = onAddComment(StubW(markDataStart, (size_t)(markDataEnd - markDataStart)));
           if (FOG_IS_ERROR(err))
             goto _End;
 
@@ -574,12 +573,12 @@ _DOCTYPEEnd:
 
       case XML_SAX_STATE_CDATA:
       {
-        const Char* q = strEnd-2;
+        const CharW* q = strEnd-2;
 
         while (strCur < q &&
-               strCur[0] != Char(']') &&
-               strCur[1] != Char(']') &&
-               strCur[2] != Char('>')) strCur++;
+               strCur[0] != CharW(']') &&
+               strCur[1] != CharW(']') &&
+               strCur[2] != CharW('>')) strCur++;
 
         if (strCur == q)
         {
@@ -594,7 +593,7 @@ _DOCTYPEEnd:
           state = XML_SAX_STATE_READY;
           mark = strCur;
 
-          err = onAddCDATA(Utf16(markDataStart, (size_t)(markDataEnd - markDataStart)));
+          err = onAddCDATA(StubW(markDataStart, (size_t)(markDataEnd - markDataStart)));
           if (FOG_IS_ERROR(err))
             goto _End;
 
@@ -646,7 +645,7 @@ void XmlSaxReader::_detectEncoding(TextCodec& tc, const void* mem, size_t size)
       while(ptr + 9 < end)
       {
         if (*ptr == '>') return;
-        if (Byte::isSpace(*ptr) && StringUtil::eq(ptr + 1, "encoding", 8, CASE_INSENSITIVE))
+        if (CharA::isSpace(*ptr) && StringUtil::eq(ptr + 1, "encoding", 8, CASE_INSENSITIVE))
         {
           // We are in "<?xml ..... encoding".
           const char* begin;
@@ -660,7 +659,7 @@ void XmlSaxReader::_detectEncoding(TextCodec& tc, const void* mem, size_t size)
           ptr++;
 
           // We are in "<?xml ..... encoding = "
-          while (ptr != end && Byte::isSpace(*ptr)) ptr++;
+          while (ptr != end && CharA::isSpace(*ptr)) ptr++;
           if (ptr == end) return;
 
           q = *ptr++;

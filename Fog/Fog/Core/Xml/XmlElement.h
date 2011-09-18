@@ -8,8 +8,8 @@
 #define _FOG_CORE_XML_XMLELEMENT_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Global/Global.h>
+#include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Xml/XmlAttribute.h>
@@ -175,22 +175,22 @@ public:
   //! @brief Get whether the current node has child nodes.
   FOG_INLINE bool hasChildNodes() const { return _firstChild != NULL; }
 
-  List<XmlElement*> getChildNodesByTagName(const String& tagName) const;
+  List<XmlElement*> getChildNodesByTagName(const StringW& tagName) const;
 
-  FOG_INLINE XmlElement* getFirstChildByTagName(const String& tagName) const
+  FOG_INLINE XmlElement* getFirstChildByTagName(const StringW& tagName) const
   { return _nextChildByTagName(_firstChild, tagName); }
 
-  FOG_INLINE XmlElement* getLastChildByTagName(const String& tagName) const
+  FOG_INLINE XmlElement* getLastChildByTagName(const StringW& tagName) const
   { return _previousChildByTagName(_lastChild, tagName); }
 
-  FOG_INLINE XmlElement* getNextChildByTagName(const String& tagName) const
+  FOG_INLINE XmlElement* getNextChildByTagName(const StringW& tagName) const
   { return _nextChildByTagName(_nextSibling, tagName); }
 
-  FOG_INLINE XmlElement* getPreviousChildByTagName(const String& tagName) const
+  FOG_INLINE XmlElement* getPreviousChildByTagName(const StringW& tagName) const
   { return _previousChildByTagName(_prevSibling, tagName); }
 
-  static XmlElement* _nextChildByTagName(XmlElement* refElement, const String& tagName);
-  static XmlElement* _previousChildByTagName(XmlElement* refElement, const String& tagName);
+  static XmlElement* _nextChildByTagName(XmlElement* refElement, const StringW& tagName);
+  static XmlElement* _previousChildByTagName(XmlElement* refElement, const StringW& tagName);
 
   // --------------------------------------------------------------------------
   // [Attributes]
@@ -202,10 +202,10 @@ public:
   //! @brief Get the array of attributes.
   List<XmlAttribute*> attributes() const;
 
-  bool hasAttribute(const String& name) const;
-  err_t setAttribute(const String& name, const String& value);
-  String getAttribute(const String& name) const;
-  err_t removeAttribute(const String& name);
+  bool hasAttribute(const StringW& name) const;
+  err_t setAttribute(const StringW& name, const StringW& value);
+  StringW getAttribute(const StringW& name) const;
+  err_t removeAttribute(const StringW& name);
 
   err_t removeAttributes();
 
@@ -213,21 +213,21 @@ public:
   // [ID]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE String getId() const { return _id; }
-  err_t setId(const String& id);
+  FOG_INLINE StringW getId() const { return _id; }
+  err_t setId(const StringW& id);
 
   // --------------------------------------------------------------------------
   // [Element and Text]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const String& getTagName() const { return _tagName.getString(); }
-  virtual err_t setTagName(const String& name);
+  FOG_INLINE const StringW& getTagName() const { return _tagName.getString(); }
+  virtual err_t setTagName(const StringW& name);
 
-  virtual String getTextContent() const;
-  virtual err_t setTextContent(const String& text);
+  virtual StringW getTextContent() const;
+  virtual err_t setTextContent(const StringW& text);
 
-  virtual err_t _setAttribute(const ManagedString& name, const String& value);
-  virtual String _getAttribute(const ManagedString& name) const;
+  virtual err_t _setAttribute(const ManagedString& name, const StringW& value);
+  virtual StringW _getAttribute(const ManagedString& name) const;
   virtual err_t _removeAttribute(const ManagedString& name);
   virtual err_t _removeAttributes();
 
@@ -260,7 +260,7 @@ protected:
   //! @brief Element tag name.
   ManagedString _tagName;
   //! @brief Element id.
-  String _id;
+  StringW _id;
   //! @brief Element id chain managed by @c XmlIdManager.
   XmlElement* _hashNextId;
 
@@ -270,7 +270,7 @@ private:
   friend struct XmlDocument;
   friend struct XmlIdManager;
 
-  _FOG_CLASS_NO_COPY(XmlElement)
+  _FOG_NO_COPY(XmlElement)
 };
 
 //! @}

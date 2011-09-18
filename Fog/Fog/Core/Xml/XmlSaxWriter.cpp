@@ -77,7 +77,7 @@ XmlSaxWriter::~XmlSaxWriter()
       attributes = NULL;
 
       // === Parse tag name ===
-      const Char* tag = strCur;
+      const CharW* tag = strCur;
       uint tagLength = xmlStrCSPN(strCur, strEnd, XML_CHAR_SPACE | XML_CHAR_SLASH | XML_CHAR_GT);
 
       strCur += tagLength;
@@ -89,7 +89,7 @@ XmlSaxWriter::~XmlSaxWriter()
         while (strCur->isSpace()) strCur++;
 
         // Temp variable where is stored beginning of attribute name or text
-        const Char* begin = strCur;
+        const CharW* begin = strCur;
 
         strCur += xmlStrCSPN(strCur, strEnd, XML_CHAR_SPACE | XML_CHAR_EQUAL | XML_CHAR_SLASH | XML_CHAR_GT);
         if (*strCur == '=' || strCur->isSpace())
@@ -100,14 +100,14 @@ XmlSaxWriter::~XmlSaxWriter()
 
             a->_prev = attributes;
             a->_next = NULL;
-            a->setName(String(begin, (size_t)(strCur - begin)));
+            a->setName(StringW(begin, (size_t)(strCur - begin)));
 
             if (attributes) attributes->_next = a;
             attributes = a;
           }
 
           // q can be " or '
-          Char q = *(strCur += xmlStrSPN(strCur, strEnd, XML_CHAR_SPACE | XML_CHAR_EQUAL));
+          CharW q = *(strCur += xmlStrSPN(strCur, strEnd, XML_CHAR_SPACE | XML_CHAR_EQUAL));
 
           // Get attribute value
           if (q == '\"' || q == '\'')
@@ -187,9 +187,9 @@ XmlSaxWriter::~XmlSaxWriter()
 
 
     // ----- Comment -----
-    else if (strCur + 3 <= strEnd && String::Raw::eq(strCur, "!--", 3))
+    else if (strCur + 3 <= strEnd && StringW::Raw::eq(strCur, "!--", 3))
     {
-      const Char* dataStart = strCur += 3;
+      const CharW* dataStart = strCur += 3;
 
       for (;;)
       {
@@ -198,13 +198,13 @@ XmlSaxWriter::~XmlSaxWriter()
         else strCur++;
       }
 
-      const Char* dataEnd = strCur - 3;
-      addComment(String(dataStart, (size_t)(dataEnd - dataStart)));
+      const CharW* dataEnd = strCur - 3;
+      addComment(StringW(dataStart, (size_t)(dataEnd - dataStart)));
     }
 
 
     // ----- CDATA -----
-    else if (strCur + 8 <= strEnd && String::Raw::eq(strCur, "![CDATA[", 8))
+    else if (strCur + 8 <= strEnd && StringW::Raw::eq(strCur, "![CDATA[", 8))
     {
 #if 0
       //FIXME:
@@ -221,7 +221,7 @@ XmlSaxWriter::~XmlSaxWriter()
 
 
     // ----- !DOCTYPE -----
-    else if (strCur + 8 <= strEnd && String::Raw::eq(strCur, "!DOCTYPE", 8))
+    else if (strCur + 8 <= strEnd && StringW::Raw::eq(strCur, "!DOCTYPE", 8))
     {
       uint i;
       for (i = 0; strCur != strEnd && ((!i && *strCur != '>') || (i && (*strCur != ']' ||
@@ -239,10 +239,10 @@ XmlSaxWriter::~XmlSaxWriter()
     // ----- <?...?> processing instructions -----
     else if (*strCur == '?')
     {
-      Char* dataStart = ++strCur;
+      CharW* dataStart = ++strCur;
 
       do {
-        strCur = xmlStrCHR(strCur, strEnd, Char('?'));
+        strCur = xmlStrCHR(strCur, strEnd, CharW('?'));
       } while (strCur && ++strCur != strEnd && *strCur != '>');
 
       // Unclosed <?
@@ -252,8 +252,8 @@ XmlSaxWriter::~XmlSaxWriter()
       }
       else
       {
-        const Char* dataEnd = strCur - 3;
-        addPI(String(dataStart, (size_t)(dataEnd - dataStart)));
+        const CharW* dataEnd = strCur - 3;
+        addPI(StringW(dataStart, (size_t)(dataEnd - dataStart)));
       }
     }
 
@@ -271,7 +271,7 @@ XmlSaxWriter::~XmlSaxWriter()
 
     // ----- tag character content -----
     {
-      const Char* begin = ++strCur;
+      const CharW* begin = ++strCur;
       while (strCur != strEnd && *strCur != '<') strCur++;
 
       if (strCur == strEnd) break;
@@ -280,7 +280,7 @@ XmlSaxWriter::~XmlSaxWriter()
       // Remove white spaces, but don't remove &..; spaces
       while (begin->isSpace()) begin++;
 
-      const Char* tr = strCur-1;
+      const CharW* tr = strCur-1;
       while (tr > begin && tr->isSpace()) tr--;
       tr++;
 
@@ -305,26 +305,26 @@ XmlSaxWriter::~XmlSaxWriter()
 
 #if 0
 // Decode xml &entities; into normal unicode text
-void XmlSaxReader::decode(String& dest, const Char* buffer, size_t length)
+void XmlSaxReader::decode(StringW& dest, const CharW* buffer, size_t length)
 {
   // This will probabbly never happen
-  if (length == DetectLength) length = String::Raw::len(buffer);
+  if (length == DetectLength) length = StringW::Raw::len(buffer);
 
-  const Char* end = buffer + length;
-  Char* p = dest._reserve(length);
+  const CharW* end = buffer + length;
+  CharW* p = dest._reserve(length);
 
 __begin:
   while (buffer != end)
   {
     if (*buffer == '&')
     {
-      const Char* begin = ++buffer;
+      const CharW* begin = ++buffer;
 
       while (buffer != end)
       {
         if (*buffer == ';')
         {
-          Char uc = XmlEntity::decode(begin, size_t( buffer - begin ));
+          CharW uc = XmlEntity::decode(begin, size_t( buffer - begin ));
           buffer++;
           if (!uc.isNull())
           {
@@ -342,7 +342,7 @@ __begin:
 __copy:
       {
         size_t i = size_t( buffer - (--begin) );
-        String::Raw::copy(p, begin, i);
+        StringW::Raw::copy(p, begin, i);
         p += i;
       }
       if (buffer == end)
@@ -353,14 +353,14 @@ __copy:
     *p++ = *buffer++;
   }
 
-  dest.finishDataX(p);
+  dest._modified(p);
 }
 
 struct CORE_HIDDEN XmlSaxWriter
 {
   XmlDocument& _doc;   // link to xml document
   Stream& _stream;     // link to stream
-  ByteArray _target;   // target encoded buffer
+  StringA _target;   // target encoded buffer
 
   TextCodec _textCodec;
   TextCodecState _textState;
@@ -382,14 +382,14 @@ struct CORE_HIDDEN XmlSaxWriter
   void writeNodesR(const XmlNode* node, uint depth);
   void writeAttributes(const XmlNode* node);
 
-  inline void writeRaw(const String& s) { _textCodec.appendFromUtf32(_target, s); }
-  inline void writeStr(const String& s) { _textCodec.appendFromUtf32(_target, s, &_textState); }
-  inline void writeChar(Char uc) { _textCodec.appendFromUtf32(_target, &uc, sizeof(Char)); }
+  inline void writeRaw(const StringW& s) { _textCodec.appendFromUtf32(_target, s); }
+  inline void writeStr(const StringW& s) { _textCodec.appendFromUtf32(_target, s, &_textState); }
+  inline void writeChar(CharW uc) { _textCodec.appendFromUtf32(_target, &uc, sizeof(Char)); }
 
   inline void writeSpaces(size_t count)
   {
     size_t i;
-    for (i = 0; i != count; i++) writeChar(Char(' '));
+    for (i = 0; i != count; i++) writeChar(CharW(' '));
   }
 
   inline void flush() { _stream.write(_target); _target.clear(); }
@@ -397,7 +397,7 @@ struct CORE_HIDDEN XmlSaxWriter
 
 void XmlSaxWriter::run()
 {
-  String str;
+  StringW str;
   str.format("<?xml version=\"1.0\" encoding=\"%s\" ?>\n", _textCodec.mime());
 
   writeRaw(str);
@@ -415,7 +415,7 @@ void XmlSaxWriter::writeNodesR(const XmlNode* node, uint depth)
     writeSpaces(depth);
 
     // Make all unnamed tags as 'Unnamed'
-    String tag;
+    StringW tag;
     if (current->tag().isEmpty())
       tag = "Unnamed";
     else
@@ -426,25 +426,25 @@ void XmlSaxWriter::writeNodesR(const XmlNode* node, uint depth)
       // Not self closing tag
 
       // Write <Tag [Attributes]>
-      writeChar(Char('<'));
+      writeChar(CharW('<'));
       writeStr(tag);
       writeAttributes(current);
-      writeChar(Char('>'));
+      writeChar(CharW('>'));
 
       // Write Text\n
       writeStr(current->text());
-      writeChar(Char('\n'));
+      writeChar(CharW('\n'));
 
       // Write children
       writeNodesR(current->children(), depth+1);
 
       // Write </Tag>\n
       writeSpaces(depth);
-      writeChar(Char('<'));
-      writeChar(Char('/'));
+      writeChar(CharW('<'));
+      writeChar(CharW('/'));
       writeStr(tag);
-      writeChar(Char('>'));
-      writeChar(Char('\n'));
+      writeChar(CharW('>'));
+      writeChar(CharW('\n'));
     }
     else
     {
@@ -452,27 +452,27 @@ void XmlSaxWriter::writeNodesR(const XmlNode* node, uint depth)
       if (current->text().isEmpty())
       {
         // Write <Tag [Attributes] />\n
-        writeChar(Char('<'));
+        writeChar(CharW('<'));
         writeStr(tag);
         writeAttributes(current);
-        writeChar(Char(' '));
-        writeChar(Char('/'));
-        writeChar(Char('>'));
-        writeChar(Char('\n'));
+        writeChar(CharW(' '));
+        writeChar(CharW('/'));
+        writeChar(CharW('>'));
+        writeChar(CharW('\n'));
       }
       else
       {
         // Write <Tag [Attributes]>Text</Tag>\n
-        writeChar(Char('<'));
+        writeChar(CharW('<'));
         writeStr(tag);
         writeAttributes(current);
-        writeChar(Char('>'));
+        writeChar(CharW('>'));
         writeStr(current->text());
-        writeChar(Char('<'));
-        writeChar(Char('/'));
+        writeChar(CharW('<'));
+        writeChar(CharW('/'));
         writeStr(tag);
-        writeChar(Char('>'));
-        writeChar(Char('\n'));
+        writeChar(CharW('>'));
+        writeChar(CharW('\n'));
       }
     }
 
@@ -483,7 +483,7 @@ void XmlSaxWriter::writeNodesR(const XmlNode* node, uint depth)
 
 void XmlSaxWriter::writeAttributes(const XmlNode* node)
 {
-  static const Char q = Char('\"');
+  static const CharW q = CharW('\"');
 
   const XmlAttribute* current = node->attributes();
 
@@ -492,9 +492,9 @@ void XmlSaxWriter::writeAttributes(const XmlNode* node)
   while (current)
   {
     // Write Attribute="Text"
-    writeChar(Char(' '));
+    writeChar(CharW(' '));
     writeStr(current->name());
-    writeChar(Char('='));
+    writeChar(CharW('='));
     writeChar(q);
     writeStr(current->value());
     writeChar(q);
@@ -503,7 +503,7 @@ void XmlSaxWriter::writeAttributes(const XmlNode* node)
   }
 }
 
-Value XmlDocument::writeFile(const String& fileName)
+Value XmlDocument::writeFile(const StringW& fileName)
 {
   Stream stream;
   Value result;

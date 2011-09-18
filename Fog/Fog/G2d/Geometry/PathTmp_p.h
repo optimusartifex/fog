@@ -35,14 +35,26 @@ struct FOG_NO_EXPORT PathTmpF : public PathF
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE PathTmpF() : PathF(_dadopt(_storage)) {}
-  FOG_INLINE PathTmpF(const PathTmpF<N>& other) : PathF(_dadopt(_storage)) { setDeep(other); }
-  FOG_INLINE PathTmpF(const PathF& other) : PathF(_dadopt(_storage)) { setDeep(other); }
+  FOG_INLINE PathTmpF() : PathF(_api.pathf.dAdopt(&_storage, N))
+  {
+  }
+  
+  FOG_INLINE PathTmpF(const PathTmpF<N>& other) :
+    PathF(_api.pathf.dAdopt(&_storage, N))
+  {
+    setDeep(other);
+  }
+
+  FOG_INLINE PathTmpF(const PathF& other) :
+    PathF(_api.pathf.dAdopt(_storage, N))
+  {
+    setDeep(other);
+  }
 
   FOG_INLINE ~PathTmpF()
   {
-    FOG_ASSERT( (_d == &_storage.d && _storage.d.refCount.get() == 1) ||
-                (_d != &_storage.d && _storage.d.refCount.get() == 0) );
+    FOG_ASSERT( (_d == &_storage.d && _storage.d.reference.get() == 1) ||
+                (_d != &_storage.d && _storage.d.reference.get() == 0) );
   }
 
   // --------------------------------------------------------------------------
@@ -55,24 +67,6 @@ struct FOG_NO_EXPORT PathTmpF : public PathF
 
   FOG_INLINE bool operator==(const PathF& other) const { return  eq(other); }
   FOG_INLINE bool operator!=(const PathF& other) const { return !eq(other); }
-
-  // --------------------------------------------------------------------------
-  // [Statics]
-  // --------------------------------------------------------------------------
-
-  static PathDataF* _dadopt(_Storage& storage)
-  {
-    storage.d.refCount.init(1);
-    storage.d.flags = PATH_DATA_STATIC;
-#if FOG_ARCH_BITS >= 64
-    storage.d.padding = 0;
-#endif // FOG_ARCH_BITS >= 64
-    storage.d.capacity = N;
-    storage.d.length = 0;
-    storage.d.boundingBox.reset();
-    storage.d.vertices = (PointF*)( (size_t)(storage.d.commands + N + 15) & ~(size_t)15 );
-    return &storage.d;
-  }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -104,32 +98,27 @@ struct FOG_NO_EXPORT PathTmpD : public PathD
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE PathTmpD() : PathD(_dadopt(_storage)) {}
-  FOG_INLINE PathTmpD(const PathTmpD<N>& other) : PathF(_dadopt(_storage)) { setDeep(other); }
-  FOG_INLINE PathTmpD(const PathD& other) : PathF(_dadopt(_storage)) { setDeep(other); }
+  FOG_INLINE PathTmpD() :
+    PathD(_api.pathd.dAdopt(&_storage, N))
+  {
+  }
+  
+  FOG_INLINE PathTmpD(const PathTmpD<N>& other) :
+    PathD(_api.pathd.dAdopt(&_storage, N))
+  {
+    setDeep(other);
+  }
+  
+  FOG_INLINE PathTmpD(const PathD& other) :
+    PathD(_api.pathd.dAdopt(&_storage, N))
+  {
+    setDeep(other);
+  }
 
   FOG_INLINE ~PathTmpD()
   {
-    FOG_ASSERT( (_d == &_storage.d && _storage.d.refCount.get() == 1) ||
-                (_d != &_storage.d && _storage.d.refCount.get() == 0) );
-  }
-
-  // --------------------------------------------------------------------------
-  // [Statics]
-  // --------------------------------------------------------------------------
-
-  static PathDataD* _dadopt(_Storage& storage)
-  {
-    storage.d.refCount.init(1);
-    storage.d.flags = PATH_DATA_STATIC;
-#if FOG_ARCH_BITS >= 64
-    storage.d.padding = 0;
-#endif // FOG_ARCH_BITS >= 64
-    storage.d.capacity = N;
-    storage.d.length = 0;
-    storage.d.boundingBox.reset();
-    storage.d.vertices = (PointD*)( (size_t)(storage.d.commands + N + 15) & ~(size_t)15 );
-    return &storage.d;
+    FOG_ASSERT( (_d == &_storage.d && _storage.d.reference.get() == 1) ||
+                (_d != &_storage.d && _storage.d.reference.get() == 0) );
   }
 
   // --------------------------------------------------------------------------
@@ -158,7 +147,9 @@ struct FOG_NO_EXPORT PathTmpD : public PathD
 // [Fog::PathTmpT<>]
 // ============================================================================
 
-FOG_CLASS_PRECISION_TEMPLATE1_F_D(PathTmp, size_t, N)
+_FOG_NUM_TEMPLATE1_T(PathTmp, size_t, N)
+_FOG_NUM_TEMPLATE1_F(PathTmp, size_t, N)
+_FOG_NUM_TEMPLATE1_D(PathTmp, size_t, N)
 
 //! @}
 

@@ -52,7 +52,7 @@ struct FOG_NO_EXPORT SvgPolygonElement : public SvgStyledElement
   SvgPointsAttribute a_points;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgPolygonElement)
+  _FOG_NO_COPY(SvgPolygonElement)
 };
 
 //! @}

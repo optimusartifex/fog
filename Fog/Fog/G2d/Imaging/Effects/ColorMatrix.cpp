@@ -6,7 +6,7 @@
 // AggOO - Version 0.1
 // Copyright (c) 2006 Dratek Software
 //
-// Author of AggOO (Chad M. Draper) agreed relicencing code to the MIT license.
+// Author of AggOO (Chad M. Draper) agreed relicensing code to the MIT license.
 
 // [Precompiled Headers]
 #if defined(FOG_PRECOMP)
@@ -182,7 +182,7 @@ ColorMatrix& ColorMatrix::multiply(float scalar)
   return *this;
 }
 
-void ColorMatrix::transformVector(float* FOG_RESTRICT v) const
+void ColorMatrix::transformVector(float* v) const
 {
   float temp[4];
 
@@ -258,7 +258,7 @@ ColorMatrix& ColorMatrix::translate(float ta, float tr, float tg, float tb, uint
 ColorMatrix& ColorMatrix::setSaturation(float sat, uint32_t order)
 {
   // If the saturation is 1.0, then this matrix remains unchanged.
-  // If the saturation is 0.0, each color is scaled by its luminance
+  // If the saturation is 0.0, each color is scaled by its luminance.
   float satComplement  = 1.0f - sat;
   float satComplementR = LUM_R * satComplement;
   float satComplementG = LUM_G * satComplement;
@@ -355,18 +355,18 @@ const ColorMatrix ColorMatrix::ZERO(
   0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
 const ColorMatrix ColorMatrix::PRE_HUE(
-  0.8164966106f, 0.0f, 0.5345109105f, 0.0f, 0.0f,
-  -0.4082482755f, 0.7071067691f, 1.055511713f, 0.0f, 0.0f,
-  -0.4082482755f, -0.7071067691f, 0.1420281678f, 0.0f, 0.0f,
-  0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-  0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+  0.8164966106f, 0.0f         , 0.5345109105f, 0.0f, 0.0f,
+ -0.4082482755f, 0.7071067691f, 1.0555117130f, 0.0f, 0.0f,
+ -0.4082482755f,-0.7071067691f, 0.1420281678f, 0.0f, 0.0f,
+  0.0f         , 0.0f         , 0.0f         , 1.0f, 0.0f,
+  0.0f         , 0.0f         , 0.0f         , 0.0f, 1.0f);
 
 const ColorMatrix ColorMatrix::POST_HUE(
-  0.8467885852f, -0.3779562712f, -0.3779562712f, 0.0f, 0.0f,
-  -0.3729280829f, 0.3341786563f, -1.080034852f, 0.0f, 0.0f,
+  0.8467885852f,-0.3779562712f,-0.3779562712f, 0.0f, 0.0f,
+ -0.3729280829f, 0.3341786563f,-1.0800348520f, 0.0f, 0.0f,
   0.5773502588f, 0.5773502588f, 0.5773502588f, 0.0f, 0.0f,
-  0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-  0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+  0.0f         , 0.0f         , 0.0f         , 1.0f, 0.0f,
+  0.0f         , 0.0f         , 0.0f         , 0.0f, 1.0f);
 
 // Code to generate PRE_HUE and POST_HUE matrices.
 #if 0

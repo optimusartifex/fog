@@ -35,7 +35,7 @@ namespace Fog {
 // [Forward Declarations]
 // ============================================================================
 
-// TODO: Remove?  
+// TODO: Remove?
 struct RasterCalc;
 struct RasterCmd;
 
@@ -112,7 +112,7 @@ union FOG_NO_EXPORT RasterHints
 
 //! @brief Raster paint-engine per-thread scope.
 //!
-//! Default value for single-threaded rendering is zero for @c offset and one 
+//! Default value for single-threaded rendering is zero for @c offset and one
 //! for @c delta. Any other combination means that multithreading is use. Each
 //! thread has the same @c delta value, but different @c offset.
 //!
@@ -156,7 +156,7 @@ struct FOG_NO_EXPORT RasterScope
 
   //! @brief Delta (how many scanlines to advance each scanline).
   //!
-  //! 
+  //!
   int _delta;
 
   //! @brief Base offset from zero scanline (positive value at range from zero
@@ -215,7 +215,7 @@ struct FOG_NO_EXPORT RasterLayer
   //! @brief The raster-layer size, NEEDED FOR _setupLayer().
   SizeI size;
   //! @brief The raster-layer stride, NEEDED FOR _setupLayer().
-  sysint_t stride;
+  ssize_t stride;
   //! @brief The raster-layer format, NEEDED FOR _setupLayer().
   uint32_t primaryFormat;
   //! @brief The raster-layer bytes-per-pixel.
@@ -237,9 +237,9 @@ struct FOG_NO_EXPORT RasterLayer
   uint32_t secondaryBPL;
 
   //! @brief The 'secondary-from-primary' format blitter.
-  RenderVBlitLineFn cvtSecondaryFromPrimary;
+  RenderVBlitLineFunc cvtSecondaryFromPrimary;
   //! @brief The 'primary-from-secondary' format blitter.
-  RenderVBlitLineFn cvtPrimaryFromSecondary;
+  RenderVBlitLineFunc cvtPrimaryFromSecondary;
 
   // --------------------------------------------------------------------------
   // [Members - Image Data]

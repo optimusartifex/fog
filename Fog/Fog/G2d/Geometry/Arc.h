@@ -429,25 +429,20 @@ FOG_INLINE void ArcF::setArc(const ArcD& other)
 // [Fog::ArcT<>]
 // ============================================================================
 
-FOG_CLASS_PRECISION_F_D(Arc)
+_FOG_NUM_T(Arc)
+_FOG_NUM_F(Arc)
+_FOG_NUM_D(Arc)
 
 //! @}
 
 } // Fog namespace
 
 // ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::ArcF, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::ArcD, Fog::TYPEINFO_PRIMITIVE)
-
-// ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_FUZZY_DECLARE(Fog::ArcF, Math::feqv((const float *)&a, (const float *)&b, 6))
-FOG_FUZZY_DECLARE(Fog::ArcD, Math::feqv((const double*)&a, (const double*)&b, 6))
+FOG_FUZZY_DECLARE_F_VEC(Fog::ArcF, 6)
+FOG_FUZZY_DECLARE_D_VEC(Fog::ArcD, 6)
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_ARC_H

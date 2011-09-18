@@ -9,14 +9,14 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/Algorithms.h>
 #include <Fog/Core/Global/Init_p.h>
-#include <Fog/Core/Global/Internals_p.h>
+#include <Fog/Core/Global/Private.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Function.h>
 #include <Fog/Core/Math/Integrate.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Math/Solve.h>
+#include <Fog/Core/Tools/Algorithm.h>
 #include <Fog/G2d/Geometry/CBezier.h>
 #include <Fog/G2d/Geometry/Internals_p.h>
 #include <Fog/G2d/Geometry/Math2d.h>
@@ -255,7 +255,22 @@ static int FOG_CDECL CBezierT_getInflectionPoints(const NumT_(Point)* self, NumT
   q[1] = NumT(6.0) * (ay * cx - ax * cy);
   q[2] = NumT(2.0) * (by * cx - bx * cy);
 
-  return Math::solve(t, q, MATH_SOLVE_QUADRATIC);
+  int count = Math::solve(t, q, MATH_SOLVE_QUADRATIC, NumT_(Interval)(NumT(0.0), NumT(1.0)));
+
+  if (count == 0)
+    return 0;
+
+  if (Math::isFuzzyZero(t[0]))
+  {
+    if (--count == 0)
+      return 0;
+    t[0] = t[1];
+  }
+
+  if (Math::isFuzzyOne(t[count - 1]))
+    count--;
+
+  return count;
 }
 
 // ============================================================================
@@ -270,7 +285,7 @@ static int FOG_CDECL CBezierT_getInflectionPoints(const NumT_(Point)* self, NumT
 // stroking.
 
 template<typename NumT>
-static int FOG_CDECL CBezierT_simplifyForProcessing(const NumT_(Point)* self, NumT_(Point)* pts, NumT flatness)
+static int FOG_CDECL CBezierT_simplifyForProcessing(const NumT_(Point)* self, NumT_(Point)* pts)
 {
   // Extract the parameters.
   NumT ax, ay, bx, by, cx, cy, dx, dy;
@@ -292,55 +307,51 @@ static int FOG_CDECL CBezierT_simplifyForProcessing(const NumT_(Point)* self, Nu
   q[1] *= NumT(6.0);
   q[2] *= NumT(2.0);
 
-  switch (Math::solve(t, q, MATH_SOLVE_QUADRATIC))
+  int tCount = Math::solve(t, q, MATH_SOLVE_QUADRATIC, NumT_(Interval)(NumT(0.0), NumT(1.0)));
+  if (tCusp > NumT(0.0) && tCusp < NumT(1.0))
   {
-    // Two inflection points. Subdivide at t0, tCusp, and t1.
-    case 2:
-      {
-        t[2] = tCusp;
-        Algorithms::isort_t<NumT>(t, 3);
+    t[tCount++] = tCusp;
+    Algorithm::isort_t<NumT>(t, tCount);
+  }
 
-        // Now split the curve into b-spline and return the count of curves.
-        const NumT_(Point)* bPtr = self;
-        NumT_(Point) bTmp[4];
-
-        int count = 0;
-        NumT cut = NumT(0.0);
-
-        for (int i = 0; i < 3; i++)
-        {
-          if (t[i] <= NumT(0.0) || t[i] >= NumT(1.0)) continue;
-          NumI_(CBezier)::splitAt(bPtr, pts, bTmp, cut == NumT(0.0) ? t[i] : (t[i] - cut) / (NumT(1.0) - cut));
-          bPtr = pts;
-
-          cut = t[i];
-          pts += 3;
-          count++;
-        }
-
-        if (count == 0) goto _NoInflection;
-
-        pts[0] = bTmp[1];
-        pts[1] = bTmp[2];
-        pts[2] = bTmp[3];
-        return ++count;
-      }
-
-    // One inflection point, subdivide at t[0].
-    case 1:
-      if (t[0] <= NumT(0.0) || t[0] >= NumT(1.0)) goto _NoInflection;
-
-      NumI_(CBezier)::splitAt(self, pts, pts + 3, t[0]);
-      return 2;
-
-    // No inflection points. The given Bezier curve doesn't need to be simplified.
+  switch (tCount)
+  {
     case 0:
-_NoInflection:
+    {
       pts[0] = self[0];
       pts[1] = self[1];
       pts[2] = self[2];
       pts[3] = self[3];
       return 1;
+    }
+
+    case 1:
+    case 2:
+    case 3:
+    {
+      int segmentCount = 2;
+
+      NumT t_ = t[0];
+      NumT cut = t_;
+
+      NumI_(CBezier)::splitAt(self, pts, pts + 3, t_);
+      pts += 3;
+
+      for (int tIndex = 1; tIndex < tCount; tIndex++)
+      {
+        t_ = t[tIndex];
+        if (Math::isFuzzyEq(t_, cut))
+          continue;
+
+        NumI_(CBezier)::splitAt(pts, pts, pts + 3, (t_ - cut) / (NumT(1.0) - cut));
+        cut = t_;
+
+        pts += 3;
+        segmentCount++;
+      }
+
+      return segmentCount;
+    }
 
     default:
       FOG_ASSERT_NOT_REACHED();
@@ -434,8 +445,8 @@ _Realloc:
     NumT d3 = Math::abs(((x2 - x3) * dy - (y2 - y3) * dx));
     NumT da1, da2, k;
 
-    switch ((int(d2 > Math2dConst<NumT>::getCollinearityEpsilon()) << 1) +
-             int(d3 > Math2dConst<NumT>::getCollinearityEpsilon()))
+    switch ((int(d2 > MathConstant<NumT>::getCollinearityEpsilon()) << 1) +
+             int(d3 > MathConstant<NumT>::getCollinearityEpsilon()))
     {
       // All collinear OR p0 == p3.
       case 0:
@@ -550,9 +561,9 @@ _Realloc:
 
       continue;
     }
-    else
+    else if (!Math::isFinite(x0123))
     {
-      if (Math::isNaN(x0123)) goto _InvalidNumber;
+      goto _InvalidNumber;
     }
 
 _Ret:
@@ -613,23 +624,23 @@ _InvalidNumber:
 
 FOG_NO_EXPORT void CBezier_init(void)
 {
-  _api.cubiccurvef.getBoundingBox = CBezierT_getBoundingBox<float>;
-  _api.cubiccurved.getBoundingBox = CBezierT_getBoundingBox<double>;
+  _api.cbezierf.getBoundingBox = CBezierT_getBoundingBox<float>;
+  _api.cbezierd.getBoundingBox = CBezierT_getBoundingBox<double>;
 
-  _api.cubiccurvef.getSplineBBox = CBezierT_getSplineBBox<float>;
-  _api.cubiccurved.getSplineBBox = CBezierT_getSplineBBox<double>;
+  _api.cbezierf.getSplineBBox = CBezierT_getSplineBBox<float>;
+  _api.cbezierd.getSplineBBox = CBezierT_getSplineBBox<double>;
 
-  _api.cubiccurvef.getLength = CBezierT_getLength<float>;
-  _api.cubiccurved.getLength = CBezierT_getLength<double>;
+  _api.cbezierf.getLength = CBezierT_getLength<float>;
+  _api.cbezierd.getLength = CBezierT_getLength<double>;
 
-  _api.cubiccurvef.getInflectionPoints = CBezierT_getInflectionPoints<float>;
-  _api.cubiccurved.getInflectionPoints = CBezierT_getInflectionPoints<double>;
+  _api.cbezierf.getInflectionPoints = CBezierT_getInflectionPoints<float>;
+  _api.cbezierd.getInflectionPoints = CBezierT_getInflectionPoints<double>;
 
-  _api.cubiccurvef.simplifyForProcessing = CBezierT_simplifyForProcessing<float>;
-  _api.cubiccurved.simplifyForProcessing = CBezierT_simplifyForProcessing<double>;
+  _api.cbezierf.simplifyForProcessing = CBezierT_simplifyForProcessing<float>;
+  _api.cbezierd.simplifyForProcessing = CBezierT_simplifyForProcessing<double>;
 
-  _api.cubiccurvef.flatten = CBezierT_flatten<float>;
-  _api.cubiccurved.flatten = CBezierT_flatten<double>;
+  _api.cbezierf.flatten = CBezierT_flatten<float>;
+  _api.cbezierd.flatten = CBezierT_flatten<double>;
 }
 
 } // Fog namespace

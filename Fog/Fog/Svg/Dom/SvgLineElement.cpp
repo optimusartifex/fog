@@ -10,6 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Tools/Swap.h>
 #include <Fog/Svg/Dom/SvgLineElement_p.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
 

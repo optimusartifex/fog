@@ -34,13 +34,13 @@ struct FOG_NO_EXPORT TextChunk
   {
   }
 
-  explicit FOG_INLINE TextChunk(const String& text) :
+  explicit FOG_INLINE TextChunk(const StringW& text) :
     _text(text),
     _range(0, text.getLength())
   {
   }
 
-  FOG_INLINE TextChunk(const String& text, const Range& range) :
+  FOG_INLINE TextChunk(const StringW& text, const Range& range) :
     _text(text),
     _range(range)
   {
@@ -55,16 +55,16 @@ struct FOG_NO_EXPORT TextChunk
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const String& getText() const { return _text; }
+  FOG_INLINE const StringW& getText() const { return _text; }
   FOG_INLINE const Range& getRange() const { return _range; }
 
-  FOG_INLINE void setText(const String& text)
+  FOG_INLINE void setText(const StringW& text)
   {
     _text = text;
     _range.setRange(0, text.getLength());
   }
 
-  FOG_INLINE void setText(const String& text, const Range& range)
+  FOG_INLINE void setText(const StringW& text, const Range& range)
   {
     _text = text;
     _range = range;
@@ -112,8 +112,8 @@ struct FOG_NO_EXPORT TextChunk
   // [Members]
   // --------------------------------------------------------------------------
 
-  //! @brief String where the span is.
-  String _text;
+  //! @brief StringW where the span is.
+  StringW _text;
   //! @brief Range within the string.
   Range _range;
 };
@@ -126,17 +126,7 @@ struct FOG_NO_EXPORT TextChunk
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-_FOG_TYPEINFO_DECLARE(Fog::TextChunk, Fog::TYPEINFO_MOVABLE)
-
-// ============================================================================
-// [Fog::Swap]
-// ============================================================================
-
-_FOG_SWAP_DECLARE(Fog::TextChunk,
-{
-  swap(a._text, b._text);
-  swap(a._range, b._range);
-})
+_FOG_TYPE_DECLARE(Fog::TextChunk, Fog::TYPE_CATEGORY_MOVABLE)
 
 // [Guard]
 #endif // _FOG_G2D_TEXT_TEXTCHUNK_H

@@ -8,8 +8,7 @@
 #define _FOG_CORE_THREADING_ATOMIC_H
 
 // [Dependencies]
-#include <Fog/Core/Config/Config.h>
-#include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/Global.h>
 
 namespace Fog {
 
@@ -146,13 +145,6 @@ static FOG_INLINE T* atomicPtrXchg(T** atomic, T* value)
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-#include <Fog/Core/Global/TypeInfo.h>
-_FOG_TYPEINFO_DECLARE_T1(Fog::Atomic, typename, T, Fog::TYPEINFO_PRIMITIVE)
 
 // [Guard]
 #endif // _FOG_CORE_THREADING_ATOMIC_H

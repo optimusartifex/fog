@@ -8,8 +8,8 @@
 #define _FOG_G2D_TEXT_FONTFACECACHE_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/Hash.h>
 #include <Fog/Core/Global/Global.h>
+#include <Fog/Core/Tools/Hash.h>
 #include <Fog/G2d/Text/FontFace.h>
 
 namespace Fog {
@@ -36,19 +36,19 @@ struct FOG_API FontFaceCache
   // --------------------------------------------------------------------------
 
   void reset();
-  FontFace* get(const String& family);
+  FontFace* get(const StringW& family);
 
-  err_t put(const String& family, FontFace* face);
-  err_t del(const String& family, FontFace* face);
+  err_t put(const StringW& family, FontFace* face);
+  err_t del(const StringW& family, FontFace* face);
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  UnorderedHash<String, FontFace*> cache;
+  Hash<StringW, FontFace*> cache;
 
 private:
-  _FOG_CLASS_NO_COPY(FontFaceCache)
+  _FOG_NO_COPY(FontFaceCache)
 };
 
 //! @}

@@ -4,13 +4,13 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_GEOMETRY_STROKER_H
-#define _FOG_G2D_GEOMETRY_STROKER_H
+#ifndef _FOG_G2D_GEOMETRY_PATHSTROKER_H
+#define _FOG_G2D_GEOMETRY_PATHSTROKER_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Threading/Atomic.h>
+#include <Fog/Core/Tools/List.h>
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Geometry/PathEffect.h>
 #include <Fog/G2d/Geometry/Point.h>
@@ -22,17 +22,10 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Helpers]
-// ============================================================================
-
-FOG_API err_t _ListFloatFromListDouble(List<float>& dst, const List<double>& src);
-FOG_API err_t _ListDoubleFromListFloat(List<double>& dst, const List<float>& src);
-
-// ============================================================================
 // [Fog::PathStrokerHints]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 union FOG_NO_EXPORT PathStrokerHints
 {
   struct
@@ -45,7 +38,7 @@ union FOG_NO_EXPORT PathStrokerHints
 
   uint32_t packed;
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 // ============================================================================
 // [Fog::PathStrokerParamsF]
@@ -99,7 +92,7 @@ struct FOG_NO_EXPORT PathStrokerParamsF
   FOG_INLINE void setMiterLimit(float miterLimit) { _miterLimit = miterLimit; }
   FOG_INLINE void setDashOffset(float dashOffset) { _dashOffset = dashOffset; }
   FOG_INLINE void setDashList(const List<float>& dashList) { _dashList = dashList; }
-  FOG_INLINE void setDashList(const float* dashList, size_t length) { _dashList.assign(dashList, length); }
+  FOG_INLINE err_t setDashList(const float* dashList, size_t length) { return _dashList.setList(dashList, length); }
 
   FOG_INLINE void setHints(uint32_t hints) { _hints.packed = hints; }
   FOG_INLINE void setStartCap(uint32_t startCap) { _hints.startCap = startCap; }
@@ -200,7 +193,7 @@ struct FOG_NO_EXPORT PathStrokerParamsD
   FOG_INLINE void setMiterLimit(double miterLimit) { _miterLimit = miterLimit; }
   FOG_INLINE void setDashOffset(double dashOffset) { _dashOffset = dashOffset; }
   FOG_INLINE void setDashList(const List<double>& dashList) { _dashList = dashList; }
-  FOG_INLINE void setDashList(const double* dashList, size_t length) { _dashList.assign(dashList, length); }
+  FOG_INLINE err_t setDashList(const double* dashList, size_t length) { return _dashList.setList(dashList, length); }
 
   FOG_INLINE void setHints(uint32_t hints) { _hints.packed = hints; }
   FOG_INLINE void setStartCap(uint32_t startCap) { _hints.startCap = startCap; }
@@ -253,82 +246,181 @@ struct FOG_NO_EXPORT PathStrokerParamsD
 // [Fog::PathStrokerF]
 // ============================================================================
 
-struct FOG_API PathStrokerF
+struct FOG_NO_EXPORT PathStrokerF
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  PathStrokerF();
-  PathStrokerF(const PathStrokerParamsF& params);
-  ~PathStrokerF();
+  FOG_INLINE PathStrokerF()
+  {
+    _api.pathstrokerf.ctor(this);
+  }
+
+  FOG_INLINE PathStrokerF(const PathStrokerParamsF& params)
+  {
+    _api.pathstrokerf.ctorParams(this, &params, NULL, NULL);
+  }
+
+  FOG_INLINE PathStrokerF(const PathStrokerParamsF& params, const TransformF& transform)
+  {
+    _api.pathstrokerf.ctorParams(this, &params, &transform, NULL);
+  }
+
+  FOG_INLINE PathStrokerF(const PathStrokerParamsF& params, const TransformF& transform, const BoxF& clipBox)
+  {
+    _api.pathstrokerf.ctorParams(this, &params, &transform, &clipBox);
+  }
+
+  FOG_INLINE ~PathStrokerF()
+  {
+    _api.pathstrokerf.dtor(this);
+  }
 
   // --------------------------------------------------------------------------
-  // [Accessors]
+  // [Stroke-Params]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const PathStrokerParamsF& getParams() const { return _params; }
-  void setParams(const PathStrokerParamsF& params);
+  FOG_INLINE const PathStrokerParamsF& getParams() const
+  {
+    return _params;
+  }
 
-  FOG_INLINE const BoxF& getClipBox() const { return _clipBox; }
-  FOG_INLINE bool isClippingEnabled() const { return _isClippingEnabled; }
+  FOG_INLINE void setParams(const PathStrokerParamsF& params)
+  {
+    _api.pathstrokerf.setParams(this, &params);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Flatten-Params]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE float getFlatness() const
+  {
+    return _flatness;
+  }
+
+  FOG_INLINE void setFlatness(float flatness)
+  {
+    _flatness = flatness;
+    _isDirty = true;
+  }
+
+  FOG_INLINE uint32_t getFlattenType() const
+  {
+    return _flattenType;
+  }
+
+  FOG_INLINE void setFlattenType(uint32_t flattenType)
+  {
+    FOG_ASSERT(flattenType < PATH_FLATTEN_COUNT);
+    _flattenType = (uint8_t)flattenType;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Clipping]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE const BoxF& getClipBox() const
+  {
+    return _clipBox;
+  }
 
   FOG_INLINE void setClipBox(const BoxF& clipBox)
   {
     _clipBox = clipBox;
-    _isClippingEnabled = true;
+
     _isDirty = true;
+    _isClippingEnabled = true;
   }
 
   FOG_INLINE void resetClipBox()
   {
     _clipBox.reset();
-    _isClippingEnabled = false;
+
     _isDirty = true;
+    _isClippingEnabled = false;
+  }
+
+  FOG_INLINE bool isClippingEnabled() const
+  {
+    return _isClippingEnabled;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Transform]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE const TransformF& getTransform() const
+  {
+    return _transform;
   }
 
   FOG_INLINE void setTransform(const TransformF& transform)
   {
-    _transform = transform;
+    _transform() = transform;
     _isDirty = true;
   }
 
   FOG_INLINE void resetTransform()
   {
-    _transform.reset();
+    _transform->reset();
     _isDirty = true;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Stroke]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t strokeShape(PathF& dst, uint32_t shapeType, const void* shapeData) const
+  {
+    return _api.pathstrokerf.strokeShape(this, &dst, shapeType, shapeData);
+  }
+
+  FOG_INLINE err_t strokeRect(PathF& dst, const RectF& rect) const
+  {
+    return _api.pathstrokerf.strokeShape(this, &dst, SHAPE_TYPE_RECT, &rect);
+  }
+
+  FOG_INLINE err_t strokePath(PathF& dst, const PathF& src) const
+  {
+    return _api.pathstrokerf.strokePath(this, &dst, &src);
   }
 
   // --------------------------------------------------------------------------
   // [Update]
   // --------------------------------------------------------------------------
 
-  void _update();
-  FOG_INLINE void update() const { if (_isDirty) const_cast<PathStrokerF*>(this)->_update(); }
+  FOG_INLINE void _update()
+  {
+    _api.pathstrokerf.update(this);
+  }
+
+  FOG_INLINE void update() const
+  {
+    if (_isDirty)
+      _api.pathstrokerf.update(const_cast<PathStrokerF*>(this));
+  }
 
   // --------------------------------------------------------------------------
-  // [Process]
+  // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  err_t strokeShape(PathF& dst, uint32_t shapeType, const void* shapeData,
-    const TransformF* tr = NULL, const BoxF* clipBox = NULL) const;
-
-  err_t strokePath(PathF& dst, const PathF& src,
-    const TransformF* tr = NULL, const BoxF* clipBox = NULL) const;
+  FOG_INLINE PathStrokerF& operator=(const PathStrokerF& other)
+  {
+    _api.pathstrokerf.setOther(this, &other);
+    return *this;
+  }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  PathStrokerParamsF _params;
-  TransformF _transform;
+  Static<PathStrokerParamsF> _params;
+  Static<TransformF> _transform;
 
   BoxF _clipBox;
   BoxF _transformedClipBox;
-
-  bool _isDirty;
-  bool _isClippingEnabled;
-  bool _isComplexTransform;
 
   //! @brief Width / 2 after the simple transformation (if used).
   float _w;
@@ -337,92 +429,194 @@ struct FOG_API PathStrokerF
   float _wEps;
   float _da;
   float _flatness;
+
   int _wSign;
 
-private:
-  _FOG_CLASS_NO_COPY(PathStrokerF)
+  uint8_t _isDirty;
+  uint8_t _isClippingEnabled;
+  uint8_t _isTransformSimple;
+  uint8_t _flattenType;
 };
 
 // ============================================================================
 // [Fog::PathStrokerD]
 // ============================================================================
 
-struct FOG_API PathStrokerD
+struct FOG_NO_EXPORT PathStrokerD
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  PathStrokerD();
-  PathStrokerD(const PathStrokerParamsD& params);
-  ~PathStrokerD();
+  FOG_INLINE PathStrokerD()
+  {
+    _api.pathstrokerd.ctor(this);
+  }
+
+  FOG_INLINE PathStrokerD(const PathStrokerParamsD& params)
+  {
+    _api.pathstrokerd.ctorParams(this, &params, NULL, NULL);
+  }
+
+  FOG_INLINE PathStrokerD(const PathStrokerParamsD& params, const TransformD& transform)
+  {
+    _api.pathstrokerd.ctorParams(this, &params, &transform, NULL);
+  }
+
+  FOG_INLINE PathStrokerD(const PathStrokerParamsD& params, const TransformD& transform, const BoxD& clipBox)
+  {
+    _api.pathstrokerd.ctorParams(this, &params, &transform, &clipBox);
+  }
+
+  FOG_INLINE ~PathStrokerD()
+  {
+    _api.pathstrokerd.dtor(this);
+  }
 
   // --------------------------------------------------------------------------
-  // [Accessors]
+  // [Stroke-Params]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const PathStrokerParamsD& getParams() const { return _params; }
-  void setParams(const PathStrokerParamsD& params);
+  FOG_INLINE const PathStrokerParamsD& getParams() const
+  {
+    return _params;
+  }
 
-  FOG_INLINE const BoxD& getClipBox() const { return _clipBox; }
-  FOG_INLINE bool isClippingEnabled() const { return _isClippingEnabled; }
+  FOG_INLINE void setParams(const PathStrokerParamsD& params)
+  {
+    _api.pathstrokerd.setParams(this, &params);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Flatten-Params]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE double getFlatness() const
+  {
+    return _flatness;
+  }
+
+  FOG_INLINE void setFlatness(double flatness)
+  {
+    _flatness = flatness;
+    _isDirty = true;
+  }
+
+  FOG_INLINE uint32_t getFlattenType() const
+  {
+    return _flattenType;
+  }
+
+  FOG_INLINE void setFlattenType(uint32_t flattenType)
+  {
+    FOG_ASSERT(flattenType < PATH_FLATTEN_COUNT);
+    _flattenType = (uint8_t)flattenType;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Clipping]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE const BoxD& getClipBox() const
+  {
+    return _clipBox;
+  }
 
   FOG_INLINE void setClipBox(const BoxD& clipBox)
   {
     _clipBox = clipBox;
-    _isClippingEnabled = true;
+
     _isDirty = true;
+    _isClippingEnabled = true;
   }
 
   FOG_INLINE void resetClipBox()
   {
     _clipBox.reset();
-    _isClippingEnabled = false;
+
     _isDirty = true;
+    _isClippingEnabled = false;
+  }
+
+  FOG_INLINE bool isClippingEnabled() const
+  {
+    return _isClippingEnabled;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Transform]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE const TransformD& getTransform() const
+  {
+    return _transform;
   }
 
   FOG_INLINE void setTransform(const TransformD& transform)
   {
-    _transform = transform;
+    _transform() = transform;
     _isDirty = true;
   }
 
   FOG_INLINE void resetTransform()
   {
-    _transform.reset();
+    _transform->reset();
     _isDirty = true;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Stroke]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t strokeShape(PathD& dst, uint32_t shapeType, const void* shapeData) const
+  {
+    return _api.pathstrokerd.strokeShape(this, &dst, shapeType, shapeData);
+  }
+
+  FOG_INLINE err_t strokeRect(PathD& dst, const RectD& rect) const
+  {
+    return _api.pathstrokerd.strokeShape(this, &dst, SHAPE_TYPE_RECT, &rect);
+  }
+
+  FOG_INLINE err_t strokePath(PathD& dst, const PathD& src) const
+  {
+    return _api.pathstrokerd.strokePath(this, &dst, &src);
   }
 
   // --------------------------------------------------------------------------
   // [Update]
   // --------------------------------------------------------------------------
 
-  void _update();
-  FOG_INLINE void update() const { if (_isDirty) const_cast<PathStrokerD*>(this)->_update(); }
+  FOG_INLINE void _update()
+  {
+    _api.pathstrokerd.update(this);
+  }
+
+  FOG_INLINE void update() const
+  {
+    if (_isDirty)
+      _api.pathstrokerd.update(const_cast<PathStrokerD*>(this));
+  }
 
   // --------------------------------------------------------------------------
-  // [Process]
+  // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  err_t strokeShape(PathD& dst, uint32_t shapeType, const void* shapeData,
-    const TransformD* tr = NULL, const BoxD* clipBox = NULL) const;
-
-  err_t strokePath(PathD& dst, const PathD& src,
-    const TransformD* tr = NULL, const BoxD* clipBox = NULL) const;
+  FOG_INLINE PathStrokerD& operator=(const PathStrokerD& other)
+  {
+    _api.pathstrokerd.setOther(this, &other);
+    return *this;
+  }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  PathStrokerParamsD _params;
-  TransformD _transform;
+  Static<PathStrokerParamsD> _params;
+  Static<TransformD> _transform;
 
   BoxD _clipBox;
   BoxD _transformedClipBox;
-
-  bool _isDirty;
-  bool _isClippingEnabled;
-  bool _isComplexTransform;
 
   //! @brief Width / 2 after the simple transformation (if used).
   double _w;
@@ -431,10 +625,13 @@ struct FOG_API PathStrokerD
   double _wEps;
   double _da;
   double _flatness;
+
   int _wSign;
 
-private:
-  _FOG_CLASS_NO_COPY(PathStrokerD)
+  uint8_t _isDirty;
+  uint8_t _isClippingEnabled;
+  uint8_t _isTransformSimple;
+  uint8_t _flattenType;
 };
 
 // ============================================================================
@@ -458,7 +655,7 @@ FOG_INLINE PathStrokerParamsF& PathStrokerParamsF::operator=(const PathStrokerPa
   _miterLimit = (float)other._miterLimit;
   _dashOffset = (float)other._dashOffset;
 
-  _ListFloatFromListDouble(_dashList, other._dashList);
+  _dashList.setList(other._dashList);
   _hints.packed = other._hints.packed;
 
   return *this;
@@ -470,7 +667,7 @@ FOG_INLINE PathStrokerParamsD& PathStrokerParamsD::operator=(const PathStrokerPa
   _miterLimit = other._miterLimit;
   _dashOffset = other._dashOffset;
 
-  _ListDoubleFromListFloat(_dashList, other._dashList);
+  _dashList.setList(other._dashList);
   _hints.packed = other._hints.packed;
 
   return *this;
@@ -489,32 +686,19 @@ FOG_INLINE PathStrokerParamsD& PathStrokerParamsD::operator=(const PathStrokerPa
 }
 
 // ============================================================================
-// [Fog::PathStrokerParamsT]
+// [Fog::PathStrokerT<> / Fog::PathStrokerParamsT<>]
 // ============================================================================
 
-FOG_CLASS_PRECISION_F_D(PathStrokerParams)
-
-// ============================================================================
-// [Fog::PathStrokerT<>]
-// ============================================================================
-
-FOG_CLASS_PRECISION_F_D(PathStroker)
+_FOG_NUM_T(PathStroker)
+_FOG_NUM_T(PathStrokerParams)
+_FOG_NUM_F(PathStroker)
+_FOG_NUM_F(PathStrokerParams)
+_FOG_NUM_D(PathStroker)
+_FOG_NUM_D(PathStrokerParams)
 
 //! @}
 
 } // Fog namespace
 
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::PathStrokerHints, Fog::TYPEINFO_PRIMITIVE)
-
-_FOG_TYPEINFO_DECLARE(Fog::PathStrokerParamsF, Fog::TYPEINFO_MOVABLE)
-_FOG_TYPEINFO_DECLARE(Fog::PathStrokerParamsD, Fog::TYPEINFO_MOVABLE)
-
-_FOG_TYPEINFO_DECLARE(Fog::PathStrokerF, Fog::TYPEINFO_MOVABLE)
-_FOG_TYPEINFO_DECLARE(Fog::PathStrokerD, Fog::TYPEINFO_MOVABLE)
-
 // [Guard]
-#endif // _FOG_G2D_GEOMETRY_STROKER_H
+#endif // _FOG_G2D_GEOMETRY_PATHSTROKER_H

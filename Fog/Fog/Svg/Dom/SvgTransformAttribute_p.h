@@ -12,7 +12,6 @@
 #include <Fog/Core/Xml/XmlAttribute.h>
 #include <Fog/Core/Xml/XmlElement.h>
 #include <Fog/G2d/Geometry/Transform.h>
-#include <Fog/Svg/Global/Constants.h>
 
 namespace Fog {
 
@@ -38,7 +37,7 @@ struct FOG_NO_EXPORT SvgTransformAttribute : public XmlAttribute
   // [Methods]
   // --------------------------------------------------------------------------
 
-  virtual err_t setValue(const String& value);
+  virtual err_t setValue(const StringW& value);
 
   // --------------------------------------------------------------------------
   // [Data]
@@ -56,7 +55,7 @@ protected:
   bool _isValid;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgTransformAttribute)
+  _FOG_NO_COPY(SvgTransformAttribute)
 };
 
 //! @}

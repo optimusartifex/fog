@@ -8,8 +8,8 @@
 #define _FOG_G2D_TEXT_TEXTLAYOUT_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Global/Global.h>
+#include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/TextChunk.h>
 #include <Fog/G2d/Painting/PaintDeviceInfo.h>
@@ -49,7 +49,7 @@ struct FOG_API TextLayout
 
   FOG_INLINE const TextChunk& getText() const { return _textChunk; }
   err_t setText(const TextChunk& textChunk);
-  err_t setText(const String& textString);
+  err_t setText(const StringW& textString);
 
   FOG_INLINE const List<Range>& getLines() { return _lines; }
   FOG_INLINE bool isMultiLine() const { return _isMultiLine; }
@@ -95,26 +95,6 @@ struct FOG_API TextLayout
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::TextLayout, Fog::TYPEINFO_MOVABLE)
-
-// ============================================================================
-// [Fog::Swap]
-// ============================================================================
-
-_FOG_SWAP_DECLARE(Fog::TextLayout,
-{
-  swap(a._deviceInfo, b._deviceInfo);
-  swap(a._font, b._font);
-  swap(a._physicalFont, b._physicalFont);
-  swap(a._textChunk, b._textChunk);
-  swap(a._lines, b._lines);
-  swap(a._isMultiLine, b._isMultiLine);
-})
 
 // [Guard]
 #endif // _FOG_G2D_TEXT_TEXTLAYOUT_H

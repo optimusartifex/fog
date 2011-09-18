@@ -19,7 +19,6 @@
 #include <Fog/G2d/Painting/Painter.h>
 #include <Fog/G2d/Source/Pattern.h>
 #include <Fog/G2d/Text/Font.h>
-#include <Fog/Svg/Global/Constants.h>
 #include <Fog/Svg/Tools/SvgCoord.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
 
@@ -292,7 +291,7 @@ struct FOG_API SvgVisitor
   Font _font;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgVisitor)
+  _FOG_NO_COPY(SvgVisitor)
 };
 
 // ============================================================================
@@ -352,13 +351,13 @@ struct FOG_NO_EXPORT SvgGState
 
   FOG_INLINE void saveTransform()
   {
-    _transform.instance() = _visitor->getTransform();
+    _transform() = _visitor->getTransform();
     _flags |= SAVED_TRANSFORM;
   }
 
   FOG_INLINE void restoreTransform()
   {
-    _visitor->setTransform(_transform.instance());
+    _visitor->setTransform(_transform);
   }
 
   // --------------------------------------------------------------------------
@@ -390,7 +389,7 @@ struct FOG_NO_EXPORT SvgGState
 
   FOG_INLINE void restoreFont()
   {
-    _visitor->_font = _font.instance();
+    _visitor->_font = _font;
     _font.destroy();
   }
 
@@ -407,7 +406,7 @@ struct FOG_NO_EXPORT SvgGState
 
   FOG_INLINE void restoreFill()
   {
-    _visitor->_fillStyle = _fillStyle.instance();
+    _visitor->_fillStyle = _fillStyle;
     _visitor->_fillRule = _fillRule;
 
     _fillStyle.destroy();
@@ -426,8 +425,8 @@ struct FOG_NO_EXPORT SvgGState
 
   FOG_INLINE void restoreStroke()
   {
-    _visitor->_strokeStyle = _strokeStyle.instance();
-    _visitor->_strokeParams = _strokeParams.instance();
+    _visitor->_strokeStyle = _strokeStyle;
+    _visitor->_strokeParams = _strokeParams;
 
     _strokeStyle.destroy();
     _strokeParams.destroy();
@@ -453,7 +452,7 @@ struct FOG_NO_EXPORT SvgGState
   PointF _cursor;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgGState)
+  _FOG_NO_COPY(SvgGState)
 };
 
 //! @}

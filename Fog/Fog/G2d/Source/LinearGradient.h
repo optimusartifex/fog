@@ -136,18 +136,13 @@ FOG_INLINE err_t LinearGradientD::setGradient(const LinearGradientD& other) { re
 // [Fog::LinearGradientT<>]
 // ============================================================================
 
-FOG_CLASS_PRECISION_F_D(LinearGradient)
+_FOG_NUM_T(LinearGradient)
+_FOG_NUM_F(LinearGradient)
+_FOG_NUM_D(LinearGradient)
 
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::LinearGradientF, Fog::TYPEINFO_MOVABLE)
-_FOG_TYPEINFO_DECLARE(Fog::LinearGradientD, Fog::TYPEINFO_MOVABLE)
 
 // [Guard]
 #endif // _FOG_G2D_SOURCE_LINEARGRADIENT_H

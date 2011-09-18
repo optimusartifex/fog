@@ -9,12 +9,13 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Cpu/Cpu.h>
-#include <Fog/Core/Cpu/Initializer.h>
 #include <Fog/Core/Face/Face_C.h>
+#include <Fog/Core/Global/Global.h>
+#include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Global/Private.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Tools/Byte.h>
 #include <Fog/Core/Tools/Char.h>
+#include <Fog/Core/Tools/Cpu.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringUtil.h>
 #include <Fog/G2d/Face/Face_Raster_C.h>
@@ -761,7 +762,7 @@ static err_t FOG_CDECL Color_adjust(Color& self, uint32_t adjustOp, float param)
 // [Fog::Color - Parse / Serialize]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 struct ColorName
 {
   char name[22];
@@ -771,7 +772,7 @@ struct ColorName
   uint32_t b : 8;
   uint32_t flags : 8;
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 enum COLOR_ENTITY_FLAGS
 {
@@ -955,7 +956,7 @@ static uint32_t Color_doubleHexToComponent(uint32_t c0, uint32_t c1)
   return (h0 << 4) + h1;
 }
 
-static const ColorName* Color_find(const Stub8& key)
+static const ColorName* Color_find(const StubA& key)
 {
   const ColorName* base = _colorNames;
   size_t i, lim;
@@ -1004,10 +1005,10 @@ static const ColorName* Color_find(const Stub8& key)
 }
 
 template<typename CharT>
-static err_t FOG_CDECL Color_parse(Color& dst, const typename CharT::Stub& str, uint32_t flags)
+static err_t FOG_CDECL Color_parse(Color& dst, const CharT_(Stub)& str, uint32_t flags)
 {
-  const typename CharT::UType* cur = reinterpret_cast<const typename CharT::UType*>(str.getData());
-  const typename CharT::UType* end = cur + str.getComputedLength();
+  const CharT_Value* cur = reinterpret_cast<const CharT_Value*>(str.getData());
+  const CharT_Value* end = cur + str.getComputedLength();
 
   if (cur == end)
     return ERR_RT_INVALID_ARGUMENT;
@@ -1022,7 +1023,7 @@ static err_t FOG_CDECL Color_parse(Color& dst, const typename CharT::Stub& str, 
   if ((flags & COLOR_NAME_STRICT) == 0)
   {
     // Skip whitespaces.
-    while (CharT::isSpace(*cur))
+    while (CharT_Func::isSpace(*cur))
     {
       if (++cur == end)
         goto _Fail;
@@ -1051,7 +1052,7 @@ static err_t FOG_CDECL Color_parse(Color& dst, const typename CharT::Stub& str, 
       {
         for (i = 0; i < 6; i++)
         {
-          if (!CharT::isAsciiXDigit(cur[i]))
+          if (!CharT_Func::isAsciiXDigit(cur[i]))
           {
             if (i == 3)
               goto _TryCssHex3;
@@ -1072,7 +1073,7 @@ static err_t FOG_CDECL Color_parse(Color& dst, const typename CharT::Stub& str, 
 _TryCssHex3:
         for (i = 0; i < 3; i++)
         {
-          if (!CharT::isAsciiXDigit(cur[i]))
+          if (!CharT_Func::isAsciiXDigit(cur[i]))
             goto _Fail;
         }
 
@@ -1107,17 +1108,17 @@ _TryCssHex3:
 
     if ((size_t)(end - cur) >= 5)
     {
-      keyword[0] = CharT::isAsciiLetter(cur[0]) ? (uint8_t)(CharT::Value)cur[0] : (uint8_t)0;
-      keyword[1] = CharT::isAsciiLetter(cur[1]) ? (uint8_t)(CharT::Value)cur[1] : (uint8_t)0;
-      keyword[2] = CharT::isAsciiLetter(cur[2]) ? (uint8_t)(CharT::Value)cur[2] : (uint8_t)0;
-      keyword[3] = CharT::isAsciiLetter(cur[3]) ? (uint8_t)(CharT::Value)cur[3] : (uint8_t)0;
+      keyword[0] = CharT_Func::isAsciiLetter(cur[0]) ? (uint8_t)cur[0] : (uint8_t)0;
+      keyword[1] = CharT_Func::isAsciiLetter(cur[1]) ? (uint8_t)cur[1] : (uint8_t)0;
+      keyword[2] = CharT_Func::isAsciiLetter(cur[2]) ? (uint8_t)cur[2] : (uint8_t)0;
+      keyword[3] = CharT_Func::isAsciiLetter(cur[3]) ? (uint8_t)cur[3] : (uint8_t)0;
 
       if (flags & COLOR_NAME_IGNORE_CASE)
       {
-        keyword[0] = Byte::toAsciiLower(keyword[0]);
-        keyword[1] = Byte::toAsciiLower(keyword[1]);
-        keyword[2] = Byte::toAsciiLower(keyword[2]);
-        keyword[3] = Byte::toAsciiLower(keyword[3]);
+        keyword[0] = CharA::toLower(keyword[0]);
+        keyword[1] = CharA::toLower(keyword[1]);
+        keyword[2] = CharA::toLower(keyword[2]);
+        keyword[3] = CharA::toLower(keyword[3]);
       }
 
       kPacked = reinterpret_cast<uint32_t*>(keyword)[0];
@@ -1160,18 +1161,18 @@ _TryCssHex3:
 _ParseRrbOrHsv:
 
       // Skip whitespaces.
-      while (CharT::isSpace(*cur))
+      while (CharT_Func::isSpace(*cur))
       {
         if (++cur == end)
           goto _Fail;
       }
 
       // Parse '('.
-      if (*cur != '(' || ++cur == end)
+      if (*cur != CharT('(') || ++cur == end)
         goto _Fail;
 
       // Skip whitespaces.
-      while (CharT::isSpace(*cur))
+      while (CharT_Func::isSpace(*cur))
       {
         if (++cur == end)
           goto _Fail;
@@ -1185,7 +1186,7 @@ _ParseRrbOrHsv:
           uint32_t pf;
 
           // Skip whitespaces.
-          while (CharT::isSpace(*cur))
+          while (CharT_Func::isSpace(*cur))
           {
             if (++cur == end)
               goto _Fail;
@@ -1193,13 +1194,13 @@ _ParseRrbOrHsv:
 
           // Parse number. It's against standard, but some SVG generators emit
           // number in floating point, including 'dot' and some numbers behind.
-          if ((StringUtil::atof((const typename CharT::PType*)cur, (size_t)(end - cur), &val, CharT::PType('.'), &valEnd, &pf) != ERR_OK) ||
-              (pf & (StringUtil::PARSED_EXPONENT)) != 0)
+          if ((StringUtil::parseReal(&val, (const CharT*)cur, (size_t)(end - cur), CharT('.'), &valEnd, &pf) != ERR_OK) ||
+              (pf & STRING_PARSED_EXPONENT) != 0)
           {
             goto _Fail;
           }
 
-          // String can't end here.
+          // StringW can't end here.
           if ((cur += valEnd) == end)
             goto _Fail;
 
@@ -1214,7 +1215,7 @@ _ParseRrbOrHsv:
             else
             {
               // Parse '%'.
-              if (*cur != '%' || ++cur == end)
+              if (*cur != CharT('%') || ++cur == end)
                 goto _Fail;
               f[i] = Math::bound<float>(val, 0.0f, 100.0f) * (1.0f / 100.0f);
             }
@@ -1222,7 +1223,7 @@ _ParseRrbOrHsv:
           else
           {
             // RGB value can be at 0-255 or 0-100%.
-            if (*cur == '%')
+            if (*cur == CharT('%'))
             {
               percentUsed = true;
               if (++cur == end)
@@ -1241,14 +1242,14 @@ _ParseRrbOrHsv:
           }
 
           // Skip whitespaces.
-          while (CharT::isSpace(*cur))
+          while (CharT_Func::isSpace(*cur))
           {
             if (++cur == end)
               goto _Fail;
           }
 
           // Expect ','.
-          if (*cur == ',')
+          if (*cur == CharT(','))
           {
             if (++cur == end)
               goto _Fail;
@@ -1268,8 +1269,8 @@ _ParseRrbOrHsv:
           uint32_t pf;
 
           // Parse float.
-          if ((StringUtil::atof((const typename CharT::PType*)cur, (size_t)(end - cur), &f[0], CharT::PType('.'), &valEnd, &pf) != ERR_OK) ||
-              (pf & (StringUtil::PARSED_EXPONENT)) != 0)
+          if ((StringUtil::parseReal(&f[0], (const CharT*)cur, (size_t)(end - cur), CharT('.'), &valEnd, &pf) != ERR_OK) ||
+              (pf & STRING_PARSED_EXPONENT) != 0)
           {
             goto _Fail;
           }
@@ -1282,7 +1283,7 @@ _ParseRrbOrHsv:
           f[0] = Math::bound(f[0], 0.0f, 1.0f);
 
           // Skip whitespaces.
-          while (CharT::isSpace(*cur))
+          while (CharT_Func::isSpace(*cur))
           {
             if (++cur == end)
               goto _Fail;
@@ -1290,7 +1291,7 @@ _ParseRrbOrHsv:
         }
 
         // Expect ')'.
-        if (*cur != ')')
+        if (*cur != CharT(')'))
           goto _Fail;
         cur++;
 
@@ -1311,41 +1312,39 @@ _ParseRrbOrHsv:
   if ((flags & (COLOR_NAME_CSS_KEYWORD | COLOR_NAME_CSS_TRANSPARENT)) != 0)
   {
     const ColorName* entity;
-    Stub8 name8(UNINITIALIZED);
+    StubA nameA(UNINITIALIZED);
 
     i = 0;
     for (;;)
     {
-      typename CharT::Value c = cur[i];
-      if (!(CharT::isAsciiNumlet(c) || c == '-')) break;
+      CharT_Value c = cur[i];
+      if (!(CharT_Func::isAsciiNumlet(c) || c == CharT('-'))) break;
 
       keyword[i] = (uint8_t)c;
       if (++i == 32)
         goto _Fail;
 
-      name8.setData(keyword);
-      name8.setLength(i);
+      nameA.setData(keyword);
+      nameA.setLength(i);
     }
 
     if ((flags & COLOR_NAME_IGNORE_CASE) != 0)
     {
-      for (i = 0; i < name8.getLength(); i++)
-      {
-        keyword[i] = Byte::toAsciiLower(keyword[i]);
-      }
+      for (i = 0; i < nameA.getLength(); i++)
+        keyword[i] = CharA::toLower(keyword[i]);
     }
 
     cur += i;
 
     // CSS keywords (basic and extended color names).
-    if ((flags & COLOR_NAME_CSS_KEYWORD) != 0 && (entity = Color_find(name8)) != NULL)
+    if ((flags & COLOR_NAME_CSS_KEYWORD) != 0 && (entity = Color_find(nameA)) != NULL)
     {
       dst.setArgb32(Argb32(0xFF, entity->r, entity->g, entity->b));
       goto _Done;
     }
 
     // CSS 'transparent'.
-    if (name8.getLength() == 11 && StringUtil::eq(name8.getData(), "transparent", 11, CASE_SENSITIVE))
+    if (nameA.getLength() == 11 && StringUtil::eq(nameA.getData(), "transparent", 11, CASE_SENSITIVE))
     {
       cur += 11;
 
@@ -1367,59 +1366,63 @@ _Done:
 // [Init / Fini]
 // ============================================================================
 
-FOG_CPU_DECLARE_INITIALIZER_SSE2(Color_initSSE2)
+FOG_CPU_DECLARE_INITIALIZER_SSE2(Color_init_SSE2)
 
 FOG_NO_EXPORT void Color_init(void)
 {
-  typedef Api::Color_Convert ConvFn;
+  typedef Api::Color_Convert ConvFunc;
 
-  _api.color.convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_NONE  ] = (ConvFn)Color_zero4f;
-  _api.color.convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_ARGB  ] = (ConvFn)Color_copy4f;
-  _api.color.convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_AHSV  ] = (ConvFn)Color_argbf_from_ahsvf;
-  _api.color.convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_AHSL  ] = (ConvFn)Color_argbf_from_ahslf;
-  _api.color.convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_ACMYK ] = (ConvFn)Color_argbf_from_acmykf;
-  _api.color.convert[ COLOR_MODEL_ARGB  ][_COLOR_MODEL_ARGB32] = (ConvFn)Color_argbf_from_argb32;
-  _api.color.convert[ COLOR_MODEL_ARGB  ][_COLOR_MODEL_ARGB64] = (ConvFn)Color_argbf_from_argb64;
+  // --------------------------------------------------------------------------
+  // [Funcs]
+  // --------------------------------------------------------------------------
 
-  _api.color.convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_NONE  ] = (ConvFn)Color_zero4f;
-  _api.color.convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_ARGB  ] = (ConvFn)Color_ahsvf_from_argbf;
-  _api.color.convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_AHSV  ] = (ConvFn)Color_copy4f;
-  _api.color.convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_AHSL  ] = (ConvFn)Color_ahsvf_from_ahslf;
-  _api.color.convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_ACMYK ] = (ConvFn)Color_ahsvf_from_acmykf;
-  _api.color.convert[ COLOR_MODEL_AHSV  ][_COLOR_MODEL_ARGB32] = (ConvFn)Color_ahsvf_from_argb32;
-  _api.color.convert[ COLOR_MODEL_AHSV  ][_COLOR_MODEL_ARGB64] = (ConvFn)Color_ahsvf_from_argb64;
+  _api.color.convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_NONE  ] = (ConvFunc)Color_zero4f;
+  _api.color.convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_ARGB  ] = (ConvFunc)Color_copy4f;
+  _api.color.convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_AHSV  ] = (ConvFunc)Color_argbf_from_ahsvf;
+  _api.color.convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_AHSL  ] = (ConvFunc)Color_argbf_from_ahslf;
+  _api.color.convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_ACMYK ] = (ConvFunc)Color_argbf_from_acmykf;
+  _api.color.convert[ COLOR_MODEL_ARGB  ][_COLOR_MODEL_ARGB32] = (ConvFunc)Color_argbf_from_argb32;
+  _api.color.convert[ COLOR_MODEL_ARGB  ][_COLOR_MODEL_ARGB64] = (ConvFunc)Color_argbf_from_argb64;
 
-  _api.color.convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_NONE  ] = (ConvFn)Color_zero4f;
-  _api.color.convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_ARGB  ] = (ConvFn)Color_ahslf_from_argbf;
-  _api.color.convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_AHSV  ] = (ConvFn)Color_ahslf_from_ahsvf;
-  _api.color.convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_AHSL  ] = (ConvFn)Color_copy4f;
-  _api.color.convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_ACMYK ] = (ConvFn)Color_ahslf_from_acmykf;
-  _api.color.convert[ COLOR_MODEL_AHSL  ][_COLOR_MODEL_ARGB32] = (ConvFn)Color_ahslf_from_argb32;
-  _api.color.convert[ COLOR_MODEL_AHSL  ][_COLOR_MODEL_ARGB64] = (ConvFn)Color_ahslf_from_argb64;
+  _api.color.convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_NONE  ] = (ConvFunc)Color_zero4f;
+  _api.color.convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_ARGB  ] = (ConvFunc)Color_ahsvf_from_argbf;
+  _api.color.convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_AHSV  ] = (ConvFunc)Color_copy4f;
+  _api.color.convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_AHSL  ] = (ConvFunc)Color_ahsvf_from_ahslf;
+  _api.color.convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_ACMYK ] = (ConvFunc)Color_ahsvf_from_acmykf;
+  _api.color.convert[ COLOR_MODEL_AHSV  ][_COLOR_MODEL_ARGB32] = (ConvFunc)Color_ahsvf_from_argb32;
+  _api.color.convert[ COLOR_MODEL_AHSV  ][_COLOR_MODEL_ARGB64] = (ConvFunc)Color_ahsvf_from_argb64;
 
-  _api.color.convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_NONE  ] = (ConvFn)Color_zero5f;
-  _api.color.convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_ARGB  ] = (ConvFn)Color_acmykf_from_argbf;
-  _api.color.convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_AHSV  ] = (ConvFn)Color_acmykf_from_ahsvf;
-  _api.color.convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_AHSL  ] = (ConvFn)Color_acmykf_from_ahslf;
-  _api.color.convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_ACMYK ] = (ConvFn)Color_copy5f;
-  _api.color.convert[ COLOR_MODEL_ACMYK ][_COLOR_MODEL_ARGB32] = (ConvFn)Color_acmykf_from_argb32;
-  _api.color.convert[ COLOR_MODEL_ACMYK ][_COLOR_MODEL_ARGB64] = (ConvFn)Color_acmykf_from_argb64;
+  _api.color.convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_NONE  ] = (ConvFunc)Color_zero4f;
+  _api.color.convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_ARGB  ] = (ConvFunc)Color_ahslf_from_argbf;
+  _api.color.convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_AHSV  ] = (ConvFunc)Color_ahslf_from_ahsvf;
+  _api.color.convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_AHSL  ] = (ConvFunc)Color_copy4f;
+  _api.color.convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_ACMYK ] = (ConvFunc)Color_ahslf_from_acmykf;
+  _api.color.convert[ COLOR_MODEL_AHSL  ][_COLOR_MODEL_ARGB32] = (ConvFunc)Color_ahslf_from_argb32;
+  _api.color.convert[ COLOR_MODEL_AHSL  ][_COLOR_MODEL_ARGB64] = (ConvFunc)Color_ahslf_from_argb64;
 
-  _api.color.convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_NONE  ] = (ConvFn)Color_argb32_zero;
-  _api.color.convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_ARGB  ] = (ConvFn)Color_argb32_from_argbf;
-  _api.color.convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_AHSV  ] = (ConvFn)Color_argb32_from_ahsvf;
-  _api.color.convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_AHSL  ] = (ConvFn)Color_argb32_from_ahslf;
-  _api.color.convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_ACMYK ] = (ConvFn)Color_argb32_from_acmykf;
-  _api.color.convert[_COLOR_MODEL_ARGB32][_COLOR_MODEL_ARGB32] = (ConvFn)Color_argb32_from_argb32;
-  _api.color.convert[_COLOR_MODEL_ARGB32][_COLOR_MODEL_ARGB64] = (ConvFn)Color_argb32_from_argb64;
+  _api.color.convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_NONE  ] = (ConvFunc)Color_zero5f;
+  _api.color.convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_ARGB  ] = (ConvFunc)Color_acmykf_from_argbf;
+  _api.color.convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_AHSV  ] = (ConvFunc)Color_acmykf_from_ahsvf;
+  _api.color.convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_AHSL  ] = (ConvFunc)Color_acmykf_from_ahslf;
+  _api.color.convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_ACMYK ] = (ConvFunc)Color_copy5f;
+  _api.color.convert[ COLOR_MODEL_ACMYK ][_COLOR_MODEL_ARGB32] = (ConvFunc)Color_acmykf_from_argb32;
+  _api.color.convert[ COLOR_MODEL_ACMYK ][_COLOR_MODEL_ARGB64] = (ConvFunc)Color_acmykf_from_argb64;
 
-  _api.color.convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_NONE  ] = (ConvFn)Color_argb64_zero;
-  _api.color.convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_ARGB  ] = (ConvFn)Color_argb64_from_argbf;
-  _api.color.convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_AHSV  ] = (ConvFn)Color_argb64_from_ahsvf;
-  _api.color.convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_AHSL  ] = (ConvFn)Color_argb64_from_ahslf;
-  _api.color.convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_ACMYK ] = (ConvFn)Color_argb64_from_acmykf;
-  _api.color.convert[_COLOR_MODEL_ARGB64][_COLOR_MODEL_ARGB32] = (ConvFn)Color_argb64_from_argb32;
-  _api.color.convert[_COLOR_MODEL_ARGB64][_COLOR_MODEL_ARGB64] = (ConvFn)Color_argb64_from_argb64;
+  _api.color.convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_NONE  ] = (ConvFunc)Color_argb32_zero;
+  _api.color.convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_ARGB  ] = (ConvFunc)Color_argb32_from_argbf;
+  _api.color.convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_AHSV  ] = (ConvFunc)Color_argb32_from_ahsvf;
+  _api.color.convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_AHSL  ] = (ConvFunc)Color_argb32_from_ahslf;
+  _api.color.convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_ACMYK ] = (ConvFunc)Color_argb32_from_acmykf;
+  _api.color.convert[_COLOR_MODEL_ARGB32][_COLOR_MODEL_ARGB32] = (ConvFunc)Color_argb32_from_argb32;
+  _api.color.convert[_COLOR_MODEL_ARGB32][_COLOR_MODEL_ARGB64] = (ConvFunc)Color_argb32_from_argb64;
+
+  _api.color.convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_NONE  ] = (ConvFunc)Color_argb64_zero;
+  _api.color.convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_ARGB  ] = (ConvFunc)Color_argb64_from_argbf;
+  _api.color.convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_AHSV  ] = (ConvFunc)Color_argb64_from_ahsvf;
+  _api.color.convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_AHSL  ] = (ConvFunc)Color_argb64_from_ahslf;
+  _api.color.convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_ACMYK ] = (ConvFunc)Color_argb64_from_acmykf;
+  _api.color.convert[_COLOR_MODEL_ARGB64][_COLOR_MODEL_ARGB32] = (ConvFunc)Color_argb64_from_argb32;
+  _api.color.convert[_COLOR_MODEL_ARGB64][_COLOR_MODEL_ARGB64] = (ConvFunc)Color_argb64_from_argb64;
 
   _api.color.setModel = Color_setModel;
   _api.color.setData = Color_setData;
@@ -1427,10 +1430,14 @@ FOG_NO_EXPORT void Color_init(void)
   _api.color.mix = Color_mix;
   _api.color.adjust = Color_adjust;
 
-  _api.color.parseA = Color_parse<Byte>;
-  _api.color.parseU = Color_parse<Char>;
+  _api.color.parseA = Color_parse<char>;
+  _api.color.parseU = Color_parse<CharW>;
 
-  FOG_CPU_USE_INITIALIZER_SSE2(Color_initSSE2)
+  // --------------------------------------------------------------------------
+  // [CPU Based Optimizations]
+  // --------------------------------------------------------------------------
+
+  FOG_CPU_USE_INITIALIZER_SSE2(Color_init_SSE2)
 }
 
 } // Fog namespace

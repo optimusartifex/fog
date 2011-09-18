@@ -483,7 +483,7 @@ extern FOG_NO_EXPORT const uint8_t _render_linear_blur8_shr[255];
 // [Fog::Render - Data - CompatibleFormat]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 struct RenderCompatibleFormat
 {
   uint8_t dstFormat;
@@ -491,7 +491,7 @@ struct RenderCompatibleFormat
   uint8_t vblitId;
   uint8_t reserved;
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 //! @internal
 extern FOG_NO_EXPORT const RenderCompatibleFormat _g2d_render_compatibleFormat[IMAGE_FORMAT_COUNT][IMAGE_FORMAT_COUNT];

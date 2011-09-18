@@ -123,7 +123,7 @@ public:
   PoolEntry* _unusedThreads;
 
 private:
-  _FOG_CLASS_NO_COPY(ThreadPool)
+  _FOG_NO_COPY(ThreadPool)
 };
 
 //! @}

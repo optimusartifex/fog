@@ -26,7 +26,7 @@ namespace Fog {
 // [Fog::IcoHeader]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 
 //! @internal
 //!
@@ -38,13 +38,13 @@ struct IcoHeader
   uint16_t count;
 };
 
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 // ============================================================================
 // [Fog::IcoEntry]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 
 //! @internal
 //!
@@ -61,7 +61,7 @@ struct IcoEntry
   uint32_t offset;
 };
 
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 // ============================================================================
 // [Fog::IcoCodecProvider]
@@ -123,8 +123,8 @@ protected:
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-_FOG_TYPEINFO_DECLARE(Fog::IcoHeader, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::IcoEntry, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPE_DECLARE(Fog::IcoHeader, Fog::TYPE_CATEGORY_SIMPLE)
+_FOG_TYPE_DECLARE(Fog::IcoEntry, Fog::TYPE_CATEGORY_SIMPLE)
 
 // [Guard]
 #endif // _FOG_G2D_IMAGING_CODECS_ICOCODEC_P_H

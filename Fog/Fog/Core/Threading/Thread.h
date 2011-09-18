@@ -9,7 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/System/EventLoop.h>
+#include <Fog/Core/Kernel/EventLoop.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Threading/ThreadEvent.h>
 #include <Fog/Core/Tools/String.h>
@@ -53,12 +53,12 @@ struct FOG_API Thread
   struct StartupData
   {
     //! @brief Event loop type (string).
-    String eventLoopType;
+    StringW eventLoopType;
 
     //! @brief Used to synchronize thread startup.
     ThreadEvent event;
 
-    StartupData(const String& eventLoopType) :
+    StartupData(const StringW& eventLoopType) :
       eventLoopType(eventLoopType),
       event(false, false)
     {
@@ -71,7 +71,7 @@ struct FOG_API Thread
 
   //! @brief Create a new @c Thread instance.
   //!
-  //! @param name String to identify the thread (default "").
+  //! @param name StringW to identify the thread (default "").
   Thread();
 
   //! @brief Destructor.
@@ -151,7 +151,7 @@ struct FOG_API Thread
   //! Note: This function can't be called on Windows with the loader lock held;
   //! i.e. during a DllMain, global object construction or destruction, atexit()
   //! callback.
-  virtual bool start(const String& eventLoopType);
+  virtual bool start(const StringW& eventLoopType);
 
   //! Signals the thread to exit and returns once the thread has exited.  After
   //! this method returns, the Thread object is completely reset and may be used
@@ -257,7 +257,7 @@ private:
   friend struct MainThread;
   friend struct QuitTask;
 
-  _FOG_CLASS_NO_COPY(Thread)
+  _FOG_NO_COPY(Thread)
 };
 
 //! @}

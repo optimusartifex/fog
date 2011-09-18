@@ -9,7 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/Memory/Alloc.h>
+#include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Geometry/Transform.h>
@@ -38,21 +38,21 @@ namespace Fog {
 struct FOG_NO_EXPORT PatternDataF
 {
   // --------------------------------------------------------------------------
-  // [Ref / Deref]
+  // [AddRef / Release]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE PatternDataF* ref() const
+  FOG_INLINE PatternDataF* addRef() const
   {
-    refCount.inc();
+    reference.inc();
     return const_cast<PatternDataF*>(this);
   }
 
-  FOG_INLINE void deref()
+  FOG_INLINE void release()
   {
-    if (refCount.deref())
+    if (reference.deref())
     {
       destroy();
-      Memory::free(this);
+      MemMgr::free(this);
     }
   }
 
@@ -73,7 +73,7 @@ struct FOG_NO_EXPORT PatternDataF
   // --------------------------------------------------------------------------
 
   //! @brief Reference count.
-  mutable Atomic<size_t> refCount;
+  mutable Atomic<size_t> reference;
 
   //! @brief Pattern type.
   uint32_t type;
@@ -100,21 +100,21 @@ struct FOG_NO_EXPORT PatternDataF
 struct FOG_NO_EXPORT PatternDataD
 {
   // --------------------------------------------------------------------------
-  // [Ref / Deref]
+  // [AddRef / Release]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE PatternDataD* ref() const
+  FOG_INLINE PatternDataD* addRef() const
   {
-    refCount.inc();
+    reference.inc();
     return const_cast<PatternDataD*>(this);
   }
 
-  FOG_INLINE void deref()
+  FOG_INLINE void release()
   {
-    if (refCount.deref())
+    if (reference.deref())
     {
       destroy();
-      Memory::free(this);
+      MemMgr::free(this);
     }
   }
 
@@ -135,7 +135,7 @@ struct FOG_NO_EXPORT PatternDataD
   // --------------------------------------------------------------------------
 
   //! @brief Reference count.
-  mutable Atomic<size_t> refCount;
+  mutable Atomic<size_t> reference;
 
   //! @brief Pattern type.
   uint32_t type;
@@ -165,17 +165,14 @@ struct FOG_API PatternF
   // --------------------------------------------------------------------------
 
   PatternF();
-
   PatternF(const PatternF& other);
-  explicit PatternF(const PatternD& other);
 
-  explicit PatternF(const Argb32& argb32);
+  explicit PatternF(const ArgbBase32& argb32);
   explicit PatternF(const Color& color);
-
   explicit PatternF(const Texture& texture);
-
   explicit PatternF(const GradientF& gradient);
   explicit PatternF(const GradientD& gradient);
+  explicit PatternF(const PatternD& other);
 
   explicit FOG_INLINE PatternF(PatternDataF* d) : _d(d) {}
   ~PatternF();
@@ -184,7 +181,7 @@ struct FOG_API PatternF
   // [Data]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
+  FOG_INLINE size_t getReference() const { return _d->reference.get(); }
 
   FOG_INLINE bool isDetached() const { return getReference() == 1; }
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
@@ -282,15 +279,15 @@ struct FOG_API PatternF
   // [Color]
   // --------------------------------------------------------------------------
 
-  //! @brief Get pattern color (for @c PATTERN_TYPE_COLOR pattern type).
+  //! @brief Get pattern color (for @c PATTERN_TYPE_COLOR).
+  err_t getArgb32(ArgbBase32& argb32) const;
+  //! @brief Get pattern color (for @c PATTERN_TYPE_COLOR).
   err_t getColor(Color& color) const;
-  //! @overload
-  err_t getColor(Argb32& argb32) const;
 
-  //! @brief Set pattern color.
+  //! @brief Set pattern to @a argb32.
+  err_t setArgb32(const ArgbBase32& argb32);
+  //! @brief Set pattern to @a color.
   err_t setColor(const Color& color);
-  //! @overload
-  err_t setColor(const Argb32& argb32);
 
   // --------------------------------------------------------------------------
   // [Texture]
@@ -371,16 +368,14 @@ struct FOG_API PatternD
   // --------------------------------------------------------------------------
 
   PatternD();
-
   PatternD(const PatternD& other);
-  explicit PatternD(const PatternF& other);
 
-  explicit PatternD(const Argb32& argb32);
+  explicit PatternD(const ArgbBase32& argb32);
   explicit PatternD(const Color& color);
   explicit PatternD(const Texture& texture);
-
   explicit PatternD(const GradientF& gradient);
   explicit PatternD(const GradientD& gradient);
+  explicit PatternD(const PatternF& other);
 
   explicit FOG_INLINE PatternD(PatternDataD* d) : _d(d) {}
   ~PatternD();
@@ -389,7 +384,7 @@ struct FOG_API PatternD
   // [Data]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
+  FOG_INLINE size_t getReference() const { return _d->reference.get(); }
 
   FOG_INLINE bool isDetached() const { return getReference() == 1; }
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
@@ -487,15 +482,15 @@ struct FOG_API PatternD
   // [Color]
   // --------------------------------------------------------------------------
 
-  //! @brief Get pattern color (for @c PATTERN_TYPE_COLOR pattern type).
+  //! @brief Get pattern color (for @c PATTERN_TYPE_COLOR).
+  err_t getArgb32(ArgbBase32& argb32) const;
+  //! @brief Get pattern color (for @c PATTERN_TYPE_COLOR).
   err_t getColor(Color& color) const;
-  //! @overload
-  err_t getColor(Argb32& argb32) const;
 
-  //! @brief Set pattern color.
+  //! @brief Set pattern to @a argb32.
+  err_t setArgb32(const ArgbBase32& argb32);
+  //! @brief Set pattern to @a color.
   err_t setColor(const Color& color);
-  //! @overload
-  err_t setColor(const Argb32& argb32);
 
   // --------------------------------------------------------------------------
   // [Texture]
@@ -569,25 +564,13 @@ struct FOG_API PatternD
 // [Fog::PatternT<>]
 // ============================================================================
 
-FOG_CLASS_PRECISION_F_D(Pattern)
+_FOG_NUM_T(Pattern)
+_FOG_NUM_F(Pattern)
+_FOG_NUM_D(Pattern)
 
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::PatternF, Fog::TYPEINFO_MOVABLE)
-_FOG_TYPEINFO_DECLARE(Fog::PatternD, Fog::TYPEINFO_MOVABLE)
-
-// ============================================================================
-// [Fog::Swap]
-// ============================================================================
-
-_FOG_SWAP_D(Fog::PatternF)
-_FOG_SWAP_D(Fog::PatternD)
 
 // [Guard]
 #endif // _FOG_G2D_SOURCE_PATTERN_H

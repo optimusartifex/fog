@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/Global/Global.h>
 
 #include <Fog/G2d/Render/RenderApi_p.h>
 #include <Fog/G2d/Render/RenderConstants_p.h>
@@ -73,22 +73,22 @@ FOG_NO_EXPORT void Render_initC(void)
 
     RENDER_INIT(init, Render_C::CConvert::init);
 
-    RENDER_INIT(copy[RENDER_CONVERTER_COPY_8  ], (ImageConverterBlitLineFn)Render_C::CConvert::copy_8  );
-    RENDER_INIT(copy[RENDER_CONVERTER_COPY_16 ], (ImageConverterBlitLineFn)Render_C::CConvert::copy_16 );
-    RENDER_INIT(copy[RENDER_CONVERTER_COPY_24 ], (ImageConverterBlitLineFn)Render_C::CConvert::copy_24 );
-    RENDER_INIT(copy[RENDER_CONVERTER_COPY_32 ], (ImageConverterBlitLineFn)Render_C::CConvert::copy_32 );
-    RENDER_INIT(copy[RENDER_CONVERTER_COPY_48 ], (ImageConverterBlitLineFn)Render_C::CConvert::copy_48 );
-    RENDER_INIT(copy[RENDER_CONVERTER_COPY_64 ], (ImageConverterBlitLineFn)Render_C::CConvert::copy_64 );
+    RENDER_INIT(copy[RENDER_CONVERTER_COPY_8  ], (ImageConverterBlitLineFunc)Render_C::CConvert::copy_8  );
+    RENDER_INIT(copy[RENDER_CONVERTER_COPY_16 ], (ImageConverterBlitLineFunc)Render_C::CConvert::copy_16 );
+    RENDER_INIT(copy[RENDER_CONVERTER_COPY_24 ], (ImageConverterBlitLineFunc)Render_C::CConvert::copy_24 );
+    RENDER_INIT(copy[RENDER_CONVERTER_COPY_32 ], (ImageConverterBlitLineFunc)Render_C::CConvert::copy_32 );
+    RENDER_INIT(copy[RENDER_CONVERTER_COPY_48 ], (ImageConverterBlitLineFunc)Render_C::CConvert::copy_48 );
+    RENDER_INIT(copy[RENDER_CONVERTER_COPY_64 ], (ImageConverterBlitLineFunc)Render_C::CConvert::copy_64 );
 
-    RENDER_INIT(bswap[RENDER_CONVERTER_BSWAP_16], (ImageConverterBlitLineFn)Render_C::CConvert::bswap_16);
-    RENDER_INIT(bswap[RENDER_CONVERTER_BSWAP_24], (ImageConverterBlitLineFn)Render_C::CConvert::bswap_24);
-    RENDER_INIT(bswap[RENDER_CONVERTER_BSWAP_32], (ImageConverterBlitLineFn)Render_C::CConvert::bswap_32);
-    RENDER_INIT(bswap[RENDER_CONVERTER_BSWAP_48], (ImageConverterBlitLineFn)Render_C::CConvert::bswap_48);
-    RENDER_INIT(bswap[RENDER_CONVERTER_BSWAP_64], (ImageConverterBlitLineFn)Render_C::CConvert::bswap_64);
+    RENDER_INIT(bswap[RENDER_CONVERTER_BSWAP_16], (ImageConverterBlitLineFunc)Render_C::CConvert::bswap_16);
+    RENDER_INIT(bswap[RENDER_CONVERTER_BSWAP_24], (ImageConverterBlitLineFunc)Render_C::CConvert::bswap_24);
+    RENDER_INIT(bswap[RENDER_CONVERTER_BSWAP_32], (ImageConverterBlitLineFunc)Render_C::CConvert::bswap_32);
+    RENDER_INIT(bswap[RENDER_CONVERTER_BSWAP_48], (ImageConverterBlitLineFunc)Render_C::CConvert::bswap_48);
+    RENDER_INIT(bswap[RENDER_CONVERTER_BSWAP_64], (ImageConverterBlitLineFunc)Render_C::CConvert::bswap_64);
 
     // Premultiply / Demultiply.
-    RENDER_INIT(prgb32_from_argb32, (ImageConverterBlitLineFn)Render_C::CConvert::prgb32_from_argb32);
-    RENDER_INIT(argb32_from_prgb32, (ImageConverterBlitLineFn)Render_C::CConvert::argb32_from_prgb32);
+    RENDER_INIT(prgb32_from_argb32, (ImageConverterBlitLineFunc)Render_C::CConvert::prgb32_from_argb32);
+    RENDER_INIT(argb32_from_prgb32, (ImageConverterBlitLineFunc)Render_C::CConvert::argb32_from_prgb32);
 
     // A8 Destination.
     RENDER_POST(a8_from_dib     [RENDER_CONVERTER_DIB_A8                 ]);

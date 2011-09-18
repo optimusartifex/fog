@@ -25,7 +25,7 @@ namespace Fog {
 struct FOG_NO_EXPORT GlyphOutlineData
 {
   //! @brief Reference count.
-  mutable Atomic<size_t> refCount;
+  mutable Atomic<size_t> reference;
 
   //! @brief Metrics.
   GlyphMetricsF metrics;
@@ -67,7 +67,7 @@ struct FOG_API GlyphOutline
 
   FOG_INLINE const PathF& getOutline() const
   {
-    return _d->outline.instance();
+    return _d->outline;
   }
 
   // --------------------------------------------------------------------------
@@ -86,18 +86,6 @@ struct FOG_API GlyphOutline
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::GlyphOutline, Fog::TYPEINFO_MOVABLE)
-
-// ============================================================================
-// [Fog::Swap<>]
-// ============================================================================
-
-_FOG_SWAP_D(Fog::GlyphOutline)
 
 // [Guard]
 #endif // _FOG_G2D_TEXT_GLYPHOUTLINE_H

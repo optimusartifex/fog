@@ -8,12 +8,11 @@
 #define _FOG_SVG_DOM_SVGDOCUMENT_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Global/Global.h>
+#include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Xml/XmlDocument.h>
 #include <Fog/G2d/Geometry/Size.h>
 #include <Fog/G2d/Tools/Dpi.h>
-#include <Fog/Svg/Global/Constants.h>
 
 namespace Fog {
 
@@ -76,7 +75,7 @@ struct FOG_API SvgDocument : public XmlDocument
   Dpi _dpi;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgDocument)
+  _FOG_NO_COPY(SvgDocument)
 };
 
 //! @}

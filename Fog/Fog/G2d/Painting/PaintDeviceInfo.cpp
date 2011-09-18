@@ -10,7 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Init_p.h>
-#include <Fog/Core/Memory/Alloc.h>
+#include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/G2d/Painting/PaintDeviceInfo.h>
 #include <Fog/G2d/Text/Font.h>
 #include <Fog/G2d/Text/FontHints.h>
@@ -29,26 +29,26 @@ static Static<PaintDeviceInfoData> PaintDeviceInfo_dnull;
 
 static FOG_INLINE PaintDeviceInfoData* PaintDeviceInfo_ref(PaintDeviceInfoData* d)
 {
-  d->refCount.inc();
+  d->reference.inc();
   return d;
 }
 
 static FOG_INLINE void PaintDeviceInfo_deref(PaintDeviceInfoData* d)
 {
-  if (d->refCount.deref()) Memory::free(d);
+  if (d->reference.deref()) MemMgr::free(d);
 }
 
 static FOG_INLINE err_t PaintDeviceInfo_detach(PaintDeviceInfo* self)
 {
   PaintDeviceInfoData* d = self->_d;
 
-  if (d->refCount.get() != 1)
+  if (d->reference.get() != 1)
   {
     PaintDeviceInfoData* newd = reinterpret_cast<PaintDeviceInfoData*>(
-      Memory::alloc(sizeof(PaintDeviceInfoData)));
+      MemMgr::alloc(sizeof(PaintDeviceInfoData)));
     if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
-    newd->refCount.init(1);
+    newd->reference.init(1);
     newd->paintDevice = d->paintDevice;
     newd->fontKerning = d->fontKerning;
     newd->fontHinting = d->fontHinting;
@@ -68,7 +68,7 @@ static FOG_INLINE err_t PaintDeviceInfo_detach(PaintDeviceInfo* self)
 // ============================================================================
 
 PaintDeviceInfo::PaintDeviceInfo() :
-  _d(PaintDeviceInfo_ref(PaintDeviceInfo_dnull.instancep()))
+  _d(PaintDeviceInfo_ref(&PaintDeviceInfo_dnull))
 {
 }
 
@@ -88,9 +88,7 @@ PaintDeviceInfo::~PaintDeviceInfo()
 
 void PaintDeviceInfo::reset()
 {
-  PaintDeviceInfo_deref(
-    atomicPtrXchg(&_d, PaintDeviceInfo_ref(PaintDeviceInfo_dnull.instancep()))
-  );
+  PaintDeviceInfo_deref(atomicPtrXchg(&_d, PaintDeviceInfo_ref(&PaintDeviceInfo_dnull)));
 }
 
 // ============================================================================
@@ -148,7 +146,7 @@ err_t PaintDeviceInfo::makePhysicalFont(Font& physical, const Font& src)
 
   FontData* sd = src._d;
 
-  String family = src.getFamily();
+  StringW family = src.getFamily();
   float height = _d->dpiInfo.toDeviceSpace(sd->metrics.getHeight(), sd->unit);
   FontHints hints = sd->hints;
   TransformF transform = sd->transform;
@@ -182,9 +180,9 @@ PaintDeviceInfo& PaintDeviceInfo::operator=(const PaintDeviceInfo& other)
 
 FOG_NO_EXPORT void PaintDeviceInfo_init(void)
 {
-  PaintDeviceInfoData* d = PaintDeviceInfo_dnull.instancep();
+  PaintDeviceInfoData* d = &PaintDeviceInfo_dnull;
 
-  d->refCount.init(1);
+  d->reference.init(1);
   d->paintDevice = PAINT_DEVICE_UNKNOWN;
   d->fontKerning = FONT_KERNING_ENABLED;
   d->fontHinting = FONT_HINTING_DISABLED;

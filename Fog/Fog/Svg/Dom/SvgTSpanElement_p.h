@@ -63,7 +63,7 @@ struct FOG_NO_EXPORT SvgTSpanElement : public SvgStyledElement
   SvgEnumAttribute a_lengthAdjust;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgTSpanElement)
+  _FOG_NO_COPY(SvgTSpanElement)
 };
 
 //! @}

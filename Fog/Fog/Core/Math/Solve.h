@@ -20,7 +20,7 @@ namespace Math {
 //! @{
 
 // ============================================================================
-// [Fog::Math - SolveQuadraticFunction]
+// [Fog::Math - Solve]
 // ============================================================================
 
 //! @brief Solve the quadratic or cubic function and return the roots.
@@ -41,6 +41,16 @@ namespace Math {
 //!   B == func[1]
 //!   C == func[2]
 //!   D == func[3]
+//!
+//! Quartic function:
+//!
+//!   Ax^4 + Bx^3 + Cx^2 + Dx + E == 0
+//!
+//!   A == func[0]
+//!   B == func[1]
+//!   C == func[2]
+//!   D == func[3]
+//!   E == func[4]
 static FOG_INLINE int solve(float* dst, const float* func, uint32_t type)
 {
   FOG_ASSERT(type < MATH_SOLVE_COUNT);
@@ -56,13 +66,13 @@ static FOG_INLINE int solve(double* dst, const double* func, uint32_t type)
 static FOG_INLINE int solve(float* dst, const float* func, uint32_t type, const IntervalF& interval)
 {
   FOG_ASSERT(type < MATH_SOLVE_COUNT);
-  return _api.mathf.solveAt[type](dst, func, interval);
+  return _api.mathf.solveAt[type](dst, func, &interval);
 }
 
 //! @overload
 static FOG_INLINE int solve(double* dst, const double* func, uint32_t type, const IntervalD& interval)
 {
-  return _api.mathd.solveAt[type](dst, func, interval);
+  return _api.mathd.solveAt[type](dst, func, &interval);
 }
 
 //! @}

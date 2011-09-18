@@ -271,18 +271,13 @@ struct FOG_API GradientD
 // [Fog::GradientT<>]
 // ============================================================================
 
-FOG_CLASS_PRECISION_F_D(Gradient)
+_FOG_NUM_T(Gradient)
+_FOG_NUM_F(Gradient)
+_FOG_NUM_D(Gradient)
 
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::GradientF, Fog::TYPEINFO_MOVABLE)
-_FOG_TYPEINFO_DECLARE(Fog::GradientD, Fog::TYPEINFO_MOVABLE)
 
 // [Guard]
 #endif // _FOG_G2D_SOURCE_GRADIENT_H

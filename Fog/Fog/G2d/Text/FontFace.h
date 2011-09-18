@@ -48,28 +48,28 @@ struct FOG_API FontFace
   virtual ~FontFace();
 
   // --------------------------------------------------------------------------
-  // [Ref / Deref]
+  // [AddRef / Release]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE FontFace* ref() const
+  FOG_INLINE FontFace* addRef() const
   {
-    refCount.inc();
+    reference.inc();
     return const_cast<FontFace*>(this);
   }
 
   FOG_INLINE void deref()
   {
-    if (refCount.deref()) fog_delete(this);
+    if (reference.deref()) fog_delete(this);
   }
 
   // --------------------------------------------------------------------------
   // [Interface]
   // --------------------------------------------------------------------------
 
-  virtual err_t getTextOutline(PathF& dst, const FontData* d, const PointF& pt, const Utf16& str) = 0;
-  virtual err_t getTextOutline(PathD& dst, const FontData* d, const PointD& pt, const Utf16& str) = 0;
+  virtual err_t getTextOutline(PathF& dst, const FontData* d, const PointF& pt, const StubW& str) = 0;
+  virtual err_t getTextOutline(PathD& dst, const FontData* d, const PointD& pt, const StubW& str) = 0;
 
-  virtual err_t getTextExtents(TextExtents& extents, const FontData* d, const Utf16& str) = 0;
+  virtual err_t getTextExtents(TextExtents& extents, const FontData* d, const StubW& str) = 0;
 
   // virtual GlyphOutlineCache* getOutlineCache() = 0;
   virtual FontKerningTableF* getKerningTable(const FontData* d) = 0;
@@ -81,15 +81,15 @@ struct FOG_API FontFace
   virtual err_t _renderGlyphOutline(PathF& dst, GlyphMetricsF& metrics, const FontData* d, uint32_t uc, void* ctx) = 0;
   virtual err_t _renderGlyphOutline(PathD& dst, GlyphMetricsF& metrics, const FontData* d, uint32_t uc, void* ctx) = 0;
 
-  err_t _getTextOutline(PathF& dst, GlyphOutlineCache* outlineCache, const FontData* d, const PointF& pt, const Utf16& str, void* ctx);
-  err_t _getTextOutline(PathD& dst, GlyphOutlineCache* outlineCache, const FontData* d, const PointD& pt, const Utf16& str, void* ctx);
+  err_t _getTextOutline(PathF& dst, GlyphOutlineCache* outlineCache, const FontData* d, const PointF& pt, const StubW& str, void* ctx);
+  err_t _getTextOutline(PathD& dst, GlyphOutlineCache* outlineCache, const FontData* d, const PointD& pt, const StubW& str, void* ctx);
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
   //! @brief Reference count.
-  mutable Atomic<size_t> refCount;
+  mutable Atomic<size_t> reference;
 
   //! @brief Font-face id.
   uint32_t id;
@@ -98,7 +98,7 @@ struct FOG_API FontFace
   uint32_t features;
 
   //! @brief Font-face family.
-  String family;
+  StringW family;
 
   //! @brief Design EM square
   //!
@@ -113,7 +113,7 @@ struct FOG_API FontFace
   FontMetricsF designMetrics;
 
 private:
-  _FOG_CLASS_NO_COPY(FontFace)
+  _FOG_NO_COPY(FontFace)
 };
 
 //! @}

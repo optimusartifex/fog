@@ -11,9 +11,7 @@
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
 
-#include <stdarg.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 FOG_CVAR_DECLARE uint32_t fog_failed;
 

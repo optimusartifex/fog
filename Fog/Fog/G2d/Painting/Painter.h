@@ -8,8 +8,8 @@
 #define _FOG_G2D_PAINTING_PAINTER_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Global/Global.h>
+#include <Fog/Core/Tools/List.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Painting/PaintEngine.h>
 #include <Fog/G2d/Painting/PaintParams.h>
@@ -308,31 +308,31 @@ struct FOG_NO_EXPORT Painter
   //! @brief Get the paint parameters (float).
   FOG_INLINE err_t getPaintParams(PaintParamsF& val) const
   {
-    return _vtable->getParameter(this, PAINTER_PARAMETER_PARAMS_F, &val);
+    return _vtable->getParameter(this, PAINTER_PARAMETER_PAINT_PARAMS_F, &val);
   }
 
   //! @brief Get the paint parameters (double).
   FOG_INLINE err_t getPaintParams(PaintParamsD& val) const
   {
-    return _vtable->getParameter(this, PAINTER_PARAMETER_PARAMS_D, &val);
+    return _vtable->getParameter(this, PAINTER_PARAMETER_PAINT_PARAMS_D, &val);
   }
 
   //! @brief Set the paint parameters (float).
   FOG_INLINE err_t setPaintParams(const PaintParamsF& val)
   {
-    return _vtable->setParameter(this, PAINTER_PARAMETER_PARAMS_F, &val);
+    return _vtable->setParameter(this, PAINTER_PARAMETER_PAINT_PARAMS_F, &val);
   }
 
   //! @brief Set the paint parameters (double).
   FOG_INLINE err_t setPaintParams(const PaintParamsD& val)
   {
-    return _vtable->setParameter(this, PAINTER_PARAMETER_PARAMS_D, &val);
+    return _vtable->setParameter(this, PAINTER_PARAMETER_PAINT_PARAMS_D, &val);
   }
 
   //! @brief Reset the paint parameters.
   FOG_INLINE err_t resetPaintParams()
   {
-    return _vtable->resetParameter(this, PAINTER_PARAMETER_PARAMS_F);
+    return _vtable->resetParameter(this, PAINTER_PARAMETER_PAINT_PARAMS_F);
   }
 
   // --------------------------------------------------------------------------
@@ -855,6 +855,11 @@ struct FOG_NO_EXPORT Painter
   // [Source - Set]
   // --------------------------------------------------------------------------
 
+  FOG_INLINE err_t setSource()
+  {
+    return _vtable->setSourceNone(this);
+  }
+
   //! @brief Set the painter source color to a given @c Argb32 color @a val.
   FOG_INLINE err_t setSource(const Argb32& val)
   {
@@ -1205,13 +1210,13 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t fillPath(const PathF& p) { return _vtable->fillPathF(this, p); }
   FOG_INLINE err_t fillPath(const PathD& p) { return _vtable->fillPathD(this, p); }
 
-  FOG_INLINE err_t fillText(const PointI& p, const String& text, const Font& font, const RectI* clip = NULL) { return _vtable->fillTextAtI(this, p, text, font, clip); }
-  FOG_INLINE err_t fillText(const PointF& p, const String& text, const Font& font, const RectF* clip = NULL) { return _vtable->fillTextAtF(this, p, text, font, clip); }
-  FOG_INLINE err_t fillText(const PointD& p, const String& text, const Font& font, const RectD* clip = NULL) { return _vtable->fillTextAtD(this, p, text, font, clip); }
+  FOG_INLINE err_t fillText(const PointI& p, const StringW& text, const Font& font, const RectI* clip = NULL) { return _vtable->fillTextAtI(this, p, text, font, clip); }
+  FOG_INLINE err_t fillText(const PointF& p, const StringW& text, const Font& font, const RectF* clip = NULL) { return _vtable->fillTextAtF(this, p, text, font, clip); }
+  FOG_INLINE err_t fillText(const PointD& p, const StringW& text, const Font& font, const RectD* clip = NULL) { return _vtable->fillTextAtD(this, p, text, font, clip); }
 
-  FOG_INLINE err_t fillText(const TextRectI& r, const String& text, const Font& font, const RectI* clip = NULL) { return _vtable->fillTextInI(this, r, text, font, clip); }
-  FOG_INLINE err_t fillText(const TextRectF& r, const String& text, const Font& font, const RectF* clip = NULL) { return _vtable->fillTextInF(this, r, text, font, clip); }
-  FOG_INLINE err_t fillText(const TextRectD& r, const String& text, const Font& font, const RectD* clip = NULL) { return _vtable->fillTextInD(this, r, text, font, clip); }
+  FOG_INLINE err_t fillText(const TextRectI& r, const StringW& text, const Font& font, const RectI* clip = NULL) { return _vtable->fillTextInI(this, r, text, font, clip); }
+  FOG_INLINE err_t fillText(const TextRectF& r, const StringW& text, const Font& font, const RectF* clip = NULL) { return _vtable->fillTextInF(this, r, text, font, clip); }
+  FOG_INLINE err_t fillText(const TextRectD& r, const StringW& text, const Font& font, const RectD* clip = NULL) { return _vtable->fillTextInD(this, r, text, font, clip); }
 
   FOG_INLINE err_t fillMask(const PointI& p, const Image& m) { return _vtable->fillMaskAtI(this, p, m, NULL); }
   FOG_INLINE err_t fillMask(const PointF& p, const Image& m) { return _vtable->fillMaskAtF(this, p, m, NULL); }
@@ -1323,13 +1328,13 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t clipPath(uint32_t clipOp, const PathF& p) { return _vtable->clipPathF(this, clipOp, p); }
   FOG_INLINE err_t clipPath(uint32_t clipOp, const PathD& p) { return _vtable->clipPathD(this, clipOp, p); }
 
-  FOG_INLINE err_t clipText(uint32_t clipOp, const PointI& p, const String& text, const Font& font, const RectI* clip = NULL) { return _vtable->clipTextAtI(this, clipOp, p, text, font, clip); }
-  FOG_INLINE err_t clipText(uint32_t clipOp, const PointF& p, const String& text, const Font& font, const RectF* clip = NULL) { return _vtable->clipTextAtF(this, clipOp, p, text, font, clip); }
-  FOG_INLINE err_t clipText(uint32_t clipOp, const PointD& p, const String& text, const Font& font, const RectD* clip = NULL) { return _vtable->clipTextAtD(this, clipOp, p, text, font, clip); }
+  FOG_INLINE err_t clipText(uint32_t clipOp, const PointI& p, const StringW& text, const Font& font, const RectI* clip = NULL) { return _vtable->clipTextAtI(this, clipOp, p, text, font, clip); }
+  FOG_INLINE err_t clipText(uint32_t clipOp, const PointF& p, const StringW& text, const Font& font, const RectF* clip = NULL) { return _vtable->clipTextAtF(this, clipOp, p, text, font, clip); }
+  FOG_INLINE err_t clipText(uint32_t clipOp, const PointD& p, const StringW& text, const Font& font, const RectD* clip = NULL) { return _vtable->clipTextAtD(this, clipOp, p, text, font, clip); }
 
-  FOG_INLINE err_t clipText(uint32_t clipOp, const TextRectI& r, const String& text, const Font& font, const RectI* clip = NULL) { return _vtable->clipTextInI(this, clipOp, r, text, font, clip); }
-  FOG_INLINE err_t clipText(uint32_t clipOp, const TextRectF& r, const String& text, const Font& font, const RectF* clip = NULL) { return _vtable->clipTextInF(this, clipOp, r, text, font, clip); }
-  FOG_INLINE err_t clipText(uint32_t clipOp, const TextRectD& r, const String& text, const Font& font, const RectD* clip = NULL) { return _vtable->clipTextInD(this, clipOp, r, text, font, clip); }
+  FOG_INLINE err_t clipText(uint32_t clipOp, const TextRectI& r, const StringW& text, const Font& font, const RectI* clip = NULL) { return _vtable->clipTextInI(this, clipOp, r, text, font, clip); }
+  FOG_INLINE err_t clipText(uint32_t clipOp, const TextRectF& r, const StringW& text, const Font& font, const RectF* clip = NULL) { return _vtable->clipTextInF(this, clipOp, r, text, font, clip); }
+  FOG_INLINE err_t clipText(uint32_t clipOp, const TextRectD& r, const StringW& text, const Font& font, const RectD* clip = NULL) { return _vtable->clipTextInD(this, clipOp, r, text, font, clip); }
 
   FOG_INLINE err_t clipMask(uint32_t clipOp, const PointI& p, const Image& m) { return _vtable->clipMaskAtI(this, clipOp, p, m, NULL); }
   FOG_INLINE err_t clipMask(uint32_t clipOp, const PointF& p, const Image& m) { return _vtable->clipMaskAtF(this, clipOp, p, m, NULL); }
@@ -1374,7 +1379,7 @@ struct FOG_NO_EXPORT Painter
   PaintEngine* _engine;
 
 private:
-  _FOG_CLASS_NO_COPY(Painter);
+  _FOG_NO_COPY(Painter);
 };
 
 //! @}

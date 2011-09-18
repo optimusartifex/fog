@@ -7,13 +7,13 @@
 #ifndef _FOG_G2D_IMAGING_CODECS_PNGCODEC_P_H
 #define _FOG_G2D_IMAGING_CODECS_PNGCODEC_P_H
 
-#include <Fog/Core/Config/Config.h>
+#include <Fog/Core/C++/Base.h>
 #if defined FOG_HAVE_LIBPNG
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/IO/Stream.h>
-#include <Fog/Core/Library/Library.h>
+#include <Fog/Core/OS/Library.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageCodec.h>
@@ -99,7 +99,7 @@ struct FOG_NO_EXPORT PngLibrary
   err_t err;
 
 private:
-  _FOG_CLASS_NO_COPY(PngLibrary)
+  _FOG_NO_COPY(PngLibrary)
 };
 
 // ============================================================================
@@ -194,8 +194,8 @@ struct FOG_NO_EXPORT PngEncoder : public ImageEncoder
   // [Properties]
   // --------------------------------------------------------------------------
 
-  virtual err_t getProperty(const ManagedString& name, Value& value) const;
-  virtual err_t setProperty(const ManagedString& name, const Value& value);
+  virtual err_t getProperty(const ManagedString& name, Var& dst) const;
+  virtual err_t setProperty(const ManagedString& name, const Var& src);
 
   // --------------------------------------------------------------------------
   // [Members]

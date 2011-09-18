@@ -8,7 +8,9 @@
 #define _FOG_CORE_FACE_FACE_SSE3_H
 
 // [Dependencies]
-#include <Fog/Core/Cpu/Intrin_SSE3.h>
+#include <Fog/Core/C++/Base.h>
+#include <Fog/Core/C++/IntrinSSE3.h>
+
 #include <Fog/Core/Face/Face_SSE.h>
 #include <Fog/Core/Face/Face_SSE2.h>
 

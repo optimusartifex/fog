@@ -18,7 +18,7 @@ namespace Fog {
 // [Fog::Util]
 // ============================================================================
 
-size_t Util::getGrowCapacity(size_t headerSize, size_t elementSize, size_t before, size_t after)
+size_t CollectionUtil::getGrowCapacity(size_t headerSize, size_t szItemT, size_t before, size_t after)
 {
   // Threshold for excessive growing. If size of data in memory is larger
   // than the threshold, grow will be constant instead of excessive.
@@ -27,8 +27,8 @@ size_t Util::getGrowCapacity(size_t headerSize, size_t elementSize, size_t befor
 
   FOG_ASSERT(before < after);
 
-  size_t beforeSize = headerSize + before * elementSize;
-  size_t afterSize = headerSize + after * elementSize;
+  size_t beforeSize = headerSize + before * szItemT;
+  size_t afterSize = headerSize + after * szItemT;
   size_t optimal;
 
   if (afterSize < minThreshold)
@@ -46,7 +46,7 @@ size_t Util::getGrowCapacity(size_t headerSize, size_t elementSize, size_t befor
   }
 
   optimal = (optimal + 15) & ~15;
-  optimal = ((optimal - headerSize) / elementSize);
+  optimal = ((optimal - headerSize) / szItemT);
 
   FOG_ASSERT(optimal >= after);
   return optimal;

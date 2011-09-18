@@ -9,10 +9,9 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/System/Object.h>
+#include <Fog/Core/Kernel/Object.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Geometry/Size.h>
-#include <Fog/Gui/Global/Constants.h>
 #include <Fog/Gui/Layout/LayoutPolicy.h>
 #include <Fog/Gui/Layout/LayoutHint.h>
 #include <Fog/Gui/Layout/Margin.h>

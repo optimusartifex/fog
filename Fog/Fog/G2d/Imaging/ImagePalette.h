@@ -9,7 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/Memory/Alloc.h>
+#include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Tools/Range.h>
 #include <Fog/G2d/Source/Color.h>
@@ -26,27 +26,35 @@ namespace Fog {
 struct FOG_NO_EXPORT ImagePaletteData
 {
   // --------------------------------------------------------------------------
-  // [Ref / Deref]
+  // [AddRef / Release]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE ImagePaletteData* ref() const
+  FOG_INLINE ImagePaletteData* addRef() const
   {
-    refCount.inc();
+    reference.inc();
     return const_cast<ImagePaletteData*>(this);
   }
 
-  FOG_INLINE void deref()
+  FOG_INLINE void release()
   {
-    if (refCount.deref()) Memory::free(this);
+    if (reference.deref())
+      MemMgr::free(this);
   }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  mutable Atomic<size_t> refCount;
+  //! @brief Reference count.
+  mutable Atomic<size_t> reference;
 
+  //! @brief Variable type and flags.
+  uint32_t vType;
+
+  //! @brief Count of palette entries used.
   uint32_t length;
+
+  //! @brief Palette data.
   Argb32 data[256];
 };
 
@@ -69,21 +77,29 @@ struct FOG_API ImagePalette
 
   ImagePalette();
   ImagePalette(const ImagePalette& other);
-  explicit FOG_INLINE ImagePalette(ImagePaletteData* d) : _d(d) {}
+
+  explicit FOG_INLINE ImagePalette(ImagePaletteData* d) : _d(d)
+  {
+  }
+
   ~ImagePalette();
 
   // --------------------------------------------------------------------------
-  // [Data]
+  // [Sharing]
   // --------------------------------------------------------------------------
 
   //! @copydoc Doxygen::Implicit::getReference().
-  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
+  FOG_INLINE size_t getReference() const { return _d->reference.get(); }
   //! @copydoc Doxygen::Implicit::isDetached().
   FOG_INLINE bool isDetached() const { return getReference() == 1; }
   //! @copydoc Doxygen::Implicit::detach().
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
   //! @copydoc Doxygen::Implicit::_detach().
   err_t _detach();
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
 
   //! @brief Returns a const pointer to the palette data in PRGB32 format.
   FOG_INLINE const Argb32* getData() const { return _d->data; }
@@ -92,7 +108,9 @@ struct FOG_API ImagePalette
   //! without calling detach().
   FOG_INLINE Argb32* getDataX()
   {
-    FOG_ASSERT_X(isDetached(), "Fog::ImagePalette::getDataX() - Called on non-detached object.");
+    FOG_ASSERT_X(isDetached(),
+      "Fog::ImagePalette::getDataX() - Called on non-detached object.");
+
     return reinterpret_cast<Argb32*>(_d->data);
   }
 
@@ -101,7 +119,7 @@ struct FOG_API ImagePalette
   //! @brief Set palette data to @a other, making their deep copy.
   err_t setDeep(const ImagePalette& other);
 
-  //! @brief Set @a count of palette entries from @a index to @a pal.
+  //! @brief Replace palette entries at @a range by @a entities.
   err_t setData(const Range& range, const Argb32* entries);
 
   //! @brief Get the palette length.
@@ -115,7 +133,9 @@ struct FOG_API ImagePalette
 
   FOG_INLINE Argb32 getAt(size_t index) const
   {
-    FOG_ASSERT_X(index < 256, "Fog::ImagePalette::at() - Index out of range.");
+    FOG_ASSERT_X(index < 256,
+      "Fog::ImagePalette::at() - Index out of range.");
+
     return _d->data[index];
   }
 
@@ -163,18 +183,6 @@ struct FOG_API ImagePalette
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::ImagePalette, Fog::TYPEINFO_MOVABLE)
-
-// ============================================================================
-// [Fog::Swap]
-// ============================================================================
-
-_FOG_SWAP_D(Fog::ImagePalette)
 
 // [Guard]
 #endif // _FOG_G2D_IMAGING_IMAGEPALETTE_H

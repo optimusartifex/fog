@@ -11,7 +11,7 @@
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Global/Init_p.h>
-#include <Fog/Core/Global/Internals_p.h>
+#include <Fog/Core/Global/Private.h>
 #include <Fog/Core/Math/Function.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Interval.h>
@@ -25,9 +25,9 @@ namespace Fog {
 // ============================================================================
 
 template<typename NumT>
-static err_t FOG_CDECL MathT_integrate_GaussLegendre(NumT* dst, const NumT_(Function)& f, const NumT_(Interval)& interval, uint32_t steps)
+static err_t FOG_CDECL MathT_integrate_GaussLegendre(NumT* dst, const NumT_(Function)* f, const NumT_(Interval)* interval, uint32_t steps)
 {
-  if (!interval.isValid())
+  if (!interval->isValid())
     return ERR_RT_INVALID_ARGUMENT;
 
   if (steps == 0)
@@ -51,8 +51,8 @@ static err_t FOG_CDECL MathT_integrate_GaussLegendre(NumT* dst, const NumT_(Func
     0.0666713443086881375935688
   };
 
-  double a = interval.getMin();
-  double b = interval.getMax();
+  double a = interval->getMin();
+  double b = interval->getMax();
   double advance = (b - a) / double(steps);
   double result = 0.0;
 
@@ -65,7 +65,8 @@ static err_t FOG_CDECL MathT_integrate_GaussLegendre(NumT* dst, const NumT_(Func
     // There is some small error when incrementing advance to 'b', if
     // this is the last step then it's good to use the 'b' from the
     // given interval.
-    if (step == steps) b = interval.getMax();
+    if (step == steps)
+      b = interval->getMax();
 
     double xm = 0.5 * (b + a);
     double xr = 0.5 * (b - a);
@@ -76,8 +77,8 @@ static err_t FOG_CDECL MathT_integrate_GaussLegendre(NumT* dst, const NumT_(Func
       double d = x[i] * xr;
 
       NumT r[2];
-      FOG_RETURN_ON_ERROR(f.evaluate(&r[0], NumT(xm + d)));
-      FOG_RETURN_ON_ERROR(f.evaluate(&r[1], NumT(xm - d)));
+      FOG_RETURN_ON_ERROR(f->evaluate(&r[0], NumT(xm + d)));
+      FOG_RETURN_ON_ERROR(f->evaluate(&r[1], NumT(xm - d)));
 
       sum += w[i] * (double(r[0]) + double(r[1]));
     }

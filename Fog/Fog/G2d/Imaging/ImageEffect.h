@@ -27,7 +27,7 @@ struct ImageEffectData;
 // [Function Prototypes]
 // ============================================================================
 
-typedef void (FOG_FASTCALL *ImageEffectDestroyFn)(ImageEffectData* d);
+typedef void (FOG_FASTCALL *ImageEffectDestroyFunc)(ImageEffectData* d);
 
 // ============================================================================
 // [Fog::ImageEffectData]
@@ -37,18 +37,19 @@ typedef void (FOG_FASTCALL *ImageEffectDestroyFn)(ImageEffectData* d);
 struct FOG_NO_EXPORT ImageEffectData
 {
   // --------------------------------------------------------------------------
-  // [Ref / Deref]
+  // [AddRef / Release]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE ImageEffectData* ref() const
+  FOG_INLINE ImageEffectData* addRef() const
   {
-    refCount.inc();
+    reference.inc();
     return const_cast<ImageEffectData*>(this);
   }
 
   FOG_INLINE void deref()
   {
-    if (refCount.deref()) destroy(this);
+    if (reference.deref())
+      destroy(this);
   }
 
   // --------------------------------------------------------------------------
@@ -56,10 +57,10 @@ struct FOG_NO_EXPORT ImageEffectData
   // --------------------------------------------------------------------------
 
   //! @brief Reference count.
-  mutable Atomic<size_t> refCount;
+  mutable Atomic<size_t> reference;
 
   //! @brief Destructor function.
-  ImageEffectDestroyFn destroy;
+  ImageEffectDestroyFunc destroy;
 
   //! @brief Effect type.
   uint32_t type;
@@ -84,7 +85,7 @@ struct FOG_API ImageEffect
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
+  FOG_INLINE size_t getReference() const { return _d->reference.get(); }
   FOG_INLINE uint32_t getType() const { return _d->type; }
 
   // --------------------------------------------------------------------------
@@ -106,7 +107,11 @@ struct FOG_API ImageEffect
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE ImageEffect& operator=(const ImageEffect& effect) { setEffect(effect); return *this; }
+  FOG_INLINE ImageEffect& operator=(const ImageEffect& effect)
+  {
+    setEffect(effect);
+    return *this;
+  }
 
   // --------------------------------------------------------------------------
   // [Statics]
@@ -129,13 +134,7 @@ struct FOG_API ImageEffect
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-_FOG_TYPEINFO_DECLARE(Fog::ImageEffect, Fog::TYPEINFO_MOVABLE)
-
-// ============================================================================
-// [Fog::Swap]
-// ============================================================================
-
-_FOG_SWAP_D(Fog::ImageEffect)
+_FOG_TYPE_DECLARE(Fog::ImageEffect, Fog::TYPE_CATEGORY_MOVABLE)
 
 // [Guard]
 #endif // _FOG_G2D_IMAGING_IMAGEEFFECT_H

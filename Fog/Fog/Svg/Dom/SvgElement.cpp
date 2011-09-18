@@ -95,12 +95,12 @@ err_t SvgElement::_visitContainer(SvgVisitor* visitor) const
   return err;
 }
 
-String SvgElement::getStyle(const String& name) const
+StringW SvgElement::getStyle(const StringW& name) const
 {
-  return String();
+  return StringW();
 }
 
-err_t SvgElement::setStyle(const String& name, const String& value)
+err_t SvgElement::setStyle(const StringW& name, const StringW& value)
 {
   return ERR_RT_INVALID_OBJECT;
 }

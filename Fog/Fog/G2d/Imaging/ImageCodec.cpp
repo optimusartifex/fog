@@ -45,20 +45,20 @@ ImageCodec::~ImageCodec()
 // [Fog::ImageCodec - Properties]
 // ============================================================================
 
-err_t ImageCodec::getProperty(const ManagedString& name, Value& value) const
+err_t ImageCodec::getProperty(const ManagedString& name, Var& dst) const
 {
-  if (name == fog_strings->getString(STR_G2D_CODEC_width      )) return value.setInt32(_size.w);
-  if (name == fog_strings->getString(STR_G2D_CODEC_height     )) return value.setInt32(_size.h);
-  if (name == fog_strings->getString(STR_G2D_CODEC_depth      )) return value.setInt32(_depth);
-  if (name == fog_strings->getString(STR_G2D_CODEC_planes     )) return value.setInt32(_planes);
-  if (name == fog_strings->getString(STR_G2D_CODEC_actualFrame)) return value.setInt32(_actualFrame);
-  if (name == fog_strings->getString(STR_G2D_CODEC_framesCount)) return value.setInt32(_framesCount);
-  if (name == fog_strings->getString(STR_G2D_CODEC_progress   )) return value.setDouble(_progress);
+  if (name == fog_strings->getString(STR_G2D_CODEC_width      )) return dst.setInt(_size.w);
+  if (name == fog_strings->getString(STR_G2D_CODEC_height     )) return dst.setInt(_size.h);
+  if (name == fog_strings->getString(STR_G2D_CODEC_depth      )) return dst.setInt(_depth);
+  if (name == fog_strings->getString(STR_G2D_CODEC_planes     )) return dst.setInt(_planes);
+  if (name == fog_strings->getString(STR_G2D_CODEC_actualFrame)) return dst.setInt(_actualFrame);
+  if (name == fog_strings->getString(STR_G2D_CODEC_framesCount)) return dst.setInt(_framesCount);
+  if (name == fog_strings->getString(STR_G2D_CODEC_progress   )) return dst.setReal(_progress);
 
-  return base::getProperty(name, value);
+  return base::getProperty(name, dst);
 }
 
-err_t ImageCodec::setProperty(const ManagedString& name, const Value& value)
+err_t ImageCodec::setProperty(const ManagedString& name, const Var& src)
 {
   if (name == fog_strings->getString(STR_G2D_CODEC_width) ||
       name == fog_strings->getString(STR_G2D_CODEC_height) ||
@@ -71,7 +71,7 @@ err_t ImageCodec::setProperty(const ManagedString& name, const Value& value)
     return ERR_OBJECT_READ_ONLY_PROPERTY;
   }
 
-  return base::setProperty(name, value);
+  return base::setProperty(name, src);
 }
 
 // ============================================================================

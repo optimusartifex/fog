@@ -639,10 +639,10 @@ static FOG_INLINE int _compareEntities(const T* entity, size_t length, const cha
 }
 
 template<typename T>
-static FOG_INLINE Char _decode(const T* entityName, size_t entityLength)
+static FOG_INLINE CharW _decode(const T* entityName, size_t entityLength)
 {
   if (entityLength == DETECT_LENGTH) entityLength = StringUtil::len(entityName);
-  if (entityLength == 0) return Char(0);
+  if (entityLength == 0) return CharW(0);
 
   // Numeric entity.
   if (entityName[0] == T('#'))
@@ -663,13 +663,13 @@ static FOG_INLINE Char _decode(const T* entityName, size_t entityLength)
     uint16_t val;
     uint32_t flags;
 
-    err_t err = StringUtil::atou16(entityName, entityLength, &val, base, NULL, &flags);
+    err_t err = StringUtil::parseU16(&val, entityName, entityLength, base, NULL, &flags);
 
     // If conversion failed or parsed skipped some other characters, entity
     // is invalid.
     if (err || flags) val = 0;
 
-    return Char(val);
+    return CharW(val);
   }
 
   // Named entity - binary search in entity table.
@@ -689,7 +689,7 @@ static FOG_INLINE Char _decode(const T* entityName, size_t entityLength)
       // Match.
       if (result == 0)
       {
-        return Char(basep->ch);
+        return CharW(basep->ch);
       }
       // Larger, move right.
       else if (result > 0)
@@ -701,21 +701,21 @@ static FOG_INLINE Char _decode(const T* entityName, size_t entityLength)
     }
 
     // Not found.
-    return Char(0);
+    return CharW(0);
   }
 }
 
-Char XmlEntity::decode(const char* entityName, size_t entityLength)
+CharW XmlEntity::decode(const char* entityName, size_t entityLength)
 {
   return _decode<char>(entityName, entityLength);
 }
 
-Char XmlEntity::decode(const Char* entityName, size_t entityLength)
+CharW XmlEntity::decode(const CharW* entityName, size_t entityLength)
 {
-  return _decode<Char>(entityName, entityLength);
+  return _decode<CharW>(entityName, entityLength);
 }
 
-size_t XmlEntity::encode(char* dst, Char _ch)
+size_t XmlEntity::encode(char* dst, CharW _ch)
 {
   uint16_t ch = _ch.getValue();
 

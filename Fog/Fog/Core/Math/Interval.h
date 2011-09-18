@@ -170,25 +170,20 @@ FOG_INLINE void IntervalF::setInterval(const IntervalD& i)
 // [Fog::IntervalT<>]
 // ============================================================================
 
-FOG_CLASS_PRECISION_F_D(Interval)
+_FOG_NUM_T(Interval)
+_FOG_NUM_F(Interval)
+_FOG_NUM_D(Interval)
 
 //! @}
 
 } // Fog namespace
 
 // ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::IntervalF, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::IntervalD, Fog::TYPEINFO_PRIMITIVE)
-
-// ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_FUZZY_DECLARE(Fog::IntervalF, Math::isFuzzyEq(a._min, b._min) && Math::isFuzzyEq(a._max, b._max))
-FOG_FUZZY_DECLARE(Fog::IntervalD, Math::isFuzzyEq(a._min, b._min) && Math::isFuzzyEq(a._max, b._max))
+FOG_FUZZY_DECLARE_F_VEC(Fog::IntervalF, 2)
+FOG_FUZZY_DECLARE_D_VEC(Fog::IntervalD, 2)
 
 // [Guard]
 #endif // _FOG_CORE_MATH_INTERVAL_H

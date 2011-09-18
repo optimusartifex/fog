@@ -9,978 +9,1419 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/Algorithms.h>
-#include <Fog/Core/Collection/HashUtil.h>
-#include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Collection/Util.h>
 #include <Fog/Core/Global/Init_p.h>
-#include <Fog/Core/Memory/Alloc.h>
+#include <Fog/Core/Global/Private.h>
+#include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/Core/Memory/BSwap.h>
-#include <Fog/Core/Tools/Byte.h>
-#include <Fog/Core/Tools/ByteArray.h>
+#include <Fog/Core/Tools/Algorithm.h>
+#include <Fog/Core/Tools/Char.h>
 #include <Fog/Core/Tools/CharData.h>
+#include <Fog/Core/Tools/HashUtil.h>
+#include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Tools/Locale.h>
+#include <Fog/Core/Tools/RegExp.h>
 #include <Fog/Core/Tools/String.h>
-#include <Fog/Core/Tools/StringFilter.h>
-#include <Fog/Core/Tools/StringMatcher.h>
 #include <Fog/Core/Tools/StringTmp_p.h>
 #include <Fog/Core/Tools/StringUtil.h>
+#include <Fog/Core/Tools/StringUtil_dtoa_p.h>
 #include <Fog/Core/Tools/TextCodec.h>
-
-// [Dependencies - C]
-#include <stdarg.h>
+#include <Fog/Core/Tools/VarId.h>
 
 namespace Fog {
+
+// ============================================================================
+// [Fog::String - Global]
+// ============================================================================
+
+static Static<StringDataA> StringA_dEmpty;
+static Static<StringDataW> StringW_dEmpty;
+
+static Static<StringA> StringA_oEmpty;
+static Static<StringW> StringW_oEmpty;
+
+template<typename CharT>
+FOG_STATIC_INLINE_T CharT_(StringData)* StringT_getDEmpty() { return NULL; }
+
+template<> FOG_STATIC_INLINE_T StringDataA* StringT_getDEmpty<char>() { return &StringA_dEmpty; }
+template<> FOG_STATIC_INLINE_T StringDataW* StringT_getDEmpty<CharW>() { return &StringW_dEmpty; }
 
 // ============================================================================
 // [Fog::String - Helpers]
 // ============================================================================
 
-static FOG_INLINE bool fitToRange(
-  const String& self, size_t& _start, size_t& _end, const Range& range)
+static FOG_INLINE void StringT_chcopy(char* dst, const char* src, size_t length)
 {
-  _start = range.getStart();
-  _end = Math::min(range.getEnd(), self.getLength());
-  return _start < _end;
+  for (size_t i = 0; i < length; i++)
+    dst[i] = src[i];
+}
+
+static FOG_INLINE void StringT_chcopy(CharW* dst, const char* src, size_t length)
+{
+  for (size_t i = 0; i < length; i++)
+    dst[i] = src[i];
+}
+
+static FOG_INLINE void StringT_chcopy(CharW* dst, const CharW* src, size_t length)
+{
+  for (size_t i = 0; i < length; i++)
+    dst[i] = src[i];
+}
+
+static FOG_INLINE void StringW_chcopy_localized(CharW* dst, const char* src, CharW offset, size_t length)
+{
+  for (size_t i = 0; i < length; i++)
+  {
+    CharW c = CharW(src[i]);
+    if (c.isAsciiDigit()) c += offset;
+    dst[i] = c;
+  }
+}
+
+static FOG_INLINE void StringW_chcopy_localized(CharW* dst, const CharW* src, CharW offset, size_t length)
+{
+  for (size_t i = 0; i < length; i++)
+  {
+    CharW c = CharW(src[i]);
+    if (c.isAsciiDigit()) c += offset;
+    dst[i] = c;
+  }
+}
+
+static FOG_INLINE void StringT_chmove(char* dst, const char* src, size_t length)
+{
+  if (dst <= src)
+    StringT_chcopy(dst, src, length);
+
+  size_t i = length;
+  while (i)
+  {
+    i--;
+    dst[i] = src[i];
+  }
+}
+
+static FOG_INLINE void StringT_chmove(CharW* dst, const CharW* src, size_t length)
+{
+  if (dst <= src)
+    StringT_chcopy(dst, src, length);
+
+  size_t i = length;
+  while (i)
+  {
+    i--;
+    dst[i] = src[i];
+  }
+}
+
+static FOG_INLINE void StringT_chfill(char* dst, char ch, size_t length)
+{
+  for (size_t i = 0; i < length; i++)
+    dst[i] = ch;
+}
+
+static FOG_INLINE void StringT_chfill(CharW* dst, uint16_t ch, size_t length)
+{
+  for (size_t i = 0; i < length; i++)
+    dst[i] = ch;
+}
+
+static FOG_INLINE size_t StringT_cheq(const char* a, const char* b, size_t length)
+{
+  size_t i;
+  for (i = 0; i < length; i++)
+    if (a[i] != b[i])
+      break;
+  return i;
+}
+
+static FOG_INLINE size_t StringT_cheq(const CharW* a, const char* b, size_t length)
+{
+  size_t i;
+  for (i = 0; i < length; i++)
+    if (a[i] != (unsigned char)b[i])
+      break;
+  return i;
+}
+
+static FOG_INLINE size_t StringT_cheq(const CharW* a, const CharW* b, size_t length)
+{
+  size_t i;
+  for (i = 0; i < length; i++)
+    if (a[i] != b[i])
+      break;
+  return i;
+}
+
+static FOG_INLINE size_t StringT_cheqi(const char* a, const char* b, size_t length)
+{
+  size_t i;
+  for (i = 0; i < length; i++)
+    if (CharA::toLower(a[i]) != CharA::toLower(b[i]))
+      break;
+  return i;
+}
+
+static FOG_INLINE size_t StringT_cheqi(const CharW* a, const char* b, size_t length)
+{
+  size_t i;
+  for (i = 0; i < length; i++)
+    if (CharW::toLower(a[i]) != CharA::toLower((unsigned char)b[i]))
+      break;
+  return i;
+}
+
+static FOG_INLINE size_t StringT_cheqi(const CharW* a, const CharW* b, size_t length)
+{
+  size_t i;
+  for (i = 0; i < length; i++)
+    if (CharW::toLower(a[i]) != CharW::toLower(b[i]))
+      break;
+  return i;
+}
+
+template<typename CharT>
+FOG_STATIC_INLINE_T uint StringT_getCaseInsensitiveChars(CharT* cArray, CharT ch)
+{
+  FOG_ASSERT_NOT_REACHED();
+}
+
+template<>
+FOG_STATIC_INLINE_T uint StringT_getCaseInsensitiveChars<char>(char* cArray, char ch)
+{
+  cArray[0] = CharA::toLower(ch);
+  cArray[1] = CharA::toUpper(ch);
+
+  return 1 + (cArray[0] != cArray[1]);
+}
+
+template<>
+FOG_STATIC_INLINE_T uint StringT_getCaseInsensitiveChars<CharW>(CharW* cArray, CharW ch)
+{
+  cArray[0] = CharW::toLower(ch);
+  cArray[1] = CharW::toUpper(ch);
+  cArray[2] = CharW::toTitle(ch);
+
+  uint cCount = 3;
+
+  if (cArray[1] == cArray[2])
+    cCount--;
+  if (cArray[0] == cArray[1])
+    cCount--;
+
+  return cCount;
 }
 
 // ============================================================================
 // [Fog::String - Construction / Destruction]
 // ============================================================================
 
-String::String()
+template<typename CharT>
+static void FOG_CDECL StringT_ctor(CharT_(String)* self)
 {
-  _d = _dnull->ref();
+  self->_d = StringT_getDEmpty<CharT>()->addRef();
 }
 
-String::String(Char ch, size_t length)
+template<typename CharT, typename SrcT>
+static void FOG_CDECL StringT_ctorStub(CharT_(String)* self, const SrcT_(Stub)* stub)
 {
-  _d = StringData::alloc(length);
-  if (FOG_IS_NULL(_d)) { _d = _dnull->ref(); return; }
-  if (!length) return;
+  CharT_(StringData)* d = CharI_(String)::_dCreate(0, *stub);
 
-  StringUtil::fill(_d->data, ch, length);
-  _d->length = length;
-  _d->data[length] = 0;
+  if (FOG_IS_NULL(d))
+    d = StringT_getDEmpty<CharT>()->addRef();
+
+  self->_d = d;
 }
 
-String::String(const String& other)
+static void FOG_CDECL StringW_ctorCodec(StringW* self, const StubA* stub, const TextCodec* tc)
 {
-  _d = other._d->ref();
+  self->_d = StringT_getDEmpty<CharW>()->addRef();
+  tc->decode(*self, *stub);
 }
 
-String::String(const String& other1, const String& other2)
+template<typename CharT, typename SrcT>
+static void FOG_CDECL StringT_ctorStub2(CharT_(String)* self, const SrcT_(Stub)* a, const SrcT_(Stub)* b)
 {
-  if (other1.getLength() == 0)
+  size_t aLength = a->getComputedLength();
+  size_t bLength = b->getComputedLength();
+
+  CharT_(StringData)* d;
+
+  if (FOG_LIKELY(Math::canSum(aLength, bLength)))
   {
-    _d = other2._d->ref();
+    size_t length = aLength + bLength;
+
+    d = CharI_(String)::_dCreate(length);
+    if (FOG_IS_NULL(d))
+      goto _Fail;
+
+    d->length = length;
+    StringT_chcopy(d->data          , a->getData(), aLength);
+    StringT_chcopy(d->data + aLength, b->getData(), bLength);
+    d->data[length] = 0;
   }
   else
   {
-    _d = other1._d->ref();
-    append(other2);
+_Fail:
+    d = StringT_getDEmpty<CharT>()->addRef();
   }
+
+  self->_d = d;
 }
 
-String::String(const Char* str)
+template<typename CharT>
+static void FOG_CDECL StringT_ctorCopy(CharT_(String)* self, const CharT_(String)* other)
 {
-  size_t length = StringUtil::len(str);
-
-  _d = StringData::alloc(0, str, length);
-  if (FOG_IS_NULL(_d)) _d = _dnull->ref();
+  self->_d = other->_d->addRef();
 }
 
-String::String(const Char* str, size_t length)
+template<typename CharT>
+static void FOG_CDECL StringT_ctorCopy2(CharT_(String)* self, const CharT_(String)* a, const CharT_(String)* b)
 {
-  if (length == DETECT_LENGTH) length = StringUtil::len(str);
+  size_t aLength = a->getLength();
+  size_t bLength = b->getLength();
 
-  _d = StringData::alloc(0, str, length);
-  if (FOG_IS_NULL(_d)) _d = _dnull->ref();
-}
+  CharT_(StringData)* d;
 
-String::String(const Ascii8& str)
-{
-  const char* sData = str.getData();
-  size_t sLength = str.getComputedLength();
-
-  _d = StringData::alloc(0, sData, sLength);
-  if (FOG_IS_NULL(_d)) _d = _dnull->ref();
-}
-
-String::String(const Utf8& str)
-{
-  _d = _dnull->ref();
-  appendUtf8(str.getData(), str.getComputedLength());
-}
-
-String::String(const Utf16& str)
-{
-  _d = _dnull->ref();
-  set(str);
-}
-
-String::~String()
-{
-  _d->deref();
-}
-
-// ============================================================================
-// [Fog::String - Implicit Sharing]
-// ============================================================================
-
-err_t String::_detach()
-{
-  if (isDetached()) return ERR_OK;
-
-  StringData* newd = StringData::copy(_d);
-  if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
-
-  atomicPtrXchg(&_d, newd)->deref();
-  return ERR_OK;
-}
-
-// ============================================================================
-// [Fog::StringData]
-// ============================================================================
-
-err_t String::prepare(size_t capacity)
-{
-  StringData* d = _d;
-
-  if (d->refCount.get() == 1 && d->capacity >= capacity)
+  if (FOG_LIKELY(Math::canSum(aLength, bLength)))
   {
-    d->hashCode = 0;
-    d->length = 0;
-    d->data[0] = 0;
+    size_t length = aLength + bLength;
+
+    d = CharI_(String)::_dCreate(length);
+    if (FOG_IS_NULL(d))
+      goto _Fail;
+
+    d->length = length;
+    StringT_chcopy(d->data          , a->getData(), aLength);
+    StringT_chcopy(d->data + aLength, b->getData(), bLength);
+    d->data[length] = 0;
+  }
+  else
+  {
+_Fail:
+    d = StringT_getDEmpty<CharT>()->addRef();
+  }
+
+  self->_d = d;
+}
+
+template<typename CharT>
+static void FOG_CDECL StringT_ctorSubstr(CharT_(String)* self, const CharT_(String)* other, const Range* range)
+{
+  CharT_(StringData)* d;
+
+  size_t rStart, rEnd;
+  size_t oLength = other->getLength();
+
+  if (Range::fit(rStart, rEnd, oLength, range))
+  {
+    size_t rLength = rEnd - rStart;
+    d = CharI_(String)::_dCreate(rLength, CharT_(Stub)(other->getData() + rStart, rLength));
+
+    if (FOG_IS_NULL(d))
+      goto _Fail;
+  }
+  else
+  {
+_Fail:
+    d = StringT_getDEmpty<CharT>()->addRef();
+  }
+
+  self->_d = d;
+}
+
+template<typename CharT>
+static void FOG_CDECL StringT_ctorU32(CharT_(String)* self, uint32_t n, bool isUnsigned)
+{
+  char nBuffer[32];
+  char* nPtr = nBuffer + FOG_ARRAY_SIZE(nBuffer);
+
+  if (!isUnsigned)
+  {
+    if ((int32_t)n < 0)
+      n = -(int32_t)n;
+    else
+      isUnsigned = true;
+  }
+
+  do {
+    uint32_t nDiv = n / 10;
+    uint32_t nRem = n % 10;
+
+    *--nPtr = (unsigned char)'0' + (unsigned char)(nRem);
+    n = nDiv;
+  } while (n != 0);
+
+  if (!isUnsigned)
+    *--nPtr = '-';
+
+  size_t nLength = (size_t)(nBuffer + FOG_ARRAY_SIZE(nBuffer) - nPtr);
+  CharT_(StringData)* d = CharI_(String)::_dCreate(nLength, Ascii8(nPtr, nLength));
+
+  if (FOG_IS_NULL(d))
+    d = StringT_getDEmpty<CharT>()->addRef();
+
+  self->_d = d;
+}
+
+template<typename CharT>
+static void FOG_CDECL StringT_ctorU64(CharT_(String)* self, uint64_t n, bool isUnsigned)
+{
+  char nBuffer[32];
+  char* nPtr = nBuffer + FOG_ARRAY_SIZE(nBuffer);
+
+  if (!isUnsigned)
+  {
+    if ((int64_t)n < 0)
+      n = -(int64_t)n;
+    else
+      isUnsigned = true;
+  }
+
+  do {
+    uint64_t nDiv = n / FOG_UINT64_C(10);
+    uint64_t nRem = n % FOG_UINT64_C(10);
+
+    *--nPtr = (unsigned char)'0' + (unsigned char)(nRem);
+    n = nDiv;
+  } while (n != 0);
+
+  if (!isUnsigned)
+    *--nPtr = '-';
+
+  size_t nLength = (size_t)(nBuffer + FOG_ARRAY_SIZE(nBuffer) - nPtr);
+  CharT_(StringData)* d = CharI_(String)::_dCreate(nLength, Ascii8(nPtr, nLength));
+
+  if (FOG_IS_NULL(d))
+    d = StringT_getDEmpty<CharT>()->addRef();
+
+  self->_d = d;
+}
+
+template<typename CharT>
+static void FOG_CDECL StringT_ctorDouble(CharT_(String)* self, double d)
+{
+  self->_d = StringT_getDEmpty<CharT>()->addRef();
+  self->setReal(d);
+}
+
+template<typename CharT>
+static void FOG_CDECL StringT_dtor(CharT_(String)* self)
+{
+  self->_d->release();
+}
+
+// ============================================================================
+// [Fog::String - Sharing]
+// ============================================================================
+
+template<typename CharT>
+static err_t FOG_CDECL StringT_detach(CharT_(String)* self)
+{
+  CharT_(StringData)* d = self->_d;
+  if (d->reference.get() == 1)
     return ERR_OK;
-  }
 
-  d = StringData::alloc(capacity);
-  if (FOG_IS_NULL(d)) return ERR_RT_OUT_OF_MEMORY;
+  d = CharI_(String)::_dCreate(d->length, CharT_(Stub)(d->data, d->length));
+  if (FOG_IS_NULL(d))
+    return ERR_RT_OUT_OF_MEMORY;
 
-  atomicPtrXchg(&_d, d)->deref();
+  atomicPtrXchg(&self->_d, d)->release();
   return ERR_OK;
 }
 
-Char* String::beginManipulation(size_t max, uint32_t op)
-{
-  StringData* d = _d;
+// ============================================================================
+// [Fog::String - Container]
+// ============================================================================
 
-  if (op == CONTAINER_OP_REPLACE)
+template<typename CharT>
+static err_t FOG_CDECL StringT_reserve(CharT_(String)* self, size_t capacity)
+{
+  CharT_(StringData)* d = self->_d;
+  size_t length = d->length;
+
+  if (capacity < length)
+    capacity = length;
+
+  if (d->reference.get() > 1)
   {
-    if (d->refCount.get() == 1 && d->capacity >= max)
+    d = CharI_(String)::_dCreate(capacity, CharT_(Stub)(d->data, d->length));
+    if (FOG_IS_NULL(d))
+      return ERR_RT_OUT_OF_MEMORY;
+
+    atomicPtrXchg(&self->_d, d)->release();
+  }
+  else if (d->capacity < capacity)
+  {
+    d = CharI_(String)::_dRealloc(d, capacity);
+    if (FOG_IS_NULL(d))
+      return ERR_RT_OUT_OF_MEMORY;
+
+    self->_d = d;
+  }
+
+  return ERR_OK;
+}
+
+template<typename CharT>
+static err_t FOG_CDECL StringT_resize(CharT_(String)* self, size_t len)
+{
+  CharT_(StringData)* d = self->_d;
+
+  if (d->reference.get() > 1)
+  {
+    d = CharI_(String)::_dCreate(len, CharT_(Stub)(d->data, Math::min(len, d->length)));
+    if (FOG_IS_NULL(d))
+      return ERR_RT_OUT_OF_MEMORY;
+
+    atomicPtrXchg(&self->_d, d)->release();
+  }
+  else if (d->capacity < len)
+  {
+    d = CharI_(String)::_dRealloc(d, len);
+    if (FOG_IS_NULL(d))
+      return ERR_RT_OUT_OF_MEMORY;
+
+    self->_d = d;
+  }
+
+  d->hashCode = 0;
+  d->length = len;
+  d->data[len] = 0;
+  return ERR_OK;
+}
+
+template<typename CharT>
+static err_t FOG_CDECL StringT_truncate(CharT_(String)* self, size_t len)
+{
+  if (self->_d->length <= len)
+    return ERR_OK;
+  else
+    return self->resize(len);
+}
+
+template<typename CharT>
+static void FOG_CDECL StringT_squeeze(CharT_(String)* self)
+{
+  CharT_(StringData)* d = self->_d;
+  size_t i = d->length;
+  size_t c = d->capacity;
+
+  // Pad to 8 or 16 bytes.
+  i = (i + 7) & ~7;
+  if (i >= c)
+    return;
+
+  d = CharI_(String)::_dCreate(0, CharT_(Stub)(d->data, d->length));
+  if (FOG_IS_NULL(d))
+    return;
+
+  atomicPtrXchg(&self->_d, d)->release();
+}
+
+template<typename CharT>
+static CharT* FOG_CDECL StringT_prepare(CharT_(String)* self, uint32_t cntOp, size_t length)
+{
+  CharT_(StringData)* d = self->_d;
+
+  if (cntOp == CONTAINER_OP_REPLACE)
+  {
+    if (d->reference.get() == 1 && length <= d->capacity)
     {
       d->hashCode = 0;
-      d->length = 0;
-      d->data[0] = 0;
+      d->length = length;
+      d->data[length] = 0;
       return d->data;
     }
-    d = StringData::alloc(max);
-    if (FOG_IS_NULL(d)) return NULL;
 
-    atomicPtrXchg(&_d, d)->deref();
+    d = CharI_(String)::_dCreate(length);
+    if (FOG_IS_NULL(d))
+      return NULL;
+    atomicPtrXchg(&self->_d, d)->release();
+
+    d->length = length;
+    d->data[length] = 0;
     return d->data;
   }
   else
   {
-    size_t length = d->length;
-    size_t newmax = length + max;
+    size_t before = d->length;
+    size_t after = before + length;
 
     // Overflow.
-    if (length > newmax) return NULL;
+    if (before > after)
+      return NULL;
 
-    if (d->refCount.get() == 1 && d->capacity >= newmax)
-      return d->data + length;
-
-    if (d->refCount.get() > 1)
+    if (d->reference.get() > 1)
     {
-      size_t optimalCapacity = Util::getGrowCapacity(
-        sizeof(StringData), sizeof(Char), length, newmax);
+      size_t optimal = CollectionUtil::getGrowCapacity(sizeof(CharT_(StringData)), sizeof(CharT), before, after);
 
-      d = StringData::alloc(optimalCapacity, d->data, d->length);
-      if (FOG_IS_NULL(d)) return NULL;
-
-      atomicPtrXchg(&_d, d)->deref();
-      return d->data + length;
+      d = CharI_(String)::_dCreate(optimal, CharT_(Stub)(d->data, before));
+      if (FOG_IS_NULL(d))
+        return NULL;
+      atomicPtrXchg(&self->_d, d)->release();
     }
-    else
+    else if (d->capacity < after)
     {
-      size_t optimalCapacity = Util::getGrowCapacity(
-        sizeof(StringData), sizeof(Char), length, newmax);
+      size_t optimal = CollectionUtil::getGrowCapacity(sizeof(CharT_(StringData)), sizeof(CharT), before, after);
 
-      d = StringData::realloc(_d, optimalCapacity);
-      if (FOG_IS_NULL(d)) return NULL;
-
-      _d = d;
-      return d->data + length;
+      d = CharI_(String)::_dRealloc(d, optimal);
+      if (FOG_IS_NULL(d))
+        return NULL;
+      self->_d = d;
     }
+
+    d->hashCode = 0;
+    d->length = after;
+    d->data[after] = 0;
+    return d->data + before;
   }
 }
 
-err_t String::reserve(size_t to)
+template<typename CharT>
+static CharT* FOG_CDECL StringT_add(CharT_(String)* self, size_t length)
 {
-  if (to < _d->length) to = _d->length;
-  if (_d->refCount.get() == 1 && _d->capacity >= to) goto done;
+  CharT_(StringData)* d = self->_d;
 
-  if (_d->refCount.get() > 1)
+  size_t before = d->length;
+  size_t after = before + length;
+
+  // Overflow.
+  if (before > after)
+    return NULL;
+
+  if (d->reference.get() > 1)
   {
-    StringData* newd = StringData::alloc(to, _d->data, _d->length);
-    if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
+    size_t optimal = CollectionUtil::getGrowCapacity(sizeof(CharT_(StringData)), sizeof(CharT), before, after);
 
-    atomicPtrXchg(&_d, newd)->deref();
+    d = CharI_(String)::_dCreate(optimal, CharT_(Stub)(d->data, before));
+    if (FOG_IS_NULL(d))
+      return NULL;
+    atomicPtrXchg(&self->_d, d)->release();
   }
-  else
+  else if (d->capacity < after)
   {
-    StringData* newd = StringData::realloc(_d, to);
-    if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
+    size_t optimal = CollectionUtil::getGrowCapacity(sizeof(CharT_(StringData)), sizeof(CharT), before, after);
 
-    _d = newd;
+    d = CharI_(String)::_dRealloc(d, optimal);
+    if (FOG_IS_NULL(d))
+      return NULL;
+    self->_d = d;
   }
-done:
-  return ERR_OK;
+
+  d->hashCode = 0;
+  d->length = after;
+  d->data[after] = 0;
+  return d->data + before;
 }
 
-err_t String::resize(size_t to)
+// ============================================================================
+// [Fog::String - Clear / Reset]
+// ============================================================================
+
+template<typename CharT>
+static void FOG_CDECL StringT_clear(CharT_(String)* self)
 {
-  if (_d->refCount.get() == 1 && _d->capacity >= to) goto done;
+  CharT_(StringData)* d = self->_d;
 
-  if (_d->refCount.get() > 1)
+  if (d->reference.get() > 1)
   {
-    StringData* newd = StringData::alloc(to, _d->data, to < _d->length ? to : _d->length);
-    if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
-
-    atomicPtrXchg(&_d, newd)->deref();
-  }
-  else
-  {
-    StringData* newd = StringData::realloc(_d, to);
-    if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
-
-    _d = newd;
-  }
-
-done:
-  _d->hashCode = 0;
-  _d->length = to;
-  _d->data[to] = 0;
-  return ERR_OK;
-}
-
-err_t String::grow(size_t by)
-{
-  size_t lengthBefore = _d->length;
-  size_t lengthAfter = lengthBefore + by;
-
-  FOG_ASSERT(lengthBefore <= lengthAfter);
-
-  if (_d->refCount.get() == 1 && _d->capacity >= lengthAfter) goto done;
-
-  if (_d->refCount.get() > 1)
-  {
-    size_t optimalCapacity = Util::getGrowCapacity(
-      sizeof(StringData), sizeof(Char), lengthBefore, lengthAfter);
-
-    StringData* newd = StringData::alloc(optimalCapacity, _d->data, _d->length);
-    if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
-
-    atomicPtrXchg(&_d, newd)->deref();
-  }
-  else
-  {
-    size_t optimalCapacity = Util::getGrowCapacity(
-      sizeof(StringData), sizeof(Char), lengthBefore, lengthAfter);
-
-    StringData* newd = StringData::realloc(_d, optimalCapacity);
-    if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
-
-    _d = newd;
-  }
-
-done:
-  _d->hashCode = 0;
-  _d->length = lengthAfter;
-  _d->data[lengthAfter] = 0;
-  return ERR_OK;
-}
-
-void String::squeeze()
-{
-  size_t i = _d->length;
-  size_t c = _d->capacity;
-
-  // Pad to 16 bytes
-  i = (i + 7) & ~7;
-
-  if (i < c)
-  {
-    StringData* newd = StringData::alloc(0, _d->data, _d->length);
-    if (FOG_IS_NULL(newd)) return;
-    atomicPtrXchg(&_d, newd)->deref();
-  }
-}
-
-void String::clear()
-{
-  if (_d->refCount.get() > 1)
-  {
-    atomicPtrXchg(&_d, _dnull->ref())->deref();
+    atomicPtrXchg(&self->_d, StringT_getDEmpty<CharT>()->addRef())->release();
     return;
   }
 
-  _d->hashCode = 0;
-  _d->length = 0;
-  _d->data[0] = 0;
-}
-
-void String::reset()
-{
-  atomicPtrXchg(&_d, _dnull->ref())->deref();
-}
-
-static Char* _prepareSet(String* self, size_t length)
-{
-  StringData* d = self->_d;
-  if (FOG_UNLIKELY(length == 0)) goto skip;
-
-  if (d->refCount.get() > 1)
-  {
-    d = StringData::alloc(length);
-    if (FOG_IS_NULL(d)) return NULL;
-    atomicPtrXchg(&self->_d, d)->deref();
-  }
-  else if (d->capacity < length)
-  {
-    size_t optimalCapacity = Util::getGrowCapacity(
-      sizeof(StringData), sizeof(Char), d->length, length);
-
-    d = StringData::realloc(d, optimalCapacity);
-    if (FOG_IS_NULL(d)) return NULL;
-    self->_d = d;
-  }
-
   d->hashCode = 0;
-  d->length = length;
-  d->data[d->length] = 0;
-skip:
-  return d->data;
+  d->length = 0;
+  d->data[0] = 0;
 }
 
-static Char* _prepareAppend(String* self, size_t length)
+template<typename CharT>
+static void FOG_CDECL StringT_reset(CharT_(String)* self)
 {
-  StringData* d = self->_d;
-
-  size_t lengthBefore = d->length;
-  size_t lengthAfter = lengthBefore + length;
-
-  if (FOG_UNLIKELY(length == 0)) goto skip;
-
-  if (d->refCount.get() > 1)
-  {
-    d = StringData::alloc(lengthAfter, d->data, d->length);
-    if (FOG_IS_NULL(d)) return NULL;
-    atomicPtrXchg(&self->_d, d)->deref();
-  }
-  else if (d->capacity < lengthAfter)
-  {
-    size_t optimalCapacity = Util::getGrowCapacity(
-      sizeof(StringData), sizeof(Char), lengthBefore, lengthAfter);
-
-    d = StringData::realloc(d, optimalCapacity);
-    if (FOG_IS_NULL(d)) return NULL;
-    self->_d = d;
-  }
-
-  d->hashCode = 0;
-  d->length = lengthAfter;
-  d->data[lengthAfter] = 0;
-skip:
-  return d->data + lengthBefore;
+  atomicPtrXchg(&self->_d, StringT_getDEmpty<CharT>()->addRef())->release();
 }
 
-static Char* _prepareInsert(String* self, size_t index, size_t length)
+// ============================================================================
+// [Fog::String - HashCode]
+// ============================================================================
+
+template<typename CharT>
+static uint32_t FOG_CDECL StringT_getHashCode(const CharT_(String)* self)
 {
-  StringData* d = self->_d;
+  CharT_(StringData)* d = self->_d;
+  uint32_t hashCode = d->hashCode;
 
-  size_t lengthBefore = d->length;
-  size_t lengthAfter = lengthBefore + length;
-  size_t moveBy;
+  if (hashCode != 0)
+    return hashCode;
 
-  if (index > lengthBefore) index = lengthBefore;
-  // If data length is zero we can just skip all this machinery.
-  if (FOG_UNLIKELY(!length)) goto skip;
+  hashCode = d->hashCode = HashUtil::hash<CharT_(Stub)>(CharT_(Stub)(d->data, d->length));
+  return hashCode;
+}
 
-  moveBy = lengthBefore - index;
+// ============================================================================
+// [Fog::String - Set]
+// ============================================================================
 
-  if (d->refCount.get() > 1 || d->capacity < lengthAfter)
+template<typename CharT, typename SrcT>
+static err_t FOG_CDECL StringT_setStub(CharT_(String)* self, const SrcT_(Stub)* stub)
+{
+  const SrcT* sData = stub->getData();
+  size_t sLength = stub->getComputedLength();
+
+  CharT* dst = self->_prepare(CONTAINER_OP_REPLACE, sLength);
+  if (FOG_IS_NULL(dst))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  StringT_chcopy(dst, sData, sLength);
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL StringW_setStubCodec(StringW* self, const StubA* stub, const TextCodec* tc)
+{
+  return tc->decode(*self, *stub, NULL, CONTAINER_OP_REPLACE);
+}
+
+template<typename CharT, typename SrcT>
+static err_t FOG_CDECL StringT_setString(CharT_(String)* self, const SrcT_(String)* other)
+{
+  if (sizeof(CharT) == sizeof(SrcT))
   {
-    size_t optimalCapacity = Util::getGrowCapacity(
-      sizeof(StringData), sizeof(Char), lengthBefore, lengthAfter);
-
-    d = StringData::alloc(optimalCapacity, d->data, index);
-    if (FOG_IS_NULL(d)) return NULL;
-
-    StringUtil::copy(
-      d->data + index + length, self->_d->data + index, moveBy);
-    atomicPtrXchg(&self->_d, d)->deref();
+    atomicPtrXchg(&self->_d,
+      reinterpret_cast<CharT_(StringData)*>(other->_d)->addRef())->release();
+    return ERR_OK;
   }
   else
   {
-    StringUtil::move(
-      d->data + index + length, d->data + index, moveBy);
+    const SrcT* sData = other->getData();
+    size_t sLength = other->getLength();
+
+    CharT* dst = self->_prepare(CONTAINER_OP_REPLACE, sLength);
+    if (FOG_IS_NULL(dst))
+      return ERR_RT_OUT_OF_MEMORY;
+
+    StringT_chcopy(dst, sData, sLength);
+    return ERR_OK;
   }
-
-  d->hashCode = 0;
-  d->length = lengthAfter;
-  d->data[lengthAfter] = 0;
-
-skip:
-  return d->data + index;
 }
 
-// TODO: Not used.
-static Char* _prepareReplace(String* self, size_t index, size_t range, size_t replacementLength)
+static err_t FOG_CDECL StringW_setStringCodec(StringW* self, const StringA* other, const TextCodec* tc)
 {
-  StringData* d = self->_d;
+  return tc->decode(*self, *other, NULL, CONTAINER_OP_REPLACE);
+}
 
-  size_t lengthBefore = d->length;
+template<typename CharT, typename SrcT>
+static err_t FOG_CDECL StringT_setStringEx(CharT_(String)* self, const SrcT_(String)* other, const Range* range)
+{
+  const SrcT* sData = other->getData();
+  size_t sLength = other->getLength();
 
-  FOG_ASSERT(index <= lengthBefore);
-  if (lengthBefore - index > range) range = lengthBefore - index;
+  if (sizeof(CharT) == sizeof(SrcT) && (const void*)self == (const void*)other)
+    return self->slice(*range);
 
-  size_t lengthAfter = lengthBefore - range + replacementLength;
-
-  if (d->refCount.get() > 1 || d->capacity < lengthAfter)
+  size_t rStart, rEnd;
+  if (!Range::fit(rStart, rEnd, sLength, range))
   {
-    size_t optimalCapacity = Util::getGrowCapacity(
-      sizeof(StringData), sizeof(Char), lengthBefore, lengthAfter);
-
-    d = StringData::alloc(optimalCapacity, d->data, index);
-    if (FOG_IS_NULL(d)) return NULL;
-
-    StringUtil::copy(
-      d->data + index + replacementLength,
-      self->_d->data + index + range, lengthBefore - index - range);
-    atomicPtrXchg(&self->_d, d)->deref();
+    self->clear();
+    return ERR_OK;
   }
+
+  size_t rLength = rEnd - rStart;
+  CharT* dst = self->_prepare(CONTAINER_OP_REPLACE, rLength);
+  if (FOG_IS_NULL(dst))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  StringT_chcopy(dst, sData + rStart, rLength);
+  return ERR_OK;
+}
+
+template<typename CharT>
+static err_t FOG_CDECL StringT_setDeep(CharT_(String)* self, const CharT_(String)* other)
+{
+  if (self == other)
+    return ERR_OK;
+
+  const CharT* sData = other->getData();
+  size_t sLength = other->getLength();
+
+  CharT* p = self->_prepare(CONTAINER_OP_REPLACE, sLength);
+  if (FOG_IS_NULL(p))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  StringT_chcopy(p, sData, sLength);
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::String - Append]
+// ============================================================================
+
+template<typename CharT, typename SrcT>
+static err_t FOG_CDECL StringT_appendStub(CharT_(String)* self, const SrcT_(Stub)* stub)
+{
+  const SrcT* sData = stub->getData();
+  size_t sLength = stub->getComputedLength();
+
+  CharT* dst = self->_prepare(CONTAINER_OP_APPEND, sLength);
+  if (FOG_IS_NULL(dst))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  StringT_chcopy(dst, sData, sLength);
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL StringW_appendStubCodec(StringW* self, const StubA* stub, const TextCodec* tc)
+{
+  return tc->decode(*self, *stub, NULL, CONTAINER_OP_APPEND);
+}
+
+template<typename CharT, typename SrcT>
+static err_t FOG_CDECL StringT_appendString(CharT_(String)* self, const SrcT_(String)* other)
+{
+  const SrcT* sData = other->getData();
+  size_t sLength = other->getLength();
+
+  CharT* dst = self->_prepare(CONTAINER_OP_APPEND, sLength);
+  if (FOG_IS_NULL(dst))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  if (sizeof(CharT) == sizeof(SrcT) && (const void*)self == (const void*)other)
+    sData = other->_d->data;
+
+  StringT_chcopy(dst, sData, sLength);
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL StringW_appendStringCodec(StringW* self, const StringA* other, const TextCodec* tc)
+{
+  return tc->decode(*self, *other, NULL, CONTAINER_OP_REPLACE);
+}
+
+template<typename CharT, typename SrcT>
+static err_t FOG_CDECL StringT_appendStringEx(CharT_(String)* self, const SrcT_(String)* other, const Range* range)
+{
+  const SrcT* sData = other->getData();
+  size_t sLength = other->getLength();
+  size_t rStart, rEnd;
+
+  if (!Range::fit(rStart, rEnd, sLength, range))
+    return ERR_OK;
+
+  size_t rLength = rEnd - rStart;
+  CharT* dst = self->_prepare(CONTAINER_OP_APPEND, rLength);
+  if (FOG_IS_NULL(dst))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  if (sizeof(CharT) == sizeof(SrcT) && (const void*)self == (const void*)other)
+    sData = other->_d->data;
+
+  StringT_chcopy(dst, sData + rStart, rLength);
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::String - OpFill]
+// ============================================================================
+
+template<typename CharT>
+static err_t FOG_CDECL StringT_opFill(CharT_(String)* self, uint32_t cntOp, CharT_Type ch, size_t length)
+{
+  CharT* p = self->_prepare(cntOp, length);
+
+  if (FOG_IS_NULL(p))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  StringT_chfill(p, ch, length);
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::String - OpBool]
+// ============================================================================
+
+template<typename CharT>
+static err_t FOG_CDECL StringT_opBool(CharT_(String)* self, uint32_t cntOp, bool b)
+{
+  if (b)
+    return self->set(Ascii8("true", 4));
   else
+    return self->set(Ascii8("false", 5));
+}
+
+// ============================================================================
+// [Fog::String - OpInt]
+// ============================================================================
+
+template<typename CharT>
+static err_t StringT_appendNTOA(CharT_(String)* self, uint32_t cntOp, uint64_t n, const FormatInt* fmt, NTOAContext* ctx)
+{
+  CharT prefixBuffer[4];
+  CharT* prefix = prefixBuffer;
+
+  uint32_t flags = fmt->getFlags();
+
+  if (ctx->negative)
+    *prefix++ = '-';
+  else if (flags & STRING_FORMAT_SIGN)
+    *prefix++ = '+';
+  else if (flags & FORMAT_FORMAT_BLANK)
+    *prefix++ = ' ';
+
+  if (flags & STRING_FORMAT_ALTERNATE)
   {
-    StringUtil::move(
-      d->data + index + replacementLength,
-      d->data + index + range, lengthBefore - index - range);
+    uint32_t base = fmt->getBase();
+
+    if (base == 8)
+    {
+      if (n != 0)
+      {
+        *--ctx->result = '0';
+        ctx->length++;
+      }
+    }
+    else if (base == 16)
+    {
+      *prefix++ = CharT('0');
+      *prefix++ = CharT((flags & STRING_FORMAT_CAPITALIZE_E_OR_X) ? 'X' : 'x');
+    }
   }
 
-  d->hashCode = 0;
-  d->length = lengthAfter;
-  d->data[lengthAfter] = 0;
-  return d->data + index;
+  size_t prefixLength = (size_t)(prefix - prefixBuffer);
+  size_t resultLength = ctx->length;
+
+  size_t width = fmt->getWidth();
+  size_t precision = fmt->getPrecision();
+
+  if (width == NO_WIDTH)
+    width = 0;
+
+  if ((flags & STRING_FORMAT_ZERO_PAD) != 0 && precision == NO_PRECISION && width > prefixLength + resultLength)
+    precision = width - prefixLength;
+
+  if (precision == NO_PRECISION)
+    precision = 0;
+
+  size_t fillLength = (resultLength < precision) ? precision - resultLength : 0;
+  size_t finalLength = prefixLength + resultLength + fillLength;
+  size_t widthLength = (finalLength < width) ? width - finalLength : 0;
+
+  finalLength += widthLength;
+
+  CharT* p = self->_prepare(cntOp, finalLength);
+  if (FOG_IS_NULL(p))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  // Left justification.
+  if (!(flags & STRING_FORMAT_LEFT))
+  {
+    StringT_chfill(p, CharT(' '), widthLength);
+    p += widthLength;
+  }
+
+  // Number with prefix and precision.
+  StringT_chcopy(p, prefixBuffer, prefixLength);
+  p += prefixLength;
+
+  // Body.
+  StringT_chfill(p, CharT('0'), fillLength);
+  p += fillLength;
+
+  StringT_chcopy(p, ctx->result, resultLength);
+  p += resultLength;
+
+  // Right justification.
+  if (flags & STRING_FORMAT_LEFT)
+  {
+    StringT_chfill(p, CharT(' '), widthLength);
+  }
+
+  return ERR_OK;
+}
+
+static err_t StringW_appendNTOA(StringW* self, uint32_t cntOp, uint64_t n, const FormatInt* fmt, const Locale* locale, NTOAContext* ctx)
+{
+  // If no locale was specified then run using common fast-path, instead of
+  // using POSIX Fog::Locale instance.
+  if (locale == NULL)
+    return StringT_appendNTOA<CharW>(self, cntOp, n, fmt, ctx);
+
+  CharW zero = locale->getChar(LOCALE_CHAR_ZERO) - CharW('0');
+
+  CharW prefixBuffer[4];
+  CharW* prefix = prefixBuffer;
+
+  uint32_t flags = fmt->getFlags();
+
+  if (ctx->negative)
+    *prefix++ = locale->getChar(LOCALE_CHAR_MINUS);
+  else if (flags & STRING_FORMAT_SIGN)
+    *prefix++ = locale->getChar(LOCALE_CHAR_PLUS);
+  else if (flags & FORMAT_FORMAT_BLANK)
+    *prefix++ = CharW(' ');
+
+  if (flags & STRING_FORMAT_ALTERNATE)
+  {
+    uint32_t base = fmt->getBase();
+
+    if (base == 8)
+    {
+      if (n != 0)
+      {
+        *--ctx->result = '0';
+        ctx->length++;
+      }
+    }
+    else if (base == 16)
+    {
+      *prefix++ = CharW('0') + zero;
+      *prefix++ = CharW((flags & STRING_FORMAT_CAPITALIZE_E_OR_X) ? 'X' : 'x');
+    }
+  }
+
+  size_t prefixLength = (size_t)(prefix - prefixBuffer);
+  size_t resultLength = ctx->length;
+
+  size_t width = fmt->getWidth();
+  size_t precision = fmt->getPrecision();
+
+  if (width == NO_WIDTH)
+    width = 0;
+
+  if ((flags & STRING_FORMAT_ZERO_PAD) != 0 && precision == NO_PRECISION && width > prefixLength + resultLength)
+    precision = width - prefixLength;
+
+  if (precision == NO_PRECISION)
+    precision = 0;
+
+  size_t fillLength = (resultLength < precision) ? precision - resultLength : 0;
+  size_t finalLength = prefixLength + resultLength + fillLength;
+  size_t widthLength = (finalLength < width) ? width - finalLength : 0;
+
+  finalLength += widthLength;
+
+  CharW* p = self->_prepare(cntOp, finalLength);
+  if (FOG_IS_NULL(p))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  // Left justification.
+  if (!(flags & STRING_FORMAT_LEFT))
+  {
+    StringT_chfill(p, ' ', widthLength);
+    p += widthLength;
+  }
+
+  // Number with prefix and precision.
+  StringT_chcopy(p, prefixBuffer, prefixLength);
+  p += prefixLength;
+
+  // Body.
+  StringT_chfill(p, zero + '0', fillLength);
+  p += fillLength;
+
+  StringW_chcopy_localized(p, ctx->result, zero, resultLength);
+  p += resultLength;
+
+  // Right justification.
+  if (flags & STRING_FORMAT_LEFT)
+  {
+    StringT_chfill(p, ' ', widthLength);
+  }
+
+  return ERR_OK;
+}
+
+template<typename CharT>
+static err_t FOG_CDECL StringT_opI32(CharT_(String)* self, uint32_t cntOp, int32_t n)
+{
+  char nBuffer[32];
+  char* nPtr = nBuffer + FOG_ARRAY_SIZE(nBuffer);
+
+  uint32_t u = (n >= 0) ? n : -n;
+  do {
+    uint32_t uDiv = u / 10;
+    uint32_t uRem = u % 10;
+
+    *--nPtr = (unsigned char)'0' + (unsigned char)(uRem);
+    u = uDiv;
+  } while (u != 0);
+
+  if (n < 0)
+    *--nPtr = '-';
+
+  size_t nLength = (size_t)(nBuffer + FOG_ARRAY_SIZE(nBuffer) - nPtr);
+  CharT* dst = self->_prepare(cntOp, nLength);
+
+  if (FOG_IS_NULL(dst))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  StringT_chcopy(dst, nPtr, nLength);
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL StringA_opI32Ex(StringA* self, uint32_t cntOp, int32_t n, const FormatInt* fmt)
+{
+  NTOAContext ctx;
+  StringUtil::itoa(&ctx, n, fmt->getBase(), (fmt->getFlags() & STRING_FORMAT_CAPITALIZE) ? TEXT_CASE_UPPER : TEXT_CASE_LOWER);
+
+  return StringT_appendNTOA<char>(self, cntOp, n, fmt, &ctx);
+}
+
+static err_t FOG_CDECL StringW_opI32Ex(StringW* self, uint32_t cntOp, int32_t n, const FormatInt* fmt, const Locale* locale)
+{
+  NTOAContext ctx;
+  StringUtil::itoa(&ctx, n, fmt->getBase(), (fmt->getFlags() & STRING_FORMAT_CAPITALIZE) ? TEXT_CASE_UPPER : TEXT_CASE_LOWER);
+
+  return StringW_appendNTOA(self, cntOp, n, fmt, locale, &ctx);
+}
+
+template<typename CharT>
+static err_t FOG_CDECL StringT_opU32(CharT_(String)* self, uint32_t cntOp, uint32_t n)
+{
+  char nBuffer[32];
+  char* nPtr = nBuffer + FOG_ARRAY_SIZE(nBuffer);
+
+  uint32_t u = n;
+  do {
+    uint32_t uDiv = u / 10;
+    uint32_t uRem = u % 10;
+
+    *--nPtr = (unsigned char)'0' + (unsigned char)(uRem);
+    u = uDiv;
+  } while (u != 0);
+
+  size_t nLength = (size_t)(nBuffer + FOG_ARRAY_SIZE(nBuffer) - nPtr);
+  CharT* dst = self->_prepare(cntOp, nLength);
+
+  if (FOG_IS_NULL(dst))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  StringT_chcopy(dst, nPtr, nLength);
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL StringA_opU32Ex(StringA* self, uint32_t cntOp, uint32_t n, const FormatInt* fmt)
+{
+  NTOAContext ctx;
+  StringUtil::utoa(&ctx, n, fmt->getBase(), (fmt->getFlags() & STRING_FORMAT_CAPITALIZE) ? TEXT_CASE_UPPER : TEXT_CASE_LOWER);
+
+  return StringT_appendNTOA<char>(self, cntOp, n, fmt, &ctx);
+}
+
+static err_t FOG_CDECL StringW_opU32Ex(StringW* self, uint32_t cntOp, uint32_t n, const FormatInt* fmt, const Locale* locale)
+{
+  NTOAContext ctx;
+  StringUtil::utoa(&ctx, n, fmt->getBase(), (fmt->getFlags() & STRING_FORMAT_CAPITALIZE) ? TEXT_CASE_UPPER : TEXT_CASE_LOWER);
+
+  return StringW_appendNTOA(self, cntOp, n, fmt, locale, &ctx);
+}
+
+template<typename CharT>
+static err_t FOG_CDECL StringT_opI64(CharT_(String)* self, uint32_t cntOp, int64_t n)
+{
+  char nBuffer[32];
+  char* nPtr = nBuffer + FOG_ARRAY_SIZE(nBuffer);
+
+  uint64_t u = (n >= 0) ? n : -n;
+  do {
+    uint64_t uDiv = u / FOG_UINT64_C(10);
+    uint64_t uRem = u % FOG_UINT64_C(10);
+
+    *--nPtr = (unsigned char)'0' + (unsigned char)(uRem);
+    u = uDiv;
+  } while (u != 0);
+
+  if (n < 0)
+    *--nPtr = '-';
+
+  size_t nLength = (size_t)(nBuffer + FOG_ARRAY_SIZE(nBuffer) - nPtr);
+  CharT* dst = self->_prepare(cntOp, nLength);
+
+  if (FOG_IS_NULL(dst))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  StringT_chcopy(dst, nPtr, nLength);
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL StringA_opI64Ex(StringA* self, uint32_t cntOp, int64_t n, const FormatInt* fmt)
+{
+  NTOAContext ctx;
+  StringUtil::itoa(&ctx, n, fmt->getBase(), (fmt->getFlags() & STRING_FORMAT_CAPITALIZE) ? TEXT_CASE_UPPER : TEXT_CASE_LOWER);
+
+  return StringT_appendNTOA<char>(self, cntOp, n, fmt, &ctx);
+}
+
+static err_t FOG_CDECL StringW_opI64Ex(StringW* self, uint32_t cntOp, int64_t n, const FormatInt* fmt, const Locale* locale)
+{
+  NTOAContext ctx;
+  StringUtil::itoa(&ctx, n, fmt->getBase(), (fmt->getFlags() & STRING_FORMAT_CAPITALIZE) ? TEXT_CASE_UPPER : TEXT_CASE_LOWER);
+
+  return StringW_appendNTOA(self, cntOp, n, fmt, locale, &ctx);
+}
+
+template<typename CharT>
+static err_t FOG_CDECL StringT_opU64(CharT_(String)* self, uint32_t cntOp, uint64_t n)
+{
+  char nBuffer[32];
+  char* nPtr = nBuffer + FOG_ARRAY_SIZE(nBuffer);
+
+  uint64_t u = n;
+  do {
+    uint64_t uDiv = u / FOG_UINT64_C(10);
+    uint64_t uRem = u % FOG_UINT64_C(10);
+
+    *--nPtr = (unsigned char)'0' + (unsigned char)(uRem);
+    u = uDiv;
+  } while (u != 0);
+
+  size_t nLength = (size_t)(nBuffer + FOG_ARRAY_SIZE(nBuffer) - nPtr);
+  CharT* dst = self->_prepare(cntOp, nLength);
+
+  if (FOG_IS_NULL(dst))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  StringT_chcopy(dst, nPtr, nLength);
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL StringA_opU64Ex(StringA* self, uint32_t cntOp, uint64_t n, const FormatInt* fmt)
+{
+  NTOAContext ctx;
+  StringUtil::utoa(&ctx, n, fmt->getBase(), (fmt->getFlags() & STRING_FORMAT_CAPITALIZE) ? TEXT_CASE_UPPER : TEXT_CASE_LOWER);
+
+  return StringT_appendNTOA<char>(self, cntOp, n, fmt, &ctx);
+}
+
+static err_t FOG_CDECL StringW_opU64Ex(StringW* self, uint32_t cntOp, uint64_t n, const FormatInt* fmt, const Locale* locale)
+{
+  NTOAContext ctx;
+  StringUtil::utoa(&ctx, n, fmt->getBase(), (fmt->getFlags() & STRING_FORMAT_CAPITALIZE) ? TEXT_CASE_UPPER : TEXT_CASE_LOWER);
+
+  return StringW_appendNTOA(self, cntOp, n, fmt, locale, &ctx);
 }
 
 // ============================================================================
-// [Fog::String::Set]
+// [Fog::String - OpFloat / OpDouble]
 // ============================================================================
 
-err_t String::set(Char ch, size_t length)
+#if 0
+template<typename CharT>
+static CharT* StringT_appendExponent(CharT* dest, uint exp, CharT zero)
 {
-  if (length == DETECT_LENGTH) return ERR_RT_INVALID_ARGUMENT;
+  uint t;
 
-  Char* p = _prepareSet(this, length);
-  if (FOG_IS_NULL(p)) return ERR_RT_OUT_OF_MEMORY;
+  if (exp > 99)
+  {
+    t = exp / 100;
+    *dest++ = zero + CharT(t); exp -= t * 100;
+  }
 
-  StringUtil::fill(p, ch, length);
-  return ERR_OK;
+  t = exp / 10;
+  *dest++ = zero + CharT(t);
+
+  exp -= t * 10;
+  *dest++ = zero + CharT(exp);
+
+  return dest;
 }
 
-err_t String::set(const Ascii8& str)
+err_t StringA::appendDouble(double d, int doubleForm, const FormatParams& ff)
 {
-  const char* sData = str.getData();
-  size_t sLength = str.getComputedLength();
+  err_t err = ERR_OK;
 
-  Char* p = _prepareSet(this, sLength);
-  if (FOG_IS_NULL(p)) return ERR_RT_OUT_OF_MEMORY;
-
-  StringUtil::copy(p, sData, sLength);
-  return ERR_OK;
-}
-
-err_t String::set(const Utf16& str)
-{
-  const Char* sData = str.getData();
-  size_t sLength = str.getComputedLength();
-
-  Char* p = _prepareSet(this, sLength);
-  if (FOG_IS_NULL(p)) return ERR_RT_OUT_OF_MEMORY;
-
-  StringUtil::copy(p, sData, sLength);
-  return ERR_OK;
-}
-
-err_t String::set(const String& other)
-{
-  StringData* self_d = _d;
-  StringData* other_d = other._d;
-  if (self_d == other_d) return ERR_OK;
-
-  atomicPtrXchg(&_d, other_d->ref())->deref();
-  return ERR_OK;
-}
-
-err_t String::set(const void* str, size_t size, const TextCodec& tc)
-{
-  return tc.decode(*this, Stub8((const char*)str, size), NULL, CONTAINER_OP_REPLACE);
-}
-
-err_t String::setUtf8(const char* s, size_t length)
-{
-  clear();
-  return appendUtf8(s, length);
-}
-
-err_t String::setUtf32(const uint32_t* s, size_t length)
-{
-  clear();
-  return appendUtf32(s, length);
-}
-
-err_t String::setDeep(const String& other)
-{
-  StringData* self_d = _d;
-  StringData* other_d = other._d;
-  if (self_d == other_d) return ERR_OK;
-
-  Char* p = _prepareSet(this, other_d->length);
-  if (FOG_IS_NULL(p)) return ERR_RT_OUT_OF_MEMORY;
-
-  StringUtil::copy(p, other.getData(), other.getLength());
-  return ERR_OK;
-}
-
-err_t String::setBool(bool b)
-{
-  return set(Ascii8(b ? "true" : "false"));
-}
-
-err_t String::setInt(int32_t n, int base)
-{
-  clear();
-  return appendInt((int64_t)n, base, FormatFlags());
-}
-
-err_t String::setInt(uint32_t n, int base)
-{
-  clear();
-  return appendInt((uint64_t)n, base, FormatFlags());
-}
-
-err_t String::setInt(int64_t n, int base)
-{
-  clear();
-  return appendInt(n, base, FormatFlags());
-}
-
-err_t String::setInt(uint64_t n, int base)
-{
-  clear();
-  return appendInt(n, base, FormatFlags());
-}
-
-err_t String::setInt(int32_t n, int base, const FormatFlags& ff, const Locale* locale)
-{
-  clear();
-  return appendInt((int64_t)n, base, ff, locale);
-}
-
-err_t String::setInt(uint32_t n, int base, const FormatFlags& ff, const Locale* locale)
-{
-  clear();
-  return appendInt((uint64_t)n, base, ff, locale);
-}
-
-err_t String::setInt(int64_t n, int base, const FormatFlags& ff, const Locale* locale)
-{
-  clear();
-  return appendInt(n, base, ff, locale);
-}
-
-err_t String::setInt(uint64_t n, int base, const FormatFlags& ff, const Locale* locale)
-{
-  clear();
-  return appendInt(n, base, ff, locale);
-}
-
-err_t String::setDouble(double d, int doubleForm)
-{
-  clear();
-  return appendDouble(d, doubleForm, FormatFlags());
-}
-
-err_t String::setDouble(double d, int doubleForm, const FormatFlags& ff, const Locale* locale)
-{
-  clear();
-  return appendDouble(d, doubleForm, ff, locale);
-}
-
-err_t String::format(const char* fmt, ...)
-{
-  va_list ap;
-  va_start(ap, fmt);
-
-  clear();
-  err_t err = appendVformat(fmt, ap);
-
-  va_end(ap);
-  return err;
-}
-
-err_t String::vformat(const char* fmt, va_list ap)
-{
-  clear();
-  return appendVformat(fmt, ap);
-}
-
-err_t String::wformat(const String& fmt, Char lex, const List<String>& args)
-{
-  clear();
-  return appendWformat(fmt, lex, args.getData(), args.getLength());
-}
-
-err_t String::wformat(const String& fmt, Char lex, const String* args, size_t length)
-{
-  clear();
-  return appendWformat(fmt, lex, args, length);
-}
-
-// ============================================================================
-// [Fog::String::Append]
-// ============================================================================
-
-static err_t append_ntoa(String* self, uint64_t n, int base, const FormatFlags& ff, const Locale* locale, StringUtil::NTOAOut* out)
-{
-  const Locale& l = locale ? *locale : Locale::posix();
-
-  Char prefixBuffer[4];
-  Char* prefix = prefixBuffer;
+  StringUtil::NTOAOut out;
 
   size_t width = ff.width;
   size_t precision = ff.precision;
   uint32_t fmt = ff.flags;
 
-  if (out->negative)
-    *prefix++ = l.getChar(LOCALE_CHAR_MINUS);
-  else if (fmt & FORMAT_SHOW_SIGN)
-    *prefix++ = l.getChar(LOCALE_CHAR_PLUS);
-  else if (fmt & FORMAT_BLANK_POSITIVE)
-    *prefix++ = l.getChar(LOCALE_CHAR_SPACE);
+  size_t beginLength = _d->length;
+  size_t numberLength;
+  size_t i;
+  size_t savedPrecision = precision;
+  int decpt;
 
-  if (fmt & FORMAT_ALTERNATE_FORM)
+  char* bufCur;
+  char* bufEnd;
+
+  char* dest;
+  char sign = 0;
+
+  if (precision == NO_PRECISION) precision = 6;
+
+  if (d < 0.0)
+    { sign = '-'; d = -d; }
+  else if (fmt & STRING_FORMAT_SIGN)
+    sign = '+';
+  else if (fmt & FORMAT_FORMAT_BLANK)
+    sign = ' ';
+
+  if (sign != 0) append(sign);
+
+  // Decimal form.
+  if (doubleForm == DF_DECIMAL)
   {
-    if (base == 8)
+    StringUtil::dtoa(d, 3, (uint32_t)precision, &out);
+
+    decpt = out.decpt;
+    if (out.decpt == 9999) goto _InfOrNaN;
+
+    bufCur = out.result;
+    bufEnd = bufCur + out.length;
+
+    // Reserve some space for number.
+    i = precision + 16;
+    if (decpt > 0) i += (size_t)decpt;
+
+    dest = beginManipulation(i, CONTAINER_OP_APPEND);
+    if (FOG_IS_NULL(dest)) { err = ERR_RT_OUT_OF_MEMORY; goto _Ret; }
+
+    while (bufCur != bufEnd && decpt > 0) { *dest++ = *bufCur++; decpt--; }
+    // Even if not in buffer.
+    while (decpt > 0) { *dest++ = '0'; decpt--; }
+
+    if ((fmt & STRING_FORMAT_ALTERNATE) != 0 || bufCur != bufEnd || precision > 0)
     {
-      if (n != 0) { out->result--; *(out->result) = '0'; out->length++; }
-    }
-    else if (base == 16)
-    {
-      *prefix++ = '0';
-      *prefix++ = (fmt & FORMAT_CAPITALIZE_E_OR_X) ? 'X' : 'x';
-    }
-  }
+      if (bufCur == out.result) *dest++ = '0';
+      *dest++ = '.';
+      while (decpt < 0 && precision > 0) { *dest++ = '0'; decpt++; precision--; }
 
-  size_t prefixLength = (size_t)(prefix - prefixBuffer);
-  size_t resultLength = out->length;
-
-  if (width == NO_WIDTH) width = 0;
-  if ((fmt & FORMAT_ZERO_PADDED) &&
-      precision == NO_PRECISION &&
-      width > prefixLength + resultLength) precision = width - prefixLength;
-  if (precision == NO_PRECISION) precision = 0;
-
-  size_t fillLength = (resultLength < precision) ? precision - resultLength : 0;
-  size_t fullLength = prefixLength + resultLength + fillLength;
-  size_t widthLength = (fullLength < width) ? width - fullLength : 0;
-
-  fullLength += widthLength;
-
-  Char* p = _prepareAppend(self, fullLength);
-  if (FOG_IS_NULL(p)) return ERR_RT_OUT_OF_MEMORY;
-
-  // Left justification
-  if (!(fmt & FORMAT_LEFT_ADJUSTED))
-  {
-    StringUtil::fill(p, Char(' '), widthLength); p += widthLength;
-  }
-
-  // Number with prefix and precision
-  StringUtil::copy(p, prefixBuffer, prefixLength); p += prefixLength;
-
-  // Body
-  Char zero = l.getChar(LOCALE_CHAR_ZERO);
-
-  if (base == 10 && zero != Char('0'))
-  {
-    StringUtil::fill(p, zero, fillLength); p += fillLength;
-    for (size_t i = 0; i != resultLength; i++)
-      p[i] = zero + Char((uint8_t)out->result[i] - (uint8_t)'0');
-    p += resultLength;
-  }
-  else
-  {
-    StringUtil::fill(p, Char('0'), fillLength); p += fillLength;
-    StringUtil::copy(p, out->result, resultLength); p += resultLength;
-  }
-
-  // Right justification
-  if (fmt & FORMAT_LEFT_ADJUSTED)
-  {
-    StringUtil::fill(p, Char(' '), widthLength);
-  }
-
-  return ERR_OK;
-}
-
-static Char* append_exponent(Char* dest, uint exp, Char zero)
-{
-  uint t;
-
-  if (exp > 99) { t = exp / 100; *dest++ = zero + Char(t); exp -= t * 100; }
-  t = exp / 10; *dest++ = zero + Char(t); exp -= t * 10;
-  *dest++ = zero + Char(exp);
-
-  return dest;
-}
-
-err_t String::append(Char ch, size_t length)
-{
-  if (length == DETECT_LENGTH) return ERR_RT_INVALID_ARGUMENT;
-
-  Char* p = _prepareAppend(this, length);
-  if (FOG_IS_NULL(p)) return ERR_RT_OUT_OF_MEMORY;
-
-  StringUtil::fill(p, ch, length);
-  return ERR_OK;
-}
-
-err_t String::append(const Ascii8& str)
-{
-  const char* sData = str.getData();
-  size_t sLength = str.getComputedLength();
-
-  Char* p = _prepareAppend(this, sLength);
-  if (FOG_IS_NULL(p)) return ERR_RT_OUT_OF_MEMORY;
-
-  StringUtil::copy(p, sData, sLength);
-  return ERR_OK;
-}
-
-err_t String::append(const Utf16& str)
-{
-  const Char* sData = str.getData();
-  size_t sLength = str.getComputedLength();
-
-  Char* p = _prepareAppend(this, sLength);
-  if (FOG_IS_NULL(p)) return ERR_RT_OUT_OF_MEMORY;
-
-  StringUtil::copy(p, sData, sLength);
-  return ERR_OK;
-}
-
-err_t String::append(const String& _other)
-{
-  if (getLength() == 0) return set(_other);
-
-  String other(_other);
-
-  Char* p = _prepareAppend(this, other.getLength());
-  if (FOG_IS_NULL(p)) return ERR_RT_OUT_OF_MEMORY;
-
-  StringUtil::copy(p, other.getData(), other.getLength());
-  return ERR_OK;
-}
-
-err_t String::append(const void* str, size_t size, const TextCodec& tc)
-{
-  return tc.decode(*this, Stub8(reinterpret_cast<const char*>(str), size), NULL, CONTAINER_OP_APPEND);
-}
-
-err_t String::appendUtf8(const char* str, size_t length)
-{
-  if (length == DETECT_LENGTH) length = StringUtil::len(str);
-  if (length == 0) return ERR_OK;
-
-  size_t i = length;
-
-  err_t err;
-  if ((err = reserve(getLength() + i))) return err;
-
-  Char* dstCur = _d->data + _d->length;
-
-  while (i)
-  {
-    uint32_t uc = (uint8_t)*str;
-    uint32_t utf8Size = Unicode::utf8GetSize(uc);
-
-    if (FOG_UNLIKELY(i < utf8Size))
-    {
-      err = ERR_STRING_TRUNCATED;
-      goto _End;
+      // Print rest of stuff.
+      while (bufCur != bufEnd && precision > 0) { *dest++ = *bufCur++; precision--; }
+      // And trailing zeros.
+      while (precision > 0) { *dest++ = '0'; precision--; }
     }
 
-    switch (utf8Size)
-    {
-      // Invalid UTF-8 Sequence.
-      case 0:
-        err = ERR_STRING_INVALID_UTF8;
-        goto _End;
-      case 1:
-        break;
-      case 2:
-        uc = ((uc - 192U) <<  6U) | (uint32_t((uint8_t)str[1]) - 128U);
-        break;
-      case 3:
-        uc = ((uc - 224U) << 12U) | ((uint32_t((uint8_t)str[1]) - 128U) <<  6)
-                                  | ((uint32_t((uint8_t)str[2]) - 128U)      );
- 
-        // Remove the UTF8-BOM.
-        if (FOG_UNLIKELY(uc == 0xFEFF)) goto _Continue;
+    _modified(dest);
+  }
+  // Exponential form.
+  else if (doubleForm == DF_EXPONENT)
+  {
+_ExponentialForm:
+    StringUtil::dtoa(d, 2, precision + 1, &out);
 
-        break;
-      case 4:
-        uc = ((uc - 240U) << 24U) | ((uint32_t((uint8_t)str[1]) - 128U) << 12)
-                                  | ((uint32_t((uint8_t)str[2]) - 128U) <<  6)
-                                  | ((uint32_t((uint8_t)str[3]) - 128U)      );
-        break;
-      default:
-        err = ERR_STRING_INVALID_UTF8;
-        goto _End;
+    decpt = out.decpt;
+    if (decpt == 9999) goto _InfOrNaN;
+
+    // Reserve some space for number, we need +X.{PRECISION}e+123
+    dest = beginManipulation(precision + 10, CONTAINER_OP_APPEND);
+    if (FOG_IS_NULL(dest)) { err = ERR_RT_OUT_OF_MEMORY; goto _Ret; }
+
+    bufCur = out.result;
+    bufEnd = bufCur + out.length;
+
+    *dest++ = *bufCur++;
+    if ((fmt & STRING_FORMAT_ALTERNATE) != 0 || precision > 0)
+    {
+      if (bufCur != bufEnd || doubleForm == DF_EXPONENT) *dest++ = '.';
+    }
+    while (bufCur != bufEnd && precision > 0)
+    {
+      *dest++ = *bufCur++;
+      precision--;
     }
 
-    if (uc >= 0x10000U && uc <= UNICODE_MAX)
+    // Add trailing zeroes to fill out to ndigits unless this is
+    // DF_SIGNIFICANT_DIGITS.
+    if (doubleForm == DF_EXPONENT)
     {
-      Char::ucs4ToSurrogate(&dstCur[0], &dstCur[1], uc);
-      dstCur += 2;
+      for (i = precision; i; i--) *dest++ = '0';
     }
-    else if (Char::isSurrogate(uc) && uc >= 0xFFFE)
+
+    // Add the exponent.
+    if (doubleForm == DF_EXPONENT || decpt > 1)
     {
-      err = ERR_STRING_INVALID_CHAR;
-      break;
+      *dest++ = (ff.flags & STRING_FORMAT_CAPITALIZE_E_OR_X) ? 'E' : 'e';
+      decpt--;
+      if (decpt < 0)
+        { *dest++ = '-'; decpt = -decpt; }
+      else
+        *dest++ = '+';
+
+      dest = StringT_appendExponent(dest, decpt, '0');
+    }
+
+    _modified(dest);
+  }
+  // Significant digits form.
+  else /* if (doubleForm == DF_SIGNIFICANT_DIGITS) */
+  {
+    char* save;
+    if (d <= 0.0001 || d >= StringUtil::_mprec_log10(precision))
+    {
+      if (precision > 0) precision--;
+      goto _ExponentialForm;
+    }
+
+    if (d < 1.0)
+    {
+      // What we want is ndigits after the point.
+      StringUtil::dtoa(d, 3, precision, &out);
     }
     else
     {
-      *dstCur++ = (uint16_t)uc;
+      StringUtil::dtoa(d, 2, precision, &out);
     }
 
-_Continue:
-    str += utf8Size;
-    i -= utf8Size;
+    decpt = out.decpt;
+    if (decpt == 9999) goto _InfOrNaN;
+
+    // Reserve some space for number.
+    i = precision + 16;
+    if (decpt > 0) i += (size_t)decpt;
+
+    dest = beginManipulation(i, CONTAINER_OP_APPEND);
+    if (FOG_IS_NULL(dest)) { err = ERR_RT_OUT_OF_MEMORY; goto _Ret; }
+
+    save = dest;
+
+    bufCur = out.result;
+    bufEnd = bufCur + out.length;
+
+    while (bufCur != bufEnd && decpt > 0) { *dest++ = *bufCur++; decpt--; precision--; }
+    // Even if not in buffer.
+    while (decpt > 0 && precision > 0) { *dest++ = '0'; decpt--; precision--; }
+
+    if ((fmt & STRING_FORMAT_ALTERNATE) != 0 || bufCur != bufEnd)
+    {
+      if (dest == save) *dest++ = '0';
+      *dest++ = '.';
+      while (decpt < 0 && precision > 0) { *dest++ = '0'; decpt++; precision--; }
+
+      // Print rest of stuff.
+      while (bufCur != bufEnd && precision > 0){ *dest++ = *bufCur++; precision--; }
+      // And trailing zeros.
+      // while (precision > 0) { *dest++ = '0'; precision--; }
+    }
+
+    _modified(dest);
   }
-_End:
-  finishDataX(dstCur);
-  return err;
-}
+  goto _Ret;
 
-err_t String::appendUtf32(const uint32_t* str, size_t length)
-{
-  if (length == DETECT_LENGTH) length = StringUtil::len(str);
-  if (length == 0) return ERR_OK;
-
-  size_t i = length;
-  err_t err;
-
-  Char* dstCur;
-  Char* dstEnd;
-
-reallocBuffer:
-  if ((err = reserve(getLength() + i + (i >> 2) + 4))) return err;
-
-  dstCur = _d->data + _d->length;
-  dstEnd = _d->data + _d->capacity - 1;
-
-  while (i)
+_InfOrNaN:
+  err |= append(StubA((const char*)out.result, out.length));
+_Ret:
+  // Apply padding.
+  numberLength = _d->length - beginLength;
+  if (width != (size_t)-1 && width > numberLength)
   {
-    uint32_t uc = *str;
+    size_t fill = width - numberLength;
 
-    if (uc >= 0x10000U && uc <= UNICODE_MAX)
+    if ((fmt & STRING_FORMAT_LEFT) == 0)
     {
-      Char::ucs4ToSurrogate(&dstCur[0], &dstCur[1], uc);
-      dstCur += 2;
-    }
-    else if (Char::isSurrogate(uc) && uc >= 0xFFFE)
-    {
-      err = ERR_STRING_INVALID_CHAR;
-      break;
+      if (savedPrecision == NO_PRECISION)
+        err |= insert(beginLength + (sign != 0), '0', fill);
+      else
+        err |= insert(beginLength, ' ', fill);
     }
     else
     {
-      *dstCur++ = (uint16_t)uc;
+      err |= append(' ', fill);
     }
-
-    str++;
-    i--;
-    if (dstCur >= dstEnd) goto reallocBuffer;
   }
-
-  finishDataX(dstCur);
   return err;
 }
 
-err_t String::appendBool(bool b)
-{
-  return append(Ascii8(b ? "true" : "false"));
-}
-
-err_t String::appendInt(int32_t n, int base)
-{
-  return appendInt((int64_t)n, base, FormatFlags());
-}
-
-err_t String::appendInt(uint32_t n, int base)
-{
-  return appendInt((uint64_t)n, base, FormatFlags());
-}
-
-err_t String::appendInt(int64_t n, int base)
-{
-  return appendInt(n, base, FormatFlags());
-}
-
-err_t String::appendInt(uint64_t n, int base)
-{
-  return appendInt(n, base, FormatFlags());
-}
-
-err_t String::appendInt(int32_t n, int base, const FormatFlags& ff, const Locale* locale)
-{
-  return appendInt((int64_t)n, base, ff, locale);
-}
-
-err_t String::appendInt(uint32_t n, int base, const FormatFlags& ff, const Locale* locale)
-{
-  return appendInt((uint64_t)n, base, ff, locale);
-}
-
-err_t String::appendInt(int64_t n, int base, const FormatFlags& ff, const Locale* locale)
-{
-  StringUtil::NTOAOut out;
-  StringUtil::itoa(n, base, (ff.flags & FORMAT_CAPITALIZE) != 0, &out);
-
-  return append_ntoa(this, (uint64_t)n, base, ff, locale, &out);
-}
-
-err_t String::appendInt(uint64_t n, int base, const FormatFlags& ff, const Locale* locale)
-{
-  StringUtil::NTOAOut out;
-  StringUtil::utoa(n, base, (ff.flags & FORMAT_CAPITALIZE) != 0, &out);
-
-  return append_ntoa(this, n, base, ff, locale, &out);
-}
-
-err_t String::appendDouble(double d, int doubleForm)
-{
-  return appendDouble(d, doubleForm, FormatFlags());
-}
-
-// Defined in StringUtil.cpp;
-namespace StringUtil { FOG_NO_EXPORT double _mprec_log10(int dig); }
-
-err_t String::appendDouble(double d, int doubleForm, const FormatFlags& ff, const Locale* locale)
+err_t StringW::appendDouble(double d, int doubleForm, const FormatParams& ff, const Locale* locale)
 {
   err_t err = ERR_OK;
   const Locale& l = locale ? *locale : Locale::posix();
@@ -1000,17 +1441,17 @@ err_t String::appendDouble(double d, int doubleForm, const FormatFlags& ff, cons
   uint8_t* bufCur;
   uint8_t* bufEnd;
 
-  Char* dest;
-  Char sign = Char('\0');
-  Char zero = l.getChar(LOCALE_CHAR_ZERO) - Char('0');
+  CharW* dest;
+  CharW sign = CharW('\0');
+  CharW zero = l.getChar(LOCALE_CHAR_ZERO) - CharW('0');
 
   if (precision == NO_PRECISION) precision = 6;
 
   if (d < 0.0)
     { sign = l.getChar(LOCALE_CHAR_MINUS); d = -d; }
-  else if (fmt & FORMAT_SHOW_SIGN)
+  else if (fmt & STRING_FORMAT_SIGN)
     sign = l.getChar(LOCALE_CHAR_PLUS);
-  else if (fmt & FORMAT_BLANK_POSITIVE)
+  else if (fmt & FORMAT_FORMAT_BLANK)
     sign = l.getChar(LOCALE_CHAR_SPACE);
 
   if (sign) append(sign);
@@ -1021,7 +1462,7 @@ err_t String::appendDouble(double d, int doubleForm, const FormatFlags& ff, cons
     StringUtil::dtoa(d, 3, precision, &out);
 
     decpt = out.decpt;
-    if (out.decpt == 9999) goto __InfOrNaN;
+    if (out.decpt == 9999) goto _InfOrNaN;
 
     bufCur = reinterpret_cast<uint8_t*>(out.result);
     bufEnd = bufCur + out.length;
@@ -1031,44 +1472,44 @@ err_t String::appendDouble(double d, int doubleForm, const FormatFlags& ff, cons
     if (decpt > 0) i += (size_t)decpt;
 
     dest = beginManipulation(i, CONTAINER_OP_APPEND);
-    if (FOG_IS_NULL(dest)) { err = ERR_RT_OUT_OF_MEMORY; goto __ret; }
+    if (FOG_IS_NULL(dest)) { err = ERR_RT_OUT_OF_MEMORY; goto _Ret; }
 
-    while (bufCur != bufEnd && decpt > 0) { *dest++ = zero + Char(*bufCur++); decpt--; }
+    while (bufCur != bufEnd && decpt > 0) { *dest++ = zero + CharW(*bufCur++); decpt--; }
     // Even if not in buffer.
-    while (decpt > 0) { *dest++ = zero + Char('0'); decpt--; }
+    while (decpt > 0) { *dest++ = zero + CharW('0'); decpt--; }
 
-    if ((fmt & FORMAT_ALTERNATE_FORM) != 0 || bufCur != bufEnd || precision > 0)
+    if ((fmt & STRING_FORMAT_ALTERNATE) != 0 || bufCur != bufEnd || precision > 0)
     {
-      if (bufCur == reinterpret_cast<uint8_t*>(out.result)) *dest++ = zero + Char('0');
+      if (bufCur == reinterpret_cast<uint8_t*>(out.result)) *dest++ = zero + CharW('0');
       *dest++ = l.getChar(LOCALE_CHAR_DECIMAL_POINT);
-      while (decpt < 0 && precision > 0) { *dest++ = zero + Char('0'); decpt++; precision--; }
+      while (decpt < 0 && precision > 0) { *dest++ = zero + CharW('0'); decpt++; precision--; }
 
       // Print rest of stuff.
-      while (*bufCur && precision > 0) { *dest++ = zero + Char(*bufCur++); precision--; }
+      while (*bufCur && precision > 0) { *dest++ = zero + CharW(*bufCur++); precision--; }
       // And trailing zeros.
-      while (precision > 0) { *dest++ = zero + Char('0'); precision--; }
+      while (precision > 0) { *dest++ = zero + CharW('0'); precision--; }
     }
 
-    finishDataX(dest);
+    _modified(dest);
   }
   // Exponential form.
   else if (doubleForm == DF_EXPONENT)
   {
-__exponentialForm:
+_ExponentialForm:
     StringUtil::dtoa(d, 2, precision + 1, &out);
 
     decpt = out.decpt;
-    if (decpt == 9999) goto __InfOrNaN;
+    if (decpt == 9999) goto _InfOrNaN;
 
     // Reserve some space for number, we need +X.{PRECISION}e+123
     dest = beginManipulation(precision + 10, CONTAINER_OP_APPEND);
-    if (FOG_IS_NULL(dest)) { err = ERR_RT_OUT_OF_MEMORY; goto __ret; }
+    if (FOG_IS_NULL(dest)) { err = ERR_RT_OUT_OF_MEMORY; goto _Ret; }
 
     bufCur = reinterpret_cast<uint8_t*>(out.result);
     bufEnd = bufCur + out.length;
 
-    *dest++ = zero + Char(*bufCur++);
-    if ((fmt & FORMAT_ALTERNATE_FORM) != 0 || precision > 0)
+    *dest++ = zero + CharW(*bufCur++);
+    if ((fmt & STRING_FORMAT_ALTERNATE) != 0 || precision > 0)
     {
       if (bufCur != bufEnd || doubleForm == DF_EXPONENT)
         *dest++ = l.getChar(LOCALE_CHAR_DECIMAL_POINT);
@@ -1076,7 +1517,7 @@ __exponentialForm:
 
     while (bufCur != bufEnd && precision > 0)
     {
-      *dest++ = zero + Char(*bufCur++);
+      *dest++ = zero + CharW(*bufCur++);
       precision--;
     }
 
@@ -1084,7 +1525,7 @@ __exponentialForm:
     // DF_SIGNIFICANT_DIGITS.
     if (doubleForm == DF_EXPONENT)
     {
-      for (i = precision; i; i--) *dest++ = zero + Char('0');
+      for (i = precision; i; i--) *dest++ = zero + CharW('0');
     }
 
     // Add the exponent.
@@ -1097,19 +1538,19 @@ __exponentialForm:
       else
         *dest++ = l.getChar(LOCALE_CHAR_PLUS);
 
-      dest = append_exponent(dest, decpt, zero + Char('0'));
+      dest = StringT_appendExponent(dest, decpt, zero + CharW('0'));
     }
 
-    finishDataX(dest);
+    _modified(dest);
   }
   // Significant digits form.
-  else /* if (doubleForm == DF_SIGNIFICANT_DIGITS) */
+  else // if (doubleForm == DF_SIGNIFICANT_DIGITS)
   {
-    Char* save;
+    CharW* save;
     if (d <= 0.0001 || d >= StringUtil::_mprec_log10(precision))
     {
       if (precision > 0) precision--;
-      goto __exponentialForm;
+      goto _ExponentialForm;
     }
 
     if (d < 1.0)
@@ -1123,488 +1564,603 @@ __exponentialForm:
     }
 
     decpt = out.decpt;
-    if (decpt == 9999) goto __InfOrNaN;
+    if (decpt == 9999) goto _InfOrNaN;
 
     // Reserve some space for number.
     i = precision + 16;
     if (decpt > 0) i += (size_t)decpt;
 
     dest = beginManipulation(i, CONTAINER_OP_APPEND);
-    if (FOG_IS_NULL(dest)) { err = ERR_RT_OUT_OF_MEMORY; goto __ret; }
+    if (FOG_IS_NULL(dest)) { err = ERR_RT_OUT_OF_MEMORY; goto _Ret; }
 
     save = dest;
 
     bufCur = reinterpret_cast<uint8_t*>(out.result);
     bufEnd = bufCur + out.length;
 
-    while (bufCur != bufEnd && decpt > 0) { *dest++ = zero + Char(*bufCur++); decpt--; precision--; }
+    while (bufCur != bufEnd && decpt > 0) { *dest++ = zero + CharW(*bufCur++); decpt--; precision--; }
     // Even if not in buffer.
-    while (decpt > 0 && precision > 0) { *dest++ = zero + Char('0'); decpt--; precision--; }
+    while (decpt > 0 && precision > 0) { *dest++ = zero + CharW('0'); decpt--; precision--; }
 
-    if ((fmt & FORMAT_ALTERNATE_FORM) != 0 || bufCur != bufEnd)
+    if ((fmt & STRING_FORMAT_ALTERNATE) != 0 || bufCur != bufEnd)
     {
-      if (dest == save) *dest++ = zero + Char('0');
+      if (dest == save) *dest++ = zero + CharW('0');
       *dest++ = l.getChar(LOCALE_CHAR_DECIMAL_POINT);
-      while (decpt < 0 && precision > 0) { *dest++ = zero + Char('0'); decpt++; precision--; }
+      while (decpt < 0 && precision > 0) { *dest++ = zero + CharW('0'); decpt++; precision--; }
 
       // Print rest of stuff.
-      while (bufCur != bufEnd && precision > 0){ *dest++ = zero + Char(*bufCur++); precision--; }
+      while (bufCur != bufEnd && precision > 0){ *dest++ = zero + CharW(*bufCur++); precision--; }
       // And trailing zeros.
-      // while (precision > 0) { *dest++ = zero + Char('0'); precision--; }
+      // while (precision > 0) { *dest++ = zero + CharW('0'); precision--; }
     }
 
-    finishDataX(dest);
+    _modified(dest);
   }
-  goto __ret;
+  goto _Ret;
 
-__InfOrNaN:
+_InfOrNaN:
   err |= append(Ascii8((const char*)out.result, out.length));
-__ret:
+
+_Ret:
   // Apply padding.
   numberLength = _d->length - beginLength;
   if (width != (size_t)-1 && width > numberLength)
   {
     size_t fill = width - numberLength;
 
-    if ((fmt & FORMAT_LEFT_ADJUSTED) == 0)
+    if ((fmt & STRING_FORMAT_LEFT) == 0)
     {
       if (savedPrecision == NO_PRECISION)
-        err |= insert(beginLength + !sign.isNull(), zero + Char('0'), fill);
+        err |= insert(beginLength + !sign.isNull(), zero + CharW('0'), fill);
       else
-        err |= insert(beginLength, Char(' '), fill);
+        err |= insert(beginLength, CharW(' '), fill);
     }
     else
     {
-      err |= append(Char(' '), fill);
+      err |= append(CharW(' '), fill);
     }
   }
   return err;
 }
+#endif
 
-err_t String::appendFormat(const char* fmt, ...)
+static err_t FOG_CDECL StringA_opDouble(StringA* self, uint32_t cntOp, double d)
 {
-  FOG_ASSERT(fmt);
-
-  va_list ap;
-  va_start(ap, fmt);
-  err_t err = appendVformat(fmt, ap);
-  va_end(ap);
-
-  return err;
+  return _api.stringa.opDoubleEx(self, cntOp, d, NULL);
 }
 
-err_t String::appendVformat(const char* fmt, va_list ap)
+static err_t FOG_CDECL StringW_opDouble(StringW* self, uint32_t cntOp, double d)
 {
-#define __VFORMAT_PARSE_NUMBER(_Ptr_, _Out_)         \
-  {                                                  \
-    /* ----- Clean-up ----- */                       \
+  return _api.stringw.opDoubleEx(self, cntOp, d, NULL, NULL);
+}
+
+static err_t FOG_CDECL StringA_opDoubleEx(StringA* self, uint32_t cntOp, double d, const FormatReal* fmt)
+{
+  // TODO:
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+static err_t FOG_CDECL StringW_opDoubleEx(StringW* self, uint32_t cntOp, double d, const FormatReal* fmt, const Locale* locale)
+{
+  // TODO:
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+// ============================================================================
+// [Fog::String - OpVFormat]
+// ============================================================================
+
+// TODO: Errors are not propagated.
+
+template<typename CharT>
+static err_t FOG_CDECL StringT_opVFormatPrivate(CharT_(String)* self, uint32_t cntOp, const CharT* fmt, size_t fmtLength, const TextCodec* tc, const Locale* locale, va_list ap)
+{
+#define _FOG_CFORMAT_PARSE_NUMBER(_Out_)             \
+  FOG_MACRO_BEGIN                                    \
+    /* Clean-up. */                                  \
     _Out_ = 0;                                       \
                                                      \
-    /* ----- Remove zeros ----- */                   \
-    while (*_Ptr_ == '0') _Ptr_++;                   \
-                                                     \
-    /* ----- Parse number ----- */                   \
-    while ((c = (uint8_t)*_Ptr_) >= '0' && c <= '9') \
+    /* Remove zeros. */                              \
+    while (c == CharT('0'))                          \
     {                                                \
-      _Out_ = 10 * _Out_ + (c - '0');                \
-      _Ptr_++;                                       \
+      if (++fmt == fmtEnd)                           \
+        goto _End;                                   \
+      c = *fmt;                                      \
     }                                                \
-  }
+                                                     \
+    /* Parse number. */                              \
+    while (CharT_Func::isAsciiDigit(c))              \
+    {                                                \
+      _Out_ = _Out_ * 10 + (CharT_Value)c - '0';     \
+                                                     \
+      if (++fmt == fmtEnd)                           \
+        goto _End;                                   \
+      c = *fmt;                                      \
+    }                                                \
+  FOG_MACRO_END
 
-  if (fmt == NULL) return ERR_RT_INVALID_ARGUMENT;
+  // Choose the default text-codec is not provided.
+  if (tc == NULL)
+    tc = _api.textcodec.oCache[TEXT_CODEC_CACHE_ASCII];
 
-  const char* fmtBeginChunk = fmt;
-  uint8_t c;
-  size_t beginLength = getLength();
+  if (sizeof(CharT) > 1 && locale == NULL)
+    locale = _api.locale.oPosix;
 
-  for (;;)
-  {
-    c = (uint8_t)*fmt;
+  if (cntOp == CONTAINER_OP_REPLACE)
+    self->clear();
 
-    if (c == '%')
+  if (fmtLength == 0)
+    return ERR_OK;
+
+  size_t initialLength = self->getLength();
+
+  const CharT* fmtBeginChunk = fmt;
+  const CharT* fmtEnd = fmt + fmtLength;
+
+  CharT c;
+
+  do {
+    c = (CharT_(_Char)::Value)*fmt;
+
+    if (c == CharT('%'))
     {
-      uint directives = 0;
-      uint sizeFlags = 0;
-      size_t fieldWidth = NO_WIDTH;
+      if (fmtBeginChunk != fmt)
+        self->append(CharT_(Stub)(fmtBeginChunk, (size_t)(fmt - fmtBeginChunk)));
+
+      if (++fmt == fmtEnd)
+        goto _End;
+
+      uint32_t base = 10;
+      uint32_t flags = NO_FLAGS;
+      uint32_t size = 0;
+
+      size_t width = NO_WIDTH;
       size_t precision = NO_PRECISION;
-      uint base = 10;
 
-      if (fmtBeginChunk != fmt) append(Ascii8(fmtBeginChunk, (size_t)(fmt - fmtBeginChunk)));
+      bool isLongDouble = false;
+      bool isLongInteger = false;
 
-      // Parse directives.
+      // ----------------------------------------------------------------------
+      // [Flags]
+      // ----------------------------------------------------------------------
+
       for (;;)
       {
-        c = (uint8_t)*(++fmt);
+        c = (uint8_t)*fmt;
 
-        if      (c == '#')  directives |= FORMAT_ALTERNATE_FORM;
-        else if (c == '0')  directives |= FORMAT_ZERO_PADDED;
-        else if (c == '-')  directives |= FORMAT_LEFT_ADJUSTED;
-        else if (c == ' ')  directives |= FORMAT_BLANK_POSITIVE;
-        else if (c == '+')  directives |= FORMAT_SHOW_SIGN;
-        else if (c == '\'') directives |= FORMAT_THOUSANDS_GROUP;
-        else break;
+        if (c == CharT('#'))
+          flags |= STRING_FORMAT_ALTERNATE;
+        else if (c == CharT('0'))
+          flags |= STRING_FORMAT_ZERO_PAD;
+        else if (c == CharT('-'))
+          flags |= STRING_FORMAT_LEFT;
+        else if (c == CharT(' '))
+          flags |= FORMAT_FORMAT_BLANK;
+        else if (c == CharT('+'))
+          flags |= STRING_FORMAT_SIGN;
+        else if (c == CharT('\''))
+          flags |= STRING_FORMAT_GROUP;
+        else
+          break;
+
+        if (++fmt == fmtEnd)
+          goto _End;
       }
 
-      // Parse field width.
-      if (Byte::isAsciiDigit(c))
+      // ----------------------------------------------------------------------
+      // [Width]
+      // ----------------------------------------------------------------------
+
+      if (CharT_Func::isAsciiDigit(c))
       {
-        __VFORMAT_PARSE_NUMBER(fmt, fieldWidth)
+        _FOG_CFORMAT_PARSE_NUMBER(width);
       }
-      else if (c == '*')
+      else if (c == CharT('*'))
       {
-        c = *++fmt;
+        int _width = va_arg(ap, int);
+        if (_width < 0) _width = 0;
+        if (_width > 4096) _width = 4096;
+        width = (size_t)_width;
 
-        int _fieldWidth = va_arg(ap, int);
-        if (_fieldWidth < 0) _fieldWidth = 0;
-        if (_fieldWidth > 4096) _fieldWidth = 4096;
-        fieldWidth = (size_t)_fieldWidth;
+        if (++fmt == fmtEnd)
+          goto _End;
+        c = *fmt;
       }
 
-      // Parse precision.
-      if (c == '.')
-      {
-        c = *++fmt;
+      // ----------------------------------------------------------------------
+      // [Precision]
+      // ----------------------------------------------------------------------
 
-        if (Byte::isAsciiDigit(c))
+      if (c == CharT('.'))
+      {
+        if (CharT_Func::isAsciiDigit(c))
         {
-          __VFORMAT_PARSE_NUMBER(fmt, precision);
+          _FOG_CFORMAT_PARSE_NUMBER(precision);
         }
         else if (c == '*')
         {
-          c = *++fmt;
-
           int _precision = va_arg(ap, int);
           if (_precision < 0) _precision = 0;
           if (_precision > 4096) _precision = 4096;
           precision = (size_t)_precision;
+
+          if (++fmt == fmtEnd)
+            goto _End;
+          c = *fmt;
         }
       }
 
-      // Parse argument type.
-      enum
-      {
-        ARG_SIZE_H   = 0x01,
-        ARG_SIZE_HH  = 0x02,
-        ARG_SIZE_L   = 0x04,
-        ARG_SIZE_LL  = 0x08,
-        ARG_SIZE_M   = 0x10,
-#if (CORE_ARCH_BITS == 32)
-        ARG_SIZE_64  = ARG_SIZE_LL
-#else
-        ARG_SIZE_64  = ARG_SIZE_L
-#endif
-      };
+      // ----------------------------------------------------------------------
+      // [Argument Size]
+      // ----------------------------------------------------------------------
+
+      // TODO: 'j'  == sizeof(intmax_t).
+      // TODO: 'll' == sizeof(long long).
 
       // 'h' and 'hh'.
-      if (c == 'h')
+      if (c == CharT('h'))
       {
-        c = (uint8_t)*(++fmt);
-        if (c == 'h')
+        size = sizeof(short);
+
+        if (++fmt == fmtEnd)
+          goto _End;
+        c = *fmt;
+
+        if (c == CharT('h'))
         {
-          c = (uint8_t)*(++fmt);
-          sizeFlags |= ARG_SIZE_HH;
-        }
-        else
-        {
-          sizeFlags |= ARG_SIZE_H;
-        }
-      }
-      // 'L'.
-      else if (c == 'L')
-      {
-        c = (uint8_t)*(++fmt);
-        sizeFlags |= ARG_SIZE_LL;
-      }
-      // 'l' and 'll'.
-      else if (c == 'l')
-      {
-        c = (uint8_t)*(++fmt);
-        if (c == 'l')
-        {
-          c = (uint8_t)*(++fmt);
-          sizeFlags |= ARG_SIZE_LL;
-        }
-        else
-        {
-          sizeFlags |= ARG_SIZE_L;
+          size = sizeof(char);
+
+          if (++fmt == fmtEnd)
+            goto _End;
+          c = *fmt;
         }
       }
       // 'j'.
       else if (c == 'j')
       {
-        c = (uint8_t)*(++fmt);
-        sizeFlags |= ARG_SIZE_LL;
+        size = sizeof(uint64_t);
+
+        if (++fmt == fmtEnd)
+          goto _End;
+        c = *fmt;
       }
-      // 'z'.
-      else if (c == 'z' || c == 'Z')
+      // 'l' and 'll'.
+      else if (c == CharT('l'))
       {
-        c = (uint8_t)*(++fmt);
-        if (sizeof(size_t) > sizeof(long))
-          sizeFlags |= ARG_SIZE_LL;
-        else if (sizeof(size_t) > sizeof(int))
-          sizeFlags |= ARG_SIZE_L;
+        isLongInteger = true;
+        size = sizeof(long);
+
+        if (++fmt == fmtEnd)
+          goto _End;
+        c = *fmt;
+
+        if (c == CharT('l'))
+        {
+          size = sizeof(uint64_t);
+
+          if (++fmt == fmtEnd)
+            goto _End;
+          c = *fmt;
+        }
+      }
+      // 'L'.
+      else if (c == CharT('L'))
+      {
+        isLongDouble = true;
+
+        if (++fmt == fmtEnd)
+          goto _End;
+        c = *fmt;
+      }
+      // 'q'.
+      else if (c == 'q')
+      {
+        size = sizeof(uint64_t);
+
+        if (++fmt == fmtEnd)
+          goto _End;
+        c = *fmt;
       }
       // 't'.
       else if (c == 't')
       {
-        c = (uint8_t)*(++fmt);
-        if (sizeof(size_t) > sizeof(long))
-          sizeFlags |= ARG_SIZE_LL;
-        else if (sizeof(size_t) > sizeof(int))
-          sizeFlags |= ARG_SIZE_L;
+        size = sizeof(ptrdiff_t);
+
+        if (++fmt == fmtEnd)
+          goto _End;
+        c = *fmt;
       }
-      // 'M' = max type (Core extension).
-      else if (c == 'M')
+      // 'z'.
+      else if (c == 'z' || c == 'Z')
       {
-        c = (uint8_t)*(++fmt);
-        sizeFlags |= ARG_SIZE_M;
+        size = sizeof(size_t);
+
+        if (++fmt == fmtEnd)
+          goto _End;
+        c = *fmt;
       }
 
-      // Parse conversion character.
+      // ----------------------------------------------------------------------
+      // [Type]
+      // ----------------------------------------------------------------------
+
+      fmt++;
       switch (c)
       {
-        // Signed integers.
+        // Signed integer.
         case 'd':
         case 'i':
         {
-          int64_t i = (sizeFlags >= ARG_SIZE_64) ? va_arg(ap, int64_t) : va_arg(ap, int32_t);
+          int64_t i = (size >= sizeof(int64_t)) ? va_arg(ap, int64_t) : va_arg(ap, int);
 
-          if (precision == NO_PRECISION && fieldWidth == NO_WIDTH && directives == 0)
-            appendInt(i, base);
+          if (flags == NO_FLAGS && precision == NO_PRECISION && width == NO_WIDTH)
+            self->appendInt(i);
           else
-            appendInt(i, base, FormatFlags(precision, fieldWidth, directives));
+            self->appendInt(i, FormatInt(base, flags, precision, width));
           break;
         }
 
-        // Unsigned integers.
+        // Unsigned integer.
         case 'o':
           base = 8;
-          goto ffUnsigned;
+          goto _FormatUnsigned;
         case 'X':
-          directives |= FORMAT_CAPITALIZE;
+          flags |= STRING_FORMAT_CAPITALIZE;
         case 'x':
           base = 16;
         case 'u':
-ffUnsigned:
+_FormatUnsigned:
         {
-          uint64_t i = (sizeFlags >= ARG_SIZE_64) ? va_arg(ap, uint64_t) : va_arg(ap, uint32_t);
+          uint64_t i = (size >= sizeof(uint64_t)) ? va_arg(ap, uint64_t) : va_arg(ap, uint);
 
-          if (precision == NO_PRECISION && fieldWidth == NO_WIDTH && directives == 0)
-            appendInt(i, base);
+          if (base == 10 && flags == NO_FLAGS && precision == NO_PRECISION && width == NO_WIDTH)
+            self->appendInt(i);
           else
-            appendInt(i, base, FormatFlags(precision, fieldWidth, directives));
+            self->appendInt(i, FormatInt(base, flags, precision, width));
           break;
         }
 
-        // Floats, doubles, long doubles.
+        // Float, double, and long double.
         case 'F':
         case 'E':
         case 'G':
-          directives |= FORMAT_CAPITALIZE_E_OR_X;
+          flags |= STRING_FORMAT_CAPITALIZE_E_OR_X;
         case 'f':
         case 'e':
         case 'g':
         {
-          double i;
-          uint doubleForm = 0; // Be quite
-
+          uint form;
           if (c == 'e' || c == 'E')
-            doubleForm = DF_EXPONENT;
+            form = DF_EXPONENT;
           else if (c == 'f' || c == 'F')
-            doubleForm = DF_DECIMAL;
-          else if (c == 'g' || c == 'G')
-            doubleForm = DF_SIGNIFICANT_DIGITS;
+            form = DF_DECIMAL;
+          else // if (c == 'g' || c == 'G')
+            form = DF_SIGNIFICANT_DIGITS;
 
-          i = va_arg(ap, double);
-          appendDouble(i, doubleForm, FormatFlags(precision, fieldWidth, directives));
+          double f = va_arg(ap, double);
+          self->appendReal(f, FormatReal(form, flags, precision, width));
           break;
         }
 
-        // Characters (latin1 or unicode...).
+        // Characters (Unicode or Latin1).
         case 'C':
-          sizeFlags |= ARG_SIZE_L;
+          isLongInteger = true;
         case 'c':
         {
-          if (precision == NO_PRECISION) precision = 1;
-          if (fieldWidth == NO_WIDTH) fieldWidth = 0;
+          if (precision == NO_PRECISION)
+            precision = 1;
+          if (width == NO_WIDTH)
+            width = 0;
 
-          size_t fill = (fieldWidth > precision) ? fieldWidth - precision : 0;
+          size_t fill = (width > precision) ? width - precision : 0;
 
-          if (fill && (directives & FORMAT_LEFT_ADJUSTED) == 0) append(Char(' '), fill);
-          append(Char(va_arg(ap, uint)), precision);
-          if (fill && (directives & FORMAT_LEFT_ADJUSTED) != 0) append(Char(' '), fill);
+          if (fill && (flags & STRING_FORMAT_LEFT) == 0)
+            self->append(CharT(' '), fill);
+
+          self->append(CharT(va_arg(ap, uint)), precision);
+
+          if (fill && (flags & STRING_FORMAT_LEFT) != 0)
+            self->append(CharT(' '), fill);
           break;
         }
 
         // Strings.
         case 'S':
-#if FOG_SIZEOF_WCHAR_T == 2
-          sizeFlags |= ARG_SIZE_L;
-#else
-          sizeFlags |= ARG_SIZE_LL;
-#endif
+          isLongInteger = true;
+
         case 's':
-          if (fieldWidth == NO_WIDTH) fieldWidth = 0;
+          if (width == NO_WIDTH)
+            width = 0;
 
-          // TODO: Not correct.
-          if (sizeFlags >= ARG_SIZE_LL)
+          // Ansi-string.
+          if (!isLongInteger)
           {
-#if 0
-            // UTF-32 string (uint32_t*).
-            const uint32_t* s = va_arg(ap, const uint32_t*);
-            size_t slen = (precision != NO_PRECISION)
-              ? (size_t)StringUtil::nlen(s, precision)
-              : (size_t)StringUtil::len(s);
+            const char* sData = va_arg(ap, const char*);
+            size_t sLength = (precision != NO_PRECISION)
+              ? (size_t)StringUtil::nlen(sData, precision)
+              : (size_t)StringUtil::len(sData);
 
-            String s16;
-            TextCodec::utf32().appendToUnicode(s16, reinterpret_cast<const void*>(s), slen * 4);
+            if (sizeof(CharT) == 1)
+            {
+              StringA* selfA = reinterpret_cast<StringA*>(self);
+              size_t fill = (width > sLength) ? width - sLength : 0;
 
-            slen = s16.getLength();
-            size_t fill = (fieldWidth > slen) ? fieldWidth - slen : 0;
+              if (fill && (flags & STRING_FORMAT_LEFT) == 0) selfA->append(char(' '), fill);
+              selfA->append(sData, sLength);
+              if (fill && (flags & STRING_FORMAT_LEFT) != 0) selfA->append(char(' '), fill);
+            }
+            else
+            {
+              StringTmpW<128> tmp;
+              tc->decode(tmp, StubA(sData, sLength));
 
-            if (fill && (directives & FORMAT_LEFT_ADJUSTED) == 0) append(Char(' '), fill);
-            append(s16);
-            if (fill && (directives & FORMAT_LEFT_ADJUSTED) != 0) append(Char(' '), fill);
-#endif
+              StringW* selfW = reinterpret_cast<StringW*>(self);
+              size_t fill = (width > tmp.getLength()) ? width - tmp.getLength() : 0;
+
+              if (fill && (flags & STRING_FORMAT_LEFT) == 0) selfW->append(CharW(' '), fill);
+              selfW->append(tmp);
+              if (fill && (flags & STRING_FORMAT_LEFT) != 0) selfW->append(CharW(' '), fill);
+            }
           }
-          else if (sizeFlags >= ARG_SIZE_L)
-          {
-#if 0
-            // UTF-16 string (Char*).
-            const Char* s = va_arg(ap, const Char*);
-            size_t slen = (precision != NO_PRECISION)
-              ? (size_t)StringUtil::nlen(s, precision)
-              : (size_t)StringUtil::len(s);
-            size_t fill = (fieldWidth > slen) ? fieldWidth - slen : 0;
-
-            if (fill && (directives & FORMAT_LEFT_ADJUSTED) == 0) append(Char(' '), fill);
-            append(s, slen);
-            if (fill && (directives & FORMAT_LEFT_ADJUSTED) != 0) append(Char(' '), fill);
-#endif
-          }
+          // Wide-string.
           else
           {
-            // 8-bit string (char*).
-            StringTmp<TEMPORARY_LENGTH> str;
+            const CharW* sData = va_arg(ap, const CharW*);
+            size_t sLength = (precision != NO_PRECISION)
+              ? (size_t)StringUtil::nlen(sData, precision)
+              : (size_t)StringUtil::len(sData);
 
-            const char* s = va_arg(ap, const char*);
-            size_t slen = (precision != NO_PRECISION)
-              ? (size_t)StringUtil::nlen(s, precision)
-              : (size_t)StringUtil::len(s);
+            if (sizeof(CharT) == 1)
+            {
+              StringA* selfA = reinterpret_cast<StringA*>(self);
+              size_t fill = (width > sLength) ? width - sLength : 0;
 
-            TextCodec::local8().decode(str, Stub8(s, slen), NULL, CONTAINER_OP_APPEND);
-            slen = str.getLength();
-            size_t fill = (fieldWidth > slen) ? fieldWidth - slen : 0;
+              if (fill && (flags & STRING_FORMAT_LEFT) == 0) selfA->append(' ', fill);
+              tc->encode(*selfA, StubW(sData, sLength), NULL, NULL, CONTAINER_OP_APPEND);
+              if (fill && (flags & STRING_FORMAT_LEFT) != 0) selfA->append(' ', fill);
+            }
+            else
+            {
+              StringW* selfW = reinterpret_cast<StringW*>(self);
+              size_t fill = (width > sLength) ? width - sLength : 0;
 
-            if (fill && (directives & FORMAT_LEFT_ADJUSTED) == 0) append(Char(' '), fill);
-            append(str);
-            if (fill && (directives & FORMAT_LEFT_ADJUSTED) != 0) append(Char(' '), fill);
+              if (fill && (flags & STRING_FORMAT_LEFT) == 0) selfW->append(CharW(' '), fill);
+              selfW->append(StubW(sData, sLength));
+              if (fill && (flags & STRING_FORMAT_LEFT) != 0) selfW->append(CharW(' '), fill);
+            }
           }
           break;
 
         // Pointer.
         case 'p':
-          directives |= FORMAT_ALTERNATE_FORM;
-#if FOG_ARCH_BITS == 32
-          sizeFlags = 0;
-#elif FOG_ARCH_BITS == 64
-          sizeFlags = ARG_SIZE_LL;
-#endif // FOG_ARCH_BITS
-          goto ffUnsigned;
+          flags |= STRING_FORMAT_ALTERNATE;
+          size = sizeof(void*);
+          goto _FormatUnsigned;
 
         // Position receiver 'n'.
         case 'n':
         {
-          void* pointer = va_arg(ap, void*);
-          size_t n = getLength() - beginLength;
-          switch (sizeFlags)
-          {
-            case ARG_SIZE_M:
-            case ARG_SIZE_LL: *(uint64_t *)pointer = (uint64_t)(n); break;
-            case ARG_SIZE_L:  *(ulong    *)pointer = (ulong   )(n); break;
-            case ARG_SIZE_HH: *(uchar    *)pointer = (uchar   )(n); break;
-            case ARG_SIZE_H:  *(uint16_t *)pointer = (uint16_t)(n); break;
-            default:          *(uint     *)pointer = (uint    )(n); break;
-          }
-          break;
-        }
+          void* p = va_arg(ap, void*);
+          size_t n = self->getLength() - initialLength;
 
-        // Extensions
-        case 'W':
-        {
-          if (fieldWidth == NO_WIDTH) fieldWidth = 0;
+          if (size == sizeof(uint64_t))
+            reinterpret_cast<uint64_t*>(p)[0] = (uint)size;
+          else if (size == sizeof(uint32_t))
+            reinterpret_cast<uint32_t*>(p)[0] = (uint)size;
+          else if (size == sizeof(uint16_t))
+            reinterpret_cast<uint16_t*>(p)[0] = (uint)size;
+          else if (size == sizeof(uint8_t ))
+            reinterpret_cast<uint8_t*>(p)[0] = (uint)size;
+          else // if (size == 0)
+            reinterpret_cast<uint*>(p)[0] = (uint)size;
 
-          String* string = va_arg(ap, String*);
-
-          const Char* s = string->getData();
-          size_t slen = string->getLength();
-          if (precision != NO_PRECISION)  slen = Math::min(slen, precision);
-          size_t fill = (fieldWidth > slen) ? fieldWidth - slen : 0;
-
-          if (fill && (directives & FORMAT_LEFT_ADJUSTED) == 0) append(Char(' '), fill);
-          append(Utf16(s, slen));
-          if (fill && (directives & FORMAT_LEFT_ADJUSTED) != 0) append(Char(' '), fill);
           break;
         }
 
         // Percent.
         case '%':
           // skip one "%" if its legal "%%", otherwise send everything
-          // to output.
-          if (fmtBeginChunk + 1 == fmt) fmtBeginChunk++;
-          break;
+          // to the output.
+          if (fmtBeginChunk + 1 == fmt)
+            fmtBeginChunk++;
+          goto _Continue;
 
         // Unsupported or end of input.
         default:
-          goto end;
+          goto _Continue;
       }
-      fmtBeginChunk = fmt+1;
-    }
 
-end:
-    if (c == '\0')
+      fmtBeginChunk = fmt;
+    }
+    else
     {
-      if (fmtBeginChunk != fmt) append(Ascii8(fmtBeginChunk, (size_t)(fmt - fmtBeginChunk)));
-      break;
+      fmt++;
     }
 
-    fmt++;
-  }
+_Continue:
+    ;
+  } while (fmt != fmtEnd);
+
+_End:
+  if (fmtBeginChunk != fmt)
+    self->append(CharT_(Stub)(fmtBeginChunk, (size_t)(fmt - fmtBeginChunk)));
   return ERR_OK;
 
-#undef __VFORMAT_PARSE_NUMBER
+#undef _FOG_CFORMAT_PARSE_NUMBER
 }
 
-err_t String::appendWformat(const String& fmt, Char lex, const List<String>& args)
+static err_t FOG_CDECL StringA_opVFormatStubA(StringA* self, uint32_t cntOp, const StubA* fmt, const TextCodec* tc, va_list ap)
 {
-  return appendWformat(fmt, lex, args.getData(), args.getLength());
+  return StringT_opVFormatPrivate<char>(self, cntOp, fmt->getData(), fmt->getComputedLength(), tc, NULL, ap);
 }
 
-err_t String::appendWformat(const String& fmt, Char lex, const String* args, size_t length)
+static err_t FOG_CDECL StringA_opVFormatStringA(StringA* self, uint32_t cntOp, const StringA* fmt, const TextCodec* tc, va_list ap)
 {
-  const Char* fmtBeg = fmt.getData();
-  const Char* fmtEnd = fmtBeg + fmt.getLength();
-  const Char* fmtCur;
+  StringA fmtCopy(*fmt);
+  return StringT_opVFormatPrivate<char>(self, cntOp, fmtCopy.getData(), fmtCopy.getLength(), tc, NULL, ap);
+}
+
+static err_t FOG_CDECL StringW_opVFormatStubA(StringW* self, uint32_t cntOp, const StubA* fmt, const TextCodec* tc, const Locale* locale, va_list ap)
+{
+  StringTmpW<256> fmtW;
+
+  if (tc == NULL)
+    tc = _api.textcodec.oCache[TEXT_CODEC_CACHE_ASCII];
+  FOG_RETURN_ON_ERROR(tc->decode(fmtW, *fmt));
+
+  return StringT_opVFormatPrivate<CharW>(self, cntOp, fmtW.getData(), fmtW.getLength(), tc, locale, ap);
+}
+
+static err_t FOG_CDECL StringW_opVFormatStubW(StringW* self, uint32_t cntOp, const StubW* fmt, const TextCodec* tc, const Locale* locale, va_list ap)
+{
+  return StringT_opVFormatPrivate<CharW>(self, cntOp, fmt->getData(), fmt->getComputedLength(), tc, locale, ap);
+}
+
+static err_t FOG_CDECL StringW_opVFormatStringW(StringW* self, uint32_t cntOp, const StringW* fmt, const TextCodec* tc, const Locale* locale, va_list ap)
+{
+  StringW fmtCopy(*fmt);
+  return StringT_opVFormatPrivate<CharW>(self, cntOp, fmtCopy.getData(), fmtCopy.getLength(), tc, locale, ap);
+}
+
+// ============================================================================
+// [Fog::String - OpZFormat]
+// ============================================================================
+
+template<typename CharT, typename SrcT>
+static err_t FOG_CDECL StringT_opZFormatStub(CharT_(String)* self, uint32_t cntOp, const SrcT_(Stub)* fmt, CharT_Type lex, const CharT_(String)* args, size_t argsLength)
+{
+  if (cntOp == CONTAINER_OP_REPLACE)
+    self->clear();
 
   err_t err = ERR_OK;
 
-  for (fmtCur = fmtBeg; fmtCur != fmtEnd; )
+  const SrcT* fmtBeg = fmt->getData();
+  const SrcT* fmtCur = fmtBeg;
+  const SrcT* fmtEnd = fmtBeg + fmt->getComputedLength();
+
+  while (fmtCur != fmtEnd)
   {
     if (*fmtCur == lex)
     {
       fmtBeg = fmtCur;
-      if ( (err = append(Utf16(fmtBeg, (size_t)(fmtCur - fmtBeg)))) ) goto done;
+
+      err = self->_append(CharT_(Stub)(fmtBeg, (size_t)(fmtCur - fmtBeg)));
+      if (FOG_IS_ERROR(err))
+        goto _End;
 
       if (++fmtCur != fmtEnd)
       {
-        Char ch = *fmtCur;
+        SrcT ch = *fmtCur;
 
-        if (ch >= Char('0') && ch <= Char('9'))
+        if (ch >= SrcT('0') && ch <= SrcT('9'))
         {
-          uint32_t n = ch.getValue() - (uint32_t)'0';
-          if (n < length)
+          size_t n = (size_t)(uint8_t)ch - (uint32_t)'0';
+          if (n < argsLength)
           {
-            if ( (err = append(args[n])) ) goto done;
+            err = self->append(args[n]);
+            if (FOG_IS_ERROR(err))
+              goto _End;
+
             fmtBeg = fmtCur + 1;
           }
         }
@@ -1614,459 +2170,919 @@ err_t String::appendWformat(const String& fmt, Char lex, const String* args, siz
       else
         break;
     }
+
     fmtCur++;
   }
 
   if (fmtCur != fmtBeg)
-  {
-    err = append(Utf16(fmtBeg, (size_t)(fmtCur - fmtBeg)));
-  }
+    err = self->append(CharT_(Stub)(fmtBeg, (size_t)(fmtCur - fmtBeg)));
 
-done:
+_End:
   return err;
 }
 
-// ============================================================================
-// [Fog::String::Prepend]
-// ============================================================================
-
-err_t String::prepend(Char ch, size_t length)
+template<typename CharT, typename SrcT>
+static err_t FOG_CDECL StringT_opZFormatString(CharT_(String)* self, uint32_t cntOp, const SrcT_(String)* fmt, CharT_Type lex, const CharT_(String)* args, size_t argsLength)
 {
-  return insert(0, ch, length);
-}
+  SrcT_(String) fmtCopy(*fmt);
+  SrcT_(Stub) fmtStub(fmtCopy.getData(), fmtCopy.getLength());
 
-err_t String::prepend(const Ascii8& str)
-{
-  return insert(0, str);
-}
-
-err_t String::prepend(const Utf16& str)
-{
-  return insert(0, str);
-}
-
-err_t String::prepend(const String& other)
-{
-  return insert(0, other);
+  return StringT_opZFormatStub<CharT, SrcT>(self, cntOp, &fmtStub, lex, args, argsLength);
 }
 
 // ============================================================================
-// [Fog::String::Insert]
+// [Fog::String - OpNormalizeSlashes]
 // ============================================================================
 
-err_t String::insert(size_t index, Char ch, size_t length)
+template<typename CharT>
+static err_t FOG_CDECL StringT_opNormalizeSlashes(CharT_(String)* self, uint32_t cntOp, const CharT_(String)* other, uint32_t slashForm)
 {
-  if (length == DETECT_LENGTH) return ERR_RT_INVALID_ARGUMENT;
+  if (slashForm >= SLASH_FORM_COUNT)
+    return ERR_RT_INVALID_ARGUMENT;
 
-  Char* p = _prepareInsert(this, index, length);
-  if (FOG_IS_NULL(p)) return ERR_RT_OUT_OF_MEMORY;
+  CharT from = CharT('\\');
+  CharT to = CharT('/');
 
-  StringUtil::fill(p, ch, length);
+  if (slashForm == SLASH_FORM_BACKWARD)
+    swap<CharT>(from, to);
+
+  size_t oLength = other->getLength();
+
+  if (cntOp == CONTAINER_OP_REPLACE && self == other)
+    return self->replace(from, to);
+
+  CharT* p = self->_prepare(cntOp, oLength);
+  const CharT* s = other->getData();
+
+  if (FOG_IS_NULL(p))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  for (size_t i = 0; i < oLength; i++)
+  {
+    CharT c = s[i];
+    if (c == from)
+      c = to;
+    p[i] = c;
+  }
+
   return ERR_OK;
 }
 
-err_t String::insert(size_t index, const Ascii8& str)
+// ============================================================================
+// [Fog::String - Prepend]
+// ============================================================================
+
+template<typename CharT>
+static err_t FOG_CDECL StringT_prependChars(CharT_(String)* self, CharT_Type ch, size_t length)
 {
-  const char* sData = str.getData();
-  size_t sLength = str.getComputedLength();
+  return self->insert(0, CharT(ch), length);
+}
 
-  Char* p = _prepareInsert(this, index, sLength);
-  if (FOG_IS_NULL(p)) return ERR_RT_OUT_OF_MEMORY;
+template<typename CharT, typename SrcT>
+static err_t FOG_CDECL StringT_prependStub(CharT_(String)* self, const SrcT_(Stub)* stub)
+{
+  return self->insert(0, *stub);
+}
 
-  StringUtil::copy(p, sData, sLength);
+static err_t FOG_CDECL StringW_prependStubCodec(StringW* self, const StubA* other, const TextCodec* tc)
+{
+  return self->insert(0, *other, *tc);
+}
+
+template<typename CharT, typename SrcT>
+static err_t FOG_CDECL StringT_prependString(CharT_(String)* self, const SrcT_(String)* other)
+{
+  return self->insert(0, *other);
+}
+
+static err_t FOG_CDECL StringW_prependStringCodec(StringW* self, const StringA* other, const TextCodec* tc)
+{
+  return self->insert(0, *other, *tc);
+}
+
+// ============================================================================
+// [Fog::String - Insert]
+// ============================================================================
+
+template<typename CharT>
+static CharT* StringT_prepareInsert(CharT_(String)* self, size_t index, size_t length)
+{
+  FOG_ASSERT(length > 0);
+
+  CharT_(StringData)* d = self->_d;
+  size_t before = d->length;
+
+  if (!Math::canSum(before, length))
+    return NULL;
+
+  size_t after = before + length;
+  size_t moveBy;
+
+  if (index > before)
+    index = before;
+  moveBy = before - index;
+
+  if (d->reference.get() > 1 || d->capacity < after)
+  {
+    size_t optimalCapacity = CollectionUtil::getGrowCapacity(
+      sizeof(CharT_(StringData)), sizeof(CharT), before, after);
+
+    d = CharI_(String)::_dCreate(optimalCapacity, CharT_(Stub)(d->data, index));
+    if (FOG_IS_NULL(d))
+      return NULL;
+
+    StringT_chcopy(d->data + index + length, self->_d->data + index, moveBy);
+    atomicPtrXchg(&self->_d, d)->release();
+  }
+  else
+  {
+    StringT_chmove(d->data + index + length, d->data + index, moveBy);
+  }
+
+  d->hashCode = 0;
+  d->length = after;
+  d->data[after] = 0;
+  return d->data + index;
+}
+
+template<typename CharT>
+static err_t FOG_CDECL StringT_insertChars(CharT_(String)* self, size_t index, CharT_Type ch, size_t length)
+{
+  if (length == DETECT_LENGTH)
+    return ERR_RT_INVALID_ARGUMENT;
+
+  if (length == 0)
+    return ERR_OK;
+
+  CharT* p = StringT_prepareInsert<CharT>(self, index, length);
+  if (FOG_IS_NULL(p))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  StringT_chfill(p, ch, length);
   return ERR_OK;
 }
 
-err_t String::insert(size_t index, const Utf16& str)
+template<typename CharT, typename SrcT>
+static err_t FOG_CDECL StringT_insertStub(CharT_(String)* self, size_t index, const SrcT_(Stub)* stub)
 {
-  const Char* sData = str.getData();
-  size_t sLength = str.getComputedLength();
+  const SrcT* sData = stub->getData();
+  size_t sLength = stub->getComputedLength();
 
-  Char* p = _prepareInsert(this, index, sLength);
-  if (FOG_IS_NULL(p)) return ERR_RT_OUT_OF_MEMORY;
+  if (sLength == 0)
+    return ERR_OK;
 
-  StringUtil::copy(p, sData, sLength);
+  CharT* p = StringT_prepareInsert<CharT>(self, index, sLength);
+  if (FOG_IS_NULL(p))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  StringT_chcopy(p, sData, sLength);
   return ERR_OK;
 }
 
-err_t String::insert(size_t index, const String& _other)
+static err_t FOG_CDECL StringW_insertStubCodec(StringW* self, size_t index, const StubA* other, const TextCodec* tc)
 {
-  String other(_other);
+  StringTmpW<256> tmp;
+  FOG_RETURN_ON_ERROR(tc->decode(tmp, *other));
 
-  Char* p = _prepareInsert(this, index, other.getLength());
-  if (FOG_IS_NULL(p)) return ERR_RT_OUT_OF_MEMORY;
+  return self->insert(index, tmp);
+}
 
-  StringUtil::copy(p, other.getData(), other.getLength());
+template<typename CharT, typename SrcT>
+static err_t FOG_CDECL StringT_insertString(CharT_(String)* self, size_t index, const SrcT_(String)* other)
+{
+  const SrcT* sData = other->getData();
+  size_t sLength = other->getLength();
+
+  if (sLength == 0)
+    return ERR_OK;
+
+  CharT* p = StringT_prepareInsert<CharT>(self, index, sLength);
+  if (FOG_IS_NULL(p))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  StringT_chcopy(p, sData, sLength);
   return ERR_OK;
+}
+
+static err_t FOG_CDECL StringW_insertStringCodec(StringW* self, size_t index, const StringA* other, const TextCodec* tc)
+{
+  StringTmpW<256> tmp;
+  FOG_RETURN_ON_ERROR(tc->decode(tmp, *other));
+
+  return self->insert(index, tmp);
 }
 
 // ============================================================================
 // [Fog::String - Remove]
 // ============================================================================
 
-size_t String::remove(const Range& range)
+template<typename CharT>
+static err_t FOG_CDECL StringT_removeRange(CharT_(String)* self, const Range* range)
 {
-  size_t rstart, rend;
-  if (!fitToRange(*this, rstart, rend, range)) return 0;
+  CharT_(StringData)* d = self->_d;
+  size_t dLength = d->length;
 
-  size_t lenPart1 = rstart;
-  size_t lenPart2 = getLength() - rend;
+  size_t rStart, rEnd;
+  if (!Range::fit(rStart, rEnd, dLength, range))
+    return ERR_OK;
+
+  size_t lenPart1 = rStart;
+  size_t lenPart2 = dLength - rEnd;
   size_t lenAfter = lenPart1 + lenPart2;
 
-  if (_d->refCount.get() > 1)
+  if (d->reference.get() > 1)
   {
-    StringData* newd = StringData::alloc(lenAfter);
-    if (FOG_IS_NULL(newd)) return 0;
+    CharT_(StringData)* newd = CharI_(String)::_dCreate(lenAfter);
+    if (FOG_IS_NULL(newd))
+      return ERR_RT_OUT_OF_MEMORY;
 
-    StringUtil::copy(newd->data, _d->data, lenPart1);
-    StringUtil::copy(newd->data + rstart, _d->data + rend, lenPart2);
+    StringT_chcopy(newd->data, d->data, lenPart1);
+    StringT_chcopy(newd->data + rStart, d->data + rEnd, lenPart2);
+
     newd->length = lenAfter;
     newd->data[lenAfter] = 0;
 
-    atomicPtrXchg(&_d, newd)->deref();
+    atomicPtrXchg(&self->_d, newd)->release();
+    return ERR_OK;
   }
   else
   {
-    StringUtil::move(_d->data + rstart, _d->data + rend, lenPart2);
-    _d->length = lenAfter;
-    _d->data[lenAfter] = 0;
-    _d->hashCode = 0;
-  }
+    StringT_chcopy(d->data + rStart, d->data + rEnd, lenPart2);
 
-  return rend - rstart;
-}
-
-size_t String::remove(Char ch, uint cs, const Range& range)
-{
-  size_t rstart, rend;
-  if (!fitToRange(*this, rstart, rend, range)) return 0;
-
-  StringData* d = _d;
-  size_t length = d->length;
-
-  Char* strBeg = d->data;
-  Char* strCur = strBeg + rstart;
-  Char* strEnd = strBeg + rend;
-  Char* destCur;
-
-  if (cs == CASE_SENSITIVE)
-  {
-caseSensitive:
-    while (strCur != strEnd)
-    {
-      if (*strCur == ch) goto caseSensitiveRemove;
-      strCur++;
-    }
-    return 0;
-
-caseSensitiveRemove:
-    if (d->refCount.get() > 1)
-    {
-      rstart = strCur - strBeg;
-      if (detach() != ERR_OK) return 0;
-
-      d = _d;
-      strBeg = d->data;
-
-      strCur = strBeg + rstart;
-      strEnd = strBeg + rend;
-    }
-
-    destCur = strCur;
-    while (strCur != strEnd)
-    {
-      if (*strCur != ch) *destCur++ = *strCur;
-      strCur++;
-    }
-  }
-  else
-  {
-    Char chLower = ch.toLower();
-    Char chUpper = ch.toUpper();
-    if (chLower == chUpper) goto caseSensitive;
-
-    while (strCur != strEnd)
-    {
-      if (*strCur == chLower || *strCur == chUpper) goto caseInsensitiveRemove;
-      strCur++;
-    }
-    return 0;
-
-caseInsensitiveRemove:
-    if (d->refCount.get() > 1)
-    {
-      rstart = strCur - strBeg;
-      if (detach() != ERR_OK) return 0;
-
-      d = _d;
-      strBeg = d->data;
-
-      strCur = strBeg + rstart;
-      strEnd = strBeg + rend;
-    }
-    destCur = strCur;
-
-    while (strCur != strEnd)
-    {
-      if (*strCur != chLower && *strCur != chUpper) *destCur++ = *strCur;
-      strCur++;
-    }
-  }
-
-  size_t tail = length - rend;
-  StringUtil::copy(destCur, strCur, tail);
-
-  size_t after = (size_t)(destCur - d->data) + tail;
-  d->length = after;
-  d->data[after] = 0;
-  d->hashCode = 0;
-  return length - after;
-}
-
-size_t String::remove(const String& other, uint cs, const Range& range)
-{
-  size_t len = other.getLength();
-  if (len == 0) return 0;
-  if (len == 1) return remove(other.getAt(0), cs, range);
-
-  size_t rstart, rend;
-  if (!fitToRange(*this, rstart, rend, range)) return 0;
-
-  if (rend - rstart >= 256)
-  {
-    // Match using StringMatcher.
-    StringMatcher matcher;
-    if (matcher.setPattern(other)) return 0;
-
-    return remove(matcher, cs, range);
-  }
-  else
-  {
-    // Match using naive algorithm.
-    const Char* aStr = getData();
-    const Char* bStr = other.getData();
-
-    // Maximal length is 256 and minimal pattern size is 2.
-    Range ranges[128];
-    size_t count = 0;
-
-    for (;;)
-    {
-      size_t i = StringUtil::indexOf(aStr + rstart, rend - rstart, bStr, len);
-      if (i == INVALID_INDEX) break;
-      rstart += i;
-      ranges[count++].setRange(rstart, rstart + len);
-      rstart += len;
-    }
-
-    return remove(ranges, count);
+    d->hashCode = 0;
+    d->length = lenAfter;
+    d->data[lenAfter] = 0;
+    return ERR_OK;
   }
 }
 
-size_t String::remove(const StringFilter& filter, uint cs, const Range& range)
+template<typename CharT>
+static err_t FOG_CDECL StringT_removeRangeList(CharT_(String)* self, const Range* range, size_t rangeLength)
 {
-  size_t rstart, rend;
-  if (!fitToRange(*this, rstart, rend, range)) return 0;
+  if (range == NULL || rangeLength == 0)
+    return ERR_OK;
 
-  const Char* str = getData();
-  size_t len = getLength();
-
-  List<Range> ranges;
-
-  for (;;)
-  {
-    Range r = filter.indexOf(str, len, cs, Range(rstart, rend));
-    if (r.getStart() == INVALID_INDEX) break;
-
-    ranges.append(r);
-    rstart = r.getEnd();
-  }
-
-  return remove(ranges.getData(), ranges.getLength());
-}
-
-size_t String::remove(const Range* range, size_t count)
-{
-  if (range == NULL || count == 0) return 0;
+  CharT_(StringData)* d = self->_d;
 
   size_t i;
-  size_t len = getLength();
+  size_t dLength = d->length;
 
-  if (_d->refCount.get() == 1)
-  {
-    i = 0;
-    Char* s = _d->data;
-    size_t dstPos = range[0].getStart();
-    size_t srcPos = dstPos;
+  if (range[rangeLength-1].getEnd() > dLength)
+    return ERR_RT_INVALID_ARGUMENT;
 
-    do {
-      srcPos += range[i].getLengthNoCheck();
-      size_t j = ((++i == count) ? len : range[i].getStart()) - srcPos;
-
-      StringUtil::copy(s + dstPos, s + srcPos, j);
-
-      dstPos += j;
-      srcPos += j;
-    } while (i != count);
-
-    _d->length = dstPos;
-    _d->hashCode = 0;
-    s[dstPos] = 0;
-  }
-  else
+  if (d->reference.get() > 1)
   {
     size_t deleteLength = 0;
     size_t lengthAfter;
 
-    for (i = 0; i < count; i++) deleteLength += range[i].getLengthNoCheck();
-    FOG_ASSERT(len >= deleteLength);
+    // Get the count of characters which will be removed from the string so
+    // we can calculate the count of characters after removal. We also need
+    // to validate whether the 'range' list do not overlap and its sorted.
+    size_t last = 0;
+    for (i = 0; i < rangeLength; i++)
+    {
+      if (!range[i].isValid() || range[i].getStart() < last)
+        return ERR_RT_INVALID_ARGUMENT;
 
-    lengthAfter = len - deleteLength;
+      deleteLength += range[i].getLengthNoCheck();
+      last = range[i].getEnd();
+    }
 
-    StringData* newd = StringData::alloc(lengthAfter);
-    if (FOG_IS_NULL(newd)) return 0;
+    FOG_ASSERT(deleteLength <= dLength);
+    lengthAfter = dLength - deleteLength;
+
+    if (lengthAfter == 0)
+    {
+      self->clear();
+      return ERR_OK;
+    }
+
+    CharT_(StringData)* newd = CharI_(String)::_dCreate(lengthAfter);
+    if (FOG_IS_NULL(newd))
+      return ERR_RT_OUT_OF_MEMORY;
+
+    CharT* dData = newd->data;
+    const CharT* sData = d->data;
+
+    size_t dPos = range[0].getStart();
+    size_t sPos = dPos;
+
+    StringUtil::copy(dData, sData, dPos);
 
     i = 0;
-    Char* dstData = newd->data;
-    Char* srgetData = _d->data;
-
-    size_t dstPos = range[0].getStart();
-    size_t srcPos = dstPos;
-
-    StringUtil::copy(dstData, srgetData, dstPos);
-
     do {
-      srcPos += range[i].getLengthNoCheck();
-      size_t j = ((++i == count) ? len : range[i].getStart()) - srcPos;
+      FOG_ASSERT(range[i].isValid());
 
-      StringUtil::copy(dstData + dstPos, srgetData + srcPos, j);
+      sPos += range[i].getLengthNoCheck();
+      size_t j = ((++i == rangeLength) ? dLength : range[i].getStart()) - sPos;
 
-      dstPos += j;
-      srcPos += j;
-    } while (i != count);
+      StringT_chcopy(dData + dPos, sData + sPos, j);
+      dPos += j;
+      sPos += j;
+    } while (i != rangeLength);
 
     newd->length = lengthAfter;
     newd->data[lengthAfter] = 0;
 
-    atomicPtrXchg(&_d, newd)->deref();
+    atomicPtrXchg(&self->_d, newd)->release();
+    return ERR_OK;
   }
-  return count;
+  else
+  {
+    CharT* data = d->data;
+
+    size_t dPos = range[0].getStart();
+    size_t sPos = dPos;
+
+    // Validate first.
+    size_t last = 0;
+    for (i = 0; i < rangeLength; i++)
+    {
+      if (!range[i].isValid() || range[i].getStart() < last)
+        return ERR_RT_INVALID_ARGUMENT;
+      last = range[i].getEnd();
+    }
+
+    i = 0;
+    do {
+      FOG_ASSERT(range[i].isValid());
+
+      sPos += range[i].getLengthNoCheck();
+      size_t j = ((++i == rangeLength) ? dLength : range[i].getStart()) - sPos;
+
+      StringT_chcopy(data + dPos, data + sPos, j);
+      dPos += j;
+      sPos += j;
+    } while (i != rangeLength);
+
+    d->hashCode = 0;
+    d->length = dPos;
+    data[dPos] = 0;
+
+    return ERR_OK;
+  }
+}
+
+template<typename CharT>
+static err_t FOG_CDECL StringT_removeChar(CharT_(String)* self, const Range* range, CharT_Type ch, uint32_t cs)
+{
+  CharT_(StringData)* d = self->_d;
+  size_t dLength = d->length;
+
+  size_t rStart, rEnd;
+  if (!Range::fit(rStart, rEnd, dLength, range))
+    return ERR_OK;
+
+  CharT* sBegin = d->data;
+  CharT* sCur = sBegin + rStart;
+  CharT* sEnd = sBegin + rEnd;
+  CharT* dCur;
+
+  if (cs == CASE_SENSITIVE)
+  {
+_CaseSensitive:
+    while (sCur != sEnd)
+    {
+      if (*sCur == ch)
+        goto _CaseSensitiveRemove;
+      sCur++;
+    }
+    return ERR_OK;
+
+_CaseSensitiveRemove:
+    if (d->reference.get() > 1)
+    {
+      rStart = sCur - sBegin;
+      FOG_RETURN_ON_ERROR(self->_detach());
+
+      d = self->_d;
+      sBegin = d->data;
+
+      sCur = sBegin + rStart;
+      sEnd = sBegin + rEnd;
+    }
+    dCur = sCur;
+
+    while (sCur != sEnd)
+    {
+      if (*sCur != ch) *dCur++ = *sCur;
+      sCur++;
+    }
+  }
+  else
+  {
+    CharT cArray[4];
+    switch (StringT_getCaseInsensitiveChars<CharT>(cArray, CharT(ch)))
+    {
+      case 1:
+        goto _CaseSensitive;
+
+      case 2:
+        while (sCur != sEnd)
+        {
+          if (*sCur == cArray[0] || *sCur == cArray[0])
+            goto _CaseInsensitiveRemove2;
+          sCur++;
+        }
+        return ERR_OK;
+
+_CaseInsensitiveRemove2:
+        if (d->reference.get() > 1)
+        {
+          rStart = sCur - sBegin;
+          FOG_RETURN_ON_ERROR(self->_detach());
+
+          d = self->_d;
+          sBegin = d->data;
+
+          sCur = sBegin + rStart;
+          sEnd = sBegin + rEnd;
+        }
+
+        dCur = sCur;
+        while (sCur != sEnd)
+        {
+          if (*sCur != cArray[0] && *sCur != cArray[1])
+            *dCur++ = *sCur;
+          sCur++;
+        }
+        break;
+
+      case 3:
+        while (sCur != sEnd)
+        {
+          if (*sCur == cArray[0] || *sCur == cArray[1] || *sCur == cArray[2])
+            goto _CaseInsensitiveRemove3;
+          sCur++;
+        }
+        return ERR_OK;
+
+_CaseInsensitiveRemove3:
+        if (d->reference.get() > 1)
+        {
+          rStart = sCur - sBegin;
+          FOG_RETURN_ON_ERROR(self->_detach());
+
+          d = self->_d;
+          sBegin = d->data;
+
+          sCur = sBegin + rStart;
+          sEnd = sBegin + rEnd;
+        }
+
+        dCur = sCur;
+        while (sCur != sEnd)
+        {
+          if (*sCur != cArray[0] && *sCur != cArray[1] || *sCur != cArray[2])
+            *dCur++ = *sCur;
+          sCur++;
+        }
+        break;
+    }
+  }
+
+  size_t tail = dLength - rEnd;
+  StringT_chcopy(dCur, sCur, tail);
+
+  size_t after = (size_t)(dCur - d->data) + tail;
+  d->hashCode = 0;
+  d->length = after;
+  d->data[after] = 0;
+  return ERR_OK;
+}
+
+template<typename CharT, typename SrcT>
+static err_t FOG_CDECL StringT_removeHelper(CharT_(String)* self, const Range& range, const SrcT* bData, size_t bLength, uint32_t cs)
+{
+  FOG_ASSERT(bLength > 1);
+  FOG_ASSERT(cs < CASE_SENSITIVITY_COUNT);
+
+  CharT_(StringData)* d = self->_d;
+
+  size_t rStart = range.getStart();
+  size_t rEnd = range.getEnd();
+
+  CharT* aData = d->data;
+  size_t aLength = d->length;
+
+  // Get the first index of the pattern 'b' in the string 'a'. If the pattern
+  // 'b' is not inside the string 'a' then we will stop here to prevent memory
+  // allocation / deallocation.
+  size_t i = StringUtil::indexOf(aData + rStart, rEnd - rStart, bData, bLength, cs);
+  if (i == INVALID_INDEX)
+    return ERR_OK;
+
+  i += rStart;
+
+  if (d->reference.get() > 1)
+  {
+    CharT_(StringData)* newd = CharI_(String)::_dCreate(aLength - bLength);
+    if (FOG_IS_NULL(newd))
+      return ERR_RT_OUT_OF_MEMORY;
+
+    CharT* p = newd->data;
+    rStart = 0;
+
+    do {
+      size_t copyLength = i - rStart;
+      StringT_chcopy(p, aData + rStart, copyLength);
+
+      p += copyLength;
+      rStart = i + bLength;
+
+      i = StringUtil::indexOf(aData + rStart, rEnd - rStart, bData, bLength, cs);
+    } while (i != INVALID_INDEX);
+
+    if (rEnd != aLength)
+    {
+      size_t copyLength = aLength - rEnd;
+      StringT_chcopy(p, aData + rEnd, copyLength);
+
+      p += copyLength;
+    }
+
+    aLength = (size_t)(p - newd->data);
+
+    newd->hashCode = 0;
+    newd->length = aLength;
+    newd->data[aLength] = 0;
+
+    atomicPtrXchg(&self->_d, newd)->release();
+    return ERR_OK;
+  }
+  else
+  {
+    CharT* p = aData + i;
+    rStart = i;
+
+    while ((i = StringUtil::indexOf(aData + rStart, rEnd - rStart, bData, bLength, cs)) != INVALID_INDEX)
+    {
+      size_t copyLength = i - rStart;
+      StringT_chcopy(p, aData + rStart, copyLength);
+
+      p += copyLength;
+      rStart = i + bLength;
+    }
+
+    if (rEnd != aLength)
+    {
+      size_t copyLength = aLength - rEnd;
+      StringT_chcopy(p, aData + rEnd, copyLength);
+
+      p += copyLength;
+    }
+
+    aLength = (size_t)(p - aData);
+
+    d->hashCode = 0;
+    d->length = aLength;
+    d->data[aLength] = 0;
+
+    return ERR_OK;
+  }
+}
+
+template<typename CharT, typename SrcT>
+static err_t FOG_CDECL StringT_removeStub(CharT_(String)* self, const Range* range, const SrcT_(Stub)* stub, uint32_t cs)
+{
+  CharT_(StringData)* d = self->_d;
+
+  size_t dLength = d->length;
+  size_t rStart, rEnd;
+
+  if (!Range::fit(rStart, rEnd, dLength, range))
+    return ERR_OK;
+
+  size_t bLength = stub->getComputedLength();
+  if (bLength == 0 || bLength > rEnd - rStart)
+    return ERR_OK;
+
+  if (bLength == 1)
+    return self->remove(Range(rStart, rEnd), CharT(stub->getData()[0]), cs);
+  else
+    return StringT_removeHelper<CharT, SrcT>(self, Range(rStart, rEnd), stub->getData(), bLength, cs);
+}
+
+template<typename CharT, typename SrcT>
+static err_t FOG_CDECL StringT_removeString(CharT_(String)* self, const Range* range, const SrcT_(String)* other, uint32_t cs)
+{
+  CharT_(StringData)* d = self->_d;
+  SrcT_(StringData)* other_d = other->_d;
+
+  size_t dLength = d->length;
+  size_t rStart, rEnd;
+
+  if (!Range::fit(rStart, rEnd, dLength, range))
+    return ERR_OK;
+
+  size_t bLength = other->getLength();
+  if (bLength == 0 || bLength > rEnd - rStart)
+    return ERR_OK;
+
+  if (bLength == 1)
+    return self->remove(Range(rStart, rEnd), other_d->data[0], cs);
+
+  // Special case. If the strings are the same and we passed the range check
+  // condition then the result is empty string, ignoring case-sensitivity,
+  // because both strings are equal.
+  if (sizeof(CharT) == sizeof(SrcT) && (void*)d == (void*)other_d)
+  {
+    self->clear();
+    return ERR_OK;
+  }
+
+  return StringT_removeHelper<CharT, SrcT>(self, Range(rStart, rEnd), other_d->data, bLength, cs);
+}
+
+template<typename CharT>
+static err_t FOG_CDECL StringT_removeRegExp(CharT_(String)* self, const Range* range, const CharT_(RegExp)* re)
+{
+  CharT_(StringData)* d = self->_d;
+  size_t dLength = d->length;
+
+  size_t rStart, rEnd;
+  if (!Range::fit(rStart, rEnd, dLength, range))
+    return ERR_OK;
+
+  const CharT* dData = d->data;
+  List<Range> matches;
+
+  for (;;)
+  {
+    Range r = re->indexIn(dData, dLength, Range(rStart, rEnd));
+    if (r.getStart() == INVALID_INDEX)
+      break;
+
+    matches.append(r);
+    rStart = r.getEnd();
+  }
+
+  return self->remove(matches.getData(), matches.getLength());
 }
 
 // ============================================================================
 // [Fog::String - Replace]
 // ============================================================================
 
-err_t String::replace(const Range& range, const String& replacement)
+template<typename CharT, typename SrcT>
+static err_t FOG_CDECL StringT_replaceRangeStub(CharT_(String)* self, const Range* range, const SrcT_(Stub)* replacement)
 {
-  size_t rstart, rend;
-  if (!fitToRange(*this, rstart, rend, range)) return ERR_OK;
+  CharT_(StringData)* d = self->_d;
 
-  const Char* replacementData = replacement.getData();
-  size_t replacementLength = replacement.getLength();
+  size_t dLength = d->length;
+  size_t rStart, rEnd;
 
-  if (_d->refCount.get() == 1 && _d != replacement._d)
+  if (!Range::fit(rStart, rEnd, dLength, range))
+    return ERR_OK;
+
+  const CharT* replacementData = replacement->getData();
+  size_t replacementLength = replacement->getComputedLength();
+
+  if (d->reference.get() == 1)
   {
-    size_t len = getLength();
-    size_t lenAfter = len - (rend - rstart) + replacementLength;
-    if (lenAfter < len) return ERR_RT_OVERFLOW;
+    size_t after = dLength - (rEnd - rStart) + replacementLength;
+    if (after < dLength)
+      return ERR_RT_OUT_OF_MEMORY;
 
-    if (_d->capacity >= lenAfter)
+    if (d->capacity >= after)
     {
-      Char* sdata = _d->data;
-      Char* sstart = sdata + rstart;
+      CharT* dData = d->data;
+      CharT* dStart = dData + rStart;
 
-      StringUtil::move(sstart + replacementLength, sdata + rend, len - rend);
-      StringUtil::copy(sstart, replacementData, replacementLength);
+      StringT_chmove(dStart + replacementLength, dData + rEnd, dLength - rEnd);
+      StringT_chcopy(dStart, replacementData, replacementLength);
 
-      _d->length = lenAfter;
-      _d->hashCode = 0;
-      _d->data[lenAfter] = 0;
+      d->hashCode = 0;
+      d->length = after;
+      d->data[after] = 0;
       return ERR_OK;
     }
   }
 
-  Range r(rstart, rend);
-  return replace(&r, 1, replacementData, replacementLength);
+  Range r(rStart, rEnd);
+  return self->replace(&r, 1, CharT_(Stub)(replacementData, replacementLength));
 }
 
-err_t String::replace(Char before, Char after, uint cs, const Range& range)
+template<typename CharT, typename SrcT>
+static err_t FOG_CDECL StringT_replaceRangeString(CharT_(String)* self, const Range* range, const SrcT_(String)* replacement)
 {
-  size_t rstart, rend;
-  if (!fitToRange(*this, rstart, rend, range)) return ERR_OK;
+  if (sizeof(CharT) == sizeof(SrcT) && (void*)self == (void*)replacement)
+  {
+    SrcT_(String) replacementCopy(*replacement);
+    SrcT_(Stub) replacementStub(replacementCopy.getData(), replacementCopy.getLength());
 
-  StringData* d = _d;
+    return StringT_replaceRangeStub<CharT, SrcT>(self, range, &replacementStub);
+  }
+  else
+  {
+    SrcT_(Stub) replacementStub(replacement->getData(), replacement->getLength());
 
-  Char* strCur = d->data;
-  Char* strEnd = strCur;
+    return StringT_replaceRangeStub<CharT, SrcT>(self, range, &replacementStub);
+  }
+}
 
-  strCur += rstart;
-  strEnd += rend;
+template<typename CharT, typename SrcT>
+static err_t FOG_CDECL StringT_replaceRangeListStub(CharT_(String)* self, const Range* range, size_t rangeLength, const SrcT_(Stub)* replacement)
+{
+  size_t i;
+
+  const CharT* sData = self->getData();
+  size_t sLength = self->getLength();
+
+  const SrcT* replacementData = replacement->getData();
+  size_t replacementLength = replacement->getComputedLength();
+
+  size_t finalLength;
+  size_t rLast;
+
+  // Get total count of characters we remove, and validate the range[] array.
+  {
+    size_t rTotal = 0;
+
+    for (i = 0, rLast = 0; i < rangeLength; i++)
+    {
+      size_t rStart = range[i].getStart();
+      size_t rEnd = range[i].getEnd();
+
+      if (rStart < rLast || rStart >= rEnd)
+        return ERR_RT_INVALID_ARGUMENT;
+
+      rTotal += rEnd - rStart;
+      rLast = rEnd;
+    }
+
+    if (rLast >= sLength)
+      return ERR_RT_INVALID_ARGUMENT;
+
+    // Get total count of characters we add.
+    size_t addLength = replacementLength * rangeLength;
+    if (addLength / rangeLength != replacementLength)
+      return ERR_RT_OUT_OF_MEMORY;
+
+    // Get final length (after all areas replaced).
+    finalLength = sLength - rTotal;
+    if (!Math::canSum(finalLength, addLength))
+      return ERR_RT_OUT_OF_MEMORY;
+
+    finalLength += addLength;
+  }
+
+  CharT_(StringData)* newd = CharI_(String)::_dCreate(finalLength);
+  if (FOG_IS_NULL(newd))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  CharT* p = newd->data;
+  size_t t;
+
+  for (i = 0, rLast = 0; i < rangeLength; i++)
+  {
+    size_t rStart = range[i].getStart();
+    size_t rEnd = range[i].getEnd();
+
+    // Begin.
+    t = rStart - rLast;
+
+    StringT_chcopy(p, sData + rLast, t);
+    p += t;
+
+    StringT_chcopy(p, replacementData, replacementLength);
+    p += replacementLength;
+
+    rLast = rEnd;
+  }
+
+  // Trailing area.
+  t = sLength - rLast;
+
+  StringT_chcopy(p, sData + rLast, t);
+  p += t;
+
+  // Be sure that final length was correctly calculated.
+  FOG_ASSERT(p == newd->data + finalLength);
+
+  newd->length = finalLength;
+  newd->data[finalLength] = 0;
+
+  atomicPtrXchg(&self->_d, newd)->release();
+  return ERR_OK;
+}
+
+template<typename CharT, typename SrcT>
+static err_t FOG_CDECL StringT_replaceRangeListString(CharT_(String)* self, const Range* range, size_t rangeLength, const SrcT_(String)* replacement)
+{
+  SrcT_(Stub) replacementStub(replacement->getData(), replacement->getLength());
+  return StringT_replaceRangeListStub<CharT, SrcT>(self, range, rangeLength, &replacementStub);
+}
+
+template<typename CharT>
+static err_t FOG_CDECL StringT_replaceChar(CharT_(String)* self, const Range* range, CharT_Type before, CharT_Type after, uint32_t cs)
+{
+  CharT_(StringData)* d = self->_d;
+
+  size_t dLength = d->length;
+  size_t rStart, rEnd;
+
+  if (!Range::fit(rStart, rEnd, dLength, range))
+    return ERR_OK;
+
+  CharT* sCur = d->data + rStart;
+  CharT* sEnd = d->data + rEnd;
 
   if (cs == CASE_SENSITIVE)
   {
-caseSensitive:
-    while (strCur != strEnd)
+_CaseSensitive:
+    while (sCur != sEnd)
     {
-      if (*strCur == before) goto caseSensitiveReplace;
-      strCur++;
+      if (*sCur == before)
+        goto _CaseSensitiveReplace;
+      sCur++;
     }
     return ERR_OK;
 
-caseSensitiveReplace:
-    if (d->refCount.get() > 1)
+_CaseSensitiveReplace:
+    if (d->reference.get() > 1)
     {
-      rstart = (size_t)(strCur - d->data);
+      rStart = (size_t)(sCur - d->data);
 
-      FOG_RETURN_ON_ERROR(_detach());
-      d = _d;
+      FOG_RETURN_ON_ERROR(self->_detach());
+      d = self->_d;
 
-      strCur = d->data;
-      strEnd = strCur;
-
-      strCur += rstart;
-      strEnd += rend;
+      sCur = d->data + rStart;
+      sEnd = d->data + rEnd;
     }
 
-    while (strCur != strEnd)
+    while (sCur != sEnd)
     {
-      if (*strCur == before) *strCur = after;
-      strCur++;
+      if (*sCur == before)
+        *sCur = after;
+      sCur++;
     }
   }
   else
   {
-    Char beforeLower = before.toLower();
-    Char beforeUpper = before.toUpper();
-
-    if (beforeLower == beforeUpper) goto caseSensitive;
-
-    while (strCur != strEnd)
+    CharT cArray[3];
+    switch (StringT_getCaseInsensitiveChars<CharT>(cArray, CharT(before)))
     {
-      if (*strCur == beforeLower || *strCur == beforeUpper) goto caseInsensitiveReplace;
-      strCur++;
-    }
-    return ERR_OK;
+      case 1:
+        goto _CaseSensitive;
 
-caseInsensitiveReplace:
-    if (d->refCount.get() > 1)
-    {
-      rstart = (size_t)(strCur - d->data);
+      case 2:
+        while (sCur != sEnd)
+        {
+          if (*sCur == cArray[0] || *sCur == cArray[1])
+            goto _CaseInsensitiveReplace2;
+          sCur++;
+        }
+        return ERR_OK;
 
-      FOG_RETURN_ON_ERROR(_detach());
-      d = _d;
+_CaseInsensitiveReplace2:
+        if (d->reference.get() > 1)
+        {
+          rStart = (size_t)(sCur - d->data);
 
-      strCur = d->data;
-      strEnd = strCur;
+          FOG_RETURN_ON_ERROR(self->_detach());
+          d = self->_d;
 
-      strCur += rstart;
-      strEnd += rend;
-    }
+          sCur = d->data + rStart;
+          sEnd = d->data + rEnd;
+        }
 
-    while (strCur != strEnd)
-    {
-      if (*strCur == beforeLower || *strCur == beforeUpper) *strCur = after;
-      strCur++;
+        while (sCur != sEnd)
+        {
+          if (*sCur == cArray[0] || *sCur == cArray[1])
+            *sCur = after;
+          sCur++;
+        }
+        break;
+
+      case 3:
+        while (sCur != sEnd)
+        {
+          if (*sCur == cArray[0] || *sCur == cArray[1] || *sCur == cArray[2])
+            goto _CaseInsensitiveReplace3;
+          sCur++;
+        }
+        return ERR_OK;
+
+_CaseInsensitiveReplace3:
+        if (d->reference.get() > 1)
+        {
+          rStart = (size_t)(sCur - d->data);
+
+          FOG_RETURN_ON_ERROR(self->_detach());
+          d = self->_d;
+
+          sCur = d->data + rStart;
+          sEnd = d->data + rEnd;
+        }
+
+        while (sCur != sEnd)
+        {
+          if (*sCur == cArray[0] || *sCur == cArray[1] || *sCur == cArray[2])
+            *sCur = after;
+          sCur++;
+        }
+        break;
     }
   }
 
@@ -2074,353 +3090,306 @@ caseInsensitiveReplace:
   return ERR_OK;
 }
 
-err_t String::replace(const String& before, const String& after,  uint cs, const Range& range)
+template<typename CharT>
+static err_t FOG_CDECL StringT_replaceString(CharT_(String)* self, const Range* range, const CharT_(String)* pattern, const CharT_(String)* replacement, uint32_t cs)
 {
-  size_t rstart, rend;
-  if (!fitToRange(*this, rstart, rend, range)) return 0;
+  CharT_(StringData)* d = self->_d;
+  size_t dLength = d->length;
 
-  size_t len = before.getLength();
-  if (len == 0) return 0;
+  size_t rStart, rEnd;
+  if (!Range::fit(rStart, rEnd, dLength, range))
+    return ERR_OK;
 
-  if (rend - rstart >= 256)
+  if (cs >= CASE_SENSITIVITY_COUNT)
+    cs = CASE_INSENSITIVE;
+
+  CharT* dData = d->data;
+
+  // Check if there is some match to prevent early allocation / deallocation.
+  rStart = StringUtil::indexOf(dData + rStart, rEnd - rStart, pattern->getData(), pattern->getLength(), cs);
+  if (rStart == INVALID_INDEX)
+    return ERR_OK;
+
+  // Create a weak copy of pattern and replacement to prevent memory corruption
+  // in case that the pattern or replacement are the same of 'self'.
+  CharT_(String) patternCopy(*pattern);
+  CharT_(String) replacementCopy(*replacement);
+
+  const CharT* pData = patternCopy.getData();
+  size_t pLength = patternCopy.getLength();
+
+  if (pLength == 0)
+    return ERR_OK;
+
+  const CharT* rData = replacementCopy.getData();
+  size_t rLength = replacementCopy.getLength();
+
+  if (d->reference.get() == 1 && pLength == rLength)
   {
-    // Match using StringMatcher.
-    StringMatcher matcher;
-    if (matcher.setPattern(before)) return 0;
+    // Special case. If the pattern length is the same as the replacement
+    // length and we have non-shared data instance then we can use faster
+    // algorithm to replace the characters in the destination.
+    do {
+      rEnd = rStart + pLength;
+      StringT_chcopy(dData + rStart, pData, pLength);
 
-    return replace(matcher, after, cs, range);
+      rStart = StringUtil::indexOf(dData + rStart, rEnd - rStart, pData, pLength, cs);
+    } while (rStart != INVALID_INDEX);
+
+    return ERR_OK;
   }
   else
   {
-    // Match using naive algorithm.
-    const Char* aStr = getData();
-    const Char* bStr = before.getData();
+    // Common case. Collect all matches and then replace them by one run.
+    List<Range> matches;
 
-    Range ranges[256];
-    size_t count = 0;
+    do {
+      rEnd = rStart + pLength;
+      matches.append(Range(rStart, rEnd));
 
-    for (;;)
-    {
-      size_t i = StringUtil::indexOf(aStr + rstart, rend - rstart, bStr, len);
-      if (i == INVALID_INDEX) break;
+      rStart = StringUtil::indexOf(dData + rStart, rEnd - rStart, pData, pLength, cs);
+    } while (rStart != INVALID_INDEX);
 
-      rstart += i;
-      ranges[count++].setRange(rstart, rstart + len);
-      rstart += len;
-    }
-
-    return replace(ranges, count, after.getData(), after.getLength());
+    return self->replace(matches.getData(), matches.getLength(), replacementCopy);
   }
 }
 
-err_t String::replace(const StringFilter& filter, const String& after, uint cs, const Range& range)
+template<typename CharT>
+static err_t FOG_CDECL StringT_replaceRegExp(CharT_(String)* self, const Range* range, const CharT_(RegExp)* re, const CharT_(String)* replacement)
 {
-  size_t rstart, rend;
-  if (!fitToRange(*this, rstart, rend, range)) return 0;
+  CharT_(StringData)* d = self->_d;
+  size_t dLength = d->length;
 
-  const Char* str = getData();
-  size_t len = getLength();
+  size_t rStart, rEnd;
+  if (!Range::fit(rStart, rEnd, dLength, range))
+    return ERR_OK;
 
-  List<Range> ranges;
+  const CharT* dData = d->data;
+  List<Range> matches;
 
   for (;;)
   {
-    Range r = filter.indexOf(str, len, cs, Range(rstart, rend));
-    if (r.getStart() == INVALID_INDEX) break;
+    Range r = re->indexIn(dData, dLength, Range(rStart, rEnd));
+    if (r.getStart() == INVALID_INDEX)
+      break;
 
-    ranges.append(r);
-    rstart = r.getEnd();
+    matches.append(r);
+    rStart = r.getEnd();
   }
 
-  return replace(ranges.getData(), ranges.getLength(), after.getData(), after.getLength());
-}
-
-err_t String::replace(const Range* m, size_t mcount, const Char* after, size_t alen)
-{
-  size_t i;
-  size_t pos = 0;
-  size_t len = getLength();
-  const Char* cur = getData();
-
-  // Get total count of characters we remove.
-  size_t mtotal = 0;
-  for (i = 0; i < mcount; i++)
-  {
-    size_t rstart = m[i].getStart();
-    size_t rend = m[i].getEnd();
-    if (rstart >= len || rstart >= rend) return ERR_RT_INVALID_ARGUMENT;
-
-    mtotal += rend - rstart;
-  }
-
-  // Get total count of characters we add.
-  size_t atotal = alen * mcount;
-
-  // Get target length.
-  size_t lenAfter = len - mtotal + atotal;
-
-  StringData* newd = StringData::alloc(lenAfter);
-  if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
-
-  Char* p = newd->data;
-  size_t remain = lenAfter;
-  size_t t;
-
-  // Serialize
-  for (i = 0; i < mcount; i++)
-  {
-    size_t mstart = m[i].getStart();
-    size_t mend = m[i].getEnd();
-
-    // Begin
-    t = mstart - pos;
-    if (t > remain) goto overflow;
-    StringUtil::copy(p, cur + pos, t);
-    p += t; remain -= t;
-
-    // Replacement
-    if (alen > remain) goto overflow;
-    StringUtil::copy(p, after, alen);
-    p += alen; remain -= alen;
-
-    pos = mend;
-  }
-
-  // Last piece of string
-  t = getLength() - pos;
-  if (t > remain) goto overflow;
-  StringUtil::copy(p, cur + pos, t);
-  p += t;
-
-  // Be sure that calculated length is correct (if this assert fails, the
-  // 'm' and 'mcount' parameters are incorrect).
-  FOG_ASSERT(p == newd->data + lenAfter);
-
-  newd->length = lenAfter;
-  newd->data[lenAfter] = 0;
-
-  atomicPtrXchg(&_d, newd)->deref();
-  return ERR_OK;
-
-overflow:
-  newd->deref();
-  return ERR_RT_OVERFLOW;
+  if (matches.getLength() == 0)
+    return ERR_OK;
+  else
+    return self->replace(matches.getData(), matches.getLength(), *replacement);
 }
 
 // ============================================================================
 // [Fog::String - Lower / Upper]
 // ============================================================================
 
-err_t String::lower()
+template<typename CharT>
+static err_t FOG_CDECL StringT_lower(CharT_(String)* self, const Range* range)
 {
-  StringData* d = _d;
+  CharT_(StringData)* d = self->_d;
 
-  Char* strCur = d->data;
-  Char* strEnd = strCur + d->length;
+  size_t rStart, rEnd;
+  if (!Range::fit(rStart, rEnd, d->length, range))
+    return ERR_OK;
 
-  for (; strCur != strEnd; strCur++)
-  {
-    if (strCur->isUpper()) goto modify;
-  }
+  CharT* p = d->data + rStart;
+  CharT* pEnd = d->data + rEnd;
+
+  do {
+    CharT c = *p;
+    if (CharT_Func::toLower(c) != c)
+      goto _Modify;
+  } while (++p != pEnd);
+
   return ERR_OK;
 
-modify:
+_Modify:
+  if (d->reference.get() > 1)
   {
-    size_t n = (size_t)(strCur - d->data);
+    rStart = (size_t)(p - d->data);
 
-    FOG_RETURN_ON_ERROR(detach());
-    d = _d;
+    FOG_RETURN_ON_ERROR(self->_detach());
+    d = self->_d;
 
-    strCur = d->data + n;
-    strEnd = d->data + d->length;
-
-    for (; strCur != strEnd; strCur++)
-    {
-      *strCur = strCur->toLower();
-    }
+    p = d->data + rStart;
+    pEnd = d->data + rEnd;
   }
+
+  do {
+    *p = CharT_Func::toLower(*p);
+  } while (++p != pEnd);
+
   d->hashCode = 0;
   return ERR_OK;
 }
 
-err_t String::upper()
+template<typename CharT>
+static err_t FOG_CDECL StringT_upper(CharT_(String)* self, const Range* range)
 {
-  StringData* d = _d;
+  CharT_(StringData)* d = self->_d;
 
-  Char* strCur = d->data;
-  Char* strEnd = strCur + d->length;
+  size_t rStart, rEnd;
+  if (!Range::fit(rStart, rEnd, d->length, range))
+    return ERR_OK;
 
-  for (; strCur != strEnd; strCur++)
-  {
-    if (strCur->isLower()) goto modify;
-  }
+  CharT* p = d->data + rStart;
+  CharT* pEnd = d->data + rEnd;
+
+  do {
+    CharT c = *p;
+    if (CharT_Func::toUpper(c) != c)
+      goto _Modify;
+  } while (++p != pEnd);
+
   return ERR_OK;
 
-modify:
+_Modify:
+  if (d->reference.get() > 1)
   {
-    size_t n = (size_t)(strCur - d->data);
+    rStart = (size_t)(p - d->data);
 
-    FOG_RETURN_ON_ERROR(detach());
-    d = _d;
+    FOG_RETURN_ON_ERROR(self->_detach());
+    d = self->_d;
 
-    strCur = d->data + n;
-    strEnd = d->data + d->length;
-
-    for (; strCur != strEnd; strCur++)
-    {
-      *strCur = strCur->toUpper();
-    }
+    p = d->data + rStart;
+    pEnd = d->data + rEnd;
   }
+
+  do {
+    *p = CharT_Func::toUpper(*p);
+  } while (++p != pEnd);
+
   d->hashCode = 0;
   return ERR_OK;
 }
 
-String String::lowered() const
-{
-  String t(*this);
-  t.lower();
-  return t;
-}
-
-String String::uppered() const
-{
-  String t(*this);
-  t.upper();
-  return t;
-}
-
 // ============================================================================
-// [Fog::String - Whitespaces / Justification]
+// [Fog::String - Trim / Simplify]
 // ============================================================================
 
-err_t String::trim()
+template<typename CharT>
+static err_t FOG_CDECL StringT_trim(CharT_(String)* self)
 {
-  StringData* d = _d;
-  size_t len = d->length;
+  CharT_(StringData)* d = self->_d;
+  size_t length = d->length;
 
-  if (!len) return ERR_OK;
+  if (length == 0)
+    return ERR_OK;
 
-  const Char* strCur = d->data;
-  const Char* strEnd = strCur + len;
+  const CharT* sCur = d->data;
+  const CharT* sEnd = sCur + length;
 
-  while (strCur != strEnd   && strCur->isSpace()) strCur++;
-  while (strCur != strEnd-- && strEnd->isSpace()) continue;
+  while (sCur != sEnd   && CharT_Func::isSpace(*sCur)) sCur++;
+  while (sCur != sEnd-- && CharT_Func::isSpace(*sEnd)) continue;
 
-  if (strCur != d->data || ++strEnd != d->data + len)
+  if (sCur != d->data || ++sEnd != d->data + length)
   {
-    len = (size_t)(strEnd - strCur);
-    if (d->refCount.get() > 1)
+    length = (size_t)(sEnd - sCur);
+
+    if (d->reference.get() > 1)
     {
-      StringData* newd = StringData::alloc(len, strCur, len);
-      if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
-      atomicPtrXchg(&_d, newd)->deref();
+      d = CharI_(String)::_dCreate(length, CharT_(Stub)(sCur, length));
+      if (FOG_IS_NULL(d))
+        return ERR_RT_OUT_OF_MEMORY;
+
+      atomicPtrXchg(&self->_d, d)->release();
     }
     else
     {
-      if (strCur != d->data) StringUtil::move(d->data, strCur, len);
-      d->length = len;
-      d->data[len] = 0;
+      if (sCur != d->data)
+        StringT_chcopy(d->data, sCur, length);
+
       d->hashCode = 0;
+      d->length = length;
+      d->data[length] = 0;
     }
   }
 
   return ERR_OK;
 }
 
-err_t String::simplify()
+template<typename CharT>
+static err_t FOG_CDECL StringT_simplify(CharT_(String)* self)
 {
-  StringData* d = _d;
-  size_t len = d->length;
+  CharT_(StringData)* d = self->_d;
+  size_t length = d->length;
 
-  if (!len) return ERR_OK;
+  if (length == 0)
+    return ERR_OK;
 
-  const Char* strBeg;
-  const Char* strCur = d->data;
-  const Char* strEnd = strCur + len;
+  const CharT* sBegin;
+  const CharT* sCur = d->data;
+  const CharT* sEnd = sCur + length;
 
-  Char* dest;
+  CharT* dst;
 
-  while (strCur != strEnd   && strCur->isSpace()) strCur++;
-  while (strCur != strEnd-- && strEnd->isSpace()) continue;
+  while (sCur != sEnd   && CharT_Func::isSpace(*sCur)) sCur++;
+  while (sCur != sEnd-- && CharT_Func::isSpace(*sEnd)) continue;
 
-  strBeg = strCur;
+  sBegin = sCur;
 
   // Left and Right trim is complete...
 
-  if (strCur != d->data || strEnd + 1 != d->data + len) goto simp;
+  if (sCur != d->data || sEnd + 1 != d->data + length)
+    goto _Simplify;
 
-  for (; strCur < strEnd; strCur++)
+  while (sCur < sEnd)
   {
-    if (strCur[0].isSpace() && strCur[1].isSpace()) goto simp;
+    if (CharT_Func::isSpace(sCur[0]) && CharT_Func::isSpace(sCur[1]))
+      goto _Simplify;
+    sCur++;
   }
   return ERR_OK;
 
-simp:
-  strCur = strBeg;
-  strEnd++;
+_Simplify:
+  sCur = sBegin;
+  sEnd++;
 
-  // this is a bit messy, but I will describe how it works. We can't
-  // change string that's shared between another one, so if reference
-  // count is larger than 1 we will alloc a new D. At the end of this
-  // function we will dereference the D and in case that string
-  // is shared it wont be destroyed. Only one problem is that we need
-  // to increase reference count if string is detached.
-  if (d->refCount.get() > 1)
+  if (d->reference.get() > 1)
   {
-    StringData* newd = StringData::alloc((size_t)(strEnd - strCur));
-    if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
-    _d = newd;
-  }
-  else
-  {
-    d->refCount.inc();
+    d = CharI_(String)::_dCreate((size_t)(sEnd - sCur));
+    if (FOG_IS_NULL(d))
+      return ERR_RT_OUT_OF_MEMORY;
   }
 
-  dest = _d->data;
+  dst = d->data;
 
   do {
-    if    (strCur != strEnd &&  strCur->isSpace()) *dest++ = ' ';
-    while (strCur != strEnd &&  strCur->isSpace()) strCur++;
-    while (strCur != strEnd && !strCur->isSpace()) *dest++ = *strCur++;
-  } while (strCur != strEnd);
+    if    (sCur != sEnd &&  CharT_Func::isSpace(*sCur)) *dst++ = ' ';
+    while (sCur != sEnd &&  CharT_Func::isSpace(*sCur)) sCur++;
+    while (sCur != sEnd && !CharT_Func::isSpace(*sCur)) *dst++ = *sCur++;
+  } while (sCur != sEnd);
 
-  _d->length = (dest - _d->data);
-  _d->data[_d->length] = 0;
-  _d->hashCode = 0;
+  length = (size_t)(dst - d->data);
 
-  d->deref();
+  d->hashCode = 0;
+  d->length = length;
+  d->data[length] = 0;
 
+  if (self->_d != d)
+    atomicPtrXchg(&self->_d, d)->release();
   return ERR_OK;
 }
 
-err_t String::truncate(size_t n)
+// ============================================================================
+// [Fog::String - Justify]
+// ============================================================================
+
+template<typename CharT>
+static err_t FOG_CDECL StringT_justify(CharT_(String)* self, size_t n, CharT_Type ch, uint32_t flags)
 {
-  StringData* d = _d;
-  if (d->length <= n) return ERR_OK;
+  CharT_(StringData)* d = self->_d;
+  size_t dLength = d->length;
 
-  if (d->refCount.get() > 1)
-  {
-    StringData* newd = StringData::alloc(n, d->data, n);
-    if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
-    atomicPtrXchg(&_d, newd)->deref();
-  }
-  else
-  {
-    d->length = n;
-    d->data[d->length] = 0;
-    d->hashCode = 0;
-  }
-  return ERR_OK;
-}
+  // If we are too large then there is nothing we can do.
+  if (n <= dLength)
+    return ERR_OK;
 
-err_t String::justify(size_t n, Char fill, uint32_t flags)
-{
-  StringData* d = _d;
-  size_t length = d->length;
-
-  if (n <= length) return ERR_OK;
-
-  size_t t = n - length;
+  size_t t = n - dLength;
   size_t left = 0;
   size_t right = 0;
 
@@ -2438,1061 +3407,1589 @@ err_t String::justify(size_t n, Char fill, uint32_t flags)
     left = t;
   }
 
-  err_t err;
-  if ( (err = reserve(n)) ) return err;
-  if ( (err = prepend(fill, left)) ) return err;
-  return append(fill, right);
-}
+  if (d->reference.get() > 1 || d->capacity < n)
+  {
+    FOG_RETURN_ON_ERROR(self->reserve(n));
+    d = self->_d;
+  }
 
-String String::trimmed() const
-{
-  String t(*this);
-  t.trim();
-  return t;
-}
+  CharT* p = d->data;
 
-String String::simplified() const
-{
-  String t(*this);
-  t.simplify();
-  return t;
-}
+  if (left != 0)
+  {
+    StringT_chmove(p + left, p, dLength - left);
+    StringT_chfill(p, ch, left);
+  }
+  if (right != 0)
+  {
+    StringT_chfill(p + n - right, ch, right);
+  }
 
-String String::truncated(size_t n) const
-{
-  String t(*this);
-  t.truncate(n);
-  return t;
-}
-
-String String::justified(size_t n, Char fill, uint32_t flags) const
-{
-  String t(*this);
-  t.justify(n, fill, flags);
-  return t;
+  d->hashCode = 0;
+  d->length = n;
+  d->data[n] = 0;
+  return ERR_OK;
 }
 
 // ============================================================================
-// [Fog::String - Split / Join]
+// [Fog::String - Split]
 // ============================================================================
 
-List<String> String::split(Char ch, uint splitBehavior, uint cs) const
+template<typename CharT>
+static err_t FOG_CDECL StringT_splitChar(List<CharT_(String)>* dst, uint32_t cntOp, const CharT_(String)* src, const Range* range, CharT_Type ch, uint32_t splitBehavior, uint32_t cs)
 {
-  List<String> result;
-  StringData* d = _d;
+  CharT_(StringData)* d = src->_d;
 
-  if (d->length == 0) return result;
+  size_t dLength = d->length;
+  size_t rStart, rEnd;
 
-  const Char* strBeg = d->data;
-  const Char* strCur = strBeg;
-  const Char* strEnd = strCur + d->length;
+  if (cntOp == CONTAINER_OP_REPLACE)
+    dst->clear();
+
+  if (!Range::fit(rStart, rEnd, dLength, range))
+    return ERR_OK;
+
+  const CharT* dData = d->data;
+  const CharT* dCur = dData;
+  const CharT* dEnd = dData + dLength;
 
   if (cs == CASE_SENSITIVE)
   {
-__caseSensitive:
+_CaseSensitive:
     for (;;)
     {
-      if (strCur == strEnd || *strCur == ch)
+      if (dCur == dEnd || *dCur == ch)
       {
-        size_t splitLength = (size_t)(strCur - strBeg);
-        if ((splitLength == 0 && splitBehavior == SPLIT_KEEP_EMPTY_PARTS) || splitLength != 0)
-        {
-          result.append(String(strBeg, splitLength));
-        }
-        if (strCur == strEnd) break;
-        strBeg = ++strCur;
+        size_t splitLength = (size_t)(dCur - dData);
+
+        if (splitLength != 0 || (splitLength == 0 && splitBehavior == SPLIT_KEEP_EMPTY))
+          FOG_RETURN_ON_ERROR(dst->append(CharT_(Stub)(dData, splitLength)));
+
+        if (dCur == dEnd) break;
+        dData = ++dCur;
       }
       else
-        strCur++;
+        dCur++;
     }
   }
   else
   {
-    Char cLower = ch.toLower();
-    Char cUpper = ch.toUpper();
-    if (cLower == cUpper) goto __caseSensitive;
+    CharT cArray[4];
 
-    for (;;)
+    switch (StringT_getCaseInsensitiveChars<CharT>(cArray, CharT(ch)))
     {
-      if (strCur == strEnd || *strCur == cLower || *strCur == cUpper)
-      {
-        size_t splitLength = (size_t)(strCur - strBeg);
-        if ((splitLength == 0 && splitBehavior == SPLIT_KEEP_EMPTY_PARTS) || splitLength != 0)
+      case 1:
+        goto _CaseSensitive;
+
+      case 2:
+        for (;;)
         {
-          result.append(String(strBeg, splitLength));
+          if (dCur == dEnd || *dCur == cArray[0] || *dCur == cArray[1])
+          {
+            size_t splitLength = (size_t)(dCur - dData);
+
+            if (splitLength != 0 || (splitLength == 0 && splitBehavior == SPLIT_KEEP_EMPTY))
+              FOG_RETURN_ON_ERROR(dst->append(CharT_(Stub)(dData, splitLength)));
+
+            if (dCur == dEnd) break;
+            dData = ++dCur;
+          }
+          else
+            dCur++;
         }
-        if (strCur == strEnd) break;
-        strBeg = ++strCur;
-      }
-      else
-        strCur++;
+        break;
+
+      case 3:
+        FOG_ASSERT(sizeof(CharT) != 1);
+
+        for (;;)
+        {
+          if (dCur == dEnd || *dCur == cArray[0] || *dCur == cArray[1] || *dCur == cArray[2])
+          {
+            size_t splitLength = (size_t)(dCur - dData);
+
+            if (splitLength != 0 || (splitLength == 0 && splitBehavior == SPLIT_KEEP_EMPTY))
+              FOG_RETURN_ON_ERROR(dst->append(CharT_(Stub)(dData, splitLength)));
+
+            if (dCur == dEnd) break;
+            dData = ++dCur;
+          }
+          else
+            dCur++;
+        }
+        break;
+
+      default:
+        FOG_ASSERT_NOT_REACHED();
     }
   }
-  return result;
+
+  return ERR_OK;
 }
 
-List<String> String::split(const String& pattern, uint splitBehavior, uint cs) const
+template<typename CharT>
+static err_t FOG_CDECL StringT_splitString(List<CharT_(String)>* dst, uint32_t cntOp, const CharT_(String)* src, const Range* range, const CharT_(String)* pattern, uint32_t splitBehavior, uint32_t cs)
 {
-  size_t plen = pattern.getLength();
+  // Prevent memory corruption in case the the 'src' or 'pattern' was given
+  // from the 'dst' list using dst->getAt() and passed directly to us.
+  CharT_(String) srcCopy(*src);
+  CharT_(String) patternCopy(*pattern);
 
-  if (!plen)
-  {
-    List<String> result;
-    result.append(*this);
-    return result;
-  }
-  else if (plen == 1)
-  {
-    return split(pattern.getAt(0), splitBehavior, cs);
-  }
-  else
-  {
-    StringMatcher matcher(pattern);
-    return split(matcher, splitBehavior, cs);
-  }
-}
+  if (cntOp == CONTAINER_OP_REPLACE)
+    dst->clear();
+  size_t dstInitialLength = dst->getLength();
 
-List<String> String::split(const StringFilter& filter, uint splitBehavior, uint cs) const
-{
-  List<String> result;
-  StringData* d = _d;
+  size_t sLength = srcCopy.getLength();
+  size_t rStart, rEnd;
 
-  size_t length = d->length;
+  if (!Range::fit(rStart, rEnd, sLength, range))
+    return ERR_OK;
 
-  const Char* strCur = d->data;
-  const Char* strEnd = strCur + length;
+  size_t pLength = patternCopy.getLength();
+
+  const CharT* sData = srcCopy.getData() + rStart;
+  const CharT* sEnd = srcCopy.getData() + rEnd;
+
+  const CharT* pData = patternCopy.getData();
 
   for (;;)
   {
-    size_t remain = (size_t)(strEnd - strCur);
-    Range m = filter.match(strCur, remain, cs, Range(0, remain));
-    size_t splitLength = (m.getStart() != INVALID_INDEX) ? m.getStart() : remain;
+    size_t remain = (size_t)(sEnd - sData);
+    size_t index = StringUtil::indexOf(sData, (size_t)(sEnd - sData), pData, pLength, cs);
 
-    if ((splitLength == 0 && splitBehavior == SPLIT_KEEP_EMPTY_PARTS) || splitLength != 0)
-      result.append(String(strCur, splitLength));
+    size_t splitLength = index != INVALID_INDEX ? index : remain;
+    if ((splitLength == 0 && splitBehavior == SPLIT_KEEP_EMPTY) || splitLength != 0)
+    {
+      if (dst->append(CharT_(Stub)(sData, splitLength)) != ERR_OK)
+        goto _OutOfMemory;
+    }
 
-    if (m.getStart() == INVALID_INDEX) break;
+    if (index == INVALID_INDEX)
+      break;
 
-    strCur += m.getEnd();
+    sData += index;
+    sData += pLength;
+  }
+  return ERR_OK;
+
+_OutOfMemory:
+  dst->slice(Range(0, dstInitialLength));
+  return ERR_RT_OUT_OF_MEMORY;
+}
+
+template<typename CharT>
+static err_t FOG_CDECL StringT_splitRegExp(List<CharT_(String)>* dst, uint32_t cntOp, const CharT_(String)* src, const Range* range, const CharT_(RegExp)* re, uint32_t splitBehavior)
+{
+  CharT_(String) srcCopy(*src);
+
+  if (cntOp == CONTAINER_OP_REPLACE)
+    dst->clear();
+  size_t dstInitialLength = dst->getLength();
+
+  size_t sLength = srcCopy.getLength();
+  size_t sStart, sEnd;
+
+  if (!Range::fit(sStart, sEnd, sLength, range))
+    return ERR_OK;
+
+  const CharT* sData = srcCopy.getData() + sStart;
+  sLength = sEnd - sStart;
+
+  size_t rIndex = 0;
+  size_t rEnd = sLength;
+
+  for (;;)
+  {
+    Range m = re->indexIn(sData, sLength, Range(rIndex, rEnd));
+
+    //size_t remain = (size_t)(strEnd - strCur);
+    //Range m = filter.match(strCur, remain, cs, Range(0, remain));
+
+    size_t splitLength = ((m.getStart() != INVALID_INDEX) ? m.getStart() : sEnd) - rIndex;
+    if ((splitLength == 0 && splitBehavior == SPLIT_KEEP_EMPTY) || splitLength != 0)
+    {
+      if (dst->append(CharT_(Stub)(sData + rIndex, splitLength)) != ERR_OK)
+        goto _OutOfMemory;
+    }
+
+    if (m.getStart() == INVALID_INDEX)
+      break;
+
+    rIndex = m.getEnd();
+  }
+  return ERR_OK;
+
+_OutOfMemory:
+  dst->slice(Range(0, dstInitialLength));
+  return ERR_RT_OUT_OF_MEMORY;
+}
+
+// ============================================================================
+// [Fog::String - Slice]
+// ============================================================================
+
+template<typename CharT>
+static err_t FOG_CDECL StringT_slice(CharT_(String)* self, const Range* range)
+{
+  CharT_(StringData)* d = self->_d;
+
+  size_t dLength = d->length;
+  size_t rStart, rEnd;
+
+  if (!Range::fit(rStart, rEnd, dLength, range))
+  {
+    self->clear();
+    return ERR_OK;
   }
 
-  return result;
-}
+  size_t finalLength = rEnd - rStart;
+  CharT* dData = d->data;
 
-String String::join(const List<String>& seq, const Char separator)
-{
-  StringTmp<1> sept(separator);
-  return join(seq, sept);
-}
-
-String String::join(const List<String>& seq, const String& separator)
-{
-  String result;
-
-  size_t seqLength = 0;
-  size_t sepLength = separator.getLength();
-
-  List<String>::ConstIterator it(seq);
-
-  for (it.toStart(); it.isValid(); it.toNext())
+  if (d->reference.get() > 1)
   {
-    size_t len = it.value().getLength();
+    d = CharI_(String)::_dCreate(finalLength, CharT_(Stub)(dData  + rStart, finalLength));
+    if (FOG_IS_NULL(d))
+      return ERR_RT_OUT_OF_MEMORY;
 
-    // Prevent for possible overflow (shouldn't normally happen)
-    if (!it.atStart())
+    atomicPtrXchg(&self->_d, d)->release();
+    return ERR_OK;
+  }
+  else
+  {
+    if (rStart != 0)
+      StringT_chcopy(dData, dData + rStart, finalLength);
+
+    d->hashCode = 0;
+    d->length = finalLength;
+    dData[finalLength] = 0;
+
+    return ERR_OK;
+  }
+}
+
+// ============================================================================
+// [Fog::String - Join]
+// ============================================================================
+
+template<typename CharT>
+static err_t FOG_CDECL StringT_joinStub(CharT_(String)* self, const CharT_(String)* list, size_t listLength, const CharT_(Stub)* sep)
+{
+  size_t i;
+  size_t finalLength = 0;
+
+  const CharT* separatorData = sep->getData();
+  size_t separatorLength = sep->getLength();
+
+  // First collect how many characters will be in the result.
+  for (i = 0; i < listLength; i++)
+  {
+    size_t itemLength = list[i].getLength();
+
+    // Prevent for possible overflow (shouldn't normally happen).
+    if (i > 0)
     {
-      if (seqLength + sepLength < seqLength) return result;
-      seqLength += sepLength;
+      if (!Math::canSum(finalLength, separatorLength))
+        return ERR_RT_OUT_OF_MEMORY;
+      finalLength += separatorLength;
     }
 
     // Prevent for possible overflow (shouldn't normally happen)
-    if (seqLength + len < seqLength) return result;
-    seqLength += len;
+    if (!Math::canSum(finalLength, itemLength))
+      return ERR_RT_OUT_OF_MEMORY;
+    finalLength += itemLength;
   }
 
-  // Allocate memory for all strings in seq and for separators
-  if (result.reserve(seqLength) != ERR_OK) return result;
+  // Alloc memory and join.
+  CharT* p = self->_prepare(CONTAINER_OP_APPEND, finalLength);
+  if (FOG_IS_NULL(p))
+    return ERR_RT_OUT_OF_MEMORY;
 
-  Char* cur = result._d->data;
-  const Char* sep = separator.getData();
-
-  // Serialize
-  for (it.toStart(); it.isValid(); it.toNext())
+  for (i = 0; i < listLength; i++)
   {
-    size_t len = it.value().getLength();
+    size_t itemLength = list[i].getLength();
 
-    if (!it.atStart())
+    if (i > 0)
     {
-      StringUtil::copy(cur, sep, sepLength);
-      cur += sepLength;
+      StringT_chcopy(p, separatorData, separatorLength);
+      p += separatorLength;
     }
 
-    StringUtil::copy(cur, it.value().getData(), len);
-    cur += len;
+    StringT_chcopy(p, list[i].getData(), itemLength);
+    p += itemLength;
   }
 
-  cur[0] = Char(0);
-  result._d->length = (size_t)(cur - result._d->data);
-  return result;
+  FOG_ASSERT(p == self->_d->data + finalLength);
+  return ERR_OK;
+}
+
+template<typename CharT>
+static err_t FOG_CDECL StringT_joinString(CharT_(String)* self, const CharT_(String)* list, size_t listLength, const CharT_(String)* sep)
+{
+  CharT_(Stub) stub(sep->getData(), sep->getLength());
+  return StringT_joinStub<CharT>(self, list, listLength, &stub);
+}
+
+template<typename CharT>
+static err_t FOG_CDECL StringT_joinChar(CharT_(String)* self, const CharT_(String)* list, size_t listLength, CharT_Type sep)
+{
+  CharT_(Stub) stub(&sep, 1);
+  return StringT_joinStub<CharT>(self, list, listLength, &stub);
 }
 
 // ============================================================================
-// [Fog::String - Substring]
+// [Fog::String - ToBool]
 // ============================================================================
 
-String String::substring(const Range& range) const
+template<typename CharT>
+static err_t FOG_CDECL StringT_parseBool(const CharT_(String)* self, bool* dst, uint32_t base, size_t* end, uint32_t* pFlags)
 {
-  size_t rstart, rend;
-  if (fitToRange(*this, rstart, rend, range))
-    return String(Utf16(getData() + rstart, rend - rstart));
-  else
-    return String();
+  CharT_(StringData)* d = self->_d;
+  return StringUtil::parseBool(dst, d->data, d->length, end, pFlags);
 }
 
 // ============================================================================
-// [Fog::String - Conversion]
+// [Fog::String - ParseInt]
 // ============================================================================
 
-err_t String::atob(bool* dst, int base, size_t* end, uint32_t* parserFlags) const
+template<typename CharT>
+static err_t FOG_CDECL StringT_parseI8(const CharT_(String)* self, int8_t* dst, uint32_t base, size_t* pEnd, uint32_t* pFlags)
 {
-  return StringUtil::atob(getData(), getLength(), dst, end, parserFlags);
+  CharT_(StringData)* d = self->_d;
+  return StringUtil::parseI8(dst, d->data, d->length, base, pEnd, pFlags);
 }
 
-err_t String::atoi8(int8_t* dst, int base, size_t* end, uint32_t* parserFlags) const
+template<typename CharT>
+static err_t FOG_CDECL StringT_parseU8(const CharT_(String)* self, uint8_t* dst, uint32_t base, size_t* pEnd, uint32_t* pFlags)
 {
-  return StringUtil::atoi8(getData(), getLength(), dst, base, end, parserFlags);
+  CharT_(StringData)* d = self->_d;
+  return StringUtil::parseU8(dst, d->data, d->length, base, pEnd, pFlags);
 }
 
-err_t String::atou8(uint8_t* dst, int base, size_t* end, uint32_t* parserFlags) const
+template<typename CharT>
+static err_t FOG_CDECL StringT_parseI16(const CharT_(String)* self, int16_t* dst, uint32_t base, size_t* pEnd, uint32_t* pFlags)
 {
-  return StringUtil::atou8(getData(), getLength(), dst, base, end, parserFlags);
+  CharT_(StringData)* d = self->_d;
+  return StringUtil::parseI16(dst, d->data, d->length, base, pEnd, pFlags);
 }
 
-err_t String::atoi16(int16_t* dst, int base, size_t* end, uint32_t* parserFlags) const
+template<typename CharT>
+static err_t FOG_CDECL StringT_parseU16(const CharT_(String)* self, uint16_t* dst, uint32_t base, size_t* pEnd, uint32_t* pFlags)
 {
-  return StringUtil::atoi16(getData(), getLength(), dst, base, end, parserFlags);
+  CharT_(StringData)* d = self->_d;
+  return StringUtil::parseU16(dst, d->data, d->length, base, pEnd, pFlags);
 }
 
-err_t String::atou16(uint16_t* dst, int base, size_t* end, uint32_t* parserFlags) const
+template<typename CharT>
+static err_t FOG_CDECL StringT_parseI32(const CharT_(String)* self, int32_t* dst, uint32_t base, size_t* pEnd, uint32_t* pFlags)
 {
-  return StringUtil::atou16(getData(), getLength(), dst, base, end, parserFlags);
+  CharT_(StringData)* d = self->_d;
+  return StringUtil::parseI32(dst, d->data, d->length, base, pEnd, pFlags);
 }
 
-err_t String::atoi32(int32_t* dst, int base, size_t* end, uint32_t* parserFlags) const
+template<typename CharT>
+static err_t FOG_CDECL StringT_parseU32(const CharT_(String)* self, uint32_t* dst, uint32_t base, size_t* pEnd, uint32_t* pFlags)
 {
-  return StringUtil::atoi32(getData(), getLength(), dst, base, end, parserFlags);
+  CharT_(StringData)* d = self->_d;
+  return StringUtil::parseU32(dst, d->data, d->length, base, pEnd, pFlags);
 }
 
-err_t String::atou32(uint32_t* dst, int base, size_t* end, uint32_t* parserFlags) const
+template<typename CharT>
+static err_t FOG_CDECL StringT_parseI64(const CharT_(String)* self, int64_t* dst, uint32_t base, size_t* pEnd, uint32_t* pFlags)
 {
-  return StringUtil::atou32(getData(), getLength(), dst, base, end, parserFlags);
+  CharT_(StringData)* d = self->_d;
+  return StringUtil::parseI64(dst, d->data, d->length, base, pEnd, pFlags);
 }
 
-err_t String::atoi64(int64_t* dst, int base, size_t* end, uint32_t* parserFlags) const
+template<typename CharT>
+static err_t FOG_CDECL StringT_parseU64(const CharT_(String)* self, uint64_t* dst, uint32_t base, size_t* pEnd, uint32_t* pFlags)
 {
-  return StringUtil::atoi64(getData(), getLength(), dst, base, end, parserFlags);
-}
-
-err_t String::atou64(uint64_t* dst, int base, size_t* end, uint32_t* parserFlags) const
-{
-  return StringUtil::atou64(getData(), getLength(), dst, base, end, parserFlags);
-}
-
-err_t String::atof(float* dst, const Locale* locale, size_t* end, uint32_t* parserFlags) const
-{
-  if (locale == NULL) locale = &Locale::posix();
-
-  return StringUtil::atof(getData(), getLength(), dst,
-    locale->getChar(LOCALE_CHAR_DECIMAL_POINT), end, parserFlags);
-}
-
-err_t String::atod(double* dst, const Locale* locale, size_t* end, uint32_t* parserFlags) const
-{
-  if (locale == NULL) locale = &Locale::posix();
-
-  return StringUtil::atod(getData(), getLength(), dst,
-    locale->getChar(LOCALE_CHAR_DECIMAL_POINT), end, parserFlags);
+  CharT_(StringData)* d = self->_d;
+  return StringUtil::parseU64(dst, d->data, d->length, base, pEnd, pFlags);
 }
 
 // ============================================================================
-// [Fog::String - Contains]
+// [Fog::String - ParseReal]
 // ============================================================================
 
-bool String::contains(Char ch,
-  uint cs, const Range& range) const
+template<typename CharT>
+static err_t FOG_CDECL StringT_parseFloat(const CharT_(String)* self, float* dst, CharT_Type decimalPoint, size_t* pEnd, uint32_t* pFlags)
 {
-  size_t rstart, rend;
-  if (fitToRange(*this, rstart, rend, range))
-    return StringUtil::indexOf(getData() + rstart, rend - rstart, ch, cs) != INVALID_INDEX;
-  else
-    return false;
+  CharT_(StringData)* d = self->_d;
+  return StringUtil::parseReal(dst, d->data, d->length, CharT(decimalPoint), pEnd, pFlags);
 }
 
-bool String::contains(const String& pattern,
-  uint cs, const Range& range) const
+template<typename CharT>
+static err_t FOG_CDECL StringT_parseDouble(const CharT_(String)* self, double* dst, CharT_Type decimalPoint, size_t* pEnd, uint32_t* pFlags)
 {
-  return indexOf(pattern, cs, range) != INVALID_INDEX;
-}
-
-bool String::contains(const StringFilter& filter,
-  uint cs, const Range& range) const
-{
-  Range m = filter.indexOf(getData(), getLength(), cs, range);
-  return m.getStart() != INVALID_INDEX;
+  CharT_(StringData)* d = self->_d;
+  return StringUtil::parseReal(dst, d->data, d->length, CharT(decimalPoint), pEnd, pFlags);
 }
 
 // ============================================================================
 // [Fog::String - CountOf]
 // ============================================================================
 
-size_t String::countOf(Char ch,
-  uint cs, const Range& range) const
+template<typename CharT>
+static size_t FOG_CDECL StringT_countOfChar(const CharT_(String)* self, const Range* range, CharT_Type ch, uint32_t cs)
 {
-  size_t rstart, rend;
-  if (fitToRange(*this, rstart, rend, range))
-    return StringUtil::countOf(getData() + rstart, rend - rstart, ch, cs);
-  else
+  CharT_(StringData)* d = self->_d;
+
+  if (cs >= CASE_SENSITIVITY_COUNT)
+    cs = CASE_INSENSITIVE;
+
+  size_t rStart, rEnd;
+  if (!Range::fit(rStart, rEnd, d->length, range))
     return 0;
-}
-
-size_t String::countOf(const String& pattern,
-  uint cs, const Range& range) const
-{
-  size_t rstart, rend;
-  if (!fitToRange(*this, rstart, rend, range)) return 0;
-
-  size_t len = pattern.getLength();
-  if (len == 0) return 0;
-  if (len == 1) return countOf(pattern.getAt(0), cs, range);
-
-  if (rend - rstart >= 256)
-  {
-    // Match using StringMatcher.
-    StringMatcher matcher;
-    if (matcher.setPattern(pattern)) return 0;
-
-    return countOf(matcher, cs, range);
-  }
   else
-  {
-    // Match using naive algorithm.
-    const Char* aStr = getData();
-    const Char* bStr = pattern.getData();
-
-    size_t count = 0;
-
-    for (;;)
-    {
-      size_t i = StringUtil::indexOf(aStr + rstart, rend - rstart, bStr, len);
-      if (i == INVALID_INDEX) break;
-      rstart += i;
-
-      count++;
-      rstart += len;
-    }
-
-    return count;
-  }
+    return StringUtil::countOf(d->data + rStart, rEnd - rStart, CharT(ch), cs);
 }
 
-size_t String::countOf(const StringFilter& filter,
-  uint cs, const Range& range) const
+template<typename CharT, typename SrcT>
+static size_t FOG_CDECL StringT_countOfStub(const CharT_(String)* self, const Range* range, const SrcT_(Stub)* pattern, uint32_t cs)
 {
-  size_t rstart, rend;
-  if (!fitToRange(*this, rstart, rend, range)) return 0;
+  CharT_(StringData)* d = self->_d;
 
-  const Char* str = getData();
-  size_t len = getLength();
-  size_t count = 0;
+  if (cs >= CASE_SENSITIVITY_COUNT)
+    cs = CASE_INSENSITIVE;
+
+  const SrcT* pData = pattern->getData();
+  size_t pLength = pattern->getComputedLength();
+
+  size_t rStart, rEnd;
+  if (!Range::fit(rStart, rEnd, d->length, range))
+    return 0;
+
+  if (pLength == 0)
+    return 0;
+
+  if (pLength == 1)
+    return self->countOf(Range(rStart, rEnd), CharT(pData[0]), cs);
+
+  size_t counter = 0;
+  const CharT* sData = d->data;
 
   for (;;)
   {
-    Range r = filter.indexOf(str, len, cs, Range(rstart, rend));
-    if (r.getStart() == INVALID_INDEX) break;
+    size_t i = StringUtil::indexOf(sData + rStart, rEnd - rStart, pData, pLength, cs);
+    if (i == INVALID_INDEX)
+      break;
 
-    count++;
-    rstart = r.getEnd();
+    rStart += i + pLength;
+    counter++;
   }
 
-  return count;
+  return counter;
 }
 
-// ============================================================================
-// [Fog::String - IndexOf / LastIndexOf]
-// ============================================================================
-
-size_t String::indexOf(Char ch,
-  uint cs, const Range& range) const
+template<typename CharT, typename SrcT>
+static size_t FOG_CDECL StringT_countOfString(const CharT_(String)* self, const Range* range, const SrcT_(String)* pattern, uint32_t cs)
 {
-  size_t rstart, rend;
-  if (!fitToRange(*this, rstart, rend, range)) return INVALID_INDEX;
+  CharT_(StringData)* d = self->_d;
 
-  size_t i = StringUtil::indexOf(getData() + rstart, rend - rstart, ch, cs);
-  return i != INVALID_INDEX ? i + rstart : i;
-}
+  const SrcT* pData = pattern->getData();
+  size_t pLength = pattern->getLength();
 
-size_t String::indexOf(const String& pattern,
-  uint cs, const Range& range) const
-{
-  size_t rstart, rend;
-  if (!fitToRange(*this, rstart, rend, range)) return INVALID_INDEX;
+  size_t rStart, rEnd;
+  if (!Range::fit(rStart, rEnd, d->length, range))
+    return 0;
 
-  size_t len = pattern.getLength();
-  if (len == 0) return INVALID_INDEX;
-  if (len == 1) return indexOf(pattern.getAt(0), cs, range);
+  if (pLength == 0)
+    return 0;
+  if (pLength == 1)
+    return self->countOf(Range(rStart, rEnd), pData[0], cs);
 
-  if (rend - rstart >= 256)
-  {
-    // Match using StringMatcher.
-    StringMatcher matcher;
-    if (matcher.setPattern(pattern)) return 0;
-
-    return indexOf(matcher, cs, range);
-  }
-  else
-  {
-    // Match using naive algorithm.
-    size_t i = StringUtil::indexOf(getData() + rstart, rend - rstart, pattern.getData(), len, cs);
-    return (i == INVALID_INDEX) ? i : i + rstart;
-  }
-}
-
-size_t String::indexOf(const StringFilter& filter,
-  uint cs, const Range& range) const
-{
-  size_t rstart, rend;
-  if (!fitToRange(*this, rstart, rend, range)) return INVALID_INDEX;
-
-  Range m = filter.match(getData(), getLength(), cs, Range(rstart, rend));
-  return m.getStart();
-}
-
-size_t String::lastIndexOf(Char ch,
-  uint cs, const Range& range) const
-{
-  size_t rstart, rend;
-  if (!fitToRange(*this, rstart, rend, range)) return INVALID_INDEX;
-
-  size_t i = StringUtil::lastIndexOf(getData() + rstart, rend - rstart, ch, cs);
-  return i != INVALID_INDEX ? i + rstart : i;
-}
-
-size_t String::lastIndexOf(const String& pattern,
-  uint cs, const Range& range) const
-{
-  size_t rstart, rend;
-  if (!fitToRange(*this, rstart, rend, range)) return INVALID_INDEX;
-
-  size_t len = pattern.getLength();
-  if (len == 0) return INVALID_INDEX;
-  if (len == 1) return lastIndexOf(pattern.getAt(0), cs, range);
-
-  if (rend - rstart >= 256)
-  {
-    // Match using StringMatcher.
-    StringMatcher matcher;
-    if (matcher.setPattern(pattern)) return 0;
-
-    return lastIndexOf(matcher, cs, range);
-  }
-  else
-  {
-    // Match using naive algorithm.
-    const Char* aData = getData();
-    const Char* bData = pattern.getData();
-
-    size_t result = INVALID_INDEX;
-
-    for (;;)
-    {
-      size_t i = StringUtil::indexOf(aData + rstart, rend - rstart, bData, len);
-      if (i == INVALID_INDEX) break;
-
-      result = i + rstart;
-      rstart = result + len;
-    }
-    return result;
-  }
-}
-
-size_t String::lastIndexOf(const StringFilter& filter,
-  uint cs, const Range& range) const
-{
-  size_t rstart, rend;
-  if (!fitToRange(*this, rstart, rend, range)) return INVALID_INDEX;
-
-  size_t result = INVALID_INDEX;
+  size_t counter = 0;
+  const CharT* sData = d->data;
 
   for (;;)
   {
-    Range m = filter.match(getData(), getLength(), cs, Range(rstart, rend));
-    if (m.getStart() == INVALID_INDEX) break;
+    size_t i = StringUtil::indexOf(sData + rStart, rEnd - rStart, pData, pLength);
+    if (i == INVALID_INDEX)
+      break;
 
-    result = m.getStart();
-    rstart = m.getEnd();
+    rStart += i + pLength;
+    counter++;
   }
 
-  return result;
+  return counter;
 }
 
-// ============================================================================
-// [Fog::String - IndexOfAny / LastIndexOfAny]
-// ============================================================================
-
-size_t String::indexOfAny(const Char* chars, size_t numChars, uint cs, const Range& range) const
+template<typename CharT>
+static size_t FOG_CDECL StringT_countOfRegExp(const CharT_(String)* self, const Range* range, const CharT_(RegExp)* re)
 {
-  size_t rstart, rend;
-  if (!chars || !fitToRange(*this, rstart, rend, range)) return INVALID_INDEX;
+  size_t rStart, rEnd;
+  size_t counter = 0;
 
-  size_t i = StringUtil::indexOfAny(getData() + rstart, rend - rstart, chars, numChars, cs);
-  return i != INVALID_INDEX ? i + rstart : i;
-}
+  if (re->getType() == REGEXP_TYPE_NONE)
+    return counter;
 
-size_t String::lastIndexOfAny(const Char* chars, size_t numChars, uint cs, const Range& range) const
-{
-  size_t rstart, rend;
-  if (!chars || !fitToRange(*this, rstart, rend, range)) return INVALID_INDEX;
+  if (!Range::fit(rStart, rEnd, self->getLength(), range))
+    return counter;
 
-  size_t i = StringUtil::lastIndexOfAny(getData() + rstart, rend - rstart, chars, numChars, cs);
-  return i != INVALID_INDEX ? i + rstart : i;
-}
-
-// ============================================================================
-// [Fog::String - StartsWith / EndsWith]
-// ============================================================================
-
-bool String::startsWith(const Ascii8& str, uint cs) const
-{
-  const char* sData = str.getData();
-  size_t sLength = str.getComputedLength();
-
-  return getLength() >= sLength && StringUtil::eq(getData(), sData, sLength, cs);
-}
-
-bool String::startsWith(const Utf16& str, uint cs) const
-{
-  const Char* sData = str.getData();
-  size_t sLength = str.getComputedLength();
-
-  return getLength() >= sLength && StringUtil::eq(getData(), sData, sLength, cs);
-}
-
-bool String::startsWith(const String& str, uint cs) const
-{
-  return getLength() >= str.getLength() &&
-    StringUtil::eq(getData(), str.getData(), str.getLength(), cs);
-}
-
-bool String::startsWith(const StringFilter& filter, uint cs) const
-{
-  size_t flen = filter.getLength();
-
-  if (flen == INVALID_INDEX) flen = getLength();
-  return filter.match(getData(), getLength(), cs, Range(0, flen)).getStart() == 0;
-}
-
-bool String::endsWith(const Ascii8& str, uint cs) const
-{
-  const char* sData = str.getData();
-  size_t sLength = str.getComputedLength();
-
-  return getLength() >= sLength && StringUtil::eq(getData() + getLength() - sLength, sData, sLength, cs);
-}
-
-bool String::endsWith(const Utf16& str, uint cs) const
-{
-  const Char* sData = str.getData();
-  size_t sLength = str.getComputedLength();
-
-  return getLength() >= sLength && StringUtil::eq(getData() + getLength() - sLength, sData, sLength, cs);
-}
-
-bool String::endsWith(const String& str, uint cs) const
-{
-  return getLength() >= str.getLength() && StringUtil::eq(getData() + getLength() - str.getLength(), str.getData(), str.getLength(), cs);
-}
-
-bool String::endsWith(const StringFilter& filter, uint cs) const
-{
-  size_t flen = filter.getLength();
-
-  if (flen == INVALID_INDEX)
+  for (;;)
   {
-    size_t i = 0;
-    size_t len = getLength();
+    Range r = re->indexIn(*self, Range(rStart, rEnd));
+    if (!r.isValid())
+      break;
 
-    for (;;)
+    rStart = r.getEnd();
+    counter++;
+  }
+
+  return counter;
+}
+
+// ============================================================================
+// [Fog::String - IndexOf]
+// ============================================================================
+
+template<typename CharT>
+static size_t FOG_CDECL StringT_indexOfChar(const CharT_(String)* self, const Range* range, CharT_Type ch, uint32_t cs)
+{
+  CharT_(StringData)* d = self->_d;
+
+  size_t rStart, rEnd;
+  if (!Range::fit(rStart, rEnd, d->length, range))
+    return INVALID_INDEX;
+
+  if (cs >= CASE_SENSITIVITY_COUNT)
+    cs = CASE_INSENSITIVE;
+
+  size_t i = StringUtil::indexOf(d->data + rStart, rEnd - rStart, CharT(ch), cs);
+  return i != INVALID_INDEX ? i + rStart : i;
+}
+
+template<typename CharT, typename SrcT>
+static size_t FOG_CDECL StringT_indexOfStub(const CharT_(String)* self, const Range* range, const SrcT_(Stub)* pattern, uint32_t cs)
+{
+  CharT_(StringData)* d = self->_d;
+
+  const SrcT* pData = pattern->getData();
+  size_t pLength = pattern->getComputedLength();
+
+  size_t rStart, rEnd;
+  if (!Range::fit(rStart, rEnd, d->length, range))
+    return INVALID_INDEX;
+
+  if (pLength == 0)
+    return INVALID_INDEX;
+
+  if (cs >= CASE_SENSITIVITY_COUNT)
+    cs = CASE_INSENSITIVE;
+
+  const CharT* sData = d->data;
+
+  size_t i = (pLength == 1)
+    ? StringUtil::indexOf(sData + rStart, rEnd - rStart, CharT(pData[0]), cs)
+    : StringUtil::indexOf(sData + rStart, rEnd - rStart, pData, pLength, cs);
+  return i != INVALID_INDEX ? i + rStart : i;
+}
+
+template<typename CharT, typename SrcT>
+static size_t FOG_CDECL StringT_indexOfString(const CharT_(String)* self, const Range* range, const SrcT_(String)* pattern, uint32_t cs)
+{
+  CharT_(StringData)* d = self->_d;
+
+  const SrcT* pData = pattern->getData();
+  size_t pLength = pattern->getLength();
+
+  size_t rStart, rEnd;
+  if (!Range::fit(rStart, rEnd, d->length, range))
+    return INVALID_INDEX;
+
+  if (pLength == 0)
+    return INVALID_INDEX;
+
+  if (cs >= CASE_SENSITIVITY_COUNT)
+    cs = CASE_INSENSITIVE;
+
+  const CharT* sData = d->data;
+
+  size_t i = (pLength == 1)
+    ? StringUtil::indexOf(sData + rStart, rEnd - rStart, pData[0], cs)
+    : StringUtil::indexOf(sData + rStart, rEnd - rStart, pData, pLength, cs);
+  return i != INVALID_INDEX ? i + rStart : i;
+}
+
+template<typename CharT>
+static size_t FOG_CDECL StringT_indexOfRegExp(const CharT_(String)* self, const Range* range, const CharT_(RegExp)* re)
+{
+  CharT_(StringData)* d = self->_d;
+
+  size_t rStart, rEnd;
+  if (!Range::fit(rStart, rEnd, d->length, range))
+    return INVALID_INDEX;
+
+  return re->indexIn(*self, Range(rStart, rEnd)).getStart();
+}
+
+template<typename CharT>
+static size_t FOG_CDECL StringT_indexOfAnyChar(const CharT_(String)* self, const Range* range, const CharT* charArray, size_t charLength, uint32_t cs)
+{
+  CharT_(StringData)* d = self->_d;
+
+  size_t rStart, rEnd;
+  if (!Range::fit(rStart, rEnd, d->length, range))
+    return INVALID_INDEX;
+
+  if (cs >= CASE_SENSITIVITY_COUNT)
+    cs = CASE_INSENSITIVE;
+
+  return StringUtil::indexOfAny(d->data + rStart, rEnd - rStart, charArray, charLength, cs);
+}
+
+// ============================================================================
+// [Fog::String - LastIndexOf]
+// ============================================================================
+
+template<typename CharT>
+static size_t FOG_CDECL StringT_lastIndexOfChar(const CharT_(String)* self, const Range* range, CharT_Type ch, uint32_t cs)
+{
+  CharT_(StringData)* d = self->_d;
+
+  size_t rStart, rEnd;
+  if (!Range::fit(rStart, rEnd, d->length, range))
+    return INVALID_INDEX;
+
+  if (cs >= CASE_SENSITIVITY_COUNT)
+    cs = CASE_INSENSITIVE;
+
+  size_t i = StringUtil::lastIndexOf(d->data + rStart, rEnd - rStart, CharT(ch), cs);
+  return i != INVALID_INDEX ? i + rStart : i;
+}
+
+template<typename CharT, typename SrcT>
+static size_t FOG_CDECL StringT_lastIndexOfStub(const CharT_(String)* self, const Range* range, const SrcT_(Stub)* pattern, uint32_t cs)
+{
+  CharT_(StringData)* d = self->_d;
+
+  const SrcT* pData = pattern->getData();
+  size_t pLength = pattern->getComputedLength();
+
+  size_t rStart, rEnd;
+  if (!Range::fit(rStart, rEnd, d->length, range))
+    return INVALID_INDEX;
+
+  if (pLength == 0)
+    return INVALID_INDEX;
+
+  if (cs >= CASE_SENSITIVITY_COUNT)
+    cs = CASE_INSENSITIVE;
+
+  const CharT* sData = d->data;
+
+  size_t i = (pLength == 1)
+    ? StringUtil::lastIndexOf(sData + rStart, rEnd - rStart, CharT(pData[0]), cs)
+    : StringUtil::lastIndexOf(sData + rStart, rEnd - rStart, pData, pLength, cs);
+  return i != INVALID_INDEX ? i + rStart : i;
+}
+
+template<typename CharT, typename SrcT>
+static size_t FOG_CDECL StringT_lastIndexOfString(const CharT_(String)* self, const Range* range, const SrcT_(String)* pattern, uint32_t cs)
+{
+  CharT_(StringData)* d = self->_d;
+
+  const SrcT* pData = pattern->getData();
+  size_t pLength = pattern->getLength();
+
+  size_t rStart, rEnd;
+  if (!Range::fit(rStart, rEnd, d->length, range))
+    return INVALID_INDEX;
+
+  if (pLength == 0)
+    return INVALID_INDEX;
+
+  if (cs >= CASE_SENSITIVITY_COUNT)
+    cs = CASE_INSENSITIVE;
+
+  const CharT* sData = d->data;
+
+  size_t i = (pLength == 1)
+    ? StringUtil::lastIndexOf(sData + rStart, rEnd - rStart, pData[0], cs)
+    : StringUtil::lastIndexOf(sData + rStart, rEnd - rStart, pData, pLength, cs);
+  return i != INVALID_INDEX ? i + rStart : i;
+}
+
+template<typename CharT>
+static size_t FOG_CDECL StringT_lastIndexOfRegExp(const CharT_(String)* self, const Range* range, const CharT_(RegExp)* re)
+{
+  CharT_(StringData)* d = self->_d;
+
+  size_t rStart, rEnd;
+  if (!Range::fit(rStart, rEnd, d->length, range))
+    return INVALID_INDEX;
+
+  return re->lastIndexIn(*self, Range(rStart, rEnd)).getStart();
+}
+
+template<typename CharT>
+static size_t FOG_CDECL StringT_lastIndexOfAnyChar(const CharT_(String)* self, const Range* range, const CharT* charArray, size_t charLength, uint32_t cs)
+{
+  CharT_(StringData)* d = self->_d;
+
+  size_t rStart, rEnd;
+  if (!Range::fit(rStart, rEnd, d->length, range))
+    return INVALID_INDEX;
+
+  if (cs >= CASE_SENSITIVITY_COUNT)
+    cs = CASE_INSENSITIVE;
+
+  return StringUtil::lastIndexOfAny(d->data + rStart, rEnd - rStart, charArray, charLength, cs);
+}
+
+// ============================================================================
+// [Fog::String - StartsWith]
+// ============================================================================
+
+template<typename CharT>
+static bool FOG_CDECL StringT_startsWithChar(const CharT_(String)* self, CharT_Type ch, uint32_t cs)
+{
+  CharT_(StringData)* d = self->_d;
+  size_t dLength = d->length;
+
+  if (dLength == 0)
+    return false;
+
+  CharT_Value first = d->data[0];
+  if (cs == CASE_SENSITIVE)
+    return first == ch;
+  else
+    return CharT_Func::toLower(first) == CharT_Func::toLower(ch);
+}
+
+template<typename CharT, typename SrcT>
+static bool FOG_CDECL StringT_startsWithStub(const CharT_(String)* self, const SrcT_(Stub)* str, uint32_t cs)
+{
+  CharT_(StringData)* d = self->_d;
+  size_t dLength = d->length;
+
+  const SrcT* sData = str->getData();
+  size_t sLength = str->getComputedLength();
+
+  if (dLength < sLength)
+    return false;
+
+  if (cs == CASE_SENSITIVE)
+    return StringT_cheq(d->data, sData, sLength);
+  else
+    return StringT_cheqi(d->data, sData, sLength);
+}
+
+template<typename CharT, typename SrcT>
+static bool FOG_CDECL StringT_startsWithString(const CharT_(String)* self, const SrcT_(String)* str, uint32_t cs)
+{
+  CharT_(StringData)* d = self->_d;
+  size_t dLength = d->length;
+
+  const SrcT* sData = str->getData();
+  size_t sLength = str->getLength();
+
+  if (dLength < sLength)
+    return false;
+
+  if (cs == CASE_SENSITIVE)
+    return StringT_cheq(d->data, sData, sLength);
+  else
+    return StringT_cheqi(d->data, sData, sLength);
+}
+
+template<typename CharT>
+static bool FOG_CDECL StringT_startsWithRegExp(const CharT_(String)* self, const CharT_(RegExp)* re)
+{
+  CharT_(StringData)* d = self->_d;
+
+  size_t dLength = d->length;
+  size_t rLength = re->getFixedLength();
+
+  if (rLength == INVALID_INDEX)
+    rLength = dLength;
+  else if (rLength > dLength)
+    return false;
+
+  return re->indexIn(*self, Range(0, rLength)).getStart() == 0;
+}
+
+// ============================================================================
+// [Fog::String - EndsWith]
+// ============================================================================
+
+template<typename CharT>
+static bool FOG_CDECL StringT_endsWithChar(const CharT_(String)* self, CharT_Type ch, uint32_t cs)
+{
+  CharT_(StringData)* d = self->_d;
+  size_t dLength = d->length;
+
+  if (dLength == 0)
+    return false;
+
+  CharT_Value last = d->data[dLength - 1];
+  if (cs == CASE_SENSITIVE)
+    return last == ch;
+  else
+    return CharT_Func::toLower(last) == CharT_Func::toLower(ch);
+}
+
+template<typename CharT, typename SrcT>
+static bool FOG_CDECL StringT_endsWithStub(const CharT_(String)* self, const SrcT_(Stub)* str, uint32_t cs)
+{
+  CharT_(StringData)* d = self->_d;
+  size_t length = d->length;
+
+  const SrcT* sData = str->getData();
+  size_t sLength = str->getComputedLength();
+
+  if (length < sLength)
+    return false;
+
+  if (cs == CASE_SENSITIVE)
+    return StringT_cheq(d->data + length - sLength, sData, sLength);
+  else
+    return StringT_cheqi(d->data + length - sLength, sData, sLength);
+}
+
+template<typename CharT, typename SrcT>
+static bool FOG_CDECL StringT_endsWithString(const CharT_(String)* self, const SrcT_(String)* str, uint32_t cs)
+{
+  CharT_(StringData)* d = self->_d;
+  size_t length = d->length;
+
+  const SrcT* sData = str->getData();
+  size_t sLength = str->getLength();
+
+  if (length < sLength)
+    return false;
+
+  if (cs == CASE_SENSITIVE)
+    return StringT_cheq(d->data + length - sLength, sData, sLength);
+  else
+    return StringT_cheqi(d->data + length - sLength, sData, sLength);
+}
+
+template<typename CharT>
+static bool FOG_CDECL StringT_endsWithRegExp(const CharT_(String)* self, const CharT_(RegExp)* re)
+{
+  CharT_(StringData)* d = self->_d;
+  return re->lastIndexIn(*self).getEnd() == d->length;
+}
+
+// ============================================================================
+// [Fog::String - Equality]
+// ============================================================================
+
+template<typename CharT, typename SrcT>
+static bool FOG_CDECL StringT_eqStub(const CharT_(String)* a, const SrcT_(Stub)* b)
+{
+  const CharT* aData = a->getData();
+  const SrcT* bData = b->getData();
+
+  size_t aLength = a->getLength();
+  size_t bLength = b->getLength();
+
+  if (bLength == DETECT_LENGTH)
+  {
+    for (size_t i = 0; i < aLength; i++)
     {
-      Range r = filter.match(getData(), len, cs, Range(i, DETECT_LENGTH));
-      if (r.getStart() == INVALID_INDEX) return false;
-      if ((i = r.getEnd()) == len) return true;
+      if (bData[i] == 0 || aData[i] != (SrcT_Char::Value)bData[i])
+        return false;
     }
+
+    return bData[aLength] == 0;
   }
   else
   {
-    return flen <= getLength() &&
-      filter.match(
-        getData() + getLength() - flen, getLength(), cs, Range(0, flen)).getStart() == 0;
+    return aLength == bLength && StringUtil::eq(aData, bData, aLength, CASE_SENSITIVE);
   }
 }
 
-// ============================================================================
-// [Fog::String - ByteSwap]
-// ============================================================================
-
-err_t String::bswap()
+template<typename CharT, typename SrcT>
+static bool FOG_CDECL StringT_eqString(const CharT_(String)* a, const SrcT_(String)* b)
 {
-  if (getLength() == 0) return ERR_OK;
+  size_t aLength = a->getLength();
+  size_t bLength = b->getLength();
 
-  FOG_RETURN_ON_ERROR(detach());
+  if (aLength != bLength)
+    return false;
 
-  size_t i, len = getLength();
-  Char* ch = _d->data;
-  for (i = 0; i < len; i++) ch[i].bswap();
+  return StringUtil::eq(a->getData(), b->getData(), aLength, CASE_SENSITIVE);
+}
 
-  _d->hashCode = 0;
+template<typename CharT, typename SrcT>
+static bool FOG_CDECL StringT_eqStubEx(const CharT_(String)* a, const SrcT_(Stub)* b, uint32_t cs)
+{
+  const CharT* aData = a->getData();
+  const SrcT* bData = b->getData();
+
+  size_t aLength = a->getLength();
+  size_t bLength = b->getLength();
+
+  if (bLength == DETECT_LENGTH)
+  {
+    if (cs == CASE_SENSITIVE)
+    {
+      for (size_t i = 0; i < aLength; i++)
+      {
+        if (bData[i] == 0 || aData[i] != (SrcT_Char::Value)bData[i])
+          return false;
+      }
+    }
+    else
+    {
+      for (size_t i = 0; i < aLength; i++)
+      {
+        if (bData[i] == 0 || CharT_Func::toLower(aData[i]) != (SrcT_Char::Value)SrcI_(_Char)::toLower(bData[i]))
+          return false;
+      }
+    }
+
+    return bData[aLength] == 0;
+  }
+  else
+  {
+    return aLength == bLength && StringUtil::eq(aData, bData, aLength, CASE_SENSITIVE);
+  }
+}
+
+template<typename CharT, typename SrcT>
+static bool FOG_CDECL StringT_eqStringEx(const CharT_(String)* a, const SrcT_(String)* b, uint32_t cs)
+{
+  size_t aLength = a->getLength();
+  size_t bLength = b->getLength();
+
+  if (aLength != bLength)
+    return false;
+
+  if (cs >= CASE_SENSITIVITY_COUNT)
+    cs = CASE_INSENSITIVE;
+
+  return StringUtil::eq(a->getData(), b->getData(), aLength, cs);
+}
+
+// ============================================================================
+// [Fog::String - Compare]
+// ============================================================================
+
+static FOG_INLINE int StringT_compareLength(size_t aLength, size_t bLength)
+{
+  if (aLength > bLength) return 1;
+  if (aLength < bLength) return -1;
+
+  return 0;
+}
+
+template<typename CharT, typename SrcT>
+static FOG_INLINE int StringT_compareAgainstNullTerminated_cs(const CharT* aData, size_t aLength, const SrcT* bData)
+{
+  FOG_ASSERT(aLength > 0);
+  const CharT* aEnd = aData + aLength;
+
+  do {
+    int c = static_cast<int>((CharT_Value)*aData) -
+            static_cast<int>((SrcT_Char::Value)*bData);
+    if (c != 0)
+      return c;
+
+    // The NULL terminator can be detected using the 'c' value. If 'b' is
+    // zero and there is something in 'a' then the 'c' will be positive,
+    // which matches the compare result. However, if there is a NULL char
+    // inside 'a' then there is security issue of bypassed NULL terminator
+    // in 'b'. We are not sure about NULL existence in 'a' so we need to
+    // check 'b' again.
+    if (*bData == 0)
+      return 1;
+
+    aData++;
+    bData++;
+  } while (aData != aEnd);
+  return *bData ? -1 : 0;
+}
+
+template<typename CharT, typename SrcT>
+static FOG_INLINE int StringT_compareAgainstNullTerminated_ci(const CharT* aData, size_t aLength, const SrcT* bData)
+{
+  FOG_ASSERT(aLength > 0);
+  const CharT* aEnd = aData + aLength;
+
+  do {
+    int c = static_cast<int>((CharT_Value)CharT_Func::toLower(*aData)) -
+            static_cast<int>((SrcT_Char::Value)SrcI_(_Char)::toLower(*bData));
+    if (c != 0)
+      return c;
+
+    // The NULL terminator can be detected using the 'c' value. If 'b' is
+    // zero and there is something in 'a' then the 'c' will be positive,
+    // which matches the compare result. However, if there is a NULL char
+    // inside 'a' then there is security issue of bypassed NULL terminator
+    // in 'b'. We are not sure about NULL existence in 'a' so we need to
+    // check 'b' again.
+    if (*bData == 0)
+      return 1;
+
+    aData++;
+    bData++;
+  } while (aData != aEnd);
+  return *bData ? -1 : 0;
+}
+
+template<typename CharT, typename SrcT>
+static FOG_INLINE int StringT_compareRaw_cs(const CharT* aData, size_t aLength, const SrcT* bData, size_t bLength)
+{
+  FOG_ASSERT(aLength > 0);
+
+  size_t sharedLength = Math::min(aLength, bLength);
+
+  for (size_t i = 0; i < sharedLength; i++)
+  {
+    int c = static_cast<int>((CharT_Value)aData[i]) -
+            static_cast<int>((SrcT_Char::Value)bData[i]);
+    if (c != 0)
+      return c;
+  }
+
+  return StringT_compareLength(aLength, bLength);
+}
+
+template<typename CharT, typename SrcT>
+static FOG_INLINE int StringT_compareRaw_ci(const CharT* aData, size_t aLength, const SrcT* bData, size_t bLength)
+{
+  FOG_ASSERT(aLength > 0);
+
+  size_t sharedLength = Math::min(aLength, bLength);
+
+  for (size_t i = 0; i < sharedLength; i++)
+  {
+    int c = static_cast<int>((CharT_Value)CharT_Func::toLower(aData[i])) -
+            static_cast<int>((SrcT_Char::Value)SrcI_(_Char)::toLower(bData[i]));
+    if (c != 0)
+      return c;
+  }
+
+  return StringT_compareLength(aLength, bLength);
+}
+
+template<typename CharT, typename SrcT>
+static int FOG_CDECL StringT_compareStub(const CharT_(String)* a, const SrcT_(Stub)* b)
+{
+  size_t aLength = a->getLength();
+  size_t bLength = b->getLength();
+
+  const CharT* aData = a->getData();
+  const SrcT* bData = b->getData();
+
+  if (aLength == 0)
+    return *bData ? -1 : 0;
+
+  if (bLength == DETECT_LENGTH)
+    return StringT_compareAgainstNullTerminated_cs<CharT, SrcT>(aData, aLength, bData);
+  else
+    return StringT_compareRaw_cs<CharT, SrcT>(aData, aLength, bData, bLength);
+}
+
+template<typename CharT, typename SrcT>
+static int FOG_CDECL StringT_compareString(const CharT_(String)* a, const SrcT_(String)* b)
+{
+  size_t aLength = a->getLength();
+  size_t bLength = b->getLength();
+
+  const CharT* aData = a->getData();
+  const SrcT* bData = b->getData();
+
+  return StringT_compareRaw_cs<CharT, SrcT>(aData, aLength, bData, bLength);
+}
+
+template<typename CharT, typename SrcT>
+static int FOG_CDECL StringT_compareStubEx(const CharT_(String)* a, const SrcT_(Stub)* b, uint32_t cs)
+{
+  size_t aLength = a->getLength();
+  size_t bLength = b->getLength();
+
+  const CharT* aData = a->getData();
+  const CharT* aEnd  = aData + aLength;
+  const SrcT* bData = b->getData();
+
+  if (FOG_UNLIKELY(aData == aEnd))
+    return *bData ? -1 : 0;
+
+  if (bLength == DETECT_LENGTH)
+  {
+    if (cs == CASE_SENSITIVE)
+      return StringT_compareAgainstNullTerminated_cs<CharT, SrcT>(aData, aLength, bData);
+    else
+      return StringT_compareAgainstNullTerminated_ci<CharT, SrcT>(aData, aLength, bData);
+  }
+  else
+  {
+    if (cs == CASE_SENSITIVE)
+      return StringT_compareRaw_cs<CharT, SrcT>(aData, aLength, bData, bLength);
+    else
+      return StringT_compareRaw_ci<CharT, SrcT>(aData, aLength, bData, bLength);
+  }
+}
+
+template<typename CharT, typename SrcT>
+static int FOG_CDECL StringT_compareStringEx(const CharT_(String)* a, const SrcT_(String)* b, uint32_t cs)
+{
+  size_t aLength = a->getLength();
+  size_t bLength = b->getLength();
+
+  const CharT* aData = a->getData();
+  const SrcT* bData = b->getData();
+
+  if (cs == CASE_SENSITIVE)
+    return StringT_compareRaw_cs<CharT, SrcT>(aData, aLength, bData, bLength);
+  else
+    return StringT_compareRaw_ci<CharT, SrcT>(aData, aLength, bData, bLength);
+}
+
+// ============================================================================
+// [Fog::String - Validate]
+// ============================================================================
+
+static err_t FOG_CDECL StringA_validateUtf8(const StringA* self, size_t* invalid)
+{
+  StringDataA* d = self->_d;
+  return StringUtil::validateUtf8(d->data, d->length, invalid);
+}
+
+static err_t FOG_CDECL StringW_validateUtf16(const StringW* self, size_t* invalid)
+{
+  StringDataW* d = self->_d;
+  return StringUtil::validateUtf16(d->data, d->length, invalid);
+}
+
+// ============================================================================
+// [Fog::String - GetUcsLength]
+// ============================================================================
+
+static err_t FOG_CDECL StringA_getUcsLength(const StringA* self, size_t* ucsLength)
+{
+  StringDataA* d = self->_d;
+  return StringUtil::ucsFromUtf8Length(d->data, d->length, ucsLength);
+}
+
+static err_t FOG_CDECL StringW_getUcsLength(const StringW* self, size_t* ucsLength)
+{
+  StringDataW* d = self->_d;
+  return StringUtil::ucsFromUtf16Length(d->data, d->length, ucsLength);
+}
+
+// ============================================================================
+// [Fog::String - Hex]
+// ============================================================================
+
+static err_t FOG_CDECL StringA_hexDecode(StringA* dst, uint32_t cntOp, const StringA* src)
+{
+  StringDataA* sd = src->_d;
+  size_t sLength = sd->length;
+  size_t dLength = (sLength >> 1) + (sLength & 1);
+
+  // Prevent data corruption in case that dst == src.
+  sd->addRef();
+
+  uint8_t* dData = reinterpret_cast<uint8_t*>(dst->_prepare(cntOp, dLength));
+  const uint8_t* sData = reinterpret_cast<const uint8_t*>(sd->data);
+
+  if (FOG_IS_NULL(dData))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  uint8_t c0 = 0xFF;
+  uint8_t c1;
+
+  for (size_t i = 0; i < sLength; i++)
+  {
+    c1 = sData[i];
+
+    if (c1 >= '0' && c1 <= '9')
+      c1 -= '0';
+    else if (c1 >= 'a' && c1 <= 'f')
+      c1 -= ('a' - 10);
+    else if (c1 >= 'A' && c1 <= 'F')
+      c1 -= ('A' + 10);
+    else
+      continue;
+
+    if (c0 == 0xFF)
+    {
+      c0 = c1;
+    }
+    else
+    {
+      *dData++ = (c0 << 4) | c1;
+      c0 = 0xFF;
+    }
+  }
+
+  sd->release();
+
+  dst->_modified(reinterpret_cast<char*>(dData));
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL StringA_hexEncode(StringA* dst, uint32_t cntOp, const StringA* src, uint32_t textCase)
+{
+  StringDataA* sd = src->_d;
+  size_t sLength = sd->length;
+  size_t dLength = sLength << 1;
+
+  if (dLength < sLength)
+    return ERR_RT_OUT_OF_MEMORY;
+
+  // Prevent data corruption in case that dst == src.
+  sd->addRef();
+
+  uint8_t* dData = reinterpret_cast<uint8_t*>(dst->_prepare(cntOp, dLength));
+  if (FOG_IS_NULL(dData)) return ERR_RT_OUT_OF_MEMORY;
+  const uint8_t* sData = reinterpret_cast<const uint8_t*>(sd->data);
+
+  uint8_t c0;
+  uint8_t c1;
+
+  uint8_t hx = (textCase == TEXT_CASE_LOWER)
+    ? (uint8_t)'a' - ((uint8_t)'9' + 1U)
+    : (uint8_t)'A' - ((uint8_t)'9' + 1U);
+
+  for (size_t i = sLength; i; i--)
+  {
+    c0 = *sData++;
+    c1 = c0;
+
+    c0 >>= 4;
+    c1 &= 0x0F;
+
+    c0 += '0';
+    c1 += '0';
+
+    if (c0 > (uint8_t)'9') c0 += hx;
+    if (c1 > (uint8_t)'9') c1 += hx;
+
+    dData[0] = c0;
+    dData[1] = c1;
+    dData += 2;
+  }
+
+  sd->release();
+
+  dst->_modified(reinterpret_cast<char*>(dData));
   return ERR_OK;
 }
 
 // ============================================================================
-// [Fog::String - Comparison]
+// [Fog::String - Base64]
 // ============================================================================
 
-bool String::eq(const String* a, const String* b)
+static const char StringT_base64Tab[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+static const char StringT_base64Pad = '=';
+
+static err_t FOG_CDECL StringA_base64DecodeStringA(StringA* dst, uint32_t cntOp, const StringA* src)
 {
-  size_t alen = a->getLength();
-  size_t blen = b->getLength();
-  if (alen != blen) return false;
-
-  return StringUtil::eq(a->getData(), b->getData(), alen, CASE_SENSITIVE);
-}
-
-bool String::ieq(const String* a, const String* b)
-{
-  size_t alen = a->getLength();
-  size_t blen = b->getLength();
-  if (alen != blen) return false;
-
-  return StringUtil::eq(a->getData(), b->getData(), alen, CASE_INSENSITIVE);
-}
-
-int String::compare(const String* a, const String* b)
-{
-  size_t aLen = a->getLength();
-  size_t bLen = b->getLength();
-  const Char* aCur = a->getData();
-  const Char* bCur = b->getData();
-  const Char* aEnd = aCur + aLen;
-
-  int c;
-
-  if (bLen < aLen) aEnd = aCur + bLen;
-
-  for (; aCur != aEnd; aCur++, bCur++)
-    if ((c = aCur->getInt() - bCur->getInt())) return c;
-
-  return (int)((sysint_t)aLen - (sysint_t)bLen);
-}
-
-int String::icompare(const String* a, const String* b)
-{
-  size_t aLen = a->getLength();
-  size_t bLen = b->getLength();
-  const Char* aCur = a->getData();
-  const Char* bCur = b->getData();
-  const Char* aEnd = aCur + aLen;
-
-  int c;
-
-  if (bLen < aLen) aEnd = aCur + bLen;
-
-  for (; aCur != aEnd; aCur++, bCur++)
-    if ((c = aCur->toLower().getInt() - bCur->toLower().getInt())) return c;
-
-  return (int)((sysint_t)aLen - (sysint_t)bLen);
-}
-
-bool String::eq(const Ascii8& other, uint cs) const
-{
-  size_t len = other.getLength();
-  if (len == DETECT_LENGTH)
+  if (dst == src)
   {
-    const Char* aCur = getData();
-    const char* bCur = other.getData();
-
-    if (cs == CASE_SENSITIVE)
-    {
-      for (size_t i = getLength(); i; i--, aCur++, bCur++)
-      {
-        if (!bCur) return false;
-        if (*aCur != *bCur) return false;
-      }
-    }
-    else
-    {
-      for (size_t i = getLength(); i; i--, aCur++, bCur++)
-      {
-        if (!bCur) return false;
-        if (aCur->toLower() != Byte::toAsciiLower(*bCur)) return false;
-      }
-    }
-    return *bCur == 0;
-  }
-  else
-    return getLength() == len && StringUtil::eq(getData(), other.getData(), len, cs);
-}
-
-bool String::eq(const Utf16& other, uint cs) const
-{
-  size_t len = other.getLength();
-  if (len == DETECT_LENGTH)
-  {
-    const Char* aCur = getData();
-    const Char* bCur = other.getData();
-
-    if (cs == CASE_SENSITIVE)
-    {
-      for (size_t i = getLength(); i; i--, aCur++, bCur++)
-      {
-        if (FOG_UNLIKELY(bCur->isNull())) return false;
-        if (*aCur != *bCur) return false;
-      }
-    }
-    else
-    {
-      for (size_t i = getLength(); i; i--, aCur++, bCur++)
-      {
-        if (FOG_UNLIKELY(bCur->isNull())) return false;
-        if (aCur->toLower() != bCur->toLower()) return false;
-      }
-    }
-    return bCur->isNull();
+    StringA copy(*src);
+    return _api.stringa.base64DecodeDataA(dst, cntOp, copy.getData(), copy.getLength());
   }
   else
   {
-    return getLength() == len && StringUtil::eq(getData(), other.getData(), len, cs);
+    return _api.stringa.base64DecodeDataA(dst, cntOp, src->getData(), src->getLength());
   }
 }
 
-bool String::eq(const String& other, uint cs) const
+static err_t FOG_CDECL StringA_base64DecodeStringW(StringA* dst, uint32_t cntOp, const StringW* src)
 {
-  return getLength() == other.getLength() &&
-    StringUtil::eq(getData(), other.getData(), getLength(), cs);
+  return _api.stringa.base64DecodeDataW(dst, cntOp, src->getData(), src->getLength());
 }
 
-int String::compare(const Ascii8& other, uint cs) const
+template<typename SrcT>
+static err_t FOG_CDECL StringA_base64DecodeData(StringA* dst, uint32_t cntOp, const SrcT* src, size_t sLength)
 {
-  size_t aLen = getLength();
-  size_t bLen = other.getLength();
-  const Char* aCur = getData();
-  const Char* aEnd = aCur + aLen;
-  const char* bCur = other.getData();
+  if (sLength == DETECT_LENGTH)
+    sLength = StringUtil::len(src);
+  size_t dLength = (sLength / 4) * 3 + 3;
 
-  int c;
+  uint8_t* dData = reinterpret_cast<uint8_t*>(dst->_prepare(cntOp, dLength));
+  const SrcT_Char::Value* sData = reinterpret_cast<const SrcT_Char::Value*>(src);
 
-  if (bLen == DETECT_LENGTH)
+  if (FOG_IS_NULL(dData))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  uint32_t accum = 0;
+  uint32_t bits = 0;
+  uint32_t c0;
+
+  for (size_t i = 0; i < sLength; i++)
   {
-    if (cs == CASE_SENSITIVE)
+    c0 = sData[i];
+
+    if (c0 >= '0' && c0 <= '9')
+      c0 -= ('0' - 52);
+    else if (c0 >= 'a' && c0 <= 'z')
+      c0 -= ('a' - 26);
+    else if (c0 >= 'A' && c0 <= 'Z')
+      c0 -= 'A';
+    else if (c0 == '+')
+      c0 = 62;
+    else if (c0 == '/')
+      c0 = 63;
+    else
+      continue;
+
+    accum = (accum << 6) | c0;
+    if (bits >= 2)
     {
-      for (;;)
-      {
-        if (FOG_UNLIKELY(aCur == aEnd)) return *bCur ? -1 : 0;
-        if ((c = aCur->getInt() - (int)(uint8_t)*bCur)) return c;
-        aCur++;
-        bCur++;
-      }
+      bits -= 2;
+      *dData++ = (uint8_t)(accum >> bits);
     }
     else
     {
-      for (;;)
-      {
-        if (FOG_UNLIKELY(aCur == aEnd)) return *bCur ? -1 : 0;
-        if ((c = aCur->toLower().getInt() - (int)(uint8_t)Byte::toAsciiLower(*bCur))) return c;
-        aCur++;
-        bCur++;
-      }
+      bits += 6;
     }
+  }
+
+  dst->_modified(reinterpret_cast<char*>(dData));
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL StringA_base64EncodeStringA(StringA* dst, uint32_t cntOp, const StringA* src)
+{
+  if (dst == src)
+  {
+    StringA copy(*src);
+    return _api.stringa.base64EncodeDataA(dst, cntOp, copy.getData(), copy.getLength());
   }
   else
   {
-    if (bLen < aLen) aEnd = aCur + bLen;
-
-    if (cs == CASE_SENSITIVE)
-    {
-      for (; aCur != aEnd; aCur++, bCur++)
-      {
-        if ((c = aCur->getInt() - (int)(uint8_t)*bCur)) return c;
-      }
-    }
-    else
-    {
-      for (; aCur != aEnd; aCur++, bCur++)
-      {
-        if ((c = aCur->toAsciiLower().getInt() - (int)(uint8_t)Byte::toAsciiLower(*bCur))) return c;
-      }
-    }
-
-    return (int)((sysint_t)aLen - (sysint_t)bLen);
+    return _api.stringa.base64EncodeDataA(dst, cntOp, src->getData(), src->getLength());
   }
 }
 
-int String::compare(const Utf16& other, uint cs) const
+static err_t FOG_CDECL StringW_base64EncodeStringA(StringW* dst, uint32_t cntOp, const StringA* src)
 {
-  size_t aLen = getLength();
-  size_t bLen = other.getLength();
-  const Char* aCur = getData();
-  const Char* aEnd = aCur + aLen;
-  const Char* bCur = other.getData();
+  return _api.stringw.base64EncodeDataA(dst, cntOp, src->getData(), src->getLength());
+}
 
-  int c;
+template<typename CharT>
+static err_t FOG_CDECL StringT_base64EncodeDataA(CharT_(String)* dst, uint32_t cntOp, const char* src, size_t sLength)
+{
+  if (sLength == DETECT_LENGTH)
+    sLength = StringUtil::len(src);
 
-  if (bLen == DETECT_LENGTH)
+  if (sLength > SIZE_MAX / 4)
+    return ERR_RT_OUT_OF_MEMORY;
+
+  size_t dLength = (size_t)( ((uint64_t)sLength * 4) / 3 + 3 );
+  if (dLength < sLength)
+    return ERR_RT_OUT_OF_MEMORY;
+
+  CharT* dData = dst->_prepare(cntOp, dLength);
+  const uint8_t* sData = reinterpret_cast<const uint8_t*>(src);
+
+  if (FOG_IS_NULL(dData))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  size_t i = sLength;
+  while (i >= 3)
   {
-    if (cs == CASE_SENSITIVE)
-    {
-      for (;;)
-      {
-        if (FOG_UNLIKELY(aCur == aEnd)) return *bCur ? -1 : 0;
-        if ((c = aCur->getInt() - bCur->getInt())) return c;
-        aCur++;
-        bCur++;
-      }
-    }
-    else
-    {
-      for (;;)
-      {
-        if (FOG_UNLIKELY(aCur == aEnd)) return *bCur ? -1 : 0;
-        if ((c = aCur->toLower().getInt() - bCur->toLower().getInt())) return c;
-        aCur++;
-        bCur++;
-      }
-    }
+    uint8_t c0 = sData[0];
+    uint8_t c1 = sData[1];
+    uint8_t c2 = sData[2];
+
+    dData[0] = StringT_base64Tab[((c0 & 0xFC) >> 2)];
+    dData[1] = StringT_base64Tab[((c0 & 0x03) << 4) + ((c1 & 0xF0) >> 4)];
+    dData[2] = StringT_base64Tab[((c1 & 0x0F) << 2) + ((c2 & 0xC0) >> 6)];
+    dData[3] = StringT_base64Tab[((c2 & 0x3f))];
+
+    sData += 3;
+    dData += 4;
+
+    i -= 3;
   }
-  else
+
+  if (i)
   {
-    if (bLen < aLen) aEnd = aCur + bLen;
+    uint8_t c0 = sData[0];
+    uint8_t c1 = (i > 1) ? sData[1] : 0;
+    uint8_t c2 = (i > 2) ? sData[2] : 0;
 
-    if (cs == CASE_SENSITIVE)
-    {
-      for (; aCur != aEnd; aCur++, bCur++)
-        if ((c = aCur->getInt() - bCur->getInt())) return c;
-    }
-    else
-    {
-      for (; aCur != aEnd; aCur++, bCur++)
-        if ((c = aCur->toLower().getInt() - bCur->toLower().getInt())) return c;
-    }
+    dData[0] = StringT_base64Tab[((c0 & 0xFC) >> 2)];
+    dData[1] = StringT_base64Tab[((c0 & 0x03) << 4) + ((c1 & 0xF0) >> 4)];
+    dData[2] = (i > 1) ? StringT_base64Tab[((c1 & 0x0F) << 2) + ((c2 & 0xC0) >> 6)]
+                       : StringT_base64Pad;
+    // 'i' shouldn't be larger than 2, but...
+    dData[3] = (i > 2) ? StringT_base64Tab[((c2 & 0x3f))]
+                       : StringT_base64Pad;
 
-    return (int)((sysint_t)aLen - (sysint_t)bLen);
+    dData += 4;
+    i -= 3;
   }
+
+  dst->_modified(dData);
+  return ERR_OK;
 }
 
-int String::compare(const String& other, uint cs) const
+// ============================================================================
+// [Fog::String - BSwap]
+// ============================================================================
+
+static err_t FOG_CDECL StringW_bswap(StringW* self)
 {
-  size_t aLen = getLength();
-  size_t bLen = other.getLength();
-  const Char* aCur = getData();
-  const Char* aEnd = aCur + aLen;
-  const Char* bCur = other.getData();
+  StringDataW* d = self->_d;
+  size_t length = d->length;
 
-  int c;
-  if (bLen < aLen) aEnd = aCur + bLen;
+  if (length == 0)
+    return ERR_OK;
 
-  if (cs == CASE_SENSITIVE)
+  if (d->reference.get() > 1)
   {
-    for (; aCur != aEnd; aCur++, bCur++)
-    {
-      if ((c = aCur->getInt() - bCur->getInt())) return c;
-    }
-  }
-  else
-  {
-    for (; aCur != aEnd; aCur++, bCur++)
-    {
-      if ((c = aCur->toLower().getInt() - bCur->toLower().getInt())) return c;
-    }
+    FOG_RETURN_ON_ERROR(self->_detach());
+    d = self->_d;
   }
 
-  return (int)((sysint_t)aLen - (sysint_t)bLen);
-}
+  CharW* p = d->data;
+  for (size_t i = 0; i < length; i++)
+    p[i].bswap();
 
-// ============================================================================
-// [Fog::String::Utf16]
-// ============================================================================
-
-err_t String::validateUtf16(size_t* invalidPos) const
-{
-  return StringUtil::validateUtf16(getData(), getLength());
-}
-
-err_t String::getNumUtf16Chars(size_t* charsCount) const
-{
-  return StringUtil::getNumUtf16Chars(getData(), getLength(), charsCount);
-}
-
-// ============================================================================
-// [Fog::String::FileSystem]
-// ============================================================================
-
-err_t String::slashesToPosix()
-{
-  return replace(Char('\\'), Char('/'));
-}
-
-err_t String::slashesToWin()
-{
-  return replace(Char('/'), Char('\\'));
-}
-
-// ============================================================================
-// [Fog::String::Hash]
-// ============================================================================
-
-uint32_t String::getHashCode() const
-{
-  uint32_t h = _d->hashCode;
-  if (h) return h;
-
-  return (_d->hashCode = HashUtil::makeStringHash(getData(), getLength()));
-}
-
-// ============================================================================
-// [Fog::StringData]
-// ============================================================================
-
-StringData* StringData::adopt(void* address, size_t capacity)
-{
-  if (capacity == 0) return String::_dnull->ref();
-
-  StringData* d = (StringData*)address;
-  d->refCount.init(1);
-  d->flags = CONTAINER_DATA_STATIC;
   d->hashCode = 0;
-  d->length = 0;
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::String - StringData]
+// ============================================================================
+
+template<typename CharT>
+static CharT_(StringData)* FOG_CDECL StringT_dCreate(size_t capacity)
+{
+  if (capacity == 0)
+    return StringT_getDEmpty<CharT>()->addRef();
+
+  // Pad to 8/16 bytes.
+  capacity = (capacity + 7) & ~7;
+
+  size_t dsize = CharI_(StringData)::getSizeOf(capacity);
+  CharT_(StringData)* d = reinterpret_cast<CharT_(StringData)*>(MemMgr::alloc(dsize));
+
+  if (FOG_IS_NULL(d))
+    return NULL;
+
+  d->reference.init(1);
+  d->vType = VarId<CharT_(String)>::ID | VAR_FLAG_NONE;
+  d->hashCode = 0;
+
   d->capacity = capacity;
+  d->length = 0;
+
+  return d;
+}
+
+template<typename CharT, typename SrcT>
+static CharT_(StringData)* FOG_CDECL StringT_dCreateStub(size_t capacity, const SrcT_(Stub)* stub)
+{
+  const SrcT* srcData = stub->getData();
+  size_t srcLength = stub->getComputedLength();
+
+  if (capacity < srcLength)
+    capacity = srcLength;
+
+  if (capacity == 0)
+    return StringT_getDEmpty<CharT>()->addRef();
+
+  // Pad to 8/16 bytes.
+  capacity = (capacity + 7) & ~7;
+
+  size_t dsize = CharI_(StringData)::getSizeOf(capacity);
+  CharT_(StringData)* d = reinterpret_cast<CharT_(StringData)*>(MemMgr::alloc(dsize));
+
+  if (FOG_IS_NULL(d))
+    return NULL;
+
+  d->reference.init(1);
+  d->vType = VarId<CharT_(String)>::ID | VAR_FLAG_NONE;
+  d->hashCode = 0;
+
+  d->capacity = capacity;
+  d->length = srcLength;
+
+  StringT_chcopy(d->data, srcData, srcLength);
+  d->data[srcLength] = 0;
+
+  return d;
+}
+
+template<typename CharT>
+static CharT_(StringData)* FOG_CDECL StringT_dAdopt(void* address, size_t capacity)
+{
+  if (capacity == 0)
+    return StringT_getDEmpty<CharT>()->addRef();
+
+  CharT_(StringData)* d = reinterpret_cast<CharT_(StringData)*>(address);
+
+  d->reference.init(1);
+  d->vType = VarId<CharT_(String)>::ID | VAR_FLAG_STATIC;
+  d->hashCode = 0;
+  d->capacity = capacity;
+  d->length = 0;
   d->data[0] = 0;
 
   return d;
 }
 
-StringData* StringData::adopt(void* address, size_t capacity, const char* str, size_t length)
+template<typename CharT, typename SrcT>
+static CharT_(StringData)* FOG_CDECL StringT_dAdoptStub(void* address, size_t capacity, const SrcT_(Stub)* stub)
 {
-  if (length == DETECT_LENGTH) length = StringUtil::len(str);
+  const SrcT* srcData = stub->getData();
+  size_t srcLength = stub->getComputedLength();
 
-  if (length <= capacity)
+  if (srcLength > capacity)
   {
-    StringData* d = adopt(address, capacity);
-    d->length = length;
-    StringUtil::copy(d->data, str, length);
-    d->data[length] = 0;
-    return d;
+    SrcT_(Stub) stubModified(srcData, srcLength);
+    return StringT_dCreateStub<CharT, SrcT>(srcLength, &stubModified);
   }
   else
   {
-    return alloc(0, str, length);
-  }
-}
+    CharT_(StringData)* d = reinterpret_cast<CharT_(StringData)*>(address);
 
-StringData* StringData::adopt(void* address, size_t capacity, const Char* str, size_t length)
-{
-  if (length == DETECT_LENGTH) length = StringUtil::len(str);
+    d->reference.init(1);
+    d->vType = VarId<CharT_(String)>::ID | VAR_FLAG_STATIC;
+    d->hashCode = 0;
+    d->capacity = capacity;
+    d->length = srcLength;
+    StringT_chcopy(d->data, srcData, srcLength);
+    d->data[srcLength] = 0;
 
-  if (length <= capacity)
-  {
-    StringData* d = adopt(address, capacity);
-    d->length = length;
-    StringUtil::copy(d->data, str, length);
-    d->data[length] = Char(0);
     return d;
   }
-  else
-  {
-    return alloc(0, str, length);
-  }
 }
 
-StringData* StringData::alloc(size_t capacity)
-{
-  if (capacity == 0) return String::_dnull->ref();
-
-  // Pad to 16 bytes (8 chars).
-  capacity = (capacity + 7) & ~7;
-
-  size_t dsize = sizeFor(capacity);
-  StringData* d = (StringData *)Memory::alloc(dsize);
-  if (FOG_IS_NULL(d)) return NULL;
-
-  d->refCount.init(1);
-  d->flags = NO_FLAGS;
-  d->hashCode = 0;
-  d->capacity = capacity;
-  d->length = 0;
-
-  return d;
-}
-
-StringData* StringData::alloc(size_t capacity, const char* str, size_t length)
-{
-  if (length == DETECT_LENGTH) length = StringUtil::len(str);
-  if (length > capacity) capacity = length;
-
-  if (capacity == 0) return String::_dnull->ref();
-
-  StringData* d = alloc(capacity);
-  if (FOG_IS_NULL(d)) return NULL;
-
-  d->length = length;
-  StringUtil::copy(d->data, str, length);
-  d->data[length] = Char(0);
-
-  return d;
-}
-
-StringData* StringData::alloc(size_t capacity, const Char* str, size_t length)
-{
-  if (length == DETECT_LENGTH) length = StringUtil::len(str);
-  if (length > capacity) capacity = length;
-
-  if (capacity == 0) return String::_dnull->ref();
-
-  StringData* d = alloc(capacity);
-  if (FOG_IS_NULL(d)) return NULL;
-
-  d->length = length;
-  StringUtil::copy(d->data, str, length);
-  d->data[length] = Char(0);
-
-  return d;
-}
-
-StringData* StringData::realloc(StringData* d, size_t capacity)
+template<typename CharT>
+static CharT_(StringData)* FOG_CDECL StringT_dRealloc(CharT_(StringData)* d, size_t capacity)
 {
   FOG_ASSERT(capacity >= d->length);
 
-  size_t dsize = StringData::sizeFor(capacity);
-  if ((d->flags & CONTAINER_DATA_STATIC) == 0)
+  size_t dsize = CharI_(StringData)::getSizeOf(capacity);
+  if ((d->vType & VAR_FLAG_STATIC) == 0)
   {
-    if ((d = (StringData *)Memory::realloc((void*)d, dsize)) != NULL)
-      d->capacity = capacity;
+    d = reinterpret_cast<CharT_(StringData)*>(MemMgr::realloc(d, dsize));
+    if (FOG_IS_NULL(d))
+      return NULL;
+
+    d->capacity = capacity;
     return d;
   }
   else
   {
-    StringData* newd = alloc(capacity, d->data, d->length);
-    if (FOG_IS_NULL(newd)) return NULL;
+    CharT_(StringData)* newd = CharI_(String)::_dCreate(capacity, CharT_(Stub)(d->data, d->length));
+    if (FOG_IS_NULL(newd))
+      return NULL;
 
-    d->deref();
+    d->release();
     return newd;
   }
 }
 
-StringData* StringData::copy(const StringData* d)
+template<typename CharT>
+static void FOG_CDECL StringT_dFree(CharT_(StringData)* d)
 {
-  return alloc(0, d->data, d->length);
+  if ((d->vType & VAR_FLAG_STATIC) == 0)
+    MemMgr::free(d);
 }
-
-Static<StringData> String::_dnull;
 
 // ============================================================================
 // [Init / Fini]
@@ -3500,13 +4997,380 @@ Static<StringData> String::_dnull;
 
 FOG_NO_EXPORT void String_init(void)
 {
-  StringData* d = String::_dnull.instancep();
-  d->refCount.init(1);
-  d->flags = NO_FLAGS;
-  d->hashCode = 0;
-  d->capacity = 0;
-  d->length = 0;
-  memset(d->data, 0, sizeof(d->data));
+  // --------------------------------------------------------------------------
+  // [Funcs]
+  // --------------------------------------------------------------------------
+
+  _api.stringa.ctor = StringT_ctor<char>;
+  _api.stringa.ctorStubA = StringT_ctorStub<char, char>;
+  _api.stringa.ctorStubA2 = StringT_ctorStub2<char, char>;
+  _api.stringa.ctorCopyA = StringT_ctorCopy<char>;
+  _api.stringa.ctorCopyA2 = StringT_ctorCopy2<char>;
+  _api.stringa.ctorSubstr = StringT_ctorSubstr<char>;
+  _api.stringa.ctorU32 = StringT_ctorU32<char>;
+  _api.stringa.ctorU64 = StringT_ctorU64<char>;
+  _api.stringa.ctorDouble = StringT_ctorDouble<char>;
+  _api.stringa.dtor = StringT_dtor<char>;
+
+  _api.stringa.detach = StringT_detach<char>;
+  _api.stringa.reserve = StringT_reserve<char>;
+  _api.stringa.resize = StringT_resize<char>;
+  _api.stringa.truncate = StringT_truncate<char>;
+  _api.stringa.squeeze = StringT_squeeze<char>;
+  _api.stringa.prepare = StringT_prepare<char>;
+  _api.stringa.add = StringT_add<char>;
+
+  _api.stringa.clear = StringT_clear<char>;
+  _api.stringa.reset = StringT_reset<char>;
+
+  _api.stringa.getHashCode = StringT_getHashCode<char>;
+
+  _api.stringa.setStubA = StringT_setStub<char, char>;
+  _api.stringa.setStringA = StringT_setString<char, char>;
+  _api.stringa.setStringExA = StringT_setStringEx<char, char>;
+
+  _api.stringa.setDeep = StringT_setDeep<char>;
+
+  _api.stringa.appendStubA = StringT_appendStub<char, char>;
+  _api.stringa.appendStringA = StringT_appendString<char, char>;
+  _api.stringa.appendStringExA = StringT_appendStringEx<char, char>;
+
+  _api.stringa.opFill = StringT_opFill<char>;
+  _api.stringa.opBool = StringT_opBool<char>;
+  _api.stringa.opI32 = StringT_opI32<char>;
+  _api.stringa.opI32Ex = StringA_opI32Ex;
+  _api.stringa.opU32 = StringT_opU32<char>;
+  _api.stringa.opU32Ex = StringA_opU32Ex;
+  _api.stringa.opI64 = StringT_opI64<char>;
+  _api.stringa.opI64Ex = StringA_opI64Ex;
+  _api.stringa.opU64 = StringT_opU64<char>;
+  _api.stringa.opU64Ex = StringA_opU64Ex;
+  _api.stringa.opDouble = StringA_opDouble;
+  _api.stringa.opDoubleEx = StringA_opDoubleEx;
+
+  _api.stringa.opVFormatStubA = StringA_opVFormatStubA;
+  _api.stringa.opVFormatStringA = StringA_opVFormatStringA;
+
+  _api.stringa.opZFormatStubA = StringT_opZFormatStub<char, char>;
+  _api.stringa.opZFormatStringA = StringT_opZFormatString<char, char>;
+
+  _api.stringa.opNormalizeSlashesA = StringT_opNormalizeSlashes<char>;
+
+  _api.stringa.prependChars = StringT_prependChars<char>;
+  _api.stringa.prependStubA = StringT_prependStub<char, char>;
+  _api.stringa.prependStringA = StringT_prependString<char, char>;
+
+  _api.stringa.insertChars = StringT_insertChars<char>;
+  _api.stringa.insertStubA = StringT_insertStub<char, char>;
+  _api.stringa.insertStringA = StringT_insertString<char, char>;
+
+  _api.stringa.removeRange = StringT_removeRange<char>;
+  _api.stringa.removeRangeList = StringT_removeRangeList<char>;
+
+  _api.stringa.removeChar = StringT_removeChar<char>;
+  _api.stringa.removeStubA = StringT_removeStub<char, char>;
+  _api.stringa.removeStringA = StringT_removeString<char, char>;
+  _api.stringa.removeRegExpA = StringT_removeRegExp<char>;
+
+  _api.stringa.replaceRangeStubA = StringT_replaceRangeStub<char, char>;
+  _api.stringa.replaceRangeStringA = StringT_replaceRangeString<char, char>;
+
+  _api.stringa.replaceRangeListStubA = StringT_replaceRangeListStub<char, char>;
+  _api.stringa.replaceRangeListStringA = StringT_replaceRangeListString<char, char>;
+
+  _api.stringa.replaceChar = StringT_replaceChar<char>;
+  _api.stringa.replaceStringA = StringT_replaceString<char>;
+  _api.stringa.replaceRegExpA = StringT_replaceRegExp<char>;
+
+  _api.stringa.lower = StringT_lower<char>;
+  _api.stringa.upper = StringT_upper<char>;
+
+  _api.stringa.trim = StringT_trim<char>;
+  _api.stringa.simplify = StringT_simplify<char>;
+  _api.stringa.justify = StringT_justify<char>;
+
+  _api.stringa.splitChar = StringT_splitChar<char>;
+  _api.stringa.splitStringA = StringT_splitString<char>;
+  _api.stringa.splitRegExpA = StringT_splitRegExp<char>;
+
+  _api.stringa.slice = StringT_slice<char>;
+
+  _api.stringa.joinChar = StringT_joinChar<char>;
+  _api.stringa.joinStringA = StringT_joinString<char>;
+
+  _api.stringa.parseBool = StringT_parseBool<char>;
+  _api.stringa.parseI8 = StringT_parseI8<char>;
+  _api.stringa.parseU8 = StringT_parseU8<char>;
+  _api.stringa.parseI16 = StringT_parseI16<char>;
+  _api.stringa.parseU16 = StringT_parseU16<char>;
+  _api.stringa.parseI32 = StringT_parseI32<char>;
+  _api.stringa.parseU32 = StringT_parseU32<char>;
+  _api.stringa.parseI64 = StringT_parseI64<char>;
+  _api.stringa.parseU64 = StringT_parseU64<char>;
+  _api.stringa.parseFloat = StringT_parseFloat<char>;
+  _api.stringa.parseDouble = StringT_parseDouble<char>;
+
+  _api.stringa.countOfChar = StringT_countOfChar<char>;
+  _api.stringa.countOfStubA = StringT_countOfStub<char, char>;
+  _api.stringa.countOfStringA = StringT_countOfString<char, char>;
+  _api.stringa.countOfRegExpA = StringT_countOfRegExp<char>;
+
+  _api.stringa.indexOfChar = StringT_indexOfChar<char>;
+  _api.stringa.indexOfStubA = StringT_indexOfStub<char, char>;
+  _api.stringa.indexOfStringA = StringT_indexOfString<char, char>;
+  _api.stringa.indexOfRegExpA = StringT_indexOfRegExp<char>;
+  _api.stringa.indexOfAnyCharA = StringT_indexOfAnyChar<char>;
+
+  _api.stringa.lastIndexOfChar = StringT_lastIndexOfChar<char>;
+  _api.stringa.lastIndexOfStubA = StringT_lastIndexOfStub<char, char>;
+  _api.stringa.lastIndexOfStringA = StringT_lastIndexOfString<char, char>;
+  _api.stringa.lastIndexOfRegExpA = StringT_lastIndexOfRegExp<char>;
+  _api.stringa.lastIndexOfAnyCharA = StringT_lastIndexOfAnyChar<char>;
+
+  _api.stringa.startsWithChar = StringT_startsWithChar<char>;
+  _api.stringa.startsWithStubA = StringT_startsWithStub<char, char>;
+  _api.stringa.startsWithStringA = StringT_startsWithString<char, char>;
+  _api.stringa.startsWithRegExpA = StringT_startsWithRegExp<char>;
+
+  _api.stringa.endsWithChar = StringT_endsWithChar<char>;
+  _api.stringa.endsWithStubA = StringT_endsWithStub<char, char>;
+  _api.stringa.endsWithStringA = StringT_endsWithString<char, char>;
+  _api.stringa.endsWithRegExpA = StringT_endsWithRegExp<char>;
+
+  _api.stringa.eqStubA = StringT_eqStub<char, char>;
+  _api.stringa.eqStringA = StringT_eqString<char, char>;
+
+  _api.stringa.eqStubExA = StringT_eqStubEx<char, char>;
+  _api.stringa.eqStringExA = StringT_eqStringEx<char, char>;
+
+  _api.stringa.compareStubA = StringT_compareStub<char, char>;
+  _api.stringa.compareStringA = StringT_compareString<char, char>;
+
+  _api.stringa.compareStubExA = StringT_compareStubEx<char, char>;
+  _api.stringa.compareStringExA = StringT_compareStringEx<char, char>;
+
+  _api.stringa.validateUtf8 = StringA_validateUtf8;
+  _api.stringa.getUcsLength = StringA_getUcsLength;
+
+  _api.stringa.hexDecode = StringA_hexDecode;
+  _api.stringa.hexEncode = StringA_hexEncode;
+
+  _api.stringa.base64DecodeStringA = StringA_base64DecodeStringA;
+  _api.stringa.base64DecodeStringW = StringA_base64DecodeStringW;
+  _api.stringa.base64DecodeDataA = StringA_base64DecodeData<char>;
+  _api.stringa.base64DecodeDataW = StringA_base64DecodeData<CharW>;
+  _api.stringa.base64EncodeStringA = StringA_base64EncodeStringA;
+  _api.stringa.base64EncodeDataA = StringT_base64EncodeDataA<char>;
+
+  _api.stringa.dCreate = StringT_dCreate<char>;
+  _api.stringa.dCreateStubA = StringT_dCreateStub<char, char>;
+  _api.stringa.dAdopt = StringT_dAdopt<char>;
+  _api.stringa.dAdoptStubA = StringT_dAdoptStub<char, char>;
+  _api.stringa.dRealloc = StringT_dRealloc<char>;
+  _api.stringa.dFree = StringT_dFree<char>;
+
+  _api.stringw.ctor = StringT_ctor<CharW>;
+  _api.stringw.ctorStubA = StringT_ctorStub<CharW, char>;
+  _api.stringw.ctorStubW = StringT_ctorStub<CharW, CharW>;
+  _api.stringw.ctorStubA2 = StringT_ctorStub2<CharW, char>;
+  _api.stringw.ctorStubW2 = StringT_ctorStub2<CharW, CharW>;
+  _api.stringw.ctorCopyW = StringT_ctorCopy<CharW>;
+  _api.stringw.ctorCopyW2 = StringT_ctorCopy2<CharW>;
+  _api.stringw.ctorCodec = StringW_ctorCodec;
+  _api.stringw.ctorSubstr = StringT_ctorSubstr<CharW>;
+  _api.stringw.ctorU32 = StringT_ctorU32<CharW>;
+  _api.stringw.ctorU64 = StringT_ctorU64<CharW>;
+  _api.stringw.ctorDouble = StringT_ctorDouble<CharW>;
+  _api.stringw.dtor = StringT_dtor<CharW>;
+
+  _api.stringw.detach = StringT_detach<CharW>;
+  _api.stringw.reserve = StringT_reserve<CharW>;
+  _api.stringw.resize = StringT_resize<CharW>;
+  _api.stringw.truncate = StringT_truncate<CharW>;
+  _api.stringw.squeeze = StringT_squeeze<CharW>;
+  _api.stringw.prepare = StringT_prepare<CharW>;
+  _api.stringw.add = StringT_add<CharW>;
+
+  _api.stringw.clear = StringT_clear<CharW>;
+  _api.stringw.reset = StringT_reset<CharW>;
+
+  _api.stringw.getHashCode = StringT_getHashCode<CharW>;
+
+  _api.stringw.setStubA = StringW_setStubCodec;
+  _api.stringw.setStubW = StringT_setStub<CharW, CharW>;
+  _api.stringw.setStringA = StringW_setStringCodec;
+  _api.stringw.setStringW = StringT_setString<CharW, CharW>;
+  _api.stringw.setStringExW = StringT_setStringEx<CharW, CharW>;
+
+  _api.stringw.setDeep = StringT_setDeep<CharW>;
+
+  _api.stringw.appendStubA = StringW_appendStubCodec;
+  _api.stringw.appendStubW = StringT_appendStub<CharW, CharW>;
+  _api.stringw.appendStringA = StringW_appendStringCodec;
+  _api.stringw.appendStringW = StringT_appendString<CharW, CharW>;
+  _api.stringw.appendStringExW = StringT_appendStringEx<CharW, CharW>;
+
+  _api.stringw.opFill = StringT_opFill<CharW>;
+  _api.stringw.opBool = StringT_opBool<CharW>;
+  _api.stringw.opI32 = StringT_opI32<CharW>;
+  _api.stringw.opI32Ex = StringW_opI32Ex;
+  _api.stringw.opU32 = StringT_opU32<CharW>;
+  _api.stringw.opU32Ex = StringW_opU32Ex;
+  _api.stringw.opI64 = StringT_opI64<CharW>;
+  _api.stringw.opI64Ex = StringW_opI64Ex;
+  _api.stringw.opU64 = StringT_opU64<CharW>;
+  _api.stringw.opU64Ex = StringW_opU64Ex;
+  _api.stringw.opDouble = StringW_opDouble;
+  _api.stringw.opDoubleEx = StringW_opDoubleEx;
+
+  _api.stringw.opVFormatStubA = StringW_opVFormatStubA;
+  _api.stringw.opVFormatStubW = StringW_opVFormatStubW;
+  _api.stringw.opVFormatStringW = StringW_opVFormatStringW;
+
+  _api.stringw.opZFormatStubW = StringT_opZFormatStub<CharW, CharW>;
+  _api.stringw.opZFormatStringW = StringT_opZFormatString<CharW, CharW>;
+
+  _api.stringw.opNormalizeSlashesW = StringT_opNormalizeSlashes<CharW>;
+
+  _api.stringw.prependChars = StringT_prependChars<CharW>;
+  _api.stringw.prependStubA = StringW_prependStubCodec;
+  _api.stringw.prependStubW = StringT_prependStub<CharW, CharW>;
+  _api.stringw.prependStringA = StringW_prependStringCodec;
+  _api.stringw.prependStringW = StringT_prependString<CharW, CharW>;
+
+  _api.stringw.insertChars = StringT_insertChars<CharW>;
+  _api.stringw.insertStubA = StringW_insertStubCodec;
+  _api.stringw.insertStubW = StringT_insertStub<CharW, CharW>;
+  _api.stringw.insertStringA = StringW_insertStringCodec;
+  _api.stringw.insertStringW = StringT_insertString<CharW, CharW>;
+
+  _api.stringw.removeRange = StringT_removeRange<CharW>;
+  _api.stringw.removeRangeList = StringT_removeRangeList<CharW>;
+
+  _api.stringw.removeChar = StringT_removeChar<CharW>;
+  _api.stringw.removeStubA = StringT_removeStub<CharW, char>;
+  _api.stringw.removeStubW = StringT_removeStub<CharW, CharW>;
+  _api.stringw.removeStringW = StringT_removeString<CharW, CharW>;
+  _api.stringw.removeRegExpW = StringT_removeRegExp<CharW>;
+
+  _api.stringw.replaceRangeStubW = StringT_replaceRangeStub<CharW, CharW>;
+  _api.stringw.replaceRangeStringW = StringT_replaceRangeString<CharW, CharW>;
+
+  _api.stringw.replaceRangeListStubW = StringT_replaceRangeListStub<CharW, CharW>;
+  _api.stringw.replaceRangeListStringW = StringT_replaceRangeListString<CharW, CharW>;
+
+  _api.stringw.replaceChar = StringT_replaceChar<CharW>;
+  _api.stringw.replaceStringW = StringT_replaceString<CharW>;
+  _api.stringw.replaceRegExpW = StringT_replaceRegExp<CharW>;
+
+  _api.stringw.lower = StringT_lower<CharW>;
+  _api.stringw.upper = StringT_upper<CharW>;
+
+  _api.stringw.trim = StringT_trim<CharW>;
+  _api.stringw.simplify = StringT_simplify<CharW>;
+  _api.stringw.justify = StringT_justify<CharW>;
+
+  _api.stringw.splitChar = StringT_splitChar<CharW>;
+  _api.stringw.splitStringW = StringT_splitString<CharW>;
+  _api.stringw.splitRegExpW = StringT_splitRegExp<CharW>;
+
+  _api.stringw.slice = StringT_slice<CharW>;
+
+  _api.stringw.joinChar = StringT_joinChar<CharW>;
+  _api.stringw.joinStringW = StringT_joinString<CharW>;
+
+  _api.stringw.parseBool = StringT_parseBool<CharW>;
+  _api.stringw.parseI8 = StringT_parseI8<CharW>;
+  _api.stringw.parseU8 = StringT_parseU8<CharW>;
+  _api.stringw.parseI16 = StringT_parseI16<CharW>;
+  _api.stringw.parseU16 = StringT_parseU16<CharW>;
+  _api.stringw.parseI32 = StringT_parseI32<CharW>;
+  _api.stringw.parseU32 = StringT_parseU32<CharW>;
+  _api.stringw.parseI64 = StringT_parseI64<CharW>;
+  _api.stringw.parseU64 = StringT_parseU64<CharW>;
+  _api.stringw.parseFloat = StringT_parseFloat<CharW>;
+  _api.stringw.parseDouble = StringT_parseDouble<CharW>;
+
+  _api.stringw.countOfChar = StringT_countOfChar<CharW>;
+  _api.stringw.countOfStubA = StringT_countOfStub<CharW, char>;
+  _api.stringw.countOfStubW = StringT_countOfStub<CharW, CharW>;
+  _api.stringw.countOfStringW = StringT_countOfString<CharW, CharW>;
+  _api.stringw.countOfRegExpW = StringT_countOfRegExp<CharW>;
+
+  _api.stringw.indexOfChar = StringT_indexOfChar<CharW>;
+  _api.stringw.indexOfStubA = StringT_indexOfStub<CharW, char>;
+  _api.stringw.indexOfStubW = StringT_indexOfStub<CharW, CharW>;
+  _api.stringw.indexOfStringW = StringT_indexOfString<CharW, CharW>;
+  _api.stringw.indexOfRegExpW = StringT_indexOfRegExp<CharW>;
+  _api.stringw.indexOfAnyCharW = StringT_indexOfAnyChar<CharW>;
+
+  _api.stringw.lastIndexOfChar = StringT_lastIndexOfChar<CharW>;
+  _api.stringw.lastIndexOfStubA = StringT_lastIndexOfStub<CharW, char>;
+  _api.stringw.lastIndexOfStubW = StringT_lastIndexOfStub<CharW, CharW>;
+  _api.stringw.lastIndexOfStringW = StringT_lastIndexOfString<CharW, CharW>;
+  _api.stringw.lastIndexOfRegExpW = StringT_lastIndexOfRegExp<CharW>;
+  _api.stringw.lastIndexOfAnyCharW = StringT_lastIndexOfAnyChar<CharW>;
+
+  _api.stringw.startsWithChar = StringT_startsWithChar<CharW>;
+  _api.stringw.startsWithStubA = StringT_startsWithStub<CharW, char>;
+  _api.stringw.startsWithStubW = StringT_startsWithStub<CharW, CharW>;
+  _api.stringw.startsWithStringW = StringT_startsWithString<CharW, CharW>;
+  _api.stringw.startsWithRegExpW = StringT_startsWithRegExp<CharW>;
+
+  _api.stringw.endsWithChar = StringT_endsWithChar<CharW>;
+  _api.stringw.endsWithStubA = StringT_endsWithStub<CharW, char>;
+  _api.stringw.endsWithStubW = StringT_endsWithStub<CharW, CharW>;
+  _api.stringw.endsWithStringW = StringT_endsWithString<CharW, CharW>;
+  _api.stringw.endsWithRegExpW = StringT_endsWithRegExp<CharW>;
+
+  _api.stringw.eqStubA = StringT_eqStub<CharW, char>;
+  _api.stringw.eqStubW = StringT_eqStub<CharW, CharW>;
+  _api.stringw.eqStringW = StringT_eqString<CharW, CharW>;
+
+  _api.stringw.eqStubExA = StringT_eqStubEx<CharW, char>;
+  _api.stringw.eqStubExW = StringT_eqStubEx<CharW, CharW>;
+  _api.stringw.eqStringExW = StringT_eqStringEx<CharW, CharW>;
+
+  _api.stringw.compareStubA = StringT_compareStub<CharW, char>;
+  _api.stringw.compareStubW = StringT_compareStub<CharW, CharW>;
+  _api.stringw.compareStringW = StringT_compareString<CharW, CharW>;
+
+  _api.stringw.compareStubExA = StringT_compareStubEx<CharW, char>;
+  _api.stringw.compareStubExW = StringT_compareStubEx<CharW, CharW>;
+  _api.stringw.compareStringExW = StringT_compareStringEx<CharW, CharW>;
+
+  _api.stringw.validateUtf16 = StringW_validateUtf16;
+  _api.stringw.getUcsLength = StringW_getUcsLength;
+
+  _api.stringw.base64EncodeStringA = StringW_base64EncodeStringA;
+  _api.stringw.base64EncodeDataA = StringT_base64EncodeDataA<CharW>;
+
+  _api.stringw.bswap = StringW_bswap;
+
+  _api.stringw.dCreate = StringT_dCreate<CharW>;
+  _api.stringw.dCreateStubA = StringT_dCreateStub<CharW, char>;
+  _api.stringw.dCreateStubW = StringT_dCreateStub<CharW, CharW>;
+  _api.stringw.dAdopt = StringT_dAdopt<CharW>;
+  _api.stringw.dAdoptStubA = StringT_dAdoptStub<CharW, char>;
+  _api.stringw.dAdoptStubW = StringT_dAdoptStub<CharW, CharW>;
+  _api.stringw.dRealloc = StringT_dRealloc<CharW>;
+  _api.stringw.dFree = StringT_dFree<CharW>;
+
+  // --------------------------------------------------------------------------
+  // [Data]
+  // --------------------------------------------------------------------------
+
+  StringDataA* da = &StringA_dEmpty;
+  StringDataW* dw = &StringW_dEmpty;
+
+  da->reference.init(1);
+  da->vType = VAR_TYPE_STRINGA | VAR_FLAG_NONE;
+
+  dw->reference.init(1);
+  dw->vType = VAR_TYPE_STRINGW | VAR_FLAG_NONE;
+
+  _api.stringa.oEmpty = StringA_oEmpty.initCustom1(da);
+  _api.stringw.oEmpty = StringW_oEmpty.initCustom1(dw);
 }
 
 } // Fog namespace

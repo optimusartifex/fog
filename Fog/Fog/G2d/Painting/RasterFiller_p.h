@@ -25,21 +25,21 @@ struct FOG_NO_EXPORT RasterFiller
   // [Typedefs]
   // --------------------------------------------------------------------------
 
-  //! @brief Called by @c rasterize() to prepare for filling 
+  //! @brief Called by @c rasterize() to prepare for filling
   //!
   //! @param y The Y coordinate where the fill starts.
-  typedef void (FOG_FASTCALL *PrepareFn)(RasterFiller* self, int y);
+  typedef void (FOG_FASTCALL *PrepareFunc)(RasterFiller* self, int y);
   //! @brief Called by @c rasterize() to process a scanline.
   //!
   //! After the scanline is rendered the callback must advance position by 1
   //! when running single-threaded or by delta when running multi-threaded.
-  typedef void (FOG_FASTCALL *ProcessFn)(RasterFiller* self, RasterSpan* spans); 
+  typedef void (FOG_FASTCALL *ProcessFunc)(RasterFiller* self, RasterSpan* spans);
   //! @brief Called by @c rasterize() to skip a scanline(s).
   //!
   //! If running single-threaded the @a step parameter is the total scanlines
   //! to skip. When running multi-threaded, the @a step parameter must be
   //! multiplied by delta to get the total count of scanlines to skip.
-  typedef void (FOG_FASTCALL *SkipFn)(RasterFiller* self, int step);
+  typedef void (FOG_FASTCALL *SkipFunc)(RasterFiller* self, int step);
 
   // --------------------------------------------------------------------------
   // [Methods]
@@ -65,11 +65,11 @@ struct FOG_NO_EXPORT RasterFiller
   // --------------------------------------------------------------------------
 
   //! @brief Prepare callback (set by user).
-  PrepareFn _prepare;
+  PrepareFunc _prepare;
   //! @brief Process callback (set by user).
-  ProcessFn _process;
+  ProcessFunc _process;
   //! @brief Skip callback (set by user).
-  SkipFn _skip;
+  SkipFunc _skip;
 };
 
 //! @}

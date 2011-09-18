@@ -35,7 +35,7 @@ struct FOG_API XmlText : public XmlElement
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  XmlText(const String& data = String());
+  XmlText(const StringW& data = StringW());
   virtual ~XmlText();
 
   // --------------------------------------------------------------------------
@@ -48,28 +48,28 @@ struct FOG_API XmlText : public XmlElement
   // [Text Specific]
   // --------------------------------------------------------------------------
 
-  virtual String getTextContent() const;
-  virtual err_t setTextContent(const String& text);
+  virtual StringW getTextContent() const;
+  virtual err_t setTextContent(const StringW& text);
 
-  FOG_INLINE const String& getData() const { return _data; }
-  err_t setData(const String& data);
-  err_t appendData(const String& data);
+  FOG_INLINE const StringW& getData() const { return _data; }
+  err_t setData(const StringW& data);
+  err_t appendData(const StringW& data);
   err_t deleteData();
-  err_t insertData(size_t start, const String& data);
-  err_t replaceData(const Range& range, const String& data);
+  err_t insertData(size_t start, const StringW& data);
+  err_t replaceData(const Range& range, const StringW& data);
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
 protected:
-  String _data;
+  StringW _data;
 
 private:
   friend struct XmlElement;
   friend struct XmlDocument;
 
-  _FOG_CLASS_NO_COPY(XmlText)
+  _FOG_NO_COPY(XmlText)
 };
 
 //! @}

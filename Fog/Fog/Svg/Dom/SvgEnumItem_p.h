@@ -8,7 +8,7 @@
 #define _FOG_SVG_DOM_SVGENUMITEM_P_H
 
 // [Dependencies]
-#include <Fog/Svg/Global/Constants.h>
+#include <Fog/Core/Global/Global.h>
 
 namespace Fog {
 
@@ -19,25 +19,25 @@ namespace Fog {
 // [Forward Declarations]
 // ============================================================================
 
-struct String;
+struct StringW;
 
 // ============================================================================
 // [Fog::SvgEnumItem]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 struct FOG_NO_EXPORT SvgEnumItem
 {
   char name[20];
   int value;
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 // ============================================================================
 // [Fog::SvgEnumItem - Methods]
 // ============================================================================
 
-FOG_NO_EXPORT int svgGetEnumId(const String& value, const SvgEnumItem* items);
+FOG_NO_EXPORT int svgGetEnumId(const StringW& value, const SvgEnumItem* items);
 
 //! @}
 

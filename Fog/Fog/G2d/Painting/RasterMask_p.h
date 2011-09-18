@@ -71,7 +71,7 @@ struct FOG_NO_EXPORT RasterMask
   //! @brief Reference count (when it goes to zero then mask should be destroyed).
   //!
   //! Saving mask to state increases the reference count.
-  mutable Atomic<uint> refCount;
+  mutable Atomic<uint> reference;
 
   //! @brief Mask ID.
   uint id;
@@ -144,7 +144,7 @@ struct FOG_NO_EXPORT RasterMaskSnapshot
 // [Fog::RasterMaskSpan8]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 //! @internal
 //!
 //! @brief Raster paint engine span managed by context.
@@ -158,13 +158,13 @@ struct FOG_NO_EXPORT RasterMaskSpan8 : public RasterSpan8
   //! @brief Span allocator category
   uint32_t poolId : 16;
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 // ============================================================================
 // [Fog::RasterMaskSpan16]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 //! @internal
 //!
 //! @brief Raster paint engine span managed by context.
@@ -178,7 +178,7 @@ struct FOG_NO_EXPORT RasterMaskSpan16 : public RasterSpan16
   //! @brief Span allocator category
   uint32_t poolId : 16;
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 //! @}
 

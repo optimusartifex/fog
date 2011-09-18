@@ -9,17 +9,14 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/Library/Library.h>
+#include <Fog/Core/OS/Library.h>
 #include <Fog/Core/Threading/ThreadLocal.h>
-
-// [Dependencies - Windows]
-#include <windows.h>
 
 // ============================================================================
 // [Fog::GdipLibrary - Defs]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackQWord.h>
+#include <Fog/Core/C++/PackQWord.h>
 
 typedef uint32_t GpARGB;
 typedef int GpPixelFormat;
@@ -219,7 +216,7 @@ struct GpRect
   int Height;
 };
 
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 namespace Fog {
 
@@ -295,7 +292,7 @@ struct FOG_API GdipLibrary
   ULONG_PTR _gdipToken;
 
 private:
-  _FOG_CLASS_NO_COPY(GdipLibrary)
+  _FOG_NO_COPY(GdipLibrary)
 };
 
 //! @}

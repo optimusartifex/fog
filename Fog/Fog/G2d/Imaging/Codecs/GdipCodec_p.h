@@ -7,7 +7,8 @@
 #ifndef _FOG_G2D_IMAGING_CODECS_GDIPCODEC_P_H
 #define _FOG_G2D_IMAGING_CODECS_GDIPCODEC_P_H
 
-#include <Fog/Core/Config/Config.h>
+#include <Fog/Core/C++/Base.h>
+
 #if !defined(FOG_OS_WINDOWS)
 #error "Fog::GdipCodecProvider can be included / compiled only under Windows"
 #endif // FOG_OS_WINDOWS
@@ -15,7 +16,7 @@
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/IO/Stream.h>
-#include <Fog/Core/Library/Library.h>
+#include <Fog/Core/OS/Library.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageCodec.h>
@@ -121,8 +122,8 @@ struct FOG_NO_EXPORT GdipDecoder : public ImageDecoder
   // [Properties]
   // --------------------------------------------------------------------------
 
-  virtual err_t getProperty(const ManagedString& name, Value& value) const;
-  virtual err_t setProperty(const ManagedString& name, const Value& value);
+  virtual err_t getProperty(const ManagedString& name, Var& dst) const;
+  virtual err_t setProperty(const ManagedString& name, const Var& src);
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -173,8 +174,8 @@ struct FOG_NO_EXPORT GdipEncoder : public ImageEncoder
   // [Properties]
   // --------------------------------------------------------------------------
 
-  virtual err_t getProperty(const ManagedString& name, Value& value) const;
-  virtual err_t setProperty(const ManagedString& name, const Value& value);
+  virtual err_t getProperty(const ManagedString& name, Var& dst) const;
+  virtual err_t setProperty(const ManagedString& name, const Var& src);
 
   // --------------------------------------------------------------------------
   // [Members]

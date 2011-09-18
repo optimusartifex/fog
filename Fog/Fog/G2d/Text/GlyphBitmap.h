@@ -25,7 +25,7 @@ namespace Fog {
 struct FOG_NO_EXPORT GlyphBitmapData
 {
   //! @brief Reference count.
-  mutable Atomic<size_t> refCount;
+  mutable Atomic<size_t> reference;
 
   //! @brief Metrics.
   GlyphMetricsF metrics;
@@ -67,7 +67,7 @@ struct FOG_API GlyphBitmap
 
   FOG_INLINE const Image& getBitmap() const
   {
-    return _d->bitmap[0].instance();
+    return _d->bitmap[0];
   }
 
   // --------------------------------------------------------------------------
@@ -86,18 +86,6 @@ struct FOG_API GlyphBitmap
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::GlyphBitmap, Fog::TYPEINFO_MOVABLE)
-
-// ============================================================================
-// [Fog::Swap<>]
-// ============================================================================
-
-_FOG_SWAP_D(Fog::GlyphBitmap)
 
 // [Guard]
 #endif // _FOG_G2D_TEXT_GLYPHIMAGE_H

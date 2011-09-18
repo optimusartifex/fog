@@ -9,7 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/Memory/MemoryBuffer.h>
+#include <Fog/Core/Memory/MemBuffer.h>
 #include <Fog/G2d/Geometry/PathClipper.h>
 #include <Fog/G2d/Geometry/PathStroker.h>
 #include <Fog/G2d/Geometry/Point.h>
@@ -198,7 +198,7 @@ struct FOG_NO_EXPORT RasterContext
   void restoreSnapshot(RasterMaskSnapshot* snapshot);
 
   // --------------------------------------------------------------------------
-  // [Members - Engine / Renderer]
+  // [Members - Engine]
   // --------------------------------------------------------------------------
 
   //! @brief Owner of this context.
@@ -292,17 +292,11 @@ struct FOG_NO_EXPORT RasterContext
   // --------------------------------------------------------------------------
 
   //! @brief Type of clipping, see @c RASTER_CLIP.
-  uint32_t finalClipType;
-  //! @brief Clip box (int).
-  BoxI finalClipBoxI;
-
-  //! @brief Clip box and clipper instance (float).
-  PathClipperF finalClipperF;
-  //! @brief Clip box and clipper instance (double).
-  PathClipperD finalClipperD;
-
+  uint32_t clipType;
   //! @brief Clip region.
-  Region finalRegion;
+  Region clipRegion;
+  //! @brief Clip box (integer).
+  BoxI clipBoxI;
 
   // --------------------------------------------------------------------------
   // [Members - Mask]
@@ -321,9 +315,9 @@ struct FOG_NO_EXPORT RasterContext
   //! @brief Clip mask y2 (max-y), per context.
   int maskY2;
 
-  //! @brief Spans data adjusted by -coreClipBox.y1. This pointer points to
+  //! @brief Spans data adjusted by -metaClipBox.y1. This pointer points to
   //! INVALID location, but this location is NEVER accessed. Caller must ensure
-  //! that data are accessed at [coreClipBox.y1 -> coreClipBox.y2] index.
+  //! that data are accessed at [metaClipBox.y1 -> metaClipBox.y2] index.
   //!
   //! To access mask spans use always @c getClipSpan() / setClipSpan() methods.
   //!
@@ -341,7 +335,7 @@ struct FOG_NO_EXPORT RasterContext
   // --------------------------------------------------------------------------
 
   //! @brief Temporary memory buffer.
-  MemoryBuffer buffer;
+  MemBuffer buffer;
 
   //! @brief Temporary path per context, used by calculations (float).
   PathF tmpPathF[3];
@@ -350,7 +344,7 @@ struct FOG_NO_EXPORT RasterContext
   PathD tmpPathD[3];
 
 private:
-  _FOG_CLASS_NO_COPY(RasterContext)
+  _FOG_NO_COPY(RasterContext)
 };
 
 //! @}

@@ -14,38 +14,34 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Init_p.h>
-#include <Fog/Core/Tools/ByteArray.h>
-#include <Fog/Core/Tools/ByteArrayTmp_p.h>
+#include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/Core/Tools/Locale.h>
 #include <Fog/Core/Tools/String.h>
+#include <Fog/Core/Tools/StringTmp_p.h>
 #include <Fog/Core/Tools/StringUtil.h>
 #include <Fog/Core/Tools/TextCodec.h>
 
+// [Dependencies - C]
 #include <wchar.h>
 #include <locale.h>
 
 namespace Fog {
 
 // ============================================================================
+// [Fog::Locale - Global]
+// ============================================================================
+
+static Static<LocaleData> Locale_dPosix;
+static Static<LocaleData> Locale_dUser;
+
+static Static<Locale> Locale_oPosix;
+static Static<Locale> Locale_oUser;
+
+// ============================================================================
 // [Fog::Locale - Helpers]
 // ============================================================================
 
-static Static<LocaleData> _Locale_dnull;
-static Static<LocaleData> _Locale_dposix;
-static Static<LocaleData> _Locale_duser;
-
-static FOG_INLINE LocaleData* _Locale_ref(LocaleData* d)
-{
-  d->refCount.inc();
-  return d;
-}
-
-static FOG_INLINE void _Locale_deref(LocaleData* d)
-{
-  if (d->refCount.deref()) fog_delete(d);
-}
-
-static void _Locale_setDefaults(LocaleData* d)
+static void Locale_setPosix(LocaleData* d)
 {
   d->data[LOCALE_CHAR_DECIMAL_POINT] = '.';
   d->data[LOCALE_CHAR_THOUSANDS_GROUP] = '\0';
@@ -59,10 +55,11 @@ static void _Locale_setDefaults(LocaleData* d)
   d->data[LOCALE_CHAR_RESERVED] = 0;
 }
 
-static void _Locale_setLConv(LocaleData* d, const struct lconv* conv)
+static void Locale_setLConv(LocaleData* d, const struct lconv* conv)
 {
-  _Locale_setDefaults(d);
-  if (FOG_IS_NULL(conv)) return;
+  Locale_setPosix(d);
+  if (FOG_IS_NULL(conv))
+    return;
 
   wchar_t buf[4];
 
@@ -72,58 +69,87 @@ static void _Locale_setLConv(LocaleData* d, const struct lconv* conv)
   if (mbstowcs(buf, conv->negative_sign, 3) == 1) d->data[LOCALE_CHAR_MINUS          ] = (uint16_t)buf[0];
 }
 
-Locale::Locale() :
-  _d(_Locale_ref(_Locale_dnull.instancep()))
+// ============================================================================
+// [Fog::Locale - Construction / Destruction]
+// ============================================================================
+
+static void FOG_CDECL Locale_ctor(Locale* self)
 {
+  self->_d = Locale_dPosix->addRef();
 }
 
-Locale::Locale(const Locale& other) :
-  _d(_Locale_ref(other._d))
+static void FOG_CDECL Locale_ctorCopy(Locale* self, const Locale* other)
 {
+  self->_d = other->_d->addRef();
 }
 
-Locale::Locale(const String& locale) :
-  _d(_Locale_ref(_Locale_dnull.instancep()))
+static void FOG_CDECL Locale_ctorString(Locale* self, const StringW* name)
 {
-  create(locale);
+  self->_d = Locale_dPosix->addRef();
+  _api.locale.create(self, name);
 }
 
-Locale::~Locale()
+static void FOG_CDECL Locale_dtor(Locale* self)
 {
-  _Locale_deref(_d);
+  self->_d->release();
 }
 
 // ============================================================================
 // [Fog::Locale - Sharing]
 // ============================================================================
 
-err_t Locale::_detach()
+static err_t FOG_CDECL Locale_detach(Locale* self)
 {
-  if (isDetached()) return ERR_OK;
+  LocaleData* d = self->_d;
+  if (d->reference.get() == 1)
+    return ERR_OK;
 
-  LocaleData* newd = fog_new LocaleData();
-  if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
+  LocaleData* newd = _api.locale.dCreate();
+  if (FOG_IS_NULL(newd))
+    return ERR_RT_OUT_OF_MEMORY;
 
-  newd->refCount.init(1);
-  newd->locale = _d->locale;
-  memcpy(newd->data, _d->data, LOCALE_CHAR_COUNT * sizeof(Char));
+  newd->name->set(d->name);
+  MemOps::copy(newd->data, d->data, LOCALE_CHAR_COUNT * sizeof(CharW));
 
-  _Locale_deref(atomicPtrXchg(&_d, newd));
+  atomicPtrXchg(&self->_d, newd)->release();
   return ERR_OK;
 }
 
 // ============================================================================
-// [Fog::Locale - Accessors]
+// [Fog::Locale - Reset]
 // ============================================================================
 
-err_t Locale::setChar(uint32_t id, Char value)
+static void FOG_CDECL Locale_reset(Locale* self)
 {
-  if (id >= (uint)LOCALE_CHAR_COUNT) return ERR_RT_INVALID_ARGUMENT;
-  if (_d->data[id] == value) return ERR_OK;
+  atomicPtrXchg(&self->_d, Locale_dPosix->addRef())->release();
+}
 
-  FOG_RETURN_ON_ERROR(detach());
+// ============================================================================
+// [Fog::Locale - SetLocale]
+// ============================================================================
 
-  _d->data[id] = value;
+static void FOG_CDECL Locale_setLocale(Locale* self, const Locale* other)
+{
+  atomicPtrXchg(&self->_d, other->_d->addRef())->release();
+}
+
+// ============================================================================
+// [Fog::Locale - SetChar]
+// ============================================================================
+
+static err_t FOG_CDECL Locale_setChar(Locale* self, uint32_t id, uint16_t ch)
+{
+  LocaleData* d = self->_d;
+
+  if (id >= (uint)LOCALE_CHAR_COUNT)
+    return ERR_RT_INVALID_ARGUMENT;
+
+  if (d->data[id] == ch)
+    return ERR_OK;
+
+  FOG_RETURN_ON_ERROR(self->detach());
+
+  self->_d->data[id] = ch;
   return ERR_OK;
 }
 
@@ -131,22 +157,24 @@ err_t Locale::setChar(uint32_t id, Char value)
 // [Fog::Locale - Create]
 // ============================================================================
 
-err_t Locale::create(const String& locale)
+static err_t FOG_CDECL Locale_create(Locale* self, const StringW* name)
 {
-  char localeA[512];
-  if (!StringUtil::unicodeToLatin1(localeA, locale.getData(), locale.getLength()))
+  char nameA[512];
+
+  if (!StringUtil::latinFromUnicode(nameA, name->getData(), name->getLength()))
     return ERR_RT_INVALID_ARGUMENT;
 
   err_t err = ERR_OK;
-  ByteArrayTmp<128> savedLocale(Stub8(setlocale(LC_ALL, NULL)));
+  StringTmpA<128> savedLocale(StubA(setlocale(LC_ALL, NULL)));
 
-  if (setlocale(LC_ALL, localeA))
+  if (setlocale(LC_ALL, nameA))
   {
-    err = detach();
-    if (FOG_IS_ERROR(err)) goto _End;
+    err = self->detach();
+    if (FOG_IS_ERROR(err))
+      goto _End;
 
-    _d->locale = locale;
-    _Locale_setLConv(_d, localeconv());
+    self->_d->name->set(*name);
+    Locale_setLConv(self->_d, localeconv());
   }
   else
   {
@@ -159,37 +187,30 @@ _End:
 }
 
 // ============================================================================
-// [Fog::Locale - Reset]
+// [Fog::Locale - LocaleData]
 // ============================================================================
 
-void Locale::reset()
+static LocaleData* FOG_CDECL Locale_dCreate(void)
 {
-  _Locale_deref(
-    atomicPtrXchg(&_d, _Locale_ref(_Locale_dnull.instancep())));
+  LocaleData* d = reinterpret_cast<LocaleData*>(MemMgr::alloc(sizeof(LocaleData)));
+  if (FOG_IS_NULL(d))
+    return NULL;
+
+  d->reference.init(1);
+  d->vType = VAR_TYPE_LOCALE;
+  FOG_PADDING_ZERO_64(d->padding0_32);
+  d->name.init();
+  
+  return d;
 }
 
-// ============================================================================
-// [Fog::Locale - Operator Overload]
-// ============================================================================
-
-Locale& Locale::operator=(const Locale& other)
+static void FOG_CDECL Locale_dFree(LocaleData* d)
 {
-  _Locale_deref(
-    atomicPtrXchg(&_d, _Locale_ref(other._d)));
-  return *this;
+  d->name.destroy();
+
+  if ((d->vType & VAR_FLAG_STATIC) == 0)
+    MemMgr::free(d);
 }
-
-// ============================================================================
-// [Fog::Locale - Statics]
-// ============================================================================
-
-Locale* Locale::_dnull;
-Locale* Locale::_dposix;
-Locale* Locale::_duser;
-
-static Static<Locale> _Locale_dnull_instance;
-static Static<Locale> _Locale_dposix_instance;
-static Static<Locale> _Locale_duser_instance;
 
 // ============================================================================
 // [Init / Fini]
@@ -197,28 +218,55 @@ static Static<Locale> _Locale_duser_instance;
 
 FOG_NO_EXPORT void Locale_init(void)
 {
-  _Locale_dnull.init();
-  _Locale_dnull->refCount.init(1);
-  _Locale_dnull->locale = Ascii8("NULL");
-  _Locale_setDefaults(_Locale_dnull.instancep());
+  // --------------------------------------------------------------------------
+  // [Funcs]
+  // --------------------------------------------------------------------------
 
-  _Locale_dposix.init();
-  _Locale_dposix->refCount.init(1);
-  _Locale_dposix->locale= Ascii8("POSIX");
-  _Locale_setDefaults(_Locale_dposix.instancep());
+  _api.locale.ctor = Locale_ctor;
+  _api.locale.ctorCopy = Locale_ctorCopy;
+  _api.locale.ctorString = Locale_ctorString;
+  _api.locale.dtor = Locale_dtor;
+  _api.locale.detach = Locale_detach;
+  _api.locale.reset = Locale_reset;
+  _api.locale.create = Locale_create;
+  _api.locale.setLocale = Locale_setLocale;
+  _api.locale.setChar = Locale_setChar;
 
-  _Locale_duser.init();
-  _Locale_duser->refCount.init(1);
-  _Locale_setLConv(_Locale_duser.instancep(), localeconv());
+  _api.locale.dCreate = Locale_dCreate;
+  _api.locale.dFree = Locale_dFree;
 
-  Locale::_dnull = _Locale_dnull_instance.instancep();
-  Locale::_dnull->_d = _Locale_dnull.instancep();
+  // --------------------------------------------------------------------------
+  // [Data]
+  // --------------------------------------------------------------------------
 
-  Locale::_dposix = _Locale_dposix_instance.instancep();
-  Locale::_dposix->_d = _Locale_dposix.instancep();
+  LocaleData* d;
 
-  Locale::_duser = _Locale_duser_instance.instancep();
-  Locale::_duser->_d = _Locale_duser.instancep();
+  d = &Locale_dPosix;
+  d->reference.init(1);
+  d->vType = VAR_TYPE_LOCALE;
+  d->name.initCustom1(Ascii8("POSIX"));
+
+  _api.locale.oPosix = Locale_oPosix.initCustom1(d);
+  Locale_setPosix(d);
+
+  d = &Locale_dUser;
+  d->reference.init(1);
+  d->vType = VAR_TYPE_LOCALE;
+  d->name.init();
+
+  _api.locale.oUser = Locale_oPosix.initCustom1(d);
+  Locale_setLConv(d, localeconv());
+}
+
+FOG_NO_EXPORT void Locale_fini(void)
+{
+  LocaleData* d;
+
+  d = &Locale_dUser;
+  d->name.destroy();
+
+  d = &Locale_dPosix;
+  d->name.destroy();
 }
 
 } // Fog namespace

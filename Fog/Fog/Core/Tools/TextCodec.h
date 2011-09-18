@@ -9,10 +9,9 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemOps.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Tools/Char.h>
-#include <Fog/Core/Tools/String.h>
 
 namespace Fog {
 
@@ -24,15 +23,15 @@ namespace Fog {
 // ============================================================================
 
 //! @brief Text-codec destroy function.
-typedef void (FOG_CDECL *TextCodecDestroyFn)(TextCodecData* d);
+typedef void (FOG_CDECL *TextCodecDestroyFunc)(TextCodecData* d);
 
 //! @brief Text-codec encode function.
-typedef err_t (FOG_CDECL *TextCodecEncodeFn)(const TextCodecData* d,
-  ByteArray& dst, const Char* src, size_t srcLength, TextCodecState* state, TextCodecHandler* handler);
+typedef err_t (FOG_CDECL *TextCodecEncodeFunc)(const TextCodecData* d,
+  StringA& dst, const CharW* src, size_t srcLength, TextCodecState* state, TextCodecHandler* handler);
 
 //! @brief Text-codec decode function.
-typedef err_t (FOG_CDECL *TextCodecDecodeFn)(const TextCodecData* d,
-  String& dst, const void* src, size_t srcSize, TextCodecState* state);
+typedef err_t (FOG_CDECL *TextCodecDecodeFunc)(const TextCodecData* d,
+  StringW& dst, const void* src, size_t srcSize, TextCodecState* state);
 
 // ============================================================================
 // [Fog::TextCodecPage8]
@@ -82,9 +81,9 @@ struct FOG_API TextCodecHandler
   //! @param pos Position relative to the input buffer used by the last
   //! call to TextCodec::encode() - for logging or extended error handling.
   //!
-  //! @note This function should use only low 0-127 ascii characters on the
+  //! @note This function should use only low 0-127 ASCII characters on the
   //! output.
-  virtual err_t replaceCharacter(ByteArray& dst, uint32_t uc) = 0;
+  virtual err_t replace(StringA& dst, uint32_t uc) = 0;
 };
 
 // ============================================================================
@@ -100,7 +99,7 @@ struct FOG_NO_EXPORT TextCodecState
 
   FOG_INLINE TextCodecState()
   {
-    Memory::zero_t<TextCodecState>(this);
+    MemOps::zero_t<TextCodecState>(this);
   }
 
   FOG_INLINE ~TextCodecState()
@@ -184,22 +183,37 @@ struct FOG_NO_EXPORT TextCodecState
 struct FOG_NO_EXPORT TextCodecData
 {
   // --------------------------------------------------------------------------
+  // [AddRef / Release]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE TextCodecData* addRef() const
+  {
+    reference.inc();
+    return const_cast<TextCodecData*>(this);
+  }
+
+  FOG_INLINE void release()
+  {
+    if (reference.deref())
+      destroy(this);
+  }
+
+  // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
   //! @brief Reference count.
-  mutable Atomic<size_t> refCount;
+  mutable Atomic<size_t> reference;
 
   //! @brief Destroy function (called when reference count is decreased to zero).
-  TextCodecDestroyFn destroy;
+  TextCodecDestroyFunc destroy;
   //! @brief Encode function.
-  TextCodecEncodeFn encode;
+  TextCodecEncodeFunc encode;
   //! @brief Decode function.
-  TextCodecDecodeFn decode;
+  TextCodecDecodeFunc decode;
 
   //! @brief Text-codec code (see @c TEXT_CODEC).
   uint32_t code;
-
   //! @brief Flags (see @c TEXT_CODEC_FLAGS).
   uint32_t flags;
 
@@ -235,23 +249,37 @@ struct FOG_NO_EXPORT TextCodecData
 //! - @c Fog::TextCodec::utf8() - UTF-8 text codec.
 //! - @c Fog::TextCodec::utf16() - UTF-16 text codec.
 //! - @c Fog::TextCodec::utf32() - UTF-32 text codec.
-struct FOG_API TextCodec
+struct FOG_NO_EXPORT TextCodec
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  TextCodec();
-  TextCodec(const TextCodec& other);
-  explicit FOG_INLINE TextCodec(TextCodecData* d) : _d(d) {}
-  ~TextCodec();
+  FOG_INLINE TextCodec()
+  {
+    _api.textcodec.ctor(this);
+  }
+
+  FOG_INLINE TextCodec(const TextCodec& other)
+  {
+    _api.textcodec.ctorCopy(this, &other);
+  }
+
+  explicit FOG_INLINE TextCodec(TextCodecData* d) : _d(d)
+  {
+  }
+
+  FOG_INLINE ~TextCodec()
+  {
+    _api.textcodec.dtor(this);
+  }
 
   // --------------------------------------------------------------------------
   // [Sharing]
   // --------------------------------------------------------------------------
 
   //! @copydoc Doxygen::Implicit::getReference().
-  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
+  FOG_INLINE size_t getReference() const { return _d->reference.get(); }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -278,51 +306,89 @@ struct FOG_API TextCodec
   // [Create]
   // --------------------------------------------------------------------------
 
-  err_t createFromCode(uint32_t code);
-  err_t createFromMime(const char* mime);
-  err_t createFromMime(const String& mime);
-  err_t createFromBom(const void* data, size_t length);
+  FOG_INLINE err_t createFromCode(uint32_t code)
+  {
+    return _api.textcodec.createFromCode(this, code);
+  }
+
+  FOG_INLINE err_t createFromMime(const char* mime)
+  {
+    StubA stub(mime);
+    return _api.textcodec.createFromMimeStubA(this, &stub);
+  }
+
+  FOG_INLINE err_t createFromMime(const Ascii8& mime)
+  {
+    return _api.textcodec.createFromMimeStubA(this, &mime);
+  }
+
+  FOG_INLINE err_t createFromMime(const StringW& mime)
+  {
+    return _api.textcodec.createFromMimeStringW(this, &mime);
+  }
+
+  FOG_INLINE err_t createFromBom(const void* data, size_t length)
+  {
+    return _api.textcodec.createFromBom(this, data, length);
+  }
 
   // --------------------------------------------------------------------------
   // [Reset]
   // --------------------------------------------------------------------------
 
-  void reset();
+  FOG_INLINE void reset()
+  {
+    _api.textcodec.reset(this);
+  }
 
   // --------------------------------------------------------------------------
   // [Encode / Decode]
   // --------------------------------------------------------------------------
 
-  err_t encode(ByteArray& dst, const Utf16& src, TextCodecState* state = NULL,
-    TextCodecHandler* handler = NULL, uint32_t cntOp = CONTAINER_OP_REPLACE) const;
+  FOG_INLINE err_t encode(StringA& dst, const StubW& src, TextCodecState* state = NULL,
+    TextCodecHandler* handler = NULL, uint32_t cntOp = CONTAINER_OP_REPLACE) const
+  {
+    return _api.textcodec.encodeStubW(this, &dst, &src, state, handler, cntOp);
+  }
 
-  err_t encode(ByteArray& dst, const String& src, TextCodecState* state = NULL,
-    TextCodecHandler* handler = NULL, uint32_t cntOp = CONTAINER_OP_REPLACE) const;
+  FOG_INLINE err_t encode(StringA& dst, const StringW& src, TextCodecState* state = NULL,
+    TextCodecHandler* handler = NULL, uint32_t cntOp = CONTAINER_OP_REPLACE) const
+  {
+    return _api.textcodec.encodeStringW(this, &dst, &src, state, handler, cntOp);
+  }
 
-  err_t decode(String& dst, const Stub8& src, TextCodecState* state = NULL,
-    uint32_t cntOp = CONTAINER_OP_REPLACE) const;
+  FOG_INLINE err_t decode(StringW& dst, const StubA& src, TextCodecState* state = NULL,
+    uint32_t cntOp = CONTAINER_OP_REPLACE) const
+  {
+    return _api.textcodec.decodeStubA(this, &dst, &src, state, cntOp);
+  }
 
-  err_t decode(String& dst, const ByteArray& src, TextCodecState* state = NULL,
-    uint32_t cntOp = CONTAINER_OP_REPLACE) const;
+  FOG_INLINE err_t decode(StringW& dst, const StringA& src, TextCodecState* state = NULL,
+    uint32_t cntOp = CONTAINER_OP_REPLACE) const
+  {
+    return _api.textcodec.decodeStringA(this, &dst, &src, state, cntOp);
+  }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  TextCodec& operator=(const TextCodec& other);
+  FOG_INLINE TextCodec& operator=(const TextCodec& other)
+  {
+    _api.textcodec.copy(this, &other);
+    return *this;
+  }
 
   // --------------------------------------------------------------------------
   // [Statics]
   // --------------------------------------------------------------------------
 
-  static uint8_t _cache[sizeof(void*) * TEXT_CODEC_CACHE_COUNT];
-
-  static FOG_INLINE const TextCodec& ascii8() { return ((const TextCodec*)_cache)[TEXT_CODEC_CACHE_ASCII]; }
-  static FOG_INLINE const TextCodec& local8() { return ((const TextCodec*)_cache)[TEXT_CODEC_CACHE_LOCAL]; }
-  static FOG_INLINE const TextCodec& utf8()   { return ((const TextCodec*)_cache)[TEXT_CODEC_CACHE_UTF8 ]; }
-  static FOG_INLINE const TextCodec& utf16()  { return ((const TextCodec*)_cache)[TEXT_CODEC_CACHE_UTF16]; }
-  static FOG_INLINE const TextCodec& utf32()  { return ((const TextCodec*)_cache)[TEXT_CODEC_CACHE_UTF32]; }
-  static FOG_INLINE const TextCodec& localW() { return ((const TextCodec*)_cache)[TEXT_CODEC_CACHE_WCHAR]; }
+  static FOG_INLINE const TextCodec& ascii8() { return *_api.textcodec.oCache[TEXT_CODEC_CACHE_ASCII]; }
+  static FOG_INLINE const TextCodec& local8() { return *_api.textcodec.oCache[TEXT_CODEC_CACHE_LOCAL]; }
+  static FOG_INLINE const TextCodec& utf8()   { return *_api.textcodec.oCache[TEXT_CODEC_CACHE_UTF8 ]; }
+  static FOG_INLINE const TextCodec& utf16()  { return *_api.textcodec.oCache[TEXT_CODEC_CACHE_UTF16]; }
+  static FOG_INLINE const TextCodec& utf32()  { return *_api.textcodec.oCache[TEXT_CODEC_CACHE_UTF32]; }
+  static FOG_INLINE const TextCodec& localW() { return *_api.textcodec.oCache[TEXT_CODEC_CACHE_WCHAR]; }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -334,19 +400,6 @@ struct FOG_API TextCodec
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::TextCodec, Fog::TYPEINFO_MOVABLE)
-_FOG_TYPEINFO_DECLARE(Fog::TextCodecState, Fog::TYPEINFO_PRIMITIVE)
-
-// ============================================================================
-// [Fog::Swap]
-// ============================================================================
-
-_FOG_SWAP_D(Fog::TextCodec)
 
 // [Guard]
 #endif // _FOG_CORE_TOOLS_TEXTCODEC_H

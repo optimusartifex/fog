@@ -67,12 +67,12 @@ struct FOG_NO_EXPORT RasterState
   // [Type & Precision]
   // ------------------------------------------------------------------------
 
-  //! @brief Source type (see @ref PATTERN_TYPE).
+  //! @brief Source type (see @ref RASTER_SOURCE).
   uint8_t sourceType;
   //! @brief RasterPaintEngine::masterSave copy.
   uint8_t savedStateFlags;
   //! @brief The strokeParams[F|D] precision.
-  uint8_t strokeParamsPrecision;
+  uint8_t strokerPrecision;
 
   // ------------------------------------------------------------------------
   // [Integral Transform]
@@ -92,6 +92,7 @@ struct FOG_NO_EXPORT RasterState
   // ------------------------------------------------------------------------
 
   RasterSource source;
+  RenderSolid solid;
   RenderPatternContext* pc;
 
   // ------------------------------------------------------------------------
@@ -121,10 +122,12 @@ struct FOG_NO_EXPORT RasterState
   // [RASTER_STATE_CLIPPING]
   // ------------------------------------------------------------------------
 
-  //! @brief The clip-box.
-  BoxI clipBox;
-
   // TODO: Clipping
+
+  //! @brief The clip-region.
+  //Region ctxClipRegion;
+  //! @brief The clip-box.
+  //BoxI ctxClipBox;
 };
 
 //! @}

@@ -35,12 +35,12 @@ WinFontProviderData::~WinFontProviderData()
 // [Fog::WinFontProviderData - Interface]
 // ============================================================================
 
-err_t WinFontProviderData::getFontFace(FontFace** dst, const String& fontFamily)
+err_t WinFontProviderData::getFontFace(FontFace** dst, const StringW& fontFamily)
 {
   LOGFONTW lf;
   FOG_RETURN_ON_ERROR(getLogFontW(&lf, fontFamily));
 
-  StringTmp<64> lfName;
+  StringTmpW<64> lfName;
   lfName.setWChar(lf.lfFaceName);
 
   AutoLock locked(lock);
@@ -86,7 +86,7 @@ err_t WinFontProviderData::getFontFace(FontFace** dst, const String& fontFamily)
   return ERR_OK;
 }
 
-err_t WinFontProviderData::getFontList(List<String>& dst)
+err_t WinFontProviderData::getFontList(List<StringW>& dst)
 {
   WinFontEnumContext ctx(dst);
 
@@ -98,16 +98,16 @@ err_t WinFontProviderData::getFontList(List<String>& dst)
   return ctx.err;
 }
 
-String WinFontProviderData::getDefaultFamily()
+StringW WinFontProviderData::getDefaultFamily()
 {
-  return Ascii8("Times New Roman");
+  return StringW::fromAscii8("Times New Roman");
 }
 
 // ============================================================================
 // [Fog::WinFontProviderData - Statics]
 // ============================================================================
 
-err_t WinFontProviderData::getLogFontW(LOGFONTW* lfDst, const String& fontFamily)
+err_t WinFontProviderData::getLogFontW(LOGFONTW* lfDst, const StringW& fontFamily)
 {
   FOG_ASSERT(lfDst != NULL);
   ZeroMemory(lfDst, sizeof(LOGFONTW));
@@ -129,7 +129,7 @@ err_t WinFontProviderData::getLogFontW(LOGFONTW* lfDst, const String& fontFamily
 
   if (fontFamily.getLength() == 0)
   {
-    String defaultFamily = getDefaultFamily();
+    StringW defaultFamily = getDefaultFamily();
     CopyMemory(lfDst->lfFaceName, defaultFamily.getData(), (defaultFamily.getLength() + 1) * sizeof(WCHAR));
   }
   else
@@ -150,7 +150,7 @@ err_t WinFontProviderData::getLogFontW(LOGFONTW* lfDst, const String& fontFamily
   if (!ctx.acceptable)
     return ERR_FONT_NOT_MATCHED;
 
-  Memory::copy(lfDst->lfFaceName, ctx.logFont.lfFaceName, FOG_ARRAY_SIZE(ctx.logFont.lfFaceName) * sizeof(WCHAR));
+  MemOps::copy(lfDst->lfFaceName, ctx.logFont.lfFaceName, FOG_ARRAY_SIZE(ctx.logFont.lfFaceName) * sizeof(WCHAR));
   return ERR_OK;
 }
 

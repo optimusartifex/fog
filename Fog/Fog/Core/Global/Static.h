@@ -8,7 +8,7 @@
 #define _FOG_CORE_GLOBAL_STATIC_H
 
 // [Dependencies]
-#include <Fog/Core/Config/Config.h>
+#include <Fog/Core/C++/Base.h>
 
 namespace Fog {
 
@@ -31,12 +31,9 @@ namespace Fog {
 //! // Initialize instance, calls Mutex constructor internally.
 //! mutex.init();
 //!
-//! // Do something, use -> operator or instance() method.
-//! mutex->lock();
-//! mutex->unlock();
-//!
-//! mutex.instance().lock();
-//! mutex.instance().unlock();
+//! // Do something, use -> overloaded operator() method.
+//! mutex().lock();
+//! mutex().unlock();
 //!
 //! // Destroy instance, calls Mutex destructor internally.
 //! mutex.destroy();
@@ -61,7 +58,7 @@ struct Static
   //! @brief Initializer with copy assignment (calls placement @c new operator).
   FOG_INLINE Type* init(const Static<Type>& t)
   {
-    return fog_new_p(reinterpret_cast<void*>(_storage)) Type(t.instance());
+    return fog_new_p(reinterpret_cast<void*>(_storage)) Type(t());
   }
 
   //! @brief Initializer with copy assignment (calls placement @c new operator).
@@ -85,36 +82,41 @@ struct Static
   //! @brief Deinitializer (calls placement @c delete operator).
   FOG_INLINE void destroy()
   {
-    instancep()->~Type();
+    p()->~Type();
   }
 
   // --------------------------------------------------------------------------
   // [Instance]
   // --------------------------------------------------------------------------
 
-  //! @brief Returns instance of @c Type.
-  FOG_INLINE Type& instance() { return *reinterpret_cast<Type*>(_storage); }
-  //! @brief Returns const instance of @c Type.
-  FOG_INLINE const Type& instance() const { return *reinterpret_cast<const Type*>(_storage); }
-
   //! @brief Returns pointer to instance of @c Type.
-  FOG_INLINE Type* instancep() { return reinterpret_cast<Type*>(_storage); }
+  FOG_INLINE Type* p() { return reinterpret_cast<Type*>(_storage); }
   //! @brief Returns const pointer to instance of @c Type.
-  FOG_INLINE const Type* instancep() const { return reinterpret_cast<const Type*>(_storage); }
+  FOG_INLINE const Type* p() const { return reinterpret_cast<const Type*>(_storage); }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  //! @brief Overriden Type* operator.
-  FOG_INLINE operator Type*() { return instancep(); }
-  //! @brief Overriden const Type* operator.
-  FOG_INLINE operator const Type*() const { return instancep(); }
+  //! @brief Overridden Type& operator.
+  FOG_INLINE operator Type&() { return *p(); }
+  //! @brief Overridden const Type& operator.
+  FOG_INLINE operator const Type&() const { return *p(); }
 
-  //! @brief Overriden -> operator.
-  FOG_INLINE Type* operator->() { return instancep(); }
-  //! @brief Overriden const -> operator.
-  FOG_INLINE Type const* operator->() const { return instancep(); }
+  //! @brief Overridden operator().
+  FOG_INLINE Type& operator()() { return *p(); }
+  //! @brief Overridden operator().
+  FOG_INLINE const Type& operator()() const { return *p(); }
+
+  //! @brief Overridden operator&().
+  FOG_INLINE Type* operator&() { return p(); }
+  //! @brief Overridden operator&().
+  FOG_INLINE const Type* operator&() const { p(); }
+
+  //! @brief Overridden -> operator.
+  FOG_INLINE Type* operator->() { return p(); }
+  //! @brief Overridden const -> operator.
+  FOG_INLINE Type const* operator->() const { return p(); }
 
 private:
   //! @brief Stack based storage.

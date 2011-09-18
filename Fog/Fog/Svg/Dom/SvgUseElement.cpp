@@ -20,19 +20,19 @@ namespace Fog {
 // [Helpers]
 // ============================================================================
 
-static Utf16 parseHtmlLinkId(const String& url)
+static StubW parseHtmlLinkId(const StringW& url)
 {
-  const Char* idStr;
-  const Char* idEnd;
-  const Char* idMark;
-  Char c;
+  const CharW* idStr;
+  const CharW* idEnd;
+  const CharW* idMark;
+  CharW c;
 
   if (url.getLength() < 2) goto bail;
 
   idStr = url.getData();
   idEnd = idStr + url.getLength();
 
-  if (*idStr != Char('#')) goto bail;
+  if (*idStr != CharW('#')) goto bail;
   idStr++;
 
   while (idStr->isSpace())
@@ -41,14 +41,14 @@ static Utf16 parseHtmlLinkId(const String& url)
   }
 
   idMark = idStr;
-  while ((c = *idStr).isAsciiNumlet() || c == Char('-') || c == Char('_'))
+  while ((c = *idStr).isAsciiNumlet() || c == CharW('-') || c == CharW('_'))
   {
     if (++idStr == idEnd) break;
   }
-  return Utf16(idMark, (size_t)(idStr - idMark));
+  return StubW(idMark, (size_t)(idStr - idMark));
 
 bail:
-  return Utf16((const Char*)NULL, 0);
+  return StubW((const CharW*)NULL, 0);
 }
 
 // ============================================================================
@@ -96,7 +96,7 @@ err_t SvgUseElement::onProcess(SvgVisitor* visitor) const
 {
   err_t err = ERR_OK;
 
-  String link = _getAttribute(fog_strings->getString(STR_SVG_ATTRIBUTE_xlink_href));
+  StringW link = _getAttribute(fog_strings->getString(STR_SVG_ATTRIBUTE_xlink_href));
   XmlElement* ref = getDocument()->getElementById(parseHtmlLinkId(link));
 
   if (ref && ref->isSvgElement())

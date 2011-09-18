@@ -8,7 +8,7 @@
 #define _FOG_CORE_MATH_FLOATCONTROL_H
 
 // [Dependencies]
-#include <Fog/Core/Config/Config.h>
+#include <Fog/Core/C++/Base.h>
 
 // [Dependencies - C]
 #include <math.h>

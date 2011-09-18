@@ -351,7 +351,7 @@ List<XmlElement*> XmlElement::getChildNodes() const
   return _children;
 }
 
-List<XmlElement*> XmlElement::getChildNodesByTagName(const String& tagName) const
+List<XmlElement*> XmlElement::getChildNodesByTagName(const StringW& tagName) const
 {
   List<XmlElement*> elms;
 
@@ -366,7 +366,7 @@ List<XmlElement*> XmlElement::getChildNodesByTagName(const String& tagName) cons
   return elms;
 }
 
-XmlElement* XmlElement::_nextChildByTagName(XmlElement* refElement, const String& tagName)
+XmlElement* XmlElement::_nextChildByTagName(XmlElement* refElement, const StringW& tagName)
 {
   XmlElement* e = refElement;
   if (e == NULL) return e;
@@ -378,7 +378,7 @@ XmlElement* XmlElement::_nextChildByTagName(XmlElement* refElement, const String
   return e;
 }
 
-XmlElement* XmlElement::_previousChildByTagName(XmlElement* refElement, const String& tagName)
+XmlElement* XmlElement::_previousChildByTagName(XmlElement* refElement, const StringW& tagName)
 {
   XmlElement* e = refElement;
   if (e == NULL) return e;
@@ -395,7 +395,7 @@ List<XmlAttribute*> XmlElement::attributes() const
   return _attributes;
 }
 
-bool XmlElement::hasAttribute(const String& name) const
+bool XmlElement::hasAttribute(const StringW& name) const
 {
   size_t i, len = _attributes.getLength();
   if (!len) return false;
@@ -412,7 +412,7 @@ bool XmlElement::hasAttribute(const String& name) const
   return false;
 }
 
-err_t XmlElement::setAttribute(const String& name, const String& value)
+err_t XmlElement::setAttribute(const StringW& name, const StringW& value)
 {
   if ((_flags & XML_ALLOWED_ATTRIBUTES) == 0) return ERR_XML_ATTRIBUTES_NOT_ALLOWED;
   if (name.isEmpty()) return ERR_XML_INVALID_ATTRIBUTE;
@@ -424,15 +424,15 @@ err_t XmlElement::setAttribute(const String& name, const String& value)
   return _setAttribute(managedName, value);
 }
 
-String XmlElement::getAttribute(const String& name) const
+StringW XmlElement::getAttribute(const StringW& name) const
 {
   ManagedString managedName;
-  if (managedName.setIfManaged(name) != ERR_OK) return String();
+  if (managedName.setIfManaged(name) != ERR_OK) return StringW();
 
   return _getAttribute(managedName);
 }
 
-err_t XmlElement::removeAttribute(const String& name)
+err_t XmlElement::removeAttribute(const StringW& name)
 {
   if ((_flags & XML_ALLOWED_ATTRIBUTES) == 0) return ERR_XML_ATTRIBUTES_NOT_ALLOWED;
 
@@ -449,18 +449,18 @@ err_t XmlElement::removeAttributes()
   size_t i = 0;
   while (i < _attributes.getLength())
   {
-    if (_removeAttribute(_attributes.at(i)->_name) != ERR_OK) i++;
+    if (_removeAttribute(_attributes.getAt(i)->_name) != ERR_OK) i++;
   }
 
   return ERR_OK;
 }
 
-err_t XmlElement::setId(const String& id)
+err_t XmlElement::setId(const StringW& id)
 {
   return setAttribute(fog_strings->getString(STR_XML_ATTRIBUTE_id), id);
 }
 
-err_t XmlElement::setTagName(const String& name)
+err_t XmlElement::setTagName(const StringW& name)
 {
   if ((_flags & XML_ALLOWED_TAG) == 0) return ERR_XML_TAG_CHANGE_NOT_ALLOWED;
   if (name.isEmpty()) return ERR_XML_INVALID_TAG_NAME;
@@ -468,7 +468,7 @@ err_t XmlElement::setTagName(const String& name)
   return _tagName.set(name);
 }
 
-String XmlElement::getTextContent() const
+StringW XmlElement::getTextContent() const
 {
   // If we use the standard behavior that is in browsers, we should traverse
   // between all nodes and check for text content. I think this is right
@@ -481,13 +481,13 @@ String XmlElement::getTextContent() const
   }
   else
   {
-    String s;
+    StringW s;
     for (XmlElement* e = getFirstChild(); e; e = e->getNextSibling()) s.append(e->getTextContent());
     return s;
   }
 }
 
-err_t XmlElement::setTextContent(const String& text)
+err_t XmlElement::setTextContent(const StringW& text)
 {
   // First try fast-path.
   if (_firstChild == _lastChild && _firstChild->getType() == XML_ELEMENT_TEXT)
@@ -504,7 +504,7 @@ err_t XmlElement::setTextContent(const String& text)
   }
 }
 
-err_t XmlElement::_setAttribute(const ManagedString& name, const String& value)
+err_t XmlElement::_setAttribute(const ManagedString& name, const StringW& value)
 {
   size_t i, len = _attributes.getLength();
   XmlAttribute** attrs = (XmlAttribute**)_attributes.getData();
@@ -530,7 +530,7 @@ err_t XmlElement::_setAttribute(const ManagedString& name, const String& value)
   return a->setValue(value);
 }
 
-String XmlElement::_getAttribute(const ManagedString& name) const
+StringW XmlElement::_getAttribute(const ManagedString& name) const
 {
   size_t i, len = _attributes.getLength();
 
@@ -540,7 +540,7 @@ String XmlElement::_getAttribute(const ManagedString& name) const
     if (attrs[i]->_name == name) return attrs[i]->getValue();
   }
 
-  return String();
+  return StringW();
 }
 
 err_t XmlElement::_removeAttribute(const ManagedString& name)

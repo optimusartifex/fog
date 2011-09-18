@@ -8,7 +8,7 @@
 #define _FOG_GUI_ENGINE_X11GUIENGINE_H
 
 // [Visibility]
-#include <Fog/Core/Config/Config.h>
+#include <Fog/Core/C++/Base.h>
 
 #if defined(Fog_Gui_X11_EXPORTS)
 # define FOG_GUIENGINE_X11_API FOG_DLL_EXPORT
@@ -17,13 +17,13 @@
 #endif // Fog_Gui_X11_EXPORTS
 
 // [Dependencies]
-#include <Fog/Core/System/Object.h>
+#include <Fog/Core/Global/Global.h>
+#include <Fog/Core/Kernel/Object.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/Gui/Engine/GuiEngine.h>
 #include <Fog/Gui/Engine/X11Headers.h>
-#include <Fog/Gui/Global/Constants.h>
 
 namespace Fog {
 
@@ -472,8 +472,8 @@ struct FOG_GUIENGINE_X11_API X11GuiWindow : public GuiWindow
 
   virtual err_t takeFocus();
 
-  virtual err_t setTitle(const String& title);
-  virtual err_t getTitle(String& title);
+  virtual err_t setTitle(const StringW& title);
+  virtual err_t getTitle(StringW& title);
 
   virtual err_t setIcon(const Image& icon);
   virtual err_t getIcon(Image& icon);

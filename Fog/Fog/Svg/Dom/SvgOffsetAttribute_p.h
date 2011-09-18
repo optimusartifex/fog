@@ -11,7 +11,6 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Xml/XmlAttribute.h>
 #include <Fog/Core/Xml/XmlElement.h>
-#include <Fog/Svg/Global/Constants.h>
 
 namespace Fog {
 
@@ -37,7 +36,7 @@ struct FOG_NO_EXPORT SvgOffsetAttribute : public XmlAttribute
   // [Methods]
   // --------------------------------------------------------------------------
 
-  virtual err_t setValue(const String& value);
+  virtual err_t setValue(const StringW& value);
 
   // --------------------------------------------------------------------------
   // [Coords]
@@ -53,7 +52,7 @@ protected:
   float _offset;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgOffsetAttribute)
+  _FOG_NO_COPY(SvgOffsetAttribute)
 };
 
 //! @}

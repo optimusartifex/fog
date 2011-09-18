@@ -44,10 +44,10 @@ namespace Fog {
 // c = t^2
 #define _FOG_QUAD_COEFF(_Number_, t, a, b, c) \
   FOG_MACRO_BEGIN \
-    _Number_ inv_t = 1.0f - t; \
+    _Number_ inv_t = _Number_(1.0) - t; \
     \
     a = inv_t * inv_t; \
-    b = 2.0f * inv_t * t; \
+    b = _Number_(2.0) * inv_t * t; \
     c = t * t; \
   FOG_MACRO_END
 
@@ -124,10 +124,10 @@ namespace Fog {
 
 static FOG_INLINE void _PathT_verifyBoundingBox(const PathF& path)
 {
-  if ((path._d->flags & PATH_DATA_DIRTY_BBOX) == 0)
+  if ((path._d->vType & PATH_FLAG_DIRTY_BBOX) == 0)
   {
     BoxF _bbOld, _bbNew;
-    path._d->flags |= PATH_DATA_DIRTY_BBOX;
+    path._d->vType |= PATH_FLAG_DIRTY_BBOX;
 
     _bbOld = path._d->boundingBox;
     path.getBoundingBox(_bbNew);
@@ -139,10 +139,10 @@ static FOG_INLINE void _PathT_verifyBoundingBox(const PathF& path)
 
 static FOG_INLINE void _PathT_verifyBoundingBox(const PathD& path)
 {
-  if ((path._d->flags & PATH_DATA_DIRTY_BBOX) == 0)
+  if ((path._d->vType & PATH_FLAG_DIRTY_BBOX) == 0)
   {
     BoxD _bbOld, _bbNew;
-    path._d->flags |= PATH_DATA_DIRTY_BBOX;
+    path._d->vType |= PATH_FLAG_DIRTY_BBOX;
 
     _bbOld = path._d->boundingBox;
     path.getBoundingBox(_bbNew);

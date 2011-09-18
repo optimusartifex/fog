@@ -8,12 +8,13 @@
 #define _FOG_G2D_RENDER_RENDER_C_DEFS_P_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/BufferP.h>
 #include <Fog/Core/Face/Face_C.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Memory/BSwap.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemBuffer.h>
+#include <Fog/Core/Memory/MemMgr.h>
+#include <Fog/Core/Memory/MemOps.h>
+#include <Fog/Core/Tools/Swap.h>
 #include <Fog/G2d/Face/Face_Raster_C.h>
 #include <Fog/G2d/Geometry/Math2d.h>
 #include <Fog/G2d/Geometry/Point.h>

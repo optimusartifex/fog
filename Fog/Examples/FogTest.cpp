@@ -1,11 +1,25 @@
-#include <Fog/Core.h>
-#include <Fog/G2d.h>
-#include <Fog/Gui.h>
-#include <Fog/Svg.h>
+#include "Helpers.h"
 
-// This is for MY testing:)
+// ============================================================================
+// [FogTest]
+// ============================================================================
 
 using namespace Fog;
+
+static void drawText(Painter* p, const PointI& pt, const Font& font, const char* fmt, ...)
+{
+  va_list ap;
+  va_start(ap, fmt);
+
+  StringW str;
+  str.vFormat(fmt, ap);
+
+  va_end(ap);
+
+  PathF path;
+  font.getTextOutline(path, PointF(pt), str);
+  p->fillPath(path);
+}
 
 struct MyWindow : public Window
 {
@@ -21,8 +35,6 @@ struct MyWindow : public Window
   virtual void onMouse(MouseEvent* e);
   virtual void onTimer(TimerEvent* e);
   virtual void onPaint(PaintEvent* e);
-
-  void paintImage(Painter* painter, const PointI& pos, const Image& im, const String& name);
 
   Image i[2];
   LinearGradientF linear;
@@ -56,10 +68,10 @@ MyWindow::MyWindow(uint32_t createFlags) :
   fps = 0.0f;
   fpsCounter = 0.0f;
 
-  setWindowTitle(Ascii8("Testing..."));
+  setWindowTitle(StringW::fromAscii8("Testing..."));
 
-  i[0].readFromFile(Ascii8("C:/My/Devel/Sprites/babelfish.png"));
-  i[1].readFromFile(Ascii8("C:/My/Devel/Sprites/kweather.png"));
+  i[0].readFromFile(StringW::fromAscii8("C:/My/Devel/Sprites/babelfish.png"));
+  i[1].readFromFile(StringW::fromAscii8("C:/My/Devel/Sprites/kweather.png"));
 
   _subx = 0.0f;
   _suby = 0.0f;
@@ -157,13 +169,12 @@ void MyWindow::onTimer(TimerEvent* e)
 
 void MyWindow::onPaint(PaintEvent* e)
 {
-  Time startTime = Time::now();
   Painter* p = e->getPainter();
 
   p->setSource(Argb32(0xFFFFFFFF));
   p->fillAll();
 
-#if 1
+#if 0
   PieD pie(PointD(0, 0), PointD(200, 200), 0.0, MATH_ONE_HALF_PI);
   BoxD box;
 
@@ -233,7 +244,118 @@ void MyWindow::onPaint(PaintEvent* e)
   }
 #endif
 
+#if 0
+  {
+    PointF pts[3];
+    pts[0].set(40, 40);
+    pts[1].set(120, 80);
+    pts[2].set(_lastMousePoint);
+
+    p->setSource(Argb32(0xFFFF0000));
+    p->setLineWidth(15.0);
+    p->setLineJoin(LINE_JOIN_ROUND);
+    p->setLineCaps(LINE_CAP_TRIANGLE);
+    p->drawPolyline(pts, 3);
+
+    p->drawRect(RectF(200, 200, 100, 100));
+    //drawText(p, PointI(4, 14), getFont(), "Angle %g", LineF::polyAngle(pts));
+  }
+#endif
+
+#if 0
+  List<int> list;
+  for (int ii = 0; ii < 100; ii++)
+    list.append(ii);
+
+  list.removeRange(Range(1, 3));
+  p->setSource(Argb32(0xFF000000));
+
+  for (size_t i = 0; i < list.getLength(); i++)
+  {
+    PathF path;
+    StringW str;
+    str.setInt(list[i]);
+    getFont().getTextOutline(path, PointF(14.0f, 14.0f * (i + 1)), str);
+    p->fillPath(path);
+  }
+#endif
+
+#if 1
+  PathF path;
+  path.moveTo(PointF(100, 100));
+  path.cubicTo(PointF(200, 200), PointF(400, 250), PointF(200, 600));
+  //path.quadTo(PointF(200, 200), PointF(200, 600));
+  path.close();
+  //path.round(RoundF(100, 100, 300, 300, 50));
+
+  p->setSource(Argb32(0xFF000000));
+  p->fillPath(path);
+
+  p->setSource(Argb32(0x4F0000FF));
+  p->fillBox(BoxF(100, 100, 200, 200));
+
+  PathF path2;
+  PathClipperF clipper(BoxF(100, 100, 200, 200));
+
+  clipper.clipPath(path2, path);
+  p->setSource(Argb32(0x4FFF0000));
+  p->fillPath(path2);
+
+/*
+  path.moveTo(PointF(100, 100));
+  path.lineTo(PointF(250, 250));
+
+  path.moveTo(PointF(300, 100));
+  path.quadTo(PointF(375, 250), PointF(450, 100));
+
+  path.moveTo(PointF(500, 100));
+  path.cubicTo(PointF(650, 150), PointF(500, 200), PointF(650, 250));
+
+  path.scale(PointF(1.3f, 1.3f));
+*/
+
+  //path.ellipse(EllipseF(RectF(100, 100, 250, 250)));
+  //Helpers::drawPathEx<float>(p, path, 2.0f, Argb32(0xFF000000));
+
+  /*
+  path.clear();
+
+  getFont().getTextOutline(path, PointF(0, 0), StringW::fromAscii8("a"));
+  path.scale(PointF(50, 50));
+  //path.translate(PointF(400, 360));
+  path.fitTo(RectF(450, 100, 250, 250));
+  Helpers::drawPathEx<float>(p, path, 2.0f, Argb32(0xFF000000));
+  */
+
+  p->setSource(Argb32(0xFF000000));
+  /*
+  p->setLineWidth(20.0f);
+
+  path.clear();
+  path.line(LineF(100, 100, 100, 200));
+  p->setLineCaps(LINE_CAP_BUTT);
+  p->drawPath(path);
+
+  path.clear();
+  path.line(LineF(200, 100, 200, 200));
+  p->setLineCaps(LINE_CAP_SQUARE);
+  p->drawPath(path);
+
+  path.clear();
+  path.line(LineF(300, 100, 300, 200));
+  p->setLineCaps(LINE_CAP_ROUND);
+  p->drawPath(path);
+  */
+
+  //p->setSource(Argb32(0xFF000000));
+  //p->fillPath(path);
+
+  //p->setSource(Argb32(0xFFFF0000));
+  //p->fillPath(path);
+#endif
+
   // --------------------------------------------------------------------------
+  /*
   Time lastTime = Time::now();
 
   TimeDelta frameDelta = lastTime - startTime;
@@ -259,8 +381,7 @@ void MyWindow::onPaint(PaintEvent* e)
     font.getTextOutline(path, PointF(30, 30), text);
     p->fillPath(path);
   }
-
-  setWindowTitle(text);
+  setWindowTitle(text);*/
 }
 
 // ============================================================================
@@ -269,7 +390,10 @@ void MyWindow::onPaint(PaintEvent* e)
 
 FOG_UI_MAIN()
 {
-  Application app(Ascii8("Gui"));
+  //Api* api = &_api;
+  //printf("%p", api);
+
+  Application app(StringW::fromAscii8("UI"));
   MyWindow window(WINDOW_TYPE_DEFAULT);
 
   window.addListener(EVENT_CLOSE, &app, &Application::quit);

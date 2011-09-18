@@ -28,12 +28,17 @@ SvgPathAttribute::~SvgPathAttribute()
 {
 }
 
-err_t SvgPathAttribute::setValue(const String& value)
+err_t SvgPathAttribute::setValue(const StringW& value)
 {
   FOG_RETURN_ON_ERROR(_value.set(value));
   FOG_RETURN_ON_ERROR(SvgUtil::parsePath(_path, value));
 
-  if (_element) reinterpret_cast<SvgElement*>(_element)->_boundingBoxDirty = true;
+  // Build path-info to optimize path operations.
+  _path.buildPathInfo();
+
+  if (_element != NULL)
+    reinterpret_cast<SvgElement*>(_element)->_boundingBoxDirty = true;
+
   return ERR_OK;
 }
 

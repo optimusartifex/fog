@@ -38,7 +38,7 @@ struct TextExtents;
 struct FOG_NO_EXPORT FontData
 {
   //! @brief Reference count.
-  mutable Atomic<size_t> refCount;
+  mutable Atomic<size_t> reference;
 
   //! @brief Font-face.
   FontFace* face;
@@ -99,9 +99,9 @@ struct FOG_API Font
   // [Sharing]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
+  FOG_INLINE size_t getReference() const { return _d->reference.get(); }
 
-  FOG_INLINE bool isDetached() const { return _d->refCount.get() == 1; }
+  FOG_INLINE bool isDetached() const { return _d->reference.get() == 1; }
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
 
   err_t _detach();
@@ -131,7 +131,7 @@ struct FOG_API Font
   FOG_INLINE uint32_t getFaceId() const { return _d->face->id; }
 
   FOG_INLINE uint32_t getFeatures() const { return _d->face->features; }
-  FOG_INLINE const String& getFamily() const { return _d->face->family; }
+  FOG_INLINE const StringW& getFamily() const { return _d->face->family; }
 
   // Unit / Height.
 
@@ -197,8 +197,8 @@ struct FOG_API Font
   // [Create]
   // --------------------------------------------------------------------------
 
-  err_t create(const String& family, float height, uint32_t unit);
-  err_t create(const String& family, float height, uint32_t unit,
+  err_t create(const StringW& family, float height, uint32_t unit);
+  err_t create(const StringW& family, float height, uint32_t unit,
     const FontHints& hints, const TransformF& transform);
 
   err_t _fromFace(FontFace* face, float height, uint32_t unit);
@@ -207,14 +207,14 @@ struct FOG_API Font
   // [Methods]
   // --------------------------------------------------------------------------
 
-  err_t getTextOutline(PathF& dst, const PointF& pt, const String& str, uint32_t cntOp = CONTAINER_OP_REPLACE) const;
-  err_t getTextOutline(PathF& dst, const PointF& pt, const Utf16& str, uint32_t cntOp = CONTAINER_OP_REPLACE) const;
+  err_t getTextOutline(PathF& dst, const PointF& pt, const StringW& str, uint32_t cntOp = CONTAINER_OP_REPLACE) const;
+  err_t getTextOutline(PathF& dst, const PointF& pt, const StubW& str, uint32_t cntOp = CONTAINER_OP_REPLACE) const;
 
-  err_t getTextOutline(PathD& dst, const PointD& pt, const String& str, uint32_t cntOp = CONTAINER_OP_REPLACE) const;
-  err_t getTextOutline(PathD& dst, const PointD& pt, const Utf16& str, uint32_t cntOp = CONTAINER_OP_REPLACE) const;
+  err_t getTextOutline(PathD& dst, const PointD& pt, const StringW& str, uint32_t cntOp = CONTAINER_OP_REPLACE) const;
+  err_t getTextOutline(PathD& dst, const PointD& pt, const StubW& str, uint32_t cntOp = CONTAINER_OP_REPLACE) const;
 
-  err_t getTextExtents(TextExtents& extents, const String& str) const;
-  err_t getTextExtents(TextExtents& extents, const Utf16& str) const;
+  err_t getTextExtents(TextExtents& extents, const StringW& str) const;
+  err_t getTextExtents(TextExtents& extents, const StubW& str) const;
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
@@ -236,18 +236,6 @@ struct FOG_API Font
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::Font, Fog::TYPEINFO_MOVABLE)
-
-// ============================================================================
-// [Fog::Swap]
-// ============================================================================
-
-_FOG_SWAP_D(Fog::Font)
 
 // [Guard]
 #endif // _FOG_G2D_TEXT_FONT_H

@@ -12,7 +12,6 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Svg/Dom/SvgEnumItem_p.h>
-#include <Fog/Svg/Global/Constants.h>
 
 namespace Fog {
 
@@ -20,7 +19,7 @@ namespace Fog {
 // [Fog::SvgEnumItem - Methods]
 // ============================================================================
 
-int svgGetEnumId(const String& value, const SvgEnumItem* items)
+int svgGetEnumId(const StringW& value, const SvgEnumItem* items)
 {
   while (items->name[0] != '\0')
   {

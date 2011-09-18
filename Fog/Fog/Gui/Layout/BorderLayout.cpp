@@ -71,11 +71,11 @@ void BorderLayout::onRemove(LayoutItem* item)
 
     if (edge & LAYOUT_EDGE_Y_MASK)
     {
-      _y.remove(item);
+      _y.removeAt(_y.indexOf(item));
     }
     else if (edge & LAYOUT_EDGE_X_MASK)
     {
-      _x.remove(item);
+      _x.removeAt(_x.indexOf(item));
     }
 
     if (_sort != LAYOUT_SORT_NONE)
@@ -106,9 +106,9 @@ void BorderLayout::calculateLayoutHint(LayoutHint& hint)
   _horizontalflex = 0;
   _verticalflex = 0;
 
-  for (int i = 0; i < (sysint_t)list.getLength(); i++)
+  for (int i = 0; i < (ssize_t)list.getLength(); i++)
   {
-    LayoutItem* item = list.at(i);
+    LayoutItem* item = list.getAt(i);
     const LayoutHint& hint = item->getLayoutHint();
     LayoutData* prop = item->getLayoutData<LayoutData>();
 
@@ -241,9 +241,9 @@ void BorderLayout::setLayoutGeometry(const RectI& rect)
   int spacingX = getSpacing();
   int spacingY = getSpacing();
 
-  for (int i = 0; i < (sysint_t)list.getLength(); i++)
+  for (int i = 0; i < (ssize_t)list.getLength(); i++)
   {
-    LayoutItem* item = list.at(i);
+    LayoutItem* item = list.getAt(i);
     if (item == _center)
     {
       //Center is also within _children of Layout, but we handle
@@ -353,13 +353,13 @@ const List<LayoutItem*>& BorderLayout::getList()
 
       if (_sort == LAYOUT_SORT_X)
       {
-        _sorted.append(_x);
-        _sorted.append(_y);
+        _sorted.concat(_x);
+        _sorted.concat(_y);
       }
       else if (_sort == LAYOUT_SORT_Y)
       {
-        _sorted.append(_y);
-        _sorted.append(_x);
+        _sorted.concat(_y);
+        _sorted.concat(_x);
       }
     }
 

@@ -8,7 +8,6 @@
 #define _FOG_CORE_TOOLS_TEXTITERATOR_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Tools/Char.h>
 #include <Fog/Core/Tools/CharData.h>
@@ -37,8 +36,8 @@ struct FOG_NO_EXPORT TextIterator
   {
   }
 
-  explicit FOG_INLINE TextIterator(const Utf16& s) { assign(s); }
-  explicit FOG_INLINE TextIterator(const String& s) { assign(s); }
+  explicit FOG_INLINE TextIterator(const StubW& s) { assign(s); }
+  explicit FOG_INLINE TextIterator(const StringW& s) { assign(s); }
   explicit FOG_INLINE TextIterator(const TextChunk& s) { assign(s); }
 
   FOG_INLINE ~TextIterator()
@@ -49,14 +48,14 @@ struct FOG_NO_EXPORT TextIterator
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const Char* getPos() const { return _pos; }
-  FOG_INLINE const Char* getEnd() const { return _end; }
+  FOG_INLINE const CharW* getPos() const { return _pos; }
+  FOG_INLINE const CharW* getEnd() const { return _end; }
 
   // --------------------------------------------------------------------------
   // [Assign]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t assign(const Utf16& s)
+  FOG_INLINE err_t assign(const StubW& s)
   {
     _pos = s.getData();
     _end = _pos + s.getComputedLength();
@@ -64,7 +63,7 @@ struct FOG_NO_EXPORT TextIterator
     return _detectInvalidString();
   }
 
-  FOG_INLINE err_t assign(const String& s)
+  FOG_INLINE err_t assign(const StringW& s)
   {
     _pos = s.getData();
     _end = _pos + s.getLength();
@@ -154,7 +153,7 @@ _Fail:
   {
     uint32_t uc0 = nextU16();
 
-    if (FOG_UNLIKELY(Char::isSurrogate(uc0)))
+    if (FOG_UNLIKELY(CharW::isSurrogate(uc0)))
     {
       // Invalid position already checked by _detectInvalidString().
       // Other case is the runtime failure.
@@ -172,8 +171,8 @@ _Fail:
   // [Members]
   // --------------------------------------------------------------------------
 
-  const Char* _pos;
-  const Char* _end;
+  const CharW* _pos;
+  const CharW* _end;
 };
 
 //! @}
@@ -184,7 +183,7 @@ _Fail:
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-_FOG_TYPEINFO_DECLARE(Fog::TextIterator, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPE_DECLARE(Fog::TextIterator, Fog::TYPE_CATEGORY_SIMPLE)
 
 // [Guard]
 #endif // _FOG_CORE_TOOLS_TEXTITERATOR_H

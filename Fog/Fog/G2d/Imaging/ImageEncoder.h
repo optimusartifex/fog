@@ -39,7 +39,7 @@ struct FOG_API ImageEncoder : public ImageCodec
   FOG_INLINE bool isHeaderDone() const { return _headerDone; }
   FOG_INLINE bool isWriterDone() const { return _writerDone; }
 
-  FOG_INLINE void setComment(const ByteArray& comment) { _comment = comment; }
+  FOG_INLINE void setComment(const StringA& comment) { _comment = comment; }
 
   // --------------------------------------------------------------------------
   // [Virtuals]

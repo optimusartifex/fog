@@ -10,12 +10,11 @@
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/IO/Stream.h>
-#include <Fog/Core/System/Object.h>
-#include <Fog/Core/Tools/ByteArray.h>
+#include <Fog/Core/Kernel/Object.h>
 #include <Fog/Core/Tools/String.h>
+#include <Fog/Core/Tools/Var.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImagePalette.h>
-#include <Fog/Core/Variant/Var.h>
 
 namespace Fog {
 
@@ -47,8 +46,8 @@ struct FOG_API ImageCodec : public Object
   // [Properties]
   // --------------------------------------------------------------------------
 
-  virtual err_t getProperty(const ManagedString& name, Value& value) const;
-  virtual err_t setProperty(const ManagedString& name, const Value& value);
+  virtual err_t getProperty(const ManagedString& name, Var& dst) const;
+  virtual err_t setProperty(const ManagedString& name, const Var& src);
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -80,7 +79,7 @@ struct FOG_API ImageCodec : public Object
   FOG_INLINE float getProgress() const { return _progress; }
 
   FOG_INLINE const ImagePalette& getPalette() const { return _palette; }
-  FOG_INLINE const ByteArray& getComment() const { return _comment; }
+  FOG_INLINE const StringA& getComment() const { return _comment; }
 
   // --------------------------------------------------------------------------
   // [Progress]
@@ -154,7 +153,7 @@ protected:
   //! format.
   ImagePalette _palette;
   //! @brief Comment.
-  ByteArray _comment;
+  StringA _comment;
 
 private:
   friend struct IcoDecoder;

@@ -79,20 +79,20 @@ int BoxLayout::calculateHorizontalGaps(bool collapse)
 
   if (collapse)
   {
-    for (int i = 1; i < (sysint_t)_children.getLength(); i++)
+    for (int i = 1; i < (ssize_t)_children.getLength(); i++)
     {
-      gaps += LayoutUtil::collapseMargins(spacing, _children.at(i-1)->getContentRightMargin(), _children.at(i)->getContentLeftMargin());
+      gaps += LayoutUtil::collapseMargins(spacing, _children.getAt(i-1)->getContentRightMargin(), _children.getAt(i)->getContentLeftMargin());
     }
 
     // Add last child.
-    gaps += _children.at(0)->getContentLeftMargin() + _children.at(_children.getLength()-1)->getContentRightMargin();
+    gaps += _children.getAt(0)->getContentLeftMargin() + _children.getAt(_children.getLength()-1)->getContentRightMargin();
   }
   else
   {
     // Simple adding of all margins.
-    for (int i = 1; i < (sysint_t)_children.getLength(); i++)
+    for (int i = 1; i < (ssize_t)_children.getLength(); i++)
     {
-      gaps += _children.at(i)->getContentLeftMargin() + _children.at(i)->getContentRightMargin();
+      gaps += _children.getAt(i)->getContentLeftMargin() + _children.getAt(i)->getContentRightMargin();
     }
 
     // Add spacing.
@@ -111,17 +111,17 @@ int BoxLayout::calculateVerticalGaps(bool collapse)
 
   if (collapse)
   {
-    for (int i = 1; i < (sysint_t)_children.getLength(); i++)
+    for (int i = 1; i < (ssize_t)_children.getLength(); i++)
     {
-      gaps += LayoutUtil::collapseMargins(spacing, _children.at(i-1)->getContentBottomMargin(), _children.at(i)->getContentTopMargin());
+      gaps += LayoutUtil::collapseMargins(spacing, _children.getAt(i-1)->getContentBottomMargin(), _children.getAt(i)->getContentTopMargin());
     }
-    gaps += _children.at(0)->getContentLeftMargin() + _children.at(_children.getLength()-1)->getContentBottomMargin();
+    gaps += _children.getAt(0)->getContentLeftMargin() + _children.getAt(_children.getLength()-1)->getContentBottomMargin();
   }
   else
   {
-    for (int i = 1; i < (sysint_t)_children.getLength(); i++)
+    for (int i = 1; i < (ssize_t)_children.getLength(); i++)
     {
-      LayoutItem* item = _children.at(i);
+      LayoutItem* item = _children.getAt(i);
       gaps += item->getContentTopMargin() + item->getContentBottomMargin();
     }
     gaps += (spacing * (int)(_children.getLength() - 1));

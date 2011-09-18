@@ -11,6 +11,7 @@
 // [Dependencies]
 #include <Fog/Core/Collection/Util.h>
 #include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Tools/Swap.h>
 #include <Fog/G2d/Source/ColorStop.h>
 #include <Fog/G2d/Source/ColorStopCache.h>
 #include <Fog/G2d/Source/ColorStopList.h>
@@ -72,18 +73,18 @@ static void ColorStopList_sort(ColorStop* stops, size_t length)
 // ============================================================================
 
 ColorStopList::ColorStopList() :
-  _d(_dnull->ref())
+  _d(_dnull->addRef())
 {
 }
 
 ColorStopList::ColorStopList(const ColorStopList& other) :
-  _d(other._d->ref())
+  _d(other._d->addRef())
 {
 }
 
 ColorStopList::~ColorStopList()
 {
-  _d->deref();
+  _d->release();
 }
 
 // ============================================================================
@@ -104,10 +105,10 @@ err_t ColorStopList::reserve(size_t n)
   memcpy(newd->data, _d->data, length * sizeof(ColorStop));
 
   ColorStopListData* oldd = atomicPtrXchg(&_d, newd);
-  if (oldd->refCount.deref())
+  if (oldd->reference.deref())
   {
     newd->stopCachePrgb32 = oldd->stopCachePrgb32;
-    Memory::free(oldd);
+    MemMgr::free(oldd);
   }
 
   _d = newd;
@@ -126,10 +127,10 @@ void ColorStopList::squeeze()
   memcpy(newd->data, _d->data, length * sizeof(ColorStop));
 
   ColorStopListData* oldd = atomicPtrXchg(&_d, newd);
-  if (oldd->refCount.deref())
+  if (oldd->reference.deref())
   {
     newd->stopCachePrgb32 = oldd->stopCachePrgb32;
-    Memory::free(oldd);
+    MemMgr::free(oldd);
   }
 
   _d = newd;
@@ -143,7 +144,7 @@ void ColorStopList::clear()
 {
   if (!isDetached())
   {
-    atomicPtrXchg(&_d, _dnull->ref())->deref();
+    atomicPtrXchg(&_d, _dnull->addRef())->release();
   }
   else
   {
@@ -156,7 +157,7 @@ void ColorStopList::clear()
 
 void ColorStopList::reset()
 {
-  atomicPtrXchg(&_d, _dnull->ref())->deref();
+  atomicPtrXchg(&_d, _dnull->addRef())->release();
 }
 
 // ============================================================================
@@ -195,7 +196,7 @@ bool ColorStopList::isOpaque_ARGB32() const
 
 err_t ColorStopList::setList(const ColorStopList& other)
 {
-  atomicPtrXchg(&_d, other._d->ref())->deref();
+  atomicPtrXchg(&_d, other._d->addRef())->release();
   return ERR_OK;
 }
 
@@ -217,7 +218,7 @@ err_t ColorStopList::setList(const ColorStop* stops, size_t length)
     ColorStopListData* newd = _dalloc(length);
     if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
-    atomicPtrXchg(&_d, newd)->deref();
+    atomicPtrXchg(&_d, newd)->release();
   }
 
   memcpy(_d->data, stops, length * sizeof(ColorStop));
@@ -250,7 +251,7 @@ err_t ColorStopList::add(const ColorStop& stop)
   // Detach or Resize.
   if (!isDetached() || length == _d->capacity)
   {
-    ColorStopListData* newd = _dalloc(Util::getGrowCapacity(
+    ColorStopListData* newd = _dalloc(CollectionUtil::getGrowCapacity(
       sizeof(ColorStopListData) - sizeof(ColorStop), sizeof(ColorStop), length, length + 1));
     if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
@@ -258,7 +259,7 @@ err_t ColorStopList::add(const ColorStop& stop)
     memcpy(newd->data + i + 1, _d->data + i, (length - i) * sizeof(ColorStop));
     newd->length = length;
 
-    atomicPtrXchg(&_d, newd)->deref();
+    atomicPtrXchg(&_d, newd)->release();
   }
   // Insert.
   else
@@ -328,7 +329,7 @@ err_t ColorStopList::removeAt(size_t index)
     memcpy(newd->data + index, _d->data + index + 1, (length - index - 1) * sizeof(ColorStop));
     newd->length = length - 1;
 
-    atomicPtrXchg(&_d, newd)->deref();
+    atomicPtrXchg(&_d, newd)->release();
     return ERR_OK;
   }
 }
@@ -360,7 +361,7 @@ err_t ColorStopList::removeAt(const Range& range)
     memcpy(newd->data + start, _d->data + end, (length - end) * sizeof(ColorStop));
     newd->length = length - rlen;
 
-    atomicPtrXchg(&_d, newd)->deref();
+    atomicPtrXchg(&_d, newd)->release();
     return ERR_OK;
   }
 }
@@ -412,10 +413,10 @@ Static<ColorStopListData> ColorStopList::_dnull;
 ColorStopListData* ColorStopList::_dalloc(size_t capacity)
 {
   ColorStopListData* d = reinterpret_cast<ColorStopListData*>(
-    Memory::alloc(ColorStopListData::sizeFor(capacity)));
+    MemMgr::alloc(ColorStopListData::getSizeOf(capacity)));
   if (FOG_UNLIKELY(d == NULL)) return NULL;
 
-  d->refCount.init(1);
+  d->reference.init(1);
   d->capacity = capacity;
   d->length = 0;
   d->stopCachePrgb32 = NULL;
@@ -429,9 +430,9 @@ ColorStopListData* ColorStopList::_dalloc(size_t capacity)
 
 FOG_NO_EXPORT void ColorStopList_init(void)
 {
-  ColorStopListData* d = ColorStopList::_dnull.instancep();
+  ColorStopListData* d = &ColorStopList::_dnull;
 
-  d->refCount.init(1);
+  d->reference.init(1);
   d->capacity = 0;
   d->length = 0;
   d->stopCachePrgb32 = NULL;

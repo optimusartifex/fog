@@ -29,7 +29,7 @@ SvgViewBoxAttribute::~SvgViewBoxAttribute()
 {
 }
 
-err_t SvgViewBoxAttribute::setValue(const String& value)
+err_t SvgViewBoxAttribute::setValue(const StringW& value)
 {
   err_t err = _value.set(value);
   if (FOG_IS_ERROR(err)) return err;

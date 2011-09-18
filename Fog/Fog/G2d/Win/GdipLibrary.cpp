@@ -47,7 +47,7 @@ GdipLibrary::GdipLibrary() :
     ;
 
   // Open the GdiPlus library and load all required symbols.
-  if (_library.open(Ascii8("gdiplus")) != ERR_OK)
+  if (_library.openLibrary(StringW::fromAscii8("gdiplus")) != ERR_OK)
   {
     // gdiplus.dll not found.
     Debug::dbgFunc("Fog::GdipLibrary", "GdipLibrary", "Can't load gdiplus.dll.\n");

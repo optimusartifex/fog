@@ -40,7 +40,7 @@ struct FOG_NO_EXPORT SvgStyledElement : public SvgElement
 
   virtual XmlAttribute* _createAttribute(const ManagedString& name) const;
 
-  virtual err_t _setAttribute(const ManagedString& name, const String& value);
+  virtual err_t _setAttribute(const ManagedString& name, const StringW& value);
   virtual err_t _removeAttribute(const ManagedString& name);
 
   // --------------------------------------------------------------------------
@@ -53,8 +53,8 @@ struct FOG_NO_EXPORT SvgStyledElement : public SvgElement
   // [SVG Styles]
   // --------------------------------------------------------------------------
 
-  virtual String getStyle(const String& name) const;
-  virtual err_t setStyle(const String& name, const String& value);
+  virtual StringW getStyle(const StringW& name) const;
+  virtual err_t setStyle(const StringW& name, const StringW& value);
 
   // --------------------------------------------------------------------------
   // [SVG Embedded Attributes]
@@ -64,7 +64,7 @@ struct FOG_NO_EXPORT SvgStyledElement : public SvgElement
   SvgTransformAttribute a_transform;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgStyledElement)
+  _FOG_NO_COPY(SvgStyledElement)
 };
 
 //! @}

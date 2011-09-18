@@ -9,8 +9,8 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Memory/Alloc.h>
 #include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/G2d/Tools/Matrix.h>
 
 namespace Fog {
@@ -21,13 +21,13 @@ namespace Fog {
 
 static FOG_INLINE MatrixDataF* _MatrixF_ref(MatrixDataF* d)
 {
-  d->refCount.inc();
+  d->reference.inc();
   return d;
 }
 
 static FOG_INLINE void _MatrixF_deref(MatrixDataF* d)
 {
-  if (d->refCount.deref()) Memory::free(d);
+  if (d->reference.deref()) MemMgr::free(d);
 }
 
 // ============================================================================
@@ -35,7 +35,7 @@ static FOG_INLINE void _MatrixF_deref(MatrixDataF* d)
 // ============================================================================
 
 MatrixF::MatrixF() :
-  _d(_MatrixF_ref(_dnull))
+  _d(_MatrixF_ref(&_dnull))
 {
 }
 
@@ -49,13 +49,13 @@ MatrixF::MatrixF(const SizeI& size, const float* data) :
 {
   if (FOG_UNLIKELY(_d == NULL))
   {
-    _d = _MatrixF_ref(_dnull);
+    _d = _MatrixF_ref(&_dnull);
     return;
   }
 
   if (data)
   {
-    Memory::copy(_d->data, data, _d->size.w * _d->size.h * sizeof(float));
+    MemOps::copy(_d->data, data, _d->size.w * _d->size.h * sizeof(float));
   }
 }
 
@@ -75,7 +75,7 @@ err_t MatrixF::_detach()
   MatrixDataF* newd = _dalloc(_d->size);
   if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
-  Memory::copy(newd->data, _d->data, _d->size.w * _d->size.h * sizeof(float));
+  MemOps::copy(newd->data, _d->data, _d->size.w * _d->size.h * sizeof(float));
 
   _MatrixF_deref(atomicPtrXchg(&_d, newd));
   return ERR_OK;
@@ -93,7 +93,7 @@ err_t MatrixF::create(const SizeI& size, const float* data)
 
   if ((_d->size.w * _d->size.h) == (size.w * size.h) && isDetached())
   {
-    if (data) Memory::copy(_d->data, data, size.w * size.h * sizeof(float));
+    if (data) MemOps::copy(_d->data, data, size.w * size.h * sizeof(float));
     _d->size = size;
     return ERR_OK;
   }
@@ -101,7 +101,7 @@ err_t MatrixF::create(const SizeI& size, const float* data)
   MatrixDataF* newd = _dalloc(size);
   if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
-  if (data) Memory::copy(newd->data, data, size.w * size.h * sizeof(float));
+  if (data) MemOps::copy(newd->data, data, size.w * size.h * sizeof(float));
 
   _MatrixF_deref(atomicPtrXchg(&_d, newd));
   return ERR_OK;
@@ -152,7 +152,7 @@ err_t MatrixF::resize(const SizeI& size, float value)
 
 void MatrixF::reset()
 {
-  _MatrixF_deref(atomicPtrXchg(&_d, _MatrixF_ref(_dnull)));
+  _MatrixF_deref(atomicPtrXchg(&_d, _MatrixF_ref(&_dnull)));
 }
 
 float MatrixF::getCell(int x, int y) const
@@ -220,13 +220,13 @@ Static<MatrixDataF> MatrixF::_dnull;
 
 MatrixDataF* MatrixF::_dalloc(const SizeI& size)
 {
-  if (!size.isValid()) return _MatrixF_ref(_dnull);
+  if (!size.isValid()) return _MatrixF_ref(&_dnull);
 
   MatrixDataF* d = reinterpret_cast<MatrixDataF*>(
-    Memory::alloc(sizeof(MatrixDataF) - sizeof(float) + (size.w * size.h) * sizeof(float)));
+    MemMgr::alloc(sizeof(MatrixDataF) - sizeof(float) + (size.w * size.h) * sizeof(float)));
   if (FOG_IS_NULL(d)) return NULL;
 
-  d->refCount.init(1);
+  d->reference.init(1);
   d->size = size;
   return d;
 }
@@ -252,7 +252,7 @@ void MatrixF::_dcopy(
 
 FOG_NO_EXPORT void Matrix_init(void)
 {
-  MatrixF::_dnull->refCount.init(1);
+  MatrixF::_dnull->reference.init(1);
   MatrixF::_dnull->size.reset();
 }
 

@@ -9,10 +9,9 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/System/Object.h>
+#include <Fog/Core/Kernel/Object.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Geometry/Size.h>
-#include <Fog/Gui/Global/Constants.h>
 #include <Fog/Gui/Layout/LayoutItem.h>
 #include <Fog/Gui/Widget/Event.h>
 
@@ -185,10 +184,24 @@ protected:
   // --------------------------------------------------------------------------
 
   FOG_INLINE LayoutItem* getAt(int index) const
-  { return (size_t)index < _children.getLength() ? _children.at((uint)index) : 0; }
+  {
+    if ((size_t)index < _children.getLength())
+      return _children.getAt((uint)index);
+    else
+      return NULL;
+  }
 
   FOG_INLINE LayoutItem* takeAt(int index)
-  { return (size_t)index < _children.getLength() ? _children.take((uint)index) : 0; }
+  {
+    if ((size_t)index < _children.getLength())
+    {
+      LayoutItem* t = _children.getAt(index);
+      _children.removeAt(index);
+      return t;
+    }
+    else
+      return NULL;
+  }
 
   FOG_INLINE int getLength() const
   { return (int)(uint)_children.getLength(); }
@@ -206,7 +219,7 @@ protected:
 private:
   int addChildLayout(Layout* l);
 
-  _FOG_CLASS_NO_COPY(Layout)
+  _FOG_NO_COPY(Layout)
 };
 
 //! @}

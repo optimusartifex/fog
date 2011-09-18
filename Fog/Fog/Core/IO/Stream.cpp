@@ -11,13 +11,12 @@
 // [Dependencies]
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Alloc.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemMgr.h>
+#include <Fog/Core/Memory/MemOps.h>
 #include <Fog/Core/IO/FileSystem.h>
 #include <Fog/Core/IO/MapFile.h>
 #include <Fog/Core/IO/Stream.h>
-#include <Fog/Core/Tools/ByteArray.h>
-#include <Fog/Core/Tools/ByteArrayTmp_p.h>
+#include <Fog/Core/OS/System.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringTmp_p.h>
 #include <Fog/Core/Tools/TextCodec.h>
@@ -60,7 +59,7 @@ namespace Fog {
 
 StreamDevice::StreamDevice()
 {
-  refCount.init(1);
+  reference.init(1);
   flags = 0;
 }
 
@@ -68,20 +67,21 @@ StreamDevice::~StreamDevice()
 {
 }
 
-StreamDevice* StreamDevice::ref() const
+StreamDevice* StreamDevice::addRef() const
 {
-  refCount.inc();
+  reference.inc();
   return const_cast<StreamDevice*>(this);
 }
 
 void StreamDevice::deref()
 {
-  if (refCount.deref()) fog_delete(this);
+  if (reference.deref())
+    fog_delete(this);
 }
 
-ByteArray StreamDevice::getBuffer() const
+StringA StreamDevice::getBuffer() const
 {
-  return ByteArray();
+  return StringA();
 }
 
 // ============================================================================
@@ -166,7 +166,7 @@ struct FOG_NO_EXPORT HANDLEStreamDevice : public StreamDevice
   HANDLEStreamDevice(HANDLE hFile, uint32_t fflags);
   ~HANDLEStreamDevice();
 
-  static err_t openFile(const String& fileName, uint32_t openFlags, StreamDevice** dst);
+  static err_t openFile(const StringW& fileName, uint32_t openFlags, StreamDevice** dst);
 
   virtual int64_t seek(int64_t offset, int whence);
   virtual int64_t tell() const;
@@ -194,17 +194,12 @@ HANDLEStreamDevice::~HANDLEStreamDevice()
   close();
 }
 
-err_t HANDLEStreamDevice::openFile(const String& _fileName, uint32_t openFlags, StreamDevice** dst)
+err_t HANDLEStreamDevice::openFile(const StringW& fileName, uint32_t openFlags, StreamDevice** dst)
 {
   FOG_ASSERT((openFlags & (STREAM_OPEN_READ | STREAM_OPEN_WRITE)) != 0);
 
-  HANDLE hFile;
-
-  // Convert path to local file system string
-  err_t err;
-  String fileName = _fileName;
-
-  if ((err = fileName.slashesToWin())) return err;
+  StringW fileNameW;
+  FOG_RETURN_ON_ERROR(System::makeWindowsPath(fileNameW, fileName));
 
   DWORD dwDesiredAccess = 0;
   DWORD dwCreationDisposition = 0;
@@ -241,8 +236,8 @@ err_t HANDLEStreamDevice::openFile(const String& _fileName, uint32_t openFlags, 
     dwCreationDisposition = OPEN_EXISTING;
   }
 
-  hFile = CreateFileW(
-    reinterpret_cast<const wchar_t*>(fileName.getData()),
+  HANDLE hFile = CreateFileW(
+    reinterpret_cast<const wchar_t*>(fileNameW.getData()),
     dwDesiredAccess,           // open mode (read / write)
     FILE_SHARE_READ | FILE_SHARE_WRITE, // share mode
     NULL,                      // security
@@ -259,7 +254,7 @@ err_t HANDLEStreamDevice::openFile(const String& _fileName, uint32_t openFlags, 
       dwError == ERROR_FILE_NOT_FOUND)
     {
       hFile = CreateFileW(
-        reinterpret_cast<const wchar_t*>(fileName.getData()),
+        reinterpret_cast<const wchar_t*>(fileNameW.getData()),
         dwDesiredAccess,           // open mode (read / write)
         FILE_SHARE_READ | FILE_SHARE_WRITE, // share mode
         NULL,                      // security
@@ -428,7 +423,7 @@ struct FOG_NO_EXPORT FdStreamDevice : public StreamDevice
   FdStreamDevice(int fd, uint32_t fflags);
   ~FdStreamDevice();
 
-  static err_t openFile(const String& fileName, uint32_t openFlags, StreamDevice** dst);
+  static err_t openFile(const StringW& fileName, uint32_t openFlags, StreamDevice** dst);
 
   virtual int64_t seek(int64_t offset, int whence);
   virtual int64_t tell() const;
@@ -456,7 +451,7 @@ FdStreamDevice::~FdStreamDevice()
   close();
 }
 
-err_t FdStreamDevice::openFile(const String& fileName, uint32_t openFlags, StreamDevice** dst)
+err_t FdStreamDevice::openFile(const StringW& fileName, uint32_t openFlags, StreamDevice** dst)
 {
   FOG_ASSERT((openFlags & (STREAM_OPEN_READ | STREAM_OPEN_WRITE)) != 0);
 
@@ -469,7 +464,7 @@ err_t FdStreamDevice::openFile(const String& fileName, uint32_t openFlags, Strea
 
   // Convert path to local file system string.
   err_t err;
-  ByteArrayTmp<TEMPORARY_LENGTH> fileName8;
+  StringTmpA<TEMPORARY_LENGTH> fileName8;
 
   if ((err = TextCodec::local8().encode(fileName8, fileName))) return err;
 
@@ -539,7 +534,7 @@ int64_t FdStreamDevice::tell() const
 
 size_t FdStreamDevice::read(void* buffer, size_t size)
 {
-  sysint_t n = ::read(fd, buffer, size);
+  ssize_t n = ::read(fd, buffer, size);
 
   if (n < 0)
     return (size_t)-1;
@@ -549,7 +544,7 @@ size_t FdStreamDevice::read(void* buffer, size_t size)
 
 size_t FdStreamDevice::write(const void* buffer, size_t size)
 {
-  sysint_t n = ::write(fd, buffer, size);
+  ssize_t n = ::write(fd, buffer, size);
 
   if (n < 0)
     return (size_t)-1;
@@ -618,7 +613,7 @@ struct FOG_NO_EXPORT MemoryStreamDevice : public StreamDevice
 
   virtual void close();
 
-  virtual ByteArray getBuffer() const;
+  virtual StringA getBuffer() const;
 
   uint8_t* data;
   size_t size;
@@ -693,7 +688,7 @@ size_t MemoryStreamDevice::read(void* buffer, size_t size)
   size_t remain = (size_t)(end - cur);
   if (size > remain) size = remain;
 
-  Memory::copy(buffer, cur, size);
+  MemOps::copy(buffer, cur, size);
   cur += size;
 
   return size;
@@ -706,7 +701,7 @@ size_t MemoryStreamDevice::write(const void* buffer, size_t size)
   size_t remain = (size_t)(end - cur);
   if (size > remain) size = remain;
 
-  Memory::copy(cur, buffer, size);
+  MemOps::copy(cur, buffer, size);
   cur += size;
 
   return size;
@@ -734,11 +729,11 @@ void MemoryStreamDevice::close()
 {
 }
 
-ByteArray MemoryStreamDevice::getBuffer() const
+StringA MemoryStreamDevice::getBuffer() const
 {
-  ByteArray buffer;
+  StringA buffer;
   if (buffer.reserve(size) == ERR_OK)
-    Memory::copy((void*)buffer.getData(), (const void*)data, size);
+    MemOps::copy((void*)buffer.getData(), (const void*)data, size);
   return buffer;
 }
 
@@ -748,7 +743,7 @@ ByteArray MemoryStreamDevice::getBuffer() const
 
 struct FOG_NO_EXPORT ByteArrayStreamDevice : public StreamDevice
 {
-  ByteArrayStreamDevice(ByteArray data, uint32_t fflags);
+  ByteArrayStreamDevice(StringA buffer, uint32_t fflags);
   virtual ~ByteArrayStreamDevice();
 
   virtual int64_t seek(int64_t offset, int whence);
@@ -763,13 +758,13 @@ struct FOG_NO_EXPORT ByteArrayStreamDevice : public StreamDevice
 
   virtual void close();
 
-  virtual ByteArray getBuffer() const;
+  virtual StringA getBuffer() const;
 
-  ByteArray data;
+  StringA data;
   size_t pos;
 };
 
-ByteArrayStreamDevice::ByteArrayStreamDevice(ByteArray buffer, uint32_t fflags) :
+ByteArrayStreamDevice::ByteArrayStreamDevice(StringA buffer, uint32_t fflags) :
   data(buffer), pos(FOG_UINT64_C(0))
 {
   flags |= fflags | STREAM_IS_OPEN | STREAM_IS_SEEKABLE | STREAM_IS_MEMORY | STREAM_IS_GROWABLE;
@@ -825,7 +820,7 @@ size_t ByteArrayStreamDevice::read(void* buffer, size_t size)
   size_t remain = (size_t)(length - pos);
   if (size > remain) size = remain;
 
-  Memory::copy(buffer, const_cast<char*>(data.getData() + pos), size);
+  MemOps::copy(buffer, const_cast<char*>(data.getData() + pos), size);
   pos += size;
 
   return size;
@@ -843,7 +838,7 @@ size_t ByteArrayStreamDevice::write(const void* buffer, size_t size)
 
   if (overwriteSize)
   {
-    Memory::copy(const_cast<char*>(data.getDataX() + pos), src, overwriteSize);
+    MemOps::copy(const_cast<char*>(data.getDataX() + pos), src, overwriteSize);
     src += overwriteSize;
     pos += overwriteSize;
   }
@@ -867,8 +862,11 @@ err_t ByteArrayStreamDevice::getSize(int64_t* size)
 
 err_t ByteArrayStreamDevice::setSize(int64_t size)
 {
-  if (size < 0) return ERR_RT_INVALID_ARGUMENT;
-  if (size >= SYSINT_MAX) return ERR_RT_OUT_OF_MEMORY;
+  if (size < 0)
+    return ERR_RT_INVALID_ARGUMENT;
+
+  if (size >= SSIZE_T_MAX)
+    return ERR_RT_OUT_OF_MEMORY;
 
   err_t err = data.resize((size_t)size);
   if (FOG_IS_ERROR(err)) return err;
@@ -891,7 +889,7 @@ void ByteArrayStreamDevice::close()
   data.reset();
 }
 
-ByteArray ByteArrayStreamDevice::getBuffer() const
+StringA ByteArrayStreamDevice::getBuffer() const
 {
   return data;
 }
@@ -907,7 +905,7 @@ struct FOG_NO_EXPORT MMapStreamDevice : public MemoryStreamDevice
 
   virtual void close();
 
-  err_t map(const String& fileName, bool loadOnFail);
+  err_t map(const StringW& fileName, bool loadOnFail);
 
   MapFile mapFile;
 };
@@ -921,7 +919,7 @@ MMapStreamDevice::~MMapStreamDevice()
   close();
 }
 
-err_t MMapStreamDevice::map(const String& fileName, bool loadOnFail)
+err_t MMapStreamDevice::map(const StringW& fileName, bool loadOnFail)
 {
   err_t err = mapFile.map(fileName, loadOnFail);
   if (FOG_IS_ERROR(err)) return err;
@@ -953,14 +951,14 @@ void MMapStreamDevice::close()
 StreamDevice* Stream::_dnull;
 
 Stream::Stream() :
-  _d(_dnull->ref())
+  _d(_dnull->addRef())
 {
 }
 
 Stream::Stream(const Stream& other) :
-  _d(other._d->ref())
+  _d(other._d->addRef())
 {
-  if (FOG_IS_NULL(_d)) _d = _dnull->ref();
+  if (FOG_IS_NULL(_d)) _d = _dnull->addRef();
 }
 
 Stream::Stream(StreamDevice* d) :
@@ -983,7 +981,7 @@ void Stream::setSeekable(bool seekable)
     _d->flags &= ~STREAM_IS_SEEKABLE;
 }
 
-err_t Stream::openFile(const String& fileName, uint32_t openFlags)
+err_t Stream::openFile(const StringW& fileName, uint32_t openFlags)
 {
   static uint32_t CREATE_PATH_FLAGS =
     STREAM_OPEN_CREATE | STREAM_OPEN_CREATE_PATH | STREAM_OPEN_WRITE;
@@ -1000,7 +998,7 @@ err_t Stream::openFile(const String& fileName, uint32_t openFlags)
   // Create path if asked for.
   if ((openFlags & CREATE_PATH_FLAGS) == CREATE_PATH_FLAGS)
   {
-    StringTmp<TEMPORARY_LENGTH> dirName;
+    StringTmpW<TEMPORARY_LENGTH> dirName;
     if ((err = FileSystem::extractDirectory(dirName, fileName))) return err;
 
     if (!dirName.isEmpty() && dirName != Ascii8("."))
@@ -1026,7 +1024,7 @@ err_t Stream::openFile(const String& fileName, uint32_t openFlags)
   return ERR_OK;
 }
 
-err_t Stream::openMMap(const String& fileName, bool loadOnFail)
+err_t Stream::openMMap(const StringW& fileName, bool loadOnFail)
 {
   close();
 
@@ -1088,12 +1086,12 @@ err_t Stream::openFd(int fd, uint32_t openFlags, bool canClose)
 
 err_t Stream::openBuffer()
 {
-  ByteArray buffer;
+  StringA buffer;
   buffer.reserve(8192);
   return openBuffer(buffer);
 }
 
-err_t Stream::openBuffer(const ByteArray& buffer)
+err_t Stream::openBuffer(const StringA& buffer)
 {
   close();
 
@@ -1137,17 +1135,18 @@ size_t Stream::read(void* buffer, size_t size)
   return _d->read(buffer, size);
 }
 
-size_t Stream::read(ByteArray& dst, size_t size)
+size_t Stream::read(StringA& dst, size_t size)
 {
-  err_t err = dst.prepare(size);
-  if (FOG_IS_ERROR(err)) return 0;
+  char* buf = dst._prepare(CONTAINER_OP_REPLACE, size);
+  if (FOG_IS_NULL(buf))
+    return ERR_RT_OUT_OF_MEMORY;
 
-  size_t n = _d->read((void*)dst.getDataX(), size);
-  dst.resize(n);
+  size_t n = _d->read(buf, size);
+  dst._modified(buf + n);
   return n;
 }
 
-size_t Stream::readAll(ByteArray& dst, size_t maxBytes)
+size_t Stream::readAll(StringA& dst, size_t maxBytes)
 {
   dst.clear();
 
@@ -1194,12 +1193,16 @@ _NonSeekable:
     if (maxBytes > 0 && (uint64_t)remain > (uint64_t)maxBytes)
       remain = maxBytes;
 
-    if (seek(curPosition, SEEK_SET) == -1) return 0;
+    if (seek(curPosition, SEEK_SET) == -1)
+      return 0;
 
 #if FOG_ARCH_BITS > 32
-    if (remain > (int64_t)(SYSINT_MAX)) return 0;
+    if (remain > (int64_t)(SSIZE_T_MAX))
+      return 0;
 #endif // FOG_ARCH_BITS > 32
-    if (dst.reserve((size_t)remain) != ERR_OK) return 0;
+
+    if (dst.reserve((size_t)remain) != ERR_OK)
+      return 0;
 
     size_t n = read(dst.getDataX(), (size_t)remain);
     dst.resize(n);
@@ -1212,7 +1215,7 @@ size_t Stream::write(const void* buffer, size_t size)
   return _d->write(buffer, size);
 }
 
-size_t Stream::write(const ByteArray& data)
+size_t Stream::write(const StringA& data)
 {
   return _d->write((const void*)data.getData(), data.getLength());
 }
@@ -1234,17 +1237,17 @@ err_t Stream::truncate(int64_t offset)
 
 void Stream::close()
 {
-  atomicPtrXchg(&_d, _dnull->ref())->deref();
+  atomicPtrXchg(&_d, _dnull->addRef())->deref();
 }
 
-ByteArray Stream::getBuffer() const
+StringA Stream::getBuffer() const
 {
   return _d->getBuffer();
 }
 
 Stream& Stream::operator=(const Stream& other)
 {
-  atomicPtrXchg(&_d, other._d->ref())->deref();
+  atomicPtrXchg(&_d, other._d->addRef())->deref();
   return *this;
 }
 

@@ -28,12 +28,12 @@ XmlAttribute::~XmlAttribute()
 {
 }
 
-String XmlAttribute::getValue() const
+StringW XmlAttribute::getValue() const
 {
   return _value;
 }
 
-err_t XmlAttribute::setValue(const String& value)
+err_t XmlAttribute::setValue(const StringW& value)
 {
   return _value.set(value);
 }

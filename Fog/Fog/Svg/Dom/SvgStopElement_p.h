@@ -51,7 +51,7 @@ struct FOG_NO_EXPORT SvgStopElement : public SvgStyledElement
   SvgOffsetAttribute a_offset;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgStopElement)
+  _FOG_NO_COPY(SvgStopElement)
 };
 
 //! @}

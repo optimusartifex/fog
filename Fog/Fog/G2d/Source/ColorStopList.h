@@ -8,12 +8,12 @@
 #define _FOG_G2D_SOURCE_COLORSTOPLIST_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/Memory/Alloc.h>
-#include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Math/Interval.h>
 #include <Fog/Core/Math/Fuzzy.h>
+#include <Fog/Core/Memory/MemMgr.h>
+#include <Fog/Core/Threading/Atomic.h>
+#include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Tools/Range.h>
 #include <Fog/G2d/Source/Color.h>
 #include <Fog/G2d/Source/ColorStop.h>
@@ -30,21 +30,22 @@ namespace Fog {
 struct FOG_NO_EXPORT ColorStopListData
 {
   // --------------------------------------------------------------------------
-  // [Ref / Deref]
+  // [AddRef / Release]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE ColorStopListData* ref() const
+  FOG_INLINE ColorStopListData* addRef() const
   {
-    refCount.inc();
+    reference.inc();
     return const_cast<ColorStopListData*>(this);
   }
 
-  FOG_INLINE void deref()
+  FOG_INLINE void release()
   {
-    if (refCount.deref())
+    if (reference.deref())
     {
-      if (stopCachePrgb32) stopCachePrgb32->deref();
-      Memory::free(this);
+      if (stopCachePrgb32)
+        stopCachePrgb32->release();
+      MemMgr::free(this);
     }
   }
 
@@ -54,7 +55,9 @@ struct FOG_NO_EXPORT ColorStopListData
 
   FOG_INLINE void destroyCache()
   {
-    if (stopCachePrgb32) stopCachePrgb32->deref();
+    if (stopCachePrgb32)
+      stopCachePrgb32->release();
+
     stopCachePrgb32 = NULL;
   }
 
@@ -62,7 +65,7 @@ struct FOG_NO_EXPORT ColorStopListData
   // [Statics]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE size_t sizeFor(size_t capacity)
+  static FOG_INLINE size_t getSizeOf(size_t capacity)
   {
     return sizeof(ColorStopListData) - sizeof(ColorStop) +
       capacity * sizeof(ColorStop);
@@ -72,7 +75,7 @@ struct FOG_NO_EXPORT ColorStopListData
   // [Members]
   // --------------------------------------------------------------------------
 
-  mutable Atomic<size_t> refCount;
+  mutable Atomic<size_t> reference;
 
   //! @brief The color-stop list capacity.
   size_t capacity;
@@ -104,7 +107,7 @@ struct FOG_API ColorStopList
   // [Data]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
+  FOG_INLINE size_t getReference() const { return _d->reference.get(); }
   FOG_INLINE bool isDetached() const { return getReference() == 1; }
 
   FOG_INLINE size_t getCapacity() const { return _d->capacity; }
@@ -186,18 +189,6 @@ struct FOG_API ColorStopList
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::ColorStopList, Fog::TYPEINFO_MOVABLE)
-
-// ============================================================================
-// [Fog::Swap]
-// ============================================================================
-
-_FOG_SWAP_D(Fog::ColorStopList)
 
 // [Guard]
 #endif // _FOG_G2D_SOURCE_COLORSTOPLIST_H

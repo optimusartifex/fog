@@ -8,7 +8,7 @@
 #define _FOG_CORE_FACE_FACE_MMX_H
 
 // [Dependencies]
-#include <Fog/Core/Cpu/Intrin_MMX.h>
+#include <Fog/Core/C++/IntrinMMX.h>
 #include <Fog/Core/Face/Features.h>
 
 namespace Fog {
@@ -73,6 +73,16 @@ static FOG_INLINE void m64iStore8(T* dstp, const m64i& src0)
 
 } // Face namespace
 } // Fog namespace
+
+// MMX+SSE extensions require both, Face_MMX.h, and Face_SSE.h headers.
+#if defined(_FOG_CORE_FACE_FACE_SSE_H)
+# include <Fog/Core/Face/Face_MMX_SSE.h>
+#endif // _FOG_CORE_FACE_FACE_SSE_H
+
+// MMX+SSE2 extensions require both, Face_MMX.h, and Face_SSE2.h headers.
+#if defined(_FOG_CORE_FACE_FACE_SSE2_H)
+# include <Fog/Core/Face/Face_MMX_SSE2.h>
+#endif // _FOG_CORE_FACE_FACE_SSE2_H
 
 // [Guard]
 #endif // _FOG_CORE_FACE_FACE_MMX_H

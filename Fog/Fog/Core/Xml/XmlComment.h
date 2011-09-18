@@ -29,7 +29,7 @@ struct FOG_API XmlComment : public XmlNoText
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  XmlComment(const String& data = String());
+  XmlComment(const StringW& data = StringW());
   virtual ~XmlComment();
 
   // --------------------------------------------------------------------------
@@ -42,21 +42,21 @@ struct FOG_API XmlComment : public XmlNoText
   // [Comment Specific]
   // --------------------------------------------------------------------------
 
-  const String& getData() const;
-  err_t setData(const String& data);
+  const StringW& getData() const;
+  err_t setData(const StringW& data);
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
 protected:
-  String _data;
+  StringW _data;
 
 private:
   friend struct XmlElement;
   friend struct XmlDocument;
 
-  _FOG_CLASS_NO_COPY(XmlComment)
+  _FOG_NO_COPY(XmlComment)
 };
 
 //! @}

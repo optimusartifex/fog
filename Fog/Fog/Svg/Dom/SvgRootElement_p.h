@@ -64,7 +64,7 @@ struct FOG_NO_EXPORT SvgRootElement : public SvgStyledElement
   // TODO: PreserveAspectRatio.
 
 private:
-  _FOG_CLASS_NO_COPY(SvgRootElement)
+  _FOG_NO_COPY(SvgRootElement)
 };
 
 //! @}

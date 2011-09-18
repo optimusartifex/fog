@@ -8,7 +8,7 @@
 #define _FOG_CORE_FACE_FACE_3DNOW_H
 
 // [Dependencies]
-#include <Fog/Core/Cpu/Intrin_3dNow.h>
+#include <Fog/Core/C++/Intrin3dNow.h>
 #include <Fog/Core/Face/Features.h>
 #include <Fog/Core/Face/Face_MMX.h>
 #include <Fog/Core/Math/Constants.h>

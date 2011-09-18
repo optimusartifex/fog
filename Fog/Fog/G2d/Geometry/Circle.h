@@ -11,7 +11,7 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemOps.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
@@ -301,25 +301,20 @@ FOG_INLINE CircleF::CircleF(const CircleD& circle) :
 // [Fog::CircleT<>]
 // ============================================================================
 
-FOG_CLASS_PRECISION_F_D(Circle)
+_FOG_NUM_T(Circle)
+_FOG_NUM_F(Circle)
+_FOG_NUM_D(Circle)
 
 //! @}
 
 } // Fog namespace
 
 // ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::CircleF, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::CircleD, Fog::TYPEINFO_PRIMITIVE)
-
-// ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_FUZZY_DECLARE(Fog::CircleF, Math::feqv((const float *)&a, (const float *)&b, 3))
-FOG_FUZZY_DECLARE(Fog::CircleD, Math::feqv((const double*)&a, (const double*)&b, 3))
+FOG_FUZZY_DECLARE_F_VEC(Fog::CircleF, 3)
+FOG_FUZZY_DECLARE_D_VEC(Fog::CircleD, 3)
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_CIRCLE_H

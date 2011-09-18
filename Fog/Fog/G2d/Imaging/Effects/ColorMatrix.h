@@ -24,8 +24,7 @@ namespace Fog {
 //! @brief Color matrix.
 //!
 //! The color matrix is a 5x5 matrix that can be used to do a color based
-//! transformations. But unlike the affine transformations used by vector
-//! graphics input and output to color matrix is an ARGB color entity.
+//! transformations.
 //!
 //! The ColorMatrix class was based on AggOO by Dratek Software. The original
 //! code was relicensed to the MIT license used by the Fog-Framework. The
@@ -348,18 +347,18 @@ struct FOG_API ColorMatrix
   FOG_INLINE ColorMatrix operator*(const ColorMatrix& other) { ColorMatrix t(*this); t.multiply(other); return t; }
 
   //! @brief Overload the [] operator for access to a row. This will enable
-  //! access to the elements by using [r][c].
-  FOG_INLINE float* operator[](size_t index)
+  //! access to the elements by using [y][x].
+  FOG_INLINE float* operator[](size_t y)
   {
-    FOG_ASSERT_X(index < 5U, "Fog::ColorMatrix::operator[] - Index out of bounds.");
-    return m[index];
+    FOG_ASSERT_X(y < 5, "Fog::ColorMatrix::operator[] - Index out of bounds.");
+    return m[y];
   }
 
   //! @overload.
-  FOG_INLINE const float* const operator[](size_t index) const
+  FOG_INLINE const float* const operator[](size_t y) const
   {
-    FOG_ASSERT_X(index < 5U, "Fog::ColorMatrix::operator[] - Index out of bounds.");
-    return m[index];
+    FOG_ASSERT_X(y < 5, "Fog::ColorMatrix::operator[] - Index out of bounds.");
+    return m[y];
   }
 
   // --------------------------------------------------------------------------
@@ -405,12 +404,6 @@ private:
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::ColorMatrix, Fog::TYPEINFO_PRIMITIVE)
 
 // [Guard]
 #endif // _FOG_G2D_IMAGING_EFFECTS_COLORMATRIX_H

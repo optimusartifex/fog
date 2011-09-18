@@ -172,19 +172,14 @@ struct FOG_NO_EXPORT TextRectD : public RectD
 // [Fog::TextRectT<>]
 // ============================================================================
 
-FOG_CLASS_PRECISION_F_D(TextRect)
+_FOG_NUM_T(TextRect)
+_FOG_NUM_I(TextRect)
+_FOG_NUM_F(TextRect)
+_FOG_NUM_D(TextRect)
 
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::TextRectI, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::TextRectF, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::TextRectD, Fog::TYPEINFO_PRIMITIVE)
 
 // [Guard]
 #endif // _FOG_G2D_TEXT_TEXTRECT_H

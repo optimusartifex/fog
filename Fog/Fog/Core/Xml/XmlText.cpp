@@ -18,7 +18,7 @@ namespace Fog {
 // [Fog::XmlText]
 // ============================================================================
 
-XmlText::XmlText(const String& data) :
+XmlText::XmlText(const StringW& data) :
   XmlElement(fog_strings->getString(STR_XML__text)),
   _data(data)
 {
@@ -35,25 +35,25 @@ XmlElement* XmlText::clone() const
   return fog_new XmlText(_data);
 }
 
-String XmlText::getTextContent() const
+StringW XmlText::getTextContent() const
 {
   FOG_ASSERT(getType() == XML_ELEMENT_TEXT);
   return _data;
 }
 
-err_t XmlText::setTextContent(const String& text)
+err_t XmlText::setTextContent(const StringW& text)
 {
   FOG_ASSERT(getType() == XML_ELEMENT_TEXT);
   return _data.set(text);
 }
 
-err_t XmlText::setData(const String& data)
+err_t XmlText::setData(const StringW& data)
 {
   FOG_ASSERT(getType() == XML_ELEMENT_TEXT);
   return _data.set(data);
 }
 
-err_t XmlText::appendData(const String& data)
+err_t XmlText::appendData(const StringW& data)
 {
   FOG_ASSERT(getType() == XML_ELEMENT_TEXT);
   return _data.append(data);
@@ -66,13 +66,13 @@ err_t XmlText::deleteData()
   return ERR_OK;
 }
 
-err_t XmlText::insertData(size_t start, const String& data)
+err_t XmlText::insertData(size_t start, const StringW& data)
 {
   FOG_ASSERT(getType() == XML_ELEMENT_TEXT);
   return _data.insert(start, data);
 }
 
-err_t XmlText::replaceData(const Range& range, const String& data)
+err_t XmlText::replaceData(const Range& range, const StringW& data)
 {
   FOG_ASSERT(getType() == XML_ELEMENT_TEXT);
   return _data.replace(range, data);

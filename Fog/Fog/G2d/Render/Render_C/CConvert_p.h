@@ -42,7 +42,7 @@ struct FOG_NO_EXPORT CConvert
 
     if (df.getFormat() < IMAGE_FORMAT_COUNT && sf.getFormat() < IMAGE_FORMAT_COUNT)
     {
-      d->blitFn = (ImageConverterBlitLineFn)_g2d_render.getCopyFullFn(df.getFormat(), sf.getFormat());
+      d->blitFn = (ImageConverterBlitLineFunc)_g2d_render.getCopyFullFunc(df.getFormat(), sf.getFormat());
       return ERR_OK;
     }
 
@@ -104,7 +104,7 @@ struct FOG_NO_EXPORT CConvert
       if (df.getFormat() == IMAGE_FORMAT_PRGB32 || df.getFormat() == IMAGE_FORMAT_XRGB32)
       {
         uint32_t sfDibFormat = getDibFormat(sf);
-        RenderVBlitLineFn blitLine = _g2d_render.convert.argb32_from_dib[sfDibFormat];
+        RenderVBlitLineFunc blitLine = _g2d_render.convert.argb32_from_dib[sfDibFormat];
 
         initIntegerPassConstants(multi->pass[0], df, sf);
 
@@ -127,7 +127,7 @@ struct FOG_NO_EXPORT CConvert
       if (sf.getFormat() == IMAGE_FORMAT_PRGB32 || sf.getFormat() == IMAGE_FORMAT_XRGB32)
       {
         uint32_t dfDibFormat = getDibFormat(df);
-        RenderVBlitLineFn blitLine = _g2d_render.convert.dib_from_argb32[dfDibFormat];
+        RenderVBlitLineFunc blitLine = _g2d_render.convert.dib_from_argb32[dfDibFormat];
 
         initIntegerPassConstants(multi->pass[0], df, sf);
 
@@ -157,8 +157,8 @@ struct FOG_NO_EXPORT CConvert
         uint32_t sfDibFormat = getDibFormat(sf);
         uint32_t dfDibFormat = getDibFormat(df);
 
-        RenderVBlitLineFn mfFromSf = _g2d_render.convert.argb32_from_dib[sfDibFormat];
-        RenderVBlitLineFn dfFromMf = _g2d_render.convert.dib_from_argb32[dfDibFormat];
+        RenderVBlitLineFunc mfFromSf = _g2d_render.convert.argb32_from_dib[sfDibFormat];
+        RenderVBlitLineFunc dfFromMf = _g2d_render.convert.dib_from_argb32[dfDibFormat];
 
         initIntegerPassConstants(multi->pass[0], mf, sf);
         initIntegerPassConstants(multi->pass[1], df, mf);
@@ -193,7 +193,7 @@ struct FOG_NO_EXPORT CConvert
       if (df.getFormat() == IMAGE_FORMAT_PRGB64)
       {
         uint32_t sfDibFormat = getDibFormat(sf);
-        RenderVBlitLineFn blitLine = _g2d_render.convert.argb64_from_dib[sfDibFormat];
+        RenderVBlitLineFunc blitLine = _g2d_render.convert.argb64_from_dib[sfDibFormat];
 
         initIntegerPassConstants(multi->pass[0], df, sf);
 
@@ -216,7 +216,7 @@ struct FOG_NO_EXPORT CConvert
       if (sf.getFormat() == IMAGE_FORMAT_PRGB64)
       {
         uint32_t dfDibFormat = getDibFormat(df);
-        RenderVBlitLineFn blitLine = _g2d_render.convert.dib_from_argb64[dfDibFormat];
+        RenderVBlitLineFunc blitLine = _g2d_render.convert.dib_from_argb64[dfDibFormat];
 
         initIntegerPassConstants(multi->pass[0], df, sf);
 
@@ -245,8 +245,8 @@ struct FOG_NO_EXPORT CConvert
         uint32_t sfDibFormat = getDibFormat(sf);
         uint32_t dfDibFormat = getDibFormat(df);
 
-        RenderVBlitLineFn mfFromSf = _g2d_render.convert.argb64_from_dib[sfDibFormat];
-        RenderVBlitLineFn dfFromMf = _g2d_render.convert.dib_from_argb64[dfDibFormat];
+        RenderVBlitLineFunc mfFromSf = _g2d_render.convert.argb64_from_dib[sfDibFormat];
+        RenderVBlitLineFunc dfFromMf = _g2d_render.convert.dib_from_argb64[dfDibFormat];
 
         initIntegerPassConstants(multi->pass[0], mf, sf);
         initIntegerPassConstants(multi->pass[1], df, mf);
@@ -467,7 +467,7 @@ struct FOG_NO_EXPORT CConvert
   {
     while ( ((size_t)dst & (sizeof(size_t) - 1)) )
     {
-      Memory::copy_1(dst, src);
+      MemOps::copy_1(dst, src);
       dst += 1;
       src += 1;
       if (--w == 0) return;
@@ -475,7 +475,7 @@ struct FOG_NO_EXPORT CConvert
 
     while ((w -= 32) >= 0)
     {
-      Memory::copy_32(dst, src);
+      MemOps::copy_32(dst, src);
       dst += 32;
       src += 32;
     }
@@ -484,7 +484,7 @@ struct FOG_NO_EXPORT CConvert
 
     while ((w -= 4) >= 0)
     {
-      Memory::copy_4(dst, src);
+      MemOps::copy_4(dst, src);
       dst += 4;
       src += 4;
     }
@@ -495,9 +495,9 @@ struct FOG_NO_EXPORT CConvert
 
     switch (w)
     {
-      case 3: Memory::copy_1(dst - 3, src - 3);
-      case 2: Memory::copy_1(dst - 2, src - 2);
-      case 1: Memory::copy_1(dst - 1, src - 1);
+      case 3: MemOps::copy_1(dst - 3, src - 3);
+      case 2: MemOps::copy_1(dst - 2, src - 2);
+      case 1: MemOps::copy_1(dst - 1, src - 1);
       case 0: break;
 
       default: FOG_ASSERT_NOT_REACHED();
@@ -513,7 +513,7 @@ struct FOG_NO_EXPORT CConvert
   {
     while ( ((size_t)dst & (sizeof(size_t) - 1)) )
     {
-      Memory::copy_2(dst, src);
+      MemOps::copy_2(dst, src);
       dst += 2;
       src += 2;
       if (--w == 0) return;
@@ -521,7 +521,7 @@ struct FOG_NO_EXPORT CConvert
 
     while ((w -= 16) >= 0)
     {
-      Memory::copy_32(dst, src);
+      MemOps::copy_32(dst, src);
       dst += 32;
       src += 32;
     }
@@ -530,7 +530,7 @@ struct FOG_NO_EXPORT CConvert
 
     while ((w -= 4) >= 0)
     {
-      Memory::copy_8(dst, src);
+      MemOps::copy_8(dst, src);
       dst += 8;
       src += 8;
     }
@@ -543,9 +543,9 @@ struct FOG_NO_EXPORT CConvert
     {
       default: FOG_ASSERT_NOT_REACHED();
 
-      case 3: Memory::copy_2(dst - 6, src - 6);
-      case 2: Memory::copy_2(dst - 4, src - 4);
-      case 1: Memory::copy_2(dst - 2, src - 2);
+      case 3: MemOps::copy_2(dst - 6, src - 6);
+      case 2: MemOps::copy_2(dst - 4, src - 4);
+      case 1: MemOps::copy_2(dst - 2, src - 2);
       case 0: break;
     }
   }
@@ -561,7 +561,7 @@ struct FOG_NO_EXPORT CConvert
 
     while ( ((size_t)dst & (sizeof(size_t) - 1)) )
     {
-      Memory::copy_1(dst, src);
+      MemOps::copy_1(dst, src);
       dst += 1;
       src += 1;
       if (--w == 0) return;
@@ -569,7 +569,7 @@ struct FOG_NO_EXPORT CConvert
 
     while ((w -= 32) >= 0)
     {
-      Memory::copy_32(dst, src);
+      MemOps::copy_32(dst, src);
       dst += 32;
       src += 32;
     }
@@ -578,7 +578,7 @@ struct FOG_NO_EXPORT CConvert
 
     while ((w -= 4) >= 0)
     {
-      Memory::copy_4(dst, src);
+      MemOps::copy_4(dst, src);
       dst += 4;
       src += 4;
     }
@@ -589,9 +589,9 @@ struct FOG_NO_EXPORT CConvert
 
     switch (w)
     {
-      case 3: Memory::copy_1(dst - 3, src - 3);
-      case 2: Memory::copy_1(dst - 2, src - 2);
-      case 1: Memory::copy_1(dst - 1, src - 1);
+      case 3: MemOps::copy_1(dst - 3, src - 3);
+      case 2: MemOps::copy_1(dst - 2, src - 2);
+      case 1: MemOps::copy_1(dst - 1, src - 1);
       case 0: break;
 
       default: FOG_ASSERT_NOT_REACHED();
@@ -609,7 +609,7 @@ struct FOG_NO_EXPORT CConvert
     // Align to 64-bits when running on 64-bit mode.
     if ((size_t)dst & 0x7)
     {
-      Memory::copy_4(dst, src);
+      MemOps::copy_4(dst, src);
       dst += 4;
       src += 4;
       if (--w == 0) return;
@@ -618,7 +618,7 @@ struct FOG_NO_EXPORT CConvert
 
     while ((w -= 8) >= 0)
     {
-      Memory::copy_32(dst, src);
+      MemOps::copy_32(dst, src);
       dst += 32;
       src += 32;
     }
@@ -631,13 +631,13 @@ struct FOG_NO_EXPORT CConvert
     {
       default: FOG_ASSERT_NOT_REACHED();
 
-      case 7: Memory::copy_4(dst - 28, src - 28);
-      case 6: Memory::copy_4(dst - 24, src - 24);
-      case 5: Memory::copy_4(dst - 20, src - 20);
-      case 4: Memory::copy_4(dst - 16, src - 16);
-      case 3: Memory::copy_4(dst - 12, src - 12);
-      case 2: Memory::copy_4(dst -  8, src -  8);
-      case 1: Memory::copy_4(dst -  4, src -  4);
+      case 7: MemOps::copy_4(dst - 28, src - 28);
+      case 6: MemOps::copy_4(dst - 24, src - 24);
+      case 5: MemOps::copy_4(dst - 20, src - 20);
+      case 4: MemOps::copy_4(dst - 16, src - 16);
+      case 3: MemOps::copy_4(dst - 12, src - 12);
+      case 2: MemOps::copy_4(dst -  8, src -  8);
+      case 1: MemOps::copy_4(dst -  4, src -  4);
       case 0: break;
     }
   }
@@ -653,7 +653,7 @@ struct FOG_NO_EXPORT CConvert
 
     while ( ((size_t)dst & (sizeof(size_t) - 1)) )
     {
-      Memory::copy_2(dst, src);
+      MemOps::copy_2(dst, src);
       dst += 2;
       src += 2;
       w--;
@@ -662,7 +662,7 @@ struct FOG_NO_EXPORT CConvert
 
     while ((w -= 16) >= 0)
     {
-      Memory::copy_32(dst, src);
+      MemOps::copy_32(dst, src);
       dst += 32;
       src += 32;
     }
@@ -671,7 +671,7 @@ struct FOG_NO_EXPORT CConvert
 
     while ((w -= 4) >= 0)
     {
-      Memory::copy_8(dst, src);
+      MemOps::copy_8(dst, src);
       dst += 8;
       src += 8;
     }
@@ -684,9 +684,9 @@ struct FOG_NO_EXPORT CConvert
     {
       default: FOG_ASSERT_NOT_REACHED();
 
-      case 3: Memory::copy_2(dst - 6, src - 6);
-      case 2: Memory::copy_2(dst - 4, src - 4);
-      case 1: Memory::copy_2(dst - 2, src - 2);
+      case 3: MemOps::copy_2(dst - 6, src - 6);
+      case 2: MemOps::copy_2(dst - 4, src - 4);
+      case 1: MemOps::copy_2(dst - 2, src - 2);
       case 0: break;
     }
   }
@@ -700,7 +700,7 @@ struct FOG_NO_EXPORT CConvert
   {
     while ((w -= 4) >= 0)
     {
-      Memory::copy_32(dst, src);
+      MemOps::copy_32(dst, src);
       dst += 32;
       src += 32;
     }
@@ -713,9 +713,9 @@ struct FOG_NO_EXPORT CConvert
     {
       default: FOG_ASSERT_NOT_REACHED();
 
-      case 3: Memory::copy_8(dst - 24, src - 24);
-      case 2: Memory::copy_8(dst - 16, src - 16);
-      case 1: Memory::copy_8(dst -  8, src -  8);
+      case 3: MemOps::copy_8(dst - 24, src - 24);
+      case 2: MemOps::copy_8(dst - 16, src - 16);
+      case 1: MemOps::copy_8(dst -  8, src -  8);
       case 0: break;
     }
   }
@@ -1836,7 +1836,7 @@ struct FOG_NO_EXPORT DibC
   // --------------------------------------------------------------------------
 
   static void FOG_FASTCALL cblit_rect_32_helper(
-    uint8_t* dst, sysint_t dstStride,
+    uint8_t* dst, ssize_t dstStride,
     uint32_t src0,
     int w, int h)
   {
@@ -1909,7 +1909,7 @@ struct FOG_NO_EXPORT DibC
   }
 
   static void FOG_FASTCALL cblit_rect_32_prgb(
-    uint8_t* dst, sysint_t dstStride,
+    uint8_t* dst, ssize_t dstStride,
     const RenderSolid* src,
     int w, int h, const RenderClosure* closure)
   {
@@ -1917,7 +1917,7 @@ struct FOG_NO_EXPORT DibC
   }
 
   static void FOG_FASTCALL cblit_rect_32_argb(
-    uint8_t* dst, sysint_t dstStride,
+    uint8_t* dst, ssize_t dstStride,
     const RenderSolid* src,
     int w, int h, const RenderClosure* closure)
   {
@@ -1925,7 +1925,7 @@ struct FOG_NO_EXPORT DibC
   }
 
   static void FOG_FASTCALL cblit_rect_8(
-    uint8_t* dst, sysint_t dstStride,
+    uint8_t* dst, ssize_t dstStride,
     const RenderSolid* src,
     int w, int h, const RenderClosure* closure)
   {
@@ -1988,8 +1988,8 @@ struct FOG_NO_EXPORT DibC
   }
 
   static void FOG_FASTCALL vblit_rect_32(
-    uint8_t* dst, sysint_t dstStride,
-    const uint8_t* src, sysint_t srcStride,
+    uint8_t* dst, ssize_t dstStride,
+    const uint8_t* src, ssize_t srcStride,
     int w, int h, const RenderClosure* closure)
   {
     FOG_ASSERT(w > 0 && h > 0);
@@ -2002,7 +2002,7 @@ struct FOG_NO_EXPORT DibC
 
       while ((i -= 8) >= 0)
       {
-        Memory::copy_64(dst, src);
+        MemOps::copy_64(dst, src);
 
         dst += 32;
         src += 32;
@@ -2011,13 +2011,13 @@ struct FOG_NO_EXPORT DibC
 
       switch (i)
       {
-        case 7: Memory::copy_4(dst, src); dst += 4; src += 4;
-        case 6: Memory::copy_4(dst, src); dst += 4; src += 4;
-        case 5: Memory::copy_4(dst, src); dst += 4; src += 4;
-        case 4: Memory::copy_4(dst, src); dst += 4; src += 4;
-        case 3: Memory::copy_4(dst, src); dst += 4; src += 4;
-        case 2: Memory::copy_4(dst, src); dst += 4; src += 4;
-        case 1: Memory::copy_4(dst, src); dst += 4; src += 4;
+        case 7: MemOps::copy_4(dst, src); dst += 4; src += 4;
+        case 6: MemOps::copy_4(dst, src); dst += 4; src += 4;
+        case 5: MemOps::copy_4(dst, src); dst += 4; src += 4;
+        case 4: MemOps::copy_4(dst, src); dst += 4; src += 4;
+        case 3: MemOps::copy_4(dst, src); dst += 4; src += 4;
+        case 2: MemOps::copy_4(dst, src); dst += 4; src += 4;
+        case 1: MemOps::copy_4(dst, src); dst += 4; src += 4;
       }
 
       dst += dstStride;
@@ -2026,8 +2026,8 @@ struct FOG_NO_EXPORT DibC
   }
 
   static void FOG_FASTCALL vblit_rect_8(
-    uint8_t* dst, sysint_t dstStride,
-    const uint8_t* src, sysint_t srcStride,
+    uint8_t* dst, ssize_t dstStride,
+    const uint8_t* src, ssize_t srcStride,
     int w, int h, const RenderClosure* closure)
   {
     FOG_ASSERT(w > 0 && h > 0);

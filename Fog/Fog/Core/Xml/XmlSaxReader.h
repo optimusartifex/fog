@@ -43,27 +43,27 @@ struct FOG_API XmlSaxReader
   // [Parser]
   // --------------------------------------------------------------------------
 
-  err_t parseFile(const String& fileName);
+  err_t parseFile(const StringW& fileName);
   err_t parseStream(Stream& stream);
   err_t parseMemory(const void* mem, size_t size);
-  err_t parseString(const Char* str, size_t len);
+  err_t parseString(const CharW* str, size_t len);
 
-  FOG_INLINE err_t parseString(const String& str)
+  FOG_INLINE err_t parseString(const StringW& str)
   { return parseString(str.getData(), str.getLength()); }
 
   // --------------------------------------------------------------------------
   // [Event Handlers]
   // --------------------------------------------------------------------------
 
-  virtual err_t onAddElement(const Utf16& tagName) = 0;
-  virtual err_t onCloseElement(const Utf16& tagName) = 0;
-  virtual err_t onAddAttribute(const Utf16& name, const Utf16& value) = 0;
+  virtual err_t onAddElement(const StubW& tagName) = 0;
+  virtual err_t onCloseElement(const StubW& tagName) = 0;
+  virtual err_t onAddAttribute(const StubW& name, const StubW& value) = 0;
 
-  virtual err_t onAddText(const Utf16& data, bool isWhiteSpace) = 0;
-  virtual err_t onAddCDATA(const Utf16& data) = 0;
-  virtual err_t onAddDOCTYPE(const List<String>& doctype) = 0;
-  virtual err_t onAddPI(const Utf16& data) = 0;
-  virtual err_t onAddComment(const Utf16& data) = 0;
+  virtual err_t onAddText(const StubW& data, bool isWhiteSpace) = 0;
+  virtual err_t onAddCDATA(const StubW& data) = 0;
+  virtual err_t onAddDOCTYPE(const List<StringW>& doctype) = 0;
+  virtual err_t onAddPI(const StubW& data) = 0;
+  virtual err_t onAddComment(const StubW& data) = 0;
 
 protected:
   static void _detectEncoding(TextCodec& tc, const void* mem, size_t size);

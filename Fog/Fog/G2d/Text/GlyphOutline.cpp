@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Memory/Alloc.h>
+#include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/G2d/Text/GlyphOutline.h>
 
 namespace Fog {
@@ -27,10 +27,10 @@ static Static<GlyphOutlineData> _GlyphOutline_dnull;
 static FOG_INLINE GlyphOutlineData* _GlyphOutline_dalloc(const GlyphMetricsF& metrics, const PathF& outline)
 {
   GlyphOutlineData* d = reinterpret_cast<GlyphOutlineData*>(
-    Memory::alloc(sizeof(GlyphOutlineData)));
+    MemMgr::alloc(sizeof(GlyphOutlineData)));
   if (FOG_IS_NULL(d)) return d;
 
-  d->refCount.init(1);
+  d->reference.init(1);
   d->metrics = metrics;
   d->outline.initCustom1(outline);
 
@@ -39,16 +39,16 @@ static FOG_INLINE GlyphOutlineData* _GlyphOutline_dalloc(const GlyphMetricsF& me
 
 static FOG_INLINE GlyphOutlineData* _GlyphOutline_dref(GlyphOutlineData* d)
 {
-  d->refCount.inc();
+  d->reference.inc();
   return d;
 }
 
 static FOG_INLINE void _GlyphOutline_deref(GlyphOutlineData* d)
 {
-  if (d->refCount.deref())
+  if (d->reference.deref())
   {
     d->outline.destroy();
-    Memory::free(d);
+    MemMgr::free(d);
   }
 }
 
@@ -57,7 +57,7 @@ static FOG_INLINE void _GlyphOutline_deref(GlyphOutlineData* d)
 // ============================================================================
 
 GlyphOutline::GlyphOutline() :
-  _d(_GlyphOutline_dref(_GlyphOutline_dnull))
+  _d(_GlyphOutline_dref(&_GlyphOutline_dnull))
 {
 }
 
@@ -103,18 +103,18 @@ GlyphOutline& GlyphOutline::operator=(const GlyphOutline& other)
 
 FOG_NO_EXPORT void GlyphOutline_init(void)
 {
-  GlyphOutlineData* d = _GlyphOutline_dnull.instancep();
+  GlyphOutlineData* d = &_GlyphOutline_dnull;
 
-  d->refCount.init(1);
+  d->reference.init(1);
   d->metrics.reset();
   d->outline.init();
 }
 
 FOG_NO_EXPORT void GlyphOutline_fini(void)
 {
-  GlyphOutlineData* d = _GlyphOutline_dnull.instancep();
+  GlyphOutlineData* d = &_GlyphOutline_dnull;
 
-  d->refCount.dec();
+  d->reference.dec();
   d->outline.destroy();
 }
 

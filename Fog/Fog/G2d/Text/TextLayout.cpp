@@ -73,7 +73,7 @@ err_t TextLayout::setText(const TextChunk& textChunk)
   return _updateLayout();
 }
 
-err_t TextLayout::setText(const String& textString)
+err_t TextLayout::setText(const StringW& textString)
 {
   _textChunk.setText(textString);
   return _updateLayout();
@@ -121,32 +121,32 @@ err_t TextLayout::_updateLayout()
   err_t err = ERR_OK;
   Range range = _textChunk.getRange();
 
-  const Char* beg = _textChunk.getText().getData();
-  const Char* cur = beg + range.getStart();
-  const Char* end = beg + range.getEnd();
+  const CharW* beg = _textChunk.getText().getData();
+  const CharW* cur = beg + range.getStart();
+  const CharW* end = beg + range.getEnd();
 
-  const Char* startLine = cur;
+  const CharW* startLine = cur;
   _lines.clear();
 
   do {
-    Char c = cur[0];
+    CharW c = cur[0];
     cur++;
 
     if (c.getValue() < 32)
     {
-      const Char* endLine = NULL;
+      const CharW* endLine = NULL;
 
-      if (c == Char('\n'))
+      if (c == CharW('\n'))
       {
         // Eat \n[\r].
         endLine = cur;
-        if (cur != end && cur[1] == Char('\r')) cur++;
+        if (cur != end && cur[1] == CharW('\r')) cur++;
       }
-      else if (c == Char('\r'))
+      else if (c == CharW('\r'))
       {
         // Eat \r[\n].
         endLine = cur;
-        if (cur != end && cur[1] == Char('\n')) cur++;
+        if (cur != end && cur[1] == CharW('\n')) cur++;
       }
 
       if (endLine)

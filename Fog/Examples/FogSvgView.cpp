@@ -37,9 +37,9 @@ struct MyWindow : public Window
   PointF lastPoint;
   SvgElement* active;
 
-  String activeStrokeBackup;
-  String activeStrokeWidthBackup;
-  String activeOpacityBackup;
+  StringW activeStrokeBackup;
+  StringW activeStrokeWidthBackup;
+  StringW activeOpacityBackup;
 
   Time fpsTime;
 
@@ -66,7 +66,7 @@ MyWindow::MyWindow(uint32_t createFlags) :
 
   recalcTransform();
 
-  setWindowTitle(Ascii8("SvgView"));
+  setWindowTitle(StringW::fromAscii8("SvgView"));
 }
 
 MyWindow::~MyWindow()
@@ -84,7 +84,7 @@ void MyWindow::recalcTransform()
   transform.translate(PointF(-size.w / 2.0f, -size.h / 2.0f));
   transform.scale(PointF(scale, scale));
 
-  transform.translate(PointF(100.0f, 100.0f));
+  //transform.translate(PointF(100.0f, 100.0f));
   transform.translate(translate);
 }
 
@@ -93,28 +93,29 @@ void MyWindow::recalcActive()
   SvgElement* e = NULL;
 
   List<SvgElement*> elements = svg.hitTest(lastPoint, &transform);
-  if (!elements.isEmpty()) e = elements.top();
+  if (!elements.isEmpty())
+    e = elements.getLast();
 
   if (active != e)
   {
     if (active != NULL)
     {
-      active->setStyle(Ascii8("stroke"), activeStrokeBackup);
-      active->setStyle(Ascii8("stroke-width"), activeStrokeWidthBackup);
-      active->setStyle(Ascii8("opacity"), activeOpacityBackup);
+      active->setStyle(StringW::fromAscii8("stroke"), activeStrokeBackup);
+      active->setStyle(StringW::fromAscii8("stroke-width"), activeStrokeWidthBackup);
+      active->setStyle(StringW::fromAscii8("opacity"), activeOpacityBackup);
     }
 
     active = e;
 
     if (active != NULL)
     {
-      activeStrokeBackup = active->getStyle(Ascii8("stroke"));
-      activeStrokeWidthBackup = active->getStyle(Ascii8("stroke-width"));
-      activeOpacityBackup = active->getStyle(Ascii8("opacity"));
+      activeStrokeBackup      = active->getStyle(StringW::fromAscii8("stroke"));
+      activeStrokeWidthBackup = active->getStyle(StringW::fromAscii8("stroke-width"));
+      activeOpacityBackup     = active->getStyle(StringW::fromAscii8("opacity"));
 
-      active->setStyle(Ascii8("stroke"), Ascii8("#FF0000"));
-      active->setStyle(Ascii8("stroke-width"), Ascii8("2.5"));
-      active->setStyle(Ascii8("opacity"), Ascii8("1"));
+      active->setStyle(StringW::fromAscii8("stroke"      ), StringW::fromAscii8("#FF0000"));
+      active->setStyle(StringW::fromAscii8("stroke-width"), StringW::fromAscii8("2.5"));
+      active->setStyle(StringW::fromAscii8("opacity"     ), StringW::fromAscii8("1"));
     }
   }
 }
@@ -156,27 +157,33 @@ void MyWindow::onKey(KeyEvent* e)
 
       case KEY_Q:
         scale += 0.1f;
+        recalcTransform();
         update(WIDGET_UPDATE_PAINT);
         break;
       case KEY_W:
         scale -= 0.1f;
+        recalcTransform();
         update(WIDGET_UPDATE_PAINT);
         break;
 
       case KEY_LEFT:
-        translate.x -= .1f;
+        translate.x -= 5.0f;
+        recalcTransform();
         update(WIDGET_UPDATE_PAINT);
         break;
       case KEY_RIGHT:
-        translate.x += .1f;
+        translate.x += 5.0f;
+        recalcTransform();
         update(WIDGET_UPDATE_PAINT);
         break;
       case KEY_UP:
-        translate.y -= .1f;
+        translate.y -= 5.0f;
+        recalcTransform();
         update(WIDGET_UPDATE_PAINT);
         break;
       case KEY_DOWN:
-        translate.y += .1f;
+        translate.y += 5.0f;
+        recalcTransform();
         update(WIDGET_UPDATE_PAINT);
         break;
     }
@@ -244,18 +251,19 @@ void MyWindow::onPaint(PaintEvent* e)
     fps = fpsCounter;
     fpsCounter = 0.0f;
     fpsTime = lastTime;
+
+    StringW text;
+    //text.format("FPS: %g, Time: %g", fps, frameDelta.getMillisecondsD());
+    text.format("FPS: %d, Time: %d", (int)fps, (int)frameDelta.getMillisecondsD());
+    setWindowTitle(text);
   }
   else
   {
     fpsCounter++;
   }
 
-  String text;
-  text.format("FPS: %g, Time: %g", fps, frameDelta.getMillisecondsD());
-  setWindowTitle(text);
-
   p->resetTransform();
-
+/*
   for (int i = 0; i < 2; i++)
   {
     PathF path;
@@ -268,6 +276,7 @@ void MyWindow::onPaint(PaintEvent* e)
     p->setSource(Argb32(0xFFFF0000));
     p->fillPath(path);
   }
+*/
   // p->fillText(PointI(0, 0), text, getFont());
 }
 
@@ -277,14 +286,14 @@ void MyWindow::onPaint(PaintEvent* e)
 
 FOG_UI_MAIN()
 {
-  Application app(Ascii8("Gui"));
+  Application app(StringW::fromAscii8("UI"));
 
-  List<String> arguments = Application::getApplicationArguments();
-  String fileName;
+  List<StringW> arguments = Application::getApplicationArguments();
+  StringW fileName;
 
   if (arguments.getLength() >= 2)
   {
-    fileName = arguments.at(1);
+    fileName = arguments.getAt(1);
   }
   else
   {

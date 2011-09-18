@@ -25,7 +25,7 @@ static const uint32_t ColorAnalyzer_result[] =
   /* 0x03 -> */ ALPHA_DISTRIBUTION_ZERO_OR_FULL
 };
 
-uint32_t ColorAnalyzer::analyzeAlpha32(const uint8_t* data, sysint_t stride, int w, int h, int aPos, int inc)
+uint32_t ColorAnalyzer::analyzeAlpha32(const uint8_t* data, ssize_t stride, int w, int h, int aPos, int inc)
 {
   uint32_t mask = 0x00;
 
@@ -53,7 +53,7 @@ uint32_t ColorAnalyzer::analyzeAlpha32(const uint8_t* data, sysint_t stride, int
   return ColorAnalyzer_result[mask];
 }
 
-uint32_t ColorAnalyzer::analyzeAlpha64(const uint8_t* data, sysint_t stride, int w, int h, int aPos, int inc)
+uint32_t ColorAnalyzer::analyzeAlpha64(const uint8_t* data, ssize_t stride, int w, int h, int aPos, int inc)
 {
   uint32_t mask = 0x00;
 

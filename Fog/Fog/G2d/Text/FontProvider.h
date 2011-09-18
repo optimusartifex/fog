@@ -8,10 +8,10 @@
 #define _FOG_G2D_TEXT_FONTPROVIDER_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Threading/Lock.h>
+#include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/G2d/Text/Font.h>
 
@@ -34,45 +34,45 @@ struct FOG_API FontProviderData
   virtual ~FontProviderData();
 
   // --------------------------------------------------------------------------
-  // [Ref / Deref]
+  // [AddRef / Release]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE FontProviderData* ref() const
+  FOG_INLINE FontProviderData* addRef() const
   {
-    refCount.inc();
+    reference.inc();
     return const_cast<FontProviderData*>(this);
   }
 
   FOG_INLINE void deref()
   {
-    if (refCount.deref()) fog_delete(this);
+    if (reference.deref()) fog_delete(this);
   }
 
   // --------------------------------------------------------------------------
   // [Interface]
   // --------------------------------------------------------------------------
 
-  virtual err_t getFontFace(FontFace** dst, const String& fontFamily) = 0;
-  virtual err_t getFontList(List<String>& dst) = 0;
+  virtual err_t getFontFace(FontFace** dst, const StringW& fontFamily) = 0;
+  virtual err_t getFontList(List<StringW>& dst) = 0;
 
-  virtual String getDefaultFamily() = 0;
+  virtual StringW getDefaultFamily() = 0;
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
   //! @brief Reference count.
-  mutable Atomic<size_t> refCount;
+  mutable Atomic<size_t> reference;
   //! @brief Lock for thread safety.
   Lock lock;
 
   //! @brief Name of this provider.
-  String name;
+  StringW name;
   //! @brief Id of this provider.
   uint32_t id;
 
 private:
-  _FOG_CLASS_NO_COPY(FontProviderData)
+  _FOG_NO_COPY(FontProviderData)
 };
 
 // ============================================================================
@@ -96,17 +96,17 @@ struct FOG_API FontProvider
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  String getName() const;
+  StringW getName() const;
   uint32_t getId() const;
 
   // --------------------------------------------------------------------------
   // [Interface]
   // --------------------------------------------------------------------------
 
-  err_t getFontFace(FontFace** dst, const String& fontFamily) const;
-  err_t getFontList(List<String>& dst) const;
+  err_t getFontFace(FontFace** dst, const StringW& fontFamily) const;
+  err_t getFontList(List<StringW>& dst) const;
 
-  String getDefaultFamily() const;
+  StringW getDefaultFamily() const;
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
@@ -127,18 +127,6 @@ struct FOG_API FontProvider
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::FontProvider, Fog::TYPEINFO_MOVABLE)
-
-// ============================================================================
-// [Fog::Swap]
-// ============================================================================
-
-_FOG_SWAP_D(Fog::FontProvider)
 
 // [Guard]
 #endif // _FOG_G2D_TEXT_FONTPROVIDER_H

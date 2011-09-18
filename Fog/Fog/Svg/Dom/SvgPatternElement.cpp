@@ -82,11 +82,11 @@ err_t SvgPatternElement::onPattern(SvgVisitor* visitor, SvgElement* obj, uint32_
 
 err_t SvgPatternElement::_createPattern(PatternF& pattern, SvgElement* obj) const
 {
-  String link = _getAttribute(fog_strings->getString(STR_SVG_ATTRIBUTE_xlink_href));
+  StringW link = _getAttribute(fog_strings->getString(STR_SVG_ATTRIBUTE_xlink_href));
 
-  if (!link.isEmpty() && link.getAt(0) == Char('#'))
+  if (!link.isEmpty() && link.getAt(0) == CharW('#'))
   {
-    XmlElement* e = getDocument()->getElementById(Utf16(link.getData() + 1, link.getLength() - 1));
+    XmlElement* e = getDocument()->getElementById(StubW(link.getData() + 1, link.getLength() - 1));
     if (e != NULL && e->isSvg() && reinterpret_cast<SvgElement*>(e)->getSvgType() == SVG_ELEMENT_PATTERN)
     {
       SvgPatternElement* pe = reinterpret_cast<SvgPatternElement*>(e);

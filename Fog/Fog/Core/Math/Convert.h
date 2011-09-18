@@ -8,17 +8,19 @@
 #define _FOG_CORE_MATH_CONVERT_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Types.h>
-#include <Fog/Core/Math/Constants.h>
-#include <Fog/Core/Math/FloatBits.h>
+#include <Fog/Core/C++/Base.h>
 
 #if defined(FOG_HARDCODE_SSE)
-# include <Fog/Core/Cpu/Intrin_SSE.h>
+# include <Fog/Core/C++/IntrinSSE.h>
 #endif // FOG_HARDCODE_SSE
 
 #if defined(FOG_HARDCODE_SSE2)
-# include <Fog/Core/Cpu/Intrin_SSE2.h>
+# include <Fog/Core/C++/IntrinSSE2.h>
 #endif // FOG_HARDCODE_SSE2
+
+#include <Fog/Core/Global/Types.h>
+#include <Fog/Core/Math/Constants.h>
+#include <Fog/Core/Math/FloatBits.h>
 
 // [Dependencies - C]
 #include <math.h>

@@ -43,7 +43,7 @@ struct FOG_NO_EXPORT SvgSymbolElement : public SvgStyledElement
   // --------------------------------------------------------------------------
 
 private:
-  _FOG_CLASS_NO_COPY(SvgSymbolElement)
+  _FOG_NO_COPY(SvgSymbolElement)
 };
 
 //! @}

@@ -8,236 +8,18 @@
 #define _FOG_CORE_GLOBAL_API_H
 
 // [Dependencies]
-#include <Fog/Core/Config/Config.h>
-#include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/C++/Base.h>
 
-namespace Fog {
-
-//! @addtogroup Fog_Core_Global
-//! @{
-
-// ============================================================================
-// [Fog::Forward Declarations]
-// ============================================================================
-
-// Core/Collection.
-template<typename ItemT> struct List;
-template<typename ItemT> struct ListP;
-
-template<typename KeyT, typename ValueT> struct Hash;
-template<typename KeyT, typename ValueT> struct HashP;
-
-template<typename KeyT, typename ValueT> struct Map;
-template<typename KeyT, typename ValueT> struct MapP;
-
-// Core/Cpu.
-struct Cpu;
-
-// Core/DateTime.
-struct Date;
-struct DateDelta;
-struct Time;
-struct TimeDelta;
-struct TimeTicks;
-
-// Core/Global.
-struct Range;
-
-// Core/IO.
-struct DirEntry;
-struct DirIterator;
-struct MapFile;
-struct Stream;
-
-// Core/Math.
-struct FunctionF;
-struct FunctionD;
-struct IntervalF;
-struct IntervalD;
-
-// Core/System.
-struct Application;
-struct Event;
-struct EventLoop;
-struct Object;
-struct Task;
-struct Timer;
-
-// Core/Threading.
-struct Lock;
-struct Thread;
-struct ThreadCondition;
-struct ThreadEvent;
-struct ThreadLocal;
-struct ThreadPool;
-
-// Core/Tools.
-struct Ascii8;
-struct Byte;
-struct ByteArray;
-struct ByteArrayData;
-struct ByteArrayFilter;
-struct ByteArrayMatcher;
-struct Char;
-struct Local8;
-struct Locale;
-struct Range;
-struct String;
-struct StringData;
-struct StringFilter;
-struct StringMatcher;
-struct Stub8;
-struct TextCodec;
-struct TextCodecData;
-struct TextCodecHandler;
-struct TextCodecState;
-struct Utf8;
-struct Utf16;
-
-// Core/Variant.
-struct Var;
-struct VarData;
-
-// Core/Xml
-struct XmlDocument;
-struct XmlElement;
-
-// G2d/Geometry.
-struct ArcF;
-struct ArcD;
-struct BoxI;
-struct BoxF;
-struct BoxD;
-struct CBezierF;
-struct CBezierD;
-struct ChordF;
-struct ChordD;
-struct CircleF;
-struct CircleD;
-struct EllipseF;
-struct EllipseD;
-struct LineF;
-struct LineD;
-struct PathF;
-struct PathD;
-struct PathClipperF;
-struct PathClipperD;
-struct PathFlattenParamsF;
-struct PathFlattenParamsD;
-struct PathStrokerF;
-struct PathStrokerD;
-struct PathStrokerParamsF;
-struct PathStrokerParamsD;
-struct PieF;
-struct PieD;
-struct PointI;
-struct PointF;
-struct PointD;
-struct QBezierF;
-struct QBezierD;
-struct RectI;
-struct RectF;
-struct RectD;
-struct RoundF;
-struct RoundD;
-struct ShapeF;
-struct ShapeD;
-struct SizeI;
-struct SizeF;
-struct SizeD;
-struct TransformF;
-struct TransformD;
-struct TriangleF;
-struct TriangleD;
-
-// G2d/Imaging.
-struct Image;
-struct ImageBits;
-struct ImageCodec;
-struct ImageCodecProvider;
-struct ImageConverter;
-struct ImageConverterClosure;
-struct ImageConverterData;
-struct ImageData;
-struct ImageDecoder;
-struct ImageEncoder;
-struct ImageFormatDescription;
-struct ImagePalette;
-struct ImagePaletteData;
-
-// G2d/Painting.
-struct Painter;
-struct PaintDevice;
-struct PaintDeviceInfo;
-struct PaintEngine;
-struct PaintParamsF;
-struct PaintParamsD;
-
-// G2d/Text.
-
-// G2d/Tools.
-struct Dpi;
-struct MatrixF;
-struct MatrixD;
-struct Region;
-struct RegionData;
-
-// G2d/Source.
-struct AcmykF;
-struct AcmykBaseF;
-struct AhslF;
-struct AhslBaseF;
-struct AhsvF;
-struct AhsvBaseF;
-struct Argb32;
-struct ArgbBase32;
-struct Argb64;
-struct ArgbBase64;
-struct ArgbF;
-struct ArgbBaseF;
-struct Color;
-struct ColorBase;
-struct ColorStop;
-struct ColorStopCache;
-struct ColorStopList;
-struct ConicalGradientF;
-struct ConicalGradientD;
-struct GradientF;
-struct GradientD;
-struct LinearGradientF;
-struct LinearGradientD;
-struct PatternF;
-struct PatternD;
-struct RadialGradientF;
-struct RadialGradientD;
-struct RectangularGradientF;
-struct RectangularGradientD;
-struct Texture;
-
-// G2d/Text
-struct Font;
-struct FontData;
-struct FontFace;
-union  FontKerningChars;
-struct FontKerningPairI;
-struct FontKerningPairF;
-struct FontKerningTableI;
-struct FontKerningTableF;
-struct FontManager;
-struct FontManagerData;
-struct FontProvider;
-struct FontProviderData;
-struct TextRectI;
-struct TextRectF;
-struct TextRectD;
-
-// TODO:
-struct ColorLutFx;
-struct ColorLutTable;
+#include <Fog/Core/Global/EnumCore.h>
+#include <Fog/Core/Global/EnumG2d.h>
+#include <Fog/Core/Global/TypeDefs.h>
+#include <Fog/Core/Global/TypeInfo.h>
 
 // ============================================================================
 // [Fog::Api]
 // ============================================================================
+
+namespace Fog {
 
 //! @internal
 //!
@@ -245,7 +27,313 @@ struct ColorLutTable;
 struct FOG_NO_EXPORT Api
 {
   // --------------------------------------------------------------------------
-  // [Core/DateTime - Date]
+  // [Core/IO - DirEntry]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *DirEntry_Ctor)(DirEntry* self);
+  typedef void (FOG_CDECL *DirEntry_CtorCopy)(DirEntry* self, const DirEntry* other);
+  typedef void (FOG_CDECL *DirEntry_Dtor)(DirEntry* self);
+
+  typedef void (FOG_CDECL *DirEntry_SetDirEntry)(DirEntry* self, const DirEntry* other);
+
+  struct FOG_NO_EXPORT _Api_DirEntry
+  {
+    DirEntry_Ctor ctor;
+    DirEntry_CtorCopy ctorCopy;
+    DirEntry_Dtor dtor;
+    DirEntry_SetDirEntry setDirEntry;
+  } direntry;
+
+  // --------------------------------------------------------------------------
+  // [Core/IO - DirIterator]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *DirIterator_Ctor)(DirIterator* self);
+  typedef void (FOG_CDECL *DirIterator_CtorString)(DirIterator* self, const StringW* path);
+  typedef void (FOG_CDECL *DirIterator_Dtor)(DirIterator* self);
+
+  typedef err_t (FOG_CDECL *DirIterator_Open)(DirIterator* self, const StringW* path);
+  typedef void (FOG_CDECL *DirIterator_Close)(DirIterator* self);
+
+  typedef bool (FOG_CDECL *DirIterator_ReadDirEntry)(DirIterator* self, DirEntry* dirEntry);
+  typedef bool (FOG_CDECL *DirIterator_ReadString)(DirIterator* self, StringW* fileName);
+
+  typedef err_t (FOG_CDECL *DirIterator_Rewind)(DirIterator* self);
+  typedef int64_t (FOG_CDECL *DirIterator_Tell)(DirIterator* self);
+
+  struct FOG_NO_EXPORT _Api_DirIterator
+  {
+    DirIterator_Ctor ctor;
+    DirIterator_CtorString ctorString;
+    DirIterator_Dtor dtor;
+    DirIterator_Open open;
+    DirIterator_Close close;
+    DirIterator_ReadDirEntry readDirEntry;
+    DirIterator_ReadString readString;
+    DirIterator_Rewind rewind;
+    DirIterator_Tell tell;
+  } diriterator;
+
+  // --------------------------------------------------------------------------
+  // [Core/Math - Math]
+  // --------------------------------------------------------------------------
+
+  typedef err_t (FOG_CDECL* MathF_Integrate)(float* dst, const FunctionF* func, const IntervalF* interval, uint32_t steps);
+  typedef err_t (FOG_CDECL* MathD_Integrate)(double* dst, const FunctionD* func, const IntervalD* interval, uint32_t steps);
+
+  typedef int (FOG_CDECL* MathF_Solve)(float* dst, const float* func);
+  typedef int (FOG_CDECL* MathD_Solve)(double* dst, const double* func);
+
+  typedef int (FOG_CDECL* MathF_SolveAt)(float* dst, const float* func, const IntervalF* interval);
+  typedef int (FOG_CDECL* MathD_SolveAt)(double* dst, const double* func, const IntervalD* interval);
+
+  typedef void (FOG_CDECL* MathF_VecFloatFromDouble)(float* dst, const double* src, size_t length);
+  typedef void (FOG_CDECL* MathD_VecDoubleFromFloat)(double* dst, const float* src, size_t length);
+
+  struct FOG_NO_EXPORT _Api_MathF
+  {
+    MathF_Integrate integrate[MATH_INTEGRATION_METHOD_COUNT];
+
+    MathF_Solve solve[MATH_SOLVE_COUNT];
+    MathF_SolveAt solveAt[MATH_SOLVE_COUNT];
+
+    MathF_VecFloatFromDouble vecFloatFromDouble;
+  } mathf;
+
+  struct FOG_NO_EXPORT _Api_MathD
+  {
+    MathD_Integrate integrate[MATH_INTEGRATION_METHOD_COUNT];
+
+    MathD_Solve solve[MATH_SOLVE_COUNT];
+    MathD_SolveAt solveAt[MATH_SOLVE_COUNT];
+
+    MathD_VecDoubleFromFloat vecDoubleFromFloat;
+  } mathd;
+
+  // --------------------------------------------------------------------------
+  // [Core/Memory - MemMgr]
+  // --------------------------------------------------------------------------
+
+  typedef void* (FOG_CDECL *MemMgr_Alloc)(size_t size);
+  typedef void* (FOG_CDECL *MemMgr_Calloc)(size_t size);
+  typedef void* (FOG_CDECL *MemMgr_Realloc)(void* ptr, size_t size);
+  typedef void (FOG_CDECL *MemMgr_Free)(void* ptr);
+
+  typedef void (FOG_CDECL *MemMgr_Cleanup)(void);
+  typedef err_t (FOG_CDECL *MemMgr_RegisterCleanupFunc)(MemCleanupFunc func, void* closure);
+  typedef err_t (FOG_CDECL *MemMgr_UnregisterCleanupFunc)(MemCleanupFunc func, void* closure);
+
+  struct FOG_NO_EXPORT _Api_Memory
+  {
+    // These functions are prefixed by _m_, because some memory leak detectors
+    // use macros to replace malloc(), realloc(), free(), etc... This prevents
+    // to be messed with them.
+    MemMgr_Alloc _m_alloc;
+    MemMgr_Calloc _m_calloc;
+    MemMgr_Realloc _m_realloc;
+    MemMgr_Free _m_free;
+
+    MemMgr_Cleanup cleanup;
+    MemMgr_RegisterCleanupFunc registerCleanupFunc;
+    MemMgr_UnregisterCleanupFunc unregisterCleanupFunc;
+  } memmgr;
+
+  // --------------------------------------------------------------------------
+  // [Core/Memory - MemOps]
+  // --------------------------------------------------------------------------
+
+  typedef void* (FOG_CDECL *MemOps_Copy)(void* dst, const void* src, size_t size);
+  typedef void* (FOG_CDECL *MemOps_Move)(void* dst, const void* src, size_t size);
+  typedef void* (FOG_CDECL *MemOps_Zero)(void* dst, size_t size);
+  typedef void* (FOG_CDECL *MemOps_Set)(void* dst, uint val, size_t size);
+  typedef void (FOG_CDECL *MemOps_Xchg)(void* mem0, void* mem1, size_t size);
+
+  struct FOG_NO_EXPORT _Api_MemOps
+  {
+    MemOps_Copy copy;
+    MemOps_Move move;
+    MemOps_Zero zero;
+    MemOps_Set set;
+
+    MemOps_Copy copy_nt;
+    MemOps_Zero zero_nt;
+    MemOps_Set set_nt;
+
+    MemOps_Xchg xchg;
+  } memops;
+
+  // --------------------------------------------------------------------------
+  // [Core/Memory - MemPool]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *MemPool_Ctor)(MemPool* self);
+  typedef void (FOG_CDECL *MemPool_Dtor)(MemPool* self);
+
+  typedef size_t (FOG_CDECL *MemPool_GetCapacity)(const MemPool* self);
+
+  typedef void (FOG_CDECL *MemPool_Reset)(MemPool* self);
+  typedef void* (FOG_CDECL *MemPool_Save)(MemPool* self);
+
+  typedef err_t (FOG_CDECL *MemPool_Prealloc)(MemPool* self, size_t szItem, size_t count);
+  typedef void* (FOG_CDECL *MemPool_Alloc)(MemPool* self, size_t szItem);
+
+  typedef void (FOG_CDECL *MemPool_FreeSaved)(void* ptr);
+
+  struct FOG_NO_EXPORT _Api_MemPool
+  {
+    MemPool_Ctor ctor;
+    MemPool_Dtor dtor;
+
+    MemPool_GetCapacity getCapacity;
+
+    MemPool_Reset reset;
+    MemPool_Save save;
+
+    MemPool_Prealloc prealloc;
+    MemPool_Alloc alloc;
+
+    MemPool_FreeSaved freeSaved;
+  } mempool;
+
+  // --------------------------------------------------------------------------
+  // [Core/OS - Library]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL* Library_Ctor)(Library* self);
+  typedef void (FOG_CDECL* Library_CtorCopy)(Library* self, const Library* other);
+  typedef void (FOG_CDECL* Library_Dtor)(Library* self);
+
+  typedef void (FOG_CDECL* Library_SetLibrary)(Library* self, const Library* other);
+  typedef err_t (FOG_CDECL* Library_OpenLibrary)(Library* self, const StringW* fileName, uint32_t flags);
+  typedef err_t (FOG_CDECL* Library_OpenPlugin)(Library* self, const StringW* category, const StringW* name);
+  typedef void (FOG_CDECL* Library_Close)(Library* self);
+
+  typedef void* (FOG_CDECL* Library_GetSymbolStubA)(const Library* self, const StubA* sym);
+  typedef void* (FOG_CDECL* Library_GetSymbolStringW)(const Library* self, const StringW* sym);
+  typedef size_t (FOG_CDECL* Library_GetSymbols)(const Library* self, void** target, const char* symbolsData, size_t symbolsLength, size_t symbolsCount, char** fail);
+
+  typedef LibraryData* (FOG_CDECL* Library_DCreate)(void* handle);
+  typedef void (FOG_CDECL* Library_DFree)(LibraryData* d);
+
+  typedef err_t (FOG_CDECL* Library_GetSystemPrefix)(StringW* dst);
+  typedef err_t (FOG_CDECL* Library_GetSystemExtensions)(List<StringW>* dst);
+
+  typedef err_t (FOG_CDECL* Library_GetLibraryPaths)(List<StringW>* dst);
+  typedef err_t (FOG_CDECL* Library_AddLibraryPath)(const StringW* path, uint32_t mode);
+  typedef err_t (FOG_CDECL* Library_RemoveLibraryPath)(const StringW* path);
+  typedef bool (FOG_CDECL* Library_HasLibraryPath)(const StringW* path);
+
+  struct FOG_NO_EXPORT _Api_Library
+  {
+    Library_Ctor ctor;
+    Library_CtorCopy ctorCopy;
+    Library_Ctor dtor;
+    Library_SetLibrary setLibrary;
+    Library_OpenLibrary openLibrary;
+    Library_OpenPlugin openPlugin;
+    Library_Close close;
+    Library_GetSymbolStubA getSymbolStubA;
+    Library_GetSymbolStringW getSymbolStringW;
+    Library_GetSymbols getSymbols;
+
+    Library_DCreate dCreate;
+    Library_DFree dFree;
+
+    Library_GetSystemPrefix getSystemPrefix;
+    Library_GetSystemExtensions getSystemExtensions;
+    Library_GetLibraryPaths getLibraryPaths;
+    Library_AddLibraryPath addLibraryPath;
+    Library_RemoveLibraryPath removeLibraryPath;
+    Library_HasLibraryPath hasLibraryPath;
+
+    LibraryData* dNone;
+  } library;
+
+  // --------------------------------------------------------------------------
+  // [Core/OS - System]
+  // --------------------------------------------------------------------------
+
+  typedef err_t (FOG_CDECL *System_GetSystemName)(StringW* dst);
+  typedef err_t (FOG_CDECL *System_GetSystemVersion)(StringW* dst);
+
+#if defined(FOG_OS_WINDOWS)
+  typedef uint32_t (FOG_CDECL *System_GetWindowsVersion)(void);
+  typedef err_t (FOG_CDECL *System_GetWindowsDirectory)(StringW* dst);
+#endif // FOG_OS_WINDOWS
+
+  typedef uint64_t (FOG_CDECL *System_GetAmountOfPhysicalMemory)(void);
+  typedef uint32_t (FOG_CDECL *System_GetAmountOfPhysicalMemoryMB)(void);
+
+  typedef err_t (FOG_CDECL* System_GetEnvironmentStubA)(const StubA* key, StringW* value);
+  typedef err_t (FOG_CDECL* System_GetEnvironmentStringW)(const StringW* key, StringW* value);
+
+  typedef err_t (FOG_CDECL* System_SetEnvironmentStubA)(const StubA* key, const StringW* value);
+  typedef err_t (FOG_CDECL* System_SetEnvironmentStringW)(const StringW* key, const StringW* value);
+
+  typedef err_t (FOG_CDECL *System_ErrorFromOSErrorCode)(int code);
+  typedef err_t (FOG_CDECL *System_ErrorFromOSLastError)(void);
+
+#if defined(FOG_OS_WINDOWS)
+  typedef err_t (FOG_CDECL *System_GetModuleFileName)(StringW* dst, HMODULE hModule);
+  typedef err_t (FOG_CDECL *System_MakeWindowsPath)(StringW* dst, const StringW* src);
+#endif // FOG_OS_WINDOWS
+
+  struct FOG_NO_EXPORT _Api_System
+  {
+    System_GetSystemName getSystemName;
+    System_GetSystemVersion getSystemVersion;
+
+#if defined(FOG_OS_WINDOWS)
+    System_GetWindowsVersion getWindowsVersion;
+    System_GetWindowsDirectory getWindowsDirectory;
+#endif // FOG_OS_WINDOWS
+
+    System_GetAmountOfPhysicalMemory getAmountOfPhysicalMemory;
+    System_GetAmountOfPhysicalMemoryMB getAmountOfPhysicalMemoryMB;
+
+    System_GetEnvironmentStubA getEnvironmentStubA;
+    System_GetEnvironmentStringW getEnvironmentStringW;
+
+    System_SetEnvironmentStubA setEnvironmentStubA;
+    System_SetEnvironmentStringW setEnvironmentStringW;
+
+    System_ErrorFromOSErrorCode errorFromOSErrorCode;
+    System_ErrorFromOSLastError errorFromOSLastError;
+
+#if defined(FOG_OS_WINDOWS)
+    System_GetModuleFileName getModuleFileName;
+    System_MakeWindowsPath makeWindowsPath;
+#endif // FOG_OS_WINDOWS
+  } system;
+
+  // --------------------------------------------------------------------------
+  // [Core/Threading - ThreadLocal]
+  // --------------------------------------------------------------------------
+
+  typedef err_t (FOG_CDECL* ThreadLocal_Create)(uint32_t* slot, void* dtor);
+  typedef err_t (FOG_CDECL* ThreadLocal_Destroy)(uint32_t slot);
+  typedef void* (FOG_CDECL* ThreadLocal_Get)(uint32_t slot);
+  typedef err_t (FOG_CDECL* ThreadLocal_Set)(uint32_t slot, void* val);
+
+  struct FOG_NO_EXPORT _Api_ThreadLocal
+  {
+    ThreadLocal_Create create;
+    ThreadLocal_Destroy destroy;
+    ThreadLocal_Get get;
+    ThreadLocal_Set set;
+  } threadlocal;
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - Cpu]
+  // --------------------------------------------------------------------------
+
+  struct FOG_NO_EXPORT _Api_Cpu
+  {
+    Cpu* instance;
+  } cpu;
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - Date]
   // --------------------------------------------------------------------------
 
   typedef int   (FOG_CDECL* Date_GetValue)(const Date* self, uint32_t key);
@@ -262,7 +350,7 @@ struct FOG_NO_EXPORT Api
 
   typedef err_t (FOG_CDECL* Date_Convert)(Date* dst, const Date* src, uint32_t zone);
 
-  struct FOG_NO_EXPORT _FuncsDate
+  struct FOG_NO_EXPORT _Api_Date
   {
     Date_GetValue getValue;
     Date_SetValue setValue;
@@ -280,14 +368,2007 @@ struct FOG_NO_EXPORT Api
   } date;
 
   // --------------------------------------------------------------------------
-  // [Core/DateTime - Time]
+  // [Core/Tools - Hash - Helpers]
+  // --------------------------------------------------------------------------
+
+  typedef size_t (FOG_CDECL *HashHelper_CalcExpandCapacity)(size_t capacity);
+  typedef size_t (FOG_CDECL *HashHelper_CalcShrinkCapacity)(size_t capacity);
+
+  struct FOG_NO_EXPORT _Api_Hash_Helper
+  {
+    HashHelper_CalcExpandCapacity calcExpandCapacity;
+    HashHelper_CalcShrinkCapacity calcShrinkCapacity;
+  };
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - Hash<Unknown, Unknown>]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *Hash_Unknown_Unknown_Ctor)(HashUntyped* self);
+  typedef void (FOG_CDECL *Hash_Unknown_Unknown_CtorCopy)(HashUntyped* self, const HashUntyped* other);
+  typedef void (FOG_CDECL *Hash_Unknown_Unknown_Dtor)(HashUntyped* self, const HashUntypedVTable* v);
+
+  typedef err_t (FOG_CDECL *Hash_Unknown_Unknown_Detach)(HashUntyped* self, const HashUntypedVTable* v);
+  typedef err_t (FOG_CDECL *Hash_Unknown_Unknown_Rehash)(HashUntyped* self, const HashUntypedVTable* v, size_t capacity);
+  typedef err_t (FOG_CDECL *Hash_Unknown_Unknown_Reserve)(HashUntyped* self, const HashUntypedVTable* v, size_t capacity);
+  typedef void (FOG_CDECL *Hash_Unknown_Unknown_Squeeze)(HashUntyped* self, const HashUntypedVTable* v);
+
+  typedef void (FOG_CDECL *Hash_Unknown_Unknown_Clear)(HashUntyped* self, const HashUntypedVTable* v);
+  typedef void (FOG_CDECL *Hash_Unknown_Unknown_Reset)(HashUntyped* self, const HashUntypedVTable* v);
+
+  typedef const void* (FOG_CDECL *Hash_Unknown_Unknown_Get)(const HashUntyped* self, const HashUntypedVTable* v, const void* key);
+  typedef void* (FOG_CDECL *Hash_Unknown_Unknown_Use)(HashUntyped* self, const HashUntypedVTable* v, const void* key);
+  typedef err_t (FOG_CDECL *Hash_Unknown_Unknown_Put)(HashUntyped* self, const HashUntypedVTable* v, const void* key, const void* item, bool replace);
+  typedef err_t (FOG_CDECL *Hash_Unknown_Unknown_Remove)(HashUntyped* self, const HashUntypedVTable* v, const void* key);
+
+  typedef void (FOG_CDECL *Hash_Unknown_Unknown_Copy)(HashUntyped* self, const HashUntypedVTable* v, const HashUntyped* other);
+
+  typedef HashUntypedData* (FOG_CDECL *Hash_Unknown_Unknown_DCreate)(size_t capacity);
+  typedef void (FOG_CDECL *Hash_Unknown_Unknown_DFree)(HashUntypedData* d, const HashUntypedVTable* v);
+
+  struct FOG_NO_EXPORT _Api_Hash_Unknown_Unknown
+  {
+    Hash_Unknown_Unknown_Ctor ctor;
+    Hash_Unknown_Unknown_CtorCopy ctorCopy;
+    Hash_Unknown_Unknown_Dtor dtor;
+
+    Hash_Unknown_Unknown_Rehash rehash;
+    Hash_Unknown_Unknown_Detach detach;
+    Hash_Unknown_Unknown_Reserve reserve;
+    Hash_Unknown_Unknown_Squeeze squeeze;
+
+    Hash_Unknown_Unknown_Clear clear;
+    Hash_Unknown_Unknown_Reset reset;
+
+    Hash_Unknown_Unknown_Get get;
+    Hash_Unknown_Unknown_Use use;
+    Hash_Unknown_Unknown_Put put;
+    Hash_Unknown_Unknown_Remove remove;
+
+    Hash_Unknown_Unknown_Copy copy;
+
+    Hash_Unknown_Unknown_DCreate dCreate;
+    Hash_Unknown_Unknown_DFree dFree;
+
+    HashUntyped* oEmpty;
+  };
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - Hash<Int32, Unknown>]
+  // --------------------------------------------------------------------------
+
+  typedef const void* (FOG_CDECL *Hash_Int32_Unknown_Get)(const HashUntyped* self, const HashUntypedVTable* v, int32_t key);
+  typedef void* (FOG_CDECL *Hash_Int32_Unknown_Use)(HashUntyped* self, const HashUntypedVTable* v, int32_t key);
+  typedef err_t (FOG_CDECL *Hash_Int32_Unknown_Put)(HashUntyped* self, const HashUntypedVTable* v, int32_t key, const void* item, bool replace);
+  typedef err_t (FOG_CDECL *Hash_Int32_Unknown_Remove)(HashUntyped* self, const HashUntypedVTable* v, int32_t key);
+
+  struct FOG_NO_EXPORT _Api_Hash_Int32_Unknown
+  {
+    Hash_Int32_Unknown_Get get;
+    Hash_Int32_Unknown_Use use;
+    Hash_Int32_Unknown_Put put;
+    Hash_Int32_Unknown_Remove remove;
+  };
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - Hash<Int64, Unknown>]
+  // --------------------------------------------------------------------------
+
+  typedef const void* (FOG_CDECL *Hash_Int64_Unknown_Get)(const HashUntyped* self, const HashUntypedVTable* v, int64_t key);
+  typedef void* (FOG_CDECL *Hash_Int64_Unknown_Use)(HashUntyped* self, const HashUntypedVTable* v, int64_t key);
+  typedef err_t (FOG_CDECL *Hash_Int64_Unknown_Put)(HashUntyped* self, const HashUntypedVTable* v, int64_t key, const void* item, bool replace);
+  typedef err_t (FOG_CDECL *Hash_Int64_Unknown_Remove)(HashUntyped* self, const HashUntypedVTable* v, int64_t key);
+
+  struct FOG_NO_EXPORT _Api_Hash_Int64_Unknown
+  {
+    Hash_Int64_Unknown_Get get;
+    Hash_Int64_Unknown_Use use;
+    Hash_Int64_Unknown_Put put;
+    Hash_Int64_Unknown_Remove remove;
+  };
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - Hash<StringA, Unknown>]
+  // --------------------------------------------------------------------------
+
+  typedef const void* (FOG_CDECL *Hash_StringA_Unknown_GetStubA)(const HashUntyped* self, const HashUntypedVTable* v, const StubA* key);
+  typedef const void* (FOG_CDECL *Hash_StringA_Unknown_GetStringA)(const HashUntyped* self, const HashUntypedVTable* v, const StringA* key);
+
+  typedef void* (FOG_CDECL *Hash_StringA_Unknown_UseStubA)(HashUntyped* self, const HashUntypedVTable* v, const StubA* key);
+  typedef void* (FOG_CDECL *Hash_StringA_Unknown_UseStringA)(HashUntyped* self, const HashUntypedVTable* v, const StringA* key);
+  
+  typedef err_t (FOG_CDECL *Hash_StringA_Unknown_PutStubA)(HashUntyped* self, const HashUntypedVTable* v, const StubA* key, const void* item, bool replace);
+  typedef err_t (FOG_CDECL *Hash_StringA_Unknown_PutStringA)(HashUntyped* self, const HashUntypedVTable* v, const StringA* key, const void* item, bool replace);
+  
+  typedef err_t (FOG_CDECL *Hash_StringA_Unknown_RemoveStubA)(HashUntyped* self, const HashUntypedVTable* v, const StubA* key);
+  typedef err_t (FOG_CDECL *Hash_StringA_Unknown_RemoveStringA)(HashUntyped* self, const HashUntypedVTable* v, const StringA* key);
+
+  struct FOG_NO_EXPORT _Api_Hash_StringA_Unknown
+  {
+    Hash_StringA_Unknown_GetStubA getStubA;
+    Hash_StringA_Unknown_GetStringA getStringA;
+    
+    Hash_StringA_Unknown_UseStubA useStubA;
+    Hash_StringA_Unknown_UseStringA useStringA;
+    
+    Hash_StringA_Unknown_PutStubA putStubA;
+    Hash_StringA_Unknown_PutStringA putStringA;
+    
+    Hash_StringA_Unknown_RemoveStubA removeStubA;
+    Hash_StringA_Unknown_RemoveStringA removeStringA;
+  };
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - Hash<StringA, StringA>]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *Hash_StringA_StringA_Ctor)(HashUntyped* self);
+  typedef void (FOG_CDECL *Hash_StringA_StringA_Dtor)(HashUntyped* self);
+
+  typedef const StringA* (FOG_CDECL *Hash_StringA_StringA_GetStubA)(const HashUntyped* self, const StubA* key);
+  typedef const StringA* (FOG_CDECL *Hash_StringA_StringA_GetStringA)(const HashUntyped* self, const StringA* key);
+
+  typedef StringA* (FOG_CDECL *Hash_StringA_StringA_UseStubA)(HashUntyped* self, const StubA* key);
+  typedef StringA* (FOG_CDECL *Hash_StringA_StringA_UseStringA)(HashUntyped* self, const StringA* key);
+
+  typedef err_t (FOG_CDECL *Hash_StringA_StringA_PutStubA)(HashUntyped* self, const StubA* key, const StringA* item, bool replace);
+  typedef err_t (FOG_CDECL *Hash_StringA_StringA_PutStringA)(HashUntyped* self, const StringA* key, const StringA* item, bool replace);
+
+  typedef err_t (FOG_CDECL *Hash_StringA_StringA_RemoveStubA)(HashUntyped* self, const StubA* key);
+  typedef err_t (FOG_CDECL *Hash_StringA_StringA_RemoveStringA)(HashUntyped* self, const StringA* key);
+
+  typedef void (FOG_CDECL *Hash_StringA_StringA_DFree)(HashUntypedData* d);
+
+  struct FOG_NO_EXPORT _Api_Hash_StringA_StringA
+  {
+    Hash_StringA_StringA_Ctor ctor;
+    Hash_StringA_StringA_Dtor dtor;
+
+    Hash_StringA_StringA_GetStubA getStubA;
+    Hash_StringA_StringA_GetStringA getStringA;
+    
+    Hash_StringA_StringA_UseStubA useStubA;
+    Hash_StringA_StringA_UseStringA useStringA;
+    
+    Hash_StringA_StringA_PutStubA putStubA;
+    Hash_StringA_StringA_PutStringA putStringA;
+    
+    Hash_StringA_StringA_RemoveStubA removeStubA;
+    Hash_StringA_StringA_RemoveStringA removeStringA;
+
+    Hash_StringA_StringA_DFree dFree;
+
+    HashUntypedVTable* vTable;
+    HashUntyped* oEmpty;
+  };
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - Hash<StringA, Var>]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *Hash_StringA_Var_Ctor)(HashUntyped* self);
+  typedef void (FOG_CDECL *Hash_StringA_Var_Dtor)(HashUntyped* self);
+
+  typedef const Var* (FOG_CDECL *Hash_StringA_Var_GetStubA)(const HashUntyped* self, const StubA* key);
+  typedef const Var* (FOG_CDECL *Hash_StringA_Var_GetStringA)(const HashUntyped* self, const StringA* key);
+
+  typedef Var* (FOG_CDECL *Hash_StringA_Var_UseStubA)(HashUntyped* self, const StubA* key);
+  typedef Var* (FOG_CDECL *Hash_StringA_Var_UseStringA)(HashUntyped* self, const StringA* key);
+
+  typedef err_t (FOG_CDECL *Hash_StringA_Var_PutStubA)(HashUntyped* self, const StubA* key, const Var* item, bool replace);
+  typedef err_t (FOG_CDECL *Hash_StringA_Var_PutStringA)(HashUntyped* self, const StringA* key, const Var* item, bool replace);
+
+  typedef err_t (FOG_CDECL *Hash_StringA_Var_RemoveStubA)(HashUntyped* self, const StubA* key);
+  typedef err_t (FOG_CDECL *Hash_StringA_Var_RemoveStringA)(HashUntyped* self, const StringA* key);
+
+  typedef void (FOG_CDECL *Hash_StringA_Var_DFree)(HashUntypedData* d);
+
+  struct FOG_NO_EXPORT _Api_Hash_StringA_Var
+  {
+    Hash_StringA_Var_Ctor ctor;
+    Hash_StringA_Var_Ctor dtor;
+
+    Hash_StringA_Var_GetStubA getStubA;
+    Hash_StringA_Var_GetStringA getStringA;
+    
+    Hash_StringA_Var_UseStubA useStubA;
+    Hash_StringA_Var_UseStringA useStringA;
+    
+    Hash_StringA_Var_PutStubA putStubA;
+    Hash_StringA_Var_PutStringA putStringA;
+    
+    Hash_StringA_Var_RemoveStubA removeStubA;
+    Hash_StringA_Var_RemoveStringA removeStringA;
+
+    Hash_StringA_Var_DFree dFree;
+
+    HashUntypedVTable* vTable;
+    HashUntyped* oEmpty;
+  };
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - Hash<StringW, Unknown>]
+  // --------------------------------------------------------------------------
+
+  typedef const void* (FOG_CDECL *Hash_StringW_Unknown_GetStubA)(const HashUntyped* self, const HashUntypedVTable* v, const StubA* key);
+  typedef const void* (FOG_CDECL *Hash_StringW_Unknown_GetStubW)(const HashUntyped* self, const HashUntypedVTable* v, const StubW* key);
+  typedef const void* (FOG_CDECL *Hash_StringW_Unknown_GetStringW)(const HashUntyped* self, const HashUntypedVTable* v, const StringW* key);
+
+  typedef void* (FOG_CDECL *Hash_StringW_Unknown_UseStubA)(HashUntyped* self, const HashUntypedVTable* v, const StubA* key);
+  typedef void* (FOG_CDECL *Hash_StringW_Unknown_UseStubW)(HashUntyped* self, const HashUntypedVTable* v, const StubW* key);
+  typedef void* (FOG_CDECL *Hash_StringW_Unknown_UseStringW)(HashUntyped* self, const HashUntypedVTable* v, const StringW* key);
+  
+  typedef err_t (FOG_CDECL *Hash_StringW_Unknown_PutStubA)(HashUntyped* self, const HashUntypedVTable* v, const StubA* key, const void* item, bool replace);
+  typedef err_t (FOG_CDECL *Hash_StringW_Unknown_PutStubW)(HashUntyped* self, const HashUntypedVTable* v, const StubW* key, const void* item, bool replace);
+  typedef err_t (FOG_CDECL *Hash_StringW_Unknown_PutStringW)(HashUntyped* self, const HashUntypedVTable* v, const StringW* key, const void* item, bool replace);
+  
+  typedef err_t (FOG_CDECL *Hash_StringW_Unknown_RemoveStubA)(HashUntyped* self, const HashUntypedVTable* v, const StubA* key);
+  typedef err_t (FOG_CDECL *Hash_StringW_Unknown_RemoveStubW)(HashUntyped* self, const HashUntypedVTable* v, const StubW* key);
+  typedef err_t (FOG_CDECL *Hash_StringW_Unknown_RemoveStringW)(HashUntyped* self, const HashUntypedVTable* v, const StringW* key);
+
+  struct FOG_NO_EXPORT _Api_Hash_StringW_Unknown
+  {
+    Hash_StringW_Unknown_GetStubA getStubA;
+    Hash_StringW_Unknown_GetStubW getStubW;
+    Hash_StringW_Unknown_GetStringW getStringW;
+    
+    Hash_StringW_Unknown_UseStubA useStubA;
+    Hash_StringW_Unknown_UseStubW useStubW;
+    Hash_StringW_Unknown_UseStringW useStringW;
+    
+    Hash_StringW_Unknown_PutStubA putStubA;
+    Hash_StringW_Unknown_PutStubW putStubW;
+    Hash_StringW_Unknown_PutStringW putStringW;
+    
+    Hash_StringW_Unknown_RemoveStubA removeStubA;
+    Hash_StringW_Unknown_RemoveStubW removeStubW;
+    Hash_StringW_Unknown_RemoveStringW removeStringW;
+  };
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - Hash<StringW, StringW>]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *Hash_StringW_StringW_Ctor)(HashUntyped* self);
+  typedef void (FOG_CDECL *Hash_StringW_StringW_Dtor)(HashUntyped* self);
+
+  typedef const StringW* (FOG_CDECL *Hash_StringW_StringW_GetStubA)(const HashUntyped* self, const StubA* key);
+  typedef const StringW* (FOG_CDECL *Hash_StringW_StringW_GetStubW)(const HashUntyped* self, const StubW* key);
+  typedef const StringW* (FOG_CDECL *Hash_StringW_StringW_GetStringW)(const HashUntyped* self, const StringW* key);
+
+  typedef StringW* (FOG_CDECL *Hash_StringW_StringW_UseStubA)(HashUntyped* self, const StubA* key);
+  typedef StringW* (FOG_CDECL *Hash_StringW_StringW_UseStubW)(HashUntyped* self, const StubW* key);
+  typedef StringW* (FOG_CDECL *Hash_StringW_StringW_UseStringW)(HashUntyped* self, const StringW* key);
+
+  typedef err_t (FOG_CDECL *Hash_StringW_StringW_PutStubA)(HashUntyped* self, const StubA* key, const StringW* item, bool replace);
+  typedef err_t (FOG_CDECL *Hash_StringW_StringW_PutStubW)(HashUntyped* self, const StubW* key, const StringW* item, bool replace);
+  typedef err_t (FOG_CDECL *Hash_StringW_StringW_PutStringW)(HashUntyped* self, const StringW* key, const StringW* item, bool replace);
+
+  typedef err_t (FOG_CDECL *Hash_StringW_StringW_RemoveStubA)(HashUntyped* self, const StubA* key);
+  typedef err_t (FOG_CDECL *Hash_StringW_StringW_RemoveStubW)(HashUntyped* self, const StubW* key);
+  typedef err_t (FOG_CDECL *Hash_StringW_StringW_RemoveStringW)(HashUntyped* self, const StringW* key);
+
+  typedef void (FOG_CDECL *Hash_StringW_StringW_DFree)(HashUntypedData* d);
+
+  struct FOG_NO_EXPORT _Api_Hash_StringW_StringW
+  {
+    Hash_StringW_StringW_Ctor ctor;
+    Hash_StringW_StringW_Ctor dtor;
+
+    Hash_StringW_StringW_GetStubA getStubA;
+    Hash_StringW_StringW_GetStubW getStubW;
+    Hash_StringW_StringW_GetStringW getStringW;
+    
+    Hash_StringW_StringW_UseStubA useStubA;
+    Hash_StringW_StringW_UseStubW useStubW;
+    Hash_StringW_StringW_UseStringW useStringW;
+    
+    Hash_StringW_StringW_PutStubA putStubA;
+    Hash_StringW_StringW_PutStubW putStubW;
+    Hash_StringW_StringW_PutStringW putStringW;
+    
+    Hash_StringW_StringW_RemoveStubA removeStubA;
+    Hash_StringW_StringW_RemoveStubW removeStubW;
+    Hash_StringW_StringW_RemoveStringW removeStringW;
+
+    Hash_StringW_StringW_DFree dFree;
+
+    HashUntypedVTable* vTable;
+    HashUntyped* oEmpty;
+  };
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - Hash<StringW, Var>]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *Hash_StringW_Var_Ctor)(HashUntyped* self);
+  typedef void (FOG_CDECL *Hash_StringW_Var_Dtor)(HashUntyped* self);
+
+  typedef const Var* (FOG_CDECL *Hash_StringW_Var_GetStubA)(const HashUntyped* self, const StubA* key);
+  typedef const Var* (FOG_CDECL *Hash_StringW_Var_GetStubW)(const HashUntyped* self, const StubW* key);
+  typedef const Var* (FOG_CDECL *Hash_StringW_Var_GetStringW)(const HashUntyped* self, const StringW* key);
+
+  typedef Var* (FOG_CDECL *Hash_StringW_Var_UseStubA)(HashUntyped* self, const StubA* key);
+  typedef Var* (FOG_CDECL *Hash_StringW_Var_UseStubW)(HashUntyped* self, const StubW* key);
+  typedef Var* (FOG_CDECL *Hash_StringW_Var_UseStringW)(HashUntyped* self, const StringW* key);
+
+  typedef err_t (FOG_CDECL *Hash_StringW_Var_PutStubA)(HashUntyped* self, const StubA* key, const Var* item, bool replace);
+  typedef err_t (FOG_CDECL *Hash_StringW_Var_PutStubW)(HashUntyped* self, const StubW* key, const Var* item, bool replace);
+  typedef err_t (FOG_CDECL *Hash_StringW_Var_PutStringW)(HashUntyped* self, const StringW* key, const Var* item, bool replace);
+
+  typedef err_t (FOG_CDECL *Hash_StringW_Var_RemoveStubA)(HashUntyped* self, const StubA* key);
+  typedef err_t (FOG_CDECL *Hash_StringW_Var_RemoveStubW)(HashUntyped* self, const StubW* key);
+  typedef err_t (FOG_CDECL *Hash_StringW_Var_RemoveStringW)(HashUntyped* self, const StringW* key);
+
+  typedef void (FOG_CDECL *Hash_StringW_Var_DFree)(HashUntypedData* d);
+
+  struct FOG_NO_EXPORT _Api_Hash_StringW_Var
+  {
+    Hash_StringW_Var_Ctor ctor;
+    Hash_StringW_Var_Dtor dtor;
+
+    Hash_StringW_Var_GetStubA getStubA;
+    Hash_StringW_Var_GetStubW getStubW;
+    Hash_StringW_Var_GetStringW getStringW;
+
+    Hash_StringW_Var_UseStubA useStubA;
+    Hash_StringW_Var_UseStubW useStubW;
+    Hash_StringW_Var_UseStringW useStringW;
+
+    Hash_StringW_Var_PutStubA putStubA;
+    Hash_StringW_Var_PutStubW putStubW;
+    Hash_StringW_Var_PutStringW putStringW;
+
+    Hash_StringW_Var_RemoveStubA removeStubA;
+    Hash_StringW_Var_RemoveStubW removeStubW;
+    Hash_StringW_Var_RemoveStringW removeStringW;
+
+    Hash_StringW_Var_DFree dFree;
+
+    HashUntypedVTable* vTable;
+    HashUntyped* oEmpty;
+  };
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - Hash<...>]
+  // --------------------------------------------------------------------------
+
+  struct FOG_NO_EXPORT _Api_Hash
+  {
+    _Api_Hash_Helper helper;
+    _Api_Hash_Unknown_Unknown unknown_unknown;
+
+    _Api_Hash_Int32_Unknown int32_unknown;
+    _Api_Hash_Int64_Unknown int64_unknown;
+
+    _Api_Hash_StringA_Unknown stringa_unknown;
+    _Api_Hash_StringA_StringA stringa_stringa;
+    _Api_Hash_StringA_Var stringa_var;
+
+    _Api_Hash_StringW_Unknown stringw_unknown;
+    _Api_Hash_StringW_StringW stringw_stringw;
+    _Api_Hash_StringW_Var stringw_var;
+  } hash;
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - HashIterator<...>]
+  // --------------------------------------------------------------------------
+
+  typedef bool (FOG_CDECL *HashIterator_Start)(HashUntypedIterator* i);
+  typedef bool (FOG_CDECL *HashIterator_Next)(HashUntypedIterator* i);
+
+  struct FOG_NO_EXPORT _Api_HashIterator
+  {
+    HashIterator_Start start;
+    HashIterator_Next next;
+  } hashiterator;
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - HashUtil]
+  // --------------------------------------------------------------------------
+
+  typedef uint32_t (FOG_CDECL *HashUtil_HashBinary)(const void* src, size_t length);
+  typedef uint32_t (FOG_CDECL *HashUtil_HashVectorD)(const void* src, size_t length);
+  typedef uint32_t (FOG_CDECL *HashUtil_HashVectorQ)(const void* src, size_t length);
+
+  typedef uint32_t (FOG_CDECL *HashUtil_HashStubA)(const StubA* item);
+  typedef uint32_t (FOG_CDECL *HashUtil_HashStubW)(const StubW* item);
+
+  struct FOG_NO_EXPORT _Api_HashUtil
+  {
+    HashUtil_HashBinary binary;
+    HashUtil_HashVectorD vectorD;
+    HashUtil_HashVectorQ vectorQ;
+
+    HashUtil_HashStubA stubA;
+    HashUtil_HashStubW stubW;
+  } hashutil;
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - List<Untyped>]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *List_Untyped_Ctor)(ListUntyped* self);
+  typedef void (FOG_CDECL *List_Untyped_CtorCopy)(ListUntyped* self, const ListUntyped* other);
+
+  typedef size_t (FOG_CDECL *List_Untyped_IndexOf)(const ListUntyped* self, const Range* range, const void* item);
+  typedef size_t (FOG_CDECL *List_Untyped_LastIndexOf)(const ListUntyped* self, const Range* range, const void* item);
+
+  typedef ListUntypedData* (FOG_CDECL *List_Untyped_DCreate)(size_t szItemT, size_t capacity);
+
+  struct FOG_NO_EXPORT _Api_List_Untyped
+  {
+    List_Untyped_Ctor ctor;
+    List_Untyped_CtorCopy ctorCopy;
+
+    List_Untyped_IndexOf indexOf_4B;
+    List_Untyped_IndexOf indexOf_8B;
+    List_Untyped_IndexOf indexOf_16B;
+
+    List_Untyped_LastIndexOf lastIndexOf_4B;
+    List_Untyped_LastIndexOf lastIndexOf_8B;
+    List_Untyped_LastIndexOf lastIndexOf_16B;
+
+    List_Untyped_DCreate dCreate;
+
+    ListUntyped* oEmpty;
+  };
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - List<Simple>]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *List_Simple_CtorSlice)(ListUntyped* self, size_t szItemT, const ListUntyped* other, const Range* range);
+  typedef void (FOG_CDECL *List_Simple_Dtor)(ListUntyped* self);
+
+  typedef err_t (FOG_CDECL *List_Simple_Detach)(ListUntyped* self, size_t szItemT);
+  typedef err_t (FOG_CDECL *List_Simple_Reserve)(ListUntyped* self, size_t szItemT, size_t capacity);
+  typedef void* (FOG_CDECL *List_Simple_Prepare)(ListUntyped* self, size_t szItemT, uint32_t cntOp, size_t length);
+  typedef err_t (FOG_CDECL *List_Simple_GrowBoth)(ListUntyped* self, size_t szItemT, size_t left, size_t right);
+  typedef err_t (FOG_CDECL *List_Simple_GrowSide)(ListUntyped* self, size_t szItemT, size_t length);
+  typedef void (FOG_CDECL *List_Simple_Squeeze)(ListUntyped* self, size_t szItemT);
+
+  typedef err_t (FOG_CDECL *List_Simple_SetAt)(ListUntyped* self, size_t szItemT, size_t index, const void* item);
+  typedef void (FOG_CDECL *List_Simple_Clear)(ListUntyped* self);
+  typedef void (FOG_CDECL *List_Simple_Reset)(ListUntyped* self);
+  typedef err_t (FOG_CDECL *List_Simple_OpList)(ListUntyped* self, size_t szItemT, uint32_t cntOp, const ListUntyped* src, const Range* srcRange);
+  typedef err_t (FOG_CDECL *List_Simple_OpData)(ListUntyped* self, size_t szItemT, uint32_t cntOp, const void* data, size_t dataLength);
+  typedef err_t (FOG_CDECL *List_Simple_AppendItem)(ListUntyped* self, size_t szItemT, const void* item);
+  typedef err_t (FOG_CDECL *List_Simple_InsertItem)(ListUntyped* self, size_t szItemT, size_t index, const void* item);
+  typedef err_t (FOG_CDECL *List_Simple_Remove)(ListUntyped* self, size_t szItemT, const Range* range);
+  typedef err_t (FOG_CDECL *List_Simple_Replace)(ListUntyped* self, size_t szItemT, const Range* range, const ListUntyped* src, const Range* srcRange);
+  typedef err_t (FOG_CDECL *List_Simple_Slice)(ListUntyped* self, size_t szItemT, const Range* range);
+
+  typedef err_t (FOG_CDECL *List_Simple_Sort)(ListUntyped* self, size_t szItemT, uint32_t sortOrder, CompareFunc compareFunc);
+  typedef err_t (FOG_CDECL *List_Simple_SortEx)(ListUntyped* self, size_t szItemT, uint32_t sortOrder, CompareExFunc compareFunc, const void* data);
+  typedef err_t (FOG_CDECL *List_Simple_SwapItems)(ListUntyped* self, size_t szItemT, size_t index1, size_t index2);
+
+  typedef void (FOG_CDECL *List_Simple_Copy)(ListUntyped* self, const ListUntyped* other);
+
+  typedef void (FOG_CDECL *List_Simple_DRelease)(ListUntypedData* d);
+  typedef void (FOG_CDECL *List_Simple_DFree)(ListUntypedData* d);
+
+  struct FOG_NO_EXPORT _Api_List_Simple
+  {
+    List_Simple_CtorSlice ctorSlice;
+    List_Simple_Dtor dtor;
+
+    List_Simple_Detach detach;
+    List_Simple_Reserve reserve;
+    List_Simple_Prepare prepare;
+    List_Simple_GrowSide growLeft;
+    List_Simple_GrowSide growRight;
+    List_Simple_Squeeze squeeze;
+
+    List_Simple_SetAt setAt;
+    List_Simple_SetAt setAt_4x;
+
+    List_Simple_Clear clear;
+    List_Simple_Reset reset;
+
+    List_Simple_OpList opList;
+    List_Simple_OpData opData;
+
+    List_Simple_AppendItem appendItem;
+    List_Simple_AppendItem appendItem_4x;
+
+    List_Simple_InsertItem insertItem;
+    List_Simple_InsertItem insertItem_4x;
+
+    List_Simple_Remove remove;
+    List_Simple_Replace replace;
+    List_Simple_Slice slice;
+
+    List_Simple_Sort sort;
+    List_Simple_SortEx sortEx;
+
+    List_Simple_SwapItems swapItems;
+    List_Simple_SwapItems swapItems_4x;
+
+    List_Simple_Copy copy;
+
+    List_Simple_DRelease dRelease;
+    List_Simple_DFree dFree;
+  };
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - List<Movable>]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *List_Unknown_CtorSlice)(ListUntyped* self, const ListUntypedVTable* v, const ListUntyped* other, const Range* range);
+  typedef void (FOG_CDECL *List_Unknown_Dtor)(ListUntyped* self, const ListUntypedVTable* v);
+
+  typedef err_t (FOG_CDECL *List_Unknown_Detach)(ListUntyped* self, const ListUntypedVTable* v);
+  typedef err_t (FOG_CDECL *List_Unknown_Reserve)(ListUntyped* self, const ListUntypedVTable* v, size_t capacity);
+  typedef void* (FOG_CDECL *List_Unknown_Prepare)(ListUntyped* self, const ListUntypedVTable* v, uint32_t cntOp, size_t length);
+  typedef void* (FOG_CDECL *List_Unknown_PrepareAppendItem)(ListUntyped* self, const ListUntypedVTable* v);
+  typedef void* (FOG_CDECL *List_Unknown_PrepareInsertItem)(ListUntyped* self, const ListUntypedVTable* v, size_t index);
+  typedef err_t (FOG_CDECL *List_Unknown_GrowBoth)(ListUntyped* self, const ListUntypedVTable* v, size_t left, size_t right);
+  typedef err_t (FOG_CDECL *List_Unknown_GrowSide)(ListUntyped* self, const ListUntypedVTable* v, size_t length);
+  typedef void (FOG_CDECL *List_Unknown_Squeeze)(ListUntyped* self, const ListUntypedVTable* v);
+
+  typedef void (FOG_CDECL *List_Unknown_Clear)(ListUntyped* self, const ListUntypedVTable* v);
+  typedef void (FOG_CDECL *List_Unknown_Reset)(ListUntyped* self, const ListUntypedVTable* v);
+  typedef err_t (FOG_CDECL *List_Unknown_OpList)(ListUntyped* self, const ListUntypedVTable* v, uint32_t cntOp, const ListUntyped* src, const Range* srcRange);
+  typedef err_t (FOG_CDECL *List_Unknown_OpData)(ListUntyped* self, const ListUntypedVTable* v, uint32_t cntOp, const void* data, size_t dataLength);
+  typedef err_t (FOG_CDECL *List_Unknown_Remove)(ListUntyped* self, const ListUntypedVTable* v, const Range* range);
+  typedef err_t (FOG_CDECL *List_Unknown_Replace)(ListUntyped* self, const ListUntypedVTable* v, const Range* range, const ListUntyped* src, const Range* srcRange);
+  typedef err_t (FOG_CDECL *List_Unknown_Slice)(ListUntyped* self, const ListUntypedVTable* v, const Range* range);
+
+  typedef err_t (FOG_CDECL *List_Unknown_Sort)(ListUntyped* self, const ListUntypedVTable* v, uint32_t sortOrder, CompareFunc compareFunc);
+  typedef err_t (FOG_CDECL *List_Unknown_SortEx)(ListUntyped* self, const ListUntypedVTable* v, uint32_t sortOrder, CompareExFunc compareFunc, const void* data);
+
+  typedef void (FOG_CDECL *List_Unknown_Copy)(ListUntyped* self, const ListUntypedVTable* v, const ListUntyped* other);
+
+  typedef void (FOG_CDECL *List_Unknown_DRelease)(ListUntypedData* d, const ListUntypedVTable* v);
+  typedef void (FOG_CDECL *List_Unknown_DFree)(ListUntypedData* d, const ListUntypedVTable* v);
+
+  struct FOG_NO_EXPORT _Api_List_Unknown
+  {
+    List_Unknown_CtorSlice ctorSlice;
+    List_Unknown_Dtor dtor;
+
+    List_Unknown_Detach detach;
+    List_Unknown_Reserve reserve;
+    List_Unknown_Prepare prepare;
+    List_Unknown_PrepareAppendItem prepareAppendItem;
+    List_Unknown_PrepareInsertItem prepareInsertItem;
+    List_Unknown_GrowSide growLeft;
+    List_Unknown_GrowSide growRight;
+    List_Unknown_Squeeze squeeze;
+
+    List_Unknown_Clear clear;
+    List_Unknown_Reset reset;
+    List_Unknown_OpList opList;
+    List_Unknown_OpData opData;
+    List_Unknown_Remove remove;
+    List_Unknown_Replace replace;
+    List_Unknown_Slice slice;
+
+    List_Unknown_Sort sort;
+    List_Unknown_SortEx sortEx;
+
+    List_Unknown_Copy copy;
+
+    List_Unknown_DRelease dRelease;
+    List_Unknown_DFree dFree;
+  };
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - List<float>, List<double>]
+  // --------------------------------------------------------------------------
+
+  typedef err_t (FOG_CDECL *List_Float_OpListD)(ListUntyped* self, uint32_t cntOp, const ListUntyped* src, const Range* srcRange);
+  typedef err_t (FOG_CDECL *List_Float_OpDataD)(ListUntyped* self, uint32_t cntOp, const void* data, size_t dataLength);
+
+  typedef err_t (FOG_CDECL *List_Double_OpListF)(ListUntyped* self, uint32_t cntOp, const ListUntyped* src, const Range* srcRange);
+  typedef err_t (FOG_CDECL *List_Double_OpDataF)(ListUntyped* self, uint32_t cntOp, const void* data, size_t dataLength);
+
+  struct FOG_NO_EXPORT _Api_List_Float
+  {
+    List_Float_OpListD opListD;
+    List_Float_OpDataD opDataD;
+  };
+
+  struct FOG_NO_EXPORT _Api_List_Double
+  {
+    List_Double_OpListF opListF;
+    List_Double_OpDataF opDataF;
+  };
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - List<StringA>, List<StringW>]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *List_StringA_Ctor)(ListUntyped* self);
+  typedef void (FOG_CDECL *List_StringW_Ctor)(ListUntyped* self);
+
+  typedef void (FOG_CDECL *List_StringA_CtorSlice)(ListUntyped* self, const ListUntyped* other, const Range* range);
+  typedef void (FOG_CDECL *List_StringW_CtorSlice)(ListUntyped* self, const ListUntyped* other, const Range* range);
+
+  typedef void (FOG_CDECL *List_StringA_Dtor)(ListUntyped* self);
+  typedef void (FOG_CDECL *List_StringW_Dtor)(ListUntyped* self);
+
+  typedef err_t (FOG_CDECL *List_StringA_Detach)(ListUntyped* self);
+  typedef err_t (FOG_CDECL *List_StringW_Detach)(ListUntyped* self);
+
+  typedef err_t (FOG_CDECL *List_StringA_Reserve)(ListUntyped* self, size_t capacity);
+  typedef err_t (FOG_CDECL *List_StringW_Reserve)(ListUntyped* self, size_t capacity);
+
+  typedef err_t (FOG_CDECL *List_StringA_GrowBoth)(ListUntyped* self, size_t left, size_t right);
+  typedef err_t (FOG_CDECL *List_StringW_GrowBoth)(ListUntyped* self, size_t left, size_t right);
+
+  typedef err_t (FOG_CDECL *List_StringA_GrowSide)(ListUntyped* self, size_t length);
+  typedef err_t (FOG_CDECL *List_StringW_GrowSide)(ListUntyped* self, size_t length);
+
+  typedef void (FOG_CDECL *List_StringA_Squeeze)(ListUntyped* self);
+  typedef void (FOG_CDECL *List_StringW_Squeeze)(ListUntyped* self);
+
+  typedef err_t (FOG_CDECL *List_StringA_SetAtStubA)(ListUntyped* self, size_t index, const StubA* item);
+  typedef err_t (FOG_CDECL *List_StringW_SetAtStubA)(ListUntyped* self, size_t index, const StubA* item);
+  typedef err_t (FOG_CDECL *List_StringW_SetAtStubW)(ListUntyped* self, size_t index, const StubW* item);
+
+  typedef err_t (FOG_CDECL *List_StringA_SetAtStringA)(ListUntyped* self, size_t index, const StringA* item);
+  typedef err_t (FOG_CDECL *List_StringW_SetAtStringW)(ListUntyped* self, size_t index, const StringW* item);
+
+  typedef void (FOG_CDECL *List_StringA_Clear)(ListUntyped* self);
+  typedef void (FOG_CDECL *List_StringW_Clear)(ListUntyped* self);
+
+  typedef void (FOG_CDECL *List_StringA_Reset)(ListUntyped* self);
+  typedef void (FOG_CDECL *List_StringW_Reset)(ListUntyped* self);
+
+  typedef err_t (FOG_CDECL *List_StringA_OpList)(ListUntyped* self, uint32_t cntOp, const ListUntyped* src, const Range* srcRange);
+  typedef err_t (FOG_CDECL *List_StringW_OpList)(ListUntyped* self, uint32_t cntOp, const ListUntyped* src, const Range* srcRange);
+
+  typedef err_t (FOG_CDECL *List_StringA_AppendStubA)(ListUntyped* self, const StubA* item);
+  typedef err_t (FOG_CDECL *List_StringW_AppendStubA)(ListUntyped* self, const StubA* item);
+  typedef err_t (FOG_CDECL *List_StringW_AppendStubW)(ListUntyped* self, const StubW* item);
+
+  typedef err_t (FOG_CDECL *List_StringA_AppendStringA)(ListUntyped* self, const StringA* item);
+  typedef err_t (FOG_CDECL *List_StringW_AppendStringW)(ListUntyped* self, const StringW* item);
+
+  typedef err_t (FOG_CDECL *List_StringA_InsertStubA)(ListUntyped* self, size_t index, const StubA* item);
+  typedef err_t (FOG_CDECL *List_StringW_InsertStubA)(ListUntyped* self, size_t index, const StubA* item);
+  typedef err_t (FOG_CDECL *List_StringW_InsertStubW)(ListUntyped* self, size_t index, const StubW* item);
+
+  typedef err_t (FOG_CDECL *List_StringA_InsertStringA)(ListUntyped* self, size_t index, const StringA* item);
+  typedef err_t (FOG_CDECL *List_StringW_InsertStringW)(ListUntyped* self, size_t index, const StringW* item);
+
+  typedef err_t (FOG_CDECL *List_StringA_Remove)(ListUntyped* self, const Range* range);
+  typedef err_t (FOG_CDECL *List_StringW_Remove)(ListUntyped* self, const Range* range);
+
+  typedef err_t (FOG_CDECL *List_StringA_Replace)(ListUntyped* self, const Range* range, const ListUntyped* src, const Range* srcRange);
+  typedef err_t (FOG_CDECL *List_StringW_Replace)(ListUntyped* self, const Range* range, const ListUntyped* src, const Range* srcRange);
+
+  typedef err_t (FOG_CDECL *List_StringA_Slice)(ListUntyped* self, const Range* range);
+  typedef err_t (FOG_CDECL *List_StringW_Slice)(ListUntyped* self, const Range* range);
+
+  typedef size_t (FOG_CDECL *List_StringA_IndexOfStubA)(const ListUntyped* self, const Range* range, const StubA* item);
+  typedef size_t (FOG_CDECL *List_StringW_IndexOfStubA)(const ListUntyped* self, const Range* range, const StubA* item);
+  typedef size_t (FOG_CDECL *List_StringW_IndexOfStubW)(const ListUntyped* self, const Range* range, const StubW* item);
+
+  typedef size_t (FOG_CDECL *List_StringA_IndexOfStringA)(const ListUntyped* self, const Range* range, const StringA* item);
+  typedef size_t (FOG_CDECL *List_StringW_IndexOfStringW)(const ListUntyped* self, const Range* range, const StringW* item);
+
+  typedef size_t (FOG_CDECL *List_StringA_LastIndexOfStubA)(const ListUntyped* self, const Range* range, const StubA* item);
+  typedef size_t (FOG_CDECL *List_StringW_LastIndexOfStubA)(const ListUntyped* self, const Range* range, const StubA* item);
+  typedef size_t (FOG_CDECL *List_StringW_LastIndexOfStubW)(const ListUntyped* self, const Range* range, const StubW* item);
+
+  typedef size_t (FOG_CDECL *List_StringA_LastIndexOfStringA)(const ListUntyped* self, const Range* range, const StringA* item);
+  typedef size_t (FOG_CDECL *List_StringW_LastIndexOfStringW)(const ListUntyped* self, const Range* range, const StringW* item);
+
+  typedef err_t (FOG_CDECL *List_StringA_Sort)(ListUntyped* self, uint32_t sortOrder, CompareFunc compareFunc);
+  typedef err_t (FOG_CDECL *List_StringW_Sort)(ListUntyped* self, uint32_t sortOrder, CompareFunc compareFunc);
+
+  typedef err_t (FOG_CDECL *List_StringA_SortEx)(ListUntyped* self, uint32_t sortOrder, CompareExFunc compareFunc, const void* data);
+  typedef err_t (FOG_CDECL *List_StringW_SortEx)(ListUntyped* self, uint32_t sortOrder, CompareExFunc compareFunc, const void* data);
+
+  typedef err_t (FOG_CDECL *List_StringA_SwapItems)(ListUntyped* self, size_t index1, size_t index2);
+  typedef err_t (FOG_CDECL *List_StringW_SwapItems)(ListUntyped* self, size_t index1, size_t index2);
+
+  struct FOG_NO_EXPORT _Api_List_StringA
+  {
+    List_StringA_Ctor ctor;
+    List_StringA_CtorSlice ctorSlice;
+    List_StringA_Dtor dtor;
+
+    List_StringA_Detach detach;
+    List_StringA_Reserve reserve;
+    List_StringA_GrowSide growLeft;
+    List_StringA_GrowSide growRight;
+    List_StringA_Squeeze squeeze;
+
+    List_StringA_SetAtStubA setAtStubA;
+    List_StringA_SetAtStringA setAtStringA;
+
+    List_StringA_Clear clear;
+    List_StringA_Reset reset;
+
+    List_StringA_OpList opList;
+
+    List_StringA_AppendStubA appendStubA;
+    List_StringA_AppendStringA appendStringA;
+
+    List_StringA_InsertStubA insertStubA;
+    List_StringA_InsertStringA insertStringA;
+
+    List_StringA_Remove remove;
+    List_StringA_Replace replace;
+    List_StringA_Slice slice;
+
+    List_StringA_IndexOfStubA indexOfStubA;
+    List_StringA_IndexOfStringA indexOfStringA;
+
+    List_StringA_LastIndexOfStubA lastIndexOfStubA;
+    List_StringA_LastIndexOfStringA lastIndexOfStringA;
+
+    List_StringA_Sort sort;
+    List_StringA_SortEx sortEx;
+    List_StringA_SwapItems swapItems;
+
+    ListUntypedVTable *vTable;
+    ListUntyped* oEmpty;
+  };
+
+  struct FOG_NO_EXPORT _Api_List_StringW
+  {
+    List_StringW_Ctor ctor;
+    List_StringW_CtorSlice ctorSlice;
+    List_StringW_Dtor dtor;
+
+    List_StringW_Detach detach;
+    List_StringW_Reserve reserve;
+    List_StringW_GrowSide growLeft;
+    List_StringW_GrowSide growRight;
+    List_StringW_Squeeze squeeze;
+
+    List_StringW_SetAtStubA setAtStubA;
+    List_StringW_SetAtStubW setAtStubW;
+    List_StringW_SetAtStringW setAtStringW;
+
+    List_StringW_Clear clear;
+    List_StringW_Reset reset;
+
+    List_StringW_OpList opList;
+
+    List_StringW_AppendStubA appendStubA;
+    List_StringW_AppendStubW appendStubW;
+    List_StringW_AppendStringW appendStringW;
+
+    List_StringW_InsertStubA insertStubA;
+    List_StringW_InsertStubW insertStubW;
+    List_StringW_InsertStringW insertStringW;
+
+    List_StringW_Remove remove;
+    List_StringW_Replace replace;
+    List_StringW_Slice slice;
+
+    List_StringW_IndexOfStubA indexOfStubA;
+    List_StringW_IndexOfStubW indexOfStubW;
+    List_StringW_IndexOfStringW indexOfStringW;
+
+    List_StringW_LastIndexOfStubA lastIndexOfStubA;
+    List_StringW_LastIndexOfStubW lastIndexOfStubW;
+    List_StringW_LastIndexOfStringW lastIndexOfStringW;
+
+    List_StringW_Sort sort;
+    List_StringW_SortEx sortEx;
+    List_StringW_SwapItems swapItems;
+
+    ListUntypedVTable *vTable;
+    ListUntyped* oEmpty;
+  };
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - List<Var>]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *List_Var_Ctor)(ListUntyped* self);
+  typedef void (FOG_CDECL *List_Var_CtorSlice)(ListUntyped* self, const ListUntyped* other, const Range* range);
+  typedef void (FOG_CDECL *List_Var_Dtor)(ListUntyped* self);
+
+  typedef err_t (FOG_CDECL *List_Var_Detach)(ListUntyped* self);
+  typedef err_t (FOG_CDECL *List_Var_Reserve)(ListUntyped* self, size_t capacity);
+  typedef err_t (FOG_CDECL *List_Var_GrowBoth)(ListUntyped* self, size_t left, size_t right);
+  typedef err_t (FOG_CDECL *List_Var_GrowSide)(ListUntyped* self, size_t length);
+  typedef void (FOG_CDECL *List_Var_Squeeze)(ListUntyped* self);
+
+  typedef err_t (FOG_CDECL *List_Var_SetAt)(ListUntyped* self, size_t index, const Var* item);
+
+  typedef void (FOG_CDECL *List_Var_Clear)(ListUntyped* self);
+  typedef void (FOG_CDECL *List_Var_Reset)(ListUntyped* self);
+
+  typedef err_t (FOG_CDECL *List_Var_OpList)(ListUntyped* self, uint32_t cntOp, const ListUntyped* src, const Range* srcRange);
+
+  typedef err_t (FOG_CDECL *List_Var_Append)(ListUntyped* self, const Var* item);
+  typedef err_t (FOG_CDECL *List_Var_Insert)(ListUntyped* self, size_t index, const Var* item);
+
+  typedef err_t (FOG_CDECL *List_Var_Remove)(ListUntyped* self, const Range* range);
+  typedef err_t (FOG_CDECL *List_Var_Replace)(ListUntyped* self, const Range* range, const ListUntyped* src, const Range* srcRange);
+  typedef err_t (FOG_CDECL *List_Var_Slice)(ListUntyped* self, const Range* range);
+
+  typedef size_t (FOG_CDECL *List_Var_IndexOf)(const ListUntyped* self, const Range* range, const Var* item);
+  typedef size_t (FOG_CDECL *List_Var_LastIndexOf)(const ListUntyped* self, const Range* range, const Var* item);
+
+  typedef err_t (FOG_CDECL *List_Var_Sort)(ListUntyped* self, uint32_t sortOrder, CompareFunc compareFunc);
+  typedef err_t (FOG_CDECL *List_Var_SortEx)(ListUntyped* self, uint32_t sortOrder, CompareExFunc compareFunc, const void* data);
+  typedef err_t (FOG_CDECL *List_Var_SwapItems)(ListUntyped* self, size_t index1, size_t index2);
+
+  struct FOG_NO_EXPORT _Api_ListVar
+  {
+    List_Var_Ctor ctor;
+    List_Var_CtorSlice ctorSlice;
+    List_Var_Dtor dtor;
+
+    List_Var_Detach detach;
+    List_Var_Reserve reserve;
+    List_Var_GrowSide growLeft;
+    List_Var_GrowSide growRight;
+    List_Var_Squeeze squeeze;
+
+    List_Var_SetAt setAt;
+
+    List_Var_Clear clear;
+    List_Var_Reset reset;
+
+    List_Var_OpList opList;
+
+    List_Var_Append append;
+    List_Var_Insert insert;
+
+    List_Var_Remove remove;
+    List_Var_Replace replace;
+    List_Var_Slice slice;
+
+    List_Var_IndexOf indexOf;
+    List_Var_LastIndexOf lastIndexOf;
+
+    List_Var_Sort sort;
+    List_Var_SortEx sortEx;
+    List_Var_SwapItems swapItems;
+
+    ListUntypedVTable *vTable;
+    ListUntyped* oEmpty;
+  };
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - List<...>]
+  // --------------------------------------------------------------------------
+
+  struct FOG_NO_EXPORT _Api_List
+  {
+    _Api_List_Untyped untyped;
+
+    _Api_List_Simple simple;
+    _Api_List_Unknown unknown;
+
+    _Api_List_Float pod_float;
+    _Api_List_Double pod_double;
+
+    _Api_List_StringA stringa;
+    _Api_List_StringW stringw;
+
+    _Api_ListVar var;
+  } list;
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - Locale]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *Locale_Ctor)(Locale* self);
+  typedef void (FOG_CDECL *Locale_CtorCopy)(Locale* self, const Locale* other);
+  typedef void (FOG_CDECL *Locale_CtorString)(Locale* self, const StringW* name);
+  typedef void (FOG_CDECL *Locale_Dtor)(Locale* self);
+
+  typedef err_t (FOG_CDECL *Locale_Detach)(Locale* self);
+  typedef void (FOG_CDECL *Locale_Reset)(Locale* self);
+
+  typedef void (FOG_CDECL *Locale_SetLocale)(Locale* self, const Locale* other);
+  typedef err_t (FOG_CDECL *Locale_SetChar)(Locale* self, uint32_t id, uint16_t ch);
+
+  typedef err_t (FOG_CDECL *Locale_Create)(Locale* self, const StringW* name);
+
+  typedef LocaleData* (FOG_CDECL *Locale_DCreate)(void);
+  typedef void (FOG_CDECL *Locale_DFree)(LocaleData* d);
+
+  struct FOG_NO_EXPORT _Api_Locale
+  {
+    Locale_Ctor ctor;
+    Locale_CtorCopy ctorCopy;
+    Locale_CtorString ctorString;
+    Locale_Dtor dtor;
+    Locale_Detach detach;
+    Locale_Reset reset;
+    Locale_Create create;
+    Locale_SetLocale setLocale;
+    Locale_SetChar setChar;
+
+    Locale_DCreate dCreate;
+    Locale_DFree dFree;
+
+    Locale* oPosix;
+    Locale* oUser;
+  } locale;
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - RegExp]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *RegExpA_Ctor)(RegExpA* self);
+  typedef void (FOG_CDECL *RegExpW_Ctor)(RegExpW* self);
+
+  typedef void (FOG_CDECL *RegExpA_CtorCopy)(RegExpA* self, const RegExpA* other);
+  typedef void (FOG_CDECL *RegExpW_CtorCopy)(RegExpW* self, const RegExpW* other);
+
+  typedef void (FOG_CDECL *RegExpA_Dtor)(RegExpA* self);
+  typedef void (FOG_CDECL *RegExpW_Dtor)(RegExpW* self);
+
+  typedef void (FOG_CDECL *RegExpA_Reset)(RegExpA* self);
+  typedef void (FOG_CDECL *RegExpW_Reset)(RegExpW* self);
+
+  typedef void (FOG_CDECL *RegExpA_Copy)(RegExpA* self, const RegExpA* other);
+  typedef void (FOG_CDECL *RegExpW_Copy)(RegExpW* self, const RegExpW* other);
+
+  typedef err_t (FOG_CDECL *RegExpA_CreateStubA)(RegExpA* self, const StubA* stub, uint32_t type, uint32_t cs);
+  typedef err_t (FOG_CDECL *RegExpW_CreateStubA)(RegExpW* self, const StubA* stub, uint32_t type, uint32_t cs);
+  typedef err_t (FOG_CDECL *RegExpW_CreateStubW)(RegExpW* self, const StubW* stub, uint32_t type, uint32_t cs);
+
+  typedef err_t (FOG_CDECL *RegExpA_CreateStringA)(RegExpA* self, const StringA* stub, uint32_t type, uint32_t cs);
+  typedef err_t (FOG_CDECL *RegExpW_CreateStringW)(RegExpW* self, const StringW* stub, uint32_t type, uint32_t cs);
+
+  typedef bool (FOG_CDECL *RegExpA_IndexIn)(const RegExpA* self, const char* sData, size_t sLength, const Range* sRange, Range* out);
+  typedef bool (FOG_CDECL *RegExpW_IndexIn)(const RegExpW* self, const CharW* sData, size_t sLength, const Range* sRange, Range* out);
+
+  typedef bool (FOG_CDECL *RegExpA_LastIndexIn)(const RegExpA* self, const char* sData, size_t sLength, const Range* sRange, Range* out);
+  typedef bool (FOG_CDECL *RegExpW_LastIndexIn)(const RegExpW* self, const CharW* sData, size_t sLength, const Range* sRange, Range* out);
+
+  struct FOG_NO_EXPORT _Api_StringMactherA
+  {
+    RegExpA_Ctor ctor;
+    RegExpA_CtorCopy ctorCopy;
+    RegExpA_Dtor dtor;
+    RegExpA_Reset reset;
+    RegExpA_Copy copy;
+    RegExpA_CreateStubA createStubA;
+    RegExpA_CreateStringA createStringA;
+    RegExpA_IndexIn indexIn;
+    RegExpA_LastIndexIn lastIndexIn;
+
+    RegExpA* oEmpty;
+  } regexpa;
+
+  struct FOG_NO_EXPORT _Api_StringMactherW
+  {
+    RegExpW_Ctor ctor;
+    RegExpW_CtorCopy ctorCopy;
+    RegExpW_Dtor dtor;
+    RegExpW_Reset reset;
+    RegExpW_Copy copy;
+    RegExpW_CreateStubA createStubA;
+    RegExpW_CreateStubW createStubW;
+    RegExpW_CreateStringW createStringW;
+    RegExpW_IndexIn indexIn;
+    RegExpW_LastIndexIn lastIndexIn;
+
+    RegExpW* oEmpty;
+  } regexpw;
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - String]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *StringA_Ctor)(StringA* self);
+  typedef void (FOG_CDECL *StringW_Ctor)(StringW* self);
+
+  typedef void (FOG_CDECL *StringA_CtorStubA)(StringA* self, const StubA* stub);
+  typedef void (FOG_CDECL *StringW_CtorStubA)(StringW* self, const StubA* stub);
+  typedef void (FOG_CDECL *StringW_CtorStubW)(StringW* self, const StubW* stub);
+  typedef void (FOG_CDECL *StringW_CtorCodec)(StringW* self, const StubA* stub, const TextCodec* tc);
+
+  typedef void (FOG_CDECL *StringA_CtorStubA2)(StringA* self, const StubA* a, const StubA* b);
+  typedef void (FOG_CDECL *StringW_CtorStubA2)(StringW* self, const StubA* a, const StubA* b);
+  typedef void (FOG_CDECL *StringW_CtorStubW2)(StringW* self, const StubW* a, const StubW* b);
+
+  typedef void (FOG_CDECL *StringA_CtorCopyA)(StringA* self, const StringA* other);
+  typedef void (FOG_CDECL *StringW_CtorCopyW)(StringW* self, const StringW* other);
+
+  typedef void (FOG_CDECL *StringA_CtorCopyA2)(StringA* self, const StringA* a, const StringA* b);
+  typedef void (FOG_CDECL *StringW_CtorCopyW2)(StringW* self, const StringW* a, const StringW* b);
+
+  typedef void (FOG_CDECL *StringA_CtorSubstr)(StringA* self, const StringA* other, const Range* range);
+  typedef void (FOG_CDECL *StringW_CtorSubstr)(StringW* self, const StringW* other, const Range* range);
+
+  typedef void (FOG_CDECL *StringA_CtorU32)(StringA* self, uint32_t n, bool isUnsigned);
+  typedef void (FOG_CDECL *StringW_CtorU32)(StringW* self, uint32_t n, bool isUnsigned);
+
+  typedef void (FOG_CDECL *StringA_CtorU64)(StringA* self, uint64_t n, bool isUnsigned);
+  typedef void (FOG_CDECL *StringW_CtorU64)(StringW* self, uint64_t n, bool isUnsigned);
+
+  typedef void (FOG_CDECL *StringA_CtorDouble)(StringA* self, double d);
+  typedef void (FOG_CDECL *StringW_CtorDouble)(StringW* self, double d);
+
+  typedef void (FOG_CDECL *StringA_Dtor)(StringA* self);
+  typedef void (FOG_CDECL *StringW_Dtor)(StringW* self);
+
+  typedef err_t (FOG_CDECL *StringA_Detach)(StringA* self);
+  typedef err_t (FOG_CDECL *StringW_Detach)(StringW* self);
+
+  typedef err_t (FOG_CDECL *StringA_Reserve)(StringA* self, size_t capacity);
+  typedef err_t (FOG_CDECL *StringW_Reserve)(StringW* self, size_t capacity);
+
+  typedef err_t (FOG_CDECL *StringA_Resize)(StringA* self, size_t length);
+  typedef err_t (FOG_CDECL *StringW_Resize)(StringW* self, size_t length);
+
+  typedef err_t (FOG_CDECL *StringA_Truncate)(StringA* self, size_t length);
+  typedef err_t (FOG_CDECL *StringW_Truncate)(StringW* self, size_t length);
+
+  typedef void (FOG_CDECL *StringA_Squeeze)(StringA* self);
+  typedef void (FOG_CDECL *StringW_Squeeze)(StringW* self);
+
+  typedef char* (FOG_CDECL *StringA_Prepare)(StringA* self, uint32_t cntOp, size_t length);
+  typedef CharW* (FOG_CDECL *StringW_Prepare)(StringW* self, uint32_t cntOp, size_t length);
+
+  typedef char* (FOG_CDECL *StringA_Add)(StringA* self, size_t length);
+  typedef CharW* (FOG_CDECL *StringW_Add)(StringW* self, size_t length);
+
+  typedef void (FOG_CDECL *StringA_Clear)(StringA* self);
+  typedef void (FOG_CDECL *StringW_Clear)(StringW* self);
+
+  typedef void (FOG_CDECL *StringA_Reset)(StringA* self);
+  typedef void (FOG_CDECL *StringW_Reset)(StringW* self);
+
+  typedef uint32_t (FOG_CDECL *StringA_GetHashCode)(const StringA* self);
+  typedef uint32_t (FOG_CDECL *StringW_GetHashCode)(const StringW* self);
+
+  typedef err_t (FOG_CDECL *StringA_SetStubA)(StringA* self, const StubA* stub);
+  typedef err_t (FOG_CDECL *StringW_SetStubA)(StringW* self, const StubA* stub, const TextCodec* tc);
+  typedef err_t (FOG_CDECL *StringW_SetStubW)(StringW* self, const StubW* stub);
+
+  typedef err_t (FOG_CDECL *StringA_SetStringA)(StringA* self, const StringA* other);
+  typedef err_t (FOG_CDECL *StringW_SetStringA)(StringW* self, const StringA* other, const TextCodec* tc);
+  typedef err_t (FOG_CDECL *StringW_SetStringW)(StringW* self, const StringW* other);
+
+  typedef err_t (FOG_CDECL *StringA_SetStringExA)(StringA* self, const StringA* other, const Range* range);
+  typedef err_t (FOG_CDECL *StringW_SetStringExW)(StringW* self, const StringW* other, const Range* range);
+
+  typedef err_t (FOG_CDECL *StringA_SetDeep)(StringA* self, const StringA* other);
+  typedef err_t (FOG_CDECL *StringW_SetDeep)(StringW* self, const StringW* other);
+
+  typedef err_t (FOG_CDECL *StringA_AppendStubA)(StringA* self, const StubA* stub);
+  typedef err_t (FOG_CDECL *StringW_AppendStubA)(StringW* self, const StubA* stub, const TextCodec* tc);
+  typedef err_t (FOG_CDECL *StringW_AppendStubW)(StringW* self, const StubW* stub);
+
+  typedef err_t (FOG_CDECL *StringA_AppendStringA)(StringA* self, const StringA* other);
+  typedef err_t (FOG_CDECL *StringW_AppendStringA)(StringW* self, const StringA* other, const TextCodec* tc);
+  typedef err_t (FOG_CDECL *StringW_AppendStringW)(StringW* self, const StringW* other);
+
+  typedef err_t (FOG_CDECL *StringA_AppendStringExA)(StringA* self, const StringA* other, const Range* range);
+  typedef err_t (FOG_CDECL *StringW_AppendStringExW)(StringW* self, const StringW* other, const Range* range);
+
+  typedef err_t (FOG_CDECL *StringA_OpFill)(StringA* self, uint32_t cntOp, char ch, size_t len);
+  typedef err_t (FOG_CDECL *StringW_OpFill)(StringW* self, uint32_t cntOp, uint16_t ch, size_t len);
+
+  typedef err_t (FOG_CDECL *StringA_OpBool)(StringA* self, uint32_t cntOp, bool b);
+  typedef err_t (FOG_CDECL *StringW_OpBool)(StringW* self, uint32_t cntOp, bool b);
+
+  typedef err_t (FOG_CDECL *StringA_OpI32)(StringA* self, uint32_t cntOp, int32_t n);
+  typedef err_t (FOG_CDECL *StringW_OpI32)(StringW* self, uint32_t cntOp, int32_t n);
+
+  typedef err_t (FOG_CDECL *StringA_OpI32Ex)(StringA* self, uint32_t cntOp, int32_t n, const FormatInt* fmt);
+  typedef err_t (FOG_CDECL *StringW_OpI32Ex)(StringW* self, uint32_t cntOp, int32_t n, const FormatInt* fmt, const Locale* locale);
+
+  typedef err_t (FOG_CDECL *StringA_OpU32)(StringA* self, uint32_t cntOp, uint32_t n);
+  typedef err_t (FOG_CDECL *StringW_OpU32)(StringW* self, uint32_t cntOp, uint32_t n);
+
+  typedef err_t (FOG_CDECL *StringA_OpU32Ex)(StringA* self, uint32_t cntOp, uint32_t n, const FormatInt* fmt);
+  typedef err_t (FOG_CDECL *StringW_OpU32Ex)(StringW* self, uint32_t cntOp, uint32_t n, const FormatInt* fmt, const Locale* locale);
+
+  typedef err_t (FOG_CDECL *StringA_OpI64)(StringA* self, uint32_t cntOp, int64_t n);
+  typedef err_t (FOG_CDECL *StringW_OpI64)(StringW* self, uint32_t cntOp, int64_t n);
+
+  typedef err_t (FOG_CDECL *StringA_OpI64Ex)(StringA* self, uint32_t cntOp, int64_t n, const FormatInt* fmt);
+  typedef err_t (FOG_CDECL *StringW_OpI64Ex)(StringW* self, uint32_t cntOp, int64_t n, const FormatInt* fmt, const Locale* locale);
+
+  typedef err_t (FOG_CDECL *StringA_OpU64)(StringA* self, uint32_t cntOp, uint64_t n);
+  typedef err_t (FOG_CDECL *StringW_OpU64)(StringW* self, uint32_t cntOp, uint64_t n);
+
+  typedef err_t (FOG_CDECL *StringA_OpU64Ex)(StringA* self, uint32_t cntOp, uint64_t n, const FormatInt* fmt);
+  typedef err_t (FOG_CDECL *StringW_OpU64Ex)(StringW* self, uint32_t cntOp, uint64_t n, const FormatInt* fmt, const Locale* locale);
+
+  typedef err_t (FOG_CDECL *StringA_OpDouble)(StringA* self, uint32_t cntOp, double d);
+  typedef err_t (FOG_CDECL *StringW_OpDouble)(StringW* self, uint32_t cntOp, double d);
+
+  typedef err_t (FOG_CDECL *StringA_OpDoubleEx)(StringA* self, uint32_t cntOp, double d, const FormatReal* fmt);
+  typedef err_t (FOG_CDECL *StringW_OpDoubleEx)(StringW* self, uint32_t cntOp, double d, const FormatReal* fmt, const Locale* locale);
+
+  typedef err_t (FOG_CDECL *StringA_OpVFormatStubA)(StringA* self, uint32_t cntOp, const StubA* fmt, const TextCodec* tc, va_list ap);
+  typedef err_t (FOG_CDECL *StringW_OpVFormatStubA)(StringW* self, uint32_t cntOp, const StubA* fmt, const TextCodec* tc, const Locale* locale, va_list ap);
+  typedef err_t (FOG_CDECL *StringW_OpVFormatStubW)(StringW* self, uint32_t cntOp, const StubW* fmt, const TextCodec* tc, const Locale* locale, va_list ap);
+
+  typedef err_t (FOG_CDECL *StringA_OpVFormatStringA)(StringA* self, uint32_t cntOp, const StringA* fmt, const TextCodec* tc, va_list ap);
+  typedef err_t (FOG_CDECL *StringW_OpVFormatStringW)(StringW* self, uint32_t cntOp, const StringW* fmt, const TextCodec* tc, const Locale* locale, va_list ap);
+
+  typedef err_t (FOG_CDECL *StringA_OpZFormatStubA)(StringA* self, uint32_t cntOp, const StubA* fmt, char lex, const StringA* args, size_t argsLength);
+  typedef err_t (FOG_CDECL *StringW_OpZFormatStubW)(StringW* self, uint32_t cntOp, const StubW* fmt, uint16_t lex, const StringW* args, size_t argsLength);
+
+  typedef err_t (FOG_CDECL *StringA_OpZFormatStringA)(StringA* self, uint32_t cntOp, const StringA* fmt, char lex, const StringA* args, size_t argsLength);
+  typedef err_t (FOG_CDECL *StringW_OpZFormatStringW)(StringW* self, uint32_t cntOp, const StringW* fmt, uint16_t lex, const StringW* args, size_t argsLength);
+
+  typedef err_t (FOG_CDECL *StringA_OpNormalizeSlashesA)(StringA* self, uint32_t cntOp, const StringA* other, uint32_t slashForm);
+  typedef err_t (FOG_CDECL *StringW_OpNormalizeSlashesW)(StringW* self, uint32_t cntOp, const StringW* other, uint32_t slashForm);
+
+  typedef err_t (FOG_CDECL *StringA_PrependChars)(StringA* self, char ch, size_t len);
+  typedef err_t (FOG_CDECL *StringW_PrependChars)(StringW* self, uint16_t ch, size_t len);
+
+  typedef err_t (FOG_CDECL *StringA_PrependStubA)(StringA* self, const StubA* stub);
+  typedef err_t (FOG_CDECL *StringW_PrependStubA)(StringW* self, const StubA* stub, const TextCodec* tc);
+  typedef err_t (FOG_CDECL *StringW_PrependStubW)(StringW* self, const StubW* stub);
+
+  typedef err_t (FOG_CDECL *StringA_PrependStringA)(StringA* self, const StringA* other);
+  typedef err_t (FOG_CDECL *StringW_PrependStringA)(StringW* self, const StringA* other, const TextCodec* tc);
+  typedef err_t (FOG_CDECL *StringW_PrependStringW)(StringW* self, const StringW* other);
+
+  typedef err_t (FOG_CDECL *StringA_InsertChars)(StringA* self, size_t index, char ch, size_t length);
+  typedef err_t (FOG_CDECL *StringW_InsertChars)(StringW* self, size_t index, uint16_t ch, size_t length);
+
+  typedef err_t (FOG_CDECL *StringA_InsertStubA)(StringA* self, size_t index, const StubA* stub);
+  typedef err_t (FOG_CDECL *StringW_InsertStubA)(StringW* self, size_t index, const StubA* stub, const TextCodec* tc);
+  typedef err_t (FOG_CDECL *StringW_InsertStubW)(StringW* self, size_t index, const StubW* stub);
+
+  typedef err_t (FOG_CDECL *StringA_InsertStringA)(StringA* self, size_t index, const StringA* other);
+  typedef err_t (FOG_CDECL *StringW_InsertStringA)(StringW* self, size_t index, const StringA* other, const TextCodec* tc);
+  typedef err_t (FOG_CDECL *StringW_InsertStringW)(StringW* self, size_t index, const StringW* other);
+
+  typedef err_t (FOG_CDECL *StringA_RemoveRange)(StringA* self, const Range* range);
+  typedef err_t (FOG_CDECL *StringW_RemoveRange)(StringW* self, const Range* range);
+
+  typedef err_t (FOG_CDECL *StringA_RemoveRangeList)(StringA* self, const Range* range, size_t rangeLength);
+  typedef err_t (FOG_CDECL *StringW_RemoveRangeList)(StringW* self, const Range* range, size_t rangeLength);
+
+  typedef err_t (FOG_CDECL *StringA_RemoveChar)(StringA* self, const Range* range, char ch, uint32_t cs);
+  typedef err_t (FOG_CDECL *StringW_RemoveChar)(StringW* self, const Range* range, uint16_t ch, uint32_t cs);
+
+  typedef err_t (FOG_CDECL *StringA_RemoveStubA)(StringA* self, const Range* range, const StubA* stub, uint32_t cs);
+  typedef err_t (FOG_CDECL *StringW_RemoveStubA)(StringW* self, const Range* range, const StubA* stub, uint32_t cs);
+  typedef err_t (FOG_CDECL *StringW_RemoveStubW)(StringW* self, const Range* range, const StubW* stub, uint32_t cs);
+
+  typedef err_t (FOG_CDECL *StringA_RemoveStringA)(StringA* self, const Range* range, const StringA* other, uint32_t cs);
+  typedef err_t (FOG_CDECL *StringW_RemoveStringW)(StringW* self, const Range* range, const StringW* other, uint32_t cs);
+
+  typedef err_t (FOG_CDECL *StringA_RemoveRegExpA)(StringA* self, const Range* range, const RegExpA* re);
+  typedef err_t (FOG_CDECL *StringW_RemoveRegExpW)(StringW* self, const Range* range, const RegExpW* re);
+
+  typedef err_t (FOG_CDECL *StringA_ReplaceRangeStubA)(StringA* self, const Range* range, const StubA* replacement);
+  typedef err_t (FOG_CDECL *StringW_ReplaceRangeStubW)(StringW* self, const Range* range, const StubW* replacement);
+
+  typedef err_t (FOG_CDECL *StringA_ReplaceRangeStringA)(StringA* self, const Range* range, const StringA* replacement);
+  typedef err_t (FOG_CDECL *StringW_ReplaceRangeStringW)(StringW* self, const Range* range, const StringW* replacement);
+
+  typedef err_t (FOG_CDECL *StringA_ReplaceRangeListStubA)(StringA* self, const Range* range, size_t rangeLength, const StubA* replacement);
+  typedef err_t (FOG_CDECL *StringW_ReplaceRangeListStubW)(StringW* self, const Range* range, size_t rangeLength, const StubW* replacement);
+
+  typedef err_t (FOG_CDECL *StringA_ReplaceRangeListStringA)(StringA* self, const Range* range, size_t rangeLength, const StringA* replacement);
+  typedef err_t (FOG_CDECL *StringW_ReplaceRangeListStringW)(StringW* self, const Range* range, size_t rangeLength, const StringW* replacement);
+
+  typedef err_t (FOG_CDECL *StringA_ReplaceChar)(StringA* self, const Range* range, char before, char after, uint32_t cs);
+  typedef err_t (FOG_CDECL *StringW_ReplaceChar)(StringW* self, const Range* range, uint16_t before, uint16_t after, uint32_t cs);
+
+  typedef err_t (FOG_CDECL *StringA_ReplaceStringA)(StringA* self, const Range* range, const StringA* pattern, const StringA* replacement, uint32_t cs);
+  typedef err_t (FOG_CDECL *StringW_ReplaceStringW)(StringW* self, const Range* range, const StringW* pattern, const StringW* replacement, uint32_t cs);
+
+  typedef err_t (FOG_CDECL *StringA_ReplaceRegExpA)(StringA* self, const Range* range, const RegExpA* re, const StringA* replacement);
+  typedef err_t (FOG_CDECL *StringW_ReplaceRegExpW)(StringW* self, const Range* range, const RegExpW* re, const StringW* replacement);
+
+  typedef err_t (FOG_CDECL *StringA_Lower)(StringA* self, const Range* range);
+  typedef err_t (FOG_CDECL *StringW_Lower)(StringW* self, const Range* range);
+
+  typedef err_t (FOG_CDECL *StringA_Upper)(StringA* self, const Range* range);
+  typedef err_t (FOG_CDECL *StringW_Upper)(StringW* self, const Range* range);
+
+  typedef err_t (FOG_CDECL *StringA_Trim)(StringA* self);
+  typedef err_t (FOG_CDECL *StringW_Trim)(StringW* self);
+
+  typedef err_t (FOG_CDECL *StringA_Simplify)(StringA* self);
+  typedef err_t (FOG_CDECL *StringW_Simplify)(StringW* self);
+
+  typedef err_t (FOG_CDECL *StringA_Justify)(StringA* self, size_t n, char ch, uint32_t flags);
+  typedef err_t (FOG_CDECL *StringW_Justify)(StringW* self, size_t n, uint16_t ch, uint32_t flags);
+
+  typedef err_t (FOG_CDECL *StringA_SplitChar)(List<StringA>* dst, uint32_t cntOp, const StringA* src, const Range* range, char ch, uint32_t splitBehavior, uint32_t cs);
+  typedef err_t (FOG_CDECL *StringW_SplitChar)(List<StringW>* dst, uint32_t cntOp, const StringW* src, const Range* range, uint16_t ch, uint32_t splitBehavior, uint32_t cs);
+
+  typedef err_t (FOG_CDECL *StringA_SplitStringA)(List<StringA>* dst, uint32_t cntOp, const StringA* src, const Range* range, const StringA* pattern, uint32_t splitBehavior, uint32_t cs);
+  typedef err_t (FOG_CDECL *StringW_SplitStringW)(List<StringW>* dst, uint32_t cntOp, const StringW* src, const Range* range, const StringW* pattern, uint32_t splitBehavior, uint32_t cs);
+
+  typedef err_t (FOG_CDECL *StringA_SplitRegExpA)(List<StringA>* dst, uint32_t cntOp, const StringA* src, const Range* range, const RegExpA* re, uint32_t splitBehavior);
+  typedef err_t (FOG_CDECL *StringW_SplitRegExpW)(List<StringW>* dst, uint32_t cntOp, const StringW* src, const Range* range, const RegExpW* re, uint32_t splitBehavior);
+
+  typedef err_t (FOG_CDECL *StringA_Slice)(StringA* self, const Range* range);
+  typedef err_t (FOG_CDECL *StringW_Slice)(StringW* self, const Range* range);
+
+  typedef err_t (FOG_CDECL *StringA_JoinChar)(StringA* self, const StringA* list, size_t listLength, char sep);
+  typedef err_t (FOG_CDECL *StringW_JoinChar)(StringW* self, const StringW* list, size_t listLength, uint16_t sep);
+
+  typedef err_t (FOG_CDECL *StringA_JoinStringA)(StringA* self, const StringA* list, size_t listLength, const StringA* sep);
+  typedef err_t (FOG_CDECL *StringW_JoinStringW)(StringW* self, const StringW* list, size_t listLength, const StringW* sep);
+
+  typedef err_t (FOG_CDECL *StringA_ParseBool)(const StringA* self, bool* dst, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+  typedef err_t (FOG_CDECL *StringW_ParseBool)(const StringW* self, bool* dst, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+
+  typedef err_t (FOG_CDECL *StringA_ParseI8)(const StringA* self, int8_t* dst, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+  typedef err_t (FOG_CDECL *StringW_ParseI8)(const StringW* self, int8_t* dst, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+
+  typedef err_t (FOG_CDECL *StringA_ParseU8)(const StringA* self, uint8_t* dst, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+  typedef err_t (FOG_CDECL *StringW_ParseU8)(const StringW* self, uint8_t* dst, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+
+  typedef err_t (FOG_CDECL *StringA_ParseI16)(const StringA* self, int16_t* dst, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+  typedef err_t (FOG_CDECL *StringW_ParseI16)(const StringW* self, int16_t* dst, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+
+  typedef err_t (FOG_CDECL *StringA_ParseU16)(const StringA* self, uint16_t* dst, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+  typedef err_t (FOG_CDECL *StringW_ParseU16)(const StringW* self, uint16_t* dst, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+
+  typedef err_t (FOG_CDECL *StringA_ParseI32)(const StringA* self, int32_t* dst, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+  typedef err_t (FOG_CDECL *StringW_ParseI32)(const StringW* self, int32_t* dst, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+
+  typedef err_t (FOG_CDECL *StringA_ParseU32)(const StringA* self, uint32_t* dst, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+  typedef err_t (FOG_CDECL *StringW_ParseU32)(const StringW* self, uint32_t* dst, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+
+  typedef err_t (FOG_CDECL *StringA_ParseI64)(const StringA* self, int64_t* dst, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+  typedef err_t (FOG_CDECL *StringW_ParseI64)(const StringW* self, int64_t* dst, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+
+  typedef err_t (FOG_CDECL *StringA_ParseU64)(const StringA* self, uint64_t* dst, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+  typedef err_t (FOG_CDECL *StringW_ParseU64)(const StringW* self, uint64_t* dst, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+
+  typedef err_t (FOG_CDECL *StringA_ParseFloat)(const StringA* self, float* dst, char decimalPoint, size_t* pEnd, uint32_t* pFlags);
+  typedef err_t (FOG_CDECL *StringW_ParseFloat)(const StringW* self, float* dst, uint16_t decimalPoint, size_t* pEnd, uint32_t* pFlags);
+
+  typedef err_t (FOG_CDECL *StringA_ParseDouble)(const StringA* self, double* dst, char decimalPoint, size_t* pEnd, uint32_t* pFlags);
+  typedef err_t (FOG_CDECL *StringW_ParseDouble)(const StringW* self, double* dst, uint16_t decimalPoint, size_t* pEnd, uint32_t* pFlags);
+
+  typedef size_t (FOG_CDECL *StringA_CountOfChar)(const StringA* self, const Range* range, char ch, uint32_t cs);
+  typedef size_t (FOG_CDECL *StringW_CountOfChar)(const StringW* self, const Range* range, uint16_t ch, uint32_t cs);
+
+  typedef size_t (FOG_CDECL *StringA_CountOfStubA)(const StringA* self, const Range* range, const StubA* pattern, uint32_t cs);
+  typedef size_t (FOG_CDECL *StringW_CountOfStubA)(const StringW* self, const Range* range, const StubA* pattern, uint32_t cs);
+  typedef size_t (FOG_CDECL *StringW_CountOfStubW)(const StringW* self, const Range* range, const StubW* pattern, uint32_t cs);
+
+  typedef size_t (FOG_CDECL *StringA_CountOfStringA)(const StringA* self, const Range* range, const StringA* pattern, uint32_t cs);
+  typedef size_t (FOG_CDECL *StringW_CountOfStringW)(const StringW* self, const Range* range, const StringW* pattern, uint32_t cs);
+
+  typedef size_t (FOG_CDECL *StringA_CountOfRegExpA)(const StringA* self, const Range* range, const RegExpA* re);
+  typedef size_t (FOG_CDECL *StringW_CountOfRegExpW)(const StringW* self, const Range* range, const RegExpW* re);
+
+  typedef size_t (FOG_CDECL *StringA_IndexOfChar)(const StringA* self, const Range* range, char ch, uint32_t cs);
+  typedef size_t (FOG_CDECL *StringW_IndexOfChar)(const StringW* self, const Range* range, uint16_t ch, uint32_t cs);
+
+  typedef size_t (FOG_CDECL *StringA_IndexOfStubA)(const StringA* self, const Range* range, const StubA* pattern, uint32_t cs);
+  typedef size_t (FOG_CDECL *StringW_IndexOfStubA)(const StringW* self, const Range* range, const StubA* pattern, uint32_t cs);
+  typedef size_t (FOG_CDECL *StringW_IndexOfStubW)(const StringW* self, const Range* range, const StubW* pattern, uint32_t cs);
+
+  typedef size_t (FOG_CDECL *StringA_IndexOfStringA)(const StringA* self, const Range* range, const StringA* pattern, uint32_t cs);
+  typedef size_t (FOG_CDECL *StringW_IndexOfStringW)(const StringW* self, const Range* range, const StringW* pattern, uint32_t cs);
+
+  typedef size_t (FOG_CDECL *StringA_IndexOfRegExpA)(const StringA* self, const Range* range, const RegExpA* re);
+  typedef size_t (FOG_CDECL *StringW_IndexOfRegExpW)(const StringW* self, const Range* range, const RegExpW* re);
+
+  typedef size_t (FOG_CDECL *StringA_IndexOfAnyCharA)(const StringA* self, const Range* range, const char* charArray, size_t charLength, uint32_t cs);
+  typedef size_t (FOG_CDECL *StringW_IndexOfAnyCharW)(const StringW* self, const Range* range, const CharW* charArray, size_t charLength, uint32_t cs);
+
+  typedef size_t (FOG_CDECL *StringA_LastIndexOfChar)(const StringA* self, const Range* range, char ch, uint32_t cs);
+  typedef size_t (FOG_CDECL *StringW_LastIndexOfChar)(const StringW* self, const Range* range, uint16_t ch, uint32_t cs);
+
+  typedef size_t (FOG_CDECL *StringA_LastIndexOfStubA)(const StringA* self, const Range* range, const StubA* pattern, uint32_t cs);
+  typedef size_t (FOG_CDECL *StringW_LastIndexOfStubA)(const StringW* self, const Range* range, const StubA* pattern, uint32_t cs);
+  typedef size_t (FOG_CDECL *StringW_LastIndexOfStubW)(const StringW* self, const Range* range, const StubW* pattern, uint32_t cs);
+
+  typedef size_t (FOG_CDECL *StringA_LastIndexOfStringA)(const StringA* self, const Range* range, const StringA* pattern, uint32_t cs);
+  typedef size_t (FOG_CDECL *StringW_LastIndexOfStringW)(const StringW* self, const Range* range, const StringW* pattern, uint32_t cs);
+
+  typedef size_t (FOG_CDECL *StringA_LastIndexOfRegExpA)(const StringA* self, const Range* range, const RegExpA* re);
+  typedef size_t (FOG_CDECL *StringW_LastIndexOfRegExpW)(const StringW* self, const Range* range, const RegExpW* re);
+
+  typedef size_t (FOG_CDECL *StringA_LastIndexOfAnyCharA)(const StringA* self, const Range* range, const char* charArray, size_t charLength, uint32_t cs);
+  typedef size_t (FOG_CDECL *StringW_LastIndexOfAnyCharW)(const StringW* self, const Range* range, const CharW* charArray, size_t charLength, uint32_t cs);
+
+  typedef bool (FOG_CDECL *StringA_StartsWithChar)(const StringA* self, char ch, uint32_t cs);
+  typedef bool (FOG_CDECL *StringW_StartsWithChar)(const StringW* self, uint16_t ch, uint32_t cs);
+
+  typedef bool (FOG_CDECL *StringA_StartsWithStubA)(const StringA* self, const StubA* str, uint32_t cs);
+  typedef bool (FOG_CDECL *StringW_StartsWithStubA)(const StringW* self, const StubA* str, uint32_t cs);
+  typedef bool (FOG_CDECL *StringW_StartsWithStubW)(const StringW* self, const StubW* str, uint32_t cs);
+
+  typedef bool (FOG_CDECL *StringA_StartsWithStringA)(const StringA* self, const StringA* str, uint32_t cs);
+  typedef bool (FOG_CDECL *StringW_StartsWithStringW)(const StringW* self, const StringW* str, uint32_t cs);
+
+  typedef bool (FOG_CDECL *StringA_StartsWithRegExpA)(const StringA* self, const RegExpA* re);
+  typedef bool (FOG_CDECL *StringW_StartsWithRegExpW)(const StringW* self, const RegExpW* re);
+
+  typedef bool (FOG_CDECL *StringA_EndsWithChar)(const StringA* self, char ch, uint32_t cs);
+  typedef bool (FOG_CDECL *StringW_EndsWithChar)(const StringW* self, uint16_t ch, uint32_t cs);
+
+  typedef bool (FOG_CDECL *StringA_EndsWithStubA)(const StringA* self, const StubA* str, uint32_t cs);
+  typedef bool (FOG_CDECL *StringW_EndsWithStubA)(const StringW* self, const StubA* str, uint32_t cs);
+  typedef bool (FOG_CDECL *StringW_EndsWithStubW)(const StringW* self, const StubW* str, uint32_t cs);
+
+  typedef bool (FOG_CDECL *StringA_EndsWithStringA)(const StringA* self, const StringA* str, uint32_t cs);
+  typedef bool (FOG_CDECL *StringW_EndsWithStringW)(const StringW* self, const StringW* str, uint32_t cs);
+
+  typedef bool (FOG_CDECL *StringA_EndsWithRegExpA)(const StringA* self, const RegExpA* re);
+  typedef bool (FOG_CDECL *StringW_EndsWithRegExpW)(const StringW* self, const RegExpW* re);
+
+  typedef bool (FOG_CDECL *StringA_EqStubA)(const StringA* a, const StubA* b);
+  typedef bool (FOG_CDECL *StringW_EqStubA)(const StringW* a, const StubA* b);
+  typedef bool (FOG_CDECL *StringW_EqStubW)(const StringW* a, const StubW* b);
+
+  typedef bool (FOG_CDECL *StringA_EqStringA)(const StringA* a, const StringA* b);
+  typedef bool (FOG_CDECL *StringW_EqStringW)(const StringW* a, const StringW* b);
+
+  typedef bool (FOG_CDECL *StringA_EqStubExA)(const StringA* a, const StubA* b, uint32_t cs);
+  typedef bool (FOG_CDECL *StringW_EqStubExA)(const StringW* a, const StubA* b, uint32_t cs);
+  typedef bool (FOG_CDECL *StringW_EqStubExW)(const StringW* a, const StubW* b, uint32_t cs);
+
+  typedef bool (FOG_CDECL *StringA_EqStringExA)(const StringA* a, const StringA* b, uint32_t cs);
+  typedef bool (FOG_CDECL *StringW_EqStringExW)(const StringW* a, const StringW* b, uint32_t cs);
+
+  typedef int (FOG_CDECL *StringA_CompareStubA)(const StringA* a, const StubA* b);
+  typedef int (FOG_CDECL *StringW_CompareStubA)(const StringW* a, const StubA* b);
+  typedef int (FOG_CDECL *StringW_CompareStubW)(const StringW* a, const StubW* b);
+
+  typedef int (FOG_CDECL *StringA_CompareStringA)(const StringA* a, const StringA* b);
+  typedef int (FOG_CDECL *StringW_CompareStringW)(const StringW* a, const StringW* b);
+
+  typedef int (FOG_CDECL *StringA_CompareStubExA)(const StringA* a, const StubA* b, uint32_t cs);
+  typedef int (FOG_CDECL *StringW_CompareStubExA)(const StringW* a, const StubA* b, uint32_t cs);
+  typedef int (FOG_CDECL *StringW_CompareStubExW)(const StringW* a, const StubW* b, uint32_t cs);
+
+  typedef int (FOG_CDECL *StringA_CompareStringExA)(const StringA* a, const StringA* b, uint32_t cs);
+  typedef int (FOG_CDECL *StringW_CompareStringExW)(const StringW* a, const StringW* b, uint32_t cs);
+
+  typedef err_t (FOG_CDECL *StringA_ValidateUtf8)(const StringA* self, size_t* invalid);
+  typedef err_t (FOG_CDECL *StringW_ValidateUtf16)(const StringW* self, size_t* invalid);
+
+  typedef err_t (FOG_CDECL *StringA_GetUcsLength)(const StringA* self, size_t* ucsLength);
+  typedef err_t (FOG_CDECL *StringW_GetUcsLength)(const StringW* self, size_t* ucsLength);
+
+  typedef err_t (FOG_CDECL *StringA_HexDecode)(StringA* dst, uint32_t cntOp, const StringA* src);
+  typedef err_t (FOG_CDECL *StringA_HexEncode)(StringA* dst, uint32_t cntOp, const StringA* src, uint32_t textCase);
+
+  typedef err_t (FOG_CDECL *StringA_Base64DecodeStringA)(StringA* dst, uint32_t cntOp, const StringA* src);
+  typedef err_t (FOG_CDECL *StringA_Base64DecodeStringW)(StringA* dst, uint32_t cntOp, const StringW* src);
+
+  typedef err_t (FOG_CDECL *StringA_Base64DecodeDataA)(StringA* dst, uint32_t cntOp, const char* src, size_t srcLength);
+  typedef err_t (FOG_CDECL *StringA_Base64DecodeDataW)(StringA* dst, uint32_t cntOp, const CharW* src, size_t srcLength);
+
+  typedef err_t (FOG_CDECL *StringA_Base64EncodeStringA)(StringA* dst, uint32_t cntOp, const StringA* src);
+  typedef err_t (FOG_CDECL *StringW_Base64EncodeStringA)(StringW* dst, uint32_t cntOp, const StringA* src);
+
+  typedef err_t (FOG_CDECL *StringA_Base64EncodeDataA)(StringA* dst, uint32_t cntOp, const char* src, size_t srcLength);
+  typedef err_t (FOG_CDECL *StringW_Base64EncodeDataA)(StringW* dst, uint32_t cntOp, const char* src, size_t srcLength);
+
+  typedef err_t (FOG_CDECL *StringW_BSwap)(StringW* self);
+
+  typedef StringDataA* (FOG_CDECL *StringA_DCreate)(size_t capacity);
+  typedef StringDataW* (FOG_CDECL *StringW_DCreate)(size_t capacity);
+
+  typedef StringDataA* (FOG_CDECL *StringA_DCreateStubA)(size_t capacity, const StubA* stub);
+  typedef StringDataW* (FOG_CDECL *StringW_DCreateStubA)(size_t capacity, const StubA* stub);
+  typedef StringDataW* (FOG_CDECL *StringW_DCreateStubW)(size_t capacity, const StubW* stub);
+
+  typedef StringDataA* (FOG_CDECL *StringA_DAdopt)(void* address, size_t capacity);
+  typedef StringDataW* (FOG_CDECL *StringW_DAdopt)(void* address, size_t capacity);
+
+  typedef StringDataA* (FOG_CDECL *StringA_DAdoptStubA)(void* address, size_t capacity, const StubA* stub);
+  typedef StringDataW* (FOG_CDECL *StringW_DAdoptStubA)(void* address, size_t capacity, const StubA* stub);
+  typedef StringDataW* (FOG_CDECL *StringW_DAdoptStubW)(void* address, size_t capacity, const StubW* stub);
+
+  typedef StringDataA* (FOG_CDECL *StringA_DRealloc)(StringDataA* d, size_t capacity);
+  typedef StringDataW* (FOG_CDECL *StringW_DRealloc)(StringDataW* d, size_t capacity);
+
+  typedef void (FOG_CDECL *StringA_DFree)(StringDataA* d);
+  typedef void (FOG_CDECL *StringW_DFree)(StringDataW* d);
+
+  struct FOG_NO_EXPORT _Api_StringA
+  {
+    StringA_Ctor ctor;
+    StringA_CtorStubA ctorStubA;
+    StringA_CtorStubA2 ctorStubA2;
+    StringA_CtorCopyA ctorCopyA;
+    StringA_CtorCopyA2 ctorCopyA2;
+    StringA_CtorSubstr ctorSubstr;
+    StringA_CtorU32 ctorU32;
+    StringA_CtorU64 ctorU64;
+    StringA_CtorDouble ctorDouble;
+    StringA_Dtor dtor;
+
+    StringA_Detach detach;
+    StringA_Reserve reserve;
+    StringA_Resize resize;
+    StringA_Truncate truncate;
+    StringA_Squeeze squeeze;
+    StringA_Prepare prepare;
+    StringA_Add add;
+
+    StringA_Clear clear;
+    StringA_Reset reset;
+
+    StringA_GetHashCode getHashCode;
+
+    StringA_SetStubA setStubA;
+    StringA_SetStringA setStringA;
+    StringA_SetStringExA setStringExA;
+
+    StringA_SetDeep setDeep;
+
+    StringA_AppendStubA appendStubA;
+    StringA_AppendStringA appendStringA;
+    StringA_AppendStringExA appendStringExA;
+
+    StringA_OpFill opFill;
+    StringA_OpBool opBool;
+    StringA_OpI32 opI32;
+    StringA_OpI32Ex opI32Ex;
+    StringA_OpU32 opU32;
+    StringA_OpU32Ex opU32Ex;
+    StringA_OpI64 opI64;
+    StringA_OpI64Ex opI64Ex;
+    StringA_OpU64 opU64;
+    StringA_OpU64Ex opU64Ex;
+    StringA_OpDouble opDouble;
+    StringA_OpDoubleEx opDoubleEx;
+
+    StringA_OpVFormatStubA opVFormatStubA;
+    StringA_OpVFormatStringA opVFormatStringA;
+
+    StringA_OpZFormatStubA opZFormatStubA;
+    StringA_OpZFormatStringA opZFormatStringA;
+
+    StringA_OpNormalizeSlashesA opNormalizeSlashesA;
+
+    StringA_PrependChars prependChars;
+    StringA_PrependStubA prependStubA;
+    StringA_PrependStringA prependStringA;
+
+    StringA_InsertChars insertChars;
+    StringA_InsertStubA insertStubA;
+    StringA_InsertStringA insertStringA;
+
+    StringA_RemoveRange removeRange;
+    StringA_RemoveRangeList removeRangeList;
+
+    StringA_RemoveChar removeChar;
+    StringA_RemoveStubA removeStubA;
+    StringA_RemoveStringA removeStringA;
+    StringA_RemoveRegExpA removeRegExpA;
+
+    StringA_ReplaceRangeStubA replaceRangeStubA;
+    StringA_ReplaceRangeStringA replaceRangeStringA;
+
+    StringA_ReplaceRangeListStubA replaceRangeListStubA;
+    StringA_ReplaceRangeListStringA replaceRangeListStringA;
+
+    StringA_ReplaceChar replaceChar;
+    StringA_ReplaceStringA replaceStringA;
+    StringA_ReplaceRegExpA replaceRegExpA;
+
+    StringA_Lower lower;
+    StringA_Upper upper;
+
+    StringA_Trim trim;
+    StringA_Simplify simplify;
+    StringA_Justify justify;
+
+    StringA_SplitChar splitChar;
+    StringA_SplitStringA splitStringA;
+    StringA_SplitRegExpA splitRegExpA;
+
+    StringA_Slice slice;
+
+    StringA_JoinChar joinChar;
+    StringA_JoinStringA joinStringA;
+
+    StringA_ParseBool parseBool;
+    StringA_ParseI8 parseI8;
+    StringA_ParseU8 parseU8;
+    StringA_ParseI16 parseI16;
+    StringA_ParseU16 parseU16;
+    StringA_ParseI32 parseI32;
+    StringA_ParseU32 parseU32;
+    StringA_ParseI64 parseI64;
+    StringA_ParseU64 parseU64;
+    StringA_ParseFloat parseFloat;
+    StringA_ParseDouble parseDouble;
+
+    StringA_CountOfChar countOfChar;
+    StringA_CountOfStubA countOfStubA;
+    StringA_CountOfStringA countOfStringA;
+    StringA_CountOfRegExpA countOfRegExpA;
+
+    StringA_IndexOfChar indexOfChar;
+    StringA_IndexOfStubA indexOfStubA;
+    StringA_IndexOfStringA indexOfStringA;
+    StringA_IndexOfRegExpA indexOfRegExpA;
+    StringA_IndexOfAnyCharA indexOfAnyCharA;
+
+    StringA_LastIndexOfChar lastIndexOfChar;
+    StringA_LastIndexOfStubA lastIndexOfStubA;
+    StringA_LastIndexOfStringA lastIndexOfStringA;
+    StringA_LastIndexOfRegExpA lastIndexOfRegExpA;
+    StringA_LastIndexOfAnyCharA lastIndexOfAnyCharA;
+
+    StringA_StartsWithChar startsWithChar;
+    StringA_StartsWithStubA startsWithStubA;
+    StringA_StartsWithStringA startsWithStringA;
+    StringA_StartsWithRegExpA startsWithRegExpA;
+
+    StringA_EndsWithChar endsWithChar;
+    StringA_EndsWithStubA endsWithStubA;
+    StringA_EndsWithStringA endsWithStringA;
+    StringA_EndsWithRegExpA endsWithRegExpA;
+
+    StringA_EqStubA eqStubA;
+    StringA_EqStringA eqStringA;
+
+    StringA_EqStubExA eqStubExA;
+    StringA_EqStringExA eqStringExA;
+
+    StringA_CompareStubA compareStubA;
+    StringA_CompareStringA compareStringA;
+
+    StringA_CompareStubExA compareStubExA;
+    StringA_CompareStringExA compareStringExA;
+
+    StringA_ValidateUtf8 validateUtf8;
+    StringA_GetUcsLength getUcsLength;
+
+    StringA_HexDecode hexDecode;
+    StringA_HexEncode hexEncode;
+
+    StringA_Base64DecodeStringA base64DecodeStringA;
+    StringA_Base64DecodeStringW base64DecodeStringW;
+    StringA_Base64DecodeDataA base64DecodeDataA;
+    StringA_Base64DecodeDataW base64DecodeDataW;
+    StringA_Base64EncodeStringA base64EncodeStringA;
+    StringA_Base64EncodeDataA base64EncodeDataA;
+
+    StringA_DCreate dCreate;
+    StringA_DCreateStubA dCreateStubA;
+    StringA_DAdopt dAdopt;
+    StringA_DAdoptStubA dAdoptStubA;
+    StringA_DRealloc dRealloc;
+    StringA_DFree dFree;
+
+    StringA* oEmpty;
+  } stringa;
+
+  struct FOG_NO_EXPORT _Api_StringW
+  {
+    StringW_Ctor ctor;
+    StringW_CtorStubA ctorStubA;
+    StringW_CtorStubW ctorStubW;
+    StringW_CtorStubA2 ctorStubA2;
+    StringW_CtorStubW2 ctorStubW2;
+    StringW_CtorCopyW ctorCopyW;
+    StringW_CtorCopyW2 ctorCopyW2;
+    StringW_CtorCodec ctorCodec;
+    StringW_CtorSubstr ctorSubstr;
+    StringW_CtorU32 ctorU32;
+    StringW_CtorU64 ctorU64;
+    StringW_CtorDouble ctorDouble;
+    StringW_Dtor dtor;
+
+    StringW_Detach detach;
+    StringW_Reserve reserve;
+    StringW_Resize resize;
+    StringW_Truncate truncate;
+    StringW_Squeeze squeeze;
+    StringW_Prepare prepare;
+    StringW_Add add;
+
+    StringW_Clear clear;
+    StringW_Reset reset;
+
+    StringW_GetHashCode getHashCode;
+
+    StringW_SetStubA setStubA;
+    StringW_SetStubW setStubW;
+    StringW_SetStringA setStringA;
+    StringW_SetStringW setStringW;
+    StringW_SetStringExW setStringExW;
+
+    StringW_SetDeep setDeep;
+
+    StringW_AppendStubA appendStubA;
+    StringW_AppendStubW appendStubW;
+    StringW_AppendStringA appendStringA;
+    StringW_AppendStringW appendStringW;
+    StringW_AppendStringExW appendStringExW;
+
+    StringW_OpFill opFill;
+    StringW_OpBool opBool;
+    StringW_OpI32 opI32;
+    StringW_OpI32Ex opI32Ex;
+    StringW_OpU32 opU32;
+    StringW_OpU32Ex opU32Ex;
+    StringW_OpI64 opI64;
+    StringW_OpI64Ex opI64Ex;
+    StringW_OpU64 opU64;
+    StringW_OpU64Ex opU64Ex;
+    StringW_OpDouble opDouble;
+    StringW_OpDoubleEx opDoubleEx;
+
+    StringW_OpVFormatStubA opVFormatStubA;
+    StringW_OpVFormatStubW opVFormatStubW;
+    StringW_OpVFormatStringW opVFormatStringW;
+
+    StringW_OpZFormatStubW opZFormatStubW;
+    StringW_OpZFormatStringW opZFormatStringW;
+
+    StringW_OpNormalizeSlashesW opNormalizeSlashesW;
+
+    StringW_PrependChars prependChars;
+    StringW_PrependStubA prependStubA;
+    StringW_PrependStubW prependStubW;
+    StringW_PrependStringA prependStringA;
+    StringW_PrependStringW prependStringW;
+
+    StringW_InsertChars insertChars;
+    StringW_InsertStubA insertStubA;
+    StringW_InsertStubW insertStubW;
+    StringW_InsertStringA insertStringA;
+    StringW_InsertStringW insertStringW;
+
+    StringW_RemoveRange removeRange;
+    StringW_RemoveRangeList removeRangeList;
+
+    StringW_RemoveChar removeChar;
+    StringW_RemoveStubA removeStubA;
+    StringW_RemoveStubW removeStubW;
+    StringW_RemoveStringW removeStringW;
+    StringW_RemoveRegExpW removeRegExpW;
+
+    StringW_ReplaceRangeStubW replaceRangeStubW;
+    StringW_ReplaceRangeStringW replaceRangeStringW;
+
+    StringW_ReplaceRangeListStubW replaceRangeListStubW;
+    StringW_ReplaceRangeListStringW replaceRangeListStringW;
+
+    StringW_ReplaceChar replaceChar;
+    StringW_ReplaceStringW replaceStringW;
+    StringW_ReplaceRegExpW replaceRegExpW;
+
+    StringW_Lower lower;
+    StringW_Upper upper;
+
+    StringW_Trim trim;
+    StringW_Simplify simplify;
+    StringW_Justify justify;
+
+    StringW_SplitChar splitChar;
+    StringW_SplitStringW splitStringW;
+    StringW_SplitRegExpW splitRegExpW;
+
+    StringW_Slice slice;
+
+    StringW_JoinChar joinChar;
+    StringW_JoinStringW joinStringW;
+
+    StringW_ParseBool parseBool;
+    StringW_ParseI8 parseI8;
+    StringW_ParseU8 parseU8;
+    StringW_ParseI16 parseI16;
+    StringW_ParseU16 parseU16;
+    StringW_ParseI32 parseI32;
+    StringW_ParseU32 parseU32;
+    StringW_ParseI64 parseI64;
+    StringW_ParseU64 parseU64;
+    StringW_ParseFloat parseFloat;
+    StringW_ParseDouble parseDouble;
+
+    StringW_CountOfChar countOfChar;
+    StringW_CountOfStubA countOfStubA;
+    StringW_CountOfStubW countOfStubW;
+    StringW_CountOfStringW countOfStringW;
+    StringW_CountOfRegExpW countOfRegExpW;
+
+    StringW_IndexOfChar indexOfChar;
+    StringW_IndexOfStubA indexOfStubA;
+    StringW_IndexOfStubW indexOfStubW;
+    StringW_IndexOfStringW indexOfStringW;
+    StringW_IndexOfRegExpW indexOfRegExpW;
+    StringW_IndexOfAnyCharW indexOfAnyCharW;
+
+    StringW_LastIndexOfChar lastIndexOfChar;
+    StringW_LastIndexOfStubA lastIndexOfStubA;
+    StringW_LastIndexOfStubW lastIndexOfStubW;
+    StringW_LastIndexOfStringW lastIndexOfStringW;
+    StringW_LastIndexOfRegExpW lastIndexOfRegExpW;
+    StringW_LastIndexOfAnyCharW lastIndexOfAnyCharW;
+
+    StringW_StartsWithChar startsWithChar;
+    StringW_StartsWithStubA startsWithStubA;
+    StringW_StartsWithStubW startsWithStubW;
+    StringW_StartsWithStringW startsWithStringW;
+    StringW_StartsWithRegExpW startsWithRegExpW;
+
+    StringW_EndsWithChar endsWithChar;
+    StringW_EndsWithStubA endsWithStubA;
+    StringW_EndsWithStubW endsWithStubW;
+    StringW_EndsWithStringW endsWithStringW;
+    StringW_EndsWithRegExpW endsWithRegExpW;
+
+    StringW_EqStubA eqStubA;
+    StringW_EqStubW eqStubW;
+    StringW_EqStringW eqStringW;
+
+    StringW_EqStubExA eqStubExA;
+    StringW_EqStubExW eqStubExW;
+    StringW_EqStringExW eqStringExW;
+
+    StringW_CompareStubA compareStubA;
+    StringW_CompareStubW compareStubW;
+    StringW_CompareStringW compareStringW;
+
+    StringW_CompareStubExA compareStubExA;
+    StringW_CompareStubExW compareStubExW;
+    StringW_CompareStringExW compareStringExW;
+
+    StringW_ValidateUtf16 validateUtf16;
+    StringW_GetUcsLength getUcsLength;
+
+    StringW_Base64EncodeStringA base64EncodeStringA;
+    StringW_Base64EncodeDataA base64EncodeDataA;
+
+    StringW_BSwap bswap;
+
+    StringW_DCreate dCreate;
+    StringW_DCreateStubA dCreateStubA;
+    StringW_DCreateStubW dCreateStubW;
+    StringW_DAdopt dAdopt;
+    StringW_DAdoptStubA dAdoptStubA;
+    StringW_DAdoptStubW dAdoptStubW;
+    StringW_DRealloc dRealloc;
+    StringW_DFree dFree;
+
+    StringW* oEmpty;
+  } stringw;
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - StringUtil]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *StringUtil_CopyA)(char* dst, const char* src, size_t length);
+  typedef void (FOG_CDECL *StringUtil_CopyW)(CharW* dst, const CharW* src, size_t length);
+
+  typedef err_t (FOG_CDECL *StringUtil_LatinFromUnicode)(char* dst, const CharW* src, size_t length);
+  typedef void (FOG_CDECL *StringUtil_UnicodeFromLatin)(CharW* dst, const char* src, size_t length);
+
+  typedef void (FOG_CDECL *StringUtil_MoveA)(char* dst, const char* src, size_t length);
+  typedef void (FOG_CDECL *StringUtil_MoveW)(CharW* dst, const CharW* src, size_t length);
+
+  typedef void (FOG_CDECL *StringUtil_FillA)(char* dst, char ch, size_t length);
+  typedef void (FOG_CDECL *StringUtil_FillW)(CharW* dst, uint16_t ch, size_t length);
+
+  typedef size_t (FOG_CDECL* StringUtil_LenA)(const char* src);
+  typedef size_t (FOG_CDECL* StringUtil_LenW)(const CharW* src);
+
+  typedef size_t (FOG_CDECL* StringUtil_NLenA)(const char* src, size_t max);
+  typedef size_t (FOG_CDECL* StringUtil_NLenW)(const CharW* src, size_t max);
+
+  typedef bool (FOG_CDECL* StringUtil_EqA)(const char* a, const char* b, size_t length);
+  typedef bool (FOG_CDECL* StringUtil_EqW)(const CharW* a, const CharW* b, size_t length);
+  typedef bool (FOG_CDECL* StringUtil_EqMixed)(const CharW* a, const char* b, size_t length);
+
+  typedef size_t (FOG_CDECL* StringUtil_CountOfA)(const char* str, size_t length, char ch);
+  typedef size_t (FOG_CDECL* StringUtil_CountOfW)(const CharW* str, size_t length, uint16_t ch);
+
+  typedef size_t (FOG_CDECL* StringUtil_IndexOfCharA)(const char* str, size_t length, char ch);
+  typedef size_t (FOG_CDECL* StringUtil_IndexOfCharW)(const CharW* str, size_t length, uint16_t ch);
+
+  typedef size_t (FOG_CDECL* StringUtil_IndexOfStringA)(const char* aStr, size_t aLength, const char* bStr, size_t bLength);
+  typedef size_t (FOG_CDECL* StringUtil_IndexOfStringWA)(const CharW* aStr, size_t aLength, const char* bStr, size_t bLength);
+  typedef size_t (FOG_CDECL* StringUtil_IndexOfStringW)(const CharW* aStr, size_t aLength, const CharW* bStr, size_t bLength);
+
+  typedef size_t (FOG_CDECL* StringUtil_IndexOfAnyA)(const char* str, size_t length, const char* charArray, size_t charLength);
+  typedef size_t (FOG_CDECL* StringUtil_IndexOfAnyW)(const CharW* str, size_t length, const CharW* charArray, size_t charLength);
+
+  typedef size_t (FOG_CDECL* StringUtil_LastIndexOfCharA)(const char* str, size_t length, char ch);
+  typedef size_t (FOG_CDECL* StringUtil_LastIndexOfCharW)(const CharW* str, size_t length, uint16_t ch);
+
+  typedef size_t (FOG_CDECL* StringUtil_LastIndexOfStringA)(const char* aStr, size_t aLength, const char* bStr, size_t bLength);
+  typedef size_t (FOG_CDECL* StringUtil_LastIndexOfStringWA)(const CharW* aStr, size_t aLength, const char* bStr, size_t bLength);
+  typedef size_t (FOG_CDECL* StringUtil_LastIndexOfStringW)(const CharW* aStr, size_t aLength, const CharW* bStr, size_t bLength);
+
+  typedef size_t (FOG_CDECL* StringUtil_LastIndexOfAnyA)(const char* str, size_t length, const char* charArray, size_t charLength);
+  typedef size_t (FOG_CDECL* StringUtil_LastIndexOfAnyW)(const CharW* str, size_t length, const CharW* charArray, size_t charLength);
+
+  typedef err_t (FOG_CDECL *StringUtil_ValidateUtf8)(const char* data, size_t length, size_t* invalid);
+  typedef err_t (FOG_CDECL *StringUtil_ValidateUtf16)(const CharW* data, size_t length, size_t* invalid);
+
+  typedef err_t (FOG_CDECL *StringUtil_UcsFromUtf8Length)(const char* data, size_t length, size_t* ucsLength);
+  typedef err_t (FOG_CDECL *StringUtil_UcsFromUtf16Length)(const CharW* data, size_t length, size_t* ucsLength);
+
+  typedef void (FOG_CDECL *StringUtil_Itoa)(NTOAContext* ctx, int64_t n, uint32_t base, uint32_t textCase);
+  typedef void (FOG_CDECL *StringUtil_Utoa)(NTOAContext* ctx, uint64_t n, uint32_t base, uint32_t textCase);
+  typedef void (FOG_CDECL *StringUtil_Dtoa)(NTOAContext* ctx, double d, uint32_t mode, int nDigits);
+
+  typedef err_t (FOG_CDECL *StringUtil_ParseBoolA)(bool* dst, const char* src, size_t length, size_t* pEnd, uint32_t* pFlags);
+  typedef err_t (FOG_CDECL *StringUtil_ParseBoolW)(bool* dst, const CharW* src, size_t length, size_t* pEnd, uint32_t* pFlags);
+
+  typedef err_t (FOG_CDECL *StringUtil_ParseI8A)(int8_t* dst, const char* src, size_t length, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+  typedef err_t (FOG_CDECL *StringUtil_ParseI8W)(int8_t* dst, const CharW* src, size_t length, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+
+  typedef err_t (FOG_CDECL *StringUtil_ParseU8A)(uint8_t* dst, const char* src, size_t length, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+  typedef err_t (FOG_CDECL *StringUtil_ParseU8W)(uint8_t* dst, const CharW* src, size_t length, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+
+  typedef err_t (FOG_CDECL *StringUtil_ParseI16A)(int16_t* dst, const char* src, size_t length, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+  typedef err_t (FOG_CDECL *StringUtil_ParseI16W)(int16_t* dst, const CharW* src, size_t length, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+
+  typedef err_t (FOG_CDECL *StringUtil_ParseU16A)(uint16_t* dst, const char* src, size_t length, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+  typedef err_t (FOG_CDECL *StringUtil_ParseU16W)(uint16_t* dst, const CharW* src, size_t length, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+
+  typedef err_t (FOG_CDECL *StringUtil_ParseI32A)(int32_t* dst, const char* src, size_t length, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+  typedef err_t (FOG_CDECL *StringUtil_ParseI32W)(int32_t* dst, const CharW* src, size_t length, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+
+  typedef err_t (FOG_CDECL *StringUtil_ParseU32A)(uint32_t* dst, const char* src, size_t length, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+  typedef err_t (FOG_CDECL *StringUtil_ParseU32W)(uint32_t* dst, const CharW* src, size_t length, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+
+  typedef err_t (FOG_CDECL *StringUtil_ParseI64A)(int64_t* dst, const char* src, size_t length, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+  typedef err_t (FOG_CDECL *StringUtil_ParseI64W)(int64_t* dst, const CharW* src, size_t length, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+
+  typedef err_t (FOG_CDECL *StringUtil_ParseU64A)(uint64_t* dst, const char* src, size_t length, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+  typedef err_t (FOG_CDECL *StringUtil_ParseU64W)(uint64_t* dst, const CharW* src, size_t length, uint32_t base, size_t* pEnd, uint32_t* pFlags);
+
+  typedef err_t (FOG_CDECL *StringUtil_ParseFloatA)(float* dst, const char* src, size_t length, char decimalPoint, size_t* pEnd, uint32_t* pFlags);
+  typedef err_t (FOG_CDECL *StringUtil_ParseFloatW)(float* dst, const CharW* src, size_t length, uint16_t decimalPoint, size_t* pEnd, uint32_t* pFlags);
+
+  typedef err_t (FOG_CDECL *StringUtil_ParseDoubleA)(double* dst, const char* src, size_t length, char decimalPoint, size_t* pEnd, uint32_t* pFlags);
+  typedef err_t (FOG_CDECL *StringUtil_ParseDoubleW)(double* dst, const CharW* src, size_t length, uint16_t decimalPoint, size_t* pEnd, uint32_t* pFlags);
+
+  struct FOG_NO_EXPORT _Api_StringUtil
+  {
+    StringUtil_CopyA copyA;
+    StringUtil_CopyW copyW;
+
+    StringUtil_LatinFromUnicode latinFromUnicode;
+    StringUtil_UnicodeFromLatin unicodeFromLatin;
+
+    StringUtil_MoveA moveA;
+    StringUtil_MoveW moveW;
+
+    StringUtil_FillA fillA;
+    StringUtil_FillW fillW;
+
+    StringUtil_LenA lenA;
+    StringUtil_LenW lenW;
+
+    StringUtil_NLenA nLenA;
+    StringUtil_NLenW nLenW;
+
+    StringUtil_EqA eqA[CASE_SENSITIVITY_COUNT];
+    StringUtil_EqW eqW[CASE_SENSITIVITY_COUNT];
+    StringUtil_EqMixed eqMixed[CASE_SENSITIVITY_COUNT];
+
+    StringUtil_CountOfA countOfA[CASE_SENSITIVITY_COUNT];
+    StringUtil_CountOfW countOfW[CASE_SENSITIVITY_COUNT];
+
+    StringUtil_IndexOfCharA indexOfCharA[CASE_SENSITIVITY_COUNT];
+    StringUtil_IndexOfCharW indexOfCharW[CASE_SENSITIVITY_COUNT];
+
+    StringUtil_IndexOfStringA indexOfStringA[CASE_SENSITIVITY_COUNT];
+    StringUtil_IndexOfStringWA indexOfStringWA[CASE_SENSITIVITY_COUNT];
+    StringUtil_IndexOfStringW indexOfStringW[CASE_SENSITIVITY_COUNT];
+
+    StringUtil_IndexOfAnyA indexOfAnyA[CASE_SENSITIVITY_COUNT];
+    StringUtil_IndexOfAnyW indexOfAnyW[CASE_SENSITIVITY_COUNT];
+
+    StringUtil_LastIndexOfCharA lastIndexOfCharA[CASE_SENSITIVITY_COUNT];
+    StringUtil_LastIndexOfCharW lastIndexOfCharW[CASE_SENSITIVITY_COUNT];
+
+    StringUtil_LastIndexOfStringA lastIndexOfStringA[CASE_SENSITIVITY_COUNT];
+    StringUtil_LastIndexOfStringWA lastIndexOfStringWA[CASE_SENSITIVITY_COUNT];
+    StringUtil_LastIndexOfStringW lastIndexOfStringW[CASE_SENSITIVITY_COUNT];
+
+    StringUtil_LastIndexOfAnyA lastIndexOfAnyA[CASE_SENSITIVITY_COUNT];
+    StringUtil_LastIndexOfAnyW lastIndexOfAnyW[CASE_SENSITIVITY_COUNT];
+
+    StringUtil_ValidateUtf8 validateUtf8;
+    StringUtil_ValidateUtf16 validateUtf16;
+
+    StringUtil_UcsFromUtf8Length ucsFromUtf8Length;
+    StringUtil_UcsFromUtf16Length ucsFromUtf16Length;
+
+    StringUtil_Itoa itoa;
+    StringUtil_Utoa utoa;
+    StringUtil_Dtoa dtoa;
+
+    StringUtil_ParseBoolA parseBoolA;
+    StringUtil_ParseBoolW parseBoolW;
+
+    StringUtil_ParseI8A parseI8A;
+    StringUtil_ParseI8W parseI8W;
+
+    StringUtil_ParseU8A parseU8A;
+    StringUtil_ParseU8W parseU8W;
+
+    StringUtil_ParseI16A parseI16A;
+    StringUtil_ParseI16W parseI16W;
+
+    StringUtil_ParseU16A parseU16A;
+    StringUtil_ParseU16W parseU16W;
+
+    StringUtil_ParseI32A parseI32A;
+    StringUtil_ParseI32W parseI32W;
+
+    StringUtil_ParseU32A parseU32A;
+    StringUtil_ParseU32W parseU32W;
+
+    StringUtil_ParseI64A parseI64A;
+    StringUtil_ParseI64W parseI64W;
+
+    StringUtil_ParseU64A parseU64A;
+    StringUtil_ParseU64W parseU64W;
+
+    StringUtil_ParseFloatA parseFloatA;
+    StringUtil_ParseFloatW parseFloatW;
+
+    StringUtil_ParseDoubleA parseDoubleA;
+    StringUtil_ParseDoubleW parseDoubleW;
+  } stringutil;
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - TextCodec]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *TextCodec_Ctor)(TextCodec* self);
+  typedef void (FOG_CDECL *TextCodec_CtorCopy)(TextCodec* self, const TextCodec* other);
+  typedef void (FOG_CDECL *TextCodec_Dtor)(TextCodec* self);
+
+  typedef err_t (FOG_CDECL *TextCodec_CreateFromCode)(TextCodec* self, uint32_t code);
+  typedef err_t (FOG_CDECL *TextCodec_CreateFromMimeStubA)(TextCodec* self, const StubA* mime);
+  typedef err_t (FOG_CDECL *TextCodec_CreateFromMimeStringW)(TextCodec* self, const StringW* mime);
+  typedef err_t (FOG_CDECL *TextCodec_CreateFromBom)(TextCodec* self, const void* data, size_t length);
+
+  typedef void (FOG_CDECL *TextCodec_Reset)(TextCodec* self);
+  typedef err_t (FOG_CDECL *TextCodec_Copy)(TextCodec* self, const TextCodec* other);
+
+  typedef err_t (FOG_CDECL *TextCodec_EncodeStubW)(const TextCodec* self, StringA* dst, const StubW* src, TextCodecState* state, TextCodecHandler* handler, uint32_t cntOp);
+  typedef err_t (FOG_CDECL *TextCodec_EncodeStringW)(const TextCodec* self, StringA* dst, const StringW* src, TextCodecState* state, TextCodecHandler* handler, uint32_t cntOp);
+
+  typedef err_t (FOG_CDECL *TextCodec_DecodeStubA)(const TextCodec* self, StringW* dst, const StubA* src, TextCodecState* state, uint32_t cntOp);
+  typedef err_t (FOG_CDECL *TextCodec_DecodeStringA)(const TextCodec* self, StringW* dst, const StringA* src, TextCodecState* state, uint32_t cntOp);
+
+  struct FOG_NO_EXPORT _Api_TextCodec
+  {
+    TextCodec_Ctor ctor;
+    TextCodec_CtorCopy ctorCopy;
+    TextCodec_Dtor dtor;
+
+    TextCodec_CreateFromCode createFromCode;
+    TextCodec_CreateFromMimeStubA createFromMimeStubA;
+    TextCodec_CreateFromMimeStringW createFromMimeStringW;
+    TextCodec_CreateFromBom createFromBom;
+
+    TextCodec_Reset reset;
+    TextCodec_Copy copy;
+
+    TextCodec_EncodeStubW encodeStubW;
+    TextCodec_EncodeStringW encodeStringW;
+
+    TextCodec_DecodeStubA decodeStubA;
+    TextCodec_DecodeStringA decodeStringA;
+
+    TextCodec* oCache[TEXT_CODEC_CACHE_COUNT];
+  } textcodec;
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - Time]
   // --------------------------------------------------------------------------
 
   typedef int64_t (FOG_CDECL* Time_Now)(void);
   typedef time_t (FOG_CDECL* Time_ToTimeT)(int64_t us);
   typedef int64_t (FOG_CDECL* Time_FromTimeT)(time_t t);
 
-  struct FOG_NO_EXPORT _FuncsTime
+  struct FOG_NO_EXPORT _Api_Time
   {
     Time_Now now;
     Time_ToTimeT toTimeT;
@@ -295,289 +2376,102 @@ struct FOG_NO_EXPORT Api
   } time;
 
   // --------------------------------------------------------------------------
-  // [Core/DateTime - TimeTicks]
+  // [Core/Tools - TimeTicks]
   // --------------------------------------------------------------------------
 
   typedef int64_t (FOG_CDECL* TimeTicks_Now)(uint32_t ticksPrecision);
 
-  struct FOG_NO_EXPORT _FuncsTimeTicks
+  struct FOG_NO_EXPORT _Api_TimeTicks
   {
     TimeTicks_Now now;
   } timeticks;
 
   // --------------------------------------------------------------------------
-  // [Core/Math - Math]
+  // [Core/Tools - Var]
   // --------------------------------------------------------------------------
 
-  typedef err_t (FOG_CDECL* MathF_Integrate)(float* dst, const FunctionF& func, const IntervalF& interval, uint32_t steps);
-  typedef err_t (FOG_CDECL* MathD_Integrate)(double* dst, const FunctionD& func, const IntervalD& interval, uint32_t steps);
+  typedef void (FOG_CDECL *Var_Ctor)(Var* self);
+  typedef void (FOG_CDECL *Var_CtorCopy)(Var* self, const Var* other);
+  typedef void (FOG_CDECL *Var_CtorType)(Var* self, uint32_t vType, const void* vData);
+  typedef void (FOG_CDECL *Var_Dtor)(Var* self);
 
-  typedef int (FOG_CDECL* MathF_Solve)(float* dst, const float* func);
-  typedef int (FOG_CDECL* MathD_Solve)(double* dst, const double* func);
+  typedef size_t (FOG_CDECL *Var_GetReference)(const Var* self);
+  typedef uint32_t (FOG_CDECL *Var_GetTypeId)(const Var* self);
 
-  typedef int (FOG_CDECL* MathF_SolveAt)(float* dst, const float* func, const IntervalF& interval);
-  typedef int (FOG_CDECL* MathD_SolveAt)(double* dst, const double* func, const IntervalD& interval);
+  typedef void (FOG_CDECL *Var_Reset)(Var* self);
+  typedef void (FOG_CDECL *Var_Copy)(Var* self, const Var* other);
 
-  typedef void (FOG_CDECL* MathF_VecFloatFromDouble)(float* dst, const double* src, size_t length);
-  typedef void (FOG_CDECL* MathD_VecDoubleFromFloat)(double* dst, const float* src, size_t length);
+  typedef err_t (FOG_CDECL *Var_GetI32)(const Var* self, int32_t* dst);
+  typedef err_t (FOG_CDECL *Var_GetI32Bound)(const Var* self, int32_t* dst, int32_t min, int32_t max);
 
-  struct FOG_NO_EXPORT _FuncsMathF
+  typedef err_t (FOG_CDECL *Var_GetU32)(const Var* self, uint32_t* dst);
+  typedef err_t (FOG_CDECL *Var_GetU32Bound)(const Var* self, uint32_t* dst, uint32_t min, uint32_t max);
+
+  typedef err_t (FOG_CDECL *Var_GetI64)(const Var* self, int64_t* dst);
+  typedef err_t (FOG_CDECL *Var_GetI64Bound)(const Var* self, int64_t* dst, int64_t min, int64_t max);
+
+  typedef err_t (FOG_CDECL *Var_GetU64)(const Var* self, uint64_t* dst);
+  typedef err_t (FOG_CDECL *Var_GetU64Bound)(const Var* self, uint64_t* dst, uint64_t min, uint64_t max);
+
+  typedef err_t (FOG_CDECL *Var_GetFloat)(const Var* self, float* dst);
+  typedef err_t (FOG_CDECL *Var_GetFloatBound)(const Var* self, float* dst, float min, float max);
+
+  typedef err_t (FOG_CDECL *Var_GetDouble)(const Var* self, double* dst);
+  typedef err_t (FOG_CDECL *Var_GetDoubleBound)(const Var* self, double* dst, double min, double max);
+
+  typedef err_t (FOG_CDECL *Var_GetType)(const Var* self, uint32_t vType, void* vData);
+  typedef err_t (FOG_CDECL *Var_SetType)(Var* self, uint32_t vType, const void* vData);
+
+  typedef bool (FOG_CDECL *Var_Eq)(const Var* a, const Var* b);
+  typedef int (FOG_CDECL *Var_Compare)(const Var* a, const Var* b);
+
+  typedef VarData* (FOG_CDECL *Var_DCreate)(size_t dataSize);
+  typedef VarData* (FOG_CDECL *Var_DAddRef)(VarData* d);
+  typedef void (FOG_CDECL *Var_DRelease)(VarData* d);
+
+  struct FOG_NO_EXPORT _Api_Var
   {
-    MathF_Integrate integrate[MATH_INTEGRATION_METHOD_COUNT];
+    Var_Ctor ctor;
+    Var_CtorCopy ctorCopy;
+    Var_CtorType ctorType;
+    Var_Dtor dtor;
 
-    MathF_Solve solve[MATH_SOLVE_COUNT];
-    MathF_SolveAt solveAt[MATH_SOLVE_COUNT];
+    Var_GetReference getReference;
+    Var_GetTypeId getTypeId;
 
-    MathF_VecFloatFromDouble vecFloatFromDouble;
-  } mathf;
+    Var_Reset reset;
+    Var_Copy copy;
 
-  struct FOG_NO_EXPORT _FuncsMathD
-  {
-    MathD_Integrate integrate[MATH_INTEGRATION_METHOD_COUNT];
+    Var_GetI32 getI32;
+    Var_GetI32Bound getI32Bound;
 
-    MathD_Solve solve[MATH_SOLVE_COUNT];
-    MathD_SolveAt solveAt[MATH_SOLVE_COUNT];
+    Var_GetU32 getU32;
+    Var_GetU32Bound getU32Bound;
 
-    MathD_VecDoubleFromFloat vecDoubleFromFloat;
-  } mathd;
+    Var_GetI64 getI64;
+    Var_GetI64Bound getI64Bound;
 
-  // --------------------------------------------------------------------------
-  // [Core/Threading - ThreadLocal]
-  // --------------------------------------------------------------------------
+    Var_GetU64 getU64;
+    Var_GetU64Bound getU64Bound;
 
-  typedef err_t (FOG_CDECL* ThreadLocal_Create)(uint32_t* slot, void* dtor);
-  typedef err_t (FOG_CDECL* ThreadLocal_Destroy)(uint32_t slot);
-  typedef void* (FOG_CDECL* ThreadLocal_Get)(uint32_t slot);
-  typedef err_t (FOG_CDECL* ThreadLocal_Set)(uint32_t slot, void* val);
+    Var_GetFloat getFloat;
+    Var_GetFloatBound getFloatBound;
 
-  struct FOG_NO_EXPORT _FuncsThreadLocal
-  {
-    ThreadLocal_Create create;
-    ThreadLocal_Destroy destroy;
-    ThreadLocal_Get get;
-    ThreadLocal_Set set;
-  } threadlocal;
+    Var_GetDouble getDouble;
+    Var_GetDoubleBound getDoubleBound;
 
-  // --------------------------------------------------------------------------
-  // [Core/Memory - Memory]
-  // --------------------------------------------------------------------------
+    Var_GetType getType;
+    Var_SetType setType;
 
-  typedef void* (FOG_CDECL *Memory_Alloc)(size_t size);
-  typedef void* (FOG_CDECL *Memory_Calloc)(size_t size);
-  typedef void* (FOG_CDECL *Memory_Realloc)(void* ptr, size_t size);
-  typedef void (FOG_CDECL *Memory_Free)(void* ptr);
+    Var_Eq eq;
+    Var_Compare compare;
 
-  typedef void (FOG_CDECL *Memory_Cleanup)();
-  typedef err_t (FOG_CDECL *Memory_RegisterCleanupHandler)(void* handler, void* closure);
-  typedef err_t (FOG_CDECL *Memory_UnregisterCleanupHandler)(void* handler, void* closure);
+    Var_DCreate dCreate;
+    Var_DAddRef dAddRef;
+    Var_DRelease dRelease;
 
-  typedef void* (FOG_CDECL *Memory_Copy)(void* dst, const void* src, size_t size);
-  typedef void* (FOG_CDECL *Memory_Move)(void* dst, const void* src, size_t size);
-
-  typedef void* (FOG_CDECL *Memory_Zero)(void* dst, size_t size);
-  typedef void* (FOG_CDECL *Memory_Set)(void* dst, uint val, size_t size);
-
-  typedef void (FOG_CDECL *Memory_Xchg)(void* mem0, void* mem1, size_t size);
-
-  struct FOG_NO_EXPORT _FuncsMemory
-  {
-    // These functions are prefixed by _m_, because some memory leak detectors
-    // use macros to replace malloc(), realloc(), free(), etc... This prevents
-    // to be messed with them.
-    Memory_Alloc _m_alloc;
-    Memory_Calloc _m_calloc;
-    Memory_Realloc _m_realloc;
-    Memory_Free _m_free;
-
-    Memory_Cleanup cleanup;
-    Memory_RegisterCleanupHandler registerCleanupHandler;
-    Memory_UnregisterCleanupHandler unregisterCleanupHandler;
-
-    Memory_Copy copy;
-    Memory_Move move;
-    Memory_Zero zero;
-    Memory_Set set;
-
-    Memory_Copy copy_nt;
-    Memory_Zero zero_nt;
-    Memory_Set set_nt;
-
-    Memory_Xchg xchg;
-  } memory;
-
-  // --------------------------------------------------------------------------
-  // [Core/Tools - ByteArray]
-  // --------------------------------------------------------------------------
-
-  /*
-  typedef void (FOG_CDECL *ByteArray_Ctor)(ByteArray* self);
-  typedef void (FOG_CDECL *ByteArray_CtorCopy)(ByteArray* self, const ByteArray& stub);
-  typedef void (FOG_CDECL *ByteArray_CtorCopy2)(ByteArray* self, const ByteArray& first, const ByteArray& second);
-  typedef void (FOG_CDECL *ByteArray_CtorStub)(ByteArray* self, const Stub8& stub);
-  typedef void (FOG_CDECL *ByteArray_CtorStub2)(ByteArray* self, const Stub8& first, const Stub8& second);
-  typedef void (FOG_CDECL *ByteArray_Dtor)(ByteArray* self);
-
-  typedef err_t (FOG_CDECL *ByteArray_Detach)(ByteArray* self);
-
-  typedef err_t (FOG_CDECL *ByteArray_Reserve)(ByteArray* self, size_t min);
-  typedef err_t (FOG_CDECL *ByteArray_Resize)(ByteArray* self, size_t len);
-  typedef void (FOG_CDECL *ByteArray_Squeeze)(ByteArray* self);
-
-  typedef void (FOG_CDECL *ByteArray_Clear)(ByteArray* self);
-  typedef void (FOG_CDECL *ByteArray_Reset)(ByteArray* self);
-
-  typedef char* (FOG_CDECL *ByteArray_Prepare)(ByteArray* self, size_t len, uint32_t cntOp);
-  typedef char* (FOG_CDECL *ByteArray_Add)(ByteArray* self, size_t len);
-
-  typedef err_t (FOG_CDECL *ByteArray_Copy)(ByteArray* self, const ByteArray& other);
-
-  typedef err_t (FOG_CDECL *ByteArray_SetStub8)(ByteArray* self, const Stub8& stub);
-  typedef err_t (FOG_CDECL *ByteArray_SetOther)(ByteArray* self, const ByteArray& other);
-
-  typedef err_t (FOG_CDECL *ByteArray_AppendStub8)(ByteArray* self, const Stub8& stub);
-  typedef err_t (FOG_CDECL *ByteArray_AppendOther)(ByteArray* self, const ByteArray& other);
-
-  typedef err_t (FOG_CDECL *ByteArray_FromBool)(ByteArray* self, bool b);
-  typedef err_t (FOG_CDECL *ByteArray_FromI32)(ByteArray* self, int32_t n, uint32_t base);
-  typedef err_t (FOG_CDECL *ByteArray_FromU32)(ByteArray* self, uint32_t n, uint32_t base);
-  typedef err_t (FOG_CDECL *ByteArray_FromI64)(ByteArray* self, int64_t n, uint32_t base);
-  typedef err_t (FOG_CDECL *ByteArray_FromU64)(ByteArray* self, uint64_t n, uint32_t base);
-  typedef err_t (FOG_CDECL *ByteArray_FromI32Ex)(ByteArray* self, int32_t n, uint32_t base, const FormatFlags& format);
-  typedef err_t (FOG_CDECL *ByteArray_FromU32Ex)(ByteArray* self, uint32_t n, uint32_t base, const FormatFlags& format);
-  typedef err_t (FOG_CDECL *ByteArray_FromI64Ex)(ByteArray* self, int64_t n, uint32_t base, const FormatFlags& format);
-  typedef err_t (FOG_CDECL *ByteArray_FromU64Ex)(ByteArray* self, uint64_t n, uint32_t base, const FormatFlags& format);
-
-  typedef err_t (FOG_CDECL *ByteArray_FromDouble)(ByteArray* self, double d, uint32_t df);
-  typedef err_t (FOG_CDECL *ByteArray_FromDoubleEx)(ByteArray* self, double d, uint32_t df, const FormatFlags& ff);
-
-  typedef err_t (FOG_CDECL *ByteArray_FromChars)(ByteArray* self, char ch, size_t len);
-
-  typedef err_t (FOG_CDECL *ByteArray_FromFormatA)(ByteArray* self, const char* fmt, ...);
-  typedef err_t (FOG_CDECL *ByteArray_FromFormatC)(ByteArray* self, const char* fmt, const TextCodec& tc, ...);
-  typedef err_t (FOG_CDECL *ByteArray_FromVFormatA)(ByteArray* self, const char* fmt, va_list ap);
-  typedef err_t (FOG_CDECL *ByteArray_FromVFormatC)(ByteArray* self, const char* fmt, const TextCodec& tc, va_list ap);
-
-  typedef err_t (FOG_CDECL *ByteArray_FromWFormat)(ByteArray* self, const ByteArray& fmt, char lex, const List<ByteArray>& args);
-  typedef err_t (FOG_CDECL *ByteArray_FromWFormat)(ByteArray* self, const ByteArray& fmt, char lex, const ByteArray* args, size_t len);
-
-  typedef err_t (FOG_CDECL *ByteArray_PrependChars)(ByteArray* self, char ch, size_t len);
-  typedef err_t (FOG_CDECL *ByteArray_PrependStub8)(ByteArray* self, const Stub8& stub);
-  typedef err_t (FOG_CDECL *ByteArray_PrependOther)(ByteArray* self, const ByteArray& other);
-
-  typedef err_t (FOG_CDECL *ByteArray_InsertChars)(ByteArray* self, size_t at, char ch, size_t len);
-  typedef err_t (FOG_CDECL *ByteArray_InsertStub8)(ByteArray* self, size_t at, const Stub8& stub);
-  typedef err_t (FOG_CDECL *ByteArray_InsertOther)(ByteArray* self, size_t at, const ByteArray& other);
-
-  typedef size_t (FOG_CDECL *ByteArray_RemoveRange)(ByteArray* self, const Range& range);
-  typedef size_t (FOG_CDECL *ByteArray_RemoveChars)(ByteArray* self, const Range* range, char ch, uint32_t cs);
-  typedef size_t (FOG_CDECL *ByteArray_RemoveOther)(ByteArray* self, const Range* range, const ByteArray& other, uint32_t cs);
-  typedef size_t (FOG_CDECL *ByteArray_RemoveFilter)(ByteArray* self, const Range* range, const ByteArrayFilter& filter, uint32_t cs);
-
-  typedef err_t (FOG_CDECL *ByteArray_ReplaceRangeOther)(ByteArray* self, const Range& range, const ByteArray& after);
-  typedef err_t (FOG_CDECL *ByteArray_ReplaceRangeStub8)(ByteArray* self, const Range& range, const Stub8& after);
-
-  typedef err_t (FOG_CDECL *ByteArray_ReplaceChars)(ByteArray* self, const Range* range, char before, char after, uint cs = CASE_SENSITIVE);
-  typedef err_t (FOG_CDECL *ByteArray_ReplaceString)(ByteArray* self, const Range* range, const ByteArray& before, const ByteArray& after, uint cs = CASE_SENSITIVE);
-  typedef err_t (FOG_CDECL *ByteArray_ReplaceFilter)(ByteArray* self, const Range* range, const ByteArrayFilter& filter, const ByteArray& after, uint cs = CASE_SENSITIVE);
-
-  typedef err_t (FOG_CDECL *ByteArray_Lower)(ByteArray* self, const Range* range);
-  typedef err_t (FOG_CDECL *ByteArray_Upper)(ByteArray* self, const Range* range);
-
-  typedef err_t (FOG_CDECL *ByteArray_Trim)(ByteArray* self);
-  typedef err_t (FOG_CDECL *ByteArray_Simplify)(ByteArray* self);
-  typedef err_t (FOG_CDECL *ByteArray_Truncate)(ByteArray* self, size_t n);
-  typedef err_t (FOG_CDECL *ByteArray_Justify)(ByteArray* self, size_t n, char ch, uint32_t flags);
-
-  typedef err_t (FOG_CDECL *ByteArray_SplitCh)(const ByteArray* self, List<ByteArray>& dst, char ch, uint splitBehavior = SPLIT_REMOVE_EMPTY_PARTS, uint cs = CASE_SENSITIVE) const;
-  typedef err_t (FOG_CDECL *ByteArray_SplitBa)(const ByteArray* self, List<ByteArray>& dst, const ByteArray& pattern, uint splitBehavior = SPLIT_REMOVE_EMPTY_PARTS, uint cs = CASE_SENSITIVE) const;
-  typedef err_t (FOG_CDECL *ByteArray_SplitFl)(const ByteArray* self, List<ByteArray>& dst, const ByteArrayFilter& filter, uint splitBehavior = SPLIT_REMOVE_EMPTY_PARTS, uint cs = CASE_SENSITIVE) const;
-
-  typedef err_t (FOG_CDECL *ByteArray_Slice)(const ByteArray* self, ByteArray* dst, const Range& range);
-  typedef err_t (FOG_CDECL *ByteArray_JoinCh)(ByteArray* self, const List<ByteArray>& list, const char sep);
-  typedef err_t (FOG_CDECL *ByteArray_JoinBa)(ByteArray* self, const List<ByteArray>& list, const ByteArray& sep);
-
-  typedef err_t (FOG_CDECL *ByteArray_ToBool)(const ByteArray* self, bool* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags) const;
-  typedef err_t (FOG_CDECL *ByteArray_ToI8)(const ByteArray* self, int8_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags) const;
-  typedef err_t (FOG_CDECL *ByteArray_ToU8)(const ByteArray* self, uint8_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags) const;
-  typedef err_t (FOG_CDECL *ByteArray_ToI16)(const ByteArray* self, int16_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags) const;
-  typedef err_t (FOG_CDECL *ByteArray_ToU16)(const ByteArray* self, uint16_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags) const;
-  typedef err_t (FOG_CDECL *ByteArray_ToI32)(const ByteArray* self, int32_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags) const;
-  typedef err_t (FOG_CDECL *ByteArray_ToU32)(const ByteArray* self, uint32_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags) const;
-  typedef err_t (FOG_CDECL *ByteArray_ToI64)(const ByteArray* self, int64_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags) const;
-  typedef err_t (FOG_CDECL *ByteArray_ToU64)(const ByteArray* self, uint64_t* dst, int base = 0, size_t* end = NULL, uint32_t* parserFlags) const;
-
-  typedef err_t (FOG_CDECL *ByteArray_ToFloat)(const ByteArray* self, float* dst, size_t* end = NULL, uint32_t* parserFlags) const;
-  typedef err_t (FOG_CDECL *ByteArray_ToDouble)(const ByteArray* self, double* dst, size_t* end = NULL, uint32_t* parserFlags) const;
-
-  typedef bool (FOG_CDECL *ByteArray_ContainsCh)(const ByteArray* self, char ch, uint cs = CASE_SENSITIVE, const Range& range) const;
-  typedef bool (FOG_CDECL *ByteArray_ContainsBa)(const ByteArray* self, const ByteArray& pattern, uint cs = CASE_SENSITIVE, const Range& range) const;
-  typedef bool (FOG_CDECL *ByteArray_ContainsFl)(const ByteArray* self, const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE, const Range& range) const;
-
-  typedef size_t (FOG_CDECL *ByteArray_CountOfCh)(const ByteArray* self, char ch, uint cs = CASE_SENSITIVE, const Range& range) const;
-  typedef size_t (FOG_CDECL *ByteArray_CountOfBa)(const ByteArray* self, const ByteArray& pattern, uint cs = CASE_SENSITIVE, const Range& range) const;
-  typedef size_t (FOG_CDECL *ByteArray_CountOfFl)(const ByteArray* self, const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE, const Range& range) const;
-
-  typedef size_t (FOG_CDECL *ByteArray_IndexOfCh)(const ByteArray* self, char ch, uint cs = CASE_SENSITIVE, const Range& range) const;
-  typedef size_t (FOG_CDECL *ByteArray_IndexOfBa)(const ByteArray* self, const ByteArray& pattern, uint cs = CASE_SENSITIVE, const Range& range) const;
-  typedef size_t (FOG_CDECL *ByteArray_IndexOfFl)(const ByteArray* self, const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE, const Range& range) const;
-
-  typedef size_t (FOG_CDECL *ByteArray_LastIndexOfCh)(const ByteArray* self, char ch, uint cs = CASE_SENSITIVE, const Range& range) const;
-  typedef size_t (FOG_CDECL *ByteArray_LastIndexOfBa)(const ByteArray* self, const ByteArray& pattern, uint cs = CASE_SENSITIVE, const Range& range) const;
-  typedef size_t (FOG_CDECL *ByteArray_LastIndexOfFl)(const ByteArray* self, const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE, const Range& range) const;
-
-  typedef size_t (FOG_CDECL *ByteArray_IndexOfAny)(const ByteArray* self, const char* chars, size_t numChars, uint cs = CASE_SENSITIVE, const Range& range) const;
-  typedef size_t (FOG_CDECL *ByteArray_LastIndexOfAny)(const ByteArray* self, const char* chars, size_t numChars, uint cs = CASE_SENSITIVE, const Range& range) const;
-
-  typedef bool (FOG_CDECL *ByteArray_StartsWithCh)(const ByteArray* self, char ch, uint cs = CASE_SENSITIVE) const;
-  typedef bool (FOG_CDECL *ByteArray_StartsWithSb)(const ByteArray* self, const Stub8& str, uint cs = CASE_SENSITIVE) const;
-  typedef bool (FOG_CDECL *ByteArray_StartsWithBa)(const ByteArray* self, const ByteArray& str, uint cs = CASE_SENSITIVE) const;
-  typedef bool (FOG_CDECL *ByteArray_StartsWithFl)(const ByteArray* self, const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE) const;
-
-  typedef bool (FOG_CDECL *ByteArray_EndsWithCh)(const ByteArray* self, char ch, uint cs = CASE_SENSITIVE) const;
-  typedef bool (FOG_CDECL *ByteArray_EndsWithSb)(const ByteArray* self, const Stub8& str, uint cs = CASE_SENSITIVE) const;
-  typedef bool (FOG_CDECL *ByteArray_EndsWithBa)(const ByteArray* self, const ByteArray& str, uint cs = CASE_SENSITIVE) const;
-  typedef bool (FOG_CDECL *ByteArray_EndsWithFl)(const ByteArray* self, const ByteArrayFilter& filter, uint cs = CASE_SENSITIVE) const;
-
-  typedef bool (FOG_CDECL *ByteArray_Eq)(const ByteArray* a, const ByteArray* b);
-  typedef bool (FOG_CDECL *ByteArray_EqI)(const ByteArray* a, const ByteArray* b);
-
-  typedef int (FOG_CDECL *ByteArray_Compare)(const ByteArray* a, const ByteArray* b);
-  typedef int (FOG_CDECL *ByteArray_CompareI)(const ByteArray* a, const ByteArray* b);
-
-  typedef bool (FOG_CDECL *ByteArray_Eq)(const Stub8& other, uint cs) const;
-  typedef bool (FOG_CDECL *ByteArray_Eq)(const ByteArray& other, uint cs) const;
-
-  typedef int (FOG_CDECL *ByteArray_Compare)(const Stub8& other, uint cs) const;
-  typedef int (FOG_CDECL *ByteArray_Compare)(const ByteArray& other, uint cs) const;
-
-  typedef err_t (FOG_CDECL *ByteArray_ValidateUtf8)(size_t* invalidPos = NULL) const;
-  typedef err_t (FOG_CDECL *ByteArray_GetUtf8Length)(size_t* charsCount) const;
-
-  typedef err_t (FOG_CDECL *ByteArray_slashesToPosix)();
-  typedef err_t (FOG_CDECL *ByteArray_slashesToWin)();
-
-  typedef uint32_t (FOG_CDECL *ByteArray_GetHashCode)() const;
-  */
-
-  // --------------------------------------------------------------------------
-  // [Core/Tools - String]
-  // --------------------------------------------------------------------------
-
-  // --------------------------------------------------------------------------
-  // [Core/Tools - StringUtil]
-  // --------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
+    Var* oNull;
+  } var;
 
   // --------------------------------------------------------------------------
   // [G2d/Geometry - Arc]
@@ -589,13 +2483,13 @@ struct FOG_NO_EXPORT Api
   typedef uint (FOG_CDECL *ArcF_ToCSpline)(const ArcF* self, PointF* pts);
   typedef uint (FOG_CDECL *ArcD_ToCSpline)(const ArcD* self, PointD* pts);
 
-  struct FOG_NO_EXPORT _FuncsArcF
+  struct FOG_NO_EXPORT _Api_ArcF
   {
     ArcF_GetBoundingBox getBoundingBox;
     ArcF_ToCSpline toCSpline;
   } arcf;
 
-  struct FOG_NO_EXPORT _FuncsArcD
+  struct FOG_NO_EXPORT _Api_ArcD
   {
     ArcD_GetBoundingBox getBoundingBox;
     ArcD_ToCSpline toCSpline;
@@ -617,13 +2511,13 @@ struct FOG_NO_EXPORT Api
   typedef int (FOG_CDECL *CBezierF_GetInflectionPoints)(const PointF* self, float*  t);
   typedef int (FOG_CDECL *CBezierD_GetInflectionPoints)(const PointD* self, double* t);
 
-  typedef int (FOG_CDECL *CBezierF_SimplifyForProcessing)(const PointF* self, PointF* pts, float flatness);
-  typedef int (FOG_CDECL *CBezierD_SimplifyForProcessing)(const PointD* self, PointD* pts, double flatness);
+  typedef int (FOG_CDECL *CBezierF_SimplifyForProcessing)(const PointF* self, PointF* pts);
+  typedef int (FOG_CDECL *CBezierD_SimplifyForProcessing)(const PointD* self, PointD* pts);
 
   typedef err_t (FOG_CDECL *CBezierF_Flatten)(const PointF* self, PathF& dst, uint8_t initialCommand, float flatness);
   typedef err_t (FOG_CDECL *CBezierD_Flatten)(const PointD* self, PathD& dst, uint8_t initialCommand, double flatness);
 
-  struct FOG_NO_EXPORT _FuncsCBezierF
+  struct FOG_NO_EXPORT _Api_CBezierF
   {
     CBezierF_GetBoundingBox getBoundingBox;
     CBezierF_GetSplineBBox getSplineBBox;
@@ -631,9 +2525,9 @@ struct FOG_NO_EXPORT Api
     CBezierF_GetInflectionPoints getInflectionPoints;
     CBezierF_SimplifyForProcessing simplifyForProcessing;
     CBezierF_Flatten flatten;
-  } cubiccurvef;
+  } cbezierf;
 
-  struct FOG_NO_EXPORT _FuncsCBezierD
+  struct FOG_NO_EXPORT _Api_CBezierD
   {
     CBezierD_GetBoundingBox getBoundingBox;
     CBezierD_GetSplineBBox getSplineBBox;
@@ -641,7 +2535,7 @@ struct FOG_NO_EXPORT Api
     CBezierD_GetInflectionPoints getInflectionPoints;
     CBezierD_SimplifyForProcessing simplifyForProcessing;
     CBezierD_Flatten flatten;
-  } cubiccurved;
+  } cbezierd;
 
   // --------------------------------------------------------------------------
   // [G2d/Geometry - Chord]
@@ -650,12 +2544,12 @@ struct FOG_NO_EXPORT Api
   typedef bool (FOG_CDECL *ChordF_HitTest)(const ChordF* self, const PointF* pt);
   typedef bool (FOG_CDECL *ChordD_HitTest)(const ChordD* self, const PointD* pt);
 
-  struct FOG_NO_EXPORT _FuncsChordF
+  struct FOG_NO_EXPORT _Api_ChordF
   {
     ChordF_HitTest hitTest;
   } chordf;
 
-  struct FOG_NO_EXPORT _FuncsChordD
+  struct FOG_NO_EXPORT _Api_ChordD
   {
     ChordD_HitTest hitTest;
   } chordd;
@@ -673,14 +2567,14 @@ struct FOG_NO_EXPORT Api
   typedef uint (FOG_CDECL *CircleF_ToCSpline)(const CircleF* self, PointF* pts);
   typedef uint (FOG_CDECL *CircleD_ToCSpline)(const CircleD* self, PointD* pts);
 
-  struct FOG_NO_EXPORT _FuncsCircleF
+  struct FOG_NO_EXPORT _Api_CircleF
   {
     CircleF_GetBoundingBox getBoundingBox;
     CircleF_HitTest hitTest;
     CircleF_ToCSpline toCSpline;
   } circlef;
 
-  struct FOG_NO_EXPORT _FuncsCircleD
+  struct FOG_NO_EXPORT _Api_CircleD
   {
     CircleD_GetBoundingBox getBoundingBox;
     CircleD_HitTest hitTest;
@@ -700,14 +2594,14 @@ struct FOG_NO_EXPORT Api
   typedef uint (FOG_CDECL *EllipseF_ToCSpline)(const EllipseF* self, PointF* pts);
   typedef uint (FOG_CDECL *EllipseD_ToCSpline)(const EllipseD* self, PointD* pts);
 
-  struct FOG_NO_EXPORT _FuncsEllipseF
+  struct FOG_NO_EXPORT _Api_EllipseF
   {
     EllipseF_GetBoundingBox getBoundingBox;
     EllipseF_HitTest hitTest;
     EllipseF_ToCSpline toCSpline;
   } ellipsef;
 
-  struct FOG_NO_EXPORT _FuncsEllipseD
+  struct FOG_NO_EXPORT _Api_EllipseD
   {
     EllipseD_GetBoundingBox getBoundingBox;
     EllipseD_HitTest hitTest;
@@ -718,198 +2612,217 @@ struct FOG_NO_EXPORT Api
   // [G2d/Geometry - Line]
   // --------------------------------------------------------------------------
 
-  typedef uint32_t (FOG_CDECL *LineF_Intersect)(
-    PointF* dst,
-    const PointF* lineA,
-    const PointF* lineB);
+  typedef uint32_t (FOG_CDECL *LineF_Intersect)(PointF* dst, const PointF* lineA, const PointF* lineB);
+  typedef uint32_t (FOG_CDECL *LineD_Intersect)(PointD* dst, const PointD* lineA, const PointD* lineB);
 
-  typedef uint32_t (FOG_CDECL *LineD_Intersect)(
-    PointD* dst,
-    const PointD* lineA,
-    const PointD* lineB);
+  typedef float (FOG_CDECL* LineF_PolyAngle)(const PointF* pts);
+  typedef double (FOG_CDECL* LineD_PolyAngle)(const PointD* pts);
 
-  struct FOG_NO_EXPORT _FuncsLineF
+  struct FOG_NO_EXPORT _Api_LineF
   {
     LineF_Intersect intersect;
+    LineF_PolyAngle polyAngle;
   } linef;
 
-  struct FOG_NO_EXPORT _FuncsLineD
+  struct FOG_NO_EXPORT _Api_LineD
   {
     LineD_Intersect intersect;
+    LineD_PolyAngle polyAngle;
   } lined;
 
   // --------------------------------------------------------------------------
   // [G2d/Geometry - Path]
   // --------------------------------------------------------------------------
 
-  typedef void (FOG_CDECL *PathF_Ctor)(PathF& self);
-  typedef void (FOG_CDECL *PathD_Ctor)(PathD& self);
+  typedef void (FOG_CDECL *PathF_Ctor)(PathF* self);
+  typedef void (FOG_CDECL *PathD_Ctor)(PathD* self);
 
-  typedef void (FOG_CDECL *PathF_CtorCopyF)(PathF& self, const PathF& other);
-  typedef void (FOG_CDECL *PathD_CtorCopyD)(PathD& self, const PathD& other);
+  typedef void (FOG_CDECL *PathF_CtorCopyF)(PathF* self, const PathF* other);
+  typedef void (FOG_CDECL *PathD_CtorCopyD)(PathD* self, const PathD* other);
 
-  typedef void (FOG_CDECL *PathF_Dtor)(PathF& self);
-  typedef void (FOG_CDECL *PathD_Dtor)(PathD& self);
+  typedef void (FOG_CDECL *PathF_Dtor)(PathF* self);
+  typedef void (FOG_CDECL *PathD_Dtor)(PathD* self);
 
-  typedef err_t (FOG_CDECL *PathF_Detach)(PathF& self);
-  typedef err_t (FOG_CDECL *PathD_Detach)(PathD& self);
+  typedef err_t (FOG_CDECL *PathF_Detach)(PathF* self);
+  typedef err_t (FOG_CDECL *PathD_Detach)(PathD* self);
 
-  typedef err_t (FOG_CDECL *PathF_Reserve)(PathF& self, size_t capacity);
-  typedef err_t (FOG_CDECL *PathD_Reserve)(PathD& self, size_t capacity);
+  typedef err_t (FOG_CDECL *PathF_Reserve)(PathF* self, size_t capacity);
+  typedef err_t (FOG_CDECL *PathD_Reserve)(PathD* self, size_t capacity);
 
-  typedef void (FOG_CDECL *PathF_Squeeze)(PathF& self);
-  typedef void (FOG_CDECL *PathD_Squeeze)(PathD& self);
+  typedef void (FOG_CDECL *PathF_Squeeze)(PathF* self);
+  typedef void (FOG_CDECL *PathD_Squeeze)(PathD* self);
 
-  typedef size_t (FOG_CDECL *PathF_Prepare)(PathF& self, size_t count, uint32_t cntOp);
-  typedef size_t (FOG_CDECL *PathD_Prepare)(PathD& self, size_t count, uint32_t cntOp);
+  typedef size_t (FOG_CDECL *PathF_Prepare)(PathF* self, uint32_t cntOp, size_t count);
+  typedef size_t (FOG_CDECL *PathD_Prepare)(PathD* self, uint32_t cntOp, size_t count);
 
-  typedef size_t (FOG_CDECL *PathF_Add)(PathF& self, size_t count);
-  typedef size_t (FOG_CDECL *PathD_Add)(PathD& self, size_t count);
+  typedef size_t (FOG_CDECL *PathF_Add)(PathF* self, size_t count);
+  typedef size_t (FOG_CDECL *PathD_Add)(PathD* self, size_t count);
 
-  typedef void (FOG_CDECL *PathF_UpdateFlat)(const PathF& self);
-  typedef void (FOG_CDECL *PathD_UpdateFlat)(const PathD& self);
+  typedef void (FOG_CDECL *PathF_UpdateFlat)(const PathF* self);
+  typedef void (FOG_CDECL *PathD_UpdateFlat)(const PathD* self);
 
-  typedef void (FOG_CDECL *PathF_Clear)(PathF& self);
-  typedef void (FOG_CDECL *PathD_Clear)(PathD& self);
+  typedef void (FOG_CDECL *PathF_Clear)(PathF* self);
+  typedef void (FOG_CDECL *PathD_Clear)(PathD* self);
 
-  typedef void (FOG_CDECL *PathF_Reset)(PathF& self);
-  typedef void (FOG_CDECL *PathD_Reset)(PathD& self);
+  typedef void (FOG_CDECL *PathF_Reset)(PathF* self);
+  typedef void (FOG_CDECL *PathD_Reset)(PathD* self);
 
-  typedef err_t (FOG_CDECL *PathF_SetPathF)(PathF& self, const PathF& other);
-  typedef err_t (FOG_CDECL *PathD_SetPathF)(PathD& self, const PathF& other);
-  typedef err_t (FOG_CDECL *PathD_SetPathD)(PathD& self, const PathD& other);
+  typedef err_t (FOG_CDECL *PathF_SetPathF)(PathF* self, const PathF* other);
+  typedef err_t (FOG_CDECL *PathD_SetPathF)(PathD* self, const PathF* other);
+  typedef err_t (FOG_CDECL *PathD_SetPathD)(PathD* self, const PathD* other);
 
-  typedef err_t (FOG_CDECL *PathF_SetDeepF)(PathF& self, const PathF& other);
-  typedef err_t (FOG_CDECL *PathD_SetDeepD)(PathD& self, const PathD& other);
+  typedef err_t (FOG_CDECL *PathF_SetDeepF)(PathF* self, const PathF* other);
+  typedef err_t (FOG_CDECL *PathD_SetDeepD)(PathD* self, const PathD* other);
 
-  typedef Range (FOG_CDECL *PathF_GetSubpathRange)(const PathF& self, size_t index);
-  typedef Range (FOG_CDECL *PathD_GetSubpathRange)(const PathD& self, size_t index);
+  typedef err_t (FOG_CDECL *PathF_GetLastVertex)(const PathF* self, PointF* dst);
+  typedef err_t (FOG_CDECL *PathD_GetLastVertex)(const PathD* self, PointD* dst);
 
-  typedef err_t (FOG_CDECL *PathF_MoveTo)(PathF& self, const PointF& pt0);
-  typedef err_t (FOG_CDECL *PathD_MoveTo)(PathD& self, const PointD& pt0);
+  typedef err_t (FOG_CDECL *PathF_SetVertex)(PathF* self, size_t index, const PointF* pt);
+  typedef err_t (FOG_CDECL *PathD_SetVertex)(PathD* self, size_t index, const PointD* pt);
 
-  typedef err_t (FOG_CDECL *PathF_LineTo)(PathF& self, const PointF& pt0);
-  typedef err_t (FOG_CDECL *PathD_LineTo)(PathD& self, const PointD& pt0);
+  typedef Range (FOG_CDECL *PathF_GetSubpathRange)(const PathF* self, size_t index);
+  typedef Range (FOG_CDECL *PathD_GetSubpathRange)(const PathD* self, size_t index);
 
-  typedef err_t (FOG_CDECL *PathF_HLineTo)(PathF& self, float x);
-  typedef err_t (FOG_CDECL *PathD_HLineTo)(PathD& self, double x);
+  typedef err_t (FOG_CDECL *PathF_MoveTo)(PathF* self, const PointF* pt0);
+  typedef err_t (FOG_CDECL *PathD_MoveTo)(PathD* self, const PointD* pt0);
 
-  typedef err_t (FOG_CDECL *PathF_VLineTo)(PathF& self, float y);
-  typedef err_t (FOG_CDECL *PathD_VLineTo)(PathD& self, double y);
+  typedef err_t (FOG_CDECL *PathF_LineTo)(PathF* self, const PointF* pt0);
+  typedef err_t (FOG_CDECL *PathD_LineTo)(PathD* self, const PointD* pt0);
 
-  typedef err_t (FOG_CDECL *PathF_PolyTo)(PathF& self, const PointF* pts, size_t count);
-  typedef err_t (FOG_CDECL *PathD_PolyTo)(PathD& self, const PointD* pts, size_t count);
+  typedef err_t (FOG_CDECL *PathF_HLineTo)(PathF* self, float x);
+  typedef err_t (FOG_CDECL *PathD_HLineTo)(PathD* self, double x);
 
-  typedef err_t (FOG_CDECL *PathF_QuadTo)(PathF& self, const PointF& pt1, const PointF& pt2);
-  typedef err_t (FOG_CDECL *PathD_QuadTo)(PathD& self, const PointD& pt1, const PointD& pt2);
+  typedef err_t (FOG_CDECL *PathF_VLineTo)(PathF* self, float y);
+  typedef err_t (FOG_CDECL *PathD_VLineTo)(PathD* self, double y);
 
-  typedef err_t (FOG_CDECL *PathF_CubicTo)(PathF& self, const PointF& pt1, const PointF& pt2, const PointF& pt3);
-  typedef err_t (FOG_CDECL *PathD_CubicTo)(PathD& self, const PointD& pt1, const PointD& pt2, const PointD& pt3);
+  typedef err_t (FOG_CDECL *PathF_PolyTo)(PathF* self, const PointF* pts, size_t count);
+  typedef err_t (FOG_CDECL *PathD_PolyTo)(PathD* self, const PointD* pts, size_t count);
 
-  typedef err_t (FOG_CDECL *PathF_SmoothQuadTo)(PathF& self, const PointF& pt2);
-  typedef err_t (FOG_CDECL *PathD_SmoothQuadTo)(PathD& self, const PointD& pt2);
+  typedef err_t (FOG_CDECL *PathF_QuadTo)(PathF* self, const PointF* pt1, const PointF* pt2);
+  typedef err_t (FOG_CDECL *PathD_QuadTo)(PathD* self, const PointD* pt1, const PointD* pt2);
 
-  typedef err_t (FOG_CDECL *PathF_SmoothCubicTo)(PathF& self, const PointF& pt1, const PointF& pt2);
-  typedef err_t (FOG_CDECL *PathD_SmoothCubicTo)(PathD& self, const PointD& pt1, const PointD& pt2);
+  typedef err_t (FOG_CDECL *PathF_CubicTo)(PathF* self, const PointF* pt1, const PointF* pt2, const PointF* pt3);
+  typedef err_t (FOG_CDECL *PathD_CubicTo)(PathD* self, const PointD* pt1, const PointD* pt2, const PointD* pt3);
 
-  typedef err_t (FOG_CDECL *PathF_ArcTo)(PathF& self, const PointF& cp, const PointF& rp, float start, float sweep, bool startPath);
-  typedef err_t (FOG_CDECL *PathD_ArcTo)(PathD& self, const PointD& cp, const PointD& rp, double start, double sweep, bool startPath);
+  typedef err_t (FOG_CDECL *PathF_SmoothQuadTo)(PathF* self, const PointF* pt2);
+  typedef err_t (FOG_CDECL *PathD_SmoothQuadTo)(PathD* self, const PointD* pt2);
 
-  typedef err_t (FOG_CDECL *PathF_SvgArcTo)(PathF& self, const PointF& rp, float angle, bool largeArcFlag, bool sweepFlag, const PointF& pt);
-  typedef err_t (FOG_CDECL *PathD_SvgArcTo)(PathD& self, const PointD& rp, double angle, bool largeArcFlag, bool sweepFlag, const PointD& pt);
+  typedef err_t (FOG_CDECL *PathF_SmoothCubicTo)(PathF* self, const PointF* pt1, const PointF* pt2);
+  typedef err_t (FOG_CDECL *PathD_SmoothCubicTo)(PathD* self, const PointD* pt1, const PointD* pt2);
 
-  typedef err_t (FOG_CDECL *PathF_Close)(PathF& self);
-  typedef err_t (FOG_CDECL *PathD_Close)(PathD& self);
+  typedef err_t (FOG_CDECL *PathF_ArcTo)(PathF* self, const PointF* cp, const PointF* rp, float start, float sweep, bool startPath);
+  typedef err_t (FOG_CDECL *PathD_ArcTo)(PathD* self, const PointD* cp, const PointD* rp, double start, double sweep, bool startPath);
 
-  typedef err_t (FOG_CDECL *PathF_BoxI)(PathF& self, const BoxI& r, uint32_t direction);
-  typedef err_t (FOG_CDECL *PathD_BoxI)(PathD& self, const BoxI& r, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathF_SvgArcTo)(PathF* self, const PointF* rp, float angle, bool largeArcFlag, bool sweepFlag, const PointF* pt);
+  typedef err_t (FOG_CDECL *PathD_SvgArcTo)(PathD* self, const PointD* rp, double angle, bool largeArcFlag, bool sweepFlag, const PointD* pt);
 
-  typedef err_t (FOG_CDECL *PathF_BoxF)(PathF& self, const BoxF& r, uint32_t direction);
-  typedef err_t (FOG_CDECL *PathD_BoxF)(PathD& self, const BoxF& r, uint32_t direction);
-  typedef err_t (FOG_CDECL *PathD_BoxD)(PathD& self, const BoxD& r, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathF_Close)(PathF* self);
+  typedef err_t (FOG_CDECL *PathD_Close)(PathD* self);
 
-  typedef err_t (FOG_CDECL *PathF_RectI)(PathF& self, const RectI& r, uint32_t direction);
-  typedef err_t (FOG_CDECL *PathD_RectI)(PathD& self, const RectI& r, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathF_BoxI)(PathF* self, const BoxI* r, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathD_BoxI)(PathD* self, const BoxI* r, uint32_t direction);
 
-  typedef err_t (FOG_CDECL *PathF_RectF)(PathF& self, const RectF& r, uint32_t direction);
-  typedef err_t (FOG_CDECL *PathD_RectF)(PathD& self, const RectF& r, uint32_t direction);
-  typedef err_t (FOG_CDECL *PathD_RectD)(PathD& self, const RectD& r, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathF_BoxF)(PathF* self, const BoxF* r, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathD_BoxF)(PathD* self, const BoxF* r, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathD_BoxD)(PathD* self, const BoxD* r, uint32_t direction);
 
-  typedef err_t (FOG_CDECL *PathF_BoxesI)(PathF& self, const BoxI* r, size_t count, uint32_t direction);
-  typedef err_t (FOG_CDECL *PathD_BoxesI)(PathD& self, const BoxI* r, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathF_RectI)(PathF* self, const RectI* r, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathD_RectI)(PathD* self, const RectI* r, uint32_t direction);
 
-  typedef err_t (FOG_CDECL *PathF_BoxesF)(PathF& self, const BoxF* r, size_t count, uint32_t direction);
-  typedef err_t (FOG_CDECL *PathD_BoxesF)(PathD& self, const BoxF* r, size_t count, uint32_t direction);
-  typedef err_t (FOG_CDECL *PathD_BoxesD)(PathD& self, const BoxD* r, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathF_RectF)(PathF* self, const RectF* r, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathD_RectF)(PathD* self, const RectF* r, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathD_RectD)(PathD* self, const RectD* r, uint32_t direction);
 
-  typedef err_t (FOG_CDECL *PathF_RectsI)(PathF& self, const RectI* r, size_t count, uint32_t direction);
-  typedef err_t (FOG_CDECL *PathD_RectsI)(PathD& self, const RectI* r, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathF_BoxesI)(PathF* self, const BoxI* r, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathD_BoxesI)(PathD* self, const BoxI* r, size_t count, uint32_t direction);
 
-  typedef err_t (FOG_CDECL *PathF_RectsF)(PathF& self, const RectF* r, size_t count, uint32_t direction);
-  typedef err_t (FOG_CDECL *PathD_RectsF)(PathD& self, const RectF* r, size_t count, uint32_t direction);
-  typedef err_t (FOG_CDECL *PathD_RectsD)(PathD& self, const RectD* r, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathF_BoxesF)(PathF* self, const BoxF* r, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathD_BoxesF)(PathD* self, const BoxF* r, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathD_BoxesD)(PathD* self, const BoxD* r, size_t count, uint32_t direction);
 
-  typedef err_t (FOG_CDECL *PathF_Region)(PathF& self, const Region& r, uint32_t direction);
-  typedef err_t (FOG_CDECL *PathD_Region)(PathD& self, const Region& r, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathF_RectsI)(PathF* self, const RectI* r, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathD_RectsI)(PathD* self, const RectI* r, size_t count, uint32_t direction);
 
-  typedef err_t (FOG_CDECL *PathF_PolylineI)(PathF& self, const PointI* pts, size_t count, uint32_t direction);
-  typedef err_t (FOG_CDECL *PathD_PolylineI)(PathD& self, const PointI* pts, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathF_RectsF)(PathF* self, const RectF* r, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathD_RectsF)(PathD* self, const RectF* r, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathD_RectsD)(PathD* self, const RectD* r, size_t count, uint32_t direction);
 
-  typedef err_t (FOG_CDECL *PathF_PolylineF)(PathF& self, const PointF* pts, size_t count, uint32_t direction);
-  typedef err_t (FOG_CDECL *PathD_PolylineD)(PathD& self, const PointD* pts, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathF_Region)(PathF* self, const Region* r, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathD_Region)(PathD* self, const Region* r, uint32_t direction);
 
-  typedef err_t (FOG_CDECL *PathF_PolygonI)(PathF& self, const PointI* pts, size_t count, uint32_t direction);
-  typedef err_t (FOG_CDECL *PathD_PolygonI)(PathD& self, const PointI* pts, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathF_PolylineI)(PathF* self, const PointI* pts, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathD_PolylineI)(PathD* self, const PointI* pts, size_t count, uint32_t direction);
 
-  typedef err_t (FOG_CDECL *PathF_PolygonF)(PathF& self, const PointF* pts, size_t count, uint32_t direction);
-  typedef err_t (FOG_CDECL *PathD_PolygonD)(PathD& self, const PointD* pts, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathF_PolylineF)(PathF* self, const PointF* pts, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathD_PolylineD)(PathD* self, const PointD* pts, size_t count, uint32_t direction);
 
-  typedef err_t (FOG_CDECL *PathF_Shape)(PathF& self, uint32_t shapeType, const void* shapeData, uint32_t direction, const TransformF* tr);
-  typedef err_t (FOG_CDECL *PathD_Shape)(PathD& self, uint32_t shapeType, const void* shapeData, uint32_t direction, const TransformD* tr);
+  typedef err_t (FOG_CDECL *PathF_PolygonI)(PathF* self, const PointI* pts, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathD_PolygonI)(PathD* self, const PointI* pts, size_t count, uint32_t direction);
 
-  typedef err_t (FOG_CDECL *PathF_AppendPathF)(PathF& self, const PathF& path, const Range* range);
-  typedef err_t (FOG_CDECL *PathD_AppendPathF)(PathD& self, const PathF& path, const Range* range);
-  typedef err_t (FOG_CDECL *PathD_AppendPathD)(PathD& self, const PathD& path, const Range* range);
+  typedef err_t (FOG_CDECL *PathF_PolygonF)(PathF* self, const PointF* pts, size_t count, uint32_t direction);
+  typedef err_t (FOG_CDECL *PathD_PolygonD)(PathD* self, const PointD* pts, size_t count, uint32_t direction);
 
-  typedef err_t (FOG_CDECL *PathF_AppendTranslatedPathF)(PathF& self, const PathF& path, const PointF& pt, const Range* range);
-  typedef err_t (FOG_CDECL *PathD_AppendTranslatedPathF)(PathD& self, const PathF& path, const PointD& pt, const Range* range);
-  typedef err_t (FOG_CDECL *PathD_AppendTranslatedPathD)(PathD& self, const PathD& path, const PointD& pt, const Range* range);
+  typedef err_t (FOG_CDECL *PathF_Shape)(PathF* self, uint32_t shapeType, const void* shapeData, uint32_t direction, const TransformF* tr);
+  typedef err_t (FOG_CDECL *PathD_Shape)(PathD* self, uint32_t shapeType, const void* shapeData, uint32_t direction, const TransformD* tr);
 
-  typedef err_t (FOG_CDECL *PathF_AppendTransformedPathF)(PathF& self, const PathF& path, const TransformF& tr, const Range* range);
-  typedef err_t (FOG_CDECL *PathD_AppendTransformedPathF)(PathD& self, const PathF& path, const TransformD& tr, const Range* range);
-  typedef err_t (FOG_CDECL *PathD_AppendTransformedPathD)(PathD& self, const PathD& path, const TransformD& tr, const Range* range);
+  typedef err_t (FOG_CDECL *PathF_AppendPathF)(PathF* self, const PathF* path, const Range* range);
+  typedef err_t (FOG_CDECL *PathD_AppendPathF)(PathD* self, const PathF* path, const Range* range);
+  typedef err_t (FOG_CDECL *PathD_AppendPathD)(PathD* self, const PathD* path, const Range* range);
 
-  typedef err_t (FOG_CDECL *PathF_GetBoundingBox)(const PathF& self, BoxF* dst, const TransformF* transform);
-  typedef err_t (FOG_CDECL *PathD_GetBoundingBox)(const PathD& self, BoxD* dst, const TransformD* transform);
+  typedef err_t (FOG_CDECL *PathF_AppendTranslatedPathF)(PathF* self, const PathF* path, const PointF* pt, const Range* range);
+  typedef err_t (FOG_CDECL *PathD_AppendTranslatedPathF)(PathD* self, const PathF* path, const PointD* pt, const Range* range);
+  typedef err_t (FOG_CDECL *PathD_AppendTranslatedPathD)(PathD* self, const PathD* path, const PointD* pt, const Range* range);
 
-  typedef bool (FOG_CDECL *PathF_HitTest)(const PathF& self, const PointF& pt, uint32_t fillRule);
-  typedef bool (FOG_CDECL *PathD_HitTest)(const PathD& self, const PointD& pt, uint32_t fillRule);
+  typedef err_t (FOG_CDECL *PathF_AppendTransformedPathF)(PathF* self, const PathF* path, const TransformF* tr, const Range* range);
+  typedef err_t (FOG_CDECL *PathD_AppendTransformedPathF)(PathD* self, const PathF* path, const TransformD* tr, const Range* range);
+  typedef err_t (FOG_CDECL *PathD_AppendTransformedPathD)(PathD* self, const PathD* path, const TransformD* tr, const Range* range);
 
-  typedef err_t (FOG_CDECL *PathF_Translate)(PathF& self, const PointF& pt, const Range* range);
-  typedef err_t (FOG_CDECL *PathD_Translate)(PathD& self, const PointD& pt, const Range* range);
+  typedef err_t (FOG_CDECL *PathF_GetBoundingBox)(const PathF* self, BoxF* dst, const TransformF* transform);
+  typedef err_t (FOG_CDECL *PathD_GetBoundingBox)(const PathD* self, BoxD* dst, const TransformD* transform);
 
-  typedef err_t (FOG_CDECL *PathF_Transform)(PathF& self, const TransformF& tr, const Range* range);
-  typedef err_t (FOG_CDECL *PathD_Transform)(PathD& self, const TransformD& tr, const Range* range);
+  typedef bool (FOG_CDECL *PathF_HitTest)(const PathF* self, const PointF* pt, uint32_t fillRule);
+  typedef bool (FOG_CDECL *PathD_HitTest)(const PathD* self, const PointD* pt, uint32_t fillRule);
 
-  typedef err_t (FOG_CDECL *PathF_FitTo)(PathF& self, const RectF& r);
-  typedef err_t (FOG_CDECL *PathD_FitTo)(PathD& self, const RectD& r);
+  typedef size_t (FOG_CDECL *PathF_GetClosestVertex)(const PathF* self, const PointF* pt, float maxDistance, float* distance);
+  typedef size_t (FOG_CDECL *PathD_GetClosestVertex)(const PathD* self, const PointD* pt, double maxDistance, double* distance);
 
-  typedef err_t (FOG_CDECL *PathF_Scale)(PathF& self, const PointF& pt, bool keepStartPos);
-  typedef err_t (FOG_CDECL *PathD_Scale)(PathD& self, const PointD& pt, bool keepStartPos);
+  typedef err_t (FOG_CDECL *PathF_Translate)(PathF* self, const PointF* pt, const Range* range);
+  typedef err_t (FOG_CDECL *PathD_Translate)(PathD* self, const PointD* pt, const Range* range);
 
-  typedef err_t (FOG_CDECL *PathF_FlipX)(PathF& self, float x0, float x1);
-  typedef err_t (FOG_CDECL *PathD_FlipX)(PathD& self, double x0, double x1);
+  typedef err_t (FOG_CDECL *PathF_Transform)(PathF* self, const TransformF* tr, const Range* range);
+  typedef err_t (FOG_CDECL *PathD_Transform)(PathD* self, const TransformD* tr, const Range* range);
 
-  typedef err_t (FOG_CDECL *PathF_FlipY)(PathF& self, float y0, float y1);
-  typedef err_t (FOG_CDECL *PathD_FlipY)(PathD& self, double y0, double y1);
+  typedef err_t (FOG_CDECL *PathF_FitTo)(PathF* self, const RectF* r);
+  typedef err_t (FOG_CDECL *PathD_FitTo)(PathD* self, const RectD* r);
 
-  typedef err_t (FOG_CDECL *PathF_Flatten)(PathF& dst, const PathF& src, const PathFlattenParamsF& params, const Range* range);
-  typedef err_t (FOG_CDECL *PathD_Flatten)(PathD& dst, const PathD& src, const PathFlattenParamsD& params, const Range* range);
+  typedef err_t (FOG_CDECL *PathF_Scale)(PathF* self, const PointF* pt, bool keepStartPos);
+  typedef err_t (FOG_CDECL *PathD_Scale)(PathD* self, const PointD* pt, bool keepStartPos);
 
-  typedef bool (FOG_CDECL *PathF_Eq)(const PathF& a, const PathF& b);
-  typedef bool (FOG_CDECL *PathD_Eq)(const PathD& a, const PathD& b);
+  typedef err_t (FOG_CDECL *PathF_FlipX)(PathF* self, float x0, float x1);
+  typedef err_t (FOG_CDECL *PathD_FlipX)(PathD* self, double x0, double x1);
 
-  struct FOG_NO_EXPORT _FuncsPathF
+  typedef err_t (FOG_CDECL *PathF_FlipY)(PathF* self, float y0, float y1);
+  typedef err_t (FOG_CDECL *PathD_FlipY)(PathD* self, double y0, double y1);
+
+  typedef err_t (FOG_CDECL *PathF_Flatten)(PathF* dst, const PathF* src, const PathFlattenParamsF* params, const Range* range);
+  typedef err_t (FOG_CDECL *PathD_Flatten)(PathD* dst, const PathD* src, const PathFlattenParamsD* params, const Range* range);
+
+  typedef const PathInfoF* (FOG_CDECL *PathF_GetPathInfo)(const PathF* self);
+  typedef const PathInfoD* (FOG_CDECL *PathD_GetPathInfo)(const PathD* self);
+
+  typedef bool (FOG_CDECL *PathF_Eq)(const PathF* a, const PathF* b);
+  typedef bool (FOG_CDECL *PathD_Eq)(const PathD* a, const PathD* b);
+
+  typedef PathDataF* (FOG_CDECL *PathF_DCreate)(size_t capacity);
+  typedef PathDataD* (FOG_CDECL *PathD_DCreate)(size_t capacity);
+
+  typedef PathDataF* (FOG_CDECL *PathF_DAdopt)(void* address, size_t capacity);
+  typedef PathDataD* (FOG_CDECL *PathD_DAdopt)(void* address, size_t capacity);
+
+  typedef void (FOG_CDECL *PathF_DFree)(PathDataF* d);
+  typedef void (FOG_CDECL *PathD_DFree)(PathDataD* d);
+
+  struct FOG_NO_EXPORT _Api_PathF
   {
     PathF_Ctor ctor;
     PathF_CtorCopyF ctorCopyF;
@@ -923,6 +2836,8 @@ struct FOG_NO_EXPORT Api
     PathF_Reset reset;
     PathF_SetPathF setPathF;
     PathF_SetDeepF setDeepF;
+    PathF_GetLastVertex getLastVertex;
+    PathF_SetVertex setVertex;
     PathF_GetSubpathRange getSubpathRange;
     PathF_MoveTo moveTo;
     PathF_MoveTo moveToRel;
@@ -968,16 +2883,24 @@ struct FOG_NO_EXPORT Api
     PathF_Flatten flatten;
     PathF_GetBoundingBox getBoundingBox;
     PathF_HitTest hitTest;
+    PathF_GetClosestVertex getClosestVertex;
     PathF_Translate translate;
     PathF_Transform transform;
     PathF_FitTo fitTo;
     PathF_Scale scale;
     PathF_FlipX flipX;
     PathF_FlipY flipY;
+    PathF_GetPathInfo getPathInfo;
     PathF_Eq eq;
+
+    PathF_DCreate dCreate;
+    PathF_DAdopt dAdopt;
+    PathF_DFree dFree;
+
+    PathF* oEmpty;
   } pathf;
 
-  struct FOG_NO_EXPORT _FuncsPathD
+  struct FOG_NO_EXPORT _Api_PathD
   {
     PathD_Ctor ctor;
     PathD_CtorCopyD ctorCopyD;
@@ -992,6 +2915,8 @@ struct FOG_NO_EXPORT Api
     PathD_SetPathD setPathD;
     PathD_SetPathF setPathF;
     PathD_SetDeepD setDeepD;
+    PathD_GetLastVertex getLastVertex;
+    PathD_SetVertex setVertex;
     PathD_GetSubpathRange getSubpathRange;
     PathD_MoveTo moveTo;
     PathD_MoveTo moveToRel;
@@ -1044,46 +2969,128 @@ struct FOG_NO_EXPORT Api
     PathD_Flatten flatten;
     PathD_GetBoundingBox getBoundingBox;
     PathD_HitTest hitTest;
+    PathD_GetClosestVertex getClosestVertex;
     PathD_Translate translate;
     PathD_Transform transform;
     PathD_FitTo fitTo;
     PathD_Scale scale;
     PathD_FlipX flipX;
     PathD_FlipY flipY;
+    PathD_GetPathInfo getPathInfo;
     PathD_Eq eq;
+
+    PathD_DCreate dCreate;
+    PathD_DAdopt dAdopt;
+    PathD_DFree dFree;
+
+    PathD* oEmpty;
   } pathd;
 
   // --------------------------------------------------------------------------
   // [G2d/Geometry - PathClipper]
   // --------------------------------------------------------------------------
 
-  typedef uint32_t (FOG_CDECL *PathClipperF_InitPath)(PathClipperF& self, const PathF& src);
-  typedef uint32_t (FOG_CDECL *PathClipperD_InitPath)(PathClipperD& self, const PathD& src);
+  typedef uint32_t (FOG_CDECL *PathClipperF_MeasurePath)(PathClipperF* self, const PathF* src);
+  typedef uint32_t (FOG_CDECL *PathClipperD_MeasurePath)(PathClipperD* self, const PathD* src);
 
-  typedef err_t (FOG_CDECL *PathClipperF_ContinuePath)(PathClipperF& self, PathF& dst, const PathF& src);
-  typedef err_t (FOG_CDECL *PathClipperD_ContinuePath)(PathClipperD& self, PathD& dst, const PathD& src);
+  typedef err_t (FOG_CDECL *PathClipperF_ContinuePath)(PathClipperF* self, PathF* dst, const PathF* src);
+  typedef err_t (FOG_CDECL *PathClipperD_ContinuePath)(PathClipperD* self, PathD* dst, const PathD* src);
 
-  typedef err_t (FOG_CDECL *PathClipperF_ContinueRaw)(PathClipperF& self, PathF& dst, const PointF* srcPts, const uint8_t* srcCmd, size_t srcLength);
-  typedef err_t (FOG_CDECL *PathClipperD_ContinueRaw)(PathClipperD& self, PathD& dst, const PointD* srcPts, const uint8_t* srcCmd, size_t srcLength);
+  typedef err_t (FOG_CDECL *PathClipperF_ContinuePathData)(PathClipperF* self, PathF* dst, const PointF* srcPts, const uint8_t* srcCmd, size_t srcLength);
+  typedef err_t (FOG_CDECL *PathClipperD_ContinuePathData)(PathClipperD* self, PathD* dst, const PointD* srcPts, const uint8_t* srcCmd, size_t srcLength);
 
-  typedef err_t (FOG_CDECL *PathClipperF_ClipPath)(PathClipperF& self, PathF& dst, const PathF& src, const TransformF* tr);
-  typedef err_t (FOG_CDECL *PathClipperD_ClipPath)(PathClipperD& self, PathD& dst, const PathD& src, const TransformD* tr);
+  typedef err_t (FOG_CDECL *PathClipperF_ClipPath)(PathClipperF* self, PathF* dst, const PathF* src, const TransformF* tr);
+  typedef err_t (FOG_CDECL *PathClipperD_ClipPath)(PathClipperD* self, PathD* dst, const PathD* src, const TransformD* tr);
 
-  struct FOG_NO_EXPORT _FuncsPathClipperF
+  struct FOG_NO_EXPORT _Api_PathClipperF
   {
-    PathClipperF_InitPath initPath;
+    PathClipperF_MeasurePath measurePath;
     PathClipperF_ContinuePath continuePath;
-    PathClipperF_ContinueRaw continueRaw;
+    PathClipperF_ContinuePathData continuePathData;
     PathClipperF_ClipPath clipPath;
   } pathclipperf;
 
-  struct FOG_NO_EXPORT _FuncsPathClipperD
+  struct FOG_NO_EXPORT _Api_PathClipperD
   {
-    PathClipperD_InitPath initPath;
+    PathClipperD_MeasurePath measurePath;
     PathClipperD_ContinuePath continuePath;
-    PathClipperD_ContinueRaw continueRaw;
+    PathClipperD_ContinuePathData continuePathData;
     PathClipperD_ClipPath clipPath;
   } pathclipperd;
+
+  // --------------------------------------------------------------------------
+  // [G2d/Geometry - PathInfo]
+  // --------------------------------------------------------------------------
+
+  typedef PathInfoF* (FOG_CDECL *PathInfoF_Generate)(const PathF* path);
+  typedef PathInfoD* (FOG_CDECL *PathInfoD_Generate)(const PathD* path);
+
+  struct FOG_NO_EXPORT _Api_PathInfoF
+  {
+    PathInfoF_Generate generate;
+  } pathinfof;
+
+  struct FOG_NO_EXPORT _Api_PathInfoD
+  {
+    PathInfoD_Generate generate;
+  } pathinfod;
+
+  // --------------------------------------------------------------------------
+  // [G2d/Geometry - PathStroker]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *PathStrokerF_Ctor)(PathStrokerF* self);
+  typedef void (FOG_CDECL *PathStrokerD_Ctor)(PathStrokerD* self);
+
+  typedef void (FOG_CDECL *PathStrokerF_CtorParams)(PathStrokerF* self, const PathStrokerParamsF* params, const TransformF* tr, const BoxF* clipBox);
+  typedef void (FOG_CDECL *PathStrokerD_CtorParams)(PathStrokerD* self, const PathStrokerParamsD* params, const TransformD* tr, const BoxD* clipBox);
+
+  typedef void (FOG_CDECL *PathStrokerF_CtorOther)(PathStrokerF* self, const PathStrokerF* other);
+  typedef void (FOG_CDECL *PathStrokerD_CtorOther)(PathStrokerD* self, const PathStrokerD* other);
+
+  typedef void (FOG_CDECL *PathStrokerF_Dtor)(PathStrokerF* self);
+  typedef void (FOG_CDECL *PathStrokerD_Dtor)(PathStrokerD* self);
+
+  typedef void (FOG_CDECL *PathStrokerF_SetParams)(PathStrokerF* self, const PathStrokerParamsF* params);
+  typedef void (FOG_CDECL *PathStrokerD_SetParams)(PathStrokerD* self, const PathStrokerParamsD* params);
+
+  typedef void (FOG_CDECL *PathStrokerF_SetOther)(PathStrokerF* self, const PathStrokerF* other);
+  typedef void (FOG_CDECL *PathStrokerD_SetOther)(PathStrokerD* self, const PathStrokerD* other);
+
+  typedef err_t (FOG_CDECL *PathStrokerF_StrokeShape)(const PathStrokerF* self, PathF* dst, uint32_t shapeType, const void* shapeData);
+  typedef err_t (FOG_CDECL *PathStrokerD_StrokeShape)(const PathStrokerD* self, PathD* dst, uint32_t shapeType, const void* shapeData);
+
+  typedef err_t (FOG_CDECL *PathStrokerF_StrokePath)(const PathStrokerF* self, PathF* dst, const PathF* src);
+  typedef err_t (FOG_CDECL *PathStrokerD_StrokePath)(const PathStrokerD* self, PathD* dst, const PathD* src);
+
+  typedef void (FOG_CDECL *PathStrokerF_Update)(PathStrokerF* self);
+  typedef void (FOG_CDECL *PathStrokerD_Update)(PathStrokerD* self);
+
+  struct FOG_NO_EXPORT _Api_PathStrokerF
+  {
+    PathStrokerF_Ctor ctor;
+    PathStrokerF_CtorParams ctorParams;
+    PathStrokerF_CtorOther ctorOther;
+    PathStrokerF_Dtor dtor;
+    PathStrokerF_SetParams setParams;
+    PathStrokerF_SetOther setOther;
+    PathStrokerF_StrokeShape strokeShape;
+    PathStrokerF_StrokePath strokePath;
+    PathStrokerF_Update update;
+  } pathstrokerf;
+
+  struct FOG_NO_EXPORT _Api_PathStrokerD
+  {
+    PathStrokerD_Ctor ctor;
+    PathStrokerD_CtorParams ctorParams;
+    PathStrokerD_CtorOther ctorOther;
+    PathStrokerD_Dtor dtor;
+    PathStrokerD_SetParams setParams;
+    PathStrokerD_SetOther setOther;
+    PathStrokerD_StrokeShape strokeShape;
+    PathStrokerD_StrokePath strokePath;
+    PathStrokerD_Update update;
+  } pathstrokerd;
 
   // --------------------------------------------------------------------------
   // [G2d/Geometry - Pie]
@@ -1092,12 +3099,12 @@ struct FOG_NO_EXPORT Api
   typedef bool (FOG_CDECL *PieF_HitTest)(const PieF* self, const PointF* pt);
   typedef bool (FOG_CDECL *PieD_HitTest)(const PieD* self, const PointD* pt);
 
-  struct FOG_NO_EXPORT _FuncsPieF
+  struct FOG_NO_EXPORT _Api_PieF
   {
     PieF_HitTest hitTest;
   } pief;
 
-  struct FOG_NO_EXPORT _FuncsPieD
+  struct FOG_NO_EXPORT _Api_PieD
   {
     PieD_HitTest hitTest;
   } pied;
@@ -1118,21 +3125,21 @@ struct FOG_NO_EXPORT Api
   typedef err_t (FOG_CDECL *QBezierF_Flatten)(const PointF* self, PathF& dst, uint8_t initialCommand, float flatness);
   typedef err_t (FOG_CDECL *QBezierD_Flatten)(const PointD* self, PathD& dst, uint8_t initialCommand, double flatness);
 
-  struct FOG_NO_EXPORT _FuncsQBezierF
+  struct FOG_NO_EXPORT _Api_QBezierF
   {
     QBezierF_GetBoundingBox getBoundingBox;
     QBezierF_GetSplineBBox getSplineBBox;
     QBezierF_GetLength getLength;
     QBezierF_Flatten flatten;
-  } quadcurvef;
+  } qbezierf;
 
-  struct FOG_NO_EXPORT _FuncsQBezierD
+  struct FOG_NO_EXPORT _Api_QBezierD
   {
     QBezierD_GetBoundingBox getBoundingBox;
     QBezierD_GetSplineBBox getSplineBBox;
     QBezierD_GetLength getLength;
     QBezierD_Flatten flatten;
-  } quadcurved;
+  } qbezierd;
 
   // --------------------------------------------------------------------------
   // [G2d/Geometry - Round]
@@ -1144,13 +3151,13 @@ struct FOG_NO_EXPORT Api
   typedef bool (FOG_CDECL *RoundF_HitTest)(const RoundF* self, const PointF* pt);
   typedef bool (FOG_CDECL *RoundD_HitTest)(const RoundD* self, const PointD* pt);
 
-  struct FOG_NO_EXPORT _FuncsRoundF
+  struct FOG_NO_EXPORT _Api_RoundF
   {
     RoundF_GetBoundingBox getBoundingBox;
     RoundF_HitTest hitTest;
   } roundf;
 
-  struct FOG_NO_EXPORT _FuncsRoundD
+  struct FOG_NO_EXPORT _Api_RoundD
   {
     RoundD_GetBoundingBox getBoundingBox;
     RoundD_HitTest hitTest;
@@ -1166,13 +3173,13 @@ struct FOG_NO_EXPORT Api
   typedef bool (FOG_CDECL *ShapeF_HitTest)(uint32_t shapeType, const void* shapeData, const PointF* pt);
   typedef bool (FOG_CDECL *ShapeD_HitTest)(uint32_t shapeType, const void* shapeData, const PointD* pt);
 
-  struct FOG_NO_EXPORT _FuncsShapeF
+  struct FOG_NO_EXPORT _Api_ShapeF
   {
     ShapeF_GetBoundingBox getBoundingBox;
     ShapeF_HitTest hitTest;
   } shapef;
 
-  struct FOG_NO_EXPORT _FuncsShapeD
+  struct FOG_NO_EXPORT _Api_ShapeD
   {
     ShapeD_GetBoundingBox getBoundingBox;
     ShapeD_HitTest hitTest;
@@ -1230,7 +3237,7 @@ struct FOG_NO_EXPORT Api
   typedef float (FOG_CDECL *TransformF_GetAverageScaling)(const TransformF& self);
   typedef double (FOG_CDECL *TransformD_GetAverageScaling)(const TransformD& self);
 
-  struct FOG_NO_EXPORT _FuncsTransformF
+  struct FOG_NO_EXPORT _Api_TransformF
   {
     TransformF_Create create;
     TransformF_Update update;
@@ -1249,7 +3256,7 @@ struct FOG_NO_EXPORT Api
     TransformF_GetAverageScaling getAverageScaling;
   } transformf;
 
-  struct FOG_NO_EXPORT _FuncsTransformD
+  struct FOG_NO_EXPORT _Api_TransformD
   {
     TransformD_Create create;
     TransformD_Update update;
@@ -1281,13 +3288,13 @@ struct FOG_NO_EXPORT Api
   typedef bool (FOG_CDECL *TriangleF_HitTest)(const PointF* self, const PointF* pt);
   typedef bool (FOG_CDECL *TriangleD_HitTest)(const PointD* self, const PointD* pt);
 
-  struct FOG_NO_EXPORT _FuncsTriangleF
+  struct FOG_NO_EXPORT _Api_TriangleF
   {
     TriangleF_GetBoundingBox getBoundingBox;
     TriangleF_HitTest hitTest;
   } trianglef;
 
-  struct FOG_NO_EXPORT _FuncsTriangleD
+  struct FOG_NO_EXPORT _Api_TriangleD
   {
     TriangleD_GetBoundingBox getBoundingBox;
     TriangleD_HitTest hitTest;
@@ -1305,7 +3312,7 @@ struct FOG_NO_EXPORT Api
     uint32_t depth, uint32_t flags,
     uint64_t aMask, uint64_t rMask, uint64_t gMask, uint64_t bMask);
 
-  struct FOG_NO_EXPORT _FuncsImageFormatDescription
+  struct FOG_NO_EXPORT _Api_ImageFormatDescription
   {
     ImageFormatDescription_GetCompatibleFormat getCompatibleFormat;
     ImageFormatDescription_CreateArgb createArgb;
@@ -1323,7 +3330,7 @@ struct FOG_NO_EXPORT Api
   typedef err_t (FOG_CDECL *Painter_SwitchToImage)(Painter* self, Image& image, const RectI* rect);
   typedef err_t (FOG_CDECL *Painter_SwitchToIBits)(Painter* self, const ImageBits& imageBits, const RectI* rect);
 
-  struct FOG_NO_EXPORT _FuncsPainter
+  struct FOG_NO_EXPORT _Api_Painter
   {
     Painter_GetNullEngine getNullEngine;
     Painter_BeginImage beginImage;
@@ -1343,10 +3350,10 @@ struct FOG_NO_EXPORT Api
   typedef err_t (FOG_CDECL *Color_Mix)(Color& self, uint32_t mixOp, uint32_t alphaOp, const Color& secondary, float mask);
   typedef err_t (FOG_CDECL *Color_Adjust)(Color& self, uint32_t adjustOp, float param);
 
-  typedef err_t (FOG_CDECL *Color_ParseA)(Color& self, const Stub8& str, uint32_t flags);
-  typedef err_t (FOG_CDECL *Color_ParseU)(Color& self, const Utf16& str, uint32_t flags);
+  typedef err_t (FOG_CDECL *Color_ParseA)(Color& self, const StubA& str, uint32_t flags);
+  typedef err_t (FOG_CDECL *Color_ParseU)(Color& self, const StubW& str, uint32_t flags);
 
-  struct FOG_NO_EXPORT _FuncsColor
+  struct FOG_NO_EXPORT _Api_Color
   {
     Color_Convert convert[_COLOR_MODEL_COUNT][_COLOR_MODEL_COUNT];
 
@@ -1359,6 +3366,145 @@ struct FOG_NO_EXPORT Api
     Color_ParseA parseA;
     Color_ParseU parseU;
   } color;
+
+  // --------------------------------------------------------------------------
+  // [G2d/Tools - Region]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *Region_Ctor)(Region* self);
+  typedef void (FOG_CDECL *Region_CtorRegion)(Region* self, const Region* other);
+  typedef void (FOG_CDECL *Region_CtorBox)(Region* self, const BoxI* box);
+  typedef void (FOG_CDECL *Region_CtorRect)(Region* self, const RectI* rect);
+  typedef void (FOG_CDECL *Region_Dtor)(Region* self);
+
+  typedef err_t (FOG_CDECL *Region_Detach)(Region* self);
+  typedef err_t (FOG_CDECL *Region_Reserve)(Region* self, size_t capacity);
+  typedef void (FOG_CDECL *Region_Squeeze)(Region* self);
+  typedef err_t (FOG_CDECL *Region_Prepare)(Region* self, size_t count);
+
+  typedef uint32_t (FOG_CDECL *Region_GetType)(const Region* self);
+
+  typedef void (FOG_CDECL *Region_Clear)(Region* self);
+  typedef void (FOG_CDECL *Region_Reset)(Region* self);
+
+  typedef err_t (FOG_CDECL *Region_SetRegion)(Region* self, const Region* other);
+  typedef err_t (FOG_CDECL *Region_SetDeep)(Region* self, const Region* other);
+  typedef err_t (FOG_CDECL *Region_SetBox)(Region* self, const BoxI* box);
+  typedef err_t (FOG_CDECL *Region_SetRect)(Region* self, const RectI* rect);
+
+  typedef err_t (FOG_CDECL *Region_SetBoxList)(Region* self, const BoxI* data, size_t length);
+  typedef err_t (FOG_CDECL *Region_SetRectList)(Region* self, const RectI* data, size_t length);
+
+  typedef err_t (FOG_CDECL *Region_CombineRegionRegion)(Region* dst, const Region* a, const Region* b, uint32_t combineOp);
+  typedef err_t (FOG_CDECL *Region_CombineRegionBox)(Region* dst, const Region* a, const BoxI* b, uint32_t combineOp);
+  typedef err_t (FOG_CDECL *Region_CombineBoxRegion)(Region* dst, const BoxI* a, const Region* b, uint32_t combineOp);
+  typedef err_t (FOG_CDECL *Region_CombineBoxBox)(Region* dst, const BoxI* a, const BoxI* b, uint32_t combineOp);
+
+  typedef err_t (FOG_CDECL *Region_Translate)(Region* dst, const Region* src, const PointI* pt);
+  typedef err_t (FOG_CDECL *Region_TranslateAndClip)(Region* dst, const Region* src, const PointI* pt, const BoxI* clipBox);
+  typedef err_t (FOG_CDECL *Region_IntersectAndClip)(Region* dst, const Region* a, const Region* b, const BoxI* clipBox);
+
+  typedef uint32_t (FOG_CDECL *Region_HitTestPoint)(const Region* self, const PointI* pt);
+  typedef uint32_t (FOG_CDECL *Region_HitTestBox)(const Region* self, const BoxI* box);
+  typedef uint32_t (FOG_CDECL *Region_HitTestRect)(const Region* self, const RectI* rect);
+
+  typedef bool (FOG_CDECL *Region_Eq)(const Region* a, const Region* b);
+
+#if defined(FOG_OS_WINDOWS)
+  typedef err_t (FOG_CDECL *Region_HRGNFromRegion)(HRGN* dst, const Region* src);
+  typedef err_t (FOG_CDECL *Region_RegionFromHRGN)(Region* dst, HRGN src);
+#endif // FOG_OS_WINDOWS
+
+  typedef RegionData* (FOG_CDECL *Region_DCreate)(size_t capacity);
+  typedef RegionData* (FOG_CDECL *Region_DCreateBox)(size_t capacity, const BoxI* box);
+  typedef RegionData* (FOG_CDECL *Region_DCreateRegion)(size_t capacity, const BoxI* data, size_t count, const BoxI* extent);
+
+  typedef RegionData* (FOG_CDECL *Region_DAdopt)(void* address, size_t capacity);
+  typedef RegionData* (FOG_CDECL *Region_DAdoptBox)(void* address, size_t capacity, const BoxI* box);
+  typedef RegionData* (FOG_CDECL *Region_DAdoptRegion)(void* address, size_t capacity, const BoxI* data, size_t count, const BoxI* bbox);
+
+  typedef RegionData* (FOG_CDECL *Region_DRealloc)(RegionData* d, size_t capacity);
+  typedef RegionData* (FOG_CDECL *Region_DCopy)(const RegionData* d);
+
+  typedef void (FOG_CDECL *Region_DFree)(RegionData* d);
+
+  struct FOG_NO_EXPORT _Api_Region
+  {
+    Region_Ctor ctor;
+    Region_CtorRegion ctorRegion;
+    Region_CtorBox ctorBox;
+    Region_CtorRect ctorRect;
+    Region_Dtor dtor;
+
+    Region_Detach detach;
+    Region_Reserve reserve;
+    Region_Squeeze squeeze;
+    Region_Prepare prepare;
+
+    Region_GetType getType;
+
+    Region_Clear clear;
+    Region_Reset reset;
+
+    Region_SetRegion setRegion;
+    Region_SetDeep setDeep;
+    Region_SetBox setBox;
+    Region_SetRect setRect;
+
+    Region_SetBoxList setBoxList;
+    Region_SetRectList setRectList;
+
+    Region_CombineRegionRegion combineRegionRegion;
+    Region_CombineRegionBox combineRegionBox;
+    Region_CombineBoxRegion combineBoxRegion;
+    Region_CombineBoxBox combineBoxBox;
+
+    Region_Translate translate;
+    Region_TranslateAndClip translateAndClip;
+    Region_IntersectAndClip intersectAndClip;
+
+    Region_HitTestPoint hitTestPoint;
+    Region_HitTestBox hitTestBox;
+    Region_HitTestRect hitTestRect;
+
+    Region_Eq eq;
+
+#if defined(FOG_OS_WINDOWS)
+    Region_HRGNFromRegion hrgnFromRegion;
+    Region_RegionFromHRGN regionFromHRGN;
+#endif // FOG_OS_WINDOWS
+
+    Region_DCreate dCreate;
+    Region_DCreateBox dCreateBox;
+    Region_DCreateRegion dCreateRegion;
+
+    Region_DAdopt dAdopt;
+    Region_DAdoptBox dAdoptBox;
+    Region_DAdoptRegion dAdoptRegion;
+
+    Region_DRealloc dRealloc;
+    Region_DCopy dCopy;
+
+    Region_DFree dFree;
+
+    Region* oEmpty;
+    Region* oInfinite;
+  } region;
+
+  // --------------------------------------------------------------------------
+  // [G2d/Tools - RegionUtil]
+  // --------------------------------------------------------------------------
+
+  typedef const BoxI* (FOG_CDECL *RegionUtil_GetClosestBox)(const BoxI* data, size_t length, int y);
+  typedef bool (FOG_CDECL *RegionUtil_IsBoxListSorted)(const BoxI* data, size_t length);
+  typedef bool (FOG_CDECL *RegionUtil_IsRectListSorted)(const RectI* data, size_t length);
+
+  struct FOG_NO_EXPORT _Api_RegionUtil
+  {
+    RegionUtil_GetClosestBox getClosestBox;
+    RegionUtil_IsBoxListSorted isBoxListSorted;
+    RegionUtil_IsRectListSorted isRectListSorted;
+  } regionutil;
 };
 
 extern FOG_API Api _api;

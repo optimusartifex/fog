@@ -9,12 +9,11 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/Hash.h>
-#include <Fog/Core/Collection/List.h>
 #include <Fog/Core/IO/MapFile.h>
 #include <Fog/Core/IO/Stream.h>
-#include <Fog/Core/Tools/Byte.h>
 #include <Fog/Core/Tools/Char.h>
+#include <Fog/Core/Tools/Hash.h>
+#include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringUtil.h>
 #include <Fog/Core/Tools/TextCodec.h>
@@ -35,7 +34,7 @@ namespace Fog {
 
 // Decode text that contains XML entities into plain form, for example
 // &quot;Hello&quot will be decoded to "Hello".
-static err_t xmlDecodeText(String& dst, const Utf16& src)
+static err_t xmlDecodeText(StringW& dst, const StubW& src)
 {
   size_t length = src.getLength();
 
@@ -47,12 +46,12 @@ static err_t xmlDecodeText(String& dst, const Utf16& src)
 
   FOG_RETURN_ON_ERROR(dst.resize(length));
 
-  Char* dstPtr = dst.getDataX();
-  const Char* srcPtr = src.getData();
-  const Char* srcEnd = srcPtr + length;
+  CharW* dstPtr = dst.getDataX();
+  const CharW* srcPtr = src.getData();
+  const CharW* srcEnd = srcPtr + length;
 
   do {
-    if (srcPtr[0] != Char('&'))
+    if (srcPtr[0] != CharW('&'))
     {
       dstPtr[0] = srcPtr[0];
       dstPtr++;
@@ -60,8 +59,8 @@ static err_t xmlDecodeText(String& dst, const Utf16& src)
     }
     else
     {
-      const Char* mark = ++srcPtr;
-      while (srcPtr != srcEnd && srcPtr[0] != Char(';')) srcPtr++;
+      const CharW* mark = ++srcPtr;
+      while (srcPtr != srcEnd && srcPtr[0] != CharW(';')) srcPtr++;
 
       // TODO: Unterminated entity.
       if (srcPtr == srcEnd)
@@ -73,7 +72,7 @@ static err_t xmlDecodeText(String& dst, const Utf16& src)
     }
   } while (srcPtr != srcEnd);
 
-  dst.finishDataX(dstPtr);
+  dst._modified(dstPtr);
   return ERR_OK;
 }
 
@@ -91,7 +90,7 @@ XmlDomReader::~XmlDomReader()
 {
 }
 
-err_t XmlDomReader::onAddElement(const Utf16& tagName)
+err_t XmlDomReader::onAddElement(const StubW& tagName)
 {
   XmlElement* e = _document->createElement(ManagedString(tagName));
   if (!e) return ERR_RT_OUT_OF_MEMORY;
@@ -109,7 +108,7 @@ err_t XmlDomReader::onAddElement(const Utf16& tagName)
   }
 }
 
-err_t XmlDomReader::onCloseElement(const Utf16& tagName)
+err_t XmlDomReader::onCloseElement(const StubW& tagName)
 {
   if (_current != _document)
   {
@@ -122,17 +121,17 @@ err_t XmlDomReader::onCloseElement(const Utf16& tagName)
   }
 }
 
-err_t XmlDomReader::onAddAttribute(const Utf16& name, const Utf16& value)
+err_t XmlDomReader::onAddAttribute(const StubW& name, const StubW& value)
 {
-  String decodedValue;
+  StringW decodedValue;
   FOG_RETURN_ON_ERROR(xmlDecodeText(decodedValue, value));
 
   return _current->_setAttribute(ManagedString(name), decodedValue);
 }
 
-err_t XmlDomReader::onAddText(const Utf16& data, bool isWhiteSpace)
+err_t XmlDomReader::onAddText(const StubW& data, bool isWhiteSpace)
 {
-  String decodedData;
+  StringW decodedData;
   FOG_RETURN_ON_ERROR(xmlDecodeText(decodedData, data));
 
   if (_current == _document)
@@ -151,11 +150,11 @@ err_t XmlDomReader::onAddText(const Utf16& data, bool isWhiteSpace)
   return err;
 }
 
-err_t XmlDomReader::onAddCDATA(const Utf16& data)
+err_t XmlDomReader::onAddCDATA(const StubW& data)
 {
   if (_current == _document) return ERR_XML_DOCUMENT_INVALID_CHILD;
 
-  XmlElement* e = fog_new XmlCDATA(String(data));
+  XmlElement* e = fog_new XmlCDATA(StringW(data));
   if (!e) return ERR_RT_OUT_OF_MEMORY;
 
   err_t err = _current->appendChild(e);
@@ -163,7 +162,7 @@ err_t XmlDomReader::onAddCDATA(const Utf16& data)
   return err;
 }
 
-err_t XmlDomReader::onAddDOCTYPE(const List<String>& doctype)
+err_t XmlDomReader::onAddDOCTYPE(const List<StringW>& doctype)
 {
   if (_current != _document) return ERR_XML_DOCUMENT_INVALID_CHILD;
 
@@ -173,9 +172,9 @@ err_t XmlDomReader::onAddDOCTYPE(const List<String>& doctype)
   return ERR_OK;
 }
 
-err_t XmlDomReader::onAddPI(const Utf16& data)
+err_t XmlDomReader::onAddPI(const StubW& data)
 {
-  XmlElement* e = fog_new XmlPI(String(data));
+  XmlElement* e = fog_new XmlPI(StringW(data));
   if (!e) return ERR_RT_OUT_OF_MEMORY;
 
   err_t err = _current->appendChild(e);
@@ -183,9 +182,9 @@ err_t XmlDomReader::onAddPI(const Utf16& data)
   return err;
 }
 
-err_t XmlDomReader::onAddComment(const Utf16& data)
+err_t XmlDomReader::onAddComment(const StubW& data)
 {
-  XmlElement* e = fog_new XmlComment(String(data));
+  XmlElement* e = fog_new XmlComment(StringW(data));
   if (!e) return ERR_RT_OUT_OF_MEMORY;
 
   err_t err = _current->appendChild(e);

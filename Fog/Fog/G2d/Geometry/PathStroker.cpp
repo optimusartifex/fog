@@ -9,47 +9,20 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/BufferP.h>
-#include <Fog/Core/Global/Internals_p.h>
+#include <Fog/Core/Global/Global.h>
+#include <Fog/Core/Global/Private.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Alloc.h>
+#include <Fog/Core/Memory/MemBufferTmp_p.h>
 #include <Fog/G2d/Geometry/Math2d.h>
 #include <Fog/G2d/Geometry/Path.h>
+#include <Fog/G2d/Geometry/PathClipper.h>
 #include <Fog/G2d/Geometry/PathStroker.h>
 #include <Fog/G2d/Geometry/PathTmp_p.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Transform.h>
 
 namespace Fog {
-
-// ============================================================================
-// [Helpers]
-// ============================================================================
-
-err_t _ListFloatFromListDouble(List<float>& dst, const List<double>& src)
-{
-  size_t i, len = src.getLength();
-  FOG_RETURN_ON_ERROR(dst.resize(len));
-
-  float* dstData = dst.getDataX();
-  const double* srcData = src.getData();
-
-  for (i = 0; i < len; i++) dstData[i] = (float)srcData[i];
-  return ERR_OK;
-}
-
-err_t _ListDoubleFromListFloat(List<double>& dst, const List<float>& src)
-{
-  size_t i, len = src.getLength();
-  FOG_RETURN_ON_ERROR(dst.resize(len));
-
-  double* dstData = dst.getDataX();
-  const float* srcData = src.getData();
-
-  for (i = 0; i < len; i++) dstData[i] = (double)srcData[i];
-  return ERR_OK;
-}
 
 // ============================================================================
 // [Fog::PathStrokerContextT<> - Declaration]
@@ -62,20 +35,13 @@ struct PathStrokerContextT
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE PathStrokerContextT(
-    const NumT_(PathStroker)& stroker,
-    NumT_(Path)& dst,
-    const NumT_(Transform)* transform,
-    const NumT_(Box)* clipBox)
-    :
+  FOG_INLINE PathStrokerContextT(const NumT_(PathStroker)* stroker, NumT_(Path)* dst) :
     stroker(stroker),
     dst(dst),
-    transform(transform),
-    clipBox(clipBox),
     distances(NULL),
     distancesAlloc(0)
   {
-    dstInitial = dst.getLength();
+    dstInitial = dst->getLength();
   }
 
   FOG_INLINE ~PathStrokerContextT()
@@ -87,9 +53,8 @@ struct PathStrokerContextT
   // --------------------------------------------------------------------------
 
   err_t strokeShape(uint32_t shapeType, const void* shapeData);
-  err_t strokePath(const NumT_(Path)& src);
-
-  err_t strokePathPrivate(const NumT_(Path)& src);
+  err_t strokePath(const NumT_(Path)* src);
+  err_t strokePathPrivate(const NumT_(Path)* src);
 
   // --------------------------------------------------------------------------
   // [Prepare / Finalize]
@@ -132,9 +97,9 @@ struct PathStrokerContextT
   // [Members]
   // --------------------------------------------------------------------------
 
-  const NumT_(PathStroker)& stroker;
+  const NumT_(PathStroker)* stroker;
 
-  NumT_(Path)& dst;
+  NumT_(Path)* dst;
   size_t dstInitial;
 
   NumT_(Point)* dstCur;
@@ -143,11 +108,8 @@ struct PathStrokerContextT
   // uint8_t *cmd;
   // size_t remain;
 
-  const NumT_(Transform)* transform;
-  const NumT_(Box)* clipBox;
-
   //! @brief Memory buffer used to store distances.
-  BufferP<1024> buffer;
+  MemBufferTmp<1024> buffer;
 
   NumT* distances;
   size_t distancesAlloc;
@@ -162,20 +124,20 @@ err_t PathStrokerContextT<NumT>::strokeShape(uint32_t shapeType, const void* sha
 {
   NumT_T1(PathTmp, 32) tmp;
   tmp._shape(shapeType, shapeData, PATH_DIRECTION_CW, NULL);
-  return strokePath(tmp);
+  return strokePath(&tmp);
 }
 
 template<typename NumT>
-err_t PathStrokerContextT<NumT>::strokePath(const NumT_(Path)& src)
+err_t PathStrokerContextT<NumT>::strokePath(const NumT_(Path)* src)
 {
   // We need:
   // - the Path instances have to be different.
   // - source path must be flat.
-  if (&dst == &src || src.hasBeziers() || !stroker._transform.isIdentity())
+  if (dst == src || src->hasBeziers() || !stroker->_transform->isIdentity())
   {
     NumT_T1(PathTmp, 200) tmp;
-    FOG_RETURN_ON_ERROR(NumI_(Path)::flatten(tmp, src, stroker._flatness));
-    return strokePathPrivate(tmp);
+    FOG_RETURN_ON_ERROR(NumI_(Path)::flatten(tmp, *src, stroker->_flatness));
+    return strokePathPrivate(&tmp);
   }
   else
   {
@@ -184,22 +146,22 @@ err_t PathStrokerContextT<NumT>::strokePath(const NumT_(Path)& src)
 }
 
 template<typename NumT>
-err_t PathStrokerContextT<NumT>::strokePathPrivate(const NumT_(Path)& src)
+err_t PathStrokerContextT<NumT>::strokePathPrivate(const NumT_(Path)* src)
 {
-  const uint8_t* commands = src.getCommands();
-  const NumT_(Point)* vertices = src.getVertices();
+  const uint8_t* commands = src->getCommands();
+  const NumT_(Point)* vertices = src->getVertices();
 
   // Traverse path, find moveTo / lineTo segments and stroke them.
   const uint8_t* subCommand = NULL;
   const uint8_t* curCommand = commands;
-  size_t remain = src.getLength();
+  size_t remain = src->getLength();
 
   while (remain)
   {
     uint8_t cmd = curCommand[0];
 
-    // LineTo is the most used command here, so it's first.
-    if (FOG_LIKELY(PathCmd::isLineTo(cmd)))
+    // LineTo is the most used command, so it's first.
+    if (PathCmd::isLineTo(cmd))
     {
       // Nothing here...
     }
@@ -228,7 +190,7 @@ err_t PathStrokerContextT<NumT>::strokePathPrivate(const NumT_(Path)& src)
         size_t subLength = (size_t)(curCommand - subCommand);
 
         FOG_RETURN_ON_ERROR(
-          strokePathFigure(vertices + subStart, subLength, true)
+          strokePathFigure(vertices + subStart, subLength, subLength > 2)
         );
       }
 
@@ -259,35 +221,36 @@ err_t PathStrokerContextT<NumT>::strokePathPrivate(const NumT_(Path)& src)
 // ============================================================================
 
 #define ADD_VERTEX(x, y) \
-  do { \
+  FOG_MACRO_BEGIN \
     if (FOG_UNLIKELY(dstCur == dstEnd)) FOG_RETURN_ON_ERROR(_grow()); \
     \
     dstCur->set(x, y); \
     dstCur++; \
-  } while(0)
+  FOG_MACRO_END
 
 #define CUR_INDEX() \
-  ( (size_t)(dstCur - dst._d->vertices) )
+  ( (size_t)(dstCur - dst->_d->vertices) )
 
 template<typename NumT>
 err_t PathStrokerContextT<NumT>::_begin()
 {
-  size_t cap = dst.getCapacity();
-  size_t remain = cap - dst.getLength();
-  if (remain < 64 || !dst.isDetached())
+  size_t cap = dst->getCapacity();
+  size_t remain = cap - dst->getLength();
+
+  if (remain < 64 || !dst->isDetached())
   {
     if (cap < 256)
       cap = 256;
     else
       cap *= 2;
-    FOG_RETURN_ON_ERROR(dst.reserve(cap));
+    FOG_RETURN_ON_ERROR(dst->reserve(cap));
   }
 
-  dstCur = const_cast<NumT_(Point)*>(dst.getVertices());
+  dstCur = const_cast<NumT_(Point)*>(dst->getVertices());
   dstEnd = dstCur;
 
-  dstCur += dst.getLength();
-  dstEnd += dst.getCapacity();
+  dstCur += dst->getLength();
+  dstEnd += dst->getCapacity();
 
   return ERR_OK;
 }
@@ -295,24 +258,24 @@ err_t PathStrokerContextT<NumT>::_begin()
 template<typename NumT>
 err_t PathStrokerContextT<NumT>::_grow()
 {
-  size_t len = dst._d->length;
-  size_t cap = dst._d->capacity;
+  size_t len = dst->_d->length;
+  size_t cap = dst->_d->capacity;
 
-  dst._d->length = cap;
+  dst->_d->length = cap;
   if (cap < 256)
     cap = 512;
   else
     cap *= 2;
 
-  err_t err = dst.reserve(cap);
+  err_t err = dst->reserve(cap);
   if (FOG_IS_ERROR(err))
     return err;
 
-  dstCur = const_cast<NumT_(Point)*>(dst.getVertices());
+  dstCur = const_cast<NumT_(Point)*>(dst->getVertices());
   dstEnd = dstCur;
 
-  dstCur += dst.getLength();
-  dstEnd += dst.getCapacity();
+  dstCur += dst->getLength();
+  dstEnd += dst->getCapacity();
 
   return ERR_OK;
 };
@@ -323,13 +286,13 @@ err_t PathStrokerContextT<NumT>::calcArc(
   NumT dx1, NumT dy1,
   NumT dx2, NumT dy2)
 {
-  NumT a1 = Math::atan2(dy1 * stroker._wSign, dx1 * stroker._wSign);
-  NumT a2 = Math::atan2(dy2 * stroker._wSign, dx2 * stroker._wSign);
-  NumT da = stroker._da;
+  NumT a1 = Math::atan2(dy1 * stroker->_wSign, dx1 * stroker->_wSign);
+  NumT a2 = Math::atan2(dy2 * stroker->_wSign, dx2 * stroker->_wSign);
+  NumT da = stroker->_da;
   int i, n;
 
   ADD_VERTEX(x + dx1, y + dy1);
-  if (stroker._wSign > 0)
+  if (stroker->_wSign > 0)
   {
     if (a1 > a2) a2 += MATH_TWO_PI;
     n = int((a2 - a1) / da);
@@ -338,11 +301,10 @@ err_t PathStrokerContextT<NumT>::calcArc(
 
     for (i = 0; i < n; i++)
     {
-      NumT a1Sin;
-      NumT a1Cos;
+      NumT a1Sin, a1Cos;
       Math::sincos(a1, &a1Sin, &a1Cos);
 
-      ADD_VERTEX(x + a1Cos * stroker._w, y + a1Sin * stroker._w);
+      ADD_VERTEX(x + a1Cos * stroker->_w, y + a1Sin * stroker->_w);
       a1 += da;
     }
   }
@@ -355,11 +317,10 @@ err_t PathStrokerContextT<NumT>::calcArc(
 
     for (i = 0; i < n; i++)
     {
-      NumT a1Sin;
-      NumT a1Cos;
+      NumT a1Sin, a1Cos;
       Math::sincos(a1, &a1Sin, &a1Cos);
 
-      ADD_VERTEX(x + a1Cos * stroker._w, y + a1Sin * stroker._w);
+      ADD_VERTEX(x + a1Cos * stroker->_w, y + a1Sin * stroker->_w);
       a1 -= da;
     }
   }
@@ -376,11 +337,11 @@ err_t PathStrokerContextT<NumT>::calcArc(
   NumT dx2, NumT dy2)
 {
   NumT a1, a2;
-  NumT da = stroker._da;
+  NumT da = stroker->_da;
   int i, n;
 
   ADD_VERTEX(x + dx1, y + dy1);
-  if (stroker._wSign > 0)
+  if (stroker->_wSign > 0)
   {
     a1 = Math::atan2(dy1, dx1);
     a2 = Math::atan2(dy2, dx2);
@@ -400,11 +361,10 @@ err_t PathStrokerContextT<NumT>::calcArc(
 
   for (i = 0; i < n; i++)
   {
-    NumT a1Sin;
-    NumT a1Cos;
+    NumT a1Sin, a1Cos;
     Math::sincos(a1, &a1Sin, &a1Cos);
 
-    ADD_VERTEX(x + a1Cos * stroker._w, y + a1Sin * stroker._w);
+    ADD_VERTEX(x + a1Cos * stroker->_w, y + a1Sin * stroker->_w);
     a1 += da;
   }
 
@@ -425,7 +385,7 @@ err_t PathStrokerContextT<NumT>::calcMiter(
 {
   NumT_(Point) pi(v1.x, v1.y);
   NumT di = NumT(1);
-  NumT lim = stroker._wAbs * mlimit;
+  NumT lim = stroker->_wAbs * mlimit;
   bool intersectionFailed  = true; // Assume the worst
 
   if (Math2d::intersectLine(pi,
@@ -466,7 +426,7 @@ err_t PathStrokerContextT<NumT>::calcMiter(
   }
 
   // Miter limit exceeded.
-  switch(lineJoin)
+  switch (lineJoin)
   {
     case LINE_JOIN_MITER_REVERT:
       // For the compatibility with SVG, PDF, etc, we use a simple bevel
@@ -483,7 +443,7 @@ err_t PathStrokerContextT<NumT>::calcMiter(
       // If no miter-revert, calculate new dx1, dy1, dx2, dy2.
       if (intersectionFailed)
       {
-        mlimit *= stroker._wSign;
+        mlimit *= stroker->_wSign;
         ADD_VERTEX(v1.x + dx1 + dy1 * mlimit, v1.y - dy1 + dx1 * mlimit);
         ADD_VERTEX(v1.x + dx2 - dy2 * mlimit, v1.y - dy2 - dx2 * mlimit);
       }
@@ -515,8 +475,8 @@ err_t PathStrokerContextT<NumT>::calcCap(
   NumT dx1 = (v1.y - v0.y) * ilen;
   NumT dy1 = (v1.x - v0.x) * ilen;
 
-  dx1 *= stroker._w;
-  dy1 *= stroker._w;
+  dx1 *= stroker->_w;
+  dy1 *= stroker->_w;
 
   switch (cap)
   {
@@ -529,8 +489,8 @@ err_t PathStrokerContextT<NumT>::calcCap(
 
     case LINE_CAP_SQUARE:
     {
-      NumT dx2 = dy1 * stroker._wSign;
-      NumT dy2 = dx1 * stroker._wSign;
+      NumT dx2 = dy1 * stroker->_wSign;
+      NumT dy2 = dx1 * stroker->_wSign;
 
       ADD_VERTEX(v0.x - dx1 - dx2, v0.y + dy1 - dy2);
       ADD_VERTEX(v0.x + dx1 - dx2, v0.y - dy1 - dy2);
@@ -540,13 +500,13 @@ err_t PathStrokerContextT<NumT>::calcCap(
     case LINE_CAP_ROUND:
     {
       int i;
-      int n = int(MATH_PI / stroker._da);
+      int n = int(MATH_PI / stroker->_da);
       NumT da = NumT(MATH_PI) / NumT(n + 1);
       NumT a1;
 
       ADD_VERTEX(v0.x - dx1, v0.y + dy1);
 
-      if (stroker._wSign > 0)
+      if (stroker->_wSign > 0)
       {
         a1 = Math::atan2(dy1, -dx1) + da;
       }
@@ -562,7 +522,7 @@ err_t PathStrokerContextT<NumT>::calcCap(
         NumT a1_cos;
         Math::sincos(a1, &a1_sin, &a1_cos);
 
-        ADD_VERTEX(v0.x + a1_cos * stroker._w, v0.y + a1_sin * stroker._w);
+        ADD_VERTEX(v0.x + a1_cos * stroker->_w, v0.y + a1_sin * stroker->_w);
         a1 += da;
       }
 
@@ -570,22 +530,22 @@ err_t PathStrokerContextT<NumT>::calcCap(
       break;
     }
 
-    case LINE_CAP_ROUND_REVERT:
+    case LINE_CAP_ROUND_REVERSE:
     {
       int i;
-      int n = int(MATH_PI / stroker._da);
+      int n = int(MATH_PI / stroker->_da);
       NumT da = NumT(MATH_PI) / NumT(n + 1);
       NumT a1;
 
-      NumT dx2 = dy1 * stroker._wSign;
-      NumT dy2 = dx1 * stroker._wSign;
+      NumT dx2 = dy1 * stroker->_wSign;
+      NumT dy2 = dx1 * stroker->_wSign;
 
       NumT vx = v0.x - dx2;
       NumT vy = v0.y - dy2;
 
       ADD_VERTEX(vx - dx1, vy + dy1);
 
-      if (stroker._wSign > 0)
+      if (stroker->_wSign > 0)
       {
         da = -da;
         a1 = Math::atan2(dy1, -dx1) + da;
@@ -601,7 +561,7 @@ err_t PathStrokerContextT<NumT>::calcCap(
         NumT a1_cos;
         Math::sincos(a1, &a1_sin, &a1_cos);
 
-        ADD_VERTEX(vx + a1_cos * stroker._w, vy + a1_sin * stroker._w);
+        ADD_VERTEX(vx + a1_cos * stroker->_w, vy + a1_sin * stroker->_w);
         a1 += da;
       }
 
@@ -611,8 +571,8 @@ err_t PathStrokerContextT<NumT>::calcCap(
 
     case LINE_CAP_TRIANGLE:
     {
-      NumT dx2 = dy1 * stroker._wSign;
-      NumT dy2 = dx1 * stroker._wSign;
+      NumT dx2 = dy1 * stroker->_wSign;
+      NumT dy2 = dx1 * stroker->_wSign;
 
       ADD_VERTEX(v0.x - dx1, v0.y + dy1);
       ADD_VERTEX(v0.x - dx2, v0.y - dy2);
@@ -620,10 +580,10 @@ err_t PathStrokerContextT<NumT>::calcCap(
       break;
     }
 
-    case LINE_CAP_TRIANGLE_REVERT:
+    case LINE_CAP_TRIANGLE_REVERSE:
     {
-      NumT dx2 = dy1 * stroker._wSign;
-      NumT dy2 = dx1 * stroker._wSign;
+      NumT dx2 = dy1 * stroker->_wSign;
+      NumT dy2 = dx1 * stroker->_wSign;
 
       ADD_VERTEX(v0.x - dx1 - dx2, v0.y + dy1 - dy2);
       ADD_VERTEX(v0.x, v0.y);
@@ -638,21 +598,6 @@ err_t PathStrokerContextT<NumT>::calcCap(
 // [Fog::INNER_JOIN]
 // ============================================================================
 
-// TODO: Remove INNER-JOIN.
-
-//! @brief Inner join.
-enum INNER_JOIN
-{
-  INNER_JOIN_MITER = 0,
-  INNER_JOIN_BEVEL = 1,
-  INNER_JOIN_ROUND = 2,
-  INNER_JOIN_JAG = 3,
-
-  INNER_JOIN_DEFAULT = INNER_JOIN_MITER,
-  //! @brief Used to catch invalid arguments.
-  INNER_JOIN_COUNT = 4
-};
-
 template<typename NumT>
 err_t PathStrokerContextT<NumT>::calcJoin(
   const NumT_(Point)& v0,
@@ -661,8 +606,8 @@ err_t PathStrokerContextT<NumT>::calcJoin(
   NumT len1,
   NumT len2)
 {
-  NumT wilen1 = (stroker._w / len1);
-  NumT wilen2 = (stroker._w / len2);
+  NumT wilen1 = (stroker->_w / len1);
+  NumT wilen2 = (stroker->_w / len2);
 
   NumT dx1 = (v1.y - v0.y) * wilen1;
   NumT dy1 = (v1.x - v0.x) * wilen1;
@@ -671,52 +616,10 @@ err_t PathStrokerContextT<NumT>::calcJoin(
 
   NumT cp = Math2d::crossProduct(v0, v1, v2);
 
-  if (cp != 0 && (cp > 0) == (stroker._w > 0))
+  if (cp != 0 && (cp > 0) == (stroker->_w > 0))
   {
-    // Inner join.
-    // NumT limit = ((len1 < len2) ? len1 : len2) / stroker._wAbs;
-    //if (limit < stroker._params._innerLimit) limit = stroker._params._innerLimit;
-
-    //switch (stroker._params._innerJoin)
-    //{
-    // case INNER_JOIN_BEVEL:
-        ADD_VERTEX(v1.x + dx1, v1.y - dy1);
-        ADD_VERTEX(v1.x + dx2, v1.y - dy2);
-    //    break;
-
-    //  case INNER_JOIN_MITER:
-    //    FOG_RETURN_ON_ERROR( calcMiter(v0, v1, v2, dx1, dy1, dx2, dy2, LINE_JOIN_MITER_REVERT, limit, 0) );
-    //    break;
-
-    //  case INNER_JOIN_JAG:
-    //  case INNER_JOIN_ROUND:
-    //    cp = (dx1-dx2) * (dx1-dx2) + (dy1-dy2) * (dy1-dy2);
-    //    if (cp < len1 * len1 && cp < len2 * len2)
-    //    {
-    //      FOG_RETURN_ON_ERROR( calcMiter(v0, v1, v2, dx1, dy1, dx2, dy2, LINE_JOIN_MITER_REVERT, limit, 0) );
-    //    }
-    //    else
-    //    {
-    //      if (stroker._params._innerJoin == INNER_JOIN_JAG)
-    //      {
-    //        ADD_VERTEX(v1.x + dx1, v1.y - dy1);
-    //        ADD_VERTEX(v1.x,       v1.y      );
-    //        ADD_VERTEX(v1.x + dx2, v1.y - dy2);
-    //      }
-    //      else
-    //      {
-    //        ADD_VERTEX(v1.x + dx1, v1.y - dy1);
-    //        ADD_VERTEX(v1.x,       v1.y      );
-    //        FOG_RETURN_ON_ERROR( calcArc(v1.x, v1.y, dx2, -dy2, dx1, -dy1) );
-    //        ADD_VERTEX(v1.x,       v1.y      );
-    //        ADD_VERTEX(v1.x + dx2, v1.y - dy2);
-    //      }
-    //    }
-    //    break;
-
-    //  default:
-    //    FOG_ASSERT_NOT_REACHED();
-    //}
+    ADD_VERTEX(v1.x + dx1, v1.y - dy1);
+    ADD_VERTEX(v1.x + dx2, v1.y - dy2);
   }
   else
   {
@@ -728,8 +631,8 @@ err_t PathStrokerContextT<NumT>::calcJoin(
     NumT dy = (dy1 + dy2) / 2;
     NumT dbevel = Math::sqrt(dx * dx + dy * dy);
     /*
-    if (stroker._params.getLineJoin() == LINE_JOIN_ROUND ||
-        stroker._params.getLineJoin() == LINE_JOIN_BEVEL)
+    if (stroker->_params->getLineJoin() == LINE_JOIN_ROUND ||
+        stroker->_params->getLineJoin() == LINE_JOIN_BEVEL)
     {
       // This is an optimization that reduces the number of points
       // in cases of almost collinear segments. If there's no
@@ -748,7 +651,7 @@ err_t PathStrokerContextT<NumT>::calcJoin(
       // the same as in round joins and caps. You can safely comment
       // out this entire "if".
       // TODO: ApproxScale used
-      if (stroker._flatness * (stroker._wAbs - dbevel) < stroker._wEps)
+      if (stroker->_flatness * (stroker->_wAbs - dbevel) < stroker->_wEps)
       {
         NumT_(Point) pi;
         if (Math2d::intersectLine(pi,
@@ -768,15 +671,15 @@ err_t PathStrokerContextT<NumT>::calcJoin(
     }
     */
 
-    switch (stroker._params.getLineJoin())
+    switch (stroker->_params->getLineJoin())
     {
       case LINE_JOIN_MITER:
       case LINE_JOIN_MITER_REVERT:
       case LINE_JOIN_MITER_ROUND:
         FOG_RETURN_ON_ERROR(
           calcMiter(v0, v1, v2, dx1, dy1, dx2, dy2,
-            stroker._params.getLineJoin(),
-            stroker._params.getMiterLimit(), dbevel)
+            stroker->_params->getLineJoin(),
+            stroker->_params->getMiterLimit(), dbevel)
         );
         break;
 
@@ -803,13 +706,18 @@ template<typename NumT>
 err_t PathStrokerContextT<NumT>::strokePathFigure(const NumT_(Point)* src, size_t count, bool outline)
 {
   // Can't stroke one-vertex array.
-  if (count <= 1) return ERR_GEOMETRY_CANT_STROKE;
+  if (count <= 1)
+    return ERR_OK;
+    //return ERR_GEOMETRY_CANT_STROKE;
+
   // To do outline we need at least three vertices.
-  if (outline && count <= 2) return ERR_GEOMETRY_CANT_STROKE;
+  if (outline && count <= 2)
+    return ERR_OK;
+    // return ERR_GEOMETRY_CANT_STROKE;
 
   const NumT_(Point)* cur;
   size_t i;
-  size_t moveToPosition0 = dst.getLength();
+  size_t moveToPosition0 = dst->getLength();
   size_t moveToPosition1 = INVALID_INDEX;
 
   FOG_RETURN_ON_ERROR(
@@ -818,8 +726,8 @@ err_t PathStrokerContextT<NumT>::strokePathFigure(const NumT_(Point)* src, size_
 
   // Alloc or realloc array for our distances (distance between individual
   // vertices [0]->[1], [1]->[2], ...). Distance at index[0] means distance
-  // between src[0] and src[1], etc. Last distance is special and it 0.0 if
-  // path is not closed, otherwise src[count-1]->src[0].
+  // between src[0] and src[1], etc. Last distance is special and it is 0.0
+  // if path is not closed, otherwise src[count-1]->src[0].
   if (distancesAlloc < count)
   {
     // Need to realloc, we align count to 128 vertices.
@@ -840,7 +748,7 @@ err_t PathStrokerContextT<NumT>::strokePathFigure(const NumT_(Point)* src, size_
   for (i = 0; i < count - 1; i++)
   {
     NumT d = Math::dist(src[i].x, src[i].y, src[i + 1].x, src[i + 1].y);
-    if (d <= Math2dConst<NumT>::getDistanceEpsilon()) d = NumT(0.0);
+    if (d <= MathConstant<NumT>::getDistanceEpsilon()) d = NumT(0.0);
 
     distances[i] = d;
   }
@@ -849,7 +757,7 @@ err_t PathStrokerContextT<NumT>::strokePathFigure(const NumT_(Point)* src, size_
   for (i = count - 1, cur = src, dist = distances; i; i--, cur++, dist++)
   {
     NumT d = Math::dist(cur[0].x, cur[0].y, cur[1].x, cur[1].y);
-    if (d <= Math2dConst<NumT>::getDistanceEpsilon()) d = 0.0;
+    if (d <= MathConstant<NumT>::getDistanceEpsilon()) d = 0.0;
 
     dist[0] = d;
   }
@@ -869,14 +777,14 @@ err_t PathStrokerContextT<NumT>::strokePathFigure(const NumT_(Point)* src, size_
   // [Outline]
   // --------------------------------------------------------------------------
 
-#define IS_DEGENERATED_DIST(__dist__) ((__dist__) <= Math2dConst<NumT>::getDistanceEpsilon())
+#define IS_DEGENERATED_DIST(__dist__) ((__dist__) <= MathConstant<NumT>::getDistanceEpsilon())
 
   if (outline)
   {
     // We need also to calc distance between first and last point.
     {
       NumT d = Math::dist(src[count - 1].x, src[count - 1].y, src[0].x, src[0].y);
-      if (d <= Math2dConst<NumT>::getDistanceEpsilon()) d = NumT(0.0);
+      if (d <= MathConstant<NumT>::getDistanceEpsilon()) d = NumT(0.0);
 
       distances[count - 1] = d;
     }
@@ -916,7 +824,9 @@ err_t PathStrokerContextT<NumT>::strokePathFigure(const NumT_(Point)* src, size_
     if (FOG_LIKELY(!IS_DEGENERATED_DIST(cd[i]))) { i++; firstI++; }
 
     do {
-      if (FOG_UNLIKELY(cur == srcEnd)) return ERR_GEOMETRY_CANT_STROKE;
+      if (FOG_UNLIKELY(cur == srcEnd))
+        return ERR_OK;
+        //return ERR_GEOMETRY_CANT_STROKE;
 
       cp[i] = *cur++;
       cd[i] = *dist++;
@@ -1038,7 +948,9 @@ _Outline2Done:
     i = 0;
 
     do {
-      if (FOG_UNLIKELY(cur == srcEnd)) return ERR_GEOMETRY_CANT_STROKE;
+      if (FOG_UNLIKELY(cur == srcEnd))
+        return ERR_OK;
+        //return ERR_GEOMETRY_CANT_STROKE;
 
       cp[i] = *cur++;
       cd[i] = *dist++;
@@ -1046,7 +958,7 @@ _Outline2Done:
     } while (i < 2);
 
     // Start cap.
-    FOG_RETURN_ON_ERROR( calcCap(cp[0], cp[1], cd[0], stroker._params.getStartCap()) );
+    FOG_RETURN_ON_ERROR( calcCap(cp[0], cp[1], cd[0], stroker->_params->getStartCap()) );
 
     // Make the outline.
     if (cur == srcEnd) goto _Pen1Done;
@@ -1097,7 +1009,7 @@ _Pen1Done:
     } while (i < 2);
 
     // End cap.
-    FOG_RETURN_ON_ERROR( calcCap(cp[0], cp[1], cd[1], stroker._params.getEndCap()) );
+    FOG_RETURN_ON_ERROR( calcCap(cp[0], cp[1], cd[1], stroker->_params->getEndCap()) );
 
     // Make the outline.
     if (cur == src) goto _Pen2Done;
@@ -1144,13 +1056,13 @@ _Pen2Done:
   {
     // Fix the length of the path.
     size_t finalLength = CUR_INDEX();
-    dst._d->length = finalLength;
-    FOG_ASSERT(finalLength <= dst._d->capacity);
+    dst->_d->length = finalLength;
+    FOG_ASSERT(finalLength <= dst->_d->capacity);
 
     // Fix path adding PATH_CMD_MOVE_TO/CLOSE commands at begin of each
     // outline and filling rest by PATH_CMD_LINE_TO. This allowed us to
     // simplify ADD_VERTEX() macro.
-    uint8_t* dstCommands = const_cast<uint8_t*>(dst.getCommands());
+    uint8_t* dstCommands = const_cast<uint8_t*>(dst->getCommands());
 
     // Close clockwise path.
     if (moveToPosition0 < finalLength)
@@ -1172,181 +1084,247 @@ _Pen2Done:
 }
 
 // ============================================================================
-// [Fog::PathStrokerF - Construction / Destruction]
+// [Fog::PathStroker - Construction / Destruction]
 // ============================================================================
 
-PathStrokerF::PathStrokerF() :
-  _clipBox(0.0f, 0.0f, 0.0f, 0.0f),
-  _transformedClipBox(0.0f, 0.0f, 0.0f, 0.0f),
-  _isDirty(true),
-  _isClippingEnabled(false),
-  _isComplexTransform(false),
-  _flatness(Math2dConst<float>::getDefaultFlatness())
+template<typename NumT>
+static void FOG_CDECL PathStrokerT_ctor(NumT_(PathStroker)* self)
 {
+  self->_params.init();
+  self->_transform.init();
+  self->_clipBox.reset();
+  self->_transformedClipBox.reset();
+  self->_w = NumT(0);
+  self->_wAbs = NumT(0);
+  self->_wEps = NumT(0);
+  self->_da = NumT(0);
+  self->_flatness = MathConstant<NumT>::getDefaultFlatness();
+  self->_wSign = 1;
+  self->_isDirty = true;
+  self->_isClippingEnabled = false;
+  self->_isTransformSimple = true;
+  self->_flattenType = PATH_FLATTEN_DISABLED;
 }
 
-PathStrokerF::PathStrokerF(const PathStrokerParamsF& params) :
-  _params(params),
-  _clipBox(0.0f, 0.0f, 0.0f, 0.0f),
-  _transformedClipBox(0.0f, 0.0f, 0.0f, 0.0f),
-  _isDirty(true),
-  _isClippingEnabled(false),
-  _isComplexTransform(false),
-  _flatness(Math2dConst<float>::getDefaultFlatness())
+template<typename NumT>
+static void FOG_CDECL PathStrokerT_ctorParams(NumT_(PathStroker)* self,
+  const NumT_(PathStrokerParams)* params, const NumT_(Transform)* tr, const NumT_(Box)* clipBox)
 {
+  if (params != NULL)
+    self->_params.initCustom1(*params);
+  else
+    self->_params.init();
+
+  if (tr != NULL)
+    self->_transform.initCustom1(*tr);
+  else
+    self->_transform.init();
+
+  if (clipBox != NULL)
+    self->_clipBox = *clipBox;
+  else
+    self->_clipBox.reset();
+
+  self->_transformedClipBox.reset();
+  self->_w = NumT(0);
+  self->_wAbs = NumT(0);
+  self->_wEps = NumT(0);
+  self->_da = NumT(0);
+  self->_flatness = MathConstant<NumT>::getDefaultFlatness();
+  self->_wSign = 1;
+  self->_isDirty = true;
+  self->_isClippingEnabled = false;
+  self->_isTransformSimple = true;
+  self->_flattenType = PATH_FLATTEN_DISABLED;
 }
 
-PathStrokerF::~PathStrokerF()
+template<typename NumT>
+static void FOG_CDECL PathStrokerT_ctorOther(NumT_(PathStroker)* self, const NumT_(PathStroker)* other)
 {
+  self->_params.initCustom1(other->_params);
+  self->_transform.initCustom1(other->_transform);
+  self->_clipBox = other->_clipBox;
+  self->_transformedClipBox = other->_transformedClipBox;
+  self->_w = other->_w;
+  self->_wAbs = other->_wAbs;
+  self->_wEps = other->_wEps;
+  self->_da = other->_da;
+  self->_flatness = other->_flatness;
+  self->_wSign = other->_wSign;
+  self->_isDirty = other->_isDirty;
+  self->_isClippingEnabled = other->_isClippingEnabled;
+  self->_isTransformSimple = other->_isTransformSimple;
+  self->_flattenType = other->_flattenType;
+}
+
+template<typename NumT>
+static void FOG_CDECL PathStrokerT_dtor(NumT_(PathStroker)* self)
+{
+  self->_params.destroy();
 }
 
 // ============================================================================
-// [Fog::PathStrokerF - Accessors]
+// [Fog::PathStroker - Params]
 // ============================================================================
 
-void PathStrokerF::setParams(const PathStrokerParamsF& params)
+template<typename NumT>
+static void FOG_CDECL PathStrokerT_setParams(NumT_(PathStroker)* self, const NumT_(PathStrokerParams)* params)
 {
-  _params = params;
-  _isDirty = true;
+  self->_params() = *params;
+  self->_isDirty = true;
+}
+
+template<typename NumT>
+static void FOG_CDECL PathStrokerT_setOther(NumT_(PathStroker)* self, const NumT_(PathStroker)* other)
+{
+  self->_params() = other->_params();
+  self->_transform() = other->_transform();
+  self->_clipBox = other->_clipBox;
+  self->_transformedClipBox = other->_transformedClipBox;
+  self->_w = other->_w;
+  self->_wAbs = other->_wAbs;
+  self->_wEps = other->_wEps;
+  self->_da = other->_da;
+  self->_flatness = other->_flatness;
+  self->_wSign = other->_wSign;
+  self->_isDirty = other->_isDirty;
+  self->_isClippingEnabled = other->_isClippingEnabled;
+  self->_isTransformSimple = other->_isTransformSimple;
+  self->_flattenType = other->_flattenType;
 }
 
 // ============================================================================
-// [Fog::PathStrokerF - Update]
+// [Fog::PathStroker - Stroker]
 // ============================================================================
 
-void PathStrokerF::_update()
+template<typename NumT>
+static err_t PathStrokerT_postProcess(const NumT_(PathStroker)* self, NumT_(Path)* dst)
 {
-  _w = _params._lineWidth * 0.5f;
+  const NumT_(Transform)& tr = self->getTransform();
 
-  if (_w < 0.0f)
+  if (self->isClippingEnabled())
   {
-    _wAbs  = -_w;
-    _wSign = -1;
+    NumT_(PathClipper) clipper(self->_clipBox);
+
+    if (tr._getType() != TRANSFORM_TYPE_IDENTITY)
+    {
+      NumT_T1(PathTmp, 128) tmp;
+
+      FOG_RETURN_ON_ERROR(tr.mapPath(tmp, *dst));
+      dst->clear();
+      FOG_RETURN_ON_ERROR(clipper.clipPath(*dst, tmp));
+
+      return ERR_OK;
+    }
+    else
+    {
+      switch (clipper.measurePath(*dst))
+      {
+        case PATH_CLIPPER_MEASURE_BOUNDED:
+        {
+          return ERR_OK;
+        }
+
+        case PATH_CLIPPER_MEASURE_UNBOUNDED:
+        {
+          NumT_(Path) tmp;
+          FOG_RETURN_ON_ERROR(clipper.continuePath(tmp, *dst));
+          *dst = tmp;
+          return ERR_OK;
+        }
+
+        default:
+        {
+          dst->clear();
+          return ERR_GEOMETRY_INVALID;
+        }
+      }
+    }
   }
   else
   {
-    _wAbs  = _w;
-    _wSign = 1;
+    if (tr._getType() != TRANSFORM_TYPE_IDENTITY)
+      return tr.mapPath(*dst, *dst);
+    else
+      return ERR_OK;
   }
-
-  _wEps = _w / 1024.0f;
-  _da = Math::acos(_wAbs / (_wAbs + 0.125f * _flatness)) * 2.0f;
 }
 
-// ============================================================================
-// [Fog::PathStrokerF - Process]
-// ============================================================================
-
-err_t PathStrokerF::strokeShape(
-  PathF& dst,
-  uint32_t shapeType, const void* shapeData,
-  const TransformF* tr, const BoxF* clipBox) const
+template<typename NumT>
+static err_t FOG_CDECL PathStrokerT_strokeShape(const NumT_(PathStroker)* self, NumT_(Path)* dst, uint32_t shapeType, const void* shapeData)
 {
-  update();
+  self->update();
 
-  PathStrokerContextT<float> ctx(*this, dst, tr, clipBox);
-  return ctx.strokeShape(shapeType, shapeData);
-}
-
-err_t PathStrokerF::strokePath(
-  PathF& dst,
-  const PathF& src,
-  const TransformF* tr, const BoxF* clipBox) const
-{
-  update();
-
-  PathStrokerContextT<float> ctx(*this, dst, tr, clipBox);
-  return ctx.strokePath(src);
-}
-
-// ============================================================================
-// [Fog::PathStrokerD - Construction / Destruction]
-// ============================================================================
-
-PathStrokerD::PathStrokerD() :
-  _clipBox(0.0, 0.0, 0.0, 0.0),
-  _transformedClipBox(0.0, 0.0, 0.0, 0.0),
-  _isDirty(true),
-  _isClippingEnabled(false),
-  _isComplexTransform(false),
-  _flatness(Math2dConst<double>::getDefaultFlatness())
-{
-}
-
-PathStrokerD::PathStrokerD(const PathStrokerParamsD& params) :
-  _params(params),
-  _clipBox(0.0, 0.0, 0.0, 0.0),
-  _transformedClipBox(0.0, 0.0, 0.0, 0.0),
-  _isDirty(true),
-  _isClippingEnabled(false),
-  _isComplexTransform(false),
-  _flatness(Math2dConst<double>::getDefaultFlatness())
-{
-}
-
-PathStrokerD::~PathStrokerD()
-{
-}
-
-// ============================================================================
-// [Fog::PathStrokerD - Accessors]
-// ============================================================================
-
-void PathStrokerD::setParams(const PathStrokerParamsD& params)
-{
-  _params = params;
-  _isDirty = true;
-}
-
-// ============================================================================
-// [Fog::PathStrokerD - Update]
-// ============================================================================
-
-void PathStrokerD::_update()
-{
-  _w = _params._lineWidth * 0.5;
-
-  if (_w < 0.0)
   {
-    _wAbs  = -_w;
-    _wSign = -1;
+    PathStrokerContextT<NumT> ctx(self, dst);
+    FOG_RETURN_ON_ERROR(ctx.strokeShape(shapeType, shapeData));
   }
-  else
+
+  return PathStrokerT_postProcess<NumT>(self, dst);
+}
+
+template<typename NumT>
+static err_t FOG_CDECL PathStrokerT_strokePath(const NumT_(PathStroker)* self, NumT_(Path)* dst, const NumT_(Path)* src)
+{
+  self->update();
+
   {
-    _wAbs  = _w;
-    _wSign = 1;
+    PathStrokerContextT<NumT> ctx(self, dst);
+    FOG_RETURN_ON_ERROR(ctx.strokePath(src));
   }
 
-  _wEps = _w / 1024.0;
-  _da = Math::acos(_wAbs / (_wAbs + 0.125 * _flatness)) * 2.0;
-
-  _isDirty = false;
+  return PathStrokerT_postProcess<NumT>(self, dst);
 }
 
 // ============================================================================
-// [Fog::PathStrokerD - Process]
+// [Fog::PathStroker - Update]
 // ============================================================================
 
-err_t PathStrokerD::strokeShape(PathD& dst, uint32_t shapeType, const void* shapeData,
-  const TransformD* tr, const BoxD* clipBox) const
+template<typename NumT>
+static void FOG_CDECL PathStrokerT_update(NumT_(PathStroker)* self)
 {
-  update();
+  self->_w = self->_params->_lineWidth * NumT(0.5);
+  self->_wAbs = self->_w;
+  self->_wSign = 1;
 
-  PathStrokerContextT<double> ctx(*this, dst, tr, clipBox);
-  return ctx.strokeShape(shapeType, shapeData);
+  if (self->_w < NumT(0.0))
+  {
+    self->_wAbs  = -self->_w;
+    self->_wSign = -1;
+  }
+
+  self->_wEps = self->_w / NumT(1024.0);
+  self->_da = Math::acos(self->_wAbs / (self->_wAbs + NumT(0.125) * self->_flatness)) * NumT(2.0);
+
+  self->_isDirty = false;
+  self->_isTransformSimple = self->_transform->getType() == TRANSFORM_TYPE_IDENTITY;
 }
 
-err_t PathStrokerD::strokePath(PathD& dst, const PathD& src,
-  const TransformD* tr, const BoxD* clipBox) const
+// ============================================================================
+// [Init / Fini]
+// ============================================================================
+
+FOG_NO_EXPORT void PathStroker_init(void)
 {
-  update();
+  _api.pathstrokerf.ctor = PathStrokerT_ctor<float>;
+  _api.pathstrokerf.ctorParams = PathStrokerT_ctorParams<float>;
+  _api.pathstrokerf.ctorOther = PathStrokerT_ctorOther<float>;
+  _api.pathstrokerf.dtor = PathStrokerT_dtor<float>;
+  _api.pathstrokerf.setParams = PathStrokerT_setParams<float>;
+  _api.pathstrokerf.setOther = PathStrokerT_setOther<float>;
+  _api.pathstrokerf.strokeShape = PathStrokerT_strokeShape<float>;
+  _api.pathstrokerf.strokePath = PathStrokerT_strokePath<float>;
+  _api.pathstrokerf.update = PathStrokerT_update<float>;
 
-  PathStrokerContextT<double> ctx(*this, dst, tr, clipBox);
-  return ctx.strokePath(src);
+  _api.pathstrokerd.ctor = PathStrokerT_ctor<double>;
+  _api.pathstrokerd.ctorParams = PathStrokerT_ctorParams<double>;
+  _api.pathstrokerd.ctorOther = PathStrokerT_ctorOther<double>;
+  _api.pathstrokerd.dtor = PathStrokerT_dtor<double>;
+  _api.pathstrokerd.setParams = PathStrokerT_setParams<double>;
+  _api.pathstrokerd.setOther = PathStrokerT_setOther<double>;
+  _api.pathstrokerd.strokeShape = PathStrokerT_strokeShape<double>;
+  _api.pathstrokerd.strokePath = PathStrokerT_strokePath<double>;
+  _api.pathstrokerd.update = PathStrokerT_update<double>;
 }
-
-// ============================================================================
-// [Fog::StrokerPrivate]
-// ============================================================================
 
 } // Fog namespace

@@ -41,35 +41,35 @@ struct FOG_NO_EXPORT G2dRenderApi
 
   struct FOG_NO_EXPORT _FuncsConvert
   {
-    RenderConverterInitFn init;
+    RenderConverterInitFunc init;
 
-    RenderVBlitLineFn copy[RENDER_CONVERTER_COPY_COUNT];
-    RenderVBlitLineFn bswap[RENDER_CONVERTER_BSWAP_COUNT];
+    RenderVBlitLineFunc copy[RENDER_CONVERTER_COPY_COUNT];
+    RenderVBlitLineFunc bswap[RENDER_CONVERTER_BSWAP_COUNT];
 
-    RenderVBlitLineFn argb32_from_prgb32;
-    RenderVBlitLineFn prgb32_from_argb32;
+    RenderVBlitLineFunc argb32_from_prgb32;
+    RenderVBlitLineFunc prgb32_from_argb32;
 
-    RenderVBlitLineFn argb64_from_prgb64;
-    RenderVBlitLineFn prgb64_from_argb64;
+    RenderVBlitLineFunc argb64_from_prgb64;
+    RenderVBlitLineFunc prgb64_from_argb64;
 
-    RenderVBlitLineFn a8_from_dib[RENDER_CONVERTER_DIB_COUNT];
-    RenderVBlitLineFn dib_from_a8[RENDER_CONVERTER_DIB_COUNT];
+    RenderVBlitLineFunc a8_from_dib[RENDER_CONVERTER_DIB_COUNT];
+    RenderVBlitLineFunc dib_from_a8[RENDER_CONVERTER_DIB_COUNT];
 
-    RenderVBlitLineFn a16_from_dib[RENDER_CONVERTER_DIB_COUNT];
-    RenderVBlitLineFn dib_from_a16[RENDER_CONVERTER_DIB_COUNT];
+    RenderVBlitLineFunc a16_from_dib[RENDER_CONVERTER_DIB_COUNT];
+    RenderVBlitLineFunc dib_from_a16[RENDER_CONVERTER_DIB_COUNT];
 
-    RenderVBlitLineFn a32_from_dib[RENDER_CONVERTER_DIB_COUNT];
-    RenderVBlitLineFn dib_from_a32[RENDER_CONVERTER_DIB_COUNT];
+    RenderVBlitLineFunc a32_from_dib[RENDER_CONVERTER_DIB_COUNT];
+    RenderVBlitLineFunc dib_from_a32[RENDER_CONVERTER_DIB_COUNT];
 
-    RenderVBlitLineFn argb32_from_dib[RENDER_CONVERTER_DIB_COUNT];
-    RenderVBlitLineFn dib_from_argb32[RENDER_CONVERTER_DIB_COUNT];
+    RenderVBlitLineFunc argb32_from_dib[RENDER_CONVERTER_DIB_COUNT];
+    RenderVBlitLineFunc dib_from_argb32[RENDER_CONVERTER_DIB_COUNT];
 
-    RenderVBlitLineFn argb64_from_dib[RENDER_CONVERTER_DIB_COUNT];
-    RenderVBlitLineFn dib_from_argb64[RENDER_CONVERTER_DIB_COUNT];
+    RenderVBlitLineFunc argb64_from_dib[RENDER_CONVERTER_DIB_COUNT];
+    RenderVBlitLineFunc dib_from_argb64[RENDER_CONVERTER_DIB_COUNT];
 
     // TODO: Not Implemented.
-    RenderVBlitLineFn dithered_from_xrgb32[RENDER_DITHER_COUNT];
-    RenderVBlitLineFn dithered_from_rgb24 [RENDER_DITHER_COUNT];
+    RenderVBlitLineFunc dithered_from_xrgb32[RENDER_DITHER_COUNT];
+    RenderVBlitLineFunc dithered_from_rgb24 [RENDER_DITHER_COUNT];
   } convert;
 
   // --------------------------------------------------------------------------
@@ -82,17 +82,17 @@ struct FOG_NO_EXPORT G2dRenderApi
     // [CompositeCore - CBlit]
     // ------------------------------------------------------------------------
 
-    RenderCBlitRectFn cblit_rect[RENDER_CBLIT_COUNT];
-    RenderCBlitLineFn cblit_line[RENDER_CBLIT_COUNT];
-    RenderCBlitSpanFn cblit_span[RENDER_CBLIT_COUNT];
+    RenderCBlitRectFunc cblit_rect[RENDER_CBLIT_COUNT];
+    RenderCBlitLineFunc cblit_line[RENDER_CBLIT_COUNT];
+    RenderCBlitSpanFunc cblit_span[RENDER_CBLIT_COUNT];
 
     // ------------------------------------------------------------------------
     // [CompositeCore - VBlit]
     // ------------------------------------------------------------------------
 
-    RenderVBlitRectFn vblit_rect[IMAGE_FORMAT_COUNT];
-    RenderVBlitLineFn vblit_line[IMAGE_FORMAT_COUNT];
-    RenderVBlitSpanFn vblit_span[IMAGE_FORMAT_COUNT];
+    RenderVBlitRectFunc vblit_rect[IMAGE_FORMAT_COUNT];
+    RenderVBlitLineFunc vblit_line[IMAGE_FORMAT_COUNT];
+    RenderVBlitSpanFunc vblit_span[IMAGE_FORMAT_COUNT];
   };
 
   _FuncsCompositeCore compositeCore[IMAGE_FORMAT_COUNT][RENDER_COMPOSITE_CORE_COUNT];
@@ -107,15 +107,15 @@ struct FOG_NO_EXPORT G2dRenderApi
     // [CompositeExt - CBlit]
     // ------------------------------------------------------------------------
 
-    RenderCBlitLineFn cblit_line[RENDER_CBLIT_COUNT];
-    RenderCBlitSpanFn cblit_span[RENDER_CBLIT_COUNT];
+    RenderCBlitLineFunc cblit_line[RENDER_CBLIT_COUNT];
+    RenderCBlitSpanFunc cblit_span[RENDER_CBLIT_COUNT];
 
     // ------------------------------------------------------------------------
     // [CompositeExt - VBlit]
     // ------------------------------------------------------------------------
 
-    RenderVBlitLineFn vblit_line[RENDER_VBLIT_COUNT];
-    RenderVBlitSpanFn vblit_span[RENDER_VBLIT_COUNT];
+    RenderVBlitLineFunc vblit_line[RENDER_VBLIT_COUNT];
+    RenderVBlitSpanFunc vblit_span[RENDER_VBLIT_COUNT];
   };
 
   _FuncsCompositeExt compositeExt[IMAGE_FORMAT_COUNT][RENDER_COMPOSITE_EXT_COUNT];
@@ -127,9 +127,9 @@ struct FOG_NO_EXPORT G2dRenderApi
   // TODO?
   struct FOG_NO_EXPORT _FuncsMask
   {
-    RasterMaskCOpVFn c_op_v;
-    RasterMaskVOpCFn v_op_c;
-    RasterMaskVOpVFn v_op_v;
+    RasterMaskCOpVFunc c_op_v;
+    RasterMaskVOpCFunc v_op_c;
+    RasterMaskVOpVFunc v_op_v;
   };
 
   _FuncsMask mask[CLIP_OP_COUNT][IMAGE_FORMAT_COUNT];
@@ -144,20 +144,20 @@ struct FOG_NO_EXPORT G2dRenderApi
     // [Create / Destroy]
     // ------------------------------------------------------------------------
 
-    RenderPatternSolidCreateFn create;
-    RenderPatternDestroyFn destroy;
+    RenderPatternSolidCreateFunc create;
+    RenderPatternDestroyFunc destroy;
 
     // ------------------------------------------------------------------------
     // [Prepare]
     // ------------------------------------------------------------------------
 
-    RenderPatternPrepareFn prepare;
+    RenderPatternPrepareFunc prepare;
 
     // ------------------------------------------------------------------------
     // [Fetch]
     // ------------------------------------------------------------------------
 
-    RenderPatternFetchFn fetch[IMAGE_FORMAT_COUNT];
+    RenderPatternFetchFunc fetch[IMAGE_FORMAT_COUNT];
   };
 
   _FuncsSolid solid;
@@ -172,7 +172,7 @@ struct FOG_NO_EXPORT G2dRenderApi
     // [Create]
     // ------------------------------------------------------------------------
 
-    RenderPatternTextureCreateFn create;
+    RenderPatternTextureCreateFunc create;
 
     struct _Fetch
     {
@@ -180,31 +180,31 @@ struct FOG_NO_EXPORT G2dRenderApi
       // [Fetch - Simple]
       // ----------------------------------------------------------------------
 
-      RenderPatternFetchFn fetch_simple_align[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
-      RenderPatternFetchFn fetch_simple_subx0[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
-      RenderPatternFetchFn fetch_simple_sub0y[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
-      RenderPatternFetchFn fetch_simple_subxy[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
+      RenderPatternFetchFunc fetch_simple_align[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
+      RenderPatternFetchFunc fetch_simple_subx0[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
+      RenderPatternFetchFunc fetch_simple_sub0y[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
+      RenderPatternFetchFunc fetch_simple_subxy[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
 
       // ----------------------------------------------------------------------
       // [Fetch - Scale]
       // ----------------------------------------------------------------------
 
-      RenderPatternFetchFn fetch_scale_nearest[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
-      RenderPatternFetchFn fetch_scale_bilinear[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
+      RenderPatternFetchFunc fetch_scale_nearest[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
+      RenderPatternFetchFunc fetch_scale_bilinear[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
 
       // ----------------------------------------------------------------------
       // [Fetch - Affine]
       // ----------------------------------------------------------------------
 
-      RenderPatternFetchFn fetch_affine_nearest[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
-      RenderPatternFetchFn fetch_affine_bilinear[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
+      RenderPatternFetchFunc fetch_affine_nearest[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
+      RenderPatternFetchFunc fetch_affine_bilinear[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
 
       // ----------------------------------------------------------------------
       // [Fetch - Projection]
       // ----------------------------------------------------------------------
 
-      RenderPatternFetchFn fetch_proj_nearest[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
-      RenderPatternFetchFn fetch_proj_bilinear[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
+      RenderPatternFetchFunc fetch_proj_nearest[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
+      RenderPatternFetchFunc fetch_proj_bilinear[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
     };
 
     _Fetch prgb32;
@@ -227,13 +227,13 @@ struct FOG_NO_EXPORT G2dRenderApi
     // [Interpolate]
     // ------------------------------------------------------------------------
 
-    RenderPatternGradientInterpolateFn interpolate[IMAGE_FORMAT_COUNT];
+    RenderPatternGradientInterpolateFunc interpolate[IMAGE_FORMAT_COUNT];
 
     // ------------------------------------------------------------------------
     // [Create / Destroy]
     // ------------------------------------------------------------------------
 
-    RenderPatternGradientCreateFn create[GRADIENT_TYPE_COUNT];
+    RenderPatternGradientCreateFunc create[GRADIENT_TYPE_COUNT];
 
     // ------------------------------------------------------------------------
     // [Linear]
@@ -241,11 +241,11 @@ struct FOG_NO_EXPORT G2dRenderApi
 
     struct _Linear
     {
-      RenderPatternFetchFn fetch_simple_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
-      RenderPatternFetchFn fetch_simple_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+      RenderPatternFetchFunc fetch_simple_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+      RenderPatternFetchFunc fetch_simple_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
 
-      RenderPatternFetchFn fetch_proj_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
-      RenderPatternFetchFn fetch_proj_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+      RenderPatternFetchFunc fetch_proj_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+      RenderPatternFetchFunc fetch_proj_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
     } linear;
 
     // ------------------------------------------------------------------------
@@ -254,11 +254,11 @@ struct FOG_NO_EXPORT G2dRenderApi
 
     struct _Radial
     {
-      RenderPatternFetchFn fetch_simple_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
-      RenderPatternFetchFn fetch_simple_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+      RenderPatternFetchFunc fetch_simple_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+      RenderPatternFetchFunc fetch_simple_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
 
-      RenderPatternFetchFn fetch_proj_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
-      RenderPatternFetchFn fetch_proj_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+      RenderPatternFetchFunc fetch_proj_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+      RenderPatternFetchFunc fetch_proj_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
     } radial;
 
     // ------------------------------------------------------------------------
@@ -267,8 +267,8 @@ struct FOG_NO_EXPORT G2dRenderApi
 
     struct _Conical
     {
-      RenderPatternFetchFn fetch_simple_nearest[IMAGE_FORMAT_COUNT];
-      RenderPatternFetchFn fetch_simple_bilinear[IMAGE_FORMAT_COUNT];
+      RenderPatternFetchFunc fetch_simple_nearest[IMAGE_FORMAT_COUNT];
+      RenderPatternFetchFunc fetch_simple_bilinear[IMAGE_FORMAT_COUNT];
     } conical;
 
     // ------------------------------------------------------------------------
@@ -277,11 +277,11 @@ struct FOG_NO_EXPORT G2dRenderApi
 
     struct _Rectangular
     {
-      RenderPatternFetchFn fetch_simple_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
-      RenderPatternFetchFn fetch_simple_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+      RenderPatternFetchFunc fetch_simple_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+      RenderPatternFetchFunc fetch_simple_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
 
-      RenderPatternFetchFn fetch_proj_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
-      RenderPatternFetchFn fetch_proj_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+      RenderPatternFetchFunc fetch_proj_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+      RenderPatternFetchFunc fetch_proj_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
     } rectangular;
   };
 
@@ -300,14 +300,14 @@ struct FOG_NO_EXPORT G2dRenderApi
   // [Accessors - Composite - Copy]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE RenderVBlitRectFn getCopyRectFn(uint32_t format) const
+  FOG_INLINE RenderVBlitRectFunc getCopyRectFunc(uint32_t format) const
   {
     FOG_ASSERT(format < IMAGE_FORMAT_COUNT);
 
     return compositeCore[format][COMPOSITE_SRC].vblit_rect[format];
   }
 
-  FOG_INLINE RenderVBlitRectFn getCopyRectFn(uint32_t dstFormat, uint32_t srcFormat) const
+  FOG_INLINE RenderVBlitRectFunc getCopyRectFunc(uint32_t dstFormat, uint32_t srcFormat) const
   {
     FOG_ASSERT(dstFormat < IMAGE_FORMAT_COUNT);
     FOG_ASSERT(srcFormat < IMAGE_FORMAT_COUNT);
@@ -315,14 +315,14 @@ struct FOG_NO_EXPORT G2dRenderApi
     return compositeCore[dstFormat][COMPOSITE_SRC].vblit_rect[srcFormat];
   }
 
-  FOG_INLINE RenderVBlitLineFn getCopyFullFn(uint32_t format) const
+  FOG_INLINE RenderVBlitLineFunc getCopyFullFunc(uint32_t format) const
   {
     FOG_ASSERT(format < IMAGE_FORMAT_COUNT);
 
     return compositeCore[format][COMPOSITE_SRC].vblit_line[format];
   }
 
-  FOG_INLINE RenderVBlitLineFn getCopyFullFn(uint32_t dstFormat, uint32_t srcFormat) const
+  FOG_INLINE RenderVBlitLineFunc getCopyFullFunc(uint32_t dstFormat, uint32_t srcFormat) const
   {
     FOG_ASSERT(dstFormat < IMAGE_FORMAT_COUNT);
     FOG_ASSERT(srcFormat < IMAGE_FORMAT_COUNT);
@@ -360,7 +360,7 @@ struct FOG_NO_EXPORT G2dRenderApi
   // [Accessors - Composite - Unified]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE RenderCBlitLineFn getCBlitLine(uint32_t dstFormat, uint32_t op, uint32_t isOpaque)
+  FOG_INLINE RenderCBlitLineFunc getCBlitLine(uint32_t dstFormat, uint32_t op, uint32_t isOpaque)
   {
     if (RenderUtil::isCompositeCoreOperator(op))
       return get_FuncsCompositeCore(dstFormat, op)->cblit_line[isOpaque];
@@ -368,7 +368,7 @@ struct FOG_NO_EXPORT G2dRenderApi
       return get_FuncsCompositeExt(dstFormat, op)->cblit_line[isOpaque];
   }
 
-  FOG_INLINE RenderCBlitSpanFn getCBlitSpan(uint32_t dstFormat, uint32_t op, uint32_t isOpaque)
+  FOG_INLINE RenderCBlitSpanFunc getCBlitSpan(uint32_t dstFormat, uint32_t op, uint32_t isOpaque)
   {
     if (RenderUtil::isCompositeCoreOperator(op))
       return get_FuncsCompositeCore(dstFormat, op)->cblit_span[isOpaque];
@@ -376,7 +376,7 @@ struct FOG_NO_EXPORT G2dRenderApi
       return get_FuncsCompositeExt(dstFormat, op)->cblit_span[isOpaque];
   }
 
-  FOG_INLINE RenderVBlitLineFn getVBlitLine(uint32_t dstFormat, uint32_t op, uint32_t srcFormat)
+  FOG_INLINE RenderVBlitLineFunc getVBlitLine(uint32_t dstFormat, uint32_t op, uint32_t srcFormat)
   {
     if (RenderUtil::isCompositeCoreOperator(op))
       return get_FuncsCompositeCore(dstFormat, op)->vblit_line[srcFormat];
@@ -384,7 +384,7 @@ struct FOG_NO_EXPORT G2dRenderApi
       return get_FuncsCompositeExt(dstFormat, op)->vblit_line[RenderUtil::getCompatVBlitId(dstFormat, srcFormat)];
   }
 
-  FOG_INLINE RenderVBlitSpanFn getVBlitSpan(uint32_t dstFormat, uint32_t op, uint32_t srcFormat)
+  FOG_INLINE RenderVBlitSpanFunc getVBlitSpan(uint32_t dstFormat, uint32_t op, uint32_t srcFormat)
   {
     if (RenderUtil::isCompositeCoreOperator(op))
       return get_FuncsCompositeCore(dstFormat, op)->vblit_span[srcFormat];

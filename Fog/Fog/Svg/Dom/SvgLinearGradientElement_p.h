@@ -54,7 +54,7 @@ struct FOG_NO_EXPORT SvgLinearGradientElement : public SvgAbstractGradientElemen
   SvgCoordAttribute a_y2;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgLinearGradientElement)
+  _FOG_NO_COPY(SvgLinearGradientElement)
 };
 
 //! @}

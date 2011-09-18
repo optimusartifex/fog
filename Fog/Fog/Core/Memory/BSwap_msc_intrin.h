@@ -4,7 +4,7 @@
 // MIT, See COPYING file in package
 
 // [Dependencies]
-#include <Fog/Core/Config/Config.h>
+#include <Fog/Core/C++/Base.h>
 
 // [Guard]
 #if !defined(FOG_IDE) && !defined(_FOG_CORE_MEMORY_BSWAP_H)

@@ -11,7 +11,7 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemOps.h>
 
 namespace Fog {
 
@@ -559,26 +559,21 @@ FOG_INLINE void PointF::set(const PointD& other)
 // [Fog::PointT<>]
 // ============================================================================
 
-FOG_CLASS_PRECISION_F_D_I(Point)
+_FOG_NUM_T(Point)
+_FOG_NUM_I(Point)
+_FOG_NUM_F(Point)
+_FOG_NUM_D(Point)
 
 //! @}
 
 } // Fog namespace
 
 // ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::PointI, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::PointF, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::PointD, Fog::TYPEINFO_PRIMITIVE)
-
-// ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_FUZZY_DECLARE(Fog::PointF, Math::isFuzzyEq(a.x, b.x) && Math::isFuzzyEq(a.y, b.y))
-FOG_FUZZY_DECLARE(Fog::PointD, Math::isFuzzyEq(a.x, b.x) && Math::isFuzzyEq(a.y, b.y))
+FOG_FUZZY_DECLARE_F_VEC(Fog::PointF, 4)
+FOG_FUZZY_DECLARE_D_VEC(Fog::PointD, 4)
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_POINT_H

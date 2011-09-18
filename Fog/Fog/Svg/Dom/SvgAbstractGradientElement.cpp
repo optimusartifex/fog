@@ -101,10 +101,10 @@ _Start:
   if (!stopsParsed)
   {
     XmlElement* e;
-    String link = root->_getAttribute(fog_strings->getString(STR_SVG_ATTRIBUTE_xlink_href));
+    StringW link = root->_getAttribute(fog_strings->getString(STR_SVG_ATTRIBUTE_xlink_href));
 
-    if ((!link.isEmpty() && link.getAt(0) == Char('#')) &&
-        (e = root->getDocument()->getElementById(Utf16(link.getData() + 1, link.getLength() - 1))))
+    if ((!link.isEmpty() && link.getAt(0) == CharW('#')) &&
+        (e = root->getDocument()->getElementById(StubW(link.getData() + 1, link.getLength() - 1))))
     {
       root = e;
       if (++depth == 32) return;

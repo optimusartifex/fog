@@ -39,11 +39,11 @@ struct FOG_API XmlNoText : public XmlElement
   // [Methods]
   // --------------------------------------------------------------------------
 
-  virtual String getTextContent() const;
-  virtual err_t setTextContent(const String& text);
+  virtual StringW getTextContent() const;
+  virtual err_t setTextContent(const StringW& text);
 
 private:
-  _FOG_CLASS_NO_COPY(XmlNoText)
+  _FOG_NO_COPY(XmlNoText)
 };
 
 } // Fog namespace

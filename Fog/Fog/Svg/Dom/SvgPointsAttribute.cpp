@@ -29,13 +29,22 @@ SvgPointsAttribute::~SvgPointsAttribute()
 {
 }
 
-err_t SvgPointsAttribute::setValue(const String& value)
+err_t SvgPointsAttribute::setValue(const StringW& value)
 {
   FOG_RETURN_ON_ERROR(_value.set(value));
   FOG_RETURN_ON_ERROR(SvgUtil::parsePoints(_path, value, _closePath));
-  if (!_path.isEmpty() && _closePath) _path.close();
 
-  if (_element) reinterpret_cast<SvgElement*>(_element)->_boundingBoxDirty = true;
+  // Close path if used by closed object (SvgPolygon).
+  if (!_path.isEmpty() && _closePath)
+    _path.close();
+
+  // Build path-info to optimize path operations.
+  _path.buildPathInfo();
+
+  if (_element != NULL)
+    reinterpret_cast<SvgElement*>(_element)->_boundingBoxDirty = true;
+
   return ERR_OK;
 }
+
 } // Fog namespace

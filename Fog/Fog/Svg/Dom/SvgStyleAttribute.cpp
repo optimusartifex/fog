@@ -81,9 +81,9 @@ SvgStyleAttribute::~SvgStyleAttribute()
 {
 }
 
-String SvgStyleAttribute::getValue() const
+StringW SvgStyleAttribute::getValue() const
 {
-  String result;
+  StringW result;
   result.reserve(128);
 
   int i;
@@ -92,32 +92,32 @@ String SvgStyleAttribute::getValue() const
     if (_mask & (1 << i))
     {
       result.append(fog_strings->getString(i + STR_SVG_STYLE_NAMES));
-      result.append(Char(':'));
+      result.append(CharW(':'));
       result.append(getStyle(i));
-      result.append(Char(';'));
+      result.append(CharW(';'));
     }
   }
 
   return result;
 }
 
-err_t SvgStyleAttribute::setValue(const String& value)
+err_t SvgStyleAttribute::setValue(const StringW& value)
 {
   // Parse all "name: value;" pairs.
-  const Char* strCur = value.getData();
-  const Char* strEnd = strCur + value.getLength();
+  const CharW* strCur = value.getData();
+  const CharW* strEnd = strCur + value.getLength();
 
   ManagedString styleName;
-  String styleValue;
+  StringW styleValue;
 
   for (;;)
   {
     if (strCur == strEnd) break;
 
-    const Char* styleNameBegin;
-    const Char* styleNameEnd;
-    const Char* styleValueBegin;
-    const Char* styleValueEnd;
+    const CharW* styleNameBegin;
+    const CharW* styleNameEnd;
+    const CharW* styleValueBegin;
+    const CharW* styleValueEnd;
 
     err_t err;
 
@@ -129,7 +129,7 @@ err_t SvgStyleAttribute::setValue(const String& value)
 
     // Parse style name.
     styleNameBegin = strCur;
-    while (*strCur != Char(':') && !strCur->isSpace())
+    while (*strCur != CharW(':') && !strCur->isSpace())
     {
       if (++strCur == strEnd) goto _Bail;
     }
@@ -137,7 +137,7 @@ err_t SvgStyleAttribute::setValue(const String& value)
 
     if (strCur->isSpace())
     {
-      while (*strCur != Char(':'))
+      while (*strCur != CharW(':'))
       {
         if (++strCur == strEnd) goto _Bail;
       }
@@ -154,7 +154,7 @@ err_t SvgStyleAttribute::setValue(const String& value)
 
     // Parse style value.
     styleValueBegin = strCur;
-    while (*strCur != Char(';'))
+    while (*strCur != CharW(';'))
     {
       if (++strCur == strEnd) break;
     }
@@ -182,9 +182,9 @@ _Bail:
   return ERR_OK;
 }
 
-String SvgStyleAttribute::getStyle(int styleId) const
+StringW SvgStyleAttribute::getStyle(int styleId) const
 {
-  String result;
+  StringW result;
 
   // Don't process non-used style values.
   if ((_mask & (1 << styleId)) == 0) goto _End;
@@ -220,7 +220,7 @@ String SvgStyleAttribute::getStyle(int styleId) const
       break;
 
     case SVG_STYLE_FILL_OPACITY:
-      result.setDouble(_fillOpacity);
+      result.setReal(_fillOpacity);
       break;
 
     case SVG_STYLE_FILL_RULE:
@@ -249,7 +249,7 @@ String SvgStyleAttribute::getStyle(int styleId) const
       break;
 
     case SVG_STYLE_OPACITY:
-      result.setDouble(_opacity);
+      result.setReal(_opacity);
       break;
 
     case SVG_STYLE_STOP_COLOR:
@@ -257,7 +257,7 @@ String SvgStyleAttribute::getStyle(int styleId) const
       break;
 
     case SVG_STYLE_STOP_OPACITY:
-      result.setDouble(_stopOpacity);
+      result.setReal(_stopOpacity);
       break;
 
     case SVG_STYLE_STROKE:
@@ -298,7 +298,7 @@ String SvgStyleAttribute::getStyle(int styleId) const
       break;
 
     case SVG_STYLE_STROKE_OPACITY:
-      result.setDouble(_strokeOpacity);
+      result.setReal(_strokeOpacity);
       break;
 
     case SVG_STYLE_STROKE_WIDTH:
@@ -312,7 +312,7 @@ _End:
   return result;
 }
 
-err_t SvgStyleAttribute::setStyle(int styleId, const String& value)
+err_t SvgStyleAttribute::setStyle(int styleId, const StringW& value)
 {
   err_t err = ERR_OK;
   int i;

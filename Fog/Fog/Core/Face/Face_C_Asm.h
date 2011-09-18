@@ -33,9 +33,8 @@ namespace Face {
 // [Fog::Face - P32 - MSC
 // ============================================================================
 
-#if defined(FOG_CC_MSC)
-#if defined(FOG_ARCH_X86   ) || \
-    defined(FOG_ARCH_X86_64)
+#if defined(FOG_CC_MSC) && (defined(FOG_ARCH_X86   ) || \
+                            defined(FOG_ARCH_X86_64))
 
 #define FOG_FACE_HAS_FAST_CTZ
 #define FOG_FACE_HAS_FAST_CLZ
@@ -86,18 +85,15 @@ static FOG_INLINE uint64_t u64EMul2x32(uint32_t x, uint32_t y)
 {
   return (uint64_t)__emulu(x, y);
 }
-
-#endif // FOG_ARCH_X86 || FOG_ARCH_X86_64
-#endif // FOG_CC_MSC
+#endif // FOG_CC_MSC && (FOG_ARCH_X86 || FOG_ARCH_X86_64)
 
 // ============================================================================
 // [Fog::Face - P32 - GNU
 // ============================================================================
 
-#if defined(FOG_CC_GNU)
-#if defined(FOG_ARCH_X86   ) || \
-    defined(FOG_ARCH_X86_64) || \
-    defined(FOG_ARCH_ARM   )
+#if defined(FOG_CC_GNU) && (defined(FOG_ARCH_X86   ) || \
+                            defined(FOG_ARCH_X86_64) || \
+                            defined(FOG_ARCH_ARM   ))
 
 #define FOG_FACE_HAS_FAST_CTZ
 #define FOG_FACE_HAS_FAST_CLZ
@@ -120,8 +116,7 @@ static FOG_INLINE bool p32CTZ(p32& dst, const p32& src)
 // AMD64, and ARM (and maybe other architectures too).
 #define FOG_FACE_SET_FAST_ROTATE
 
-#endif // FOG_ARCH_X86 || FOG_ARCH_X86_64 || FOG_ARCH_ARM
-#endif // FOG_CC_GNU
+#endif // FOG_CC_GNU && (FOG_ARCH_X86 || FOG_ARCH_X86_64 || FOG_ARCH_ARM)
 
 // ============================================================================
 // [Fog::Face - P32 - Generic

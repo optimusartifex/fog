@@ -11,7 +11,7 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemOps.h>
 #include <Fog/G2d/Geometry/Arc.h>
 
 namespace Fog {
@@ -85,25 +85,20 @@ struct FOG_NO_EXPORT ChordD : ArcD
 // [Fog::ChordT<>]
 // ============================================================================
 
-FOG_CLASS_PRECISION_F_D(Chord)
+_FOG_NUM_T(Chord)
+_FOG_NUM_F(Chord)
+_FOG_NUM_D(Chord)
 
 //! @}
 
 } // Fog namespace
 
 // ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::ChordF, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::ChordD, Fog::TYPEINFO_PRIMITIVE)
-
-// ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_FUZZY_DECLARE(Fog::ChordF, Fuzzy<ArcF>::eq(a, b))
-FOG_FUZZY_DECLARE(Fog::ChordD, Fuzzy<ArcD>::eq(a, b))
+FOG_FUZZY_DECLARE_F_VEC(Fog::ChordF, 6)
+FOG_FUZZY_DECLARE_D_VEC(Fog::ChordD, 6)
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_CHORD_H

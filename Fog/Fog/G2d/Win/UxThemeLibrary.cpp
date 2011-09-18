@@ -9,8 +9,8 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Library/Library.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemOps.h>
+#include <Fog/Core/OS/Library.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/G2d/Win/UxThemeLibrary.h>
 
@@ -76,7 +76,7 @@ err_t UxThemeLibrary::_init()
   // we can't be called again).
   FOG_ASSERT(err == 0xFFFFFFFF);
 
-  if (dll.open(Ascii8("uxtheme")) != ERR_OK)
+  if (dll.openLibrary(StringW::fromAscii8("uxtheme")) != ERR_OK)
   {
     // UxTheme.dll not found.
     return ERR_THEME_NATIVE_NOT_AVAILABLE;
@@ -99,7 +99,7 @@ err_t UxThemeLibrary::_init()
     NUM_VISTA_SYMBOLS, (char**)&badSymbol) != NUM_VISTA_SYMBOLS)
   {
     // This is not a failure case, probably using older system than WinVista.
-    Memory::zero(vista_addr, sizeof(void*) * NUM_VISTA_SYMBOLS);
+    MemOps::zero(vista_addr, sizeof(void*) * NUM_VISTA_SYMBOLS);
   }
 
   return ERR_OK;

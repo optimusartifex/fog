@@ -8,8 +8,8 @@
 #define _FOG_G2D_IMAGING_IMAGEDEVICEPROVIDER_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Global/Global.h>
+#include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Tools/String.h>
 
 namespace Fog {
@@ -40,10 +40,10 @@ struct FOG_API ImageCodecProvider
   virtual ~ImageCodecProvider();
 
   // --------------------------------------------------------------------------
-  // [Ref / Deref]
+  // [AddRef / Release]
   // --------------------------------------------------------------------------
 
-  virtual ImageCodecProvider* ref() const;
+  virtual ImageCodecProvider* addRef() const;
   virtual void deref();
 
   // --------------------------------------------------------------------------
@@ -57,9 +57,9 @@ struct FOG_API ImageCodecProvider
   FOG_INLINE uint32_t getStreamType() const { return _streamType; }
 
   //! @brief Get name of the provider.
-  FOG_INLINE const String& getName() const { return _name; }
+  FOG_INLINE const StringW& getName() const { return _name; }
   //! @brief Get list of the supported image extensions.
-  FOG_INLINE const List<String>& getImageExtensions() const { return _imageExtensions; }
+  FOG_INLINE const List<StringW>& getImageExtensions() const { return _imageExtensions; }
 
   //! @brief Get whether image-decoder can be created by the provider.
   FOG_INLINE bool supportsImageDecoder() const { return (_codecType & IMAGE_CODEC_DECODER) != 0; }
@@ -67,7 +67,7 @@ struct FOG_API ImageCodecProvider
   FOG_INLINE bool supportsImageEncoder() const { return (_codecType & IMAGE_CODEC_ENCODER) != 0; }
 
   //! @brief Get whether the provider supports an image file extension @a extension.
-  bool supportsImageExtension(const String& extension) const;
+  bool supportsImageExtension(const StringW& extension) const;
 
   // --------------------------------------------------------------------------
   // [Virtual]
@@ -98,39 +98,39 @@ struct FOG_API ImageCodecProvider
   static List<ImageCodecProvider*> getProviders();
 
   //! @brief Get image provider by @a name.
-  static ImageCodecProvider* getProviderByName(uint32_t codecType, const String& name);
+  static ImageCodecProvider* getProviderByName(uint32_t codecType, const StringW& name);
   //! @brief Get image provider by file @a extension.
-  static ImageCodecProvider* getProviderByExtension(uint32_t codecType, const String& extension);
+  static ImageCodecProvider* getProviderByExtension(uint32_t codecType, const StringW& extension);
   //! @brief Get image provider by signature.
   static ImageCodecProvider* getProviderBySignature(uint32_t codecType, void* mem, size_t len);
 
   //! @brief Create decoder for a given provider @a name.
-  static err_t createDecoderByName(const String& name, ImageDecoder** codec);
+  static err_t createDecoderByName(const StringW& name, ImageDecoder** codec);
   //! @brief Create encoder for a given provider @a name.
-  static err_t createEncoderByName(const String& name, ImageEncoder** codec);
+  static err_t createEncoderByName(const StringW& name, ImageEncoder** codec);
 
   //! @brief Create decoder for a given @a extension.
-  static err_t createDecoderByExtension(const String& extension, ImageDecoder** codec);
+  static err_t createDecoderByExtension(const StringW& extension, ImageDecoder** codec);
   //! @brief Create encoder for a given @a extension.
-  static err_t createEncoderByExtension(const String& extension, ImageEncoder** codec);
+  static err_t createEncoderByExtension(const StringW& extension, ImageEncoder** codec);
 
   //! @brief Create decoder for a file called @a fileName.
   //!
   //! This method is higher-level. It matches image extension, then tries to find
   //! suitable decoder device. It opens the file @a fileName and assigns the
   //! stream into the created decoder device on success.
-  static err_t createDecoderForFile(const String& fileName, ImageDecoder** codec);
+  static err_t createDecoderForFile(const StringW& fileName, ImageDecoder** codec);
 
   //! @brief Create decoder device for a stream, using @a extension to match
   //! suitable decoder or using raw image signature.
-  static err_t createDecoderForStream(Stream& stream, const String& extension, ImageDecoder** codec);
+  static err_t createDecoderForStream(Stream& stream, const StringW& extension, ImageDecoder** codec);
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
 protected:
-  mutable Atomic<size_t> _refCount;
+  mutable Atomic<size_t> _reference;
 
   //! @brief Supported device flags (see @c IMAGE_CODEC).
   uint32_t _codecType;
@@ -139,13 +139,13 @@ protected:
   uint32_t _streamType;
 
   //! @brief Image provider name (for example "BMP", "PNG", "PNG[GDI+]", ...).
-  String _name;
+  StringW _name;
 
   //! @brief List of standard image file extensions.
-  List<String> _imageExtensions;
+  List<StringW> _imageExtensions;
 
 private:
-  _FOG_CLASS_NO_COPY(ImageCodecProvider)
+  _FOG_NO_COPY(ImageCodecProvider)
 };
 
 //! @}

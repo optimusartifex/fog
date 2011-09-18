@@ -28,7 +28,7 @@ struct FOG_API UserInfo
 
   //! @brief Get user related directory, see @c USER_DIRECTORY enumeration for
   //! possibilities.
-  static err_t getDirectory(String& dst, int id);
+  static err_t getDirectory(StringW& dst, int id);
 };
 
 //! @}

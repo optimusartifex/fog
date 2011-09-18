@@ -9,7 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/Memory/Alloc.h>
+#include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/Core/Threading/Atomic.h>
 
 namespace Fog {
@@ -132,7 +132,7 @@ struct FOG_NO_EXPORT BlockAllocator
   Block* blocks;
 
 private:
-  _FOG_CLASS_NO_COPY(BlockAllocator)
+  _FOG_NO_COPY(BlockAllocator)
 };
 
 FOG_INLINE void BlockAllocator::free(void* ptr)

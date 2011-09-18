@@ -21,7 +21,7 @@ namespace Fog {
 // [Fog::ColorStop]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 struct FOG_NO_EXPORT ColorStop
 {
   // --------------------------------------------------------------------------
@@ -79,7 +79,7 @@ struct FOG_NO_EXPORT ColorStop
 
   FOG_INLINE void reset()
   {
-    Memory::zero_t<ColorStop>(this);
+    MemOps::zero_t<ColorStop>(this);
   }
 
   // --------------------------------------------------------------------------
@@ -105,12 +105,12 @@ struct FOG_NO_EXPORT ColorStop
 
   FOG_INLINE ColorStop& operator=(const ColorStop& other)
   {
-    Memory::copy_t<ColorStop>(this, &other);
+    MemOps::copy_t<ColorStop>(this, &other);
     return *this;
   }
 
-  FOG_INLINE bool operator==(const ColorStop& other) const { return  Memory::eq_t<ColorStop>(this, &other); }
-  FOG_INLINE bool operator!=(const ColorStop& other) const { return !Memory::eq_t<ColorStop>(this, &other); }
+  FOG_INLINE bool operator==(const ColorStop& other) const { return  MemOps::eq_t<ColorStop>(this, &other); }
+  FOG_INLINE bool operator!=(const ColorStop& other) const { return !MemOps::eq_t<ColorStop>(this, &other); }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -119,25 +119,19 @@ struct FOG_NO_EXPORT ColorStop
   Color _color;
   float _offset;
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 //! @}
 
 } // Fog namespace
 
 // ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::ColorStop, Fog::TYPEINFO_PRIMITIVE)
-
-// ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_FUZZY_DECLARE(Fog::ColorStop,
-  Math::isFuzzyEq(a._offset, b._offset) &&
-  Fuzzy<Color>::eq(a._color, b._color))
+FOG_FUZZY_DECLARE_F(Fog::ColorStop,
+  Math::isFuzzyEq(a._offset, b._offset, epsilon) &&
+  Fuzzy<Color>::eq(a._color, b._color, epsilon))
 
 // [Guard]
 #endif // _FOG_G2D_SOURCE_COLORSTOP_H

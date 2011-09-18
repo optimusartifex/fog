@@ -12,7 +12,6 @@
 #include <Fog/Core/Xml/XmlAttribute.h>
 #include <Fog/Core/Xml/XmlElement.h>
 #include <Fog/Svg/Dom/SvgDocument.h>
-#include <Fog/Svg/Global/Constants.h>
 #include <Fog/Svg/Tools/SvgCoord.h>
 
 namespace Fog {
@@ -39,7 +38,7 @@ struct FOG_NO_EXPORT SvgCoordAttribute : public XmlAttribute
   // [Methods]
   // --------------------------------------------------------------------------
 
-  virtual err_t setValue(const String& value);
+  virtual err_t setValue(const StringW& value);
 
   // --------------------------------------------------------------------------
   // [Coords]
@@ -63,7 +62,7 @@ protected:
   SvgCoord _coord;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgCoordAttribute)
+  _FOG_NO_COPY(SvgCoordAttribute)
 };
 
 //! @}

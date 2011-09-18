@@ -8,9 +8,9 @@
 #define _FOG_G2D_TEXT_FONTHINTS_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/HashUtil.h>
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemOps.h>
+#include <Fog/Core/Tools/HashUtil.h>
 
 namespace Fog {
 
@@ -56,7 +56,7 @@ struct FOG_NO_EXPORT FontHints
 
   FOG_INLINE FontHints(const FontHints& other)
   {
-    Memory::copy_t<FontHints>(this, &other);
+    MemOps::copy_t<FontHints>(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -106,9 +106,7 @@ struct FOG_NO_EXPORT FontHints
 
   FOG_INLINE uint32_t getHashCode() const
   {
-    return HashUtil::combineHash(
-      _data[0],
-      _data[1]);
+    return HashUtil::combine(_data[0], _data[1]);
   }
 
   // --------------------------------------------------------------------------
@@ -117,13 +115,13 @@ struct FOG_NO_EXPORT FontHints
 
   FOG_INLINE FontHints& operator=(const FontHints& other)
   {
-    Memory::copy_t<FontHints>(this, &other);
+    MemOps::copy_t<FontHints>(this, &other);
     return *this;
   }
 
   FOG_INLINE bool operator==(const FontHints& other) const
   {
-    return Memory::eq_t<FontHints>(this, &other);
+    return MemOps::eq_t<FontHints>(this, &other);
   }
 
   FOG_INLINE bool operator!=(const FontHints& other) const

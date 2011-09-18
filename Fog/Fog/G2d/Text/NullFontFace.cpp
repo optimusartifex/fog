@@ -31,17 +31,17 @@ NullFontFace::~NullFontFace()
 // [Fog::NullFontFace - Interface]
 // ============================================================================
 
-err_t NullFontFace::getTextOutline(PathF& dst, const FontData* d, const PointF& pt, const Utf16& str)
+err_t NullFontFace::getTextOutline(PathF& dst, const FontData* d, const PointF& pt, const StubW& str)
 {
   return ERR_FONT_INVALID_FACE;
 }
 
-err_t NullFontFace::getTextOutline(PathD& dst, const FontData* d, const PointD& pt, const Utf16& str)
+err_t NullFontFace::getTextOutline(PathD& dst, const FontData* d, const PointD& pt, const StubW& str)
 {
   return ERR_FONT_INVALID_FACE;
 }
 
-err_t NullFontFace::getTextExtents(TextExtents& extents, const FontData* d, const Utf16& str)
+err_t NullFontFace::getTextExtents(TextExtents& extents, const FontData* d, const StubW& str)
 {
   return ERR_FONT_INVALID_FACE;
 }
@@ -77,16 +77,16 @@ Static<FontFace> NullFontFace::_dnull;
 
 FOG_NO_EXPORT void FontFace_initNull(void)
 {
-  NullFontFace* d = reinterpret_cast<NullFontFace*>(NullFontFace::_dnull.instancep());
+  NullFontFace* d = reinterpret_cast<NullFontFace*>(&NullFontFace::_dnull);
 
   fog_new_p(d) NullFontFace();
 }
 
 FOG_NO_EXPORT void FontFace_finiNull(void)
 {
-  NullFontFace* d = reinterpret_cast<NullFontFace*>(NullFontFace::_dnull.instancep());
+  NullFontFace* d = reinterpret_cast<NullFontFace*>(&NullFontFace::_dnull);
 
-  d->refCount.dec();
+  d->reference.dec();
   d->~NullFontFace();
 }
 

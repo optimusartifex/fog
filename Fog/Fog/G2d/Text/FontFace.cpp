@@ -10,7 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Init_p.h>
-#include <Fog/Core/Global/Internals_p.h>
+#include <Fog/Core/Global/Private.h>
 #include <Fog/Core/Tools/TextIterator.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Transform.h>
@@ -27,7 +27,7 @@ namespace Fog {
 
 FontFace::FontFace()
 {
-  refCount.init(1);
+  reference.init(1);
 
   id = FONT_FACE_NULL;
   features = NO_FLAGS;
@@ -49,7 +49,7 @@ static FOG_INLINE err_t _FontFace_getTextOutline(FontFace* self,
   NumT_(Path)& dst,
   GlyphOutlineCache* outlineCache,
   const FontKerningTableF* kerningTable,
-  const FontData* d, const NumT_(Point)& pt, const Utf16& str, void* ctx)
+  const FontData* d, const NumT_(Point)& pt, const StubW& str, void* ctx)
 {
   // Initialize text iterator and check if we can continue. Text iterator
   // expects correct text, but can detect basic surrogate failures at the begin
@@ -135,7 +135,7 @@ static FOG_INLINE err_t _FontFace_getTextOutline(FontFace* self,
   return ERR_OK;
 }
 
-err_t FontFace::_getTextOutline(PathF& dst, GlyphOutlineCache* outlineCache, const FontData* d, const PointF& pt, const Utf16& str, void* ctx)
+err_t FontFace::_getTextOutline(PathF& dst, GlyphOutlineCache* outlineCache, const FontData* d, const PointF& pt, const StubW& str, void* ctx)
 {
   const FontKerningTableF* kerningTable = NULL;
   if (d->hints.getKerning() == FONT_KERNING_ENABLED)
@@ -147,7 +147,7 @@ err_t FontFace::_getTextOutline(PathF& dst, GlyphOutlineCache* outlineCache, con
     return _FontFace_getTextOutline<float, false>(this, dst, outlineCache, kerningTable, d, pt, str, ctx);
 }
 
-err_t FontFace::_getTextOutline(PathD& dst, GlyphOutlineCache* outlineCache, const FontData* d, const PointD& pt, const Utf16& str, void* ctx)
+err_t FontFace::_getTextOutline(PathD& dst, GlyphOutlineCache* outlineCache, const FontData* d, const PointD& pt, const StubW& str, void* ctx)
 {
   const FontKerningTableF* kerningTable = NULL;
   if (d->hints.getKerning() == FONT_KERNING_ENABLED)

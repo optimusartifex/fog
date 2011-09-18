@@ -20,7 +20,7 @@ namespace Fog {
 // [Fog::RasterSpan]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 //! @internal
 //!
 //! @brief RasterSpan is small element that contains position, length, CMask
@@ -44,7 +44,10 @@ struct FOG_NO_EXPORT RasterSpan
   // --------------------------------------------------------------------------
 
   //! @brief Whether the span is valid (used by asserts).
-  FOG_INLINE bool isValid() const { return (_x0 < _x1) && (_mask != NULL); }
+  FOG_INLINE bool isValid() const
+  {
+    return (_x0 < _x1) && (_mask != NULL);
+  }
 
   // --------------------------------------------------------------------------
   // [Position / Type]
@@ -187,13 +190,13 @@ struct FOG_NO_EXPORT RasterSpan
   //! @brief Pointer to the next span (or @c NULL).
   RasterSpan* _next;
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 // ============================================================================
 // [Fog::RasterSpan8]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 //! @internal
 //!
 //! @brief RasterSpan that is used by rendering to 8-bit image formats.
@@ -337,13 +340,13 @@ struct FOG_NO_EXPORT RasterSpan8 : public RasterSpan
     return (uint8_t*)(void*)mask;
   }
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 // ============================================================================
 // [Fog::RasterSpanExt8]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 //! @internal
 //!
 //! @brief @c RasterSpan8 extended by a @c data pointer.
@@ -382,13 +385,13 @@ struct FOG_NO_EXPORT RasterSpanExt8 : public RasterSpan8
   //! @brief Data pointer, used by patterns to store pointer to a fetched pixels.
   uint8_t* _data;
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 // ============================================================================
 // [Fog::RasterSpan16]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 //! @internal
 //!
 //! @brief RasterSpan that is used by rendering to 16-bit image formats.
@@ -544,13 +547,13 @@ struct FOG_NO_EXPORT RasterSpan16 : public RasterSpan
     return width * advanceData[type];
   }
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 // ============================================================================
 // [Fog::RasterSpanExt16]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 //! @internal
 //!
 //! @brief @c RasterSpan16 extended by a @c data pointer.
@@ -589,7 +592,7 @@ struct FOG_NO_EXPORT RasterSpanExt16 : public RasterSpan16
   //! @brief Data pointer, used by patterns to store pointer to a fetched pixels.
   uint8_t* _data;
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 //! @}
 

@@ -8,8 +8,7 @@
 #define _FOG_CORE_THREADING_ATOMICPADDING_H
 
 // [Dependencies]
-#include <Fog/Core/Config/Config.h>
-#include <Fog/Core/Cpu/Cpu.h>
+#include <Fog/Core/Tools/Cpu.h>
 
 namespace Fog {
 

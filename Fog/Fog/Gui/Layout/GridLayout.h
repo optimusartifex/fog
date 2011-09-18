@@ -8,7 +8,7 @@
 #define _FOG_GUI_LAYOUT_GRIDLAYOUT_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/List.h>
+#include <Fog/Core/Tools/List.h>
 #include <Fog/Gui/Layout/Layout.h>
 
 namespace Fog {
@@ -102,8 +102,8 @@ struct FOG_API GridLayout : public Layout
       widgetProps->_next = flexibles;
     }
 
-    FOG_INLINE LayoutItem* getItem(int row) const { return (uint)row < _layout->_rows.getLength() ? _layout->_rows.at(row)->getColumn(_colid) : 0;}
-    FOG_INLINE Row* getRow(int row) const { return (uint)row < _layout->_rows.getLength() ? _layout->_rows.at(row) : 0;}
+    FOG_INLINE LayoutItem* getItem(int row) const { return (uint)row < _layout->_rows.getLength() ? _layout->_rows.getAt(row)->getColumn(_colid) : 0;}
+    FOG_INLINE Row* getRow(int row) const { return (uint)row < _layout->_rows.getLength() ? _layout->_rows.getAt(row) : 0;}
 
     int _minWidth;
     int _maxWidth;
@@ -140,7 +140,7 @@ struct FOG_API GridLayout : public Layout
     }
 
     void calculateHeight();
-    FOG_INLINE LayoutItem* getColumn(int id) const { return (uint)id < _cols.getLength() ? _cols.at(id) : 0; }
+    FOG_INLINE LayoutItem* getColumn(int id) const { return (uint)id < _cols.getLength() ? _cols.getAt(id) : 0; }
 
     int _minHeight;
     int _maxHeight;

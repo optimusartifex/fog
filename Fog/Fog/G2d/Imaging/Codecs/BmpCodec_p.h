@@ -27,7 +27,7 @@ namespace Fog {
 // [Fog::BmpFileHeader]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 
 //! @internal
 //!
@@ -44,13 +44,13 @@ struct BmpFileHeader
   uint32_t imageOffset;     //!< @brief Offset to image data (54, 124, ...).
 };
 
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 // ============================================================================
 // [Fog::BmpOS2V1Header]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 
 //! @internal
 //!
@@ -66,13 +66,13 @@ struct BmpOS2V1Header
   uint16_t bitsPerPixel;    //!< @brief Bits per pixel (1, 4, 8 or 24).
 };
 
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 // ============================================================================
 // [Fog::BmpWinV3Header]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 
 //! @internal
 //!
@@ -94,13 +94,13 @@ struct BmpWinV3Header
   uint32_t colorsImportant; //!< @brief Minimum number of important colors.
 };
 
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 // ============================================================================
 // [Fog::BmpWinV4Header]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 
 //! @internal
 //!
@@ -128,13 +128,13 @@ struct BmpWinV4Header : public BmpWinV3Header
   uint32_t bGamma;          //!< @brief Gamma blue coordinate scale value.
 };
 
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 // ============================================================================
 // [Fog::BmpWinV5Header]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 
 //! @internal
 //!
@@ -150,7 +150,7 @@ struct BmpWinV5Header : public BmpWinV4Header
   uint32_t reserved;        //!< @brief Reserved, should be zero.
 };
 
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 // ============================================================================
 // [Fog::BmpDataHeader]
@@ -271,8 +271,8 @@ struct FOG_NO_EXPORT BmpDecoder : public ImageDecoder
   // [Properties]
   // --------------------------------------------------------------------------
 
-  virtual err_t getProperty(const ManagedString& name, Value& value) const;
-  virtual err_t setProperty(const ManagedString& name, const Value& value);
+  virtual err_t getProperty(const ManagedString& name, Var& dst) const;
+  virtual err_t setProperty(const ManagedString& name, const Var& src);
 
   // --------------------------------------------------------------------------
   // [Helpers]
@@ -282,7 +282,7 @@ struct FOG_NO_EXPORT BmpDecoder : public ImageDecoder
   FOG_INLINE void zeroall()
   {
     static const size_t ddsize = sizeof(ImageDecoder);
-    Memory::zero((uint8_t*)this + ddsize, sizeof(BmpDecoder) - ddsize);
+    MemOps::zero((uint8_t*)this + ddsize, sizeof(BmpDecoder) - ddsize);
   }
 
   // --------------------------------------------------------------------------
@@ -337,12 +337,12 @@ struct FOG_NO_EXPORT BmpEncoder : public ImageEncoder
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-_FOG_TYPEINFO_DECLARE(Fog::BmpFileHeader, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::BmpOS2V1Header, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::BmpWinV3Header, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::BmpWinV4Header, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::BmpWinV5Header, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::BmpDataHeader, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPE_DECLARE(Fog::BmpFileHeader, Fog::TYPE_CATEGORY_SIMPLE)
+_FOG_TYPE_DECLARE(Fog::BmpOS2V1Header, Fog::TYPE_CATEGORY_SIMPLE)
+_FOG_TYPE_DECLARE(Fog::BmpWinV3Header, Fog::TYPE_CATEGORY_SIMPLE)
+_FOG_TYPE_DECLARE(Fog::BmpWinV4Header, Fog::TYPE_CATEGORY_SIMPLE)
+_FOG_TYPE_DECLARE(Fog::BmpWinV5Header, Fog::TYPE_CATEGORY_SIMPLE)
+_FOG_TYPE_DECLARE(Fog::BmpDataHeader, Fog::TYPE_CATEGORY_SIMPLE)
 
 // [Guard]
 #endif // _FOG_G2D_IMAGING_CODECS_BMPCODEC_P_H

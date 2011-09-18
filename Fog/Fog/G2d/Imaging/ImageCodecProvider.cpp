@@ -9,12 +9,12 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/IO/FileSystem.h>
 #include <Fog/Core/IO/MapFile.h>
 #include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Threading/Lock.h>
+#include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringTmp_p.h>
@@ -64,7 +64,7 @@ static Static<ImageCodecProvider_Global> ImageCodecProvider_global;
 
 ImageCodecProvider::ImageCodecProvider()
 {
-  _refCount.init(1);
+  _reference.init(1);
 
   _codecType = IMAGE_CODEC_NONE;
   _streamType = IMAGE_STREAM_NONE;
@@ -78,22 +78,23 @@ ImageCodecProvider::~ImageCodecProvider()
 // [Fog::ImageCodecProvider - Ref / Deref]
 // ============================================================================
 
-ImageCodecProvider* ImageCodecProvider::ref() const
+ImageCodecProvider* ImageCodecProvider::addRef() const
 {
-  _refCount.inc();
+  _reference.inc();
   return const_cast<ImageCodecProvider*>(this);
 }
 
 void ImageCodecProvider::deref()
 {
-  if (_refCount.deref()) fog_delete(this);
+  if (_reference.deref())
+    fog_delete(this);
 }
 
 // ============================================================================
 // [Fog::ImageCodecProvider - Provider]
 // ============================================================================
 
-bool ImageCodecProvider::supportsImageExtension(const String& extension) const
+bool ImageCodecProvider::supportsImageExtension(const StringW& extension) const
 {
   return _imageExtensions.contains(extension);
 }
@@ -112,7 +113,7 @@ err_t ImageCodecProvider::addProvider(ImageCodecProvider* provider)
   if (ImageCodecProvider_global->providers.indexOf(provider) == INVALID_INDEX)
   {
     FOG_RETURN_ON_ERROR(ImageCodecProvider_global->providers.append(provider));
-    provider->ref();
+    provider->addRef();
   }
 
   return ERR_OK;
@@ -128,7 +129,7 @@ err_t ImageCodecProvider::removeProvider(ImageCodecProvider* provider)
   size_t index = ImageCodecProvider_global->providers.indexOf(provider);
   if (index == INVALID_INDEX) return ERR_RT_OBJECT_NOT_FOUND;
 
-  FOG_RETURN_ON_ERROR(ImageCodecProvider_global->providers.remove(provider));
+  FOG_RETURN_ON_ERROR(ImageCodecProvider_global->providers.removeAt(index));
 
   provider->deref();
   return ERR_OK;
@@ -146,41 +147,43 @@ List<ImageCodecProvider*> ImageCodecProvider::getProviders()
   return ImageCodecProvider_global->providers;
 }
 
-ImageCodecProvider* ImageCodecProvider::getProviderByName(uint32_t codecType, const String& name)
+ImageCodecProvider* ImageCodecProvider::getProviderByName(uint32_t codecType, const StringW& name)
 {
   if (codecType == IMAGE_CODEC_NONE || codecType > IMAGE_CODEC_BOTH)
     return NULL;
 
   List<ImageCodecProvider*> providers = getProviders();
-  List<ImageCodecProvider*>::ConstIterator it(providers);
+  ListIterator<ImageCodecProvider*> it(providers);
 
-  for (; it.isValid(); it.toNext())
+  while (it.isValid())
   {
-    ImageCodecProvider* provider = it.value();
+    ImageCodecProvider* provider = it.getItem();
     if ((provider->getCodecType() & codecType) == codecType && provider->getName() == name)
       return provider;
+    it.next();
   }
 
   return 0;
 }
 
-ImageCodecProvider* ImageCodecProvider::getProviderByExtension(uint32_t codecType, const String& extension)
+ImageCodecProvider* ImageCodecProvider::getProviderByExtension(uint32_t codecType, const StringW& extension)
 {
   if (codecType == IMAGE_CODEC_NONE || codecType > IMAGE_CODEC_BOTH)
     return NULL;
 
   List<ImageCodecProvider*> providers = getProviders();
-  List<ImageCodecProvider*>::ConstIterator it(providers);
+  ListIterator<ImageCodecProvider*> it(providers);
 
   // Convert extension to lower case.
-  StringTmp<16> e(extension);
+  StringTmpW<16> e(extension);
   e.lower();
 
-  for (it.toStart(); it.isValid(); it.toNext())
+  while (it.isValid())
   {
-    ImageCodecProvider* provider = it.value();
+    ImageCodecProvider* provider = it.getItem();
     if ((provider->getCodecType() & codecType) == codecType && provider->supportsImageExtension(e))
       return provider;
+    it.next();
   }
 
   return NULL;
@@ -195,14 +198,14 @@ ImageCodecProvider* ImageCodecProvider::getProviderBySignature(uint32_t codecTyp
     return NULL;
 
   List<ImageCodecProvider*> providers = getProviders();
-  List<ImageCodecProvider*>::ConstIterator it(providers);
+  ListIterator<ImageCodecProvider*> it(providers);
 
   uint32_t bestScore = 0;
   ImageCodecProvider* bestProvider = NULL;
 
-  for (it.toStart(); it.isValid(); it.toNext())
+  while (it.isValid())
   {
-    ImageCodecProvider* provider = it.value();
+    ImageCodecProvider* provider = it.getItem();
     if ((provider->getCodecType() & codecType) != codecType) continue;
 
     uint32_t score = provider->checkSignature(mem, len);
@@ -211,12 +214,14 @@ ImageCodecProvider* ImageCodecProvider::getProviderBySignature(uint32_t codecTyp
       bestScore = score;
       bestProvider = provider;
     }
+
+    it.next();
   }
 
   return bestProvider;
 }
 
-static err_t createImageCodecByName(uint32_t codecType, const String& name, ImageCodec** codec)
+static err_t createImageCodecByName(uint32_t codecType, const StringW& name, ImageCodec** codec)
 {
   err_t err = ERR_OK;
   if (codec == NULL) return ERR_RT_INVALID_ARGUMENT;
@@ -232,19 +237,19 @@ static err_t createImageCodecByName(uint32_t codecType, const String& name, Imag
   return err;
 }
 
-err_t ImageCodecProvider::createDecoderByName(const String& name, ImageDecoder** codec)
+err_t ImageCodecProvider::createDecoderByName(const StringW& name, ImageDecoder** codec)
 {
   return createImageCodecByName(
     IMAGE_CODEC_DECODER, name, reinterpret_cast<ImageCodec**>(codec));
 }
 
-err_t ImageCodecProvider::createEncoderByName(const String& name, ImageEncoder** codec)
+err_t ImageCodecProvider::createEncoderByName(const StringW& name, ImageEncoder** codec)
 {
   return createImageCodecByName(
     IMAGE_CODEC_ENCODER, name, reinterpret_cast<ImageCodec**>(codec));
 }
 
-static err_t createImageCodecByExtension(uint32_t codecType, const String& extension, ImageCodec** codec)
+static err_t createImageCodecByExtension(uint32_t codecType, const StringW& extension, ImageCodec** codec)
 {
   err_t err = ERR_OK;
   if (codec == NULL) return ERR_RT_INVALID_ARGUMENT;
@@ -260,24 +265,24 @@ static err_t createImageCodecByExtension(uint32_t codecType, const String& exten
   return err;
 }
 
-err_t ImageCodecProvider::createDecoderByExtension(const String& extension, ImageDecoder** codec)
+err_t ImageCodecProvider::createDecoderByExtension(const StringW& extension, ImageDecoder** codec)
 {
   return createImageCodecByExtension(
     IMAGE_CODEC_DECODER, extension, reinterpret_cast<ImageCodec**>(codec));
 }
 
-err_t ImageCodecProvider::createEncoderByExtension(const String& extension, ImageEncoder** codec)
+err_t ImageCodecProvider::createEncoderByExtension(const StringW& extension, ImageEncoder** codec)
 {
   return createImageCodecByExtension(
     IMAGE_CODEC_ENCODER, extension, reinterpret_cast<ImageCodec**>(codec));
 }
 
-err_t ImageCodecProvider::createDecoderForFile(const String& fileName, ImageDecoder** codec)
+err_t ImageCodecProvider::createDecoderForFile(const StringW& fileName, ImageDecoder** codec)
 {
   if (codec == NULL) return ERR_RT_INVALID_ARGUMENT;
 
   Stream stream;
-  String extension;
+  StringW extension;
 
   err_t err = stream.openMMap(fileName, false);
   // MMap failed? Try to open the file using standard stream.
@@ -296,7 +301,7 @@ _End:
   return err;
 }
 
-err_t ImageCodecProvider::createDecoderForStream(Stream& stream, const String& extension, ImageDecoder** codec)
+err_t ImageCodecProvider::createDecoderForStream(Stream& stream, const StringW& extension, ImageDecoder** codec)
 {
   if (codec == NULL) return ERR_RT_INVALID_ARGUMENT;
 
@@ -369,14 +374,12 @@ FOG_NO_EXPORT void ImageCodecProvider_fini(void)
   // Remove (and delete) all providers
   //
   // Do not need to lock, because we are shutting down. All threads should
-  // been already destroyed.
+  // have been already destroyed.
+  ListIterator<ImageCodecProvider*> it(ImageCodecProvider_global->providers);
+  while (it.isValid())
   {
-    List<ImageCodecProvider*>::ConstIterator it(ImageCodecProvider_global->providers);
-    for (it.toStart(); it.isValid(); it.toNext())
-    {
-      ImageCodecProvider* provider = it.value();
-      provider->deref();
-    }
+    it.getItem()->deref();
+    it.next();
   }
 
   // Shutdown.

@@ -8,12 +8,12 @@
 #include FOG_PRECOMP
 #endif // FOG_PRECOMP
 
-#include <Fog/Core/Cpu/Cpu.h>
-#include <Fog/Core/Cpu/Initializer.h>
 #include <Fog/Core/Global/Init_p.h>
-#include <Fog/Core/Global/Internals_p.h>
+#include <Fog/Core/Global/Private.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
+#include <Fog/Core/Tools/Cpu.h>
+#include <Fog/Core/Tools/Swap.h>
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Transform.h>
@@ -1504,7 +1504,7 @@ static void FOG_CDECL TransformT_mapPointT(const NumT_(Transform)& self,
       NumT _y = y;
       NumT _w = x * self._02 + y * self._12 + self._22;
 
-      if (Math::isFuzzyZero(_w)) _w = Math2dConst<NumT>::getMathEpsilon();
+      if (Math::isFuzzyZero(_w)) _w = MathConstant<NumT>::getEpsilon();
       _w = NumT(1.0) / _w;
 
       x = _x * self._00 + _y * self._10 + self._20;
@@ -1639,7 +1639,7 @@ static void FOG_CDECL TransformT_mapPointsT_Projection(const NumT_(Transform)& s
   {
     NumT _w = src->x * self._02 + src->y * self._12 + self._22;
 
-    if (Math::isFuzzyZero(_w)) _w = Math2dConst<NumT>::getMathEpsilon();
+    if (Math::isFuzzyZero(_w)) _w = MathConstant<NumT>::getEpsilon();
     _w = NumT(1.0) / _w;
 
     dst->set((src->x * _00 + src->y * _10 + _20) * _w,
@@ -1677,7 +1677,7 @@ static err_t FOG_CDECL TransformT_mapPathT(const NumT_(Transform)& self,
       self._mapPoints(dst._d->vertices, src._d->vertices, srcLength);
       if (sizeof(NumT) != sizeof(SrcT) || (void*)dst._d != (void*)src._d)
       {
-        Memory::copy(dst._d->commands, src._d->commands, srcLength);
+        MemOps::copy(dst._d->commands, src._d->commands, srcLength);
         dst._d->length = srcLength;
       }
     }
@@ -1687,9 +1687,10 @@ static err_t FOG_CDECL TransformT_mapPathT(const NumT_(Transform)& self,
       if (FOG_UNLIKELY(pos == INVALID_INDEX)) return ERR_RT_OUT_OF_MEMORY;
 
       self._mapPoints(dst._d->vertices + pos, src._d->vertices, srcLength);
-      Memory::copy(dst._d->commands + pos, src._d->commands, srcLength);
+      MemOps::copy(dst._d->commands + pos, src._d->commands, srcLength);
     }
 
+    dst._modified();
     return ERR_OK;
   }
   else
@@ -1738,31 +1739,31 @@ static err_t FOG_CDECL TransformT_mapPathDataT(const NumT_(Transform)& self,
 
   if (transformType != TRANSFORM_TYPE_PROJECTION)
   {
-    size_t pos = dst._prepare(srcLength, cntOp);
+    size_t pos = dst._prepare(cntOp, srcLength);
     if (FOG_UNLIKELY(pos == INVALID_INDEX)) return ERR_RT_OUT_OF_MEMORY;
 
     uint8_t* dstCmd = dst._d->commands + pos;
     NumT_(Point)* dstPts = dst._d->vertices + pos;
 
-    Memory::copy(dstCmd, srcCmd, srcLength);
+    MemOps::copy(dstCmd, srcCmd, srcLength);
     self._mapPoints(dstPts, srcPts, srcLength);
 
-    dst._d->flags |= PATH_DATA_DIRTY_BBOX | PATH_DATA_DIRTY_CMD;
+    dst._d->vType |= PATH_FLAG_DIRTY_BBOX | PATH_FLAG_DIRTY_CMD;
     return ERR_OK;
   }
   else
   {
-    if (srcLength >= SYSUINT_MAX / 4)
+    if (srcLength >= SIZE_MAX / 4)
       return ERR_RT_OUT_OF_MEMORY;
 
-    size_t pos = dst._prepare(srcLength * 4, cntOp);
+    size_t pos = dst._prepare(cntOp, srcLength * 4);
     if (FOG_UNLIKELY(pos == INVALID_INDEX)) return ERR_RT_OUT_OF_MEMORY;
 
     uint8_t* dstCmd = dst._d->commands + pos;
     NumT_(Point)* dstPts = dst._d->vertices + pos;
 
     size_t i = srcLength;
-    uint32_t mask = PATH_DATA_DIRTY_BBOX;
+    uint32_t mask = PATH_FLAG_DIRTY_BBOX;
     NumT_(Point) spline[20];
 
     NumT _00 = self._00;
@@ -1792,7 +1793,7 @@ static err_t FOG_CDECL TransformT_mapPathDataT(const NumT_(Transform)& self,
           if (FOG_UNLIKELY(!hasPrevious)) goto _Invalid;
 
           _w = srcPts[0].x * self._02 + srcPts[0].y * self._12 + self._22;
-          if (Math::isFuzzyZero(_w)) _w = Math2dConst<NumT>::getMathEpsilon();
+          if (Math::isFuzzyZero(_w)) _w = MathConstant<NumT>::getEpsilon();
 
           NumT _wRecip = NumT(1.0) / _w;
 
@@ -1814,7 +1815,7 @@ static err_t FOG_CDECL TransformT_mapPathDataT(const NumT_(Transform)& self,
           FOG_ASSERT(i >= 2);
 
           if (FOG_UNLIKELY(!hasPrevious)) goto _Invalid;
-          mask |= PATH_DATA_HAS_QBEZIER;
+          mask |= PATH_FLAG_HAS_QBEZIER;
 
           if (sizeof(NumT) != sizeof(SrcT))
           {
@@ -1838,7 +1839,7 @@ static err_t FOG_CDECL TransformT_mapPathDataT(const NumT_(Transform)& self,
           for (uint j = 1; j < 10; j++)
           {
             NumT w = spline[j].x * self._02 + spline[j].y * self._12 + self._22;
-            if (Math::isFuzzyZero(w)) w = Math2dConst<NumT>::getMathEpsilon();
+            if (Math::isFuzzyZero(w)) w = MathConstant<NumT>::getEpsilon();
 
             NumT wRecip = NumT(1.0) / w;
 
@@ -1860,7 +1861,7 @@ static err_t FOG_CDECL TransformT_mapPathDataT(const NumT_(Transform)& self,
           FOG_ASSERT(i >= 3);
 
           if (FOG_UNLIKELY(!hasPrevious)) goto _Invalid;
-          mask |= PATH_DATA_HAS_CBEZIER;
+          mask |= PATH_FLAG_HAS_CBEZIER;
 
           if (sizeof(NumT) != sizeof(SrcT))
           {
@@ -1884,7 +1885,7 @@ static err_t FOG_CDECL TransformT_mapPathDataT(const NumT_(Transform)& self,
           for (uint j = 1; j < 13; j++)
           {
             NumT w = spline[j].x * self._02 + spline[j].y * self._12 + self._22;
-            if (Math::isFuzzyZero(w)) w = Math2dConst<NumT>::getMathEpsilon();
+            if (Math::isFuzzyZero(w)) w = MathConstant<NumT>::getEpsilon();
 
             NumT wRecip = NumT(1.0) / w;
 
@@ -1923,7 +1924,7 @@ static err_t FOG_CDECL TransformT_mapPathDataT(const NumT_(Transform)& self,
     } while (i);
 
     dst._d->length = (size_t)(dstCmd - dst._d->commands);
-    dst._d->flags |= mask;
+    dst._d->vType |= mask;
     return ERR_OK;
 
 _Invalid:
@@ -2098,8 +2099,8 @@ static void FOG_CDECL TransformT_mapVectorT(const NumT_(Transform)& self,
       NumT _w0 = (self._22);
       NumT _w1 = (self._22 + src.x * self._02 + src.y * self._12);
 
-      if (Math::isFuzzyZero(_w0)) _w0 = Math2dConst<NumT>::getMathEpsilon();
-      if (Math::isFuzzyZero(_w1)) _w1 = Math2dConst<NumT>::getMathEpsilon();
+      if (Math::isFuzzyZero(_w0)) _w0 = MathConstant<NumT>::getEpsilon();
+      if (Math::isFuzzyZero(_w1)) _w1 = MathConstant<NumT>::getEpsilon();
 
       _w0 = NumT(1.0) / _w0;
       _w1 = NumT(1.0) / _w1;
@@ -2189,12 +2190,16 @@ static NumT FOG_CDECL TransformT_getAverageScaling(const NumT_(Transform)& self)
 // [Init / Fini]
 // ============================================================================
 
-FOG_CPU_DECLARE_INITIALIZER_3DNOW(Transform_init3dNow)
-FOG_CPU_DECLARE_INITIALIZER_SSE(Transform_initSSE)
-FOG_CPU_DECLARE_INITIALIZER_SSE2(Transform_initSSE2)
+FOG_CPU_DECLARE_INITIALIZER_3DNOW(Transform_init_3dNow)
+FOG_CPU_DECLARE_INITIALIZER_SSE(Transform_init_SSE)
+FOG_CPU_DECLARE_INITIALIZER_SSE2(Transform_init_SSE2)
 
 FOG_NO_EXPORT void Transform_init(void)
 {
+  // --------------------------------------------------------------------------
+  // [Funcs]
+  // --------------------------------------------------------------------------
+
   _api.transformf.create = TransformT_create<float>;
   _api.transformf.update = TransformT_update<float>;
   _api.transformf.transform = TransformT_transform<float>;
@@ -2205,6 +2210,12 @@ FOG_NO_EXPORT void Transform_init(void)
   _api.transformf.getRotation = TransformT_getRotation<float>;
   _api.transformf.getAverageScaling = TransformT_getAverageScaling<float>;
 
+  _api.transformf.mapPointF = TransformT_mapPointT<float, float>;
+  _api.transformf.mapPathF = TransformT_mapPathT<float, float>;
+  _api.transformf.mapPathDataF = TransformT_mapPathDataT<float, float>;
+  _api.transformf.mapBoxF = TransformT_mapBoxT<float, float>;
+  _api.transformf.mapVectorF = TransformT_mapVectorT<float, float>;
+
   _api.transformd.create = TransformT_create<double>;
   _api.transformd.update = TransformT_update<double>;
   _api.transformd.transform = TransformT_transform<double>;
@@ -2214,12 +2225,6 @@ FOG_NO_EXPORT void Transform_init(void)
   _api.transformd.getScaling = TransformT_getScaling<double>;
   _api.transformd.getRotation = TransformT_getRotation<double>;
   _api.transformd.getAverageScaling = TransformT_getAverageScaling<double>;
-
-  _api.transformf.mapPointF = TransformT_mapPointT<float, float>;
-  _api.transformf.mapPathF = TransformT_mapPathT<float, float>;
-  _api.transformf.mapPathDataF = TransformT_mapPathDataT<float, float>;
-  _api.transformf.mapBoxF = TransformT_mapBoxT<float, float>;
-  _api.transformf.mapVectorF = TransformT_mapVectorT<float, float>;
 
   _api.transformd.mapPathF = TransformT_mapPathT<double, float>;
   _api.transformd.mapPathD = TransformT_mapPathT<double, double>;
@@ -2259,9 +2264,13 @@ FOG_NO_EXPORT void Transform_init(void)
   _api.transformd.mapPointsD[TRANSFORM_TYPE_DEGENERATE ] = TransformT_mapPointsT_Degenerate <double, double>;
 #endif // FOG_TRANSFORM_INIT_C
 
-  FOG_CPU_USE_INITIALIZER_3DNOW(Transform_init3dNow)
-  FOG_CPU_USE_INITIALIZER_SSE(Transform_initSSE)
-  FOG_CPU_USE_INITIALIZER_SSE2(Transform_initSSE2)
+  // --------------------------------------------------------------------------
+  // [CPU Based Optimizations]
+  // --------------------------------------------------------------------------
+
+  FOG_CPU_USE_INITIALIZER_3DNOW(Transform_init_3dNow)
+  FOG_CPU_USE_INITIALIZER_SSE(Transform_init_SSE)
+  FOG_CPU_USE_INITIALIZER_SSE2(Transform_init_SSE2)
 }
 
 } // Fog namespace

@@ -9,8 +9,8 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/System/Application.h>
-#include <Fog/Core/System/Object.h>
+#include <Fog/Core/Kernel/Application.h>
+#include <Fog/Core/Kernel/Object.h>
 #include <Fog/Gui/Animation/Animation.h>
 
 FOG_IMPLEMENT_OBJECT(Fog::Animation)
@@ -75,9 +75,12 @@ void AnimationDispatcher::onTimer(TimerEvent* e)
 
   while (_finished.getLength() > 0)
   {
-    Animation* e = _finished.takeFirst();
-    //who is responsible to destruct?
-    //current answer: call destroy on Animation
+    Animation* e = _finished.getFirst();
+    _finished.removeFirst();
+
+    // TODO:
+    // Who is responsible to destruct?
+    // Current answer: call destroy on Animation
     removeListener(e);
     e->destroy();
   }

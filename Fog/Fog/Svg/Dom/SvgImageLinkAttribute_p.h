@@ -12,7 +12,6 @@
 #include <Fog/Core/Xml/XmlAttribute.h>
 #include <Fog/Core/Xml/XmlElement.h>
 #include <Fog/G2d/Imaging/Image.h>
-#include <Fog/Svg/Global/Constants.h>
 
 namespace Fog {
 
@@ -38,8 +37,8 @@ struct FOG_NO_EXPORT SvgImageLinkAttribute : public XmlAttribute
   // [Methods]
   // --------------------------------------------------------------------------
 
-  virtual String getValue() const;
-  virtual err_t setValue(const String& value);
+  virtual StringW getValue() const;
+  virtual err_t setValue(const StringW& value);
 
   // --------------------------------------------------------------------------
   // [Image]
@@ -59,7 +58,7 @@ protected:
 private:
   friend struct SvgImageElement;
 
-  _FOG_CLASS_NO_COPY(SvgImageLinkAttribute)
+  _FOG_NO_COPY(SvgImageLinkAttribute)
 };
 
 //! @}

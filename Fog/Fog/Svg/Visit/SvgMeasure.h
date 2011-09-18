@@ -78,7 +78,7 @@ struct FOG_API SvgMeasure : public SvgVisitor
   PathF _pathTmp;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgMeasure)
+  _FOG_NO_COPY(SvgMeasure)
 };
 
 //! @}

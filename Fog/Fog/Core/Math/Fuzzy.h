@@ -8,9 +8,9 @@
 #define _FOG_CORE_MATH_FUZZY_H
 
 // [Dependencies]
-#include <Fog/Core/Config/Config.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Convert.h>
+#include <Fog/Core/Math/Math.h>
 
 namespace Fog {
 
@@ -28,14 +28,56 @@ struct Fuzzy {};
 // [Fog::Fuzzy<> - Macros]
 // ============================================================================
 
-#define FOG_FUZZY_DECLARE(_Symbol_, _Code_) \
+#define FOG_FUZZY_DECLARE_F(_Symbol_, _Code_) \
 namespace Fog { \
   template <> \
   struct Fuzzy < _Symbol_ > \
   { \
-    static FOG_INLINE bool eq(const _Symbol_& a, const _Symbol_& b) \
+    static FOG_INLINE bool eq(const _Symbol_& a, const _Symbol_& b, float epsilon = MATH_EPSILON_F) \
     { \
       return (_Code_); \
+    } \
+  }; \
+}
+
+#define FOG_FUZZY_DECLARE_D(_Symbol_, _Code_) \
+namespace Fog { \
+  template <> \
+  struct Fuzzy < _Symbol_ > \
+  { \
+    static FOG_INLINE bool eq(const _Symbol_& a, const _Symbol_& b, double epsilon = MATH_EPSILON_D) \
+    { \
+      return (_Code_); \
+    } \
+  }; \
+}
+
+#define FOG_FUZZY_DECLARE_F_VEC(_Symbol_, _Length_) \
+namespace Fog { \
+  template <> \
+  struct Fuzzy < _Symbol_ > \
+  { \
+    static FOG_INLINE bool eq(const _Symbol_& a, const _Symbol_& b, float epsilon = MATH_EPSILON_F) \
+    { \
+      return Math::feqv( \
+        reinterpret_cast<const float*>(&a), \
+        reinterpret_cast<const float*>(&b), \
+        _Length_, epsilon); \
+    } \
+  }; \
+}
+
+#define FOG_FUZZY_DECLARE_D_VEC(_Symbol_, _Length_) \
+namespace Fog { \
+  template <> \
+  struct Fuzzy < ::_Symbol_ > \
+  { \
+    static FOG_INLINE bool eq(const ::_Symbol_& a, const ::_Symbol_& b, float epsilon = MATH_EPSILON_F) \
+    { \
+      return Math::feqv( \
+        reinterpret_cast<const double*>(&a), \
+        reinterpret_cast<const double*>(&b), \
+        _Length_, epsilon); \
     } \
   }; \
 }
@@ -114,8 +156,8 @@ static FOG_INLINE bool feqv(const double* a, const double* b, size_t length, dou
 // [Fog::Fuzzy<> - Specialization]
 // ============================================================================
 
-FOG_FUZZY_DECLARE(float, Math::isFuzzyEq(a, b))
-FOG_FUZZY_DECLARE(double, Math::isFuzzyEq(a, b))
+FOG_FUZZY_DECLARE_F(float, Math::isFuzzyEq(a, b, epsilon))
+FOG_FUZZY_DECLARE_D(double, Math::isFuzzyEq(a, b, epsilon))
 
 // [Guard]
 #endif // _FOG_CORE_MATH_FUZZY_H

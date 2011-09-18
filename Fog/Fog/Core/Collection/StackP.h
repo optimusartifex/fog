@@ -4,16 +4,16 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_COLLECTION_STACKP_H
-#define _FOG_CORE_COLLECTION_STACKP_H
+#ifndef _FOG_CORE_TOOLS_STACKP_H
+#define _FOG_CORE_TOOLS_STACKP_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/Memory/Alloc.h>
+#include <Fog/Core/Memory/MemMgr.h>
 
 namespace Fog {
 
-//! @addtogroup Fog_Core_Collection
+//! @addtogroup Fog_Core_Tools
 //! @{
 
 // ============================================================================
@@ -62,7 +62,7 @@ struct StackP
     while (node)
     {
       Node* next = node->next;
-      Memory::free(node);
+      MemMgr::free(node);
       node = next;
     }
   }
@@ -87,7 +87,7 @@ struct StackP
     {
       if (_current->next == NULL)
       {
-        Node* node = (Node*)Memory::alloc(sizeof(Node) - N + (1024*32));
+        Node* node = (Node*)MemMgr::alloc(sizeof(Node) - N + (1024*32));
         if (FOG_UNLIKELY(node == NULL)) return ERR_RT_OUT_OF_MEMORY;
 
         node->cur = node->buffer;
@@ -133,7 +133,7 @@ protected:
   Node _first;
 
 private:
-  _FOG_CLASS_NO_COPY(StackP)
+  _FOG_NO_COPY(StackP)
 };
 
 //! @}
@@ -141,4 +141,4 @@ private:
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_CORE_COLLECTION_STACKP_H
+#endif // _FOG_CORE_TOOLS_STACKP_H

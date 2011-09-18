@@ -8,7 +8,7 @@
 #define _FOG_CORE_GLOBAL_INIT_P_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/C++/Base.h>
 
 // ============================================================================
 // [Fog::Core - Init / Fini]
@@ -16,45 +16,29 @@
 
 namespace Fog {
 
-// [Fog/Core/Collection]
-FOG_NO_EXPORT void List_init(void);
-FOG_NO_EXPORT void Hash_init(void);
-
-// [Fog/Core/Cpu]
-FOG_NO_EXPORT void Cpu_init(void);
-
-// [Fog/Core/DateTime]
-FOG_NO_EXPORT void Date_init(void);
-FOG_NO_EXPORT void Time_init(void);
-
-// [Fog/Core/Global]
-FOG_NO_EXPORT void Error_init(void);
-
 // [Fog/Core/IO]
+FOG_NO_EXPORT void DirEntry_init(void);
+FOG_NO_EXPORT void DirIterator_init(void);
 FOG_NO_EXPORT void Stream_init(void);
 FOG_NO_EXPORT void Stream_fini(void);
-
-// [Fog/Core/Library]
-FOG_NO_EXPORT void Library_init(void);
-FOG_NO_EXPORT void Library_fini(void);
 
 // [Fog/Core/Math]
 FOG_NO_EXPORT void Math_init(void);
 
 // [Fog/Core/Memory]
-FOG_NO_EXPORT void MemoryOps_init(void);
-FOG_NO_EXPORT void MemoryManager_init(void);
+FOG_NO_EXPORT void MemMgr_init(void);
+FOG_NO_EXPORT void MemMgr_fini(void);
 
-FOG_NO_EXPORT void MemoryAlloc_init(void);
-FOG_NO_EXPORT void MemoryAlloc_fini(void);
-
-FOG_NO_EXPORT void MemoryCleanup_init(void);
+FOG_NO_EXPORT void MemOps_init(void);
+FOG_NO_EXPORT void MemPool_init(void);
 
 // [Fog/Core/OS]
-FOG_NO_EXPORT void OS_init(void);
-FOG_NO_EXPORT void OS_fini(void);
+FOG_NO_EXPORT void Library_init(void);
+FOG_NO_EXPORT void Library_fini(void);
 
-// [Fog/Core/System]
+FOG_NO_EXPORT void System_init(void);
+
+// [Fog/Core/Kernel]
 FOG_NO_EXPORT void Application_init(void);
 FOG_NO_EXPORT void Application_fini(void);
 
@@ -75,21 +59,32 @@ FOG_NO_EXPORT void ThreadPool_init(void);
 FOG_NO_EXPORT void ThreadPool_fini(void);
 
 // [Fog/Core/Tools]
-FOG_NO_EXPORT void ByteArray_init(void);
+FOG_NO_EXPORT void Cpu_init(void);
+
+FOG_NO_EXPORT void Hash_init(void);
+FOG_NO_EXPORT void HashUtil_init(void);
+FOG_NO_EXPORT void List_init(void);
+
 FOG_NO_EXPORT void Locale_init(void);
+FOG_NO_EXPORT void Locale_fini(void);
 
 FOG_NO_EXPORT void ManagedString_init(void);
 FOG_NO_EXPORT void ManagedString_fini(void);
 
 FOG_NO_EXPORT void String_init(void);
+FOG_NO_EXPORT void StringUtil_init(void);
+FOG_NO_EXPORT void StringUtil_init_dtoa(void);
+
+FOG_NO_EXPORT void RegExp_init(void);
 FOG_NO_EXPORT void Strings_init(void);
 
 FOG_NO_EXPORT void TextCodec_init(void);
 FOG_NO_EXPORT void TextCodec_fini(void);
 
-// [Fog/Core/Variant]
+FOG_NO_EXPORT void Date_init(void);
+FOG_NO_EXPORT void Time_init(void);
+
 FOG_NO_EXPORT void Var_init(void);
-FOG_NO_EXPORT void Var_fini(void);
 
 // [Fog/Core/Xml]
 FOG_NO_EXPORT void XmlEntity_init(void);
@@ -111,6 +106,8 @@ FOG_NO_EXPORT void Shape_init(void);
 
 FOG_NO_EXPORT void Transform_init(void);
 FOG_NO_EXPORT void PathClipper_init(void);
+FOG_NO_EXPORT void PathStroker_init(void);
+FOG_NO_EXPORT void PathInfo_init(void);
 
 // [Fog/G2d/Imaging]
 FOG_NO_EXPORT void Image_init(void);
@@ -140,6 +137,7 @@ FOG_NO_EXPORT void Pattern_init(void);
 // [Fog/G2d/Tools]
 FOG_NO_EXPORT void Matrix_init(void);
 FOG_NO_EXPORT void Region_init(void);
+FOG_NO_EXPORT void RegionUtil_init(void);
 
 // [Fog/G2d/Text]
 FOG_NO_EXPORT void GlyphBitmap_init(void);

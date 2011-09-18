@@ -9,8 +9,9 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/Hash.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemMgr.h>
+#include <Fog/Core/Memory/MemOps.h>
+#include <Fog/Core/Tools/Hash.h>
 #include <Fog/Core/Tools/StringUtil.h>
 #include <Fog/Core/Xml/XmlElement.h>
 #include <Fog/Core/Xml/XmlIdManager.h>
@@ -30,12 +31,12 @@ XmlIdManager::XmlIdManager() :
   _shrinkLength(0),
   _buckets(_bucketsBuffer)
 {
-  Memory::zero(_bucketsBuffer, sizeof(_bucketsBuffer));
+  MemOps::zero(_bucketsBuffer, sizeof(_bucketsBuffer));
 }
 
 XmlIdManager::~XmlIdManager()
 {
-  if (_buckets != _bucketsBuffer) Memory::free(_buckets);
+  if (_buckets != _bucketsBuffer) MemMgr::free(_buckets);
 }
 
 void XmlIdManager::add(XmlElement* e)
@@ -86,7 +87,7 @@ void XmlIdManager::remove(XmlElement* e)
   }
 }
 
-XmlElement* XmlIdManager::get(const String& id) const
+XmlElement* XmlIdManager::get(const StringW& id) const
 {
   uint32_t hashCode = id.getHashCode();
   uint32_t hashMod = hashCode % _capacity;
@@ -100,9 +101,9 @@ XmlElement* XmlIdManager::get(const String& id) const
   return NULL;
 }
 
-XmlElement* XmlIdManager::get(const Char* idStr, size_t idLen) const
+XmlElement* XmlIdManager::get(const CharW* idStr, size_t idLen) const
 {
-  uint32_t hashCode = HashUtil::makeStringHash(idStr, idLen);
+  uint32_t hashCode = HashUtil::hash(StubW(idStr, idLen));
   uint32_t hashMod = hashCode % _capacity;
 
   XmlElement* node = _buckets[hashMod];
@@ -117,7 +118,7 @@ XmlElement* XmlIdManager::get(const Char* idStr, size_t idLen) const
 void XmlIdManager::_rehash(size_t capacity)
 {
   XmlElement** oldBuckets = _buckets;
-  XmlElement** newBuckets = (XmlElement**)Memory::calloc(sizeof(XmlElement*) * capacity);
+  XmlElement** newBuckets = (XmlElement**)MemMgr::calloc(sizeof(XmlElement*) * capacity);
   if (!newBuckets) return;
 
   size_t i, len = _capacity;
@@ -145,14 +146,14 @@ void XmlIdManager::_rehash(size_t capacity)
 
   _capacity = capacity;
 
-  _expandCapacity = UnorderedAbstract::_calcExpandCapacity(capacity);
-  _expandLength = (size_t)((sysint_t)_capacity * 0.92);
+  _expandCapacity = _api.hash.helper.calcExpandCapacity(capacity);
+  _expandLength = (size_t)((ssize_t)_capacity * 0.92);
 
-  _shrinkCapacity = UnorderedAbstract::_calcShrinkCapacity(capacity);
-  _shrinkLength = (size_t)((sysint_t)_shrinkCapacity * 0.70);
+  _shrinkCapacity = _api.hash.helper.calcShrinkCapacity(capacity);
+  _shrinkLength = (size_t)((ssize_t)_shrinkCapacity * 0.70);
 
   atomicPtrXchg(&_buckets, newBuckets);
-  if (oldBuckets != _bucketsBuffer) Memory::free(oldBuckets);
+  if (oldBuckets != _bucketsBuffer) MemMgr::free(oldBuckets);
 }
 
 } // Fog namespace

@@ -8,7 +8,6 @@
 #define _FOG_CORE_GLOBAL_ASSERT_H
 
 // [Dependencies]
-#include <Fog/Core/Config/Config.h>
 #include <Fog/Core/Global/Debug.h>
 
 //! @addtogroup Fog_Core_Global

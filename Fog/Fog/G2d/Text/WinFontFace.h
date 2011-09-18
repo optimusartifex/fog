@@ -56,9 +56,9 @@ struct FOG_API WinFontFace : public FontFace
   // [Interface]
   // --------------------------------------------------------------------------
 
-  virtual err_t getTextOutline(PathF& dst, const FontData* d, const PointF& pt, const Utf16& str);
-  virtual err_t getTextOutline(PathD& dst, const FontData* d, const PointD& pt, const Utf16& str);
-  virtual err_t getTextExtents(TextExtents& extents, const FontData* d, const Utf16& str);
+  virtual err_t getTextOutline(PathF& dst, const FontData* d, const PointF& pt, const StubW& str);
+  virtual err_t getTextOutline(PathD& dst, const FontData* d, const PointD& pt, const StubW& str);
+  virtual err_t getTextExtents(TextExtents& extents, const FontData* d, const StubW& str);
 
   virtual FontKerningTableF* getKerningTable(const FontData* d);
 
@@ -94,7 +94,7 @@ struct FOG_API WinFontFace : public FontFace
   WinFontHandle hCache[HFONT_CACHE_SIZE];
 
 private:
-  _FOG_CLASS_NO_COPY(WinFontFace)
+  _FOG_NO_COPY(WinFontFace)
 };
 
 //! @}

@@ -10,7 +10,7 @@
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/IO/Stream.h>
-#include <Fog/Core/System/Delegate.h>
+#include <Fog/Core/Kernel/Delegate.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
@@ -39,16 +39,16 @@ struct FOG_API ImageData
   virtual ~ImageData();
 
   // --------------------------------------------------------------------------
-  // [Ref / Deref]
+  // [AddRef / Release]
   // --------------------------------------------------------------------------
 
   FOG_INLINE ImageData* refAlways() const
   {
-    refCount.inc();
+    reference.inc();
     return const_cast<ImageData*>(this);
   }
 
-  virtual ImageData* ref() const;
+  virtual ImageData* addRef() const;
   virtual void deref();
 
   // --------------------------------------------------------------------------
@@ -64,15 +64,17 @@ struct FOG_API ImageData
   // [Statics]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE size_t getSizeFor(size_t size)
-  { return sizeof(ImageData) - (sizeof(uint8_t) * 8) + size; }
+  static FOG_INLINE size_t getSizeOf(size_t size)
+  {
+    return sizeof(ImageData) - (sizeof(uint8_t) * 8) + size;
+  }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
   //! @brief Reference count.
-  mutable Atomic<size_t> refCount;
+  mutable Atomic<size_t> reference;
 
   //! @brief Whether there is exclusive access to the image.
   //!
@@ -109,7 +111,7 @@ struct FOG_API ImageData
   //! last scanline and @c stride is negative.
   uint8_t* first;
   //! @brief Image stride.
-  sysint_t stride;
+  ssize_t stride;
 
   //! @brief Image palette (only for 8 bit indexed images).
   ImagePalette palette;
@@ -118,7 +120,7 @@ struct FOG_API ImageData
   uint8_t buffer[8];
 
 private:
-  _FOG_CLASS_NO_COPY(ImageData)
+  _FOG_NO_COPY(ImageData)
 };
 
 // ============================================================================
@@ -143,7 +145,7 @@ struct FOG_API Image
   // --------------------------------------------------------------------------
 
   //! @copydoc Doxygen::Implicit::getReference().
-  FOG_INLINE size_t getReference() const { return _d->refCount.get(); }
+  FOG_INLINE size_t getReference() const { return _d->reference.get(); }
   //! @copydoc Doxygen::Implicit::isDetached().
   FOG_INLINE bool isDetached() const { return (getReference() + isReadOnly()) == 1; }
   //! @copydoc Doxygen::Implicit::detach().
@@ -163,15 +165,10 @@ struct FOG_API Image
   // [Flags]
   // --------------------------------------------------------------------------
 
-  //! @copydoc Doxygen::Implicit::getFlags().
-  FOG_INLINE uint32_t getFlags() const { return _d->flags; }
-
-  //! @copydoc Doxygen::Implicit::isNull().
-  FOG_INLINE bool isNull() const { return _d == _dnull.instancep(); }
   //! @copydoc Doxygen::Implicit::isStatic().
-  FOG_INLINE bool isStatic() const { return _d->flags & IMAGE_DATA_STATIC; }
+  FOG_INLINE bool isStatic() const { return _d->flags & VAR_FLAG_STATIC; }
   //! @brief Get whether the image is read-only.
-  FOG_INLINE bool isReadOnly() const { return _d->flags & IMAGE_DATA_READ_ONLY; }
+  FOG_INLINE bool isReadOnly() const { return _d->flags & VAR_FLAG_READ_ONLY; }
 
   // --------------------------------------------------------------------------
   // [Consistency]
@@ -204,7 +201,9 @@ struct FOG_API Image
   //! @note Image must be detached to call this function.
   FOG_INLINE uint8_t* getDataX()
   {
-    FOG_ASSERT_X(isDetached(), "Fog::Image::getDataX() - Called on non-detached object.");
+    FOG_ASSERT_X(isDetached(),
+      "Fog::Image::getDataX() - Called on non-detached object.");
+
     return _d->data;
   }
 
@@ -219,25 +218,32 @@ struct FOG_API Image
   //! @note The @c Image must be detached to call this function.
   FOG_INLINE uint8_t* getFirstX()
   {
-    FOG_ASSERT_X(isDetached(), "Fog::Image::getFirstX() - Called on non-detached object.");
+    FOG_ASSERT_X(isDetached(),
+      "Fog::Image::getFirstX() - Called on non-detached object.");
+
     return _d->first;
   }
 
   //! @brief Get a pointer to a scanline at index @a i (const).
-  FOG_INLINE const uint8_t* getScanline(uint32_t i) const
+  FOG_INLINE const uint8_t* getScanline(int y) const
   {
-    FOG_ASSERT_X(i < (uint32_t)_d->size.h, "Fog::Image::getScanline() - Index out of range");
-    return _d->first + (sysint_t)i * _d->stride;
+    FOG_ASSERT_X((uint)y < (uint)_d->size.h,
+      "Fog::Image::getScanline() - Index out of range.");
+
+    return _d->first + (ssize_t)y * _d->stride;
   }
 
   //! @brief Get a pointer to a scanline at index @a i (mutable).
   //!
   //! @note The @c Image must be detached to call this function.
-  FOG_INLINE uint8_t* getScanlineX(uint32_t i)
+  FOG_INLINE uint8_t* getScanlineX(int y)
   {
-    FOG_ASSERT_X(i < (uint32_t)_d->size.h, "Fog::Image::getScanlineX() - Index out of range");
-    FOG_ASSERT_X(isDetached(), "Fog::Image::getScanlineX() - Called on non-detached object.");
-    return _d->first + (sysint_t)i * _d->stride;
+    FOG_ASSERT_X((uint)y < (uint)_d->size.h,
+      "Fog::Image::getScanlineX() - Index out of range.");
+    FOG_ASSERT_X(isDetached(),
+      "Fog::Image::getScanlineX() - Called on non-detached object.");
+
+    return _d->first + (ssize_t)y * _d->stride;
   }
 
   // --------------------------------------------------------------------------
@@ -268,7 +274,7 @@ struct FOG_API Image
   //! @brief Get image stride (bytes per line).
   //!
   //! @note Stride can be 'width * bytesPerPixel', but can be also larger.
-  FOG_INLINE sysint_t getStride() const { return _d->stride; }
+  FOG_INLINE ssize_t getStride() const { return _d->stride; }
 
   // --------------------------------------------------------------------------
   // [Type / Format]
@@ -503,21 +509,21 @@ struct FOG_API Image
   // [Read]
   // --------------------------------------------------------------------------
 
-  err_t readFromFile(const String& fileName);
+  err_t readFromFile(const StringW& fileName);
   err_t readFromStream(Stream& stream);
-  err_t readFromStream(Stream& stream, const String& extension);
-  err_t readFromBuffer(const ByteArray& buffer);
-  err_t readFromBuffer(const ByteArray& buffer, const String& extension);
+  err_t readFromStream(Stream& stream, const StringW& extension);
+  err_t readFromBuffer(const StringA& buffer);
+  err_t readFromBuffer(const StringA& buffer, const StringW& extension);
   err_t readFromBuffer(const void* buffer, size_t size);
-  err_t readFromBuffer(const void* buffer, size_t size, const String& extension);
+  err_t readFromBuffer(const void* buffer, size_t size, const StringW& extension);
 
   // --------------------------------------------------------------------------
   // [Write]
   // --------------------------------------------------------------------------
 
-  err_t writeToFile(const String& fileName) const;
-  err_t writeToStream(Stream& stream, const String& extension) const;
-  err_t writeToBuffer(ByteArray& buffer, const String& extension) const;
+  err_t writeToFile(const StringW& fileName) const;
+  err_t writeToStream(Stream& stream, const StringW& extension) const;
+  err_t writeToBuffer(StringA& buffer, const StringW& extension) const;
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
@@ -537,10 +543,10 @@ struct FOG_API Image
   //! Stride is calculated using @a width and @a depth using 32-bit alignment
   //! that is compatible to Windows DIBs and probably to other OS specific
   //! image formats.
-  static sysint_t getStrideFromWidth(int width, uint32_t depth);
+  static ssize_t getStrideFromWidth(int width, uint32_t depth);
 
   // --------------------------------------------------------------------------
-  // [Ref / Deref]
+  // [AddRef / Release]
   // --------------------------------------------------------------------------
 
   static ImageData* _dalloc(size_t size);
@@ -556,18 +562,6 @@ struct FOG_API Image
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::Image, Fog::TYPEINFO_MOVABLE)
-
-// ============================================================================
-// [Fog::Swap]
-// ============================================================================
-
-_FOG_SWAP_D(Fog::Image)
 
 // [Guard]
 #endif // _FOG_G2D_IMAGING_IMAGE_H

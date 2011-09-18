@@ -8,11 +8,10 @@
 #define _FOG_GUI_ANIMATION_ANIMATION_H
 
 // [Dependencies]
-#include <Fog/Core/DateTime/Time.h>
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/System/Object.h>
-#include <Fog/Core/System/Timer.h>
-#include <Fog/Gui/Global/Constants.h>
+#include <Fog/Core/Kernel/Object.h>
+#include <Fog/Core/Kernel/Timer.h>
+#include <Fog/Core/Tools/Time.h>
 #include <Fog/Gui/Engine/GuiEngine.h>
 #include <Fog/Gui/Widget/Event.h>
 #include <Fog/Gui/Widget/Widget.h>
@@ -75,7 +74,7 @@ protected:
   List<Animation*> _finished;
 
 private:
-  _FOG_CLASS_NO_COPY(AnimationDispatcher)
+  _FOG_NO_COPY(AnimationDispatcher)
 };
 
 // ============================================================================
@@ -141,7 +140,7 @@ protected:
   TimeTicks _endtime;
 
 private:
-  _FOG_CLASS_NO_COPY(Animation)
+  _FOG_NO_COPY(Animation)
 };
 
 // ============================================================================

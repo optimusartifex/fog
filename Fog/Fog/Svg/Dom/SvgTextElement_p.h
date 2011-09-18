@@ -61,7 +61,7 @@ struct FOG_NO_EXPORT SvgTextElement : public SvgStyledElement
   SvgCoordAttribute a_textLength;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgTextElement)
+  _FOG_NO_COPY(SvgTextElement)
 };
 
 //! @}

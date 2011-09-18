@@ -9,9 +9,8 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/Library/Library.h>
-#include <Fog/Core/System/Object.h>
-#include <Fog/Gui/Global/Constants.h>
+#include <Fog/Core/Kernel/Object.h>
+#include <Fog/Core/OS/Library.h>
 
 // ============================================================================
 // [Fog::UxThemeLibrary - Defs]
@@ -100,7 +99,7 @@ struct FOG_API UxThemeLibrary
 private:
   err_t _init();
 
-  _FOG_CLASS_NO_COPY(UxThemeLibrary)
+  _FOG_NO_COPY(UxThemeLibrary)
 };
 
 //! @}

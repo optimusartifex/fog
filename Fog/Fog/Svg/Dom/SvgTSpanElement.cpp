@@ -81,7 +81,7 @@ err_t SvgTSpanElement::onProcess(SvgVisitor* visitor) const
   if (a_dx.isAssigned()) x += a_dx.getCoordComputed();
   if (a_dy.isAssigned()) y += a_dy.getCoordComputed();
 
-  String text = getTextContent();
+  StringW text = getTextContent();
   text.simplify();
 
   // TODO: Not optimal, just initial support for text rendering.

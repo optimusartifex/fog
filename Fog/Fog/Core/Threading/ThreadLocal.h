@@ -11,11 +11,6 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Threading/Atomic.h>
 
-// [Dependencies - Windows]
-#if defined(FOG_OS_WINDOWS)
-# include <windows.h>
-#endif // FOG_OS_WINDOWS
-
 // [Dependencies - Posix]
 #if defined(FOG_OS_POSIX)
 # include <pthread.h>
@@ -33,7 +28,7 @@ namespace Fog {
 // Prototype for the TLS destructor, which can be optionally used to cleanup
 // thread local storage on thread exit. The @c value argument is the data
 // stored by thread local.
-typedef void (*ThreadLocalDestructorFn)(void* value);
+typedef void (*ThreadLocalDestructorFunc)(void* value);
 
 // ============================================================================
 // [Fog::ThreadLocal]
@@ -62,13 +57,13 @@ struct FOG_NO_EXPORT ThreadLocal
     return _slot != 0;
   }
 
-  FOG_INLINE err_t create(ThreadLocalDestructorFn dtor = NULL)
+  FOG_INLINE err_t create(ThreadLocalDestructorFunc dtor = NULL)
   {
     return _api.threadlocal.create(&_slot, (void*)dtor);
   }
 
   // --------------------------------------------------------------------------
-  // [Value Management]
+  // [Accessors]
   // --------------------------------------------------------------------------
 
   FOG_INLINE void* get() const
@@ -88,7 +83,7 @@ struct FOG_NO_EXPORT ThreadLocal
   uint32_t _slot;
 
 private:
-  _FOG_CLASS_NO_COPY(ThreadLocal)
+  _FOG_NO_COPY(ThreadLocal)
 };
 
 //! @}

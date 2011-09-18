@@ -11,7 +11,7 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemOps.h>
 
 namespace Fog {
 namespace Math {
@@ -37,7 +37,7 @@ template<typename DstNumber, typename SrcNumber>
 static FOG_INLINE void vConvertFloat(DstNumber* dst, const SrcNumber* src, size_t length)
 {
   FOG_ASSERT(sizeof(DstNumber) == sizeof(SrcNumber));
-  Memory::copy(dst, src, length * sizeof(DstNumber));
+  MemOps::copy(dst, src, length * sizeof(DstNumber));
 }
 
 template<>

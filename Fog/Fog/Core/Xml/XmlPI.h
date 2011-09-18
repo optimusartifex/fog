@@ -29,7 +29,7 @@ struct FOG_API XmlPI : public XmlNoText
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  XmlPI(const String& data = String());
+  XmlPI(const StringW& data = StringW());
   virtual ~XmlPI();
 
   // --------------------------------------------------------------------------
@@ -42,21 +42,21 @@ struct FOG_API XmlPI : public XmlNoText
   // [Processing Instruction Specific]
   // --------------------------------------------------------------------------
 
-  const String& getData() const;
-  err_t setData(const String& data);
+  const StringW& getData() const;
+  err_t setData(const StringW& data);
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
 protected:
-  String _data;
+  StringW _data;
 
 private:
   friend struct XmlElement;
   friend struct XmlDocument;
 
-  _FOG_CLASS_NO_COPY(XmlPI)
+  _FOG_NO_COPY(XmlPI)
 };
 
 //! @}

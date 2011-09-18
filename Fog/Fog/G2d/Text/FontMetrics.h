@@ -8,9 +8,9 @@
 #define _FOG_G2D_TEXT_FONTMETRICS_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/HashUtil.h>
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemOps.h>
+#include <Fog/Core/Tools/HashUtil.h>
 
 namespace Fog {
 
@@ -50,7 +50,7 @@ struct FOG_NO_EXPORT FontMetricsF
 
   FOG_INLINE void reset()
   {
-    Memory::zero_t<FontMetricsF>(this);
+    MemOps::zero_t<FontMetricsF>(this);
   }
 
   // --------------------------------------------------------------------------
@@ -59,14 +59,7 @@ struct FOG_NO_EXPORT FontMetricsF
 
   FOG_INLINE uint32_t getHashCode() const
   {
-    return HashUtil::combineHash(
-      HashUtil::getHashCode(_height),
-      HashUtil::getHashCode(_ascent),
-      HashUtil::getHashCode(_descent),
-      HashUtil::getHashCode(_internalLeading),
-      HashUtil::getHashCode(_externalLeading),
-      HashUtil::getHashCode(_averageWidth),
-      HashUtil::getHashCode(_maximumWidth));
+    return HashUtil::hashVectorD(this, 7);
   }
 
   // --------------------------------------------------------------------------
@@ -93,12 +86,6 @@ struct FOG_NO_EXPORT FontMetricsF
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::FontMetricsF, Fog::TYPEINFO_PRIMITIVE)
 
 // [Guard]
 #endif // _FOG_G2D_TEXT_FONTMETRICS_H

@@ -31,8 +31,8 @@ struct FOG_API ButtonBase : public Widget
 
   // [Text]
 
-  String getText() const;
-  void setText(const String& text);
+  StringW getText() const;
+  void setText(const StringW& text);
 
   // [Value]
 
@@ -72,7 +72,7 @@ struct FOG_API ButtonBase : public Widget
   FOG_EVENT_END()
 
 protected:
-  String _text;
+  StringW _text;
 
   int _checked;
   bool _isMouseOver;

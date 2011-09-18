@@ -4,14 +4,14 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_GEOMETRY_CUBICCURVE_H
-#define _FOG_G2D_GEOMETRY_CUBICCURVE_H
+#ifndef _FOG_G2D_GEOMETRY_CBEZIER_H
+#define _FOG_G2D_GEOMETRY_CBEZIER_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemOps.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Math2d.h>
 #include <Fog/G2d/Geometry/Point.h>
@@ -85,7 +85,7 @@ struct FOG_NO_EXPORT CBezierF
   FOG_INLINE float getLength() const
   {
     float length;
-    _api.cubiccurvef.getLength(p, &length);
+    _api.cbezierf.getLength(p, &length);
     return length;
   }
 
@@ -116,16 +116,16 @@ struct FOG_NO_EXPORT CBezierF
 
   FOG_INLINE int getInflectionPoints(float* t) const
   {
-    return _api.cubiccurvef.getInflectionPoints(p, t);
+    return _api.cbezierf.getInflectionPoints(p, t);
   }
 
   // --------------------------------------------------------------------------
   // [Simplify]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE int simplifyForProcessing(PointF* pts, float flatness) const
+  FOG_INLINE int simplifyForProcessing(PointF* pts) const
   {
-    return _api.cubiccurvef.simplifyForProcessing(p, pts, flatness);
+    return _api.cbezierf.simplifyForProcessing(p, pts);
   }
 
   // --------------------------------------------------------------------------
@@ -134,12 +134,12 @@ struct FOG_NO_EXPORT CBezierF
 
   FOG_INLINE err_t getBoundingBox(BoxF& dst) const
   {
-    return _api.cubiccurvef.getBoundingBox(p, &dst);
+    return _api.cbezierf.getBoundingBox(p, &dst);
   }
 
   FOG_INLINE err_t getBoundingRect(RectF& dst) const
   {
-    err_t err = _api.cubiccurvef.getBoundingBox(p, reinterpret_cast<BoxF*>(&dst));
+    err_t err = _api.cbezierf.getBoundingBox(p, reinterpret_cast<BoxF*>(&dst));
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -201,7 +201,7 @@ struct FOG_NO_EXPORT CBezierF
 
   FOG_INLINE err_t flatten(PathF& dst, uint8_t initialCommand, float flatness) const
   {
-    return _api.cubiccurvef.flatten(p, dst, initialCommand, flatness);
+    return _api.cbezierf.flatten(p, dst, initialCommand, flatness);
   }
 
   // --------------------------------------------------------------------------
@@ -236,17 +236,17 @@ struct FOG_NO_EXPORT CBezierF
 
   static FOG_INLINE err_t getBoundingBox(const CBezierF* self, BoxF* dst)
   {
-    return _api.cubiccurvef.getBoundingBox(self->p, dst);
+    return _api.cbezierf.getBoundingBox(self->p, dst);
   }
 
   static FOG_INLINE err_t getBoundingBox(const PointF* self, BoxF* dst)
   {
-    return _api.cubiccurvef.getBoundingBox(self, dst);
+    return _api.cbezierf.getBoundingBox(self, dst);
   }
 
   static FOG_INLINE err_t getSplineBBox(const PointF* self, size_t length, BoxF* dst)
   {
-    return _api.cubiccurvef.getSplineBBox(self, length, dst);
+    return _api.cbezierf.getSplineBBox(self, length, dst);
   }
 
   static FOG_INLINE void getMidPoint(const PointF* self, PointF* dst)
@@ -345,12 +345,12 @@ struct FOG_NO_EXPORT CBezierF
 
   static FOG_INLINE err_t flatten(const CBezierF* self, PathF& dst, uint8_t initialCommand, float flatness)
   {
-    return _api.cubiccurvef.flatten(self->p, dst, initialCommand, flatness);
+    return _api.cbezierf.flatten(self->p, dst, initialCommand, flatness);
   }
 
   static FOG_INLINE err_t flatten(const PointF* self, PathF& dst, uint8_t initialCommand, float flatness)
   {
-    return _api.cubiccurvef.flatten(self, dst, initialCommand, flatness);
+    return _api.cbezierf.flatten(self, dst, initialCommand, flatness);
   }
 
   // --------------------------------------------------------------------------
@@ -423,7 +423,7 @@ struct FOG_NO_EXPORT CBezierD
   FOG_INLINE double getLength() const
   {
     double length;
-    _api.cubiccurved.getLength(p, &length);
+    _api.cbezierd.getLength(p, &length);
     return length;
   }
 
@@ -454,16 +454,16 @@ struct FOG_NO_EXPORT CBezierD
 
   FOG_INLINE int getInflectionPoints(double* t) const
   {
-    return _api.cubiccurved.getInflectionPoints(p, t);
+    return _api.cbezierd.getInflectionPoints(p, t);
   }
 
   // --------------------------------------------------------------------------
   // [Simplify]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE int simplifyForProcessing(PointD* pts, double flatness) const
+  FOG_INLINE int simplifyForProcessing(PointD* pts) const
   {
-    return _api.cubiccurved.simplifyForProcessing(p, pts, flatness);
+    return _api.cbezierd.simplifyForProcessing(p, pts);
   }
 
   // --------------------------------------------------------------------------
@@ -472,12 +472,12 @@ struct FOG_NO_EXPORT CBezierD
 
   FOG_INLINE err_t getBoundingBox(BoxD& dst) const
   {
-    return _api.cubiccurved.getBoundingBox(p, &dst);
+    return _api.cbezierd.getBoundingBox(p, &dst);
   }
 
   FOG_INLINE err_t getBoundingRect(RectD& dst) const
   {
-    err_t err = _api.cubiccurved.getBoundingBox(p, reinterpret_cast<BoxD*>(&dst));
+    err_t err = _api.cbezierd.getBoundingBox(p, reinterpret_cast<BoxD*>(&dst));
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -539,7 +539,7 @@ struct FOG_NO_EXPORT CBezierD
 
   FOG_INLINE err_t flatten(PathD& dst, uint8_t initialCommand, double flatness) const
   {
-    return _api.cubiccurved.flatten(p, dst, initialCommand, flatness);
+    return _api.cbezierd.flatten(p, dst, initialCommand, flatness);
   }
 
   // --------------------------------------------------------------------------
@@ -574,17 +574,17 @@ struct FOG_NO_EXPORT CBezierD
 
   static FOG_INLINE err_t getBoundingBox(const CBezierD* self, BoxD* dst)
   {
-    return _api.cubiccurved.getBoundingBox(self->p, dst);
+    return _api.cbezierd.getBoundingBox(self->p, dst);
   }
 
   static FOG_INLINE err_t getBoundingBox(const PointD* self, BoxD* dst)
   {
-    return _api.cubiccurved.getBoundingBox(self, dst);
+    return _api.cbezierd.getBoundingBox(self, dst);
   }
 
   static FOG_INLINE err_t getSplineBBox(const PointD* self, size_t length, BoxD* dst)
   {
-    return _api.cubiccurved.getSplineBBox(self, length, dst);
+    return _api.cbezierd.getSplineBBox(self, length, dst);
   }
 
   static FOG_INLINE void getMidPoint(const PointD* self, PointD* dst)
@@ -683,12 +683,12 @@ struct FOG_NO_EXPORT CBezierD
 
   static FOG_INLINE err_t flatten(const CBezierD* self, PathD& dst, uint8_t initialCommand, double flatness)
   {
-    return _api.cubiccurved.flatten(self->p, dst, initialCommand, flatness);
+    return _api.cbezierd.flatten(self->p, dst, initialCommand, flatness);
   }
 
   static FOG_INLINE err_t flatten(const PointD* self, PathD& dst, uint8_t initialCommand, double flatness)
   {
-    return _api.cubiccurved.flatten(self, dst, initialCommand, flatness);
+    return _api.cbezierd.flatten(self, dst, initialCommand, flatness);
   }
 
   // --------------------------------------------------------------------------
@@ -702,25 +702,20 @@ struct FOG_NO_EXPORT CBezierD
 // [Fog::CBezierT<>]
 // ============================================================================
 
-FOG_CLASS_PRECISION_F_D(CBezier)
+_FOG_NUM_T(CBezier)
+_FOG_NUM_F(CBezier)
+_FOG_NUM_D(CBezier)
 
 //! @}
 
 } // Fog namespace
 
 // ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::CBezierF, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::CBezierD, Fog::TYPEINFO_PRIMITIVE)
-
-// ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_FUZZY_DECLARE(Fog::CBezierF, Math::feqv((const float *)&a, (const float *)&b, 8))
-FOG_FUZZY_DECLARE(Fog::CBezierD, Math::feqv((const double*)&a, (const double*)&b, 8))
+FOG_FUZZY_DECLARE_F_VEC(Fog::CBezierF, 8)
+FOG_FUZZY_DECLARE_D_VEC(Fog::CBezierD, 8)
 
 // [Guard]
-#endif // _FOG_G2D_GEOMETRY_CUBICCURVE_H
+#endif // _FOG_G2D_GEOMETRY_CBEZIER_H

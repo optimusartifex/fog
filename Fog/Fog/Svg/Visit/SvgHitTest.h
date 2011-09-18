@@ -8,8 +8,8 @@
 #define _FOG_SVG_VISIT_SVGHITTEST_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Global/Global.h>
+#include <Fog/Core/Tools/List.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
 
 namespace Fog {
@@ -68,7 +68,7 @@ struct FOG_API SvgHitTest : public SvgVisitor
   PathF _pathTmp;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgHitTest)
+  _FOG_NO_COPY(SvgHitTest)
 };
 
 //! @}

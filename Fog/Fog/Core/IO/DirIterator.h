@@ -10,7 +10,7 @@
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/IO/DirEntry.h>
-#include <Fog/Core/Tools/ByteArray.h>
+#include <Fog/Core/Tools/String.h>
 
 namespace Fog {
 
@@ -18,107 +18,129 @@ namespace Fog {
 //! @{
 
 // ============================================================================
+// [Fog::DirIteratorData]
+// ============================================================================
+
+struct FOG_NO_EXPORT DirIteratorData
+{
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  void* handle;
+  Static<StringW> pathAbs;
+};
+
+// ============================================================================
 // [Fog::DirIterator]
 // ============================================================================
 
-//! @brief DirIterator browsing class.
+//! @brief Directory iterator.
 //!
-//! This class can be used to browse a directory.
+//! This class can be used to iterate over a directory.
 //!
 //! @code
-//! // Code example to successfully parse current directory
-//!
 //! // Open a directory stream with a given path, path will be normalized,
-//! // so we can use "" and "." for current directory or for example ".." for
-//! // parent of current directory
-//! Fog::DirIterator dir(".");
+//! // so the "" or "." can be used for current directory or for example ".."
+//! // for a parent directory.
+//! Fog::DirIterator dir(Fog::Ascii8("."));
 //! Fog::DirEntry entry;
 //!
 //! // We can check if directory is successfully opened, bud @c read() return
-//! // false if not, so this check isn't necessary here.
+//! // false if not, so this check isn't necessary.
 //! while (dir.read(entry))
 //! {
-//!   // We are readed directory entry, check it by entry.type() and
-//!   // use its name by entry.name(). See @c DirEntry for details.
+//!   // The entryt was read. Use entry instance to check whether the entry
+//!   // is a file or a directory, to get file size, or name, etc...
 //! }
 //!
-//! // Close directory stream if opened
+//! // Close directory if open.
 //! dir.close();
 //! @endcode
-struct FOG_API DirIterator
+struct FOG_NO_EXPORT DirIterator
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  DirIterator();
-  DirIterator(const String& path);
-  ~DirIterator();
+  FOG_NO_EXPORT DirIterator()
+  {
+    _api.diriterator.ctor(this);
+  }
+
+  FOG_NO_EXPORT DirIterator(const StringW& path)
+  {
+    _api.diriterator.ctorString(this, &path);
+  }
+
+  FOG_NO_EXPORT ~DirIterator()
+  {
+    _api.diriterator.dtor(this);
+  }
 
   // --------------------------------------------------------------------------
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool isOpen() const  { return _handle != NULL; }
+  FOG_INLINE bool isOpen() const { return _d->handle != NULL; }
+
+  FOG_INLINE void* getHandle() const { return _d->handle; }
+  FOG_INLINE const StringW& getPath() const { return _d->pathAbs; }
 
   FOG_INLINE bool getSkipDots() const { return _skipDots; }
   FOG_INLINE void setSkipDots(bool val) { _skipDots = val; }
-
-  FOG_INLINE void* getHandle() const { return _handle; }
-  FOG_INLINE const String& getPath() const { return _path; }
 
   // --------------------------------------------------------------------------
   // [Open / Close]
   // --------------------------------------------------------------------------
 
-  err_t open(const String& path);
-  void close();
+  FOG_INLINE err_t open(const StringW& path)
+  {
+    return _api.diriterator.open(this, &path);
+  }
+
+  FOG_INLINE void close()
+  {
+    _api.diriterator.close(this);
+  }
 
   // --------------------------------------------------------------------------
   // [Read]
   // --------------------------------------------------------------------------
 
-  bool read(DirEntry& dirEntry);
-  bool read(String& fileName);
+  FOG_INLINE bool read(DirEntry& dirEntry)
+  {
+    return _api.diriterator.readDirEntry(this, &dirEntry);
+  }
+
+  FOG_INLINE bool read(StringW& fileName)
+  {
+    return _api.diriterator.readString(this, &fileName);
+  }
 
   // --------------------------------------------------------------------------
   // [Rewind / Tell]
   // --------------------------------------------------------------------------
 
-  err_t rewind();
-  int64_t tell();
+  FOG_INLINE err_t rewind()
+  {
+    return _api.diriterator.rewind(this);
+  }
+
+  FOG_INLINE int64_t tell()
+  {
+    return _api.diriterator.tell(this);
+  }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-private:
-  void* _handle;
-  String _path;
-
-  // --------------------------------------------------------------------------
-  // [Members - Windows Specific]
-  // --------------------------------------------------------------------------
-
-#if defined(FOG_OS_WINDOWS)
-  WIN32_FIND_DATAW _winFindData;
-  int64_t _position;
-#endif // FOG_OS_WINDOWS
-
-  // --------------------------------------------------------------------------
-  // [Members - Posix Specific]
-  // --------------------------------------------------------------------------
-
-#if defined(FOG_OS_POSIX)
-  ByteArray _pathCache;
-  size_t _pathCacheBaseLength;
-  struct dirent *_dent;
-#endif // FOG_OS_POSIX
-
+  _FOG_CLASS_D(DirIteratorData)
   bool _skipDots;
 
 private:
-  _FOG_CLASS_NO_COPY(DirIterator)
+  _FOG_NO_COPY(DirIterator)
 };
 
 //! @}

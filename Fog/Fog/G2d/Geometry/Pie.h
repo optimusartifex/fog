@@ -11,7 +11,7 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemOps.h>
 #include <Fog/G2d/Geometry/Arc.h>
 
 namespace Fog {
@@ -159,25 +159,20 @@ struct FOG_NO_EXPORT PieD : ArcD
 // [Fog::PieT<>]
 // ============================================================================
 
-FOG_CLASS_PRECISION_F_D(Pie)
+_FOG_NUM_T(Pie)
+_FOG_NUM_F(Pie)
+_FOG_NUM_D(Pie)
 
 //! @}
 
 } // Fog namespace
 
 // ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::PieF, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::PieD, Fog::TYPEINFO_PRIMITIVE)
-
-// ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_FUZZY_DECLARE(Fog::PieF, Fuzzy<ArcF>::eq(a, b))
-FOG_FUZZY_DECLARE(Fog::PieD, Fuzzy<ArcD>::eq(a, b))
+FOG_FUZZY_DECLARE_F_VEC(Fog::PieF, 6)
+FOG_FUZZY_DECLARE_D_VEC(Fog::PieD, 6)
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_PIE_H

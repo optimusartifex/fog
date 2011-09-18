@@ -8,7 +8,7 @@
 #define _FOG_CORE_FACE_FEATURES_H
 
 // [Dependencies]
-#include <Fog/Core/Config/Config.h>
+#include <Fog/Core/C++/Base.h>
 
 namespace Fog {
 namespace Face {

@@ -84,22 +84,22 @@ void XmlDocument::clear()
   deleteAll();
 }
 
-XmlElement* XmlDocument::getElementById(const String& id) const
+XmlElement* XmlDocument::getElementById(const StringW& id) const
 {
   if (id.isEmpty()) return NULL;
   return _elementIdsHash.get(id);
 }
 
-XmlElement* XmlDocument::getElementById(const Utf16& id) const
+XmlElement* XmlDocument::getElementById(const StubW& id) const
 {
-  const Char* idData = id.getData();
+  const CharW* idData = id.getData();
   size_t idLen = id.getComputedLength();
 
   if (idLen == 0) return NULL;
   return _elementIdsHash.get(idData, idLen);
 }
 
-err_t XmlDocument::readFromFile(const String& fileName)
+err_t XmlDocument::readFromFile(const StringW& fileName)
 {
   clear();
 
@@ -135,7 +135,7 @@ err_t XmlDocument::readFromMemory(const void* mem, size_t size)
   return err;
 }
 
-err_t XmlDocument::readFromString(const String& str)
+err_t XmlDocument::readFromString(const StringW& str)
 {
   clear();
 

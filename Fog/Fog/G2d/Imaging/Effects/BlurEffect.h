@@ -9,7 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemOps.h>
 #include <Fog/G2d/Imaging/Effects/BorderEffect.h>
 
 namespace Fog {
@@ -21,7 +21,7 @@ namespace Fog {
 // [Fog::Blur]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 struct FOG_NO_EXPORT BlurEffect : public BorderEffect
 {
   // --------------------------------------------------------------------------
@@ -79,7 +79,7 @@ struct FOG_NO_EXPORT BlurEffect : public BorderEffect
 
   FOG_INLINE BlurEffect& operator=(const BlurEffect& other)
   {
-    Memory::copy_t<BlurEffect>(this, &other);
+    MemOps::copy_t<BlurEffect>(this, &other);
     return *this;
   }
 
@@ -95,7 +95,7 @@ struct FOG_NO_EXPORT BlurEffect : public BorderEffect
   //! @brief The vertical radius.
   float _vRadius;
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 //! @}
 
@@ -105,7 +105,7 @@ struct FOG_NO_EXPORT BlurEffect : public BorderEffect
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-_FOG_TYPEINFO_DECLARE(Fog::BlurEffect, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPE_DECLARE(Fog::BlurEffect, Fog::TYPE_CATEGORY_SIMPLE)
 
 // [Guard]
 #endif // _FOG_G2D_IMAGING_EFFECTS_BLUREFFECT_H

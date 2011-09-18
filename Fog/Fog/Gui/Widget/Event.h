@@ -9,11 +9,10 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/System/Event.h>
+#include <Fog/Core/Kernel/Event.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Geometry/Size.h>
-#include <Fog/Gui/Global/Constants.h>
 
 namespace Fog {
 
@@ -189,7 +188,7 @@ struct FOG_API KeyEvent : public Event
   FOG_INLINE uint32_t getSystemCode() const { return _systemCode; }
 
   //! @brief Returns key code translated to unicode character, can be zero if it's not possible to translate it.
-  FOG_INLINE Char getUnicode() const { return _unicode; }
+  FOG_INLINE CharW getUnicode() const { return _unicode; }
 
   //! @brief Get whether key was repeated by timer.
   FOG_INLINE bool isRepeated() const { return _isRepeated; }
@@ -205,7 +204,7 @@ struct FOG_API KeyEvent : public Event
   //! @brief System key code (OS dependent, shouldn't be used).
   uint32_t _systemCode;
   //! @brief Key code translated to unicode character, can be zero.
-  Char _unicode;
+  CharW _unicode;
   //! @brief Whether key was repeated by timer.
   bool _isRepeated;
 };

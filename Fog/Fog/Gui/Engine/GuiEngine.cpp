@@ -5,7 +5,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/StackP.h>
-#include <Fog/Core/System/Application.h>
+#include <Fog/Core/Kernel/Application.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Painting/Painter.h>
 #include <Fog/G2d/Tools/Region.h>
@@ -103,7 +103,7 @@ bool GuiEngine::unmapHandle(void* handle)
 
 GuiWindow* GuiEngine::getWindowFromHandle(void* handle) const
 {
-  return _widgetMapper.value(handle, NULL);
+  return _widgetMapper.get(handle, NULL);
 }
 
 // ============================================================================
@@ -230,7 +230,7 @@ void GuiEngine::changeMouseStatus(Widget* w, const PointI& pos)
     _buttonTime[2].reset();
 
     uint32_t code = 0; // Be quite.
-    uint32_t hoverChange;;
+    uint32_t hoverChange;
 
     hoverChange = (!!_mouseStatus.hover) |
                   ((!(pos.getX() < 0 ||
@@ -604,7 +604,7 @@ void GuiEngine::widgetDestroyed(Widget* w)
 
   if (_caretStatus.widget == w)
   {
-    Memory::zero(&_caretStatus, sizeof(CaretStatus));
+    MemOps::zero(&_caretStatus, sizeof(CaretStatus));
   }
 }
 
@@ -680,11 +680,13 @@ void GuiEngine::doUpdate()
     List<GuiWindow*> dirty(_dirtyList);
     _dirtyList.reset();
 
-    List<GuiWindow*>::ConstIterator it(dirty);
-    for (it.toStart(); it.isValid(); it.toNext())
+    ListIterator<GuiWindow*> it(dirty);
+    while (it.isValid())
     {
-      GuiWindow* uiWindow = it.value();
+      GuiWindow* uiWindow = it.getItem();
       if (uiWindow) doUpdateWindow(uiWindow);
+
+      it.next();
     }
   }
 
@@ -915,13 +917,13 @@ inside:
         e._code = EVENT_NCPAINT;
         e._receiver = widget;
 
-        rtmp1.set(widgetRec.paintBounds);
+        rtmp1.setBox(widgetRec.paintBounds);
         painter.setMetaParams(
           rtmp1,
           PointI(widgetRec.bounds.getX0(), widgetRec.bounds.getY0()));
 
         widget->sendEvent(&e);
-        if (!parentRec.painted) blitRegion.combine(rtmp1, REGION_OP_UNION);
+        if (!parentRec.painted) blitRegion.union_(rtmp1);
       }
 
       // ----------------------------------------------------------------------
@@ -938,11 +940,11 @@ inside:
         {
           rtmp2.set(widgetRec.paintBounds);
           RegionTmp<128> rtmp4;
-          List<Widget*>::ConstIterator ci(widget->children());
+          ListIterator<Widget*> ci(widget->children());
           int ox = widgetRec.bounds.x1() + widget->origin().x();
           int oy = widgetRec.bounds.y1() + widget->origin().y();
 
-          for (ci.toStart(); ci.isValid(); ci.toNext())
+          while (ci.isValid())
           {
             Widget* cw = core_object_cast<Widget*>(ci.value());
             if (cw && cw->visibility() == Widget::Visible)
@@ -956,21 +958,22 @@ inside:
               }
               else
               {
-                rtmp4.combine(BoxI(
+                rtmp4.subtract(BoxI(
                   cw->rect().x1() + ox,
                   cw->rect().y1() + oy,
                   cw->rect().x2() + ox,
-                  cw->rect().y2() + oy), REGION_OP_UNION);
+                  cw->rect().y2() + oy));
               }
             }
+            ci.next();
           }
-          Region::combine(rtmp1, rtmp2, rtmp4, REGION_OP_SUBTRACT);
+          Region::subtract(rtmp1, rtmp2, rtmp4);
         }
         else
         {
 #endif
           //rtmp1.set(BoxI(widgetRec.paintBounds.x1));
-          rtmp1.set(widgetRec.paintBounds);
+          rtmp1.setBox(widgetRec.paintBounds);
           widgetRec.painted = true;
 #if 0
         }
@@ -984,7 +987,7 @@ inside:
         {
           widget->sendEvent(&e);
           //blitFull = true;
-          if (!parentRec.painted) blitRegion.combine(rtmp1, REGION_OP_UNION);
+          if (!parentRec.painted) blitRegion.union_(rtmp1);
         }
 
         /*
@@ -1168,7 +1171,7 @@ GuiWindow::~GuiWindow()
 
   // Remove GuiWindow's from dirty list.
   size_t i = guiEngine->_dirtyList.indexOf(this);
-  if (i != INVALID_INDEX) guiEngine->_dirtyList.set(i, NULL);
+  if (i != INVALID_INDEX) guiEngine->_dirtyList.setAt(i, NULL);
 }
 
 GuiWindow* GuiWindow::getModalWindow()
@@ -1287,10 +1290,12 @@ __repeat:
     // Iterate over children and try to find child widget where a mouse
     // position is. Iteration must be done through end, becuase we want
     // widget with highest Z-Order to match mouse position first.
-    List<Object*>::ConstIterator it(w->_children);
-    for (it.toEnd(); it.isValid(); it.toPrevious())
+    ListReverseIterator<Object*> it(w->_children);
+
+    while (it.isValid())
     {
-      Widget* current = fog_object_cast<Widget*>(it.value());
+      Widget* current = fog_object_cast<Widget*>(it.getItem());
+
       if (current &&
           current->getVisibility() >= WIDGET_VISIBLE &&
           current->_widgetGeometry.hitTest(p))
@@ -1299,6 +1304,8 @@ __repeat:
         p -= w->getPosition();
         goto __repeat;
       }
+
+      it.next();
     }
 
     guiEngine->changeMouseStatus(w, p);
@@ -1464,7 +1471,7 @@ void GuiWindow::onFocus(bool focus)
   }
 }
 
-bool GuiWindow::onKeyPress(uint32_t key, uint32_t modifier, uint32_t systemCode, Char unicode)
+bool GuiWindow::onKeyPress(uint32_t key, uint32_t modifier, uint32_t systemCode, CharW unicode)
 {
   GuiEngine* guiEngine = GUI_ENGINE();
 
@@ -1490,7 +1497,7 @@ bool GuiWindow::onKeyPress(uint32_t key, uint32_t modifier, uint32_t systemCode,
   return e.isAccepted();
 }
 
-bool GuiWindow::onKeyRelease(uint32_t key, uint32_t modifier, uint32_t systemCode, Char unicode)
+bool GuiWindow::onKeyRelease(uint32_t key, uint32_t modifier, uint32_t systemCode, CharW unicode)
 {
   GuiEngine* guiEngine = GUI_ENGINE();
   guiEngine->_keyboardStatus.modifiers &= ~modifier;
@@ -1575,14 +1582,15 @@ void GuiWindow::showPopUp(Widget* w)
 
 void GuiWindow::closePopUps()
 {
-  List<Widget*>::ConstIterator it(_popup);
-  for (it.toStart(); it.isValid(); it.toNext())
+  ListIterator<Widget*> it(_popup);
+  while (it.isValid())
   {
-    Widget* widget = it.value();
+    Widget* widget = it.getItem();
     if (widget) widget->hide();
-  }
 
-  _popup.reset();
+    it.next();
+  }
+  _popup.clear();
 }
 
 // ============================================================================

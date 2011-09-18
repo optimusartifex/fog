@@ -4,13 +4,13 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_COLOR_COLOR_H
-#define _FOG_G2D_COLOR_COLOR_H
+#ifndef _FOG_G2D_SOURCE_COLOR_H
+#define _FOG_G2D_SOURCE_COLOR_H
 
 // [Dependencies]
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemOps.h>
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Stub.h>
@@ -30,7 +30,7 @@ namespace Fog {
 // [Fog::Color]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 //! @brief Color value using ARGB, AHSV or ACMYK format.
 //!
 //! @c Color is universal container for storing color value. It remembers the
@@ -198,7 +198,7 @@ struct FOG_NO_EXPORT Color : public ColorBase
 
   FOG_INLINE void setColor(const ColorBase& color)
   {
-    Memory::copy_t<Color>(this, reinterpret_cast<const Color*>(&color));
+    MemOps::copy_t<Color>(this, reinterpret_cast<const Color*>(&color));
   }
 
   // --------------------------------------------------------------------------
@@ -207,7 +207,7 @@ struct FOG_NO_EXPORT Color : public ColorBase
 
   FOG_INLINE void reset()
   {
-    Memory::zero_t<Color>(this);
+    MemOps::zero_t<Color>(this);
   }
 
   // --------------------------------------------------------------------------
@@ -242,19 +242,19 @@ struct FOG_NO_EXPORT Color : public ColorBase
   // [Parse / Serialize]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t parse(const Stub8& str, uint32_t flags = COLOR_NAME_ANY)
+  FOG_INLINE err_t parse(const StubA& str, uint32_t flags = COLOR_NAME_ANY)
   {
     return _api.color.parseA(*this, str, flags);
   }
 
-  FOG_INLINE err_t parse(const Utf16& str, uint32_t flags = COLOR_NAME_ANY)
+  FOG_INLINE err_t parse(const StubW& str, uint32_t flags = COLOR_NAME_ANY)
   {
     return _api.color.parseU(*this, str, flags);
   }
 
-  FOG_INLINE err_t parse(const String& str, uint32_t flags = COLOR_NAME_ANY)
+  FOG_INLINE err_t parse(const StringW& str, uint32_t flags = COLOR_NAME_ANY)
   {
-    return _api.color.parseU(*this, Utf16(str.getData(), str.getLength()), flags);
+    return _api.color.parseU(*this, StubW(str.getData(), str.getLength()), flags);
   }
 
   // --------------------------------------------------------------------------
@@ -268,7 +268,7 @@ struct FOG_NO_EXPORT Color : public ColorBase
   FOG_INLINE Color& operator=(const AcmykBaseF& acmykf) { setAcmykF(acmykf); return *this; }
   FOG_INLINE Color& operator=(const ColorBase& color) { setColor(color); return *this; }
 
-  FOG_INLINE bool operator==(const Color& other) const { return Memory::eq_t<Color>(this, &other); }
+  FOG_INLINE bool operator==(const Color& other) const { return MemOps::eq_t<Color>(this, &other); }
   FOG_INLINE bool operator!=(const Color& other) const { return !operator==(other); }
 
   // --------------------------------------------------------------------------
@@ -311,23 +311,17 @@ struct FOG_NO_EXPORT Color : public ColorBase
   static FOG_INLINE void convert(AcmykBaseF& dst, const AhsvBaseF&  src) { _api.color.convert[COLOR_MODEL_ACMYK][COLOR_MODEL_AHSV   ](&dst, &src); }
   static FOG_INLINE void convert(AcmykBaseF& dst, const AhslBaseF&  src) { _api.color.convert[COLOR_MODEL_ACMYK][COLOR_MODEL_AHSL   ](&dst, &src); }
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 //! @}
 
 } // Fog namespace
 
 // ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::Color, Fog::TYPEINFO_PRIMITIVE)
-
-// ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_FUZZY_DECLARE(Fog::Color,
+FOG_FUZZY_DECLARE_F(Fog::Color,
   a._model == b._model &&
   a._hints == b._hints &&
   a._argb32.u32 == b._argb32.u32 &&
@@ -335,4 +329,4 @@ FOG_FUZZY_DECLARE(Fog::Color,
 )
 
 // [Guard]
-#endif // _FOG_G2D_COLOR_COLOR_H
+#endif // _FOG_G2D_SOURCE_COLOR_H

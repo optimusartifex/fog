@@ -13,15 +13,9 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/DateTime/Time.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Threading/ThreadEvent.h>
-
-// [Dependencies - Windows]
-#if defined(FOG_OS_WINDOWS)
-#include <windows.h>
-#include <math.h>
-#endif // FOG_OS_WINDOWS
+#include <Fog/Core/Tools/Time.h>
 
 // [Dependencies - Posix]
 #if defined(FOG_OS_POSIX)
@@ -34,15 +28,6 @@ namespace Fog {
 // ============================================================================
 // [Fog::ThreadEvent]
 // ============================================================================
-
-// In Core/Event.h is this macro undefined
-#if !defined CreateEvent
-#if defined(_UNICODE)
-#define CreateEvent CreateEventW
-#else
-#define CreateEvent CreateEventA
-#endif // _UNICODE
-#endif // CreateEvent
 
 #if defined(FOG_OS_WINDOWS)
 ThreadEvent::ThreadEvent(bool manualReset, bool signaled)

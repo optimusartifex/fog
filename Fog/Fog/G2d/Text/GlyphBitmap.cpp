@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Memory/Alloc.h>
+#include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/G2d/Text/GlyphBitmap.h>
 
 namespace Fog {
@@ -27,10 +27,10 @@ static Static<GlyphBitmapData> _GlyphBitmap_dnull;
 static FOG_INLINE GlyphBitmapData* _GlyphBitmap_dalloc(const GlyphMetricsF& metrics, const Image& bitmap)
 {
   GlyphBitmapData* d = reinterpret_cast<GlyphBitmapData*>(
-    Memory::alloc(sizeof(GlyphBitmapData)));
+    MemMgr::alloc(sizeof(GlyphBitmapData)));
   if (FOG_IS_NULL(d)) return d;
 
-  d->refCount.init(1);
+  d->reference.init(1);
   d->metrics = metrics;
   d->bitmap[0].initCustom1(bitmap);
 
@@ -39,16 +39,16 @@ static FOG_INLINE GlyphBitmapData* _GlyphBitmap_dalloc(const GlyphMetricsF& metr
 
 static FOG_INLINE GlyphBitmapData* _GlyphBitmap_dref(GlyphBitmapData* d)
 {
-  d->refCount.inc();
+  d->reference.inc();
   return d;
 }
 
 static FOG_INLINE void _GlyphBitmap_deref(GlyphBitmapData* d)
 {
-  if (d->refCount.deref())
+  if (d->reference.deref())
   {
     d->bitmap[0].destroy();
-    Memory::free(d);
+    MemMgr::free(d);
   }
 }
 
@@ -57,7 +57,7 @@ static FOG_INLINE void _GlyphBitmap_deref(GlyphBitmapData* d)
 // ============================================================================
 
 GlyphBitmap::GlyphBitmap() :
-  _d(_GlyphBitmap_dref(_GlyphBitmap_dnull))
+  _d(_GlyphBitmap_dref(&_GlyphBitmap_dnull))
 {
 }
 
@@ -103,18 +103,18 @@ GlyphBitmap& GlyphBitmap::operator=(const GlyphBitmap& other)
 
 FOG_NO_EXPORT void GlyphBitmap_init(void)
 {
-  GlyphBitmapData* d = _GlyphBitmap_dnull.instancep();
+  GlyphBitmapData* d = &_GlyphBitmap_dnull;
 
-  d->refCount.init(1);
+  d->reference.init(1);
   d->metrics.reset();
   d->bitmap[0].init();
 }
 
 FOG_NO_EXPORT void GlyphBitmap_fini(void)
 {
-  GlyphBitmapData* d = _GlyphBitmap_dnull.instancep();
+  GlyphBitmapData* d = &_GlyphBitmap_dnull;
 
-  d->refCount.dec();
+  d->reference.dec();
   d->bitmap[0].destroy();
 }
 

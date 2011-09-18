@@ -8,9 +8,9 @@
 #define _FOG_G2D_GEOMETRY_TRANSFORM_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/HashUtil.h>
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Math.h>
+#include <Fog/Core/Tools/HashUtil.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
@@ -26,6 +26,10 @@ namespace Fog {
 
 struct FOG_NO_EXPORT ParallelogramParamsF
 {
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
   FOG_INLINE ParallelogramParamsF(
     const PointF& dst0, const PointF& dst1, const PointF& dst2,
     const PointF& src0, const PointF& src1, const PointF& src2)
@@ -33,6 +37,18 @@ struct FOG_NO_EXPORT ParallelogramParamsF
     dst[0] = dst0; dst[1] = dst1; dst[2] = dst2;
     src[0] = src0; src[1] = src1; src[2] = src2;
   }
+
+  FOG_INLINE ParallelogramParamsF(
+    float dx0, float dy0, float dx1, float dy1, float dx2, float dy2,
+    float sx0, float sy0, float sx1, float sy1, float sx2, float sy2)
+  {
+    dst[0].set(dx0, dy0); dst[1].set(dx1, dy1); dst[2].set(dx2, dy2);
+    src[0].set(sx0, sy0); src[1].set(sx1, sy1); src[2].set(sx2, sy2);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
 
   PointF dst[3];
   PointF src[3];
@@ -44,6 +60,10 @@ struct FOG_NO_EXPORT ParallelogramParamsF
 
 struct FOG_NO_EXPORT ParallelogramParamsD
 {
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
   FOG_INLINE ParallelogramParamsD(
     const PointD& dst0, const PointD& dst1, const PointD& dst2,
     const PointD& src0, const PointD& src1, const PointD& src2)
@@ -51,6 +71,18 @@ struct FOG_NO_EXPORT ParallelogramParamsD
     dst[0] = dst0; dst[1] = dst1; dst[2] = dst2;
     src[0] = src0; src[1] = src1; src[2] = src2;
   }
+
+  FOG_INLINE ParallelogramParamsD(
+    double dx0, double dy0, double dx1, double dy1, double dx2, double dy2,
+    double sx0, double sy0, double sx1, double sy1, double sx2, double sy2)
+  {
+    dst[0].set(dx0, dy0); dst[1].set(dx1, dy1); dst[2].set(dx2, dy2);
+    src[0].set(sx0, sy0); src[1].set(sx1, sy1); src[2].set(sx2, sy2);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
 
   PointD dst[3];
   PointD src[3];
@@ -62,6 +94,10 @@ struct FOG_NO_EXPORT ParallelogramParamsD
 
 struct FOG_NO_EXPORT QuadToQuadParamsF
 {
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
   FOG_INLINE QuadToQuadParamsF(
     const PointF& dst0, const PointF& dst1, const PointF& dst2, const PointF& dst3,
     const PointF& src0, const PointF& src1, const PointF& src2, const PointF& src3)
@@ -69,6 +105,18 @@ struct FOG_NO_EXPORT QuadToQuadParamsF
     dst[0] = dst0; dst[1] = dst1; dst[2] = dst2; dst[3] = dst3;
     src[0] = src0; src[1] = src1; src[2] = src2; src[3] = src3;
   }
+
+  FOG_INLINE QuadToQuadParamsF(
+    float dx0, float dy0, float dx1, float dy1, float dx2, float dy2, float dx3, float dy3,
+    float sx0, float sy0, float sx1, float sy1, float sx2, float sy2, float sx3, float sy3)
+  {
+    dst[0].set(dx0, dy0); dst[1].set(dx1, dy1); dst[2].set(dx2, dy2); dst[3].set(dx3, dy3);
+    src[0].set(sx0, sy0); src[1].set(sx1, sy1); src[2].set(sx2, sy2); src[3].set(sx3, sy3);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
 
   PointF dst[4];
   PointF src[4];
@@ -80,6 +128,10 @@ struct FOG_NO_EXPORT QuadToQuadParamsF
 
 struct FOG_NO_EXPORT QuadToQuadParamsD
 {
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
   FOG_INLINE QuadToQuadParamsD(
     const PointD& dst0, const PointD& dst1, const PointD& dst2, const PointD& dst3,
     const PointD& src0, const PointD& src1, const PointD& src2, const PointD& src3)
@@ -87,6 +139,18 @@ struct FOG_NO_EXPORT QuadToQuadParamsD
     dst[0] = dst0; dst[1] = dst1; dst[2] = dst2; dst[3] = dst3;
     src[0] = src0; src[1] = src1; src[2] = src2; src[3] = src3;
   }
+
+  FOG_INLINE QuadToQuadParamsD(
+    double dx0, double dy0, double dx1, double dy1, double dx2, double dy2, double dx3, double dy3,
+    double sx0, double sy0, double sx1, double sy1, double sx2, double sy2, double sx3, double sy3)
+  {
+    dst[0].set(dx0, dy0); dst[1].set(dx1, dy1); dst[2].set(dx2, dy2); dst[3].set(dx3, dy3);
+    src[0].set(sx0, sy0); src[1].set(sx1, sy1); src[2].set(sx2, sy2); src[3].set(sx3, sy3);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
 
   PointD dst[4];
   PointD src[4];
@@ -526,6 +590,12 @@ struct FOG_NO_EXPORT TransformF
     uint32_t type = _api.transformf.update(*this);
     FOG_ASSUME(_type == type);
     return type;
+  }
+
+  FOG_INLINE uint32_t _getType() const
+  {
+    FOG_ASSUME(_type < TRANSFORM_TYPE_COUNT);
+    return _type;
   }
 
   //! @brief Update the type of the transform and get it.
@@ -1094,11 +1164,7 @@ struct FOG_NO_EXPORT TransformF
 
   FOG_INLINE uint32_t getHashCode() const
   {
-    // TODO: Use getHashVector(m, 9)...
-    return HashUtil::combineHash(
-      HashUtil::getHashCode(_00), HashUtil::getHashCode(_01), HashUtil::getHashCode(_02),
-      HashUtil::getHashCode(_10), HashUtil::getHashCode(_11), HashUtil::getHashCode(_12),
-      HashUtil::getHashCode(_20), HashUtil::getHashCode(_21), HashUtil::getHashCode(_22));
+    return HashUtil::hashVectorD(_data, 9);
   }
 
   // --------------------------------------------------------------------------
@@ -1707,7 +1773,7 @@ struct FOG_NO_EXPORT TransformD
 
   FOG_INLINE uint32_t _getType() const
   {
-    FOG_ASSERT(_type < TRANSFORM_TYPE_COUNT);
+    FOG_ASSUME(_type < TRANSFORM_TYPE_COUNT);
     return _type;
   }
 
@@ -2307,11 +2373,7 @@ struct FOG_NO_EXPORT TransformD
 
   FOG_INLINE uint32_t getHashCode() const
   {
-    // TODO: Use getHashVector(m, 9)...
-    return HashUtil::combineHash(
-      HashUtil::getHashCode(_00), HashUtil::getHashCode(_01), HashUtil::getHashCode(_02),
-      HashUtil::getHashCode(_10), HashUtil::getHashCode(_11), HashUtil::getHashCode(_12),
-      HashUtil::getHashCode(_20), HashUtil::getHashCode(_21), HashUtil::getHashCode(_22));
+    return HashUtil::hashVectorQ(_data, 9);
   }
 
   // --------------------------------------------------------------------------
@@ -2487,23 +2549,22 @@ FOG_INLINE err_t TransformF::setTransform(const TransformD& other)
 }
 
 // ============================================================================
-// [Fog::TransformT<>]
+// [Fog::ParallelogramParamsT<> / Fog::QuadToQuadParamsT<> / Fog::TransformT<>]
 // ============================================================================
 
-FOG_CLASS_PRECISION_F_D(ParallelogramParams)
-FOG_CLASS_PRECISION_F_D(QuadToQuadParams)
-FOG_CLASS_PRECISION_F_D(Transform)
+_FOG_NUM_T(ParallelogramParams)
+_FOG_NUM_T(QuadToQuadParams)
+_FOG_NUM_T(Transform)
+_FOG_NUM_F(ParallelogramParams)
+_FOG_NUM_F(QuadToQuadParams)
+_FOG_NUM_F(Transform)
+_FOG_NUM_D(ParallelogramParams)
+_FOG_NUM_D(QuadToQuadParams)
+_FOG_NUM_D(Transform)
 
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::TransformF, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::TransformD, Fog::TYPEINFO_PRIMITIVE)
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_TRANSFORM_H

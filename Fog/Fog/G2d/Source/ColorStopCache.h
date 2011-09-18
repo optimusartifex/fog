@@ -10,7 +10,7 @@
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
-#include <Fog/Core/Memory/Alloc.h>
+#include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/G2d/Source/Color.h>
 #include <Fog/G2d/Source/ColorStop.h>
 
@@ -43,18 +43,19 @@ struct FOG_NO_EXPORT ColorStopCache
   { return reinterpret_cast<const uint8_t*>(this) + sizeof(ColorStopCache); }
 
   // --------------------------------------------------------------------------
-  // [Ref / Deref]
+  // [AddRef / Release]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE ColorStopCache* ref() const
+  FOG_INLINE ColorStopCache* addRef() const
   {
-    refCount.inc();
+    reference.inc();
     return const_cast<ColorStopCache*>(this);
   }
 
-  FOG_INLINE void deref()
+  FOG_INLINE void release()
   {
-    if (refCount.deref()) destroy(this);
+    if (reference.deref())
+      destroy(this);
   }
 
   // --------------------------------------------------------------------------
@@ -64,10 +65,10 @@ struct FOG_NO_EXPORT ColorStopCache
   static FOG_INLINE ColorStopCache* create32(uint32_t format, uint32_t length)
   {
     ColorStopCache* cache = reinterpret_cast<ColorStopCache*>(
-      Memory::alloc(sizeof(ColorStopCache) + (length + 1) * 4));
+      MemMgr::alloc(sizeof(ColorStopCache) + (length + 1) * 4));
     if (FOG_UNLIKELY(cache == NULL)) return NULL;
 
-    cache->refCount.init(1);
+    cache->reference.init(1);
     cache->format = format;
     cache->length = length;
 
@@ -77,10 +78,10 @@ struct FOG_NO_EXPORT ColorStopCache
   static FOG_INLINE ColorStopCache* create64(uint32_t format, uint32_t length)
   {
     ColorStopCache* cache = reinterpret_cast<ColorStopCache*>(
-      Memory::alloc(sizeof(ColorStopCache) + (length + 1) * 8));
+      MemMgr::alloc(sizeof(ColorStopCache) + (length + 1) * 8));
     if (FOG_UNLIKELY(cache == NULL)) return NULL;
 
-    cache->refCount.init(1);
+    cache->reference.init(1);
     cache->format = format;
     cache->length = length;
 
@@ -89,7 +90,7 @@ struct FOG_NO_EXPORT ColorStopCache
 
   static FOG_INLINE void destroy(ColorStopCache* cache)
   {
-    Memory::free(cache);
+    MemMgr::free(cache);
   }
 
   // --------------------------------------------------------------------------
@@ -97,7 +98,7 @@ struct FOG_NO_EXPORT ColorStopCache
   // --------------------------------------------------------------------------
 
   //! @brief Reference count.
-  mutable Atomic<size_t> refCount;
+  mutable Atomic<size_t> reference;
 
   //! @brief Format of color-stop cache.
   uint32_t format;

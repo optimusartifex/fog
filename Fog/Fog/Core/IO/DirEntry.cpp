@@ -16,46 +16,66 @@
 namespace Fog {
 
 // ============================================================================
-// [Fog::DirEntry]
+// [Fog::DirEntry - Helpers]
 // ============================================================================
 
-DirEntry::DirEntry()
-{
-}
-
-DirEntry::DirEntry(const DirEntry& other) :
-  _name(other._name),
-  _type(other._type),
-  _size(other._size)
+static FOG_INLINE void DirEntry_copyData(DirEntry* dst, const DirEntry* src)
 {
 #if defined(FOG_OS_WINDOWS)
-  memcpy(&_winFindData, &other._winFindData, sizeof(WIN32_FIND_DATAW));
+  memcpy(&dst->_winFindData, &src->_winFindData, sizeof(WIN32_FIND_DATAW));
 #endif // FOG_OS_WINDOWS
 
 #if defined(FOG_OS_POSIX)
-  memcpy(&_statInfo, &other._statInfo, sizeof(struct stat));
+  memcpy(&dst->_posixStatData, &src->_posixStatData, sizeof(struct stat));
 #endif // FOG_OS_POSIX
 }
 
-DirEntry::~DirEntry()
+// ============================================================================
+// [Fog::DirEntry - Construction / Destruction]
+// ============================================================================
+
+static void FOG_CDECL DirEntry_ctor(DirEntry* self)
 {
+  self->_name.init();
+  self->_type = DIR_ENTRY_UNKNOWN;
+  self->_size = 0;
 }
 
-DirEntry& DirEntry::operator=(const DirEntry& other)
+static void FOG_CDECL DirEntry_ctorCopy(DirEntry* self, const DirEntry* other)
 {
-  _name = other._name;
-  _type = other._type;
-  _size = other._size;
+  self->_name.initCustom1(other->_name);
+  self->_type = other->_type;
+  self->_size = other->_size;
+  DirEntry_copyData(self, other);
+}
 
-#if defined(FOG_OS_WINDOWS)
-  memcpy(&_winFindData, &other._winFindData, sizeof(WIN32_FIND_DATAW));
-#endif // FOG_OS_WINDOWS
+static void FOG_CDECL DirEntry_dtor(DirEntry* self)
+{
+  self->_name.destroy();
+}
 
-#if defined(FOG_OS_POSIX)
-  memcpy(&_statInfo, &other._statInfo, sizeof(struct stat));
-#endif // FOG_OS_POSIX
+// ============================================================================
+// [Fog::DirEntry - Set]
+// ============================================================================
 
-  return *this;
+static void FOG_CDECL DirEntry_setDirEntry(DirEntry* self, const DirEntry* other)
+{
+  self->_name->set(other->_name);
+  self->_type = other->_type;
+  self->_size = other->_size;
+  DirEntry_copyData(self, other);
+}
+
+// ============================================================================
+// [Init / Fini]
+// ============================================================================
+
+FOG_NO_EXPORT void DirEntry_init(void)
+{
+  _api.direntry.ctor = DirEntry_ctor;
+  _api.direntry.ctorCopy = DirEntry_ctorCopy;
+  _api.direntry.dtor = DirEntry_dtor;
+  _api.direntry.setDirEntry = DirEntry_setDirEntry;
 }
 
 } // Fog namespace

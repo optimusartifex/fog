@@ -9,10 +9,11 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/Hash.h>
-#include <Fog/Core/Collection/HashUtil.h>
 #include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/Core/Threading/Lock.h>
+#include <Fog/Core/Tools/Hash.h>
+#include <Fog/Core/Tools/HashUtil.h>
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/StringUtil.h>
 
@@ -36,8 +37,8 @@ struct FOG_NO_EXPORT ManagedStringLocal
     _expandLength((size_t)(INITIAL_CAPACITY * 0.9)),
     _shrinkCapacity(0),
     _shrinkLength(0),
-    _buckets((Node**)Memory::calloc(INITIAL_CAPACITY * sizeof(Node*))),
-    _null(String())
+    _buckets((Node**)MemMgr::calloc(INITIAL_CAPACITY * sizeof(Node*))),
+    _null(StringW())
   {
     ManagedString::_dnull = &_null;
   }
@@ -45,21 +46,22 @@ struct FOG_NO_EXPORT ManagedStringLocal
   FOG_INLINE ~ManagedStringLocal()
   {
     {
-      UnorderedHash<String, Cache*>::ConstIterator it(_hash);
-      for (it.toStart(); it.isValid(); it.toNext())
+      HashIterator<StringW, Cache*> it(_hash);
+      while (it.isValid())
       {
-        Cache* c = it.value();
+        Cache* c = it.getItem();
         c->~Cache();
-        Memory::free(c);
+        MemMgr::free(c);
+        it.next();
       }
     }
 
     // Free allocated memory for buckets and set everything to NULL.
-    Memory::free(_buckets);
+    MemMgr::free(_buckets);
     ManagedString::_dnull = NULL;
   }
 
-  FOG_INLINE Node* addString(const String& s)
+  FOG_INLINE Node* addString(const StringW& s)
   {
     AutoLock locked(_lock);
 
@@ -78,7 +80,7 @@ struct FOG_NO_EXPORT ManagedStringLocal
         // to do some work without locking and this is simply situation where
         // some other thread was faster. We can't create new hash node, because
         // it already exists, we just reference it.
-        node->refCount.inc();
+        node->reference.inc();
         return node;
       }
 
@@ -99,7 +101,7 @@ struct FOG_NO_EXPORT ManagedStringLocal
     return node;
   }
 
-  // This function is called from @c MaagedString::createCache().
+  // This function is called from @c ManagedString::createCache().
   FOG_INLINE Node* addNodeNoLock(Node* n)
   {
     uint32_t hashCode = n->getHashCode();
@@ -113,7 +115,7 @@ struct FOG_NO_EXPORT ManagedStringLocal
       // Node is already here? But different pointer.
       if (node->getHashCode() == hashCode && node->getString() == n->getString())
       {
-        node->refCount.inc();
+        node->reference.inc();
         return node;
       }
 
@@ -130,16 +132,16 @@ struct FOG_NO_EXPORT ManagedStringLocal
     return n;
   }
 
-  FOG_INLINE Node* addUtf16(const Utf16& _s)
+  FOG_INLINE Node* addUtf16(const StubW& _s)
   {
     AutoLock locked(_lock);
 
-    const Char* sData = _s.getData();
+    const CharW* sData = _s.getData();
     size_t sLength = _s.getComputedLength();
 
     FOG_ASSERT(sLength != 0);
 
-    uint32_t hashCode = HashUtil::makeStringHash(sData, sLength);
+    uint32_t hashCode = HashUtil::hash(StubW(sData, sLength));
     uint32_t hashMod = hashCode % _capacity;
 
     Node* node = _buckets[hashMod];
@@ -148,13 +150,13 @@ struct FOG_NO_EXPORT ManagedStringLocal
     while (node)
     {
       // Node is already here?
-      if (node->getHashCode() == hashCode && node->getString().eq(Utf16(sData, sLength)))
+      if (node->getHashCode() == hashCode && node->getString().eq(StubW(sData, sLength)))
       {
         // This can also happen in high concurrent environment. We are trying
         // to do some work without locking and this is simply situation where
         // some other thread was faster. We can't create new hash node, because
         // it already exists, we just reference it.
-        node->refCount.inc();
+        node->reference.inc();
         return node;
       }
 
@@ -162,8 +164,8 @@ struct FOG_NO_EXPORT ManagedStringLocal
       node = node->next;
     }
 
-    String str;
-    if (str.set(Utf16(sData, sLength)) != ERR_OK) return NULL;
+    StringW str;
+    if (str.set(StubW(sData, sLength)) != ERR_OK) return NULL;
 
     node = fog_new Node(str);
     if (FOG_IS_NULL(node)) return NULL;
@@ -184,7 +186,7 @@ struct FOG_NO_EXPORT ManagedStringLocal
     AutoLock locked(_lock);
 
     // If some thread referenced it before our lock.
-    if (n->refCount.get() > 0) return;
+    if (n->reference.get() > 0) return;
 
     uint32_t hashCode = n->getHashCode();
     uint32_t hashMod = hashCode % _capacity;
@@ -211,7 +213,7 @@ struct FOG_NO_EXPORT ManagedStringLocal
     }
   }
 
-  FOG_INLINE Node* refString(const String& s) const
+  FOG_INLINE Node* refString(const StringW& s) const
   {
     AutoLock locked(_lock);
 
@@ -221,35 +223,36 @@ struct FOG_NO_EXPORT ManagedStringLocal
     Node* node = _buckets[hashMod];
     while (node)
     {
-      if (node->getHashCode() == hashCode && node->string == s) return node->ref();
+      if (node->getHashCode() == hashCode && node->string == s) return node->addRef();
       node = node->next;
     }
     return NULL;
   }
 
-  FOG_INLINE Node* refUtf16(const Utf16& _s) const
+  FOG_INLINE Node* refUtf16(const StubW& _s) const
   {
     AutoLock locked(_lock);
 
-    const Char* sData = _s.getData();
+    const CharW* sData = _s.getData();
     size_t sLength = _s.getComputedLength();
 
-    uint32_t hashCode = HashUtil::makeStringHash(sData, sLength);
+    uint32_t hashCode = HashUtil::hash(StubW(sData, sLength));
     uint32_t hashMod = hashCode % _capacity;
 
     Node* node = _buckets[hashMod];
     while (node)
     {
-      if (node->getHashCode() == hashCode && node->string.eq(Utf16(sData, sLength))) return node->ref();
+      if (node->getHashCode() == hashCode && node->string.eq(StubW(sData, sLength))) return node->addRef();
       node = node->next;
     }
+
     return NULL;
   }
 
   FOG_NO_INLINE void _rehash(size_t capacity)
   {
     Node** oldBuckets = _buckets;
-    Node** newBuckets = (Node**)Memory::calloc(sizeof(Node*) * capacity);
+    Node** newBuckets = (Node**)MemMgr::calloc(sizeof(Node*) * capacity);
     if (FOG_IS_NULL(newBuckets)) return;
 
     size_t i, len = _capacity;
@@ -270,14 +273,14 @@ struct FOG_NO_EXPORT ManagedStringLocal
 
     _capacity = capacity;
 
-    _expandCapacity = UnorderedAbstract::_calcExpandCapacity(capacity);
-    _expandLength = (size_t)((sysint_t)_capacity * 0.92);
+    _expandCapacity = _api.hash.helper.calcExpandCapacity(capacity);
+    _expandLength = (size_t)((ssize_t)_capacity * 0.92);
 
-    _shrinkCapacity = UnorderedAbstract::_calcShrinkCapacity(capacity);
-    _shrinkLength = (size_t)((sysint_t)_shrinkCapacity * 0.70);
+    _shrinkCapacity = _api.hash.helper.calcShrinkCapacity(capacity);
+    _shrinkLength = (size_t)((ssize_t)_shrinkCapacity * 0.70);
 
     atomicPtrXchg(&_buckets, newBuckets);
-    if (oldBuckets) Memory::free(oldBuckets);
+    if (oldBuckets) MemMgr::free(oldBuckets);
   }
 
   // [Members]
@@ -306,9 +309,9 @@ struct FOG_NO_EXPORT ManagedStringLocal
 
   Node _null;
 
-  // [Managed String Cache]
+  // [Managed StringW Cache]
 
-  UnorderedHash<String, Cache*> _hash;
+  Hash<StringW, Cache*> _hash;
 };
 
 static Static<ManagedStringLocal> managed_local;
@@ -320,46 +323,46 @@ static Static<ManagedStringLocal> managed_local;
 ManagedString::Node* ManagedString::_dnull;
 
 ManagedString::ManagedString() :
-  _node(_dnull->ref())
+  _node(_dnull->addRef())
 {
 }
 
 ManagedString::ManagedString(const ManagedString& other) :
-  _node(other._node->ref())
+  _node(other._node->addRef())
 {
 }
 
-ManagedString::ManagedString(const String& s) :
+ManagedString::ManagedString(const StringW& s) :
   _node(managed_local->addString(s))
 {
-  if (_node == NULL) _node = _dnull->ref();
+  if (_node == NULL) _node = _dnull->addRef();
 }
 
-ManagedString::ManagedString(const Utf16& s) :
+ManagedString::ManagedString(const StubW& s) :
   _node(managed_local->addUtf16(s))
 {
-  if (_node == NULL) _node = _dnull->ref();
+  if (_node == NULL) _node = _dnull->addRef();
 }
 
 ManagedString::~ManagedString()
 {
-  if (_node->refCount.deref()) managed_local->remove(_node);
+  if (_node->reference.deref()) managed_local->remove(_node);
 }
 
 void ManagedString::clear()
 {
-  Node* old = atomicPtrXchg(&_node, _dnull->ref());
-  if (old->refCount.deref()) managed_local->remove(old);
+  Node* old = atomicPtrXchg(&_node, _dnull->addRef());
+  if (old->reference.deref()) managed_local->remove(old);
 }
 
 err_t ManagedString::set(const ManagedString& str)
 {
-  Node* old = atomicPtrXchg(&_node, str._node->ref());
-  if (old->refCount.deref()) managed_local->remove(old);
+  Node* old = atomicPtrXchg(&_node, str._node->addRef());
+  if (old->reference.deref()) managed_local->remove(old);
   return ERR_OK;
 }
 
-err_t ManagedString::set(const String& str)
+err_t ManagedString::set(const StringW& str)
 {
   Node* node = managed_local->addString(str);
 
@@ -370,11 +373,11 @@ err_t ManagedString::set(const String& str)
   }
 
   Node* old = atomicPtrXchg(&_node, node);
-  if (old->refCount.deref()) managed_local->remove(old);
+  if (old->reference.deref()) managed_local->remove(old);
   return ERR_OK;
 }
 
-err_t ManagedString::set(const Utf16& str)
+err_t ManagedString::set(const StubW& str)
 {
   Node* node = managed_local->addUtf16(str);
 
@@ -385,27 +388,27 @@ err_t ManagedString::set(const Utf16& str)
   }
 
   Node* old = atomicPtrXchg(&_node, node);
-  if (old->refCount.deref()) managed_local->remove(old);
+  if (old->reference.deref()) managed_local->remove(old);
   return ERR_OK;
 }
 
-err_t ManagedString::setIfManaged(const String& s)
+err_t ManagedString::setIfManaged(const StringW& s)
 {
   Node* node = managed_local->refString(s);
   if (FOG_IS_NULL(node)) return ERR_RT_OBJECT_NOT_FOUND;
 
   Node* old = atomicPtrXchg(&_node, node);
-  if (old->refCount.deref()) managed_local->remove(old);
+  if (old->reference.deref()) managed_local->remove(old);
   return ERR_OK;
 }
 
-err_t ManagedString::setIfManaged(const Utf16& s)
+err_t ManagedString::setIfManaged(const StubW& s)
 {
   Node* node = managed_local->refUtf16(s);
   if (FOG_IS_NULL(node)) return ERR_RT_OBJECT_NOT_FOUND;
 
   Node* old = atomicPtrXchg(&_node, node);
-  if (old->refCount.deref()) managed_local->remove(old);
+  if (old->reference.deref()) managed_local->remove(old);
   return ERR_OK;
 }
 
@@ -413,12 +416,12 @@ err_t ManagedString::setIfManaged(const Utf16& s)
 // [Fog::ManagedString::Cache]
 // ============================================================================
 
-ManagedString::Cache* ManagedString::createCache(const char* strings, size_t length, size_t count, const String& name)
+ManagedString::Cache* ManagedString::createCache(const char* strings, size_t length, size_t count, const StringW& name)
 {
   if (name.isEmpty()) return NULL;
 
   AutoLock locked(managed_local->_lock);
-  Cache* self = managed_local->_hash.value(name, NULL);
+  Cache* self = managed_local->_hash.get(name, NULL);
 
   // Get count of 'strings'.
   //
@@ -432,14 +435,14 @@ ManagedString::Cache* ManagedString::createCache(const char* strings, size_t len
     sizeof(Cache) +
     // Fog::ManagedString structure
     sizeof(ManagedString) * count +
-    // Fog::StringData structure
-    sizeof(StringData) * count +
-    // Fog::StringData contains null terminator, subtract it.
-    sizeof(Char) * (length - count) +
+    // Fog::StringDataW structure
+    sizeof(StringDataW) * count +
+    // Fog::StringDataW contains null terminator, subtract it.
+    sizeof(CharW) * (length - count) +
     // Fog::ManagedString::Node
     sizeof(Node) * count;
 
-  if ((self = (ManagedString::Cache*)Memory::alloc(alloc)) == NULL) return NULL;
+  if ((self = (ManagedString::Cache*)MemMgr::alloc(alloc)) == NULL) return NULL;
 
   const char* pBeg = strings;
   const char* pCur = strings;
@@ -452,11 +455,11 @@ ManagedString::Cache* ManagedString::createCache(const char* strings, size_t len
   {
     if (pCur[0] == 0)
     {
-      StringData* d = (StringData*)pChars;
+      StringDataW* d = (StringDataW*)pChars;
       size_t len = (size_t)(pCur - pBeg);
 
-      d->refCount.init(1);
-      d->flags = NO_FLAGS;
+      d->reference.init(1);
+      d->vType = VAR_TYPE_STRINGW | VAR_FLAG_NONE;
       d->length = len;
       d->capacity = len;
       d->hashCode = 0;
@@ -464,7 +467,7 @@ ManagedString::Cache* ManagedString::createCache(const char* strings, size_t len
 
       *pList++ = managed_local->addNodeNoLock(fog_new_p(pNodes) Node(d));
       pNodes += sizeof(Node);
-      pChars += StringData::sizeFor(len);
+      pChars += StringDataW::getSizeOf(len);
 
       counter++;
 
@@ -484,10 +487,10 @@ ManagedString::Cache* ManagedString::createCache(const char* strings, size_t len
   return self;
 }
 
-ManagedString::Cache* ManagedString::getCacheByName(const String& name)
+ManagedString::Cache* ManagedString::getCacheByName(const StringW& name)
 {
   AutoLock locked(managed_local->_lock);
-  return managed_local->_hash.value(name, NULL);
+  return managed_local->_hash.get(name, NULL);
 }
 
 // ============================================================================

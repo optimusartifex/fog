@@ -9,7 +9,6 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/Tools/ByteArray.h>
 #include <Fog/Core/Tools/Char.h>
 #include <Fog/Core/Tools/String.h>
 
@@ -57,18 +56,18 @@ struct FOG_NO_EXPORT XmlEntity
   static FOG_INLINE size_t pairsCount() { return _pairsCount; }
 
   //! @brief Decode named entity into unicode character.
-  static Char decode(const char* entityName, size_t entityLength = DETECT_LENGTH);
+  static CharW decode(const char* entityName, size_t entityLength = DETECT_LENGTH);
   //! @overload.
-  static FOG_INLINE Char decode(const ByteArray& entityName) { return decode(entityName.getData(), entityName.getLength()); }
+  static FOG_INLINE CharW decode(const StringA& entityName) { return decode(entityName.getData(), entityName.getLength()); }
 
   //! @brief Decode named entity into unicode character.
-  static Char decode(const Char* entityName, size_t entityLength = DETECT_LENGTH);
+  static CharW decode(const CharW* entityName, size_t entityLength = DETECT_LENGTH);
   //! @overload.
-  static FOG_INLINE Char decode(const String& entityName) { return decode(entityName.getData(), entityName.getLength()); }
+  static FOG_INLINE CharW decode(const StringW& entityName) { return decode(entityName.getData(), entityName.getLength()); }
 
   //! @brief Encode unicode character into named entity.
   //! @note Length of @a dest must be at least 16 characters.
-  static size_t encode(char* dst, Char ch);
+  static size_t encode(char* dst, CharW ch);
 
   static const Pair* _pairs;
   static size_t _pairsCount;

@@ -115,7 +115,7 @@ void RasterWorker::run()
             // ... Fall through ...
 
           case RASTER_CMD_SKIP:
-            if (cmd->refCount.deref()) cmd->release(&ctx);
+            if (cmd->reference.deref()) cmd->release(&ctx);
 
             cmdCurrent++;
             cont = 0;

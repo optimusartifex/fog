@@ -70,7 +70,7 @@ struct FOG_API GlyphOutlineCache
       tCol = 0;
     }
 
-    return _tableData[tRow]->glyphs[tCol].instance();
+    return _tableData[tRow]->glyphs[tCol];
   }
 
   err_t put(uint32_t uc, const GlyphOutline& glyph);
@@ -88,7 +88,7 @@ struct FOG_API GlyphOutlineCache
   Table** _tableData;
 
 private:
-  _FOG_CLASS_NO_COPY(GlyphOutlineCache)
+  _FOG_NO_COPY(GlyphOutlineCache)
 };
 
 //! @}

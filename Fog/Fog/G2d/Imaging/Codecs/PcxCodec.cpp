@@ -9,11 +9,11 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/BufferP.h>
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Memory/BSwap.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemBufferTmp_p.h>
+#include <Fog/Core/Memory/MemOps.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/G2d/Imaging/Codecs/PcxCodec_p.h>
@@ -468,16 +468,16 @@ err_t PcxDecoder::readImage(Image& image)
   uint32_t err = ERR_OK;
 
   // Source.
-  ByteArray dataArray;
+  StringA dataArray;
   const uint8_t* dataCur;
   const uint8_t* dataEnd;
 
   // Destination.
   uint8_t* pixels;
-  sysint_t stride;
+  ssize_t stride;
 
   // Temporary plane data.
-  BufferP<1024> temporary;
+  MemBufferTmp<1024> temporary;
   uint8_t* mem;
 
   // Bytes per line.
@@ -519,7 +519,7 @@ err_t PcxDecoder::readImage(Image& image)
     uint32_t plane;
     uint8_t b;
 
-    if (!temporary.alloc(bytesPerLine))
+    if (FOG_IS_NULL(temporary.alloc(bytesPerLine)))
     {
       err = ERR_RT_OUT_OF_MEMORY;
       goto _End;
@@ -553,7 +553,7 @@ err_t PcxDecoder::readImage(Image& image)
 
   else if (_depth == 4)
   {
-    if (!temporary.alloc(bytesPerLine))
+    if (FOG_IS_NULL(temporary.alloc(bytesPerLine)))
     {
       err = ERR_RT_OUT_OF_MEMORY;
       goto _End;
@@ -636,7 +636,7 @@ err_t PcxDecoder::readImage(Image& image)
     bool palRead = true;
 
     // Setup basic palette settings.
-    Memory::zero(palData, 256 * sizeof(uint32_t));
+    MemOps::zero(palData, 256 * sizeof(uint32_t));
 
     if (_depth == 1 && _planes == 1)
     {
@@ -735,7 +735,7 @@ err_t PcxEncoder::writeImage(const Image& image)
   err_t err = ERR_OK;
 
   PcxHeader pcx;
-  BufferP<1024> rle;
+  MemBufferTmp<1024> rle;
 
   ImageConverter converter;
   ImageData* d = image._d;
@@ -748,7 +748,7 @@ err_t PcxEncoder::writeImage(const Image& image)
   uint32_t nPlanes = 1;
   uint32_t bpl = w;
   uint32_t alignment = bpl & 1; // Align bpl to 16 bits (PCX Specification).
-  sysint_t pos[4] = { 0, 0, 0, 0 };
+  ssize_t pos[4] = { 0, 0, 0, 0 };
 
   const uint8_t* pixels = d->first;
   size_t stride = d->stride;
@@ -807,7 +807,7 @@ err_t PcxEncoder::writeImage(const Image& image)
       break;
   }
 
-  Memory::zero((void*)&pcx, sizeof(pcx));
+  MemOps::zero((void*)&pcx, sizeof(pcx));
   pcx.manufacturer = 10;
   pcx.version = version;
   pcx.encoding = 1;
@@ -832,7 +832,8 @@ err_t PcxEncoder::writeImage(const Image& image)
   _PcxSwapHeader(&pcx);
 
   // Initialize the RLE buffer and write the PCX header.
-  if (!rle.alloc(w * 2 + 2)) return ERR_RT_OUT_OF_MEMORY;
+  if (FOG_IS_NULL(rle.alloc(w * 2 + 2)))
+    return ERR_RT_OUT_OF_MEMORY;
 
   if (_stream.write((const char *)(&pcx), sizeof(PcxHeader)) != sizeof(PcxHeader)) goto _Fail;
 
@@ -880,10 +881,11 @@ err_t PcxEncoder::writeImage(const Image& image)
     }
     else
     {
-      BufferP<1024> buffer;
+      MemBufferTmp<1024> buffer;
       PointI ditherOrigin(0, 0);
 
-      if (!buffer.alloc(w * inc)) return ERR_RT_OUT_OF_MEMORY;
+      if (FOG_IS_NULL(buffer.alloc(w * inc)))
+        return ERR_RT_OUT_OF_MEMORY;
 
       for (int y = 0; y != h; y++, pixels += stride, ditherOrigin.y++)
       {

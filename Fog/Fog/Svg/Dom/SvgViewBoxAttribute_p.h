@@ -13,7 +13,6 @@
 #include <Fog/Core/Xml/XmlElement.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Rect.h>
-#include <Fog/Svg/Global/Constants.h>
 #include <Fog/Svg/Tools/SvgCoord.h>
 
 namespace Fog {
@@ -40,7 +39,7 @@ struct FOG_NO_EXPORT SvgViewBoxAttribute : public XmlAttribute
   // [Methods]
   // --------------------------------------------------------------------------
 
-  virtual err_t setValue(const String& value);
+  virtual err_t setValue(const StringW& value);
 
   // --------------------------------------------------------------------------
   // [Box]
@@ -58,7 +57,7 @@ protected:
   bool _isValid;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgViewBoxAttribute)
+  _FOG_NO_COPY(SvgViewBoxAttribute)
 };
 
 //! @}

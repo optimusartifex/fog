@@ -35,8 +35,8 @@ struct FOG_API TextField : public Frame
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  const String& getValue() const { return _value; }
-  void setValue(const String& value);
+  const StringW& getValue() const { return _value; }
+  void setValue(const StringW& value);
 
   // --------------------------------------------------------------------------
   // [Layout]
@@ -54,7 +54,7 @@ struct FOG_API TextField : public Frame
   // [Members]
   // --------------------------------------------------------------------------
 
-  String _value;
+  StringW _value;
 };
 
 //! @}

@@ -12,7 +12,6 @@
 #include <Fog/Core/Xml/XmlAttribute.h>
 #include <Fog/Core/Xml/XmlElement.h>
 #include <Fog/Svg/Dom/SvgEnumItem_p.h>
-#include <Fog/Svg/Global/Constants.h>
 
 namespace Fog {
 
@@ -38,7 +37,7 @@ struct FOG_NO_EXPORT SvgEnumAttribute : public XmlAttribute
   // [Methods]
   // --------------------------------------------------------------------------
 
-  virtual err_t setValue(const String& value);
+  virtual err_t setValue(const StringW& value);
 
   // --------------------------------------------------------------------------
   // [Coords]
@@ -55,7 +54,7 @@ protected:
   int _enumValue;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgEnumAttribute)
+  _FOG_NO_COPY(SvgEnumAttribute)
 };
 //! @}
 

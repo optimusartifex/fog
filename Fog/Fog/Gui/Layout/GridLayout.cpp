@@ -45,22 +45,22 @@ int GridLayout::getColumnCount() const
 
 float GridLayout::getColumnFlex(int column) const
 {
-  return (uint)column < _cols.getLength() ? _cols.at(column)->_flex : 0;
+  return (uint)column < _cols.getLength() ? _cols.getAt(column)->_flex : 0;
 }
 
 int GridLayout::getColumnMinimumWidth(int column) const
 {
-  return (uint)column < _cols.getLength() ? _cols.at(column)->_minWidth : -1;
+  return (uint)column < _cols.getLength() ? _cols.getAt(column)->_minWidth : -1;
 }
 
 int GridLayout::getColumnMaximumWidth(int column) const
 {
-  return (uint)column < _cols.getLength() ? _cols.at(column)->_maxWidth : -1;
+  return (uint)column < _cols.getLength() ? _cols.getAt(column)->_maxWidth : -1;
 }
 
 int GridLayout::getColumnHintWidth(int column) const
 {
-  return (uint)column < _cols.getLength() ? _cols.at(column)->_hintWidth : -1;
+  return (uint)column < _cols.getLength() ? _cols.getAt(column)->_hintWidth : -1;
 }
 
 int GridLayout::getRowCount() const
@@ -70,62 +70,62 @@ int GridLayout::getRowCount() const
 
 float GridLayout::getRowFlex(int row) const
 {
-  return (uint)row < _rows.getLength() ? _rows.at(row)->_flex : 0;
+  return (uint)row < _rows.getLength() ? _rows.getAt(row)->_flex : 0;
 }
 
 int GridLayout::getRowMinimumHeight(int row) const
 {
-  return (uint)row < _rows.getLength() ? _rows.at(row)->_minHeight : -1;
+  return (uint)row < _rows.getLength() ? _rows.getAt(row)->_minHeight : -1;
 }
 
 int GridLayout::getRowMaximumHeight(int row) const
 {
-  return (uint)row < _rows.getLength() ? _rows.at(row)->_maxHeight : -1;
+  return (uint)row < _rows.getLength() ? _rows.getAt(row)->_maxHeight : -1;
 }
 
 int GridLayout::getRowHintHeight(int row) const
 {
-  return (uint)row < _rows.getLength() ? _rows.at(row)->_hintHeight : -1;
+  return (uint)row < _rows.getLength() ? _rows.getAt(row)->_hintHeight : -1;
 }
 
 void GridLayout::setColumnFlex(int column, float flex)
 {
-  if ((uint)column < _cols.getLength()) _cols.at(column)->_flex = flex < 1 ? 0 : flex;
+  if ((uint)column < _cols.getLength()) _cols.getAt(column)->_flex = flex < 1 ? 0 : flex;
 }
 
 void GridLayout::setColumnMinimumWidth(int column, int minsize)
 {
-  if ((uint)column < _cols.getLength()) _cols.at(column)->_minWidth = minsize;
+  if ((uint)column < _cols.getLength()) _cols.getAt(column)->_minWidth = minsize;
 }
 
 void GridLayout::setColumnMaximumWidth(int column, int maxsize)
 {
-  if ((uint)column < _cols.getLength()) _cols.at(column)->_maxWidth = maxsize;
+  if ((uint)column < _cols.getLength()) _cols.getAt(column)->_maxWidth = maxsize;
 }
 
 void GridLayout::setColumnHintWidth(int column, int hintsize)
 {
-  if ((uint)column < _cols.getLength()) _cols.at(column)->_hintWidth = hintsize;
+  if ((uint)column < _cols.getLength()) _cols.getAt(column)->_hintWidth = hintsize;
 }
 
 void GridLayout::setRowFlex(int row, float flex)
 {
-  if ((uint)row < _rows.getLength()) _rows.at(row)->_flex = flex < 1 ? 0 : flex;
+  if ((uint)row < _rows.getLength()) _rows.getAt(row)->_flex = flex < 1 ? 0 : flex;
 }
 
 void GridLayout::setRowMinimumHeight(int row, int minsize)
 {
-  if ((uint)row < _rows.getLength()) _rows.at(row)->_minHeight = minsize;
+  if ((uint)row < _rows.getLength()) _rows.getAt(row)->_minHeight = minsize;
 }
 
 void GridLayout::setRowMaximumHeight(int row, int maxsize)
 {
-  if ((uint)row < _rows.getLength()) _rows.at(row)->_maxHeight = maxsize;
+  if ((uint)row < _rows.getLength()) _rows.getAt(row)->_maxHeight = maxsize;
 }
 
 void GridLayout::setRowHintHeight(int row, int hintsize)
 {
-  if ((uint)row < _rows.getLength()) _rows.at(row)->_hintHeight = hintsize;
+  if ((uint)row < _rows.getLength()) _rows.getAt(row)->_hintHeight = hintsize;
 }
 
 void GridLayout::onRemove(LayoutItem* item)
@@ -276,7 +276,7 @@ void GridLayout::addItem(LayoutItem* item, int row, int column, int rowSpan, int
   // Now we need to create enough columns per row!
   for (int i = 0; i < rowSpan; i++)
   {
-    Row* r = _rows.at(row+i);
+    Row* r = _rows.getAt(row+i);
 
     // Append enough columns into row.
     while ((uint)ccolumn > r->_cols.getLength())
@@ -287,16 +287,16 @@ void GridLayout::addItem(LayoutItem* item, int row, int column, int rowSpan, int
     // Set item into column within row.
     for (int j = 0; j < columnSpan; j++)
     {
-      r->_cols.set(column+j, item);
+      r->_cols.setAt(column+j, item);
     }
   }
 
   if (item)
   {
     LayoutProperties* prop = static_cast<LayoutProperties*>(item->_layoutdata);
-    prop->_row = _rows.at(row);
+    prop->_row = _rows.getAt(row);
     prop->_rowspan = rowSpan;
-    prop->_column = _cols.at(column);
+    prop->_column = _cols.getAt(column);
     prop->_colspan = columnSpan;
 
     item->setLayoutAlignment(alignment);
@@ -322,12 +322,14 @@ LayoutItem* GridLayout::takeCellItem(int row, int column)
   if ((uint)column >= _cols.getLength() || (uint)row >= _rows.getLength())
     return 0;
 
-  Row* r = _rows.at(row);
+  Row* r = _rows.getAt(row);
 
   if ((uint)column >= r->_cols.getLength())
     return 0;
 
-  return r->_cols.take(column);
+  LayoutItem* item = r->_cols.getAt(column);
+  r->_cols.removeAt(column);
+  return item;
 }
 
 LayoutItem* GridLayout::getCellItem(int row, int column) const
@@ -337,12 +339,12 @@ LayoutItem* GridLayout::getCellItem(int row, int column) const
   if ((uint)column >= _cols.getLength() || (uint)row >= _rows.getLength())
     return 0;
 
-  Row* r = _rows.at(row);
+  Row* r = _rows.getAt(row);
 
   if ((uint)column >= r->_cols.getLength())
     return 0;
 
-  return r->_cols.at(column);
+  return r->_cols.getAt(column);
 }
 
 void GridLayout::Column::calculateWidth()
@@ -350,7 +352,7 @@ void GridLayout::Column::calculateWidth()
   // LAYOUT TODO: Column Cache handling!
   int width = 0, minWidth = 0;
 
-  for (int row = 0; row < (sysint_t)_layout->_rows.getLength(); ++row)
+  for (int row = 0; row < (ssize_t)_layout->_rows.getLength(); ++row)
   {
     LayoutItem* item = getItem(row);
     if (!item)
@@ -384,7 +386,7 @@ void GridLayout::Row::calculateHeight()
 {
   int minHeight = 0, height = 0;
 
-  for (int col = 0; col < (sysint_t)_cols.getLength(); ++col)
+  for (int col = 0; col < (ssize_t)_cols.getLength(); ++col)
   {
     LayoutItem* item = getColumn(col);
     if (!item)
@@ -423,9 +425,9 @@ void GridLayout::calculateColumnWidths(int& minWidth, int& hintWidth)
 
   _colflexibles = 0;
 
-  for (int col = 0; col < (sysint_t)_cols.getLength(); col++)
+  for (int col = 0; col < (ssize_t)_cols.getLength(); col++)
   {
-    Column* column = _cols.at(col);
+    Column* column = _cols.getAt(col);
     column->calculateWidth();
 
     _cacheMinWidth += column->_flex > 0 ? column->_minWidth : column->_hintWidth;
@@ -457,9 +459,9 @@ void GridLayout::calculateRowHeights(int& minHeight, int& hintHeight)
 
   _rowflexibles = 0;
 
-  for (int crow = 0; crow < (sysint_t)_rows.getLength(); ++crow)
+  for (int crow = 0; crow < (ssize_t)_rows.getLength(); ++crow)
   {
-     Row* row = _rows.at(crow);
+     Row* row = _rows.getAt(crow);
      row->calculateHeight();
 
      _cacheMinHeight += row->_flex > 0 ? row->_minHeight : row->_hintHeight;
@@ -531,7 +533,7 @@ int GridLayout::calculateSpanWidth(int col, LayoutItem* item) const
   int width = _hspacing * (widgetProps->_colspan - 1);
   for (int i=0; i<widgetProps->_colspan; ++i)
   {
-    Column* column = _cols.at(col+i);
+    Column* column = _cols.getAt(col+i);
     // Update if flex was calculated for this column.
     width += updateColumnFlexWidth(column);
   }
@@ -546,7 +548,7 @@ int GridLayout::calculateSpanHeight(int crow, LayoutItem* item) const
   int height = _vspacing * (widgetProps->_rowspan - 1);
   for (int i=0; i<widgetProps->_rowspan; i++)
   {
-    Row* row = _rows.at(crow+i);
+    Row* row = _rows.getAt(crow+i);
     // Update if flex was calculated for this row.
     height += updateRowFlexHeight(row);
   }
@@ -574,7 +576,7 @@ void GridLayout::setLayoutGeometry(const RectI& rect)
 
   for (int col=0; col<maxColIndex; ++col)
   {
-    Column* column = _cols.at(col);
+    Column* column = _cols.getAt(col);
     int curtop = top;
 
     //int x = updateColumnFlexWidth(column);
@@ -582,7 +584,7 @@ void GridLayout::setLayoutGeometry(const RectI& rect)
 
     for (int crow=0; crow<maxRowIndex; ++crow)
     {
-      Row* row = _rows.at(crow);
+      Row* row = _rows.getAt(crow);
       LayoutItem* item = getCellItem(crow,col);
 
       // LAYOUT TODO:

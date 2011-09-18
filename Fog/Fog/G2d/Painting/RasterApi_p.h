@@ -20,7 +20,8 @@ namespace Fog {
 // [Forward Declarations]
 // ============================================================================
 
-struct MemoryBuffer;
+struct Rasterizer8;
+struct Rasterizer16;
 
 struct BoxRasterizer8;
 struct BoxRasterizer16;
@@ -28,7 +29,10 @@ struct BoxRasterizer16;
 struct PathRasterizer8;
 struct PathRasterizer16;
 
+struct RasterContext;
 struct RasterFiller;
+struct RasterPaintEngine;
+struct RasterSerializer;
 
 struct RasterScanline8;
 struct RasterScanline16;
@@ -44,18 +48,6 @@ struct RasterSpan16;
 //! @internal
 struct FOG_NO_EXPORT RasterApi
 {
-  // --------------------------------------------------------------------------
-  // [BoxRasterizer8]
-  // --------------------------------------------------------------------------
-
-  typedef void (FOG_CDECL *BoxRasterizer8_InitAligned)(BoxRasterizer8* self, const BoxI* box);
-  typedef void (FOG_CDECL *BoxRasterizer8_Init24x8)(BoxRasterizer8* self, const BoxI* box24x8);
-
-  struct FOG_NO_EXPORT _FuncsBoxRasterizer8
-  {
-    BoxRasterizer8_InitAligned initAligned;
-    BoxRasterizer8_Init24x8 init24x8;
-  } boxrasterizer8;
 };
 
 extern FOG_API RasterApi _rasterApi;

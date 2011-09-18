@@ -177,7 +177,7 @@ struct FOG_NO_EXPORT PGradientBase
         ColorStopCache* cache = AtomicCore<ColorStopCache*>::get(&stops._d->stopCachePrgb32);
         if (cache != NULL)
         {
-          cache->refCount.inc();
+          cache->reference.inc();
         }
         else
         {
@@ -185,7 +185,7 @@ struct FOG_NO_EXPORT PGradientBase
           cache = ColorStopCache::create32(srcFormat, get_optimal_cache_length(stops));
           if (FOG_IS_NULL(cache)) return ERR_RT_OUT_OF_MEMORY;
 
-          cache->refCount.init(2);
+          cache->reference.init(2);
 
           _g2d_render.gradient.interpolate[srcFormat](
             reinterpret_cast<uint8_t*>(cache->getData()), cache->getLength(), stops.getList(), stops.getLength());
@@ -198,7 +198,7 @@ struct FOG_NO_EXPORT PGradientBase
           // some other thread was faster than us, in this case it's needed to
           // decrease the reference count of the instance we created.
           if (!AtomicCore<ColorStopCache*>::cmpXchg(&stops._d->stopCachePrgb32, (ColorStopCache*)NULL, cache))
-            cache->refCount.dec();
+            cache->reference.dec();
         }
 
         // Setup the context.
@@ -227,7 +227,7 @@ struct FOG_NO_EXPORT PGradientBase
   {
     FOG_ASSERT(ctx->isInitialized());
 
-    ctx->_d.gradient.base.cache->deref();
+    ctx->_d.gradient.base.cache->release();
     ctx->reset();
   }
 

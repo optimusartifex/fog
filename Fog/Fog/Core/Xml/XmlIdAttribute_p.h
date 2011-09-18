@@ -37,7 +37,7 @@ struct FOG_NO_EXPORT XmlIdAttribute : public XmlAttribute
   // [Methods]
   // --------------------------------------------------------------------------
 
-  virtual err_t setValue(const String& value);
+  virtual err_t setValue(const StringW& value);
 };
 
 //! @}

@@ -9,7 +9,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Gui/Global/Constants.h>
 #include <Fog/Gui/Widget/ButtonBase.h>
 
 FOG_IMPLEMENT_OBJECT(Fog::ButtonBase)
@@ -33,12 +32,12 @@ ButtonBase::~ButtonBase()
 {
 }
 
-String ButtonBase::getText() const
+StringW ButtonBase::getText() const
 {
   return _text;
 }
 
-void ButtonBase::setText(const String& text)
+void ButtonBase::setText(const StringW& text)
 {
   _text = text;
 

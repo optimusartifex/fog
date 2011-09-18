@@ -22,7 +22,7 @@ namespace Fog {
 // [Constants]
 // ============================================================================
 
-enum { SPAN_INVALID_POSITION = 0x1FFFFFF0 };
+enum { RASTER_SPAN_INVALID_X = 0x1FFFFFF0 };
 
 // ============================================================================
 // [Fog::Scanline]
@@ -189,7 +189,7 @@ struct FOG_NO_EXPORT RasterScanline
   uint32_t _spanSize;
 
 private:
-  _FOG_CLASS_NO_COPY(RasterScanline)
+  _FOG_NO_COPY(RasterScanline)
 };
 
 // ============================================================================
@@ -322,7 +322,8 @@ _Link:
   FOG_INLINE void lnkA8Glyph(int x0)
   {
     // Try to join with the current span.
-    if (getCurrent()->getX1() == x0 && getCurrent()->getType() == RASTER_SPAN_A8_GLYPH) return;
+    if (getCurrent()->getX1() == x0 && getCurrent()->getType() == RASTER_SPAN_A8_GLYPH)
+      return;
 
     newA8Glyph(x0);
   }
@@ -368,7 +369,7 @@ _Link:
     FOG_ASSERT(getCurrent()->getType() == RASTER_SPAN_A8_GLYPH ||
                getCurrent()->getType() == RASTER_SPAN_AX_GLYPH);
 
-    getCurrent()->setX1(getCurrent()->getX0() + (int)(sysint_t)(_maskCurrent - (uint8_t*)getCurrent()->getGenericMask()));
+    getCurrent()->setX1(getCurrent()->getX0() + (int)(ssize_t)(_maskCurrent - (uint8_t*)getCurrent()->getGenericMask()));
     FOG_ASSERT(getCurrent()->getX0() < getCurrent()->getX1());
   }
 
@@ -380,7 +381,7 @@ _Link:
     // Detect an invalid range.
     FOG_ASSERT(getCurrent()->getX0() < x1);
     // Detect an invalid buffer position.
-    FOG_ASSERT(getCurrent()->getX0() + (int)(sysint_t)(_maskCurrent - (uint8_t*)getCurrent()->getGenericMask()) == x1);
+    FOG_ASSERT(getCurrent()->getX0() + (int)(ssize_t)(_maskCurrent - (uint8_t*)getCurrent()->getGenericMask()) == x1);
 
     getCurrent()->setX1(x1);
   }
@@ -422,7 +423,8 @@ _Link:
   FOG_INLINE void lnkA8Extra(int x0)
   {
     // Try to join with the current span.
-    if (getCurrent()->getX1() == x0 && getCurrent()->getType() == RASTER_SPAN_AX_EXTRA) return;
+    if (getCurrent()->getX1() == x0 && getCurrent()->getType() == RASTER_SPAN_AX_EXTRA)
+      return;
 
     newA8Extra(x0);
   }
@@ -467,7 +469,7 @@ _Link:
     // Detect an invalid span.
     FOG_ASSERT(getCurrent()->getType() == RASTER_SPAN_AX_EXTRA);
 
-    getCurrent()->setX1(getCurrent()->getX0() + (int)(sysint_t)(_maskCurrent - (uint8_t*)getCurrent()->getGenericMask()) / 2);
+    getCurrent()->setX1(getCurrent()->getX0() + (int)(ssize_t)(_maskCurrent - (uint8_t*)getCurrent()->getGenericMask()) / 2);
     FOG_ASSERT(getCurrent()->getX0() < getCurrent()->getX1());
   }
 
@@ -478,7 +480,7 @@ _Link:
     // Detect an invalid range.
     FOG_ASSERT(getCurrent()->getX0() < x1);
     // Detect an invalid position.
-    FOG_ASSERT(getCurrent()->getX0() + (int)(sysint_t)(_maskCurrent - (uint8_t*)getCurrent()->getGenericMask()) / 2 == x1);
+    FOG_ASSERT(getCurrent()->getX0() + (int)(ssize_t)(_maskCurrent - (uint8_t*)getCurrent()->getGenericMask()) / 2 == x1);
 
     getCurrent()->setX1(x1);
   }
@@ -520,7 +522,8 @@ _Link:
   FOG_INLINE void lnkARGB32Glyph(int x0)
   {
     // Try to join with the current span.
-    if (getCurrent()->getX1() == x0 && getCurrent()->getType() == RASTER_SPAN_ARGB32_GLYPH) return;
+    if (getCurrent()->getX1() == x0 && getCurrent()->getType() == RASTER_SPAN_ARGB32_GLYPH)
+      return;
 
     newARGB32Glyph(x0);
   }
@@ -562,7 +565,7 @@ _Link:
     FOG_ASSERT(getCurrent()->getType() == RASTER_SPAN_ARGB32_GLYPH ||
                getCurrent()->getType() == RASTER_SPAN_ARGBXX_GLYPH);
 
-    getCurrent()->setX1(getCurrent()->getX0() + (int)(sysint_t)(_maskCurrent - (uint8_t*)getCurrent()->getGenericMask()) / 4);
+    getCurrent()->setX1(getCurrent()->getX0() + (int)(ssize_t)(_maskCurrent - (uint8_t*)getCurrent()->getGenericMask()) / 4);
     FOG_ASSERT(getCurrent()->getX0() < getCurrent()->getX1());
   }
 
@@ -574,7 +577,7 @@ _Link:
     // Detect an invalid range.
     FOG_ASSERT(getCurrent()->getX0() < x1);
     // Detect an invalid buffer position.
-    FOG_ASSERT(getCurrent()->getX0() + (int)(sysint_t)(_maskCurrent - (uint8_t*)getCurrent()->getGenericMask()) / 4 == x1);
+    FOG_ASSERT(getCurrent()->getX0() + (int)(ssize_t)(_maskCurrent - (uint8_t*)getCurrent()->getGenericMask()) / 4 == x1);
 
     getCurrent()->setX1(x1);
   }
@@ -613,7 +616,7 @@ _Link:
   */
 
 private:
-  _FOG_CLASS_NO_COPY(RasterScanline8)
+  _FOG_NO_COPY(RasterScanline8)
 };
 
 // ============================================================================

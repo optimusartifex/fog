@@ -30,20 +30,20 @@ SvgImageLinkAttribute::~SvgImageLinkAttribute()
 {
 }
 
-String SvgImageLinkAttribute::getValue() const
+StringW SvgImageLinkAttribute::getValue() const
 {
   if (_embedded)
   {
     err_t err = ERR_OK;
 
-    String dst;
+    StringW dst;
     Stream memio;
 
     err |= dst.append(Ascii8("data:image/png;base64,"));
     err |= memio.openBuffer();
 
-    _image.writeToStream(memio, Ascii8("png"));
-    err |= StringUtil::toBase64(dst, memio.getBuffer(), CONTAINER_OP_APPEND);
+    _image.writeToStream(memio, StringW::fromAscii8("png"));
+    err |= StringW::base64Encode(dst, CONTAINER_OP_APPEND, memio.getBuffer());
 
     if (FOG_IS_ERROR(err)) dst.reset();
     return dst;
@@ -54,22 +54,22 @@ String SvgImageLinkAttribute::getValue() const
   }
 }
 
-err_t SvgImageLinkAttribute::setValue(const String& value)
+err_t SvgImageLinkAttribute::setValue(const StringW& value)
 {
   err_t err = ERR_OK;
 
   if (value.startsWith(Ascii8("data:")))
   {
-    size_t semicolon = value.indexOf(Char(';'));
-    size_t separator = value.indexOf(Char(','));
+    size_t semicolon = value.indexOf(CharW(';'));
+    size_t separator = value.indexOf(CharW(','));
 
     if (semicolon != INVALID_INDEX && separator != INVALID_INDEX)
     {
-      String type = value.substring(Range(5, semicolon));
-      String extension;
-      String encoding = value.substring(Range(semicolon + 1, separator));
+      StringW type = value.substring(Range(5, semicolon));
+      StringW extension;
+      StringW encoding = value.substring(Range(semicolon + 1, separator));
 
-      ByteArray memio;
+      StringA memio;
       Stream stream;
 
       if (type == Ascii8("image/png"))
@@ -88,12 +88,11 @@ err_t SvgImageLinkAttribute::setValue(const String& value)
 
       if (encoding == Ascii8("base64"))
       {
-        err |= StringUtil::fromBase64(memio, value.getData() + separator + 1, value.getLength() - separator - 1);
+        err |= StringA::base64Decode(memio, CONTAINER_OP_REPLACE, value.getData() + separator + 1, value.getLength() - separator - 1);
       }
       else
       {
-        // Maybe in future something else will be supported by SVG. For now
-        // this is error.
+        // Maybe in future something else will be supported by the SVG standard.
         return ERR_SVG_INVALID_DATA_ENCODING;
       }
 

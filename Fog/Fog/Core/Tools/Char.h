@@ -18,45 +18,271 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::Char]
+// [Fog::CharA]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
-//! @brief 16-bit unicode character.
-struct FOG_NO_EXPORT Char
+#include <Fog/Core/C++/PackByte.h>
+//! @brief Char (ansi).
+struct FOG_NO_EXPORT CharA
 {
-  // --------------------------------------------------------------------------
-  // [Typedefs]
-  // --------------------------------------------------------------------------
-
-  // Template support.
-  typedef Char PType;
-  typedef Char UType;
-  typedef uint16_t Value;
-  typedef Utf16 Stub;
-  typedef String Sequence;
-  typedef StringFilter Filter;
-  typedef StringMatcher Matcher;
+  //! @brief Type used by Fog-Framework in public API.
+  typedef char Type;
+  //! @brief Value of CharA.
+  typedef unsigned char Value;
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE Char() {}
-  FOG_INLINE Char(const Char& c) : _value(c._value) {}
+  FOG_INLINE CharA() {}
+  FOG_INLINE CharA(const CharA& c) : _value(c._value) {}
 
-#if defined(FOG_CC_HAVE_STANDARD_CHAR_TYPE)
-  explicit FOG_INLINE Char(char c) : _value((unsigned char)c) {}
-#endif // FOG_CC_HAVE_STANDARD_CHAR_TYPE
+  explicit FOG_INLINE CharA(_Uninitialized) {}
+#if defined(FOG_CC_HAVE_NATIVE_CHAR_TYPE)
+  explicit FOG_INLINE CharA(char c) : _value((uint8_t)c) {}
+#endif // FOG_CC_HAVE_NATIVE_CHAR_TYPE
+  explicit FOG_INLINE CharA(signed char c) : _value((uint8_t)c) {}
+  explicit FOG_INLINE CharA(unsigned char c) : _value((uint8_t)c) {}
 
-  explicit FOG_INLINE Char(signed char c) : _value((unsigned char)c) {}
-  explicit FOG_INLINE Char(unsigned char c) : _value(c) {}
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
 
-  explicit FOG_INLINE Char(signed short c) : _value((unsigned short)c) {}
-  explicit FOG_INLINE Char(unsigned short c) : _value(c) {}
+  //! @brief Get the byte value.
+  FOG_INLINE uint8_t getValue() const
+  {
+    return _value;
+  }
 
-  explicit FOG_INLINE Char(signed int c) : _value((uint16_t)(unsigned int)c) {}
-  explicit FOG_INLINE Char(unsigned int c) : _value((uint16_t)c) {}
+  //! @brief Set the byte value.
+  FOG_INLINE void setValue(uint8_t value)
+  {
+    _value = value;
+  }
+
+  //! @brief Get the byte value converted to a signed integer.
+  FOG_INLINE int getInt() const
+  {
+    return (int)_value;
+  }
+
+  //! @brief Set the byte value from an integer.
+  FOG_INLINE void setInt(int value)
+  {
+    FOG_ASSUME(value >= 0 && value <= 0xFF);
+    _value = (uint8_t)value;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Properties]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool isNull() const { return _value == 0; }
+  FOG_INLINE bool isAt(uint8_t start, uint8_t end) const { return (_value >= start) & (_value <= end); }
+
+  // --------------------------------------------------------------------------
+  // [ASCII Properties]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool isAsciiBlank() const { return isAsciiBlank(_value); }
+  FOG_INLINE bool isAsciiCntrl() const { return isAsciiCntrl(_value); }
+  FOG_INLINE bool isAsciiDigit() const { return isAsciiDigit(_value); }
+  FOG_INLINE bool isAsciiGraph() const { return isAsciiGraph(_value); }
+  FOG_INLINE bool isAsciiLetter() const { return isAsciiLetter(_value); }
+  FOG_INLINE bool isAsciiLetter_() const { return isAsciiLetter_(_value); }
+  FOG_INLINE bool isAsciiLower() const { return isAsciiLower(_value); }
+  FOG_INLINE bool isAsciiNumlet() const { return isAsciiNumlet(_value); }
+  FOG_INLINE bool isAsciiPrint() const { return isAsciiPrint(_value); }
+  FOG_INLINE bool isAsciiPunct() const { return isAsciiPunct(_value); }
+  FOG_INLINE bool isAsciiSpace() const { return isAsciiSpace(_value); }
+  FOG_INLINE bool isAsciiUpper() const { return isAsciiUpper(_value); }
+  FOG_INLINE bool isAsciiXDigit() const { return isAsciiXDigit(_value); }
+  FOG_INLINE bool isAsciiXLetter() const { return isAsciiXLetter(_value); }
+
+  FOG_INLINE CharA toAsciiLower() const { return CharA(toAsciiLower(_value)); }
+  FOG_INLINE CharA toAsciiUpper() const { return CharA(toAsciiUpper(_value)); }
+
+  // --------------------------------------------------------------------------
+  // [Char Properties]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool isLetter() const { return isLetter(_value); }
+  FOG_INLINE bool isLower() const { return isLower(_value); }
+  FOG_INLINE bool isNumlet() const { return isNumlet(_value); }
+  FOG_INLINE bool isSpace() const { return isSpace(_value); }
+  FOG_INLINE bool isUpper() const { return isUpper(_value); }
+
+  FOG_INLINE CharA toLower() const { return CharA(toLower(_value)); }
+  FOG_INLINE CharA toUpper() const { return CharA(toUpper(_value)); }
+
+  // --------------------------------------------------------------------------
+  // [Equality / Comparison]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const CharA& other) { return _value == other._value; }
+  FOG_INLINE int compare(const CharA& other) { return (int)_value - (int)other._value; }
+
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE CharA& operator =(const CharA& c) { _value  = c._value; return *this; }
+  FOG_INLINE CharA& operator-=(const CharA& c) { _value -= c._value; return *this; }
+  FOG_INLINE CharA& operator+=(const CharA& c) { _value += c._value; return *this; }
+
+#if defined(FOG_CC_HAVE_NATIVE_CHAR_TYPE)
+  FOG_INLINE CharA& operator =(const char& c) { _value  = (uint8_t)c; return *this; }
+  FOG_INLINE CharA& operator-=(const char& c) { _value -= (uint8_t)c; return *this; }
+  FOG_INLINE CharA& operator+=(const char& c) { _value += (uint8_t)c; return *this; }
+#endif // FOG_CC_HAVE_NATIVE_CHAR_TYPE
+
+  FOG_INLINE CharA& operator =(const signed char& c) { _value  = (uint8_t)c; return *this; }
+  FOG_INLINE CharA& operator-=(const signed char& c) { _value -= (uint8_t)c; return *this; }
+  FOG_INLINE CharA& operator+=(const signed char& c) { _value += (uint8_t)c; return *this; }
+
+  FOG_INLINE CharA& operator =(const unsigned char& c) { _value  = c; return *this; }
+  FOG_INLINE CharA& operator-=(const unsigned char& c) { _value -= c; return *this; }
+  FOG_INLINE CharA& operator+=(const unsigned char& c) { _value += c; return *this; }
+
+  FOG_INLINE bool operator==(const CharA& c) { return _value == c._value; }
+  FOG_INLINE bool operator!=(const CharA& c) { return _value != c._value; }
+  FOG_INLINE bool operator>=(const CharA& c) { return _value >= c._value; }
+  FOG_INLINE bool operator> (const CharA& c) { return _value >  c._value; }
+  FOG_INLINE bool operator<=(const CharA& c) { return _value <= c._value; }
+  FOG_INLINE bool operator< (const CharA& c) { return _value <  c._value; }
+
+#if defined(FOG_CC_HAVE_NATIVE_CHAR_TYPE)
+  FOG_INLINE bool operator==(const char& c) { return _value == (uint8_t)c; }
+  FOG_INLINE bool operator!=(const char& c) { return _value != (uint8_t)c; }
+  FOG_INLINE bool operator>=(const char& c) { return _value >= (uint8_t)c; }
+  FOG_INLINE bool operator> (const char& c) { return _value >  (uint8_t)c; }
+  FOG_INLINE bool operator<=(const char& c) { return _value <= (uint8_t)c; }
+  FOG_INLINE bool operator< (const char& c) { return _value <  (uint8_t)c; }
+#endif // FOG_CC_HAVE_NATIVE_CHAR_TYPE
+
+  FOG_INLINE bool operator==(const signed char& c) { return _value == (uint8_t)c; }
+  FOG_INLINE bool operator!=(const signed char& c) { return _value != (uint8_t)c; }
+  FOG_INLINE bool operator>=(const signed char& c) { return _value >= (uint8_t)c; }
+  FOG_INLINE bool operator> (const signed char& c) { return _value >  (uint8_t)c; }
+  FOG_INLINE bool operator<=(const signed char& c) { return _value <= (uint8_t)c; }
+  FOG_INLINE bool operator< (const signed char& c) { return _value <  (uint8_t)c; }
+
+  FOG_INLINE bool operator==(const unsigned char& c) { return _value == (uint8_t)c; }
+  FOG_INLINE bool operator!=(const unsigned char& c) { return _value != (uint8_t)c; }
+  FOG_INLINE bool operator>=(const unsigned char& c) { return _value >= (uint8_t)c; }
+  FOG_INLINE bool operator> (const unsigned char& c) { return _value >  (uint8_t)c; }
+  FOG_INLINE bool operator<=(const unsigned char& c) { return _value <= (uint8_t)c; }
+  FOG_INLINE bool operator< (const unsigned char& c) { return _value <  (uint8_t)c; }
+
+  // --------------------------------------------------------------------------
+  // [Implicit Conversion]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE operator bool() const { return _value != 0; }
+
+#if defined(FOG_CC_HAVE_NATIVE_CHAR_TYPE)
+  FOG_INLINE operator char() const { return (char)_value; }
+#endif // FOG_CC_HAVE_NATIVE_CHAR_TYPE
+  FOG_INLINE operator signed char() const { return (signed char)_value; }
+  FOG_INLINE operator unsigned char() const { return (unsigned char)_value; }
+
+  FOG_INLINE operator short() const { return _value; }
+  FOG_INLINE operator ushort() const { return _value; }
+
+  FOG_INLINE operator int() const { return _value; }
+  FOG_INLINE operator uint() const { return _value; }
+
+  FOG_INLINE operator long() const { return _value; }
+  FOG_INLINE operator ulong() const { return _value; }
+
+  FOG_INLINE operator int64_t() const { return _value; }
+  FOG_INLINE operator uint64_t() const { return _value; }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Common]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE bool isNull(uint8_t c) { return c == 0; }
+  static FOG_INLINE bool isAt(uint8_t c, uint8_t start, uint8_t end) { return (c >= start) & (c <= end); }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Ascii]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE bool isAsciiBlank(uint8_t c) { return (_charData.asciiCType[c] & ASCII_CLASS_BLANK) != 0; }
+  static FOG_INLINE bool isAsciiCntrl(uint8_t c) { return (_charData.asciiCType[c] & ASCII_CLASS_PRINT) == 0; }
+  static FOG_INLINE bool isAsciiDigit(uint8_t c) { return (_charData.asciiCType[c] & ASCII_CLASS_DIGIT) != 0; }
+  static FOG_INLINE bool isAsciiGraph(uint8_t c) { return (_charData.asciiCType[c] & ASCII_CLASS_GRAPH) != 0; }
+  static FOG_INLINE bool isAsciiLetter(uint8_t c) { return (_charData.asciiCType[c] & ASCII_CLASS_ALPHA) != 0; }
+  static FOG_INLINE bool isAsciiLetter_(uint8_t c) { return (_charData.asciiCType[c] & ASCII_CLASS_ALPHA_) != 0; }
+  static FOG_INLINE bool isAsciiLower(uint8_t c) { return (_charData.asciiCType[c] & ASCII_CLASS_LOWER) != 0; }
+  static FOG_INLINE bool isAsciiNumlet(uint8_t c) { return (_charData.asciiCType[c] & ASCII_CLASS_ALNUM) != 0; }
+  static FOG_INLINE bool isAsciiPrint(uint8_t c) { return (_charData.asciiCType[c] & ASCII_CLASS_PRINT) != 0; }
+  static FOG_INLINE bool isAsciiPunct(uint8_t c) { return (_charData.asciiCType[c] & ASCII_CLASS_PUNCT) != 0; }
+  static FOG_INLINE bool isAsciiSpace(uint8_t c) { return (_charData.asciiCType[c] & ASCII_CLASS_SPACE) != 0; }
+  static FOG_INLINE bool isAsciiUpper(uint8_t c) { return (_charData.asciiCType[c] & ASCII_CLASS_UPPER) != 0; }
+  static FOG_INLINE bool isAsciiXDigit(uint8_t c) { return (_charData.asciiCType[c] & ASCII_CLASS_XDIGIT) != 0; }
+  static FOG_INLINE bool isAsciiXLetter(uint8_t c) { return (_charData.asciiCType[c] & ASCII_CLASS_XALPHA) != 0; }
+
+  static FOG_INLINE uint8_t toAsciiLower(uint8_t c) { return _charData.asciiToLower[c]; }
+  static FOG_INLINE uint8_t toAsciiUpper(uint8_t c) { return _charData.asciiToUpper[c]; }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Char]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE bool isLetter(uint8_t c) { return isAsciiLetter(c); }
+  static FOG_INLINE bool isLower(uint8_t c) { return isAsciiLower(c); }
+  static FOG_INLINE bool isNumlet(uint8_t c) { return isAsciiNumlet(c); }
+  static FOG_INLINE bool isSpace(uint8_t c) { return isAsciiSpace(c); }
+  static FOG_INLINE bool isUpper(uint8_t c) { return isAsciiUpper(c); }
+
+  static FOG_INLINE uint8_t toLower(uint8_t c) { return toAsciiLower(c); }
+  static FOG_INLINE uint8_t toUpper(uint8_t c) { return toAsciiUpper(c); }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  //! @brief CharA value.
+  uint8_t _value;
+};
+#include <Fog/Core/C++/PackRestore.h>
+
+// ============================================================================
+// [Fog::CharW]
+// ============================================================================
+
+#include <Fog/Core/C++/PackByte.h>
+//! @brief Char (unicode).
+struct FOG_NO_EXPORT CharW
+{
+  //! @brief Type used by Fog-Framework in public API.
+  typedef uint16_t Type;
+  //! @brief Value of CharW.
+  typedef uint16_t Value;
+
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE CharW() {}
+  FOG_INLINE CharW(const CharW& c) : _value(c._value) {}
+
+  explicit FOG_INLINE CharW(const CharA& ch) : _value(ch._value) {}
+
+#if defined(FOG_CC_HAVE_NATIVE_CHAR_TYPE)
+  explicit FOG_INLINE CharW(char c) : _value((unsigned char)c) {}
+#endif // FOG_CC_HAVE_NATIVE_CHAR_TYPE
+
+  explicit FOG_INLINE CharW(signed char c) : _value((unsigned char)c) {}
+  explicit FOG_INLINE CharW(unsigned char c) : _value(c) {}
+
+  explicit FOG_INLINE CharW(signed short c) : _value((unsigned short)c) {}
+  explicit FOG_INLINE CharW(unsigned short c) : _value(c) {}
+
+  explicit FOG_INLINE CharW(signed int c) : _value((uint16_t)(unsigned int)c) {}
+  explicit FOG_INLINE CharW(unsigned int c) : _value((uint16_t)c) {}
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -85,12 +311,12 @@ struct FOG_NO_EXPORT Char
   // --------------------------------------------------------------------------
 
   FOG_INLINE bool isNull() const { return _value == 0; }
-  FOG_INLINE bool isAt(uint16_t start, uint16_t end) const { return _value >= start && _value <= end; }
+  FOG_INLINE bool isAt(uint16_t start, uint16_t end) const { return (_value >= start) & (_value <= end); }
 
   // --------------------------------------------------------------------------
   // [ASCII Properties]
   // --------------------------------------------------------------------------
-  
+
   FOG_INLINE bool isAsciiBlank() const { return isAsciiBlank(_value); }
   FOG_INLINE bool isAsciiCntrl() const { return isAsciiCntrl(_value); }
   FOG_INLINE bool isAsciiDigit() const { return isAsciiDigit(_value); }
@@ -106,13 +332,13 @@ struct FOG_NO_EXPORT Char
   FOG_INLINE bool isAsciiXDigit() const { return isAsciiXDigit(_value); }
   FOG_INLINE bool isAsciiXLetter() const { return isAsciiXLetter(_value); }
 
-  FOG_INLINE Char toAsciiLower() const { return Char(_value < 128 ? _charData.asciiToLower[_value] : _value); }
-  FOG_INLINE Char toAsciiUpper() const { return Char(_value < 128 ? _charData.asciiToUpper[_value] : _value); }
+  FOG_INLINE CharW toAsciiLower() const { return CharW(_value < 128 ? _charData.asciiToLower[_value] : _value); }
+  FOG_INLINE CharW toAsciiUpper() const { return CharW(_value < 128 ? _charData.asciiToUpper[_value] : _value); }
 
   // --------------------------------------------------------------------------
   // [Unicode Properties]
   // --------------------------------------------------------------------------
-  
+
   FOG_INLINE const CharProperty& getProperty() const { return _charData.getPropertyUCS2(_value); }
 
   FOG_INLINE bool isControl() const { return isControl(_value); }
@@ -128,7 +354,7 @@ struct FOG_NO_EXPORT Char
   FOG_INLINE bool isSymbol() const { return isSymbol(_value); }
   FOG_INLINE bool isTitle() const { return isTitle(_value); }
   FOG_INLINE bool isUpper() const { return isUpper(_value); }
-  
+
   FOG_INLINE uint32_t getCategory() const { return getProperty().getCategory(); }
   FOG_INLINE uint32_t getUnicodeVersion() const { return getProperty().getUnicodeVersion(); }
   FOG_INLINE uint32_t getCombiningClass() const { return getProperty().getCombiningClass(); }
@@ -160,10 +386,10 @@ struct FOG_NO_EXPORT Char
   FOG_INLINE bool hasTitle() const { return hasTitle(_value); }
   FOG_INLINE bool hasMirror() const { return hasMirror(_value); }
 
-  FOG_INLINE Char toUpper() const { return Char(toUpper(_value)); }
-  FOG_INLINE Char toLower() const { return Char(toLower(_value)); }
-  FOG_INLINE Char toTitle() const { return Char(toTitle(_value)); }
-  FOG_INLINE Char toMirror() const { return Char(toMirror(_value)); } 
+  FOG_INLINE CharW toUpper() const { return CharW(toUpper(_value)); }
+  FOG_INLINE CharW toLower() const { return CharW(toLower(_value)); }
+  FOG_INLINE CharW toTitle() const { return CharW(toTitle(_value)); }
+  FOG_INLINE CharW toMirror() const { return CharW(toMirror(_value)); }
 
   // --------------------------------------------------------------------------
   // [Surrogates]
@@ -179,84 +405,84 @@ struct FOG_NO_EXPORT Char
 
   FOG_INLINE bool isBomMark() const { return _value == UTF16_BOM_MARK; }
   FOG_INLINE bool isBomSwap() const { return _value == UTF16_BOM_SWAP; }
-  FOG_INLINE Char& bswap() { _value = Memory::bswap16(_value); return *this; }
+  FOG_INLINE CharW& bswap() { _value = Memory::bswap16(_value); return *this; }
 
   // --------------------------------------------------------------------------
   // [Equality / Comparison]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool eq(const Char& other) { return _value == other._value; }
-  FOG_INLINE int compare(const Char& other) { return (int)_value - (int)other._value; }
+  FOG_INLINE bool eq(const CharW& other) { return _value == other._value; }
+  FOG_INLINE int compare(const CharW& other) { return (int)_value - (int)other._value; }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE Char& operator =(const Char& c) { _value  = c._value; return *this; }
-  FOG_INLINE Char& operator-=(const Char& c) { _value -= c._value; return *this; }
-  FOG_INLINE Char& operator+=(const Char& c) { _value += c._value; return *this; }
-  FOG_INLINE Char operator-(const Char& c) { return Char(_value - c._value); }
-  FOG_INLINE Char operator+(const Char& c) { return Char(_value + c._value); }
+  FOG_INLINE CharW& operator =(const CharW& c) { _value  = c._value; return *this; }
+  FOG_INLINE CharW& operator-=(const CharW& c) { _value -= c._value; return *this; }
+  FOG_INLINE CharW& operator+=(const CharW& c) { _value += c._value; return *this; }
+  FOG_INLINE CharW operator-(const CharW& c) { return CharW(_value - c._value); }
+  FOG_INLINE CharW operator+(const CharW& c) { return CharW(_value + c._value); }
 
-#if defined(FOG_CC_HAVE_STANDARD_CHAR_TYPE)
-  FOG_INLINE Char& operator =(const char& c) { _value  = (uint8_t)c; return *this; }
-  FOG_INLINE Char& operator-=(const char& c) { _value -= (uint8_t)c; return *this; }
-  FOG_INLINE Char& operator+=(const char& c) { _value += (uint8_t)c; return *this; }
-  FOG_INLINE Char operator-(const char& c) { return Char(_value - (uint8_t)c); }
-  FOG_INLINE Char operator+(const char& c) { return Char(_value + (uint8_t)c); }
-#endif // FOG_CC_HAVE_STANDARD_CHAR_TYPE
+#if defined(FOG_CC_HAVE_NATIVE_CHAR_TYPE)
+  FOG_INLINE CharW& operator =(const char& c) { _value  = (uint8_t)c; return *this; }
+  FOG_INLINE CharW& operator-=(const char& c) { _value -= (uint8_t)c; return *this; }
+  FOG_INLINE CharW& operator+=(const char& c) { _value += (uint8_t)c; return *this; }
+  FOG_INLINE CharW operator-(const char& c) { return CharW(_value - (uint8_t)c); }
+  FOG_INLINE CharW operator+(const char& c) { return CharW(_value + (uint8_t)c); }
+#endif // FOG_CC_HAVE_NATIVE_CHAR_TYPE
 
-  FOG_INLINE Char& operator =(const signed char& c) { _value  = (uint8_t)c; return *this; }
-  FOG_INLINE Char& operator-=(const signed char& c) { _value -= (uint8_t)c; return *this; }
-  FOG_INLINE Char& operator+=(const signed char& c) { _value += (uint8_t)c; return *this; }
-  FOG_INLINE Char operator-(const signed char& c) { return Char(_value - (uint8_t)c); }
-  FOG_INLINE Char operator+(const signed char& c) { return Char(_value + (uint8_t)c); }
+  FOG_INLINE CharW& operator =(const signed char& c) { _value  = (uint8_t)c; return *this; }
+  FOG_INLINE CharW& operator-=(const signed char& c) { _value -= (uint8_t)c; return *this; }
+  FOG_INLINE CharW& operator+=(const signed char& c) { _value += (uint8_t)c; return *this; }
+  FOG_INLINE CharW operator-(const signed char& c) { return CharW(_value - (uint8_t)c); }
+  FOG_INLINE CharW operator+(const signed char& c) { return CharW(_value + (uint8_t)c); }
 
-  FOG_INLINE Char& operator =(const unsigned char& c) { _value  = c; return *this; }
-  FOG_INLINE Char& operator-=(const unsigned char& c) { _value -= c; return *this; }
-  FOG_INLINE Char& operator+=(const unsigned char& c) { _value += c; return *this; }
-  FOG_INLINE Char operator-(const unsigned char& c) { return Char(_value - c); }
-  FOG_INLINE Char operator+(const unsigned char& c) { return Char(_value + c); }
+  FOG_INLINE CharW& operator =(const unsigned char& c) { _value  = c; return *this; }
+  FOG_INLINE CharW& operator-=(const unsigned char& c) { _value -= c; return *this; }
+  FOG_INLINE CharW& operator+=(const unsigned char& c) { _value += c; return *this; }
+  FOG_INLINE CharW operator-(const unsigned char& c) { return CharW(_value - c); }
+  FOG_INLINE CharW operator+(const unsigned char& c) { return CharW(_value + c); }
 
-  FOG_INLINE Char& operator =(const signed short& c) { _value  = (unsigned short)c; return *this; }
-  FOG_INLINE Char& operator-=(const signed short& c) { _value -= (unsigned short)c; return *this; }
-  FOG_INLINE Char& operator+=(const signed short& c) { _value += (unsigned short)c; return *this; }
-  FOG_INLINE Char operator-(const signed short& c) { return Char(_value - (uint16_t)c); }
-  FOG_INLINE Char operator+(const signed short& c) { return Char(_value + (uint16_t)c); }
+  FOG_INLINE CharW& operator =(const signed short& c) { _value  = (unsigned short)c; return *this; }
+  FOG_INLINE CharW& operator-=(const signed short& c) { _value -= (unsigned short)c; return *this; }
+  FOG_INLINE CharW& operator+=(const signed short& c) { _value += (unsigned short)c; return *this; }
+  FOG_INLINE CharW operator-(const signed short& c) { return CharW(_value - (uint16_t)c); }
+  FOG_INLINE CharW operator+(const signed short& c) { return CharW(_value + (uint16_t)c); }
 
-  FOG_INLINE Char& operator =(const unsigned short& c) { _value  = c; return *this; }
-  FOG_INLINE Char& operator-=(const unsigned short& c) { _value -= c; return *this; }
-  FOG_INLINE Char& operator+=(const unsigned short& c) { _value += c; return *this; }
-  FOG_INLINE Char operator-(const unsigned short& c) { return Char(_value - c); }
-  FOG_INLINE Char operator+(const unsigned short& c) { return Char(_value + c); }
+  FOG_INLINE CharW& operator =(const unsigned short& c) { _value  = c; return *this; }
+  FOG_INLINE CharW& operator-=(const unsigned short& c) { _value -= c; return *this; }
+  FOG_INLINE CharW& operator+=(const unsigned short& c) { _value += c; return *this; }
+  FOG_INLINE CharW operator-(const unsigned short& c) { return CharW(_value - c); }
+  FOG_INLINE CharW operator+(const unsigned short& c) { return CharW(_value + c); }
 
-  FOG_INLINE Char& operator =(const signed int& c) { _value  = (uint16_t)(unsigned int)c; return *this; }
-  FOG_INLINE Char& operator-=(const signed int& c) { _value -= (uint16_t)(unsigned int)c; return *this; }
-  FOG_INLINE Char& operator+=(const signed int& c) { _value += (uint16_t)(unsigned int)c; return *this; }
-  FOG_INLINE Char operator-(const signed int& c) { return Char(_value - (uint16_t)(unsigned int)c); }
-  FOG_INLINE Char operator+(const signed int& c) { return Char(_value + (uint16_t)(unsigned int)c); }
+  FOG_INLINE CharW& operator =(const signed int& c) { _value  = (uint16_t)(unsigned int)c; return *this; }
+  FOG_INLINE CharW& operator-=(const signed int& c) { _value -= (uint16_t)(unsigned int)c; return *this; }
+  FOG_INLINE CharW& operator+=(const signed int& c) { _value += (uint16_t)(unsigned int)c; return *this; }
+  FOG_INLINE CharW operator-(const signed int& c) { return CharW(_value - (uint16_t)(unsigned int)c); }
+  FOG_INLINE CharW operator+(const signed int& c) { return CharW(_value + (uint16_t)(unsigned int)c); }
 
-  FOG_INLINE Char& operator =(const unsigned int& c) { _value  = (uint16_t)c; return *this; }
-  FOG_INLINE Char& operator-=(const unsigned int& c) { _value -= (uint16_t)c; return *this; }
-  FOG_INLINE Char& operator+=(const unsigned int& c) { _value += (uint16_t)c; return *this; }
-  FOG_INLINE Char operator-(const unsigned int& c) { return Char(_value - (uint16_t)c); }
-  FOG_INLINE Char operator+(const unsigned int& c) { return Char(_value + (uint16_t)c); }
+  FOG_INLINE CharW& operator =(const unsigned int& c) { _value  = (uint16_t)c; return *this; }
+  FOG_INLINE CharW& operator-=(const unsigned int& c) { _value -= (uint16_t)c; return *this; }
+  FOG_INLINE CharW& operator+=(const unsigned int& c) { _value += (uint16_t)c; return *this; }
+  FOG_INLINE CharW operator-(const unsigned int& c) { return CharW(_value - (uint16_t)c); }
+  FOG_INLINE CharW operator+(const unsigned int& c) { return CharW(_value + (uint16_t)c); }
 
-  FOG_INLINE bool operator==(const Char& c) { return _value == c._value; }
-  FOG_INLINE bool operator!=(const Char& c) { return _value != c._value; }
-  FOG_INLINE bool operator>=(const Char& c) { return _value >= c._value; }
-  FOG_INLINE bool operator> (const Char& c) { return _value >  c._value; }
-  FOG_INLINE bool operator<=(const Char& c) { return _value <= c._value; }
-  FOG_INLINE bool operator< (const Char& c) { return _value <  c._value; }
+  FOG_INLINE bool operator==(const CharW& c) { return _value == c._value; }
+  FOG_INLINE bool operator!=(const CharW& c) { return _value != c._value; }
+  FOG_INLINE bool operator>=(const CharW& c) { return _value >= c._value; }
+  FOG_INLINE bool operator> (const CharW& c) { return _value >  c._value; }
+  FOG_INLINE bool operator<=(const CharW& c) { return _value <= c._value; }
+  FOG_INLINE bool operator< (const CharW& c) { return _value <  c._value; }
 
-#if defined(FOG_CC_HAVE_STANDARD_CHAR_TYPE)
+#if defined(FOG_CC_HAVE_NATIVE_CHAR_TYPE)
   FOG_INLINE bool operator==(const char& c) { return _value == (uint8_t)c; }
   FOG_INLINE bool operator!=(const char& c) { return _value != (uint8_t)c; }
   FOG_INLINE bool operator>=(const char& c) { return _value >= (uint8_t)c; }
   FOG_INLINE bool operator> (const char& c) { return _value >  (uint8_t)c; }
   FOG_INLINE bool operator<=(const char& c) { return _value <= (uint8_t)c; }
   FOG_INLINE bool operator< (const char& c) { return _value <  (uint8_t)c; }
-#endif // FOG_CC_HAVE_STANDARD_CHAR_TYPE
+#endif // FOG_CC_HAVE_NATIVE_CHAR_TYPE
 
   FOG_INLINE bool operator==(const signed char& c) { return _value == (uint8_t)c; }
   FOG_INLINE bool operator!=(const signed char& c) { return _value != (uint8_t)c; }
@@ -307,11 +533,18 @@ struct FOG_NO_EXPORT Char
   FOG_INLINE operator uint16_t() const { return (uint16_t)_value; }
 
   // --------------------------------------------------------------------------
-  // [Statics]
+  // [Statics - Common]
   // --------------------------------------------------------------------------
 
   static FOG_INLINE bool isNull(uint16_t c) { return c == 0; }
   static FOG_INLINE bool isNull(uint32_t c) { return c == 0; }
+
+  static FOG_INLINE bool isAt(uint16_t c, uint16_t start, uint16_t end) { return (c >= start) & (c <= end); }
+  static FOG_INLINE bool isAt(uint32_t c, uint32_t start, uint32_t end) { return (c >= start) & (c <= end); }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Ascii]
+  // --------------------------------------------------------------------------
 
   static FOG_INLINE bool isAsciiBlank(uint16_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_BLANK) != 0 : false; }
   static FOG_INLINE bool isAsciiBlank(uint32_t c) { return c < 128 ? (_charData.asciiCType[c] & ASCII_CLASS_BLANK) != 0 : false; }
@@ -361,19 +594,23 @@ struct FOG_NO_EXPORT Char
   static FOG_INLINE uint16_t toAsciiUpper(uint16_t c) { return c < 128 ? (uint16_t)_charData.asciiToUpper[c] : c; }
   static FOG_INLINE uint32_t toAsciiUpper(uint32_t c) { return c < 128 ? (uint16_t)_charData.asciiToUpper[c] : c; }
 
+  // --------------------------------------------------------------------------
+  // [Statics - Unicode]
+  // --------------------------------------------------------------------------
+
   static FOG_INLINE const CharProperty& getProperty(uint16_t c) { return _charData.getPropertyUCS2(c); }
   static FOG_INLINE const CharProperty& getProperty(uint32_t c) { return _charData.getPropertyUCS2(c); }
 
   static FOG_INLINE bool isCategoryAt(uint16_t c, uint32_t first, uint32_t last)
   {
     FOG_ASSERT(first <= last);
-    return getCategory(c) - first <= last - first; 
+    return getCategory(c) - first <= last - first;
   }
 
   static FOG_INLINE bool isCategoryAt(uint32_t c, uint32_t first, uint32_t last)
   {
     FOG_ASSERT(first <= last);
-    return getCategory(c) - first <= last - first; 
+    return getCategory(c) - first <= last - first;
   }
 
   static FOG_INLINE bool isControl(uint16_t c) { return isCategoryAt(c, CHAR_CATEGORY_CC, CHAR_CATEGORY_CN); }
@@ -599,7 +836,7 @@ struct FOG_NO_EXPORT Char
     if (p.getMappingType() != CHAR_MAPPING_SPECIAL)
       return c;
 
-    int32_t x = (int32_t)c + _charData.special[x]._titleCaseDiff;
+    int32_t x = (int32_t)c + _charData.special[p.getMappingData()]._titleCaseDiff;
     FOG_ASSUME(x >= 0 && x < 0x10000);
 
     return (uint16_t)x;
@@ -611,7 +848,7 @@ struct FOG_NO_EXPORT Char
     if (p.getMappingType() != CHAR_MAPPING_SPECIAL)
       return c;
 
-    int32_t x = (int32_t)c + _charData.special[x]._titleCaseDiff;
+    int32_t x = (int32_t)c + _charData.special[p.getMappingData()]._titleCaseDiff;
     FOG_ASSUME(x >= 0);
 
     return (uint32_t)x;
@@ -672,7 +909,7 @@ struct FOG_NO_EXPORT Char
     *lo = 0xDC00 + (ucs4 & 0x03FFU);
   }
 
-  static FOG_INLINE void ucs4ToSurrogate(Char* hi, Char* lo, uint32_t ucs4)
+  static FOG_INLINE void ucs4ToSurrogate(CharW* hi, CharW* lo, uint32_t ucs4)
   {
     ucs4ToSurrogate(&hi->_value, &lo->_value, ucs4);
   }
@@ -688,16 +925,26 @@ struct FOG_NO_EXPORT Char
   //! @brief 16-bit character value.
   uint16_t _value;
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
+
+// ============================================================================
+// [Fog::CharT<>]
+// ============================================================================
+
+_FOG_CHAR_T(Char)
+_FOG_CHAR_A(Char)
+_FOG_CHAR_W(Char)
+
+// Internal.
+typedef CharA _CharA;
+typedef CharW _CharW;
+
+_FOG_CHAR_T(_Char)
+_FOG_CHAR_A(_Char)
+_FOG_CHAR_W(_Char)
 
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::Char, Fog::TYPEINFO_PRIMITIVE)
 
 #endif // _FOG_CORE_TOOLS_CHAR_H

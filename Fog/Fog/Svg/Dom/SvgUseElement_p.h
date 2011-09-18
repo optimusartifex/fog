@@ -54,7 +54,7 @@ struct FOG_NO_EXPORT SvgUseElement : public SvgStyledElement
   SvgCoordAttribute a_y;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgUseElement)
+  _FOG_NO_COPY(SvgUseElement)
 };
 
 //! @}

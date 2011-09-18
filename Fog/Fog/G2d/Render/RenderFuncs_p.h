@@ -22,9 +22,8 @@ namespace Fog {
 // Fog/G2d/Painting.
 struct RasterSpan;
 
-// Fog/G2d/Render.
 typedef ImageConverterClosure RenderClosure;
-union  RenderSolid;
+union RenderSolid;
 struct RenderPatternContext;
 struct RenderPatternFetcher;
 
@@ -33,15 +32,15 @@ struct RenderPatternFetcher;
 // ============================================================================
 
 //! @internal
-typedef err_t (FOG_FASTCALL *RenderConverterInitFn)(
+typedef err_t (FOG_FASTCALL *RenderConverterInitFunc)(
   ImageConverterData* d);
 
 //! @internal
-typedef void (FOG_FASTCALL *RenderConverterDestroyFn)(
+typedef void (FOG_FASTCALL *RenderConverterDestroyFunc)(
   ImageConverterData* d);
 
 //! @internal
-typedef void (FOG_FASTCALL *RenderConverterSpanFn)(
+typedef void (FOG_FASTCALL *RenderConverterSpanFunc)(
   uint8_t* dst,
   const RenderSolid* src,
   int w,
@@ -52,21 +51,21 @@ typedef void (FOG_FASTCALL *RenderConverterSpanFn)(
 // ============================================================================
 
 //! @internal
-typedef void (FOG_FASTCALL *RenderCBlitRectFn)(
-  uint8_t* dst, sysint_t dstStride,
+typedef void (FOG_FASTCALL *RenderCBlitRectFunc)(
+  uint8_t* dst, ssize_t dstStride,
   const RenderSolid* src,
   int w, int h,
   const RenderClosure* closure);
 
 //! @internal
-typedef void (FOG_FASTCALL *RenderCBlitLineFn)(
+typedef void (FOG_FASTCALL *RenderCBlitLineFunc)(
   uint8_t* dst,
   const RenderSolid* src,
   int w,
   const RenderClosure* closure);
 
 //! @internal
-typedef void (FOG_FASTCALL *RenderCBlitSpanFn)(
+typedef void (FOG_FASTCALL *RenderCBlitSpanFunc)(
   uint8_t* dst,
   const RenderSolid* src,
   const RasterSpan* span,
@@ -77,21 +76,21 @@ typedef void (FOG_FASTCALL *RenderCBlitSpanFn)(
 // ============================================================================
 
 //! @internal
-typedef void (FOG_FASTCALL *RenderVBlitRectFn)(
-  uint8_t* dst, sysint_t dstStride,
-  const uint8_t* src, sysint_t srcStride,
+typedef void (FOG_FASTCALL *RenderVBlitRectFunc)(
+  uint8_t* dst, ssize_t dstStride,
+  const uint8_t* src, ssize_t srcStride,
   int w, int h,
   const RenderClosure* closure);
 
 //! @internal
-typedef void (FOG_FASTCALL *RenderVBlitLineFn)(
+typedef void (FOG_FASTCALL *RenderVBlitLineFunc)(
   uint8_t* dst,
   const uint8_t* src,
   int w,
   const RenderClosure* closure);
 
 //! @internal
-typedef void (FOG_FASTCALL *RenderVBlitSpanFn)(
+typedef void (FOG_FASTCALL *RenderVBlitSpanFunc)(
   uint8_t* dst,
   const RasterSpan* span,
   const RenderClosure* closure);
@@ -101,15 +100,15 @@ typedef void (FOG_FASTCALL *RenderVBlitSpanFn)(
 // ============================================================================
 
 //! @internal
-typedef void (FOG_FASTCALL *RasterMaskCOpVFn)(
+typedef void (FOG_FASTCALL *RasterMaskCOpVFunc)(
   uint8_t* dst, uint32_t a, const uint8_t* b, int w);
 
 //! @internal
-typedef void (FOG_FASTCALL *RasterMaskVOpCFn)(
+typedef void (FOG_FASTCALL *RasterMaskVOpCFunc)(
   uint8_t* dst, const uint8_t* a, uint32_t b, int w);
 
 //! @internal
-typedef void (FOG_FASTCALL *RasterMaskVOpVFn)(
+typedef void (FOG_FASTCALL *RasterMaskVOpVFunc)(
   uint8_t* dst, const uint8_t* a, const uint8_t* b, int w);
 
 // ============================================================================
@@ -117,19 +116,19 @@ typedef void (FOG_FASTCALL *RasterMaskVOpVFn)(
 // ============================================================================
 
 //! @internal
-typedef err_t (FOG_FASTCALL *RenderPatternSolidCreateFn)(
+typedef err_t (FOG_FASTCALL *RenderPatternSolidCreateFunc)(
   RenderPatternContext* ctx, uint32_t dstFormat,
   const RenderSolid& solid);
 
 //! @internal
-typedef err_t (FOG_FASTCALL *RenderPatternTextureCreateFn)(
+typedef err_t (FOG_FASTCALL *RenderPatternTextureCreateFunc)(
   RenderPatternContext* ctx, uint32_t dstFormat, const BoxI& boundingBox,
   const Image& srcImage, const RectI& srcFragment, const TransformD& tr,
   const Color& clampColor, uint32_t tileMode,
   uint32_t imageQuality);
 
 //! @internal
-typedef err_t (FOG_FASTCALL *RenderPatternGradientCreateFn)(
+typedef err_t (FOG_FASTCALL *RenderPatternGradientCreateFunc)(
   RenderPatternContext* ctx, uint32_t dstFormat, const BoxI& boundingBox,
   const GradientD& gradient, const TransformD& tr,
   uint32_t gradientQuality);
@@ -139,7 +138,7 @@ typedef err_t (FOG_FASTCALL *RenderPatternGradientCreateFn)(
 // ============================================================================
 
 //! @internal
-typedef void (FOG_FASTCALL *RenderPatternGradientInterpolateFn)(
+typedef void (FOG_FASTCALL *RenderPatternGradientInterpolateFunc)(
   uint8_t* dst, int w, const ColorStop* stops, size_t length);
 
 // ============================================================================
@@ -147,7 +146,7 @@ typedef void (FOG_FASTCALL *RenderPatternGradientInterpolateFn)(
 // ============================================================================
 
 //! @internal
-typedef void (FOG_FASTCALL *RenderPatternDestroyFn)(
+typedef void (FOG_FASTCALL *RenderPatternDestroyFunc)(
   RenderPatternContext* ctx);
 
 // ============================================================================
@@ -155,7 +154,7 @@ typedef void (FOG_FASTCALL *RenderPatternDestroyFn)(
 // ============================================================================
 
 //! @internal
-typedef void (FOG_FASTCALL *RenderPatternPrepareFn)(
+typedef void (FOG_FASTCALL *RenderPatternPrepareFunc)(
   const RenderPatternContext* ctx,
   RenderPatternFetcher* fetcher, int y, int delta, uint32_t mode);
 
@@ -164,11 +163,11 @@ typedef void (FOG_FASTCALL *RenderPatternPrepareFn)(
 // ============================================================================
 
 //! @internal
-typedef void (FOG_FASTCALL *RenderPatternFetchFn)(
+typedef void (FOG_FASTCALL *RenderPatternFetchFunc)(
   RenderPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer);
 
 //! @internal
-typedef void (FOG_FASTCALL *RenderPatternSkipFn)(
+typedef void (FOG_FASTCALL *RenderPatternSkipFunc)(
   RenderPatternFetcher* fetcher, int step);
 
 

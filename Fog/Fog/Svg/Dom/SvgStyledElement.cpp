@@ -38,13 +38,13 @@ static int svgStyleToId(const ManagedString& name)
   return i;
 }
 
-static Utf16 parseCssLinkId(const String& url)
+static StubW parseCssLinkId(const StringW& url)
 {
-  const Char* idStr;
-  const Char* idEnd;
-  const Char* idMark;
+  const CharW* idStr;
+  const CharW* idEnd;
+  const CharW* idMark;
 
-  Char quot;
+  CharW quot;
 
   if (url.getLength() < 7) goto _Bail;
 
@@ -56,18 +56,18 @@ static Utf16 parseCssLinkId(const String& url)
 
   // Detect quot, if used.
   quot = idStr[0];
-  if (quot == Char('\"') || quot == Char('\''))
+  if (quot == CharW('\"') || quot == CharW('\''))
   {
     idStr++;
     idEnd--;
   }
   else
   {
-    quot = Char(')');
+    quot = CharW(')');
   }
 
   // Invalid ID.
-  if (idStr + 1 >= idEnd || idStr[0] != Char('#')) goto _Bail;
+  if (idStr + 1 >= idEnd || idStr[0] != CharW('#')) goto _Bail;
   idStr++;
 
   while (idStr->isSpace())
@@ -80,10 +80,10 @@ static Utf16 parseCssLinkId(const String& url)
   {
     if (++idStr == idEnd) goto _Bail;
   }
-  return Utf16(idMark, (size_t)(idStr - idMark));
+  return StubW(idMark, (size_t)(idStr - idMark));
 
 _Bail:
-  return Utf16((const Char*)NULL, 0);
+  return StubW((const CharW*)NULL, 0);
 }
 
 // ============================================================================
@@ -114,7 +114,7 @@ XmlAttribute* SvgStyledElement::_createAttribute(const ManagedString& name) cons
   return base::_createAttribute(name);
 }
 
-err_t SvgStyledElement::_setAttribute(const ManagedString& name, const String& value)
+err_t SvgStyledElement::_setAttribute(const ManagedString& name, const StringW& value)
 {
   // Add css-style instead of attribute.
   int id = svgStyleToId(name);
@@ -167,7 +167,7 @@ err_t SvgStyledElement::onPrepare(SvgVisitor* visitor, SvgGState* state) const
     {
       if (state) state->saveFont();
 
-      String family = visitor->_font.getFamily();
+      StringW family = visitor->_font.getFamily();
       float size = visitor->_font.getHeight();
 
       if (styleMask & (1 << SVG_STYLE_FONT_FAMILY))
@@ -302,10 +302,10 @@ err_t SvgStyledElement::onPrepare(SvgVisitor* visitor, SvgGState* state) const
   return ERR_OK;
 }
 
-String SvgStyledElement::getStyle(const String& name) const
+StringW SvgStyledElement::getStyle(const StringW& name) const
 {
   ManagedString managedName;
-  String result;
+  StringW result;
   int id;
 
   if (managedName.setIfManaged(name) == ERR_OK &&
@@ -317,7 +317,7 @@ String SvgStyledElement::getStyle(const String& name) const
   return result;
 }
 
-err_t SvgStyledElement::setStyle(const String& name, const String& value)
+err_t SvgStyledElement::setStyle(const StringW& name, const StringW& value)
 {
   ManagedString managedName;
   err_t err = ERR_SVG_INVALID_STYLE_NAME;

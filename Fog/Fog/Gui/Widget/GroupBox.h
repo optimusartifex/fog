@@ -36,8 +36,8 @@ struct FOG_API GroupBox : public Widget
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const String& getLabel() const { return _label; }
-  void setLabel(const String& label);
+  FOG_INLINE const StringW& getLabel() const { return _label; }
+  void setLabel(const StringW& label);
 
   // --------------------------------------------------------------------------
   // [Client Geometry]
@@ -50,7 +50,7 @@ struct FOG_API GroupBox : public Widget
   // [Members]
   // --------------------------------------------------------------------------
 
-  String _label;
+  StringW _label;
 };
 
 //! @}

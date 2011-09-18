@@ -9,13 +9,14 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Constants.h>
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Memory/BSwap.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemOps.h>
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Tools/Var.h>
 #include <Fog/G2d/Imaging/Codecs/BmpCodec_p.h>
 #include <Fog/G2d/Imaging/Codecs/IcoCodec_p.h>
 #include <Fog/G2d/Imaging/Image.h>
@@ -133,7 +134,7 @@ void IcoDecoder::reset()
 {
   ImageDecoder::reset();
 
-  if (_framesInfo) Memory::free(_framesInfo);
+  if (_framesInfo) MemMgr::free(_framesInfo);
 
   _framesInfo = NULL;
 }
@@ -182,7 +183,7 @@ err_t IcoDecoder::readHeader()
 
     size_t memSize = _framesCount * sizeof(IcoEntry);
 
-    _framesInfo = (IcoEntry*)Memory::alloc(memSize);
+    _framesInfo = (IcoEntry*)MemMgr::alloc(memSize);
     if (_framesInfo == NULL)
     {
       return (_headerResult = ERR_RT_OUT_OF_MEMORY);
@@ -190,7 +191,7 @@ err_t IcoDecoder::readHeader()
 
     if (getStream().read(_framesInfo, memSize) != memSize)
     {
-      Memory::free(_framesInfo);
+      MemMgr::free(_framesInfo);
       _framesInfo = NULL;
       _framesCount = 0;
       return (_headerResult = ERR_IMAGE_TRUNCATED);
@@ -211,7 +212,7 @@ err_t IcoDecoder::readHeader()
 
       if (currentEntry->offset < _currentOffset || currentEntry->size == 0)
       {
-        Memory::free(_framesInfo);
+        MemMgr::free(_framesInfo);
         _framesInfo = NULL;
         _framesCount = 0;
         return (_headerResult = ERR_IMAGE_MALFORMED_HEADER);
@@ -268,7 +269,7 @@ err_t IcoDecoder::readImage(Image& image)
     if (FOG_IS_ERROR(err)) goto _End;
 
     decoder->attachStream(_stream);
-    decoder->setProperty(fog_strings->getString(STR_G2D_CODEC_skipFileHeader), Value::fromInt32(1));
+    decoder->setProperty(fog_strings->getString(STR_G2D_CODEC_skipFileHeader), Var::fromInteger(1));
 
     if ((err = decoder->readHeader()) == ERR_OK)
     {

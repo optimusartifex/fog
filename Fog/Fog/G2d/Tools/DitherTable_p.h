@@ -8,7 +8,7 @@
 #define _FOG_G2D_TOOLS_DITHERTABLE_P_H
 
 // [Dependencies]
-#include <Fog/Core/Config/Config.h>
+#include <Fog/Core/C++/Base.h>
 
 namespace Fog {
 

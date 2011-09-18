@@ -11,11 +11,6 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Threading/Atomic.h>
 
-// [Dependencies - Windows]
-#if defined(FOG_OS_WINDOWS)
-#include <windows.h>
-#endif // FOG_OS_WINDOWS
-
 // [Dependencies - Posix]
 #if defined(FOG_OS_POSIX)
 #include <pthread.h>
@@ -155,7 +150,7 @@ private:
     CVEvent* _next;
     CVEvent* _prev;
 
-    _FOG_CLASS_NO_COPY(CVEvent)
+    _FOG_NO_COPY(CVEvent)
   };
 
   //! @brief States
@@ -192,7 +187,7 @@ private:
   pthread_mutex_t* _userMutex;
 #endif // FOG_OS_POSIX
 
-  _FOG_CLASS_NO_COPY(ThreadCondition)
+  _FOG_NO_COPY(ThreadCondition)
 };
 
 //! @}

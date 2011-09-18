@@ -19,7 +19,7 @@ namespace Fog {
 // [Fog::SvgCoord]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 struct FOG_NO_EXPORT SvgCoord
 {
   FOG_INLINE SvgCoord() {}
@@ -28,7 +28,7 @@ struct FOG_NO_EXPORT SvgCoord
   float value;
   uint32_t unit;
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 //! @}
 
@@ -38,7 +38,7 @@ struct FOG_NO_EXPORT SvgCoord
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-_FOG_TYPEINFO_DECLARE(Fog::SvgCoord, Fog::TYPEINFO_PRIMITIVE)
+_FOG_TYPE_DECLARE(Fog::SvgCoord, Fog::TYPE_CATEGORY_SIMPLE)
 
 // [Guard]
 #endif // _FOG_SVG_TOOLS_SVGCOORD_H

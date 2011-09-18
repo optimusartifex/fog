@@ -25,20 +25,16 @@ FOG_CAPI_DECLARE void _fog_init(void)
   if (++_fog_init_counter != 1)
     return;
 
-  // [Core/Cpu]
+  // [Core/Tools]
   Cpu_init();
 
   // [Core/Threading]
   Lock_init(),
 
-  // [Core/Error]
-  Error_init();
-
   // [Core/Memory]
-  MemoryOps_init();              // Depends on Cpu.
-  MemoryAlloc_init();
-  MemoryCleanup_init();
-  MemoryManager_init();
+  MemOps_init();                 // Depends on Cpu.
+  MemMgr_init();
+  MemPool_init();
 
   // [Core/Threading]
   ThreadLocal_init();
@@ -46,43 +42,44 @@ FOG_CAPI_DECLARE void _fog_init(void)
   // [Core/Math]
   Math_init();                   // Depends on Cpu.
 
-  // [Core/DateTime]
-  Time_init();                   // Depends on Lock.
-  Date_init();
-
-  // [Core/Collection]
-  List_init();
-  Hash_init();
-
   // [Core/Tools]
-  ByteArray_init();
   String_init();
+  Var_init();
+  RegExp_init();
+
+  HashUtil_init();
+  Hash_init();
+  List_init();
+
+  StringUtil_init();
+  StringUtil_init_dtoa();
+
   TextCodec_init();
   ManagedString_init();          // Depends on String and Lock.
   Strings_init();                // Depends on StringCache.
   Locale_init();                 // Depends on TextCodec.
 
-  // [Core/Variant]
-  Var_init();
-
-  // [Core/Library]
-  Library_init();
+  Time_init();                   // Depends on Lock.
+  Date_init();
 
   // [Core/OS]
-  OS_init();                     // Depends on String and TextCodec.
+  Library_init();
+  System_init();
 
   // [Core/Streaming]
+  DirEntry_init();
+  DirIterator_init();
   Stream_init();
 
   // [Core/Threading]
   Thread_init();
   ThreadPool_init();
 
-  // [Core/Object]
-  Object_init();                 // Depends on String.
-
-  // [Core/Xml
+  // [Core/Xml]
   XmlEntity_init();
+
+  // [Core/Kernel]
+  Object_init();                 // Depends on String.
 
   // [Core/Application]
   Application_init();
@@ -103,10 +100,13 @@ FOG_CAPI_DECLARE void _fog_init(void)
 
   Transform_init();
   PathClipper_init();
+  PathStroker_init();
+  PathInfo_init();
 
   // [G2d/Tools]
-  Region_init();
   Matrix_init();
+  Region_init();
+  RegionUtil_init();
 
   // [G2d/Painting]
   Rasterizer_init();
@@ -156,7 +156,7 @@ FOG_CAPI_DECLARE void _fog_fini(void)
   // [Core/Application]
   Application_fini();
 
-  // [Core/Object]
+  // [Core/Kernel]
   Object_fini();
 
   // [Core/Threading]
@@ -167,15 +167,10 @@ FOG_CAPI_DECLARE void _fog_fini(void)
   Stream_fini();
 
   // [Core/OS]
-  OS_fini();
-
-  // [Core/Library]
   Library_fini();
 
-  // [Core/Variant]
-  Var_fini();
-
   // [Core/Tools]
+  Locale_fini();
   ManagedString_fini();
   TextCodec_fini();
 
@@ -183,7 +178,7 @@ FOG_CAPI_DECLARE void _fog_fini(void)
   ThreadLocal_fini();
 
   // [Core/Memory]
-  MemoryAlloc_fini();
+  MemMgr_fini();
 }
 
 // ============================================================================

@@ -29,7 +29,7 @@ GroupBox::~GroupBox()
 {
 }
 
-void GroupBox::setLabel(const String& label)
+void GroupBox::setLabel(const StringW& label)
 {
   _label = label;
   update(WIDGET_UPDATE_NCPAINT);

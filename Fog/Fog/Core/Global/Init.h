@@ -8,7 +8,7 @@
 #define _FOG_CORE_GLOBAL_INIT_H
 
 // [Dependencies]
-#include <Fog/Core/Config/Config.h>
+#include <Fog/Core/C++/Base.h>
 
 //! @addtogroup Fog_Core_Global
 //! @{

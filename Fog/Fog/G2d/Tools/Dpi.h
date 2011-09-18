@@ -102,11 +102,5 @@ struct FOG_API Dpi
 
 } // Fog namespace
 
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::Dpi, Fog::TYPEINFO_PRIMITIVE)
-
 // [Guard]
 #endif // _FOG_G2D_TOOLS_DPI_H

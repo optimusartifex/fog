@@ -39,6 +39,11 @@ XmlAttribute* SvgPathElement::_createAttribute(const ManagedString& name) const
 
 err_t SvgPathElement::onProcess(SvgVisitor* visitor) const
 {
+  if (_unused)
+  {
+    printf("A");
+  }
+
   if (!a_d.isAssigned()) return ERR_OK;
 
   const PathF& path = a_d.getPath();

@@ -8,7 +8,7 @@
 #define _FOG_G2D_PAINTING_PAINTENGINE_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/List.h>
+#include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Geometry/PathStroker.h>
@@ -75,6 +75,7 @@ struct FOG_NO_EXPORT PaintEngineVTable
   typedef err_t (FOG_CDECL *GetSourcePatternF)(const Painter* self, PatternF& pattern);
   typedef err_t (FOG_CDECL *GetSourcePatternD)(const Painter* self, PatternD& pattern);
 
+  typedef err_t (FOG_CDECL *SetSourceNone)(Painter* self);
   typedef err_t (FOG_CDECL *SetSourceArgb32)(Painter* self, uint32_t argb32);
   typedef err_t (FOG_CDECL *SetSourceArgb64)(Painter* self, const Argb64& argb64);
   typedef err_t (FOG_CDECL *SetSourceColor)(Painter* self, const Color& color);
@@ -91,6 +92,7 @@ struct FOG_NO_EXPORT PaintEngineVTable
   GetSourcePatternF getSourcePatternF;
   GetSourcePatternD getSourcePatternD;
 
+  SetSourceNone setSourceNone;
   SetSourceArgb32 setSourceArgb32;
   SetSourceArgb64 setSourceArgb64;
   SetSourceColor setSourceColor;
@@ -184,13 +186,13 @@ struct FOG_NO_EXPORT PaintEngineVTable
   typedef err_t (FOG_CDECL *PaintPathF)(Painter* self, const PathF& p);
   typedef err_t (FOG_CDECL *PaintPathD)(Painter* self, const PathD& p);
 
-  typedef err_t (FOG_CDECL *PaintTextAtI)(Painter* self, const PointI& p, const String& text, const Font& font, const RectI* clip);
-  typedef err_t (FOG_CDECL *PaintTextAtF)(Painter* self, const PointF& p, const String& text, const Font& font, const RectF* clip);
-  typedef err_t (FOG_CDECL *PaintTextAtD)(Painter* self, const PointD& p, const String& text, const Font& font, const RectD* clip);
+  typedef err_t (FOG_CDECL *PaintTextAtI)(Painter* self, const PointI& p, const StringW& text, const Font& font, const RectI* clip);
+  typedef err_t (FOG_CDECL *PaintTextAtF)(Painter* self, const PointF& p, const StringW& text, const Font& font, const RectF* clip);
+  typedef err_t (FOG_CDECL *PaintTextAtD)(Painter* self, const PointD& p, const StringW& text, const Font& font, const RectD* clip);
 
-  typedef err_t (FOG_CDECL *PaintTextInI)(Painter* self, const TextRectI& r, const String& text, const Font& font, const RectI* clip);
-  typedef err_t (FOG_CDECL *PaintTextInF)(Painter* self, const TextRectF& r, const String& text, const Font& font, const RectF* clip);
-  typedef err_t (FOG_CDECL *PaintTextInD)(Painter* self, const TextRectD& r, const String& text, const Font& font, const RectD* clip);
+  typedef err_t (FOG_CDECL *PaintTextInI)(Painter* self, const TextRectI& r, const StringW& text, const Font& font, const RectI* clip);
+  typedef err_t (FOG_CDECL *PaintTextInF)(Painter* self, const TextRectF& r, const StringW& text, const Font& font, const RectF* clip);
+  typedef err_t (FOG_CDECL *PaintTextInD)(Painter* self, const TextRectD& r, const StringW& text, const Font& font, const RectD* clip);
 
   typedef err_t (FOG_CDECL *PaintMaskAtI)(Painter* self, const PointI& p, const Image& m, const RectI* mr);
   typedef err_t (FOG_CDECL *PaintMaskAtF)(Painter* self, const PointF& p, const Image& m, const RectI* mr);
@@ -328,13 +330,13 @@ struct FOG_NO_EXPORT PaintEngineVTable
   typedef err_t (FOG_CDECL *ClipPathF)(Painter* self, uint32_t clipOp, const PathF& p);
   typedef err_t (FOG_CDECL *ClipPathD)(Painter* self, uint32_t clipOp, const PathD& p);
 
-  typedef err_t (FOG_CDECL *ClipTextAtI)(Painter* self, uint32_t clipOp, const PointI& p, const String& text, const Font& font, const RectI* clip);
-  typedef err_t (FOG_CDECL *ClipTextAtF)(Painter* self, uint32_t clipOp, const PointF& p, const String& text, const Font& font, const RectF* clip);
-  typedef err_t (FOG_CDECL *ClipTextAtD)(Painter* self, uint32_t clipOp, const PointD& p, const String& text, const Font& font, const RectD* clip);
+  typedef err_t (FOG_CDECL *ClipTextAtI)(Painter* self, uint32_t clipOp, const PointI& p, const StringW& text, const Font& font, const RectI* clip);
+  typedef err_t (FOG_CDECL *ClipTextAtF)(Painter* self, uint32_t clipOp, const PointF& p, const StringW& text, const Font& font, const RectF* clip);
+  typedef err_t (FOG_CDECL *ClipTextAtD)(Painter* self, uint32_t clipOp, const PointD& p, const StringW& text, const Font& font, const RectD* clip);
 
-  typedef err_t (FOG_CDECL *ClipTextInI)(Painter* self, uint32_t clipOp, const TextRectI& r, const String& text, const Font& font, const RectI* clip);
-  typedef err_t (FOG_CDECL *ClipTextInF)(Painter* self, uint32_t clipOp, const TextRectF& r, const String& text, const Font& font, const RectF* clip);
-  typedef err_t (FOG_CDECL *ClipTextInD)(Painter* self, uint32_t clipOp, const TextRectD& r, const String& text, const Font& font, const RectD* clip);
+  typedef err_t (FOG_CDECL *ClipTextInI)(Painter* self, uint32_t clipOp, const TextRectI& r, const StringW& text, const Font& font, const RectI* clip);
+  typedef err_t (FOG_CDECL *ClipTextInF)(Painter* self, uint32_t clipOp, const TextRectF& r, const StringW& text, const Font& font, const RectF* clip);
+  typedef err_t (FOG_CDECL *ClipTextInD)(Painter* self, uint32_t clipOp, const TextRectD& r, const StringW& text, const Font& font, const RectD* clip);
 
   typedef err_t (FOG_CDECL *ClipMaskAtI)(Painter* self, uint32_t clipOp, const PointI& p, const Image& m, const RectI* mr);
   typedef err_t (FOG_CDECL *ClipMaskAtF)(Painter* self, uint32_t clipOp, const PointF& p, const Image& m, const RectI* mr);

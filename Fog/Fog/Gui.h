@@ -15,11 +15,10 @@
 // [Fog-Gui]
 // ============================================================================
 
-#include <Fog/Core/Config/Config.h>
+#include <Fog/Core/Global/Global.h>
 
 #include <Fog/Gui/Animation/Animation.h>
 #include <Fog/Gui/Engine/GuiEngine.h>
-#include <Fog/Gui/Global/Constants.h>
 #include <Fog/Gui/Layout/BorderLayout.h>
 #include <Fog/Gui/Layout/BoxLayout.h>
 #include <Fog/Gui/Layout/FlowLayout.h>

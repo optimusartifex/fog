@@ -86,25 +86,25 @@ struct FOG_NO_EXPORT PathClipperF
   //! @retval @true The path must be clipped, the function continuePath should
   //! be called to clip it.
   //! @retval @false The path do not need to be clipped.
-  FOG_INLINE uint32_t initPath(const PathF& src)
+  FOG_INLINE uint32_t measurePath(const PathF& src)
   {
-    return _api.pathclipperf.initPath(*this, src);
+    return _api.pathclipperf.measurePath(this, &src);
   }
 
   //! @brief Continue with the clipping using the info collected by
-  //! @c initPath() method. The path @a src must be the same as used by
-  //! @c initPath() method.
+  //! @c measurePath() method. The path @a src must be the same as used by
+  //! @c measurePath() method.
   //!
-  //! @note Calling this function without calling @c initPath() will cause
+  //! @note Calling this function without calling @c measurePath() will cause
   //! the @c ERR_RT_INVALID_STATE error.
   FOG_INLINE err_t continuePath(PathF& dst, const PathF& src)
   {
-    return _api.pathclipperf.continuePath(*this, dst, src);
+    return _api.pathclipperf.continuePath(this, &dst, &src);
   }
 
-  FOG_INLINE err_t continueRaw(PathF& dst, const PointF* srcPts, const uint8_t* srcCmd, size_t srcLength)
+  FOG_INLINE err_t continuePathData(PathF& dst, const PointF* srcPts, const uint8_t* srcCmd, size_t srcLength)
   {
-    return _api.pathclipperf.continueRaw(*this, dst, srcPts, srcCmd, srcLength);
+    return _api.pathclipperf.continuePathData(this, &dst, srcPts, srcCmd, srcLength);
   }
 
   FOG_INLINE void resetPath()
@@ -115,13 +115,13 @@ struct FOG_NO_EXPORT PathClipperF
   //! @brief Clip path @a src to @a dst.
   FOG_INLINE err_t clipPath(PathF& dst, const PathF& src)
   {
-    return _api.pathclipperf.clipPath(*this, dst, src, NULL);
+    return _api.pathclipperf.clipPath(this, &dst, &src, NULL);
   }
 
   //! @brief Clip transformed path @a src to @a dst.
   FOG_INLINE err_t clipPath(PathF& dst, const PathF& src, const TransformF& tr)
   {
-    return _api.pathclipperf.clipPath(*this, dst, src, &tr);
+    return _api.pathclipperf.clipPath(this, &dst, &src, &tr);
   }
 
   // --------------------------------------------------------------------------
@@ -212,25 +212,25 @@ struct FOG_NO_EXPORT PathClipperD
   //! @retval @true The path must be clipped, the function continuePath should
   //! be called to clip it.
   //! @retval @false The path do not need to be clipped.
-  FOG_INLINE uint32_t initPath(const PathD& src)
+  FOG_INLINE uint32_t measurePath(const PathD& src)
   {
-    return _api.pathclipperd.initPath(*this, src);
+    return _api.pathclipperd.measurePath(this, &src);
   }
 
   //! @brief Continue with the clipping using the info collected by
-  //! @c initPath() method. The path @a src must be the same as used by
-  //! @c initPath() method.
+  //! @c measurePath() method. The path @a src must be the same as used by
+  //! @c measurePath() method.
   //!
-  //! @note Calling this function without calling @c initPath() will cause
+  //! @note Calling this function without calling @c measurePath() will cause
   //! the @c ERR_RT_INVALID_STATE error.
   FOG_INLINE err_t continuePath(PathD& dst, const PathD& src)
   {
-    return _api.pathclipperd.continuePath(*this, dst, src);
+    return _api.pathclipperd.continuePath(this, &dst, &src);
   }
 
-  FOG_INLINE err_t continueRaw(PathD& dst, const PointD* srcPts, const uint8_t* srcCmd, size_t srcLength)
+  FOG_INLINE err_t continuePathData(PathD& dst, const PointD* srcPts, const uint8_t* srcCmd, size_t srcLength)
   {
-    return _api.pathclipperd.continueRaw(*this, dst, srcPts, srcCmd, srcLength);
+    return _api.pathclipperd.continuePathData(this, &dst, srcPts, srcCmd, srcLength);
   }
 
   FOG_INLINE void resetPath()
@@ -241,13 +241,13 @@ struct FOG_NO_EXPORT PathClipperD
   //! @brief Clip path @a src to @a dst.
   FOG_INLINE err_t clipPath(PathD& dst, const PathD& src)
   {
-    return _api.pathclipperd.clipPath(*this, dst, src, NULL);
+    return _api.pathclipperd.clipPath(this, &dst, &src, NULL);
   }
 
   //! @brief Clip transformed path @a src to @a dst.
   FOG_INLINE err_t clipPath(PathD& dst, const PathD& src, const TransformD& tr)
   {
-    return _api.pathclipperd.clipPath(*this, dst, src, &tr);
+    return _api.pathclipperd.clipPath(this, &dst, &src, &tr);
   }
 
   // --------------------------------------------------------------------------
@@ -276,18 +276,13 @@ struct FOG_NO_EXPORT PathClipperD
 // [Fog::PathClipperT<>]
 // ============================================================================
 
-FOG_CLASS_PRECISION_F_D(PathClipper)
+_FOG_NUM_T(PathClipper)
+_FOG_NUM_F(PathClipper)
+_FOG_NUM_D(PathClipper)
 
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::PathClipperF, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::PathClipperD, Fog::TYPEINFO_PRIMITIVE)
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_PATHCLIPPER_H

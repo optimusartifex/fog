@@ -34,10 +34,10 @@ struct FOG_API FTFontProviderData : public FontProviderData
   // [Interface]
   // --------------------------------------------------------------------------
 
-  virtual err_t getFontFace(FontFace** dst, const String& fontFamily);
-  virtual err_t getFontList(List<String>& dst);
+  virtual err_t getFontFace(FontFace** dst, const StringW& fontFamily);
+  virtual err_t getFontList(List<StringW>& dst);
 
-  virtual String getDefaultFamily();
+  virtual StringW getDefaultFamily();
 
   // --------------------------------------------------------------------------
   // [Statics]
@@ -50,7 +50,7 @@ struct FOG_API FTFontProviderData : public FontProviderData
   FontFaceCache fontFaceCache;
 
 private:
-  _FOG_CLASS_NO_COPY(FTFontProviderData)
+  _FOG_NO_COPY(FTFontProviderData)
 };
 
 //! @}

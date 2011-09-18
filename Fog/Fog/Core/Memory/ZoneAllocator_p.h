@@ -9,7 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/Memory/Alloc.h>
+#include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/Core/Threading/Atomic.h>
 
 namespace Fog {
@@ -24,8 +24,7 @@ namespace Fog {
 //! @internal
 //!
 //! @brief Memory allocator designed to fast alloc memory that will be freed
-//! in one step (used by raster paint engine and scanline container for
-//! temporary objects).
+//! in one step (used to alloc temporary objects).
 //!
 //! This is hackery for performance. Concept is that objects created by
 //! @c ZoneAllocator are freed all at once. This means that lifetime of
@@ -34,10 +33,6 @@ namespace Fog {
 //! that can be used to record current allocation position and to revert
 //! it back. This is used by clip-span engine to reuse memory used by the
 //! clip state that was restored (data not needed anymore).
-//!
-//! This class was stripped from AsmJit, and little modified for clip-span
-//! allocator:
-//!   http://code.google.com/p/asmjit/
 struct FOG_NO_EXPORT ZoneAllocator
 {
   // --------------------------------------------------------------------------
@@ -139,7 +134,9 @@ struct FOG_NO_EXPORT ZoneAllocator
     uint8_t* p = _current->pos;
     _current->pos += size;
 
-    if (FOG_UNLIKELY(_current->pos > _current->end)) return _alloc(size);
+    if (FOG_UNLIKELY(_current->pos > _current->end))
+      return _alloc(size);
+
     return (void*)p;
   }
 
@@ -156,15 +153,15 @@ struct FOG_NO_EXPORT ZoneAllocator
   //! @brief Revert to state previously recorded by @c record() method.
   void revert(Record* record, bool keepRecord = false);
 
-  // TODO: reset() should be clear() and free() should be renamed to reset().
+  //! @brief Invalidate all allocated memory, but do not free allocated memory
+  //! chunks.
+  //!
+  //! This method should be used when one task which needed zone memory ended,
+  //! but another needs to be run.
+  void reuse();
 
-  //! @brief Invalidate all allocated memory, next call to @a alloc() will
-  //! return memory chunk allocated using the first chunk.
+  //! @brief Free allocated memory.
   void reset();
-
-  //! @brief Free all chunks, except the first one that must be always
-  //! available.
-  void free();
 
   // --------------------------------------------------------------------------
   // [Private]
@@ -174,7 +171,7 @@ private:
   FOG_INLINE Chunk* _allocChunk()
   {
     return reinterpret_cast<Chunk*>(
-      Memory::alloc(sizeof(Chunk) - sizeof(void*) + _chunkSize));
+      MemMgr::alloc(sizeof(Chunk) - sizeof(void*) + _chunkSize));
   }
 
   // --------------------------------------------------------------------------
@@ -182,20 +179,40 @@ private:
   // --------------------------------------------------------------------------
 
 protected:
-  //! @brief First allocated chunk of memory.
-  //!
-  //! @note This chunk is statically allocated and its length is zero. It
-  //! prevents some checks in @c alloc() method and it also prevents from
-  //! allocation memory in case that the instance wasn't used.
-  Chunk _first;
   //! @brief Current allocated chunk of memory.
   Chunk* _current;
 
   //! @brief One chunk size.
   size_t _chunkSize;
 
+  //! @brief First allocated chunk of memory.
+  //!
+  //! @note This chunk is statically allocated and its length is zero. It
+  //! prevents some checks in @c alloc() method and it also prevents from
+  //! allocation memory in case that the instance has not been used.
+  Chunk _first;
+
 private:
-  _FOG_CLASS_NO_COPY(ZoneAllocator)
+  _FOG_NO_COPY(ZoneAllocator)
+};
+
+template<size_t N>
+struct FOG_NO_EXPORT ZoneAllocatorT : public ZoneAllocator
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE ZoneAllocatorT(size_t chunkSize) : ZoneAllocator(chunkSize)
+  {
+    _first.end = _first.data + N;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  char _buffer[N];
 };
 
 //! @}

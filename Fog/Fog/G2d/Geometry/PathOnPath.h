@@ -8,8 +8,8 @@
 #define _FOG_G2D_GEOMETRY_PATHONPATH_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Global/Global.h>
+#include <Fog/Core/Tools/List.h>
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Geometry/PathEffect.h>
 #include <Fog/G2d/Geometry/Point.h>
@@ -47,7 +47,7 @@ protected:
   double _baseLength;
 
 private:
-  _FOG_CLASS_NO_COPY(PathOnPath)
+  _FOG_NO_COPY(PathOnPath)
 };
 
 //! @}
@@ -58,7 +58,7 @@ private:
 // [Fog::TypeInfo<>]
 // ============================================================================
 
-_FOG_TYPEINFO_DECLARE(Fog::PathOnPath, Fog::TYPEINFO_MOVABLE)
+_FOG_TYPE_DECLARE(Fog::PathOnPath, Fog::TYPE_CATEGORY_MOVABLE)
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_PATHONPATH_H

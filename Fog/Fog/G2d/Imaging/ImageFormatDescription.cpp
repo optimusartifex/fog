@@ -298,7 +298,7 @@ static err_t FOG_CDECL ImageFormatDescription_createArgb(
 
   self->_isPremultiplied = aMask ? (flags & IMAGE_FD_IS_PREMULTIPLIED) != 0 : 0;
   self->_isIndexed = 0;
-  self->_isByteSwapped = (flags & IMAGE_FD_IS_BYTESWAPPED) != 0;;
+  self->_isByteSwapped = (flags & IMAGE_FD_IS_BYTESWAPPED) != 0;
   self->_hasAlignedComponents = 0;
   self->_reservedBits = 0;
 

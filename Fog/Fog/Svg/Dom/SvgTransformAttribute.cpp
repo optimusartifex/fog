@@ -27,7 +27,7 @@ SvgTransformAttribute::~SvgTransformAttribute()
 {
 }
 
-err_t SvgTransformAttribute::setValue(const String& value)
+err_t SvgTransformAttribute::setValue(const StringW& value)
 {
   err_t err = _value.set(value);
   if (FOG_IS_ERROR(err)) return err;

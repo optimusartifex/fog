@@ -25,7 +25,7 @@ namespace Fog {
 struct FOG_NO_EXPORT PaintDeviceInfoData
 {
   //! @brief Reference count.
-  Atomic<size_t> refCount;
+  mutable Atomic<size_t> reference;
 
   //! @brief Paint device ID (see @c PAINT_DEVICE).
   uint32_t paintDevice;
@@ -129,18 +129,6 @@ struct FOG_API PaintDeviceInfo
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::PaintDeviceInfo, Fog::TYPEINFO_MOVABLE)
-
-// ============================================================================
-// [Fog::Swap<>]
-// ============================================================================
-
-_FOG_SWAP_D(Fog::PaintDeviceInfo)
 
 // [Guard]
 #endif // _FOG_G2D_PAINTING_PAINTDEVICEINFO_H

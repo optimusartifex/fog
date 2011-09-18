@@ -11,7 +11,7 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemOps.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
@@ -307,25 +307,20 @@ FOG_INLINE void RoundF::setRound(const RoundD& other)
 // [Fog::RoundT<>]
 // ============================================================================
 
-FOG_CLASS_PRECISION_F_D(Round)
+_FOG_NUM_T(Round)
+_FOG_NUM_F(Round)
+_FOG_NUM_D(Round)
 
 //! @}
 
 } // Fog namespace
 
 // ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::RoundF, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::RoundD, Fog::TYPEINFO_PRIMITIVE)
-
-// ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_FUZZY_DECLARE(Fog::RoundF, Math::feqv((const float *)&a, (const float *)&b, 6))
-FOG_FUZZY_DECLARE(Fog::RoundD, Math::feqv((const double*)&a, (const double*)&b, 6))
+FOG_FUZZY_DECLARE_F_VEC(Fog::RoundF, 6)
+FOG_FUZZY_DECLARE_D_VEC(Fog::RoundD, 6)
 
 // [Guard]
 #endif // _FOG_G2D_GEOMETRY_ROUND_H

@@ -20,7 +20,7 @@ namespace Fog {
 
 FontProviderData::FontProviderData()
 {
-  refCount.init(1);
+  reference.init(1);
   id = FONT_PROVIDER_NULL;
 }
 
@@ -41,7 +41,7 @@ FontProvider::FontProvider(const FontProvider& other) :
   _d(other._d)
 {
   if (FOG_LIKELY(_d != NULL))
-    _d->refCount.inc();
+    _d->reference.inc();
 }
 
 FontProvider::~FontProvider()
@@ -54,9 +54,9 @@ FontProvider::~FontProvider()
 // [Fog::FontProvider - Accessors]
 // ============================================================================
 
-String FontProvider::getName() const
+StringW FontProvider::getName() const
 {
-  if (FOG_IS_NULL(_d)) return String();
+  if (FOG_IS_NULL(_d)) return StringW();
 
   return _d->name;
 }
@@ -72,23 +72,24 @@ uint32_t FontProvider::getId() const
 // [Fog::FontProvider - Interface]
 // ============================================================================
 
-err_t FontProvider::getFontFace(FontFace** dst, const String& fontFamily) const
+err_t FontProvider::getFontFace(FontFace** dst, const StringW& fontFamily) const
 {
   if (FOG_IS_NULL(_d)) return ERR_RT_INVALID_STATE;
 
   return _d->getFontFace(dst, fontFamily);
 }
 
-err_t FontProvider::getFontList(List<String>& dst) const
+err_t FontProvider::getFontList(List<StringW>& dst) const
 {
   if (FOG_IS_NULL(_d)) return ERR_RT_INVALID_STATE;
 
   return _d->getFontList(dst);
 }
 
-String FontProvider::getDefaultFamily() const
+StringW FontProvider::getDefaultFamily() const
 {
-  if (FOG_IS_NULL(_d)) return String();
+  if (FOG_IS_NULL(_d))
+    return StringW();
 
   return _d->getDefaultFamily();
 }
@@ -100,7 +101,7 @@ String FontProvider::getDefaultFamily() const
 const FontProvider& FontProvider::operator=(const FontProvider& other)
 {
   FontProviderData* newd = other._d;
-  if (FOG_LIKELY(newd != NULL)) newd->refCount.inc();
+  if (FOG_LIKELY(newd != NULL)) newd->reference.inc();
 
   FontProviderData* oldd = atomicPtrXchg(&_d, newd);
   if (FOG_LIKELY(oldd != NULL)) oldd->deref();

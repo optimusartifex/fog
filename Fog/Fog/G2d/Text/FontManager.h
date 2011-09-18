@@ -8,10 +8,10 @@
 #define _FOG_G2D_TEXT_FONTMANAGER_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Threading/Lock.h>
+#include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/G2d/Text/Font.h>
 
@@ -35,18 +35,18 @@ struct FOG_API FontManagerData
   ~FontManagerData();
 
   // --------------------------------------------------------------------------
-  // [Ref / Deref]
+  // [AddRef / Release]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE FontManagerData* ref() const
+  FOG_INLINE FontManagerData* addRef() const
   {
-    refCount.inc();
+    reference.inc();
     return const_cast<FontManagerData*>(this);
   }
 
   FOG_INLINE void deref()
   {
-    if (refCount.deref()) fog_delete(this);
+    if (reference.deref()) fog_delete(this);
   }
 
   // --------------------------------------------------------------------------
@@ -54,13 +54,13 @@ struct FOG_API FontManagerData
   // --------------------------------------------------------------------------
 
   //! @brief Reference count.
-  mutable Atomic<size_t> refCount;
+  mutable Atomic<size_t> reference;
 
   //! @brief List of font providers associated with this font-manager data.
   List<FontProvider> providers;
 
   //! @brief Cached list of font-faces get from all providers.
-  List<String> fontListCache;
+  List<StringW> fontListCache;
   //! @brief Whether the fontListCache is dirty (needs update).
   bool fontListDirty;
 
@@ -104,14 +104,14 @@ struct FOG_API FontManager
   err_t removeProvider(const FontProvider& provider);
 
   bool hasProvider(const FontProvider& provider) const;
-  bool hasProvider(const String& name) const;
+  bool hasProvider(const StringW& name) const;
 
   // --------------------------------------------------------------------------
   // [Fonts]
   // --------------------------------------------------------------------------
 
-  FontFace* getFontFace(const String& fontFamily) const;
-  List<String> getFontList() const;
+  FontFace* getFontFace(const StringW& fontFamily) const;
+  List<StringW> getFontList() const;
 
   void _initDefaultFont();
 
@@ -138,18 +138,6 @@ struct FOG_API FontManager
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::FontManager, Fog::TYPEINFO_MOVABLE)
-
-// ============================================================================
-// [Fog::Swap]
-// ============================================================================
-
-_FOG_SWAP_D(Fog::FontManager)
 
 // [Guard]
 #endif // _FOG_G2D_TEXT_FONTMANAGER_H

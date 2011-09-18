@@ -9,8 +9,8 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
+#include <Fog/Core/Kernel/Task.h>
 #include <Fog/Core/Memory/ZoneAllocator_p.h>
-#include <Fog/Core/System/Task.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Threading/AtomicPadding.h>
 #include <Fog/Core/Threading/Lock.h>

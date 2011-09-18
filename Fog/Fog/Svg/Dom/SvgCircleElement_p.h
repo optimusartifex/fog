@@ -54,7 +54,7 @@ struct FOG_NO_EXPORT SvgCircleElement : public SvgStyledElement
   SvgCoordAttribute a_r;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgCircleElement)
+  _FOG_NO_COPY(SvgCircleElement)
 };
 
 //! @}

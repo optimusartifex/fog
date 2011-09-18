@@ -15,7 +15,7 @@
 // [Fog/G2d]
 // ============================================================================
 
-#include <Fog/Core/Config/Config.h>
+#include <Fog/Core/C++/Base.h>
 
 #include <Fog/G2d/Geometry/Arc.h>
 #include <Fog/G2d/Geometry/Box.h>

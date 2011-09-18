@@ -4,14 +4,13 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_COLOR_ACMYK_H
-#define _FOG_G2D_COLOR_ACMYK_H
+#ifndef _FOG_G2D_SOURCE_ACMYK_H
+#define _FOG_G2D_SOURCE_ACMYK_H
 
 // [Dependencies]
-#include <Fog/Core/Collection/List.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemOps.h>
 #include <Fog/Core/Global/Global.h>
 #include <Fog/G2d/Source/ColorBase.h>
 #include <Fog/G2d/Source/ColorUtil.h>
@@ -25,7 +24,7 @@ namespace Fog {
 // [Fog::AcmykF]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 //! @brief Color in ACMYK format (alpha, cyan, magenta, yellow, black).
 struct FOG_NO_EXPORT AcmykF : public AcmykBaseF
 {
@@ -99,7 +98,7 @@ struct FOG_NO_EXPORT AcmykF : public AcmykBaseF
 
   FOG_INLINE void reset()
   {
-    Memory::zero_t<AcmykF>(this);
+    MemOps::zero_t<AcmykF>(this);
   }
 
   // --------------------------------------------------------------------------
@@ -157,23 +156,17 @@ struct FOG_NO_EXPORT AcmykF : public AcmykBaseF
     return acmykf;
   }
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 //! @}
 
 } // Fog namespace
 
 // ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::AcmykF, Fog::TYPEINFO_PRIMITIVE)
-
-// ============================================================================
 // [Fog::Fuzzy<>]
 // ============================================================================
 
-FOG_FUZZY_DECLARE(Fog::AcmykF, Math::feqv(a.data, b.data, 5))
+FOG_FUZZY_DECLARE_F_VEC(Fog::AcmykF, 5)
 
 // [Guard]
-#endif // _FOG_G2D_COLOR_ACMYK_H
+#endif // _FOG_G2D_SOURCE_ACMYK_H

@@ -18,7 +18,7 @@ namespace Fog {
 // [Fog::XmlCDATA]
 // ============================================================================
 
-XmlCDATA::XmlCDATA(const String& data) :
+XmlCDATA::XmlCDATA(const StringW& data) :
   XmlNoText(fog_strings->getString(STR_XML__cdata)),
   _data(data)
 {
@@ -35,13 +35,13 @@ XmlElement* XmlCDATA::clone() const
   return fog_new XmlCDATA(_data);
 }
 
-const String& XmlCDATA::getData() const
+const StringW& XmlCDATA::getData() const
 {
   FOG_ASSERT(getType() == XML_ELEMENT_CDATA);
   return _data;
 }
 
-err_t XmlCDATA::setData(const String& data)
+err_t XmlCDATA::setData(const StringW& data)
 {
   FOG_ASSERT(getType() == XML_ELEMENT_CDATA);
   return _data.set(data);

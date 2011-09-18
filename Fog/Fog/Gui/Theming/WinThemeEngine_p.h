@@ -7,14 +7,13 @@
 #ifndef _FOG_GUI_THEMING_WINTHEMEENGINE_P_H
 #define _FOG_GUI_THEMING_WINTHEMEENGINE_P_H
 
-#include <Fog/Core/Config/Config.h>
+#include <Fog/Core/C++/Base.h>
 #if defined(FOG_OS_WINDOWS)
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/Library/Library.h>
-#include <Fog/Core/System/Object.h>
-#include <Fog/Gui/Global/Constants.h>
+#include <Fog/Core/Kernel/Object.h>
+#include <Fog/Core/OS/Library.h>
 #include <Fog/Gui/Theming/ThemeEngine.h>
 
 #include <uxtheme.h>

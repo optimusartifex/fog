@@ -86,14 +86,14 @@ struct FOG_NO_EXPORT RenderConverterMulti
   RenderConverterPass pass[2];
 
   //! @brief Converter blitter for each pass (convert to/from a middle format).
-  RenderVBlitLineFn blit[2];
+  RenderVBlitLineFunc blit[2];
   //! @brief Middleware, colorspace conversion routine (optional, can be NULL).
-  RenderVBlitLineFn middleware;
+  RenderVBlitLineFunc middleware;
 
   //! @brief Destination advance relative to 'step'.
-  sysint_t dstAdvance;
+  ssize_t dstAdvance;
   //! @brief Source advance relative to 'step'.
-  sysint_t srcAdvance;
+  ssize_t srcAdvance;
 
   //! @brief How many pixels in chunk to process.
   //!
@@ -111,7 +111,7 @@ struct FOG_NO_EXPORT RenderConverterMulti
 
 //! @internal
 //!
-//! @brief Solid color for 32-bit and 64-bit image manipulation.
+//! @brief Solid color for 32-bit and 64-bit rendering.
 union RenderSolid
 {
   ArgbBase64 prgb64;
@@ -175,10 +175,10 @@ struct FOG_NO_EXPORT RenderPatternContext
   }
 
   FOG_INLINE void _initFuncs(
-    RenderPatternPrepareFn prepare,
-    RenderPatternFetchFn fetch,
-    RenderPatternSkipFn skip,
-    RenderPatternDestroyFn destroy)
+    RenderPatternPrepareFunc prepare,
+    RenderPatternFetchFunc fetch,
+    RenderPatternSkipFunc skip,
+    RenderPatternDestroyFunc destroy)
   {
     _prepare = prepare;
     _fetch = fetch;
@@ -214,16 +214,16 @@ struct FOG_NO_EXPORT RenderPatternContext
   // --------------------------------------------------------------------------
 
   //! @brief Reference count.
-  Atomic<size_t> _refCount;
+  Atomic<size_t> _reference;
 
   //! @brief Prepare function.
-  RenderPatternPrepareFn _prepare;
+  RenderPatternPrepareFunc _prepare;
   //! @brief Fetch function (can be @c NULL if @c fetch is initialized by @c prepare).
-  RenderPatternFetchFn _fetch;
+  RenderPatternFetchFunc _fetch;
   //! @brief Skip function (can be @c NULL if @c skip is initialized by @c prepare).
-  RenderPatternSkipFn _skip;
+  RenderPatternSkipFunc _skip;
   //! @brief Destroy function.
-  RenderPatternDestroyFn _destroy;
+  RenderPatternDestroyFunc _destroy;
 
   //! @brief Bounding box.
   BoxI _boundingBox;
@@ -254,7 +254,7 @@ struct FOG_NO_EXPORT RenderPatternContext
     //! @brief The texture (or texture-fragment) size.
     int w, h;
     //! @brief The texture (or texture-fragment) stride.
-    sysint_t stride;
+    ssize_t stride;
 
     //! @brief Clamped pixel value (@c TEXTURE_TILE_CLAMP).
     RenderSolid clamp;
@@ -508,8 +508,8 @@ struct FOG_NO_EXPORT RenderPatternFetcher
 
   const RenderPatternContext* _ctx;
 
-  RenderPatternFetchFn _fetch;
-  RenderPatternSkipFn _skip;
+  RenderPatternFetchFunc _fetch;
+  RenderPatternSkipFunc _skip;
 
   uint32_t _mode;
 #if FOG_ARCH_BITS >= 64

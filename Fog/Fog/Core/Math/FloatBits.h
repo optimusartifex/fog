@@ -8,7 +8,6 @@
 #define _FOG_CORE_MATH_FLOATBITS_H
 
 // [Dependencies]
-#include <Fog/Core/Config/Config.h>
 #include <Fog/Core/Global/TypeInfo.h>
 
 namespace Fog {
@@ -68,13 +67,6 @@ union DoubleBits
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::FloatBits, Fog::TYPEINFO_PRIMITIVE)
-_FOG_TYPEINFO_DECLARE(Fog::DoubleBits, Fog::TYPEINFO_PRIMITIVE)
 
 // [Guard]
 #endif // _FOG_CORE_MATH_FLOATBITS_H

@@ -69,7 +69,7 @@ struct FOG_NO_EXPORT PatternScaleC
       rv = 1;
     }
 
-    p = reinterpret_cast<uint32_t**>(Memory::alloc((dh + 1) * sizeof(uint32_t*)));
+    p = reinterpret_cast<uint32_t**>(MemMgr::alloc((dh + 1) * sizeof(uint32_t*)));
     if (p == NULL) return p;
 
     val = (dh >= sh) ? ((0x8000 * sh / dh) + 0x8000) : 0;
@@ -109,7 +109,7 @@ struct FOG_NO_EXPORT PatternScaleC
       rv = 1;
     }
 
-    p = reinterpret_cast<int*>(Memory::alloc((dw + 1) * sizeof(int)));
+    p = reinterpret_cast<int*>(MemMgr::alloc((dw + 1) * sizeof(int)));
     if (p == NULL) return p;
 
     val = (dw >= sw) ? ((0x8000 * sw / dw) + 0x8000) : 0;
@@ -149,7 +149,7 @@ struct FOG_NO_EXPORT PatternScaleC
       d = -d;
     }
 
-    p = reinterpret_cast<int*>(Memory::alloc(d * sizeof(int)));
+    p = reinterpret_cast<int*>(MemMgr::alloc(d * sizeof(int)));
     if (p == NULL) return p;
 
     val = 0;
@@ -202,7 +202,7 @@ struct FOG_NO_EXPORT PatternScaleC
 
   static err_t FOG_FASTCALL init(RenderPatternContext* ctx, const Image& image, int dw, int dh, uint32_t interpolationType)
   {
-    Memory::zero(&ctx->scale, sizeof(ctx->scale));
+    MemOps::zero(&ctx->scale, sizeof(ctx->scale));
 
     int sw = image.getWidth();
     int sh = image.getHeight();
@@ -245,10 +245,10 @@ fail:
 
   static void FOG_FASTCALL destroy(RenderPatternContext* ctx)
   {
-    Memory::free(ctx->scale.xpoints);
-    Memory::free(ctx->scale.ypoints);
-    Memory::free(ctx->scale.xapoints);
-    Memory::free(ctx->scale.yapoints);
+    MemMgr::free(ctx->scale.xpoints);
+    MemMgr::free(ctx->scale.ypoints);
+    MemMgr::free(ctx->scale.xapoints);
+    MemMgr::free(ctx->scale.yapoints);
   }
 
   // Scale by pixel sampling only.
@@ -316,7 +316,7 @@ fail:
     const int* yapoints = ctx->scale.yapoints;
 
     const uint32_t* sptr;
-    sysint_t sow = ctx->scale.sw;
+    ssize_t sow = ctx->scale.sw;
 
     P_FETCH_SPAN8_BEGIN()
       P_FETCH_SPAN8_SET_CURRENT_AND_MERGE_NEIGHBORS(4)

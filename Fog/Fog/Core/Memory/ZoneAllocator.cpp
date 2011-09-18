@@ -32,7 +32,7 @@ ZoneAllocator::ZoneAllocator(size_t chunkSize)
 
 ZoneAllocator::~ZoneAllocator()
 {
-  free();
+  reset();
 }
 
 void* ZoneAllocator::_alloc(size_t size)
@@ -81,18 +81,18 @@ void ZoneAllocator::revert(Record* record, bool keepRecord)
   if (keepRecord) alloc(sizeof(Record));
 }
 
-void ZoneAllocator::reset()
+void ZoneAllocator::reuse()
 {
   _current = &_first;
 }
 
-void ZoneAllocator::free()
+void ZoneAllocator::reset()
 {
   Chunk* cur = _first.next;
   while (cur)
   {
     Chunk* next = cur->next;
-    Memory::free(cur);
+    MemMgr::free(cur);
     cur = next;
   }
 

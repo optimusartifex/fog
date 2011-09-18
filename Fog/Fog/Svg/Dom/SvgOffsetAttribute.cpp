@@ -28,15 +28,15 @@ SvgOffsetAttribute::~SvgOffsetAttribute()
 {
 }
 
-err_t SvgOffsetAttribute::setValue(const String& value)
+err_t SvgOffsetAttribute::setValue(const StringW& value)
 {
   err_t err = _value.set(value);
   if (FOG_IS_ERROR(err)) return err;
 
   size_t end;
-  if (value.atof(&_offset, NULL, &end) == ERR_OK)
+  if (value.parseReal(&_offset, CharW('.'), &end, NULL) == ERR_OK)
   {
-    if (end < value.getLength() && value.getAt(end) == Char('%')) _offset *= 0.01f;
+    if (end < value.getLength() && value.getAt(end) == CharW('%')) _offset *= 0.01f;
     _offset = Math::bound<float>(_offset, 0.0f, 1.0f);
   }
   else

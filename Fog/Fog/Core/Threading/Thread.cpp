@@ -10,21 +10,18 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Init_p.h>
-#include <Fog/Core/Tools/ByteArray.h>
-#include <Fog/Core/Cpu/Cpu.h>
-#include <Fog/Core/OS/OS.h>
-#include <Fog/Core/System/Application.h>
-#include <Fog/Core/System/Event.h>
-#include <Fog/Core/System/Object.h>
+#include <Fog/Core/Kernel/Application.h>
+#include <Fog/Core/Kernel/Event.h>
+#include <Fog/Core/Kernel/Object.h>
+#include <Fog/Core/OS/System.h>
 #include <Fog/Core/Threading/Thread.h>
 #include <Fog/Core/Threading/ThreadLocal.h>
-#include <Fog/Core/Tools/ByteArray.h>
-#include <Fog/Core/Tools/ByteArrayTmp_p.h>
+#include <Fog/Core/Tools/Cpu.h>
+#include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/TextCodec.h>
 
 // [Dependencies - Windows]
 #if defined(FOG_OS_WINDOWS)
-# include <windows.h>
 # include <process.h>
 # if !defined(STACK_SIZE_PARAM_IS_A_RESERVATION)
 #  define STACK_SIZE_PARAM_IS_A_RESERVATION 0x00010000
@@ -115,7 +112,7 @@ static bool _Thread_create(size_t stackSize, Thread* thread)
 {
   uint flags = 0;
 
-  if (stackSize > 0 && OS::getWindowsVersion() >= OS::WIN_VERSION_XP)
+  if (stackSize > 0 && System::getWindowsVersion() >= OS_WIN_VERSION_XP)
     flags = STACK_SIZE_PARAM_IS_A_RESERVATION;
   else
     stackSize = 0;
@@ -153,7 +150,7 @@ err_t Thread::setAffinity(int mask)
 
 err_t Thread::resetAffinity()
 {
-  size_t affinityMask = (1 << Cpu::get()->numberOfProcessors) - 1;
+  size_t affinityMask = (1 << Cpu::get()->getNumberOfProcessors()) - 1;
   DWORD_PTR result = SetThreadAffinityMask(_handle, (DWORD_PTR)(affinityMask));
 
   if (result != 0)
@@ -286,7 +283,7 @@ err_t Thread::setAffinity(int mask)
 err_t Thread::resetAffinity()
 {
 #if defined(FOG_OS_LINUX)
-  size_t affinityMask = (1 << Cpu::get()->numberOfProcessors) - 1;
+  size_t affinityMask = (1 << Cpu::get()->getNumberOfProcessors()) - 1;
   return pthread_setaffinity_np(_handle, sizeof(affinityMask), (const cpu_set_t*)&affinityMask);
 #else
   return ERR_RT_NOT_IMPLEMENTED;
@@ -328,7 +325,7 @@ err_t Thread::setStackSize(uint32_t stackSize)
   return ERR_OK;
 }
 
-bool Thread::start(const String& eventLoopType)
+bool Thread::start(const StringW& eventLoopType)
 {
   FOG_ASSERT(!_eventLoop);
 
@@ -478,6 +475,7 @@ FOG_NO_EXPORT void Thread_init(void)
 
 #if defined(FOG_OS_POSIX)
   thread->_handle = pthread_self();
+  thread->_id = Thread::getCurrentThreadId();
 
   int error = ::pthread_key_create(&_Thread_tls, NULL);
   if (error != 0)

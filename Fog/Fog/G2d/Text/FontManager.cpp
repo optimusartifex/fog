@@ -9,6 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
+#include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/G2d/Text/FontManager.h>
 #include <Fog/G2d/Text/FontProvider.h>
 #include <Fog/G2d/Text/NullFontFace_p.h>
@@ -35,7 +36,7 @@ FontManagerData::FontManagerData() :
   fontListDirty(true),
   defaultFont(reinterpret_cast<FontData*>(NULL))
 {
-  refCount.init(1);
+  reference.init(1);
 }
 
 FontManagerData::FontManagerData(const FontManagerData& other) :
@@ -44,7 +45,7 @@ FontManagerData::FontManagerData(const FontManagerData& other) :
   fontListDirty(other.fontListDirty),
   defaultFont(other.defaultFont)
 {
-  refCount.init(1);
+  reference.init(1);
 }
 
 FontManagerData::~FontManagerData()
@@ -65,21 +66,21 @@ static Static<FontManager> FontManager_globalInstance;
 
 FontManager::FontManager()
 {
-  AutoLock locked(FontManager_lock.instance());
+  AutoLock locked(FontManager_lock);
 
-  _d = _global->_d->ref();
+  _d = _global->_d->addRef();
 }
 
 FontManager::FontManager(const FontManager& other)
 {
-  AutoLock locked(FontManager_lock.instance());
+  AutoLock locked(FontManager_lock);
 
-  _d = other._d->ref();
+  _d = other._d->addRef();
 }
 
 FontManager::~FontManager()
 {
-  AutoLock locked(FontManager_lock.instance());
+  AutoLock locked(FontManager_lock);
 
   _d->deref();
 }
@@ -93,7 +94,7 @@ err_t FontManager::addProvider(const FontProvider& provider, uint32_t order)
   if (FOG_IS_NULL(provider._d))
     return ERR_RT_INVALID_STATE;
 
-  AutoLock locked(FontManager_lock.instance());
+  AutoLock locked(FontManager_lock);
 
   size_t i = _d->providers.indexOf(provider);
   size_t w = (order == FONT_ORDER_FIRST) ? 0 : _d->providers.getLength();
@@ -101,7 +102,7 @@ err_t FontManager::addProvider(const FontProvider& provider, uint32_t order)
   if (i == w)
     return ERR_OK;
 
-  if (_d->refCount.get() > 1)
+  if (_d->reference.get() > 1)
   {
     FontManagerData* newd = fog_new FontManagerData(*_d);
     if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
@@ -118,7 +119,7 @@ err_t FontManager::addProvider(const FontProvider& provider, uint32_t order)
       return ERR_RT_OUT_OF_MEMORY;
     }
 
-    _d->refCount.dec();
+    _d->reference.dec();
     _d = newd;
   }
   else
@@ -138,12 +139,12 @@ err_t FontManager::removeProvider(const FontProvider& provider)
   if (FOG_IS_NULL(provider._d))
     return ERR_RT_INVALID_STATE;
 
-  AutoLock locked(FontManager_lock.instance());
+  AutoLock locked(FontManager_lock);
 
   size_t i = _d->providers.indexOf(provider);
   if (i == INVALID_INDEX) return ERR_RT_OBJECT_NOT_FOUND;
 
-  if (_d->refCount.get() > 1)
+  if (_d->reference.get() > 1)
   {
     FontManagerData* newd = fog_new FontManagerData(*_d);
     if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
@@ -154,7 +155,7 @@ err_t FontManager::removeProvider(const FontProvider& provider)
       return ERR_RT_OUT_OF_MEMORY;
     }
 
-    _d->refCount.dec();
+    _d->reference.dec();
     _d = newd;
   }
   else
@@ -168,19 +169,20 @@ err_t FontManager::removeProvider(const FontProvider& provider)
 
 bool FontManager::hasProvider(const FontProvider& provider) const
 {
-  AutoLock locked(FontManager_lock.instance());
+  AutoLock locked(FontManager_lock);
 
   return _d->providers.contains(provider);
 }
 
-bool FontManager::hasProvider(const String& name) const
+bool FontManager::hasProvider(const StringW& name) const
 {
-  AutoLock locked(FontManager_lock.instance());
+  AutoLock locked(FontManager_lock);
 
-  List<FontProvider>::ConstIterator i(_d->providers);
-  for (i.toStart(); i.isValid(); i.toNext())
+  ListIterator<FontProvider> it(_d->providers);
+  while (it.isValid())
   {
-    if (i.value()._d->name == name) return true;
+    if (it.getItem()._d->name == name) return true;
+    it.next();
   }
 
   return false;
@@ -190,36 +192,38 @@ bool FontManager::hasProvider(const String& name) const
 // [Fog::FontManager - Fonts]
 // ============================================================================
 
-FontFace* FontManager::getFontFace(const String& fontFamily) const
+FontFace* FontManager::getFontFace(const StringW& fontFamily) const
 {
-  AutoLock locked(FontManager_lock.instance());
+  AutoLock locked(FontManager_lock);
 
+  ListIterator<FontProvider> it(_d->providers);
   FontFace* face = NULL;
 
-  List<FontProvider>::ConstIterator i(_d->providers);
-  for (i.toStart(); i.isValid(); i.toNext())
+  while (it.isValid())
   {
-    if (i.value().getFontFace(&face, fontFamily) == ERR_OK)
+    if (it.getItem().getFontFace(&face, fontFamily) == ERR_OK)
       goto _Done;
+    it.next();
   }
 
 _Done:
   return face;
 }
 
-List<String> FontManager::getFontList() const
+List<StringW> FontManager::getFontList() const
 {
-  AutoLock locked(FontManager_lock.instance());
+  AutoLock locked(FontManager_lock);
 
   if (_d->fontListDirty == true)
   {
     _d->fontListCache.clear();
 
-    List<FontProvider>::ConstIterator i(_d->providers);
-    for (i.toStart(); i.isValid(); i.toNext())
+    ListIterator<FontProvider> it(_d->providers);
+    while (it.isValid())
     {
-      if (i.value().getFontList(_d->fontListCache) != ERR_OK)
+      if (it.getItem().getFontList(_d->fontListCache) != ERR_OK)
         goto _End;
+      it.next();
     }
 
     _d->fontListDirty = false;
@@ -231,17 +235,16 @@ _End:
 
 void FontManager::_initDefaultFont()
 {
+  AutoLock locked(FontManager_lock);
+
+  ListIterator<FontProvider> it(_d->providers);
+  while (it.isValid())
   {
-    AutoLock locked(FontManager_lock.instance());
-    List<FontProvider>::ConstIterator i(_d->providers);
+    const FontProvider& provider = it.getItem();
+    StringW fontFamily = provider.getDefaultFamily();
 
-    for (i.toStart(); i.isValid(); i.toNext())
+    if (!fontFamily.isEmpty())
     {
-      const FontProvider& provider = i.value();
-
-      String fontFamily = provider.getDefaultFamily();
-      if (fontFamily.isEmpty()) continue;
-
       FontFace* face;
       if (provider.getFontFace(&face, fontFamily) == ERR_OK)
       {
@@ -249,6 +252,8 @@ void FontManager::_initDefaultFont()
           break;
       }
     }
+
+    it.next();
   }
 }
 
@@ -258,7 +263,7 @@ void FontManager::_initDefaultFont()
 
 const FontManager& FontManager::operator=(const FontManager& other)
 {
-  atomicPtrXchg(&_d, other._d->ref())->deref();
+  atomicPtrXchg(&_d, other._d->addRef())->deref();
   return *this;
 }
 
@@ -279,23 +284,21 @@ FOG_NO_EXPORT void FontManager_init(void)
 {
   FontFace_initNull();
 
-  // HACK:
-  //
   // Initialize the font in default FontManager to font using NullFontFace.
   // NullFontFace is only used when something failed and system fonts are
   // inaccessible - This can probably happen only under linux if fontconfig
-  // configuration is broken and fog can't find any suitable font.
-
+  // configuration is broken and Fog-Framework can't find any other suitable 
+  // font.
   FontManager_lock.init();
 
   FontManager_globalD.init();
-  FontManager_globalInstance.initCustom1(FontManager_globalD.instancep());
-  FontManager::_global = FontManager_globalInstance.instancep();
+  FontManager_globalInstance.initCustom1(&FontManager_globalD);
+  FontManager::_global = &FontManager_globalInstance;
 
-  FontData* fd = reinterpret_cast<FontData*>(Memory::alloc(sizeof(FontData)));
+  FontData* fd = reinterpret_cast<FontData*>(MemMgr::alloc(sizeof(FontData)));
   FOG_ASSERT(fd != NULL);
 
-  fd->refCount.init(1);
+  fd->reference.init(1);
 
   fd->unit = UNIT_NONE;
   fd->letterSpacingMode = FONT_SPACING_MODE_PERCENTAGE;
@@ -310,7 +313,7 @@ FOG_NO_EXPORT void FontManager_init(void)
   fd->metrics.reset();
 
   fd->forceCaching = false;
-  fd->face = NullFontFace::_dnull->ref();
+  fd->face = NullFontFace::_dnull->addRef();
 
   FontManager::_global->_d->defaultFont._d = fd;
 

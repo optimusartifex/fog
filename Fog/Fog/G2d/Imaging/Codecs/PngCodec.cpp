@@ -9,18 +9,19 @@
 #endif // FOG_PRECOMP
 
 // [Guard]
-#include <Fog/Core/Config/Config.h>
+#include <Fog/Core/C++/Base.h>
 #if defined(FOG_HAVE_LIBPNG)
 
 // [Dependencies]
-#include <Fog/Core/Collection/BufferP.h>
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/IO/Stream.h>
-#include <Fog/Core/Library/Library.h>
 #include <Fog/Core/Math/Math.h>
+#include <Fog/Core/Memory/MemBufferTmp_p.h>
+#include <Fog/Core/OS/Library.h>
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Tools/Var.h>
 #include <Fog/G2d/Imaging/Codecs/PngCodec_p.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageConverter.h>
@@ -108,7 +109,7 @@ err_t PngLibrary::init()
     "png_get_IHDR\0"
     "png_error\0";
 
-  if (dll.open(Ascii8("png")) != ERR_OK)
+  if (dll.openLibrary(StringW::fromAscii8("png")) != ERR_OK)
   {
     // No PNG library found.
     return ERR_IMAGE_LIBPNG_NOT_LOADED;
@@ -408,7 +409,7 @@ err_t PngDecoder::readImage(Image& image)
     for (pass = 0; pass < passesCount; pass++)
     {
       uint8_t* dstPixels = image.getFirstX();
-      sysint_t dstStride = image.getStride();
+      ssize_t dstStride = image.getStride();
 
       for (y = 0; y < _size.h; y++, yi++, dstPixels += dstStride)
       {
@@ -504,7 +505,7 @@ err_t PngEncoder::writeImage(const Image& image)
   err_t err = ERR_OK;
 
   const uint8_t* pixels = image.getFirst();
-  sysint_t stride = image.getStride();
+  ssize_t stride = image.getStride();
   uint32_t format = image.getFormat();
   int w = image.getWidth();
   int h = image.getHeight();
@@ -515,7 +516,7 @@ err_t PngEncoder::writeImage(const Image& image)
   int y;
 
   ImageConverter converter;
-  BufferP<2048> buffer;
+  MemBufferTmp<2048> buffer;
 
   // Step 0: Simple reject.
   if (!w || !h)
@@ -624,7 +625,7 @@ err_t PngEncoder::writeImage(const Image& image)
     case IMAGE_FORMAT_I8:
     {
       const Argb32* pal = image.getPalette().getData();
-      uint32_t palLength = image.getPalette().getLength();;
+      uint32_t palLength = image.getPalette().getLength();
 
       png.set_IHDR(png_ptr, info_ptr, w, h, 8,
         PNG_COLOR_TYPE_PALETTE, PNG_INTERLACE_NONE,
@@ -655,7 +656,7 @@ err_t PngEncoder::writeImage(const Image& image)
   if (converter.isValid())
   {
     ImageConverterClosure closure;
-    ImageConverterBlitLineFn blit;
+    ImageConverterBlitLineFunc blit;
 
     converter.setupClosure(&closure);
     blit = converter.getBlitFn();
@@ -693,25 +694,20 @@ _End:
 // [Fog::PngEncoder - Properties]
 // ===========================================================================
 
-err_t PngEncoder::getProperty(const ManagedString& name, Value& value) const
+err_t PngEncoder::getProperty(const ManagedString& name, Var& dst) const
 {
-  if (name == fog_strings->getString(STR_G2D_CODEC_compression)) return value.setInt32(_compression);
+  if (name == fog_strings->getString(STR_G2D_CODEC_compression))
+    return dst.setInt(_compression);
 
-  return base::getProperty(name, value);
+  return base::getProperty(name, dst);
 }
 
-err_t PngEncoder::setProperty(const ManagedString& name, const Value& value)
+err_t PngEncoder::setProperty(const ManagedString& name, const Var& src)
 {
-  err_t err;
-  int i;
-
   if (name == fog_strings->getString(STR_G2D_CODEC_compression))
-  {
-    if (err = value.getInt32(&i)) return err;
-    _compression = Math::bound<int>(i, 0, 9);
-    return ERR_OK;
-  }
-  return base::setProperty(name, value);
+    return src.getInt(_compression, 0, 9);
+
+  return base::setProperty(name, src);
 }
 
 // ============================================================================

@@ -10,7 +10,6 @@
 
 // [Dependencies]
 #include <Fog/Core/Memory/BlockAllocator_p.h>
-#include <Fog/Core/Memory/Alloc.h>
 
 namespace Fog {
 
@@ -61,7 +60,7 @@ void* BlockAllocator::alloc(size_t size)
     }
 
     // If we are here, it's needed to allocate new chunk of memory.
-    cur = (Block*)Memory::alloc(sizeof(Block));
+    cur = (Block*)MemMgr::alloc(sizeof(Block));
     if (FOG_IS_NULL(cur)) return NULL;
 
     cur->size = BLOCK_SIZE;
@@ -95,7 +94,7 @@ void BlockAllocator::reset()
     FOG_ASSERT(cur->used.get() == 0);
 
     Block* next = cur->next;
-    Memory::free(cur);
+    MemMgr::free(cur);
     cur = next;
   }
 }

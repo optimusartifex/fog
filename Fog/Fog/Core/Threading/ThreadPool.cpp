@@ -10,6 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Threading/Thread.h>
 #include <Fog/Core/Threading/ThreadPool.h>
@@ -141,21 +142,21 @@ err_t ThreadPool::getThreads(Thread** threads, size_t _count, int workId)
     }
     else if (_numThreads < _maxThreads)
     {
-      pe = (PoolEntry*)Memory::alloc(sizeof(PoolEntry));
+      pe = (PoolEntry*)MemMgr::alloc(sizeof(PoolEntry));
       if (FOG_IS_NULL(pe)) return ERR_RT_OUT_OF_MEMORY;
 
       Thread* thread = _createThread();
       if (FOG_IS_NULL(thread))
       {
-        Memory::free(pe);
+        MemMgr::free(pe);
         err = ERR_RT_OUT_OF_MEMORY;
         goto _Fail;
       }
 
-      if (!thread->start(Ascii8("Default")))
+      if (!thread->start(StringW::fromAscii8("Default")))
       {
         fog_delete(thread);
-        Memory::free(pe);
+        MemMgr::free(pe);
         err = ERR_RT_OUT_OF_MEMORY;
         goto _Fail;
       }
@@ -246,7 +247,7 @@ err_t ThreadPool::setMaxThreads(int maxThreads)
 
 ThreadPool* ThreadPool::getInstance()
 {
-  return _core_threadpool_global.instancep();
+  return &_core_threadpool_global;
 }
 
 // ============================================================================
@@ -274,7 +275,7 @@ void ThreadPool::releaseAllAvailable()
     PoolEntry* next = cur->next;
     Thread* thread = cur->thread;
 
-    Memory::free(cur);
+    MemMgr::free(cur);
     fog_delete(thread);
 
     cur = next;

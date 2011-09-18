@@ -136,18 +136,13 @@ FOG_INLINE err_t ConicalGradientD::setGradient(const ConicalGradientD& other) { 
 // [Fog::ConicalGradientT<>]
 // ============================================================================
 
-FOG_CLASS_PRECISION_F_D(ConicalGradient)
+_FOG_NUM_T(ConicalGradient)
+_FOG_NUM_F(ConicalGradient)
+_FOG_NUM_D(ConicalGradient)
 
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::ConicalGradientF, Fog::TYPEINFO_MOVABLE)
-_FOG_TYPEINFO_DECLARE(Fog::ConicalGradientD, Fog::TYPEINFO_MOVABLE)
 
 // [Guard]
 #endif // _FOG_G2D_SOURCE_CONICALGRADIENT_H

@@ -43,7 +43,7 @@ struct FOG_API MapFile
   // --------------------------------------------------------------------------
 
   //! @brief Map a given file into memory.
-  err_t map(const String& fileName, bool loadOnFail = true);
+  err_t map(const StringW& fileName, bool loadOnFail = true);
   //! @brief Unmap file if mapped.
   void unmap();
 
@@ -55,7 +55,7 @@ struct FOG_API MapFile
   // --------------------------------------------------------------------------
 
   //! @brief Get mapped file name.
-  FOG_INLINE const String& getFileName() const { return _fileName; }
+  FOG_INLINE const StringW& getFileName() const { return _fileName; }
 
   //! @brief Get mapped file data.
   FOG_INLINE const void* getData() const { return _data; }
@@ -100,7 +100,7 @@ struct FOG_API MapFile
   // --------------------------------------------------------------------------
 
 private:
-  String _fileName;
+  StringW _fileName;
 
   void* _data;
   size_t _length;
@@ -117,7 +117,7 @@ private:
   int _state;
 
 private:
-  _FOG_CLASS_NO_COPY(MapFile)
+  _FOG_NO_COPY(MapFile)
 };
 
 //! @}

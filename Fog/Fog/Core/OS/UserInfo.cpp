@@ -9,28 +9,26 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/BufferP.h>
 #include <Fog/Core/IO/MapFile.h>
-#include <Fog/Core/OS/OS.h>
+#include <Fog/Core/Memory/MemBufferTmp_p.h>
+#include <Fog/Core/OS/System.h>
 #include <Fog/Core/OS/UserInfo.h>
-#include <Fog/Core/Tools/Byte.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Core/Tools/TextCodec.h>
 
 #if defined(FOG_OS_POSIX)
-#include <stdlib.h>
-#include <pwd.h>
+# include <stdlib.h>
+# include <pwd.h>
 // for getuid() and getgid()
-#if defined(FOG_HAVE_UNISTD_H)
-#include <unistd.h>
-#include <X11/X.h>
-#endif // FOG_HAVE_UNISTD_H
+# if defined(FOG_HAVE_UNISTD_H)
+#  include <unistd.h>
+# endif // FOG_HAVE_UNISTD_H
 #endif
 
 namespace Fog {
 
-static err_t getHomeDirectory(String& dst);
+static err_t getHomeDirectory(StringW& dst);
 
 #if defined(FOG_OS_WINDOWS)
 
@@ -46,7 +44,7 @@ static const char* winDirectoryNames[] =
 
 // TODO: Update to WChar.
 // fixed: documents, music and videos returns as home directory
-static err_t registryLookupDir(String& dst, int id)
+static err_t registryLookupDir(StringW& dst, int id)
 {
   FOG_ASSERT(id != 0 && (uint)id < FOG_ARRAY_SIZE(winDirectoryNames));
   FOG_ASSERT(dst.isEmpty()); // Dst should be clear.
@@ -56,8 +54,8 @@ static err_t registryLookupDir(String& dst, int id)
   const char *reg_path;
   bool tryShellFolders = true;
 
-  BufferP<1024> bufStorage;
-  BufferP<1024> expandedStorage;
+  MemBufferTmp<512> bufStorage;
+  MemBufferTmp<512> expandedStorage;
 
   char* buf;
   char* expanded;
@@ -81,7 +79,7 @@ _back:
     RegQueryValueExA(k, type, NULL, NULL, (LPBYTE)buf, &size);
     if (*buf)
     {
-      TextCodec::local8().decode(dst, Stub8(buf, size));
+      TextCodec::local8().decode(dst, StubA(buf, size));
       if (v_type == REG_EXPAND_SZ)
       {
         size = ExpandEnvironmentStringsA(buf, NULL, 0);
@@ -91,7 +89,7 @@ _back:
           expanded = (char*)expandedStorage.alloc(size);
 
           ExpandEnvironmentStringsA(buf, expanded, size);
-          if (expanded[0]) TextCodec::local8().decode(dst, Stub8(expanded, DETECT_LENGTH));
+          if (expanded[0]) TextCodec::local8().decode(dst, StubA(expanded, DETECT_LENGTH));
         }
       }
     }
@@ -119,19 +117,19 @@ static const char* xdgDirectoryNames[] =
   "XDG_VIDEOS_DIR"
 };
 
-static err_t getXdgDirectory(String& dst, int id)
+static err_t getXdgDirectory(StringW& dst, int id)
 {
   FOG_ASSERT(id != 0 && (uint)id < FOG_ARRAY_SIZE(xdgDirectoryNames));
   FOG_ASSERT(dst.isEmpty()); // Dst should be clear.
 
   err_t err;
 
-  String home;
-  String configFile;
+  StringW home;
+  StringW configFile;
 
   if ((err = UserInfo::getDirectory(home, USER_DIRECTORY_HOME))) return err;
 
-  if ((err = OS::getEnv(Ascii8("XDG_CONFIG_HOME"), configFile)) || configFile.isEmpty())
+  if ((err = System::getEnvironment(Ascii8("XDG_CONFIG_HOME"), configFile)) || configFile.isEmpty())
   {
     // XDG_CONFIG_HOME variable is not set, so guess...
     configFile = home;
@@ -157,7 +155,7 @@ static err_t getXdgDirectory(String& dst, int id)
   for (;;)
   {
     // Skip spaces and empty lines.
-    while (p != end && Byte::isSpace(*p)) p++;
+    while (p != end && CharA::isSpace(*p)) p++;
     if (p == end) break;
 
     // We are looking for XDG_SOME_DIR="VALUE".
@@ -204,8 +202,8 @@ static err_t getXdgDirectory(String& dst, int id)
       goto _NextLine;
     }
 
-    if (relative) { dst.setDeep(home); dst.append(Char('/')); }
-    return TextCodec::local8().decode(dst, Stub8(mark, remain), NULL, CONTAINER_OP_APPEND);
+    if (relative) { dst.setDeep(home); dst.append(CharW('/')); }
+    return TextCodec::local8().decode(dst, StubA(mark, remain), NULL, CONTAINER_OP_APPEND);
 
 _NextLine:
     while (p != end && *p != '\n') p++;
@@ -225,17 +223,17 @@ _Fail:
 }
 #endif
 
-static err_t getHomeDirectory(String& dst)
+static err_t getHomeDirectory(StringW& dst)
 {
 #if defined(FOG_OS_WINDOWS)
-  return OS::getEnv(fog_strings->getString(STR_PLATFORM_USERPROFILE), dst);
+  return System::getEnvironment(fog_strings->getString(STR_PLATFORM_USERPROFILE), dst);
 #endif // FOG_OS_WINDOWS
 
 #if defined(FOG_OS_POSIX)
   struct passwd *pwd = getpwuid(UserInfo::uid());
   if (pwd)
   {
-    TextCodec::local8().decode(dst, Stub8(pwd->pw_dir, DETECT_LENGTH));
+    TextCodec::local8().decode(dst, StubA(pwd->pw_dir, DETECT_LENGTH));
     return ERR_OK;
   }
   else
@@ -244,12 +242,12 @@ static err_t getHomeDirectory(String& dst)
 
     if ((s = getenv("HOME")) != 0)
     {
-      TextCodec::local8().decode(dst, Stub8(s, DETECT_LENGTH));
+      TextCodec::local8().decode(dst, StubA(s, DETECT_LENGTH));
       return ERR_OK;
     }
     else if ((s = getenv("TMPDIR")) != 0)
     {
-      TextCodec::local8().decode(dst, Stub8(s, DETECT_LENGTH));
+      TextCodec::local8().decode(dst, StubA(s, DETECT_LENGTH));
       return ERR_USER_NO_HOME_DIRECTORY;
     }
     else
@@ -285,7 +283,7 @@ uint32_t UserInfo::gid()
 #endif // FOG_OS_POSIX
 }
 
-err_t UserInfo::getDirectory(String& dst, int id)
+err_t UserInfo::getDirectory(StringW& dst, int id)
 {
   err_t err;
 
@@ -310,7 +308,7 @@ err_t UserInfo::getDirectory(String& dst, int id)
   }
 
 #if defined(FOG_OS_WINDOWS)
-  dst.slashesToPosix();
+  dst.normalizeSlashes(SLASH_FORM_UNIX);
 #endif // FOG_OS_WINDOWS
 
   return err;

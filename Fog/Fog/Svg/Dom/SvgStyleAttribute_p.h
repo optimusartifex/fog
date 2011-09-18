@@ -14,7 +14,6 @@
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Source/Color.h>
-#include <Fog/Svg/Global/Constants.h>
 #include <Fog/Svg/Tools/SvgCoord.h>
 
 namespace Fog {
@@ -26,7 +25,7 @@ namespace Fog {
 // [Fog::SvgStyleAttribute]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 struct FOG_NO_EXPORT SvgStyleAttribute : public XmlAttribute
 {
   typedef XmlAttribute base;
@@ -42,8 +41,8 @@ struct FOG_NO_EXPORT SvgStyleAttribute : public XmlAttribute
   // [Methods]
   // --------------------------------------------------------------------------
 
-  virtual String getValue() const;
-  virtual err_t setValue(const String& value);
+  virtual StringW getValue() const;
+  virtual err_t setValue(const StringW& value);
 
   // --------------------------------------------------------------------------
   // [Getters]
@@ -56,11 +55,11 @@ struct FOG_NO_EXPORT SvgStyleAttribute : public XmlAttribute
   // [Style]
   // --------------------------------------------------------------------------
 
-  String getStyle(const ManagedString& name) const;
-  err_t setStyle(const ManagedString& name, const String& value);
+  StringW getStyle(const ManagedString& name) const;
+  err_t setStyle(const ManagedString& name, const StringW& value);
 
-  String getStyle(int styleId) const;
-  err_t setStyle(int styleId, const String& value);
+  StringW getStyle(int styleId) const;
+  err_t setStyle(int styleId, const StringW& value);
 
   static int styleToId(const ManagedString& name);
 
@@ -96,14 +95,14 @@ struct FOG_NO_EXPORT SvgStyleAttribute : public XmlAttribute
   PathF _clipPath;
   List<float> _dashArray;
 
-  String _fillUri;
-  String _strokeUri;
-  String _fontFamily;
+  StringW _fillUri;
+  StringW _strokeUri;
+  StringW _fontFamily;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgStyleAttribute)
+  _FOG_NO_COPY(SvgStyleAttribute)
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 //! @}
 

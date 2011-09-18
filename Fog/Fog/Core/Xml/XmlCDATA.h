@@ -29,7 +29,7 @@ struct FOG_API XmlCDATA : public XmlNoText
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  XmlCDATA(const String& data = String());
+  XmlCDATA(const StringW& data = StringW());
   virtual ~XmlCDATA();
 
   // --------------------------------------------------------------------------
@@ -42,21 +42,21 @@ struct FOG_API XmlCDATA : public XmlNoText
   // [CDATA Specific]
   // --------------------------------------------------------------------------
 
-  const String& getData() const;
-  err_t setData(const String& data);
+  const StringW& getData() const;
+  err_t setData(const StringW& data);
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
 protected:
-  String _data;
+  StringW _data;
 
 private:
   friend struct XmlElement;
   friend struct XmlDocument;
 
-  _FOG_CLASS_NO_COPY(XmlCDATA)
+  _FOG_NO_COPY(XmlCDATA)
 };
 
 //! @}

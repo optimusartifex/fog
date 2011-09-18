@@ -50,7 +50,7 @@ struct FOG_NO_EXPORT PTextureAffine
     double offy = fetcher->_d.texture.affine.py;
 
     const uint8_t* srcPixels = ctx->_d.texture.base.pixels;
-    sysint_t srcStride = ctx->_d.texture.base.stride;
+    ssize_t srcStride = ctx->_d.texture.base.stride;
 
     P_FETCH_SPAN8_INIT()
 
@@ -119,7 +119,7 @@ struct FOG_NO_EXPORT PTextureAffine
               int py0 = Math::bound<int>(py >> 16, 0, th);
 
               typename Accessor::Pixel pix;
-              accessor.fetchNorm(pix, srcPixels + (sysint_t)py0 * srcStride + px0 * Accessor::SRC_BPP);
+              accessor.fetchNorm(pix, srcPixels + (ssize_t)py0 * srcStride + px0 * Accessor::SRC_BPP);
               accessor.store(dst, pix);
 
               dst += Accessor::DST_BPP;
@@ -199,7 +199,7 @@ struct FOG_NO_EXPORT PTextureAffine
     double offy = fetcher->_d.texture.affine.py;
 
     const uint8_t* srcPixels = ctx->_d.texture.base.pixels;
-    sysint_t srcStride = ctx->_d.texture.base.stride;
+    ssize_t srcStride = ctx->_d.texture.base.stride;
 
     P_FETCH_SPAN8_INIT()
 
@@ -459,7 +459,7 @@ struct FOG_NO_EXPORT PTextureAffine
     double offy = fetcher->_d.texture.affine.py;
 
     const uint8_t* srcPixels = ctx->_d.texture.base.pixels;
-    sysint_t srcStride = ctx->_d.texture.base.stride;
+    ssize_t srcStride = ctx->_d.texture.base.stride;
 
     P_FETCH_SPAN8_INIT()
 
@@ -536,7 +536,7 @@ struct FOG_NO_EXPORT PTextureAffine
               int py0 = py >> 16;
 
               typename Accessor::Pixel pix;
-              accessor.fetchNorm(pix, srcPixels + (sysint_t)py0 * srcStride + px0 * Accessor::SRC_BPP);
+              accessor.fetchNorm(pix, srcPixels + (ssize_t)py0 * srcStride + px0 * Accessor::SRC_BPP);
               accessor.store(dst, pix);
 
               dst += Accessor::DST_BPP;
@@ -630,7 +630,7 @@ struct FOG_NO_EXPORT PTextureAffine
     double offy = fetcher->_d.texture.affine.py;
 
     const uint8_t* srcPixels = ctx->_d.texture.base.pixels;
-    sysint_t srcStride = ctx->_d.texture.base.stride;
+    ssize_t srcStride = ctx->_d.texture.base.stride;
 
     P_FETCH_SPAN8_INIT()
 
@@ -804,9 +804,9 @@ struct FOG_NO_EXPORT PTextureAffine
           typename Accessor::Pixel pix_x0y1;
           typename Accessor::Pixel pix_x1y1;
 
-          const uint8_t* srcLine0 = srcPixels + (sysint_t)(uint)py0 * srcStride;
+          const uint8_t* srcLine0 = srcPixels + (ssize_t)(uint)py0 * srcStride;
           if (++py0 > th) py0 = 0;
-          const uint8_t* srcLine1 = srcPixels + (sysint_t)(uint)py0 * srcStride;
+          const uint8_t* srcLine1 = srcPixels + (ssize_t)(uint)py0 * srcStride;
 
           accessor.fetchRaw(pix_x0y0, srcLine0 + (uint)px0 * Accessor::SRC_BPP);
           accessor.fetchRaw(pix_x0y1, srcLine1 + (uint)px0 * Accessor::SRC_BPP);
@@ -877,7 +877,7 @@ struct FOG_NO_EXPORT PTextureAffine
     double offy = fetcher->_d.texture.affine.py;
 
     const uint8_t* srcPixels = ctx->_d.texture.base.pixels;
-    sysint_t srcStride = ctx->_d.texture.base.stride;
+    ssize_t srcStride = ctx->_d.texture.base.stride;
 
     P_FETCH_SPAN8_INIT()
 
@@ -959,7 +959,7 @@ struct FOG_NO_EXPORT PTextureAffine
               if (py0 > th) py0 = th2 - py0;
 
               typename Accessor::Pixel pix;
-              accessor.fetchNorm(pix, srcPixels + (sysint_t)py0 * srcStride + px0 * Accessor::SRC_BPP);
+              accessor.fetchNorm(pix, srcPixels + (ssize_t)py0 * srcStride + px0 * Accessor::SRC_BPP);
               accessor.store(dst, pix);
 
               dst += Accessor::DST_BPP;
@@ -1059,7 +1059,7 @@ struct FOG_NO_EXPORT PTextureAffine
     double offy = fetcher->_d.texture.affine.py;
 
     const uint8_t* srcPixels = ctx->_d.texture.base.pixels;
-    sysint_t srcStride = ctx->_d.texture.base.stride;
+    ssize_t srcStride = ctx->_d.texture.base.stride;
 
     P_FETCH_SPAN8_INIT()
 
@@ -1234,8 +1234,8 @@ struct FOG_NO_EXPORT PTextureAffine
           typename Accessor::Pixel pix_x0y1;
           typename Accessor::Pixel pix_x1y1;
 
-          const uint8_t* srcLine0 = srcPixels + (sysint_t)(uint)py0 * srcStride;
-          const uint8_t* srcLine1 = srcPixels + (sysint_t)(uint)py1 * srcStride;
+          const uint8_t* srcLine0 = srcPixels + (ssize_t)(uint)py0 * srcStride;
+          const uint8_t* srcLine1 = srcPixels + (ssize_t)(uint)py1 * srcStride;
 
           accessor.fetchRaw(pix_x0y0, srcLine0 + (uint)px0 * Accessor::SRC_BPP);
           accessor.fetchRaw(pix_x1y0, srcLine0 + (uint)px1 * Accessor::SRC_BPP);
@@ -1300,7 +1300,7 @@ struct FOG_NO_EXPORT PTextureAffine
     double offy = fetcher->_d.texture.affine.py;
 
     const uint8_t* srcPixels = ctx->_d.texture.base.pixels;
-    sysint_t srcStride = ctx->_d.texture.base.stride;
+    ssize_t srcStride = ctx->_d.texture.base.stride;
 
     typename Accessor::Pixel clamp;
     accessor.fetchSolid(clamp, ctx->_d.texture.base.clamp);
@@ -1383,7 +1383,7 @@ struct FOG_NO_EXPORT PTextureAffine
               if (((uint)px0 <= (uint)tw) & ((uint)py0 <= (uint)th))
               {
                 typename Accessor::Pixel pix;
-                accessor.fetchNorm(pix, srcPixels + (sysint_t)py0 * srcStride + px0 * Accessor::SRC_BPP);
+                accessor.fetchNorm(pix, srcPixels + (ssize_t)py0 * srcStride + px0 * Accessor::SRC_BPP);
                 accessor.store(dst, pix);
               }
               else
@@ -1425,7 +1425,7 @@ struct FOG_NO_EXPORT PTextureAffine
           if (((uint)px0 <= (uint)tw) & ((uint)py0 <= (uint)th))
           {
             typename Accessor::Pixel pix;
-            accessor.fetchNorm(pix, srcPixels + (sysint_t)py0 * srcStride + px0 * Accessor::SRC_BPP);
+            accessor.fetchNorm(pix, srcPixels + (ssize_t)py0 * srcStride + px0 * Accessor::SRC_BPP);
             accessor.store(dst, pix);
           }
           else
@@ -1488,7 +1488,7 @@ _FetchEnd:
     double offy = fetcher->_d.texture.affine.py;
 
     const uint8_t* srcPixels = ctx->_d.texture.base.pixels;
-    sysint_t srcStride = ctx->_d.texture.base.stride;
+    ssize_t srcStride = ctx->_d.texture.base.stride;
 
     typename Accessor::Pixel clamp;
     accessor.fetchSolid(clamp, ctx->_d.texture.base.clamp);

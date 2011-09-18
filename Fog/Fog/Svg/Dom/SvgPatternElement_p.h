@@ -64,7 +64,7 @@ struct FOG_NO_EXPORT SvgPatternElement : public SvgElement
   SvgViewBoxAttribute a_viewBox;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgPatternElement)
+  _FOG_NO_COPY(SvgPatternElement)
 };
 
 //! @}

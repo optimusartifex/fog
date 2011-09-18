@@ -55,7 +55,7 @@ struct FOG_NO_EXPORT SvgRadialGradientElement : public SvgAbstractGradientElemen
   SvgCoordAttribute a_r;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgRadialGradientElement)
+  _FOG_NO_COPY(SvgRadialGradientElement)
 };
 
 //! @}

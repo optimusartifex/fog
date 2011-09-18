@@ -8,7 +8,7 @@
 #define _FOG_G2D_IMAGING_EFFECTS_BORDEREFFECT_H
 
 // [Dependencies]
-#include <Fog/Core/Memory/Ops.h>
+#include <Fog/Core/Memory/MemOps.h>
 #include <Fog/G2d/Source/Color.h>
 
 namespace Fog {
@@ -20,7 +20,7 @@ namespace Fog {
 // [Fog::BorderEffect]
 // ============================================================================
 
-#include <Fog/Core/Pack/PackByte.h>
+#include <Fog/Core/C++/PackByte.h>
 struct FOG_NO_EXPORT BorderEffect
 {
   // --------------------------------------------------------------------------
@@ -64,7 +64,7 @@ public:
   //! @brief The border extend color.
   Color _extendColor;
 };
-#include <Fog/Core/Pack/PackRestore.h>
+#include <Fog/Core/C++/PackRestore.h>
 
 //! @}
 

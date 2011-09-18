@@ -118,6 +118,26 @@ struct FOG_NO_EXPORT Range
   FOG_INLINE bool operator!=(const Range& other) { return (_start != other._start) | (_end != other._end); }
 
   // --------------------------------------------------------------------------
+  // [Static]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE bool fit(size_t& rStart, size_t& rEnd, size_t length, const Range* range)
+  {
+    rStart = 0;
+    rEnd = length;
+
+    if (range != NULL)
+    {
+      rStart = range->getStart();
+      rEnd = range->getEnd();
+
+      if (rEnd > length) rEnd = length;
+    }
+
+    return rStart < rEnd;
+  }
+
+  // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
@@ -128,12 +148,6 @@ struct FOG_NO_EXPORT Range
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPEINFO_DECLARE(Fog::Range , Fog::TYPEINFO_PRIMITIVE)
 
 // [Guard]
 #endif // _FOG_CORE_TOOLS_RANGE_H

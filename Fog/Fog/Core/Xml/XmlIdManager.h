@@ -45,8 +45,8 @@ struct FOG_API XmlIdManager
 
   void add(XmlElement* e);
   void remove(XmlElement* e);
-  XmlElement* get(const String& id) const;
-  XmlElement* get(const Char* idStr, size_t idLen) const;
+  XmlElement* get(const StringW& id) const;
+  XmlElement* get(const CharW* idStr, size_t idLen) const;
 
   // --------------------------------------------------------------------------
   // [Internal]

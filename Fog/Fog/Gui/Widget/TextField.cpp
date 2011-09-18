@@ -31,7 +31,7 @@ TextField::~TextField()
 {
 }
 
-void TextField::setValue(const String& value)
+void TextField::setValue(const StringW& value)
 {
   _value = value;
   update(WIDGET_UPDATE_PAINT);

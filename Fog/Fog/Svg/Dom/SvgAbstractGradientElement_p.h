@@ -60,7 +60,7 @@ struct FOG_NO_EXPORT SvgAbstractGradientElement : public SvgStyledElement
   SvgTransformAttribute a_gradientTransform;
 
 private:
-  _FOG_CLASS_NO_COPY(SvgAbstractGradientElement)
+  _FOG_NO_COPY(SvgAbstractGradientElement)
 };
 
 //! @}

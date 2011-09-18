@@ -15,11 +15,11 @@ namespace Fog {
 
 ImageEffect::ImageEffect()
 {
-  _d = _dnull->ref();
+  _d = _dnull->addRef();
 }
 
 ImageEffect::ImageEffect(const ImageEffect& other) :
-  _d(other._d->ref())
+  _d(other._d->addRef())
 {
 }
 
@@ -46,7 +46,7 @@ err_t ImageEffect::_setEffect(uint32_t type, const void* effect)
 
 err_t ImageEffect::setEffect(const ImageEffect& effect)
 {
-  atomicPtrXchg(&_d, effect._d->ref())->deref();
+  atomicPtrXchg(&_d, effect._d->addRef())->deref();
   return ERR_OK;
 }
 
@@ -56,8 +56,10 @@ err_t ImageEffect::setEffect(const ImageEffect& effect)
 
 void ImageEffect::reset()
 {
-  if (_d == _dnull.instancep()) return;
-  atomicPtrXchg(&_d, _dnull->ref())->deref();
+  if (_d == &_dnull)
+    return;
+
+  atomicPtrXchg(&_d, _dnull->addRef())->deref();
 }
 
 // ============================================================================
@@ -72,9 +74,9 @@ Static<ImageEffectData> ImageEffect::_dnull;
 
 FOG_NO_EXPORT void ImageEffect_init(void)
 {
-  ImageEffectData* d = ImageEffect::_dnull.instancep();
+  ImageEffectData* d = &ImageEffect::_dnull;
 
-  d->refCount.init(1);
+  d->reference.init(1);
   d->destroy = NULL; // Never called.
   d->type = IMAGE_EFFECT_NONE;
 }

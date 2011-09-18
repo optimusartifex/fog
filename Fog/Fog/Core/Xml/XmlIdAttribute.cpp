@@ -33,7 +33,7 @@ XmlIdAttribute::~XmlIdAttribute()
   element->_id.reset();
 }
 
-err_t XmlIdAttribute::setValue(const String& value)
+err_t XmlIdAttribute::setValue(const StringW& value)
 {
   if (_value == value) return ERR_OK;
 
